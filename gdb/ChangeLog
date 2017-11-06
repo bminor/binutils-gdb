@@ -1,5 +1,29 @@
 2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (cast_to_fixed): Reimplement in target arithmetic.
+	(cast_from_fixed): Likewise.
+	(ada_scaling_type): New function.
+	(ada_delta): Return value instead of DOUBLEST.  Perform target
+	arithmetic instead of host arithmetic.
+	(scaling_factor): Rename to ...
+	(ada_scaling_factor) ... this.  Make non-static.  Return value instead
+	of DOUBLEST.  Perform target arithmetic instead of host arithmetic.
+	(ada_fixed_to_float): Remove.
+	(ada_float_to_fixed): Remove.
+	* ada-lang.h (ada_fixed_to_float): Remove.
+	(ada_float_to_fixed): Remove.
+	(ada_delta): Return value instead of DOUBLEST.
+	(ada_scaling_factor): Add prototype.
+
+	* ada-typeprint.c: Include "target-float.h".
+	(print_fixed_point_type): Perform target arithmetic instead of
+	host arithmetic.
+	* ada-valprint.c: Include "target-float.h".
+	(ada_val_print_num): Perform target arithmetic instead of
+	host arithmetic for fixed-point types.
+
+2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* target-float.c: Include <math.h>.
 	(floatformat_binop): New function.
 	(floatformat_compare): Likewise.

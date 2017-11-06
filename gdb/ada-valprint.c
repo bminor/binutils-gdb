@@ -31,6 +31,7 @@
 #include "c-lang.h"
 #include "infcall.h"
 #include "objfiles.h"
+#include "target-float.h"
 
 static int print_field_values (struct type *, const gdb_byte *,
 			       int,
@@ -796,10 +797,15 @@ ada_val_print_num (struct type *type, const gdb_byte *valaddr,
 {
   if (ada_is_fixed_point_type (type))
     {
-      LONGEST v = unpack_long (type, valaddr + offset_aligned);
+      struct value *scale = ada_scaling_factor (type);
+      struct value *v = value_from_contents (type, valaddr + offset_aligned);
+      v = value_cast (value_type (scale), v);
+      v = value_binop (v, scale, BINOP_MUL);
 
-      fprintf_filtered (stream, TYPE_LENGTH (type) < 4 ? "%.11g" : "%.17g",
-			(double) ada_fixed_to_float (type, v));
+      const char *fmt = TYPE_LENGTH (type) < 4 ? "%.11g" : "%.17g";
+      std::string str
+	= target_float_to_string (value_contents (v), value_type (v), fmt);
+      fputs_filtered (str.c_str (), stream);
       return;
     }
   else if (TYPE_CODE (type) == TYPE_CODE_RANGE)

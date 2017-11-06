@@ -9567,33 +9567,29 @@ unwrap_value (struct value *val)
 }
 
 static struct value *
-cast_to_fixed (struct type *type, struct value *arg)
+cast_from_fixed (struct type *type, struct value *arg)
 {
-  LONGEST val;
+  struct value *scale = ada_scaling_factor (value_type (arg));
+  arg = value_cast (value_type (scale), arg);
 
-  if (type == value_type (arg))
-    return arg;
-  else if (ada_is_fixed_point_type (value_type (arg)))
-    val = ada_float_to_fixed (type,
-                              ada_fixed_to_float (value_type (arg),
-                                                  value_as_long (arg)));
-  else
-    {
-      DOUBLEST argd = value_as_double (arg);
-
-      val = ada_float_to_fixed (type, argd);
-    }
-
-  return value_from_longest (type, val);
+  arg = value_binop (arg, scale, BINOP_MUL);
+  return value_cast (type, arg);
 }
 
 static struct value *
-cast_from_fixed (struct type *type, struct value *arg)
+cast_to_fixed (struct type *type, struct value *arg)
 {
-  DOUBLEST val = ada_fixed_to_float (value_type (arg),
-                                     value_as_long (arg));
+  if (type == value_type (arg))
+    return arg;
 
-  return value_from_double (type, val);
+  struct value *scale = ada_scaling_factor (type);
+  if (ada_is_fixed_point_type (value_type (arg)))
+    arg = cast_from_fixed (value_type (scale), arg);
+  else
+    arg = value_cast (value_type (scale), arg);
+
+  arg = value_binop (arg, scale, BINOP_DIV);
+  return value_cast (type, arg);
 }
 
 /* Given two array types T1 and T2, return nonzero iff both arrays
@@ -11475,68 +11471,57 @@ ada_is_system_address_type (struct type *type)
 }
 
 /* Assuming that TYPE is the representation of an Ada fixed-point
-   type, return its delta, or -1 if the type is malformed and the
+   type, return the target floating-point type to be used to represent
+   of this type during internal computation.  */
+
+static struct type *
+ada_scaling_type (struct type *type)
+{
+  return builtin_type (get_type_arch (type))->builtin_long_double;
+}
+
+/* Assuming that TYPE is the representation of an Ada fixed-point
+   type, return its delta, or NULL if the type is malformed and the
    delta cannot be determined.  */
 
-DOUBLEST
+struct value *
 ada_delta (struct type *type)
 {
   const char *encoding = fixed_type_info (type);
-  DOUBLEST num, den;
+  struct type *scale_type = ada_scaling_type (type);
 
-  /* Strictly speaking, num and den are encoded as integer.  However,
-     they may not fit into a long, and they will have to be converted
-     to DOUBLEST anyway.  So scan them as DOUBLEST.  */
-  if (sscanf (encoding, "_%" DOUBLEST_SCAN_FORMAT "_%" DOUBLEST_SCAN_FORMAT,
-	      &num, &den) < 2)
-    return -1.0;
+  long long num, den;
+
+  if (sscanf (encoding, "_%lld_%lld", &num, &den) < 2)
+    return nullptr;
   else
-    return num / den;
+    return value_binop (value_from_longest (scale_type, num),
+			value_from_longest (scale_type, den), BINOP_DIV);
 }
 
 /* Assuming that ada_is_fixed_point_type (TYPE), return the scaling
    factor ('SMALL value) associated with the type.  */
 
-static DOUBLEST
-scaling_factor (struct type *type)
+struct value *
+ada_scaling_factor (struct type *type)
 {
   const char *encoding = fixed_type_info (type);
-  DOUBLEST num0, den0, num1, den1;
+  struct type *scale_type = ada_scaling_type (type);
+
+  long long num0, den0, num1, den1;
   int n;
 
-  /* Strictly speaking, num's and den's are encoded as integer.  However,
-     they may not fit into a long, and they will have to be converted
-     to DOUBLEST anyway.  So scan them as DOUBLEST.  */
-  n = sscanf (encoding,
-	      "_%" DOUBLEST_SCAN_FORMAT "_%" DOUBLEST_SCAN_FORMAT
-	      "_%" DOUBLEST_SCAN_FORMAT "_%" DOUBLEST_SCAN_FORMAT,
+  n = sscanf (encoding, "_%lld_%lld_%lld_%lld",
 	      &num0, &den0, &num1, &den1);
 
   if (n < 2)
-    return 1.0;
+    return value_from_longest (scale_type, 1);
   else if (n == 4)
-    return num1 / den1;
+    return value_binop (value_from_longest (scale_type, num1),
+			value_from_longest (scale_type, den1), BINOP_DIV);
   else
-    return num0 / den0;
-}
-
-
-/* Assuming that X is the representation of a value of fixed-point
-   type TYPE, return its floating-point equivalent.  */
-
-DOUBLEST
-ada_fixed_to_float (struct type *type, LONGEST x)
-{
-  return (DOUBLEST) x *scaling_factor (type);
-}
-
-/* The representation of a fixed-point value of type TYPE
-   corresponding to the value X.  */
-
-LONGEST
-ada_float_to_fixed (struct type *type, DOUBLEST x)
-{
-  return (LONGEST) (x / scaling_factor (type) + 0.5);
+    return value_binop (value_from_longest (scale_type, num0),
+			value_from_longest (scale_type, den0), BINOP_DIV);
 }
 
 

@@ -31,6 +31,7 @@
 #include "demangle.h"
 #include "c-lang.h"
 #include "typeprint.h"
+#include "target-float.h"
 #include "ada-lang.h"
 #include <ctype.h>
 
@@ -356,16 +357,23 @@ print_enum_type (struct type *type, struct ui_file *stream)
 static void
 print_fixed_point_type (struct type *type, struct ui_file *stream)
 {
-  DOUBLEST delta = ada_delta (type);
-  DOUBLEST small = ada_fixed_to_float (type, 1);
+  struct value *delta = ada_delta (type);
+  struct value *small = ada_scaling_factor (type);
 
-  if (delta < 0.0)
+  if (delta == nullptr)
     fprintf_filtered (stream, "delta ??");
   else
     {
-      fprintf_filtered (stream, "delta %g", (double) delta);
-      if (delta != small)
-	fprintf_filtered (stream, " <'small = %g>", (double) small);
+      std::string str;
+      str = target_float_to_string (value_contents (delta),
+				    value_type (delta), "%g");
+      fprintf_filtered (stream, "delta %s", str.c_str());
+      if (!value_equal (delta, small))
+	{
+	  str = target_float_to_string (value_contents (small),
+					value_type (small), "%g");
+	  fprintf_filtered (stream, " <'small = %s>", str.c_str());
+	}
     }
 }
 
