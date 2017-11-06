@@ -1,3 +1,7 @@
+2017-11-06  Pedro Alves  <palves@redhat.com>
+
+	* config.in, configure: Regenerate.
+
 2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* target.c (struct thread_search): Remove.
