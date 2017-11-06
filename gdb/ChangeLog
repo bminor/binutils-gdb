@@ -1,5 +1,47 @@
 2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* Makefile.in (SFILES): Remove doublest.c and dfp.c.
+	(HFILES_NO_SRCDIR): Remove doublest.h and dfp.h.
+	(COMMON_OBS): Remove doublest.o and dfp.o.
+	Do not build target-float.c (instead of doublest.c)
+	with -Wformat-nonliteral.
+
+	* doublest.c: Remove file.
+	* doublest.h: Remove file.
+	* dfp.c: Remove file.
+	* dfp.h: Remove file.
+
+	* target-float.c: Do not include "doublest.h" and "dfp.h".
+	(DOUBLEST): Move here from doublest.h.
+	(enum float_kind): Likewise.
+	(FLOATFORMAT_CHAR_BIT): Likewise.
+	(FLOATFORMAT_LARGEST_BYTES): Likewise.
+	(floatformat_totalsize_bytes): Move here from doublest.c.  Make static.
+	(floatformat_precision): Likewise.
+	(floatformat_normalize_byteorder, get_field, put_field): Likewise.
+	(floatformat_is_negative, floatformat_classify, floatformat_mantissa):
+	Likewise.
+	(host_float_format, host_double_format, host_long_double_format):
+	Likewise.
+	(floatformat_to_string, floatformat_from_string): Likewise.
+	(floatformat_to_doublest): Likewise.  Also, inline the original
+	convert_floatformat_to_doublest.
+	(floatformat_from_doublest): Likewise.  Also, inline the original
+	convert_floatformat_from_doublest.
+
+	Include "dpd/decimal128.h", "dpd/decimal64.h", and "dpd/decimal32.h".
+	(MAX_DECIMAL_STRING): Move here from dfp.c.
+	(match_endianness): Likewise.
+	(set_decnumber_context, decimal_check_errors): Likewise.
+	(decimal_from_number, decimal_to_number): Likewise.
+	(decimal_to_string, decimal_from_string): Likewise.  Make static.
+	(decimal_from_longest, decimal_from_ulongest): Likewise.
+	(decimal_to_longest): Likewise.
+	(decimal_binop, decimal_is_zero, decimal_compare): Likewise.
+	(decimal_convert): Likewise.
+
+2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* doublest.c: Do not include "gdbtypes.h".
 	(extract_typed_floating): Remove.
 	(store_typed_floating): Remove.

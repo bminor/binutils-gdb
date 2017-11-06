@@ -1086,11 +1086,9 @@ SFILES = \
 	d-valprint.c \
 	dbxread.c \
 	demangle.c \
-	dfp.c \
 	dictionary.c \
 	disasm.c \
 	disasm-selftests.c \
-	doublest.c \
 	dtrace-probe.c \
 	dummy-frame.c \
 	dwarf2-frame.c \
@@ -1320,11 +1318,9 @@ HFILES_NO_SRCDIR = \
 	darwin-nat.h \
 	dcache.h \
 	defs.h \
-	dfp.h \
 	dicos-tdep.h \
 	dictionary.h \
 	disasm.h \
-	doublest.h \
 	dummy-frame.h \
 	dwarf2-frame.h \
 	dwarf2-frame-tailcall.h \
@@ -1709,11 +1705,9 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	dbxread.o \
 	debug.o \
 	demangle.o \
-	dfp.o \
 	dictionary.o \
 	disasm.o \
 	disasm-selftests.o \
-	doublest.o \
 	dummy-frame.o \
 	dwarf2-frame.o \
 	dwarf2-frame-tailcall.o \
@@ -2735,10 +2729,10 @@ printcmd.o: $(srcdir)/printcmd.c
 		$(COMPILE.post) $(srcdir)/printcmd.c
 	$(POSTCOMPILE)
 
-# Same for "doublest.c".
-doublest.o: $(srcdir)/doublest.c
+# Same for "target-float.c".
+target-float.o: $(srcdir)/target-float.c
 	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
-		$(COMPILE.post) $(srcdir)/doublest.c
+		$(COMPILE.post) $(srcdir)/target-float.c
 
 # ada-exp.c can appear in srcdir, for releases; or in ., for
 # development builds.
