@@ -165,7 +165,7 @@ gdb_has_a_terminal (void)
    before we actually run the inferior.  */
 
 void
-child_terminal_init_with_pgrp (int pgrp)
+child_terminal_init (struct target_ops *self)
 {
   struct inferior *inf = current_inferior ();
   struct terminal_info *tinfo = get_inflow_inferior_data (inf);
@@ -173,8 +173,10 @@ child_terminal_init_with_pgrp (int pgrp)
 #ifdef HAVE_TERMIOS_H
   /* Store the process group even without a terminal as it is used not
      only to reset the tty foreground process group, but also to
-     interrupt the inferior.  */
-  tinfo->process_group = pgrp;
+     interrupt the inferior.  A child we spawn should be a process
+     group leader (PGID==PID) at this point, though that may not be
+     true if we're attaching to an existing process.  */
+  tinfo->process_group = inf->pid;
 #endif
 
   if (gdb_has_a_terminal ())
@@ -202,20 +204,6 @@ gdb_save_tty_state (void)
       xfree (our_terminal_info.ttystate);
       our_terminal_info.ttystate = serial_get_tty_state (stdin_serial);
     }
-}
-
-void
-child_terminal_init (struct target_ops *self)
-{
-#ifdef HAVE_TERMIOS_H
-  /* This is for Lynx, and should be cleaned up by having Lynx be a
-     separate debugging target with a version of target_terminal::init
-     which passes in the process group to a generic routine which does
-     all the work (and the non-threaded child_terminal_init can just
-     pass in inferior_ptid to the same routine).  */
-  /* We assume INFERIOR_PID is also the child's process group.  */
-  child_terminal_init_with_pgrp (ptid_get_pid (inferior_ptid));
-#endif /* HAVE_TERMIOS_H */
 }
 
 /* Put the inferior's terminal settings into effect.

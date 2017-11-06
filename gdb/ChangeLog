@@ -1,5 +1,12 @@
 2017-11-06  Pedro Alves  <palves@redhat.com>
 
+	* gnu-nat.c (gnu_terminal_init): Delete.
+	(gnu_target): Don't install gnu_terminal_init.
+	* inflow.c (child_terminal_init_with_pgrp): Delete, merged with ...
+	(child_terminal_init): ... this function.
+
+2017-11-06  Pedro Alves  <palves@redhat.com>
+
 	* common/common.m4 (GDB_AC_COMMON): No longer check termio.h nor
 	sgtty.h.
 	* config.in, configure: Regenerate.
