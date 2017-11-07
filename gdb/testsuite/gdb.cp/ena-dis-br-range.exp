@@ -130,3 +130,41 @@ gdb_test_no_output "disable 2.8-6"
 
 gdb_test "info break" [make_info_breakpoint_reply_re y y y y y y] \
     "breakpoint info disable 2.8-6"
+
+# Check that invalid/open ranges are handled correctly.
+with_test_prefix "open range" {
+    gdb_test "disable -" "bad breakpoint number at or near: '-'"
+    gdb_test "disable -1" "bad breakpoint number at or near: '-1'"
+    gdb_test "disable 1-" "bad breakpoint number at or near: '1-'"
+    gdb_test "disable 1.-2" "Bad breakpoint location number '-2'"
+    gdb_test "disable 1.2-" "bad breakpoint number at or near: '2-'"
+    gdb_test "disable 1.-2-3" "Bad breakpoint location number '-2'"
+    gdb_test "disable 1-2-3" "bad breakpoint number at or near: '1-2-3'"
+}
+
+with_test_prefix "dangling period" {
+    gdb_test "disable 2." "bad breakpoint number at or near: '2.'"
+    gdb_test "disable .2" "bad breakpoint number at or near: '.2'"
+    gdb_test "disable 2.3.4" "bad breakpoint number at or near '2.3.4'"
+}
+
+# Check that 0s are handled correctly.
+with_test_prefix "zero" {
+    gdb_test "disable 0" "bad breakpoint number at or near '0'"
+    gdb_test "disable 0.0" "Bad breakpoint number '0.0'"
+    gdb_test "disable 0.1" "Bad breakpoint number '0.1'"
+    gdb_test "disable 0.1-2" "Bad breakpoint number '0.1-2'"
+    gdb_test "disable 2.0" "bad breakpoint number at or near '2.0'"
+
+    # These should really fail...
+    gdb_test_no_output "disable 2.0-0"
+    gdb_test_no_output "enable 2.0-0"
+
+    gdb_test "disable 2.0-1" "Bad breakpoint location number '0'"
+
+    # Likewise, should fail.
+    gdb_test_no_output "disable 2.1-0"
+}
+
+gdb_test "info break" [make_info_breakpoint_reply_re y y y y y y] \
+    "breakpoint info after invalids"
