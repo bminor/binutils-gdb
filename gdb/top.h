@@ -134,11 +134,14 @@ struct ui
   /* See enum prompt_state's description.  */
   enum prompt_state prompt_state;
 
+  /* Per-UI info for printcmd.c.  Initialized on demand.  */
+  struct current_printcmd_info *curr_printcmd_info = NULL;
+
   /* Per-UI info for source.c.  Initialized on demand.  */
   struct current_source_info *curr_source_info = NULL;
 
-  /* Per-UI info for printcmd.c.  Initialized on demand.  */
-  struct current_printcmd_info *curr_printcmd_info = NULL;
+  /* Per-UI info for top.c.  Initialized on demand.  */
+  struct current_top_info *curr_top_info = NULL;
 
   /* The fields below that start with "m_" are "private".  They're
      meant to be accessed through wrapper macros that make them look
@@ -242,6 +245,11 @@ extern void quit_force (int *, int);
 extern void quit_command (char *, int);
 extern void quit_cover (void);
 extern void execute_command (char *, int);
+
+/* Delete the per-UI info of UI.  */
+extern void delete_current_printcmd_info (struct ui *ui);
+extern void delete_current_source_info (struct ui *ui);
+extern void delete_current_top_info (struct ui *ui);
 
 /* If the interpreter is in sync mode (we're running a user command's
    list, running command hooks or similars), and we just ran a

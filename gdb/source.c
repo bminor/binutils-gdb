@@ -111,6 +111,12 @@ get_current_source_info ()
   return *current_ui->curr_source_info;
 }
 
+void
+delete_current_source_info (struct ui *ui)
+{
+  delete ui->curr_source_info;
+}
+
 /* Default number of lines to print with commands like "list".
    This is based on guessing how many long (i.e. more than chars_per_line
    characters) lines there will be.  To be completely correct, "list"

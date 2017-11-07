@@ -83,6 +83,12 @@ get_current_printcmd_info ()
   return *current_ui->curr_printcmd_info;
 }
 
+void
+delete_current_printcmd_info (struct ui *ui)
+{
+  delete ui->curr_printcmd_info;
+}
+
 /* Number of delay instructions following current disassembled insn.  */
 
 static int branch_delay_insns;

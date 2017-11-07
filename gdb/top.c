@@ -298,6 +298,10 @@ ui::~ui ()
   else
     ui_list = next;
 
+  delete_current_printcmd_info (this);
+  delete_current_source_info (this);
+  delete_current_top_info (this);
+
   delete m_gdb_stdin;
   delete m_gdb_stdout;
   delete m_gdb_stderr;
@@ -1665,6 +1669,27 @@ dont_repeat_command (char *ignored, int from_tty)
 
 /* Functions to manipulate command line editing control variables.  */
 
+struct current_top_info
+{
+  /* Number of the history entry which we are planning to display
+     next in "show commands".  Relative to history_base.  */
+  int num = 0;
+};
+
+static current_top_info &
+get_current_top_info ()
+{
+  if (current_ui->curr_top_info == NULL)
+    current_ui->curr_top_info = new current_top_info ();
+  return *current_ui->curr_top_info;
+}
+
+void
+delete_current_top_info (struct ui *ui)
+{
+  delete ui->curr_top_info;
+}
+
 /* Number of commands to print in each call to show_commands.  */
 #define Hist_print 10
 void
@@ -1673,9 +1698,7 @@ show_commands (char *args, int from_tty)
   /* Index for history commands.  Relative to history_base.  */
   int offset;
 
-  /* Number of the history entry which we are planning to display next.
-     Relative to history_base.  */
-  static int num = 0;
+  current_top_info &ci = get_current_top_info ();
 
   /* Print out some of the commands from the command history.  */
 
@@ -1686,28 +1709,28 @@ show_commands (char *args, int from_tty)
 	;
       else
 	/* "info editing <exp>" should print around command number <exp>.  */
-	num = (parse_and_eval_long (args) - history_base) - Hist_print / 2;
+	ci.num = (parse_and_eval_long (args) - history_base) - Hist_print / 2;
     }
   /* "show commands" means print the last Hist_print commands.  */
   else
     {
-      num = history_length - Hist_print;
+      ci.num = history_length - Hist_print;
     }
 
-  if (num < 0)
-    num = 0;
+  if (ci.num < 0)
+    ci.num = 0;
 
   /* If there are at least Hist_print commands, we want to display the last
      Hist_print rather than, say, the last 6.  */
-  if (history_length - num < Hist_print)
+  if (history_length - ci.num < Hist_print)
     {
-      num = history_length - Hist_print;
-      if (num < 0)
-	num = 0;
+      ci.num = history_length - Hist_print;
+      if (ci.num < 0)
+	ci.num = 0;
     }
 
-  for (offset = num;
-       offset < num + Hist_print && offset < history_length;
+  for (offset = ci.num;
+       offset < ci.num + Hist_print && offset < history_length;
        offset++)
     {
       printf_filtered ("%5d  %s\n", history_base + offset,
@@ -1716,7 +1739,7 @@ show_commands (char *args, int from_tty)
 
   /* The next command we want to display is the next one that we haven't
      displayed yet.  */
-  num += Hist_print;
+  ci.num += Hist_print;
 
   /* If the user repeats this command with return, it should do what
      "show commands +" does.  This is unnecessary if arg is null,
