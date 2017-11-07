@@ -25,4 +25,5 @@ if [istarget riscv*-*-*] {
     run_dump_test "c-addi4spn-fail"
     run_dump_test "c-addi16sp-fail"
     run_dump_test "satp"
+    run_dump_test "eh-relocs"
 }

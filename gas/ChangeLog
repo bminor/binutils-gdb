@@ -1,3 +1,11 @@
+2017-11-07  Jim Wilson  <jimw@sifive.com>
+
+	* config/tc-riscv.c (append_insn): Call frag_wane and frag_new at
+	end for linker optimizable relocs.
+	* testsuite/gas/riscv/eh-relocs.d: New.
+	* testsuite/gas/riscv/eh-relocs.s: New.
+	* testsuite/gas/riscv/riscv.exp: Run eh-relocs test.
+
 2017-11-07  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* testsuite/gas/riscv/satp.d: New test.
