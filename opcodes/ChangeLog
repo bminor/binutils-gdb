@@ -1,3 +1,7 @@
+2017-11-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Change incorrect use of NONE to MISC.
+
 2017-11-07  Alan Modra  <amodra@gmail.com>
 
 	* opintl.h: Formatting, comment fixes.
