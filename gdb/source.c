@@ -44,6 +44,7 @@
 #include "readline/readline.h"
 #include "common/enum-flags.h"
 #include <algorithm>
+#include "top.h"
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -76,15 +77,39 @@ struct substitute_path_rule
 
 static struct substitute_path_rule *substitute_path_rules = NULL;
 
-/* Symtab of default file for listing lines of.  */
+struct current_source_info
+{
+  /* Symtab of default file for listing lines of.  */
+  symtab *current_source_symtab = NULL;
 
-static struct symtab *current_source_symtab;
+  /* Default next line to list.  */
+  int current_source_line = 0;
 
-/* Default next line to list.  */
+  program_space *current_source_pspace = NULL;
 
-static int current_source_line;
+  /* Line number of last line printed.  Default for various commands.
+     source_line is usually, but not always, the same as this.  */
+  int last_line_listed;
 
-static struct program_space *current_source_pspace;
+  /* First line number listed by last listing command.  If 0, then no
+     source lines have yet been listed since the last time the current
+     source line was changed.  */
+  int first_line_listed;
+
+  /* Saves the name of the last source file visited and a possible
+     error code.  Used to prevent repeating annoying "No such file or
+     directories" msgs.  */
+  struct symtab *last_source_visited = NULL;
+  int last_source_error = 0;
+};
+
+static current_source_info &
+get_current_source_info ()
+{
+  if (current_ui->curr_source_info == NULL)
+    current_ui->curr_source_info = new current_source_info ();
+  return *current_ui->curr_source_info;
+}
 
 /* Default number of lines to print with commands like "list".
    This is based on guessing how many long (i.e. more than chars_per_line
@@ -123,23 +148,8 @@ show_filename_display_string (struct ui_file *file, int from_tty,
 {
   fprintf_filtered (file, _("Filenames are displayed as \"%s\".\n"), value);
 }
- 
-/* Line number of last line printed.  Default for various commands.
-   current_source_line is usually, but not always, the same as this.  */
 
-static int last_line_listed;
 
-/* First line number listed by last listing command.  If 0, then no
-   source lines have yet been listed since the last time the current
-   source line was changed.  */
-
-static int first_line_listed;
-
-/* Saves the name of the last source file visited and a possible error code.
-   Used to prevent repeating annoying "No such file or directories" msgs.  */
-
-static struct symtab *last_source_visited = NULL;
-static int last_source_error = 0;
 
 /* Return the first line listed by print_source_lines.
    Used by command interpreters to request listing from
@@ -148,7 +158,9 @@ static int last_source_error = 0;
 int
 get_first_line_listed (void)
 {
-  return first_line_listed;
+  current_source_info &si = get_current_source_info ();
+
+  return si.first_line_listed;
 }
 
 /* Clear line listed range.  This makes the next "list" center the
@@ -157,8 +169,10 @@ get_first_line_listed (void)
 static void
 clear_lines_listed_range (void)
 {
-  first_line_listed = 0;
-  last_line_listed = 0;
+  current_source_info &si = get_current_source_info ();
+
+  si.first_line_listed = 0;
+  si.last_line_listed = 0;
 }
 
 /* Return the default number of lines to print with commands like the
@@ -180,12 +194,14 @@ get_current_source_symtab_and_line (void)
 {
   symtab_and_line cursal;
 
-  cursal.pspace = current_source_pspace;
-  cursal.symtab = current_source_symtab;
-  cursal.line = current_source_line;
+  current_source_info &si = get_current_source_info ();
+
+  cursal.pspace = si.current_source_pspace;
+  cursal.symtab = si.current_source_symtab;
+  cursal.line = si.current_source_line;
   cursal.pc = 0;
   cursal.end = 0;
-  
+
   return cursal;
 }
 
@@ -203,8 +219,9 @@ set_default_source_symtab_and_line (void)
   if (!have_full_symbols () && !have_partial_symbols ())
     error (_("No symbol table is loaded.  Use the \"file\" command."));
 
+  current_source_info &si = get_current_source_info ();
   /* Pull in a current source symtab if necessary.  */
-  if (current_source_symtab == 0)
+  if (si.current_source_symtab == NULL)
     select_source_symtab (0);
 }
 
@@ -218,15 +235,17 @@ set_current_source_symtab_and_line (const symtab_and_line &sal)
 {
   symtab_and_line cursal;
 
-  cursal.pspace = current_source_pspace;
-  cursal.symtab = current_source_symtab;
-  cursal.line = current_source_line;
+  current_source_info &si = get_current_source_info ();
+
+  cursal.pspace = si.current_source_pspace;
+  cursal.symtab = si.current_source_symtab;
+  cursal.line = si.current_source_line;
   cursal.pc = 0;
   cursal.end = 0;
 
-  current_source_pspace = sal.pspace;
-  current_source_symtab = sal.symtab;
-  current_source_line = sal.line;
+  si.current_source_pspace = sal.pspace;
+  si.current_source_symtab = sal.symtab;
+  si.current_source_line = sal.line;
 
   /* Force the next "list" to center around the current line.  */
   clear_lines_listed_range ();
@@ -239,8 +258,10 @@ set_current_source_symtab_and_line (const symtab_and_line &sal)
 void
 clear_current_source_symtab_and_line (void)
 {
-  current_source_symtab = 0;
-  current_source_line = 0;
+  current_source_info &si = get_current_source_info ();
+
+  si.current_source_symtab = NULL;
+  si.current_source_line = 0;
 }
 
 /* Set the source file default for the "list" command to be S.
@@ -257,15 +278,17 @@ select_source_symtab (struct symtab *s)
   struct objfile *ofp;
   struct compunit_symtab *cu;
 
+  current_source_info &si = get_current_source_info ();
+
   if (s)
     {
-      current_source_symtab = s;
-      current_source_line = 1;
-      current_source_pspace = SYMTAB_PSPACE (s);
+      si.current_source_symtab = s;
+      si.current_source_line = 1;
+      si.current_source_pspace = SYMTAB_PSPACE (s);
       return;
     }
 
-  if (current_source_symtab)
+  if (si.current_source_symtab != NULL)
     return;
 
   /* Make the default place to list be the function `main'
@@ -276,17 +299,17 @@ select_source_symtab (struct symtab *s)
 	= decode_line_with_current_source (main_name (),
 					   DECODE_LINE_FUNFIRSTLINE);
       const symtab_and_line &sal = sals[0];
-      current_source_pspace = sal.pspace;
-      current_source_symtab = sal.symtab;
-      current_source_line = std::max (sal.line - (lines_to_list - 1), 1);
-      if (current_source_symtab)
+      si.current_source_pspace = sal.pspace;
+      si.current_source_symtab = sal.symtab;
+      si.current_source_line = std::max (sal.line - (lines_to_list - 1), 1);
+      if (si.current_source_symtab != NULL)
 	return;
     }
 
   /* Alright; find the last file in the symtab list (ignoring .h's
      and namespace symtabs).  */
 
-  current_source_line = 1;
+  si.current_source_line = 1;
 
   ALL_FILETABS (ofp, cu, s)
     {
@@ -296,12 +319,12 @@ select_source_symtab (struct symtab *s)
       if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
 			|| strcmp (name, "<<C++-namespaces>>") == 0)))
 	{
-	  current_source_pspace = current_program_space;
-	  current_source_symtab = s;
+	  si.current_source_pspace = current_program_space;
+	  si.current_source_symtab = s;
 	}
     }
 
-  if (current_source_symtab)
+  if (si.current_source_symtab != NULL)
     return;
 
   ALL_OBJFILES (ofp)
@@ -309,9 +332,9 @@ select_source_symtab (struct symtab *s)
     if (ofp->sf)
       s = ofp->sf->qf->find_last_source_symtab (ofp);
     if (s)
-      current_source_symtab = s;
+      si.current_source_symtab = s;
   }
-  if (current_source_symtab)
+  if (si.current_source_symtab != NULL)
     return;
 
   error (_("Can't find a default source file"));
@@ -403,7 +426,12 @@ forget_cached_source_info (void)
       forget_cached_source_info_for_objfile (objfile);
     }
 
-  last_source_visited = NULL;
+  struct ui *ui;
+  ALL_UIS (ui)
+    {
+      if (ui->curr_source_info != NULL)
+	ui->curr_source_info->last_source_visited = NULL;
+    }
 }
 
 void
@@ -645,7 +673,8 @@ add_path (char *dirname, char **which_path, int parse_separators)
 static void
 info_source_command (char *ignore, int from_tty)
 {
-  struct symtab *s = current_source_symtab;
+  current_source_info &si = get_current_source_info ();
+  struct symtab *s = si.current_source_symtab;
   struct compunit_symtab *cust;
 
   if (!s)
@@ -1312,8 +1341,9 @@ identify_source_line (struct symtab *s, int line, int mid_statement,
   annotate_source (s->fullname, line, s->line_charpos[line - 1],
 		   mid_statement, get_objfile_arch (SYMTAB_OBJFILE (s)), pc);
 
-  current_source_line = line;
-  current_source_symtab = s;
+  current_source_info &si = get_current_source_info ();
+  si.current_source_line = line;
+  si.current_source_symtab = s;
   clear_lines_listed_range ();
   return 1;
 }
@@ -1333,36 +1363,37 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
   struct ui_out *uiout = current_uiout;
 
   /* Regardless of whether we can open the file, set current_source_symtab.  */
-  current_source_symtab = s;
-  current_source_line = line;
-  first_line_listed = line;
+  current_source_info &si = get_current_source_info ();
+  si.current_source_symtab = s;
+  si.current_source_line = line;
+  si.first_line_listed = line;
 
   /* If printing of source lines is disabled, just print file and line
      number.  */
   if (uiout->test_flags (ui_source_list))
     {
       /* Only prints "No such file or directory" once.  */
-      if ((s != last_source_visited) || (!last_source_error))
+      if ((s != si.last_source_visited) || (!si.last_source_error))
 	{
-	  last_source_visited = s;
+	  si.last_source_visited = s;
 	  desc = open_source_file (s);
 	}
       else
 	{
-	  desc = last_source_error;
+	  desc = si.last_source_error;
 	  flags |= PRINT_SOURCE_LINES_NOERROR;
 	}
     }
   else
     {
-      desc = last_source_error;
+      desc = si.last_source_error;
       flags |= PRINT_SOURCE_LINES_NOERROR;
       noprint = 1;
     }
 
   if (desc < 0 || noprint)
     {
-      last_source_error = desc;
+      si.last_source_error = desc;
 
       if (!(flags & PRINT_SOURCE_LINES_NOERROR))
 	{
@@ -1404,7 +1435,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       return;
     }
 
-  last_source_error = 0;
+  si.last_source_error = 0;
 
   if (s->line_charpos == 0)
     find_source_lines (s, desc);
@@ -1432,13 +1463,13 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       c = fgetc (stream.get ());
       if (c == EOF)
 	break;
-      last_line_listed = current_source_line;
+      si.last_line_listed = si.current_source_line;
       if (flags & PRINT_SOURCE_LINES_FILENAME)
         {
           uiout->text (symtab_to_filename_for_display (s));
           uiout->text (":");
         }
-      xsnprintf (buf, sizeof (buf), "%d\t", current_source_line++);
+      xsnprintf (buf, sizeof (buf), "%d\t", si.current_source_line++);
       uiout->text (buf);
       do
 	{
@@ -1492,14 +1523,16 @@ info_line_command (char *arg, int from_tty)
   symtab_and_line curr_sal;
   gdb::array_view<symtab_and_line> sals;
 
+  current_source_info &si = get_current_source_info ();
+
   if (arg == 0)
     {
-      curr_sal.symtab = current_source_symtab;
+      curr_sal.symtab = si.current_source_symtab;
       curr_sal.pspace = current_program_space;
-      if (last_line_listed != 0)
-	curr_sal.line = last_line_listed;
+      if (si.last_line_listed != 0)
+	curr_sal.line = si.last_line_listed;
       else
-	curr_sal.line = current_source_line;
+	curr_sal.line = si.current_source_line;
 
       sals = curr_sal;
     }
@@ -1572,7 +1605,7 @@ info_line_command (char *arg, int from_tty)
 	  set_next_address (gdbarch, start_pc);
 
 	  /* Repeating "info line" should do the following line.  */
-	  last_line_listed = sal.line + 1;
+	  si.last_line_listed = sal.line + 1;
 
 	  /* If this is the only line, show the source code.  If it could
 	     not find the file, don't do anything special.  */
@@ -1599,28 +1632,30 @@ forward_search_command (char *regex, int from_tty)
   char *msg;
   struct cleanup *cleanups;
 
-  line = last_line_listed + 1;
+  current_source_info &si = get_current_source_info ();
+
+  line = si.last_line_listed + 1;
 
   msg = (char *) re_comp (regex);
   if (msg)
     error (("%s"), msg);
 
-  if (current_source_symtab == 0)
+  if (si.current_source_symtab == 0)
     select_source_symtab (0);
 
-  desc = open_source_file (current_source_symtab);
+  desc = open_source_file (si.current_source_symtab);
   if (desc < 0)
-    perror_with_name (symtab_to_filename_for_display (current_source_symtab));
+    perror_with_name (symtab_to_filename_for_display (si.current_source_symtab));
   cleanups = make_cleanup_close (desc);
 
-  if (current_source_symtab->line_charpos == 0)
-    find_source_lines (current_source_symtab, desc);
+  if (si.current_source_symtab->line_charpos == 0)
+    find_source_lines (si.current_source_symtab, desc);
 
-  if (line < 1 || line > current_source_symtab->nlines)
+  if (line < 1 || line > si.current_source_symtab->nlines)
     error (_("Expression not found"));
 
-  if (lseek (desc, current_source_symtab->line_charpos[line - 1], 0) < 0)
-    perror_with_name (symtab_to_filename_for_display (current_source_symtab));
+  if (lseek (desc, si.current_source_symtab->line_charpos[line - 1], 0) < 0)
+    perror_with_name (symtab_to_filename_for_display (si.current_source_symtab));
 
   discard_cleanups (cleanups);
   gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
@@ -1664,9 +1699,9 @@ forward_search_command (char *regex, int from_tty)
       if (re_exec (buf) > 0)
 	{
 	  /* Match!  */
-	  print_source_lines (current_source_symtab, line, line + 1, 0);
+	  print_source_lines (si.current_source_symtab, line, line + 1, 0);
 	  set_internalvar_integer (lookup_internalvar ("_"), line);
-	  current_source_line = std::max (line - lines_to_list / 2, 1);
+	  si.current_source_line = std::max (line - lines_to_list / 2, 1);
 	  return;
 	}
       line++;
@@ -1684,28 +1719,30 @@ reverse_search_command (char *regex, int from_tty)
   char *msg;
   struct cleanup *cleanups;
 
-  line = last_line_listed - 1;
+  current_source_info &si = get_current_source_info ();
+
+  line = si.last_line_listed - 1;
 
   msg = (char *) re_comp (regex);
   if (msg)
     error (("%s"), msg);
 
-  if (current_source_symtab == 0)
+  if (si.current_source_symtab == 0)
     select_source_symtab (0);
 
-  desc = open_source_file (current_source_symtab);
+  desc = open_source_file (si.current_source_symtab);
   if (desc < 0)
-    perror_with_name (symtab_to_filename_for_display (current_source_symtab));
+    perror_with_name (symtab_to_filename_for_display (si.current_source_symtab));
   cleanups = make_cleanup_close (desc);
 
-  if (current_source_symtab->line_charpos == 0)
-    find_source_lines (current_source_symtab, desc);
+  if (si.current_source_symtab->line_charpos == 0)
+    find_source_lines (si.current_source_symtab, desc);
 
-  if (line < 1 || line > current_source_symtab->nlines)
+  if (line < 1 || line > si.current_source_symtab->nlines)
     error (_("Expression not found"));
 
-  if (lseek (desc, current_source_symtab->line_charpos[line - 1], 0) < 0)
-    perror_with_name (symtab_to_filename_for_display (current_source_symtab));
+  if (lseek (desc, si.current_source_symtab->line_charpos[line - 1], 0) < 0)
+    perror_with_name (symtab_to_filename_for_display (si.current_source_symtab));
 
   discard_cleanups (cleanups);
   gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
@@ -1738,18 +1775,18 @@ reverse_search_command (char *regex, int from_tty)
       if (re_exec (buf) > 0)
 	{
 	  /* Match!  */
-	  print_source_lines (current_source_symtab, line, line + 1, 0);
+	  print_source_lines (si.current_source_symtab, line, line + 1, 0);
 	  set_internalvar_integer (lookup_internalvar ("_"), line);
-	  current_source_line = std::max (line - lines_to_list / 2, 1);
+	  si.current_source_line = std::max (line - lines_to_list / 2, 1);
 	  return;
 	}
       line--;
       if (fseek (stream.get (),
-		 current_source_symtab->line_charpos[line - 1], 0) < 0)
+		 si.current_source_symtab->line_charpos[line - 1], 0) < 0)
 	{
 	  const char *filename;
 
-	  filename = symtab_to_filename_for_display (current_source_symtab);
+	  filename = symtab_to_filename_for_display (si.current_source_symtab);
 	  perror_with_name (filename);
 	}
     }
@@ -1974,7 +2011,6 @@ _initialize_source (void)
 {
   struct cmd_list_element *c;
 
-  current_source_symtab = 0;
   init_source_path ();
 
   /* The intention is to use POSIX Basic Regular Expressions.

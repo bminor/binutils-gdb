@@ -134,6 +134,8 @@ struct ui
   /* See enum prompt_state's description.  */
   enum prompt_state prompt_state;
 
+  struct current_source_info *curr_source_info = NULL;
+
   /* The fields below that start with "m_" are "private".  They're
      meant to be accessed through wrapper macros that make them look
      like globals.  */
