@@ -1,5 +1,11 @@
 2017-11-07  Alan Modra  <amodra@gmail.com>
 
+	* read.c (assemble_one, s_bundle_unlock): Formatting.
+	Consistently add comma and "bytes" to error message.
+	* testsuite/gas/i386/bundle-bad.l: Adjust to suit.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/arm/got_prel.d,
 	* testsuite/gas/elf/dwarf2-1.d,
 	* testsuite/gas/elf/dwarf2-2.d,
