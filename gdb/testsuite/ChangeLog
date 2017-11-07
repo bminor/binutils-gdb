@@ -1,3 +1,7 @@
+2017-11-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/ena-dis-br.exp: Don't expect "warning:".
+
 2017-11-07  Xavier Roirand  <roirand@adacore.com>
 	    Pedro Alves  <palves@redhat.com>
 

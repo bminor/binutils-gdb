@@ -14225,7 +14225,7 @@ find_location_by_number (int bp_num, int loc_num)
 	 location number range.
 */
 
-static bool
+static void
 extract_bp_number_and_location (const std::string &arg,
 				std::pair<int, int> &bp_num_range,
 				std::pair<int, int> &bp_loc_range)
@@ -14267,10 +14267,7 @@ extract_bp_number_and_location (const std::string &arg,
 	  const char *ptls = bp_loc;
 	  bp_loc_range.first = get_number_trailer (&ptls, '\0');
 	  if (bp_loc_range.first == 0)
-	    {
-	      warning (_("bad breakpoint number at or near '%s'"), arg.c_str ());
-	      return false;
-	    }
+	    error (_("bad breakpoint number at or near '%s'"), arg.c_str ());
 	  bp_loc_range.second = bp_loc_range.first;
 	}
     }
@@ -14294,10 +14291,7 @@ extract_bp_number_and_location (const std::string &arg,
 	  const char *ptf = arg.c_str ();
 	  bp_num_range.first = get_number (&ptf);
 	  if (bp_num_range.first == 0)
-	    {
-	      warning (_("bad breakpoint number at or near '%s'"), arg.c_str ());
-	      return false;
-	    }
+	    error (_("bad breakpoint number at or near '%s'"), arg.c_str ());
 	  bp_num_range.second = bp_num_range.first;
 	}
       bp_loc_range.first = 0;
@@ -14306,8 +14300,6 @@ extract_bp_number_and_location (const std::string &arg,
 
   if (bp_num_range.first == 0 || bp_num_range.second == 0)
     error (_("bad breakpoint number at or near: '%s'"), arg.c_str ());
-
-  return true;
 }
 
 /* Enable or disable a breakpoint location BP_NUM.LOC_NUM.  ENABLE
@@ -14408,24 +14400,23 @@ enable_disable_command (const char *args, int from_tty, bool enable)
 	{
 	  std::pair<int, int> bp_num_range, bp_loc_range;
 
-	  if (extract_bp_number_and_location (num, bp_num_range, bp_loc_range))
+	  extract_bp_number_and_location (num, bp_num_range, bp_loc_range);
+
+	  if (bp_loc_range.first == bp_loc_range.second
+	      && bp_loc_range.first == 0)
 	    {
-	      if (bp_loc_range.first == bp_loc_range.second
-		  && bp_loc_range.first == 0)
-		{
-		  /* Handle breakpoint ids with formats 'x' or 'x-z'.  */
-		  map_breakpoint_number_range (bp_num_range,
-					       enable
-					       ? enable_breakpoint
-					       : disable_breakpoint);
-		}
-	      else
-		{
-		  /* Handle breakpoint ids with formats 'x.y' or
-		     'x.y-z'.  */
-		  enable_disable_breakpoint_location_range
-		    (bp_num_range.first, bp_loc_range, enable);
-		}
+	      /* Handle breakpoint ids with formats 'x' or 'x-z'.  */
+	      map_breakpoint_number_range (bp_num_range,
+					   enable
+					   ? enable_breakpoint
+					   : disable_breakpoint);
+	    }
+	  else
+	    {
+	      /* Handle breakpoint ids with formats 'x.y' or
+		 'x.y-z'.  */
+	      enable_disable_breakpoint_location_range
+		(bp_num_range.first, bp_loc_range, enable);
 	    }
 	  num = extract_arg (&args);
 	}

@@ -1,3 +1,9 @@
+2017-11-07  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (extract_bp_number_and_location): Change return
+	type to void.  Throw error instead of warning.
+	(enable_disable_command): Adjust.
+
 2017-11-07  Xavier Roirand  <roirand@adacore.com>
 	    Pedro Alves  <palves@redhat.com>
 
