@@ -1,3 +1,9 @@
+2017-11-07  Palmer Dabbelt  <palmer@sifive.com>
+
+	* MAINTAINERS (RISC-V): Add Jim Wilson as a maintainer.
+	Clean up Andrew's entry (remove trailing space, add tabs).
+	Change Palmer's email address, and clean up entry (add tabs).
+
 2017-11-07  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.c (read_uleb128): Properly pluralize messages.
