@@ -71,6 +71,10 @@ struct ui
      input until we have a whole command line.  */
   struct buffer line_buffer;
 
+  /* The last command line executed on the console.  Used for command
+     repetitions.  */
+  char *saved_command_line;
+
   /* The callback used by the event loop whenever an event is detected
      on the UI's input file descriptor.  This function incrementally
      builds a buffer where it accumulates the line read up to the
@@ -217,7 +221,6 @@ extern void ui_register_input_event_handler (struct ui *ui);
 extern void ui_unregister_input_event_handler (struct ui *ui);
 
 /* From top.c.  */
-extern char *saved_command_line;
 extern int confirm;
 extern int inhibit_gdbinit;
 extern const char gdbinit[];

@@ -132,10 +132,6 @@ show_confirm (struct ui_file *file, int from_tty,
 
 char *current_directory;
 
-/* The last command line executed on the console.  Used for command
-   repetitions.  */
-char *saved_command_line;
-
 /* Nonzero if the current command is modified by "server ".  This
    affects things like recording into the command history, commands
    repeating on RETURN, etc.  This is so a user interface (emacs, GUI,
@@ -251,6 +247,7 @@ static int highest_ui_num;
 ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
   : next (nullptr),
     num (++highest_ui_num),
+    saved_command_line (xstrdup ("")),
     call_readline (nullptr),
     input_handler (nullptr),
     command_editing (0),
@@ -675,7 +672,10 @@ dont_repeat (void)
      thing read from stdin in line and don't want to delete it.  Null
      lines won't repeat here in any case.  */
   if (ui->instream == ui->stdin_stream)
-    *saved_command_line = 0;
+    {
+      xfree (ui->saved_command_line);
+      ui->saved_command_line = NULL;
+    }
 }
 
 /* Prevent dont_repeat from working, and return a cleanup that
@@ -1659,7 +1659,8 @@ dont_repeat_command (char *ignored, int from_tty)
 {
   /* Can't call dont_repeat here because we're not necessarily reading
      from stdin.  */
-  *saved_command_line = 0;
+  xfree (current_ui->saved_command_line);
+  current_ui->saved_command_line = NULL;
 }
 
 /* Functions to manipulate command line editing control variables.  */
