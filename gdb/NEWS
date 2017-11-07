@@ -75,6 +75,9 @@ QSetWorkingDir
 * The "maintenance selftest" command now takes an optional argument to
   filter the tests to be run.
 
+* The "enable", and "disable" commands now accept a range of
+  breakpoint locations, e.g. "enable 1.3-5".
+
 * New commands
 
 set|show cwd

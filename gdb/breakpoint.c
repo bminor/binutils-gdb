@@ -14131,59 +14131,66 @@ ignore_command (char *args, int from_tty)
     printf_filtered ("\n");
 }
 
-/* Call FUNCTION on each of the breakpoints
-   whose numbers are given in ARGS.  */
+
+/* Call FUNCTION on each of the breakpoints with numbers in the range
+   defined by BP_NUM_RANGE (an inclusive range).  */
 
 static void
-map_breakpoint_numbers (const char *args,
-			gdb::function_view<void (breakpoint *)> function)
+map_breakpoint_number_range (std::pair<int, int> bp_num_range,
+			     gdb::function_view<void (breakpoint *)> function)
 {
-  int num;
-  struct breakpoint *b, *tmp;
-
-  if (args == 0 || *args == '\0')
-    error_no_arg (_("one or more breakpoint numbers"));
-
-  number_or_range_parser parser (args);
-
-  while (!parser.finished ())
+  if (bp_num_range.first == 0)
     {
-      const char *p = parser.cur_tok ();
-      bool match = false;
+      warning (_("bad breakpoint number at or near '%d'"),
+	       bp_num_range.first);
+    }
+  else
+    {
+      struct breakpoint *b, *tmp;
 
-      num = parser.get_number ();
-      if (num == 0)
+      for (int i = bp_num_range.first; i <= bp_num_range.second; i++)
 	{
-	  warning (_("bad breakpoint number at or near '%s'"), p);
-	}
-      else
-	{
+	  bool match = false;
+
 	  ALL_BREAKPOINTS_SAFE (b, tmp)
-	    if (b->number == num)
+	    if (b->number == i)
 	      {
 		match = true;
 		function (b);
 		break;
 	      }
 	  if (!match)
-	    printf_unfiltered (_("No breakpoint number %d.\n"), num);
+	    printf_unfiltered (_("No breakpoint number %d.\n"), i);
 	}
     }
 }
 
-static struct bp_location *
-find_location_by_number (const char *number)
-{
-  const char *p1;
-  int bp_num;
-  int loc_num;
-  struct breakpoint *b;
-  struct bp_location *loc;  
+/* Call FUNCTION on each of the breakpoints whose numbers are given in
+   ARGS.  */
 
-  p1 = number;
-  bp_num = get_number_trailer (&p1, '.');
-  if (bp_num == 0 || p1[0] != '.')
-    error (_("Bad breakpoint number '%s'"), number);
+static void
+map_breakpoint_numbers (const char *args,
+			gdb::function_view<void (breakpoint *)> function)
+{
+  if (args == NULL || *args == '\0')
+    error_no_arg (_("one or more breakpoint numbers"));
+
+  number_or_range_parser parser (args);
+
+  while (!parser.finished ())
+    {
+      int num = parser.get_number ();
+      map_breakpoint_number_range (std::make_pair (num, num), function);
+    }
+}
+
+/* Return the breakpoint location structure corresponding to the
+   BP_NUM and LOC_NUM values.  */
+
+static struct bp_location *
+find_location_by_number (int bp_num, int loc_num)
+{
+  struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
     if (b->number == bp_num)
@@ -14192,25 +14199,153 @@ find_location_by_number (const char *number)
       }
 
   if (!b || b->number != bp_num)
-    error (_("Bad breakpoint number '%s'"), number);
+    error (_("Bad breakpoint number '%d'"), bp_num);
   
-  /* Skip the dot.  */
-  ++p1;
-  const char *save = p1;
-  loc_num = get_number (&p1);
   if (loc_num == 0)
-    error (_("Bad breakpoint location number '%s'"), number);
+    error (_("Bad breakpoint location number '%d'"), loc_num);
 
-  --loc_num;
-  loc = b->loc;
-  for (;loc_num && loc; --loc_num, loc = loc->next)
-    ;
-  if (!loc)
-    error (_("Bad breakpoint location number '%s'"), save);
-    
-  return loc;  
+  int n = 0;
+  for (bp_location *loc = b->loc; loc != NULL; loc = loc->next)
+    if (++n == loc_num)
+      return loc;
+
+  error (_("Bad breakpoint location number '%d'"), loc_num);
 }
 
+/* Extract the breakpoint/location range specified by ARG.  Returns
+   the breakpoint range in BP_NUM_RANGE, and the location range in
+   BP_LOC_RANGE.
+
+   ARG may be in any of the following forms:
+
+   x     where 'x' is a breakpoint number.
+   x-y   where 'x' and 'y' specify a breakpoint numbers range.
+   x.y   where 'x' is a breakpoint number and 'y' a location number.
+   x.y-z where 'x' is a breakpoint number and 'y' and 'z' specify a
+	 location number range.
+*/
+
+static bool
+extract_bp_number_and_location (const std::string &arg,
+				std::pair<int, int> &bp_num_range,
+				std::pair<int, int> &bp_loc_range)
+{
+  std::string::size_type dot = arg.find ('.');
+
+  if (dot != std::string::npos)
+    {
+      /* Handle 'x.y' and 'x.y-z' cases.  */
+
+      if (arg.length () == dot + 1 || dot == 0)
+	error (_("bad breakpoint number at or near: '%s'"), arg.c_str ());
+
+      const char *ptb = arg.c_str ();
+      int bp_num = get_number_trailer (&ptb, '.');
+      if (bp_num == 0)
+	error (_("Bad breakpoint number '%s'"), arg.c_str ());
+
+      bp_num_range.first = bp_num;
+      bp_num_range.second = bp_num;
+
+      const char *bp_loc = &arg[dot + 1];
+      std::string::size_type dash = arg.find ('-', dot + 1);
+      if (dash != std::string::npos)
+	{
+	  /* bp_loc is a range (x-z).  */
+	  if (arg.length () == dash + 1)
+	    error (_("bad breakpoint number at or near: '%s'"), bp_loc);
+
+	  const char *ptlf = bp_loc;
+	  bp_loc_range.first = get_number_trailer (&ptlf, '-');
+
+	  const char *ptls = &arg[dash + 1];
+	  bp_loc_range.second = get_number_trailer (&ptls, '\0');
+	}
+      else
+	{
+	  /* bp_loc is a single value.  */
+	  const char *ptls = bp_loc;
+	  bp_loc_range.first = get_number_trailer (&ptls, '\0');
+	  if (bp_loc_range.first == 0)
+	    {
+	      warning (_("bad breakpoint number at or near '%s'"), arg.c_str ());
+	      return false;
+	    }
+	  bp_loc_range.second = bp_loc_range.first;
+	}
+    }
+  else
+    {
+      /* Handle x and x-y cases.  */
+      std::string::size_type dash = arg.find ('-');
+      if (dash != std::string::npos)
+	{
+	  if (arg.length () == dash + 1 || dash == 0)
+	    error (_("bad breakpoint number at or near: '%s'"), arg.c_str ());
+
+	  const char *ptf = arg.c_str ();
+	  bp_num_range.first = get_number_trailer (&ptf, '-');
+
+	  const char *pts = &arg[dash + 1];
+	  bp_num_range.second = get_number_trailer (&pts, '\0');
+	}
+      else
+	{
+	  const char *ptf = arg.c_str ();
+	  bp_num_range.first = get_number (&ptf);
+	  if (bp_num_range.first == 0)
+	    {
+	      warning (_("bad breakpoint number at or near '%s'"), arg.c_str ());
+	      return false;
+	    }
+	  bp_num_range.second = bp_num_range.first;
+	}
+      bp_loc_range.first = 0;
+      bp_loc_range.second = 0;
+    }
+
+  if (bp_num_range.first == 0 || bp_num_range.second == 0)
+    error (_("bad breakpoint number at or near: '%s'"), arg.c_str ());
+
+  return true;
+}
+
+/* Enable or disable a breakpoint location BP_NUM.LOC_NUM.  ENABLE
+   specifies whether to enable or disable.  */
+
+static void
+enable_disable_bp_num_loc (int bp_num, int loc_num, bool enable)
+{
+  struct bp_location *loc = find_location_by_number (bp_num, loc_num);
+  if (loc != NULL)
+    {
+      if (loc->enabled != enable)
+	{
+	  loc->enabled = enable;
+	  mark_breakpoint_location_modified (loc);
+	}
+      if (target_supports_enable_disable_tracepoint ()
+	  && current_trace_status ()->running && loc->owner
+	  && is_tracepoint (loc->owner))
+	target_disable_tracepoint (loc);
+    }
+  update_global_location_list (UGLL_DONT_INSERT);
+}
+
+/* Enable or disable a range of breakpoint locations.  BP_NUM is the
+   number of the breakpoint, and BP_LOC_RANGE specifies the
+   (inclusive) range of location numbers of that breakpoint to
+   enable/disable.  ENABLE specifies whether to enable or disable the
+   location.  */
+
+static void
+enable_disable_breakpoint_location_range (int bp_num,
+					  std::pair<int, int> &bp_loc_range,
+					  bool enable)
+{
+  for (int i = bp_loc_range.first; i <= bp_loc_range.second; i++)
+    enable_disable_bp_num_loc (bp_num, i, enable);
+}
 
 /* Set ignore-count of breakpoint number BPTNUM to COUNT.
    If from_tty is nonzero, it prints a message to that effect,
@@ -14244,8 +14379,13 @@ disable_breakpoint (struct breakpoint *bpt)
   observer_notify_breakpoint_modified (bpt);
 }
 
+/* Enable or disable the breakpoint(s) or breakpoint location(s)
+   specified in ARGS.  ARGS may be in any of the formats handled by
+   extract_bp_number_and_location.  ENABLE specifies whether to enable
+   or disable the breakpoints/locations.  */
+
 static void
-disable_command (const char *args, int from_tty)
+enable_disable_command (const char *args, int from_tty, bool enable)
 {
   if (args == 0)
     {
@@ -14253,7 +14393,12 @@ disable_command (const char *args, int from_tty)
 
       ALL_BREAKPOINTS (bpt)
 	if (user_breakpoint_p (bpt))
-	  disable_breakpoint (bpt);
+	  {
+	    if (enable)
+	      enable_breakpoint (bpt);
+	    else
+	      disable_breakpoint (bpt);
+	  }
     }
   else
     {
@@ -14261,33 +14406,41 @@ disable_command (const char *args, int from_tty)
 
       while (!num.empty ())
 	{
-	  if (num.find ('.') != std::string::npos)
-	    {
-	      struct bp_location *loc = find_location_by_number (num.c_str ());
+	  std::pair<int, int> bp_num_range, bp_loc_range;
 
-	      if (loc)
+	  if (extract_bp_number_and_location (num, bp_num_range, bp_loc_range))
+	    {
+	      if (bp_loc_range.first == bp_loc_range.second
+		  && bp_loc_range.first == 0)
 		{
-		  if (loc->enabled)
-		    {
-		      loc->enabled = 0;
-		      mark_breakpoint_location_modified (loc);
-		    }
-		  if (target_supports_enable_disable_tracepoint ()
-		      && current_trace_status ()->running && loc->owner
-		      && is_tracepoint (loc->owner))
-		    target_disable_tracepoint (loc);
+		  /* Handle breakpoint ids with formats 'x' or 'x-z'.  */
+		  map_breakpoint_number_range (bp_num_range,
+					       enable
+					       ? enable_breakpoint
+					       : disable_breakpoint);
 		}
-	      update_global_location_list (UGLL_DONT_INSERT);
+	      else
+		{
+		  /* Handle breakpoint ids with formats 'x.y' or
+		     'x.y-z'.  */
+		  enable_disable_breakpoint_location_range
+		    (bp_num_range.first, bp_loc_range, enable);
+		}
 	    }
-	  else
-	    map_breakpoint_numbers
-	      (num.c_str (), [&] (breakpoint *b)
-	       {
-		 iterate_over_related_breakpoints (b, disable_breakpoint);
-	       });
 	  num = extract_arg (&args);
 	}
     }
+}
+
+/* The disable command disables the specified breakpoints/locations
+   (or all defined breakpoints) so they're no longer effective in
+   stopping the inferior.  ARGS may be in any of the forms defined in
+   extract_bp_number_and_location.  */
+
+static void
+disable_command (const char *args, int from_tty)
+{
+  enable_disable_command (args, from_tty, false);
 }
 
 static void
@@ -14360,54 +14513,15 @@ enable_breakpoint (struct breakpoint *bpt)
   enable_breakpoint_disp (bpt, bpt->disposition, 0);
 }
 
-/* The enable command enables the specified breakpoints (or all defined
-   breakpoints) so they once again become (or continue to be) effective
-   in stopping the inferior.  */
+/* The enable command enables the specified breakpoints/locations (or
+   all defined breakpoints) so they once again become (or continue to
+   be) effective in stopping the inferior.  ARGS may be in any of the
+   forms defined in extract_bp_number_and_location.  */
 
 static void
 enable_command (const char *args, int from_tty)
 {
-  if (args == 0)
-    {
-      struct breakpoint *bpt;
-
-      ALL_BREAKPOINTS (bpt)
-	if (user_breakpoint_p (bpt))
-	  enable_breakpoint (bpt);
-    }
-  else
-    {
-      std::string num = extract_arg (&args);
-
-      while (!num.empty ())
-	{
-	  if (num.find ('.') != std::string::npos)
-	    {
-	      struct bp_location *loc = find_location_by_number (num.c_str ());
-
-	      if (loc)
-		{
-		  if (!loc->enabled)
-		    {
-		      loc->enabled = 1;
-		      mark_breakpoint_location_modified (loc);
-		    }
-		  if (target_supports_enable_disable_tracepoint ()
-		      && current_trace_status ()->running && loc->owner
-		      && is_tracepoint (loc->owner))
-		    target_enable_tracepoint (loc);
-		}
-	      update_global_location_list (UGLL_MAY_INSERT);
-	    }
-	  else
-	    map_breakpoint_numbers
-	      (num.c_str (), [&] (breakpoint *b)
-	       {
-		 iterate_over_related_breakpoints (b, enable_breakpoint);
-	       });
-	  num = extract_arg (&args);
-	}
-    }
+  enable_disable_command (args, from_tty, true);
 }
 
 static void

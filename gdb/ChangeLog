@@ -1,3 +1,19 @@
+2017-11-07  Xavier Roirand  <roirand@adacore.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (map_breakpoint_number_range): New, factored out
+	from ...
+	(map_breakpoint_numbers): ... here.
+	(find_location_by_number): Change parameters from string to
+	breakpoint number and location.
+	(extract_bp_number_and_location): New function.
+	(enable_disable_bp_num_loc)
+	(enable_disable_breakpoint_location_range)
+	(enable_disable_command): New functions, factored out ...
+	(enable_command, disable_command): ... these functions, and
+	adjusted to support ranges.
+	* NEWS: Document enable/disable breakpoint location range feature.
+
 2017-11-06  Luis Machado  <luis.machado@linaro.org>
 
 	* MAINTAINERS (Write After Approval): Update my e-mail address.

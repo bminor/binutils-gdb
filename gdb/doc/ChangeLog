@@ -1,3 +1,9 @@
+2017-11-07  Xavier Roirand  <roirand@adacore.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Set Breaks): Document support for breakpoint
+	location ranges in the enable/disable commands.
+
 2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.texinfo (Starting your Program) <The working directory.>:
