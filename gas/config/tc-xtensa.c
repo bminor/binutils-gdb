@@ -6358,10 +6358,20 @@ finish_vinsn (vliw_insn *vinsn)
   if (vinsn->num_slots
       != xtensa_format_num_slots (xtensa_default_isa, vinsn->format))
     {
-      as_bad (_("format '%s' allows %d slots, but there are %d opcodes"),
-	      xtensa_format_name (xtensa_default_isa, vinsn->format),
-	      xtensa_format_num_slots (xtensa_default_isa, vinsn->format),
-	      vinsn->num_slots);
+      char *msg;
+      int slots = xtensa_format_num_slots (xtensa_default_isa, vinsn->format);
+
+      msg = concat (ngettext ("format '%s' allows %d slot, ",
+			      "format '%s' allows %d slots, ",
+			      slots),
+		    ngettext ("but there is %d opcode",
+			      "but there are %d opcodes",
+			      vinsn->num_slots),
+		    (const char *) 0);
+
+      as_bad (msg, xtensa_format_name (xtensa_default_isa, vinsn->format),
+	      slots, vinsn->num_slots);
+      free (msg);
       xg_clear_vinsn (vinsn);
       return;
     }

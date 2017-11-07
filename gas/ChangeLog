@@ -1,3 +1,7 @@
+2017-11-08  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-xtensa.c (finish_vinsn): Properly pluralize error message.
+
 2017-11-07  Jim Wilson  <jimw@sifive.com>
 
 	* config/tc-riscv.c (append_insn): Call frag_wane and frag_new at
