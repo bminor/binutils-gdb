@@ -80,6 +80,14 @@ test_enable_disable "enable  1" y y y y y y
 test_enable_disable "disable 2" y n y y y y
 test_enable_disable "enable  2" y y y y y y
 
+# Check that we can disable/disable a range of breakpoints.
+test_enable_disable "disable 1-2" n n y y y y
+test_enable_disable "enable 1-2"  y y y y y y
+
+# Check that we can disable/disable a list of breakpoints.
+test_enable_disable "disable 1 2" n n y y y y
+test_enable_disable "enable 1 2"  y y y y y y
+
 # Check that we can disable/enable a single location breakpoint.
 test_enable_disable "disable 2.2" y y y n y y
 test_enable_disable "enable  2.2" y y y y y y
@@ -92,6 +100,11 @@ test_enable_disable "enable  2.2-3" y y y y y y
 # START==END.
 test_enable_disable "disable 2.2-2" y y y n y y
 test_enable_disable "enable  2.2-2" y y y y y y
+
+# Check that we can disable/disable a list of breakpoints that
+# includes some elements with location ranges and others without.
+test_enable_disable "disable 1 2.1 2.3-4" n y n y n n
+test_enable_disable "enable  1 2.1 2.3-4" y y y y y y
 
 # Check that we can disable a location breakpoint range with max >
 # existing breakpoint location.
