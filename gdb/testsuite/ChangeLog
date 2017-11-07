@@ -1,5 +1,13 @@
 2017-11-07  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/ena-dis-br.exp (test_ena_dis_br): Adjust test.
+	* gdb.cp/ena-dis-br-range.exp: Adjust tests.
+	(disable_invalid, disable_inverted, disable_negative): New
+	procedures.
+	("bad numbers"): New set of tests.
+
+2017-11-07  Pedro Alves  <palves@redhat.com>
+
 	* gdb.cp/ena-dis-br-range.exp: Add tests.
 
 2017-11-07  Pedro Alves  <palves@redhat.com>

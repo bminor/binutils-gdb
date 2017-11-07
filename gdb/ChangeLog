@@ -1,5 +1,13 @@
 2017-11-07  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (extract_bp_kind): New enum.
+	(extract_bp_num, extract_bp_or_bp_range): New functions, partially
+	factored out from ...
+	(extract_bp_number_and_location): ... here.
+	* cli/cli-utils.c (get_number_trailer): Handle '-$variable'.
+
+2017-11-07  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (extract_bp_number_and_location): Change return
 	type to void.  Throw error instead of warning.
 	(enable_disable_command): Adjust.

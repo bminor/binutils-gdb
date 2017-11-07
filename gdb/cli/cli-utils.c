@@ -30,6 +30,13 @@ get_number_trailer (const char **pp, int trailer)
 {
   int retval = 0;	/* default */
   const char *p = *pp;
+  bool negative = false;
+
+  if (*p == '-')
+    {
+      ++p;
+      negative = true;
+    }
 
   if (*p == '$')
     {
@@ -70,11 +77,10 @@ get_number_trailer (const char **pp, int trailer)
     }
   else
     {
-      if (*p == '-')
-	++p;
+      const char *p1 = p;
       while (*p >= '0' && *p <= '9')
 	++p;
-      if (p == *pp)
+      if (p == p1)
 	/* There is no number here.  (e.g. "cond a == b").  */
 	{
 	  /* Skip non-numeric token.  */
@@ -84,7 +90,7 @@ get_number_trailer (const char **pp, int trailer)
 	  retval = 0;
 	}
       else
-	retval = atoi (*pp);
+	retval = atoi (p1);
     }
   if (!(isspace (*p) || *p == '\0' || *p == trailer))
     {
@@ -95,7 +101,7 @@ get_number_trailer (const char **pp, int trailer)
     }
   p = skip_spaces (p);
   *pp = p;
-  return retval;
+  return negative ? -retval : retval;
 }
 
 /* See documentation in cli-utils.h.  */

@@ -14212,6 +14212,87 @@ find_location_by_number (int bp_num, int loc_num)
   error (_("Bad breakpoint location number '%d'"), loc_num);
 }
 
+/* Modes of operation for extract_bp_num.  */
+enum class extract_bp_kind
+{
+  /* Extracting a breakpoint number.  */
+  bp,
+
+  /* Extracting a location number.  */
+  loc,
+};
+
+/* Extract a breakpoint or location number (as determined by KIND)
+   from the string starting at START.  TRAILER is a character which
+   can be found after the number.  If you don't want a trailer, use
+   '\0'.  If END_OUT is not NULL, it is set to point after the parsed
+   string.  This always returns a positive integer.  */
+
+static int
+extract_bp_num (extract_bp_kind kind, const char *start,
+		int trailer, const char **end_out = NULL)
+{
+  const char *end = start;
+  int num = get_number_trailer (&end, trailer);
+  if (num < 0)
+    error (kind == extract_bp_kind::bp
+	   ? _("Negative breakpoint number '%.*s'")
+	   : _("Negative breakpoint location number '%.*s'"),
+	   int (end - start), start);
+  if (num == 0)
+    error (kind == extract_bp_kind::bp
+	   ? _("Bad breakpoint number '%.*s'")
+	   : _("Bad breakpoint location number '%.*s'"),
+	   int (end - start), start);
+
+  if (end_out != NULL)
+    *end_out = end;
+  return num;
+}
+
+/* Extract a breakpoint or location range (as determined by KIND) in
+   the form NUM1-NUM2 stored at &ARG[arg_offset].  Returns a std::pair
+   representing the (inclusive) range.  The returned pair's elements
+   are always positive integers.  */
+
+static std::pair<int, int>
+extract_bp_or_bp_range (extract_bp_kind kind,
+			const std::string &arg,
+			std::string::size_type arg_offset)
+{
+  std::pair<int, int> range;
+  const char *bp_loc = &arg[arg_offset];
+  std::string::size_type dash = arg.find ('-', arg_offset);
+  if (dash != std::string::npos)
+    {
+      /* bp_loc is a range (x-z).  */
+      if (arg.length () == dash + 1)
+	error (kind == extract_bp_kind::bp
+	       ? _("Bad breakpoint number at or near: '%s'")
+	       : _("Bad breakpoint location number at or near: '%s'"),
+	       bp_loc);
+
+      const char *end;
+      const char *start_first = bp_loc;
+      const char *start_second = &arg[dash + 1];
+      range.first = extract_bp_num (kind, start_first, '-');
+      range.second = extract_bp_num (kind, start_second, '\0', &end);
+
+      if (range.first > range.second)
+	error (kind == extract_bp_kind::bp
+	       ? _("Inverted breakpoint range at '%.*s'")
+	       : _("Inverted breakpoint location range at '%.*s'"),
+	       int (end - start_first), start_first);
+    }
+  else
+    {
+      /* bp_loc is a single value.  */
+      range.first = extract_bp_num (kind, bp_loc, '\0');
+      range.second = range.first;
+    }
+  return range;
+}
+
 /* Extract the breakpoint/location range specified by ARG.  Returns
    the breakpoint range in BP_NUM_RANGE, and the location range in
    BP_LOC_RANGE.
@@ -14237,69 +14318,23 @@ extract_bp_number_and_location (const std::string &arg,
       /* Handle 'x.y' and 'x.y-z' cases.  */
 
       if (arg.length () == dot + 1 || dot == 0)
-	error (_("bad breakpoint number at or near: '%s'"), arg.c_str ());
+	error (_("Bad breakpoint number at or near: '%s'"), arg.c_str ());
 
-      const char *ptb = arg.c_str ();
-      int bp_num = get_number_trailer (&ptb, '.');
-      if (bp_num == 0)
-	error (_("Bad breakpoint number '%s'"), arg.c_str ());
+      bp_num_range.first
+	= extract_bp_num (extract_bp_kind::bp, arg.c_str (), '.');
+      bp_num_range.second = bp_num_range.first;
 
-      bp_num_range.first = bp_num;
-      bp_num_range.second = bp_num;
-
-      const char *bp_loc = &arg[dot + 1];
-      std::string::size_type dash = arg.find ('-', dot + 1);
-      if (dash != std::string::npos)
-	{
-	  /* bp_loc is a range (x-z).  */
-	  if (arg.length () == dash + 1)
-	    error (_("bad breakpoint number at or near: '%s'"), bp_loc);
-
-	  const char *ptlf = bp_loc;
-	  bp_loc_range.first = get_number_trailer (&ptlf, '-');
-
-	  const char *ptls = &arg[dash + 1];
-	  bp_loc_range.second = get_number_trailer (&ptls, '\0');
-	}
-      else
-	{
-	  /* bp_loc is a single value.  */
-	  const char *ptls = bp_loc;
-	  bp_loc_range.first = get_number_trailer (&ptls, '\0');
-	  if (bp_loc_range.first == 0)
-	    error (_("bad breakpoint number at or near '%s'"), arg.c_str ());
-	  bp_loc_range.second = bp_loc_range.first;
-	}
+      bp_loc_range = extract_bp_or_bp_range (extract_bp_kind::loc,
+					     arg, dot + 1);
     }
   else
     {
       /* Handle x and x-y cases.  */
-      std::string::size_type dash = arg.find ('-');
-      if (dash != std::string::npos)
-	{
-	  if (arg.length () == dash + 1 || dash == 0)
-	    error (_("bad breakpoint number at or near: '%s'"), arg.c_str ());
 
-	  const char *ptf = arg.c_str ();
-	  bp_num_range.first = get_number_trailer (&ptf, '-');
-
-	  const char *pts = &arg[dash + 1];
-	  bp_num_range.second = get_number_trailer (&pts, '\0');
-	}
-      else
-	{
-	  const char *ptf = arg.c_str ();
-	  bp_num_range.first = get_number (&ptf);
-	  if (bp_num_range.first == 0)
-	    error (_("bad breakpoint number at or near '%s'"), arg.c_str ());
-	  bp_num_range.second = bp_num_range.first;
-	}
+      bp_num_range = extract_bp_or_bp_range (extract_bp_kind::bp, arg, 0);
       bp_loc_range.first = 0;
       bp_loc_range.second = 0;
     }
-
-  if (bp_num_range.first == 0 || bp_num_range.second == 0)
-    error (_("bad breakpoint number at or near: '%s'"), arg.c_str ());
 }
 
 /* Enable or disable a breakpoint location BP_NUM.LOC_NUM.  ENABLE

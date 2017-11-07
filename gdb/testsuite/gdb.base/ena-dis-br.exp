@@ -398,7 +398,7 @@ proc test_ena_dis_br { what } {
     # Now enable(disable) '$b4.1 fooobaar'.  This should error on
     # fooobaar.
     gdb_test "$what $b4.1 fooobaar" \
-       "bad breakpoint number at or near 'fooobaar'" \
+       "Bad breakpoint number 'fooobaar'" \
        "$what \$b4.1 fooobar"
     set test1 "${what}d \$b4.1"
 

@@ -109,9 +109,9 @@ gdb_test "enable 2.3-5" "Bad breakpoint location number '5'" \
 gdb_test "info break" [make_info_breakpoint_reply_re y y y y y y] \
     "breakpoint info enable 2.3 to 2.5"
 
-# Check that disabling an reverse location breakpoint range does not
+# Check that disabling an inverted breakpoint location range does not
 # work.
-gdb_test_no_output "disable 2.3-2"
+gdb_test "disable 2.3-2" "Inverted breakpoint location range at '3-2'"
 
 gdb_test "info break" [make_info_breakpoint_reply_re y y y y y y] \
     "breakpoint info disable 2.3-2"
@@ -126,44 +126,111 @@ gdb_test "info break" [make_info_breakpoint_reply_re y y y y y y] \
 
 # Check that disabling an invalid breakpoint location range does not
 # cause trouble.
-gdb_test_no_output "disable 2.8-6"
+gdb_test "disable 2.8-6" "Inverted breakpoint location range at '8-6'"
 
 gdb_test "info break" [make_info_breakpoint_reply_re y y y y y y] \
     "breakpoint info disable 2.8-6"
 
 # Check that invalid/open ranges are handled correctly.
 with_test_prefix "open range" {
-    gdb_test "disable -" "bad breakpoint number at or near: '-'"
-    gdb_test "disable -1" "bad breakpoint number at or near: '-1'"
-    gdb_test "disable 1-" "bad breakpoint number at or near: '1-'"
-    gdb_test "disable 1.-2" "Bad breakpoint location number '-2'"
-    gdb_test "disable 1.2-" "bad breakpoint number at or near: '2-'"
-    gdb_test "disable 1.-2-3" "Bad breakpoint location number '-2'"
-    gdb_test "disable 1-2-3" "bad breakpoint number at or near: '1-2-3'"
+    gdb_test "disable -" "Bad breakpoint number at or near: '-'"
+    gdb_test "disable -1" "Negative breakpoint number '-1'"
+    gdb_test "disable 1-" "Bad breakpoint number at or near: '1-'"
+    gdb_test "disable 1.-2" "Negative breakpoint location number '-2'"
+    gdb_test "disable 1.2-" "Bad breakpoint location number at or near: '2-'"
+    gdb_test "disable 1.-2-3" "Negative breakpoint location number '-2'"
+    gdb_test "disable 1-2-3" "Bad breakpoint number '2-3'"
 }
 
 with_test_prefix "dangling period" {
-    gdb_test "disable 2." "bad breakpoint number at or near: '2.'"
-    gdb_test "disable .2" "bad breakpoint number at or near: '.2'"
-    gdb_test "disable 2.3.4" "bad breakpoint number at or near '2.3.4'"
+    gdb_test "disable 2." "Bad breakpoint number at or near: '2.'"
+    gdb_test "disable .2" "Bad breakpoint number at or near: '.2'"
+    gdb_test "disable 2.3.4" "Bad breakpoint location number '3.4'"
 }
 
 # Check that 0s are handled correctly.
 with_test_prefix "zero" {
-    gdb_test "disable 0" "bad breakpoint number at or near '0'"
-    gdb_test "disable 0.0" "Bad breakpoint number '0.0'"
-    gdb_test "disable 0.1" "Bad breakpoint number '0.1'"
-    gdb_test "disable 0.1-2" "Bad breakpoint number '0.1-2'"
-    gdb_test "disable 2.0" "bad breakpoint number at or near '2.0'"
-
-    # These should really fail...
-    gdb_test_no_output "disable 2.0-0"
-    gdb_test_no_output "enable 2.0-0"
-
+    gdb_test "disable 0" "Bad breakpoint number '0'"
+    gdb_test "disable 0.0" "Bad breakpoint number '0'"
+    gdb_test "disable 0.1" "Bad breakpoint number '0'"
+    gdb_test "disable 0.1-2" "Bad breakpoint number '0'"
+    gdb_test "disable 2.0" "Bad breakpoint location number '0'"
+    gdb_test "disable 2.0-0" "Bad breakpoint location number '0'"
     gdb_test "disable 2.0-1" "Bad breakpoint location number '0'"
+    gdb_test "disable 2.1-0" "Bad breakpoint location number '0'"
+}
 
-    # Likewise, should fail.
-    gdb_test_no_output "disable 2.1-0"
+# Test "disable BPLIST" with an invalid breakpoint/location BPLIST.
+# PREFIX and SUFFIX are concatenated to form BPLIST.  The invalid part
+# is always in SUFFIX.
+
+proc disable_invalid {prefix suffix} {
+    set bad_re [string_to_regexp $suffix]
+
+    if {$prefix == ""} {
+	gdb_test \
+	    "disable $suffix" \
+	    "Bad breakpoint number '${bad_re}'"
+    } else {
+	gdb_test \
+	    "disable ${prefix}$suffix" \
+	    "Bad breakpoint location number '${bad_re}'"
+    }
+}
+
+# Like disable_invalid, but expects an "inverted range" error.
+
+proc disable_inverted {prefix suffix} {
+    set bad_re [string_to_regexp $suffix]
+
+    if {$prefix == ""} {
+	gdb_test \
+	    "disable $suffix" \
+	    "Inverted breakpoint range at '${bad_re}'"
+    } else {
+	gdb_test \
+	    "disable ${prefix}$suffix" \
+	    "Inverted breakpoint location range at '${bad_re}'"
+    }
+}
+
+# Like disable_invalid, but expects a "negative number" error.
+
+proc disable_negative {prefix suffix} {
+    set bad_re [string_to_regexp $suffix]
+
+    if {$prefix == ""} {
+	gdb_test \
+	    "disable $suffix" \
+	    "Negative breakpoint number '${bad_re}'"
+    } else {
+	gdb_test \
+	    "disable ${prefix}$suffix" \
+	    "Negative breakpoint location number '${bad_re}'"
+    }
+}
+
+with_test_prefix "bad numbers" {
+    gdb_test "p \$zero = 0" " = 0"
+    gdb_test "p \$one = 1" " = 1"
+    gdb_test "p \$two = 2" " = 2"
+    gdb_test "p \$minus_one = -1" " = -1"
+    foreach prefix {"" "1." "$one."} {
+	set prefix_re [string_to_regexp $prefix]
+
+	disable_invalid $prefix "foo"
+	disable_invalid $prefix "1foo"
+	disable_invalid $prefix "foo1"
+
+	disable_inverted $prefix "2-1"
+	disable_inverted $prefix "2-\$one"
+	disable_inverted $prefix "\$two-1"
+	disable_inverted $prefix "\$two-\$one"
+
+	disable_negative $prefix "-1"
+	disable_negative $prefix "-\$one"
+	disable_negative $prefix "\$minus_one"
+    }
 }
 
 gdb_test "info break" [make_info_breakpoint_reply_re y y y y y y] \
