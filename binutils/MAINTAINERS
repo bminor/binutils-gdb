@@ -119,7 +119,7 @@ responsibility among the other maintainers.
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>
   RISC-V	   Palmer Dabbelt <palmer@sifive.com>
   RISC-V	   Andrew Waterman <andrew@sifive.com>
-  RISC-V	   Jim Wilson <jim@sifive.com>
+  RISC-V	   Jim Wilson <jimw@sifive.com>
   RL78             DJ Delorie <dj@redhat.com>
   RX               DJ Delorie <dj@redhat.com>
   RX               Nick Clifton <nickc@redhat.com>
