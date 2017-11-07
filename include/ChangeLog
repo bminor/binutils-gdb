@@ -1,3 +1,8 @@
+2017-11-07  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/arm.h (FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD):
+	New macro.
+
 2017-11-02  Siddhesh Poyarekar  <siddhesh@sourceware.org>
 
 	* include/opcode/aarch64.h (AARCH64_ARCH_V8_2): Drop

@@ -143,17 +143,17 @@ bfd_boolean codecomposer_syntax = FALSE;
 /* Variables that we set while parsing command-line options.  Once all
    options have been read we re-process these values to set the real
    assembly flags.  */
-static const arm_feature_set *legacy_cpu = NULL;
-static const arm_feature_set *legacy_fpu = NULL;
+static const arm_feature_set *  legacy_cpu = NULL;
+static const arm_feature_set *  legacy_fpu = NULL;
 
-static const arm_feature_set *mcpu_cpu_opt = NULL;
-static arm_feature_set *dyn_mcpu_ext_opt = NULL;
-static const arm_feature_set *mcpu_fpu_opt = NULL;
-static const arm_feature_set *march_cpu_opt = NULL;
-static arm_feature_set *dyn_march_ext_opt = NULL;
-static const arm_feature_set *march_fpu_opt = NULL;
-static const arm_feature_set *mfpu_opt = NULL;
-static const arm_feature_set *object_arch = NULL;
+static const arm_feature_set *  mcpu_cpu_opt = NULL;
+static arm_feature_set *        dyn_mcpu_ext_opt = NULL;
+static const arm_feature_set *  mcpu_fpu_opt = NULL;
+static const arm_feature_set *  march_cpu_opt = NULL;
+static arm_feature_set *        dyn_march_ext_opt = NULL;
+static const arm_feature_set *  march_fpu_opt = NULL;
+static const arm_feature_set *  mfpu_opt = NULL;
+static const arm_feature_set *  object_arch = NULL;
 
 /* Constants for known architecture features.  */
 static const arm_feature_set fpu_default = FPU_DEFAULT;
@@ -540,7 +540,7 @@ struct asm_barrier_opt
 
 struct reloc_entry
 {
-  const char *                    name;
+  const char *              name;
   bfd_reloc_code_real_type  reloc;
 };
 
@@ -977,11 +977,11 @@ skip_past_char (char ** str, char c)
 
 /* Return TRUE if anything in the expression is a bignum.  */
 
-static int
+static bfd_boolean
 walk_no_bignums (symbolS * sp)
 {
   if (symbol_get_value_expression (sp)->X_op == O_big)
-    return 1;
+    return TRUE;
 
   if (symbol_get_value_expression (sp)->X_add_symbol)
     {
@@ -990,10 +990,10 @@ walk_no_bignums (symbolS * sp)
 		  && walk_no_bignums (symbol_get_value_expression (sp)->X_op_symbol)));
     }
 
-  return 0;
+  return FALSE;
 }
 
-static int in_my_get_expression = 0;
+static bfd_boolean in_my_get_expression = FALSE;
 
 /* Third argument to my_get_expression.	 */
 #define GE_NO_PREFIX 0
@@ -1030,16 +1030,17 @@ my_get_expression (expressionS * ep, char ** str, int prefix_mode)
       if (is_immediate_prefix (**str))
 	(*str)++;
       break;
-    default: abort ();
+    default:
+      abort ();
     }
 
   memset (ep, 0, sizeof (expressionS));
 
   save_in = input_line_pointer;
   input_line_pointer = *str;
-  in_my_get_expression = 1;
+  in_my_get_expression = TRUE;
   seg = expression (ep);
-  in_my_get_expression = 0;
+  in_my_get_expression = FALSE;
 
   if (ep->X_op == O_illegal || ep->X_op == O_absent)
     {
@@ -1086,7 +1087,7 @@ my_get_expression (expressionS * ep, char ** str, int prefix_mode)
 
   *str = input_line_pointer;
   input_line_pointer = save_in;
-  return 0;
+  return SUCCESS;
 }
 
 /* Turn a string in input_line_pointer into a floating point constant
@@ -1181,6 +1182,7 @@ md_atof (int type, char * litP, int * sizeP)
 
 /* We handle all bad expressions here, so that we can report the faulty
    instruction in the error message.  */
+
 void
 md_operand (expressionS * exp)
 {
@@ -1190,10 +1192,11 @@ md_operand (expressionS * exp)
 
 /* Immediate values.  */
 
+#ifdef OBJ_ELF
 /* Generic immediate-value read function for use in directives.
    Accepts anything that 'expression' can fold to a constant.
    *val receives the number.  */
-#ifdef OBJ_ELF
+
 static int
 immediate_for_directive (int *val)
 {
@@ -4771,6 +4774,7 @@ parse_immediate (char **str, int *val, int min, int max,
 		 bfd_boolean prefix_opt)
 {
   expressionS exp;
+
   my_get_expression (&exp, str, prefix_opt ? GE_OPT_PREFIX : GE_IMM_PREFIX);
   if (exp.X_op != O_constant)
     {
@@ -5618,6 +5622,7 @@ parse_address_main (char **str, int i, int group_relocations,
 	  else
 	    {
 	      char *q = p;
+
 	      if (my_get_expression (&inst.reloc.exp, &p, GE_IMM_PREFIX))
 		return PARSE_OPERAND_FAIL;
 	      /* If the offset is 0, find out if it's a +0 or -0.  */
@@ -5708,6 +5713,7 @@ parse_address_main (char **str, int i, int group_relocations,
 	  else
 	    {
 	      char *q = p;
+
 	      if (inst.operands[i].negative)
 		{
 		  inst.operands[i].negative = 0;
@@ -8376,7 +8382,7 @@ do_adr (void)
       && inst.reloc.exp.X_add_symbol != NULL
       && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
       && THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
-    inst.reloc.exp.X_add_number += 1;  
+    inst.reloc.exp.X_add_number += 1;
 }
 
 /* This is a pseudo-op of the form "adrl rd, label" to be converted
@@ -8400,7 +8406,7 @@ do_adrl (void)
       && inst.reloc.exp.X_add_symbol != NULL
       && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
       && THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
-    inst.reloc.exp.X_add_number += 1;  
+    inst.reloc.exp.X_add_number += 1;
 }
 
 static void
@@ -18001,7 +18007,7 @@ opcode_lookup (char **str)
 	case OT_cinfix3_deprecated:
 	case OT_odd_infix_unc:
 	  if (!unified_syntax)
-	    return 0;
+	    return NULL;
 	  /* Fall through.  */
 
 	case OT_csuffix:
@@ -22167,6 +22173,7 @@ add_unwind_adjustsp (offsetT offset)
 }
 
 /* Finish the list of unwind opcodes for this function.	 */
+
 static void
 finish_unwind_opcodes (void)
 {
@@ -22453,7 +22460,7 @@ tc_arm_regname_to_dw2regnum (char *regname)
   if (reg != FAIL)
     return reg + 256;
 
-  return -1;
+  return FAIL;
 }
 
 #ifdef TE_PE
@@ -22883,6 +22890,7 @@ thumb32_negate_data_op (offsetT *instruction, unsigned int value)
 }
 
 /* Read a 32-bit thumb instruction from buf.  */
+
 static unsigned long
 get_thumb32_insn (char * buf)
 {
@@ -22892,7 +22900,6 @@ get_thumb32_insn (char * buf)
 
   return insn;
 }
-
 
 /* We usually want to set the low bit on the address of thumb function
    symbols.  In particular .word foo - . should have the low bit set.
@@ -25404,16 +25411,15 @@ struct option md_longopts[] =
   {NULL, no_argument, NULL, 0}
 };
 
-
 size_t md_longopts_size = sizeof (md_longopts);
 
 struct arm_option_table
 {
-  const char *option;		/* Option name to match.  */
-  const char *help;		/* Help information.  */
-  int  *var;		/* Variable to change.	*/
-  int	value;		/* What to change it to.  */
-  const char *deprecated;	/* If non-null, print this message.  */
+  const char *  option;		/* Option name to match.  */
+  const char *  help;		/* Help information.  */
+  int *         var;		/* Variable to change.	*/
+  int	        value;		/* What to change it to.  */
+  const char *  deprecated;	/* If non-null, print this message.  */
 };
 
 struct arm_option_table arm_opts[] =
@@ -25446,10 +25452,10 @@ struct arm_option_table arm_opts[] =
 
 struct arm_legacy_option_table
 {
-  const char *option;				/* Option name to match.  */
-  const arm_feature_set	**var;		/* Variable to change.	*/
-  const arm_feature_set	value;		/* What to change it to.  */
-  const char *deprecated;			/* If non-null, print this message.  */
+  const char *              option;		/* Option name to match.  */
+  const arm_feature_set	**  var;		/* Variable to change.	*/
+  const arm_feature_set	    value;		/* What to change it to.  */
+  const char *              deprecated;		/* If non-null, print this message.  */
 };
 
 const struct arm_legacy_option_table arm_legacy_opts[] =
@@ -25556,10 +25562,10 @@ const struct arm_legacy_option_table arm_legacy_opts[] =
   {"marmv5e",	 &legacy_cpu, ARM_ARCH_V5TE, N_("use -march=armv5te")},
 
   /* Floating point variants -- don't add any more to this list either.	 */
-  {"mfpe-old", &legacy_fpu, FPU_ARCH_FPE, N_("use -mfpu=fpe")},
-  {"mfpa10",   &legacy_fpu, FPU_ARCH_FPA, N_("use -mfpu=fpa10")},
-  {"mfpa11",   &legacy_fpu, FPU_ARCH_FPA, N_("use -mfpu=fpa11")},
-  {"mno-fpu",  &legacy_fpu, ARM_ARCH_NONE,
+  {"mfpe-old",   &legacy_fpu, FPU_ARCH_FPE, N_("use -mfpu=fpe")},
+  {"mfpa10",     &legacy_fpu, FPU_ARCH_FPA, N_("use -mfpu=fpa10")},
+  {"mfpa11",     &legacy_fpu, FPU_ARCH_FPA, N_("use -mfpu=fpa11")},
+  {"mno-fpu",    &legacy_fpu, ARM_ARCH_NONE,
    N_("use either -mfpu=softfpa or -mfpu=softvfp")},
 
   {NULL, NULL, ARM_ARCH_NONE, NULL}
@@ -25567,21 +25573,22 @@ const struct arm_legacy_option_table arm_legacy_opts[] =
 
 struct arm_cpu_option_table
 {
-  const char *name;
-  size_t name_len;
-  const arm_feature_set	value;
-  const arm_feature_set	ext;
+  const char *           name;
+  size_t                 name_len;
+  const arm_feature_set	 value;
+  const arm_feature_set	 ext;
   /* For some CPUs we assume an FPU unless the user explicitly sets
      -mfpu=...	*/
-  const arm_feature_set	default_fpu;
+  const arm_feature_set	 default_fpu;
   /* The canonical name of the CPU, or NULL to use NAME converted to upper
      case.  */
-  const char *canonical_name;
+  const char *           canonical_name;
 };
 
 /* This list should, at a minimum, contain all the cpu names
    recognized by GCC.  */
 #define ARM_CPU_OPT(N, CN, V, E, DF) { N, sizeof (N) - 1, V, E, DF, CN }
+
 static const struct arm_cpu_option_table arm_cpus[] =
 {
   ARM_CPU_OPT ("all",		  NULL,		       ARM_ANY,
@@ -25865,7 +25872,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-a55",    "Cortex-A55",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
-	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
+	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD),
   ARM_CPU_OPT ("cortex-a57",	  "Cortex-A57",	       ARM_ARCH_V8A,
 	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
@@ -25877,7 +25884,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
 	      FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-a75",    "Cortex-A75",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
-	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
+	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD),
   ARM_CPU_OPT ("cortex-r4",	  "Cortex-R4",	       ARM_ARCH_V7R,
 	       ARM_ARCH_NONE,
 	       FPU_NONE),
@@ -25940,7 +25947,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
 	       ARM_ARCH_NONE,
 	       FPU_ARCH_VFP_V2),
 
-  /* Maverick */
+  /* Maverick.  */
   ARM_CPU_OPT ("ep9312",	  "ARM920T",
 	       ARM_FEATURE_LOW (ARM_AEXT_V4T, ARM_CEXT_MAVERICK),
 	       ARM_ARCH_NONE, FPU_ARCH_MAVERICK),
@@ -25967,15 +25974,16 @@ static const struct arm_cpu_option_table arm_cpus[] =
 
 struct arm_arch_option_table
 {
-  const char *name;
-  size_t name_len;
-  const arm_feature_set	value;
-  const arm_feature_set	default_fpu;
+  const char *           name;
+  size_t                 name_len;
+  const arm_feature_set	 value;
+  const arm_feature_set	 default_fpu;
 };
 
 /* This list should, at a minimum, contain all the architecture names
    recognized by GCC.  */
 #define ARM_ARCH_OPT(N, V, DF) { N, sizeof (N) - 1, V, DF }
+
 static const struct arm_arch_option_table arm_archs[] =
 {
   ARM_ARCH_OPT ("all",		ARM_ANY,	 FPU_ARCH_FPA),
@@ -26038,22 +26046,24 @@ static const struct arm_arch_option_table arm_archs[] =
 #undef ARM_ARCH_OPT
 
 /* ISA extensions in the co-processor and main instruction set space.  */
+
 struct arm_option_extension_value_table
 {
-  const char *name;
-  size_t name_len;
-  const arm_feature_set merge_value;
-  const arm_feature_set clear_value;
+  const char *           name;
+  size_t                 name_len;
+  const arm_feature_set  merge_value;
+  const arm_feature_set  clear_value;
   /* List of architectures for which an extension is available.  ARM_ARCH_NONE
      indicates that an extension is available for all architectures while
      ARM_ANY marks an empty entry.  */
-  const arm_feature_set allowed_archs[2];
+  const arm_feature_set  allowed_archs[2];
 };
 
-/* The following table must be in alphabetical order with a NULL last entry.
-   */
+/* The following table must be in alphabetical order with a NULL last entry.  */
+
 #define ARM_EXT_OPT(N, M, C, AA) { N, sizeof (N) - 1, M, C, { AA, ARM_ANY } }
 #define ARM_EXT_OPT2(N, M, C, AA1, AA2) { N, sizeof (N) - 1, M, C, {AA1, AA2} }
+
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
   ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
@@ -26125,8 +26135,8 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 /* ISA floating-point and Advanced SIMD extensions.  */
 struct arm_option_fpu_value_table
 {
-  const char *name;
-  const arm_feature_set value;
+  const char *           name;
+  const arm_feature_set  value;
 };
 
 /* This list should, at a minimum, contain all the fpu names
@@ -26207,7 +26217,7 @@ static const struct arm_option_value_table arm_eabis[] =
 
 struct arm_long_option_table
 {
-  const char * option;		/* Substring to match.	*/
+  const char * option;			/* Substring to match.	*/
   const char * help;			/* Help information.  */
   int (* func) (const char * subopt);	/* Function to decode sub-option.  */
   const char * deprecated;		/* If non-null, print this message.  */
@@ -26663,8 +26673,8 @@ md_show_usage (FILE * fp)
   --fix-v4bx              Allow BX in ARMv4 code\n"));
 }
 
-
 #ifdef OBJ_ELF
+
 typedef struct
 {
   int val;
@@ -26730,6 +26740,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
 };
 
 /* Set an attribute if it has not already been set by the user.  */
+
 static void
 aeabi_set_attribute_int (int tag, int value)
 {
@@ -26750,6 +26761,7 @@ aeabi_set_attribute_string (int tag, const char *value)
 
 /* Return whether features in the *NEEDED feature set are available via
    extensions for the architecture whose feature set is *ARCH_FSET.  */
+
 static bfd_boolean
 have_ext_for_needed_feat_p (const arm_feature_set *arch_fset,
 			    const arm_feature_set *needed)
@@ -26793,6 +26805,7 @@ have_ext_for_needed_feat_p (const arm_feature_set *arch_fset,
    For -march/-mcpu=all the build attribute value of the most featureful
    architecture is returned.  Tag_CPU_arch_profile result is returned in
    PROFILE.  */
+
 static int
 get_aeabi_cpu_arch_from_fset (const arm_feature_set *arch_ext_fset,
 			      const arm_feature_set *ext_fset,
@@ -26895,6 +26908,7 @@ found:
 }
 
 /* Set the public EABI object attributes.  */
+
 static void
 aeabi_set_public_attributes (void)
 {
@@ -27096,6 +27110,7 @@ aeabi_set_public_attributes (void)
 
 /* Post relaxation hook.  Recompute ARM attributes now that relaxation is
    finished and free extension feature bits which will not be used anymore.  */
+
 void
 arm_md_post_relax (void)
 {
@@ -27107,6 +27122,7 @@ arm_md_post_relax (void)
 }
 
 /* Add the default contents for the .ARM.attributes section.  */
+
 void
 arm_md_end (void)
 {
@@ -27116,7 +27132,6 @@ arm_md_end (void)
   aeabi_set_public_attributes ();
 }
 #endif /* OBJ_ELF */
-
 
 /* Parse a .cpu directive.  */
 
@@ -27164,7 +27179,6 @@ s_arm_cpu (int ignored ATTRIBUTE_UNUSED)
   ignore_rest_of_line ();
 }
 
-
 /* Parse a .arch directive.  */
 
 static void
@@ -27199,7 +27213,6 @@ s_arm_arch (int ignored ATTRIBUTE_UNUSED)
   *input_line_pointer = saved_char;
   ignore_rest_of_line ();
 }
-
 
 /* Parse a .object_arch directive.  */
 
@@ -27422,10 +27435,10 @@ arm_convert_symbolic_attribute (const char *name)
   return -1;
 }
 
-
 /* Apply sym value for relocations only in the case that they are for
    local symbols in the same segment as the fixup and you have the
    respective architectural feature for blx and simple switches.  */
+
 int
 arm_apply_sym_value (struct fix * fixP, segT this_seg)
 {

@@ -1,3 +1,9 @@
+2017-11-07  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-arm.c (arm_cpus):
+	Change FPU_ARCH_CRYPTO_NEON_VFP_ARMV8
+	into FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD.
+
 2017-11-07  Alan Modra  <amodra@gmail.com>
 
 	* read.c (assemble_one, s_bundle_unlock): Formatting.

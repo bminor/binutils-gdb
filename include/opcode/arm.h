@@ -70,8 +70,8 @@
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00000001	/* Allow MIA etc.          */
 #define ARM_CEXT_MAVERICK 0x00000002	/* Use Cirrus/DSP coprocessor.  */
-#define ARM_CEXT_IWMMXT   0x00000004    /* Intel Wireless MMX technology coprocessor.   */
-#define ARM_CEXT_IWMMXT2  0x00000008    /* Intel Wireless MMX technology coprocessor version 2.   */
+#define ARM_CEXT_IWMMXT   0x00000004    /* Intel Wireless MMX technology coprocessor.  */
+#define ARM_CEXT_IWMMXT2  0x00000008    /* Intel Wireless MMX technology coprocessor version 2.  */
 
 #define FPU_ENDIAN_PURE	 0x80000000	/* Pure-endian doubles.	      */
 #define FPU_ENDIAN_BIG	 0		/* Double words-big-endian.   */
@@ -227,6 +227,9 @@
 						 | FPU_VFP_ARMV8)
 #define FPU_ARCH_CRYPTO_NEON_VFP_ARMV8 \
   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8 | FPU_NEON_ARMV8 | FPU_VFP_ARMV8)
+#define FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD \
+  ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8 | FPU_NEON_ARMV8 | FPU_VFP_ARMV8 | \
+		      FPU_NEON_EXT_DOTPROD)
 #define ARCH_CRC_ARMV8 ARM_FEATURE_COPROC (CRC_EXT_ARMV8)
 #define FPU_ARCH_NEON_VFP_ARMV8_1 \
   ARM_FEATURE_COPROC (FPU_NEON_ARMV8				 \
@@ -362,31 +365,37 @@ typedef struct
   ((CPU).core[0] == ((arm_feature_set)ARM_ANY).core[0] \
    && (CPU).core[1] == ((arm_feature_set)ARM_ANY).core[1])
 
-#define ARM_MERGE_FEATURE_SETS(TARG,F1,F2)	\
-  do {						\
-    (TARG).core[0] = (F1).core[0] | (F2).core[0];\
-    (TARG).core[1] = (F1).core[1] | (F2).core[1];\
-    (TARG).coproc = (F1).coproc | (F2).coproc;	\
-  } while (0)
+#define ARM_MERGE_FEATURE_SETS(TARG,F1,F2)		\
+  do							\
+    {							\
+      (TARG).core[0] = (F1).core[0] | (F2).core[0];	\
+      (TARG).core[1] = (F1).core[1] | (F2).core[1];	\
+      (TARG).coproc = (F1).coproc | (F2).coproc;	\
+    }							\
+  while (0)
 
-#define ARM_CLEAR_FEATURE(TARG,F1,F2)		\
-  do {						\
-    (TARG).core[0] = (F1).core[0] &~ (F2).core[0];\
-    (TARG).core[1] = (F1).core[1] &~ (F2).core[1];\
-    (TARG).coproc = (F1).coproc &~ (F2).coproc;	\
-  } while (0)
+#define ARM_CLEAR_FEATURE(TARG,F1,F2)			\
+  do							\
+    {							\
+      (TARG).core[0] = (F1).core[0] &~ (F2).core[0];	\
+      (TARG).core[1] = (F1).core[1] &~ (F2).core[1];	\
+      (TARG).coproc = (F1).coproc &~ (F2).coproc;	\
+    }							\
+  while (0)
 
 #define ARM_FEATURE_COPY(F1, F2)		\
-  do {						\
+  do						\
+    {						\
       (F1).core[0] = (F2).core[0];		\
       (F1).core[1] = (F2).core[1];		\
       (F1).coproc = (F2).coproc;		\
-  } while (0)
+    }						\
+  while (0)
 
 #define ARM_FEATURE_EQUAL(T1,T2)		\
-  ((T1).core[0] == (T2).core[0]			\
+  (   (T1).core[0] == (T2).core[0]		\
    && (T1).core[1] == (T2).core[1]		\
-   && (T1).coproc == (T2).coproc)
+   && (T1).coproc  == (T2).coproc)
 
 #define ARM_FEATURE_ZERO(T)			\
   ((T).core[0] == 0 && (T).core[1] == 0 && (T).coproc == 0)
