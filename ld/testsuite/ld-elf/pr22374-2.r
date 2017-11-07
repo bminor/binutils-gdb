@@ -1,4 +1,4 @@
 #failif
-Relocation section .* contains 1 entries:
+Relocation section .* contains 1 entry:
 .*
 .*COPY.*

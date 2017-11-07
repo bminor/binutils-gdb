@@ -52,7 +52,7 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 3 entries:
 [0-9a-f ]+R_IA64_DTPMOD64LSB +0+ sG1 \+ 0
 [0-9a-f ]+R_IA64_DTPREL64LSB +0+ sG1 \+ 0
 
-Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entry:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f ]+R_IA64_IPLTLSB +0+ __tls_get_addr \+ 0
 

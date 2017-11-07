@@ -1,5 +1,32 @@
 2017-11-07  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (read_uleb128): Properly pluralize messages.
+	(display_debug_lines_raw, display_debug_loc): Likewise.
+	(display_debug_names, process_cu_tu_index): Likewise.
+	* od-macho.c (dump_code_signature_superblob): Likewise.
+	* readelf.c (process_program_headers): Likewise.
+	(process_section_header, process_relocs): Likewise.
+	(hppa_process_unwind, arm_process_unwind): Likewise.
+	(process_dynamic_section, process_version_sections): Likewise.
+	(process_symbol_table, process_syminfo): Likewise.
+	(apply_relocations, process_mips_specific): Likewise.
+	(process_gnu_liblist, process_notes_at): Likewise.
+	(process_archive): Likewise.
+	* testsuite/binutils-all/dw2-1.W,
+	* testsuite/binutils-all/dw2-3.W,
+	* testsuite/binutils-all/dw2-3gabi.W,
+	* testsuite/binutils-all/dw5.S,
+	* testsuite/binutils-all/dw5.W,
+	* testsuite/binutils-all/i386/compressed-1a.d,
+	* testsuite/binutils-all/libdw2-compressedgabi.out,
+	* testsuite/binutils-all/objdump.W,
+	* testsuite/binutils-all/readelf.r,
+	* testsuite/binutils-all/readelf.r-64,
+	* testsuite/binutils-all/x86-64/compressed-1a.d: Update
+	for pluralization fixes.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
 	* sysdep.h (textdomain, bindtextdomain): Use safer "do nothing".
 	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
 

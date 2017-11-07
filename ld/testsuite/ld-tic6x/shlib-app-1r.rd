@@ -66,11 +66,11 @@ Relocation section '\.rela\.got' at offset 0x110c contains 2 entries:
 100000b8  00000701 R_C6000_ABS32          100000c0   b \+ 0
 100000bc  00000901 R_C6000_ABS32          100000c4   a \+ 0
 
-Relocation section '\.rela\.bss' at offset 0x1124 contains 1 entries:
+Relocation section '\.rela\.bss' at offset 0x1124 contains 1 entry:
  Offset     Info    Type                Sym\. Value  Symbol's Name \+ Addend
 100000c4  0000091a R_C6000_COPY           100000c4   a \+ 0
 
-Relocation section '\.rela\.plt' at offset 0x2000 contains 1 entries:
+Relocation section '\.rela\.plt' at offset 0x2000 contains 1 entry:
  Offset     Info    Type                Sym\. Value  Symbol's Name \+ Addend
 100000b4  0000081b R_C6000_JUMP_SLOT      00000000   sub0 \+ 0
 

@@ -1,4 +1,4 @@
-Relocation section .* contains 1 entries:
+Relocation section .* contains 1 entry:
 .*
 .* +0+ +foo.*
 

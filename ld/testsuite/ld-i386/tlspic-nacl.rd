@@ -77,7 +77,7 @@ Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 26 entries:
 [0-9a-f ]+R_386_TLS_DTPOFF3 0+ +sg1
 [0-9a-f ]+R_386_TLS_TPOFF32 0+4 +sg2
 
-Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entry:
  Offset +Info +Type +Sym.Value +Sym. Name
 [0-9a-f ]+R_386_JUMP_SLOT +0+ +___tls_get_addr
 

@@ -5,5 +5,5 @@
 #target: *-*-linux* *-*-gnu* *-*-solaris*
 #notarget: cris*-*-* alpha-*-*
 
-Symbol table '\.dynsym' contains [0-9]+ entries:
+Symbol table '\.dynsym' contains [0-9]+ entr(y|ies):
 #pass

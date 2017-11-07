@@ -55,7 +55,7 @@ Relocation section '\.rela\.dyn' at offset .* contains 2 entries:
 [0-9a-f ]+R_PPC_TPREL32 +00000000 +gd \+ 0
 [0-9a-f ]+R_PPC_DTPMOD32 +00000000 +ld \+ 0
 
-Relocation section '\.rela\.plt' at offset .* contains 1 entries:
+Relocation section '\.rela\.plt' at offset .* contains 1 entry:
  Offset +Info +Type +Sym\. Value +Symbol's Name \+ Addend
 [0-9a-f ]+R_PPC_JMP_SLOT[0-9a-f ]+__tls_get_addr_opt \+ 0
 

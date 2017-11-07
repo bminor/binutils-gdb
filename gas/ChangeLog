@@ -1,5 +1,40 @@
 2017-11-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/arm/got_prel.d,
+	* testsuite/gas/elf/dwarf2-1.d,
+	* testsuite/gas/elf/dwarf2-2.d,
+	* testsuite/gas/elf/dwarf2-3.d,
+	* testsuite/gas/elf/dwarf2-5.d,
+	* testsuite/gas/elf/dwarf2-6.d,
+	* testsuite/gas/i386/debug1.d,
+	* testsuite/gas/i386/dw2-compress-1.d,
+	* testsuite/gas/i386/dw2-compress-3a.d,
+	* testsuite/gas/i386/dw2-compress-3b.d,
+	* testsuite/gas/i386/dw2-compressed-1.d,
+	* testsuite/gas/i386/dw2-compressed-3a.d,
+	* testsuite/gas/i386/dw2-compressed-3b.d,
+	* testsuite/gas/i386/ilp32/x86-64-localpic.d,
+	* testsuite/gas/i386/localpic.d,
+	* testsuite/gas/i386/x86-64-localpic.d,
+	* testsuite/gas/ia64/pr13167.d,
+	* testsuite/gas/mips/loc-swap-2.d,
+	* testsuite/gas/mips/loc-swap.d,
+	* testsuite/gas/mips/micromips@loc-swap-2.d,
+	* testsuite/gas/mips/micromips@loc-swap.d,
+	* testsuite/gas/mips/mips16-dwarf2-n32.d,
+	* testsuite/gas/mips/mips16-dwarf2.d,
+	* testsuite/gas/mips/mips16@loc-swap-2.d,
+	* testsuite/gas/mips/mips16@loc-swap.d,
+	* testsuite/gas/mips/mips16e@loc-swap.d,
+	* testsuite/gas/mmix/bspec-1.d,
+	* testsuite/gas/mmix/bspec-2.d,
+	* testsuite/gas/tic6x/unwind-1.d,
+	* testsuite/gas/tic6x/unwind-2.d,
+	* testsuite/gas/tic6x/unwind-3.d: Update for pluralization
+	fixes.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
 	* as.c (main): Properly pluralize messages.
 	* frags.c (frag_grow): Likewise.
 	* read.c (emit_expr_with_reloc, emit_expr_fix): Likewise.

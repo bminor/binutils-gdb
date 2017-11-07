@@ -10,7 +10,7 @@
 # the right contents.
 
 #...
-Relocation section '.rela.dyn' at offset 0x.* contains 1 entries:
+Relocation section '.rela.dyn' at offset 0x.* contains 1 entry:
  Offset     Info    Type            Sym.Value  Sym. Name \+ Addend
 00002290  0000001c R_CRIS_32_TPREL[ ]+80
 

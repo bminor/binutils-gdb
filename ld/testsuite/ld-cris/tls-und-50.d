@@ -9,7 +9,7 @@
 # dynsyms and dynrelocs look right.
 
 #...
-Relocation section '.rela.dyn' at offset 0x.* contains 1 entries:
+Relocation section '.rela.dyn' at offset 0x.* contains 1 entry:
  Offset +Info +Type +Sym.Value +Sym. Name \+ Addend
 000021ec +0000021c R_CRIS_32_TPREL +0+ +x \+ 0
 

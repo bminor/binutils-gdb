@@ -8,7 +8,7 @@
 # the relocation, GOT, .text and .tdata have the right contents.
 
 #...
-Relocation section '.rela.dyn' at offset 0x.* contains 1 entries:
+Relocation section '.rela.dyn' at offset 0x.* contains 1 entry:
  Offset     Info    Type            Sym.Value  Sym. Name \+ Addend
 00002210  0000001c R_CRIS_32_TPREL[ ]+0
 

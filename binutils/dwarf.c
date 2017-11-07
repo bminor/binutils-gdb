@@ -380,7 +380,11 @@ read_uleb128 (unsigned char * data,
       unsigned int amount = (AMOUNT);		\
       if (sizeof (VAL) < amount)		\
 	{					\
-	  error (_("internal error: attempt to read %d bytes of data in to %d sized variable"),\
+	  error (ngettext ("internal error: attempt to read %d byte "	\
+			   "of data in to %d sized variable",		\
+			   "internal error: attempt to read %d bytes "	\
+			   "of data in to %d sized variable",		\
+			   amount),					\
 		 amount, (int) sizeof (VAL));	\
 	  amount = sizeof (VAL);		\
 	}					\
@@ -3402,7 +3406,10 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  printf (_("\n Opcodes:\n"));
 
 	  for (i = 1; i < linfo.li_opcode_base; i++)
-	    printf (_("  Opcode %d has %d args\n"), i, standard_opcodes[i - 1]);
+	    printf (ngettext ("  Opcode %d has %d arg\n",
+			      "  Opcode %d has %d args\n",
+			      standard_opcodes[i - 1]),
+		    i, standard_opcodes[i - 1]);
 
 	  /* Display the contents of the Directory table.  */
 	  data = standard_opcodes + linfo.li_opcode_base - 1;
@@ -5981,7 +5988,9 @@ display_debug_loc (struct dwarf_section *section, void *file)
     }
 
   if (start < section->start + section->size)
-    warn (_("There are %ld unused bytes at the end of section %s\n"),
+    warn (ngettext ("There is %ld unused byte at the end of section %s\n",
+		    "There are %ld unused bytes at the end of section %s\n",
+		    (long) (section->start + section->size - start)),
 	  (long) (section->start + section->size - start), section->name);
   putchar ('\n');
   free (array);
@@ -8246,8 +8255,10 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  if (bucket != 0)
 	    ++buckets_filled;
 	}
-      printf (_("Used %zu of %lu buckets.\n"), buckets_filled,
-	      (unsigned long) bucket_count);
+      printf (ngettext ("Used %zu of %lu bucket.\n",
+			"Used %zu of %lu buckets.\n",
+			bucket_count),
+	      buckets_filled, (unsigned long) bucket_count);
 
       uint32_t hash_prev = 0;
       size_t hash_clash_count = 0;
@@ -8790,7 +8801,9 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   /* PR 17531: file: 45d69832.  */
   if (pindex < phash || ppool < phdr || (pindex == phash && nslots != 0))
     {
-      warn (_("Section %s is too small for %d slots\n"),
+      warn (ngettext ("Section %s is too small for %d slot\n",
+		      "Section %s is too small for %d slots\n",
+		      nslots),
 	    section->name, nslots);
       return 0;
     }

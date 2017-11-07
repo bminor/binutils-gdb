@@ -23,7 +23,7 @@
 # local, its absence from the dynamic symbol table and that the
 # relocation and symbol values match.
 
-Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 1 entry:
  Offset[ 	]+Info[ 	]+Type[ 	]+Sym\.Value  Sym\. Name \+ Addend
 [0-9a-f]+  0+[0-9a-f]+ R_CRIS_RELATIVE[ 	]+184
 

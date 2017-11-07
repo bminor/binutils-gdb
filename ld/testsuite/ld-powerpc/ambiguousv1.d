@@ -9,7 +9,7 @@
 # reloc on the function address, and my_func should be undefined
 # dynamic with value zero.
 
-Relocation section .* contains 1 entries:
+Relocation section .* contains 1 entry:
 .*
 .* R_PPC64_ADDR64 +0+ my_func \+ 0
 
