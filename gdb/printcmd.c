@@ -49,36 +49,43 @@
 #include "format.h"
 #include "source.h"
 #include "common/byte-vector.h"
+#include "top.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et al.   */
 #endif
 
-/* Last specified output format.  */
+struct current_printcmd_info
+{
+  /* Last specified output format.  */
+  char last_format = 0;
 
-static char last_format = 0;
+  /* Last specified examination size.  'b', 'h', 'w' or `q'.  */
+  char last_size = 'w';
 
-/* Last specified examination size.  'b', 'h', 'w' or `q'.  */
+  /* Default address to examine next, and associated architecture.  */
+  struct gdbarch *next_gdbarch;
+  CORE_ADDR next_address;
 
-static char last_size = 'w';
+  /* Last address examined.  */
+  CORE_ADDR last_examine_address;
 
-/* Default address to examine next, and associated architecture.  */
+  /* Contents of last address examined.  This is not valid past the
+     end of the `x' command!  */
+  struct value *last_examine_value;
+};
 
-static struct gdbarch *next_gdbarch;
-static CORE_ADDR next_address;
+static current_printcmd_info &
+get_current_printcmd_info ()
+{
+  if (current_ui->curr_printcmd_info == NULL)
+    current_ui->curr_printcmd_info = new current_printcmd_info ();
+  return *current_ui->curr_printcmd_info;
+}
 
 /* Number of delay instructions following current disassembled insn.  */
 
 static int branch_delay_insns;
-
-/* Last address examined.  */
-
-static CORE_ADDR last_examine_address;
-
-/* Contents of last address examined.
-   This is not valid past the end of the `x' command!  */
-
-static struct value *last_examine_value;
 
 /* Largest offset between a symbolic value and an address, that will be
    printed as `0x1234 <symbol+offset>'.  */
@@ -279,8 +286,10 @@ print_formatted (struct value *val, int size,
   struct type *type = check_typedef (value_type (val));
   int len = TYPE_LENGTH (type);
 
+  current_printcmd_info &ci = get_current_printcmd_info ();
+
   if (VALUE_LVAL (val) == lval_memory)
-    next_address = value_address (val) + len;
+    ci.next_address = value_address (val) + len;
 
   if (size)
     {
@@ -290,20 +299,20 @@ print_formatted (struct value *val, int size,
 	  {
 	    struct type *elttype = value_type (val);
 
-	    next_address = (value_address (val)
-			    + val_print_string (elttype, NULL,
-						value_address (val), -1,
-						stream, options) * len);
+	    ci.next_address = (value_address (val)
+			       + val_print_string (elttype, NULL,
+						   value_address (val), -1,
+						   stream, options) * len);
 	  }
 	  return;
 
 	case 'i':
 	  /* We often wrap here if there are long symbolic names.  */
 	  wrap_here ("    ");
-	  next_address = (value_address (val)
-			  + gdb_print_insn (get_type_arch (type),
-					    value_address (val), stream,
-					    &branch_delay_insns));
+	  ci.next_address = (value_address (val)
+			     + gdb_print_insn (get_type_arch (type),
+					       value_address (val), stream,
+					       &branch_delay_insns));
 	  return;
 	}
     }
@@ -500,10 +509,13 @@ set_next_address (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
-  next_gdbarch = gdbarch;
-  next_address = addr;
+  current_printcmd_info &ci = get_current_printcmd_info ();
 
-  /* Make address available to the user as $_.  */
+  ci.next_gdbarch = gdbarch;
+  ci.next_address = addr;
+
+  /* Make address available to the user as $_.  FIXME: should instead
+     be a computed val, so that it works Per-UI.  */
   set_internalvar (lookup_internalvar ("_"),
 		   value_from_pointer (ptr_type, addr));
 }
@@ -976,8 +988,11 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
   format = fmt.format;
   size = fmt.size;
   count = fmt.count;
-  next_gdbarch = gdbarch;
-  next_address = addr;
+
+  current_printcmd_info &ci = get_current_printcmd_info ();
+
+  ci.next_gdbarch = gdbarch;
+  ci.next_address = addr;
 
   /* Instruction format implies fetch single bytes
      regardless of the specified size.
@@ -989,11 +1004,11 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
   if (size == 'a')
     {
       /* Pick the appropriate size for an address.  */
-      if (gdbarch_ptr_bit (next_gdbarch) == 64)
+      if (gdbarch_ptr_bit (ci.next_gdbarch) == 64)
 	size = 'g';
-      else if (gdbarch_ptr_bit (next_gdbarch) == 32)
+      else if (gdbarch_ptr_bit (ci.next_gdbarch) == 32)
 	size = 'w';
-      else if (gdbarch_ptr_bit (next_gdbarch) == 16)
+      else if (gdbarch_ptr_bit (ci.next_gdbarch) == 16)
 	size = 'h';
       else
 	/* Bad value for gdbarch_ptr_bit.  */
@@ -1002,13 +1017,13 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
     }
 
   if (size == 'b')
-    val_type = builtin_type (next_gdbarch)->builtin_int8;
+    val_type = builtin_type (ci.next_gdbarch)->builtin_int8;
   else if (size == 'h')
-    val_type = builtin_type (next_gdbarch)->builtin_int16;
+    val_type = builtin_type (ci.next_gdbarch)->builtin_int16;
   else if (size == 'w')
-    val_type = builtin_type (next_gdbarch)->builtin_int32;
+    val_type = builtin_type (ci.next_gdbarch)->builtin_int32;
   else if (size == 'g')
-    val_type = builtin_type (next_gdbarch)->builtin_int64;
+    val_type = builtin_type (ci.next_gdbarch)->builtin_int64;
 
   if (format == 's')
     {
@@ -1017,9 +1032,9 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
       /* Search for "char16_t"  or "char32_t" types or fall back to 8-bit char
 	 if type is not found.  */
       if (size == 'h')
-	char_type = builtin_type (next_gdbarch)->builtin_char16;
+	char_type = builtin_type (ci.next_gdbarch)->builtin_char16;
       else if (size == 'w')
-	char_type = builtin_type (next_gdbarch)->builtin_char32;
+	char_type = builtin_type (ci.next_gdbarch)->builtin_char32;
       if (char_type)
         val_type = char_type;
       else
@@ -1028,7 +1043,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	    warning (_("Unable to display strings with "
 		       "size '%c', using 'b' instead."), size);
 	  size = 'b';
-	  val_type = builtin_type (next_gdbarch)->builtin_int8;
+	  val_type = builtin_type (ci.next_gdbarch)->builtin_int8;
         }
     }
 
@@ -1051,26 +1066,26 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
       count = -count;
       if (format == 'i')
         {
-          next_address = find_instruction_backward (gdbarch, addr, count,
-                                                    &count);
+          ci.next_address = find_instruction_backward (gdbarch, addr, count,
+						       &count);
         }
       else if (format == 's')
         {
-          next_address = find_string_backward (gdbarch, addr, count,
-                                               TYPE_LENGTH (val_type),
-                                               &opts, &count);
+          ci.next_address = find_string_backward (gdbarch, addr, count,
+						  TYPE_LENGTH (val_type),
+						  &opts, &count);
         }
       else
         {
-          next_address = addr - count * TYPE_LENGTH (val_type);
+          ci.next_address = addr - count * TYPE_LENGTH (val_type);
         }
 
       /* The following call to print_formatted updates next_address in every
          iteration.  In backward case, we store the start address here
          and update next_address with it before exiting the function.  */
       addr_rewound = (format == 's'
-                      ? next_address - TYPE_LENGTH (val_type)
-                      : next_address);
+                      ? ci.next_address - TYPE_LENGTH (val_type)
+                      : ci.next_address);
       need_to_update_next_address = 1;
     }
 
@@ -1081,8 +1096,8 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
     {
       QUIT;
       if (format == 'i')
-	fputs_filtered (pc_prefix (next_address), gdb_stdout);
-      print_address (next_gdbarch, next_address, gdb_stdout);
+	fputs_filtered (pc_prefix (ci.next_address), gdb_stdout);
+      print_address (ci.next_gdbarch, ci.next_address, gdb_stdout);
       printf_filtered (":");
       for (i = maxelts;
 	   i > 0 && count > 0;
@@ -1091,10 +1106,10 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	  printf_filtered ("\t");
 	  /* Note that print_formatted sets next_address for the next
 	     object.  */
-	  last_examine_address = next_address;
+	  ci.last_examine_address = ci.next_address;
 
-	  if (last_examine_value)
-	    value_free (last_examine_value);
+	  if (ci.last_examine_value)
+	    value_free (ci.last_examine_value);
 
 	  /* The value to be displayed is not fetched greedily.
 	     Instead, to avoid the possibility of a fetched value not
@@ -1105,12 +1120,12 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	     the disassembler be modified so that LAST_EXAMINE_VALUE
 	     is left with the byte sequence from the last complete
 	     instruction fetched from memory?  */
-	  last_examine_value = value_at_lazy (val_type, next_address);
+	  ci.last_examine_value = value_at_lazy (val_type, ci.next_address);
 
-	  if (last_examine_value)
-	    release_value (last_examine_value);
+	  if (ci.last_examine_value)
+	    release_value (ci.last_examine_value);
 
-	  print_formatted (last_examine_value, size, &opts, gdb_stdout);
+	  print_formatted (ci.last_examine_value, size, &opts, gdb_stdout);
 
 	  /* Display any branch delay slots following the final insn.  */
 	  if (format == 'i' && count == 1)
@@ -1121,7 +1136,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
     }
 
   if (need_to_update_next_address)
-    next_address = addr_rewound;
+    ci.next_address = addr_rewound;
 }
 
 static void
@@ -1149,9 +1164,12 @@ print_command_parse_format (const char **expp, const char *cmdname,
   if (exp && *exp == '/')
     {
       exp++;
-      *fmtp = decode_format (&exp, last_format, 0);
+
+      current_printcmd_info &ci = get_current_printcmd_info ();
+
+      *fmtp = decode_format (&exp, ci.last_format, 0);
       validate_format (*fmtp, cmdname);
-      last_format = fmtp->format;
+      ci.last_format = fmtp->format;
     }
   else
     {
@@ -1624,8 +1642,10 @@ x_command (char *exp, int from_tty)
   struct format_data fmt;
   struct value *val;
 
-  fmt.format = last_format ? last_format : 'x';
-  fmt.size = last_size;
+  current_printcmd_info &ci = get_current_printcmd_info ();
+
+  fmt.format = ci.last_format ? ci.last_format : 'x';
+  fmt.size = ci.last_size;
   fmt.count = 1;
   fmt.raw = 0;
 
@@ -1633,7 +1653,7 @@ x_command (char *exp, int from_tty)
     {
       const char *tmp = exp + 1;
 
-      fmt = decode_format (&tmp, last_format, last_size);
+      fmt = decode_format (&tmp, ci.last_format, ci.last_size);
       exp = (char *) tmp;
     }
 
@@ -1655,45 +1675,45 @@ x_command (char *exp, int from_tty)
       if (/* last_format == 'i'  && */ 
 	  TYPE_CODE (value_type (val)) == TYPE_CODE_FUNC
 	   && VALUE_LVAL (val) == lval_memory)
-	next_address = value_address (val);
+	ci.next_address = value_address (val);
       else
-	next_address = value_as_address (val);
+	ci.next_address = value_as_address (val);
 
-      next_gdbarch = expr->gdbarch;
+      ci.next_gdbarch = expr->gdbarch;
     }
 
-  if (!next_gdbarch)
+  if (!ci.next_gdbarch)
     error_no_arg (_("starting display address"));
 
-  do_examine (fmt, next_gdbarch, next_address);
+  do_examine (fmt, ci.next_gdbarch, ci.next_address);
 
   /* If the examine succeeds, we remember its size and format for next
      time.  Set last_size to 'b' for strings.  */
   if (fmt.format == 's')
-    last_size = 'b';
+    ci.last_size = 'b';
   else
-    last_size = fmt.size;
-  last_format = fmt.format;
+    ci.last_size = fmt.size;
+  ci.last_format = fmt.format;
 
   /* Set a couple of internal variables if appropriate.  */
-  if (last_examine_value)
+  if (ci.last_examine_value)
     {
       /* Make last address examined available to the user as $_.  Use
          the correct pointer type.  */
       struct type *pointer_type
-	= lookup_pointer_type (value_type (last_examine_value));
+	= lookup_pointer_type (value_type (ci.last_examine_value));
       set_internalvar (lookup_internalvar ("_"),
 		       value_from_pointer (pointer_type,
-					   last_examine_address));
+					   ci.last_examine_address));
 
       /* Make contents of last address examined available to the user
 	 as $__.  If the last value has not been fetched from memory
 	 then don't fetch it now; instead mark it by voiding the $__
 	 variable.  */
-      if (value_lazy (last_examine_value))
+      if (value_lazy (ci.last_examine_value))
 	clear_internalvar (lookup_internalvar ("__"));
       else
-	set_internalvar (lookup_internalvar ("__"), last_examine_value);
+	set_internalvar (lookup_internalvar ("__"), ci.last_examine_value);
     }
 }
 

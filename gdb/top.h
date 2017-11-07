@@ -134,7 +134,11 @@ struct ui
   /* See enum prompt_state's description.  */
   enum prompt_state prompt_state;
 
+  /* Per-UI info for source.c.  Initialized on demand.  */
   struct current_source_info *curr_source_info = NULL;
+
+  /* Per-UI info for printcmd.c.  Initialized on demand.  */
+  struct current_printcmd_info *curr_printcmd_info = NULL;
 
   /* The fields below that start with "m_" are "private".  They're
      meant to be accessed through wrapper macros that make them look
