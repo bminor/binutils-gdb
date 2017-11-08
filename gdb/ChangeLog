@@ -1,5 +1,19 @@
 2017-11-08  Pedro Alves  <palves@redhat.com>
 
+	* linespec.c (iterate_over_all_matching_symtabs): Add
+	search_domain parameter.  Pass it down to expand_symtabs_matching.
+	(decode_objc): Request FUNCTIONS_DOMAIN symbols only.
+	(lookup_prefix_sym): Adjust by passing ALL_DOMAIN as
+	search_domain.
+	(add_all_symbol_names_from_pspace): Add search_domain parameter.
+	Pass it down.
+	(find_method, find_function_symbols): Request FUNCTIONS_DOMAIN
+	symbols.
+	(add_matching_symbols_to_info): Add search_domain parameter.  Pass
+	it down.
+
+2017-11-08  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_make_symbol_completion_list): Remove text and
 	text_len locals and don't pass them down.
 	* symtab.c (completion_list_add_name): Remove
