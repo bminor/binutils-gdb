@@ -37,6 +37,8 @@ extern "C" {
 typedef uint32_t aarch64_insn;
 
 /* The following bitmasks control CPU features.  */
+#define AARCH64_FEATURE_SHA2	0x200000000ULL  /* SHA2 instructions.  */
+#define AARCH64_FEATURE_AES	0x800000000ULL  /* AES instructions.  */
 #define AARCH64_FEATURE_V8	0x00000001	/* All processors.  */
 #define AARCH64_FEATURE_V8_2	0x00000020      /* ARMv8.2 processors.  */
 #define AARCH64_FEATURE_V8_3	0x00000040      /* ARMv8.3 processors.  */

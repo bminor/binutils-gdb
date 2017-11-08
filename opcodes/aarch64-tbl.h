@@ -2005,7 +2005,8 @@ static const aarch64_feature_set aarch64_feature_fp =
 static const aarch64_feature_set aarch64_feature_simd =
   AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0);
 static const aarch64_feature_set aarch64_feature_crypto =
-  AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO | AARCH64_FEATURE_AES
+		   | AARCH64_FEATURE_SHA2, 0);
 static const aarch64_feature_set aarch64_feature_crc =
   AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0);
 static const aarch64_feature_set aarch64_feature_lse =
@@ -2036,6 +2037,10 @@ static const aarch64_feature_set aarch64_feature_rcpc =
   AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0);
 static const aarch64_feature_set aarch64_feature_dotprod =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_DOTPROD, 0);
+static const aarch64_feature_set aarch64_feature_sha2 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8 | AARCH64_FEATURE_SHA2, 0);
+static const aarch64_feature_set aarch64_feature_aes =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8 | AARCH64_FEATURE_AES, 0);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2055,6 +2060,8 @@ static const aarch64_feature_set aarch64_feature_dotprod =
 #define FP_V8_3		&aarch64_feature_fp_v8_3
 #define COMPNUM		&aarch64_feature_compnum
 #define RCPC		&aarch64_feature_rcpc
+#define SHA2		&aarch64_feature_sha2
+#define AES		&aarch64_feature_aes
 #define DOTPROD		&aarch64_feature_dotprod
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
@@ -2088,6 +2095,10 @@ static const aarch64_feature_set aarch64_feature_dotprod =
   { NAME, OPCODE, MASK, CLASS, OP, COMPNUM, OPS, QUALS, FLAGS, 0, NULL }
 #define RCPC_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, RCPC, OPS, QUALS, FLAGS, 0, NULL }
+#define SHA2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, SHA2, OPS, QUALS, FLAGS, 0, NULL }
+#define AES_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, AES, OPS, QUALS, FLAGS, 0, NULL }
 #define DOT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, DOTPROD, OPS, QUALS, FLAGS, 0, NULL }
 
@@ -2170,9 +2181,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SIMD_INSN ("sqdmull", 0x0e20d000, 0xff20fc00, asimddiff, 0, OP3 (Vd, Vn, Vm), QL_V3LONGHS,   F_SIZEQ),
   SIMD_INSN ("sqdmull2",0x4e20d000, 0xff20fc00, asimddiff, 0, OP3 (Vd, Vn, Vm), QL_V3LONGHS2,  F_SIZEQ),
   SIMD_INSN ("pmull",   0x0e20e000, 0xffe0fc00, asimddiff, 0, OP3 (Vd, Vn, Vm), QL_V3LONGB,    0),
-  CRYP_INSN ("pmull",   0x0ee0e000, 0xffe0fc00, asimddiff, OP3 (Vd, Vn, Vm), QL_V3LONGD,    0),
+  AES_INSN ("pmull",   0x0ee0e000, 0xffe0fc00, asimddiff, OP3 (Vd, Vn, Vm), QL_V3LONGD,    0),
   SIMD_INSN ("pmull2",  0x4e20e000, 0xffe0fc00, asimddiff, 0, OP3 (Vd, Vn, Vm), QL_V3LONGB2,   0),
-  CRYP_INSN ("pmull2",  0x4ee0e000, 0xffe0fc00, asimddiff, OP3 (Vd, Vn, Vm), QL_V3LONGD2,   0),
+  AES_INSN ("pmull2",  0x4ee0e000, 0xffe0fc00, asimddiff, OP3 (Vd, Vn, Vm), QL_V3LONGD2,   0),
   SIMD_INSN ("uaddl",   0x2e200000, 0xff20fc00, asimddiff, 0, OP3 (Vd, Vn, Vm), QL_V3LONGBHS,  F_SIZEQ),
   SIMD_INSN ("uaddl2",  0x6e200000, 0xff20fc00, asimddiff, 0, OP3 (Vd, Vn, Vm), QL_V3LONGBHS2, F_SIZEQ),
   SIMD_INSN ("uaddw",   0x2e201000, 0xff20fc00, asimddiff, 0, OP3 (Vd, Vn, Vm), QL_V3WIDEBHS,  F_SIZEQ),
@@ -2795,22 +2806,22 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("csneg", 0x5a800400, 0x7fe00c00, condsel, 0, OP4 (Rd, Rn, Rm, COND), QL_CSEL, F_HAS_ALIAS | F_SF),
   CORE_INSN ("cneg", 0x5a800400, 0x7fe00c00, condsel, OP_CNEG, OP3 (Rd, Rn, COND1), QL_CSEL, F_ALIAS | F_SF | F_CONV),
   /* Crypto AES.  */
-  CRYP_INSN ("aese",     0x4e284800, 0xfffffc00, cryptoaes, OP2 (Vd, Vn), QL_V2SAME16B, 0),
-  CRYP_INSN ("aesd",     0x4e285800, 0xfffffc00, cryptoaes, OP2 (Vd, Vn), QL_V2SAME16B, 0),
-  CRYP_INSN ("aesmc",    0x4e286800, 0xfffffc00, cryptoaes, OP2 (Vd, Vn), QL_V2SAME16B, 0),
-  CRYP_INSN ("aesimc",   0x4e287800, 0xfffffc00, cryptoaes, OP2 (Vd, Vn), QL_V2SAME16B, 0),
+  AES_INSN ("aese",     0x4e284800, 0xfffffc00, cryptoaes, OP2 (Vd, Vn), QL_V2SAME16B, 0),
+  AES_INSN ("aesd",     0x4e285800, 0xfffffc00, cryptoaes, OP2 (Vd, Vn), QL_V2SAME16B, 0),
+  AES_INSN ("aesmc",    0x4e286800, 0xfffffc00, cryptoaes, OP2 (Vd, Vn), QL_V2SAME16B, 0),
+  AES_INSN ("aesimc",   0x4e287800, 0xfffffc00, cryptoaes, OP2 (Vd, Vn), QL_V2SAME16B, 0),
   /* Crypto two-reg SHA.  */
-  CRYP_INSN ("sha1h",    0x5e280800, 0xfffffc00, cryptosha2, OP2 (Fd, Fn), QL_2SAMES, 0),
-  CRYP_INSN ("sha1su1",  0x5e281800, 0xfffffc00, cryptosha2, OP2 (Vd, Vn), QL_V2SAME4S, 0),
-  CRYP_INSN ("sha256su0",0x5e282800, 0xfffffc00, cryptosha2, OP2 (Vd, Vn), QL_V2SAME4S, 0),
+  SHA2_INSN ("sha1h",    0x5e280800, 0xfffffc00, cryptosha2, OP2 (Fd, Fn), QL_2SAMES, 0),
+  SHA2_INSN ("sha1su1",  0x5e281800, 0xfffffc00, cryptosha2, OP2 (Vd, Vn), QL_V2SAME4S, 0),
+  SHA2_INSN ("sha256su0",0x5e282800, 0xfffffc00, cryptosha2, OP2 (Vd, Vn), QL_V2SAME4S, 0),
   /* Crypto three-reg SHA.  */
-  CRYP_INSN ("sha1c",    0x5e000000, 0xffe0fc00, cryptosha3, OP3 (Fd, Fn, Vm), QL_SHAUPT, 0),
-  CRYP_INSN ("sha1p",    0x5e001000, 0xffe0fc00, cryptosha3, OP3 (Fd, Fn, Vm), QL_SHAUPT, 0),
-  CRYP_INSN ("sha1m",    0x5e002000, 0xffe0fc00, cryptosha3, OP3 (Fd, Fn, Vm), QL_SHAUPT, 0),
-  CRYP_INSN ("sha1su0",  0x5e003000, 0xffe0fc00, cryptosha3, OP3 (Vd, Vn, Vm), QL_V3SAME4S, 0),
-  CRYP_INSN ("sha256h",  0x5e004000, 0xffe0fc00, cryptosha3, OP3 (Fd, Fn, Vm), QL_SHA256UPT, 0),
-  CRYP_INSN ("sha256h2", 0x5e005000, 0xffe0fc00, cryptosha3, OP3 (Fd, Fn, Vm), QL_SHA256UPT, 0),
-  CRYP_INSN ("sha256su1",0x5e006000, 0xffe0fc00, cryptosha3, OP3 (Vd, Vn, Vm), QL_V3SAME4S, 0),
+  SHA2_INSN ("sha1c",    0x5e000000, 0xffe0fc00, cryptosha3, OP3 (Fd, Fn, Vm), QL_SHAUPT, 0),
+  SHA2_INSN ("sha1p",    0x5e001000, 0xffe0fc00, cryptosha3, OP3 (Fd, Fn, Vm), QL_SHAUPT, 0),
+  SHA2_INSN ("sha1m",    0x5e002000, 0xffe0fc00, cryptosha3, OP3 (Fd, Fn, Vm), QL_SHAUPT, 0),
+  SHA2_INSN ("sha1su0",  0x5e003000, 0xffe0fc00, cryptosha3, OP3 (Vd, Vn, Vm), QL_V3SAME4S, 0),
+  SHA2_INSN ("sha256h",  0x5e004000, 0xffe0fc00, cryptosha3, OP3 (Fd, Fn, Vm), QL_SHA256UPT, 0),
+  SHA2_INSN ("sha256h2", 0x5e005000, 0xffe0fc00, cryptosha3, OP3 (Fd, Fn, Vm), QL_SHA256UPT, 0),
+  SHA2_INSN ("sha256su1",0x5e006000, 0xffe0fc00, cryptosha3, OP3 (Vd, Vn, Vm), QL_V3SAME4S, 0),
   /* Data-processing (1 source).  */
   CORE_INSN ("rbit",  0x5ac00000, 0x7ffffc00, dp_1src, 0, OP2 (Rd, Rn), QL_I2SAME, F_SF),
   CORE_INSN ("rev16", 0x5ac00400, 0x7ffffc00, dp_1src, 0, OP2 (Rd, Rn), QL_I2SAME, F_SF),

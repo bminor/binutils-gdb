@@ -1,3 +1,14 @@
+2017-11-08  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_crypto): Add AES and SHA2.
+	(aarch64_feature_sha2, aarch64_feature_aes): New.
+	(SHA2, AES): New.
+	(AES_INSN, SHA2_INSN): New.
+	(pmull, pmull2, aese, aesd, aesmc, aesimc): Change to AES_INS.
+	(sha1h, sha1su1, sha256su0, sha1c, sha1p,
+	 sha1m, sha1su0, sha256h, sha256h2, sha256su1):
+	Change to SHA2_INS.
+
 2017-11-08  Jiong Wang  <jiong.wang@arm.com>
 	    Tamar Christina <tamar.christina@arm.com>
 

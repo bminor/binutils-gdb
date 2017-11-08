@@ -1,3 +1,8 @@
+2017-11-08  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h:
+	(AARCH64_FEATURE_SHA2, AARCH64_FEATURE_AES): New.
+
 2017-11-08  Jiong Wang  <jiong.wang@arm.com>
 
 	* opcode/arm.h (ARM_AEXT2_V8_4A): Include Dot Product feature.
