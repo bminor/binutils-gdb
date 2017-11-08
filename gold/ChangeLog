@@ -1,3 +1,8 @@
+2017-11-08  Kyle Butt  <iteratee@google.com>
+
+        * object.cc (do_find_special_sections): Fix a thinko with memmem return
+        values and check for !=	NULL rather than == 0.
+
 2017-11-07  Alan Modra  <amodra@gmail.com>
 
 	* system.h (textdomain, bindtextdomain): Use safer "do nothing".
