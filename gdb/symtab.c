@@ -1766,6 +1766,20 @@ demangle_for_lookup_info::demangle_for_lookup_info
 {
   demangle_result_storage storage;
 
+  if (lookup_name.ignore_parameters () && lang == language_cplus)
+    {
+      gdb::unique_xmalloc_ptr<char> without_params
+	= cp_remove_params_if_any (lookup_name.name ().c_str (),
+				   lookup_name.completion_mode ());
+
+      if (without_params != NULL)
+	{
+	  m_demangled_name = demangle_for_lookup (without_params.get (),
+						  lang, storage);
+	  return;
+	}
+    }
+
   m_demangled_name = demangle_for_lookup (lookup_name.name ().c_str (),
 					  lang, storage);
 }
@@ -4619,20 +4633,11 @@ rbreak_command (const char *regexp, int from_tty)
 }
 
 
-/* Evaluate if NAME matches SYM_TEXT and SYM_TEXT_LEN.
-
-   Either sym_text[sym_text_len] != '(' and then we search for any
-   symbol starting with SYM_TEXT text.
-
-   Otherwise sym_text[sym_text_len] == '(' and then we require symbol name to
-   be terminated at that point.  Partial symbol tables do not have parameters
-   information.  */
+/* Evaluate if SYMNAME matches LOOKUP_NAME.  */
 
 static int
-compare_symbol_name (const char *name,
-		     language symbol_language,
+compare_symbol_name (const char *symbol_name, language symbol_language,
 		     const lookup_name_info &lookup_name,
-		     const char *sym_text, int sym_text_len,
 		     completion_match_result &match_res)
 {
   const language_defn *lang;
@@ -4654,23 +4659,7 @@ compare_symbol_name (const char *name,
   symbol_name_matcher_ftype *name_match
     = language_get_symbol_name_matcher (lang, lookup_name);
 
-  /* Clip symbols that cannot match.  */
-  if (!name_match (name, lookup_name, &match_res.match))
-    return 0;
-
-  if (sym_text[sym_text_len] == '(')
-    {
-      /* User searches for `name(someth...'.  Require NAME to be terminated.
-	 Normally psymtabs and gdbindex have no parameter types so '\0' will be
-	 present but accept even parameters presence.  In this case this
-	 function is in fact strcmp_iw but whitespace skipping is not supported
-	 for tab completion.  */
-
-      if (name[sym_text_len] != '\0' && name[sym_text_len] != '(')
-	return 0;
-    }
-
-  return 1;
+  return name_match (symbol_name, lookup_name, &match_res.match);
 }
 
 /*  See symtab.h.  */
@@ -4687,10 +4676,7 @@ completion_list_add_name (completion_tracker &tracker,
     = tracker.reset_completion_match_result ();
 
   /* Clip symbols that cannot match.  */
-  if (!compare_symbol_name (symname, symbol_language,
-			    lookup_name,
-			    sym_text, sym_text_len,
-			    match_res))
+  if (!compare_symbol_name (symname, symbol_language, lookup_name, match_res))
     return;
 
   /* Refresh SYMNAME from the match string.  It's potentially
@@ -5013,21 +4999,6 @@ default_collect_symbol_completion_matches_break_on
   }
 
   sym_text_len = strlen (sym_text);
-
-  /* Prepare SYM_TEXT_LEN for compare_symbol_name.  */
-
-  if (current_language->la_language == language_cplus
-      || current_language->la_language == language_fortran)
-    {
-      /* These languages may have parameters entered by user but they are never
-	 present in the partial symbol tables.  */
-
-      const char *cs = (const char *) memchr (sym_text, '(', sym_text_len);
-
-      if (cs)
-	sym_text_len = cs - sym_text;
-    }
-  gdb_assert (sym_text[sym_text_len] == '\0' || sym_text[sym_text_len] == '(');
 
   lookup_name_info lookup_name (std::string (sym_text, sym_text_len),
 				name_match_type, true);

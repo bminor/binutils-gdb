@@ -98,6 +98,14 @@ extern char *cp_func_name (const char *full_name);
 extern gdb::unique_xmalloc_ptr<char> cp_remove_params
   (const char *demanged_name);
 
+/* DEMANGLED_NAME is the name of a function, (optionally) including
+   parameters and (optionally) a return type.  Return the name of the
+   function without parameters or return type, or NULL if we can not
+   parse the name.  If COMPLETION_MODE is true, then tolerate a
+   non-existing or unbalanced parameter list.  */
+extern gdb::unique_xmalloc_ptr<char> cp_remove_params_if_any
+  (const char *demangled_name, bool completion_mode);
+
 extern struct symbol **make_symbol_overload_list (const char *,
 						  const char *);
 

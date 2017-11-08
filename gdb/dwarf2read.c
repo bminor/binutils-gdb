@@ -81,6 +81,7 @@
 #include <algorithm>
 #include <unordered_set>
 #include <unordered_map>
+#include "selftest.h"
 
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
@@ -4198,13 +4199,15 @@ gdb_index_symbol_name_matcher::matches (const char *symbol_name)
 static void
 dw2_expand_symtabs_matching_symbol
   (mapped_index &index,
-   const lookup_name_info &lookup_name,
+   const lookup_name_info &lookup_name_in,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    enum search_domain kind,
    gdb::function_view<void (offset_type)> match_callback)
 {
+  lookup_name_info lookup_name_without_params
+    = lookup_name_in.make_ignore_params ();
   gdb_index_symbol_name_matcher lookup_name_matcher
-    (lookup_name);
+    (lookup_name_without_params);
 
   auto *name_cmp = case_sensitivity == case_sensitive_on ? strcmp : strcasecmp;
 
@@ -4262,7 +4265,7 @@ dw2_expand_symtabs_matching_symbol
     }
 
   const char *cplus
-    = lookup_name.cplus ().lookup_name ().c_str ();
+    = lookup_name_without_params.cplus ().lookup_name ().c_str ();
 
   /* Comparison function object for lower_bound that matches against a
      given symbol name.  */
@@ -4290,7 +4293,7 @@ dw2_expand_symtabs_matching_symbol
   /* Find the lower bound.  */
   auto lower = [&] ()
     {
-      if (lookup_name.completion_mode () && cplus[0] == '\0')
+      if (lookup_name_in.completion_mode () && cplus[0] == '\0')
 	return begin;
       else
 	return std::lower_bound (begin, end, cplus, lookup_compare_lower);
@@ -4299,7 +4302,7 @@ dw2_expand_symtabs_matching_symbol
   /* Find the upper bound.  */
   auto upper = [&] ()
     {
-      if (lookup_name.completion_mode ())
+      if (lookup_name_in.completion_mode ())
 	{
 	  /* The string frobbing below won't work if the string is
 	     empty.  We don't need it then, anyway -- if we're
@@ -4364,6 +4367,288 @@ dw2_expand_symtabs_matching_symbol
      (offset_type)-1 are both possible values.  */
   static_assert (sizeof (prev) > sizeof (offset_type), "");
 }
+
+#if GDB_SELF_TEST
+
+namespace selftests { namespace dw2_expand_symtabs_matching {
+
+/* A wrapper around mapped_index that builds a mock mapped_index, from
+   the symbol list passed as parameter to the constructor.  */
+class mock_mapped_index
+{
+public:
+  template<size_t N>
+  mock_mapped_index (const char *(&symbols)[N])
+    : mock_mapped_index (symbols, N)
+  {}
+
+  /* Access the built index.  */
+  mapped_index &index ()
+  { return m_index; }
+
+  /* Disable copy.  */
+  mock_mapped_index(const mock_mapped_index &) = delete;
+  void operator= (const mock_mapped_index &) = delete;
+
+private:
+  mock_mapped_index (const char **symbols, size_t symbols_size)
+  {
+    /* No string can live at offset zero.  Add a dummy entry.  */
+    obstack_grow_str0 (&m_constant_pool, "");
+
+    for (size_t i = 0; i < symbols_size; i++)
+      {
+	const char *sym = symbols[i];
+	size_t offset = obstack_object_size (&m_constant_pool);
+	obstack_grow_str0 (&m_constant_pool, sym);
+	m_symbol_table.push_back (offset);
+	m_symbol_table.push_back (0);
+      };
+
+    m_index.constant_pool = (const char *) obstack_base (&m_constant_pool);
+    m_index.symbol_table = m_symbol_table.data ();
+    m_index.symbol_table_slots = m_symbol_table.size () / 2;
+  }
+
+public:
+  /* The built mapped_index.  */
+  mapped_index m_index{};
+
+  /* The storage that the built mapped_index uses for symbol and
+     constant pool tables.  */
+  std::vector<offset_type> m_symbol_table;
+  auto_obstack m_constant_pool;
+};
+
+/* Convenience function that converts a NULL pointer to a "<null>"
+   string, to pass to print routines.  */
+
+static const char *
+string_or_null (const char *str)
+{
+  return str != NULL ? str : "<null>";
+}
+
+/* Check if a lookup_name_info built from
+   NAME/MATCH_TYPE/COMPLETION_MODE matches the symbols in the mock
+   index.  EXPECTED_LIST is the list of expected matches, in expected
+   matching order.  If no match expected, then an empty list is
+   specified.  Returns true on success.  On failure prints a warning
+   indicating the file:line that failed, and returns false.  */
+
+static bool
+check_match (const char *file, int line,
+	     mock_mapped_index &mock_index,
+	     const char *name, symbol_name_match_type match_type,
+	     bool completion_mode,
+	     std::initializer_list<const char *> expected_list)
+{
+  lookup_name_info lookup_name (name, match_type, completion_mode);
+
+  bool matched = true;
+
+  auto mismatch = [&] (const char *expected_str,
+		       const char *got)
+  {
+    warning (_("%s:%d: match_type=%s, looking-for=\"%s\", "
+	       "expected=\"%s\", got=\"%s\"\n"),
+	     file, line,
+	     (match_type == symbol_name_match_type::FULL
+	      ? "FULL" : "WILD"),
+	     name, string_or_null (expected_str), string_or_null (got));
+    matched = false;
+  };
+
+  auto expected_it = expected_list.begin ();
+  auto expected_end = expected_list.end ();
+
+  dw2_expand_symtabs_matching_symbol (mock_index.index (), lookup_name,
+				      NULL, ALL_DOMAIN,
+				      [&] (offset_type idx)
+  {
+    const char *matched_name = mock_index.index ().symbol_name_at (idx);
+    const char *expected_str
+      = expected_it == expected_end ? NULL : *expected_it++;
+
+    if (expected_str == NULL || strcmp (expected_str, matched_name) != 0)
+      mismatch (expected_str, matched_name);
+  });
+
+  const char *expected_str
+  = expected_it == expected_end ? NULL : *expected_it++;
+  if (expected_str != NULL)
+    mismatch (expected_str, NULL);
+
+  return matched;
+}
+
+/* The symbols added to the mock mapped_index for testing (in
+   canonical form).  */
+static const char *test_symbols[] = {
+  "function",
+  "std::bar",
+  "std::zfunction",
+  "std::zfunction2",
+  "w1::w2",
+  "ns::foo<char*>",
+  "ns::foo<int>",
+  "ns::foo<long>",
+
+  /* A name with all sorts of complications.  Starts with "z" to make
+     it easier for the completion tests below.  */
+#define Z_SYM_NAME \
+  "z::std::tuple<(anonymous namespace)::ui*, std::bar<(anonymous namespace)::ui> >" \
+    "::tuple<(anonymous namespace)::ui*, " \
+    "std::default_delete<(anonymous namespace)::ui>, void>"
+
+  Z_SYM_NAME
+};
+
+static void
+run_test ()
+{
+  mock_mapped_index mock_index (test_symbols);
+
+  /* We let all tests run until the end even if some fails, for debug
+     convenience.  */
+  bool any_mismatch = false;
+
+  /* Create the expected symbols list (an initializer_list).  Needed
+     because lists have commas, and we need to pass them to CHECK,
+     which is a macro.  */
+#define EXPECT(...) { __VA_ARGS__ }
+
+  /* Wrapper for check_match that passes down the current
+     __FILE__/__LINE__.  */
+#define CHECK_MATCH(NAME, MATCH_TYPE, COMPLETION_MODE, EXPECTED_LIST)	\
+  any_mismatch |= !check_match (__FILE__, __LINE__,			\
+				mock_index,				\
+				NAME, MATCH_TYPE, COMPLETION_MODE,	\
+				EXPECTED_LIST)
+
+  /* Identity checks.  */
+  for (const char *sym : test_symbols)
+    {
+      /* Should be able to match all existing symbols.  */
+      CHECK_MATCH (sym, symbol_name_match_type::FULL, false,
+		   EXPECT (sym));
+
+      /* Should be able to match all existing symbols with
+	 parameters.  */
+      std::string with_params = std::string (sym) + "(int)";
+      CHECK_MATCH (with_params.c_str (), symbol_name_match_type::FULL, false,
+		   EXPECT (sym));
+
+      /* Should be able to match all existing symbols with
+	 parameters and qualifiers.  */
+      with_params = std::string (sym) + " ( int ) const";
+      CHECK_MATCH (with_params.c_str (), symbol_name_match_type::FULL, false,
+		   EXPECT (sym));
+
+      /* This should really find sym, but cp-name-parser.y doesn't
+	 know about lvalue/rvalue qualifiers yet.  */
+      with_params = std::string (sym) + " ( int ) &&";
+      CHECK_MATCH (with_params.c_str (), symbol_name_match_type::FULL, false,
+		   {});
+    }
+
+  /* Check that completion mode works at each prefix of the expected
+     symbol name.  */
+  {
+    static const char str[] = "function(int)";
+    size_t len = strlen (str);
+    std::string lookup;
+
+    for (size_t i = 1; i < len; i++)
+      {
+	lookup.assign (str, i);
+	CHECK_MATCH (lookup.c_str (), symbol_name_match_type::FULL, true,
+		     EXPECT ("function"));
+      }
+  }
+
+  /* While "w" is a prefix of both components, the match function
+     should still only be called once.  */
+  {
+    CHECK_MATCH ("w", symbol_name_match_type::FULL, true,
+		 EXPECT ("w1::w2"));
+  }
+
+  /* Same, with a "complicated" symbol.  */
+  {
+    static const char str[] = Z_SYM_NAME;
+    size_t len = strlen (str);
+    std::string lookup;
+
+    for (size_t i = 1; i < len; i++)
+      {
+	lookup.assign (str, i);
+	CHECK_MATCH (lookup.c_str (), symbol_name_match_type::FULL, true,
+		     EXPECT (Z_SYM_NAME));
+      }
+  }
+
+  /* In FULL mode, an incomplete symbol doesn't match.  */
+  {
+    CHECK_MATCH ("std::zfunction(int", symbol_name_match_type::FULL, false,
+		 {});
+  }
+
+  /* A complete symbol with parameters matches any overload, since the
+     index has no overload info.  */
+  {
+    CHECK_MATCH ("std::zfunction(int)", symbol_name_match_type::FULL, true,
+		 EXPECT ("std::zfunction", "std::zfunction2"));
+  }
+
+  /* Check that whitespace is ignored appropriately.  A symbol with a
+     template argument list. */
+  {
+    static const char expected[] = "ns::foo<int>";
+    CHECK_MATCH ("ns :: foo < int > ", symbol_name_match_type::FULL, false,
+		 EXPECT (expected));
+  }
+
+  /* Check that whitespace is ignored appropriately.  A symbol with a
+     template argument list that includes a pointer.  */
+  {
+    static const char expected[] = "ns::foo<char*>";
+    /* Try both completion and non-completion modes.  */
+    static const bool completion_mode[2] = {false, true};
+    for (size_t i = 0; i < 2; i++)
+      {
+	CHECK_MATCH ("ns :: foo < char * >", symbol_name_match_type::FULL,
+		     completion_mode[i], EXPECT (expected));
+
+	CHECK_MATCH ("ns :: foo < char * > (int)", symbol_name_match_type::FULL,
+		     completion_mode[i], EXPECT (expected));
+      }
+  }
+
+  {
+    /* Check method qualifiers are ignored.  */
+    static const char expected[] = "ns::foo<char*>";
+    CHECK_MATCH ("ns :: foo < char * >  ( int ) const",
+		 symbol_name_match_type::FULL, true, EXPECT (expected));
+    CHECK_MATCH ("ns :: foo < char * >  ( int ) &&",
+		 symbol_name_match_type::FULL, true, EXPECT (expected));
+  }
+
+  /* Test lookup names that don't match anything.  */
+  {
+    CHECK_MATCH ("doesntexist", symbol_name_match_type::FULL, false,
+		 {});
+  }
+
+  SELF_CHECK (!any_mismatch);
+
+#undef EXPECT
+#undef CHECK_MATCH
+}
+
+}} // namespace selftests::dw2_expand_symtabs_matching
+
+#endif /* GDB_SELF_TEST */
 
 /* Helper for dw2_expand_matching symtabs.  Called on each symbol
    matched, to expand corresponding CUs that were marked.  IDX is the
@@ -24454,4 +24739,9 @@ Usage: save gdb-index DIRECTORY"),
 					&dwarf2_block_frame_base_locexpr_funcs);
   dwarf2_loclist_block_index = register_symbol_block_impl (LOC_BLOCK,
 					&dwarf2_block_frame_base_loclist_funcs);
+
+#if GDB_SELF_TEST
+  selftests::register_test ("dw2_expand_symtabs_matching",
+			    selftests::dw2_expand_symtabs_matching::run_test);
+#endif
 }

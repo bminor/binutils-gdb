@@ -1,5 +1,47 @@
 2017-11-08  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/lookup_name_info-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add lookup_name_info-selftests.o.
+	* cp-support.c: Include "selftest.h".
+	(cp_remove_params_1): Rename from cp_remove_params.  Add
+	'require_param' parameter, and handle it.
+	(cp_remove_params): Reimplement.
+	(cp_remove_params_if_any): New.
+	(selftests::quote): New.
+	(selftests::check_remove_params): New.
+	(selftests::test_cp_remove_params): New.
+	(_initialize_cp_support): Install
+	selftests::test_cp_remove_params.
+	* cp-support.h (cp_remove_params_if_any): Declare.
+	* dwarf2read.c :Include "selftest.h".
+	(dw2_expand_symtabs_matching_symbol): Use
+	lookup_name_info::make_ignore_params.
+	(selftests::dw2_expand_symtabs_matching::mock_mapped_index)
+	(selftests::dw2_expand_symtabs_matching::string_or_null)
+	(selftests::dw2_expand_symtabs_matching::check_match)
+	(selftests::dw2_expand_symtabs_matching::test_symbols)
+	(selftests::dw2_expand_symtabs_matching::run_test): New.
+	(_initialize_dwarf2_read): Register
+	selftests::dw2_expand_symtabs_matching::run_test.
+	* psymtab.c (psym_expand_symtabs_matching): Use
+	lookup_name_info::make_ignore_params.
+	* symtab.c (demangle_for_lookup_info::demangle_for_lookup_info):
+	If the lookup name wants to ignore parameters, strip them.
+	(compare_symbol_name): Remove sym_text/sym_text_len parameters and
+	code handling '('.
+	(completion_list_add_name): Don't pass down sym_text/sym_text_len.
+	(default_collect_symbol_completion_matches_break_on): Don't try to
+	strip parameters.
+	* symtab.h (lookup_name_info::lookup_name_info): Add
+	'ignore_parameters' parameter.
+	(lookup_name_info::ignore_parameters)
+	(lookup_name_info::make_ignore_params): New methods.
+	(lookup_name_info::m_ignore_parameters): New field.
+	* unittests/lookup_name_info-selftests.c: New file.
+
+2017-11-08  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (dw2_expand_marked_cus)
 	(dw2_expand_symtabs_matching_symbol): Remove forward declarations.
 	(dw2_expand_symtabs_matching): Move further below.

@@ -1390,12 +1390,14 @@ static void
 psym_expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   const lookup_name_info &lookup_name,
+   const lookup_name_info &lookup_name_in,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain domain)
 {
   struct partial_symtab *ps;
+
+  lookup_name_info lookup_name = lookup_name_in.make_ignore_params ();
 
   /* Clear the search flags.  */
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, ps)
