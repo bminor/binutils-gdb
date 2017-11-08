@@ -1,3 +1,15 @@
+2017-11-08  James Clarke  <jrtc27@jrtc27.com>
+
+	PR gold/22266
+	* object.cc (Sized_relobj_file::compute_final_local_value_internal):
+	Drop relocatable parameter and stop adjusting output value based on
+	it.
+	(Sized_relobj_file::compute_final_local_value): Stop passing
+	relocatable to compute_final_local_value_internal.
+	(Sized_relobj_file::do_finalize_local_symbols): Ditto.
+	* object.h (Sized_relobj_file::compute_final_local_value_internal):
+	Drop relocatable parameter.
+
 2017-11-08  Kyle Butt  <iteratee@google.com>
 
         * object.cc (do_find_special_sections): Fix a thinko with memmem return
