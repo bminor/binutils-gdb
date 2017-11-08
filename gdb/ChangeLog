@@ -1,3 +1,20 @@
+2017-11-08  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (byte_swap, MAYBE_SWAP): Move higher up in file.
+	(struct name_component): New.
+	(mapped_index::name_components): New field.
+	(mapped_index::symbol_name_at): New method.
+	(dwarf2_read_index): Call mapped_index ctor.
+	(dw2_map_matching_symbols): Add comment about name_components
+	table.
+	(dw2_expand_symtabs_matching): Factor part to...
+	(dw2_expand_symtabs_matching_symbol): ... this new function.
+	Build name components table, and lookup symbols in it before
+	calling the name matcher.
+	(dw2_expand_marked_cus): New, factored out from
+	dw2_expand_symtabs_matching.
+	(dwarf2_per_objfile_free): Call the mapped_index's dtor.
+
 2017-11-08   Pedro Alves  <palves@redhat.com>
 
 	* ada-lang.c (ada_encode): Rename to ..
