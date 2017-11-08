@@ -1,3 +1,8 @@
+2017-11-08  Djordje Todorovic  <djordje.todorovic@rt-rk.com>
+
+	* gdb.threads/tls-core.c: New file.
+	* gdb.threads/tls-core.exp: Likewise.
+
 2017-11-08   Pedro Alves  <palves@redhat.com>
 
 	* gdb.ada/complete.exp (p <Exported_Capitalized>): New test.
