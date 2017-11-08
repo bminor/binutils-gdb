@@ -133,8 +133,7 @@ extern struct symbol *dict_iterator_next (struct dict_iterator *iterator);
    if there are no such symbols.  */
 
 extern struct symbol *dict_iter_match_first (const struct dictionary *dict,
-					     const char *name,
-					     symbol_compare_ftype *compare,
+					     const lookup_name_info &name,
 					     struct dict_iterator *iterator);
 
 /* Advance ITERATOR to point at the next symbol in DICT whose
@@ -145,8 +144,7 @@ extern struct symbol *dict_iter_match_first (const struct dictionary *dict,
    iteration.  And don't call it unless ITERATOR was created by a
    previous call to dict_iter_match_first with the same NAME and COMPARE.  */
 
-extern struct symbol *dict_iter_match_next (const char *name,
-					    symbol_compare_ftype *compare,
+extern struct symbol *dict_iter_match_next (const lookup_name_info &name,
 					    struct dict_iterator *iterator);
 
 /* Return some notion of the size of the dictionary: the number of

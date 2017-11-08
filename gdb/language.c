@@ -699,6 +699,41 @@ default_get_string (struct value *value, gdb_byte **buffer, int *length,
   error (_("Getting a string is unsupported in this language."));
 }
 
+/* See language.h.  */
+
+bool
+default_symbol_name_matcher (const char *symbol_search_name,
+			     const lookup_name_info &lookup_name,
+			     completion_match *match)
+{
+  const std::string &name = lookup_name.name ();
+
+  strncmp_iw_mode mode = (lookup_name.completion_mode ()
+			  ? strncmp_iw_mode::NORMAL
+			  : strncmp_iw_mode::MATCH_PARAMS);
+
+  if (strncmp_iw_with_mode (symbol_search_name, name.c_str (), name.size (),
+			    mode) == 0)
+    {
+      if (match != NULL)
+	match->set_match (symbol_search_name);
+      return true;
+    }
+  else
+    return false;
+}
+
+/* See language.h.  */
+
+symbol_name_matcher_ftype *
+language_get_symbol_name_matcher (const language_defn *lang,
+				  const lookup_name_info &lookup_name)
+{
+  if (lang->la_get_symbol_name_matcher != nullptr)
+    return lang->la_get_symbol_name_matcher (lookup_name);
+  return default_symbol_name_matcher;
+}
+
 /* Define the language that is no language.  */
 
 static int
@@ -837,7 +872,7 @@ const struct language_defn unknown_language_defn =
   default_pass_by_reference,
   default_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
   default_search_name_hash,
   &default_varobj_ops,
@@ -888,7 +923,7 @@ const struct language_defn auto_language_defn =
   default_pass_by_reference,
   default_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
   default_search_name_hash,
   &default_varobj_ops,

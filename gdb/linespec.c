@@ -334,7 +334,8 @@ typedef struct ls_parser linespec_parser;
 /* Prototypes for local functions.  */
 
 static void iterate_over_file_blocks
-  (struct symtab *symtab, const char *name, domain_enum domain,
+  (struct symtab *symtab, const lookup_name_info &name,
+   domain_enum domain,
    gdb::function_view<symbol_found_callback_ftype> callback);
 
 static void initialize_defaults (struct symtab **default_symtab,
@@ -369,6 +370,7 @@ static int symbol_to_sal (struct symtab_and_line *result,
 			  int funfirstline, struct symbol *sym);
 
 static void add_matching_symbols_to_info (const char *name,
+					  symbol_name_match_type name_match_type,
 					  struct collect_info *info,
 					  struct program_space *pspace);
 
@@ -1101,18 +1103,14 @@ maybe_add_address (htab_t set, struct program_space *pspace, CORE_ADDR addr)
 
 static void
 iterate_over_all_matching_symtabs
-  (struct linespec_state *state, const char *name, const domain_enum domain,
+  (struct linespec_state *state,
+   const lookup_name_info &lookup_name,
+   const domain_enum name_domain,
    struct program_space *search_pspace, bool include_inline,
    gdb::function_view<symbol_found_callback_ftype> callback)
 {
   struct objfile *objfile;
   struct program_space *pspace;
-
-  /* The routine to be used for comparison.  */
-  symbol_name_cmp_ftype symbol_name_cmp
-    = (state->language->la_get_symbol_name_cmp != NULL
-       ? state->language->la_get_symbol_name_cmp (name)
-       : strcmp_iw);
 
   ALL_PSPACES (pspace)
   {
@@ -1128,21 +1126,17 @@ iterate_over_all_matching_symtabs
       struct compunit_symtab *cu;
 
       if (objfile->sf)
-	objfile->sf->qf->expand_symtabs_matching
-	  (objfile,
-	   NULL,
-	   [&] (const char *symbol_name)
-	   {
-	     return symbol_name_cmp (symbol_name, name) == 0;
-	   },
-	   NULL,
-	   ALL_DOMAIN);
+	objfile->sf->qf->expand_symtabs_matching (objfile,
+						  NULL,
+						  lookup_name,
+						  NULL, NULL,
+						  ALL_DOMAIN);
 
       ALL_OBJFILE_COMPUNITS (objfile, cu)
 	{
 	  struct symtab *symtab = COMPUNIT_FILETABS (cu);
 
-	  iterate_over_file_blocks (symtab, name, domain, callback);
+	  iterate_over_file_blocks (symtab, lookup_name, name_domain, callback);
 
 	  if (include_inline)
 	    {
@@ -1155,7 +1149,7 @@ iterate_over_all_matching_symtabs
 		{
 		  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), i);
 		  state->language->la_iterate_over_symbols
-		    (block, name, domain, [&] (symbol *sym)
+		    (block, lookup_name, name_domain, [&] (symbol *sym)
 		     {
 		       /* Restrict calls to CALLBACK to symbols
 			  representing inline symbols only.  */
@@ -1192,8 +1186,8 @@ get_current_search_block (void)
 
 static void
 iterate_over_file_blocks
-  (struct symtab *symtab, const char *name, domain_enum domain,
-   gdb::function_view<symbol_found_callback_ftype> callback)
+  (struct symtab *symtab, const lookup_name_info &name,
+   domain_enum domain, gdb::function_view<symbol_found_callback_ftype> callback)
 {
   struct block *block;
 
@@ -1203,12 +1197,12 @@ iterate_over_file_blocks
     LA_ITERATE_OVER_SYMBOLS (block, name, domain, callback);
 }
 
-/* A helper for find_method.  This finds all methods in type T which
-   match NAME.  It adds matching symbol names to RESULT_NAMES, and
-   adds T's direct superclasses to SUPERCLASSES.  */
+/* A helper for find_method.  This finds all methods in type T of
+   language T_LANG which match NAME.  It adds matching symbol names to
+   RESULT_NAMES, and adds T's direct superclasses to SUPERCLASSES.  */
 
 static void
-find_methods (struct type *t, const char *name,
+find_methods (struct type *t, enum language t_lang, const char *name,
 	      VEC (const_char_ptr) **result_names,
 	      VEC (typep) **superclasses)
 {
@@ -1221,6 +1215,9 @@ find_methods (struct type *t, const char *name,
   if (class_name)
     {
       int method_counter;
+      lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+      symbol_name_matcher_ftype *symbol_name_compare
+	= language_get_symbol_name_matcher (language_def (t_lang), lookup_name);
 
       t = check_typedef (t);
 
@@ -1245,7 +1242,7 @@ find_methods (struct type *t, const char *name,
 		method_name = dem_opname;
 	    }
 
-	  if (strcmp_iw (method_name, name) == 0)
+	  if (symbol_name_compare (method_name, lookup_name, NULL))
 	    {
 	      int field_counter;
 
@@ -2831,15 +2828,19 @@ linespec_complete_function (completion_tracker &tracker,
 			    const char *source_filename)
 {
   complete_symbol_mode mode = complete_symbol_mode::LINESPEC;
+  symbol_name_match_type func_match_type = symbol_name_match_type::WILD;
 
   if (source_filename != NULL)
     {
-      collect_file_symbol_completion_matches (tracker, mode,
-					      function, function,
-					      source_filename);
+      collect_file_symbol_completion_matches (tracker, mode, func_match_type,
+					      function, function, source_filename);
     }
   else
-    collect_symbol_completion_matches (tracker, mode, function, function);
+    {
+      collect_symbol_completion_matches (tracker, mode, func_match_type,
+					 function, function);
+
+    }
 }
 
 /* Helper for complete_linespec to simplify it.  SOURCE_FILENAME is
@@ -3576,14 +3577,18 @@ lookup_prefix_sym (struct linespec_state *state, VEC (symtab_ptr) *file_symtabs,
   struct symtab *elt;
   decode_compound_collector collector;
 
+  lookup_name_info lookup_name (class_name, symbol_name_match_type::FULL);
+
   for (ix = 0; VEC_iterate (symtab_ptr, file_symtabs, ix, elt); ++ix)
     {
       if (elt == NULL)
 	{
-	  iterate_over_all_matching_symtabs (state, class_name, STRUCT_DOMAIN,
-					     NULL, false, collector);
-	  iterate_over_all_matching_symtabs (state, class_name, VAR_DOMAIN,
-					     NULL, false, collector);
+	  iterate_over_all_matching_symtabs (state, lookup_name,
+					     STRUCT_DOMAIN, NULL, false,
+					     collector);
+	  iterate_over_all_matching_symtabs (state, lookup_name,
+					     VAR_DOMAIN, NULL, false,
+					     collector);
 	}
       else
 	{
@@ -3591,8 +3596,8 @@ lookup_prefix_sym (struct linespec_state *state, VEC (symtab_ptr) *file_symtabs,
 	     been filtered out earlier.  */
 	  gdb_assert (!SYMTAB_PSPACE (elt)->executing_startup);
 	  set_current_program_space (SYMTAB_PSPACE (elt));
-	  iterate_over_file_blocks (elt, class_name, STRUCT_DOMAIN, collector);
-	  iterate_over_file_blocks (elt, class_name, VAR_DOMAIN, collector);
+	  iterate_over_file_blocks (elt, lookup_name, STRUCT_DOMAIN, collector);
+	  iterate_over_file_blocks (elt, lookup_name, VAR_DOMAIN, collector);
 	}
     }
 
@@ -3673,12 +3678,14 @@ add_all_symbol_names_from_pspace (struct collect_info *info,
   const char *iter;
 
   for (ix = 0; VEC_iterate (const_char_ptr, names, ix, iter); ++ix)
-    add_matching_symbols_to_info (iter, info, pspace);
+    add_matching_symbols_to_info (iter,
+				  symbol_name_match_type::FULL,
+				  info, pspace);
 }
 
 static void
 find_superclass_methods (VEC (typep) *superclasses,
-			 const char *name,
+			 const char *name, enum language name_lang,
 			 VEC (const_char_ptr) **result_names)
 {
   int old_len = VEC_length (const_char_ptr, *result_names);
@@ -3694,7 +3701,7 @@ find_superclass_methods (VEC (typep) *superclasses,
 
       make_cleanup (VEC_cleanup (typep), &new_supers);
       for (ix = 0; VEC_iterate (typep, iter_classes, ix, t); ++ix)
-	find_methods (t, name, result_names, &new_supers);
+	find_methods (t, name_lang, name, result_names, &new_supers);
 
       if (VEC_length (const_char_ptr, *result_names) != old_len
 	  || VEC_empty (typep, new_supers))
@@ -3761,7 +3768,8 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
       gdb_assert (!pspace->executing_startup);
       set_current_program_space (pspace);
       t = check_typedef (SYMBOL_TYPE (sym));
-      find_methods (t, method_name, &result_names, &superclass_vec);
+      find_methods (t, SYMBOL_LANGUAGE (sym),
+		    method_name, &result_names, &superclass_vec);
 
       /* Handle all items from a single program space at once; and be
 	 sure not to miss the last batch.  */
@@ -3774,7 +3782,7 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 	     this program space, consider superclasses.  */
 	  if (VEC_length (const_char_ptr, result_names) == last_result_len)
 	    find_superclass_methods (superclass_vec, method_name,
-				     &result_names);
+				     SYMBOL_LANGUAGE (sym), &result_names);
 
 	  /* We have a list of candidate symbol names, so now we
 	     iterate over the symbol tables looking for all
@@ -3941,7 +3949,8 @@ find_function_symbols (struct linespec_state *state,
     add_all_symbol_names_from_pspace (&info, state->search_pspace,
 				      symbol_names);
   else
-    add_matching_symbols_to_info (name, &info, state->search_pspace);
+    add_matching_symbols_to_info (name, symbol_name_match_type::WILD,
+				  &info, state->search_pspace);
 
   do_cleanups (cleanup);
 
@@ -3968,28 +3977,10 @@ find_function_symbols (struct linespec_state *state,
 static void
 find_linespec_symbols (struct linespec_state *state,
 		       VEC (symtab_ptr) *file_symtabs,
-		       const char *name,
+		       const char *lookup_name,
 		       VEC (symbolp) **symbols,
 		       VEC (bound_minimal_symbol_d) **minsyms)
 {
-  demangle_result_storage demangle_storage;
-  std::string ada_lookup_storage;
-  const char *lookup_name;
-
-  if (state->language->la_language == language_ada)
-    {
-      /* In Ada, the symbol lookups are performed using the encoded
-         name rather than the demangled name.  */
-      ada_lookup_storage = ada_name_for_lookup (name);
-      lookup_name = ada_lookup_storage.c_str ();
-    }
-  else
-    {
-      lookup_name = demangle_for_lookup (name,
-					 state->language->la_language,
-					 demangle_storage);
-    }
-
   std::string canon = cp_canonicalize_string_no_typedefs (lookup_name);
   if (!canon.empty ())
     lookup_name = canon.c_str ();
@@ -4483,7 +4474,8 @@ add_minsym (struct minimal_symbol *minsym, void *d)
    restrict results to the given SYMTAB.  */
 
 static void
-search_minsyms_for_name (struct collect_info *info, const char *name,
+search_minsyms_for_name (struct collect_info *info,
+			 const lookup_name_info &name,
 			 struct program_space *search_pspace,
 			 struct symtab *symtab)
 {
@@ -4525,8 +4517,7 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
 	{
 	  set_current_program_space (SYMTAB_PSPACE (symtab));
 	  local.objfile = SYMTAB_OBJFILE(symtab);
-	  iterate_over_minimal_symbols (local.objfile, name, add_minsym,
-					&local);
+	  iterate_over_minimal_symbols (local.objfile, name, add_minsym, &local);
 	}
     }
 
@@ -4568,20 +4559,24 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
 
 static void
 add_matching_symbols_to_info (const char *name,
+			      symbol_name_match_type name_match_type,
 			      struct collect_info *info,
 			      struct program_space *pspace)
 {
   int ix;
   struct symtab *elt;
 
+  lookup_name_info lookup_name (name, name_match_type);
+
   for (ix = 0; VEC_iterate (symtab_ptr, info->file_symtabs, ix, elt); ++ix)
     {
       if (elt == NULL)
 	{
-	  iterate_over_all_matching_symtabs (info->state, name, VAR_DOMAIN,
+	  iterate_over_all_matching_symtabs (info->state, lookup_name,
+					     VAR_DOMAIN,
 					     pspace, true, [&] (symbol *sym)
 	    { return info->add_symbol (sym); });
-	  search_minsyms_for_name (info, name, pspace, NULL);
+	  search_minsyms_for_name (info, lookup_name, pspace, NULL);
 	}
       else if (pspace == NULL || pspace == SYMTAB_PSPACE (elt))
 	{
@@ -4591,7 +4586,8 @@ add_matching_symbols_to_info (const char *name,
 	     been filtered out earlier.  */
 	  gdb_assert (!SYMTAB_PSPACE (elt)->executing_startup);
 	  set_current_program_space (SYMTAB_PSPACE (elt));
-	  iterate_over_file_blocks (elt, name, VAR_DOMAIN, [&] (symbol *sym)
+	  iterate_over_file_blocks (elt, lookup_name, VAR_DOMAIN,
+				    [&] (symbol *sym)
 	    { return info->add_symbol (sym); });
 
 	  /* If no new symbols were found in this iteration and this symtab
@@ -4600,7 +4596,7 @@ add_matching_symbols_to_info (const char *name,
 	     this case.  */
 	  if (prev_len == VEC_length (symbolp, info->result.symbols)
 	      && elt->language == language_asm)
-	    search_minsyms_for_name (info, name, pspace, elt);
+	    search_minsyms_for_name (info, lookup_name, pspace, elt);
 	}
     }
 }

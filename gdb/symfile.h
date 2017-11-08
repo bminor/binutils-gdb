@@ -231,7 +231,7 @@ struct quick_symbol_functions
 				int (*callback) (struct block *,
 						 struct symbol *, void *),
 				void *data,
-				symbol_compare_ftype *match,
+				symbol_name_match_type match,
 				symbol_compare_ftype *ordered_compare);
 
   /* Expand all symbol tables in OBJFILE matching some criteria.
@@ -255,6 +255,7 @@ struct quick_symbol_functions
   void (*expand_symtabs_matching)
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info &lookup_name,
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      enum search_domain kind);
@@ -526,6 +527,7 @@ extern scoped_restore_tmpl<int> increment_reading_symtab (void);
 
 void expand_symtabs_matching
   (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind);

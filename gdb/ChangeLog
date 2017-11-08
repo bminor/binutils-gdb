@@ -1,3 +1,207 @@
+2017-11-08   Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_encode): Rename to ..
+	(ada_encode_1): ... this.  Add throw_errors parameter and handle
+	it.
+	(ada_encode): Reimplement.
+	(match_name): Delete, folded into full_name.
+	(resolve_subexp): No longer pass the encoded name to
+	ada_lookup_symbol_list.
+	(should_use_wild_match): Delete.
+	(name_match_type_from_name): New.
+	(ada_lookup_simple_minsym): Use lookup_name_info and the
+	language's symbol_name_matcher_ftype.
+	(add_symbols_from_enclosing_procs, ada_add_local_symbols)
+	(ada_add_block_renamings): Adjust to use lookup_name_info.
+	(ada_lookup_name): New.
+	(add_nonlocal_symbols, ada_add_all_symbols)
+	(ada_lookup_symbol_list_worker, ada_lookup_symbol_list)
+	(ada_iterate_over_symbols): Adjust to use lookup_name_info.
+	(ada_name_for_lookup): Delete.
+	(ada_lookup_encoded_symbol): Construct a verbatim name.
+	(wild_match): Reverse sense of return type.  Use bool.
+	(full_match): Reverse sense of return type.  Inline bits of old
+	match_name here.
+	(ada_add_block_symbols): Adjust to use lookup_name_info.
+	(symbol_completion_match): Delete, folded into...
+	(ada_lookup_name_info::matches): ... .this new method.
+	(symbol_completion_add): Delete.
+	(ada_collect_symbol_completion_matches): Add name_match_type
+	parameter.  Adjust to use lookup_name_info and
+	completion_list_add_name.
+	(get_var_value, ada_add_global_exceptions): Adjust to use
+	lookup_name_info.
+	(ada_get_symbol_name_cmp): Delete.
+	(do_wild_match, do_full_match): New functions.
+	(ada_lookup_name_info::ada_lookup_name_info): New method.
+	(ada_symbol_name_matches, ada_get_symbol_name_matcher): New
+	functions.
+	(ada_language_defn): Install ada_get_symbol_name_matcher.
+	* ada-lex.l (processId): If name starts with '<', copy it
+	verbatim.
+	* block.c (block_iter_match_step, block_iter_match_first)
+	(block_iter_match_next, block_lookup_symbol)
+	(block_lookup_symbol_primary, block_find_symbol): Adjust to use
+	lookup_name_info.
+	* block.h (block_iter_match_first, block_iter_match_next)
+	(ALL_BLOCK_SYMBOLS_WITH_NAME): Adjust to use lookup_name_info.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Adjust comments to
+	refer to la_get_symbol_name_matcher.
+	* completer.c (complete_files_symbols)
+	(collect_explicit_location_matches, symbol_completer): Pass a
+	symbol_name_match_type down.
+	* completer.h (class completion_match, completion_match_result):
+	New classes.
+	(completion_tracker::reset_completion_match_result): New method.
+	(completion_tracker::m_completion_match_result): New field.
+	* cp-support.c (make_symbol_overload_list_block): Adjust to use
+	lookup_name_info.
+	(cp_fq_symbol_name_matches, cp_get_symbol_name_matcher): New
+	functions.
+	* cp-support.h (cp_get_symbol_name_matcher): New declaration.
+	* d-lang.c: Adjust comments to refer to
+	la_get_symbol_name_matcher.
+	* dictionary.c (dict_vector) <iter_match_first, iter_match_next>:
+	Adjust to use lookup_name_info.
+	(dict_iter_match_first, dict_iter_match_next)
+	(iter_match_first_hashed, iter_match_next_hashed)
+	(iter_match_first_linear, iter_match_next_linear): Adjust to work
+	with a lookup_name_info.
+	* dictionary.h (dict_iter_match_first, dict_iter_match_next):
+	Likewise.
+	* dwarf2read.c (dw2_lookup_symbol): Adjust to use lookup_name_info.
+	(dw2_map_matching_symbols): Adjust to use symbol_name_match_type.
+	(gdb_index_symbol_name_matcher): New class.
+	(dw2_expand_symtabs_matching) Adjust to use lookup_name_info and
+	gdb_index_symbol_name_matcher.  Accept a NULL symbol_matcher.
+	* f-lang.c (f_collect_symbol_completion_matches): Adjust to work
+	with a symbol_name_match_type.
+	(f_language_defn): Adjust comments to refer to
+	la_get_symbol_name_matcher.
+	* go-lang.c (go_language_defn): Adjust comments to refer to
+	la_get_symbol_name_matcher.
+	* language.c (default_symbol_name_matcher)
+	(language_get_symbol_name_matcher): New functions.
+	(unknown_language_defn, auto_language_defn): Adjust comments to
+	refer to la_get_symbol_name_matcher.
+	* language.h (symbol_name_cmp_ftype): Delete.
+	(language_defn) <la_collect_symbol_completion_matches>: Add match
+	type parameter.
+	<la_get_symbol_name_cmp>: Delete field.
+	<la_get_symbol_name_matcher>: New field.
+	<la_iterate_over_symbols>: Adjust to use lookup_name_info.
+	(default_symbol_name_matcher, language_get_symbol_name_matcher):
+	Declare.
+	* linespec.c (iterate_over_all_matching_symtabs)
+	(iterate_over_file_blocks): Adjust to use lookup_name_info.
+	(find_methods): Add language parameter, and use lookup_name_info
+	and the language's symbol_name_matcher_ftype.
+	(linespec_complete_function): Adjust.
+	(lookup_prefix_sym): Use lookup_name_info.
+	(add_all_symbol_names_from_pspace): Adjust.
+	(find_superclass_methods): Add language parameter and pass it
+	down.
+	(find_method): Pass symbol language down.
+	(find_linespec_symbols): Don't demangle or Ada encode here.
+	(search_minsyms_for_name): Add lookup_name_info parameter.
+	(add_matching_symbols_to_info): Add name_match_type parameter.
+	Use lookup_name_info.
+	* m2-lang.c (m2_language_defn): Adjust comments to refer to
+	la_get_symbol_name_matcher.
+	* minsyms.c: Include <algorithm>.
+	(add_minsym_to_demangled_hash_table): Remove table parameter and
+	add objfile parameter.  Use search_name_hash, and add language to
+	demangled languages vector.
+	(struct found_minimal_symbols): New struct.
+	(lookup_minimal_symbol_mangled, lookup_minimal_symbol_demangled):
+	New functions.
+	(lookup_minimal_symbol): Adjust to use them.  Don't canonicalize
+	input names here.  Use lookup_name_info instead.  Lookup up
+	demangled names once for each language in the demangled names
+	vector.
+	(iterate_over_minimal_symbols): Use lookup_name_info.  Lookup up
+	demangled names once for each language in the demangled names
+	vector.
+	(build_minimal_symbol_hash_tables): Adjust.
+	* minsyms.h (iterate_over_minimal_symbols): Adjust to pass down a
+	lookup_name_info.
+	* objc-lang.c (objc_language_defn): Adjust comment to refer to
+	la_get_symbol_name_matcher.
+	* objfiles.h: Include <vector>.
+	(objfile_per_bfd_storage) <demangled_hash_languages>: New field.
+	* opencl-lang.c (opencl_language_defn): Adjust comment to refer to
+	la_get_symbol_name_matcher.
+	* p-lang.c (pascal_language_defn): Adjust comment to refer to
+	la_get_symbol_name_matcher.
+	* psymtab.c (psym_lookup_symbol): Use lookup_name_info.
+	(match_partial_symbol): Use symbol_name_match_type,
+	lookup_name_info and psymbol_name_matches.
+	(lookup_partial_symbol): Use lookup_name_info.
+	(map_block): Use symbol_name_match_type and lookup_name_info.
+	(psym_map_matching_symbols): Use symbol_name_match_type.
+	(psymbol_name_matches): New.
+	(recursively_search_psymtabs): Use lookup_name_info and
+	psymbol_name_matches.  Rename 'kind' parameter to 'domain'.
+	(psym_expand_symtabs_matching): Use lookup_name_info.  Rename
+	'kind' parameter to 'domain'.
+	* rust-lang.c (rust_language_defn): Adjust comment to refer to
+	la_get_symbol_name_matcher.
+	* symfile-debug.c (debug_qf_map_matching_symbols)
+	(debug_qf_map_matching_symbols): Use symbol_name_match_type.
+	(debug_qf_expand_symtabs_matching): Use lookup_name_info.
+	* symfile.c (expand_symtabs_matching): Use lookup_name_info.
+	* symfile.h (quick_symbol_functions) <map_matching_symbols>:
+	Adjust to use symbol_name_match_type.
+	<expand_symtabs_matching>: Adjust to use lookup_name_info.
+	(expand_symtabs_matching): Adjust to use lookup_name_info.
+	* symmisc.c (maintenance_expand_symtabs): Use
+	lookup_name_info::match_any ().
+	* symtab.c (symbol_matches_search_name): New.
+	(eq_symbol_entry): Adjust to use lookup_name_info and the
+	language's matcher.
+	(demangle_for_lookup_info::demangle_for_lookup_info): New.
+	(lookup_name_info::match_any): New.
+	(iterate_over_symbols, search_symbols): Use lookup_name_info.
+	(compare_symbol_name): Add language, lookup_name_info and
+	completion_match_result parameters, and use them.
+	(completion_list_add_name): Make extern.  Add language and
+	lookup_name_info parameters.  Use them.
+	(completion_list_add_symbol, completion_list_add_msymbol)
+	(completion_list_objc_symbol): Add lookup_name_info parameters and
+	adjust.  Pass down language.
+	(completion_list_add_fields): Add lookup_name_info parameters and
+	adjust.  Pass down language.
+	(add_symtab_completions): Add lookup_name_info parameters and
+	adjust.
+	(default_collect_symbol_completion_matches_break_on): Add
+	name_match_type parameter, and use it.  Use lookup_name_info.
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches): Add name_match_type
+	parameter, and pass it down.
+	(collect_symbol_completion_matches_type): Adjust.
+	(collect_file_symbol_completion_matches): Add name_match_type
+	parameter, and use lookup_name_info.
+	* symtab.h: Include <string> and "common/gdb_optional.h".
+	(enum class symbol_name_match_type): New.
+	(class ada_lookup_name_info): New.
+	(struct demangle_for_lookup_info): New.
+	(class lookup_name_info): New.
+	(symbol_name_matcher_ftype): New.
+	(SYMBOL_MATCHES_SEARCH_NAME): Use symbol_matches_search_name.
+	(symbol_matches_search_name): Declare.
+	(MSYMBOL_MATCHES_SEARCH_NAME): Delete.
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches)
+	(collect_file_symbol_completion_matches): Add name_match_type
+	parameter.
+	(iterate_over_symbols): Use lookup_name_info.
+	(completion_list_add_name): Declare.
+	* utils.c (enum class strncmp_iw_mode): Moved to utils.h.
+	(strncmp_iw_with_mode): Now extern.
+	* utils.h (enum class strncmp_iw_mode): Moved from utils.c.
+	(strncmp_iw_with_mode): Declare.
+
 2017-11-08  Keith Seitz  <keiths@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 

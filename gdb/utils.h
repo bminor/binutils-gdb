@@ -31,6 +31,29 @@ extern void initialize_utils (void);
 
 extern int sevenbit_strings;
 
+/* Modes of operation for strncmp_iw_with_mode.  */
+
+enum class strncmp_iw_mode
+{
+/* Do a strcmp() type operation on STRING1 and STRING2, ignoring any
+   differences in whitespace.  Returns 0 if they match, non-zero if
+   they don't (slightly different than strcmp()'s range of return
+   values).  */
+  NORMAL,
+
+  /* Like NORMAL, but also apply the strcmp_iw hack.  I.e.,
+     string1=="FOO(PARAMS)" matches string2=="FOO".  */
+  MATCH_PARAMS,
+};
+
+/* Helper for strcmp_iw and strncmp_iw.  Exported so that languages
+   can implement both NORMAL and MATCH_PARAMS variants in a single
+   function and defer part of the work to strncmp_iw_with_mode.  */
+extern int strncmp_iw_with_mode (const char *string1,
+				 const char *string2,
+				 size_t string2_len,
+				 strncmp_iw_mode mode);
+
 /* Do a strncmp() type operation on STRING1 and STRING2, ignoring any
    differences in whitespace.  STRING2_LEN is STRING2's length.
    Returns 0 if STRING1 matches STRING2_LEN characters of STRING2,

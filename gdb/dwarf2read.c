@@ -3878,6 +3878,8 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 
   dw2_setup (objfile);
 
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+
   index = dwarf2_per_objfile->index_table;
 
   /* index is NULL if OBJF_READNOW.  */
@@ -3904,10 +3906,10 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	     information (but NAME might contain it).  */
 
 	  if (sym != NULL
-	      && SYMBOL_MATCHES_SEARCH_NAME (sym, name))
+	      && SYMBOL_MATCHES_SEARCH_NAME (sym, lookup_name))
 	    return stab;
 	  if (with_opaque != NULL
-	      && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, name))
+	      && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, lookup_name))
 	    stab_best = stab;
 
 	  /* Keep looking through other CUs.  */
@@ -4052,7 +4054,7 @@ dw2_map_matching_symbols (struct objfile *objfile,
 			  int global,
 			  int (*callback) (struct block *,
 					   struct symbol *, void *),
-			  void *data, symbol_compare_ftype *match,
+			  void *data, symbol_name_match_type match,
 			  symbol_compare_ftype *ordered_compare)
 {
   /* Currently unimplemented; used for Ada.  The function can be called if the
@@ -4060,10 +4062,96 @@ dw2_map_matching_symbols (struct objfile *objfile,
      does not look for non-Ada symbols this function should just return.  */
 }
 
+/* Symbol name matcher for .gdb_index names.
+
+   Symbol names in .gdb_index have a few particularities:
+
+   - There's no indication of which is the language of each symbol.
+
+     Since each language has its own symbol name matching algorithm,
+     and we don't know which language is the right one, we must match
+     each symbol against all languages.
+
+   - Symbol names in the index have no overload (parameter)
+     information.  I.e., in C++, "foo(int)" and "foo(long)" both
+     appear as "foo" in the index, for example.
+
+     This means that the lookup names passed to the symbol name
+     matcher functions must have no parameter information either
+     because (e.g.) symbol search name "foo" does not match
+     lookup-name "foo(int)" [while swapping search name for lookup
+     name would match].
+*/
+class gdb_index_symbol_name_matcher
+{
+public:
+  /* Prepares the vector of comparison functions for LOOKUP_NAME.  */
+  gdb_index_symbol_name_matcher (const lookup_name_info &lookup_name);
+
+  /* Walk all the matcher routines and match SYMBOL_NAME against them.
+     Returns true if any matcher matches.  */
+  bool matches (const char *symbol_name);
+
+private:
+  /* A reference to the lookup name we're matching against.  */
+  const lookup_name_info &m_lookup_name;
+
+  /* A vector holding all the different symbol name matchers, for all
+     languages.  */
+  std::vector<symbol_name_matcher_ftype *> m_symbol_name_matcher_funcs;
+};
+
+gdb_index_symbol_name_matcher::gdb_index_symbol_name_matcher
+  (const lookup_name_info &lookup_name)
+    : m_lookup_name (lookup_name)
+{
+  /* Prepare the vector of comparison functions upfront, to avoid
+     doing the same work for each symbol.  Care is taken to avoid
+     matching with the same matcher more than once if/when multiple
+     languages use the same matcher function.  */
+  auto &matchers = m_symbol_name_matcher_funcs;
+  matchers.reserve (nr_languages);
+
+  matchers.push_back (default_symbol_name_matcher);
+
+  for (int i = 0; i < nr_languages; i++)
+    {
+      const language_defn *lang = language_def ((enum language) i);
+      if (lang->la_get_symbol_name_matcher != NULL)
+	{
+	  symbol_name_matcher_ftype *name_matcher
+	    = lang->la_get_symbol_name_matcher (m_lookup_name);
+
+	  /* Don't insert the same comparison routine more than once.
+	     Note that we do this linear walk instead of a cheaper
+	     sorted insert, or use a std::set or something like that,
+	     because relative order of function addresses is not
+	     stable.  This is not a problem in practice because the
+	     number of supported languages is low, and the cost here
+	     is tiny compared to the number of searches we'll do
+	     afterwards using this object.  */
+	  if (std::find (matchers.begin (), matchers.end (), name_matcher)
+	      == matchers.end ())
+	    matchers.push_back (name_matcher);
+	}
+    }
+}
+
+bool
+gdb_index_symbol_name_matcher::matches (const char *symbol_name)
+{
+  for (auto matches_name : m_symbol_name_matcher_funcs)
+    if (matches_name (symbol_name, m_lookup_name, NULL))
+      return true;
+
+  return false;
+}
+
 static void
 dw2_expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind)
@@ -4151,6 +4239,8 @@ dw2_expand_symtabs_matching
 	}
     }
 
+  gdb_index_symbol_name_matcher lookup_name_matcher (lookup_name);
+
   for (iter = 0; iter < index->symbol_table_slots; ++iter)
     {
       offset_type idx = 2 * iter;
@@ -4165,7 +4255,8 @@ dw2_expand_symtabs_matching
 
       name = index->constant_pool + MAYBE_SWAP (index->symbol_table[idx]);
 
-      if (!symbol_matcher (name))
+      if (!lookup_name_matcher.matches (name)
+	  || (symbol_matcher != NULL && !symbol_matcher (name)))
 	continue;
 
       /* The name was matched, now expand corresponding CUs that were

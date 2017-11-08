@@ -115,11 +115,9 @@ struct dict_vector
   struct symbol *(*iterator_next) (struct dict_iterator *iterator);
   /* Functions to iterate over symbols with a given name.  */
   struct symbol *(*iter_match_first) (const struct dictionary *dict,
-				      const char *name,
-				      symbol_compare_ftype *equiv,
+				      const lookup_name_info &name,
 				      struct dict_iterator *iterator);
-  struct symbol *(*iter_match_next) (const char *name,
-				     symbol_compare_ftype *equiv,
+  struct symbol *(*iter_match_next) (const lookup_name_info &name,
 				     struct dict_iterator *iterator);
   /* A size function, for maint print symtabs.  */
   int (*size) (const struct dictionary *dict);
@@ -239,12 +237,10 @@ static struct symbol *iterator_first_hashed (const struct dictionary *dict,
 static struct symbol *iterator_next_hashed (struct dict_iterator *iterator);
 
 static struct symbol *iter_match_first_hashed (const struct dictionary *dict,
-					       const char *name,
-					       symbol_compare_ftype *compare,
+					       const lookup_name_info &name,
 					      struct dict_iterator *iterator);
 
-static struct symbol *iter_match_next_hashed (const char *name,
-					      symbol_compare_ftype *compare,
+static struct symbol *iter_match_next_hashed (const lookup_name_info &name,
 					      struct dict_iterator *iterator);
 
 /* Functions only for DICT_HASHED.  */
@@ -269,12 +265,10 @@ static struct symbol *iterator_first_linear (const struct dictionary *dict,
 static struct symbol *iterator_next_linear (struct dict_iterator *iterator);
 
 static struct symbol *iter_match_first_linear (const struct dictionary *dict,
-					       const char *name,
-					       symbol_compare_ftype *compare,
+					       const lookup_name_info &name,
 					       struct dict_iterator *iterator);
 
-static struct symbol *iter_match_next_linear (const char *name,
-					      symbol_compare_ftype *compare,
+static struct symbol *iter_match_next_linear (const lookup_name_info &name,
 					      struct dict_iterator *iterator);
 
 static int size_linear (const struct dictionary *dict);
@@ -526,19 +520,18 @@ dict_iterator_next (struct dict_iterator *iterator)
 
 struct symbol *
 dict_iter_match_first (const struct dictionary *dict,
-		       const char *name, symbol_compare_ftype *compare,
+		       const lookup_name_info &name,
 		       struct dict_iterator *iterator)
 {
-  return (DICT_VECTOR (dict))->iter_match_first (dict, name,
-						 compare, iterator);
+  return (DICT_VECTOR (dict))->iter_match_first (dict, name, iterator);
 }
 
 struct symbol *
-dict_iter_match_next (const char *name, symbol_compare_ftype *compare,
+dict_iter_match_next (const lookup_name_info &name,
 		      struct dict_iterator *iterator)
 {
   return (DICT_VECTOR (DICT_ITERATOR_DICT (iterator)))
-    ->iter_match_next (name, compare, iterator);
+    ->iter_match_next (name, iterator);
 }
 
 int
@@ -629,13 +622,15 @@ iterator_hashed_advance (struct dict_iterator *iterator)
 }
 
 static struct symbol *
-iter_match_first_hashed (const struct dictionary *dict, const char *name,
-			 symbol_compare_ftype *compare,
+iter_match_first_hashed (const struct dictionary *dict,
+			 const lookup_name_info &name,
 			 struct dict_iterator *iterator)
 {
-  unsigned int hash_index
-    = (search_name_hash (DICT_LANGUAGE (dict)->la_language, name)
-       % DICT_HASHED_NBUCKETS (dict));
+  const language_defn *lang = DICT_LANGUAGE (dict);
+  unsigned int hash_index = (name.search_name_hash (lang->la_language)
+			     % DICT_HASHED_NBUCKETS (dict));
+  symbol_name_matcher_ftype *matches_name
+    = language_get_symbol_name_matcher (lang, name);
   struct symbol *sym;
 
   DICT_ITERATOR_DICT (iterator) = dict;
@@ -649,11 +644,8 @@ iter_match_first_hashed (const struct dictionary *dict, const char *name,
        sym = sym->hash_next)
     {
       /* Warning: the order of arguments to compare matters!  */
-      if (compare (SYMBOL_SEARCH_NAME (sym), name) == 0)
-	{
-	  break;
-	}
-	
+      if (matches_name (SYMBOL_SEARCH_NAME (sym), name, NULL))
+	break;
     }
 
   DICT_ITERATOR_CURRENT (iterator) = sym;
@@ -661,16 +653,19 @@ iter_match_first_hashed (const struct dictionary *dict, const char *name,
 }
 
 static struct symbol *
-iter_match_next_hashed (const char *name, symbol_compare_ftype *compare,
+iter_match_next_hashed (const lookup_name_info &name,
 			struct dict_iterator *iterator)
 {
+  const language_defn *lang = DICT_LANGUAGE (DICT_ITERATOR_DICT (iterator));
+  symbol_name_matcher_ftype *matches_name
+    = language_get_symbol_name_matcher (lang, name);
   struct symbol *next;
 
   for (next = DICT_ITERATOR_CURRENT (iterator)->hash_next;
        next != NULL;
        next = next->hash_next)
     {
-      if (compare (SYMBOL_SEARCH_NAME (next), name) == 0)
+      if (matches_name (SYMBOL_SEARCH_NAME (next), name, NULL))
 	break;
     }
 
@@ -863,27 +858,32 @@ iterator_next_linear (struct dict_iterator *iterator)
 
 static struct symbol *
 iter_match_first_linear (const struct dictionary *dict,
-			 const char *name, symbol_compare_ftype *compare,
+			 const lookup_name_info &name,
 			 struct dict_iterator *iterator)
 {
   DICT_ITERATOR_DICT (iterator) = dict;
   DICT_ITERATOR_INDEX (iterator) = -1;
 
-  return iter_match_next_linear (name, compare, iterator);
+  return iter_match_next_linear (name, iterator);
 }
 
 static struct symbol *
-iter_match_next_linear (const char *name, symbol_compare_ftype *compare,
+iter_match_next_linear (const lookup_name_info &name,
 			struct dict_iterator *iterator)
 {
   const struct dictionary *dict = DICT_ITERATOR_DICT (iterator);
+  const language_defn *lang = DICT_LANGUAGE (dict);
+  symbol_name_matcher_ftype *matches_name
+    = language_get_symbol_name_matcher (lang, name);
+
   int i, nsyms = DICT_LINEAR_NSYMS (dict);
   struct symbol *sym, *retval = NULL;
 
   for (i = DICT_ITERATOR_INDEX (iterator) + 1; i < nsyms; ++i)
     {
       sym = DICT_LINEAR_SYM (dict, i);
-      if (compare (SYMBOL_SEARCH_NAME (sym), name) == 0)
+
+      if (matches_name (SYMBOL_SEARCH_NAME (sym), name, NULL))
 	{
 	  retval = sym;
 	  break;

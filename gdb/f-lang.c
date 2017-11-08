@@ -229,10 +229,12 @@ f_word_break_characters (void)
 static void
 f_collect_symbol_completion_matches (completion_tracker &tracker,
 				     complete_symbol_mode mode,
+				     symbol_name_match_type compare_name,
 				     const char *text, const char *word,
 				     enum type_code code)
 {
   default_collect_symbol_completion_matches_break_on (tracker, mode,
+						      compare_name,
 						      text, word, ":", code);
 }
 
@@ -289,7 +291,7 @@ extern const struct language_defn f_language_defn =
   default_pass_by_reference,
   default_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
   default_search_name_hash,
   &default_varobj_ops,

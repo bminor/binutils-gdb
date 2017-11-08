@@ -260,7 +260,7 @@ debug_qf_map_matching_symbols (struct objfile *objfile,
 			       int (*callback) (struct block *,
 						struct symbol *, void *),
 			       void *data,
-			       symbol_compare_ftype *match,
+			       symbol_name_match_type match,
 			       symbol_compare_ftype *ordered_compare)
 {
   const struct debug_sym_fns_data *debug_data
@@ -273,7 +273,7 @@ debug_qf_map_matching_symbols (struct objfile *objfile,
 		    domain_name (domain), global,
 		    host_address_to_string (callback),
 		    host_address_to_string (data),
-		    host_address_to_string (match),
+		    plongest ((LONGEST) match),
 		    host_address_to_string (ordered_compare));
 
   debug_data->real_sf->qf->map_matching_symbols (objfile, name,
@@ -287,6 +287,7 @@ static void
 debug_qf_expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind)
@@ -305,6 +306,7 @@ debug_qf_expand_symtabs_matching
 
   debug_data->real_sf->qf->expand_symtabs_matching (objfile,
 						    file_matcher,
+						    lookup_name,
 						    symbol_matcher,
 						    expansion_notify,
 						    kind);

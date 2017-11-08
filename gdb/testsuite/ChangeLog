@@ -1,3 +1,9 @@
+2017-11-08   Pedro Alves  <palves@redhat.com>
+
+	* gdb.ada/complete.exp (p <Exported_Capitalized>): New test.
+	(p Exported_Capitalized): New test.
+	(p exported_capitalized): New test.
+
 2017-11-07  Pedro Alves  <palves@redhat.com>
 
 	* gdb.cp/ena-dis-br-range.exp: Add more tests.

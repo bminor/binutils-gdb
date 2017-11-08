@@ -1181,7 +1181,9 @@ make_symbol_overload_list_block (const char *name,
   struct block_iterator iter;
   struct symbol *sym;
 
-  ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+
+  ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
     overload_list_add_symbol (sym, name);
 }
 
@@ -1562,6 +1564,40 @@ gdb_sniff_from_mangled_name (const char *mangled, char **demangled)
 {
   *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
   return *demangled != NULL;
+}
+
+/* C++ symbol_name_matcher_ftype implementation.  */
+
+static bool
+cp_fq_symbol_name_matches (const char *symbol_search_name,
+			   const lookup_name_info &lookup_name,
+			   completion_match *match)
+{
+  /* Get the demangled name.  */
+  const std::string &name = lookup_name.cplus ().lookup_name ();
+
+  strncmp_iw_mode mode = (lookup_name.completion_mode ()
+			  ? strncmp_iw_mode::NORMAL
+			  : strncmp_iw_mode::MATCH_PARAMS);
+
+  if (strncmp_iw_with_mode (symbol_search_name,
+			    name.c_str (), name.size (),
+			    mode) == 0)
+    {
+      if (match != NULL)
+	match->set_match (symbol_search_name);
+      return true;
+    }
+
+  return false;
+}
+
+/* See cp-support.h.  */
+
+symbol_name_matcher_ftype *
+cp_get_symbol_name_matcher (const lookup_name_info &lookup_name)
+{
+  return cp_fq_symbol_name_matches;
 }
 
 /* Don't allow just "maintenance cplus".  */

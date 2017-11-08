@@ -46,7 +46,7 @@ static struct partial_symbol *match_partial_symbol (struct objfile *,
 						    struct partial_symtab *,
 						    int,
 						    const char *, domain_enum,
-						    symbol_compare_ftype *,
+						    symbol_name_match_type,
 						    symbol_compare_ftype *);
 
 static struct partial_symbol *lookup_partial_symbol (struct objfile *,
@@ -510,6 +510,8 @@ psym_lookup_symbol (struct objfile *objfile,
   const int psymtab_index = (block_index == GLOBAL_BLOCK ? 1 : 0);
   struct compunit_symtab *stab_best = NULL;
 
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, ps)
   {
     if (!ps->readin && lookup_partial_symbol (objfile, ps, name,
@@ -532,10 +534,10 @@ psym_lookup_symbol (struct objfile *objfile,
 	   information (but NAME might contain it).  */
 
 	if (sym != NULL
-	    && SYMBOL_MATCHES_SEARCH_NAME (sym, name))
+	    && SYMBOL_MATCHES_SEARCH_NAME (sym, lookup_name))
 	  return stab;
 	if (with_opaque != NULL
-	    && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, name))
+	    && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, lookup_name))
 	  stab_best = stab;
 
 	/* Keep looking through other psymtabs.  */
@@ -543,6 +545,18 @@ psym_lookup_symbol (struct objfile *objfile,
   }
 
   return stab_best;
+}
+
+/* Returns true if PSYM matches LOOKUP_NAME.  */
+
+static bool
+psymbol_name_matches (partial_symbol *psym,
+		      const lookup_name_info &lookup_name)
+{
+  const language_defn *lang = language_def (SYMBOL_LANGUAGE (psym));
+  symbol_name_matcher_ftype *name_match
+    = language_get_symbol_name_matcher (lang, lookup_name);
+  return name_match (SYMBOL_SEARCH_NAME (psym), lookup_name, NULL);
 }
 
 /* Look in PST for a symbol in DOMAIN whose name matches NAME.  Search
@@ -557,7 +571,7 @@ static struct partial_symbol *
 match_partial_symbol (struct objfile *objfile,
 		      struct partial_symtab *pst, int global,
 		      const char *name, domain_enum domain,
-		      symbol_compare_ftype *match,
+		      symbol_name_match_type match_type,
 		      symbol_compare_ftype *ordered_compare)
 {
   struct partial_symbol **start, **psym;
@@ -566,7 +580,10 @@ match_partial_symbol (struct objfile *objfile,
   int do_linear_search = 1;
 
   if (length == 0)
-      return NULL;
+    return NULL;
+
+  lookup_name_info lookup_name (name, match_type);
+
   start = (global ?
 	   &objfile->global_psymbols[pst->globals_offset] :
 	   &objfile->static_psymbols[pst->statics_offset]);
@@ -588,7 +605,12 @@ match_partial_symbol (struct objfile *objfile,
 	{
 	  center = bottom + (top - bottom) / 2;
 	  gdb_assert (center < top);
-	  if (ordered_compare (SYMBOL_SEARCH_NAME (*center), name) >= 0)
+
+	  enum language lang = SYMBOL_LANGUAGE (*center);
+	  const char *lang_ln
+	    = lookup_name.language_lookup_name (lang).c_str ();
+
+	  if (ordered_compare (SYMBOL_SEARCH_NAME (*center), lang_ln) >= 0)
 	    top = center;
 	  else
 	    bottom = center + 1;
@@ -596,7 +618,7 @@ match_partial_symbol (struct objfile *objfile,
       gdb_assert (top == bottom);
 
       while (top <= real_top
-	     && match (SYMBOL_SEARCH_NAME (*top), name) == 0)
+	     && psymbol_name_matches (*top, lookup_name))
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*top),
 				     SYMBOL_DOMAIN (*top), domain))
@@ -614,7 +636,7 @@ match_partial_symbol (struct objfile *objfile,
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*psym),
 				     SYMBOL_DOMAIN (*psym), domain)
-	      && match (SYMBOL_SEARCH_NAME (*psym), name) == 0)
+	      && psymbol_name_matches (*psym, lookup_name))
 	    return *psym;
 	}
     }
@@ -669,6 +691,9 @@ lookup_partial_symbol (struct objfile *objfile,
     return NULL;
 
   gdb::unique_xmalloc_ptr<char> search_name = psymtab_search_name (name);
+
+  lookup_name_info lookup_name (search_name.get (), symbol_name_match_type::FULL);
+
   start = (global ?
 	   &objfile->global_psymbols[pst->globals_offset] :
 	   &objfile->static_psymbols[pst->statics_offset]);
@@ -708,15 +733,13 @@ lookup_partial_symbol (struct objfile *objfile,
 
       /* For `case_sensitivity == case_sensitive_off' strcmp_iw_ordered will
 	 search more exactly than what matches SYMBOL_MATCHES_SEARCH_NAME.  */
-      while (top >= start && SYMBOL_MATCHES_SEARCH_NAME (*top,
-							 search_name.get ()))
+      while (top >= start && SYMBOL_MATCHES_SEARCH_NAME (*top, lookup_name))
 	top--;
 
       /* Fixup to have a symbol which matches SYMBOL_MATCHES_SEARCH_NAME.  */
       top++;
 
-      while (top <= real_top
-	     && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name.get ()))
+      while (top <= real_top && SYMBOL_MATCHES_SEARCH_NAME (*top, lookup_name))
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*top),
 				     SYMBOL_DOMAIN (*top), domain))
@@ -734,7 +757,7 @@ lookup_partial_symbol (struct objfile *objfile,
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*psym),
 				     SYMBOL_DOMAIN (*psym), domain)
-	      && SYMBOL_MATCHES_SEARCH_NAME (*psym, search_name.get ()))
+	      && SYMBOL_MATCHES_SEARCH_NAME (*psym, lookup_name))
 	    return *psym;
 	}
     }
@@ -1213,13 +1236,16 @@ static int
 map_block (const char *name, domain_enum domain, struct objfile *objfile,
 	   struct block *block,
 	   int (*callback) (struct block *, struct symbol *, void *),
-	   void *data, symbol_compare_ftype *match)
+	   void *data, symbol_name_match_type match)
 {
   struct block_iterator iter;
   struct symbol *sym;
 
-  for (sym = block_iter_match_first (block, name, match, &iter);
-       sym != NULL; sym = block_iter_match_next (name, match, &iter))
+  lookup_name_info lookup_name (name, match);
+
+  for (sym = block_iter_match_first (block, lookup_name, &iter);
+       sym != NULL;
+       sym = block_iter_match_next (lookup_name, &iter))
     {
       if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				 SYMBOL_DOMAIN (sym), domain))
@@ -1242,7 +1268,7 @@ psym_map_matching_symbols (struct objfile *objfile,
 			   int (*callback) (struct block *,
 					    struct symbol *, void *),
 			   void *data,
-			   symbol_compare_ftype *match,
+			   symbol_name_match_type match,
 			   symbol_compare_ftype *ordered_compare)
 {
   const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
@@ -1277,7 +1303,8 @@ psym_map_matching_symbols (struct objfile *objfile,
 
 static bool
 recursively_search_psymtabs
-  (struct partial_symtab *ps, struct objfile *objfile, enum search_domain kind,
+  (struct partial_symtab *ps, struct objfile *objfile, enum search_domain domain,
+   const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> sym_matcher)
 {
   int keep_going = 1;
@@ -1298,7 +1325,8 @@ recursively_search_psymtabs
 	continue;
 
       r = recursively_search_psymtabs (ps->dependencies[i],
-				       objfile, kind, sym_matcher);
+				       objfile, domain, lookup_name,
+				       sym_matcher);
       if (r != 0)
 	{
 	  ps->searched_flag = PST_SEARCHED_AND_FOUND;
@@ -1332,15 +1360,16 @@ recursively_search_psymtabs
 	{
 	  QUIT;
 
-	  if ((kind == ALL_DOMAIN
-	       || (kind == VARIABLES_DOMAIN
+	  if ((domain == ALL_DOMAIN
+	       || (domain == VARIABLES_DOMAIN
 		   && PSYMBOL_CLASS (*psym) != LOC_TYPEDEF
 		   && PSYMBOL_CLASS (*psym) != LOC_BLOCK)
-	       || (kind == FUNCTIONS_DOMAIN
+	       || (domain == FUNCTIONS_DOMAIN
 		   && PSYMBOL_CLASS (*psym) == LOC_BLOCK)
-	       || (kind == TYPES_DOMAIN
+	       || (domain == TYPES_DOMAIN
 		   && PSYMBOL_CLASS (*psym) == LOC_TYPEDEF))
-	      && sym_matcher (SYMBOL_SEARCH_NAME (*psym)))
+	      && psymbol_name_matches (*psym, lookup_name)
+	      && (sym_matcher == NULL || sym_matcher (SYMBOL_SEARCH_NAME (*psym))))
 	    {
 	      /* Found a match, so notify our caller.  */
 	      result = PST_SEARCHED_AND_FOUND;
@@ -1361,9 +1390,10 @@ static void
 psym_expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-   enum search_domain kind)
+   enum search_domain domain)
 {
   struct partial_symtab *ps;
 
@@ -1405,7 +1435,8 @@ psym_expand_symtabs_matching
 	    continue;
 	}
 
-      if (recursively_search_psymtabs (ps, objfile, kind, symbol_matcher))
+      if (recursively_search_psymtabs (ps, objfile, domain,
+				       lookup_name, symbol_matcher))
 	{
 	  struct compunit_symtab *symtab =
 	    psymtab_to_symtab (objfile, ps);

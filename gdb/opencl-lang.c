@@ -1081,7 +1081,7 @@ extern const struct language_defn opencl_language_defn =
   default_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
   default_search_name_hash,
   &default_varobj_ops,

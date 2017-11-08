@@ -869,7 +869,7 @@ extern const struct language_defn c_language_defn =
   default_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
   default_search_name_hash,
   &c_varobj_ops,
@@ -1014,7 +1014,7 @@ extern const struct language_defn cplus_language_defn =
   cp_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  cp_get_symbol_name_matcher,
   iterate_over_symbols,
   default_search_name_hash,
   &cplus_varobj_ops,
@@ -1068,7 +1068,7 @@ extern const struct language_defn asm_language_defn =
   default_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
   default_search_name_hash,
   &default_varobj_ops,
@@ -1122,7 +1122,7 @@ extern const struct language_defn minimal_language_defn =
   default_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
   default_search_name_hash,
   &default_varobj_ops,

@@ -108,6 +108,11 @@ extern struct symbol **make_symbol_overload_list_adl (struct type **arg_types,
 extern struct type *cp_lookup_rtti_type (const char *name,
 					 struct block *block);
 
+/* Implement the "la_get_symbol_name_matcher" language_defn method for
+   C++.  */
+extern symbol_name_matcher_ftype *cp_get_symbol_name_matcher
+  (const lookup_name_info &lookup_name);
+
 /* Functions/variables from cp-namespace.c.  */
 
 extern int cp_is_in_anonymous (const char *symbol_name);
