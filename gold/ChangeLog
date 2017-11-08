@@ -1,3 +1,11 @@
+2018-04-04  Eric Christopher  <echristo@gmail.com>
+
+	Apply from master:
+        2017-11-08  Kyle Butt  <iteratee@google.com>
+
+        * object.cc (do_find_special_sections): Fix a thinko with memmem return
+        values and check for !=	NULL rather than == 0.
+
 2018-03-20  Sriraman Tallam  <tmsriram@google.com>
 
 	Apply from master:
