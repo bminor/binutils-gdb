@@ -4877,11 +4877,44 @@ completion_list_add_fields (completion_tracker &tracker,
     }
 }
 
+/* See symtab.h.  */
+
+bool
+symbol_is_function_or_method (symbol *sym)
+{
+  switch (TYPE_CODE (SYMBOL_TYPE (sym)))
+    {
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_METHOD:
+      return true;
+    default:
+      return false;
+    }
+}
+
+/* See symtab.h.  */
+
+bool
+symbol_is_function_or_method (minimal_symbol *msymbol)
+{
+  switch (MSYMBOL_TYPE (msymbol))
+    {
+    case mst_text:
+    case mst_text_gnu_ifunc:
+    case mst_solib_trampoline:
+    case mst_file_text:
+      return true;
+    default:
+      return false;
+    }
+}
+
 /* Add matching symbols from SYMTAB to the current completion list.  */
 
 static void
 add_symtab_completions (struct compunit_symtab *cust,
 			completion_tracker &tracker,
+			complete_symbol_mode mode,
 			const lookup_name_info &lookup_name,
 			const char *text, const char *word,
 			enum type_code code)
@@ -4900,6 +4933,9 @@ add_symtab_completions (struct compunit_symtab *cust,
       b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), i);
       ALL_BLOCK_SYMBOLS (b, iter, sym)
 	{
+	  if (completion_skip_symbol (mode, sym))
+	    continue;
+
 	  if (code == TYPE_CODE_UNDEF
 	      || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		  && TYPE_CODE (SYMBOL_TYPE (sym)) == code))
@@ -4998,6 +5034,9 @@ default_collect_symbol_completion_matches_break_on
 	{
 	  QUIT;
 
+	  if (completion_skip_symbol (mode, msymbol))
+	    continue;
+
 	  completion_list_add_msymbol (tracker, msymbol, lookup_name,
 				       sym_text, word);
 
@@ -5008,7 +5047,7 @@ default_collect_symbol_completion_matches_break_on
 
   /* Add completions for all currently loaded symbol tables.  */
   ALL_COMPUNITS (objfile, cust)
-    add_symtab_completions (cust, tracker, lookup_name,
+    add_symtab_completions (cust, tracker, mode, lookup_name,
 			    sym_text, word, code);
 
   /* Look through the partial symtabs for all symbols which begin by
@@ -5019,7 +5058,7 @@ default_collect_symbol_completion_matches_break_on
 			   [&] (compunit_symtab *symtab) /* expansion notify */
 			     {
 			       add_symtab_completions (symtab,
-						       tracker, lookup_name,
+						       tracker, mode, lookup_name,
 						       sym_text, word, code);
 			     },
 			   ALL_DOMAIN);
@@ -5225,7 +5264,7 @@ collect_file_symbol_completion_matches (completion_tracker &tracker,
   iterate_over_symtabs (srcfile, [&] (symtab *s)
     {
       add_symtab_completions (SYMTAB_COMPUNIT (s),
-			      tracker, lookup_name,
+			      tracker, mode, lookup_name,
 			      sym_text, word, TYPE_CODE_UNDEF);
       return false;
     });

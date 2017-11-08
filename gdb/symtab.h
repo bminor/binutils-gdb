@@ -1803,6 +1803,26 @@ extern void collect_file_symbol_completion_matches
 extern completion_list
   make_source_files_completion_list (const char *, const char *);
 
+/* Return whether SYM is a function/method, as opposed to a data symbol.  */
+
+extern bool symbol_is_function_or_method (symbol *sym);
+
+/* Return whether MSYMBOL is a function/method, as opposed to a data
+   symbol */
+
+extern bool symbol_is_function_or_method (minimal_symbol *msymbol);
+
+/* Return whether SYM should be skipped in completion mode MODE.  In
+   linespec mode, we're only interested in functions/methods.  */
+
+template<typename Symbol>
+static bool
+completion_skip_symbol (complete_symbol_mode mode, Symbol *sym)
+{
+  return (mode == complete_symbol_mode::LINESPEC
+	  && !symbol_is_function_or_method (sym));
+}
+
 /* symtab.c */
 
 int matching_obj_sections (struct obj_section *, struct obj_section *);

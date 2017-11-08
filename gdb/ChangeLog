@@ -1,5 +1,19 @@
 2017-11-08  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_make_symbol_completion_list): Use
+	completion_skip_symbol.
+	* symtab.c (symbol_is_function_or_method(minimal_symbol*)): New.
+	(symbol_is_function_or_method(symbol*)): New.
+	(add_symtab_completions): Add complete_symbol_mode parameter.  Use
+	completion_skip_symbol.
+	(default_collect_symbol_completion_matches_break_on): Use
+	completion_skip_symbol.  Pass down mode.
+	(collect_file_symbol_completion_matches): Pass down mode.
+	* symtab.h (symbol_is_function_or_method): New declarations.
+	(completion_skip_symbol): New template function.
+
+2017-11-08  Pedro Alves  <palves@redhat.com>
+
 	* linespec.c (iterate_over_all_matching_symtabs): Add
 	search_domain parameter.  Pass it down to expand_symtabs_matching.
 	(decode_objc): Request FUNCTIONS_DOMAIN symbols only.
