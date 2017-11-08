@@ -1761,6 +1761,7 @@ template<int size, bool big_endian>
 Sized_symbol<size>*
 Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 				    bool only_if_ref,
+				    elfcpp::STV visibility,
                                     Sized_symbol<size>** poldsym,
 				    bool* resolve_oldsym, bool is_forced_local)
 {
@@ -1799,8 +1800,21 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
       oldsym = this->lookup(*pname, *pversion);
       if (oldsym == NULL && is_default_version)
 	oldsym = this->lookup(*pname, NULL);
-      if (oldsym == NULL || !oldsym->is_undefined())
+      if (oldsym == NULL)
 	return NULL;
+      if (!oldsym->is_undefined())
+	{
+	  // Skip if the old definition is from a regular object.
+	  if (!oldsym->is_from_dynobj())
+	    return NULL;
+
+	  // If the symbol has hidden or internal visibility, ignore
+	  // definition and reference from a dynamic object.
+	  if ((visibility == elfcpp::STV_HIDDEN
+	       || visibility == elfcpp::STV_INTERNAL)
+	      && !oldsym->in_reg())
+	    return NULL;
+	}
 
       *pname = oldsym->name();
       if (is_default_version)
@@ -1975,7 +1989,9 @@ Symbol_table::do_define_in_output_data(
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
-						    only_if_ref, &oldsym,
+						    only_if_ref,
+						    visibility,
+						    &oldsym,
 						    &resolve_oldsym,
 						    is_forced_local);
 #else
@@ -1986,7 +2002,9 @@ Symbol_table::do_define_in_output_data(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
-						     only_if_ref, &oldsym,
+						     only_if_ref,
+						     visibility,
+						     &oldsym,
 						     &resolve_oldsym,
 						     is_forced_local);
 #else
@@ -2094,7 +2112,9 @@ Symbol_table::do_define_in_output_segment(
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
-						    only_if_ref, &oldsym,
+						    only_if_ref,
+						    visibility,
+						    &oldsym,
 						    &resolve_oldsym,
 						    is_forced_local);
 #else
@@ -2105,7 +2125,9 @@ Symbol_table::do_define_in_output_segment(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
-						     only_if_ref, &oldsym,
+						     only_if_ref,
+						     visibility,
+						     &oldsym,
 						     &resolve_oldsym,
 						     is_forced_local);
 #else
@@ -2211,7 +2233,9 @@ Symbol_table::do_define_as_constant(
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
-						    only_if_ref, &oldsym,
+						    only_if_ref,
+						    visibility,
+						    &oldsym,
 						    &resolve_oldsym,
 						    is_forced_local);
 #else
@@ -2222,7 +2246,9 @@ Symbol_table::do_define_as_constant(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
-						     only_if_ref, &oldsym,
+						     only_if_ref,
+						     visibility,
+						     &oldsym,
 						     &resolve_oldsym,
 						     is_forced_local);
 #else
@@ -2449,7 +2475,9 @@ Symbol_table::add_undefined_symbol_from_command_line(const char* name)
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
-						    false, &oldsym,
+						    false,
+						    elfcpp::STV_DEFAULT,
+						    &oldsym,
 						    &resolve_oldsym,
 						    false);
 #else
@@ -2460,7 +2488,9 @@ Symbol_table::add_undefined_symbol_from_command_line(const char* name)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
-						     false, &oldsym,
+						     false,
+						     elfcpp::STV_DEFAULT,
+						     &oldsym,
 						     &resolve_oldsym,
 						     false);
 #else
