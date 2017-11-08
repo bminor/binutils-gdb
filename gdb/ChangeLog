@@ -1,5 +1,20 @@
 2017-11-08  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_make_symbol_completion_list): Remove text and
+	text_len locals and don't pass them down.
+	* symtab.c (completion_list_add_name): Remove
+	sym_text/sym_text_len parameters and adjust.
+	(completion_list_add_symbol, completion_list_add_msymbol)
+	(completion_list_objc_symbol, completion_list_add_fields)
+	(add_symtab_completions): Likewise.
+	(default_collect_symbol_completion_matches_break_on)
+	(collect_file_symbol_completion_matches): Remove sym_text_len
+	local and don't pass it down.
+	* symtab.h (completion_list_add_name): Remove
+	sym_text/sym_text_len parameters.
+
+2017-11-08  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	unittests/lookup_name_info-selftests.c.
 	(SUBDIR_UNITTESTS_OBS): Add lookup_name_info-selftests.o.

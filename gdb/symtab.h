@@ -2004,7 +2004,6 @@ void completion_list_add_name (completion_tracker &tracker,
 			       language symbol_language,
 			       const char *symname,
 			       const lookup_name_info &lookup_name,
-			       const char *sym_text, int sym_text_len,
 			       const char *text, const char *word);
 
 #endif /* !defined(SYMTAB_H) */
