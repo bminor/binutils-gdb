@@ -125,6 +125,9 @@ struct buildsym_compunit
 
   /* The compunit we are building.  */
   struct compunit_symtab *compunit_symtab;
+
+  /* Language of this compunit_symtab.  */
+  enum language language;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -346,20 +349,23 @@ finish_block_internal (struct symbol *symbol,
 
   if (symbol)
     {
-      BLOCK_DICT (block) = dict_create_linear (&objfile->objfile_obstack,
-					       *listhead);
+      BLOCK_DICT (block)
+	= dict_create_linear (&objfile->objfile_obstack,
+			      buildsym_compunit->language, *listhead);
     }
   else
     {
       if (expandable)
 	{
-	  BLOCK_DICT (block) = dict_create_hashed_expandable ();
+	  BLOCK_DICT (block)
+	    = dict_create_hashed_expandable (buildsym_compunit->language);
 	  dict_add_pending (BLOCK_DICT (block), *listhead);
 	}
       else
 	{
 	  BLOCK_DICT (block) =
-	    dict_create_hashed (&objfile->objfile_obstack, *listhead);
+	    dict_create_hashed (&objfile->objfile_obstack,
+				buildsym_compunit->language, *listhead);
 	}
     }
 
@@ -763,7 +769,8 @@ start_subfile (const char *name)
    (or NULL if not known).  */
 
 static struct buildsym_compunit *
-start_buildsym_compunit (struct objfile *objfile, const char *comp_dir)
+start_buildsym_compunit (struct objfile *objfile, const char *comp_dir,
+			 enum language language)
 {
   struct buildsym_compunit *bscu;
 
@@ -772,6 +779,7 @@ start_buildsym_compunit (struct objfile *objfile, const char *comp_dir)
 
   bscu->objfile = objfile;
   bscu->comp_dir = (comp_dir == NULL) ? NULL : xstrdup (comp_dir);
+  bscu->language = language;
 
   /* Initialize the debug format string to NULL.  We may supply it
      later via a call to record_debugformat.  */
@@ -1036,17 +1044,20 @@ prepare_for_building (const char *name, CORE_ADDR start_addr)
    TAG_compile_unit DIE is seen.  It indicates the start of data for
    one original source file.
 
-   NAME is the name of the file (cannot be NULL).  COMP_DIR is the directory in
-   which the file was compiled (or NULL if not known).  START_ADDR is the
-   lowest address of objects in the file (or 0 if not known).  */
+   NAME is the name of the file (cannot be NULL).  COMP_DIR is the
+   directory in which the file was compiled (or NULL if not known).
+   START_ADDR is the lowest address of objects in the file (or 0 if
+   not known).  LANGUAGE is the language of the source file, or
+   language_unknown if not known, in which case it'll be deduced from
+   the filename.  */
 
 struct compunit_symtab *
 start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
-	      CORE_ADDR start_addr)
+	      CORE_ADDR start_addr, enum language language)
 {
   prepare_for_building (name, start_addr);
 
-  buildsym_compunit = start_buildsym_compunit (objfile, comp_dir);
+  buildsym_compunit = start_buildsym_compunit (objfile, comp_dir, language);
 
   /* Allocate the compunit symtab now.  The caller needs it to allocate
      non-primary symtabs.  It is also needed by get_macro_table.  */
@@ -1083,7 +1094,8 @@ restart_symtab (struct compunit_symtab *cust,
   prepare_for_building (name, start_addr);
 
   buildsym_compunit = start_buildsym_compunit (COMPUNIT_OBJFILE (cust),
-					       COMPUNIT_DIRNAME (cust));
+					       COMPUNIT_DIRNAME (cust),
+					       compunit_language (cust));
   buildsym_compunit->compunit_symtab = cust;
 }
 

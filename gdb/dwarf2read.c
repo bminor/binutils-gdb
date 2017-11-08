@@ -18926,7 +18926,7 @@ dwarf2_start_symtab (struct dwarf2_cu *cu,
 		     const char *name, const char *comp_dir, CORE_ADDR low_pc)
 {
   struct compunit_symtab *cust
-    = start_symtab (cu->objfile, name, comp_dir, low_pc);
+    = start_symtab (cu->objfile, name, comp_dir, low_pc, cu->language);
 
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);

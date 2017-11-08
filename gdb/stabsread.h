@@ -17,6 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 struct objfile;
+enum language;
 
 /* Definitions, prototypes, etc for stabs debugging format support
    functions.
@@ -169,7 +170,7 @@ extern struct partial_symtab *dbx_end_psymtab
 
 extern void process_one_symbol (int, int, CORE_ADDR, const char *,
 				const struct section_offsets *,
-				struct objfile *);
+				struct objfile *, enum language);
 
 extern void elfstab_build_psymtabs (struct objfile *objfile,
 				    asection *stabsect,

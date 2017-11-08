@@ -1044,7 +1044,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
   last_csect_name = 0;
 
   start_stabs ();
-  start_symtab (objfile, filestring, (char *) NULL, file_start_addr);
+  start_symtab (objfile, filestring, (char *) NULL, file_start_addr,
+		language_unknown);
   record_debugformat (debugfmt);
   symnum = ((struct symloc *) pst->read_symtab_private)->first_symnum;
   max_symnum =
@@ -1137,7 +1138,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	    }
 
 	  start_stabs ();
-	  start_symtab (objfile, "_globals_", (char *) NULL, (CORE_ADDR) 0);
+	  start_symtab (objfile, "_globals_", (char *) NULL, (CORE_ADDR) 0,
+			language_unknown);
 	  record_debugformat (debugfmt);
 	  cur_src_end_addr = first_object_file_end;
 	  /* Done with all files, everything from here on is globals.  */
@@ -1227,7 +1229,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 			  /* Give all csects for this source file the same
 			     name.  */
 			  start_symtab (objfile, filestring, NULL,
-					(CORE_ADDR) 0);
+					(CORE_ADDR) 0, language_unknown);
 			  record_debugformat (debugfmt);
 			}
 
@@ -1347,7 +1349,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	    filestring = cs->c_name;
 
 	  start_stabs ();
-	  start_symtab (objfile, filestring, (char *) NULL, (CORE_ADDR) 0);
+	  start_symtab (objfile, filestring, (char *) NULL, (CORE_ADDR) 0,
+			language_unknown);
 	  record_debugformat (debugfmt);
 	  last_csect_name = 0;
 

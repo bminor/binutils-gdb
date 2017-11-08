@@ -277,6 +277,11 @@ extern const char *symbol_search_name (const struct general_symbol_info *);
 #define SYMBOL_MATCHES_SEARCH_NAME(symbol, name)			\
   (strcmp_iw (SYMBOL_SEARCH_NAME (symbol), (name)) == 0)
 
+/* Compute the hash of the given symbol search name of a symbol of
+   language LANGUAGE.  */
+extern unsigned int search_name_hash (enum language language,
+				      const char *search_name);
+
 /* Classification types for a minimal symbol.  These should be taken as
    "advisory only", since if gdb can't easily figure out a
    classification it simply selects mst_unknown.  It may also have to

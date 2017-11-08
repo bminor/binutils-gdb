@@ -165,6 +165,7 @@ struct dictionary_linear_expandable
 
 struct dictionary
 {
+  const struct language_defn *language;
   const struct dict_vector *vector;
   union
   {
@@ -179,6 +180,7 @@ struct dictionary
 /* Accessor macros.  */
 
 #define DICT_VECTOR(d)			(d)->vector
+#define DICT_LANGUAGE(d)                (d)->language
 
 /* These can be used for DICT_HASHED_EXPANDABLE, too.  */
 
@@ -244,8 +246,6 @@ static struct symbol *iter_match_first_hashed (const struct dictionary *dict,
 static struct symbol *iter_match_next_hashed (const char *name,
 					      symbol_compare_ftype *compare,
 					      struct dict_iterator *iterator);
-
-static unsigned int dict_hash (const char *string);
 
 /* Functions only for DICT_HASHED.  */
 
@@ -348,12 +348,11 @@ static void expand_hashtable (struct dictionary *dict);
 
 /* The creation functions.  */
 
-/* Create a dictionary implemented via a fixed-size hashtable.  All
-   memory it uses is allocated on OBSTACK; the environment is
-   initialized from SYMBOL_LIST.  */
+/* See dictionary.h.  */
 
 struct dictionary *
 dict_create_hashed (struct obstack *obstack,
+		    enum language language,
 		    const struct pending *symbol_list)
 {
   struct dictionary *retval;
@@ -363,6 +362,7 @@ dict_create_hashed (struct obstack *obstack,
 
   retval = XOBNEW (obstack, struct dictionary);
   DICT_VECTOR (retval) = &dict_hashed_vector;
+  DICT_LANGUAGE (retval) = language_def (language);
 
   /* Calculate the number of symbols, and allocate space for them.  */
   for (list_counter = symbol_list;
@@ -391,17 +391,15 @@ dict_create_hashed (struct obstack *obstack,
   return retval;
 }
 
-/* Create a dictionary implemented via a hashtable that grows as
-   necessary.  The dictionary is initially empty; to add symbols to
-   it, call dict_add_symbol().  Call dict_free() when you're done with
-   it.  */
+/* See dictionary.h.  */
 
 extern struct dictionary *
-dict_create_hashed_expandable (void)
+dict_create_hashed_expandable (enum language language)
 {
   struct dictionary *retval = XNEW (struct dictionary);
 
   DICT_VECTOR (retval) = &dict_hashed_expandable_vector;
+  DICT_LANGUAGE (retval) = language_def (language);
   DICT_HASHED_NBUCKETS (retval) = DICT_EXPANDABLE_INITIAL_CAPACITY;
   DICT_HASHED_BUCKETS (retval) = XCNEWVEC (struct symbol *,
 					   DICT_EXPANDABLE_INITIAL_CAPACITY);
@@ -410,13 +408,11 @@ dict_create_hashed_expandable (void)
   return retval;
 }
 
-/* Create a dictionary implemented via a fixed-size array.  All memory
-   it uses is allocated on OBSTACK; the environment is initialized
-   from the SYMBOL_LIST.  The symbols are ordered in the same order
-   that they're found in SYMBOL_LIST.  */
+/* See dictionary.h.  */
 
 struct dictionary *
 dict_create_linear (struct obstack *obstack,
+		    enum language language,
 		    const struct pending *symbol_list)
 {
   struct dictionary *retval;
@@ -426,6 +422,7 @@ dict_create_linear (struct obstack *obstack,
 
   retval = XOBNEW (obstack, struct dictionary);
   DICT_VECTOR (retval) = &dict_linear_vector;
+  DICT_LANGUAGE (retval) = language_def (language);
 
   /* Calculate the number of symbols, and allocate space for them.  */
   for (list_counter = symbol_list;
@@ -455,17 +452,15 @@ dict_create_linear (struct obstack *obstack,
   return retval;
 }
 
-/* Create a dictionary implemented via an array that grows as
-   necessary.  The dictionary is initially empty; to add symbols to
-   it, call dict_add_symbol().  Call dict_free() when you're done with
-   it.  */
+/* See dictionary.h.  */
 
 struct dictionary *
-dict_create_linear_expandable (void)
+dict_create_linear_expandable (enum language language)
 {
   struct dictionary *retval = XNEW (struct dictionary);
 
   DICT_VECTOR (retval) = &dict_linear_expandable_vector;
+  DICT_LANGUAGE (retval) = language_def (language);
   DICT_LINEAR_NSYMS (retval) = 0;
   DICT_LINEAR_EXPANDABLE_CAPACITY (retval) = DICT_EXPANDABLE_INITIAL_CAPACITY;
   DICT_LINEAR_SYMS (retval)
@@ -638,7 +633,9 @@ iter_match_first_hashed (const struct dictionary *dict, const char *name,
 			 symbol_compare_ftype *compare,
 			 struct dict_iterator *iterator)
 {
-  unsigned int hash_index = dict_hash (name) % DICT_HASHED_NBUCKETS (dict);
+  unsigned int hash_index
+    = (search_name_hash (DICT_LANGUAGE (dict)->la_language, name)
+       % DICT_HASHED_NBUCKETS (dict));
   struct symbol *sym;
 
   DICT_ITERATOR_DICT (iterator) = dict;
@@ -689,10 +686,15 @@ insert_symbol_hashed (struct dictionary *dict,
 		      struct symbol *sym)
 {
   unsigned int hash_index;
+  unsigned int hash;
   struct symbol **buckets = DICT_HASHED_BUCKETS (dict);
 
-  hash_index = 
-    dict_hash (SYMBOL_SEARCH_NAME (sym)) % DICT_HASHED_NBUCKETS (dict);
+  /* We don't want to insert a symbol into a dictionary of a different
+     language.  The two may not use the same hashing algorithm.  */
+  gdb_assert (SYMBOL_LANGUAGE (sym) == DICT_LANGUAGE (dict)->la_language);
+
+  hash = search_name_hash (SYMBOL_LANGUAGE (sym), SYMBOL_SEARCH_NAME (sym));
+  hash_index = hash % DICT_HASHED_NBUCKETS (dict);
   sym->hash_next = buckets[hash_index];
   buckets[hash_index] = sym;
 }
@@ -765,13 +767,10 @@ expand_hashtable (struct dictionary *dict)
   xfree (old_buckets);
 }
 
-/* Produce an unsigned hash value from STRING0 that is consistent
-   with strcmp_iw, strcmp, and, at least on Ada symbols, wild_match.
-   That is, two identifiers equivalent according to any of those three
-   comparison operators hash to the same value.  */
+/* See dictionary.h.  */
 
-static unsigned int
-dict_hash (const char *string0)
+unsigned int
+default_search_name_hash (const char *string0)
 {
   /* The Ada-encoded version of a name P1.P2...Pn has either the form
      P1__P2__...Pn<suffix> or _ada_P1__P2__...Pn<suffix> (where the Pi

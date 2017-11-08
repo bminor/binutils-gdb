@@ -35,42 +35,46 @@ struct dictionary;
 struct symbol;
 struct obstack;
 struct pending;
-
+struct language_defn;
 
 /* The creation functions for various implementations of
    dictionaries.  */
 
-/* Create a dictionary implemented via a fixed-size hashtable.  All
-   memory it uses is allocated on OBSTACK; the environment is
-   initialized from SYMBOL_LIST.  */
+/* Create a dictionary of symbols of language LANGUAGE implemented via
+   a fixed-size hashtable.  All memory it uses is allocated on
+   OBSTACK; the environment is initialized from SYMBOL_LIST.  */
 
 extern struct dictionary *dict_create_hashed (struct obstack *obstack,
+					      enum language language,
 					      const struct pending
 					      *symbol_list);
 
-/* Create a dictionary implemented via a hashtable that grows as
-   necessary.  The dictionary is initially empty; to add symbols to
-   it, call dict_add_symbol().  Call dict_free() when you're done with
-   it.  */
+/* Create a dictionary of symbols of language LANGUAGE, implemented
+   via a hashtable that grows as necessary.  The dictionary is
+   initially empty; to add symbols to it, call dict_add_symbol().
+   Call dict_free() when you're done with it.  */
 
-extern struct dictionary *dict_create_hashed_expandable (void);
+extern struct dictionary *
+  dict_create_hashed_expandable (enum language language);
 
-/* Create a dictionary implemented via a fixed-size array.  All memory
-   it uses is allocated on OBSTACK; the environment is initialized
-   from the SYMBOL_LIST.  The symbols are ordered in the same order
-   that they're found in SYMBOL_LIST.  */
+/* Create a dictionary of symbols of language LANGUAGE, implemented
+   via a fixed-size array.  All memory it uses is allocated on
+   OBSTACK; the environment is initialized from the SYMBOL_LIST.  The
+   symbols are ordered in the same order that they're found in
+   SYMBOL_LIST.  */
 
 extern struct dictionary *dict_create_linear (struct obstack *obstack,
+					      enum language language,
 					      const struct pending
 					      *symbol_list);
 
-/* Create a dictionary implemented via an array that grows as
-   necessary.  The dictionary is initially empty; to add symbols to
-   it, call dict_add_symbol().  Call dict_free() when you're done with
-   it.  */
+/* Create a dictionary of symbols of language LANGUAGE, implemented
+   via an array that grows as necessary.  The dictionary is initially
+   empty; to add symbols to it, call dict_add_symbol().  Call
+   dict_free() when you're done with it.  */
 
-extern struct dictionary *dict_create_linear_expandable (void);
-
+extern struct dictionary *
+  dict_create_linear_expandable (enum language language);
 
 /* The functions providing the interface to dictionaries.  Note that
    the most common parts of the interface, namely symbol lookup, are

@@ -54,7 +54,6 @@
 #include "cp-support.h"
 #include "psympriv.h"
 #include "block.h"
-
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not
 				   native, now.  */
@@ -92,6 +91,7 @@ struct symloc
     int symbol_offset;
     int string_offset;
     int file_string_offset;
+    enum language pst_language;
   };
 
 #define LDSYMOFF(p) (((struct symloc *)((p)->read_symtab_private))->ldsymoff)
@@ -101,6 +101,7 @@ struct symloc
 #define SYMBOL_OFFSET(p) (SYMLOC(p)->symbol_offset)
 #define STRING_OFFSET(p) (SYMLOC(p)->string_offset)
 #define FILE_STRING_OFFSET(p) (SYMLOC(p)->file_string_offset)
+#define PST_LANGUAGE(p) (SYMLOC(p)->pst_language)
 
 
 /* The objfile we are currently reading.  */
@@ -2013,6 +2014,7 @@ start_psymtab (struct objfile *objfile, const char *filename, CORE_ADDR textlow,
 
   /* Deduce the source language from the filename for this psymtab.  */
   psymtab_language = deduce_language_from_filename (filename);
+  PST_LANGUAGE (result) = psymtab_language;
 
   return result;
 }
@@ -2396,7 +2398,8 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		 positive offsets.  */
 	    nlist.n_value = (nlist.n_value ^ 0x80000000) - 0x80000000;
 	  process_one_symbol (type, nlist.n_desc, nlist.n_value,
-			      namestring, section_offsets, objfile);
+			      namestring, section_offsets, objfile,
+			      PST_LANGUAGE (pst));
 	}
       /* We skip checking for a new .o or -l file; that should never
          happen in this routine.  */
@@ -2491,12 +2494,14 @@ cp_set_block_scope (const struct symbol *symbol,
    the pst->section_offsets.  All symbols that refer to memory
    locations need to be offset by these amounts.
    OBJFILE is the object file from which we are reading symbols.  It
-   is used in end_symtab.  */
+   is used in end_symtab.
+   LANGUAGE is the language of the symtab.
+*/
 
 void
 process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		    const struct section_offsets *section_offsets,
-		    struct objfile *objfile)
+		    struct objfile *objfile, enum language language)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct context_stack *newobj;
@@ -2710,7 +2715,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
       function_start_offset = 0;
 
       start_stabs ();
-      start_symtab (objfile, name, NULL, valu);
+      start_symtab (objfile, name, NULL, valu, language);
       record_debugformat ("stabs");
       break;
 

@@ -13941,6 +13941,7 @@ extern const struct language_defn ada_language_defn = {
   c_watch_location_expression,
   ada_get_symbol_name_cmp,	/* la_get_symbol_name_cmp */
   ada_iterate_over_symbols,
+  default_search_name_hash,
   &ada_varobj_ops,
   NULL,
   NULL,

@@ -2252,6 +2252,7 @@ extern const struct language_defn rust_language_defn =
   rust_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,

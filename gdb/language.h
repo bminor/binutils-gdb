@@ -392,6 +392,11 @@ struct language_defn
       (const struct block *block, const char *name, domain_enum domain,
        gdb::function_view<symbol_found_callback_ftype> callback);
 
+    /* Hash the given symbol search name.  Use
+       default_search_name_hash if no special treatment is
+       required.  */
+    unsigned int (*la_search_name_hash) (const char *name);
+
     /* Various operations on varobj.  */
     const struct lang_varobj_ops *la_varobj_ops;
 
@@ -610,6 +615,14 @@ void default_print_typedef (struct type *type, struct symbol *new_symbol,
 
 void default_get_string (struct value *value, gdb_byte **buffer, int *length,
 			 struct type **char_type, const char **charset);
+
+/* Default name hashing function.  */
+
+/* Produce an unsigned hash value from SEARCH_NAME that is consistent
+   with strcmp_iw, strcmp, and, at least on Ada symbols, wild_match.
+   That is, two identifiers equivalent according to any of those three
+   comparison operators hash to the same value.  */
+extern unsigned int default_search_name_hash (const char *search_name);
 
 void c_get_string (struct value *value, gdb_byte **buffer, int *length,
 		   struct type **char_type, const char **charset);
