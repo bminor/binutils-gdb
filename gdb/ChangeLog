@@ -1,3 +1,7 @@
+2017-11-08  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (main): Don't initialize extra_chars.
+
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
 	* event-top.h (command_handler): Constify.
