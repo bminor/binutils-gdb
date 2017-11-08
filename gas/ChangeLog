@@ -1,6 +1,6 @@
 2017-11-08  Tamar Christina  <tamar.christina@arm.com>
 
-	* gas/config/tc-aarch64.c
+	* config/tc-aarch64.c
 	(aarch64_features): Include AES and SHA2 in CRYPTO.
 	Add SHA2 and AES.
 
