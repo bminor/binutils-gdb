@@ -1,3 +1,10 @@
+2017-11-08  Jiong Wang  <jiong.wang@arm.com>
+
+	* opcode/arm.h (ARM_AEXT2_V8_4A): Include Dot Product feature.
+	(ARM_EXT2_V8_4A): New macro.
+	(ARM_AEXT2_V8_4A): Likewise.
+	(ARM_ARCH_V8_4A): Likewise.
+
 2017-11-07  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* opcode/riscv-opc.h (sptbr): Rename to satp.

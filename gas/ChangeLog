@@ -1,3 +1,35 @@
+2017-11-08  Jiong Wang  <jiong.wang@arm.com>
+	    Tamar Christina <tamar.christina@arm.com>
+
+	* config/tc-arm.c (arm_extensions):
+	(arm_archs): New entry for "armv8.4-a".
+	Add FPU_ARCH_DOTPROD_NEON_VFP_ARMV8.
+	(arm_ext_v8_2): New variable.
+	(enum arm_reg_type): New enumeration REG_TYPE_NSD.
+	(reg_expected_msgs): New entry for REG_TYPE_NSD.
+	(parse_typed_reg_or_scalar): Handle REG_TYPE_NSD.
+	(parse_scalar): Support REG_TYPE_VFS.
+	(enum operand_parse_code): New enumerations OP_RNSD and OP_RNSD_RNSC.
+	(parse_operands): Handle OP_RNSD and OP_RNSD_RNSC.
+	(NEON_SHAPE_DEF): New entries for DHH and DHS.
+	(neon_scalar_for_fmac_fp16_long): New function to generate Rm encoding
+	for new FP16 instructions in ARMv8.2-A.
+	(do_neon_fmac_maybe_scalar_long): New function to encode new FP16
+	instructions in ARMv8.2-A.
+	(do_neon_vfmal): Wrapper function for vfmal.
+	(do_neon_vfmsl): Wrapper function for vfmsl.
+	(insns): New entries for vfmal and vfmsl.
+	* doc/c-arm.texi (-march): Document "armv8.4-a".
+	* testsuite/gas/arm/dotprod-mandatory.d: New test.
+	* testsuite/gas/arm/armv8_2-a-fp16.s: New test source.
+	* testsuite/gas/arm/armv8_2-a-fp16-illegal.s: New test source.
+	* testsuite/gas/arm/armv8_2-a-fp16.d: New test.
+	* testsuite/gas/arm/armv8_3-a-fp16.d: New test.
+	* testsuite/gas/arm/armv8_4-a-fp16.d: New test.
+	* testsuite/gas/arm/armv8_2-a-fp16-thumb2.d: New test.
+	* testsuite/gas/arm/armv8_2-a-fp16-illegal.d: New test.
+	* testsuite/gas/arm/armv8_2-a-fp16-illegal.l: New error file.
+
 2017-11-08  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-xtensa.c (finish_vinsn): Properly pluralize error message.

@@ -235,6 +235,8 @@ static const arm_feature_set arm_ext_ras =
 /* FP16 instructions.  */
 static const arm_feature_set arm_ext_fp16 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST);
+static const arm_feature_set arm_ext_v8_2 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A);
 static const arm_feature_set arm_ext_v8_3 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A);
 
@@ -579,6 +581,7 @@ enum arm_reg_type
   REG_TYPE_NQ,
   REG_TYPE_VFSD,
   REG_TYPE_NDQ,
+  REG_TYPE_NSD,
   REG_TYPE_NSDQ,
   REG_TYPE_VFC,
   REG_TYPE_MVF,
@@ -619,6 +622,7 @@ const char * const reg_expected_msgs[] =
   N_("Neon quad precision register expected"),
   N_("VFP single or double precision register expected"),
   N_("Neon double or quad precision register expected"),
+  N_("Neon single or double precision register expected"),
   N_("VFP single, double or Neon quad precision register expected"),
   N_("VFP system register expected"),
   N_("Maverick MVF register expected"),
@@ -1506,6 +1510,8 @@ parse_typed_reg_or_scalar (char **ccp, enum arm_reg_type type,
       || (type == REG_TYPE_NSDQ
 	  && (reg->type == REG_TYPE_VFS || reg->type == REG_TYPE_VFD
 	      || reg->type == REG_TYPE_NQ))
+      || (type == REG_TYPE_NSD
+	  && (reg->type == REG_TYPE_VFS || reg->type == REG_TYPE_VFD))
       || (type == REG_TYPE_MMXWC
 	  && (reg->type == REG_TYPE_MMXWCG)))
     type = (enum arm_reg_type) reg->type;
@@ -1529,7 +1535,9 @@ parse_typed_reg_or_scalar (char **ccp, enum arm_reg_type type,
 
   if (skip_past_char (&str, '[') == SUCCESS)
     {
-      if (type != REG_TYPE_VFD)
+      if (type != REG_TYPE_VFD
+	  && !(type == REG_TYPE_VFS
+	       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8_2)))
 	{
 	  first_error (_("only D registers may be indexed"));
 	  return FAIL;
@@ -1625,8 +1633,12 @@ parse_scalar (char **ccp, int elsize, struct neon_type_el *type)
   int reg;
   char *str = *ccp;
   struct neon_typed_alias atype;
+  enum arm_reg_type reg_type = REG_TYPE_VFD;
 
-  reg = parse_typed_reg_or_scalar (&str, REG_TYPE_VFD, NULL, &atype);
+  if (elsize == 4)
+    reg_type = REG_TYPE_VFS;
+
+  reg = parse_typed_reg_or_scalar (&str, reg_type, NULL, &atype);
 
   if (reg == FAIL || (atype.defined & NTA_HASINDEX) == 0)
     return FAIL;
@@ -6486,6 +6498,7 @@ enum operand_parse_code
   OP_RND,       /* Neon double precision register (0..31) */
   OP_RNQ,	/* Neon quad precision register */
   OP_RVSD,	/* VFP single or double precision register */
+  OP_RNSD,      /* Neon single or double precision register */
   OP_RNDQ,      /* Neon double or quad precision register */
   OP_RNSDQ,	/* Neon single, double or quad precision register */
   OP_RNSC,      /* Neon scalar D[X] */
@@ -6512,6 +6525,7 @@ enum operand_parse_code
   OP_RVSD_I0,	/* VFP S or D reg, or immediate zero.  */
   OP_RSVD_FI0, /* VFP S or D reg, or floating point immediate zero.  */
   OP_RR_RNSC,   /* ARM reg or Neon scalar.  */
+  OP_RNSD_RNSC, /* Neon S or D reg, or Neon scalar.  */
   OP_RNSDQ_RNSC, /* Vector S, D or Q reg, or Neon scalar.  */
   OP_RNDQ_RNSC, /* Neon D or Q reg, or Neon scalar.  */
   OP_RND_RNSC,  /* Neon D reg, or Neon scalar.  */
@@ -6773,6 +6787,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RXA:   po_reg_or_fail (REG_TYPE_XSCALE);  break;
 	case OP_oRNQ:
 	case OP_RNQ:   po_reg_or_fail (REG_TYPE_NQ);      break;
+	case OP_RNSD:  po_reg_or_fail (REG_TYPE_NSD);     break;
 	case OP_oRNDQ:
 	case OP_RNDQ:  po_reg_or_fail (REG_TYPE_NDQ);     break;
 	case OP_RVSD:  po_reg_or_fail (REG_TYPE_VFSD);    break;
@@ -6827,6 +6842,18 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	    break;
 	    try_nsdq:
 	    po_reg_or_fail (REG_TYPE_NSDQ);
+	  }
+	  break;
+
+	case OP_RNSD_RNSC:
+	  {
+	    po_scalar_or_goto (8, try_s_scalar);
+	    break;
+	    try_s_scalar:
+	    po_scalar_or_goto (4, try_nsd);
+	    break;
+	    try_nsd:
+	    po_reg_or_fail (REG_TYPE_NSD);
 	  }
 	  break;
 
@@ -13423,7 +13450,9 @@ NEON_ENC_TAB
   X (2, (H, I), HALF),			\
   X (3, (H, H, H), HALF),		\
   X (3, (H, F, I), MIXED),		\
-  X (3, (F, H, I), MIXED)
+  X (3, (F, H, I), MIXED),		\
+  X (3, (D, H, H), MIXED),		\
+  X (3, (D, H, S), MIXED)
 
 #define S2(A,B)		NS_##A##B
 #define S3(A,B,C)	NS_##A##B##C
@@ -16131,6 +16160,133 @@ static void
 do_neon_mac_maybe_scalar_long (void)
 {
   neon_mac_reg_scalar_long (N_S16 | N_S32 | N_U16 | N_U32, N_SU_32);
+}
+
+/* Like neon_scalar_for_mul, this function generate Rm encoding from GAS's
+   internal SCALAR.  QUAD_P is 1 if it's for Q format, otherwise it's 0.  */
+
+static unsigned
+neon_scalar_for_fmac_fp16_long (unsigned scalar, unsigned quad_p)
+{
+  unsigned regno = NEON_SCALAR_REG (scalar);
+  unsigned elno = NEON_SCALAR_INDEX (scalar);
+
+  if (quad_p)
+    {
+      if (regno > 7 || elno > 3)
+	goto bad_scalar;
+
+      return ((regno & 0x7)
+	      | ((elno & 0x1) << 3)
+	      | (((elno >> 1) & 0x1) << 5));
+    }
+  else
+    {
+      if (regno > 15 || elno > 1)
+	goto bad_scalar;
+
+      return (((regno & 0x1) << 5)
+	      | ((regno >> 1) & 0x7)
+	      | ((elno & 0x1) << 3));
+    }
+
+bad_scalar:
+  first_error (_("scalar out of range for multiply instruction"));
+  return 0;
+}
+
+static void
+do_neon_fmac_maybe_scalar_long (int subtype)
+{
+  enum neon_shape rs;
+  int high8;
+  /* NOTE: vfmal/vfmsl use slightly different NEON three-same encoding.  'size"
+     field (bits[21:20]) has different meaning.  For scalar index variant, it's
+     used to differentiate add and subtract, otherwise it's with fixed value
+     0x2.  */
+  int size = -1;
+
+  if (inst.cond != COND_ALWAYS)
+    as_warn (_("vfmal/vfmsl with FP16 type cannot be conditional, the "
+	       "behaviour is UNPREDICTABLE"));
+
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16),
+	      _(BAD_FP16));
+
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_armv8),
+	      _(BAD_FPU));
+
+  /* vfmal/vfmsl are in three-same D/Q register format or the third operand can
+     be a scalar index register.  */
+  if (inst.operands[2].isscalar)
+    {
+      high8 = 0xfe000000;
+      if (subtype)
+	size = 16;
+      rs = neon_select_shape (NS_DHS, NS_QDS, NS_NULL);
+    }
+  else
+    {
+      high8 = 0xfc000000;
+      size = 32;
+      if (subtype)
+	inst.instruction |= (0x1 << 23);
+      rs = neon_select_shape (NS_DHH, NS_QDD, NS_NULL);
+    }
+
+  neon_check_type (3, rs, N_EQK, N_EQK, N_KEY | N_F16);
+
+  /* "opcode" from template has included "ubit", so simply pass 0 here.  Also,
+     the "S" bit in size field has been reused to differentiate vfmal and vfmsl,
+     so we simply pass -1 as size.  */
+  unsigned quad_p = (rs == NS_QDD || rs == NS_QDS);
+  neon_three_same (quad_p, 0, size);
+
+  /* Undo neon_dp_fixup.  Redo the high eight bits.  */
+  inst.instruction &= 0x00ffffff;
+  inst.instruction |= high8;
+
+#define LOW1(R) ((R) & 0x1)
+#define HI4(R) (((R) >> 1) & 0xf)
+  /* Unlike usually NEON three-same, encoding for Vn and Vm will depend on
+     whether the instruction is in Q form and whether Vm is a scalar indexed
+     operand.  */
+  if (inst.operands[2].isscalar)
+    {
+      unsigned rm
+	= neon_scalar_for_fmac_fp16_long (inst.operands[2].reg, quad_p);
+      inst.instruction &= 0xffffffd0;
+      inst.instruction |= rm;
+
+      if (!quad_p)
+	{
+	  /* Redo Rn as well.  */
+	  inst.instruction &= 0xfff0ff7f;
+	  inst.instruction |= HI4 (inst.operands[1].reg) << 16;
+	  inst.instruction |= LOW1 (inst.operands[1].reg) << 7;
+	}
+    }
+  else if (!quad_p)
+    {
+      /* Redo Rn and Rm.  */
+      inst.instruction &= 0xfff0ff50;
+      inst.instruction |= HI4 (inst.operands[1].reg) << 16;
+      inst.instruction |= LOW1 (inst.operands[1].reg) << 7;
+      inst.instruction |= HI4 (inst.operands[2].reg);
+      inst.instruction |= LOW1 (inst.operands[2].reg) << 5;
+    }
+}
+
+static void
+do_neon_vfmal (void)
+{
+  return do_neon_fmac_maybe_scalar_long (0);
+}
+
+static void
+do_neon_vfmsl (void)
+{
+  return do_neon_fmac_maybe_scalar_long (1);
 }
 
 static void
@@ -20643,6 +20799,10 @@ static const struct asm_opcode insns[] =
     the upper 16 bits of a 32-bit vector register.  */
  NCE (vmovx,     eb00a40,       2, (RVS, RVS), neon_movhf),
  NCE (vins,      eb00ac0,       2, (RVS, RVS), neon_movhf),
+
+ /* New backported fma/fms instructions optional in v8.2.  */
+ NCE (vfmal, 810, 3, (RNDQ, RNSD, RNSD_RNSC), neon_vfmal),
+ NCE (vfmsl, 810, 3, (RNDQ, RNSD, RNSD_RNSC), neon_vfmsl),
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & fpu_neon_ext_v1
@@ -26038,6 +26198,7 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT ("armv8.2-a",	ARM_ARCH_V8_2A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8.3-a",	ARM_ARCH_V8_3A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8-r",	ARM_ARCH_V8R,	 FPU_ARCH_VFP),
+  ARM_ARCH_OPT ("armv8.4-a",	ARM_ARCH_V8_4A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("xscale",	ARM_ARCH_XSCALE, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt",	ARM_ARCH_IWMMXT, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt2",	ARM_ARCH_IWMMXT2,FPU_ARCH_VFP),
@@ -26736,6 +26897,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {16, ARM_ARCH_V8M_BASE},
     {17, ARM_ARCH_V8M_MAIN},
     {15, ARM_ARCH_V8R},
+    {16, ARM_ARCH_V8_4A},
     {-1, ARM_ARCH_NONE}
 };
 

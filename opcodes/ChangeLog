@@ -1,3 +1,9 @@
+2017-11-08  Jiong Wang  <jiong.wang@arm.com>
+	    Tamar Christina <tamar.christina@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): New entries for ARMv8.2-A new
+	FP16 instructions, including vfmal.f16 and vfmsl.f16.
+
 2017-11-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-nps400-tbl.h: Change incorrect use of NONE to MISC.
