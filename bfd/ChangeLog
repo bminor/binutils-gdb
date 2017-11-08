@@ -1,5 +1,11 @@
 2017-11-08  Djordje Todorovic  <djordje.todorovic@rt-rk.com>
 
+	* elf32-mips.c (elf32_mips_grok_psinfo): Extract core->pid.
+	* elf64-mips.c (elf64_mips_grok_psinfo): Likewise.
+	* elfn32-mips.c (elf32_mips_grok_psinfo): Likewise.
+
+2017-11-08  Djordje Todorovic  <djordje.todorovic@rt-rk.com>
+
 	* elf32-mips.c (elf32_mips_write_core_note): New function.
 	(elf_backend_write_core_note): New macro.
 	* elf64-mips.c (elf64_mips_write_core_note): New function.
