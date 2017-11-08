@@ -2373,6 +2373,45 @@ elf32_mips_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 
   return TRUE;
 }
+
+/* Write Linux core PRSTATUS note into core file.  */
+
+static char *
+elf32_mips_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
+			     ...)
+{
+  switch (note_type)
+    {
+    default:
+      return NULL;
+
+    case NT_PRPSINFO:
+      BFD_FAIL ();
+      return NULL;
+
+    case NT_PRSTATUS:
+      {
+	char data[256];
+	va_list ap;
+	long pid;
+	int cursig;
+	const void *greg;
+
+	va_start (ap, note_type);
+	memset (data, 0, 72);
+	pid = va_arg (ap, long);
+	bfd_put_32 (abfd, pid, data + 24);
+	cursig = va_arg (ap, int);
+	bfd_put_16 (abfd, cursig, data + 12);
+	greg = va_arg (ap, const void *);
+	memcpy (data + 72, greg, 180);
+	memset (data + 252, 0, 4);
+	va_end (ap);
+	return elfcore_write_note (abfd, buf, bufsiz,
+				   "CORE", note_type, data, sizeof (data));
+      }
+    }
+}
 
 /* Depending on the target vector we generate some version of Irix
    executables or "normal" MIPS ELF ABI executables.  */
@@ -2554,6 +2593,9 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define ELF_COMMONPAGESIZE		0x1000
 #define elf32_bed			elf32_tradbed
 
+#undef elf_backend_write_core_note
+#define elf_backend_write_core_note	elf32_mips_write_core_note
+
 /* Include the target file again for this target.  */
 #include "elf32-target.h"
 
@@ -2574,6 +2616,8 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 
 #undef	elf32_bed
 #define elf32_bed				elf32_fbsd_tradbed
+
+#undef elf_backend_write_core_note
 
 #include "elf32-target.h"
 /* Implement elf_backend_final_write_processing for VxWorks.  */
