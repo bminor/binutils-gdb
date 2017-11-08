@@ -4188,123 +4188,6 @@ gdb_index_symbol_name_matcher::matches (const char *symbol_name)
   return false;
 }
 
-static void
-dw2_expand_marked_cus
-  (mapped_index &index, offset_type idx,
-   struct objfile *objfile,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-   search_domain kind);
-
-static void
-dw2_expand_symtabs_matching_symbol
-  (mapped_index &index,
-   const lookup_name_info &lookup_name_in,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   enum search_domain kind,
-   gdb::function_view<void (offset_type)> on_match);
-
-static void
-dw2_expand_symtabs_matching
-  (struct objfile *objfile,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   const lookup_name_info &lookup_name,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-   enum search_domain kind)
-{
-  int i;
-  offset_type iter;
-
-  dw2_setup (objfile);
-
-  /* index_table is NULL if OBJF_READNOW.  */
-  if (!dwarf2_per_objfile->index_table)
-    return;
-
-  if (file_matcher != NULL)
-    {
-      htab_up visited_found (htab_create_alloc (10, htab_hash_pointer,
-						htab_eq_pointer,
-						NULL, xcalloc, xfree));
-      htab_up visited_not_found (htab_create_alloc (10, htab_hash_pointer,
-						    htab_eq_pointer,
-						    NULL, xcalloc, xfree));
-
-      /* The rule is CUs specify all the files, including those used by
-	 any TU, so there's no need to scan TUs here.  */
-
-      for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
-	{
-	  int j;
-	  struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
-	  struct quick_file_names *file_data;
-	  void **slot;
-
-	  QUIT;
-
-	  per_cu->v.quick->mark = 0;
-
-	  /* We only need to look at symtabs not already expanded.  */
-	  if (per_cu->v.quick->compunit_symtab)
-	    continue;
-
-	  file_data = dw2_get_file_names (per_cu);
-	  if (file_data == NULL)
-	    continue;
-
-	  if (htab_find (visited_not_found.get (), file_data) != NULL)
-	    continue;
-	  else if (htab_find (visited_found.get (), file_data) != NULL)
-	    {
-	      per_cu->v.quick->mark = 1;
-	      continue;
-	    }
-
-	  for (j = 0; j < file_data->num_file_names; ++j)
-	    {
-	      const char *this_real_name;
-
-	      if (file_matcher (file_data->file_names[j], false))
-		{
-		  per_cu->v.quick->mark = 1;
-		  break;
-		}
-
-	      /* Before we invoke realpath, which can get expensive when many
-		 files are involved, do a quick comparison of the basenames.  */
-	      if (!basenames_may_differ
-		  && !file_matcher (lbasename (file_data->file_names[j]),
-				    true))
-		continue;
-
-	      this_real_name = dw2_get_real_path (objfile, file_data, j);
-	      if (file_matcher (this_real_name, false))
-		{
-		  per_cu->v.quick->mark = 1;
-		  break;
-		}
-	    }
-
-	  slot = htab_find_slot (per_cu->v.quick->mark
-				 ? visited_found.get ()
-				 : visited_not_found.get (),
-				 file_data, INSERT);
-	  *slot = file_data;
-	}
-    }
-
-  mapped_index &index = *dwarf2_per_objfile->index_table;
-
-  dw2_expand_symtabs_matching_symbol (index, lookup_name,
-				      symbol_matcher,
-				      kind, [&] (offset_type idx)
-    {
-      dw2_expand_marked_cus (index, idx, objfile, file_matcher,
-			     expansion_notify, kind);
-    });
-}
-
 /* Helper for dw2_expand_symtabs_matching that works with a
    mapped_index instead of the containing objfile.  This is split to a
    separate function in order to be able to unit test the
@@ -4498,83 +4381,182 @@ dw2_expand_marked_cus
   offset_type *vec, vec_len, vec_idx;
   bool global_seen = false;
 
-      vec = (offset_type *) (index.constant_pool
-			     + MAYBE_SWAP (index.symbol_table[idx + 1]));
-      vec_len = MAYBE_SWAP (vec[0]);
-      for (vec_idx = 0; vec_idx < vec_len; ++vec_idx)
+  vec = (offset_type *) (index.constant_pool
+			 + MAYBE_SWAP (index.symbol_table[idx + 1]));
+  vec_len = MAYBE_SWAP (vec[0]);
+  for (vec_idx = 0; vec_idx < vec_len; ++vec_idx)
+    {
+      struct dwarf2_per_cu_data *per_cu;
+      offset_type cu_index_and_attrs = MAYBE_SWAP (vec[vec_idx + 1]);
+      /* This value is only valid for index versions >= 7.  */
+      int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
+      gdb_index_symbol_kind symbol_kind =
+	GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
+      int cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
+      /* Only check the symbol attributes if they're present.
+	 Indices prior to version 7 don't record them,
+	 and indices >= 7 may elide them for certain symbols
+	 (gold does this).  */
+      int attrs_valid =
+	(index.version >= 7
+	 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
+
+      /* Work around gold/15646.  */
+      if (attrs_valid)
 	{
-	  struct dwarf2_per_cu_data *per_cu;
-	  offset_type cu_index_and_attrs = MAYBE_SWAP (vec[vec_idx + 1]);
-	  /* This value is only valid for index versions >= 7.  */
-	  int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
-	  gdb_index_symbol_kind symbol_kind =
-	    GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
-	  int cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
-	  /* Only check the symbol attributes if they're present.
-	     Indices prior to version 7 don't record them,
-	     and indices >= 7 may elide them for certain symbols
-	     (gold does this).  */
-	  int attrs_valid =
-	    (index.version >= 7
-	     && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
+	  if (!is_static && global_seen)
+	    continue;
+	  if (!is_static)
+	    global_seen = true;
+	}
 
-	  /* Work around gold/15646.  */
-	  if (attrs_valid)
+      /* Only check the symbol's kind if it has one.  */
+      if (attrs_valid)
+	{
+	  switch (kind)
 	    {
-	      if (!is_static && global_seen)
+	    case VARIABLES_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_VARIABLE)
 		continue;
-	      if (!is_static)
-		global_seen = true;
+	      break;
+	    case FUNCTIONS_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_FUNCTION)
+		continue;
+	      break;
+	    case TYPES_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
+		continue;
+	      break;
+	    default:
+	      break;
 	    }
+	}
 
-	  /* Only check the symbol's kind if it has one.  */
-	  if (attrs_valid)
-	    {
-	      switch (kind)
-		{
-		case VARIABLES_DOMAIN:
-		  if (symbol_kind != GDB_INDEX_SYMBOL_KIND_VARIABLE)
-		    continue;
-		  break;
-		case FUNCTIONS_DOMAIN:
-		  if (symbol_kind != GDB_INDEX_SYMBOL_KIND_FUNCTION)
-		    continue;
-		  break;
-		case TYPES_DOMAIN:
-		  if (symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
-		    continue;
-		  break;
-		default:
-		  break;
-		}
-	    }
+      /* Don't crash on bad data.  */
+      if (cu_index >= (dwarf2_per_objfile->n_comp_units
+		       + dwarf2_per_objfile->n_type_units))
+	{
+	  complaint (&symfile_complaints,
+		     _(".gdb_index entry has bad CU index"
+		       " [in module %s]"), objfile_name (objfile));
+	  continue;
+	}
 
-	  /* Don't crash on bad data.  */
-	  if (cu_index >= (dwarf2_per_objfile->n_comp_units
-			   + dwarf2_per_objfile->n_type_units))
+      per_cu = dw2_get_cutu (cu_index);
+      if (file_matcher == NULL || per_cu->v.quick->mark)
+	{
+	  int symtab_was_null =
+	    (per_cu->v.quick->compunit_symtab == NULL);
+
+	  dw2_instantiate_symtab (per_cu);
+
+	  if (expansion_notify != NULL
+	      && symtab_was_null
+	      && per_cu->v.quick->compunit_symtab != NULL)
+	    expansion_notify (per_cu->v.quick->compunit_symtab);
+	}
+    }
+}
+
+static void
+dw2_expand_symtabs_matching
+  (struct objfile *objfile,
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   const lookup_name_info &lookup_name,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   enum search_domain kind)
+{
+  int i;
+  offset_type iter;
+
+  dw2_setup (objfile);
+
+  /* index_table is NULL if OBJF_READNOW.  */
+  if (!dwarf2_per_objfile->index_table)
+    return;
+
+  if (file_matcher != NULL)
+    {
+      htab_up visited_found (htab_create_alloc (10, htab_hash_pointer,
+						htab_eq_pointer,
+						NULL, xcalloc, xfree));
+      htab_up visited_not_found (htab_create_alloc (10, htab_hash_pointer,
+						    htab_eq_pointer,
+						    NULL, xcalloc, xfree));
+
+      /* The rule is CUs specify all the files, including those used by
+	 any TU, so there's no need to scan TUs here.  */
+
+      for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+	{
+	  int j;
+	  struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+	  struct quick_file_names *file_data;
+	  void **slot;
+
+	  QUIT;
+
+	  per_cu->v.quick->mark = 0;
+
+	  /* We only need to look at symtabs not already expanded.  */
+	  if (per_cu->v.quick->compunit_symtab)
+	    continue;
+
+	  file_data = dw2_get_file_names (per_cu);
+	  if (file_data == NULL)
+	    continue;
+
+	  if (htab_find (visited_not_found.get (), file_data) != NULL)
+	    continue;
+	  else if (htab_find (visited_found.get (), file_data) != NULL)
 	    {
-	      complaint (&symfile_complaints,
-			 _(".gdb_index entry has bad CU index"
-			   " [in module %s]"), objfile_name (objfile));
+	      per_cu->v.quick->mark = 1;
 	      continue;
 	    }
 
-	  per_cu = dw2_get_cutu (cu_index);
-	  if (file_matcher == NULL || per_cu->v.quick->mark)
+	  for (j = 0; j < file_data->num_file_names; ++j)
 	    {
-	      int symtab_was_null =
-		(per_cu->v.quick->compunit_symtab == NULL);
+	      const char *this_real_name;
 
-	      dw2_instantiate_symtab (per_cu);
-
-	      if (expansion_notify != NULL
-		  && symtab_was_null
-		  && per_cu->v.quick->compunit_symtab != NULL)
+	      if (file_matcher (file_data->file_names[j], false))
 		{
-		  expansion_notify (per_cu->v.quick->compunit_symtab);
+		  per_cu->v.quick->mark = 1;
+		  break;
+		}
+
+	      /* Before we invoke realpath, which can get expensive when many
+		 files are involved, do a quick comparison of the basenames.  */
+	      if (!basenames_may_differ
+		  && !file_matcher (lbasename (file_data->file_names[j]),
+				    true))
+		continue;
+
+	      this_real_name = dw2_get_real_path (objfile, file_data, j);
+	      if (file_matcher (this_real_name, false))
+		{
+		  per_cu->v.quick->mark = 1;
+		  break;
 		}
 	    }
+
+	  slot = htab_find_slot (per_cu->v.quick->mark
+				 ? visited_found.get ()
+				 : visited_not_found.get (),
+				 file_data, INSERT);
+	  *slot = file_data;
 	}
+    }
+
+  mapped_index &index = *dwarf2_per_objfile->index_table;
+
+  dw2_expand_symtabs_matching_symbol (index, lookup_name,
+				      symbol_matcher,
+				      kind, [&] (offset_type idx)
+    {
+      dw2_expand_marked_cus (index, idx, objfile, file_matcher,
+			     expansion_notify, kind);
+    });
 }
 
 /* A helper for dw2_find_pc_sect_compunit_symtab which finds the most specific
