@@ -1,3 +1,8 @@
+2017-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* opcode/aarch64.h (aarch64_feature_set): Change type to unsigned
+	long long.
+
 2017-11-08  Tamar Christina  <tamar.christina@arm.com>
 
 	* opcode/aarch64.h:

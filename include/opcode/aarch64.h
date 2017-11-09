@@ -82,7 +82,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */
 
 /* CPU-specific features.  */
-typedef unsigned long aarch64_feature_set;
+typedef unsigned long long aarch64_feature_set;
 
 #define AARCH64_CPU_HAS_ALL_FEATURES(CPU,FEAT)	\
   ((~(CPU) & (FEAT)) == 0)
