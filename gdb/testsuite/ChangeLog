@@ -1,5 +1,12 @@
 2017-11-09  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/completion.exp (ignore_and_resync, test_tab_complete):
+	New procedures, factored out from ...
+	(top level): ... here, and adjusted to avoid expecting beyond the
+	prompt in one go.
+
+2017-11-09  Pedro Alves  <palves@redhat.com>
+
 	* gdb.asm/asm-source.exp ("kill" test): Match the whole query
 	output.  Fix '?' match.
 
