@@ -1,3 +1,8 @@
+2017-11-06  Tamar Christina  <tamar.christina@arm.com>
+
+	* gas/testsuite/gas/aarch64/dotproduct_armv8_4.s: New.
+	* gas/testsuite/gas/aarch64/dotproduct_armv8_4.d: New.
+
 2017-11-09  Tamar Christina  <tamar.christina@arm.com>
 
 	* gas/testsuite/gas/aarch64/armv8_4-a-registers-illegal.d: New.
