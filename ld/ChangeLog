@@ -1,3 +1,8 @@
+2017-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_get_script): Reformat
+	to generate consistent codes.
+
 2017-11-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-aarch64/ifunc-13.d,

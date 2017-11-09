@@ -2379,18 +2379,21 @@ sed $sc ldscripts/${EMULATION_NAME}.xd			>> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
-echo '  ; else if (bfd_link_dll (&link_info) && link_info.combreloc' >> e${EMULATION_NAME}.c
-echo '             && link_info.relro' >> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
+echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
+echo '             && link_info.relro'			>> e${EMULATION_NAME}.c
 echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xsw			>> e${EMULATION_NAME}.c
-echo '  ; else if (bfd_link_dll (&link_info) && link_info.combreloc) return' >> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
+echo '             && link_info.combreloc) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xsc			>> e${EMULATION_NAME}.c
 fi
 echo '  ; else if (bfd_link_dll (&link_info)) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xs			>> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
-echo '  ; else if (link_info.combreloc && link_info.relro' >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.combreloc'			>> e${EMULATION_NAME}.c
+echo '             && link_info.relro'			>> e${EMULATION_NAME}.c
 echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xw			>> e${EMULATION_NAME}.c
 echo '  ; else if (link_info.combreloc) return'		>> e${EMULATION_NAME}.c
