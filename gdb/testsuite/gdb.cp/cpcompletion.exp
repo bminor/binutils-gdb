@@ -26,7 +26,7 @@ proc test_class_complete {class expr name matches} {
     gdb_test_multiple $cmd $name {
 	"break ${class}::main" { fail "$name (saw global symbol)" }
 	$cmd { exp_continue }
-	-re "break ${class}::\[A-Za-z0-9_~\]+" {
+	-re "break ${class}::\[^\r\n\]*\r\n" {
 	    set str $expect_out(0,string)
 	    scan $str "break ${class}::%\[^(\]" method
 	    lappend seen $method
