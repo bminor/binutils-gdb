@@ -1,5 +1,12 @@
 2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* config/tc-xtensa.c (xg_append_jump): New function.
+	(xg_relax_trampoline, init_trampoline_frag)
+	(add_jump_to_trampoline): Replace trampoline jump assembling
+	code with a call to xg_append_jump.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* config/tc-xtensa.c (xg_relax_trampoline): New function.
 	(xtensa_relax_frag): Replace trampoline relaxation code with a
 	call to xg_relax_trampoline.
