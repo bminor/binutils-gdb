@@ -1,5 +1,12 @@
 2017-11-09  Pedro Alves  <palves@redhat.com>
 
+	* gdb.tui/tui-completion.exp (test_tab_completion): New procedure,
+	factored out from ...
+	(top level): ... here, and adjusted to avoid expecting beyond the
+	prompt in a single gdb_test_multiple.
+
+2017-11-09  Pedro Alves  <palves@redhat.com>
+
 	* gdb.multi/multi-attach.exp ("kill" test): Match the whole query
 	output.
 	* gdb.server/ext-attach.exp ("kill" test): Likewise.
