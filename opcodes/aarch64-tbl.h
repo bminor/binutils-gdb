@@ -1995,6 +1995,96 @@
   QLF3(V_2S, V_8B,  S_B),\
   QLF3(V_4S, V_16B, S_B),\
 }
+
+/* e.g. SHA512H <Qd>, <Qn>, <Vm>.2D.  */
+#define QL_SHA512UPT			\
+{				\
+  QLF3(S_Q, S_Q, V_2D),		\
+}
+
+/* e.g. SHA512SU0 <Vd.2D>, <Vn>.2D.  */
+#define QL_V2SAME2D		\
+{				\
+  QLF2(V_2D, V_2D),		\
+}
+
+/* e.g. SHA512SU1 <Vd>.2D, <Vn>.2D, <Vm>.2D>.  */
+#define QL_V3SAME2D		\
+{				\
+  QLF3(V_2D, V_2D, V_2D),	\
+}
+
+/* e.g. EOR3 <Vd>.16B, <Vn>.16B, <Vm>.16B, <Va>.16B.  */
+#define QL_V4SAME16B			\
+{					\
+  QLF4(V_16B, V_16B, V_16B, V_16B),	\
+}
+
+/* e.g. SM3SS1 <Vd>.4S, <Vn>.4S, <Vm>.4S, <Va>.4S.  */
+#define QL_V4SAME4S			\
+{					\
+  QLF4(V_4S, V_4S, V_4S, V_4S),		\
+}
+
+/* e.g. XAR <Vd>.2D, <Vn>.2D, <Vm>.2D, #<imm6>.  */
+#define QL_XAR			\
+{				\
+  QLF4(V_2D, V_2D, V_2D, imm_0_63),	\
+}
+
+/* e.g. SM3TT1A <Vd>.4S, <Vn>.4S, <Vm>.S[<imm2>].  */
+#define QL_SM3TT	\
+{			\
+  QLF3(V_4S, V_4S, S_S),\
+}
+
+/* e.g. FMLAL  <Vd>.2S, <Vn>.2H, <Vm>.2H.  */
+#define QL_V3FML2S \
+{		   \
+  QLF3(V_2S, V_2H, V_2H),\
+}
+
+/* e.g. FMLAL  <Vd>.4S, <Vn>.4H, <Vm>.4H.  */
+#define QL_V3FML4S \
+{		   \
+  QLF3(V_4S, V_4H, V_4H),\
+}
+
+/* e.g. FMLAL  <Vd>.2S, <Vn>.2H, <Vm>.H[<index>].  */
+#define QL_V2FML2S \
+{		   \
+  QLF3(V_2S, V_2H, S_H),\
+}
+
+/* e.g. FMLAL  <Vd>.4S, <Vn>.4H, <Vm>.H[<index>].  */
+#define QL_V2FML4S \
+{		   \
+  QLF3(V_4S, V_4H, S_H),\
+}
+
+/* e.g. RMIF <Xn>, #<shift>, #<mask>.  */
+#define QL_RMIF  \
+{		  \
+  QLF3(X, imm_0_63, imm_0_15),\
+}
+
+/* e.g. SETF8 <Wn>.  */
+#define QL_SETF \
+{		\
+  QLF1(W),	\
+}
+
+/* e.g. STLURB <Wt>, [<Xn|SP>{,#<simm>}].  */
+#define QL_STLW \
+{		\
+  QLF2(W, NIL),	\
+}
+
+/* e.g. STLURB <Xt>, [<Xn|SP>{,#<simm>}].  */
+#define QL_STLX \
+{		\
+  QLF2(X, NIL),	\
+}
 
 /* Opcode table.  */
 

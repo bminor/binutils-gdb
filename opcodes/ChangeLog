@@ -1,5 +1,12 @@
 2017-11-09  Tamar Christina  <tamar.christina@arm.com>
 
+	* aarch64-tbl.h (QL_SHA512UPT, QL_V2SAME2D, QL_V3SAME2D): New.
+	(QL_V4SAME16B, QL_V4SAME4S, QL_XAR, QL_SM3TT, QL_V3FML2S): New.
+	(QL_V3FML4S, QL_V2FML2S, QL_V2FML4S, QL_RMIF, QL_SETF): New.
+	(QL_STLW, QL_STLX): New.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
 	* aarch64-asm.h (ins_addr_offset): New.
 	* aarch64-asm.c (aarch64_ins_reglane): Add cryptosm3.
 	(aarch64_ins_addr_offset): New.
