@@ -435,7 +435,7 @@ gdb_test "next" "$line_foo2_leave\[ \t\]+gdbasm_leave" "next over foo3"
 # Like "finish", "return" command also can return to the caller
 # line again or the statement after, depending on the architecture.
 gdb_test_multiple "return" "return from foo2" {
-    -re "Make (foo2|selected stack frame) return now\?.*" {
+    -re "Make (foo2|selected stack frame) return now\\? .y or n. " {
         send_gdb "y\n"
         exp_continue
     }
