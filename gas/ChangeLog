@@ -1,3 +1,7 @@
+2017-11-09  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/gas/elf/dwarf2-10.l: Accept optional line number in error.
+
 2017-11-06  Tamar Christina  <tamar.christina@arm.com>
 
 	* gas/testsuite/gas/aarch64/dotproduct_armv8_4.s: New.
