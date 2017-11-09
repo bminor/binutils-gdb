@@ -1,3 +1,11 @@
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* gas/testsuite/gas/aarch64/armv8_4-a-registers-illegal.d: New.
+	* gas/testsuite/gas/aarch64/armv8_4-a-registers-illegal.l: New.
+	* gas/testsuite/gas/aarch64/armv8_4-a-registers-illegal.s: New.
+	* gas/testsuite/gas/aarch64/armv8_4-a-registers.d: New.
+	* gas/testsuite/gas/aarch64/armv8_4-a-registers.s: New.
+
 2017-11-09 Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-aarch64.c (process_omitted_operand):

@@ -2465,7 +2465,8 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	     MSR PAN, #uimm4
 	     The immediate must be #0 or #1.  */
 	  if ((opnd->pstatefield == 0x03	/* UAO.  */
-	       || opnd->pstatefield == 0x04)	/* PAN.  */
+	       || opnd->pstatefield == 0x04	/* PAN.  */
+	       || opnd->pstatefield == 0x1a)	/* DIT.  */
 	      && opnds[1].imm.value > 1)
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 0, 1);
@@ -4031,6 +4032,18 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "pmevtyper29_el0",   CPENC(3,3,C14,C15,5),	0 },
   { "pmevtyper30_el0",   CPENC(3,3,C14,C15,6),	0 },
   { "pmccfiltr_el0",     CPENC(3,3,C14,C15,7),	0 },
+
+  { "dit",		 CPEN_ (3, C2, 5), F_ARCHEXT },
+  { "vstcr_el2",	 CPENC(3, 4, C2, C6, 2), F_ARCHEXT },
+  { "vsttbr_el2",	 CPENC(3, 4, C2, C6, 0), F_ARCHEXT },
+  { "cnthvs_tval_el2",	 CPENC(3, 4, C14, C4, 0), F_ARCHEXT },
+  { "cnthvs_cval_el2",	 CPENC(3, 4, C14, C4, 2), F_ARCHEXT },
+  { "cnthvs_ctl_el2",	 CPENC(3, 4, C14, C4, 1), F_ARCHEXT },
+  { "cnthps_tval_el2",	 CPENC(3, 4, C14, C5, 0), F_ARCHEXT },
+  { "cnthps_cval_el2",	 CPENC(3, 4, C14, C5, 2), F_ARCHEXT },
+  { "cnthps_ctl_el2",	 CPENC(3, 4, C14, C5, 1), F_ARCHEXT },
+  { "sder32_el2",	 CPENC(3, 4, C1, C3, 1), F_ARCHEXT },
+  { "vncr_el2",		 CPENC(3, 4, C2, C2, 0), F_ARCHEXT },
   { 0,          CPENC(0,0,0,0,0),	0 },
 };
 
@@ -4168,9 +4181,87 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_SVE))
     return FALSE;
 
+  /* ARMv8.4 features.  */
+
+  /* PSTATE.DIT.  */
+  if (reg->value == CPEN_ (3, C2, 5)
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_4))
+    return FALSE;
+
+  /* Virtualization extensions.  */
+  if ((reg->value == CPENC(3, 4, C2, C6, 2)
+       || reg->value == CPENC(3, 4, C2, C6, 0)
+       || reg->value == CPENC(3, 4, C14, C4, 0)
+       || reg->value == CPENC(3, 4, C14, C4, 2)
+       || reg->value == CPENC(3, 4, C14, C4, 1)
+       || reg->value == CPENC(3, 4, C14, C5, 0)
+       || reg->value == CPENC(3, 4, C14, C5, 2)
+       || reg->value == CPENC(3, 4, C14, C5, 1)
+       || reg->value == CPENC(3, 4, C1, C3, 1)
+       || reg->value == CPENC(3, 4, C2, C2, 0))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_4))
+    return FALSE;
+
+  /* ARMv8.4 TLB instructions.  */
+  if ((reg->value == CPENS (0, C8, C1, 0)
+       || reg->value == CPENS (0, C8, C1, 1)
+       || reg->value == CPENS (0, C8, C1, 2)
+       || reg->value == CPENS (0, C8, C1, 3)
+       || reg->value == CPENS (0, C8, C1, 5)
+       || reg->value == CPENS (0, C8, C1, 7)
+       || reg->value == CPENS (4, C8, C4, 0)
+       || reg->value == CPENS (4, C8, C4, 4)
+       || reg->value == CPENS (4, C8, C1, 1)
+       || reg->value == CPENS (4, C8, C1, 5)
+       || reg->value == CPENS (4, C8, C1, 6)
+       || reg->value == CPENS (6, C8, C1, 1)
+       || reg->value == CPENS (6, C8, C1, 5)
+       || reg->value == CPENS (4, C8, C1, 0)
+       || reg->value == CPENS (4, C8, C1, 4)
+       || reg->value == CPENS (6, C8, C1, 0)
+       || reg->value == CPENS (0, C8, C6, 1)
+       || reg->value == CPENS (0, C8, C6, 3)
+       || reg->value == CPENS (0, C8, C6, 5)
+       || reg->value == CPENS (0, C8, C6, 7)
+       || reg->value == CPENS (0, C8, C2, 1)
+       || reg->value == CPENS (0, C8, C2, 3)
+       || reg->value == CPENS (0, C8, C2, 5)
+       || reg->value == CPENS (0, C8, C2, 7)
+       || reg->value == CPENS (0, C8, C5, 1)
+       || reg->value == CPENS (0, C8, C5, 3)
+       || reg->value == CPENS (0, C8, C5, 5)
+       || reg->value == CPENS (0, C8, C5, 7)
+       || reg->value == CPENS (4, C8, C0, 2)
+       || reg->value == CPENS (4, C8, C0, 6)
+       || reg->value == CPENS (4, C8, C4, 2)
+       || reg->value == CPENS (4, C8, C4, 6)
+       || reg->value == CPENS (4, C8, C4, 3)
+       || reg->value == CPENS (4, C8, C4, 7)
+       || reg->value == CPENS (4, C8, C6, 1)
+       || reg->value == CPENS (4, C8, C6, 5)
+       || reg->value == CPENS (4, C8, C2, 1)
+       || reg->value == CPENS (4, C8, C2, 5)
+       || reg->value == CPENS (4, C8, C5, 1)
+       || reg->value == CPENS (4, C8, C5, 5)
+       || reg->value == CPENS (6, C8, C6, 1)
+       || reg->value == CPENS (6, C8, C6, 5)
+       || reg->value == CPENS (6, C8, C2, 1)
+       || reg->value == CPENS (6, C8, C2, 5)
+       || reg->value == CPENS (6, C8, C5, 1)
+       || reg->value == CPENS (6, C8, C5, 5))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_4))
+    return FALSE;
+
   return TRUE;
 }
 
+/* The CPENC below is fairly misleading, the fields
+   here are not in CPENC form. They are in op2op1 form. The fields are encoded
+   by ins_pstatefield, which just shifts the value by the width of the fields
+   in a loop. So if you CPENC them only the first value will be set, the rest
+   are masked out to 0. As an example. op2 = 3, op1=2. CPENC would produce a
+   value of 0b110000000001000000 (0x30040) while what you want is
+   0b011010 (0x1a).  */
 const aarch64_sys_reg aarch64_pstatefields [] =
 {
   { "spsel",            0x05,	0 },
@@ -4178,6 +4269,7 @@ const aarch64_sys_reg aarch64_pstatefields [] =
   { "daifclr",          0x1f,	0 },
   { "pan",		0x04,	F_ARCHEXT },
   { "uao",		0x03,	F_ARCHEXT },
+  { "dit",		0x1a,	F_ARCHEXT },
   { 0,          CPENC(0,0,0,0,0), 0 },
 };
 
@@ -4196,6 +4288,11 @@ aarch64_pstatefield_supported_p (const aarch64_feature_set features,
   /* UAO.  Values are from aarch64_pstatefields.  */
   if (reg->value == 0x03
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
+    return FALSE;
+
+  /* DIT.  Values are from aarch64_pstatefields.  */
+  if (reg->value == 0x1a
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_4))
     return FALSE;
 
   return TRUE;
@@ -4276,6 +4373,55 @@ const aarch64_sys_ins_reg aarch64_sys_regs_tlbi[] =
     { "vale2",     CPENS (4, C8, C7, 5), F_HASXT },
     { "vale3",     CPENS (6, C8, C7, 5), F_HASXT },
     { "vaale1",    CPENS (0, C8, C7, 7), F_HASXT },
+
+    { "vmalle1os",    CPENS (0, C8, C1, 0), F_ARCHEXT },
+    { "vae1os",       CPENS (0, C8, C1, 1), F_HASXT | F_ARCHEXT },
+    { "aside1os",     CPENS (0, C8, C1, 2), F_HASXT | F_ARCHEXT },
+    { "vaae1os",      CPENS (0, C8, C1, 3), F_HASXT | F_ARCHEXT },
+    { "vale1os",      CPENS (0, C8, C1, 5), F_HASXT | F_ARCHEXT },
+    { "vaale1os",     CPENS (0, C8, C1, 7), F_HASXT | F_ARCHEXT },
+    { "ipas2e1os",    CPENS (4, C8, C4, 0), F_HASXT | F_ARCHEXT },
+    { "ipas2le1os",   CPENS (4, C8, C4, 4), F_HASXT | F_ARCHEXT },
+    { "vae2os",       CPENS (4, C8, C1, 1), F_HASXT | F_ARCHEXT },
+    { "vale2os",      CPENS (4, C8, C1, 5), F_HASXT | F_ARCHEXT },
+    { "vmalls12e1os", CPENS (4, C8, C1, 6), F_ARCHEXT },
+    { "vae3os",       CPENS (6, C8, C1, 1), F_HASXT | F_ARCHEXT },
+    { "vale3os",      CPENS (6, C8, C1, 5), F_HASXT | F_ARCHEXT },
+    { "alle2os",      CPENS (4, C8, C1, 0), F_ARCHEXT },
+    { "alle1os",      CPENS (4, C8, C1, 4), F_ARCHEXT },
+    { "alle3os",      CPENS (6, C8, C1, 0), F_ARCHEXT },
+
+    { "rvae1",      CPENS (0, C8, C6, 1), F_HASXT | F_ARCHEXT },
+    { "rvaae1",     CPENS (0, C8, C6, 3), F_HASXT | F_ARCHEXT },
+    { "rvale1",     CPENS (0, C8, C6, 5), F_HASXT | F_ARCHEXT },
+    { "rvaale1",    CPENS (0, C8, C6, 7), F_HASXT | F_ARCHEXT },
+    { "rvae1is",    CPENS (0, C8, C2, 1), F_HASXT | F_ARCHEXT },
+    { "rvaae1is",   CPENS (0, C8, C2, 3), F_HASXT | F_ARCHEXT },
+    { "rvale1is",   CPENS (0, C8, C2, 5), F_HASXT | F_ARCHEXT },
+    { "rvaale1is",  CPENS (0, C8, C2, 7), F_HASXT | F_ARCHEXT },
+    { "rvae1os",    CPENS (0, C8, C5, 1), F_HASXT | F_ARCHEXT },
+    { "rvaae1os",   CPENS (0, C8, C5, 3), F_HASXT | F_ARCHEXT },
+    { "rvale1os",   CPENS (0, C8, C5, 5), F_HASXT | F_ARCHEXT },
+    { "rvaale1os",  CPENS (0, C8, C5, 7), F_HASXT | F_ARCHEXT },
+    { "ripas2e1is", CPENS (4, C8, C0, 2), F_HASXT | F_ARCHEXT },
+    { "ripas2le1is",CPENS (4, C8, C0, 6), F_HASXT | F_ARCHEXT },
+    { "ripas2e1",   CPENS (4, C8, C4, 2), F_HASXT | F_ARCHEXT },
+    { "ripas2le1",  CPENS (4, C8, C4, 6), F_HASXT | F_ARCHEXT },
+    { "ripas2e1os", CPENS (4, C8, C4, 3), F_HASXT | F_ARCHEXT },
+    { "ripas2le1os",CPENS (4, C8, C4, 7), F_HASXT | F_ARCHEXT },
+    { "rvae2",      CPENS (4, C8, C6, 1), F_HASXT | F_ARCHEXT },
+    { "rvale2",     CPENS (4, C8, C6, 5), F_HASXT | F_ARCHEXT },
+    { "rvae2is",    CPENS (4, C8, C2, 1), F_HASXT | F_ARCHEXT },
+    { "rvale2is",   CPENS (4, C8, C2, 5), F_HASXT | F_ARCHEXT },
+    { "rvae2os",    CPENS (4, C8, C5, 1), F_HASXT | F_ARCHEXT },
+    { "rvale2os",   CPENS (4, C8, C5, 5), F_HASXT | F_ARCHEXT },
+    { "rvae3",      CPENS (6, C8, C6, 1), F_HASXT | F_ARCHEXT },
+    { "rvale3",     CPENS (6, C8, C6, 5), F_HASXT | F_ARCHEXT },
+    { "rvae3is",    CPENS (6, C8, C2, 1), F_HASXT | F_ARCHEXT },
+    { "rvale3is",   CPENS (6, C8, C2, 5), F_HASXT | F_ARCHEXT },
+    { "rvae3os",    CPENS (6, C8, C5, 1), F_HASXT | F_ARCHEXT },
+    { "rvale3os",   CPENS (6, C8, C5, 5), F_HASXT | F_ARCHEXT },
+
     { 0,       CPENS(0,0,0,0), 0 }
 };
 

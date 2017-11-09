@@ -1,5 +1,22 @@
 2017-11-09  Tamar Christina  <tamar.christina@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_regs): Add ARMv8.4-a registers;
+	dit, vstcr_el2, vsttbr_el2, cnthvs_tval_el2, cnthvs_cval_el2,
+	cnthvs_ctl_el2, cnthps_tval_el2, cnthps_cval_el2, cnthps_ctl_el2,
+	sder32_el2, vncr_el2.
+	(aarch64_sys_reg_supported_p): Likewise.
+	(aarch64_pstatefields): Add dit register.
+	(aarch64_pstatefield_supported_p): Likewise.
+	(aarch64_sys_regs_tlbi): Add vmalle1os, vae1os, aside1os, vaae1os,
+	vale1os, vaale1os, ipas2e1os, ipas2le1os, vae2os, vale2os, vmalls12e1os,
+	vae3os, vale3os, alle2os, alle1os, alle3os, rvae1, rvaae1, rvale1,
+	rvaale1, rvae1is, rvaae1is, rvale1is, rvaale1is, rvae1os, rvaae1os,
+	rvale1os, rvaale1os, ripas2e1is, ripas2le1is, ripas2e1, ripas2le1,
+	ripas2e1os, ripas2le1os, rvae2, rvale2, rvae2is, rvale2is, rvae2os,
+	rvale2os, rvae3, rvale3, rvae3is, rvale3is, rvae3os, rvale3os.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
 	* aarch64-tbl.h (QL_SHA512UPT, QL_V2SAME2D, QL_V3SAME2D): New.
 	(QL_V4SAME16B, QL_V4SAME4S, QL_XAR, QL_SM3TT, QL_V3FML2S): New.
 	(QL_V3FML4S, QL_V2FML2S, QL_V2FML4S, QL_RMIF, QL_SETF): New.
