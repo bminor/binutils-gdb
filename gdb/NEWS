@@ -12,6 +12,10 @@ set debug fbsd-nat
 show debug fbsd-nat
   Control display of debugging info regarding the FreeBSD native target.
 
+* New targets
+
+RiscV ELF			riscv*-*-elf
+
 *** Changes in GDB 8.1
 
 * GDB now supports dynamically creating arbitrary register groups specified

@@ -1,4 +1,18 @@
 2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Tim Newsome <tim@sifive.com>
+	    Albert Ou <a0u@eecs.berkeley.edu>
+	    Darius Rad <darius@bluespec.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add riscv-tdep.o
+	(HFILES_NO_SRCDIR): Add riscv-tdep.h.
+	(ALLDEPFILES): Add riscv-tdep.c
+	* configure.tgt: Add riscv support.
+	* riscv-tdep.c: New file.
+	* riscv-tdep.h: New file.
+	* NEWS: Mention new target.
+	* MAINTAINERS: Add entry for riscv.
+
+2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* amd64-tdep.c (amd64_classify_aggregate): Ignore zero sized
 	fields within aggregates.

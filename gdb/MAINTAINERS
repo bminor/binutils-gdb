@@ -294,6 +294,11 @@ the native maintainer when resolving ABI issues.
 
 	powerpc		--target=powerpc-eabi ,-Werror
 
+	riscv		--target=riscv32-elf ,-Werror
+			--target=riscv64-elf ,-Werror
+			Andrew Burgess		andrew.burgess@embecosm.com
+			Palmer Dabbelt		palmer@sifive.com
+
 	rl78		--target=rl78-elf ,-Werror
 
 	rx		--target=rx-elf ,-Werror

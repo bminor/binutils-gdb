@@ -520,6 +520,11 @@ s390*-*-linux*)
 	build_gdbserver=yes
 	;;
 
+riscv*-*-*)
+	# Target: RISC-V architecture
+	gdb_target_obs="riscv-tdep.o"
+	;;
+
 rl78-*-elf)
 	# Target: Renesas rl78
 	gdb_target_obs="rl78-tdep.o"
