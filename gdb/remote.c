@@ -12289,28 +12289,6 @@ remote_trace_init (struct target_ops *self)
     error (_("Target does not support this command."));
 }
 
-static void free_actions_list (char **actions_list);
-static void free_actions_list_cleanup_wrapper (void *);
-static void
-free_actions_list_cleanup_wrapper (void *al)
-{
-  free_actions_list ((char **) al);
-}
-
-static void
-free_actions_list (char **actions_list)
-{
-  int ndx;
-
-  if (actions_list == 0)
-    return;
-
-  for (ndx = 0; actions_list[ndx]; ndx++)
-    xfree (actions_list[ndx]);
-
-  xfree (actions_list);
-}
-
 /* Recursive routine to walk through command list including loops, and
    download packets for each command.  */
 
@@ -12359,20 +12337,14 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
   CORE_ADDR tpaddr;
   char addrbuf[40];
   char buf[BUF_SIZE];
-  char **tdp_actions;
-  char **stepping_actions;
-  int ndx;
-  struct cleanup *old_chain = NULL;
+  std::vector<std::string> tdp_actions;
+  std::vector<std::string> stepping_actions;
   char *pkt;
   struct breakpoint *b = loc->owner;
   struct tracepoint *t = (struct tracepoint *) b;
   struct remote_state *rs = get_remote_state ();
 
   encode_actions_rsp (loc, &tdp_actions, &stepping_actions);
-  old_chain = make_cleanup (free_actions_list_cleanup_wrapper,
-			    tdp_actions);
-  (void) make_cleanup (free_actions_list_cleanup_wrapper,
-		       stepping_actions);
 
   tpaddr = loc->address;
   sprintf_vma (addrbuf, tpaddr);
@@ -12438,7 +12410,7 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 	  xsnprintf (buf + strlen (buf), BUF_SIZE - strlen (buf), ":X%x,",
 		     aexpr->len);
 	  pkt = buf + strlen (buf);
-	  for (ndx = 0; ndx < aexpr->len; ++ndx)
+	  for (int ndx = 0; ndx < aexpr->len; ++ndx)
 	    pkt = pack_hex_byte (pkt, aexpr->buf[ndx]);
 	  *pkt = '\0';
 	}
@@ -12455,38 +12427,42 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
     error (_("Target does not support tracepoints."));
 
   /* do_single_steps (t); */
-  if (tdp_actions)
+  for (auto action_it = tdp_actions.begin ();
+       action_it != tdp_actions.end (); action_it++)
     {
-      for (ndx = 0; tdp_actions[ndx]; ndx++)
-	{
-	  QUIT;	/* Allow user to bail out with ^C.  */
-	  xsnprintf (buf, BUF_SIZE, "QTDP:-%x:%s:%s%c",
-		     b->number, addrbuf, /* address */
-		     tdp_actions[ndx],
-		     ((tdp_actions[ndx + 1] || stepping_actions)
-		      ? '-' : 0));
-	  putpkt (buf);
-	  remote_get_noisy_reply ();
-	  if (strcmp (rs->buf, "OK"))
-	    error (_("Error on target while setting tracepoints."));
-	}
+      QUIT;	/* Allow user to bail out with ^C.  */
+
+      bool has_more = (action_it != tdp_actions.end ()
+		       || !stepping_actions.empty ());
+
+      xsnprintf (buf, BUF_SIZE, "QTDP:-%x:%s:%s%c",
+		 b->number, addrbuf, /* address */
+		 action_it->c_str (),
+		 has_more ? '-' : 0);
+      putpkt (buf);
+      remote_get_noisy_reply ();
+      if (strcmp (rs->buf, "OK"))
+	error (_("Error on target while setting tracepoints."));
     }
-  if (stepping_actions)
-    {
-      for (ndx = 0; stepping_actions[ndx]; ndx++)
-	{
-	  QUIT;	/* Allow user to bail out with ^C.  */
-	  xsnprintf (buf, BUF_SIZE, "QTDP:-%x:%s:%s%s%s",
-		     b->number, addrbuf, /* address */
-		     ((ndx == 0) ? "S" : ""),
-		     stepping_actions[ndx],
-		     (stepping_actions[ndx + 1] ? "-" : ""));
-	  putpkt (buf);
-	  remote_get_noisy_reply ();
-	  if (strcmp (rs->buf, "OK"))
-	    error (_("Error on target while setting tracepoints."));
-	}
-    }
+
+    for (auto action_it = stepping_actions.begin ();
+	 action_it != stepping_actions.end (); action_it++)
+      {
+	QUIT;	/* Allow user to bail out with ^C.  */
+
+	bool is_first = action_it == stepping_actions.begin ();
+	bool has_more = action_it != stepping_actions.end ();
+
+	xsnprintf (buf, BUF_SIZE, "QTDP:-%x:%s:%s%s%s",
+		   b->number, addrbuf, /* address */
+		   is_first ? "S" : "",
+		   action_it->c_str (),
+		   has_more ? "-" : "");
+	putpkt (buf);
+	remote_get_noisy_reply ();
+	if (strcmp (rs->buf, "OK"))
+	  error (_("Error on target while setting tracepoints."));
+      }
 
   if (packet_support (PACKET_TracepointSource) == PACKET_ENABLE)
     {
@@ -12515,8 +12491,6 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
       remote_download_command_source (b->number, loc->address,
 				      breakpoint_commands (b));
     }
-
-  do_cleanups (old_chain);
 }
 
 static int

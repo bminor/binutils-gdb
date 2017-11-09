@@ -1,3 +1,17 @@
+2017-11-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tracepoint.h (class collection_list) <stringify>: Return
+	std::vector<std::string>.
+	(encode_actions_rsp): Change parameters to
+	std::vector<std::string> *.
+	* tracepoint.c (collection_list::stringify): Return
+	std::vector<std::string> and adjust accordingly.
+	(encode_actions_rsp): Changee parameters to
+	std::vector<std::string> and adjust accordingly.
+	* remote.c (free_actions_list),
+	free_actions_list_cleanup_wrapper): Remove.
+	(remote_download_tracepoint): Adjust to std::vector.
+
 2017-11-08  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (symbolp): Remove typedef.

@@ -1118,18 +1118,14 @@ collection_list::collection_list ()
 
 /* Reduce a collection list to string form (for gdb protocol).  */
 
-char **
+std::vector<std::string>
 collection_list::stringify ()
 {
   char temp_buf[2048];
   int count;
-  int ndx = 0;
-  char *(*str_list)[];
   char *end;
   long i;
-
-  count = 1 + 1 + m_memranges.size () + m_aexprs.size () + 1;
-  str_list = (char *(*)[]) xmalloc (count * sizeof (char *));
+  std::vector<std::string> str_list;
 
   if (m_strace_data)
     {
@@ -1137,8 +1133,7 @@ collection_list::stringify ()
 	printf_filtered ("\nCollecting static trace data\n");
       end = temp_buf;
       *end++ = 'L';
-      (*str_list)[ndx] = savestring (temp_buf, end - temp_buf);
-      ndx++;
+      str_list.emplace_back (temp_buf, end - temp_buf);
     }
 
   for (i = sizeof (m_regs_mask) - 1; i > 0; i--)
@@ -1158,8 +1153,7 @@ collection_list::stringify ()
 	  sprintf (end, "%02X", m_regs_mask[i]);
 	  end += 2;
 	}
-      (*str_list)[ndx] = xstrdup (temp_buf);
-      ndx++;
+      str_list.emplace_back (temp_buf);
     }
   if (info_verbose)
     printf_filtered ("\n");
@@ -1179,8 +1173,7 @@ collection_list::stringify ()
 	}
       if (count + 27 > MAX_AGENT_EXPR_LEN)
 	{
-	  (*str_list)[ndx] = savestring (temp_buf, count);
-	  ndx++;
+	  str_list.emplace_back (temp_buf, count);
 	  count = 0;
 	  end = temp_buf;
 	}
@@ -1210,8 +1203,7 @@ collection_list::stringify ()
       QUIT;			/* Allow user to bail out with ^C.  */
       if ((count + 10 + 2 * m_aexprs[i]->len) > MAX_AGENT_EXPR_LEN)
 	{
-	  (*str_list)[ndx] = savestring (temp_buf, count);
-	  ndx++;
+	  str_list.emplace_back (temp_buf, count);
 	  count = 0;
 	  end = temp_buf;
 	}
@@ -1225,20 +1217,12 @@ collection_list::stringify ()
 
   if (count != 0)
     {
-      (*str_list)[ndx] = savestring (temp_buf, count);
-      ndx++;
+      str_list.emplace_back (temp_buf, count);
       count = 0;
       end = temp_buf;
     }
-  (*str_list)[ndx] = NULL;
 
-  if (ndx == 0)
-    {
-      xfree (str_list);
-      return NULL;
-    }
-  else
-    return *str_list;
+  return str_list;
 }
 
 /* Add the printed expression EXP to *LIST.  */
@@ -1513,13 +1497,11 @@ encode_actions (struct bp_location *tloc,
 /* Render all actions into gdb protocol.  */
 
 void
-encode_actions_rsp (struct bp_location *tloc, char ***tdp_actions,
-		    char ***stepping_actions)
+encode_actions_rsp (struct bp_location *tloc,
+		    std::vector<std::string> *tdp_actions,
+		    std::vector<std::string> *stepping_actions)
 {
   struct collection_list tracepoint_list, stepping_list;
-
-  *tdp_actions = NULL;
-  *stepping_actions = NULL;
 
   encode_actions (tloc, &tracepoint_list, &stepping_list);
 
