@@ -1,3 +1,24 @@
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-asm.h (ins_addr_offset): New.
+	* aarch64-asm.c (aarch64_ins_reglane): Add cryptosm3.
+	(aarch64_ins_addr_offset): New.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_addr_offset): New.
+	* aarch64-dis.c (aarch64_ext_reglane): Add cryptosm3.
+	(aarch64_ext_addr_offset): New.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc.h (aarch64_field_kind): Add FLD_imm6_2,
+	FLD_imm4_2 and FLD_SM3_imm2.
+	* aarch64-opc.c (fields): Add FLD_imm6_2,
+	FLD_imm4_2 and FLD_SM3_imm2.
+	(operand_general_constraint_met_p): Add AARCH64_OPND_ADDR_OFFSET.
+	(aarch64_print_operand): Add AARCH64_OPND_Va, AARCH64_OPND_SM3_IMM2,
+	AARCH64_OPND_MASK, AARCH64_OPND_IMM_2 and AARCH64_OPND_ADDR_OFFSET.
+	* aarch64-opc-2.c (Va, MASK, IMM_2, ADDR_OFFSET, SM3_IMM2): New.
+	* aarch64-tbl.h
+	(aarch64_opcode_table): Add Va, MASK, IMM_2, ADDR_OFFSET, SM3_IMM2.
+
 2017-11-09 Tamar Christina  <tamar.christina@arm.com>
 
 	* aarch64-tbl.h

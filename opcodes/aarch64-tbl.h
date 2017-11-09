@@ -4250,6 +4250,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(SISD_REG, regno, "Sd", 0, F(FLD_Rd), "a SIMD scalar register")	\
     Y(SISD_REG, regno, "Sn", 0, F(FLD_Rn), "a SIMD scalar register")	\
     Y(SISD_REG, regno, "Sm", 0, F(FLD_Rm), "a SIMD scalar register")	\
+    Y(SIMD_REG, regno, "Va", 0, F(FLD_Ra), "a SIMD vector register")	\
     Y(SIMD_REG, regno, "Vd", 0, F(FLD_Rd), "a SIMD vector register")	\
     Y(SIMD_REG, regno, "Vn", 0, F(FLD_Rn), "a SIMD vector register")	\
     Y(SIMD_REG, regno, "Vm", 0, F(FLD_Rm), "a SIMD vector register")	\
@@ -4277,6 +4278,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a 4-bit opcode field named for historical reasons C0 - C15")	\
     Y(IMMEDIATE, imm, "IDX", 0, F(FLD_imm4),				\
       "an immediate as the index of the least significant byte")	\
+    Y(IMMEDIATE, imm, "MASK", 0, F(FLD_imm4_2),				\
+      "an immediate as the index of the least significant byte")	\
     Y(IMMEDIATE, advsimd_imm_shift, "IMM_VLSL", 0, F(),			\
       "a left shift amount for an AdvSIMD register")			\
     Y(IMMEDIATE, advsimd_imm_shift, "IMM_VLSR", 0, F(),			\
@@ -4299,7 +4302,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "the leftmost bit number to be moved from the source")		\
     Y(IMMEDIATE, imm, "WIDTH", 0, F(FLD_imm6),				\
       "the width of the bit-field")					\
-    Y(IMMEDIATE, imm, "IMM", 0, F(FLD_imm6), "an immediate")		\
+    Y(IMMEDIATE, imm, "IMM", 0, F(FLD_imm6), "an immediate")            \
+    Y(IMMEDIATE, imm, "IMM_2", 0, F(FLD_imm6_2), "an immediate")        \
     Y(IMMEDIATE, imm, "UIMM3_OP1", 0, F(FLD_op1),			\
       "a 3-bit unsigned immediate")					\
     Y(IMMEDIATE, imm, "UIMM3_OP2", 0, F(FLD_op2),			\
@@ -4362,6 +4366,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "an address with scaled, unsigned immediate offset")		\
     Y(ADDRESS, addr_simple, "SIMD_ADDR_SIMPLE", 0, F(),			\
       "an address with base register (no offset)")			\
+    Y(ADDRESS, addr_offset, "ADDR_OFFSET", 0, F(FLD_Rn,FLD_imm9,FLD_index),\
+      "an address with an optional 8-bit signed immediate offset")	\
     Y(ADDRESS, simd_addr_post, "SIMD_ADDR_POST", 0, F(),		\
       "a post-indexed address with immediate or register increment")	\
     Y(SYSTEM, sysreg, "SYSREG", 0, F(), "a system register")		\
@@ -4598,4 +4604,6 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(SVE_REG, regno, "SVE_Zt", 0, F(FLD_SVE_Zt),			\
       "an SVE vector register")						\
     Y(SVE_REG, sve_reglist, "SVE_ZtxN", 0, F(FLD_SVE_Zt),		\
-      "a list of SVE vector registers")
+      "a list of SVE vector registers")					\
+    Y(SIMD_ELEMENT, reglane, "SM3_IMM2", 0, F(FLD_SM3_imm2),		\
+      "an indexed SM3 vector immediate")

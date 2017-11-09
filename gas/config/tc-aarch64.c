@@ -4999,6 +4999,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_Sd:
     case AARCH64_OPND_Sn:
     case AARCH64_OPND_Sm:
+    case AARCH64_OPND_Va:
     case AARCH64_OPND_Vd:
     case AARCH64_OPND_Vn:
     case AARCH64_OPND_Vm:
@@ -5010,6 +5011,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_Ed:
     case AARCH64_OPND_En:
     case AARCH64_OPND_Em:
+    case AARCH64_OPND_SM3_IMM2:
       operand->reglane.regno = default_value;
       break;
 
@@ -5026,6 +5028,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_UIMM3_OP1:
     case AARCH64_OPND_UIMM3_OP2:
     case AARCH64_OPND_IMM:
+    case AARCH64_OPND_IMM_2:
     case AARCH64_OPND_WIDTH:
     case AARCH64_OPND_UIMM7:
     case AARCH64_OPND_NZCV:
@@ -5390,6 +5393,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  reg_type = REG_TYPE_ZN;
 	  goto vector_reg;
 
+	case AARCH64_OPND_Va:
 	case AARCH64_OPND_Vd:
 	case AARCH64_OPND_Vn:
 	case AARCH64_OPND_Vm:
@@ -5451,6 +5455,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Ed:
 	case AARCH64_OPND_En:
 	case AARCH64_OPND_Em:
+	case AARCH64_OPND_SM3_IMM2:
 	  reg_type = REG_TYPE_VN;
 	vector_reg_index:
 	  val = aarch64_reg_parse (&str, reg_type, NULL, &vectype);
@@ -5561,6 +5566,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_UIMM3_OP2:
 	case AARCH64_OPND_IMM_VLSL:
 	case AARCH64_OPND_IMM:
+	case AARCH64_OPND_IMM_2:
 	case AARCH64_OPND_WIDTH:
 	case AARCH64_OPND_SVE_INV_LIMM:
 	case AARCH64_OPND_SVE_LIMM:
@@ -5627,6 +5633,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_IDX:
+	case AARCH64_OPND_MASK:
 	case AARCH64_OPND_BIT_NUM:
 	case AARCH64_OPND_IMMR:
 	case AARCH64_OPND_IMMS:
@@ -6046,6 +6053,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_ADDR_SIMM10:
+	case AARCH64_OPND_ADDR_OFFSET:
 	  po_misc_or_fail (parse_address (&str, info));
 	  if (info->addr.pcrel || info->addr.offset.is_reg
 	      || !info->addr.preind || info->addr.postind)

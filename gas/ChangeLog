@@ -1,3 +1,12 @@
+2017-11-09 Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c (process_omitted_operand):
+	Add AARCH64_OPND_Va, AARCH64_OPND_SM3_IMM2
+	and AARCH64_OPND_IMM_2.
+	(parse_operands): Add AARCH64_OPND_Va, AARCH64_OPND_SM3_IMM2,
+	AARCH64_OPND_IMM_2, AARCH64_OPND_MASK
+	and AARCH64_OPND_ADDR_OFFSET.
+
 2017-11-09  Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-aarch64.c (aarch64_arch_option_table): Add armv8.4-a.

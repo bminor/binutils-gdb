@@ -166,6 +166,7 @@ enum aarch64_opnd
   AARCH64_OPND_Sn,	/* AdvSIMD Scalar Sn.  */
   AARCH64_OPND_Sm,	/* AdvSIMD Scalar Sm.  */
 
+  AARCH64_OPND_Va,	/* AdvSIMD Vector Va.  */
   AARCH64_OPND_Vd,	/* AdvSIMD Vector Vd.  */
   AARCH64_OPND_Vn,	/* AdvSIMD Vector Vn.  */
   AARCH64_OPND_Vm,	/* AdvSIMD Vector Vm.  */
@@ -184,6 +185,7 @@ enum aarch64_opnd
   AARCH64_OPND_CRm,	/* Co-processor register in CRm field.  */
 
   AARCH64_OPND_IDX,	/* AdvSIMD EXT index operand.  */
+  AARCH64_OPND_MASK,	/* AdvSIMD EXT index operand.  */
   AARCH64_OPND_IMM_VLSL,/* Immediate for shifting vector registers left.  */
   AARCH64_OPND_IMM_VLSR,/* Immediate for shifting vector registers right.  */
   AARCH64_OPND_SIMD_IMM,/* AdvSIMD modified immediate without shift.  */
@@ -198,6 +200,7 @@ enum aarch64_opnd
   AARCH64_OPND_IMMS,	/* Immediate #<imms> in e.g. BFM.  */
   AARCH64_OPND_WIDTH,	/* Immediate #<width> in e.g. BFI.  */
   AARCH64_OPND_IMM,	/* Immediate.  */
+  AARCH64_OPND_IMM_2,	/* Immediate.  */
   AARCH64_OPND_UIMM3_OP1,/* Unsigned 3-bit immediate in the op1 field.  */
   AARCH64_OPND_UIMM3_OP2,/* Unsigned 3-bit immediate in the op2 field.  */
   AARCH64_OPND_UIMM4,	/* Unsigned 4-bit immediate in the CRm field.  */
@@ -241,6 +244,7 @@ enum aarch64_opnd
   AARCH64_OPND_ADDR_SIMM10,	/* Address of signed 10-bit immediate.  */
   AARCH64_OPND_ADDR_UIMM12,	/* Address of unsigned 12-bit immediate.  */
   AARCH64_OPND_SIMD_ADDR_SIMPLE,/* Address of ld/st multiple structures.  */
+  AARCH64_OPND_ADDR_OFFSET,     /* Address with an optional 9-bit immediate.  */
   AARCH64_OPND_SIMD_ADDR_POST,	/* Address of ld/st multiple post-indexed.  */
 
   AARCH64_OPND_SYSREG,		/* System register operand.  */
@@ -353,6 +357,7 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ZnxN,	/* SVE vector register list in Zn.  */
   AARCH64_OPND_SVE_Zt,		/* SVE vector register in Zt.  */
   AARCH64_OPND_SVE_ZtxN,	/* SVE vector register list in Zt.  */
+  AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -515,6 +520,8 @@ enum aarch64_insn_class
   sve_size_hsd,
   sve_size_sd,
   testbranch,
+  cryptosm3,
+  cryptosm4,
   dotproduct,
 };
 

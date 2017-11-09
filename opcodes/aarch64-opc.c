@@ -240,7 +240,9 @@ const aarch64_field fields[] =
     { 22,  2 },	/* type: floating point type field in fp data inst.  */
     { 30,  2 },	/* ldst_size: size field in ld/st reg offset inst.  */
     { 10,  6 },	/* imm6: in add/sub reg shifted instructions.  */
+    { 15,  6 },	/* imm6_2: in rmif instructions.  */
     { 11,  4 },	/* imm4: in advsimd ext and advsimd ins instructions.  */
+    {  0,  4 },	/* imm4_2: in rmif instructions.  */
     { 16,  5 },	/* imm5: in conditional compare (immediate) instructions.  */
     { 15,  7 },	/* imm7: in load/store pair pre/post index instructions.  */
     { 13,  8 },	/* imm8: in floating-point scalar move immediate inst.  */
@@ -316,6 +318,7 @@ const aarch64_field fields[] =
     { 11,  2 }, /* rotate1: FCMLA immediate rotate.  */
     { 13,  2 }, /* rotate2: Indexed element FCMLA immediate rotate.  */
     { 12,  1 }, /* rotate3: FCADD immediate rotate.  */
+    { 12,  2 }, /* SM3: Indexed element SM3 2 bits index immediate.  */
 };
 
 enum aarch64_operand_class
@@ -1602,6 +1605,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      return 0;
 	    }
 	  break;
+	case AARCH64_OPND_ADDR_OFFSET:
 	case AARCH64_OPND_ADDR_SIMM9:
 	  /* Unscaled signed 9 bits immediate offset.  */
 	  if (!value_in_range_p (opnd->addr.offset.imm, -256, 255))
@@ -3142,6 +3146,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		opnd->reg.regno);
       break;
 
+    case AARCH64_OPND_Va:
     case AARCH64_OPND_Vd:
     case AARCH64_OPND_Vn:
     case AARCH64_OPND_Vm:
@@ -3152,6 +3157,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Ed:
     case AARCH64_OPND_En:
     case AARCH64_OPND_Em:
+    case AARCH64_OPND_SM3_IMM2:
       snprintf (buf, size, "v%d.%s[%" PRIi64 "]", opnd->reglane.regno,
 		aarch64_get_qualifier_name (opnd->qualifier),
 		opnd->reglane.index);
@@ -3222,7 +3228,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_IDX:
+    case AARCH64_OPND_MASK:
     case AARCH64_OPND_IMM:
+    case AARCH64_OPND_IMM_2:
     case AARCH64_OPND_WIDTH:
     case AARCH64_OPND_UIMM3_OP1:
     case AARCH64_OPND_UIMM3_OP2:
@@ -3499,6 +3507,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:
     case AARCH64_OPND_ADDR_SIMM10:
+    case AARCH64_OPND_ADDR_OFFSET:
     case AARCH64_OPND_SVE_ADDR_RI_S4x16:
     case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
     case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:

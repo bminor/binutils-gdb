@@ -1,6 +1,15 @@
 2017-11-09  Tamar Christina  <tamar.christina@arm.com>
 
 	* opcode/aarch64.h:
+	(aarch64_opnd): Add AARCH64_OPND_Va, AARCH64_OPND_MASK,
+	AARCH64_OPND_IMM_2, AARCH64_OPND_ADDR_OFFSET
+	and AARCH64_OPND_SM3_IMM2. 
+	(aarch64_insn_class): Add cryptosm3 and cryptosm4.
+	(arch64_feature_set): Make uint64_t.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h:
 	(AARCH64_FEATURE_V8_4, AARCH64_FEATURE_SM4): New.
 	(AARCH64_ARCH_V8_4, AARCH64_FEATURE_SHA3): New.
 
