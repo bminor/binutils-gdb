@@ -10303,14 +10303,14 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
     one element out of that array.  On the other hand, fixing should
     not be performed on the elements when taking a slice of an array!
 
-    Note that one of the side-effects of miscomputing the offset and
+    Note that one of the side effects of miscomputing the offset and
     size of each field is that we end up also miscomputing the size
     of the containing type.  This can have adverse results when computing
     the value of an entity.  GDB fetches the value of an entity based
     on the size of its type, and thus a wrong size causes GDB to fetch
     the wrong amount of memory.  In the case where the computed size is
     too small, GDB fetches too little data to print the value of our
-    entiry.  Results in this case as unpredicatble, as we usually read
+    entity.  Results in this case are unpredictable, as we usually read
     past the buffer containing the data =:-o.  */
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure

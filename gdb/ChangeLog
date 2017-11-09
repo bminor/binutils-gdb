@@ -1,3 +1,9 @@
+2017-11-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c: Fix some typos in the general command documenting
+	how Ada expressions are being evaluated and how their result
+	is printed.
+
 2017-11-09  Tom Tromey  <tom@tromey.com>
 
 	* psymtab.c (psymbol_hash): Do not hash string contents.
