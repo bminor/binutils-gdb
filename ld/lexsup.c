@@ -1785,8 +1785,15 @@ elf_shlib_list_options (FILE *file)
   fprintf (file, _("\
   -z relro                    Create RELRO program header\n"));
   fprintf (file, _("\
-  -z norelro                  Don't create RELRO program header (default)\n"));
+  -z norelro                  Don't create RELRO nor separate code and read-only\n\
+                                data program headers (default)\n"));
 #endif
+  fprintf (file, _("\
+  -z separate-code            Create separate code and read-only data program\n\
+                                headers\n"));
+  fprintf (file, _("\
+  -z noseparate-code          Don't create separate code and read-only data\n\
+                                program headers (default)\n"));
   fprintf (file, _("\
   -z common                   Generate common symbols with STT_COMMON type\n"));
   fprintf (file, _("\

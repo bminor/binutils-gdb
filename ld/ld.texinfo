@@ -1262,7 +1262,16 @@ Create an ELF @code{PT_GNU_RELRO} segment header in the object.  This
 specifies a memory segment that should be made read-only after
 relocation, if supported.  Specifying @samp{common-page-size} smaller
 than the system page size will render this protection ineffective.
-Don't create an ELF @code{PT_GNU_RELRO} segment if @samp{norelro}.
+Don't create an ELF @code{PT_GNU_RELRO} segment if @samp{norelro} is
+used, which also implies @option{-z noseparate-code}.
+
+@item separate-code
+@itemx noseparate-code
+Create separate code and read-only data @code{PT_LOAD} segment headers
+in the object.  This specifies a memory segment that should contain
+only instructions.  This option also implies @option{-z relro}.  Don't
+create separate code and read-only data @code{PT_LOAD} segments if
+@samp{noseparate-code} is used.
 
 @item shstk
 Generate GNU_PROPERTY_X86_FEATURE_1_SHSTK in .note.gnu.property section

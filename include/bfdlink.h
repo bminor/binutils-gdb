@@ -383,8 +383,11 @@ struct bfd_link_info
      executable.  */
   unsigned int emitrelocations: 1;
 
-  /* TRUE if PT_GNU_RELRO segment should be created.  */
-  unsigned int relro: 1;
+  /* Non-zero if PT_GNU_RELRO as well as separate code and read-only data
+     PT_LOAD segments should be created.  1 for PT_GNU_RELRO segment only,
+     > 1 for PT_GNU_RELRO segment as well as separate code and read-only
+     data PT_LOAD segments.  */
+  unsigned int relro: 2;
 
   /* Nonzero if .eh_frame_hdr section and PT_GNU_EH_FRAME ELF segment
      should be created.  1 for DWARF2 tables, 2 for compact tables.  */
