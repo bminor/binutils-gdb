@@ -8455,6 +8455,7 @@ static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"armv8.1-a", AARCH64_ARCH_V8_1},
   {"armv8.2-a", AARCH64_ARCH_V8_2},
   {"armv8.3-a", AARCH64_ARCH_V8_3},
+  {"armv8.4-a", AARCH64_ARCH_V8_4},
   {NULL, AARCH64_ARCH_NONE}
 };
 
@@ -8505,6 +8506,11 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"sha2",		AARCH64_FEATURE (AARCH64_FEATURE_SHA2, 0),
 			AARCH64_ARCH_NONE},
   {"aes",		AARCH64_FEATURE (AARCH64_FEATURE_AES, 0),
+			AARCH64_ARCH_NONE},
+  {"sm4",		AARCH64_FEATURE (AARCH64_FEATURE_SM4, 0),
+			AARCH64_ARCH_NONE},
+  {"sha3",		AARCH64_FEATURE (AARCH64_FEATURE_SHA2
+					 | AARCH64_FEATURE_SHA3, 0),
 			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };

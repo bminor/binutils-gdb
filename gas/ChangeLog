@@ -1,3 +1,8 @@
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c (aarch64_arch_option_table): Add armv8.4-a.
+	(aarch64_features): Add SM4 and SHA3.
+
 2017-11-08  Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-aarch64.c

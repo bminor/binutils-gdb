@@ -1,3 +1,13 @@
+2017-11-09 Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-tbl.h
+	(aarch64_feature_v8_4, aarch64_feature_crypto_v8_2): New.
+	(aarch64_feature_sm4, aarch64_feature_sha3): New.
+	(aarch64_feature_fp_16_v8_2): New.
+	(ARMV8_4, SHA3, SM4, CRYPTO_V8_2, FP_F16_V8_2): New.
+	(V8_4_INSN, CRYPTO_V8_2_INSN): New.
+	(SHA3_INSN, SM4_INSN, FP16_V8_2_INSN): New.
+
 2017-11-08  Tamar Christina  <tamar.christina@arm.com>
 
 	* aarch64-tbl.h (aarch64_feature_crypto): Add AES and SHA2.

@@ -2041,6 +2041,18 @@ static const aarch64_feature_set aarch64_feature_sha2 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8 | AARCH64_FEATURE_SHA2, 0);
 static const aarch64_feature_set aarch64_feature_aes =
   AARCH64_FEATURE (AARCH64_FEATURE_V8 | AARCH64_FEATURE_AES, 0);
+static const aarch64_feature_set aarch64_feature_v8_4 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_4, 0);
+static const aarch64_feature_set aarch64_feature_crypto_v8_2 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_CRYPTO, 0);
+static const aarch64_feature_set aarch64_feature_sm4 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SM4, 0);
+static const aarch64_feature_set aarch64_feature_sha3 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SHA2
+		   | AARCH64_FEATURE_SHA3, 0);
+static const aarch64_feature_set aarch64_feature_fp_16_v8_2 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F16
+		   | AARCH64_FEATURE_FP, 0);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2062,6 +2074,11 @@ static const aarch64_feature_set aarch64_feature_aes =
 #define RCPC		&aarch64_feature_rcpc
 #define SHA2		&aarch64_feature_sha2
 #define AES		&aarch64_feature_aes
+#define ARMV8_4		&aarch64_feature_v8_4
+#define SHA3		&aarch64_feature_sha3
+#define SM4		&aarch64_feature_sm4
+#define CRYPTO_V8_2	&aarch64_feature_crypto_v8_2
+#define FP_F16_V8_2	&aarch64_feature_fp_16_v8_2
 #define DOTPROD		&aarch64_feature_dotprod
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
@@ -2099,6 +2116,16 @@ static const aarch64_feature_set aarch64_feature_aes =
   { NAME, OPCODE, MASK, CLASS, 0, SHA2, OPS, QUALS, FLAGS, 0, NULL }
 #define AES_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, AES, OPS, QUALS, FLAGS, 0, NULL }
+#define V8_4_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, ARMV8_4, OPS, QUALS, FLAGS, 0, NULL }
+#define CRYPTO_V8_2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, CRYPTO_V8_2, OPS, QUALS, FLAGS, 0, NULL }
+#define SHA3_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, SHA3, OPS, QUALS, FLAGS, 0, NULL }
+#define SM4_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, SM4, OPS, QUALS, FLAGS, 0, NULL }
+#define FP16_V8_2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, FP_F16_V8_2, OPS, QUALS, FLAGS, 0, NULL }
 #define DOT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, DOTPROD, OPS, QUALS, FLAGS, 0, NULL }
 

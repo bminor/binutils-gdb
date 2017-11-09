@@ -39,6 +39,9 @@ typedef uint32_t aarch64_insn;
 /* The following bitmasks control CPU features.  */
 #define AARCH64_FEATURE_SHA2	0x200000000ULL  /* SHA2 instructions.  */
 #define AARCH64_FEATURE_AES	0x800000000ULL  /* AES instructions.  */
+#define AARCH64_FEATURE_V8_4	0x000000800ULL  /* ARMv8.4 processors.  */
+#define AARCH64_FEATURE_SM4	0x100000000ULL  /* SM3 & SM4 instructions.  */
+#define AARCH64_FEATURE_SHA3	0x400000000ULL  /* SHA3 instructions.  */
 #define AARCH64_FEATURE_V8	0x00000001	/* All processors.  */
 #define AARCH64_FEATURE_V8_2	0x00000020      /* ARMv8.2 processors.  */
 #define AARCH64_FEATURE_V8_3	0x00000040      /* ARMv8.3 processors.  */
@@ -77,6 +80,8 @@ typedef uint32_t aarch64_insn;
 						 AARCH64_FEATURE_V8_3	\
 						 | AARCH64_FEATURE_RCPC	\
 						 | AARCH64_FEATURE_COMPNUM)
+#define AARCH64_ARCH_V8_4	AARCH64_FEATURE (AARCH64_ARCH_V8_3,	\
+						 AARCH64_FEATURE_V8_4)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */

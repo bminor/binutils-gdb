@@ -1,3 +1,9 @@
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h:
+	(AARCH64_FEATURE_V8_4, AARCH64_FEATURE_SM4): New.
+	(AARCH64_ARCH_V8_4, AARCH64_FEATURE_SHA3): New.
+
 2017-11-09  Nick Clifton  <nickc@redhat.com>
 
 	* opcode/aarch64.h (aarch64_feature_set): Change type to unsigned
