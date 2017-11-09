@@ -1,5 +1,14 @@
 2017-11-09  Pedro Alves  <palves@redhat.com>
 
+	* gdb.multi/multi-attach.exp ("kill" test): Match the whole query
+	output.
+	* gdb.server/ext-attach.exp ("kill" test): Likewise.
+	* gdb.server/ext-restart.exp ("kill" test): Likewise.
+	* gdb.server/ext-run.exp ("kill" test): Likewise.
+	* gdb.server/ext-wrapper.exp ("kill" test): Likewise.
+
+2017-11-09  Pedro Alves  <palves@redhat.com>
+
 	* gdb.cp/cpcompletion.exp (test_class_complete): Tighten regex to
 	match till end of line.
 

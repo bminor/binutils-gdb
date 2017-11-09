@@ -61,7 +61,7 @@ if { [istarget *-*-linux*] } {
     }
 }
 
-gdb_test "kill" "" "kill" "Kill the program being debugged.*" "y"
+gdb_test "kill" "" "kill" "Kill the program being debugged. .y or n. " "y"
 
 gdb_load $binfile
 gdb_test "monitor help" "The following monitor commands.*" \
