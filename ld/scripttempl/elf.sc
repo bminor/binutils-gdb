@@ -316,6 +316,17 @@ STACK=".stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
 TEXT_START_ADDR="SEGMENT_START(\"text-segment\", ${TEXT_START_ADDR})"
 SHLIB_TEXT_START_ADDR="SEGMENT_START(\"text-segment\", ${SHLIB_TEXT_START_ADDR:-0})"
 
+# Don't bother with separate code segment when there are data sections
+# between .plt and .text.
+if test -z "$TINY_READONLY_SECTION"; then
+  case "$LD_FLAG" in
+    *textonly*)
+      SEPARATE_TEXT=yes
+      TEXT_SEGMENT_ALIGN=". = ALIGN(${MAXPAGESIZE});"
+      ;;
+  esac
+fi
+
 if [ -z "$SEPARATE_CODE" ]; then
   SIZEOF_HEADERS_CODE=" + SIZEOF_HEADERS"
 else
@@ -478,6 +489,8 @@ emit_dyn()
 test -n "${NON_ALLOC_DYN}${SEPARATE_CODE}" || emit_dyn
 
 cat <<EOF
+  ${RELOCATING+${TEXT_SEGMENT_ALIGN}}
+
   .init         ${RELOCATING-0}${RELOCATING+${INIT_ADDR}} :
   {
     ${RELOCATING+${INIT_START}}
@@ -508,9 +521,10 @@ cat <<EOF
   ${RELOCATING+PROVIDE (__${ETEXT_NAME} = .);}
   ${RELOCATING+PROVIDE (_${ETEXT_NAME} = .);}
   ${RELOCATING+PROVIDE (${ETEXT_NAME} = .);}
+  ${RELOCATING+${TEXT_SEGMENT_ALIGN}}
 EOF
 
-if test -n "${SEPARATE_CODE}"; then
+if test -n "${SEPARATE_CODE}${SEPARATE_TEXT}"; then
   if test -n "${RODATA_ADDR}"; then
     RODATA_ADDR="\
 SEGMENT_START(\"rodata-segment\", ${RODATA_ADDR}) + SIZEOF_HEADERS"
@@ -532,8 +546,10 @@ SEGMENT_START(\"rodata-segment\", ${SHLIB_RODATA_ADDR}) + SIZEOF_HEADERS"
   ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_RODATA_ADDR};}}
   ${CREATE_PIE+${RELOCATING+. = ${SHLIB_RODATA_ADDR};}}
 EOF
-  emit_early_ro
-  emit_dyn
+  if test -n "${SEPARATE_CODE}"; then
+    emit_early_ro
+    emit_dyn
+  fi
 fi
 
 cat <<EOF

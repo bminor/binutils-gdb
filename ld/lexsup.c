@@ -1788,6 +1788,10 @@ elf_shlib_list_options (FILE *file)
   -z norelro                  Don't create RELRO program header (default)\n"));
 #endif
   fprintf (file, _("\
+  -z separate-code            Create separate code program header\n"));
+  fprintf (file, _("\
+  -z noseparate-code          Don't create separate code program header (default)\n"));
+  fprintf (file, _("\
   -z common                   Generate common symbols with STT_COMMON type\n"));
   fprintf (file, _("\
   -z nocommon                 Generate common symbols with STT_OBJECT type\n"));
