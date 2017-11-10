@@ -484,9 +484,8 @@ static void xtensa_check_frag_count (void);
 static void xtensa_create_trampoline_frag (bfd_boolean);
 static void xtensa_maybe_create_trampoline_frag (void);
 struct trampoline_frag;
-static int init_trampoline_frag (struct trampoline_frag *);
-static fixS *xg_append_jump (fragS *fragP, fixS *jump_around,
-			     symbolS *sym, offsetT offset);
+static int init_trampoline_frag (fragS *);
+static fixS *xg_append_jump (fragS *fragP, symbolS *sym, offsetT offset);
 static void xtensa_maybe_create_literal_pool_frag (bfd_boolean, bfd_boolean);
 static bfd_boolean auto_litpools = FALSE;
 static int auto_litpool_limit = 10000;
@@ -7350,19 +7349,11 @@ xtensa_end (void)
 }
 
 
-struct trampoline_frag
-{
-  struct trampoline_frag *next;
-  bfd_boolean needs_jump_around;
-  fragS *fragP;
-  fixS *fixP;
-};
-
 struct trampoline_seg
 {
   struct trampoline_seg *next;
   asection *seg;
-  struct trampoline_frag trampoline_list;
+  fragS trampoline_list;
 };
 
 static struct trampoline_seg trampoline_seg_list;
@@ -7446,7 +7437,6 @@ xtensa_create_trampoline_frag (bfd_boolean needs_jump_around)
      If that's not enough, oh well.  */
 
   struct trampoline_seg *ts = find_trampoline_seg (now_seg);
-  struct trampoline_frag *tf;
   char *varP;
   fragS *fragP;
   int size = TRAMPOLINE_FRAG_SIZE;
@@ -7469,12 +7459,10 @@ xtensa_create_trampoline_frag (bfd_boolean needs_jump_around)
       trampoline_buf = xtensa_insnbuf_alloc (xtensa_default_isa);
       trampoline_slotbuf = xtensa_insnbuf_alloc (xtensa_default_isa);
     }
-  tf = XNEW (struct trampoline_frag);
-  tf->next = ts->trampoline_list.next;
-  ts->trampoline_list.next = tf;
-  tf->needs_jump_around = needs_jump_around;
-  tf->fragP = fragP;
-  tf->fixP = NULL;
+  fragP->tc_frag_data.next_trampoline =
+    ts->trampoline_list.tc_frag_data.next_trampoline;
+  ts->trampoline_list.tc_frag_data.next_trampoline = fragP;
+  fragP->tc_frag_data.needs_jump_around = needs_jump_around;
 }
 
 
@@ -7492,14 +7480,12 @@ dump_trampolines (void)
       if (seg == NULL)
 	continue;
       fprintf(stderr, "SECTION %s\n", seg->name);
-      struct trampoline_frag *tf = ts->trampoline_list.next;
-      for ( ; tf; tf = tf->next)
+      fragS *tf = ts->trampoline_list.tc_frag_data.next_trampoline;
+      for ( ; tf; tf = tf->tc_frag_data.next_trampoline)
 	{
-	  if (tf->fragP == NULL)
-	    continue;
 	  fprintf(stderr, "   0x%08x: fix=%d, jump_around=%s\n",
-		  (int)tf->fragP->fr_address, (int)tf->fragP->fr_fix,
-		  tf->needs_jump_around ? "T" : "F");
+		  (int)tf->fr_address, (int)tf->fr_fix,
+		  tf->tc_frag_data.needs_jump_around ? "T" : "F");
 	}
     }
 }
@@ -9199,8 +9185,8 @@ static void xg_relax_trampoline (fragS *fragP, long stretch, long *new_stretch)
       if (delta > J_RANGE  || delta < -1 * J_RANGE)
 	{ /* Found an out-of-range jump; scan the list of trampolines for the best match.  */
 	  struct trampoline_seg *ts = find_trampoline_seg (now_seg);
-	  struct trampoline_frag *tf = ts->trampoline_list.next;
-	  struct trampoline_frag *prev = &ts->trampoline_list;
+	  fragS *tf = ts->trampoline_list.tc_frag_data.next_trampoline;
+	  fragS *prev = &ts->trampoline_list;
 	  int lower = (target < addr) ? target : addr;
 	  int upper = (target > addr) ? target : addr;
 	  int midpoint = lower + (upper - lower) / 2;
@@ -9210,10 +9196,11 @@ static void xg_relax_trampoline (fragS *fragP, long stretch, long *new_stretch)
 	      /* One trampoline won't suffice; we need multiple jumps.
 		 Jump to the trampoline that's farthest, but still in
 		 range relative to the original "j" instruction.  */
-	      for ( ; tf; prev = tf, tf = tf->next )
+	      for ( ; tf; prev = tf, tf = tf->tc_frag_data.next_trampoline)
 		{
-		  int this_addr = tf->fragP->fr_address + tf->fragP->fr_fix;
-		  int next_addr = (tf->next) ? tf->next->fragP->fr_address + tf->next->fragP->fr_fix : 0 ;
+		  fragS *next = tf->tc_frag_data.next_trampoline;
+		  int this_addr = tf->fr_address + tf->fr_fix;
+		  int next_addr = next ? next->fr_address + next->fr_fix : 0 ;
 
 		  if (addr == lower)
 		    {
@@ -9231,13 +9218,13 @@ static void xg_relax_trampoline (fragS *fragP, long stretch, long *new_stretch)
 	    }
 	  else
 	    {
-	      struct trampoline_frag *best_tf = NULL;
-	      struct trampoline_frag *best_tf_prev = NULL;
+	      fragS *best_tf = NULL;
+	      fragS *best_tf_prev = NULL;
 	      int best_delta = 0;
 
-	      for ( ; tf; prev = tf, tf = tf->next )
+	      for ( ; tf; prev = tf, tf = tf->tc_frag_data.next_trampoline)
 		{
-		  int this_addr = tf->fragP->fr_address + tf->fragP->fr_fix;
+		  int this_addr = tf->fr_address + tf->fr_fix;
 		  int this_delta = abs (this_addr - midpoint);
 
 		  if (!best_tf || this_delta < best_delta)
@@ -9250,7 +9237,7 @@ static void xg_relax_trampoline (fragS *fragP, long stretch, long *new_stretch)
 	      tf = best_tf;
 	      prev = best_tf_prev;
 	    }
-	  if (tf->fragP == fragP)
+	  if (tf == fragP)
 	    {
 	      if (abs (addr - trampaddr) < J_RANGE)
 		{ /* The trampoline is in range of original; fix it!  */
@@ -9258,7 +9245,7 @@ static void xg_relax_trampoline (fragS *fragP, long stretch, long *new_stretch)
 
 		  new_stretch += init_trampoline_frag (tf) + 3;
 		  /* Assemble a jump to the target label in the trampoline frag.  */
-		  newfixP = xg_append_jump (fragP, tf->fixP,
+		  newfixP = xg_append_jump (fragP,
 					    fixP->fx_addsy, fixP->fx_offset);
 
 		  /* Adjust the fixup for the original "j" instruction to
@@ -9282,7 +9269,8 @@ static void xg_relax_trampoline (fragS *fragP, long stretch, long *new_stretch)
 		      frag_wane (fragP);
 		      fragP->fr_subtype = 0;
 		      /* Remove from the trampoline_list.  */
-		      prev->next = tf->next;
+		      prev->tc_frag_data.next_trampoline =
+			tf->tc_frag_data.next_trampoline;
 		      if (fragP == fixup_cache.first_frag)
 			fixup_cache.first_frag = NULL;
 		      break;
@@ -9877,12 +9865,12 @@ bytes_to_stretch (fragS *this_frag,
 }
 
 
-static struct trampoline_frag *
+static fragS *
 search_trampolines (TInsn *tinsn, fragS *fragP, bfd_boolean unreachable_only)
 {
   struct trampoline_seg *ts = find_trampoline_seg (now_seg);
-  struct trampoline_frag *tf = (ts) ? ts->trampoline_list.next : NULL;
-  struct trampoline_frag *best_tf = NULL;
+  fragS *tf = ts ? ts->trampoline_list.tc_frag_data.next_trampoline : NULL;
+  fragS *best_tf = NULL;
   int best_delta = 0;
   int best_addr = 0;
   symbolS *sym = tinsn->tok[0].X_add_symbol;
@@ -9900,11 +9888,12 @@ search_trampolines (TInsn *tinsn, fragS *fragP, bfd_boolean unreachable_only)
       /* One trampoline won't do; we need multiple.
 	 Choose the farthest trampoline that's still in range of the original
 	 and let a later pass finish the job.  */
-      for ( ; tf; tf = tf->next)
+      for ( ; tf; tf = tf->tc_frag_data.next_trampoline)
 	{
-	  int next_addr = (tf->next) ? tf->next->fragP->fr_address + tf->next->fragP->fr_fix : 0;
+	  fragS *next = tf->tc_frag_data.next_trampoline;
+	  int next_addr = next ? next->fr_address + next->fr_fix : 0;
 
-	  this_addr = tf->fragP->fr_address + tf->fragP->fr_fix;
+	  this_addr = tf->fr_address + tf->fr_fix;
 	  if (lower == addr)
 	    {
 	      /* Forward jump.  */
@@ -9923,11 +9912,11 @@ search_trampolines (TInsn *tinsn, fragS *fragP, bfd_boolean unreachable_only)
 
       return NULL;
     }
-  for ( ; tf; tf = tf->next)
+  for ( ; tf; tf = tf->tc_frag_data.next_trampoline)
     {
-      this_addr = tf->fragP->fr_address + tf->fragP->fr_fix;
+      this_addr = tf->fr_address + tf->fr_fix;
       this_delta = abs (this_addr - midpoint);
-      if (unreachable_only && tf->needs_jump_around)
+      if (unreachable_only && tf->tc_frag_data.needs_jump_around)
 	continue;
       if (!best_tf || this_delta < best_delta)
         {
@@ -9947,10 +9936,10 @@ search_trampolines (TInsn *tinsn, fragS *fragP, bfd_boolean unreachable_only)
 }
 
 
-static struct trampoline_frag *
+static fragS *
 get_best_trampoline (TInsn *tinsn, fragS *fragP)
 {
-  struct trampoline_frag *tf = NULL;
+  fragS *tf = NULL;
 
   tf = search_trampolines (tinsn, fragP, TRUE); /* Try unreachable first.  */
 
@@ -9965,22 +9954,21 @@ static void
 check_and_update_trampolines (void)
 {
   struct trampoline_seg *ts = find_trampoline_seg (now_seg);
-  struct trampoline_frag *tf = ts->trampoline_list.next;
-  struct trampoline_frag *prev = &ts->trampoline_list;
+  fragS *tf = ts->trampoline_list.tc_frag_data.next_trampoline;
+  fragS *prev = &ts->trampoline_list;
 
-  for ( ; tf; prev = tf, tf = tf->next)
+  for ( ; tf; prev = tf, tf = tf->tc_frag_data.next_trampoline)
     {
-      if (tf->fragP->fr_var < 3)
+      if (tf->fr_var < 3)
 	{
-	  frag_wane (tf->fragP);
-	  prev->next = tf->next;
-	  tf->fragP = NULL;
+	  frag_wane (tf);
+	  prev->tc_frag_data.next_trampoline =
+	    tf->tc_frag_data.next_trampoline;
 	}
     }
 }
 
-static fixS *xg_append_jump (fragS *fragP, fixS *jump_around,
-			     symbolS *sym, offsetT offset)
+static fixS *xg_append_jump (fragS *fragP, symbolS *sym, offsetT offset)
 {
   fixS *fixP;
   TInsn insn;
@@ -10006,17 +9994,16 @@ static fixS *xg_append_jump (fragS *fragP, fixS *jump_around,
   fragP->fr_var -= 3;
 
   /* Adjust the jump around this trampoline (if present).  */
-  if (jump_around)
-    jump_around->fx_offset += 3;
+  if (fragP->tc_frag_data.jump_around_fix)
+    fragP->tc_frag_data.jump_around_fix->fx_offset += 3;
 
   return fixP;
 }
 
 
 static int
-init_trampoline_frag (struct trampoline_frag *trampP)
+init_trampoline_frag (fragS *fp)
 {
-  fragS *fp = trampP->fragP;
   int growth = 0;
 
   if (fp->fr_fix == 0)
@@ -10027,9 +10014,9 @@ init_trampoline_frag (struct trampoline_frag *trampP)
       sprintf (label, ".L0_TR_%p", fp);
       lsym = (symbolS *)local_symbol_make (label, now_seg, 0, fp);
       fp->fr_symbol = lsym;
-      if (trampP->needs_jump_around)
+      if (fp->tc_frag_data.needs_jump_around)
         {
-	  trampP->fixP = xg_append_jump (fp, NULL, lsym, 3);
+	  fp->tc_frag_data.jump_around_fix = xg_append_jump (fp, lsym, 3);
 	  growth = 3;
         }
     }
@@ -10038,9 +10025,8 @@ init_trampoline_frag (struct trampoline_frag *trampP)
 
 
 static int
-add_jump_to_trampoline (struct trampoline_frag *trampP, fragS *origfrag)
+add_jump_to_trampoline (fragS *tramp, fragS *origfrag)
 {
-  fragS *tramp = trampP->fragP;
   int i, slot = -1;
 
   for (i = 0; i < MAX_SLOTS; ++i)
@@ -10053,7 +10039,7 @@ add_jump_to_trampoline (struct trampoline_frag *trampP, fragS *origfrag)
   gas_assert (slot >= 0 && slot < MAX_SLOTS);
 
   /* Assemble a jump to the target label in the trampoline frag.  */
-  xg_append_jump (tramp, trampP->fixP,
+  xg_append_jump (tramp,
 		  origfrag->tc_frag_data.slot_symbols[slot],
 		  origfrag->tc_frag_data.slot_offsets[slot]);
 
@@ -10216,7 +10202,7 @@ relax_frag_immed (segT segP,
 
       if (!xg_symbolic_immeds_fit (jinsn, segP, fragP, fragP->fr_offset, total_text_diff))
 	{
-	  struct trampoline_frag *tf = get_best_trampoline (jinsn, fragP);
+	  fragS *tf = get_best_trampoline (jinsn, fragP);
 
 	  if (tf)
 	    {

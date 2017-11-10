@@ -1,5 +1,27 @@
 2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* config/tc-xtensa.c (init_trampoline_frag): Replace pointer to
+	struct trampoline_frag parameter with pointer to fragS.
+	(xg_append_jump): Remove jump_around parameter.
+	(struct trampoline_frag): Remove.
+	(struct trampoline_seg): Change type of trampoline_list from
+	struct trampoline_frag to fragS.
+	(xtensa_create_trampoline_frag): Don't allocate struct
+	trampoline_frag. Initialize new fragS::tc_frag_data fields.
+	(dump_trampolines, xg_relax_trampoline, search_trampolines)
+	(get_best_trampoline, init_trampoline_frag)
+	(add_jump_to_trampoline, relax_frag_immed): Replace pointer to
+	struct trampoline_frag with a pointer to fragS.
+	(xg_append_jump): Remove jump_around parameter, use
+	fragS::tc_frag_data.jump_around_fix instead.
+	(xg_relax_trampoline, init_trampoline_frag)
+	(add_jump_to_trampoline): Don't pass jump_around parameter to
+	xg_append_jump.
+	* config/tc-xtensa.h (struct xtensa_frag_type): Add new fields:
+	needs_jump_around, next_trampoline and jump_around_fix.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* config/tc-xtensa.c (find_trampoline_seg): Move above the first
 	use.
 	(xtensa_create_trampoline_frag): Replace trampoline seg search
