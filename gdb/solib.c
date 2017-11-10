@@ -1474,8 +1474,8 @@ gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
     {
       unsigned int i;
 
-      asymbol **symbol_table = (asymbol **) xmalloc (storage_needed);
-      struct cleanup *back_to = make_cleanup (xfree, symbol_table);
+      gdb::def_vector<asymbol *> storage (storage_needed / sizeof (asymbol *));
+      asymbol **symbol_table = storage.data ();
       unsigned int number_of_symbols =
 	bfd_canonicalize_symtab (abfd, symbol_table);
 
@@ -1510,7 +1510,6 @@ gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 	      break;
 	    }
 	}
-      do_cleanups (back_to);
     }
 
   return symaddr;
@@ -1533,8 +1532,8 @@ bfd_lookup_symbol_from_dyn_symtab (bfd *abfd,
   if (storage_needed > 0)
     {
       unsigned int i;
-      asymbol **symbol_table = (asymbol **) xmalloc (storage_needed);
-      struct cleanup *back_to = make_cleanup (xfree, symbol_table);
+      gdb::def_vector<asymbol *> storage (storage_needed / sizeof (asymbol *));
+      asymbol **symbol_table = storage.data ();
       unsigned int number_of_symbols =
 	bfd_canonicalize_dynamic_symtab (abfd, symbol_table);
 
@@ -1549,7 +1548,6 @@ bfd_lookup_symbol_from_dyn_symtab (bfd *abfd,
 	      break;
 	    }
 	}
-      do_cleanups (back_to);
     }
   return symaddr;
 }

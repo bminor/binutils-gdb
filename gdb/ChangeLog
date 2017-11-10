@@ -1,3 +1,9 @@
+2018-03-18  Tom Tromey  <tom@tromey.com>
+
+	* solib.c (gdb_bfd_lookup_symbol_from_symtab): Use
+	gdb::def_vector.
+	(bfd_lookup_symbol_from_dyn_symtab): Likewise.
+
 2018-03-17  Tom Tromey  <tom@tromey.com>
 
 	* auto-load.c (auto_load_objfile_script_1): Use std::string.
