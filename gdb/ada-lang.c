@@ -12805,11 +12805,9 @@ print_mention_exception (enum ada_exception_catchpoint_kind ex,
       case ada_catch_exception:
         if (c->excep_string != NULL)
 	  {
-	    char *info = xstrprintf (_("`%s' Ada exception"), c->excep_string);
-	    struct cleanup *old_chain = make_cleanup (xfree, info);
-
-	    uiout->text (info);
-	    do_cleanups (old_chain);
+	    std::string info = string_printf (_("`%s' Ada exception"),
+					      c->excep_string);
+	    uiout->text (info.c_str ());
 	  }
         else
           uiout->text (_("all Ada exceptions"));

@@ -1,5 +1,9 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (print_mention_exception): Use std::string.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (create_excep_cond_exprs): Update.
 	(ada_exception_catchpoint_cond_string): Use std::string.
 
