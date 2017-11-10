@@ -1,5 +1,10 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (xget_renaming_scope): Return std::string.
+	(old_renaming_is_invisible): Update.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* bfd-target.c (target_bfd::m_bfd): Now a gdb_bfd_ref_ptr.
 	(target_bfd::target_bfd, target_bfd::~target_bfd): Update.
 

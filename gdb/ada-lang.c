@@ -5180,9 +5180,9 @@ remove_extra_symbols (struct block_symbol *syms, int nsyms)
 /* Given a type that corresponds to a renaming entity, use the type name
    to extract the scope (package name or function name, fully qualified,
    and following the GNAT encoding convention) where this renaming has been
-   defined.  The string returned needs to be deallocated after use.  */
+   defined.  */
 
-static char *
+static std::string
 xget_renaming_scope (struct type *renaming_type)
 {
   /* The renaming types adhere to the following convention:
@@ -5193,8 +5193,6 @@ xget_renaming_scope (struct type *renaming_type)
   const char *name = type_name_no_tag (renaming_type);
   const char *suffix = strstr (name, "___XR");
   const char *last;
-  int scope_len;
-  char *scope;
 
   /* Now, backtrack a bit until we find the first "__".  Start looking
      at suffix - 3, as the <rename> part is at least one character long.  */
@@ -5204,14 +5202,7 @@ xget_renaming_scope (struct type *renaming_type)
       break;
 
   /* Make a copy of scope and return it.  */
-
-  scope_len = last - name;
-  scope = (char *) xmalloc ((scope_len + 1) * sizeof (char));
-
-  strncpy (scope, name, scope_len);
-  scope[scope_len] = '\0';
-
-  return scope;
+  return std::string (name, last);
 }
 
 /* Return nonzero if NAME corresponds to a package name.  */
@@ -5251,21 +5242,14 @@ is_package_name (const char *name)
 static int
 old_renaming_is_invisible (const struct symbol *sym, const char *function_name)
 {
-  char *scope;
-  struct cleanup *old_chain;
-
   if (SYMBOL_CLASS (sym) != LOC_TYPEDEF)
     return 0;
 
-  scope = xget_renaming_scope (SYMBOL_TYPE (sym));
-  old_chain = make_cleanup (xfree, scope);
+  std::string scope = xget_renaming_scope (SYMBOL_TYPE (sym));
 
   /* If the rename has been defined in a package, then it is visible.  */
-  if (is_package_name (scope))
-    {
-      do_cleanups (old_chain);
-      return 0;
-    }
+  if (is_package_name (scope.c_str ()))
+    return 0;
 
   /* Check that the rename is in the current function scope by checking
      that its name starts with SCOPE.  */
@@ -5277,12 +5261,7 @@ old_renaming_is_invisible (const struct symbol *sym, const char *function_name)
   if (startswith (function_name, "_ada_"))
     function_name += 5;
 
-  {
-    int is_invisible = !startswith (function_name, scope);
-
-    do_cleanups (old_chain);
-    return is_invisible;
-  }
+  return !startswith (function_name, scope.c_str ());
 }
 
 /* Remove entries from SYMS that corresponds to a renaming entity that
