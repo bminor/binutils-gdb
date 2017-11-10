@@ -7421,6 +7421,21 @@ static xtensa_insnbuf litpool_slotbuf = NULL;
 
 #define TRAMPOLINE_FRAG_SIZE 3000
 
+static struct trampoline_seg *
+find_trampoline_seg (asection *seg)
+{
+  struct trampoline_seg *ts = trampoline_seg_list.next;
+
+  for ( ; ts; ts = ts->next)
+    {
+      if (ts->seg == seg)
+	return ts;
+    }
+
+  return NULL;
+}
+
+
 static void
 xtensa_create_trampoline_frag (bfd_boolean needs_jump_around)
 {
@@ -7430,17 +7445,11 @@ xtensa_create_trampoline_frag (bfd_boolean needs_jump_around)
      We allocate enough for 1000 trampolines in each frag.
      If that's not enough, oh well.  */
 
-  struct trampoline_seg *ts = trampoline_seg_list.next;
+  struct trampoline_seg *ts = find_trampoline_seg (now_seg);
   struct trampoline_frag *tf;
   char *varP;
   fragS *fragP;
   int size = TRAMPOLINE_FRAG_SIZE;
-
-  for ( ; ts; ts = ts->next)
-    {
-      if (ts->seg == now_seg)
-	break;
-    }
 
   if (ts == NULL)
     {
@@ -7466,21 +7475,6 @@ xtensa_create_trampoline_frag (bfd_boolean needs_jump_around)
   tf->needs_jump_around = needs_jump_around;
   tf->fragP = fragP;
   tf->fixP = NULL;
-}
-
-
-static struct trampoline_seg *
-find_trampoline_seg (asection *seg)
-{
-  struct trampoline_seg *ts = trampoline_seg_list.next;
-
-  for ( ; ts; ts = ts->next)
-    {
-      if (ts->seg == seg)
-	return ts;
-    }
-
-  return NULL;
 }
 
 
