@@ -1203,14 +1203,14 @@ psymtab_to_fullname (struct partial_symtab *ps)
      to handle cases like the file being moved.  */
   if (ps->fullname == NULL)
     {
-      int fd = find_and_open_source (ps->filename, ps->dirname, &ps->fullname);
+      gdb::unique_xmalloc_ptr<char> fullname;
+      int fd = find_and_open_source (ps->filename, ps->dirname, &fullname);
+      ps->fullname = fullname.release ();
 
       if (fd >= 0)
 	close (fd);
       else
 	{
-	  gdb::unique_xmalloc_ptr<char> fullname;
-
 	  /* rewrite_source_path would be applied by find_and_open_source, we
 	     should report the pathname where GDB tried to find the file.  */
 

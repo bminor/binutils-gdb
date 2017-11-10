@@ -1,5 +1,25 @@
 2018-02-14  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (symfile_bfd_open): Update.
+	* source.h (openp, source_full_path_of, find_and_open_source):
+	Change argument type to unique_xmalloc_ptr.
+	* source.c (openp): Take a unique_xmalloc_ptr.
+	(source_full_path_of, find_and_open_source): Likewise.
+	(open_source_file, symtab_to_fullname): Update.
+	* solist.h (struct target_so_ops) <find_and_open_solib>: Take a
+	unique_xmalloc_ptr.
+	* solib.c (solib_find_1): Use unique_xmalloc_ptr.
+	(exec_file_find): Update.
+	* psymtab.c (psymtab_to_fullname): Update.
+	* nto-tdep.h (nto_find_and_open_solib): Update.
+	* nto-tdep.c (nto_find_and_open_solib): Change temp_path to a
+	unique_xmalloc_ptr.
+	* exec.c (exec_file_attach): Update.
+	* dwarf2read.c (try_open_dwop_file): Use unique_xmalloc_ptr.
+	* cli/cli-cmds.c (find_and_open_script): Use unique_xmalloc_ptr.
+
+2018-02-14  Tom Tromey  <tom@tromey.com>
+
 	* solib.c: Include source.h.
 	* nto-tdep.c: Include source.h.
 	* mi/mi-cmd-env.c: Include source.h.

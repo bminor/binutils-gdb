@@ -32,9 +32,10 @@ enum openp_flag
 
 DEF_ENUM_FLAGS_TYPE(openp_flag, openp_flags);
 
-extern int openp (const char *, openp_flags, const char *, int, char **);
+extern int openp (const char *, openp_flags, const char *, int,
+		  gdb::unique_xmalloc_ptr<char> *);
 
-extern int source_full_path_of (const char *, char **);
+extern int source_full_path_of (const char *, gdb::unique_xmalloc_ptr<char> *);
 
 extern void mod_path (const char *, char **);
 
@@ -67,7 +68,7 @@ extern void init_source_path (void);
      FULLNAME is set to NULL.  */
 extern int find_and_open_source (const char *filename,
 				 const char *dirname,
-				 char **fullname);
+				 gdb::unique_xmalloc_ptr<char> *fullname);
 
 /* Open a source file given a symtab S.  Returns a file descriptor or
    negative number for error.  */

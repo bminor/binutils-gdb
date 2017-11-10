@@ -1719,12 +1719,10 @@ gdb_bfd_ref_ptr
 symfile_bfd_open (const char *name)
 {
   int desc = -1;
-  struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
+  gdb::unique_xmalloc_ptr<char> absolute_name;
   if (!is_target_filename (name))
     {
-      char *absolute_name;
-
       gdb::unique_xmalloc_ptr<char> expanded_name (tilde_expand (name));
 
       /* Look down path for it, allocate 2nd new malloc'd copy.  */
@@ -1745,8 +1743,7 @@ symfile_bfd_open (const char *name)
       if (desc < 0)
 	perror_with_name (expanded_name.get ());
 
-      make_cleanup (xfree, absolute_name);
-      name = absolute_name;
+      name = absolute_name.get ();
     }
 
   gdb_bfd_ref_ptr sym_bfd (gdb_bfd_open (name, gnutarget, desc));
@@ -1760,8 +1757,6 @@ symfile_bfd_open (const char *name)
   if (!bfd_check_format (sym_bfd.get (), bfd_object))
     error (_("`%s': can't read symbols: %s."), name,
 	   bfd_errmsg (bfd_get_error ()));
-
-  do_cleanups (back_to);
 
   return sym_bfd;
 }

@@ -737,7 +737,7 @@ is_regular_file (const char *name, int *errno_ptr)
     >>>>  eg executable, non-directory.  */
 int
 openp (const char *path, openp_flags opts, const char *string,
-       int mode, char **filename_opened)
+       int mode, gdb::unique_xmalloc_ptr<char> *filename_opened)
 {
   int fd;
   char *filename;
@@ -896,11 +896,11 @@ done:
     {
       /* If a file was opened, canonicalize its filename.  */
       if (fd < 0)
-	*filename_opened = NULL;
+	filename_opened->reset (NULL);
       else if ((opts & OPF_RETURN_REALPATH) != 0)
-	*filename_opened = gdb_realpath (filename).release ();
+	*filename_opened = gdb_realpath (filename);
       else
-	*filename_opened = gdb_abspath (filename).release ();
+	*filename_opened = gdb_abspath (filename);
     }
 
   errno = last_errno;
@@ -920,7 +920,8 @@ done:
 
    Else, this functions returns 0, and FULL_PATHNAME is set to NULL.  */
 int
-source_full_path_of (const char *filename, char **full_pathname)
+source_full_path_of (const char *filename,
+		     gdb::unique_xmalloc_ptr<char> *full_pathname)
 {
   int fd;
 
@@ -929,7 +930,7 @@ source_full_path_of (const char *filename, char **full_pathname)
 	      filename, O_RDONLY, full_pathname);
   if (fd < 0)
     {
-      *full_pathname = NULL;
+      full_pathname->reset (NULL);
       return 0;
     }
 
@@ -1011,7 +1012,7 @@ rewrite_source_path (const char *path)
 int
 find_and_open_source (const char *filename,
 		      const char *dirname,
-		      char **fullname)
+		      gdb::unique_xmalloc_ptr<char> *fullname)
 {
   char *path = source_path;
   const char *p;
@@ -1024,27 +1025,21 @@ find_and_open_source (const char *filename,
       /* The user may have requested that source paths be rewritten
          according to substitution rules he provided.  If a substitution
          rule applies to this path, then apply it.  */
-      char *rewritten_fullname = rewrite_source_path (*fullname).release ();
+      gdb::unique_xmalloc_ptr<char> rewritten_fullname
+	= rewrite_source_path (fullname->get ());
 
       if (rewritten_fullname != NULL)
-        {
-          xfree (*fullname);
-          *fullname = rewritten_fullname;
-        }
+	*fullname = std::move (rewritten_fullname);
 
-      result = gdb_open_cloexec (*fullname, OPEN_MODE, 0);
+      result = gdb_open_cloexec (fullname->get (), OPEN_MODE, 0);
       if (result >= 0)
 	{
-	  char *lpath = gdb_realpath (*fullname).release ();
-
-	  xfree (*fullname);
-	  *fullname = lpath;
+	  *fullname = gdb_realpath (fullname->get ());
 	  return result;
 	}
 
       /* Didn't work -- free old one, try again.  */
-      xfree (*fullname);
-      *fullname = NULL;
+      fullname->reset (NULL);
     }
 
   gdb::unique_xmalloc_ptr<char> rewritten_dirname;
@@ -1115,7 +1110,10 @@ open_source_file (struct symtab *s)
   if (!s)
     return -1;
 
-  return find_and_open_source (s->filename, SYMTAB_DIRNAME (s), &s->fullname);
+  gdb::unique_xmalloc_ptr<char> fullname;
+  int fd = find_and_open_source (s->filename, SYMTAB_DIRNAME (s), &fullname);
+  s->fullname = fullname.release ();
+  return fd;
 }
 
 /* Finds the fullname that a symtab represents.
@@ -1135,8 +1133,7 @@ symtab_to_fullname (struct symtab *s)
      to handle cases like the file being moved.  */
   if (s->fullname == NULL)
     {
-      int fd = find_and_open_source (s->filename, SYMTAB_DIRNAME (s),
-				     &s->fullname);
+      int fd = open_source_file (s);
 
       if (fd >= 0)
 	close (fd);

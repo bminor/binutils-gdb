@@ -12881,35 +12881,40 @@ try_open_dwop_file (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		    const char *file_name, int is_dwp, int search_cwd)
 {
   int desc;
-  char *absolute_name;
   /* Blech.  OPF_TRY_CWD_FIRST also disables searching the path list if
      FILE_NAME contains a '/'.  So we can't use it.  Instead prepend "."
      to debug_file_directory.  */
-  char *search_path;
+  const char *search_path;
   static const char dirname_separator_string[] = { DIRNAME_SEPARATOR, '\0' };
 
+  gdb::unique_xmalloc_ptr<char> search_path_holder;
   if (search_cwd)
     {
       if (*debug_file_directory != '\0')
-	search_path = concat (".", dirname_separator_string,
-			      debug_file_directory, (char *) NULL);
+	{
+	  search_path_holder.reset (concat (".", dirname_separator_string,
+					    debug_file_directory,
+					    (char *) NULL));
+	  search_path = search_path_holder.get ();
+	}
       else
-	search_path = xstrdup (".");
+	search_path = ".";
     }
   else
-    search_path = xstrdup (debug_file_directory);
+    search_path = debug_file_directory;
 
   openp_flags flags = OPF_RETURN_REALPATH;
   if (is_dwp)
     flags |= OPF_SEARCH_IN_PATH;
+
+  gdb::unique_xmalloc_ptr<char> absolute_name;
   desc = openp (search_path, flags, file_name,
 		O_RDONLY | O_BINARY, &absolute_name);
-  xfree (search_path);
   if (desc < 0)
     return NULL;
 
-  gdb_bfd_ref_ptr sym_bfd (gdb_bfd_open (absolute_name, gnutarget, desc));
-  xfree (absolute_name);
+  gdb_bfd_ref_ptr sym_bfd (gdb_bfd_open (absolute_name.get (),
+					 gnutarget, desc));
   if (sym_bfd == NULL)
     return NULL;
   bfd_set_cacheable (sym_bfd.get (), 1);

@@ -89,7 +89,7 @@ nto_map_arch_to_cputype (const char *arch)
 
 int
 nto_find_and_open_solib (const char *solib, unsigned o_flags,
-			 char **temp_pathname)
+			 gdb::unique_xmalloc_ptr<char> *temp_pathname)
 {
   char *buf, *arch_path, *nto_root;
   const char *endian;
@@ -143,9 +143,9 @@ nto_find_and_open_solib (const char *solib, unsigned o_flags,
       if (temp_pathname)
 	{
 	  if (ret >= 0)
-	    *temp_pathname = gdb_realpath (arch_path).release ();
+	    *temp_pathname = gdb_realpath (arch_path);
 	  else
-	    *temp_pathname = NULL;
+	    temp_pathname->reset (NULL);
 	}
     }
   return ret;

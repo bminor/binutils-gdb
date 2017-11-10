@@ -506,10 +506,9 @@ find_and_open_script (const char *script_file, int search_path)
 
   /* Search for and open 'file' on the search path used for source
      files.  Put the full location in *FULL_PATHP.  */
-  char *temp_path;
+  gdb::unique_xmalloc_ptr<char> full_path;
   fd = openp (source_path, search_flags,
-	      file.get (), O_RDONLY, &temp_path);
-  gdb::unique_xmalloc_ptr<char> full_path (temp_path);
+	      file.get (), O_RDONLY, &full_path);
 
   if (fd == -1)
     return opened;

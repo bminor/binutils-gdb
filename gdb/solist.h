@@ -136,7 +136,8 @@ struct target_so_ops
        pointer to a malloc'd and realpath'd copy of SONAME is stored there,
        otherwise NULL is stored there.  */
     int (*find_and_open_solib) (const char *soname,
-        unsigned o_flags, char **temp_pathname);
+				unsigned o_flags,
+				gdb::unique_xmalloc_ptr<char> *temp_pathname);
 
     /* Hook for looking up global symbols in a library-specific way.  */
     struct block_symbol (*lookup_lib_global_symbol)

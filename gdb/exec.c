@@ -290,12 +290,10 @@ exec_file_attach (const char *filename, int from_tty)
 	}
       else
 	{
-	  char *temp_pathname;
-
 	  scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST,
 				filename, write_files ?
 				O_RDWR | O_BINARY : O_RDONLY | O_BINARY,
-				&temp_pathname);
+				&scratch_storage);
 #if defined(__GO32__) || defined(_WIN32) || defined(__CYGWIN__)
 	  if (scratch_chan < 0)
 	    {
@@ -306,14 +304,13 @@ exec_file_attach (const char *filename, int from_tty)
 				    exename, write_files ?
 				    O_RDWR | O_BINARY
 				    : O_RDONLY | O_BINARY,
-				    &temp_pathname);
+				    &scratch_storage);
 	    }
 #endif
 	  if (scratch_chan < 0)
 	    perror_with_name (filename);
 
-	  scratch_storage.reset (temp_pathname);
-	  scratch_pathname = temp_pathname;
+	  scratch_pathname = scratch_storage.get ();
 
 	  /* gdb_bfd_open (and its variants) prefers canonicalized
 	     pathname for better BFD caching.  */

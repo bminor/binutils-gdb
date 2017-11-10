@@ -152,7 +152,7 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
   int found_file = -1;
-  char *temp_pathname = NULL;
+  gdb::unique_xmalloc_ptr<char> temp_pathname;
   const char *fskind = effective_target_file_system_kind ();
   const char *sysroot = gdb_sysroot;
   int prefix_len, orig_prefix_len;
@@ -214,7 +214,7 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
   */
 
   if (!IS_TARGET_ABSOLUTE_PATH (fskind, in_pathname) || sysroot == NULL)
-    temp_pathname = xstrdup (in_pathname);
+    temp_pathname.reset (xstrdup (in_pathname));
   else
     {
       int need_dir_separator;
@@ -240,23 +240,21 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
 			     || strcmp (TARGET_SYSROOT_PREFIX, sysroot) == 0);
 
       /* Cat the prefixed pathname together.  */
-      temp_pathname = concat (sysroot,
-			      need_dir_separator ? SLASH_STRING : "",
-			      in_pathname, (char *) NULL);
+      temp_pathname.reset (concat (sysroot,
+				   need_dir_separator ? SLASH_STRING : "",
+				   in_pathname, (char *) NULL));
     }
 
   /* Handle files to be accessed via the target.  */
-  if (is_target_filename (temp_pathname))
+  if (is_target_filename (temp_pathname.get ()))
     {
       if (fd != NULL)
 	*fd = -1;
-      return gdb::unique_xmalloc_ptr<char> (temp_pathname);
+      return temp_pathname;
     }
 
   /* Now see if we can open it.  */
-  found_file = gdb_open_cloexec (temp_pathname, O_RDONLY | O_BINARY, 0);
-  if (found_file < 0)
-    xfree (temp_pathname);
+  found_file = gdb_open_cloexec (temp_pathname.get (), O_RDONLY | O_BINARY, 0);
 
   /* If the search in gdb_sysroot failed, and the path name has a
      drive spec (e.g, c:/foo), try stripping ':' from the drive spec,
@@ -268,33 +266,30 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
       && HAS_TARGET_DRIVE_SPEC (fskind, in_pathname))
     {
       int need_dir_separator = !IS_DIR_SEPARATOR (in_pathname[2]);
-      char *drive = savestring (in_pathname, 1);
+      char drive[2] = { in_pathname[0], '\0' };
 
-      temp_pathname = concat (sysroot,
-			      SLASH_STRING,
-			      drive,
-			      need_dir_separator ? SLASH_STRING : "",
-			      in_pathname + 2, (char *) NULL);
-      xfree (drive);
+      temp_pathname.reset (concat (sysroot,
+				   SLASH_STRING,
+				   drive,
+				   need_dir_separator ? SLASH_STRING : "",
+				   in_pathname + 2, (char *) NULL));
 
-      found_file = gdb_open_cloexec (temp_pathname, O_RDONLY | O_BINARY, 0);
+      found_file = gdb_open_cloexec (temp_pathname.get (),
+				     O_RDONLY | O_BINARY, 0);
       if (found_file < 0)
 	{
-	  xfree (temp_pathname);
-
 	  /* If the search in gdb_sysroot still failed, try fully
 	     stripping the drive spec, and trying once more in the
 	     sysroot before giving up.
 
 	     c:/foo/bar.dll ==> /sysroot/foo/bar.dll.  */
 
-	  temp_pathname = concat (sysroot,
-				  need_dir_separator ? SLASH_STRING : "",
-				  in_pathname + 2, (char *) NULL);
+	  temp_pathname.reset (concat (sysroot,
+				       need_dir_separator ? SLASH_STRING : "",
+				       in_pathname + 2, (char *) NULL));
 
-	  found_file = gdb_open_cloexec (temp_pathname, O_RDONLY | O_BINARY, 0);
-	  if (found_file < 0)
-	    xfree (temp_pathname);
+	  found_file = gdb_open_cloexec (temp_pathname.get (),
+					 O_RDONLY | O_BINARY, 0);
 	}
     }
 
@@ -304,7 +299,7 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
      needs to be freed.  */
 
   if (found_file < 0)
-    temp_pathname = NULL;
+    temp_pathname.reset (NULL);
 
   /* If the search in gdb_sysroot failed, and the path name is
      absolute at this point, make it relative.  (openp will try and open the
@@ -366,7 +361,7 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
   else
     *fd = found_file;
 
-  return gdb::unique_xmalloc_ptr<char> (temp_pathname);
+  return temp_pathname;
 }
 
 /* Return the full pathname of the main executable, or NULL if not
@@ -407,10 +402,7 @@ exec_file_find (const char *in_pathname, int *fd)
 	 (If that fails, we'll just fall back on the original
 	 filename.  Not much more we can do...)  */
 
-      char *full_path = NULL;
-      if (source_full_path_of (in_pathname, &full_path))
-	result.reset (full_path);
-      else
+      if (!source_full_path_of (in_pathname, &result))
 	result.reset (xstrdup (in_pathname));
       if (fd != NULL)
 	*fd = -1;
