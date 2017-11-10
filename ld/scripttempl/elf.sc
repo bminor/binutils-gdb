@@ -139,6 +139,23 @@ if test -z "$DATA_SEGMENT_ALIGN"; then
     DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT-0}, .);"
   fi
 fi
+# Don't bother with text-only segment when there are data sections between
+# .plt and .text.
+if test -n "$TINY_READONLY_SECTION"; then
+  TEXT_SEGMENT_ALIGN=" "
+  TEXT_SEGMENT_RELRO_END=" "
+  TEXT_SEGMENT_END=" "
+fi
+if test -z "$TEXT_SEGMENT_ALIGN" && test -n "$DATA_SEGMENT_ALIGN"; then
+  case "$LD_FLAG" in
+    *textonly*)
+      TEXT_SEGMENT_ALIGN=`echo $DATA_SEGMENT_ALIGN | sed -e "s/DATA/TEXT/g"`
+      TEXT_SEGMENT_ALIGN=". = $TEXT_SEGMENT_ALIGN;"
+      TEXT_SEGMENT_RELRO_END=". = TEXT_SEGMENT_RELRO_END (0, .);"
+      TEXT_SEGMENT_END=". = TEXT_SEGMENT_END (.);"
+      ;;
+  esac
+fi
 if test -z "${INITIAL_READONLY_SECTIONS}${CREATE_SHLIB}"; then
   INITIAL_READONLY_SECTIONS=".interp       ${RELOCATING-0} : { *(.interp) }"
 fi
@@ -478,6 +495,8 @@ emit_dyn()
 test -n "${NON_ALLOC_DYN}${SEPARATE_CODE}" || emit_dyn
 
 cat <<EOF
+  ${RELOCATING+${TEXT_SEGMENT_ALIGN}}
+
   .init         ${RELOCATING-0}${RELOCATING+${INIT_ADDR}} :
   {
     ${RELOCATING+${INIT_START}}
@@ -508,6 +527,8 @@ cat <<EOF
   ${RELOCATING+PROVIDE (__${ETEXT_NAME} = .);}
   ${RELOCATING+PROVIDE (_${ETEXT_NAME} = .);}
   ${RELOCATING+PROVIDE (${ETEXT_NAME} = .);}
+  ${RELOCATING+${TEXT_SEGMENT_RELRO_END}}
+  ${RELOCATING+${TEXT_SEGMENT_END}}
 EOF
 
 if test -n "${SEPARATE_CODE}"; then

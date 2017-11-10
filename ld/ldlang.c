@@ -3889,6 +3889,7 @@ strip_excluded_output_sections (void)
     {
       expld.phase = lang_mark_phase_enum;
       expld.dataseg.phase = exp_seg_none;
+      expld.textseg.phase = exp_seg_none;
       one_lang_size_sections_pass (NULL, FALSE);
       lang_reset_memory_regions ();
     }
@@ -5448,14 +5449,17 @@ lang_size_sections_1
 	    bfd_vma newdot = dot;
 	    etree_type *tree = s->assignment_statement.exp;
 
+	    expld.textseg.relro = exp_seg_relro_none;
 	    expld.dataseg.relro = exp_seg_relro_none;
 
 	    exp_fold_tree (tree,
 			   output_section_statement->bfd_section,
 			   &newdot);
 
+	    ldlang_check_relro_region (s, &expld.textseg);
 	    ldlang_check_relro_region (s, &expld.dataseg);
 
+	    expld.textseg.relro = exp_seg_relro_none;
 	    expld.dataseg.relro = exp_seg_relro_none;
 
 	    /* This symbol may be relative to this section.  */
@@ -5662,34 +5666,55 @@ static bfd_boolean
 lang_size_relro_segment (bfd_boolean *relax, bfd_boolean check_regions)
 {
   bfd_boolean do_reset = FALSE;
-  bfd_boolean do_data_relro;
-  bfd_vma data_initial_base, data_relro_end;
+  bfd_boolean do_text_relro = FALSE;
+  bfd_boolean do_data_relro = FALSE;
 
-  if (link_info.relro && expld.dataseg.relro_end)
+  if (link_info.relro)
     {
-      do_data_relro = TRUE;
-      data_initial_base = expld.dataseg.base;
-      data_relro_end = lang_size_relro_segment_1 (&expld.dataseg);
-    }
-  else
-    {
-      do_data_relro = FALSE;
-      data_initial_base = data_relro_end = 0;
-    }
+      bfd_vma text_initial_base, text_relro_end;
+      bfd_vma data_initial_base, data_relro_end;
 
-  if (do_data_relro)
-    {
-      lang_reset_memory_regions ();
-      one_lang_size_sections_pass (relax, check_regions);
-
-      /* Assignments to dot, or to output section address in a user
-	 script have increased padding over the original.  Revert.  */
-      if (do_data_relro && expld.dataseg.relro_end > data_relro_end)
+      if (link_info.relro > 1 && expld.textseg.relro_end)
 	{
-	  expld.dataseg.base = data_initial_base;;
-	  do_reset = TRUE;
+	  do_text_relro = TRUE;
+	  text_initial_base = expld.textseg.base;
+	  text_relro_end = lang_size_relro_segment_1 (&expld.textseg);
+	}
+      else
+	text_initial_base = text_relro_end = 0;
+
+      if (expld.dataseg.relro_end)
+	{
+	  do_data_relro = TRUE;
+	  data_initial_base = expld.dataseg.base;
+	  data_relro_end = lang_size_relro_segment_1 (&expld.dataseg);
+	}
+      else
+	data_initial_base = data_relro_end = 0;
+
+      if (do_text_relro || do_data_relro)
+	{
+	  lang_reset_memory_regions ();
+	  one_lang_size_sections_pass (relax, check_regions);
+
+	  /* Assignments to dot, or to output section address in a user
+	     script have increased padding over the original.  Revert.  */
+	  if (do_text_relro && expld.textseg.relro_end > text_relro_end)
+	    {
+	      expld.textseg.base = text_initial_base;
+	      do_reset = TRUE;
+	    }
+
+	  if (do_data_relro && expld.dataseg.relro_end > data_relro_end)
+	    {
+	      expld.dataseg.base = data_initial_base;;
+	      do_reset = TRUE;
+	    }
 	}
     }
+
+  if (!do_text_relro && lang_size_segment (&expld.textseg))
+    do_reset = TRUE;
 
   if (!do_data_relro && lang_size_segment (&expld.dataseg))
     do_reset = TRUE;
@@ -5702,13 +5727,17 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 {
   expld.phase = lang_allocating_phase_enum;
   expld.dataseg.phase = exp_seg_none;
+  expld.textseg.phase = exp_seg_none;
 
   one_lang_size_sections_pass (relax, check_regions);
 
+  if (expld.textseg.phase != exp_seg_end_seen)
+    expld.textseg.phase = exp_seg_done;
   if (expld.dataseg.phase != exp_seg_end_seen)
     expld.dataseg.phase = exp_seg_done;
 
-  if (expld.dataseg.phase == exp_seg_end_seen)
+  if (expld.textseg.phase == exp_seg_end_seen
+      || expld.dataseg.phase == exp_seg_end_seen)
     {
       bfd_boolean do_reset
 	= lang_size_relro_segment (relax, check_regions);
@@ -5717,6 +5746,12 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	{
 	  lang_reset_memory_regions ();
 	  one_lang_size_sections_pass (relax, check_regions);
+	}
+
+      if (link_info.relro > 1 && expld.textseg.relro_end)
+	{
+	  link_info.text_start = expld.textseg.base;
+	  link_info.text_end = expld.textseg.relro_end;
 	}
 
       if (link_info.relro && expld.dataseg.relro_end)
@@ -6904,15 +6939,33 @@ lang_find_relro_sections_1 (lang_statement_union_type *s,
 static void
 lang_find_relro_sections (void)
 {
-  bfd_boolean has_relro_section = FALSE;
-
   /* Check all sections in the link script.  */
+  if (link_info.relro)
+    {
+      bfd_boolean has_relro_section;
 
-  lang_find_relro_sections_1 (expld.dataseg.relro_start_stat,
-			      &expld.dataseg, &has_relro_section);
+      if (link_info.relro > 1)
+	{
+	  has_relro_section = FALSE;
+	  lang_find_relro_sections_1 (expld.textseg.relro_start_stat,
+				      &expld.textseg,
+				      &has_relro_section);
+	  if (!has_relro_section)
+	    link_info.relro = 1;
+	}
 
-  if (!has_relro_section)
-    link_info.relro = FALSE;
+      /* We can't turn off RELRO if we need to generate read-only
+	 PT_LOAD segment.  */
+      if (link_info.relro == 1)
+	{
+	  has_relro_section = FALSE;
+	  lang_find_relro_sections_1 (expld.dataseg.relro_start_stat,
+				      &expld.dataseg,
+				      &has_relro_section);
+	  if (!has_relro_section)
+	    link_info.relro = 0;
+	}
+    }
 }
 
 /* Relax all sections until bfd_relax_section gives up.  */

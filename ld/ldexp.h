@@ -178,6 +178,9 @@ struct ldexp_control {
 
   /* State machine and results for DATASEG.  */
   seg_align_type dataseg;
+
+  /* State machine and results for TEXTSEG.  */
+  seg_align_type textseg;
 };
 
 extern struct ldexp_control expld;

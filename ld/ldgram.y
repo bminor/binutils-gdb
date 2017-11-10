@@ -127,6 +127,7 @@ static int error_index;
 %token <token> ALIGN_K BLOCK BIND QUAD SQUAD LONG SHORT BYTE
 %token SECTIONS PHDRS INSERT_K AFTER BEFORE
 %token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
+%token TEXT_SEGMENT_ALIGN TEXT_SEGMENT_RELRO_END TEXT_SEGMENT_END
 %token SORT_BY_NAME SORT_BY_ALIGNMENT SORT_NONE
 %token SORT_BY_INIT_PRIORITY
 %token '{' '}'
@@ -993,6 +994,12 @@ exp	:
 			{ $$ = exp_binop (DATA_SEGMENT_RELRO_END, $5, $3); }
 	|	DATA_SEGMENT_END '(' exp ')'
 			{ $$ = exp_unop (DATA_SEGMENT_END, $3); }
+	|	TEXT_SEGMENT_ALIGN '(' exp ',' exp ')'
+			{ $$ = exp_binop (TEXT_SEGMENT_ALIGN, $3, $5); }
+	|	TEXT_SEGMENT_RELRO_END '(' exp ',' exp ')'
+			{ $$ = exp_binop (TEXT_SEGMENT_RELRO_END, $5, $3); }
+	|	TEXT_SEGMENT_END '(' exp ')'
+			{ $$ = exp_unop (TEXT_SEGMENT_END, $3); }
 	|	SEGMENT_START '(' NAME ',' exp ')'
 			{ /* The operands to the expression node are
 			     placed in the opposite order from the way

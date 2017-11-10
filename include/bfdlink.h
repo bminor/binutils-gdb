@@ -627,6 +627,9 @@ struct bfd_link_info
   /* May be used to set DT_FLAGS_1 for ELF. */
   bfd_vma flags_1;
 
+  /* Start and end of text-only region.  */
+  bfd_vma text_start, text_end;
+
   /* Start and end of RELRO region.  */
   bfd_vma relro_start, relro_end;
 

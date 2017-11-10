@@ -131,6 +131,9 @@ exp_print_token (token_code_type code, int infix_p)
     { DATA_SEGMENT_ALIGN, "DATA_SEGMENT_ALIGN" },
     { DATA_SEGMENT_RELRO_END, "DATA_SEGMENT_RELRO_END" },
     { DATA_SEGMENT_END, "DATA_SEGMENT_END" },
+    { TEXT_SEGMENT_ALIGN, "TEXT_SEGMENT_ALIGN" },
+    { TEXT_SEGMENT_RELRO_END, "TEXT_SEGMENT_RELRO_END" },
+    { TEXT_SEGMENT_END, "TEXT_SEGMENT_END" },
     { ORIGIN, "ORIGIN" },
     { LENGTH, "LENGTH" },
     { SEGMENT_START, "SEGMENT_START" }
@@ -411,6 +414,10 @@ fold_unary (etree_type *tree)
 	  fold_segment_end (&expld.dataseg);
 	  break;
 
+	case TEXT_SEGMENT_END:
+	  fold_segment_end (&expld.textseg);
+	  break;
+
 	default:
 	  FAIL ();
 	  break;
@@ -657,6 +664,14 @@ fold_binary (etree_type *tree)
 
 	case DATA_SEGMENT_RELRO_END:
 	  fold_segment_relro_end (&expld.dataseg, &lhs);
+	  break;
+
+	case TEXT_SEGMENT_ALIGN:
+	  fold_segment_align (&expld.textseg, &lhs);
+	  break;
+
+	case TEXT_SEGMENT_RELRO_END:
+	  fold_segment_relro_end (&expld.textseg, &lhs);
 	  break;
 
 	default:
@@ -1311,7 +1326,8 @@ exp_unop (int code, etree_type *child)
       && code != ALIGN_K
       && code != ABSOLUTE
       && code != NEXT
-      && code != DATA_SEGMENT_END)
+      && code != DATA_SEGMENT_END
+      && code != TEXT_SEGMENT_END)
     exp_value_fold (new_e);
   return new_e;
 }
