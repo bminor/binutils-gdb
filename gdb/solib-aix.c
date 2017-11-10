@@ -614,7 +614,6 @@ solib_aix_bfd_open (char *pathname)
   char *sep;
   int filename_len;
   int found_file;
-  char *found_pathname;
 
   if (pathname[path_len - 1] != ')')
     return solib_bfd_open (pathname);
@@ -638,10 +637,12 @@ solib_aix_bfd_open (char *pathname)
   /* Calling solib_find makes certain that sysroot path is set properly
      if program has a dependency on .a archive and sysroot is set via
      set sysroot command.  */
-  found_pathname = solib_find (filename.c_str (), &found_file);
+  gdb::unique_xmalloc_ptr<char> found_pathname
+    = solib_find (filename.c_str (), &found_file);
   if (found_pathname == NULL)
       perror_with_name (pathname);
-  gdb_bfd_ref_ptr archive_bfd (solib_bfd_fopen (found_pathname, found_file));
+  gdb_bfd_ref_ptr archive_bfd (solib_bfd_fopen (found_pathname.get (),
+						found_file));
   if (archive_bfd == NULL)
     {
       warning (_("Could not open `%s' as an executable file: %s"),

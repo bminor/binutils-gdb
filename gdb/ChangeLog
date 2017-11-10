@@ -1,3 +1,17 @@
+2018-02-14  Tom Tromey  <tom@tromey.com>
+
+	* solist.h (exec_file_find, solib_find): Return
+	unique_xmalloc_ptr.
+	(solib_bfd_fopen): Take a const char *.
+	* solib.c (solib_find_1): Return unique_xmalloc_ptr.
+	(exec_file_find, solib_find): Likewise.
+	(solib_bfd_fopen): Do not take ownership of "pathname".
+	(solib_bfd_open): Use unique_xmalloc_ptr.
+	* solib-darwin.c (darwin_bfd_open): Use unique_xmalloc_ptr.
+	* solib-aix.c (solib_aix_bfd_open): Use unique_xmalloc_ptr.
+	* infrun.c (follow_exec): Use unique_xmalloc_ptr.
+	* exec.c (exec_file_locate_attach): Use unique_xmalloc_ptr.
+
 2018-02-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (name_match_type_from_name): Remove reference to

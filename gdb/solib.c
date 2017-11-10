@@ -111,11 +111,9 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 #  define DOS_BASED_FILE_SYSTEM 0
 #endif
 
-/* Return the full pathname of a binary file (the main executable
-   or a shared library file), or NULL if not found.  The returned
-   pathname is malloc'ed and must be freed by the caller.  If FD
-   is non-NULL, *FD is set to either -1 or an open file handle for
-   the binary file.
+/* Return the full pathname of a binary file (the main executable or a
+   shared library file), or NULL if not found.  If FD is non-NULL, *FD
+   is set to either -1 or an open file handle for the binary file.
 
    Global variable GDB_SYSROOT is used as a prefix directory
    to search for binary files if they have an absolute path.
@@ -148,7 +146,7 @@ show_solib_search_path (struct ui_file *file, int from_tty,
    * machines since a sysroot will almost always be set.
 */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 solib_find_1 (const char *in_pathname, int *fd, int is_solib)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
@@ -251,7 +249,7 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
     {
       if (fd != NULL)
 	*fd = -1;
-      return temp_pathname;
+      return gdb::unique_xmalloc_ptr<char> (temp_pathname);
     }
 
   /* Now see if we can open it.  */
@@ -367,18 +365,17 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
   else
     *fd = found_file;
 
-  return temp_pathname;
+  return gdb::unique_xmalloc_ptr<char> (temp_pathname);
 }
 
 /* Return the full pathname of the main executable, or NULL if not
-   found.  The returned pathname is malloc'ed and must be freed by
-   the caller.  If FD is non-NULL, *FD is set to either -1 or an open
-   file handle for the main executable.  */
+   found.  If FD is non-NULL, *FD is set to either -1 or an open file
+   handle for the main executable.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 exec_file_find (const char *in_pathname, int *fd)
 {
-  char *result;
+  gdb::unique_xmalloc_ptr<char> result;
   const char *fskind = effective_target_file_system_kind ();
 
   if (in_pathname == NULL)
@@ -409,8 +406,11 @@ exec_file_find (const char *in_pathname, int *fd)
 	 (If that fails, we'll just fall back on the original
 	 filename.  Not much more we can do...)  */
 
-      if (!source_full_path_of (in_pathname, &result))
-	result = xstrdup (in_pathname);
+      char *full_path = NULL;
+      if (source_full_path_of (in_pathname, &full_path))
+	result.reset (full_path);
+      else
+	result.reset (xstrdup (in_pathname));
       if (fd != NULL)
 	*fd = -1;
     }
@@ -419,14 +419,13 @@ exec_file_find (const char *in_pathname, int *fd)
 }
 
 /* Return the full pathname of a shared library file, or NULL if not
-   found.  The returned pathname is malloc'ed and must be freed by
-   the caller.  If FD is non-NULL, *FD is set to either -1 or an open
-   file handle for the shared library.
+   found.  If FD is non-NULL, *FD is set to either -1 or an open file
+   handle for the shared library.
 
    The search algorithm used is described in solib_find_1's comment
    above.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 solib_find (const char *in_pathname, int *fd)
 {
   const char *solib_symbols_extension
@@ -463,12 +462,10 @@ solib_find (const char *in_pathname, int *fd)
    it is used as file handle to open the file.  Throws an error if the file
    could not be opened.  Handles both local and remote file access.
 
-   PATHNAME must be malloc'ed by the caller.  It will be freed by this
-   function.  If unsuccessful, the FD will be closed (unless FD was
-   -1).  */
+   If unsuccessful, the FD will be closed (unless FD was -1).  */
 
 gdb_bfd_ref_ptr
-solib_bfd_fopen (char *pathname, int fd)
+solib_bfd_fopen (const char *pathname, int fd)
 {
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (pathname, gnutarget, fd));
 
@@ -478,12 +475,9 @@ solib_bfd_fopen (char *pathname, int fd)
   if (abfd == NULL)
     {
       /* Arrange to free PATHNAME when the error is thrown.  */
-      gdb::unique_xmalloc_ptr<char> free_pathname (pathname);
       error (_("Could not open `%s' as an executable file: %s"),
 	     pathname, bfd_errmsg (bfd_get_error ()));
     }
-
-  xfree (pathname);
 
   return abfd;
 }
@@ -493,12 +487,12 @@ solib_bfd_fopen (char *pathname, int fd)
 gdb_bfd_ref_ptr
 solib_bfd_open (char *pathname)
 {
-  char *found_pathname;
   int found_file;
   const struct bfd_arch_info *b;
 
   /* Search for shared library file.  */
-  found_pathname = solib_find (pathname, &found_file);
+  gdb::unique_xmalloc_ptr<char> found_pathname
+    = solib_find (pathname, &found_file);
   if (found_pathname == NULL)
     {
       /* Return failure if the file could not be found, so that we can
@@ -510,7 +504,7 @@ solib_bfd_open (char *pathname)
     }
 
   /* Open bfd for shared library.  */
-  gdb_bfd_ref_ptr abfd (solib_bfd_fopen (found_pathname, found_file));
+  gdb_bfd_ref_ptr abfd (solib_bfd_fopen (found_pathname.get (), found_file));
 
   /* Check bfd format.  */
   if (!bfd_check_format (abfd.get (), bfd_object))

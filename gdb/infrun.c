@@ -1081,8 +1081,6 @@ follow_exec (ptid_t ptid, char *exec_file_target)
   struct inferior *inf = current_inferior ();
   int pid = ptid_get_pid (ptid);
   ptid_t process_ptid;
-  char *exec_file_host;
-  struct cleanup *old_chain;
 
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
@@ -1161,8 +1159,8 @@ follow_exec (ptid_t ptid, char *exec_file_target)
 
   breakpoint_init_inferior (inf_execd);
 
-  exec_file_host = exec_file_find (exec_file_target, NULL);
-  old_chain = make_cleanup (xfree, exec_file_host);
+  gdb::unique_xmalloc_ptr<char> exec_file_host
+    = exec_file_find (exec_file_target, NULL);
 
   /* If we were unable to map the executable target pathname onto a host
      pathname, tell the user that.  Otherwise GDB's subsequent behavior
@@ -1216,9 +1214,7 @@ follow_exec (ptid_t ptid, char *exec_file_target)
      Executable) main symbol file will only be computed by
      solib_create_inferior_hook below.  breakpoint_re_set would fail
      to insert the breakpoints with the zero displacement.  */
-  try_open_exec_file (exec_file_host, inf, SYMFILE_DEFER_BP_RESET);
-
-  do_cleanups (old_chain);
+  try_open_exec_file (exec_file_host.get (), inf, SYMFILE_DEFER_BP_RESET);
 
   /* If the target can specify a description, read it.  Must do this
      after flipping to the new executable (because the target supplied

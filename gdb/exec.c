@@ -190,8 +190,7 @@ try_open_exec_file (const char *exec_file_host, struct inferior *inf,
 void
 exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
 {
-  char *exec_file_target, *exec_file_host;
-  struct cleanup *old_chain;
+  char *exec_file_target;
   symfile_add_flags add_flags = 0;
 
   /* Do nothing if we already have an executable filename.  */
@@ -209,8 +208,8 @@ exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
       return;
     }
 
-  exec_file_host = exec_file_find (exec_file_target, NULL);
-  old_chain = make_cleanup (xfree, exec_file_host);
+  gdb::unique_xmalloc_ptr<char> exec_file_host
+    = exec_file_find (exec_file_target, NULL);
 
   if (defer_bp_reset)
     add_flags |= SYMFILE_DEFER_BP_RESET;
@@ -219,8 +218,7 @@ exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
     add_flags |= SYMFILE_VERBOSE;
 
   /* Attempt to open the exec file.  */
-  try_open_exec_file (exec_file_host, current_inferior (), add_flags);
-  do_cleanups (old_chain);
+  try_open_exec_file (exec_file_host.get (), current_inferior (), add_flags);
 }
 
 /* Set FILENAME as the new exec file.

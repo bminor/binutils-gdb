@@ -619,16 +619,16 @@ darwin_lookup_lib_symbol (struct objfile *objfile,
 static gdb_bfd_ref_ptr
 darwin_bfd_open (char *pathname)
 {
-  char *found_pathname;
   int found_file;
 
   /* Search for shared library file.  */
-  found_pathname = solib_find (pathname, &found_file);
+  gdb::unique_xmalloc_ptr<char> found_pathname
+    = solib_find (pathname, &found_file);
   if (found_pathname == NULL)
     perror_with_name (pathname);
 
   /* Open bfd for shared library.  */
-  gdb_bfd_ref_ptr abfd (solib_bfd_fopen (found_pathname, found_file));
+  gdb_bfd_ref_ptr abfd (solib_bfd_fopen (found_pathname.get (), found_file));
 
   gdb_bfd_ref_ptr res
     (gdb_bfd_mach_o_fat_extract (abfd.get (), bfd_object,
