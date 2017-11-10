@@ -583,25 +583,23 @@ rs6000_create_inferior (struct target_ops * ops, const char *exec_file,
 /* Shared Object support.  */
 
 /* Return the LdInfo data for the given process.  Raises an error
-   if the data could not be obtained.
+   if the data could not be obtained.  */
 
-   The returned value must be deallocated after use.  */
-
-static gdb_byte *
+static gdb::byte_vector
 rs6000_ptrace_ldinfo (ptid_t ptid)
 {
   const int pid = ptid_get_pid (ptid);
-  int ldi_size = 1024;
-  void *ldi = xmalloc (ldi_size);
+  gdb::byte_vector ldi (1024);
   int rc = -1;
 
   while (1)
     {
       if (ARCH64 ())
-	rc = rs6000_ptrace64 (PT_LDINFO, pid, (unsigned long) ldi, ldi_size,
-			      NULL);
+	rc = rs6000_ptrace64 (PT_LDINFO, pid, (unsigned long) ldi.data (),
+			      ldi.size (), NULL);
       else
-	rc = rs6000_ptrace32 (PT_LDINFO, pid, (int *) ldi, ldi_size, NULL);
+	rc = rs6000_ptrace32 (PT_LDINFO, pid, (int *) ldi.data (),
+			      ldi.size (), NULL);
 
       if (rc != -1)
 	break; /* Success, we got the entire ld_info data.  */
@@ -610,11 +608,10 @@ rs6000_ptrace_ldinfo (ptid_t ptid)
 	perror_with_name (_("ptrace ldinfo"));
 
       /* ldi is not big enough.  Double it and try again.  */
-      ldi_size *= 2;
-      ldi = xrealloc (ldi, ldi_size);
+      ldi.resize (ldi.size () * 2);
     }
 
-  return (gdb_byte *) ldi;
+  return ldi;
 }
 
 /* Implement the to_xfer_partial target_ops method for
@@ -626,9 +623,7 @@ rs6000_xfer_shared_libraries
    const char *annex, gdb_byte *readbuf, const gdb_byte *writebuf,
    ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  gdb_byte *ldi_buf;
   ULONGEST result;
-  struct cleanup *cleanup;
 
   /* This function assumes that it is being run with a live process.
      Core files are handled via gdbarch.  */
@@ -637,14 +632,9 @@ rs6000_xfer_shared_libraries
   if (writebuf)
     return TARGET_XFER_E_IO;
 
-  ldi_buf = rs6000_ptrace_ldinfo (inferior_ptid);
-  gdb_assert (ldi_buf != NULL);
-  cleanup = make_cleanup (xfree, ldi_buf);
-  result = rs6000_aix_ld_info_to_xml (target_gdbarch (), ldi_buf,
+  gdb::byte_vector ldi_buf = rs6000_ptrace_ldinfo (inferior_ptid);
+  result = rs6000_aix_ld_info_to_xml (target_gdbarch (), ldi_buf.data (),
 				      readbuf, offset, len, 1);
-  xfree (ldi_buf);
-
-  do_cleanups (cleanup);
 
   if (result == 0)
     return TARGET_XFER_EOF;
