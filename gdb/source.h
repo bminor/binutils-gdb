@@ -21,6 +21,31 @@
 
 struct symtab;
 
+/* See openp function definition for their description.  */
+
+enum openp_flag
+{
+  OPF_TRY_CWD_FIRST = 0x01,
+  OPF_SEARCH_IN_PATH = 0x02,
+  OPF_RETURN_REALPATH = 0x04,
+};
+
+DEF_ENUM_FLAGS_TYPE(openp_flag, openp_flags);
+
+extern int openp (const char *, openp_flags, const char *, int, char **);
+
+extern int source_full_path_of (const char *, char **);
+
+extern void mod_path (const char *, char **);
+
+extern void add_path (const char *, char **, int);
+
+extern void directory_switch (const char *, int);
+
+extern char *source_path;
+
+extern void init_source_path (void);
+
 /* This function is capable of finding the absolute path to a
    source file, and opening it, provided you give it a FILENAME.  Both the
    DIRNAME and FULLNAME are only added suggestions on where to find the file.

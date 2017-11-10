@@ -1,5 +1,19 @@
 2018-02-14  Tom Tromey  <tom@tromey.com>
 
+	* solib.c: Include source.h.
+	* nto-tdep.c: Include source.h.
+	* mi/mi-cmd-env.c: Include source.h.
+	* infcmd.c: Include source.h.
+	* exec.c: Include source.h.
+	* defs.h (enum openp_flag, openp, source_full_path_of, mod_path)
+	(add_path, directory_switch, source_path, init_source_path): Move
+	declarations...
+	* source.h (enum openp_flag, openp, source_full_path_of, mod_path)
+	(add_path, directory_switch, source_path, init_source_path):
+	...here.
+
+2018-02-14  Tom Tromey  <tom@tromey.com>
+
 	* solist.h (exec_file_find, solib_find): Return
 	unique_xmalloc_ptr.
 	(solib_bfd_fopen): Take a const char *.

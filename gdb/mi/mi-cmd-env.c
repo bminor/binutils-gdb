@@ -31,6 +31,7 @@
 #include "ui-out.h"
 #include "top.h"
 #include <sys/stat.h>
+#include "source.h"
 
 static const char path_var_name[] = "PATH";
 static char *orig_path = NULL;

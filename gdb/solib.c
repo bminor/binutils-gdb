@@ -46,6 +46,7 @@
 #include "filesystem.h"
 #include "gdb_bfd.h"
 #include "filestuff.h"
+#include "source.h"
 
 /* Architecture-specific operations.  */
 

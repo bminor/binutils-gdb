@@ -59,6 +59,7 @@
 #include "top.h"
 #include "interps.h"
 #include "common/gdb_optional.h"
+#include "source.h"
 
 /* Local functions: */
 

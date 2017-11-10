@@ -35,6 +35,7 @@
 #include "progspace.h"
 #include "gdb_bfd.h"
 #include "gcore.h"
+#include "source.h"
 
 #include <fcntl.h>
 #include "readline/readline.h"
