@@ -536,20 +536,18 @@ skip_quote_char (const char *string, char quote_char)
 /* Make a writable copy of the string given in TOKEN, trimming
    any trailing whitespace.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 copy_token_string (linespec_token token)
 {
-  char *str, *s;
+  const char *str, *s;
 
   if (token.type == LSTOKEN_KEYWORD)
-    return xstrdup (LS_TOKEN_KEYWORD (token));
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (LS_TOKEN_KEYWORD (token)));
 
-  str = savestring (LS_TOKEN_STOKEN (token).ptr,
-		    LS_TOKEN_STOKEN (token).length);
+  str = LS_TOKEN_STOKEN (token).ptr;
   s = remove_trailing_whitespace (str, str + LS_TOKEN_STOKEN (token).length);
-  *s = '\0';
 
-  return str;
+  return gdb::unique_xmalloc_ptr<char> (savestring (str, s - str));
 }
 
 /* Does P represent the end of a quote-enclosed linespec?  */
@@ -1692,13 +1690,10 @@ unexpected_linespec_error (linespec_parser *parser)
   if (token.type == LSTOKEN_STRING || token.type == LSTOKEN_NUMBER
       || token.type == LSTOKEN_KEYWORD)
     {
-      char *string;
-
-      string = copy_token_string (token);
-      make_cleanup (xfree, string);
+      gdb::unique_xmalloc_ptr<char> string = copy_token_string (token);
       throw_error (GENERIC_ERROR,
 		   _("malformed linespec error: unexpected %s, \"%s\""),
-		   token_type_strings[token.type], string);
+		   token_type_strings[token.type], string.get ());
     }
   else
     throw_error (GENERIC_ERROR,
@@ -1792,11 +1787,10 @@ set_completion_after_number (linespec_parser *parser,
 static void
 linespec_parse_basic (linespec_parser *parser)
 {
-  char *name;
+  gdb::unique_xmalloc_ptr<char> name;
   linespec_token token;
   VEC (symbolp) *symbols, *labels;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
-  struct cleanup *cleanup;
 
   /* Get the next token.  */
   token = linespec_lexer_lex_one (parser);
@@ -1818,9 +1812,8 @@ linespec_parse_basic (linespec_parser *parser)
 
       /* Record the line offset and get the next token.  */
       name = copy_token_string (token);
-      cleanup = make_cleanup (xfree, name);
-      PARSER_EXPLICIT (parser)->line_offset = linespec_parse_line_offset (name);
-      do_cleanups (cleanup);
+      PARSER_EXPLICIT (parser)->line_offset
+	= linespec_parse_line_offset (name.get ());
 
       /* Get the next token.  */
       token = linespec_lexer_consume_token (parser);
@@ -1851,7 +1844,6 @@ linespec_parse_basic (linespec_parser *parser)
   /* The current token will contain the name of a function, method,
      or label.  */
   name = copy_token_string (token);
-  cleanup = make_cleanup (free_current_contents, &name);
 
   if (parser->completion_tracker != NULL)
     {
@@ -1885,21 +1877,19 @@ linespec_parse_basic (linespec_parser *parser)
 	      PARSER_STREAM (parser)++;
 	      LS_TOKEN_STOKEN (token).length++;
 
-	      xfree (name);
-	      name = savestring (parser->completion_word,
-				 (PARSER_STREAM (parser)
-				  - parser->completion_word));
+	      name.reset (savestring (parser->completion_word,
+				      (PARSER_STREAM (parser)
+				       - parser->completion_word)));
 	    }
 	}
 
-      PARSER_EXPLICIT (parser)->function_name = name;
-      discard_cleanups (cleanup);
+      PARSER_EXPLICIT (parser)->function_name = name.release ();
     }
   else
     {
       /* Try looking it up as a function/method.  */
       find_linespec_symbols (PARSER_STATE (parser),
-			     PARSER_RESULT (parser)->file_symtabs, name,
+			     PARSER_RESULT (parser)->file_symtabs, name.get (),
 			     PARSER_EXPLICIT (parser)->func_name_match_type,
 			     &symbols, &minimal_symbols);
 
@@ -1907,43 +1897,36 @@ linespec_parse_basic (linespec_parser *parser)
 	{
 	  PARSER_RESULT (parser)->function_symbols = symbols;
 	  PARSER_RESULT (parser)->minimal_symbols = minimal_symbols;
-	  PARSER_EXPLICIT (parser)->function_name = name;
+	  PARSER_EXPLICIT (parser)->function_name = name.release ();
 	  symbols = NULL;
-	  discard_cleanups (cleanup);
 	}
       else
 	{
 	  /* NAME was not a function or a method.  So it must be a label
 	     name or user specified variable like "break foo.c:$zippo".  */
 	  labels = find_label_symbols (PARSER_STATE (parser), NULL,
-				       &symbols, name);
+				       &symbols, name.get ());
 	  if (labels != NULL)
 	    {
 	      PARSER_RESULT (parser)->labels.label_symbols = labels;
 	      PARSER_RESULT (parser)->labels.function_symbols = symbols;
-	      PARSER_EXPLICIT (parser)->label_name = name;
+	      PARSER_EXPLICIT (parser)->label_name = name.release ();
 	      symbols = NULL;
-	      discard_cleanups (cleanup);
 	    }
 	  else if (token.type == LSTOKEN_STRING
 		   && *LS_TOKEN_STOKEN (token).ptr == '$')
 	    {
 	      /* User specified a convenience variable or history value.  */
 	      PARSER_EXPLICIT (parser)->line_offset
-		= linespec_parse_variable (PARSER_STATE (parser), name);
+		= linespec_parse_variable (PARSER_STATE (parser), name.get ());
 
 	      if (PARSER_EXPLICIT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN)
 		{
 		  /* The user-specified variable was not valid.  Do not
 		     throw an error here.  parse_linespec will do it for us.  */
-		  PARSER_EXPLICIT (parser)->function_name = name;
-		  discard_cleanups (cleanup);
+		  PARSER_EXPLICIT (parser)->function_name = name.release ();
 		  return;
 		}
-
-	      /* The convenience variable/history value parsed correctly.
-		 NAME is no longer needed.  */
-	      do_cleanups (cleanup);
 	    }
 	  else
 	    {
@@ -1951,8 +1934,7 @@ linespec_parse_basic (linespec_parser *parser)
 		 an error here.  parse_linespec will do it for us.  */
 
 	      /* Save a copy of the name we were trying to lookup.  */
-	      PARSER_EXPLICIT (parser)->function_name = name;
-	      discard_cleanups (cleanup);
+	      PARSER_EXPLICIT (parser)->function_name = name.release ();
 	      return;
 	    }
 	}
@@ -1980,10 +1962,8 @@ linespec_parse_basic (linespec_parser *parser)
 	  set_completion_after_number (parser, linespec_complete_what::KEYWORD);
 
 	  name = copy_token_string (token);
-	  cleanup = make_cleanup (xfree, name);
 	  PARSER_EXPLICIT (parser)->line_offset
-	    = linespec_parse_line_offset (name);
-	  do_cleanups (cleanup);
+	    = linespec_parse_line_offset (name.get ());
 
 	  /* Get the next token.  */
 	  token = linespec_lexer_consume_token (parser);
@@ -2027,25 +2007,23 @@ linespec_parse_basic (linespec_parser *parser)
 	    {
 	      /* Grab a copy of the label's name and look it up.  */
 	      name = copy_token_string (token);
-	      cleanup = make_cleanup (xfree, name);
 	      labels
 		= find_label_symbols (PARSER_STATE (parser),
 				      PARSER_RESULT (parser)->function_symbols,
-				      &symbols, name);
+				      &symbols, name.get ());
 
 	      if (labels != NULL)
 		{
 		  PARSER_RESULT (parser)->labels.label_symbols = labels;
 		  PARSER_RESULT (parser)->labels.function_symbols = symbols;
-		  PARSER_EXPLICIT (parser)->label_name = name;
+		  PARSER_EXPLICIT (parser)->label_name = name.release ();
 		  symbols = NULL;
-		  discard_cleanups (cleanup);
 		}
 	      else
 		{
 		  /* We don't know what it was, but it isn't a label.  */
 		  undefined_label_error
-		    (PARSER_EXPLICIT (parser)->function_name, name);
+		    (PARSER_EXPLICIT (parser)->function_name, name.get ());
 		}
 
 	    }
@@ -2063,11 +2041,9 @@ linespec_parse_basic (linespec_parser *parser)
 
 	      /* Record the line offset and get the next token.  */
 	      name = copy_token_string (token);
-	      cleanup = make_cleanup (xfree, name);
 
 	      PARSER_EXPLICIT (parser)->line_offset
-		= linespec_parse_line_offset (name);
-	      do_cleanups (cleanup);
+		= linespec_parse_line_offset (name.get ());
 
 	      /* Get the next token.  */
 	      token = linespec_lexer_consume_token (parser);
@@ -2524,7 +2500,6 @@ parse_linespec (linespec_parser *parser, const char *arg,
 {
   linespec_token token;
   struct gdb_exception file_exception = exception_none;
-  struct cleanup *cleanup;
 
   /* A special case to start.  It has become quite popular for
      IDEs to work around bugs in the previous parser by quoting
@@ -2582,18 +2557,14 @@ parse_linespec (linespec_parser *parser, const char *arg,
   /* It must be either LSTOKEN_STRING or LSTOKEN_NUMBER.  */
   if (token.type == LSTOKEN_STRING && *LS_TOKEN_STOKEN (token).ptr == '$')
     {
-      char *var;
-
       /* A NULL entry means to use GLOBAL_DEFAULT_SYMTAB.  */
       if (parser->completion_tracker == NULL)
 	VEC_safe_push (symtab_ptr, PARSER_RESULT (parser)->file_symtabs, NULL);
 
       /* User specified a convenience variable or history value.  */
-      var = copy_token_string (token);
-      cleanup = make_cleanup (xfree, var);
+      gdb::unique_xmalloc_ptr<char> var = copy_token_string (token);
       PARSER_EXPLICIT (parser)->line_offset
-	= linespec_parse_variable (PARSER_STATE (parser), var);
-      do_cleanups (cleanup);
+	= linespec_parse_variable (PARSER_STATE (parser), var.get ());
 
       /* If a line_offset wasn't found (VAR is the name of a user
 	 variable/function), then skip to normal symbol processing.  */
@@ -2622,17 +2593,15 @@ parse_linespec (linespec_parser *parser, const char *arg,
 
   if (token.type == LSTOKEN_COLON)
     {
-      char *user_filename;
-
       /* Get the current token again and extract the filename.  */
       token = linespec_lexer_lex_one (parser);
-      user_filename = copy_token_string (token);
+      gdb::unique_xmalloc_ptr<char> user_filename = copy_token_string (token);
 
       /* Check if the input is a filename.  */
       TRY
 	{
 	  PARSER_RESULT (parser)->file_symtabs
-	    = symtabs_from_filename (user_filename,
+	    = symtabs_from_filename (user_filename.get (),
 				     PARSER_STATE (parser)->search_pspace);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
@@ -2644,7 +2613,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
       if (file_exception.reason >= 0)
 	{
 	  /* Symtabs were found for the file.  Record the filename.  */
-	  PARSER_EXPLICIT (parser)->source_filename = user_filename;
+	  PARSER_EXPLICIT (parser)->source_filename = user_filename.release ();
 
 	  /* Get the next token.  */
 	  token = linespec_lexer_consume_token (parser);
@@ -2654,9 +2623,6 @@ parse_linespec (linespec_parser *parser, const char *arg,
 	}
       else
 	{
-	  /* No symtabs found -- discard user_filename.  */
-	  xfree (user_filename);
-
 	  /* A NULL entry means to use GLOBAL_DEFAULT_SYMTAB.  */
 	  VEC_safe_push (symtab_ptr, PARSER_RESULT (parser)->file_symtabs, NULL);
 	}
