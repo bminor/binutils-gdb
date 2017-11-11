@@ -1,5 +1,38 @@
 2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* config/tc-xtensa.c (trampoline_index): New structure.
+	(trampoline_seg): Replace trampoline list with trampoline index.
+	(xg_find_trampoline, xg_add_trampoline_to_index)
+	(xg_remove_trampoline_from_index, xg_add_trampoline_to_seg)
+	(xg_is_trampoline_frag_full, xg_get_fulcrum)
+	(xg_find_best_trampoline, xg_relax_fixup, xg_relax_fixups)
+	(xg_is_relaxable_fixup): New functions.
+	(J_MARGIN): New macro.
+	(xtensa_create_trampoline_frag): Use xg_add_trampoline_to_seg
+	instead of open-coded addition to the linked list.
+	(dump_trampolines): Iterate through the trampoline_seg::index.
+	(cached_fixupS, cached_fixup, fixup_cacheS, fixup_cache)
+	(fixup_order, xtensa_make_cached_fixup)
+	(xtensa_realloc_fixup_cache, xtensa_cache_relaxable_fixups)
+	(xtensa_find_first_cached_fixup, xtensa_delete_cached_fixup)
+	(xtensa_add_cached_fixup, check_and_update_trampolines): Remove
+	definitions.
+	(xg_relax_trampoline): Extract logic into separate functions,
+	replace body with a call to xg_relax_fixups.
+	(search_trampolines): Replace search in linked list with search
+	in index. Change data type of address-tracking variables from
+	int to offsetT. Replace abs with labs.
+	(xg_append_jump): Finish the trampoline frag if it's full.
+	(add_jump_to_trampoline): Remove trampoline frag from the index
+	if the frag is full.
+	* config/tc-xtensa.h (xtensa_frag_type): Remove next_trampoline.
+	* testsuite/gas/xtensa/trampoline.d: Adjust absolute addresses
+	as the placement of trampolines has slightly changed.
+	* testsuite/gas/xtensa/trampoline.s: Add _nop so that objdump
+	stays in sync with instruction stream.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* config/tc-xtensa.c (init_trampoline_frag): Replace pointer to
 	struct trampoline_frag parameter with pointer to fragS.
 	(xg_append_jump): Remove jump_around parameter.

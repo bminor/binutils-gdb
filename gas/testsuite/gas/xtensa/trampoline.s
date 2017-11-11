@@ -24,6 +24,7 @@
 	and	a2, a2, a3
 	_ret
 	.endr
+	_nop
 4:
 	j	4b
 

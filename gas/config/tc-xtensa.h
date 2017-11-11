@@ -274,7 +274,6 @@ struct xtensa_frag_type
   offsetT slot_offsets[MAX_SLOTS];
 
   /* For trampoline fragments.  */
-  fragS *next_trampoline;
   struct fix *jump_around_fix;
 
   /* When marking frags after this one in the chain as no transform,
