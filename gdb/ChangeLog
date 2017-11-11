@@ -1,3 +1,8 @@
+2018-04-03  Tom Tromey  <tom@tromey.com>
+
+	* mipsread.c (read_alphacoff_dynamic_symtab): Use
+	gdb::byte_vector.
+
 2018-04-02  Weimin Pan  <weimin.pan@oracle.com>
 
 	* MAINTAINERS (Write After Approval): Add Weimin Pan.
