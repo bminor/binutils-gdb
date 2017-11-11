@@ -4975,6 +4975,30 @@ os_region_check (lang_output_section_statement_type *os,
     }
 }
 
+static void
+ldlang_check_relro_region (lang_statement_union_type *s,
+			   seg_align_type *seg)
+{
+  if (seg->relro == exp_seg_relro_start)
+    {
+      if (!seg->relro_start_stat)
+	seg->relro_start_stat = s;
+      else
+	{
+	  ASSERT (seg->relro_start_stat == s);
+	}
+    }
+  else if (seg->relro == exp_seg_relro_end)
+    {
+      if (!seg->relro_end_stat)
+	seg->relro_end_stat = s;
+      else
+	{
+	  ASSERT (seg->relro_end_stat == s);
+	}
+    }
+}
+
 /* Set the sizes for all the output sections.  */
 
 static bfd_vma
@@ -5432,24 +5456,8 @@ lang_size_sections_1
 			   output_section_statement->bfd_section,
 			   &newdot);
 
-	    if (expld.dataseg.relro == exp_seg_relro_start)
-	      {
-		if (!expld.dataseg.relro_start_stat)
-		  expld.dataseg.relro_start_stat = s;
-		else
-		  {
-		    ASSERT (expld.dataseg.relro_start_stat == s);
-		  }
-	      }
-	    else if (expld.dataseg.relro == exp_seg_relro_end)
-	      {
-		if (!expld.dataseg.relro_end_stat)
-		  expld.dataseg.relro_end_stat = s;
-		else
-		  {
-		    ASSERT (expld.dataseg.relro_end_stat == s);
-		  }
-	      }
+	    ldlang_check_relro_region (s, &expld.dataseg);
+
 	    expld.dataseg.relro = exp_seg_relro_none;
 
 	    /* This symbol may be relative to this section.  */
@@ -6859,6 +6867,7 @@ find_relro_section_callback (lang_wild_statement_type *ptr ATTRIBUTE_UNUSED,
 
 static void
 lang_find_relro_sections_1 (lang_statement_union_type *s,
+			    seg_align_type *seg,
 			    bfd_boolean *has_relro_section)
 {
   if (*has_relro_section)
@@ -6866,7 +6875,7 @@ lang_find_relro_sections_1 (lang_statement_union_type *s,
 
   for (; s != NULL; s = s->header.next)
     {
-      if (s == expld.dataseg.relro_end_stat)
+      if (s == seg->relro_end_stat)
 	break;
 
       switch (s->header.type)
@@ -6878,15 +6887,15 @@ lang_find_relro_sections_1 (lang_statement_union_type *s,
 	  break;
 	case lang_constructors_statement_enum:
 	  lang_find_relro_sections_1 (constructor_list.head,
-				      has_relro_section);
+				      seg, has_relro_section);
 	  break;
 	case lang_output_section_statement_enum:
 	  lang_find_relro_sections_1 (s->output_section_statement.children.head,
-				      has_relro_section);
+				      seg, has_relro_section);
 	  break;
 	case lang_group_statement_enum:
 	  lang_find_relro_sections_1 (s->group_statement.children.head,
-				      has_relro_section);
+				      seg, has_relro_section);
 	  break;
 	default:
 	  break;
@@ -6902,7 +6911,7 @@ lang_find_relro_sections (void)
   /* Check all sections in the link script.  */
 
   lang_find_relro_sections_1 (expld.dataseg.relro_start_stat,
-			      &has_relro_section);
+			      &expld.dataseg, &has_relro_section);
 
   if (!has_relro_section)
     link_info.relro = FALSE;
