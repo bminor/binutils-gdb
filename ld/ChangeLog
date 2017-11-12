@@ -1,3 +1,14 @@
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf32_x86_64.sh (TINY_READONLY_SECTION): Renamed
+	to ...
+	(OTHER_PLT_SECTIONS): This.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_iamcu.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* scripttempl/elf.sc: Place ${OTHER_PLT_SECTIONS} just after
+	.plt.
+
 2017-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_get_script): Reformat

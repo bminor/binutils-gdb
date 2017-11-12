@@ -17,8 +17,8 @@ GENERATE_PIE_SCRIPT=yes
 NO_SMALL_DATA=yes
 SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 12 ? 12 : 0"
 IREL_IN_PLT=
-# Reuse TINY_READONLY_SECTION which is placed right after .plt section.
-TINY_READONLY_SECTION="
+# These sections are placed right after .plt section.
+OTHER_PLT_SECTIONS="
 .plt.got      ${RELOCATING-0} : { *(.plt.got) }
 .plt.sec      ${RELOCATING-0} : { *(.plt.sec) }
 "
