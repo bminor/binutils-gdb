@@ -7177,6 +7177,23 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       || h->type == STT_GNU_IFUNC
       || h->needs_plt)
     {
+      bfd_boolean local = (((struct ppc_link_hash_entry *) h)->save_res
+			   || SYMBOL_CALLS_LOCAL (info, h)
+			   || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
+      /* Discard dyn_relocs when non-pic if we've decided that a
+	 function symbol is local and not an ifunc.  We keep dynamic
+	 relocs for ifuncs when local rather than always emitting a
+	 plt call stub for them and defining the symbol on the call
+	 stub.  We can't do that for ELFv1 anyway (a function symbol
+	 is defined on a descriptor, not code) and it can be faster at
+	 run-time due to not needing to bounce through a stub.  The
+	 dyn_relocs for ifuncs will be applied even in a static
+	 executable.  */
+      if (!bfd_link_pic (info)
+	  && h->type != STT_GNU_IFUNC
+	  && local)
+	((struct ppc_link_hash_entry *) h)->dyn_relocs = NULL;
+
       /* Clear procedure linkage table information for any symbol that
 	 won't need a .plt entry.  */
       struct plt_entry *ent;
@@ -7184,24 +7201,11 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	if (ent->plt.refcount > 0)
 	  break;
       if (ent == NULL
-	  || (h->type != STT_GNU_IFUNC
-	      && (SYMBOL_CALLS_LOCAL (info, h)
-		  || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
-	  || ((struct ppc_link_hash_entry *) h)->save_res)
+	  || (h->type != STT_GNU_IFUNC && local))
 	{
 	  h->plt.plist = NULL;
 	  h->needs_plt = 0;
 	  h->pointer_equality_needed = 0;
-	  /* After adjust_dynamic_symbol, non_got_ref set in the
-	     non-pic case means that dyn_relocs for this symbol should
-	     be discarded.  We either want the symbol to remain
-	     undefined, or we have a local definition of some sort.
-	     The "local definition" for non-function symbols may be
-	     due to creating a local definition in .dynbss, and for
-	     ELFv2 function symbols, defining the symbol on the PLT
-	     call stub code.  Set non_got_ref here to ensure undef
-	     weaks stay undefined.  */
-	  h->non_got_ref = 1;
 	}
       else if (abiversion (info->output_bfd) >= 2)
 	{
@@ -7212,16 +7216,20 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     relocs is that calling via a global entry stub costs a
 	     few more instructions, and pointer_equality_needed causes
 	     extra work in ld.so when resolving these symbols.  */
-	  if (global_entry_stub (h)
-	      && !alias_readonly_dynrelocs (h))
+	  if (global_entry_stub (h))
 	    {
-	      h->pointer_equality_needed = 0;
-	      /* Say that we do want dynamic relocs.  */
-	      h->non_got_ref = 0;
-	      /* If we haven't seen a branch reloc then we don't need
-		 a plt entry.  */
-	      if (!h->needs_plt)
-		h->plt.plist = NULL;
+	      if (!alias_readonly_dynrelocs (h))
+		{
+		  h->pointer_equality_needed = 0;
+		  /* If we haven't seen a branch reloc then we don't need
+		     a plt entry.  */
+		  if (!h->needs_plt)
+		    h->plt.plist = NULL;
+		}
+	      else if (!bfd_link_pic (info))
+		/* We are going to be defining the function symbol on the
+		   plt stub, so no dyn_relocs needed when non-pic.  */
+		((struct ppc_link_hash_entry *) h)->dyn_relocs = NULL;
 	    }
 
 	  /* ELFv2 function symbols can't have copy relocs.  */
@@ -7234,7 +7242,6 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     plt entry.  */
 	  h->plt.plist = NULL;
 	  h->pointer_equality_needed = 0;
-	  h->non_got_ref = 0;
 	  return TRUE;
 	}
     }
@@ -7282,10 +7289,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	 definition for the variable.  Text relocations are preferable
 	 to an incorrect program.  */
       || h->protected_def)
-    {
-      h->non_got_ref = 0;
-      return TRUE;
-    }
+    return TRUE;
 
   if (h->plt.plist != NULL)
     {
@@ -7333,6 +7337,8 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       h->needs_copy = 1;
     }
 
+  /* We no longer want dyn_relocs.  */
+  ((struct ppc_link_hash_entry *) h)->dyn_relocs = NULL;
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
@@ -9724,6 +9730,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       && h->type != STT_GNU_IFUNC)
     eh->dyn_relocs = NULL;
 
+  /* Discard relocs on undefined symbols that must be local.  */
+  else if (h->root.type == bfd_link_hash_undefined
+	   && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+    eh->dyn_relocs = NULL;
+
   /* Also discard relocs on undefined weak syms with non-default
      visibility, or when dynamic_undefined_weak says so.  */
   else if (UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
@@ -9768,36 +9779,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		return FALSE;
 	    }
 	}
-      else if (h->type == STT_GNU_IFUNC)
-	{
-	  /* A plt entry is always created when making direct calls to
-	     an ifunc, even when building a static executable, but
-	     that doesn't cover all cases.  We may have only an ifunc
-	     initialised function pointer for a given ifunc symbol.
-
-	     For ELFv2, dynamic relocations are not required when
-	     generating a global entry PLT stub.  */
-	  if (abiversion (info->output_bfd) >= 2)
-	    {
-	      if (global_entry_stub (h))
-		eh->dyn_relocs = NULL;
-	    }
-
-	  /* For ELFv1 we have function descriptors.  Descriptors need
-	     to be treated like PLT entries and thus have dynamic
-	     relocations.  One exception is when the function
-	     descriptor is copied into .dynbss (which should only
-	     happen with ancient versions of gcc).  */
-	  else if (h->needs_copy)
-	    eh->dyn_relocs = NULL;
-	}
-      else if (ELIMINATE_COPY_RELOCS)
+      else if (ELIMINATE_COPY_RELOCS && h->type != STT_GNU_IFUNC)
 	{
 	  /* For the non-pic case, discard space for relocs against
 	     symbols which turn out to need copy relocs or are not
 	     dynamic.  */
-	  if (!h->non_got_ref
-	      && !h->def_regular)
+	  if (h->dynamic_adjusted
+	      && !h->def_regular
+	      && !ELF_COMMON_DEF_P (h))
 	    {
 	      /* Make sure this symbol is output as a dynamic symbol.  */
 	      if (!ensure_undef_dynamic (info, h))

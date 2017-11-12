@@ -1692,7 +1692,9 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (eh->type == STT_FUNC
       || eh->needs_plt)
     {
-      /* After adjust_dynamic_symbol, non_got_ref set in the non-pic
+      /* Prior to adjust_dynamic_symbol, non_got_ref set means that
+	 check_relocs generated dyn_relocs for this symbol.
+	 After adjust_dynamic_symbol, non_got_ref clear in the non-pic
 	 case means that dyn_relocs for this symbol should be
 	 discarded;  We either want the symbol to remain undefined, or
 	 we have a local definition of some sort.  The "local
@@ -1700,22 +1702,13 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
 	 local definition in .dynbss.
 	 Unlike other targets, elf32-hppa.c does not define a function
 	 symbol in a non-pic executable on PLT stub code, so we don't
-	 have a local definition in that case.  dyn_relocs therefore
-	 should not be discarded for function symbols, generally.
-	 However we should discard dyn_relocs if we've decided that an
-	 undefined function symbol is local, for example due to
-	 non-default visibility, or UNDEFWEAK_NO_DYNAMIC_RELOC is
-	 true for an undefined weak symbol.  */
+	 have a local definition in that case.  */
       bfd_boolean local = (SYMBOL_CALLS_LOCAL (info, eh)
 			   || UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh));
-      /* Prior to adjust_dynamic_symbol, non_got_ref set means that
-	 check_relocs set up some dyn_relocs for this symbol.
-	 The !non_got_ref term here is saying that if we didn't have
-	 any dyn_relocs set up by check_relocs, then we don't want
-	 relocate_section looking for them.
-	 FIXME: Get rid of the inversion, so non_got_ref set after
-	 dyn_relocs means we do have dyn_relocs.  */
-      eh->non_got_ref = local || !eh->non_got_ref;
+      /* Arrange to discard dyn_relocs if we've decided that a
+	 function symbol is local.  */
+      if (local)
+	eh->non_got_ref = 0;
 
       /* If the symbol is used by a plabel, we must allocate a PLT slot.
 	 The refcounts are not reliable when it has been hidden since
@@ -1773,24 +1766,17 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If there are no references to this symbol that do not use the
      GOT, we don't need to generate a copy reloc.  */
   if (!eh->non_got_ref)
-    {
-      eh->non_got_ref = 1;
-      return TRUE;
-    }
+    return TRUE;
 
   /* If -z nocopyreloc was given, we won't generate them either.  */
   if (info->nocopyreloc)
-    {
-      eh->non_got_ref = 0;
-      return TRUE;
-    }
+    return TRUE;
 
   if (ELIMINATE_COPY_RELOCS
       && !readonly_dynrelocs (eh))
     {
       /* If we didn't find any dynamic relocs in read-only sections, then
 	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-      eh->non_got_ref = 0;
       return TRUE;
     }
 
@@ -1827,6 +1813,8 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
       eh->needs_copy = 1;
     }
 
+  /* We no longer want dyn_relocs.  */
+  eh->non_got_ref = 0;
   return _bfd_elf_adjust_dynamic_copy (info, eh, sec);
 }
 
@@ -2011,8 +1999,17 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
   if (!htab->etab.dynamic_sections_created)
     hh->dyn_relocs = NULL;
 
+  /* Discard relocs on undefined syms with non-default visibility.  */
+  else if ((eh->root.type == bfd_link_hash_undefined
+	    && ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
+	   || UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh))
+    hh->dyn_relocs = NULL;
+
   if (hh->dyn_relocs == NULL)
-    return TRUE;
+    {
+      eh->non_got_ref = 0;
+      return TRUE;
+    }
 
   /* If this is a -Bsymbolic shared link, then we need to discard all
      space allocated for dynamic pc-relative relocs against symbols
@@ -2021,14 +2018,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
      changes.  */
   if (bfd_link_pic (info))
     {
-      /* Discard relocs on undefined syms with non-default visibility.  */
-      if ((eh->root.type == bfd_link_hash_undefined
-	   && ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
-	  || UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh))
-	hh->dyn_relocs = NULL;
-
 #if RELATIVE_DYNRELOCS
-      else if (SYMBOL_CALLS_LOCAL (info, eh))
+      if (SYMBOL_CALLS_LOCAL (info, eh))
 	{
 	  struct elf32_hppa_dyn_reloc_entry **hdh_pp;
 
@@ -2056,17 +2047,25 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 	 symbols which turn out to need copy relocs or are not
 	 dynamic.  */
 
-      if (!eh->non_got_ref
-	  && !eh->def_regular)
+      if (eh->dynamic_adjusted
+	  && eh->non_got_ref
+	  && !eh->def_regular
+	  && !ELF_COMMON_DEF_P (eh))
 	{
 	  if (!ensure_undef_dynamic (info, eh))
 	    return FALSE;
 
 	  if (eh->dynindx == -1)
-	    hh->dyn_relocs = NULL;
+	    {
+	      eh->non_got_ref = 0;
+	      hh->dyn_relocs = NULL;
+	    }
 	}
       else
-	hh->dyn_relocs = NULL;
+	{
+	  eh->non_got_ref = 0;
+	  hh->dyn_relocs = NULL;
+	}
     }
 
   /* Finally, allocate space.  */
@@ -3913,9 +3912,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	      || (ELIMINATE_COPY_RELOCS
 		  && !bfd_link_pic (info)
 		  && hh != NULL
-		  && hh->eh.dynindx != -1
-		  && !hh->eh.non_got_ref
-		  && !hh->eh.def_regular))
+		  && hh->eh.non_got_ref))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip;

@@ -1,3 +1,26 @@
+2017-11-12  Alan Modra  <amodra@gmail.com>
+
+	* elf32-hppa.c (elf32_hppa_adjust_dynamic_symbol): Set non_got_ref
+	to keep dyn_relocs, clear to discard.  Comment.
+	(allocate_dynrelocs): Always clear non_got_ref when clearing
+	dyn_relocs in non-pic case.  Invert non_got_ref test.  Also test
+	dynamic_adjusted and ELF_COMMON_DEF_P.  Move code deleting
+	dyn_relocs on undefined syms to handle for non-pic too.
+	(elf32_hppa_relocate_section): Simplify test for non-pic dyn relocs.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Set non_got_ref
+	to keep dyn_relocs, clear to discard.  Comment.
+	(allocate_dynrelocs): Always clear non_got_ref when clearing
+	dyn_relocs in non-pic case.  Invert non_got_ref test.  Also test
+	dynamic_adjusted and ELF_COMMON_DEF_P.  Move code deleting
+	dyn_relocs on undefined syms to handle for non-pic too.
+	(ppc_elf_relocate_section): Simplify test for non-pic dyn relocs.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Discard
+	dyn_relocs here.  Don't bother setting non_got_ref.  Comment.
+	(allocate_dynrelocs): Delete special handling of non-pic ELFv2
+	ifuncs.  Move code deleting dyn_relocs on undefined symbols to
+	handle for non-pic too.  Don't test non_got_ref.  Do test
+	dynamic_adjusted and ELF_COMMON_DEF_P.
+
 2017-11-08  Djordje Todorovic  <djordje.todorovic@rt-rk.com>
 
 	* elf32-mips.c (elf32_mips_grok_psinfo): Extract core->pid.
