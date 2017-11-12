@@ -1,3 +1,8 @@
+2017-11-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-ifunc/ifunc.exp: Ensure non-PIC tests are really
+	not PIE by default gcc options.
+
 2017-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/ppc32elf.em (ppc_before_allocation): Replace
