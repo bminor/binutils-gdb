@@ -5145,10 +5145,10 @@ error_free_dyn:
 	  weaks = hlook->u.weakdef;
 	  hlook->u.weakdef = NULL;
 
-	  BFD_ASSERT (hlook->root.type == bfd_link_hash_defined
-		      || hlook->root.type == bfd_link_hash_defweak
-		      || hlook->root.type == bfd_link_hash_common
-		      || hlook->root.type == bfd_link_hash_indirect);
+	  if (hlook->root.type != bfd_link_hash_defined
+	      && hlook->root.type != bfd_link_hash_defweak)
+	    continue;
+
 	  slook = hlook->root.u.def.section;
 	  vlook = hlook->root.u.def.value;
 

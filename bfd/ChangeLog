@@ -1,5 +1,10 @@
 2017-11-12  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (elf_link_add_object_symbols): Ignore anything but
+	defined and defweak symbols when setting up weakdefs.
+
+2017-11-12  Alan Modra  <amodra@gmail.com>
+
 	* elf32-hppa.c (elf32_hppa_adjust_dynamic_symbol): Set non_got_ref
 	to keep dyn_relocs, clear to discard.  Comment.
 	(allocate_dynrelocs): Always clear non_got_ref when clearing
