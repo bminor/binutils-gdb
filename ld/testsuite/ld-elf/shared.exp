@@ -819,6 +819,51 @@ if { [istarget *-*-linux*]
 	    {} \
 	    "libpr19579.so" \
 	] \
+	[list \
+	    "Build pr22393-2a.so" \
+	    "-shared -Wl,-z,separate-code" \
+	    "-fPIC" \
+	    {pr22393-2a.c} \
+	    {{readelf -lW pr22393-2a.rd} \
+	     {readelf -lW pr22393-2b.rd}} \
+	    "pr22393-2a.so" \
+	] \
+	[list \
+	    "Build pr22393-2a-now.so" \
+	    "-shared -Wl,-z,separate-code,-z,now" \
+	    "-fPIC" \
+	    {pr22393-2a.c} \
+	    {{readelf -lW pr22393-2a.rd} \
+	     {readelf -lW pr22393-2b.rd}} \
+	    "pr22393-2a-now.so" \
+	] \
+	[list \
+	    "Build pr22393-2" \
+	    "$NOPIE_LDFLAGS -Wl,-z,separate-code,--no-as-needed tmpdir/pr22393-2a.so" \
+	    "$NOPIE_CFLAGS" \
+	    {pr22393-2b.c} \
+	    {{readelf -lW pr22393-2a.rd} \
+	     {readelf -lW pr22393-2b.rd}} \
+	    "pr22393-2" \
+	] \
+	[list \
+	    "Build pr22393-2 (PIE)" \
+	    "-pie -Wl,-z,separate-code,--no-as-needed tmpdir/pr22393-2a-now.so" \
+	    "-fPIE" \
+	    {pr22393-2b.c} \
+	    {{readelf -lW pr22393-2a.rd} \
+	     {readelf -lW pr22393-2b.rd}} \
+	    "pr22393-2-pie" \
+	] \
+	[list \
+	    "Build pr22393-2 (static)" \
+	    "-static -Wl,-z,separate-code" \
+	    "" \
+	    {pr22393-2a.c pr22393-2b.c} \
+	    {{readelf -lW pr22393-2a.rd} \
+	     {readelf -lW pr22393-2b.rd}} \
+	    "pr22393-2-static" \
+	] \
     ]
     run_ld_link_exec_tests [list \
 	[list \
@@ -955,6 +1000,32 @@ if { [istarget *-*-linux*]
 	    "pr19579n" \
 	    "pass.out" \
 	    "-fPIE" \
+	] \
+	[list \
+	    "Run pr22393-2" \
+	    "$NOPIE_LDFLAGS -Wl,-z,separate-code,--no-as-needed tmpdir/pr22393-2a.so" \
+	    "" \
+	    {pr22393-2b.c} \
+	    "pr22393-2" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run pr22393-2 (PIE)" \
+	    "-pie -Wl,-z,separate-code,--no-as-needed tmpdir/pr22393-2a-now.so" \
+	    "" \
+	    {pr22393-2b.c} \
+	    "pr22393-2-pie" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
+	    "Run pr22393-2 (static)" \
+	    "-static -Wl,-z,separate-code" \
+	    "" \
+	    {pr22393-2a.c pr22393-2b.c} \
+	    "pr22393-2-static" \
+	    "pass.out" \
 	] \
     ]
 }
