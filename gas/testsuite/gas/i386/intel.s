@@ -699,6 +699,12 @@ fidivr  dword ptr [ebx]
  cmovpe  dx, 0x90909090[eax]
  cmovpo dx, 0x90909090[eax]
 
+ # Check base/index swapping
+	.allow_index_reg
+ mov    eax, [eax+esp]
+ mov    eax, [eiz+eax]
+ vgatherdps xmm0, [xmm1+eax], xmm2
+
 	# Test that disassembly of a partial instruction shows the partial byte:
 	# https://www.sourceware.org/ml/binutils/2015-08/msg00226.html
 	.byte 0x24

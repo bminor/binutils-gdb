@@ -1,5 +1,13 @@
 2017-11-13  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386-intel.c (i386_intel_simplify_register): Also
+	recognize RegRiz/RegEiz as index-only registers.
+	* testsuite/gas/i386/intel.s: Add tests exercising base/index
+	swapping.
+	* testsuite/gas/i386/intel.d: Adjust expectations.
+
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (i386_index_check): Break out ...
 	(i386_addressing_mode): ... this new function.
 	* config/tc-i386-intel.c (i386_intel_operand): Do base/index
