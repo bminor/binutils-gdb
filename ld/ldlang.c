@@ -5589,6 +5589,108 @@ one_lang_size_sections_pass (bfd_boolean *relax, bfd_boolean check_regions)
 			0, 0, relax, check_regions);
 }
 
+static bfd_boolean
+lang_size_segment (seg_align_type *seg)
+{
+  /* If XXX_SEGMENT_ALIGN XXX_SEGMENT_END pair was seen, check whether
+     a page could be saved in the data segment.  */
+  bfd_vma first, last;
+
+  first = -seg->base & (seg->pagesize - 1);
+  last = seg->end & (seg->pagesize - 1);
+  if (first && last
+      && ((seg->base & ~(seg->pagesize - 1))
+	  != (seg->end & ~(seg->pagesize - 1)))
+      && first + last <= seg->pagesize)
+    {
+      seg->phase = exp_seg_adjust;
+      return TRUE;
+    }
+
+  seg->phase = exp_seg_done;
+  return FALSE;
+}
+
+static bfd_vma
+lang_size_relro_segment_1 (seg_align_type *seg)
+{
+  bfd_vma relro_end, desired_end;
+  asection *sec;
+
+  /* Compute the expected PT_GNU_RELRO/PT_LOAD segment end.  */
+  relro_end = ((seg->relro_end + seg->pagesize - 1)
+	       & ~(seg->pagesize - 1));
+
+  /* Adjust by the offset arg of XXX_SEGMENT_RELRO_END.  */
+  desired_end = relro_end - seg->relro_offset;
+
+  /* For sections in the relro segment..  */
+  for (sec = link_info.output_bfd->section_last; sec; sec = sec->prev)
+    if ((sec->flags & SEC_ALLOC) != 0
+	&& sec->vma >= seg->base
+	&& sec->vma < seg->relro_end - seg->relro_offset)
+      {
+	/* Where do we want to put this section so that it ends as
+	   desired?  */
+	bfd_vma start, end, bump;
+
+	end = start = sec->vma;
+	if (!IS_TBSS (sec))
+	  end += TO_ADDR (sec->size);
+	bump = desired_end - end;
+	/* We'd like to increase START by BUMP, but we must heed
+	   alignment so the increase might be less than optimum.  */
+	start += bump;
+	start &= ~(((bfd_vma) 1 << sec->alignment_power) - 1);
+	/* This is now the desired end for the previous section.  */
+	desired_end = start;
+      }
+
+  seg->phase = exp_seg_relro_adjust;
+  ASSERT (desired_end >= seg->base);
+  seg->base = desired_end;
+  return relro_end;
+}
+
+static bfd_boolean
+lang_size_relro_segment (bfd_boolean *relax, bfd_boolean check_regions)
+{
+  bfd_boolean do_reset = FALSE;
+  bfd_boolean do_data_relro;
+  bfd_vma data_initial_base, data_relro_end;
+
+  if (link_info.relro && expld.dataseg.relro_end)
+    {
+      do_data_relro = TRUE;
+      data_initial_base = expld.dataseg.base;
+      data_relro_end = lang_size_relro_segment_1 (&expld.dataseg);
+    }
+  else
+    {
+      do_data_relro = FALSE;
+      data_initial_base = data_relro_end = 0;
+    }
+
+  if (do_data_relro)
+    {
+      lang_reset_memory_regions ();
+      one_lang_size_sections_pass (relax, check_regions);
+
+      /* Assignments to dot, or to output section address in a user
+	 script have increased padding over the original.  Revert.  */
+      if (do_data_relro && expld.dataseg.relro_end > data_relro_end)
+	{
+	  expld.dataseg.base = data_initial_base;;
+	  do_reset = TRUE;
+	}
+    }
+
+  if (!do_data_relro && lang_size_segment (&expld.dataseg))
+    do_reset = TRUE;
+
+  return do_reset;
+}
+
 void
 lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 {
@@ -5596,83 +5698,27 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
   expld.dataseg.phase = exp_seg_none;
 
   one_lang_size_sections_pass (relax, check_regions);
-  if (expld.dataseg.phase == exp_seg_end_seen
-      && link_info.relro && expld.dataseg.relro_end)
-    {
-      bfd_vma initial_base, relro_end, desired_end;
-      asection *sec;
 
-      /* Compute the expected PT_GNU_RELRO segment end.  */
-      relro_end = ((expld.dataseg.relro_end + expld.dataseg.pagesize - 1)
-		   & ~(expld.dataseg.pagesize - 1));
-
-      /* Adjust by the offset arg of DATA_SEGMENT_RELRO_END.  */
-      desired_end = relro_end - expld.dataseg.relro_offset;
-
-      /* For sections in the relro segment..  */
-      for (sec = link_info.output_bfd->section_last; sec; sec = sec->prev)
-	if ((sec->flags & SEC_ALLOC) != 0
-	    && sec->vma >= expld.dataseg.base
-	    && sec->vma < expld.dataseg.relro_end - expld.dataseg.relro_offset)
-	  {
-	    /* Where do we want to put this section so that it ends as
-	       desired?  */
-	    bfd_vma start, end, bump;
-
-	    end = start = sec->vma;
-	    if (!IS_TBSS (sec))
-	      end += TO_ADDR (sec->size);
-	    bump = desired_end - end;
-	    /* We'd like to increase START by BUMP, but we must heed
-	       alignment so the increase might be less than optimum.  */
-	    start += bump;
-	    start &= ~(((bfd_vma) 1 << sec->alignment_power) - 1);
-	    /* This is now the desired end for the previous section.  */
-	    desired_end = start;
-	  }
-
-      expld.dataseg.phase = exp_seg_relro_adjust;
-      ASSERT (desired_end >= expld.dataseg.base);
-      initial_base = expld.dataseg.base;
-      expld.dataseg.base = desired_end;
-      lang_reset_memory_regions ();
-      one_lang_size_sections_pass (relax, check_regions);
-
-      if (expld.dataseg.relro_end > relro_end)
-	{
-	  /* Assignments to dot, or to output section address in a
-	     user script have increased padding over the original.
-	     Revert.  */
-	  expld.dataseg.base = initial_base;
-	  lang_reset_memory_regions ();
-	  one_lang_size_sections_pass (relax, check_regions);
-	}
-
-      link_info.relro_start = expld.dataseg.base;
-      link_info.relro_end = expld.dataseg.relro_end;
-    }
-  else if (expld.dataseg.phase == exp_seg_end_seen)
-    {
-      /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_END pair was seen, check whether
-	 a page could be saved in the data segment.  */
-      bfd_vma first, last;
-
-      first = -expld.dataseg.base & (expld.dataseg.pagesize - 1);
-      last = expld.dataseg.end & (expld.dataseg.pagesize - 1);
-      if (first && last
-	  && ((expld.dataseg.base & ~(expld.dataseg.pagesize - 1))
-	      != (expld.dataseg.end & ~(expld.dataseg.pagesize - 1)))
-	  && first + last <= expld.dataseg.pagesize)
-	{
-	  expld.dataseg.phase = exp_seg_adjust;
-	  lang_reset_memory_regions ();
-	  one_lang_size_sections_pass (relax, check_regions);
-	}
-      else
-	expld.dataseg.phase = exp_seg_done;
-    }
-  else
+  if (expld.dataseg.phase != exp_seg_end_seen)
     expld.dataseg.phase = exp_seg_done;
+
+  if (expld.dataseg.phase == exp_seg_end_seen)
+    {
+      bfd_boolean do_reset
+	= lang_size_relro_segment (relax, check_regions);
+
+      if (do_reset)
+	{
+	  lang_reset_memory_regions ();
+	  one_lang_size_sections_pass (relax, check_regions);
+	}
+
+      if (link_info.relro && expld.dataseg.relro_end)
+	{
+	  link_info.relro_start = expld.dataseg.base;
+	  link_info.relro_end = expld.dataseg.relro_end;
+	}
+    }
 }
 
 static lang_output_section_statement_type *current_section;
