@@ -844,7 +844,7 @@ string_to_event_location_basic (const char **stringp,
 
   /* Try the input as a probe spec.  */
   cs = *stringp;
-  if (cs != NULL && probe_linespec_to_ops (&cs) != NULL)
+  if (cs != NULL && probe_linespec_to_static_ops (&cs) != NULL)
     {
       location = new_probe_location (*stringp);
       *stringp += strlen (*stringp);

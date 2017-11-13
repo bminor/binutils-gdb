@@ -1,3 +1,121 @@
+2017-11-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* break-catch-throw.c (fetch_probe_arguments): Use
+	'probe.prob' instead of 'probe.probe'.
+	* breakpoint.c (create_longjmp_master_breakpoint): Call
+	'can_evaluate_arguments' and 'get_relocated_address' methods
+	from probe.
+	(create_exception_master_breakpoint): Likewise.
+	(add_location_to_breakpoint): Use 'sal->prob' instead of
+	'sal->probe'.
+	(bkpt_probe_insert_location): Call 'set_semaphore' method from
+	probe.
+	(bkpt_probe_remove_location): Likewise, for 'clear_semaphore'.
+	* elfread.c (elf_get_probes): Use 'static_probe_ops' instead
+	of 'probe_ops'.
+	(probe_key_free): Call 'delete' on probe.
+	(check_exception_resume): Use 'probe.prob' instead of
+	'probe.probe'.
+	* location.c (string_to_event_location_basic): Call
+	'probe_linespec_to_static_ops'.
+	* probe.c (class any_static_probe_ops): New class.
+	(any_static_probe_ops any_static_probe_ops): New variable.
+	(parse_probes_in_pspace): Receive 'static_probe_ops' as
+	argument.  Adjust code to reflect change.
+	(parse_probes): Use 'static_probe_ops' instead of
+	'probe_ops'.  Adjust code to reflect change.
+	(find_probes_in_objfile): Call methods to get name and
+	provider from probe.
+	(find_probe_by_pc): Use 'result.prob' instead of
+	'result.probe'.  Call 'get_relocated_address' method from
+	probe.
+	(collect_probes): Adjust comment and argument list to receive
+	'static_probe_ops' instead of 'probe_ops'.  Adjust code to
+	reflect change.  Call necessary methods from probe.
+	(compare_probes): Call methods to get name and provider from
+	probes.
+	(gen_ui_out_table_header_info): Receive 'static_probe_ops'
+	instead of 'probe_ops'.  Use 'std::vector' instead of VEC,
+	adjust code accordingly.
+	(print_ui_out_not_applicables): Likewise.
+	(info_probes_for_ops): Rename to...
+	(info_probes_for_spops): ...this.  Receive 'static_probe_ops'
+	as argument instead of 'probe_ops'.  Adjust code.  Call
+	necessary methods from probe.
+	(info_probes_command): Use 'info_probes_for_spops'.
+	(enable_probes_command): Pass correct argument to
+	'collect_probes'.  Call methods from probe.
+	(disable_probes_command): Likewise.
+	(get_probe_address): Move to 'any_static_probe_ops::get_address'.
+	(get_probe_argument_count): Move to
+	'any_static_probe_ops::get_argument_count'.
+	(can_evaluate_probe_arguments): Move to
+	'any_static_probe_ops::can_evaluate_arguments'.
+	(evaluate_probe_argument): Move to
+	'any_static_probe_ops::evaluate_argument'.
+	(probe_safe_evaluate_at_pc): Use 'probe.prob' instead of
+	'probe.probe'.
+	(probe_linespec_to_ops): Rename to...
+	(probe_linespec_to_static_ops): ...this.  Adjust code.
+	(probe_any_is_linespec): Rename to...
+	(any_static_probe_ops::is_linespec): ...this.
+	(probe_any_get_probes): Rename to...
+	(any_static_probe_ops::get_probes): ...this.
+	(any_static_probe_ops::type_name): New method.
+	(any_static_probe_ops::gen_info_probes_table_header): New
+	method.
+	(compute_probe_arg): Use 'pc_probe.prob' instead of
+	'pc_probe.probe'.  Call methods from probe.
+	(compile_probe_arg): Likewise.
+	(std::vector<const probe_ops *> all_probe_ops): Delete.
+	(std::vector<const static_probe_ops *> all_static_probe_ops):
+	New variable.
+	(_initialize_probe): Use 'all_static_probe_ops' instead of
+	'all_probe_ops'.
+	* probe.h (struct info_probe_column) <field_name>: Delete
+	extraneous newline
+	(info_probe_column_s): Delete type and VEC.
+	(struct probe_ops): Delete.  Replace with...
+	(class static_probe_ops): ...this and...
+	(clas probe): ...this.
+	(struct bound_probe) <bound_probe>: Delete extraneous
+	newline.  Adjust constructor to receive 'probe' instead of
+	'struct probe'.
+	<probe>: Rename to...
+	<prob>: ...this.  Delete extraneous newline.
+	<objfile>: Delete extraneous newline.
+	(register_probe_ops): Delete unused prototype.
+	(info_probes_for_ops): Rename to...
+	(info_probes_for_spops): ...this.  Adjust comment.
+	(get_probe_address): Move to 'probe::get_address'.
+	(get_probe_argument_count): Move to
+	'probe::get_argument_count'.
+	(can_evaluate_probe_arguments): Move to
+	'probe::can_evaluate_arguments'.
+	(evaluate_probe_argument): Move to 'probe::evaluate_argument'.
+	* solib-svr4.c (struct svr4_info): Adjust comment.
+	(struct probe_and_action) <probe>: Rename to...
+	<prob>: ...this.
+	(register_solib_event_probe): Receive 'probe' instead of
+	'struct probe' as argument.  Use 'prob' instead of 'probe'
+	when applicable.
+	(solib_event_probe_action): Call 'get_argument_count' method
+	from probe.  Adjust comment.
+	(svr4_handle_solib_event): Adjust comment.  Call
+	'evaluate_argument' method from probe.
+	(svr4_create_probe_breakpoints): Call 'get_relocated_address'
+	from probe.
+	(svr4_create_solib_event_breakpoints): Use 'probe' instead of
+	'struct probe'.  Call 'can_evaluate_arguments' from probe.
+	* symfile.h: Forward declare 'class probe' instead of 'struct
+	probe'.
+	* symtab.h: Likewise.
+	(struct symtab_and_line) <probe>: Rename to...
+	<prob>: ...this.
+	* tracepoint.c (start_tracing): Use 'prob' when applicable.
+	Call probe methods.
+	(stop_tracing): Likewise.
+
 2017-11-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* ravenscar-thread.c (ravenscar_inferior_created): Remove

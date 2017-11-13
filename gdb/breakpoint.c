@@ -3310,7 +3310,7 @@ create_longjmp_master_breakpoint (void)
 	      /* We are only interested in checking one element.  */
 	      probe *p = ret[0];
 
-	      if (!can_evaluate_probe_arguments (p))
+	      if (!p->can_evaluate_arguments ())
 		{
 		  /* We cannot use the probe interface here, because it does
 		     not know how to evaluate arguments.  */
@@ -3330,7 +3330,7 @@ create_longjmp_master_breakpoint (void)
 	      struct breakpoint *b;
 
 	      b = create_internal_breakpoint (gdbarch,
-					      get_probe_address (p, objfile),
+					      p->get_relocated_address (objfile),
 					      bp_longjmp_master,
 					      &internal_breakpoint_ops);
 	      b->location = new_probe_location ("-probe-stap libc:longjmp");
@@ -3463,7 +3463,7 @@ create_exception_master_breakpoint (void)
 	      /* We are only interested in checking one element.  */
 	      probe *p = ret[0];
 
-	      if (!can_evaluate_probe_arguments (p))
+	      if (!p->can_evaluate_arguments ())
 		{
 		  /* We cannot use the probe interface here, because it does
 		     not know how to evaluate arguments.  */
@@ -3483,7 +3483,7 @@ create_exception_master_breakpoint (void)
 	      struct breakpoint *b;
 
 	      b = create_internal_breakpoint (gdbarch,
-					      get_probe_address (p, objfile),
+					      p->get_relocated_address (objfile),
 					      bp_exception_master,
 					      &internal_breakpoint_ops);
 	      b->location = new_probe_location ("-probe-stap libgcc:unwind");
@@ -8692,7 +8692,7 @@ add_location_to_breakpoint (struct breakpoint *b,
   loc->requested_address = sal->pc;
   loc->address = adjusted_address;
   loc->pspace = sal->pspace;
-  loc->probe.probe = sal->probe;
+  loc->probe.prob = sal->prob;
   loc->probe.objfile = sal->objfile;
   gdb_assert (loc->pspace != NULL);
   loc->section = sal->section;
@@ -12877,10 +12877,7 @@ bkpt_probe_insert_location (struct bp_location *bl)
     {
       /* The insertion was successful, now let's set the probe's semaphore
 	 if needed.  */
-      if (bl->probe.probe->pops->set_semaphore != NULL)
-	bl->probe.probe->pops->set_semaphore (bl->probe.probe,
-					      bl->probe.objfile,
-					      bl->gdbarch);
+      bl->probe.prob->set_semaphore (bl->probe.objfile, bl->gdbarch);
     }
 
   return v;
@@ -12891,10 +12888,7 @@ bkpt_probe_remove_location (struct bp_location *bl,
 			    enum remove_bp_reason reason)
 {
   /* Let's clear the semaphore before removing the location.  */
-  if (bl->probe.probe->pops->clear_semaphore != NULL)
-    bl->probe.probe->pops->clear_semaphore (bl->probe.probe,
-					    bl->probe.objfile,
-					    bl->gdbarch);
+  bl->probe.prob->clear_semaphore (bl->probe.objfile, bl->gdbarch);
 
   return bkpt_remove_location (bl, reason);
 }

@@ -34,11 +34,11 @@ struct objfile;
 struct obj_section;
 struct obstack;
 struct block;
-struct probe;
 struct value;
 struct frame_info;
 struct agent_expr;
 struct axs_value;
+class probe;
 
 /* Comparison function for symbol look ups.  */
 

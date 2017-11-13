@@ -1324,7 +1324,7 @@ elf_get_probes (struct objfile *objfile)
 
       /* Here we try to gather information about all types of probes from the
 	 objfile.  */
-      for (const probe_ops *ops : all_probe_ops)
+      for (const static_probe_ops *ops : all_static_probe_ops)
 	ops->get_probes (probes_per_bfd, objfile);
 
       set_bfd_data (objfile->obfd, probe_key, probes_per_bfd);
@@ -1342,7 +1342,7 @@ probe_key_free (bfd *abfd, void *d)
   std::vector<probe *> *probes = (std::vector<probe *> *) d;
 
   for (probe *p : *probes)
-    p->pops->destroy (p);
+    delete p;
 
   delete probes;
 }

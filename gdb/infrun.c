@@ -7565,7 +7565,7 @@ check_exception_resume (struct execution_control_state *ecs,
      CFA and the HANDLER.  We ignore the CFA, extract the handler, and
      set a breakpoint there.  */
   probe = find_probe_by_pc (get_frame_pc (frame));
-  if (probe.probe)
+  if (probe.prob)
     {
       insert_exception_resume_from_probe (ecs->event_thread, &probe, frame);
       return;

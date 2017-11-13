@@ -42,10 +42,10 @@ struct axs_value;
 struct agent_expr;
 struct program_space;
 struct language_defn;
-struct probe;
 struct common_block;
 struct obj_section;
 struct cmd_list_element;
+class probe;
 struct lookup_name_info;
 
 /* How to match a lookup name against a symbol search name.  */
@@ -1727,7 +1727,7 @@ struct symtab_and_line
   bool explicit_line = false;
 
   /* The probe associated with this symtab_and_line.  */
-  struct probe *probe = NULL;
+  probe *prob = NULL;
   /* If PROBE is not NULL, then this is the objfile in which the probe
      originated.  */
   struct objfile *objfile = NULL;
