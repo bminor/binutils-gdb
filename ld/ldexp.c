@@ -343,6 +343,30 @@ update_definedness (const char *name, struct bfd_link_hash_entry *h)
 }
 
 static void
+fold_segment_end (seg_align_type *seg)
+{
+  if (expld.phase == lang_first_phase_enum
+      || expld.section != bfd_abs_section_ptr)
+    {
+      expld.result.valid_p = FALSE;
+    }
+  else if (seg->phase == exp_seg_align_seen
+	   || seg->phase == exp_seg_relro_seen)
+    {
+      seg->phase = exp_seg_end_seen;
+      seg->end = expld.result.value;
+    }
+  else if (seg->phase == exp_seg_done
+	   || seg->phase == exp_seg_adjust
+	   || seg->phase == exp_seg_relro_adjust)
+    {
+      /* OK.  */
+    }
+  else
+    expld.result.valid_p = FALSE;
+}
+
+static void
 fold_unary (etree_type *tree)
 {
   exp_fold_tree_1 (tree->unary.child);
@@ -389,25 +413,7 @@ fold_unary (etree_type *tree)
 	  break;
 
 	case DATA_SEGMENT_END:
-	  if (expld.phase == lang_first_phase_enum
-	      || expld.section != bfd_abs_section_ptr)
-	    {
-	      expld.result.valid_p = FALSE;
-	    }
-	  else if (expld.dataseg.phase == exp_seg_align_seen
-		   || expld.dataseg.phase == exp_seg_relro_seen)
-	    {
-	      expld.dataseg.phase = exp_seg_end_seen;
-	      expld.dataseg.end = expld.result.value;
-	    }
-	  else if (expld.dataseg.phase == exp_seg_done
-		   || expld.dataseg.phase == exp_seg_adjust
-		   || expld.dataseg.phase == exp_seg_relro_adjust)
-	    {
-	      /* OK.  */
-	    }
-	  else
-	    expld.result.valid_p = FALSE;
+	  fold_segment_end (&expld.dataseg);
 	  break;
 
 	default:
@@ -441,6 +447,84 @@ arith_result_section (const etree_value_type *lhs)
       else
 	expld.result.section = NULL;
     }
+}
+
+static void
+fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
+{
+  seg->relro = exp_seg_relro_start;
+  if (expld.phase == lang_first_phase_enum
+      || expld.section != bfd_abs_section_ptr)
+    expld.result.valid_p = FALSE;
+  else
+    {
+      bfd_vma maxpage = lhs->value;
+      bfd_vma commonpage = expld.result.value;
+
+      expld.result.value = align_n (expld.dot, maxpage);
+      if (seg->phase == exp_seg_relro_adjust)
+	expld.result.value = seg->base;
+      else if (seg->phase == exp_seg_adjust)
+	{
+	  if (commonpage < maxpage)
+	    expld.result.value += ((expld.dot + commonpage - 1)
+				   & (maxpage - commonpage));
+	}
+      else
+	{
+	  expld.result.value += expld.dot & (maxpage - 1);
+	  if (seg->phase == exp_seg_done)
+	    {
+	      /* OK.  */
+	    }
+	  else if (seg->phase == exp_seg_none)
+	    {
+	      seg->phase = exp_seg_align_seen;
+	      seg->base = expld.result.value;
+	      seg->pagesize = commonpage;
+	      seg->maxpagesize = maxpage;
+	      seg->relro_end = 0;
+	    }
+	  else
+	    expld.result.valid_p = FALSE;
+	}
+    }
+}
+
+static void
+fold_segment_relro_end (seg_align_type *seg, etree_value_type *lhs)
+{
+  /* Operands swapped!  XXX_SEGMENT_RELRO_END(offset,exp) has offset
+     in expld.result and exp in lhs.  */
+  seg->relro = exp_seg_relro_end;
+  seg->relro_offset = expld.result.value;
+  if (expld.phase == lang_first_phase_enum
+      || expld.section != bfd_abs_section_ptr)
+    expld.result.valid_p = FALSE;
+  else if (seg->phase == exp_seg_align_seen
+	   || seg->phase == exp_seg_adjust
+	   || seg->phase == exp_seg_relro_adjust
+	   || seg->phase == exp_seg_done)
+    {
+      if (seg->phase == exp_seg_align_seen
+	  || seg->phase == exp_seg_relro_adjust)
+	seg->relro_end = lhs->value + expld.result.value;
+
+      if (seg->phase == exp_seg_relro_adjust
+	  && (seg->relro_end & (seg->pagesize - 1)))
+	{
+	  seg->relro_end += seg->pagesize - 1;
+	  seg->relro_end &= ~(seg->pagesize - 1);
+	  expld.result.value = seg->relro_end - expld.result.value;
+	}
+      else
+	expld.result.value = lhs->value;
+
+      if (seg->phase == exp_seg_align_seen)
+	seg->phase = exp_seg_relro_seen;
+    }
+  else
+    expld.result.valid_p = FALSE;
 }
 
 static void
@@ -573,79 +657,11 @@ fold_binary (etree_type *tree)
 	  break;
 
 	case DATA_SEGMENT_ALIGN:
-	  expld.dataseg.relro = exp_seg_relro_start;
-	  if (expld.phase == lang_first_phase_enum
-	      || expld.section != bfd_abs_section_ptr)
-	    expld.result.valid_p = FALSE;
-	  else
-	    {
-	      bfd_vma maxpage = lhs.value;
-	      bfd_vma commonpage = expld.result.value;
-
-	      expld.result.value = align_n (expld.dot, maxpage);
-	      if (expld.dataseg.phase == exp_seg_relro_adjust)
-		expld.result.value = expld.dataseg.base;
-	      else if (expld.dataseg.phase == exp_seg_adjust)
-		{
-		  if (commonpage < maxpage)
-		    expld.result.value += ((expld.dot + commonpage - 1)
-					   & (maxpage - commonpage));
-		}
-	      else
-		{
-		  expld.result.value += expld.dot & (maxpage - 1);
-		  if (expld.dataseg.phase == exp_seg_done)
-		    {
-		      /* OK.  */
-		    }
-		  else if (expld.dataseg.phase == exp_seg_none)
-		    {
-		      expld.dataseg.phase = exp_seg_align_seen;
-		      expld.dataseg.base = expld.result.value;
-		      expld.dataseg.pagesize = commonpage;
-		      expld.dataseg.maxpagesize = maxpage;
-		      expld.dataseg.relro_end = 0;
-		    }
-		  else
-		    expld.result.valid_p = FALSE;
-		}
-	    }
+	  fold_segment_align (&expld.dataseg, &lhs);
 	  break;
 
 	case DATA_SEGMENT_RELRO_END:
-	  /* Operands swapped!  DATA_SEGMENT_RELRO_END(offset,exp)
-	     has offset in expld.result and exp in lhs.  */
-	  expld.dataseg.relro = exp_seg_relro_end;
-	  expld.dataseg.relro_offset = expld.result.value;
-	  if (expld.phase == lang_first_phase_enum
-	      || expld.section != bfd_abs_section_ptr)
-	    expld.result.valid_p = FALSE;
-	  else if (expld.dataseg.phase == exp_seg_align_seen
-		   || expld.dataseg.phase == exp_seg_adjust
-		   || expld.dataseg.phase == exp_seg_relro_adjust
-		   || expld.dataseg.phase == exp_seg_done)
-	    {
-	      if (expld.dataseg.phase == exp_seg_align_seen
-		  || expld.dataseg.phase == exp_seg_relro_adjust)
-		expld.dataseg.relro_end = lhs.value + expld.result.value;
-
-	      if (expld.dataseg.phase == exp_seg_relro_adjust
-		  && (expld.dataseg.relro_end
-		      & (expld.dataseg.pagesize - 1)))
-		{
-		  expld.dataseg.relro_end += expld.dataseg.pagesize - 1;
-		  expld.dataseg.relro_end &= ~(expld.dataseg.pagesize - 1);
-		  expld.result.value = (expld.dataseg.relro_end
-					- expld.result.value);
-		}
-	      else
-		expld.result.value = lhs.value;
-
-	      if (expld.dataseg.phase == exp_seg_align_seen)
-		expld.dataseg.phase = exp_seg_relro_seen;
-	    }
-	  else
-	    expld.result.valid_p = FALSE;
+	  fold_segment_relro_end (&expld.dataseg, &lhs);
 	  break;
 
 	default:

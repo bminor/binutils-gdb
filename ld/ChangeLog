@@ -1,5 +1,14 @@
 2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ldexp.c (fold_unary): Extract the DATA_SEGMENT_END case to ...
+	(fold_segment_end): New function.
+	(fold_binary): Extract the DATA_SEGMENT_ALIGN case to ...
+	(fold_segment_align): New function.
+	(fold_binary): Extract the DATA_SEGMENT_RELRO_END case to ...
+	(fold_segment_relro_end): New function.
+
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ldexp.h (phase_enum): Rename exp_dataseg_none,
 	exp_dataseg_align_seen, exp_dataseg_relro_seen,
 	exp_dataseg_end_seen, exp_dataseg_relro_adjust,
