@@ -1,5 +1,10 @@
 2017-11-13  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-aarch64.c (R_Z_BHSDQ_VZP): Rename to ...
+	(R_Z_SP_BHSDQ_VZP): ... and include both stack pointer variants.
+
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/ia64/group-1.d: Adjust expectations.
 	* testsuite/gas/ia64/group-2.d: Likewise.
 	* testsuite/gas/ia64/xdata.d: Likewise.
