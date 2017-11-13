@@ -1,3 +1,9 @@
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (fxsave64, fxrstor64, xsave64, xrstor64,
+	xsaveopt64): Add No_qSuf.
+	* i386-tbl.h: Re-generate.
+
 2017-11-09  Tamar Christina  <tamar.christina@arm.com>
 
 	* aarch64-opc.c (aarch64_sys_regs): Add ARMv8.4-a registers;
