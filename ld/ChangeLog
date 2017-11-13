@@ -1,5 +1,15 @@
 2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ldlang.c (lang_size_sections_1): Extract GNU_RELRO region check
+	into ...
+	(ldlang_check_relro_region): New function.
+	(lang_find_relro_sections_1): Add an argument for pointer to
+	seg_align_type and replace expld.dataseg with the pointer.
+	(lang_find_relro_sections): Pass address of expld.dataseg to
+	lang_find_relro_sections_1.
+
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ldlang.c (lang_size_segment): New function.
 	(lang_size_relro_segment_1): Likewise.
 	(lang_size_relro_segment): Likewise.
