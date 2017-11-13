@@ -1,3 +1,10 @@
+2017-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/ppc32elf.em (ppc_before_allocation): Replace
+	exp_dataseg_none with exp_seg_none.
+	* emultempl/ppc64elf.em (prelim_size_sections): Likewise.
+	* emultempl/spuelf.em (spu_before_allocation): Likewise.
+
 2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldlang.c (lang_size_sections_1): Extract GNU_RELRO region check

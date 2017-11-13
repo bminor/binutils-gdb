@@ -266,7 +266,7 @@ prelim_size_sections (void)
   if (expld.phase != lang_mark_phase_enum)
     {
       expld.phase = lang_mark_phase_enum;
-      expld.dataseg.phase = exp_dataseg_none;
+      expld.dataseg.phase = exp_seg_none;
       one_lang_size_sections_pass (NULL, FALSE);
       /* We must not cache anything from the preliminary sizing.  */
       lang_reset_memory_regions ();
