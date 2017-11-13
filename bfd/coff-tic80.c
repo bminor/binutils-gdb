@@ -42,6 +42,8 @@
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 #define COFF_ALIGN_IN_SECTION_HEADER 1
 #define COFF_ALIGN_IN_SFLAGS 1
+#define COFF_ENCODE_ALIGNMENT(S,X) ((S).s_flags |= (((unsigned)(X) & 0xf) << 8))
+#define COFF_DECODE_ALIGNMENT(X) (((X) >> 8) & 0xf)
 
 #define GET_SCNHDR_FLAGS H_GET_16
 #define PUT_SCNHDR_FLAGS H_PUT_16
