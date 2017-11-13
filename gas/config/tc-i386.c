@@ -5431,7 +5431,8 @@ process_suffix (void)
 		}
 
 	      for (op = i.operands; --op >= 0;)
-		if (!i.tm.operand_types[op].bitfield.inoutportreg)
+		if (!i.tm.operand_types[op].bitfield.inoutportreg
+		    && !i.tm.operand_types[op].bitfield.shiftcount)
 		  {
 		    if (i.types[op].bitfield.reg8)
 		      {
