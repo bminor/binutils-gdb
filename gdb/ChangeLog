@@ -1,4 +1,70 @@
 2017-11-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* dtrace-probe.c (struct probe_ops dtrace_probe_ops): Delete.
+	(struct dtrace_probe_arg) <dtrace_probe_arg>: New constructor.
+	<type_str>: Convert to 'std::string'.
+	<expr>: Convert to 'expression_up'.
+	(dtrace_probe_arg_s): Delete type and VEC.
+	(dtrace_probe_enabler_s): Likewise.
+	(struct dtrace_probe): Replace by...
+	(class dtrace_static_probe_ops): ...this and...
+	(class dtrace_probe): ...this.
+	(dtrace_probe_is_linespec): Rename to...
+	(dtrace_static_probe_ops::is_linespec): ...this.  Adjust code
+	to reflect change.
+	(dtrace_process_dof_probe): Use 'std::vector' instead of VEC.
+	Adjust code.  Create new instance of 'dtrace_probe'.
+	(dtrace_build_arg_exprs): Rename to...
+	(dtrace_probe::build_arg_exprs): ...this.  Adjust code to
+	reflect change.
+	(dtrace_get_probes): Rename to...
+	(dtrace_static_probe_ops::get_probes): ...this.  Adjust code
+	to reflect change.
+	(dtrace_get_arg): Rename to...
+	(dtrace_probe::get_arg_by_number): ...this.  Adjust code to
+	reflect change.
+	(dtrace_probe_is_enabled): Rename to...
+	(dtrace_probe::is_enabled): ...this.  Adjust code to reflect
+	change.
+	(dtrace_get_probe_address): Rename to...
+	(dtrace_probe::get_relocated_address): ...this.  Adjust code
+	to reflect change.
+	(dtrace_get_probe_argument_count): Rename to...
+	(dtrace_probe::get_argument_count): ...this.  Adjust code to
+	reflect change.
+	(dtrace_can_evaluate_probe_arguments): Rename to...
+	(dtrace_probe::can_evaluate_arguments): ...this.  Adjust code
+	to reflect change.
+	(dtrace_evaluate_probe_argument): Rename to...
+	(dtrace_probe::evaluate_argument): ...this.  Adjust code to
+	reflect change.
+	(dtrace_compile_to_ax): Rename to...
+	(dtrace_probe::compile_to_ax): ...this.  Adjust code to
+	reflect change.
+	(dtrace_probe_destroy): Delete.
+	(dtrace_type_name): Rename to...
+	(dtrace_static_probe_ops::type_name): ...this.  Adjust code to
+	reflect change.
+	(dtrace_probe::get_static_ops): New method.
+	(dtrace_gen_info_probes_table_header): Rename to...
+	(dtrace_static_probe_ops::gen_info_probes_table_header):
+	...this.  Adjust code to reflect change.
+	(dtrace_gen_info_probes_table_values): Rename to...
+	(dtrace_probe::gen_info_probes_table_values): ...this.  Adjust
+	code to reflect change.
+	(dtrace_enable_probe): Rename to...
+	(dtrace_probe::enable_probe): ...this.  Adjust code to reflect
+	change.
+	(dtrace_disable_probe): Rename to...
+	(dtrace_probe::disable_probe): ...this.  Adjust code to reflect
+	change.
+	(struct probe_ops dtrace_probe_ops): Delete.
+	(info_probes_dtrace_command): Call 'info_probes_for_spops'
+	instead of 'info_probes_for_ops'.
+	(_initialize_dtrace_probe): Use 'all_static_probe_ops' instead
+	of 'all_probe_ops'.
+
+2017-11-22  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Simon Marchi  <simark@simark.ca>
 
 	* stap-probe.c (struct probe_ops stap_probe_ops): Delete
