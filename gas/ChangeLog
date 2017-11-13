@@ -1,5 +1,11 @@
 2017-11-13  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/ia64/group-1.d: Adjust expectations.
+	* testsuite/gas/ia64/group-2.d: Likewise.
+	* testsuite/gas/ia64/xdata.d: Likewise.
+
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (process_suffix): Treat .shiftcount just like
 	.inoutportreg.
 	* testsuite/gas/i386/inval.s: Add ambiguous shift/rotate cases.
