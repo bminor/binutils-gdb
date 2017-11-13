@@ -9806,99 +9806,20 @@ bytes_to_stretch (fragS *this_frag,
 
 
 static fragS *
-search_trampolines (TInsn *tinsn, fragS *fragP, bfd_boolean unreachable_only)
+xg_find_best_trampoline_for_tinsn (TInsn *tinsn, fragS *fragP)
 {
-  struct trampoline_seg *ts = find_trampoline_seg (now_seg);
-  fragS *tf = NULL;
-  size_t i;
-  fragS *best_tf = NULL;
-  offsetT best_delta = 0;
-  offsetT best_addr = 0;
   symbolS *sym = tinsn->tok[0].X_add_symbol;
-  offsetT target = S_GET_VALUE (sym) + tinsn->tok[0].X_add_number;
-  offsetT addr = fragP->fr_address;
-  offsetT lower = (addr < target) ? addr : target;
-  offsetT upper = (addr > target) ? addr : target;
-  offsetT delta = upper - lower;
-  offsetT midpoint = lower + delta / 2;
-  offsetT this_delta = -1;
-  offsetT this_addr = -1;
+  addressT source = fragP->fr_address;
+  addressT target = S_GET_VALUE (sym) + tinsn->tok[0].X_add_number;
+  struct trampoline_seg *ts = find_trampoline_seg (now_seg);
+  size_t i;
 
-  if (!ts)
+  if (!ts || !ts->index.n_entries)
     return NULL;
 
-  if (delta > 2 * J_RANGE)
-    {
-      /* One trampoline won't do; we need multiple.
-	 Choose the farthest trampoline that's still in range of the original
-	 and let a later pass finish the job.  */
-      for (i = 0; i < ts->index.n_entries; ++i)
-	{
-	  tf = ts->index.entry[i];
-	  this_addr = tf->fr_address + tf->fr_fix;
-	  if (upper == addr)
-	    {
-	      /* Backward jump.  */
-	      if (addr - this_addr < J_RANGE)
-		break;
-	    }
-	  else if (i + 1 < ts->index.n_entries)
-	    {
-	      /* Forward jump.  */
-	      fragS *next = ts->index.entry[i + 1];
-	      offsetT next_addr = next->fr_address + next->fr_fix;
+  i = xg_find_best_trampoline (&ts->index, source, target);
 
-	      if (next_addr - addr > J_RANGE)
-		break;
-	    }
-	  else
-	    {
-	      break;
-	    }
-	}
-      if (i < ts->index.n_entries &&
-	  labs (addr - this_addr) < J_RANGE)
-	return tf;
-
-      return NULL;
-    }
-
-  for (i = 0; i < ts->index.n_entries; ++i)
-    {
-      tf = ts->index.entry[i];
-      this_addr = tf->fr_address + tf->fr_fix;
-      this_delta = labs (this_addr - midpoint);
-      if (unreachable_only && tf->tc_frag_data.needs_jump_around)
-	continue;
-      if (!best_tf || this_delta < best_delta)
-        {
-	  best_tf = tf;
-	  best_delta = this_delta;
-	  best_addr = this_addr;
-        }
-    }
-
-  if (best_tf &&
-      best_delta < J_RANGE &&
-      labs(best_addr - lower) < J_RANGE &&
-      labs(best_addr - upper) < J_RANGE)
-    return best_tf;
-
-  return NULL; /* No suitable trampoline found.  */
-}
-
-
-static fragS *
-get_best_trampoline (TInsn *tinsn, fragS *fragP)
-{
-  fragS *tf = NULL;
-
-  tf = search_trampolines (tinsn, fragP, TRUE); /* Try unreachable first.  */
-
-  if (tf == NULL)
-    tf = search_trampolines (tinsn, fragP, FALSE); /* Try ones needing a jump-around, too.  */
-
-  return tf;
+  return ts->index.entry[i];
 }
 
 
@@ -10154,7 +10075,7 @@ relax_frag_immed (segT segP,
 
       if (!xg_symbolic_immeds_fit (jinsn, segP, fragP, fragP->fr_offset, total_text_diff))
 	{
-	  fragS *tf = get_best_trampoline (jinsn, fragP);
+	  fragS *tf = xg_find_best_trampoline_for_tinsn (jinsn, fragP);
 
 	  if (tf)
 	    {

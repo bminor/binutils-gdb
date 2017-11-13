@@ -1,5 +1,16 @@
 2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* config/tc-xtensa.c (search_trampolines, get_best_trampoline):
+	Remove definitions.
+	(xg_find_best_trampoline_for_tinsn): New function.
+	(relax_frag_immed): Replace call to get_best_trampoline with a
+	call to xg_find_best_trampoline_for_tinsn.
+	* testsuite/gas/xtensa/trampoline.d: Adjust absolute addresses
+	as the placement of trampolines for relaxed branches has been
+	changed.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* config/tc-xtensa.c (trampoline_index): New structure.
 	(trampoline_seg): Replace trampoline list with trampoline index.
 	(xg_find_trampoline, xg_add_trampoline_to_index)
