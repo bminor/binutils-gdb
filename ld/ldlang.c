@@ -3890,7 +3890,7 @@ strip_excluded_output_sections (void)
   if (expld.phase != lang_mark_phase_enum)
     {
       expld.phase = lang_mark_phase_enum;
-      expld.dataseg.phase = exp_dataseg_none;
+      expld.dataseg.phase = exp_seg_none;
       one_lang_size_sections_pass (NULL, FALSE);
       lang_reset_memory_regions ();
     }
@@ -5426,13 +5426,13 @@ lang_size_sections_1
 	    bfd_vma newdot = dot;
 	    etree_type *tree = s->assignment_statement.exp;
 
-	    expld.dataseg.relro = exp_dataseg_relro_none;
+	    expld.dataseg.relro = exp_seg_relro_none;
 
 	    exp_fold_tree (tree,
 			   output_section_statement->bfd_section,
 			   &newdot);
 
-	    if (expld.dataseg.relro == exp_dataseg_relro_start)
+	    if (expld.dataseg.relro == exp_seg_relro_start)
 	      {
 		if (!expld.dataseg.relro_start_stat)
 		  expld.dataseg.relro_start_stat = s;
@@ -5441,7 +5441,7 @@ lang_size_sections_1
 		    ASSERT (expld.dataseg.relro_start_stat == s);
 		  }
 	      }
-	    else if (expld.dataseg.relro == exp_dataseg_relro_end)
+	    else if (expld.dataseg.relro == exp_seg_relro_end)
 	      {
 		if (!expld.dataseg.relro_end_stat)
 		  expld.dataseg.relro_end_stat = s;
@@ -5450,7 +5450,7 @@ lang_size_sections_1
 		    ASSERT (expld.dataseg.relro_end_stat == s);
 		  }
 	      }
-	    expld.dataseg.relro = exp_dataseg_relro_none;
+	    expld.dataseg.relro = exp_seg_relro_none;
 
 	    /* This symbol may be relative to this section.  */
 	    if ((tree->type.node_class == etree_provided
@@ -5593,10 +5593,10 @@ void
 lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 {
   expld.phase = lang_allocating_phase_enum;
-  expld.dataseg.phase = exp_dataseg_none;
+  expld.dataseg.phase = exp_seg_none;
 
   one_lang_size_sections_pass (relax, check_regions);
-  if (expld.dataseg.phase == exp_dataseg_end_seen
+  if (expld.dataseg.phase == exp_seg_end_seen
       && link_info.relro && expld.dataseg.relro_end)
     {
       bfd_vma initial_base, relro_end, desired_end;
@@ -5631,7 +5631,7 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	    desired_end = start;
 	  }
 
-      expld.dataseg.phase = exp_dataseg_relro_adjust;
+      expld.dataseg.phase = exp_seg_relro_adjust;
       ASSERT (desired_end >= expld.dataseg.base);
       initial_base = expld.dataseg.base;
       expld.dataseg.base = desired_end;
@@ -5651,7 +5651,7 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
       link_info.relro_start = expld.dataseg.base;
       link_info.relro_end = expld.dataseg.relro_end;
     }
-  else if (expld.dataseg.phase == exp_dataseg_end_seen)
+  else if (expld.dataseg.phase == exp_seg_end_seen)
     {
       /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_END pair was seen, check whether
 	 a page could be saved in the data segment.  */
@@ -5664,15 +5664,15 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	      != (expld.dataseg.end & ~(expld.dataseg.pagesize - 1)))
 	  && first + last <= expld.dataseg.pagesize)
 	{
-	  expld.dataseg.phase = exp_dataseg_adjust;
+	  expld.dataseg.phase = exp_seg_adjust;
 	  lang_reset_memory_regions ();
 	  one_lang_size_sections_pass (relax, check_regions);
 	}
       else
-	expld.dataseg.phase = exp_dataseg_done;
+	expld.dataseg.phase = exp_seg_done;
     }
   else
-    expld.dataseg.phase = exp_dataseg_done;
+    expld.dataseg.phase = exp_seg_done;
 }
 
 static lang_output_section_statement_type *current_section;

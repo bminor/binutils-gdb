@@ -394,15 +394,15 @@ fold_unary (etree_type *tree)
 	    {
 	      expld.result.valid_p = FALSE;
 	    }
-	  else if (expld.dataseg.phase == exp_dataseg_align_seen
-		   || expld.dataseg.phase == exp_dataseg_relro_seen)
+	  else if (expld.dataseg.phase == exp_seg_align_seen
+		   || expld.dataseg.phase == exp_seg_relro_seen)
 	    {
-	      expld.dataseg.phase = exp_dataseg_end_seen;
+	      expld.dataseg.phase = exp_seg_end_seen;
 	      expld.dataseg.end = expld.result.value;
 	    }
-	  else if (expld.dataseg.phase == exp_dataseg_done
-		   || expld.dataseg.phase == exp_dataseg_adjust
-		   || expld.dataseg.phase == exp_dataseg_relro_adjust)
+	  else if (expld.dataseg.phase == exp_seg_done
+		   || expld.dataseg.phase == exp_seg_adjust
+		   || expld.dataseg.phase == exp_seg_relro_adjust)
 	    {
 	      /* OK.  */
 	    }
@@ -573,7 +573,7 @@ fold_binary (etree_type *tree)
 	  break;
 
 	case DATA_SEGMENT_ALIGN:
-	  expld.dataseg.relro = exp_dataseg_relro_start;
+	  expld.dataseg.relro = exp_seg_relro_start;
 	  if (expld.phase == lang_first_phase_enum
 	      || expld.section != bfd_abs_section_ptr)
 	    expld.result.valid_p = FALSE;
@@ -583,9 +583,9 @@ fold_binary (etree_type *tree)
 	      bfd_vma commonpage = expld.result.value;
 
 	      expld.result.value = align_n (expld.dot, maxpage);
-	      if (expld.dataseg.phase == exp_dataseg_relro_adjust)
+	      if (expld.dataseg.phase == exp_seg_relro_adjust)
 		expld.result.value = expld.dataseg.base;
-	      else if (expld.dataseg.phase == exp_dataseg_adjust)
+	      else if (expld.dataseg.phase == exp_seg_adjust)
 		{
 		  if (commonpage < maxpage)
 		    expld.result.value += ((expld.dot + commonpage - 1)
@@ -594,13 +594,13 @@ fold_binary (etree_type *tree)
 	      else
 		{
 		  expld.result.value += expld.dot & (maxpage - 1);
-		  if (expld.dataseg.phase == exp_dataseg_done)
+		  if (expld.dataseg.phase == exp_seg_done)
 		    {
 		      /* OK.  */
 		    }
-		  else if (expld.dataseg.phase == exp_dataseg_none)
+		  else if (expld.dataseg.phase == exp_seg_none)
 		    {
-		      expld.dataseg.phase = exp_dataseg_align_seen;
+		      expld.dataseg.phase = exp_seg_align_seen;
 		      expld.dataseg.base = expld.result.value;
 		      expld.dataseg.pagesize = commonpage;
 		      expld.dataseg.maxpagesize = maxpage;
@@ -615,21 +615,21 @@ fold_binary (etree_type *tree)
 	case DATA_SEGMENT_RELRO_END:
 	  /* Operands swapped!  DATA_SEGMENT_RELRO_END(offset,exp)
 	     has offset in expld.result and exp in lhs.  */
-	  expld.dataseg.relro = exp_dataseg_relro_end;
+	  expld.dataseg.relro = exp_seg_relro_end;
 	  expld.dataseg.relro_offset = expld.result.value;
 	  if (expld.phase == lang_first_phase_enum
 	      || expld.section != bfd_abs_section_ptr)
 	    expld.result.valid_p = FALSE;
-	  else if (expld.dataseg.phase == exp_dataseg_align_seen
-		   || expld.dataseg.phase == exp_dataseg_adjust
-		   || expld.dataseg.phase == exp_dataseg_relro_adjust
-		   || expld.dataseg.phase == exp_dataseg_done)
+	  else if (expld.dataseg.phase == exp_seg_align_seen
+		   || expld.dataseg.phase == exp_seg_adjust
+		   || expld.dataseg.phase == exp_seg_relro_adjust
+		   || expld.dataseg.phase == exp_seg_done)
 	    {
-	      if (expld.dataseg.phase == exp_dataseg_align_seen
-		  || expld.dataseg.phase == exp_dataseg_relro_adjust)
+	      if (expld.dataseg.phase == exp_seg_align_seen
+		  || expld.dataseg.phase == exp_seg_relro_adjust)
 		expld.dataseg.relro_end = lhs.value + expld.result.value;
 
-	      if (expld.dataseg.phase == exp_dataseg_relro_adjust
+	      if (expld.dataseg.phase == exp_seg_relro_adjust
 		  && (expld.dataseg.relro_end
 		      & (expld.dataseg.pagesize - 1)))
 		{
@@ -641,8 +641,8 @@ fold_binary (etree_type *tree)
 	      else
 		expld.result.value = lhs.value;
 
-	      if (expld.dataseg.phase == exp_dataseg_align_seen)
-		expld.dataseg.phase = exp_dataseg_relro_seen;
+	      if (expld.dataseg.phase == exp_seg_align_seen)
+		expld.dataseg.phase = exp_seg_relro_seen;
 	    }
 	  else
 	    expld.result.valid_p = FALSE;
