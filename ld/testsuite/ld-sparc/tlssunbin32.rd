@@ -30,7 +30,7 @@ There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
  +Type +Offset +VirtAddr +PhysAddr +FileSiz MemSiz +Flg Align
- +PHDR +0x0+34 0x0+10034 0x0+10034 0x0+c0 0x0+c0 R E 0x4
+ +PHDR +0x0+34 0x0+10034 0x0+10034 0x0+c0 0x0+c0 R +0x4
  +INTERP +0x0+f4 0x0+100f4 0x0+100f4 0x0+11 0x0+11 R +0x1
 .*Requesting program interpreter.*
  +LOAD .* R E 0x10000

@@ -4610,8 +4610,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	    goto error_return;
 	  m->next = NULL;
 	  m->p_type = PT_PHDR;
-	  /* FIXME: UnixWare and Solaris set PF_X, Irix 5 does not.  */
-	  m->p_flags = PF_R | PF_X;
+	  m->p_flags = PF_R;
 	  m->p_flags_valid = 1;
 	  m->includes_phdrs = 1;
 	  linker_created_pt_phdr_segment = TRUE;

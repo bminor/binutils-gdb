@@ -1,5 +1,21 @@
 2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/22423
+	* testsuite/ld-alpha/tlsbin.rd: Replace "R E " with "R +" for
+	PT_PHDR segment.
+	* testsuite/ld-alpha/tlsbinr.rd: Likewise.
+	* testsuite/ld-ia64/tlsbin.rd: Likewise.
+	* testsuite/ld-powerpc/tlsexe.r: Likewise.
+	* testsuite/ld-powerpc/tlsexe32.r: Likewise.
+	* testsuite/ld-powerpc/tlsexetoc.r: Likewise.
+	* testsuite/ld-s390/tlsbin.rd: Likewise.
+	* testsuite/ld-s390/tlsbin_64.rd: Likewise.
+	* testsuite/ld-sparc/tlssunbin32.rd: Likewise.
+	* testsuite/ld-sparc/tlssunbin64.rd: Likewise.
+	* testsuite/ld-elf/pr22423.d: New test.
+
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* emulparams/elf32_x86_64.sh (TINY_READONLY_SECTION): Renamed
 	to ...
 	(OTHER_PLT_SECTIONS): This.

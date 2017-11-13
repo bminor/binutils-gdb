@@ -1,3 +1,9 @@
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22423
+	* elf.c (_bfd_elf_map_sections_to_segments): Remove PF_X from
+	PT_PHDR segment.
+
 2017-11-12  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (elf_link_add_object_symbols): Ignore anything but
