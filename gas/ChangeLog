@@ -1,3 +1,14 @@
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (i386_index_check): Break out ...
+	(i386_addressing_mode): ... this new function.
+	* config/tc-i386-intel.c (i386_intel_operand): Do base/index
+	swapping and the setting of .baseindex earlier. Call
+	i386_addressing_mode.
+	* testsuite/gas/i386/x86-64-inval.s: Add out of range
+	displacement case.
+	* testsuite/gas/i386/x86-64-inval.l: Adjust expectations.
+
 2017-11-09  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/gas/elf/dwarf2-10.l: Accept optional line number in error.

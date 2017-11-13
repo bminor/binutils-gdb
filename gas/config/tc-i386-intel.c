@@ -876,17 +876,40 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  return 0;
 	}
 
+      /* Swap base and index in 16-bit memory operands like
+	 [si+bx]. Since i386_index_check is also used in AT&T
+	 mode we have to do this here.  */
+      if (intel_state.base
+	  && intel_state.index
+	  && intel_state.base->reg_type.bitfield.reg16
+	  && intel_state.index->reg_type.bitfield.reg16
+	  && intel_state.base->reg_num >= 6
+	  && intel_state.index->reg_num < 6)
+	{
+	  i.base_reg = intel_state.index;
+	  i.index_reg = intel_state.base;
+	}
+      else
+	{
+	  i.base_reg = intel_state.base;
+	  i.index_reg = intel_state.index;
+	}
+
+      if (i.base_reg || i.index_reg)
+	i.types[this_operand].bitfield.baseindex = 1;
+
       expP = &disp_expressions[i.disp_operands];
       memcpy (expP, &exp, sizeof(exp));
       resolve_expression (expP);
 
       if (expP->X_op != O_constant
 	  || expP->X_add_number
-	  || (!intel_state.base
-	      && !intel_state.index))
+	  || !i.types[this_operand].bitfield.baseindex)
 	{
 	  i.op[this_operand].disps = expP;
 	  i.disp_operands++;
+
+	  i386_addressing_mode ();
 
 	  if (flag_code == CODE_64BIT)
 	    {
@@ -927,9 +950,6 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	    return 0;
 	}
 
-      if (intel_state.base || intel_state.index)
-	i.types[this_operand].bitfield.baseindex = 1;
-
       if (intel_state.seg)
 	{
 	  expP = symbol_get_value_expression (intel_state.seg);
@@ -954,25 +974,6 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	    case 5: i.seg[i.mem_operands] = &gs; break;
 	    case RegFlat: i.seg[i.mem_operands] = NULL; break;
 	    }
-	}
-
-      /* Swap base and index in 16-bit memory operands like
-	 [si+bx]. Since i386_index_check is also used in AT&T
-	 mode we have to do that here.  */
-      if (intel_state.base
-	  && intel_state.index
-	  && intel_state.base->reg_type.bitfield.reg16
-	  && intel_state.index->reg_type.bitfield.reg16
-	  && intel_state.base->reg_num >= 6
-	  && intel_state.index->reg_num < 6)
-	{
-	  i.base_reg = intel_state.index;
-	  i.index_reg = intel_state.base;
-	}
-      else
-	{
-	  i.base_reg = intel_state.base;
-	  i.index_reg = intel_state.index;
 	}
 
       if (!i386_index_check (operand_string))
