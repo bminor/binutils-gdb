@@ -1,4 +1,71 @@
 2017-11-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Simon Marchi  <simark@simark.ca>
+
+	* stap-probe.c (struct probe_ops stap_probe_ops): Delete
+	variable.
+	(struct stap_probe_arg) <stap_probe_arg>: New constructor.
+	<aexpr>: Change type to 'expression_up'.
+	(stap_probe_arg_s): Delete type and VEC.
+	(struct stap_probe): Delete.  Replace by...
+	(class stap_static_probe_ops): ...this and...
+	(class stap_probe): ...this.  Rename variables to add 'm_'
+	prefix.  Do not use 'union' for arguments anymore.
+	(stap_get_expected_argument_type): Receive probe name instead
+	of 'struct stap_probe'.  Adjust code.
+	(stap_parse_probe_arguments): Rename to...
+	(stap_probe::parse_arguments): ...this.  Adjust code to
+	reflect change.
+	(stap_get_probe_address): Rename to...
+	(stap_probe::get_relocated_address): ...this.  Adjust code
+	to reflect change.
+	(stap_get_probe_argument_count): Rename to...
+	(stap_probe::get_argument_count): ...this.  Adjust code
+	to reflect change.
+	(stap_get_arg): Rename to...
+	(stap_probe::get_arg_by_number'): ...this. Adjust code to
+	reflect change.
+	(can_evaluate_probe_arguments): Rename to...
+	(stap_probe::can_evaluate_arguments): ...this.  Adjust code
+	to reflect change.
+	(stap_evaluate_probe_argument): Rename to...
+	(stap_probe::evaluate_argument): ...this.  Adjust code
+	to reflect change.
+	(stap_compile_to_ax): Rename to...
+	(stap_probe::compile_to_ax): ...this.  Adjust code to
+	reflect change.
+	(stap_probe_destroy): Delete.
+	(stap_modify_semaphore): Adjust comment.
+	(stap_set_semaphore): Rename to...
+	(stap_probe::set_semaphore): ...this.  Adjust code to reflect
+	change.
+	(stap_clear_semaphore): Rename to...
+	(stap_probe::clear_semaphore): ...this.  Adjust code to
+	reflect	change.
+	(stap_probe::get_static_ops): New method.
+	(handle_stap_probe): Adjust code to create instance of
+	'stap_probe'.
+	(stap_get_probes): Rename to...
+	(stap_static_probe_ops::get_probes): ...this.  Adjust code to
+	reflect change.
+	(stap_probe_is_linespec): Rename to...
+	(stap_static_probe_ops::is_linespec): ...this.  Adjust code to
+	reflect change.
+	(stap_type_name): Rename to...
+	(stap_static_probe_ops::type_name): ...this.  Adjust code to
+	reflect change.
+	(stap_gen_info_probes_table_header): Rename to...
+	(stap_static_probe_ops::gen_info_probes_table_header):
+	...this.  Adjust code to reflect change.
+	(stap_gen_info_probes_table_values): Rename to...
+	(stap_probe::gen_info_probes_table_values): ...this.  Adjust
+	code to reflect change.
+	(struct probe_ops stap_probe_ops): Delete.
+	(info_probes_stap_command): Use 'info_probes_for_spops'
+	instead of 'info_probes_for_ops'.
+	(_initialize_stap_probe): Use 'all_static_probe_ops' instead
+	of 'all_probe_ops'.
+
+2017-11-22  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* break-catch-throw.c (fetch_probe_arguments): Use
 	'probe.prob' instead of 'probe.probe'.
