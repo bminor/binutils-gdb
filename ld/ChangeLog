@@ -1,3 +1,9 @@
+2017-11-24  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-11-14  Alan Modra  <amodra@gmail.com>
+	* testsuite/ld-elf/note-3.t: Don't discard .got.
+
 2017-11-01  Alan Modra  <amodra@gmail.com>
 
 	Apply from master

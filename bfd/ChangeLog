@@ -1,3 +1,14 @@
+2017-11-24  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-11-14  Alan Modra  <amodra@gmail.com>
+	PR 22431
+	* elf64-ppc.c (ppc64_elf_size_dynamic_sections): Warn on discarding
+	non-empty dynamic section.
+	(ppc_build_one_stub): Take elf_gp from output bfd, not output
+	section owner.
+	(ppc_size_one_stub, ppc64_elf_next_toc_section): Likewise.
+
 2017-11-05  Alan Modra  <amodra@gmail.com>
 
 	PR 22397
