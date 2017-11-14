@@ -302,7 +302,7 @@ static char **compile_args_argv;
 /* Implement 'set compile-args'.  */
 
 static void
-set_compile_args (char *args, int from_tty, struct cmd_list_element *c)
+set_compile_args (const char *args, int from_tty, struct cmd_list_element *c)
 {
   freeargv (compile_args_argv);
   build_argc_argv (compile_args, &compile_args_argc, &compile_args_argv);

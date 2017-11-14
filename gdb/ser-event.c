@@ -144,7 +144,6 @@ static const struct serial_ops serial_event_ops =
   NULL, /* copy_tty_state */
   NULL, /* set_tty_state */
   NULL, /* print_tty_state */
-  NULL, /* noflush_set_tty_state */
   NULL, /* setbaudrate */
   NULL, /* setstopbits */
   NULL, /* setparity */

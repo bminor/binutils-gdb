@@ -643,6 +643,7 @@ md_begin (void)
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_abi, NFPR);
 
 #define DECLARE_CSR(name, num) hash_reg_name (RCLASS_CSR, #name, num);
+#define DECLARE_CSR_ALIAS(name, num) DECLARE_CSR(name, num);
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
 
@@ -715,6 +716,21 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
 
   add_fixed_insn (ip);
   install_insn (ip);
+
+  /* We need to start a new frag after any instruction that can be
+     optimized away or compressed by the linker during relaxation, to prevent
+     the assembler from computing static offsets across such an instruction.
+     This is necessary to get correct EH info.  */
+  if (reloc_type == BFD_RELOC_RISCV_CALL
+      || reloc_type == BFD_RELOC_RISCV_CALL_PLT
+      || reloc_type == BFD_RELOC_RISCV_HI20
+      || reloc_type == BFD_RELOC_RISCV_PCREL_HI20
+      || reloc_type == BFD_RELOC_RISCV_TPREL_HI20
+      || reloc_type == BFD_RELOC_RISCV_TPREL_ADD)
+    {
+      frag_wane (frag_now);
+      frag_new (0);
+    }
 }
 
 /* Build an instruction created by a macro expansion.  This is passed

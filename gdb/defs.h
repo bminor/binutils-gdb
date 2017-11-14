@@ -350,11 +350,11 @@ extern int openp (const char *, int, const char *, int, char **);
 
 extern int source_full_path_of (const char *, char **);
 
-extern void mod_path (char *, char **);
+extern void mod_path (const char *, char **);
 
-extern void add_path (char *, char **, int);
+extern void add_path (const char *, char **, int);
 
-extern void directory_switch (char *, int);
+extern void directory_switch (const char *, int);
 
 extern char *source_path;
 
@@ -660,7 +660,7 @@ extern ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
 extern void (*deprecated_attach_hook) (void);
 extern void (*deprecated_detach_hook) (void);
 extern void (*deprecated_call_command_hook) (struct cmd_list_element * c,
-					     char *cmd, int from_tty);
+					     const char *cmd, int from_tty);
 
 extern int (*deprecated_ui_load_progress_hook) (const char *section,
 						unsigned long num);

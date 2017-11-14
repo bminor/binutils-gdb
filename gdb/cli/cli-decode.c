@@ -101,28 +101,12 @@ print_help_for_command (struct cmd_list_element *c, const char *prefix,
    bounce function (unless cfunc / sfunc is NULL that is).  */
 
 static void
-do_cfunc (struct cmd_list_element *c, char *args, int from_tty)
-{
-  c->function.cfunc (args, from_tty);
-}
-
-void
-set_cmd_cfunc (struct cmd_list_element *cmd, cmd_cfunc_ftype *cfunc)
-{
-  if (cfunc == NULL)
-    cmd->func = NULL;
-  else
-    cmd->func = do_cfunc;
-  cmd->function.cfunc = cfunc;
-}
-
-static void
-do_const_cfunc (struct cmd_list_element *c, char *args, int from_tty)
+do_const_cfunc (struct cmd_list_element *c, const char *args, int from_tty)
 {
   c->function.const_cfunc (args, from_tty);
 }
 
-void
+static void
 set_cmd_cfunc (struct cmd_list_element *cmd, cmd_const_cfunc_ftype *cfunc)
 {
   if (cfunc == NULL)
@@ -133,25 +117,19 @@ set_cmd_cfunc (struct cmd_list_element *cmd, cmd_const_cfunc_ftype *cfunc)
 }
 
 static void
-do_sfunc (struct cmd_list_element *c, char *args, int from_tty)
+do_sfunc (struct cmd_list_element *c, const char *args, int from_tty)
 {
   c->function.sfunc (args, from_tty, c);
 }
 
 void
-set_cmd_sfunc (struct cmd_list_element *cmd, cmd_sfunc_ftype *sfunc)
+set_cmd_sfunc (struct cmd_list_element *cmd, cmd_const_sfunc_ftype *sfunc)
 {
   if (sfunc == NULL)
     cmd->func = NULL;
   else
     cmd->func = do_sfunc;
   cmd->function.sfunc = sfunc;
-}
-
-int
-cmd_cfunc_eq (struct cmd_list_element *cmd, cmd_cfunc_ftype *cfunc)
-{
-  return cmd->func == do_cfunc && cmd->function.cfunc == cfunc;
 }
 
 int
@@ -281,21 +259,12 @@ do_add_cmd (const char *name, enum command_class theclass,
 }
 
 struct cmd_list_element *
-add_cmd (const char *name, enum command_class theclass, cmd_cfunc_ftype *fun,
-	 const char *doc, struct cmd_list_element **list)
-{
-  cmd_list_element *result = do_add_cmd (name, theclass, doc, list);
-  set_cmd_cfunc (result, fun);
-  return result;
-}
-
-struct cmd_list_element *
 add_cmd (const char *name, enum command_class theclass,
 	 const char *doc, struct cmd_list_element **list)
 {
   cmd_list_element *result = do_add_cmd (name, theclass, doc, list);
   result->func = NULL;
-  result->function.cfunc = NULL; /* Ok.  */
+  result->function.const_cfunc = NULL;
   return result;
 }
 
@@ -424,7 +393,7 @@ add_prefix_cmd (const char *name, enum command_class theclass,
 
 struct cmd_list_element *
 add_abbrev_prefix_cmd (const char *name, enum command_class theclass,
-		       cmd_cfunc_ftype *fun, const char *doc,
+		       cmd_const_cfunc_ftype *fun, const char *doc,
 		       struct cmd_list_element **prefixlist,
 		       const char *prefixname,
 		       int allow_unknown, struct cmd_list_element **list)
@@ -445,10 +414,9 @@ not_just_help_class_command (const char *args, int from_tty)
 }
 
 /* This is an empty "sfunc".  */
-static void empty_sfunc (char *, int, struct cmd_list_element *);
 
 static void
-empty_sfunc (char *args, int from_tty, struct cmd_list_element *c)
+empty_sfunc (const char *args, int from_tty, struct cmd_list_element *c)
 {
 }
 
@@ -496,7 +464,7 @@ add_setshow_cmd_full (const char *name,
 		      var_types var_type, void *var,
 		      const char *set_doc, const char *show_doc,
 		      const char *help_doc,
-		      cmd_sfunc_ftype *set_func,
+		      cmd_const_sfunc_ftype *set_func,
 		      show_value_ftype *show_func,
 		      struct cmd_list_element **set_list,
 		      struct cmd_list_element **show_list,
@@ -551,7 +519,7 @@ add_setshow_enum_cmd (const char *name,
 		      const char *set_doc,
 		      const char *show_doc,
 		      const char *help_doc,
-		      cmd_sfunc_ftype *set_func,
+		      cmd_const_sfunc_ftype *set_func,
 		      show_value_ftype *show_func,
 		      struct cmd_list_element **set_list,
 		      struct cmd_list_element **show_list)
@@ -578,7 +546,7 @@ add_setshow_auto_boolean_cmd (const char *name,
 			      enum auto_boolean *var,
 			      const char *set_doc, const char *show_doc,
 			      const char *help_doc,
-			      cmd_sfunc_ftype *set_func,
+			      cmd_const_sfunc_ftype *set_func,
 			      show_value_ftype *show_func,
 			      struct cmd_list_element **set_list,
 			      struct cmd_list_element **show_list)
@@ -601,7 +569,7 @@ void
 add_setshow_boolean_cmd (const char *name, enum command_class theclass, int *var,
 			 const char *set_doc, const char *show_doc,
 			 const char *help_doc,
-			 cmd_sfunc_ftype *set_func,
+			 cmd_const_sfunc_ftype *set_func,
 			 show_value_ftype *show_func,
 			 struct cmd_list_element **set_list,
 			 struct cmd_list_element **show_list)
@@ -624,7 +592,7 @@ add_setshow_filename_cmd (const char *name, enum command_class theclass,
 			  char **var,
 			  const char *set_doc, const char *show_doc,
 			  const char *help_doc,
-			  cmd_sfunc_ftype *set_func,
+			  cmd_const_sfunc_ftype *set_func,
 			  show_value_ftype *show_func,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
@@ -646,7 +614,7 @@ add_setshow_string_cmd (const char *name, enum command_class theclass,
 			char **var,
 			const char *set_doc, const char *show_doc,
 			const char *help_doc,
-			cmd_sfunc_ftype *set_func,
+			cmd_const_sfunc_ftype *set_func,
 			show_value_ftype *show_func,
 			struct cmd_list_element **set_list,
 			struct cmd_list_element **show_list)
@@ -665,7 +633,7 @@ add_setshow_string_noescape_cmd (const char *name, enum command_class theclass,
 				 char **var,
 				 const char *set_doc, const char *show_doc,
 				 const char *help_doc,
-				 cmd_sfunc_ftype *set_func,
+				 cmd_const_sfunc_ftype *set_func,
 				 show_value_ftype *show_func,
 				 struct cmd_list_element **set_list,
 				 struct cmd_list_element **show_list)
@@ -687,7 +655,7 @@ add_setshow_optional_filename_cmd (const char *name, enum command_class theclass
 				   char **var,
 				   const char *set_doc, const char *show_doc,
 				   const char *help_doc,
-				   cmd_sfunc_ftype *set_func,
+				   cmd_const_sfunc_ftype *set_func,
 				   show_value_ftype *show_func,
 				   struct cmd_list_element **set_list,
 				   struct cmd_list_element **show_list)
@@ -731,7 +699,7 @@ add_setshow_integer_cmd (const char *name, enum command_class theclass,
 			 int *var,
 			 const char *set_doc, const char *show_doc,
 			 const char *help_doc,
-			 cmd_sfunc_ftype *set_func,
+			 cmd_const_sfunc_ftype *set_func,
 			 show_value_ftype *show_func,
 			 struct cmd_list_element **set_list,
 			 struct cmd_list_element **show_list)
@@ -756,7 +724,7 @@ add_setshow_uinteger_cmd (const char *name, enum command_class theclass,
 			  unsigned int *var,
 			  const char *set_doc, const char *show_doc,
 			  const char *help_doc,
-			  cmd_sfunc_ftype *set_func,
+			  cmd_const_sfunc_ftype *set_func,
 			  show_value_ftype *show_func,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
@@ -781,7 +749,7 @@ add_setshow_zinteger_cmd (const char *name, enum command_class theclass,
 			  int *var,
 			  const char *set_doc, const char *show_doc,
 			  const char *help_doc,
-			  cmd_sfunc_ftype *set_func,
+			  cmd_const_sfunc_ftype *set_func,
 			  show_value_ftype *show_func,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
@@ -800,7 +768,7 @@ add_setshow_zuinteger_unlimited_cmd (const char *name,
 				     const char *set_doc,
 				     const char *show_doc,
 				     const char *help_doc,
-				     cmd_sfunc_ftype *set_func,
+				     cmd_const_sfunc_ftype *set_func,
 				     show_value_ftype *show_func,
 				     struct cmd_list_element **set_list,
 				     struct cmd_list_element **show_list)
@@ -825,7 +793,7 @@ add_setshow_zuinteger_cmd (const char *name, enum command_class theclass,
 			   unsigned int *var,
 			   const char *set_doc, const char *show_doc,
 			   const char *help_doc,
-			   cmd_sfunc_ftype *set_func,
+			   cmd_const_sfunc_ftype *set_func,
 			   show_value_ftype *show_func,
 			   struct cmd_list_element **set_list,
 			   struct cmd_list_element **show_list)
@@ -915,7 +883,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 /* Add an element to the list of info subcommands.  */
 
 struct cmd_list_element *
-add_info (const char *name, cmd_cfunc_ftype *fun, const char *doc)
+add_info (const char *name, cmd_const_cfunc_ftype *fun, const char *doc)
 {
   return add_cmd (name, class_info, fun, doc, &infolist);
 }
@@ -931,7 +899,8 @@ add_info_alias (const char *name, const char *oldname, int abbrev_flag)
 /* Add an element to the list of commands.  */
 
 struct cmd_list_element *
-add_com (const char *name, enum command_class theclass, cmd_cfunc_ftype *fun,
+add_com (const char *name, enum command_class theclass,
+	 cmd_const_cfunc_ftype *fun,
 	 const char *doc)
 {
   return add_cmd (name, theclass, fun, doc, &cmdlist);
@@ -950,7 +919,7 @@ add_com_alias (const char *name, const char *oldname, enum command_class theclas
 
 struct cmd_list_element *
 add_com_suppress_notification (const char *name, enum command_class theclass,
-			       cmd_cfunc_ftype *fun, const char *doc,
+			       cmd_const_cfunc_ftype *fun, const char *doc,
 			       int *suppress_notification)
 {
   struct cmd_list_element *element;
@@ -1940,7 +1909,7 @@ cmd_func_p (struct cmd_list_element *cmd)
 
 /* Call the command function.  */
 void
-cmd_func (struct cmd_list_element *cmd, char *args, int from_tty)
+cmd_func (struct cmd_list_element *cmd, const char *args, int from_tty)
 {
   if (cmd_func_p (cmd))
     {
@@ -1959,6 +1928,5 @@ int
 cli_user_command_p (struct cmd_list_element *cmd)
 {
   return (cmd->theclass == class_user
-	  && (cmd->func == do_cfunc || cmd->func == do_sfunc
-	      || cmd->func == do_const_cfunc));
+	  && (cmd->func == do_const_cfunc || cmd->func == do_sfunc));
 }

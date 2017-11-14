@@ -36,6 +36,7 @@
 #include <signal.h>
 #include "gdb_setjmp.h"
 #include "safe-ctype.h"
+#include "selftest.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
@@ -830,12 +831,14 @@ cp_func_name (const char *full_name)
   return ret.release ();
 }
 
-/* DEMANGLED_NAME is the name of a function, including parameters and
-   (optionally) a return type.  Return the name of the function without
-   parameters or return type, or NULL if we can not parse the name.  */
+/* Helper for cp_remove_params.  DEMANGLED_NAME is the name of a
+   function, including parameters and (optionally) a return type.
+   Return the name of the function without parameters or return type,
+   or NULL if we can not parse the name.  If REQUIRE_PARAMS is false,
+   then tolerate a non-existing or unbalanced parameter list.  */
 
-gdb::unique_xmalloc_ptr<char>
-cp_remove_params (const char *demangled_name)
+static gdb::unique_xmalloc_ptr<char>
+cp_remove_params_1 (const char *demangled_name, bool require_params)
 {
   bool done = false;
   struct demangle_component *ret_comp;
@@ -871,8 +874,54 @@ cp_remove_params (const char *demangled_name)
   /* What we have now should be a function.  Return its name.  */
   if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
     ret = cp_comp_to_string (d_left (ret_comp), 10);
+  else if (!require_params
+	   && (ret_comp->type == DEMANGLE_COMPONENT_NAME
+	       || ret_comp->type == DEMANGLE_COMPONENT_QUAL_NAME
+	       || ret_comp->type == DEMANGLE_COMPONENT_TEMPLATE))
+    ret = cp_comp_to_string (ret_comp, 10);
 
   return ret;
+}
+
+/* DEMANGLED_NAME is the name of a function, including parameters and
+   (optionally) a return type.  Return the name of the function
+   without parameters or return type, or NULL if we can not parse the
+   name.  */
+
+gdb::unique_xmalloc_ptr<char>
+cp_remove_params (const char *demangled_name)
+{
+  return cp_remove_params_1 (demangled_name, true);
+}
+
+/* See cp-support.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+cp_remove_params_if_any (const char *demangled_name, bool completion_mode)
+{
+  /* Trying to remove parameters from the empty string fails.  If
+     we're completing / matching everything, avoid returning NULL
+     which would make callers interpret the result as an error.  */
+  if (demangled_name[0] == '\0' && completion_mode)
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (""));
+
+  gdb::unique_xmalloc_ptr<char> without_params
+    = cp_remove_params_1 (demangled_name, false);
+
+  if (without_params == NULL && completion_mode)
+    {
+      std::string copy = demangled_name;
+
+      while (!copy.empty ())
+	{
+	  copy.pop_back ();
+	  without_params = cp_remove_params_1 (copy.c_str (), false);
+	  if (without_params != NULL)
+	    break;
+	}
+    }
+
+  return without_params;
 }
 
 /* Here are some random pieces of trivia to keep in mind while trying
@@ -1181,7 +1230,9 @@ make_symbol_overload_list_block (const char *name,
   struct block_iterator iter;
   struct symbol *sym;
 
-  ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+
+  ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
     overload_list_add_symbol (sym, name);
 }
 
@@ -1286,16 +1337,6 @@ make_symbol_overload_list_adl (struct type **arg_types, int nargs,
   return sym_return_val;
 }
 
-/* Used for cleanups to reset the "searched" flag in case of an
-   error.  */
-
-static void
-reset_directive_searched (void *data)
-{
-  struct using_direct *direct = (struct using_direct *) data;
-  direct->searched = 0;
-}
-
 /* This applies the using directives to add namespaces to search in,
    and then searches for overloads in all of those namespaces.  It
    adds the symbols found to sym_return_val.  Arguments are as in
@@ -1332,16 +1373,11 @@ make_symbol_overload_list_using (const char *func_name,
 	  {
 	    /* Mark this import as searched so that the recursive call
 	       does not search it again.  */
-	    struct cleanup *old_chain;
-	    current->searched = 1;
-	    old_chain = make_cleanup (reset_directive_searched,
-				      current);
+	    scoped_restore reset_directive_searched
+	      = make_scoped_restore (&current->searched, 1);
 
 	    make_symbol_overload_list_using (func_name,
 					     current->import_src);
-
-	    current->searched = 0;
-	    discard_cleanups (old_chain);
 	  }
       }
 
@@ -1579,6 +1615,163 @@ gdb_sniff_from_mangled_name (const char *mangled, char **demangled)
   return *demangled != NULL;
 }
 
+/* C++ symbol_name_matcher_ftype implementation.  */
+
+static bool
+cp_fq_symbol_name_matches (const char *symbol_search_name,
+			   const lookup_name_info &lookup_name,
+			   completion_match *match)
+{
+  /* Get the demangled name.  */
+  const std::string &name = lookup_name.cplus ().lookup_name ();
+
+  strncmp_iw_mode mode = (lookup_name.completion_mode ()
+			  ? strncmp_iw_mode::NORMAL
+			  : strncmp_iw_mode::MATCH_PARAMS);
+
+  if (strncmp_iw_with_mode (symbol_search_name,
+			    name.c_str (), name.size (),
+			    mode) == 0)
+    {
+      if (match != NULL)
+	match->set_match (symbol_search_name);
+      return true;
+    }
+
+  return false;
+}
+
+/* See cp-support.h.  */
+
+symbol_name_matcher_ftype *
+cp_get_symbol_name_matcher (const lookup_name_info &lookup_name)
+{
+  return cp_fq_symbol_name_matches;
+}
+
+#if GDB_SELF_TEST
+
+namespace selftests {
+
+/* If non-NULL, return STR wrapped in quotes.  Otherwise, return a
+   "<null>" string (with no quotes).  */
+
+static std::string
+quote (const char *str)
+{
+  if (str != NULL)
+    return std::string (1, '\"') + str + '\"';
+  else
+    return "<null>";
+}
+
+/* Check that removing parameter info out of NAME produces EXPECTED.
+   COMPLETION_MODE indicates whether we're testing normal and
+   completion mode.  FILE and LINE are used to provide better test
+   location information in case ithe check fails.  */
+
+static void
+check_remove_params (const char *file, int line,
+		      const char *name, const char *expected,
+		      bool completion_mode)
+{
+  gdb::unique_xmalloc_ptr<char> result
+    = cp_remove_params_if_any (name, completion_mode);
+
+  if ((expected == NULL) != (result == NULL)
+      || (expected != NULL
+	  && strcmp (result.get (), expected) != 0))
+    {
+      error (_("%s:%d: make-paramless self-test failed: (completion=%d) "
+	       "\"%s\" -> %s, expected %s"),
+	     file, line, completion_mode, name,
+	     quote (result.get ()).c_str (), quote (expected).c_str ());
+    }
+}
+
+/* Entry point for cp_remove_params unit tests.  */
+
+static void
+test_cp_remove_params ()
+{
+  /* Check that removing parameter info out of NAME produces EXPECTED.
+     Checks both normal and completion modes.  */
+#define CHECK(NAME, EXPECTED)						\
+  do									\
+    {									\
+      check_remove_params (__FILE__, __LINE__, NAME, EXPECTED, false);	\
+      check_remove_params (__FILE__, __LINE__, NAME, EXPECTED, true);	\
+    }									\
+  while (0)
+
+  /* Similar, but used when NAME is incomplete -- i.e., is has
+     unbalanced parentheses.  In this case, looking for the exact name
+     should fail / return empty.  */
+#define CHECK_INCOMPL(NAME, EXPECTED)					\
+  do									\
+    {									\
+      check_remove_params (__FILE__, __LINE__, NAME, NULL, false);	\
+      check_remove_params (__FILE__, __LINE__, NAME, EXPECTED, true);	\
+    }									\
+  while (0)
+
+  CHECK ("function()", "function");
+  CHECK_INCOMPL ("function(", "function");
+  CHECK ("function() const", "function");
+
+  CHECK ("(anonymous namespace)::A::B::C",
+	 "(anonymous namespace)::A::B::C");
+
+  CHECK ("A::(anonymous namespace)",
+	 "A::(anonymous namespace)");
+
+  CHECK_INCOMPL ("A::(anonymou", "A");
+
+  CHECK ("A::foo<int>()",
+	 "A::foo<int>");
+
+  CHECK_INCOMPL ("A::foo<int>(",
+		 "A::foo<int>");
+
+  CHECK ("A::foo<(anonymous namespace)::B>::func(int)",
+	 "A::foo<(anonymous namespace)::B>::func");
+
+  CHECK_INCOMPL ("A::foo<(anonymous namespace)::B>::func(in",
+		 "A::foo<(anonymous namespace)::B>::func");
+
+  CHECK_INCOMPL ("A::foo<(anonymous namespace)::B>::",
+		 "A::foo<(anonymous namespace)::B>");
+
+  CHECK_INCOMPL ("A::foo<(anonymous namespace)::B>:",
+		 "A::foo<(anonymous namespace)::B>");
+
+  CHECK ("A::foo<(anonymous namespace)::B>",
+	 "A::foo<(anonymous namespace)::B>");
+
+  CHECK_INCOMPL ("A::foo<(anonymous namespace)::B",
+		 "A::foo");
+
+  /* Shouldn't this parse?  Looks like a bug in
+     cp_demangled_name_to_comp.  See PR c++/22411.  */
+#if 0
+  CHECK ("A::foo<void(int)>::func(int)",
+	 "A::foo<void(int)>::func");
+#else
+  CHECK_INCOMPL ("A::foo<void(int)>::func(int)",
+		 "A::foo");
+#endif
+
+  CHECK_INCOMPL ("A::foo<void(int",
+		 "A::foo");
+
+#undef CHECK
+#undef CHECK_INCOMPL
+}
+
+} // namespace selftests
+
+#endif /* GDB_SELF_CHECK */
+
 /* Don't allow just "maintenance cplus".  */
 
 static  void
@@ -1616,7 +1809,7 @@ first_component_command (const char *arg, int from_tty)
 /* Implement "info vtbl".  */
 
 static void
-info_vtbl_command (char *arg, int from_tty)
+info_vtbl_command (const char *arg, int from_tty)
 {
   struct value *value;
 
@@ -1660,5 +1853,10 @@ display the offending symbol."),
 			   NULL,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
+#endif
+
+#if GDB_SELF_TEST
+  selftests::register_test ("cp_remove_params",
+			    selftests::test_cp_remove_params);
 #endif
 }

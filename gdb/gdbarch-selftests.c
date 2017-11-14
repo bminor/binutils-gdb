@@ -24,6 +24,7 @@
 #include "inferior.h"
 #include "gdbthread.h"
 #include "target.h"
+#include "target-float.h"
 
 namespace selftests {
 
@@ -178,11 +179,8 @@ register_to_value_test (struct gdbarch *gdbarch)
 
 	      if (TYPE_CODE (type) == TYPE_CODE_FLT)
 		{
-		  DOUBLEST d = 1.25;
-
 		  /* Generate valid float format.  */
-		  floatformat_from_doublest (floatformat_from_type (type),
-					     &d, expected.data ());
+		  target_float_from_string (expected.data (), type, "1.25");
 		}
 	      else
 		{

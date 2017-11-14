@@ -529,7 +529,7 @@ print_selected_inferior (struct ui_out *uiout)
    printed.  */
 
 static void
-print_inferior (struct ui_out *uiout, char *requested_inferiors)
+print_inferior (struct ui_out *uiout, const char *requested_inferiors)
 {
   struct inferior *inf;
   int inf_count = 0;
@@ -718,7 +718,7 @@ inferior_command (const char *args, int from_tty)
 /* Print information about currently known inferiors.  */
 
 static void
-info_inferiors_command (char *args, int from_tty)
+info_inferiors_command (const char *args, int from_tty)
 {
   print_inferior (current_uiout, args);
 }
@@ -726,7 +726,7 @@ info_inferiors_command (char *args, int from_tty)
 /* remove-inferior ID */
 
 static void
-remove_inferior_command (char *args, int from_tty)
+remove_inferior_command (const char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
     error (_("Requires an argument (inferior id(s) to remove)"));
@@ -790,7 +790,7 @@ add_inferior_with_spaces (void)
 /* add-inferior [-copies N] [-exec FILENAME]  */
 
 static void
-add_inferior_command (char *args, int from_tty)
+add_inferior_command (const char *args, int from_tty)
 {
   int i, copies = 1;
   gdb::unique_xmalloc_ptr<char> exec;
@@ -852,7 +852,7 @@ add_inferior_command (char *args, int from_tty)
 /* clone-inferior [-copies N] [ID] */
 
 static void
-clone_inferior_command (char *args, int from_tty)
+clone_inferior_command (const char *args, int from_tty)
 {
   int i, copies = 1;
   struct inferior *orginf = NULL;

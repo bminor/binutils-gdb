@@ -55,6 +55,7 @@
 #include "user-regs.h"
 #include "valprint.h"
 #include "ax.h"
+#include "target-float.h"
 #include <algorithm>
 
 static const struct objfile_data *mips_pdr_data;
@@ -555,8 +556,6 @@ mips2_fp_compat (struct frame_info *frame)
 
 static CORE_ADDR heuristic_proc_start (struct gdbarch *, CORE_ADDR);
 
-static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
-
 /* The list of available "set mips " and "show mips " commands.  */
 
 static struct cmd_list_element *setmipscmdlist = NULL;
@@ -854,7 +853,7 @@ static int heuristic_fence_post = 0;
 static int mips64_transfers_32bit_regs_p = 0;
 
 static void
-set_mips64_transfers_32bit_regs (char *args, int from_tty,
+set_mips64_transfers_32bit_regs (const char *args, int from_tty,
 				 struct cmd_list_element *c)
 {
   struct gdbarch_info info;
@@ -6258,10 +6257,8 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
   gdb_byte *raw_buffer;
   std::string flt_str, dbl_str;
 
-  const struct floatformat *flt_fmt
-    = floatformat_from_type (builtin_type (gdbarch)->builtin_float);
-  const struct floatformat *dbl_fmt
-    = floatformat_from_type (builtin_type (gdbarch)->builtin_double);
+  const struct type *flt_type = builtin_type (gdbarch)->builtin_float;
+  const struct type *dbl_type = builtin_type (gdbarch)->builtin_double;
 
   raw_buffer
     = ((gdb_byte *)
@@ -6279,7 +6276,7 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       /* 4-byte registers: Print hex and floating.  Also print even
          numbered registers as doubles.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
-      flt_str = floatformat_to_string (flt_fmt, raw_buffer, "%-17.9g");
+      flt_str = target_float_to_string (raw_buffer, flt_type, "%-17.9g");
 
       get_formatted_print_options (&opts, 'x');
       print_scalar_formatted (raw_buffer,
@@ -6291,7 +6288,7 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       if ((regnum - gdbarch_num_regs (gdbarch)) % 2 == 0)
 	{
 	  mips_read_fp_register_double (frame, regnum, raw_buffer);
-	  dbl_str = floatformat_to_string (dbl_fmt, raw_buffer, "%-24.17g");
+	  dbl_str = target_float_to_string (raw_buffer, dbl_type, "%-24.17g");
 
 	  fprintf_filtered (file, " dbl: %s", dbl_str.c_str ());
 	}
@@ -6302,10 +6299,10 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
 
       /* Eight byte registers: print each one as hex, float and double.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
-      flt_str = floatformat_to_string (flt_fmt, raw_buffer, "%-17.9g");
+      flt_str = target_float_to_string (raw_buffer, flt_type, "%-17.9g");
 
       mips_read_fp_register_double (frame, regnum, raw_buffer);
-      dbl_str = floatformat_to_string (dbl_fmt, raw_buffer, "%-24.17g");
+      dbl_str = target_float_to_string (raw_buffer, dbl_type, "%-24.17g");
 
       get_formatted_print_options (&opts, 'x');
       print_scalar_formatted (raw_buffer,
@@ -6598,7 +6595,6 @@ mips_single_step_through_delay (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc = get_frame_pc (frame);
-  struct address_space *aspace;
   enum mips_isa isa;
   ULONGEST insn;
   int status;
@@ -6616,7 +6612,9 @@ mips_single_step_through_delay (struct gdbarch *gdbarch,
   /* _has_delay_slot above will have validated the read.  */
   insn = mips_fetch_instruction (gdbarch, isa, pc, NULL);
   size = mips_insn_size (isa, insn);
-  aspace = get_frame_address_space (frame);
+
+  const address_space *aspace = get_frame_address_space (frame);
+
   return breakpoint_here_p (aspace, pc + size) != no_breakpoint_here;
 }
 
@@ -6972,7 +6970,7 @@ set_mipsfpu_auto_command (const char *args, int from_tty)
    callable as an sfunc.  */
 
 static void
-reinit_frame_cache_sfunc (char *args, int from_tty,
+reinit_frame_cache_sfunc (const char *args, int from_tty,
 			  struct cmd_list_element *c)
 {
   reinit_frame_cache ();
@@ -8829,7 +8827,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 static void
-mips_abi_update (char *ignore_args, int from_tty, struct cmd_list_element *c)
+mips_abi_update (const char *ignore_args,
+		 int from_tty, struct cmd_list_element *c)
 {
   struct gdbarch_info info;
 

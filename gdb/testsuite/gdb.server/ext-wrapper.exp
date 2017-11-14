@@ -65,6 +65,6 @@ with_test_prefix "restart" {
     gdb_test "print d" "\\$${decimal} = ${hex} \"1\".*"
 }
 
-gdb_test "kill" "" "kill" "Kill the program being debugged.*" "y"
+gdb_test "kill" "" "kill" "Kill the program being debugged. .y or n. " "y"
 
 gdb_test_no_output "monitor exit"

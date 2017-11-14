@@ -743,7 +743,7 @@ record_full_exec_insn (struct regcache *regcache,
 		       not doing the change at all if the watchpoint
 		       traps.  */
 		    if (hardware_watchpoint_inserted_in_range
-			(get_regcache_aspace (regcache),
+			(regcache->aspace (),
 			 entry->u.mem.addr, entry->u.mem.len))
 		      record_full_stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
 		  }
@@ -1098,7 +1098,6 @@ record_full_wait_1 (struct target_ops *ops,
 		  && status->value.sig == GDB_SIGNAL_TRAP)
 		{
 		  struct regcache *regcache;
-		  struct address_space *aspace;
 		  enum target_stop_reason *stop_reason_p
 		    = &record_full_stop_reason;
 
@@ -1109,7 +1108,7 @@ record_full_wait_1 (struct target_ops *ops,
 		  registers_changed ();
 		  regcache = get_current_regcache ();
 		  tmp_pc = regcache_read_pc (regcache);
-		  aspace = get_regcache_aspace (regcache);
+		  const struct address_space *aspace = regcache->aspace ();
 
 		  if (target_stopped_by_watchpoint ())
 		    {
@@ -1172,7 +1171,7 @@ record_full_wait_1 (struct target_ops *ops,
     {
       struct regcache *regcache = get_current_regcache ();
       struct gdbarch *gdbarch = regcache->arch ();
-      struct address_space *aspace = get_regcache_aspace (regcache);
+      const struct address_space *aspace = regcache->aspace ();
       int continue_flag = 1;
       int first_record_full_end = 1;
       struct cleanup *old_cleanups
@@ -2757,11 +2756,11 @@ record_full_goto_insn (struct record_full_entry *entry,
 static void
 cmd_record_full_start (const char *args, int from_tty)
 {
-  execute_command ((char *) "target record-full", from_tty);
+  execute_command ("target record-full", from_tty);
 }
 
 static void
-set_record_full_insn_max_num (char *args, int from_tty,
+set_record_full_insn_max_num (const char *args, int from_tty,
 			      struct cmd_list_element *c)
 {
   if (record_full_insn_num > record_full_insn_max_num)

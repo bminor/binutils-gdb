@@ -70,10 +70,6 @@
 
 /* Prototypes for local functions */
 
-static void info_signals_command (char *, int);
-
-static void handle_command (char *, int);
-
 static void sig_print_info (enum gdb_signal);
 
 static void sig_print_header (void);
@@ -85,9 +81,6 @@ static int follow_fork (void);
 static int follow_fork_inferior (int follow_child, int detach_fork);
 
 static void follow_inferior_reset_breakpoints (void);
-
-static void set_schedlock_func (char *args, int from_tty,
-				struct cmd_list_element *c);
 
 static int currently_stepping (struct thread_info *tp);
 
@@ -199,7 +192,7 @@ show_disable_randomization (struct ui_file *file, int from_tty,
 }
 
 static void
-set_disable_randomization (char *args, int from_tty,
+set_disable_randomization (const char *args, int from_tty,
 			   struct cmd_list_element *c)
 {
   if (!target_supports_disable_randomization ())
@@ -214,7 +207,7 @@ int non_stop = 0;
 static int non_stop_1 = 0;
 
 static void
-set_non_stop (char *args, int from_tty,
+set_non_stop (const char *args, int from_tty,
 	      struct cmd_list_element *c)
 {
   if (target_has_execution)
@@ -243,7 +236,7 @@ int observer_mode = 0;
 static int observer_mode_1 = 0;
 
 static void
-set_observer_mode (char *args, int from_tty,
+set_observer_mode (const char *args, int from_tty,
 		   struct cmd_list_element *c)
 {
   if (target_has_execution)
@@ -368,7 +361,8 @@ int stop_on_solib_events;
    as appropriate when the above flag is changed.  */
 
 static void
-set_stop_on_solib_events (char *args, int from_tty, struct cmd_list_element *c)
+set_stop_on_solib_events (const char *args,
+			  int from_tty, struct cmd_list_element *c)
 {
   update_solib_breakpoints ();
 }
@@ -1289,7 +1283,7 @@ struct step_over_info
      and address of the instruction the breakpoint is set at.  We'll
      skip inserting all breakpoints here.  Valid iff ASPACE is
      non-NULL.  */
-  struct address_space *aspace;
+  const address_space *aspace;
   CORE_ADDR address;
 
   /* The instruction being stepped over triggers a nonsteppable
@@ -1332,7 +1326,7 @@ static struct step_over_info step_over_info;
    because when we need the info later the thread may be running.  */
 
 static void
-set_step_over_info (struct address_space *aspace, CORE_ADDR address,
+set_step_over_info (const address_space *aspace, CORE_ADDR address,
 		    int nonsteppable_watchpoint_p,
 		    int thread)
 {
@@ -1760,7 +1754,7 @@ displaced_step_prepare_throw (ptid_t ptid)
   struct thread_info *tp = find_thread_ptid (ptid);
   struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = regcache->arch ();
-  struct address_space *aspace = get_regcache_aspace (regcache);
+  const address_space *aspace = regcache->aspace ();
   CORE_ADDR original, copy;
   ULONGEST len;
   struct displaced_step_closure *closure;
@@ -2233,7 +2227,7 @@ show_scheduler_mode (struct ui_file *file, int from_tty,
 }
 
 static void
-set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
+set_schedlock_func (const char *args, int from_tty, struct cmd_list_element *c)
 {
   if (!target_can_lock_scheduler)
     {
@@ -2388,7 +2382,7 @@ resume (enum gdb_signal sig)
   struct gdbarch *gdbarch = regcache->arch ();
   struct thread_info *tp = inferior_thread ();
   CORE_ADDR pc = regcache_read_pc (regcache);
-  struct address_space *aspace = get_regcache_aspace (regcache);
+  const address_space *aspace = regcache->aspace ();
   ptid_t resume_ptid;
   /* This represents the user's step vs continue request.  When
      deciding whether "set scheduler-locking step" applies, it's the
@@ -2591,7 +2585,7 @@ resume (enum gdb_signal sig)
 	  if (target_is_non_stop_p ())
 	    stop_all_threads ();
 
-	  set_step_over_info (get_regcache_aspace (regcache),
+	  set_step_over_info (regcache->aspace (),
 			      regcache_read_pc (regcache), 0, tp->global_num);
 
 	  step = maybe_software_singlestep (gdbarch, pc);
@@ -2920,7 +2914,7 @@ thread_still_needs_step_over_bp (struct thread_info *tp)
     {
       struct regcache *regcache = get_thread_regcache (tp->ptid);
 
-      if (breakpoint_here_p (get_regcache_aspace (regcache),
+      if (breakpoint_here_p (regcache->aspace (),
 			     regcache_read_pc (regcache))
 	  == ordinary_breakpoint_here)
 	return 1;
@@ -2983,7 +2977,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   struct gdbarch *gdbarch;
   struct thread_info *tp;
   CORE_ADDR pc;
-  struct address_space *aspace;
   ptid_t resume_ptid;
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
@@ -3007,7 +3000,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   regcache = get_current_regcache ();
   gdbarch = regcache->arch ();
-  aspace = get_regcache_aspace (regcache);
+  const address_space *aspace = regcache->aspace ();
+
   pc = regcache_read_pc (regcache);
   tp = inferior_thread ();
 
@@ -3535,7 +3529,7 @@ do_target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 				paddress (gdbarch, pc));
 	  discard = 1;
 	}
-      else if (!breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
+      else if (!breakpoint_inserted_here_p (regcache->aspace (), pc))
 	{
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -4070,7 +4064,6 @@ adjust_pc_after_break (struct thread_info *thread,
 {
   struct regcache *regcache;
   struct gdbarch *gdbarch;
-  struct address_space *aspace;
   CORE_ADDR breakpoint_pc, decr_pc;
 
   /* If we've hit a breakpoint, we'll normally be stopped with SIGTRAP.  If
@@ -4150,7 +4143,7 @@ adjust_pc_after_break (struct thread_info *thread,
   if (decr_pc == 0)
     return;
 
-  aspace = get_regcache_aspace (regcache);
+  const address_space *aspace = regcache->aspace ();
 
   /* Find the location where (if we've hit a breakpoint) the
      breakpoint would be.  */
@@ -4266,7 +4259,7 @@ handle_syscall_event (struct execution_control_state *ecs)
                             syscall_number);
 
       ecs->event_thread->control.stop_bpstat
-	= bpstat_stop_status (get_regcache_aspace (regcache),
+	= bpstat_stop_status (regcache->aspace (),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
       if (handle_stop_requested (ecs))
@@ -4385,7 +4378,6 @@ static void
 save_waitstatus (struct thread_info *tp, struct target_waitstatus *ws)
 {
   struct regcache *regcache;
-  struct address_space *aspace;
 
   if (debug_infrun)
     {
@@ -4404,7 +4396,7 @@ save_waitstatus (struct thread_info *tp, struct target_waitstatus *ws)
   tp->suspend.waitstatus_pending_p = 1;
 
   regcache = get_thread_regcache (tp->ptid);
-  aspace = get_regcache_aspace (regcache);
+  const address_space *aspace = regcache->aspace ();
 
   if (ws->kind == TARGET_WAITKIND_STOPPED
       && ws->value.sig == GDB_SIGNAL_TRAP)
@@ -4888,7 +4880,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
     {
       struct regcache *regcache = get_thread_regcache (ecs->ptid);
 
-      if (breakpoint_inserted_here_p (get_regcache_aspace (regcache),
+      if (breakpoint_inserted_here_p (regcache->aspace (),
 				      regcache_read_pc (regcache)))
 	{
 	  if (debug_infrun)
@@ -4958,7 +4950,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
 	  handle_solib_event ();
 
 	  ecs->event_thread->control.stop_bpstat
-	    = bpstat_stop_status (get_regcache_aspace (regcache),
+	    = bpstat_stop_status (regcache->aspace (),
 				  stop_pc, ecs->ptid, &ecs->ws);
 
 	  if (handle_stop_requested (ecs))
@@ -5212,7 +5204,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
       ecs->event_thread->control.stop_bpstat
-	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
+	= bpstat_stop_status (get_current_regcache ()->aspace (),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
       if (handle_stop_requested (ecs))
@@ -5327,7 +5319,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       ecs->event_thread = inferior_thread ();
 
       ecs->event_thread->control.stop_bpstat
-	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
+	= bpstat_stop_status (get_current_regcache ()->aspace (),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
       /* Note that this may be referenced from inside
@@ -5776,11 +5768,11 @@ handle_signal_stop (struct execution_control_state *ecs)
   if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
     {
       struct regcache *regcache;
-      struct address_space *aspace;
       CORE_ADDR pc;
 
       regcache = get_thread_regcache (ecs->ptid);
-      aspace = get_regcache_aspace (regcache);
+      const address_space *aspace = regcache->aspace ();
+
       pc = regcache_read_pc (regcache);
 
       /* However, before doing so, if this single-step breakpoint was
@@ -5871,8 +5863,8 @@ handle_signal_stop (struct execution_control_state *ecs)
      inline function call sites).  */
   if (ecs->event_thread->control.step_range_end != 1)
     {
-      struct address_space *aspace = 
-	get_regcache_aspace (get_thread_regcache (ecs->ptid));
+      const address_space *aspace =
+	get_thread_regcache (ecs->ptid)->aspace ();
 
       /* skip_inline_frames is expensive, so we avoid it if we can
 	 determine that the address is one where functions cannot have
@@ -5944,7 +5936,7 @@ handle_signal_stop (struct execution_control_state *ecs)
   /* See if there is a breakpoint/watchpoint/catchpoint/etc. that
      handles this event.  */
   ecs->event_thread->control.stop_bpstat
-    = bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
+    = bpstat_stop_status (get_current_regcache ()->aspace (),
 			  stop_pc, ecs->ptid, &ecs->ws);
 
   /* Following in case break condition called a
@@ -7404,7 +7396,7 @@ insert_step_resume_breakpoint_at_sal_1 (struct gdbarch *gdbarch,
 			paddress (gdbarch, sr_sal.pc));
 
   inferior_thread ()->control.step_resume_breakpoint
-    = set_momentary_breakpoint (gdbarch, sr_sal, sr_id, sr_type);
+    = set_momentary_breakpoint (gdbarch, sr_sal, sr_id, sr_type).release ();
 }
 
 void
@@ -7493,7 +7485,7 @@ insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 			paddress (gdbarch, pc));
 
   inferior_thread ()->control.exception_resume_breakpoint =
-    set_momentary_breakpoint_at_pc (gdbarch, pc, bp_longjmp_resume);
+    set_momentary_breakpoint_at_pc (gdbarch, pc, bp_longjmp_resume).release ();
 }
 
 /* Insert an exception resume breakpoint.  TP is the thread throwing
@@ -7528,7 +7520,8 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 				(unsigned long) handler);
 
 	  bp = set_momentary_breakpoint_at_pc (get_frame_arch (frame),
-					       handler, bp_exception_resume);
+					       handler,
+					       bp_exception_resume).release ();
 
 	  /* set_momentary_breakpoint_at_pc invalidates FRAME.  */
 	  frame = NULL;
@@ -7569,7 +7562,7 @@ insert_exception_resume_from_probe (struct thread_info *tp,
 				  handler));
 
   bp = set_momentary_breakpoint_at_pc (get_frame_arch (frame),
-				       handler, bp_exception_resume);
+				       handler, bp_exception_resume).release ();
   bp->thread = tp->global_num;
   inferior_thread ()->control.exception_resume_breakpoint = bp;
 }
@@ -7758,7 +7751,7 @@ keep_going_pass_signal (struct execution_control_state *ecs)
       if (remove_bp
 	  && (remove_wps || !use_displaced_stepping (ecs->event_thread)))
 	{
-	  set_step_over_info (get_regcache_aspace (regcache),
+	  set_step_over_info (regcache->aspace (),
 			      regcache_read_pc (regcache), remove_wps,
 			      ecs->event_thread->global_num);
 	}
@@ -8469,7 +8462,7 @@ sig_print_info (enum gdb_signal oursig)
 /* Specify how various signals in the inferior should be handled.  */
 
 static void
-handle_command (char *args, int from_tty)
+handle_command (const char *args, int from_tty)
 {
   int digits, wordlen;
   int sigfirst, signum, siglast;
@@ -8682,7 +8675,7 @@ Use \"info signals\" for a list of symbolic signals."));
    targets, all signals should be in the signal tables).  */
 
 static void
-info_signals_command (char *signum_exp, int from_tty)
+info_signals_command (const char *signum_exp, int from_tty)
 {
   enum gdb_signal oursig;
 
@@ -9101,7 +9094,7 @@ static const char *const exec_direction_names[] = {
 };
 
 static void
-set_exec_direction_func (char *args, int from_tty,
+set_exec_direction_func (const char *args, int from_tty,
 			 struct cmd_list_element *cmd)
 {
   if (target_can_execute_reverse)

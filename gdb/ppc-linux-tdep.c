@@ -725,28 +725,19 @@ ppc_linux_get_syscall_number (struct gdbarch *gdbarch,
   struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct cleanup *cleanbuf;
-  /* The content of a register */
-  gdb_byte *buf;
-  /* The result */
-  LONGEST ret;
 
   /* Make sure we're in a 32- or 64-bit machine */
   gdb_assert (tdep->wordsize == 4 || tdep->wordsize == 8);
 
-  buf = (gdb_byte *) xmalloc (tdep->wordsize * sizeof (gdb_byte));
-
-  cleanbuf = make_cleanup (xfree, buf);
+  /* The content of a register */
+  gdb::byte_vector buf (tdep->wordsize);
 
   /* Getting the system call number from the register.
      When dealing with PowerPC architecture, this information
      is stored at 0th register.  */
-  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum, buf);
+  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum, buf.data ());
 
-  ret = extract_signed_integer (buf, tdep->wordsize, byte_order);
-  do_cleanups (cleanbuf);
-
-  return ret;
+  return extract_signed_integer (buf.data (), tdep->wordsize, byte_order);
 }
 
 /* PPC process record-replay */
@@ -1361,10 +1352,9 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 	{
 	  struct ppu2spu_cache *cache
 	    = FRAME_OBSTACK_CALLOC (1, struct ppu2spu_cache);
-
-	  struct address_space *aspace = get_frame_address_space (this_frame);
 	  std::unique_ptr<struct regcache> regcache
-	    (new struct regcache (data.gdbarch, aspace));
+	    (new struct regcache (data.gdbarch));
+
 	  regcache_save (regcache.get (), ppu2spu_unwind_register, &data);
 
 	  cache->frame_id = frame_id_build (base, func);

@@ -289,7 +289,7 @@ eval_python_command (const char *command)
 /* Implementation of the gdb "python-interactive" command.  */
 
 static void
-python_interactive_command (char *arg, int from_tty)
+python_interactive_command (const char *arg, int from_tty)
 {
   struct ui *ui = current_ui;
   int err;
@@ -404,7 +404,7 @@ gdbpy_eval_from_control_command (const struct extension_language_defn *extlang,
 /* Implementation of the gdb "python" command.  */
 
 static void
-python_command (char *arg, int from_tty)
+python_command (const char *arg, int from_tty)
 {
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
@@ -584,8 +584,6 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 
   TRY
     {
-      /* Copy the argument text in case the command modifies it.  */
-      std::string copy (arg);
       struct interp *interp;
 
       scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
@@ -599,9 +597,9 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 
       scoped_restore preventer = prevent_dont_repeat ();
       if (to_string)
-	to_string_res = execute_command_to_string (&copy[0], from_tty);
+	to_string_res = execute_command_to_string (arg, from_tty);
       else
-	execute_command (&copy[0], from_tty);
+	execute_command (arg, from_tty);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1397,7 +1395,7 @@ gdbpy_free_type_printers (const struct extension_language_defn *extlang,
    command. */
 
 static void
-python_interactive_command (char *arg, int from_tty)
+python_interactive_command (const char *arg, int from_tty)
 {
   arg = skip_spaces (arg);
   if (arg && *arg)
@@ -1411,7 +1409,7 @@ python_interactive_command (char *arg, int from_tty)
 }
 
 static void
-python_command (char *arg, int from_tty)
+python_command (const char *arg, int from_tty)
 {
   python_interactive_command (arg, from_tty);
 }

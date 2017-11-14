@@ -125,8 +125,6 @@ static int dcache_read_line (DCACHE *dcache, struct dcache_block *db);
 
 static struct dcache_block *dcache_alloc (DCACHE *dcache, CORE_ADDR addr);
 
-static void info_dcache_command (char *exp, int tty);
-
 static int dcache_enabled_p = 0; /* OBSOLETE */
 
 static void
@@ -585,7 +583,7 @@ dcache_print_line (DCACHE *dcache, int index)
 /* Parse EXP and show the info about DCACHE.  */
 
 static void
-dcache_info_1 (DCACHE *dcache, char *exp)
+dcache_info_1 (DCACHE *dcache, const char *exp)
 {
   splay_tree_node n;
   int i, refcount;
@@ -640,13 +638,13 @@ dcache_info_1 (DCACHE *dcache, char *exp)
 }
 
 static void
-info_dcache_command (char *exp, int tty)
+info_dcache_command (const char *exp, int tty)
 {
   dcache_info_1 (target_dcache_get (), exp);
 }
 
 static void
-set_dcache_size (char *args, int from_tty,
+set_dcache_size (const char *args, int from_tty,
 		 struct cmd_list_element *c)
 {
   if (dcache_size == 0)
@@ -658,7 +656,7 @@ set_dcache_size (char *args, int from_tty,
 }
 
 static void
-set_dcache_line_size (char *args, int from_tty,
+set_dcache_line_size (const char *args, int from_tty,
 		      struct cmd_list_element *c)
 {
   if (dcache_line_size < 2

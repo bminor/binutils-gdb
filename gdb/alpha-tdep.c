@@ -1461,7 +1461,8 @@ static const struct frame_base alpha_heuristic_frame_base = {
    callable as an sfunc.  Used by the "set heuristic-fence-post" command.  */
 
 static void
-reinit_frame_cache_sfunc (char *args, int from_tty, struct cmd_list_element *c)
+reinit_frame_cache_sfunc (const char *args,
+			  int from_tty, struct cmd_list_element *c)
 {
   reinit_frame_cache ();
 }

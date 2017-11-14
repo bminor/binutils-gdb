@@ -380,7 +380,11 @@ read_uleb128 (unsigned char * data,
       unsigned int amount = (AMOUNT);		\
       if (sizeof (VAL) < amount)		\
 	{					\
-	  error (_("internal error: attempt to read %d bytes of data in to %d sized variable"),\
+	  error (ngettext ("internal error: attempt to read %d byte "	\
+			   "of data in to %d sized variable",		\
+			   "internal error: attempt to read %d bytes "	\
+			   "of data in to %d sized variable",		\
+			   amount),					\
 		 amount, (int) sizeof (VAL));	\
 	  amount = sizeof (VAL);		\
 	}					\
@@ -3402,7 +3406,10 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  printf (_("\n Opcodes:\n"));
 
 	  for (i = 1; i < linfo.li_opcode_base; i++)
-	    printf (_("  Opcode %d has %d args\n"), i, standard_opcodes[i - 1]);
+	    printf (ngettext ("  Opcode %d has %d arg\n",
+			      "  Opcode %d has %d args\n",
+			      standard_opcodes[i - 1]),
+		    i, standard_opcodes[i - 1]);
 
 	  /* Display the contents of the Directory table.  */
 	  data = standard_opcodes + linfo.li_opcode_base - 1;
@@ -5981,7 +5988,9 @@ display_debug_loc (struct dwarf_section *section, void *file)
     }
 
   if (start < section->start + section->size)
-    warn (_("There are %ld unused bytes at the end of section %s\n"),
+    warn (ngettext ("There is %ld unused byte at the end of section %s\n",
+		    "There are %ld unused bytes at the end of section %s\n",
+		    (long) (section->start + section->size - start)),
 	  (long) (section->start + section->size - start), section->name);
   putchar ('\n');
   free (array);
@@ -6989,13 +6998,13 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, unsigned int *max_reg
 static unsigned char *
 read_cie (unsigned char *start, unsigned char *end,
 	  Frame_Chunk **p_cie, int *p_version,
-	  unsigned long *p_aug_len, unsigned char **p_aug)
+	  bfd_size_type *p_aug_len, unsigned char **p_aug)
 {
   int version;
   Frame_Chunk *fc;
   unsigned int length_return;
   unsigned char *augmentation_data = NULL;
-  unsigned long augmentation_data_len = 0;
+  bfd_size_type augmentation_data_len = 0;
 
   * p_cie = NULL;
   /* PR 17512: file: 001-228113-0.004.  */
@@ -7065,10 +7074,11 @@ read_cie (unsigned char *start, unsigned char *end,
       READ_ULEB (augmentation_data_len);
       augmentation_data = start;
       /* PR 17512: file: 11042-2589-0.004.  */
-      if (augmentation_data_len > (size_t) (end - start))
+      if (augmentation_data_len > (bfd_size_type) (end - start))
 	{
-	  warn (_("Augmentation data too long: %#lx, expected at most %#lx\n"),
-		augmentation_data_len, (unsigned long) (end - start));
+	  warn (_("Augmentation data too long: 0x%s, expected at most %#lx\n"),
+		dwarf_vmatoa ("x", augmentation_data_len),
+		(unsigned long) (end - start));
 	  return end;
 	}
       start += augmentation_data_len;
@@ -7113,6 +7123,31 @@ read_cie (unsigned char *start, unsigned char *end,
   return start;
 }
 
+/* Prints out the contents on the augmentation data array.
+   If do_wide is not enabled, then formats the output to fit into 80 columns.  */
+
+static void
+display_augmentation_data (const unsigned char * data, const bfd_size_type len)
+{
+  bfd_size_type i;
+
+  i = printf (_("  Augmentation data:    "));
+
+  if (do_wide || len < ((80 - i) / 3))
+    for (i = 0; i < len; ++i)
+      printf (" %02x", data[i]);
+  else
+    {
+      for (i = 0; i < len; ++i)
+	{
+	  if (i % (80 / 3) == 0)
+	    putchar ('\n');
+	  printf (" %02x", data[i]);
+	}
+    }
+  putchar ('\n');
+}
+
 static int
 display_debug_frames (struct dwarf_section *section,
 		      void *file ATTRIBUTE_UNUSED)
@@ -7141,7 +7176,7 @@ display_debug_frames (struct dwarf_section *section,
       Frame_Chunk *cie;
       int need_col_headers = 1;
       unsigned char *augmentation_data = NULL;
-      unsigned long augmentation_data_len = 0;
+      bfd_size_type augmentation_data_len = 0;
       unsigned int encoded_ptr_size = saved_eh_addr_size;
       unsigned int offset_size;
       unsigned int initial_length_size;
@@ -7235,16 +7270,8 @@ display_debug_frames (struct dwarf_section *section,
 	      printf ("  Return address column: %d\n", fc->ra);
 
 	      if (augmentation_data_len)
-		{
-		  unsigned long i;
+		display_augmentation_data (augmentation_data, augmentation_data_len);
 
-		  printf ("  Augmentation data:    ");
-		  for (i = 0; i < augmentation_data_len; ++i)
-		    /* FIXME: If do_wide is FALSE, then we should
-		       add carriage returns at 80 columns...  */
-		    printf (" %02x", augmentation_data[i]);
-		  putchar ('\n');
-		}
 	      putchar ('\n');
 	    }
 	}
@@ -7400,11 +7427,13 @@ display_debug_frames (struct dwarf_section *section,
 	      READ_ULEB (augmentation_data_len);
 	      augmentation_data = start;
 	      start += augmentation_data_len;
-	      /* PR 17512: file: 722-8446-0.004.  */
-	      if (start >= end || ((signed long) augmentation_data_len) < 0)
+	      /* PR 17512 file: 722-8446-0.004 and PR 22386.  */
+	      if (start >= end
+		  || ((bfd_signed_vma) augmentation_data_len) < 0
+		  || augmentation_data > start)
 		{
-		  warn (_("Corrupt augmentation data length: %lx\n"),
-			augmentation_data_len);
+		  warn (_("Corrupt augmentation data length: 0x%s\n"),
+			dwarf_vmatoa ("x", augmentation_data_len));
 		  start = end;
 		  augmentation_data = NULL;
 		  augmentation_data_len = 0;
@@ -7426,12 +7455,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	  if (! do_debug_frames_interp && augmentation_data_len)
 	    {
-	      unsigned long i;
-
-	      printf ("  Augmentation data:    ");
-	      for (i = 0; i < augmentation_data_len; ++i)
-		printf (" %02x", augmentation_data[i]);
-	      putchar ('\n');
+	      display_augmentation_data (augmentation_data, augmentation_data_len);
 	      putchar ('\n');
 	    }
 	}
@@ -8231,8 +8255,10 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  if (bucket != 0)
 	    ++buckets_filled;
 	}
-      printf (_("Used %zu of %lu buckets.\n"), buckets_filled,
-	      (unsigned long) bucket_count);
+      printf (ngettext ("Used %zu of %lu bucket.\n",
+			"Used %zu of %lu buckets.\n",
+			bucket_count),
+	      buckets_filled, (unsigned long) bucket_count);
 
       uint32_t hash_prev = 0;
       size_t hash_clash_count = 0;
@@ -8775,7 +8801,9 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   /* PR 17531: file: 45d69832.  */
   if (pindex < phash || ppool < phdr || (pindex == phash && nslots != 0))
     {
-      warn (_("Section %s is too small for %d slots\n"),
+      warn (ngettext ("Section %s is too small for %d slot\n",
+		      "Section %s is too small for %d slots\n",
+		      nslots),
 	    section->name, nslots);
       return 0;
     }

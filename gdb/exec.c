@@ -49,8 +49,6 @@ void (*deprecated_file_changed_hook) (const char *);
 
 /* Prototypes for local functions */
 
-static void set_section_command (char *, int);
-
 static void exec_files_info (struct target_ops *);
 
 static void init_exec_ops (void);
@@ -957,10 +955,10 @@ exec_files_info (struct target_ops *t)
 }
 
 static void
-set_section_command (char *args, int from_tty)
+set_section_command (const char *args, int from_tty)
 {
   struct target_section *p;
-  char *secname;
+  const char *secname;
   unsigned seclen;
   unsigned long secaddr;
   char secprint[100];

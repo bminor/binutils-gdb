@@ -1874,7 +1874,7 @@ unset_tdesc_cmd (const char *args, int from_tty)
 }
 
 static void
-set_tdesc_filename_cmd (char *args, int from_tty,
+set_tdesc_filename_cmd (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
   xfree (target_description_filename);

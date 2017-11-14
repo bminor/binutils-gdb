@@ -84,8 +84,6 @@ int readnow_symbol_files;	/* Read full symbols immediately.  */
 
 /* Functions this file defines.  */
 
-static void load_command (char *, int);
-
 static void symbol_file_add_main_1 (const char *args, symfile_add_flags add_flags,
 				    objfile_flags flags);
 
@@ -101,8 +99,6 @@ static void read_target_long_array (CORE_ADDR, unsigned int *, int, int,
 static int simple_read_overlay_table (void);
 
 static int simple_overlay_update_1 (struct obj_section *);
-
-static void info_ext_lang_command (char *args, int from_tty);
 
 static void symfile_find_segment_sections (struct objfile *objfile);
 
@@ -997,7 +993,8 @@ syms_from_objfile_1 (struct objfile *objfile,
 
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
-  old_chain = make_cleanup_free_objfile (objfile);
+  old_chain = make_cleanup (null_cleanup, NULL);
+  std::unique_ptr<struct objfile> objfile_holder (objfile);
 
   /* If ADDRS is NULL, put together a dummy address list.
      We now establish the convention that an addr of zero means
@@ -1053,6 +1050,7 @@ syms_from_objfile_1 (struct objfile *objfile,
 
   /* Discard cleanups as symbol reading was successful.  */
 
+  objfile_holder.release ();
   discard_cleanups (old_chain);
   xfree (local_addr);
 }
@@ -1545,13 +1543,11 @@ terminate_after_last_dir_separator (char *path)
 char *
 find_separate_debug_file_by_debuglink (struct objfile *objfile)
 {
-  char *debuglink;
-  char *dir, *canon_dir;
   char *debugfile;
   unsigned long crc32;
-  struct cleanup *cleanups;
 
-  debuglink = bfd_get_debug_link_info (objfile->obfd, &crc32);
+  gdb::unique_xmalloc_ptr<char> debuglink
+    (bfd_get_debug_link_info (objfile->obfd, &crc32));
 
   if (debuglink == NULL)
     {
@@ -1560,15 +1556,12 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
       return NULL;
     }
 
-  cleanups = make_cleanup (xfree, debuglink);
-  dir = xstrdup (objfile_name (objfile));
-  make_cleanup (xfree, dir);
-  terminate_after_last_dir_separator (dir);
-  canon_dir = lrealpath (dir);
+  std::string dir = objfile_name (objfile);
+  terminate_after_last_dir_separator (&dir[0]);
+  gdb::unique_xmalloc_ptr<char> canon_dir (lrealpath (dir.c_str ()));
 
-  debugfile = find_separate_debug_file (dir, canon_dir, debuglink,
-					crc32, objfile);
-  xfree (canon_dir);
+  debugfile = find_separate_debug_file (dir.c_str (), canon_dir.get (),
+					debuglink.get (), crc32, objfile);
 
   if (debugfile == NULL)
     {
@@ -1580,19 +1573,17 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
       if (lstat (objfile_name (objfile), &st_buf) == 0
 	  && S_ISLNK (st_buf.st_mode))
 	{
-	  char *symlink_dir;
-
-	  symlink_dir = lrealpath (objfile_name (objfile));
+	  gdb::unique_xmalloc_ptr<char> symlink_dir
+	    (lrealpath (objfile_name (objfile)));
 	  if (symlink_dir != NULL)
 	    {
-	      make_cleanup (xfree, symlink_dir);
-	      terminate_after_last_dir_separator (symlink_dir);
-	      if (strcmp (dir, symlink_dir) != 0)
+	      terminate_after_last_dir_separator (symlink_dir.get ());
+	      if (dir != symlink_dir.get ())
 		{
 		  /* Different directory, so try using it.  */
-		  debugfile = find_separate_debug_file (symlink_dir,
-							symlink_dir,
-							debuglink,
+		  debugfile = find_separate_debug_file (symlink_dir.get (),
+							symlink_dir.get (),
+							debuglink.get (),
 							crc32,
 							objfile);
 		}
@@ -1600,7 +1591,6 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
 	}
     }
 
-  do_cleanups (cleanups);
   return debugfile;
 }
 
@@ -1799,7 +1789,7 @@ find_sym_fns (bfd *abfd)
 /* This function runs the load command of our current target.  */
 
 static void
-load_command (char *arg, int from_tty)
+load_command (const char *arg, int from_tty)
 {
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
@@ -1812,7 +1802,7 @@ load_command (char *arg, int from_tty)
 
   if (arg == NULL)
     {
-      char *parg;
+      const char *parg;
       int count = 0;
 
       parg = arg = get_exec_file (1);
@@ -1829,7 +1819,7 @@ load_command (char *arg, int from_tty)
 	  /* We need to quote this string so buildargv can pull it apart.  */
 	  char *temp = (char *) xmalloc (strlen (arg) + count + 1 );
 	  char *ptemp = temp;
-	  char *prev;
+	  const char *prev;
 
 	  make_cleanup (xfree, temp);
 
@@ -2444,9 +2434,10 @@ reread_symbols (void)
 	  /* If we get an error, blow away this objfile (not sure if
 	     that is the correct response for things like shared
 	     libraries).  */
-	  old_cleanups = make_cleanup_free_objfile (objfile);
+	  std::unique_ptr<struct objfile> objfile_holder (objfile);
+
 	  /* We need to do this whenever any symbols go away.  */
-	  make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
+	  old_cleanups = make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
 
 	  if (exec_bfd != NULL
 	      && filename_cmp (bfd_get_filename (objfile->obfd),
@@ -2608,6 +2599,7 @@ reread_symbols (void)
 	  reinit_frame_cache ();
 
 	  /* Discard cleanups as symbol reading was successful.  */
+	  objfile_holder.release ();
 	  discard_cleanups (old_cleanups);
 
 	  /* If the mtime has changed between the time we set new_modtime
@@ -2669,7 +2661,8 @@ show_ext_args (struct ui_file *file, int from_tty,
 }
 
 static void
-set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
+set_ext_lang_command (const char *args,
+		      int from_tty, struct cmd_list_element *e)
 {
   char *cp = ext_args;
   enum language lang;
@@ -2727,7 +2720,7 @@ set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
 }
 
 static void
-info_ext_lang_command (char *args, int from_tty)
+info_ext_lang_command (const char *args, int from_tty)
 {
   printf_filtered (_("Filename extensions and the languages they represent:"));
   printf_filtered ("\n\n");
@@ -3780,6 +3773,7 @@ symfile_free_objfile (struct objfile *objfile)
 void
 expand_symtabs_matching
   (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind)
@@ -3790,6 +3784,7 @@ expand_symtabs_matching
   {
     if (objfile->sf)
       objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
+						lookup_name,
 						symbol_matcher,
 						expansion_notify, kind);
   }

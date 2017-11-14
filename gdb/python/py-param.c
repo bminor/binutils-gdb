@@ -357,7 +357,7 @@ call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
    neither exist, insert a string indicating the Parameter is not
    documented.  */
 static void
-get_set_value (char *args, int from_tty,
+get_set_value (const char *args, int from_tty,
 	       struct cmd_list_element *c)
 {
   PyObject *obj = (PyObject *) get_cmd_context (c);

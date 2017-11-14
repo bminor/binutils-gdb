@@ -21,8 +21,8 @@ LARGE_SECTIONS=yes
 LARGE_BSS_AFTER_BSS=
 SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 24 ? 24 : 0"
 IREL_IN_PLT=
-# Reuse TINY_READONLY_SECTION which is placed right after .plt section.
-TINY_READONLY_SECTION="
+# These sections are placed right after .plt section.
+OTHER_PLT_SECTIONS="
 .plt.got      ${RELOCATING-0} : { *(.plt.got) }
 .plt.sec      ${RELOCATING-0} : { *(.plt.sec) }
 "

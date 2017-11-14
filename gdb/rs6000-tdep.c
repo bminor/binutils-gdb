@@ -29,7 +29,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "regset.h"
-#include "doublest.h"
+#include "target-float.h"
 #include "value.h"
 #include "parser-defs.h"
 #include "osabi.h"
@@ -2622,8 +2622,8 @@ rs6000_register_to_value (struct frame_info *frame,
 				 from, optimizedp, unavailablep))
     return 0;
 
-  convert_typed_floating (from, builtin_type (gdbarch)->builtin_double,
-			  to, type);
+  target_float_convert (from, builtin_type (gdbarch)->builtin_double,
+			to, type);
   *optimizedp = *unavailablep = 0;
   return 1;
 }
@@ -2639,8 +2639,8 @@ rs6000_value_to_register (struct frame_info *frame,
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
-  convert_typed_floating (from, type,
-			  to, builtin_type (gdbarch)->builtin_double);
+  target_float_convert (from, type,
+			to, builtin_type (gdbarch)->builtin_double);
   put_frame_register (frame, regnum, to);
 }
 
@@ -6634,7 +6634,7 @@ show_powerpc_command (const char *args, int from_tty)
 }
 
 static void
-powerpc_set_soft_float (char *args, int from_tty,
+powerpc_set_soft_float (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
   struct gdbarch_info info;
@@ -6646,7 +6646,7 @@ powerpc_set_soft_float (char *args, int from_tty,
 }
 
 static void
-powerpc_set_vector_abi (char *args, int from_tty,
+powerpc_set_vector_abi (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
   struct gdbarch_info info;

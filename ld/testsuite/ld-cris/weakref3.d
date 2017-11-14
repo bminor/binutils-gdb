@@ -14,11 +14,11 @@
 #...
  +\[[0-9]+\] .bss +NOBITS +[0-9a-f]* [0-9a-f]* 000010 .*
 #...
-Relocation section '.rela.dyn' at offset 0x... contains 1 entries:
+Relocation section '.rela.dyn' at offset 0x... contains 1 entry:
  Offset +Info +Type +Sym.Value +Sym. Name \+ Addend
 .* R_CRIS_COPY .* __expobj2@TST3 \+ 0
 
-Relocation section '.rela.plt' at offset 0x... contains 1 entries:
+Relocation section '.rela.plt' at offset 0x... contains 1 entry:
  Offset +Info +Type +Sym.Value +Sym. Name \+ Addend
 .* R_CRIS_JUMP_SLOT .* expfn2@TST3 \+ 0
 

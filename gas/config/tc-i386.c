@@ -5431,7 +5431,8 @@ process_suffix (void)
 		}
 
 	      for (op = i.operands; --op >= 0;)
-		if (!i.tm.operand_types[op].bitfield.inoutportreg)
+		if (!i.tm.operand_types[op].bitfield.inoutportreg
+		    && !i.tm.operand_types[op].bitfield.shiftcount)
 		  {
 		    if (i.types[op].bitfield.reg8)
 		      {
@@ -8633,13 +8634,13 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
   return ret;
 }
 
-/* Make sure the memory operand we've been dealt is valid.
-   Return 1 on success, 0 on a failure.  */
+/* Return the active addressing mode, taking address override and
+   registers forming the address into consideration.  Update the
+   address override prefix if necessary.  */
 
-static int
-i386_index_check (const char *operand_string)
+static enum flag_code
+i386_addressing_mode (void)
 {
-  const char *kind = "base/index";
   enum flag_code addr_mode;
 
   if (i.prefix[ADDR_PREFIX])
@@ -8687,6 +8688,18 @@ i386_index_check (const char *operand_string)
 	}
 #endif
     }
+
+  return addr_mode;
+}
+
+/* Make sure the memory operand we've been dealt is valid.
+   Return 1 on success, 0 on a failure.  */
+
+static int
+i386_index_check (const char *operand_string)
+{
+  const char *kind = "base/index";
+  enum flag_code addr_mode = i386_addressing_mode ();
 
   if (current_templates->start->opcode_modifier.isstring
       && !current_templates->start->opcode_modifier.immext

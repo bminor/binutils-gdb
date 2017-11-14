@@ -122,6 +122,9 @@ static linkclass decodelist = NULL;
 
 static unsigned enforced_isa_mask = ARC_OPCODE_NONE;
 
+/* True if we want to print using only hex numbers.  */
+static bfd_boolean print_hex = FALSE;
+
 /* Macros section.  */
 
 #ifdef DEBUG
@@ -186,6 +189,7 @@ skip_this_opcode (const struct arc_opcode *opcode)
     {
     case FLOAT:
     case DSP:
+    case ARITH:
       break;
     default:
       return FALSE;
@@ -771,6 +775,8 @@ parse_option (const char *option)
       add_to_decodelist (FLOAT, DP);
       add_to_decodelist (FLOAT, CVT);
     }
+  else if (CONST_STRNEQ (option, "hex"))
+    print_hex = TRUE;
   else
     fprintf (stderr, _("Unrecognised disassembler option: %s\n"), option);
 }
@@ -1256,7 +1262,12 @@ print_insn_arc (bfd_vma memaddr,
 	  if (rname && open_braket)
 	    (*info->fprintf_func) (info->stream, "%s", rname);
 	  else
-	    (*info->fprintf_func) (info->stream, "%d", value);
+	    {
+	      if (print_hex)
+		(*info->fprintf_func) (info->stream, "%#x", value);
+	      else
+		(*info->fprintf_func) (info->stream, "%d", value);
+	    }
 	}
       else if (operand->flags & ARC_OPERAND_ADDRTYPE)
 	{
@@ -1367,6 +1378,8 @@ with -M switch (multiple options should be separated by commas):\n"));
   fpus            Recognize single precision FPU instructions.\n"));
   fprintf (stream, _("\
   fpud            Recognize double precision FPU instructions.\n"));
+  fprintf (stream, _("\
+  hex             Use only hexadecimal number to print immediates.\n"));
 }
 
 void arc_insn_decode (bfd_vma addr,

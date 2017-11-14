@@ -1061,7 +1061,7 @@ print_mem (unsigned long datum, const char *header, int in_pages_p)
 
 /* Display assorted information about the underlying OS.  */
 static void
-go32_sysinfo (char *arg, int from_tty)
+go32_sysinfo (const char *arg, int from_tty)
 {
   static const char test_pattern[] =
     "deadbeafdeadbeafdeadbeafdeadbeafdeadbeaf"
@@ -1658,7 +1658,7 @@ display_descriptor (unsigned type, unsigned long base_addr, int idx, int force)
 }
 
 static void
-go32_sldt (char *arg, int from_tty)
+go32_sldt (const char *arg, int from_tty)
 {
   struct dtr_reg gdtr;
   unsigned short ldtr = 0;
@@ -1731,7 +1731,7 @@ go32_sldt (char *arg, int from_tty)
 }
 
 static void
-go32_sgdt (char *arg, int from_tty)
+go32_sgdt (const char *arg, int from_tty)
 {
   struct dtr_reg gdtr;
   long gdt_entry = -1L;
@@ -1772,7 +1772,7 @@ go32_sgdt (char *arg, int from_tty)
 }
 
 static void
-go32_sidt (char *arg, int from_tty)
+go32_sidt (const char *arg, int from_tty)
 {
   struct dtr_reg idtr;
   long idt_entry = -1L;
@@ -1944,7 +1944,7 @@ display_ptable_entry (unsigned long entry, int is_dir, int force, unsigned off)
 }
 
 static void
-go32_pde (char *arg, int from_tty)
+go32_pde (const char *arg, int from_tty)
 {
   long pde_idx = -1, i;
 
@@ -1994,7 +1994,7 @@ display_page_table (long n, int force)
 }
 
 static void
-go32_pte (char *arg, int from_tty)
+go32_pte (const char *arg, int from_tty)
 {
   long pde_idx = -1L, i;
 
@@ -2021,7 +2021,7 @@ go32_pte (char *arg, int from_tty)
 }
 
 static void
-go32_pte_for_address (char *arg, int from_tty)
+go32_pte_for_address (const char *arg, int from_tty)
 {
   CORE_ADDR addr = 0, i;
 

@@ -99,6 +99,7 @@ static void VEXI4_Fixup (int, int);
 static void VZERO_Fixup (int, int);
 static void VCMP_Fixup (int, int);
 static void VPCMP_Fixup (int, int);
+static void VPCOM_Fixup (int, int);
 static void OP_0f07 (int, int);
 static void OP_Monitor (int, int);
 static void OP_Mwait (int, int);
@@ -441,6 +442,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VZERO { VZERO_Fixup, 0 }
 #define VCMP { VCMP_Fixup, 0 }
 #define VPCMP { VPCMP_Fixup, 0 }
+#define VPCOM { VPCOM_Fixup, 0 }
 
 #define EXxEVexR { OP_Rounding, evex_rounding_mode }
 #define EXxEVexS { OP_Rounding, evex_sae_mode }
@@ -10192,42 +10194,42 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0FXOP_08_CC */
   {
-     { "vpcomb",	{ XM, Vex128, EXx, Ib }, 0 },
+     { "vpcomb",	{ XM, Vex128, EXx, VPCOM }, 0 },
   },
 
   /* VEX_LEN_0FXOP_08_CD */
   {
-     { "vpcomw",	{ XM, Vex128, EXx, Ib }, 0 },
+     { "vpcomw",	{ XM, Vex128, EXx, VPCOM }, 0 },
   },
 
   /* VEX_LEN_0FXOP_08_CE */
   {
-     { "vpcomd",	{ XM, Vex128, EXx, Ib }, 0 },
+     { "vpcomd",	{ XM, Vex128, EXx, VPCOM }, 0 },
   },
 
   /* VEX_LEN_0FXOP_08_CF */
   {
-     { "vpcomq",	{ XM, Vex128, EXx, Ib }, 0 },
+     { "vpcomq",	{ XM, Vex128, EXx, VPCOM }, 0 },
   },
 
   /* VEX_LEN_0FXOP_08_EC */
   {
-     { "vpcomub",	{ XM, Vex128, EXx, Ib }, 0 },
+     { "vpcomub",	{ XM, Vex128, EXx, VPCOM }, 0 },
   },
 
   /* VEX_LEN_0FXOP_08_ED */
   {
-     { "vpcomuw",	{ XM, Vex128, EXx, Ib }, 0 },
+     { "vpcomuw",	{ XM, Vex128, EXx, VPCOM }, 0 },
   },
 
   /* VEX_LEN_0FXOP_08_EE */
   {
-     { "vpcomud",	{ XM, Vex128, EXx, Ib }, 0 },
+     { "vpcomud",	{ XM, Vex128, EXx, VPCOM }, 0 },
   },
 
   /* VEX_LEN_0FXOP_08_EF */
   {
-     { "vpcomuq",	{ XM, Vex128, EXx, Ib }, 0 },
+     { "vpcomuq",	{ XM, Vex128, EXx, VPCOM }, 0 },
   },
 
   /* VEX_LEN_0FXOP_09_80 */
@@ -17610,6 +17612,58 @@ VPCMP_Fixup (int bytemode ATTRIBUTE_UNUSED,
 
       sprintf (p, "%s%s", simd_cmp_op[cmp_type].name, suffix);
       mnemonicendp += simd_cmp_op[cmp_type].len;
+    }
+  else
+    {
+      /* We have a reserved extension byte.  Output it directly.  */
+      scratchbuf[0] = '$';
+      print_operand_value (scratchbuf + 1, 1, cmp_type);
+      oappend_maybe_intel (scratchbuf);
+      scratchbuf[0] = '\0';
+    }
+}
+
+static const struct op xop_cmp_op[] =
+{
+  { STRING_COMMA_LEN ("lt") },
+  { STRING_COMMA_LEN ("le") },
+  { STRING_COMMA_LEN ("gt") },
+  { STRING_COMMA_LEN ("ge") },
+  { STRING_COMMA_LEN ("eq") },
+  { STRING_COMMA_LEN ("neq") },
+  { STRING_COMMA_LEN ("false") },
+  { STRING_COMMA_LEN ("true") }
+};
+
+static void
+VPCOM_Fixup (int bytemode ATTRIBUTE_UNUSED,
+	     int sizeflag ATTRIBUTE_UNUSED)
+{
+  unsigned int cmp_type;
+
+  FETCH_DATA (the_info, codep + 1);
+  cmp_type = *codep++ & 0xff;
+  if (cmp_type < ARRAY_SIZE (xop_cmp_op))
+    {
+      char suffix[3];
+      char *p = mnemonicendp - 2;
+
+      /* vpcom* can have both one- and two-lettered suffix.  */
+      if (p[0] == 'm')
+	{
+	  p++;
+	  suffix[0] = p[0];
+	  suffix[1] = '\0';
+	}
+      else
+	{
+	  suffix[0] = p[0];
+	  suffix[1] = p[1];
+	  suffix[2] = '\0';
+	}
+
+      sprintf (p, "%s%s", xop_cmp_op[cmp_type].name, suffix);
+      mnemonicendp += xop_cmp_op[cmp_type].len;
     }
   else
     {

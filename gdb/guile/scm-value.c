@@ -24,6 +24,7 @@
 #include "arch-utils.h"
 #include "charset.h"
 #include "cp-abi.h"
+#include "target-float.h"
 #include "infcall.h"
 #include "symtab.h" /* Needed by language.h.  */
 #include "language.h"
@@ -1019,7 +1020,8 @@ gdbscm_value_to_real (SCM self)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
   struct type *type;
-  DOUBLEST d = 0;
+  double d = 0;
+  struct value *check = nullptr;
 
   type = value_type (value);
 
@@ -1038,7 +1040,22 @@ gdbscm_value_to_real (SCM self)
 
   TRY
     {
-      d = value_as_double (value);
+      if (is_floating_value (value))
+	{
+	  d = target_float_to_host_double (value_contents (value), type);
+	  check = allocate_value (type);
+	  target_float_from_host_double (value_contents_raw (check), type, d);
+	}
+      else if (TYPE_UNSIGNED (type))
+	{
+	  d = (ULONGEST) value_as_long (value);
+	  check = value_from_ulongest (type, (ULONGEST) d);
+	}
+      else
+	{
+	  d = value_as_long (value);
+	  check = value_from_longest (type, (LONGEST) d);
+	}
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1047,7 +1064,7 @@ gdbscm_value_to_real (SCM self)
   END_CATCH
 
   /* TODO: Is there a better way to check if the value fits?  */
-  if (d != (double) d)
+  if (!value_equal (value, check))
     gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
 			       _("number can't be converted to a double"));
 

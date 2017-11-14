@@ -923,9 +923,10 @@ elf_gnu_ifunc_resolver_stop (struct breakpoint *b)
       sal.pc = prev_pc;
       sal.section = find_pc_overlay (sal.pc);
       sal.explicit_pc = 1;
-      b_return = set_momentary_breakpoint (get_frame_arch (prev_frame), sal,
-					   prev_frame_id,
-					   bp_gnu_ifunc_resolver_return);
+      b_return
+	= set_momentary_breakpoint (get_frame_arch (prev_frame), sal,
+				    prev_frame_id,
+				    bp_gnu_ifunc_resolver_return).release ();
 
       /* set_momentary_breakpoint invalidates PREV_FRAME.  */
       prev_frame = NULL;

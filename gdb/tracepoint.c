@@ -354,11 +354,11 @@ validate_trace_state_variable_name (const char *name)
    evaluate into an initial value.  */
 
 static void
-trace_variable_command (char *args, int from_tty)
+trace_variable_command (const char *args, int from_tty)
 {
   LONGEST initval = 0;
   struct trace_state_variable *tsv;
-  char *name_start, *p;
+  const char *name_start, *p;
 
   if (!args || !*args)
     error_no_arg (_("Syntax is $NAME [ = EXPR ]"));
@@ -492,7 +492,7 @@ tvariables_info_1 (void)
 /* List all the trace state variables.  */
 
 static void
-info_tvariables_command (char *args, int from_tty)
+info_tvariables_command (const char *args, int from_tty)
 {
   tvariables_info_1 ();
 }
@@ -526,25 +526,25 @@ save_trace_state_variables (struct ui_file *fp)
    which is always an error.  */
 
 static void
-end_actions_pseudocommand (char *args, int from_tty)
+end_actions_pseudocommand (const char *args, int from_tty)
 {
   error (_("This command cannot be used at the top level."));
 }
 
 static void
-while_stepping_pseudocommand (char *args, int from_tty)
+while_stepping_pseudocommand (const char *args, int from_tty)
 {
   error (_("This command can only be used in a tracepoint actions list."));
 }
 
 static void
-collect_pseudocommand (char *args, int from_tty)
+collect_pseudocommand (const char *args, int from_tty)
 {
   error (_("This command can only be used in a tracepoint actions list."));
 }
 
 static void
-teval_pseudocommand (char *args, int from_tty)
+teval_pseudocommand (const char *args, int from_tty)
 {
   error (_("This command can only be used in a tracepoint actions list."));
 }
@@ -593,7 +593,7 @@ decode_agent_options (const char *exp, int *trace_string)
 
 /* Enter a list of actions for a tracepoint.  */
 static void
-actions_command (char *args, int from_tty)
+actions_command (const char *args, int from_tty)
 {
   struct tracepoint *t;
 
@@ -1118,18 +1118,14 @@ collection_list::collection_list ()
 
 /* Reduce a collection list to string form (for gdb protocol).  */
 
-char **
+std::vector<std::string>
 collection_list::stringify ()
 {
   char temp_buf[2048];
   int count;
-  int ndx = 0;
-  char *(*str_list)[];
   char *end;
   long i;
-
-  count = 1 + 1 + m_memranges.size () + m_aexprs.size () + 1;
-  str_list = (char *(*)[]) xmalloc (count * sizeof (char *));
+  std::vector<std::string> str_list;
 
   if (m_strace_data)
     {
@@ -1137,8 +1133,7 @@ collection_list::stringify ()
 	printf_filtered ("\nCollecting static trace data\n");
       end = temp_buf;
       *end++ = 'L';
-      (*str_list)[ndx] = savestring (temp_buf, end - temp_buf);
-      ndx++;
+      str_list.emplace_back (temp_buf, end - temp_buf);
     }
 
   for (i = sizeof (m_regs_mask) - 1; i > 0; i--)
@@ -1158,8 +1153,7 @@ collection_list::stringify ()
 	  sprintf (end, "%02X", m_regs_mask[i]);
 	  end += 2;
 	}
-      (*str_list)[ndx] = xstrdup (temp_buf);
-      ndx++;
+      str_list.emplace_back (temp_buf);
     }
   if (info_verbose)
     printf_filtered ("\n");
@@ -1179,8 +1173,7 @@ collection_list::stringify ()
 	}
       if (count + 27 > MAX_AGENT_EXPR_LEN)
 	{
-	  (*str_list)[ndx] = savestring (temp_buf, count);
-	  ndx++;
+	  str_list.emplace_back (temp_buf, count);
 	  count = 0;
 	  end = temp_buf;
 	}
@@ -1210,8 +1203,7 @@ collection_list::stringify ()
       QUIT;			/* Allow user to bail out with ^C.  */
       if ((count + 10 + 2 * m_aexprs[i]->len) > MAX_AGENT_EXPR_LEN)
 	{
-	  (*str_list)[ndx] = savestring (temp_buf, count);
-	  ndx++;
+	  str_list.emplace_back (temp_buf, count);
 	  count = 0;
 	  end = temp_buf;
 	}
@@ -1225,20 +1217,12 @@ collection_list::stringify ()
 
   if (count != 0)
     {
-      (*str_list)[ndx] = savestring (temp_buf, count);
-      ndx++;
+      str_list.emplace_back (temp_buf, count);
       count = 0;
       end = temp_buf;
     }
-  (*str_list)[ndx] = NULL;
 
-  if (ndx == 0)
-    {
-      xfree (str_list);
-      return NULL;
-    }
-  else
-    return *str_list;
+  return str_list;
 }
 
 /* Add the printed expression EXP to *LIST.  */
@@ -1513,13 +1497,11 @@ encode_actions (struct bp_location *tloc,
 /* Render all actions into gdb protocol.  */
 
 void
-encode_actions_rsp (struct bp_location *tloc, char ***tdp_actions,
-		    char ***stepping_actions)
+encode_actions_rsp (struct bp_location *tloc,
+		    std::vector<std::string> *tdp_actions,
+		    std::vector<std::string> *stepping_actions)
 {
   struct collection_list tracepoint_list, stepping_list;
-
-  *tdp_actions = NULL;
-  *stepping_actions = NULL;
 
   encode_actions (tloc, &tracepoint_list, &stepping_list);
 
@@ -1587,7 +1569,7 @@ trace_reset_local_state (void)
 }
 
 void
-start_tracing (char *notes)
+start_tracing (const char *notes)
 {
   VEC(breakpoint_p) *tp_vec = NULL;
   int ix;
@@ -1718,7 +1700,7 @@ start_tracing (char *notes)
    anybody else messing with the target.  */
 
 static void
-tstart_command (char *args, int from_tty)
+tstart_command (const char *args, int from_tty)
 {
   dont_repeat ();	/* Like "run", dangerous to repeat accidentally.  */
 
@@ -1738,7 +1720,7 @@ tstart_command (char *args, int from_tty)
    of the trace run's status.  */
 
 static void
-tstop_command (char *args, int from_tty)
+tstop_command (const char *args, int from_tty)
 {
   if (!current_trace_status ()->running)
     error (_("Trace is not running."));
@@ -1747,7 +1729,7 @@ tstop_command (char *args, int from_tty)
 }
 
 void
-stop_tracing (char *note)
+stop_tracing (const char *note)
 {
   int ret;
   VEC(breakpoint_p) *tp_vec = NULL;
@@ -1795,7 +1777,7 @@ stop_tracing (char *note)
 
 /* tstatus command */
 static void
-tstatus_command (char *args, int from_tty)
+tstatus_command (const char *args, int from_tty)
 {
   struct trace_status *ts = current_trace_status ();
   int status, ix;
@@ -2514,7 +2496,7 @@ tfind_outside_command (const char *args, int from_tty)
 
 /* info scope command: list the locals for a scope.  */
 static void
-info_scope_command (char *args_in, int from_tty)
+info_scope_command (const char *args_in, int from_tty)
 {
   struct symbol *sym;
   struct bound_minimal_symbol msym;
@@ -2865,7 +2847,7 @@ all_tracepoint_actions_and_cleanup (struct breakpoint *t)
 /* The tdump command.  */
 
 static void
-tdump_command (char *args, int from_tty)
+tdump_command (const char *args, int from_tty)
 {
   int stepping_frame = 0;
   struct bp_location *loc;
@@ -2913,28 +2895,28 @@ encode_source_string (int tpnum, ULONGEST addr,
    disconnects for some reason.  */
 
 static void
-set_disconnected_tracing (char *args, int from_tty,
+set_disconnected_tracing (const char *args, int from_tty,
 			  struct cmd_list_element *c)
 {
   target_set_disconnected_tracing (disconnected_tracing);
 }
 
 static void
-set_circular_trace_buffer (char *args, int from_tty,
+set_circular_trace_buffer (const char *args, int from_tty,
 			   struct cmd_list_element *c)
 {
   target_set_circular_trace_buffer (circular_trace_buffer);
 }
 
 static void
-set_trace_buffer_size (char *args, int from_tty,
+set_trace_buffer_size (const char *args, int from_tty,
 			   struct cmd_list_element *c)
 {
   target_set_trace_buffer_size (trace_buffer_size);
 }
 
 static void
-set_trace_user (char *args, int from_tty,
+set_trace_user (const char *args, int from_tty,
 		struct cmd_list_element *c)
 {
   int ret;
@@ -2946,7 +2928,7 @@ set_trace_user (char *args, int from_tty,
 }
 
 static void
-set_trace_notes (char *args, int from_tty,
+set_trace_notes (const char *args, int from_tty,
 		 struct cmd_list_element *c)
 {
   int ret;
@@ -2958,7 +2940,7 @@ set_trace_notes (char *args, int from_tty,
 }
 
 static void
-set_trace_stop_notes (char *args, int from_tty,
+set_trace_stop_notes (const char *args, int from_tty,
 		      struct cmd_list_element *c)
 {
   int ret;
@@ -3874,7 +3856,7 @@ print_one_static_tracepoint_marker (int count,
 }
 
 static void
-info_static_tracepoint_markers_command (char *arg, int from_tty)
+info_static_tracepoint_markers_command (const char *arg, int from_tty)
 {
   VEC(static_tracepoint_marker_p) *markers;
   struct cleanup *old_chain;

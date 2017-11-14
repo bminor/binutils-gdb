@@ -51,9 +51,7 @@ struct regcache_descr
      redundant information - if the PC is constructed from two
      registers then those registers and not the PC lives in the raw
      cache.  */
-  int nr_raw_registers;
   long sizeof_raw_registers;
-  long sizeof_raw_register_status;
 
   /* The cooked register space.  Each cooked register in the range
      [0..NR_RAW_REGISTERS) is direct-mapped onto the corresponding raw
@@ -63,7 +61,6 @@ struct regcache_descr
      gdbarch_pseudo_register_read and gdbarch_pseudo_register_write.  */
   int nr_cooked_registers;
   long sizeof_cooked_registers;
-  long sizeof_cooked_register_status;
 
   /* Offset and size (in 8 bit bytes), of each register in the
      register cache.  All registers (including those in the range
@@ -92,8 +89,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
      either mapped onto raw-registers or memory.  */
   descr->nr_cooked_registers = gdbarch_num_regs (gdbarch)
 			       + gdbarch_num_pseudo_regs (gdbarch);
-  descr->sizeof_cooked_register_status
-    = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   /* Fill in a table of register types.  */
   descr->register_type
@@ -104,8 +99,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
 
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
      into the register cache.  */
-  descr->nr_raw_registers = gdbarch_num_regs (gdbarch);
-  descr->sizeof_raw_register_status = gdbarch_num_regs (gdbarch);
 
   /* Lay out the register cache.
 
@@ -121,7 +114,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
       = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
     descr->register_offset
       = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
-    for (i = 0; i < descr->nr_raw_registers; i++)
+    for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
       {
 	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
 	descr->register_offset[i] = offset;
@@ -188,7 +181,7 @@ regcache_register_size (const struct regcache *regcache, int n)
   return register_size (regcache->arch (), n);
 }
 
-regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
+regcache::regcache (gdbarch *gdbarch, const address_space *aspace_,
 		    bool readonly_p_)
   : m_aspace (aspace_), m_readonly_p (readonly_p_)
 {
@@ -199,13 +192,12 @@ regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
     {
       m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_cooked_registers);
       m_register_status = XCNEWVEC (signed char,
-				    m_descr->sizeof_cooked_register_status);
+				    m_descr->nr_cooked_registers);
     }
   else
     {
       m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_raw_registers);
-      m_register_status = XCNEWVEC (signed char,
-				    m_descr->sizeof_raw_register_status);
+      m_register_status = XCNEWVEC (signed char, gdbarch_num_regs (gdbarch));
     }
   m_ptid = minus_one_ptid;
 }
@@ -219,7 +211,7 @@ do_cooked_read (void *src, int regnum, gdb_byte *buf)
 }
 
 regcache::regcache (readonly_t, const regcache &src)
-  : regcache (src.arch (), src.aspace (), true)
+  : regcache (src.arch (), nullptr, true)
 {
   gdb_assert (!src.m_readonly_p);
   save (do_cooked_read, (void *) &src);
@@ -272,12 +264,6 @@ private:
   int m_regnum;
 };
 
-struct address_space *
-get_regcache_aspace (const struct regcache *regcache)
-{
-  return regcache->aspace ();
-}
-
 /* Return  a pointer to register REGNUM's buffer cache.  */
 
 gdb_byte *
@@ -306,7 +292,7 @@ regcache::save (regcache_cooked_read_ftype *cooked_read,
   gdb_assert (m_readonly_p);
   /* Clear the dest.  */
   memset (m_registers, 0, m_descr->sizeof_cooked_registers);
-  memset (m_register_status, 0, m_descr->sizeof_cooked_register_status);
+  memset (m_register_status, 0, m_descr->nr_cooked_registers);
   /* Copy over any registers (identified by their membership in the
      save_reggroup) and mark them as valid.  The full [0 .. gdbarch_num_regs +
      gdbarch_num_pseudo_regs) range is checked since some architectures need
@@ -383,7 +369,7 @@ regcache::get_register_status (int regnum) const
   if (m_readonly_p)
     gdb_assert (regnum < m_descr->nr_cooked_registers);
   else
-    gdb_assert (regnum < m_descr->nr_raw_registers);
+    gdb_assert (regnum < num_raw_registers ());
 
   return (enum register_status) m_register_status[regnum];
 }
@@ -398,10 +384,15 @@ regcache_invalidate (struct regcache *regcache, int regnum)
 void
 regcache::invalidate (int regnum)
 {
-  gdb_assert (regnum >= 0);
   gdb_assert (!m_readonly_p);
-  gdb_assert (regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   m_register_status[regnum] = REG_UNKNOWN;
+}
+
+void
+regcache::assert_regnum (int regnum) const
+{
+  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (arch ()));
 }
 
 /* Global structure containing the current regcache.  */
@@ -551,7 +542,7 @@ regcache_raw_update (struct regcache *regcache, int regnum)
 void
 regcache::raw_update (int regnum)
 {
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
 
   /* Make certain that the register cache is up-to-date with respect
      to the current thread.  This switching shouldn't be necessary
@@ -605,7 +596,7 @@ regcache::raw_read (int regnum, T *val)
   gdb_byte *buf;
   enum register_status status;
 
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
   status = raw_read (regnum, buf);
   if (status == REG_VALID)
@@ -638,7 +629,7 @@ regcache::raw_write (int regnum, T val)
 {
   gdb_byte *buf;
 
-  gdb_assert (regnum >=0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
   store_integer (buf, m_descr->sizeof_register[regnum],
 		 gdbarch_byte_order (m_descr->gdbarch), val);
@@ -677,7 +668,7 @@ regcache::cooked_read (int regnum, gdb_byte *buf)
 {
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < m_descr->nr_cooked_registers);
-  if (regnum < m_descr->nr_raw_registers)
+  if (regnum < num_raw_registers ())
     return raw_read (regnum, buf);
   else if (m_readonly_p
 	   && m_register_status[regnum] != REG_UNKNOWN)
@@ -731,7 +722,7 @@ regcache::cooked_read_value (int regnum)
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < m_descr->nr_cooked_registers);
 
-  if (regnum < m_descr->nr_raw_registers
+  if (regnum < num_raw_registers ()
       || (m_readonly_p && m_register_status[regnum] != REG_UNKNOWN)
       || !gdbarch_pseudo_register_read_value_p (m_descr->gdbarch))
     {
@@ -849,7 +840,7 @@ regcache::raw_write (int regnum, const gdb_byte *buf)
 {
 
   gdb_assert (buf != NULL);
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   gdb_assert (!m_readonly_p);
 
   /* On the sparc, writing %g0 is a no-op, so we don't even want to
@@ -890,7 +881,7 @@ regcache::cooked_write (int regnum, const gdb_byte *buf)
 {
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < m_descr->nr_cooked_registers);
-  if (regnum < m_descr->nr_raw_registers)
+  if (regnum < num_raw_registers ())
     raw_write (regnum, buf);
   else
     gdbarch_pseudo_register_write (m_descr->gdbarch, this,
@@ -958,7 +949,7 @@ regcache_raw_read_part (struct regcache *regcache, int regnum,
 enum register_status
 regcache::raw_read_part (int regnum, int offset, int len, gdb_byte *buf)
 {
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   return xfer_part (regnum, offset, len, buf, NULL, true);
 }
 
@@ -973,7 +964,7 @@ void
 regcache::raw_write_part (int regnum, int offset, int len,
 			  const gdb_byte *buf)
 {
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   xfer_part (regnum, offset, len, NULL, buf, true);
 }
 
@@ -1022,7 +1013,7 @@ regcache::raw_supply (int regnum, const void *buf)
   void *regbuf;
   size_t size;
 
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   gdb_assert (!m_readonly_p);
 
   regbuf = register_buffer (regnum);
@@ -1057,7 +1048,7 @@ regcache::raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
   gdb_byte *regbuf;
   size_t regsize;
 
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   gdb_assert (!m_readonly_p);
 
   regbuf = register_buffer (regnum);
@@ -1078,7 +1069,7 @@ regcache::raw_supply_zeroed (int regnum)
   void *regbuf;
   size_t size;
 
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   gdb_assert (!m_readonly_p);
 
   regbuf = register_buffer (regnum);
@@ -1104,7 +1095,7 @@ regcache::raw_collect (int regnum, void *buf) const
   size_t size;
 
   gdb_assert (buf != NULL);
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
 
   regbuf = register_buffer (regnum);
   size = m_descr->sizeof_register[regnum];
@@ -1129,7 +1120,7 @@ regcache::raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
   const gdb_byte *regbuf;
   size_t regsize;
 
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
 
   regbuf = register_buffer (regnum);
   regsize = m_descr->sizeof_register[regnum];
@@ -1280,6 +1271,12 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
   reinit_frame_cache ();
 }
 
+int
+regcache::num_raw_registers () const
+{
+  return gdbarch_num_regs (arch ());
+}
+
 void
 regcache::debug_print_register (const char *func,  int regno)
 {
@@ -1316,7 +1313,7 @@ regcache::debug_print_register (const char *func,  int regno)
 }
 
 static void
-reg_flush_command (char *command, int from_tty)
+reg_flush_command (const char *command, int from_tty)
 {
   /* Force-flush the register cache.  */
   registers_changed ();
@@ -1334,21 +1331,6 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
   int footnote_register_offset = 0;
   int footnote_register_type_name_null = 0;
   long register_offset = 0;
-
-#if 0
-  fprintf_unfiltered (file, "nr_raw_registers %d\n",
-		      m_descr->nr_raw_registers);
-  fprintf_unfiltered (file, "nr_cooked_registers %d\n",
-		      m_descr->nr_cooked_registers);
-  fprintf_unfiltered (file, "sizeof_raw_registers %ld\n",
-		      m_descr->sizeof_raw_registers);
-  fprintf_unfiltered (file, "sizeof_raw_register_status %ld\n",
-		      m_descr->sizeof_raw_register_status);
-  fprintf_unfiltered (file, "gdbarch_num_regs %d\n", 
-		      gdbarch_num_regs (gdbarch));
-  fprintf_unfiltered (file, "gdbarch_num_pseudo_regs %d\n",
-		      gdbarch_num_pseudo_regs (gdbarch));
-#endif
 
   gdb_assert (m_descr->nr_cooked_registers
 	      == (gdbarch_num_regs (gdbarch)
@@ -1450,7 +1432,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	{
 	  if (regnum < 0)
 	    fprintf_unfiltered (file, "Raw value");
-	  else if (regnum >= m_descr->nr_raw_registers)
+	  else if (regnum >= num_raw_registers ())
 	    fprintf_unfiltered (file, "<cooked>");
 	  else if (get_register_status (regnum) == REG_UNKNOWN)
 	    fprintf_unfiltered (file, "<invalid>");
@@ -1476,7 +1458,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	      enum register_status status;
 	      struct value *value = NULL;
 
-	      if (regnum < m_descr->nr_raw_registers)
+	      if (regnum < num_raw_registers ())
 		{
 		  raw_update (regnum);
 		  status = get_register_status (regnum);
@@ -1544,7 +1526,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	    {
 	      fprintf_unfiltered (file, "Rmt Nr  g/G Offset");
 	    }
-	  else if (regnum < m_descr->nr_raw_registers)
+	  else if (regnum < num_raw_registers ())
 	    {
 	      int pnum, poffset;
 
@@ -1592,7 +1574,7 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
       /* For the benefit of "maint print registers" & co when
 	 debugging an executable, allow dumping a regcache even when
 	 there is no thread selected / no registers.  */
-      regcache dummy_regs (target_gdbarch (), nullptr);
+      regcache dummy_regs (target_gdbarch ());
       dummy_regs.dump (out, what_to_dump);
     }
 }

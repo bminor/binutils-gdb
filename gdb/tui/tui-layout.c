@@ -62,7 +62,7 @@ static void show_source_disasm_command (void);
 static void show_data (enum tui_layout_type);
 static enum tui_layout_type next_layout (void);
 static enum tui_layout_type prev_layout (void);
-static void tui_layout_command (char *, int);
+static void tui_layout_command (const char *, int);
 static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
 
 
@@ -492,12 +492,11 @@ extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 
 
 static void
-tui_layout_command (char *arg, int from_tty)
+tui_layout_command (const char *arg, int from_tty)
 {
   /* Switch to the selected layout.  */
   if (tui_set_layout_by_name (arg) != TUI_SUCCESS)
     warning (_("Invalid layout specified.\n%s"), LAYOUT_USAGE);
-
 }
 
 /* Answer the previous layout to cycle to.  */

@@ -1,3 +1,258 @@
+2017-11-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/note-3.t: Don't discard .got.
+
+2017-11-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-ifunc/ifunc.exp: Ensure non-PIC tests are really
+	not PIE by default gcc options.
+
+2017-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/ppc32elf.em (ppc_before_allocation): Replace
+	exp_dataseg_none with exp_seg_none.
+	* emultempl/ppc64elf.em (prelim_size_sections): Likewise.
+	* emultempl/spuelf.em (spu_before_allocation): Likewise.
+
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (lang_size_sections_1): Extract GNU_RELRO region check
+	into ...
+	(ldlang_check_relro_region): New function.
+	(lang_find_relro_sections_1): Add an argument for pointer to
+	seg_align_type and replace expld.dataseg with the pointer.
+	(lang_find_relro_sections): Pass address of expld.dataseg to
+	lang_find_relro_sections_1.
+
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (lang_size_segment): New function.
+	(lang_size_relro_segment_1): Likewise.
+	(lang_size_relro_segment): Likewise.
+	(lang_size_sections): Rewrite to call lang_size_relro_segment.
+
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldexp.c (fold_unary): Extract the DATA_SEGMENT_END case to ...
+	(fold_segment_end): New function.
+	(fold_binary): Extract the DATA_SEGMENT_ALIGN case to ...
+	(fold_segment_align): New function.
+	(fold_binary): Extract the DATA_SEGMENT_RELRO_END case to ...
+	(fold_segment_relro_end): New function.
+
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldexp.h (phase_enum): Rename exp_dataseg_none,
+	exp_dataseg_align_seen, exp_dataseg_relro_seen,
+	exp_dataseg_end_seen, exp_dataseg_relro_adjust,
+	exp_dataseg_adjust and exp_dataseg_done to exp_seg_none,
+	exp_seg_align_seen, exp_seg_relro_seen, exp_seg_end_seen,
+	exp_seg_relro_adjust, exp_seg_adjust and exp_seg_done.
+	(relro_enum): Rename exp_dataseg_relro_none,
+	exp_dataseg_relro_start and exp_dataseg_relro_end to
+	exp_seg_relro_none, exp_seg_relro_start and exp_seg_relro_end.
+	(seg_align_type): New struct type.
+	(ldexp_control): Use seg_align_type.
+	* ldexp.c (fold_unary): Updated.
+	(fold_binary): Likewise.
+	* ldlang.c (strip_excluded_output_sections): Likewise.
+	(lang_size_sections_1): Likewise.
+	(lang_size_sections): Likewise.
+
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22423
+	* testsuite/ld-alpha/tlsbin.rd: Replace "R E " with "R +" for
+	PT_PHDR segment.
+	* testsuite/ld-alpha/tlsbinr.rd: Likewise.
+	* testsuite/ld-ia64/tlsbin.rd: Likewise.
+	* testsuite/ld-powerpc/tlsexe.r: Likewise.
+	* testsuite/ld-powerpc/tlsexe32.r: Likewise.
+	* testsuite/ld-powerpc/tlsexetoc.r: Likewise.
+	* testsuite/ld-s390/tlsbin.rd: Likewise.
+	* testsuite/ld-s390/tlsbin_64.rd: Likewise.
+	* testsuite/ld-sparc/tlssunbin32.rd: Likewise.
+	* testsuite/ld-sparc/tlssunbin64.rd: Likewise.
+	* testsuite/ld-elf/pr22423.d: New test.
+
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf32_x86_64.sh (TINY_READONLY_SECTION): Renamed
+	to ...
+	(OTHER_PLT_SECTIONS): This.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_iamcu.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* scripttempl/elf.sc: Place ${OTHER_PLT_SECTIONS} just after
+	.plt.
+
+2017-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_get_script): Reformat
+	to generate consistent codes.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-aarch64/ifunc-13.d,
+	* testsuite/ld-aarch64/ifunc-15.d,
+	* testsuite/ld-aarch64/ifunc-20.d,
+	* testsuite/ld-alpha/tlsbin.rd,
+	* testsuite/ld-alpha/tlspic.rd,
+	* testsuite/ld-arm/ifunc-3.rd,
+	* testsuite/ld-arm/ifunc-9.rd,
+	* testsuite/ld-arm/unwind-mix.d,
+	* testsuite/ld-arm/unwind-rel.d,
+	* testsuite/ld-cris/hiddef1.d,
+	* testsuite/ld-cris/libdso-13.d,
+	* testsuite/ld-cris/libdso-2.d,
+	* testsuite/ld-cris/pr16044.d,
+	* testsuite/ld-cris/tls-local-63.d,
+	* testsuite/ld-cris/tls-local-64.d,
+	* testsuite/ld-cris/tls-und-38.d,
+	* testsuite/ld-cris/tls-und-42.d,
+	* testsuite/ld-cris/tls-und-46.d,
+	* testsuite/ld-cris/tls-und-50.d,
+	* testsuite/ld-cris/weakref3.d,
+	* testsuite/ld-cris/weakref4.d,
+	* testsuite/ld-elf/comm-data2r.rd,
+	* testsuite/ld-elf/discard1.d,
+	* testsuite/ld-elf/discard2.d,
+	* testsuite/ld-elf/pr19539.d,
+	* testsuite/ld-elf/pr22374-1.r,
+	* testsuite/ld-elf/pr22374-2.r,
+	* testsuite/ld-i386/combreloc.d,
+	* testsuite/ld-i386/emit-relocs-nacl.rd,
+	* testsuite/ld-i386/emit-relocs.rd,
+	* testsuite/ld-i386/pr13302.d,
+	* testsuite/ld-i386/pr17709-nacl.rd,
+	* testsuite/ld-i386/pr17709.rd,
+	* testsuite/ld-i386/pr19539.d,
+	* testsuite/ld-i386/pr19615.d,
+	* testsuite/ld-i386/pr19636-1a.d,
+	* testsuite/ld-i386/pr19636-1e.d,
+	* testsuite/ld-i386/pr19636-1f.d,
+	* testsuite/ld-i386/pr19636-2a.d,
+	* testsuite/ld-i386/pr19636-2b.d,
+	* testsuite/ld-i386/pr19636-2d-nacl.d,
+	* testsuite/ld-i386/pr19636-2e-nacl.d,
+	* testsuite/ld-i386/pr19636-3a.d,
+	* testsuite/ld-i386/pr19636-3d.d,
+	* testsuite/ld-i386/pr19636-3e.d,
+	* testsuite/ld-i386/pr19636-4a.d,
+	* testsuite/ld-i386/pr19645.d,
+	* testsuite/ld-i386/pr19827-nacl.rd,
+	* testsuite/ld-i386/pr19827.rd,
+	* testsuite/ld-i386/pr20253-4a.d,
+	* testsuite/ld-i386/pr20253-4b.d,
+	* testsuite/ld-i386/pr20253-5.d,
+	* testsuite/ld-i386/tlsbin-nacl.rd,
+	* testsuite/ld-i386/tlsbin.rd,
+	* testsuite/ld-i386/tlspic-nacl.rd,
+	* testsuite/ld-i386/tlspic.rd,
+	* testsuite/ld-i386/undefweakb.d,
+	* testsuite/ld-ia64/tlsbin.rd,
+	* testsuite/ld-ia64/tlspic.rd,
+	* testsuite/ld-ifunc/ifunc-13-i386.d,
+	* testsuite/ld-ifunc/ifunc-13-x86-64.d,
+	* testsuite/ld-ifunc/ifunc-15-i386.d,
+	* testsuite/ld-ifunc/ifunc-15-x86-64.d,
+	* testsuite/ld-ifunc/ifunc-20-i386.d,
+	* testsuite/ld-ifunc/ifunc-20-x86-64.d,
+	* testsuite/ld-ifunc/ifunc-23a-x86.d,
+	* testsuite/ld-ifunc/ifunc-23b-x86.d,
+	* testsuite/ld-ifunc/ifunc-23c-x86.d,
+	* testsuite/ld-ifunc/ifunc-24a-x86.d,
+	* testsuite/ld-ifunc/ifunc-24b-x86.d,
+	* testsuite/ld-ifunc/ifunc-24c-x86.d,
+	* testsuite/ld-ifunc/ifunc-25a-x86.d,
+	* testsuite/ld-ifunc/ifunc-25b-x86.d,
+	* testsuite/ld-ifunc/ifunc-25c-x86.d,
+	* testsuite/ld-m68k/got-1.d,
+	* testsuite/ld-mips-elf/vxworks1.rd,
+	* testsuite/ld-powerpc/ambiguousv1.d,
+	* testsuite/ld-powerpc/ambiguousv1b.d,
+	* testsuite/ld-powerpc/ambiguousv2.d,
+	* testsuite/ld-powerpc/ambiguousv2b.d,
+	* testsuite/ld-powerpc/tlsexe.r,
+	* testsuite/ld-powerpc/tlsexe32.r,
+	* testsuite/ld-powerpc/tlsexetoc.r,
+	* testsuite/ld-powerpc/tlsso.r,
+	* testsuite/ld-powerpc/tlsso32.r,
+	* testsuite/ld-powerpc/tlstocso.r,
+	* testsuite/ld-powerpc/vle-multiseg-1.d,
+	* testsuite/ld-powerpc/vle-multiseg-2.d,
+	* testsuite/ld-powerpc/vle-multiseg-3.d,
+	* testsuite/ld-s390/tlsbin.rd,
+	* testsuite/ld-s390/tlsbin_64.rd,
+	* testsuite/ld-s390/tlspic.rd,
+	* testsuite/ld-s390/tlspic_64.rd,
+	* testsuite/ld-sh/ld-r-1.d,
+	* testsuite/ld-sh/sh64/gotplt.d,
+	* testsuite/ld-sh/shared-1.d,
+	* testsuite/ld-sh/tlsbin-2.d,
+	* testsuite/ld-sh/tlspic-2.d,
+	* testsuite/ld-sparc/gotop32.rd,
+	* testsuite/ld-sparc/gotop64.rd,
+	* testsuite/ld-sparc/tlssunpic32.rd,
+	* testsuite/ld-sparc/tlssunpic64.rd,
+	* testsuite/ld-sparc/vxworks1-lib.rd,
+	* testsuite/ld-tic6x/shlib-app-1.rd,
+	* testsuite/ld-tic6x/shlib-app-1b.rd,
+	* testsuite/ld-tic6x/shlib-app-1r.rd,
+	* testsuite/ld-tic6x/shlib-app-1rb.rd,
+	* testsuite/ld-tic6x/shlib-noindex.rd,
+	* testsuite/ld-vax-elf/export-class-data.rd,
+	* testsuite/ld-x86-64/pr13082-1a.d,
+	* testsuite/ld-x86-64/pr13082-1b.d,
+	* testsuite/ld-x86-64/pr13082-2a.d,
+	* testsuite/ld-x86-64/pr13082-2b.d,
+	* testsuite/ld-x86-64/pr13082-3a.d,
+	* testsuite/ld-x86-64/pr13082-3c.d,
+	* testsuite/ld-x86-64/pr13082-4a.d,
+	* testsuite/ld-x86-64/pr13082-5a.d,
+	* testsuite/ld-x86-64/pr13082-5b.d,
+	* testsuite/ld-x86-64/pr13082-6a.d,
+	* testsuite/ld-x86-64/pr13082-6b.d,
+	* testsuite/ld-x86-64/pr17709-nacl.rd,
+	* testsuite/ld-x86-64/pr17709.rd,
+	* testsuite/ld-x86-64/pr19539a.d,
+	* testsuite/ld-x86-64/pr19539b.d,
+	* testsuite/ld-x86-64/pr19615.d,
+	* testsuite/ld-x86-64/pr19636-1a.d,
+	* testsuite/ld-x86-64/pr19636-1d.d,
+	* testsuite/ld-x86-64/pr19636-1e.d,
+	* testsuite/ld-x86-64/pr19636-2a.d,
+	* testsuite/ld-x86-64/pr19636-2e.d,
+	* testsuite/ld-x86-64/pr19636-2f.d,
+	* testsuite/ld-x86-64/pr19636-3a.d,
+	* testsuite/ld-x86-64/pr19645.d,
+	* testsuite/ld-x86-64/pr19807-2b.d,
+	* testsuite/ld-x86-64/pr19807-2d.d,
+	* testsuite/ld-x86-64/pr19827-nacl.rd,
+	* testsuite/ld-x86-64/pr19827.rd,
+	* testsuite/ld-x86-64/pr20253-4a.d,
+	* testsuite/ld-x86-64/pr20253-4b.d,
+	* testsuite/ld-x86-64/pr20253-4d.d,
+	* testsuite/ld-x86-64/pr20253-4e.d,
+	* testsuite/ld-x86-64/pr20253-5a.d,
+	* testsuite/ld-x86-64/pr20253-5b.d,
+	* testsuite/ld-x86-64/tlsbin-nacl.rd,
+	* testsuite/ld-x86-64/tlsbin.rd,
+	* testsuite/ld-x86-64/tlspic-nacl.rd,
+	* testsuite/ld-x86-64/tlspic.rd,
+	* testsuite/ld-x86-64/tlspic2-nacl.rd: Update for
+	pluralization fixes.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_size_sections_1): Properly pluralize messages.
+	(lang_check_section_addresses): Likewise.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* ld.h (textdomain, bindtextdomain): Use safer "do nothing".
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+
 2017-11-01  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/ambiguousv2.d: Remove FIXME.

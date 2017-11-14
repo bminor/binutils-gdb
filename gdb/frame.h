@@ -494,8 +494,10 @@ extern struct program_space *get_frame_program_space (struct frame_info *);
 /* Unwind THIS frame's program space from the NEXT frame.  */
 extern struct program_space *frame_unwind_program_space (struct frame_info *);
 
+class address_space;
+
 /* Return the frame's address space.  */
-extern struct address_space *get_frame_address_space (struct frame_info *);
+extern const address_space *get_frame_address_space (struct frame_info *);
 
 /* For frames where we can not unwind further, describe why.  */
 
@@ -784,11 +786,11 @@ extern void read_frame_arg (struct symbol *sym, struct frame_info *frame,
 extern void read_frame_local (struct symbol *sym, struct frame_info *frame,
 			      struct frame_arg *argp);
 
-extern void info_args_command (char *, int);
+extern void info_args_command (const char *, int);
 
-extern void info_locals_command (char *, int);
+extern void info_locals_command (const char *, int);
 
-extern void return_command (char *, int);
+extern void return_command (const char *, int);
 
 /* Set FRAME's unwinder temporarily, so that we can call a sniffer.
    If sniffing fails, the caller should be sure to call

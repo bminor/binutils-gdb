@@ -269,7 +269,7 @@ public:
 
   void finish ();
 
-  char **stringify ();
+  std::vector<std::string> stringify ();
 
   const std::vector<std::string> &wholly_collected ()
   { return m_wholly_collected; }
@@ -328,7 +328,8 @@ extern void encode_actions (struct bp_location *tloc,
 			    struct collection_list *stepping_list);
 
 extern void encode_actions_rsp (struct bp_location *tloc,
-				char ***tdp_actions, char ***stepping_actions);
+				std::vector<std::string> *tdp_actions,
+				std::vector<std::string> *stepping_actions);
 
 extern void validate_actionline (const char *, struct breakpoint *);
 extern void validate_trace_state_variable_name (const char *name);
@@ -369,8 +370,8 @@ extern void trace_reset_local_state (void);
 
 extern void check_trace_running (struct trace_status *);
 
-extern void start_tracing (char *notes);
-extern void stop_tracing (char *notes);
+extern void start_tracing (const char *notes);
+extern void stop_tracing (const char *notes);
 
 extern void trace_status_mi (int on_stop);
 

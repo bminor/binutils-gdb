@@ -81,9 +81,7 @@
 #include <algorithm>
 #include <unordered_set>
 #include <unordered_map>
-
-typedef struct symbol *symbolp;
-DEF_VEC_P (symbolp);
+#include "selftest.h"
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
@@ -182,6 +180,53 @@ DEF_VEC_I (offset_type);
     GDB_INDEX_CU_SET_VALUE((cu_index), (value)); \
   } while (0)
 
+#if WORDS_BIGENDIAN
+
+/* Convert VALUE between big- and little-endian.  */
+
+static offset_type
+byte_swap (offset_type value)
+{
+  offset_type result;
+
+  result = (value & 0xff) << 24;
+  result |= (value & 0xff00) << 8;
+  result |= (value & 0xff0000) >> 8;
+  result |= (value & 0xff000000) >> 24;
+  return result;
+}
+
+#define MAYBE_SWAP(V)  byte_swap (V)
+
+#else
+#define MAYBE_SWAP(V) static_cast<offset_type> (V)
+#endif /* WORDS_BIGENDIAN */
+
+/* An index into a (C++) symbol name component in a symbol name as
+   recorded in the mapped_index's symbol table.  For each C++ symbol
+   in the symbol table, we record one entry for the start of each
+   component in the symbol in a table of name components, and then
+   sort the table, in order to be able to binary search symbol names,
+   ignoring leading namespaces, both completion and regular look up.
+   For example, for symbol "A::B::C", we'll have an entry that points
+   to "A::B::C", another that points to "B::C", and another for "C".
+   Note that function symbols in GDB index have no parameter
+   information, just the function/method names.  You can convert a
+   name_component to a "const char *" using the
+   'mapped_index::symbol_name_at(offset_type)' method.  */
+
+struct name_component
+{
+  /* Offset in the symbol name where the component starts.  Stored as
+     a (32-bit) offset instead of a pointer to save memory and improve
+     locality on 64-bit architectures.  */
+  offset_type name_offset;
+
+  /* The symbol's index in the symbol and constant pool tables of a
+     mapped_index.  */
+  offset_type idx;
+};
+
 /* A description of the mapped index.  The file format is described in
    a comment by the code that writes the index.  */
 struct mapped_index
@@ -206,6 +251,15 @@ struct mapped_index
 
   /* A pointer to the constant pool.  */
   const char *constant_pool;
+
+  /* The name_component table (a sorted vector).  See name_component's
+     description above.  */
+  std::vector<name_component> name_components;
+
+  /* Convenience method to get at the name of the symbol at IDX in the
+     symbol table.  */
+  const char *symbol_name_at (offset_type idx) const
+  { return this->constant_pool + MAYBE_SWAP (this->symbol_table[idx]); }
 };
 
 typedef struct dwarf2_per_cu_data *dwarf2_per_cu_ptr;
@@ -2160,26 +2214,6 @@ line_header_eq_voidp (const void *item_lhs, const void *item_rhs)
 }
 
 
-#if WORDS_BIGENDIAN
-
-/* Convert VALUE between big- and little-endian.  */
-static offset_type
-byte_swap (offset_type value)
-{
-  offset_type result;
-
-  result = (value & 0xff) << 24;
-  result |= (value & 0xff00) << 8;
-  result |= (value & 0xff0000) >> 8;
-  result |= (value & 0xff000000) >> 24;
-  return result;
-}
-
-#define MAYBE_SWAP(V)  byte_swap (V)
-
-#else
-#define MAYBE_SWAP(V) static_cast<offset_type> (V)
-#endif /* WORDS_BIGENDIAN */
 
 /* Read the given attribute value as an address, taking the attribute's
    form into account.  */
@@ -3444,6 +3478,7 @@ dwarf2_read_index (struct objfile *objfile)
   create_addrmap_from_index (objfile, &local_map);
 
   map = XOBNEW (&objfile->objfile_obstack, struct mapped_index);
+  map = new (map) mapped_index ();
   *map = local_map;
 
   dwarf2_per_objfile->index_table = map;
@@ -3878,6 +3913,8 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 
   dw2_setup (objfile);
 
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+
   index = dwarf2_per_objfile->index_table;
 
   /* index is NULL if OBJF_READNOW.  */
@@ -3904,10 +3941,10 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	     information (but NAME might contain it).  */
 
 	  if (sym != NULL
-	      && SYMBOL_MATCHES_SEARCH_NAME (sym, name))
+	      && SYMBOL_MATCHES_SEARCH_NAME (sym, lookup_name))
 	    return stab;
 	  if (with_opaque != NULL
-	      && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, name))
+	      && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, lookup_name))
 	    stab_best = stab;
 
 	  /* Keep looking through other CUs.  */
@@ -4052,7 +4089,7 @@ dw2_map_matching_symbols (struct objfile *objfile,
 			  int global,
 			  int (*callback) (struct block *,
 					   struct symbol *, void *),
-			  void *data, symbol_compare_ftype *match,
+			  void *data, symbol_name_match_type match,
 			  symbol_compare_ftype *ordered_compare)
 {
   /* Currently unimplemented; used for Ada.  The function can be called if the
@@ -4060,24 +4097,666 @@ dw2_map_matching_symbols (struct objfile *objfile,
      does not look for non-Ada symbols this function should just return.  */
 }
 
+/* Symbol name matcher for .gdb_index names.
+
+   Symbol names in .gdb_index have a few particularities:
+
+   - There's no indication of which is the language of each symbol.
+
+     Since each language has its own symbol name matching algorithm,
+     and we don't know which language is the right one, we must match
+     each symbol against all languages.  This would be a potential
+     performance problem if it were not mitigated by the
+     mapped_index::name_components lookup table, which significantly
+     reduces the number of times we need to call into this matcher,
+     making it a non-issue.
+
+   - Symbol names in the index have no overload (parameter)
+     information.  I.e., in C++, "foo(int)" and "foo(long)" both
+     appear as "foo" in the index, for example.
+
+     This means that the lookup names passed to the symbol name
+     matcher functions must have no parameter information either
+     because (e.g.) symbol search name "foo" does not match
+     lookup-name "foo(int)" [while swapping search name for lookup
+     name would match].
+*/
+class gdb_index_symbol_name_matcher
+{
+public:
+  /* Prepares the vector of comparison functions for LOOKUP_NAME.  */
+  gdb_index_symbol_name_matcher (const lookup_name_info &lookup_name);
+
+  /* Walk all the matcher routines and match SYMBOL_NAME against them.
+     Returns true if any matcher matches.  */
+  bool matches (const char *symbol_name);
+
+private:
+  /* A reference to the lookup name we're matching against.  */
+  const lookup_name_info &m_lookup_name;
+
+  /* A vector holding all the different symbol name matchers, for all
+     languages.  */
+  std::vector<symbol_name_matcher_ftype *> m_symbol_name_matcher_funcs;
+};
+
+gdb_index_symbol_name_matcher::gdb_index_symbol_name_matcher
+  (const lookup_name_info &lookup_name)
+    : m_lookup_name (lookup_name)
+{
+  /* Prepare the vector of comparison functions upfront, to avoid
+     doing the same work for each symbol.  Care is taken to avoid
+     matching with the same matcher more than once if/when multiple
+     languages use the same matcher function.  */
+  auto &matchers = m_symbol_name_matcher_funcs;
+  matchers.reserve (nr_languages);
+
+  matchers.push_back (default_symbol_name_matcher);
+
+  for (int i = 0; i < nr_languages; i++)
+    {
+      const language_defn *lang = language_def ((enum language) i);
+      if (lang->la_get_symbol_name_matcher != NULL)
+	{
+	  symbol_name_matcher_ftype *name_matcher
+	    = lang->la_get_symbol_name_matcher (m_lookup_name);
+
+	  /* Don't insert the same comparison routine more than once.
+	     Note that we do this linear walk instead of a cheaper
+	     sorted insert, or use a std::set or something like that,
+	     because relative order of function addresses is not
+	     stable.  This is not a problem in practice because the
+	     number of supported languages is low, and the cost here
+	     is tiny compared to the number of searches we'll do
+	     afterwards using this object.  */
+	  if (std::find (matchers.begin (), matchers.end (), name_matcher)
+	      == matchers.end ())
+	    matchers.push_back (name_matcher);
+	}
+    }
+}
+
+bool
+gdb_index_symbol_name_matcher::matches (const char *symbol_name)
+{
+  for (auto matches_name : m_symbol_name_matcher_funcs)
+    if (matches_name (symbol_name, m_lookup_name, NULL))
+      return true;
+
+  return false;
+}
+
+/* Helper for dw2_expand_symtabs_matching that works with a
+   mapped_index instead of the containing objfile.  This is split to a
+   separate function in order to be able to unit test the
+   name_components matching using a mock mapped_index.  For each
+   symbol name that matches, calls MATCH_CALLBACK, passing it the
+   symbol's index in the mapped_index symbol table.  */
+
+static void
+dw2_expand_symtabs_matching_symbol
+  (mapped_index &index,
+   const lookup_name_info &lookup_name_in,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   enum search_domain kind,
+   gdb::function_view<void (offset_type)> match_callback)
+{
+  lookup_name_info lookup_name_without_params
+    = lookup_name_in.make_ignore_params ();
+  gdb_index_symbol_name_matcher lookup_name_matcher
+    (lookup_name_without_params);
+
+  auto *name_cmp = case_sensitivity == case_sensitive_on ? strcmp : strcasecmp;
+
+  /* Build the symbol name component sorted vector, if we haven't yet.
+     The code below only knows how to break apart components of C++
+     symbol names (and other languages that use '::' as
+     namespace/module separator).  If we add support for wild matching
+     to some language that uses some other operator (E.g., Ada, Go and
+     D use '.'), then we'll need to try splitting the symbol name
+     according to that language too.  Note that Ada does support wild
+     matching, but doesn't currently support .gdb_index.  */
+  if (index.name_components.empty ())
+    {
+      for (size_t iter = 0; iter < index.symbol_table_slots; ++iter)
+	{
+	  offset_type idx = 2 * iter;
+
+	  if (index.symbol_table[idx] == 0
+	      && index.symbol_table[idx + 1] == 0)
+	    continue;
+
+	  const char *name = index.symbol_name_at (idx);
+
+	  /* Add each name component to the name component table.  */
+	  unsigned int previous_len = 0;
+	  for (unsigned int current_len = cp_find_first_component (name);
+	       name[current_len] != '\0';
+	       current_len += cp_find_first_component (name + current_len))
+	    {
+	      gdb_assert (name[current_len] == ':');
+	      index.name_components.push_back ({previous_len, idx});
+	      /* Skip the '::'.  */
+	      current_len += 2;
+	      previous_len = current_len;
+	    }
+	  index.name_components.push_back ({previous_len, idx});
+	}
+
+      /* Sort name_components elements by name.  */
+      auto name_comp_compare = [&] (const name_component &left,
+				    const name_component &right)
+	{
+	  const char *left_qualified = index.symbol_name_at (left.idx);
+	  const char *right_qualified = index.symbol_name_at (right.idx);
+
+	  const char *left_name = left_qualified + left.name_offset;
+	  const char *right_name = right_qualified + right.name_offset;
+
+	  return name_cmp (left_name, right_name) < 0;
+	};
+
+      std::sort (index.name_components.begin (),
+		 index.name_components.end (),
+		 name_comp_compare);
+    }
+
+  const char *cplus
+    = lookup_name_without_params.cplus ().lookup_name ().c_str ();
+
+  /* Comparison function object for lower_bound that matches against a
+     given symbol name.  */
+  auto lookup_compare_lower = [&] (const name_component &elem,
+				   const char *name)
+    {
+      const char *elem_qualified = index.symbol_name_at (elem.idx);
+      const char *elem_name = elem_qualified + elem.name_offset;
+      return name_cmp (elem_name, name) < 0;
+    };
+
+  /* Comparison function object for upper_bound that matches against a
+     given symbol name.  */
+  auto lookup_compare_upper = [&] (const char *name,
+				   const name_component &elem)
+    {
+      const char *elem_qualified = index.symbol_name_at (elem.idx);
+      const char *elem_name = elem_qualified + elem.name_offset;
+      return name_cmp (name, elem_name) < 0;
+    };
+
+  auto begin = index.name_components.begin ();
+  auto end = index.name_components.end ();
+
+  /* Find the lower bound.  */
+  auto lower = [&] ()
+    {
+      if (lookup_name_in.completion_mode () && cplus[0] == '\0')
+	return begin;
+      else
+	return std::lower_bound (begin, end, cplus, lookup_compare_lower);
+    } ();
+
+  /* Find the upper bound.  */
+  auto upper = [&] ()
+    {
+      if (lookup_name_in.completion_mode ())
+	{
+	  /* The string frobbing below won't work if the string is
+	     empty.  We don't need it then, anyway -- if we're
+	     completing an empty string, then we want to iterate over
+	     the whole range.  */
+	  if (cplus[0] == '\0')
+	    return end;
+
+	  /* In completion mode, increment the last character because
+	     we want UPPER to point past all symbols names that have
+	     the same prefix.  */
+	  std::string after = cplus;
+
+	  gdb_assert (after.back () != 0xff);
+	  after.back ()++;
+
+	  return std::upper_bound (lower, end, after.c_str (),
+				   lookup_compare_upper);
+	}
+      else
+	return std::upper_bound (lower, end, cplus, lookup_compare_upper);
+    } ();
+
+  /* Now for each symbol name in range, check to see if we have a name
+     match, and if so, call the MATCH_CALLBACK callback.  */
+
+  /* The same symbol may appear more than once in the range though.
+     E.g., if we're looking for symbols that complete "w", and we have
+     a symbol named "w1::w2", we'll find the two name components for
+     that same symbol in the range.  To be sure we only call the
+     callback once per symbol, we first collect the symbol name
+     indexes that matched in a temporary vector and ignore
+     duplicates.  */
+  std::vector<offset_type> matches;
+  matches.reserve (std::distance (lower, upper));
+
+  for (;lower != upper; ++lower)
+    {
+      const char *qualified = index.symbol_name_at (lower->idx);
+
+      if (!lookup_name_matcher.matches (qualified)
+	  || (symbol_matcher != NULL && !symbol_matcher (qualified)))
+	continue;
+
+      matches.push_back (lower->idx);
+    }
+
+  std::sort (matches.begin (), matches.end ());
+
+  /* Finally call the callback, once per match.  */
+  ULONGEST prev = -1;
+  for (offset_type idx : matches)
+    {
+      if (prev != idx)
+	{
+	  match_callback (idx);
+	  prev = idx;
+	}
+    }
+
+  /* Above we use a type wider than idx's for 'prev', since 0 and
+     (offset_type)-1 are both possible values.  */
+  static_assert (sizeof (prev) > sizeof (offset_type), "");
+}
+
+#if GDB_SELF_TEST
+
+namespace selftests { namespace dw2_expand_symtabs_matching {
+
+/* A wrapper around mapped_index that builds a mock mapped_index, from
+   the symbol list passed as parameter to the constructor.  */
+class mock_mapped_index
+{
+public:
+  template<size_t N>
+  mock_mapped_index (const char *(&symbols)[N])
+    : mock_mapped_index (symbols, N)
+  {}
+
+  /* Access the built index.  */
+  mapped_index &index ()
+  { return m_index; }
+
+  /* Disable copy.  */
+  mock_mapped_index(const mock_mapped_index &) = delete;
+  void operator= (const mock_mapped_index &) = delete;
+
+private:
+  mock_mapped_index (const char **symbols, size_t symbols_size)
+  {
+    /* No string can live at offset zero.  Add a dummy entry.  */
+    obstack_grow_str0 (&m_constant_pool, "");
+
+    for (size_t i = 0; i < symbols_size; i++)
+      {
+	const char *sym = symbols[i];
+	size_t offset = obstack_object_size (&m_constant_pool);
+	obstack_grow_str0 (&m_constant_pool, sym);
+	m_symbol_table.push_back (offset);
+	m_symbol_table.push_back (0);
+      };
+
+    m_index.constant_pool = (const char *) obstack_base (&m_constant_pool);
+    m_index.symbol_table = m_symbol_table.data ();
+    m_index.symbol_table_slots = m_symbol_table.size () / 2;
+  }
+
+public:
+  /* The built mapped_index.  */
+  mapped_index m_index{};
+
+  /* The storage that the built mapped_index uses for symbol and
+     constant pool tables.  */
+  std::vector<offset_type> m_symbol_table;
+  auto_obstack m_constant_pool;
+};
+
+/* Convenience function that converts a NULL pointer to a "<null>"
+   string, to pass to print routines.  */
+
+static const char *
+string_or_null (const char *str)
+{
+  return str != NULL ? str : "<null>";
+}
+
+/* Check if a lookup_name_info built from
+   NAME/MATCH_TYPE/COMPLETION_MODE matches the symbols in the mock
+   index.  EXPECTED_LIST is the list of expected matches, in expected
+   matching order.  If no match expected, then an empty list is
+   specified.  Returns true on success.  On failure prints a warning
+   indicating the file:line that failed, and returns false.  */
+
+static bool
+check_match (const char *file, int line,
+	     mock_mapped_index &mock_index,
+	     const char *name, symbol_name_match_type match_type,
+	     bool completion_mode,
+	     std::initializer_list<const char *> expected_list)
+{
+  lookup_name_info lookup_name (name, match_type, completion_mode);
+
+  bool matched = true;
+
+  auto mismatch = [&] (const char *expected_str,
+		       const char *got)
+  {
+    warning (_("%s:%d: match_type=%s, looking-for=\"%s\", "
+	       "expected=\"%s\", got=\"%s\"\n"),
+	     file, line,
+	     (match_type == symbol_name_match_type::FULL
+	      ? "FULL" : "WILD"),
+	     name, string_or_null (expected_str), string_or_null (got));
+    matched = false;
+  };
+
+  auto expected_it = expected_list.begin ();
+  auto expected_end = expected_list.end ();
+
+  dw2_expand_symtabs_matching_symbol (mock_index.index (), lookup_name,
+				      NULL, ALL_DOMAIN,
+				      [&] (offset_type idx)
+  {
+    const char *matched_name = mock_index.index ().symbol_name_at (idx);
+    const char *expected_str
+      = expected_it == expected_end ? NULL : *expected_it++;
+
+    if (expected_str == NULL || strcmp (expected_str, matched_name) != 0)
+      mismatch (expected_str, matched_name);
+  });
+
+  const char *expected_str
+  = expected_it == expected_end ? NULL : *expected_it++;
+  if (expected_str != NULL)
+    mismatch (expected_str, NULL);
+
+  return matched;
+}
+
+/* The symbols added to the mock mapped_index for testing (in
+   canonical form).  */
+static const char *test_symbols[] = {
+  "function",
+  "std::bar",
+  "std::zfunction",
+  "std::zfunction2",
+  "w1::w2",
+  "ns::foo<char*>",
+  "ns::foo<int>",
+  "ns::foo<long>",
+
+  /* A name with all sorts of complications.  Starts with "z" to make
+     it easier for the completion tests below.  */
+#define Z_SYM_NAME \
+  "z::std::tuple<(anonymous namespace)::ui*, std::bar<(anonymous namespace)::ui> >" \
+    "::tuple<(anonymous namespace)::ui*, " \
+    "std::default_delete<(anonymous namespace)::ui>, void>"
+
+  Z_SYM_NAME
+};
+
+static void
+run_test ()
+{
+  mock_mapped_index mock_index (test_symbols);
+
+  /* We let all tests run until the end even if some fails, for debug
+     convenience.  */
+  bool any_mismatch = false;
+
+  /* Create the expected symbols list (an initializer_list).  Needed
+     because lists have commas, and we need to pass them to CHECK,
+     which is a macro.  */
+#define EXPECT(...) { __VA_ARGS__ }
+
+  /* Wrapper for check_match that passes down the current
+     __FILE__/__LINE__.  */
+#define CHECK_MATCH(NAME, MATCH_TYPE, COMPLETION_MODE, EXPECTED_LIST)	\
+  any_mismatch |= !check_match (__FILE__, __LINE__,			\
+				mock_index,				\
+				NAME, MATCH_TYPE, COMPLETION_MODE,	\
+				EXPECTED_LIST)
+
+  /* Identity checks.  */
+  for (const char *sym : test_symbols)
+    {
+      /* Should be able to match all existing symbols.  */
+      CHECK_MATCH (sym, symbol_name_match_type::FULL, false,
+		   EXPECT (sym));
+
+      /* Should be able to match all existing symbols with
+	 parameters.  */
+      std::string with_params = std::string (sym) + "(int)";
+      CHECK_MATCH (with_params.c_str (), symbol_name_match_type::FULL, false,
+		   EXPECT (sym));
+
+      /* Should be able to match all existing symbols with
+	 parameters and qualifiers.  */
+      with_params = std::string (sym) + " ( int ) const";
+      CHECK_MATCH (with_params.c_str (), symbol_name_match_type::FULL, false,
+		   EXPECT (sym));
+
+      /* This should really find sym, but cp-name-parser.y doesn't
+	 know about lvalue/rvalue qualifiers yet.  */
+      with_params = std::string (sym) + " ( int ) &&";
+      CHECK_MATCH (with_params.c_str (), symbol_name_match_type::FULL, false,
+		   {});
+    }
+
+  /* Check that completion mode works at each prefix of the expected
+     symbol name.  */
+  {
+    static const char str[] = "function(int)";
+    size_t len = strlen (str);
+    std::string lookup;
+
+    for (size_t i = 1; i < len; i++)
+      {
+	lookup.assign (str, i);
+	CHECK_MATCH (lookup.c_str (), symbol_name_match_type::FULL, true,
+		     EXPECT ("function"));
+      }
+  }
+
+  /* While "w" is a prefix of both components, the match function
+     should still only be called once.  */
+  {
+    CHECK_MATCH ("w", symbol_name_match_type::FULL, true,
+		 EXPECT ("w1::w2"));
+  }
+
+  /* Same, with a "complicated" symbol.  */
+  {
+    static const char str[] = Z_SYM_NAME;
+    size_t len = strlen (str);
+    std::string lookup;
+
+    for (size_t i = 1; i < len; i++)
+      {
+	lookup.assign (str, i);
+	CHECK_MATCH (lookup.c_str (), symbol_name_match_type::FULL, true,
+		     EXPECT (Z_SYM_NAME));
+      }
+  }
+
+  /* In FULL mode, an incomplete symbol doesn't match.  */
+  {
+    CHECK_MATCH ("std::zfunction(int", symbol_name_match_type::FULL, false,
+		 {});
+  }
+
+  /* A complete symbol with parameters matches any overload, since the
+     index has no overload info.  */
+  {
+    CHECK_MATCH ("std::zfunction(int)", symbol_name_match_type::FULL, true,
+		 EXPECT ("std::zfunction", "std::zfunction2"));
+  }
+
+  /* Check that whitespace is ignored appropriately.  A symbol with a
+     template argument list. */
+  {
+    static const char expected[] = "ns::foo<int>";
+    CHECK_MATCH ("ns :: foo < int > ", symbol_name_match_type::FULL, false,
+		 EXPECT (expected));
+  }
+
+  /* Check that whitespace is ignored appropriately.  A symbol with a
+     template argument list that includes a pointer.  */
+  {
+    static const char expected[] = "ns::foo<char*>";
+    /* Try both completion and non-completion modes.  */
+    static const bool completion_mode[2] = {false, true};
+    for (size_t i = 0; i < 2; i++)
+      {
+	CHECK_MATCH ("ns :: foo < char * >", symbol_name_match_type::FULL,
+		     completion_mode[i], EXPECT (expected));
+
+	CHECK_MATCH ("ns :: foo < char * > (int)", symbol_name_match_type::FULL,
+		     completion_mode[i], EXPECT (expected));
+      }
+  }
+
+  {
+    /* Check method qualifiers are ignored.  */
+    static const char expected[] = "ns::foo<char*>";
+    CHECK_MATCH ("ns :: foo < char * >  ( int ) const",
+		 symbol_name_match_type::FULL, true, EXPECT (expected));
+    CHECK_MATCH ("ns :: foo < char * >  ( int ) &&",
+		 symbol_name_match_type::FULL, true, EXPECT (expected));
+  }
+
+  /* Test lookup names that don't match anything.  */
+  {
+    CHECK_MATCH ("doesntexist", symbol_name_match_type::FULL, false,
+		 {});
+  }
+
+  SELF_CHECK (!any_mismatch);
+
+#undef EXPECT
+#undef CHECK_MATCH
+}
+
+}} // namespace selftests::dw2_expand_symtabs_matching
+
+#endif /* GDB_SELF_TEST */
+
+/* Helper for dw2_expand_matching symtabs.  Called on each symbol
+   matched, to expand corresponding CUs that were marked.  IDX is the
+   index of the symbol name that matched.  */
+
+static void
+dw2_expand_marked_cus
+  (mapped_index &index, offset_type idx,
+   struct objfile *objfile,
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   search_domain kind)
+{
+  const char *name;
+  offset_type *vec, vec_len, vec_idx;
+  bool global_seen = false;
+
+  vec = (offset_type *) (index.constant_pool
+			 + MAYBE_SWAP (index.symbol_table[idx + 1]));
+  vec_len = MAYBE_SWAP (vec[0]);
+  for (vec_idx = 0; vec_idx < vec_len; ++vec_idx)
+    {
+      struct dwarf2_per_cu_data *per_cu;
+      offset_type cu_index_and_attrs = MAYBE_SWAP (vec[vec_idx + 1]);
+      /* This value is only valid for index versions >= 7.  */
+      int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
+      gdb_index_symbol_kind symbol_kind =
+	GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
+      int cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
+      /* Only check the symbol attributes if they're present.
+	 Indices prior to version 7 don't record them,
+	 and indices >= 7 may elide them for certain symbols
+	 (gold does this).  */
+      int attrs_valid =
+	(index.version >= 7
+	 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
+
+      /* Work around gold/15646.  */
+      if (attrs_valid)
+	{
+	  if (!is_static && global_seen)
+	    continue;
+	  if (!is_static)
+	    global_seen = true;
+	}
+
+      /* Only check the symbol's kind if it has one.  */
+      if (attrs_valid)
+	{
+	  switch (kind)
+	    {
+	    case VARIABLES_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_VARIABLE)
+		continue;
+	      break;
+	    case FUNCTIONS_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_FUNCTION)
+		continue;
+	      break;
+	    case TYPES_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
+		continue;
+	      break;
+	    default:
+	      break;
+	    }
+	}
+
+      /* Don't crash on bad data.  */
+      if (cu_index >= (dwarf2_per_objfile->n_comp_units
+		       + dwarf2_per_objfile->n_type_units))
+	{
+	  complaint (&symfile_complaints,
+		     _(".gdb_index entry has bad CU index"
+		       " [in module %s]"), objfile_name (objfile));
+	  continue;
+	}
+
+      per_cu = dw2_get_cutu (cu_index);
+      if (file_matcher == NULL || per_cu->v.quick->mark)
+	{
+	  int symtab_was_null =
+	    (per_cu->v.quick->compunit_symtab == NULL);
+
+	  dw2_instantiate_symtab (per_cu);
+
+	  if (expansion_notify != NULL
+	      && symtab_was_null
+	      && per_cu->v.quick->compunit_symtab != NULL)
+	    expansion_notify (per_cu->v.quick->compunit_symtab);
+	}
+    }
+}
+
 static void
 dw2_expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind)
 {
   int i;
   offset_type iter;
-  struct mapped_index *index;
 
   dw2_setup (objfile);
 
   /* index_table is NULL if OBJF_READNOW.  */
   if (!dwarf2_per_objfile->index_table)
     return;
-  index = dwarf2_per_objfile->index_table;
 
   if (file_matcher != NULL)
     {
@@ -4151,103 +4830,15 @@ dw2_expand_symtabs_matching
 	}
     }
 
-  for (iter = 0; iter < index->symbol_table_slots; ++iter)
+  mapped_index &index = *dwarf2_per_objfile->index_table;
+
+  dw2_expand_symtabs_matching_symbol (index, lookup_name,
+				      symbol_matcher,
+				      kind, [&] (offset_type idx)
     {
-      offset_type idx = 2 * iter;
-      const char *name;
-      offset_type *vec, vec_len, vec_idx;
-      int global_seen = 0;
-
-      QUIT;
-
-      if (index->symbol_table[idx] == 0 && index->symbol_table[idx + 1] == 0)
-	continue;
-
-      name = index->constant_pool + MAYBE_SWAP (index->symbol_table[idx]);
-
-      if (!symbol_matcher (name))
-	continue;
-
-      /* The name was matched, now expand corresponding CUs that were
-	 marked.  */
-      vec = (offset_type *) (index->constant_pool
-			     + MAYBE_SWAP (index->symbol_table[idx + 1]));
-      vec_len = MAYBE_SWAP (vec[0]);
-      for (vec_idx = 0; vec_idx < vec_len; ++vec_idx)
-	{
-	  struct dwarf2_per_cu_data *per_cu;
-	  offset_type cu_index_and_attrs = MAYBE_SWAP (vec[vec_idx + 1]);
-	  /* This value is only valid for index versions >= 7.  */
-	  int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
-	  gdb_index_symbol_kind symbol_kind =
-	    GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
-	  int cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
-	  /* Only check the symbol attributes if they're present.
-	     Indices prior to version 7 don't record them,
-	     and indices >= 7 may elide them for certain symbols
-	     (gold does this).  */
-	  int attrs_valid =
-	    (index->version >= 7
-	     && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
-
-	  /* Work around gold/15646.  */
-	  if (attrs_valid)
-	    {
-	      if (!is_static && global_seen)
-		continue;
-	      if (!is_static)
-		global_seen = 1;
-	    }
-
-	  /* Only check the symbol's kind if it has one.  */
-	  if (attrs_valid)
-	    {
-	      switch (kind)
-		{
-		case VARIABLES_DOMAIN:
-		  if (symbol_kind != GDB_INDEX_SYMBOL_KIND_VARIABLE)
-		    continue;
-		  break;
-		case FUNCTIONS_DOMAIN:
-		  if (symbol_kind != GDB_INDEX_SYMBOL_KIND_FUNCTION)
-		    continue;
-		  break;
-		case TYPES_DOMAIN:
-		  if (symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
-		    continue;
-		  break;
-		default:
-		  break;
-		}
-	    }
-
-	  /* Don't crash on bad data.  */
-	  if (cu_index >= (dwarf2_per_objfile->n_comp_units
-			   + dwarf2_per_objfile->n_type_units))
-	    {
-	      complaint (&symfile_complaints,
-			 _(".gdb_index entry has bad CU index"
-			   " [in module %s]"), objfile_name (objfile));
-	      continue;
-	    }
-
-	  per_cu = dw2_get_cutu (cu_index);
-	  if (file_matcher == NULL || per_cu->v.quick->mark)
-	    {
-	      int symtab_was_null =
-		(per_cu->v.quick->compunit_symtab == NULL);
-
-	      dw2_instantiate_symtab (per_cu);
-
-	      if (expansion_notify != NULL
-		  && symtab_was_null
-		  && per_cu->v.quick->compunit_symtab != NULL)
-		{
-		  expansion_notify (per_cu->v.quick->compunit_symtab);
-		}
-	    }
-	}
-    }
+      dw2_expand_marked_cus (index, idx, objfile, file_matcher,
+			     expansion_notify, kind);
+    });
 }
 
 /* A helper for dw2_find_pc_sect_compunit_symtab which finds the most specific
@@ -8317,7 +8908,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   CORE_ADDR lowpc, highpc;
   struct compunit_symtab *cust;
-  struct cleanup *back_to, *delayed_list_cleanup;
+  struct cleanup *delayed_list_cleanup;
   CORE_ADDR baseaddr;
   struct block *static_block;
   CORE_ADDR addr;
@@ -8325,7 +8916,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
   buildsym_init ();
-  back_to = make_cleanup (really_free_pendings, NULL);
+  scoped_free_pendings free_pending;
   delayed_list_cleanup = make_cleanup (free_delayed_list, cu);
 
   cu->list_in_scope = &file_symbols;
@@ -8407,8 +8998,6 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
 
   /* Push it for inclusion processing later.  */
   VEC_safe_push (dwarf2_per_cu_ptr, dwarf2_per_objfile->just_read_cus, per_cu);
-
-  do_cleanups (back_to);
 }
 
 /* Generate full symbol information for type unit PER_CU, whose DIEs have
@@ -8421,14 +9010,14 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
   struct dwarf2_cu *cu = per_cu->cu;
   struct objfile *objfile = per_cu->objfile;
   struct compunit_symtab *cust;
-  struct cleanup *back_to, *delayed_list_cleanup;
+  struct cleanup *delayed_list_cleanup;
   struct signatured_type *sig_type;
 
   gdb_assert (per_cu->is_debug_types);
   sig_type = (struct signatured_type *) per_cu;
 
   buildsym_init ();
-  back_to = make_cleanup (really_free_pendings, NULL);
+  scoped_free_pendings free_pending;
   delayed_list_cleanup = make_cleanup (free_delayed_list, cu);
 
   cu->list_in_scope = &file_symbols;
@@ -8483,8 +9072,6 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
       pst->compunit_symtab = cust;
       pst->readin = 1;
     }
-
-  do_cleanups (back_to);
 }
 
 /* Process an imported unit DIE.  */
@@ -11614,7 +12201,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   CORE_ADDR baseaddr;
   struct block *block;
   int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
-  VEC (symbolp) *template_args = NULL;
+  std::vector<struct symbol *> template_args;
   struct template_symbol *templ_func = NULL;
 
   if (inlined_func)
@@ -11707,7 +12294,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      struct symbol *arg = new_symbol (child_die, NULL, cu);
 
 	      if (arg != NULL)
-		VEC_safe_push (symbolp, template_args, arg);
+		template_args.push_back (arg);
 	    }
 	  else
 	    process_die (child_die, cu);
@@ -11762,18 +12349,17 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   gdbarch_make_symbol_special (gdbarch, newobj->name, objfile);
 
   /* Attach template arguments to function.  */
-  if (! VEC_empty (symbolp, template_args))
+  if (!template_args.empty ())
     {
       gdb_assert (templ_func != NULL);
 
-      templ_func->n_template_arguments = VEC_length (symbolp, template_args);
+      templ_func->n_template_arguments = template_args.size ();
       templ_func->template_arguments
         = XOBNEWVEC (&objfile->objfile_obstack, struct symbol *,
 		     templ_func->n_template_arguments);
       memcpy (templ_func->template_arguments,
-	      VEC_address (symbolp, template_args),
+	      template_args.data (),
 	      (templ_func->n_template_arguments * sizeof (struct symbol *)));
-      VEC_free (symbolp, template_args);
     }
 
   /* In C++, we can have functions nested inside functions (e.g., when
@@ -13724,7 +14310,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (die->child != NULL && ! die_is_declaration (die, cu))
     {
       struct field_info fi;
-      VEC (symbolp) *template_args = NULL;
+      std::vector<struct symbol *> template_args;
       struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
       memset (&fi, 0, sizeof (struct field_info));
@@ -13769,27 +14355,25 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      struct symbol *arg = new_symbol (child_die, NULL, cu);
 
 	      if (arg != NULL)
-		VEC_safe_push (symbolp, template_args, arg);
+		template_args.push_back (arg);
 	    }
 
 	  child_die = sibling_die (child_die);
 	}
 
       /* Attach template arguments to type.  */
-      if (! VEC_empty (symbolp, template_args))
+      if (!template_args.empty ())
 	{
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
-	  TYPE_N_TEMPLATE_ARGUMENTS (type)
-	    = VEC_length (symbolp, template_args);
+	  TYPE_N_TEMPLATE_ARGUMENTS (type) = template_args.size ();
 	  TYPE_TEMPLATE_ARGUMENTS (type)
 	    = XOBNEWVEC (&objfile->objfile_obstack,
 			 struct symbol *,
 			 TYPE_N_TEMPLATE_ARGUMENTS (type));
 	  memcpy (TYPE_TEMPLATE_ARGUMENTS (type),
-		  VEC_address (symbolp, template_args),
+		  template_args.data (),
 		  (TYPE_N_TEMPLATE_ARGUMENTS (type)
 		   * sizeof (struct symbol *)));
-	  VEC_free (symbolp, template_args);
 	}
 
       /* Attach fields and member functions to the type.  */
@@ -18930,7 +19514,7 @@ dwarf2_start_symtab (struct dwarf2_cu *cu,
 		     const char *name, const char *comp_dir, CORE_ADDR low_pc)
 {
   struct compunit_symtab *cust
-    = start_symtab (cu->objfile, name, comp_dir, low_pc);
+    = start_symtab (cu->objfile, name, comp_dir, low_pc, cu->language);
 
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);
@@ -23275,6 +23859,9 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 
   if (data->dwz_file && data->dwz_file->dwz_bfd)
     gdb_bfd_unref (data->dwz_file->dwz_bfd);
+
+  if (data->index_table != NULL)
+    data->index_table->~mapped_index ();
 }
 
 
@@ -24146,4 +24733,9 @@ Usage: save gdb-index DIRECTORY"),
 					&dwarf2_block_frame_base_locexpr_funcs);
   dwarf2_loclist_block_index = register_symbol_block_impl (LOC_BLOCK,
 					&dwarf2_block_frame_base_loclist_funcs);
+
+#if GDB_SELF_TEST
+  selftests::register_test ("dw2_expand_symtabs_matching",
+			    selftests::dw2_expand_symtabs_matching::run_test);
+#endif
 }

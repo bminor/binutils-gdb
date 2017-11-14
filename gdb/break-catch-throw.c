@@ -430,11 +430,10 @@ extract_exception_regexp (const char **string)
 
 static void
 catch_exception_command_1 (enum exception_event_kind ex_event,
-			   char *arg_entry,
+			   const char *arg,
 			   int tempflag, int from_tty)
 {
   const char *cond_string = NULL;
-  const char *arg = arg_entry;
 
   if (!arg)
     arg = "";
@@ -459,7 +458,8 @@ catch_exception_command_1 (enum exception_event_kind ex_event,
 /* Implementation of "catch catch" command.  */
 
 static void
-catch_catch_command (char *arg, int from_tty, struct cmd_list_element *command)
+catch_catch_command (const char *arg, int from_tty,
+		     struct cmd_list_element *command)
 {
   int tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
@@ -469,7 +469,8 @@ catch_catch_command (char *arg, int from_tty, struct cmd_list_element *command)
 /* Implementation of "catch throw" command.  */
 
 static void
-catch_throw_command (char *arg, int from_tty, struct cmd_list_element *command)
+catch_throw_command (const char *arg, int from_tty,
+		     struct cmd_list_element *command)
 {
   int tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
@@ -479,7 +480,7 @@ catch_throw_command (char *arg, int from_tty, struct cmd_list_element *command)
 /* Implementation of "catch rethrow" command.  */
 
 static void
-catch_rethrow_command (char *arg, int from_tty,
+catch_rethrow_command (const char *arg, int from_tty,
 		       struct cmd_list_element *command)
 {
   int tempflag = get_cmd_context (command) == CATCH_TEMPORARY;

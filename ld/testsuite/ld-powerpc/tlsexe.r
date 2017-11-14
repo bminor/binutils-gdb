@@ -34,7 +34,7 @@ There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
  +Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
- +PHDR +0x0+40 0x0+10000040 0x0+10000040 0x0+150 0x0+150 R E 0x8
+ +PHDR +0x0+40 0x0+10000040 0x0+10000040 0x0+150 0x0+150 R +0x8
  +INTERP +0x0+190 0x0+10000190 0x0+10000190 0x0+11 0x0+11 R +0x1
  +\[Requesting program interpreter: .*\]
  +LOAD .* R E 0x10000
@@ -56,7 +56,7 @@ Relocation section '\.rela\.dyn' at offset .* contains 2 entries:
 [0-9a-f ]+R_PPC64_TPREL64 +0+ gd \+ 0
 [0-9a-f ]+R_PPC64_DTPMOD64 +0+ ld \+ 0
 
-Relocation section '\.rela\.plt' at offset .* contains 1 entries:
+Relocation section '\.rela\.plt' at offset .* contains 1 entry:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f ]+R_PPC64_JMP_SLOT +0+ __tls_get_addr_opt \+ 0
 

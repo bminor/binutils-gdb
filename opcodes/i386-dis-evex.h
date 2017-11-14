@@ -3957,13 +3957,13 @@ static const struct dis386 evex_table[][256] = {
   },
   /* EVEX_W_0F3A3E_P_2 */
   {
-    { "vpcmpub",	{ XMask, Vex, EXx, Ib }, 0 },
-    { "vpcmpuw",	{ XMask, Vex, EXx, Ib }, 0 },
+    { "vpcmpub",	{ XMask, Vex, EXx, VPCMP }, 0 },
+    { "vpcmpuw",	{ XMask, Vex, EXx, VPCMP }, 0 },
   },
   /* EVEX_W_0F3A3F_P_2 */
   {
-    { "vpcmpb",	{ XMask, Vex, EXx, Ib }, 0 },
-    { "vpcmpw",	{ XMask, Vex, EXx, Ib }, 0 },
+    { "vpcmpb",	{ XMask, Vex, EXx, VPCMP }, 0 },
+    { "vpcmpw",	{ XMask, Vex, EXx, VPCMP }, 0 },
   },
   /* EVEX_W_0F3A42_P_2 */
   {

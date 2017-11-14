@@ -1,3 +1,150 @@
+2017-11-14  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (VPCOM_Fixup, VPCOM, xop_cmp_op): New.
+	(vex_len_table): Use VPCOM.
+
+2017-11-14  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis-evex.h (evex_table[EVEX_W_0F3A3E_P_2]): Use VPCMP.
+	(evex_table[EVEX_W_0F3A3F_P_2]): Likewise.
+	* i386-opc.tbl (vpcmpeqb, vpcmpgtb, vpcmpeqw, vpcmpgtw, vpcmpuw,
+	vpcmpw): Move up.
+	(vpcmpeqb, vpcmpleb, vpcmpltb, vpcmpneqb, vpcmpnleb, vpcmpnltb,
+	vpcmpequb, vpcmpleub, vpcmpltub, vpcmpnequb, vpcmpnleub,
+	vpcmpnltub, vpcmpeqw, vpcmplew, vpcmpltw, vpcmpneqw, vpcmpnlew,
+	vpcmpnltw, vpcmpequw, vpcmpleuw, vpcmpltuw, vpcmpnequw, vpcmpnleuw,
+	vpcmpnltuw): New.
+	* i386-tbl.h: Re-generate.
+
+2017-11-14  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (cmps, ins, lods, movs, outs, scas, scmp, slod,
+	smov, ssca, stos, ssto, xlat): Drop Disp*.
+	* i386-tbl.h: Re-generate.
+
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (fxsave64, fxrstor64, xsave64, xrstor64,
+	xsaveopt64): Add No_qSuf.
+	* i386-tbl.h: Re-generate.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs): Add ARMv8.4-a registers;
+	dit, vstcr_el2, vsttbr_el2, cnthvs_tval_el2, cnthvs_cval_el2,
+	cnthvs_ctl_el2, cnthps_tval_el2, cnthps_cval_el2, cnthps_ctl_el2,
+	sder32_el2, vncr_el2.
+	(aarch64_sys_reg_supported_p): Likewise.
+	(aarch64_pstatefields): Add dit register.
+	(aarch64_pstatefield_supported_p): Likewise.
+	(aarch64_sys_regs_tlbi): Add vmalle1os, vae1os, aside1os, vaae1os,
+	vale1os, vaale1os, ipas2e1os, ipas2le1os, vae2os, vale2os, vmalls12e1os,
+	vae3os, vale3os, alle2os, alle1os, alle3os, rvae1, rvaae1, rvale1,
+	rvaale1, rvae1is, rvaae1is, rvale1is, rvaale1is, rvae1os, rvaae1os,
+	rvale1os, rvaale1os, ripas2e1is, ripas2le1is, ripas2e1, ripas2le1,
+	ripas2e1os, ripas2le1os, rvae2, rvale2, rvae2is, rvale2is, rvae2os,
+	rvale2os, rvae3, rvale3, rvae3is, rvale3is, rvae3os, rvale3os.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-tbl.h (QL_SHA512UPT, QL_V2SAME2D, QL_V3SAME2D): New.
+	(QL_V4SAME16B, QL_V4SAME4S, QL_XAR, QL_SM3TT, QL_V3FML2S): New.
+	(QL_V3FML4S, QL_V2FML2S, QL_V2FML4S, QL_RMIF, QL_SETF): New.
+	(QL_STLW, QL_STLX): New.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-asm.h (ins_addr_offset): New.
+	* aarch64-asm.c (aarch64_ins_reglane): Add cryptosm3.
+	(aarch64_ins_addr_offset): New.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_addr_offset): New.
+	* aarch64-dis.c (aarch64_ext_reglane): Add cryptosm3.
+	(aarch64_ext_addr_offset): New.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc.h (aarch64_field_kind): Add FLD_imm6_2,
+	FLD_imm4_2 and FLD_SM3_imm2.
+	* aarch64-opc.c (fields): Add FLD_imm6_2,
+	FLD_imm4_2 and FLD_SM3_imm2.
+	(operand_general_constraint_met_p): Add AARCH64_OPND_ADDR_OFFSET.
+	(aarch64_print_operand): Add AARCH64_OPND_Va, AARCH64_OPND_SM3_IMM2,
+	AARCH64_OPND_MASK, AARCH64_OPND_IMM_2 and AARCH64_OPND_ADDR_OFFSET.
+	* aarch64-opc-2.c (Va, MASK, IMM_2, ADDR_OFFSET, SM3_IMM2): New.
+	* aarch64-tbl.h
+	(aarch64_opcode_table): Add Va, MASK, IMM_2, ADDR_OFFSET, SM3_IMM2.
+
+2017-11-09 Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-tbl.h
+	(aarch64_feature_v8_4, aarch64_feature_crypto_v8_2): New.
+	(aarch64_feature_sm4, aarch64_feature_sha3): New.
+	(aarch64_feature_fp_16_v8_2): New.
+	(ARMV8_4, SHA3, SM4, CRYPTO_V8_2, FP_F16_V8_2): New.
+	(V8_4_INSN, CRYPTO_V8_2_INSN): New.
+	(SHA3_INSN, SM4_INSN, FP16_V8_2_INSN): New.
+
+2017-11-08  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_crypto): Add AES and SHA2.
+	(aarch64_feature_sha2, aarch64_feature_aes): New.
+	(SHA2, AES): New.
+	(AES_INSN, SHA2_INSN): New.
+	(pmull, pmull2, aese, aesd, aesmc, aesimc): Change to AES_INS.
+	(sha1h, sha1su1, sha256su0, sha1c, sha1p,
+	 sha1m, sha1su0, sha256h, sha256h2, sha256su1):
+	Change to SHA2_INS.
+
+2017-11-08  Jiong Wang  <jiong.wang@arm.com>
+	    Tamar Christina <tamar.christina@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): New entries for ARMv8.2-A new
+	FP16 instructions, including vfmal.f16 and vfmsl.f16.
+
+2017-11-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-nps400-tbl.h: Change incorrect use of NONE to MISC.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* opintl.h: Formatting, comment fixes.
+	(gettext, ngettext): Redefine when ENABLE_NLS.
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+	(_): Define using gettext.
+	(textdomain, bindtextdomain): Use safer "do nothing".
+
+2017-11-03  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (print_hex): New variable.
+	(parse_option): Check for hex option.
+	(print_insn_arc): Use hexadecimal representation for short
+	immediate values when requested.
+	(print_arc_disassembler_options): Add hex option to the list.
+
+2017-11-03  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-tbl.h (abss, abssh, adc, adcs, adds, aslacc, asls, aslsacc)
+	(asrs, asrsr, cbflyhf0r, cbflyhf1r, cmacchfr, cmacchnfr, cmachfr)
+	(cmachnfr, cmpychfr, cmpychnfr, cmpyhfmr, cmpyhfr, cmpyhnfr, divf)
+	(dmachbl, dmachbm, dmachf, dmachfr, dmacwhf, dmpyhbl, dmpyhbm)
+	(dmpyhf, dmpyhfr, dmpyhwf, dmpywhf, dsync, flagacc, getacc, macdf)
+	(macf, macfr, macwhfl, macwhflr, macwhfm, macwhfmr, macwhkl)
+	(macwhkul, macwhl, macwhul, mpydf, mpyf, mpyfr, mpywhfl, mpywhflr)
+	(mpywhfm, mpywhfmr, mpywhkl, mpywhkul, mpywhl, mpywhul, msubdf)
+	(msubf, msubfr, msubwhfl, msubwhflr, msubwhfm, msubwhfmr, mul64)
+	(negs, negsh, normacc, qmachf, qmpyh, qmpyhf, rndh, satf, sath)
+	(sbcs, setacc, sflag, sqrt, sqrtf, subs, swi_s, vabs2h, vabss2h)
+	(vadd4b, vadds2, vadds2h, vadds4h, vaddsubs, vaddsubs2h)
+	(vaddsubs4h, valgn2h, vasl2h, vasls2h, vasr2h, vasrs2h, vasrsr2h)
+	(vext2bhl, vext2bhlf, vext2bhm, vext2bhmf, vlsr2h, vmac2hf)
+	(vmac2hfr, vmac2hnfr, vmax2h, vmin2h, vmpy2h, vmpy2hf, vmpy2hfr)
+	(vmpy2hwf, vmsub2hf, vmsub2hfr, vmsub2hnfr, vneg2h, vnegs2h)
+	(vnorm2h, vpack2hbl, vpack2hblf, vpack2hbm, vpack2hbmf, vpack2hl)
+	(vpack2hm, vperm, vrep2hl, vrep2hm, vsext2bhl, vsext2bhm, vsub4b)
+	(vsubadds, vsubadds2h, vsubadds4h, vsubs2, vsubs2h, vsubs4h):
+	Changed opcodes.
+	(prealloc, prefetch*): Place them before ld instruction.
+	* arc-opc.c (skip_this_opcode): Add ARITH class.
+
 2017-10-25  Alan Modra  <amodra@gmail.com>
 
 	PR 22348

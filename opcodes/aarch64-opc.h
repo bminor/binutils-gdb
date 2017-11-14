@@ -67,7 +67,9 @@ enum aarch64_field_kind
   FLD_type,
   FLD_ldst_size,
   FLD_imm6,
+  FLD_imm6_2,
   FLD_imm4,
+  FLD_imm4_2,
   FLD_imm5,
   FLD_imm7,
   FLD_imm8,
@@ -143,6 +145,7 @@ enum aarch64_field_kind
   FLD_rotate1,
   FLD_rotate2,
   FLD_rotate3,
+  FLD_SM3_imm2
 };
 
 /* Field description.  */

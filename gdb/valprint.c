@@ -27,8 +27,7 @@
 #include "language.h"
 #include "annotate.h"
 #include "valprint.h"
-#include "doublest.h"
-#include "dfp.h"
+#include "target-float.h"
 #include "extension.h"
 #include "ada-lang.h"
 #include "gdb_obstack.h"
@@ -83,11 +82,7 @@ struct cmd_list_element *showprintrawlist;
 static int partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 				int len, int *errptr);
 
-static void set_input_radix (char *, int, struct cmd_list_element *);
-
 static void set_input_radix_1 (int, unsigned);
-
-static void set_output_radix (char *, int, struct cmd_list_element *);
 
 static void set_output_radix_1 (int, unsigned);
 
@@ -1366,18 +1361,7 @@ void
 print_floating (const gdb_byte *valaddr, struct type *type,
 		struct ui_file *stream)
 {
-  std::string str;
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    {
-      const struct floatformat *fmt = floatformat_from_type (type);
-      str = floatformat_to_string (fmt, valaddr);
-    }
-  else
-    {
-      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-      unsigned len = TYPE_LENGTH (type);
-      str = decimal_to_string (valaddr, len, byte_order);
-    }
+  std::string str = target_float_to_string (valaddr, type);
   fputs_filtered (str.c_str (), stream);
 }
 
@@ -2908,7 +2892,7 @@ static unsigned input_radix_1 = 10;
    setting the input radix to "10" never changes it!  */
 
 static void
-set_input_radix (char *args, int from_tty, struct cmd_list_element *c)
+set_input_radix (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_input_radix_1 (from_tty, input_radix_1);
 }
@@ -2945,7 +2929,7 @@ set_input_radix_1 (int from_tty, unsigned radix)
 static unsigned output_radix_1 = 10;
 
 static void
-set_output_radix (char *args, int from_tty, struct cmd_list_element *c)
+set_output_radix (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_output_radix_1 (from_tty, output_radix_1);
 }

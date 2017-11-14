@@ -72,11 +72,11 @@ Relocation section '\.rela\.neardata' at offset 0x1154 contains 2 entries:
 100000c4  00000801 R_C6000_ABS32          00000000   g1 \+ 0
 100000c8  00000901 R_C6000_ABS32          00000000   g2 \+ 0
 
-Relocation section '\.rela\.bss' at offset 0x116c contains 1 entries:
+Relocation section '\.rela\.bss' at offset 0x116c contains 1 entry:
  Offset     Info    Type                Sym\. Value  Symbol's Name \+ Addend
 100000cc  00000b1a R_C6000_COPY           100000cc   a \+ 0
 
-Relocation section '\.rela\.plt' at offset 0x2000 contains 1 entries:
+Relocation section '\.rela\.plt' at offset 0x2000 contains 1 entry:
  Offset     Info    Type                Sym\. Value  Symbol's Name \+ Addend
 100000b4  00000a1b R_C6000_JUMP_SLOT      00000000   sub0 \+ 0
 

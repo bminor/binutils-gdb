@@ -161,7 +161,7 @@ const struct extension_language_ops guile_extension_ops =
 /* Implementation of the gdb "guile-repl" command.  */
 
 static void
-guile_repl_command (char *arg, int from_tty)
+guile_repl_command (const char *arg, int from_tty)
 {
   scoped_restore restore_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -189,7 +189,7 @@ guile_repl_command (char *arg, int from_tty)
    TODO: Add the result to Guile's history?  */
 
 static void
-guile_command (char *arg, int from_tty)
+guile_command (const char *arg, int from_tty)
 {
   scoped_restore restore_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -390,7 +390,7 @@ gdbscm_target_config (void)
    commands. */
 
 static void
-guile_repl_command (char *arg, int from_tty)
+guile_repl_command (const char *arg, int from_tty)
 {
   arg = skip_spaces (arg);
   if (arg && *arg)
@@ -399,7 +399,7 @@ guile_repl_command (char *arg, int from_tty)
 }
 
 static void
-guile_command (char *arg, int from_tty)
+guile_command (const char *arg, int from_tty)
 {
   arg = skip_spaces (arg);
   if (arg && *arg)

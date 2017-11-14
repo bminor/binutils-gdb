@@ -20,7 +20,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-void select_frame_command (char *level_exp, int from_tty);
+void select_frame_command (const char *level_exp, int from_tty);
 
 gdb::unique_xmalloc_ptr<char> find_frame_funname (struct frame_info *frame,
 						  enum language *funlang,

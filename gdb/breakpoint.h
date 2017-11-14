@@ -1223,10 +1223,22 @@ extern void breakpoint_re_set (void);
 
 extern void breakpoint_re_set_thread (struct breakpoint *);
 
-extern struct breakpoint *set_momentary_breakpoint
+extern void delete_breakpoint (struct breakpoint *);
+
+struct breakpoint_deleter
+{
+  void operator() (struct breakpoint *b) const
+  {
+    delete_breakpoint (b);
+  }
+};
+
+typedef std::unique_ptr<struct breakpoint, breakpoint_deleter> breakpoint_up;
+
+extern breakpoint_up set_momentary_breakpoint
   (struct gdbarch *, struct symtab_and_line, struct frame_id, enum bptype);
 
-extern struct breakpoint *set_momentary_breakpoint_at_pc
+extern breakpoint_up set_momentary_breakpoint_at_pc
   (struct gdbarch *, CORE_ADDR pc, enum bptype type);
 
 extern struct breakpoint *clone_momentary_breakpoint (struct breakpoint *bpkt);
@@ -1234,10 +1246,6 @@ extern struct breakpoint *clone_momentary_breakpoint (struct breakpoint *bpkt);
 extern void set_ignore_count (int, int, int);
 
 extern void breakpoint_init_inferior (enum inf_context);
-
-extern struct cleanup *make_cleanup_delete_breakpoint (struct breakpoint *);
-
-extern void delete_breakpoint (struct breakpoint *);
 
 extern void breakpoint_auto_delete (bpstat);
 
@@ -1253,15 +1261,15 @@ extern struct command_line *breakpoint_commands (struct breakpoint *b);
    NOT be deallocated after use.  */
 const char *bpdisp_text (enum bpdisp disp);
 
-extern void break_command (char *, int);
+extern void break_command (const char *, int);
 
-extern void hbreak_command_wrapper (char *, int);
-extern void thbreak_command_wrapper (char *, int);
-extern void rbreak_command_wrapper (char *, int);
+extern void hbreak_command_wrapper (const char *, int);
+extern void thbreak_command_wrapper (const char *, int);
+extern void rbreak_command_wrapper (const char *, int);
 extern void watch_command_wrapper (const char *, int, int);
 extern void awatch_command_wrapper (const char *, int, int);
 extern void rwatch_command_wrapper (const char *, int, int);
-extern void tbreak_command (char *, int);
+extern void tbreak_command (const char *, int);
 
 extern struct breakpoint_ops base_breakpoint_ops;
 extern struct breakpoint_ops bkpt_breakpoint_ops;
@@ -1280,7 +1288,7 @@ extern void initialize_breakpoint_ops (void);
 
 extern void
   add_catch_command (const char *name, const char *docstring,
-		     cmd_sfunc_ftype *sfunc,
+		     cmd_const_sfunc_ftype *sfunc,
 		     completer_ftype *completer,
 		     void *user_data_catch,
 		     void *user_data_tcatch);
@@ -1583,7 +1591,7 @@ extern struct tracepoint *get_tracepoint_by_number_on_target (int num);
 
 /* Find a tracepoint by parsing a number in the supplied string.  */
 extern struct tracepoint *
-  get_tracepoint_by_number (char **arg,
+  get_tracepoint_by_number (const char **arg,
 			    number_or_range_parser *parser);
 
 /* Return a vector of all tracepoints currently defined.  The vector
@@ -1601,10 +1609,18 @@ extern VEC(breakpoint_p) *static_tracepoints_here (CORE_ADDR addr);
    that each command is suitable for tracepoint command list.  */
 extern void check_tracepoint_command (char *line, void *closure);
 
-/* Call at the start and end of an "rbreak" command to register
-   breakpoint numbers for a later "commands" command.  */
-extern void start_rbreak_breakpoints (void);
-extern void end_rbreak_breakpoints (void);
+/* Create an instance of this to start registering breakpoint numbers
+   for a later "commands" command.  */
+
+class scoped_rbreak_breakpoints
+{
+public:
+
+  scoped_rbreak_breakpoints ();
+  ~scoped_rbreak_breakpoints ();
+
+  DISABLE_COPY_AND_ASSIGN (scoped_rbreak_breakpoints);
+};
 
 /* Breakpoint iterator function.
 

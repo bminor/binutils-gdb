@@ -1855,10 +1855,6 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
     if ((1 << i) >= hdr->s_align)
       break;
 #endif
-#ifdef TIC80COFF
-  /* TI tools puts the alignment power in bits 8-11.  */
-  i = (hdr->s_flags >> 8) & 0xF ;
-#endif
 #ifdef COFF_DECODE_ALIGNMENT
   i = COFF_DECODE_ALIGNMENT(hdr->s_flags);
 #endif
@@ -3865,12 +3861,25 @@ coff_write_object_contents (bfd * abfd)
 			 ? 1 << current->alignment_power
 			 : 0);
 #endif
-#ifdef TIC80COFF
-      /* TI COFF puts the alignment power in bits 8-11 of the flags.  */
-      section.s_flags |= (current->alignment_power & 0xF) << 8;
-#endif
 #ifdef COFF_ENCODE_ALIGNMENT
       COFF_ENCODE_ALIGNMENT(section, current->alignment_power);
+      if ((unsigned int)COFF_DECODE_ALIGNMENT(section.s_flags)
+	  != current->alignment_power)
+	{
+	  bfd_boolean warn = coff_data (abfd)->link_info
+	    && !bfd_link_relocatable (coff_data (abfd)->link_info);
+
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%B:%s section %s: alignment 2**%u not representable"),
+	    abfd, warn ? " warning:" : "", current->name,
+            current->alignment_power);
+	  if (!warn)
+	    {
+	      bfd_set_error (bfd_error_nonrepresentable_section);
+	      return FALSE;
+	    }  
+	}
 #endif
 
 #ifdef COFF_IMAGE_WITH_PE

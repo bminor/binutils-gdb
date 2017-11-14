@@ -1,3 +1,42 @@
+2017-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/22291
+	* layout.cc (Layout::define_section_symbols): Use STV_PROTECTED
+	for __start and __stop symbols.
+	* symtab.cc (Symbol_table::define_special_symbol): Add an
+	argument, visibility.  Ignore definition and reference from
+	a dynamic object, depending on visibility.
+	(Symbol_table::do_define_in_output_data): Pass visibility to
+	define_special_symbol.
+	(Symbol_table::do_define_in_output_segment): Likewise.
+	(Symbol_table::do_define_as_constant): Likewise.
+	(Symbol_table::add_undefined_symbol_from_command_line): Pass
+	STV_DEFAULT to define_special_symbol.
+	* symtab.h (Symbol_table::define_special_symbol): Add an
+	argument, visibility.
+
+2017-11-08  James Clarke  <jrtc27@jrtc27.com>
+
+	PR gold/22266
+	* object.cc (Sized_relobj_file::compute_final_local_value_internal):
+	Drop relocatable parameter and stop adjusting output value based on
+	it.
+	(Sized_relobj_file::compute_final_local_value): Stop passing
+	relocatable to compute_final_local_value_internal.
+	(Sized_relobj_file::do_finalize_local_symbols): Ditto.
+	* object.h (Sized_relobj_file::compute_final_local_value_internal):
+	Drop relocatable parameter.
+
+2017-11-08  Kyle Butt  <iteratee@google.com>
+
+        * object.cc (do_find_special_sections): Fix a thinko with memmem return
+        values and check for !=	NULL rather than == 0.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* system.h (textdomain, bindtextdomain): Use safer "do nothing".
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+
 2017-10-25  Alan Modra  <amodra@gmail.com>
 
 	* symtab.cc (Symbol_table::add_from_relobj): Match "__gnu_lto_slim"

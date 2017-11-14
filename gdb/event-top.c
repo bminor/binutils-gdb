@@ -68,8 +68,8 @@ static void async_do_nothing (gdb_client_data);
 static void async_disconnect (gdb_client_data);
 #endif
 static void async_float_handler (gdb_client_data);
-#ifdef STOP_SIGNAL
-static void async_stop_sig (gdb_client_data);
+#ifdef SIGTSTP
+static void async_sigtstp_handler (gdb_client_data);
 #endif
 static void async_sigterm_handler (gdb_client_data arg);
 
@@ -111,7 +111,7 @@ static struct async_signal_handler *sighup_token;
 static struct async_signal_handler *sigquit_token;
 #endif
 static struct async_signal_handler *sigfpe_token;
-#ifdef STOP_SIGNAL
+#ifdef SIGTSTP
 static struct async_signal_handler *sigtstp_token;
 #endif
 static struct async_signal_handler *async_sigterm_token;
@@ -565,10 +565,10 @@ async_disable_stdin (void)
    a whole command.  */
 
 void
-command_handler (char *command)
+command_handler (const char *command)
 {
   struct ui *ui = current_ui;
-  char *c;
+  const char *c;
 
   if (ui->instream == ui->stdin_stream)
     reinitialize_more_filter ();
@@ -759,7 +759,7 @@ command_line_handler (char *rl)
 	 hung up but GDB is still alive.  In such a case, we just quit
 	 gdb killing the inferior program too.  */
       printf_unfiltered ("quit\n");
-      execute_command ((char *) "quit", 1);
+      execute_command ("quit", 1);
     }
   else if (cmd == NULL)
     {
@@ -912,9 +912,9 @@ async_init_signals (void)
   sigfpe_token =
     create_async_signal_handler (async_float_handler, NULL);
 
-#ifdef STOP_SIGNAL
+#ifdef SIGTSTP
   sigtstp_token =
-    create_async_signal_handler (async_stop_sig, NULL);
+    create_async_signal_handler (async_sigtstp_handler, NULL);
 #endif
 }
 
@@ -1112,20 +1112,19 @@ async_disconnect (gdb_client_data arg)
 }
 #endif
 
-#ifdef STOP_SIGNAL
+#ifdef SIGTSTP
 void
-handle_stop_sig (int sig)
+handle_sigtstp (int sig)
 {
   mark_async_signal_handler (sigtstp_token);
-  signal (sig, handle_stop_sig);
+  signal (sig, handle_sigtstp);
 }
 
 static void
-async_stop_sig (gdb_client_data arg)
+async_sigtstp_handler (gdb_client_data arg)
 {
   char *prompt = get_prompt ();
 
-#if STOP_SIGNAL == SIGTSTP
   signal (SIGTSTP, SIG_DFL);
 #if HAVE_SIGPROCMASK
   {
@@ -1138,10 +1137,7 @@ async_stop_sig (gdb_client_data arg)
   sigsetmask (0);
 #endif
   raise (SIGTSTP);
-  signal (SIGTSTP, handle_stop_sig);
-#else
-  signal (STOP_SIGNAL, handle_stop_sig);
-#endif
+  signal (SIGTSTP, handle_sigtstp);
   printf_unfiltered ("%s", prompt);
   gdb_flush (gdb_stdout);
 
@@ -1149,7 +1145,7 @@ async_stop_sig (gdb_client_data arg)
      nothing.  */
   dont_repeat ();
 }
-#endif /* STOP_SIGNAL */
+#endif /* SIGTSTP */
 
 /* Tell the event loop what to do if SIGFPE is received.
    See event-signal.c.  */

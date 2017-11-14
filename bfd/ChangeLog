@@ -1,3 +1,173 @@
+2017-11-14  Alan Modra  <amodra@gmail.com>
+
+	PR 22431
+	* elf64-ppc.c (ppc64_elf_size_dynamic_sections): Warn on discarding
+	non-empty dynamic section.
+	(ppc_build_one_stub): Take elf_gp from output bfd, not output
+	section owner.
+	(ppc_size_one_stub, ppc64_elf_next_toc_section): Likewise.
+
+2017-11-14  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Correct test for user
+	.eh_frame info.
+
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
+	* coff-tic80.c (COFF_ENCODE_ALIGNMENT, COFF_DECODE_ALIGNMENT):
+	Define.
+	* coffcode.h (coff_set_alignment_hook): Drop tic80 special case.
+	(coff_write_object_contents): Likewise. Issue diagnostic for too
+	large alignment.
+
+2017-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22423
+	* elf.c (_bfd_elf_map_sections_to_segments): Remove PF_X from
+	PT_PHDR segment.
+
+2017-11-12  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (elf_link_add_object_symbols): Ignore anything but
+	defined and defweak symbols when setting up weakdefs.
+
+2017-11-12  Alan Modra  <amodra@gmail.com>
+
+	* elf32-hppa.c (elf32_hppa_adjust_dynamic_symbol): Set non_got_ref
+	to keep dyn_relocs, clear to discard.  Comment.
+	(allocate_dynrelocs): Always clear non_got_ref when clearing
+	dyn_relocs in non-pic case.  Invert non_got_ref test.  Also test
+	dynamic_adjusted and ELF_COMMON_DEF_P.  Move code deleting
+	dyn_relocs on undefined syms to handle for non-pic too.
+	(elf32_hppa_relocate_section): Simplify test for non-pic dyn relocs.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Set non_got_ref
+	to keep dyn_relocs, clear to discard.  Comment.
+	(allocate_dynrelocs): Always clear non_got_ref when clearing
+	dyn_relocs in non-pic case.  Invert non_got_ref test.  Also test
+	dynamic_adjusted and ELF_COMMON_DEF_P.  Move code deleting
+	dyn_relocs on undefined syms to handle for non-pic too.
+	(ppc_elf_relocate_section): Simplify test for non-pic dyn relocs.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Discard
+	dyn_relocs here.  Don't bother setting non_got_ref.  Comment.
+	(allocate_dynrelocs): Delete special handling of non-pic ELFv2
+	ifuncs.  Move code deleting dyn_relocs on undefined symbols to
+	handle for non-pic too.  Don't test non_got_ref.  Do test
+	dynamic_adjusted and ELF_COMMON_DEF_P.
+
+2017-11-08  Djordje Todorovic  <djordje.todorovic@rt-rk.com>
+
+	* elf32-mips.c (elf32_mips_grok_psinfo): Extract core->pid.
+	* elf64-mips.c (elf64_mips_grok_psinfo): Likewise.
+	* elfn32-mips.c (elf32_mips_grok_psinfo): Likewise.
+
+2017-11-08  Djordje Todorovic  <djordje.todorovic@rt-rk.com>
+
+	* elf32-mips.c (elf32_mips_write_core_note): New function.
+	(elf_backend_write_core_note): New macro.
+	* elf64-mips.c (elf64_mips_write_core_note): New function.
+	(elf_backend_write_core_note): New macro.
+	* elfn32-mips.c (elf32_mips_write_core_note): New function.
+	(elf_backend_write_core_note): New macro.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_build_stubs): Correct pluralization in
+	statistics message.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* sysdep.h: Formatting, comment fixes.
+	(gettext, ngettext): Redefine when ENABLE_NLS.
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+	(_): Define using gettext.
+	(textdomain, bindtextdomain): Use safer "do nothing".
+	* hosts/alphavms.h (textdomain, bindtextdomain): Likewise.
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+
+2017-11-05  Alan Modra  <amodra@gmail.com>
+
+	PR 22397
+	* bfd.c (_bfd_doprnt_scan): Check args index before storing, not
+	after.
+
+2017-11-05  Alan Modra  <amodra@gmail.com>
+
+	PR 22397
+	* bfd.c (union _bfd_doprnt_args): New.
+	(PRINT_TYPE): Add FIELD arg.  Take value from args.
+	(_bfd_doprnt): Replace ap parameter with args.  Adjust all
+	PRINT_TYPE invocations and reading of format args to suit.
+	Move "%%" handling out of switch handling args.  Support
+	positional parameters.
+	(_bfd_doprnt_scan): New function.
+	(error_handler_internal): Call _bfd_doprnt_scan and read args.
+
+2017-11-04  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (got_entries_needed, got_relocs_needed): New functions.
+	(allocate_dynrelocs, ppc_elf_size_dynamic_sections): Use them here.
+	(ppc_elf_relocate_section): Don't output a dynamic relocation
+	for IE GOT entries in an executable.
+	* elf64-ppc.c (allocate_got): Trim unnecessary TPREL relocs.
+	(ppc64_elf_size_dynamic_sections): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+
+2017-11-04  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (readonly_dynrelocs): Delete info param.  Update all
+	callers.  Don't bother with SEC_ALLOC test.  Return section pointer.
+	Move minfo call to..
+	(maybe_set_textrel): ..here.
+	* elf64-ppc.c (readonly_dynrelocs): Return section pointer.
+	(maybe_set_textrel): Call minfo to print textrel warning to map file.
+
+2017-11-04  Alan Modra  <amodra@gmail.com>
+
+	* elf32-hppa.c (enum _tls_type): Move.
+	(struct elf32_hppa_link_hash_entry): Make tls_type a bitfield.
+	(elf32_hppa_check_relocs): Set DF_STATIC_TLS only for shared libraries.
+	Tidy tls_type handling.  Set symbol tls_type for GOT_TLS_LDM too.
+	(got_entries_needed, got_relocs_needed): New functions.
+	(allocate_dynrelocs): Use them.
+	(elf32_hppa_size_dynamic_sections): Likewise.
+	(elf32_hppa_relocate_section): Delete bogus FIXME.  Formatting.
+	Correct code emitting relocs on GD/IE got entries.  Report an
+	error when a symbol has both normal and TLS GOT relocs.
+
+2017-11-04  Alan Modra  <amodra@gmail.com>
+
+	PR 22394
+	* elf32-hppa.c (elf32_hppa_check_relocs): Don't create dyn_relocs
+	for plabels when non-pic.
+	(maybe_set_textrel): New function.
+	(readonly_dynrelocs): Move and rewrite.
+	(elf32_hppa_adjust_dynamic_symbol): Use it.  Don't create copy
+	relocs when def_regular or -z nocopyreloc.  Handle non_got_ref
+	for functions.  Expand non_got_ref comments.
+	(elf32_hppa_size_dynamic_sections): Use maybe_set_textrel.
+
+2017-11-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Set plt.refcount to 1.
+	Don't use func_pointer_refcount.  Don't set plt.refcount nor
+	non_got_ref for function pointer reference.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Don't use
+	func_pointer_refcount.
+	(_bfd_x86_elf_copy_indirect_symbol): Don't copy
+	func_pointer_refcount.
+	(_bfd_x86_elf_hide_symbol): Don't use func_pointer_refcount.
+	* elfxx-x86.h (GENERATE_DYNAMIC_RELOCATION_P): Likewise.
+	(elf_x86_link_hash_entry): Remove func_pointer_refcount.
+
+2017-11-03  Mingi Cho  <mgcho.minic@gmail.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 22385
+	* coffgen.c (_bfd_coff_get_external_symbols): Check for an
+	overlarge raw syment count.
+	(coff_get_normalized_symtab): Likewise.
+
 2017-11-01  James Bowman  <james.bowman@ftdichip.com>
 
 	* archures.c: Add bfd_mach_ft32b.

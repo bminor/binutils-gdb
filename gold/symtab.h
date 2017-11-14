@@ -1830,7 +1830,8 @@ class Symbol_table
   template<int size, bool big_endian>
   Sized_symbol<size>*
   define_special_symbol(const char** pname, const char** pversion,
-			bool only_if_ref, Sized_symbol<size>** poldsym,
+			bool only_if_ref, elfcpp::STV visibility,
+			Sized_symbol<size>** poldsym,
 			bool* resolve_oldsym, bool is_forced_local);
 
   // Define a symbol in an Output_data, sized version.

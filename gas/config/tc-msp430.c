@@ -2601,7 +2601,9 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       && opcode->insn_opnumb
       && (!*line || *line == '\n'))
     {
-      as_bad (_("instruction %s requires %d operand(s)"),
+      as_bad (ngettext ("instruction %s requires %d operand",
+			"instruction %s requires %d operands",
+			opcode->insn_opnumb),
 	      opcode->name, opcode->insn_opnumb);
       return 0;
     }

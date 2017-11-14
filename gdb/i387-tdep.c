@@ -18,12 +18,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "doublest.h"
 #include "frame.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "language.h"
 #include "regcache.h"
+#include "target-float.h"
 #include "value.h"
 
 #include "i386-tdep.h"
@@ -40,9 +40,8 @@ print_i387_value (struct gdbarch *gdbarch,
      garbage, but we'd better print one too many.  We need enough room
      to print the value, 1 position for the sign, 1 for the decimal
      point, 19 for the digits and 6 for the exponent adds up to 27.  */
-  const struct floatformat *fmt
-    = floatformat_from_type (i387_ext_type (gdbarch));
-  std::string str = floatformat_to_string (fmt, raw, " %-+27.19g");
+  const struct type *type = i387_ext_type (gdbarch);
+  std::string str = target_float_to_string (raw, type, " %-+27.19g");
   fprintf_filtered (file, "%s", str.c_str ());
 }
 
@@ -370,7 +369,7 @@ i387_register_to_value (struct frame_info *frame, int regnum,
 				 from, optimizedp, unavailablep))
     return 0;
 
-  convert_typed_floating (from, i387_ext_type (gdbarch), to, type);
+  target_float_convert (from, i387_ext_type (gdbarch), to, type);
   *optimizedp = *unavailablep = 0;
   return 1;
 }
@@ -396,7 +395,7 @@ i387_value_to_register (struct frame_info *frame, int regnum,
     }
 
   /* Convert from TYPE.  */
-  convert_typed_floating (from, type, to, i387_ext_type (gdbarch));
+  target_float_convert (from, type, to, i387_ext_type (gdbarch));
   put_frame_register (frame, regnum, to);
 }
 

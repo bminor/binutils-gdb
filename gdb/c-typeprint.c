@@ -1218,8 +1218,8 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 	      for (j = 0; j < len2; j++)
 		{
 		  const char *mangled_name;
+		  gdb::unique_xmalloc_ptr<char> mangled_name_holder;
 		  char *demangled_name;
-		  struct cleanup *inner_cleanup;
 		  const char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
 		  int is_full_physname_constructor =
 		    TYPE_FN_FIELD_CONSTRUCTOR (f, j)
@@ -1230,8 +1230,6 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		  /* Do not print out artificial methods.  */
 		  if (TYPE_FN_FIELD_ARTIFICIAL (f, j))
 		    continue;
-
-		  inner_cleanup = make_cleanup (null_cleanup, NULL);
 
 		  QUIT;
 		  section_type = output_access_specifier
@@ -1265,12 +1263,9 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		    }
 		  if (TYPE_FN_FIELD_STUB (f, j))
 		    {
-		      char *tem;
-
 		      /* Build something we can demangle.  */
-		      tem = gdb_mangle_name (type, i, j);
-		      make_cleanup (xfree, tem);
-		      mangled_name = tem;
+		      mangled_name_holder.reset (gdb_mangle_name (type, i, j));
+		      mangled_name = mangled_name_holder.get ();
 		    }
 		  else
 		    mangled_name = TYPE_FN_FIELD_PHYSNAME (f, j);
@@ -1327,8 +1322,6 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 			fputs_filtered (demangled_no_class, stream);
 		      xfree (demangled_name);
 		    }
-
-		  do_cleanups (inner_cleanup);
 
 		  fprintf_filtered (stream, ";\n");
 		}

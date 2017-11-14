@@ -340,6 +340,11 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	  return 0;
 	}
     }
+  else if (inst->opcode->iclass == cryptosm3)
+    {
+      /* index for e.g. SM3TT2A <Vd>.4S, <Vn>.4S, <Vm>S[<imm2>].  */
+      info->reglane.index = extract_field (FLD_SM3_imm2, code, 0);
+    }
   else
     {
       /* Index only for e.g. SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>]
@@ -933,6 +938,28 @@ aarch64_ext_addr_simple (const aarch64_operand *self ATTRIBUTE_UNUSED,
 {
   /* Rn */
   info->addr.base_regno = extract_field (FLD_Rn, code, 0);
+  return 1;
+}
+
+/* Decode the address operand for e.g.
+     stlur <Xt>, [<Xn|SP>{, <amount>}].  */
+int
+aarch64_ext_addr_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
+			 aarch64_opnd_info *info,
+			 aarch64_insn code, const aarch64_inst *inst)
+{
+  info->qualifier = get_expected_qualifier (inst, info->idx);
+
+  /* Rn */
+  info->addr.base_regno = extract_field (self->fields[0], code, 0);
+
+  /* simm9 */
+  aarch64_insn imm = extract_fields (code, 0, 1, self->fields[1]);
+  info->addr.offset.imm = sign_extend (imm, 8);
+  if (extract_field (self->fields[2], code, 0) == 1) {
+    info->addr.writeback = 1;
+    info->addr.preind = 1;
+  }
   return 1;
 }
 

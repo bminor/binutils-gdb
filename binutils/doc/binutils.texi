@@ -2313,6 +2313,10 @@ special QuarkSE-EM instructions, @option{fpuda} selects the printing
 of double precision assist instructions, @option{fpus} selects the
 printing of FPU single precision FP instructions, while @option{fpud}
 selects the printing of FPU souble precision FP instructions.
+Additionally, one can choose to have all the immediates printed in
+hexadecimal using @option{hex}.  By default, the short immediates are
+printed using the decimal representation, while the long immediate
+values are printed as hexadecimal.
 
 @option{cpu=...} allows to enforce a particular ISA when disassembling
 instructions, overriding the @option{-m} value or whatever is in the ELF file.

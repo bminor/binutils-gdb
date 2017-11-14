@@ -1074,7 +1074,10 @@ dump_code_signature_superblob (bfd *abfd ATTRIBUTE_UNUSED,
       return;
     }
   count = bfd_getb32 (buf + 8);
-  printf (_("  %u index entries:\n"), count);
+  printf (ngettext ("  %u index entry:\n",
+		    "  %u index entries:\n",
+		    count),
+	  count);
   if (len < 12 + 8 * count)
     {
       printf (_("  [bad block length]\n"));

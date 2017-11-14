@@ -1459,14 +1459,14 @@ set_width (void)
 }
 
 static void
-set_width_command (char *args, int from_tty, struct cmd_list_element *c)
+set_width_command (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_screen_size ();
   set_width ();
 }
 
 static void
-set_height_command (char *args, int from_tty, struct cmd_list_element *c)
+set_height_command (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_screen_size ();
 }
@@ -2156,21 +2156,9 @@ fprintf_symbol_filtered (struct ui_file *stream, const char *name,
     }
 }
 
-/* Modes of operation for strncmp_iw_with_mode.  */
+/* See utils.h.  */
 
-enum class strncmp_iw_mode
-{
-  /* Work like strncmp, while ignoring whitespace.  */
-  NORMAL,
-
-  /* Like NORMAL, but also apply the strcmp_iw hack.  I.e.,
-     string1=="FOO(PARAMS)" matches string2=="FOO".  */
-  MATCH_PARAMS,
-};
-
-/* Helper for strncmp_iw and strcmp_iw.  */
-
-static int
+int
 strncmp_iw_with_mode (const char *string1, const char *string2,
 		      size_t string2_len, strncmp_iw_mode mode)
 {

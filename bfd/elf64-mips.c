@@ -4228,6 +4228,8 @@ elf64_mips_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 	return FALSE;
 
       case 136:		/* Linux/MIPS - N64 kernel elf_prpsinfo */
+	elf_tdata (abfd)->core->pid
+	 = bfd_get_32 (abfd, note->descdata + 24);
 	elf_tdata (abfd)->core->program
 	 = _bfd_elfcore_strndup (abfd, note->descdata + 40, 16);
 	elf_tdata (abfd)->core->command
@@ -4247,6 +4249,45 @@ elf64_mips_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
   }
 
   return TRUE;
+}
+
+/* Write Linux core PRSTATUS note into core file.  */
+
+static char *
+elf64_mips_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
+			     ...)
+{
+  switch (note_type)
+    {
+    default:
+      return NULL;
+
+    case NT_PRPSINFO:
+      BFD_FAIL ();
+      return NULL;
+
+    case NT_PRSTATUS:
+      {
+	char data[480];
+	va_list ap;
+	long pid;
+	int cursig;
+	const void *greg;
+
+	va_start (ap, note_type);
+	memset (data, 0, 112);
+	pid = va_arg (ap, long);
+	bfd_put_32 (abfd, pid, data + 32);
+	cursig = va_arg (ap, int);
+	bfd_put_16 (abfd, cursig, data + 12);
+	greg = va_arg (ap, const void *);
+	memcpy (data + 112, greg, 360);
+	memset (data + 472, 0, 8);
+	va_end (ap);
+	return elfcore_write_note (abfd, buf, bufsiz,
+				   "CORE", note_type, data, sizeof (data));
+      }
+    }
 }
 
 /* ECOFF swapping routines.  These are used when dealing with the
@@ -4454,6 +4495,9 @@ const struct elf_size_info mips_elf64_size_info =
 #define ELF_COMMONPAGESIZE		0x1000
 #define elf64_bed			elf64_tradbed
 
+#undef elf_backend_write_core_note
+#define elf_backend_write_core_note	elf64_mips_write_core_note
+
 /* Include the target file again for this target.  */
 #include "elf64-target.h"
 
@@ -4475,5 +4519,7 @@ const struct elf_size_info mips_elf64_size_info =
 
 #undef	elf64_bed
 #define elf64_bed				elf64_fbsd_tradbed
+
+#undef elf64_mips_write_core_note
 
 #include "elf64-target.h"

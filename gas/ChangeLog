@@ -1,3 +1,234 @@
+2017-11-14  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/x86-64-xop.d, testsuite/gas/i386/xop.d,
+	testsuite/gas/i386/xop32reg.d: Adjust expectations.
+
+2017-11-14  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/avx512bw.s: Add vpcmp* pseudo tests.
+	* testsuite/gas/i386/avx512bw_vl.s: Likewise.
+	* testsuite/gas/i386/avx512bw.d, testsuite/gas/i386/avx512bw-intel.d,
+	testsuite/gas/i386/avx512bw_vl.d,
+	testsuite/gas/i386/avx512bw_vl-intel.d: Adjust expectations.
+
+2017-11-14  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/string-ok.s: Add a few more valid patterns.
+	Move bogus tests ...
+	* testsuite/gas/i386/string-bad.s: ... here.
+	* testsuite/gas/i386/string-bad.l: Adjust expectations.
+	* testsuite/gas/i386/string-ok.d: Likewise.
+	* testsuite/gas/i386/string-ok.e: Likewise.
+
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-aarch64.c (R_Z_BHSDQ_VZP): Rename to ...
+	(R_Z_SP_BHSDQ_VZP): ... and include both stack pointer variants.
+
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/ia64/group-1.d: Adjust expectations.
+	* testsuite/gas/ia64/group-2.d: Likewise.
+	* testsuite/gas/ia64/xdata.d: Likewise.
+
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (process_suffix): Treat .shiftcount just like
+	.inoutportreg.
+	* testsuite/gas/i386/inval.s: Add ambiguous shift/rotate cases.
+	* testsuite/gas/i386/inval.l: Adjust expectations.
+
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386-intel.c (i386_intel_simplify_register): Also
+	recognize RegRiz/RegEiz as index-only registers.
+	* testsuite/gas/i386/intel.s: Add tests exercising base/index
+	swapping.
+	* testsuite/gas/i386/intel.d: Adjust expectations.
+
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (i386_index_check): Break out ...
+	(i386_addressing_mode): ... this new function.
+	* config/tc-i386-intel.c (i386_intel_operand): Do base/index
+	swapping and the setting of .baseindex earlier. Call
+	i386_addressing_mode.
+	* testsuite/gas/i386/x86-64-inval.s: Add out of range
+	displacement case.
+	* testsuite/gas/i386/x86-64-inval.l: Adjust expectations.
+
+2017-11-09  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/gas/elf/dwarf2-10.l: Accept optional line number in error.
+
+2017-11-06  Tamar Christina  <tamar.christina@arm.com>
+
+	* gas/testsuite/gas/aarch64/dotproduct_armv8_4.s: New.
+	* gas/testsuite/gas/aarch64/dotproduct_armv8_4.d: New.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* gas/testsuite/gas/aarch64/armv8_4-a-registers-illegal.d: New.
+	* gas/testsuite/gas/aarch64/armv8_4-a-registers-illegal.l: New.
+	* gas/testsuite/gas/aarch64/armv8_4-a-registers-illegal.s: New.
+	* gas/testsuite/gas/aarch64/armv8_4-a-registers.d: New.
+	* gas/testsuite/gas/aarch64/armv8_4-a-registers.s: New.
+
+2017-11-09 Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c (process_omitted_operand):
+	Add AARCH64_OPND_Va, AARCH64_OPND_SM3_IMM2
+	and AARCH64_OPND_IMM_2.
+	(parse_operands): Add AARCH64_OPND_Va, AARCH64_OPND_SM3_IMM2,
+	AARCH64_OPND_IMM_2, AARCH64_OPND_MASK
+	and AARCH64_OPND_ADDR_OFFSET.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c (aarch64_arch_option_table): Add armv8.4-a.
+	(aarch64_features): Add SM4 and SHA3.
+
+2017-11-08  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c
+	(aarch64_features): Include AES and SHA2 in CRYPTO.
+	Add SHA2 and AES.
+
+2017-11-08  Jiong Wang  <jiong.wang@arm.com>
+	    Tamar Christina <tamar.christina@arm.com>
+
+	* config/tc-arm.c (arm_extensions):
+	(arm_archs): New entry for "armv8.4-a".
+	Add FPU_ARCH_DOTPROD_NEON_VFP_ARMV8.
+	(arm_ext_v8_2): New variable.
+	(enum arm_reg_type): New enumeration REG_TYPE_NSD.
+	(reg_expected_msgs): New entry for REG_TYPE_NSD.
+	(parse_typed_reg_or_scalar): Handle REG_TYPE_NSD.
+	(parse_scalar): Support REG_TYPE_VFS.
+	(enum operand_parse_code): New enumerations OP_RNSD and OP_RNSD_RNSC.
+	(parse_operands): Handle OP_RNSD and OP_RNSD_RNSC.
+	(NEON_SHAPE_DEF): New entries for DHH and DHS.
+	(neon_scalar_for_fmac_fp16_long): New function to generate Rm encoding
+	for new FP16 instructions in ARMv8.2-A.
+	(do_neon_fmac_maybe_scalar_long): New function to encode new FP16
+	instructions in ARMv8.2-A.
+	(do_neon_vfmal): Wrapper function for vfmal.
+	(do_neon_vfmsl): Wrapper function for vfmsl.
+	(insns): New entries for vfmal and vfmsl.
+	* doc/c-arm.texi (-march): Document "armv8.4-a".
+	* testsuite/gas/arm/dotprod-mandatory.d: New test.
+	* testsuite/gas/arm/armv8_2-a-fp16.s: New test source.
+	* testsuite/gas/arm/armv8_2-a-fp16-illegal.s: New test source.
+	* testsuite/gas/arm/armv8_2-a-fp16.d: New test.
+	* testsuite/gas/arm/armv8_3-a-fp16.d: New test.
+	* testsuite/gas/arm/armv8_4-a-fp16.d: New test.
+	* testsuite/gas/arm/armv8_2-a-fp16-thumb2.d: New test.
+	* testsuite/gas/arm/armv8_2-a-fp16-illegal.d: New test.
+	* testsuite/gas/arm/armv8_2-a-fp16-illegal.l: New error file.
+
+2017-11-08  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-xtensa.c (finish_vinsn): Properly pluralize error message.
+
+2017-11-07  Jim Wilson  <jimw@sifive.com>
+
+	* config/tc-riscv.c (append_insn): Call frag_wane and frag_new at
+	end for linker optimizable relocs.
+	* testsuite/gas/riscv/eh-relocs.d: New.
+	* testsuite/gas/riscv/eh-relocs.s: New.
+	* testsuite/gas/riscv/riscv.exp: Run eh-relocs test.
+
+2017-11-07  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* testsuite/gas/riscv/satp.d: New test.
+	testsuite/gas/riscv/satp.s: Likewise.
+	testsuite/gas/riscv/riscv.exp: Likewise.
+	config/tc-riscv.c (md_begin): Handle CSR aliases.
+
+2017-11-07  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-arm.c (arm_cpus):
+	Change FPU_ARCH_CRYPTO_NEON_VFP_ARMV8
+	into FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* read.c (assemble_one, s_bundle_unlock): Formatting.
+	Consistently add comma and "bytes" to error message.
+	* testsuite/gas/i386/bundle-bad.l: Adjust to suit.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/arm/got_prel.d,
+	* testsuite/gas/elf/dwarf2-1.d,
+	* testsuite/gas/elf/dwarf2-2.d,
+	* testsuite/gas/elf/dwarf2-3.d,
+	* testsuite/gas/elf/dwarf2-5.d,
+	* testsuite/gas/elf/dwarf2-6.d,
+	* testsuite/gas/i386/debug1.d,
+	* testsuite/gas/i386/dw2-compress-1.d,
+	* testsuite/gas/i386/dw2-compress-3a.d,
+	* testsuite/gas/i386/dw2-compress-3b.d,
+	* testsuite/gas/i386/dw2-compressed-1.d,
+	* testsuite/gas/i386/dw2-compressed-3a.d,
+	* testsuite/gas/i386/dw2-compressed-3b.d,
+	* testsuite/gas/i386/ilp32/x86-64-localpic.d,
+	* testsuite/gas/i386/localpic.d,
+	* testsuite/gas/i386/x86-64-localpic.d,
+	* testsuite/gas/ia64/pr13167.d,
+	* testsuite/gas/mips/loc-swap-2.d,
+	* testsuite/gas/mips/loc-swap.d,
+	* testsuite/gas/mips/micromips@loc-swap-2.d,
+	* testsuite/gas/mips/micromips@loc-swap.d,
+	* testsuite/gas/mips/mips16-dwarf2-n32.d,
+	* testsuite/gas/mips/mips16-dwarf2.d,
+	* testsuite/gas/mips/mips16@loc-swap-2.d,
+	* testsuite/gas/mips/mips16@loc-swap.d,
+	* testsuite/gas/mips/mips16e@loc-swap.d,
+	* testsuite/gas/mmix/bspec-1.d,
+	* testsuite/gas/mmix/bspec-2.d,
+	* testsuite/gas/tic6x/unwind-1.d,
+	* testsuite/gas/tic6x/unwind-2.d,
+	* testsuite/gas/tic6x/unwind-3.d: Update for pluralization
+	fixes.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* as.c (main): Properly pluralize messages.
+	* frags.c (frag_grow): Likewise.
+	* read.c (emit_expr_with_reloc, emit_expr_fix): Likewise.
+	(parse_bitfield_cons): Likewise.
+	* write.c (fixup_segment, compress_debug, write_contents): Likewise.
+	(relax_segment): Likewise.
+	* config/tc-arm.c (s_arm_elf_cons): Likewise.
+	* config/tc-cr16.c (l_cons): Likewise.
+	* config/tc-i370.c (i370_elf_cons): Likewise.
+	* config/tc-m68k.c (m68k_elf_cons): Likewise.
+	* config/tc-msp430.c (msp430_operands): Likewise.
+	* config/tc-s390.c (s390_elf_cons, s390_literals): Likewise.
+	* config/tc-mcore.c (md_apply_fix): Likewise.
+	* config/tc-tic54x.c (md_assemble): Likewise.
+	* config/tc-xtensa.c (xtensa_elf_cons): Likewise.
+	(xg_expand_assembly_insn): Likewise.
+	* config/xtensa-relax.c (build_transition): Likewise.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* asintl.h (textdomain, bindtextdomain): Use safer "do nothing".
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+
+2017-11-03  Siddhesh Poyarekar  <siddhesh.poyarekar@linaro.org>
+	    Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add saphira.
+	* doc/c-aarch64.texi: Likewise.
+
+2017-11-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-1.d: Add
+	--disassembler-options=force-thumb to objdump options.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-2.d: Likewise.
+
 2017-11-01  James Bowman  <james.bowman@ftdichip.com>
 
 	* config/tc-ft32.c (md_assemble): Add relaxation reloc

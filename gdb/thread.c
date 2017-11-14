@@ -60,9 +60,7 @@ static int highest_thread_num;
    spawned new threads we haven't heard of yet.  */
 static int threads_executing;
 
-static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
-static void info_threads_command (char *, int);
 
 /* RAII type used to increase / decrease the refcount of each thread
    in a given list of threads.  */
@@ -1197,7 +1195,7 @@ should_print_thread (const char *requested_threads, int default_inf_num,
    thread ids.  */
 
 static void
-print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
+print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 		     int global_ids, int pid,
 		     int show_global_ids)
 {
@@ -1384,7 +1382,7 @@ print_thread_info (struct ui_out *uiout, char *requested_threads, int pid)
 	 effects info-threads command would be nicer.  */
 
 static void
-info_threads_command (char *arg, int from_tty)
+info_threads_command (const char *arg, int from_tty)
 {
   int show_global_ids = 0;
 
@@ -1653,7 +1651,7 @@ tp_array_compar (const thread_info *a, const thread_info *b)
    thread apply all p x/i $pc   Apply x/i $pc cmd to all threads.  */
 
 static void
-thread_apply_all_command (char *cmd, int from_tty)
+thread_apply_all_command (const char *cmd, int from_tty)
 {
   tp_array_compar_ascending = false;
   if (cmd != NULL
@@ -1667,10 +1665,6 @@ thread_apply_all_command (char *cmd, int from_tty)
     error (_("Please specify a command following the thread ID list"));
 
   update_thread_list ();
-
-  /* Save a copy of the command in case it is clobbered by
-     execute_command.  */
-  std::string saved_cmd = cmd;
 
   int tc = live_threads_count ();
   if (tc != 0)
@@ -1709,10 +1703,8 @@ thread_apply_all_command (char *cmd, int from_tty)
 	    printf_filtered (_("\nThread %s (%s):\n"),
 			     print_thread_id (thr),
 			     target_pid_to_str (inferior_ptid));
-	    execute_command (cmd, from_tty);
 
-	    /* Restore exact command used previously.  */
-	    strcpy (cmd, saved_cmd.c_str ());
+	    execute_command (cmd, from_tty);
 	  }
     }
 }
@@ -1722,7 +1714,7 @@ thread_apply_all_command (char *cmd, int from_tty)
 static void
 thread_apply_command (const char *tidlist, int from_tty)
 {
-  char *cmd = NULL;
+  const char *cmd = NULL;
   tid_range_parser parser;
 
   if (tidlist == NULL || *tidlist == '\000')
@@ -1735,7 +1727,7 @@ thread_apply_command (const char *tidlist, int from_tty)
 
       if (!parser.get_tid_range (&inf_num, &thr_start, &thr_end))
 	{
-	  cmd = (char *) parser.cur_tok ();
+	  cmd = parser.cur_tok ();
 	  break;
 	}
     }
@@ -1745,10 +1737,6 @@ thread_apply_command (const char *tidlist, int from_tty)
 
   if (tidlist == cmd || !isalpha (cmd[0]))
     invalid_thread_id_error (cmd);
-
-  /* Save a copy of the command in case it is clobbered by
-     execute_command.  */
-  std::string saved_cmd = cmd;
 
   scoped_restore_current_thread restore_thread;
 
@@ -1803,9 +1791,6 @@ thread_apply_command (const char *tidlist, int from_tty)
       printf_filtered (_("\nThread %s (%s):\n"), print_thread_id (tp),
 		       target_pid_to_str (inferior_ptid));
       execute_command (cmd, from_tty);
-
-      /* Restore exact command used previously.  */
-      strcpy (cmd, saved_cmd.c_str ());
     }
 }
 

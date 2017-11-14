@@ -1316,15 +1316,10 @@ main (int argc, char ** argv)
       n_warns = had_warnings ();
       n_errs = had_errors ();
 
-      if (n_warns == 1)
-	sprintf (warn_msg, _("%d warning"), n_warns);
-      else
-	sprintf (warn_msg, _("%d warnings"), n_warns);
-      if (n_errs == 1)
-	sprintf (err_msg, _("%d error"), n_errs);
-      else
-	sprintf (err_msg, _("%d errors"), n_errs);
-
+      sprintf (warn_msg,
+	       ngettext ("%d warning", "%d warnings", n_warns), n_warns);
+      sprintf (err_msg,
+	       ngettext ("%d error", "%d errors", n_errs), n_errs);
       if (flag_fatal_warnings && n_warns != 0)
 	{
 	  if (n_errs == 0)

@@ -3100,6 +3100,12 @@ exception_x86_64_bnd_2.o: exception_test_2.cc gcctestdir/as
 	$(CXXCOMPILE) -c -Bgcctestdir/ -Wa,-madd-bnd-prefix -o $@ $<
 endif DEFAULT_TARGET_X86_64
 
+check_PROGRAMS += pr22266
+pr22266: pr22266_main.o pr22266_ar.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ pr22266_main.o pr22266_ar.o
+pr22266_ar.o: pr22266_a.o gcctestdir/ld
+	gcctestdir/ld -r -T $(srcdir)/pr22266_script.t -o $@ pr22266_a.o
+
 endif GCC
 endif NATIVE_LINKER
 

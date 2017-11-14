@@ -2129,7 +2129,7 @@ internal_error (const char *file, int line, const char *fmt, ...)
 int
 main (int argc, char **argv)
 {
-  char *str2, *extra_chars = "", c;
+  char *str2, *extra_chars, c;
   char buf[65536];
   int arg;
   const char *errmsg;

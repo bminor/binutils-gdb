@@ -341,7 +341,7 @@ adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
    for "SIZE" number of bytes.  */
 
 static int
-adi_read_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
+adi_read_versions (CORE_ADDR vaddr, size_t size, gdb_byte *tags)
 {
   int fd = adi_tag_fd ();
   if (fd == -1)
@@ -383,7 +383,7 @@ adi_write_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
    at "VADDR" with number of "CNT".  */
 
 static void
-adi_print_versions (CORE_ADDR vaddr, size_t cnt, unsigned char *tags)
+adi_print_versions (CORE_ADDR vaddr, size_t cnt, gdb_byte *tags)
 {
   int v_idx = 0;
   const int maxelts = 8;  /* # of elements per line */
@@ -415,21 +415,17 @@ static void
 do_examine (CORE_ADDR start, int bcnt)
 {
   CORE_ADDR vaddr = adi_normalize_address (start);
-  struct cleanup *cleanup;
 
   CORE_ADDR vstart = adi_align_address (vaddr);
   int cnt = adi_convert_byte_count (vaddr, bcnt, vstart);
-  unsigned char *buf = (unsigned char *) xmalloc (cnt);
-  cleanup = make_cleanup (xfree, buf);
-  int read_cnt = adi_read_versions (vstart, cnt, buf);
+  gdb::def_vector<gdb_byte> buf (cnt);
+  int read_cnt = adi_read_versions (vstart, cnt, buf.data ());
   if (read_cnt == -1)
     error (_("No ADI information"));
   else if (read_cnt < cnt)
     error(_("No ADI information at %s"), paddress (target_gdbarch (), vaddr));
 
-  adi_print_versions (vstart, cnt, buf);
-
-  do_cleanups (cleanup);
+  adi_print_versions (vstart, cnt, buf.data ());
 }
 
 static void
@@ -456,7 +452,7 @@ do_assign (CORE_ADDR start, size_t bcnt, int version)
      adi (examine|x)/count <addr> */
 
 static void
-adi_examine_command (char *args, int from_tty)
+adi_examine_command (const char *args, int from_tty)
 {
   /* make sure program is active and adi is available */
   if (!target_has_execution)
@@ -468,7 +464,7 @@ adi_examine_command (char *args, int from_tty)
   pid_t pid = ptid_get_pid (inferior_ptid);
   sparc64_adi_info *proc = get_adi_info_proc (pid);
   int cnt = 1;
-  char *p = args;
+  const char *p = args;
   if (p && *p == '/')
     {
       p++;
@@ -491,7 +487,7 @@ adi_examine_command (char *args, int from_tty)
      adi (assign|a)/count <addr> = <version>  */
 
 static void
-adi_assign_command (char *args, int from_tty)
+adi_assign_command (const char *args, int from_tty)
 {
   /* make sure program is active and adi is available */
   if (!target_has_execution)
@@ -500,7 +496,7 @@ adi_assign_command (char *args, int from_tty)
   if (!adi_available ())
     error (_("No ADI information"));
 
-  char *exp = args;
+  const char *exp = args;
   if (exp == 0)
     error_no_arg (_("Usage: adi assign|a[/count] <addr> = <version>"));
 
@@ -511,7 +507,7 @@ adi_assign_command (char *args, int from_tty)
     error (_("Usage: adi assign|a[/count] <addr> = <version>"));
 
   size_t cnt = 1;
-  char *p = args;
+  const char *p = args;
   if (exp && *exp == '/')
     {
       p = exp + 1;

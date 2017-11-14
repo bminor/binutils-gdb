@@ -61,7 +61,7 @@ Dynamic section at offset 0x1188 contains 17 entries:
  0x00000016 \(TEXTREL\)                    0x0
  0x00000000 \(NULL\)                       0x0
 
-Relocation section '\.rela\.text' at offset 0x1140 contains 1 entries:
+Relocation section '\.rela\.text' at offset 0x1140 contains 1 entry:
  Offset     Info    Type                Sym\. Value  Symbol's Name \+ Addend
 10000094  00000618 R_C6000_DSBT_INDEX     10000100   __c6xabi_DSBT_BASE \+ 0
 

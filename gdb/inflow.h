@@ -20,17 +20,11 @@
 #ifndef INFLOW_H
 #define INFLOW_H
 
-#include "gdb_termios.h"
+#include <unistd.h>
 
-#ifdef HAVE_TERMIOS
-# define PROCESS_GROUP_TYPE pid_t
-#elif defined (HAVE_TERMIO) || defined (HAVE_SGTTY)
-# define PROCESS_GROUP_TYPE int
-#endif
-
-#ifdef PROCESS_GROUP_TYPE
 /* Process group of the current inferior.  */
-extern PROCESS_GROUP_TYPE inferior_process_group (void);
+#ifdef HAVE_TERMIOS_H
+extern pid_t inferior_process_group (void);
 #endif
 
 #endif /* inflow.h */

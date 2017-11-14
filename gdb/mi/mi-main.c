@@ -108,7 +108,7 @@ static int mi_async = 0;
 static int mi_async_1 = 0;
 
 static void
-set_mi_async_command (char *args, int from_tty,
+set_mi_async_command (const char *args, int from_tty,
 		      struct cmd_list_element *c)
 {
   if (have_live_inferiors ())
@@ -2206,7 +2206,7 @@ mi_execute_cli_command (const char *cmd, int args_p, const char *args)
 	/* FIXME: gdb_???? */
 	fprintf_unfiltered (gdb_stdout, "cli=%s run=%s\n",
 			    cmd, run.c_str ());
-      execute_command (&run[0], 0 /* from_tty */ );
+      execute_command (run.c_str (), 0 /* from_tty */ );
     }
 }
 
@@ -2220,7 +2220,7 @@ mi_execute_async_cli_command (const char *cli_command, char **argv, int argc)
   if (mi_async_p ())
     run += "&";
 
-  execute_command (&run[0], 0 /* from_tty */ );
+  execute_command (run.c_str (), 0 /* from_tty */ );
 }
 
 void

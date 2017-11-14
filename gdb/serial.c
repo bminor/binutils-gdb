@@ -514,14 +514,6 @@ serial_print_tty_state (struct serial *scb,
 }
 
 int
-serial_noflush_set_tty_state (struct serial *scb,
-			      serial_ttystate new_ttystate,
-			      serial_ttystate old_ttystate)
-{
-  return scb->ops->noflush_set_tty_state (scb, new_ttystate, old_ttystate);
-}
-
-int
 serial_setbaudrate (struct serial *scb, int rate)
 {
   return scb->ops->setbaudrate (scb, rate);
@@ -669,7 +661,7 @@ static const char *parity = parity_none;
 /* Set serial_parity value.  */
 
 static void
-set_parity (char *ignore_args, int from_tty, struct cmd_list_element *c)
+set_parity (const char *ignore_args, int from_tty, struct cmd_list_element *c)
 {
   if (parity == parity_odd)
     serial_parity = GDBPARITY_ODD;

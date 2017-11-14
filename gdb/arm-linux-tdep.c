@@ -1020,7 +1020,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
 	{
 	  inferior_thread ()->control.step_resume_breakpoint
 	    = set_momentary_breakpoint (gdbarch, sal, get_frame_id (frame),
-					bp_step_resume);
+					bp_step_resume).release ();
 
 	  /* set_momentary_breakpoint invalidates FRAME.  */
 	  frame = NULL;

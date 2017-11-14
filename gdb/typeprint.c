@@ -37,12 +37,6 @@
 #include "extension.h"
 #include "completer.h"
 
-static void ptype_command (char *, int);
-
-static void whatis_command (char *, int);
-
-static void whatis_exp (char *, int);
-
 const struct type_print_options type_print_raw_options =
 {
   1,				/* raw */
@@ -405,7 +399,7 @@ error_unknown_type (const char *sym_print_name)
    show is passed to type_print.  */
 
 static void
-whatis_exp (char *exp, int show)
+whatis_exp (const char *exp, int show)
 {
   struct value *val;
   struct cleanup *old_chain;
@@ -524,7 +518,7 @@ whatis_exp (char *exp, int show)
 }
 
 static void
-whatis_command (char *exp, int from_tty)
+whatis_command (const char *exp, int from_tty)
 {
   /* Most of the time users do not want to see all the fields
      in a structure.  If they do they can use the "ptype" command.
@@ -535,7 +529,7 @@ whatis_command (char *exp, int from_tty)
 /* TYPENAME is either the name of a type, or an expression.  */
 
 static void
-ptype_command (char *type_name, int from_tty)
+ptype_command (const char *type_name, int from_tty)
 {
   whatis_exp (type_name, 1);
 }
@@ -678,7 +672,8 @@ show_print_type (const char *args, int from_tty)
 static int print_methods = 1;
 
 static void
-set_print_type_methods (char *args, int from_tty, struct cmd_list_element *c)
+set_print_type_methods (const char *args,
+			int from_tty, struct cmd_list_element *c)
 {
   default_ptype_flags.print_methods = print_methods;
 }
@@ -694,7 +689,8 @@ show_print_type_methods (struct ui_file *file, int from_tty,
 static int print_typedefs = 1;
 
 static void
-set_print_type_typedefs (char *args, int from_tty, struct cmd_list_element *c)
+set_print_type_typedefs (const char *args,
+			 int from_tty, struct cmd_list_element *c)
 {
   default_ptype_flags.print_typedefs = print_typedefs;
 }

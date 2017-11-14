@@ -1,2 +1,2 @@
 [^:]*: Assembler messages:
-[^:]*: Error: view number mismatch
+[^:]*(:26)?: Error: view number mismatch

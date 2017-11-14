@@ -112,7 +112,10 @@ frag_grow (size_t nchars)
 
       /* Check for possible overflow.  */
       if (newc < nchars)
-        as_fatal (_("can't extend frag %lu chars"), (unsigned long) nchars);
+	as_fatal (ngettext ("can't extend frag %lu char",
+			    "can't extend frag %lu chars",
+			    (unsigned long) nchars),
+		  (unsigned long) nchars);
 
       /* Force to allocate at least NEWC bytes, but not less than the
          default.  */

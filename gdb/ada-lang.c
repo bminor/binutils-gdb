@@ -104,16 +104,16 @@ static int ada_type_match (struct type *, struct type *, int);
 
 static int ada_args_match (struct symbol *, struct value **, int);
 
-static int full_match (const char *, const char *);
-
 static struct value *make_array_descriptor (struct type *, struct value *);
 
 static void ada_add_block_symbols (struct obstack *,
-                                   const struct block *, const char *,
-                                   domain_enum, struct objfile *, int);
+				   const struct block *,
+				   const lookup_name_info &lookup_name,
+				   domain_enum, struct objfile *);
 
 static void ada_add_all_symbols (struct obstack *, const struct block *,
-				 const char *, domain_enum, int, int *);
+				 const lookup_name_info &lookup_name,
+				 domain_enum, int, int *);
 
 static int is_nonfunction (struct block_symbol *, int);
 
@@ -203,7 +203,7 @@ static int is_name_suffix (const char *);
 
 static int advance_wild_match (const char **, const char *, int);
 
-static int wild_match (const char *, const char *);
+static bool wild_match (const char *name, const char *patn);
 
 static struct value *ada_coerce_ref (struct value *);
 
@@ -270,6 +270,10 @@ static void ada_forward_operator_length (struct expression *, int, int *,
 					 int *);
 
 static struct type *ada_find_any_type (const char *name);
+
+static symbol_name_matcher_ftype *ada_get_symbol_name_matcher
+  (const lookup_name_info &lookup_name);
+
 
 
 /* The result of a symbol lookup to be stored in our symbol cache.  */
@@ -976,11 +980,13 @@ const struct ada_opname_map ada_opname_table[] = {
   {NULL, NULL}
 };
 
-/* The "encoded" form of DECODED, according to GNAT conventions.
-   The result is valid until the next call to ada_encode.  */
+/* The "encoded" form of DECODED, according to GNAT conventions.  The
+   result is valid until the next call to ada_encode.  If
+   THROW_ERRORS, throw an error if invalid operator name is found.
+   Otherwise, return NULL in that case.  */
 
-char *
-ada_encode (const char *decoded)
+static char *
+ada_encode_1 (const char *decoded, bool throw_errors)
 {
   static char *encoding_buffer = NULL;
   static size_t encoding_buffer_size = 0;
@@ -1010,7 +1016,12 @@ ada_encode (const char *decoded)
                && !startswith (p, mapping->decoded); mapping += 1)
             ;
           if (mapping->encoded == NULL)
-            error (_("invalid Ada operator name: %s"), p);
+	    {
+	      if (throw_errors)
+		error (_("invalid Ada operator name: %s"), p);
+	      else
+		return NULL;
+	    }
           strcpy (encoding_buffer + k, mapping->encoded);
           k += strlen (mapping->encoded);
           break;
@@ -1024,6 +1035,15 @@ ada_encode (const char *decoded)
 
   encoding_buffer[k] = '\0';
   return encoding_buffer;
+}
+
+/* The "encoded" form of DECODED, according to GNAT conventions.
+   The result is valid until the next call to ada_encode.  */
+
+char *
+ada_encode (const char *decoded)
+{
+  return ada_encode_1 (decoded, true);
 }
 
 /* Return NAME folded to lower case, or, if surrounded by single
@@ -1490,31 +1510,6 @@ ada_sniff_from_mangled_name (const char *mangled, char **out)
   return 0;
 }
 
-/* Returns non-zero iff SYM_NAME matches NAME, ignoring any trailing
-   suffixes that encode debugging information or leading _ada_ on
-   SYM_NAME (see is_name_suffix commentary for the debugging
-   information that is ignored).  If WILD, then NAME need only match a
-   suffix of SYM_NAME minus the same suffixes.  Also returns 0 if
-   either argument is NULL.  */
-
-static int
-match_name (const char *sym_name, const char *name, int wild)
-{
-  if (sym_name == NULL || name == NULL)
-    return 0;
-  else if (wild)
-    return wild_match (sym_name, name) == 0;
-  else
-    {
-      int len_name = strlen (name);
-
-      return (strncmp (sym_name, name, len_name) == 0
-              && is_name_suffix (sym_name + len_name))
-        || (startswith (sym_name, "_ada_")
-            && strncmp (sym_name + 5, name, len_name) == 0
-            && is_name_suffix (sym_name + len_name + 5));
-    }
-}
 
 
                                 /* Arrays */
@@ -3587,7 +3582,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
           int n_candidates;
 
           n_candidates =
-            ada_lookup_symbol_list (ada_encode (ada_decoded_op_name (op)),
+            ada_lookup_symbol_list (ada_decoded_op_name (op),
                                     (struct block *) NULL, VAR_DOMAIN,
                                     &candidates);
           i = ada_resolve_function (candidates, n_candidates, argvec, nargs,
@@ -4758,16 +4753,18 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
 
                                 /* Symbol Lookup */
 
-/* Return nonzero if wild matching should be used when searching for
-   all symbols matching LOOKUP_NAME.
+/* Return the symbol name match type that should be used used when
+   searching for all symbols matching LOOKUP_NAME.
 
    LOOKUP_NAME is expected to be a symbol name after transformation
    for Ada lookups (see ada_name_for_lookup).  */
 
-static int
-should_use_wild_match (const char *lookup_name)
+static symbol_name_match_type
+name_match_type_from_name (const char *lookup_name)
 {
-  return (strstr (lookup_name, "__") == NULL);
+  return (strstr (lookup_name, "__") == NULL
+	  ? symbol_name_match_type::WILD
+	  : symbol_name_match_type::FULL);
 }
 
 /* Return the result of a standard (literal, C-like) lookup of NAME in
@@ -4937,23 +4934,18 @@ ada_lookup_simple_minsym (const char *name)
   struct bound_minimal_symbol result;
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
-  const int wild_match_p = should_use_wild_match (name);
 
   memset (&result, 0, sizeof (result));
 
-  /* Special case: If the user specifies a symbol name inside package
-     Standard, do a non-wild matching of the symbol name without
-     the "standard__" prefix.  This was primarily introduced in order
-     to allow the user to specifically access the standard exceptions
-     using, for instance, Standard.Constraint_Error when Constraint_Error
-     is ambiguous (due to the user defining its own Constraint_Error
-     entity inside its program).  */
-  if (startswith (name, "standard__"))
-    name += sizeof ("standard__") - 1;
+  symbol_name_match_type match_type = name_match_type_from_name (name);
+  lookup_name_info lookup_name (name, match_type);
+
+  symbol_name_matcher_ftype *match_name
+    = ada_get_symbol_name_matcher (lookup_name);
 
   ALL_MSYMBOLS (objfile, msymbol)
   {
-    if (match_name (MSYMBOL_LINKAGE_NAME (msymbol), name, wild_match_p)
+    if (match_name (MSYMBOL_LINKAGE_NAME (msymbol), lookup_name, NULL)
         && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
       {
 	result.minsym = msymbol;
@@ -4973,8 +4965,8 @@ ada_lookup_simple_minsym (const char *name)
 
 static void
 add_symbols_from_enclosing_procs (struct obstack *obstackp,
-                                  const char *name, domain_enum domain,
-                                  int wild_match_p)
+				  const lookup_name_info &lookup_name,
+				  domain_enum domain)
 {
 }
 
@@ -5426,17 +5418,16 @@ remove_irrelevant_renamings (struct block_symbol *syms,
    Note: This function assumes that OBSTACKP has 0 (zero) element in it.  */
 
 static void
-ada_add_local_symbols (struct obstack *obstackp, const char *name,
-                       const struct block *block, domain_enum domain,
-                       int wild_match_p)
+ada_add_local_symbols (struct obstack *obstackp,
+		       const lookup_name_info &lookup_name,
+		       const struct block *block, domain_enum domain)
 {
   int block_depth = 0;
 
   while (block != NULL)
     {
       block_depth += 1;
-      ada_add_block_symbols (obstackp, block, name, domain, NULL,
-			     wild_match_p);
+      ada_add_block_symbols (obstackp, block, lookup_name, domain, NULL);
 
       /* If we found a non-function match, assume that's the one.  */
       if (is_nonfunction (defns_collected (obstackp, 0),
@@ -5449,7 +5440,7 @@ ada_add_local_symbols (struct obstack *obstackp, const char *name,
   /* If no luck so far, try to find NAME as a local symbol in some lexically
      enclosing subprogram.  */
   if (num_defns_collected (obstackp) == 0 && block_depth > 2)
-    add_symbols_from_enclosing_procs (obstackp, name, domain, wild_match_p);
+    add_symbols_from_enclosing_procs (obstackp, lookup_name, domain);
 }
 
 /* An object of this type is used as the user_data argument when
@@ -5503,28 +5494,27 @@ aux_add_nonlocal_symbols (struct block *block, struct symbol *sym, void *data0)
   return 0;
 }
 
-/* Helper for add_nonlocal_symbols.  Find symbols in DOMAIN which are targetted
-   by renamings matching NAME in BLOCK.  Add these symbols to OBSTACKP.  If
-   WILD_MATCH_P is nonzero, perform the naming matching in "wild" mode (see
-   function "wild_match" for more information).  Return whether we found such
-   symbols.  */
+/* Helper for add_nonlocal_symbols.  Find symbols in DOMAIN which are
+   targeted by renamings matching LOOKUP_NAME in BLOCK.  Add these
+   symbols to OBSTACKP.  Return whether we found such symbols.  */
 
 static int
 ada_add_block_renamings (struct obstack *obstackp,
 			 const struct block *block,
-			 const char *name,
-			 domain_enum domain,
-			 int wild_match_p)
+			 const lookup_name_info &lookup_name,
+			 domain_enum domain)
 {
   struct using_direct *renaming;
   int defns_mark = num_defns_collected (obstackp);
+
+  symbol_name_matcher_ftype *name_match
+    = ada_get_symbol_name_matcher (lookup_name);
 
   for (renaming = block_using (block);
        renaming != NULL;
        renaming = renaming->next)
     {
       const char *r_name;
-      int name_match;
 
       /* Avoid infinite recursions: skip this renaming if we are actually
 	 already traversing it.
@@ -5549,11 +5539,13 @@ ada_add_block_renamings (struct obstack *obstackp,
       r_name = (renaming->alias != NULL
 		? renaming->alias
 		: renaming->declaration);
-      name_match
-	= wild_match_p ? wild_match (r_name, name) : strcmp (r_name, name);
-      if (name_match == 0)
-	ada_add_all_symbols (obstackp, block, renaming->declaration, domain,
-			     1, NULL);
+      if (name_match (r_name, lookup_name, NULL))
+	{
+	  lookup_name_info decl_lookup_name (renaming->declaration,
+					     lookup_name.match_type ());
+	  ada_add_all_symbols (obstackp, block, decl_lookup_name, domain,
+			       1, NULL);
+	}
       renaming->searched = 0;
     }
   return num_defns_collected (obstackp) != defns_mark;
@@ -5644,14 +5636,24 @@ compare_names (const char *string1, const char *string2)
   return result;
 }
 
+/* Convenience function to get at the Ada encoded lookup name for
+   LOOKUP_NAME, as a C string.  */
+
+static const char *
+ada_lookup_name (const lookup_name_info &lookup_name)
+{
+  return lookup_name.ada ().lookup_name ().c_str ();
+}
+
 /* Add to OBSTACKP all non-local symbols whose name and domain match
-   NAME and DOMAIN respectively.  The search is performed on GLOBAL_BLOCK
-   symbols if GLOBAL is non-zero, or on STATIC_BLOCK symbols otherwise.  */
+   LOOKUP_NAME and DOMAIN respectively.  The search is performed on
+   GLOBAL_BLOCK symbols if GLOBAL is non-zero, or on STATIC_BLOCK
+   symbols otherwise.  */
 
 static void
-add_nonlocal_symbols (struct obstack *obstackp, const char *name,
-		      domain_enum domain, int global,
-		      int is_wild_match)
+add_nonlocal_symbols (struct obstack *obstackp,
+		      const lookup_name_info &lookup_name,
+		      domain_enum domain, int global)
 {
   struct objfile *objfile;
   struct compunit_symtab *cu;
@@ -5660,50 +5662,57 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
   memset (&data, 0, sizeof data);
   data.obstackp = obstackp;
 
+  bool is_wild_match = lookup_name.ada ().wild_match_p ();
+
   ALL_OBJFILES (objfile)
     {
       data.objfile = objfile;
 
       if (is_wild_match)
-	objfile->sf->qf->map_matching_symbols (objfile, name, domain, global,
+	objfile->sf->qf->map_matching_symbols (objfile, lookup_name.name ().c_str (),
+					       domain, global,
 					       aux_add_nonlocal_symbols, &data,
-					       wild_match, NULL);
+					       symbol_name_match_type::WILD,
+					       NULL);
       else
-	objfile->sf->qf->map_matching_symbols (objfile, name, domain, global,
+	objfile->sf->qf->map_matching_symbols (objfile, lookup_name.name ().c_str (),
+					       domain, global,
 					       aux_add_nonlocal_symbols, &data,
-					       full_match, compare_names);
+					       symbol_name_match_type::FULL,
+					       compare_names);
 
       ALL_OBJFILE_COMPUNITS (objfile, cu)
 	{
 	  const struct block *global_block
 	    = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cu), GLOBAL_BLOCK);
 
-	  if (ada_add_block_renamings (obstackp, global_block , name, domain,
-				       is_wild_match))
+	  if (ada_add_block_renamings (obstackp, global_block, lookup_name,
+				       domain))
 	    data.found_sym = 1;
 	}
     }
 
   if (num_defns_collected (obstackp) == 0 && global && !is_wild_match)
     {
+      const char *name = ada_lookup_name (lookup_name);
+      std::string name1 = std::string ("<_ada_") + name + '>';
+
       ALL_OBJFILES (objfile)
         {
-	  char *name1 = (char *) alloca (strlen (name) + sizeof ("_ada_"));
-	  strcpy (name1, "_ada_");
-	  strcpy (name1 + sizeof ("_ada_") - 1, name);
 	  data.objfile = objfile;
-	  objfile->sf->qf->map_matching_symbols (objfile, name1, domain,
-						 global,
+	  objfile->sf->qf->map_matching_symbols (objfile, name1.c_str (),
+						 domain, global,
 						 aux_add_nonlocal_symbols,
 						 &data,
-						 full_match, compare_names);
+						 symbol_name_match_type::FULL,
+						 compare_names);
 	}
     }      	
 }
 
-/* Find symbols in DOMAIN matching NAME, in BLOCK and, if FULL_SEARCH is
-   non-zero, enclosing scope and in global scopes, returning the number of
-   matches.  Add these to OBSTACKP.
+/* Find symbols in DOMAIN matching LOOKUP_NAME, in BLOCK and, if
+   FULL_SEARCH is non-zero, enclosing scope and in global scopes,
+   returning the number of matches.  Add these to OBSTACKP.
 
    When FULL_SEARCH is non-zero, any non-function/non-enumeral
    symbol match within the nest of blocks whose innermost member is BLOCK,
@@ -5711,8 +5720,9 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
    enclosing blocks is returned).  If there are any matches in or
    surrounding BLOCK, then these alone are returned.
 
-   Names prefixed with "standard__" are handled specially: "standard__"
-   is first stripped off, and only static and global symbols are searched.
+   Names prefixed with "standard__" are handled specially:
+   "standard__" is first stripped off (by the lookup_name
+   constructor), and only static and global symbols are searched.
 
    If MADE_GLOBAL_LOOKUP_P is non-null, set it before return to whether we had
    to lookup global symbols.  */
@@ -5720,13 +5730,12 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
 static void
 ada_add_all_symbols (struct obstack *obstackp,
 		     const struct block *block,
-		     const char *name,
+		     const lookup_name_info &lookup_name,
 		     domain_enum domain,
 		     int full_search,
 		     int *made_global_lookup_p)
 {
   struct symbol *sym;
-  const int wild_match_p = should_use_wild_match (name);
 
   if (made_global_lookup_p)
     *made_global_lookup_p = 0;
@@ -5738,25 +5747,21 @@ ada_add_all_symbols (struct obstack *obstackp,
      using, for instance, Standard.Constraint_Error when Constraint_Error
      is ambiguous (due to the user defining its own Constraint_Error
      entity inside its program).  */
-  if (startswith (name, "standard__"))
-    {
-      block = NULL;
-      name = name + sizeof ("standard__") - 1;
-    }
+  if (lookup_name.ada ().standard_p ())
+    block = NULL;
 
   /* Check the non-global symbols.  If we have ANY match, then we're done.  */
 
   if (block != NULL)
     {
       if (full_search)
-	ada_add_local_symbols (obstackp, name, block, domain, wild_match_p);
+	ada_add_local_symbols (obstackp, lookup_name, block, domain);
       else
 	{
 	  /* In the !full_search case we're are being called by
 	     ada_iterate_over_symbols, and we don't want to search
 	     superblocks.  */
-	  ada_add_block_symbols (obstackp, block, name, domain, NULL,
-				 wild_match_p);
+	  ada_add_block_symbols (obstackp, block, lookup_name, domain, NULL);
 	}
       if (num_defns_collected (obstackp) > 0 || !full_search)
 	return;
@@ -5766,10 +5771,11 @@ ada_add_all_symbols (struct obstack *obstackp,
      already performed this search before.  If we have, then return
      the same result.  */
 
-  if (lookup_cached_symbol (name, domain, &sym, &block))
+  if (lookup_cached_symbol (ada_lookup_name (lookup_name),
+			    domain, &sym, &block))
     {
       if (sym != NULL)
-        add_defn_to_vec (obstackp, sym, block);
+	add_defn_to_vec (obstackp, sym, block);
       return;
     }
 
@@ -5778,17 +5784,17 @@ ada_add_all_symbols (struct obstack *obstackp,
 
   /* Search symbols from all global blocks.  */
  
-  add_nonlocal_symbols (obstackp, name, domain, 1, wild_match_p);
+  add_nonlocal_symbols (obstackp, lookup_name, domain, 1);
 
   /* Now add symbols from all per-file blocks if we've gotten no hits
      (not strictly correct, but perhaps better than an error).  */
 
   if (num_defns_collected (obstackp) == 0)
-    add_nonlocal_symbols (obstackp, name, domain, 0, wild_match_p);
+    add_nonlocal_symbols (obstackp, lookup_name, domain, 0);
 }
 
-/* Find symbols in DOMAIN matching NAME, in BLOCK and, if full_search is
-   non-zero, enclosing scope and in global scopes, returning the number of
+/* Find symbols in DOMAIN matching LOOKUP_NAME, in BLOCK and, if FULL_SEARCH
+   is non-zero, enclosing scope and in global scopes, returning the number of
    matches.
    Sets *RESULTS to point to a vector of (SYM,BLOCK) tuples,
    indicating the symbols found and the blocks and symbol tables (if
@@ -5805,19 +5811,19 @@ ada_add_all_symbols (struct obstack *obstackp,
    is first stripped off, and only static and global symbols are searched.  */
 
 static int
-ada_lookup_symbol_list_worker (const char *name, const struct block *block,
+ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
+			       const struct block *block,
 			       domain_enum domain,
 			       struct block_symbol **results,
 			       int full_search)
 {
-  const int wild_match_p = should_use_wild_match (name);
   int syms_from_global_search;
   int ndefns;
 
   obstack_free (&symbol_list_obstack, NULL);
   obstack_init (&symbol_list_obstack);
-  ada_add_all_symbols (&symbol_list_obstack, block, name, domain,
-		       full_search, &syms_from_global_search);
+  ada_add_all_symbols (&symbol_list_obstack, block, lookup_name,
+		       domain, full_search, &syms_from_global_search);
 
   ndefns = num_defns_collected (&symbol_list_obstack);
   *results = defns_collected (&symbol_list_obstack, 1);
@@ -5825,32 +5831,37 @@ ada_lookup_symbol_list_worker (const char *name, const struct block *block,
   ndefns = remove_extra_symbols (*results, ndefns);
 
   if (ndefns == 0 && full_search && syms_from_global_search)
-    cache_symbol (name, domain, NULL, NULL);
+    cache_symbol (ada_lookup_name (lookup_name), domain, NULL, NULL);
 
   if (ndefns == 1 && full_search && syms_from_global_search)
-    cache_symbol (name, domain, (*results)[0].symbol, (*results)[0].block);
+    cache_symbol (ada_lookup_name (lookup_name), domain,
+		  (*results)[0].symbol, (*results)[0].block);
 
   ndefns = remove_irrelevant_renamings (*results, ndefns, block);
   return ndefns;
 }
 
-/* Find symbols in DOMAIN matching NAME0, in BLOCK0 and enclosing scope and
+/* Find symbols in DOMAIN matching NAME, in BLOCK and enclosing scope and
    in global scopes, returning the number of matches, and setting *RESULTS
    to a vector of (SYM,BLOCK) tuples.
    See ada_lookup_symbol_list_worker for further details.  */
 
 int
-ada_lookup_symbol_list (const char *name0, const struct block *block0,
+ada_lookup_symbol_list (const char *name, const struct block *block,
 			domain_enum domain, struct block_symbol **results)
 {
-  return ada_lookup_symbol_list_worker (name0, block0, domain, results, 1);
+  symbol_name_match_type name_match_type = name_match_type_from_name (name);
+  lookup_name_info lookup_name (name, name_match_type);
+
+  return ada_lookup_symbol_list_worker (lookup_name, block, domain, results, 1);
 }
 
 /* Implementation of the la_iterate_over_symbols method.  */
 
 static void
 ada_iterate_over_symbols
-  (const struct block *block, const char *name, domain_enum domain,
+  (const struct block *block, const lookup_name_info &name,
+   domain_enum domain,
    gdb::function_view<symbol_found_callback_ftype> callback)
 {
   int ndefs, i;
@@ -5862,24 +5873,6 @@ ada_iterate_over_symbols
       if (!callback (results[i].symbol))
 	break;
     }
-}
-
-/* If NAME is the name of an entity, return a string that should
-   be used to look that entity up in Ada units.
-
-   NAME can have any form that the "break" or "print" commands might
-   recognize.  In other words, it does not have to be the "natural"
-   name, or the "encoded" name.  */
-
-std::string
-ada_name_for_lookup (const char *name)
-{
-  int nlen = strlen (name);
-
-  if (name[0] == '<' && name[nlen - 1] == '>')
-    return std::string (name + 1, nlen - 2);
-  else
-    return ada_encode (ada_fold_name (name));
 }
 
 /* The result is as for ada_lookup_symbol_list with FULL_SEARCH set
@@ -5897,10 +5890,19 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
   struct block_symbol *candidates;
   int n_candidates;
 
+  /* Since we already have an encoded name, wrap it in '<>' to force a
+     verbatim match.  Otherwise, if the name happens to not look like
+     an encoded name (because it doesn't include a "__"),
+     ada_lookup_name_info would re-encode/fold it again, and that
+     would e.g., incorrectly lowercase object renaming names like
+     "R28b" -> "r28b".  */
+  std::string verbatim = std::string ("<") + name + '>';
+
   gdb_assert (info != NULL);
   memset (info, 0, sizeof (struct block_symbol));
 
-  n_candidates = ada_lookup_symbol_list (name, block, domain, &candidates);
+  n_candidates = ada_lookup_symbol_list (verbatim.c_str (), block,
+					 domain, &candidates);
   if (n_candidates == 0)
     return;
 
@@ -6181,11 +6183,12 @@ advance_wild_match (const char **namep, const char *name0, int target0)
   return 1;
 }
 
-/* Return 0 iff NAME encodes a name of the form prefix.PATN.  Ignores any
-   informational suffixes of NAME (i.e., for which is_name_suffix is
-   true).  Assumes that PATN is a lower-cased Ada simple name.  */
+/* Return true iff NAME encodes a name of the form prefix.PATN.
+   Ignores any informational suffixes of NAME (i.e., for which
+   is_name_suffix is true).  Assumes that PATN is a lower-cased Ada
+   simple name.  */
 
-static int
+static bool
 wild_match (const char *name, const char *patn)
 {
   const char *p;
@@ -6201,39 +6204,49 @@ wild_match (const char *name, const char *patn)
 	    if (*p != *name)
 	      break;
 	  if (*p == '\0' && is_name_suffix (name))
-	    return match != name0 && !is_valid_name_for_wild_match (name0);
+	    return match == name0 || is_valid_name_for_wild_match (name0);
 
 	  if (name[-1] == '_')
 	    name -= 1;
 	}
       if (!advance_wild_match (&name, name0, *patn))
-	return 1;
+	return false;
     }
 }
 
-/* Returns 0 iff symbol name SYM_NAME matches SEARCH_NAME, apart from
-   informational suffix.  */
+/* Returns true iff symbol name SYM_NAME matches SEARCH_NAME, ignoring
+   any trailing suffixes that encode debugging information or leading
+   _ada_ on SYM_NAME (see is_name_suffix commentary for the debugging
+   information that is ignored).  */
 
-static int
+static bool
 full_match (const char *sym_name, const char *search_name)
 {
-  return !match_name (sym_name, search_name, 0);
+  size_t search_name_len = strlen (search_name);
+
+  if (strncmp (sym_name, search_name, search_name_len) == 0
+      && is_name_suffix (sym_name + search_name_len))
+    return true;
+
+  if (startswith (sym_name, "_ada_")
+      && strncmp (sym_name + 5, search_name, search_name_len) == 0
+      && is_name_suffix (sym_name + search_name_len + 5))
+    return true;
+
+  return false;
 }
 
-
-/* Add symbols from BLOCK matching identifier NAME in DOMAIN to
-   vector *defn_symbols, updating the list of symbols in OBSTACKP 
-   (if necessary).  If WILD, treat as NAME with a wildcard prefix.
-   OBJFILE is the section containing BLOCK.  */
+/* Add symbols from BLOCK matching LOOKUP_NAME in DOMAIN to vector
+   *defn_symbols, updating the list of symbols in OBSTACKP (if
+   necessary).  OBJFILE is the section containing BLOCK.  */
 
 static void
 ada_add_block_symbols (struct obstack *obstackp,
-                       const struct block *block, const char *name,
-                       domain_enum domain, struct objfile *objfile,
-                       int wild)
+		       const struct block *block,
+		       const lookup_name_info &lookup_name,
+		       domain_enum domain, struct objfile *objfile)
 {
   struct block_iterator iter;
-  int name_len = strlen (name);
   /* A matching argument symbol, if any.  */
   struct symbol *arg_sym;
   /* Set true when we find a matching non-argument symbol.  */
@@ -6242,56 +6255,31 @@ ada_add_block_symbols (struct obstack *obstackp,
 
   arg_sym = NULL;
   found_sym = 0;
-  if (wild)
+  for (sym = block_iter_match_first (block, lookup_name, &iter);
+       sym != NULL;
+       sym = block_iter_match_next (lookup_name, &iter))
     {
-      for (sym = block_iter_match_first (block, name, wild_match, &iter);
-	   sym != NULL; sym = block_iter_match_next (name, wild_match, &iter))
-      {
-        if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-                                   SYMBOL_DOMAIN (sym), domain)
-            && wild_match (SYMBOL_LINKAGE_NAME (sym), name) == 0)
-          {
-	    if (SYMBOL_CLASS (sym) == LOC_UNRESOLVED)
-	      continue;
-	    else if (SYMBOL_IS_ARGUMENT (sym))
-	      arg_sym = sym;
-	    else
-	      {
-                found_sym = 1;
-                add_defn_to_vec (obstackp,
-                                 fixup_symbol_section (sym, objfile),
-                                 block);
-              }
-          }
-      }
-    }
-  else
-    {
-     for (sym = block_iter_match_first (block, name, full_match, &iter);
-	  sym != NULL; sym = block_iter_match_next (name, full_match, &iter))
-      {
-        if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-                                   SYMBOL_DOMAIN (sym), domain))
-          {
-	    if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
-	      {
-		if (SYMBOL_IS_ARGUMENT (sym))
-		  arg_sym = sym;
-		else
-		  {
-		    found_sym = 1;
-		    add_defn_to_vec (obstackp,
-				     fixup_symbol_section (sym, objfile),
-				     block);
-		  }
-	      }
-          }
-      }
+      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				 SYMBOL_DOMAIN (sym), domain))
+	{
+	  if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
+	    {
+	      if (SYMBOL_IS_ARGUMENT (sym))
+		arg_sym = sym;
+	      else
+		{
+		  found_sym = 1;
+		  add_defn_to_vec (obstackp,
+				   fixup_symbol_section (sym, objfile),
+				   block);
+		}
+	    }
+	}
     }
 
   /* Handle renamings.  */
 
-  if (ada_add_block_renamings (obstackp, block, name, domain, wild))
+  if (ada_add_block_renamings (obstackp, block, lookup_name, domain))
     found_sym = 1;
 
   if (!found_sym && arg_sym != NULL)
@@ -6301,10 +6289,13 @@ ada_add_block_symbols (struct obstack *obstackp,
                        block);
     }
 
-  if (!wild)
+  if (!lookup_name.ada ().wild_match_p ())
     {
       arg_sym = NULL;
       found_sym = 0;
+      const std::string &ada_lookup_name = lookup_name.ada ().lookup_name ();
+      const char *name = ada_lookup_name.c_str ();
+      size_t name_len = ada_lookup_name.size ();
 
       ALL_BLOCK_SYMBOLS (block, iter, sym)
       {
@@ -6355,51 +6346,39 @@ ada_add_block_symbols (struct obstack *obstackp,
 
                                 /* Symbol Completion */
 
-/* If SYM_NAME is a completion candidate for TEXT, return this symbol
-   name in a form that's appropriate for the completion.  The result
-   does not need to be deallocated, but is only good until the next call.
+/* See symtab.h.  */
 
-   TEXT_LEN is equal to the length of TEXT.
-   Perform a wild match if WILD_MATCH_P is set.
-   ENCODED_P should be set if TEXT represents the start of a symbol name
-   in its encoded form.  */
-
-static const char *
-symbol_completion_match (const char *sym_name,
-                         const char *text, int text_len,
-                         int wild_match_p, int encoded_p)
+bool
+ada_lookup_name_info::matches
+  (const char *sym_name,
+   symbol_name_match_type match_type,
+   completion_match *comp_match) const
 {
-  const int verbatim_match = (text[0] == '<');
-  int match = 0;
-
-  if (verbatim_match)
-    {
-      /* Strip the leading angle bracket.  */
-      text = text + 1;
-      text_len--;
-    }
+  bool match = false;
+  const char *text = m_encoded_name.c_str ();
+  size_t text_len = m_encoded_name.size ();
 
   /* First, test against the fully qualified name of the symbol.  */
 
   if (strncmp (sym_name, text, text_len) == 0)
-    match = 1;
+    match = true;
 
-  if (match && !encoded_p)
+  if (match && !m_encoded_p)
     {
       /* One needed check before declaring a positive match is to verify
          that iff we are doing a verbatim match, the decoded version
          of the symbol name starts with '<'.  Otherwise, this symbol name
          is not a suitable completion.  */
       const char *sym_name_copy = sym_name;
-      int has_angle_bracket;
+      bool has_angle_bracket;
 
       sym_name = ada_decode (sym_name);
       has_angle_bracket = (sym_name[0] == '<');
-      match = (has_angle_bracket == verbatim_match);
+      match = (has_angle_bracket == m_verbatim_p);
       sym_name = sym_name_copy;
     }
 
-  if (match && !verbatim_match)
+  if (match && !m_verbatim_p)
     {
       /* When doing non-verbatim match, another check that needs to
          be done is to verify that the potentially matching symbol name
@@ -6410,12 +6389,12 @@ symbol_completion_match (const char *sym_name,
 
       for (tmp = sym_name; *tmp != '\0' && !isupper (*tmp); tmp++);
       if (*tmp != '\0')
-        match = 0;
+	match = false;
     }
 
   /* Second: Try wild matching...  */
 
-  if (!match && wild_match_p)
+  if (!match && m_wild_match_p)
     {
       /* Since we are doing wild matching, this means that TEXT
          may represent an unqualified symbol name.  We therefore must
@@ -6423,91 +6402,47 @@ symbol_completion_match (const char *sym_name,
       sym_name = ada_unqualified_name (ada_decode (sym_name));
 
       if (strncmp (sym_name, text, text_len) == 0)
-        match = 1;
+	match = true;
     }
 
-  /* Finally: If we found a mach, prepare the result to return.  */
+  /* Finally: If we found a match, prepare the result to return.  */
 
   if (!match)
-    return NULL;
+    return false;
 
-  if (verbatim_match)
-    sym_name = add_angle_brackets (sym_name);
+  if (comp_match != NULL)
+    {
+      std::string &match_str = comp_match->storage ();
 
-  if (!encoded_p)
-    sym_name = ada_decode (sym_name);
+      if (!m_encoded_p)
+	{
+	  match_str = ada_decode (sym_name);
+	  comp_match->set_match (match_str.c_str ());
+	}
+      else
+	{
+	  if (m_verbatim_p)
+	    match_str = add_angle_brackets (sym_name);
+	  else
+	    match_str = sym_name;
 
-  return sym_name;
+	  comp_match->set_match (match_str.c_str ());
+	}
+    }
+
+  return true;
 }
 
-/* A companion function to ada_collect_symbol_completion_matches().
-   Check if SYM_NAME represents a symbol which name would be suitable
-   to complete TEXT (TEXT_LEN is the length of TEXT), in which case it
-   is added as a completion match to TRACKER.
-
-   ORIG_TEXT is the string original string from the user command
-   that needs to be completed.  WORD is the entire command on which
-   completion should be performed.  These two parameters are used to
-   determine which part of the symbol name should be added to the
-   completion vector.
-   if WILD_MATCH_P is set, then wild matching is performed.
-   ENCODED_P should be set if TEXT represents a symbol name in its
-   encoded formed (in which case the completion should also be
-   encoded).  */
-
-static void
-symbol_completion_add (completion_tracker &tracker,
-		       const char *sym_name,
-                       const char *text, int text_len,
-                       const char *orig_text, const char *word,
-                       int wild_match_p, int encoded_p)
-{
-  const char *match = symbol_completion_match (sym_name, text, text_len,
-                                               wild_match_p, encoded_p);
-  char *completion;
-
-  if (match == NULL)
-    return;
-
-  /* We found a match, so add the appropriate completion to the given
-     string vector.  */
-
-  if (word == orig_text)
-    {
-      completion = (char *) xmalloc (strlen (match) + 5);
-      strcpy (completion, match);
-    }
-  else if (word > orig_text)
-    {
-      /* Return some portion of sym_name.  */
-      completion = (char *) xmalloc (strlen (match) + 5);
-      strcpy (completion, match + (word - orig_text));
-    }
-  else
-    {
-      /* Return some of ORIG_TEXT plus sym_name.  */
-      completion = (char *) xmalloc (strlen (match) + (orig_text - word) + 5);
-      strncpy (completion, word, orig_text - word);
-      completion[orig_text - word] = '\0';
-      strcat (completion, match);
-    }
-
-  tracker.add_completion (gdb::unique_xmalloc_ptr<char> (completion));
-}
-
-/* Add the list of possible symbol names completing TEXT0 to TRACKER.
+/* Add the list of possible symbol names completing TEXT to TRACKER.
    WORD is the entire command on which completion is made.  */
 
 static void
 ada_collect_symbol_completion_matches (completion_tracker &tracker,
 				       complete_symbol_mode mode,
-				       const char *text0, const char *word,
+				       symbol_name_match_type name_match_type,
+				       const char *text, const char *word,
 				       enum type_code code)
 {
-  char *text;
-  int text_len;
-  int wild_match_p;
-  int encoded_p;
   struct symbol *sym;
   struct compunit_symtab *s;
   struct minimal_symbol *msymbol;
@@ -6519,39 +6454,12 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 
   gdb_assert (code == TYPE_CODE_UNDEF);
 
-  if (text0[0] == '<')
-    {
-      text = xstrdup (text0);
-      make_cleanup (xfree, text);
-      text_len = strlen (text);
-      wild_match_p = 0;
-      encoded_p = 1;
-    }
-  else
-    {
-      text = xstrdup (ada_encode (text0));
-      make_cleanup (xfree, text);
-      text_len = strlen (text);
-      for (i = 0; i < text_len; i++)
-        text[i] = tolower (text[i]);
-
-      encoded_p = (strstr (text0, "__") != NULL);
-      /* If the name contains a ".", then the user is entering a fully
-         qualified entity name, and the match must not be done in wild
-         mode.  Similarly, if the user wants to complete what looks like
-         an encoded name, the match must not be done in wild mode.  */
-      wild_match_p = (strchr (text0, '.') == NULL && !encoded_p);
-    }
+  lookup_name_info lookup_name (text, name_match_type, true);
 
   /* First, look at the partial symtab symbols.  */
   expand_symtabs_matching (NULL,
-			   [&] (const char *symname)
-			   {
-			     return symbol_completion_match (symname,
-							     text, text_len,
-							     wild_match_p,
-							     encoded_p);
-			   },
+			   lookup_name,
+			   NULL,
 			   NULL,
 			   ALL_DOMAIN);
 
@@ -6563,9 +6471,14 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
   ALL_MSYMBOLS (objfile, msymbol)
   {
     QUIT;
-    symbol_completion_add (tracker, MSYMBOL_LINKAGE_NAME (msymbol),
-			   text, text_len, text0, word, wild_match_p,
-			   encoded_p);
+
+    if (completion_skip_symbol (mode, msymbol))
+      continue;
+
+    completion_list_add_name (tracker,
+			      MSYMBOL_LANGUAGE (msymbol),
+			      MSYMBOL_LINKAGE_NAME (msymbol),
+			      lookup_name, text, word);
   }
 
   /* Search upwards from currently selected frame (so that we can
@@ -6578,9 +6491,13 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 
       ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
-	symbol_completion_add (tracker, SYMBOL_LINKAGE_NAME (sym),
-                               text, text_len, text0, word,
-                               wild_match_p, encoded_p);
+	if (completion_skip_symbol (mode, sym))
+	  continue;
+
+	completion_list_add_name (tracker,
+				  SYMBOL_LANGUAGE (sym),
+				  SYMBOL_LINKAGE_NAME (sym),
+				  lookup_name, text, word);
       }
     }
 
@@ -6593,9 +6510,13 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
     b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      symbol_completion_add (tracker, SYMBOL_LINKAGE_NAME (sym),
-                             text, text_len, text0, word,
-                             wild_match_p, encoded_p);
+      if (completion_skip_symbol (mode, sym))
+	continue;
+
+      completion_list_add_name (tracker,
+				SYMBOL_LANGUAGE (sym),
+				SYMBOL_LINKAGE_NAME (sym),
+				lookup_name, text, word);
     }
   }
 
@@ -6608,9 +6529,13 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
       continue;
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      symbol_completion_add (tracker, SYMBOL_LINKAGE_NAME (sym),
-                             text, text_len, text0, word,
-                             wild_match_p, encoded_p);
+      if (completion_skip_symbol (mode, sym))
+	continue;
+
+      completion_list_add_name (tracker,
+				SYMBOL_LANGUAGE (sym),
+				SYMBOL_LINKAGE_NAME (sym),
+				lookup_name, text, word);
     }
   }
 
@@ -9567,33 +9492,29 @@ unwrap_value (struct value *val)
 }
 
 static struct value *
-cast_to_fixed (struct type *type, struct value *arg)
+cast_from_fixed (struct type *type, struct value *arg)
 {
-  LONGEST val;
+  struct value *scale = ada_scaling_factor (value_type (arg));
+  arg = value_cast (value_type (scale), arg);
 
-  if (type == value_type (arg))
-    return arg;
-  else if (ada_is_fixed_point_type (value_type (arg)))
-    val = ada_float_to_fixed (type,
-                              ada_fixed_to_float (value_type (arg),
-                                                  value_as_long (arg)));
-  else
-    {
-      DOUBLEST argd = value_as_double (arg);
-
-      val = ada_float_to_fixed (type, argd);
-    }
-
-  return value_from_longest (type, val);
+  arg = value_binop (arg, scale, BINOP_MUL);
+  return value_cast (type, arg);
 }
 
 static struct value *
-cast_from_fixed (struct type *type, struct value *arg)
+cast_to_fixed (struct type *type, struct value *arg)
 {
-  DOUBLEST val = ada_fixed_to_float (value_type (arg),
-                                     value_as_long (arg));
+  if (type == value_type (arg))
+    return arg;
 
-  return value_from_double (type, val);
+  struct value *scale = ada_scaling_factor (type);
+  if (ada_is_fixed_point_type (value_type (arg)))
+    arg = cast_from_fixed (value_type (scale), arg);
+  else
+    arg = value_cast (value_type (scale), arg);
+
+  arg = value_binop (arg, scale, BINOP_DIV);
+  return value_cast (type, arg);
 }
 
 /* Given two array types T1 and T2, return nonzero iff both arrays
@@ -10382,14 +10303,14 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
     one element out of that array.  On the other hand, fixing should
     not be performed on the elements when taking a slice of an array!
 
-    Note that one of the side-effects of miscomputing the offset and
+    Note that one of the side effects of miscomputing the offset and
     size of each field is that we end up also miscomputing the size
     of the containing type.  This can have adverse results when computing
     the value of an entity.  GDB fetches the value of an entity based
     on the size of its type, and thus a wrong size causes GDB to fetch
     the wrong amount of memory.  In the case where the computed size is
     too small, GDB fetches too little data to print the value of our
-    entiry.  Results in this case as unpredicatble, as we usually read
+    entity.  Results in this case are unpredictable, as we usually read
     past the buffer containing the data =:-o.  */
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure
@@ -11475,68 +11396,57 @@ ada_is_system_address_type (struct type *type)
 }
 
 /* Assuming that TYPE is the representation of an Ada fixed-point
-   type, return its delta, or -1 if the type is malformed and the
+   type, return the target floating-point type to be used to represent
+   of this type during internal computation.  */
+
+static struct type *
+ada_scaling_type (struct type *type)
+{
+  return builtin_type (get_type_arch (type))->builtin_long_double;
+}
+
+/* Assuming that TYPE is the representation of an Ada fixed-point
+   type, return its delta, or NULL if the type is malformed and the
    delta cannot be determined.  */
 
-DOUBLEST
+struct value *
 ada_delta (struct type *type)
 {
   const char *encoding = fixed_type_info (type);
-  DOUBLEST num, den;
+  struct type *scale_type = ada_scaling_type (type);
 
-  /* Strictly speaking, num and den are encoded as integer.  However,
-     they may not fit into a long, and they will have to be converted
-     to DOUBLEST anyway.  So scan them as DOUBLEST.  */
-  if (sscanf (encoding, "_%" DOUBLEST_SCAN_FORMAT "_%" DOUBLEST_SCAN_FORMAT,
-	      &num, &den) < 2)
-    return -1.0;
+  long long num, den;
+
+  if (sscanf (encoding, "_%lld_%lld", &num, &den) < 2)
+    return nullptr;
   else
-    return num / den;
+    return value_binop (value_from_longest (scale_type, num),
+			value_from_longest (scale_type, den), BINOP_DIV);
 }
 
 /* Assuming that ada_is_fixed_point_type (TYPE), return the scaling
    factor ('SMALL value) associated with the type.  */
 
-static DOUBLEST
-scaling_factor (struct type *type)
+struct value *
+ada_scaling_factor (struct type *type)
 {
   const char *encoding = fixed_type_info (type);
-  DOUBLEST num0, den0, num1, den1;
+  struct type *scale_type = ada_scaling_type (type);
+
+  long long num0, den0, num1, den1;
   int n;
 
-  /* Strictly speaking, num's and den's are encoded as integer.  However,
-     they may not fit into a long, and they will have to be converted
-     to DOUBLEST anyway.  So scan them as DOUBLEST.  */
-  n = sscanf (encoding,
-	      "_%" DOUBLEST_SCAN_FORMAT "_%" DOUBLEST_SCAN_FORMAT
-	      "_%" DOUBLEST_SCAN_FORMAT "_%" DOUBLEST_SCAN_FORMAT,
+  n = sscanf (encoding, "_%lld_%lld_%lld_%lld",
 	      &num0, &den0, &num1, &den1);
 
   if (n < 2)
-    return 1.0;
+    return value_from_longest (scale_type, 1);
   else if (n == 4)
-    return num1 / den1;
+    return value_binop (value_from_longest (scale_type, num1),
+			value_from_longest (scale_type, den1), BINOP_DIV);
   else
-    return num0 / den0;
-}
-
-
-/* Assuming that X is the representation of a value of fixed-point
-   type TYPE, return its floating-point equivalent.  */
-
-DOUBLEST
-ada_fixed_to_float (struct type *type, LONGEST x)
-{
-  return (DOUBLEST) x *scaling_factor (type);
-}
-
-/* The representation of a fixed-point value of type TYPE
-   corresponding to the value X.  */
-
-LONGEST
-ada_float_to_fixed (struct type *type, DOUBLEST x)
-{
-  return (LONGEST) (x / scaling_factor (type) + 0.5);
+    return value_binop (value_from_longest (scale_type, num0),
+			value_from_longest (scale_type, den0), BINOP_DIV);
 }
 
 
@@ -11598,11 +11508,12 @@ scan_discrim_bound (const char *str, int k, struct value *dval, LONGEST * px,
 static struct value *
 get_var_value (const char *name, const char *err_msg)
 {
-  struct block_symbol *syms;
-  int nsyms;
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
-  nsyms = ada_lookup_symbol_list (name, get_selected_block (0), VAR_DOMAIN,
-                                  &syms);
+  struct block_symbol *syms;
+  int nsyms = ada_lookup_symbol_list_worker (lookup_name,
+					     get_selected_block (0),
+					     VAR_DOMAIN, &syms, 1);
 
   if (nsyms != 1)
     {
@@ -13003,7 +12914,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 /* Implement the "catch exception" command.  */
 
 static void
-catch_ada_exception_command (char *arg_entry, int from_tty,
+catch_ada_exception_command (const char *arg_entry, int from_tty,
 			     struct cmd_list_element *command)
 {
   const char *arg = arg_entry;
@@ -13058,7 +12969,7 @@ catch_ada_assert_command_split (const char *args, char **cond_string)
 /* Implement the "catch assert" command.  */
 
 static void
-catch_assert_command (char *arg_entry, int from_tty,
+catch_assert_command (const char *arg_entry, int from_tty,
 		      struct cmd_list_element *command)
 {
   const char *arg = arg_entry;
@@ -13275,6 +13186,7 @@ ada_add_global_exceptions (compiled_regex *preg,
      regular expression used to do the matching refers to the natural
      name.  So match against the decoded name.  */
   expand_symtabs_matching (NULL,
+			   lookup_name_info::match_any (),
 			   [&] (const char *search_name)
 			   {
 			     const char *decoded = ada_decode (search_name);
@@ -13374,7 +13286,7 @@ ada_exceptions_list (const char *regexp)
 /* Implement the "info exceptions" command.  */
 
 static void
-info_exceptions_command (char *regexp, int from_tty)
+info_exceptions_command (const char *regexp, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
@@ -13874,16 +13786,113 @@ static const struct exp_descriptor ada_exp_descriptor = {
   ada_evaluate_subexp
 };
 
-/* Implement the "la_get_symbol_name_cmp" language_defn method
-   for Ada.  */
+/* symbol_name_matcher_ftype adapter for wild_match.  */
 
-static symbol_name_cmp_ftype
-ada_get_symbol_name_cmp (const char *lookup_name)
+static bool
+do_wild_match (const char *symbol_search_name,
+	       const lookup_name_info &lookup_name,
+	       completion_match *match)
 {
-  if (should_use_wild_match (lookup_name))
-    return wild_match;
+  return wild_match (symbol_search_name, ada_lookup_name (lookup_name));
+}
+
+/* symbol_name_matcher_ftype adapter for full_match.  */
+
+static bool
+do_full_match (const char *symbol_search_name,
+	       const lookup_name_info &lookup_name,
+	       completion_match *match)
+{
+  return full_match (symbol_search_name, ada_lookup_name (lookup_name));
+}
+
+/* Build the Ada lookup name for LOOKUP_NAME.  */
+
+ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
+{
+  const std::string &user_name = lookup_name.name ();
+
+  if (user_name[0] == '<')
+    {
+      if (user_name.back () == '>')
+	m_encoded_name = user_name.substr (1, user_name.size () - 2);
+      else
+	m_encoded_name = user_name.substr (1, user_name.size () - 1);
+      m_encoded_p = true;
+      m_verbatim_p = true;
+      m_wild_match_p = false;
+      m_standard_p = false;
+    }
   else
-    return compare_names;
+    {
+      m_verbatim_p = false;
+
+      m_encoded_p = user_name.find ("__") != std::string::npos;
+
+      if (!m_encoded_p)
+	{
+	  const char *folded = ada_fold_name (user_name.c_str ());
+	  const char *encoded = ada_encode_1 (folded, false);
+	  if (encoded != NULL)
+	    m_encoded_name = encoded;
+	  else
+	    m_encoded_name = user_name;
+	}
+      else
+	m_encoded_name = user_name;
+
+      /* Handle the 'package Standard' special case.  See description
+	 of m_standard_p.  */
+      if (startswith (m_encoded_name.c_str (), "standard__"))
+	{
+	  m_encoded_name = m_encoded_name.substr (sizeof ("standard__") - 1);
+	  m_standard_p = true;
+	}
+      else
+	m_standard_p = false;
+
+      /* If the name contains a ".", then the user is entering a fully
+	 qualified entity name, and the match must not be done in wild
+	 mode.  Similarly, if the user wants to complete what looks
+	 like an encoded name, the match must not be done in wild
+	 mode.  Also, in the standard__ special case always do
+	 non-wild matching.  */
+      m_wild_match_p
+	= (lookup_name.match_type () != symbol_name_match_type::FULL
+	   && !m_encoded_p
+	   && !m_standard_p
+	   && user_name.find ('.') == std::string::npos);
+    }
+}
+
+/* symbol_name_matcher_ftype method for Ada.  This only handles
+   completion mode.  */
+
+static bool
+ada_symbol_name_matches (const char *symbol_search_name,
+			 const lookup_name_info &lookup_name,
+			 completion_match *match)
+{
+  return lookup_name.ada ().matches (symbol_search_name,
+				     lookup_name.match_type (),
+				     match);
+}
+
+/* Implement the "la_get_symbol_name_matcher" language_defn method for
+   Ada.  */
+
+static symbol_name_matcher_ftype *
+ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
+{
+  if (lookup_name.completion_mode ())
+    return ada_symbol_name_matches;
+  else
+    {
+      if (lookup_name.ada ().wild_match_p ())
+	return do_wild_match;
+      else
+	return do_full_match;
+    }
 }
 
 /* Implement the "la_read_var_value" language_defn method for Ada.  */
@@ -13954,8 +13963,9 @@ extern const struct language_defn ada_language_defn = {
   default_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  ada_get_symbol_name_cmp,	/* la_get_symbol_name_cmp */
+  ada_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
   ada_iterate_over_symbols,
+  default_search_name_hash,
   &ada_varobj_ops,
   NULL,
   NULL,

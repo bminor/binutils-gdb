@@ -59,7 +59,7 @@ Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 10 entries:
 [0-9a-f ]+R_SH_TLS_DTPOFF32 +0+ +sg1 \+ 0
 [0-9a-f ]+R_SH_TLS_TPOFF32 +0+04 +sg2 \+ 0
 
-Relocation section '\.rela\.plt' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '\.rela\.plt' at offset 0x[0-9a-f]+ contains 1 entry:
  Offset +Info +Type +Sym\.Value +Sym\. Name \+ Addend
 [0-9a-f ]+R_SH_JMP_SLOT[0-9a-f ]+__tls_get_addr \+ [0-9a-f]+
 

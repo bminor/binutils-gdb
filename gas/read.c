@@ -713,19 +713,19 @@ assemble_one (char *line)
       /* Make sure this hasn't pushed the locked sequence
 	 past the bundle size.  */
       unsigned int bundle_size = pending_bundle_size (bundle_lock_frag);
-      if (bundle_size > (1U << bundle_align_p2))
-	as_bad (_("\
-.bundle_lock sequence at %u bytes but .bundle_align_mode limit is %u bytes"),
+      if (bundle_size > 1U << bundle_align_p2)
+	as_bad (_ (".bundle_lock sequence at %u bytes, "
+		   "but .bundle_align_mode limit is %u bytes"),
 		bundle_size, 1U << bundle_align_p2);
     }
   else if (bundle_align_p2 > 0)
     {
       unsigned int insn_size = pending_bundle_size (insn_start_frag);
 
-      if (insn_size > (1U << bundle_align_p2))
-	as_bad (_("\
-single instruction is %u bytes long but .bundle_align_mode limit is %u"),
-		(unsigned int) insn_size, 1U << bundle_align_p2);
+      if (insn_size > 1U << bundle_align_p2)
+	as_bad (_("single instruction is %u bytes long, "
+		  "but .bundle_align_mode limit is %u bytes"),
+		insn_size, 1U << bundle_align_p2);
 
       finish_bundle (insn_start_frag, insn_size);
     }
@@ -4489,7 +4489,10 @@ emit_expr_with_reloc (expressionS *exp,
 	    }
 
 	  if (i < exp->X_add_number)
-	    as_warn (_("bignum truncated to %d bytes"), nbytes);
+	    as_warn (ngettext ("bignum truncated to %d byte",
+			       "bignum truncated to %d bytes",
+			       nbytes),
+		     nbytes);
 	  size = nbytes;
 	}
 
@@ -4565,7 +4568,9 @@ emit_expr_fix (expressionS *exp, unsigned int nbytes, fragS *frag, char *p,
 
       if (size > nbytes)
 	{
-	  as_bad (_("%s relocations do not fit in %u bytes\n"),
+	  as_bad (ngettext ("%s relocations do not fit in %u byte",
+			    "%s relocations do not fit in %u bytes",
+			    nbytes),
 		  reloc_howto->name, nbytes);
 	  return;
 	}
@@ -4674,7 +4679,11 @@ parse_bitfield_cons (expressionS *exp, unsigned int nbytes)
 
 	  if ((width = exp->X_add_number) > (BITS_PER_CHAR * nbytes))
 	    {
-	      as_warn (_("field width %lu too big to fit in %d bytes: truncated to %d bits"),
+	      as_warn (ngettext ("field width %lu too big to fit in %d byte:"
+				 " truncated to %d bits",
+				 "field width %lu too big to fit in %d bytes:"
+				 " truncated to %d bits",
+				 nbytes),
 		       width, nbytes, (BITS_PER_CHAR * nbytes));
 	      width = BITS_PER_CHAR * nbytes;
 	    }			/* Too big.  */
@@ -6235,9 +6244,10 @@ s_bundle_unlock (int arg ATTRIBUTE_UNUSED)
 
   size = pending_bundle_size (bundle_lock_frag);
 
-  if (size > (1U << bundle_align_p2))
-    as_bad (_(".bundle_lock sequence is %u bytes, but bundle size only %u"),
-	    size, 1 << bundle_align_p2);
+  if (size > 1U << bundle_align_p2)
+    as_bad (_(".bundle_lock sequence is %u bytes, "
+	      "but bundle size is only %u bytes"),
+	    size, 1u << bundle_align_p2);
   else
     finish_bundle (bundle_lock_frag, size);
 

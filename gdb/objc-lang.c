@@ -405,8 +405,9 @@ extern const struct language_defn objc_language_defn = {
   default_pass_by_reference,
   default_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
@@ -561,7 +562,7 @@ compare_selectors (const void *a, const void *b)
  */
 
 static void
-info_selectors_command (char *regexp, int from_tty)
+info_selectors_command (const char *regexp, int from_tty)
 {
   struct objfile	*objfile;
   struct minimal_symbol *msymbol;
@@ -723,7 +724,7 @@ compare_classes (const void *a, const void *b)
  */
 
 static void
-info_classes_command (char *regexp, int from_tty)
+info_classes_command (const char *regexp, int from_tty)
 {
   struct objfile	*objfile;
   struct minimal_symbol *msymbol;
@@ -1184,7 +1185,7 @@ find_imps (const char *method, VEC (const_char_ptr) **symbol_names)
 }
 
 static void 
-print_object_command (char *args, int from_tty)
+print_object_command (const char *args, int from_tty)
 {
   struct value *object, *function, *description;
   CORE_ADDR string_addr, object_addr;

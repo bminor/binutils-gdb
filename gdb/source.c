@@ -52,14 +52,6 @@
 
 static int get_filename_and_charpos (struct symtab *, char **);
 
-static void reverse_search_command (char *, int);
-
-static void forward_search_command (char *, int);
-
-static void info_line_command (char *, int);
-
-static void info_source_command (char *, int);
-
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
 
@@ -322,7 +314,8 @@ select_source_symtab (struct symtab *s)
    path list.  The theory is that set(show(dir)) should be a no-op.  */
 
 static void
-set_directories_command (char *args, int from_tty, struct cmd_list_element *c)
+set_directories_command (const char *args,
+			 int from_tty, struct cmd_list_element *c)
 {
   /* This is the value that was set.
      It needs to be processed to maintain $cdir:$cwd and remove dups.  */
@@ -419,7 +412,7 @@ init_source_path (void)
 /* Add zero or more directories to the front of the source path.  */
 
 static void
-directory_command (char *dirname, int from_tty)
+directory_command (const char *dirname, int from_tty)
 {
   dont_repeat ();
   /* FIXME, this goes to "delete dir"...  */
@@ -444,7 +437,7 @@ directory_command (char *dirname, int from_tty)
    This will not be quoted so we must not treat spaces as separators.  */
 
 void
-directory_switch (char *dirname, int from_tty)
+directory_switch (const char *dirname, int from_tty)
 {
   add_path (dirname, &source_path, 0);
 }
@@ -452,7 +445,7 @@ directory_switch (char *dirname, int from_tty)
 /* Add zero or more directories to the front of an arbitrary path.  */
 
 void
-mod_path (char *dirname, char **which_path)
+mod_path (const char *dirname, char **which_path)
 {
   add_path (dirname, which_path, 1);
 }
@@ -464,7 +457,7 @@ mod_path (char *dirname, char **which_path)
    as space or tab.  */
 
 void
-add_path (char *dirname, char **which_path, int parse_separators)
+add_path (const char *dirname, char **which_path, int parse_separators)
 {
   char *old = *which_path;
   int prefix = 0;
@@ -643,7 +636,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
 
 
 static void
-info_source_command (char *ignore, int from_tty)
+info_source_command (const char *ignore, int from_tty)
 {
   struct symtab *s = current_source_symtab;
   struct compunit_symtab *cust;
@@ -1484,7 +1477,7 @@ print_source_lines (struct symtab *s, int line, int stopline,
 /* Print info on range of pc's in a specified line.  */
 
 static void
-info_line_command (char *arg, int from_tty)
+info_line_command (const char *arg, int from_tty)
 {
   CORE_ADDR start_pc, end_pc;
 
@@ -1591,7 +1584,7 @@ info_line_command (char *arg, int from_tty)
 /* Commands to search the source file for a regexp.  */
 
 static void
-forward_search_command (char *regex, int from_tty)
+forward_search_command (const char *regex, int from_tty)
 {
   int c;
   int desc;
@@ -1676,7 +1669,7 @@ forward_search_command (char *regex, int from_tty)
 }
 
 static void
-reverse_search_command (char *regex, int from_tty)
+reverse_search_command (const char *regex, int from_tty)
 {
   int c;
   int desc;

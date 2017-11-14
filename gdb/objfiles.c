@@ -729,18 +729,6 @@ objfile::~objfile ()
     htab_delete (static_links);
 }
 
-static void
-do_free_objfile_cleanup (void *obj)
-{
-  delete (struct objfile *) obj;
-}
-
-struct cleanup *
-make_cleanup_free_objfile (struct objfile *obj)
-{
-  return make_cleanup (do_free_objfile_cleanup, obj);
-}
-
 /* Free all the object files at once and clean up their users.  */
 
 void

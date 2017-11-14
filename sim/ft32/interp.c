@@ -340,15 +340,23 @@ step_once (SIM_DESC sd)
   uint32_t bit_len;
   uint32_t upper;
   uint32_t insnpc;
+  unsigned int sc[2];
+  int isize;
 
-  if (cpu->state.cycles >= cpu->state.next_tick_cycle)
-    {
-      cpu->state.next_tick_cycle += 100000;
-      ft32_push (sd, cpu->state.pc);
-      cpu->state.pc = 12;  /* interrupt 1.  */
-    }
   inst = ft32_read_item (sd, 2, cpu->state.pc);
   cpu->state.cycles += 1;
+
+  if ((STATE_ARCHITECTURE (sd)->mach == bfd_mach_ft32b)
+      && ft32_decode_shortcode (cpu->state.pc, inst, sc))
+    {
+      if ((cpu->state.pc & 3) == 0)
+        inst = sc[0];
+      else
+        inst = sc[1];
+      isize = 2;
+    }
+  else
+    isize = 4;
 
   /* Handle "call 8" (which is FT32's "break" equivalent) here.  */
   if (inst == 0x00340002)
@@ -390,7 +398,7 @@ step_once (SIM_DESC sd)
   upper = (inst >> 27);
 
   insnpc = cpu->state.pc;
-  cpu->state.pc += 4;
+  cpu->state.pc += isize;
   switch (upper)
     {
     case FT32_PAT_TOC:

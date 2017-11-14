@@ -382,7 +382,7 @@ create_syscall_event_catchpoint (int tempflag, std::vector<int> &&filter,
 /* Splits the argument using space as delimiter.  */
 
 static std::vector<int>
-catch_syscall_split_args (char *arg)
+catch_syscall_split_args (const char *arg)
 {
   std::vector<int> result;
   struct gdbarch *gdbarch = target_gdbarch ();
@@ -457,7 +457,7 @@ catch_syscall_split_args (char *arg)
 /* Implement the "catch syscall" command.  */
 
 static void
-catch_syscall_command_1 (char *arg, int from_tty, 
+catch_syscall_command_1 (const char *arg, int from_tty, 
 			 struct cmd_list_element *command)
 {
   int tempflag;

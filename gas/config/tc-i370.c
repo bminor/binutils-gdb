@@ -680,7 +680,9 @@ i370_elf_cons (int nbytes)   /* 1=.byte, 2=.word, 4=.long.  */
           int size = bfd_get_reloc_size (reloc_howto);
 
           if (size > nbytes)
-            as_bad (_("%s relocations do not fit in %d bytes\n"),
+	    as_bad (ngettext ("%s relocations do not fit in %u byte",
+			      "%s relocations do not fit in %u bytes",
+			      nbytes),
 		    reloc_howto->name, nbytes);
           else
             {

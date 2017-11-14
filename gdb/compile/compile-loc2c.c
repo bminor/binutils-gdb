@@ -62,7 +62,7 @@ struct insn_info
    NEED_TEMPVAR is an out parameter which is set if this expression
    needs a special temporary variable to be emitted (see the code
    generator).
-   INFO is an array of insn_info objects, indexed by offset from the
+   INFO is a vector of insn_info objects, indexed by offset from the
    start of the DWARF expression.
    TO_DO is a list of bytecodes which must be examined; it may be
    added to by this function.
@@ -71,7 +71,7 @@ struct insn_info
 
 static void
 compute_stack_depth_worker (int start, int *need_tempvar,
-			    struct insn_info *info,
+			    std::vector<struct insn_info> *info,
 			    std::vector<int> *to_do,
 			    enum bfd_endian byte_order, unsigned int addr_size,
 			    const gdb_byte *op_ptr, const gdb_byte *op_end)
@@ -80,8 +80,8 @@ compute_stack_depth_worker (int start, int *need_tempvar,
   int stack_depth;
 
   op_ptr += start;
-  gdb_assert (info[start].visited);
-  stack_depth = info[start].depth;
+  gdb_assert ((*info)[start].visited);
+  stack_depth = (*info)[start].depth;
 
   while (op_ptr < op_end)
     {
@@ -91,16 +91,16 @@ compute_stack_depth_worker (int start, int *need_tempvar,
       int ndx = op_ptr - base;
 
 #define SET_CHECK_DEPTH(WHERE)				\
-      if (info[WHERE].visited)				\
+      if ((*info)[WHERE].visited)				\
 	{						\
-	  if (info[WHERE].depth != stack_depth)		\
+	  if ((*info)[WHERE].depth != stack_depth)		\
 	    error (_("inconsistent stack depths"));	\
 	}						\
       else						\
 	{						\
 	  /* Stack depth not set, so set it.  */	\
-	  info[WHERE].visited = 1;			\
-	  info[WHERE].depth = stack_depth;		\
+	  (*info)[WHERE].visited = 1;			\
+	  (*info)[WHERE].depth = stack_depth;		\
 	}
 
       SET_CHECK_DEPTH (ndx);
@@ -324,7 +324,7 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 
 	case DW_OP_GNU_push_tls_address:
 	case DW_OP_form_tls_address:
-	  info[ndx].is_tls = 1;
+	  (*info)[ndx].is_tls = 1;
 	  break;
 
 	case DW_OP_skip:
@@ -333,10 +333,10 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  offset = op_ptr + offset - base;
 	  /* If the destination has not been seen yet, add it to the
 	     to-do list.  */
-	  if (!info[offset].visited)
+	  if (!(*info)[offset].visited)
 	    to_do->push_back (offset);
 	  SET_CHECK_DEPTH (offset);
-	  info[offset].label = 1;
+	  (*info)[offset].label = 1;
 	  /* We're done with this line of code.  */
 	  return;
 
@@ -347,10 +347,10 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  --stack_depth;
 	  /* If the destination has not been seen yet, add it to the
 	     to-do list.  */
-	  if (!info[offset].visited)
+	  if (!(*info)[offset].visited)
 	    to_do->push_back (offset);
 	  SET_CHECK_DEPTH (offset);
-	  info[offset].label = 1;
+	  (*info)[offset].label = 1;
 	  break;
 
 	case DW_OP_nop:
@@ -387,15 +387,13 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
 		     int *need_tempvar, int *is_tls,
 		     const gdb_byte *op_ptr, const gdb_byte *op_end,
 		     int initial_depth,
-		     struct insn_info **info)
+		     std::vector<struct insn_info> *info)
 {
   unsigned char *set;
-  struct cleanup *outer_cleanup;
   std::vector<int> to_do;
   int stack_depth, i;
 
-  *info = XCNEWVEC (struct insn_info, op_end - op_ptr);
-  outer_cleanup = make_cleanup (xfree, *info);
+  info->resize (op_end - op_ptr);
 
   to_do.push_back (0);
   (*info)[0].depth = initial_depth;
@@ -406,7 +404,7 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
       int ndx = to_do.back ();
       to_do.pop_back ();
 
-      compute_stack_depth_worker (ndx, need_tempvar, *info, &to_do,
+      compute_stack_depth_worker (ndx, need_tempvar, info, &to_do,
 				  byte_order, addr_size,
 				  op_ptr, op_end);
     }
@@ -421,7 +419,6 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
 	*is_tls = 1;
     }
 
-  discard_cleanups (outer_cleanup);
   return stack_depth + 1;
 }
 
@@ -594,8 +591,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file &stream,
   const gdb_byte * const base = op_ptr;
   int need_tempvar = 0;
   int is_tls = 0;
-  struct cleanup *cleanup;
-  struct insn_info *info;
+  std::vector<struct insn_info> info;
   int stack_depth;
 
   ++scope;
@@ -609,7 +605,6 @@ do_compile_dwarf_expr_to_c (int indent, string_file &stream,
 				     &need_tempvar, &is_tls,
 				     op_ptr, op_end, initial != NULL,
 				     &info);
-  cleanup = make_cleanup (xfree, info);
 
   /* This is a hack until we can add a feature to glibc to let us
      properly generate code for TLS.  You might think we could emit
@@ -643,7 +638,6 @@ do_compile_dwarf_expr_to_c (int indent, string_file &stream,
 			 result_name,
 			 core_addr_to_string (value_address (val)));
       fprintfi_filtered (indent - 2, &stream, "}\n");
-      do_cleanups (cleanup);
       return;
     }
 
@@ -1117,8 +1111,6 @@ do_compile_dwarf_expr_to_c (int indent, string_file &stream,
   fprintfi_filtered (indent, &stream, "%s = __gdb_stack[__gdb_tos];\n",
 		     result_name);
   fprintfi_filtered (indent - 2, &stream, "}\n");
-
-  do_cleanups (cleanup);
 }
 
 /* See compile.h.  */

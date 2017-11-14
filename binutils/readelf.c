@@ -4915,12 +4915,12 @@ process_program_headers (FILE * file)
   if (do_segments && !do_header)
     {
       printf (_("\nElf file type is %s\n"), get_file_type (elf_header.e_type));
-      printf (_("Entry point "));
-      print_vma ((bfd_vma) elf_header.e_entry, PREFIX_HEX);
-      printf (_("\nThere are %d program headers, starting at offset "),
-	      elf_header.e_phnum);
-      print_vma ((bfd_vma) elf_header.e_phoff, DEC);
-      printf ("\n");
+      printf (_("Entry point 0x%s\n"), bfd_vmatoa ("x", elf_header.e_entry));
+      printf (ngettext ("There is %d program header, starting at offset %s\n",
+			"There are %d program headers, starting at offset %s\n",
+			elf_header.e_phnum),
+	      elf_header.e_phnum,
+	      bfd_vmatoa ("u", elf_header.e_phoff));
     }
 
   if (! get_program_headers (file))
@@ -5895,7 +5895,11 @@ process_section_headers (FILE * file)
     }
 
   if (do_sections && !do_header)
-    printf (_("There are %d section headers, starting at offset 0x%lx:\n"),
+    printf (ngettext ("There is %d section header, "
+		      "starting at offset 0x%lx:\n",
+		      "There are %d section headers, "
+		      "starting at offset 0x%lx:\n",
+		      elf_header.e_shnum),
 	    elf_header.e_shnum, (unsigned long) elf_header.e_shoff);
 
   if (is_32bit_elf)
@@ -7089,6 +7093,7 @@ process_relocs (FILE * file)
 	    {
 	      Elf_Internal_Shdr * strsec;
 	      int is_rela;
+	      unsigned long num_rela;
 
 	      printf (_("\nRelocation section "));
 
@@ -7097,8 +7102,11 @@ process_relocs (FILE * file)
 	      else
 		printf ("'%s'", printable_section_name (section));
 
-	      printf (_(" at offset 0x%lx contains %lu entries:\n"),
-		 rel_offset, (unsigned long) (rel_size / section->sh_entsize));
+	      num_rela = rel_size / section->sh_entsize;
+	      printf (ngettext (" at offset 0x%lx contains %lu entry:\n",
+				" at offset 0x%lx contains %lu entries:\n",
+				num_rela),
+		      rel_offset, num_rela);
 
 	      is_rela = section->sh_type == SHT_RELA;
 
@@ -7992,10 +8000,15 @@ hppa_process_unwind (FILE * file)
     {
       if (streq (SECTION_NAME (sec), ".PARISC.unwind"))
 	{
-	  printf (_("\nUnwind section '%s' at offset 0x%lx contains %lu entries:\n"),
+	  unsigned long num_unwind = sec->sh_size / (2 * eh_addr_size + 8);
+	  printf (ngettext ("\nUnwind section '%s' at offset 0x%lx "
+			    "contains %lu entry:\n",
+			    "\nUnwind section '%s' at offset 0x%lx "
+			    "contains %lu entries:\n",
+			    num_unwind),
 		  printable_section_name (sec),
 		  (unsigned long) sec->sh_offset,
-		  (unsigned long) (sec->sh_size / (2 * eh_addr_size + 8)));
+		  num_unwind);
 
           if (! slurp_hppa_unwind_table (file, &aux, sec))
 	    res = FALSE;
@@ -9082,10 +9095,15 @@ arm_process_unwind (FILE *file)
       {
 	if (sec->sh_type == sec_type)
 	  {
-	    printf (_("\nUnwind table index '%s' at offset 0x%lx contains %lu entries:\n"),
+	    unsigned long num_unwind = sec->sh_size / (2 * eh_addr_size);
+	    printf (ngettext ("\nUnwind section '%s' at offset 0x%lx "
+			      "contains %lu entry:\n",
+			      "\nUnwind section '%s' at offset 0x%lx "
+			      "contains %lu entries:\n",
+			      num_unwind),
 		    printable_section_name (sec),
 		    (unsigned long) sec->sh_offset,
-		    (unsigned long) (sec->sh_size / (2 * eh_addr_size)));
+		    num_unwind);
 
 	    if (! dump_arm_unwind (&aux, sec))
 	      res = FALSE;
@@ -9666,7 +9684,11 @@ process_dynamic_section (FILE * file)
     }
 
   if (do_dynamic && dynamic_addr)
-    printf (_("\nDynamic section at offset 0x%lx contains %lu entries:\n"),
+    printf (ngettext ("\nDynamic section at offset 0x%lx "
+		      "contains %lu entry:\n",
+		      "\nDynamic section at offset 0x%lx "
+		      "contains %lu entries:\n",
+		      dynamic_nent),
 	    dynamic_addr, (unsigned long) dynamic_nent);
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
@@ -10207,7 +10229,11 @@ process_version_sections (FILE * file)
 
 	    found = TRUE;
 
-	    printf (_("\nVersion definition section '%s' contains %u entries:\n"),
+	    printf (ngettext ("\nVersion definition section '%s' "
+			      "contains %u entry:\n",
+			      "\nVersion definition section '%s' "
+			      "contains %u entries:\n",
+			      section->sh_info),
 		    printable_section_name (section),
 		    section->sh_info);
 
@@ -10340,7 +10366,11 @@ process_version_sections (FILE * file)
 
 	    found = TRUE;
 
-	    printf (_("\nVersion needs section '%s' contains %u entries:\n"),
+	    printf (ngettext ("\nVersion needs section '%s' "
+			      "contains %u entry:\n",
+			      "\nVersion needs section '%s' "
+			      "contains %u entries:\n",
+			      section->sh_info),
 		    printable_section_name (section), section->sh_info);
 
 	    printf (_(" Addr: 0x"));
@@ -10492,7 +10522,11 @@ process_version_sections (FILE * file)
 		break;
 	      }
 
-	    printf (_("\nVersion symbols section '%s' contains %lu entries:\n"),
+	    printf (ngettext ("\nVersion symbols section '%s' "
+			      "contains %lu entry:\n",
+			      "\nVersion symbols section '%s' "
+			      "contains %lu entries:\n",
+			      total),
 		    printable_section_name (section), (unsigned long) total);
 
 	    printf (_(" Addr: "));
@@ -11528,9 +11562,12 @@ process_symbol_table (FILE * file)
 	      continue;
 	    }
 
-	  printf (_("\nSymbol table '%s' contains %lu entries:\n"),
+	  num_syms = section->sh_size / section->sh_entsize;
+	  printf (ngettext ("\nSymbol table '%s' contains %lu entry:\n",
+			    "\nSymbol table '%s' contains %lu entries:\n",
+			    num_syms),
 		  printable_section_name (section),
-		  (unsigned long) (section->sh_size / section->sh_entsize));
+		  num_syms);
 
 	  if (is_32bit_elf)
 	    printf (_("   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"));
@@ -11634,7 +11671,11 @@ process_symbol_table (FILE * file)
       unsigned long nsyms = 0;
       char *visited;
 
-      printf (_("\nHistogram for bucket list length (total of %lu buckets):\n"),
+      printf (ngettext ("\nHistogram for bucket list length "
+			"(total of %lu bucket):\n",
+			"\nHistogram for bucket list length "
+			"(total of %lu buckets):\n",
+			(unsigned long) nbuckets),
 	      (unsigned long) nbuckets);
 
       lengths = (unsigned long *) calloc (nbuckets, sizeof (*lengths));
@@ -11708,7 +11749,11 @@ process_symbol_table (FILE * file)
       unsigned long nzero_counts = 0;
       unsigned long nsyms = 0;
 
-      printf (_("\nHistogram for `.gnu.hash' bucket list length (total of %lu buckets):\n"),
+      printf (ngettext ("\nHistogram for `.gnu.hash' bucket list length "
+			"(total of %lu bucket):\n",
+			"\nHistogram for `.gnu.hash' bucket list length "
+			"(total of %lu buckets):\n",
+			(unsigned long) ngnubuckets),
 	      (unsigned long) ngnubuckets);
 
       lengths = (unsigned long *) calloc (ngnubuckets, sizeof (*lengths));
@@ -11785,7 +11830,11 @@ process_syminfo (FILE * file ATTRIBUTE_UNUSED)
     return FALSE;
 
   if (dynamic_addr)
-    printf (_("\nDynamic info segment at offset 0x%lx contains %d entries:\n"),
+    printf (ngettext ("\nDynamic info segment at offset 0x%lx "
+		      "contains %d entry:\n",
+		      "\nDynamic info segment at offset 0x%lx "
+		      "contains %d entries:\n",
+		      dynamic_syminfo_nent),
 	    dynamic_syminfo_offset, dynamic_syminfo_nent);
 
   printf (_(" Num: Name                           BoundTo     Flags\n"));
@@ -12750,10 +12799,10 @@ apply_relocations (void *                     file,
 	      && ELF_ST_TYPE (sym->st_info) != STT_COMMON
 	      && ELF_ST_TYPE (sym->st_info) > STT_SECTION)
 	    {
-	      warn (_("skipping unexpected symbol type %s in %ld'th relocation in section %s\n"),
+	      warn (_("skipping unexpected symbol type %s in section %s relocation %ld\n"),
 		    get_symbol_type (ELF_ST_TYPE (sym->st_info)),
-		    (long int)(rp - relocs),
-		    printable_section_name (relsec));
+		    printable_section_name (relsec),
+		    (long int)(rp - relocs));
 	      res = FALSE;
 	      continue;
 	    }
@@ -15455,7 +15504,9 @@ process_mips_specific (FILE * file)
                                               _("liblist section data"));
       if (elib)
 	{
-	  printf (_("\nSection '.liblist' contains %lu entries:\n"),
+	  printf (ngettext ("\nSection '.liblist' contains %lu entry:\n",
+			    "\nSection '.liblist' contains %lu entries:\n",
+			    (unsigned long) liblistno),
 		  (unsigned long) liblistno);
 	  fputs (_("     Library              Time Stamp          Checksum   Version Flags\n"),
 		 stdout);
@@ -15584,7 +15635,9 @@ process_mips_specific (FILE * file)
 	      ++cnt;
 	    }
 
-	  printf (_("\nSection '%s' contains %d entries:\n"),
+	  printf (ngettext ("\nSection '%s' contains %d entry:\n",
+			    "\nSection '%s' contains %d entries:\n",
+			    cnt),
 		  printable_section_name (sect), cnt);
 
 	  option = iopt;
@@ -15804,7 +15857,9 @@ process_mips_specific (FILE * file)
 	  free (econf64);
 	}
 
-      printf (_("\nSection '.conflict' contains %lu entries:\n"),
+      printf (ngettext ("\nSection '.conflict' contains %lu entry:\n",
+			"\nSection '.conflict' contains %lu entries:\n",
+			(unsigned long) conflictsno),
 	      (unsigned long) conflictsno);
       puts (_("  Num:    Index       Value  Name"));
 
@@ -16094,6 +16149,7 @@ process_gnu_liblist (FILE * file)
   char * strtab;
   size_t strtab_size;
   size_t cnt;
+  unsigned long num_liblist;
   unsigned i;
   bfd_boolean res = TRUE;
 
@@ -16134,9 +16190,12 @@ process_gnu_liblist (FILE * file)
 	    }
 	  strtab_size = string_sec->sh_size;
 
-	  printf (_("\nLibrary list section '%s' contains %lu entries:\n"),
+	  num_liblist = section->sh_size / sizeof (Elf32_External_Lib);
+	  printf (ngettext ("\nLibrary list section '%s' contains %lu entries:\n",
+			    "\nLibrary list section '%s' contains %lu entries:\n",
+			    num_liblist),
 		  printable_section_name (section),
-		  (unsigned long) (section->sh_size / sizeof (Elf32_External_Lib)));
+		  num_liblist);
 
 	  puts (_("     Library              Time Stamp          Checksum   Version Flags"));
 
@@ -16519,15 +16578,24 @@ print_gnu_property_note (Elf_Internal_Note * pnote)
       return;
     }
 
-  while (1)
+  while (ptr < ptr_end)
     {
       unsigned int j;
-      unsigned int type = byte_get (ptr, 4);
-      unsigned int datasz = byte_get (ptr + 4, 4);
+      unsigned int type;
+      unsigned int datasz;
+
+      if ((size_t) (ptr_end - ptr) < 8)
+	{
+	  printf (_("<corrupt descsz: %#lx>\n"), pnote->descsz);
+	  break;
+	}
+
+      type = byte_get (ptr, 4);
+      datasz = byte_get (ptr + 4, 4);
 
       ptr += 8;
 
-      if ((ptr + datasz) > ptr_end)
+      if (datasz > (size_t) (ptr_end - ptr))
 	{
 	  printf (_("<corrupt type (%#x) datasz: %#x>\n"),
 		  type, datasz);
@@ -16608,19 +16676,11 @@ next:
       ptr += ((datasz + (size - 1)) & ~ (size - 1));
       if (ptr == ptr_end)
 	break;
-      else
-	{
-	  if (do_wide)
-	    printf (", ");
-	  else
-	    printf ("\n\t");
-	}
 
-      if (ptr > (ptr_end - 8))
-	{
-	  printf (_("<corrupt descsz: %#lx>\n"), pnote->descsz);
-	  break;
-	}
+      if (do_wide)
+	printf (", ");
+      else
+	printf ("\n\t");
     }
 
   printf ("\n");
@@ -17671,8 +17731,12 @@ process_notes_at (FILE *              file,
 	  min_notesz = offsetof (Elf_External_Note, name);
 	  if (data_remaining < min_notesz)
 	    {
-	      warn (_("Corrupt note: only %d bytes remain, not enough for a full note\n"),
-		    (int) data_remaining);
+	      warn (ngettext ("Corrupt note: only %ld byte remains, "
+			      "not enough for a full note\n",
+			      "Corrupt note: only %ld bytes remain, "
+			      "not enough for a full note\n",
+			      data_remaining),
+		    (long) data_remaining);
 	      break;
 	    }
 	  data_remaining -= min_notesz;
@@ -17694,8 +17758,12 @@ process_notes_at (FILE *              file,
 	  min_notesz = offsetof (Elf64_External_VMS_Note, name);
 	  if (data_remaining < min_notesz)
 	    {
-	      warn (_("Corrupt note: only %d bytes remain, not enough for a full note\n"),
-		    (int) data_remaining);
+	      warn (ngettext ("Corrupt note: only %ld byte remains, "
+			      "not enough for a full note\n",
+			      "Corrupt note: only %ld bytes remain, "
+			      "not enough for a full note\n",
+			      data_remaining),
+		    (long) data_remaining);
 	      break;
 	    }
 	  data_remaining -= min_notesz;
@@ -18362,7 +18430,13 @@ process_archive (char * file_name, FILE * file, bfd_boolean is_thin_archive)
 
 	  if (l < arch.sym_size)
 	    {
-	      error (_("%s: %ld bytes remain in the symbol table, but without corresponding entries in the index table\n"),
+	      error (ngettext ("%s: %ld byte remains in the symbol table, "
+			       "but without corresponding entries in "
+			       "the index table\n",
+			       "%s: %ld bytes remain in the symbol table, "
+			       "but without corresponding entries in "
+			       "the index table\n",
+			       arch.sym_size - l),
 		     file_name, arch.sym_size - l);
 	      ret = FALSE;
 	    }

@@ -133,7 +133,6 @@
        && (EH) != NULL \
        && (EH)->elf.dynindx != -1 \
        && (!(EH)->elf.non_got_ref \
-	   || (EH)->func_pointer_refcount > 0 \
 	   || ((EH)->elf.root.type == bfd_link_hash_undefweak \
 	       && !(RESOLVED_TO_ZERO))) \
 	       && (((EH)->elf.def_dynamic && !(EH)->elf.def_regular) \
@@ -267,10 +266,6 @@ struct elf_x86_link_hash_entry
      real definition and check it when allowing copy reloc in PIE.  This
      is only used by x86-64.  */
   unsigned int needs_copy : 1;
-
-  /* Reference count of C/C++ function pointer relocations in read-write
-     section which can be resolved at run-time.  */
-  bfd_signed_vma func_pointer_refcount;
 
   /* Information about the GOT PLT entry. Filled when there are both
      GOT and PLT relocations against the same function.  */

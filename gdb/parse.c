@@ -44,8 +44,7 @@
 #include "gdbcmd.h"
 #include "symfile.h"		/* for overlay functions */
 #include "inferior.h"
-#include "doublest.h"
-#include "dfp.h"
+#include "target-float.h"
 #include "block.h"
 #include "source.h"
 #include "objfiles.h"
@@ -1338,13 +1337,7 @@ bool
 parse_float (const char *p, int len,
 	     const struct type *type, gdb_byte *data)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    return floatformat_from_string (floatformat_from_type (type),
-				    data, std::string (p, len));
-  else
-    return decimal_from_string (data, TYPE_LENGTH (type),
-				gdbarch_byte_order (get_type_arch (type)),
-				std::string (p, len));
+  return target_float_from_string (data, type, std::string (p, len));
 }
 
 /* Stuff for maintaining a stack of types.  Currently just used by C, but

@@ -416,13 +416,12 @@ processReal (struct parser_state *par_state, const char *num0)
 /* Store a canonicalized version of NAME0[0..LEN-1] in yylval.ssym.  The
    resulting string is valid until the next call to ada_parse.  If
    NAME0 contains the substring "___", it is assumed to be already
-   encoded and the resulting name is equal to it.  Otherwise, it differs
+   encoded and the resulting name is equal to it.  Similarly, if the name
+   starts with '<', it is copied verbatim.  Otherwise, it differs
    from NAME0 in that:
-    + Characters between '...' or <...> are transfered verbatim to 
-      yylval.ssym.
-    + <, >, and trailing "'" characters in quoted sequences are removed
-      (a leading quote is preserved to indicate that the name is not to be
-      GNAT-encoded).
+    + Characters between '...' are transfered verbatim to yylval.ssym.
+    + Trailing "'" characters in quoted sequences are removed (a leading quote is
+      preserved to indicate that the name is not to be GNAT-encoded).
     + Unquoted whitespace is removed.
     + Unquoted alphabetic characters are mapped to lower case.
    Result is returned as a struct stoken, but for convenience, the string
@@ -440,7 +439,7 @@ processId (const char *name0, int len)
   while (len > 0 && isspace (name0[len-1]))
     len -= 1;
 
-  if (strstr (name0, "___") != NULL)
+  if (name0[0] == '<' || strstr (name0, "___") != NULL)
     {
       strncpy (name, name0, len);
       name[len] = '\000';
@@ -472,15 +471,6 @@ processId (const char *name0, int len)
 	      i += 1; i0 += 1;
 	    }
 	  while (i0 < len && name0[i0] != '\'');
-	  i0 += 1;
-	  break;
-	case '<':
-	  i0 += 1;
-	  while (i0 < len && name0[i0] != '>')
-	    {
-	      name[i] = name0[i0];
-	      i += 1; i0 += 1;
-	    }
 	  i0 += 1;
 	  break;
 	}

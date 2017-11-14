@@ -1640,13 +1640,23 @@ _bfd_coff_get_external_symbols (bfd *abfd)
   size = obj_raw_syment_count (abfd) * symesz;
   if (size == 0)
     return TRUE;
+  /* Check for integer overflow and for unreasonable symbol counts.  */
+  if (size < obj_raw_syment_count (abfd)
+      || (bfd_get_file_size (abfd) > 0
+	  && size > bfd_get_file_size (abfd)))
+    
+    {
+      _bfd_error_handler (_("%B: corrupt symbol count: %#Lx"),
+			  abfd, obj_raw_syment_count (abfd));
+      return FALSE;
+    }
 
   syms = bfd_malloc (size);
   if (syms == NULL)
     {
       /* PR 21013: Provide an error message when the alloc fails.  */
-      _bfd_error_handler (_("%B: Not enough memory to allocate space for %Lu symbols"),
-			  abfd, size);
+      _bfd_error_handler (_("%B: not enough memory to allocate space for %#Lx symbols of size %#Lx"),
+			  abfd, obj_raw_syment_count (abfd), symesz);
       return FALSE;
     }
 
@@ -1794,6 +1804,9 @@ coff_get_normalized_symtab (bfd *abfd)
     return NULL;
 
   size = obj_raw_syment_count (abfd) * sizeof (combined_entry_type);
+  /* Check for integer overflow.  */
+  if (size < obj_raw_syment_count (abfd))
+    return NULL;
   internal = (combined_entry_type *) bfd_zalloc (abfd, size);
   if (internal == NULL && size != 0)
     return NULL;

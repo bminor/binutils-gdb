@@ -938,7 +938,7 @@ set_disassembler_options (char *prospective_options)
 }
 
 static void
-set_disassembler_options_sfunc (char *args, int from_tty,
+set_disassembler_options_sfunc (const char *args, int from_tty,
 				struct cmd_list_element *c)
 {
   set_disassembler_options (prospective_options);

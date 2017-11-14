@@ -50,7 +50,7 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 7 entries:
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_DTPMOD64 +0+
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_TPREL64 +24
 
-Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entry:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_JMP_SLOT +0+ __tls_get_addr \+ 0
 

@@ -2642,7 +2642,7 @@ status_callback (struct lwp_info *lp, void *data)
 	}
 
 #if !USE_SIGTRAP_SIGINFO
-      else if (!breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
+      else if (!breakpoint_inserted_here_p (regcache->aspace (), pc))
 	{
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -2802,7 +2802,7 @@ save_stop_reason (struct lwp_info *lp)
     }
 #else
   if ((!lp->step || lp->stop_pc == sw_bp_pc)
-      && software_breakpoint_inserted_here_p (get_regcache_aspace (regcache),
+      && software_breakpoint_inserted_here_p (regcache->aspace (),
 					      sw_bp_pc))
     {
       /* The LWP was either continued, or stepped a software
@@ -2810,7 +2810,7 @@ save_stop_reason (struct lwp_info *lp)
       lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
     }
 
-  if (hardware_breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
+  if (hardware_breakpoint_inserted_here_p (regcache->aspace (), pc))
     lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
 
   if (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON)
@@ -3574,7 +3574,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
 	     immediately, and we're not waiting for this LWP.  */
 	  if (!ptid_match (lp->ptid, *wait_ptid_p))
 	    {
-	      if (breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
+	      if (breakpoint_inserted_here_p (regcache->aspace (), pc))
 		leave_stopped = 1;
 	    }
 

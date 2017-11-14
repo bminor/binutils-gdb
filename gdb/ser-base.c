@@ -551,14 +551,6 @@ ser_base_set_tty_state (struct serial *scb, serial_ttystate ttystate)
   return 0;
 }
 
-int
-ser_base_noflush_set_tty_state (struct serial *scb,
-				serial_ttystate new_ttystate,
-				serial_ttystate old_ttystate)
-{
-  return 0;
-}
-
 void
 ser_base_print_tty_state (struct serial *scb, 
 			  serial_ttystate ttystate,

@@ -530,6 +530,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/common-utils-selftests.c \
 	unittests/environ-selftests.c \
 	unittests/function-view-selftests.c \
+	unittests/lookup_name_info-selftests.c \
 	unittests/memrange-selftests.c \
 	unittests/offset-type-selftests.c \
 	unittests/optional-selftests.c \
@@ -542,6 +543,7 @@ SUBDIR_UNITTESTS_OBS = \
 	common-utils-selftests.o \
 	environ-selftests.o \
 	function-view-selftests.o \
+	lookup_name_info-selftests.o \
 	memrange-selftests.o \
 	offset-type-selftests.o \
 	optional-selftests.o \
@@ -729,12 +731,9 @@ XMLFILES = \
 	$(srcdir)/features/traceframe-info.dtd \
 	$(srcdir)/features/xinclude.dtd
 
-# This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
-# interface to the serial port.  Hopefully if get ported to OS/2, VMS,
-# etc., then there will be (as part of the C library or perhaps as
-# part of libiberty) a POSIX interface.  But at least for now the
-# host-dependent makefile fragment might need to use something else
-# besides ser-unix.o
+# Build the ser-*.o files the host supports.  This includes ser-unix.o
+# for any system that supports a POSIX interface to the serial port.
+# See configure.ac.
 SER_HARDWIRE = @SER_HARDWIRE@
 
 # The `remote' debugging target is supported for most architectures,
@@ -1086,11 +1085,9 @@ SFILES = \
 	d-valprint.c \
 	dbxread.c \
 	demangle.c \
-	dfp.c \
 	dictionary.c \
 	disasm.c \
 	disasm-selftests.c \
-	doublest.c \
 	dtrace-probe.c \
 	dummy-frame.c \
 	dwarf2-frame.c \
@@ -1224,6 +1221,7 @@ SFILES = \
 	tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
+	target-float.c \
 	typeprint.c \
 	ui-file.c \
 	ui-file.h \
@@ -1319,11 +1317,9 @@ HFILES_NO_SRCDIR = \
 	darwin-nat.h \
 	dcache.h \
 	defs.h \
-	dfp.h \
 	dicos-tdep.h \
 	dictionary.h \
 	disasm.h \
-	doublest.h \
 	dummy-frame.h \
 	dwarf2-frame.h \
 	dwarf2-frame-tailcall.h \
@@ -1492,6 +1488,7 @@ HFILES_NO_SRCDIR = \
 	tracefile.h \
 	tracepoint.h \
 	trad-frame.h \
+	target-float.h \
 	tramp-frame.h \
 	typeprint.h \
 	ui-file.h \
@@ -1541,7 +1538,6 @@ HFILES_NO_SRCDIR = \
 	common/gdb_setjmp.h \
 	common/gdb_signals.h \
 	common/gdb_sys_time.h \
-	common/gdb_termios.h \
 	common/gdb_vecs.h \
 	common/gdb_wait.h \
 	common/common-inferior.h \
@@ -1707,11 +1703,9 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	dbxread.o \
 	debug.o \
 	demangle.o \
-	dfp.o \
 	dictionary.o \
 	disasm.o \
 	disasm-selftests.o \
-	doublest.o \
 	dummy-frame.o \
 	dwarf2-frame.o \
 	dwarf2-frame-tailcall.o \
@@ -1845,6 +1839,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	top.o \
 	trad-frame.o \
 	tramp-frame.o \
+	target-float.o \
 	typeprint.o \
 	ui-file.o \
 	ui-out.o \
@@ -2732,10 +2727,10 @@ printcmd.o: $(srcdir)/printcmd.c
 		$(COMPILE.post) $(srcdir)/printcmd.c
 	$(POSTCOMPILE)
 
-# Same for "doublest.c".
-doublest.o: $(srcdir)/doublest.c
+# Same for "target-float.c".
+target-float.o: $(srcdir)/target-float.c
 	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
-		$(COMPILE.post) $(srcdir)/doublest.c
+		$(COMPILE.post) $(srcdir)/target-float.c
 
 # ada-exp.c can appear in srcdir, for releases; or in ., for
 # development builds.

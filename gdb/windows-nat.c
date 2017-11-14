@@ -859,7 +859,7 @@ windows_clear_solib (void)
 }
 
 static void
-signal_event_command (char *args, int from_tty)
+signal_event_command (const char *args, int from_tty)
 {
   uintptr_t event_id = 0;
   char *endargs = NULL;
@@ -1020,7 +1020,7 @@ display_selector (HANDLE thread, DWORD sel)
 }
 
 static void
-display_selectors (char * args, int from_tty)
+display_selectors (const char * args, int from_tty)
 {
   if (!current_thread)
     {

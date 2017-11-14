@@ -104,7 +104,10 @@
 
 /* Encode alignment power into IMAGE_SCN_ALIGN bits of s_flags.  */
 #define COFF_ENCODE_ALIGNMENT(SECTION, ALIGNMENT_POWER) \
-  ((SECTION).s_flags |= IMAGE_SCN_ALIGN_POWER_CONST ((ALIGNMENT_POWER)))
+  ((SECTION).s_flags |= IMAGE_SCN_ALIGN_POWER_CONST ((ALIGNMENT_POWER) <= 13 \
+						     ? (ALIGNMENT_POWER) : 13))
+#define COFF_DECODE_ALIGNMENT(X)             \
+  IMAGE_SCN_ALIGN_POWER_NUM ((X) & IMAGE_SCN_ALIGN_POWER_BIT_MASK)
 
 #define IMAGE_SCN_LNK_NRELOC_OVFL            0x01000000  /* Section contains extended relocations. */
 #define IMAGE_SCN_MEM_NOT_CACHED             0x04000000  /* Section is not cachable.               */

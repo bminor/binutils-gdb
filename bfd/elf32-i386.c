@@ -1600,7 +1600,7 @@ elf_i386_check_relocs (bfd *abfd,
 
 	  eh->zero_undefweak &= 0x2;
 	  h->needs_plt = 1;
-	  h->plt.refcount += 1;
+	  h->plt.refcount = 1;
 	  break;
 
 	case R_386_SIZE32:
@@ -1751,20 +1751,7 @@ do_relocation:
 	      && (bfd_link_executable (info)
 		  || h->type == STT_GNU_IFUNC))
 	    {
-	      /* If this reloc is in a read-only section, we might
-		 need a copy reloc.  We can't check reliably at this
-		 stage whether the section is read-only, as input
-		 sections have not yet been mapped to output sections.
-		 Tentatively set the flag for now, and correct in
-		 adjust_dynamic_symbol.  */
-	      h->non_got_ref = 1;
-
-	      /* We may need a .plt entry if the symbol is a function
-		 defined in a shared lib or is a STT_GNU_IFUNC function
-		 referenced from the code or read-only section.  */
-	      if (!h->def_regular
-		  || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
-		h->plt.refcount += 1;
+	      bfd_boolean func_pointer_ref = FALSE;
 
 	      if (r_type == R_386_PC32)
 		{
@@ -1790,7 +1777,25 @@ do_relocation:
 		  /* R_386_32 can be resolved at run-time.  */
 		  if (r_type == R_386_32
 		      && (sec->flags & SEC_READONLY) == 0)
-		    eh->func_pointer_refcount += 1;
+		    func_pointer_ref = TRUE;
+		}
+
+	      if (!func_pointer_ref)
+		{
+		  /* If this reloc is in a read-only section, we might
+		     need a copy reloc.  We can't check reliably at this
+		     stage whether the section is read-only, as input
+		     sections have not yet been mapped to output sections.
+		     Tentatively set the flag for now, and correct in
+		     adjust_dynamic_symbol.  */
+		  h->non_got_ref = 1;
+
+		  /* We may need a .plt entry if the symbol is a function
+		     defined in a shared lib or is a function referenced
+		     from the code or read-only section.  */
+		  if (!h->def_regular
+		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
+		    h->plt.refcount = 1;
 		}
 	    }
 

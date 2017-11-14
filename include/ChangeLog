@@ -1,3 +1,61 @@
+2017-11-13  Jan Beulich  <jbeulich@suse.com>
+
+	* coff/pe.h (COFF_ENCODE_ALIGNMENT): Cap value to maximum one
+	representable.
+	(COFF_DECODE_ALIGNMENT): Define.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h (AARCH64_ARCH_V8_4): Enable DOTPROD.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h:
+	(aarch64_opnd): Add AARCH64_OPND_Va, AARCH64_OPND_MASK,
+	AARCH64_OPND_IMM_2, AARCH64_OPND_ADDR_OFFSET
+	and AARCH64_OPND_SM3_IMM2. 
+	(aarch64_insn_class): Add cryptosm3 and cryptosm4.
+	(arch64_feature_set): Make uint64_t.
+
+2017-11-09  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h:
+	(AARCH64_FEATURE_V8_4, AARCH64_FEATURE_SM4): New.
+	(AARCH64_ARCH_V8_4, AARCH64_FEATURE_SHA3): New.
+
+2017-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* opcode/aarch64.h (aarch64_feature_set): Change type to unsigned
+	long long.
+
+2017-11-08  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h:
+	(AARCH64_FEATURE_SHA2, AARCH64_FEATURE_AES): New.
+
+2017-11-08  Jiong Wang  <jiong.wang@arm.com>
+
+	* opcode/arm.h (ARM_AEXT2_V8_4A): Include Dot Product feature.
+	(ARM_EXT2_V8_4A): New macro.
+	(ARM_AEXT2_V8_4A): Likewise.
+	(ARM_ARCH_V8_4A): Likewise.
+
+2017-11-07  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* opcode/riscv-opc.h (sptbr): Rename to satp.
+	(CSR_SPTBR): Rename to CSR_SATP.
+	(sptbr): Alias to CSR_SATP.
+
+2017-11-07  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/arm.h (FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD):
+	New macro.
+
+2017-11-02  Siddhesh Poyarekar  <siddhesh@sourceware.org>
+
+	* include/opcode/aarch64.h (AARCH64_ARCH_V8_2): Drop
+	AARCH64_FEATURE_F16.
+
 2017-11-01  James Bowman  <james.bowman@ftdichip.com>
 
 	* elf/ft32.h: Add R_FT32_RELAX, SC0, SC1, DIFF32.

@@ -332,7 +332,7 @@ show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 }
 
 static void
-set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
+set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
 {
   struct gdbarch_info info;
 
@@ -490,7 +490,8 @@ show_architecture (struct ui_file *file, int from_tty,
    argument.  */
 
 static void
-set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
+set_architecture (const char *ignore_args,
+		  int from_tty, struct cmd_list_element *c)
 {
   struct gdbarch_info info;
 

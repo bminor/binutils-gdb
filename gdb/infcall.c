@@ -1100,8 +1100,9 @@ call_function_by_hand_dummy (struct value *function,
     /* Sanity.  The exact same SP value is returned by
        PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
        dummy_id to form the frame ID's stack address.  */
-    breakpoint *bpt = set_momentary_breakpoint (gdbarch, sal,
-						dummy_id, bp_call_dummy);
+    breakpoint *bpt
+      = set_momentary_breakpoint (gdbarch, sal,
+				  dummy_id, bp_call_dummy).release ();
 
     /* set_momentary_breakpoint invalidates FRAME.  */
     frame = NULL;

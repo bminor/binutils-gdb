@@ -135,6 +135,13 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
 	  assert (0);
 	}
     }
+  else if (inst->opcode->iclass == cryptosm3)
+    {
+      /* index for e.g. SM3TT2A <Vd>.4S, <Vn>.4S, <Vm>S[<imm2>].  */
+      unsigned reglane_index = info->reglane.index;
+      assert (reglane_index < 4);
+      insert_field (FLD_SM3_imm2, code, reglane_index, 0);
+    }
   else
     {
       /* index for e.g. SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>]
@@ -617,6 +624,29 @@ aarch64_ins_addr_regoff (const aarch64_operand *self ATTRIBUTE_UNUSED,
     S = info->shifter.operator_present && info->shifter.amount_present;
   insert_field (FLD_S, code, S, 0);
 
+  return NULL;
+}
+
+/* Encode the address operand for e.g.
+     stlur <Xt>, [<Xn|SP>{, <amount>}].  */
+const char *
+aarch64_ins_addr_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
+			 const aarch64_opnd_info *info, aarch64_insn *code,
+			 const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  /* Rn */
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+
+  /* simm9 */
+  int imm = info->addr.offset.imm;
+  insert_field (self->fields[1], code, imm, 0);
+
+  /* writeback */
+  if (info->addr.writeback)
+    {
+      assert (info->addr.preind == 1 && info->addr.postind == 0);
+      insert_field (self->fields[2], code, 1, 0);
+    }
   return NULL;
 }
 

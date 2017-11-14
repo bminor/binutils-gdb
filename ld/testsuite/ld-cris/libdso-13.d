@@ -26,6 +26,6 @@ Dynamic section at offset 0x[0-9a-f][0-9a-f][0-9a-f] contains 11 entries:
  0x0+1e \(FLAGS\)[ 	]+TEXTREL
  0x0+ \(NULL\)[ 	]+0x0
 
-Relocation section '\.rela\.text' at offset 0x[12][0-9a-f][0-9a-f] contains 1 entries:
+Relocation section '\.rela\.text' at offset 0x[12][0-9a-f][0-9a-f] contains 1 entry:
  Offset[ 	]+Info[ 	]+Type[ 	]+Sym\.Value  Sym\. Name \+ Addend
 0+[12][0-9a-f][0-9a-f]  0+[0-9a-f]06 R_CRIS_32_PCREL[ 	]+0+[0-f]+[ 	]+dsofn \+ 6

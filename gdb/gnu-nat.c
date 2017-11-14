@@ -2279,12 +2279,6 @@ gnu_detach (struct target_ops *ops, const char *args, int from_tty)
   inf_child_maybe_unpush_target (ops);
 }
 
-static void
-gnu_terminal_init (struct target_ops *self)
-{
-  gdb_assert (gnu_current_inf);
-  child_terminal_init_with_pgrp (gnu_current_inf->pid);
-}
 
 static void
 gnu_stop (struct target_ops *self, ptid_t ptid)
@@ -2693,7 +2687,6 @@ gnu_target (void)
   t->to_wait = gnu_wait;
   t->to_xfer_partial = gnu_xfer_partial;
   t->to_find_memory_regions = gnu_find_memory_regions;
-  t->to_terminal_init = gnu_terminal_init;
   t->to_kill = gnu_kill_inferior;
   t->to_create_inferior = gnu_create_inferior;
   t->to_mourn_inferior = gnu_mourn_inferior;
@@ -2749,7 +2742,7 @@ show_thread_default_cmd (const char *args, int from_tty)
 }
 
 static int
-parse_int_arg (char *args, char *cmd_prefix)
+parse_int_arg (const char *args, char *cmd_prefix)
 {
   if (args)
     {
@@ -2764,7 +2757,7 @@ parse_int_arg (char *args, char *cmd_prefix)
 }
 
 static int
-_parse_bool_arg (char *args, char *t_val, char *f_val, char *cmd_prefix)
+_parse_bool_arg (const char *args, char *t_val, char *f_val, char *cmd_prefix)
 {
   if (!args || strcmp (args, t_val) == 0)
     return 1;
@@ -2825,13 +2818,13 @@ set_task_pause_cmd (int arg, int from_tty)
 }
 
 static void
-set_task_pause_cmd (char *args, int from_tty)
+set_task_pause_cmd (const char *args, int from_tty)
 {
   set_task_pause_cmd (parse_bool_arg (args, "set task pause"), from_tty);
 }
 
 static void
-show_task_pause_cmd (char *args, int from_tty)
+show_task_pause_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
 
@@ -2843,14 +2836,14 @@ show_task_pause_cmd (char *args, int from_tty)
 }
 
 static void
-set_task_detach_sc_cmd (char *args, int from_tty)
+set_task_detach_sc_cmd (const char *args, int from_tty)
 {
   cur_inf ()->detach_sc = parse_int_arg (args,
 					 "set task detach-suspend-count");
 }
 
 static void
-show_task_detach_sc_cmd (char *args, int from_tty)
+show_task_detach_sc_cmd (const char *args, int from_tty)
 {
   check_empty (args, "show task detach-suspend-count");
   printf_unfiltered ("The inferior task will be left with a "
@@ -2860,7 +2853,7 @@ show_task_detach_sc_cmd (char *args, int from_tty)
 
 
 static void
-set_thread_default_pause_cmd (char *args, int from_tty)
+set_thread_default_pause_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
 
@@ -2869,7 +2862,7 @@ set_thread_default_pause_cmd (char *args, int from_tty)
 }
 
 static void
-show_thread_default_pause_cmd (char *args, int from_tty)
+show_thread_default_pause_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
   int sc = inf->default_thread_pause_sc;
@@ -2881,7 +2874,7 @@ show_thread_default_pause_cmd (char *args, int from_tty)
 }
 
 static void
-set_thread_default_run_cmd (char *args, int from_tty)
+set_thread_default_run_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
 
@@ -2890,7 +2883,7 @@ set_thread_default_run_cmd (char *args, int from_tty)
 }
 
 static void
-show_thread_default_run_cmd (char *args, int from_tty)
+show_thread_default_run_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
 
@@ -2900,14 +2893,14 @@ show_thread_default_run_cmd (char *args, int from_tty)
 }
 
 static void
-set_thread_default_detach_sc_cmd (char *args, int from_tty)
+set_thread_default_detach_sc_cmd (const char *args, int from_tty)
 {
   cur_inf ()->default_thread_detach_sc =
     parse_int_arg (args, "set thread default detach-suspend-count");
 }
 
 static void
-show_thread_default_detach_sc_cmd (char *args, int from_tty)
+show_thread_default_detach_sc_cmd (const char *args, int from_tty)
 {
   check_empty (args, "show thread default detach-suspend-count");
   printf_unfiltered ("New threads will get a detach-suspend-count of %d.\n",
@@ -2953,7 +2946,7 @@ steal_exc_port (struct proc *proc, mach_port_t name)
 }
 
 static void
-set_task_exc_port_cmd (char *args, int from_tty)
+set_task_exc_port_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
 
@@ -2963,13 +2956,13 @@ set_task_exc_port_cmd (char *args, int from_tty)
 }
 
 static void
-set_stopped_cmd (char *args, int from_tty)
+set_stopped_cmd (const char *args, int from_tty)
 {
   cur_inf ()->stopped = _parse_bool_arg (args, "yes", "no", "set stopped");
 }
 
 static void
-show_stopped_cmd (char *args, int from_tty)
+show_stopped_cmd (const char *args, int from_tty)
 {
   struct inf *inf = active_inf ();
 
@@ -2979,7 +2972,7 @@ show_stopped_cmd (char *args, int from_tty)
 }
 
 static void
-set_sig_thread_cmd (char *args, int from_tty)
+set_sig_thread_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
 
@@ -2997,7 +2990,7 @@ set_sig_thread_cmd (char *args, int from_tty)
 }
 
 static void
-show_sig_thread_cmd (char *args, int from_tty)
+show_sig_thread_cmd (const char *args, int from_tty)
 {
   struct inf *inf = active_inf ();
 
@@ -3023,13 +3016,13 @@ set_signals_cmd (int arg, int from_tty)
 }
 
 static void
-set_signals_cmd (char *args, int from_tty)
+set_signals_cmd (const char *args, int from_tty)
 {
   set_signals_cmd(parse_bool_arg (args, "set signals"), from_tty);
 }
 
 static void
-show_signals_cmd (char *args, int from_tty)
+show_signals_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
 
@@ -3052,13 +3045,13 @@ set_exceptions_cmd (int arg, int from_tty)
 }
 
 static void
-set_exceptions_cmd (char *args, int from_tty)
+set_exceptions_cmd (const char *args, int from_tty)
 {
   set_exceptions_cmd (parse_bool_arg (args, "set exceptions"), from_tty);
 }
 
 static void
-show_exceptions_cmd (char *args, int from_tty)
+show_exceptions_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
 
@@ -3106,7 +3099,7 @@ show_task_cmd (const char *args, int from_tty)
 
 
 static void
-set_noninvasive_cmd (char *args, int from_tty)
+set_noninvasive_cmd (const char *args, int from_tty)
 {
   /* Invert the sense of the arg for each component.  */
   int inv_arg = parse_bool_arg (args, "set noninvasive") ? 0 : 1;
@@ -3152,31 +3145,31 @@ info_port_rights (const char *args, mach_port_type_t only)
 }
 
 static void
-info_send_rights_cmd (char *args, int from_tty)
+info_send_rights_cmd (const char *args, int from_tty)
 {
   info_port_rights (args, MACH_PORT_TYPE_SEND);
 }
 
 static void
-info_recv_rights_cmd (char *args, int from_tty)
+info_recv_rights_cmd (const char *args, int from_tty)
 {
   info_port_rights (args, MACH_PORT_TYPE_RECEIVE);
 }
 
 static void
-info_port_sets_cmd (char *args, int from_tty)
+info_port_sets_cmd (const char *args, int from_tty)
 {
   info_port_rights (args, MACH_PORT_TYPE_PORT_SET);
 }
 
 static void
-info_dead_names_cmd (char *args, int from_tty)
+info_dead_names_cmd (const char *args, int from_tty)
 {
   info_port_rights (args, MACH_PORT_TYPE_DEAD_NAME);
 }
 
 static void
-info_port_rights_cmd (char *args, int from_tty)
+info_port_rights_cmd (const char *args, int from_tty)
 {
   info_port_rights (args, ~0);
 }
@@ -3308,7 +3301,7 @@ This is the same as setting `task pause', `exceptions', and\n\
 
 
 static void
-set_thread_pause_cmd (char *args, int from_tty)
+set_thread_pause_cmd (const char *args, int from_tty)
 {
   struct proc *thread = cur_thread ();
   int old_sc = thread->pause_sc;
@@ -3321,7 +3314,7 @@ set_thread_pause_cmd (char *args, int from_tty)
 }
 
 static void
-show_thread_pause_cmd (char *args, int from_tty)
+show_thread_pause_cmd (const char *args, int from_tty)
 {
   struct proc *thread = cur_thread ();
   int sc = thread->pause_sc;
@@ -3334,7 +3327,7 @@ show_thread_pause_cmd (char *args, int from_tty)
 }
 
 static void
-set_thread_run_cmd (char *args, int from_tty)
+set_thread_run_cmd (const char *args, int from_tty)
 {
   struct proc *thread = cur_thread ();
 
@@ -3342,7 +3335,7 @@ set_thread_run_cmd (char *args, int from_tty)
 }
 
 static void
-show_thread_run_cmd (char *args, int from_tty)
+show_thread_run_cmd (const char *args, int from_tty)
 {
   struct proc *thread = cur_thread ();
 
@@ -3353,14 +3346,14 @@ show_thread_run_cmd (char *args, int from_tty)
 }
 
 static void
-set_thread_detach_sc_cmd (char *args, int from_tty)
+set_thread_detach_sc_cmd (const char *args, int from_tty)
 {
   cur_thread ()->detach_sc = parse_int_arg (args,
 					    "set thread detach-suspend-count");
 }
 
 static void
-show_thread_detach_sc_cmd (char *args, int from_tty)
+show_thread_detach_sc_cmd (const char *args, int from_tty)
 {
   struct proc *thread = cur_thread ();
 
@@ -3372,7 +3365,7 @@ show_thread_detach_sc_cmd (char *args, int from_tty)
 }
 
 static void
-set_thread_exc_port_cmd (char *args, int from_tty)
+set_thread_exc_port_cmd (const char *args, int from_tty)
 {
   struct proc *thread = cur_thread ();
 
@@ -3396,7 +3389,7 @@ show_thread_cmd (char *args, int from_tty)
 #endif
 
 static void
-thread_takeover_sc_cmd (char *args, int from_tty)
+thread_takeover_sc_cmd (const char *args, int from_tty)
 {
   struct proc *thread = cur_thread ();
 

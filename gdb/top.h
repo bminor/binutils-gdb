@@ -230,9 +230,9 @@ extern void init_history (void);
 extern void command_loop (void);
 extern int quit_confirm (void);
 extern void quit_force (int *, int);
-extern void quit_command (char *, int);
+extern void quit_command (const char *, int);
 extern void quit_cover (void);
-extern void execute_command (char *, int);
+extern void execute_command (const char *, int);
 
 /* If the interpreter is in sync mode (we're running a user command's
    list, running command hooks or similars), and we just ran a
@@ -281,13 +281,13 @@ extern char *lim_at_start;
 
 extern void gdb_add_history (const char *);
 
-extern void show_commands (char *args, int from_tty);
+extern void show_commands (const char *args, int from_tty);
 
 extern void set_history (const char *, int);
 
 extern void show_history (const char *, int);
 
-extern void set_verbose (char *, int, struct cmd_list_element *);
+extern void set_verbose (const char *, int, struct cmd_list_element *);
 
 extern char *handle_line_of_input (struct buffer *cmd_line_buffer,
 				   char *rl, int repeat,

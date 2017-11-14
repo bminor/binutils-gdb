@@ -369,7 +369,7 @@ execute_cmd_pre_hook (struct cmd_list_element *c)
     {
       scoped_restore_hook_in restore_hook (c);
       c->hook_in = 1; /* Prevent recursive hooking.  */
-      execute_user_command (c->hook_pre, (char *) 0);
+      execute_user_command (c->hook_pre, nullptr);
     }
 }
 
@@ -380,12 +380,12 @@ execute_cmd_post_hook (struct cmd_list_element *c)
     {
       scoped_restore_hook_in restore_hook (c);
       c->hook_in = 1; /* Prevent recursive hooking.  */
-      execute_user_command (c->hook_post, (char *) 0);
+      execute_user_command (c->hook_post, nullptr);
     }
 }
 
 void
-execute_user_command (struct cmd_list_element *c, char *args)
+execute_user_command (struct cmd_list_element *c, const char *args)
 {
   struct ui *ui = current_ui;
   struct command_line *cmdlines;
@@ -484,7 +484,7 @@ execute_control_command_1 (struct command_line *cmd)
       {
 	/* A simple command, execute it and return.  */
 	std::string new_line = insert_user_defined_cmd_args (cmd->line);
-	execute_command (&new_line[0], 0);
+	execute_command (new_line.c_str (), 0);
 	ret = cmd->control_type;
 	break;
       }
@@ -673,7 +673,7 @@ execute_control_command_untraced (struct command_line *cmd)
    loop condition is nonzero.  */
 
 static void
-while_command (char *arg, int from_tty)
+while_command (const char *arg, int from_tty)
 {
   control_level = 1;
   command_line_up command = get_command_line (while_control, arg);
@@ -690,7 +690,7 @@ while_command (char *arg, int from_tty)
    on the value of the if conditional.  */
 
 static void
-if_command (char *arg, int from_tty)
+if_command (const char *arg, int from_tty)
 {
   control_level = 1;
   command_line_up command = get_command_line (if_control, arg);
@@ -1366,10 +1366,10 @@ copy_command_lines (struct command_line *cmds)
    prefix.  */
 
 static struct cmd_list_element **
-validate_comname (char **comname)
+validate_comname (const char **comname)
 {
   struct cmd_list_element **list = &cmdlist;
-  char *p, *last_word;
+  const char *p, *last_word;
 
   if (*comname == 0)
     error_no_arg (_("name of command to define"));
@@ -1386,19 +1386,16 @@ validate_comname (char **comname)
   if (last_word != *comname)
     {
       struct cmd_list_element *c;
-      char saved_char;
-      const char *tem = *comname;
 
       /* Separate the prefix and the command.  */
-      saved_char = last_word[-1];
-      last_word[-1] = '\0';
+      std::string prefix (*comname, last_word - 1);
+      const char *tem = prefix.c_str ();
 
       c = lookup_cmd (&tem, cmdlist, "", 0, 1);
       if (c->prefixlist == NULL)
-	error (_("\"%s\" is not a prefix command."), *comname);
+	error (_("\"%s\" is not a prefix command."), prefix.c_str ());
 
       list = c->prefixlist;
-      last_word[-1] = saved_char;
       *comname = last_word;
     }
 
@@ -1420,7 +1417,7 @@ user_defined_command (const char *ignore, int from_tty)
 }
 
 static void
-define_command (char *comname, int from_tty)
+define_command (const char *comname, int from_tty)
 {
 #define MAX_TMPBUF 128   
   enum cmd_hook_type
@@ -1430,8 +1427,7 @@ define_command (char *comname, int from_tty)
       CMD_POST_HOOK
     };
   struct cmd_list_element *c, *newc, *hookc = 0, **list;
-  char *tem, *comfull;
-  const char *tem_c;
+  const char *tem, *comfull;
   char tmpbuf[MAX_TMPBUF];
   int  hook_type      = CMD_NO_HOOK;
   int  hook_name_size = 0;
@@ -1445,8 +1441,8 @@ define_command (char *comname, int from_tty)
   list = validate_comname (&comname);
 
   /* Look it up, and verify that we got an exact match.  */
-  tem_c = comname;
-  c = lookup_cmd (&tem_c, *list, "", -1, 1);
+  tem = comname;
+  c = lookup_cmd (&tem, *list, "", -1, 1);
   if (c && strcmp (comname, c->name) != 0)
     c = 0;
 
@@ -1480,8 +1476,8 @@ define_command (char *comname, int from_tty)
   if (hook_type != CMD_NO_HOOK)
     {
       /* Look up cmd it hooks, and verify that we got an exact match.  */
-      tem_c = comname + hook_name_size;
-      hookc = lookup_cmd (&tem_c, *list, "", -1, 0);
+      tem = comname + hook_name_size;
+      hookc = lookup_cmd (&tem, *list, "", -1, 0);
       if (hookc && strcmp (comname + hook_name_size, hookc->name) != 0)
 	hookc = 0;
       if (!hookc)
@@ -1531,11 +1527,11 @@ define_command (char *comname, int from_tty)
 }
 
 static void
-document_command (char *comname, int from_tty)
+document_command (const char *comname, int from_tty)
 {
   struct cmd_list_element *c, **list;
   const char *tem;
-  char *comfull;
+  const char *comfull;
   char tmpbuf[128];
 
   comfull = comname;

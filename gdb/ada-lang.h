@@ -305,11 +305,9 @@ extern int ada_is_fixed_point_type (struct type *);
 
 extern int ada_is_system_address_type (struct type *);
 
-extern DOUBLEST ada_delta (struct type *);
+extern struct value *ada_delta (struct type *);
 
-extern DOUBLEST ada_fixed_to_float (struct type *, LONGEST);
-
-extern LONGEST ada_float_to_fixed (struct type *, DOUBLEST);
+extern struct value *ada_scaling_factor (struct type *);
 
 extern struct type *ada_system_address_type (void);
 

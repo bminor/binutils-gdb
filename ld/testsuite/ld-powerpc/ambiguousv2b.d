@@ -10,7 +10,7 @@
 # entry stub, and my_func should be undefined dynamic with non-zero
 # value.
 
-Relocation section .* contains 1 entries:
+Relocation section .* contains 1 entry:
 .*
 .* R_PPC64_JMP_SLOT .* my_func \+ 0
 

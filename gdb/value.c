@@ -28,11 +28,9 @@
 #include "target.h"
 #include "language.h"
 #include "demangle.h"
-#include "doublest.h"
-#include "floatformat.h"
 #include "regcache.h"
 #include "block.h"
-#include "dfp.h"
+#include "target-float.h"
 #include "objfiles.h"
 #include "valprint.h"
 #include "cli/cli-decode.h"
@@ -882,10 +880,6 @@ value_contents_eq (const struct value *val1, LONGEST offset1,
 				 length * TARGET_CHAR_BIT);
 }
 
-/* Prototypes for local functions.  */
-
-static void show_values (char *, int);
-
 
 /* The value-history records all the values printed
    by print commands during this session.  Each chunk
@@ -975,7 +969,7 @@ gdb_static_assert (sizeof (LONGEST) <= MIN_VALUE_FOR_MAX_VALUE_SIZE);
 /* Implement the "set max-value-size" command.  */
 
 static void
-set_max_value_size (char *args, int from_tty,
+set_max_value_size (const char *args, int from_tty,
 		    struct cmd_list_element *c)
 {
   gdb_assert (max_value_size == -1 || max_value_size >= 0);
@@ -1965,7 +1959,7 @@ access_value_history (int num)
 }
 
 static void
-show_values (char *num_exp, int from_tty)
+show_values (const char *num_exp, int from_tty)
 {
   int i;
   struct value *val;
@@ -2005,10 +1999,7 @@ show_values (char *num_exp, int from_tty)
      "show values +".  If num_exp is null, this is unnecessary, since
      "show values +" is not useful after "show values".  */
   if (from_tty && num_exp)
-    {
-      num_exp[0] = '+';
-      num_exp[1] = '\0';
-    }
+    set_repeat_arguments ("+");
 }
 
 enum internalvar_kind
@@ -2095,7 +2086,7 @@ static struct internalvar *internalvars;
 /* If the variable does not already exist create it and give it the
    value given.  If no value is given then the default is zero.  */
 static void
-init_if_undefined_command (char* args, int from_tty)
+init_if_undefined_command (const char* args, int from_tty)
 {
   struct internalvar* intvar;
 
@@ -2764,18 +2755,6 @@ value_as_long (struct value *val)
   return unpack_long (value_type (val), value_contents (val));
 }
 
-DOUBLEST
-value_as_double (struct value *val)
-{
-  DOUBLEST foo;
-  int inv;
-
-  foo = unpack_double (value_type (val), value_contents (val), &inv);
-  if (inv)
-    error (_("Invalid floating value found in program."));
-  return foo;
-}
-
 /* Extract a value as a C pointer.  Does not deallocate the value.
    Note that val's type may not actually be a pointer; value_as_long
    handles all the cases.  */
@@ -2922,10 +2901,8 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
 	return extract_signed_integer (valaddr, len, byte_order);
 
     case TYPE_CODE_FLT:
-      return (LONGEST) extract_typed_floating (valaddr, type);
-
     case TYPE_CODE_DECFLOAT:
-      return decimal_to_longest (valaddr, len, byte_order);
+      return target_float_to_longest (valaddr, type);
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
@@ -2938,66 +2915,6 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
       error (_("Value can't be converted to integer."));
     }
   return 0;			/* Placate lint.  */
-}
-
-/* Return a double value from the specified type and address.
-   INVP points to an int which is set to 0 for valid value,
-   1 for invalid value (bad float format).  In either case,
-   the returned double is OK to use.  Argument is in target
-   format, result is in host format.  */
-
-DOUBLEST
-unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
-{
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-  enum type_code code;
-  int len;
-  int nosign;
-
-  *invp = 0;			/* Assume valid.  */
-  type = check_typedef (type);
-  code = TYPE_CODE (type);
-  len = TYPE_LENGTH (type);
-  nosign = TYPE_UNSIGNED (type);
-  if (code == TYPE_CODE_FLT)
-    {
-      /* NOTE: cagney/2002-02-19: There was a test here to see if the
-	 floating-point value was valid (using the macro
-	 INVALID_FLOAT).  That test/macro have been removed.
-
-	 It turns out that only the VAX defined this macro and then
-	 only in a non-portable way.  Fixing the portability problem
-	 wouldn't help since the VAX floating-point code is also badly
-	 bit-rotten.  The target needs to add definitions for the
-	 methods gdbarch_float_format and gdbarch_double_format - these
-	 exactly describe the target floating-point format.  The
-	 problem here is that the corresponding floatformat_vax_f and
-	 floatformat_vax_d values these methods should be set to are
-	 also not defined either.  Oops!
-
-         Hopefully someone will add both the missing floatformat
-         definitions and the new cases for floatformat_is_valid ().  */
-
-      if (!floatformat_is_valid (floatformat_from_type (type), valaddr))
-	{
-	  *invp = 1;
-	  return 0.0;
-	}
-
-      return extract_typed_floating (valaddr, type);
-    }
-  else if (code == TYPE_CODE_DECFLOAT)
-    return decimal_to_doublest (valaddr, len, byte_order);
-  else if (nosign)
-    {
-      /* Unsigned -- be sure we compensate for signed LONGEST.  */
-      return (ULONGEST) unpack_long (type, valaddr);
-    }
-  else
-    {
-      /* Signed -- we are OK with unpack_long.  */
-      return unpack_long (type, valaddr);
-    }
 }
 
 /* Unpack raw data (copied from debugee, target byte order) at VALADDR
@@ -3019,6 +2936,21 @@ unpack_pointer (struct type *type, const gdb_byte *valaddr)
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
   return unpack_long (type, valaddr);
+}
+
+bool
+is_floating_value (struct value *val)
+{
+  struct type *type = check_typedef (value_type (val));
+
+  if (is_floating_type (type))
+    {
+      if (!target_float_is_valid (value_contents (val), type))
+	error (_("Invalid floating value found in program."));
+      return true;
+    }
+
+  return false;
 }
 
 
@@ -3541,6 +3473,11 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
       store_typed_address (buf, type, (CORE_ADDR) num);
       break;
 
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_DECFLOAT:
+      target_float_from_longest (buf, type, num);
+      break;
+
     default:
       error (_("Unexpected type (%d) encountered for integer constant."),
 	     TYPE_CODE (type));
@@ -3576,6 +3513,11 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
     case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_PTR:
       store_typed_address (buf, type, (CORE_ADDR) num);
+      break;
+
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_DECFLOAT:
+      target_float_from_ulongest (buf, type, num);
       break;
 
     default:
@@ -3685,32 +3627,6 @@ value_from_contents (struct type *type, const gdb_byte *contents)
   result = allocate_value (type);
   memcpy (value_contents_raw (result), contents, TYPE_LENGTH (type));
   return result;
-}
-
-struct value *
-value_from_double (struct type *type, DOUBLEST num)
-{
-  struct value *val = allocate_value (type);
-  struct type *base_type = check_typedef (type);
-  enum type_code code = TYPE_CODE (base_type);
-
-  if (code == TYPE_CODE_FLT)
-    {
-      store_typed_floating (value_contents_raw (val), base_type, num);
-    }
-  else
-    error (_("Unexpected type encountered for floating constant."));
-
-  return val;
-}
-
-struct value *
-value_from_decfloat (struct type *type, const gdb_byte *dec)
-{
-  struct value *val = allocate_value (type);
-
-  memcpy (value_contents_raw (val), dec, TYPE_LENGTH (type));
-  return val;
 }
 
 /* Extract a value from the history file.  Input will be of the form

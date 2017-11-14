@@ -23,7 +23,6 @@
 #include "command.h"
 #include "dummy-frame.h"
 #include "dwarf2-frame.h"
-#include "doublest.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
@@ -40,6 +39,7 @@
 #include "symfile.h"
 #include "symtab.h"
 #include "target.h"
+#include "target-float.h"
 #include "value.h"
 #include "dis-asm.h"
 #include "disasm.h"
@@ -2802,7 +2802,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 	 exactly how it would happen on the target itself, but it is
 	 the best we can do.  */
       regcache_raw_read (regcache, I386_ST0_REGNUM, buf);
-      convert_typed_floating (buf, i387_ext_type (gdbarch), valbuf, type);
+      target_float_convert (buf, i387_ext_type (gdbarch), valbuf, type);
     }
   else
     {
@@ -2857,7 +2857,7 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 	 floating-point format used by the FPU.  This is probably
 	 not exactly how it would happen on the target itself, but
 	 it is the best we can do.  */
-      convert_typed_floating (valbuf, type, buf, i387_ext_type (gdbarch));
+      target_float_convert (valbuf, type, buf, i387_ext_type (gdbarch));
       regcache_raw_write (regcache, I386_ST0_REGNUM, buf);
 
       /* Set the top of the floating-point register stack to 7.  The

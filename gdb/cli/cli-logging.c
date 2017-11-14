@@ -44,7 +44,8 @@ maybe_warn_already_logging ()
 }
 
 static void
-set_logging_overwrite (char *args, int from_tty, struct cmd_list_element *c)
+set_logging_overwrite (const char *args,
+		       int from_tty, struct cmd_list_element *c)
 {
   maybe_warn_already_logging ();
 }
@@ -63,7 +64,8 @@ show_logging_overwrite (struct ui_file *file, int from_tty,
 static int logging_redirect;
 
 static void
-set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
+set_logging_redirect (const char *args,
+		      int from_tty, struct cmd_list_element *c)
 {
   maybe_warn_already_logging ();
 }

@@ -2252,7 +2252,7 @@ Layout::define_section_symbols(Symbol_table* symtab)
 					0, // symsize
 					elfcpp::STT_NOTYPE,
 					elfcpp::STB_GLOBAL,
-					elfcpp::STV_DEFAULT,
+					elfcpp::STV_PROTECTED,
 					0, // nonvis
 					false, // offset_is_from_end
 					true); // only_if_ref
@@ -2265,7 +2265,7 @@ Layout::define_section_symbols(Symbol_table* symtab)
 					0, // symsize
 					elfcpp::STT_NOTYPE,
 					elfcpp::STB_GLOBAL,
-					elfcpp::STV_DEFAULT,
+					elfcpp::STV_PROTECTED,
 					0, // nonvis
 					true, // offset_is_from_end
 					true); // only_if_ref

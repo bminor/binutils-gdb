@@ -36,6 +36,7 @@
 #include "xcoffread.h"
 #include "solib.h"
 #include "solib-aix.h"
+#include "target-float.h"
 #include "xml-utils.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
@@ -258,8 +259,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	  gdb_assert (len <= 8);
 
-	  convert_typed_floating (value_contents (arg), type,
-				  reg_val, reg_type);
+	  target_float_convert (value_contents (arg), type, reg_val, reg_type);
 	  regcache_cooked_write (regcache, fp_regnum, reg_val);
 	  ++f_argno;
 	}
@@ -463,11 +463,11 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
       if (readbuf)
 	{
 	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, regval);
-	  convert_typed_floating (regval, regtype, readbuf, valtype);
+	  target_float_convert (regval, regtype, readbuf, valtype);
 	}
       if (writebuf)
 	{
-	  convert_typed_floating (writebuf, valtype, regval, regtype);
+	  target_float_convert (writebuf, valtype, regval, regtype);
 	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
 	}
 

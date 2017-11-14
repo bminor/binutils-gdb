@@ -9,7 +9,7 @@
 # taken in a read-only section we should get a copy reloc for the OPD
 # entry.
 
-Relocation section .* contains 1 entries:
+Relocation section .* contains 1 entry:
 .*
 .* R_PPC64_COPY .* my_func \+ 0
 
