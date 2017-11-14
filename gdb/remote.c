@@ -8264,7 +8264,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
   /* Return UNITS_WRITTEN, not TODO_UNITS, in case escape chars caused us to
      send fewer units than we'd planned.  */
   *xfered_len_units = (ULONGEST) units_written;
-  return TARGET_XFER_OK;
+  return (*xfered_len_units != 0) ? TARGET_XFER_OK : TARGET_XFER_EOF;
 }
 
 /* Write memory data directly to the remote machine.
@@ -8358,7 +8358,7 @@ remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len_units,
   decoded_bytes = hex2bin (p, myaddr, todo_units * unit_size);
   /* Return what we have.  Let higher layers handle partial reads.  */
   *xfered_len_units = (ULONGEST) (decoded_bytes / unit_size);
-  return TARGET_XFER_OK;
+  return (*xfered_len_units != 0) ? TARGET_XFER_OK : TARGET_XFER_EOF;
 }
 
 /* Using the set of read-only target sections of remote, read live
@@ -8461,7 +8461,8 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 		  /* No use trying further, we know some memory starting
 		     at MEMADDR isn't available.  */
 		  *xfered_len = len;
-		  return TARGET_XFER_UNAVAILABLE;
+		  return (*xfered_len != 0) ?
+		    TARGET_XFER_UNAVAILABLE : TARGET_XFER_EOF;
 		}
 	    }
 
@@ -10386,7 +10387,7 @@ remote_write_qxfer (struct target_ops *ops, const char *object_name,
   unpack_varlen_hex (rs->buf, &n);
 
   *xfered_len = n;
-  return TARGET_XFER_OK;
+  return (*xfered_len != 0) ? TARGET_XFER_OK : TARGET_XFER_EOF;
 }
 
 /* Read OBJECT_NAME/ANNEX from the remote target using a qXfer packet.
@@ -10687,7 +10688,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   strcpy ((char *) readbuf, rs->buf);
 
   *xfered_len = strlen ((char *) readbuf);
-  return TARGET_XFER_OK;
+  return (*xfered_len != 0) ? TARGET_XFER_OK : TARGET_XFER_EOF;
 }
 
 /* Implementation of to_get_memory_xfer_limit.  */
