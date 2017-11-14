@@ -1,3 +1,8 @@
+2017-11-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.opt/inline-locals.exp: Remove trailing parentheses from
+	test names.
+
 2017-11-09  Pedro Alves  <palves@redhat.com>
 
 	* gdb.tui/tui-completion.exp (test_tab_completion): New procedure,
