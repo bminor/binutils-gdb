@@ -1,5 +1,34 @@
 2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* config/tc-xtensa.c (trampoline_chain_entry, trampoline_chain)
+	(trampoline_chain_index): New structures.
+	(trampoline_index): Add chain_index field.
+	(xg_order_trampoline_chain_entry, xg_sort_trampoline_chain)
+	(xg_find_chain_entry, xg_get_best_chain_entry)
+	(xg_order_trampoline_chain, xg_get_trampoline_chain)
+	(xg_find_best_eq_target, xg_add_location_to_chain)
+	(xg_create_trampoline_chain, xg_get_single_symbol_slot): New
+	functions.
+	(xg_relax_fixups): Call xg_find_best_eq_target to adjust jump
+	target to point to an existing jump. Call
+	xg_create_trampoline_chain to create new jump target. Call
+	xg_add_location_to_chain to add newly created trampoline jump
+	to the corresponding chain.
+	(add_jump_to_trampoline): Extract loop searching for a single
+	slot with a symbol into a separate function, replace that code
+	with a call to that function.
+	(relax_frag_immed): Call xg_find_best_eq_target to adjust jump
+	target to point to an existing jump.
+	* testsuite/gas/xtensa/all.exp: Add trampoline-2 test.
+	* testsuite/gas/xtensa/trampoline.d: Adjust absolute addresses
+	as many duplicate trampoline chains are now coalesced.
+	* testsuite/gas/xtensa/trampoline.s: Add _nop so that objdump
+	stays in sync with instruction stream.
+	* testsuite/gas/xtensa/trampoline-2.l: New test result file.
+	* testsuite/gas/xtensa/trampoline-2.s: New test source file.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* config/tc-xtensa.c (search_trampolines, get_best_trampoline):
 	Remove definitions.
 	(xg_find_best_trampoline_for_tinsn): New function.

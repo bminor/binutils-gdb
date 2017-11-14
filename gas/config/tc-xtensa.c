@@ -7348,6 +7348,33 @@ xtensa_end (void)
   xtensa_check_frag_count ();
 }
 
+struct trampoline_chain_entry
+{
+  symbolS *sym;
+  addressT offset;
+};
+
+/* Trampoline chain for a given (sym, offset) pair is a sorted array
+   of locations of trampoline jumps leading there.  Jumps are represented
+   as pairs (sym, offset): trampoline frag symbol and offset of the jump
+   inside the frag.  */
+struct trampoline_chain
+{
+  struct trampoline_chain_entry target;
+  struct trampoline_chain_entry *entry;
+  size_t n_entries;
+  size_t n_max;
+  bfd_boolean needs_sorting;
+};
+
+struct trampoline_chain_index
+{
+  struct trampoline_chain *entry;
+  size_t n_entries;
+  size_t n_max;
+  bfd_boolean needs_sorting;
+};
+
 struct trampoline_index
 {
   fragS **entry;
@@ -7359,7 +7386,10 @@ struct trampoline_seg
 {
   struct trampoline_seg *next;
   asection *seg;
+  /* Trampolines ordered by their frag fr_address */
   struct trampoline_index index;
+  /* Known trampoline chains ordered by (sym, offset) pair */
+  struct trampoline_chain_index chain_index;
 };
 
 static struct trampoline_seg trampoline_seg_list;
@@ -7518,6 +7548,187 @@ xtensa_create_trampoline_frag (bfd_boolean needs_jump_around)
 static bfd_boolean xg_is_trampoline_frag_full (const fragS *fragP)
 {
   return fragP->fr_var < 3;
+}
+
+static int xg_order_trampoline_chain_entry (const void *a, const void *b)
+{
+  const struct trampoline_chain_entry *pa = a;
+  const struct trampoline_chain_entry *pb = b;
+
+  if (pa->sym == pb->sym ||
+      S_GET_VALUE (pa->sym) == S_GET_VALUE (pb->sym))
+    if (pa->offset == pb->offset)
+      return 0;
+    else
+      return pa->offset < pb->offset ? -1 : 1;
+  else
+    return S_GET_VALUE (pa->sym) < S_GET_VALUE (pb->sym) ? -1 : 1;
+}
+
+static void xg_sort_trampoline_chain (struct trampoline_chain *tc)
+{
+  qsort (tc->entry, tc->n_entries, sizeof (*tc->entry),
+	 xg_order_trampoline_chain_entry);
+  tc->needs_sorting = FALSE;
+}
+
+/* Find entry index in the given chain with maximal address <= source.  */
+static size_t xg_find_chain_entry (struct trampoline_chain *tc,
+				   addressT source)
+{
+  size_t a = 0;
+  size_t b = tc->n_entries;
+
+  if (tc->needs_sorting)
+    xg_sort_trampoline_chain (tc);
+
+  while (b - a > 1)
+    {
+      size_t c = (a + b) / 2;
+      struct trampoline_chain_entry *e = tc->entry + c;
+
+      if (S_GET_VALUE(e->sym) + e->offset <= source)
+	a = c;
+      else
+	b = c;
+    }
+  return a;
+}
+
+/* Find the best jump target for the source in the given trampoline chain.
+   The best jump target is the one that results in the shortest path to the
+   final target, it's the location of the jump closest to the final target,
+   but within the J_RANGE - J_MARGIN from the source.  */
+static struct trampoline_chain_entry *
+xg_get_best_chain_entry (struct trampoline_chain *tc, addressT source)
+{
+  addressT target = S_GET_VALUE(tc->target.sym) + tc->target.offset;
+  size_t i = xg_find_chain_entry (tc, source);
+  struct trampoline_chain_entry *e = tc->entry + i;
+  int step = target < source ? -1 : 1;
+  addressT chained_target;
+  offsetT off;
+
+  if (target > source &&
+      S_GET_VALUE(e->sym) + e->offset <= source &&
+      i + 1 < tc->n_entries)
+    ++i;
+
+  while (i + step < tc->n_entries)
+    {
+      struct trampoline_chain_entry *next = tc->entry + i + step;
+
+      chained_target = S_GET_VALUE(next->sym) + next->offset;
+      off = source - chained_target;
+
+      if (labs (off) >= J_RANGE - J_MARGIN)
+	break;
+
+      i += step;
+    }
+
+  e = tc->entry + i;
+  chained_target = S_GET_VALUE(e->sym) + e->offset;
+  off = source - chained_target;
+
+  if (labs (off) < J_MARGIN ||
+      labs (off) >= J_RANGE - J_MARGIN)
+    return &tc->target;
+  return tc->entry + i;
+}
+
+static int xg_order_trampoline_chain (const void *a, const void *b)
+{
+  const struct trampoline_chain *pa = a;
+  const struct trampoline_chain *pb = b;
+
+  return xg_order_trampoline_chain_entry (&pa->target, &pb->target);
+}
+
+static struct trampoline_chain *
+xg_get_trampoline_chain (struct trampoline_seg *ts,
+			 symbolS *sym,
+			 addressT offset)
+{
+  struct trampoline_chain_index *idx = &ts->chain_index;
+  struct trampoline_chain c;
+
+  if (idx->needs_sorting)
+    {
+      qsort (idx->entry, idx->n_entries, sizeof (*idx->entry),
+	     xg_order_trampoline_chain);
+      idx->needs_sorting = FALSE;
+    }
+  c.target.sym = sym;
+  c.target.offset = offset;
+  return bsearch (&c, idx->entry, idx->n_entries,
+		  sizeof (struct trampoline_chain),
+		  xg_order_trampoline_chain);
+}
+
+/* Find trampoline chain in the given trampoline segment that is going
+   to the *sym + *offset.  If found, replace *sym and *offset with the
+   best jump target in that chain.  */
+static struct trampoline_chain *
+xg_find_best_eq_target (struct trampoline_seg *ts,
+			addressT source, symbolS **sym,
+			addressT *offset)
+{
+  struct trampoline_chain *tc = xg_get_trampoline_chain (ts, *sym, *offset);
+
+  if (tc)
+    {
+      struct trampoline_chain_entry *e = xg_get_best_chain_entry (tc, source);
+
+      *sym = e->sym;
+      *offset = e->offset;
+    }
+  return tc;
+}
+
+static void xg_add_location_to_chain (struct trampoline_chain *tc,
+				      symbolS *sym, addressT offset)
+{
+  struct trampoline_chain_entry *e;
+
+  if (tc->n_entries == tc->n_max)
+    {
+      tc->n_max = (tc->n_max + 1) * 2;
+      tc->entry = xrealloc (tc->entry, sizeof (*tc->entry) * tc->n_max);
+    }
+  e = tc->entry + tc->n_entries;
+  e->sym = sym;
+  e->offset = offset;
+  ++tc->n_entries;
+  tc->needs_sorting = TRUE;
+}
+
+static struct trampoline_chain *
+xg_create_trampoline_chain (struct trampoline_seg *ts,
+			    symbolS *sym, addressT offset)
+{
+  struct trampoline_chain_index *idx = &ts->chain_index;
+  struct trampoline_chain *tc;
+
+  if (idx->n_entries == idx->n_max)
+    {
+      idx->n_max = (idx->n_max + 1) * 2;
+      idx->entry = xrealloc (idx->entry,
+			     sizeof (*idx->entry) * idx->n_max);
+    }
+
+  tc = idx->entry + idx->n_entries;
+  tc->target.sym = sym;
+  tc->target.offset = offset;
+  tc->entry = NULL;
+  tc->n_entries = 0;
+  tc->n_max = 0;
+  xg_add_location_to_chain (tc, sym, offset);
+
+  ++idx->n_entries;
+  idx->needs_sorting = TRUE;
+
+  return tc;
 }
 
 void dump_trampolines (void);
@@ -9200,9 +9411,24 @@ static void xg_relax_fixups (struct trampoline_seg *ts)
   for (fx = seginfo->fix_root; fx; fx = fx->fx_next)
     {
       fixS *fixP = fx;
+      struct trampoline_chain *tc = NULL;
+
+      if (xg_is_relaxable_fixup (fixP))
+	{
+	  tc = xg_find_best_eq_target (ts, fixP->fx_frag->fr_address,
+				       &fixP->fx_addsy, &fixP->fx_offset);
+	  if (!tc)
+	    tc = xg_create_trampoline_chain (ts, fixP->fx_addsy,
+					     fixP->fx_offset);
+	  gas_assert (tc);
+	}
 
       while (xg_is_relaxable_fixup (fixP))
-	fixP = xg_relax_fixup (idx, fixP);
+	{
+	  fixP = xg_relax_fixup (idx, fixP);
+	  xg_add_location_to_chain (tc, fixP->fx_frag->fr_symbol,
+				    fixP->fx_where);
+	}
     }
 }
 
@@ -9889,14 +10115,14 @@ init_trampoline_frag (fragS *fp)
   return growth;
 }
 
-
 static int
-add_jump_to_trampoline (fragS *tramp, fragS *origfrag)
+xg_get_single_symbol_slot (fragS *fragP)
 {
-  int i, slot = -1;
+  int i;
+  int slot = -1;
 
   for (i = 0; i < MAX_SLOTS; ++i)
-    if (origfrag->tc_frag_data.slot_symbols[i])
+    if (fragP->tc_frag_data.slot_symbols[i])
       {
 	gas_assert (slot == -1);
 	slot = i;
@@ -9904,10 +10130,19 @@ add_jump_to_trampoline (fragS *tramp, fragS *origfrag)
 
   gas_assert (slot >= 0 && slot < MAX_SLOTS);
 
+  return slot;
+}
+
+static fixS *
+add_jump_to_trampoline (fragS *tramp, fragS *origfrag)
+{
+  int slot = xg_get_single_symbol_slot (origfrag);
+  fixS *fixP;
+
   /* Assemble a jump to the target label in the trampoline frag.  */
-  xg_append_jump (tramp,
-		  origfrag->tc_frag_data.slot_symbols[slot],
-		  origfrag->tc_frag_data.slot_offsets[slot]);
+  fixP = xg_append_jump (tramp,
+			 origfrag->tc_frag_data.slot_symbols[slot],
+			 origfrag->tc_frag_data.slot_offsets[slot]);
 
   /* Modify the original j to point here.  */
   origfrag->tc_frag_data.slot_symbols[slot] = tramp->fr_symbol;
@@ -9923,7 +10158,7 @@ add_jump_to_trampoline (fragS *tramp, fragS *origfrag)
       xg_remove_trampoline_from_index (&ts->index, tr);
     }
 
-  return 3;
+  return fixP;
 }
 
 
@@ -10072,15 +10307,42 @@ relax_frag_immed (segT segP,
       istack.insn[istack.ninsn - 2].opcode == xtensa_j_opcode)
     {
       TInsn *jinsn = &istack.insn[istack.ninsn - 2];
+      struct trampoline_seg *ts = find_trampoline_seg (segP);
+      struct trampoline_chain *tc = NULL;
 
-      if (!xg_symbolic_immeds_fit (jinsn, segP, fragP, fragP->fr_offset, total_text_diff))
+      if (ts &&
+	  !xg_symbolic_immeds_fit (jinsn, segP, fragP, fragP->fr_offset,
+				   total_text_diff))
+	{
+	  int s = xg_get_single_symbol_slot (fragP);
+	  addressT offset = fragP->tc_frag_data.slot_offsets[s];
+
+	  tc = xg_find_best_eq_target (ts, fragP->fr_address,
+				       &fragP->tc_frag_data.slot_symbols[s],
+				       &offset);
+
+	  if (!tc)
+	    tc = xg_create_trampoline_chain (ts,
+					     fragP->tc_frag_data.slot_symbols[s],
+					     offset);
+	  fragP->tc_frag_data.slot_offsets[s] = offset;
+	  tinsn_immed_from_frag (jinsn, fragP, s);
+	}
+
+      if (!xg_symbolic_immeds_fit (jinsn, segP, fragP, fragP->fr_offset,
+				   total_text_diff))
 	{
 	  fragS *tf = xg_find_best_trampoline_for_tinsn (jinsn, fragP);
 
 	  if (tf)
 	    {
-	      this_text_diff += init_trampoline_frag (tf);
-	      this_text_diff += add_jump_to_trampoline (tf, fragP);
+	      fixS *fixP;
+
+	      this_text_diff += init_trampoline_frag (tf) + 3;
+	      fixP = add_jump_to_trampoline (tf, fragP);
+	      xg_add_location_to_chain (tc, fixP->fx_frag->fr_symbol,
+					fixP->fx_where);
+	      fragP->tc_frag_data.relax_seen = FALSE;
 	    }
 	  else
 	    {
