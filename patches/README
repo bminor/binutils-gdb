@@ -24,6 +24,12 @@ patches="
 	binutils-pr21128.patch
 	binutils-pr21129.patch
 	binutils-x86-gpoff.patch
+0001-ld-Add-z-textonly-option-to-ELF-linker.patch
+0002-ld-Add-TEXT_SEGMENT_ALIGN-TEXT_SEGMENT_-RELRO_-END.patch
+0003-ld-Create-a-new-LOAD-segment-for-text-only-LOAD-segm.patch
+0004-ld-ppc-spu-Also-set-expld.textseg.phase-to-exp_seg_n.patch
+0005-ld-Add-tests-for-z-textonly-and-z-notextonly.patch
+0006-x86-64-Add-tests-for-z-textonly-z-max-page-size-0x10.patch
 "
 
 for p in $patches

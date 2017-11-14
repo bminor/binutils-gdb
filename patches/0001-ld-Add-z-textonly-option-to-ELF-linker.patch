@@ -1,0 +1,479 @@
+From 10728c17a5b63dff7301970c3d58285c77eb955a Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Thu, 9 Nov 2017 14:14:08 -0800
+Subject: [PATCH 1/6] ld: Add "-z textonly" option to ELF linker
+
+Text-only LOAD segment has the same requirement for segment alignment
+and page sizes as GNU_RELRO segment.  But for GNU_RELRO segment, the
+segment may not end at the same address of the end of data segment.  But
+for text-only LOAD segment, it is exactly the same as text LOAD segment.
+
+The new "-z textonly" option will turn on both text-only LOAD segment and
+GNU_RELRO segment.  The new "-z notextonly" option will turn off only
+text-only LOAD segment.  "-z relro" is updated not to turn off text-only
+LOAD segment.  "-z norelro" is updated to turn off both GNU_RELRO segment
+and text-only LOAD segment.
+
+include/
+
+	PR ld/22393
+	* bfdlink.h (bfd_link_info): Change the relro field to 2 bits.
+
+ld/
+
+	PR ld/22393
+	* NEWS: Mention "-z textonly".
+	* emultempl/elf32.em (gld${EMULATION_NAME}_get_script): Get
+	builtin linker scripts and return linker scripts from disk for
+	"-z textonly".
+	(gld${EMULATION_NAME}_handle_option): Set the first bit of
+	link_info.relro for "-z relro".  Clear link_info.relro for
+	"-z norelro".  Set link_info.relro to 2 for "-z textonly".
+	Keep only the first bit of link_info.relro for "notextonly".
+	* genscripts.sh: Generate linker scripts for "-z textonly".
+	(LD_FLAG): Set to *textonly for "-z textonly".
+	* lexsup.c (elf_shlib_list_options): Update linker help messsages
+	for "-z relro" and "-z norelro".  Add linker help messsages for
+	"-z textonly" and "-z notextonly".
+	* ld.texinfo: Update "-z norelro".  Document "-z textonly".
+---
+ include/bfdlink.h     |   6 ++-
+ ld/NEWS               |   2 +
+ ld/emultempl/elf32.em | 104 ++++++++++++++++++++++++++++++++++++++++++++------
+ ld/genscripts.sh      |  76 ++++++++++++++++++++++++++++++++----
+ ld/ld.texinfo         |  10 ++++-
+ ld/lexsup.c           |   8 +++-
+ 6 files changed, 182 insertions(+), 24 deletions(-)
+
+diff --git a/include/bfdlink.h b/include/bfdlink.h
+index 2370c0d45a..d283429fdb 100644
+--- a/include/bfdlink.h
++++ b/include/bfdlink.h
+@@ -383,8 +383,10 @@ struct bfd_link_info
+      executable.  */
+   unsigned int emitrelocations: 1;
+ 
+-  /* TRUE if PT_GNU_RELRO segment should be created.  */
+-  unsigned int relro: 1;
++  /* Non-zero if PT_GNU_RELRO and text-only PT_LOAD segments should be
++     created.  1 for PT_GNU_RELRO segment only, > 1 for PT_GNU_RELRO
++     segment as well as text-only PT_LOAD segment.  */
++  unsigned int relro: 2;
+ 
+   /* Nonzero if .eh_frame_hdr section and PT_GNU_EH_FRAME ELF segment
+      should be created.  1 for DWARF2 tables, 2 for compact tables.  */
+diff --git a/ld/NEWS b/ld/NEWS
+index 8f67fbe179..4da1cc07b3 100644
+--- a/ld/NEWS
++++ b/ld/NEWS
+@@ -1,4 +1,6 @@
+ -*- text -*-
++* Add -z textonly to generate text-only PT_LOAD segment.
++
+ * Add -z globalaudit command line option to force audit libraries to be run
+   for every dynamic object loaded by an executable - provided that the loader
+   supports this functionality.
+diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
+index edd8944f04..b633977438 100644
+--- a/ld/emultempl/elf32.em
++++ b/ld/emultempl/elf32.em
+@@ -2367,13 +2367,25 @@ if test -n "$GENERATE_PIE_SCRIPT" ; then
+ if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+ echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
+ echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
++echo '             && link_info.relro > 1'		>> e${EMULATION_NAME}.c
++echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
++sed $sc ldscripts/${EMULATION_NAME}.xdwe		>> e${EMULATION_NAME}.c
++echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
++echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
+ echo '             && link_info.relro'			>> e${EMULATION_NAME}.c
+ echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
+ sed $sc ldscripts/${EMULATION_NAME}.xdw			>> e${EMULATION_NAME}.c
+ echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
++echo '             && link_info.relro > 1'		>> e${EMULATION_NAME}.c
++echo '             && link_info.combreloc) return'	>> e${EMULATION_NAME}.c
++sed $sc ldscripts/${EMULATION_NAME}.xdce		>> e${EMULATION_NAME}.c
++echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
+ echo '             && link_info.combreloc) return'	>> e${EMULATION_NAME}.c
+ sed $sc ldscripts/${EMULATION_NAME}.xdc			>> e${EMULATION_NAME}.c
+ fi
++echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
++echo '             && link_info.relro > 1) return'	>> e${EMULATION_NAME}.c
++sed $sc ldscripts/${EMULATION_NAME}.xde			>> e${EMULATION_NAME}.c
+ echo '  ; else if (bfd_link_pie (&link_info)) return'	>> e${EMULATION_NAME}.c
+ sed $sc ldscripts/${EMULATION_NAME}.xd			>> e${EMULATION_NAME}.c
+ fi
+@@ -2381,24 +2393,45 @@ if test -n "$GENERATE_SHLIB_SCRIPT" ; then
+ if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+ echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
+ echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
++echo '             && link_info.relro > 1'		>> e${EMULATION_NAME}.c
++echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
++sed $sc ldscripts/${EMULATION_NAME}.xswe		>> e${EMULATION_NAME}.c
++echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
++echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
+ echo '             && link_info.relro'			>> e${EMULATION_NAME}.c
+ echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
+ sed $sc ldscripts/${EMULATION_NAME}.xsw			>> e${EMULATION_NAME}.c
+ echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
++echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
++echo '             && link_info.relro > 1) return'	>> e${EMULATION_NAME}.c
++sed $sc ldscripts/${EMULATION_NAME}.xsce			>> e${EMULATION_NAME}.c
++echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
+ echo '             && link_info.combreloc) return'	>> e${EMULATION_NAME}.c
+ sed $sc ldscripts/${EMULATION_NAME}.xsc			>> e${EMULATION_NAME}.c
+ fi
++echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
++echo '             && link_info.relro > 1) return'	>> e${EMULATION_NAME}.c
++sed $sc ldscripts/${EMULATION_NAME}.xse			>> e${EMULATION_NAME}.c
+ echo '  ; else if (bfd_link_dll (&link_info)) return'	>> e${EMULATION_NAME}.c
+ sed $sc ldscripts/${EMULATION_NAME}.xs			>> e${EMULATION_NAME}.c
+ fi
+ if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+ echo '  ; else if (link_info.combreloc'			>> e${EMULATION_NAME}.c
++echo '             && link_info.relro > 1'		>> e${EMULATION_NAME}.c
++echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
++sed $sc ldscripts/${EMULATION_NAME}.xwe			>> e${EMULATION_NAME}.c
++echo '  ; else if (link_info.combreloc'			>> e${EMULATION_NAME}.c
+ echo '             && link_info.relro'			>> e${EMULATION_NAME}.c
+ echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
+ sed $sc ldscripts/${EMULATION_NAME}.xw			>> e${EMULATION_NAME}.c
++echo '  ; else if (link_info.combreloc'			>> e${EMULATION_NAME}.c
++echo '             && link_info.relro > 1) return'	>> e${EMULATION_NAME}.c
++sed $sc ldscripts/${EMULATION_NAME}.xce			>> e${EMULATION_NAME}.c
+ echo '  ; else if (link_info.combreloc) return'		>> e${EMULATION_NAME}.c
+ sed $sc ldscripts/${EMULATION_NAME}.xc			>> e${EMULATION_NAME}.c
+ fi
++echo '  ; else if (link_info.relro > 1) return'		>> e${EMULATION_NAME}.c
++sed $sc ldscripts/${EMULATION_NAME}.xe			>> e${EMULATION_NAME}.c
+ echo '  ; else return'					>> e${EMULATION_NAME}.c
+ sed $sc ldscripts/${EMULATION_NAME}.x			>> e${EMULATION_NAME}.c
+ echo '; }'						>> e${EMULATION_NAME}.c
+@@ -2431,15 +2464,30 @@ fragment <<EOF
+ 	   && link_info.combreloc
+ 	   && link_info.relro
+ 	   && (link_info.flags & DF_BIND_NOW))
+-    return "ldscripts/${EMULATION_NAME}.xdw";
++    {
++      if (link_info.relro > 1)
++	return "ldscripts/${EMULATION_NAME}.xdwe";
++      else
++	return "ldscripts/${EMULATION_NAME}.xdw";
++    }
+   else if (bfd_link_pie (&link_info)
+ 	   && link_info.combreloc)
+-    return "ldscripts/${EMULATION_NAME}.xdc";
++    {
++      if (link_info.relro > 1)
++	return "ldscripts/${EMULATION_NAME}.xdce";
++      else
++	return "ldscripts/${EMULATION_NAME}.xdc";
++    }
+ EOF
+ fi
+ fragment <<EOF
+   else if (bfd_link_pie (&link_info))
+-    return "ldscripts/${EMULATION_NAME}.xd";
++    {
++      if (link_info.relro > 1)
++	return "ldscripts/${EMULATION_NAME}.xde";
++      else
++	return "ldscripts/${EMULATION_NAME}.xd";
++    }
+ EOF
+ fi
+ if test -n "$GENERATE_SHLIB_SCRIPT" ; then
+@@ -2447,28 +2495,58 @@ if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+ fragment <<EOF
+   else if (bfd_link_dll (&link_info) && link_info.combreloc
+ 	   && link_info.relro && (link_info.flags & DF_BIND_NOW))
+-    return "ldscripts/${EMULATION_NAME}.xsw";
++    {
++      if (link_info.relro > 1)
++	return "ldscripts/${EMULATION_NAME}.xswe";
++      else
++	return "ldscripts/${EMULATION_NAME}.xsw";
++    }
+   else if (bfd_link_dll (&link_info) && link_info.combreloc)
+-    return "ldscripts/${EMULATION_NAME}.xsc";
++    {
++      if (link_info.relro > 1)
++	return "ldscripts/${EMULATION_NAME}.xsce";
++      else
++	return "ldscripts/${EMULATION_NAME}.xsc";
++    }
+ EOF
+ fi
+ fragment <<EOF
+   else if (bfd_link_dll (&link_info))
+-    return "ldscripts/${EMULATION_NAME}.xs";
++    {
++      if (link_info.relro > 1)
++	return "ldscripts/${EMULATION_NAME}.xse";
++      else
++	return "ldscripts/${EMULATION_NAME}.xs";
++    }
+ EOF
+ fi
+ if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+ fragment <<EOF
+   else if (link_info.combreloc && link_info.relro
+ 	   && (link_info.flags & DF_BIND_NOW))
+-    return "ldscripts/${EMULATION_NAME}.xw";
++    {
++      if (link_info.relro > 1)
++	return "ldscripts/${EMULATION_NAME}.xwe";
++      else
++	return "ldscripts/${EMULATION_NAME}.xw";
++    }
+   else if (link_info.combreloc)
+-    return "ldscripts/${EMULATION_NAME}.xc";
++    {
++      if (link_info.relro > 1)
++	return "ldscripts/${EMULATION_NAME}.xce";
++      else
++	return "ldscripts/${EMULATION_NAME}.xc";
++    }
+ EOF
+ fi
+ fragment <<EOF
+   else
+-    return "ldscripts/${EMULATION_NAME}.x";
++    {
++      if (link_info.relro > 1)
++	return "ldscripts/${EMULATION_NAME}.xe";
++      else
++	return "ldscripts/${EMULATION_NAME}.x";
++    }
+ }
+ 
+ EOF
+@@ -2735,9 +2813,13 @@ fragment <<EOF
+       else if (strcmp (optarg, "nocopyreloc") == 0)
+ 	link_info.nocopyreloc = TRUE;
+       else if (strcmp (optarg, "relro") == 0)
+-	link_info.relro = TRUE;
++	link_info.relro |= 1;
+       else if (strcmp (optarg, "norelro") == 0)
+-	link_info.relro = FALSE;
++	link_info.relro = 0;
++      else if (strcmp (optarg, "textonly") == 0)
++	link_info.relro = 2;
++      else if (strcmp (optarg, "notextonly") == 0)
++	link_info.relro &= 1;
+       else if (strcmp (optarg, "common") == 0)
+ 	link_info.elf_stt_common = elf_stt_common;
+       else if (strcmp (optarg, "nocommon") == 0)
+diff --git a/ld/genscripts.sh b/ld/genscripts.sh
+index 53cd5ad95c..9d4edc04d1 100755
+--- a/ld/genscripts.sh
++++ b/ld/genscripts.sh
+@@ -290,14 +290,20 @@ CONSTRUCTING=" "
+   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+ ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xu
+ 
+-LD_FLAG=
+ DATA_ALIGNMENT=${DATA_ALIGNMENT_}
+ RELOCATING=" "
++LD_FLAG=
+ ( echo "/* Default linker script, for normal executables */"
+   . ${CUSTOMIZER_SCRIPT}
+   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+ ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.x
+ 
++LD_FLAG=textonly
++( echo "/* Script for -z textonly: generate normal executables with text-only segment */"
++  . ${CUSTOMIZER_SCRIPT}
++  . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
++) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xe
++
+ LD_FLAG=n
+ DATA_ALIGNMENT=${DATA_ALIGNMENT_n}
+ ( echo "/* Script for -n: mix text and data on same page */"
+@@ -321,44 +327,78 @@ if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
+     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+   ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xc
+   rm -f ${COMBRELOC}
+-  LD_FLAG=w
++  LD_FLAG=ctextonly
++  COMBRELOC=ldscripts/${EMULATION_NAME}.xce.tmp
++  ( echo "/* Script for -z combreloc -z textonly: combine and sort reloc sections with text-only segment */"
++    . ${CUSTOMIZER_SCRIPT}
++    . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
++  ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xce
++  rm -f ${COMBRELOC}
+   RELRO_NOW=" "
++  LD_FLAG=w
+   COMBRELOC=ldscripts/${EMULATION_NAME}.xw.tmp
+   ( echo "/* Script for -z combreloc -z now -z relro: combine and sort reloc sections */"
+     . ${CUSTOMIZER_SCRIPT}
+     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+   ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xw
+   rm -f ${COMBRELOC}
++  LD_FLAG=wtextonly
++  COMBRELOC=ldscripts/${EMULATION_NAME}.xwe.tmp
++  ( echo "/* Script for -z combreloc -z now -z relro -z textonly: combine and sort reloc sections with text-only segment */"
++    . ${CUSTOMIZER_SCRIPT}
++    . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
++  ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xwe
++  rm -f ${COMBRELOC}
+   COMBRELOC=
+   unset RELRO_NOW
+ fi
+ 
+ if test -n "$GENERATE_SHLIB_SCRIPT"; then
+-  LD_FLAG=shared
+   DATA_ALIGNMENT=${DATA_ALIGNMENT_s-${DATA_ALIGNMENT_}}
+   CREATE_SHLIB=" "
++  LD_FLAG=shared
+   (
+     echo "/* Script for ld --shared: link shared library */"
+     . ${CUSTOMIZER_SCRIPT}
+     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+   ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xs
++  LD_FLAG=sharedtextonly
++  (
++    echo "/* Script for ld --shared -z textonly: link shared library with text-only segment */"
++    . ${CUSTOMIZER_SCRIPT}
++    . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
++  ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xse
+   if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
+-    LD_FLAG=cshared
+     DATA_ALIGNMENT=${DATA_ALIGNMENT_sc-${DATA_ALIGNMENT}}
++    LD_FLAG=cshared
+     COMBRELOC=ldscripts/${EMULATION_NAME}.xsc.tmp
+     ( echo "/* Script for --shared -z combreloc: shared library, combine & sort relocs */"
+       . ${CUSTOMIZER_SCRIPT}
+       . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+     ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xsc
+     rm -f ${COMBRELOC}
+-    LD_FLAG=wshared
++    LD_FLAG=csharedtextonly
++    COMBRELOC=ldscripts/${EMULATION_NAME}.xsce.tmp
++    ( echo "/* Script for --shared -z combreloc -z textonly: shared library, combine & sort relocs with text-only segment */"
++      . ${CUSTOMIZER_SCRIPT}
++      . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
++    ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xsce
++    rm -f ${COMBRELOC}
+     RELRO_NOW=" "
++    LD_FLAG=wshared
+     COMBRELOC=ldscripts/${EMULATION_NAME}.xsw.tmp
+     ( echo "/* Script for --shared -z combreloc -z now -z relro: shared library, combine & sort relocs */"
+       . ${CUSTOMIZER_SCRIPT}
+       . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+     ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xsw
+     rm -f ${COMBRELOC}
++    LD_FLAG=wsharedtextonly
++    COMBRELOC=ldscripts/${EMULATION_NAME}.xswe.tmp
++    ( echo "/* Script for --shared -z combreloc -z now -z relro -z textonly: shared library, combine & sort relocs with text-only segment */"
++      . ${CUSTOMIZER_SCRIPT}
++      . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
++    ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xswe
++    rm -f ${COMBRELOC}
+     COMBRELOC=
+     unset RELRO_NOW
+   fi
+@@ -366,31 +406,51 @@ if test -n "$GENERATE_SHLIB_SCRIPT"; then
+ fi
+ 
+ if test -n "$GENERATE_PIE_SCRIPT"; then
+-  LD_FLAG=pie
+   DATA_ALIGNMENT=${DATA_ALIGNMENT_s-${DATA_ALIGNMENT_}}
+   CREATE_PIE=" "
++  LD_FLAG=pie
+   (
+     echo "/* Script for ld -pie: link position independent executable */"
+     . ${CUSTOMIZER_SCRIPT}
+     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+   ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xd
++  LD_FLAG=pietextonly
++  (
++    echo "/* Script for ld -pie -z textonly: link position independent executable with text-only segment */"
++    . ${CUSTOMIZER_SCRIPT}
++    . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
++  ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xde
+   if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
+-    LD_FLAG=cpie
+     DATA_ALIGNMENT=${DATA_ALIGNMENT_sc-${DATA_ALIGNMENT}}
+     COMBRELOC=ldscripts/${EMULATION_NAME}.xdc.tmp
++    LD_FLAG=cpie
+     ( echo "/* Script for -pie -z combreloc: position independent executable, combine & sort relocs */"
+       . ${CUSTOMIZER_SCRIPT}
+       . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+     ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xdc
+     rm -f ${COMBRELOC}
+-    LD_FLAG=wpie
++    LD_FLAG=cpietextonly
++    COMBRELOC=ldscripts/${EMULATION_NAME}.xdce.tmp
++    ( echo "/* Script for -pie -z combreloc -z textonly: position independent executable, combine & sort relocs with text-only segment */"
++      . ${CUSTOMIZER_SCRIPT}
++      . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
++    ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xdce
++    rm -f ${COMBRELOC}
+     RELRO_NOW=" "
++    LD_FLAG=wpie
+     COMBRELOC=ldscripts/${EMULATION_NAME}.xdw.tmp
+     ( echo "/* Script for -pie -z combreloc -z now -z relro: position independent executable, combine & sort relocs */"
+       . ${CUSTOMIZER_SCRIPT}
+       . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+     ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xdw
+     rm -f ${COMBRELOC}
++    LD_FLAG=wpietextonly
++    COMBRELOC=ldscripts/${EMULATION_NAME}.xdwe.tmp
++    ( echo "/* Script for -pie -z combreloc -z now -z relro -z textonly: position independent executable, combine & sort relocs with text-only segment */"
++      . ${CUSTOMIZER_SCRIPT}
++      . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
++    ) | sed -e '/^ *$/d;s/[	 ]*$//' > ldscripts/${EMULATION_NAME}.xdwe
++    rm -f ${COMBRELOC}
+     COMBRELOC=
+     unset RELRO_NOW
+   fi
+diff --git a/ld/ld.texinfo b/ld/ld.texinfo
+index 14788884cc..88f0f9b27f 100644
+--- a/ld/ld.texinfo
++++ b/ld/ld.texinfo
+@@ -1262,7 +1262,15 @@ Create an ELF @code{PT_GNU_RELRO} segment header in the object.  This
+ specifies a memory segment that should be made read-only after
+ relocation, if supported.  Specifying @samp{common-page-size} smaller
+ than the system page size will render this protection ineffective.
+-Don't create an ELF @code{PT_GNU_RELRO} segment if @samp{norelro}.
++Don't create an ELF @code{PT_GNU_RELRO} segment if @samp{norelro} is
++used, which also implies @option{-z notextonly}.
++
++@item textonly
++@itemx notextonly
++Create an ELF text-only @code{PT_LOAD} segment header in the object.
++This specifies a memory segment that should contain only instructions.
++This option also implies @option{-z relro}.  Don't create an ELF
++text-only @code{PT_LOAD} segment if @samp{notext} is used.
+ 
+ @item shstk
+ Generate GNU_PROPERTY_X86_FEATURE_1_SHSTK in .note.gnu.property section
+diff --git a/ld/lexsup.c b/ld/lexsup.c
+index cb9edaf7a6..9e977c88fc 100644
+--- a/ld/lexsup.c
++++ b/ld/lexsup.c
+@@ -1780,14 +1780,18 @@ elf_shlib_list_options (FILE *file)
+   fprintf (file, _("\
+   -z relro                    Create RELRO program header (default)\n"));
+   fprintf (file, _("\
+-  -z norelro                  Don't create RELRO program header\n"));
++  -z norelro                  Don't create RELRO nor text-only LOAD program header\n"));
+ #else
+   fprintf (file, _("\
+   -z relro                    Create RELRO program header\n"));
+   fprintf (file, _("\
+-  -z norelro                  Don't create RELRO program header (default)\n"));
++  -z norelro                  Don't create RELRO nor text-only LOAD program header (default)\n"));
+ #endif
+   fprintf (file, _("\
++  -z textonly                 Create RELRO and text-only LOAD program header\n"));
++  fprintf (file, _("\
++  -z notextonly               Don't create text-only LOAD program header (default)\n"));
++  fprintf (file, _("\
+   -z common                   Generate common symbols with STT_COMMON type\n"));
+   fprintf (file, _("\
+   -z nocommon                 Generate common symbols with STT_OBJECT type\n"));
+-- 
+2.13.6
+

@@ -1,0 +1,323 @@
+From 3eab3df1811338c4ee5bc4adafdf6dcd6935f560 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Mon, 13 Nov 2017 12:47:38 -0800
+Subject: [PATCH 5/6] ld: Add tests for -z textonly and -z notextonly
+
+Verify that -z textonly works and -z notextonly doesn't disable -z relro.
+
+	PR ld/22393
+	* testsuite/ld-elf/pr16322.d: Add -z notextonly.
+	* testsuite/ld-elf/pr22393-1.s: New file.
+	* testsuite/ld-elf/pr22393-1a.d: Likewise.
+	* testsuite/ld-elf/pr22393-1b.d: Likewise.
+	* testsuite/ld-elf/pr22393-1c.d: Likewise.
+	* testsuite/ld-elf/pr22393-1d.d: Likewise.
+	* testsuite/ld-elf/pr22393-1e.d: Likewise.
+	* testsuite/ld-elf/pr22393-1f.d: Likewise.
+	* testsuite/ld-elf/pr22393-2a.c: Likewise.
+	* testsuite/ld-elf/pr22393-2a.rd: Likewise.
+	* testsuite/ld-elf/pr22393-2b.c: Likewise.
+	* testsuite/ld-elf/pr22393-2b.rd: Likewise.
+	* testsuite/ld-elf/shared.exp: Run tests for -z textonly.
+---
+ ld/testsuite/ld-elf/pr16322.d     |  2 +-
+ ld/testsuite/ld-elf/pr22393-1.s   | 21 ++++++++++++
+ ld/testsuite/ld-elf/pr22393-1a.d  |  9 +++++
+ ld/testsuite/ld-elf/pr22393-1b.d  |  9 +++++
+ ld/testsuite/ld-elf/pr22393-1c.d  |  9 +++++
+ ld/testsuite/ld-elf/pr22393-1d.d  |  9 +++++
+ ld/testsuite/ld-elf/pr22393-1e.d  |  9 +++++
+ ld/testsuite/ld-elf/pr22393-1f.d  |  9 +++++
+ ld/testsuite/ld-elf/pr22393-2a.c  |  7 ++++
+ ld/testsuite/ld-elf/pr22393-2a.rd |  9 +++++
+ ld/testsuite/ld-elf/pr22393-2b.c  |  7 ++++
+ ld/testsuite/ld-elf/pr22393-2b.rd |  9 +++++
+ ld/testsuite/ld-elf/shared.exp    | 71 +++++++++++++++++++++++++++++++++++++++
+ 13 files changed, 179 insertions(+), 1 deletion(-)
+ create mode 100644 ld/testsuite/ld-elf/pr22393-1.s
+ create mode 100644 ld/testsuite/ld-elf/pr22393-1a.d
+ create mode 100644 ld/testsuite/ld-elf/pr22393-1b.d
+ create mode 100644 ld/testsuite/ld-elf/pr22393-1c.d
+ create mode 100644 ld/testsuite/ld-elf/pr22393-1d.d
+ create mode 100644 ld/testsuite/ld-elf/pr22393-1e.d
+ create mode 100644 ld/testsuite/ld-elf/pr22393-1f.d
+ create mode 100644 ld/testsuite/ld-elf/pr22393-2a.c
+ create mode 100644 ld/testsuite/ld-elf/pr22393-2a.rd
+ create mode 100644 ld/testsuite/ld-elf/pr22393-2b.c
+ create mode 100644 ld/testsuite/ld-elf/pr22393-2b.rd
+
+diff --git a/ld/testsuite/ld-elf/pr16322.d b/ld/testsuite/ld-elf/pr16322.d
+index 40a7975cb0..497537fbc9 100644
+--- a/ld/testsuite/ld-elf/pr16322.d
++++ b/ld/testsuite/ld-elf/pr16322.d
+@@ -1,4 +1,4 @@
+-#ld: -shared -z relro
++#ld: -shared -z relro -z notextonly
+ #readelf: -l --wide
+ #target: *-*-linux-gnu *-*-gnu* *-*-nacl*
+ 
+diff --git a/ld/testsuite/ld-elf/pr22393-1.s b/ld/testsuite/ld-elf/pr22393-1.s
+new file mode 100644
+index 0000000000..ffdb620915
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-1.s
+@@ -0,0 +1,21 @@
++	.section .rodata,"a",%progbits
++	.globl	fx1
++	.type	fx1, %object
++fx1:
++	.zero	20
++	.section .data.rel.ro,"aw",%progbits
++	.globl	px1
++	.type	px1, %object
++px1:
++	.dc.a	fx1
++
++	.text
++	.global start	/* Used by SH targets.  */
++start:
++	.global _start
++_start:
++	.global __start
++__start:
++	.global main	/* Used by HPPA targets.  */
++main:
++	.dc.a 0
+diff --git a/ld/testsuite/ld-elf/pr22393-1a.d b/ld/testsuite/ld-elf/pr22393-1a.d
+new file mode 100644
+index 0000000000..8c5a8da37b
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-1a.d
+@@ -0,0 +1,9 @@
++#source: pr22393-1.s
++#ld: -shared -z textonly -z relro
++#readelf: -l --wide
++#target: *-*-linux-gnu *-*-gnu* *-*-nacl*
++
++#failif
++#...
++ +[0-9]+  +.*(\.note|\.gnu|\.hash|\.dyn|\.rel).*\.text.*
++#...
+diff --git a/ld/testsuite/ld-elf/pr22393-1b.d b/ld/testsuite/ld-elf/pr22393-1b.d
+new file mode 100644
+index 0000000000..a8dbc39b19
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-1b.d
+@@ -0,0 +1,9 @@
++#source: pr22393-1.s
++#ld: -shared -z relro -z textonly
++#readelf: -l --wide
++#target: *-*-linux-gnu *-*-gnu* *-*-nacl*
++
++#failif
++#...
++ +[0-9]+  +.*.text.*(.eh_frame|\.rodata).*
++#...
+diff --git a/ld/testsuite/ld-elf/pr22393-1c.d b/ld/testsuite/ld-elf/pr22393-1c.d
+new file mode 100644
+index 0000000000..e69281e4bb
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-1c.d
+@@ -0,0 +1,9 @@
++#source: pr22393-1.s
++#ld: -pie -z textonly
++#readelf: -l --wide
++#target: *-*-linux-gnu *-*-gnu* *-*-nacl*
++
++#failif
++#...
++ +[0-9]+  +.*(\.note|\.gnu|\.hash|\.dyn|\.rel).*\.text.*
++#...
+diff --git a/ld/testsuite/ld-elf/pr22393-1d.d b/ld/testsuite/ld-elf/pr22393-1d.d
+new file mode 100644
+index 0000000000..83e8c3e4b6
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-1d.d
+@@ -0,0 +1,9 @@
++#source: pr22393-1.s
++#ld: -pie -z textonly
++#readelf: -l --wide
++#target: *-*-linux-gnu *-*-gnu* *-*-nacl*
++
++#failif
++#...
++ +[0-9]+  +.*.text.*(.eh_frame|\.rodata).*
++#...
+diff --git a/ld/testsuite/ld-elf/pr22393-1e.d b/ld/testsuite/ld-elf/pr22393-1e.d
+new file mode 100644
+index 0000000000..df723921c2
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-1e.d
+@@ -0,0 +1,9 @@
++#source: pr22393-1.s
++#ld: -z textonly
++#readelf: -l --wide
++#target: *-*-linux-gnu *-*-gnu* *-*-nacl*
++
++#failif
++#...
++ +[0-9]+  +.*(\.note|\.gnu|\.hash|\.dyn|\.rel).*\.text.*
++#...
+diff --git a/ld/testsuite/ld-elf/pr22393-1f.d b/ld/testsuite/ld-elf/pr22393-1f.d
+new file mode 100644
+index 0000000000..3c80e70da1
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-1f.d
+@@ -0,0 +1,9 @@
++#source: pr22393-1.s
++#ld: -z textonly
++#readelf: -l --wide
++#target: *-*-linux-gnu *-*-gnu* *-*-nacl*
++
++#failif
++#...
++ +[0-9]+  +.*.text.*(.eh_frame|\.rodata).*
++#...
+diff --git a/ld/testsuite/ld-elf/pr22393-2a.c b/ld/testsuite/ld-elf/pr22393-2a.c
+new file mode 100644
+index 0000000000..68fa4a0dd0
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-2a.c
+@@ -0,0 +1,7 @@
++#include <stdio.h>
++
++void
++test()
++{
++  printf ("PASS\n");
++}
+diff --git a/ld/testsuite/ld-elf/pr22393-2a.rd b/ld/testsuite/ld-elf/pr22393-2a.rd
+new file mode 100644
+index 0000000000..b7ba110095
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-2a.rd
+@@ -0,0 +1,9 @@
++#source: pr22393-1.s
++#ld: -shared -z textonly
++#readelf: -l --wide
++#target: *-*-linux-gnu *-*-gnu* *-*-nacl*
++
++#failif
++#...
++ +[0-9]+  +.*(\.note|\.gnu|\.hash|\.dyn|\.rel).*\.text.*
++#...
+diff --git a/ld/testsuite/ld-elf/pr22393-2b.c b/ld/testsuite/ld-elf/pr22393-2b.c
+new file mode 100644
+index 0000000000..3033809b02
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-2b.c
+@@ -0,0 +1,7 @@
++void test(void);
++
++int main()
++{
++  test();
++  return 0;
++}
+diff --git a/ld/testsuite/ld-elf/pr22393-2b.rd b/ld/testsuite/ld-elf/pr22393-2b.rd
+new file mode 100644
+index 0000000000..b7ba110095
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr22393-2b.rd
+@@ -0,0 +1,9 @@
++#source: pr22393-1.s
++#ld: -shared -z textonly
++#readelf: -l --wide
++#target: *-*-linux-gnu *-*-gnu* *-*-nacl*
++
++#failif
++#...
++ +[0-9]+  +.*(\.note|\.gnu|\.hash|\.dyn|\.rel).*\.text.*
++#...
+diff --git a/ld/testsuite/ld-elf/shared.exp b/ld/testsuite/ld-elf/shared.exp
+index a40f8e0f59..b382a2591b 100644
+--- a/ld/testsuite/ld-elf/shared.exp
++++ b/ld/testsuite/ld-elf/shared.exp
+@@ -756,6 +756,51 @@ if { [istarget *-*-linux*]
+ 	    {} \
+ 	    "libpr19579.so" \
+ 	] \
++	[list \
++	    "Build pr22393-2a.so" \
++	    "-shared -Wl,-z,textonly" \
++	    "-fPIC" \
++	    {pr22393-2a.c} \
++	    {{readelf -lW pr22393-2a.rd} \
++	     {readelf -lW pr22393-2b.rd}} \
++	    "pr22393-2a.so" \
++	] \
++	[list \
++	    "Build pr22393-2a-now.so" \
++	    "-shared -Wl,-z,textonly,-z,now" \
++	    "-fPIC" \
++	    {pr22393-2a.c} \
++	    {{readelf -lW pr22393-2a.rd} \
++	     {readelf -lW pr22393-2b.rd}} \
++	    "pr22393-2a-now.so" \
++	] \
++	[list \
++	    "Build pr22393-2" \
++	    "$NOPIE_LDFLAGS -Wl,-z,textonly,--no-as-needed tmpdir/pr22393-2a.so" \
++	    "$NOPIE_CFLAGS" \
++	    {pr22393-2b.c} \
++	    {{readelf -lW pr22393-2a.rd} \
++	     {readelf -lW pr22393-2b.rd}} \
++	    "pr22393-2" \
++	] \
++	[list \
++	    "Build pr22393-2 (PIE)" \
++	    "-pie -Wl,-z,textonly,--no-as-needed tmpdir/pr22393-2a-now.so" \
++	    "-fPIE" \
++	    {pr22393-2b.c} \
++	    {{readelf -lW pr22393-2a.rd} \
++	     {readelf -lW pr22393-2b.rd}} \
++	    "pr22393-2-pie" \
++	] \
++	[list \
++	    "Build pr22393-2 (static)" \
++	    "-static -Wl,-z,textonly" \
++	    "" \
++	    {pr22393-2a.c pr22393-2b.c} \
++	    {{readelf -lW pr22393-2a.rd} \
++	     {readelf -lW pr22393-2b.rd}} \
++	    "pr22393-2-static" \
++	] \
+     ]
+     run_ld_link_exec_tests [list \
+ 	[list \
+@@ -893,6 +938,32 @@ if { [istarget *-*-linux*]
+ 	    "pass.out" \
+ 	    "-fPIE" \
+ 	] \
++	[list \
++	    "Run pr22393-2" \
++	    "$NOPIE_LDFLAGS -Wl,-z,textonly,--no-as-needed tmpdir/pr22393-2a.so" \
++	    "" \
++	    {pr22393-2b.c} \
++	    "pr22393-2" \
++	    "pass.out" \
++	    "$NOPIE_CFLAGS" \
++	] \
++	[list \
++	    "Run pr22393-2 (PIE)" \
++	    "-pie -Wl,-z,textonly,--no-as-needed tmpdir/pr22393-2a-now.so" \
++	    "" \
++	    {pr22393-2b.c} \
++	    "pr22393-2-pie" \
++	    "pass.out" \
++	    "-fPIE" \
++	] \
++	[list \
++	    "Run pr22393-2 (static)" \
++	    "-static -Wl,-z,textonly" \
++	    "" \
++	    {pr22393-2a.c pr22393-2b.c} \
++	    "pr22393-2-static" \
++	    "pass.out" \
++	] \
+     ]
+ }
+ 
+-- 
+2.13.6
+
