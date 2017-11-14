@@ -1,3 +1,9 @@
+2017-11-14  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (cmps, ins, lods, movs, outs, scas, scmp, slod,
+	smov, ssca, stos, ssto, xlat): Drop Disp*.
+	* i386-tbl.h: Re-generate.
+
 2017-11-13  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (fxsave64, fxrstor64, xsave64, xrstor64,

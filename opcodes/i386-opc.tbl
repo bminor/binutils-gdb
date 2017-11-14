@@ -437,37 +437,37 @@ setg, 1, 0xf9f, 0x0, 2, Cpu386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, 
 
 // String manipulation.
 cmps, 0, 0xa6, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-cmps, 2, 0xa6, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg, Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+cmps, 2, 0xa6, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 scmp, 0, 0xa6, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-scmp, 2, 0xa6, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg, Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+scmp, 2, 0xa6, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ins, 0, 0x6c, None, 1, Cpu186, W|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-ins, 2, 0x6c, None, 1, Cpu186, W|CheckRegSize|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, { InOutPortReg, Byte|Word|Dword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
+ins, 2, 0x6c, None, 1, Cpu186, W|CheckRegSize|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, { InOutPortReg, Byte|Word|Dword|Unspecified|BaseIndex|EsSeg }
 outs, 0, 0x6e, None, 1, Cpu186, W|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-outs, 2, 0x6e, None, 1, Cpu186, W|CheckRegSize|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, InOutPortReg }
+outs, 2, 0x6e, None, 1, Cpu186, W|CheckRegSize|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Unspecified|BaseIndex, InOutPortReg }
 lods, 0, 0xac, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-lods, 1, 0xac, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-lods, 2, 0xac, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Acc|Byte|Word|Dword|Qword }
+lods, 1, 0xac, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+lods, 2, 0xac, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
 slod, 0, 0xac, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-slod, 1, 0xac, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-slod, 2, 0xac, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Acc|Byte|Word|Dword|Qword }
+slod, 1, 0xac, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+slod, 2, 0xac, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
 movs, 0, 0xa4, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-movs, 2, 0xa4, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
+movs, 2, 0xa4, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg }
 smov, 0, 0xa4, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-smov, 2, 0xa4, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
+smov, 2, 0xa4, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg }
 scas, 0, 0xae, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-scas, 1, 0xae, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
-scas, 2, 0xae, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg, Acc|Byte|Word|Dword|Qword }
+scas, 1, 0xae, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg }
+scas, 2, 0xae, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg, Acc|Byte|Word|Dword|Qword }
 ssca, 0, 0xae, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-ssca, 1, 0xae, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
-ssca, 2, 0xae, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg, Acc|Byte|Word|Dword|Qword }
+ssca, 1, 0xae, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg }
+ssca, 2, 0xae, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg, Acc|Byte|Word|Dword|Qword }
 stos, 0, 0xaa, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-stos, 1, 0xaa, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
-stos, 2, 0xaa, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
+stos, 1, 0xaa, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg }
+stos, 2, 0xaa, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg }
 ssto, 0, 0xaa, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }
-ssto, 1, 0xaa, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
-ssto, 2, 0xaa, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg }
+ssto, 1, 0xaa, None, 1, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg }
+ssto, 2, 0xaa, None, 1, 0, W|CheckRegSize|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex|EsSeg }
 xlat, 0, 0xd7, None, 1, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString, { 0 }
-xlat, 1, 0xd7, None, 1, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xlat, 1, 0xd7, None, 1, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString, { Byte|Unspecified|BaseIndex }
 
 // Bit manipulation.
 bsf, 2, 0xfbc, None, 2, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf|RepPrefixOk, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }

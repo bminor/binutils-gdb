@@ -1,3 +1,12 @@
+2017-11-14  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/string-ok.s: Add a few more valid patterns.
+	Move bogus tests ...
+	* testsuite/gas/i386/string-bad.s: ... here.
+	* testsuite/gas/i386/string-bad.l: Adjust expectations.
+	* testsuite/gas/i386/string-ok.d: Likewise.
+	* testsuite/gas/i386/string-ok.e: Likewise.
+
 2017-11-13  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-aarch64.c (R_Z_BHSDQ_VZP): Rename to ...
