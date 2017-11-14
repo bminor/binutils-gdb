@@ -462,7 +462,7 @@ nds32_pseudo_register_read (struct gdbarch *gdbarch,
 	offset = (regnum & 1) ? 0 : 4;
 
       fdr_regnum = NDS32_FD0_REGNUM + (regnum >> 1);
-      status = regcache_raw_read (regcache, fdr_regnum, reg_buf);
+      status = regcache->raw_read (fdr_regnum, reg_buf);
       if (status == REG_VALID)
 	memcpy (buf, reg_buf + offset, 4);
 

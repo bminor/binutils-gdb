@@ -562,9 +562,8 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
       ULONGEST value;
       enum register_status status;
 
-      status = regcache_raw_read_unsigned (regcache,
-					   gdbarch_tdep (gdbarch)->wb_regnum,
-					   &value);
+      status = regcache->raw_read (gdbarch_tdep (gdbarch)->wb_regnum,
+				   &value);
       if (status != REG_VALID)
 	return status;
       regnum = arreg_number (gdbarch, regnum, value);
@@ -572,7 +571,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
 
   /* We can always read non-pseudo registers.  */
   if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch))
-    return regcache_raw_read (regcache, regnum, buffer);
+    return regcache->raw_read (regnum, buffer);
 
   /* We have to find out how to deal with priveleged registers.
      Let's treat them as pseudo-registers, but we cannot read/write them.  */
@@ -629,7 +628,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
 	return xtensa_register_read_masked (regcache, reg, buffer);
 
       /* Assume that we can read the register.  */
-      return regcache_raw_read (regcache, regnum, buffer);
+      return regcache->raw_read (regnum, buffer);
     }
   else
     internal_error (__FILE__, __LINE__,

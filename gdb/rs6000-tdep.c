@@ -2746,19 +2746,19 @@ dfp_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       /* Read two FP registers to form a whole dl register.  */
-      status = regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
-				  2 * reg_index, buffer);
+      status = regcache->raw_read (tdep->ppc_fp0_regnum +
+				   2 * reg_index, buffer);
       if (status == REG_VALID)
-	status = regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
-				    2 * reg_index + 1, buffer + 8);
+	status = regcache->raw_read (tdep->ppc_fp0_regnum +
+				     2 * reg_index + 1, buffer + 8);
     }
   else
     {
-      status = regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
-				  2 * reg_index + 1, buffer);
+      status = regcache->raw_read (tdep->ppc_fp0_regnum +
+				   2 * reg_index + 1, buffer);
       if (status == REG_VALID)
-	status = regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
-				    2 * reg_index, buffer + 8);
+	status = regcache->raw_read (tdep->ppc_fp0_regnum +
+				     2 * reg_index, buffer + 8);
     }
 
   return status;
@@ -2801,25 +2801,25 @@ vsx_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
   /* Read the portion that overlaps the VMX registers.  */
   if (reg_index > 31)
-    status = regcache_raw_read (regcache, tdep->ppc_vr0_regnum +
-				reg_index - 32, buffer);
+    status = regcache->raw_read (tdep->ppc_vr0_regnum +
+				 reg_index - 32, buffer);
   else
     /* Read the portion that overlaps the FPR registers.  */
     if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
       {
-	status = regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
-				    reg_index, buffer);
+	status = regcache->raw_read (tdep->ppc_fp0_regnum +
+				     reg_index, buffer);
 	if (status == REG_VALID)
-	  status = regcache_raw_read (regcache, tdep->ppc_vsr0_upper_regnum +
-				      reg_index, buffer + 8);
+	  status = regcache->raw_read (tdep->ppc_vsr0_upper_regnum +
+				       reg_index, buffer + 8);
       }
     else
       {
-	status = regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
-				    reg_index, buffer + 8);
+	status = regcache->raw_read (tdep->ppc_fp0_regnum +
+				     reg_index, buffer + 8);
 	if (status == REG_VALID)
-	  status = regcache_raw_read (regcache, tdep->ppc_vsr0_upper_regnum +
-				      reg_index, buffer);
+	  status = regcache->raw_read (tdep->ppc_vsr0_upper_regnum +
+				       reg_index, buffer);
       }
 
   return status;

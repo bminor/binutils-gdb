@@ -391,7 +391,7 @@ avr_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   switch (regnum)
     {
     case AVR_PSEUDO_PC_REGNUM:
-      status = regcache_raw_read_unsigned (regcache, AVR_PC_REGNUM, &val);
+      status = regcache->raw_read (AVR_PC_REGNUM, &val);
       if (status != REG_VALID)
 	return status;
       val >>= 1;

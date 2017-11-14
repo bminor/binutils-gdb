@@ -2245,7 +2245,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch,
       unsigned v_regnum;
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_Q0_REGNUM;
-      status = regcache_raw_read (regcache, v_regnum, reg_buf);
+      status = regcache->raw_read (v_regnum, reg_buf);
       if (status != REG_VALID)
 	mark_value_bytes_unavailable (result_value, 0,
 				      TYPE_LENGTH (value_type (result_value)));
@@ -2260,7 +2260,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch,
       unsigned v_regnum;
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_D0_REGNUM;
-      status = regcache_raw_read (regcache, v_regnum, reg_buf);
+      status = regcache->raw_read (v_regnum, reg_buf);
       if (status != REG_VALID)
 	mark_value_bytes_unavailable (result_value, 0,
 				      TYPE_LENGTH (value_type (result_value)));
@@ -2275,7 +2275,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch,
       unsigned v_regnum;
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_S0_REGNUM;
-      status = regcache_raw_read (regcache, v_regnum, reg_buf);
+      status = regcache->raw_read (v_regnum, reg_buf);
       if (status != REG_VALID)
 	mark_value_bytes_unavailable (result_value, 0,
 				      TYPE_LENGTH (value_type (result_value)));
@@ -2290,7 +2290,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch,
       unsigned v_regnum;
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_H0_REGNUM;
-      status = regcache_raw_read (regcache, v_regnum, reg_buf);
+      status = regcache->raw_read (v_regnum, reg_buf);
       if (status != REG_VALID)
 	mark_value_bytes_unavailable (result_value, 0,
 				      TYPE_LENGTH (value_type (result_value)));
@@ -2305,7 +2305,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch,
       unsigned v_regnum;
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_B0_REGNUM;
-      status = regcache_raw_read (regcache, v_regnum, reg_buf);
+      status = regcache->raw_read (v_regnum, reg_buf);
       if (status != REG_VALID)
 	mark_value_bytes_unavailable (result_value, 0,
 				      TYPE_LENGTH (value_type (result_value)));

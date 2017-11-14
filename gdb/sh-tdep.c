@@ -1640,7 +1640,7 @@ pseudo_register_read_portions (struct gdbarch *gdbarch,
       gdb_byte *b;
 
       b = buffer + register_size (gdbarch, base_regnum) * portion;
-      status = regcache_raw_read (regcache, base_regnum + portion, b);
+      status = regcache->raw_read (base_regnum + portion, b);
       if (status != REG_VALID)
 	return status;
     }
@@ -1656,7 +1656,7 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   enum register_status status;
 
   if (reg_nr == PSEUDO_BANK_REGNUM)
-    return regcache_raw_read (regcache, BANK_REGNUM, buffer);
+    return regcache->raw_read (BANK_REGNUM, buffer);
   else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
       /* Enough space for two float registers.  */
