@@ -18,6 +18,7 @@ SECTIONS
   
   .dynstr : { *(.dynstr) }
   .dynsym : { *(.dynsym) }
+  .got : { *(.got .toc) *(.igot) }
   .got.plt : { *(.got.plt) *(.igot.plt) }
   /DISCARD/ : { *(*) }
 }

@@ -1,5 +1,9 @@
 2017-11-14  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/note-3.t: Don't discard .got.
+
+2017-11-14  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-ifunc/ifunc.exp: Ensure non-PIC tests are really
 	not PIE by default gcc options.
 

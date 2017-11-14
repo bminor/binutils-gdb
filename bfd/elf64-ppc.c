@@ -10202,6 +10202,10 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	  continue;
 	}
 
+      if (bfd_is_abs_section (s->output_section))
+	_bfd_error_handler (_("warning: discarding dynamic section %s"),
+			    s->name);
+
       if ((s->flags & SEC_HAS_CONTENTS) == 0)
 	continue;
 
@@ -10996,7 +11000,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      + htab->brlt->output_section->vma);
 
       off = (dest
-	     - elf_gp (htab->brlt->output_section->owner)
+	     - elf_gp (info->output_bfd)
 	     - htab->sec_info[stub_entry->group->link_sec->id].toc_off);
 
       if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
@@ -11147,7 +11151,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	}
 
       off = (dest
-	     - elf_gp (plt->output_section->owner)
+	     - elf_gp (info->output_bfd)
 	     - htab->sec_info[stub_entry->group->link_sec->id].toc_off);
 
       if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
@@ -11295,7 +11299,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	plt = htab->elf.iplt;
       off += (plt->output_offset
 	      + plt->output_section->vma
-	      - elf_gp (plt->output_section->owner)
+	      - elf_gp (info->output_bfd)
 	      - htab->sec_info[stub_entry->group->link_sec->id].toc_off);
 
       size = plt_stub_size (htab, stub_entry, off);
@@ -11398,7 +11402,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  off = (br_entry->offset
 		 + htab->brlt->output_offset
 		 + htab->brlt->output_section->vma
-		 - elf_gp (htab->brlt->output_section->owner)
+		 - elf_gp (info->output_bfd)
 		 - htab->sec_info[stub_entry->group->link_sec->id].toc_off);
 
 	  if (info->emitrelocations)
@@ -11518,7 +11522,7 @@ ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
 	 output toc base plus 0x8000.  Making the input elf_gp an
 	 offset allows us to move the toc as a whole without
 	 recalculating input elf_gp.  */
-      off = htab->toc_curr - elf_gp (isec->output_section->owner);
+      off = htab->toc_curr - elf_gp (info->output_bfd);
       off += TOC_BASE_OFF;
 
       /* Die if someone uses a linker script that doesn't keep input
@@ -11547,7 +11551,7 @@ ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
     }
   addr = (htab->toc_first_sec->output_offset
 	  + htab->toc_first_sec->output_section->vma);
-  off = addr - elf_gp (isec->output_section->owner) + TOC_BASE_OFF;
+  off = addr - elf_gp (info->output_bfd) + TOC_BASE_OFF;
   elf_gp (isec->owner) = off;
 
   return TRUE;
