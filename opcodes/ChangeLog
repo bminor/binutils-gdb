@@ -1,5 +1,18 @@
 2017-11-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis-evex.h (evex_table[EVEX_W_0F3A3E_P_2]): Use VPCMP.
+	(evex_table[EVEX_W_0F3A3F_P_2]): Likewise.
+	* i386-opc.tbl (vpcmpeqb, vpcmpgtb, vpcmpeqw, vpcmpgtw, vpcmpuw,
+	vpcmpw): Move up.
+	(vpcmpeqb, vpcmpleb, vpcmpltb, vpcmpneqb, vpcmpnleb, vpcmpnltb,
+	vpcmpequb, vpcmpleub, vpcmpltub, vpcmpnequb, vpcmpnleub,
+	vpcmpnltub, vpcmpeqw, vpcmplew, vpcmpltw, vpcmpneqw, vpcmpnlew,
+	vpcmpnltw, vpcmpequw, vpcmpleuw, vpcmpltuw, vpcmpnequw, vpcmpnleuw,
+	vpcmpnltuw): New.
+	* i386-tbl.h: Re-generate.
+
+2017-11-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (cmps, ins, lods, movs, outs, scas, scmp, slod,
 	smov, ssca, stos, ssto, xlat): Drop Disp*.
 	* i386-tbl.h: Re-generate.

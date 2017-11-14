@@ -771,6 +771,12 @@ _start:
 	vpcmpb	$123, 8192(%edx), %zmm6, %k5	 # AVX512BW
 	vpcmpb	$123, -8192(%edx), %zmm6, %k5	 # AVX512BW Disp8
 	vpcmpb	$123, -8256(%edx), %zmm6, %k5	 # AVX512BW
+	vpcmpb	$0, %zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpleb	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpltb	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpneqb	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpnleb	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpnltb	%zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpw	$0xab, %zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpw	$0xab, %zmm5, %zmm6, %k5{%k7}	 # AVX512BW
 	vpcmpw	$123, %zmm5, %zmm6, %k5	 # AVX512BW
@@ -780,6 +786,12 @@ _start:
 	vpcmpw	$123, 8192(%edx), %zmm6, %k5	 # AVX512BW
 	vpcmpw	$123, -8192(%edx), %zmm6, %k5	 # AVX512BW Disp8
 	vpcmpw	$123, -8256(%edx), %zmm6, %k5	 # AVX512BW
+	vpcmpw	$0, %zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmplew	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpltw	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpneqw	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpnlew	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpnltw	%zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpub	$0xab, %zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpub	$0xab, %zmm5, %zmm6, %k5{%k7}	 # AVX512BW
 	vpcmpub	$123, %zmm5, %zmm6, %k5	 # AVX512BW
@@ -789,6 +801,12 @@ _start:
 	vpcmpub	$123, 8192(%edx), %zmm6, %k5	 # AVX512BW
 	vpcmpub	$123, -8192(%edx), %zmm6, %k5	 # AVX512BW Disp8
 	vpcmpub	$123, -8256(%edx), %zmm6, %k5	 # AVX512BW
+	vpcmpequb	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpleub	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpltub	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpnequb	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpnleub	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpnltub	%zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpuw	$0xab, %zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpuw	$0xab, %zmm5, %zmm6, %k5{%k7}	 # AVX512BW
 	vpcmpuw	$123, %zmm5, %zmm6, %k5	 # AVX512BW
@@ -798,6 +816,12 @@ _start:
 	vpcmpuw	$123, 8192(%edx), %zmm6, %k5	 # AVX512BW
 	vpcmpuw	$123, -8192(%edx), %zmm6, %k5	 # AVX512BW Disp8
 	vpcmpuw	$123, -8256(%edx), %zmm6, %k5	 # AVX512BW
+	vpcmpequw	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpleuw	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpltuw	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpnequw	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpnleuw	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpnltuw	%zmm5, %zmm6, %k5	 # AVX512BW
 
 	.intel_syntax noprefix
 	vpabsb	zmm6, zmm5	 # AVX512BW
