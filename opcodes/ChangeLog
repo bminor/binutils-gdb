@@ -1,5 +1,10 @@
 2017-11-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (VPCOM_Fixup, VPCOM, xop_cmp_op): New.
+	(vex_len_table): Use VPCOM.
+
+2017-11-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis-evex.h (evex_table[EVEX_W_0F3A3E_P_2]): Use VPCMP.
 	(evex_table[EVEX_W_0F3A3F_P_2]): Likewise.
 	* i386-opc.tbl (vpcmpeqb, vpcmpgtb, vpcmpeqw, vpcmpgtw, vpcmpuw,
