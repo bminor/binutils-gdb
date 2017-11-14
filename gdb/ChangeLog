@@ -1,3 +1,12 @@
+2017-11-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	memory-map-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add memory-map-selftests.o.
+	* memory-map.c (memory_map_start_memory): Fix computation of hi
+	address.
+	* unittests/memory-map-selftests.c: New file.
+
 2017-11-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c: Fix some typos in the general command documenting

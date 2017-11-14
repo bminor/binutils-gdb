@@ -71,7 +71,7 @@ memory_map_start_memory (struct gdb_xml_parser *parser,
   type_p
     = (ULONGEST *) xml_find_attribute (attributes, "type")->value;
 
-  data->memory_map->emplace_back (*start_p, *length_p,
+  data->memory_map->emplace_back (*start_p, *start_p + *length_p,
 				  (enum mem_access_mode) *type_p);
 }
 

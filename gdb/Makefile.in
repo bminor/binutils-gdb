@@ -531,6 +531,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/environ-selftests.c \
 	unittests/function-view-selftests.c \
 	unittests/lookup_name_info-selftests.c \
+	unittests/memory-map-selftests.c \
 	unittests/memrange-selftests.c \
 	unittests/offset-type-selftests.c \
 	unittests/optional-selftests.c \
@@ -544,6 +545,7 @@ SUBDIR_UNITTESTS_OBS = \
 	environ-selftests.o \
 	function-view-selftests.o \
 	lookup_name_info-selftests.o \
+	memory-map-selftests.o \
 	memrange-selftests.o \
 	offset-type-selftests.o \
 	optional-selftests.o \
