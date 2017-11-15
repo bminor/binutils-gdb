@@ -1,3 +1,8 @@
+2017-11-15  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-reg.tbl (axl): Remove Acc and Byte.
+	* i386-tbl.h: Re-generate.
+
 2017-11-14  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (VPCOM_Fixup, VPCOM, xop_cmp_op): New.
