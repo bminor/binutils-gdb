@@ -1,3 +1,13 @@
+2017-11-15  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-arm.c (arm_ext_fp16_fml, fp16fml): New.
+	(do_neon_fmac_maybe_scalar_long): Use arm_ext_fp16_fml.
+	* doc/c-arm.texi (fp16, fp16fml): New.
+	* testsuite/gas/arm/armv8_2-a-fp16.d (fp16): Make fp16fml.
+	* testsuite/gas/arm/armv8_3-a-fp16.d (fp16): Make fp16fml.
+	* testsuite/gas/arm/armv8_2-a-fp16-illegal.d (fp16): Make fp16fml.
+	* testsuite/gas/arm/armv8_2-a-fp16-thumb2.d (fp16): Make fp16fml.
+
 2017-11-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 15152

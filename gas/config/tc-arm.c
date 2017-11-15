@@ -235,6 +235,8 @@ static const arm_feature_set arm_ext_ras =
 /* FP16 instructions.  */
 static const arm_feature_set arm_ext_fp16 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST);
+static const arm_feature_set arm_ext_fp16_fml =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_FML);
 static const arm_feature_set arm_ext_v8_2 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A);
 static const arm_feature_set arm_ext_v8_3 =
@@ -16210,7 +16212,7 @@ do_neon_fmac_maybe_scalar_long (int subtype)
     as_warn (_("vfmal/vfmsl with FP16 type cannot be conditional, the "
 	       "behaviour is UNPREDICTABLE"));
 
-  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16),
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16_fml),
 	      _(BAD_FP16));
 
   constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_armv8),
@@ -26243,6 +26245,11 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("fp16",  ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 			ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 			ARM_ARCH_V8_2A),
+  ARM_EXT_OPT ("fp16fml",  ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST
+						  | ARM_EXT2_FP16_FML),
+			   ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST
+						  | ARM_EXT2_FP16_FML),
+			   ARM_ARCH_V8_2A),
   ARM_EXT_OPT2 ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V7A),

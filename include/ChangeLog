@@ -1,3 +1,8 @@
+2017-11-15  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/arm.h: (ARM_EXT2_FP16_FML): New.
+	(ARM_AEXT2_V8_4A): Add ARM_EXT2_FP16_FML.
+
 2017-11-13  Jan Beulich  <jbeulich@suse.com>
 
 	* coff/pe.h (COFF_ENCODE_ALIGNMENT): Cap value to maximum one
