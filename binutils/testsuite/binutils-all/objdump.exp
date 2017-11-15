@@ -424,6 +424,89 @@ if {[isnative] && [is_elf_format]} then {
     test_build_id_debuglink
 }
 
+# Test objdump -Wk on a file containing debug links.
+
+if { [is_elf_format] } then {
+    set testsrc $srcdir/$subdir/debuglink.s
+
+    if { ![binutils_assemble $testsrc tmpdir/debuglink.o] } then {
+	fail "objdump -Wk (reason: could not assemble source)"
+    }
+
+    if [is_remote host] {
+	set testfile [remote_download host tmpdir/debuglink.o]
+    } else {
+	set testfile tmpdir/debuglink.o
+    }
+
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wk $testfile" "" "/dev/null" "objdump.out"]
+
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "objdump -Wk (reason: unexpected output)"
+	send_log $got
+	send_log "\n"
+    }
+
+    if { [regexp_diff objdump.out $srcdir/$subdir/objdump.Wk] } then {
+	fail "objdump -Wk"
+    } else {
+	pass "objdump -Wk"
+    }
+}
+
+
+# Very similar to proc test_build_id_debuglink except this time we
+# display some of the contents of the separate debug info file.
+
+proc test_follow_debuglink {} {
+    global srcdir
+    global subdir
+    global OBJDUMP
+    
+    set test "follow-debuglink"
+
+    if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
+	fail "$test (reason: assemble first source file)"
+	return
+    }
+
+    if {![binutils_assemble $srcdir/$subdir/linkdebug.s tmpdir/linkdebug.debug]} then {
+	fail "$test (reason: assemble second source file)"
+	return
+    }
+
+    if ![is_remote host] {
+	set tempfile tmpdir/debuglink.o
+    } else {
+	set tempfile [remote_download host tmpdir/linkdebug.debug]
+	set tempfile [remote_download host tmpdir/debuglink.o]
+    }
+    
+    set got [remote_exec host "$OBJDUMP --dwarf=follow-links --dwarf=info --dwarf=str $tempfile" "" "/dev/null" "tmpdir/objdump.out"]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "$test (reason: unexpected error output from objdump)"
+	return
+    }
+
+    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/objdump.WK2] } then {
+	fail $test
+	verbose "output is \n[file_contents objdump.out]" 2
+	return
+    }
+
+    pass $test
+
+    # Tidy up
+    set got [remote_exec host "rm tmpdir/objdump.out"]
+    set got [remote_exec host "rm $tempfile"]
+    set got [remote_exec host "rm tmpdir/linkdebug.debug"]
+}
+
+if {[isnative] && [is_elf_format]} then {
+    test_follow_debuglink
+}
+
+
 # Options which are not tested: -a -d -D -R -T -x -l --stabs
 # I don't see any generic way to test any of these other than -a.
 # Tests could be written for specific targets, and that should be done

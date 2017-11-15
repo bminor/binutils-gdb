@@ -7,7 +7,7 @@
 
 .*:     file format elf32-avr
 
-Decoded dump of debug contents of section .debug_line:
+Contents of the \.debug_line section:
 
 .*:
 File name                            Line number    Starting address    View

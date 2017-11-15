@@ -6,7 +6,7 @@
 # The tile targets require 8-byte instructions, but the test only simulates 4-byte instructions.
 #not-target: am3*-* avr-* cr16-* crx-* ft32*-* m32c-* mn10*-* msp430-* nds32*-* pru-* riscv*-* rl78-* tile*-* xtensa-*
 
-Decoded dump of debug contents of section \.debug_line:
+Contents of the \.debug_line section:
 
 CU: dwarf2-11\.c:
 File name  *Line number  *Starting address  *View

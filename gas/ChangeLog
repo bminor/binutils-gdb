@@ -1,3 +1,20 @@
+2017-11-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 15152
+	* testsuite/gas/avr/large-debug-line-table.d: Update expected
+	output.
+	* testsuite/gas/elf/dwarf2-11.d: Likewise.
+	* testsuite/gas/elf/dwarf2-12.d: Likewise.
+	* testsuite/gas/elf/dwarf2-13.d: Likewise.
+	* testsuite/gas/elf/dwarf2-14.d: Likewise.
+	* testsuite/gas/elf/dwarf2-15.d: Likewise.
+	* testsuite/gas/elf/dwarf2-16.d: Likewise.
+	* testsuite/gas/elf/dwarf2-17.d: Likewise.
+	* testsuite/gas/elf/dwarf2-18.d: Likewise.
+	* testsuite/gas/elf/dwarf2-5.d: Likewise.
+	* testsuite/gas/elf/dwarf2-6.d: Likewise.
+	* testsuite/gas/elf/dwarf2-7.d: Likewise.
+
 2017-11-15  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/noextreg.s: Add tests for VEX-encoded GPR

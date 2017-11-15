@@ -1,5 +1,13 @@
 -*- text -*-
 
+* Add --debug-dump=links option to readelf and --dwarf=links option to objdump
+  which displays the contents of any .gnu_debuglink or .gnu_debugaltlink
+  sections.
+
+  Add a --debug-dump=follow-links option to readelf and a --dwarf=follow-links
+  option to objdump which causes indirect links into separate debug info files
+  to be followed when dumping other DWARF sections.
+
 Changes in 2.29:
 
 * The MIPS port now supports microMIPS eXtended Physical Addressing (XPA)
