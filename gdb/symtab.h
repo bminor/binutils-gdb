@@ -20,6 +20,7 @@
 #if !defined (SYMTAB_H)
 #define SYMTAB_H 1
 
+#include <array>
 #include <vector>
 #include <string>
 #include "gdb_vecs.h"

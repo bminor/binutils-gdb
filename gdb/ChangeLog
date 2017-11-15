@@ -1,5 +1,9 @@
 2017-11-15  John Baldwin  <jhb@FreeBSD.org>
 
+	* symtab.h: Include <array>.
+
+2017-11-15  John Baldwin  <jhb@FreeBSD.org>
+
 	* bsd-kvm.c (bsd_kvm_cmd): Constify 'arg'.
 	(bsd_kvm_proc_cmd): Likewise.
 
