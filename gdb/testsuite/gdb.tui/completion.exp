@@ -32,7 +32,7 @@ proc test_tab_completion {input_line expected_re} {
     gdb_test_multiple "" "$test" {
 	-re "$expected_re\r\n$gdb_prompt " {
 	    gdb_test_multiple "" "$test" {
-		-re "^$input_line$" {
+		-re "^$input_line $" {
 		    pass "$test"
 		}
 	    }

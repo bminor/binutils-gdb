@@ -1,3 +1,8 @@
+2017-11-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.tui/completionn.exp (test_tab_completion): Add space in
+	regex.
+
 2017-11-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.opt/inline-locals.exp: Remove trailing parentheses from
