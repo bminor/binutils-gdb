@@ -1,3 +1,8 @@
+2017-11-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* bsd-kvm.c (bsd_kvm_cmd): Constify 'arg'.
+	(bsd_kvm_proc_cmd): Likewise.
+
 2017-11-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tui/tui-win.c (window_name_completer): Replace VEC with
