@@ -1,5 +1,10 @@
 2017-11-15  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_VEX, OP_LWPCB_E, OP_LWP_E): Use rex to
+	determine GPR register set.
+
+2017-11-15  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (VEXI4_Fixup, VexI4): Delete.
 	(prefix_table, xop_table, vex_len_table): Remove VexI4 uses.
 	(OP_EX_VexW): Move setting of vex_w_done. Update codep on 2nd

@@ -17122,7 +17122,7 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  names = names_xmm;
 	  break;
 	case dq_mode:
-	  if (vex.w)
+	  if (rex & REX_W)
 	    names = names64;
 	  else
 	    names = names32;
@@ -17758,7 +17758,7 @@ OP_LWPCB_E (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
   MODRM_CHECK;
   codep++;
 
-  if (vex.w)
+  if (rex & REX_W)
     names = names64;
   else
     names = names32;
@@ -17776,7 +17776,7 @@ OP_LWP_E (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   const char **names;
 
-  if (vex.w)
+  if (rex & REX_W)
     names = names64;
   else
     names = names32;
