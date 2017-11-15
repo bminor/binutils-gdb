@@ -1,3 +1,9 @@
+2017-11-14  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/ld-elf/compress1-alt.s: New.
+	* testsuite/ld-elf/compressed1d-alt.d: New.
+	* testsuite/ld-elf/compressed1d.d: Add riscv*-*-* to notarget list.
+
 2017-11-14  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/note-3.t: Don't discard .got.
