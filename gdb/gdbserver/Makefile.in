@@ -567,7 +567,7 @@ arch/%.o: ../arch/%.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
-%-ipa.o: ../arch/%.c
+arch/%-ipa.o: ../arch/%.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 

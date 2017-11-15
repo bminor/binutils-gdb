@@ -133,7 +133,7 @@ case "${target}" in
 			srv_linux_thread_db=yes
 			srv_linux_btrace=yes
 			ipa_obj="linux-i386-ipa.o linux-x86-tdesc-ipa.o"
-			ipa_obj="${ipa_obj} i386-ipa.o"
+			ipa_obj="${ipa_obj} arch/i386-ipa.o"
 			;;
   i[34567]86-*-lynxos*)	srv_regobj=""
 			srv_tgtobj="lynx-low.o lynx-i386-low.o fork-child.o fork-inferior.o"
@@ -383,7 +383,7 @@ case "${target}" in
 			srv_linux_thread_db=yes
 			srv_linux_btrace=yes
 			ipa_obj="linux-amd64-ipa.o linux-x86-tdesc-ipa.o"
-			ipa_obj="${ipa_obj} amd64-ipa.o"
+			ipa_obj="${ipa_obj} arch/amd64-ipa.o"
 			;;
   x86_64-*-mingw*)	srv_regobj=""
 			srv_tgtobj="x86-low.o x86-dregs.o i387-fp.o win32-low.o win32-i386-low.o"
