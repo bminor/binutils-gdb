@@ -1,5 +1,13 @@
 2017-11-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	PR ld/22263
+	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Use
+	bfd_link_executable instead of bfd_link_pic for TLS.
+	(elfNN_aarch64_allocate_dynrelocs): Likewise.
+	(aarch64_can_relax_tls): Likewise.
+
+2017-11-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	PR ld/22269
 	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol): Use
 	UNDEFWEAK_NO_DYNAMIC_RELOC to avoid dynamic GOT relocs.
