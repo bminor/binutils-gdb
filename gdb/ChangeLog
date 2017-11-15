@@ -1,3 +1,8 @@
+2017-11-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tui/tui-win.c (window_name_completer): Replace VEC with
+	std::vector.
+
 2017-11-15  Andrew Cagney  <cagney@gnu.org>
 
 	* MAINTAINERS: Remove no-longer applicable entries.

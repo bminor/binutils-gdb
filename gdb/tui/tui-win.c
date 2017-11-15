@@ -365,7 +365,7 @@ window_name_completer (completion_tracker &tracker,
 		       int include_next_prev_p,
 		       const char *text, const char *word)
 {
-  VEC (const_char_ptr) *completion_name_vec = NULL;
+  std::vector<const char *> completion_name_vec;
   int win_type;
 
   for (win_type = SRC_WIN; win_type < MAX_MAJOR_WINDOWS; win_type++)
@@ -379,31 +379,28 @@ window_name_completer (completion_tracker &tracker,
 
       completion_name = tui_win_name (&tui_win_list [win_type]->generic);
       gdb_assert (completion_name != NULL);
-      VEC_safe_push (const_char_ptr, completion_name_vec, completion_name);
+      completion_name_vec.push_back (completion_name);
     }
 
   /* If no windows are considered visible then the TUI has not yet been
      initialized.  But still "focus src" and "focus cmd" will work because
      invoking the focus command will entail initializing the TUI which sets the
      default layout to SRC_COMMAND.  */
-  if (VEC_length (const_char_ptr, completion_name_vec) == 0)
+  if (completion_name_vec.empty ())
     {
-      VEC_safe_push (const_char_ptr, completion_name_vec, SRC_NAME);
-      VEC_safe_push (const_char_ptr, completion_name_vec, CMD_NAME);
+      completion_name_vec.push_back (SRC_NAME);
+      completion_name_vec.push_back (CMD_NAME);
     }
 
   if (include_next_prev_p)
     {
-      VEC_safe_push (const_char_ptr, completion_name_vec, "next");
-      VEC_safe_push (const_char_ptr, completion_name_vec, "prev");
+      completion_name_vec.push_back ("next");
+      completion_name_vec.push_back ("prev");
     }
 
-  VEC_safe_push (const_char_ptr, completion_name_vec, NULL);
-  complete_on_enum (tracker,
-		    VEC_address (const_char_ptr, completion_name_vec),
-		    text, word);
 
-  VEC_free (const_char_ptr, completion_name_vec);
+  completion_name_vec.push_back (NULL);
+  complete_on_enum (tracker, completion_name_vec.data (), text, word);
 }
 
 /* Complete possible window names to focus on.  TEXT is the complete text
