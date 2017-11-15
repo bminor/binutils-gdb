@@ -1,3 +1,10 @@
+2017-11-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/22269
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol): Use
+	UNDEFWEAK_NO_DYNAMIC_RELOC to avoid dynamic GOT relocs.
+	(elfNN_aarch64_allocate_dynrelocs): Likewise.
+
 2017-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/22444

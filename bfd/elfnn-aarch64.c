@@ -8022,7 +8022,10 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	       || h->root.type != bfd_link_hash_undefweak)
 	      && (bfd_link_pic (info)
-		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
+		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+	      /* Undefined weak symbol in static PIE resolves to 0 without
+		 any dynamic relocations.  */
+	      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    {
 	      htab->root.srelgot->size += RELOC_SIZE (htab);
 	    }
@@ -8824,7 +8827,10 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   if (h->got.offset != (bfd_vma) - 1
-      && elf_aarch64_hash_entry (h)->got_type == GOT_NORMAL)
+      && elf_aarch64_hash_entry (h)->got_type == GOT_NORMAL
+      /* Undefined weak symbol in static PIE resolves to 0 without
+	 any dynamic relocations.  */
+      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
     {
       Elf_Internal_Rela rela;
       bfd_byte *loc;
