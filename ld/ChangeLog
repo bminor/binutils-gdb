@@ -1,3 +1,7 @@
+2017-11-15  Alan Modra  <amodra@gmail.com>
+
+	* ldmisc.c (vfinfo): Support up to 9 positional args.
+
 2017-11-14  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/ld-elf/compress1-alt.s: New.
