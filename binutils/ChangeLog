@@ -1,3 +1,8 @@
+2017-11-15  Alan Modra  <amodra@gmail.com>
+
+	PR 22426
+	* objcopy.c (copy_main): Free tmpname.
+
 2017-11-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 15152
