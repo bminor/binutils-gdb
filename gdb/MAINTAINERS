@@ -421,7 +421,6 @@ further review from a Global Maintainer or Responsible Maintainer.  They are
 under no obligation to review posted patches - but, of course, are invited
 to do so!
 
-PowerPC			Andrew Cagney		cagney@gnu.org
 ARM			Richard Earnshaw	rearnsha@arm.com
 Blackfin		Mike Frysinger		vapier@gentoo.org
 CRIS			Hans-Peter Nilsson	hp@axis.com
@@ -485,7 +484,6 @@ Julian Brown					julian@codesourcery.com
 Iain Buclaw					ibuclaw@gdcproject.org
 Kevin Buettner					kevinb@redhat.com
 Andrew Burgess					andrew.burgess@embecosm.com
-Andrew Cagney					cagney@gnu.org
 David Carlton					carlton@bactrian.org
 Stephane Carrez					Stephane.Carrez@gmail.com
 Michael Chastain				mec.gnu@mindspring.com

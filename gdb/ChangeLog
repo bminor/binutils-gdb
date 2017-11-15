@@ -1,5 +1,9 @@
 2017-11-15  Andrew Cagney  <cagney@gnu.org>
 
+	* MAINTAINERS: Remove no-longer applicable entries.
+
+2017-11-15  Andrew Cagney  <cagney@gnu.org>
+
 	* MAINTAINERS: Move self to Past Maintainers.
 
 2017-11-15  Yao Qi  <yao.qi@linaro.org>
