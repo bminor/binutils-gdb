@@ -1,3 +1,10 @@
+2017-11-15  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (union _bfd_doprnt_args): Add "Bad".
+	(_bfd_doprnt): Handle more flags.
+	(_bfd_doprnt_scan): Likewise.  Tidy setting of args array.
+	(error_handler_internal): Init args type to Bad.
+
 2017-11-14  Alan Modra  <amodra@gmail.com>
 
 	PR 22431

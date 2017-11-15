@@ -638,6 +638,7 @@ union _bfd_doprnt_args
   void *p;
   enum
   {
+    Bad,
     Int,
     Long,
     LongLong,
@@ -707,7 +708,7 @@ _bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
 	    }
 
 	  /* Move past flags.  */
-	  while (strchr ("-+ #0", *ptr))
+	  while (strchr ("-+ #0'I", *ptr))
 	    *sptr++ = *ptr++;
 
 	  if (*ptr == '*')
@@ -948,6 +949,7 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 	{
 	  int wide_width = 0, short_width = 0;
 	  unsigned int arg_no;
+	  int arg_type;
 
 	  ptr++;
 
@@ -960,7 +962,7 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 	    }
 
 	  /* Move past flags.  */
-	  while (strchr ("-+ #0", *ptr))
+	  while (strchr ("-+ #0'I", *ptr))
 	    ptr++;
 
 	  if (*ptr == '*')
@@ -1032,8 +1034,7 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 	  if ((int) arg_no < 0)
 	    arg_no = arg_count;
 
-	  if (arg_no >= 9)
-	    abort ();
+	  arg_type = Bad;
 	  switch (ptr[-1])
 	    {
 	    case 'd':
@@ -1045,7 +1046,7 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 	    case 'c':
 	      {
 		if (short_width)
-		  args[arg_no].type = Int;
+		  arg_type = Int;
 		else
 		  {
 		    if (ptr[-2] == 'L')
@@ -1057,17 +1058,17 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 		    switch (wide_width)
 		      {
 		      case 0:
-			args[arg_no].type = Int;
+			arg_type = Int;
 			break;
 		      case 1:
-			args[arg_no].type = Long;
+			arg_type = Long;
 			break;
 		      case 2:
 		      default:
 #if defined (__GNUC__) || defined (HAVE_LONG_LONG)
-			args[arg_no].type = LongLong;
+			arg_type = LongLong;
 #else
-			args[arg_no].type = Long;
+			arg_type = Long;
 #endif
 			break;
 		      }
@@ -1081,13 +1082,13 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 	    case 'G':
 	      {
 		if (wide_width == 0)
-		  args[arg_no].type = Double;
+		  arg_type = Double;
 		else
 		  {
 #if defined (__GNUC__) || defined (HAVE_LONG_DOUBLE)
-		    args[arg_no].type = LongDouble;
+		    arg_type = LongDouble;
 #else
-		    args[arg_no].type = Double;
+		    arg_type = Double;
 #endif
 		  }
 	      }
@@ -1096,11 +1097,15 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 	    case 'p':
 	    case 'A':
 	    case 'B':
-	      args[arg_no].type = Ptr;
+	      arg_type = Ptr;
 	      break;
 	    default:
 	      abort();
 	    }
+
+	  if (arg_no >= 9)
+	    abort ();
+	  args[arg_no].type = arg_type;
 	  arg_count++;
 	}
     }
@@ -1119,8 +1124,11 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 static void
 error_handler_internal (const char *fmt, va_list ap)
 {
-  int i, arg_count;
+  unsigned int i, arg_count;
   union _bfd_doprnt_args args[9];
+
+  for (i = 0; i < sizeof (args) / sizeof (args[0]); i++)
+    args[i].type = Bad;
 
   arg_count = _bfd_doprnt_scan (fmt, args);
   for (i = 0; i < arg_count; i++)
