@@ -1,5 +1,13 @@
 2017-11-15  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (VEXI4_Fixup, VexI4): Delete.
+	(prefix_table, xop_table, vex_len_table): Remove VexI4 uses.
+	(OP_EX_VexW): Move setting of vex_w_done. Update codep on 2nd
+	pass.
+	(OP_REG_VexI4): Drop low 4 bits check.
+
+2017-11-15  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-reg.tbl (axl): Remove Acc and Byte.
 	* i386-tbl.h: Re-generate.
 

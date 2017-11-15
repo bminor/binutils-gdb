@@ -1,5 +1,10 @@
 2017-11-15  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/noextreg.{s,d}: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2017-11-15  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/x86-64-reg.s: Add extended byte reg tests.
 	* testsuite/gas/i386/x86-64-reg.d,
 	testsuite/gas/i386/x86-64-reg-intel.d,
