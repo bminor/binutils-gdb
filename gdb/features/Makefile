@@ -136,7 +136,6 @@ XMLTOC = \
 	mips64-dsp-linux.xml \
 	mips64-linux.xml \
 	nds32.xml \
-	nios2-linux.xml \
 	nios2.xml \
 	rs6000/powerpc-32.xml \
 	rs6000/powerpc-32l.xml \

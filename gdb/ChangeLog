@@ -1,5 +1,12 @@
 2017-11-15  Yao Qi  <yao.qi@linaro.org>
 
+	* features/Makefile (XMLTOC): Remove nios2-linux.xml.
+	* features/nios2-linux.c: Remove.
+	* nios2-linux-tdep.c (_initialize_nios2_linux_tdep): Don't call
+	initialize_tdesc_nios2_linux.
+
+2017-11-15  Yao Qi  <yao.qi@linaro.org>
+
 	* m68hc11-tdep.c (M68HC11_NUM_REGS): Change it to
 	M68HC11_LAST_HARD_REG + 1.
 
