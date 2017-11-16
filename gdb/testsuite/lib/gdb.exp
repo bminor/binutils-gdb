@@ -1093,7 +1093,8 @@ proc gdb_test_no_output { args } {
 # This is useful when the sequence is long and contains ".*", a single
 # regexp to match the entire output can get a timeout much easier.
 #
-# COMMAND is the command to send.
+# COMMAND is the command to execute, send to GDB with send_gdb.  If
+#   this is the null string no command is sent.
 # TEST_NAME is passed to pass/fail.  COMMAND is used if TEST_NAME is "".
 # EXPECTED_OUTPUT_LIST is a list of regexps of expected output, which are
 # processed in order, and all must be present in the output.
@@ -1116,7 +1117,9 @@ proc gdb_test_sequence { command test_name expected_output_list } {
 	set test_name $command
     }
     lappend expected_output_list ""; # implicit ".*" before gdb prompt
-    send_gdb "$command\n"
+    if { $command != "" } {
+	send_gdb "$command\n"
+    }
     return [gdb_expect_list $test_name "$gdb_prompt $" $expected_output_list]
 }
 

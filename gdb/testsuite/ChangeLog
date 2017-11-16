@@ -1,3 +1,10 @@
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/starti.exp ("continue" test): Remove ".*"s from
+	pattern.
+	* lib/gdb.exp (gdb_test_sequence): Don't send empty command to
+	GDB.
+
 2017-11-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.tui/completionn.exp (test_tab_completion): Add space in

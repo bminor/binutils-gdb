@@ -47,5 +47,5 @@ gdb_test_sequence "" "starti" {
 gdb_breakpoint main
 gdb_test_sequence "continue" "" {
     "\\$2 = 1"
-    ".*Breakpoint .*main \\(\\) at .*starti.c.*"
+    "Breakpoint \[^\r\n\]*main \\(\\) at \[^\r\n\]*starti.c"
 }
