@@ -1,3 +1,227 @@
+2017-11-15  Eric Christopher  <echristo@gmail.com>
+
+	Apply from master.
+        2017-10-18  Kyle Butt  <iteratee@google.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Scan::local): Correct dst_off
+	calculation for TOC16 relocs.
+	(Target_powerpc::Scan::global): Likewise.
+
+        2017-11-08  Kyle Butt  <iteratee@google.com>
+
+        * object.cc (do_find_special_sections): Fix a thinko with memmem return
+        values and check for !=	NULL rather than == 0.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* system.h (textdomain, bindtextdomain): Use safer "do nothing".
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
+	* symtab.cc (Symbol_table::add_from_relobj): Match "__gnu_lto_slim"
+	optionally prefixed with "_".
+
+2017-10-20  Sriraman Tallam  <tmsriram@google.com>
+
+	* options.h (-z,text_unlikely_segment): New option.
+	* layout.cc (Layout::layout): Create new output section
+	for .text.unlikely sections with the new option.
+	(Layout::segment_precedes): Check for the new option
+	when segment flags match.
+	* testsuite/text_unlikely_segment.cc: New test source.
+	* testsuite/text_unlikely_segment.sh: New test script.
+	* testsuite/Makefile.am (text_unlikely_segment): New test.
+	* testsuite/Makefile.in: Regenerate.
+
+2017-10-19  Umesh Kalappa  <ukalappa@cisco.com>
+
+	* arm.cc (Stub::do_fixed_endian_write):Far call stubs support for arm
+	in the be8 mode.
+	* testsuite/Makefile.am: New test cases.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_farcall_arm_arm_be8.sh: New script for arm to arm far
+	call stubs.
+	* testsuite/arm_farcall_thumb_thumb_be8.sh: New script for thumb to
+	thumb far call stubs.
+
+2017-09-26  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/22213
+	* sparc.cc (Target_sparc): Fix incorrect register mask.
+
+2017-09-22  Jim Wilson  <jim.wilson@linaro.org>
+
+	* aarch64.cc (Target_aarch64::aarch64_info): Set
+	is_default_stack_executable to false.
+
+2017-09-22  Alan Modra  <amodra@gmail.com>
+
+	* resolve.cc (clone): Fix got_offset_list test.
+
+2017-09-22  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc<64,*>::powerpc_info): Set
+	is_default_stack_executable false.
+
+2017-09-20  Teresa Johnson  <tejohnson@google.com>
+
+	* plugin.cc (is_visible_from_outside): Check for export dynamic symbol
+        option and list.
+	* testsuite/Makefile.am (plugin_test_12): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/export_dynamic_plugin.cc: New test source.
+	* testsuite/plugin_test_12.sh: New test script.
+
+2017-09-20  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Branch_info::make_stub): Put
+	stubs for ppc32 non-branch relocs in first stub table.
+	(Target_powerpc::Relocate::relocate): Resolve similarly.
+
+2017-09-19  Alan Modra  <amodra@gmail.com>
+
+	* options.h (stub-group-multi): Default to true.  Add
+	--no-stub-group-multi.
+
+2017-08-30  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Nop addis on
+	TPREL16_HA, and convert insn on TPREL16_LO and TPREL16_LO_DS
+	relocs to use r2/r13 when addis would add zero.
+
+2017-08-29  Alan Modra  <amodra@gmail.com>
+
+	* options.h (tls_get_addr_optimize): New option.
+	* symtab.h (Symbol::clear_in_reg, clone): New functions.
+	(Sized_symbol::clone): New function.
+	(Symbol_table::clone): New function.
+	* resolve.cc (Symbol::clone, Sized_symbol::clone): New functions.
+	* powerpc.cc (Target_powerpc::has_tls_get_addr_opt_,
+	tls_get_addr_, tls_get_addr_opt_): New vars.
+	(Target_powerpc::tls_get_addr_opt, tls_get_addr,
+	is_tls_get_addr_opt, replace_tls_get_addr,
+	set_has_tls_get_addr_opt, stk_linker): New functions.
+	(Target_powerpc::Track_tls::maybe_skip_tls_get_addr_call): Add
+	target param.  Update callers.  Compare symbols rather than names.
+	(Target_powerpc::do_define_standard_symbols): Init tls_get_addr_
+	and tls_get_addr_opt_.
+	(Target_powerpc::Branch_info::mark_pltcall): Translate tls_get_addr
+	sym to tls_get_addr_opt.
+	(Target_powerpc::Branch_info::make_stub): Likewise.
+	(Stub_table::define_stub_syms): Likewise.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.
+	(add_3_12_2, add_3_12_13, bctrl, beqlr, cmpdi_11_0, cmpwi_11_0,
+	ld_11_1, ld_11_3, ld_12_3, lwz_11_3, lwz_12_3, mr_0_3, mr_3_0,
+	mtlr_11, std_11_1): New constants.
+	(Stub_table::eh_frame_added_): Delete.
+	(Stub_table::tls_get_addr_opt_bctrl_, plt_fde_len_, plt_fde_): New vars.
+	(Stub_table::init_plt_fde): New functions.
+	(Stub_table::add_eh_frame, replace_eh_frame): Move definition out
+	of line.  Init and use plt_fde_.
+	(Stub_table::plt_call_size): Return size for tls_get_addr stub.
+	Extract alignment code to..
+	(Stub_table::plt_call_align): ..this new function.  Adjust all callers.
+	(Stub_table::add_plt_call_entry): Set has_tls_get_addr_opt and
+	tls_get_addr_opt_bctrl, and align after that.
+	(Stub_table::do_write): Write out tls_get_addr stub.
+	(Target_powerpc::do_finalize_sections): Emit DT_PPC_OPT
+	PPC_OPT_TLS/PPC64_OPT_TLS bit.
+	(Target_powerpc::Relocate::relocate): Don't check for or modify
+	nop following bl for tls_get_addr stub.
+
+2017-08-29  Alan Modra  <amodra@gmail.com>
+
+	* symtab.h (Symbol): Split u_ into u1_ and u2_.  Adjust accessors
+	to suit.  Move plt_offset_ before got_offsets_.
+	* symtab.cc (Symbol::init_fields): Adjust for union change.
+	(Symbol::init_base_output_data): Likewise.
+	(Symbol::init_base_output_segment): Likewise.
+	(Symbol::allocate_base_common): Likewise.
+	(Symbol::output_section): Likewise.
+	(Symbol::set_output_section): Likewise.
+	(Symbol::set_output_segment): Likewise.
+	* resolve.cc (Symbol::override_base): Likewise.
+	(Symbol::override_base_with_special): Likewise.
+
+2017-08-28  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* aarch64.cc (Target_aarch64::Relocate::relocate_tls):
+	Make got_tlsdesc_offset signed and fix its calculation.
+	* testsuite/Makefile.am (aarch64_tlsdesc): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/aarch64_tlsdesc.s: New test source file.
+	* testsuite/aarch64_tlsdesc.sh: New test script.
+	* testsuite/aarch64_tlsdesc.t: New test linker script.
+
+2017-08-28  Alan Modra  <amodra@gmail.com>
+
+	PR 21847
+	* powerpc.cc (Target_powerpc::is_elfv2_localentry0): Test
+	non_zero_localentry.
+	(Target_powerpc::resolve): New function.
+	(powerpc_info): Set has_resolve for 64-bit.
+	* target.h (Sized_target::resolve): Return bool.
+	* resolve.cc (Symbol_table::resolve): Continue with normal
+	processing when target resolve returns false.
+	* symtab.h (Symbol::non_zero_localentry, set_non_zero_localentry):
+	New accessors.
+	(Symbol::non_zero_localentry_): New flag bit.
+	* symtab.cc (Symbol::init_fields): Init non_zero_localentry_.
+
+2017-08-08  Romain Geissler  <romain.geissler@gmail.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Add --enable-default-hash-style option.
+	* options.h (hash_style): Use DEFAULT_HASH_STYLE as default value.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2017-08-03  James Clarke  <jrtc27@jrtc27.com>
+
+	* options.h (General_options): Set a non-NULL second help string
+	argument for relax to allow --no-relax.
+
+2017-08-01  Alan Modra  <amodra@gmail.com>
+
+	* ehframe.cc (Fde::operator==): New.
+	(Cie::remove_fde, Eh_frame::remove_ehframe_for_plt): New.
+	* ehframe.h (Fde::operator==): Declare.
+	(Cie::remove_fde, Eh_frame::remove_ehframe_for_plt): Likewise.
+	* layout.cc (Layout::remove_eh_frame_for_plt): New.
+	* layout.h (Layout::remove_eh_frame_for_plt): Declare.
+	* powerpc.cc (Target_powerpc::do_relax): Remove old eh_frame FDEs.
+	(Stub_table::add_eh_frame): Delete eh_frame_added_ condition.
+	Don't add eh_frame for empty stub section.
+	(Stub_table::remove_eh_frame): New.
+
+2017-07-31  Alan Modra  <amodra@gmail.com>
+
+	* options.h (no_tls_optimize): New powerpc option.
+	* powerpc.cc (Target_powerpc::abiversion, set_abiversion): Formatting.
+	(Target_powerpc::stk_toc): Formatting, fix comment.
+	(Target_powerpc::Track_tls::tls_get_addr_state): Rename from
+	tls_get_addr.
+	(Target_powerpc::optimize_tls_gd, optimize_tls_ld, optimize_tls_ie):
+	Return TLSOPT_NONE when !tls_optimize.
+	(Target_powerpc::add_global_pair_with_rel): Check
+	for existing reloc before reserving.
+	(Target_powerpc::add_local_tls_pair): Likewise.
+
+2017-07-31  Alan Modra  <amodra@gmail.com>
+
+	PR 21847
+	* powerpc.cc (Target_powerpc::scan_relocs): Warn on --plt-localentry
+	without ld.so checks.
+
+2017-07-29  Alan Modra  <amodra@gmail.com>
+
+	PR 21847
+	* powerpc.cc (Target_powerpc::scan_relocs): Default to
+	--no-plt-localentry.
+
 2017-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/21857
