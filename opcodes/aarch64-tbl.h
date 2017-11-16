@@ -2096,7 +2096,7 @@ static const aarch64_feature_set aarch64_feature_simd =
   AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0);
 static const aarch64_feature_set aarch64_feature_crypto =
   AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO | AARCH64_FEATURE_AES
-		   | AARCH64_FEATURE_SHA2, 0);
+		   | AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_crc =
   AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0);
 static const aarch64_feature_set aarch64_feature_lse =
@@ -2134,12 +2134,14 @@ static const aarch64_feature_set aarch64_feature_aes =
 static const aarch64_feature_set aarch64_feature_v8_4 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_4, 0);
 static const aarch64_feature_set aarch64_feature_crypto_v8_2 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_CRYPTO, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_CRYPTO
+		   | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_sm4 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SM4, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SM4
+		   | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_sha3 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SHA2
-		   | AARCH64_FEATURE_SHA3, 0);
+		   | AARCH64_FEATURE_SHA3 | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_fp_16_v8_2 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F16
 		   | AARCH64_FEATURE_FP, 0);
