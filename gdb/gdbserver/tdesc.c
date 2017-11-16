@@ -92,8 +92,7 @@ tdesc_get_features_xml (target_desc *tdesc)
   /* Either .xmltarget or .features is not NULL.  */
   gdb_assert (tdesc->xmltarget != NULL
 	      || (tdesc->features != NULL
-		  && tdesc->arch != NULL
-		  && tdesc->osabi != NULL));
+		  && tdesc->arch != NULL));
 
   if (tdesc->xmltarget == NULL)
     {
@@ -105,9 +104,12 @@ tdesc_get_features_xml (target_desc *tdesc)
       buffer += tdesc->arch;
       buffer += "</architecture>";
 
-      buffer += "<osabi>";
-      buffer += tdesc->osabi;
-      buffer += "</osabi>";
+      if (tdesc->osabi != nullptr)
+	{
+	  buffer += "<osabi>";
+	  buffer += tdesc->osabi;
+	  buffer += "</osabi>";
+	}
 
       char *xml;
 
