@@ -1,5 +1,12 @@
 2017-11-16  Nick Clifton  <nickc@redhat.com>
 
+	PR 22421
+	* elf.c (elfcore_grok_netbsd_procinfo): Check that the note is big enough.
+	(elfcore_grok_openbsd_procinfo): Likewise.
+	(elfcore_grok_nto_status): Likewise.
+
+2017-11-16  Nick Clifton  <nickc@redhat.com>
+
 	* merge.c (sec_merge_emit): Always create padding buffer.  Add
 	asserts to make sure that the buffer is long enough.
 

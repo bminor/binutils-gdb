@@ -9871,6 +9871,7 @@ elfcore_grok_freebsd_psinfo (bfd *abfd, Elf_Internal_Note *note)
   /* Check for version 1 in pr_version.  */
   if (bfd_h_get_32 (abfd, (bfd_byte *) note->descdata) != 1)
     return FALSE;
+
   offset = 4;
 
   /* Skip over pr_psinfosz. */
@@ -10051,6 +10052,9 @@ elfcore_netbsd_get_lwpid (Elf_Internal_Note *note, int *lwpidp)
 static bfd_boolean
 elfcore_grok_netbsd_procinfo (bfd *abfd, Elf_Internal_Note *note)
 {
+  if (note->descsz <= 0x7c + 31)
+    return FALSE;
+
   /* Signal number at offset 0x08. */
   elf_tdata (abfd)->core->signal
     = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + 0x08);
@@ -10135,6 +10139,9 @@ elfcore_grok_netbsd_note (bfd *abfd, Elf_Internal_Note *note)
 static bfd_boolean
 elfcore_grok_openbsd_procinfo (bfd *abfd, Elf_Internal_Note *note)
 {
+  if (note->descsz <= 0x48 + 31)
+    return FALSE;
+
   /* Signal number at offset 0x08. */
   elf_tdata (abfd)->core->signal
     = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + 0x08);
@@ -10205,6 +10212,9 @@ elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, long *tid)
   asection *sect;
   short sig;
   unsigned flags;
+
+  if (note->descsz < 16)
+    return FALSE;
 
   /* nto_procfs_status 'pid' field is at offset 0.  */
   elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, (bfd_byte *) ddata);
