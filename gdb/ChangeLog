@@ -1,3 +1,9 @@
+2017-11-16  Yao Qi  <yao.qi@linaro.org>
+
+	* features/tic6x-c62x.xml: Remove.
+	* features/tic6x-c64x.xml: Remove.
+	* features/tic6x-c64xp.xml: Remove.
+
 2017-11-15  John Baldwin  <jhb@FreeBSD.org>
 
 	* symtab.h: Include <array>.
