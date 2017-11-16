@@ -875,6 +875,15 @@ extern struct value *evaluate_subexp (struct type *expect_type,
 extern struct value *evaluate_subexpression_type (struct expression *exp,
 						  int subexp);
 
+extern value *evaluate_var_value (enum noside noside, const block *blk,
+				  symbol *var);
+
+extern value *evaluate_var_msym_value (enum noside noside,
+				       struct objfile *objfile,
+				       minimal_symbol *msymbol);
+
+extern value *eval_skip_value (expression *exp);
+
 extern void fetch_subexp_value (struct expression *exp, int *pc,
 				struct value **valp, struct value **resultp,
 				struct value **val_chain,

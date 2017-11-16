@@ -1,3 +1,16 @@
+2017-11-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (resolve_subexp): Add handling of OP_VAR_MSYM_VALUE.
+	(ada_evaluate_subexp_for_cast): New function.
+	(ada_evaluate_subexp) <UNOP_CAST>: Replace code by call to
+	ada_evaluate_subexp_for_cast.
+	(ada_evaluate_subexp) <nosideret>: Replace code by call to
+	eval_skip_value.
+	* eval.c (evaluate_var_value): Make non-static.
+	(evaluate_var_msym_value, eval_skip_value): Likewise.
+	* value.h (evaluate_var_value, evaluate_var_msym_value)
+	(eval_skip_value): Declare.
+
 2017-11-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_value_cast): Remove parameter "noside".

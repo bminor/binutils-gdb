@@ -3603,7 +3603,12 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
     }
 
   *pos = pc;
-  return evaluate_subexp_type (exp, pos);
+  if (exp->elts[pc].opcode == OP_VAR_MSYM_VALUE)
+    return evaluate_var_msym_value (EVAL_AVOID_SIDE_EFFECTS,
+				    exp->elts[pc + 1].objfile,
+				    exp->elts[pc + 2].msymbol);
+  else
+    return evaluate_subexp_type (exp, pos);
 }
 
 /* Return non-zero if formal type FTYPE matches actual type ATYPE.  If
@@ -10313,6 +10318,58 @@ ada_value_cast (struct type *type, struct value *arg2)
     entity.  Results in this case are unpredictable, as we usually read
     past the buffer containing the data =:-o.  */
 
+/* Evaluate a subexpression of EXP, at index *POS, and return a value
+   for that subexpression cast to TO_TYPE.  Advance *POS over the
+   subexpression.  */
+
+static value *
+ada_evaluate_subexp_for_cast (expression *exp, int *pos,
+			      enum noside noside, struct type *to_type)
+{
+  int pc = *pos;
+
+  if (exp->elts[pc].opcode == OP_VAR_MSYM_VALUE
+      || exp->elts[pc].opcode == OP_VAR_VALUE)
+    {
+      (*pos) += 4;
+
+      value *val;
+      if (exp->elts[pc].opcode == OP_VAR_MSYM_VALUE)
+        {
+          if (noside == EVAL_AVOID_SIDE_EFFECTS)
+            return value_zero (to_type, not_lval);
+
+          val = evaluate_var_msym_value (noside,
+                                         exp->elts[pc + 1].objfile,
+                                         exp->elts[pc + 2].msymbol);
+        }
+      else
+        val = evaluate_var_value (noside,
+                                  exp->elts[pc + 1].block,
+                                  exp->elts[pc + 2].symbol);
+
+      if (noside == EVAL_SKIP)
+        return eval_skip_value (exp);
+
+      val = ada_value_cast (to_type, val);
+
+      /* Follow the Ada language semantics that do not allow taking
+	 an address of the result of a cast (view conversion in Ada).  */
+      if (VALUE_LVAL (val) == lval_memory)
+        {
+          if (value_lazy (val))
+            value_fetch_lazy (val);
+          VALUE_LVAL (val) = not_lval;
+        }
+      return val;
+    }
+
+  value *val = evaluate_subexp (to_type, exp, pos, noside);
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  return ada_value_cast (to_type, val);
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10371,11 +10428,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case UNOP_CAST:
       (*pos) += 2;
       type = exp->elts[pc + 1].type;
-      arg1 = evaluate_subexp (type, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-        goto nosideret;
-      arg1 = ada_value_cast (type, arg1);
-      return arg1;
+      return ada_evaluate_subexp_for_cast (exp, pos, noside, type);
 
     case UNOP_QUAL:
       (*pos) += 2;
@@ -11347,7 +11400,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     }
 
 nosideret:
-  return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
+  return eval_skip_value (exp);
 }
 
 
