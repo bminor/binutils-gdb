@@ -182,8 +182,11 @@ tic6x_sw_breakpoint_from_kind (int kind, int *size)
   return (const gdb_byte *) &tic6x_breakpoint;
 }
 
-/* Forward definition.  */
-static struct usrregs_info tic6x_usrregs_info;
+static struct usrregs_info tic6x_usrregs_info =
+  {
+    TIC6X_NUM_REGS,
+    NULL, /* Set in tic6x_read_description.  */
+  };
 
 static const struct target_desc *
 tic6x_read_description (void)
@@ -310,7 +313,7 @@ tic6x_supply_register (struct regcache *regcache, int regno,
 static void
 tic6x_fill_gregset (struct regcache *regcache, void *buf)
 {
-  union tic6x_register *regset = buf;
+  auto regset = static_cast<union tic6x_register *> (buf);
   int i;
 
   for (i = 0; i < TIC6X_NUM_REGS; i++)
@@ -321,7 +324,7 @@ tic6x_fill_gregset (struct regcache *regcache, void *buf)
 static void
 tic6x_store_gregset (struct regcache *regcache, const void *buf)
 {
-  const union tic6x_register *regset = buf;
+  const auto regset = static_cast<const union tic6x_register *> (buf);
   int i;
 
   for (i = 0; i < TIC6X_NUM_REGS; i++)
@@ -354,12 +357,6 @@ static struct regsets_info tic6x_regsets_info =
     tic6x_regsets, /* regsets */
     0, /* num_regsets */
     NULL, /* disabled_regsets */
-  };
-
-static struct usrregs_info tic6x_usrregs_info =
-  {
-    TIC6X_NUM_REGS,
-    NULL, /* Set in tic6x_read_description.  */
   };
 
 static struct regs_info regs_info =

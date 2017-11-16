@@ -1,3 +1,9 @@
+2017-11-16  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-tic6x-low.c (tic6x_fill_gregset): Cast buf.
+	(tic6x_store_gregset): Likewise.
+	(tic6x_usrregs_info): Move it up.
+
 2017-11-15  Alan Hayward  <alan.hayward@arm.com>
 
 	* Makefile.in: Update arch rules.
