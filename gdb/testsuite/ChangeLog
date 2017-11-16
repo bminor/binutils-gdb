@@ -1,5 +1,10 @@
 2017-11-16  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/bp-cmds-continue-ctrl-c.c: New file.
+	* gdb.base/bp-cmds-continue-ctrl-c.exp: New file.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
 	* gdb.rust/modules.exp: Skip tests that rely on inferior I/O if
 	gdb,noinferiorio is set, and use gdb_test_stdio otherwise.
 
