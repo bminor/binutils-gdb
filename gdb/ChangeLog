@@ -1,5 +1,10 @@
 2017-11-16  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (insert_bp_location): Replace bp_err and
+	bp_err_message locals by a gdb_exception local.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
 	* inflow.c (scoped_ignore_sigttou): New class.
 	(child_terminal_ours_1, new_tty): Use it.
 

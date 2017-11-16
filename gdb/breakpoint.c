@@ -2458,8 +2458,7 @@ insert_bp_location (struct bp_location *bl,
 		    int *hw_breakpoint_error,
 		    int *hw_bp_error_explained_already)
 {
-  enum errors bp_err = GDB_NO_ERROR;
-  const char *bp_err_message = NULL;
+  gdb_exception bp_excpt = exception_none;
 
   if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
     return 0;
@@ -2568,12 +2567,11 @@ insert_bp_location (struct bp_location *bl,
 
 	      val = bl->owner->ops->insert_location (bl);
 	      if (val)
-		bp_err = GENERIC_ERROR;
+		bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 	    }
 	  CATCH (e, RETURN_MASK_ALL)
 	    {
-	      bp_err = e.error;
-	      bp_err_message = e.message;
+	      bp_excpt = e;
 	    }
 	  END_CATCH
 	}
@@ -2608,16 +2606,16 @@ insert_bp_location (struct bp_location *bl,
 		      val = target_insert_breakpoint (bl->gdbarch,
 						      &bl->overlay_target_info);
 		      if (val)
-			bp_err = GENERIC_ERROR;
+			bp_excpt
+			  = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 		    }
 		  CATCH (e, RETURN_MASK_ALL)
 		    {
-		      bp_err = e.error;
-		      bp_err_message = e.message;
+		      bp_excpt = e;
 		    }
 		  END_CATCH
 
-		  if (bp_err != GDB_NO_ERROR)
+		  if (bp_excpt.reason != 0)
 		    fprintf_unfiltered (tmp_error_stream,
 					"Overlay breakpoint %d "
 					"failed: in ROM?\n",
@@ -2634,12 +2632,11 @@ insert_bp_location (struct bp_location *bl,
 
 	          val = bl->owner->ops->insert_location (bl);
 		  if (val)
-		    bp_err = GENERIC_ERROR;
+		    bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 	        }
 	      CATCH (e, RETURN_MASK_ALL)
 	        {
-		  bp_err = e.error;
-		  bp_err_message = e.message;
+		  bp_excpt = e;
 	        }
 	      END_CATCH
 	    }
@@ -2651,7 +2648,7 @@ insert_bp_location (struct bp_location *bl,
 	    }
 	}
 
-      if (bp_err != GDB_NO_ERROR)
+      if (bp_excpt.reason != 0)
 	{
 	  /* Can't set the breakpoint.  */
 
@@ -2663,7 +2660,9 @@ insert_bp_location (struct bp_location *bl,
 	     breakpoint insertion failed (e.g., the remote target
 	     doesn't define error codes), so we must treat generic
 	     errors as memory errors.  */
-	  if ((bp_err == GENERIC_ERROR || bp_err == MEMORY_ERROR)
+	  if (bp_excpt.reason == RETURN_ERROR
+	      && (bp_excpt.error == GENERIC_ERROR
+		  || bp_excpt.error == MEMORY_ERROR)
 	      && bl->loc_type == bp_loc_software_breakpoint
 	      && (solib_name_from_address (bl->pspace, bl->address)
 		  || shared_objfile_contains_address_p (bl->pspace,
@@ -2691,16 +2690,18 @@ insert_bp_location (struct bp_location *bl,
 	      if (bl->loc_type == bp_loc_hardware_breakpoint)
 		{
 		  *hw_breakpoint_error = 1;
-		  *hw_bp_error_explained_already = bp_err_message != NULL;
+		  *hw_bp_error_explained_already = bp_excpt.message != NULL;
                   fprintf_unfiltered (tmp_error_stream,
                                       "Cannot insert hardware breakpoint %d%s",
-                                      bl->owner->number, bp_err_message ? ":" : ".\n");
-                  if (bp_err_message != NULL)
-                    fprintf_unfiltered (tmp_error_stream, "%s.\n", bp_err_message);
+                                      bl->owner->number,
+				      bp_excpt.message ? ":" : ".\n");
+                  if (bp_excpt.message != NULL)
+                    fprintf_unfiltered (tmp_error_stream, "%s.\n",
+					bp_excpt.message);
 		}
 	      else
 		{
-		  if (bp_err_message == NULL)
+		  if (bp_excpt.message == NULL)
 		    {
 		      std::string message
 			= memory_error_message (TARGET_XFER_E_IO,
@@ -2716,7 +2717,7 @@ insert_bp_location (struct bp_location *bl,
 		      fprintf_unfiltered (tmp_error_stream,
 					  "Cannot insert breakpoint %d: %s\n",
 					  bl->owner->number,
-					  bp_err_message);
+					  bp_excpt.message);
 		    }
 		}
 	      return 1;
