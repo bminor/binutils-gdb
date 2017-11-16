@@ -1,3 +1,8 @@
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* inflow.c (scoped_ignore_sigttou): New class.
+	(child_terminal_ours_1, new_tty): Use it.
+
 2017-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* target-float.c (decimal_from_number): Add byte_order argument and
