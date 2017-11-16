@@ -1,3 +1,14 @@
+2017-11-16  Jan Beulich  <jbeulich@suse.com>
+
+	(get_valid_dis386): Never flag bad opcode when
+	vex.register_specifier is beyond 7. Always store all four
+	bits of it. Move 16-/32-bit override in EVEX handling after
+	all to be overridden bits have been set.
+	(OP_VEX): Mask vex.register_specifier outside of 64-bit mode.
+	Use rex to determine GPR register set.
+	(OP_EX_VexReg, OP_Vex_2src_1, OP_Vex_2src_2, OP_REG_VexI4,
+	OP_LWP_E): Mask vex.register_specifier outside of 64-bit mode.
+
 2017-11-15  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (OP_VEX, OP_LWPCB_E, OP_LWP_E): Use rex to

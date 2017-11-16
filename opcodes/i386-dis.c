@@ -12809,11 +12809,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	{
 	  /* In 16/32-bit mode REX_B is silently ignored.  */
 	  rex &= ~REX_B;
-	  if (vex.register_specifier > 0x7)
-	    {
-	      dp = &bad_opcode;
-	      return dp;
-	    }
 	}
 
       vex.length = (*codep & 0x4) ? 256 : 128;
@@ -12872,16 +12867,15 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	{
 	  if (vex.w)
 	    rex |= REX_W;
-	  vex.register_specifier = (~(*codep >> 3)) & 0xf;
 	}
       else
 	{
 	  /* For the 3-byte VEX prefix in 32-bit mode, the REX_B bit
 	     is ignored, other REX bits are 0 and the highest bit in
-	     VEX.vvvv is also ignored.  */
+	     VEX.vvvv is also ignored (but we mustn't clear it here).  */
 	  rex = 0;
-	  vex.register_specifier = (~(*codep >> 3)) & 0x7;
 	}
+      vex.register_specifier = (~(*codep >> 3)) & 0xf;
       vex.length = (*codep & 0x4) ? 256 : 128;
       switch ((*codep & 0x3))
 	{
@@ -12996,14 +12990,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	rex |= REX_W;
 
       vex.register_specifier = (~(*codep >> 3)) & 0xf;
-      if (address_mode != mode_64bit)
-	{
-	  /* In 16/32-bit mode silently ignore following bits.  */
-	  rex &= ~REX_B;
-	  vex.r = 1;
-	  vex.v = 1;
-	  vex.register_specifier &= 0x7;
-	}
 
       /* The U bit.  */
       if (!(*codep & 0x4))
@@ -13035,6 +13021,14 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       vex.v = *codep & 0x8;
       vex.mask_register_specifier = *codep & 0x7;
       vex.zeroing = *codep & 0x80;
+
+      if (address_mode != mode_64bit)
+	{
+	  /* In 16/32-bit mode silently ignore following bits.  */
+	  rex &= ~REX_B;
+	  vex.r = 1;
+	  vex.v = 1;
+	}
 
       need_vex = 1;
       need_vex_reg = 1;
@@ -17098,11 +17092,10 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     return;
 
   reg = vex.register_specifier;
-  if (vex.evex)
-    {
-      if (!vex.v)
-	reg += 16;
-    }
+  if (address_mode != mode_64bit)
+    reg &= 7;
+  else if (vex.evex && !vex.v)
+    reg += 16;
 
   if (bytemode == vex_scalar_mode)
     {
@@ -17287,8 +17280,8 @@ OP_EX_VexReg (int bytemode, int sizeflag, int reg)
 	  if (rex & REX_B)
 	    reg += 8;
 	}
-      else if (reg > 7 && address_mode != mode_64bit)
-	BadOp ();
+      if (address_mode != mode_64bit)
+	reg &= 7;
     }
 
   switch (vex.length)
@@ -17380,7 +17373,13 @@ OP_Vex_2src_1 (int bytemode, int sizeflag)
     }
 
   if (vex.w)
-    oappend (names_xmm[vex.register_specifier]);
+    {
+      unsigned int reg = vex.register_specifier;
+
+      if (address_mode != mode_64bit)
+	reg &= 7;
+      oappend (names_xmm[reg]);
+    }
   else
     OP_Vex_2src (bytemode, sizeflag);
 }
@@ -17391,7 +17390,13 @@ OP_Vex_2src_2 (int bytemode, int sizeflag)
   if (vex.w)
     OP_Vex_2src (bytemode, sizeflag);
   else
-    oappend (names_xmm[vex.register_specifier]);
+    {
+      unsigned int reg = vex.register_specifier;
+
+      if (address_mode != mode_64bit)
+	reg &= 7;
+      oappend (names_xmm[reg]);
+    }
 }
 
 static void
@@ -17434,8 +17439,8 @@ OP_REG_VexI4 (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     abort ();
 
   reg >>= 4;
-  if (reg > 7 && address_mode != mode_64bit)
-    BadOp ();
+  if (address_mode != mode_64bit)
+    reg &= 7;
 
   switch (vex.length)
     {
@@ -17775,13 +17780,16 @@ static void
 OP_LWP_E (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   const char **names;
+  unsigned int reg = vex.register_specifier;
 
   if (rex & REX_W)
     names = names64;
   else
     names = names32;
 
-  oappend (names[vex.register_specifier]);
+  if (address_mode != mode_64bit)
+    reg &= 7;
+  oappend (names[reg]);
 }
 
 static void

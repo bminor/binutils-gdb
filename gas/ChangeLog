@@ -1,5 +1,11 @@
 2017-11-16  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/noextreg.s: Add tests with register index
+	bit 3 set.
+	* testsuite/gas/i386/noextreg.d: Adjust expectations.
+
+2017-11-16  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (process_suffix): Ignore .no_qsuf outside of
 	64-bit mode.
 	* testsuite/gas/i386/ptwrite.s: Add test for memory operand
