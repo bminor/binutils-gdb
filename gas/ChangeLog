@@ -1,5 +1,10 @@
 2017-11-16  Tamar Christina  <tamar.christina@arm.com>
 
+	* doc/c-aarch64.texi (armv8.4-a, sha2, sha3, sm4): New.
+	(dotprod): Update default note.
+
+2017-11-16  Tamar Christina  <tamar.christina@arm.com>
+
 	* testsuite/gas/aarch64/armv8_4-a-illegal.d: New.
 	* testsuite/gas/aarch64/armv8_4-a-illegal.l: New.
 	* testsuite/gas/aarch64/armv8_4-a-illegal.s: New.
