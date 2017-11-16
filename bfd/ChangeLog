@@ -1,3 +1,8 @@
+2017-11-16  Nick Clifton  <nickc@redhat.com>
+
+	* merge.c (sec_merge_emit): Always create padding buffer.  Add
+	asserts to make sure that the buffer is long enough.
+
 2017-11-15  Alan Modra  <amodra@gmail.com>
 
 	* bfd.c (union _bfd_doprnt_args): Add "Bad".
