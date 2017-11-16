@@ -1136,8 +1136,11 @@ decimal_check_errors (decContext *ctx)
 /* Helper function to convert from libdecnumber's appropriate representation
    for computation to each size of decimal float.  */
 static void
-decimal_from_number (const decNumber *from, gdb_byte *to, int len)
+decimal_from_number (const decNumber *from,
+                     gdb_byte *to, int len, enum bfd_endian byte_order)
 {
+  gdb_byte dec[16];
+
   decContext set;
 
   set_decnumber_context (&set, len);
@@ -1145,32 +1148,41 @@ decimal_from_number (const decNumber *from, gdb_byte *to, int len)
   switch (len)
     {
       case 4:
-	decimal32FromNumber ((decimal32 *) to, from, &set);
+	decimal32FromNumber ((decimal32 *) dec, from, &set);
 	break;
       case 8:
-	decimal64FromNumber ((decimal64 *) to, from, &set);
+	decimal64FromNumber ((decimal64 *) dec, from, &set);
 	break;
       case 16:
-	decimal128FromNumber ((decimal128 *) to, from, &set);
+	decimal128FromNumber ((decimal128 *) dec, from, &set);
+	break;
+      default:
+	error (_("Unknown decimal floating point type."));
 	break;
     }
+
+  match_endianness (dec, len, byte_order, to);
 }
 
 /* Helper function to convert each size of decimal float to libdecnumber's
    appropriate representation for computation.  */
 static void
-decimal_to_number (const gdb_byte *from, int len, decNumber *to)
+decimal_to_number (const gdb_byte *from, int len, enum bfd_endian byte_order,
+                   decNumber *to)
 {
+  gdb_byte dec[16];
+  match_endianness (from, len, byte_order, dec);
+
   switch (len)
     {
       case 4:
-	decimal32ToNumber ((decimal32 *) from, to);
+	decimal32ToNumber ((decimal32 *) dec, to);
 	break;
       case 8:
-	decimal64ToNumber ((decimal64 *) from, to);
+	decimal64ToNumber ((decimal64 *) dec, to);
 	break;
       case 16:
-	decimal128ToNumber ((decimal128 *) from, to);
+	decimal128ToNumber ((decimal128 *) dec, to);
 	break;
       default:
 	error (_("Unknown decimal floating point type."));
@@ -1263,8 +1275,8 @@ static void
 decimal_from_longest (LONGEST from,
 		      gdb_byte *to, int len, enum bfd_endian byte_order)
 {
-  gdb_byte dec[16];
   decNumber number;
+
   if ((int32_t) from != from)
     /* libdecnumber can convert only 32-bit integers.  */
     error (_("Conversion of large integer to a "
@@ -1272,8 +1284,7 @@ decimal_from_longest (LONGEST from,
 
   decNumberFromInt32 (&number, (int32_t) from);
 
-  decimal_from_number (&number, dec, len);
-  match_endianness (dec, len, byte_order, to);
+  decimal_from_number (&number, to, len, byte_order);
 }
 
 /* Converts a ULONGEST to a decimal float of specified LEN bytes.  */
@@ -1281,7 +1292,6 @@ static void
 decimal_from_ulongest (ULONGEST from,
 		       gdb_byte *to, int len, enum bfd_endian byte_order)
 {
-  gdb_byte dec[16];
   decNumber number;
 
   if ((uint32_t) from != from)
@@ -1291,8 +1301,7 @@ decimal_from_ulongest (ULONGEST from,
 
   decNumberFromUInt32 (&number, (uint32_t) from);
 
-  decimal_from_number (&number, dec, len);
-  match_endianness (dec, len, byte_order, to);
+  decimal_from_number (&number, to, len, byte_order);
 }
 
 /* Converts a decimal float of LEN bytes to a LONGEST.  */
@@ -1317,13 +1326,9 @@ decimal_binop (enum exp_opcode op,
 {
   decContext set;
   decNumber number1, number2, number3;
-  gdb_byte dec1[16], dec2[16], dec3[16];
 
-  match_endianness (x, len_x, byte_order_x, dec1);
-  match_endianness (y, len_y, byte_order_y, dec2);
-
-  decimal_to_number (dec1, len_x, &number1);
-  decimal_to_number (dec2, len_y, &number2);
+  decimal_to_number (x, len_x, byte_order_x, &number1);
+  decimal_to_number (y, len_y, byte_order_y, &number2);
 
   set_decnumber_context (&set, len_result);
 
@@ -1352,9 +1357,7 @@ decimal_binop (enum exp_opcode op,
   /* Check for errors in the DFP operation.  */
   decimal_check_errors (&set);
 
-  decimal_from_number (&number3, dec3, len_result);
-
-  match_endianness (dec3, len_result, byte_order_result, result);
+  decimal_from_number (&number3, result, len_result, byte_order_result);
 }
 
 /* Returns true if X (which is LEN bytes wide) is the number zero.  */
@@ -1362,10 +1365,8 @@ static int
 decimal_is_zero (const gdb_byte *x, int len, enum bfd_endian byte_order)
 {
   decNumber number;
-  gdb_byte dec[16];
 
-  match_endianness (x, len, byte_order, dec);
-  decimal_to_number (dec, len, &number);
+  decimal_to_number (x, len, byte_order, &number);
 
   return decNumberIsZero (&number);
 }
@@ -1379,14 +1380,10 @@ decimal_compare (const gdb_byte *x, int len_x, enum bfd_endian byte_order_x,
 {
   decNumber number1, number2, result;
   decContext set;
-  gdb_byte dec1[16], dec2[16];
   int len_result;
 
-  match_endianness (x, len_x, byte_order_x, dec1);
-  match_endianness (y, len_y, byte_order_y, dec2);
-
-  decimal_to_number (dec1, len_x, &number1);
-  decimal_to_number (dec2, len_y, &number2);
+  decimal_to_number (x, len_x, byte_order_x, &number1);
+  decimal_to_number (y, len_y, byte_order_y, &number2);
 
   /* Perform the comparison in the larger of the two sizes.  */
   len_result = len_x > len_y ? len_x : len_y;
@@ -1415,14 +1412,9 @@ decimal_convert (const gdb_byte *from, int len_from,
 		 enum bfd_endian byte_order_to)
 {
   decNumber number;
-  gdb_byte dec[16];
 
-  match_endianness (from, len_from, byte_order_from, dec);
-
-  decimal_to_number (dec, len_from, &number);
-  decimal_from_number (&number, dec, len_to);
-
-  match_endianness (dec, len_to, byte_order_to, to);
+  decimal_to_number (from, len_from, byte_order_from, &number);
+  decimal_from_number (&number, to, len_to, byte_order_to);
 }
 
 

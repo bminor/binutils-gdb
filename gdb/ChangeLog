@@ -1,3 +1,15 @@
+2017-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* target-float.c (decimal_from_number): Add byte_order argument and
+	call match_endianness.  Error if unknown floating-point type.
+	(decimal_to_number): Add byte_order argument and call match_endianness.
+	(decimal_from_longest): Update call.  Do not call match_endianness.
+	(decimal_from_ulongest): Likewise.
+	(decimal_binop): Likewise.
+	(decimal_is_zero): Likewise.
+	(decimal_compare): Likewise.
+	(decimal_convert): Likewise.
+
 2017-11-16  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/python.c (gdbpy_rbreak): New function.
