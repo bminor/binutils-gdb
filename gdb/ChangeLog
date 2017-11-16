@@ -1,5 +1,14 @@
 2017-11-16  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (resume_cleanups): Delete.
+	(resume): No longer install a resume_cleanups cleanup nor call
+	QUIT.
+	(proceed): Pass the terminal to the inferior.
+	(keep_going_pass_signal): No longer install a resume_cleanups
+	cleanup.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
 	* inf-loop.c (inferior_event_handler): Don't swallow the exception
 	if the prompt is blocked.
 
