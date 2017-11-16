@@ -378,10 +378,7 @@ remote_close (void)
 {
   delete_file_handler (remote_desc);
 
-#ifndef USE_WIN32API
-  /* Remove SIGIO handler.  */
-  signal (SIGIO, SIG_IGN);
-#endif
+  disable_async_io ();
 
 #ifdef USE_WIN32API
   closesocket (remote_desc);

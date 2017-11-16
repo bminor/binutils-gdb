@@ -1,3 +1,8 @@
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* remote-utils.c (remote_close): Block SIGIO signals instead of
+	uninstalling the SIGIO handler.
+
 2017-11-16  Alan Hayward  <alan.hayward@arm.com>
 
 	* tdesc.c (tdesc_get_features_xml): Allow null osabi.
