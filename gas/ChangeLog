@@ -1,5 +1,12 @@
 2017-11-16  Tamar Christina  <tamar.christina@arm.com>
 
+	* config/tc-aarch64.c (fp16fml): New.
+	* doc/c-aarch64.texi (fp16fml): New.
+	* testsuite/gas/aarch64/armv8_2-a-crypto-fp16.d (fp16): Make fp16fml.
+	* testsuite/gas/aarch64/armv8_3-a-crypto-fp16.d (fp16): Make fp16fml.
+
+2017-11-16  Tamar Christina  <tamar.christina@arm.com>
+
 	* opcodes/aarch64-tbl.h
 	(aarch64_feature_crypto): Add ARCH64_FEATURE_SIMD and AARCH64_FEATURE_FP.
 	(aarch64_feature_crypto_v8_2, aarch64_feature_sm4): Likewise.

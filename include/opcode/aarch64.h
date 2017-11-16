@@ -61,6 +61,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_RCPC	0x20000000	/* RCPC instructions.  */
 #define AARCH64_FEATURE_COMPNUM	0x40000000	/* Complex # instructions.  */
 #define AARCH64_FEATURE_DOTPROD 0x080000000     /* Dot Product instructions.  */
+#define AARCH64_FEATURE_F16_FML	0x1000000000ULL	/* v8.2 FP16FML ins.  */
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -82,7 +83,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_COMPNUM)
 #define AARCH64_ARCH_V8_4	AARCH64_FEATURE (AARCH64_ARCH_V8_3,	\
 						 AARCH64_FEATURE_V8_4   \
-						 | AARCH64_FEATURE_DOTPROD)
+						 | AARCH64_FEATURE_DOTPROD \
+						 | AARCH64_FEATURE_F16_FML)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */

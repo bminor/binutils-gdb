@@ -1,4 +1,4 @@
-#as: -march=armv8.3-a+crypto+sm4+sha3+fp16
+#as: -march=armv8.3-a+crypto+sm4+sha3+fp16fml
 #source: armv8_2-a-crypto-fp16.s
 #objdump: -dr
 

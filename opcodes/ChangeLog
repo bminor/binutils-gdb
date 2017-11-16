@@ -1,5 +1,10 @@
 2017-11-16  Tamar Christina  <tamar.christina@arm.com>
 
+	* aarch64-tbl.h (aarch64_feature_fp_16_v8_2): Require AARCH64_FEATURE_F16_FML
+	and AARCH64_FEATURE_F16.
+
+2017-11-16  Tamar Christina  <tamar.christina@arm.com>
+
 	* aarch64-tbl.h (sha512h, sha512h2, sha512su0, sha512su1, eor3): New.
 	(rax1, xar, bcax, sm3ss1, sm3tt1a, sm3tt1b, sm3tt2a, sm3tt2b): New.
 	(sm3partw1, sm3partw2, sm4e, sm4ekey, fmlal, fmlsl): New.
