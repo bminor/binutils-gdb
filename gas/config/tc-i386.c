@@ -5565,7 +5565,7 @@ process_suffix (void)
 	    suffixes |= 1 << 3;
 	  if (!i.tm.opcode_modifier.no_ssuf)
 	    suffixes |= 1 << 4;
-	  if (!i.tm.opcode_modifier.no_qsuf)
+	  if (flag_code == CODE_64BIT && !i.tm.opcode_modifier.no_qsuf)
 	    suffixes |= 1 << 5;
 
 	  /* There are more than suffix matches.  */
