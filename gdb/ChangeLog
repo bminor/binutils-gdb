@@ -1,5 +1,10 @@
 2017-11-16  Pedro Alves  <palves@redhat.com>
 
+	* inf-loop.c (inferior_event_handler): Don't swallow the exception
+	if the prompt is blocked.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (insert_bp_location): Replace bp_err and
 	bp_err_message locals by a gdb_exception local.
 
