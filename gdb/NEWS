@@ -24,6 +24,10 @@
      gdb.new_thread are emitted.  See the manual for further
      description of these.
 
+  ** A new command, "rbreak" has been added to the Python API.  This
+     command allows the setting of a large number of breakpoints via a
+     regex pattern in Python.  See the manual for further details.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now able to start inferior processes with a

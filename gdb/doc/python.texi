@@ -243,6 +243,23 @@ were no breakpoints.  This peculiarity was subsequently fixed, and now
 @code{gdb.breakpoints} returns an empty sequence in this case.
 @end defun
 
+@defun gdb.rbreak (regex @r{[}, minsyms @r{[}, throttle, @r{[}, symtabs @r{]]]})
+Return a Python list holding a collection of newly set
+@code{gdb.Breakpoint} objects matching function names defined by the
+@var{regex} pattern.  If the @var{minsyms} keyword is @code{True}, all
+system functions (those not explicitly defined in the inferior) will
+also be included in the match.  The @var{throttle} keyword takes an
+integer that defines the maximum number of pattern matches for
+functions matched by the @var{regex} pattern.  If the number of
+matches exceeds the integer value of @var{throttle}, a
+@code{RuntimeError} will be raised and no breakpoints will be created.
+If @var{throttle} is not defined then there is no imposed limit on the
+maximum number of matches and breakpoints to be created.  The
+@var{symtabs} keyword takes a Python iterable that yields a collection
+of @code{gdb.Symtab} objects and will restrict the search to those
+functions only contained within the @code{gdb.Symtab} objects.
+@end defun
+
 @findex gdb.parameter
 @defun gdb.parameter (parameter)
 Return the value of a @value{GDBN} @var{parameter} given by its name,

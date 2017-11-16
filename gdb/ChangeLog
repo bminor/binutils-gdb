@@ -1,3 +1,8 @@
+2017-11-16  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/python.c (gdbpy_rbreak): New function.
+	* NEWS: Document Python rbreak feature.
+
 2017-11-16  Yao Qi  <yao.qi@linaro.org>
 
 	* features/tic6x-c62x.xml: Remove.
