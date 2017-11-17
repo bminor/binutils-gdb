@@ -124,7 +124,6 @@
 #include "elf/metag.h"
 #include "elf/microblaze.h"
 #include "elf/mips.h"
-#include "elf/riscv.h"
 #include "elf/mmix.h"
 #include "elf/mn10200.h"
 #include "elf/mn10300.h"
@@ -138,6 +137,7 @@
 #include "elf/ppc.h"
 #include "elf/ppc64.h"
 #include "elf/pru.h"
+#include "elf/riscv.h"
 #include "elf/rl78.h"
 #include "elf/rx.h"
 #include "elf/s390.h"
@@ -12585,6 +12585,134 @@ is_16bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     }
 }
 
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 32-bit inplace add RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_32bit_inplace_add_reloc (Filedata * filedata, unsigned int reloc_type)
+{
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
+  switch (filedata->file_header.e_machine)
+    {
+    case EM_RISCV:
+      return reloc_type == 35; /* R_RISCV_ADD32.  */
+    default:
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 32-bit inplace sub RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_32bit_inplace_sub_reloc (Filedata * filedata, unsigned int reloc_type)
+{
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
+  switch (filedata->file_header.e_machine)
+    {
+    case EM_RISCV:
+      return reloc_type == 39; /* R_RISCV_SUB32.  */
+    default:
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 64-bit inplace add RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_64bit_inplace_add_reloc (Filedata * filedata, unsigned int reloc_type)
+{
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
+  switch (filedata->file_header.e_machine)
+    {
+    case EM_RISCV:
+      return reloc_type == 36; /* R_RISCV_ADD64.  */
+    default:
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 64-bit inplace sub RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_64bit_inplace_sub_reloc (Filedata * filedata, unsigned int reloc_type)
+{
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
+  switch (filedata->file_header.e_machine)
+    {
+    case EM_RISCV:
+      return reloc_type == 40; /* R_RISCV_SUB64.  */
+    default:
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 16-bit inplace add RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_16bit_inplace_add_reloc (Filedata * filedata, unsigned int reloc_type)
+{
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
+  switch (filedata->file_header.e_machine)
+    {
+    case EM_RISCV:
+      return reloc_type == 34; /* R_RISCV_ADD16.  */
+    default:
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 16-bit inplace sub RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_16bit_inplace_sub_reloc (Filedata * filedata, unsigned int reloc_type)
+{
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
+  switch (filedata->file_header.e_machine)
+    {
+    case EM_RISCV:
+      return reloc_type == 38; /* R_RISCV_SUB16.  */
+    default:
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 8-bit inplace add RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_8bit_inplace_add_reloc (Filedata * filedata, unsigned int reloc_type)
+{
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
+  switch (filedata->file_header.e_machine)
+    {
+    case EM_RISCV:
+      return reloc_type == 33; /* R_RISCV_ADD8.  */
+    default:
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 8-bit inplace sub RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_8bit_inplace_sub_reloc (Filedata * filedata, unsigned int reloc_type)
+{
+  /* Please keep this table alpha-sorted for ease of visual lookup.  */
+  switch (filedata->file_header.e_machine)
+    {
+    case EM_RISCV:
+      return reloc_type == 37; /* R_RISCV_SUB8.  */
+    default:
+      return FALSE;
+    }
+}
+
 /* Returns TRUE iff RELOC_TYPE is a NONE relocation used for discarded
    relocation entries (possibly formerly used for SHT_GROUP sections).  */
 
@@ -12767,6 +12895,8 @@ apply_relocations (Filedata *                 filedata,
 	  bfd_vma         addend;
 	  unsigned int    reloc_type;
 	  unsigned int    reloc_size;
+	  bfd_boolean     reloc_inplace = FALSE;
+	  bfd_boolean     reloc_subtract = FALSE;
 	  unsigned char * rloc;
 	  unsigned long   sym_index;
 
@@ -12786,6 +12916,34 @@ apply_relocations (Filedata *                 filedata,
 	    reloc_size = 3;
 	  else if (is_16bit_abs_reloc (filedata, reloc_type))
 	    reloc_size = 2;
+	  else if ((reloc_subtract = is_32bit_inplace_sub_reloc (filedata,
+								 reloc_type))
+		   || is_32bit_inplace_add_reloc (filedata, reloc_type))
+	    {
+	      reloc_size = 4;
+	      reloc_inplace = TRUE;
+	    }
+	  else if ((reloc_subtract = is_64bit_inplace_sub_reloc (filedata,
+								 reloc_type))
+		   || is_64bit_inplace_add_reloc (filedata, reloc_type))
+	    {
+	      reloc_size = 8;
+	      reloc_inplace = TRUE;
+	    }
+	  else if ((reloc_subtract = is_16bit_inplace_sub_reloc (filedata,
+								 reloc_type))
+		   || is_16bit_inplace_add_reloc (filedata, reloc_type))
+	    {
+	      reloc_size = 2;
+	      reloc_inplace = TRUE;
+	    }
+	  else if ((reloc_subtract = is_8bit_inplace_sub_reloc (filedata,
+								reloc_type))
+		   || is_8bit_inplace_add_reloc (filedata, reloc_type))
+	    {
+	      reloc_size = 1;
+	      reloc_inplace = TRUE;
+	    }
 	  else
 	    {
 	      static unsigned int prev_reloc = 0;
@@ -12856,7 +13014,8 @@ apply_relocations (Filedata *                 filedata,
 		  && reloc_type == 1)
 	      || ((filedata->file_header.e_machine == EM_D30V
 		   || filedata->file_header.e_machine == EM_CYGNUS_D30V)
-		  && reloc_type == 12))
+		  && reloc_type == 12)
+	      || reloc_inplace)
 	    addend += byte_get (rloc, reloc_size);
 
 	  if (is_32bit_pcrel_reloc (filedata, reloc_type)
@@ -12868,6 +13027,8 @@ apply_relocations (Filedata *                 filedata,
 	      byte_put (rloc, (addend + sym->st_value) - rp->r_offset,
 		        reloc_size);
 	    }
+	  else if (reloc_subtract)
+	    byte_put (rloc, addend - sym->st_value, reloc_size);
 	  else
 	    byte_put (rloc, addend + sym->st_value, reloc_size);
 	}

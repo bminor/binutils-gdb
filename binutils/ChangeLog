@@ -1,3 +1,14 @@
+2017-11-17  Jim Wilson  <jimw@sifive.com>
+
+	* readelf.c (elf/riscv.h): Alphabetize include.
+	(is_32bit_inplace_add_reloc, is_32bit_inplace_sub_reloc)
+	(is_64bit_inplace_add_reloc, is_64bit_inplace_sub_reloc)
+	(is_16bit_inplace_add_reloc, is_16bit_inplace_sub_reloc)
+	(is_8bit_inplace_add_reloc, is_8bit_inplace_sub_reloc): New.
+	(apply_relocations): New locals reloc_inplace and reloc_subtract.
+	Call the new functions and set the new locals.  Call byte_get if
+	reloc_inplace.  Subtract sym->st_value if reloc_subtract.
+
 2017-11-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 22449
