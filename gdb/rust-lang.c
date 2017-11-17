@@ -421,7 +421,7 @@ rust_get_trait_object_pointer (struct value *value)
 
   CORE_ADDR vtable = value_as_address (value_field (value, vtable_field));
   struct symbol *symbol = find_symbol_at_address (vtable);
-  if (symbol == NULL || !symbol->is_rust_vtable)
+  if (symbol == NULL || symbol->subclass != SYMBOL_RUST_VTABLE)
     return NULL;
 
   struct rust_vtable_symbol *vtable_sym

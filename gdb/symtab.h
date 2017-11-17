@@ -1009,6 +1009,21 @@ struct symbol_impl
   const struct symbol_register_ops *ops_register;
 };
 
+/* struct symbol has some subclasses.  This enum is used to
+   differentiate between them.  */
+
+enum symbol_subclass_kind
+{
+  /* Plain struct symbol.  */
+  SYMBOL_NONE,
+
+  /* struct template_symbol.  */
+  SYMBOL_TEMPLATE,
+
+  /* struct rust_vtable_symbol.  */
+  SYMBOL_RUST_VTABLE
+};
+
 /* This structure is space critical.  See space comments at the top.  */
 
 struct symbol
@@ -1058,14 +1073,9 @@ struct symbol
   /* Whether this is an inlined function (class LOC_BLOCK only).  */
   unsigned is_inlined : 1;
 
-  /* True if this is a C++ function symbol with template arguments.
-     In this case the symbol is really a "struct template_symbol".  */
-  unsigned is_cplus_template_function : 1;
+  /* The concrete type of this symbol.  */
 
-  /* True if this is a Rust virtual table.  In this case, the symbol
-     can be downcast to "struct rust_vtable_symbol".  */
-
-  unsigned is_rust_vtable : 1;
+  ENUM_BITFIELD (symbol_subclass_kind) subclass : 2;
 
   /* Line number of this symbol's definition, except for inlined
      functions.  For an inlined function (class LOC_BLOCK and
@@ -1127,7 +1137,7 @@ extern const struct block_symbol null_block_symbol;
 #define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
 #define SYMBOL_INLINED(symbol)		(symbol)->is_inlined
 #define SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION(symbol) \
-  (symbol)->is_cplus_template_function
+  (((symbol)->subclass) == SYMBOL_TEMPLATE)
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_COMPUTED_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_computed)

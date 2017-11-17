@@ -12263,7 +12263,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  || child_die->tag == DW_TAG_template_value_param)
 	{
 	  templ_func = allocate_template_symbol (objfile);
-	  templ_func->is_cplus_template_function = 1;
+	  templ_func->subclass = SYMBOL_TEMPLATE;
 	  break;
 	}
     }
@@ -12821,7 +12821,7 @@ read_variable (struct die_info *die, struct dwarf2_cu *cu)
 				    struct rust_vtable_symbol);
 	  initialize_objfile_symbol (storage);
 	  storage->concrete_type = containing_type;
-	  storage->is_rust_vtable = 1;
+	  storage->subclass = SYMBOL_RUST_VTABLE;
 	}
     }
 

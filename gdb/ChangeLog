@@ -1,5 +1,16 @@
 2017-11-17  Tom Tromey  <tom@tromey.com>
 
+	* symtab.h (enum symbol_subclass_kind): New.
+	(struct symbol) <is_cplus_template_function, is_rust_vtable>:
+	Remove.
+	<subclass>: New member.
+	(SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION): Update.
+	* rust-lang.c (rust_get_trait_object_pointer): Update.
+	* dwarf2read.c (read_func_scope): Update.
+	(read_variable): Update.
+
+2017-11-17  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (read_func_scope): Update.
 	* symtab.h (struct template_symbol): Derive from symbol.
 	<base>: Remove.
