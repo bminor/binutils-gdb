@@ -1,3 +1,8 @@
+2017-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Pass
+	"%F%P:", instead of "%F:", to linker callback in case of error.
+
 2017-11-16  Nick Clifton  <nickc@redhat.com>
 
 	PR 22421
