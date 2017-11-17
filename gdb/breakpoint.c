@@ -6031,12 +6031,10 @@ bptype_string (enum bptype type)
 static void
 output_thread_groups (struct ui_out *uiout,
 		      const char *field_name,
-		      VEC(int) *inf_num,
+		      const std::vector<int> &inf_nums,
 		      int mi_only)
 {
   int is_mi = uiout->is_mi_like_p ();
-  int inf;
-  int i;
 
   /* For backward compatibility, don't display inferiors in CLI unless
      there are several.  Always display them for MI. */
@@ -6045,13 +6043,13 @@ output_thread_groups (struct ui_out *uiout,
 
   ui_out_emit_list list_emitter (uiout, field_name);
 
-  for (i = 0; VEC_iterate (int, inf_num, i, inf); ++i)
+  for (size_t i = 0; i < inf_nums.size (); i++)
     {
       if (is_mi)
 	{
 	  char mi_group[10];
 
-	  xsnprintf (mi_group, sizeof (mi_group), "i%d", inf);
+	  xsnprintf (mi_group, sizeof (mi_group), "i%d", inf_nums[i]);
 	  uiout->field_string (NULL, mi_group);
 	}
       else
@@ -6061,7 +6059,7 @@ output_thread_groups (struct ui_out *uiout,
 	  else
 	    uiout->text (", ");
 	
-	  uiout->text (plongest (inf));
+	  uiout->text (plongest (inf_nums[i]));
 	}
     }
 }
@@ -6220,13 +6218,13 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (loc != NULL && !header_of_multiple)
     {
       struct inferior *inf;
-      VEC(int) *inf_num = NULL;
+      std::vector<int> inf_nums;
       int mi_only = 1;
 
       ALL_INFERIORS (inf)
 	{
 	  if (inf->pspace == loc->pspace)
-	    VEC_safe_push (int, inf_num, inf->num);
+	    inf_nums.push_back (inf->num);
 	}
 
         /* For backward compatibility, don't display inferiors in CLI unless
@@ -6239,8 +6237,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 		   moribund_locations and thus having NULL OWNER.  */
 		&& loc->owner->type != bp_catchpoint))
 	mi_only = 0;
-      output_thread_groups (uiout, "thread-groups", inf_num, mi_only);
-      VEC_free (int, inf_num);
+      output_thread_groups (uiout, "thread-groups", inf_nums, mi_only);
     }
 
   if (!part_of_multiple)

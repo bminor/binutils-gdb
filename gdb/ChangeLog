@@ -1,3 +1,8 @@
+2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c (output_thread_groups): Take an std::vector.
+	(print_one_breakpoint_location): Adjust.
+
 2017-11-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (resolve_subexp): Add handling of OP_VAR_MSYM_VALUE.
