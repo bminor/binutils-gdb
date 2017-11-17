@@ -1,5 +1,9 @@
 2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* common/gdb_vecs.h (DEF_VEC_I (int)): Remove.
+
+2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* common/filestuff.c: Include <algorithm>.
 	(open_fds): Change type to std::vector<int>.
 	(do_mark_open_fd): Adjust.
