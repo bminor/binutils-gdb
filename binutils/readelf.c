@@ -18715,6 +18715,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
           archive_file_offset = arch.next_arhdr_offset;
           arch.next_arhdr_offset += archive_file_size;
 
+	  filedata->file_name = qualified_name;
           if (! process_object (filedata))
 	    ret = FALSE;
         }

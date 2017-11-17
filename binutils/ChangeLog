@@ -1,3 +1,8 @@
+2017-11-17  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_archive): Include member name in the
+	file_name of the filedata structure.
+
 2017-11-15  Alan Modra  <amodra@gmail.com>
 
 	PR 22426
