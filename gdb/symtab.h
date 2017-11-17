@@ -1167,16 +1167,11 @@ extern struct symtab *symbol_symtab (const struct symbol *symbol);
 extern void symbol_set_symtab (struct symbol *symbol, struct symtab *symtab);
 
 /* An instance of this type is used to represent a C++ template
-   function.  It includes a "struct symbol" as a kind of base class;
-   users downcast to "struct template_symbol *" when needed.  A symbol
-   is really of this type iff SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION is
-   true.  */
+   function.  A symbol is really of this type iff
+   SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION is true.  */
 
-struct template_symbol
+struct template_symbol : public symbol
 {
-  /* The base class.  */
-  struct symbol base;
-
   /* The number of template arguments.  */
   int n_template_arguments;
 

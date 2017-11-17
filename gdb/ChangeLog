@@ -1,5 +1,11 @@
 2017-11-17  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (read_func_scope): Update.
+	* symtab.h (struct template_symbol): Derive from symbol.
+	<base>: Remove.
+
+2017-11-17  Tom Tromey  <tom@tromey.com>
+
 	* symtab.h (struct symbol) <is_rust_vtable>: New member.
 	(struct rust_vtable_symbol): New.
 	(find_symbol_at_address): Declare.

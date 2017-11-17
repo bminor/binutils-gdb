@@ -12263,7 +12263,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  || child_die->tag == DW_TAG_template_value_param)
 	{
 	  templ_func = allocate_template_symbol (objfile);
-	  templ_func->base.is_cplus_template_function = 1;
+	  templ_func->is_cplus_template_function = 1;
 	  break;
 	}
     }
