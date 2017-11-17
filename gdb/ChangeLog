@@ -1,5 +1,13 @@
 2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* common/filestuff.c: Include <algorithm>.
+	(open_fds): Change type to std::vector<int>.
+	(do_mark_open_fd): Adjust.
+	(unmark_fd_no_cloexec): Adjust.
+	(do_close): Adjust.
+
+2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.c (output_thread_groups): Take an std::vector.
 	(print_one_breakpoint_location): Adjust.
 
