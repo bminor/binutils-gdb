@@ -10045,7 +10045,7 @@ add_component_interval (LONGEST low, LONGEST high,
    is different.  */
 
 static struct value *
-ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
+ada_value_cast (struct type *type, struct value *arg2)
 {
   if (type == ada_check_typedef (value_type (arg2)))
     return arg2;
@@ -10351,7 +10351,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
          Similarly, we need to perform the conversion from OP_LONG
          ourselves.  */
       if ((op == OP_FLOAT || op == OP_LONG) && expect_type != NULL)
-        arg1 = ada_value_cast (expect_type, arg1, noside);
+        arg1 = ada_value_cast (expect_type, arg1);
 
       return arg1;
 
@@ -10374,7 +10374,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg1 = evaluate_subexp (type, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
-      arg1 = ada_value_cast (type, arg1, noside);
+      arg1 = ada_value_cast (type, arg1);
       return arg1;
 
     case UNOP_QUAL:

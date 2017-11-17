@@ -1,3 +1,8 @@
+2017-11-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_cast): Remove parameter "noside".
+	Update all callers.
+
 2017-11-16  Pedro Alves  <palves@redhat.com>
 
 	* python/py-unwind.c (pyuw_sniffer): Translate
