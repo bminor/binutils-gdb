@@ -683,7 +683,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
   else if (event == PTRACE_EVENT_EXEC && report_exec_events)
     {
       struct process_info *proc;
-      VEC (int) *syscalls_to_catch;
+      std::vector<int> syscalls_to_catch;
       ptid_t event_ptid;
       pid_t event_pid;
 
@@ -699,8 +699,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 
       /* Save the syscall list from the execing process.  */
       proc = get_thread_process (event_thr);
-      syscalls_to_catch = proc->syscalls_to_catch;
-      proc->syscalls_to_catch = NULL;
+      syscalls_to_catch = std::move (proc->syscalls_to_catch);
 
       /* Delete the execing process and all its threads.  */
       linux_mourn (proc);
@@ -731,7 +730,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
       /* Restore the list to catch.  Don't rely on the client, which is free
 	 to avoid sending a new list when the architecture doesn't change.
 	 Also, for ANY_SYSCALL, the architecture doesn't really matter.  */
-      proc->syscalls_to_catch = syscalls_to_catch;
+      proc->syscalls_to_catch = std::move (syscalls_to_catch);
 
       /* Report the event.  */
       *orig_event_lwp = event_lwp;
@@ -3182,7 +3181,7 @@ gdb_catching_syscalls_p (struct lwp_info *event_child)
   struct thread_info *thread = get_lwp_thread (event_child);
   struct process_info *proc = get_thread_process (thread);
 
-  return !VEC_empty (int, proc->syscalls_to_catch);
+  return !proc->syscalls_to_catch.empty ();
 }
 
 /* Returns 1 if GDB is interested in the event_child syscall.
@@ -3191,21 +3190,19 @@ gdb_catching_syscalls_p (struct lwp_info *event_child)
 static int
 gdb_catch_this_syscall_p (struct lwp_info *event_child)
 {
-  int i, iter;
   int sysno;
   struct thread_info *thread = get_lwp_thread (event_child);
   struct process_info *proc = get_thread_process (thread);
 
-  if (VEC_empty (int, proc->syscalls_to_catch))
+  if (proc->syscalls_to_catch.empty ())
     return 0;
 
-  if (VEC_index (int, proc->syscalls_to_catch, 0) == ANY_SYSCALL)
+  if (proc->syscalls_to_catch[0] == ANY_SYSCALL)
     return 1;
 
   get_syscall_trapinfo (event_child, &sysno);
-  for (i = 0;
-       VEC_iterate (int, proc->syscalls_to_catch, i, iter);
-       i++)
+
+  for (int iter : proc->syscalls_to_catch)
     if (iter == sysno)
       return 1;
 

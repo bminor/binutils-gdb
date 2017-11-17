@@ -623,7 +623,7 @@ handle_general_set (char *own_buf)
 	}
 
       process = current_process ();
-      VEC_truncate (int, process->syscalls_to_catch, 0);
+      process->syscalls_to_catch.clear ();
 
       if (enabled)
 	{
@@ -634,11 +634,11 @@ handle_general_set (char *own_buf)
 	      while (*p != '\0')
 		{
 		  p = decode_address_to_semicolon (&sysno, p);
-		  VEC_safe_push (int, process->syscalls_to_catch, (int) sysno);
+		  process->syscalls_to_catch.push_back (sysno);
 		}
 	    }
 	  else
-	    VEC_safe_push (int, process->syscalls_to_catch, ANY_SYSCALL);
+	    process->syscalls_to_catch.push_back (ANY_SYSCALL);
 	}
 
       write_ok (own_buf);

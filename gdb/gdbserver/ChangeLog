@@ -1,3 +1,14 @@
+2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inferiors.h (struct process_info): Add constructor, initialize
+	fields..
+	<syscalls_to_catch>: Change type to std::vector<int>.
+	* inferiors.c (add_process): Allocate process_info with new.
+	(remove_process): Free process_info with delete.
+	* linux-low.c (handle_extended_wait): Adjust.
+	(gdb_catching_syscalls_p, gdb_catch_this_syscall_p): Adjust.
+	* server.c (handle_general_set): Adjust.
+
 2017-11-16  Pedro Alves  <palves@redhat.com>
 
 	* remote-utils.c (remote_close): Block SIGIO signals instead of
