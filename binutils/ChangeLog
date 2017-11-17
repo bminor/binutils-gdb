@@ -1,5 +1,10 @@
 2017-11-17  Nick Clifton  <nickc@redhat.com>
 
+	PR 22449
+	* ar.c (write_archive): Free the temporary file name.
+
+2017-11-17  Nick Clifton  <nickc@redhat.com>
+
 	* readelf.c (process_archive): Include member name in the
 	file_name of the filedata structure.
 
