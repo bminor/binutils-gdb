@@ -799,10 +799,10 @@ compare_symbols (const void *ap, const void *bp)
       bfd_vma asz, bsz;
 
       asz = 0;
-      if ((a->flags & BSF_SYNTHETIC) == 0)
+      if ((a->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
 	asz = ((elf_symbol_type *) a)->internal_elf_sym.st_size;
       bsz = 0;
-      if ((b->flags & BSF_SYNTHETIC) == 0)
+      if ((b->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
 	bsz = ((elf_symbol_type *) b)->internal_elf_sym.st_size;
       if (asz != bsz)
 	return asz > bsz ? -1 : 1;
@@ -888,7 +888,7 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
 	name = alloc;
     }
 
-  if ((sym->flags & BSF_SYNTHETIC) == 0)
+  if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
     version_string = bfd_get_symbol_version_string (abfd, sym, &hidden);
 
   if (bfd_is_und_section (bfd_get_section (sym)))

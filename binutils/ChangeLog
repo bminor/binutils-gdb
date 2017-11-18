@@ -1,3 +1,15 @@
+2017-11-18  Alan Modra  <amodra@gmail.com>
+
+	PR 22443
+	* nm.c (sort_symbols_by_size): Don't attempt to access
+	section symbol internal_elf_sym.
+	(print_symbol): Likewise.  Don't call bfd_get_symbol_version_string
+	for section symbols.
+	* objdump.c (compare_symbols): Don't attempt to access
+	section symbol internal_elf_sym.
+	(objdump_print_symname): Don't call bfd_get_symbol_version_string
+	for section symbols.
+
 2017-11-17  Jim Wilson  <jimw@sifive.com>
 
 	* readelf.c (elf/riscv.h): Alphabetize include.
