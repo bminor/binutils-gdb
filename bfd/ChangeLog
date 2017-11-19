@@ -1,3 +1,8 @@
+2017-11-18  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (_bfd_riscv_relax_align): Add space between alignment
+	and to in error message.
+
 2017-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Pass

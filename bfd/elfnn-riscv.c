@@ -3077,7 +3077,7 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
   if (rel->r_addend < nop_bytes)
     {
       (*_bfd_error_handler)
-	(_("%B(%A+0x%lx): %d bytes required for alignment"
+	(_("%B(%A+0x%lx): %d bytes required for alignment "
 	   "to %d-byte boundary, but only %d present"),
 	   abfd, sym_sec, rel->r_offset, nop_bytes, alignment, rel->r_addend);
       bfd_set_error (bfd_error_bad_value);
