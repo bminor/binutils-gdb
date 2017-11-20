@@ -3,6 +3,9 @@
 
 *** Changes since GDB 8.0
 
+* The 'ptype' command now accepts a '/o' flag, which prints the
+  offsets and sizes of fields in a struct, like the pahole(1) tool.
+
 * New "--readnever" command line option instructs GDB to not read each
   symbol file's symbolic debug information.  This makes startup faster
   but at the expense of not being able to perform symbolic debugging.

@@ -1,4 +1,39 @@
 2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR cli/16224
+	* NEWS (Changes since GDB 8.0): Mention new '/o' flag.
+	* c-typeprint.c (OFFSET_SPC_LEN): New define.
+	(c_type_print_varspec_prefix): New argument 'struct
+	print_offset_data *'.
+	(c_type_print_base_1): New function and prototype.
+	(c_print_type_1): New function, with code from 'c_print_type'.
+	(c_print_type): Use 'c_print_type_1'.
+	(c_type_print_varspec_prefix): New argument 'struct
+	print_offset_data *'.  Use it.  Call 'c_type_print_base_1'
+	instead of 'c_print_type_base'.
+	(print_spaces_filtered_with_print_options): New function.
+	(output_access_specifier): Take new argument FLAGS.  Modify
+	function to call 'print_spaces_filtered_with_print_options'.
+	(c_print_type_vtable_offset_marker): New function.
+	(c_print_type_union_field_offset): New function.
+	(c_print_type_struct_field_offset): New function.
+	(c_print_type_no_offsets): New function.
+	(c_type_print_base_struct_union): New argument 'struct
+	print_offset_data *'.  Print offsets and sizes for
+	struct/union/class fields.
+	* typeprint.c (const struct type_print_options
+	type_print_raw_options): Initialize 'print_offsets'.
+	(static struct type_print_options default_ptype_flags):
+	Likewise.
+	(struct print_offset_data print_offset_default_data): New
+	variable.
+	(whatis_exp): Handle '/o' option.
+	(_initialize_typeprint): Add '/o' flag to ptype's help.
+	* typeprint.h (struct print_offset_data): New struct.
+	(struct type_print_options) <print_offsets>: New field.
+
+2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* c-typeprint.c (need_access_label_p): New function.
 	(c_type_print_base_struct_union): New function.

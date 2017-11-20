@@ -1,3 +1,8 @@
+2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/16224
+	* gdb.texinfo (ptype): Add documentation for new flag '/o'.
+
 2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python.texi (Manipulating breakpoints using Python): Document

@@ -24,6 +24,20 @@ struct ui_file;
 struct typedef_hash_table;
 struct ext_lang_type_printers;
 
+struct print_offset_data
+{
+  /* The offset to be applied to bitpos when PRINT_OFFSETS is true.
+     This is needed for when we are printing nested structs and want
+     to make sure that the printed offset for each field carries over
+     the offset of the outter struct.  */
+  unsigned int offset_bitpos = 0;
+
+  /* END_BITPOS is the one-past-the-end bit position of the previous
+     field (where we expect the current field to be if there is no
+     hole).  */
+  unsigned int end_bitpos = 0;
+};
+
 struct type_print_options
 {
   /* True means that no special printing flags should apply.  */
@@ -34,6 +48,9 @@ struct type_print_options
 
   /* True means print typedefs in a class.  */
   unsigned int print_typedefs : 1;
+
+  /* True means to print offsets, a la 'pahole'.  */
+  unsigned int print_offsets : 1;
 
   /* The number of nested type definitions to print.  -1 == all.  */
   int print_nested_type_limit;

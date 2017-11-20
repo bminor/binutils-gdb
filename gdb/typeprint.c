@@ -42,6 +42,7 @@ const struct type_print_options type_print_raw_options =
   1,				/* raw */
   1,				/* print_methods */
   1,				/* print_typedefs */
+  0,				/* print_offsets */
   0,				/* print_nested_type_limit  */
   NULL,				/* local_typedefs */
   NULL,				/* global_table */
@@ -55,6 +56,7 @@ static struct type_print_options default_ptype_flags =
   0,				/* raw */
   1,				/* print_methods */
   1,				/* print_typedefs */
+  0,				/* print_offsets */
   0,				/* print_nested_type_limit  */
   NULL,				/* local_typedefs */
   NULL,				/* global_table */
@@ -440,6 +442,20 @@ whatis_exp (const char *exp, int show)
 		case 'T':
 		  flags.print_typedefs = 1;
 		  break;
+		case 'o':
+		  {
+		    /* Filter out languages which don't implement the
+		       feature.  */
+		    if (show > 0 &&
+			(current_language->la_language == language_c
+			 || current_language->la_language == language_cplus))
+		      {
+			flags.print_offsets = 1;
+			flags.print_typedefs = 0;
+			flags.print_methods = 0;
+		      }
+		    break;
+		  }
 		default:
 		  error (_("unrecognized flag '%c'"), *exp);
 		}
@@ -498,6 +514,11 @@ whatis_exp (const char *exp, int show)
       else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	real_type = value_rtti_type (val, &full, &top, &using_enc);
     }
+
+  if (flags.print_offsets
+      && (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (type) == TYPE_CODE_UNION))
+    fprintf_filtered (gdb_stdout, "/* offset    |  size */  ");
 
   printf_filtered ("type = ");
 
@@ -759,7 +780,8 @@ Available FLAGS are:\n\
   /m    do not print methods defined in a class\n\
   /M    print methods defined in a class\n\
   /t    do not print typedefs defined in a class\n\
-  /T    print typedefs defined in a class"));
+  /T    print typedefs defined in a class\n\
+  /o    print offsets and sizes of fields in a struct (like pahole)\n"));
   set_cmd_completer (c, expression_completer);
 
   c = add_com ("whatis", class_vars, whatis_command,
