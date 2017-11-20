@@ -460,35 +460,22 @@ arm_linux_hw_point_initialize (enum raw_bkpt_type raw_type, CORE_ADDR addr,
 /* Callback to mark a watch-/breakpoint to be updated in all threads of
    the current process.  */
 
-struct update_registers_data
-{
-  int watch;
-  int i;
-};
-
-static int
-update_registers_callback (thread_info *thread, void *arg)
+static void
+update_registers_callback (thread_info *thread, int watch, int i)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
-  struct update_registers_data *data = (struct update_registers_data *) arg;
 
-  /* Only update the threads of the current process.  */
-  if (pid_of (thread) == pid_of (current_thread))
-    {
-      /* The actual update is done later just before resuming the lwp,
-         we just mark that the registers need updating.  */
-      if (data->watch)
-	lwp->arch_private->wpts_changed[data->i] = 1;
-      else
-	lwp->arch_private->bpts_changed[data->i] = 1;
+  /* The actual update is done later just before resuming the lwp,
+     we just mark that the registers need updating.  */
+  if (watch)
+    lwp->arch_private->wpts_changed[i] = 1;
+  else
+    lwp->arch_private->bpts_changed[i] = 1;
 
-      /* If the lwp isn't stopped, force it to momentarily pause, so
-         we can update its breakpoint registers.  */
-      if (!lwp->stopped)
-        linux_stop_lwp (lwp);
-    }
-
-  return 0;
+  /* If the lwp isn't stopped, force it to momentarily pause, so
+     we can update its breakpoint registers.  */
+  if (!lwp->stopped)
+    linux_stop_lwp (lwp);
 }
 
 static int
@@ -538,9 +525,14 @@ arm_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   for (i = 0; i < count; i++)
     if (!arm_hwbp_control_is_enabled (pts[i].control))
       {
-	struct update_registers_data data = { watch, i };
 	pts[i] = p;
-	find_inferior (&all_threads, update_registers_callback, &data);
+
+	/* Only update the threads of the current process.  */
+	for_each_thread (current_thread->id.pid (), [&] (thread_info *thread)
+	  {
+	    update_registers_callback (thread, watch, i);
+	  });
+
 	return 0;
       }
 
@@ -578,9 +570,14 @@ arm_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
   for (i = 0; i < count; i++)
     if (arm_linux_hw_breakpoint_equal (&p, pts + i))
       {
-	struct update_registers_data data = { watch, i };
 	pts[i].control = arm_hwbp_control_disable (pts[i].control);
-	find_inferior (&all_threads, update_registers_callback, &data);
+
+	/* Only update the threads of the current process.  */
+	for_each_thread (current_thread->id.pid (), [&] (thread_info *thread)
+	  {
+	    update_registers_callback (thread, watch, i);
+	  });
+
 	return 0;
       }
 

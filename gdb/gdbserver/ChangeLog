@@ -1,5 +1,12 @@
 2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-arm-low.c (struct update_registers_data): Remove.
+	(update_registers_callback): Return void, take arguments
+	directly, don't check thread's pid.
+	(arm_insert_point, arm_remove_point): Use for_each_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* win32-low.c (continue_one_thread): Return void, take argument
 	directly.
 	(child_continue): Use for_each_thread.
