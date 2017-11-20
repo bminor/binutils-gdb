@@ -3,9 +3,9 @@
 	Apply from master:
 	2017-11-19  Ian Lance Taylor  <iant@google.com>
 		    Cary Coutant  <ccoutant@gmail.com>
-	* gold/dwarf_reader.h (class Dwarf_info_reader): Add ref_addr_size
+	* dwarf_reader.h (class Dwarf_info_reader): Add ref_addr_size
 	method.
-	* gold/dwarf_reader.cc (Dwarf_die::read_attributes): Use ref_addr_size
+	* dwarf_reader.cc (Dwarf_die::read_attributes): Use ref_addr_size
 	for DW_FORM_ref_addr_size.
 	(Dwarf_die::skip_attributes): Likewise.
 
