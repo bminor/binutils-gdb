@@ -4569,33 +4569,22 @@ linux_resume_one_lwp (struct lwp_info *lwp,
   END_CATCH
 }
 
-struct thread_resume_array
-{
-  struct thread_resume *resume;
-  size_t n;
-};
-
-/* This function is called once per thread via find_inferior.
-   ARG is a pointer to a thread_resume_array struct.
-   We look up the thread specified by ENTRY in ARG, and mark the thread
-   with a pointer to the appropriate resume request.
+/* This function is called once per thread via for_each_thread.
+   We look up which resume request applies to THREAD and mark it with a
+   pointer to the appropriate resume request.
 
    This algorithm is O(threads * resume elements), but resume elements
    is small (and will remain small at least until GDB supports thread
    suspension).  */
 
-static int
-linux_set_resume_request (thread_info *thread, void *arg)
+static void
+linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
-  int ndx;
-  struct thread_resume_array *r;
 
-  r = (struct thread_resume_array *) arg;
-
-  for (ndx = 0; ndx < r->n; ndx++)
+  for (int ndx = 0; ndx < n; ndx++)
     {
-      ptid_t ptid = r->resume[ndx].thread;
+      ptid_t ptid = resume[ndx].thread;
       if (ptid_equal (ptid, minus_one_ptid)
 	  || ptid == thread->id
 	  /* Handle both 'pPID' and 'pPID.-1' as meaning 'all threads
@@ -4604,7 +4593,7 @@ linux_set_resume_request (thread_info *thread, void *arg)
 	      && (ptid_is_pid (ptid)
 		  || ptid_get_lwp (ptid) == -1)))
 	{
-	  if (r->resume[ndx].kind == resume_stop
+	  if (resume[ndx].kind == resume_stop
 	      && thread->last_resume_kind == resume_stop)
 	    {
 	      if (debug_threads)
@@ -4620,7 +4609,7 @@ linux_set_resume_request (thread_info *thread, void *arg)
 
 	  /* Ignore (wildcard) resume requests for already-resumed
 	     threads.  */
-	  if (r->resume[ndx].kind != resume_stop
+	  if (resume[ndx].kind != resume_stop
 	      && thread->last_resume_kind != resume_stop)
 	    {
 	      if (debug_threads)
@@ -4662,7 +4651,7 @@ linux_set_resume_request (thread_info *thread, void *arg)
 	      continue;
 	    }
 
-	  lwp->resume = &r->resume[ndx];
+	  lwp->resume = &resume[ndx];
 	  thread->last_resume_kind = lwp->resume->kind;
 
 	  lwp->step_range_start = lwp->resume->step_range_start;
@@ -4684,14 +4673,12 @@ linux_set_resume_request (thread_info *thread, void *arg)
 			      lwpid_of (thread));
 	    }
 
-	  return 0;
+	  return;
 	}
     }
 
   /* No resume action for this thread.  */
   lwp->resume = NULL;
-
-  return 0;
 }
 
 /* find_inferior callback for linux_resume.
@@ -5104,7 +5091,6 @@ linux_resume_one_thread (thread_info *thread, void *arg)
 static void
 linux_resume (struct thread_resume *resume_info, size_t n)
 {
-  struct thread_resume_array array = { resume_info, n };
   struct thread_info *need_step_over = NULL;
   int any_pending;
   int leave_all_stopped;
@@ -5115,7 +5101,10 @@ linux_resume (struct thread_resume *resume_info, size_t n)
       debug_printf ("linux_resume:\n");
     }
 
-  find_inferior (&all_threads, linux_set_resume_request, &array);
+  for_each_thread ([&] (thread_info *thread)
+    {
+      linux_set_resume_request (thread, resume_info, n);
+    });
 
   /* If there is a thread which would otherwise be resumed, which has
      a pending status, then don't resume any threads - we can just
