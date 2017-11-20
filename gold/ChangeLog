@@ -1,3 +1,14 @@
+2017-11-21  Ian Lance Taylor  <iant@google.com>
+
+	Apply from master:
+	2017-11-19  Ian Lance Taylor  <iant@google.com>
+		    Cary Coutant  <ccoutant@gmail.com>
+	* gold/dwarf_reader.h (class Dwarf_info_reader): Add ref_addr_size
+	method.
+	* gold/dwarf_reader.cc (Dwarf_die::read_attributes): Use ref_addr_size
+	for DW_FORM_ref_addr_size.
+	(Dwarf_die::skip_attributes): Likewise.
+
 2017-11-01  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
