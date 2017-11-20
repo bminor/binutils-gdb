@@ -1,5 +1,11 @@
 2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-low.c (reset_lwp_ptrace_options_callback): Remove.
+	(linux_handle_new_gdb_connection): Use for_each_thread, inline
+	code from reset_lwp_ptrace_options_callback.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-arm-low.c (struct update_registers_data): Remove.
 	(update_registers_callback): Return void, take arguments
 	directly, don't check thread's pid.

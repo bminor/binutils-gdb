@@ -6434,33 +6434,6 @@ linux_supports_exec_events (void)
   return linux_supports_traceexec ();
 }
 
-/* Callback for 'find_inferior'.  Set the (possibly changed) ptrace
-   options for the specified lwp.  */
-
-static int
-reset_lwp_ptrace_options_callback (thread_info *thread, void *args)
-{
-  struct lwp_info *lwp = get_thread_lwp (thread);
-
-  if (!lwp->stopped)
-    {
-      /* Stop the lwp so we can modify its ptrace options.  */
-      lwp->must_set_ptrace_flags = 1;
-      linux_stop_lwp (lwp);
-    }
-  else
-    {
-      /* Already stopped; go ahead and set the ptrace options.  */
-      struct process_info *proc = find_process_pid (pid_of (thread));
-      int options = linux_low_ptrace_options (proc->attached);
-
-      linux_enable_event_reporting (lwpid_of (thread), options);
-      lwp->must_set_ptrace_flags = 0;
-    }
-
-  return 0;
-}
-
 /* Target hook for 'handle_new_gdb_connection'.  Causes a reset of the
    ptrace flags for all inferiors.  This is in case the new GDB connection
    doesn't support the same set of events that the previous one did.  */
@@ -6468,10 +6441,27 @@ reset_lwp_ptrace_options_callback (thread_info *thread, void *args)
 static void
 linux_handle_new_gdb_connection (void)
 {
-  pid_t pid;
-
   /* Request that all the lwps reset their ptrace options.  */
-  find_inferior (&all_threads, reset_lwp_ptrace_options_callback , &pid);
+  for_each_thread ([] (thread_info *thread)
+    {
+      struct lwp_info *lwp = get_thread_lwp (thread);
+
+      if (!lwp->stopped)
+	{
+	  /* Stop the lwp so we can modify its ptrace options.  */
+	  lwp->must_set_ptrace_flags = 1;
+	  linux_stop_lwp (lwp);
+	}
+      else
+	{
+	  /* Already stopped; go ahead and set the ptrace options.  */
+	  struct process_info *proc = find_process_pid (pid_of (thread));
+	  int options = linux_low_ptrace_options (proc->attached);
+
+	  linux_enable_event_reporting (lwpid_of (thread), options);
+	  lwp->must_set_ptrace_flags = 0;
+	}
+    });
 }
 
 static int
