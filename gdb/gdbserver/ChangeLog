@@ -1,5 +1,11 @@
 2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-low.c (stuck_in_jump_pad_callback): Change prototype,
+	return bool, remove data argument.
+	(linux_stabilize_threads): Use find_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-low.c (unsuspend_one_lwp): Remove.
 	(unsuspend_all_lwps): Use for_each_thread, inline code from
 	unsuspend_one_lwp.

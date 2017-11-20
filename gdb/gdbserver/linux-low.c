@@ -2985,7 +2985,7 @@ unsuspend_all_lwps (struct lwp_info *except)
 }
 
 static void move_out_of_jump_pad_callback (thread_info *thread);
-static int stuck_in_jump_pad_callback (thread_info *thread, void *data);
+static bool stuck_in_jump_pad_callback (thread_info *thread);
 static int lwp_running (thread_info *thread, void *data);
 static ptid_t linux_wait_1 (ptid_t ptid,
 			    struct target_waitstatus *ourstatus,
@@ -3024,13 +3024,8 @@ static ptid_t linux_wait_1 (ptid_t ptid,
 static void
 linux_stabilize_threads (void)
 {
-  struct thread_info *saved_thread;
-  struct thread_info *thread_stuck;
+  thread_info *thread_stuck = find_thread (stuck_in_jump_pad_callback);
 
-  thread_stuck
-    = (struct thread_info *) find_inferior (&all_threads,
-					    stuck_in_jump_pad_callback,
-					    NULL);
   if (thread_stuck != NULL)
     {
       if (debug_threads)
@@ -3039,7 +3034,7 @@ linux_stabilize_threads (void)
       return;
     }
 
-  saved_thread = current_thread;
+  thread_info *saved_thread = current_thread;
 
   stabilizing_threads = 1;
 
@@ -3082,10 +3077,8 @@ linux_stabilize_threads (void)
 
   if (debug_threads)
     {
-      thread_stuck
-	= (struct thread_info *) find_inferior (&all_threads,
-						stuck_in_jump_pad_callback,
-						NULL);
+      thread_stuck = find_thread (stuck_in_jump_pad_callback);
+
       if (thread_stuck != NULL)
 	debug_printf ("couldn't stabilize, LWP %ld got stuck in jump pad\n",
 		      lwpid_of (thread_stuck));
@@ -4111,13 +4104,13 @@ wait_for_sigstop (void)
     }
 }
 
-/* Returns true if LWP ENTRY is stopped in a jump pad, and we can't
+/* Returns true if THREAD is stopped in a jump pad, and we can't
    move it out, because we need to report the stop event to GDB.  For
    example, if the user puts a breakpoint in the jump pad, it's
    because she wants to debug it.  */
 
-static int
-stuck_in_jump_pad_callback (thread_info *thread, void *data)
+static bool
+stuck_in_jump_pad_callback (thread_info *thread)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
 
