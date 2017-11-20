@@ -1,3 +1,13 @@
+2017-11-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 22450
+	* testsuite/ld-elf/elf.exp: Add --defsym ALIGN=2|3 to assembler
+	command line depending upon the size of the target address space.
+	* testsuite/ld-elf/pr22450.s: New test file.
+	* testsuite/ld-elf/pr22450.d: New test driver.
+	* testsuite/config/default.exp: Add note that LD_CLASS refers to
+	the size of the host linker not the size of the target linker.
+
 2017-11-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 15152
