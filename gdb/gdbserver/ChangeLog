@@ -1,5 +1,12 @@
 2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdbthread.h (find_thread): Add overload with ptid_t filter.
+	* linux-low.c (struct iterate_over_lwps_args): Remove.
+	(iterate_over_lwps_filter): Remove.
+	(iterate_over_lwps): Use find_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-low.c (reset_lwp_ptrace_options_callback): Remove.
 	(linux_handle_new_gdb_connection): Use for_each_thread, inline
 	code from reset_lwp_ptrace_options_callback.
