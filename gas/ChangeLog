@@ -1,3 +1,8 @@
+2017-11-21  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-xtensa.c (finish_vinsn): Avoid multiple ngettext calls
+	in error message.
+
 2017-11-20  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/i386/x86-64-reg-bad.l: Accept trailing padding.
