@@ -7453,11 +7453,18 @@ static struct trampoline_seg *
 find_trampoline_seg (asection *seg)
 {
   struct trampoline_seg *ts = trampoline_seg_list.next;
+  static struct trampoline_seg *mr;
+
+  if (mr && mr->seg == seg)
+    return mr;
 
   for ( ; ts; ts = ts->next)
     {
       if (ts->seg == seg)
-	return ts;
+	{
+	  mr = ts;
+	  return ts;
+	}
     }
 
   return NULL;

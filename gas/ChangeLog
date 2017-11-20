@@ -1,5 +1,10 @@
 2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* config/tc-xtensa.c (find_trampoline_seg): Add static variable
+	that caches the result of the most recent search.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* config/tc-xtensa.c (trampoline_chain_entry, trampoline_chain)
 	(trampoline_chain_index): New structures.
 	(trampoline_index): Add chain_index field.
