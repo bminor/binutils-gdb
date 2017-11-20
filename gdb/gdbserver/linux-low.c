@@ -4702,8 +4702,8 @@ resume_status_pending_p (thread_info *thread)
    required STOP_PC adjustment has already been propagated to the
    inferior's regcache.  */
 
-static int
-need_step_over_p (thread_info *thread, void *dummy)
+static bool
+need_step_over_p (thread_info *thread)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
   struct thread_info *saved_thread;
@@ -4713,7 +4713,7 @@ need_step_over_p (thread_info *thread, void *dummy)
   /* GDBserver is skipping the extra traps from the wrapper program,
      don't have to do step over.  */
   if (proc->tdesc == NULL)
-    return 0;
+    return false;
 
   /* LWPs which will not be resumed are not interesting, because we
      might not wait for them next time through linux_wait.  */
@@ -4723,7 +4723,7 @@ need_step_over_p (thread_info *thread, void *dummy)
       if (debug_threads)
 	debug_printf ("Need step over [LWP %ld]? Ignoring, not stopped\n",
 		      lwpid_of (thread));
-      return 0;
+      return false;
     }
 
   if (thread->last_resume_kind == resume_stop)
@@ -4732,7 +4732,7 @@ need_step_over_p (thread_info *thread, void *dummy)
 	debug_printf ("Need step over [LWP %ld]? Ignoring, should remain"
 		      " stopped\n",
 		      lwpid_of (thread));
-      return 0;
+      return false;
     }
 
   gdb_assert (lwp->suspended >= 0);
@@ -4742,7 +4742,7 @@ need_step_over_p (thread_info *thread, void *dummy)
       if (debug_threads)
 	debug_printf ("Need step over [LWP %ld]? Ignoring, suspended\n",
 		      lwpid_of (thread));
-      return 0;
+      return false;
     }
 
   if (lwp->status_pending_p)
@@ -4751,7 +4751,7 @@ need_step_over_p (thread_info *thread, void *dummy)
 	debug_printf ("Need step over [LWP %ld]? Ignoring, has pending"
 		      " status.\n",
 		      lwpid_of (thread));
-      return 0;
+      return false;
     }
 
   /* Note: PC, not STOP_PC.  Either GDB has adjusted the PC already,
@@ -4770,7 +4770,7 @@ need_step_over_p (thread_info *thread, void *dummy)
 		      "Old stop_pc was 0x%s, PC is now 0x%s\n",
 		      lwpid_of (thread),
 		      paddress (lwp->stop_pc), paddress (pc));
-      return 0;
+      return false;
     }
 
   /* On software single step target, resume the inferior with signal
@@ -4784,7 +4784,7 @@ need_step_over_p (thread_info *thread, void *dummy)
 		      " signals.\n",
 		      lwpid_of (thread));
 
-      return 0;
+      return false;
     }
 
   saved_thread = current_thread;
@@ -4806,7 +4806,7 @@ need_step_over_p (thread_info *thread, void *dummy)
 			  lwpid_of (thread), paddress (pc));
 
 	  current_thread = saved_thread;
-	  return 0;
+	  return false;
 	}
       else
 	{
@@ -4819,7 +4819,7 @@ need_step_over_p (thread_info *thread, void *dummy)
 	     that find_inferior stops looking.  */
 	  current_thread = saved_thread;
 
-	  return 1;
+	  return true;
 	}
     }
 
@@ -4830,7 +4830,7 @@ need_step_over_p (thread_info *thread, void *dummy)
 		  " at 0x%s\n",
 		  lwpid_of (thread), paddress (pc));
 
-  return 0;
+  return false;
 }
 
 /* Start a step-over operation on LWP.  When LWP stopped at a
@@ -5119,9 +5119,7 @@ linux_resume (struct thread_resume *resume_info, size_t n)
      to queue any signals that would otherwise be delivered or
      queued.  */
   if (!any_pending && supports_breakpoints ())
-    need_step_over
-      = (struct thread_info *) find_inferior (&all_threads,
-					      need_step_over_p, NULL);
+    need_step_over = find_thread (need_step_over_p);
 
   leave_all_stopped = (need_step_over != NULL || any_pending);
 
@@ -5291,9 +5289,7 @@ proceed_all_lwps (void)
 
   if (supports_breakpoints ())
     {
-      need_step_over
-	= (struct thread_info *) find_inferior (&all_threads,
-						need_step_over_p, NULL);
+      need_step_over = find_thread (need_step_over_p);
 
       if (need_step_over != NULL)
 	{

@@ -1,5 +1,11 @@
 2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-low.c (need_step_over_p): Return bool, remove dummy
+	argument.
+	(linux_resume, proceed_all_lwps): Use find_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-low.c (resume_status_pending_p): Return bool, remove
 	flag_p argument.
 	(linux_resume): Use find_thread.
