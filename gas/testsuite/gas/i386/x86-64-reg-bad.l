@@ -18,3 +18,4 @@ GAS LISTING .*
 [ 	]*[1-9][0-9]*[ 	]+movabs	-1, %axl
 [ 	]*[1-9][0-9]*[ 	]+shl	%cxl, %eax
 [ 	]*[1-9][0-9]*[ 	]+\?* 40F6C001[ 	]+test	\$1, %axl
+#pass
