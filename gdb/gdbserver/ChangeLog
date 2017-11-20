@@ -1,5 +1,11 @@
 2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-low.c (resume_status_pending_p): Return bool, remove
+	flag_p argument.
+	(linux_resume): Use find_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-low.c (struct thread_resume_array): Remove.
 	(linux_set_resume_request): Return void, take arguments
 	directly.

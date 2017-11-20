@@ -4684,20 +4684,17 @@ linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
 /* find_inferior callback for linux_resume.
    Set *FLAG_P if this lwp has an interesting status pending.  */
 
-static int
-resume_status_pending_p (thread_info *thread, void *flag_p)
+static bool
+resume_status_pending_p (thread_info *thread)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   /* LWPs which will not be resumed are not interesting, because
      we might not wait for them next time through linux_wait.  */
   if (lwp->resume == NULL)
-    return 0;
+    return false;
 
-  if (thread_still_has_status_pending_p (thread))
-    * (int *) flag_p = 1;
-
-  return 0;
+  return thread_still_has_status_pending_p (thread);
 }
 
 /* Return 1 if this lwp that GDB wants running is stopped at an
@@ -5092,7 +5089,6 @@ static void
 linux_resume (struct thread_resume *resume_info, size_t n)
 {
   struct thread_info *need_step_over = NULL;
-  int any_pending;
   int leave_all_stopped;
 
   if (debug_threads)
@@ -5112,9 +5108,9 @@ linux_resume (struct thread_resume *resume_info, size_t n)
      would otherwise be sent.  In non-stop mode, we'll apply this
      logic to each thread individually.  We consume all pending events
      before considering to start a step-over (in all-stop).  */
-  any_pending = 0;
+  bool any_pending = false;
   if (!non_stop)
-    find_inferior (&all_threads, resume_status_pending_p, &any_pending);
+    any_pending = find_thread (resume_status_pending_p) != NULL;
 
   /* If there is a thread which would otherwise be resumed, which is
      stopped at a breakpoint that needs stepping over, then don't
