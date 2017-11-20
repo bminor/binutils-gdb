@@ -1356,17 +1356,13 @@ kill_wait_lwp (struct lwp_info *lwp)
     perror_with_name ("kill_wait_lwp");
 }
 
-/* Callback for `find_inferior'.  Kills an lwp of a given process,
+/* Callback for `for_each_thread'.  Kills an lwp of a given process,
    except the leader.  */
 
-static int
-kill_one_lwp_callback (thread_info *thread, void *args)
+static void
+kill_one_lwp_callback (thread_info *thread, int pid)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
-  int pid = * (int *) args;
-
-  if (thread->id.pid () != pid)
-    return 0;
 
   /* We avoid killing the first thread here, because of a Linux kernel (at
      least 2.6.0-test7 through 2.6.8-rc4) bug; if we kill the parent before
@@ -1378,11 +1374,10 @@ kill_one_lwp_callback (thread_info *thread, void *args)
       if (debug_threads)
 	debug_printf ("lkop: is last of process %s\n",
 		      target_pid_to_str (thread->id));
-      return 0;
+      return;
     }
 
   kill_wait_lwp (lwp);
-  return 0;
 }
 
 static int
@@ -1399,7 +1394,10 @@ linux_kill (int pid)
      first, as PTRACE_KILL will not work otherwise.  */
   stop_all_lwps (0, NULL);
 
-  find_inferior (&all_threads, kill_one_lwp_callback , &pid);
+  for_each_thread (pid, [&] (thread_info *thread)
+    {
+      kill_one_lwp_callback (thread, pid);
+    });
 
   /* See the comment in linux_kill_one_lwp.  We did not kill the first
      thread in the list, so do so now.  */

@@ -1,5 +1,11 @@
 2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-low.c (kill_one_lwp_callback): Return void, take
+	argument directly, don't filter on pid.
+	(linux_kill): Use for_each_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-low.c (need_step_over_p): Return bool, remove dummy
 	argument.
 	(linux_resume, proceed_all_lwps): Use find_thread.
