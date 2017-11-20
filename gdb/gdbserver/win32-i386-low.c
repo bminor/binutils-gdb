@@ -36,21 +36,14 @@
 
 static struct x86_debug_reg_state debug_reg_state;
 
-static int
-update_debug_registers_callback (thread_info *thr, void *pid_p)
+static void
+update_debug_registers (thread_info *thread)
 {
-  win32_thread_info *th = (win32_thread_info *) thread_target_data (thr);
-  int pid = *(int *) pid_p;
+  win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
-  /* Only update the threads of this process.  */
-  if (pid_of (thr) == pid)
-    {
-      /* The actual update is done later just before resuming the lwp,
-	 we just mark that the registers need updating.  */
-      th->debug_registers_changed = 1;
-    }
-
-  return 0;
+  /* The actual update is done later just before resuming the lwp,
+     we just mark that the registers need updating.  */
+  th->debug_registers_changed = 1;
 }
 
 /* Update the inferior's debug register REGNUM from STATE.  */
@@ -58,12 +51,10 @@ update_debug_registers_callback (thread_info *thr, void *pid_p)
 static void
 x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
 {
-  /* Only update the threads of this process.  */
-  int pid = pid_of (current_thread);
-
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
-  find_inferior (&all_threads, update_debug_registers_callback, &pid);
+  /* Only update the threads of this process.  */
+  for_each_thread (current_thread->id.pid (), update_debug_registers);
 }
 
 /* Update the inferior's DR7 debug control register from STATE.  */
@@ -72,9 +63,7 @@ static void
 x86_dr_low_set_control (unsigned long control)
 {
   /* Only update the threads of this process.  */
-  int pid = pid_of (current_thread);
-
-  find_inferior (&all_threads, update_debug_registers_callback, &pid);
+  for_each_thread (current_thread->id.pid (), update_debug_registers);
 }
 
 /* Return the current value of a DR register of the current thread's
