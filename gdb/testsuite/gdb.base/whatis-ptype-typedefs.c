@@ -56,6 +56,16 @@ DEF (int);
 typedef float float_typedef;
 DEF (float);
 
+/* Double floats.  */
+
+typedef double double_typedef;
+DEF (double);
+
+/* Long doubles.  */
+
+typedef long double long_double_typedef;
+DEF (long_double);
+
 /* Enums.  */
 
 typedef enum colors {red, green, blue} colors_typedef;

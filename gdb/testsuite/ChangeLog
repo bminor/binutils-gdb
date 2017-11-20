@@ -1,3 +1,14 @@
+2017-11-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/whatis-ptype-typedefs.c (double_typedef)
+	(long_double_typedef): New typedefs.
+	Use DEF on double and long double.
+	* gdb.base/whatis-ptype-typedefs.exp: Add double and long double
+	cases.
+	(run_tests): New 'float_ptr_same_size', 'double_ptr_same_size',
+	and 'long_double_ptr_same_size' locals.  Use them to decide
+	whether cast from array/function to float is valid/invalid.
+
 2017-11-17  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/traits.rs: New file.
