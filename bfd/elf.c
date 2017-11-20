@@ -3061,7 +3061,6 @@ _bfd_elf_set_reloc_sh_name (bfd *abfd,
 static bfd_boolean
 _bfd_elf_init_reloc_shdr (bfd *abfd,
 			  struct bfd_elf_section_reloc_data *reldata,
-			  const Elf_Internal_Shdr *sec_hdr,
 			  const char *sec_name,
 			  bfd_boolean use_rela_p,
 			  bfd_boolean delay_st_name_p)
@@ -3083,7 +3082,7 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
 			 ? bed->s->sizeof_rela
 			 : bed->s->sizeof_rel);
   rel_hdr->sh_addralign = (bfd_vma) 1 << bed->s->log_file_align;
-  rel_hdr->sh_flags = sec_hdr->sh_flags & SHF_GROUP;
+  rel_hdr->sh_flags = 0;
   rel_hdr->sh_addr = 0;
   rel_hdr->sh_size = 0;
   rel_hdr->sh_offset = 0;
@@ -3374,14 +3373,14 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 	      || arg->link_info->emitrelocations))
 	{
 	  if (esd->rel.count && esd->rel.hdr == NULL
-	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rel, this_hdr, name,
+	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rel, name,
 					    FALSE, delay_st_name_p))
 	    {
 	      arg->failed = TRUE;
 	      return;
 	    }
 	  if (esd->rela.count && esd->rela.hdr == NULL
-	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rela, this_hdr, name,
+	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rela, name,
 					    TRUE, delay_st_name_p))
 	    {
 	      arg->failed = TRUE;
@@ -3391,7 +3390,6 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
       else if (!_bfd_elf_init_reloc_shdr (abfd,
 					  (asect->use_rela_p
 					   ? &esd->rela : &esd->rel),
-					  this_hdr,
 					  name,
 					  asect->use_rela_p,
 					  delay_st_name_p))
@@ -3526,13 +3524,23 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 	  && !bfd_is_abs_section (s))
 	{
 	  struct bfd_elf_section_data *elf_sec = elf_section_data (s);
-	  if (elf_sec->rel.hdr != NULL)
+	  struct bfd_elf_section_data *input_elf_sec = elf_section_data (elt);
+
+	  if (elf_sec->rel.hdr != NULL
+	      && (gas
+		  || (input_elf_sec->rel.hdr != NULL
+		      && input_elf_sec->rel.hdr->sh_flags & SHF_GROUP) != 0))
 	    {
+	      elf_sec->rel.hdr->sh_flags |= SHF_GROUP;
 	      loc -= 4;
 	      H_PUT_32 (abfd, elf_sec->rel.idx, loc);
 	    }
-	  if (elf_sec->rela.hdr != NULL)
+	  if (elf_sec->rela.hdr != NULL
+	      && (gas
+		  || (input_elf_sec->rela.hdr != NULL
+		      && input_elf_sec->rela.hdr->sh_flags & SHF_GROUP) != 0))
 	    {
+	      elf_sec->rela.hdr->sh_flags |= SHF_GROUP;
 	      loc -= 4;
 	      H_PUT_32 (abfd, elf_sec->rela.idx, loc);
 	    }

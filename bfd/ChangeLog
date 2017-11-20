@@ -1,3 +1,13 @@
+2017-11-20  Alan Modra  <amodra@gmail.com>
+
+	PR 22451
+	PR 22460
+	* elf.c (_bfd_elf_init_reloc_shdr): Delete "sec_hdr" parameter
+	and leave rel_hdr->sh_flags zero.  Update calls.
+	(bfd_elf_set_group_contents): Check input rel/rela SHF_GROUP
+	flag when !gas before adding rel/rela section to group.  Set
+	output rel/rela SHF_GROUP flags.
+
 2017-11-18  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (_bfd_riscv_relax_align): Add space between alignment
