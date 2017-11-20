@@ -2969,28 +2969,19 @@ select_event_lwp (struct lwp_info **orig_lp)
     }
 }
 
-/* Decrement the suspend count of an LWP.  */
-
-static int
-unsuspend_one_lwp (thread_info *thread, void *except)
-{
-  struct lwp_info *lwp = get_thread_lwp (thread);
-
-  /* Ignore EXCEPT.  */
-  if (lwp == except)
-    return 0;
-
-  lwp_suspended_decr (lwp);
-  return 0;
-}
-
 /* Decrement the suspend count of all LWPs, except EXCEPT, if non
    NULL.  */
 
 static void
 unsuspend_all_lwps (struct lwp_info *except)
 {
-  find_inferior (&all_threads, unsuspend_one_lwp, except);
+  for_each_thread ([&] (thread_info *thread)
+    {
+      lwp_info *lwp = get_thread_lwp (thread);
+
+      if (lwp != except)
+	lwp_suspended_decr (lwp);
+    });
 }
 
 static void move_out_of_jump_pad_callback (thread_info *thread);
