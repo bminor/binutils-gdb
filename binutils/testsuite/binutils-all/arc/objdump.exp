@@ -77,7 +77,7 @@ check_assembly "arc double_store -Mcpu=hs" $objfile \
     $double_store_hs_expected "-Mcpu=hs"
 check_assembly "arc double_store -Mcpu=hs38_linux" $objfile \
     $double_store_hs_expected "-Mcpu=hs38_linux"
-set double_store_em_expected ".long 0x1b000006"
+set double_store_em_expected {word\s*0x1b000006}
 check_assembly "arc double_store -Mcpu=em" $objfile \
     $double_store_em_expected "-Mcpu=em"
 check_assembly "arc double_store -Mcpu=em4_dmips" $objfile \
