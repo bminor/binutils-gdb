@@ -1,5 +1,11 @@
 2017-11-27  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (SUBDIR_TUI_OBS): Redefine.
+	(CONFIG_SRC_SUBDIR): Add tui.
+	(%.o): Remove tui rule.
+
+2017-11-27  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (SUBDIR_GCC_COMPILE_OBS): Redefine.
 	(%.o): Remove compile rule.
 	(CONFIG_SRC_SUBDIR): Add compile.

@@ -282,25 +282,6 @@ SUBDIR_MI_CFLAGS =
 #
 # TUI sub directory definitions
 #
-SUBDIR_TUI_OBS = \
-	tui.o \
-	tui-command.o \
-	tui-data.o \
-	tui-disasm.o \
-	tui-file.o \
-	tui-hooks.o \
-	tui-interp.o \
-	tui-io.o \
-	tui-layout.o \
-	tui-out.o \
-	tui-regs.o \
-	tui-source.o \
-	tui-stack.o \
-	tui-win.o \
-	tui-windata.o \
-	tui-wingeneral.o \
-	tui-winsource.o
-
 SUBDIR_TUI_SRCS = \
 	tui/tui.c \
 	tui/tui-command.c \
@@ -319,6 +300,8 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-windata.c \
 	tui/tui-wingeneral.c \
 	tui/tui-winsource.c
+
+SUBDIR_TUI_OBS = $(patsubst %.c,%.o,$(SUBDIR_TUI_SRCS))
 
 SUBDIR_TUI_DEPS =
 SUBDIR_TUI_LDFLAGS =
@@ -615,7 +598,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch cli mi compile
+CONFIG_SRC_SUBDIR = arch cli mi compile tui
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
 # -I. for config files.
@@ -1927,10 +1910,6 @@ $(CONFIG_DEP_SUBDIR):
 	$(POSTCOMPILE)
 
 %.o: ${srcdir}/target/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: $(srcdir)/tui/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
