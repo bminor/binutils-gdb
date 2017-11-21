@@ -1,5 +1,13 @@
 2017-11-27  Tom Tromey  <tom@tromey.com>
 
+	* configure: Rebuild.
+	* configure.ac (CONFIG_OBS): Refer to guile/guile.o.
+	* Makefile.in (SUBDIR_GUILE_OBS): Redefine.
+	(CONFIG_SRC_SUBDIR): Add guile.
+	(%.o): Remove guile rule.
+
+2017-11-27  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_OBS): Redefine.
 	(%.o): Remove unittests rule.
 	(CONFIG_SRC_SUBDIR): Add unittests.

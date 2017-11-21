@@ -326,33 +326,6 @@ SUBDIR_GCC_COMPILE_OBS = $(patsubst %.c,%.o,$(filter %.c,$(SUBDIR_GCC_COMPILE_SR
 #
 # Guile sub directory definitons for guile support.
 #
-SUBDIR_GUILE_OBS = \
-	guile.o \
-	scm-arch.o \
-	scm-auto-load.o \
-	scm-block.o \
-	scm-breakpoint.o \
-	scm-cmd.o \
-	scm-disasm.o \
-	scm-exception.o \
-	scm-frame.o \
-	scm-gsmob.o \
-	scm-iterator.o \
-	scm-lazy-string.o \
-	scm-math.o \
-	scm-objfile.o \
-	scm-param.o \
-	scm-ports.o \
-	scm-pretty-print.o \
-	scm-progspace.o \
-	scm-safe-call.o \
-	scm-string.o \
-	scm-symbol.o \
-	scm-symtab.o \
-	scm-type.o \
-	scm-utils.o \
-	scm-value.o
-
 SUBDIR_GUILE_SRCS = \
 	guile/guile.c \
 	guile/scm-arch.c \
@@ -379,6 +352,8 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-type.c \
 	guile/scm-utils.c \
 	guile/scm-value.c
+
+SUBDIR_GUILE_OBS = $(patsubst %.c,%.o,$(SUBDIR_GUILE_SRCS))
 
 SUBDIR_GUILE_DEPS =
 SUBDIR_GUILE_LDFLAGS =
@@ -585,7 +560,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch cli mi compile tui unittests
+CONFIG_SRC_SUBDIR = arch cli mi compile tui unittests guile
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
 # -I. for config files.
@@ -1882,10 +1857,6 @@ $(CONFIG_DEP_SUBDIR):
 
 %.o: $(srcdir)/gdbtk/generic/%.c
 	$(COMPILE) $(all_gdbtk_cflags) $<
-	$(POSTCOMPILE)
-
-%.o: $(srcdir)/guile/%.c
-	$(COMPILE) $<
 	$(POSTCOMPILE)
 
 %.o: ${srcdir}/nat/%.c
