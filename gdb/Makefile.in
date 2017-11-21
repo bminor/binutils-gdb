@@ -327,15 +327,6 @@ SUBDIR_TUI_CFLAGS = -DTUI=1
 #
 # GCC Compile support sub-directory definitions
 #
-SUBDIR_GCC_COMPILE_OBS = \
-	compile.o \
-	compile-c-support.o \
-	compile-c-symbols.o \
-	compile-c-types.o \
-	compile-loc2c.o \
-	compile-object-load.o \
-	compile-object-run.o
-
 SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile.c \
 	compile/compile-c-support.c \
@@ -346,6 +337,8 @@ SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile-object-load.h \
 	compile/compile-object-run.c \
 	compile/compile-object-run.h
+
+SUBDIR_GCC_COMPILE_OBS = $(patsubst %.c,%.o,$(filter %.c,$(SUBDIR_GCC_COMPILE_SRCS)))
 
 #
 # Guile sub directory definitons for guile support.
@@ -622,7 +615,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch cli mi
+CONFIG_SRC_SUBDIR = arch cli mi compile
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
 # -I. for config files.
@@ -1914,10 +1907,6 @@ $(CONFIG_DEP_SUBDIR):
 
 # Rules for compiling .c files in the various source subdirectories.
 %.o: ${srcdir}/common/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: $(srcdir)/compile/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
