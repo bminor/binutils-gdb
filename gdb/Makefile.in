@@ -429,6 +429,10 @@ SUBDIR_UNITTESTS_SRCS = \
 
 SUBDIR_UNITTESTS_OBS = $(patsubst %.c,%.o,$(SUBDIR_UNITTESTS_SRCS))
 
+SUBDIR_TARGET_SRCS = target/waitstatus.c
+SUBDIR_TARGET_OBS = $(patsubst %.c,%.o,$(SUBDIR_TARGET_SRCS))
+
+
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
 # in INCLUDE_DIR.
@@ -518,7 +522,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch cli mi compile tui unittests guile python
+CONFIG_SRC_SUBDIR = arch cli mi compile tui unittests guile python target
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
 # -I. for config files.
@@ -1152,7 +1156,7 @@ SFILES = \
 	common/vec.c \
 	common/xml-utils.c \
 	mi/mi-common.c \
-	target/waitstatus.c \
+	$(SUBDIR_TARGET_SRCS) \
 	$(COMMON_SFILES) \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
@@ -1567,10 +1571,10 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	signals-state-save-restore.o \
 	vec.o \
 	version.o \
-	waitstatus.o \
 	xml-builtin.o \
 	xml-utils.o \
 	$(patsubst %.c,%.o,$(COMMON_SFILES)) \
+	$(SUBDIR_TARGET_OBS) \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -1645,10 +1649,6 @@ python/%.o: INTERNAL_CFLAGS += $(PYTHON_CFLAGS)
 	$(POSTCOMPILE)
 
 %.o: ${srcdir}/nat/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: ${srcdir}/target/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
