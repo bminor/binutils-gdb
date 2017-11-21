@@ -101,8 +101,14 @@ static void ravenscar_inferior_created (struct target_ops *target,
 static int
 is_ravenscar_task (ptid_t ptid)
 {
-  /* By construction, ravenscar tasks have their LWP set to zero.  */
-  return ptid_get_lwp (ptid) == 0;
+  /* By construction, ravenscar tasks have their LWP set to zero.
+     Also make sure that the TID is nonzero, as some remotes, when
+     asked for the list of threads, will return the first thread
+     as having its TID set to zero.  For instance, TSIM version
+     2.0.48 for LEON3 sends 'm0' as a reply to the 'qfThreadInfo'
+     query, which the remote protocol layer then treats as a thread
+     whose TID is 0.  This is obviously not a ravenscar task.  */
+  return ptid_get_lwp (ptid) == 0 && ptid_get_tid (ptid) != 0;
 }
 
 /* Given PTID, which can be either a ravenscar task or a CPU thread,

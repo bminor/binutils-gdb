@@ -1,5 +1,10 @@
 2017-11-21  Joel Brobecker  <brobecker@adacore.com>
 
+	* ravenscar-thread.c (is_ravenscar_task): Also verify that
+	the ptid's TID is nonzero.
+
+2017-11-21  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (ada_get_tcb_types_info): Add declaration.
 	* ada-tasks.c (ada_get_tcb_types_info): Renames get_tcb_types_info.
 	Make non-static.  Change return type to char *.  Adjust code
