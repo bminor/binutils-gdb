@@ -1,3 +1,13 @@
+2017-11-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-tdep.h (enum powerpc_long_double_abi): New data type.
+	(struct gdbarch_tdep): New member long_double_abi.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Initialize long_double_abi
+	member of tdep struct based on Tag_GNU_Power_ABI_FP attribute.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Install long double data
+	format depending on long_double_abi tdep member.
+	(ppc_floatformat_for_type): Handle __ibm128 type.
+
 2017-11-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* darwin-nat.c (set_enable_mach_exceptions): Constify parameter.

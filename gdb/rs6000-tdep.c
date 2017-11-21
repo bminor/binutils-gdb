@@ -5949,6 +5949,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bfd abfd;
   enum auto_boolean soft_float_flag = powerpc_soft_float_global;
   int soft_float;
+  enum powerpc_long_double_abi long_double_abi = POWERPC_LONG_DOUBLE_AUTO;
   enum powerpc_vector_abi vector_abi = powerpc_vector_abi_global;
   enum powerpc_elf_abi elf_abi = POWERPC_ELF_AUTO;
   int have_fpu = 1, have_spe = 0, have_mq = 0, have_altivec = 0, have_dfp = 0,
@@ -6271,13 +6272,29 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (soft_float_flag == AUTO_BOOLEAN_AUTO && from_elf_exec)
     {
       switch (bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
-					Tag_GNU_Power_ABI_FP))
+					Tag_GNU_Power_ABI_FP) & 3)
 	{
 	case 1:
 	  soft_float_flag = AUTO_BOOLEAN_FALSE;
 	  break;
 	case 2:
 	  soft_float_flag = AUTO_BOOLEAN_TRUE;
+	  break;
+	default:
+	  break;
+	}
+    }
+
+  if (long_double_abi == POWERPC_LONG_DOUBLE_AUTO && from_elf_exec)
+    {
+      switch (bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
+					Tag_GNU_Power_ABI_FP) >> 2)
+	{
+	case 1:
+	  long_double_abi = POWERPC_LONG_DOUBLE_IBM128;
+	  break;
+	case 3:
+	  long_double_abi = POWERPC_LONG_DOUBLE_IEEE128;
 	  break;
 	default:
 	  break;
@@ -6365,6 +6382,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	continue;
       if (tdep && tdep->soft_float != soft_float)
 	continue;
+      if (tdep && tdep->long_double_abi != long_double_abi)
+	continue;
       if (tdep && tdep->vector_abi != vector_abi)
 	continue;
       if (tdep && tdep->wordsize == wordsize)
@@ -6387,6 +6406,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->wordsize = wordsize;
   tdep->elf_abi = elf_abi;
   tdep->soft_float = soft_float;
+  tdep->long_double_abi = long_double_abi;
   tdep->vector_abi = vector_abi;
 
   gdbarch = gdbarch_alloc (&info, tdep);

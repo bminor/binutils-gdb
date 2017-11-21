@@ -1623,12 +1623,17 @@ ppc_floatformat_for_type (struct gdbarch *gdbarch,
                           const char *name, int len)
 {
   if (len == 128 && name)
-    if (strcmp (name, "__float128") == 0
-        || strcmp (name, "_Float128") == 0
-        || strcmp (name, "_Float64x") == 0
-        || strcmp (name, "complex _Float128") == 0
-        || strcmp (name, "complex _Float64x") == 0)
-      return floatformats_ia64_quad;
+    {
+      if (strcmp (name, "__float128") == 0
+	  || strcmp (name, "_Float128") == 0
+	  || strcmp (name, "_Float64x") == 0
+	  || strcmp (name, "complex _Float128") == 0
+	  || strcmp (name, "complex _Float64x") == 0)
+	return floatformats_ia64_quad;
+
+      if (strcmp (name, "__ibm128") == 0)
+	return floatformats_ibm_long_double;
+    }
 
   return default_floatformat_for_type (gdbarch, name, len);
 }
@@ -1648,12 +1653,15 @@ ppc_linux_init_abi (struct gdbarch_info info,
   linux_init_abi (info, gdbarch);
 
   /* PPC GNU/Linux uses either 64-bit or 128-bit long doubles; where
-     128-bit, they are IBM long double, not IEEE quad long double as
-     in the System V ABI PowerPC Processor Supplement.  We can safely
-     let them default to 128-bit, since the debug info will give the
-     size of type actually used in each case.  */
+     128-bit, they can be either IBM long double or IEEE quad long double.
+     The 64-bit long double case will be detected automatically using
+     the size specified in debug info.  We use a .gnu.attribute flag
+     to distinguish between the IBM long double and IEEE quad cases.  */
   set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
-  set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
+  if (tdep->long_double_abi == POWERPC_LONG_DOUBLE_IEEE128)
+    set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+  else
+    set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
 
   /* Support for floating-point data type variants.  */
   set_gdbarch_floatformat_for_type (gdbarch, ppc_floatformat_for_type);
