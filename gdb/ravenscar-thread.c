@@ -297,9 +297,10 @@ ravenscar_wait (struct target_ops *ops, ptid_t ptid,
                 int options)
 {
   struct target_ops *beneath = find_target_beneath (ops);
+  ptid_t event_ptid;
 
   inferior_ptid = base_ptid;
-  beneath->to_wait (beneath, base_ptid, status, 0);
+  event_ptid = beneath->to_wait (beneath, base_ptid, status, 0);
   /* Find any new threads that might have been created, and update
      inferior_ptid to the active thread.
 
@@ -310,6 +311,7 @@ ravenscar_wait (struct target_ops *ops, ptid_t ptid,
   if (status->kind != TARGET_WAITKIND_EXITED
       && status->kind != TARGET_WAITKIND_SIGNALLED)
     {
+      inferior_ptid = event_ptid;
       ravenscar_update_thread_list (ops);
       ravenscar_update_inferior_ptid ();
     }
