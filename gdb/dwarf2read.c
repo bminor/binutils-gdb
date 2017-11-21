@@ -256,10 +256,24 @@ struct mapped_index
      description above.  */
   std::vector<name_component> name_components;
 
+  /* How NAME_COMPONENTS is sorted.  */
+  enum case_sensitivity name_components_casing;
+
   /* Convenience method to get at the name of the symbol at IDX in the
      symbol table.  */
   const char *symbol_name_at (offset_type idx) const
   { return this->constant_pool + MAYBE_SWAP (this->symbol_table[idx]); }
+
+  /* Build the symbol name component sorted vector, if we haven't
+     yet.  */
+  void build_name_components ();
+
+  /* Returns the lower (inclusive) and upper (exclusive) bounds of the
+     possible matches for LN_NO_PARAMS in the name component
+     vector.  */
+  std::pair<std::vector<name_component>::const_iterator,
+	    std::vector<name_component>::const_iterator>
+    find_name_components_bounds (const lookup_name_info &ln_no_params) const;
 };
 
 typedef struct dwarf2_per_cu_data *dwarf2_per_cu_ptr;
@@ -4261,80 +4275,15 @@ make_sort_after_prefix_name (const char *search_name)
   return after;
 }
 
-/* Helper for dw2_expand_symtabs_matching that works with a
-   mapped_index instead of the containing objfile.  This is split to a
-   separate function in order to be able to unit test the
-   name_components matching using a mock mapped_index.  For each
-   symbol name that matches, calls MATCH_CALLBACK, passing it the
-   symbol's index in the mapped_index symbol table.  */
+/* See declaration.  */
 
-static void
-dw2_expand_symtabs_matching_symbol
-  (mapped_index &index,
-   const lookup_name_info &lookup_name_in,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   enum search_domain kind,
-   gdb::function_view<void (offset_type)> match_callback)
+std::pair<std::vector<name_component>::const_iterator,
+	  std::vector<name_component>::const_iterator>
+mapped_index::find_name_components_bounds
+  (const lookup_name_info &lookup_name_without_params) const
 {
-  lookup_name_info lookup_name_without_params
-    = lookup_name_in.make_ignore_params ();
-  gdb_index_symbol_name_matcher lookup_name_matcher
-    (lookup_name_without_params);
-
-  auto *name_cmp = case_sensitivity == case_sensitive_on ? strcmp : strcasecmp;
-
-  /* Build the symbol name component sorted vector, if we haven't yet.
-     The code below only knows how to break apart components of C++
-     symbol names (and other languages that use '::' as
-     namespace/module separator).  If we add support for wild matching
-     to some language that uses some other operator (E.g., Ada, Go and
-     D use '.'), then we'll need to try splitting the symbol name
-     according to that language too.  Note that Ada does support wild
-     matching, but doesn't currently support .gdb_index.  */
-  if (index.name_components.empty ())
-    {
-      for (size_t iter = 0; iter < index.symbol_table_slots; ++iter)
-	{
-	  offset_type idx = 2 * iter;
-
-	  if (index.symbol_table[idx] == 0
-	      && index.symbol_table[idx + 1] == 0)
-	    continue;
-
-	  const char *name = index.symbol_name_at (idx);
-
-	  /* Add each name component to the name component table.  */
-	  unsigned int previous_len = 0;
-	  for (unsigned int current_len = cp_find_first_component (name);
-	       name[current_len] != '\0';
-	       current_len += cp_find_first_component (name + current_len))
-	    {
-	      gdb_assert (name[current_len] == ':');
-	      index.name_components.push_back ({previous_len, idx});
-	      /* Skip the '::'.  */
-	      current_len += 2;
-	      previous_len = current_len;
-	    }
-	  index.name_components.push_back ({previous_len, idx});
-	}
-
-      /* Sort name_components elements by name.  */
-      auto name_comp_compare = [&] (const name_component &left,
-				    const name_component &right)
-	{
-	  const char *left_qualified = index.symbol_name_at (left.idx);
-	  const char *right_qualified = index.symbol_name_at (right.idx);
-
-	  const char *left_name = left_qualified + left.name_offset;
-	  const char *right_name = right_qualified + right.name_offset;
-
-	  return name_cmp (left_name, right_name) < 0;
-	};
-
-      std::sort (index.name_components.begin (),
-		 index.name_components.end (),
-		 name_comp_compare);
-    }
+  auto *name_cmp
+    = this->name_components_casing == case_sensitive_on ? strcmp : strcasecmp;
 
   const char *cplus
     = lookup_name_without_params.cplus ().lookup_name ().c_str ();
@@ -4344,7 +4293,7 @@ dw2_expand_symtabs_matching_symbol
   auto lookup_compare_lower = [&] (const name_component &elem,
 				   const char *name)
     {
-      const char *elem_qualified = index.symbol_name_at (elem.idx);
+      const char *elem_qualified = this->symbol_name_at (elem.idx);
       const char *elem_name = elem_qualified + elem.name_offset;
       return name_cmp (elem_name, name) < 0;
     };
@@ -4354,18 +4303,18 @@ dw2_expand_symtabs_matching_symbol
   auto lookup_compare_upper = [&] (const char *name,
 				   const name_component &elem)
     {
-      const char *elem_qualified = index.symbol_name_at (elem.idx);
+      const char *elem_qualified = this->symbol_name_at (elem.idx);
       const char *elem_name = elem_qualified + elem.name_offset;
       return name_cmp (name, elem_name) < 0;
     };
 
-  auto begin = index.name_components.begin ();
-  auto end = index.name_components.end ();
+  auto begin = this->name_components.begin ();
+  auto end = this->name_components.end ();
 
   /* Find the lower bound.  */
   auto lower = [&] ()
     {
-      if (lookup_name_in.completion_mode () && cplus[0] == '\0')
+      if (lookup_name_without_params.completion_mode () && cplus[0] == '\0')
 	return begin;
       else
 	return std::lower_bound (begin, end, cplus, lookup_compare_lower);
@@ -4374,7 +4323,7 @@ dw2_expand_symtabs_matching_symbol
   /* Find the upper bound.  */
   auto upper = [&] ()
     {
-      if (lookup_name_in.completion_mode ())
+      if (lookup_name_without_params.completion_mode ())
 	{
 	  /* In completion mode, we want UPPER to point past all
 	     symbols names that have the same prefix.  I.e., with
@@ -4397,6 +4346,97 @@ dw2_expand_symtabs_matching_symbol
 	return std::upper_bound (lower, end, cplus, lookup_compare_upper);
     } ();
 
+  return {lower, upper};
+}
+
+/* See declaration.  */
+
+void
+mapped_index::build_name_components ()
+{
+  if (!this->name_components.empty ())
+    return;
+
+  this->name_components_casing = case_sensitivity;
+  auto *name_cmp
+    = this->name_components_casing == case_sensitive_on ? strcmp : strcasecmp;
+
+  /* The code below only knows how to break apart components of C++
+     symbol names (and other languages that use '::' as
+     namespace/module separator).  If we add support for wild matching
+     to some language that uses some other operator (E.g., Ada, Go and
+     D use '.'), then we'll need to try splitting the symbol name
+     according to that language too.  Note that Ada does support wild
+     matching, but doesn't currently support .gdb_index.  */
+  for (size_t iter = 0; iter < this->symbol_table_slots; ++iter)
+    {
+      offset_type idx = 2 * iter;
+
+      if (this->symbol_table[idx] == 0
+	  && this->symbol_table[idx + 1] == 0)
+	continue;
+
+      const char *name = this->symbol_name_at (idx);
+
+      /* Add each name component to the name component table.  */
+      unsigned int previous_len = 0;
+      for (unsigned int current_len = cp_find_first_component (name);
+	   name[current_len] != '\0';
+	   current_len += cp_find_first_component (name + current_len))
+	{
+	  gdb_assert (name[current_len] == ':');
+	  this->name_components.push_back ({previous_len, idx});
+	  /* Skip the '::'.  */
+	  current_len += 2;
+	  previous_len = current_len;
+	}
+      this->name_components.push_back ({previous_len, idx});
+    }
+
+  /* Sort name_components elements by name.  */
+  auto name_comp_compare = [&] (const name_component &left,
+				const name_component &right)
+    {
+      const char *left_qualified = this->symbol_name_at (left.idx);
+      const char *right_qualified = this->symbol_name_at (right.idx);
+
+      const char *left_name = left_qualified + left.name_offset;
+      const char *right_name = right_qualified + right.name_offset;
+
+      return name_cmp (left_name, right_name) < 0;
+    };
+
+  std::sort (this->name_components.begin (),
+	     this->name_components.end (),
+	     name_comp_compare);
+}
+
+/* Helper for dw2_expand_symtabs_matching that works with a
+   mapped_index instead of the containing objfile.  This is split to a
+   separate function in order to be able to unit test the
+   name_components matching using a mock mapped_index.  For each
+   symbol name that matches, calls MATCH_CALLBACK, passing it the
+   symbol's index in the mapped_index symbol table.  */
+
+static void
+dw2_expand_symtabs_matching_symbol
+  (mapped_index &index,
+   const lookup_name_info &lookup_name_in,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   enum search_domain kind,
+   gdb::function_view<void (offset_type)> match_callback)
+{
+  lookup_name_info lookup_name_without_params
+    = lookup_name_in.make_ignore_params ();
+  gdb_index_symbol_name_matcher lookup_name_matcher
+    (lookup_name_without_params);
+
+  /* Build the symbol name component sorted vector, if we haven't
+     yet.  */
+  index.build_name_components ();
+
+  auto bounds = index.find_name_components_bounds (lookup_name_without_params);
+
   /* Now for each symbol name in range, check to see if we have a name
      match, and if so, call the MATCH_CALLBACK callback.  */
 
@@ -4408,17 +4448,17 @@ dw2_expand_symtabs_matching_symbol
      indexes that matched in a temporary vector and ignore
      duplicates.  */
   std::vector<offset_type> matches;
-  matches.reserve (std::distance (lower, upper));
+  matches.reserve (std::distance (bounds.first, bounds.second));
 
-  for (;lower != upper; ++lower)
+  for (; bounds.first != bounds.second; ++bounds.first)
     {
-      const char *qualified = index.symbol_name_at (lower->idx);
+      const char *qualified = index.symbol_name_at (bounds.first->idx);
 
       if (!lookup_name_matcher.matches (qualified)
 	  || (symbol_matcher != NULL && !symbol_matcher (qualified)))
 	continue;
 
-      matches.push_back (lower->idx);
+      matches.push_back (bounds.first->idx);
     }
 
   std::sort (matches.begin (), matches.end ());
@@ -4595,8 +4635,80 @@ static const char *test_symbols[] = {
   Z_SYM_NAME
 };
 
+/* Returns true if the mapped_index::find_name_component_bounds method
+   finds EXPECTED_SYMS in INDEX when looking for SEARCH_NAME, in
+   completion mode.  */
+
+static bool
+check_find_bounds_finds (mapped_index &index,
+			 const char *search_name,
+			 gdb::array_view<const char *> expected_syms)
+{
+  lookup_name_info lookup_name (search_name,
+				symbol_name_match_type::FULL, true);
+
+  auto bounds = index.find_name_components_bounds (lookup_name);
+
+  size_t distance = std::distance (bounds.first, bounds.second);
+  if (distance != expected_syms.size ())
+    return false;
+
+  for (size_t exp_elem = 0; exp_elem < distance; exp_elem++)
+    {
+      auto nc_elem = bounds.first + exp_elem;
+      const char *qualified = index.symbol_name_at (nc_elem->idx);
+      if (strcmp (qualified, expected_syms[exp_elem]) != 0)
+	return false;
+    }
+
+  return true;
+}
+
+/* Test the lower-level mapped_index::find_name_component_bounds
+   method.  */
+
 static void
-run_test ()
+test_mapped_index_find_name_component_bounds ()
+{
+  mock_mapped_index mock_index (test_symbols);
+
+  mock_index.index ().build_name_components ();
+
+  /* Test the lower-level mapped_index::find_name_component_bounds
+     method in completion mode.  */
+  {
+    static const char *expected_syms[] = {
+      "t1_func",
+      "t1_func1",
+      "t1_fund", /* This one's incorrect.  */
+    };
+
+    SELF_CHECK (check_find_bounds_finds (mock_index.index (),
+					 "t1_func", expected_syms));
+  }
+
+  /* Check that the increment-last-char in the name matching algorithm
+     for completion doesn't get confused with Ansi1 'ÿ' / 0xff.  */
+  {
+    static const char *expected_syms1[] = {
+      "\377",
+      "\377\377123",
+    };
+    SELF_CHECK (check_find_bounds_finds (mock_index.index (),
+					 "\377", expected_syms1));
+
+    static const char *expected_syms2[] = {
+      "\377\377123",
+    };
+    SELF_CHECK (check_find_bounds_finds (mock_index.index (),
+					 "\377\377", expected_syms2));
+  }
+}
+
+/* Test dw2_expand_symtabs_matching_symbol.  */
+
+static void
+test_dw2_expand_symtabs_matching_symbol ()
 {
   mock_mapped_index mock_index (test_symbols);
 
@@ -4751,6 +4863,13 @@ run_test ()
 
 #undef EXPECT
 #undef CHECK_MATCH
+}
+
+static void
+run_test ()
+{
+  test_mapped_index_find_name_component_bounds ();
+  test_dw2_expand_symtabs_matching_symbol ();
 }
 
 }} // namespace selftests::dw2_expand_symtabs_matching

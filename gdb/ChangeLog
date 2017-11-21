@@ -1,5 +1,19 @@
 2017-11-21  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (mapped_index::name_components_casing): New field.
+	(mapped_index) <build_name_components,
+	find_name_components_bounds): Declare new methods.
+	(mapped_index::find_name_components_bounds)
+	(mapped_index::build_name_components): New methods, factored out
+	from dw2_expand_symtabs_matching_symbol.
+	(check_find_bounds_finds)
+	(test_mapped_index_find_name_component_bounds): New.
+	(run_test): Rename to ...
+	(test_dw2_expand_symtabs_matching_symbol): ... this.
+	(run_test): Reimplement.
+
+2017-11-21  Pedro Alves  <palves@redhat.com>
+
 	* cp-name-parser.y (cp_ident_is_alpha, cp_ident_is_alnum): New.
 	(symbol_end): Use cp_ident_is_alnum.
 	(yylex): Use cp_ident_is_alpha and cp_ident_is_alnum.
