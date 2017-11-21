@@ -1,5 +1,10 @@
 2017-11-27  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (YYFILES): Update comment.
+	(YYOBJ): Redefine.
+
+2017-11-27  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (SUBDIR_PYTHON_OBS): Redefine.
 	(CONFIG_SRC_SUBDIR): Add python.
 	(%.o): Remove python rule.

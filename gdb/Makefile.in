@@ -1753,7 +1753,7 @@ CLEANDIRS = $(SUBDIRS)
 # The format here is for the `case' shell command.
 REQUIRED_SUBDIRS = doc | testsuite | $(GNULIB_BUILDDIR) | data-directory
 
-# For now, shortcut the "configure GDB for fewer languages" stuff.
+# Parser intermediate files.
 YYFILES = \
 	ada-exp.c \
 	ada-lex.c \
@@ -1766,16 +1766,9 @@ YYFILES = \
 	p-exp.c \
 	rust-exp.c
 
-YYOBJ = \
-	ada-exp.o \
-	c-exp.o \
-	cp-name-parser.o \
-	d-exp.o \
-	f-exp.o \
-	go-exp.o \
-	m2-exp.o \
-	p-exp.o \
-	rust-exp.o
+# ada-lex.c is included by another file, so it shouldn't wind up as a
+# .o itself.
+YYOBJ = $(filter-out ada-lex.o,$(patsubst %.c,%.o,$(YYFILES)))
 
 # Things which need to be built when making a distribution.
 
