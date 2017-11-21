@@ -6084,7 +6084,7 @@ process_section_headers (Filedata * filedata)
 		|| do_debug_lines || do_debug_pubnames || do_debug_pubtypes
 		|| do_debug_aranges || do_debug_frames || do_debug_macinfo
 		|| do_debug_str || do_debug_loc || do_debug_ranges
-		|| do_debug_addr || do_debug_cu_index)
+		|| do_debug_addr || do_debug_cu_index || do_debug_links)
 	       && (const_strneq (name, ".debug_")
                    || const_strneq (name, ".zdebug_")))
 	{
@@ -13658,40 +13658,43 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, Filedata * fileda
 
   /* See if we know how to display the contents of this section.  */
   for (i = 0; i < max; i++)
-    if (streq (debug_displays[i].section.uncompressed_name, name)
-	|| (i == line && const_strneq (name, ".debug_line."))
-        || streq (debug_displays[i].section.compressed_name, name))
-      {
-	struct dwarf_section * sec = &debug_displays [i].section;
-	int secondary = (section != find_section (filedata, name));
+    {
+      enum dwarf_section_display_enum  id = (enum dwarf_section_display_enum) i;
+      struct dwarf_section_display *   display = debug_displays + i;
+      struct dwarf_section *           sec = & display->section;
 
-	if (secondary)
-	  free_debug_section ((enum dwarf_section_display_enum) i);
+      if (streq (sec->uncompressed_name, name)
+	  || (id == line && const_strneq (name, ".debug_line."))
+	  || streq (sec->compressed_name, name))
+	{
+	  bfd_boolean secondary = (section != find_section (filedata, name));
 
-	if (i == line && const_strneq (name, ".debug_line."))
-	  sec->name = name;
-	else if (streq (sec->uncompressed_name, name))
-	  sec->name = sec->uncompressed_name;
-	else
-	  sec->name = sec->compressed_name;
+	  if (secondary)
+	    free_debug_section (id);
 
-	if (load_specific_debug_section ((enum dwarf_section_display_enum) i,
-                                         section, filedata))
-	  {
-	    /* If this debug section is part of a CU/TU set in a .dwp file,
-	       restrict load_debug_section to the sections in that set.  */
-	    section_subset = find_cu_tu_set (filedata, shndx);
+	  if (i == line && const_strneq (name, ".debug_line."))
+	    sec->name = name;
+	  else if (streq (sec->uncompressed_name, name))
+	    sec->name = sec->uncompressed_name;
+	  else
+	    sec->name = sec->compressed_name;
 
-	    result &= debug_displays[i].display (sec, filedata);
+	  if (load_specific_debug_section (id, section, filedata))
+	    {
+	      /* If this debug section is part of a CU/TU set in a .dwp file,
+		 restrict load_debug_section to the sections in that set.  */
+	      section_subset = find_cu_tu_set (filedata, shndx);
 
-	    section_subset = NULL;
+	      result &= display->display (sec, filedata);
 
-	    if (secondary || (i != info && i != abbrev))
-	      free_debug_section ((enum dwarf_section_display_enum) i);
-	  }
+	      section_subset = NULL;
 
-	break;
-      }
+	      if (secondary || (id != info && id != abbrev))
+		free_debug_section (id);
+	    }
+	  break;
+	}
+    }
 
   if (i == max)
     {

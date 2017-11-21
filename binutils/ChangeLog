@@ -1,3 +1,24 @@
+2017-11-21  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (dwo_name, dwo_dir, dwo_id, dwo_id_len): New variables.
+	(read_and_display_attr_value): Record dwo variables if requested.
+	(display_augmentation_data): Rename to display_data and make
+	generic.
+	(load_dwo_file): New function.  Loads a separate dwarf object
+	file.
+	(load_separate_debug_file): Add reporting and loading of separate
+	dwarf objet files.
+	* readelf.c (process_section_headers): Add do_debug_links to list
+	of flags requiring a debug dump.
+	(display_debug_section): Tidy up code.
+	* doc/debug.options.texi: Add note that dwo links will also be
+	followed.
+	* testsuite/binutils-all/debuglink.s: Tidy code.
+	* testsuite/binutils-all/dwo.s: New test file.
+	* testsuite/binutils-all/readelf.wk2: New file - expected output
+	from readelf.
+	* testsuite/binutils-all/readelf.exp: Run the new test.
+
 2017-11-18  Alan Modra  <amodra@gmail.com>
 
 	PR 22443

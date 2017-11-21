@@ -1,5 +1,5 @@
 /* Assembler source used to create an object file for testing readelf's
-   and objdump's ability to process separate debug information files.
+   and objdump's ability to process separate dwarf object files.
 
    Copyright (C) 2017 Free Software Foundation, Inc.
 
@@ -17,35 +17,21 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 	
-	/* Create a fake .gnu_debuglink section.  */
-
-	.section .gnu_debuglink,"",%progbits
-	.asciz "this_is_a_debuglink.debug"
-	.balign 4
-	.4byte 0x12345678
-
-	/* Create a fake .gnu_debugaltlink section.  */
-
-	.section .gnu_debugaltlink,"",%progbits
-	.asciz "linkdebug.debug"
-	.dc.b 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77
-	.dc.b 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff
-	.dc.b 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef
-   
 	/* Create a .debug_str section for local use.  This is also to check
 	   the ability to dump the same section twice, if it exists in
 	   both the main file and the separate debug info file.  */
 
 	.section	.debug_str,"MS",%progbits,1
 string1:
-	.asciz	"string-1"
-	.asciz  "string-2"
+	.asciz	"debugfile.dwo"
+string2:
+	.asciz  "/path/to/dwo/files"
+string3:
+	.asciz  "/another/path/"
 	.balign	2
 string_end:
 	
-	/* Create a .debug_info section that contains string references into
-	   the separate debug info file.  Plus the abbreviations are stored
-	   in the separate file too...  */
+	/* Create a .debug_info section that contains the dwo links.  */
 
 	.section	.debug_info,"",%progbits
 	.4byte	debugE - debugS	;# Length of Compilation Unit Info
@@ -54,14 +40,45 @@ debugS:
 	.4byte	0x0	;# Offset into .debug_abbrev section.
 	.byte	0x4	;# Pointer Size (in bytes).
 
-	.uleb128 0x1	;# Use abbrev #1.  This needs a string from the local string table.
+	.uleb128 0x1	;# Use abbrev #1.  This needs strings from the .debug_str section.
 	.4byte	string1
+	.4byte  string2
 
-	.uleb128 0x2	;# Use abbrev #2.  This needs a string from the separate string table.
-	.4byte   0x0	;# Avoid complicated expression resolution and hard code the offset...
+	.uleb128 0x2	;# Use abbrev #2.
+	.asciz   "file.dwo"
+	.4byte   string3
+	.8byte   0x12345678aabbccdd
 
 	;# Minimal section alignment on alpha-* is 2, so ensure no new invalid CU
 	;# will be started.
 	.balign	2, 0
 debugE:
+
+	.section	.debug_abbrev,"",%progbits
+
+	/* Create an abbrev containing a DWARF5 style dwo link.  */
+	.uleb128 0x01	;# Abbrev code.
+	.uleb128 0x11	;# DW_TAG_compile_unit
+	.byte	 0x00	;# DW_children_no
+	.uleb128 0x76	;# DW_AT_dwo_name
+	.uleb128 0x0e	;# DW_FORM_strp
+	.uleb128 0x1b	;# DW_AT_comp_dir
+	.uleb128 0x0e	;# DW_FORM_strp
+	.byte	 0x00	;# End of abbrev
+	.byte	 0x00
+
+	/* Create an abbrev containing a GNU style dwo link.  */
+	.uleb128 0x02	;# Abbrev code.
+	.uleb128 0x11	;# DW_TAG_compile_unit
+	.byte	 0x00	;# DW_children_no
+	.uleb128 0x2130	;# DW_AT_GNU_dwo_name
+	.uleb128 0x08	;# DW_FORM_string
+	.uleb128 0x1b	;# DW_AT_comp_dir
+	.uleb128 0x0e	;# DW_FORM_strp
+	.uleb128 0x2131	;# DW_AT_GNU_dwo_id
+	.uleb128 0x07	;# DW_FORM_data8	
+	.byte	 0x00	;# End of abbrev
+	.byte	 0x00
+
+	.byte	 0x0	;# Abbrevs terminator
 

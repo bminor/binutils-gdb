@@ -48,6 +48,12 @@ static debug_info *debug_information = NULL;
    that the .debug_info section could not be loaded/parsed.  */
 #define DEBUG_INFO_UNAVAILABLE  (unsigned int) -1
 
+static const char *           dwo_name;
+static const char *           dwo_dir;
+static const unsigned char *  dwo_id;
+static bfd_size_type          dwo_id_len;
+static bfd_boolean            need_dwo_info;
+
 unsigned int eh_addr_size;
 
 int do_debug_info;
@@ -731,7 +737,7 @@ fetch_indirect_line_string (dwarf_vma offset)
 
 static const char *
 fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
-		      dwarf_vma offset_size, int dwo)
+		      dwarf_vma offset_size, bfd_boolean dwo)
 {
   enum dwarf_section_display_enum str_sec_idx = dwo ? str_dwo : str;
   enum dwarf_section_display_enum idx_sec_idx = dwo ? str_index_dwo : str_index;
@@ -1369,21 +1375,21 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_push_object_address");
 	  break;
 	case DW_OP_call2:
-	  /* XXX: Strictly speaking for 64-bit DWARF3 files
+	  /* FIXME: Strictly speaking for 64-bit DWARF3 files
 	     this ought to be an 8-byte wide computation.  */
 	  SAFE_SIGNED_BYTE_GET_AND_INC (svalue, data, 2, end);
 	  printf ("DW_OP_call2: <0x%s>",
 		  dwarf_vmatoa ("x", svalue + cu_offset));
 	  break;
 	case DW_OP_call4:
-	  /* XXX: Strictly speaking for 64-bit DWARF3 files
+	  /* FIXME: Strictly speaking for 64-bit DWARF3 files
 	     this ought to be an 8-byte wide computation.  */
 	  SAFE_SIGNED_BYTE_GET_AND_INC (svalue, data, 4, end);
 	  printf ("DW_OP_call4: <0x%s>",
 		  dwarf_vmatoa ("x", svalue + cu_offset));
 	  break;
 	case DW_OP_call_ref:
-	  /* XXX: Strictly speaking for 64-bit DWARF3 files
+	  /* FIXME: Strictly speaking for 64-bit DWARF3 files
 	     this ought to be an 8-byte wide computation.  */
 	  if (dwarf_version == -1)
 	    {
@@ -1452,7 +1458,7 @@ decode_location_expression (unsigned char * data,
 	  break;
 	case DW_OP_implicit_pointer:
 	case DW_OP_GNU_implicit_pointer:
-	  /* XXX: Strictly speaking for 64-bit DWARF3 files
+	  /* FIXME: Strictly speaking for 64-bit DWARF3 files
 	     this ought to be an 8-byte wide computation.  */
 	  if (dwarf_version == -1)
 	    {
@@ -1713,6 +1719,32 @@ fetch_alt_indirect_string (dwarf_vma offset)
   return ret;
 }
 	
+static const char *
+get_AT_name (unsigned long attribute)
+{
+  const char *name;
+
+  if (attribute == 0)
+    return "DW_AT value: 0";
+
+  /* One value is shared by the MIPS and HP extensions:  */
+  if (attribute == DW_AT_MIPS_fde)
+    return "DW_AT_MIPS_fde or DW_AT_HP_unmodifiable";
+
+  name = get_DW_AT_name (attribute);
+
+  if (name == NULL)
+    {
+      static char buffer[100];
+
+      snprintf (buffer, sizeof (buffer), _("Unknown AT value: %lx"),
+		attribute);
+      return buffer;
+    }
+
+  return name;
+}
+
 static unsigned char *
 read_and_display_attr_value (unsigned long           attribute,
 			     unsigned long           form,
@@ -2036,8 +2068,8 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_GNU_str_index:
       if (!do_loc)
 	{
-	  const char *suffix = strrchr (section->name, '.');
-	  int dwo = (suffix && strcmp (suffix, ".dwo") == 0) ? 1 : 0;
+	  const char * suffix = strrchr (section->name, '.');
+	  bfd_boolean  dwo = (suffix && strcmp (suffix, ".dwo") == 0) ? TRUE : FALSE;
 
 	  printf (_("%c(indexed string: 0x%s): %s"), delimiter,
 		  dwarf_vmatoa ("x", uvalue),
@@ -2188,6 +2220,69 @@ read_and_display_attr_value (unsigned long           attribute,
 	    }
 	  break;
 
+	case DW_AT_GNU_dwo_name:
+	case DW_AT_dwo_name:
+	  if (need_dwo_info)
+	    switch (form)
+	      {
+	      case DW_FORM_strp:
+		dwo_name = (const char *) fetch_indirect_string (uvalue);
+		break;
+	      case DW_FORM_GNU_str_index:
+		dwo_name = fetch_indexed_string (uvalue, this_set, offset_size, FALSE);
+		break;
+	      case DW_FORM_string:
+		dwo_name = (const char *) orig_data;
+		break;
+	      default:
+		warn (_("Unsupported form (%s) for attribute %s\n"),
+		      get_FORM_name (form), get_AT_name (attribute));
+		dwo_name = _("<unknown>");
+		break;
+	      }
+	  break;
+	      
+	case DW_AT_comp_dir:
+	  /* FIXME: Also extract a build-id in a CU/TU.  */
+	  if (need_dwo_info)
+	    switch (form)
+	      {
+	      case DW_FORM_strp:
+		dwo_dir = (const char *) fetch_indirect_string (uvalue);
+		break;
+	      case DW_FORM_line_strp:
+		dwo_dir = (const char *) fetch_indirect_line_string (uvalue);
+		break;
+	      case DW_FORM_GNU_str_index:
+		dwo_dir = fetch_indexed_string (uvalue, this_set, offset_size, FALSE);
+		break;
+	      case DW_FORM_string:
+		dwo_dir = (const char *) orig_data;
+		break;
+	      default:
+		warn (_("Unsupported form (%s) for attribute %s\n"),
+		      get_FORM_name (form), get_AT_name (attribute));
+		dwo_dir = _("<unknown>");
+		break;
+	      }
+	  break;
+	      
+	case DW_AT_GNU_dwo_id:
+	  if (need_dwo_info)
+	    switch (form)
+	      {
+	      case DW_FORM_data8:
+		dwo_id = data - 8;
+		dwo_id_len = 8;
+		break;
+	      default:
+		warn (_("Unsupported form (%s) for attribute %s\n"),
+		      get_FORM_name (form), get_AT_name (attribute));
+		dwo_id = NULL;
+		break;
+	      }
+	  break;
+	      
 	default:
 	  break;
 	}
@@ -2540,32 +2635,6 @@ read_and_display_attr_value (unsigned long           attribute,
   return data;
 }
 
-static const char *
-get_AT_name (unsigned long attribute)
-{
-  const char *name;
-
-  if (attribute == 0)
-    return "DW_AT value: 0";
-
-  /* One value is shared by the MIPS and HP extensions:  */
-  if (attribute == DW_AT_MIPS_fde)
-    return "DW_AT_MIPS_fde or DW_AT_HP_unmodifiable";
-
-  name = get_DW_AT_name (attribute);
-
-  if (name == NULL)
-    {
-      static char buffer[100];
-
-      snprintf (buffer, sizeof (buffer), _("Unknown AT value: %lx"),
-		attribute);
-      return buffer;
-    }
-
-  return name;
-}
-
 static unsigned char *
 read_and_display_attr (unsigned long           attribute,
 		       unsigned long           form,
@@ -2642,17 +2711,22 @@ introduce (struct dwarf_section * section, bfd_boolean raw)
     }
 }
   
-/* Process the contents of a .debug_info section.  If do_loc is non-zero
-   then we are scanning for location lists and we do not want to display
-   anything to the user.  If do_types is non-zero, we are processing
-   a .debug_types section instead of a .debug_info section.  */
+/* Process the contents of a .debug_info section.
+   If do_loc is TRUE then we are scanning for location lists and dwo tags
+   and we do not want to display anything to the user.
+   If do_types is TRUE, we are processing a .debug_types section instead of
+   a .debug_info section.
+   The information displayed is restricted by the values in DWARF_START_DIE
+   and DWARF_CUTOFF_LEVEL.
+   Returns TRUE upon success.  Otherwise an error or warning message is
+   printed and FALSE is returned.  */
 
-static int
-process_debug_info (struct dwarf_section *section,
-		    void *file,
-		    enum dwarf_section_display_enum abbrev_sec,
-		    int do_loc,
-		    int do_types)
+static bfd_boolean
+process_debug_info (struct dwarf_section *           section,
+		    void *                           file,
+		    enum dwarf_section_display_enum  abbrev_sec,
+		    bfd_boolean                      do_loc,
+		    bfd_boolean                      do_types)
 {
   unsigned char *start = section->start;
   unsigned char *end = start + section->size;
@@ -2684,7 +2758,7 @@ process_debug_info (struct dwarf_section *section,
 	    {
 	      warn (_("Reserved length value (0x%s) found in section %s\n"),
 		    dwarf_vmatoa ("x", length), section->name);
-	      return 0;
+	      return FALSE;
 	    }
 	  else
 	    section_begin += length + 4;
@@ -2696,14 +2770,14 @@ process_debug_info (struct dwarf_section *section,
 	    {
 	      warn (_("Corrupt unit length (0x%s) found in section %s\n"),
 		    dwarf_vmatoa ("x", length), section->name);
-	      return 0;
+	      return FALSE;
 	    }
 	}
 
       if (num_units == 0)
 	{
 	  error (_("No comp units in %s section ?\n"), section->name);
-	  return 0;
+	  return FALSE;
 	}
 
       /* Then allocate an array to hold the information.  */
@@ -2714,8 +2788,9 @@ process_debug_info (struct dwarf_section *section,
 	  error (_("Not enough memory for a debug info array of %u entries\n"),
 		 num_units);
 	  alloc_num_debug_info_entries = num_debug_info_entries = 0;
-	  return 0;
+	  return FALSE;
 	}
+
       /* PR 17531: file: 92ca3797.
 	 We cannot rely upon the debug_information array being initialised
 	 before it is used.  A corrupt file could easily contain references
@@ -2741,7 +2816,7 @@ process_debug_info (struct dwarf_section *section,
     {
       warn (_("Unable to locate %s section!\n"),
 	    debug_displays [abbrev_sec].section.uncompressed_name);
-      return 0;
+      return FALSE;
     }
 
   if (!do_loc && dwarf_start_die == 0)
@@ -3008,7 +3083,7 @@ process_debug_info (struct dwarf_section *section,
 		    }
 		}
 	      if (dwarf_start_die != 0 && level < saved_level)
-		return 1;
+		return TRUE;
 	      continue;
 	    }
 
@@ -3048,7 +3123,7 @@ process_debug_info (struct dwarf_section *section,
 		}
 	      warn (_("DIE at offset 0x%lx refers to abbreviation number %lu which does not exist\n"),
 		    die_offset, abbrev_number);
-	      return 0;
+	      return FALSE;
 	    }
 
 	  if (!do_loc && do_printing)
@@ -3060,7 +3135,8 @@ process_debug_info (struct dwarf_section *section,
 	      need_base_address = 0;
 	      break;
 	    case DW_TAG_compile_unit:
-	      need_base_address = 1;
+	      need_base_address = 1;	
+	      need_dwo_info = do_loc;
 	      break;
 	    case DW_TAG_entry_point:
 	    case DW_TAG_subprogram:
@@ -3146,7 +3222,7 @@ process_debug_info (struct dwarf_section *section,
   if (!do_loc)
     printf ("\n");
 
-  return 1;
+  return TRUE;
 }
 
 /* Locate and scan the .debug_info section in the file and record the pointer
@@ -3171,12 +3247,12 @@ load_debug_info (void * file)
   (void) load_cu_tu_indexes (file);
 
   if (load_debug_section_with_follow (info, file)
-      && process_debug_info (&debug_displays [info].section, file, abbrev, 1, 0))
+      && process_debug_info (&debug_displays [info].section, file, abbrev, TRUE, FALSE))
     return num_debug_info_entries;
 
   if (load_debug_section_with_follow (info_dwo, file)
       && process_debug_info (&debug_displays [info_dwo].section, file,
-			     abbrev_dwo, 1, 0))
+			     abbrev_dwo, TRUE, FALSE))
     return num_debug_info_entries;
 
   num_debug_info_entries = DEBUG_INFO_UNAVAILABLE;
@@ -6161,19 +6237,19 @@ display_debug_str (struct dwarf_section *section,
 static int
 display_debug_info (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, section->abbrev_sec, 0, 0);
+  return process_debug_info (section, file, section->abbrev_sec, FALSE, FALSE);
 }
 
 static int
 display_debug_types (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, section->abbrev_sec, 0, 1);
+  return process_debug_info (section, file, section->abbrev_sec, FALSE, TRUE);
 }
 
 static int
 display_trace_info (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, section->abbrev_sec, 0, 0);
+  return process_debug_info (section, file, section->abbrev_sec, FALSE, TRUE);
 }
 
 static int
@@ -7227,6 +7303,30 @@ read_cie (unsigned char *start, unsigned char *end,
   return start;
 }
 
+/* Prints out the contents on the DATA array formatted as unsigned bytes.
+   If do_wide is not enabled, then formats the output to fit into 80 columns.
+   PRINTED contains the number of characters already written to the current
+   output line.  */
+
+static void
+display_data (bfd_size_type          printed,
+	      const unsigned char *  data,
+	      const bfd_size_type    len)
+{
+  if (do_wide || len < ((80 - printed) / 3))
+    for (printed = 0; printed < len; ++printed)
+      printf (" %02x", data[printed]);
+  else
+    {
+      for (printed = 0; printed < len; ++printed)
+	{
+	  if (printed % (80 / 3) == 0)
+	    putchar ('\n');
+	  printf (" %02x", data[printed]);
+	}
+    }
+}
+
 /* Prints out the contents on the augmentation data array.
    If do_wide is not enabled, then formats the output to fit into 80 columns.  */
 
@@ -7236,20 +7336,7 @@ display_augmentation_data (const unsigned char * data, const bfd_size_type len)
   bfd_size_type i;
 
   i = printf (_("  Augmentation data:    "));
-
-  if (do_wide || len < ((80 - i) / 3))
-    for (i = 0; i < len; ++i)
-      printf (" %02x", data[i]);
-  else
-    {
-      for (i = 0; i < len; ++i)
-	{
-	  if (i % (80 / 3) == 0)
-	    putchar ('\n');
-	  printf (" %02x", data[i]);
-	}
-    }
-  putchar ('\n');
+  display_data (i, data, len);
 }
 
 static int
@@ -8550,8 +8637,8 @@ display_debug_names (struct dwarf_section *section, void *file)
 }
 
 static int
-display_debug_links (struct dwarf_section * section,
-		     void * file ATTRIBUTE_UNUSED)
+display_debug_links (struct dwarf_section *  section,
+		     void *                  file ATTRIBUTE_UNUSED)
 {
   const unsigned char * filename;
   unsigned int          filelen;
@@ -8615,19 +8702,7 @@ display_debug_links (struct dwarf_section * section,
 	}
 
       printed = printf (_("  Build-ID (%#lx bytes):"), (long) build_id_len);
-
-      if (do_wide || build_id_len < ((80 - printed) / 3))
-	for (printed = 0; printed < build_id_len; ++printed)
-	  printf (" %02x", build_id[printed]);
-      else
-	{
-	  for (printed = 0; printed < build_id_len; ++printed)
-	    {
-	      if (printed % (80 / 3) == 0)
-		putchar ('\n');
-	      printf (" %02x", build_id[printed]);
-	    }
-	}
+      display_data (printed, build_id, build_id_len);
       putchar ('\n');
     }
 
@@ -9723,21 +9798,84 @@ load_separate_debug_info (const char *            main_filename,
   return separate_debug_file;
 }
 
+/* Attempt to load a separate dwarf object file.  */
+
+static void *
+load_dwo_file (const char * main_filename)
+{
+  char * filename;
+
+  /* FIXME: Skip adding / if dwo_dir ends in /.  */
+  filename = concat (dwo_dir, "/", dwo_name, NULL);
+  if (filename == NULL)
+    {
+      warn (_("Out of memory allocating dwo filename\n"));
+      return NULL;
+    }
+
+  if ((separate_debug_file = open_debug_file (filename)) == NULL)
+    {
+      warn (_("Unable to load dwo file: %s\n"), filename);
+      free (filename);
+      return NULL;
+    }
+
+  /* FIXME: We should check the dwo_id.  */
+
+  printf (_("%s: Found separate debug object file: %s\n\n"), main_filename, filename);
+  separate_debug_filename = filename;
+  return separate_debug_file;
+}
+
 /* Load a separate debug info file, if it exists.
    Returns the data pointer that is the result of calling open_debug_file
-   on the separate debug info file.  */
+   on the separate debug info file, or NULL if there were problems or there
+   is no such file.  */
 
 void *
 load_separate_debug_file (void * file, const char * filename)
 {
+  /* See if there is a dwo link.  */
+  if (load_debug_section (str, file)
+      && load_debug_section (abbrev, file)
+      && load_debug_section (info, file))
+    {
+      dwo_name = dwo_dir = NULL;
+      dwo_id = NULL;
+      dwo_id_len = 0;
+
+      if (process_debug_info (& debug_displays[info].section, file, abbrev, TRUE, FALSE))
+	{
+	  if (dwo_name != NULL)
+	    {
+	      if (do_debug_links)
+		{
+		  printf (_("The %s section contains a link to a dwo file:\n"),
+			  debug_displays [info].section.uncompressed_name);
+		  printf (_("  Name:      %s\n"), dwo_name);
+		  printf (_("  Directory: %s\n"), dwo_dir ? dwo_dir : _("<not-found>"));
+		  if (dwo_id != NULL)
+		    display_data (printf (_("  ID:       ")), dwo_id, dwo_id_len);
+		  else
+		    printf (_("  ID: <unknown>\n"));
+		  printf ("\n\n");
+		}
+
+	      /* FIXME: We do not check to see if there are any more dwo links in the file...  */
+	      if (do_follow_links)
+		return load_dwo_file (filename);
+	    }
+	}
+    }
+
   if (! do_follow_links)
     return NULL;
 
   /* FIXME: We do not check for the presence of both link sections in the same file.  */
   /* FIXME: We do not check the separate debug info file to see if it too contains debuglinks.  */
   /* FIXME: We do not check for the presence of multiple, same-name debuglink sections.  */
+  /* FIXME: We do not check for the presence of a dwo link as well as a debuglink.  */
 
-  /* We try the alt version first as that is blessed by the DWARF5 standard.  */
   if (load_debug_section (gnu_debugaltlink, file))
     {
       Build_id_data * build_id_data;
