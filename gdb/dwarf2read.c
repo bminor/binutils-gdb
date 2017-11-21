@@ -4339,8 +4339,8 @@ mapped_index::find_name_components_bounds
 	  std::string after = make_sort_after_prefix_name (cplus);
 	  if (after.empty ())
 	    return end;
-	  return std::upper_bound (lower, end, after.c_str (),
-				   lookup_compare_upper);
+	  return std::lower_bound (lower, end, after.c_str (),
+				   lookup_compare_lower);
 	}
       else
 	return std::upper_bound (lower, end, cplus, lookup_compare_upper);
@@ -4680,7 +4680,6 @@ test_mapped_index_find_name_component_bounds ()
     static const char *expected_syms[] = {
       "t1_func",
       "t1_func1",
-      "t1_fund", /* This one's incorrect.  */
     };
 
     SELF_CHECK (check_find_bounds_finds (mock_index.index (),

@@ -1,5 +1,13 @@
 2017-11-21  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (mapped_index::find_name_components_bounds)
+	<completion mode, upper bound>: Use std::lower_bound instead of
+	std::upper_bound.
+	(test_mapped_index_find_name_component_bounds): Remove incorrect
+	"t1_fund" from expected symbols.
+
+2017-11-21  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (mapped_index::name_components_casing): New field.
 	(mapped_index) <build_name_components,
 	find_name_components_bounds): Declare new methods.
