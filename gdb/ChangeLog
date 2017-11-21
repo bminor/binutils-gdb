@@ -1,5 +1,11 @@
 2017-11-27  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (SUBDIR_CLI_OBS): Redefine.
+	(%.o): Remove cli rule.
+	(CONFIG_SRC_SUBDIR): Add cli.
+
+2017-11-27  Tom Tromey  <tom@tromey.com>
+
 	* configure.ac (CONFIG_SRC_SUBDIR): Don't subst.
 	* configure: Rebuild.
 	* Makefile.in (CONFIG_SRC_SUBDIR): Redefine.

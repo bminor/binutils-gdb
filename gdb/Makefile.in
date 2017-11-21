@@ -235,16 +235,6 @@ GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
 #
 # CLI sub directory definitons
 #
-SUBDIR_CLI_OBS = \
-	cli-cmds.o \
-	cli-decode.o \
-	cli-dump.o \
-	cli-interp.o \
-	cli-logging.o \
-	cli-script.o \
-	cli-setshow.o \
-	cli-utils.o
-
 SUBDIR_CLI_SRCS = \
 	cli/cli-cmds.c \
 	cli/cli-decode.c \
@@ -254,6 +244,8 @@ SUBDIR_CLI_SRCS = \
 	cli/cli-script.c \
 	cli/cli-setshow.c \
 	cli/cli-utils.c
+
+SUBDIR_CLI_OBS = $(patsubst %.c,%.o,$(SUBDIR_CLI_SRCS))
 
 SUBDIR_CLI_DEPS =
 SUBDIR_CLI_LDFLAGS =
@@ -647,7 +639,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch
+CONFIG_SRC_SUBDIR = arch cli
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
 # -I. for config files.
@@ -1938,10 +1930,6 @@ $(CONFIG_DEP_SUBDIR):
 	$(SHELL) $(srcdir)/../mkinstalldirs $@
 
 # Rules for compiling .c files in the various source subdirectories.
-%.o: $(srcdir)/cli/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 %.o: ${srcdir}/common/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
