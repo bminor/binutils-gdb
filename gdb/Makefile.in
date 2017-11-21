@@ -645,8 +645,10 @@ CONFIG_ALL = @CONFIG_ALL@
 CONFIG_CLEAN = @CONFIG_CLEAN@
 CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
-CONFIG_SRC_SUBDIR = @CONFIG_SRC_SUBDIR@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
+
+CONFIG_SRC_SUBDIR = arch
+CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
 # -I. for config files.
 # -I$(srcdir) for gdb internal headers.
@@ -1927,9 +1929,13 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
 # Rule for compiling .c files in the top-level gdb directory.
-%.o: %.c
+# The order-only dependencies ensure that we create the build subdirectories.
+%.o: %.c | $(CONFIG_DEP_SUBDIR)
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+
+$(CONFIG_DEP_SUBDIR):
+	$(SHELL) $(srcdir)/../mkinstalldirs $@
 
 # Rules for compiling .c files in the various source subdirectories.
 %.o: $(srcdir)/cli/%.c

@@ -1,3 +1,12 @@
+2017-11-27  Tom Tromey  <tom@tromey.com>
+
+	* configure.ac (CONFIG_SRC_SUBDIR): Don't subst.
+	* configure: Rebuild.
+	* Makefile.in (CONFIG_SRC_SUBDIR): Redefine.
+	(CONFIG_DEP_SUBDIR): New variable.
+	(%.o): Add order-only dependency.
+	($(CONFIG_DEP_SUBDIR)): New target.
+
 2017-11-26  Dominik Czarnota  <dominik.b.czarnota@gmail.com>
 
 	PR gdb/21945
