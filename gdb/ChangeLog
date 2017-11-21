@@ -1,5 +1,11 @@
 2017-11-27  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (SUBDIR_UNITTESTS_OBS): Redefine.
+	(%.o): Remove unittests rule.
+	(CONFIG_SRC_SUBDIR): Add unittests.
+
+2017-11-27  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (SUBDIR_TUI_OBS): Redefine.
 	(CONFIG_SRC_SUBDIR): Add tui.
 	(%.o): Remove tui rule.
