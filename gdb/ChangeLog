@@ -1,5 +1,13 @@
 2017-11-21  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.h (struct ada_task_info) <base_cpu>: New field.
+	* ada-lang.c (struct atcb_fieldno) <base_cpu>: New field.
+	(get_tcb_types_info): Set fieldnos.base_cpu.
+	(read_atcb): Set task_info->base_cpu.
+	(info_task): Print "Base CPU" info if set by runtime.
+
+2017-11-21  Joel Brobecker  <brobecker@adacore.com>
+
 	* ravenscar-thread.c (ravenscar_stopped_by_sw_breakpoint)
 	(ravenscar_stopped_by_hw_breakpoint, ravenscar_stopped_by_watchpoint)
 	(ravenscar_stopped_data_address, ravenscar_core_of_thread):

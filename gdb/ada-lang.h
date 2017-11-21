@@ -141,6 +141,12 @@ struct ada_task_info
   /* If the task is accepting a rendezvous with another task, this field
      contains the ID of the calling task.  Zero otherwise.  */
   CORE_ADDR caller_task;
+
+  /* The CPU on which the task is running.  This is dependent on
+     the runtime actually providing that info, which is not always
+     the case.  Normally, we should be able to count on it on
+     bare-metal targets.  */
+  int base_cpu;
 };
 
 /* Assuming V points to an array of S objects,  make sure that it contains at

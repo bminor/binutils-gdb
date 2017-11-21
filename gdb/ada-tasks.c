@@ -123,6 +123,7 @@ struct atcb_fieldnos
   int activation_link;
   int call;
   int ll;
+  int base_cpu;
 
   /* Fields in Task_Primitives.Private_Data.  */
   int ll_thread;
@@ -535,6 +536,7 @@ get_tcb_types_info (void)
                                                   "activation_link", 1);
   fieldnos.call = ada_get_field_index (common_type, "call", 1);
   fieldnos.ll = ada_get_field_index (common_type, "ll", 0);
+  fieldnos.base_cpu = ada_get_field_index (common_type, "base_cpu", 0);
   fieldnos.ll_thread = ada_get_field_index (ll_type, "thread", 0);
   fieldnos.ll_lwp = ada_get_field_index (ll_type, "lwp", 1);
   fieldnos.call_self = ada_get_field_index (call_type, "self", 0);
@@ -747,6 +749,10 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
 	      (value_field (call_val, pspace_data->atcb_fieldno.call_self));
         }
     }
+
+  task_info->base_cpu
+    = value_as_long (value_field (common_value,
+				  pspace_data->atcb_fieldno.base_cpu));
 
   /* And finally, compute the task ptid.  Note that there are situations
      where this cannot be determined:
@@ -1178,6 +1184,10 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
   /* Print the TID and LWP.  */
   printf_filtered (_("Thread: %#lx\n"), ptid_get_tid (task_info->ptid));
   printf_filtered (_("LWP: %#lx\n"), ptid_get_lwp (task_info->ptid));
+
+  /* If set, print the base CPU.  */
+  if (task_info->base_cpu != 0)
+    printf_filtered (_("Base CPU: %d\n"), task_info->base_cpu);
 
   /* Print who is the parent (if any).  */
   if (task_info->parent != 0)
