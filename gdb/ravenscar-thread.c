@@ -326,6 +326,66 @@ ravenscar_prepare_to_store (struct target_ops *self,
     }
 }
 
+/* Implement the to_stopped_by_sw_breakpoint target_ops "method".  */
+
+static int
+ravenscar_stopped_by_sw_breakpoint (struct target_ops *ops)
+{
+  ptid_t saved_ptid = inferior_ptid;
+  struct target_ops *beneath = find_target_beneath (ops);
+  int result;
+
+  inferior_ptid = base_ptid;
+  result = beneath->to_stopped_by_sw_breakpoint (beneath);
+  inferior_ptid = saved_ptid;
+  return result;
+}
+
+/* Implement the to_stopped_by_hw_breakpoint target_ops "method".  */
+
+static int
+ravenscar_stopped_by_hw_breakpoint (struct target_ops *ops)
+{
+  ptid_t saved_ptid = inferior_ptid;
+  struct target_ops *beneath = find_target_beneath (ops);
+  int result;
+
+  inferior_ptid = base_ptid;
+  result = beneath->to_stopped_by_hw_breakpoint (beneath);
+  inferior_ptid = saved_ptid;
+  return result;
+}
+
+/* Implement the to_stopped_by_watchpoint target_ops "method".  */
+
+static int
+ravenscar_stopped_by_watchpoint (struct target_ops *ops)
+{
+  ptid_t saved_ptid = inferior_ptid;
+  struct target_ops *beneath = find_target_beneath (ops);
+  int result;
+
+  inferior_ptid = base_ptid;
+  result = beneath->to_stopped_by_watchpoint (beneath);
+  inferior_ptid = saved_ptid;
+  return result;
+}
+
+/* Implement the to_stopped_data_address target_ops "method".  */
+
+static int
+ravenscar_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
+{
+  ptid_t saved_ptid = inferior_ptid;
+  struct target_ops *beneath = find_target_beneath (ops);
+  int result;
+
+  inferior_ptid = base_ptid;
+  result = beneath->to_stopped_data_address (beneath, addr_p);
+  inferior_ptid = saved_ptid;
+  return result;
+}
+
 static void
 ravenscar_mourn_inferior (struct target_ops *ops)
 {
@@ -334,6 +394,21 @@ ravenscar_mourn_inferior (struct target_ops *ops)
   base_ptid = null_ptid;
   beneath->to_mourn_inferior (beneath);
   unpush_target (&ravenscar_ops);
+}
+
+/* Implement the to_core_of_thread target_ops "method".  */
+
+static int
+ravenscar_core_of_thread (struct target_ops *ops, ptid_t ptid)
+{
+  ptid_t saved_ptid = inferior_ptid;
+  struct target_ops *beneath = find_target_beneath (ops);
+  int result;
+
+  inferior_ptid = base_ptid;
+  result = beneath->to_core_of_thread (beneath, inferior_ptid);
+  inferior_ptid = saved_ptid;
+  return result;
 }
 
 /* Observer on inferior_created: push ravenscar thread stratum if needed.  */
@@ -369,6 +444,12 @@ init_ravenscar_thread_ops (void)
   ravenscar_ops.to_fetch_registers = ravenscar_fetch_registers;
   ravenscar_ops.to_store_registers = ravenscar_store_registers;
   ravenscar_ops.to_prepare_to_store = ravenscar_prepare_to_store;
+  ravenscar_ops.to_stopped_by_sw_breakpoint
+    = ravenscar_stopped_by_sw_breakpoint;
+  ravenscar_ops.to_stopped_by_hw_breakpoint
+    = ravenscar_stopped_by_hw_breakpoint;
+  ravenscar_ops.to_stopped_by_watchpoint = ravenscar_stopped_by_watchpoint;
+  ravenscar_ops.to_stopped_data_address = ravenscar_stopped_data_address;
   ravenscar_ops.to_thread_alive = ravenscar_thread_alive;
   ravenscar_ops.to_update_thread_list = ravenscar_update_thread_list;
   ravenscar_ops.to_pid_to_str = ravenscar_pid_to_str;
@@ -381,6 +462,7 @@ init_ravenscar_thread_ops (void)
   ravenscar_ops.to_has_registers = default_child_has_registers;
   ravenscar_ops.to_has_execution = default_child_has_execution;
   ravenscar_ops.to_stratum = thread_stratum;
+  ravenscar_ops.to_core_of_thread = ravenscar_core_of_thread;
   ravenscar_ops.to_magic = OPS_MAGIC;
 }
 

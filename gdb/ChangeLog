@@ -1,3 +1,14 @@
+2017-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_stopped_by_sw_breakpoint)
+	(ravenscar_stopped_by_hw_breakpoint, ravenscar_stopped_by_watchpoint)
+	(ravenscar_stopped_data_address, ravenscar_core_of_thread):
+	New functions.
+	(init_ravenscar_thread_ops): Set the to_stopped_by_sw_breakpoint,
+	to_stopped_by_hw_breakpoint, to_stopped_by_watchpoint,
+	to_stopped_data_address and to_core_of_thread fields of
+	ravenscar_ops.
+
 2017-11-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-tdep.h (enum powerpc_long_double_abi): New data type.
