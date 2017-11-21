@@ -1,3 +1,13 @@
+2017-11-21  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (cp_ident_is_alpha, cp_ident_is_alnum): New.
+	(symbol_end): Use cp_ident_is_alnum.
+	(yylex): Use cp_ident_is_alpha and cp_ident_is_alnum.
+	* dwarf2read.c (make_sort_after_prefix_name): New function.
+	(dw2_expand_symtabs_matching_symbol): Use it.
+	(test_symbols): Add more symbols.
+	(run_test): Add tests.
+
 2017-11-17  Tom Tromey  <tom@tromey.com>
 
 	* symtab.h (enum symbol_subclass_kind): New.

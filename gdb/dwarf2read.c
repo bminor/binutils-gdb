@@ -4188,6 +4188,79 @@ gdb_index_symbol_name_matcher::matches (const char *symbol_name)
   return false;
 }
 
+/* Starting from a search name, return the string that finds the upper
+   bound of all strings that start with SEARCH_NAME in a sorted name
+   list.  Returns the empty string to indicate that the upper bound is
+   the end of the list.  */
+
+static std::string
+make_sort_after_prefix_name (const char *search_name)
+{
+  /* When looking to complete "func", we find the upper bound of all
+     symbols that start with "func" by looking for where we'd insert
+     the closest string that would follow "func" in lexicographical
+     order.  Usually, that's "func"-with-last-character-incremented,
+     i.e. "fund".  Mind non-ASCII characters, though.  Usually those
+     will be UTF-8 multi-byte sequences, but we can't be certain.
+     Especially mind the 0xff character, which is a valid character in
+     non-UTF-8 source character sets (e.g. Latin1 'ÿ'), and we can't
+     rule out compilers allowing it in identifiers.  Note that
+     conveniently, strcmp/strcasecmp are specified to compare
+     characters interpreted as unsigned char.  So what we do is treat
+     the whole string as a base 256 number composed of a sequence of
+     base 256 "digits" and add 1 to it.  I.e., adding 1 to 0xff wraps
+     to 0, and carries 1 to the following more-significant position.
+     If the very first character in SEARCH_NAME ends up incremented
+     and carries/overflows, then the upper bound is the end of the
+     list.  The string after the empty string is also the empty
+     string.
+
+     Some examples of this operation:
+
+       SEARCH_NAME  => "+1" RESULT
+
+       "abc"              => "abd"
+       "ab\xff"           => "ac"
+       "\xff" "a" "\xff"  => "\xff" "b"
+       "\xff"             => ""
+       "\xff\xff"         => ""
+       ""                 => ""
+
+     Then, with these symbols for example:
+
+      func
+      func1
+      fund
+
+     completing "func" looks for symbols between "func" and
+     "func"-with-last-character-incremented, i.e. "fund" (exclusive),
+     which finds "func" and "func1", but not "fund".
+
+     And with:
+
+      funcÿ     (Latin1 'ÿ' [0xff])
+      funcÿ1
+      fund
+
+     completing "funcÿ" looks for symbols between "funcÿ" and "fund"
+     (exclusive), which finds "funcÿ" and "funcÿ1", but not "fund".
+
+     And with:
+
+      ÿÿ        (Latin1 'ÿ' [0xff])
+      ÿÿ1
+
+     completing "ÿ" or "ÿÿ" looks for symbols between between "ÿÿ" and
+     the end of the list.
+  */
+  std::string after = search_name;
+  while (!after.empty () && (unsigned char) after.back () == 0xff)
+    after.pop_back ();
+  if (!after.empty ())
+    after.back () = (unsigned char) after.back () + 1;
+  return after;
+}
+
 /* Helper for dw2_expand_symtabs_matching that works with a
    mapped_index instead of the containing objfile.  This is split to a
    separate function in order to be able to unit test the
@@ -4303,21 +4376,20 @@ dw2_expand_symtabs_matching_symbol
     {
       if (lookup_name_in.completion_mode ())
 	{
-	  /* The string frobbing below won't work if the string is
-	     empty.  We don't need it then, anyway -- if we're
-	     completing an empty string, then we want to iterate over
-	     the whole range.  */
-	  if (cplus[0] == '\0')
+	  /* In completion mode, we want UPPER to point past all
+	     symbols names that have the same prefix.  I.e., with
+	     these symbols, and completing "func":
+
+	      function        << lower bound
+	      function1
+	      other_function  << upper bound
+
+	     We find the upper bound by looking for the insertion
+	     point of "func"-with-last-character-incremented,
+	     i.e. "fund".  */
+	  std::string after = make_sort_after_prefix_name (cplus);
+	  if (after.empty ())
 	    return end;
-
-	  /* In completion mode, increment the last character because
-	     we want UPPER to point past all symbols names that have
-	     the same prefix.  */
-	  std::string after = cplus;
-
-	  gdb_assert (after.back () != 0xff);
-	  after.back ()++;
-
 	  return std::upper_bound (lower, end, after.c_str (),
 				   lookup_compare_upper);
 	}
@@ -4493,6 +4565,26 @@ static const char *test_symbols[] = {
   "ns::foo<int>",
   "ns::foo<long>",
 
+  /* These are used to check that the increment-last-char in the
+     matching algorithm for completion doesn't match "t1_fund" when
+     completing "t1_func".  */
+  "t1_func",
+  "t1_func1",
+  "t1_fund",
+  "t1_fund1",
+
+  /* A UTF-8 name with multi-byte sequences to make sure that
+     cp-name-parser understands this as a single identifier ("função"
+     is "function" in PT).  */
+  u8"u8função",
+
+  /* \377 (0xff) is Latin1 'ÿ'.  */
+  "yfunc\377",
+
+  /* \377 (0xff) is Latin1 'ÿ'.  */
+  "\377",
+  "\377\377123",
+
   /* A name with all sorts of complications.  Starts with "z" to make
      it easier for the completion tests below.  */
 #define Z_SYM_NAME \
@@ -4550,6 +4642,22 @@ run_test ()
       CHECK_MATCH (with_params.c_str (), symbol_name_match_type::FULL, false,
 		   {});
     }
+
+  /* Check that the name matching algorithm for completion doesn't get
+     confused with Latin1 'ÿ' / 0xff.  */
+  {
+    static const char str[] = "\377";
+    CHECK_MATCH (str, symbol_name_match_type::FULL, true,
+		 EXPECT ("\377", "\377\377123"));
+  }
+
+  /* Check that the increment-last-char in the matching algorithm for
+     completion doesn't match "t1_fund" when completing "t1_func".  */
+  {
+    static const char str[] = "t1_func";
+    CHECK_MATCH (str, symbol_name_match_type::FULL, true,
+		 EXPECT ("t1_func", "t1_func1"));
+  }
 
   /* Check that completion mode works at each prefix of the expected
      symbol name.  */
