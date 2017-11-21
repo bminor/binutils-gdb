@@ -409,6 +409,8 @@ typedef void (ada_task_list_iterator_ftype) (struct ada_task_info *task);
 extern void iterate_over_live_ada_tasks
   (ada_task_list_iterator_ftype *iterator);
 
+extern const char *ada_get_tcb_types_info (void);
+
 extern int ada_build_task_list (void);
 
 extern void print_ada_task_info (struct ui_out *uiout,

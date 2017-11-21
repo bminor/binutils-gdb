@@ -1,5 +1,16 @@
 2017-11-21  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.h (ada_get_tcb_types_info): Add declaration.
+	* ada-tasks.c (ada_get_tcb_types_info): Renames get_tcb_types_info.
+	Make non-static.  Change return type to char *.  Adjust code
+	accordingly.  Rewrite the function's documentation.
+	(read_atcb): Adjust call to get_tcb_types_info accordingly.
+	* ravenscar-thread.c (ravenscar_inferior_created): Check that
+	we have enough debugging information in the runtime to support
+	Ada task debugging before we enable the ravenscar-thread layer.
+
+2017-11-21  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (ada_get_task_info_from_ptid): Add declaration.
 	* ada-tasks.c (ada_get_task_info_from_ptid): New function.
 	* ravenscar-thread.c: Add into comment.

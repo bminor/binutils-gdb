@@ -519,11 +519,19 @@ ravenscar_core_of_thread (struct target_ops *ops, ptid_t ptid)
 static void
 ravenscar_inferior_created (struct target_ops *target, int from_tty)
 {
+  const char *err_msg;
 
   if (!ravenscar_task_support
       || gdbarch_ravenscar_ops (target_gdbarch ()) == NULL
       || !has_ravenscar_runtime ())
     return;
+
+  err_msg = ada_get_tcb_types_info ();
+  if (err_msg != NULL)
+    {
+      warning (_("%s. Task/thread support disabled.\n"), err_msg);
+      return;
+    }
 
   ravenscar_update_inferior_ptid ();
   push_target (&ravenscar_ops);

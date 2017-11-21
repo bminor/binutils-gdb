@@ -466,18 +466,17 @@ read_fat_string_value (char *dest, struct value *val, int max_len)
   dest[len] = '\0';
 }
 
-/* Get from the debugging information the type description of all types
-   related to the Ada Task Control Block that will be needed in order to
-   read the list of known tasks in the Ada runtime.  Also return the
-   associated ATCB_FIELDNOS.
+/* Get, from the debugging information, the type description of all types
+   related to the Ada Task Control Block that are needed in order to
+   read the list of known tasks in the Ada runtime.  If all of the info
+   needed to do so is found, then save that info in the module's per-
+   program-space data, and return NULL.  Otherwise, if any information
+   cannot be found, leave the per-program-space data untouched, and
+   return an error message explaining what was missing (that error
+   message does NOT need to be deallocated).  */
 
-   Error handling:  Any data missing from the debugging info will cause
-   an error to be raised, and none of the return values to be set.
-   Users of this function can depend on the fact that all or none of the
-   return values will be set.  */
-
-static void
-get_tcb_types_info (void)
+const char *
+ada_get_tcb_types_info (void)
 {
   struct type *type;
   struct type *common_type;
@@ -518,7 +517,7 @@ get_tcb_types_info (void)
 					    NULL).symbol;
 
       if (atcb_sym == NULL || atcb_sym->type == NULL)
-        error (_("Cannot find Ada_Task_Control_Block type. Aborting"));
+        return _("Cannot find Ada_Task_Control_Block type");
 
       type = atcb_sym->type;
     }
@@ -531,11 +530,11 @@ get_tcb_types_info (void)
     }
 
   if (common_atcb_sym == NULL || common_atcb_sym->type == NULL)
-    error (_("Cannot find Common_ATCB type. Aborting"));
+    return _("Cannot find Common_ATCB type");
   if (private_data_sym == NULL || private_data_sym->type == NULL)
-    error (_("Cannot find Private_Data type. Aborting"));
+    return _("Cannot find Private_Data type");
   if (entry_call_record_sym == NULL || entry_call_record_sym->type == NULL)
-    error (_("Cannot find Entry_Call_Record type. Aborting"));
+    return _("Cannot find Entry_Call_Record type");
 
   /* Get the type for Ada_Task_Control_Block.Common.  */
   common_type = common_atcb_sym->type;
@@ -583,6 +582,7 @@ get_tcb_types_info (void)
   pspace_data->atcb_ll_type = ll_type;
   pspace_data->atcb_call_type = call_type;
   pspace_data->atcb_fieldno = fieldnos;
+  return NULL;
 }
 
 /* Build the PTID of the task from its COMMON_VALUE, which is the "Common"
@@ -630,7 +630,12 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
     = get_ada_tasks_pspace_data (current_program_space);
 
   if (!pspace_data->initialized_p)
-    get_tcb_types_info ();
+    {
+      const char *err_msg = ada_get_tcb_types_info ();
+
+      if (err_msg != NULL)
+	error (_("%s. Aborting"), err_msg);
+    }
 
   tcb_value = value_from_contents_and_address (pspace_data->atcb_type,
 					       NULL, task_id);
