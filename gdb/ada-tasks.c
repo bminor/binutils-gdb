@@ -353,6 +353,30 @@ ada_task_is_alive (struct ada_task_info *task_info)
   return (task_info->state != Terminated);
 }
 
+/* Search through the list of known tasks for the one whose ptid is
+   PTID, and return it.  Return NULL if the task was not found.  */
+
+struct ada_task_info *
+ada_get_task_info_from_ptid (ptid_t ptid)
+{
+  int i, nb_tasks;
+  struct ada_task_info *task;
+  struct ada_tasks_inferior_data *data;
+
+  ada_build_task_list ();
+  data = get_ada_tasks_inferior_data (current_inferior ());
+  nb_tasks = VEC_length (ada_task_info_s, data->task_list);
+
+  for (i = 0; i < nb_tasks; i++)
+    {
+      task = VEC_index (ada_task_info_s, data->task_list, i);
+      if (ptid_equal (task->ptid, ptid))
+	return task;
+    }
+
+  return NULL;
+}
+
 /* Call the ITERATOR function once for each Ada task that hasn't been
    terminated yet.  */
 

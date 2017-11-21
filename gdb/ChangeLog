@@ -1,5 +1,34 @@
 2017-11-21  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.h (ada_get_task_info_from_ptid): Add declaration.
+	* ada-tasks.c (ada_get_task_info_from_ptid): New function.
+	* ravenscar-thread.c: Add into comment.
+	(base_magic_null_ptid): Delete.
+	(base_ptid): Change documentation.
+	(ravenscar_active_task): Renames ravenscar_running_thread.
+	All callers updated throughout.
+	(is_ravenscar_task, ravenscar_get_thread_base_cpu): New function.
+	(ravenscar_task_is_currently_active): Likewise.
+	(get_base_thread_from_ravenscar_task): Ditto.
+	(ravenscar_update_inferior_ptid): Adjust to handle multiple CPUs.
+	(ravenscar_runtime_initialized): Likewise.
+	(get_running_thread_id): Add new parameter "cpu".  Adjust
+	implementation to handle this new parameter.
+	(ravenscar_fetch_registers): Small adjustment to use
+	is_ravenscar_task and ravenscar_task_is_currently_active in
+	order to decide whether to use the target beneath or this
+	module's arch_ops.
+	(ravenscar_store_registers, ravenscar_prepare_to_store): Likewise.
+	(ravenscar_stopped_by_sw_breakpoint): Use
+	get_base_thread_from_ravenscar_task to get the underlying
+	thread, rather than using base_ptid.
+	(ravenscar_stopped_by_hw_breakpoint, ravenscar_stopped_by_watchpoint)
+	(ravenscar_stopped_data_address, ravenscar_core_of_thread):
+	Likewise.
+	(ravenscar_inferior_created): Do not set base_magic_null_ptid.
+
+2017-11-21  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (struct ada_task_info) <base_cpu>: New field.
 	* ada-lang.c (struct atcb_fieldno) <base_cpu>: New field.
 	(get_tcb_types_info): Set fieldnos.base_cpu.

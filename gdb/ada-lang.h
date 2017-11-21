@@ -401,6 +401,8 @@ extern std::vector<ada_exc_info> ada_exceptions_list (const char *regexp);
 
 extern int valid_task_id (int);
 
+extern struct ada_task_info *ada_get_task_info_from_ptid (ptid_t ptid);
+
 extern int ada_get_task_number (ptid_t);
 
 typedef void (ada_task_list_iterator_ftype) (struct ada_task_info *task);
