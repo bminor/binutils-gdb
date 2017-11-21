@@ -362,50 +362,6 @@ SUBDIR_GUILE_CFLAGS =
 #
 # python sub directory definitons
 #
-SUBDIR_PYTHON_OBS = \
-	py-arch.o \
-	py-auto-load.o \
-	py-block.o \
-	py-bpevent.o \
-	py-breakpoint.o \
-	py-cmd.o \
-	py-continueevent.o \
-	py-event.o \
-	py-evtregistry.o \
-	py-evts.o \
-	py-exitedevent.o \
-	py-finishbreakpoint.o \
-	py-frame.o \
-	py-framefilter.o \
-	py-function.o \
-	py-gdb-readline.o \
-	py-inferior.o \
-	py-infevents.o \
-	py-infthread.o \
-	py-instruction.o \
-	py-lazy-string.o \
-	py-linetable.o \
-	py-newobjfileevent.o \
-	py-objfile.o \
-	py-param.o \
-	py-prettyprint.o \
-	py-progspace.o \
-	py-record.o \
-	py-record-btrace.o \
-	py-record-full.o \
-	py-signalevent.o \
-	py-stopevent.o \
-	py-symbol.o \
-	py-symtab.o \
-	py-threadevent.o \
-	py-type.o \
-	py-unwind.o \
-	py-utils.o \
-	py-value.o \
-	py-varobj.o \
-	py-xmethods.o \
-	python.o
-
 SUBDIR_PYTHON_SRCS = \
 	python/py-arch.c \
 	python/py-auto-load.c \
@@ -449,6 +405,8 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-varobj.c \
 	python/py-xmethods.c \
 	python/python.c
+
+SUBDIR_PYTHON_OBS = $(patsubst %.c,%.o,$(SUBDIR_PYTHON_SRCS))
 
 SUBDIR_PYTHON_DEPS =
 SUBDIR_PYTHON_LDFLAGS =
@@ -560,7 +518,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch cli mi compile tui unittests guile
+CONFIG_SRC_SUBDIR = arch cli mi compile tui unittests guile python
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
 # -I. for config files.
@@ -1850,6 +1808,9 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 $(CONFIG_DEP_SUBDIR):
 	$(SHELL) $(srcdir)/../mkinstalldirs $@
 
+# Python files need special flags.
+python/%.o: INTERNAL_CFLAGS += $(PYTHON_CFLAGS)
+
 # Rules for compiling .c files in the various source subdirectories.
 %.o: ${srcdir}/common/%.c
 	$(COMPILE) $<
@@ -1861,10 +1822,6 @@ $(CONFIG_DEP_SUBDIR):
 
 %.o: ${srcdir}/nat/%.c
 	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: $(srcdir)/python/%.c
-	$(COMPILE) $(PYTHON_CFLAGS) $<
 	$(POSTCOMPILE)
 
 %.o: ${srcdir}/target/%.c
