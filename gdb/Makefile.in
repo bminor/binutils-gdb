@@ -254,25 +254,6 @@ SUBDIR_CLI_CFLAGS =
 #
 # MI sub directory definitons
 #
-SUBDIR_MI_OBS = \
-	mi-cmd-break.o \
-	mi-cmd-catch.o \
-	mi-cmd-disas.o \
-	mi-cmd-env.o \
-	mi-cmd-file.o \
-	mi-cmd-info.o \
-	mi-cmd-stack.o \
-	mi-cmd-target.o \
-	mi-cmd-var.o \
-	mi-cmds.o \
-	mi-console.o \
-	mi-getopt.o \
-	mi-interp.o \
-	mi-main.o \
-	mi-out.o \
-	mi-parse.o \
-	mi-symbol-cmds.o
-
 SUBDIR_MI_SRCS = \
 	mi/mi-cmd-break.c \
 	mi/mi-cmd-catch.c \
@@ -291,6 +272,8 @@ SUBDIR_MI_SRCS = \
 	mi/mi-out.c \
 	mi/mi-parse.c \
 	mi/mi-symbol-cmds.c
+
+SUBDIR_MI_OBS = $(patsubst %.c,%.o,$(SUBDIR_MI_SRCS))
 
 SUBDIR_MI_DEPS =
 SUBDIR_MI_LDFLAGS =
@@ -639,7 +622,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch cli
+CONFIG_SRC_SUBDIR = arch cli mi
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
 # -I. for config files.
@@ -1779,7 +1762,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	memattr.o \
 	memory-map.o \
 	memrange.o \
-	mi-common.o \
+	mi/mi-common.o \
 	minidebug.o \
 	minsyms.o \
 	mipsread.o \
@@ -1943,10 +1926,6 @@ $(CONFIG_DEP_SUBDIR):
 	$(POSTCOMPILE)
 
 %.o: $(srcdir)/guile/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: $(srcdir)/mi/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
