@@ -2229,7 +2229,7 @@ darwin_xfer_partial (struct target_ops *ops,
 }
 
 static void
-set_enable_mach_exceptions (char *args, int from_tty,
+set_enable_mach_exceptions (const char *args, int from_tty,
 			    struct cmd_list_element *c)
 {
   if (!ptid_equal (inferior_ptid, null_ptid))
