@@ -909,11 +909,10 @@ TARGET_FLAGS_TO_PASS = \
 	"TESTS=$(TESTS)"
 
 # All source files that go into linking GDB.
-# Links made at configuration time should not be specified here, since
-# SFILES is used in building the distribution archive.
 
-SFILES = \
-	ada-exp.y \
+# Files that should wind up in SFILES and whose corresponding .o
+# should be in COMMON_OBS.
+COMMON_SFILES = \
 	ada-lang.c \
 	ada-tasks.c \
 	ada-typeprint.c \
@@ -923,11 +922,8 @@ SFILES = \
 	agent.c \
 	annotate.c \
 	arch-utils.c \
-	arch/i386.c \
 	auto-load.c \
 	auxv.c \
-	ax-gdb.c \
-	ax-general.c \
 	bcache.c \
 	bfd-target.c \
 	block.c \
@@ -939,7 +935,6 @@ SFILES = \
 	btrace.c \
 	build-id.c \
 	buildsym.c \
-	c-exp.y \
 	c-lang.c \
 	c-typeprint.c \
 	c-valprint.c \
@@ -955,12 +950,9 @@ SFILES = \
 	corefile.c \
 	corelow.c \
 	cp-abi.c \
-	cp-name-parser.y \
 	cp-namespace.c \
 	cp-support.c \
 	cp-valprint.c \
-	ctf.c \
-	d-exp.y \
 	d-lang.c \
 	d-namespace.c \
 	d-valprint.c \
@@ -969,21 +961,18 @@ SFILES = \
 	dictionary.c \
 	disasm.c \
 	disasm-selftests.c \
-	dtrace-probe.c \
 	dummy-frame.c \
 	dwarf2-frame.c \
 	dwarf2-frame-tailcall.c \
 	dwarf2expr.c \
 	dwarf2loc.c \
 	dwarf2read.c \
-	elfread.c \
 	eval.c \
 	event-loop.c \
 	event-top.c \
 	exceptions.c \
 	expprint.c \
 	extension.c \
-	f-exp.y \
 	f-lang.c \
 	f-typeprint.c \
 	f-valprint.c \
@@ -994,7 +983,6 @@ SFILES = \
 	frame-base.c \
 	frame-unwind.c \
 	gcore.c \
-	gdb.c \
 	gdb_bfd.c \
 	gdb-dlfcn.c \
 	gdb_obstack.c \
@@ -1005,7 +993,6 @@ SFILES = \
 	gdbtypes.c \
 	gnu-v2-abi.c \
 	gnu-v3-abi.c \
-	go-exp.y \
 	go-lang.c \
 	go-typeprint.c \
 	go-valprint.c \
@@ -1014,7 +1001,6 @@ SFILES = \
 	infcall.c \
 	infcmd.c \
 	inferior.c \
-	inflow.c \
 	infrun.c \
 	inline-frame.c \
 	interps.c \
@@ -1022,7 +1008,6 @@ SFILES = \
 	language.c \
 	linespec.c \
 	location.c \
-	m2-exp.y \
 	m2-lang.c \
 	m2-typeprint.c \
 	m2-valprint.c \
@@ -1047,7 +1032,6 @@ SFILES = \
 	opencl-lang.c \
 	osabi.c \
 	osdata.c \
-	p-exp.y \
 	p-lang.c \
 	p-typeprint.c \
 	p-valprint.c \
@@ -1055,7 +1039,6 @@ SFILES = \
 	printcmd.c \
 	probe.c \
 	producer.c \
-	proc-service.list \
 	progspace.c \
 	progspace-and-thread.c \
 	prologue-value.c \
@@ -1065,31 +1048,21 @@ SFILES = \
 	record-full.c \
 	regcache.c \
 	reggroups.c \
-	remote.c \
-	remote-fileio.c \
-	remote-notif.c \
 	reverse.c \
-	rust-exp.y \
 	rust-lang.c \
 	selftest-arch.c \
 	sentinel-frame.c \
-	ser-base.c \
 	ser-event.c \
-	ser-unix.c \
 	serial.c \
 	skip.c \
-	sol-thread.c \
 	solib.c \
 	solib-target.c \
 	source.c \
 	stabsread.c \
 	stack.c \
-	stap-probe.c \
 	std-regs.c \
-	stub-termcap.c \
 	symfile.c \
 	symfile-debug.c \
-	symfile-mem.c \
 	symmisc.c \
 	symtab.c \
 	target.c \
@@ -1099,13 +1072,11 @@ SFILES = \
 	thread.c \
 	tid-parse.c \
 	top.c \
-	tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
 	target-float.c \
 	typeprint.c \
 	ui-file.c \
-	ui-file.h \
 	ui-out.c \
 	user-regs.c \
 	utils.c \
@@ -1116,7 +1087,40 @@ SFILES = \
 	varobj.c \
 	xml-support.c \
 	xml-syscall.c \
-	xml-tdesc.c \
+	xml-tdesc.c
+
+# Links made at configuration time should not be specified here, since
+# SFILES is used in building the distribution archive.
+SFILES = \
+	ada-exp.y \
+	arch/i386.c \
+	ax-gdb.c \
+	ax-general.c \
+	c-exp.y \
+	cp-name-parser.y \
+	ctf.c \
+	d-exp.y \
+	dtrace-probe.c \
+	elfread.c \
+	f-exp.y \
+	gdb.c \
+	go-exp.y \
+	inflow.c \
+	m2-exp.y \
+	p-exp.y \
+	proc-service.list \
+	remote.c \
+	remote-fileio.c \
+	remote-notif.c \
+	rust-exp.y \
+	ser-base.c \
+	ser-unix.c \
+	sol-thread.c \
+	stap-probe.c \
+	stub-termcap.c \
+	symfile-mem.c \
+	tracepoint.c \
+	ui-file.h \
 	common/agent.c \
 	common/btrace-common.c \
 	common/buffer.c \
@@ -1145,6 +1149,7 @@ SFILES = \
 	common/xml-utils.c \
 	mi/mi-common.c \
 	target/waitstatus.c \
+	$(COMMON_SFILES) \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -1530,216 +1535,42 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
-	ada-lang.o \
-	ada-tasks.o \
-	ada-typeprint.o \
-	ada-valprint.o \
-	ada-varobj.o \
-	addrmap.o \
-	agent.o \
-	annotate.o \
-	arch-utils.o \
-	auto-load.o \
-	auxv.o \
-	bcache.o \
-	bfd-target.o \
-	block.o \
-	blockframe.o \
-	break-catch-sig.o \
-	break-catch-syscall.o \
-	break-catch-throw.o \
-	breakpoint.o \
-	btrace.o \
 	btrace-common.o \
 	buffer.o \
-	build-id.o \
-	buildsym.o \
-	c-lang.o \
-	c-typeprint.o \
-	c-valprint.o \
-	c-varobj.o \
-	charset.o \
 	cleanups.o \
-	cli-out.o \
-	coff-pe-read.o \
-	coffread.o \
 	common-agent.o \
 	common-debug.o \
 	common-exceptions.o \
 	job-control.o \
 	common-regcache.o \
 	common-utils.o \
-	complaints.o \
-	completer.o \
-	continuations.o \
-	copying.o \
-	corefile.o \
-	corelow.o \
-	cp-abi.o \
-	cp-namespace.o \
-	cp-support.o \
-	cp-valprint.o \
-	d-lang.o \
-	d-namespace.o \
-	d-valprint.o \
-	dbxread.o \
 	debug.o \
-	demangle.o \
-	dictionary.o \
-	disasm.o \
-	disasm-selftests.o \
-	dummy-frame.o \
-	dwarf2-frame.o \
-	dwarf2-frame-tailcall.o \
-	dwarf2expr.o \
-	dwarf2loc.o \
-	dwarf2read.o \
 	environ.o \
 	errors.o \
-	eval.o \
-	event-loop.o \
-	event-top.o \
-	exceptions.o \
 	exec.o \
-	expprint.o \
-	extension.o \
-	f-lang.o \
-	f-typeprint.o \
-	f-valprint.o \
 	fileio.o \
 	filename-seen-cache.o \
 	filestuff.o \
-	filesystem.o \
-	findcmd.o \
-	findvar.o \
 	format.o \
-	frame.o \
-	frame-base.o \
-	frame-unwind.o \
-	gcore.o \
-	gdb_bfd.o \
 	gdb_tilde_expand.o \
-	gdb-dlfcn.o \
-	gdb_obstack.o \
-	gdb_regex.o \
-	gdb_usleep.o \
 	gdb_vecs.o \
-	gdbarch.o \
-	gdbarch-selftests.o \
-	gdbtypes.o \
-	gnu-v2-abi.o \
-	gnu-v3-abi.o \
-	go-lang.o \
-	go-typeprint.o \
-	go-valprint.o \
-	inf-child.o \
-	inf-loop.o \
-	infcall.o \
-	infcmd.o \
-	inferior.o \
-	infrun.o \
-	inline-frame.o \
-	interps.o \
-	jit.o \
-	language.o \
-	linespec.o \
-	location.o \
-	m2-lang.o \
-	m2-typeprint.o \
-	m2-valprint.o \
-	macrocmd.o \
-	macroexp.o \
-	macroscope.o \
-	macrotab.o \
-	main.o \
-	maint.o \
-	mdebugread.o \
-	mem-break.o \
-	memattr.o \
-	memory-map.o \
-	memrange.o \
 	mi/mi-common.o \
-	minidebug.o \
-	minsyms.o \
-	mipsread.o \
-	namespace.o \
 	new-op.o \
-	objc-lang.o \
-	objfiles.o \
-	observer.o \
-	opencl-lang.o \
-	osabi.o \
-	osdata.o \
-	p-lang.o \
-	p-typeprint.o \
-	p-valprint.o \
-	parse.o \
 	print-utils.o \
-	printcmd.o \
-	probe.o \
-	producer.o \
-	progspace.o \
-	progspace-and-thread.o \
-	prologue-value.o \
-	psymtab.o \
 	ptid.o \
-	record.o \
-	record-btrace.o \
-	record-full.o \
-	regcache.o \
-	reggroups.o \
 	registry.o \
-	reverse.o \
 	rsp-low.o \
 	run-time-clock.o \
-	rust-lang.o \
 	selftest.o \
-	selftest-arch.o \
-	sentinel-frame.o \
-	ser-event.o \
-	serial.o \
 	signals.o \
 	signals-state-save-restore.o \
-	skip.o \
-	solib.o \
-	solib-target.o \
-	source.o \
-	stabsread.o \
-	stack.o \
-	std-regs.o \
-	symfile.o \
-	symfile-debug.o \
-	symmisc.o \
-	symtab.o \
-	target.o \
-	target-dcache.o \
-	target-descriptions.o \
-	target-memory.o \
-	thread.o \
 	thread-fsm.o \
-	tid-parse.o \
-	top.o \
-	trad-frame.o \
-	tramp-frame.o \
-	target-float.o \
-	typeprint.o \
-	ui-file.o \
-	ui-out.o \
-	user-regs.o \
-	utils.o \
-	valarith.o \
-	valops.o \
-	valprint.o \
-	value.o \
-	varobj.o \
 	vec.o \
 	version.o \
 	waitstatus.o \
 	xml-builtin.o \
-	xml-support.o \
-	xml-syscall.o \
-	xml-tdesc.o \
 	xml-utils.o \
+	$(patsubst %.c,%.o,$(COMMON_SFILES)) \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o

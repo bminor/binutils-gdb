@@ -1,5 +1,11 @@
 2017-11-27  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (COMMON_SFILES): New.
+	(SFILES): Move some entries to COMMON_SFILES.
+	(COMMON_OBS): Use COMMON_SFILES.
+
+2017-11-27  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (YYFILES): Update comment.
 	(YYOBJ): Redefine.
 
