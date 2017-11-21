@@ -1,3 +1,8 @@
+2017-11-21  Claudiu Zissulescu <claziss@synopsys.com>
+
+	* arc-dis.c (print_insn_arc): Pretty print pc-relative offsets.
+	* arc-opc.c (SIMM21_A16_5): Make it pc-relative.
+
 2017-11-16  Tamar Christina  <tamar.christina@arm.com>
 
 	* aarch64-tbl.h (aarch64_feature_fp_16_v8_2): Require AARCH64_FEATURE_F16_FML
