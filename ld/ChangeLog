@@ -1,3 +1,12 @@
+2017-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 22419
+	* emultempl/v850elf.em (v850_create_output_section_statements):
+	New function.  Generate an error if attempting to convert the
+	format of the output file.
+	* testsuite/ld-unique/pr21529.d: Skip for the V850.
+	* testsuite/ld-elf/pr21884.d: Skip for the V850.
+
 2017-11-21  Claudiu Zissulescu <claziss@synopsys.com>
 
 	* testsuite/ld-arc/jli-simple.d: Update test.
