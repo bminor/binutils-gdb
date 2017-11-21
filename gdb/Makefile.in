@@ -957,6 +957,7 @@ COMMON_SFILES = \
 	d-namespace.c \
 	d-valprint.c \
 	dbxread.c \
+	debug.c \
 	demangle.c \
 	dictionary.c \
 	disasm.c \
@@ -976,6 +977,7 @@ COMMON_SFILES = \
 	f-lang.c \
 	f-typeprint.c \
 	f-valprint.c \
+	filename-seen-cache.c \
 	filesystem.c \
 	findcmd.c \
 	findvar.c \
@@ -1048,6 +1050,7 @@ COMMON_SFILES = \
 	record-full.c \
 	regcache.c \
 	reggroups.c \
+	registry.c \
 	reverse.c \
 	rust-lang.c \
 	selftest-arch.c \
@@ -1070,6 +1073,7 @@ COMMON_SFILES = \
 	target-descriptions.c \
 	target-memory.c \
 	thread.c \
+	thread-fsm.c \
 	tid-parse.c \
 	top.c \
 	trad-frame.c \
@@ -1544,12 +1548,10 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	job-control.o \
 	common-regcache.o \
 	common-utils.o \
-	debug.o \
 	environ.o \
 	errors.o \
 	exec.o \
 	fileio.o \
-	filename-seen-cache.o \
 	filestuff.o \
 	format.o \
 	gdb_tilde_expand.o \
@@ -1558,13 +1560,11 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	new-op.o \
 	print-utils.o \
 	ptid.o \
-	registry.o \
 	rsp-low.o \
 	run-time-clock.o \
 	selftest.o \
 	signals.o \
 	signals-state-save-restore.o \
-	thread-fsm.o \
 	vec.o \
 	version.o \
 	waitstatus.o \
