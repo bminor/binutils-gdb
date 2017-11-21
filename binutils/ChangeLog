@@ -1,3 +1,9 @@
+2017-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22451
+	* testsuite/binutils-all/x86-64/objects.exp: New file.
+	* testsuite/binutils-all/x86-64/pr22451.o.bz2: Likewise.
+
 2017-11-21  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/binutils-all/arc/objdump.exp: Update pattern matching
