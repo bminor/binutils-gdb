@@ -2227,7 +2227,7 @@ add_file (const char *file_name, int indx ATTRIBUTE_UNUSED, int fake)
   if (stabs_seen)
     {
       (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
-			       symbol_new ("L0\001", now_seg,
+			       symbol_new (FAKE_LABEL_NAME, now_seg,
 					   (valueT) frag_now_fix (),
 					   frag_now),
 			       (bfd_vma) 0, 0, ECOFF_MARK_STAB (N_SOL));
@@ -3020,7 +3020,7 @@ ecoff_directive_end (int ignore ATTRIBUTE_UNUSED)
     as_warn (_(".end directive names unknown symbol"));
   else
     (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text,
-			     symbol_new ("L0\001", now_seg,
+			     symbol_new (FAKE_LABEL_NAME, now_seg,
 					 (valueT) frag_now_fix (),
 					 frag_now),
 			     (bfd_vma) 0, (symint_t) 0, (symint_t) 0);
@@ -3264,7 +3264,7 @@ ecoff_directive_loc (int ignore ATTRIBUTE_UNUSED)
   if (stabs_seen)
     {
       (void) add_ecoff_symbol ((char *) NULL, st_Label, sc_Text,
-			       symbol_new ("L0\001", now_seg,
+			       symbol_new (FAKE_LABEL_NAME, now_seg,
 					   (valueT) frag_now_fix (),
 					   frag_now),
 			       (bfd_vma) 0, 0, lineno);
@@ -4104,10 +4104,10 @@ ecoff_build_symbols (const struct ecoff_debug_swap *backend,
 		      /* If an st_end symbol has an associated gas
 		         symbol, then it is a local label created for
 		         a .bend or .end directive.  Stabs line
-		         numbers will have \001 in the names.  */
+		         numbers will have FAKE_LABEL_CHAR in the names.  */
 		      if (local
 			  && sym_ptr->ecoff_sym.asym.st != st_End
-			  && strchr (sym_ptr->name, '\001') == 0)
+			  && strchr (sym_ptr->name, FAKE_LABEL_CHAR) == 0)
 			sym_ptr->ecoff_sym.asym.iss =
 			  add_string (&fil_ptr->strings,
 				      fil_ptr->str_hash,

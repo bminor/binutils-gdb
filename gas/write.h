@@ -27,6 +27,12 @@
 #define FAKE_LABEL_NAME "L0\001"
 #endif
 
+/* This is the special character used to indicate a fake symbol.  Must be
+   present in FAKE_LABEL_NAME.  */
+#ifndef FAKE_LABEL_CHAR
+#define FAKE_LABEL_CHAR '\001'
+#endif
+
 #include "bit_fix.h"
 
 /*

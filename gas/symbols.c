@@ -25,6 +25,7 @@
 #include "obstack.h"		/* For "symbols.h" */
 #include "subsegs.h"
 #include "struc-symbol.h"
+#include "write.h"
 
 /* This is non-zero if symbols are case sensitive, which is the
    default.  */
@@ -2161,6 +2162,9 @@ S_IS_LOCAL (symbolS *s)
 	  && ! S_IS_DEBUG (s)
 	  && (strchr (name, DOLLAR_LABEL_CHAR)
 	      || strchr (name, LOCAL_LABEL_CHAR)
+#if FAKE_LABEL_CHAR != DOLLAR_LABEL_CHAR
+	      || strchr (name, FAKE_LABEL_CHAR)
+#endif
 	      || TC_LABEL_IS_LOCAL (name)
 	      || (! flag_keep_locals
 		  && (bfd_is_local_label (stdoutput, s->bsym)
@@ -3087,7 +3091,7 @@ symbol_relc_make_sym (symbolS * sym)
       || S_GET_SEGMENT (sym) == absolute_section)
     return symbol_relc_make_expr (& sym->sy_value);
 
-  /* This may be a "fake symbol" L0\001, referring to ".".
+  /* This may be a "fake symbol", referring to ".".
      Write out a special null symbol to refer to this position.  */
   if (! strcmp (S_GET_NAME (sym), FAKE_LABEL_NAME))
     return xstrdup (".");

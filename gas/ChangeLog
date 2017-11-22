@@ -1,5 +1,26 @@
 2017-11-22  Jim Wilson  <jimw@sifive.com>
 
+	* as.c: Include write.h.
+	(common_emul_init): Use FAKE_LABEL_NAME.
+	* ecoff.c (add_file, ecoff_directive_end, ecoff_directive_loc):
+	Likewise.
+	(ecoff_build_symbols): Use FAKE_LABEL_CHAR.
+	* expr.c (get_symbol_name): Use FAKE_LABEL_CHAR.  Accept only if
+	input_from_string is TRUE.
+	* read.c (input_from_string): New.
+	(read_symbol_name): Use FAKE_LABEL_CHAR.  Accept only if
+	input_from_string is TRUE.
+	(temp_ilp): Set input_from_string to TRUE.
+	(restore_ilp): Set input_from_string to FALSE.
+	* read.h (input_from_string): Declare.
+	* symbols.c: Include write.h
+	(S_IS_LOCAL): Check for FAKE_LABEL_CHAR.
+	(symbol_relc_make_sym): Fix comment refering to default fake label
+	string.
+	* write.h (FAKE_LABEL_CHAR): New.
+	* config/tc-riscv.h (FAKE_LABEL_CHAR): Define.
+	* testsuite/gas/all/err-fakelabel.s: New.
+
 	* doc/as.texinfo (.align): Change some to most for text nop fill.
 	(.balign, .p2align): Likewise.
 
