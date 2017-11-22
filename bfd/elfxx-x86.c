@@ -1765,19 +1765,19 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      struct elf_link_hash_entry *def = weakdef (h);
+      BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+      h->root.u.def.section = def->root.u.def.section;
+      h->root.u.def.value = def->root.u.def.value;
       if (ELIMINATE_COPY_RELOCS
 	  || info->nocopyreloc
 	  || SYMBOL_NO_COPYRELOC (info, eh))
 	{
 	  /* NB: needs_copy is always 0 for i386.  */
-	  h->non_got_ref = h->u.weakdef->non_got_ref;
-	  eh->needs_copy = h->u.weakdef->needs_copy;
+	  h->non_got_ref = def->non_got_ref;
+	  eh->needs_copy = def->needs_copy;
 	}
       return TRUE;
     }

@@ -6576,8 +6576,8 @@ ppc64_elf_gc_mark_hook (asection *sec,
 		     a call reloc.  Mark the function descriptor too
 		     against garbage collection.  */
 		  fdh->elf.mark = 1;
-		  if (fdh->elf.u.weakdef != NULL)
-		    fdh->elf.u.weakdef->mark = 1;
+		  if (fdh->elf.is_weakalias)
+		    weakdef (&fdh->elf)->mark = 1;
 		  eh = fdh;
 		}
 
@@ -7251,14 +7251,14 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      struct elf_link_hash_entry *def = weakdef (h);
+      BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+      h->root.u.def.section = def->root.u.def.section;
+      h->root.u.def.value = def->root.u.def.value;
       if (ELIMINATE_COPY_RELOCS)
-	h->non_got_ref = h->u.weakdef->non_got_ref;
+	h->non_got_ref = def->non_got_ref;
       return TRUE;
     }
 

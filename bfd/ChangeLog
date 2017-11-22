@@ -1,3 +1,66 @@
+2017-11-23  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_link_hash_entry): Add is_weakalias.
+	Rename u.weakdef to u.alias and update comment.
+	(weakdef): New static inline function.
+	* elflink.c (bfd_elf_record_link_assignment) Test is_weakalias
+	rather than u.weakdef != NULL, and use weakdef function.
+	(_bfd_elf_adjust_dynamic_symbol): Likewise.
+	(_bfd_elf_fix_symbol_flags): Likewise.  Clear is_weakalias on
+	all aliases if def has been overridden in a regular object, not
+	u.weakdef.
+	(elf_link_add_object_symbols): Delete new_weakdef flag.  Test
+	is_weakalias and use weakdef.  Set is_weakalias and circular
+	u.alias.  Update comments.
+	(_bfd_elf_gc_mark_rsec): Test is_weakalias rather than
+	u.weakdef != NULL and use weakdef function.
+	* elf-m10300.c (_bfd_mn10300_elf_adjust_dynamic_symbol): Test
+	is_weakalias rather than u.weakdef != NULL and use weakdef
+	function.  Assert that def is strong defined.
+	* elf32-arc.c (elf_arc_adjust_dynamic_symbol): Likewise.
+	* elf32-arm.c (elf32_arm_adjust_dynamic_symbol): Likewise.
+	* elf32-bfin.c (elf32_bfinfdpic_adjust_dynamic_symbol): Likewise.
+	(bfin_adjust_dynamic_symbol): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-cris.c (elf_cris_adjust_dynamic_symbol): Likewise.
+	* elf32-frv.c (elf32_frvfdpic_adjust_dynamic_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_adjust_dynamic_symbol): Likewise.
+	* elf32-i370.c (i370_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-lm32.c (lm32_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-m32r.c (m32r_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Likewise.
+	* elf32-metag.c (elf_metag_adjust_dynamic_symbol): Likewise.
+	* elf32-microblaze.c (microblaze_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-nds32.c (nds32_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-nios2.c (nios2_elf32_adjust_dynamic_symbol): Likewise.
+	* elf32-or1k.c (or1k_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+	* elf32-score.c (s3_bfd_score_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-sh.c (sh_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_adjust_dynamic_symbol): Likewise.
+	* elf32-tilepro.c (tilepro_elf_gc_mark_hook): Likewise.
+	(tilepro_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-vax.c (elf_vax_adjust_dynamic_symbol): Likewise.
+	* elf32-xtensa.c (elf_xtensa_adjust_dynamic_symbol): Likewise.
+	* elf64-alpha.c (elf64_alpha_adjust_dynamic_symbol): Likewise.
+	* elf64-hppa.c (elf64_hppa_adjust_dynamic_symbol): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_adjust_dynamic_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_gc_mark_hook): Likewise.
+	(ppc64_elf_adjust_dynamic_symbol): Likewise.
+	* elf64-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+	* elf64-sh64.c (sh64_elf64_adjust_dynamic_symbol): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_adjust_dynamic_symbol): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_adjust_dynamic_symbol): Likewise.
+	* elfnn-riscv.c (riscv_elf_adjust_dynamic_symbol): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_adjust_dynamic_symbol): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_gc_mark_hook): Likewise.
+	(_bfd_sparc_elf_adjust_dynamic_symbol): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_gc_mark_hook): Likewise.
+	(tilegx_elf_adjust_dynamic_symbol): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_adjust_dynamic_symbol): Likewise.
+
 2017-11-21  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (elf_symbol_from): Check for NULL symbol bfd.
