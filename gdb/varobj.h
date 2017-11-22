@@ -60,26 +60,33 @@ struct varobj;
 typedef struct varobj *varobj_p;
 DEF_VEC_P (varobj_p);
 
-typedef struct varobj_update_result_t
+struct varobj_update_result
 {
+  varobj_update_result (struct varobj *varobj_,
+			varobj_scope_status status_ = VAROBJ_IN_SCOPE)
+  : varobj (varobj_), status (status_)
+  {}
+
+  varobj_update_result (varobj_update_result &&other) = default;
+
+  DISABLE_COPY_AND_ASSIGN (varobj_update_result);
+
   struct varobj *varobj;
-  int type_changed;
-  int children_changed;
-  int changed;
+  int type_changed = 0;
+  int children_changed = 0;
+  int changed = 0;
   enum varobj_scope_status status;
   /* This variable is used internally by varobj_update to indicate if the
      new value of varobj is already computed and installed, or has to
      be yet installed.  Don't use this outside varobj.c.  */
-  int value_installed;  
+  int value_installed = 0;
 
   /* This will be non-NULL when new children were added to the varobj.
      It lists the new children (which must necessarily come at the end
      of the child list) added during an update.  The caller is
      responsible for freeing this vector.  */
-  VEC (varobj_p) *newobj;
-} varobj_update_result;
-
-DEF_VEC_O (varobj_update_result);
+  std::vector<struct varobj *> newobj;
+};
 
 struct varobj_root;
 struct varobj_dynamic;
@@ -305,8 +312,8 @@ extern int varobj_set_value (struct varobj *var, const char *expression);
 extern void all_root_varobjs (void (*func) (struct varobj *var, void *data),
 			      void *data);
 
-extern VEC(varobj_update_result) *varobj_update (struct varobj **varp, 
-						 int is_explicit);
+extern std::vector<varobj_update_result>
+  varobj_update (struct varobj **varp, int is_explicit);
 
 extern void varobj_invalidate (void);
 

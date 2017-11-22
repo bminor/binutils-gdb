@@ -629,10 +629,10 @@ varobj_restrict_range (const std::vector<varobj *> &children,
 
 static void
 install_dynamic_child (struct varobj *var,
-		       VEC (varobj_p) **changed,
-		       VEC (varobj_p) **type_changed,
-		       VEC (varobj_p) **newobj,
-		       VEC (varobj_p) **unchanged,
+		       std::vector<varobj *> *changed,
+		       std::vector<varobj *> *type_changed,
+		       std::vector<varobj *> *newobj,
+		       std::vector<varobj *> *unchanged,
 		       int *cchanged,
 		       int index,
 		       struct varobj_item *item)
@@ -642,9 +642,9 @@ install_dynamic_child (struct varobj *var,
       /* There's no child yet.  */
       struct varobj *child = varobj_add_child (var, item);
 
-      if (newobj)
+      if (newobj != NULL)
 	{
-	  VEC_safe_push (varobj_p, *newobj, child);
+	  newobj->push_back (child);
 	  *cchanged = 1;
 	}
     }
@@ -655,16 +655,16 @@ install_dynamic_child (struct varobj *var,
 
       if (type_updated)
 	{
-	  if (type_changed)
-	    VEC_safe_push (varobj_p, *type_changed, existing);
+	  if (type_changed != NULL)
+	    type_changed->push_back (existing);
 	}
       if (install_new_value (existing, item->value, 0))
 	{
-	  if (!type_updated && changed)
-	    VEC_safe_push (varobj_p, *changed, existing);
+	  if (!type_updated && changed != NULL)
+	    changed->push_back (existing);
 	}
-      else if (!type_updated && unchanged)
-	VEC_safe_push (varobj_p, *unchanged, existing);
+      else if (!type_updated && unchanged != NULL)
+	unchanged->push_back (existing);
     }
 }
 
@@ -713,10 +713,10 @@ varobj_clear_saved_item (struct varobj_dynamic *var)
 
 static int
 update_dynamic_varobj_children (struct varobj *var,
-				VEC (varobj_p) **changed,
-				VEC (varobj_p) **type_changed,
-				VEC (varobj_p) **newobj,
-				VEC (varobj_p) **unchanged,
+				std::vector<varobj *> *changed,
+				std::vector<varobj *> *type_changed,
+				std::vector<varobj *> *newobj,
+				std::vector<varobj *> *unchanged,
 				int *cchanged,
 				int update_children,
 				int from,
@@ -1525,14 +1525,13 @@ varobj_value_has_mutated (const struct varobj *var, struct value *new_value,
    returns TYPE_CHANGED, then it has done this and VARP will be modified
    to point to the new varobj.  */
 
-VEC(varobj_update_result) *
+std::vector<varobj_update_result>
 varobj_update (struct varobj **varp, int is_explicit)
 {
   int type_changed = 0;
-  int i;
   struct value *newobj;
-  VEC (varobj_update_result) *stack = NULL;
-  VEC (varobj_update_result) *result = NULL;
+  std::vector<varobj_update_result> stack;
+  std::vector<varobj_update_result> result;
 
   /* Frozen means frozen -- we don't check for any change in
      this varobj, including its going out of scope, or
@@ -1544,20 +1543,13 @@ varobj_update (struct varobj **varp, int is_explicit)
 
   if (!(*varp)->root->is_valid)
     {
-      varobj_update_result r = {0};
-
-      r.varobj = *varp;
-      r.status = VAROBJ_INVALID;
-      VEC_safe_push (varobj_update_result, result, &r);
+      result.emplace_back (*varp, VAROBJ_INVALID);
       return result;
     }
 
   if ((*varp)->root->rootvar == *varp)
     {
-      varobj_update_result r = {0};
-
-      r.varobj = *varp;
-      r.status = VAROBJ_IN_SCOPE;
+      varobj_update_result r (*varp);
 
       /* Update the root variable.  value_of_root can return NULL
 	 if the variable is no longer around, i.e. we stepped out of
@@ -1579,27 +1571,22 @@ varobj_update (struct varobj **varp, int is_explicit)
       if (r.status == VAROBJ_NOT_IN_SCOPE)
 	{
 	  if (r.type_changed || r.changed)
-	    VEC_safe_push (varobj_update_result, result, &r);
+	    result.push_back (std::move (r));
+
 	  return result;
 	}
-            
-      VEC_safe_push (varobj_update_result, stack, &r);
+
+      stack.push_back (std::move (r));
     }
   else
-    {
-      varobj_update_result r = {0};
-
-      r.varobj = *varp;
-      VEC_safe_push (varobj_update_result, stack, &r);
-    }
+    stack.emplace_back (*varp);
 
   /* Walk through the children, reconstructing them all.  */
-  while (!VEC_empty (varobj_update_result, stack))
+  while (!stack.empty ())
     {
-      varobj_update_result r = *(VEC_last (varobj_update_result, stack));
+      varobj_update_result r = std::move (stack.back ());
+      stack.pop_back ();
       struct varobj *v = r.varobj;
-
-      VEC_pop (varobj_update_result, stack);
 
       /* Update this variable, unless it's a root, which is already
 	 updated.  */
@@ -1638,9 +1625,8 @@ varobj_update (struct varobj **varp, int is_explicit)
 	 for which -var-list-children was never invoked.  */
       if (varobj_is_dynamic_p (v))
 	{
-	  VEC (varobj_p) *changed = 0, *type_changed = 0, *unchanged = 0;
-	  VEC (varobj_p) *newobj = 0;
-	  int i, children_changed = 0;
+	  std::vector<varobj *> changed, type_changed, unchanged, newobj;
+	  int children_changed = 0;
 
 	  if (v->frozen)
 	    continue;
@@ -1664,7 +1650,7 @@ varobj_update (struct varobj **varp, int is_explicit)
 		}
 
 	      if (r.changed)
-		VEC_safe_push (varobj_update_result, result, &r);
+		result.push_back (std::move (r));
 
 	      continue;
 	    }
@@ -1675,58 +1661,48 @@ varobj_update (struct varobj **varp, int is_explicit)
 					      &unchanged, &children_changed, 1,
 					      v->from, v->to))
 	    {
-	      if (children_changed || newobj)
+	      if (children_changed || !newobj.empty ())
 		{
 		  r.children_changed = 1;
-		  r.newobj = newobj;
+		  r.newobj = std::move (newobj);
 		}
 	      /* Push in reverse order so that the first child is
 		 popped from the work stack first, and so will be
 		 added to result first.  This does not affect
 		 correctness, just "nicer".  */
-	      for (i = VEC_length (varobj_p, type_changed) - 1; i >= 0; --i)
+	      for (int i = type_changed.size () - 1; i >= 0; --i)
 		{
-		  varobj_p tmp = VEC_index (varobj_p, type_changed, i);
-		  varobj_update_result r = {0};
+		  varobj_update_result r (type_changed[i]);
 
 		  /* Type may change only if value was changed.  */
-		  r.varobj = tmp;
 		  r.changed = 1;
 		  r.type_changed = 1;
 		  r.value_installed = 1;
-		  VEC_safe_push (varobj_update_result, stack, &r);
-		}
-	      for (i = VEC_length (varobj_p, changed) - 1; i >= 0; --i)
-		{
-		  varobj_p tmp = VEC_index (varobj_p, changed, i);
-		  varobj_update_result r = {0};
 
-		  r.varobj = tmp;
+		  stack.push_back (std::move (r));
+		}
+	      for (int i = changed.size () - 1; i >= 0; --i)
+		{
+		  varobj_update_result r (changed[i]);
+
 		  r.changed = 1;
 		  r.value_installed = 1;
-		  VEC_safe_push (varobj_update_result, stack, &r);
+
+		  stack.push_back (std::move (r));
 		}
-	      for (i = VEC_length (varobj_p, unchanged) - 1; i >= 0; --i)
-	      	{
-		  varobj_p tmp = VEC_index (varobj_p, unchanged, i);
+	      for (int i = unchanged.size () - 1; i >= 0; --i)
+		{
+		  if (!unchanged[i]->frozen)
+		    {
+		      varobj_update_result r (unchanged[i]);
 
-	      	  if (!tmp->frozen)
-	      	    {
-	      	      varobj_update_result r = {0};
+		      r.value_installed = 1;
 
-		      r.varobj = tmp;
-	      	      r.value_installed = 1;
-	      	      VEC_safe_push (varobj_update_result, stack, &r);
-	      	    }
-	      	}
+		      stack.push_back (std::move (r));
+		    }
+		}
 	      if (r.changed || r.children_changed)
-		VEC_safe_push (varobj_update_result, result, &r);
-
-	      /* Free CHANGED, TYPE_CHANGED and UNCHANGED, but not NEW,
-		 because NEW has been put into the result vector.  */
-	      VEC_free (varobj_p, changed);
-	      VEC_free (varobj_p, type_changed);
-	      VEC_free (varobj_p, unchanged);
+		result.push_back (std::move (r));
 
 	      continue;
 	    }
@@ -1736,29 +1712,21 @@ varobj_update (struct varobj **varp, int is_explicit)
 	 child is popped from the work stack first, and so
 	 will be added to result first.  This does not
 	 affect correctness, just "nicer".  */
-      for (i = v->children.size () - 1; i >= 0; --i)
+      for (int i = v->children.size () - 1; i >= 0; --i)
 	{
 	  varobj *c = v->children[i];
 
 	  /* Child may be NULL if explicitly deleted by -var-delete.  */
 	  if (c != NULL && !c->frozen)
-	    {
-	      varobj_update_result r = {0};
-
-	      r.varobj = c;
-	      VEC_safe_push (varobj_update_result, stack, &r);
-	    }
+	    stack.emplace_back (c);
 	}
 
       if (r.changed || r.type_changed)
-	VEC_safe_push (varobj_update_result, result, &r);
+	result.push_back (std::move (r));
     }
-
-  VEC_free (varobj_update_result, stack);
 
   return result;
 }
-
 
 /* Helper functions */
 

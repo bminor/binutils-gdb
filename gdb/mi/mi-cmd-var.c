@@ -685,27 +685,24 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 		   int is_explicit)
 {
   struct ui_out *uiout = current_uiout;
-  VEC (varobj_update_result) *changes;
-  varobj_update_result *r;
-  int i;
+
+  std::vector<varobj_update_result> changes = varobj_update (&var, is_explicit);
   
-  changes = varobj_update (&var, is_explicit);
-  
-  for (i = 0; VEC_iterate (varobj_update_result, changes, i, r); ++i)
+  for (const varobj_update_result &r : changes)
     {
       int from, to;
 
       gdb::optional<ui_out_emit_tuple> tuple_emitter;
       if (mi_version (uiout) > 1)
 	tuple_emitter.emplace (uiout, nullptr);
-      uiout->field_string ("name", varobj_get_objname (r->varobj));
+      uiout->field_string ("name", varobj_get_objname (r.varobj));
 
-      switch (r->status)
+      switch (r.status)
 	{
 	case VAROBJ_IN_SCOPE:
-	  if (mi_print_value_p (r->varobj, print_values))
+	  if (mi_print_value_p (r.varobj, print_values))
 	    {
-	      std::string val = varobj_get_value (r->varobj);
+	      std::string val = varobj_get_value (r.varobj);
 
 	      uiout->field_string ("value", val.c_str ());
 	    }
@@ -719,53 +716,47 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
  	  break;
 	}
 
-      if (r->status != VAROBJ_INVALID)
+      if (r.status != VAROBJ_INVALID)
 	{
-	  if (r->type_changed)
+	  if (r.type_changed)
 	    uiout->field_string ("type_changed", "true");
 	  else
 	    uiout->field_string ("type_changed", "false");
 	}
 
-      if (r->type_changed)
+      if (r.type_changed)
 	{
-	  std::string type_name = varobj_get_type (r->varobj);
+	  std::string type_name = varobj_get_type (r.varobj);
 
 	  uiout->field_string ("new_type", type_name.c_str ());
 	}
 
-      if (r->type_changed || r->children_changed)
+      if (r.type_changed || r.children_changed)
 	uiout->field_int ("new_num_children",
-			  varobj_get_num_children (r->varobj));
+			  varobj_get_num_children (r.varobj));
 
       gdb::unique_xmalloc_ptr<char> display_hint
-	= varobj_get_display_hint (r->varobj);
+	= varobj_get_display_hint (r.varobj);
       if (display_hint)
 	uiout->field_string ("displayhint", display_hint.get ());
 
-      if (varobj_is_dynamic_p (r->varobj))
+      if (varobj_is_dynamic_p (r.varobj))
 	uiout->field_int ("dynamic", 1);
 
-      varobj_get_child_range (r->varobj, &from, &to);
-      uiout->field_int ("has_more", varobj_has_more (r->varobj, to));
+      varobj_get_child_range (r.varobj, &from, &to);
+      uiout->field_int ("has_more", varobj_has_more (r.varobj, to));
 
-      if (r->newobj)
+      if (!r.newobj.empty ())
 	{
-	  int j;
-	  varobj_p child;
-
 	  ui_out_emit_list list_emitter (uiout, "new_children");
-	  for (j = 0; VEC_iterate (varobj_p, r->newobj, j, child); ++j)
+
+	  for (varobj *child : r.newobj)
 	    {
 	      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 	      print_varobj (child, print_values, 1 /* print_expression */);
 	    }
-
-	  VEC_free (varobj_p, r->newobj);
-	  r->newobj = NULL;	/* Paranoia.  */
 	}
     }
-  VEC_free (varobj_update_result, changes);
 }
 
 void

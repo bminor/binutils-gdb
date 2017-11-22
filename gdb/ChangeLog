@@ -1,5 +1,17 @@
 2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* varobj.h (struct varobj_update_result): Add constructor, add
+	move constructor, disable copy and assign, initialize fields.
+	<newobj>: Change type to std::vector.
+	(varobj_update): Return std::vector.
+	* varobj.c (install_dynamic_child): Change VEC parameters to
+	std::vector and adjust.
+	(update_dynamic_varobj_children): Likewise.
+	(varobj_update): Return std::vector and adjust.
+	* mi/mi-cmd-var.c (varobj_update_one): Adjust to vector changes.
+
+2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* varobj.h (struct varobj) <parent>: Remove const.
 	<children>: Change type to std::vector.
 	(varobj_list_children): Return std::vector const reference.
