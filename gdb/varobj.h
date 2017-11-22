@@ -89,6 +89,9 @@ struct varobj_dynamic;
    a particular object variable.  */
 struct varobj
 {
+  explicit varobj (varobj_root *root_);
+  ~varobj ();
+
   /* Name of the variable for this object.  If this variable is a
      child, then this name will be the child's source name.
      (bar, not foo.bar).  */
@@ -104,37 +107,37 @@ struct varobj
   std::string obj_name;
 
   /* Index of this variable in its parent or -1.  */
-  int index;
+  int index = -1;
 
   /* The type of this variable.  This can be NULL
      for artificial variable objects -- currently, the "accessibility"
      variable objects in C++.  */
-  struct type *type;
+  struct type *type = NULL;
 
   /* The value of this expression or subexpression.  A NULL value
      indicates there was an error getting this value.
      Invariant: if varobj_value_is_changeable_p (this) is non-zero, 
      the value is either NULL, or not lazy.  */
-  struct value *value;
+  struct value *value = NULL;
 
   /* The number of (immediate) children this variable has.  */
-  int num_children;
+  int num_children = -1;
 
   /* If this object is a child, this points to its immediate parent.  */
-  const struct varobj *parent;
+  const struct varobj *parent = NULL;
 
   /* Children of this object.  */
-  VEC (varobj_p) *children;
+  VEC (varobj_p) *children = NULL;
 
   /* Description of the root variable.  Points to root variable for
      children.  */
   struct varobj_root *root;
 
   /* The format of the output for this object.  */
-  enum varobj_display_formats format;
+  enum varobj_display_formats format = FORMAT_NATURAL;
 
   /* Was this variable updated via a varobj_set_value operation.  */
-  int updated;
+  int updated = 0;
 
   /* Last print value.  */
   std::string print_value;
@@ -142,18 +145,18 @@ struct varobj
   /* Is this variable frozen.  Frozen variables are never implicitly
      updated by -var-update * 
      or -var-update <direct-or-indirect-parent>.  */
-  int frozen;
+  int frozen = 0;
 
   /* Is the value of this variable intentionally not fetched?  It is
      not fetched if either the variable is frozen, or any parents is
      frozen.  */
-  int not_fetched;
+  int not_fetched = 0;
 
   /* Sub-range of children which the MI consumer has requested.  If
      FROM < 0 or TO < 0, means that all children have been
      requested.  */
-  int from;
-  int to;
+  int from = -1;
+  int to = -1;
 
   /* Dynamic part of varobj.  */
   struct varobj_dynamic *dynamic;

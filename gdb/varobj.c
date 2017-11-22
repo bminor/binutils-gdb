@@ -68,42 +68,41 @@ varobj_enable_pretty_printing (void)
    varobj.  */
 struct varobj_root
 {
-
   /* The expression for this parent.  */
   expression_up exp;
 
   /* Block for which this expression is valid.  */
-  const struct block *valid_block;
+  const struct block *valid_block = NULL;
 
   /* The frame for this expression.  This field is set iff valid_block is
      not NULL.  */
-  struct frame_id frame;
+  struct frame_id frame = null_frame_id;
 
   /* The global thread ID that this varobj_root belongs to.  This field
      is only valid if valid_block is not NULL.
      When not 0, indicates which thread 'frame' belongs to.
      When 0, indicates that the thread list was empty when the varobj_root
      was created.  */
-  int thread_id;
+  int thread_id = 0;
 
   /* If 1, the -var-update always recomputes the value in the
      current thread and frame.  Otherwise, variable object is
      always updated in the specific scope/thread/frame.  */
-  int floating;
+  int floating = 0;
 
   /* Flag that indicates validity: set to 0 when this varobj_root refers 
      to symbols that do not exist anymore.  */
-  int is_valid;
+  int is_valid = 1;
 
   /* Language-related operations for this variable and its
      children.  */
-  const struct lang_varobj_ops *lang_ops;
+  const struct lang_varobj_ops *lang_ops = NULL;
 
   /* The varobj for this root node.  */
-  struct varobj *rootvar;
+  struct varobj *rootvar = NULL;
 
   /* Next root variable */
-  struct varobj_root *next;
+  struct varobj_root *next = NULL;
 };
 
 /* Dynamic part of varobj.  */
@@ -114,27 +113,27 @@ struct varobj_dynamic
      used to decide if dynamic varobj should recompute their children.
      In the event that the frontend never asked for the children, we
      can avoid that.  */
-  int children_requested;
+  int children_requested = 0;
 
   /* The pretty-printer constructor.  If NULL, then the default
      pretty-printer will be looked up.  If None, then no
      pretty-printer will be installed.  */
-  PyObject *constructor;
+  PyObject *constructor = NULL;
 
   /* The pretty-printer that has been constructed.  If NULL, then a
      new printer object is needed, and one will be constructed.  */
-  PyObject *pretty_printer;
+  PyObject *pretty_printer = NULL;
 
   /* The iterator returned by the printer's 'children' method, or NULL
      if not available.  */
-  struct varobj_iter *child_iter;
+  struct varobj_iter *child_iter = NULL;
 
   /* We request one extra item from the iterator, so that we can
      report to the caller whether there are more items than we have
      already reported.  However, we don't want to install this value
      when we read it, because that will mess up future updates.  So,
      we stash it here instead.  */
-  varobj_item *saved_item;
+  varobj_item *saved_item = NULL;
 };
 
 /* A list of varobjs */
@@ -164,14 +163,6 @@ create_child_with_value (struct varobj *parent, int index,
 			 struct varobj_item *item);
 
 /* Utility routines */
-
-static struct varobj *new_variable (void);
-
-static struct varobj *new_root_variable (void);
-
-static void free_variable (struct varobj *var);
-
-static struct cleanup *make_cleanup_free_variable (struct varobj *var);
 
 static enum varobj_display_formats variable_default_display (struct varobj *);
 
@@ -273,12 +264,8 @@ struct varobj *
 varobj_create (const char *objname,
 	       const char *expression, CORE_ADDR frame, enum varobj_type type)
 {
-  struct varobj *var;
-  struct cleanup *old_chain;
-
   /* Fill out a varobj structure for the (root) variable being constructed.  */
-  var = new_root_variable ();
-  old_chain = make_cleanup_free_variable (var);
+  std::unique_ptr<varobj> var (new varobj (new varobj_root));
 
   if (expression != NULL)
     {
@@ -333,7 +320,6 @@ varobj_create (const char *objname,
 
       CATCH (except, RETURN_MASK_ERROR)
 	{
-	  do_cleanups (old_chain);
 	  return NULL;
 	}
       END_CATCH
@@ -343,13 +329,12 @@ varobj_create (const char *objname,
 	  || var->root->exp->elts[0].opcode == OP_TYPEOF
 	  || var->root->exp->elts[0].opcode == OP_DECLTYPE)
 	{
-	  do_cleanups (old_chain);
 	  fprintf_unfiltered (gdb_stderr, "Attempt to use a type name"
 			      " as an expression.\n");
 	  return NULL;
 	}
 
-      var->format = variable_default_display (var);
+      var->format = variable_default_display (var.get ());
       var->root->valid_block = innermost_block;
       var->name = expression;
       /* For a root var, the name and the expr are the same.  */
@@ -403,10 +388,10 @@ varobj_create (const char *objname,
       /* Set language info */
       var->root->lang_ops = var->root->exp->language_defn->la_varobj_ops;
 
-      install_new_value (var, value, 1 /* Initial assignment */);
+      install_new_value (var.get (), value, 1 /* Initial assignment */);
 
       /* Set ourselves as our root.  */
-      var->root->rootvar = var;
+      var->root->rootvar = var.get ();
 
       /* Reset the selected frame.  */
       if (frame_id_p (old_id))
@@ -422,15 +407,11 @@ varobj_create (const char *objname,
 
       /* If a varobj name is duplicated, the install will fail so
          we must cleanup.  */
-      if (!install_variable (var))
-	{
-	  do_cleanups (old_chain);
-	  return NULL;
-	}
+      if (!install_variable (var.get ()))
+	return NULL;
     }
 
-  discard_cleanups (old_chain);
-  return var;
+  return var.release ();
 }
 
 /* Generates an unique name that can be used for a varobj.  */
@@ -1846,7 +1827,7 @@ delete_variable_1 (int *delcountp, struct varobj *var, int only_children_p,
     uninstall_variable (var);
 
   /* Free memory associated with this variable.  */
-  free_variable (var);
+  delete var;
 }
 
 /* Install the given variable VAR with the object name VAR->OBJ_NAME.  */
@@ -1985,15 +1966,12 @@ static struct varobj *
 create_child_with_value (struct varobj *parent, int index,
 			 struct varobj_item *item)
 {
-  struct varobj *child;
-
-  child = new_variable ();
+  varobj *child = new varobj (parent->root);
 
   /* NAME is allocated by caller.  */
   std::swap (child->name, item->name);
   child->index = index;
   child->parent = parent;
-  child->root = parent->root;
 
   if (varobj_is_anonymous_child (child))
     child->obj_name = string_printf ("%s.%d_anonymous",
@@ -2026,57 +2004,17 @@ create_child_with_value (struct varobj *parent, int index,
  */
 
 /* Allocate memory and initialize a new variable.  */
-static struct varobj *
-new_variable (void)
+varobj::varobj (varobj_root *root_)
+: root (root_), dynamic (new varobj_dynamic)
 {
-  struct varobj *var;
-
-  var = new varobj ();
-  var->index = -1;
-  var->type = NULL;
-  var->value = NULL;
-  var->num_children = -1;
-  var->parent = NULL;
-  var->children = NULL;
-  var->format = FORMAT_NATURAL;
-  var->root = NULL;
-  var->updated = 0;
-  var->frozen = 0;
-  var->not_fetched = 0;
-  var->dynamic = XNEW (struct varobj_dynamic);
-  var->dynamic->children_requested = 0;
-  var->from = -1;
-  var->to = -1;
-  var->dynamic->constructor = 0;
-  var->dynamic->pretty_printer = 0;
-  var->dynamic->child_iter = 0;
-  var->dynamic->saved_item = 0;
-
-  return var;
-}
-
-/* Allocate memory and initialize a new root variable.  */
-static struct varobj *
-new_root_variable (void)
-{
-  struct varobj *var = new_variable ();
-
-  var->root = new varobj_root ();
-  var->root->lang_ops = NULL;
-  var->root->exp = NULL;
-  var->root->valid_block = NULL;
-  var->root->frame = null_frame_id;
-  var->root->floating = 0;
-  var->root->rootvar = NULL;
-  var->root->is_valid = 1;
-
-  return var;
 }
 
 /* Free any allocated memory associated with VAR.  */
-static void
-free_variable (struct varobj *var)
+
+varobj::~varobj ()
 {
+  varobj *var = this;
+
 #if HAVE_PYTHON
   if (var->dynamic->pretty_printer != NULL)
     {
@@ -2094,20 +2032,7 @@ free_variable (struct varobj *var)
   if (is_root_p (var))
     delete var->root;
 
-  xfree (var->dynamic);
-  delete var;
-}
-
-static void
-do_free_variable_cleanup (void *var)
-{
-  free_variable ((struct varobj *) var);
-}
-
-static struct cleanup *
-make_cleanup_free_variable (struct varobj *var)
-{
-  return make_cleanup (do_free_variable_cleanup, var);
+  delete var->dynamic;
 }
 
 /* Return the type of the value that's stored in VAR,

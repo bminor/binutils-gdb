@@ -1,3 +1,22 @@
+2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* varobj.h (struct varobj): Add constructor and destructor,
+	initialize fields.
+	* varobj.c (struct varobj_root): Initialize fields.
+	(struct varobj_dynamic): Initialize fields.
+	(varobj_create): Use unique_ptr instead of cleanup.  Create
+	varobj with new instead of new_root_variable.
+	(delete_variable_1): Free variable with delete instead of
+	free_variable.
+	(create_child_with_value): Create variable with new instead of
+	new_variable.
+	(varobj::varobj): New.
+	(varobj::~varobj): New (body mostly coming from free_variable).
+	(new_variable): Remove.
+	(free_variable): Remove.
+	(do_free_variable_cleanup): Remove.
+	(make_cleanup_free_variable): Remove.
+
 2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* core-regset.c: Remove file.
