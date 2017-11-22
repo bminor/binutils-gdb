@@ -1,5 +1,9 @@
 2017-11-26  Tom Tromey  <tom@tromey.com>
 
+	* common/format.h: Add include guards.
+
+2017-11-26  Tom Tromey  <tom@tromey.com>
+
 	* nat/linux-personality.h (class
 	maybe_disable_address_space_randomization): New class.
 	(maybe_disable_address_space_randomization): Don't declare

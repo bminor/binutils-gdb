@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef COMMON_FORMAT_H
+#define COMMON_FORMAT_H
+
 #if defined(__MINGW32__) && !defined(PRINTF_HAS_LONG_LONG)
 # define USE_PRINTF_I64 1
 # define PRINTF_HAS_LONG_LONG
@@ -62,3 +65,5 @@ extern void free_format_pieces (struct format_piece *frags);
 /* Freeing, cast as a cleanup.  */
 
 extern void free_format_pieces_cleanup (void *);
+
+#endif /* COMMON_FORMAT_H */
