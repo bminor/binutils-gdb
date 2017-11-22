@@ -1,5 +1,17 @@
 2017-11-26  Tom Tromey  <tom@tromey.com>
 
+	* nat/linux-personality.h (class
+	maybe_disable_address_space_randomization): New class.
+	(maybe_disable_address_space_randomization): Don't declare
+	function.
+	* nat/linux-personality.c (restore_personality)
+	(make_disable_asr_cleanup): Remove.
+	(maybe_disable_address_space_randomization): Now a constructor.
+	(~maybe_disable_address_space_randomization): New destructor.
+	* linux-nat.c (linux_nat_create_inferior): Update.
+
+2017-11-26  Tom Tromey  <tom@tromey.com>
+
 	* gcore.c (write_gcore_file_1): Use gdb::unique_xmalloc_ptr.
 
 2017-11-26  Ulrich Weigand  <uweigand@de.ibm.com>

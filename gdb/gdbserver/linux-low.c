@@ -998,16 +998,17 @@ linux_create_inferior (const char *program,
   struct lwp_info *new_lwp;
   int pid;
   ptid_t ptid;
-  struct cleanup *restore_personality
-    = maybe_disable_address_space_randomization (disable_randomization);
-  std::string str_program_args = stringify_argv (program_args);
 
-  pid = fork_inferior (program,
-		       str_program_args.c_str (),
-		       get_environ ()->envp (), linux_ptrace_fun,
-		       NULL, NULL, NULL, NULL);
+  {
+    maybe_disable_address_space_randomization restore_personality
+      (disable_randomization);
+    std::string str_program_args = stringify_argv (program_args);
 
-  do_cleanups (restore_personality);
+    pid = fork_inferior (program,
+			 str_program_args.c_str (),
+			 get_environ ()->envp (), linux_ptrace_fun,
+			 NULL, NULL, NULL, NULL);
+  }
 
   linux_add_process (pid, 0);
 
