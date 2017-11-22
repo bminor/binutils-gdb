@@ -46,6 +46,7 @@
 #include <ctype.h>
 #include "nat/linux-namespaces.h"
 #include <algorithm>
+#include "valprint.h"
 
 /* GNU/Linux libthread_db support.
 
@@ -79,6 +80,10 @@ static char *libthread_db_search_path;
 /* Set to non-zero if thread_db auto-loading is enabled
    by the "set auto-load libthread-db" command.  */
 static int auto_load_thread_db = 1;
+
+/* Set to non-zero if load-time libthread_db tests have been enabled
+   by the "maintenence set check-libthread-db" command.  */
+static int check_thread_db_on_load = 0;
 
 /* "show" command for the auto_load_thread_db configuration variable.  */
 
@@ -493,6 +498,216 @@ dladdr_to_soname (const void *addr)
   return NULL;
 }
 
+/* State for check_thread_db_callback.  */
+
+struct check_thread_db_info
+{
+  /* The libthread_db under test.  */
+  struct thread_db_info *info;
+
+  /* True if progress should be logged.  */
+  bool log_progress;
+
+  /* True if the callback was called.  */
+  bool threads_seen;
+};
+
+static struct check_thread_db_info *tdb_testinfo;
+
+/* Callback for check_thread_db.  */
+
+static int
+check_thread_db_callback (const td_thrhandle_t *th, void *arg)
+{
+  gdb_assert (tdb_testinfo != NULL);
+  tdb_testinfo->threads_seen = true;
+
+#define LOG(fmt, args...)						\
+  do									\
+    {									\
+      if (tdb_testinfo->log_progress)					\
+	{								\
+	  debug_printf (fmt, ## args);					\
+	  gdb_flush (gdb_stdlog);					\
+	}								\
+    }									\
+  while (0)
+
+#define __CHECK(expr, args...)						\
+  do									\
+    {									\
+      if (!(expr))							\
+	{								\
+	  LOG (" ... FAIL!\n");						\
+	  error (args);							\
+	}								\
+    }									\
+  while (0)
+
+#define CHECK(expr)							\
+  __CHECK (expr, "(%s) == false", #expr)
+
+#define CHECK_CALL(func, args...)					\
+  do									\
+    {									\
+      td_err_e __err = tdb_testinfo->info->func ## _p (args);		\
+									\
+      __CHECK (__err == TD_OK, _("%s failed: %s"), #func,		\
+	       thread_db_err_str (__err));				\
+    }									\
+  while (0)
+
+  LOG ("  Got thread");
+
+  /* Check td_ta_thr_iter passed consistent arguments.  */
+  CHECK (th != NULL);
+  CHECK (arg == (void *) tdb_testinfo);
+  CHECK (th->th_ta_p == tdb_testinfo->info->thread_agent);
+
+  LOG (" %s", core_addr_to_string_nz ((CORE_ADDR) th->th_unique));
+
+  /* Check td_thr_get_info.  */
+  td_thrinfo_t ti;
+  CHECK_CALL (td_thr_get_info, th, &ti);
+
+  LOG (" => %d", ti.ti_lid);
+
+  CHECK (ti.ti_ta_p == th->th_ta_p);
+  CHECK (ti.ti_tid == (thread_t) th->th_unique);
+
+  /* Check td_ta_map_lwp2thr.  */
+  td_thrhandle_t th2;
+  memset (&th2, 23, sizeof (td_thrhandle_t));
+  CHECK_CALL (td_ta_map_lwp2thr, th->th_ta_p, ti.ti_lid, &th2);
+
+  LOG (" => %s", core_addr_to_string_nz ((CORE_ADDR) th2.th_unique));
+
+  CHECK (memcmp (th, &th2, sizeof (td_thrhandle_t)) == 0);
+
+  /* Attempt TLS access.  Assuming errno is TLS, this calls
+     thread_db_get_thread_local_address, which in turn calls
+     td_thr_tls_get_addr for live inferiors or td_thr_tlsbase
+     for core files.  This test is skipped if the thread has
+     not been recorded; proceeding in that case would result
+     in the test having the side-effect of noticing threads
+     which seems wrong.
+
+     Note that in glibc's libthread_db td_thr_tls_get_addr is
+     a thin wrapper around td_thr_tlsbase; this check always
+     hits the bulk of the code.
+
+     Note also that we don't actually check any libthread_db
+     calls are made, we just assume they were; future changes
+     to how GDB accesses TLS could result in this passing
+     without exercising the calls it's supposed to.  */
+  ptid_t ptid = ptid_build (tdb_testinfo->info->pid, ti.ti_lid, 0);
+  struct thread_info *thread_info = find_thread_ptid (ptid);
+  if (thread_info != NULL && thread_info->priv != NULL)
+    {
+      LOG ("; errno");
+
+      scoped_restore_current_thread restore_current_thread;
+      switch_to_thread (ptid);
+
+      expression_up expr = parse_expression ("errno");
+      struct value *val = evaluate_expression (expr.get ());
+
+      if (tdb_testinfo->log_progress)
+	{
+	  struct value_print_options opts;
+
+	  get_user_print_options (&opts);
+	  LOG (" = ");
+	  value_print (val, gdb_stdlog, &opts);
+	}
+    }
+
+  LOG (" ... OK\n");
+
+#undef LOG
+#undef __CHECK
+#undef CHECK
+#undef CHECK_CALL
+
+  return 0;
+}
+
+/* Run integrity checks on the dlopen()ed libthread_db described by
+   INFO.  Returns true on success, displays a warning and returns
+   false on failure.  Logs progress messages to gdb_stdlog during
+   the test if LOG_PROGRESS is true.  */
+
+static bool
+check_thread_db (struct thread_db_info *info, bool log_progress)
+{
+  bool test_passed = true;
+
+  if (log_progress)
+    debug_printf (_("Running libthread_db integrity checks:\n"));
+
+  /* GDB avoids using td_ta_thr_iter wherever possible (see comment
+     in try_thread_db_load_1 below) so in order to test it we may
+     have to locate it ourselves.  */
+  td_ta_thr_iter_ftype *td_ta_thr_iter_p = info->td_ta_thr_iter_p;
+  if (td_ta_thr_iter_p == NULL)
+    {
+      void *thr_iter = verbose_dlsym (info->handle, "td_ta_thr_iter");
+      if (thr_iter == NULL)
+	return 0;
+
+      td_ta_thr_iter_p = (td_ta_thr_iter_ftype *) thr_iter;
+    }
+
+  /* Set up the test state we share with the callback.  */
+  gdb_assert (tdb_testinfo == NULL);
+  struct check_thread_db_info tdb_testinfo_buf;
+  tdb_testinfo = &tdb_testinfo_buf;
+
+  memset (tdb_testinfo, 0, sizeof (struct check_thread_db_info));
+  tdb_testinfo->info = info;
+  tdb_testinfo->log_progress = log_progress;
+
+  /* td_ta_thr_iter shouldn't be used on running processes.  */
+  linux_stop_and_wait_all_lwps ();
+
+  TRY
+    {
+      td_err_e err = td_ta_thr_iter_p (info->thread_agent,
+				       check_thread_db_callback,
+				       tdb_testinfo,
+				       TD_THR_ANY_STATE,
+				       TD_THR_LOWEST_PRIORITY,
+				       TD_SIGNO_MASK,
+				       TD_THR_ANY_USER_FLAGS);
+
+      if (err != TD_OK)
+	error (_("td_ta_thr_iter failed: %s"), thread_db_err_str (err));
+
+      if (!tdb_testinfo->threads_seen)
+	error (_("no threads seen"));
+    }
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      if (warning_pre_print)
+	fputs_unfiltered (warning_pre_print, gdb_stderr);
+
+      exception_fprintf (gdb_stderr, except,
+			 _("libthread_db integrity checks failed: "));
+
+      test_passed = false;
+    }
+  END_CATCH
+
+  if (test_passed && log_progress)
+    debug_printf (_("libthread_db integrity checks passed.\n"));
+
+  tdb_testinfo = NULL;
+
+  linux_unstop_all_lwps ();
+
+  return test_passed;
+}
+
 /* Attempt to initialize dlopen()ed libthread_db, described by INFO.
    Return 1 on success.
    Failure could happen if libthread_db does not have symbols we expect,
@@ -585,6 +800,13 @@ try_thread_db_load_1 (struct thread_db_info *info)
 #undef TDB_VERBOSE_DLSYM
 #undef TDB_DLSYM
 #undef CHK
+
+  /* Run integrity checks if requested.  */
+  if (check_thread_db_on_load)
+    {
+      if (!check_thread_db (info, libthread_db_debug != 0))
+	return 0;
+    }
 
   if (info->td_ta_thr_iter_p == NULL)
     {
@@ -1704,6 +1926,24 @@ info_auto_load_libthread_db (const char *args, int from_tty)
     uiout->message (_("No auto-loaded libthread-db.\n"));
 }
 
+/* Implement 'maintenance check libthread-db'.  */
+
+static void
+maintenance_check_libthread_db (const char *args, int from_tty)
+{
+  int inferior_pid = ptid_get_pid (inferior_ptid);
+  struct thread_db_info *info;
+
+  if (inferior_pid == 0)
+    error (_("No inferior running"));
+
+  info = get_thread_db_info (inferior_pid);
+  if (info == NULL)
+    error (_("No libthread_db loaded"));
+
+  check_thread_db (info, true);
+}
+
 static void
 init_thread_db_ops (void)
 {
@@ -1779,6 +2019,23 @@ This options has security implications for untrusted inferiors."),
 	   _("Print the list of loaded inferior specific libthread_db.\n\
 Usage: info auto-load libthread-db"),
 	   auto_load_info_cmdlist_get ());
+
+  add_cmd ("libthread-db", class_maintenance,
+	   maintenance_check_libthread_db, _("\
+Run integrity checks on the current inferior's libthread_db."),
+	   &maintenancechecklist);
+
+  add_setshow_boolean_cmd ("check-libthread-db",
+			   class_maintenance,
+			   &check_thread_db_on_load, _("\
+Set whether to check libthread_db at load time."), _("\
+Show whether to check libthread_db at load time."), _("\
+If enabled GDB will run integrity checks on inferior specific libthread_db\n\
+as they are loaded."),
+			   NULL,
+			   NULL,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 
   /* Add ourselves to objfile event chain.  */
   observer_attach_new_objfile (thread_db_new_objfile);

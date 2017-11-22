@@ -1,3 +1,14 @@
+2017-11-22  Gary Benson <gbenson@redhat.com>
+
+	* linux-thread-db.c (valprint.h): New include.
+	(struct check_thread_db_info): New structure.
+	(check_thread_db_on_load, tdb_testinfo): New static globals.
+	(check_thread_db, check_thread_db_callback): New functions.
+	(try_thread_db_load_1): Run integrity checks if requested.
+	(maintenance_check_libthread_db): New function.
+	(_initialize_thread_db): Register "maint check libthread-db"
+	and "maint set/show check-libthread-db".
+
 2017-11-21  Jerome Guitton  <guitton@adacore.com>
 
 	* ravenscar-thread.c (ravenscar_wait): Update inferior ptid

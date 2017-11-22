@@ -1,3 +1,8 @@
+2017-11-22  Gary Benson <gbenson@redhat.com>
+
+	* gdb.threads/check-libthread-db.exp: New file.
+	* gdb.threads/check-libthread-db.c: Likewise.
+
 2017-11-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.arch/ppc-longdouble.exp: New file.

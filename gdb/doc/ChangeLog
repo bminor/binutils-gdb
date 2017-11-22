@@ -1,3 +1,8 @@
+2017-11-22  Gary Benson <gbenson@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint check
+	libthread-db" and "maint set/show check-libthread-db".
+
 2017-11-16  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python.texi (Basic Python): Add rbreak documentation.
