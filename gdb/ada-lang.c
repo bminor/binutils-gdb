@@ -12024,6 +12024,10 @@ struct exception_support_info
       a catchpoint on failed assertions.  */
    const char *catch_assert_sym;
 
+   /* The name of the symbol to break on in order to insert
+      a catchpoint on exception handling.  */
+   const char *catch_handlers_sym;
+
    /* Assuming that the inferior just triggered an unhandled exception
       catchpoint, this function is responsible for returning the address
       in inferior memory where the name of that exception is stored.
@@ -12043,6 +12047,7 @@ static const struct exception_support_info default_exception_support_info =
   "__gnat_debug_raise_exception", /* catch_exception_sym */
   "__gnat_unhandled_exception", /* catch_exception_unhandled_sym */
   "__gnat_debug_raise_assert_failure", /* catch_assert_sym */
+  "__gnat_begin_handler", /* catch_handlers_sym */
   ada_unhandled_exception_name_addr
 };
 
@@ -12055,6 +12060,7 @@ static const struct exception_support_info exception_support_info_fallback =
   "__gnat_raise_nodefer_with_msg", /* catch_exception_sym */
   "__gnat_unhandled_exception", /* catch_exception_unhandled_sym */
   "system__assertions__raise_assert_failure",  /* catch_assert_sym */
+  "__gnat_begin_handler", /* catch_handlers_sym */
   ada_unhandled_exception_name_addr_from_raise
 };
 
@@ -12323,7 +12329,12 @@ ada_exception_name_addr_1 (enum ada_exception_catchpoint_kind ex,
       case ada_catch_exception_unhandled:
         return data->exception_info->unhandled_exception_name_addr ();
         break;
-      
+
+      case ada_catch_handlers:
+        return 0;  /* The runtimes does not provide access to the exception
+		      name.  */
+        break;
+
       case ada_catch_assert:
         return 0;  /* Exception name is not relevant in this case.  */
         break;
@@ -12429,7 +12440,9 @@ ada_exception_name_addr (enum ada_exception_catchpoint_kind ex,
   return result;
 }
 
-static char *ada_exception_catchpoint_cond_string (const char *excep_string);
+static char *ada_exception_catchpoint_cond_string
+  (const char *excep_string,
+   enum ada_exception_catchpoint_kind ex);
 
 /* Ada catchpoints.
 
@@ -12492,7 +12505,8 @@ struct ada_catchpoint : public breakpoint
    catchpoint's locations, and store them for later evaluation.  */
 
 static void
-create_excep_cond_exprs (struct ada_catchpoint *c)
+create_excep_cond_exprs (struct ada_catchpoint *c,
+                         enum ada_exception_catchpoint_kind ex)
 {
   struct cleanup *old_chain;
   struct bp_location *bl;
@@ -12508,7 +12522,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 
   /* Compute the condition expression in text form, from the specific
      expection we want to catch.  */
-  cond_string = ada_exception_catchpoint_cond_string (c->excep_string);
+  cond_string = ada_exception_catchpoint_cond_string (c->excep_string, ex);
   old_chain = make_cleanup (xfree, cond_string);
 
   /* Iterate over all the catchpoint's locations, and parse an
@@ -12576,7 +12590,7 @@ re_set_exception (enum ada_exception_catchpoint_kind ex, struct breakpoint *b)
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */
-  create_excep_cond_exprs (c);
+  create_excep_cond_exprs (c, ex);
 }
 
 /* Returns true if we should stop for this breakpoint hit.  If the
@@ -12665,6 +12679,7 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
     {
       case ada_catch_exception:
       case ada_catch_exception_unhandled:
+      case ada_catch_handlers:
 	{
 	  const CORE_ADDR addr = ada_exception_name_addr (ex, b);
 	  char exception_name[256];
@@ -12762,6 +12777,17 @@ print_one_exception (enum ada_exception_catchpoint_kind ex,
         uiout->field_string ("what", "unhandled Ada exceptions");
         break;
       
+      case ada_catch_handlers:
+        if (c->excep_string != NULL)
+          {
+	    uiout->field_fmt ("what",
+			      _("`%s' Ada exception handlers"),
+			      c->excep_string);
+          }
+        else
+	  uiout->field_string ("what", "all Ada exceptions handlers");
+        break;
+
       case ada_catch_assert:
         uiout->field_string ("what", "failed Ada assertions");
         break;
@@ -12805,7 +12831,19 @@ print_mention_exception (enum ada_exception_catchpoint_kind ex,
       case ada_catch_exception_unhandled:
         uiout->text (_("unhandled Ada exceptions"));
         break;
-      
+
+      case ada_catch_handlers:
+        if (c->excep_string != NULL)
+	  {
+	    std::string info
+	      = string_printf (_("`%s' Ada exception handlers"),
+			       c->excep_string);
+	    uiout->text (info.c_str ());
+	  }
+        else
+          uiout->text (_("all Ada exceptions handlers"));
+        break;
+
       case ada_catch_assert:
         uiout->text (_("failed Ada assertions"));
         break;
@@ -12835,6 +12873,10 @@ print_recreate_exception (enum ada_exception_catchpoint_kind ex,
 
       case ada_catch_exception_unhandled:
 	fprintf_filtered (fp, "catch exception unhandled");
+	break;
+
+      case ada_catch_handlers:
+	fprintf_filtered (fp, "catch handlers");
 	break;
 
       case ada_catch_assert:
@@ -12987,6 +13029,54 @@ print_recreate_catch_assert (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops catch_assert_breakpoint_ops;
 
+/* Virtual table for "catch handlers" breakpoints.  */
+
+static struct bp_location *
+allocate_location_catch_handlers (struct breakpoint *self)
+{
+  return allocate_location_exception (ada_catch_handlers, self);
+}
+
+static void
+re_set_catch_handlers (struct breakpoint *b)
+{
+  re_set_exception (ada_catch_handlers, b);
+}
+
+static void
+check_status_catch_handlers (bpstat bs)
+{
+  check_status_exception (ada_catch_handlers, bs);
+}
+
+static enum print_stop_action
+print_it_catch_handlers (bpstat bs)
+{
+  return print_it_exception (ada_catch_handlers, bs);
+}
+
+static void
+print_one_catch_handlers (struct breakpoint *b,
+			  struct bp_location **last_loc)
+{
+  print_one_exception (ada_catch_handlers, b, last_loc);
+}
+
+static void
+print_mention_catch_handlers (struct breakpoint *b)
+{
+  print_mention_exception (ada_catch_handlers, b);
+}
+
+static void
+print_recreate_catch_handlers (struct breakpoint *b,
+			       struct ui_file *fp)
+{
+  print_recreate_exception (ada_catch_handlers, b, fp);
+}
+
+static struct breakpoint_ops catch_handlers_breakpoint_ops;
+
 /* Return a newly allocated copy of the first space-separated token
    in ARGSP, and then adjust ARGSP to point immediately after that
    token.
@@ -13025,12 +13115,15 @@ ada_get_next_arg (const char **argsp)
    Set EX to the appropriate catchpoint type.
    Set EXCEP_STRING to the name of the specific exception if
    specified by the user.
+   IS_CATCH_HANDLERS_CMD: True if the arguments are for a
+   "catch handlers" command.  False otherwise.
    If a condition is found at the end of the arguments, the condition
    expression is stored in COND_STRING (memory must be deallocated
    after use).  Otherwise COND_STRING is set to NULL.  */
 
 static void
 catch_ada_exception_command_split (const char *args,
+				   bool is_catch_handlers_cmd,
                                    enum ada_exception_catchpoint_kind *ex,
 				   char **excep_string,
 				   char **cond_string)
@@ -13076,7 +13169,13 @@ catch_ada_exception_command_split (const char *args,
 
   discard_cleanups (old_chain);
 
-  if (exception_name == NULL)
+  if (is_catch_handlers_cmd)
+    {
+      /* Catch handling of exceptions.  */
+      *ex = ada_catch_handlers;
+      *excep_string = exception_name;
+    }
+  else if (exception_name == NULL)
     {
       /* Catch all exceptions.  */
       *ex = ada_catch_exception;
@@ -13118,6 +13217,9 @@ ada_exception_sym_name (enum ada_exception_catchpoint_kind ex)
       case ada_catch_assert:
         return (data->exception_info->catch_assert_sym);
         break;
+      case ada_catch_handlers:
+        return (data->exception_info->catch_handlers_sym);
+        break;
       default:
         internal_error (__FILE__, __LINE__,
                         _("unexpected catchpoint kind (%d)"), ex);
@@ -13141,6 +13243,9 @@ ada_exception_breakpoint_ops (enum ada_exception_catchpoint_kind ex)
       case ada_catch_assert:
         return (&catch_assert_breakpoint_ops);
         break;
+      case ada_catch_handlers:
+        return (&catch_handlers_breakpoint_ops);
+        break;
       default:
         internal_error (__FILE__, __LINE__,
                         _("unexpected catchpoint kind (%d)"), ex);
@@ -13151,14 +13256,29 @@ ada_exception_breakpoint_ops (enum ada_exception_catchpoint_kind ex)
    being raised with the exception that the user wants to catch.  This
    assumes that this condition is used when the inferior just triggered
    an exception catchpoint.
+   EX: the type of catchpoints used for catching Ada exceptions.
    
    The string returned is a newly allocated string that needs to be
    deallocated later.  */
 
 static char *
-ada_exception_catchpoint_cond_string (const char *excep_string)
+ada_exception_catchpoint_cond_string (const char *excep_string,
+                                      enum ada_exception_catchpoint_kind ex)
 {
   int i;
+  bool is_standard_exc = false;
+  const char *actual_exc_expr;
+  char *ref_exc_expr;
+
+  if (ex == ada_catch_handlers)
+    {
+      /* For exception handlers catchpoints, the condition string does
+         not use the same parameter as for the other exceptions.  */
+      actual_exc_expr = ("long_integer (GNAT_GCC_exception_Access"
+			 "(gcc_exception).all.occurrence.id)");
+    }
+  else
+    actual_exc_expr = "long_integer (e)";
 
   /* The standard exceptions are a special case.  They are defined in
      runtime units that have been compiled without debugging info; if
@@ -13183,11 +13303,19 @@ ada_exception_catchpoint_cond_string (const char *excep_string)
     {
       if (strcmp (standard_exc [i], excep_string) == 0)
 	{
-          return xstrprintf ("long_integer (e) = long_integer (&standard.%s)",
-                             excep_string);
+	  is_standard_exc = true;
+	  break;
 	}
     }
-  return xstrprintf ("long_integer (e) = long_integer (&%s)", excep_string);
+
+  if (is_standard_exc)
+    ref_exc_expr = xstrprintf ("long_integer (&standard.%s)", excep_string);
+  else
+    ref_exc_expr = xstrprintf ("long_integer (&%s)", excep_string);
+
+  char *result =  xstrprintf ("%s = %s", actual_exc_expr, ref_exc_expr);
+  xfree (ref_exc_expr);
+  return result;
 }
 
 /* Return the symtab_and_line that should be used to insert an exception
@@ -13270,7 +13398,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
   init_ada_exception_breakpoint (c.get (), gdbarch, sal, addr_string,
 				 ops, tempflag, disabled, from_tty);
   c->excep_string = excep_string;
-  create_excep_cond_exprs (c.get ());
+  create_excep_cond_exprs (c.get (), ex_kind);
   if (cond_string != NULL)
     set_breakpoint_condition (c.get (), cond_string, from_tty);
   install_breakpoint (0, std::move (c), 1);
@@ -13293,7 +13421,32 @@ catch_ada_exception_command (const char *arg_entry, int from_tty,
 
   if (!arg)
     arg = "";
-  catch_ada_exception_command_split (arg, &ex_kind, &excep_string,
+  catch_ada_exception_command_split (arg, false, &ex_kind, &excep_string,
+				     &cond_string);
+  create_ada_exception_catchpoint (gdbarch, ex_kind,
+				   excep_string, cond_string,
+				   tempflag, 1 /* enabled */,
+				   from_tty);
+}
+
+/* Implement the "catch handlers" command.  */
+
+static void
+catch_ada_handlers_command (const char *arg_entry, int from_tty,
+			    struct cmd_list_element *command)
+{
+  const char *arg = arg_entry;
+  struct gdbarch *gdbarch = get_current_arch ();
+  int tempflag;
+  enum ada_exception_catchpoint_kind ex_kind;
+  char *excep_string = NULL;
+  char *cond_string = NULL;
+
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  if (!arg)
+    arg = "";
+  catch_ada_exception_command_split (arg, true, &ex_kind, &excep_string,
 				     &cond_string);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
 				   excep_string, cond_string,
@@ -14408,6 +14561,16 @@ initialize_ada_catchpoint_ops (void)
   ops->print_one = print_one_catch_assert;
   ops->print_mention = print_mention_catch_assert;
   ops->print_recreate = print_recreate_catch_assert;
+
+  ops = &catch_handlers_breakpoint_ops;
+  *ops = bkpt_breakpoint_ops;
+  ops->allocate_location = allocate_location_catch_handlers;
+  ops->re_set = re_set_catch_handlers;
+  ops->check_status = check_status_catch_handlers;
+  ops->print_it = print_it_catch_handlers;
+  ops->print_one = print_one_catch_handlers;
+  ops->print_mention = print_mention_catch_handlers;
+  ops->print_recreate = print_recreate_catch_handlers;
 }
 
 /* This module's 'new_objfile' observer.  */
@@ -14465,6 +14628,14 @@ overloads selection menu is activated"),
 Catch Ada exceptions, when raised.\n\
 With an argument, catch only exceptions with the given name."),
 		     catch_ada_exception_command,
+                     NULL,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
+
+  add_catch_command ("handlers", _("\
+Catch Ada exceptions, when handled.\n\
+With an argument, catch only exceptions with the given name."),
+		     catch_ada_handlers_command,
                      NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);

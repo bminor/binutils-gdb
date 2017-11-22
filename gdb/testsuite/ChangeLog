@@ -1,3 +1,9 @@
+2018-01-03  Xavier Roirand  <roirand@adacore.com>
+
+	* gdb.ada/excep_handle.exp: New testcase.
+	* gdb.ada/excep_handle/foo.adb: New file.
+	* gdb.ada/excep_handle/pck.ads: New file.
+
 2018-01-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/step-line.c: Add extra empty line in copyright header.

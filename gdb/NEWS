@@ -669,6 +669,9 @@ show max-value-size
 * Support for reading/writing memory and extracting values on architectures
   whose memory is addressable in units of any integral multiple of 8 bits.
 
+catch handlers
+  Allows to break when an Ada exception is handled.
+
 * New remote packets
 
 exec stop reason

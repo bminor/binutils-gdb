@@ -108,7 +108,8 @@ enum ada_exception_catchpoint_kind
 {
   ada_catch_exception,
   ada_catch_exception_unhandled,
-  ada_catch_assert
+  ada_catch_assert,
+  ada_catch_handlers
 };
 
 /* Ada task structures.  */

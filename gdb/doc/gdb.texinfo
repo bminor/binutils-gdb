@@ -4458,6 +4458,26 @@ called @code{Constraint_Error} is defined in package @code{Pck}, then
 the command to use to catch such exceptions is @kbd{catch exception
 Pck.Constraint_Error}.
 
+@item handlers
+@kindex catch handlers
+@cindex Ada exception handlers catching
+@cindex catch Ada exceptions when handled
+An Ada exception being handled.  If an exception name is
+specified at the end of the command
+ (eg @kbd{catch handlers Program_Error}), the debugger will stop
+only when this specific exception is handled.
+Otherwise, the debugger stops execution when any Ada exception is handled.
+
+When inserting a handlers catchpoint on a user-defined
+exception whose name is identical to one of the exceptions
+defined by the language, the fully qualified name must be used
+as the exception name.  Otherwise, @value{GDBN} will assume that it
+should stop on the pre-defined exception rather than the
+user-defined one.  For instance, assuming an exception called
+ @code{Constraint_Error} is defined in package @code{Pck}, then the
+command to use to catch such exceptions handling is
+@kbd{catch handlers Pck.Constraint_Error}.
+
 @item exception unhandled
 @kindex catch exception unhandled
 An exception that was raised but is not handled by the program.
