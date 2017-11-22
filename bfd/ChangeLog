@@ -1,5 +1,13 @@
 2017-11-23  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct ppc_link_hash_entry): Delete weakref field.
+	(ppc64_elf_copy_indirect_symbol): Don't set weakref.
+	(alias_readonly_dynrelocs): Use u.alias rather than weakref.
+	(ppc64_elf_adjust_dynamic_symbol): Don't use
+	alias_readonly_dynrelocs for function symbols.
+
+2017-11-23  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (struct elf_link_hash_entry): Add is_weakalias.
 	Rename u.weakdef to u.alias and update comment.
 	(weakdef): New static inline function.
