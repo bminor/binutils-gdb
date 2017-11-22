@@ -1,3 +1,8 @@
+2017-11-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-opc.tbl: Add Disp8MemShift for AVX512 VAES instructions.
+	* i386-tbl.h: Regenerate.
+
 2017-11-23  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (OP_E_memory): Also shift the 8-bit immediate in
