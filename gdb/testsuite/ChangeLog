@@ -1,3 +1,9 @@
+2017-11-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.opt/inline-locals.exp: Mark tests as KFAIL.
+	* gdb.dwarf2/info-locals-optimized-out.exp: New file.
+	* gdb.dwarf2/info-locals-optimized-out.c: New file.
+
 2017-11-22  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/info-os.exp: Pass pthreads.

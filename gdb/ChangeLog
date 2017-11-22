@@ -1,3 +1,8 @@
+2017-11-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* stack.c (iterate_over_block_locals): Add LOC_OPTIMIZED_OUT
+	case in switch.
+
 2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* varobj.h (DEF_VEC_P (varobj_p)): Remove.
