@@ -1,3 +1,7 @@
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* remote-utils.c (prepare_resume_reply): Use memcpy.
+
 2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* linux-low.c (kill_one_lwp_callback): Return void, take

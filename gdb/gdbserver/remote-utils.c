@@ -1173,7 +1173,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    CORE_ADDR addr;
 	    int i;
 
-	    strncpy (buf, "watch:", 6);
+	    memcpy (buf, "watch:", 6);
 	    buf += 6;
 
 	    addr = (*the_target->stopped_data_address) ();
