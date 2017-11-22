@@ -23,7 +23,7 @@ if {![can_spawn_for_attach]} {
     return 0
 }
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug additional_flags=-lpthread}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}]} {
     return -1
 }
 

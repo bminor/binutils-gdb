@@ -1,5 +1,10 @@
 2017-11-22  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/info-os.exp: Pass pthreads.
+	* gdb.multi/multi-attach.exp: Likewise.
+
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.dwarf2/pr10770.exp: Remove code skipping non-gcc
 	compiler.
 
