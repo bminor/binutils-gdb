@@ -3594,6 +3594,10 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir->elf.needs_plt |= eind->elf.needs_plt;
   edir->elf.pointer_equality_needed |= eind->elf.pointer_equality_needed;
 
+  /* If we were called to copy over info for a weak sym, that's all.  */
+  if (eind->elf.root.type != bfd_link_hash_indirect)
+    return;
+
   if (eind->dyn_relocs != NULL)
     {
       if (edir->dyn_relocs != NULL)
@@ -3624,16 +3628,6 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
       edir->dyn_relocs = eind->dyn_relocs;
       eind->dyn_relocs = NULL;
     }
-
-  /* If we were called to copy over info for a weak sym, that's all.
-     You might think dyn_relocs need not be copied over;  After all,
-     both syms will be dynamic or both non-dynamic so we're just
-     moving reloc accounting around.  However, ELIMINATE_COPY_RELOCS
-     code in ppc_elf_adjust_dynamic_symbol needs to check for
-     dyn_relocs in read-only sections, and it does so on what is the
-     DIR sym here.  */
-  if (eind->elf.root.type != bfd_link_hash_indirect)
-    return;
 
   /* Copy over the GOT refcount entries that we may have already seen to
      the symbol which just became indirect.  */
@@ -5441,6 +5435,37 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
   return NULL;
 }
 
+/* Return true if we have dynamic relocs against H or any of its weak
+   aliases, that apply to read-only sections.  Cannot be used after
+   size_dynamic_sections.  */
+
+static bfd_boolean
+alias_readonly_dynrelocs (struct elf_link_hash_entry *h)
+{
+  struct ppc_elf_link_hash_entry *eh = ppc_elf_hash_entry (h);
+  do
+    {
+      if (readonly_dynrelocs (&eh->elf))
+	return TRUE;
+      eh = ppc_elf_hash_entry (eh->elf.u.alias);
+    } while (eh != NULL && &eh->elf != h);
+
+  return FALSE;
+}
+
+/* Return whether H has pc-relative dynamic relocs.  */
+
+static bfd_boolean
+pc_dynrelocs (struct elf_link_hash_entry *h)
+{
+  struct elf_dyn_relocs *p;
+
+  for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+    if (p->pc_count != 0)
+      return TRUE;
+  return FALSE;
+}
+
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -5474,35 +5499,12 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       || h->type == STT_GNU_IFUNC
       || h->needs_plt)
     {
-      /* Prior to adjust_dynamic_symbol, non_got_ref set means that
-	 we might need to generate a copy reloc for this symbol.
-	 After adjust_dynamic_symbol, non_got_ref is only relevant for
-	 non-pic and means that the symbol might have dynamic
-	 relocations.  If it is clear then dyn_relocs for this symbol
-	 should be discarded;  We either want the symbol to remain
-	 undefined, or we have a local definition of some sort.  The
-	 "local definition" for non-function symbols may be due to
-	 creating a local definition in .dynbss, and for function
-	 symbols, defining the symbol on the PLT call stub code.  */
       bfd_boolean local = (SYMBOL_CALLS_LOCAL (info, h)
 			   || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
-      /* Arrange to discard dyn_relocs if we've decided that a
-	 function symbol is local.  It might be possible to discard
-	 dyn_relocs here, but when a symbol has a weakdef they have
-	 been transferred to the weakdef symbol for the benefit of
-	 readonly_dynrelocs.  (See ppc_elf_copy_indirect_symbol.)
-	 Not only would we need to handle weakdefs here, but also in
-	 allocate_dynrelocs and relocate_section.  The latter is
-	 impossible since the weakdef field has been overwritten by
-	 that time.  In relocate_section we need a proxy for
-	 dyn_relocs and non_got_ref is that proxy.
-	 Note that function symbols are not supposed to have weakdefs,
-	 but since symbols may not be correctly typed we handle them
-	 here.  */
-      h->non_got_ref = (h->is_weakalias
-			? weakdef (h)->non_got_ref
-			: !local && (((struct ppc_elf_link_hash_entry *) h)
-				     ->dyn_relocs != NULL));
+      /* Discard dyn_relocs when non-pic if we've decided that a
+	 function symbol is local.  */
+      if (!bfd_link_pic (info) && local)
+	ppc_elf_hash_entry (h)->dyn_relocs = NULL;
 
       /* Clear procedure linkage table information for any symbol that
 	 won't need a .plt entry.  */
@@ -5552,10 +5554,10 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	      if (!h->needs_plt)
 		h->plt.plist = NULL;
 	    }
-	  else
+	  else if (!bfd_link_pic (info))
 	    /* We are going to be defining the function symbol on the
 	       plt stub, so no dyn_relocs needed when non-pic.  */
-	    h->non_got_ref = 0;
+	    ppc_elf_hash_entry (h)->dyn_relocs = NULL;
 	}
       h->protected_def = 0;
       /* Function symbols can't have copy relocs.  */
@@ -5628,7 +5630,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       && !ppc_elf_hash_entry (h)->has_sda_refs
       && !htab->is_vxworks
       && !h->def_regular
-      && !readonly_dynrelocs (h))
+      && !alias_readonly_dynrelocs (h))
     return TRUE;
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -5672,7 +5674,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
 
   /* We no longer want dyn_relocs.  */
-  h->non_got_ref = 0;
+  ppc_elf_hash_entry (h)->dyn_relocs = NULL;
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
@@ -5912,7 +5914,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     eh->dyn_relocs = NULL;
 
   if (eh->dyn_relocs == NULL)
-    h->non_got_ref = 0;
+    ;
 
   /* In the shared -Bsymbolic case, discard space allocated for
      dynamic pc-relative relocs against symbols which turn out to be
@@ -5968,7 +5970,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 symbols which turn out to need copy relocs or are not
 	 dynamic.  */
       if (h->dynamic_adjusted
-	  && h->non_got_ref
 	  && !h->def_regular
 	  && !ELF_COMMON_DEF_P (h)
 	  && !(h->protected_def
@@ -5981,16 +5982,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    return FALSE;
 
 	  if (h->dynindx == -1)
-	    {
-	      h->non_got_ref = 0;
-	      eh->dyn_relocs = NULL;
-	    }
+	    eh->dyn_relocs = NULL;
 	}
       else
-	{
-	  h->non_got_ref = 0;
-	  eh->dyn_relocs = NULL;
-	}
+	eh->dyn_relocs = NULL;
     }
 
   /* Allocate space.  */
@@ -8756,17 +8751,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      || is_vxworks_tls)
 	    break;
 
-	  if ((bfd_link_pic (info)
-	       && !(h != NULL
-		    && ((h->root.type == bfd_link_hash_undefined
-			 && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-			|| UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
-	       && (must_be_dyn_reloc (info, r_type)
-		   || !SYMBOL_CALLS_LOCAL (info, h)))
-	      || (ELIMINATE_COPY_RELOCS
-		  && !bfd_link_pic (info)
-		  && h != NULL
-		  && h->non_got_ref))
+	  if (bfd_link_pic (info)
+	      ? ((h == NULL
+		  || ppc_elf_hash_entry (h)->dyn_relocs != NULL)
+		 && ((h != NULL && pc_dynrelocs (h))
+		     || must_be_dyn_reloc (info, r_type)))
+	      : (h != NULL
+		 && ppc_elf_hash_entry (h)->dyn_relocs != NULL))
 	    {
 	      int skip;
 	      bfd_byte *loc;
