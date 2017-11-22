@@ -34270,6 +34270,21 @@ Branch trace (@pxref{Branch Trace Format},
 @pxref{Branch Trace Configuration Format})
 @end itemize
 
+@item MPFR
+@anchor{MPFR}
+@value{GDBN} can use the GNU MPFR multiple-precision floating-point
+library.  This library may be included with your operating system
+distribution; if it is not, you can get the latest version from
+@url{http://www.mpfr.org}.  The @file{configure} script will search
+for this library in several standard locations; if it is installed
+in an unusual path, you can use the @option{--with-libmpfr-prefix}
+option to specify its location.
+
+GNU MPFR is used to emulate target floating-point arithmetic during
+expression evaluation when the target uses different floating-point
+formats than the host.  If GNU MPFR it is not available, @value{GDBN}
+will fall back to using host floating-point arithmetic.
+
 @item zlib
 @cindex compressed debug sections 
 @value{GDBN} will use the @samp{zlib} library, if available, to read

@@ -249,6 +249,9 @@
 /* Define to 1 if you have the `mcheck' library (-lmcheck). */
 #undef HAVE_LIBMCHECK
 
+/* Define if you have the mpfr library. */
+#undef HAVE_LIBMPFR
+
 /* Define if Python 2.4 is being used. */
 #undef HAVE_LIBPYTHON2_4
 

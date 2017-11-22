@@ -695,6 +695,28 @@ else
   fi
 fi
 
+AC_ARG_WITH(mpfr,
+  AS_HELP_STRING([--with-mpfr], [include MPFR support (auto/yes/no)]),
+  [], [with_mpfr=auto])
+AC_MSG_CHECKING([whether to use MPFR])
+AC_MSG_RESULT([$with_mpfr])
+
+if test "${with_mpfr}" = no; then
+  AC_MSG_WARN([MPFR support disabled; some features may be unavailable.])
+  HAVE_LIBMPFR=no
+else
+  AC_LIB_HAVE_LINKFLAGS([mpfr], [], [#include <mpfr.h>],
+			[mpfr_exp_t exp; mpfr_t x;
+			 mpfr_frexp (&exp, x, x, MPFR_RNDN);])
+  if test "$HAVE_LIBMPFR" != yes; then
+    if test "$with_mpfr" = yes; then
+      AC_MSG_ERROR([MPFR is missing or unusable])
+    else
+      AC_MSG_WARN([MPFR is missing or unusable; some features may be unavailable.])
+    fi
+  fi
+fi
+
 # --------------------- #
 # Check for libpython.  #
 # --------------------- #

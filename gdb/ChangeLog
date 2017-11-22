@@ -1,5 +1,32 @@
 2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* NEWS: Document use of GNU MPFR.
+	* README: Likewise.
+
+	* Makefile.in (LIBMPFR): Add define.
+	(CLIBS): Add $(LIBMPFR).
+	* configure.ac: Add --with-mpfr configure option.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+	* target-float.c [HAVE_LIBMPFR]: Include <mpfr.h>.
+	(class mpfr_float_ops): New type.
+	(mpfr_float_ops::from_target): Two new overloaded functions.
+	(mpfr_float_ops::to_target): Likewise.
+	(mpfr_float_ops::to_string): New function.
+	(mpfr_float_ops::from_string): Likewise.
+	(mpfr_float_ops::to_longest): Likewise.
+	(mpfr_float_ops::from_longest): Likewise.
+	(mpfr_float_ops::from_ulongest): Likewise.
+	(mpfr_float_ops::to_host_double): Likewise.
+	(mpfr_float_ops::from_host_double): Likewise.
+	(mpfr_float_ops::convert): Likewise.
+	(mpfr_float_ops::binop): Likewise.
+	(mpfr_float_ops::compare): Likewise.
+	(get_target_float_ops): Use mpfr_float_ops if available.
+
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* target-float.c: Do not include <math.h>.
 	Include <cmath> and <limits>.
 	(DOUBLEST): Do not define.

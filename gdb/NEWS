@@ -3,6 +3,11 @@
 
 *** Changes since GDB 8.0
 
+* GDB now uses the GNU MPFR library, if available, to emulate target
+  floating-point arithmetic during expression evaluation when the target
+  uses different floating-point formats than the host.  At least version
+  3.1 of GNU MPFR is required.
+
 * GDB now supports access to the guarded-storage-control registers and the
   software-based guarded-storage broadcast control registers on IBM z14.
 

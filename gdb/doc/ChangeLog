@@ -1,3 +1,8 @@
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.texinfo (Requirements): Document use of GNU MPFR.
+
+
 2017-11-16  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python.texi (Basic Python): Add rbreak documentation.

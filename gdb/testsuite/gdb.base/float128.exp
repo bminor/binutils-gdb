@@ -74,3 +74,6 @@ gdb_test_multiple "set var f128=20.375l" "$test" {
 gdb_test "print ld" ".* = 10\\.375.*" "the value of ld is changed to 10.375"
 gdb_test "print f128" ".* = 20\\.375.*" "the value of f128 is changed to 20.375"
 
+# Test that we can correctly handle the largest IEEE-128 value
+gdb_test "print large128" ".* = 1\\.18973149535723176508575932662800702e\\+4932" "print large128"
+

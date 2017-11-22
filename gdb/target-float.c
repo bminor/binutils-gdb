@@ -1142,6 +1142,569 @@ host_float_ops<T>::compare (const gdb_byte *x, const struct type *type_x,
 }
 
 
+/* Implementation of target_float_ops using the MPFR library
+   mpfr_t as intermediate type.  */
+
+#ifdef HAVE_LIBMPFR
+
+#include <mpfr.h>
+
+class mpfr_float_ops : public target_float_ops
+{
+public:
+  std::string to_string (const gdb_byte *addr, const struct type *type,
+			 const char *format) const override;
+  bool from_string (gdb_byte *addr, const struct type *type,
+		    const std::string &string) const override;
+
+  LONGEST to_longest (const gdb_byte *addr,
+		      const struct type *type) const override;
+  void from_longest (gdb_byte *addr, const struct type *type,
+		     LONGEST val) const override;
+  void from_ulongest (gdb_byte *addr, const struct type *type,
+		      ULONGEST val) const override;
+  double to_host_double (const gdb_byte *addr,
+			 const struct type *type) const override;
+  void from_host_double (gdb_byte *addr, const struct type *type,
+			 double val) const override;
+  void convert (const gdb_byte *from, const struct type *from_type,
+		gdb_byte *to, const struct type *to_type) const override;
+
+  void binop (enum exp_opcode opcode,
+	      const gdb_byte *x, const struct type *type_x,
+	      const gdb_byte *y, const struct type *type_y,
+	      gdb_byte *res, const struct type *type_res) const override;
+  int compare (const gdb_byte *x, const struct type *type_x,
+	       const gdb_byte *y, const struct type *type_y) const override;
+
+private:
+  /* Local wrapper class to handle mpfr_t initalization and cleanup.  */
+  class gdb_mpfr
+  {
+  public:
+    mpfr_t val;
+
+    gdb_mpfr (const struct type *type)
+    {
+      const struct floatformat *fmt = floatformat_from_type (type);
+      mpfr_init2 (val, floatformat_precision (fmt));
+    }
+
+    gdb_mpfr (const gdb_mpfr &source)
+    {
+      mpfr_init2 (val, mpfr_get_prec (source.val));
+    }
+
+    ~gdb_mpfr ()
+    {
+      mpfr_clear (val);
+    }
+  };
+
+  void from_target (const struct floatformat *fmt,
+		const gdb_byte *from, gdb_mpfr &to) const;
+  void from_target (const struct type *type,
+		const gdb_byte *from, gdb_mpfr &to) const;
+
+  void to_target (const struct type *type,
+		  const gdb_mpfr &from, gdb_byte *to) const;
+  void to_target (const struct floatformat *fmt,
+		  const gdb_mpfr &from, gdb_byte *to) const;
+};
+
+
+/* Convert TO/FROM target floating-point format to mpfr_t.  */
+
+void
+mpfr_float_ops::from_target (const struct floatformat *fmt,
+			     const gdb_byte *orig_from, gdb_mpfr &to) const
+{
+  const gdb_byte *from = orig_from;
+  mpfr_exp_t exponent;
+  unsigned long mant;
+  unsigned int mant_bits, mant_off;
+  int mant_bits_left;
+  int special_exponent;		/* It's a NaN, denorm or zero.  */
+  enum floatformat_byteorders order;
+  unsigned char newfrom[FLOATFORMAT_LARGEST_BYTES];
+  enum float_kind kind;
+
+  gdb_assert (fmt->totalsize
+	      <= FLOATFORMAT_LARGEST_BYTES * FLOATFORMAT_CHAR_BIT);
+
+  /* Handle non-numbers.  */
+  kind = floatformat_classify (fmt, from);
+  if (kind == float_infinite)
+    {
+      mpfr_set_inf (to.val, floatformat_is_negative (fmt, from) ? -1 : 1);
+      return;
+    }
+  if (kind == float_nan)
+    {
+      mpfr_set_nan (to.val);
+      return;
+    }
+
+  order = floatformat_normalize_byteorder (fmt, from, newfrom);
+
+  if (order != fmt->byteorder)
+    from = newfrom;
+
+  if (fmt->split_half)
+    {
+      gdb_mpfr top (to), bot (to);
+
+      from_target (fmt->split_half, from, top);
+      /* Preserve the sign of 0, which is the sign of the top half.  */
+      if (mpfr_zero_p (top.val))
+	{
+	  mpfr_set (to.val, top.val, MPFR_RNDN);
+	  return;
+	}
+      from_target (fmt->split_half,
+	       from + fmt->totalsize / FLOATFORMAT_CHAR_BIT / 2, bot);
+      mpfr_add (to.val, top.val, bot.val, MPFR_RNDN);
+      return;
+    }
+
+  exponent = get_field (from, order, fmt->totalsize, fmt->exp_start,
+			fmt->exp_len);
+  /* Note that if exponent indicates a NaN, we can't really do anything useful
+     (not knowing if the host has NaN's, or how to build one).  So it will
+     end up as an infinity or something close; that is OK.  */
+
+  mant_bits_left = fmt->man_len;
+  mant_off = fmt->man_start;
+  mpfr_set_zero (to.val, 0);
+
+  special_exponent = exponent == 0 || exponent == fmt->exp_nan;
+
+  /* Don't bias NaNs.  Use minimum exponent for denorms.  For
+     simplicity, we don't check for zero as the exponent doesn't matter.
+     Note the cast to int; exp_bias is unsigned, so it's important to
+     make sure the operation is done in signed arithmetic.  */
+  if (!special_exponent)
+    exponent -= fmt->exp_bias;
+  else if (exponent == 0)
+    exponent = 1 - fmt->exp_bias;
+
+  /* Build the result algebraically.  Might go infinite, underflow, etc;
+     who cares.  */
+
+  /* If this format uses a hidden bit, explicitly add it in now.  Otherwise,
+     increment the exponent by one to account for the integer bit.  */
+
+  if (!special_exponent)
+    {
+      if (fmt->intbit == floatformat_intbit_no)
+	mpfr_set_ui_2exp (to.val, 1, exponent, MPFR_RNDN);
+      else
+	exponent++;
+    }
+
+  gdb_mpfr tmp (to);
+
+  while (mant_bits_left > 0)
+    {
+      mant_bits = std::min (mant_bits_left, 32);
+
+      mant = get_field (from, order, fmt->totalsize, mant_off, mant_bits);
+
+      mpfr_set_si (tmp.val, mant, MPFR_RNDN);
+      mpfr_mul_2si (tmp.val, tmp.val, exponent - mant_bits, MPFR_RNDN);
+      mpfr_add (to.val, to.val, tmp.val, MPFR_RNDN);
+      exponent -= mant_bits;
+      mant_off += mant_bits;
+      mant_bits_left -= mant_bits;
+    }
+
+  /* Negate it if negative.  */
+  if (get_field (from, order, fmt->totalsize, fmt->sign_start, 1))
+    mpfr_neg (to.val, to.val, MPFR_RNDN);
+}
+
+void
+mpfr_float_ops::from_target (const struct type *type,
+			     const gdb_byte *from, gdb_mpfr &to) const
+{
+  from_target (floatformat_from_type (type), from, to);
+}
+
+void
+mpfr_float_ops::to_target (const struct floatformat *fmt,
+			   const gdb_mpfr &from, gdb_byte *orig_to) const
+{
+  unsigned char *to = orig_to;
+  mpfr_exp_t exponent;
+  unsigned int mant_bits, mant_off;
+  int mant_bits_left;
+  enum floatformat_byteorders order = fmt->byteorder;
+  unsigned char newto[FLOATFORMAT_LARGEST_BYTES];
+
+  if (order != floatformat_little)
+    order = floatformat_big;
+
+  if (order != fmt->byteorder)
+    to = newto;
+
+  memset (to, 0, floatformat_totalsize_bytes (fmt));
+
+  if (fmt->split_half)
+    {
+      gdb_mpfr top (from), bot (from);
+
+      mpfr_set (top.val, from.val, MPFR_RNDN);
+      /* If the rounded top half is Inf, the bottom must be 0 not NaN
+	 or Inf.  */
+      if (mpfr_inf_p (top.val))
+	mpfr_set_zero (bot.val, 0);
+      else
+	mpfr_sub (bot.val, from.val, top.val, MPFR_RNDN);
+
+      to_target (fmt->split_half, top, to);
+      to_target (fmt->split_half, bot,
+		 to + fmt->totalsize / FLOATFORMAT_CHAR_BIT / 2);
+      return;
+    }
+
+  gdb_mpfr tmp (from);
+
+  if (mpfr_zero_p (from.val))
+    goto finalize_byteorder;	/* Result is zero */
+
+  mpfr_set (tmp.val, from.val, MPFR_RNDN);
+
+  if (mpfr_nan_p (tmp.val))	/* Result is NaN */
+    {
+      /* From is NaN */
+      put_field (to, order, fmt->totalsize, fmt->exp_start,
+		 fmt->exp_len, fmt->exp_nan);
+      /* Be sure it's not infinity, but NaN value is irrel.  */
+      put_field (to, order, fmt->totalsize, fmt->man_start,
+		 fmt->man_len, 1);
+      goto finalize_byteorder;
+    }
+
+  /* If negative, set the sign bit.  */
+  if (mpfr_sgn (tmp.val) < 0)
+    {
+      put_field (to, order, fmt->totalsize, fmt->sign_start, 1, 1);
+      mpfr_neg (tmp.val, tmp.val, MPFR_RNDN);
+    }
+
+  if (mpfr_inf_p (tmp.val))		/* Result is Infinity.  */
+    {
+      /* Infinity exponent is same as NaN's.  */
+      put_field (to, order, fmt->totalsize, fmt->exp_start,
+		 fmt->exp_len, fmt->exp_nan);
+      /* Infinity mantissa is all zeroes.  */
+      put_field (to, order, fmt->totalsize, fmt->man_start,
+		 fmt->man_len, 0);
+      goto finalize_byteorder;
+    }
+
+  mpfr_frexp (&exponent, tmp.val, tmp.val, MPFR_RNDN);
+
+  if (exponent + fmt->exp_bias <= 0)
+    {
+      /* The value is too small to be expressed in the destination
+	 type (not enough bits in the exponent.  Treat as 0.  */
+      put_field (to, order, fmt->totalsize, fmt->exp_start,
+		 fmt->exp_len, 0);
+      put_field (to, order, fmt->totalsize, fmt->man_start,
+		 fmt->man_len, 0);
+      goto finalize_byteorder;
+    }
+
+  if (exponent + fmt->exp_bias >= (1 << fmt->exp_len))
+    {
+      /* The value is too large to fit into the destination.
+	 Treat as infinity.  */
+      put_field (to, order, fmt->totalsize, fmt->exp_start,
+		 fmt->exp_len, fmt->exp_nan);
+      put_field (to, order, fmt->totalsize, fmt->man_start,
+		 fmt->man_len, 0);
+      goto finalize_byteorder;
+    }
+
+  put_field (to, order, fmt->totalsize, fmt->exp_start, fmt->exp_len,
+	     exponent + fmt->exp_bias - 1);
+
+  mant_bits_left = fmt->man_len;
+  mant_off = fmt->man_start;
+  while (mant_bits_left > 0)
+    {
+      unsigned long mant_long;
+
+      mant_bits = mant_bits_left < 32 ? mant_bits_left : 32;
+
+      mpfr_mul_2ui (tmp.val, tmp.val, 32, MPFR_RNDN);
+      mant_long = mpfr_get_ui (tmp.val, MPFR_RNDZ) & 0xffffffffL;
+      mpfr_sub_ui (tmp.val, tmp.val, mant_long, MPFR_RNDZ);
+
+      /* If the integer bit is implicit, then we need to discard it.
+         If we are discarding a zero, we should be (but are not) creating
+         a denormalized number which means adjusting the exponent
+         (I think).  */
+      if (mant_bits_left == fmt->man_len
+	  && fmt->intbit == floatformat_intbit_no)
+	{
+	  mant_long <<= 1;
+	  mant_long &= 0xffffffffL;
+          /* If we are processing the top 32 mantissa bits of a doublest
+             so as to convert to a float value with implied integer bit,
+             we will only be putting 31 of those 32 bits into the
+             final value due to the discarding of the top bit.  In the
+             case of a small float value where the number of mantissa
+             bits is less than 32, discarding the top bit does not alter
+             the number of bits we will be adding to the result.  */
+          if (mant_bits == 32)
+            mant_bits -= 1;
+	}
+
+      if (mant_bits < 32)
+	{
+	  /* The bits we want are in the most significant MANT_BITS bits of
+	     mant_long.  Move them to the least significant.  */
+	  mant_long >>= 32 - mant_bits;
+	}
+
+      put_field (to, order, fmt->totalsize,
+		 mant_off, mant_bits, mant_long);
+      mant_off += mant_bits;
+      mant_bits_left -= mant_bits;
+    }
+
+ finalize_byteorder:
+  /* Do we need to byte-swap the words in the result?  */
+  if (order != fmt->byteorder)
+    floatformat_normalize_byteorder (fmt, newto, orig_to);
+}
+
+void
+mpfr_float_ops::to_target (const struct type *type,
+			   const gdb_mpfr &from, gdb_byte *to) const
+{
+  /* Ensure possible padding bytes in the target buffer are zeroed out.  */
+  memset (to, 0, TYPE_LENGTH (type));
+
+  to_target (floatformat_from_type (type), from, to);
+}
+
+/* Convert the byte-stream ADDR, interpreted as floating-point type TYPE,
+   to a string, optionally using the print format FORMAT.  */
+std::string
+mpfr_float_ops::to_string (const gdb_byte *addr,
+			   const struct type *type,
+			   const char *format) const
+{
+  const struct floatformat *fmt = floatformat_from_type (type);
+
+  /* Unless we need to adhere to a specific format, provide special
+     output for certain cases.  */
+  if (format == nullptr)
+    {
+      /* Detect invalid representations.  */
+      if (!floatformat_is_valid (fmt, addr))
+	return "<invalid float value>";
+
+      /* Handle NaN and Inf.  */
+      enum float_kind kind = floatformat_classify (fmt, addr);
+      if (kind == float_nan)
+	{
+	  const char *sign = floatformat_is_negative (fmt, addr)? "-" : "";
+	  const char *mantissa = floatformat_mantissa (fmt, addr);
+	  return string_printf ("%snan(0x%s)", sign, mantissa);
+	}
+      else if (kind == float_infinite)
+	{
+	  const char *sign = floatformat_is_negative (fmt, addr)? "-" : "";
+	  return string_printf ("%sinf", sign);
+	}
+    }
+
+  /* Determine the format string to use on the host side.  */
+  std::string host_format = floatformat_printf_format (fmt, format, 'R');
+
+  gdb_mpfr tmp (type);
+  from_target (type, addr, tmp);
+
+  int size = mpfr_snprintf (NULL, 0, host_format.c_str (), tmp.val);
+  std::string str (size, '\0');
+  mpfr_sprintf (&str[0], host_format.c_str (), tmp.val);
+
+  return str;
+}
+
+/* Parse string STRING into a target floating-number of type TYPE and
+   store it as byte-stream ADDR.  Return whether parsing succeeded.  */
+bool
+mpfr_float_ops::from_string (gdb_byte *addr,
+			     const struct type *type,
+			     const std::string &in) const
+{
+  gdb_mpfr tmp (type);
+
+  char *endptr;
+  mpfr_strtofr (tmp.val, in.c_str (), &endptr, 0, MPFR_RNDN);
+
+  /* We only accept the whole string.  */
+  if (*endptr)
+    return false;
+
+  to_target (type, tmp, addr);
+  return true;
+}
+
+/* Convert the byte-stream ADDR, interpreted as floating-point type TYPE,
+   to an integer value (rounding towards zero).  */
+LONGEST
+mpfr_float_ops::to_longest (const gdb_byte *addr,
+			    const struct type *type) const
+{
+  gdb_mpfr tmp (type);
+  from_target (type, addr, tmp);
+  return mpfr_get_sj (tmp.val, MPFR_RNDZ);
+}
+
+/* Convert signed integer VAL to a target floating-number of type TYPE
+   and store it as byte-stream ADDR.  */
+void
+mpfr_float_ops::from_longest (gdb_byte *addr,
+			      const struct type *type,
+			      LONGEST val) const
+{
+  gdb_mpfr tmp (type);
+  mpfr_set_sj (tmp.val, val, MPFR_RNDN);
+  to_target (type, tmp, addr);
+}
+
+/* Convert unsigned integer VAL to a target floating-number of type TYPE
+   and store it as byte-stream ADDR.  */
+void
+mpfr_float_ops::from_ulongest (gdb_byte *addr,
+			       const struct type *type,
+			       ULONGEST val) const
+{
+  gdb_mpfr tmp (type);
+  mpfr_set_uj (tmp.val, val, MPFR_RNDN);
+  to_target (type, tmp, addr);
+}
+
+/* Convert the byte-stream ADDR, interpreted as floating-point type TYPE,
+   to a floating-point value in the host "double" format.  */
+double
+mpfr_float_ops::to_host_double (const gdb_byte *addr,
+				const struct type *type) const
+{
+  gdb_mpfr tmp (type);
+  from_target (type, addr, tmp);
+  return mpfr_get_d (tmp.val, MPFR_RNDN);
+}
+
+/* Convert floating-point value VAL in the host "double" format to a target
+   floating-number of type TYPE and store it as byte-stream ADDR.  */
+void
+mpfr_float_ops::from_host_double (gdb_byte *addr,
+				  const struct type *type,
+				  double val) const
+{
+  gdb_mpfr tmp (type);
+  mpfr_set_d (tmp.val, val, MPFR_RNDN);
+  to_target (type, tmp, addr);
+}
+
+/* Convert a floating-point number of type FROM_TYPE from the target
+   byte-stream FROM to a floating-point number of type TO_TYPE, and
+   store it to the target byte-stream TO.  */
+void
+mpfr_float_ops::convert (const gdb_byte *from,
+			 const struct type *from_type,
+			 gdb_byte *to,
+			 const struct type *to_type) const
+{
+  gdb_mpfr from_tmp (from_type), to_tmp (to_type);
+  from_target (from_type, from, from_tmp);
+  mpfr_set (to_tmp.val, from_tmp.val, MPFR_RNDN);
+  to_target (to_type, to_tmp, to);
+}
+
+/* Perform the binary operation indicated by OPCODE, using as operands the
+   target byte streams X and Y, interpreted as floating-point numbers of
+   types TYPE_X and TYPE_Y, respectively.  Convert the result to type
+   TYPE_RES and store it into the byte-stream RES.  */
+void
+mpfr_float_ops::binop (enum exp_opcode op,
+		       const gdb_byte *x, const struct type *type_x,
+		       const gdb_byte *y, const struct type *type_y,
+		       gdb_byte *res, const struct type *type_res) const
+{
+  gdb_mpfr x_tmp (type_x), y_tmp (type_y), tmp (type_res);
+
+  from_target (type_x, x, x_tmp);
+  from_target (type_y, y, y_tmp);
+
+  switch (op)
+    {
+      case BINOP_ADD:
+	mpfr_add (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+	break;
+
+      case BINOP_SUB:
+	mpfr_sub (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+	break;
+
+      case BINOP_MUL:
+	mpfr_mul (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+	break;
+
+      case BINOP_DIV:
+	mpfr_div (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+	break;
+
+      case BINOP_EXP:
+	mpfr_pow (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+	break;
+
+      case BINOP_MIN:
+	mpfr_min (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+	break;
+
+      case BINOP_MAX:
+	mpfr_max (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+	break;
+
+      default:
+	error (_("Integer-only operation on floating point number."));
+	break;
+    }
+
+  to_target (type_res, tmp, res);
+}
+
+/* Compare the two target byte streams X and Y, interpreted as floating-point
+   numbers of types TYPE_X and TYPE_Y, respectively.  Return zero if X and Y
+   are equal, -1 if X is less than Y, and 1 otherwise.  */
+int
+mpfr_float_ops::compare (const gdb_byte *x, const struct type *type_x,
+			 const gdb_byte *y, const struct type *type_y) const
+{
+  gdb_mpfr x_tmp (type_x), y_tmp (type_y);
+
+  from_target (type_x, x, x_tmp);
+  from_target (type_y, y, y_tmp);
+
+  if (mpfr_equal_p (x_tmp.val, y_tmp.val))
+    return 0;
+  else if (mpfr_less_p (x_tmp.val, y_tmp.val))
+    return -1;
+  else
+    return 1;
+}
+
+#endif
+
+
 /* Helper routines operating on decimal floating-point data.  */
 
 /* Decimal floating point is one of the extension to IEEE 754, which is
@@ -1685,10 +2248,16 @@ get_target_float_ops (enum target_float_ops_kind kind)
 	}
 
       /* For binary floating-point formats that do not match any host format,
+         use mpfr_t as intermediate format to provide precise target-floating
+         point emulation.  However, if the MPFR library is not availabe,
          use the largest host floating-point type as intermediate format.  */
       case target_float_ops_kind::binary:
         {
+#ifdef HAVE_LIBMPFR
+	  static mpfr_float_ops binary_float_ops;
+#else
 	  static host_float_ops<long double> binary_float_ops;
+#endif
 	  return &binary_float_ops;
 	}
 
