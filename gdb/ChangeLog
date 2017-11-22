@@ -1,5 +1,9 @@
 2017-11-22  Yao Qi  <yao.qi@linaro.org>
 
+	* python/py-gdb-readline.c (gdbpy_readline_wrapper): Use strcpy.
+
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
 	* cli/cli-decode.c (help_list): Use memcpy instead of strncpy.
 	* cp-namespace.c (cp_lookup_transparent_type_loop): Likewise.
 

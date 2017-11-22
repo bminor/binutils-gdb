@@ -76,7 +76,7 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
   q = (char *) PyMem_RawMalloc (n + 2);
   if (q != NULL)
     {
-      strncpy (q, p, n);
+      strcpy (q, p);
       q[n] = '\n';
       q[n + 1] = '\0';
     }
