@@ -27,7 +27,7 @@
 
 #if !defined(HAVE_LIBEXPAT)
 
-struct osdata *
+std::unique_ptr<osdata>
 osdata_parse (const char *xml)
 {
   static int have_warned;
@@ -46,10 +46,10 @@ osdata_parse (const char *xml)
 
 /* Internal parsing data passed to all XML callbacks.  */
 struct osdata_parsing_data
-  {
-    struct osdata *osdata;
-    char *property_name;
-  };
+{
+  std::unique_ptr<struct osdata> osdata;
+  std::string property_name;
+};
 
 /* Handle the start of a <osdata> element.  */
 
@@ -59,16 +59,12 @@ osdata_start_osdata (struct gdb_xml_parser *parser,
                         void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
-  char *type;
-  struct osdata *osdata;
 
-  if (data->osdata)
+  if (data->osdata != NULL)
     gdb_xml_error (parser, _("Seen more than on osdata element"));
 
-  type = (char *) xml_find_attribute (attributes, "type")->value;
-  osdata = XCNEW (struct osdata);
-  osdata->type = xstrdup (type);
-  data->osdata = osdata;
+  char *type = (char *) xml_find_attribute (attributes, "type")->value;
+  data->osdata.reset (new struct osdata (std::string (type)));
 }
 
 /* Handle the start of a <item> element.  */
@@ -79,9 +75,7 @@ osdata_start_item (struct gdb_xml_parser *parser,
                   void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
-  struct osdata_item item = { NULL };
-
-  VEC_safe_push (osdata_item_s, data->osdata->items, &item);
+  data->osdata->items.emplace_back ();
 }
 
 /* Handle the start of a <column> element.  */
@@ -95,7 +89,7 @@ osdata_start_column (struct gdb_xml_parser *parser,
   const char *name
     = (const char *) xml_find_attribute (attributes, "name")->value;
 
-  data->property_name = xstrdup (name);
+  data->property_name.assign (name);
 }
 
 /* Handle the end of a <column> element.  */
@@ -105,29 +99,12 @@ osdata_end_column (struct gdb_xml_parser *parser,
                   const struct gdb_xml_element *element,
                   void *user_data, const char *body_text)
 {
-  struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
-  struct osdata *osdata = data->osdata;
-  struct osdata_item *item = VEC_last (osdata_item_s, osdata->items);
-  struct osdata_column *col = VEC_safe_push (osdata_column_s,
-                                            item->columns, NULL);
+  osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
+  struct osdata *osdata = data->osdata.get ();
+  osdata_item &item = osdata->items.back ();
 
-  /* Transfer memory ownership.  NAME was already strdup'ed.  */
-  col->name = data->property_name;
-  col->value = xstrdup (body_text);
-  data->property_name = NULL;
-}
-
-/* Discard the constructed osdata (if an error occurs).  */
-
-static void
-clear_parsing_data (void *p)
-{
-  struct osdata_parsing_data *data = (struct osdata_parsing_data *) p;
-
-  osdata_free (data->osdata);
-  data->osdata = NULL;
-  xfree (data->property_name);
-  data->property_name = NULL;
+  item.columns.emplace_back (std::move (data->property_name),
+			     std::move (std::string (body_text)));
 }
 
 /* The allowed elements and attributes for OS data object.
@@ -163,88 +140,26 @@ const struct gdb_xml_element osdata_elements[] = {
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-struct osdata *
+std::unique_ptr<osdata>
 osdata_parse (const char *xml)
 {
-  struct cleanup *back_to;
-  struct osdata_parsing_data data = { NULL };
-
-  back_to = make_cleanup (clear_parsing_data, &data);
+  osdata_parsing_data data;
 
   if (gdb_xml_parse_quick (_("osdata"), "osdata.dtd",
 			   osdata_elements, xml, &data) == 0)
     {
       /* Parsed successfully, don't need to delete the result.  */
-      discard_cleanups (back_to);
-      return data.osdata;
+      return std::move (data.osdata);
     }
 
-  do_cleanups (back_to);
   return NULL;
 }
 #endif
 
-static void
-osdata_item_clear (struct osdata_item *item)
-{
-  if (item->columns != NULL)
-    {
-      struct osdata_column *col;
-      int ix;
-
-      for (ix = 0;
-	   VEC_iterate (osdata_column_s, item->columns,
-			ix, col);
-	   ix++)
-       {
-	 xfree (col->name);
-	 xfree (col->value);
-       }
-      VEC_free (osdata_column_s, item->columns);
-      item->columns = NULL;
-    }
-}
-
-void
-osdata_free (struct osdata *osdata)
-{
-  if (osdata == NULL)
-    return;
-
-  if (osdata->items != NULL)
-    {
-      struct osdata_item *item;
-      int ix;
-
-      for (ix = 0;
-          VEC_iterate (osdata_item_s, osdata->items,
-                       ix, item);
-          ix++)
-       osdata_item_clear (item);
-      VEC_free (osdata_item_s, osdata->items);
-    }
-
-  xfree (osdata);
-}
-
-static void
-osdata_free_cleanup (void *arg)
-{
-  struct osdata *osdata = (struct osdata *) arg;
-
-  osdata_free (osdata);
-}
-
-struct cleanup *
-make_cleanup_osdata_free (struct osdata *data)
-{
-  return make_cleanup (osdata_free_cleanup, data);
-}
-
-struct osdata *
+std::unique_ptr<osdata>
 get_osdata (const char *type)
 {
-  struct osdata *osdata = NULL;
+  std::unique_ptr<osdata> osdata;
   gdb::unique_xmalloc_ptr<char> xml = target_get_osdata (type);
 
   if (xml)
@@ -260,24 +175,18 @@ get_osdata (const char *type)
 	osdata = osdata_parse (xml.get ());
     }
 
-  if (!osdata)
+  if (osdata == NULL)
     error (_("Can not fetch data now."));
 
-  return osdata;
+  return std::move (osdata);
 }
 
-const char *
-get_osdata_column (struct osdata_item *item, const char *name)
+const std::string *
+get_osdata_column (const osdata_item &item, const char *name)
 {
-  struct osdata_column *col;
-  int ix_cols; 
-  
-  for (ix_cols = 0;
-       VEC_iterate (osdata_column_s, item->columns,
-		    ix_cols, col);
-       ix_cols++)
-    if (strcmp (col->name, name) == 0)
-      return col->value;
+  for (const osdata_column &col : item.columns)
+    if (col.name == name)
+      return &col.value;
 
   return NULL;
 }
@@ -286,29 +195,24 @@ void
 info_osdata (const char *type)
 {
   struct ui_out *uiout = current_uiout;
-  struct osdata *osdata = NULL;
   struct osdata_item *last = NULL;
-  struct cleanup *old_chain;
   int ncols = 0;
-  int nrows;
   int col_to_skip = -1;
 
   if (type == NULL)
     type = "";
 
-  osdata = get_osdata (type);
-  old_chain = make_cleanup_osdata_free (osdata);
+  std::unique_ptr<osdata> osdata = get_osdata (type);
 
-  nrows = VEC_length (osdata_item_s, osdata->items);
+  int nrows = osdata->items.size ();
 
   if (*type == '\0' && nrows == 0)
     error (_("Available types of OS data not reported."));
   
-  if (!VEC_empty (osdata_item_s, osdata->items))
+  if (!osdata->items.empty ())
     {
-      last = VEC_last (osdata_item_s, osdata->items);
-      if (last->columns)
-        ncols = VEC_length (osdata_column_s, last->columns);
+      last = &osdata->items.back ();
+      ncols = last->columns.size ();
 
       /* As a special case, scan the listing of available data types
 	 for a column named "Title", and only include it with MI
@@ -316,14 +220,9 @@ info_osdata (const char *type)
 	 elements like menus, and it clutters up CLI output.  */
       if (*type == '\0' && !uiout->is_mi_like_p ())
 	{
-	  struct osdata_column *col;
-	  int ix;
-
-	  for (ix = 0;
-	       VEC_iterate (osdata_column_s, last->columns, ix, col);
-	       ix++)
+	  for (int ix = 0; ix < last->columns.size (); ix++)
 	    {
-	      if (strcmp (col->name, "Title") == 0)
+	      if (last->columns[ix].name == "Title")
 		col_to_skip = ix;
 	    }
 	  /* Be sure to reduce the total column count, otherwise
@@ -338,20 +237,11 @@ info_osdata (const char *type)
   /* With no columns/items, we just output an empty table, but we
      still output the table.  This matters for MI.  */
   if (ncols == 0)
-    {
-      do_cleanups (old_chain);
-      return;
-    }
+    return;
 
-  if (last && last->columns)
+  if (last != NULL && !last->columns.empty ())
     {
-      struct osdata_column *col;
-      int ix;
-
-      for (ix = 0;
-          VEC_iterate (osdata_column_s, last->columns,
-                       ix, col);
-          ix++)
+      for (int ix = 0; ix < last->columns.size (); ix++)
 	{
 	  char col_name[32];
 
@@ -360,7 +250,7 @@ info_osdata (const char *type)
 
 	  snprintf (col_name, 32, "col%d", ix);
 	  uiout->table_header (10, ui_left,
-			       col_name, col->name);
+			       col_name, last->columns[ix].name.c_str ());
         }
     }
 
@@ -368,24 +258,12 @@ info_osdata (const char *type)
 
   if (nrows != 0)
     {
-      struct osdata_item *item;
-      int ix_items;
-
-      for (ix_items = 0;
-          VEC_iterate (osdata_item_s, osdata->items,
-                       ix_items, item);
-          ix_items++)
+      for (const osdata_item &item : osdata->items)
        {
-         int ix_cols;
-         struct osdata_column *col;
-
 	 {
 	   ui_out_emit_tuple tuple_emitter (uiout, "item");
 
-	   for (ix_cols = 0;
-		VEC_iterate (osdata_column_s, item->columns,
-			     ix_cols, col);
-		ix_cols++)
+	   for (int ix_cols = 0; ix_cols < item.columns.size (); ix_cols++)
 	     {
 	       char col_name[32];
 
@@ -393,15 +271,14 @@ info_osdata (const char *type)
 		 continue;
 
 	       snprintf (col_name, 32, "col%d", ix_cols);
-	       uiout->field_string (col_name, col->value);
+	       uiout->field_string (col_name,
+				    item.columns[ix_cols].value.c_str ());
 	     }
 	 }
 
          uiout->text ("\n");
        }
     }
-
-  do_cleanups (old_chain);
 }
 
 static void

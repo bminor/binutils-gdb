@@ -1,3 +1,42 @@
+2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* osdata.h: Include vector isntead of vec.h.
+	(osdata_column_s): Remove typedef.
+	(struct osdata_column): Add constructor.
+	<name, value>: Change type to std::string.
+	(DEF_VEC_O (osdata_column_s)): Remove.
+	(osdata_item_s): Remove typedef.
+	(struct osdata_item) <columns>: Change type to std::vector.
+	(DEF_VEC_O (osdata_item_s)): Remove.
+	(struct osdata): Add constructor.
+	<type>: Change type to std::string.
+	<items>: Change type to std::vector.
+	(osdata_p): Remove typedef.
+	(DEF_VEC_P (osdata_p)): Remove.
+	(osdata_parse): Return a unique_ptr.
+	(osdata_free): Remove.
+	(make_cleanup_osdata_free): Remove.
+	(get_osdata): Return a unique_ptr.
+	(get_osdata_column): Return pointer to std::string, take a
+	reference to osdata_item as parameter.
+	* osdata.c (struct osdata_parsing_data) <osdata>: Change type to
+	unique_ptr.
+	<property_name>: Change type to std::string.
+	(osdata_start_osdata): Allocate osdata with new and adjust.
+	(osdata_start_item): Adjust.
+	(osdata_start_column): Adjust.
+	(osdata_end_column): Adjust.
+	(clear_parsing_data): Remove.
+	(osdata_parse): Return a unique_ptr and adjust, remove cleanup.
+	(osdata_item_clear): Remove.
+	(get_osdata): return a unique_ptr and adjust.
+	(get_osdata_column): Return a pointer to std::string and adjust.
+	(info_osdata): Adjust.
+	* mi/mi-main.c: Include <map>.
+	(free_vector_of_osdata_items): Remove.
+	(list_available_thread_groups): Adjust, use std::map instead of
+	splay tree.
+
 2017-11-22  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* stack.c (iterate_over_block_locals): Add LOC_OPTIMIZED_OUT
