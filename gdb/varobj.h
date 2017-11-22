@@ -57,9 +57,6 @@ extern const char *varobj_format_string[];
 
 struct varobj;
 
-typedef struct varobj *varobj_p;
-DEF_VEC_P (varobj_p);
-
 struct varobj_update_result
 {
   varobj_update_result (struct varobj *varobj_,
