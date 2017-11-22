@@ -1,3 +1,110 @@
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* target-float.c: Do not include <math.h>.
+	Include <cmath> and <limits>.
+	(DOUBLEST): Do not define.
+	(class target_float_ops): New type.
+	(class host_float_ops): New templated type.
+	(class decimal_float_ops): New type.
+
+	(floatformat_to_doublest): Rename to ...
+	(host_float_ops<T>::from_target): ... this.  Use template type T
+	instead of DOUBLEST.  Use C++ math routines.  Update recursive calls.
+	(host_float_ops<T>::from_target): New overload using a type argument.
+	(floatformat_from_doublest): Rename to ...
+	(host_float_ops<T>::to_target): ... this.  Use template type T
+	instead of DOUBLEST.  Use C++ math routines.  Update recursive calls.
+	(host_float_ops<T>::to_target): New overload using a type argument.
+	(floatformat_printf_format): New function.
+	(struct printf_length_modifier): New templated type.
+	(floatformat_to_string): Rename to ...
+	(host_float_ops<T>::to_string): ... this.  Use type instead of
+	floatformat argument.  Use floatformat_printf_format and
+	printf_length_modifier.  Remove special handling of invalid numbers,
+	infinities and NaN (moved to target_float_to_string).
+	(struct scanf_length_modifier): New templated type.
+	(floatformat_from_string): Rename to ...
+	(host_float_ops<T>::from_string): ... this.  Use type instead of
+	floatformat argument.  Use scanf_length_modifier.
+	(floatformat_to_longest): Rename to ...
+	(host_float_ops<T>::to_longest): ... this.  Use type instead of
+	floatformat argument.  Handle out-of-range values deterministically.
+	(floatformat_from_longest): Rename to ...
+	(host_float_ops<T>::from_longest): ... this.  Use type instead of
+	floatformat argument.
+	(floatformat_from_ulongest): Rename to ...
+	(host_float_ops<T>::from_ulongest): ... this.  Use type instead of
+	floatformat argument.
+	(floatformat_to_host_double): Rename to ...
+	(host_float_ops<T>::to_host_double): ... this.  Use type instead of
+	floatformat argument.
+	(floatformat_from_host_double): Rename to ...
+	(host_float_ops<T>::from_host_double): ... this.  Use type instead of
+	floatformat argument.
+	(floatformat_convert): Rename to ...
+	(host_float_ops<T>::convert): ... this.  Use type instead of
+	floatformat arguments.  Remove handling of no-op conversions.
+	(floatformat_binop): Rename to ...
+	(host_float_ops<T>::binop): ... this.  Use type instead of
+	floatformat arguments.
+	(floatformat_compare): Rename to ...
+	(host_float_ops<T>::compare): ... this.  Use type instead of
+	floatformat arguments.
+
+	(match_endianness): Use type instead of length/byte_order arguments.
+	(set_decnumber_context): Likewise.
+	(decimal_from_number): Likewise.  Update calls.
+	(decimal_to_number): Likewise.
+	(decimal_is_zero): Likewise.  Update calls.  Move to earlier in file.
+	(decimal_float_ops::to_host_double): New dummy function.
+	(decimal_float_ops::from_host_double): Likewise.
+	(decimal_to_string): Rename to ...
+	(decimal_float_ops::to_string): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_from_string): Rename to ...
+	(decimal_float_ops::from_string): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_from_longest): Rename to ...
+	(decimal_float_ops::from_longest): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_from_ulongest): Rename to ...
+	(decimal_float_ops::from_ulongest): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_to_longest): Rename to ...
+	(decimal_float_ops::to_longest): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_binop): Rename to ...
+	(decimal_float_ops::binop): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_compare): Rename to ...
+	(decimal_float_ops::compare): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_convert): Rename to ...
+	(decimal_float_ops::convert): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+
+	(target_float_same_category_p): New function.
+	(target_float_same_format_p): Likewise.
+	(target_float_format_length): Likewise.
+	(enum target_float_ops_kind): New type.
+	(get_target_float_ops_kind): New function.
+	(get_target_float_ops): Three new overloaded functions.
+
+	(target_float_is_zero): Update call.
+	(target_float_to_string): Add special handling of invalid numbers,
+	infinities and NaN (moved from floatformat_to_string).  Use
+	target_float_ops callback.
+	(target_float_from_string): Use target_float_ops callback.
+	(target_float_to_longest): Likewise.
+	(target_float_from_longest): Likewise.
+	(target_float_from_ulongest): Likewise.
+	(target_float_to_host_double): Likewise.
+	(target_float_from_host_double): Likewise.
+	(target_float_convert): Add special case for no-op conversions.
+	Use target_float_ops callback.
+	(target_float_binop): Use target_float_ops callback.
+	(target_float_compare): Likewise.
+
 2017-11-22  Yao Qi  <yao.qi@linaro.org>
 
 	* python/py-gdb-readline.c (gdbpy_readline_wrapper): Use strcpy.
