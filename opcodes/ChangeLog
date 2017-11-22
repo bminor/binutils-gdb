@@ -1,3 +1,7 @@
+2017-11-22  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	*arc-opc (insert_rhv2): Check h-regs range.
+
 2017-11-21  Claudiu Zissulescu <claziss@synopsys.com>
 
 	* arc-dis.c (print_insn_arc): Pretty print pc-relative offsets.
