@@ -1,3 +1,10 @@
+2017-11-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_reg_type): Comment on the link with
+	reg_expected_msgs.
+	(reg_expected_msgs): Initialize using array designators with
+	arm_reg_type index.
+
 2017-11-22  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/hregs-err.s: New test.
