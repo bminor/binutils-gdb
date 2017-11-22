@@ -537,7 +537,7 @@ ravenscar_inferior_created (struct target_ops *target, int from_tty)
   err_msg = ada_get_tcb_types_info ();
   if (err_msg != NULL)
     {
-      warning (_("%s. Task/thread support disabled.\n"), err_msg);
+      warning (_("%s. Task/thread support disabled."), err_msg);
       return;
     }
 

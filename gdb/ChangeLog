@@ -1,3 +1,8 @@
+2017-11-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_inferior_created): Remove
+	trailing newline at end of string in call to warning.
+
 2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* osdata.h: Include vector isntead of vec.h.
