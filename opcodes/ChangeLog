@@ -1,3 +1,8 @@
+2017-11-22  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-opc.tbl: Remove Vec_Disp8 from vpcompressb and vpexpandb.
+	* i386-tbl.h: Regenerate.
+
 2017-11-22  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	*arc-opc (insert_rhv2): Check h-regs range.
