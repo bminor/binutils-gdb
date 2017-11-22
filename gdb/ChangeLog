@@ -1,5 +1,10 @@
 2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* core-regset.c: Remove file.
+	* Makefile.in (ALLDEPFILES): Remove core-regset.c.
+
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* NEWS: Document use of GNU MPFR.
 	* README: Likewise.
 

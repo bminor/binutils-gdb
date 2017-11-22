@@ -2559,7 +2559,6 @@ ALLDEPFILES = \
 	bfin-tdep.c \
 	bsd-kvm.c \
 	bsd-uthread.c \
-	core-regset.c \
 	darwin-nat.c \
 	dcache.c \
 	dcache.c \
