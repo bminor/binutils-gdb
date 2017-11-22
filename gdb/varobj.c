@@ -558,9 +558,10 @@ varobj_get_display_hint (const struct varobj *var)
 int
 varobj_has_more (const struct varobj *var, int to)
 {
-  if (VEC_length (varobj_p, var->children) > to)
+  if (var->children.size () > to)
     return 1;
-  return ((to == -1 || VEC_length (varobj_p, var->children) == to)
+
+  return ((to == -1 || var->children.size () == to)
 	  && (var->dynamic->saved_item != NULL));
 }
 
@@ -602,19 +603,22 @@ varobj_get_frozen (const struct varobj *var)
    used.  */
 
 void
-varobj_restrict_range (VEC (varobj_p) *children, int *from, int *to)
+varobj_restrict_range (const std::vector<varobj *> &children,
+		       int *from, int *to)
 {
+  int len = children.size ();
+
   if (*from < 0 || *to < 0)
     {
       *from = 0;
-      *to = VEC_length (varobj_p, children);
+      *to = len;
     }
   else
     {
-      if (*from > VEC_length (varobj_p, children))
-	*from = VEC_length (varobj_p, children);
-      if (*to > VEC_length (varobj_p, children))
-	*to = VEC_length (varobj_p, children);
+      if (*from > len)
+	*from = len;
+      if (*to > len)
+	*to = len;
       if (*from > *to)
 	*from = *to;
     }
@@ -633,7 +637,7 @@ install_dynamic_child (struct varobj *var,
 		       int index,
 		       struct varobj_item *item)
 {
-  if (VEC_length (varobj_p, var->children) < index + 1)
+  if (var->children.size () < index + 1)
     {
       /* There's no child yet.  */
       struct varobj *child = varobj_add_child (var, item);
@@ -646,7 +650,7 @@ install_dynamic_child (struct varobj *var,
     }
   else
     {
-      varobj_p existing = VEC_index (varobj_p, var->children, index);
+      varobj *existing = var->children[index];
       int type_updated = update_type_if_necessary (existing, item->value);
 
       if (type_updated)
@@ -735,7 +739,7 @@ update_dynamic_varobj_children (struct varobj *var,
 	return 0;
     }
   else
-    i = VEC_length (varobj_p, var->children);
+    i = var->children.size ();
 
   /* We ask for one extra child, so that MI can report whether there
      are more children.  */
@@ -789,22 +793,21 @@ update_dynamic_varobj_children (struct varobj *var,
 	}
     }
 
-  if (i < VEC_length (varobj_p, var->children))
+  if (i < var->children.size ())
     {
-      int j;
-
       *cchanged = 1;
-      for (j = i; j < VEC_length (varobj_p, var->children); ++j)
-	varobj_delete (VEC_index (varobj_p, var->children, j), 0);
-      VEC_truncate (varobj_p, var->children, i);
+      for (int j = i; j < var->children.size (); ++j)
+	varobj_delete (var->children[j], 0);
+
+      var->children.resize (i);
     }
 
   /* If there are fewer children than requested, note that the list of
      children changed.  */
-  if (to >= 0 && VEC_length (varobj_p, var->children) < to)
+  if (to >= 0 && var->children.size () < to)
     *cchanged = 1;
 
-  var->num_children = VEC_length (varobj_p, var->children);
+  var->num_children = var->children.size ();
 
   return 1;
 }
@@ -833,10 +836,10 @@ varobj_get_num_children (struct varobj *var)
 /* Creates a list of the immediate children of a variable object;
    the return code is the number of such children or -1 on error.  */
 
-VEC (varobj_p)*
+const std::vector<varobj *> &
 varobj_list_children (struct varobj *var, int *from, int *to)
 {
-  int i, children_changed;
+  int children_changed;
 
   var->dynamic->children_requested = 1;
 
@@ -860,21 +863,18 @@ varobj_list_children (struct varobj *var, int *from, int *to)
 
   /* If we're called when the list of children is not yet initialized,
      allocate enough elements in it.  */
-  while (VEC_length (varobj_p, var->children) < var->num_children)
-    VEC_safe_push (varobj_p, var->children, NULL);
+  while (var->children.size () < var->num_children)
+    var->children.push_back (NULL);
 
-  for (i = 0; i < var->num_children; i++)
+  for (int i = 0; i < var->num_children; i++)
     {
-      varobj_p existing = VEC_index (varobj_p, var->children, i);
-
-      if (existing == NULL)
+      if (var->children[i] == NULL)
 	{
 	  /* Either it's the first call to varobj_list_children for
 	     this variable object, and the child was never created,
 	     or it was explicitly deleted by the client.  */
 	  std::string name = name_of_child (var, i);
-	  existing = create_child (var, i, name);
-	  VEC_replace (varobj_p, var->children, i, existing);
+	  var->children[i] = create_child (var, i, name);
 	}
     }
 
@@ -885,11 +885,10 @@ varobj_list_children (struct varobj *var, int *from, int *to)
 static struct varobj *
 varobj_add_child (struct varobj *var, struct varobj_item *item)
 {
-  varobj_p v = create_child_with_value (var,
-					VEC_length (varobj_p, var->children), 
-					item);
+  varobj *v = create_child_with_value (var, var->children.size (), item);
 
-  VEC_safe_push (varobj_p, var->children, v);
+  var->children.push_back (v);
+
   return v;
 }
 
@@ -1221,7 +1220,7 @@ update_type_if_necessary (struct varobj *var, struct value *new_value)
 
 	      /* This information may be not valid for a new type.  */
 	      varobj_delete (var, 1);
-	      VEC_free (varobj_p, var->children);
+	      var->children.clear ();
 	      var->num_children = -1;
 	      return 1;
 	    }
@@ -1737,9 +1736,9 @@ varobj_update (struct varobj **varp, int is_explicit)
 	 child is popped from the work stack first, and so
 	 will be added to result first.  This does not
 	 affect correctness, just "nicer".  */
-      for (i = VEC_length (varobj_p, v->children)-1; i >= 0; --i)
+      for (i = v->children.size () - 1; i >= 0; --i)
 	{
-	  varobj_p c = VEC_index (varobj_p, v->children, i);
+	  varobj *c = v->children[i];
 
 	  /* Child may be NULL if explicitly deleted by -var-delete.  */
 	  if (c != NULL && !c->frozen)
@@ -1786,20 +1785,18 @@ static void
 delete_variable_1 (int *delcountp, struct varobj *var, int only_children_p,
 		   int remove_from_parent_p)
 {
-  int i;
-
   /* Delete any children of this variable, too.  */
-  for (i = 0; i < VEC_length (varobj_p, var->children); ++i)
+  for (varobj *child : var->children)
     {   
-      varobj_p child = VEC_index (varobj_p, var->children, i);
-
       if (!child)
 	continue;
+
       if (!remove_from_parent_p)
 	child->parent = NULL;
+
       delete_variable_1 (delcountp, child, 0, only_children_p);
     }
-  VEC_free (varobj_p, var->children);
+  var->children.clear ();
 
   /* if we were called to delete only the children we are done here.  */
   if (only_children_p)
@@ -1819,9 +1816,7 @@ delete_variable_1 (int *delcountp, struct varobj *var, int only_children_p,
      expensive list search to find the element to remove when we are
      discarding the list afterwards.  */
   if ((remove_from_parent_p) && (var->parent != NULL))
-    {
-      VEC_replace (varobj_p, var->parent->children, var->index, NULL);
-    }
+    var->parent->children[var->index] = NULL;
 
   if (!var->obj_name.empty ())
     uninstall_variable (var);

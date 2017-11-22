@@ -959,7 +959,6 @@ static int
 ada_value_has_mutated (const struct varobj *var, struct value *new_val,
 		       struct type *new_type)
 {
-  int i;
   int from = -1;
   int to = -1;
 
@@ -983,10 +982,10 @@ ada_value_has_mutated (const struct varobj *var, struct value *new_val,
      has mutated or not. So just assume it hasn't.  */
 
   varobj_restrict_range (var->children, &from, &to);
-  for (i = from; i < to; i++)
+  for (int i = from; i < to; i++)
     if (ada_varobj_get_name_of_child (new_val, new_type,
 				      var->name.c_str (), i)
-	!= VEC_index (varobj_p, var->children, i)->name)
+	!= var->children[i]->name)
       return 1;
 
   return 0;

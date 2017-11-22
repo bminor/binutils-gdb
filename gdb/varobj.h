@@ -124,10 +124,10 @@ struct varobj
   int num_children = -1;
 
   /* If this object is a child, this points to its immediate parent.  */
-  const struct varobj *parent = NULL;
+  struct varobj *parent = NULL;
 
   /* Children of this object.  */
-  VEC (varobj_p) *children = NULL;
+  std::vector<varobj *> children;
 
   /* Description of the root variable.  Points to root variable for
      children.  */
@@ -280,8 +280,8 @@ extern int varobj_get_num_children (struct varobj *var);
    that was returned.  The resulting VEC will contain at least the
    children from *FROM to just before *TO; it might contain more
    children, depending on whether any more were available.  */
-extern VEC (varobj_p)* varobj_list_children (struct varobj *var,
-					     int *from, int *to);
+extern const std::vector<varobj *> &
+  varobj_list_children (struct varobj *var, int *from, int *to);
 
 extern std::string varobj_get_type (struct varobj *var);
 
@@ -341,8 +341,8 @@ extern std::string
 extern void varobj_formatted_print_options (struct value_print_options *opts,
 					    enum varobj_display_formats format);
 
-extern void varobj_restrict_range (VEC (varobj_p) *children, int *from,
-				   int *to);
+extern void varobj_restrict_range (const std::vector<varobj *> &children,
+				   int *from, int *to);
 
 extern int varobj_default_is_path_expr_parent (const struct varobj *var);
 

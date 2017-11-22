@@ -1,5 +1,26 @@
 2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* varobj.h (struct varobj) <parent>: Remove const.
+	<children>: Change type to std::vector.
+	(varobj_list_children): Return std::vector const reference.
+	(varobj_restrict_range): Change parameter type to std::vector
+	const reference.
+	* varobj.c (varobj_has_more): Adjust.
+	(varobj_restrict_range): Change parameter type to std::vector
+	const reference and adjust.
+	(install_dynamic_child): Adjust.
+	(update_dynamic_varobj_children): Adjust.
+	(varobj_list_children): Return std::vector const reference and
+	adjust.
+	(varobj_add_child): Adjust.
+	(update_type_if_necessary): Adjust.
+	(varobj_update): Adjust.
+	(delete_variable_1): Adjust.
+	* ada-varobj.c (ada_value_has_mutated): Adjust.
+	* mi/mi-cmd-var.c (mi_cmd_var_list_children): Adjust.
+
+2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* varobj.h (struct varobj): Add constructor and destructor,
 	initialize fields.
 	* varobj.c (struct varobj_root): Initialize fields.

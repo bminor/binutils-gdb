@@ -352,10 +352,7 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;  
-  VEC(varobj_p) *children;
-  struct varobj *child;
   enum print_values print_values;
-  int ix;
   int from, to;
 
   if (argc < 1 || argc > 4)
@@ -379,7 +376,9 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
       to = -1;
     }
 
-  children = varobj_list_children (var, &from, &to);
+  const std::vector<varobj *> &children
+    = varobj_list_children (var, &from, &to);
+
   uiout->field_int ("numchild", to - from);
   if (argc == 2 || argc == 4)
     print_values = mi_parse_print_values (argv[0]);
@@ -401,13 +400,11 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
 	tuple_emitter.emplace (uiout, "children");
       else
 	list_emitter.emplace (uiout, "children");
-      for (ix = from;
-	   ix < to && VEC_iterate (varobj_p, children, ix, child);
-	   ++ix)
+      for (int ix = from; ix < to && ix < children.size (); ix++)
 	{
 	  ui_out_emit_tuple child_emitter (uiout, "child");
 
-	  print_varobj (child, print_values, 1 /* print expression */);
+	  print_varobj (children[ix], print_values, 1 /* print expression */);
 	}
     }
 
