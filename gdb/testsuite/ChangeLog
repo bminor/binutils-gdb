@@ -1,5 +1,10 @@
 2017-11-22  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.dwarf2/pr10770.exp: Remove code skipping non-gcc
+	compiler.
+
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/attach-pie-noexec.exp: Pass "-pie" in ldflags.
 	* gdb.base/break-interp.exp: Likewise.
 	* gdb.base/jit-attach-pie.exp: Likewise.
