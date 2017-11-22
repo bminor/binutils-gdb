@@ -1,3 +1,9 @@
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/attach-pie-noexec.exp: Pass "-pie" in ldflags.
+	* gdb.base/break-interp.exp: Likewise.
+	* gdb.base/jit-attach-pie.exp: Likewise.
+
 2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.base/float128.c (large128): New variable.

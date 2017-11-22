@@ -21,7 +21,7 @@ standard_testfile .c
 set executable ${testfile}
 
 if { [build_executable ${testfile}.exp $executable $srcfile \
-			  [list debug pthreads "additional_flags=-fPIE -pie"]] } {
+			  [list debug pthreads "additional_flags=-fPIE" "ldflags=-pie"]] } {
     return -1
 }
 
