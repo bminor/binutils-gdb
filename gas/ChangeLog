@@ -1,3 +1,10 @@
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386-intel.c (i386_intel_operand): Don't call
+	as_bad() if a prior error was already reported.
+	* testsuite/gas/i386/inval-avx512f.l,
+	testsuite/gas/i386/x86-64-inval-avx512f.l: Adjust expectations.
+
 2017-11-22  Jim Wilson  <jimw@sifive.com>
 
 	* as.c: Include write.h.

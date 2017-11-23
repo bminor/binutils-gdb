@@ -18,10 +18,7 @@
 .*:26: Error: .*
 .*:27: Error: .*
 .*:28: Error: .*
-.*:28: Error: .*
 .*:29: Error: .*
-.*:29: Error: .*
-.*:30: Error: .*
 .*:30: Error: .*
 .*:32: Error: .*
 .*:33: Error: .*

@@ -580,12 +580,14 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      as_bad (_("junk `%s' after expression"), input_line_pointer);
+      if (ret)
+	as_bad (_("junk `%s' after expression"), input_line_pointer);
       ret = 0;
     }
   else if (exp.X_op == O_illegal || exp.X_op == O_absent)
     {
-      as_bad (_("invalid expression"));
+      if (ret)
+	as_bad (_("invalid expression"));
       ret = 0;
     }
   else if (!intel_state.has_offset
