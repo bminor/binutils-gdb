@@ -1,5 +1,9 @@
 2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* osdata.c (osdata_end_column, get_osdata): Remove std::move.
+
+2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* varobj.c (struct varobj_dynamic) <children_requested_>: Rename
 	back to...
 	<children_requested>: ... this.

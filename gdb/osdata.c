@@ -104,7 +104,7 @@ osdata_end_column (struct gdb_xml_parser *parser,
   osdata_item &item = osdata->items.back ();
 
   item.columns.emplace_back (std::move (data->property_name),
-			     std::move (std::string (body_text)));
+			     std::string (body_text));
 }
 
 /* The allowed elements and attributes for OS data object.
@@ -178,7 +178,7 @@ get_osdata (const char *type)
   if (osdata == NULL)
     error (_("Can not fetch data now."));
 
-  return std::move (osdata);
+  return osdata;
 }
 
 const std::string *
