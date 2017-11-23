@@ -344,6 +344,9 @@ static const autofilter_entry_type autofilter_liblist[] =
   { STRING_COMMA_LEN ("libsupc++") },
   { STRING_COMMA_LEN ("libobjc") },
   { STRING_COMMA_LEN ("libgcj") },
+  { STRING_COMMA_LEN ("libmsvcrt") },
+  { STRING_COMMA_LEN ("libmsvcrt-os") },
+  { STRING_COMMA_LEN ("libucrtbase") },
   { NULL, 0 }
 };
 
