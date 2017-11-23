@@ -1,3 +1,67 @@
+2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ada-varobj.c (ada_value_is_changeable_p): Change int to bool where applicable.
+	(ada_value_has_mutated): Likewise.
+	* c-varobj.c (varobj_is_anonymous_child): Likewise.
+	(c_is_path_expr_parent): Likewise.
+	* mi/mi-cmd-var.c (varobj_update_one): Likewise.
+	(mi_cmd_var_set_frozen): Likewise.
+	(mi_cmd_var_update_iter): Likewise.
+	(mi_cmd_var_update): Likewise.
+	* varobj.c (pretty_printing): Likewise.
+	(varobj_enable_pretty_printing): Likewise.
+	(struct varobj_root) <floating, is_valid>: Likewise.
+	(struct varobj_dynamic) <children_requested>: Likewise.
+	(delete_variable): Likewise.
+	(delete_variable_1): Likewise.
+	(install_variable): Likewise.
+	(update_type_if_necessary): Likewise.
+	(install_new_value): Likewise.
+	(value_of_root): Likewise.
+	(is_root_p): Likewise.
+	(varobj_create): Likewise.
+	(varobj_delete): Likewise.
+	(varobj_has_more): Likewise.
+	(varobj_set_frozen): Likewise.
+	(varobj_get_frozen): Likewise.
+	(install_dynamic_child): Likewise.
+	(dynamic_varobj_has_child_method): Likewise.
+	(update_dynamic_varobj_children): Likewise.
+	(varobj_get_num_children): Likewise.
+	(varobj_list_children): Likewise.
+	(is_path_expr_parent): Likewise.
+	(varobj_default_is_path_expr_parent): Likewise.
+	(varobj_is_dynamic_p): Likewise.
+	(varobj_set_value): Likewise.
+	(varobj_value_has_mutated): Likewise.
+	(varobj_update): Likewise.
+	(check_scope): Likewise.
+	(value_of_root_1): Likewise.
+	(varobj_value_get_print_value): Likewise.
+	(varobj_editable_p): Likewise.
+	(varobj_value_is_changeable_p): Likewise.
+	(varobj_floating_p): Likewise.
+	(varobj_default_value_is_changeable_p): Likewise.
+	(varobj_invalidate_iter): Likewise.
+	* varobj.h (struct varobj_update_result) <type_changed,
+	children_changed, changed, value_installed>: Likewise.
+	(struct varobj) <updated, frozen, not_fetched>: Likewise.
+	(struct lang_varobj_ops) <value_is_changeable_p,
+	value_has_mutated, is_path_expr_parent>: Likewise.
+	(varobj_delete): Likewise.
+	(varobj_set_frozen): Likewise.
+	(varobj_get_frozen): Likewise.
+	(varobj_set_value): Likewise.
+	(varobj_update): Likewise.
+	(varobj_editable_p): Likewise.
+	(varobj_floating_p): Likewise.
+	(varobj_has_more): Likewise.
+	(varobj_is_dynamic_p): Likewise.
+	(varobj_default_value_is_changeable_p): Likewise.
+	(varobj_value_is_changeable_p): Likewise.
+	(varobj_is_anonymous_child): Likewise.
+	(varobj_default_is_path_expr_parent): Likewise.
+
 2017-11-22  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* dtrace-probe.c (struct probe_ops dtrace_probe_ops): Delete.

@@ -36,7 +36,7 @@ extern unsigned int varobjdebug;		/* defined in varobj.c.  */
 
 static void varobj_update_one (struct varobj *var,
 			       enum print_values print_values,
-			       int is_explicit);
+			       bool is_explicit);
 
 static int mi_print_value_p (struct varobj *var,
 			     enum print_values print_values);
@@ -260,7 +260,7 @@ void
 mi_cmd_var_set_frozen (const char *command, char **argv, int argc)
 {
   struct varobj *var;
-  int frozen;
+  bool frozen;
 
   if (argc != 2)
     error (_("-var-set-format: Usage: NAME FROZEN_FLAG."));
@@ -268,9 +268,9 @@ mi_cmd_var_set_frozen (const char *command, char **argv, int argc)
   var = varobj_get_handle (argv[0]);
 
   if (strcmp (argv[1], "0") == 0)
-    frozen = 0;
+    frozen = false;
   else if (strcmp (argv[1], "1") == 0)
-    frozen = 1;
+    frozen = true;
   else
     error (_("Invalid flag value"));
 
@@ -620,7 +620,7 @@ mi_cmd_var_update_iter (struct varobj *var, void *data_pointer)
 
   if (thread_stopped
       && (!data->only_floating || varobj_floating_p (var)))
-    varobj_update_one (var, data->print_values, 0 /* implicit */);
+    varobj_update_one (var, data->print_values, false /* implicit */);
 }
 
 void
@@ -674,7 +674,7 @@ mi_cmd_var_update (const char *command, char **argv, int argc)
       /* Get varobj handle, if a valid var obj name was specified.  */
       struct varobj *var = varobj_get_handle (name);
 
-      varobj_update_one (var, print_values, 1 /* explicit */);
+      varobj_update_one (var, print_values, true /* explicit */);
     }
 }
 
@@ -682,7 +682,7 @@ mi_cmd_var_update (const char *command, char **argv, int argc)
 
 static void
 varobj_update_one (struct varobj *var, enum print_values print_values,
-		   int is_explicit)
+		   bool is_explicit)
 {
   struct ui_out *uiout = current_uiout;
 

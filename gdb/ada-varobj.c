@@ -929,7 +929,7 @@ ada_value_of_variable (const struct varobj *var,
 
 /* Implement the "value_is_changeable_p" routine for Ada.  */
 
-static int
+static bool
 ada_value_is_changeable_p (const struct varobj *var)
 {
   struct type *type = var->value ? value_type (var->value) : var->type;
@@ -939,7 +939,7 @@ ada_value_is_changeable_p (const struct varobj *var)
     {
       /* This is in reality a pointer to an unconstrained array.
 	 its value is changeable.  */
-      return 1;
+      return true;
     }
 
   if (ada_is_string_type (type))
@@ -947,7 +947,7 @@ ada_value_is_changeable_p (const struct varobj *var)
       /* We display the contents of the string in the array's
 	 "value" field.  The contents can change, so consider
 	 that the array is changeable.  */
-      return 1;
+      return true;
     }
 
   return varobj_default_value_is_changeable_p (var);
@@ -955,7 +955,7 @@ ada_value_is_changeable_p (const struct varobj *var)
 
 /* Implement the "value_has_mutated" routine for Ada.  */
 
-static int
+static bool
 ada_value_has_mutated (const struct varobj *var, struct value *new_val,
 		       struct type *new_type)
 {
@@ -966,7 +966,7 @@ ada_value_has_mutated (const struct varobj *var, struct value *new_val,
      has mutated.  */
   if (ada_varobj_get_number_of_children (new_val, new_type)
       != var->num_children)
-    return 1;
+    return true;
 
   /* If the number of fields have remained the same, then we need
      to check the name of each field.  If they remain the same,
@@ -986,9 +986,9 @@ ada_value_has_mutated (const struct varobj *var, struct value *new_val,
     if (ada_varobj_get_name_of_child (new_val, new_type,
 				      var->name.c_str (), i)
 	!= var->children[i]->name)
-      return 1;
+      return true;
 
-  return 0;
+  return false;
 }
 
 /* varobj operations for ada.  */
