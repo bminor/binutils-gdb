@@ -1,5 +1,14 @@
 2017-11-23  Jan Beulich  <jbeulich@suse.com>
 
+	PR gas/22441
+	* config/tc-i386.c (build_modrm_byte): Add address override
+	prefix checks alongside 64-bit mode ones.
+	* testsuite/gas/i386/reloc64.s: Add 32-bit signed/unsigned
+	relocation cases.
+	* testsuite/gas/i386/reloc64.d: Adjust expectations.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (build_modrm_byte): Drop VSIB handling from
 	code also setting fake_zero_displacement.
 

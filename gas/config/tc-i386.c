@@ -6566,7 +6566,7 @@ build_modrm_byte (void)
 		  i.types[op].bitfield.disp8 = 0;
 		  i.types[op].bitfield.disp16 = 0;
 		  i.types[op].bitfield.disp64 = 0;
-		  if (flag_code != CODE_64BIT)
+		  if (flag_code != CODE_64BIT || i.prefix[ADDR_PREFIX])
 		    {
 		      /* Must be 32 bit */
 		      i.types[op].bitfield.disp32 = 1;
@@ -6636,7 +6636,7 @@ build_modrm_byte (void)
 		  i.types[op].bitfield.disp8 = 0;
 		  i.types[op].bitfield.disp16 = 0;
 		  i.types[op].bitfield.disp64 = 0;
-		  if (flag_code != CODE_64BIT)
+		  if (flag_code != CODE_64BIT || i.prefix[ADDR_PREFIX])
 		    {
 		      /* Must be 32 bit */
 		      i.types[op].bitfield.disp32 = 1;
