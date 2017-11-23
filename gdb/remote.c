@@ -11713,7 +11713,7 @@ remote_hostio_unlink (struct target_ops *self,
 
 /* Implementation of to_fileio_readlink.  */
 
-static char *
+static gdb::optional<std::string>
 remote_hostio_readlink (struct target_ops *self,
 			struct inferior *inf, const char *filename,
 			int *remote_errno)
@@ -11724,10 +11724,9 @@ remote_hostio_readlink (struct target_ops *self,
   int left = get_remote_packet_size ();
   int len, attachment_len;
   int read_len;
-  char *ret;
 
   if (remote_hostio_set_filesystem (inf, remote_errno) != 0)
-    return NULL;
+    return {};
 
   remote_buffer_add_string (&p, &left, "vFile:readlink:");
 
@@ -11739,16 +11738,15 @@ remote_hostio_readlink (struct target_ops *self,
 				    &attachment_len);
 
   if (len < 0)
-    return NULL;
+    return {};
 
-  ret = (char *) xmalloc (len + 1);
+  std::string ret (len, '\0');
 
   read_len = remote_unescape_input ((gdb_byte *) attachment, attachment_len,
-				    (gdb_byte *) ret, len);
+				    (gdb_byte *) &ret[0], len);
   if (read_len != len)
     error (_("Readlink returned %d, but %d bytes."), len, read_len);
 
-  ret[len] = '\0';
   return ret;
 }
 

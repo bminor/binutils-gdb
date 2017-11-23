@@ -4709,27 +4709,23 @@ linux_nat_fileio_open (struct target_ops *self,
 
 /* Implementation of to_fileio_readlink.  */
 
-static char *
+static gdb::optional<std::string>
 linux_nat_fileio_readlink (struct target_ops *self,
 			   struct inferior *inf, const char *filename,
 			   int *target_errno)
 {
   char buf[PATH_MAX];
   int len;
-  char *ret;
 
   len = linux_mntns_readlink (linux_nat_fileio_pid_of (inf),
 			      filename, buf, sizeof (buf));
   if (len < 0)
     {
       *target_errno = host_to_fileio_error (errno);
-      return NULL;
+      return {};
     }
 
-  ret = (char *) xmalloc (len + 1);
-  memcpy (ret, buf, len);
-  ret[len] = '\0';
-  return ret;
+  return std::string (buf, len);
 }
 
 /* Implementation of to_fileio_unlink.  */

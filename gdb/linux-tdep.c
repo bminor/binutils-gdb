@@ -764,26 +764,20 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (cwd_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/cwd", pid);
-      data = target_fileio_readlink (NULL, filename, &target_errno);
-      if (data)
-	{
-	  struct cleanup *cleanup = make_cleanup (xfree, data);
-          printf_filtered ("cwd = '%s'\n", data);
-	  do_cleanups (cleanup);
-	}
+      gdb::optional<std::string> contents
+	= target_fileio_readlink (NULL, filename, &target_errno);
+      if (contents.has_value ())
+	printf_filtered ("cwd = '%s'\n", contents->c_str ());
       else
 	warning (_("unable to read link '%s'"), filename);
     }
   if (exe_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/exe", pid);
-      data = target_fileio_readlink (NULL, filename, &target_errno);
-      if (data)
-	{
-	  struct cleanup *cleanup = make_cleanup (xfree, data);
-          printf_filtered ("exe = '%s'\n", data);
-	  do_cleanups (cleanup);
-	}
+      gdb::optional<std::string> contents
+	= target_fileio_readlink (NULL, filename, &target_errno);
+      if (contents.has_value ())
+	printf_filtered ("exe = '%s'\n", contents->c_str ());
       else
 	warning (_("unable to read link '%s'"), filename);
     }

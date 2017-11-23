@@ -933,12 +933,12 @@ struct target_ops
     /* Read value of symbolic link FILENAME on the target, in the
        filesystem as seen by INF.  If INF is NULL, use the filesystem
        seen by the debugger (GDB or, for remote targets, the remote
-       stub).  Return a null-terminated string allocated via xmalloc,
-       or NULL if an error occurs (and set *TARGET_ERRNO).  */
-    char *(*to_fileio_readlink) (struct target_ops *,
-				 struct inferior *inf,
-				 const char *filename,
-				 int *target_errno);
+       stub).  Return a string, or an empty optional if an error
+       occurs (and set *TARGET_ERRNO).  */
+    gdb::optional<std::string> (*to_fileio_readlink) (struct target_ops *,
+						      struct inferior *inf,
+						      const char *filename,
+						      int *target_errno);
 
 
     /* Implement the "info proc" command.  */
@@ -2095,9 +2095,8 @@ extern int target_fileio_unlink (struct inferior *inf,
    by the debugger (GDB or, for remote targets, the remote stub).
    Return a null-terminated string allocated via xmalloc, or NULL if
    an error occurs (and set *TARGET_ERRNO).  */
-extern char *target_fileio_readlink (struct inferior *inf,
-				     const char *filename,
-				     int *target_errno);
+extern gdb::optional<std::string> target_fileio_readlink
+    (struct inferior *inf, const char *filename, int *target_errno);
 
 /* Read target file FILENAME, in the filesystem as seen by INF.  If
    INF is NULL, use the filesystem seen by the debugger (GDB or, for

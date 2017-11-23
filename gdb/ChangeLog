@@ -1,3 +1,14 @@
+2018-03-07  Tom Tromey  <tom@tromey.com>
+
+	* linux-tdep.c (linux_info_proc): Update.
+	* target.h (struct target_ops) <to_fileio_readlink>: Return
+	optional<string>.
+	(target_fileio_readlink): Return optional<string>.
+	* remote.c (remote_hostio_readlink): Return optional<string>.
+	* inf-child.c (inf_child_fileio_readlink): Return
+	optional<string>.
+	* target.c (target_fileio_readlink): Return optional<string>.
+
 2018-03-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* regcache.c (cooked_read_test): Add riscv to the list of

@@ -3059,7 +3059,7 @@ target_fileio_unlink (struct inferior *inf, const char *filename,
 
 /* See target.h.  */
 
-char *
+gdb::optional<std::string>
 target_fileio_readlink (struct inferior *inf, const char *filename,
 			int *target_errno)
 {
@@ -3069,22 +3069,22 @@ target_fileio_readlink (struct inferior *inf, const char *filename,
     {
       if (t->to_fileio_readlink != NULL)
 	{
-	  char *ret = t->to_fileio_readlink (t, inf, filename,
-					     target_errno);
+	  gdb::optional<std::string> ret
+	    = t->to_fileio_readlink (t, inf, filename, target_errno);
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
 				"target_fileio_readlink (%d,%s)"
 				" = %s (%d)\n",
 				inf == NULL ? 0 : inf->num,
-				filename, ret? ret : "(nil)",
-				ret? 0 : *target_errno);
+				filename, ret ? ret->c_str () : "(nil)",
+				ret ? 0 : *target_errno);
 	  return ret;
 	}
     }
 
   *target_errno = FILEIO_ENOSYS;
-  return NULL;
+  return {};
 }
 
 static void

@@ -333,7 +333,7 @@ inf_child_fileio_unlink (struct target_ops *self,
 
 /* Implementation of to_fileio_readlink.  */
 
-static char *
+static gdb::optional<std::string>
 inf_child_fileio_readlink (struct target_ops *self,
 			   struct inferior *inf, const char *filename,
 			   int *target_errno)
@@ -343,22 +343,18 @@ inf_child_fileio_readlink (struct target_ops *self,
 #if defined (PATH_MAX)
   char buf[PATH_MAX];
   int len;
-  char *ret;
 
   len = readlink (filename, buf, sizeof buf);
   if (len < 0)
     {
       *target_errno = host_to_fileio_error (errno);
-      return NULL;
+      return {};
     }
 
-  ret = (char *) xmalloc (len + 1);
-  memcpy (ret, buf, len);
-  ret[len] = '\0';
-  return ret;
+  return std::string (buf, len);
 #else
   *target_errno = FILEIO_ENOSYS;
-  return NULL;
+  return {};
 #endif
 }
 
