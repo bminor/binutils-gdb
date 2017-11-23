@@ -1,5 +1,10 @@
 2017-11-23  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_E_memory): Also shift the 8-bit immediate in
+	the 16-bit addressing case.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (dis386_twobyte): Correct ud1. Add ud0.
 	(twobyte_has_modrm): Set flag for index 0xb9 and 0xff.
 	* i386-opc.tbl (ud1, ud2b): Add operands.

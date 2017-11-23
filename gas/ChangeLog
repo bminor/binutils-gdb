@@ -1,5 +1,12 @@
 2017-11-23  Jan Beulich  <jbeulich@suse.com>
 
+	* tc-i386.c (check_VecOperands): Don't clear .disp16.
+	* testsuite/gas/i386/avx512f.s: Add 16-bit addressing tests.
+	* testsuite/gas/i386/avx512f.d,
+	testsuite/gas/i386/avx512f-intel.d: Adjust expectations.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
 	PR gas/22441
 	* config/tc-i386.c (build_modrm_byte): Add address override
 	prefix checks alongside 64-bit mode ones.

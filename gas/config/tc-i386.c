@@ -4798,12 +4798,8 @@ check_VecOperands (const insn_template *t)
 		  i.types[op].bitfield.vec_disp8 = 1;
 		else
 		  {
-		    /* Vector insn can only have Vec_Disp8/Disp32 in
-		       32/64bit modes, and Vec_Disp8/Disp16 in 16bit
-		       mode.  */
+		    /* Vector insn doesn't allow plain Disp8.  */
 		    i.types[op].bitfield.disp8 = 0;
-		    if (flag_code != CODE_16BIT)
-		      i.types[op].bitfield.disp16 = 0;
 		  }
 	      }
 	    else if (flag_code != CODE_16BIT)
