@@ -620,20 +620,6 @@ XMLFILES = \
 # See configure.ac.
 SER_HARDWIRE = @SER_HARDWIRE@
 
-# The `remote' debugging target is supported for most architectures,
-# but not all (e.g. 960)
-REMOTE_OBS = \
-	ax-gdb.o \
-	ax-general.o \
-	ctf.o \
-	dcache.o \
-	remote.o \
-	remote-fileio.o \
-	remote-notif.o \
-	tracefile.o \
-	tracefile-tfile.o \
-	tracepoint.o
-
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS = @SIM_OBS@
 
@@ -928,6 +914,8 @@ COMMON_SFILES = \
 	arch-utils.c \
 	auto-load.c \
 	auxv.c \
+	ax-gdb.c \
+	ax-general.c \
 	bcache.c \
 	bfd-target.c \
 	block.c \
@@ -957,10 +945,12 @@ COMMON_SFILES = \
 	cp-namespace.c \
 	cp-support.c \
 	cp-valprint.c \
+	ctf.c \
 	d-lang.c \
 	d-namespace.c \
 	d-valprint.c \
 	dbxread.c \
+	dcache.c \
 	debug.c \
 	demangle.c \
 	dictionary.c \
@@ -1055,6 +1045,9 @@ COMMON_SFILES = \
 	regcache.c \
 	reggroups.c \
 	registry.c \
+	remote.c \
+	remote-fileio.c \
+	remote-notif.c \
 	reverse.c \
 	rust-lang.c \
 	selftest-arch.c \
@@ -1080,6 +1073,9 @@ COMMON_SFILES = \
 	thread-fsm.c \
 	tid-parse.c \
 	top.c \
+	tracefile.c \
+	tracefile-tfile.c \
+	tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
 	target-float.c \
@@ -1102,11 +1098,8 @@ COMMON_SFILES = \
 SFILES = \
 	ada-exp.y \
 	arch/i386.c \
-	ax-gdb.c \
-	ax-general.c \
 	c-exp.y \
 	cp-name-parser.y \
-	ctf.c \
 	d-exp.y \
 	dtrace-probe.c \
 	elfread.c \
@@ -1117,9 +1110,6 @@ SFILES = \
 	m2-exp.y \
 	p-exp.y \
 	proc-service.list \
-	remote.c \
-	remote-fileio.c \
-	remote-notif.c \
 	rust-exp.y \
 	ser-base.c \
 	ser-unix.c \
@@ -1127,7 +1117,6 @@ SFILES = \
 	stap-probe.c \
 	stub-termcap.c \
 	symfile-mem.c \
-	tracepoint.c \
 	ui-file.h \
 	common/agent.c \
 	common/btrace-common.c \
@@ -2240,8 +2229,6 @@ ALLDEPFILES = \
 	bsd-kvm.c \
 	bsd-uthread.c \
 	darwin-nat.c \
-	dcache.c \
-	dcache.c \
 	dicos-tdep.c \
 	exec.c \
 	fbsd-nat.c \

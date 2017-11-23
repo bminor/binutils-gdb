@@ -1,5 +1,12 @@
 2017-11-27  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (REMOTE_OBS): Remove.
+	(SFILES): Remove remote sources.
+	(COMMON_SFILES): Add remote sources.
+	(ALLDEPFILES): Remove dcache.c.
+
+2017-11-27  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (SUBDIR_TARGET_SRCS, SUBDIR_TARGET_OBS): New
 	variables.
 	(SFILES): Use SUBDIR_TARGET_SRCS.
