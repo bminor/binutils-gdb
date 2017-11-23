@@ -1,5 +1,12 @@
 2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* varobj.c (struct varobj_dynamic) <children_requested_>: Rename
+	back to...
+	<children_requested>: ... this.
+	(varobj_get_num_children, varobj_update): Adjust.
+
+2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* ada-varobj.c (ada_value_is_changeable_p): Change int to bool where applicable.
 	(ada_value_has_mutated): Likewise.
 	* c-varobj.c (varobj_is_anonymous_child): Likewise.

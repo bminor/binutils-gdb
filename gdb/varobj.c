@@ -113,7 +113,7 @@ struct varobj_dynamic
      used to decide if dynamic varobj should recompute their children.
      In the event that the frontend never asked for the children, we
      can avoid that.  */
-  bool children_requested_ = false;
+  bool children_requested = false;
 
   /* The pretty-printer constructor.  If NULL, then the default
      pretty-printer will be looked up.  If None, then no
@@ -839,7 +839,7 @@ varobj_get_num_children (struct varobj *var)
 const std::vector<varobj *> &
 varobj_list_children (struct varobj *var, int *from, int *to)
 {
-  var->dynamic->children_requested_ = true;
+  var->dynamic->children_requested = true;
 
   if (varobj_is_dynamic_p (var))
     {
@@ -1629,7 +1629,7 @@ varobj_update (struct varobj **varp, bool is_explicit)
 	  if (v->frozen)
 	    continue;
 
-	  if (!v->dynamic->children_requested_)
+	  if (!v->dynamic->children_requested)
 	    {
 	      bool dummy;
 
