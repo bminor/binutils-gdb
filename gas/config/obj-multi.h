@@ -155,7 +155,10 @@
 
 #define EMIT_SECTION_SYMBOLS (this_format->emit_section_symbols)
 
+#ifndef INITIALIZING_EMULS
+/* We want to use the default FAKE_LABEL_NAME in as.c.  */
 #define FAKE_LABEL_NAME (this_emulation->fake_label_name)
+#endif
 
 #ifdef OBJ_MAYBE_ELF
 /* We need OBJ_SYMFIELD_TYPE so that symbol_get_obj is defined in symbol.c

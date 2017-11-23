@@ -31,6 +31,10 @@
 
 #define COMMON
 
+/* Disable code to set FAKE_LABEL_NAME in obj-multi.h, to avoid circular
+   reference.  */
+#define INITIALIZING_EMULS
+
 #include "as.h"
 #include "subsegs.h"
 #include "output-file.h"

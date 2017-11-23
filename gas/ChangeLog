@@ -1,3 +1,9 @@
+2017-11-23  Jim Wilson  <jimw@sifive.com>
+
+	* as.c (INITIALIZING_EMULS): Define.
+	* config/obj-multi.h (FAKE_LABEL_NAME): When INITIALIZING_EMULS set,
+	don't define it.
+
 2017-11-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* testsuite/gas/i386/avx512f_vaes-intel.d: Regenerate.
