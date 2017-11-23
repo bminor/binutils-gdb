@@ -3067,7 +3067,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "movz{wR|x}",	{ Gv, Ew }, 0 }, /* yes, there really is movzww ! */
   /* b8 */
   { PREFIX_TABLE (PREFIX_0FB8) },
-  { "ud1",		{ XX }, 0 },
+  { "ud1S",		{ Gv, Ev }, 0 },
   { REG_TABLE (REG_0FBA) },
   { "btcS",		{ Evh1, Gv }, 0 },
   { PREFIX_TABLE (PREFIX_0FBC) },
@@ -3145,7 +3145,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "paddb",		{ MX, EM }, PREFIX_OPCODE },
   { "paddw",		{ MX, EM }, PREFIX_OPCODE },
   { "paddd",		{ MX, EM }, PREFIX_OPCODE },
-  { Bad_Opcode },
+  { "ud0S",		{ Gv, Ev }, 0 },
 };
 
 static const unsigned char onebyte_has_modrm[256] = {
@@ -3185,11 +3185,11 @@ static const unsigned char twobyte_has_modrm[256] = {
   /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
   /* 90 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 9f */
   /* a0 */ 0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1, /* af */
-  /* b0 */ 1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1, /* bf */
+  /* b0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* bf */
   /* c0 */ 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0, /* cf */
   /* d0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* df */
   /* e0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ef */
-  /* f0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0  /* ff */
+  /* f0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1  /* ff */
   /*       -------------------------------        */
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };

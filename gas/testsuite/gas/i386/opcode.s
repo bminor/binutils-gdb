@@ -350,7 +350,7 @@ foo:
  lgs    0x90909090(%eax),%edx
  movzbl 0x90909090(%eax),%edx
  movzwl 0x90909090(%eax),%edx
- ud2b
+ ud2
  btc    %edx,0x90909090(%eax)
  bsf    0x90909090(%eax),%edx
  bsr    0x90909090(%eax),%edx

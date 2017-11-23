@@ -861,9 +861,11 @@ ud2, 0, 0xf0b, None, 2, Cpu186, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf
 // alias for ud2
 ud2a, 0, 0xf0b, None, 2, Cpu186, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 // 2nd. official undefined instr.
-ud1, 0, 0xfb9, None, 2, Cpu186, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+ud1, 2, 0xfb9, None, 2, Cpu186, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 // alias for ud1
-ud2b, 0, 0xfb9, None, 2, Cpu186, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+ud2b, 2, 0xfb9, None, 2, Cpu186, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
+// 3rd official undefined instr (older CPUs don't take a ModR/M byte)
+ud0, 2, 0xfff, None, 2, Cpu186, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 
 cmovo, 2, 0xf40, None, 2, Cpu686, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 cmovno, 2, 0xf41, None, 2, Cpu686, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }

@@ -353,7 +353,7 @@ foo:
  lgs    edx, 0x90909090[eax]
  movzx  edx, byte ptr 0x90909090[eax]
  movzx  edx, word ptr 0x90909090[eax]
- ud2b
+ ud2
  btc    0x90909090[eax], edx
  bsf    edx, 0x90909090[eax]
  bsr    edx, 0x90909090[eax]

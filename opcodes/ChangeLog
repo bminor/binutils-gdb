@@ -1,3 +1,11 @@
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (dis386_twobyte): Correct ud1. Add ud0.
+	(twobyte_has_modrm): Set flag for index 0xb9 and 0xff.
+	* i386-opc.tbl (ud1, ud2b): Add operands.
+	(ud0): New.
+	* i386-tbl.h: Re-generate.
+
 2017-11-22  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* i386-opc.tbl: Remove Vec_Disp8 from vgf2p8mulb.
