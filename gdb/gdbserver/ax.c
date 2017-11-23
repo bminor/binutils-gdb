@@ -816,30 +816,29 @@ ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
 	   int nargs, ULONGEST *args)
 {
   const char *f = format;
-  struct format_piece *fpieces;
-  int i, fp;
-  char *current_substring;
+  int i;
+  const char *current_substring;
   int nargs_wanted;
 
   ax_debug ("Printf of \"%s\" with %d args", format, nargs);
 
-  fpieces = parse_format_string (&f);
+  format_pieces fpieces (&f);
 
   nargs_wanted = 0;
-  for (fp = 0; fpieces[fp].string != NULL; fp++)
-    if (fpieces[fp].argclass != literal_piece)
+  for (auto &&piece : fpieces)
+    if (piece.argclass != literal_piece)
       ++nargs_wanted;
 
   if (nargs != nargs_wanted)
     error (_("Wrong number of arguments for specified format-string"));
 
   i = 0;
-  for (fp = 0; fpieces[fp].string != NULL; fp++)
+  for (auto &&piece : fpieces)
     {
-      current_substring = fpieces[fp].string;
+      current_substring = piece.string;
       ax_debug ("current substring is '%s', class is %d",
-		current_substring, fpieces[fp].argclass);
-      switch (fpieces[fp].argclass)
+		current_substring, piece.argclass);
+      switch (piece.argclass)
 	{
 	case string_arg:
 	  {
@@ -914,11 +913,10 @@ ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
 	}
 
       /* Maybe advance to the next argument.  */
-      if (fpieces[fp].argclass != literal_piece)
+      if (piece.argclass != literal_piece)
 	++i;
     }
 
-  free_format_pieces (fpieces);
   fflush (stdout);
 }
 

@@ -2427,14 +2427,8 @@ printf_pointer (struct ui_file *stream, const char *format,
 static void
 ui_printf (const char *arg, struct ui_file *stream)
 {
-  struct format_piece *fpieces;
   const char *s = arg;
-  struct value **val_args;
-  int allocated_args = 20;
-  struct cleanup *old_cleanups;
-
-  val_args = XNEWVEC (struct value *, allocated_args);
-  old_cleanups = make_cleanup (free_current_contents, &val_args);
+  std::vector<struct value *> val_args;
 
   if (s == 0)
     error_no_arg (_("format-control string and values to print"));
@@ -2445,9 +2439,7 @@ ui_printf (const char *arg, struct ui_file *stream)
   if (*s++ != '"')
     error (_("Bad format string, missing '\"'."));
 
-  fpieces = parse_format_string (&s);
-
-  make_cleanup (free_format_pieces_cleanup, &fpieces);
+  format_pieces fpieces (&s);
 
   if (*s++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
@@ -2462,14 +2454,13 @@ ui_printf (const char *arg, struct ui_file *stream)
   s = skip_spaces (s);
 
   {
-    int nargs = 0;
     int nargs_wanted;
-    int i, fr;
-    char *current_substring;
+    int i;
+    const char *current_substring;
 
     nargs_wanted = 0;
-    for (fr = 0; fpieces[fr].string != NULL; fr++)
-      if (fpieces[fr].argclass != literal_piece)
+    for (auto &&piece : fpieces)
+      if (piece.argclass != literal_piece)
 	++nargs_wanted;
 
     /* Now, parse all arguments and evaluate them.
@@ -2479,28 +2470,23 @@ ui_printf (const char *arg, struct ui_file *stream)
       {
 	const char *s1;
 
-	if (nargs == allocated_args)
-	  val_args = (struct value **) xrealloc ((char *) val_args,
-						 (allocated_args *= 2)
-						 * sizeof (struct value *));
 	s1 = s;
-	val_args[nargs] = parse_to_comma_and_eval (&s1);
+	val_args.push_back (parse_to_comma_and_eval (&s1));
 
-	nargs++;
 	s = s1;
 	if (*s == ',')
 	  s++;
       }
 
-    if (nargs != nargs_wanted)
+    if (val_args.size () != nargs_wanted)
       error (_("Wrong number of arguments for specified format-string"));
 
     /* Now actually print them.  */
     i = 0;
-    for (fr = 0; fpieces[fr].string != NULL; fr++)
+    for (auto &&piece : fpieces)
       {
-	current_substring = fpieces[fr].string;
-	switch (fpieces[fr].argclass)
+	current_substring = piece.string;
+	switch (piece.argclass)
 	  {
 	  case string_arg:
 	    printf_c_string (stream, current_substring, val_args[i]);
@@ -2569,7 +2555,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 	  case dec64float_arg:
 	  case dec128float_arg:
 	    printf_floating (stream, current_substring, val_args[i],
-			     fpieces[fr].argclass);
+			     piece.argclass);
 	    break;
 	  case ptr_arg:
 	    printf_pointer (stream, current_substring, val_args[i]);
@@ -2590,11 +2576,10 @@ ui_printf (const char *arg, struct ui_file *stream)
 			    _("failed internal consistency check"));
 	  }
 	/* Maybe advance to the next argument.  */
-	if (fpieces[fr].argclass != literal_piece)
+	if (piece.argclass != literal_piece)
 	  ++i;
       }
   }
-  do_cleanups (old_cleanups);
 }
 
 /* Implement the "printf" command.  */

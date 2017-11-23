@@ -1,3 +1,19 @@
+2017-12-08  Tom Tromey  <tom@tromey.com>
+
+	* printcmd.c (ui_printf): Update.  Use std::vector.
+	* common/format.h (struct format_piece): Add constructor.
+	<string>: Now const.
+	(class format_pieces): New class.
+	(parse_format_string, free_format_pieces)
+	(free_format_pieces_cleanup): Remove.
+	* common/format.c (format_pieces::format_pieces): Rename from
+	parse_format_string.  Update.
+	(free_format_pieces, free_format_pieces_cleanup): Remove.
+	* breakpoint.c (parse_cmd_to_aexpr): Update.  Use std::vector.
+	* ax-gdb.h (gen_printf): Remove argument.
+	* ax-gdb.c (gen_printf): Remove "frags" argument.
+	(maint_agent_printf_command): Update.  Use std::vector.
+
 2017-12-08  Yao Qi  <yao.qi@linaro.org>
 
 	PR breakpionts/22567

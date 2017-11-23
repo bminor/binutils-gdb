@@ -2541,7 +2541,6 @@ agent_expr_up
 gen_printf (CORE_ADDR scope, struct gdbarch *gdbarch,
 	    CORE_ADDR function, LONGEST channel,
 	    const char *format, int fmtlen,
-	    struct format_piece *frags,
 	    int nargs, struct expression **exprs)
 {
   agent_expr_up ax (new agent_expr (gdbarch, scope));
@@ -2681,12 +2680,8 @@ agent_eval_command (const char *exp, int from_tty)
 static void
 maint_agent_printf_command (const char *cmdrest, int from_tty)
 {
-  struct cleanup *old_chain = 0;
-  struct expression *argvec[100];
   struct frame_info *fi = get_current_frame ();	/* need current scope */
   const char *format_start, *format_end;
-  struct format_piece *fpieces;
-  int nargs;
 
   /* We don't deal with overlay debugging at the moment.  We need to
      think more carefully about this.  If you copy this code into
@@ -2705,9 +2700,7 @@ maint_agent_printf_command (const char *cmdrest, int from_tty)
 
   format_start = cmdrest;
 
-  fpieces = parse_format_string (&cmdrest);
-
-  old_chain = make_cleanup (free_format_pieces_cleanup, &fpieces);
+  format_pieces fpieces (&cmdrest);
 
   format_end = cmdrest;
 
@@ -2723,15 +2716,14 @@ maint_agent_printf_command (const char *cmdrest, int from_tty)
     cmdrest++;
   cmdrest = skip_spaces (cmdrest);
 
-  nargs = 0;
+  std::vector<struct expression *> argvec;
   while (*cmdrest != '\0')
     {
       const char *cmd1;
 
       cmd1 = cmdrest;
       expression_up expr = parse_exp_1 (&cmd1, 0, (struct block *) 0, 1);
-      argvec[nargs] = expr.release ();
-      ++nargs;
+      argvec.push_back (expr.release ());
       cmdrest = cmd1;
       if (*cmdrest == ',')
 	++cmdrest;
@@ -2742,14 +2734,13 @@ maint_agent_printf_command (const char *cmdrest, int from_tty)
   agent_expr_up agent = gen_printf (get_frame_pc (fi), get_current_arch (),
 				    0, 0,
 				    format_start, format_end - format_start,
-				    fpieces, nargs, argvec);
+				    argvec.size (), argvec.data ());
   ax_reqs (agent.get ());
   ax_print (gdb_stdout, agent.get ());
 
   /* It would be nice to call ax_reqs here to gather some general info
      about the expression, and then print out the result.  */
 
-  do_cleanups (old_chain);
   dont_repeat ();
 }
 

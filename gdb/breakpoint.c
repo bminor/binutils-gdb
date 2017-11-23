@@ -2226,12 +2226,8 @@ build_target_condition_list (struct bp_location *bl)
 static agent_expr_up
 parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 {
-  struct cleanup *old_cleanups = 0;
-  struct expression **argvec;
   const char *cmdrest;
   const char *format_start, *format_end;
-  struct format_piece *fpieces;
-  int nargs;
   struct gdbarch *gdbarch = get_current_arch ();
 
   if (cmd == NULL)
@@ -2248,9 +2244,7 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 
   format_start = cmdrest;
 
-  fpieces = parse_format_string (&cmdrest);
-
-  old_cleanups = make_cleanup (free_format_pieces_cleanup, &fpieces);
+  format_pieces fpieces (&cmdrest);
 
   format_end = cmdrest;
 
@@ -2268,17 +2262,14 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 
   /* For each argument, make an expression.  */
 
-  argvec = (struct expression **) alloca (strlen (cmd)
-					 * sizeof (struct expression *));
-
-  nargs = 0;
+  std::vector<struct expression *> argvec;
   while (*cmdrest != '\0')
     {
       const char *cmd1;
 
       cmd1 = cmdrest;
       expression_up expr = parse_exp_1 (&cmd1, scope, block_for_pc (scope), 1);
-      argvec[nargs++] = expr.release ();
+      argvec.push_back (expr.release ());
       cmdrest = cmd1;
       if (*cmdrest == ',')
 	++cmdrest;
@@ -2292,7 +2283,7 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
     {
       aexpr = gen_printf (scope, gdbarch, 0, 0,
 			  format_start, format_end - format_start,
-			  fpieces, nargs, argvec);
+			  argvec.size (), argvec.data ());
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -2301,8 +2292,6 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 	 It's no use iterating through the other commands.  */
     }
   END_CATCH
-
-  do_cleanups (old_cleanups);
 
   /* We have a valid agent expression, return it.  */
   return aexpr;
