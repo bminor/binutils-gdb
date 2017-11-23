@@ -1,3 +1,9 @@
+2017-11-23  Pavel I. Kryukov  <kryukov@frtk.ru>
+
+	PR 22485
+	* readelf.c (process_archive): Use memset to initiaise
+	thin_filedata structure.
+
 2017-11-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/22451

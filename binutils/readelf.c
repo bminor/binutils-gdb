@@ -18845,7 +18845,9 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
         }
       else if (is_thin_archive)
         {
-          Filedata thin_filedata = { 0 };
+          Filedata thin_filedata;
+
+          memset (&thin_filedata, 0, sizeof (thin_filedata));
 
 	  /* PR 15140: Allow for corrupt thin archives.  */
 	  if (nested_arch.file == NULL)
