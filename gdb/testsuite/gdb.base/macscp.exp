@@ -21,7 +21,7 @@ set objfile [standard_output_file ${testfile}.o]
 set options { debug additional_flags=-DFROM_COMMANDLINE=ARG}
 
 get_compiler_info
-if [test_compiler_info gcc*] {
+if { [test_compiler_info "gcc-*"] || [test_compiler_info "clang-*"] } {
     lappend options additional_flags=-g3
 }
 

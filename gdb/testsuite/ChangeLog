@@ -1,3 +1,7 @@
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/macscp.exp: Append -g3 to additional_flags for clang.
+
 2017-11-22  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.opt/inline-locals.exp: Mark tests as KFAIL.
