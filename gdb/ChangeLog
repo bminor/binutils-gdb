@@ -1,3 +1,27 @@
+2017-12-30  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* stap-probe.h (struct stap_parse_info): Add constructor,
+	destructor.
+	* stap-probe.c (stap_parse_argument): Update.
+	* rust-exp.y (rust_lex_tests): Update.
+	* parser-defs.h (struct parser_state): Add constructor,
+	destructor, release method.
+	<expout>: Change type to expression_up.
+	(null_post_parser): Change type.
+	(initialize_expout, reallocate_expout): Remove.
+	* parse.c (parser_state::parser_state): Rename from
+	initialize_expout.
+	(parser_state::release): Rename from reallocate_expout.
+	(write_exp_elt, parse_exp_in_context_1, increase_expout_size):
+	Update.
+	(null_post_parser): Change type of "exp".
+	* dtrace-probe.c (dtrace_probe::build_arg_exprs): Update.
+	* ada-lang.c (resolve, resolve_subexp)
+	(replace_operator_with_call): Change type of "expp".
+	* language.h (struct language_defn) <la_post_parser>: Change type
+	of "expp".
+
 2017-12-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2read.c (struct mapped_debug_names): Make final.

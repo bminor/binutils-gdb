@@ -124,10 +124,10 @@ static int num_defns_collected (struct obstack *);
 
 static struct block_symbol *defns_collected (struct obstack *, int);
 
-static struct value *resolve_subexp (struct expression **, int *, int,
+static struct value *resolve_subexp (expression_up *, int *, int,
                                      struct type *);
 
-static void replace_operator_with_call (struct expression **, int, int, int,
+static void replace_operator_with_call (expression_up *, int, int, int,
                                         struct symbol *, const struct block *);
 
 static int possible_user_operator_p (enum exp_opcode, struct value **);
@@ -3235,7 +3235,7 @@ ada_decoded_op_name (enum exp_opcode op)
    return type is preferred.  May change (expand) *EXP.  */
 
 static void
-resolve (struct expression **expp, int void_context_p)
+resolve (expression_up *expp, int void_context_p)
 {
   struct type *context_type = NULL;
   int pc = 0;
@@ -3256,7 +3256,7 @@ resolve (struct expression **expp, int void_context_p)
    are as in ada_resolve, above.  */
 
 static struct value *
-resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
+resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
                 struct type *context_type)
 {
   int pc = *pos;
@@ -3270,7 +3270,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
   argvec = NULL;
   nargs = 0;
-  exp = *expp;
+  exp = expp->get ();
 
   /* Pass one: resolve operands, saving their types and updating *pos,
      if needed.  */
@@ -3420,7 +3420,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
   for (i = 0; i < nargs; i += 1)
     argvec[i] = resolve_subexp (expp, pos, 1, NULL);
   argvec[i] = NULL;
-  exp = *expp;
+  exp = expp->get ();
 
   /* Pass two: perform any resolution on principal operator.  */
   switch (op)
@@ -3515,7 +3515,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
           replace_operator_with_call (expp, pc, 0, 0,
                                       exp->elts[pc + 2].symbol,
                                       exp->elts[pc + 1].block);
-          exp = *expp;
+          exp = expp->get ();
         }
       break;
 
@@ -3596,7 +3596,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 	  replace_operator_with_call (expp, pc, nargs, 1,
 				      candidates[i].symbol,
 				      candidates[i].block);
-          exp = *expp;
+          exp = expp->get ();
         }
       break;
 
@@ -4115,7 +4115,7 @@ get_selections (int *choices, int n_choices, int max_results,
    arguments.  Update *EXPP as needed to hold more space.  */
 
 static void
-replace_operator_with_call (struct expression **expp, int pc, int nargs,
+replace_operator_with_call (expression_up *expp, int pc, int nargs,
                             int oplen, struct symbol *sym,
                             const struct block *block)
 {
@@ -4124,7 +4124,7 @@ replace_operator_with_call (struct expression **expp, int pc, int nargs,
   struct expression *newexp = (struct expression *)
     xzalloc (sizeof (struct expression)
              + EXP_ELEM_TO_BYTES ((*expp)->nelts + 7 - oplen));
-  struct expression *exp = *expp;
+  struct expression *exp = expp->get ();
 
   newexp->nelts = exp->nelts + 7 - oplen;
   newexp->language_defn = exp->language_defn;
@@ -4140,8 +4140,7 @@ replace_operator_with_call (struct expression **expp, int pc, int nargs,
   newexp->elts[pc + 4].block = block;
   newexp->elts[pc + 5].symbol = sym;
 
-  *expp = newexp;
-  xfree (exp);
+  expp->reset (newexp);
 }
 
 /* Type-class predicates */

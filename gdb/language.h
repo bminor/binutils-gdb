@@ -25,12 +25,12 @@
 
 #include "symtab.h"
 #include "common/function-view.h"
+#include "expression.h"
 
 /* Forward decls for prototypes.  */
 struct value;
 struct objfile;
 struct frame_info;
-struct expression;
 struct ui_file;
 struct value_print_options;
 struct type_print_options;
@@ -182,7 +182,7 @@ struct language_defn
        for releasing its previous contents, if necessary.  If 
        VOID_CONTEXT_P, then no value is expected from the expression.  */
 
-    void (*la_post_parser) (struct expression ** expp, int void_context_p);
+    void (*la_post_parser) (expression_up *expp, int void_context_p);
 
     void (*la_printchar) (int ch, struct type *chtype,
 			  struct ui_file * stream);

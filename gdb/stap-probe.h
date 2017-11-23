@@ -28,6 +28,20 @@
 
 struct stap_parse_info
 {
+  stap_parse_info (const char *arg_, struct type *arg_type_,
+		   size_t initial_size, const struct language_defn *lang,
+		   struct gdbarch *gdbarch)
+    : arg (arg_),
+      pstate (initial_size, lang, gdbarch),
+      saved_arg (arg_),
+      arg_type (arg_type_),
+      gdbarch (gdbarch),
+      inside_paren_p (0)
+  {
+  }
+
+  DISABLE_COPY_AND_ASSIGN (stap_parse_info);
+
   /* The probe's argument in a string format.  */
   const char *arg;
 
