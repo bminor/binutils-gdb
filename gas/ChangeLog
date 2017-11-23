@@ -1,5 +1,10 @@
 2017-11-23  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (build_modrm_byte): Drop VSIB handling from
+	code also setting fake_zero_displacement.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/arch-4.s: Correct ud1 and ud2b. Add ud0.
 	* testsuite/gas/i386/intel.s: Test ud2 instead of ud2b.
 	* testsuite/gas/i386/opcode.s: Likewise.
