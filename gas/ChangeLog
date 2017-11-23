@@ -1,5 +1,8 @@
 2017-11-23  Jim Wilson  <jimw@sifive.com>
 
+	* testsuite/gas/all/err-fakelabel.s (dg-error): Also accept fatal error
+	string.
+
 	* as.c (INITIALIZING_EMULS): Define.
 	* config/obj-multi.h (FAKE_LABEL_NAME): When INITIALIZING_EMULS set,
 	don't define it.
