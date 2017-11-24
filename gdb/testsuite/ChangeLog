@@ -1,3 +1,14 @@
+2017-11-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/cpcompletion.exp: New file.
+	* gdb.linespec/cpls-hyphen.cc: New file.
+	* gdb.linespec/cpls.cc: New file.
+	* gdb.linespec/cpls2.cc: New file.
+	* gdb.linespec/explicit.exp: Load completion-support.exp.  Adjust
+	test to use test_gdb_complete_unique.  Add label completion,
+	keyword completion and explicit location completion tests.
+	* lib/completion-support.exp: New file.
+
 2017-11-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/catch_ex.exp, gdb.ada/mi_catch_ex.exp,
