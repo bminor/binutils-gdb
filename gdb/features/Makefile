@@ -221,7 +221,10 @@ FEATURE_XMLFILES = i386/32bit-core.xml \
 	i386/64bit-linux.xml \
 	i386/64bit-pkeys.xml \
 	i386/64bit-sse.xml \
-	i386/x32-core.xml
+	i386/x32-core.xml \
+	tic6x-c6xp.xml \
+	tic6x-core.xml \
+	tic6x-gp.xml
 
 FEATURE_CFILES = $(patsubst %.xml,%.c,$(FEATURE_XMLFILES))
 

@@ -356,16 +356,18 @@ case "${target}" in
   spu*-*-*)		srv_regobj=reg-spu.o
 			srv_tgtobj="spu-low.o fork-child.o fork-inferior.o"
 			;;
-  tic6x-*-uclinux)	srv_regobj="tic6x-c64xp-linux.o"
-			srv_regobj="${srv_regobj} tic6x-c64x-linux.o"
-			srv_regobj="${srv_regobj} tic6x-c62x-linux.o"
-			srv_xmlfiles="tic6x-c64xp-linux.xml"
-			srv_xmlfiles="${srv_xmlfiles} tic6x-c64x-linux.xml"
-			srv_xmlfiles="${srv_xmlfiles} tic6x-c62x-linux.xml"
+  tic6x-*-uclinux)	if $development; then
+			  srv_regobj="tic6x-c64xp-linux.o"
+			  srv_regobj="${srv_regobj} tic6x-c64x-linux.o"
+			  srv_regobj="${srv_regobj} tic6x-c62x-linux.o"
+                        else
+			  srv_regobj=""
+                        fi
 			srv_xmlfiles="${srv_xmlfiles} tic6x-core.xml"
 			srv_xmlfiles="${srv_xmlfiles} tic6x-gp.xml"
 			srv_xmlfiles="${srv_xmlfiles} tic6x-c6xp.xml"
 			srv_tgtobj="$srv_linux_obj linux-tic6x-low.o"
+			srv_tgtobj="${srv_tgtobj} arch/tic6x.o"
 			srv_linux_regsets=yes
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes

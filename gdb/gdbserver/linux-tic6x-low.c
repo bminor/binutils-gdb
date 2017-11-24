@@ -21,6 +21,8 @@
 
 #include "server.h"
 #include "linux-low.h"
+#include "arch/tic6x.h"
+#include "tdesc.h"
 
 #include "nat/gdb_ptrace.h"
 #include <endian.h>
@@ -189,45 +191,21 @@ static struct usrregs_info tic6x_usrregs_info =
   };
 
 static const struct target_desc *
-tic6x_read_description (void)
+tic6x_read_description (enum c6x_feature feature)
 {
-  register unsigned int csr asm ("B2");
-  unsigned int cpuid;
-  const struct target_desc *tdesc;
+  static target_desc *tdescs[C6X_LAST] = { };
+  struct target_desc **tdesc = &tdescs[feature];
 
-  /* Determine the CPU we're running on to find the register order.  */
-  __asm__ ("MVC .S2 CSR,%0" : "=r" (csr) :);
-  cpuid = csr >> 24;
-  switch (cpuid)
+  if (*tdesc == NULL)
     {
-    case 0x00: /* C62x */
-    case 0x02: /* C67x */
-      tic6x_regmap = tic6x_regmap_c62x;
-      tic6x_breakpoint = 0x0000a122;  /* BNOP .S2 0,5 */
-      tdesc = tdesc_tic6x_c62x_linux;
-      break;
-    case 0x03: /* C67x+ */
-      tic6x_regmap = tic6x_regmap_c64x;
-      tic6x_breakpoint = 0x0000a122;  /* BNOP .S2 0,5 */
-      tdesc = tdesc_tic6x_c64x_linux;
-      break;
-    case 0x0c: /* C64x */
-      tic6x_regmap = tic6x_regmap_c64x;
-      tic6x_breakpoint = 0x0000a122;  /* BNOP .S2 0,5 */
-      tdesc = tdesc_tic6x_c64x_linux;
-      break;
-    case 0x10: /* C64x+ */
-    case 0x14: /* C674x */
-    case 0x15: /* C66x */
-      tic6x_regmap = tic6x_regmap_c64xp;
-      tic6x_breakpoint = 0x56454314;  /* illegal opcode */
-      tdesc = tdesc_tic6x_c64xp_linux;
-      break;
-    default:
-      error ("Unknown CPU ID 0x%02x", cpuid);
+      *tdesc = tic6x_create_target_description (feature);
+      init_target_desc (*tdesc);
+
+      static const char *expedite_regs[] = { "A15", "PC", NULL };
+      (*tdesc)->expedite_regs = expedite_regs;
     }
-  tic6x_usrregs_info.regmap = tic6x_regmap;
-  return tdesc;
+
+  return *tdesc;
 }
 
 static int
@@ -341,7 +319,44 @@ static struct regset_info tic6x_regsets[] = {
 static void
 tic6x_arch_setup (void)
 {
-  current_process ()->tdesc = tic6x_read_description ();
+  register unsigned int csr asm ("B2");
+  unsigned int cpuid;
+  enum c6x_feature feature = C6X_CORE;
+
+  /* Determine the CPU we're running on to find the register order.  */
+  __asm__ ("MVC .S2 CSR,%0" : "=r" (csr) :);
+  cpuid = csr >> 24;
+  switch (cpuid)
+    {
+    case 0x00: /* C62x */
+    case 0x02: /* C67x */
+      tic6x_regmap = tic6x_regmap_c62x;
+      tic6x_breakpoint = 0x0000a122;  /* BNOP .S2 0,5 */
+      feature = C6X_CORE;
+      break;
+    case 0x03: /* C67x+ */
+      tic6x_regmap = tic6x_regmap_c64x;
+      tic6x_breakpoint = 0x0000a122;  /* BNOP .S2 0,5 */
+      feature = C6X_GP;
+      break;
+    case 0x0c: /* C64x */
+      tic6x_regmap = tic6x_regmap_c64x;
+      tic6x_breakpoint = 0x0000a122;  /* BNOP .S2 0,5 */
+      feature = C6X_GP;
+      break;
+    case 0x10: /* C64x+ */
+    case 0x14: /* C674x */
+    case 0x15: /* C66x */
+      tic6x_regmap = tic6x_regmap_c64xp;
+      tic6x_breakpoint = 0x56454314;  /* illegal opcode */
+      feature = C6X_C6XP;
+      break;
+    default:
+      error ("Unknown CPU ID 0x%02x", cpuid);
+    }
+  tic6x_usrregs_info.regmap = tic6x_regmap;
+
+  current_process ()->tdesc = tic6x_read_description (feature);
 }
 
 /* Support for hardware single step.  */
@@ -410,13 +425,33 @@ struct linux_target_ops the_low_target = {
   tic6x_supports_hardware_single_step,
 };
 
+#if GDB_SELF_TEST
+#include "common/selftest.h"
+
+namespace selftests {
+namespace tdesc {
+static void
+tic6x_tdesc_test ()
+{
+  SELF_CHECK (*tdesc_tic6x_c62x_linux == *tic6x_read_description (C6X_CORE));
+  SELF_CHECK (*tdesc_tic6x_c64x_linux == *tic6x_read_description (C6X_GP));
+  SELF_CHECK (*tdesc_tic6x_c64xp_linux == *tic6x_read_description (C6X_C6XP));
+}
+}
+}
+#endif
+
 void
 initialize_low_arch (void)
 {
+#if GDB_SELF_TEST
   /* Initialize the Linux target descriptions.  */
   init_registers_tic6x_c64xp_linux ();
   init_registers_tic6x_c64x_linux ();
   init_registers_tic6x_c62x_linux ();
+
+  selftests::register_test ("tic6x-tdesc", selftests::tdesc::tic6x_tdesc_test);
+#endif
 
   initialize_regsets_info (&tic6x_regsets_info);
 }

@@ -1,3 +1,11 @@
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv: Set $srv_regobj for tic6x-linux.
+	* linux-tic6x-low.c: Include "arch/tic6x.h" and "tdesc.h".
+	(tic6x_read_description): Move some code to tic6x_arch_setup.
+	(tic6x_tdesc_test): New function.
+	(initialize_low_arch): Call selftests::register_test.
+
 2017-11-22  Yao Qi  <yao.qi@linaro.org>
 
 	* remote-utils.c (prepare_resume_reply): Use memcpy.

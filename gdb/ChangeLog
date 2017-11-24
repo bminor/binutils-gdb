@@ -1,3 +1,15 @@
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/tic6x.c: New file.
+	* arch/tic6x.h: New file.
+	* features/Makefile (FEATURE_XMLFILES): Add tic6x-c6xp.xml,
+	tic6x-core.xml and tic6x-gp.xml.
+	* features/tic6x-c6xp.c: Generated.
+	* features/tic6x-core.c: Generated.
+	* features/tic6x-gp.c: Generated.
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Match
+	"tic6x-".
+
 2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* mi/mi-main.c (list_available_thread_groups): Change map value
