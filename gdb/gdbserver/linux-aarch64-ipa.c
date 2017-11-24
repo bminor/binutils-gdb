@@ -25,10 +25,10 @@
 #ifdef HAVE_GETAUXVAL
 #include <sys/auxv.h>
 #endif
+#include "linux-aarch64-tdesc.h"
 
 /* Defined in auto-generated file aarch64.c.  */
 void init_registers_aarch64 (void);
-extern const struct target_desc *tdesc_aarch64;
 
 /* Each register saved by the jump pad is in a 16 byte cell.  */
 #define FT_CR_SIZE 16
@@ -155,7 +155,7 @@ get_raw_reg (const unsigned char *raw_regs, int regnum)
 const struct target_desc *
 get_ipa_tdesc (int idx)
 {
-  return tdesc_aarch64;
+  return aarch64_linux_read_description ();
 }
 
 /* Allocate buffer for the jump pads.  The branch instruction has a reach

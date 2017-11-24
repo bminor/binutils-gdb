@@ -1,3 +1,14 @@
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* configure.srv: Add new files.
+	* linux-aarch64-ipa.c (get_ipa_tdesc): Call
+	aarch64_linux_read_description.
+	* linux-aarch64-low.c (aarch64_linux_read_description):
+	Merge with aarch64_arch_setup.
+	(aarch64_arch_setup): Call aarch64_linux_read_description.
+	* linux-aarch64-tdesc.c: New file.
+	* linux-aarch64-tdesc.h: New file.
+
 2017-11-24  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.srv: Set $srv_regobj for tic6x-linux.
