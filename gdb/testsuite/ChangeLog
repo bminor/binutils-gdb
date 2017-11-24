@@ -1,3 +1,9 @@
+2017-12-01  Joel Brobecker  <brobecker@adacore.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/readnever.c, gdb.base/readnever.exp: New files.
+
 2017-12-01  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.arch/aarch64-atomic-inst.exp: Replace mail address with

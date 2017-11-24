@@ -1,3 +1,34 @@
+2017-12-01  Andrew Cagney  <cagney@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* NEWS (Changes since GDB 8.0: Mention new '--readnever'
+	feature.
+	* coffread.c (coff_symfile_read): Do not map over sections with
+	'coff_locate_sections' if readnever is on.
+	* dwarf2read.c (dwarf2_has_info): Return 0 if
+	readnever is on.
+	* elfread.c (elf_symfile_read): Do not map over sections with
+	'elf_locate_sections' if readnever is on.
+	* main.c (validate_readnow_readnever): New function.
+	(captured_main_1): Add support for --readnever.
+	(print_gdb_help): Document --readnever.
+	* objfile-flags.h (enum objfile_flag) <OBJF_READNEVER>: New
+	flag.
+	* symfile.c (readnever_symbol_files): New global.
+	(symbol_file_add_with_addrs): Set 'OBJF_READNEVER' when
+	'READNEVER_SYMBOL_FILES' is set.
+	(validate_readnow_readnever): New function.
+	(symbol_file_command): Handle '-readnever' option.
+	Call 'validate_readnow_readnever'.
+	(add_symbol_file_command): Handle '-readnever' option.
+	Call 'validate_readnow_readnever'.
+	(_initialize_symfile): Document new '-readnever' option for
+	both 'symbol-file' and 'add-symbol-file' commands.
+	* top.h (readnever_symbol_files): New extern global.
+	* xcoffread.c (xcoff_initial_scan): Do not read debug
+	information if readnever is on.
+
 2017-12-01  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (all_deps_files): New variable.

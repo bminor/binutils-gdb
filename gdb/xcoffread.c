@@ -2975,31 +2975,33 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
       /* Read the string table.  */
       init_stringtab (abfd, stringtab_offset, objfile);
 
-      /* Read the .debug section, if present.  */
-      {
-	struct bfd_section *secp;
-	bfd_size_type length;
-	bfd_byte *debugsec = NULL;
+      /* Read the .debug section, if present and if we're not ignoring
+	 it.  */
+      if (!(objfile->flags & OBJF_READNEVER))
+	{
+	  struct bfd_section *secp;
+	  bfd_size_type length;
+	  bfd_byte *debugsec = NULL;
 
-	secp = bfd_get_section_by_name (abfd, ".debug");
-	if (secp)
-	  {
-	    length = bfd_section_size (abfd, secp);
-	    if (length)
-	      {
-		debugsec
-		  = (bfd_byte *) obstack_alloc (&objfile->objfile_obstack,
-						length);
+	  secp = bfd_get_section_by_name (abfd, ".debug");
+	  if (secp)
+	    {
+	      length = bfd_section_size (abfd, secp);
+	      if (length)
+		{
+		  debugsec
+		    = (bfd_byte *) obstack_alloc (&objfile->objfile_obstack,
+						  length);
 
-		if (!bfd_get_full_section_contents (abfd, secp, &debugsec))
-		  {
-		    error (_("Error reading .debug section of `%s': %s"),
-			   name, bfd_errmsg (bfd_get_error ()));
-		  }
-	      }
-	  }
-	info->debugsec = (char *) debugsec;
-      }
+		  if (!bfd_get_full_section_contents (abfd, secp, &debugsec))
+		    {
+		      error (_("Error reading .debug section of `%s': %s"),
+			     name, bfd_errmsg (bfd_get_error ()));
+		    }
+		}
+	    }
+	  info->debugsec = (char *) debugsec;
+	}
     }
 
   /* Read the symbols.  We keep them in core because we will want to
