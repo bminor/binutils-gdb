@@ -2998,4 +2998,8 @@ initialize_low_arch (void)
   initialize_low_arch_aarch32 ();
 
   initialize_regsets_info (&aarch64_regsets_info);
+
+#if GDB_SELF_TEST
+  initialize_low_tdesc ();
+#endif
 }

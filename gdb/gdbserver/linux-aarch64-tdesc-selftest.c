@@ -1,6 +1,4 @@
-/* Low level support for aarch64, shared between gdbserver and IPA.
-
-   Copyright (C) 2016-2017 Free Software Foundation, Inc.
+/* Copyright (C) 2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,8 +15,31 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-const target_desc * aarch64_linux_read_description ();
+#include "server.h"
+#include "tdesc.h"
+#include "common/selftest.h"
+#include "linux-aarch64-tdesc.h"
 
-#if GDB_SELF_TEST
-void initialize_low_tdesc ();
-#endif
+/* Defined in auto-generated file features/aarch64.c.  */
+void init_registers_aarch64 (void);
+extern const struct target_desc *tdesc_aarch64;
+
+namespace selftests {
+namespace tdesc {
+static void
+aarch64_tdesc_test ()
+{
+  const target_desc *tdesc = aarch64_linux_read_description ();
+  SELF_CHECK (*tdesc == *tdesc_aarch64);
+}
+}
+} // namespace selftests
+
+void
+initialize_low_tdesc ()
+{
+  init_registers_aarch64 ();
+
+  selftests::register_test ("aarch64-tdesc",
+			    selftests::tdesc::aarch64_tdesc_test);
+}

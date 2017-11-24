@@ -1,5 +1,10 @@
 2017-11-24  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch64-tdep.c (_initialize_aarch64_tdep): Add target desc
+	selftest.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-tdep.c (_initialize_aarch64_tdep): Remove init.
 	* arch/aarch64.c (aarch64_create_target_description): Create
 	new target description.

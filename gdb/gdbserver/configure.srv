@@ -53,6 +53,7 @@ case "${target}" in
 			srv_regobj="arm-with-neon.o"
 			if $development; then
 			  srv_regobj="${srv_regobj} aarch64.o"
+			  srv_regobj="${srv_regobj} linux-aarch64-tdesc-selftest.o"
                         fi
 			srv_tgtobj="linux-aarch64-low.o aarch64-linux-hw-point.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"

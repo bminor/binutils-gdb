@@ -1,5 +1,19 @@
 2017-11-24  Alan Hayward  <alan.hayward@arm.com>
 
+	* configure.srv: Add linux-aarch64-tdesc-selftest.o.
+	* linux-aarch64-low.c (initialize_low_arch): Call init func.
+	* linux-aarch64-tdesc-selftest.c: New file.
+	* linux-aarch64-tdesc.h (initialize_low_tdesc): New declaration.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* configure.srv: Add new file.
+	* linux-aarch64-low.c (initialize_low_arch): Call init func.
+	* linux-aarch64-tdesc-selftest.c: New file.
+	* linux-aarch64-tdesc.h (initialize_low_tdesc): New declaration.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
 	* linux-aarch64-ipa.c (initialize_low_tracepoint): Remove init.
 	* linux-aarch64-low.c (initialize_low_arch): Remove init.
 	* linux-aarch64-tdesc.c (aarch64_linux_read_description): Add init.
