@@ -1,5 +1,16 @@
 2017-11-24  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (check_VecOperations): Check register type
+	for masking. Quote the actual register name in the respective
+	diagnostic. Check {z} wasn't specified on its own.
+	* testsuite/gas/i386/inval-avx512f.s,
+	testsuite/gas/i386/x86-64-inval-avx512f.s: Add further bad
+	masking tests.
+	* testsuite/gas/i386/inval-avx512f.l,
+	testsuite/gas/i386/x86-64-inval-avx512f.l: Adjust expectations.
+
+2017-11-24  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/intel.d, testsuite/gas/i386/opcode.d,
 	testsuite/gas/i386/opcode-suffix.d, testsuite/gas/i386/sse3.d,
 	testsuite/gas/i386/sse-noavx.d, testsuite/gas/i386/x86-64-sse3.d,
