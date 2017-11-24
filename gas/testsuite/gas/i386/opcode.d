@@ -218,8 +218,8 @@ Disassembly of section .text:
  2ac:	db 90 90 90 90 90 [ 	]*fistl  -0x6f6f6f70\(%eax\)
  2b2:	dc 90 90 90 90 90 [ 	]*fcoml  -0x6f6f6f70\(%eax\)
  2b8:	dd 90 90 90 90 90 [ 	]*fstl   -0x6f6f6f70\(%eax\)
- 2be:	de 90 90 90 90 90 [ 	]*ficom  -0x6f6f6f70\(%eax\)
- 2c4:	df 90 90 90 90 90 [ 	]*fist   -0x6f6f6f70\(%eax\)
+ 2be:	de 90 90 90 90 90 [ 	]*ficoms -0x6f6f6f70\(%eax\)
+ 2c4:	df 90 90 90 90 90 [ 	]*fists  -0x6f6f6f70\(%eax\)
  2ca:	e0 90 [ 	]*loopne (0x)?25c.*
  2cc:	e1 90 [ 	]*loope  (0x)?25e.*
  2ce:	e2 90 [ 	]*loop   (0x)?260.*

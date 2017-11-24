@@ -221,8 +221,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	db 90 90 90 90 90 [ 	]*fistl  -0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	dc 90 90 90 90 90 [ 	]*fcoml  -0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	dd 90 90 90 90 90 [ 	]*fstl   -0x6f6f6f70\(%eax\)
-[ 	]*[a-f0-9]+:	de 90 90 90 90 90 [ 	]*ficom  -0x6f6f6f70\(%eax\)
-[ 	]*[a-f0-9]+:	df 90 90 90 90 90 [ 	]*fist   -0x6f6f6f70\(%eax\)
+[ 	]*[a-f0-9]+:	de 90 90 90 90 90 [ 	]*ficoms -0x6f6f6f70\(%eax\)
+[ 	]*[a-f0-9]+:	df 90 90 90 90 90 [ 	]*fists  -0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	e0 90 [ 	]*loopne (0x)?260.*
 [ 	]*[a-f0-9]+:	e1 90 [ 	]*loope  (0x)?262.*
 [ 	]*[a-f0-9]+:	e2 90 [ 	]*loop   (0x)?264.*
@@ -692,7 +692,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
-[ 	]*[a-f0-9]+:	de 3b                	fidivr \(%ebx\)
+[ 	]*[a-f0-9]+:	de 3b                	fidivrs \(%ebx\)
 [ 	]*[a-f0-9]+:	da 3b                	fidivrl \(%ebx\)
 [ 	]*[a-f0-9]+:	0f 4a 90 90 90 90 90 	cmovp  -0x6f6f6f70\(%eax\),%edx
 [ 	]*[a-f0-9]+:	0f 4b 90 90 90 90 90 	cmovnp -0x6f6f6f70\(%eax\),%edx
