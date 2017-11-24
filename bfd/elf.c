@@ -52,10 +52,9 @@ static int elf_sort_sections (const void *, const void *);
 static bfd_boolean assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
 static bfd_boolean prep_headers (bfd *);
 static bfd_boolean swap_out_syms (bfd *, struct elf_strtab_hash **, int) ;
-static bfd_boolean elf_read_notes (bfd *, file_ptr, bfd_size_type,
-				   size_t align) ;
+static bfd_boolean elf_read_notes (bfd *, file_ptr, bfd_size_type) ;
 static bfd_boolean elf_parse_notes (bfd *abfd, char *buf, size_t size,
-				    file_ptr offset, size_t align);
+				    file_ptr offset);
 
 /* Swap version information in and out.  The version information is
    currently size independent.  If that ever changes, this code will
@@ -1090,8 +1089,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       if (!bfd_malloc_and_get_section (abfd, newsect, &contents))
 	return FALSE;
 
-      elf_parse_notes (abfd, (char *) contents, hdr->sh_size,
-		       hdr->sh_offset, hdr->sh_addralign);
+      elf_parse_notes (abfd, (char *) contents, hdr->sh_size, hdr->sh_offset);
       free (contents);
     }
 
@@ -2992,8 +2990,7 @@ bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int hdr_index)
     case PT_NOTE:
       if (! _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "note"))
 	return FALSE;
-      if (! elf_read_notes (abfd, hdr->p_offset, hdr->p_filesz,
-			    hdr->p_align))
+      if (! elf_read_notes (abfd, hdr->p_offset, hdr->p_filesz))
 	return FALSE;
       return TRUE;
 
@@ -10973,14 +10970,14 @@ elfcore_write_register_note (bfd *abfd,
 }
 
 static bfd_boolean
-elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset,
-		 size_t align)
+elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset)
 {
   char *p;
 
   p = buf;
   while (p < buf + size)
     {
+      /* FIXME: bad alignment assumption.  */
       Elf_External_Note *xnp = (Elf_External_Note *) p;
       Elf_Internal_Note in;
 
@@ -10995,7 +10992,7 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset,
 	return FALSE;
 
       in.descsz = H_GET_32 (abfd, xnp->descsz);
-      in.descdata = p + ELF_NOTE_DESC_OFFSET (in.namesz, align);
+      in.descdata = in.namedata + BFD_ALIGN (in.namesz, 4);
       in.descpos = offset + (in.descdata - buf);
       if (in.descsz != 0
 	  && (in.descdata >= buf + size
@@ -11057,15 +11054,14 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset,
 	  break;
 	}
 
-      p += ELF_NOTE_NEXT_OFFSET (in.namesz, in.descsz, align);
+      p = in.descdata + BFD_ALIGN (in.descsz, 4);
     }
 
   return TRUE;
 }
 
 static bfd_boolean
-elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size,
-		size_t align)
+elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size)
 {
   char *buf;
 
@@ -11084,7 +11080,7 @@ elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size,
   buf[size] = 0;
 
   if (bfd_bread (buf, size, abfd) != size
-      || !elf_parse_notes (abfd, buf, size, offset, align))
+      || !elf_parse_notes (abfd, buf, size, offset))
     {
       free (buf);
       return FALSE;
