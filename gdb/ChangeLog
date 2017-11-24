@@ -1,3 +1,36 @@
+2017-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* remote.c (struct thread_item): Add constructor, disable copy
+	construction and copy assignment, define default move
+	construction and move assignment.
+	<extra, name>: Change type to std::string.
+	<core>: Initialize.
+	<thread_handle>: Make non-pointer.
+	(thread_item_t): Remove typedef.
+	(DEF_VEC_O(thread_item_t)): Remove.
+	(threads_listing_context) <contains_thread>: New method.
+	<remove_thread>: New method.
+	<items>: Change type to std::vector.
+	(clear_threads_listing_context): Remove.
+	(threads_listing_context_remove): Remove.
+	(remote_newthread_step): Use thread_item constructor, adjust to
+	change to std::vector.
+	(start_thread): Use thread_item constructor, adjust to change to
+	std::vector.
+	(end_thread): Adjust to change to std::vector and std::string.
+	(remote_get_threads_with_qthreadinfo): Use thread_item
+	constructor, adjust to std::vector.
+	(remote_update_thread_list): Adjust to change to std::vector and
+	std::string, use threads_listing_context methods.
+	(remove_child_of_pending_fork): Adjust.
+	(remove_new_fork_children): Adjust.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add rsp-low-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add rsp-low-selftests.o.
+	* unittests/rsp-low-selftests.c: New file.
+	* common/rsp-low.h: Include common/byte-vector.h.
+	(hex2bin): New overload.
+	* common/rsp-low.c (hex2bin): New overload.
+
 2017-11-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* inferior.h (private_inferior): Define structure type, add
