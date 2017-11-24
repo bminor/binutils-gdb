@@ -1,3 +1,7 @@
+2017-11-24  Jim Wilson  <jimw@sifive.com>
+
+	* write.h (FAKE_LABEL_CHAR): Expand comment.
+
 2017-11-24  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (check_VecOperations): Check register type
