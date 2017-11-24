@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+#include "poison.h"
+
 /* If possible, define FUNCTION_NAME, a macro containing the name of
    the function being defined.  Since this macro may not always be
    defined, all uses must be protected by appropriate macro definition
@@ -47,7 +49,17 @@
 /* Like xmalloc, but zero the memory.  */
 void *xzalloc (size_t);
 
-void xfree (void *);
+template <typename T>
+static void
+xfree (T *ptr)
+{
+  static_assert (IsFreeable<T>::value, "Trying to use xfree with a non-POD \
+data type.  Use operator delete instead.");
+
+  if (ptr != NULL)
+    free (ptr);		/* ARI: free */
+}
+
 
 /* Like asprintf and vasprintf, but return the string, throw an error
    if no memory.  */

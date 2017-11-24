@@ -1,5 +1,34 @@
 2017-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* common/common-utils.h: Include poison.h.
+	(xfree): Remove declaration, add definition with static_assert.
+	* common/common-utils.c (xfree): Remove.
+	* common/poison.h (IsMallocatable): Define.
+	(IsFreeable): Define.
+	(free): Delete for non-freeable types.
+	(xnew): New.
+	(XNEW): Undef and redefine.
+	(xcnew): New.
+	(XCNEW): Undef and redefine.
+	(xdelete): New.
+	(XDELETE): Undef and redefine.
+	(xnewvec): New.
+	(XNEWVEC): Undef and redefine.
+	(xcnewvec): New.
+	(XCNEWVEC): Undef and redefine.
+	(xresizevec): New.
+	(XRESIZEVEC): Undef and redefine.
+	(xdeletevec): New.
+	(XDELETEVEC): Undef and redefine.
+	(xnewvar): New.
+	(XNEWVAR): Undef and redefine.
+	(xcnewvar): New.
+	(XCNEWVAR): Undef and redefine.
+	(xresizevar): New.
+	(XRESIZEVAR): Undef and redefine.
+
+2017-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbthread.h (private_thread_info): Define structure type, add
 	virtual pure destructor.
 	(thread_info) <priv>: Change type to unique_ptr.
