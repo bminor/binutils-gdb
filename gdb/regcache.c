@@ -1865,6 +1865,82 @@ cooked_read_test (struct gdbarch *gdbarch)
 
       mock_target.reset ();
     }
+
+  regcache readonly (regcache::readonly, readwrite);
+
+  /* GDB may go to target layer to fetch all registers and memory for
+     readonly regcache.  */
+  mock_target.reset ();
+
+  for (int regnum = 0;
+       regnum < gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+       regnum++)
+    {
+      if (gdbarch_bfd_arch_info (gdbarch)->arch == bfd_arch_mt)
+	{
+	  /* Trigger an internal error otherwise.  */
+	  continue;
+	}
+
+      if (register_size (gdbarch, regnum) == 0)
+	continue;
+
+      gdb::def_vector<gdb_byte> buf (register_size (gdbarch, regnum));
+      enum register_status status = readonly.cooked_read (regnum,
+							  buf.data ());
+
+      if (regnum < gdbarch_num_regs (gdbarch))
+	{
+	  auto bfd_arch = gdbarch_bfd_arch_info (gdbarch)->arch;
+
+	  if (bfd_arch == bfd_arch_frv || bfd_arch == bfd_arch_h8300
+	      || bfd_arch == bfd_arch_m32c || bfd_arch == bfd_arch_sh
+	      || bfd_arch == bfd_arch_alpha || bfd_arch == bfd_arch_v850
+	      || bfd_arch == bfd_arch_msp430 || bfd_arch == bfd_arch_mep
+	      || bfd_arch == bfd_arch_mips || bfd_arch == bfd_arch_v850_rh850
+	      || bfd_arch == bfd_arch_tic6x || bfd_arch == bfd_arch_mn10300
+	      || bfd_arch == bfd_arch_rl78 || bfd_arch == bfd_arch_score)
+	    {
+	      /* Raw registers.  If raw registers are not in save_reggroup,
+		 their status are unknown.  */
+	      if (gdbarch_register_reggroup_p (gdbarch, regnum, save_reggroup))
+		SELF_CHECK (status == REG_VALID);
+	      else
+		SELF_CHECK (status == REG_UNKNOWN);
+	    }
+	  else
+	    SELF_CHECK (status == REG_VALID);
+	}
+      else
+	{
+	  if (gdbarch_register_reggroup_p (gdbarch, regnum, save_reggroup))
+	    SELF_CHECK (status == REG_VALID);
+	  else
+	    {
+	      /* If pseudo registers are not in save_reggroup, some of
+		 them can be computed from saved raw registers, but some
+		 of them are unknown.  */
+	      auto bfd_arch = gdbarch_bfd_arch_info (gdbarch)->arch;
+
+	      if (bfd_arch == bfd_arch_frv
+		  || bfd_arch == bfd_arch_m32c
+		  || bfd_arch == bfd_arch_mep
+		  || bfd_arch == bfd_arch_sh)
+		SELF_CHECK (status == REG_VALID || status == REG_UNKNOWN);
+	      else if (bfd_arch == bfd_arch_mips
+		       || bfd_arch == bfd_arch_h8300)
+		SELF_CHECK (status == REG_UNKNOWN);
+	      else
+		SELF_CHECK (status == REG_VALID);
+	    }
+	}
+
+      SELF_CHECK (mock_target.fetch_registers_called == 0);
+      SELF_CHECK (mock_target.store_registers_called == 0);
+      SELF_CHECK (mock_target.xfer_partial_called == 0);
+
+      mock_target.reset ();
+    }
 }
 
 } // namespace selftests
