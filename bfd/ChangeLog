@@ -1,3 +1,18 @@
+2017-11-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22444
+	* elf.c (elf_read_notes): Add an argument for note aligment.
+	(elf_parse_notes): Likewise.
+	(_bfd_elf_make_section_from_shdr): Pass section aligment to
+	elf_parse_notes.
+	(bfd_section_from_phdr): Pass segment aligment to elf_read_notes.
+	(elf_parse_notes): Add an argument for note aligment.  Use
+	ELF_NOTE_DESC_OFFSET to get the offset of the note descriptor.
+	Use ELF_NOTE_NEXT_OFFSET to get the offset of the next note
+	entry.
+	(elf_read_notes): Add an argument for note aligment and pass it
+	to elf_parse_notes.
+
 2017-11-23  Alan Modra  <amodra@gmail.com>
 
 	* elf32-hppa.c (pc_dynrelocs): Define.

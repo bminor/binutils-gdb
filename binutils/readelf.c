@@ -17969,9 +17969,13 @@ process_notes_at (Filedata *           filedata,
 	  inote.namesz   = BYTE_GET (external->namesz);
 	  inote.namedata = external->name;
 	  inote.descsz   = BYTE_GET (external->descsz);
-	  inote.descdata = inote.namedata + align_power (inote.namesz, 2);
+	  inote.descdata = ((char *) external
+			    + ELF_NOTE_DESC_OFFSET (inote.namesz,
+						    section->sh_addralign));
 	  inote.descpos  = offset + (inote.descdata - (char *) pnotes);
-	  next = inote.descdata + align_power (inote.descsz, 2);
+	  next = ((char *) external
+		  + ELF_NOTE_NEXT_OFFSET (inote.namesz, inote.descsz,
+					  section->sh_addralign));
 	}
       else
 	{
