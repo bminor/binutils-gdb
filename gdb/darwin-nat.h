@@ -18,6 +18,7 @@
 #define __DARWIN_NAT_H__
 
 #include <mach/mach.h>
+#include "gdbthread.h"
 
 /* Describe the mach exception handling state for a task.  This state is saved
    before being changed and restored when a process is detached.
@@ -69,7 +70,7 @@ enum darwin_msg_state
   DARWIN_MESSAGE
 };
 
-struct private_thread_info
+struct darwin_thread_info : public private_thread_info
 {
   /* The thread port from a GDB point of view.  */
   thread_t gdb_port;
@@ -92,7 +93,13 @@ struct private_thread_info
   /* The last exception received.  */
   struct darwin_exception_msg event;
 };
-typedef struct private_thread_info darwin_thread_t;
+typedef struct darwin_thread_info darwin_thread_t;
+
+static inline darwin_thread_info *
+get_darwin_thread_info (class thread_info *thread)
+{
+  return static_cast<darwin_thread_info *> (thread->priv.get ());
+}
 
 /* Describe an inferior.  */
 struct darwin_inferior : public private_inferior

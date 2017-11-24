@@ -251,16 +251,21 @@ delete_thread_db_info (int pid)
 /* Use "struct private_thread_info" to cache thread state.  This is
    a substantial optimization.  */
 
-struct private_thread_info
+struct thread_db_thread_info : public private_thread_info
 {
   /* Flag set when we see a TD_DEATH event for this thread.  */
-  unsigned int dying:1;
+  bool dying = false;
 
   /* Cached thread state.  */
-  td_thrhandle_t th;
-  thread_t tid;
+  td_thrhandle_t th {};
+  thread_t tid {};
 };
-
+
+static thread_db_thread_info *
+get_thread_db_thread_info (thread_info *thread)
+{
+  return static_cast<thread_db_thread_info *> (thread->priv.get ());
+}
 
 static const char *
 thread_db_err_str (td_err_e err)
@@ -1040,7 +1045,7 @@ thread_db_inferior_created (struct target_ops *target, int from_tty)
    from libthread_db thread state information.  */
 
 static void
-update_thread_state (struct private_thread_info *priv,
+update_thread_state (thread_db_thread_info *priv,
 		     const td_thrinfo_t *ti_p)
 {
   priv->dying = (ti_p->ti_state == TD_THR_UNKNOWN
@@ -1057,8 +1062,6 @@ record_thread (struct thread_db_info *info,
 	       ptid_t ptid, const td_thrhandle_t *th_p,
 	       const td_thrinfo_t *ti_p)
 {
-  struct private_thread_info *priv;
-
   /* A thread ID of zero may mean the thread library has not
      initialized yet.  Leave private == NULL until the thread library
      has initialized.  */
@@ -1066,7 +1069,7 @@ record_thread (struct thread_db_info *info,
     return tp;
 
   /* Construct the thread's private data.  */
-  priv = XCNEW (struct private_thread_info);
+  thread_db_thread_info *priv = new thread_db_thread_info;
 
   priv->th = *th_p;
   priv->tid = ti_p->ti_tid;
@@ -1078,7 +1081,7 @@ record_thread (struct thread_db_info *info,
   if (tp == NULL || tp->state == THREAD_EXITED)
     tp = add_thread_with_info (ptid, priv);
   else
-    tp->priv = priv;
+    tp->priv.reset (priv);
 
   if (target_has_execution)
     check_thread_signals ();
@@ -1381,11 +1384,10 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
   if (thread_info != NULL && thread_info->priv != NULL)
     {
       static char buf[64];
-      thread_t tid;
+      thread_db_thread_info *priv = get_thread_db_thread_info (thread_info);
 
-      tid = thread_info->priv->tid;
       snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
-		(unsigned long) tid, ptid_get_lwp (ptid));
+		(unsigned long) priv->tid, ptid_get_lwp (ptid));
 
       return buf;
     }
@@ -1404,7 +1406,9 @@ thread_db_extra_thread_info (struct target_ops *self,
   if (info->priv == NULL)
     return NULL;
 
-  if (info->priv->dying)
+  thread_db_thread_info *priv = get_thread_db_thread_info (info);
+
+  if (priv->dying)
     return "Exiting";
 
   return NULL;
@@ -1434,7 +1438,9 @@ thread_db_thread_handle_to_thread_info (struct target_ops *ops,
 
   ALL_NON_EXITED_THREADS (tp)
     {
-      if (tp->inf == inf && tp->priv != NULL && handle_tid == tp->priv->tid)
+      thread_db_thread_info *priv = get_thread_db_thread_info (tp);
+
+      if (tp->inf == inf && priv != NULL && handle_tid == priv->tid)
         return tp;
     }
 
@@ -1464,9 +1470,8 @@ thread_db_get_thread_local_address (struct target_ops *ops,
     {
       td_err_e err;
       psaddr_t address;
-      struct thread_db_info *info;
-
-      info = get_thread_db_info (ptid_get_pid (ptid));
+      thread_db_info *info = get_thread_db_info (ptid_get_pid (ptid));
+      thread_db_thread_info *priv = get_thread_db_thread_info (thread_info);
 
       /* Finally, get the address of the variable.  */
       if (lm != 0)
@@ -1479,7 +1484,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
 	  /* Note the cast through uintptr_t: this interface only works if
 	     a target address fits in a psaddr_t, which is a host pointer.
 	     So a 32-bit debugger can not access 64-bit TLS through this.  */
-	  err = info->td_thr_tls_get_addr_p (&thread_info->priv->th,
+	  err = info->td_thr_tls_get_addr_p (&priv->th,
 					     (psaddr_t)(uintptr_t) lm,
 					     offset, &address);
 	}
@@ -1497,8 +1502,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
 	     PR libc/16831 due to GDB PR threads/16954 LOAD_MODULE is also NULL.
 	     The constant number 1 depends on GNU __libc_setup_tls
 	     initialization of l_tls_modid to 1.  */
-	  err = info->td_thr_tlsbase_p (&thread_info->priv->th,
-					1, &address);
+	  err = info->td_thr_tlsbase_p (&priv->th, 1, &address);
 	  address = (char *) address + offset;
 	}
 

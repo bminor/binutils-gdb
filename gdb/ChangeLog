@@ -1,5 +1,86 @@
 2017-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdbthread.h (private_thread_info): Define structure type, add
+	virtual pure destructor.
+	(thread_info) <priv>: Change type to unique_ptr.
+	<private_dtor>: Remove.
+	* thread.c (add_thread_with_info): Adjust to use of unique_ptr.
+	(private_thread_info::~private_thread_info): Provide default
+	implementation.
+	(thread_info::~thread_info): Don't call private_dtor nor
+	manually free priv.
+	* aix-thread.c (private_thread_info): Rename to ...
+	(aix_thread_info): ... this.
+	(get_aix_thread_info): New.
+	(sync_threadlists): Adjust.
+	(iter_tid): Adjust.
+	(aix_thread_resume): Adjust.
+	(aix_thread_fetch_registers): Adjust.
+	(aix_thread_store_registers): Adjust.
+	(aix_thread_extra_thread_info): Adjust.
+	* darwin-nat.h (private_thread_info): Rename to ...
+	(darwin_thread_info): ... this.
+	(get_darwin_thread_info): New.
+	* darwin-nat.c (darwin_init_thread_list): Adjust.
+	(darwin_check_new_threads): Adjust.
+	(thread_info_from_private_thread_info): Adjust.
+	* linux-thread-db.c (private_thread_info): Rename to ...
+	(thread_db_thread_info): ... this, initialize fields.
+	(get_thread_db_thread_info): New.
+	<dying>: Change type to bool.
+	(update_thread_state): Adjust to type rename.
+	(record_thread): Adjust to type rename an use of unique_ptr.
+	(thread_db_pid_to_str): Likewise.
+	(thread_db_extra_thread_info): Likewise.
+	(thread_db_thread_handle_to_thread_info): Likewise.
+	(thread_db_get_thread_local_address): Likewise.
+	* nto-tdep.h (private_thread_info): Rename to ...
+	(nto_thread_info): ... this, initialize fields.
+	(get_nto_thread_info): New.
+	<name>: Change type to std::string.
+	* nto-tdep.c (nto_extra_thread_info): Adjust to type rename and
+	use of unique_ptr.
+	* nto-procfs.c (update_thread_private_data_name): Adjust to
+	std::string change, allocate nto_private_thread_info with new.
+	(update_thread_private_data): Adjust to unique_ptr.
+	* remote.c (private_thread_info): Rename to ...
+	(remote_thread_info): ... this, initialize data members with
+	default values.
+	<extra, name>: Change type to std::string.
+	<thread_handle>: Change type to non-pointer.
+	(free_private_thread_info): Remove.
+	(get_private_info_thread): Rename to...
+	(get_remote_thread_info): ... this, change return type, adjust to
+	use of unique_ptr, use remote_thread_info constructor.
+	(remote_add_thread): Adjust.
+	(get_private_info_ptid): Rename to...
+	(get_remote_thread_info): ...this, change return type.
+	(remote_thread_name): Use get_remote_thread_info, adjust to
+	change to std::string.
+	(struct thread_item) <~thread_item>: Remove.
+	<thread_handle>: Make non pointer.
+	(start_thread): Adjust to thread_item::thread_handle type
+	change.
+	(remote_update_thread_list): Adjust to type name change, move
+	strings from temporary to long-lived object instead of
+	duplicating.
+	(remote_threads_extra_info): Use get_remote_thread_info.
+	(process_initial_stop_replies): Likewise.
+	(resume_clear_thread_private_info): Likewise.
+	(remote_resume): Adjust to type name change.
+	(remote_commit_resume): Use get_remote_thread_info.
+	(process_stop_reply): Adjust to type name change.
+	(remote_stopped_by_sw_breakpoint): Use get_remote_thread_info.
+	(remote_stopped_by_hw_breakpoint): Likewise.
+	(remote_stopped_by_watchpoint): Likewise.
+	(remote_stopped_data_address): Likewise.
+	(remote_core_of_thread): Likewise.
+	(remote_thread_handle_to_thread_info): Use
+	get_private_info_thread, adjust to thread_handle field type
+	change.
+
+2017-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* remote.c (struct thread_item): Add constructor, disable copy
 	construction and copy assignment, define default move
 	construction and move assignment.

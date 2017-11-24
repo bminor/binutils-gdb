@@ -316,11 +316,11 @@ add_thread_silent (ptid_t ptid)
 }
 
 struct thread_info *
-add_thread_with_info (ptid_t ptid, struct private_thread_info *priv)
+add_thread_with_info (ptid_t ptid, private_thread_info *priv)
 {
   struct thread_info *result = add_thread_silent (ptid);
 
-  result->priv = priv;
+  result->priv.reset (priv);
 
   if (print_thread_events)
     printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid));
@@ -334,6 +334,8 @@ add_thread (ptid_t ptid)
 {
   return add_thread_with_info (ptid, NULL);
 }
+
+private_thread_info::~private_thread_info () = default;
 
 thread_info::thread_info (struct inferior *inf_, ptid_t ptid_)
   : ptid (ptid_), inf (inf_)
@@ -351,14 +353,6 @@ thread_info::thread_info (struct inferior *inf_, ptid_t ptid_)
 
 thread_info::~thread_info ()
 {
-  if (this->priv)
-    {
-      if (this->private_dtor)
-	this->private_dtor (this->priv);
-      else
-	xfree (this->priv);
-    }
-
   xfree (this->name);
 }
 

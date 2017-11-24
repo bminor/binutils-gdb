@@ -363,9 +363,8 @@ darwin_check_new_threads (struct inferior *inf)
       if (new_ix < new_nbr && (old_ix == old_nbr || new_id < old_id))
 	{
 	  /* A thread was created.  */
-	  struct private_thread_info *pti;
+	  darwin_thread_info *pti = new darwin_thread_info;
 
-	  pti = XCNEW (darwin_thread_t);
 	  pti->gdb_port = new_id;
 	  pti->msg_state = DARWIN_RUNNING;
 
@@ -1692,16 +1691,18 @@ darwin_attach_pid (struct inferior *inf)
     push_target (darwin_ops);
 }
 
-/* Get the thread_info object corresponding to this private_thread_info.  */
+/* Get the thread_info object corresponding to this darwin_thread_info.  */
 
 static struct thread_info *
-thread_info_from_private_thread_info (private_thread_info *pti)
+thread_info_from_private_thread_info (darwin_thread_info *pti)
 {
   struct thread_info *it;
 
   ALL_THREADS (it)
     {
-      if (it->priv->gdb_port == pti->gdb_port)
+      darwin_thread_info *iter_pti = get_darwin_thread_info (it);
+
+      if (iter_pti->gdb_port == pti->gdb_port)
 	break;
     }
 
@@ -1719,7 +1720,7 @@ darwin_init_thread_list (struct inferior *inf)
 
   gdb_assert (!priv->threads.empty ());
 
-  private_thread_info *first_pti = priv->threads.front ();
+  darwin_thread_info *first_pti = priv->threads.front ();
   struct thread_info *first_thread
     = thread_info_from_private_thread_info (first_pti);
 
