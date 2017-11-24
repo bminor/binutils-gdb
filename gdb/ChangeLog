@@ -1,3 +1,7 @@
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* configure.tgt: Add arch/aarch64.o
+
 2017-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common/common-utils.h: Include poison.h.
