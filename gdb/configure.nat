@@ -482,7 +482,8 @@ case ${gdb_host} in
 		NAT_FILE=
 		NAT_CDEPS=
 		LOADLIBES=
-		NATDEPFILES='spu-linux-nat.o fork-child.o inf-ptrace.o \
+		NATDEPFILES='spu-linux-nat.o \
+		      inf-ptrace.o fork-child.o fork-inferior.o \
 		      linux-procfs.o linux-ptrace.o linux-waitpid.o \
 		      linux-personality.o linux-namespaces.o'
 		;;
