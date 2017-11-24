@@ -1617,6 +1617,39 @@ gdb_sniff_from_mangled_name (const char *mangled, char **demangled)
 
 /* C++ symbol_name_matcher_ftype implementation.  */
 
+/* Helper for cp_fq_symbol_name_matches (i.e.,
+   symbol_name_matcher_ftype implementation).  Split to a separate
+   function for unit-testing convenience.
+
+   See symbol_name_matcher_ftype for description of SYMBOL_SEARCH_NAME
+   and COMP_MATCH_RES.
+
+   LOOKUP_NAME/LOOKUP_NAME_LEN is the name we're looking up.
+
+   See strncmp_iw_with_mode for description of MODE.
+*/
+
+static bool
+cp_symbol_name_matches_1 (const char *symbol_search_name,
+			  const char *lookup_name,
+			  size_t lookup_name_len,
+			  strncmp_iw_mode mode,
+			  completion_match *match)
+{
+  if (strncmp_iw_with_mode (symbol_search_name,
+			    lookup_name, lookup_name_len,
+			    mode, language_cplus) == 0)
+    {
+      if (match != NULL)
+	match->set_match (symbol_search_name);
+      return true;
+    }
+
+  return false;
+}
+
+/* C++ symbol_name_matcher_ftype implementation.  */
+
 static bool
 cp_fq_symbol_name_matches (const char *symbol_search_name,
 			   const lookup_name_info &lookup_name,
@@ -1629,16 +1662,9 @@ cp_fq_symbol_name_matches (const char *symbol_search_name,
 			  ? strncmp_iw_mode::NORMAL
 			  : strncmp_iw_mode::MATCH_PARAMS);
 
-  if (strncmp_iw_with_mode (symbol_search_name,
-			    name.c_str (), name.size (),
-			    mode) == 0)
-    {
-      if (match != NULL)
-	match->set_match (symbol_search_name);
-      return true;
-    }
-
-  return false;
+  return cp_symbol_name_matches_1 (symbol_search_name,
+				   name.c_str (), name.size (),
+				   mode, match);
 }
 
 /* See cp-support.h.  */
@@ -1652,6 +1678,136 @@ cp_get_symbol_name_matcher (const lookup_name_info &lookup_name)
 #if GDB_SELF_TEST
 
 namespace selftests {
+
+void
+test_cp_symbol_name_matches ()
+{
+#define CHECK_MATCH(SYMBOL, INPUT)					\
+  SELF_CHECK (cp_symbol_name_matches_1 (SYMBOL,				\
+					INPUT, sizeof (INPUT) - 1,	\
+					strncmp_iw_mode::MATCH_PARAMS,	\
+					NULL))
+
+#define CHECK_NOT_MATCH(SYMBOL, INPUT)					\
+  SELF_CHECK (!cp_symbol_name_matches_1 (SYMBOL,			\
+					 INPUT, sizeof (INPUT) - 1,	\
+					 strncmp_iw_mode::MATCH_PARAMS,	\
+					 NULL))
+
+  /* Like CHECK_MATCH, and also check that INPUT (and all substrings
+     that start at index 0) completes to SYMBOL.  */
+#define CHECK_MATCH_C(SYMBOL, INPUT)					\
+  do									\
+    {									\
+      CHECK_MATCH (SYMBOL, INPUT);					\
+      for (size_t i = 0; i < sizeof (INPUT) - 1; i++)			\
+	SELF_CHECK (cp_symbol_name_matches_1 (SYMBOL, INPUT, i,		\
+					      strncmp_iw_mode::NORMAL,	\
+					      NULL));			\
+    } while (0)
+
+  /* Like CHECK_NOT_MATCH, and also check that INPUT does NOT complete
+     to SYMBOL.  */
+#define CHECK_NOT_MATCH_C(SYMBOL, INPUT)				\
+  do									\
+    { 									\
+      CHECK_NOT_MATCH (SYMBOL, INPUT);					\
+      SELF_CHECK (!cp_symbol_name_matches_1 (SYMBOL, INPUT,		\
+					     sizeof (INPUT) - 1,	\
+					     strncmp_iw_mode::NORMAL,	\
+					     NULL));			\
+    } while (0)
+
+  /* Lookup name without parens matches all overloads.  */
+  CHECK_MATCH_C ("function()", "function");
+  CHECK_MATCH_C ("function(int)", "function");
+
+  /* Check whitespace around parameters is ignored.  */
+  CHECK_MATCH_C ("function()", "function ()");
+  CHECK_MATCH_C ("function ( )", "function()");
+  CHECK_MATCH_C ("function ()", "function( )");
+  CHECK_MATCH_C ("func(int)", "func( int )");
+  CHECK_MATCH_C ("func(int)", "func ( int ) ");
+  CHECK_MATCH_C ("func ( int )", "func( int )");
+  CHECK_MATCH_C ("func ( int )", "func ( int ) ");
+
+  /* Check symbol name prefixes aren't incorrectly matched.  */
+  CHECK_NOT_MATCH ("func", "function");
+  CHECK_NOT_MATCH ("function", "func");
+  CHECK_NOT_MATCH ("function()", "func");
+
+  /* Check that if the lookup name includes parameters, only the right
+     overload matches.  */
+  CHECK_MATCH_C ("function(int)", "function(int)");
+  CHECK_NOT_MATCH_C ("function(int)", "function()");
+
+  /* Check that whitespace within symbol names is not ignored.  */
+  CHECK_NOT_MATCH_C ("function", "func tion");
+  CHECK_NOT_MATCH_C ("func__tion", "func_ _tion");
+  CHECK_NOT_MATCH_C ("func11tion", "func1 1tion");
+
+  /* Check the converse, which can happen with template function,
+     where the return type is part of the demangled name.  */
+  CHECK_NOT_MATCH_C ("func tion", "function");
+  CHECK_NOT_MATCH_C ("func1 1tion", "func11tion");
+  CHECK_NOT_MATCH_C ("func_ _tion", "func__tion");
+
+  /* Within parameters too.  */
+  CHECK_NOT_MATCH_C ("func(param)", "func(par am)");
+
+  /* Check handling of whitespace around C++ operators.  */
+  CHECK_NOT_MATCH_C ("operator<<", "opera tor<<");
+  CHECK_NOT_MATCH_C ("operator<<", "operator< <");
+  CHECK_NOT_MATCH_C ("operator<<", "operator < <");
+  CHECK_NOT_MATCH_C ("operator==", "operator= =");
+  CHECK_NOT_MATCH_C ("operator==", "operator = =");
+  CHECK_MATCH_C ("operator<<", "operator <<");
+  CHECK_MATCH_C ("operator<<()", "operator <<");
+  CHECK_NOT_MATCH_C ("operator<<()", "operator<<(int)");
+  CHECK_NOT_MATCH_C ("operator<<(int)", "operator<<()");
+  CHECK_MATCH_C ("operator==", "operator ==");
+  CHECK_MATCH_C ("operator==()", "operator ==");
+  CHECK_MATCH_C ("operator <<", "operator<<");
+  CHECK_MATCH_C ("operator ==", "operator==");
+  CHECK_MATCH_C ("operator bool", "operator  bool");
+  CHECK_MATCH_C ("operator bool ()", "operator  bool");
+  CHECK_MATCH_C ("operatorX<<", "operatorX < <");
+  CHECK_MATCH_C ("Xoperator<<", "Xoperator < <");
+
+  CHECK_MATCH_C ("operator()(int)", "operator()(int)");
+  CHECK_MATCH_C ("operator()(int)", "operator ( ) ( int )");
+  CHECK_MATCH_C ("operator()<long>(int)", "operator ( ) < long > ( int )");
+  /* The first "()" is not the parameter list.  */
+  CHECK_NOT_MATCH ("operator()(int)", "operator");
+
+  /* Misc user-defined operator tests.  */
+
+  CHECK_NOT_MATCH_C ("operator/=()", "operator ^=");
+  /* Same length at end of input.  */
+  CHECK_NOT_MATCH_C ("operator>>", "operator[]");
+  /* Same length but not at end of input.  */
+  CHECK_NOT_MATCH_C ("operator>>()", "operator[]()");
+
+  CHECK_MATCH_C ("base::operator char*()", "base::operator char*()");
+  CHECK_MATCH_C ("base::operator char*()", "base::operator char * ()");
+  CHECK_MATCH_C ("base::operator char**()", "base::operator char * * ()");
+  CHECK_MATCH ("base::operator char**()", "base::operator char * *");
+  CHECK_MATCH_C ("base::operator*()", "base::operator*()");
+  CHECK_NOT_MATCH_C ("base::operator char*()", "base::operatorc");
+  CHECK_NOT_MATCH ("base::operator char*()", "base::operator char");
+  CHECK_NOT_MATCH ("base::operator char*()", "base::operat");
+
+  /* Check handling of whitespace around C++ scope operators.  */
+  CHECK_NOT_MATCH_C ("foo::bar", "foo: :bar");
+  CHECK_MATCH_C ("foo::bar", "foo :: bar");
+  CHECK_MATCH_C ("foo :: bar", "foo::bar");
+
+  CHECK_MATCH_C ("abc::def::ghi()", "abc::def::ghi()");
+  CHECK_MATCH_C ("abc::def::ghi ( )", "abc::def::ghi()");
+  CHECK_MATCH_C ("abc::def::ghi()", "abc::def::ghi ( )");
+  CHECK_MATCH_C ("function()", "function()");
+  CHECK_MATCH_C ("bar::function()", "bar::function()");
+}
 
 /* If non-NULL, return STR wrapped in quotes.  Otherwise, return a
    "<null>" string (with no quotes).  */
@@ -1856,6 +2012,8 @@ display the offending symbol."),
 #endif
 
 #if GDB_SELF_TEST
+  selftests::register_test ("cp_symbol_name_matches",
+			    selftests::test_cp_symbol_name_matches);
   selftests::register_test ("cp_remove_params",
 			    selftests::test_cp_remove_params);
 #endif

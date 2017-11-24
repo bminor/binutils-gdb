@@ -1,3 +1,23 @@
+2017-11-24  Pedro Alves  <palves@redhat.com>
+
+	* cp-support.c (cp_symbol_name_matches_1): New, factored out from
+	cp_fq_symbol_name_matches.  Pass language_cplus to
+	strncmp_with_mode.
+	(cp_fq_symbol_name_matches): Call cp_symbol_name_matches_1.
+	(selftests::test_cp_symbol_name_cmp): New.
+	(_initialize_cp_support): Register "cp_symbol_name_matches"
+	selftests.
+	* language.c (default_symbol_name_matcher): Pass language_minimal
+	to strncmp_iw_with_mode.
+	* utils.c: Include "cp-support.h" and <algorithm>.
+	(valid_identifier_name_char, cp_skip_operator_token, skip_ws)
+	(cp_is_operator): New functions.
+	(strncmp_iw_with_mode): Use them.  Add language parameter.  Don't
+	skip whitespace in the symbol name when the lookup name doesn't
+	have spaces, and vice versa.
+	(strncmp_iw, strcmp_iw): Pass language to strncmp_iw_with_mode.
+	* utils.h (strncmp_iw_with_mode): Add language parameter.
+
 2017-11-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_exception_message_1, ada_exception_message):
