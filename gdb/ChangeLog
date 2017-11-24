@@ -1,5 +1,10 @@
 2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* mi/mi-main.c (list_available_thread_groups): Change map value
+	type to std::vector.
+
+2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* osdata.c (osdata_end_column, get_osdata): Remove std::move.
 
 2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>

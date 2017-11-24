@@ -716,7 +716,7 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 
   /* This keeps a map from integer (pid) to vector of struct osdata_item.
      The vector contains information about all threads for the given pid.  */
-  std::map<int, std::vector<osdata_item> *> tree_;
+  std::map<int, std::vector<osdata_item>> tree;
 
   /* get_osdata will throw if it cannot return data.  */
   std::unique_ptr<osdata> data = get_osdata ("processes");
@@ -729,18 +729,8 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 	{
 	  const std::string *pid = get_osdata_column (item, "pid");
 	  int pid_i = strtoul (pid->c_str (), NULL, 0);
-	  std::vector<osdata_item> *vec;
 
-	  auto n = tree_.find (pid_i);
-	  if (n == tree_.end ())
-	    {
-	      vec = new std::vector<osdata_item>;
-	      tree_[pid_i] = vec;
-	    }
-	  else
-	    vec = n->second;
-
-	  vec->push_back (item);
+	  tree[pid_i].push_back (item);
 	}
     }
 
@@ -774,14 +764,14 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 
       if (recurse)
 	{
-	  auto n = tree_.find (pid_i);
-	  if (n != tree_.end ())
+	  auto n = tree.find (pid_i);
+	  if (n != tree.end ())
 	    {
-	      std::vector<osdata_item> *children = n->second;
+	      std::vector<osdata_item> &children = n->second;
 
 	      ui_out_emit_list thread_list_emitter (uiout, "threads");
 
-	      for (const osdata_item &child : *children)
+	      for (const osdata_item &child : children)
 		{
 		  ui_out_emit_tuple tuple_emitter (uiout, NULL);
 		  const std::string *tid = get_osdata_column (child, "tid");
