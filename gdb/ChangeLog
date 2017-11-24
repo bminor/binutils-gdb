@@ -1,5 +1,11 @@
 2017-11-24  Yao Qi  <yao.qi@linaro.org>
 
+	* mi/mi-main.c (mi_cmd_data_list_changed_registers): Remove
+	local 'changed'.  Remove error.
+	(register_changed_p): Change return type to bool.
+
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
 	* arch/tic6x.c: New file.
 	* arch/tic6x.h: New file.
 	* features/Makefile (FEATURE_XMLFILES): Add tic6x-c6xp.xml,

@@ -96,8 +96,8 @@ static void mi_execute_cli_command (const char *cmd, int args_p,
 				    const char *args);
 static void mi_execute_async_cli_command (const char *cli_command,
 					  char **argv, int argc);
-static int register_changed_p (int regnum, struct regcache *,
-			       struct regcache *);
+static bool register_changed_p (int regnum, regcache *,
+				regcache *);
 static void output_register (struct frame_info *, int regnum, int format,
 			     int skip_unavailable);
 
@@ -935,7 +935,7 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
   std::unique_ptr<struct regcache> prev_regs;
   struct gdbarch *gdbarch;
-  int regnum, numregs, changed;
+  int regnum, numregs;
   int i;
 
   /* The last time we visited this function, the current frame's
@@ -968,12 +968,9 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
 	  if (gdbarch_register_name (gdbarch, regnum) == NULL
 	      || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    continue;
-	  changed = register_changed_p (regnum, prev_regs.get (),
-					this_regs.get ());
-	  if (changed < 0)
-	    error (_("-data-list-changed-registers: "
-		     "Unable to read register contents."));
-	  else if (changed)
+
+	  if (register_changed_p (regnum, prev_regs.get (),
+				  this_regs.get ()))
 	    uiout->field_int (NULL, regnum);
 	}
     }
@@ -988,12 +985,8 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
 	  && gdbarch_register_name (gdbarch, regnum) != NULL
 	  && *gdbarch_register_name (gdbarch, regnum) != '\000')
 	{
-	  changed = register_changed_p (regnum, prev_regs.get (),
-					this_regs.get ());
-	  if (changed < 0)
-	    error (_("-data-list-changed-registers: "
-		     "Unable to read register contents."));
-	  else if (changed)
+	  if (register_changed_p (regnum, prev_regs.get (),
+				  this_regs.get ()))
 	    uiout->field_int (NULL, regnum);
 	}
       else
@@ -1001,18 +994,17 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
     }
 }
 
-static int
+static bool
 register_changed_p (int regnum, struct regcache *prev_regs,
 		    struct regcache *this_regs)
 {
   struct gdbarch *gdbarch = this_regs->arch ();
   struct value *prev_value, *this_value;
-  int ret;
 
   /* First time through or after gdbarch change consider all registers
      as changed.  */
   if (!prev_regs || prev_regs->arch () != gdbarch)
-    return 1;
+    return true;
 
   /* Get register contents and compare.  */
   prev_value = prev_regs->cooked_read_value (regnum);
@@ -1020,8 +1012,8 @@ register_changed_p (int regnum, struct regcache *prev_regs,
   gdb_assert (prev_value != NULL);
   gdb_assert (this_value != NULL);
 
-  ret = value_contents_eq (prev_value, 0, this_value, 0,
-			   register_size (gdbarch, regnum)) == 0;
+  auto ret = value_contents_eq (prev_value, 0, this_value, 0,
+				register_size (gdbarch, regnum)) == 0;
 
   release_value (prev_value);
   release_value (this_value);
