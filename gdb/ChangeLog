@@ -1,3 +1,28 @@
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
+	* gdbarch-selftests.c (test_target_has_registers): Move it to
+	target.c.
+	(test_target_has_stack): Likewise.
+	(test_target_has_memory): Likewise.
+	(test_target_prepare_to_store): Likewise.
+	(test_target_store_registers): Likewise.
+	(test_target_ops): Likewise.
+	* regcache.c: Include selftest-arch.h and gdbthread.h.
+	(target_ops_no_register): New class.
+	(test_target_fetch_registers): New.
+	(test_target_store_registers): New.
+	(test_target_xfer_partial): New.
+	(readwrite_regcache): New.
+	(cooked_read_test): New.
+	(_initialize_regcache): Register the test.
+	* target.c: (test_target_has_registers): Moved from
+	gdbarch-selftests.c.
+	(test_target_has_stack): Likewise.
+	(test_target_has_memory): Likewise.
+	(test_target_prepare_to_store): Likewise.
+	(test_target_store_registers): Likewise.
+	* target.h (test_target_ops): New class.
+
 2017-11-24  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (_initialize_aarch64_tdep): Add target desc

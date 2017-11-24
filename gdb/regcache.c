@@ -1611,6 +1611,8 @@ maintenance_print_remote_registers (const char *args, int from_tty)
 
 #if GDB_SELF_TEST
 #include "selftest.h"
+#include "selftest-arch.h"
+#include "gdbthread.h"
 
 namespace selftests {
 
@@ -1679,6 +1681,192 @@ current_regcache_test (void)
   SELF_CHECK (regcache_access::current_regcache_size () == 2);
 }
 
+static void test_target_fetch_registers (target_ops *self, regcache *regs,
+					 int regno);
+static void test_target_store_registers (target_ops *self, regcache *regs,
+					 int regno);
+static enum target_xfer_status
+  test_target_xfer_partial (struct target_ops *ops,
+			    enum target_object object,
+			    const char *annex, gdb_byte *readbuf,
+			    const gdb_byte *writebuf,
+			    ULONGEST offset, ULONGEST len,
+			    ULONGEST *xfered_len);
+
+class target_ops_no_register : public test_target_ops
+{
+public:
+  target_ops_no_register ()
+    : test_target_ops {}
+  {
+    to_fetch_registers = test_target_fetch_registers;
+    to_store_registers = test_target_store_registers;
+    to_xfer_partial = test_target_xfer_partial;
+
+    to_data = this;
+  }
+
+  void reset ()
+  {
+    fetch_registers_called = 0;
+    store_registers_called = 0;
+    xfer_partial_called = 0;
+  }
+
+  unsigned int fetch_registers_called = 0;
+  unsigned int store_registers_called = 0;
+  unsigned int xfer_partial_called = 0;
+};
+
+static void
+test_target_fetch_registers (target_ops *self, regcache *regs, int regno)
+{
+  auto ops = static_cast<target_ops_no_register *> (self->to_data);
+
+  /* Mark register available.  */
+  regs->raw_supply_zeroed (regno);
+  ops->fetch_registers_called++;
+}
+
+static void
+test_target_store_registers (target_ops *self, regcache *regs, int regno)
+{
+  auto ops = static_cast<target_ops_no_register *> (self->to_data);
+
+  ops->store_registers_called++;
+}
+
+static enum target_xfer_status
+test_target_xfer_partial (struct target_ops *self, enum target_object object,
+			  const char *annex, gdb_byte *readbuf,
+			  const gdb_byte *writebuf,
+			  ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+{
+  auto ops = static_cast<target_ops_no_register *> (self->to_data);
+
+  ops->xfer_partial_called++;
+
+  *xfered_len = len;
+  return TARGET_XFER_OK;
+}
+
+class readwrite_regcache : public regcache
+{
+public:
+  readwrite_regcache (struct gdbarch *gdbarch)
+    : regcache (gdbarch, nullptr, false)
+  {}
+};
+
+/* Test regcache::cooked_read gets registers from raw registers and
+   memory instead of target to_{fetch,store}_registers.  */
+
+static void
+cooked_read_test (struct gdbarch *gdbarch)
+{
+  /* Error out if debugging something, because we're going to push the
+     test target, which would pop any existing target.  */
+  if (current_target.to_stratum >= process_stratum)
+    error (_("target already pushed"));
+
+  /* Create a mock environment.  An inferior with a thread, with a
+     process_stratum target pushed.  */
+
+  target_ops_no_register mock_target;
+  ptid_t mock_ptid (1, 1);
+  inferior mock_inferior (mock_ptid.pid ());
+  address_space mock_aspace {};
+  mock_inferior.gdbarch = gdbarch;
+  mock_inferior.aspace = &mock_aspace;
+  thread_info mock_thread (&mock_inferior, mock_ptid);
+
+  scoped_restore restore_thread_list
+    = make_scoped_restore (&thread_list, &mock_thread);
+
+  /* Add the mock inferior to the inferior list so that look ups by
+     target+ptid can find it.  */
+  scoped_restore restore_inferior_list
+    = make_scoped_restore (&inferior_list);
+  inferior_list = &mock_inferior;
+
+  /* Switch to the mock inferior.  */
+  scoped_restore_current_inferior restore_current_inferior;
+  set_current_inferior (&mock_inferior);
+
+  /* Push the process_stratum target so we can mock accessing
+     registers.  */
+  push_target (&mock_target);
+
+  /* Pop it again on exit (return/exception).  */
+  struct on_exit
+  {
+    ~on_exit ()
+    {
+      pop_all_targets_at_and_above (process_stratum);
+    }
+  } pop_targets;
+
+  /* Switch to the mock thread.  */
+  scoped_restore restore_inferior_ptid
+    = make_scoped_restore (&inferior_ptid, mock_ptid);
+
+  /* Test that read one raw register from regcache_no_target will go
+     to the target layer.  */
+  int regnum;
+
+  /* Find a raw register which size isn't zero.  */
+  for (regnum = 0; regnum < gdbarch_num_regs (gdbarch); regnum++)
+    {
+      if (register_size (gdbarch, regnum) != 0)
+	break;
+    }
+
+  readwrite_regcache readwrite (gdbarch);
+  gdb::def_vector<gdb_byte> buf (register_size (gdbarch, regnum));
+
+  readwrite.raw_read (regnum, buf.data ());
+
+  /* raw_read calls target_fetch_registers.  */
+  SELF_CHECK (mock_target.fetch_registers_called > 0);
+  mock_target.reset ();
+
+  /* Mark all raw registers valid, so the following raw registers
+     accesses won't go to target.  */
+  for (auto i = 0; i < gdbarch_num_regs (gdbarch); i++)
+    readwrite.raw_update (i);
+
+  mock_target.reset ();
+  /* Then, read all raw and pseudo registers, and don't expect calling
+     to_{fetch,store}_registers.  */
+  for (int regnum = 0;
+       regnum < gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+       regnum++)
+    {
+      if (register_size (gdbarch, regnum) == 0)
+	continue;
+
+      gdb::def_vector<gdb_byte> buf (register_size (gdbarch, regnum));
+
+      SELF_CHECK (REG_VALID == readwrite.cooked_read (regnum, buf.data ()));
+
+      if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_mt)
+	{
+	  /* MT pseudo registers are banked, and different banks are
+	     selected by a raw registers, so GDB needs to write to
+	     that raw register to get different banked pseudo registers.
+	     See mt_select_coprocessor.  */
+	  SELF_CHECK (mock_target.fetch_registers_called == 0);
+	  SELF_CHECK (mock_target.store_registers_called == 0);
+	}
+
+      /* Some SPU pseudo registers are got via TARGET_OBJECT_SPU.  */
+      if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
+	SELF_CHECK (mock_target.xfer_partial_called == 0);
+
+      mock_target.reset ();
+    }
+}
+
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
@@ -1722,5 +1910,8 @@ Takes an optional file parameter."),
 
 #if GDB_SELF_TEST
   selftests::register_test ("current_regcache", selftests::current_regcache_test);
+
+  selftests::register_test_foreach_arch ("regcache::cooked_read_test",
+					 selftests::cooked_read_test);
 #endif
 }
