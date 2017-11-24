@@ -549,12 +549,12 @@ extern void mark_value_bits_unavailable (struct value *value,
 
    then:
 
-     value_contents_eq(val, 0, val, 8, 6) => 1
-     value_contents_eq(val, 0, val, 4, 4) => 0
-     value_contents_eq(val, 0, val, 8, 8) => 0
-     value_contents_eq(val, 4, val, 12, 2) => 1
-     value_contents_eq(val, 4, val, 12, 4) => 0
-     value_contents_eq(val, 3, val, 4, 4) => 0
+     value_contents_eq(val, 0, val, 8, 6) => true
+     value_contents_eq(val, 0, val, 4, 4) => false
+     value_contents_eq(val, 0, val, 8, 8) => false
+     value_contents_eq(val, 4, val, 12, 2) => true
+     value_contents_eq(val, 4, val, 12, 4) => true
+     value_contents_eq(val, 3, val, 4, 4) => true
 
    If 'x's represent an unavailable byte, 'o' represents an optimized
    out byte, in a value with length 8:
@@ -564,9 +564,9 @@ extern void mark_value_bits_unavailable (struct value *value,
 
    then:
 
-     value_contents_eq(val, 0, val, 2, 2) => 1
-     value_contents_eq(val, 4, val, 6, 2) => 1
-     value_contents_eq(val, 0, val, 4, 4) => 0
+     value_contents_eq(val, 0, val, 2, 2) => true
+     value_contents_eq(val, 4, val, 6, 2) => true
+     value_contents_eq(val, 0, val, 4, 4) => true
 
    We only know whether a value chunk is unavailable or optimized out
    if we've tried to read it.  As this routine is used by printing
@@ -574,9 +574,9 @@ extern void mark_value_bits_unavailable (struct value *value,
    after the inferior is gone, it works with const values.  Therefore,
    this routine must not be called with lazy values.  */
 
-extern int value_contents_eq (const struct value *val1, LONGEST offset1,
-			      const struct value *val2, LONGEST offset2,
-			      LONGEST length);
+extern bool value_contents_eq (const struct value *val1, LONGEST offset1,
+			       const struct value *val2, LONGEST offset2,
+			       LONGEST length);
 
 /* Read LENGTH addressable memory units starting at MEMADDR into BUFFER,
    which is (or will be copied to) VAL's contents buffer offset by

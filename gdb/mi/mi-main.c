@@ -1012,8 +1012,8 @@ register_changed_p (int regnum, struct regcache *prev_regs,
   gdb_assert (prev_value != NULL);
   gdb_assert (this_value != NULL);
 
-  auto ret = value_contents_eq (prev_value, 0, this_value, 0,
-				register_size (gdbarch, regnum)) == 0;
+  auto ret = !value_contents_eq (prev_value, 0, this_value, 0,
+				 register_size (gdbarch, regnum));
 
   release_value (prev_value);
   release_value (this_value);
