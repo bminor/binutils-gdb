@@ -1,3 +1,9 @@
+2017-11-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Completion): Update need-quoting examples.  Remove
+	false claim that GDB inserts quoting automatically.
+	(Symbols): Add anchor.
+
 2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.texinfo (Requirements): Document use of GNU MPFR.

@@ -1638,39 +1638,56 @@ its notion of a word.  To permit word completion to work in this
 situation, you may enclose words in @code{'} (single quote marks) in
 @value{GDBN} commands.
 
-The most likely situation where you might need this is in typing the
-name of a C@t{++} function.  This is because C@t{++} allows function
-overloading (multiple definitions of the same function, distinguished
-by argument type).  For example, when you want to set a breakpoint you
-may need to distinguish whether you mean the version of @code{name}
-that takes an @code{int} parameter, @code{name(int)}, or the version
-that takes a @code{float} parameter, @code{name(float)}.  To use the
-word-completion facilities in this situation, type a single quote
+A likely situation where you might need this is in typing an
+expression that involves a C@t{++} symbol name with template
+parameters.  This is because when completing expressions, GDB treats
+the @samp{<} character as word delimiter, assuming that it's the
+less-than comparison operator (@pxref{C Operators, , C and C@t{++}
+Operators}).
+
+For example, when you want to call a C@t{++} template function
+interactively using the @code{print} or @code{call} commands, you may
+need to distinguish whether you mean the version of @code{name} that
+was specialized for @code{int}, @code{name<int>()}, or the version
+that was specialized for @code{float}, @code{name<float>()}.  To use
+the word-completion facilities in this situation, type a single quote
 @code{'} at the beginning of the function name.  This alerts
 @value{GDBN} that it may need to consider more information than usual
 when you press @key{TAB} or @kbd{M-?} to request word completion:
 
 @smallexample
-(@value{GDBP}) b 'bubble( @kbd{M-?}
-bubble(double,double)    bubble(int,int)
-(@value{GDBP}) b 'bubble(
+(@value{GDBP}) p 'func< @kbd{M-?}
+func<int>()    func<float>()
+(@value{GDBP}) p 'func<
 @end smallexample
 
-In some cases, @value{GDBN} can tell that completing a name requires using
-quotes.  When this happens, @value{GDBN} inserts the quote for you (while
-completing as much as it can) if you do not type the quote in the first
-place:
+When setting breakpoints however (@pxref{Specify Location}), you don't
+usually need to type a quote before the function name, because
+@value{GDBN} understands that you want to set a breakpoint on a
+function:
 
 @smallexample
-(@value{GDBP}) b bub @key{TAB}
-@exdent @value{GDBN} alters your input line to the following, and rings a bell:
-(@value{GDBP}) b 'bubble(
+(@value{GDBP}) b func< @kbd{M-?}
+func<int>()    func<float>()
+(@value{GDBP}) b func<
 @end smallexample
 
-@noindent
-In general, @value{GDBN} can tell that a quote is needed (and inserts it) if
-you have not yet started typing the argument list when you ask for
-completion on an overloaded symbol.
+This is true even in the case of typing the name of C@t{++} overloaded
+functions (multiple definitions of the same function, distinguished by
+argument type).  For example, when you want to set a breakpoint you
+don't need to distinguish whether you mean the version of @code{name}
+that takes an @code{int} parameter, @code{name(int)}, or the version
+that takes a @code{float} parameter, @code{name(float)}.
+
+@smallexample
+(@value{GDBP}) b bubble( @kbd{M-?}
+bubble(int)    bubble(double)
+(@value{GDBP}) b bubble(dou @kbd{M-?}
+bubble(double)
+@end smallexample
+
+See @ref{quoting names} for a description of other scenarios that
+require quoting.
 
 For more information about overloaded functions, see @ref{C Plus Plus
 Expressions, ,C@t{++} Expressions}.  You can use the command @code{set
@@ -16890,6 +16907,7 @@ file-management commands (@pxref{Files, ,Commands to Specify Files}).
 @cindex symbol names
 @cindex names of symbols
 @cindex quoting names
+@anchor{quoting names}
 Occasionally, you may need to refer to symbols that contain unusual
 characters, which @value{GDBN} ordinarily treats as word delimiters.  The
 most frequent case is in referring to static variables in other
