@@ -54,9 +54,6 @@
 
 #include "record.h"
 #include "record-full.h"
-
-#include "features/aarch64.c"
-
 #include "arch/aarch64-insn.h"
 
 #include "opcode/aarch64.h"
@@ -3057,8 +3054,6 @@ _initialize_aarch64_tdep (void)
 {
   gdbarch_register (bfd_arch_aarch64, aarch64_gdbarch_init,
 		    aarch64_dump_tdep);
-
-  initialize_tdesc_aarch64 ();
 
   /* Debug this file's internals.  */
   add_setshow_boolean_cmd ("aarch64", class_maintenance, &aarch64_debug, _("\

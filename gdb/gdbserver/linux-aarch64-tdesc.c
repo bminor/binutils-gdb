@@ -31,7 +31,16 @@ aarch64_linux_read_description ()
   target_desc **tdesc = &aarch64_tdesc;
 
   if (*tdesc == NULL)
-    *tdesc = aarch64_create_target_description ();
+    {
+      *tdesc = aarch64_create_target_description ();
+
+      init_target_desc (*tdesc);
+
+#ifndef IN_PROCESS_AGENT
+      static const char *expedite_regs_aarch64[] = { "x29", "sp", "pc", NULL };
+      (*tdesc)->expedite_regs = expedite_regs_aarch64;
+#endif
+    }
 
   return *tdesc;
 }

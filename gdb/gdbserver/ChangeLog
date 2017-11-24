@@ -1,5 +1,11 @@
 2017-11-24  Alan Hayward  <alan.hayward@arm.com>
 
+	* linux-aarch64-ipa.c (initialize_low_tracepoint): Remove init.
+	* linux-aarch64-low.c (initialize_low_arch): Remove init.
+	* linux-aarch64-tdesc.c (aarch64_linux_read_description): Add init.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
 	* configure.srv: Add new files.
 	* linux-aarch64-ipa.c (get_ipa_tdesc): Call
 	aarch64_linux_read_description.

@@ -17,14 +17,26 @@
 
 
 #include "aarch64.h"
+#include <stdlib.h>
 
-extern struct target_desc *tdesc_aarch64;
+#include "../features/aarch64-core.c"
+#include "../features/aarch64-fpu.c"
 
 /* Create the aarch64 target description.  */
 
 target_desc *
 aarch64_create_target_description ()
 {
-  return tdesc_aarch64;
-}
+  target_desc *tdesc = allocate_target_description ();
 
+#ifndef IN_PROCESS_AGENT
+  set_tdesc_architecture (tdesc, "aarch64");
+#endif
+
+  long regnum = 0;
+
+  regnum = create_feature_aarch64_core (tdesc, regnum);
+  regnum = create_feature_aarch64_fpu (tdesc, regnum);
+
+  return tdesc;
+}

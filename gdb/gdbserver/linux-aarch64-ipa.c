@@ -27,9 +27,6 @@
 #endif
 #include "linux-aarch64-tdesc.h"
 
-/* Defined in auto-generated file aarch64.c.  */
-void init_registers_aarch64 (void);
-
 /* Each register saved by the jump pad is in a 16 byte cell.  */
 #define FT_CR_SIZE 16
 
@@ -207,5 +204,4 @@ alloc_jump_pad_buffer (size_t size)
 void
 initialize_low_tracepoint (void)
 {
-  init_registers_aarch64 ();
 }

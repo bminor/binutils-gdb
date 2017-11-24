@@ -41,9 +41,6 @@
 #include "arch/aarch64.h"
 #include "linux-aarch64-tdesc.h"
 
-/* Defined in auto-generated files.  */
-void init_registers_aarch64 (void);
-
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
@@ -2998,8 +2995,6 @@ struct linux_target_ops the_low_target =
 void
 initialize_low_arch (void)
 {
-  init_registers_aarch64 ();
-
   initialize_low_arch_aarch32 ();
 
   initialize_regsets_info (&aarch64_regsets_info);

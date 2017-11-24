@@ -119,7 +119,6 @@ OUTPUTS = $(patsubst %,$(outdir)/%.dat,$(WHICH))
 # --enable-targets=all GDB.  You can override this by passing XMLTOC
 # to make on the command line.
 XMLTOC = \
-	aarch64.xml \
 	arc-v2.xml \
 	arc-arcompact.xml \
 	arm/arm-with-iwmmxt.xml \
@@ -206,7 +205,9 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 	  $(XSLTPROC) gdbserver-regs.xsl - >> $(outdir)/$*.tmp
 	sh ../../move-if-change $(outdir)/$*.tmp $(outdir)/$*.dat
 
-FEATURE_XMLFILES = i386/32bit-core.xml \
+FEATURE_XMLFILES = aarch64-core.xml \
+	aarch64-fpu.xml \
+	i386/32bit-core.xml \
 	i386/32bit-sse.xml \
 	i386/32bit-linux.xml \
 	i386/32bit-avx.xml \
