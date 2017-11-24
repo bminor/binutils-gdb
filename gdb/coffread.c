@@ -699,7 +699,8 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	}
     }
 
-  bfd_map_over_sections (abfd, coff_locate_sections, (void *) info);
+  if (!(objfile->flags & OBJF_READNEVER))
+    bfd_map_over_sections (abfd, coff_locate_sections, (void *) info);
 
   if (info->stabsects)
     {
