@@ -1,3 +1,11 @@
+2017-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_exception_message_1, ada_exception_message):
+	New functions.
+	(print_it_exception): If available, display the exception
+	message as well.
+	* NEWS: Document new feature.
+
 2017-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.nat <spu-linux>: Add fork-inferior.o to NATDEPFILES.

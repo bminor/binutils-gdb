@@ -86,6 +86,11 @@
      variables that are to be set or unset from GDB.  These variables
      will affect the environment to be passed to the inferior.
 
+* When catching an Ada exception raised with a message, GDB now prints
+  the message in the catchpoint hit notification. In GDB/MI mode, that
+  information is provided as an extra field named "exception-message"
+  in the *stopped notification.
+
 * New remote packets
 
 QEnvironmentHexEncoded

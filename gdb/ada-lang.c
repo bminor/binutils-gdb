@@ -12105,6 +12105,73 @@ ada_exception_name_addr_1 (enum ada_exception_catchpoint_kind ex,
   return 0; /* Should never be reached.  */
 }
 
+/* Assuming the inferior is stopped at an exception catchpoint,
+   return the message which was associated to the exception, if
+   available.  Return NULL if the message could not be retrieved.
+
+   The caller must xfree the string after use.
+
+   Note: The exception message can be associated to an exception
+   either through the use of the Raise_Exception function, or
+   more simply (Ada 2005 and later), via:
+
+       raise Exception_Name with "exception message";
+
+   */
+
+static char *
+ada_exception_message_1 (void)
+{
+  struct value *e_msg_val;
+  char *e_msg = NULL;
+  int e_msg_len;
+  struct cleanup *cleanups;
+
+  /* For runtimes that support this feature, the exception message
+     is passed as an unbounded string argument called "message".  */
+  e_msg_val = parse_and_eval ("message");
+  if (e_msg_val == NULL)
+    return NULL; /* Exception message not supported.  */
+
+  e_msg_val = ada_coerce_to_simple_array (e_msg_val);
+  gdb_assert (e_msg_val != NULL);
+  e_msg_len = TYPE_LENGTH (value_type (e_msg_val));
+
+  /* If the message string is empty, then treat it as if there was
+     no exception message.  */
+  if (e_msg_len <= 0)
+    return NULL;
+
+  e_msg = (char *) xmalloc (e_msg_len + 1);
+  cleanups = make_cleanup (xfree, e_msg);
+  read_memory_string (value_address (e_msg_val), e_msg, e_msg_len + 1);
+  e_msg[e_msg_len] = '\0';
+
+  discard_cleanups (cleanups);
+  return e_msg;
+}
+
+/* Same as ada_exception_message_1, except that all exceptions are
+   contained here (returning NULL instead).  */
+
+static char *
+ada_exception_message (void)
+{
+  char *e_msg = NULL;  /* Avoid a spurious uninitialized warning.  */
+
+  TRY
+    {
+      e_msg = ada_exception_message_1 ();
+    }
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      e_msg = NULL;
+    }
+  END_CATCH
+
+  return e_msg;
+}
+
 /* Same as ada_exception_name_addr_1, except that it intercepts and contains
    any error that ada_exception_name_addr_1 might cause to be thrown.
    When an error is intercepted, a warning with the error message is printed,
@@ -12340,6 +12407,7 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 {
   struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;
+  char *exception_message;
 
   annotate_catchpoint (b->number);
 
@@ -12405,6 +12473,19 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 	uiout->text ("failed assertion");
 	break;
     }
+
+  exception_message = ada_exception_message ();
+  if (exception_message != NULL)
+    {
+      struct cleanup *cleanups = make_cleanup (xfree, exception_message);
+
+      uiout->text (" (");
+      uiout->field_string ("exception-message", exception_message);
+      uiout->text (")");
+
+      do_cleanups (cleanups);
+    }
+
   uiout->text (" at ");
   ada_find_printable_frame (get_current_frame ());
 

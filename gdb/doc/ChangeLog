@@ -1,3 +1,8 @@
+2017-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Ada Exception Information): Document
+	new "exception-message" field.
+
 2017-11-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Memory Map Format): Update gdb-memory-map.dtd.
@@ -11,7 +16,6 @@
 2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.texinfo (Requirements): Document use of GNU MPFR.
-
 
 2017-11-16  Phil Muldoon  <pmuldoon@redhat.com>
 

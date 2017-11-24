@@ -27201,7 +27201,9 @@ thread was last seen on.  This field is optional.
 Whenever a @code{*stopped} record is emitted because the program
 stopped after hitting an exception catchpoint (@pxref{Set Catchpoints}),
 @value{GDBN} provides the name of the exception that was raised via
-the @code{exception-name} field.
+the @code{exception-name} field.  Also, for exceptions that were raised
+with an exception message, @value{GDBN} provides that message via
+the @code{exception-message} field.
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Simple Examples

@@ -1,3 +1,9 @@
+2017-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/catch_ex.exp, gdb.ada/mi_catch_ex.exp,
+	gdb.ada/mi_ex_cond.exp: Accept optional exception message in
+	when hitting an exception catchpoint.
+
 2017-11-22  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/macscp.exp: Append -g3 to additional_flags for clang.
