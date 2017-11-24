@@ -1,3 +1,7 @@
+2017-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-low.c (spu_create_inferior): Fix typo in argument name.
+
 2017-11-24  Alan Hayward  <alan.hayward@arm.com>
 
 	* configure.srv: Add linux-aarch64-tdesc-selftest.o.
