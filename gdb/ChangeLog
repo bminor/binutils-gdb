@@ -1,5 +1,9 @@
 2017-11-24  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.c (regcache::dump): Remove footnote_register_size.
+
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (cooked_read_test): Add more test for readonly
 	regcache.
 

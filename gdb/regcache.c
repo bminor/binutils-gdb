@@ -1327,7 +1327,6 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
   struct gdbarch *gdbarch = m_descr->gdbarch;
   int regnum;
   int footnote_nr = 0;
-  int footnote_register_size = 0;
   int footnote_register_offset = 0;
   int footnote_register_type_name_null = 0;
   long register_offset = 0;
@@ -1539,9 +1538,6 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
       fprintf_unfiltered (file, "\n");
     }
 
-  if (footnote_register_size)
-    fprintf_unfiltered (file, "*%d: Inconsistent register sizes.\n",
-			footnote_register_size);
   if (footnote_register_offset)
     fprintf_unfiltered (file, "*%d: Inconsistent register offsets.\n",
 			footnote_register_offset);
