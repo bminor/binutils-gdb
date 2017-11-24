@@ -783,6 +783,7 @@ ALL_64_TARGET_OBS = \
 	amd64-sol2-tdep.o \
 	amd64-tdep.o \
 	amd64-windows-tdep.o \
+	arch/aarch64.o \
 	arch/aarch64-insn.o \
 	arch/amd64.o \
 	ia64-linux-tdep.o \
@@ -1515,6 +1516,7 @@ HFILES_NO_SRCDIR = \
 	xml-syscall.h \
 	xml-tdesc.h \
 	xtensa-tdep.h \
+	arch/aarch64.h \
 	arch/aarch64-insn.h \
 	arch/arm.h \
 	arch/i386.h \

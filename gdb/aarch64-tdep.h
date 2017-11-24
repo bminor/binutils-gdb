@@ -75,7 +75,7 @@ struct gdbarch_tdep
   int (*aarch64_syscall_record) (struct regcache *regcache, unsigned long svc_number);
 };
 
-extern struct target_desc *tdesc_aarch64;
+const target_desc *aarch64_read_description ();
 
 extern int aarch64_process_record (struct gdbarch *gdbarch,
                                struct regcache *regcache, CORE_ADDR addr);

@@ -20,6 +20,10 @@
 #ifndef ARCH_AARCH64_H
 #define ARCH_AARCH64_H
 
+#include "tdesc.h"
+
+target_desc *aarch64_create_target_description ();
+
 /* Register numbers of various important registers.  */
 enum aarch64_regnum
 {

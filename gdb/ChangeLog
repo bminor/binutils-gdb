@@ -1,3 +1,17 @@
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* Makefile.in: Add new files.
+	* aarch64-linux-nat.c (aarch64_linux_read_description): Call
+	aarch64_read_description.
+	* aarch64-linux-tdep.c (aarch64_linux_core_read_description):
+	Call aarch64_read_description.
+	* aarch64-tdep.c (aarch64_read_description): New function.
+	(aarch64_gdbarch_init): Call aarch64_read_description.
+	* aarch64-tdep.h (aarch64_read_description): New function.
+	* arch/aarch64.c: New file.
+	* configure.tgt: Add new files.
+
 2017-11-24  Yao Qi  <yao.qi@linaro.org>
 
 	* mi/mi-main.c (register_changed_p): Update.

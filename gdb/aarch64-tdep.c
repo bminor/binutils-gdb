@@ -2828,6 +2828,20 @@ aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
   return 1;
 }
 
+/* Get the correct target description.  */
+
+const target_desc *
+aarch64_read_description ()
+{
+  static target_desc *aarch64_tdesc = NULL;
+  target_desc **tdesc = &aarch64_tdesc;
+
+  if (*tdesc == NULL)
+    *tdesc = aarch64_create_target_description ();
+
+  return *tdesc;
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -2851,7 +2865,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Ensure we always have a target descriptor.  */
   if (!tdesc_has_registers (tdesc))
-    tdesc = tdesc_aarch64;
+    tdesc = aarch64_read_description ();
 
   gdb_assert (tdesc);
 
