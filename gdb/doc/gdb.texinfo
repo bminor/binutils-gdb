@@ -40840,18 +40840,17 @@ The formal DTD for memory map format is given below:
 <!-- .................................... .............. -->
 <!-- memory-map.dtd -->
 <!-- memory-map: Root element with versioning -->
-<!ELEMENT memory-map (memory | property)>
+<!ELEMENT memory-map (memory)*>
 <!ATTLIST memory-map    version CDATA   #FIXED  "1.0.0">
-<!ELEMENT memory (property)>
+<!ELEMENT memory (property)*>
 <!-- memory: Specifies a memory region,
              and its type, or device. -->
-<!ATTLIST memory        type    CDATA   #REQUIRED
+<!ATTLIST memory        type    (ram|rom|flash) #REQUIRED
                         start   CDATA   #REQUIRED
-                        length  CDATA   #REQUIRED
-                        device  CDATA   #IMPLIED>
+                        length  CDATA   #REQUIRED>
 <!-- property: Generic attribute tag -->
 <!ELEMENT property (#PCDATA | property)*>
-<!ATTLIST property      name    CDATA   #REQUIRED>
+<!ATTLIST property      name    (blocksize) #REQUIRED>
 @end smallexample
 
 @node Thread List Format

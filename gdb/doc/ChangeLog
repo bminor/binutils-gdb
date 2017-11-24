@@ -1,3 +1,7 @@
+2017-11-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Memory Map Format): Update gdb-memory-map.dtd.
+
 2017-11-24  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Completion): Update need-quoting examples.  Remove
