@@ -71,6 +71,8 @@ set_current_inferior (struct inferior *inf)
   current_inferior_ = inf;
 }
 
+private_inferior::~private_inferior () = default;
+
 inferior::~inferior ()
 {
   inferior *inf = this;
@@ -80,7 +82,6 @@ inferior::~inferior ()
   xfree (inf->args);
   xfree (inf->terminal);
   target_desc_info_free (inf->tdesc_info);
-  xfree (inf->priv);
 }
 
 inferior::inferior (int pid_)
@@ -209,7 +210,6 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
 
   inf->pid = 0;
   inf->fake_pid_p = 0;
-  xfree (inf->priv);
   inf->priv = NULL;
 
   if (inf->vfork_parent != NULL)

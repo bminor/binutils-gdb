@@ -5826,11 +5826,22 @@ static int is_pending_fork_parent_thread (struct thread_info *thread);
 
 /* Private per-inferior info for target remote processes.  */
 
-struct private_inferior
+struct remote_inferior : public private_inferior
 {
   /* Whether we can send a wildcard vCont for this process.  */
-  int may_wildcard_vcont;
+  bool may_wildcard_vcont = true;
 };
+
+/* Get the remote private inferior data associated to INF.  */
+
+static remote_inferior *
+get_remote_inferior (inferior *inf)
+{
+  if (inf->priv == NULL)
+    inf->priv.reset (new remote_inferior);
+
+  return static_cast<remote_inferior *> (inf->priv.get ());
+}
 
 /* Structure used to track the construction of a vCont packet in the
    outgoing packet buffer.  This is used to send multiple vCont
@@ -5993,9 +6004,9 @@ remote_commit_resume (struct target_ops *ops)
   /* And assume every process is individually wildcard-able too.  */
   ALL_NON_EXITED_INFERIORS (inf)
     {
-      if (inf->priv == NULL)
-	inf->priv = XNEW (struct private_inferior);
-      inf->priv->may_wildcard_vcont = 1;
+      remote_inferior *priv = get_remote_inferior (inf);
+
+      priv->may_wildcard_vcont = true;
     }
 
   /* Check for any pending events (not reported or processed yet) and
@@ -6008,7 +6019,7 @@ remote_commit_resume (struct target_ops *ops)
 	 can't wildcard that process.  */
       if (!tp->executing)
 	{
-	  tp->inf->priv->may_wildcard_vcont = 0;
+	  get_remote_inferior (tp->inf)->may_wildcard_vcont = false;
 
 	  /* And if we can't wildcard a process, we can't wildcard
 	     everything either.  */
@@ -6042,7 +6053,7 @@ remote_commit_resume (struct target_ops *ops)
 
       if (!remote_thr->last_resume_step
 	  && remote_thr->last_resume_sig == GDB_SIGNAL_0
-	  && tp->inf->priv->may_wildcard_vcont)
+	  && get_remote_inferior (tp->inf)->may_wildcard_vcont)
 	{
 	  /* We'll send a wildcard resume instead.  */
 	  remote_thr->vcont_resumed = 1;
@@ -6062,7 +6073,7 @@ remote_commit_resume (struct target_ops *ops)
 
   ALL_NON_EXITED_INFERIORS (inf)
     {
-      if (inf->priv->may_wildcard_vcont)
+      if (get_remote_inferior (inf)->may_wildcard_vcont)
 	{
 	  any_process_wildcard = 1;
 	  break;
@@ -6083,7 +6094,7 @@ remote_commit_resume (struct target_ops *ops)
 	{
 	  ALL_NON_EXITED_INFERIORS (inf)
 	    {
-	      if (inf->priv->may_wildcard_vcont)
+	      if (get_remote_inferior (inf)->may_wildcard_vcont)
 		{
 		  vcont_builder_push_action (&vcont_builder,
 					     pid_to_ptid (inf->pid),
@@ -6579,7 +6590,7 @@ check_pending_event_prevents_wildcard_vcont_callback
      we'd resume this process too.  */
   *may_global_wildcard_vcont = 0;
   if (inf != NULL)
-    inf->priv->may_wildcard_vcont = 0;
+    get_remote_inferior (inf)->may_wildcard_vcont = false;
 
   return 1;
 }

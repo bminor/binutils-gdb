@@ -263,7 +263,12 @@ enum stop_kind
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
 
-struct private_inferior;
+/* Base class for target-specific inferior data.  */
+
+struct private_inferior
+{
+  virtual ~private_inferior () = 0;
+};
 
 /* Inferior process specific part of `struct infcall_control_state'.
 
@@ -403,7 +408,7 @@ public:
   bool needs_setup = false;
 
   /* Private data used by the target vector implementation.  */
-  private_inferior *priv = NULL;
+  std::unique_ptr<private_inferior> priv;
 
   /* HAS_EXIT_CODE is true if the inferior exited with an exit code.
      In this case, the EXIT_CODE field is also valid.  */

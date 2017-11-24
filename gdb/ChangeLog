@@ -1,3 +1,58 @@
+2017-11-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inferior.h (private_inferior): Define structure type, add
+	virtual pure destructor.
+	(inferior) <priv>: Change type to unique_ptr.
+	* inferior.c (private_inferior::~private_inferior): Provide
+	default implementation.
+	(inferior::~inferior): Don't free priv field.
+	(exit_inferior_1): Likewise.
+	* darwin-nat.h (struct darwin_exception_info): Initialize fields.
+	(darwin_exception_info): Remove typedef.
+	(DEF_VEC_O (darwin_thread_t)); Remove.
+	(private_inferior): Rename to ...
+	(darwin_private_inferior): ... this, extend private_inferior.
+	(get_darwin_inferior): New.
+	<threads>: Change type to std::vector of darwin_thread_t pointers.
+	* darwin-nat.c (darwin_check_new_threads): Adjust.
+	(find_inferior_task_it): Adjust.
+	(darwin_find_thread); Adjust.
+	(darwin_suspend_inferior): Adjust.
+	(darwin_resume_inferior): Adjust.
+	(darwin_find_new_inferior): Adjust.
+	(darwin_decode_notify_message): Adjust.
+	(darwin_send_reply): Adjust.
+	(darwin_resume_inferior_threads): Adjust.
+	(darwin_suspend_inferior_threads): Adjust.
+	(darwin_decode_message): Adjust.
+	(darwin_wait): Adjust.
+	(darwin_interrupt): Adjust.
+	(darwin_deallocate_threads): Adjust.
+	(darwin_mourn_inferior): Adjust, don't free private data.
+	(darwin_reply_to_all_pending_messages): Adjust.
+	(darwin_stop_inferior): Adjust.
+	(darwin_setup_exceptions): Adjust.
+	(darwin_kill_inferior): Adjust.
+	(darwin_setup_request_notification): Adjust.
+	(darwin_attach_pid): Adjust.
+	(darwin_init_thread_list): Adjust.
+	(darwin_setup_fake_stop_event): Adjust.
+	(darwin_attach): Adjust.
+	(darwin_detach): Adjust.
+	(darwin_xfer_partial): Adjust.
+	(set_enable_mach_exceptions): Adjust.
+	(darwin_pid_to_exec_file): Adjust.
+	(darwin_get_ada_task_ptid): Adjust.
+	* darwin-nat-info.c (get_task_from_args): Adjust.
+	(info_mach_ports_command): Adjust.
+	(info_mach_region_command): Adjust.
+	(info_mach_exceptions_command): Adjust.
+	* remote.c (private_inferior): Rename to ...
+	(remote_private_inferior): ... this, initialize fields.
+	(get_remote_inferior); New.
+	(remote_commit_resume): Use get_remote_inferior.
+	(check_pending_event_prevents_wildcard_vcont_callback): Likewise.
+
 2017-11-24  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention linespecs and explicit locations, and completion
