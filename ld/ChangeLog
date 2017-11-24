@@ -1,3 +1,9 @@
+2017-11-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr21562c.t: Also provide ___start_scnfoo and
+	___stop_scnfoo.
+	* testsuite/ld-elf/pr21562d.t: Likewise.
+
 2017-11-23  Martin Storsjo  <martin@martin.st>
 
 	* pe-dll.c (autofilter_liblist): Add libmsvcrt, libmsvcrt-os and
