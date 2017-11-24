@@ -367,7 +367,7 @@ gen_ui_out_table_header_info (const std::vector<bound_probe> &probes,
   std::vector<struct info_probe_column> headings
     = spops->gen_info_probes_table_header ();
 
-  for (const struct info_probe_column &column : headings)
+  for (const info_probe_column &column : headings)
     {
       size_t size_max = strlen (column.print_name);
 
@@ -410,7 +410,7 @@ print_ui_out_not_applicables (const static_probe_ops *spops)
    std::vector<struct info_probe_column> headings
      = spops->gen_info_probes_table_header ();
 
-  for (const struct info_probe_column &column : headings)
+  for (const info_probe_column &column : headings)
     current_uiout->field_string (column.field_name, _("n/a"));
 }
 

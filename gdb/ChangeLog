@@ -1,3 +1,13 @@
+2017-11-24  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	* dtrace-probe.c (dtrace_probe::build_arg_exprs)
+	(dtrace_probe::is_enabled, dtrace_probe::enable)
+	(dtrace_probe::disable): Remove keyword 'struct' at for-range
+	variable
+	* probe.c (gen_ui_out_table_header_info)
+	(print_ui_out_not_applicables):  Remove keyword 'struct' at
+	for-range variable
+
 2017-11-24  Alan Hayward  <alan.hayward@arm.com>
 
 	* configure.tgt: Add arch/aarch64.o

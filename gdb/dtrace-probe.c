@@ -624,7 +624,7 @@ dtrace_probe::build_arg_exprs (struct gdbarch *gdbarch)
   /* Iterate over the arguments in the probe and build the
      corresponding GDB internal expression that will generate the
      value of the argument when executed at the PC of the probe.  */
-  for (struct dtrace_probe_arg &arg : m_args)
+  for (dtrace_probe_arg &arg : m_args)
     {
       struct cleanup *back_to;
       struct parser_state pstate;
@@ -684,7 +684,7 @@ dtrace_probe::is_enabled () const
 {
   struct gdbarch *gdbarch = this->get_gdbarch ();
 
-  for (const struct dtrace_probe_enabler &enabler : m_enablers)
+  for (const dtrace_probe_enabler &enabler : m_enablers)
     if (!gdbarch_dtrace_probe_is_enabled (gdbarch, enabler.address))
       return false;
 
@@ -796,7 +796,7 @@ dtrace_probe::enable ()
 
   /* Iterate over all defined enabler in the given probe and enable
      them all using the corresponding gdbarch hook.  */
-  for (const struct dtrace_probe_enabler &enabler : m_enablers)
+  for (const dtrace_probe_enabler &enabler : m_enablers)
     if (gdbarch_dtrace_enable_probe_p (gdbarch))
       gdbarch_dtrace_enable_probe (gdbarch, enabler.address);
 }
@@ -826,7 +826,7 @@ dtrace_probe::disable ()
 
   /* Iterate over all defined enabler in the given probe and disable
      them all using the corresponding gdbarch hook.  */
-  for (struct dtrace_probe_enabler &enabler : m_enablers)
+  for (dtrace_probe_enabler &enabler : m_enablers)
     if (gdbarch_dtrace_disable_probe_p (gdbarch))
       gdbarch_dtrace_disable_probe (gdbarch, enabler.address);
 }
