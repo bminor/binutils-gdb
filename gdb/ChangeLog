@@ -1,3 +1,12 @@
+2017-11-25  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/22491
+	* stap-probe.c (relocate_address): New function.
+	(stap_probe::get_relocated_address): Use 'relocate_address'.
+	(stap_probe::set_semaphore): Use 'relocate_address' and pass
+	'm_sem_addr'.
+	(stap_probe::clear_semaphore): Likewise.
+
 2017-11-25  Pedro Alves  <palves@redhat.com>
 
 	* dictionary.c: Include "safe-ctype.h".
