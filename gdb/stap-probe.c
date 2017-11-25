@@ -1278,13 +1278,21 @@ stap_probe::parse_arguments (struct gdbarch *gdbarch)
     }
 }
 
+/* Helper function to relocate an address.  */
+
+static CORE_ADDR
+relocate_address (CORE_ADDR address, struct objfile *objfile)
+{
+  return address + ANOFFSET (objfile->section_offsets,
+			     SECT_OFF_DATA (objfile));
+}
+
 /* Implementation of the get_relocated_address method.  */
 
 CORE_ADDR
 stap_probe::get_relocated_address (struct objfile *objfile)
 {
-  return this->get_address () + ANOFFSET (objfile->section_offsets,
-					  SECT_OFF_DATA (objfile));
+  return relocate_address (this->get_address (), objfile);
 }
 
 /* Given PROBE, returns the number of arguments present in that probe's
@@ -1455,7 +1463,7 @@ stap_modify_semaphore (CORE_ADDR address, int set, struct gdbarch *gdbarch)
 void
 stap_probe::set_semaphore (struct objfile *objfile, struct gdbarch *gdbarch)
 {
-  stap_modify_semaphore (this->get_relocated_address (objfile), 1, gdbarch);
+  stap_modify_semaphore (relocate_address (m_sem_addr, objfile), 1, gdbarch);
 }
 
 /* Implementation of the 'clear_semaphore' method.  */
@@ -1463,7 +1471,7 @@ stap_probe::set_semaphore (struct objfile *objfile, struct gdbarch *gdbarch)
 void
 stap_probe::clear_semaphore (struct objfile *objfile, struct gdbarch *gdbarch)
 {
-  stap_modify_semaphore (this->get_relocated_address (objfile), 0, gdbarch);
+  stap_modify_semaphore (relocate_address (m_sem_addr, objfile), 0, gdbarch);
 }
 
 /* Implementation of the 'get_static_ops' method.  */
