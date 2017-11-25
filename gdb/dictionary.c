@@ -26,6 +26,7 @@
 #include "symtab.h"
 #include "buildsym.h"
 #include "dictionary.h"
+#include "safe-ctype.h"
 
 /* This file implements dictionaries, which are tables that associate
    symbols to names.  They are represented by an opaque type 'struct

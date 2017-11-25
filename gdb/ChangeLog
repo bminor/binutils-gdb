@@ -1,3 +1,9 @@
+2017-11-25  Pedro Alves  <palves@redhat.com>
+
+	* dictionary.c: Include "safe-ctype.h".
+	* minsyms.c: Include "safe-ctype.h".
+	* minsyms.c (SYMBOL_HASH_NEXT): Use TOLOWER instead of tolower.
+
 2017-11-25   Pedro Alves  <palves@redhat.com>
 
 	* completer.c (complete_line_internal_1): Skip spaces until the
