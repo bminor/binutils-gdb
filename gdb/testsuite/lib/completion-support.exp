@@ -259,19 +259,28 @@ proc test_gdb_complete_multiple { cmd_prefix completion_word add_completed_line 
     test_gdb_complete_cmd_multiple $cmd_prefix $completion_word $completion_list $start_quote_char $end_quote_char
 }
 
+# Test that all the substring prefixes of INPUT from [0..START) to
+# [0..END) complete to COMPLETION_RE (a regular expression).  If END
+# is ommitted, default to the length of INPUT.
+
+proc test_complete_prefix_range_re {input completion_re start {end -1}} {
+    if {$end == -1} {
+	set end [string length $input]
+    }
+
+    for {set i $start} {$i < $end} {incr i} {
+	set line [string range $input 0 $i]
+	test_gdb_complete_unique_re "$line" $completion_re
+    }
+}
+
 # Test that all the substring prefixes of COMPLETION from [0..START)
 # to [0..END) complete to COMPLETION.  If END is ommitted, default to
 # the length of COMPLETION.
 
 proc test_complete_prefix_range {completion start {end -1}} {
-    if {$end == -1} {
-	set end [string length $completion]
-    }
-
-    for {set i $start} {$i < $end} {incr i} {
-	set line [string range $completion 0 $i]
-	test_gdb_complete_unique "$line" "$completion"
-    }
+    set completion_re [string_to_regexp $completion]
+    test_complete_prefix_range_re $completion $completion_re $start $end
 }
 
 # Find NEEDLE in HAYSTACK and return the index _after_ NEEDLE.  E.g.,

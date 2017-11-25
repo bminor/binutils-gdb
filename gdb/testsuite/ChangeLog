@@ -1,3 +1,11 @@
+2017-11-25  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/cpls-ops.cc: New file.
+	* gdb.linespec/cpls-ops.exp: New file.
+	* lib/completion-support.exp (test_complete_prefix_range_re): New,
+	factored out from ...
+	(test_complete_prefix_range): ... this.
+
 2017-11-24  Pedro Alves  <palves@redhat.com>
 
 	* gdb.linespec/cpcompletion.exp: New file.
