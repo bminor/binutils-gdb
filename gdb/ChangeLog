@@ -1,3 +1,8 @@
+2017-11-25   Pedro Alves  <palves@redhat.com>
+
+	* completer.c (complete_line_internal_1): Skip spaces until the
+	start of the command.
+
 2017-11-24  Pedro Alves  <palves@redhat.com>
 
 	* cp-support.c (cp_symbol_name_matches_1): New, factored out from

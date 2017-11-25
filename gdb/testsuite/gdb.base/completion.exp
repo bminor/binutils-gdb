@@ -722,13 +722,13 @@ gdb_test "complete file ./gdb.base/compl" \
     "file ./gdb.base/completion\\.exp.*" \
     "complete-command 'file ./gdb.base/compl'"
 
-set test "complete 'file ./gdb.base/complet'"
-send_gdb "file ./gdb.base/complet\t"
+set test "complete 'file ./gdb.base/completi'"
+send_gdb "file ./gdb.base/completi\t"
 gdb_test_multiple "" "$test" {
     -re "^file ./gdb.base/completion\\.exp $" {
 	send_gdb "\n"
 	# Ignore the exact error message.
-	gdb_test_multiple "" "complete 'file ./gdb.base/complet'" {
+	gdb_test_multiple "" "complete 'file ./gdb.base/completi'" {
 	    -re "\r\nA program is being debugged already\\.\[\r\n\]+Are you sure you want to change the file\\? \\(y or n\\) $" {
 		send_gdb "n\n"
 		exp_continue
