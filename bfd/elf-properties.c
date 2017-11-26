@@ -328,11 +328,15 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	has_properties = TRUE;
 
 	/* Ignore GNU properties from ELF objects with different machine
-	   code or class.  */
+	   code or class.  Also skip objects without a GNU_PROPERTY note
+	   section.  */
 	if ((elf_machine_code
 	     == get_elf_backend_data (abfd)->elf_machine_code)
 	    && (elfclass
-		== get_elf_backend_data (abfd)->s->elfclass))
+		== get_elf_backend_data (abfd)->s->elfclass)
+	    && bfd_get_section_by_name (abfd,
+					NOTE_GNU_PROPERTY_SECTION_NAME) != NULL
+	    )
 	  {
 	    /* Keep .note.gnu.property section in FIRST_PBFD.  */
 	    first_pbfd = abfd;
@@ -374,10 +378,11 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 
 	if (list != NULL)
 	  {
-	    /* Discard .note.gnu.property section in the rest inputs.  */
+	    /* Discard the .note.gnu.property section in this bfd.  */
 	    sec = bfd_get_section_by_name (abfd,
 					   NOTE_GNU_PROPERTY_SECTION_NAME);
-	    sec->output_section = bfd_abs_section_ptr;
+	    if (sec != NULL)
+	      sec->output_section = bfd_abs_section_ptr;
 	  }
       }
 
@@ -393,6 +398,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 
       sec = bfd_get_section_by_name (first_pbfd,
 				     NOTE_GNU_PROPERTY_SECTION_NAME);
+      BFD_ASSERT (sec != NULL);
 
       /* Update stack size in .note.gnu.property with -z stack-size=N
 	 if N > 0.  */

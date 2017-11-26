@@ -89,6 +89,14 @@ features.  Expat will be linked in if it is available at build time, or
 those features will be disabled.  The latest version of Expat should be
 available from `http://expat.sourceforge.net'.
 
+   GDB uses GNU MPFR, a library for multiple-precision floating-point
+computation with correct rounding, to emulate target floating-point
+arithmetic during expression evaluation when the target uses different
+floating-point formats than the host.  MPFR will be linked in if it is
+available at build time.  If GNU MPFR it is not available, GDB will fall
+back to using host floating-point arithmetic.  The latest version of
+GNU MPFR should be available from `http://www.mpfr.org'.
+
    GDB can be used as a cross-debugger, running on a machine of one
 type while debugging a program running on a machine of another type.
 See below.
@@ -474,6 +482,15 @@ prefer; but you may abbreviate option names if you use `--'.
      XML files, will not be available in GDB.  If your host does not
      have libexpat installed, you can  get the latest version from
      http://expat.sourceforge.net.
+
+`--with-mpfr'
+     Build GDB with the GNU MPFR library.  (Done by default if
+     GNU MPFR is installed and found at configure time.)  This library
+     is used to emulate target floating-point arithmetic during expression
+     evaluation when the target uses different floating-point formats than
+     the host.  If GNU MPFR is not available, GDB will fall back to using
+     host floating-point arithmetic.  If your host does not have GNU MPFR
+     installed, you can get the latest version from http://www.mpfr.org.
 
 `--with-python[=PATH]'
      Build GDB with Python scripting support.  (Done by default if

@@ -292,13 +292,15 @@ sec_merge_emit (bfd *abfd, struct sec_merge_hash_entry *entry,
   char *pad = NULL;
   bfd_size_type off = 0;
   int alignment_power = sec->output_section->alignment_power;
+  bfd_size_type pad_len;
 
-  if (alignment_power)
-    {
-      pad = (char *) bfd_zmalloc ((bfd_size_type) 1 << alignment_power);
-      if (pad == NULL)
-	return FALSE;
-    }
+  /* FIXME: If alignment_power is 0 then really we should scan the
+     entry list for the largest required alignment and use that.  */
+  pad_len = alignment_power ? ((bfd_size_type) 1 << alignment_power) : 16;
+
+  pad = (char *) bfd_zmalloc (pad_len);
+  if (pad == NULL)
+    return FALSE;
 
   for (; entry != NULL && entry->secinfo == secinfo; entry = entry->next)
     {
@@ -308,6 +310,7 @@ sec_merge_emit (bfd *abfd, struct sec_merge_hash_entry *entry,
       len = -off & (entry->alignment - 1);
       if (len != 0)
 	{
+	  BFD_ASSERT (len <= pad_len);
 	  if (contents)
 	    {
 	      memcpy (contents + offset, pad, len);
@@ -336,19 +339,18 @@ sec_merge_emit (bfd *abfd, struct sec_merge_hash_entry *entry,
   off = sec->size - off;
   if (off != 0)
     {
+      BFD_ASSERT (off <= pad_len);
       if (contents)
 	memcpy (contents + offset, pad, off);
       else if (bfd_bwrite (pad, off, abfd) != off)
 	goto err;
     }
 
-  if (pad != NULL)
-    free (pad);
+  free (pad);
   return TRUE;
 
  err:
-  if (pad != NULL)
-    free (pad);
+  free (pad);
   return FALSE;
 }
 

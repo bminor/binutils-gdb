@@ -63,6 +63,7 @@
 #include "common/rsp-low.h"
 #include <algorithm>
 #include <set>
+#include <map>
 
 enum
   {
@@ -95,8 +96,8 @@ static void mi_execute_cli_command (const char *cmd, int args_p,
 				    const char *args);
 static void mi_execute_async_cli_command (const char *cli_command,
 					  char **argv, int argc);
-static int register_changed_p (int regnum, struct regcache *,
-			       struct regcache *);
+static bool register_changed_p (int regnum, regcache *,
+				regcache *);
 static void output_register (struct frame_info *, int regnum, int format,
 			     int skip_unavailable);
 
@@ -709,88 +710,40 @@ output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
 }
 
 static void
-free_vector_of_osdata_items (splay_tree_value xvalue)
-{
-  VEC (osdata_item_s) *value = (VEC (osdata_item_s) *) xvalue;
-
-  /* We don't free the items itself, it will be done separately.  */
-  VEC_free (osdata_item_s, value);
-}
-
-static int
-splay_tree_int_comparator (splay_tree_key xa, splay_tree_key xb)
-{
-  int a = xa;
-  int b = xb;
-
-  return a - b;
-}
-
-static void
 list_available_thread_groups (const std::set<int> &ids, int recurse)
 {
-  struct osdata *data;
-  struct osdata_item *item;
-  int ix_items;
   struct ui_out *uiout = current_uiout;
-  struct cleanup *cleanup;
 
-  /* This keeps a map from integer (pid) to VEC (struct osdata_item *)*
-     The vector contains information about all threads for the given pid.
-     This is assigned an initial value to avoid "may be used uninitialized"
-     warning from gcc.  */
-  gdb_splay_tree_up tree;
+  /* This keeps a map from integer (pid) to vector of struct osdata_item.
+     The vector contains information about all threads for the given pid.  */
+  std::map<int, std::vector<osdata_item>> tree;
 
   /* get_osdata will throw if it cannot return data.  */
-  data = get_osdata ("processes");
-  cleanup = make_cleanup_osdata_free (data);
+  std::unique_ptr<osdata> data = get_osdata ("processes");
 
   if (recurse)
     {
-      struct osdata *threads = get_osdata ("threads");
+      std::unique_ptr<osdata> threads = get_osdata ("threads");
 
-      make_cleanup_osdata_free (threads);
-      tree.reset (splay_tree_new (splay_tree_int_comparator,
-				  NULL,
-				  free_vector_of_osdata_items));
-
-      for (ix_items = 0;
-	   VEC_iterate (osdata_item_s, threads->items,
-			ix_items, item);
-	   ix_items++)
+      for (const osdata_item &item : threads->items)
 	{
-	  const char *pid = get_osdata_column (item, "pid");
-	  int pid_i = strtoul (pid, NULL, 0);
-	  VEC (osdata_item_s) *vec = 0;
+	  const std::string *pid = get_osdata_column (item, "pid");
+	  int pid_i = strtoul (pid->c_str (), NULL, 0);
 
-	  splay_tree_node n = splay_tree_lookup (tree.get (), pid_i);
-	  if (!n)
-	    {
-	      VEC_safe_push (osdata_item_s, vec, item);
-	      splay_tree_insert (tree.get (), pid_i, (splay_tree_value)vec);
-	    }
-	  else
-	    {
-	      vec = (VEC (osdata_item_s) *) n->value;
-	      VEC_safe_push (osdata_item_s, vec, item);
-	      n->value = (splay_tree_value) vec;
-	    }
+	  tree[pid_i].push_back (item);
 	}
     }
 
   ui_out_emit_list list_emitter (uiout, "groups");
 
-  for (ix_items = 0;
-       VEC_iterate (osdata_item_s, data->items,
-		    ix_items, item);
-       ix_items++)
+  for (const osdata_item &item : data->items)
     {
-      const char *pid = get_osdata_column (item, "pid");
-      const char *cmd = get_osdata_column (item, "command");
-      const char *user = get_osdata_column (item, "user");
-      const char *cores = get_osdata_column (item, "cores");
+      const std::string *pid = get_osdata_column (item, "pid");
+      const std::string *cmd = get_osdata_column (item, "command");
+      const std::string *user = get_osdata_column (item, "user");
+      const std::string *cores = get_osdata_column (item, "cores");
 
-      int pid_i = strtoul (pid, NULL, 0);
+      int pid_i = strtoul (pid->c_str (), NULL, 0);
 
       /* At present, the target will return all available processes
 	 and if information about specific ones was required, we filter
@@ -800,43 +753,37 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-      uiout->field_fmt ("id", "%s", pid);
+      uiout->field_fmt ("id", "%s", pid->c_str ());
       uiout->field_string ("type", "process");
       if (cmd)
-	uiout->field_string ("description", cmd);
+	uiout->field_string ("description", cmd->c_str ());
       if (user)
-	uiout->field_string ("user", user);
+	uiout->field_string ("user", user->c_str ());
       if (cores)
-	output_cores (uiout, "cores", cores);
+	output_cores (uiout, "cores", cores->c_str ());
 
       if (recurse)
 	{
-	  splay_tree_node n = splay_tree_lookup (tree.get (), pid_i);
-	  if (n)
+	  auto n = tree.find (pid_i);
+	  if (n != tree.end ())
 	    {
-	      VEC (osdata_item_s) *children = (VEC (osdata_item_s) *) n->value;
-	      struct osdata_item *child;
-	      int ix_child;
+	      std::vector<osdata_item> &children = n->second;
 
 	      ui_out_emit_list thread_list_emitter (uiout, "threads");
 
-	      for (ix_child = 0;
-		   VEC_iterate (osdata_item_s, children, ix_child, child);
-		   ++ix_child)
+	      for (const osdata_item &child : children)
 		{
 		  ui_out_emit_tuple tuple_emitter (uiout, NULL);
-		  const char *tid = get_osdata_column (child, "tid");
-		  const char *tcore = get_osdata_column (child, "core");
+		  const std::string *tid = get_osdata_column (child, "tid");
+		  const std::string *tcore = get_osdata_column (child, "core");
 
-		  uiout->field_string ("id", tid);
+		  uiout->field_string ("id", tid->c_str ());
 		  if (tcore)
-		    uiout->field_string ("core", tcore);
+		    uiout->field_string ("core", tcore->c_str ());
 		}
 	    }
 	}
     }
-
-  do_cleanups (cleanup);
 }
 
 void
@@ -988,7 +935,7 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
   std::unique_ptr<struct regcache> prev_regs;
   struct gdbarch *gdbarch;
-  int regnum, numregs, changed;
+  int regnum, numregs;
   int i;
 
   /* The last time we visited this function, the current frame's
@@ -1021,12 +968,9 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
 	  if (gdbarch_register_name (gdbarch, regnum) == NULL
 	      || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    continue;
-	  changed = register_changed_p (regnum, prev_regs.get (),
-					this_regs.get ());
-	  if (changed < 0)
-	    error (_("-data-list-changed-registers: "
-		     "Unable to read register contents."));
-	  else if (changed)
+
+	  if (register_changed_p (regnum, prev_regs.get (),
+				  this_regs.get ()))
 	    uiout->field_int (NULL, regnum);
 	}
     }
@@ -1041,12 +985,8 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
 	  && gdbarch_register_name (gdbarch, regnum) != NULL
 	  && *gdbarch_register_name (gdbarch, regnum) != '\000')
 	{
-	  changed = register_changed_p (regnum, prev_regs.get (),
-					this_regs.get ());
-	  if (changed < 0)
-	    error (_("-data-list-changed-registers: "
-		     "Unable to read register contents."));
-	  else if (changed)
+	  if (register_changed_p (regnum, prev_regs.get (),
+				  this_regs.get ()))
 	    uiout->field_int (NULL, regnum);
 	}
       else
@@ -1054,18 +994,17 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
     }
 }
 
-static int
+static bool
 register_changed_p (int regnum, struct regcache *prev_regs,
 		    struct regcache *this_regs)
 {
   struct gdbarch *gdbarch = this_regs->arch ();
   struct value *prev_value, *this_value;
-  int ret;
 
   /* First time through or after gdbarch change consider all registers
      as changed.  */
   if (!prev_regs || prev_regs->arch () != gdbarch)
-    return 1;
+    return true;
 
   /* Get register contents and compare.  */
   prev_value = prev_regs->cooked_read_value (regnum);
@@ -1073,8 +1012,8 @@ register_changed_p (int regnum, struct regcache *prev_regs,
   gdb_assert (prev_value != NULL);
   gdb_assert (this_value != NULL);
 
-  ret = value_contents_eq (prev_value, 0, this_value, 0,
-			   register_size (gdbarch, regnum)) == 0;
+  auto ret = !value_contents_eq (prev_value, 0, this_value, 0,
+				 register_size (gdbarch, regnum));
 
   release_value (prev_value);
   release_value (this_value);

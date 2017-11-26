@@ -20,7 +20,7 @@ Disassembly of section .text:
 Disassembly of section .jlitab:
 
 00010060 <__jli.foo>:
-   10060:	07f9 ffcf           	b	10058 <foo>
+   10060:	07f9 ffcf           	b	-8	;10058 <foo>
 
 00010064 <__jli.bar>:
-   10064:	07f9 ffcf           	b	1005c <bar>
+   10064:	07f9 ffcf           	b	-8	;1005c <bar>

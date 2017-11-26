@@ -151,7 +151,6 @@ The current global maintainers are (in alphabetical order):
 Pedro Alves                     palves@redhat.com
 Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
-Andrew Cagney			cagney@gnu.org
 Doug Evans			dje@google.com
 Simon Marchi			simon.marchi@ericsson.com
 Yao Qi				yao.qi@arm.com
@@ -422,7 +421,6 @@ further review from a Global Maintainer or Responsible Maintainer.  They are
 under no obligation to review posted patches - but, of course, are invited
 to do so!
 
-PowerPC			Andrew Cagney		cagney@gnu.org
 ARM			Richard Earnshaw	rearnsha@arm.com
 Blackfin		Mike Frysinger		vapier@gentoo.org
 CRIS			Hans-Peter Nilsson	hp@axis.com
@@ -486,7 +484,6 @@ Julian Brown					julian@codesourcery.com
 Iain Buclaw					ibuclaw@gdcproject.org
 Kevin Buettner					kevinb@redhat.com
 Andrew Burgess					andrew.burgess@embecosm.com
-Andrew Cagney					cagney@gnu.org
 David Carlton					carlton@bactrian.org
 Stephane Carrez					Stephane.Carrez@gmail.com
 Michael Chastain				mec.gnu@mindspring.com
@@ -732,6 +729,9 @@ Christopher Faylor (MS Windows, host & native)
 Daniel Jacobowitz (global, GNU/Linux MIPS,
   C++, GDBserver)				drow at false dot org
 Maxim Grigoriev (xtensa)			maxim2405 at gmail dot com
+Andrew Cagney (acting head maintainer,
+  release manager, global, MIPS, PPC, d10v,
+  d30v, sim, mi, multi-arch, unwinder)		cagney at gnu dot org
 
 
 Folks that have been caught up in a paper trail:

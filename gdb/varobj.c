@@ -54,12 +54,12 @@ const char *varobj_format_string[] =
   { "natural", "binary", "decimal", "hexadecimal", "octal", "zero-hexadecimal" };
 
 /* True if we want to allow Python-based pretty-printing.  */
-static int pretty_printing = 0;
+static bool pretty_printing = false;
 
 void
 varobj_enable_pretty_printing (void)
 {
-  pretty_printing = 1;
+  pretty_printing = true;
 }
 
 /* Data structures */
@@ -68,42 +68,41 @@ varobj_enable_pretty_printing (void)
    varobj.  */
 struct varobj_root
 {
-
   /* The expression for this parent.  */
   expression_up exp;
 
   /* Block for which this expression is valid.  */
-  const struct block *valid_block;
+  const struct block *valid_block = NULL;
 
   /* The frame for this expression.  This field is set iff valid_block is
      not NULL.  */
-  struct frame_id frame;
+  struct frame_id frame = null_frame_id;
 
   /* The global thread ID that this varobj_root belongs to.  This field
      is only valid if valid_block is not NULL.
      When not 0, indicates which thread 'frame' belongs to.
      When 0, indicates that the thread list was empty when the varobj_root
      was created.  */
-  int thread_id;
+  int thread_id = 0;
 
-  /* If 1, the -var-update always recomputes the value in the
+  /* If true, the -var-update always recomputes the value in the
      current thread and frame.  Otherwise, variable object is
      always updated in the specific scope/thread/frame.  */
-  int floating;
+  bool floating = false;
 
-  /* Flag that indicates validity: set to 0 when this varobj_root refers 
+  /* Flag that indicates validity: set to false when this varobj_root refers
      to symbols that do not exist anymore.  */
-  int is_valid;
+  bool is_valid = true;
 
   /* Language-related operations for this variable and its
      children.  */
-  const struct lang_varobj_ops *lang_ops;
+  const struct lang_varobj_ops *lang_ops = NULL;
 
   /* The varobj for this root node.  */
-  struct varobj *rootvar;
+  struct varobj *rootvar = NULL;
 
   /* Next root variable */
-  struct varobj_root *next;
+  struct varobj_root *next = NULL;
 };
 
 /* Dynamic part of varobj.  */
@@ -114,27 +113,27 @@ struct varobj_dynamic
      used to decide if dynamic varobj should recompute their children.
      In the event that the frontend never asked for the children, we
      can avoid that.  */
-  int children_requested;
+  bool children_requested = false;
 
   /* The pretty-printer constructor.  If NULL, then the default
      pretty-printer will be looked up.  If None, then no
      pretty-printer will be installed.  */
-  PyObject *constructor;
+  PyObject *constructor = NULL;
 
   /* The pretty-printer that has been constructed.  If NULL, then a
      new printer object is needed, and one will be constructed.  */
-  PyObject *pretty_printer;
+  PyObject *pretty_printer = NULL;
 
   /* The iterator returned by the printer's 'children' method, or NULL
      if not available.  */
-  struct varobj_iter *child_iter;
+  struct varobj_iter *child_iter = NULL;
 
   /* We request one extra item from the iterator, so that we can
      report to the caller whether there are more items than we have
      already reported.  However, we don't want to install this value
      when we read it, because that will mess up future updates.  So,
      we stash it here instead.  */
-  varobj_item *saved_item;
+  varobj_item *saved_item = NULL;
 };
 
 /* A list of varobjs */
@@ -149,11 +148,11 @@ struct vlist
 
 /* Helper functions for the above subcommands.  */
 
-static int delete_variable (struct varobj *, int);
+static int delete_variable (struct varobj *, bool);
 
-static void delete_variable_1 (int *, struct varobj *, int, int);
+static void delete_variable_1 (int *, struct varobj *, bool, bool);
 
-static int install_variable (struct varobj *);
+static bool install_variable (struct varobj *);
 
 static void uninstall_variable (struct varobj *);
 
@@ -165,21 +164,13 @@ create_child_with_value (struct varobj *parent, int index,
 
 /* Utility routines */
 
-static struct varobj *new_variable (void);
-
-static struct varobj *new_root_variable (void);
-
-static void free_variable (struct varobj *var);
-
-static struct cleanup *make_cleanup_free_variable (struct varobj *var);
-
 static enum varobj_display_formats variable_default_display (struct varobj *);
 
-static int update_type_if_necessary (struct varobj *var,
-				     struct value *new_value);
+static bool update_type_if_necessary (struct varobj *var,
+				      struct value *new_value);
 
-static int install_new_value (struct varobj *var, struct value *value, 
-			      int initial);
+static bool install_new_value (struct varobj *var, struct value *value,
+			       bool initial);
 
 /* Language-specific routines.  */
 
@@ -189,14 +180,14 @@ static std::string name_of_variable (const struct varobj *);
 
 static std::string name_of_child (struct varobj *, int);
 
-static struct value *value_of_root (struct varobj **var_handle, int *);
+static struct value *value_of_root (struct varobj **var_handle, bool *);
 
 static struct value *value_of_child (const struct varobj *parent, int index);
 
 static std::string my_value_of_variable (struct varobj *var,
 					 enum varobj_display_formats format);
 
-static int is_root_p (const struct varobj *var);
+static bool is_root_p (const struct varobj *var);
 
 static struct varobj *varobj_add_child (struct varobj *var,
 					struct varobj_item *item);
@@ -219,7 +210,7 @@ static struct vlist **varobj_table;
 
 
 /* API Implementation */
-static int
+static bool
 is_root_p (const struct varobj *var)
 {
   return (var->root->rootvar == var);
@@ -273,12 +264,8 @@ struct varobj *
 varobj_create (const char *objname,
 	       const char *expression, CORE_ADDR frame, enum varobj_type type)
 {
-  struct varobj *var;
-  struct cleanup *old_chain;
-
   /* Fill out a varobj structure for the (root) variable being constructed.  */
-  var = new_root_variable ();
-  old_chain = make_cleanup_free_variable (var);
+  std::unique_ptr<varobj> var (new varobj (new varobj_root));
 
   if (expression != NULL)
     {
@@ -312,7 +299,7 @@ varobj_create (const char *objname,
 
       /* frame = -2 means always use selected frame.  */
       if (type == USE_SELECTED_FRAME)
-	var->root->floating = 1;
+	var->root->floating = true;
 
       pc = 0;
       block = NULL;
@@ -333,7 +320,6 @@ varobj_create (const char *objname,
 
       CATCH (except, RETURN_MASK_ERROR)
 	{
-	  do_cleanups (old_chain);
 	  return NULL;
 	}
       END_CATCH
@@ -343,13 +329,12 @@ varobj_create (const char *objname,
 	  || var->root->exp->elts[0].opcode == OP_TYPEOF
 	  || var->root->exp->elts[0].opcode == OP_DECLTYPE)
 	{
-	  do_cleanups (old_chain);
 	  fprintf_unfiltered (gdb_stderr, "Attempt to use a type name"
 			      " as an expression.\n");
 	  return NULL;
 	}
 
-      var->format = variable_default_display (var);
+      var->format = variable_default_display (var.get ());
       var->root->valid_block = innermost_block;
       var->name = expression;
       /* For a root var, the name and the expr are the same.  */
@@ -403,10 +388,10 @@ varobj_create (const char *objname,
       /* Set language info */
       var->root->lang_ops = var->root->exp->language_defn->la_varobj_ops;
 
-      install_new_value (var, value, 1 /* Initial assignment */);
+      install_new_value (var.get (), value, 1 /* Initial assignment */);
 
       /* Set ourselves as our root.  */
-      var->root->rootvar = var;
+      var->root->rootvar = var.get ();
 
       /* Reset the selected frame.  */
       if (frame_id_p (old_id))
@@ -422,15 +407,11 @@ varobj_create (const char *objname,
 
       /* If a varobj name is duplicated, the install will fail so
          we must cleanup.  */
-      if (!install_variable (var))
-	{
-	  do_cleanups (old_chain);
-	  return NULL;
-	}
+      if (!install_variable (var.get ()))
+	return NULL;
     }
 
-  discard_cleanups (old_chain);
-  return var;
+  return var.release ();
 }
 
 /* Generates an unique name that can be used for a varobj.  */
@@ -491,7 +472,7 @@ varobj_get_expression (const struct varobj *var)
 /* See varobj.h.  */
 
 int
-varobj_delete (struct varobj *var, int only_children)
+varobj_delete (struct varobj *var, bool only_children)
 {
   return delete_variable (var, only_children);
 }
@@ -574,12 +555,13 @@ varobj_get_display_hint (const struct varobj *var)
 
 /* Return true if the varobj has items after TO, false otherwise.  */
 
-int
+bool
 varobj_has_more (const struct varobj *var, int to)
 {
-  if (VEC_length (varobj_p, var->children) > to)
-    return 1;
-  return ((to == -1 || VEC_length (varobj_p, var->children) == to)
+  if (var->children.size () > to)
+    return true;
+
+  return ((to == -1 || var->children.size () == to)
 	  && (var->dynamic->saved_item != NULL));
 }
 
@@ -597,7 +579,7 @@ varobj_get_thread_id (const struct varobj *var)
 }
 
 void
-varobj_set_frozen (struct varobj *var, int frozen)
+varobj_set_frozen (struct varobj *var, bool frozen)
 {
   /* When a variable is unfrozen, we don't fetch its value.
      The 'not_fetched' flag remains set, so next -var-update
@@ -609,7 +591,7 @@ varobj_set_frozen (struct varobj *var, int frozen)
   var->frozen = frozen;
 }
 
-int
+bool
 varobj_get_frozen (const struct varobj *var)
 {
   return var->frozen;
@@ -621,19 +603,22 @@ varobj_get_frozen (const struct varobj *var)
    used.  */
 
 void
-varobj_restrict_range (VEC (varobj_p) *children, int *from, int *to)
+varobj_restrict_range (const std::vector<varobj *> &children,
+		       int *from, int *to)
 {
+  int len = children.size ();
+
   if (*from < 0 || *to < 0)
     {
       *from = 0;
-      *to = VEC_length (varobj_p, children);
+      *to = len;
     }
   else
     {
-      if (*from > VEC_length (varobj_p, children))
-	*from = VEC_length (varobj_p, children);
-      if (*to > VEC_length (varobj_p, children))
-	*to = VEC_length (varobj_p, children);
+      if (*from > len)
+	*from = len;
+      if (*to > len)
+	*to = len;
       if (*from > *to)
 	*from = *to;
     }
@@ -644,54 +629,54 @@ varobj_restrict_range (VEC (varobj_p) *children, int *from, int *to)
 
 static void
 install_dynamic_child (struct varobj *var,
-		       VEC (varobj_p) **changed,
-		       VEC (varobj_p) **type_changed,
-		       VEC (varobj_p) **newobj,
-		       VEC (varobj_p) **unchanged,
-		       int *cchanged,
+		       std::vector<varobj *> *changed,
+		       std::vector<varobj *> *type_changed,
+		       std::vector<varobj *> *newobj,
+		       std::vector<varobj *> *unchanged,
+		       bool *cchanged,
 		       int index,
 		       struct varobj_item *item)
 {
-  if (VEC_length (varobj_p, var->children) < index + 1)
+  if (var->children.size () < index + 1)
     {
       /* There's no child yet.  */
       struct varobj *child = varobj_add_child (var, item);
 
-      if (newobj)
+      if (newobj != NULL)
 	{
-	  VEC_safe_push (varobj_p, *newobj, child);
-	  *cchanged = 1;
+	  newobj->push_back (child);
+	  *cchanged = true;
 	}
     }
   else
     {
-      varobj_p existing = VEC_index (varobj_p, var->children, index);
-      int type_updated = update_type_if_necessary (existing, item->value);
+      varobj *existing = var->children[index];
+      bool type_updated = update_type_if_necessary (existing, item->value);
 
       if (type_updated)
 	{
-	  if (type_changed)
-	    VEC_safe_push (varobj_p, *type_changed, existing);
+	  if (type_changed != NULL)
+	    type_changed->push_back (existing);
 	}
       if (install_new_value (existing, item->value, 0))
 	{
-	  if (!type_updated && changed)
-	    VEC_safe_push (varobj_p, *changed, existing);
+	  if (!type_updated && changed != NULL)
+	    changed->push_back (existing);
 	}
-      else if (!type_updated && unchanged)
-	VEC_safe_push (varobj_p, *unchanged, existing);
+      else if (!type_updated && unchanged != NULL)
+	unchanged->push_back (existing);
     }
 }
 
 #if HAVE_PYTHON
 
-static int
+static bool
 dynamic_varobj_has_child_method (const struct varobj *var)
 {
   PyObject *printer = var->dynamic->pretty_printer;
 
   if (!gdb_python_initialized)
-    return 0;
+    return false;
 
   gdbpy_enter_varobj enter_py (var);
   return PyObject_HasAttr (printer, gdbpy_children_cst);
@@ -726,20 +711,20 @@ varobj_clear_saved_item (struct varobj_dynamic *var)
     }
 }
 
-static int
+static bool
 update_dynamic_varobj_children (struct varobj *var,
-				VEC (varobj_p) **changed,
-				VEC (varobj_p) **type_changed,
-				VEC (varobj_p) **newobj,
-				VEC (varobj_p) **unchanged,
-				int *cchanged,
-				int update_children,
+				std::vector<varobj *> *changed,
+				std::vector<varobj *> *type_changed,
+				std::vector<varobj *> *newobj,
+				std::vector<varobj *> *unchanged,
+				bool *cchanged,
+				bool update_children,
 				int from,
 				int to)
 {
   int i;
 
-  *cchanged = 0;
+  *cchanged = false;
 
   if (update_children || var->dynamic->child_iter == NULL)
     {
@@ -751,10 +736,10 @@ update_dynamic_varobj_children (struct varobj *var,
       i = 0;
 
       if (var->dynamic->child_iter == NULL)
-	return 0;
+	return false;
     }
   else
-    i = VEC_length (varobj_p, var->children);
+    i = var->children.size ();
 
   /* We ask for one extra child, so that MI can report whether there
      are more children.  */
@@ -787,7 +772,7 @@ update_dynamic_varobj_children (struct varobj *var,
       /* We don't want to push the extra child on any report list.  */
       if (to < 0 || i < to)
 	{
-	  int can_mention = from < 0 || i >= from;
+	  bool can_mention = from < 0 || i >= from;
 
 	  install_dynamic_child (var, can_mention ? changed : NULL,
 				 can_mention ? type_changed : NULL,
@@ -808,24 +793,23 @@ update_dynamic_varobj_children (struct varobj *var,
 	}
     }
 
-  if (i < VEC_length (varobj_p, var->children))
+  if (i < var->children.size ())
     {
-      int j;
+      *cchanged = true;
+      for (int j = i; j < var->children.size (); ++j)
+	varobj_delete (var->children[j], 0);
 
-      *cchanged = 1;
-      for (j = i; j < VEC_length (varobj_p, var->children); ++j)
-	varobj_delete (VEC_index (varobj_p, var->children, j), 0);
-      VEC_truncate (varobj_p, var->children, i);
+      var->children.resize (i);
     }
 
   /* If there are fewer children than requested, note that the list of
      children changed.  */
-  if (to >= 0 && VEC_length (varobj_p, var->children) < to)
-    *cchanged = 1;
+  if (to >= 0 && var->children.size () < to)
+    *cchanged = true;
 
-  var->num_children = VEC_length (varobj_p, var->children);
+  var->num_children = var->children.size ();
 
-  return 1;
+  return true;
 }
 
 int
@@ -835,12 +819,12 @@ varobj_get_num_children (struct varobj *var)
     {
       if (varobj_is_dynamic_p (var))
 	{
-	  int dummy;
+	  bool dummy;
 
 	  /* If we have a dynamic varobj, don't report -1 children.
 	     So, try to fetch some children first.  */
 	  update_dynamic_varobj_children (var, NULL, NULL, NULL, NULL, &dummy,
-					  0, 0, 0);
+					  false, 0, 0);
 	}
       else
 	var->num_children = number_of_children (var);
@@ -852,20 +836,20 @@ varobj_get_num_children (struct varobj *var)
 /* Creates a list of the immediate children of a variable object;
    the return code is the number of such children or -1 on error.  */
 
-VEC (varobj_p)*
+const std::vector<varobj *> &
 varobj_list_children (struct varobj *var, int *from, int *to)
 {
-  int i, children_changed;
-
-  var->dynamic->children_requested = 1;
+  var->dynamic->children_requested = true;
 
   if (varobj_is_dynamic_p (var))
     {
+      bool children_changed;
+
       /* This, in theory, can result in the number of children changing without
 	 frontend noticing.  But well, calling -var-list-children on the same
 	 varobj twice is not something a sane frontend would do.  */
       update_dynamic_varobj_children (var, NULL, NULL, NULL, NULL,
-				      &children_changed, 0, 0, *to);
+				      &children_changed, false, 0, *to);
       varobj_restrict_range (var->children, from, to);
       return var->children;
     }
@@ -879,21 +863,18 @@ varobj_list_children (struct varobj *var, int *from, int *to)
 
   /* If we're called when the list of children is not yet initialized,
      allocate enough elements in it.  */
-  while (VEC_length (varobj_p, var->children) < var->num_children)
-    VEC_safe_push (varobj_p, var->children, NULL);
+  while (var->children.size () < var->num_children)
+    var->children.push_back (NULL);
 
-  for (i = 0; i < var->num_children; i++)
+  for (int i = 0; i < var->num_children; i++)
     {
-      varobj_p existing = VEC_index (varobj_p, var->children, i);
-
-      if (existing == NULL)
+      if (var->children[i] == NULL)
 	{
 	  /* Either it's the first call to varobj_list_children for
 	     this variable object, and the child was never created,
 	     or it was explicitly deleted by the client.  */
 	  std::string name = name_of_child (var, i);
-	  existing = create_child (var, i, name);
-	  VEC_replace (varobj_p, var->children, i, existing);
+	  var->children[i] = create_child (var, i, name);
 	}
     }
 
@@ -904,11 +885,10 @@ varobj_list_children (struct varobj *var, int *from, int *to)
 static struct varobj *
 varobj_add_child (struct varobj *var, struct varobj_item *item)
 {
-  varobj_p v = create_child_with_value (var,
-					VEC_length (varobj_p, var->children), 
-					item);
+  varobj *v = create_child_with_value (var, var->children.size (), item);
 
-  VEC_safe_push (varobj_p, var->children, v);
+  var->children.push_back (v);
+
   return v;
 }
 
@@ -939,7 +919,7 @@ varobj_get_gdb_type (const struct varobj *var)
 /* Is VAR a path expression parent, i.e., can it be used to construct
    a valid path expression?  */
 
-static int
+static bool
 is_path_expr_parent (const struct varobj *var)
 {
   gdb_assert (var->root->lang_ops->is_path_expr_parent != NULL);
@@ -950,10 +930,10 @@ is_path_expr_parent (const struct varobj *var)
    a valid path expression?  By default we assume any VAR can be a path
    parent.  */
 
-int
+bool
 varobj_default_is_path_expr_parent (const struct varobj *var)
 {
-  return 1;
+  return true;
 }
 
 /* Return the path expression parent for VAR.  */
@@ -1009,7 +989,7 @@ varobj_get_attributes (const struct varobj *var)
 
 /* Return true if VAR is a dynamic varobj.  */
 
-int
+bool
 varobj_is_dynamic_p (const struct varobj *var)
 {
   return var->dynamic->pretty_printer != NULL;
@@ -1032,7 +1012,7 @@ varobj_get_value (struct varobj *var)
    value of the given expression.  */
 /* Note: Invokes functions that can call error().  */
 
-int
+bool
 varobj_set_value (struct varobj *var, const char *expression)
 {
   struct value *val = NULL; /* Initialize to keep gcc happy.  */
@@ -1055,7 +1035,7 @@ varobj_set_value (struct varobj *var, const char *expression)
   CATCH (except, RETURN_MASK_ERROR)
     {
       /* We cannot proceed without a valid expression.  */
-      return 0;
+      return false;
     }
   END_CATCH
 
@@ -1083,7 +1063,7 @@ varobj_set_value (struct varobj *var, const char *expression)
 
   CATCH (except, RETURN_MASK_ERROR)
     {
-      return 0;
+      return false;
     }
   END_CATCH
 
@@ -1093,9 +1073,9 @@ varobj_set_value (struct varobj *var, const char *expression)
      variable as changed -- because the first assignment has set the
      'updated' flag.  There's no need to optimize that, because return value
      of -var-update should be considered an approximation.  */
-  var->updated = install_new_value (var, val, 0 /* Compare values.  */);
+  var->updated = install_new_value (var, val, false /* Compare values.  */);
   input_radix = saved_input_radix;
-  return 1;
+  return true;
 }
 
 #if HAVE_PYTHON
@@ -1219,7 +1199,7 @@ install_new_value_visualizer (struct varobj *var)
    VAR will change when a new value NEW_VALUE is assigned and if it is so
    updates the type of VAR.  */
 
-static int
+static bool
 update_type_if_necessary (struct varobj *var, struct value *new_value)
 {
   if (new_value)
@@ -1240,36 +1220,36 @@ update_type_if_necessary (struct varobj *var, struct value *new_value)
 
 	      /* This information may be not valid for a new type.  */
 	      varobj_delete (var, 1);
-	      VEC_free (varobj_p, var->children);
+	      var->children.clear ();
 	      var->num_children = -1;
-	      return 1;
+	      return true;
 	    }
 	}
     }
 
-  return 0;
+  return false;
 }
 
-/* Assign a new value to a variable object.  If INITIAL is non-zero,
-   this is the first assignement after the variable object was just
+/* Assign a new value to a variable object.  If INITIAL is true,
+   this is the first assignment after the variable object was just
    created, or changed type.  In that case, just assign the value 
-   and return 0.
-   Otherwise, assign the new value, and return 1 if the value is
-   different from the current one, 0 otherwise.  The comparison is
+   and return false.
+   Otherwise, assign the new value, and return true if the value is
+   different from the current one, false otherwise.  The comparison is
    done on textual representation of value.  Therefore, some types
    need not be compared.  E.g.  for structures the reported value is
    always "{...}", so no comparison is necessary here.  If the old
-   value was NULL and new one is not, or vice versa, we always return 1.
+   value was NULL and new one is not, or vice versa, we always return true.
 
    The VALUE parameter should not be released -- the function will
    take care of releasing it when needed.  */
-static int
-install_new_value (struct varobj *var, struct value *value, int initial)
+static bool
+install_new_value (struct varobj *var, struct value *value, bool initial)
 { 
-  int changeable;
-  int need_to_fetch;
-  int changed = 0;
-  int intentionally_not_fetched = 0;
+  bool changeable;
+  bool need_to_fetch;
+  bool changed = false;
+  bool intentionally_not_fetched = false;
 
   /* We need to know the varobj's type to decide if the value should
      be fetched or not.  C++ fake children (public/protected/private)
@@ -1281,7 +1261,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
      changeable.  FIXME: need to make sure this behaviour will not
      mess up read-sensitive values.  */
   if (var->dynamic->pretty_printer != NULL)
-    changeable = 1;
+    changeable = true;
 
   need_to_fetch = changeable;
 
@@ -1301,7 +1281,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
        the data from memory.  For unions, that means we'll read the
        same memory more than once, which is not desirable.  So
        fetch now.  */
-    need_to_fetch = 1;
+    need_to_fetch = true;
 
   /* The new value might be lazy.  If the type is changeable,
      that is we'll be comparing values of this type, fetch the
@@ -1310,7 +1290,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   if (need_to_fetch && value && value_lazy (value))
     {
       const struct varobj *parent = var->parent;
-      int frozen = var->frozen;
+      bool frozen = var->frozen;
 
       for (; !frozen && parent; parent = parent->parent)
 	frozen |= parent->frozen;
@@ -1321,7 +1301,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	     variables, we don't do fetch on initial assignment.
 	     For non-initial assignemnt we do the fetch, since it means we're
 	     explicitly asked to compare the new value with the old one.  */
-	  intentionally_not_fetched = 1;
+	  intentionally_not_fetched = true;
 	}
       else
 	{
@@ -1367,9 +1347,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	 varobj had after the previous -var-update.  So need to the
 	 varobj as changed.  */
       if (var->updated)
-	{
-	  changed = 1;
-	}
+	changed = true;
       else if (var->dynamic->pretty_printer == NULL)
 	{
 	  /* Try to compare the values.  That requires that both
@@ -1381,14 +1359,14 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 		 Now that we've fetched the real value, we need to report
 		 this varobj as changed so that UI can show the real
 		 value.  */
-	      changed = 1;
+	      changed = true;
 	    }
           else  if (var->value == NULL && value == NULL)
 	    /* Equal.  */
 	    ;
 	  else if (var->value == NULL || value == NULL)
 	    {
-	      changed = 1;
+	      changed = true;
 	    }
 	  else
 	    {
@@ -1397,7 +1375,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 
 	      gdb_assert (!var->print_value.empty () && !print_value.empty ());
 	      if (var->print_value != print_value)
-		changed = 1;
+		changed = true;
 	    }
 	}
     }
@@ -1416,10 +1394,10 @@ install_new_value (struct varobj *var, struct value *value, int initial)
     value_free (var->value);
   var->value = value;
   if (value && value_lazy (value) && intentionally_not_fetched)
-    var->not_fetched = 1;
+    var->not_fetched = true;
   else
-    var->not_fetched = 0;
-  var->updated = 0;
+    var->not_fetched = false;
+  var->updated = false;
 
   install_new_value_visualizer (var);
 
@@ -1433,7 +1411,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	  || (!var->print_value.empty () && print_value.empty ())
 	  || (!var->print_value.empty () && !print_value.empty ()
 	      && var->print_value != print_value))
-	  changed = 1;
+	  changed = true;
     }
   var->print_value = print_value;
 
@@ -1498,13 +1476,13 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
 }
 
 /* If NEW_VALUE is the new value of the given varobj (var), return
-   non-zero if var has mutated.  In other words, if the type of
+   true if var has mutated.  In other words, if the type of
    the new value is different from the type of the varobj's old
    value.
 
    NEW_VALUE may be NULL, if the varobj is now out of scope.  */
 
-static int
+static bool
 varobj_value_has_mutated (const struct varobj *var, struct value *new_value,
 			  struct type *new_type)
 {
@@ -1513,9 +1491,9 @@ varobj_value_has_mutated (const struct varobj *var, struct value *new_value,
      the type has mutated or not.  For all intents and purposes,
      it has not mutated.  */
   if (var->num_children < 0)
-    return 0;
+    return false;
 
-  if (var->root->lang_ops->value_has_mutated)
+  if (var->root->lang_ops->value_has_mutated != NULL)
     {
       /* The varobj module, when installing new values, explicitly strips
 	 references, saying that we're not interested in those addresses.
@@ -1527,7 +1505,7 @@ varobj_value_has_mutated (const struct varobj *var, struct value *new_value,
       return var->root->lang_ops->value_has_mutated (var, new_value, new_type);
     }
   else
-    return 0;
+    return false;
 }
 
 /* Update the values for a variable and its children.  This is a
@@ -1536,7 +1514,7 @@ varobj_value_has_mutated (const struct varobj *var, struct value *new_value,
    through its children, reconstructing them and noting if they've
    changed.
 
-   The EXPLICIT parameter specifies if this call is result
+   The IS_EXPLICIT parameter specifies if this call is result
    of MI request to update this specific variable, or 
    result of implicit -var-update *.  For implicit request, we don't
    update frozen variables.
@@ -1545,14 +1523,13 @@ varobj_value_has_mutated (const struct varobj *var, struct value *new_value,
    returns TYPE_CHANGED, then it has done this and VARP will be modified
    to point to the new varobj.  */
 
-VEC(varobj_update_result) *
-varobj_update (struct varobj **varp, int is_explicit)
+std::vector<varobj_update_result>
+varobj_update (struct varobj **varp, bool is_explicit)
 {
-  int type_changed = 0;
-  int i;
+  bool type_changed = false;
   struct value *newobj;
-  VEC (varobj_update_result) *stack = NULL;
-  VEC (varobj_update_result) *result = NULL;
+  std::vector<varobj_update_result> stack;
+  std::vector<varobj_update_result> result;
 
   /* Frozen means frozen -- we don't check for any change in
      this varobj, including its going out of scope, or
@@ -1564,20 +1541,13 @@ varobj_update (struct varobj **varp, int is_explicit)
 
   if (!(*varp)->root->is_valid)
     {
-      varobj_update_result r = {0};
-
-      r.varobj = *varp;
-      r.status = VAROBJ_INVALID;
-      VEC_safe_push (varobj_update_result, result, &r);
+      result.emplace_back (*varp, VAROBJ_INVALID);
       return result;
     }
 
   if ((*varp)->root->rootvar == *varp)
     {
-      varobj_update_result r = {0};
-
-      r.varobj = *varp;
-      r.status = VAROBJ_IN_SCOPE;
+      varobj_update_result r (*varp);
 
       /* Update the root variable.  value_of_root can return NULL
 	 if the variable is no longer around, i.e. we stepped out of
@@ -1585,41 +1555,36 @@ varobj_update (struct varobj **varp, int is_explicit)
 	 value_of_root variable dispose of the varobj if the type
 	 has changed.  */
       newobj = value_of_root (varp, &type_changed);
-      if (update_type_if_necessary(*varp, newobj))
-	  type_changed = 1;
+      if (update_type_if_necessary (*varp, newobj))
+	  type_changed = true;
       r.varobj = *varp;
       r.type_changed = type_changed;
       if (install_new_value ((*varp), newobj, type_changed))
-	r.changed = 1;
+	r.changed = true;
       
       if (newobj == NULL)
 	r.status = VAROBJ_NOT_IN_SCOPE;
-      r.value_installed = 1;
+      r.value_installed = true;
 
       if (r.status == VAROBJ_NOT_IN_SCOPE)
 	{
 	  if (r.type_changed || r.changed)
-	    VEC_safe_push (varobj_update_result, result, &r);
+	    result.push_back (std::move (r));
+
 	  return result;
 	}
-            
-      VEC_safe_push (varobj_update_result, stack, &r);
+
+      stack.push_back (std::move (r));
     }
   else
-    {
-      varobj_update_result r = {0};
-
-      r.varobj = *varp;
-      VEC_safe_push (varobj_update_result, stack, &r);
-    }
+    stack.emplace_back (*varp);
 
   /* Walk through the children, reconstructing them all.  */
-  while (!VEC_empty (varobj_update_result, stack))
+  while (!stack.empty ())
     {
-      varobj_update_result r = *(VEC_last (varobj_update_result, stack));
+      varobj_update_result r = std::move (stack.back ());
+      stack.pop_back ();
       struct varobj *v = r.varobj;
-
-      VEC_pop (varobj_update_result, stack);
 
       /* Update this variable, unless it's a root, which is already
 	 updated.  */
@@ -1628,8 +1593,8 @@ varobj_update (struct varobj **varp, int is_explicit)
 	  struct type *new_type;
 
 	  newobj = value_of_child (v->parent, v->index);
-	  if (update_type_if_necessary(v, newobj))
-	    r.type_changed = 1;
+	  if (update_type_if_necessary (v, newobj))
+	    r.type_changed = true;
 	  if (newobj)
 	    new_type = value_type (newobj);
 	  else
@@ -1644,13 +1609,13 @@ varobj_update (struct varobj **varp, int is_explicit)
 	      v->to = -1;
 	      v->from = -1;
 	      v->type = new_type;
-	      r.type_changed = 1;
+	      r.type_changed = true;
 	    }
 
 	  if (install_new_value (v, newobj, r.type_changed))
 	    {
-	      r.changed = 1;
-	      v->updated = 0;
+	      r.changed = true;
+	      v->updated = false;
 	    }
 	}
 
@@ -1658,16 +1623,15 @@ varobj_update (struct varobj **varp, int is_explicit)
 	 for which -var-list-children was never invoked.  */
       if (varobj_is_dynamic_p (v))
 	{
-	  VEC (varobj_p) *changed = 0, *type_changed = 0, *unchanged = 0;
-	  VEC (varobj_p) *newobj = 0;
-	  int i, children_changed = 0;
+	  std::vector<varobj *> changed, type_changed, unchanged, newobj;
+	  bool children_changed = false;
 
 	  if (v->frozen)
 	    continue;
 
 	  if (!v->dynamic->children_requested)
 	    {
-	      int dummy;
+	      bool dummy;
 
 	      /* If we initially did not have potential children, but
 		 now we do, consider the varobj as changed.
@@ -1678,75 +1642,65 @@ varobj_update (struct varobj **varp, int is_explicit)
 	      if (!varobj_has_more (v, 0))
 		{
 		  update_dynamic_varobj_children (v, NULL, NULL, NULL, NULL,
-						  &dummy, 0, 0, 0);
+						  &dummy, false, 0, 0);
 		  if (varobj_has_more (v, 0))
-		    r.changed = 1;
+		    r.changed = true;
 		}
 
 	      if (r.changed)
-		VEC_safe_push (varobj_update_result, result, &r);
+		result.push_back (std::move (r));
 
 	      continue;
 	    }
 
-	  /* If update_dynamic_varobj_children returns 0, then we have
+	  /* If update_dynamic_varobj_children returns false, then we have
 	     a non-conforming pretty-printer, so we skip it.  */
 	  if (update_dynamic_varobj_children (v, &changed, &type_changed, &newobj,
-					      &unchanged, &children_changed, 1,
+					      &unchanged, &children_changed, true,
 					      v->from, v->to))
 	    {
-	      if (children_changed || newobj)
+	      if (children_changed || !newobj.empty ())
 		{
-		  r.children_changed = 1;
-		  r.newobj = newobj;
+		  r.children_changed = true;
+		  r.newobj = std::move (newobj);
 		}
 	      /* Push in reverse order so that the first child is
 		 popped from the work stack first, and so will be
 		 added to result first.  This does not affect
 		 correctness, just "nicer".  */
-	      for (i = VEC_length (varobj_p, type_changed) - 1; i >= 0; --i)
+	      for (int i = type_changed.size () - 1; i >= 0; --i)
 		{
-		  varobj_p tmp = VEC_index (varobj_p, type_changed, i);
-		  varobj_update_result r = {0};
+		  varobj_update_result r (type_changed[i]);
 
 		  /* Type may change only if value was changed.  */
-		  r.varobj = tmp;
-		  r.changed = 1;
-		  r.type_changed = 1;
-		  r.value_installed = 1;
-		  VEC_safe_push (varobj_update_result, stack, &r);
+		  r.changed = true;
+		  r.type_changed = true;
+		  r.value_installed = true;
+
+		  stack.push_back (std::move (r));
 		}
-	      for (i = VEC_length (varobj_p, changed) - 1; i >= 0; --i)
+	      for (int i = changed.size () - 1; i >= 0; --i)
 		{
-		  varobj_p tmp = VEC_index (varobj_p, changed, i);
-		  varobj_update_result r = {0};
+		  varobj_update_result r (changed[i]);
 
-		  r.varobj = tmp;
-		  r.changed = 1;
-		  r.value_installed = 1;
-		  VEC_safe_push (varobj_update_result, stack, &r);
+		  r.changed = true;
+		  r.value_installed = true;
+
+		  stack.push_back (std::move (r));
 		}
-	      for (i = VEC_length (varobj_p, unchanged) - 1; i >= 0; --i)
-	      	{
-		  varobj_p tmp = VEC_index (varobj_p, unchanged, i);
+	      for (int i = unchanged.size () - 1; i >= 0; --i)
+		{
+		  if (!unchanged[i]->frozen)
+		    {
+		      varobj_update_result r (unchanged[i]);
 
-	      	  if (!tmp->frozen)
-	      	    {
-	      	      varobj_update_result r = {0};
+		      r.value_installed = true;
 
-		      r.varobj = tmp;
-	      	      r.value_installed = 1;
-	      	      VEC_safe_push (varobj_update_result, stack, &r);
-	      	    }
-	      	}
+		      stack.push_back (std::move (r));
+		    }
+		}
 	      if (r.changed || r.children_changed)
-		VEC_safe_push (varobj_update_result, result, &r);
-
-	      /* Free CHANGED, TYPE_CHANGED and UNCHANGED, but not NEW,
-		 because NEW has been put into the result vector.  */
-	      VEC_free (varobj_p, changed);
-	      VEC_free (varobj_p, type_changed);
-	      VEC_free (varobj_p, unchanged);
+		result.push_back (std::move (r));
 
 	      continue;
 	    }
@@ -1756,29 +1710,21 @@ varobj_update (struct varobj **varp, int is_explicit)
 	 child is popped from the work stack first, and so
 	 will be added to result first.  This does not
 	 affect correctness, just "nicer".  */
-      for (i = VEC_length (varobj_p, v->children)-1; i >= 0; --i)
+      for (int i = v->children.size () - 1; i >= 0; --i)
 	{
-	  varobj_p c = VEC_index (varobj_p, v->children, i);
+	  varobj *c = v->children[i];
 
 	  /* Child may be NULL if explicitly deleted by -var-delete.  */
 	  if (c != NULL && !c->frozen)
-	    {
-	      varobj_update_result r = {0};
-
-	      r.varobj = c;
-	      VEC_safe_push (varobj_update_result, stack, &r);
-	    }
+	    stack.emplace_back (c);
 	}
 
       if (r.changed || r.type_changed)
-	VEC_safe_push (varobj_update_result, result, &r);
+	result.push_back (std::move (r));
     }
-
-  VEC_free (varobj_update_result, stack);
 
   return result;
 }
-
 
 /* Helper functions */
 
@@ -1787,12 +1733,12 @@ varobj_update (struct varobj **varp, int is_explicit)
  */
 
 static int
-delete_variable (struct varobj *var, int only_children_p)
+delete_variable (struct varobj *var, bool only_children_p)
 {
   int delcount = 0;
 
   delete_variable_1 (&delcount, var, only_children_p,
-		     1 /* remove_from_parent_p */ );
+		     true /* remove_from_parent_p */ );
 
   return delcount;
 }
@@ -1802,23 +1748,21 @@ delete_variable (struct varobj *var, int only_children_p)
    and the parent is not removed we dump core.  It must be always
    initially called with remove_from_parent_p set.  */
 static void
-delete_variable_1 (int *delcountp, struct varobj *var, int only_children_p,
-		   int remove_from_parent_p)
+delete_variable_1 (int *delcountp, struct varobj *var, bool only_children_p,
+		   bool remove_from_parent_p)
 {
-  int i;
-
   /* Delete any children of this variable, too.  */
-  for (i = 0; i < VEC_length (varobj_p, var->children); ++i)
+  for (varobj *child : var->children)
     {   
-      varobj_p child = VEC_index (varobj_p, var->children, i);
-
       if (!child)
 	continue;
+
       if (!remove_from_parent_p)
 	child->parent = NULL;
-      delete_variable_1 (delcountp, child, 0, only_children_p);
+
+      delete_variable_1 (delcountp, child, false, only_children_p);
     }
-  VEC_free (varobj_p, var->children);
+  var->children.clear ();
 
   /* if we were called to delete only the children we are done here.  */
   if (only_children_p)
@@ -1838,19 +1782,17 @@ delete_variable_1 (int *delcountp, struct varobj *var, int only_children_p,
      expensive list search to find the element to remove when we are
      discarding the list afterwards.  */
   if ((remove_from_parent_p) && (var->parent != NULL))
-    {
-      VEC_replace (varobj_p, var->parent->children, var->index, NULL);
-    }
+    var->parent->children[var->index] = NULL;
 
   if (!var->obj_name.empty ())
     uninstall_variable (var);
 
   /* Free memory associated with this variable.  */
-  free_variable (var);
+  delete var;
 }
 
 /* Install the given variable VAR with the object name VAR->OBJ_NAME.  */
-static int
+static bool
 install_variable (struct varobj *var)
 {
   struct vlist *cv;
@@ -1888,7 +1830,7 @@ install_variable (struct varobj *var)
       rootlist = var->root;
     }
 
-  return 1;			/* OK */
+  return true;			/* OK */
 }
 
 /* Unistall the object VAR.  */
@@ -1985,15 +1927,12 @@ static struct varobj *
 create_child_with_value (struct varobj *parent, int index,
 			 struct varobj_item *item)
 {
-  struct varobj *child;
-
-  child = new_variable ();
+  varobj *child = new varobj (parent->root);
 
   /* NAME is allocated by caller.  */
   std::swap (child->name, item->name);
   child->index = index;
   child->parent = parent;
-  child->root = parent->root;
 
   if (varobj_is_anonymous_child (child))
     child->obj_name = string_printf ("%s.%d_anonymous",
@@ -2026,57 +1965,17 @@ create_child_with_value (struct varobj *parent, int index,
  */
 
 /* Allocate memory and initialize a new variable.  */
-static struct varobj *
-new_variable (void)
+varobj::varobj (varobj_root *root_)
+: root (root_), dynamic (new varobj_dynamic)
 {
-  struct varobj *var;
-
-  var = new varobj ();
-  var->index = -1;
-  var->type = NULL;
-  var->value = NULL;
-  var->num_children = -1;
-  var->parent = NULL;
-  var->children = NULL;
-  var->format = FORMAT_NATURAL;
-  var->root = NULL;
-  var->updated = 0;
-  var->frozen = 0;
-  var->not_fetched = 0;
-  var->dynamic = XNEW (struct varobj_dynamic);
-  var->dynamic->children_requested = 0;
-  var->from = -1;
-  var->to = -1;
-  var->dynamic->constructor = 0;
-  var->dynamic->pretty_printer = 0;
-  var->dynamic->child_iter = 0;
-  var->dynamic->saved_item = 0;
-
-  return var;
-}
-
-/* Allocate memory and initialize a new root variable.  */
-static struct varobj *
-new_root_variable (void)
-{
-  struct varobj *var = new_variable ();
-
-  var->root = new varobj_root ();
-  var->root->lang_ops = NULL;
-  var->root->exp = NULL;
-  var->root->valid_block = NULL;
-  var->root->frame = null_frame_id;
-  var->root->floating = 0;
-  var->root->rootvar = NULL;
-  var->root->is_valid = 1;
-
-  return var;
 }
 
 /* Free any allocated memory associated with VAR.  */
-static void
-free_variable (struct varobj *var)
+
+varobj::~varobj ()
 {
+  varobj *var = this;
+
 #if HAVE_PYTHON
   if (var->dynamic->pretty_printer != NULL)
     {
@@ -2094,20 +1993,7 @@ free_variable (struct varobj *var)
   if (is_root_p (var))
     delete var->root;
 
-  xfree (var->dynamic);
-  delete var;
-}
-
-static void
-do_free_variable_cleanup (void *var)
-{
-  free_variable ((struct varobj *) var);
-}
-
-static struct cleanup *
-make_cleanup_free_variable (struct varobj *var)
-{
-  return make_cleanup (do_free_variable_cleanup, var);
+  delete var->dynamic;
 }
 
 /* Return the type of the value that's stored in VAR,
@@ -2183,13 +2069,13 @@ name_of_child (struct varobj *var, int index)
 }
 
 /* If frame associated with VAR can be found, switch
-   to it and return 1.  Otherwise, return 0.  */
+   to it and return true.  Otherwise, return false.  */
 
-static int
+static bool
 check_scope (const struct varobj *var)
 {
   struct frame_info *fi;
-  int scope;
+  bool scope;
 
   fi = frame_find_by_id (var->root->frame);
   scope = fi != NULL;
@@ -2200,7 +2086,7 @@ check_scope (const struct varobj *var)
 
       if (pc <  BLOCK_START (var->root->valid_block) ||
 	  pc >= BLOCK_END (var->root->valid_block))
-	scope = 0;
+	scope = false;
       else
 	select_frame (fi);
     }
@@ -2214,7 +2100,7 @@ value_of_root_1 (struct varobj **var_handle)
 {
   struct value *new_val = NULL;
   struct varobj *var = *var_handle;
-  int within_scope = 0;
+  bool within_scope = false;
 								 
   /*  Only root variables can be updated...  */
   if (!is_root_p (var))
@@ -2225,7 +2111,7 @@ value_of_root_1 (struct varobj **var_handle)
 
   /* Determine whether the variable is still around.  */
   if (var->root->valid_block == NULL || var->root->floating)
-    within_scope = 1;
+    within_scope = true;
   else if (var->root->thread_id == 0)
     {
       /* The program was single-threaded when the variable object was
@@ -2273,7 +2159,7 @@ value_of_root_1 (struct varobj **var_handle)
    - *var_handle will be set to the new varobj 
    Otherwise, *type_changed will be set to 0.  */
 static struct value *
-value_of_root (struct varobj **var_handle, int *type_changed)
+value_of_root (struct varobj **var_handle, bool *type_changed)
 {
   struct varobj *var;
 
@@ -2323,7 +2209,7 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 	  install_variable (tmp_var);
 	  *var_handle = tmp_var;
 	  var = *var_handle;
-	  *type_changed = 1;
+	  *type_changed = true;
 	}
     }
   else
@@ -2349,7 +2235,7 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 	var->num_children = -1;
 	var->to = -1;
 	var->from = -1;
-	*type_changed = 1;
+	*type_changed = true;
       }
     return value;
   }
@@ -2400,7 +2286,7 @@ varobj_value_get_print_value (struct value *value,
   gdb::unique_xmalloc_ptr<char> encoding;
   /* Initialize it just to avoid a GCC false warning.  */
   CORE_ADDR str_addr = 0;
-  int string_print = 0;
+  bool string_print = false;
 
   if (value == NULL)
     return std::string ();
@@ -2440,7 +2326,7 @@ varobj_value_get_print_value (struct value *value,
 		    {
 		      gdbpy_extract_lazy_string (output.get (), &str_addr,
 						 &type, &len, &encoding);
-		      string_print = 1;
+		      string_print = true;
 		    }
 		  else
 		    {
@@ -2462,7 +2348,7 @@ varobj_value_get_print_value (struct value *value,
 			  if (hint)
 			    {
 			      if (!strcmp (hint.get (), "string"))
-				string_print = 1;
+				string_print = true;
 			    }
 
 			  thevalue = std::string (s.get ());
@@ -2504,13 +2390,13 @@ varobj_value_get_print_value (struct value *value,
   return std::move (stb.string ());
 }
 
-int
+bool
 varobj_editable_p (const struct varobj *var)
 {
   struct type *type;
 
   if (!(var->root->is_valid && var->value && VALUE_LVAL (var->value)))
-    return 0;
+    return false;
 
   type = varobj_get_value_type (var);
 
@@ -2521,27 +2407,27 @@ varobj_editable_p (const struct varobj *var)
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
-      return 0;
+      return false;
       break;
 
     default:
-      return 1;
+      return true;
       break;
     }
 }
 
 /* Call VAR's value_is_changeable_p language-specific callback.  */
 
-int
+bool
 varobj_value_is_changeable_p (const struct varobj *var)
 {
   return var->root->lang_ops->value_is_changeable_p (var);
 }
 
-/* Return 1 if that varobj is floating, that is is always evaluated in the
+/* Return true if that varobj is floating, that is is always evaluated in the
    selected frame, and not bound to thread/frame.  Such variable objects
    are created using '@' as frame specifier to -var-create.  */
-int
+bool
 varobj_floating_p (const struct varobj *var)
 {
   return var->root->floating;
@@ -2550,14 +2436,14 @@ varobj_floating_p (const struct varobj *var)
 /* Implement the "value_is_changeable_p" varobj callback for most
    languages.  */
 
-int
+bool
 varobj_default_value_is_changeable_p (const struct varobj *var)
 {
-  int r;
+  bool r;
   struct type *type;
 
   if (CPLUS_FAKE_CHILD (var))
-    return 0;
+    return false;
 
   type = varobj_get_value_type (var);
 
@@ -2566,11 +2452,11 @@ varobj_default_value_is_changeable_p (const struct varobj *var)
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
     case TYPE_CODE_ARRAY:
-      r = 0;
+      r = false;
       break;
 
     default:
-      r = 1;
+      r = true;
     }
 
   return r;
@@ -2620,10 +2506,10 @@ varobj_invalidate_iter (struct varobj *var, void *unused)
 	  install_variable (tmp_var);
 	}
       else
-	var->root->is_valid = 0;
+	var->root->is_valid = false;
     }
   else /* locals must be invalidated.  */
-    var->root->is_valid = 0;
+    var->root->is_valid = false;
 }
 
 /* Invalidate the varobjs that are tied to locals and re-create the ones that

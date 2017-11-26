@@ -43,6 +43,7 @@ if { ! $no_frames } {
 	"backtrace from bar 2"
     gdb_test "up" "#1  .*func1 .* at .*" "up from bar 2"
     gdb_test "info frame" ".*inlined into frame.*" "func1 inlined 2"
+    setup_kfail "gdb/xyz" *-*-*
     gdb_test "info locals" "array = {.*}" "info locals above bar 2"
 
     set msg "info args above bar 2"
@@ -82,6 +83,7 @@ if { ! $no_frames } {
 	"backtrace from bar 3"
     gdb_test "up" "#1  .*func1 .* at .*" "up from bar 3"
     gdb_test "info frame" ".*inlined into frame.*" "func1 inlined 3"
+    setup_kfail "gdb/xyz" *-*-*
     gdb_test "info locals" "array = {.*}" "info locals above bar 3"
 
     set msg "info args above bar 3"

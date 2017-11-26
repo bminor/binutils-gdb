@@ -2817,7 +2817,7 @@ sh_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (htab->root.dynobj != NULL
 	      && (h->needs_plt
-		  || h->u.weakdef != NULL
+		  || h->is_weakalias
 		  || (h->def_dynamic
 		      && h->ref_regular
 		      && !h->def_regular)));
@@ -2850,14 +2850,14 @@ sh_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      struct elf_link_hash_entry *def = weakdef (h);
+      BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+      h->root.u.def.section = def->root.u.def.section;
+      h->root.u.def.value = def->root.u.def.value;
       if (info->nocopyreloc)
-	h->non_got_ref = h->u.weakdef->non_got_ref;
+	h->non_got_ref = def->non_got_ref;
       return TRUE;
     }
 

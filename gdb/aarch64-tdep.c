@@ -54,9 +54,6 @@
 
 #include "record.h"
 #include "record-full.h"
-
-#include "features/aarch64.c"
-
 #include "arch/aarch64-insn.h"
 
 #include "opcode/aarch64.h"
@@ -2828,6 +2825,20 @@ aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
   return 1;
 }
 
+/* Get the correct target description.  */
+
+const target_desc *
+aarch64_read_description ()
+{
+  static target_desc *aarch64_tdesc = NULL;
+  target_desc **tdesc = &aarch64_tdesc;
+
+  if (*tdesc == NULL)
+    *tdesc = aarch64_create_target_description ();
+
+  return *tdesc;
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -2851,7 +2862,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Ensure we always have a target descriptor.  */
   if (!tdesc_has_registers (tdesc))
-    tdesc = tdesc_aarch64;
+    tdesc = aarch64_read_description ();
 
   gdb_assert (tdesc);
 
@@ -3044,8 +3055,6 @@ _initialize_aarch64_tdep (void)
   gdbarch_register (bfd_arch_aarch64, aarch64_gdbarch_init,
 		    aarch64_dump_tdep);
 
-  initialize_tdesc_aarch64 ();
-
   /* Debug this file's internals.  */
   add_setshow_boolean_cmd ("aarch64", class_maintenance, &aarch64_debug, _("\
 Set AArch64 debugging."), _("\
@@ -3060,6 +3069,8 @@ When on, AArch64 specific debugging is enabled."),
 			    selftests::aarch64_analyze_prologue_test);
   selftests::register_test ("aarch64-process-record",
 			    selftests::aarch64_process_record_test);
+  selftests::record_xml_tdesc ("aarch64.xml",
+			       aarch64_create_target_description ());
 #endif
 }
 

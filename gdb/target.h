@@ -2523,4 +2523,18 @@ extern void target_prepare_to_generate_core (void);
 /* See to_done_generating_core.  */
 extern void target_done_generating_core (void);
 
+#if GDB_SELF_TEST
+namespace selftests {
+
+/* A mock process_stratum target_ops that doesn't read/write registers
+   anywhere.  */
+
+class test_target_ops : public target_ops
+{
+public:
+  test_target_ops ();
+};
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 #endif /* !defined (TARGET_H) */

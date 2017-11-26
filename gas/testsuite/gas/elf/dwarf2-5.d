@@ -60,7 +60,7 @@ Raw dump of debug contents of section \.debug_line:
   \[0x.*\]  Extended opcode 1: End of Sequence
 
 
-Decoded dump of debug contents of section \.debug_line:
+Contents of the \.debug_line section:
 
 CU: dwarf2-5\.c:
 File name  *Line number  *Starting address  *View

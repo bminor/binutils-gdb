@@ -723,10 +723,12 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
       /* If this is a weak defined symbol, and we know a corresponding
 	 real symbol from the same dynamic object, make sure the real
 	 symbol is also made into a dynamic symbol.  */
-      if (h->u.weakdef != NULL
-	  && h->u.weakdef->dynindx == -1)
+      if (h->is_weakalias)
 	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, h->u.weakdef))
+	  struct elf_link_hash_entry *def = weakdef (h);
+
+	  if (def->dynindx == -1
+	      && !bfd_elf_link_record_dynamic_symbol (info, def))
 	    return FALSE;
 	}
     }
@@ -2782,26 +2784,28 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
   /* If this is a weak defined symbol in a dynamic object, and we know
      the real definition in the dynamic object, copy interesting flags
      over to the real definition.  */
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
+      struct elf_link_hash_entry *def = weakdef (h);
+
       /* If the real definition is defined by a regular object file,
 	 don't do anything special.  See the longer description in
 	 _bfd_elf_adjust_dynamic_symbol, below.  */
-      if (h->u.weakdef->def_regular)
-	h->u.weakdef = NULL;
+      if (def->def_regular)
+	{
+	  h = def;
+	  while ((h = h->u.alias) != def)
+	    h->is_weakalias = 0;
+	}
       else
 	{
-	  struct elf_link_hash_entry *weakdef = h->u.weakdef;
-
 	  while (h->root.type == bfd_link_hash_indirect)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
 	  BFD_ASSERT (h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak);
-	  BFD_ASSERT (weakdef->def_dynamic);
-	  BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined
-		      || weakdef->root.type == bfd_link_hash_defweak);
-	  (*bed->elf_backend_copy_indirect_symbol) (eif->info, weakdef, h);
+	  BFD_ASSERT (def->def_dynamic);
+	  BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+	  (*bed->elf_backend_copy_indirect_symbol) (eif->info, def, h);
 	}
     }
 
@@ -2863,7 +2867,7 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
       && (h->def_regular
 	  || !h->def_dynamic
 	  || (!h->ref_regular
-	      && (h->u.weakdef == NULL || h->u.weakdef->dynindx == -1))))
+	      && (!h->is_weakalias || weakdef (h)->dynindx == -1))))
     {
       h->plt = elf_hash_table (eif->info)->init_plt_offset;
       return TRUE;
@@ -2908,15 +2912,17 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
      wind up at different memory locations.  The tzset call will set
      _timezone, leaving timezone unchanged.  */
 
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
+      struct elf_link_hash_entry *def = weakdef (h);
+
       /* If we get to this point, there is an implicit reference to
-	 H->U.WEAKDEF by a regular object file via the weak symbol H.  */
-      h->u.weakdef->ref_regular = 1;
+	 the alias by a regular object file via the weak symbol H.  */
+      def->ref_regular = 1;
 
       /* Ensure that the backend adjust_dynamic_symbol function sees
-	 H->U.WEAKDEF before H by recursively calling ourselves.  */
-      if (! _bfd_elf_adjust_dynamic_symbol (h->u.weakdef, eif))
+	 the strong alias before H by recursively calling ourselves.  */
+      if (!_bfd_elf_adjust_dynamic_symbol (def, eif))
 	return FALSE;
     }
 
@@ -4256,7 +4262,6 @@ error_free_dyn:
       bfd_boolean definition;
       bfd_boolean size_change_ok;
       bfd_boolean type_change_ok;
-      bfd_boolean new_weakdef;
       bfd_boolean new_weak;
       bfd_boolean old_weak;
       bfd_boolean override;
@@ -4588,29 +4593,27 @@ error_free_dyn:
       *sym_hash = h;
 
       new_weak = (flags & BSF_WEAK) != 0;
-      new_weakdef = FALSE;
       if (dynamic
 	  && definition
 	  && new_weak
 	  && !bed->is_function_type (ELF_ST_TYPE (isym->st_info))
 	  && is_elf_hash_table (htab)
-	  && h->u.weakdef == NULL)
+	  && h->u.alias == NULL)
 	{
 	  /* Keep a list of all weak defined non function symbols from
-	     a dynamic object, using the weakdef field.  Later in this
-	     function we will set the weakdef field to the correct
+	     a dynamic object, using the alias field.  Later in this
+	     function we will set the alias field to the correct
 	     value.  We only put non-function symbols from dynamic
 	     objects on this list, because that happens to be the only
 	     time we need to know the normal symbol corresponding to a
 	     weak symbol, and the information is time consuming to
-	     figure out.  If the weakdef field is not already NULL,
+	     figure out.  If the alias field is not already NULL,
 	     then this symbol was already defined by some previous
 	     dynamic object, and we will be using that previous
 	     definition anyhow.  */
 
-	  h->u.weakdef = weaks;
+	  h->u.alias = weaks;
 	  weaks = h;
-	  new_weakdef = TRUE;
 	}
 
       /* Set the alignment of a common symbol.  */
@@ -4689,9 +4692,8 @@ error_free_dyn:
 	      if ((h == hi || !hi->forced_local)
 		  && (h->def_regular
 		      || h->ref_regular
-		      || (h->u.weakdef != NULL
-			  && ! new_weakdef
-			  && h->u.weakdef->dynindx != -1)))
+		      || (h->is_weakalias
+			  && weakdef (h)->dynindx != -1)))
 		dynsym = TRUE;
 	    }
 
@@ -4860,11 +4862,10 @@ error_free_dyn:
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		goto error_free_vers;
-	      if (h->u.weakdef != NULL
-		  && ! new_weakdef
-		  && h->u.weakdef->dynindx == -1)
+	      if (h->is_weakalias
+		  && weakdef (h)->dynindx == -1)
 		{
-		  if (!bfd_elf_link_record_dynamic_symbol (info, h->u.weakdef))
+		  if (!bfd_elf_link_record_dynamic_symbol (info, weakdef (h)))
 		    goto error_free_vers;
 		}
 	    }
@@ -5084,7 +5085,7 @@ error_free_dyn:
       nondeflt_vers = NULL;
     }
 
-  /* Now set the weakdefs field correctly for all the weak defined
+  /* Now set the alias field correctly for all the weak defined
      symbols we found.  The only way to do this is to search all the
      symbols.  Since we only need the information for non functions in
      dynamic objects, that's the only time we actually put anything on
@@ -5142,8 +5143,8 @@ error_free_dyn:
 	  size_t i, j, idx = 0;
 
 	  hlook = weaks;
-	  weaks = hlook->u.weakdef;
-	  hlook->u.weakdef = NULL;
+	  weaks = hlook->u.alias;
+	  hlook->u.alias = NULL;
 
 	  if (hlook->root.type != bfd_link_hash_defined
 	      && hlook->root.type != bfd_link_hash_defweak)
@@ -5205,7 +5206,15 @@ error_free_dyn:
 		break;
 	      else if (h != hlook)
 		{
-		  hlook->u.weakdef = h;
+		  struct elf_link_hash_entry *t;
+
+		  hlook->u.alias = h;
+		  hlook->is_weakalias = 1;
+		  t = h;
+		  if (t->u.alias != NULL)
+		    while (t->u.alias != h)
+		      t = t->u.alias;
+		  t->u.alias = hlook;
 
 		  /* If the weak definition is in the list of dynamic
 		     symbols, make sure the real definition is put
@@ -12756,8 +12765,8 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 	 keep the non-weak definition because many backends put
 	 dynamic reloc info on the non-weak definition for code
 	 handling copy relocs.  */
-      if (h->u.weakdef != NULL)
-	h->u.weakdef->mark = 1;
+      if (h->is_weakalias)
+	weakdef (h)->mark = 1;
 
       if (start_stop != NULL)
 	{

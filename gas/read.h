@@ -19,6 +19,7 @@
    02110-1301, USA.  */
 
 extern char *input_line_pointer;	/* -> char we are parsing now.  */
+extern bfd_boolean input_from_string;
 
 /* Define to make whitespace be allowed in many syntactically
    unnecessary places.  Normally undefined.  For compatibility with

@@ -22,10 +22,10 @@ load_lib cell.exp
 
 set ppu_file "size"
 set ppu_src ${srcdir}/${subdir}/${ppu_file}.c
-set ppu_bin ${objdir}/${subdir}/${ppu_file}
+set ppu_bin [standard_output_file ${ppu_file}]
 set spu_file "size-spu"
 set spu_src ${srcdir}/${subdir}/${spu_file}.c
-set spu_bin ${objdir}/${subdir}/${spu_file}
+set spu_bin [standard_output_file ${spu_file}]
 
 if {[skip_cell_tests]} {
     return 0

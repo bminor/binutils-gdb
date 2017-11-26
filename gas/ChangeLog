@@ -1,3 +1,292 @@
+2017-11-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/sse-noavx.s: Add tests for fisttps and
+	fisttpl.
+	* testsuite/gas/i386/x86-64-sse-noavx.s: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-sse-noavx.d: Updated.
+	* testsuite/gas/i386/sse-noavx.d: Likewise.
+	* testsuite/gas/i386/x86-64-sse-noavx.d: Likewise.
+
+2017-11-24  Jim Wilson  <jimw@sifive.com>
+
+	* write.h (FAKE_LABEL_CHAR): Expand comment.
+
+2017-11-24  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (check_VecOperations): Check register type
+	for masking. Quote the actual register name in the respective
+	diagnostic. Check {z} wasn't specified on its own.
+	* testsuite/gas/i386/inval-avx512f.s,
+	testsuite/gas/i386/x86-64-inval-avx512f.s: Add further bad
+	masking tests.
+	* testsuite/gas/i386/inval-avx512f.l,
+	testsuite/gas/i386/x86-64-inval-avx512f.l: Adjust expectations.
+
+2017-11-24  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/intel.d, testsuite/gas/i386/opcode.d,
+	testsuite/gas/i386/opcode-suffix.d, testsuite/gas/i386/sse3.d,
+	testsuite/gas/i386/sse-noavx.d, testsuite/gas/i386/x86-64-sse3.d,
+	testsuite/gas/i386/x86-64-sse-noavx.d,
+	testsuite/gas/i386/ilp32/x86-64-sse3.d,
+	testsuite/gas/i386/ilp32/x86-64-sse-noavx.d: Adjust expectations.
+
+2017-11-23  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/gas/all/err-fakelabel.s (dg-error): Also accept fatal error
+	string.
+
+	* as.c (INITIALIZING_EMULS): Define.
+	* config/obj-multi.h (FAKE_LABEL_NAME): When INITIALIZING_EMULS set,
+	don't define it.
+
+2017-11-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* testsuite/gas/i386/avx512f_vaes-intel.d: Regenerate.
+	* testsuite/gas/i386/avx512f_vaes.d: Likewise.
+	* testsuite/gas/i386/avx512f_vaes-wig1-intel.d: Likewise.
+	* testsuite/gas/i386/avx512f_vaes-wig1.d: Likewise.
+	* testsuite/gas/i386/avx512vl_vaes-intel.d: Likewise.
+	* testsuite/gas/i386/avx512vl_vaes.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_vaes.s: Add instructions with
+	disp8*N.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-intel.d: Regenerate.
+	* testsuite/gas/i386/x86-64-avx512f_vaes.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-wig.s: Add instructions with
+	disp8*N.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-wig1-intel.d: Regenerate.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-wig1.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-intel.d: Regenerate.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-wig.s: Add instructions with
+	disp8*N.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-wig1-intel.d: Regenerate.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-wig1.d: Regenerate.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
+	* tc-i386.c (check_VecOperands): Don't clear .disp16.
+	* testsuite/gas/i386/avx512f.s: Add 16-bit addressing tests.
+	* testsuite/gas/i386/avx512f.d,
+	testsuite/gas/i386/avx512f-intel.d: Adjust expectations.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/22441
+	* config/tc-i386.c (build_modrm_byte): Add address override
+	prefix checks alongside 64-bit mode ones.
+	* testsuite/gas/i386/reloc64.s: Add 32-bit signed/unsigned
+	relocation cases.
+	* testsuite/gas/i386/reloc64.d: Adjust expectations.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (build_modrm_byte): Drop VSIB handling from
+	code also setting fake_zero_displacement.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/arch-4.s: Correct ud1 and ud2b. Add ud0.
+	* testsuite/gas/i386/intel.s: Test ud2 instead of ud2b.
+	* testsuite/gas/i386/opcode.s: Likewise.
+	* testsuite/gas/i386/arch-4.d, testsuite/gas/i386/intel.d,
+	testsuite/gas/i386/opcode.d, testsuite/gas/i386/opcode-intel.d,
+	testsuite/gas/i386/opcode-suffix.d: Adjust expectations.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386-intel.c (i386_intel_operand): Don't call
+	as_bad() if a prior error was already reported.
+	* testsuite/gas/i386/inval-avx512f.l,
+	testsuite/gas/i386/x86-64-inval-avx512f.l: Adjust expectations.
+
+2017-11-22  Jim Wilson  <jimw@sifive.com>
+
+	* as.c: Include write.h.
+	(common_emul_init): Use FAKE_LABEL_NAME.
+	* ecoff.c (add_file, ecoff_directive_end, ecoff_directive_loc):
+	Likewise.
+	(ecoff_build_symbols): Use FAKE_LABEL_CHAR.
+	* expr.c (get_symbol_name): Use FAKE_LABEL_CHAR.  Accept only if
+	input_from_string is TRUE.
+	* read.c (input_from_string): New.
+	(read_symbol_name): Use FAKE_LABEL_CHAR.  Accept only if
+	input_from_string is TRUE.
+	(temp_ilp): Set input_from_string to TRUE.
+	(restore_ilp): Set input_from_string to FALSE.
+	* read.h (input_from_string): Declare.
+	* symbols.c: Include write.h
+	(S_IS_LOCAL): Check for FAKE_LABEL_CHAR.
+	(symbol_relc_make_sym): Fix comment refering to default fake label
+	string.
+	* write.h (FAKE_LABEL_CHAR): New.
+	* config/tc-riscv.h (FAKE_LABEL_CHAR): Define.
+	* testsuite/gas/all/err-fakelabel.s: New.
+
+	* doc/as.texinfo (.align): Change some to most for text nop fill.
+	(.balign, .p2align): Likewise.
+
+2017-11-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_reg_type): Comment on the link with
+	reg_expected_msgs.
+	(reg_expected_msgs): Initialize using array designators with
+	arm_reg_type index.
+
+2017-11-22  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/hregs-err.s: New test.
+
+2017-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/22464
+	* testsuite/gas/i386/align-1.s: New file.
+	* testsuite/gas/i386/align-1a.d: Likewise.
+	* testsuite/gas/i386/align-1b.d: Likewise.
+	* testsuite/gas/i386/i386.exp: Run align-1a and align-1b.
+
+2017-11-21  Claudiu Zissulescu <claziss@synopsys.com>
+
+	* testsuite/gas/arc/b.d : Update test.
+	* testsuite/gas/arc/bl.d: Likewise.
+	* testsuite/gas/arc/jli-1.d: Likewise.
+	* testsuite/gas/arc/lp.d: Likewise.
+	* testsuite/gas/arc/pcl-relocs.d: Likewise.
+	* testsuite/gas/arc/pcrel-relocs.d: Likewise.
+	* testsuite/gas/arc/pic-relocs.d: Likewise.
+	* testsuite/gas/arc/plt-relocs.d: Likewise.
+	* testsuite/gas/arc/pseudos.d: Likewise.
+	* testsuite/gas/arc/relax-avoid2.d: Likewise.
+	* testsuite/gas/arc/relax-avoid3.d: Likewise.
+	* testsuite/gas/arc/relax-b.d: Likewise.
+	* testsuite/gas/arc/tls-relocs.d: Likewise.
+	* testsuite/gas/arc/relax-add01.d: Likewise.
+	* testsuite/gas/arc/relax-add04.d: Likewise.
+	* testsuite/gas/arc/relax-ld01.d: Likewise.
+	* testsuite/gas/arc/relax-sub01.d: Likewise.
+	* testsuite/gas/arc/relax-sub02.d: Likewise.
+	* testsuite/gas/arc/relax-sub04.d: Likewise.
+	* testsuite/gas/arc/pcl-print.s: New file.
+	* testsuite/gas/arc/pcl-print.d: Likewise.
+	* testsuite/gas/arc/nps400-12.d: Likewise.
+
+2017-11-21  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-xtensa.c (finish_vinsn): Avoid multiple ngettext calls
+	in error message.
+
+2017-11-20  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/i386/x86-64-reg-bad.l: Accept trailing padding.
+
+2017-11-16  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c (fp16fml): New.
+	* doc/c-aarch64.texi (fp16fml): New.
+	* testsuite/gas/aarch64/armv8_2-a-crypto-fp16.d (fp16): Make fp16fml.
+	* testsuite/gas/aarch64/armv8_3-a-crypto-fp16.d (fp16): Make fp16fml.
+
+2017-11-16  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcodes/aarch64-tbl.h
+	(aarch64_feature_crypto): Add ARCH64_FEATURE_SIMD and AARCH64_FEATURE_FP.
+	(aarch64_feature_crypto_v8_2, aarch64_feature_sm4): Likewise.
+	(aarch64_feature_sha3): Likewise.
+
+2017-11-16  Tamar Christina  <tamar.christina@arm.com>
+
+	* doc/c-aarch64.texi (armv8.4-a, sha2, sha3, sm4): New.
+	(dotprod): Update default note.
+
+2017-11-16  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/gas/aarch64/armv8_4-a-illegal.d: New.
+	* testsuite/gas/aarch64/armv8_4-a-illegal.l: New.
+	* testsuite/gas/aarch64/armv8_4-a-illegal.s: New.
+	* testsuite/gas/aarch64/armv8_4-a.d: New.
+	* testsuite/gas/aarch64/armv8_4-a.s: New.
+	* testsuite/gas/aarch64/armv8_2-a-crypto-fp16.s: New.
+	* testsuite/gas/aarch64/armv8_2-a-crypto-fp16.d: New.
+	* testsuite/gas/aarch64/armv8_3-a-crypto-fp16.d: New.
+	* testsuite/gas/aarch64/armv8_4-a-crypto-fp16.d: New.
+	* testsuite/gas/aarch64/armv8_2-a-crypto-fp16-illegal.s: New.
+	* testsuite/gas/aarch64/armv8_2-a-crypto-fp16-illegal.l: New.
+	* testsuite/gas/aarch64/armv8_2-a-crypto-fp16-illegal.d: New.
+
+2017-11-16  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/noextreg.s: Add tests with register index
+	bit 3 set.
+	* testsuite/gas/i386/noextreg.d: Adjust expectations.
+
+2017-11-16  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (process_suffix): Ignore .no_qsuf outside of
+	64-bit mode.
+	* testsuite/gas/i386/ptwrite.s: Add test for memory operand
+	without DWORD PTR.
+	* testsuite/gas/i386/ptwrite.d,
+	testsuite/gas/i386/ptwrite-intel.d: Adjust expectations.
+
+2017-11-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/noextreg.s: Replace .code64/.code32 and
+	64-bit instructions with .byte.  Remove ELF directive.
+
+2017-11-15  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-arm.c (arm_ext_fp16_fml, fp16fml): New.
+	(do_neon_fmac_maybe_scalar_long): Use arm_ext_fp16_fml.
+	* doc/c-arm.texi (fp16, fp16fml): New.
+	* testsuite/gas/arm/armv8_2-a-fp16.d (fp16): Make fp16fml.
+	* testsuite/gas/arm/armv8_3-a-fp16.d (fp16): Make fp16fml.
+	* testsuite/gas/arm/armv8_2-a-fp16-illegal.d (fp16): Make fp16fml.
+	* testsuite/gas/arm/armv8_2-a-fp16-thumb2.d (fp16): Make fp16fml.
+
+2017-11-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 15152
+	* testsuite/gas/avr/large-debug-line-table.d: Update expected
+	output.
+	* testsuite/gas/elf/dwarf2-11.d: Likewise.
+	* testsuite/gas/elf/dwarf2-12.d: Likewise.
+	* testsuite/gas/elf/dwarf2-13.d: Likewise.
+	* testsuite/gas/elf/dwarf2-14.d: Likewise.
+	* testsuite/gas/elf/dwarf2-15.d: Likewise.
+	* testsuite/gas/elf/dwarf2-16.d: Likewise.
+	* testsuite/gas/elf/dwarf2-17.d: Likewise.
+	* testsuite/gas/elf/dwarf2-18.d: Likewise.
+	* testsuite/gas/elf/dwarf2-5.d: Likewise.
+	* testsuite/gas/elf/dwarf2-6.d: Likewise.
+	* testsuite/gas/elf/dwarf2-7.d: Likewise.
+
+2017-11-15  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/noextreg.s: Add tests for VEX-encoded GPR
+	insns with VEX.W set.
+	* testsuite/gas/i386/noextreg.d: Adjust expectations.
+
+2017-11-15  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/noextreg.{s,d}: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2017-11-15  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/x86-64-reg.s: Add extended byte reg tests.
+	* testsuite/gas/i386/x86-64-reg.d,
+	testsuite/gas/i386/x86-64-reg-intel.d,
+	testsuite/gas/i386/ilp32/x86-64-reg.d,
+	testsuite/gas/i386/ilp32/x86-64-reg-intel.d: Adjust
+	expectations.
+
+	* testsuite/gas/i386/x86-64-reg-bad.{s,l}: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2017-11-14  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/gas/lns/lns.exp (lns-common-1): Add riscv*-*-* to alt list.
+
 2017-11-14  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/x86-64-xop.d, testsuite/gas/i386/xop.d,

@@ -786,7 +786,7 @@ riscv_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   BFD_ASSERT (dynobj != NULL
 	      && (h->needs_plt
 		  || h->type == STT_GNU_IFUNC
-		  || h->u.weakdef != NULL
+		  || h->is_weakalias
 		  || (h->def_dynamic
 		      && h->ref_regular
 		      && !h->def_regular)));
@@ -817,12 +817,12 @@ riscv_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      struct elf_link_hash_entry *def = weakdef (h);
+      BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+      h->root.u.def.section = def->root.u.def.section;
+      h->root.u.def.value = def->root.u.def.value;
       return TRUE;
     }
 
@@ -3077,7 +3077,7 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
   if (rel->r_addend < nop_bytes)
     {
       (*_bfd_error_handler)
-	(_("%B(%A+0x%lx): %d bytes required for alignment"
+	(_("%B(%A+0x%lx): %d bytes required for alignment "
 	   "to %d-byte boundary, but only %d present"),
 	   abfd, sym_sec, rel->r_offset, nop_bytes, alignment, rel->r_addend);
       bfd_set_error (bfd_error_bad_value);

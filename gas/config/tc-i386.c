@@ -4798,12 +4798,8 @@ check_VecOperands (const insn_template *t)
 		  i.types[op].bitfield.vec_disp8 = 1;
 		else
 		  {
-		    /* Vector insn can only have Vec_Disp8/Disp32 in
-		       32/64bit modes, and Vec_Disp8/Disp16 in 16bit
-		       mode.  */
+		    /* Vector insn doesn't allow plain Disp8.  */
 		    i.types[op].bitfield.disp8 = 0;
-		    if (flag_code != CODE_16BIT)
-		      i.types[op].bitfield.disp16 = 0;
 		  }
 	      }
 	    else if (flag_code != CODE_16BIT)
@@ -5565,7 +5561,7 @@ process_suffix (void)
 	    suffixes |= 1 << 3;
 	  if (!i.tm.opcode_modifier.no_ssuf)
 	    suffixes |= 1 << 4;
-	  if (!i.tm.opcode_modifier.no_qsuf)
+	  if (flag_code == CODE_64BIT && !i.tm.opcode_modifier.no_qsuf)
 	    suffixes |= 1 << 5;
 
 	  /* There are more than suffix matches.  */
@@ -6566,7 +6562,7 @@ build_modrm_byte (void)
 		  i.types[op].bitfield.disp8 = 0;
 		  i.types[op].bitfield.disp16 = 0;
 		  i.types[op].bitfield.disp64 = 0;
-		  if (flag_code != CODE_64BIT)
+		  if (flag_code != CODE_64BIT || i.prefix[ADDR_PREFIX])
 		    {
 		      /* Must be 32 bit */
 		      i.types[op].bitfield.disp32 = 1;
@@ -6591,13 +6587,7 @@ build_modrm_byte (void)
 	    {
 	      i.rm.mode = 0;
 	      if (!i.disp_operands)
-		{
-		  fake_zero_displacement = 1;
-		  /* Instructions with VSIB byte need 32bit displacement
-		     if there is no base register.  */
-		  if (i.tm.opcode_modifier.vecsib)
-		    i.types[op].bitfield.disp32 = 1;
-		}
+		fake_zero_displacement = 1;
 	      if (i.index_reg == 0)
 		{
 		  gas_assert (!i.tm.opcode_modifier.vecsib);
@@ -6642,7 +6632,7 @@ build_modrm_byte (void)
 		  i.types[op].bitfield.disp8 = 0;
 		  i.types[op].bitfield.disp16 = 0;
 		  i.types[op].bitfield.disp64 = 0;
-		  if (flag_code != CODE_64BIT)
+		  if (flag_code != CODE_64BIT || i.prefix[ADDR_PREFIX])
 		    {
 		      /* Must be 32 bit */
 		      i.types[op].bitfield.disp32 = 1;
@@ -8148,10 +8138,10 @@ check_VecOperations (char *op_string, char *op_end)
 	  else if ((mask = parse_register (op_string, &end_op)) != NULL)
 	    {
 	      /* k0 can't be used for write mask.  */
-	      if (mask->reg_num == 0)
+	      if (!mask->reg_type.bitfield.regmask || mask->reg_num == 0)
 		{
-		  as_bad (_("`%s' can't be used for write mask"),
-			  op_string);
+		  as_bad (_("`%s%s' can't be used for write mask"),
+			  register_prefix, mask->reg_name);
 		  return NULL;
 		}
 
@@ -8227,6 +8217,12 @@ check_VecOperations (char *op_string, char *op_end)
     unknown_vec_op:
       /* We don't know this one.  */
       as_bad (_("unknown vector operation: `%s'"), saved);
+      return NULL;
+    }
+
+  if (i.mask && i.mask->zeroing && !i.mask->mask)
+    {
+      as_bad (_("zeroing-masking only allowed with write mask"));
       return NULL;
     }
 

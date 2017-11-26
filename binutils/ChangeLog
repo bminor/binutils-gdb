@@ -1,3 +1,180 @@
+2017-11-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22444
+	* readelf.c (process_notes_at): Use ELF_NOTE_DESC_OFFSET to get
+	the offset of the note descriptor.  Use ELF_NOTE_NEXT_OFFSET to
+	get the offset of the next note entry.
+
+2017-11-23  Pavel I. Kryukov  <kryukov@frtk.ru>
+
+	PR 22485
+	* readelf.c (process_archive): Use memset to initiaise
+	thin_filedata structure.
+
+2017-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22451
+	* testsuite/binutils-all/x86-64/objects.exp: New file.
+	* testsuite/binutils-all/x86-64/pr22451.o.bz2: Likewise.
+
+2017-11-21  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/binutils-all/arc/objdump.exp: Update pattern matching
+	expression.
+
+2017-11-21  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (dwo_name, dwo_dir, dwo_id, dwo_id_len): New variables.
+	(read_and_display_attr_value): Record dwo variables if requested.
+	(display_augmentation_data): Rename to display_data and make
+	generic.
+	(load_dwo_file): New function.  Loads a separate dwarf object
+	file.
+	(load_separate_debug_file): Add reporting and loading of separate
+	dwarf objet files.
+	* readelf.c (process_section_headers): Add do_debug_links to list
+	of flags requiring a debug dump.
+	(display_debug_section): Tidy up code.
+	* doc/debug.options.texi: Add note that dwo links will also be
+	followed.
+	* testsuite/binutils-all/debuglink.s: Tidy code.
+	* testsuite/binutils-all/dwo.s: New test file.
+	* testsuite/binutils-all/readelf.wk2: New file - expected output
+	from readelf.
+	* testsuite/binutils-all/readelf.exp: Run the new test.
+
+2017-11-18  Alan Modra  <amodra@gmail.com>
+
+	PR 22443
+	* nm.c (sort_symbols_by_size): Don't attempt to access
+	section symbol internal_elf_sym.
+	(print_symbol): Likewise.  Don't call bfd_get_symbol_version_string
+	for section symbols.
+	* objdump.c (compare_symbols): Don't attempt to access
+	section symbol internal_elf_sym.
+	(objdump_print_symname): Don't call bfd_get_symbol_version_string
+	for section symbols.
+
+2017-11-17  Jim Wilson  <jimw@sifive.com>
+
+	* readelf.c (elf/riscv.h): Alphabetize include.
+	(is_32bit_inplace_add_reloc, is_32bit_inplace_sub_reloc)
+	(is_64bit_inplace_add_reloc, is_64bit_inplace_sub_reloc)
+	(is_16bit_inplace_add_reloc, is_16bit_inplace_sub_reloc)
+	(is_8bit_inplace_add_reloc, is_8bit_inplace_sub_reloc): New.
+	(apply_relocations): New locals reloc_inplace and reloc_subtract.
+	Call the new functions and set the new locals.  Call byte_get if
+	reloc_inplace.  Subtract sym->st_value if reloc_subtract.
+
+2017-11-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 22449
+	* ar.c (write_archive): Free the temporary file name.
+
+2017-11-17  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_archive): Include member name in the
+	file_name of the filedata structure.
+
+2017-11-15  Alan Modra  <amodra@gmail.com>
+
+	PR 22426
+	* objcopy.c (copy_main): Free tmpname.
+
+2017-11-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 15152
+	* dwarf.h (enum dwarf_section_display_enum): Add gnu_debuglink,
+	gnu_debugaltlink and separate_debug_str.
+	(struct dwarf_section): Add filename field.
+	Add prototypes for load_separate_debug_file, close_debug_file and
+	open_debug_file.
+	* dwarf.c (do_debug_links): New.
+	(do_follow_links): New.
+	(separate_debug_file, separate_debug_filename): New.
+	(fetch_alt_indirect_string): New function.  Retrieves a string
+	from the debug string table in the separate debug info file.
+	(read_and_display_attr_value): Use it with DW_FORM_GNU_strp_alt.
+	(load_debug_section_with_follow): New function.  Like
+	load_debug_section, but if the first attempt fails, then tries
+	again in the separate debug info file.
+	(introduce): New function.
+	(process_debug_info): Use load_debug_section_with_follow and
+	introduce.
+	(load_debug_info): Likewise.
+	(display_debug_lines_raw): Likewise.
+	(display_debug_lines_decoded): Likewise.
+	(display_debug_macinfo): Likewise.
+	(display_debug_macro): Likewise.
+	(display_debug_abbrev): Likewise.
+	(display_debug_loc): Likewise.
+	(display_debug_str): Likewise.
+	(display_debug_aranges): Likewise.
+	(display_debug_addr); Likewise.
+	(display_debug_frames): Likewise.
+	(display_gdb_index): Likewise.
+	(process_cu_tu_index): Likewise.
+	(load_cu_tu_indexes): Likewise.
+	(display_debug_links): New function.  Displays the contents of a
+	.gnu_debuglink or .gnu_debugaltlink section.
+	(calc_gnu_debuglink_ctc32):New function.  Calculates a CRC32
+	value.
+	(check_gnu_debuglink): New function.  Checks the CRC of a
+	potential separate debug info file.
+	(parse_gnu_debuglink): New function.  Reads a CRC value out of a
+	.gnu_debuglink section.
+	(check_gnu_debugaltlink): New function.
+	(parse_gnu_debugaltlink): New function.  Reads the build-id value
+	out of a .gnu_debugaltlink section.
+	(load_separate_debug_info): New function.  Finds and loads a
+	separate debug info file.
+	(load_separate_debug_file): New function. Attempts to find and
+	follow a link to a separate debug info file.
+	(free_debug_memory): Free the separate debug info file
+	information.
+	(opts_table): Add "follow-links" and "links".
+	(dwarf_select_sections_by_letters): Add "k" and "K".
+	(debug_displays): Reformat.  Add .gnu-debuglink and
+	.gnu_debugaltlink.
+	Add an extra entry for .debug_str in a separate debug info file.
+	* doc/binutils.texi: Move description of debug dump features
+	common to both readelf and objdump into...
+	* objdump.c (usage): Add -Wk and -WK.
+	(load_specific_debug_section): Initialise the filename field in
+	the dwarf_section structure.
+	(close_debug_file): New function.
+	(open_debug_file): New function.
+	(dump_dwarf): Load and dump the separate debug info sections.
+	* readelf.c (struct filedata): New structure.  Contains various
+	variables that used to be global:
+	(current_file_size, string_table, string_table_length, elf_header)
+	(section_headers, program_headers, dump_sects, num_dump_sects):
+	Move into filedata structure.
+	(cmdline): New global variable.  Contains list of sections to dump
+	by number, as specified on the command line.
+	Add filedata parameter to most functions.
+	(load_debug_section): Load the string table if it has not already
+	been retrieved.
+	(close_file): New function.
+	(close_debug_file): New function.
+	(open_file): New function.
+	(open_debug_file): New function.
+	(process_object): Process sections in any separate debug info files.
+	* doc/debug.options.texi: New file.  Add description of =links and
+	=follow-links options.
+	* NEWS: Mention the new feature.
+	* elfcomm.c: Have the byte get functions take a const pointer.
+	* elfcomm.h: Update prototypes.
+	* testsuite/binutils-all/dw5.W: Update expected output.
+	* testsuite/binutils-all/objdump.WL: Update expected output.
+	* testsuite/binutils-all/objdump.exp: Add test of -WK and -Wk.
+	* testsuite/binutils-all/readelf.exp: Add test of -wK and -wk.
+	* testsuite/binutils-all/readelf.k: New file.
+	* testsuite/binutils-all/objdump.Wk: New file.
+	* testsuite/binutils-all/objdump.WK2: New file.
+	* testsuite/binutils-all/linkdebug.s: New file.
+	* testsuite/binutils-all/debuglink.s: New file.
+
 2017-11-10  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/binutils-all/objdump.exp: Expect the debug_ranges test to

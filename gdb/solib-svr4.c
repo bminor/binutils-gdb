@@ -351,7 +351,7 @@ struct svr4_info
   /* Table of struct probe_and_action instances, used by the
      probes-based interface to map breakpoint addresses to probes
      and their associated actions.  Lookup is performed using
-     probe_and_action->probe->address.  */
+     probe_and_action->prob->address.  */
   htab_t probes_table;
 
   /* List of objects loaded into the inferior, used by the probes-
@@ -1664,7 +1664,7 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
 struct probe_and_action
 {
   /* The probe.  */
-  struct probe *probe;
+  probe *prob;
 
   /* The relocated address of the probe.  */
   CORE_ADDR address;
@@ -1699,7 +1699,7 @@ equal_probe_and_action (const void *p1, const void *p2)
    probes table.  */
 
 static void
-register_solib_event_probe (struct probe *probe, CORE_ADDR address,
+register_solib_event_probe (probe *prob, CORE_ADDR address,
 			    enum probe_action action)
 {
   struct svr4_info *info = get_svr4_info ();
@@ -1712,13 +1712,13 @@ register_solib_event_probe (struct probe *probe, CORE_ADDR address,
 					    equal_probe_and_action,
 					    xfree, xcalloc, xfree);
 
-  lookup.probe = probe;
+  lookup.prob = prob;
   lookup.address = address;
   slot = htab_find_slot (info->probes_table, &lookup, INSERT);
   gdb_assert (*slot == HTAB_EMPTY_ENTRY);
 
   pa = XCNEW (struct probe_and_action);
-  pa->probe = probe;
+  pa->prob = prob;
   pa->address = address;
   pa->action = action;
 
@@ -1767,7 +1767,7 @@ solib_event_probe_action (struct probe_and_action *pa)
        arg2: struct link_map *new (optional, for incremental updates)  */
   TRY
     {
-      probe_argc = get_probe_argument_count (pa->probe, frame);
+      probe_argc = pa->prob->get_argument_count (frame);
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -1776,11 +1776,11 @@ solib_event_probe_action (struct probe_and_action *pa)
     }
   END_CATCH
 
-  /* If get_probe_argument_count throws an exception, probe_argc will
-     be set to zero.  However, if pa->probe does not have arguments,
-     then get_probe_argument_count will succeed but probe_argc will
-     also be zero.  Both cases happen because of different things, but
-     they are treated equally here: action will be set to
+  /* If get_argument_count throws an exception, probe_argc will be set
+     to zero.  However, if pa->prob does not have arguments, then
+     get_argument_count will succeed but probe_argc will also be zero.
+     Both cases happen because of different things, but they are
+     treated equally here: action will be set to
      PROBES_INTERFACE_FAILED.  */
   if (probe_argc == 2)
     action = FULL_RELOAD;
@@ -1922,7 +1922,7 @@ svr4_handle_solib_event (void)
       return;
     }
 
-  /* evaluate_probe_argument looks up symbols in the dynamic linker
+  /* evaluate_argument looks up symbols in the dynamic linker
      using find_pc_section.  find_pc_section is accelerated by a cache
      called the section map.  The section map is invalidated every
      time a shared library is loaded or unloaded, and if the inferior
@@ -1931,14 +1931,14 @@ svr4_handle_solib_event (void)
      We called find_pc_section in svr4_create_solib_event_breakpoints,
      so we can guarantee that the dynamic linker's sections are in the
      section map.  We can therefore inhibit section map updates across
-     these calls to evaluate_probe_argument and save a lot of time.  */
+     these calls to evaluate_argument and save a lot of time.  */
   inhibit_section_map_updates (current_program_space);
   usm_chain = make_cleanup (resume_section_map_updates_cleanup,
 			    current_program_space);
 
   TRY
     {
-      val = evaluate_probe_argument (pa->probe, 1, frame);
+      val = pa->prob->evaluate_argument (1, frame);
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -1979,7 +1979,7 @@ svr4_handle_solib_event (void)
     {
       TRY
 	{
-	  val = evaluate_probe_argument (pa->probe, 2, frame);
+	  val = pa->prob->evaluate_argument (2, frame);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
@@ -2084,7 +2084,7 @@ svr4_create_probe_breakpoints (struct gdbarch *gdbarch,
 
       for (probe *p : probes[i])
 	{
-	  CORE_ADDR address = get_probe_address (p, objfile);
+	  CORE_ADDR address = p->get_relocated_address (objfile);
 
 	  create_solib_event_breakpoint (gdbarch, address);
 	  register_solib_event_probe (p, address, action);
@@ -2126,7 +2126,7 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 	  for (int i = 0; i < NUM_PROBES; i++)
 	    {
 	      const char *name = probe_info[i].name;
-	      struct probe *p;
+	      probe *p;
 	      char buf[32];
 
 	      /* Fedora 17 and Red Hat Enterprise Linux 6.2-6.4
@@ -2160,7 +2160,7 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 	      if (!checked_can_use_probe_arguments)
 		{
 		  p = probes[i][0];
-		  if (!can_evaluate_probe_arguments (p))
+		  if (!p->can_evaluate_arguments ())
 		    {
 		      all_probes_found = 0;
 		      break;

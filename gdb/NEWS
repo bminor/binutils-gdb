@@ -3,6 +3,11 @@
 
 *** Changes since GDB 8.0
 
+* GDB now uses the GNU MPFR library, if available, to emulate target
+  floating-point arithmetic during expression evaluation when the target
+  uses different floating-point formats than the host.  At least version
+  3.1 of GNU MPFR is required.
+
 * GDB now supports access to the guarded-storage-control registers and the
   software-based guarded-storage broadcast control registers on IBM z14.
 
@@ -18,11 +23,44 @@
   the remote inferior is started by the GDBserver, use the "unset
   environment" command.
 
+* Completion improvements
+
+  ** GDB can now complete function parameters in linespecs and
+     explicit locations without quoting.  When setting breakpoints,
+     quoting around functions names to help with TAB-completion is
+     generally no longer necessary.  For example, this now completes
+     correctly:
+
+      (gdb) b function(in[TAB]
+      (gdb) b function(int)
+
+     Related, GDB is no longer confused with completing functions in
+     C++ anonymous namespaces:
+
+      (gdb) b (anon[TAB]
+      (gdb) b (anonymous namespace)::[TAB][TAB]
+      (anonymous namespace)::a_function()
+      (anonymous namespace)::b_function()
+
+  ** GDB now has much improved linespec and explicit locations TAB
+     completion support, that better understands what you're
+     completing and offers better suggestions.  For example, GDB no
+     longer offers data symbols as possible completions when you're
+     setting a breakpoint.
+
+  ** GDB now TAB-completes label symbol names.
+
+  ** The "complete" command now mimics TAB completion accurately.
+
 * Python Scripting
 
   ** New events gdb.new_inferior, gdb.inferior_deleted, and
      gdb.new_thread are emitted.  See the manual for further
      description of these.
+
+  ** A new command, "rbreak" has been added to the Python API.  This
+     command allows the setting of a large number of breakpoints via a
+     regex pattern in Python.  See the manual for further details.
 
 * New features in the GDB remote stub, GDBserver
 
@@ -47,6 +85,11 @@
   ** On Unix systems, GDBserver now supports receiving environment
      variables that are to be set or unset from GDB.  These variables
      will affect the environment to be passed to the inferior.
+
+* When catching an Ada exception raised with a message, GDB now prints
+  the message in the catchpoint hit notification. In GDB/MI mode, that
+  information is provided as an extra field named "exception-message"
+  in the *stopped notification.
 
 * New remote packets
 

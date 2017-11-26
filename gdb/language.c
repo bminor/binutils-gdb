@@ -713,7 +713,7 @@ default_symbol_name_matcher (const char *symbol_search_name,
 			  : strncmp_iw_mode::MATCH_PARAMS);
 
   if (strncmp_iw_with_mode (symbol_search_name, name.c_str (), name.size (),
-			    mode) == 0)
+			    mode, language_minimal) == 0)
     {
       if (match != NULL)
 	match->set_match (symbol_search_name);

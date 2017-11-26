@@ -361,6 +361,11 @@ struct objfile
 
   struct psymbol_bcache *psymbol_cache;
 
+  /* Map symbol addresses to the partial symtab that defines the
+     object at that address.  */
+
+  std::vector<std::pair<CORE_ADDR, partial_symtab *>> psymbol_map;
+
   /* Vectors of all partial symbols read in from file.  The actual data
      is stored in the objfile_obstack.  */
 

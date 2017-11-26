@@ -178,6 +178,8 @@ The following extensions are currently supported:
 @code{crypto} (Cryptography Extensions for v8-A architecture, implies @code{fp+simd}),
 @code{dotprod} (Dot Product Extensions for v8.2-A architecture, implies @code{fp+simd}),
 @code{fp} (Floating Point Extensions for v8-A architecture),
+@code{fp16} (FP16 Extensions for v8.2-A architecture, implies @code{fp}),
+@code{fp16fml} (FP16 Floating Point Multiplication Variant Extensions for v8.2-A architecture, implies @code{fp16}),
 @code{idiv} (Integer Divide Extensions for v7-A and v7-R architectures),
 @code{iwmmxt},
 @code{iwmmxt2},

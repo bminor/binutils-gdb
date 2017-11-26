@@ -216,20 +216,22 @@ struct elf_link_hash_entry
   /* Symbol is __start_SECNAME or __stop_SECNAME to mark section
      SECNAME.  */
   unsigned int start_stop : 1;
+  /* Symbol is or was a weak defined symbol from a dynamic object with
+     a strong defined symbol alias.  U.ALIAS points to a list of aliases,
+     the definition having is_weakalias clear.  */
+  unsigned int is_weakalias : 1;
 
   /* String table index in .dynstr if this is a dynamic symbol.  */
   unsigned long dynstr_index;
 
   union
   {
-    /* If this is a weak defined symbol from a dynamic object, this
-       field points to a defined symbol with the same value, if there is
-       one.  Otherwise it is NULL.  */
-    struct elf_link_hash_entry *weakdef;
+    /* Points to a circular list of non-function symbol aliases.  */
+    struct elf_link_hash_entry *alias;
 
     /* Hash value of the name computed using the ELF hash function.
        Used part way through size_dynamic_sections, after we've finished
-       with weakdefs.  */
+       with aliases.  */
     unsigned long elf_hash_value;
   } u;
 
@@ -256,6 +258,16 @@ struct elf_link_hash_entry
     struct elf_link_virtual_table_entry *vtable;
   } u2;
 };
+
+/* Return the strong definition for a weak symbol with aliases.  */
+
+static inline struct elf_link_hash_entry *
+weakdef (struct elf_link_hash_entry *h)
+{
+  while (h->is_weakalias)
+    h = h->u.alias;
+  return h;
+}
 
 /* Will references to this symbol always reference the symbol
    in this object?  */
@@ -731,10 +743,11 @@ struct elf_size_info {
 };
 
 #define elf_symbol_from(ABFD,S) \
-	(((S)->the_bfd->xvec->flavour == bfd_target_elf_flavour \
-	  && (S)->the_bfd->tdata.elf_obj_data != 0) \
-	 ? (elf_symbol_type *) (S) \
-	 : 0)
+  (((S)->the_bfd != NULL					\
+    && (S)->the_bfd->xvec->flavour == bfd_target_elf_flavour	\
+    && (S)->the_bfd->tdata.elf_obj_data != 0)			\
+   ? (elf_symbol_type *) (S)					\
+   : 0)
 
 enum elf_reloc_type_class {
   reloc_class_normal,

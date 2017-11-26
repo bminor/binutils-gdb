@@ -134,13 +134,19 @@ typedef struct _debug_regs
   qnx_reg64 padding[1024];
 } nto_regset_t;
 
-struct private_thread_info
+struct nto_thread_info : public private_thread_info
 {
-  short tid;
-  unsigned char state;
-  unsigned char flags;
-  char name[1];
+  short tid = 0;
+  unsigned char state = 0;
+  unsigned char flags = 0;
+  std::string name;
 };
+
+static inline nto_thread_info *
+get_nto_thread_info (thread_info *thread)
+{
+  return static_cast<nto_thread_info *> (thread->priv.get ());
+}
 
 /* Per-inferior data, common for both procfs and remote.  */
 struct nto_inferior_data

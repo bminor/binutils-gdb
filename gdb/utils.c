@@ -68,6 +68,8 @@
 #include "job-control.h"
 #include "common/selftest.h"
 #include "common/gdb_optional.h"
+#include "cp-support.h"
+#include <algorithm>
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -2156,28 +2158,245 @@ fprintf_symbol_filtered (struct ui_file *stream, const char *name,
     }
 }
 
+/* True if CH is a character that can be part of a symbol name.  I.e.,
+   either a number, a letter, or a '_'.  */
+
+static bool
+valid_identifier_name_char (int ch)
+{
+  return (isalnum (ch) || ch == '_');
+}
+
+/* Skip to end of token, or to END, whatever comes first.  Input is
+   assumed to be a C++ operator name.  */
+
+static const char *
+cp_skip_operator_token (const char *token, const char *end)
+{
+  const char *p = token;
+  while (p != end && !isspace (*p) && *p != '(')
+    {
+      if (valid_identifier_name_char (*p))
+	{
+	  while (p != end && valid_identifier_name_char (*p))
+	    p++;
+	  return p;
+	}
+      else
+	{
+	  /* Note, ordered such that among ops that share a prefix,
+	     longer comes first.  This is so that the loop below can
+	     bail on first match.  */
+	  static const char *ops[] =
+	    {
+	      "[",
+	      "]",
+	      "~",
+	      ",",
+	      "-=", "--", "->", "-",
+	      "+=", "++", "+",
+	      "*=", "*",
+	      "/=", "/",
+	      "%=", "%",
+	      "|=", "||", "|",
+	      "&=", "&&", "&",
+	      "^=", "^",
+	      "!=", "!",
+	      "<<=", "<=", "<<", "<",
+	      ">>=", ">=", ">>", ">",
+	      "==", "=",
+	    };
+
+	  for (const char *op : ops)
+	    {
+	      size_t oplen = strlen (op);
+	      size_t lencmp = std::min<size_t> (oplen, end - p);
+
+	      if (strncmp (p, op, lencmp) == 0)
+		return p + lencmp;
+	    }
+	  /* Some unidentified character.  Return it.  */
+	  return p + 1;
+	}
+    }
+
+  return p;
+}
+
+/* Advance STRING1/STRING2 past whitespace.  */
+
+static void
+skip_ws (const char *&string1, const char *&string2, const char *end_str2)
+{
+  while (isspace (*string1))
+    string1++;
+  while (string2 < end_str2 && isspace (*string2))
+    string2++;
+}
+
+/* True if STRING points at the start of a C++ operator name.  START
+   is the start of the string that STRING points to, hence when
+   reading backwards, we must not read any character before START.  */
+
+static bool
+cp_is_operator (const char *string, const char *start)
+{
+  return ((string == start
+	   || !valid_identifier_name_char (string[-1]))
+	  && strncmp (string, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0
+	  && !valid_identifier_name_char (string[CP_OPERATOR_LEN]));
+}
+
 /* See utils.h.  */
 
 int
 strncmp_iw_with_mode (const char *string1, const char *string2,
-		      size_t string2_len, strncmp_iw_mode mode)
+		      size_t string2_len, strncmp_iw_mode mode,
+		      enum language language)
 {
+  const char *string1_start = string1;
   const char *end_str2 = string2 + string2_len;
+  bool skip_spaces = true;
+  bool have_colon_op = (language == language_cplus
+			|| language == language_rust
+			|| language == language_fortran);
 
   while (1)
     {
-      while (isspace (*string1))
-	string1++;
-      while (string2 < end_str2 && isspace (*string2))
-	string2++;
+      if (skip_spaces
+	  || ((isspace (*string1) && !valid_identifier_name_char (*string2))
+	      || (isspace (*string2) && !valid_identifier_name_char (*string1))))
+	{
+	  skip_ws (string1, string2, end_str2);
+	  skip_spaces = false;
+	}
+
       if (*string1 == '\0' || string2 == end_str2)
 	break;
+
+      /* Handle the :: operator.  */
+      if (have_colon_op && string1[0] == ':' && string1[1] == ':')
+	{
+	  if (*string2 != ':')
+	    return 1;
+
+	  string1++;
+	  string2++;
+
+	  if (string2 == end_str2)
+	    break;
+
+	  if (*string2 != ':')
+	    return 1;
+
+	  string1++;
+	  string2++;
+
+	  while (isspace (*string1))
+	    string1++;
+	  while (string2 < end_str2 && isspace (*string2))
+	    string2++;
+	  continue;
+	}
+
+      /* Handle C++ user-defined operators.  */
+      else if (language == language_cplus
+	       && *string1 == 'o')
+	{
+	  if (cp_is_operator (string1, string1_start))
+	    {
+	      /* An operator name in STRING1.  Check STRING2.  */
+	      size_t cmplen
+		= std::min<size_t> (CP_OPERATOR_LEN, end_str2 - string2);
+	      if (strncmp (string1, string2, cmplen) != 0)
+		return 1;
+
+	      string1 += cmplen;
+	      string2 += cmplen;
+
+	      if (string2 != end_str2)
+		{
+		  /* Check for "operatorX" in STRING2.  */
+		  if (valid_identifier_name_char (*string2))
+		    return 1;
+
+		  skip_ws (string1, string2, end_str2);
+		}
+
+	      /* Handle operator().  */
+	      if (*string1 == '(')
+		{
+		  if (string2 == end_str2)
+		    {
+		      if (mode == strncmp_iw_mode::NORMAL)
+			return 0;
+		      else
+			{
+			  /* Don't break for the regular return at the
+			     bottom, because "operator" should not
+			     match "operator()", since this open
+			     parentheses is not the parameter list
+			     start.  */
+			  return *string1 != '\0';
+			}
+		    }
+
+		  if (*string1 != *string2)
+		    return 1;
+
+		  string1++;
+		  string2++;
+		}
+
+	      while (1)
+		{
+		  skip_ws (string1, string2, end_str2);
+
+		  /* Skip to end of token, or to END, whatever comes
+		     first.  */
+		  const char *end_str1 = string1 + strlen (string1);
+		  const char *p1 = cp_skip_operator_token (string1, end_str1);
+		  const char *p2 = cp_skip_operator_token (string2, end_str2);
+
+		  cmplen = std::min (p1 - string1, p2 - string2);
+		  if (p2 == end_str2)
+		    {
+		      if (strncmp (string1, string2, cmplen) != 0)
+			return 1;
+		    }
+		  else
+		    {
+		      if (p1 - string1 != p2 - string2)
+			return 1;
+		      if (strncmp (string1, string2, cmplen) != 0)
+			return 1;
+		    }
+
+		  string1 += cmplen;
+		  string2 += cmplen;
+
+		  if (*string1 == '\0' || string2 == end_str2)
+		    break;
+		  if (*string1 == '(' || *string2 == '(')
+		    break;
+		}
+
+	      continue;
+	    }
+	}
+
       if (case_sensitivity == case_sensitive_on && *string1 != *string2)
 	break;
       if (case_sensitivity == case_sensitive_off
 	  && (tolower ((unsigned char) *string1)
 	      != tolower ((unsigned char) *string2)))
 	break;
+
+      /* If we see any non-whitespace, non-identifier-name character
+	 (any of "()<>*&" etc.), then skip spaces the next time
+	 around.  */
+      if (!isspace (*string1) && !valid_identifier_name_char (*string1))
+	skip_spaces = true;
 
       string1++;
       string2++;
@@ -2200,7 +2419,7 @@ int
 strncmp_iw (const char *string1, const char *string2, size_t string2_len)
 {
   return strncmp_iw_with_mode (string1, string2, string2_len,
-			       strncmp_iw_mode::NORMAL);
+			       strncmp_iw_mode::NORMAL, language_minimal);
 }
 
 /* See utils.h.  */
@@ -2209,7 +2428,7 @@ int
 strcmp_iw (const char *string1, const char *string2)
 {
   return strncmp_iw_with_mode (string1, string2, strlen (string2),
-			       strncmp_iw_mode::MATCH_PARAMS);
+			       strncmp_iw_mode::MATCH_PARAMS, language_minimal);
 }
 
 /* This is like strcmp except that it ignores whitespace and treats

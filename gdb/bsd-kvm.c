@@ -279,7 +279,7 @@ bsd_kvm_cmd (const char *arg, int fromtty)
 #ifndef HAVE_STRUCT_THREAD_TD_PCB
 
 static void
-bsd_kvm_proc_cmd (char *arg, int fromtty)
+bsd_kvm_proc_cmd (const char *arg, int fromtty)
 {
   CORE_ADDR addr;
 
@@ -308,7 +308,7 @@ bsd_kvm_proc_cmd (char *arg, int fromtty)
 #endif
 
 static void
-bsd_kvm_pcb_cmd (char *arg, int fromtty)
+bsd_kvm_pcb_cmd (const char *arg, int fromtty)
 {
   if (arg == NULL)
     /* i18n: PCB == "Process Control Block".  */

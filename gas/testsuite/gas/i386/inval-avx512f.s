@@ -48,3 +48,11 @@ _start:
 	vaddps zmm2, zmm1, ZMMWORD PTR [eax]{1to16}
 	vaddps zmm2, zmm1, DWORD PTR [eax]
 	vaddpd zmm2, zmm1, QWORD PTR [eax]
+
+	.att_syntax prefix
+	vaddps %zmm0, %zmm1, %zmm2{%ecx}
+	vaddps %zmm0, %zmm1, %zmm2{z}
+
+	.intel_syntax noprefix
+	vaddps zmm2{ecx}, zmm1, zmm0
+	vaddps zmm2{z}, zmm1, zmm0

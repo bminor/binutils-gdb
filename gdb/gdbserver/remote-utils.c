@@ -378,10 +378,7 @@ remote_close (void)
 {
   delete_file_handler (remote_desc);
 
-#ifndef USE_WIN32API
-  /* Remove SIGIO handler.  */
-  signal (SIGIO, SIG_IGN);
-#endif
+  disable_async_io ();
 
 #ifdef USE_WIN32API
   closesocket (remote_desc);
@@ -1176,7 +1173,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    CORE_ADDR addr;
 	    int i;
 
-	    strncpy (buf, "watch:", 6);
+	    memcpy (buf, "watch:", 6);
 	    buf += 6;
 
 	    addr = (*the_target->stopped_data_address) ();

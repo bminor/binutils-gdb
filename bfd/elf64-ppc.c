@@ -4001,9 +4001,6 @@ struct ppc_link_hash_entry
   /* Track dynamic relocs copied for this symbol.  */
   struct elf_dyn_relocs *dyn_relocs;
 
-  /* Chain of aliases referring to a weakdef.  */
-  struct ppc_link_hash_entry *weakref;
-
   /* Link between function code and descriptor symbols.  */
   struct ppc_link_hash_entry *oh;
 
@@ -4784,39 +4781,9 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
      in order to simplify readonly_dynrelocs and save a field in the
      symbol hash entry, but that means dyn_relocs can't be used in any
      tests about a specific symbol, or affect other symbol flags which
-     are then tested.
-     Chain weakdefs so we can get from the weakdef back to an alias.
-     The list is circular so that we don't need to use u.weakdef as
-     well as this list to look at all aliases.  */
+     are then tested.  */
   if (eind->elf.root.type != bfd_link_hash_indirect)
-    {
-      struct ppc_link_hash_entry *cur, *add, *next;
-
-      add = eind;
-      do
-	{
-	  cur = edir->weakref;
-	  if (cur != NULL)
-	    {
-	      do
-		{
-		  /* We can be called twice for the same symbols.
-		     Don't make multiple loops.  */
-		  if (cur == add)
-		    return;
-		  cur = cur->weakref;
-		} while (cur != edir);
-	    }
-	  next = add->weakref;
-	  if (cur != add)
-	    {
-	      add->weakref = edir->weakref != NULL ? edir->weakref : edir;
-	      edir->weakref = add;
-	    }
-	  add = next;
-	} while (add != NULL && add != eind);
-      return;
-    }
+    return;
 
   /* Copy over any dynamic relocs we may have on the indirect sym.  */
   if (eind->dyn_relocs != NULL)
@@ -6576,8 +6543,8 @@ ppc64_elf_gc_mark_hook (asection *sec,
 		     a call reloc.  Mark the function descriptor too
 		     against garbage collection.  */
 		  fdh->elf.mark = 1;
-		  if (fdh->elf.u.weakdef != NULL)
-		    fdh->elf.u.weakdef->mark = 1;
+		  if (fdh->elf.is_weakalias)
+		    weakdef (&fdh->elf)->mark = 1;
 		  eh = fdh;
 		}
 
@@ -7104,7 +7071,8 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
 }
 
 /* Return true if we have dynamic relocs against H or any of its weak
-   aliases, that apply to read-only sections.  */
+   aliases, that apply to read-only sections.  Cannot be used after
+   size_dynamic_sections.  */
 
 static bfd_boolean
 alias_readonly_dynrelocs (struct elf_link_hash_entry *h)
@@ -7116,7 +7084,7 @@ alias_readonly_dynrelocs (struct elf_link_hash_entry *h)
     {
       if (readonly_dynrelocs (&eh->elf))
 	return TRUE;
-      eh = eh->weakref;
+      eh = (struct ppc_link_hash_entry *) eh->elf.u.alias;
     } while (eh != NULL && &eh->elf != h);
 
   return FALSE;
@@ -7218,7 +7186,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     extra work in ld.so when resolving these symbols.  */
 	  if (global_entry_stub (h))
 	    {
-	      if (!alias_readonly_dynrelocs (h))
+	      if (!readonly_dynrelocs (h))
 		{
 		  h->pointer_equality_needed = 0;
 		  /* If we haven't seen a branch reloc then we don't need
@@ -7236,7 +7204,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  return TRUE;
 	}
       else if (!h->needs_plt
-	       && !alias_readonly_dynrelocs (h))
+	       && !readonly_dynrelocs (h))
 	{
 	  /* If we haven't seen a branch reloc then we don't need a
 	     plt entry.  */
@@ -7251,14 +7219,14 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      struct elf_link_hash_entry *def = weakdef (h);
+      BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+      h->root.u.def.section = def->root.u.def.section;
+      h->root.u.def.value = def->root.u.def.value;
       if (ELIMINATE_COPY_RELOCS)
-	h->non_got_ref = h->u.weakdef->non_got_ref;
+	h->non_got_ref = def->non_got_ref;
       return TRUE;
     }
 

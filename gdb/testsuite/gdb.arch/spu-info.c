@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <spu_mfcio.h>
 
 
@@ -190,14 +191,14 @@ do_signal_test ()
   fd = open_context_file (context_fd, "signal1", O_RDWR);
   if (fstat (fd, &fdstat) != 0)
     return -1;
-  ret = write (fd, buf, sizeof (int));
+  ret = write (fd, &buf, sizeof (int));
   close (fd);  /* Marker Signal1 */
 
   /* Write to signal2.  */
   fd = open_context_file (context_fd, "signal2", O_RDWR);
   if (fstat (fd, &fdstat) != 0)
     return -1;
-  ret = write (fd, buf, sizeof (int));
+  ret = write (fd, &buf, sizeof (int));
   close (fd);  /* Marker Signal2 */
 
   /* Read signal1.  */

@@ -625,7 +625,8 @@ foreach ldprelink {NO YES} {
 				lappend opts {debug}
 			    }
 			    if {$binpie != "NO"} {
-				lappend opts {additional_flags=-fPIE -pie}
+				lappend opts {additional_flags=-fPIE}
+				lappend opts {ldflags=-pie}
 			    }
 
 			    set dir ${exec}.d

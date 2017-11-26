@@ -74,8 +74,6 @@ static void sig_print_info (enum gdb_signal);
 
 static void sig_print_header (void);
 
-static void resume_cleanups (void *);
-
 static int follow_fork (void);
 
 static int follow_fork_inferior (int follow_child, int detach_fork);
@@ -2192,17 +2190,6 @@ infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 }
 
 
-/* Resuming.  */
-
-/* Things to clean up if we QUIT out of resume ().  */
-static void
-resume_cleanups (void *ignore)
-{
-  if (!ptid_equal (inferior_ptid, null_ptid))
-    delete_single_step_breakpoints (inferior_thread ());
-
-  normal_stop ();
-}
 
 static const char schedlock_off[] = "off";
 static const char schedlock_on[] = "on";
@@ -2367,17 +2354,12 @@ do_target_resume (ptid_t resume_ptid, int step, enum gdb_signal sig)
   target_commit_resume ();
 }
 
-/* Resume the inferior, but allow a QUIT.  This is useful if the user
-   wants to interrupt some lengthy single-stepping operation
-   (for child processes, the SIGINT goes to the inferior, and so
-   we get a SIGINT random_signal, but for remote debugging and perhaps
-   other targets, that's not true).
+/* Resume the inferior.  SIG is the signal to give the inferior
+   (GDB_SIGNAL_0 for none).  */
 
-   SIG is the signal to give the inferior (zero for none).  */
 void
 resume (enum gdb_signal sig)
 {
-  struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = regcache->arch ();
   struct thread_info *tp = inferior_thread ();
@@ -2396,8 +2378,6 @@ resume (enum gdb_signal sig)
 
   gdb_assert (!tp->stop_requested);
   gdb_assert (!thread_is_in_step_over_chain (tp));
-
-  QUIT;
 
   if (tp->suspend.waitstatus_pending_p)
     {
@@ -2425,7 +2405,6 @@ resume (enum gdb_signal sig)
 	}
 
       tp->suspend.stop_signal = GDB_SIGNAL_0;
-      discard_cleanups (old_cleanups);
 
       if (target_can_async_p ())
 	target_async (1);
@@ -2537,7 +2516,6 @@ resume (enum gdb_signal sig)
 
 	      resume_ptid = internal_resume_ptid (user_step);
 	      do_target_resume (resume_ptid, 0, GDB_SIGNAL_0);
-	      discard_cleanups (old_cleanups);
 	      tp->resumed = 1;
 	      return;
 	    }
@@ -2575,7 +2553,6 @@ resume (enum gdb_signal sig)
 				"Got placed in step-over queue\n");
 
 	  tp->control.trap_expected = 0;
-	  discard_cleanups (old_cleanups);
 	  return;
 	}
       else if (prepared < 0)
@@ -2752,7 +2729,6 @@ resume (enum gdb_signal sig)
 
   do_target_resume (resume_ptid, step, sig);
   tp->resumed = 1;
-  discard_cleanups (old_cleanups);
 }
 
 /* Proceeding.  */
@@ -3066,6 +3042,12 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   /* Make sure that output from GDB appears before output from the
      inferior.  */
   gdb_flush (gdb_stdout);
+
+  /* Since we've marked the inferior running, give it the terminal.  A
+     QUIT/Ctrl-C from here on is forwarded to the target (which can
+     still detect attempts to unblock a stuck connection with repeated
+     Ctrl-C from within target_pass_ctrlc).  */
+  target_terminal::inferior ();
 
   /* In a multi-threaded task we may select another thread and
      then continue or step.
@@ -7583,7 +7565,7 @@ check_exception_resume (struct execution_control_state *ecs,
      CFA and the HANDLER.  We ignore the CFA, extract the handler, and
      set a breakpoint there.  */
   probe = find_probe_by_pc (get_frame_pc (frame));
-  if (probe.probe)
+  if (probe.prob)
     {
       insert_exception_resume_from_probe (ecs->event_thread, &probe, frame);
       return;
@@ -7657,10 +7639,6 @@ stop_waiting (struct execution_control_state *ecs)
 static void
 keep_going_pass_signal (struct execution_control_state *ecs)
 {
-  /* Make sure normal_stop is called if we get a QUIT handled before
-     reaching resume.  */
-  struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
-
   gdb_assert (ptid_equal (ecs->event_thread->ptid, inferior_ptid));
   gdb_assert (!ecs->event_thread->resumed);
 
@@ -7682,7 +7660,6 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 	 non-signal event (e.g., a fork); or took a signal which we
 	 are supposed to pass through to the inferior.  Simply
 	 continue.  */
-      discard_cleanups (old_cleanups);
       resume (ecs->event_thread->suspend.stop_signal);
     }
   else if (step_over_info_valid_p ())
@@ -7710,8 +7687,6 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 				"resume of %s deferred\n",
 				target_pid_to_str (tp->ptid));
 	}
-
-      discard_cleanups (old_cleanups);
     }
   else
     {
@@ -7775,14 +7750,12 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 	{
 	  exception_print (gdb_stderr, e);
 	  stop_waiting (ecs);
-	  discard_cleanups (old_cleanups);
 	  return;
 	}
       END_CATCH
 
       ecs->event_thread->control.trap_expected = (remove_bp || remove_wps);
 
-      discard_cleanups (old_cleanups);
       resume (ecs->event_thread->suspend.stop_signal);
     }
 

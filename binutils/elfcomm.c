@@ -125,10 +125,10 @@ byte_put_big_endian (unsigned char * field, elf_vma value, int size)
     }
 }
 
-elf_vma (*byte_get) (unsigned char *, int);
+elf_vma (*byte_get) (const unsigned char *, int);
 
 elf_vma
-byte_get_little_endian (unsigned char *field, int size)
+byte_get_little_endian (const unsigned char *field, int size)
 {
   switch (size)
     {
@@ -231,7 +231,7 @@ byte_get_little_endian (unsigned char *field, int size)
 }
 
 elf_vma
-byte_get_big_endian (unsigned char *field, int size)
+byte_get_big_endian (const unsigned char *field, int size)
 {
   switch (size)
     {
@@ -341,7 +341,7 @@ byte_get_big_endian (unsigned char *field, int size)
 }
 
 elf_vma
-byte_get_signed (unsigned char *field, int size)
+byte_get_signed (const unsigned char *field, int size)
 {
   elf_vma x = byte_get (field, size);
 
@@ -373,7 +373,7 @@ byte_get_signed (unsigned char *field, int size)
    of an 8-byte value separately.  */
 
 void
-byte_get_64 (unsigned char *field, elf_vma *high, elf_vma *low)
+byte_get_64 (const unsigned char *field, elf_vma *high, elf_vma *low)
 {
   if (byte_get == byte_get_big_endian)
     {

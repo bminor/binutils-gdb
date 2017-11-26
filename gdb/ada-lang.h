@@ -141,6 +141,12 @@ struct ada_task_info
   /* If the task is accepting a rendezvous with another task, this field
      contains the ID of the calling task.  Zero otherwise.  */
   CORE_ADDR caller_task;
+
+  /* The CPU on which the task is running.  This is dependent on
+     the runtime actually providing that info, which is not always
+     the case.  Normally, we should be able to count on it on
+     bare-metal targets.  */
+  int base_cpu;
 };
 
 /* Assuming V points to an array of S objects,  make sure that it contains at
@@ -395,11 +401,15 @@ extern std::vector<ada_exc_info> ada_exceptions_list (const char *regexp);
 
 extern int valid_task_id (int);
 
+extern struct ada_task_info *ada_get_task_info_from_ptid (ptid_t ptid);
+
 extern int ada_get_task_number (ptid_t);
 
 typedef void (ada_task_list_iterator_ftype) (struct ada_task_info *task);
 extern void iterate_over_live_ada_tasks
   (ada_task_list_iterator_ftype *iterator);
+
+extern const char *ada_get_tcb_types_info (void);
 
 extern int ada_build_task_list (void);
 

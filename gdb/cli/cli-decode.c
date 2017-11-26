@@ -1084,9 +1084,9 @@ help_list (struct cmd_list_element *list, const char *cmdtype,
   if (len)
     {
       cmdtype1[0] = ' ';
-      strncpy (cmdtype1 + 1, cmdtype, len - 1);
+      memcpy (cmdtype1 + 1, cmdtype, len - 1);
       cmdtype1[len] = 0;
-      strncpy (cmdtype2, cmdtype, len - 1);
+      memcpy (cmdtype2, cmdtype, len - 1);
       strcpy (cmdtype2 + len - 1, " sub");
     }
 

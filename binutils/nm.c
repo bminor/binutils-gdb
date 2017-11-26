@@ -763,7 +763,6 @@ sort_symbols_by_size (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
       asection *sec;
       bfd_vma sz;
       asymbol *temp;
-      int synthetic = (sym->flags & BSF_SYNTHETIC);
 
       if (from + size < fromend)
 	{
@@ -780,10 +779,13 @@ sort_symbols_by_size (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
       sec = bfd_get_section (sym);
 
       /* Synthetic symbols don't have a full type set of data available, thus
-	 we can't rely on that information for the symbol size.  */
-      if (!synthetic && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	 we can't rely on that information for the symbol size.  Ditto for
+	 bfd/section.c:global_syms like *ABS*.  */
+      if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0
+	  && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	sz = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
-      else if (!synthetic && bfd_is_com_section (sec))
+      else if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0
+	       && bfd_is_com_section (sec))
 	sz = sym->value;
       else
 	{
@@ -872,8 +874,9 @@ print_symbol (bfd *        abfd,
 
   info.sinfo = &syminfo;
   info.ssize = ssize;
-  /* Synthetic symbols do not have a full symbol type set of data available.  */
-  if ((sym->flags & BSF_SYNTHETIC) != 0)
+  /* Synthetic symbols do not have a full symbol type set of data available.
+     Nor do bfd/section.c:global_syms like *ABS*.  */
+  if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) != 0)
     {
       info.elfinfo = NULL;
       info.coffinfo = NULL;
@@ -891,7 +894,7 @@ print_symbol (bfd *        abfd,
       const char *  version_string = NULL;
       bfd_boolean   hidden = FALSE;
 
-      if ((sym->flags & BSF_SYNTHETIC) == 0)
+      if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
 	version_string = bfd_get_symbol_version_string (abfd, sym, &hidden);
 
       if (bfd_is_und_section (bfd_get_section (sym)))

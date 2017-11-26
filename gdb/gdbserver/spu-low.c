@@ -280,7 +280,7 @@ spu_ptrace_fun ()
 
 static int
 spu_create_inferior (const char *program,
-		     const std::vector<char *> &program_argv)
+		     const std::vector<char *> &program_args)
 {
   int pid;
   ptid_t ptid;

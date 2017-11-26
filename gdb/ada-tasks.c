@@ -123,6 +123,7 @@ struct atcb_fieldnos
   int activation_link;
   int call;
   int ll;
+  int base_cpu;
 
   /* Fields in Task_Primitives.Private_Data.  */
   int ll_thread;
@@ -352,6 +353,30 @@ ada_task_is_alive (struct ada_task_info *task_info)
   return (task_info->state != Terminated);
 }
 
+/* Search through the list of known tasks for the one whose ptid is
+   PTID, and return it.  Return NULL if the task was not found.  */
+
+struct ada_task_info *
+ada_get_task_info_from_ptid (ptid_t ptid)
+{
+  int i, nb_tasks;
+  struct ada_task_info *task;
+  struct ada_tasks_inferior_data *data;
+
+  ada_build_task_list ();
+  data = get_ada_tasks_inferior_data (current_inferior ());
+  nb_tasks = VEC_length (ada_task_info_s, data->task_list);
+
+  for (i = 0; i < nb_tasks; i++)
+    {
+      task = VEC_index (ada_task_info_s, data->task_list, i);
+      if (ptid_equal (task->ptid, ptid))
+	return task;
+    }
+
+  return NULL;
+}
+
 /* Call the ITERATOR function once for each Ada task that hasn't been
    terminated yet.  */
 
@@ -441,18 +466,17 @@ read_fat_string_value (char *dest, struct value *val, int max_len)
   dest[len] = '\0';
 }
 
-/* Get from the debugging information the type description of all types
-   related to the Ada Task Control Block that will be needed in order to
-   read the list of known tasks in the Ada runtime.  Also return the
-   associated ATCB_FIELDNOS.
+/* Get, from the debugging information, the type description of all types
+   related to the Ada Task Control Block that are needed in order to
+   read the list of known tasks in the Ada runtime.  If all of the info
+   needed to do so is found, then save that info in the module's per-
+   program-space data, and return NULL.  Otherwise, if any information
+   cannot be found, leave the per-program-space data untouched, and
+   return an error message explaining what was missing (that error
+   message does NOT need to be deallocated).  */
 
-   Error handling:  Any data missing from the debugging info will cause
-   an error to be raised, and none of the return values to be set.
-   Users of this function can depend on the fact that all or none of the
-   return values will be set.  */
-
-static void
-get_tcb_types_info (void)
+const char *
+ada_get_tcb_types_info (void)
 {
   struct type *type;
   struct type *common_type;
@@ -493,7 +517,7 @@ get_tcb_types_info (void)
 					    NULL).symbol;
 
       if (atcb_sym == NULL || atcb_sym->type == NULL)
-        error (_("Cannot find Ada_Task_Control_Block type. Aborting"));
+        return _("Cannot find Ada_Task_Control_Block type");
 
       type = atcb_sym->type;
     }
@@ -506,11 +530,11 @@ get_tcb_types_info (void)
     }
 
   if (common_atcb_sym == NULL || common_atcb_sym->type == NULL)
-    error (_("Cannot find Common_ATCB type. Aborting"));
+    return _("Cannot find Common_ATCB type");
   if (private_data_sym == NULL || private_data_sym->type == NULL)
-    error (_("Cannot find Private_Data type. Aborting"));
+    return _("Cannot find Private_Data type");
   if (entry_call_record_sym == NULL || entry_call_record_sym->type == NULL)
-    error (_("Cannot find Entry_Call_Record type. Aborting"));
+    return _("Cannot find Entry_Call_Record type");
 
   /* Get the type for Ada_Task_Control_Block.Common.  */
   common_type = common_atcb_sym->type;
@@ -535,6 +559,7 @@ get_tcb_types_info (void)
                                                   "activation_link", 1);
   fieldnos.call = ada_get_field_index (common_type, "call", 1);
   fieldnos.ll = ada_get_field_index (common_type, "ll", 0);
+  fieldnos.base_cpu = ada_get_field_index (common_type, "base_cpu", 0);
   fieldnos.ll_thread = ada_get_field_index (ll_type, "thread", 0);
   fieldnos.ll_lwp = ada_get_field_index (ll_type, "lwp", 1);
   fieldnos.call_self = ada_get_field_index (call_type, "self", 0);
@@ -557,6 +582,7 @@ get_tcb_types_info (void)
   pspace_data->atcb_ll_type = ll_type;
   pspace_data->atcb_call_type = call_type;
   pspace_data->atcb_fieldno = fieldnos;
+  return NULL;
 }
 
 /* Build the PTID of the task from its COMMON_VALUE, which is the "Common"
@@ -604,7 +630,12 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
     = get_ada_tasks_pspace_data (current_program_space);
 
   if (!pspace_data->initialized_p)
-    get_tcb_types_info ();
+    {
+      const char *err_msg = ada_get_tcb_types_info ();
+
+      if (err_msg != NULL)
+	error (_("%s. Aborting"), err_msg);
+    }
 
   tcb_value = value_from_contents_and_address (pspace_data->atcb_type,
 					       NULL, task_id);
@@ -747,6 +778,10 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
 	      (value_field (call_val, pspace_data->atcb_fieldno.call_self));
         }
     }
+
+  task_info->base_cpu
+    = value_as_long (value_field (common_value,
+				  pspace_data->atcb_fieldno.base_cpu));
 
   /* And finally, compute the task ptid.  Note that there are situations
      where this cannot be determined:
@@ -1178,6 +1213,10 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
   /* Print the TID and LWP.  */
   printf_filtered (_("Thread: %#lx\n"), ptid_get_tid (task_info->ptid));
   printf_filtered (_("LWP: %#lx\n"), ptid_get_lwp (task_info->ptid));
+
+  /* If set, print the base CPU.  */
+  if (task_info->base_cpu != 0)
+    printf_filtered (_("Base CPU: %d\n"), task_info->base_cpu);
 
   /* Print who is the parent (if any).  */
   if (task_info->parent != 0)

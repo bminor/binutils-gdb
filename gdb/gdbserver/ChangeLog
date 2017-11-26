@@ -1,3 +1,151 @@
+2017-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-low.c (spu_create_inferior): Fix typo in argument name.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* configure.srv: Add linux-aarch64-tdesc-selftest.o.
+	* linux-aarch64-low.c (initialize_low_arch): Call init func.
+	* linux-aarch64-tdesc-selftest.c: New file.
+	* linux-aarch64-tdesc.h (initialize_low_tdesc): New declaration.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* configure.srv: Add new file.
+	* linux-aarch64-low.c (initialize_low_arch): Call init func.
+	* linux-aarch64-tdesc-selftest.c: New file.
+	* linux-aarch64-tdesc.h (initialize_low_tdesc): New declaration.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* linux-aarch64-ipa.c (initialize_low_tracepoint): Remove init.
+	* linux-aarch64-low.c (initialize_low_arch): Remove init.
+	* linux-aarch64-tdesc.c (aarch64_linux_read_description): Add init.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* configure.srv: Add new files.
+	* linux-aarch64-ipa.c (get_ipa_tdesc): Call
+	aarch64_linux_read_description.
+	* linux-aarch64-low.c (aarch64_linux_read_description):
+	Merge with aarch64_arch_setup.
+	(aarch64_arch_setup): Call aarch64_linux_read_description.
+	* linux-aarch64-tdesc.c: New file.
+	* linux-aarch64-tdesc.h: New file.
+
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv: Set $srv_regobj for tic6x-linux.
+	* linux-tic6x-low.c: Include "arch/tic6x.h" and "tdesc.h".
+	(tic6x_read_description): Move some code to tic6x_arch_setup.
+	(tic6x_tdesc_test): New function.
+	(initialize_low_arch): Call selftests::register_test.
+
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* remote-utils.c (prepare_resume_reply): Use memcpy.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-low.c (kill_one_lwp_callback): Return void, take
+	argument directly, don't filter on pid.
+	(linux_kill): Use for_each_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-low.c (need_step_over_p): Return bool, remove dummy
+	argument.
+	(linux_resume, proceed_all_lwps): Use find_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-low.c (resume_status_pending_p): Return bool, remove
+	flag_p argument.
+	(linux_resume): Use find_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-low.c (struct thread_resume_array): Remove.
+	(linux_set_resume_request): Return void, take arguments
+	directly.
+	(linux_resume): Use for_each_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-low.c (stuck_in_jump_pad_callback): Change prototype,
+	return bool, remove data argument.
+	(linux_stabilize_threads): Use find_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-low.c (unsuspend_one_lwp): Remove.
+	(unsuspend_all_lwps): Use for_each_thread, inline code from
+	unsuspend_one_lwp.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbthread.h (find_thread): Add overload with ptid_t filter.
+	* linux-low.c (struct iterate_over_lwps_args): Remove.
+	(iterate_over_lwps_filter): Remove.
+	(iterate_over_lwps): Use find_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-low.c (reset_lwp_ptrace_options_callback): Remove.
+	(linux_handle_new_gdb_connection): Use for_each_thread, inline
+	code from reset_lwp_ptrace_options_callback.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-arm-low.c (struct update_registers_data): Remove.
+	(update_registers_callback): Return void, take arguments
+	directly, don't check thread's pid.
+	(arm_insert_point, arm_remove_point): Use for_each_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* win32-low.c (continue_one_thread): Return void, take argument
+	directly.
+	(child_continue): Use for_each_thread.
+
+2017-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* win32-i386-low.c (update_debug_registers_callback): Rename
+	to ...
+	(update_debug_registers): ... this, return void, remove pid_p arg.
+	(x86_dr_low_set_addr, x86_dr_low_set_control): Use for_each_thread.
+
+2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inferiors.h (struct process_info): Add constructor, initialize
+	fields..
+	<syscalls_to_catch>: Change type to std::vector<int>.
+	* inferiors.c (add_process): Allocate process_info with new.
+	(remove_process): Free process_info with delete.
+	* linux-low.c (handle_extended_wait): Adjust.
+	(gdb_catching_syscalls_p, gdb_catch_this_syscall_p): Adjust.
+	* server.c (handle_general_set): Adjust.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* remote-utils.c (remote_close): Block SIGIO signals instead of
+	uninstalling the SIGIO handler.
+
+2017-11-16  Alan Hayward  <alan.hayward@arm.com>
+
+	* tdesc.c (tdesc_get_features_xml): Allow null osabi.
+
+2017-11-16  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-tic6x-low.c (tic6x_fill_gregset): Cast buf.
+	(tic6x_store_gregset): Likewise.
+	(tic6x_usrregs_info): Move it up.
+
+2017-11-15  Alan Hayward  <alan.hayward@arm.com>
+
+	* Makefile.in: Update arch rules.
+	* configure.srv: Explicitly mark arch/ files.
+
 2017-11-13  Andreas Schwab  <schwab@suse.de>
 
 	* linux-m68k-low.c (m68k_supports_hardware_single_step): New

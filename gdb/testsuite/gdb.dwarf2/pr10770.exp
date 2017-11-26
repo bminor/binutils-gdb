@@ -21,12 +21,6 @@ if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
     return 0
 }
 
-# This test can only be run on targets which use GCC.
-get_compiler_info
-if {![test_compiler_info "gcc-*"]} {
-    return 0
-}
-
 if {![runto_main]} {
     return -1
 }

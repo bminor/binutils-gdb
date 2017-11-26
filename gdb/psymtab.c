@@ -36,6 +36,7 @@
 #include "cp-support.h"
 #include "gdbcmd.h"
 #include <algorithm>
+#include <set>
 
 struct psymbol_bcache
 {
@@ -823,6 +824,8 @@ psym_relocate (struct objfile *objfile,
       if (SYMBOL_SECTION (psym) >= 0)
 	SYMBOL_VALUE_ADDRESS (psym) += ANOFFSET (delta, SYMBOL_SECTION (psym));
     }
+
+  objfile->psymbol_map.clear ();
 }
 
 /* Psymtab version of find_last_source_symtab.  See its definition in
@@ -1458,6 +1461,84 @@ psym_has_symbols (struct objfile *objfile)
   return objfile->psymtabs != NULL;
 }
 
+/* Helper function for psym_find_compunit_symtab_by_address that fills
+   in psymbol_map for a given range of psymbols.  */
+
+static void
+psym_fill_psymbol_map (struct objfile *objfile,
+		       struct partial_symtab *psymtab,
+		       std::set<CORE_ADDR> *seen_addrs,
+		       const std::vector<partial_symbol *> &symbols,
+		       int start,
+		       int length)
+{
+  for (int i = 0; i < length; ++i)
+    {
+      struct partial_symbol *psym = symbols[start + i];
+
+      if (PSYMBOL_CLASS (psym) == LOC_STATIC)
+	{
+	  CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (psym);
+	  if (seen_addrs->find (addr) == seen_addrs->end ())
+	    {
+	      seen_addrs->insert (addr);
+	      objfile->psymbol_map.emplace_back (addr, psymtab);
+	    }
+	}
+    }
+}
+
+/* See find_compunit_symtab_by_address in quick_symbol_functions, in
+   symfile.h.  */
+
+static compunit_symtab *
+psym_find_compunit_symtab_by_address (struct objfile *objfile,
+				      CORE_ADDR address)
+{
+  if (objfile->psymbol_map.empty ())
+    {
+      struct partial_symtab *pst;
+
+      std::set<CORE_ADDR> seen_addrs;
+
+      ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, pst)
+      {
+	psym_fill_psymbol_map (objfile, pst,
+			       &seen_addrs,
+			       objfile->global_psymbols,
+			       pst->globals_offset,
+			       pst->n_global_syms);
+	psym_fill_psymbol_map (objfile, pst,
+			       &seen_addrs,
+			       objfile->static_psymbols,
+			       pst->statics_offset,
+			       pst->n_static_syms);
+      }
+
+      objfile->psymbol_map.shrink_to_fit ();
+
+      std::sort (objfile->psymbol_map.begin (), objfile->psymbol_map.end (),
+		 [] (const std::pair<CORE_ADDR, partial_symtab *> &a,
+		     const std::pair<CORE_ADDR, partial_symtab *> &b)
+		 {
+		   return a.first < b.first;
+		 });
+    }
+
+  auto iter = std::lower_bound
+    (objfile->psymbol_map.begin (), objfile->psymbol_map.end (), address,
+     [] (const std::pair<CORE_ADDR, partial_symtab *> &a,
+	 CORE_ADDR b)
+     {
+       return a.first < b;
+     });
+
+  if (iter == objfile->psymbol_map.end () || iter->first != address)
+    return NULL;
+
+  return psymtab_to_symtab (objfile, iter->second);
+}
+
 const struct quick_symbol_functions psym_functions =
 {
   psym_has_symbols,
@@ -1474,6 +1555,7 @@ const struct quick_symbol_functions psym_functions =
   psym_map_matching_symbols,
   psym_expand_symtabs_matching,
   psym_find_pc_sect_compunit_symtab,
+  psym_find_compunit_symtab_by_address,
   psym_map_symbol_filenames
 };
 

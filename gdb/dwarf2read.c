@@ -256,10 +256,24 @@ struct mapped_index
      description above.  */
   std::vector<name_component> name_components;
 
+  /* How NAME_COMPONENTS is sorted.  */
+  enum case_sensitivity name_components_casing;
+
   /* Convenience method to get at the name of the symbol at IDX in the
      symbol table.  */
   const char *symbol_name_at (offset_type idx) const
   { return this->constant_pool + MAYBE_SWAP (this->symbol_table[idx]); }
+
+  /* Build the symbol name component sorted vector, if we haven't
+     yet.  */
+  void build_name_components ();
+
+  /* Returns the lower (inclusive) and upper (exclusive) bounds of the
+     possible matches for LN_NO_PARAMS in the name component
+     vector.  */
+  std::pair<std::vector<name_component>::const_iterator,
+	    std::vector<name_component>::const_iterator>
+    find_name_components_bounds (const lookup_name_info &ln_no_params) const;
 };
 
 typedef struct dwarf2_per_cu_data *dwarf2_per_cu_ptr;
@@ -1796,6 +1810,8 @@ static void read_func_scope (struct die_info *, struct dwarf2_cu *);
 static void read_lexical_block_scope (struct die_info *, struct dwarf2_cu *);
 
 static void read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu);
+
+static void read_variable (struct die_info *die, struct dwarf2_cu *cu);
 
 static int dwarf2_ranges_read (unsigned, CORE_ADDR *, CORE_ADDR *,
 			       struct dwarf2_cu *, struct partial_symtab *);
@@ -4186,6 +4202,215 @@ gdb_index_symbol_name_matcher::matches (const char *symbol_name)
   return false;
 }
 
+/* Starting from a search name, return the string that finds the upper
+   bound of all strings that start with SEARCH_NAME in a sorted name
+   list.  Returns the empty string to indicate that the upper bound is
+   the end of the list.  */
+
+static std::string
+make_sort_after_prefix_name (const char *search_name)
+{
+  /* When looking to complete "func", we find the upper bound of all
+     symbols that start with "func" by looking for where we'd insert
+     the closest string that would follow "func" in lexicographical
+     order.  Usually, that's "func"-with-last-character-incremented,
+     i.e. "fund".  Mind non-ASCII characters, though.  Usually those
+     will be UTF-8 multi-byte sequences, but we can't be certain.
+     Especially mind the 0xff character, which is a valid character in
+     non-UTF-8 source character sets (e.g. Latin1 'ÿ'), and we can't
+     rule out compilers allowing it in identifiers.  Note that
+     conveniently, strcmp/strcasecmp are specified to compare
+     characters interpreted as unsigned char.  So what we do is treat
+     the whole string as a base 256 number composed of a sequence of
+     base 256 "digits" and add 1 to it.  I.e., adding 1 to 0xff wraps
+     to 0, and carries 1 to the following more-significant position.
+     If the very first character in SEARCH_NAME ends up incremented
+     and carries/overflows, then the upper bound is the end of the
+     list.  The string after the empty string is also the empty
+     string.
+
+     Some examples of this operation:
+
+       SEARCH_NAME  => "+1" RESULT
+
+       "abc"              => "abd"
+       "ab\xff"           => "ac"
+       "\xff" "a" "\xff"  => "\xff" "b"
+       "\xff"             => ""
+       "\xff\xff"         => ""
+       ""                 => ""
+
+     Then, with these symbols for example:
+
+      func
+      func1
+      fund
+
+     completing "func" looks for symbols between "func" and
+     "func"-with-last-character-incremented, i.e. "fund" (exclusive),
+     which finds "func" and "func1", but not "fund".
+
+     And with:
+
+      funcÿ     (Latin1 'ÿ' [0xff])
+      funcÿ1
+      fund
+
+     completing "funcÿ" looks for symbols between "funcÿ" and "fund"
+     (exclusive), which finds "funcÿ" and "funcÿ1", but not "fund".
+
+     And with:
+
+      ÿÿ        (Latin1 'ÿ' [0xff])
+      ÿÿ1
+
+     completing "ÿ" or "ÿÿ" looks for symbols between between "ÿÿ" and
+     the end of the list.
+  */
+  std::string after = search_name;
+  while (!after.empty () && (unsigned char) after.back () == 0xff)
+    after.pop_back ();
+  if (!after.empty ())
+    after.back () = (unsigned char) after.back () + 1;
+  return after;
+}
+
+/* See declaration.  */
+
+std::pair<std::vector<name_component>::const_iterator,
+	  std::vector<name_component>::const_iterator>
+mapped_index::find_name_components_bounds
+  (const lookup_name_info &lookup_name_without_params) const
+{
+  auto *name_cmp
+    = this->name_components_casing == case_sensitive_on ? strcmp : strcasecmp;
+
+  const char *cplus
+    = lookup_name_without_params.cplus ().lookup_name ().c_str ();
+
+  /* Comparison function object for lower_bound that matches against a
+     given symbol name.  */
+  auto lookup_compare_lower = [&] (const name_component &elem,
+				   const char *name)
+    {
+      const char *elem_qualified = this->symbol_name_at (elem.idx);
+      const char *elem_name = elem_qualified + elem.name_offset;
+      return name_cmp (elem_name, name) < 0;
+    };
+
+  /* Comparison function object for upper_bound that matches against a
+     given symbol name.  */
+  auto lookup_compare_upper = [&] (const char *name,
+				   const name_component &elem)
+    {
+      const char *elem_qualified = this->symbol_name_at (elem.idx);
+      const char *elem_name = elem_qualified + elem.name_offset;
+      return name_cmp (name, elem_name) < 0;
+    };
+
+  auto begin = this->name_components.begin ();
+  auto end = this->name_components.end ();
+
+  /* Find the lower bound.  */
+  auto lower = [&] ()
+    {
+      if (lookup_name_without_params.completion_mode () && cplus[0] == '\0')
+	return begin;
+      else
+	return std::lower_bound (begin, end, cplus, lookup_compare_lower);
+    } ();
+
+  /* Find the upper bound.  */
+  auto upper = [&] ()
+    {
+      if (lookup_name_without_params.completion_mode ())
+	{
+	  /* In completion mode, we want UPPER to point past all
+	     symbols names that have the same prefix.  I.e., with
+	     these symbols, and completing "func":
+
+	      function        << lower bound
+	      function1
+	      other_function  << upper bound
+
+	     We find the upper bound by looking for the insertion
+	     point of "func"-with-last-character-incremented,
+	     i.e. "fund".  */
+	  std::string after = make_sort_after_prefix_name (cplus);
+	  if (after.empty ())
+	    return end;
+	  return std::lower_bound (lower, end, after.c_str (),
+				   lookup_compare_lower);
+	}
+      else
+	return std::upper_bound (lower, end, cplus, lookup_compare_upper);
+    } ();
+
+  return {lower, upper};
+}
+
+/* See declaration.  */
+
+void
+mapped_index::build_name_components ()
+{
+  if (!this->name_components.empty ())
+    return;
+
+  this->name_components_casing = case_sensitivity;
+  auto *name_cmp
+    = this->name_components_casing == case_sensitive_on ? strcmp : strcasecmp;
+
+  /* The code below only knows how to break apart components of C++
+     symbol names (and other languages that use '::' as
+     namespace/module separator).  If we add support for wild matching
+     to some language that uses some other operator (E.g., Ada, Go and
+     D use '.'), then we'll need to try splitting the symbol name
+     according to that language too.  Note that Ada does support wild
+     matching, but doesn't currently support .gdb_index.  */
+  for (size_t iter = 0; iter < this->symbol_table_slots; ++iter)
+    {
+      offset_type idx = 2 * iter;
+
+      if (this->symbol_table[idx] == 0
+	  && this->symbol_table[idx + 1] == 0)
+	continue;
+
+      const char *name = this->symbol_name_at (idx);
+
+      /* Add each name component to the name component table.  */
+      unsigned int previous_len = 0;
+      for (unsigned int current_len = cp_find_first_component (name);
+	   name[current_len] != '\0';
+	   current_len += cp_find_first_component (name + current_len))
+	{
+	  gdb_assert (name[current_len] == ':');
+	  this->name_components.push_back ({previous_len, idx});
+	  /* Skip the '::'.  */
+	  current_len += 2;
+	  previous_len = current_len;
+	}
+      this->name_components.push_back ({previous_len, idx});
+    }
+
+  /* Sort name_components elements by name.  */
+  auto name_comp_compare = [&] (const name_component &left,
+				const name_component &right)
+    {
+      const char *left_qualified = this->symbol_name_at (left.idx);
+      const char *right_qualified = this->symbol_name_at (right.idx);
+
+      const char *left_name = left_qualified + left.name_offset;
+      const char *right_name = right_qualified + right.name_offset;
+
+      return name_cmp (left_name, right_name) < 0;
+    };
+
+  std::sort (this->name_components.begin (),
+	     this->name_components.end (),
+	     name_comp_compare);
+}
+
 /* Helper for dw2_expand_symtabs_matching that works with a
    mapped_index instead of the containing objfile.  This is split to a
    separate function in order to be able to unit test the
@@ -4206,122 +4431,11 @@ dw2_expand_symtabs_matching_symbol
   gdb_index_symbol_name_matcher lookup_name_matcher
     (lookup_name_without_params);
 
-  auto *name_cmp = case_sensitivity == case_sensitive_on ? strcmp : strcasecmp;
+  /* Build the symbol name component sorted vector, if we haven't
+     yet.  */
+  index.build_name_components ();
 
-  /* Build the symbol name component sorted vector, if we haven't yet.
-     The code below only knows how to break apart components of C++
-     symbol names (and other languages that use '::' as
-     namespace/module separator).  If we add support for wild matching
-     to some language that uses some other operator (E.g., Ada, Go and
-     D use '.'), then we'll need to try splitting the symbol name
-     according to that language too.  Note that Ada does support wild
-     matching, but doesn't currently support .gdb_index.  */
-  if (index.name_components.empty ())
-    {
-      for (size_t iter = 0; iter < index.symbol_table_slots; ++iter)
-	{
-	  offset_type idx = 2 * iter;
-
-	  if (index.symbol_table[idx] == 0
-	      && index.symbol_table[idx + 1] == 0)
-	    continue;
-
-	  const char *name = index.symbol_name_at (idx);
-
-	  /* Add each name component to the name component table.  */
-	  unsigned int previous_len = 0;
-	  for (unsigned int current_len = cp_find_first_component (name);
-	       name[current_len] != '\0';
-	       current_len += cp_find_first_component (name + current_len))
-	    {
-	      gdb_assert (name[current_len] == ':');
-	      index.name_components.push_back ({previous_len, idx});
-	      /* Skip the '::'.  */
-	      current_len += 2;
-	      previous_len = current_len;
-	    }
-	  index.name_components.push_back ({previous_len, idx});
-	}
-
-      /* Sort name_components elements by name.  */
-      auto name_comp_compare = [&] (const name_component &left,
-				    const name_component &right)
-	{
-	  const char *left_qualified = index.symbol_name_at (left.idx);
-	  const char *right_qualified = index.symbol_name_at (right.idx);
-
-	  const char *left_name = left_qualified + left.name_offset;
-	  const char *right_name = right_qualified + right.name_offset;
-
-	  return name_cmp (left_name, right_name) < 0;
-	};
-
-      std::sort (index.name_components.begin (),
-		 index.name_components.end (),
-		 name_comp_compare);
-    }
-
-  const char *cplus
-    = lookup_name_without_params.cplus ().lookup_name ().c_str ();
-
-  /* Comparison function object for lower_bound that matches against a
-     given symbol name.  */
-  auto lookup_compare_lower = [&] (const name_component &elem,
-				   const char *name)
-    {
-      const char *elem_qualified = index.symbol_name_at (elem.idx);
-      const char *elem_name = elem_qualified + elem.name_offset;
-      return name_cmp (elem_name, name) < 0;
-    };
-
-  /* Comparison function object for upper_bound that matches against a
-     given symbol name.  */
-  auto lookup_compare_upper = [&] (const char *name,
-				   const name_component &elem)
-    {
-      const char *elem_qualified = index.symbol_name_at (elem.idx);
-      const char *elem_name = elem_qualified + elem.name_offset;
-      return name_cmp (name, elem_name) < 0;
-    };
-
-  auto begin = index.name_components.begin ();
-  auto end = index.name_components.end ();
-
-  /* Find the lower bound.  */
-  auto lower = [&] ()
-    {
-      if (lookup_name_in.completion_mode () && cplus[0] == '\0')
-	return begin;
-      else
-	return std::lower_bound (begin, end, cplus, lookup_compare_lower);
-    } ();
-
-  /* Find the upper bound.  */
-  auto upper = [&] ()
-    {
-      if (lookup_name_in.completion_mode ())
-	{
-	  /* The string frobbing below won't work if the string is
-	     empty.  We don't need it then, anyway -- if we're
-	     completing an empty string, then we want to iterate over
-	     the whole range.  */
-	  if (cplus[0] == '\0')
-	    return end;
-
-	  /* In completion mode, increment the last character because
-	     we want UPPER to point past all symbols names that have
-	     the same prefix.  */
-	  std::string after = cplus;
-
-	  gdb_assert (after.back () != 0xff);
-	  after.back ()++;
-
-	  return std::upper_bound (lower, end, after.c_str (),
-				   lookup_compare_upper);
-	}
-      else
-	return std::upper_bound (lower, end, cplus, lookup_compare_upper);
-    } ();
+  auto bounds = index.find_name_components_bounds (lookup_name_without_params);
 
   /* Now for each symbol name in range, check to see if we have a name
      match, and if so, call the MATCH_CALLBACK callback.  */
@@ -4334,17 +4448,17 @@ dw2_expand_symtabs_matching_symbol
      indexes that matched in a temporary vector and ignore
      duplicates.  */
   std::vector<offset_type> matches;
-  matches.reserve (std::distance (lower, upper));
+  matches.reserve (std::distance (bounds.first, bounds.second));
 
-  for (;lower != upper; ++lower)
+  for (; bounds.first != bounds.second; ++bounds.first)
     {
-      const char *qualified = index.symbol_name_at (lower->idx);
+      const char *qualified = index.symbol_name_at (bounds.first->idx);
 
       if (!lookup_name_matcher.matches (qualified)
 	  || (symbol_matcher != NULL && !symbol_matcher (qualified)))
 	continue;
 
-      matches.push_back (lower->idx);
+      matches.push_back (bounds.first->idx);
     }
 
   std::sort (matches.begin (), matches.end ());
@@ -4491,6 +4605,26 @@ static const char *test_symbols[] = {
   "ns::foo<int>",
   "ns::foo<long>",
 
+  /* These are used to check that the increment-last-char in the
+     matching algorithm for completion doesn't match "t1_fund" when
+     completing "t1_func".  */
+  "t1_func",
+  "t1_func1",
+  "t1_fund",
+  "t1_fund1",
+
+  /* A UTF-8 name with multi-byte sequences to make sure that
+     cp-name-parser understands this as a single identifier ("função"
+     is "function" in PT).  */
+  u8"u8função",
+
+  /* \377 (0xff) is Latin1 'ÿ'.  */
+  "yfunc\377",
+
+  /* \377 (0xff) is Latin1 'ÿ'.  */
+  "\377",
+  "\377\377123",
+
   /* A name with all sorts of complications.  Starts with "z" to make
      it easier for the completion tests below.  */
 #define Z_SYM_NAME \
@@ -4501,8 +4635,79 @@ static const char *test_symbols[] = {
   Z_SYM_NAME
 };
 
+/* Returns true if the mapped_index::find_name_component_bounds method
+   finds EXPECTED_SYMS in INDEX when looking for SEARCH_NAME, in
+   completion mode.  */
+
+static bool
+check_find_bounds_finds (mapped_index &index,
+			 const char *search_name,
+			 gdb::array_view<const char *> expected_syms)
+{
+  lookup_name_info lookup_name (search_name,
+				symbol_name_match_type::FULL, true);
+
+  auto bounds = index.find_name_components_bounds (lookup_name);
+
+  size_t distance = std::distance (bounds.first, bounds.second);
+  if (distance != expected_syms.size ())
+    return false;
+
+  for (size_t exp_elem = 0; exp_elem < distance; exp_elem++)
+    {
+      auto nc_elem = bounds.first + exp_elem;
+      const char *qualified = index.symbol_name_at (nc_elem->idx);
+      if (strcmp (qualified, expected_syms[exp_elem]) != 0)
+	return false;
+    }
+
+  return true;
+}
+
+/* Test the lower-level mapped_index::find_name_component_bounds
+   method.  */
+
 static void
-run_test ()
+test_mapped_index_find_name_component_bounds ()
+{
+  mock_mapped_index mock_index (test_symbols);
+
+  mock_index.index ().build_name_components ();
+
+  /* Test the lower-level mapped_index::find_name_component_bounds
+     method in completion mode.  */
+  {
+    static const char *expected_syms[] = {
+      "t1_func",
+      "t1_func1",
+    };
+
+    SELF_CHECK (check_find_bounds_finds (mock_index.index (),
+					 "t1_func", expected_syms));
+  }
+
+  /* Check that the increment-last-char in the name matching algorithm
+     for completion doesn't get confused with Ansi1 'ÿ' / 0xff.  */
+  {
+    static const char *expected_syms1[] = {
+      "\377",
+      "\377\377123",
+    };
+    SELF_CHECK (check_find_bounds_finds (mock_index.index (),
+					 "\377", expected_syms1));
+
+    static const char *expected_syms2[] = {
+      "\377\377123",
+    };
+    SELF_CHECK (check_find_bounds_finds (mock_index.index (),
+					 "\377\377", expected_syms2));
+  }
+}
+
+/* Test dw2_expand_symtabs_matching_symbol.  */
+
+static void
+test_dw2_expand_symtabs_matching_symbol ()
 {
   mock_mapped_index mock_index (test_symbols);
 
@@ -4548,6 +4753,22 @@ run_test ()
       CHECK_MATCH (with_params.c_str (), symbol_name_match_type::FULL, false,
 		   {});
     }
+
+  /* Check that the name matching algorithm for completion doesn't get
+     confused with Latin1 'ÿ' / 0xff.  */
+  {
+    static const char str[] = "\377";
+    CHECK_MATCH (str, symbol_name_match_type::FULL, true,
+		 EXPECT ("\377", "\377\377123"));
+  }
+
+  /* Check that the increment-last-char in the matching algorithm for
+     completion doesn't match "t1_fund" when completing "t1_func".  */
+  {
+    static const char str[] = "t1_func";
+    CHECK_MATCH (str, symbol_name_match_type::FULL, true,
+		 EXPECT ("t1_func", "t1_func1"));
+  }
 
   /* Check that completion mode works at each prefix of the expected
      symbol name.  */
@@ -4641,6 +4862,13 @@ run_test ()
 
 #undef EXPECT
 #undef CHECK_MATCH
+}
+
+static void
+run_test ()
+{
+  test_mapped_index_find_name_component_bounds ();
+  test_dw2_expand_symtabs_matching_symbol ();
 }
 
 }} // namespace selftests::dw2_expand_symtabs_matching
@@ -4995,6 +5223,7 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_map_matching_symbols,
   dw2_expand_symtabs_matching,
   dw2_find_pc_sect_compunit_symtab,
+  NULL,
   dw2_map_symbol_filenames
 };
 
@@ -9230,6 +9459,10 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       process_imported_unit_die (die, cu);
       break;
 
+    case DW_TAG_variable:
+      read_variable (die, cu);
+      break;
+
     default:
       new_symbol (die, NULL, cu);
       break;
@@ -12256,7 +12489,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  || child_die->tag == DW_TAG_template_value_param)
 	{
 	  templ_func = allocate_template_symbol (objfile);
-	  templ_func->base.is_cplus_template_function = 1;
+	  templ_func->subclass = SYMBOL_TEMPLATE;
 	  break;
 	}
     }
@@ -12768,6 +13001,57 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	}
     }
+}
+
+/* Helper function for read_variable.  If DIE represents a virtual
+   table, then return the type of the concrete object that is
+   associated with the virtual table.  Otherwise, return NULL.  */
+
+static struct type *
+rust_containing_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct attribute *attr = dwarf2_attr (die, DW_AT_type, cu);
+  if (attr == NULL)
+    return NULL;
+
+  /* Find the type DIE.  */
+  struct die_info *type_die = NULL;
+  struct dwarf2_cu *type_cu = cu;
+
+  if (attr_form_is_ref (attr))
+    type_die = follow_die_ref (die, attr, &type_cu);
+  if (type_die == NULL)
+    return NULL;
+
+  if (dwarf2_attr (type_die, DW_AT_containing_type, type_cu) == NULL)
+    return NULL;
+  return die_containing_type (type_die, type_cu);
+}
+
+/* Read a variable (DW_TAG_variable) DIE and create a new symbol.  */
+
+static void
+read_variable (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct rust_vtable_symbol *storage = NULL;
+
+  if (cu->language == language_rust)
+    {
+      struct type *containing_type = rust_containing_type (die, cu);
+
+      if (containing_type != NULL)
+	{
+	  struct objfile *objfile = cu->objfile;
+
+	  storage = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+				    struct rust_vtable_symbol);
+	  initialize_objfile_symbol (storage);
+	  storage->concrete_type = containing_type;
+	  storage->subclass = SYMBOL_RUST_VTABLE;
+	}
+    }
+
+  new_symbol_full (die, NULL, cu, storage);
 }
 
 /* Call CALLBACK from DW_AT_ranges attribute value OFFSET

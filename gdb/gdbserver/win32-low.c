@@ -428,10 +428,9 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 
 /* Resume all artificially suspended threads if we are continuing
    execution.  */
-static int
-continue_one_thread (thread_info *thread, void *id_ptr)
+static void
+continue_one_thread (thread_info *thread, int thread_id)
 {
-  int thread_id = * (int *) id_ptr;
   win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
   if (thread_id == -1 || thread_id == th->tid)
@@ -455,8 +454,6 @@ continue_one_thread (thread_info *thread, void *id_ptr)
 	  th->suspended = 0;
 	}
     }
-
-  return 0;
 }
 
 static BOOL
@@ -464,7 +461,10 @@ child_continue (DWORD continue_status, int thread_id)
 {
   /* The inferior will only continue after the ContinueDebugEvent
      call.  */
-  find_inferior (&all_threads, continue_one_thread, &thread_id);
+  for_each_thread ([&] (thread_info *thread)
+    {
+      continue_one_thread (thread, thread_id);
+    });
   faked_breakpoint = 0;
 
   if (!ContinueDebugEvent (current_event.dwProcessId,

@@ -1,3 +1,59 @@
+2017-11-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr21562c.t: Also provide ___start_scnfoo and
+	___stop_scnfoo.
+	* testsuite/ld-elf/pr21562d.t: Likewise.
+
+2017-11-23  Martin Storsjo  <martin@martin.st>
+
+	* pe-dll.c (autofilter_liblist): Add libmsvcrt, libmsvcrt-os and
+	libucrtbase.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/22441
+	* testsuite/ld-x86-64/apic.{s,d}: New.
+	* testsuite/ld-x86-64/x86-64.exp: Run new test.
+
+2017-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 22419
+	* emultempl/v850elf.em (v850_create_output_section_statements):
+	New function.  Generate an error if attempting to convert the
+	format of the output file.
+	* testsuite/ld-unique/pr21529.d: Skip for the V850.
+	* testsuite/ld-elf/pr21884.d: Skip for the V850.
+
+2017-11-21  Claudiu Zissulescu <claziss@synopsys.com>
+
+	* testsuite/ld-arc/jli-simple.d: Update test.
+
+2017-11-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 22450
+	* testsuite/ld-elf/elf.exp: Add --defsym ALIGN=2|3 to assembler
+	command line depending upon the size of the target address space.
+	* testsuite/ld-elf/pr22450.s: New test file.
+	* testsuite/ld-elf/pr22450.d: New test driver.
+	* testsuite/config/default.exp: Add note that LD_CLASS refers to
+	the size of the host linker not the size of the target linker.
+
+2017-11-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 15152
+	* testsuite/ld-avr/gc-section-debugline.d: Update expected
+	output.
+
+2017-11-15  Alan Modra  <amodra@gmail.com>
+
+	* ldmisc.c (vfinfo): Support up to 9 positional args.
+
+2017-11-14  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/ld-elf/compress1-alt.s: New.
+	* testsuite/ld-elf/compressed1d-alt.d: New.
+	* testsuite/ld-elf/compressed1d.d: Add riscv*-*-* to notarget list.
+
 2017-11-14  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/note-3.t: Don't discard .got.

@@ -1922,6 +1922,7 @@ iterate_over_block_locals (const struct block *b,
 	case LOC_REGISTER:
 	case LOC_STATIC:
 	case LOC_COMPUTED:
+	case LOC_OPTIMIZED_OUT:
 	  if (SYMBOL_IS_ARGUMENT (sym))
 	    break;
 	  if (SYMBOL_DOMAIN (sym) == COMMON_BLOCK_DOMAIN)

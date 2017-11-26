@@ -2458,8 +2458,7 @@ insert_bp_location (struct bp_location *bl,
 		    int *hw_breakpoint_error,
 		    int *hw_bp_error_explained_already)
 {
-  enum errors bp_err = GDB_NO_ERROR;
-  const char *bp_err_message = NULL;
+  gdb_exception bp_excpt = exception_none;
 
   if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
     return 0;
@@ -2568,12 +2567,11 @@ insert_bp_location (struct bp_location *bl,
 
 	      val = bl->owner->ops->insert_location (bl);
 	      if (val)
-		bp_err = GENERIC_ERROR;
+		bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 	    }
 	  CATCH (e, RETURN_MASK_ALL)
 	    {
-	      bp_err = e.error;
-	      bp_err_message = e.message;
+	      bp_excpt = e;
 	    }
 	  END_CATCH
 	}
@@ -2608,16 +2606,16 @@ insert_bp_location (struct bp_location *bl,
 		      val = target_insert_breakpoint (bl->gdbarch,
 						      &bl->overlay_target_info);
 		      if (val)
-			bp_err = GENERIC_ERROR;
+			bp_excpt
+			  = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 		    }
 		  CATCH (e, RETURN_MASK_ALL)
 		    {
-		      bp_err = e.error;
-		      bp_err_message = e.message;
+		      bp_excpt = e;
 		    }
 		  END_CATCH
 
-		  if (bp_err != GDB_NO_ERROR)
+		  if (bp_excpt.reason != 0)
 		    fprintf_unfiltered (tmp_error_stream,
 					"Overlay breakpoint %d "
 					"failed: in ROM?\n",
@@ -2634,12 +2632,11 @@ insert_bp_location (struct bp_location *bl,
 
 	          val = bl->owner->ops->insert_location (bl);
 		  if (val)
-		    bp_err = GENERIC_ERROR;
+		    bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 	        }
 	      CATCH (e, RETURN_MASK_ALL)
 	        {
-		  bp_err = e.error;
-		  bp_err_message = e.message;
+		  bp_excpt = e;
 	        }
 	      END_CATCH
 	    }
@@ -2651,7 +2648,7 @@ insert_bp_location (struct bp_location *bl,
 	    }
 	}
 
-      if (bp_err != GDB_NO_ERROR)
+      if (bp_excpt.reason != 0)
 	{
 	  /* Can't set the breakpoint.  */
 
@@ -2663,7 +2660,9 @@ insert_bp_location (struct bp_location *bl,
 	     breakpoint insertion failed (e.g., the remote target
 	     doesn't define error codes), so we must treat generic
 	     errors as memory errors.  */
-	  if ((bp_err == GENERIC_ERROR || bp_err == MEMORY_ERROR)
+	  if (bp_excpt.reason == RETURN_ERROR
+	      && (bp_excpt.error == GENERIC_ERROR
+		  || bp_excpt.error == MEMORY_ERROR)
 	      && bl->loc_type == bp_loc_software_breakpoint
 	      && (solib_name_from_address (bl->pspace, bl->address)
 		  || shared_objfile_contains_address_p (bl->pspace,
@@ -2691,16 +2690,18 @@ insert_bp_location (struct bp_location *bl,
 	      if (bl->loc_type == bp_loc_hardware_breakpoint)
 		{
 		  *hw_breakpoint_error = 1;
-		  *hw_bp_error_explained_already = bp_err_message != NULL;
+		  *hw_bp_error_explained_already = bp_excpt.message != NULL;
                   fprintf_unfiltered (tmp_error_stream,
                                       "Cannot insert hardware breakpoint %d%s",
-                                      bl->owner->number, bp_err_message ? ":" : ".\n");
-                  if (bp_err_message != NULL)
-                    fprintf_unfiltered (tmp_error_stream, "%s.\n", bp_err_message);
+                                      bl->owner->number,
+				      bp_excpt.message ? ":" : ".\n");
+                  if (bp_excpt.message != NULL)
+                    fprintf_unfiltered (tmp_error_stream, "%s.\n",
+					bp_excpt.message);
 		}
 	      else
 		{
-		  if (bp_err_message == NULL)
+		  if (bp_excpt.message == NULL)
 		    {
 		      std::string message
 			= memory_error_message (TARGET_XFER_E_IO,
@@ -2716,7 +2717,7 @@ insert_bp_location (struct bp_location *bl,
 		      fprintf_unfiltered (tmp_error_stream,
 					  "Cannot insert breakpoint %d: %s\n",
 					  bl->owner->number,
-					  bp_err_message);
+					  bp_excpt.message);
 		    }
 		}
 	      return 1;
@@ -3309,7 +3310,7 @@ create_longjmp_master_breakpoint (void)
 	      /* We are only interested in checking one element.  */
 	      probe *p = ret[0];
 
-	      if (!can_evaluate_probe_arguments (p))
+	      if (!p->can_evaluate_arguments ())
 		{
 		  /* We cannot use the probe interface here, because it does
 		     not know how to evaluate arguments.  */
@@ -3329,7 +3330,7 @@ create_longjmp_master_breakpoint (void)
 	      struct breakpoint *b;
 
 	      b = create_internal_breakpoint (gdbarch,
-					      get_probe_address (p, objfile),
+					      p->get_relocated_address (objfile),
 					      bp_longjmp_master,
 					      &internal_breakpoint_ops);
 	      b->location = new_probe_location ("-probe-stap libc:longjmp");
@@ -3462,7 +3463,7 @@ create_exception_master_breakpoint (void)
 	      /* We are only interested in checking one element.  */
 	      probe *p = ret[0];
 
-	      if (!can_evaluate_probe_arguments (p))
+	      if (!p->can_evaluate_arguments ())
 		{
 		  /* We cannot use the probe interface here, because it does
 		     not know how to evaluate arguments.  */
@@ -3482,7 +3483,7 @@ create_exception_master_breakpoint (void)
 	      struct breakpoint *b;
 
 	      b = create_internal_breakpoint (gdbarch,
-					      get_probe_address (p, objfile),
+					      p->get_relocated_address (objfile),
 					      bp_exception_master,
 					      &internal_breakpoint_ops);
 	      b->location = new_probe_location ("-probe-stap libgcc:unwind");
@@ -6030,12 +6031,10 @@ bptype_string (enum bptype type)
 static void
 output_thread_groups (struct ui_out *uiout,
 		      const char *field_name,
-		      VEC(int) *inf_num,
+		      const std::vector<int> &inf_nums,
 		      int mi_only)
 {
   int is_mi = uiout->is_mi_like_p ();
-  int inf;
-  int i;
 
   /* For backward compatibility, don't display inferiors in CLI unless
      there are several.  Always display them for MI. */
@@ -6044,13 +6043,13 @@ output_thread_groups (struct ui_out *uiout,
 
   ui_out_emit_list list_emitter (uiout, field_name);
 
-  for (i = 0; VEC_iterate (int, inf_num, i, inf); ++i)
+  for (size_t i = 0; i < inf_nums.size (); i++)
     {
       if (is_mi)
 	{
 	  char mi_group[10];
 
-	  xsnprintf (mi_group, sizeof (mi_group), "i%d", inf);
+	  xsnprintf (mi_group, sizeof (mi_group), "i%d", inf_nums[i]);
 	  uiout->field_string (NULL, mi_group);
 	}
       else
@@ -6060,7 +6059,7 @@ output_thread_groups (struct ui_out *uiout,
 	  else
 	    uiout->text (", ");
 	
-	  uiout->text (plongest (inf));
+	  uiout->text (plongest (inf_nums[i]));
 	}
     }
 }
@@ -6219,13 +6218,13 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (loc != NULL && !header_of_multiple)
     {
       struct inferior *inf;
-      VEC(int) *inf_num = NULL;
+      std::vector<int> inf_nums;
       int mi_only = 1;
 
       ALL_INFERIORS (inf)
 	{
 	  if (inf->pspace == loc->pspace)
-	    VEC_safe_push (int, inf_num, inf->num);
+	    inf_nums.push_back (inf->num);
 	}
 
         /* For backward compatibility, don't display inferiors in CLI unless
@@ -6238,8 +6237,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 		   moribund_locations and thus having NULL OWNER.  */
 		&& loc->owner->type != bp_catchpoint))
 	mi_only = 0;
-      output_thread_groups (uiout, "thread-groups", inf_num, mi_only);
-      VEC_free (int, inf_num);
+      output_thread_groups (uiout, "thread-groups", inf_nums, mi_only);
     }
 
   if (!part_of_multiple)
@@ -8694,7 +8692,7 @@ add_location_to_breakpoint (struct breakpoint *b,
   loc->requested_address = sal->pc;
   loc->address = adjusted_address;
   loc->pspace = sal->pspace;
-  loc->probe.probe = sal->probe;
+  loc->probe.prob = sal->prob;
   loc->probe.objfile = sal->objfile;
   gdb_assert (loc->pspace != NULL);
   loc->section = sal->section;
@@ -12879,10 +12877,7 @@ bkpt_probe_insert_location (struct bp_location *bl)
     {
       /* The insertion was successful, now let's set the probe's semaphore
 	 if needed.  */
-      if (bl->probe.probe->pops->set_semaphore != NULL)
-	bl->probe.probe->pops->set_semaphore (bl->probe.probe,
-					      bl->probe.objfile,
-					      bl->gdbarch);
+      bl->probe.prob->set_semaphore (bl->probe.objfile, bl->gdbarch);
     }
 
   return v;
@@ -12893,10 +12888,7 @@ bkpt_probe_remove_location (struct bp_location *bl,
 			    enum remove_bp_reason reason)
 {
   /* Let's clear the semaphore before removing the location.  */
-  if (bl->probe.probe->pops->clear_semaphore != NULL)
-    bl->probe.probe->pops->clear_semaphore (bl->probe.probe,
-					    bl->probe.objfile,
-					    bl->gdbarch);
+  bl->probe.prob->clear_semaphore (bl->probe.objfile, bl->gdbarch);
 
   return bkpt_remove_location (bl, reason);
 }

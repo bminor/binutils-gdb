@@ -1,3 +1,155 @@
+2017-11-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/spu-info.c: Include <unistd.h>.
+	(do_signal_test): Fix broken calls to write.
+	* gdb.arch/spu-info.exp: Use prepare_for_testing.
+	Fix checks for empty mailboxes.  Update signal tests for corrected
+	do_signal_test routine.  Allow nonzero event status.
+	* gdb.arch/spu-ls.exp: Use prepare_for_testing.
+	* gdb.cell/arch.exp: Use standard_output_file.
+	* gdb.cell/break.exp: Likewise.
+	* gdb.cell/bt.exp: Likewise.
+	* gdb.cell/core.exp: Likewise.
+	* gdb.cell/dwarfaddr.exp: Likewise.
+	* gdb.cell/ea-cache.exp: Likewise.
+	* gdb.cell/ea-standalone.exp: Likewise.
+	* gdb.cell/f-regs.exp: Likewise.
+	* gdb.cell/fork.exp: Likewise.
+	* gdb.cell/gcore.exp: Likewise.
+	* gdb.cell/mem-access.exp: Likewise.
+	* gdb.cell/ptype.exp: Likewise.
+	* gdb.cell/registers.exp: Likewise.
+	* gdb.cell/sizeof.exp: Likewise.
+	* gdb.cell/solib-symbol.exp: Likewise.
+	* gdb.cell/solib.exp: Likewise.
+
+2017-11-25   Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/complete-empty.exp: New file.
+	* gdb.base/completion.exp: Adjust.
+
+2017-11-25  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/cpls-ops.cc: New file.
+	* gdb.linespec/cpls-ops.exp: New file.
+	* lib/completion-support.exp (test_complete_prefix_range_re): New,
+	factored out from ...
+	(test_complete_prefix_range): ... this.
+
+2017-11-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/cpcompletion.exp: New file.
+	* gdb.linespec/cpls-hyphen.cc: New file.
+	* gdb.linespec/cpls.cc: New file.
+	* gdb.linespec/cpls2.cc: New file.
+	* gdb.linespec/explicit.exp: Load completion-support.exp.  Adjust
+	test to use test_gdb_complete_unique.  Add label completion,
+	keyword completion and explicit location completion tests.
+	* lib/completion-support.exp: New file.
+
+2017-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/catch_ex.exp, gdb.ada/mi_catch_ex.exp,
+	gdb.ada/mi_ex_cond.exp: Accept optional exception message in
+	when hitting an exception catchpoint.
+
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/macscp.exp: Append -g3 to additional_flags for clang.
+
+2017-11-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.opt/inline-locals.exp: Mark tests as KFAIL.
+	* gdb.dwarf2/info-locals-optimized-out.exp: New file.
+	* gdb.dwarf2/info-locals-optimized-out.c: New file.
+
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/info-os.exp: Pass pthreads.
+	* gdb.multi/multi-attach.exp: Likewise.
+
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.dwarf2/pr10770.exp: Remove code skipping non-gcc
+	compiler.
+
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/attach-pie-noexec.exp: Pass "-pie" in ldflags.
+	* gdb.base/break-interp.exp: Likewise.
+	* gdb.base/jit-attach-pie.exp: Likewise.
+
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/float128.c (large128): New variable.
+	* gdb.base/float128.exp: Add test to print largest __float128 value.
+
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/vsx-regs.exp: Update register content checks.
+
+2017-11-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/ppc-longdouble.exp: New file.
+	* gdb.arch/ppc-longdouble.c: Likewise.
+
+2017-11-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.ada/minsyms.exp: Accept any address for 'some_minsym'.
+
+2017-11-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/whatis-ptype-typedefs.c (double_typedef)
+	(long_double_typedef): New typedefs.
+	Use DEF on double and long double.
+	* gdb.base/whatis-ptype-typedefs.exp: Add double and long double
+	cases.
+	(run_tests): New 'float_ptr_same_size', 'double_ptr_same_size',
+	and 'long_double_ptr_same_size' locals.  Use them to decide
+	whether cast from array/function to float is valid/invalid.
+
+2017-11-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/traits.rs: New file.
+	* gdb.rust/traits.exp: New file.
+
+2017-11-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/minsyms: New testcase.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/bp-cmds-continue-ctrl-c.c: New file.
+	* gdb.base/bp-cmds-continue-ctrl-c.exp: New file.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.rust/modules.exp: Skip tests that rely on inferior I/O if
+	gdb,noinferiorio is set, and use gdb_test_stdio otherwise.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/reconnect-ctrl-c.c: New file.
+	* gdb.server/reconnect-ctrl-c.exp: New file.
+
+2017-11-16  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-rbreak.exp: New file.
+	* gdb.python/py-rbreak.c: New file.
+	* gdb.python/py-rbreak-func2.c: New file.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/starti.exp ("continue" test): Remove ".*"s from
+	pattern.
+	* lib/gdb.exp (gdb_test_sequence): Don't send empty command to
+	GDB.
+
+2017-11-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.tui/completionn.exp (test_tab_completion): Add space in
+	regex.
+
 2017-11-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.opt/inline-locals.exp: Remove trailing parentheses from

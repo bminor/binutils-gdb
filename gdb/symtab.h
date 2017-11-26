@@ -20,6 +20,7 @@
 #if !defined (SYMTAB_H)
 #define SYMTAB_H 1
 
+#include <array>
 #include <vector>
 #include <string>
 #include "gdb_vecs.h"
@@ -41,10 +42,10 @@ struct axs_value;
 struct agent_expr;
 struct program_space;
 struct language_defn;
-struct probe;
 struct common_block;
 struct obj_section;
 struct cmd_list_element;
+class probe;
 struct lookup_name_info;
 
 /* How to match a lookup name against a symbol search name.  */
@@ -1008,6 +1009,21 @@ struct symbol_impl
   const struct symbol_register_ops *ops_register;
 };
 
+/* struct symbol has some subclasses.  This enum is used to
+   differentiate between them.  */
+
+enum symbol_subclass_kind
+{
+  /* Plain struct symbol.  */
+  SYMBOL_NONE,
+
+  /* struct template_symbol.  */
+  SYMBOL_TEMPLATE,
+
+  /* struct rust_vtable_symbol.  */
+  SYMBOL_RUST_VTABLE
+};
+
 /* This structure is space critical.  See space comments at the top.  */
 
 struct symbol
@@ -1057,9 +1073,9 @@ struct symbol
   /* Whether this is an inlined function (class LOC_BLOCK only).  */
   unsigned is_inlined : 1;
 
-  /* True if this is a C++ function symbol with template arguments.
-     In this case the symbol is really a "struct template_symbol".  */
-  unsigned is_cplus_template_function : 1;
+  /* The concrete type of this symbol.  */
+
+  ENUM_BITFIELD (symbol_subclass_kind) subclass : 2;
 
   /* Line number of this symbol's definition, except for inlined
      functions.  For an inlined function (class LOC_BLOCK and
@@ -1121,7 +1137,7 @@ extern const struct block_symbol null_block_symbol;
 #define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
 #define SYMBOL_INLINED(symbol)		(symbol)->is_inlined
 #define SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION(symbol) \
-  (symbol)->is_cplus_template_function
+  (((symbol)->subclass) == SYMBOL_TEMPLATE)
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_COMPUTED_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_computed)
@@ -1161,22 +1177,26 @@ extern struct symtab *symbol_symtab (const struct symbol *symbol);
 extern void symbol_set_symtab (struct symbol *symbol, struct symtab *symtab);
 
 /* An instance of this type is used to represent a C++ template
-   function.  It includes a "struct symbol" as a kind of base class;
-   users downcast to "struct template_symbol *" when needed.  A symbol
-   is really of this type iff SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION is
-   true.  */
+   function.  A symbol is really of this type iff
+   SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION is true.  */
 
-struct template_symbol
+struct template_symbol : public symbol
 {
-  /* The base class.  */
-  struct symbol base;
-
   /* The number of template arguments.  */
   int n_template_arguments;
 
   /* The template arguments.  This is an array with
      N_TEMPLATE_ARGUMENTS elements.  */
   struct symbol **template_arguments;
+};
+
+/* A symbol that represents a Rust virtual table object.  */
+
+struct rust_vtable_symbol : public symbol
+{
+  /* The concrete type for which this vtable was created; that is, in
+     "impl Trait for Type", this is "Type".  */
+  struct type *concrete_type;
 };
 
 
@@ -1605,6 +1625,11 @@ extern struct symbol *find_pc_function (CORE_ADDR);
 
 extern struct symbol *find_pc_sect_function (CORE_ADDR, struct obj_section *);
 
+/* Find the symbol at the given address.  Returns NULL if no symbol
+   found.  Only exact matches for ADDRESS are considered.  */
+
+extern struct symbol *find_symbol_at_address (CORE_ADDR);
+
 extern int find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
 					       CORE_ADDR *address,
 					       CORE_ADDR *endaddr,
@@ -1702,7 +1727,7 @@ struct symtab_and_line
   bool explicit_line = false;
 
   /* The probe associated with this symtab_and_line.  */
-  struct probe *probe = NULL;
+  probe *prob = NULL;
   /* If PROBE is not NULL, then this is the objfile in which the probe
      originated.  */
   struct objfile *objfile = NULL;

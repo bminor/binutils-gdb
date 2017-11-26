@@ -36,7 +36,7 @@ extern unsigned int varobjdebug;		/* defined in varobj.c.  */
 
 static void varobj_update_one (struct varobj *var,
 			       enum print_values print_values,
-			       int is_explicit);
+			       bool is_explicit);
 
 static int mi_print_value_p (struct varobj *var,
 			     enum print_values print_values);
@@ -260,7 +260,7 @@ void
 mi_cmd_var_set_frozen (const char *command, char **argv, int argc)
 {
   struct varobj *var;
-  int frozen;
+  bool frozen;
 
   if (argc != 2)
     error (_("-var-set-format: Usage: NAME FROZEN_FLAG."));
@@ -268,9 +268,9 @@ mi_cmd_var_set_frozen (const char *command, char **argv, int argc)
   var = varobj_get_handle (argv[0]);
 
   if (strcmp (argv[1], "0") == 0)
-    frozen = 0;
+    frozen = false;
   else if (strcmp (argv[1], "1") == 0)
-    frozen = 1;
+    frozen = true;
   else
     error (_("Invalid flag value"));
 
@@ -352,10 +352,7 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;  
-  VEC(varobj_p) *children;
-  struct varobj *child;
   enum print_values print_values;
-  int ix;
   int from, to;
 
   if (argc < 1 || argc > 4)
@@ -379,7 +376,9 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
       to = -1;
     }
 
-  children = varobj_list_children (var, &from, &to);
+  const std::vector<varobj *> &children
+    = varobj_list_children (var, &from, &to);
+
   uiout->field_int ("numchild", to - from);
   if (argc == 2 || argc == 4)
     print_values = mi_parse_print_values (argv[0]);
@@ -401,13 +400,11 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
 	tuple_emitter.emplace (uiout, "children");
       else
 	list_emitter.emplace (uiout, "children");
-      for (ix = from;
-	   ix < to && VEC_iterate (varobj_p, children, ix, child);
-	   ++ix)
+      for (int ix = from; ix < to && ix < children.size (); ix++)
 	{
 	  ui_out_emit_tuple child_emitter (uiout, "child");
 
-	  print_varobj (child, print_values, 1 /* print expression */);
+	  print_varobj (children[ix], print_values, 1 /* print expression */);
 	}
     }
 
@@ -623,7 +620,7 @@ mi_cmd_var_update_iter (struct varobj *var, void *data_pointer)
 
   if (thread_stopped
       && (!data->only_floating || varobj_floating_p (var)))
-    varobj_update_one (var, data->print_values, 0 /* implicit */);
+    varobj_update_one (var, data->print_values, false /* implicit */);
 }
 
 void
@@ -677,7 +674,7 @@ mi_cmd_var_update (const char *command, char **argv, int argc)
       /* Get varobj handle, if a valid var obj name was specified.  */
       struct varobj *var = varobj_get_handle (name);
 
-      varobj_update_one (var, print_values, 1 /* explicit */);
+      varobj_update_one (var, print_values, true /* explicit */);
     }
 }
 
@@ -685,30 +682,27 @@ mi_cmd_var_update (const char *command, char **argv, int argc)
 
 static void
 varobj_update_one (struct varobj *var, enum print_values print_values,
-		   int is_explicit)
+		   bool is_explicit)
 {
   struct ui_out *uiout = current_uiout;
-  VEC (varobj_update_result) *changes;
-  varobj_update_result *r;
-  int i;
+
+  std::vector<varobj_update_result> changes = varobj_update (&var, is_explicit);
   
-  changes = varobj_update (&var, is_explicit);
-  
-  for (i = 0; VEC_iterate (varobj_update_result, changes, i, r); ++i)
+  for (const varobj_update_result &r : changes)
     {
       int from, to;
 
       gdb::optional<ui_out_emit_tuple> tuple_emitter;
       if (mi_version (uiout) > 1)
 	tuple_emitter.emplace (uiout, nullptr);
-      uiout->field_string ("name", varobj_get_objname (r->varobj));
+      uiout->field_string ("name", varobj_get_objname (r.varobj));
 
-      switch (r->status)
+      switch (r.status)
 	{
 	case VAROBJ_IN_SCOPE:
-	  if (mi_print_value_p (r->varobj, print_values))
+	  if (mi_print_value_p (r.varobj, print_values))
 	    {
-	      std::string val = varobj_get_value (r->varobj);
+	      std::string val = varobj_get_value (r.varobj);
 
 	      uiout->field_string ("value", val.c_str ());
 	    }
@@ -722,53 +716,47 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
  	  break;
 	}
 
-      if (r->status != VAROBJ_INVALID)
+      if (r.status != VAROBJ_INVALID)
 	{
-	  if (r->type_changed)
+	  if (r.type_changed)
 	    uiout->field_string ("type_changed", "true");
 	  else
 	    uiout->field_string ("type_changed", "false");
 	}
 
-      if (r->type_changed)
+      if (r.type_changed)
 	{
-	  std::string type_name = varobj_get_type (r->varobj);
+	  std::string type_name = varobj_get_type (r.varobj);
 
 	  uiout->field_string ("new_type", type_name.c_str ());
 	}
 
-      if (r->type_changed || r->children_changed)
+      if (r.type_changed || r.children_changed)
 	uiout->field_int ("new_num_children",
-			  varobj_get_num_children (r->varobj));
+			  varobj_get_num_children (r.varobj));
 
       gdb::unique_xmalloc_ptr<char> display_hint
-	= varobj_get_display_hint (r->varobj);
+	= varobj_get_display_hint (r.varobj);
       if (display_hint)
 	uiout->field_string ("displayhint", display_hint.get ());
 
-      if (varobj_is_dynamic_p (r->varobj))
+      if (varobj_is_dynamic_p (r.varobj))
 	uiout->field_int ("dynamic", 1);
 
-      varobj_get_child_range (r->varobj, &from, &to);
-      uiout->field_int ("has_more", varobj_has_more (r->varobj, to));
+      varobj_get_child_range (r.varobj, &from, &to);
+      uiout->field_int ("has_more", varobj_has_more (r.varobj, to));
 
-      if (r->newobj)
+      if (!r.newobj.empty ())
 	{
-	  int j;
-	  varobj_p child;
-
 	  ui_out_emit_list list_emitter (uiout, "new_children");
-	  for (j = 0; VEC_iterate (varobj_p, r->newobj, j, child); ++j)
+
+	  for (varobj *child : r.newobj)
 	    {
 	      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 	      print_varobj (child, print_values, 1 /* print_expression */);
 	    }
-
-	  VEC_free (varobj_p, r->newobj);
-	  r->newobj = NULL;	/* Paranoia.  */
 	}
     }
-  VEC_free (varobj_update_result, changes);
 }
 
 void

@@ -1,3 +1,26 @@
+2017-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Ada Exception Information): Document
+	new "exception-message" field.
+
+2017-11-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Memory Map Format): Update gdb-memory-map.dtd.
+
+2017-11-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Completion): Update need-quoting examples.  Remove
+	false claim that GDB inserts quoting automatically.
+	(Symbols): Add anchor.
+
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.texinfo (Requirements): Document use of GNU MPFR.
+
+2017-11-16  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python.texi (Basic Python): Add rbreak documentation.
+
 2017-11-07  Xavier Roirand  <roirand@adacore.com>
 	    Pedro Alves  <palves@redhat.com>
 

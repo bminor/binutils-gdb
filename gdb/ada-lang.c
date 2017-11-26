@@ -3603,7 +3603,12 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
     }
 
   *pos = pc;
-  return evaluate_subexp_type (exp, pos);
+  if (exp->elts[pc].opcode == OP_VAR_MSYM_VALUE)
+    return evaluate_var_msym_value (EVAL_AVOID_SIDE_EFFECTS,
+				    exp->elts[pc + 1].objfile,
+				    exp->elts[pc + 2].msymbol);
+  else
+    return evaluate_subexp_type (exp, pos);
 }
 
 /* Return non-zero if formal type FTYPE matches actual type ATYPE.  If
@@ -10045,7 +10050,7 @@ add_component_interval (LONGEST low, LONGEST high,
    is different.  */
 
 static struct value *
-ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
+ada_value_cast (struct type *type, struct value *arg2)
 {
   if (type == ada_check_typedef (value_type (arg2)))
     return arg2;
@@ -10313,6 +10318,58 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
     entity.  Results in this case are unpredictable, as we usually read
     past the buffer containing the data =:-o.  */
 
+/* Evaluate a subexpression of EXP, at index *POS, and return a value
+   for that subexpression cast to TO_TYPE.  Advance *POS over the
+   subexpression.  */
+
+static value *
+ada_evaluate_subexp_for_cast (expression *exp, int *pos,
+			      enum noside noside, struct type *to_type)
+{
+  int pc = *pos;
+
+  if (exp->elts[pc].opcode == OP_VAR_MSYM_VALUE
+      || exp->elts[pc].opcode == OP_VAR_VALUE)
+    {
+      (*pos) += 4;
+
+      value *val;
+      if (exp->elts[pc].opcode == OP_VAR_MSYM_VALUE)
+        {
+          if (noside == EVAL_AVOID_SIDE_EFFECTS)
+            return value_zero (to_type, not_lval);
+
+          val = evaluate_var_msym_value (noside,
+                                         exp->elts[pc + 1].objfile,
+                                         exp->elts[pc + 2].msymbol);
+        }
+      else
+        val = evaluate_var_value (noside,
+                                  exp->elts[pc + 1].block,
+                                  exp->elts[pc + 2].symbol);
+
+      if (noside == EVAL_SKIP)
+        return eval_skip_value (exp);
+
+      val = ada_value_cast (to_type, val);
+
+      /* Follow the Ada language semantics that do not allow taking
+	 an address of the result of a cast (view conversion in Ada).  */
+      if (VALUE_LVAL (val) == lval_memory)
+        {
+          if (value_lazy (val))
+            value_fetch_lazy (val);
+          VALUE_LVAL (val) = not_lval;
+        }
+      return val;
+    }
+
+  value *val = evaluate_subexp (to_type, exp, pos, noside);
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  return ada_value_cast (to_type, val);
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10351,7 +10408,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
          Similarly, we need to perform the conversion from OP_LONG
          ourselves.  */
       if ((op == OP_FLOAT || op == OP_LONG) && expect_type != NULL)
-        arg1 = ada_value_cast (expect_type, arg1, noside);
+        arg1 = ada_value_cast (expect_type, arg1);
 
       return arg1;
 
@@ -10371,11 +10428,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case UNOP_CAST:
       (*pos) += 2;
       type = exp->elts[pc + 1].type;
-      arg1 = evaluate_subexp (type, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-        goto nosideret;
-      arg1 = ada_value_cast (type, arg1, noside);
-      return arg1;
+      return ada_evaluate_subexp_for_cast (exp, pos, noside, type);
 
     case UNOP_QUAL:
       (*pos) += 2;
@@ -11347,7 +11400,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     }
 
 nosideret:
-  return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
+  return eval_skip_value (exp);
 }
 
 
@@ -12052,6 +12105,73 @@ ada_exception_name_addr_1 (enum ada_exception_catchpoint_kind ex,
   return 0; /* Should never be reached.  */
 }
 
+/* Assuming the inferior is stopped at an exception catchpoint,
+   return the message which was associated to the exception, if
+   available.  Return NULL if the message could not be retrieved.
+
+   The caller must xfree the string after use.
+
+   Note: The exception message can be associated to an exception
+   either through the use of the Raise_Exception function, or
+   more simply (Ada 2005 and later), via:
+
+       raise Exception_Name with "exception message";
+
+   */
+
+static char *
+ada_exception_message_1 (void)
+{
+  struct value *e_msg_val;
+  char *e_msg = NULL;
+  int e_msg_len;
+  struct cleanup *cleanups;
+
+  /* For runtimes that support this feature, the exception message
+     is passed as an unbounded string argument called "message".  */
+  e_msg_val = parse_and_eval ("message");
+  if (e_msg_val == NULL)
+    return NULL; /* Exception message not supported.  */
+
+  e_msg_val = ada_coerce_to_simple_array (e_msg_val);
+  gdb_assert (e_msg_val != NULL);
+  e_msg_len = TYPE_LENGTH (value_type (e_msg_val));
+
+  /* If the message string is empty, then treat it as if there was
+     no exception message.  */
+  if (e_msg_len <= 0)
+    return NULL;
+
+  e_msg = (char *) xmalloc (e_msg_len + 1);
+  cleanups = make_cleanup (xfree, e_msg);
+  read_memory_string (value_address (e_msg_val), e_msg, e_msg_len + 1);
+  e_msg[e_msg_len] = '\0';
+
+  discard_cleanups (cleanups);
+  return e_msg;
+}
+
+/* Same as ada_exception_message_1, except that all exceptions are
+   contained here (returning NULL instead).  */
+
+static char *
+ada_exception_message (void)
+{
+  char *e_msg = NULL;  /* Avoid a spurious uninitialized warning.  */
+
+  TRY
+    {
+      e_msg = ada_exception_message_1 ();
+    }
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      e_msg = NULL;
+    }
+  END_CATCH
+
+  return e_msg;
+}
+
 /* Same as ada_exception_name_addr_1, except that it intercepts and contains
    any error that ada_exception_name_addr_1 might cause to be thrown.
    When an error is intercepted, a warning with the error message is printed,
@@ -12287,6 +12407,7 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 {
   struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;
+  char *exception_message;
 
   annotate_catchpoint (b->number);
 
@@ -12352,6 +12473,19 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 	uiout->text ("failed assertion");
 	break;
     }
+
+  exception_message = ada_exception_message ();
+  if (exception_message != NULL)
+    {
+      struct cleanup *cleanups = make_cleanup (xfree, exception_message);
+
+      uiout->text (" (");
+      uiout->field_string ("exception-message", exception_message);
+      uiout->text (")");
+
+      do_cleanups (cleanups);
+    }
+
   uiout->text (" at ");
   ada_find_printable_frame (get_current_frame ());
 

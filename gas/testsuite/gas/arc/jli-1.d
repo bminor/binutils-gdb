@@ -20,7 +20,7 @@ Disassembly of section .text:
 Disassembly of section .jlitab:
 
 00000000 <__jli.foo>:
-   0:	0001 0000           	b	0 <foo>
+   0:	0001 0000           	b	0	;0 <foo>
 			0: R_ARC_S25H_PCREL	foo
 
 #...

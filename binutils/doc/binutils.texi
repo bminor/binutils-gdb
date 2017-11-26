@@ -2071,11 +2071,8 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-r}|@option{--reloc}]
         [@option{-R}|@option{--dynamic-reloc}]
         [@option{-s}|@option{--full-contents}]
-        [@option{-W[lLiaprmfFsoRt]}|
-         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames]
-                 [=aranges,=macro,=frames,=frames-interp,=str,=loc]
-                 [=Ranges,=pubtypes,=trace_info,=trace_abbrev]
-                 [=trace_aranges,=gdb_index]
+        [@option{-W[lLiaprmfFsoRtUuTgAckK]}|
+         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
         [@option{-G}|@option{--stabs}]
         [@option{-t}|@option{--syms}]
         [@option{-T}|@option{--dynamic-syms}]
@@ -2560,42 +2557,9 @@ This is the default when @option{--prefix-addresses} is used.
 Display @var{width} bytes on a single line when disassembling
 instructions.
 
-@item -W[lLiaprmfFsoRt]
-@itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames]
-@itemx --dwarf[=aranges,=macro,=frames,=frames-interp,=str,=loc]
-@itemx --dwarf[=Ranges,=pubtypes,=trace_info,=trace_abbrev]
-@itemx --dwarf[=trace_aranges,=gdb_index]
-@cindex DWARF
-@cindex debug symbols
-Displays the contents of the debug sections in the file, if any are
-present.  If one of the optional letters or words follows the switch
-then only data found in those specific sections will be dumped.
-
-Note that there is no single letter option to display the content of
-trace sections or .gdb_index.
-
-Note: the output from the @option{=info} option can also be affected
-by the options @option{--dwarf-depth}, the @option{--dwarf-start} and
-the @option{--dwarf-check}.
-
-@item --dwarf-depth=@var{n}
-Limit the dump of the @code{.debug_info} section to @var{n} children.
-This is only useful with @option{--dwarf=info}.  The default is
-to print all DIEs; the special value 0 for @var{n} will also have this
-effect.
-
-With a non-zero value for @var{n}, DIEs at or deeper than @var{n}
-levels will not be printed.  The range for @var{n} is zero-based.
-
-@item --dwarf-start=@var{n}
-Print only DIEs beginning with the DIE numbered @var{n}.  This is only
-useful with @option{--dwarf=info}.
-
-If specified, this option will suppress printing of any header
-information and all DIEs before the DIE numbered @var{n}.  Only
-siblings and children of the specified DIE will be printed.
-
-This can be used in conjunction with @option{--dwarf-depth}.
+@item -W[lLiaprmfFsoRtUuTgAckK]
+@itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
+@include debug.options.texi
 
 @item --dwarf-check
 Enable additional checks for consistency of Dwarf information.
@@ -4627,8 +4591,8 @@ readelf [@option{-a}|@option{--all}]
         [@option{-R} <number or name>|@option{--relocated-dump=}<number or name>]
         [@option{-z}|@option{--decompress}]
         [@option{-c}|@option{--archive-index}]
-        [@option{-w[lLiaprmfFsoRt]}|
-         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index]]
+        [@option{-w[lLiaprmfFsoRtUuTgAckK]}|
+         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
         [@option{-I}|@option{--histogram}]
@@ -4803,44 +4767,9 @@ Displays the file symbol index information contained in the header part
 of binary archives.  Performs the same function as the @option{t}
 command to @command{ar}, but without using the BFD library.  @xref{ar}.
 
-@item -w[lLiaprmfFsoRt]
-@itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index]
-Displays the contents of the debug sections in the file, if any are
-present.  If one of the optional letters or words follows the switch
-then only data found in those specific sections will be dumped.
-
-Note that there is no single letter option to display the content of
-trace sections or .gdb_index.
-
-Note: the @option{=decodedline} option will display the interpreted
-contents of a .debug_line section whereas the @option{=rawline} option
-dumps the contents in a raw format.
-
-Note: the @option{=frames-interp} option will display the interpreted
-contents of a .debug_frame section whereas the @option{=frames} option
-dumps the contents in a raw format.
-
-Note: the output from the @option{=info} option can also be affected
-by the options @option{--dwarf-depth} and @option{--dwarf-start}.
-
-@item --dwarf-depth=@var{n}
-Limit the dump of the @code{.debug_info} section to @var{n} children.
-This is only useful with @option{--debug-dump=info}.  The default is
-to print all DIEs; the special value 0 for @var{n} will also have this
-effect.
-
-With a non-zero value for @var{n}, DIEs at or deeper than @var{n}
-levels will not be printed.  The range for @var{n} is zero-based.
-
-@item --dwarf-start=@var{n}
-Print only DIEs beginning with the DIE numbered @var{n}.  This is only
-useful with @option{--debug-dump=info}.
-
-If specified, this option will suppress printing of any header
-information and all DIEs before the DIE numbered @var{n}.  Only
-siblings and children of the specified DIE will be printed.
-
-This can be used in conjunction with @option{--dwarf-depth}.
+@item -w[lLiaprmfFsoRtUuTgAckK]
+@itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
+@include debug.options.texi
 
 @item -I
 @itemx --histogram

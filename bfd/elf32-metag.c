@@ -2499,14 +2499,13 @@ elf_metag_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (eh->u.weakdef != NULL)
+  if (eh->is_weakalias)
     {
-      if (eh->u.weakdef->root.type != bfd_link_hash_defined
-	  && eh->u.weakdef->root.type != bfd_link_hash_defweak)
-	abort ();
-      eh->root.u.def.section = eh->u.weakdef->root.u.def.section;
-      eh->root.u.def.value = eh->u.weakdef->root.u.def.value;
-      eh->non_got_ref = eh->u.weakdef->non_got_ref;
+      struct elf_link_hash_entry *def = weakdef (eh);
+      BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+      eh->root.u.def.section = def->root.u.def.section;
+      eh->root.u.def.value = def->root.u.def.value;
+      eh->non_got_ref = def->non_got_ref;
       return TRUE;
     }
 

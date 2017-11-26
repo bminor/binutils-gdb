@@ -9,7 +9,7 @@
 Hex dump of section '\.rodata':
   0x00000000 01 *.*
 
-Decoded dump of debug contents of section \.debug_line:
+Contents of the \.debug_line section:
 
 CU: dwarf2-15\.c:
 File name  *Line number  *Starting address  *View

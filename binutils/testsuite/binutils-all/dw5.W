@@ -342,7 +342,7 @@ Raw dump of debug contents of section .debug_line:
   \[0x00000091\]  Extended opcode 1: End of Sequence
 
 
-Decoded dump of debug contents of section .debug_line:
+Contents of the .debug_line section:
 
 CU: ./main.c:
 File name                            Line number    Starting address    View

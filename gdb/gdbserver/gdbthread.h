@@ -123,6 +123,18 @@ find_thread (int pid, Func func)
     });
 }
 
+/* Find the first thread that matches FILTER for which FUNC returns true.
+   Return NULL if no thread satisfying these conditions is found.  */
+
+template <typename Func>
+static thread_info *
+find_thread (ptid_t filter, Func func)
+{
+  return find_thread ([&] (thread_info *thread) {
+    return thread->id.matches (filter) && func (thread);
+  });
+}
+
 /* Invoke FUNC for each thread.  */
 
 template <typename Func>

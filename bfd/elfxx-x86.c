@@ -1765,19 +1765,19 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      struct elf_link_hash_entry *def = weakdef (h);
+      BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+      h->root.u.def.section = def->root.u.def.section;
+      h->root.u.def.value = def->root.u.def.value;
       if (ELIMINATE_COPY_RELOCS
 	  || info->nocopyreloc
 	  || SYMBOL_NO_COPYRELOC (info, eh))
 	{
 	  /* NB: needs_copy is always 0 for i386.  */
-	  h->non_got_ref = h->u.weakdef->non_got_ref;
-	  eh->needs_copy = h->u.weakdef->needs_copy;
+	  h->non_got_ref = def->non_got_ref;
+	  eh->needs_copy = def->needs_copy;
 	}
       return TRUE;
     }
@@ -2401,7 +2401,7 @@ _bfd_x86_elf_link_setup_gnu_properties
 					      | SEC_HAS_CONTENTS
 					      | SEC_DATA));
 	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
+	    info->callbacks->einfo (_("%F%P: failed to create GNU property section\n"));
 
 	  if (!bfd_set_section_alignment (ebfd, sec, class_align))
 	    {
@@ -2556,7 +2556,7 @@ error_alignment:
       && !elf_vxworks_create_dynamic_sections (dynobj, info,
 					       &htab->srelplt2))
     {
-      info->callbacks->einfo (_("%F: failed to create VxWorks dynamic sections\n"));
+      info->callbacks->einfo (_("%F%P: failed to create VxWorks dynamic sections\n"));
       return pbfd;
     }
 
@@ -2565,7 +2565,7 @@ error_alignment:
      don't need to do it in check_relocs.  */
   if (htab->elf.sgot == NULL
       && !_bfd_elf_create_got_section (dynobj, info))
-    info->callbacks->einfo (_("%F: failed to create GOT sections\n"));
+    info->callbacks->einfo (_("%F%P: failed to create GOT sections\n"));
 
   got_align = (bed->target_id == X86_64_ELF_DATA) ? 3 : 2;
 
@@ -2583,7 +2583,7 @@ error_alignment:
   /* Create the ifunc sections here so that check_relocs can be
      simplified.  */
   if (!_bfd_elf_create_ifunc_sections (dynobj, info))
-    info->callbacks->einfo (_("%F: failed to create ifunc sections\n"));
+    info->callbacks->einfo (_("%F%P: failed to create ifunc sections\n"));
 
   plt_alignment = bfd_log2 (htab->plt.plt_entry_size);
 
@@ -2624,7 +2624,7 @@ error_alignment:
 						    ".plt.got",
 						    pltflags);
 	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F: failed to create GOT PLT section\n"));
+	    info->callbacks->einfo (_("%F%P: failed to create GOT PLT section\n"));
 
 	  if (!bfd_set_section_alignment (dynobj, sec,
 					  non_lazy_plt_alignment))
@@ -2645,7 +2645,7 @@ error_alignment:
 							    ".plt.sec",
 							    pltflags);
 		  if (sec == NULL)
-		    info->callbacks->einfo (_("%F: failed to create IBT-enabled PLT section\n"));
+		    info->callbacks->einfo (_("%F%P: failed to create IBT-enabled PLT section\n"));
 
 		  if (!bfd_set_section_alignment (dynobj, sec,
 						  plt_alignment))
@@ -2660,7 +2660,7 @@ error_alignment:
 							    ".plt.sec",
 							    pltflags);
 		  if (sec == NULL)
-		    info->callbacks->einfo (_("%F: failed to create BND PLT section\n"));
+		    info->callbacks->einfo (_("%F%P: failed to create BND PLT section\n"));
 
 		  if (!bfd_set_section_alignment (dynobj, sec,
 						  non_lazy_plt_alignment))
@@ -2681,7 +2681,7 @@ error_alignment:
 						    ".eh_frame",
 						    flags);
 	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F: failed to create PLT .eh_frame section\n"));
+	    info->callbacks->einfo (_("%F%P: failed to create PLT .eh_frame section\n"));
 
 	  if (!bfd_set_section_alignment (dynobj, sec, class_align))
 	    goto error_alignment;
@@ -2694,7 +2694,7 @@ error_alignment:
 							".eh_frame",
 							flags);
 	      if (sec == NULL)
-		info->callbacks->einfo (_("%F: failed to create GOT PLT .eh_frame section\n"));
+		info->callbacks->einfo (_("%F%P: failed to create GOT PLT .eh_frame section\n"));
 
 	      if (!bfd_set_section_alignment (dynobj, sec, class_align))
 		goto error_alignment;
@@ -2708,7 +2708,7 @@ error_alignment:
 							".eh_frame",
 							flags);
 	      if (sec == NULL)
-		info->callbacks->einfo (_("%F: failed to create the second PLT .eh_frame section\n"));
+		info->callbacks->einfo (_("%F%P: failed to create the second PLT .eh_frame section\n"));
 
 	      if (!bfd_set_section_alignment (dynobj, sec, class_align))
 		goto error_alignment;

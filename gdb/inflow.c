@@ -91,6 +91,35 @@ static serial_ttystate initial_gdb_ttystate;
 
 static struct terminal_info *get_inflow_inferior_data (struct inferior *);
 
+/* RAII class used to ignore SIGTTOU in a scope.  */
+
+class scoped_ignore_sigttou
+{
+public:
+  scoped_ignore_sigttou ()
+  {
+#ifdef SIGTTOU
+    if (job_control)
+      m_osigttou = signal (SIGTTOU, SIG_IGN);
+#endif
+  }
+
+  ~scoped_ignore_sigttou ()
+  {
+#ifdef SIGTTOU
+    if (job_control)
+      signal (SIGTTOU, m_osigttou);
+#endif
+  }
+
+  DISABLE_COPY_AND_ASSIGN (scoped_ignore_sigttou);
+
+private:
+#ifdef SIGTTOU
+  sighandler_t m_osigttou = NULL;
+#endif
+};
+
 #ifdef HAVE_TERMIOS_H
 
 /* Return the process group of the current inferior.  */
@@ -329,17 +358,11 @@ child_terminal_ours_1 (int output_only)
     return;
   else
     {
-#ifdef SIGTTOU
-      /* Ignore this signal since it will happen when we try to set the
-         pgrp.  */
-      sighandler_t osigttou = NULL;
-#endif
       int result ATTRIBUTE_UNUSED;
 
-#ifdef SIGTTOU
-      if (job_control)
-	osigttou = signal (SIGTTOU, SIG_IGN);
-#endif
+      /* Ignore SIGTTOU since it will happen when we try to set the
+	 terminal's pgrp.  */
+      scoped_ignore_sigttou ignore_sigttou;
 
       xfree (tinfo->ttystate);
       tinfo->ttystate = serial_get_tty_state (stdin_serial);
@@ -371,11 +394,6 @@ child_terminal_ours_1 (int output_only)
 #endif
 #endif /* termios */
 	}
-
-#ifdef SIGTTOU
-      if (job_control)
-	signal (SIGTTOU, osigttou);
-#endif
 
       if (!job_control)
 	{
@@ -603,12 +621,10 @@ new_tty (void)
   tty = open ("/dev/tty", O_RDWR);
   if (tty > 0)
     {
-      sighandler_t osigttou;
+      scoped_ignore_sigttou ignore_sigttou;
 
-      osigttou = signal (SIGTTOU, SIG_IGN);
       ioctl (tty, TIOCNOTTY, 0);
       close (tty);
-      signal (SIGTTOU, osigttou);
     }
 #endif
 

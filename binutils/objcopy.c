@@ -5301,6 +5301,9 @@ copy_main (int argc, char *argv[])
   else
     unlink_if_ordinary (tmpname);
 
+  if (tmpname != output_filename)
+    free (tmpname);
+
   if (change_warn)
     {
       struct section_list *p;

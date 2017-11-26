@@ -248,38 +248,24 @@ static void
 update_thread_private_data_name (struct thread_info *new_thread,
 				 const char *newname)
 {
-  int newnamelen;
-  struct private_thread_info *pti;
+  nto_thread_info *pti = get_nto_thread_info (new_thread);
 
   gdb_assert (newname != NULL);
   gdb_assert (new_thread != NULL);
-  newnamelen = strlen (newname);
-  if (!new_thread->priv)
-    {
-      new_thread->priv = xmalloc (offsetof (struct private_thread_info,
-					       name)
-				     + newnamelen + 1);
-      memcpy (new_thread->priv->name, newname, newnamelen + 1);
-    }
-  else if (strcmp (newname, new_thread->priv->name) != 0)
-    {
-      /* Reallocate if neccessary.  */
-      int oldnamelen = strlen (new_thread->priv->name);
 
-      if (oldnamelen < newnamelen)
-	new_thread->priv = xrealloc (new_thread->priv,
-					offsetof (struct private_thread_info,
-						  name)
-					+ newnamelen + 1);
-      memcpy (new_thread->priv->name, newname, newnamelen + 1);
+  if (pti)
+    {
+      pti = new nto_thread_info;
+      new_thread->priv.reset (pti);
     }
+
+  pti->name = newname;
 }
 
 static void 
 update_thread_private_data (struct thread_info *new_thread, 
 			    pthread_t tid, int state, int flags)
 {
-  struct private_thread_info *pti;
   procfs_info pidinfo;
   struct _thread_name *tn;
   procfs_threadctl tctl;
@@ -306,7 +292,7 @@ update_thread_private_data (struct thread_info *new_thread,
 
   update_thread_private_data_name (new_thread, tn->name_buf);
 
-  pti = (struct private_thread_info *) new_thread->priv;
+  nto_thread_info *pti = get_nto_thread_info (new_thread);
   pti->tid = tid;
   pti->state = state;
   pti->flags = flags;

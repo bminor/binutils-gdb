@@ -4018,6 +4018,53 @@ set_write_memory_permission (const char *args, int from_tty,
   update_observer_mode ();
 }
 
+#if GDB_SELF_TEST
+namespace selftests {
+
+static int
+test_target_has_registers (target_ops *self)
+{
+  return 1;
+}
+
+static int
+test_target_has_stack (target_ops *self)
+{
+  return 1;
+}
+
+static int
+test_target_has_memory (target_ops *self)
+{
+  return 1;
+}
+
+static void
+test_target_prepare_to_store (target_ops *self, regcache *regs)
+{
+}
+
+static void
+test_target_store_registers (target_ops *self, regcache *regs, int regno)
+{
+}
+
+test_target_ops::test_target_ops ()
+  : target_ops {}
+{
+  to_magic = OPS_MAGIC;
+  to_stratum = process_stratum;
+  to_has_memory = test_target_has_memory;
+  to_has_stack = test_target_has_stack;
+  to_has_registers = test_target_has_registers;
+  to_prepare_to_store = test_target_prepare_to_store;
+  to_store_registers = test_target_store_registers;
+
+  complete_target_initialization (this);
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
 
 void
 initialize_targets (void)

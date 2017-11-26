@@ -2096,7 +2096,7 @@ static const aarch64_feature_set aarch64_feature_simd =
   AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0);
 static const aarch64_feature_set aarch64_feature_crypto =
   AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO | AARCH64_FEATURE_AES
-		   | AARCH64_FEATURE_SHA2, 0);
+		   | AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_crc =
   AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0);
 static const aarch64_feature_set aarch64_feature_lse =
@@ -2134,15 +2134,17 @@ static const aarch64_feature_set aarch64_feature_aes =
 static const aarch64_feature_set aarch64_feature_v8_4 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_4, 0);
 static const aarch64_feature_set aarch64_feature_crypto_v8_2 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_CRYPTO, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_CRYPTO
+		   | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_sm4 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SM4, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SM4
+		   | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_sha3 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SHA2
-		   | AARCH64_FEATURE_SHA3, 0);
+		   | AARCH64_FEATURE_SHA3 | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_fp_16_v8_2 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F16
-		   | AARCH64_FEATURE_FP, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F16_FML
+		   | AARCH64_FEATURE_F16 | AARCH64_FEATURE_FP, 0);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -4288,7 +4290,66 @@ struct aarch64_opcode aarch64_opcode_table[] =
   DOT_INSN ("sdot", 0xe009400,  0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
   DOT_INSN ("udot", 0x2f00e000, 0xbf00f000, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
   DOT_INSN ("sdot", 0xf00e000,  0xbf00f000, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
+/* Crypto SHA2 (optional in ARMv8.2-a).  */
+  SHA2_INSN ("sha512h",   0xce608000, 0xffe0fc00, cryptosha2, OP3 (Fd, Fn, Vm), QL_SHA512UPT, 0),
+  SHA2_INSN ("sha512h2",  0xce608400, 0xffe0fc00, cryptosha2, OP3 (Fd, Fn, Vm), QL_SHA512UPT, 0),
+  SHA2_INSN ("sha512su0", 0xcec08000, 0xfffffc00, cryptosha2, OP2 (Vd, Vn), QL_V2SAME2D, 0),
+  SHA2_INSN ("sha512su1", 0xce608800, 0xffe0fc00, cryptosha2, OP3 (Vd, Vn, Vm), QL_V3SAME2D, 0),
+  /* Crypto SHA3 (optional in ARMv8.2-a).  */
+  SHA3_INSN ("eor3",      0xce000000, 0xffe08000, cryptosha3, OP4 (Vd, Vn, Vm, Va), QL_V4SAME16B, 0),
+  SHA3_INSN ("rax1",      0xce608c00, 0xffe0fc00, cryptosha3, OP3 (Vd, Vn, Vm), QL_V3SAME2D, 0),
+  SHA3_INSN ("xar",       0xce800000, 0xffe00000, cryptosha3, OP4 (Vd, Vn, Vm, IMM), QL_XAR, 0),
+  SHA3_INSN ("bcax",      0xce200000, 0xffe08000, cryptosha3, OP4 (Vd, Vn, Vm, Va), QL_V4SAME16B, 0),
+  /* Crypto SM3 (optional in ARMv8.2-a).  */
+  SM4_INSN ("sm3ss1",    0xce400000, 0xffe08000, cryptosm3, OP4 (Vd, Vn, Vm, Va), QL_V4SAME4S, 0),
+  SM4_INSN ("sm3tt1a",   0xce408000, 0xffe0cc00, cryptosm3, OP3 (Vd, Vn, Em), QL_SM3TT, 0),
+  SM4_INSN ("sm3tt1b",   0xce408400, 0xffe0cc00, cryptosm3, OP3 (Vd, Vn, Em), QL_SM3TT, 0),
+  SM4_INSN ("sm3tt2a",   0xce408800, 0xffe0cc00, cryptosm3, OP3 (Vd, Vn, Em), QL_SM3TT, 0),
+  SM4_INSN ("sm3tt2b",   0xce408c00, 0xffe0cc00, cryptosm3, OP3 (Vd, Vn, Em), QL_SM3TT, 0),
+  SM4_INSN ("sm3partw1", 0xce60c000, 0xffe0fc00, cryptosm3, OP3 (Vd, Vn, Vm), QL_V3SAME4S, 0),
+  SM4_INSN ("sm3partw2", 0xce60c400, 0xffe0fc00, cryptosm3, OP3 (Vd, Vn, Vm), QL_V3SAME4S, 0),
+  /* Crypto SM4 (optional in ARMv8.2-a).  */
+  SM4_INSN ("sm4e",    0xcec08400, 0xfffffc00, cryptosm4, OP2 (Vd, Vn), QL_V2SAME4S, 0),
+  SM4_INSN ("sm4ekey", 0xce60c800, 0xffe0fc00, cryptosm4, OP3 (Vd, Vn, Vm), QL_V3SAME4S, 0),
+  /* Crypto FP16 (optional in ARMv8.2-a).  */
+  FP16_V8_2_INSN ("fmlal",  0xe20ec00,  0xffa0fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3FML2S, 0),
+  FP16_V8_2_INSN ("fmlsl",  0xea0ec00,  0xffa0fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3FML2S, 0),
+  FP16_V8_2_INSN ("fmlal2", 0x2e20cc00, 0xffa0fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3FML2S, 0),
+  FP16_V8_2_INSN ("fmlsl2", 0x2ea0cc00, 0xffa0fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3FML2S, 0),
 
+  FP16_V8_2_INSN ("fmlal",  0x4e20ec00, 0xffa0fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3FML4S, 0),
+  FP16_V8_2_INSN ("fmlsl",  0x4ea0ec00, 0xffa0fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3FML4S, 0),
+  FP16_V8_2_INSN ("fmlal2", 0x6e20cc00, 0xffa0fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3FML4S, 0),
+  FP16_V8_2_INSN ("fmlsl2", 0x6ea0cc00, 0xffa0fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3FML4S, 0),
+
+  FP16_V8_2_INSN ("fmlal",  0xf800000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML2S, 0),
+  FP16_V8_2_INSN ("fmlsl",  0xf804000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML2S, 0),
+  FP16_V8_2_INSN ("fmlal2", 0x2f808000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML2S, 0),
+  FP16_V8_2_INSN ("fmlsl2", 0x2f80c000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML2S, 0),
+
+  FP16_V8_2_INSN ("fmlal",  0x4f800000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML4S, 0),
+  FP16_V8_2_INSN ("fmlsl",  0x4f804000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML4S, 0),
+  FP16_V8_2_INSN ("fmlal2", 0x6f808000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML4S, 0),
+  FP16_V8_2_INSN ("fmlsl2", 0x6f80c000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML4S, 0),
+  /* System extensions ARMv8.4-a.  */
+  V8_4_INSN ("cfinv",  0xd500401f, 0xffffffff, ic_system, OP0 (), {}, 0),
+  V8_4_INSN ("rmif",   0xba000400, 0xffe07c10, ic_system, OP3 (Rn, IMM_2, MASK), QL_RMIF, 0),
+  V8_4_INSN ("setf8",  0x3a00080d, 0xfffffc1f, ic_system, OP1 (Rn), QL_SETF, 0),
+  V8_4_INSN ("setf16", 0x3a00480d, 0xfffffc1f, ic_system, OP1 (Rn), QL_SETF, 0),
+  /* Memory access instructions ARMv8.4-a.  */
+  V8_4_INSN ("stlurb" ,  0x19000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  V8_4_INSN ("ldapurb",  0x19400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  V8_4_INSN ("ldapursb", 0x19c00000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  V8_4_INSN ("ldapursb", 0x19800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+  V8_4_INSN ("stlurh",   0x59000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  V8_4_INSN ("ldapurh",  0x59400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  V8_4_INSN ("ldapursh", 0x59c00000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  V8_4_INSN ("ldapursh", 0x59800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+  V8_4_INSN ("stlur",    0x99000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  V8_4_INSN ("ldapur",   0x99400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  V8_4_INSN ("ldapursw", 0x99800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+  V8_4_INSN ("stlur",    0xd9000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+  V8_4_INSN ("ldapur",   0xd9400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, NULL},
 };
 

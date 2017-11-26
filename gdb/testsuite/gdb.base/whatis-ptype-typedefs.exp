@@ -92,6 +92,16 @@ set table {
     {"v_float_typedef"    "float_typedef"    "float"}
     {"v_float_typedef2"   "float_typedef2"   "float"}
 
+    {"double_typedef"     "double"           "double"}
+    {"double_typedef2"    "double_typedef"   "double"}
+    {"v_double_typedef"   "double_typedef"   "double"}
+    {"v_double_typedef2"  "double_typedef2"  "double"}
+
+    {"long_double_typedef"    "long double"           "long double"}
+    {"long_double_typedef2"   "long_double_typedef"   "long double"}
+    {"v_long_double_typedef"  "long_double_typedef"   "long double"}
+    {"v_long_double_typedef2" "long_double_typedef2"  "long double"}
+
     {"colors_typedef"     "(enum )?colors"   "enum colors( : unsigned int)? {red, green, blue}"}
     {"colors_typedef2"    "colors_typedef"   "enum colors( : unsigned int)? {red, green, blue}"}
     {"v_colors_typedef"   "colors_typedef"   "enum colors( : unsigned int)? {red, green, blue}"}
@@ -199,6 +209,22 @@ proc run_tests {lang} {
 	}
     }
 
+    # If floats and pointers have the same size on this architecture,
+    # then casting from array/function to float works, because
+    # arrays/functions first decay to pointers, and then GDB's cast is
+    # more general than a C cast and accepts any two types of the same
+    # length.
+    set float_ptr_same_size \
+	[get_integer_valueof "sizeof (float) == sizeof (void *)" -1]
+
+    # Ditto double.
+    set double_ptr_same_size \
+	[get_integer_valueof "sizeof (double) == sizeof (void *)" -1]
+
+    # Ditto long double.
+    set long_double_ptr_same_size \
+	[get_integer_valueof "sizeof (long double) == sizeof (void *)" -1]
+
     # Test converting/casting all variables in the first column of the
     # table to all types (found in the first column of the table).
     # The aggregates are all defined to be the same size so that
@@ -230,7 +256,7 @@ proc run_tests {lang} {
 		# regression making them inadvertently valid.  For
 		# example, these convertions are invalid:
 		#
-		#  float <-> array
+		#  float <-> array   [iff sizeof pointer != sizeof float]
 		#  array -> function (not function pointer)
 		#  array -> member_ptr
 		#
@@ -247,8 +273,15 @@ proc run_tests {lang} {
 		    gdb_test "whatis ($to) $from" "syntax error.*" "whatis ($to) $from (syntax)"
 		    gdb_test "ptype ($to) $from" "syntax error.*" "ptype ($to) $from (syntax)"
 		} elseif {([string match "*float*" $from] && [string match "*array*" $to])
-			  || ([string match "float*" $to] && [string match "*array*" $from])
-			  || ([string match "float*" $to] && [string match "*method" $from])
+			  || (!$float_ptr_same_size
+			      && ([string match "float*" $to] && [string match "*array*" $from]
+				  || [string match "float*" $to] && [string match "*method" $from]))
+			  || (!$double_ptr_same_size
+			      && ([string match "double*" $to] && [string match "*array*" $from]
+				  || [string match "double*" $to] && [string match "*method" $from]))
+			  || (!$long_double_ptr_same_size
+			      && ([string match "long_double*" $to] && [string match "*array*" $from]
+				  || [string match "long_double*" $to] && [string match "*method" $from]))
 			  || ([string match "*ftype" $to] && [string match "*array*" $from])
 			  || ([string match "*ftype2" $to] && [string match "*array*" $from])
 			  || ([string match "*ftype" $to] && [string match "*method" $from])

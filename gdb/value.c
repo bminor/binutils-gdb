@@ -808,7 +808,7 @@ find_first_range_overlap_and_match (struct ranges_and_idx *rp1,
    with LENGTH bits of VAL2's contents starting at OFFSET2 bits.
    Return true if the available bits match.  */
 
-static int
+static bool
 value_contents_bits_eq (const struct value *val1, int offset1,
 			const struct value *val2, int offset2,
 			int length)
@@ -847,7 +847,7 @@ value_contents_bits_eq (const struct value *val1, int offset1,
 	  if (!find_first_range_overlap_and_match (&rp1[i], &rp2[i],
 						   offset1, offset2, length,
 						   &l_tmp, &h_tmp))
-	    return 0;
+	    return false;
 
 	  /* We're interested in the lowest/first range found.  */
 	  if (i == 0 || l_tmp < l)
@@ -860,17 +860,17 @@ value_contents_bits_eq (const struct value *val1, int offset1,
       /* Compare the available/valid contents.  */
       if (memcmp_with_bit_offsets (val1->contents, offset1,
 				   val2->contents, offset2, l) != 0)
-	return 0;
+	return false;
 
       length -= h;
       offset1 += h;
       offset2 += h;
     }
 
-  return 1;
+  return true;
 }
 
-int
+bool
 value_contents_eq (const struct value *val1, LONGEST offset1,
 		   const struct value *val2, LONGEST offset2,
 		   LONGEST length)

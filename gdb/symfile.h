@@ -34,11 +34,11 @@ struct objfile;
 struct obj_section;
 struct obstack;
 struct block;
-struct probe;
 struct value;
 struct frame_info;
 struct agent_expr;
 struct axs_value;
+class probe;
 
 /* Comparison function for symbol look ups.  */
 
@@ -269,6 +269,14 @@ struct quick_symbol_functions
   struct compunit_symtab *(*find_pc_sect_compunit_symtab)
     (struct objfile *objfile, struct bound_minimal_symbol msymbol,
      CORE_ADDR pc, struct obj_section *section, int warn_if_readin);
+
+  /* Return the comp unit from OBJFILE that contains a symbol at
+     ADDRESS.  Return NULL if there is no such comp unit.  Unlike
+     find_pc_sect_compunit_symtab, any sort of symbol (not just text
+     symbols) can be considered, and only exact address matches are
+     considered.  This pointer may be NULL.  */
+  struct compunit_symtab *(*find_compunit_symtab_by_address)
+    (struct objfile *objfile, CORE_ADDR address);
 
   /* Call a callback for every file defined in OBJFILE whose symtab is
      not already read in.  FUN is the callback.  It is passed the file's

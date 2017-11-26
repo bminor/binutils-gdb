@@ -95,13 +95,6 @@ xzalloc (size_t size)
 }
 
 void
-xfree (void *ptr)
-{
-  if (ptr != NULL)
-    free (ptr);		/* ARI: free */
-}
-
-void
 xmalloc_failed (size_t size)
 {
   malloc_failure (size);

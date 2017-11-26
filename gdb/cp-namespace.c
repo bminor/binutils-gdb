@@ -1049,7 +1049,7 @@ cp_lookup_transparent_type_loop (const char *name,
 
   full_name = (char *) alloca (scope_length + 2 + strlen (name) + 1);
   strncpy (full_name, scope, scope_length);
-  strncpy (full_name + scope_length, "::", 2);
+  memcpy (full_name + scope_length, "::", 2);
   strcpy (full_name + scope_length + 2, name);
 
   return basic_lookup_transparent_type (full_name);

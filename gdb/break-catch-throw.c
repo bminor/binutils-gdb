@@ -106,20 +106,20 @@ fetch_probe_arguments (struct value **arg0, struct value **arg1)
   unsigned n_args;
 
   pc_probe = find_probe_by_pc (pc);
-  if (pc_probe.probe == NULL
-      || strcmp (pc_probe.probe->provider, "libstdcxx") != 0
-      || (strcmp (pc_probe.probe->name, "catch") != 0
-	  && strcmp (pc_probe.probe->name, "throw") != 0
-	  && strcmp (pc_probe.probe->name, "rethrow") != 0))
+  if (pc_probe.prob == NULL
+      || pc_probe.prob->get_provider () != "libstdcxx"
+      || (pc_probe.prob->get_name () != "catch"
+	  && pc_probe.prob->get_name () != "throw"
+	  && pc_probe.prob->get_name () != "rethrow"))
     error (_("not stopped at a C++ exception catchpoint"));
 
-  n_args = get_probe_argument_count (pc_probe.probe, frame);
+  n_args = pc_probe.prob->get_argument_count (frame);
   if (n_args < 2)
     error (_("C++ exception catchpoint has too few arguments"));
 
   if (arg0 != NULL)
-    *arg0 = evaluate_probe_argument (pc_probe.probe, 0, frame);
-  *arg1 = evaluate_probe_argument (pc_probe.probe, 1, frame);
+    *arg0 = pc_probe.prob->evaluate_argument (0, frame);
+  *arg1 = pc_probe.prob->evaluate_argument (1, frame);
 
   if ((arg0 != NULL && *arg0 == NULL) || *arg1 == NULL)
     error (_("error computing probe argument at c++ exception catchpoint"));

@@ -235,6 +235,8 @@ static const arm_feature_set arm_ext_ras =
 /* FP16 instructions.  */
 static const arm_feature_set arm_ext_fp16 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST);
+static const arm_feature_set arm_ext_fp16_fml =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_FML);
 static const arm_feature_set arm_ext_v8_2 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A);
 static const arm_feature_set arm_ext_v8_3 =
@@ -569,7 +571,8 @@ struct neon_typed_alias
 };
 
 /* ARM register categories.  This includes coprocessor numbers and various
-   architecture extensions' registers.	*/
+   architecture extensions' registers.  Each entry should have an error message
+   in reg_expected_msgs below.  */
 enum arm_reg_type
 {
   REG_TYPE_RN,
@@ -613,28 +616,30 @@ struct reg_entry
 /* Diagnostics used when we don't get a register of the expected type.	*/
 const char * const reg_expected_msgs[] =
 {
-  N_("ARM register expected"),
-  N_("bad or missing co-processor number"),
-  N_("co-processor register expected"),
-  N_("FPA register expected"),
-  N_("VFP single precision register expected"),
-  N_("VFP/Neon double precision register expected"),
-  N_("Neon quad precision register expected"),
-  N_("VFP single or double precision register expected"),
-  N_("Neon double or quad precision register expected"),
-  N_("Neon single or double precision register expected"),
-  N_("VFP single, double or Neon quad precision register expected"),
-  N_("VFP system register expected"),
-  N_("Maverick MVF register expected"),
-  N_("Maverick MVD register expected"),
-  N_("Maverick MVFX register expected"),
-  N_("Maverick MVDX register expected"),
-  N_("Maverick MVAX register expected"),
-  N_("Maverick DSPSC register expected"),
-  N_("iWMMXt data register expected"),
-  N_("iWMMXt control register expected"),
-  N_("iWMMXt scalar register expected"),
-  N_("XScale accumulator register expected"),
+  [REG_TYPE_RN]	    = N_("ARM register expected"),
+  [REG_TYPE_CP]	    = N_("bad or missing co-processor number"),
+  [REG_TYPE_CN]	    = N_("co-processor register expected"),
+  [REG_TYPE_FN]	    = N_("FPA register expected"),
+  [REG_TYPE_VFS]    = N_("VFP single precision register expected"),
+  [REG_TYPE_VFD]    = N_("VFP/Neon double precision register expected"),
+  [REG_TYPE_NQ]	    = N_("Neon quad precision register expected"),
+  [REG_TYPE_VFSD]   = N_("VFP single or double precision register expected"),
+  [REG_TYPE_NDQ]    = N_("Neon double or quad precision register expected"),
+  [REG_TYPE_NSD]    = N_("Neon single or double precision register expected"),
+  [REG_TYPE_NSDQ]   = N_("VFP single, double or Neon quad precision register"
+			 " expected"),
+  [REG_TYPE_VFC]    = N_("VFP system register expected"),
+  [REG_TYPE_MVF]    = N_("Maverick MVF register expected"),
+  [REG_TYPE_MVD]    = N_("Maverick MVD register expected"),
+  [REG_TYPE_MVFX]   = N_("Maverick MVFX register expected"),
+  [REG_TYPE_MVDX]   = N_("Maverick MVDX register expected"),
+  [REG_TYPE_MVAX]   = N_("Maverick MVAX register expected"),
+  [REG_TYPE_DSPSC]  = N_("Maverick DSPSC register expected"),
+  [REG_TYPE_MMXWR]  = N_("iWMMXt data register expected"),
+  [REG_TYPE_MMXWC]  = N_("iWMMXt control register expected"),
+  [REG_TYPE_MMXWCG] = N_("iWMMXt scalar register expected"),
+  [REG_TYPE_XSCALE] = N_("XScale accumulator register expected"),
+  [REG_TYPE_RNB]    = N_("")
 };
 
 /* Some well known registers that we refer to directly elsewhere.  */
@@ -16210,7 +16215,7 @@ do_neon_fmac_maybe_scalar_long (int subtype)
     as_warn (_("vfmal/vfmsl with FP16 type cannot be conditional, the "
 	       "behaviour is UNPREDICTABLE"));
 
-  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16),
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16_fml),
 	      _(BAD_FP16));
 
   constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_armv8),
@@ -26243,6 +26248,11 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("fp16",  ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 			ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 			ARM_ARCH_V8_2A),
+  ARM_EXT_OPT ("fp16fml",  ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST
+						  | ARM_EXT2_FP16_FML),
+			   ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST
+						  | ARM_EXT2_FP16_FML),
+			   ARM_ARCH_V8_2A),
   ARM_EXT_OPT2 ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V7A),

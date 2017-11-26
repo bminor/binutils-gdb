@@ -1,3 +1,1244 @@
+2017-11-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-tdep.c (spu_software_single_step): Access SPU_LSLR_REGNUM as
+	"cooked" register.  Access only first four bytes of branch target
+	registers.
+
+2017-11-25  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/22491
+	* stap-probe.c (relocate_address): New function.
+	(stap_probe::get_relocated_address): Use 'relocate_address'.
+	(stap_probe::set_semaphore): Use 'relocate_address' and pass
+	'm_sem_addr'.
+	(stap_probe::clear_semaphore): Likewise.
+
+2017-11-25  Pedro Alves  <palves@redhat.com>
+
+	* dictionary.c: Include "safe-ctype.h".
+	* minsyms.c: Include "safe-ctype.h".
+	* minsyms.c (SYMBOL_HASH_NEXT): Use TOLOWER instead of tolower.
+
+2017-11-25   Pedro Alves  <palves@redhat.com>
+
+	* completer.c (complete_line_internal_1): Skip spaces until the
+	start of the command.
+
+2017-11-24  Pedro Alves  <palves@redhat.com>
+
+	* cp-support.c (cp_symbol_name_matches_1): New, factored out from
+	cp_fq_symbol_name_matches.  Pass language_cplus to
+	strncmp_with_mode.
+	(cp_fq_symbol_name_matches): Call cp_symbol_name_matches_1.
+	(selftests::test_cp_symbol_name_cmp): New.
+	(_initialize_cp_support): Register "cp_symbol_name_matches"
+	selftests.
+	* language.c (default_symbol_name_matcher): Pass language_minimal
+	to strncmp_iw_with_mode.
+	* utils.c: Include "cp-support.h" and <algorithm>.
+	(valid_identifier_name_char, cp_skip_operator_token, skip_ws)
+	(cp_is_operator): New functions.
+	(strncmp_iw_with_mode): Use them.  Add language parameter.  Don't
+	skip whitespace in the symbol name when the lookup name doesn't
+	have spaces, and vice versa.
+	(strncmp_iw, strcmp_iw): Pass language to strncmp_iw_with_mode.
+	* utils.h (strncmp_iw_with_mode): Add language parameter.
+
+2017-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_exception_message_1, ada_exception_message):
+	New functions.
+	(print_it_exception): If available, display the exception
+	message as well.
+	* NEWS: Document new feature.
+
+2017-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.nat <spu-linux>: Add fork-inferior.o to NATDEPFILES.
+
+2017-11-24  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	* dtrace-probe.c (dtrace_probe::build_arg_exprs)
+	(dtrace_probe::is_enabled, dtrace_probe::enable)
+	(dtrace_probe::disable): Remove keyword 'struct' at for-range
+	variable
+	* probe.c (gen_ui_out_table_header_info)
+	(print_ui_out_not_applicables):  Remove keyword 'struct' at
+	for-range variable
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* configure.tgt: Add arch/aarch64.o
+
+2017-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/common-utils.h: Include poison.h.
+	(xfree): Remove declaration, add definition with static_assert.
+	* common/common-utils.c (xfree): Remove.
+	* common/poison.h (IsMallocatable): Define.
+	(IsFreeable): Define.
+	(free): Delete for non-freeable types.
+	(xnew): New.
+	(XNEW): Undef and redefine.
+	(xcnew): New.
+	(XCNEW): Undef and redefine.
+	(xdelete): New.
+	(XDELETE): Undef and redefine.
+	(xnewvec): New.
+	(XNEWVEC): Undef and redefine.
+	(xcnewvec): New.
+	(XCNEWVEC): Undef and redefine.
+	(xresizevec): New.
+	(XRESIZEVEC): Undef and redefine.
+	(xdeletevec): New.
+	(XDELETEVEC): Undef and redefine.
+	(xnewvar): New.
+	(XNEWVAR): Undef and redefine.
+	(xcnewvar): New.
+	(XCNEWVAR): Undef and redefine.
+	(xresizevar): New.
+	(XRESIZEVAR): Undef and redefine.
+
+2017-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbthread.h (private_thread_info): Define structure type, add
+	virtual pure destructor.
+	(thread_info) <priv>: Change type to unique_ptr.
+	<private_dtor>: Remove.
+	* thread.c (add_thread_with_info): Adjust to use of unique_ptr.
+	(private_thread_info::~private_thread_info): Provide default
+	implementation.
+	(thread_info::~thread_info): Don't call private_dtor nor
+	manually free priv.
+	* aix-thread.c (private_thread_info): Rename to ...
+	(aix_thread_info): ... this.
+	(get_aix_thread_info): New.
+	(sync_threadlists): Adjust.
+	(iter_tid): Adjust.
+	(aix_thread_resume): Adjust.
+	(aix_thread_fetch_registers): Adjust.
+	(aix_thread_store_registers): Adjust.
+	(aix_thread_extra_thread_info): Adjust.
+	* darwin-nat.h (private_thread_info): Rename to ...
+	(darwin_thread_info): ... this.
+	(get_darwin_thread_info): New.
+	* darwin-nat.c (darwin_init_thread_list): Adjust.
+	(darwin_check_new_threads): Adjust.
+	(thread_info_from_private_thread_info): Adjust.
+	* linux-thread-db.c (private_thread_info): Rename to ...
+	(thread_db_thread_info): ... this, initialize fields.
+	(get_thread_db_thread_info): New.
+	<dying>: Change type to bool.
+	(update_thread_state): Adjust to type rename.
+	(record_thread): Adjust to type rename an use of unique_ptr.
+	(thread_db_pid_to_str): Likewise.
+	(thread_db_extra_thread_info): Likewise.
+	(thread_db_thread_handle_to_thread_info): Likewise.
+	(thread_db_get_thread_local_address): Likewise.
+	* nto-tdep.h (private_thread_info): Rename to ...
+	(nto_thread_info): ... this, initialize fields.
+	(get_nto_thread_info): New.
+	<name>: Change type to std::string.
+	* nto-tdep.c (nto_extra_thread_info): Adjust to type rename and
+	use of unique_ptr.
+	* nto-procfs.c (update_thread_private_data_name): Adjust to
+	std::string change, allocate nto_private_thread_info with new.
+	(update_thread_private_data): Adjust to unique_ptr.
+	* remote.c (private_thread_info): Rename to ...
+	(remote_thread_info): ... this, initialize data members with
+	default values.
+	<extra, name>: Change type to std::string.
+	<thread_handle>: Change type to non-pointer.
+	(free_private_thread_info): Remove.
+	(get_private_info_thread): Rename to...
+	(get_remote_thread_info): ... this, change return type, adjust to
+	use of unique_ptr, use remote_thread_info constructor.
+	(remote_add_thread): Adjust.
+	(get_private_info_ptid): Rename to...
+	(get_remote_thread_info): ...this, change return type.
+	(remote_thread_name): Use get_remote_thread_info, adjust to
+	change to std::string.
+	(struct thread_item) <~thread_item>: Remove.
+	<thread_handle>: Make non pointer.
+	(start_thread): Adjust to thread_item::thread_handle type
+	change.
+	(remote_update_thread_list): Adjust to type name change, move
+	strings from temporary to long-lived object instead of
+	duplicating.
+	(remote_threads_extra_info): Use get_remote_thread_info.
+	(process_initial_stop_replies): Likewise.
+	(resume_clear_thread_private_info): Likewise.
+	(remote_resume): Adjust to type name change.
+	(remote_commit_resume): Use get_remote_thread_info.
+	(process_stop_reply): Adjust to type name change.
+	(remote_stopped_by_sw_breakpoint): Use get_remote_thread_info.
+	(remote_stopped_by_hw_breakpoint): Likewise.
+	(remote_stopped_by_watchpoint): Likewise.
+	(remote_stopped_data_address): Likewise.
+	(remote_core_of_thread): Likewise.
+	(remote_thread_handle_to_thread_info): Use
+	get_private_info_thread, adjust to thread_handle field type
+	change.
+
+2017-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* remote.c (struct thread_item): Add constructor, disable copy
+	construction and copy assignment, define default move
+	construction and move assignment.
+	<extra, name>: Change type to std::string.
+	<core>: Initialize.
+	<thread_handle>: Make non-pointer.
+	(thread_item_t): Remove typedef.
+	(DEF_VEC_O(thread_item_t)): Remove.
+	(threads_listing_context) <contains_thread>: New method.
+	<remove_thread>: New method.
+	<items>: Change type to std::vector.
+	(clear_threads_listing_context): Remove.
+	(threads_listing_context_remove): Remove.
+	(remote_newthread_step): Use thread_item constructor, adjust to
+	change to std::vector.
+	(start_thread): Use thread_item constructor, adjust to change to
+	std::vector.
+	(end_thread): Adjust to change to std::vector and std::string.
+	(remote_get_threads_with_qthreadinfo): Use thread_item
+	constructor, adjust to std::vector.
+	(remote_update_thread_list): Adjust to change to std::vector and
+	std::string, use threads_listing_context methods.
+	(remove_child_of_pending_fork): Adjust.
+	(remove_new_fork_children): Adjust.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add rsp-low-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add rsp-low-selftests.o.
+	* unittests/rsp-low-selftests.c: New file.
+	* common/rsp-low.h: Include common/byte-vector.h.
+	(hex2bin): New overload.
+	* common/rsp-low.c (hex2bin): New overload.
+
+2017-11-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inferior.h (private_inferior): Define structure type, add
+	virtual pure destructor.
+	(inferior) <priv>: Change type to unique_ptr.
+	* inferior.c (private_inferior::~private_inferior): Provide
+	default implementation.
+	(inferior::~inferior): Don't free priv field.
+	(exit_inferior_1): Likewise.
+	* darwin-nat.h (struct darwin_exception_info): Initialize fields.
+	(darwin_exception_info): Remove typedef.
+	(DEF_VEC_O (darwin_thread_t)); Remove.
+	(private_inferior): Rename to ...
+	(darwin_private_inferior): ... this, extend private_inferior.
+	(get_darwin_inferior): New.
+	<threads>: Change type to std::vector of darwin_thread_t pointers.
+	* darwin-nat.c (darwin_check_new_threads): Adjust.
+	(find_inferior_task_it): Adjust.
+	(darwin_find_thread); Adjust.
+	(darwin_suspend_inferior): Adjust.
+	(darwin_resume_inferior): Adjust.
+	(darwin_find_new_inferior): Adjust.
+	(darwin_decode_notify_message): Adjust.
+	(darwin_send_reply): Adjust.
+	(darwin_resume_inferior_threads): Adjust.
+	(darwin_suspend_inferior_threads): Adjust.
+	(darwin_decode_message): Adjust.
+	(darwin_wait): Adjust.
+	(darwin_interrupt): Adjust.
+	(darwin_deallocate_threads): Adjust.
+	(darwin_mourn_inferior): Adjust, don't free private data.
+	(darwin_reply_to_all_pending_messages): Adjust.
+	(darwin_stop_inferior): Adjust.
+	(darwin_setup_exceptions): Adjust.
+	(darwin_kill_inferior): Adjust.
+	(darwin_setup_request_notification): Adjust.
+	(darwin_attach_pid): Adjust.
+	(darwin_init_thread_list): Adjust.
+	(darwin_setup_fake_stop_event): Adjust.
+	(darwin_attach): Adjust.
+	(darwin_detach): Adjust.
+	(darwin_xfer_partial): Adjust.
+	(set_enable_mach_exceptions): Adjust.
+	(darwin_pid_to_exec_file): Adjust.
+	(darwin_get_ada_task_ptid): Adjust.
+	* darwin-nat-info.c (get_task_from_args): Adjust.
+	(info_mach_ports_command): Adjust.
+	(info_mach_region_command): Adjust.
+	(info_mach_exceptions_command): Adjust.
+	* remote.c (private_inferior): Rename to ...
+	(remote_private_inferior): ... this, initialize fields.
+	(get_remote_inferior); New.
+	(remote_commit_resume): Use get_remote_inferior.
+	(check_pending_event_prevents_wildcard_vcont_callback): Likewise.
+
+2017-11-24  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention linespecs and explicit locations, and completion
+	improvements.
+
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache::dump): Remove footnote_register_size.
+
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (cooked_read_test): Add more test for readonly
+	regcache.
+
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
+	* gdbarch-selftests.c (test_target_has_registers): Move it to
+	target.c.
+	(test_target_has_stack): Likewise.
+	(test_target_has_memory): Likewise.
+	(test_target_prepare_to_store): Likewise.
+	(test_target_store_registers): Likewise.
+	(test_target_ops): Likewise.
+	* regcache.c: Include selftest-arch.h and gdbthread.h.
+	(target_ops_no_register): New class.
+	(test_target_fetch_registers): New.
+	(test_target_store_registers): New.
+	(test_target_xfer_partial): New.
+	(readwrite_regcache): New.
+	(cooked_read_test): New.
+	(_initialize_regcache): Register the test.
+	* target.c: (test_target_has_registers): Moved from
+	gdbarch-selftests.c.
+	(test_target_has_stack): Likewise.
+	(test_target_has_memory): Likewise.
+	(test_target_prepare_to_store): Likewise.
+	(test_target_store_registers): Likewise.
+	* target.h (test_target_ops): New class.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (_initialize_aarch64_tdep): Add target desc
+	selftest.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (_initialize_aarch64_tdep): Remove init.
+	* arch/aarch64.c (aarch64_create_target_description): Create
+	new target description.
+	* features/Makefile: Add new files.
+	* features/aarch64.c: Remove file.
+	* features/aarch64-core.c: New autogenerated file.
+	* features/aarch64-fpu.c: New autogenerated file.
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Check for aarch64.
+
+2017-11-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* Makefile.in: Add new files.
+	* aarch64-linux-nat.c (aarch64_linux_read_description): Call
+	aarch64_read_description.
+	* aarch64-linux-tdep.c (aarch64_linux_core_read_description):
+	Call aarch64_read_description.
+	* aarch64-tdep.c (aarch64_read_description): New function.
+	(aarch64_gdbarch_init): Call aarch64_read_description.
+	* aarch64-tdep.h (aarch64_read_description): New function.
+	* arch/aarch64.c: New file.
+	* configure.tgt: Add new files.
+
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
+	* mi/mi-main.c (register_changed_p): Update.
+	* value.c (value_contents_bits_eq): Change return type.
+	(value_contents_eq): Likewise.
+	* value.h: Update comments.
+
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
+	* mi/mi-main.c (mi_cmd_data_list_changed_registers): Remove
+	local 'changed'.  Remove error.
+	(register_changed_p): Change return type to bool.
+
+2017-11-24  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/tic6x.c: New file.
+	* arch/tic6x.h: New file.
+	* features/Makefile (FEATURE_XMLFILES): Add tic6x-c6xp.xml,
+	tic6x-core.xml and tic6x-gp.xml.
+	* features/tic6x-c6xp.c: Generated.
+	* features/tic6x-core.c: Generated.
+	* features/tic6x-gp.c: Generated.
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Match
+	"tic6x-".
+
+2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi/mi-main.c (list_available_thread_groups): Change map value
+	type to std::vector.
+
+2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* osdata.c (osdata_end_column, get_osdata): Remove std::move.
+
+2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* varobj.c (struct varobj_dynamic) <children_requested_>: Rename
+	back to...
+	<children_requested>: ... this.
+	(varobj_get_num_children, varobj_update): Adjust.
+
+2017-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ada-varobj.c (ada_value_is_changeable_p): Change int to bool where applicable.
+	(ada_value_has_mutated): Likewise.
+	* c-varobj.c (varobj_is_anonymous_child): Likewise.
+	(c_is_path_expr_parent): Likewise.
+	* mi/mi-cmd-var.c (varobj_update_one): Likewise.
+	(mi_cmd_var_set_frozen): Likewise.
+	(mi_cmd_var_update_iter): Likewise.
+	(mi_cmd_var_update): Likewise.
+	* varobj.c (pretty_printing): Likewise.
+	(varobj_enable_pretty_printing): Likewise.
+	(struct varobj_root) <floating, is_valid>: Likewise.
+	(struct varobj_dynamic) <children_requested>: Likewise.
+	(delete_variable): Likewise.
+	(delete_variable_1): Likewise.
+	(install_variable): Likewise.
+	(update_type_if_necessary): Likewise.
+	(install_new_value): Likewise.
+	(value_of_root): Likewise.
+	(is_root_p): Likewise.
+	(varobj_create): Likewise.
+	(varobj_delete): Likewise.
+	(varobj_has_more): Likewise.
+	(varobj_set_frozen): Likewise.
+	(varobj_get_frozen): Likewise.
+	(install_dynamic_child): Likewise.
+	(dynamic_varobj_has_child_method): Likewise.
+	(update_dynamic_varobj_children): Likewise.
+	(varobj_get_num_children): Likewise.
+	(varobj_list_children): Likewise.
+	(is_path_expr_parent): Likewise.
+	(varobj_default_is_path_expr_parent): Likewise.
+	(varobj_is_dynamic_p): Likewise.
+	(varobj_set_value): Likewise.
+	(varobj_value_has_mutated): Likewise.
+	(varobj_update): Likewise.
+	(check_scope): Likewise.
+	(value_of_root_1): Likewise.
+	(varobj_value_get_print_value): Likewise.
+	(varobj_editable_p): Likewise.
+	(varobj_value_is_changeable_p): Likewise.
+	(varobj_floating_p): Likewise.
+	(varobj_default_value_is_changeable_p): Likewise.
+	(varobj_invalidate_iter): Likewise.
+	* varobj.h (struct varobj_update_result) <type_changed,
+	children_changed, changed, value_installed>: Likewise.
+	(struct varobj) <updated, frozen, not_fetched>: Likewise.
+	(struct lang_varobj_ops) <value_is_changeable_p,
+	value_has_mutated, is_path_expr_parent>: Likewise.
+	(varobj_delete): Likewise.
+	(varobj_set_frozen): Likewise.
+	(varobj_get_frozen): Likewise.
+	(varobj_set_value): Likewise.
+	(varobj_update): Likewise.
+	(varobj_editable_p): Likewise.
+	(varobj_floating_p): Likewise.
+	(varobj_has_more): Likewise.
+	(varobj_is_dynamic_p): Likewise.
+	(varobj_default_value_is_changeable_p): Likewise.
+	(varobj_value_is_changeable_p): Likewise.
+	(varobj_is_anonymous_child): Likewise.
+	(varobj_default_is_path_expr_parent): Likewise.
+
+2017-11-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* dtrace-probe.c (struct probe_ops dtrace_probe_ops): Delete.
+	(struct dtrace_probe_arg) <dtrace_probe_arg>: New constructor.
+	<type_str>: Convert to 'std::string'.
+	<expr>: Convert to 'expression_up'.
+	(dtrace_probe_arg_s): Delete type and VEC.
+	(dtrace_probe_enabler_s): Likewise.
+	(struct dtrace_probe): Replace by...
+	(class dtrace_static_probe_ops): ...this and...
+	(class dtrace_probe): ...this.
+	(dtrace_probe_is_linespec): Rename to...
+	(dtrace_static_probe_ops::is_linespec): ...this.  Adjust code
+	to reflect change.
+	(dtrace_process_dof_probe): Use 'std::vector' instead of VEC.
+	Adjust code.  Create new instance of 'dtrace_probe'.
+	(dtrace_build_arg_exprs): Rename to...
+	(dtrace_probe::build_arg_exprs): ...this.  Adjust code to
+	reflect change.
+	(dtrace_get_probes): Rename to...
+	(dtrace_static_probe_ops::get_probes): ...this.  Adjust code
+	to reflect change.
+	(dtrace_get_arg): Rename to...
+	(dtrace_probe::get_arg_by_number): ...this.  Adjust code to
+	reflect change.
+	(dtrace_probe_is_enabled): Rename to...
+	(dtrace_probe::is_enabled): ...this.  Adjust code to reflect
+	change.
+	(dtrace_get_probe_address): Rename to...
+	(dtrace_probe::get_relocated_address): ...this.  Adjust code
+	to reflect change.
+	(dtrace_get_probe_argument_count): Rename to...
+	(dtrace_probe::get_argument_count): ...this.  Adjust code to
+	reflect change.
+	(dtrace_can_evaluate_probe_arguments): Rename to...
+	(dtrace_probe::can_evaluate_arguments): ...this.  Adjust code
+	to reflect change.
+	(dtrace_evaluate_probe_argument): Rename to...
+	(dtrace_probe::evaluate_argument): ...this.  Adjust code to
+	reflect change.
+	(dtrace_compile_to_ax): Rename to...
+	(dtrace_probe::compile_to_ax): ...this.  Adjust code to
+	reflect change.
+	(dtrace_probe_destroy): Delete.
+	(dtrace_type_name): Rename to...
+	(dtrace_static_probe_ops::type_name): ...this.  Adjust code to
+	reflect change.
+	(dtrace_probe::get_static_ops): New method.
+	(dtrace_gen_info_probes_table_header): Rename to...
+	(dtrace_static_probe_ops::gen_info_probes_table_header):
+	...this.  Adjust code to reflect change.
+	(dtrace_gen_info_probes_table_values): Rename to...
+	(dtrace_probe::gen_info_probes_table_values): ...this.  Adjust
+	code to reflect change.
+	(dtrace_enable_probe): Rename to...
+	(dtrace_probe::enable_probe): ...this.  Adjust code to reflect
+	change.
+	(dtrace_disable_probe): Rename to...
+	(dtrace_probe::disable_probe): ...this.  Adjust code to reflect
+	change.
+	(struct probe_ops dtrace_probe_ops): Delete.
+	(info_probes_dtrace_command): Call 'info_probes_for_spops'
+	instead of 'info_probes_for_ops'.
+	(_initialize_dtrace_probe): Use 'all_static_probe_ops' instead
+	of 'all_probe_ops'.
+
+2017-11-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Simon Marchi  <simark@simark.ca>
+
+	* stap-probe.c (struct probe_ops stap_probe_ops): Delete
+	variable.
+	(struct stap_probe_arg) <stap_probe_arg>: New constructor.
+	<aexpr>: Change type to 'expression_up'.
+	(stap_probe_arg_s): Delete type and VEC.
+	(struct stap_probe): Delete.  Replace by...
+	(class stap_static_probe_ops): ...this and...
+	(class stap_probe): ...this.  Rename variables to add 'm_'
+	prefix.  Do not use 'union' for arguments anymore.
+	(stap_get_expected_argument_type): Receive probe name instead
+	of 'struct stap_probe'.  Adjust code.
+	(stap_parse_probe_arguments): Rename to...
+	(stap_probe::parse_arguments): ...this.  Adjust code to
+	reflect change.
+	(stap_get_probe_address): Rename to...
+	(stap_probe::get_relocated_address): ...this.  Adjust code
+	to reflect change.
+	(stap_get_probe_argument_count): Rename to...
+	(stap_probe::get_argument_count): ...this.  Adjust code
+	to reflect change.
+	(stap_get_arg): Rename to...
+	(stap_probe::get_arg_by_number'): ...this. Adjust code to
+	reflect change.
+	(can_evaluate_probe_arguments): Rename to...
+	(stap_probe::can_evaluate_arguments): ...this.  Adjust code
+	to reflect change.
+	(stap_evaluate_probe_argument): Rename to...
+	(stap_probe::evaluate_argument): ...this.  Adjust code
+	to reflect change.
+	(stap_compile_to_ax): Rename to...
+	(stap_probe::compile_to_ax): ...this.  Adjust code to
+	reflect change.
+	(stap_probe_destroy): Delete.
+	(stap_modify_semaphore): Adjust comment.
+	(stap_set_semaphore): Rename to...
+	(stap_probe::set_semaphore): ...this.  Adjust code to reflect
+	change.
+	(stap_clear_semaphore): Rename to...
+	(stap_probe::clear_semaphore): ...this.  Adjust code to
+	reflect	change.
+	(stap_probe::get_static_ops): New method.
+	(handle_stap_probe): Adjust code to create instance of
+	'stap_probe'.
+	(stap_get_probes): Rename to...
+	(stap_static_probe_ops::get_probes): ...this.  Adjust code to
+	reflect change.
+	(stap_probe_is_linespec): Rename to...
+	(stap_static_probe_ops::is_linespec): ...this.  Adjust code to
+	reflect change.
+	(stap_type_name): Rename to...
+	(stap_static_probe_ops::type_name): ...this.  Adjust code to
+	reflect change.
+	(stap_gen_info_probes_table_header): Rename to...
+	(stap_static_probe_ops::gen_info_probes_table_header):
+	...this.  Adjust code to reflect change.
+	(stap_gen_info_probes_table_values): Rename to...
+	(stap_probe::gen_info_probes_table_values): ...this.  Adjust
+	code to reflect change.
+	(struct probe_ops stap_probe_ops): Delete.
+	(info_probes_stap_command): Use 'info_probes_for_spops'
+	instead of 'info_probes_for_ops'.
+	(_initialize_stap_probe): Use 'all_static_probe_ops' instead
+	of 'all_probe_ops'.
+
+2017-11-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* break-catch-throw.c (fetch_probe_arguments): Use
+	'probe.prob' instead of 'probe.probe'.
+	* breakpoint.c (create_longjmp_master_breakpoint): Call
+	'can_evaluate_arguments' and 'get_relocated_address' methods
+	from probe.
+	(create_exception_master_breakpoint): Likewise.
+	(add_location_to_breakpoint): Use 'sal->prob' instead of
+	'sal->probe'.
+	(bkpt_probe_insert_location): Call 'set_semaphore' method from
+	probe.
+	(bkpt_probe_remove_location): Likewise, for 'clear_semaphore'.
+	* elfread.c (elf_get_probes): Use 'static_probe_ops' instead
+	of 'probe_ops'.
+	(probe_key_free): Call 'delete' on probe.
+	(check_exception_resume): Use 'probe.prob' instead of
+	'probe.probe'.
+	* location.c (string_to_event_location_basic): Call
+	'probe_linespec_to_static_ops'.
+	* probe.c (class any_static_probe_ops): New class.
+	(any_static_probe_ops any_static_probe_ops): New variable.
+	(parse_probes_in_pspace): Receive 'static_probe_ops' as
+	argument.  Adjust code to reflect change.
+	(parse_probes): Use 'static_probe_ops' instead of
+	'probe_ops'.  Adjust code to reflect change.
+	(find_probes_in_objfile): Call methods to get name and
+	provider from probe.
+	(find_probe_by_pc): Use 'result.prob' instead of
+	'result.probe'.  Call 'get_relocated_address' method from
+	probe.
+	(collect_probes): Adjust comment and argument list to receive
+	'static_probe_ops' instead of 'probe_ops'.  Adjust code to
+	reflect change.  Call necessary methods from probe.
+	(compare_probes): Call methods to get name and provider from
+	probes.
+	(gen_ui_out_table_header_info): Receive 'static_probe_ops'
+	instead of 'probe_ops'.  Use 'std::vector' instead of VEC,
+	adjust code accordingly.
+	(print_ui_out_not_applicables): Likewise.
+	(info_probes_for_ops): Rename to...
+	(info_probes_for_spops): ...this.  Receive 'static_probe_ops'
+	as argument instead of 'probe_ops'.  Adjust code.  Call
+	necessary methods from probe.
+	(info_probes_command): Use 'info_probes_for_spops'.
+	(enable_probes_command): Pass correct argument to
+	'collect_probes'.  Call methods from probe.
+	(disable_probes_command): Likewise.
+	(get_probe_address): Move to 'any_static_probe_ops::get_address'.
+	(get_probe_argument_count): Move to
+	'any_static_probe_ops::get_argument_count'.
+	(can_evaluate_probe_arguments): Move to
+	'any_static_probe_ops::can_evaluate_arguments'.
+	(evaluate_probe_argument): Move to
+	'any_static_probe_ops::evaluate_argument'.
+	(probe_safe_evaluate_at_pc): Use 'probe.prob' instead of
+	'probe.probe'.
+	(probe_linespec_to_ops): Rename to...
+	(probe_linespec_to_static_ops): ...this.  Adjust code.
+	(probe_any_is_linespec): Rename to...
+	(any_static_probe_ops::is_linespec): ...this.
+	(probe_any_get_probes): Rename to...
+	(any_static_probe_ops::get_probes): ...this.
+	(any_static_probe_ops::type_name): New method.
+	(any_static_probe_ops::gen_info_probes_table_header): New
+	method.
+	(compute_probe_arg): Use 'pc_probe.prob' instead of
+	'pc_probe.probe'.  Call methods from probe.
+	(compile_probe_arg): Likewise.
+	(std::vector<const probe_ops *> all_probe_ops): Delete.
+	(std::vector<const static_probe_ops *> all_static_probe_ops):
+	New variable.
+	(_initialize_probe): Use 'all_static_probe_ops' instead of
+	'all_probe_ops'.
+	* probe.h (struct info_probe_column) <field_name>: Delete
+	extraneous newline
+	(info_probe_column_s): Delete type and VEC.
+	(struct probe_ops): Delete.  Replace with...
+	(class static_probe_ops): ...this and...
+	(clas probe): ...this.
+	(struct bound_probe) <bound_probe>: Delete extraneous
+	newline.  Adjust constructor to receive 'probe' instead of
+	'struct probe'.
+	<probe>: Rename to...
+	<prob>: ...this.  Delete extraneous newline.
+	<objfile>: Delete extraneous newline.
+	(register_probe_ops): Delete unused prototype.
+	(info_probes_for_ops): Rename to...
+	(info_probes_for_spops): ...this.  Adjust comment.
+	(get_probe_address): Move to 'probe::get_address'.
+	(get_probe_argument_count): Move to
+	'probe::get_argument_count'.
+	(can_evaluate_probe_arguments): Move to
+	'probe::can_evaluate_arguments'.
+	(evaluate_probe_argument): Move to 'probe::evaluate_argument'.
+	* solib-svr4.c (struct svr4_info): Adjust comment.
+	(struct probe_and_action) <probe>: Rename to...
+	<prob>: ...this.
+	(register_solib_event_probe): Receive 'probe' instead of
+	'struct probe' as argument.  Use 'prob' instead of 'probe'
+	when applicable.
+	(solib_event_probe_action): Call 'get_argument_count' method
+	from probe.  Adjust comment.
+	(svr4_handle_solib_event): Adjust comment.  Call
+	'evaluate_argument' method from probe.
+	(svr4_create_probe_breakpoints): Call 'get_relocated_address'
+	from probe.
+	(svr4_create_solib_event_breakpoints): Use 'probe' instead of
+	'struct probe'.  Call 'can_evaluate_arguments' from probe.
+	* symfile.h: Forward declare 'class probe' instead of 'struct
+	probe'.
+	* symtab.h: Likewise.
+	(struct symtab_and_line) <probe>: Rename to...
+	<prob>: ...this.
+	* tracepoint.c (start_tracing): Use 'prob' when applicable.
+	Call probe methods.
+	(stop_tracing): Likewise.
+
+2017-11-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_inferior_created): Remove
+	trailing newline at end of string in call to warning.
+
+2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* osdata.h: Include vector isntead of vec.h.
+	(osdata_column_s): Remove typedef.
+	(struct osdata_column): Add constructor.
+	<name, value>: Change type to std::string.
+	(DEF_VEC_O (osdata_column_s)): Remove.
+	(osdata_item_s): Remove typedef.
+	(struct osdata_item) <columns>: Change type to std::vector.
+	(DEF_VEC_O (osdata_item_s)): Remove.
+	(struct osdata): Add constructor.
+	<type>: Change type to std::string.
+	<items>: Change type to std::vector.
+	(osdata_p): Remove typedef.
+	(DEF_VEC_P (osdata_p)): Remove.
+	(osdata_parse): Return a unique_ptr.
+	(osdata_free): Remove.
+	(make_cleanup_osdata_free): Remove.
+	(get_osdata): Return a unique_ptr.
+	(get_osdata_column): Return pointer to std::string, take a
+	reference to osdata_item as parameter.
+	* osdata.c (struct osdata_parsing_data) <osdata>: Change type to
+	unique_ptr.
+	<property_name>: Change type to std::string.
+	(osdata_start_osdata): Allocate osdata with new and adjust.
+	(osdata_start_item): Adjust.
+	(osdata_start_column): Adjust.
+	(osdata_end_column): Adjust.
+	(clear_parsing_data): Remove.
+	(osdata_parse): Return a unique_ptr and adjust, remove cleanup.
+	(osdata_item_clear): Remove.
+	(get_osdata): return a unique_ptr and adjust.
+	(get_osdata_column): Return a pointer to std::string and adjust.
+	(info_osdata): Adjust.
+	* mi/mi-main.c: Include <map>.
+	(free_vector_of_osdata_items): Remove.
+	(list_available_thread_groups): Adjust, use std::map instead of
+	splay tree.
+
+2017-11-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* stack.c (iterate_over_block_locals): Add LOC_OPTIMIZED_OUT
+	case in switch.
+
+2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* varobj.h (DEF_VEC_P (varobj_p)): Remove.
+
+2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* varobj.h (struct varobj_update_result): Add constructor, add
+	move constructor, disable copy and assign, initialize fields.
+	<newobj>: Change type to std::vector.
+	(varobj_update): Return std::vector.
+	* varobj.c (install_dynamic_child): Change VEC parameters to
+	std::vector and adjust.
+	(update_dynamic_varobj_children): Likewise.
+	(varobj_update): Return std::vector and adjust.
+	* mi/mi-cmd-var.c (varobj_update_one): Adjust to vector changes.
+
+2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* varobj.h (struct varobj) <parent>: Remove const.
+	<children>: Change type to std::vector.
+	(varobj_list_children): Return std::vector const reference.
+	(varobj_restrict_range): Change parameter type to std::vector
+	const reference.
+	* varobj.c (varobj_has_more): Adjust.
+	(varobj_restrict_range): Change parameter type to std::vector
+	const reference and adjust.
+	(install_dynamic_child): Adjust.
+	(update_dynamic_varobj_children): Adjust.
+	(varobj_list_children): Return std::vector const reference and
+	adjust.
+	(varobj_add_child): Adjust.
+	(update_type_if_necessary): Adjust.
+	(varobj_update): Adjust.
+	(delete_variable_1): Adjust.
+	* ada-varobj.c (ada_value_has_mutated): Adjust.
+	* mi/mi-cmd-var.c (mi_cmd_var_list_children): Adjust.
+
+2017-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* varobj.h (struct varobj): Add constructor and destructor,
+	initialize fields.
+	* varobj.c (struct varobj_root): Initialize fields.
+	(struct varobj_dynamic): Initialize fields.
+	(varobj_create): Use unique_ptr instead of cleanup.  Create
+	varobj with new instead of new_root_variable.
+	(delete_variable_1): Free variable with delete instead of
+	free_variable.
+	(create_child_with_value): Create variable with new instead of
+	new_variable.
+	(varobj::varobj): New.
+	(varobj::~varobj): New (body mostly coming from free_variable).
+	(new_variable): Remove.
+	(free_variable): Remove.
+	(do_free_variable_cleanup): Remove.
+	(make_cleanup_free_variable): Remove.
+
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* core-regset.c: Remove file.
+	* Makefile.in (ALLDEPFILES): Remove core-regset.c.
+
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* NEWS: Document use of GNU MPFR.
+	* README: Likewise.
+
+	* Makefile.in (LIBMPFR): Add define.
+	(CLIBS): Add $(LIBMPFR).
+	* configure.ac: Add --with-mpfr configure option.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+	* target-float.c [HAVE_LIBMPFR]: Include <mpfr.h>.
+	(class mpfr_float_ops): New type.
+	(mpfr_float_ops::from_target): Two new overloaded functions.
+	(mpfr_float_ops::to_target): Likewise.
+	(mpfr_float_ops::to_string): New function.
+	(mpfr_float_ops::from_string): Likewise.
+	(mpfr_float_ops::to_longest): Likewise.
+	(mpfr_float_ops::from_longest): Likewise.
+	(mpfr_float_ops::from_ulongest): Likewise.
+	(mpfr_float_ops::to_host_double): Likewise.
+	(mpfr_float_ops::from_host_double): Likewise.
+	(mpfr_float_ops::convert): Likewise.
+	(mpfr_float_ops::binop): Likewise.
+	(mpfr_float_ops::compare): Likewise.
+	(get_target_float_ops): Use mpfr_float_ops if available.
+
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* target-float.c: Do not include <math.h>.
+	Include <cmath> and <limits>.
+	(DOUBLEST): Do not define.
+	(class target_float_ops): New type.
+	(class host_float_ops): New templated type.
+	(class decimal_float_ops): New type.
+
+	(floatformat_to_doublest): Rename to ...
+	(host_float_ops<T>::from_target): ... this.  Use template type T
+	instead of DOUBLEST.  Use C++ math routines.  Update recursive calls.
+	(host_float_ops<T>::from_target): New overload using a type argument.
+	(floatformat_from_doublest): Rename to ...
+	(host_float_ops<T>::to_target): ... this.  Use template type T
+	instead of DOUBLEST.  Use C++ math routines.  Update recursive calls.
+	(host_float_ops<T>::to_target): New overload using a type argument.
+	(floatformat_printf_format): New function.
+	(struct printf_length_modifier): New templated type.
+	(floatformat_to_string): Rename to ...
+	(host_float_ops<T>::to_string): ... this.  Use type instead of
+	floatformat argument.  Use floatformat_printf_format and
+	printf_length_modifier.  Remove special handling of invalid numbers,
+	infinities and NaN (moved to target_float_to_string).
+	(struct scanf_length_modifier): New templated type.
+	(floatformat_from_string): Rename to ...
+	(host_float_ops<T>::from_string): ... this.  Use type instead of
+	floatformat argument.  Use scanf_length_modifier.
+	(floatformat_to_longest): Rename to ...
+	(host_float_ops<T>::to_longest): ... this.  Use type instead of
+	floatformat argument.  Handle out-of-range values deterministically.
+	(floatformat_from_longest): Rename to ...
+	(host_float_ops<T>::from_longest): ... this.  Use type instead of
+	floatformat argument.
+	(floatformat_from_ulongest): Rename to ...
+	(host_float_ops<T>::from_ulongest): ... this.  Use type instead of
+	floatformat argument.
+	(floatformat_to_host_double): Rename to ...
+	(host_float_ops<T>::to_host_double): ... this.  Use type instead of
+	floatformat argument.
+	(floatformat_from_host_double): Rename to ...
+	(host_float_ops<T>::from_host_double): ... this.  Use type instead of
+	floatformat argument.
+	(floatformat_convert): Rename to ...
+	(host_float_ops<T>::convert): ... this.  Use type instead of
+	floatformat arguments.  Remove handling of no-op conversions.
+	(floatformat_binop): Rename to ...
+	(host_float_ops<T>::binop): ... this.  Use type instead of
+	floatformat arguments.
+	(floatformat_compare): Rename to ...
+	(host_float_ops<T>::compare): ... this.  Use type instead of
+	floatformat arguments.
+
+	(match_endianness): Use type instead of length/byte_order arguments.
+	(set_decnumber_context): Likewise.
+	(decimal_from_number): Likewise.  Update calls.
+	(decimal_to_number): Likewise.
+	(decimal_is_zero): Likewise.  Update calls.  Move to earlier in file.
+	(decimal_float_ops::to_host_double): New dummy function.
+	(decimal_float_ops::from_host_double): Likewise.
+	(decimal_to_string): Rename to ...
+	(decimal_float_ops::to_string): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_from_string): Rename to ...
+	(decimal_float_ops::from_string): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_from_longest): Rename to ...
+	(decimal_float_ops::from_longest): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_from_ulongest): Rename to ...
+	(decimal_float_ops::from_ulongest): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_to_longest): Rename to ...
+	(decimal_float_ops::to_longest): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_binop): Rename to ...
+	(decimal_float_ops::binop): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_compare): Rename to ...
+	(decimal_float_ops::compare): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+	(decimal_convert): Rename to ...
+	(decimal_float_ops::convert): ... this.  Use type instead of
+	length/byte_order arguments.  Update calls.
+
+	(target_float_same_category_p): New function.
+	(target_float_same_format_p): Likewise.
+	(target_float_format_length): Likewise.
+	(enum target_float_ops_kind): New type.
+	(get_target_float_ops_kind): New function.
+	(get_target_float_ops): Three new overloaded functions.
+
+	(target_float_is_zero): Update call.
+	(target_float_to_string): Add special handling of invalid numbers,
+	infinities and NaN (moved from floatformat_to_string).  Use
+	target_float_ops callback.
+	(target_float_from_string): Use target_float_ops callback.
+	(target_float_to_longest): Likewise.
+	(target_float_from_longest): Likewise.
+	(target_float_from_ulongest): Likewise.
+	(target_float_to_host_double): Likewise.
+	(target_float_from_host_double): Likewise.
+	(target_float_convert): Add special case for no-op conversions.
+	Use target_float_ops callback.
+	(target_float_binop): Use target_float_ops callback.
+	(target_float_compare): Likewise.
+
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* python/py-gdb-readline.c (gdbpy_readline_wrapper): Use strcpy.
+
+2017-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* cli/cli-decode.c (help_list): Use memcpy instead of strncpy.
+	* cp-namespace.c (cp_lookup_transparent_type_loop): Likewise.
+
+2017-11-21  Jerome Guitton  <guitton@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_wait): Update inferior ptid
+	with event ptid from the lower layer before doing the
+	ravenscar-specific update.
+
+2017-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* ravenscar-thread.c (is_ravenscar_task): Also verify that
+	the ptid's TID is nonzero.
+
+2017-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h (ada_get_tcb_types_info): Add declaration.
+	* ada-tasks.c (ada_get_tcb_types_info): Renames get_tcb_types_info.
+	Make non-static.  Change return type to char *.  Adjust code
+	accordingly.  Rewrite the function's documentation.
+	(read_atcb): Adjust call to get_tcb_types_info accordingly.
+	* ravenscar-thread.c (ravenscar_inferior_created): Check that
+	we have enough debugging information in the runtime to support
+	Ada task debugging before we enable the ravenscar-thread layer.
+
+2017-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h (ada_get_task_info_from_ptid): Add declaration.
+	* ada-tasks.c (ada_get_task_info_from_ptid): New function.
+	* ravenscar-thread.c: Add into comment.
+	(base_magic_null_ptid): Delete.
+	(base_ptid): Change documentation.
+	(ravenscar_active_task): Renames ravenscar_running_thread.
+	All callers updated throughout.
+	(is_ravenscar_task, ravenscar_get_thread_base_cpu): New function.
+	(ravenscar_task_is_currently_active): Likewise.
+	(get_base_thread_from_ravenscar_task): Ditto.
+	(ravenscar_update_inferior_ptid): Adjust to handle multiple CPUs.
+	(ravenscar_runtime_initialized): Likewise.
+	(get_running_thread_id): Add new parameter "cpu".  Adjust
+	implementation to handle this new parameter.
+	(ravenscar_fetch_registers): Small adjustment to use
+	is_ravenscar_task and ravenscar_task_is_currently_active in
+	order to decide whether to use the target beneath or this
+	module's arch_ops.
+	(ravenscar_store_registers, ravenscar_prepare_to_store): Likewise.
+	(ravenscar_stopped_by_sw_breakpoint): Use
+	get_base_thread_from_ravenscar_task to get the underlying
+	thread, rather than using base_ptid.
+	(ravenscar_stopped_by_hw_breakpoint, ravenscar_stopped_by_watchpoint)
+	(ravenscar_stopped_data_address, ravenscar_core_of_thread):
+	Likewise.
+	(ravenscar_inferior_created): Do not set base_magic_null_ptid.
+
+2017-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h (struct ada_task_info) <base_cpu>: New field.
+	* ada-lang.c (struct atcb_fieldno) <base_cpu>: New field.
+	(get_tcb_types_info): Set fieldnos.base_cpu.
+	(read_atcb): Set task_info->base_cpu.
+	(info_task): Print "Base CPU" info if set by runtime.
+
+2017-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_stopped_by_sw_breakpoint)
+	(ravenscar_stopped_by_hw_breakpoint, ravenscar_stopped_by_watchpoint)
+	(ravenscar_stopped_data_address, ravenscar_core_of_thread):
+	New functions.
+	(init_ravenscar_thread_ops): Set the to_stopped_by_sw_breakpoint,
+	to_stopped_by_hw_breakpoint, to_stopped_by_watchpoint,
+	to_stopped_data_address and to_core_of_thread fields of
+	ravenscar_ops.
+
+2017-11-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-tdep.h (enum powerpc_long_double_abi): New data type.
+	(struct gdbarch_tdep): New member long_double_abi.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Initialize long_double_abi
+	member of tdep struct based on Tag_GNU_Power_ABI_FP attribute.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Install long double data
+	format depending on long_double_abi tdep member.
+	(ppc_floatformat_for_type): Handle __ibm128 type.
+
+2017-11-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* darwin-nat.c (set_enable_mach_exceptions): Constify parameter.
+
+2017-11-21  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (mapped_index::find_name_components_bounds)
+	<completion mode, upper bound>: Use std::lower_bound instead of
+	std::upper_bound.
+	(test_mapped_index_find_name_component_bounds): Remove incorrect
+	"t1_fund" from expected symbols.
+
+2017-11-21  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (mapped_index::name_components_casing): New field.
+	(mapped_index) <build_name_components,
+	find_name_components_bounds): Declare new methods.
+	(mapped_index::find_name_components_bounds)
+	(mapped_index::build_name_components): New methods, factored out
+	from dw2_expand_symtabs_matching_symbol.
+	(check_find_bounds_finds)
+	(test_mapped_index_find_name_component_bounds): New.
+	(run_test): Rename to ...
+	(test_dw2_expand_symtabs_matching_symbol): ... this.
+	(run_test): Reimplement.
+
+2017-11-21  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (cp_ident_is_alpha, cp_ident_is_alnum): New.
+	(symbol_end): Use cp_ident_is_alnum.
+	(yylex): Use cp_ident_is_alpha and cp_ident_is_alnum.
+	* dwarf2read.c (make_sort_after_prefix_name): New function.
+	(dw2_expand_symtabs_matching_symbol): Use it.
+	(test_symbols): Add more symbols.
+	(run_test): Add tests.
+
+2017-11-17  Tom Tromey  <tom@tromey.com>
+
+	* symtab.h (enum symbol_subclass_kind): New.
+	(struct symbol) <is_cplus_template_function, is_rust_vtable>:
+	Remove.
+	<subclass>: New member.
+	(SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION): Update.
+	* rust-lang.c (rust_get_trait_object_pointer): Update.
+	* dwarf2read.c (read_func_scope): Update.
+	(read_variable): Update.
+
+2017-11-17  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (read_func_scope): Update.
+	* symtab.h (struct template_symbol): Derive from symbol.
+	<base>: Remove.
+
+2017-11-17  Tom Tromey  <tom@tromey.com>
+
+	* symtab.h (struct symbol) <is_rust_vtable>: New member.
+	(struct rust_vtable_symbol): New.
+	(find_symbol_at_address): Declare.
+	* symtab.c (find_symbol_at_address): New function.
+	* symfile.h (struct quick_symbol_functions)
+	<find_compunit_symtab_by_address>: New member.
+	* symfile-debug.c (debug_qf_find_compunit_symtab_by_address): New
+	function.
+	(debug_sym_quick_functions): Link to
+	debug_qf_find_compunit_symtab_by_address.
+	* rust-lang.c (rust_get_trait_object_pointer): New function.
+	(rust_evaluate_subexp) <case UNOP_IND>: New case.  Call
+	rust_get_trait_object_pointer.
+	* psymtab.c (psym_relocate): Clear psymbol_map.
+	(psym_fill_psymbol_map, psym_find_compunit_symtab_by_address): New
+	functions.
+	(psym_functions): Link to psym_find_compunit_symtab_by_address.
+	* objfiles.h (struct objfile) <psymbol_map>: New member.
+	* dwarf2read.c (dwarf2_gdb_index_functions): Update.
+	(process_die) <DW_TAG_variable>: New case.  Call read_variable.
+	(rust_containing_type, read_variable): New functions.
+
+2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/gdb_vecs.h (DEF_VEC_I (int)): Remove.
+
+2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/filestuff.c: Include <algorithm>.
+	(open_fds): Change type to std::vector<int>.
+	(do_mark_open_fd): Adjust.
+	(unmark_fd_no_cloexec): Adjust.
+	(do_close): Adjust.
+
+2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c (output_thread_groups): Take an std::vector.
+	(print_one_breakpoint_location): Adjust.
+
+2017-11-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (resolve_subexp): Add handling of OP_VAR_MSYM_VALUE.
+	(ada_evaluate_subexp_for_cast): New function.
+	(ada_evaluate_subexp) <UNOP_CAST>: Replace code by call to
+	ada_evaluate_subexp_for_cast.
+	(ada_evaluate_subexp) <nosideret>: Replace code by call to
+	eval_skip_value.
+	* eval.c (evaluate_var_value): Make non-static.
+	(evaluate_var_msym_value, eval_skip_value): Likewise.
+	* value.h (evaluate_var_value, evaluate_var_msym_value)
+	(eval_skip_value): Declare.
+
+2017-11-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_cast): Remove parameter "noside".
+	Update all callers.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* python/py-unwind.c (pyuw_sniffer): Translate
+	PyExc_KeyboardInterrupt to a GDB Quit exception.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (resume_cleanups): Delete.
+	(resume): No longer install a resume_cleanups cleanup nor call
+	QUIT.
+	(proceed): Pass the terminal to the inferior.
+	(keep_going_pass_signal): No longer install a resume_cleanups
+	cleanup.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* inf-loop.c (inferior_event_handler): Don't swallow the exception
+	if the prompt is blocked.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (insert_bp_location): Replace bp_err and
+	bp_err_message locals by a gdb_exception local.
+
+2017-11-16  Pedro Alves  <palves@redhat.com>
+
+	* inflow.c (scoped_ignore_sigttou): New class.
+	(child_terminal_ours_1, new_tty): Use it.
+
+2017-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* target-float.c (decimal_from_number): Add byte_order argument and
+	call match_endianness.  Error if unknown floating-point type.
+	(decimal_to_number): Add byte_order argument and call match_endianness.
+	(decimal_from_longest): Update call.  Do not call match_endianness.
+	(decimal_from_ulongest): Likewise.
+	(decimal_binop): Likewise.
+	(decimal_is_zero): Likewise.
+	(decimal_compare): Likewise.
+	(decimal_convert): Likewise.
+
+2017-11-16  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/python.c (gdbpy_rbreak): New function.
+	* NEWS: Document Python rbreak feature.
+
+2017-11-16  Yao Qi  <yao.qi@linaro.org>
+
+	* features/tic6x-c62x.xml: Remove.
+	* features/tic6x-c64x.xml: Remove.
+	* features/tic6x-c64xp.xml: Remove.
+
+2017-11-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* symtab.h: Include <array>.
+
+2017-11-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* bsd-kvm.c (bsd_kvm_cmd): Constify 'arg'.
+	(bsd_kvm_proc_cmd): Likewise.
+
+2017-11-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tui/tui-win.c (window_name_completer): Replace VEC with
+	std::vector.
+
+2017-11-15  Andrew Cagney  <cagney@gnu.org>
+
+	* MAINTAINERS: Remove no-longer applicable entries.
+
+2017-11-15  Andrew Cagney  <cagney@gnu.org>
+
+	* MAINTAINERS: Move self to Past Maintainers.
+
+2017-11-15  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (XMLTOC): Remove nios2-linux.xml.
+	* features/nios2-linux.c: Remove.
+	* nios2-linux-tdep.c (_initialize_nios2_linux_tdep): Don't call
+	initialize_tdesc_nios2_linux.
+
+2017-11-15  Yao Qi  <yao.qi@linaro.org>
+
+	* m68hc11-tdep.c (M68HC11_NUM_REGS): Change it to
+	M68HC11_LAST_HARD_REG + 1.
+
+2017-11-14  Paul Carroll  <pcarroll@codesourcery.com>
+
+	PR gdb/22388
+	* remote.c (remote_write_bytes_aux, remote_read_bytes_1,
+	remote_read_bytes, remote_write_qxfer, remote_xfer_partial):
+	Return TARGET_XFER_EOF if size of returned data is 0.
+
+2017-11-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	memory-map-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add memory-map-selftests.o.
+	* memory-map.c (memory_map_start_memory): Fix computation of hi
+	address.
+	* unittests/memory-map-selftests.c: New file.
+
 2017-11-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c: Fix some typos in the general command documenting

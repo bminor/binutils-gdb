@@ -29,7 +29,7 @@ ah, Reg8, 0, 4, Dw2Inval, Dw2Inval
 ch, Reg8, 0, 5, Dw2Inval, Dw2Inval
 dh, Reg8, 0, 6, Dw2Inval, Dw2Inval
 bh, Reg8, 0, 7, Dw2Inval, Dw2Inval
-axl, Reg8|Acc|Byte, RegRex64, 0, Dw2Inval, Dw2Inval
+axl, Reg8, RegRex64, 0, Dw2Inval, Dw2Inval
 cxl, Reg8, RegRex64, 1, Dw2Inval, Dw2Inval
 dxl, Reg8, RegRex64, 2, Dw2Inval, Dw2Inval
 bxl, Reg8, RegRex64, 3, Dw2Inval, Dw2Inval

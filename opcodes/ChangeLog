@@ -1,3 +1,89 @@
+2017-11-24  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (float_mem): Add suffixes to fi* in the "de" and
+	"df" groups.
+
+2017-11-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-opc.tbl: Add Disp8MemShift for AVX512 VAES instructions.
+	* i386-tbl.h: Regenerate.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (OP_E_memory): Also shift the 8-bit immediate in
+	the 16-bit addressing case.
+
+2017-11-23  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (dis386_twobyte): Correct ud1. Add ud0.
+	(twobyte_has_modrm): Set flag for index 0xb9 and 0xff.
+	* i386-opc.tbl (ud1, ud2b): Add operands.
+	(ud0): New.
+	* i386-tbl.h: Re-generate.
+
+2017-11-22  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-opc.tbl: Remove Vec_Disp8 from vgf2p8mulb.
+	* i386-tbl.h: Regenerate.
+
+2017-11-22  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-opc.tbl: Remove Vec_Disp8 from vpcompressb and vpexpandb.
+	* i386-tbl.h: Regenerate.
+
+2017-11-22  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	*arc-opc (insert_rhv2): Check h-regs range.
+
+2017-11-21  Claudiu Zissulescu <claziss@synopsys.com>
+
+	* arc-dis.c (print_insn_arc): Pretty print pc-relative offsets.
+	* arc-opc.c (SIMM21_A16_5): Make it pc-relative.
+
+2017-11-16  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_fp_16_v8_2): Require AARCH64_FEATURE_F16_FML
+	and AARCH64_FEATURE_F16.
+
+2017-11-16  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-tbl.h (sha512h, sha512h2, sha512su0, sha512su1, eor3): New.
+	(rax1, xar, bcax, sm3ss1, sm3tt1a, sm3tt1b, sm3tt2a, sm3tt2b): New.
+	(sm3partw1, sm3partw2, sm4e, sm4ekey, fmlal, fmlsl): New.
+	(fmlal2, fmlsl2, cfinv, rmif, setf8, setf16, stlurb): New.
+	(ldapurb, ldapursb, stlurh, ldapurh, ldapursh, stlur): New.
+	(ldapur, ldapursw, stlur): New.
+	* aarch64-dis-2.c: Regenerate.
+
+2017-11-16  Jan Beulich  <jbeulich@suse.com>
+
+	(get_valid_dis386): Never flag bad opcode when
+	vex.register_specifier is beyond 7. Always store all four
+	bits of it. Move 16-/32-bit override in EVEX handling after
+	all to be overridden bits have been set.
+	(OP_VEX): Mask vex.register_specifier outside of 64-bit mode.
+	Use rex to determine GPR register set.
+	(OP_EX_VexReg, OP_Vex_2src_1, OP_Vex_2src_2, OP_REG_VexI4,
+	OP_LWP_E): Mask vex.register_specifier outside of 64-bit mode.
+
+2017-11-15  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (OP_VEX, OP_LWPCB_E, OP_LWP_E): Use rex to
+	determine GPR register set.
+
+2017-11-15  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (VEXI4_Fixup, VexI4): Delete.
+	(prefix_table, xop_table, vex_len_table): Remove VexI4 uses.
+	(OP_EX_VexW): Move setting of vex_w_done. Update codep on 2nd
+	pass.
+	(OP_REG_VexI4): Drop low 4 bits check.
+
+2017-11-15  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-reg.tbl (axl): Remove Acc and Byte.
+	* i386-tbl.h: Re-generate.
+
 2017-11-14  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (VPCOM_Fixup, VPCOM, xop_cmp_op): New.

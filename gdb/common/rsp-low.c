@@ -132,6 +132,19 @@ hex2bin (const char *hex, gdb_byte *bin, int count)
 
 /* See rsp-low.h.  */
 
+gdb::byte_vector
+hex2bin (const char *hex)
+{
+  size_t bin_len = strlen (hex) / 2;
+  gdb::byte_vector bin (bin_len);
+
+  hex2bin (hex, bin.data (), bin_len);
+
+  return bin;
+}
+
+/* See rsp-low.h.  */
+
 std::string
 hex2str (const char *hex)
 {

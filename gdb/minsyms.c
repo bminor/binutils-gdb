@@ -52,6 +52,7 @@
 #include "cli/cli-utils.h"
 #include "symbol.h"
 #include <algorithm>
+#include "safe-ctype.h"
 
 /* See minsyms.h.  */
 

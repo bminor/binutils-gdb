@@ -62,6 +62,7 @@
 #endif
 
 char *input_line_pointer;	/*->next char of source file to parse.  */
+bfd_boolean input_from_string = FALSE;
 
 #if BITS_PER_CHAR != 8
 /*  The following table is indexed by[(char)] and will break if
@@ -1684,16 +1685,16 @@ read_symbol_name (void)
       if (mbstowcs (NULL, name, len) == (size_t) -1)
 	as_warn (_("symbol name not recognised in the current locale"));
     }
-  else if (is_name_beginner (c) || c == '\001')
+  else if (is_name_beginner (c) || (input_from_string && c == FAKE_LABEL_CHAR))
     {
       ptrdiff_t len;
 
       name = input_line_pointer - 1;
 
-      /* We accept \001 in a name in case this is
+      /* We accept FAKE_LABEL_CHAR in a name in case this is
 	 being called with a constructed string.  */
       while (is_part_of_name (c = *input_line_pointer++)
-	     || c == '\001')
+	     || (input_from_string && c == FAKE_LABEL_CHAR))
 	;
 
       len = (input_line_pointer - name) - 1;
@@ -6385,6 +6386,7 @@ temp_ilp (char *buf)
 
   input_line_pointer = buf;
   buffer_limit = buf + strlen (buf);
+  input_from_string = TRUE;
 }
 
 /* Restore a saved input line pointer.  */
@@ -6396,6 +6398,7 @@ restore_ilp (void)
 
   input_line_pointer = saved_ilp;
   buffer_limit = saved_limit;
+  input_from_string = FALSE;
 
   saved_ilp = NULL;
 }

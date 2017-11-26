@@ -1440,6 +1440,8 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
 	relent->address = rela.r_offset - asect->vma;
 
       if (ELF_R_SYM (rela.r_info) == STN_UNDEF)
+	/* FIXME: This and the error case below mean that we have a
+	   symbol on relocs that is not elf_symbol_type.  */
 	relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       else if (ELF_R_SYM (rela.r_info) > symcount)
 	{

@@ -365,6 +365,33 @@ debug_qf_map_symbol_filenames (struct objfile *objfile,
 						 need_fullname);
 }
 
+static struct compunit_symtab *
+debug_qf_find_compunit_symtab_by_address (struct objfile *objfile,
+					  CORE_ADDR address)
+{
+  const struct debug_sym_fns_data *debug_data
+    = ((const struct debug_sym_fns_data *)
+       objfile_data (objfile, symfile_debug_objfile_data_key));
+  fprintf_filtered (gdb_stdlog,
+		    "qf->find_compunit_symtab_by_address (%s, %s)\n",
+		    objfile_debug_name (objfile),
+		    hex_string (address));
+
+  struct compunit_symtab *result = NULL;
+  if (debug_data->real_sf->qf->map_symbol_filenames != NULL)
+    result
+      = debug_data->real_sf->qf->find_compunit_symtab_by_address (objfile,
+								  address);
+
+  fprintf_filtered (gdb_stdlog,
+		    "qf->find_compunit_symtab_by_address (...) = %s\n",
+		    result
+		    ? debug_symtab_name (compunit_primary_filetab (result))
+		    : "NULL");
+
+  return result;
+}
+
 static const struct quick_symbol_functions debug_sym_quick_functions =
 {
   debug_qf_has_symbols,
@@ -381,6 +408,7 @@ static const struct quick_symbol_functions debug_sym_quick_functions =
   debug_qf_map_matching_symbols,
   debug_qf_expand_symtabs_matching,
   debug_qf_find_pc_sect_compunit_symtab,
+  debug_qf_find_compunit_symtab_by_address,
   debug_qf_map_symbol_filenames
 };
 

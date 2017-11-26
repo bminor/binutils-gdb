@@ -194,6 +194,9 @@ LIBBABELTRACE = @LIBBABELTRACE@
 # Where is libipt?  This will be empty if libipt was not available.
 LIBIPT = @LIBIPT@
 
+# Where is libmpfr?  This will be empty if libmpfr was not available.
+LIBMPFR = @LIBMPFR@
+
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
 GDB_WARN_CFLAGS = $(WARN_CFLAGS)
@@ -531,10 +534,12 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/environ-selftests.c \
 	unittests/function-view-selftests.c \
 	unittests/lookup_name_info-selftests.c \
+	unittests/memory-map-selftests.c \
 	unittests/memrange-selftests.c \
 	unittests/offset-type-selftests.c \
 	unittests/optional-selftests.c \
 	unittests/ptid-selftests.c \
+	unittests/rsp-low-selftests.c \
 	unittests/scoped_restore-selftests.c \
 	unittests/xml-utils-selftests.c
 
@@ -544,10 +549,12 @@ SUBDIR_UNITTESTS_OBS = \
 	environ-selftests.o \
 	function-view-selftests.o \
 	lookup_name_info-selftests.o \
+	memory-map-selftests.o \
 	memrange-selftests.o \
 	offset-type-selftests.o \
 	optional-selftests.o \
 	ptid-selftests.o \
+	rsp-low-selftests.o \
 	scoped_restore-selftests.o \
 	xml-utils-selftests.o
 
@@ -701,7 +708,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(ZLIB) $(INTL) $(LIBIBERTY) $(LIBD
 	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) \
 	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
-	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU) $(LIBICONV)
+	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU) $(LIBICONV) $(LIBMPFR)
 CDEPS = $(XM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
 
@@ -778,6 +785,7 @@ ALL_64_TARGET_OBS = \
 	amd64-sol2-tdep.o \
 	amd64-tdep.o \
 	amd64-windows-tdep.o \
+	arch/aarch64.o \
 	arch/aarch64-insn.o \
 	arch/amd64.o \
 	ia64-linux-tdep.o \
@@ -1510,6 +1518,7 @@ HFILES_NO_SRCDIR = \
 	xml-syscall.h \
 	xml-tdesc.h \
 	xtensa-tdep.h \
+	arch/aarch64.h \
 	arch/aarch64-insn.h \
 	arch/arm.h \
 	arch/i386.h \
@@ -2554,7 +2563,6 @@ ALLDEPFILES = \
 	bfin-tdep.c \
 	bsd-kvm.c \
 	bsd-uthread.c \
-	core-regset.c \
 	darwin-nat.c \
 	dcache.c \
 	dcache.c \

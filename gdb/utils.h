@@ -48,17 +48,24 @@ enum class strncmp_iw_mode
 
 /* Helper for strcmp_iw and strncmp_iw.  Exported so that languages
    can implement both NORMAL and MATCH_PARAMS variants in a single
-   function and defer part of the work to strncmp_iw_with_mode.  */
+   function and defer part of the work to strncmp_iw_with_mode.
+   LANGUAGE is used to implement some context-sensitive
+   language-specific comparisons.  For example, for C++,
+   "string1=operator()" should not match "string2=operator" even in
+   MATCH_PARAMS mode.  */
 extern int strncmp_iw_with_mode (const char *string1,
 				 const char *string2,
 				 size_t string2_len,
-				 strncmp_iw_mode mode);
+				 strncmp_iw_mode mode,
+				 enum language language);
 
 /* Do a strncmp() type operation on STRING1 and STRING2, ignoring any
    differences in whitespace.  STRING2_LEN is STRING2's length.
    Returns 0 if STRING1 matches STRING2_LEN characters of STRING2,
    non-zero otherwise (slightly different than strncmp()'s range of
-   return values).  */
+   return values).  Note: passes language_minimal to
+   strncmp_iw_with_mode, and should therefore be avoided if a more
+   suitable language is available.  */
 extern int strncmp_iw (const char *string1, const char *string2,
 		       size_t string2_len);
 
@@ -70,7 +77,10 @@ extern int strncmp_iw (const char *string1, const char *string2,
    As an extra hack, string1=="FOO(ARGS)" matches string2=="FOO".
    This "feature" is useful when searching for matching C++ function
    names (such as if the user types 'break FOO', where FOO is a
-   mangled C++ function).  */
+   mangled C++ function).
+
+   Note: passes language_minimal to strncmp_iw_with_mode, and should
+   therefore be avoided if a more suitable language is available.  */
 extern int strcmp_iw (const char *string1, const char *string2);
 
 extern int strcmp_iw_ordered (const char *, const char *);

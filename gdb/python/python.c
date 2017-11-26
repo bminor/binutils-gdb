@@ -640,6 +640,190 @@ gdbpy_solib_name (PyObject *self, PyObject *args)
   return str_obj;
 }
 
+/* Implementation of Python rbreak command.  Take a REGEX and
+   optionally a MINSYMS, THROTTLE and SYMTABS keyword and return a
+   Python list that contains newly set breakpoints that match that
+   criteria.  REGEX refers to a GDB format standard regex pattern of
+   symbols names to search; MINSYMS is an optional boolean (default
+   False) that indicates if the function should search GDB's minimal
+   symbols; THROTTLE is an optional integer (default unlimited) that
+   indicates the maximum amount of breakpoints allowable before the
+   function exits (note, if the throttle bound is passed, no
+   breakpoints will be set and a runtime error returned); SYMTABS is
+   an optional Python iterable that contains a set of gdb.Symtabs to
+   constrain the search within.  */
+
+static PyObject *
+gdbpy_rbreak (PyObject *self, PyObject *args, PyObject *kw)
+{
+  /* A simple type to ensure clean up of a vector of allocated strings
+     when a C interface demands a const char *array[] type
+     interface.  */
+  struct symtab_list_type
+  {
+    ~symtab_list_type ()
+    {
+      for (const char *elem: vec)
+	xfree ((void *) elem);
+    }
+    std::vector<const char *> vec;
+  };
+
+  char *regex = NULL;
+  std::vector<symbol_search> symbols;
+  unsigned long count = 0;
+  PyObject *symtab_list = NULL;
+  PyObject *minsyms_p_obj = NULL;
+  int minsyms_p = 0;
+  unsigned int throttle = 0;
+  static const char *keywords[] = {"regex","minsyms", "throttle",
+				   "symtabs", NULL};
+  symtab_list_type symtab_paths;
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|O!IO", keywords,
+					&regex, &PyBool_Type,
+					&minsyms_p_obj, &throttle,
+					&symtab_list))
+    return NULL;
+
+  /* Parse minsyms keyword.  */
+  if (minsyms_p_obj != NULL)
+    {
+      int cmp = PyObject_IsTrue (minsyms_p_obj);
+      if (cmp < 0)
+	return NULL;
+      minsyms_p = cmp;
+    }
+
+  /* The "symtabs" keyword is any Python iterable object that returns
+     a gdb.Symtab on each iteration.  If specified, iterate through
+     the provided gdb.Symtabs and extract their full path.  As
+     python_string_to_target_string returns a
+     gdb::unique_xmalloc_ptr<char> and a vector containing these types
+     cannot be coerced to a const char **p[] via the vector.data call,
+     release the value from the unique_xmalloc_ptr and place it in a
+     simple type symtab_list_type (which holds the vector and a
+     destructor that frees the contents of the allocated strings.  */
+  if (symtab_list != NULL)
+    {
+      gdbpy_ref<> iter (PyObject_GetIter (symtab_list));
+
+      if (iter == NULL)
+	return NULL;
+
+      while (true)
+	{
+	  gdbpy_ref<> next (PyIter_Next (iter.get ()));
+
+	  if (next == NULL)
+	    {
+	      if (PyErr_Occurred ())
+		return NULL;
+	      break;
+	    }
+
+	  gdbpy_ref<> obj_name (PyObject_GetAttrString (next.get (),
+							"filename"));
+
+	  if (obj_name == NULL)
+	    return NULL;
+
+	  /* Is the object file still valid?  */
+	  if (obj_name == Py_None)
+	    continue;
+
+	  gdb::unique_xmalloc_ptr<char> filename =
+	    python_string_to_target_string (obj_name.get ());
+
+	  if (filename == NULL)
+	    return NULL;
+
+	  /* Make sure there is a definite place to store the value of
+	     filename before it is released.  */
+	  symtab_paths.vec.push_back (nullptr);
+	  symtab_paths.vec.back () = filename.release ();
+	}
+    }
+
+  if (symtab_list)
+    {
+      const char **files = symtab_paths.vec.data ();
+
+      symbols = search_symbols (regex, FUNCTIONS_DOMAIN,
+				symtab_paths.vec.size (), files);
+    }
+  else
+    symbols = search_symbols (regex, FUNCTIONS_DOMAIN, 0, NULL);
+
+  /* Count the number of symbols (both symbols and optionally minimal
+     symbols) so we can correctly check the throttle limit.  */
+  for (const symbol_search &p : symbols)
+    {
+      /* Minimal symbols included?  */
+      if (minsyms_p)
+	{
+	  if (p.msymbol.minsym != NULL)
+	    count++;
+	}
+
+      if (p.symbol != NULL)
+	count++;
+    }
+
+  /* Check throttle bounds and exit if in excess.  */
+  if (throttle != 0 && count > throttle)
+    {
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("Number of breakpoints exceeds throttled maximum."));
+      return NULL;
+    }
+
+  gdbpy_ref<> return_list (PyList_New (0));
+
+  if (return_list == NULL)
+    return NULL;
+
+  /* Construct full path names for symbols and call the Python
+     breakpoint constructor on the resulting names.  Be tolerant of
+     individual breakpoint failures.  */
+  for (const symbol_search &p : symbols)
+    {
+      std::string symbol_name;
+
+      /* Skipping minimal symbols?  */
+      if (minsyms_p == 0)
+	if (p.msymbol.minsym != NULL)
+	  continue;
+
+      if (p.msymbol.minsym == NULL)
+	{
+	  struct symtab *symtab = symbol_symtab (p.symbol);
+	  const char *fullname = symtab_to_fullname (symtab);
+
+	  symbol_name = fullname;
+	  symbol_name  += ":";
+	  symbol_name  += SYMBOL_LINKAGE_NAME (p.symbol);
+	}
+      else
+	symbol_name = MSYMBOL_LINKAGE_NAME (p.msymbol.minsym);
+
+      gdbpy_ref<> argList (Py_BuildValue("(s)", symbol_name.c_str ()));
+      gdbpy_ref<> obj (PyObject_CallObject ((PyObject *)
+					    &breakpoint_object_type,
+					    argList.get ()));
+
+      /* Tolerate individual breakpoint failures.  */
+      if (obj == NULL)
+	gdbpy_print_stack ();
+      else
+	{
+	  if (PyList_Append (return_list.get (), obj.get ()) == -1)
+	    return NULL;
+	}
+    }
+  return return_list.release ();
+}
+
 /* A Python function which is a wrapper for decode_line_1.  */
 
 static PyObject *
@@ -1910,7 +2094,9 @@ Return the name of the current target charset." },
   { "target_wide_charset", gdbpy_target_wide_charset, METH_NOARGS,
     "target_wide_charset () -> string.\n\
 Return the name of the current target wide charset." },
-
+  { "rbreak", (PyCFunction) gdbpy_rbreak, METH_VARARGS | METH_KEYWORDS,
+    "rbreak (Regex) -> List.\n\
+Return a Tuple containing gdb.Breakpoint objects that match the given Regex." },
   { "string_to_argv", gdbpy_string_to_argv, METH_VARARGS,
     "string_to_argv (String) -> Array.\n\
 Parse String and return an argv-like array.\n\

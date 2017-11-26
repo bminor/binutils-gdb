@@ -21,6 +21,10 @@
 long double ld;
 __float128 f128;
 
+// Test largest IEEE-128 value.  This has to be supported since the
+// __float128 data type by definition is encoded as IEEE-128.
+__float128 large128 = 1.18973149535723176508575932662800702e+4932q;
+
 int main()
 {
   ld = 1.375l;
