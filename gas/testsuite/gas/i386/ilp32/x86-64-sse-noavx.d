@@ -17,6 +17,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 2c dc          	cvttpd2pi %xmm4,%mm3
 [ 	]*[a-f0-9]+:	0f 2c dc             	cvttps2pi %xmm4,%mm3
 [ 	]*[a-f0-9]+:	df 08                	fisttps \(%rax\)
+[ 	]*[a-f0-9]+:	df 08                	fisttps \(%rax\)
 [ 	]*[a-f0-9]+:	db 08                	fisttpl \(%rax\)
 [ 	]*[a-f0-9]+:	dd 08                	fisttpll \(%rax\)
 [ 	]*[a-f0-9]+:	0f ae e8             	lfence 
