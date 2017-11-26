@@ -1,3 +1,7 @@
+2017-11-26  Tom Tromey  <tom@tromey.com>
+
+	* linux-low.c (linux_create_inferior): Update.
+
 2017-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-low.c (spu_create_inferior): Fix typo in argument name.

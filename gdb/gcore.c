@@ -68,8 +68,7 @@ create_gcore_bfd (const char *filename)
 static void
 write_gcore_file_1 (bfd *obfd)
 {
-  struct cleanup *cleanup;
-  void *note_data = NULL;
+  gdb::unique_xmalloc_ptr<char> note_data;
   int note_size = 0;
   asection *note_sec = NULL;
 
@@ -78,11 +77,10 @@ write_gcore_file_1 (bfd *obfd)
      generation should be converted to gdbarch_make_corefile_notes; at that
      point, the target vector method can be removed.  */
   if (!gdbarch_make_corefile_notes_p (target_gdbarch ()))
-    note_data = target_make_corefile_notes (obfd, &note_size);
+    note_data.reset (target_make_corefile_notes (obfd, &note_size));
   else
-    note_data = gdbarch_make_corefile_notes (target_gdbarch (), obfd, &note_size);
-
-  cleanup = make_cleanup (xfree, note_data);
+    note_data.reset (gdbarch_make_corefile_notes (target_gdbarch (), obfd,
+						  &note_size));
 
   if (note_data == NULL || note_size == 0)
     error (_("Target does not support core file generation."));
@@ -105,10 +103,9 @@ write_gcore_file_1 (bfd *obfd)
     error (_("gcore: failed to get corefile memory sections from target."));
 
   /* Write out the contents of the note section.  */
-  if (!bfd_set_section_contents (obfd, note_sec, note_data, 0, note_size))
+  if (!bfd_set_section_contents (obfd, note_sec, note_data.get (), 0,
+				 note_size))
     warning (_("writing note section (%s)"), bfd_errmsg (bfd_get_error ()));
-
-  do_cleanups (cleanup);
 }
 
 /* write_gcore_file -- helper for gcore_command (exported).

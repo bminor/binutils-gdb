@@ -1118,8 +1118,8 @@ linux_nat_create_inferior (struct target_ops *ops,
 			   const char *exec_file, const std::string &allargs,
 			   char **env, int from_tty)
 {
-  struct cleanup *restore_personality
-    = maybe_disable_address_space_randomization (disable_randomization);
+  maybe_disable_address_space_randomization restore_personality
+    (disable_randomization);
 
   /* The fork_child mechanism is synchronous and calls target_wait, so
      we have to mask the async mode.  */
@@ -1128,8 +1128,6 @@ linux_nat_create_inferior (struct target_ops *ops,
   linux_nat_pass_signals (ops, 0, NULL);
 
   linux_ops->to_create_inferior (ops, exec_file, allargs, env, from_tty);
-
-  do_cleanups (restore_personality);
 }
 
 /* Callback for linux_proc_attach_tgid_threads.  Attach to PTID if not

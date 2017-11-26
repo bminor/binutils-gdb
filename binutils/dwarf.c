@@ -9647,7 +9647,7 @@ parse_gnu_debugaltlink (struct dwarf_section * section, void * data)
 
 static void *
 load_separate_debug_info (const char *            main_filename,
-			  struct dwarf_section *  link,
+			  struct dwarf_section *  xlink,
 			  parse_func_type         parse_func,
 			  check_func_type         check_func,
 			  void *                  func_data)
@@ -9658,10 +9658,10 @@ load_separate_debug_info (const char *            main_filename,
   size_t         canon_dirlen;
   size_t         dirlen;
 
-  if ((separate_filename = parse_func (link, func_data)) == NULL)
+  if ((separate_filename = parse_func (xlink, func_data)) == NULL)
     {
       warn (_("Corrupt debuglink section: %s\n"),
-	    link->name ? link->name : link->uncompressed_name);
+	    xlink->name ? xlink->name : xlink->uncompressed_name);
       return FALSE;
     }
     

@@ -1,3 +1,8 @@
+2017-11-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (load_separate_debug_info): Rename argument name from
+	link to xlink.
+
 2017-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/22444
