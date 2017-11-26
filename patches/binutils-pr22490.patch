@@ -1,0 +1,182 @@
+From d199b872fa237a0f173092a8b38d070e689081c2 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Fri, 24 Nov 2017 15:47:10 -0800
+Subject: [PATCH] Properly handle note sections and segments
+
+gABI specifies that notes should be aligned to 4 bytes in 32-bit objects
+and to 8 bytes in 64-bit objects.  As a Linux extension, we support 4
+byte alignment in 64-bit objects.  obj_elf_version and sco_id pad note
+section to 4 byte alignment:
+
+frag_align (2, 0, 0);
+
+They should set section alignment to 4 bytes.  When dumping note sections,
+if section alignment is less than 4, we treate alignment as 4 bytes to
+handle note sections with incorrect section alignment.
+
+readelf should also be able to dump CORE PT_NOTE segment, like
+
+Displaying notes found at file offset 0x00000548 with length 0x00000cbc:
+  Owner                 Data size	Description
+  CORE                 0x00000150	NT_PRSTATUS (prstatus structure)
+  CORE                 0x00000088	NT_PRPSINFO (prpsinfo structure)
+  CORE                 0x00000080	NT_SIGINFO (siginfo_t data)
+  CORE                 0x00000140	NT_AUXV (auxiliary vector)
+  CORE                 0x00000358	NT_FILE (mapped files)
+    Page size: 4096
+                 Start                 End         Page Offset
+    0x0000000000400000  0x0000000000401000  0x0000000000000000
+        /export/build/gnu/gdb/build-x86_64-linux/gdb/testsuite/outputs/gdb.base/auxv/auxv
+    0x0000000000600000  0x0000000000601000  0x0000000000000000
+        /export/build/gnu/gdb/build-x86_64-linux/gdb/testsuite/outputs/gdb.base/auxv/auxv
+    0x0000000000601000  0x0000000000602000  0x0000000000000001
+        /export/build/gnu/gdb/build-x86_64-linux/gdb/testsuite/outputs/gdb.base/auxv/auxv
+    0x00007ffff7659000  0x00007ffff7834000  0x0000000000000000
+        /usr/lib64/libc-2.26.so
+    0x00007ffff7834000  0x00007ffff7a33000  0x00000000000001db
+        /usr/lib64/libc-2.26.so
+    0x00007ffff7a33000  0x00007ffff7a37000  0x00000000000001da
+        /usr/lib64/libc-2.26.so
+    0x00007ffff7a37000  0x00007ffff7a39000  0x00000000000001de
+        /usr/lib64/libc-2.26.so
+    0x00007ffff7a3d000  0x00007ffff7bd4000  0x0000000000000000
+        /usr/lib64/libm-2.26.so
+    0x00007ffff7bd4000  0x00007ffff7dd3000  0x0000000000000197
+        /usr/lib64/libm-2.26.so
+    0x00007ffff7dd3000  0x00007ffff7dd4000  0x0000000000000196
+        /usr/lib64/libm-2.26.so
+    0x00007ffff7dd4000  0x00007ffff7dd5000  0x0000000000000197
+        /usr/lib64/libm-2.26.so
+    0x00007ffff7dd5000  0x00007ffff7dfc000  0x0000000000000000
+        /usr/lib64/ld-2.26.so
+    0x00007ffff7ffc000  0x00007ffff7ffd000  0x0000000000000027
+        /usr/lib64/ld-2.26.so
+    0x00007ffff7ffd000  0x00007ffff7ffe000  0x0000000000000028
+        /usr/lib64/ld-2.26.so
+  CORE                 0x00000200	NT_FPREGSET (floating point registers)
+  LINUX                0x00000340	NT_X86_XSTATE (x86 XSAVE extended state)
+   description data: 7f 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ffffff80 1f 00 00 ffffffff ffffffff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff 2f 2f 2f 2f 2f 2f 2f 2f 2f 2f 2f 2f 2f 2f 2f 2f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ffffffff 00 00 00 00 00 00 00 ffffffff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ffffffff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 74 2f 62 75 69 6c 64 2f 67 6e 75 2f 67 64 62 2f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 07 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+binutils/
+
+	PR binutils/22490
+	PR gas/22492
+	* readelf.c (process_notes_at): Add an argument for note
+	alignment.  If note alignment is less than 4, use 4 byte
+	alignment.
+	(process_corefile_note_segments): Pass segment alignment to
+	process_notes_at.
+	(process_note_sections): Pass section alignment to
+	process_notes_at.
+	(process_object): Call load_separate_debug_file only if
+	e_shstrndx != SHN_UNDEF.
+
+gas/
+
+	PR gas/22492
+	* config/obj-elf.c (obj_elf_version): Align note section to 4
+	bytes.
+	(sco_id): Likewise.
+---
+ binutils/readelf.c   | 26 ++++++++++++++++++++------
+ gas/config/obj-elf.c |  2 ++
+ 2 files changed, 22 insertions(+), 6 deletions(-)
+
+diff --git a/binutils/readelf.c b/binutils/readelf.c
+index 739367d899..04d968f7e2 100644
+--- a/binutils/readelf.c
++++ b/binutils/readelf.c
+@@ -17904,7 +17904,8 @@ static bfd_boolean
+ process_notes_at (Filedata *           filedata,
+ 		  Elf_Internal_Shdr *  section,
+ 		  bfd_vma              offset,
+-		  bfd_vma              length)
++		  bfd_vma              length,
++		  bfd_vma              align)
+ {
+   Elf_External_Note * pnotes;
+   Elf_External_Note * external;
+@@ -17937,6 +17938,14 @@ process_notes_at (Filedata *           filedata,
+     printf (_("\nDisplaying notes found at file offset 0x%08lx with length 0x%08lx:\n"),
+ 	    (unsigned long) offset, (unsigned long) length);
+ 
++  /* NB: Some note sections may have alignment value of 0 or 1.  gABI
++     specifies that notes should be aligned to 4 bytes in 32-bit
++     objects and to 8 bytes in 64-bit objects.  As a Linux extension,
++     we also support 4 byte alignment in 64-bit objects.  If section
++     alignment is less than 4, we treate alignment as 4 bytes.   */
++  if (align < 4)
++    align = 4;
++
+   printf (_("  %-20s %10s\tDescription\n"), _("Owner"), _("Data size"));
+ 
+   end = (char *) pnotes + length;
+@@ -17971,11 +17980,11 @@ process_notes_at (Filedata *           filedata,
+ 	  inote.descsz   = BYTE_GET (external->descsz);
+ 	  inote.descdata = ((char *) external
+ 			    + ELF_NOTE_DESC_OFFSET (inote.namesz,
+-						    section->sh_addralign));
++						    align));
+ 	  inote.descpos  = offset + (inote.descdata - (char *) pnotes);
+ 	  next = ((char *) external
+ 		  + ELF_NOTE_NEXT_OFFSET (inote.namesz, inote.descsz,
+-					  section->sh_addralign));
++					  align));
+ 	}
+       else
+ 	{
+@@ -18077,7 +18086,8 @@ process_corefile_note_segments (Filedata * filedata)
+       if (segment->p_type == PT_NOTE)
+ 	if (! process_notes_at (filedata, NULL,
+ 				(bfd_vma) segment->p_offset,
+-				(bfd_vma) segment->p_filesz))
++				(bfd_vma) segment->p_filesz,
++				(bfd_vma) segment->p_align))
+ 	  res = FALSE;
+     }
+ 
+@@ -18181,7 +18191,8 @@ process_note_sections (Filedata * filedata)
+ 	{
+ 	  if (! process_notes_at (filedata, section,
+ 				  (bfd_vma) section->sh_offset,
+-				  (bfd_vma) section->sh_size))
++				  (bfd_vma) section->sh_size,
++				  (bfd_vma) section->sh_addralign))
+ 	    res = FALSE;
+ 	  n++;
+ 	}
+@@ -18556,7 +18567,10 @@ process_object (Filedata * filedata)
+   if (! process_version_sections (filedata))
+     res = FALSE;
+ 
+-  separates = load_separate_debug_file (filedata, filedata->file_name);
++  if (filedata->file_header.e_shstrndx != SHN_UNDEF)
++    separates = load_separate_debug_file (filedata, filedata->file_name);
++  else
++    separates = NULL;
+ 
+   if (! process_section_contents (filedata))
+     res = FALSE;
+diff --git a/gas/config/obj-elf.c b/gas/config/obj-elf.c
+index 3f641f4394..768812748e 100644
+--- a/gas/config/obj-elf.c
++++ b/gas/config/obj-elf.c
+@@ -1829,6 +1829,7 @@ obj_elf_version (int ignore ATTRIBUTE_UNUSED)
+       bfd_set_section_flags (stdoutput,
+ 			     note_secp,
+ 			     SEC_HAS_CONTENTS | SEC_READONLY);
++      bfd_set_section_alignment (stdoutput, note_secp, 2);
+ 
+       /* Process the version string.  */
+       len = strlen (name) + 1;
+@@ -2684,6 +2685,7 @@ sco_id (void)
+   bfd_set_section_flags (stdoutput,
+ 			 note_secp,
+ 			 SEC_HAS_CONTENTS | SEC_READONLY);
++  bfd_set_section_alignment (stdoutput, note_secp, 2);
+ 
+   /* process the version string */
+ 
+-- 
+2.14.3
+

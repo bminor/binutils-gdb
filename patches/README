@@ -26,6 +26,7 @@ patches="
 	binutils-pr21841.patch
 	binutils-pr22309.patch
 	binutils-pr22471.patch
+	binutils-pr22490.patch
 	binutils-x86-gpoff.patch
 0001-ld-Add-z-textonly-option-to-ELF-linker.patch
 0002-ld-Add-TEXT_SEGMENT_ALIGN-TEXT_SEGMENT_-RELRO_-END.patch
