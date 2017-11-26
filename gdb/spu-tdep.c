@@ -1632,8 +1632,8 @@ spu_software_single_step (struct regcache *regcache)
   insn = extract_unsigned_integer (buf, 4, byte_order);
 
   /* Get local store limit.  */
-  lslr = regcache_raw_get_unsigned (regcache, SPU_LSLR_REGNUM);
-  if (!lslr)
+  if ((regcache_cooked_read_unsigned (regcache, SPU_LSLR_REGNUM, &lslr)
+       != REG_VALID) || !lslr)
     lslr = (ULONGEST) -1;
 
   /* Next sequential instruction is at PC + 4, except if the current
@@ -1653,7 +1653,10 @@ spu_software_single_step (struct regcache *regcache)
       if (reg == SPU_PC_REGNUM)
 	target += SPUADDR_ADDR (pc);
       else if (reg != -1)
-	target += regcache_raw_get_unsigned (regcache, reg) & -4;
+      {
+	regcache_raw_read_part (regcache, reg, 0, 4, buf);
+	target += extract_unsigned_integer (buf, 4, byte_order) & -4;
+      }
 
       target = target & lslr;
       if (target != next_pc)

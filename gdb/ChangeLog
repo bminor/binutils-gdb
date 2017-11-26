@@ -1,3 +1,9 @@
+2017-11-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-tdep.c (spu_software_single_step): Access SPU_LSLR_REGNUM as
+	"cooked" register.  Access only first four bytes of branch target
+	registers.
+
 2017-11-25  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/22491
