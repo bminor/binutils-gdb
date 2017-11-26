@@ -1,3 +1,11 @@
+2017-11-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/spu-info.c: Include <unistd.h>.
+	(do_signal_test): Fix broken calls to write.
+	* gdb.arch/spu-info.exp: Use prepare_for_testing.
+	Fix checks for empty mailboxes.  Update signal tests for corrected
+	do_signal_test routine.  Allow nonzero event status.
+
 2017-11-25   Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/complete-empty.exp: New file.

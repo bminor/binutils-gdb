@@ -22,7 +22,7 @@ load_lib cell.exp
 
 set testfile "dwarfaddr"
 set srcfile ${srcdir}/${subdir}/${testfile}.S
-set binary ${objdir}/${subdir}/${testfile}
+set binary [standard_output_file ${testfile}]
 
 if {[skip_cell_tests]} {
     return 0

@@ -22,7 +22,7 @@ load_lib cell.exp
 
 set testfile "ea-test"
 set source ${srcdir}/${subdir}/${testfile}.c
-set binary ${objdir}/${subdir}/${testfile}
+set binary [standard_output_file ${testfile}]
 
 if {[skip_cell_tests]} {
     return 0
