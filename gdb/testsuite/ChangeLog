@@ -5,6 +5,23 @@
 	* gdb.arch/spu-info.exp: Use prepare_for_testing.
 	Fix checks for empty mailboxes.  Update signal tests for corrected
 	do_signal_test routine.  Allow nonzero event status.
+	* gdb.arch/spu-ls.exp: Use prepare_for_testing.
+	* gdb.cell/arch.exp: Use standard_output_file.
+	* gdb.cell/break.exp: Likewise.
+	* gdb.cell/bt.exp: Likewise.
+	* gdb.cell/core.exp: Likewise.
+	* gdb.cell/dwarfaddr.exp: Likewise.
+	* gdb.cell/ea-cache.exp: Likewise.
+	* gdb.cell/ea-standalone.exp: Likewise.
+	* gdb.cell/f-regs.exp: Likewise.
+	* gdb.cell/fork.exp: Likewise.
+	* gdb.cell/gcore.exp: Likewise.
+	* gdb.cell/mem-access.exp: Likewise.
+	* gdb.cell/ptype.exp: Likewise.
+	* gdb.cell/registers.exp: Likewise.
+	* gdb.cell/sizeof.exp: Likewise.
+	* gdb.cell/solib-symbol.exp: Likewise.
+	* gdb.cell/solib.exp: Likewise.
 
 2017-11-25   Pedro Alves  <palves@redhat.com>
 
