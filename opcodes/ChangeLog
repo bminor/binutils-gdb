@@ -1,3 +1,7 @@
+2017-11-27  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated simplified Chinese translation.
+
 2017-11-24  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (float_mem): Add suffixes to fi* in the "de" and
