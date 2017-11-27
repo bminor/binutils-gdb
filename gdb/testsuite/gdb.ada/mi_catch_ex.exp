@@ -87,7 +87,7 @@ proc continue_to_exception { exception_name exception_message test } {
 
     # Match console stream output.
     gdb_expect {
-	-re " $exception_name at $hex in foo " {
+	-re " $exception_name\( \\($exception_message\\)\)? at $hex in foo " {
 	}
 	timeout {
 	    fail "$test (timeout)"
@@ -97,7 +97,7 @@ proc continue_to_exception { exception_name exception_message test } {
 
     # Now MI stream output.
     mi_expect_stop \
-	"breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\",exception-name=\"$exception_name(\",exception-message=\"$exception_message)?" \
+	"breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\",exception-name=\"$exception_name\(\",exception-message=\"$exception_message\)?" \
 	"foo" "" ".*" ".*" \
 	".*" \
 	$test
