@@ -227,9 +227,44 @@ typedef struct cached_reg
   gdb_byte *data;
 } cached_reg_t;
 
+/* Buffer of registers.  */
+
+class reg_buffer
+{
+public:
+  reg_buffer (gdbarch *gdbarch, bool has_pseudo);
+
+  DISABLE_COPY_AND_ASSIGN (reg_buffer);
+
+  /* Return regcache's architecture.  */
+  gdbarch *arch () const;
+
+  virtual ~reg_buffer ()
+  {
+    xfree (m_registers);
+    xfree (m_register_status);
+  }
+
+protected:
+  /* Assert on the range of REGNUM.  */
+  void assert_regnum (int regnum) const;
+
+  int num_raw_registers () const;
+
+  gdb_byte *register_buffer (int regnum) const;
+
+  struct regcache_descr *m_descr;
+
+  bool m_has_pseudo;
+  /* The register buffers.  */
+  gdb_byte *m_registers;
+  /* Register cache status.  */
+  signed char *m_register_status;
+};
+
 /* The register cache for storing raw register values.  */
 
-class regcache
+class regcache : public reg_buffer
 {
 public:
   regcache (gdbarch *gdbarch)
@@ -243,15 +278,6 @@ public:
   regcache (readonly_t, const regcache &src);
 
   DISABLE_COPY_AND_ASSIGN (regcache);
-
-  ~regcache ()
-  {
-    xfree (m_registers);
-    xfree (m_register_status);
-  }
-
-  /* Return regcache's architecture.  */
-  gdbarch *arch () const;
 
   /* Return REGCACHE's address space.  */
   const address_space *aspace () const
@@ -339,14 +365,9 @@ public:
   static void regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid);
 protected:
   regcache (gdbarch *gdbarch, const address_space *aspace_, bool readonly_p_);
-
-  int num_raw_registers () const;
-
   static std::forward_list<regcache *> current_regcache;
 
 private:
-  gdb_byte *register_buffer (int regnum) const;
-
   void restore (struct regcache *src);
 
   enum register_status xfer_part (int regnum, int offset, int len, void *in,
@@ -357,21 +378,10 @@ private:
 			int regnum, const void *in_buf,
 			void *out_buf, size_t size) const;
 
-  /* Assert on the range of REGNUM.  */
-  void assert_regnum (int regnum) const;
-
-  struct regcache_descr *m_descr;
-
   /* The address space of this register cache (for registers where it
      makes sense, like PC or SP).  */
   const address_space * const m_aspace;
 
-  /* The register buffers.  A read-only register cache can hold the
-     full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a read/write
-     register cache can only hold [0 .. gdbarch_num_regs).  */
-  gdb_byte *m_registers;
-  /* Register cache status.  */
-  signed char *m_register_status;
   /* Is this a read-only cache?  A read-only cache is used for saving
      the target's register state (e.g, across an inferior function
      call or just before forcing a function return).  A read-only
