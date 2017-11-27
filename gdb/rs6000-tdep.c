@@ -2706,12 +2706,6 @@ e500_move_ev_register (move_ev_register_func move,
 }
 
 static enum register_status
-do_regcache_raw_read (struct regcache *regcache, int regnum, void *buffer)
-{
-  return regcache_raw_read (regcache, regnum, (gdb_byte *) buffer);
-}
-
-static enum register_status
 do_regcache_raw_write (struct regcache *regcache, int regnum, void *buffer)
 {
   regcache_raw_write (regcache, regnum, (const gdb_byte *) buffer);
@@ -2720,10 +2714,36 @@ do_regcache_raw_write (struct regcache *regcache, int regnum, void *buffer)
 }
 
 static enum register_status
-e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
-			   int reg_nr, gdb_byte *buffer)
+e500_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache,
+			   int ev_reg, gdb_byte *buffer)
 {
-  return e500_move_ev_register (do_regcache_raw_read, regcache, reg_nr, buffer);
+  struct gdbarch *arch = regcache->arch ();
+  struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
+  int reg_index;
+  enum register_status status;
+
+  gdb_assert (IS_SPE_PSEUDOREG (tdep, ev_reg));
+
+  reg_index = ev_reg - tdep->ppc_ev0_regnum;
+
+  if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
+    {
+      status = regcache->raw_read (tdep->ppc_ev0_upper_regnum + reg_index,
+				   buffer);
+      if (status == REG_VALID)
+	status = regcache->raw_read (tdep->ppc_gp0_regnum + reg_index,
+				     buffer + 4);
+    }
+  else
+    {
+      status = regcache->raw_read (tdep->ppc_gp0_regnum + reg_index, buffer);
+      if (status == REG_VALID)
+	status = regcache->raw_read (tdep->ppc_ev0_upper_regnum + reg_index,
+				     buffer + 4);
+    }
+
+  return status;
+
 }
 
 static void
@@ -2736,7 +2756,7 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
 /* Read method for DFP pseudo-registers.  */
 static enum register_status
-dfp_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+dfp_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache,
 			   int reg_nr, gdb_byte *buffer)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -2792,7 +2812,7 @@ dfp_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
 /* Read method for POWER7 VSX pseudo-registers.  */
 static enum register_status
-vsx_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+vsx_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache,
 			   int reg_nr, gdb_byte *buffer)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -2857,7 +2877,7 @@ vsx_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
 /* Read method for POWER7 Extended FP pseudo-registers.  */
 static enum register_status
-efpr_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+efpr_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache,
 			   int reg_nr, gdb_byte *buffer)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -2865,9 +2885,9 @@ efpr_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   int offset = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 0 : 8;
 
   /* Read the portion that overlaps the VMX register.  */
-  return regcache_raw_read_part (regcache, tdep->ppc_vr0_regnum + reg_index,
-				 offset, register_size (gdbarch, reg_nr),
-				 buffer);
+  return regcache->raw_read_part (tdep->ppc_vr0_regnum + reg_index,
+				  offset, register_size (gdbarch, reg_nr),
+				  buffer);
 }
 
 /* Write method for POWER7 Extended FP pseudo-registers.  */
@@ -2887,7 +2907,7 @@ efpr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static enum register_status
 rs6000_pseudo_register_read (struct gdbarch *gdbarch,
-			     struct regcache *regcache,
+			     regcache_read *regcache,
 			     int reg_nr, gdb_byte *buffer)
 {
   struct gdbarch *regcache_arch = regcache->arch ();

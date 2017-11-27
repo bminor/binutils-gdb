@@ -1160,7 +1160,7 @@ h8300_register_type (struct gdbarch *gdbarch, int regno)
    raw registers.  These helpers extend/narrow the values.  */
 
 static enum register_status
-pseudo_from_raw_register (struct gdbarch *gdbarch, struct regcache *regcache,
+pseudo_from_raw_register (struct gdbarch *gdbarch, regcache_read *regcache,
 			  gdb_byte *buf, int pseudo_regno, int raw_regno)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1191,7 +1191,7 @@ raw_from_pseudo_register (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static enum register_status
 h8300_pseudo_register_read (struct gdbarch *gdbarch,
-			    struct regcache *regcache, int regno,
+			    regcache_read *regcache, int regno,
 			    gdb_byte *buf)
 {
   if (regno == E_PSEUDO_CCR_REGNUM (gdbarch))

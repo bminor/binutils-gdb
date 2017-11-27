@@ -265,8 +265,8 @@ extern void set_gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, gdbarch_
 
 extern int gdbarch_pseudo_register_read_p (struct gdbarch *gdbarch);
 
-typedef enum register_status (gdbarch_pseudo_register_read_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf);
-extern enum register_status gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf);
+typedef enum register_status (gdbarch_pseudo_register_read_ftype) (struct gdbarch *gdbarch, regcache_read *regcache, int cookednum, gdb_byte *buf);
+extern enum register_status gdbarch_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache, int cookednum, gdb_byte *buf);
 extern void set_gdbarch_pseudo_register_read (struct gdbarch *gdbarch, gdbarch_pseudo_register_read_ftype *pseudo_register_read);
 
 /* Read a register into a new struct value.  If the register is wholly
@@ -276,8 +276,8 @@ extern void set_gdbarch_pseudo_register_read (struct gdbarch *gdbarch, gdbarch_p
 
 extern int gdbarch_pseudo_register_read_value_p (struct gdbarch *gdbarch);
 
-typedef struct value * (gdbarch_pseudo_register_read_value_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum);
-extern struct value * gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum);
+typedef struct value * (gdbarch_pseudo_register_read_value_ftype) (struct gdbarch *gdbarch, regcache_read *regcache, int cookednum);
+extern struct value * gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, regcache_read *regcache, int cookednum);
 extern void set_gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, gdbarch_pseudo_register_read_value_ftype *pseudo_register_read_value);
 
 extern int gdbarch_pseudo_register_write_p (struct gdbarch *gdbarch);

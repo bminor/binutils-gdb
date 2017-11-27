@@ -737,7 +737,7 @@ mips_tdesc_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    registers.  Take care of alignment and size problems.  */
 
 static enum register_status
-mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+mips_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache,
 			   int cookednum, gdb_byte *buf)
 {
   int rawnum = cookednum % gdbarch_num_regs (gdbarch);

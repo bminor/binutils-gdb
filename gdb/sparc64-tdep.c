@@ -899,7 +899,7 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
 
 static enum register_status
 sparc64_pseudo_register_read (struct gdbarch *gdbarch,
-			      struct regcache *regcache,
+			      regcache_read *regcache,
 			      int regnum, gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

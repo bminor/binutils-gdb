@@ -1504,7 +1504,7 @@ sh64_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
 
 static enum register_status
 pseudo_register_read_portions (struct gdbarch *gdbarch,
-			       struct regcache *regcache,
+			       regcache_read *regcache,
 			       int portions,
 			       int base_regnum, gdb_byte *buffer)
 {
@@ -1525,7 +1525,7 @@ pseudo_register_read_portions (struct gdbarch *gdbarch,
 }
 
 static enum register_status
-sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+sh64_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache,
 			   int reg_nr, gdb_byte *buffer)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

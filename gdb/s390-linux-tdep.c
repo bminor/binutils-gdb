@@ -387,7 +387,7 @@ s390_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 }
 
 static enum register_status
-s390_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+s390_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache,
 			   int regnum, gdb_byte *buf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
