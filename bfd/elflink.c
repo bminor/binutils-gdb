@@ -1471,10 +1471,15 @@ _bfd_elf_merge_symbol (bfd *abfd,
      treated as strong if the new symbol is from a dynamic library.
      This reflects the way glibc's ld.so works.
 
+     Also allow a weak symbol to override a linker script symbol
+     defined by an early pass over the script.  This is done so the
+     linker knows the symbol is defined in an object file, for the
+     DEFINED script function.
+
      Do this before setting *type_change_ok or *size_change_ok so that
      we warn properly when dynamic library symbols are overridden.  */
 
-  if (newdef && !newdyn && olddyn)
+  if (newdef && !newdyn && (olddyn || h->root.ldscript_def))
     newweak = FALSE;
   if (olddef && newdyn)
     oldweak = FALSE;

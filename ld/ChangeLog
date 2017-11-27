@@ -1,5 +1,27 @@
 2017-11-28  Alan Modra  <amodra@gmail.com>
 
+	PR 22471
+	* ldexp.c (struct definedness_hash_entry): Delete "by_script".  Make
+	"iteration" an 8-bit field, and update mask in all uses.
+	(definedness_newfunc): Don't init "by_script".
+	(update_definedness): Test ldscript_def rather than by_script.
+	(is_sym_value): Likewise.
+	(fold_name <DEFINED>): Return a result for first phase.  Test
+	ldscript_def.
+	(fold_name <NAME>): Return a result for first phase.
+	* ldlang.c (open_input_bfds): Process all assignments, not just
+	defsym.
+	(lang_process): Increment lang_statement_iteration before
+	open_input_bfds.
+	* testsuite/ld-mips-elf/tlsdyn-o32-1.d: Adjust for larger .dynsym.
+	* testsuite/ld-mips-elf/tlsdyn-o32-1.got: Likewise.
+	* testsuite/ld-mips-elf/tlsdyn-o32-2.d: Likewise.
+	* testsuite/ld-mips-elf/tlsdyn-o32-2.got: Likewise.
+	* testsuite/ld-mips-elf/tlsdyn-o32-3.d: Likewise.
+	* testsuite/ld-mips-elf/tlsdyn-o32-3.got: Likewise.
+
+2017-11-28  Alan Modra  <amodra@gmail.com>
+
 	* ldexp.h (struct ldexp_control): Add "assign_src".
 	* ldexp.c (fold_trinary): Save and restore assign_src around
 	condition evaluation.

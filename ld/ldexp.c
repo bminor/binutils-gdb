@@ -60,15 +60,12 @@ struct definedness_hash_entry
      section statement, the section we'd like it relative to.  */
   asection *final_sec;
 
+  /* Low bits of iteration count.  Symbols with matching iteration have
+     been defined in this pass over the script.  */
+  unsigned int iteration : 8;
+
   /* Symbol was defined by an object file.  */
   unsigned int by_object : 1;
-
-  /* Symbols was defined by a script.  */
-  unsigned int by_script : 1;
-
-  /* Low bit of iteration count.  Symbols with matching iteration have
-     been defined in this pass over the script.  */
-  unsigned int iteration : 1;
 };
 
 static struct bfd_hash_table definedness_table;
@@ -286,7 +283,6 @@ definedness_newfunc (struct bfd_hash_entry *entry,
     einfo (_("%P%F: bfd_hash_allocate failed creating symbol %s\n"), name);
 
   ret->by_object = 0;
-  ret->by_script = 0;
   ret->iteration = 0;
   return &ret->root;
 }
@@ -320,7 +316,7 @@ update_definedness (const char *name, struct bfd_link_hash_entry *h)
   /* If the symbol was already defined, and not by a script, then it
      must be defined by an object file or by the linker target code.  */
   ret = TRUE;
-  if (!defentry->by_script
+  if (!h->ldscript_def
       && (h->type == bfd_link_hash_defined
 	  || h->type == bfd_link_hash_defweak
 	  || h->type == bfd_link_hash_common))
@@ -332,7 +328,6 @@ update_definedness (const char *name, struct bfd_link_hash_entry *h)
 	ret = FALSE;
     }
 
-  defentry->by_script = 1;
   defentry->iteration = lang_statement_iteration;
   defentry->final_sec = bfd_abs_section_ptr;
   if (expld.phase == lang_final_phase_enum
@@ -686,6 +681,9 @@ fold_trinary (etree_type *tree)
 static void
 fold_name (etree_type *tree)
 {
+  struct bfd_link_hash_entry *h;
+  struct definedness_hash_entry *def;
+
   memset (&expld.result, 0, sizeof (expld.result));
 
   switch (tree->type.node_code)
@@ -703,23 +701,18 @@ fold_name (etree_type *tree)
       break;
 
     case DEFINED:
-      if (expld.phase != lang_first_phase_enum)
-	{
-	  struct bfd_link_hash_entry *h;
-	  struct definedness_hash_entry *def;
-
-	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
-					    &link_info,
-					    tree->name.name,
-					    FALSE, FALSE, TRUE);
-	  new_number (h != NULL
-		      && (h->type == bfd_link_hash_defined
-			  || h->type == bfd_link_hash_defweak
-			  || h->type == bfd_link_hash_common)
-		      && ((def = symbol_defined (tree->name.name)) == NULL
-			  || def->by_object
-			  || def->iteration == (lang_statement_iteration & 1)));
-	}
+      h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
+					&link_info,
+					tree->name.name,
+					FALSE, FALSE, TRUE);
+      new_number (h != NULL
+		  && (h->type == bfd_link_hash_defined
+		      || h->type == bfd_link_hash_defweak
+		      || h->type == bfd_link_hash_common)
+		  && (!h->ldscript_def
+		      || (def = symbol_defined (tree->name.name)) == NULL
+		      || def->by_object
+		      || def->iteration == (lang_statement_iteration & 255)));
       break;
 
     case NAME:
@@ -728,9 +721,6 @@ fold_name (etree_type *tree)
 	{
 	  /* Self-assignment is only allowed for absolute symbols
 	     defined in a linker script.  */
-	  struct bfd_link_hash_entry *h;
-	  struct definedness_hash_entry *def;
-
 	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
 					    &link_info,
 					    tree->name.name,
@@ -740,17 +730,13 @@ fold_name (etree_type *tree)
 		    || h->type == bfd_link_hash_defweak)
 		&& h->u.def.section == bfd_abs_section_ptr
 		&& (def = symbol_defined (tree->name.name)) != NULL
-		&& def->iteration == (lang_statement_iteration & 1)))
+		&& def->iteration == (lang_statement_iteration & 255)))
 	    expld.assign_name = NULL;
 	}
-      if (expld.phase == lang_first_phase_enum)
-	;
-      else if (tree->name.name[0] == '.' && tree->name.name[1] == 0)
+      if (tree->name.name[0] == '.' && tree->name.name[1] == 0)
 	new_rel_from_abs (expld.dot);
       else
 	{
-	  struct bfd_link_hash_entry *h;
-
 	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
 					    &link_info,
 					    tree->name.name,
@@ -765,7 +751,7 @@ fold_name (etree_type *tree)
 	      output_section = h->u.def.section->output_section;
 	      if (output_section == NULL)
 		{
-		  if (expld.phase == lang_mark_phase_enum)
+		  if (expld.phase <= lang_mark_phase_enum)
 		    new_rel (h->u.def.value, h->u.def.section);
 		  else
 		    einfo (_("%X%S: unresolvable symbol `%s'"
@@ -957,12 +943,12 @@ is_sym_value (const etree_type *tree, bfd_vma val)
   return (tree->type.node_class == etree_name
 	  && tree->type.node_code == NAME
 	  && (def = symbol_defined (tree->name.name)) != NULL
-	  && def->by_script
-	  && def->iteration == (lang_statement_iteration & 1)
+	  && def->iteration == (lang_statement_iteration & 255)
 	  && (h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
 						&link_info,
 						tree->name.name,
 						FALSE, FALSE, TRUE)) != NULL
+	  && h->ldscript_def
 	  && h->type == bfd_link_hash_defined
 	  && h->u.def.section == bfd_abs_section_ptr
 	  && h->u.def.value == val);

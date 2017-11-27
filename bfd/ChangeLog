@@ -1,5 +1,14 @@
 2017-11-28  Alan Modra  <amodra@gmail.com>
 
+	PR 22471
+	* elflink.c (_bfd_elf_merge_symbol): Allow weak symbols to override
+	early passes over linker script symbols.
+	* linker.c (_bfd_generic_link_add_one_symbol): Allow symbols to
+	override early passes over linker script symbols.  Clear ldscript_def
+	on symbol definitions.
+
+2017-11-28  Alan Modra  <amodra@gmail.com>
+
 	* elf64-mmix.c (bfd_elf64_bfd_copy_link_hash_symbol_type): Define.
 
 2017-11-28  H.J. Lu  <hongjiu.lu@intel.com>
