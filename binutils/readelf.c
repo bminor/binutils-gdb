@@ -13581,7 +13581,7 @@ load_debug_section (enum dwarf_section_display_enum debug, void * data)
       /* Read in the string table, so that we have section names to scan.  */
       strs = filedata->section_headers + filedata->file_header.e_shstrndx;
 
-      if (strs->sh_size != 0)
+      if (strs != NULL && strs->sh_size != 0)
 	{
 	  filedata->string_table = (char *) get_data (NULL, filedata, strs->sh_offset,
 						      1, strs->sh_size,
@@ -17908,8 +17908,9 @@ process_notes_at (Filedata *           filedata,
 {
   Elf_External_Note * pnotes;
   Elf_External_Note * external;
-  char * end;
-  bfd_boolean res = TRUE;
+  char *              end;
+  bfd_boolean         res = TRUE;
+  size_t              align;
 
   if (length <= 0)
     return FALSE;
@@ -17922,10 +17923,21 @@ process_notes_at (Filedata *           filedata,
 	  if (! apply_relocations (filedata, section, (unsigned char *) pnotes, length, NULL, NULL))
 	    return FALSE;
 	}
+      align = section->sh_addralign;
     }
   else
-    pnotes = (Elf_External_Note *) get_data (NULL, filedata, offset, 1, length,
+    {
+      pnotes = (Elf_External_Note *) get_data (NULL, filedata, offset, 1, length,
 					     _("notes"));
+
+      /* FIXME: Core notes seem to be produced with
+	 4-byte alignment even on 64-bit systems.  */
+      if (filedata->file_header.e_type == ET_CORE)
+	align = 4;
+      else
+	align = is_32bit_elf ? 4 : 4;
+    }
+
   if (pnotes == NULL)
     return FALSE;
 
@@ -17944,7 +17956,7 @@ process_notes_at (Filedata *           filedata,
     {
       Elf_Internal_Note inote;
       size_t min_notesz;
-      char *next;
+      char * next;
       char * temp = NULL;
       size_t data_remaining = end - (char *) external;
 
@@ -17970,12 +17982,10 @@ process_notes_at (Filedata *           filedata,
 	  inote.namedata = external->name;
 	  inote.descsz   = BYTE_GET (external->descsz);
 	  inote.descdata = ((char *) external
-			    + ELF_NOTE_DESC_OFFSET (inote.namesz,
-						    section->sh_addralign));
+			    + ELF_NOTE_DESC_OFFSET (inote.namesz, align));
 	  inote.descpos  = offset + (inote.descdata - (char *) pnotes);
 	  next = ((char *) external
-		  + ELF_NOTE_NEXT_OFFSET (inote.namesz, inote.descsz,
-					  section->sh_addralign));
+		  + ELF_NOTE_NEXT_OFFSET (inote.namesz, inote.descsz, align));
 	}
       else
 	{
@@ -18016,8 +18026,8 @@ process_notes_at (Filedata *           filedata,
 	{
 	  warn (_("note with invalid namesz and/or descsz found at offset 0x%lx\n"),
 		(unsigned long) ((char *) external - (char *) pnotes));
-	  warn (_(" type: 0x%lx, namesize: 0x%08lx, descsize: 0x%08lx\n"),
-		inote.type, inote.namesz, inote.descsz);
+	  warn (_(" type: 0x%lx, namesize: 0x%08lx, descsize: 0x%08lx, alignment: %u\n"),
+		inote.type, inote.namesz, inote.descsz, (int) align);
 	  break;
 	}
 

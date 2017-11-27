@@ -1,3 +1,11 @@
+2017-11-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22490
+	* readelf.c (dump_section_as_bytes): Check for a NULL string
+	section pointer.
+	(process_notes_at): Compute the alignment to use if displaying
+	notes from a segment.
+
 2017-11-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (load_separate_debug_info): Rename argument name from
