@@ -1971,7 +1971,7 @@ gdbarch_pseudo_register_read_p (struct gdbarch *gdbarch)
 }
 
 enum register_status
-gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf)
+gdbarch_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache, int cookednum, gdb_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->pseudo_register_read != NULL);
@@ -1995,7 +1995,7 @@ gdbarch_pseudo_register_read_value_p (struct gdbarch *gdbarch)
 }
 
 struct value *
-gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum)
+gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, regcache_read *regcache, int cookednum)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->pseudo_register_read_value != NULL);

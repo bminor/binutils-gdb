@@ -640,7 +640,7 @@ rl78_make_data_address (CORE_ADDR addr)
 
 static enum register_status
 rl78_pseudo_register_read (struct gdbarch *gdbarch,
-                           struct regcache *regcache,
+			   regcache_read *regcache,
                            int reg, gdb_byte *buffer)
 {
   enum register_status status;

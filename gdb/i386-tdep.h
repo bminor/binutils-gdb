@@ -364,7 +364,7 @@ extern struct type *i386_pseudo_register_type (struct gdbarch *gdbarch,
 					       int regnum);
 
 extern void i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
-						  struct regcache *regcache,
+						  regcache_read *regcache,
 						  int regnum,
 						  struct value *result);
 

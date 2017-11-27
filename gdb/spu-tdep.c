@@ -182,7 +182,7 @@ spu_register_type (struct gdbarch *gdbarch, int reg_nr)
 /* Pseudo registers for preferred slots - stack pointer.  */
 
 static enum register_status
-spu_pseudo_register_read_spu (struct regcache *regcache, const char *regname,
+spu_pseudo_register_read_spu (regcache_read *regcache, const char *regname,
 			      gdb_byte *buf)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -207,7 +207,7 @@ spu_pseudo_register_read_spu (struct regcache *regcache, const char *regname,
 }
 
 static enum register_status
-spu_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+spu_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache,
                           int regnum, gdb_byte *buf)
 {
   gdb_byte reg[16];

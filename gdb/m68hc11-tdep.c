@@ -279,7 +279,7 @@ m68hc11_which_soft_register (CORE_ADDR addr)
    fetch into a memory read.  */
 static enum register_status
 m68hc11_pseudo_register_read (struct gdbarch *gdbarch,
-			      struct regcache *regcache,
+			      regcache_read *regcache,
 			      int regno, gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

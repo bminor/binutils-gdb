@@ -2225,7 +2225,7 @@ aarch64_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 static struct value *
 aarch64_pseudo_read_value (struct gdbarch *gdbarch,
-			   struct regcache *regcache,
+			   regcache_read *regcache,
 			   int regnum)
 {
   gdb_byte reg_buf[V_REGISTER_SIZE];

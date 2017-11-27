@@ -262,9 +262,39 @@ protected:
   signed char *m_register_status;
 };
 
+class regcache_read : public reg_buffer
+{
+public:
+  regcache_read (gdbarch *gdbarch, bool has_pseudo)
+    : reg_buffer (gdbarch, has_pseudo)
+  {}
+
+  enum register_status raw_read (int regnum, gdb_byte *buf);
+  template<typename T, typename = RequireLongest<T>>
+  enum register_status raw_read (int regnum, T *val);
+
+  enum register_status raw_read_part (int regnum, int offset, int len,
+				      gdb_byte *buf);
+
+  virtual void raw_update (int regnum) = 0;
+
+  enum register_status cooked_read (int regnum, gdb_byte *buf);
+  template<typename T, typename = RequireLongest<T>>
+  enum register_status cooked_read (int regnum, T *val);
+
+  enum register_status cooked_read_part (int regnum, int offset, int len,
+					 gdb_byte *buf);
+
+  struct value *cooked_read_value (int regnum);
+
+protected:
+  enum register_status read_part (int regnum, int offset, int len, void *in,
+				  bool is_raw);
+};
+
 /* The register cache for storing raw register values.  */
 
-class regcache : public reg_buffer
+class regcache : public regcache_read
 {
 public:
   regcache (gdbarch *gdbarch)
@@ -287,28 +317,17 @@ public:
 
   void save (regcache_cooked_read_ftype *cooked_read, void *src);
 
-  enum register_status cooked_read (int regnum, gdb_byte *buf);
   void cooked_write (int regnum, const gdb_byte *buf);
-
-  enum register_status raw_read (int regnum, gdb_byte *buf);
 
   void raw_write (int regnum, const gdb_byte *buf);
 
   template<typename T, typename = RequireLongest<T>>
-  enum register_status raw_read (int regnum, T *val);
-
-  template<typename T, typename = RequireLongest<T>>
   void raw_write (int regnum, T val);
-
-  struct value *cooked_read_value (int regnum);
-
-  template<typename T, typename = RequireLongest<T>>
-  enum register_status cooked_read (int regnum, T *val);
 
   template<typename T, typename = RequireLongest<T>>
   void cooked_write (int regnum, T val);
 
-  void raw_update (int regnum);
+  void raw_update (int regnum) override;
 
   void raw_collect (int regnum, void *buf) const;
 
@@ -328,13 +347,7 @@ public:
 
   void invalidate (int regnum);
 
-  enum register_status raw_read_part (int regnum, int offset, int len,
-				      gdb_byte *buf);
-
   void raw_write_part (int regnum, int offset, int len, const gdb_byte *buf);
-
-  enum register_status cooked_read_part (int regnum, int offset, int len,
-					 gdb_byte *buf);
 
   void cooked_write_part (int regnum, int offset, int len,
 			  const gdb_byte *buf);
@@ -370,13 +383,14 @@ protected:
 private:
   void restore (struct regcache *src);
 
-  enum register_status xfer_part (int regnum, int offset, int len, void *in,
-				  const void *out, bool is_raw);
-
   void transfer_regset (const struct regset *regset,
 			struct regcache *out_regcache,
 			int regnum, const void *in_buf,
 			void *out_buf, size_t size) const;
+
+  enum register_status write_part (int regnum, int offset, int len,
+				   const void *out, bool is_raw);
+
 
   /* The address space of this register cache (for registers where it
      makes sense, like PC or SP).  */

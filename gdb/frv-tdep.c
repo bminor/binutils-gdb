@@ -295,7 +295,7 @@ frv_register_type (struct gdbarch *gdbarch, int reg)
 }
 
 static enum register_status
-frv_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+frv_pseudo_register_read (struct gdbarch *gdbarch, regcache_read *regcache,
                           int reg, gdb_byte *buffer)
 {
   enum register_status status;

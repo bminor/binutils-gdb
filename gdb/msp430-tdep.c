@@ -218,7 +218,7 @@ msp430_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 static enum register_status
 msp430_pseudo_register_read (struct gdbarch *gdbarch,
-			     struct regcache *regcache,
+			     regcache_read *regcache,
 			     int regnum, gdb_byte *buffer)
 {
   if (MSP430_NUM_REGS <= regnum && regnum < MSP430_NUM_TOTAL_REGS)
