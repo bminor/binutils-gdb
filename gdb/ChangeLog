@@ -1,3 +1,9 @@
+2017-11-26  Dominik Czarnota  <dominik.b.czarnota@gmail.com>
+
+	PR gdb/21945
+	* findcmd.c (_initialize_mem_search): Update find command help
+	text.
+
 2017-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* python/python.c (do_start_initialization): Change progname

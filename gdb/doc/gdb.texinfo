@@ -11920,6 +11920,8 @@ giant words (eight bytes)
 All values are interpreted in the current language.
 This means, for example, that if the current source language is C/C@t{++}
 then searching for the string ``hello'' includes the trailing '\0'.
+The null terminator can be removed from searching by using casts,
+e.g.: @samp{@{char[5]@}"hello"}.
 
 If the value size is not specified, it is taken from the
 value's type in the current language.
@@ -11969,7 +11971,11 @@ you get during debugging:
 (gdb) find &hello[0], +sizeof(hello), 'h', 'e', 'l', 'l', 'o'
 0x8049567 <hello.1620>
 0x804956d <hello.1620+6>
-2 patterns found
+2 patterns found.
+(gdb) find &hello[0], +sizeof(hello), @{char[5]@}"hello"
+0x8049567 <hello.1620>
+0x804956d <hello.1620+6>
+2 patterns found.
 (gdb) find /b1 &hello[0], +sizeof(hello), 'h', 0x65, 'l'
 0x8049567 <hello.1620>
 1 pattern found
