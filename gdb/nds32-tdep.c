@@ -437,7 +437,7 @@ nds32_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 
 static enum register_status
 nds32_pseudo_register_read (struct gdbarch *gdbarch,
-			    struct regcache *regcache, int regnum,
+			    readable_regcache *regcache, int regnum,
 			    gdb_byte *buf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);

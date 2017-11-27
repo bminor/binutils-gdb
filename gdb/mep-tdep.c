@@ -1114,7 +1114,7 @@ mep_register_type (struct gdbarch *gdbarch, int reg_nr)
 
 static enum register_status
 mep_pseudo_cr32_read (struct gdbarch *gdbarch,
-                      struct regcache *regcache,
+		      readable_regcache *regcache,
                       int cookednum,
                       gdb_byte *buf)
 {
@@ -1140,7 +1140,7 @@ mep_pseudo_cr32_read (struct gdbarch *gdbarch,
 
 static enum register_status
 mep_pseudo_cr64_read (struct gdbarch *gdbarch,
-                      struct regcache *regcache,
+                      readable_regcache *regcache,
                       int cookednum,
                       gdb_byte *buf)
 {
@@ -1150,7 +1150,7 @@ mep_pseudo_cr64_read (struct gdbarch *gdbarch,
 
 static enum register_status
 mep_pseudo_register_read (struct gdbarch *gdbarch,
-                          struct regcache *regcache,
+			  readable_regcache *regcache,
                           int cookednum,
                           gdb_byte *buf)
 {

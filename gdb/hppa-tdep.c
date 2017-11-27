@@ -2747,7 +2747,7 @@ hppa_fetch_pointer_argument (struct frame_info *frame, int argi,
 }
 
 static enum register_status
-hppa_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+hppa_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 			   int regnum, gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

@@ -1628,7 +1628,7 @@ dr_reg_base_num (struct gdbarch *gdbarch, int dr_regnum)
 
 static enum register_status
 pseudo_register_read_portions (struct gdbarch *gdbarch,
-			       struct regcache *regcache,
+			       readable_regcache *regcache,
 			       int portions,
 			       int base_regnum, gdb_byte *buffer)
 {
@@ -1649,7 +1649,7 @@ pseudo_register_read_portions (struct gdbarch *gdbarch,
 }
 
 static enum register_status
-sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+sh_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 			 int reg_nr, gdb_byte *buffer)
 {
   int base_regnum;
