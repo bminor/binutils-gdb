@@ -2908,6 +2908,9 @@ mmix_elf_relax_section (bfd *abfd,
 #define elf_backend_omit_section_dynsym \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 
+#define bfd_elf64_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
+
 #define bfd_elf64_bfd_is_local_label_name \
 	mmix_elf_is_local_label_name
 

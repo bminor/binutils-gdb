@@ -163,6 +163,11 @@ struct ldexp_control {
      does the false branch of a trinary expression.  */
   const char *assign_name;
 
+  /* If evaluating an assignment, the source if it is an expression
+     referencing single etree_name NAME, or a trinary expression where
+     the true branch references a single etree_name NAME.  */
+  struct bfd_link_hash_entry *assign_src;
+
   /* Working results.  */
   etree_value_type result;
   bfd_vma dot;

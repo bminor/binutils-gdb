@@ -1,3 +1,12 @@
+2017-11-28  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.h (struct ldexp_control): Add "assign_src".
+	* ldexp.c (fold_trinary): Save and restore assign_src around
+	condition evaluation.
+	(fold_name <NAME>): Set expld.assign_src.
+	(try_copy_symbol_type): Delete.
+	(exp_fold_tree_1): Set symbol type using expld.assign_src.
+
 2017-11-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22502

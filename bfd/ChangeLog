@@ -1,3 +1,7 @@
+2017-11-28  Alan Modra  <amodra@gmail.com>
+
+	* elf64-mmix.c (bfd_elf64_bfd_copy_link_hash_symbol_type): Define.
+
 2017-11-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22502
