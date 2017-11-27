@@ -1,3 +1,9 @@
+2017-11-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22492
+	* config/obj-elf.c (obj_elf_version): Set the alignment of the
+	.note section.
+
 2017-11-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/sse-noavx.s: Add tests for fisttps and
