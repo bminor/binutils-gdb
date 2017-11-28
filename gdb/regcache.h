@@ -194,13 +194,6 @@ typedef enum register_status (regcache_cooked_read_ftype) (void *src,
 							   int regnum,
 							   gdb_byte *buf);
 
-enum regcache_dump_what
-{
-  regcache_dump_none, regcache_dump_raw,
-  regcache_dump_cooked, regcache_dump_groups,
-  regcache_dump_remote
-};
-
 /* A (register_number, register_value) pair.  */
 
 typedef struct cached_reg
@@ -371,8 +364,6 @@ public:
 
   void collect_regset (const struct regset *regset, int regnum,
 		       void *buf, size_t size) const;
-
-  void dump (ui_file *file, enum regcache_dump_what what_to_dump);
 
   ptid_t ptid () const
   {
