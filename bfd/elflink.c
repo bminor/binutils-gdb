@@ -1471,10 +1471,15 @@ _bfd_elf_merge_symbol (bfd *abfd,
      treated as strong if the new symbol is from a dynamic library.
      This reflects the way glibc's ld.so works.
 
+     Also allow a weak symbol to override a linker script symbol
+     defined by an early pass over the script.  This is done so the
+     linker knows the symbol is defined in an object file, for the
+     DEFINED script function.
+
      Do this before setting *type_change_ok or *size_change_ok so that
      we warn properly when dynamic library symbols are overridden.  */
 
-  if (newdef && !newdyn && olddyn)
+  if (newdef && !newdyn && (olddyn || h->root.ldscript_def))
     newweak = FALSE;
   if (olddef && newdyn)
     oldweak = FALSE;
@@ -1555,10 +1560,13 @@ _bfd_elf_merge_symbol (bfd *abfd,
       sec = *psec;
     }
 
-  /* There are multiple definitions of a normal symbol.
-     Skip the default symbol as well.  */
+  /* There are multiple definitions of a normal symbol.  Skip the
+     default symbol as well as definition from an IR object.  */
   if (olddef && !olddyn && !oldweak && newdef && !newdyn && !newweak
-      && !default_sym && h->def_regular)
+      && !default_sym && h->def_regular
+      && !(oldbfd != NULL
+	   && (oldbfd->flags & BFD_PLUGIN) != 0
+	   && (abfd->flags & BFD_PLUGIN) == 0))
     {
       /* Handle a multiple definition.  */
       (*info->callbacks->multiple_definition) (info, &h->root,
@@ -4928,6 +4936,65 @@ error_free_dyn:
 
 	      BFD_ASSERT (ret == 0);
 	    }
+	}
+    }
+
+  if (info->lto_plugin_active
+      && !bfd_link_relocatable (info)
+      && (abfd->flags & BFD_PLUGIN) == 0
+      && !just_syms
+      && extsymcount)
+    {
+      int r_sym_shift;
+
+      if (bed->s->arch_size == 32)
+	r_sym_shift = 8;
+      else
+	r_sym_shift = 32;
+
+      /* If linker plugin is enabled, set non_ir_ref_regular on symbols
+	 referenced in regular objects so that linker plugin will get
+	 the correct symbol resolution.  */
+
+      sym_hash = elf_sym_hashes (abfd);
+      for (s = abfd->sections; s != NULL; s = s->next)
+	{
+	  Elf_Internal_Rela *internal_relocs;
+	  Elf_Internal_Rela *rel, *relend;
+
+	  /* Don't check relocations in excluded sections.  */
+	  if ((s->flags & SEC_RELOC) == 0
+	      || s->reloc_count == 0
+	      || (s->flags & SEC_EXCLUDE) != 0
+	      || ((info->strip == strip_all
+		   || info->strip == strip_debugger)
+		  && (s->flags & SEC_DEBUGGING) != 0))
+	    continue;
+
+	  internal_relocs = _bfd_elf_link_read_relocs (abfd, s, NULL,
+						       NULL,
+						       info->keep_memory);
+	  if (internal_relocs == NULL)
+	    goto error_free_vers;
+
+	  rel = internal_relocs;
+	  relend = rel + s->reloc_count;
+	  for ( ; rel < relend; rel++)
+	    {
+	      unsigned long r_symndx = rel->r_info >> r_sym_shift;
+	      struct elf_link_hash_entry *h;
+
+	      /* Skip local symbols.  */
+	      if (r_symndx < extsymoff)
+		continue;
+
+	      h = sym_hash[r_symndx - extsymoff];
+	      if (h != NULL)
+		h->root.non_ir_ref_regular = 1;
+	    }
+
+	  if (elf_section_data (s)->relocs != internal_relocs)
+	    free (internal_relocs);
 	}
     }
 

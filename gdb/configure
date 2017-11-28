@@ -736,7 +736,6 @@ LIBINTL_DEP
 LIBINTL
 USE_NLS
 CCDEPMODE
-CONFIG_SRC_SUBDIR
 DEPDIR
 am__leading_dot
 CXX_DIALECT
@@ -5958,13 +5957,6 @@ DEPDIR="${am__leading_dot}deps"
 ac_config_commands="$ac_config_commands depdir"
 
 
-# Create sub-directories for objects and dependencies.
-CONFIG_SRC_SUBDIR="arch"
-
-
-ac_config_commands="$ac_config_commands gdbdepdir"
-
-
 depcc="$CC"   am_compiler_list=
 
 am_depcomp=$ac_aux_dir/depcomp
@@ -10726,7 +10718,7 @@ $as_echo "${python_has_threads}" >&6; }
 else
   # Even if Python support is not compiled in, we need to have this file
   # included so that the "python" command, et.al., still exists.
-  CONFIG_OBS="$CONFIG_OBS python.o"
+  CONFIG_OBS="$CONFIG_OBS python/python.o"
   CONFIG_SRCS="$CONFIG_SRCS python/python.c"
 fi
 
@@ -11287,7 +11279,7 @@ done
 else
   # Even if Guile support is not compiled in, we need to have these files
   # included.
-  CONFIG_OBS="$CONFIG_OBS guile.o"
+  CONFIG_OBS="$CONFIG_OBS guile/guile.o"
   CONFIG_SRCS="$CONFIG_SRCS guile/guile.c"
 fi
 
@@ -18512,7 +18504,6 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 # INIT-COMMANDS
 #
 ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR CONFIG_SRC_SUBDIR="$CONFIG_SRC_SUBDIR"
 
 _ACEOF
 
@@ -18524,7 +18515,6 @@ do
   case $ac_config_target in
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
     "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
-    "gdbdepdir") CONFIG_COMMANDS="$CONFIG_COMMANDS gdbdepdir" ;;
     "jit-reader.h") CONFIG_FILES="$CONFIG_FILES jit-reader.h:jit-reader.in" ;;
     "$ac_config_links_1") CONFIG_LINKS="$CONFIG_LINKS $ac_config_links_1" ;;
     "gcore") CONFIG_FILES="$CONFIG_FILES gcore" ;;
@@ -19148,11 +19138,6 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
   case $ac_file$ac_mode in
     "depdir":C) $SHELL $ac_aux_dir/mkinstalldirs $DEPDIR ;;
-    "gdbdepdir":C)
-  for subdir in ${CONFIG_SRC_SUBDIR}
-  do
-      $SHELL $ac_aux_dir/mkinstalldirs $subdir/$DEPDIR
-  done ;;
     "gcore":F) chmod +x gcore ;;
     "Makefile":F)
 case x$CONFIG_HEADERS in

@@ -1,3 +1,10 @@
+2017-11-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_catch_ex.exp (continue_to_exception): Adjust
+	expected output in gdb_expect call to allow the exception
+	message to be present as well.  Fix syntax confusion to avoid
+	TCL thinking that exception_name is an array.
+
 2017-11-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.arch/spu-info.c: Include <unistd.h>.

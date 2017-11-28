@@ -1,3 +1,142 @@
+2017-11-27  Andrew Waterman <andrew@sifive.com>
+	    Palmer Dabbelt  <palmer@sifive.com>
+	    Jim Wilson  <jimw@sifive.com>
+
+	gas/
+	* config/tc-riscv.c (riscv_handle_implicit_zero_offset): New.
+	(riscv_ip): Cases 'k', 'l', 'm', 'n', 'M', 'N', add call to
+	riscv_handle_implicit_zero_offset.  At label load_store, replace
+	existing code with call to riscv_handle_implicit_zero_offset.
+	* testsuite/gas/riscv/c-ld.d, testsuite/gas/riscv/c-ld.s: New.
+	* testsuite/gas/riscv/c-lw.d, testsuite/gas/riscv/c-lw.s: New.
+	* testsuite/gas/riscv/riscv.exp: Run new tests.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (find_trampoline_seg): Add static variable
+	that caches the result of the most recent search.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (trampoline_chain_entry, trampoline_chain)
+	(trampoline_chain_index): New structures.
+	(trampoline_index): Add chain_index field.
+	(xg_order_trampoline_chain_entry, xg_sort_trampoline_chain)
+	(xg_find_chain_entry, xg_get_best_chain_entry)
+	(xg_order_trampoline_chain, xg_get_trampoline_chain)
+	(xg_find_best_eq_target, xg_add_location_to_chain)
+	(xg_create_trampoline_chain, xg_get_single_symbol_slot): New
+	functions.
+	(xg_relax_fixups): Call xg_find_best_eq_target to adjust jump
+	target to point to an existing jump. Call
+	xg_create_trampoline_chain to create new jump target. Call
+	xg_add_location_to_chain to add newly created trampoline jump
+	to the corresponding chain.
+	(add_jump_to_trampoline): Extract loop searching for a single
+	slot with a symbol into a separate function, replace that code
+	with a call to that function.
+	(relax_frag_immed): Call xg_find_best_eq_target to adjust jump
+	target to point to an existing jump.
+	* testsuite/gas/xtensa/all.exp: Add trampoline-2 test.
+	* testsuite/gas/xtensa/trampoline.d: Adjust absolute addresses
+	as many duplicate trampoline chains are now coalesced.
+	* testsuite/gas/xtensa/trampoline.s: Add _nop so that objdump
+	stays in sync with instruction stream.
+	* testsuite/gas/xtensa/trampoline-2.l: New test result file.
+	* testsuite/gas/xtensa/trampoline-2.s: New test source file.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (search_trampolines, get_best_trampoline):
+	Remove definitions.
+	(xg_find_best_trampoline_for_tinsn): New function.
+	(relax_frag_immed): Replace call to get_best_trampoline with a
+	call to xg_find_best_trampoline_for_tinsn.
+	* testsuite/gas/xtensa/trampoline.d: Adjust absolute addresses
+	as the placement of trampolines for relaxed branches has been
+	changed.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (trampoline_index): New structure.
+	(trampoline_seg): Replace trampoline list with trampoline index.
+	(xg_find_trampoline, xg_add_trampoline_to_index)
+	(xg_remove_trampoline_from_index, xg_add_trampoline_to_seg)
+	(xg_is_trampoline_frag_full, xg_get_fulcrum)
+	(xg_find_best_trampoline, xg_relax_fixup, xg_relax_fixups)
+	(xg_is_relaxable_fixup): New functions.
+	(J_MARGIN): New macro.
+	(xtensa_create_trampoline_frag): Use xg_add_trampoline_to_seg
+	instead of open-coded addition to the linked list.
+	(dump_trampolines): Iterate through the trampoline_seg::index.
+	(cached_fixupS, cached_fixup, fixup_cacheS, fixup_cache)
+	(fixup_order, xtensa_make_cached_fixup)
+	(xtensa_realloc_fixup_cache, xtensa_cache_relaxable_fixups)
+	(xtensa_find_first_cached_fixup, xtensa_delete_cached_fixup)
+	(xtensa_add_cached_fixup, check_and_update_trampolines): Remove
+	definitions.
+	(xg_relax_trampoline): Extract logic into separate functions,
+	replace body with a call to xg_relax_fixups.
+	(search_trampolines): Replace search in linked list with search
+	in index. Change data type of address-tracking variables from
+	int to offsetT. Replace abs with labs.
+	(xg_append_jump): Finish the trampoline frag if it's full.
+	(add_jump_to_trampoline): Remove trampoline frag from the index
+	if the frag is full.
+	* config/tc-xtensa.h (xtensa_frag_type): Remove next_trampoline.
+	* testsuite/gas/xtensa/trampoline.d: Adjust absolute addresses
+	as the placement of trampolines has slightly changed.
+	* testsuite/gas/xtensa/trampoline.s: Add _nop so that objdump
+	stays in sync with instruction stream.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (init_trampoline_frag): Replace pointer to
+	struct trampoline_frag parameter with pointer to fragS.
+	(xg_append_jump): Remove jump_around parameter.
+	(struct trampoline_frag): Remove.
+	(struct trampoline_seg): Change type of trampoline_list from
+	struct trampoline_frag to fragS.
+	(xtensa_create_trampoline_frag): Don't allocate struct
+	trampoline_frag. Initialize new fragS::tc_frag_data fields.
+	(dump_trampolines, xg_relax_trampoline, search_trampolines)
+	(get_best_trampoline, init_trampoline_frag)
+	(add_jump_to_trampoline, relax_frag_immed): Replace pointer to
+	struct trampoline_frag with a pointer to fragS.
+	(xg_append_jump): Remove jump_around parameter, use
+	fragS::tc_frag_data.jump_around_fix instead.
+	(xg_relax_trampoline, init_trampoline_frag)
+	(add_jump_to_trampoline): Don't pass jump_around parameter to
+	xg_append_jump.
+	* config/tc-xtensa.h (struct xtensa_frag_type): Add new fields:
+	needs_jump_around, next_trampoline and jump_around_fix.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (find_trampoline_seg): Move above the first
+	use.
+	(xtensa_create_trampoline_frag): Replace trampoline seg search
+	code with a call to find_trampoline_seg.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xg_append_jump): New function.
+	(xg_relax_trampoline, init_trampoline_frag)
+	(add_jump_to_trampoline): Replace trampoline jump assembling
+	code with a call to xg_append_jump.
+
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xg_relax_trampoline): New function.
+	(xtensa_relax_frag): Replace trampoline relaxation code with a
+	call to xg_relax_trampoline.
+
+2017-11-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22492
+	* config/obj-elf.c (obj_elf_version): Set the alignment of the
+	.note section.
+
 2017-11-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/sse-noavx.s: Add tests for fisttps and

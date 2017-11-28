@@ -1443,9 +1443,14 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
   do
     {
       enum link_action action;
+      int prev;
 
+      prev = h->type;
+      /* Treat symbols defined by early linker script pass as undefined.  */
+      if (h->ldscript_def)
+	prev = bfd_link_hash_undefined;
       cycle = FALSE;
-      action = link_action[(int) row][(int) h->type];
+      action = link_action[(int) row][prev];
       switch (action)
 	{
 	case FAIL:
@@ -1489,6 +1494,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	    h->u.def.section = section;
 	    h->u.def.value = value;
 	    h->linker_def = 0;
+	    h->ldscript_def = 0;
 
 	    /* If we have been asked to, we act like collect2 and
 	       identify all functions that might be global
@@ -1588,6 +1594,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  else
 	    h->u.c.p->section = section;
 	  h->linker_def = 0;
+	  h->ldscript_def = 0;
 	  break;
 
 	case REF:

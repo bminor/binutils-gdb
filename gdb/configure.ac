@@ -44,17 +44,6 @@ AX_CXX_COMPILE_STDCXX(11, , mandatory)
 
 # Dependency checking.
 ZW_CREATE_DEPDIR
-# Create sub-directories for objects and dependencies.
-CONFIG_SRC_SUBDIR="arch"
-AC_SUBST(CONFIG_SRC_SUBDIR)
-
-AC_CONFIG_COMMANDS([gdbdepdir],[
-  for subdir in ${CONFIG_SRC_SUBDIR}
-  do
-      $SHELL $ac_aux_dir/mkinstalldirs $subdir/$DEPDIR
-  done],
-  [ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR CONFIG_SRC_SUBDIR="$CONFIG_SRC_SUBDIR"])
-
 ZW_PROG_COMPILER_DEPENDENCIES([CC])
 
 gnulib_extra_configure_args=
@@ -1038,7 +1027,7 @@ if test "${have_libpython}" != no; then
 else
   # Even if Python support is not compiled in, we need to have this file
   # included so that the "python" command, et.al., still exists.
-  CONFIG_OBS="$CONFIG_OBS python.o"
+  CONFIG_OBS="$CONFIG_OBS python/python.o"
   CONFIG_SRCS="$CONFIG_SRCS python/python.c"
 fi
 
@@ -1238,7 +1227,7 @@ if test "${have_libguile}" != no; then
 else
   # Even if Guile support is not compiled in, we need to have these files
   # included.
-  CONFIG_OBS="$CONFIG_OBS guile.o"
+  CONFIG_OBS="$CONFIG_OBS guile/guile.o"
   CONFIG_SRCS="$CONFIG_SRCS guile/guile.c"
 fi
 AC_SUBST(GUILE_CPPFLAGS)

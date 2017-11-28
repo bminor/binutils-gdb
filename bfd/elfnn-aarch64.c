@@ -4580,7 +4580,7 @@ aarch64_can_relax_tls (bfd *input_bfd,
   if (symbol_got_type == GOT_TLS_IE && GOT_TLS_GD_ANY_P (reloc_got_type))
     return TRUE;
 
-  if (bfd_link_pic (info))
+  if (!bfd_link_executable (info))
     return FALSE;
 
   if  (h && h->root.type == bfd_link_hash_undefweak)
@@ -6247,7 +6247,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	      indx = h && h->dynindx != -1 ? h->dynindx : 0;
 
 	      need_relocs =
-		(bfd_link_pic (info) || indx != 0) &&
+		(!bfd_link_executable (info) || indx != 0) &&
 		(h == NULL
 		 || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		 || h->root.type != bfd_link_hash_undefweak);
@@ -6342,7 +6342,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	      indx = h && h->dynindx != -1 ? h->dynindx : 0;
 
 	      need_relocs =
-		(bfd_link_pic (info) || indx != 0) &&
+		(!bfd_link_executable (info) || indx != 0) &&
 		(h == NULL
 		 || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		 || h->root.type != bfd_link_hash_undefweak);
@@ -6994,10 +6994,6 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  /* PR15323, ref flags aren't set for references in the same
-	     object.  */
-	  h->root.non_ir_ref_regular = 1;
 	}
 
       /* Could be done earlier, if h were already available.  */
@@ -7053,7 +7049,6 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* It is referenced by a non-shared object.  */
 	  h->ref_regular = 1;
-	  h->root.non_ir_ref_regular = 1;
 	}
 
       switch (bfd_r_type)
@@ -8022,7 +8017,10 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	       || h->root.type != bfd_link_hash_undefweak)
 	      && (bfd_link_pic (info)
-		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
+		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+	      /* Undefined weak symbol in static PIE resolves to 0 without
+		 any dynamic relocations.  */
+	      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    {
 	      htab->root.srelgot->size += RELOC_SIZE (htab);
 	    }
@@ -8054,7 +8052,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  indx = h && h->dynindx != -1 ? h->dynindx : 0;
 	  if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	       || h->root.type != bfd_link_hash_undefweak)
-	      && (bfd_link_pic (info)
+	      && (!bfd_link_executable (info)
 		  || indx != 0
 		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
 	    {
@@ -8824,7 +8822,10 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   if (h->got.offset != (bfd_vma) - 1
-      && elf_aarch64_hash_entry (h)->got_type == GOT_NORMAL)
+      && elf_aarch64_hash_entry (h)->got_type == GOT_NORMAL
+      /* Undefined weak symbol in static PIE resolves to 0 without
+	 any dynamic relocations.  */
+      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
     {
       Elf_Internal_Rela rela;
       bfd_byte *loc;

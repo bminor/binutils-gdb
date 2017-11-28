@@ -1658,7 +1658,6 @@ finalize_python (void *ignore)
 static bool
 do_start_initialization ()
 {
-  char *progname;
 #ifdef IS_PY3K
   int i;
   size_t progsize, count;
@@ -1672,19 +1671,20 @@ do_start_initialization ()
      /foo/bin/python
      /foo/lib/pythonX.Y/...
      This must be done before calling Py_Initialize.  */
-  progname = concat (ldirname (python_libdir).c_str (), SLASH_STRING, "bin",
-		     SLASH_STRING, "python", (char *) NULL);
+  gdb::unique_xmalloc_ptr<char> progname
+    (concat (ldirname (python_libdir).c_str (), SLASH_STRING, "bin",
+	      SLASH_STRING, "python", (char *) NULL));
 #ifdef IS_PY3K
   std::string oldloc = setlocale (LC_ALL, NULL);
   setlocale (LC_ALL, "");
-  progsize = strlen (progname);
+  progsize = strlen (progname.get ());
   progname_copy = (wchar_t *) PyMem_Malloc ((progsize + 1) * sizeof (wchar_t));
   if (!progname_copy)
     {
       fprintf (stderr, "out of memory\n");
       return false;
     }
-  count = mbstowcs (progname_copy, progname, progsize + 1);
+  count = mbstowcs (progname_copy, progname.get (), progsize + 1);
   if (count == (size_t) -1)
     {
       fprintf (stderr, "Could not convert python path to string\n");
@@ -1697,7 +1697,7 @@ do_start_initialization ()
      it is not freed after this call.  */
   Py_SetProgramName (progname_copy);
 #else
-  Py_SetProgramName (progname);
+  Py_SetProgramName (progname.release ());
 #endif
 #endif
 

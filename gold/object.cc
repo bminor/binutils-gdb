@@ -2318,6 +2318,7 @@ Sized_relobj_file<size, big_endian>::compute_final_local_value_internal(
     unsigned int r_sym,
     const Symbol_value<size>* lv_in,
     Symbol_value<size>* lv_out,
+    bool relocatable,
     const Output_sections& out_sections,
     const std::vector<Address>& out_offsets,
     const Symbol_table* symtab)
@@ -2404,8 +2405,11 @@ Sized_relobj_file<size, big_endian>::compute_final_local_value_internal(
 	    {
 	      // This is not a section symbol.  We can determine
 	      // the final value now.
-	      lv_out->set_output_value(
-		  os->output_address(this, shndx, lv_in->input_value()));
+	      uint64_t value =
+		os->output_address(this, shndx, lv_in->input_value());
+	      if (relocatable)
+		value -= os->address();
+	      lv_out->set_output_value(value);
 	    }
 	  else if (!os->find_starting_output_address(this, shndx, &start))
 	    {
@@ -2419,7 +2423,10 @@ Sized_relobj_file<size, big_endian>::compute_final_local_value_internal(
 		os->find_relaxed_input_section(this, shndx);
 	      if (posd != NULL)
 		{
-		  lv_out->set_output_value(posd->address());
+		  uint64_t value = posd->address();
+		  if (relocatable)
+		    value -= os->address();
+		  lv_out->set_output_value(value);
 		}
 	      else
 		lv_out->set_output_value(os->address());
@@ -2428,10 +2435,14 @@ Sized_relobj_file<size, big_endian>::compute_final_local_value_internal(
 	    {
 	      // We have to consider the addend to determine the
 	      // value to use in a relocation.  START is the start
-	      // of this input section.
+	      // of this input section.  If we are doing a relocatable
+	      // link, use offset from start output section instead of
+	      // address.
+	      Address adjusted_start =
+		relocatable ? start - os->address() : start;
 	      Merged_symbol_value<size>* msv =
 		new Merged_symbol_value<size>(lv_in->input_value(),
-					      start);
+					      adjusted_start);
 	      lv_out->set_merged_symbol_value(msv);
 	    }
 	}
@@ -2442,7 +2453,7 @@ Sized_relobj_file<size, big_endian>::compute_final_local_value_internal(
 				 + secoffset
 				 + lv_in->input_value());
       else
-	lv_out->set_output_value(os->address()
+	lv_out->set_output_value((relocatable ? 0 : os->address())
 				 + secoffset
 				 + lv_in->input_value());
     }
@@ -2468,11 +2479,12 @@ Sized_relobj_file<size, big_endian>::compute_final_local_value(
     const Symbol_table* symtab)
 {
   // This is just a wrapper of compute_final_local_value_internal.
+  const bool relocatable = parameters->options().relocatable();
   const Output_sections& out_sections(this->output_sections());
   const std::vector<Address>& out_offsets(this->section_offsets());
   return this->compute_final_local_value_internal(r_sym, lv_in, lv_out,
-						  out_sections, out_offsets,
-						  symtab);
+						  relocatable, out_sections,
+						  out_offsets, symtab);
 }
 
 // Finalize the local symbols.  Here we set the final value in
@@ -2492,6 +2504,7 @@ Sized_relobj_file<size, big_endian>::do_finalize_local_symbols(
   const unsigned int loccount = this->local_symbol_count_;
   this->local_symbol_offset_ = off;
 
+  const bool relocatable = parameters->options().relocatable();
   const Output_sections& out_sections(this->output_sections());
   const std::vector<Address>& out_offsets(this->section_offsets());
 
@@ -2500,8 +2513,9 @@ Sized_relobj_file<size, big_endian>::do_finalize_local_symbols(
       Symbol_value<size>* lv = &this->local_values_[i];
 
       Compute_final_local_value_status cflv_status =
-	this->compute_final_local_value_internal(i, lv, lv, out_sections,
-						 out_offsets, symtab);
+	this->compute_final_local_value_internal(i, lv, lv, relocatable,
+						 out_sections, out_offsets,
+						 symtab);
       switch (cflv_status)
 	{
 	case CFLV_OK:
@@ -2666,7 +2680,6 @@ Sized_relobj_file<size, big_endian>::write_local_symbols(
       elfcpp::Sym<size, big_endian> isym(psyms);
 
       Symbol_value<size>& lv(this->local_values_[i]);
-      typename elfcpp::Elf_types<size>::Elf_Addr sym_value = lv.value(this, 0);
 
       bool is_ordinary;
       unsigned int st_shndx = this->adjust_sym_shndx(i, isym.get_st_shndx(),
@@ -2676,9 +2689,6 @@ Sized_relobj_file<size, big_endian>::write_local_symbols(
 	  gold_assert(st_shndx < out_sections.size());
 	  if (out_sections[st_shndx] == NULL)
 	    continue;
-	  // In relocatable object files symbol values are section relative.
-	  if (parameters->options().relocatable())
-	    sym_value -= out_sections[st_shndx]->address();
 	  st_shndx = out_sections[st_shndx]->out_shndx();
 	  if (st_shndx >= elfcpp::SHN_LORESERVE)
 	    {
@@ -2698,7 +2708,7 @@ Sized_relobj_file<size, big_endian>::write_local_symbols(
 	  gold_assert(isym.get_st_name() < strtab_size);
 	  const char* name = pnames + isym.get_st_name();
 	  osym.put_st_name(sympool->get_offset(name));
-	  osym.put_st_value(sym_value);
+	  osym.put_st_value(lv.value(this, 0));
 	  osym.put_st_size(isym.get_st_size());
 	  osym.put_st_info(isym.get_st_info());
 	  osym.put_st_other(isym.get_st_other());
@@ -2716,7 +2726,7 @@ Sized_relobj_file<size, big_endian>::write_local_symbols(
 	  gold_assert(isym.get_st_name() < strtab_size);
 	  const char* name = pnames + isym.get_st_name();
 	  osym.put_st_name(dynpool->get_offset(name));
-	  osym.put_st_value(sym_value);
+	  osym.put_st_value(lv.value(this, 0));
 	  osym.put_st_size(isym.get_st_size());
 	  osym.put_st_info(isym.get_st_info());
 	  osym.put_st_other(isym.get_st_other());

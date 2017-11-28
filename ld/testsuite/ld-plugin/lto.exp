@@ -208,6 +208,12 @@ set lto_link_tests [list \
    "-flto -Wl,-plugin,$plug_so" "-flto" \
    {pr20321.c} {{warning ".*: duplicated plugin"}} \
    "pr20321" "c"] \
+  [list "Build pr22502a.o" \
+   "" "" \
+   {pr22502a.c}] \
+  [list "Build pr22502b.o" \
+   "$plug_opt" "-flto $lto_no_fat" \
+   {pr22502b.c}] \
 ]
 
 if { [at_least_gcc_version 4 7] } {
@@ -391,6 +397,9 @@ set lto_run_tests [list \
   [list "Run pr20267b" \
    "-O2 -flto tmpdir/pr20267a.o tmpdir/libpr20267b.a" "" \
    {dummy.c} "pr20267b" "pass.out" "-flto -O2" "c"] \
+  [list "Run pr22502" \
+   "-O2 -flto tmpdir/pr22502a.o tmpdir/pr22502b.o" "" \
+   {dummy.c} "pr20267" "pass.out" "-flto -O2" "c"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {

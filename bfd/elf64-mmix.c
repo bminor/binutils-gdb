@@ -1986,10 +1986,6 @@ mmix_elf_check_relocs (bfd *abfd,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  /* PR15323, ref flags aren't set for references in the same
-	     object.  */
-	  h->root.non_ir_ref_regular = 1;
 	}
 
       switch (ELF64_R_TYPE (rel->r_info))
@@ -2907,6 +2903,9 @@ mmix_elf_relax_section (bfd *abfd,
 #define elf_backend_symbol_processing	mmix_elf_symbol_processing
 #define elf_backend_omit_section_dynsym \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
+
+#define bfd_elf64_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
 
 #define bfd_elf64_bfd_is_local_label_name \
 	mmix_elf_is_local_label_name
