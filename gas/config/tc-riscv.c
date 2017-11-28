@@ -1185,6 +1185,25 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
   return reloc_index;
 }
 
+/* Detect and handle implicitly zero load-store offsets.  For example,
+   "lw t0, (t1)" is shorthand for "lw t0, 0(t1)".  Return TRUE iff such
+   an implicit offset was detected.  */
+
+static bfd_boolean
+riscv_handle_implicit_zero_offset (expressionS *expr, const char *s)
+{
+  /* Check whether there is only a single bracketed expression left.
+     If so, it must be the base register and the constant must be zero.  */
+  if (*s == '(' && strchr (s + 1, '(') == 0)
+    {
+      expr->X_op = O_constant;
+      expr->X_add_number = 0;
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
 /* This routine assembles an instruction into its binary format.  As a
    side effect, it sets the global variable imm_reloc to the type of
    relocation to do if one of the operands is an address expression.  */
@@ -1325,6 +1344,8 @@ rvc_imm_done:
 		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'k':
+		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
+		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || !VALID_RVC_LW_IMM (imm_expr->X_add_number))
@@ -1332,6 +1353,8 @@ rvc_imm_done:
 		  ip->insn_opcode |= ENCODE_RVC_LW_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'l':
+		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
+		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || !VALID_RVC_LD_IMM (imm_expr->X_add_number))
@@ -1339,6 +1362,8 @@ rvc_imm_done:
 		  ip->insn_opcode |= ENCODE_RVC_LD_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'm':
+		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
+		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || !VALID_RVC_LWSP_IMM (imm_expr->X_add_number))
@@ -1347,6 +1372,8 @@ rvc_imm_done:
 		    ENCODE_RVC_LWSP_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'n':
+		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
+		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || !VALID_RVC_LDSP_IMM (imm_expr->X_add_number))
@@ -1380,6 +1407,8 @@ rvc_imm_done:
 		    ENCODE_RVC_ADDI16SP_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'M':
+		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
+		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || !VALID_RVC_SWSP_IMM (imm_expr->X_add_number))
@@ -1388,6 +1417,8 @@ rvc_imm_done:
 		    ENCODE_RVC_SWSP_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'N':
+		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
+		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || !VALID_RVC_SDSP_IMM (imm_expr->X_add_number))
@@ -1618,12 +1649,7 @@ rvc_lui:
 	      p = percent_op_rtype;
 	      *imm_reloc = BFD_RELOC_UNUSED;
 load_store:
-	      /* Check whether there is only a single bracketed expression
-		 left.  If so, it must be the base register and the
-		 constant must be zero.  */
-	      imm_expr->X_op = O_constant;
-	      imm_expr->X_add_number = 0;
-	      if (*s == '(' && strchr (s + 1, '(') == 0)
+	      if (riscv_handle_implicit_zero_offset (imm_expr, s))
 		continue;
 alu_op:
 	      /* If this value won't fit into a 16 bit offset, then go

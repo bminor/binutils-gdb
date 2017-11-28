@@ -1,3 +1,16 @@
+2017-11-27  Andrew Waterman <andrew@sifive.com>
+	    Palmer Dabbelt  <palmer@sifive.com>
+	    Jim Wilson  <jimw@sifive.com>
+
+	gas/
+	* config/tc-riscv.c (riscv_handle_implicit_zero_offset): New.
+	(riscv_ip): Cases 'k', 'l', 'm', 'n', 'M', 'N', add call to
+	riscv_handle_implicit_zero_offset.  At label load_store, replace
+	existing code with call to riscv_handle_implicit_zero_offset.
+	* testsuite/gas/riscv/c-ld.d, testsuite/gas/riscv/c-ld.s: New.
+	* testsuite/gas/riscv/c-lw.d, testsuite/gas/riscv/c-lw.s: New.
+	* testsuite/gas/riscv/riscv.exp: Run new tests.
+
 2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (find_trampoline_seg): Add static variable
