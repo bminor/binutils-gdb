@@ -540,12 +540,31 @@ bfd_check_overflow (enum complain_overflow how,
   return flag;
 }
 
+/*
+FUNCTION
+	bfd_reloc_offset_in_range
+
+SYNOPSIS
+	bfd_boolean bfd_reloc_offset_in_range
+          (reloc_howto_type *howto,
+           bfd *abfd,
+           asection *section,
+           bfd_size_type offset);
+
+DESCRIPTION
+        Returns TRUE if the reloc described by @var{HOWTO} can be
+	applied at @var{OFFSET} octets in @var{SECTION}.
+
+*/
+
 /* HOWTO describes a relocation, at offset OCTET.  Return whether the
    relocation field is within SECTION of ABFD.  */
 
-static bfd_boolean
-reloc_offset_in_range (reloc_howto_type *howto, bfd *abfd,
-		       asection *section, bfd_size_type octet)
+bfd_boolean
+bfd_reloc_offset_in_range (reloc_howto_type *howto,
+			   bfd *abfd,
+			   asection *section,
+			   bfd_size_type octet)
 {
   bfd_size_type octet_end = bfd_get_section_limit_octets (abfd, section);
   bfd_size_type reloc_size = bfd_get_reloc_size (howto);
@@ -619,6 +638,11 @@ bfd_perform_relocation (bfd *abfd,
   if (howto && howto->special_function)
     {
       bfd_reloc_status_type cont;
+
+      /* Note - we do not call bfd_reloc_offset_in_range here as the
+	 reloc_entry->address field might actually be valid for the
+	 backend concerned.  It is up to the special_function itself
+	 to call bfd_reloc_offset_in_range if needed.  */
       cont = howto->special_function (abfd, reloc_entry, symbol, data,
 				      input_section, output_bfd,
 				      error_message);
@@ -639,7 +663,7 @@ bfd_perform_relocation (bfd *abfd,
 
   /* Is the address of the relocation really within the section?  */
   octets = reloc_entry->address * bfd_octets_per_byte (abfd);
-  if (!reloc_offset_in_range (howto, abfd, input_section, octets))
+  if (!bfd_reloc_offset_in_range (howto, abfd, input_section, octets))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -1005,6 +1029,10 @@ bfd_install_relocation (bfd *abfd,
     {
       bfd_reloc_status_type cont;
 
+      /* Note - we do not call bfd_reloc_offset_in_range here as the
+	 reloc_entry->address field might actually be valid for the
+	 backend concerned.  It is up to the special_function itself
+	 to call bfd_reloc_offset_in_range if needed.  */
       /* XXX - The special_function calls haven't been fixed up to deal
 	 with creating new relocations and section contents.  */
       cont = howto->special_function (abfd, reloc_entry, symbol,
@@ -1027,7 +1055,7 @@ bfd_install_relocation (bfd *abfd,
 
   /* Is the address of the relocation really within the section?  */
   octets = reloc_entry->address * bfd_octets_per_byte (abfd);
-  if (!reloc_offset_in_range (howto, abfd, input_section, octets))
+  if (!bfd_reloc_offset_in_range (howto, abfd, input_section, octets))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -1365,7 +1393,7 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
   bfd_size_type octets = address * bfd_octets_per_byte (input_bfd);
 
   /* Sanity check the address.  */
-  if (!reloc_offset_in_range (howto, input_bfd, input_section, octets))
+  if (!bfd_reloc_offset_in_range (howto, input_bfd, input_section, octets))
     return bfd_reloc_outofrange;
 
   /* This function assumes that we are dealing with a basic relocation

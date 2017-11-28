@@ -142,17 +142,11 @@ coff_amd64_reloc (bfd *abfd,
     {
       reloc_howto_type *howto = reloc_entry->howto;
       unsigned char *addr = (unsigned char *) data + reloc_entry->address;
-
-      /* FIXME: We do not have an end address for data, so we cannot
-	 accurately range check any addresses computed against it.
-	 cf: PR binutils/17512: file: 1085-1761-0.004.
-	 For now we do the best that we can.  */
-      if (addr < (unsigned char *) data
-	  || addr > ((unsigned char *) data) + input_section->size)
-	{
-	  bfd_set_error (bfd_error_bad_value);
-	  return bfd_reloc_notsupported;
-	}
+      
+      if (! bfd_reloc_offset_in_range (howto, abfd, input_section,
+				       reloc_entry->address
+				       * bfd_octets_per_byte (abfd)))
+	return bfd_reloc_outofrange;
 
       switch (howto->size)
 	{
