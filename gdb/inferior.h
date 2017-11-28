@@ -70,7 +70,7 @@ extern struct cleanup *make_cleanup_restore_infcall_control_state
 extern void discard_infcall_suspend_state (struct infcall_suspend_state *);
 extern void discard_infcall_control_state (struct infcall_control_state *);
 
-extern struct regcache *
+extern readonly_detached_regcache *
   get_infcall_suspend_state_regcache (struct infcall_suspend_state *);
 
 extern void set_sigint_trap (void);
