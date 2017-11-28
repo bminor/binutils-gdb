@@ -1,3 +1,24 @@
+2017-11-27  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19291
+	PR gold/22266
+	* object.cc (Sized_relobj_file::compute_final_local_value_internal):
+	Revert changes from 2017-11-08 patch.  Adjust symbol value in
+	relocatable links for non-section symbols.
+	(Sized_relobj_file::compute_final_local_value): Revert changes from
+	2017-11-08 patch.
+	(Sized_relobj_file::do_finalize_local_symbols): Likewise.
+	(Sized_relobj_file::write_local_symbols): Revert changes from
+	2015-11-25 patch.
+	* object.h (Sized_relobj_file::compute_final_local_value_internal):
+	Revert changes from 2017-11-08 patch.
+	* powerpc.cc (Target_powerpc::relocate_relocs): Adjust addend for
+	relocatable links.
+	* target-reloc.h (relocate_relocs): Adjust addend for relocatable links.
+	* testsuite/pr22266_a.c (hello): New function.
+	* testsuite/pr22266_main.c (main): Add test for merge sections.
+	* testsuite/pr22266_script.t: Add rule for .rodata.
+
 2017-11-19  Ian Lance Taylor  <iant@google.com>
 	    Cary Coutant  <ccoutant@gmail.com>
 

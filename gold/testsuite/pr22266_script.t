@@ -8,8 +8,9 @@ SECTIONS
     .text : {
         *(.text*)
     }
-    .rodata.cst16 : {
-        *(.rodata.cst16*)
+    .rodata :
+    {
+        *(.rodata .rodata.* .gnu.linkonce.r.*)
     }
     .data.rel.ro : {
         *(.data.rel.ro*)
