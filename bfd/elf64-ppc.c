@@ -5440,17 +5440,8 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	h = NULL;
       else
 	{
-	  struct ppc_link_hash_entry *eh;
-
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  h = elf_follow_link (h);
-	  eh = (struct ppc_link_hash_entry *) h;
-
-	  /* PR15323, ref flags aren't set for references in the same
-	     object.  */
-	  h->root.non_ir_ref_regular = 1;
-	  if (eh->is_func && eh->oh != NULL)
-	    eh->oh->elf.root.non_ir_ref_regular = 1;
 
 	  if (h == htab->elf.hgot)
 	    sec->has_toc_reloc = 1;

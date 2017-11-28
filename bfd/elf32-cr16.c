@@ -735,10 +735,6 @@ cr16_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
           while (h->root.type == bfd_link_hash_indirect
                  || h->root.type == bfd_link_hash_warning)
             h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  /* PR15323, ref flags aren't set for references in the same
-	     object.  */
-	  h->root.non_ir_ref_regular = 1;
         }
 
       /* Some relocs require a global offset table.  */
