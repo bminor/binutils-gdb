@@ -1315,231 +1315,284 @@ reg_flush_command (const char *command, int from_tty)
     printf_filtered (_("Register cache flushed.\n"));
 }
 
-void
-regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
+/* An abstract base class for register dump.  */
+
+class register_dump
 {
-  struct gdbarch *gdbarch = m_descr->gdbarch;
-  int regnum;
-  int footnote_nr = 0;
-  int footnote_register_offset = 0;
-  int footnote_register_type_name_null = 0;
-  long register_offset = 0;
+public:
+  void dump (ui_file *file)
+  {
+    auto descr = regcache_descr (m_gdbarch);
+    int regnum;
+    int footnote_nr = 0;
+    int footnote_register_offset = 0;
+    int footnote_register_type_name_null = 0;
+    long register_offset = 0;
 
-  gdb_assert (m_descr->nr_cooked_registers
-	      == (gdbarch_num_regs (gdbarch)
-		  + gdbarch_num_pseudo_regs (gdbarch)));
+    gdb_assert (descr->nr_cooked_registers
+		== (gdbarch_num_regs (m_gdbarch)
+		    + gdbarch_num_pseudo_regs (m_gdbarch)));
 
-  for (regnum = -1; regnum < m_descr->nr_cooked_registers; regnum++)
-    {
-      /* Name.  */
-      if (regnum < 0)
-	fprintf_unfiltered (file, " %-10s", "Name");
-      else
-	{
-	  const char *p = gdbarch_register_name (gdbarch, regnum);
-
-	  if (p == NULL)
-	    p = "";
-	  else if (p[0] == '\0')
-	    p = "''";
-	  fprintf_unfiltered (file, " %-10s", p);
-	}
-
-      /* Number.  */
-      if (regnum < 0)
-	fprintf_unfiltered (file, " %4s", "Nr");
-      else
-	fprintf_unfiltered (file, " %4d", regnum);
-
-      /* Relative number.  */
-      if (regnum < 0)
-	fprintf_unfiltered (file, " %4s", "Rel");
-      else if (regnum < gdbarch_num_regs (gdbarch))
-	fprintf_unfiltered (file, " %4d", regnum);
-      else
-	fprintf_unfiltered (file, " %4d",
-			    (regnum - gdbarch_num_regs (gdbarch)));
-
-      /* Offset.  */
-      if (regnum < 0)
-	fprintf_unfiltered (file, " %6s  ", "Offset");
-      else
-	{
-	  fprintf_unfiltered (file, " %6ld",
-			      m_descr->register_offset[regnum]);
-	  if (register_offset != m_descr->register_offset[regnum]
-	      || (regnum > 0
-		  && (m_descr->register_offset[regnum]
-		      != (m_descr->register_offset[regnum - 1]
-			  + m_descr->sizeof_register[regnum - 1])))
-	      )
-	    {
-	      if (!footnote_register_offset)
-		footnote_register_offset = ++footnote_nr;
-	      fprintf_unfiltered (file, "*%d", footnote_register_offset);
-	    }
-	  else
-	    fprintf_unfiltered (file, "  ");
-	  register_offset = (m_descr->register_offset[regnum]
-			     + m_descr->sizeof_register[regnum]);
-	}
-
-      /* Size.  */
-      if (regnum < 0)
-	fprintf_unfiltered (file, " %5s ", "Size");
-      else
-	fprintf_unfiltered (file, " %5ld", m_descr->sizeof_register[regnum]);
-
-      /* Type.  */
+    for (regnum = -1; regnum < descr->nr_cooked_registers; regnum++)
       {
-	const char *t;
-	std::string name_holder;
-
+	/* Name.  */
 	if (regnum < 0)
-	  t = "Type";
+	  fprintf_unfiltered (file, " %-10s", "Name");
 	else
 	  {
-	    static const char blt[] = "builtin_type";
+	    const char *p = gdbarch_register_name (m_gdbarch, regnum);
 
-	    t = TYPE_NAME (register_type (arch (), regnum));
-	    if (t == NULL)
-	      {
-		if (!footnote_register_type_name_null)
-		  footnote_register_type_name_null = ++footnote_nr;
-		name_holder = string_printf ("*%d",
-					     footnote_register_type_name_null);
-		t = name_holder.c_str ();
-	      }
-	    /* Chop a leading builtin_type.  */
-	    if (startswith (t, blt))
-	      t += strlen (blt);
+	    if (p == NULL)
+	      p = "";
+	    else if (p[0] == '\0')
+	      p = "''";
+	    fprintf_unfiltered (file, " %-10s", p);
 	  }
-	fprintf_unfiltered (file, " %-15s", t);
+
+	/* Number.  */
+	if (regnum < 0)
+	  fprintf_unfiltered (file, " %4s", "Nr");
+	else
+	  fprintf_unfiltered (file, " %4d", regnum);
+
+	/* Relative number.  */
+	if (regnum < 0)
+	  fprintf_unfiltered (file, " %4s", "Rel");
+	else if (regnum < gdbarch_num_regs (m_gdbarch))
+	  fprintf_unfiltered (file, " %4d", regnum);
+	else
+	  fprintf_unfiltered (file, " %4d",
+			      (regnum - gdbarch_num_regs (m_gdbarch)));
+
+	/* Offset.  */
+	if (regnum < 0)
+	  fprintf_unfiltered (file, " %6s  ", "Offset");
+	else
+	  {
+	    fprintf_unfiltered (file, " %6ld",
+				descr->register_offset[regnum]);
+	    if (register_offset != descr->register_offset[regnum]
+		|| (regnum > 0
+		    && (descr->register_offset[regnum]
+			!= (descr->register_offset[regnum - 1]
+			    + descr->sizeof_register[regnum - 1])))
+		)
+	      {
+		if (!footnote_register_offset)
+		  footnote_register_offset = ++footnote_nr;
+		fprintf_unfiltered (file, "*%d", footnote_register_offset);
+	      }
+	    else
+	      fprintf_unfiltered (file, "  ");
+	    register_offset = (descr->register_offset[regnum]
+			       + descr->sizeof_register[regnum]);
+	  }
+
+	/* Size.  */
+	if (regnum < 0)
+	  fprintf_unfiltered (file, " %5s ", "Size");
+	else
+	  fprintf_unfiltered (file, " %5ld", descr->sizeof_register[regnum]);
+
+	/* Type.  */
+	{
+	  const char *t;
+	  std::string name_holder;
+
+	  if (regnum < 0)
+	    t = "Type";
+	  else
+	    {
+	      static const char blt[] = "builtin_type";
+
+	      t = TYPE_NAME (register_type (m_gdbarch, regnum));
+	      if (t == NULL)
+		{
+		  if (!footnote_register_type_name_null)
+		    footnote_register_type_name_null = ++footnote_nr;
+		  name_holder = string_printf ("*%d",
+					       footnote_register_type_name_null);
+		  t = name_holder.c_str ();
+		}
+	      /* Chop a leading builtin_type.  */
+	      if (startswith (t, blt))
+		t += strlen (blt);
+	    }
+	  fprintf_unfiltered (file, " %-15s", t);
+	}
+
+	/* Leading space always present.  */
+	fprintf_unfiltered (file, " ");
+
+	dump_reg (file, regnum);
+
+	fprintf_unfiltered (file, "\n");
       }
 
-      /* Leading space always present.  */
-      fprintf_unfiltered (file, " ");
+    if (footnote_register_offset)
+      fprintf_unfiltered (file, "*%d: Inconsistent register offsets.\n",
+			  footnote_register_offset);
+    if (footnote_register_type_name_null)
+      fprintf_unfiltered (file,
+			  "*%d: Register type's name NULL.\n",
+			  footnote_register_type_name_null);
+  }
 
-      /* Value, raw.  */
-      if (what_to_dump == regcache_dump_raw)
-	{
-	  if (regnum < 0)
-	    fprintf_unfiltered (file, "Raw value");
-	  else if (regnum >= num_raw_registers ())
+  virtual ~register_dump () {};
+
+protected:
+  register_dump (gdbarch *arch)
+    : m_gdbarch (arch)
+  {}
+
+  /* Dump the register REGNUM contents.  If REGNUM is -1, print the
+     header.  */
+  virtual void dump_reg (ui_file *file, int regnum) = 0;
+
+  gdbarch *m_gdbarch;
+};
+
+/* Dump registers from regcache, used for dump raw registers and
+   cooked registers.  */
+
+class register_dump_regcache : public register_dump
+{
+public:
+  register_dump_regcache (regcache *regcache, bool dump_pseudo)
+    : register_dump (regcache->arch ()), m_regcache (regcache),
+      m_dump_pseudo (dump_pseudo)
+  {
+  }
+
+protected:
+  void dump_reg (ui_file *file, int regnum) override
+  {
+    if (regnum < 0)
+      {
+	if (m_dump_pseudo)
+	  fprintf_unfiltered (file, "Cooked value");
+	else
+	  fprintf_unfiltered (file, "Raw value");
+      }
+    else
+      {
+	if (regnum < gdbarch_num_regs (m_gdbarch) || m_dump_pseudo)
+	  {
+	    auto size = register_size (m_gdbarch, regnum);
+
+	    if (size == 0)
+	      return;
+
+	    gdb::def_vector<gdb_byte> buf (size);
+	    auto status = m_regcache->cooked_read (regnum, buf.data ());
+
+	    if (status == REG_UNKNOWN)
+	      fprintf_unfiltered (file, "<invalid>");
+	    else if (status == REG_UNAVAILABLE)
+	      fprintf_unfiltered (file, "<unavailable>");
+	    else
+	      {
+		print_hex_chars (file, buf.data (), size,
+				 gdbarch_byte_order (m_gdbarch), true);
+	      }
+	  }
+	else
+	  {
+	    /* Just print "<cooked>" for pseudo register when
+	       regcache_dump_raw.  */
 	    fprintf_unfiltered (file, "<cooked>");
-	  else if (get_register_status (regnum) == REG_UNKNOWN)
-	    fprintf_unfiltered (file, "<invalid>");
-	  else if (get_register_status (regnum) == REG_UNAVAILABLE)
-	    fprintf_unfiltered (file, "<unavailable>");
-	  else
-	    {
-	      raw_update (regnum);
-	      print_hex_chars (file, register_buffer (regnum),
-			       m_descr->sizeof_register[regnum],
-			       gdbarch_byte_order (gdbarch), true);
-	    }
-	}
+	  }
+      }
+  }
 
-      /* Value, cooked.  */
-      if (what_to_dump == regcache_dump_cooked)
-	{
-	  if (regnum < 0)
-	    fprintf_unfiltered (file, "Cooked value");
-	  else
-	    {
-	      const gdb_byte *buf = NULL;
-	      enum register_status status;
-	      struct value *value = NULL;
+private:
+  regcache *m_regcache;
 
-	      if (regnum < num_raw_registers ())
-		{
-		  raw_update (regnum);
-		  status = get_register_status (regnum);
-		  buf = register_buffer (regnum);
-		}
-	      else
-		{
-		  value = cooked_read_value (regnum);
+  /* Dump pseudo registers or not.  */
+  const bool m_dump_pseudo;
+};
 
-		  if (!value_optimized_out (value)
-		      && value_entirely_available (value))
-		    {
-		      status = REG_VALID;
-		      buf = value_contents_all (value);
-		    }
-		  else
-		    status = REG_UNAVAILABLE;
-		}
+/* For "maint print registers".  */
 
-	      if (status == REG_UNKNOWN)
-		fprintf_unfiltered (file, "<invalid>");
-	      else if (status == REG_UNAVAILABLE)
-		fprintf_unfiltered (file, "<unavailable>");
-	      else
-		print_hex_chars (file, buf,
-				 m_descr->sizeof_register[regnum],
-				 gdbarch_byte_order (gdbarch), true);
+class register_dump_none : public register_dump
+{
+public:
+  register_dump_none (gdbarch *arch)
+    : register_dump (arch)
+  {}
 
-	      if (value != NULL)
-		{
-		  release_value (value);
-		  value_free (value);
-		}
-	    }
-	}
+protected:
+  void dump_reg (ui_file *file, int regnum) override
+  {}
+};
 
-      /* Group members.  */
-      if (what_to_dump == regcache_dump_groups)
-	{
-	  if (regnum < 0)
-	    fprintf_unfiltered (file, "Groups");
-	  else
-	    {
-	      const char *sep = "";
-	      struct reggroup *group;
+/* For "maint print remote-registers".  */
 
-	      for (group = reggroup_next (gdbarch, NULL);
-		   group != NULL;
-		   group = reggroup_next (gdbarch, group))
-		{
-		  if (gdbarch_register_reggroup_p (gdbarch, regnum, group))
-		    {
-		      fprintf_unfiltered (file,
-					  "%s%s", sep, reggroup_name (group));
-		      sep = ",";
-		    }
-		}
-	    }
-	}
+class register_dump_remote : public register_dump
+{
+public:
+  register_dump_remote (gdbarch *arch)
+    : register_dump (arch)
+  {}
 
-      /* Remote packet configuration.  */
-      if (what_to_dump == regcache_dump_remote)
-	{
-	  if (regnum < 0)
-	    {
-	      fprintf_unfiltered (file, "Rmt Nr  g/G Offset");
-	    }
-	  else if (regnum < num_raw_registers ())
-	    {
-	      int pnum, poffset;
+protected:
+  void dump_reg (ui_file *file, int regnum) override
+  {
+    if (regnum < 0)
+      {
+	fprintf_unfiltered (file, "Rmt Nr  g/G Offset");
+      }
+    else if (regnum < gdbarch_num_regs (m_gdbarch))
+      {
+	int pnum, poffset;
 
-	      if (remote_register_number_and_offset (arch (), regnum,
-						     &pnum, &poffset))
-		fprintf_unfiltered (file, "%7d %11d", pnum, poffset);
-	    }
-	}
+	if (remote_register_number_and_offset (m_gdbarch, regnum,
+					       &pnum, &poffset))
+	  fprintf_unfiltered (file, "%7d %11d", pnum, poffset);
+      }
+  }
+};
 
-      fprintf_unfiltered (file, "\n");
-    }
+/* For "maint print register-groups".  */
 
-  if (footnote_register_offset)
-    fprintf_unfiltered (file, "*%d: Inconsistent register offsets.\n",
-			footnote_register_offset);
-  if (footnote_register_type_name_null)
-    fprintf_unfiltered (file, 
-			"*%d: Register type's name NULL.\n",
-			footnote_register_type_name_null);
-}
+class register_dump_groups : public register_dump
+{
+public:
+  register_dump_groups (gdbarch *arch)
+    : register_dump (arch)
+  {}
+
+protected:
+  void dump_reg (ui_file *file, int regnum) override
+  {
+    if (regnum < 0)
+      fprintf_unfiltered (file, "Groups");
+    else
+      {
+	const char *sep = "";
+	struct reggroup *group;
+
+	for (group = reggroup_next (m_gdbarch, NULL);
+	     group != NULL;
+	     group = reggroup_next (m_gdbarch, group))
+	  {
+	    if (gdbarch_register_reggroup_p (m_gdbarch, regnum, group))
+	      {
+		fprintf_unfiltered (file,
+				    "%s%s", sep, reggroup_name (group));
+		sep = ",";
+	      }
+	  }
+      }
+  }
+};
+
+enum regcache_dump_what
+{
+  regcache_dump_none, regcache_dump_raw,
+  regcache_dump_cooked, regcache_dump_groups,
+  regcache_dump_remote
+};
 
 static void
 regcache_print (const char *args, enum regcache_dump_what what_to_dump)
@@ -1557,16 +1610,50 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
       out = &file;
     }
 
+  std::unique_ptr<register_dump> dump;
+  std::unique_ptr<regcache> regs;
+  gdbarch *gdbarch;
+
   if (target_has_registers)
-    get_current_regcache ()->dump (out, what_to_dump);
+    gdbarch = get_current_regcache ()->arch ();
   else
+    gdbarch = target_gdbarch ();
+
+  switch (what_to_dump)
     {
-      /* For the benefit of "maint print registers" & co when
-	 debugging an executable, allow dumping a regcache even when
-	 there is no thread selected / no registers.  */
-      regcache dummy_regs (target_gdbarch ());
-      dummy_regs.dump (out, what_to_dump);
+    case regcache_dump_none:
+      dump.reset (new register_dump_none (gdbarch));
+      break;
+    case regcache_dump_remote:
+      dump.reset (new register_dump_remote (gdbarch));
+      break;
+    case regcache_dump_groups:
+      dump.reset (new register_dump_groups (gdbarch));
+      break;
+    case regcache_dump_raw:
+    case regcache_dump_cooked:
+      {
+	regcache *reg;
+
+	if (target_has_registers)
+	  reg = get_current_regcache ();
+	else
+	  {
+	    /* For the benefit of "maint print registers" & co when
+	       debugging an executable, allow dumping a regcache even when
+	       there is no thread selected / no registers.  */
+	    reg = new regcache (target_gdbarch ());
+	    regs.reset (reg);
+	  }
+
+	auto dump_pseudo = (what_to_dump == regcache_dump_cooked);
+
+	dump.reset (new register_dump_regcache (reg, dump_pseudo));
+      }
+      break;
     }
+
+  dump->dump (out);
 }
 
 static void
