@@ -1,3 +1,12 @@
+2017-11-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22502
+	* elflink.c (_bfd_elf_merge_symbol): Also skip definition from
+	an IR object.
+	(elf_link_add_object_symbols): If linker plugin is enabled, set
+	non_ir_ref_regular on symbols referenced in regular objects so
+	that linker plugin will get the correct symbol resolution.
+
 2017-11-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR ld/22263

@@ -1,3 +1,10 @@
+2017-11-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22502
+	* testsuite/ld-plugin/lto.exp: Run PR ld/22502 test.
+	* testsuite/ld-plugin/pr22502a.c: New file.
+	* testsuite/ld-plugin/pr22502b.c: Likewise.
+
 2017-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr21562c.t: Also provide ___start_scnfoo and
