@@ -198,19 +198,9 @@ extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
    
 extern int register_size (struct gdbarch *gdbarch, int regnum);
 
-
-/* Save/restore a register cache.  The set of registers saved /
-   restored into the DST regcache determined by the save_reggroup /
-   restore_reggroup respectively.  COOKED_READ returns zero iff the
-   register's value can't be returned.  */
-
 typedef enum register_status (regcache_cooked_read_ftype) (void *src,
 							   int regnum,
 							   gdb_byte *buf);
-
-extern void regcache_save (struct regcache *dst,
-			   regcache_cooked_read_ftype *cooked_read,
-			   void *cooked_read_context);
 
 enum regcache_dump_what
 {
@@ -317,7 +307,14 @@ public:
     return m_aspace;
   }
 
+/* Save/restore a register cache.  The set of registers saved /
+   restored into the regcache determined by the save_reggroup /
+   restore_reggroup respectively.  COOKED_READ returns zero iff the
+   register's value can't be returned.  */
   void save (regcache_cooked_read_ftype *cooked_read, void *src);
+  /* Writes to regcache will go through to the target.  SRC is a
+     read-only register cache.  */
+  void restore (struct regcache *src);
 
   void cooked_write (int regnum, const gdb_byte *buf);
 
@@ -383,7 +380,6 @@ protected:
   static std::forward_list<regcache *> current_regcache;
 
 private:
-  void restore (struct regcache *src);
 
   void transfer_regset (const struct regset *regset,
 			struct regcache *out_regcache,
@@ -401,9 +397,8 @@ private:
   /* Is this a read-only cache?  A read-only cache is used for saving
      the target's register state (e.g, across an inferior function
      call or just before forcing a function return).  A read-only
-     cache can only be updated via the methods regcache_dup() and
-     regcache_cpy().  The actual contents are determined by the
-     reggroup_save and reggroup_restore methods.  */
+     cache can only be created via a constructor.  The actual contents
+     are determined by the save and restore methods.  */
   const bool m_readonly_p;
   /* If this is a read-write cache, which thread's registers is
      it connected to?  */
@@ -415,18 +410,11 @@ private:
 
   friend void
   registers_changed_ptid (ptid_t ptid);
-
-  friend void
-  regcache_cpy (struct regcache *dst, struct regcache *src);
 };
 
 /* Duplicate the contents of a register cache to a read-only register
    cache.  The operation is pass-through.  */
 extern struct regcache *regcache_dup (struct regcache *regcache);
-
-/* Writes to DEST will go through to the target.  SRC is a read-only
-   register cache.  */
-extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 
 extern void registers_changed (void);
 extern void registers_changed_ptid (ptid_t);
