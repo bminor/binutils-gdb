@@ -1202,7 +1202,7 @@ spu_write_pc (struct regcache *regcache, CORE_ADDR pc)
 struct spu2ppu_cache
 {
   struct frame_id frame_id;
-  struct regcache *regcache;
+  regcache_readonly *regcache;
 };
 
 static struct gdbarch *
@@ -1229,7 +1229,7 @@ spu2ppu_prev_register (struct frame_info *this_frame,
   gdb_byte *buf;
 
   buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
-  regcache_cooked_read (cache->regcache, regnum, buf);
+  cache->regcache->cooked_read (regnum, buf);
   return frame_unwind_got_bytes (this_frame, regnum, buf);
 }
 
@@ -1274,7 +1274,7 @@ spu2ppu_sniffer (const struct frame_unwind *self,
 	{
 	  struct regcache *regcache;
 	  regcache = get_thread_arch_regcache (inferior_ptid, target_gdbarch ());
-	  cache->regcache = regcache_dup (regcache);
+	  cache->regcache = new regcache_readonly (*regcache);
 	  *this_prologue_cache = cache;
 	  return 1;
 	}

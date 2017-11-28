@@ -243,6 +243,11 @@ protected:
 
   gdb_byte *register_buffer (int regnum) const;
 
+  /* Save a register cache.  The set of registers saved into the
+     regcache determined by the save_reggroup.  COOKED_READ returns
+     zero iff the register's value can't be returned.  */
+  void save (regcache_cooked_read_ftype *cooked_read, void *src);
+
   struct regcache_descr *m_descr;
 
   bool m_has_pseudo;
@@ -250,6 +255,8 @@ protected:
   gdb_byte *m_registers;
   /* Register cache status.  */
   signed char *m_register_status;
+
+  friend class regcache;
 };
 
 class regcache_read : public reg_buffer
@@ -282,6 +289,8 @@ protected:
 				  bool is_raw);
 };
 
+class regcache_readonly;
+
 /* The register cache for storing raw register values.  */
 
 class regcache : public regcache_read
@@ -305,14 +314,11 @@ public:
     return m_aspace;
   }
 
-/* Save/restore a register cache.  The set of registers saved /
-   restored into the regcache determined by the save_reggroup /
-   restore_reggroup respectively.  COOKED_READ returns zero iff the
-   register's value can't be returned.  */
-  void save (regcache_cooked_read_ftype *cooked_read, void *src);
-  /* Writes to regcache will go through to the target.  SRC is a
+  /* Restore a register cache.  The set of registers restored into
+     the regcache determined by the restore_reggroup.
+     Writes to regcache will go through to the target.  SRC is a
      read-only register cache.  */
-  void restore (struct regcache *src);
+  void restore (regcache_readonly *src);
 
   void cooked_write (int regnum, const gdb_byte *buf);
 
@@ -410,9 +416,26 @@ private:
   registers_changed_ptid (ptid_t ptid);
 };
 
-/* Duplicate the contents of a register cache to a read-only register
-   cache.  The operation is pass-through.  */
-extern struct regcache *regcache_dup (struct regcache *regcache);
+class regcache_readonly : public regcache_read
+{
+public:
+  regcache_readonly (const regcache &src);
+
+  /* Create a readonly regcache by getting contents from COOKED_READ.  */
+
+  regcache_readonly (gdbarch *gdbarch,
+		     regcache_cooked_read_ftype *cooked_read,
+		     void *src)
+    : regcache_read (gdbarch, true)
+  {
+    save (cooked_read, src);
+  }
+
+  DISABLE_COPY_AND_ASSIGN (regcache_readonly);
+
+  void raw_update (int regnum) override
+  {}
+};
 
 extern void registers_changed (void);
 extern void registers_changed_ptid (ptid_t);

@@ -282,7 +282,7 @@ cleanup_dummy_frames (struct target_ops *target, int from_tty)
 struct dummy_frame_cache
 {
   struct frame_id this_id;
-  struct regcache *prev_regcache;
+  regcache_readonly *prev_regcache;
 };
 
 static int
@@ -352,8 +352,8 @@ dummy_frame_prev_register (struct frame_info *this_frame,
   /* Use the regcache_cooked_read() method so that it, on the fly,
      constructs either a raw or pseudo register from the raw
      register cache.  */
-  regcache_cooked_read (cache->prev_regcache, regnum,
-			value_contents_writeable (reg_val));
+  cache->prev_regcache->cooked_read (regnum,
+				     value_contents_writeable (reg_val));
   return reg_val;
 }
 

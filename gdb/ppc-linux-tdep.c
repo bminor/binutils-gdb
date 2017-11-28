@@ -1241,7 +1241,7 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
 struct ppu2spu_cache
 {
   struct frame_id frame_id;
-  struct regcache *regcache;
+  regcache_readonly *regcache;
 };
 
 static struct gdbarch *
@@ -1348,10 +1348,9 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 	{
 	  struct ppu2spu_cache *cache
 	    = FRAME_OBSTACK_CALLOC (1, struct ppu2spu_cache);
-	  std::unique_ptr<struct regcache> regcache
-	    (new struct regcache (data.gdbarch));
-
-	  regcache->save (ppu2spu_unwind_register, &data);
+	  std::unique_ptr<regcache_readonly> regcache
+	    (new regcache_readonly (data.gdbarch, ppu2spu_unwind_register,
+				    &data));
 
 	  cache->frame_id = frame_id_build (base, func);
 	  cache->regcache = regcache.release ();
