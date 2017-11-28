@@ -8896,7 +8896,7 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
      (and perhaps other times).  */
   if (target_has_execution)
     /* NB: The register write goes through to the target.  */
-    regcache_cpy (regcache, inf_state->registers);
+    regcache->restore (inf_state->registers);
 
   discard_infcall_suspend_state (inf_state);
 }

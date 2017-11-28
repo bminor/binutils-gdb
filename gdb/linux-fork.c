@@ -261,7 +261,7 @@ fork_load_infrun_state (struct fork_info *fp)
   linux_nat_switch_fork (fp->ptid);
 
   if (fp->savedregs && fp->clobber_regs)
-    regcache_cpy (get_current_regcache (), fp->savedregs);
+    get_current_regcache ()->restore (fp->savedregs);
 
   registers_changed ();
   reinit_frame_cache ();
