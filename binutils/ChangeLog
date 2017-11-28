@@ -1,3 +1,17 @@
+2017-11-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22490
+	* readelf.c (process_notes_at): Add an argument for note
+	alignment.  If note alignment is less than 4, use 4 byte
+	alignment.  Otherwise, skip notes if alignment isn't 4 nor
+	8 bytes.
+	(process_corefile_note_segments): Pass segment alignment to
+	process_notes_at.
+	(process_note_sections): Pass section alignment to
+	process_notes_at.
+	(process_object): Call load_separate_debug_file only if
+	e_shstrndx != SHN_UNDEF.
+
 2017-11-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 22490

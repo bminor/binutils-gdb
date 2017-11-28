@@ -17904,13 +17904,13 @@ static bfd_boolean
 process_notes_at (Filedata *           filedata,
 		  Elf_Internal_Shdr *  section,
 		  bfd_vma              offset,
-		  bfd_vma              length)
+		  bfd_vma              length,
+		  bfd_vma              align)
 {
   Elf_External_Note * pnotes;
   Elf_External_Note * external;
   char *              end;
   bfd_boolean         res = TRUE;
-  size_t              align;
 
   if (length <= 0)
     return FALSE;
@@ -17923,20 +17923,10 @@ process_notes_at (Filedata *           filedata,
 	  if (! apply_relocations (filedata, section, (unsigned char *) pnotes, length, NULL, NULL))
 	    return FALSE;
 	}
-      align = section->sh_addralign;
     }
   else
-    {
-      pnotes = (Elf_External_Note *) get_data (NULL, filedata, offset, 1, length,
+    pnotes = (Elf_External_Note *) get_data (NULL, filedata, offset, 1, length,
 					     _("notes"));
-
-      /* FIXME: Core notes seem to be produced with
-	 4-byte alignment even on 64-bit systems.  */
-      if (filedata->file_header.e_type == ET_CORE)
-	align = 4;
-      else
-	align = is_32bit_elf ? 4 : 4;
-    }
 
   if (pnotes == NULL)
     return FALSE;
@@ -17948,6 +17938,20 @@ process_notes_at (Filedata *           filedata,
   else
     printf (_("\nDisplaying notes found at file offset 0x%08lx with length 0x%08lx:\n"),
 	    (unsigned long) offset, (unsigned long) length);
+
+  /* NB: Some note sections may have alignment value of 0 or 1.  gABI
+     specifies that notes should be aligned to 4 bytes in 32-bit
+     objects and to 8 bytes in 64-bit objects.  As a Linux extension,
+     we also support 4 byte alignment in 64-bit objects.  If section
+     alignment is less than 4, we treate alignment as 4 bytes.   */
+  if (align < 4)
+    align = 4;
+  else if (align != 4 && align != 8)
+    {
+      warn (_("Corrupt note: alignment %ld, expecting 4 or 8\n"),
+	    (long) align);
+      return FALSE;
+    }
 
   printf (_("  %-20s %10s\tDescription\n"), _("Owner"), _("Data size"));
 
@@ -18087,7 +18091,8 @@ process_corefile_note_segments (Filedata * filedata)
       if (segment->p_type == PT_NOTE)
 	if (! process_notes_at (filedata, NULL,
 				(bfd_vma) segment->p_offset,
-				(bfd_vma) segment->p_filesz))
+				(bfd_vma) segment->p_filesz,
+				(bfd_vma) segment->p_align))
 	  res = FALSE;
     }
 
@@ -18191,7 +18196,8 @@ process_note_sections (Filedata * filedata)
 	{
 	  if (! process_notes_at (filedata, section,
 				  (bfd_vma) section->sh_offset,
-				  (bfd_vma) section->sh_size))
+				  (bfd_vma) section->sh_size,
+				  (bfd_vma) section->sh_addralign))
 	    res = FALSE;
 	  n++;
 	}
@@ -18566,7 +18572,10 @@ process_object (Filedata * filedata)
   if (! process_version_sections (filedata))
     res = FALSE;
 
-  separates = load_separate_debug_file (filedata, filedata->file_name);
+  if (filedata->file_header.e_shstrndx != SHN_UNDEF)
+    separates = load_separate_debug_file (filedata, filedata->file_name);
+  else
+    separates = NULL;
 
   if (! process_section_contents (filedata))
     res = FALSE;
