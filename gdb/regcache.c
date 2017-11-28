@@ -205,7 +205,7 @@ regcache::regcache (gdbarch *gdbarch, const address_space *aspace_,
 /* The register buffers.  A read-only register cache can hold the
    full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a
    read/write register cache can only hold [0 .. gdbarch_num_regs).  */
-  : regcache_read (gdbarch, readonly_p_),
+  : reg_buffer_rw (gdbarch, readonly_p_),
     m_aspace (aspace_), m_readonly_p (readonly_p_)
 {
   m_ptid = minus_one_ptid;
@@ -353,13 +353,9 @@ regcache_register_status (const struct regcache *regcache, int regnum)
 }
 
 enum register_status
-regcache::get_register_status (int regnum) const
+reg_buffer::get_register_status (int regnum) const
 {
-  gdb_assert (regnum >= 0);
-  if (m_readonly_p)
-    gdb_assert (regnum < m_descr->nr_cooked_registers);
-  else
-    gdb_assert (regnum < num_raw_registers ());
+  assert_regnum (regnum);
 
   return (enum register_status) m_register_status[regnum];
 }
@@ -802,23 +798,6 @@ regcache_cooked_write_unsigned (struct regcache *regcache, int regnum,
   regcache->cooked_write (regnum, val);
 }
 
-/* See regcache.h.  */
-
-void
-regcache_raw_set_cached_value (struct regcache *regcache, int regnum,
-			       const gdb_byte *buf)
-{
-  regcache->raw_set_cached_value (regnum, buf);
-}
-
-void
-regcache::raw_set_cached_value (int regnum, const gdb_byte *buf)
-{
-  memcpy (register_buffer (regnum), buf,
-	  m_descr->sizeof_register[regnum]);
-  m_register_status[regnum] = REG_VALID;
-}
-
 void
 regcache_raw_write (struct regcache *regcache, int regnum,
 		    const gdb_byte *buf)
@@ -848,7 +827,7 @@ regcache::raw_write (int regnum, const gdb_byte *buf)
     return;
 
   target_prepare_to_store (this);
-  raw_set_cached_value (regnum, buf);
+  raw_supply (regnum, buf);
 
   /* Invalidate the register after it is written, in case of a
      failure.  */
@@ -1024,13 +1003,12 @@ regcache_raw_supply (struct regcache *regcache, int regnum, const void *buf)
 }
 
 void
-regcache::raw_supply (int regnum, const void *buf)
+reg_buffer_rw::raw_supply (int regnum, const void *buf)
 {
   void *regbuf;
   size_t size;
 
   assert_regnum (regnum);
-  gdb_assert (!m_readonly_p);
 
   regbuf = register_buffer (regnum);
   size = m_descr->sizeof_register[regnum];
