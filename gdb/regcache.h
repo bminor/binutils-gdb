@@ -68,14 +68,6 @@ extern void regcache_raw_write_unsigned (struct regcache *regcache,
 extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
 					int regnum);
 
-/* Set a raw register's value in the regcache's buffer.  Unlike
-   regcache_raw_write, this is not write-through.  The intention is
-   allowing to change the buffer contents of a read-only regcache
-   allocated with new.  */
-
-extern void regcache_raw_set_cached_value
-  (struct regcache *regcache, int regnum, const gdb_byte *buf);
-
 /* Partial transfer of raw registers.  These perform read, modify,
    write style operations.  The read variant returns the status of the
    register.  */
@@ -229,12 +221,13 @@ public:
   /* Return regcache's architecture.  */
   gdbarch *arch () const;
 
+  enum register_status get_register_status (int regnum) const;
+
   virtual ~reg_buffer ()
   {
     xfree (m_registers);
     xfree (m_register_status);
   }
-
 protected:
   /* Assert on the range of REGNUM.  */
   void assert_regnum (int regnum) const;
@@ -257,6 +250,7 @@ protected:
   signed char *m_register_status;
 
   friend class regcache;
+  friend class detached_regcache;
 };
 
 /* An abstract class which only has methods doing read.  */
@@ -291,11 +285,33 @@ protected:
 				  bool is_raw);
 };
 
+/* Buffer of registers, can be red and written.  */
+
+class detached_regcache : public readable_regcache
+{
+public:
+  detached_regcache (gdbarch *gdbarch, bool has_pseudo)
+    : readable_regcache (gdbarch, has_pseudo)
+  {}
+
+  void raw_supply (int regnum, const void *buf);
+
+  void raw_supply (int regnum, const reg_buffer &src)
+  {
+    raw_supply (regnum, src.register_buffer (regnum));
+  }
+
+  void raw_update (int regnum) override
+  {}
+
+  DISABLE_COPY_AND_ASSIGN (detached_regcache);
+};
+
 class readonly_detached_regcache;
 
 /* The register cache for storing raw register values.  */
 
-class regcache : public readable_regcache
+class regcache : public detached_regcache
 {
 public:
   regcache (gdbarch *gdbarch)
@@ -339,16 +355,10 @@ public:
   void raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
 			    bool is_signed) const;
 
-  void raw_supply (int regnum, const void *buf);
-
   void raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
 			   bool is_signed);
 
   void raw_supply_zeroed (int regnum);
-
-  enum register_status get_register_status (int regnum) const;
-
-  void raw_set_cached_value (int regnum, const gdb_byte *buf);
 
   void invalidate (int regnum);
 
