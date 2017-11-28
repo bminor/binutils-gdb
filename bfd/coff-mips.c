@@ -504,6 +504,12 @@ mips_reflo_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 	  unsigned long vallo;
 	  struct mips_hi *next;
 
+	  if (! bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+					   input_section,
+					   reloc_entry->address
+					   * bfd_octets_per_byte (abfd)))
+	    return bfd_reloc_outofrange;
+	  
 	  /* Do the REFHI relocation.  Note that we actually don't
 	     need to know anything about the REFLO itself, except
 	     where to find the low 16 bits of the addend needed by the

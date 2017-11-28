@@ -1,3 +1,20 @@
+2017-11-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 22506
+	* reloc.c (reloc_offset_in_range): Rename to
+	bfd_reloc_offset_in_range and export.
+	(bfd_perform_relocation): Rename function invocation.
+	(bfd_install_relocation): Likewise.
+	(bfd_final_link_relocate): Likewise.
+	* bfd-in2.h: Regenerate.
+	* coff-arm.c (coff_arm_reloc): Use bfd_reloc_offset_in_range.
+	* coff-i386.c (coff_i386_reloc): Likewise.
+	* coff-i860.c (coff_i860_reloc): Likewise.
+	* coff-m68k.c (mk68kcoff_common_addend_special_fn): Likewise.
+	* coff-m88k.c (m88k_special_reloc): Likewise.
+	* coff-mips.c (mips_reflo_reloc): Likewise.
+	* coff-x86_64.c (coff_amd64_reloc): Likewise.
+
 2017-11-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-m10300.c (mn10300_elf_check_relocs): Don't set

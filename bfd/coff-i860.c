@@ -95,6 +95,11 @@ coff_i860_reloc (bfd *abfd,
 	reloc_howto_type *howto = reloc_entry->howto;
 	unsigned char *addr = (unsigned char *) data + reloc_entry->address;
 
+	if (! bfd_reloc_offset_in_range (howto, abfd, input_section,
+					 reloc_entry->address
+					 * bfd_octets_per_byte (abfd)))
+	  return bfd_reloc_outofrange;
+
 	switch (howto->size)
 	  {
 	  case 0:

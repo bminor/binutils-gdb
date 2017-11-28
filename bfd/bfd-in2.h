@@ -2662,6 +2662,12 @@ bfd_reloc_status_type bfd_check_overflow
     unsigned int addrsize,
     bfd_vma relocation);
 
+bfd_boolean bfd_reloc_offset_in_range
+   (reloc_howto_type *howto,
+    bfd *abfd,
+    asection *section,
+    bfd_size_type offset);
+
 bfd_reloc_status_type bfd_perform_relocation
    (bfd *abfd,
     arelent *reloc_entry,
