@@ -282,13 +282,6 @@ reg_buffer::register_buffer (int regnum) const
 }
 
 void
-regcache_save (struct regcache *regcache,
-	       regcache_cooked_read_ftype *cooked_read, void *src)
-{
-  regcache->save (cooked_read, src);
-}
-
-void
 regcache::save (regcache_cooked_read_ftype *cooked_read,
 		void *src)
 {
@@ -329,10 +322,14 @@ regcache::restore (struct regcache *src)
   struct gdbarch *gdbarch = m_descr->gdbarch;
   int regnum;
 
+  gdb_assert (src != NULL);
   /* The dst had better not be read-only.  If it is, the `restore'
      doesn't make much sense.  */
   gdb_assert (!m_readonly_p);
   gdb_assert (src->m_readonly_p);
+
+  gdb_assert (gdbarch == src->arch ());
+
   /* Copy over any registers, being careful to only restore those that
      were both saved and need to be restored.  The full [0 .. gdbarch_num_regs
      + gdbarch_num_pseudo_regs) range is checked since some architectures need
@@ -345,17 +342,6 @@ regcache::restore (struct regcache *src)
 	    cooked_write (regnum, src->register_buffer (regnum));
 	}
     }
-}
-
-void
-regcache_cpy (struct regcache *dst, struct regcache *src)
-{
-  gdb_assert (src != NULL && dst != NULL);
-  gdb_assert (src->m_descr->gdbarch == dst->m_descr->gdbarch);
-  gdb_assert (src != dst);
-  gdb_assert (src->m_readonly_p && !dst->m_readonly_p);
-
-  dst->restore (src);
 }
 
 struct regcache *
