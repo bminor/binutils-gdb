@@ -1,42 +1,9 @@
-From d2b4738d7e9c37d32fb7d703e9389d7ff22a622c Mon Sep 17 00:00:00 2001
+From 7ce00e7a68138f6d58d9d7db8a096dad24b8e47e Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Thu, 23 Nov 2017 08:36:21 -0800
-Subject: [PATCH] ELF: Don't check DT_NEEDED for symbols defined by linker
- script
-
-Linker shouldn't use any shared objects, including those from DT_NEEDED,
-to resolve references of symbols which will be defined by linker script.
-gld${EMULATION_NAME}_get_script is called to get default linker script,
-which is updated to set link_info.linker_script to type_${SCRIPT_NAME}.
-In gld${EMULATION_NAME}_after_open, we set ldscript_def to 1 for symbols
-which will be defined by default linker script derived from elf.sc so
-that elf_link_add_object_symbols can avoid checking DT_NEEDED if symbols
-are defined by linker script.
-
-bfd/
+Subject: [PATCH] ld: Add a testcase for PR ld/22471
 
 	PR ld/22471
-	* elflink.c (elf_link_add_object_symbols)): Don't check DT_NEEDED
-	for symbols defined by linker script.
-
-include/
-
-	PR ld/22471
-	* bfdlink.h (linker_script_type): New enum.
-	(bfd_link_info): Add linker_script.
-
-ld/
-
-	PR ld/22471
-	* emultempl/elf32.em (ETEXT_NAME): Set to ${USER_LABEL_PREFIX}etext
-	if not set.
-	(SCRIPT_TYPE): New.
-	(gld${EMULATION_NAME}_after_open): Set ldscript_def on referenced
-	symbols defined by default linker script.
-	(gld${EMULATION_NAME}_get_script): Set link_info.linker_script to
-	${SCRIPT_TYPE}.
-	* ldmain.c (main): Initialize link_info.linker_script to
-	type_unknown.
 	* testsuite/ld-elf/pr22471.t: New file.
 	* testsuite/ld-elf/pr22471a.s: Likewise.
 	* testsuite/ld-elf/pr22471b.s: Likewise.
@@ -44,190 +11,15 @@ ld/
 	underscore targets.
 	Run PR ld/22471 tests.
 ---
- bfd/elflink.c                  |  1 +
- include/bfdlink.h              | 42 +++++++++++++++++++++++++++++++++
- ld/emultempl/elf32.em          | 53 ++++++++++++++++++++++++++++++++++++++++++
- ld/ldmain.c                    |  1 +
  ld/testsuite/ld-elf/pr22471.t  |  1 +
  ld/testsuite/ld-elf/pr22471a.s |  1 +
- ld/testsuite/ld-elf/pr22471b.s | 17 ++++++++++++++
- ld/testsuite/ld-elf/shared.exp | 34 +++++++++++++++++++++++++++
- 8 files changed, 150 insertions(+)
+ ld/testsuite/ld-elf/pr22471b.s | 17 +++++++++++++++++
+ ld/testsuite/ld-elf/shared.exp | 34 ++++++++++++++++++++++++++++++++++
+ 4 files changed, 53 insertions(+)
  create mode 100644 ld/testsuite/ld-elf/pr22471.t
  create mode 100644 ld/testsuite/ld-elf/pr22471a.s
  create mode 100644 ld/testsuite/ld-elf/pr22471b.s
 
-diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 99f867dc75..ae2c31237a 100644
---- a/bfd/elflink.c
-+++ b/bfd/elflink.c
-@@ -4887,6 +4887,7 @@ error_free_dyn:
- 	  if (!add_needed
- 	      && matched
- 	      && definition
-+	      && !h->root.ldscript_def
- 	      && ((dynsym
- 		   && h->ref_regular_nonweak
- 		   && (old_bfd == NULL
-diff --git a/include/bfdlink.h b/include/bfdlink.h
-index 2370c0d45a..7a83e45365 100644
---- a/include/bfdlink.h
-+++ b/include/bfdlink.h
-@@ -296,6 +296,45 @@ enum output_type
-   type_dll,
- };
- 
-+/* Types of linker script.  */
-+enum linker_script_type
-+{
-+  type_unknown,
-+  type_armbpabi,	/* From armbpabi.sc.  */
-+  type_arclinux,	/* From arclinux.sc.  */
-+  type_avr,		/* From avr.sc.  */
-+  type_elf,		/* From elf.sc.  */
-+  type_elf_chaos,	/* From elf_chaos.sc.  */
-+  type_elf32crx,	/* From elf32crx.sc.  */
-+  type_elfarc,		/* From elfarc.sc.  */
-+  type_elfarcv2,	/* From elfarcv2.sc.  */
-+  type_elf32cr16,	/* From elf32cr16.sc.  */
-+  type_elf32cr16c,	/* From elf32cr16c.sc.  */
-+  type_elf32sh_symbian,	/* From elf32sh-symbian.sc.  */
-+  type_elf32xc16x,	/* From elf32xc16x.sc.  */
-+  type_elf32xc16xl,	/* From elf32xc16xl.sc.  */
-+  type_elf32xc16xs,	/* From elf32xc16xs.sc.  */
-+  type_elf64hppa,	/* From elf64hppa.sc.  */
-+  type_elfd10v,		/* From elfd10v.sc.  */
-+  type_elfi370,		/* From elfi370.sc.  */
-+  type_elfm68hc11,	/* From elfm68hc11.sc.  */
-+  type_elfm68hc12,	/* From elfm68hc12.sc.  */
-+  type_elfmicroblaze,	/* From elfmicroblaze.sc.  */
-+  type_elfxgate,	/* From elfxgate.sc.  */
-+  type_elfxtensa,	/* From elfxtensa.sc.  */
-+  type_epiphany_4x4,	/* From epiphany_4x4.sc.  */
-+  type_hppaelf,		/* From hppaelf.sc.  */
-+  type_mep,		/* From mep.sc.  */
-+  type_nds32elf,	/* From nds32elf.sc.  */
-+  type_nw,		/* From nw.sc.  */
-+  type_pru,		/* From pru.sc.  */
-+  type_psos,		/* From psos.sc.  */
-+  type_v850,		/* From v850.sc.  */
-+  type_v850_rh850,	/* From v850_rh850.sc.  */
-+  type_visium,		/* From visium.sc.  */
-+  type_xstormy16	/* From xstormy16.sc.  */
-+};
-+
- #define bfd_link_pde(info)	   ((info)->type == type_pde)
- #define bfd_link_dll(info)	   ((info)->type == type_dll)
- #define bfd_link_relocatable(info) ((info)->type == type_relocatable)
-@@ -492,6 +531,9 @@ struct bfd_link_info
-   /* TRUE if common symbols should be treated as undefined.  */
-   unsigned int inhibit_common_definition : 1;
- 
-+  /* Type of linker script used.  */
-+  ENUM_BITFIELD (linker_script_type) linker_script : 6;
-+
-   /* The 1-byte NOP for x86 call instruction.  */
-   char call_nop_byte;
- 
-diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
-index edd8944f04..e6db53fbff 100644
---- a/ld/emultempl/elf32.em
-+++ b/ld/emultempl/elf32.em
-@@ -3,6 +3,8 @@
- # This file is now misnamed, because it supports both 32 bit and 64 bit
- # ELF emulations.
- test -z "${ELFSIZE}" && ELFSIZE=32
-+test -z "${ETEXT_NAME}" && ETEXT_NAME=${USER_LABEL_PREFIX}etext
-+SCRIPT_TYPE=`echo "type_${SCRIPT_NAME}" | sed -e "s/-/_/g"`
- if [ -z "$MACHINE" ]; then
-   OUTPUT_ARCH=${ARCH}
- else
-@@ -1284,6 +1286,49 @@ gld${EMULATION_NAME}_after_open (void)
-       return;
-     }
- 
-+EOF
-+
-+# FIXME: Update for other ${SCRIPT_NAME} if PR ld/22471 tests failed.
-+case ${SCRIPT_NAME} in
-+  arclinux | elf | elf64hppa | elfxtensa | nds32elf)
-+    fragment <<EOF
-+  if (link_info.linker_script == ${SCRIPT_TYPE})
-+    {
-+      struct bfd_link_hash_entry *h;
-+      const char *symbols[] =
-+	{
-+	  "__${ETEXT_NAME}",
-+	  "_${ETEXT_NAME}",
-+	  "${ETEXT_NAME}",
-+	  "${USER_LABEL_PREFIX}" "__bss_start",
-+	  "${USER_LABEL_PREFIX}" "_edata",
-+	  "${USER_LABEL_PREFIX}" "edata",
-+	  "${USER_LABEL_PREFIX}" "_end",
-+	  "${USER_LABEL_PREFIX}" "end",
-+	  NULL
-+	};
-+      const char **p;
-+
-+      /* These symbols will be defined by default linker script.  Set
-+	 ldscript_def if they are referenced.  */
-+      for (p = symbols; *p != NULL; p++)
-+	{
-+	  h = bfd_link_hash_lookup (link_info.hash, *p, FALSE, FALSE,
-+				    FALSE);
-+	  if (h != NULL
-+	      && (h->type == bfd_link_hash_new
-+		  || h->type == bfd_link_hash_undefined
-+		  || h->type == bfd_link_hash_undefweak
-+		  || h->type == bfd_link_hash_common))
-+	    h->ldscript_def = 1;
-+	}
-+    }
-+
-+EOF
-+    ;;
-+esac
-+
-+fragment <<EOF
-   if (!link_info.traditional_format)
-     {
-       bfd *elfbfd = NULL;
-@@ -2350,7 +2395,11 @@ sc="-f stringify.sed"
- fragment <<EOF
- {
-   *isfile = 0;
-+EOF
- 
-+echo "  link_info.linker_script = ${SCRIPT_TYPE};" >> e${EMULATION_NAME}.c
-+
-+fragment <<EOF
-   if (bfd_link_relocatable (&link_info) && config.build_constructors)
-     return
- EOF
-@@ -2409,7 +2458,11 @@ else
- fragment <<EOF
- {
-   *isfile = 1;
-+EOF
- 
-+echo "  link_info.linker_script = ${SCRIPT_TYPE};" >> e${EMULATION_NAME}.c
-+
-+fragment <<EOF
-   if (bfd_link_relocatable (&link_info) && config.build_constructors)
-     return "ldscripts/${EMULATION_NAME}.xu";
-   else if (bfd_link_relocatable (&link_info))
-diff --git a/ld/ldmain.c b/ld/ldmain.c
-index 9e8f3304fe..a1560eb0cd 100644
---- a/ld/ldmain.c
-+++ b/ld/ldmain.c
-@@ -287,6 +287,7 @@ main (int argc, char **argv)
-   link_info.pei386_auto_import = -1;
-   link_info.spare_dynamic_tags = 5;
-   link_info.path_separator = ':';
-+  link_info.linker_script = type_unknown;
- #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
-   link_info.compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
- #endif
 diff --git a/ld/testsuite/ld-elf/pr22471.t b/ld/testsuite/ld-elf/pr22471.t
 new file mode 100644
 index 0000000000..8862dc291d
