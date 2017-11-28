@@ -1718,7 +1718,7 @@ _bfd_coff_read_string_table (bfd *abfd)
 #endif
     }
 
-  if (strsize < STRING_SIZE_SIZE)
+  if (strsize < STRING_SIZE_SIZE || strsize > bfd_get_file_size (abfd))
     {
       _bfd_error_handler
 	/* xgettext: c-format */
@@ -1726,7 +1726,7 @@ _bfd_coff_read_string_table (bfd *abfd)
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
-
+  
   strings = (char *) bfd_malloc (strsize + 1);
   if (strings == NULL)
     return NULL;

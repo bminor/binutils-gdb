@@ -1,5 +1,11 @@
 2017-11-28  Nick Clifton  <nickc@redhat.com>
 
+	PR 22507
+	* coffgen.c (_bfd_coff_read_string_table): Check for an excessive
+	size of the external string table.
+
+2017-11-28  Nick Clifton  <nickc@redhat.com>
+
 	PR 22506
 	* reloc.c (reloc_offset_in_range): Rename to
 	bfd_reloc_offset_in_range and export.
