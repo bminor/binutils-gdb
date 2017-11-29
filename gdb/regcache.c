@@ -200,13 +200,10 @@ reg_buffer::reg_buffer (gdbarch *gdbarch, bool has_pseudo)
     }
 }
 
-regcache::regcache (gdbarch *gdbarch, const address_space *aspace_,
-		    bool readonly_p_)
-/* The register buffers.  A read-only register cache can hold the
-   full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a
-   read/write register cache can only hold [0 .. gdbarch_num_regs).  */
-  : reg_buffer_rw (gdbarch, readonly_p_),
-    m_aspace (aspace_), m_readonly_p (readonly_p_)
+regcache::regcache (gdbarch *gdbarch, const address_space *aspace_)
+/* The register buffers.  A read/write register cache can only hold
+   [0 .. gdbarch_num_regs).  */
+  : reg_buffer_rw (gdbarch, false), m_aspace (aspace_)
 {
   m_ptid = minus_one_ptid;
 }
@@ -319,7 +316,6 @@ regcache::restore (regcache_readonly *src)
   int regnum;
 
   gdb_assert (src != NULL);
-  gdb_assert (!m_readonly_p);
   gdb_assert (src->m_has_pseudo);
 
   gdb_assert (gdbarch == src->arch ());
@@ -361,9 +357,8 @@ regcache_invalidate (struct regcache *regcache, int regnum)
 }
 
 void
-regcache::invalidate (int regnum)
+reg_buffer_rw::invalidate (int regnum)
 {
-  gdb_assert (!m_readonly_p);
   assert_regnum (regnum);
   m_register_status[regnum] = REG_UNKNOWN;
 }
@@ -394,7 +389,7 @@ get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
     if (ptid_equal (regcache->ptid (), ptid) && regcache->arch () == gdbarch)
       return regcache;
 
-  regcache *new_regcache = new regcache (gdbarch, aspace, false);
+  regcache *new_regcache = new regcache (gdbarch, aspace);
 
   regcache::current_regcache.push_front (new_regcache);
   new_regcache->set_ptid (ptid);
@@ -532,7 +527,7 @@ regcache::raw_update (int regnum)
      only there is still only one target side register cache.  Sigh!
      On the bright side, at least there is a regcache object.  */
 
-  if (!m_readonly_p && get_register_status (regnum) == REG_UNKNOWN)
+  if (get_register_status (regnum) == REG_UNKNOWN)
     {
       target_fetch_registers (this, regnum);
 
@@ -805,7 +800,6 @@ regcache::raw_write (int regnum, const gdb_byte *buf)
 
   gdb_assert (buf != NULL);
   assert_regnum (regnum);
-  gdb_assert (!m_readonly_p);
 
   /* On the sparc, writing %g0 is a no-op, so we don't even want to
      change the registers array if something writes to this register.  */
@@ -1028,15 +1022,14 @@ reg_buffer_rw::raw_supply (int regnum, const void *buf)
    most significant bytes of the integer will be truncated.  */
 
 void
-regcache::raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
-			      bool is_signed)
+reg_buffer_rw::raw_supply_integer (int regnum, const gdb_byte *addr,
+				   int addr_len, bool is_signed)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (m_descr->gdbarch);
   gdb_byte *regbuf;
   size_t regsize;
 
   assert_regnum (regnum);
-  gdb_assert (!m_readonly_p);
 
   regbuf = register_buffer (regnum);
   regsize = m_descr->sizeof_register[regnum];
@@ -1051,13 +1044,12 @@ regcache::raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
    unavailable).  */
 
 void
-regcache::raw_supply_zeroed (int regnum)
+reg_buffer_rw::raw_supply_zeroed (int regnum)
 {
   void *regbuf;
   size_t size;
 
   assert_regnum (regnum);
-  gdb_assert (!m_readonly_p);
 
   regbuf = register_buffer (regnum);
   size = m_descr->sizeof_register[regnum];
@@ -1871,7 +1863,7 @@ class readwrite_regcache : public regcache
 {
 public:
   readwrite_regcache (struct gdbarch *gdbarch)
-    : regcache (gdbarch, nullptr, false)
+    : regcache (gdbarch, nullptr)
   {}
 };
 
