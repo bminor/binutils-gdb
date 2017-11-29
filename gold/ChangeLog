@@ -1,3 +1,9 @@
+2017-11-29  Stefan Stroe  <stroestefan@gmail.com>
+
+	* po/Make-in (datadir): Define as @datadir@.
+	(localedir): Define as @localedir@.
+	(gnulocaledir, gettextsrcdir): Use @datarootdir@.
+
 2017-11-28  Cary Coutant  <ccoutant@gmail.com>
 
 	* resolve.cc (Symbol_table::resolve): Allow multiply-defined absolute
