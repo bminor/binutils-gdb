@@ -57,17 +57,35 @@
 /* See minsyms.h.  */
 
 bool
-msymbol_is_text (minimal_symbol *msymbol)
+msymbol_is_function (struct objfile *objfile, minimal_symbol *minsym,
+		     CORE_ADDR *func_address_p)
 {
-  switch (MSYMBOL_TYPE (msymbol))
+  CORE_ADDR msym_addr = MSYMBOL_VALUE_ADDRESS (objfile, minsym);
+
+  switch (minsym->type)
     {
-    case mst_text:
-    case mst_text_gnu_ifunc:
-    case mst_solib_trampoline:
-    case mst_file_text:
-      return true;
+    case mst_slot_got_plt:
+    case mst_data:
+    case mst_bss:
+    case mst_abs:
+    case mst_file_data:
+    case mst_file_bss:
+      {
+	struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	CORE_ADDR pc = gdbarch_convert_from_func_ptr_addr (gdbarch, msym_addr,
+							   &current_target);
+	if (pc != msym_addr)
+	  {
+	    if (func_address_p != NULL)
+	      *func_address_p = pc;
+	    return true;
+	  }
+	return false;
+      }
     default:
-      return false;
+      if (func_address_p != NULL)
+	*func_address_p = msym_addr;
+      return true;
     }
 }
 

@@ -159,9 +159,14 @@ void terminate_minimal_symbol_table (struct objfile *objfile);
 
 
 
-/* Return whether MSYMBOL is a function/method.  */
+/* Return whether MSYMBOL is a function/method.  If FUNC_ADDRESS_P is
+   non-NULL, and the MSYMBOL is a function, then *FUNC_ADDRESS_P is
+   set to the function's address, already resolved if MINSYM points to
+   a function descriptor.  */
 
-bool msymbol_is_text (minimal_symbol *msymbol);
+bool msymbol_is_function (struct objfile *objfile,
+			  minimal_symbol *minsym,
+			  CORE_ADDR *func_address_p = NULL);
 
 /* Compute a hash code for the string argument.  */
 

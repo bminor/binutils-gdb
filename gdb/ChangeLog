@@ -1,3 +1,12 @@
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	* linespec.c (minsym_found, add_minsym): Use msymbol_is_function.
+	* minsyms.c (msymbol_is_text): Delete.
+	(msymbol_is_function): New function.
+	* minsyms.h (msymbol_is_text): Delete.
+	(msymbol_is_function): New declaration.
+	* symtab.c (find_function_alias_target): Use msymbol_is_function.
+
 2017-11-29  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (distclean): Handle the case where rmdir fails.

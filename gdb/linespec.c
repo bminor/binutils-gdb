@@ -4309,22 +4309,12 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 	      struct minimal_symbol *msymbol,
 	      std::vector<symtab_and_line> *result)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  CORE_ADDR pc;
   struct symtab_and_line sal;
 
-  if (msymbol_is_text (msymbol))
+  CORE_ADDR func_addr;
+  if (msymbol_is_function (objfile, msymbol, &func_addr))
     {
-      sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (objfile, msymbol),
-			       (struct obj_section *) 0, 0);
-      sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
-
-      /* The minimal symbol might point to a function descriptor;
-	 resolve it to the actual code address instead.  */
-      pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc,
-					       &current_target);
-      if (pc != sal.pc)
-	sal = find_pc_sect_line (pc, NULL, 0);
+      sal = find_pc_sect_line (func_addr, NULL, 0);
 
       if (self->funfirstline)
 	{
@@ -4332,14 +4322,9 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 	      && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
 		  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
 	    {
-	      /* If gdbarch_convert_from_func_ptr_addr does not apply then
-		 sal.SECTION, sal.LINE&co. will stay correct from above.
-		 If gdbarch_convert_from_func_ptr_addr applies then
-		 sal.SECTION is cleared from above and sal.LINE&co. will
-		 stay correct from the last find_pc_sect_line above.  */
-	      sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
-	      sal.pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc,
-							   &current_target);
+	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
+	      sal.pc = func_addr;
 	      if (gdbarch_skip_entrypoint_p (gdbarch))
 		sal.pc = gdbarch_skip_entrypoint (gdbarch, sal.pc);
 	    }
@@ -4424,52 +4409,26 @@ static void
 add_minsym (struct minimal_symbol *minsym, void *d)
 {
   struct collect_minsyms *info = (struct collect_minsyms *) d;
-  bound_minimal_symbol_d mo;
-
-  mo.minsym = minsym;
-  mo.objfile = info->objfile;
 
   if (info->symtab != NULL)
     {
-      CORE_ADDR pc;
-      struct symtab_and_line sal;
-      struct gdbarch *gdbarch = get_objfile_arch (info->objfile);
+      /* We're looking for a label for which we don't have debug
+	 info.  */
+      CORE_ADDR func_addr;
+      if (msymbol_is_function (info->objfile, minsym, &func_addr))
+	{
+	  symtab_and_line sal = find_pc_sect_line (func_addr, NULL, 0);
 
-      sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (info->objfile, minsym),
-			       NULL, 0);
-      sal.section = MSYMBOL_OBJ_SECTION (info->objfile, minsym);
-      pc
-	= gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc, &current_target);
-      if (pc != sal.pc)
-	sal = find_pc_sect_line (pc, NULL, 0);
-
-      if (info->symtab != sal.symtab)
-	return;
+	  if (info->symtab != sal.symtab)
+	    return;
+	}
     }
 
-  /* Exclude data symbols when looking for breakpoint locations.   */
-  if (!info->list_mode)
-    switch (minsym->type)
-      {
-	case mst_slot_got_plt:
-	case mst_data:
-	case mst_bss:
-	case mst_abs:
-	case mst_file_data:
-	case mst_file_bss:
-	  {
-	    /* Make sure this minsym is not a function descriptor
-	       before we decide to discard it.  */
-	    struct gdbarch *gdbarch = get_objfile_arch (info->objfile);
-	    CORE_ADDR addr = gdbarch_convert_from_func_ptr_addr
-			       (gdbarch, BMSYMBOL_VALUE_ADDRESS (mo),
-				&current_target);
+  /* Exclude data symbols when looking for breakpoint locations.  */
+  if (!info->list_mode && !msymbol_is_function (info->objfile, minsym))
+    return;
 
-	    if (addr == BMSYMBOL_VALUE_ADDRESS (mo))
-	      return;
-	  }
-      }
-
+  bound_minimal_symbol_d mo = {minsym, info->objfile};
   VEC_safe_push (bound_minimal_symbol_d, info->msyms, &mo);
 }
 

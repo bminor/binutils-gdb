@@ -3927,14 +3927,14 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 symbol *
 find_function_alias_target (bound_minimal_symbol msymbol)
 {
-  if (!msymbol_is_text (msymbol.minsym))
+  CORE_ADDR func_addr;
+  if (!msymbol_is_function (msymbol.objfile, msymbol.minsym, &func_addr))
     return NULL;
 
-  CORE_ADDR addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
-  symbol *sym = find_pc_function (addr);
+  symbol *sym = find_pc_function (func_addr);
   if (sym != NULL
       && SYMBOL_CLASS (sym) == LOC_BLOCK
-      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == addr)
+      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == func_addr)
     return sym;
 
   return NULL;
