@@ -1,3 +1,11 @@
+2017-11-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.cp/breakpoint.cc (bar): Set return type to void.
+	* gdb.cp/psymtab-parameter.cc (func): Likewise.
+	* gdb.cp/psymtab-parameter.exp: Update comment regarding prototype of
+	func ().
+	* gdb.cp/shadow.cc (B.func): Return 0.
+
 2017-11-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_catch_ex.exp (continue_to_exception): Adjust

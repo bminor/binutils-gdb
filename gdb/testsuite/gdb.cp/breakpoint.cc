@@ -28,7 +28,7 @@ public:
     return 1; // conditional breakpoint in method
   }
 
-  int bar ()
+  void bar ()
   {
     for (int i = 0; i < 1; ++i)
       {
