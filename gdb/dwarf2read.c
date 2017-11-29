@@ -4604,6 +4604,8 @@ static const char *test_symbols[] = {
   "ns::foo<char*>",
   "ns::foo<int>",
   "ns::foo<long>",
+  "ns2::tmpl<int>::foo2",
+  "(anonymous namespace)::A::B::C",
 
   /* These are used to check that the increment-last-char in the
      matching algorithm for completion doesn't match "t1_fund" when
@@ -4790,6 +4792,8 @@ test_dw2_expand_symtabs_matching_symbol ()
   {
     CHECK_MATCH ("w", symbol_name_match_type::FULL, true,
 		 EXPECT ("w1::w2"));
+    CHECK_MATCH ("w", symbol_name_match_type::WILD, true,
+		 EXPECT ("w1::w2"));
   }
 
   /* Same, with a "complicated" symbol.  */
@@ -4817,6 +4821,10 @@ test_dw2_expand_symtabs_matching_symbol ()
   {
     CHECK_MATCH ("std::zfunction(int)", symbol_name_match_type::FULL, true,
 		 EXPECT ("std::zfunction", "std::zfunction2"));
+    CHECK_MATCH ("zfunction(int)", symbol_name_match_type::WILD, true,
+		 EXPECT ("std::zfunction", "std::zfunction2"));
+    CHECK_MATCH ("zfunc", symbol_name_match_type::WILD, true,
+		 EXPECT ("std::zfunction", "std::zfunction2"));
   }
 
   /* Check that whitespace is ignored appropriately.  A symbol with a
@@ -4824,6 +4832,8 @@ test_dw2_expand_symtabs_matching_symbol ()
   {
     static const char expected[] = "ns::foo<int>";
     CHECK_MATCH ("ns :: foo < int > ", symbol_name_match_type::FULL, false,
+		 EXPECT (expected));
+    CHECK_MATCH ("foo < int > ", symbol_name_match_type::WILD, false,
 		 EXPECT (expected));
   }
 
@@ -4837,8 +4847,12 @@ test_dw2_expand_symtabs_matching_symbol ()
       {
 	CHECK_MATCH ("ns :: foo < char * >", symbol_name_match_type::FULL,
 		     completion_mode[i], EXPECT (expected));
+	CHECK_MATCH ("foo < char * >", symbol_name_match_type::WILD,
+		     completion_mode[i], EXPECT (expected));
 
 	CHECK_MATCH ("ns :: foo < char * > (int)", symbol_name_match_type::FULL,
+		     completion_mode[i], EXPECT (expected));
+	CHECK_MATCH ("foo < char * > (int)", symbol_name_match_type::WILD,
 		     completion_mode[i], EXPECT (expected));
       }
   }
@@ -4850,12 +4864,46 @@ test_dw2_expand_symtabs_matching_symbol ()
 		 symbol_name_match_type::FULL, true, EXPECT (expected));
     CHECK_MATCH ("ns :: foo < char * >  ( int ) &&",
 		 symbol_name_match_type::FULL, true, EXPECT (expected));
+    CHECK_MATCH ("foo < char * >  ( int ) const",
+		 symbol_name_match_type::WILD, true, EXPECT (expected));
+    CHECK_MATCH ("foo < char * >  ( int ) &&",
+		 symbol_name_match_type::WILD, true, EXPECT (expected));
   }
 
   /* Test lookup names that don't match anything.  */
   {
+    CHECK_MATCH ("bar2", symbol_name_match_type::WILD, false,
+		 {});
+
     CHECK_MATCH ("doesntexist", symbol_name_match_type::FULL, false,
 		 {});
+  }
+
+  /* Some wild matching tests, exercising "(anonymous namespace)",
+     which should not be confused with a parameter list.  */
+  {
+    static const char *syms[] = {
+      "A::B::C",
+      "B::C",
+      "C",
+      "A :: B :: C ( int )",
+      "B :: C ( int )",
+      "C ( int )",
+    };
+
+    for (const char *s : syms)
+      {
+	CHECK_MATCH (s, symbol_name_match_type::WILD, false,
+		     EXPECT ("(anonymous namespace)::A::B::C"));
+      }
+  }
+
+  {
+    static const char expected[] = "ns2::tmpl<int>::foo2";
+    CHECK_MATCH ("tmp", symbol_name_match_type::WILD, true,
+		 EXPECT (expected));
+    CHECK_MATCH ("tmpl<", symbol_name_match_type::WILD, true,
+		 EXPECT (expected));
   }
 
   SELF_CHECK (!any_mismatch);

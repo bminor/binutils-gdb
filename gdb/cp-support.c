@@ -1615,11 +1615,48 @@ gdb_sniff_from_mangled_name (const char *mangled, char **demangled)
   return *demangled != NULL;
 }
 
-/* C++ symbol_name_matcher_ftype implementation.  */
+/* See cp-support.h.  */
 
-/* Helper for cp_fq_symbol_name_matches (i.e.,
-   symbol_name_matcher_ftype implementation).  Split to a separate
-   function for unit-testing convenience.
+unsigned int
+cp_search_name_hash (const char *search_name)
+{
+  /* cp_entire_prefix_len assumes a fully-qualified name with no
+     leading "::".  */
+  if (startswith (search_name, "::"))
+    search_name += 2;
+
+  unsigned int prefix_len = cp_entire_prefix_len (search_name);
+  if (prefix_len != 0)
+    search_name += prefix_len + 2;
+
+  return default_search_name_hash (search_name);
+}
+
+/* Helper for cp_symbol_name_matches (i.e., symbol_name_matcher_ftype
+   implementation for symbol_name_match_type::WILD matching).  Split
+   to a separate function for unit-testing convenience.
+
+   If SYMBOL_SEARCH_NAME has more scopes than LOOKUP_NAME, we try to
+   match ignoring the extra leading scopes of SYMBOL_SEARCH_NAME.
+   This allows conveniently setting breakpoints on functions/methods
+   inside any namespace/class without specifying the fully-qualified
+   name.
+
+   E.g., these match:
+
+    [symbol search name]   [lookup name]
+    foo::bar::func         foo::bar::func
+    foo::bar::func         bar::func
+    foo::bar::func         func
+
+   While these don't:
+
+    [symbol search name]   [lookup name]
+    foo::zbar::func        bar::func
+    foo::bar::func         foo::func
+
+   See more examples in the test_cp_symbol_name_matches selftest
+   function below.
 
    See symbol_name_matcher_ftype for description of SYMBOL_SEARCH_NAME
    and COMP_MATCH_RES.
@@ -1636,8 +1673,68 @@ cp_symbol_name_matches_1 (const char *symbol_search_name,
 			  strncmp_iw_mode mode,
 			  completion_match_result *comp_match_res)
 {
+  const char *sname = symbol_search_name;
+
+  while (true)
+    {
+      if (strncmp_iw_with_mode (sname, lookup_name, lookup_name_len,
+				mode, language_cplus) == 0)
+	{
+	  if (comp_match_res != NULL)
+	    {
+	      /* Note here we set different MATCH and MATCH_FOR_LCD
+		 strings.  This is because with
+
+		  (gdb) b push_bac[TAB]
+
+		 we want the completion matches to list
+
+		  std::vector<int>::push_back(...)
+		  std::vector<char>::push_back(...)
+
+		 etc., which are SYMBOL_SEARCH_NAMEs, while we want
+		 the input line to auto-complete to
+
+		  (gdb) push_back(...)
+
+		 which is SNAME, not to
+
+		  (gdb) std::vector<
+
+		 which would be the regular common prefix between all
+		 the matches otherwise.  */
+	      comp_match_res->set_match (symbol_search_name, sname);
+	    }
+	  return true;
+	}
+
+      unsigned int len = cp_find_first_component (sname);
+
+      if (sname[len] == '\0')
+	return false;
+
+      gdb_assert (sname[len] == ':');
+      /* Skip the '::'.  */
+      sname += len + 2;
+    }
+}
+
+/* C++ symbol_name_matcher_ftype implementation.  */
+
+static bool
+cp_fq_symbol_name_matches (const char *symbol_search_name,
+			   const lookup_name_info &lookup_name,
+			   completion_match_result *comp_match_res)
+{
+  /* Get the demangled name.  */
+  const std::string &name = lookup_name.cplus ().lookup_name ();
+
+  strncmp_iw_mode mode = (lookup_name.completion_mode ()
+			  ? strncmp_iw_mode::NORMAL
+			  : strncmp_iw_mode::MATCH_PARAMS);
+
   if (strncmp_iw_with_mode (symbol_search_name,
-			    lookup_name, lookup_name_len,
+			    name.c_str (), name.size (),
 			    mode, language_cplus) == 0)
     {
       if (comp_match_res != NULL)
@@ -1648,12 +1745,13 @@ cp_symbol_name_matches_1 (const char *symbol_search_name,
   return false;
 }
 
-/* C++ symbol_name_matcher_ftype implementation.  */
+/* C++ symbol_name_matcher_ftype implementation for wild matches.
+   Defers work to cp_symbol_name_matches_1.  */
 
 static bool
-cp_fq_symbol_name_matches (const char *symbol_search_name,
-			   const lookup_name_info &lookup_name,
-			   completion_match_result *comp_match_res)
+cp_symbol_name_matches (const char *symbol_search_name,
+			const lookup_name_info &lookup_name,
+			completion_match_result *comp_match_res)
 {
   /* Get the demangled name.  */
   const std::string &name = lookup_name.cplus ().lookup_name ();
@@ -1672,7 +1770,16 @@ cp_fq_symbol_name_matches (const char *symbol_search_name,
 symbol_name_matcher_ftype *
 cp_get_symbol_name_matcher (const lookup_name_info &lookup_name)
 {
-  return cp_fq_symbol_name_matches;
+  switch (lookup_name.match_type ())
+    {
+    case symbol_name_match_type::FULL:
+    case symbol_name_match_type::EXPRESSION:
+      return cp_fq_symbol_name_matches;
+    case symbol_name_match_type::WILD:
+      return cp_symbol_name_matches;
+    }
+
+  gdb_assert_not_reached ("");
 }
 
 #if GDB_SELF_TEST
@@ -1807,6 +1914,42 @@ test_cp_symbol_name_matches ()
   CHECK_MATCH_C ("abc::def::ghi()", "abc::def::ghi ( )");
   CHECK_MATCH_C ("function()", "function()");
   CHECK_MATCH_C ("bar::function()", "bar::function()");
+
+  /* Wild matching tests follow.  */
+
+  /* Tests matching symbols in some scope.  */
+  CHECK_MATCH_C ("foo::function()", "function");
+  CHECK_MATCH_C ("foo::function(int)", "function");
+  CHECK_MATCH_C ("foo::bar::function()", "function");
+  CHECK_MATCH_C ("bar::function()", "bar::function");
+  CHECK_MATCH_C ("foo::bar::function()", "bar::function");
+  CHECK_MATCH_C ("foo::bar::function(int)", "bar::function");
+
+  /* Same, with parameters in the lookup name.  */
+  CHECK_MATCH_C ("foo::function()", "function()");
+  CHECK_MATCH_C ("foo::bar::function()", "function()");
+  CHECK_MATCH_C ("foo::function(int)", "function(int)");
+  CHECK_MATCH_C ("foo::function()", "foo::function()");
+  CHECK_MATCH_C ("foo::bar::function()", "bar::function()");
+  CHECK_MATCH_C ("foo::bar::function(int)", "bar::function(int)");
+  CHECK_MATCH_C ("bar::function()", "bar::function()");
+
+  CHECK_NOT_MATCH_C ("foo::bar::function(int)", "bar::function()");
+
+  CHECK_MATCH_C ("(anonymous namespace)::bar::function(int)",
+		 "bar::function(int)");
+  CHECK_MATCH_C ("foo::(anonymous namespace)::bar::function(int)",
+		 "function(int)");
+
+  /* Lookup scope wider than symbol scope, should not match.  */
+  CHECK_NOT_MATCH_C ("function()", "bar::function");
+  CHECK_NOT_MATCH_C ("function()", "bar::function()");
+
+  /* Explicit global scope doesn't match.  */
+  CHECK_NOT_MATCH_C ("foo::function()", "::function");
+  CHECK_NOT_MATCH_C ("foo::function()", "::function()");
+  CHECK_NOT_MATCH_C ("foo::function(int)", "::function()");
+  CHECK_NOT_MATCH_C ("foo::function(int)", "::function(int)");
 }
 
 /* If non-NULL, return STR wrapped in quotes.  Otherwise, return a

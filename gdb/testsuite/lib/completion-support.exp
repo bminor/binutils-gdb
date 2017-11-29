@@ -30,7 +30,7 @@ namespace eval completion {
     variable keyword_list {"if" "task" "thread"}
 
     variable explicit_opts_list \
-	{"-function" "-label" "-line" "-source"}
+	{"-function" "-label" "-line" "-qualified" "-source"}
 }
 
 # Make a regular expression that matches a TAB completion list.

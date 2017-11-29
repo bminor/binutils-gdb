@@ -337,7 +337,8 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
     }
   else
     {
-      location = string_to_event_location_basic (&address, current_language);
+      location = string_to_event_location_basic (&address, current_language,
+						 symbol_name_match_type::WILD);
       if (*address)
 	error (_("Garbage '%s' at end of location"), address);
     }

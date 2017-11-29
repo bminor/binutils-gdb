@@ -838,7 +838,8 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
     return NULL;
 
   if (arg != NULL)
-    location = string_to_event_location_basic (&arg, python_language);
+    location = string_to_event_location_basic (&arg, python_language,
+					       symbol_name_match_type::WILD);
 
   std::vector<symtab_and_line> decoded_sals;
   symtab_and_line def_sal;

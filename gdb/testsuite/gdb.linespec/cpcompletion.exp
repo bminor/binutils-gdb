@@ -118,6 +118,339 @@ proc_with_prefix overload {} {
     }
 }
 
+# Test completion of a function that is defined in different scopes
+# with different parameters.
+
+proc_with_prefix overload-2 {} {
+    with_test_prefix "all" {
+	set completion_list {
+	    "(anonymous namespace)::overload2_function(overload2_arg3)"
+	    "(anonymous namespace)::struct_overload2_test::overload2_function(overload2_arg4)"
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::overload2_function(overload2_arg9)"
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::struct_overload2_test::overload2_function(overload2_arga)"
+	    "ns_overload2_test::(anonymous namespace)::overload2_function(overload2_arg7)"
+	    "ns_overload2_test::(anonymous namespace)::struct_overload2_test::overload2_function(overload2_arg8)"
+	    "ns_overload2_test::overload2_function(overload2_arg5)"
+	    "ns_overload2_test::struct_overload2_test::overload2_function(overload2_arg6)"
+	    "overload2_function(overload2_arg1)"
+	    "struct_overload2_test::overload2_function(overload2_arg2)"
+	}
+	foreach cmd_prefix {"b" "b -function"} {
+	    test_gdb_complete_multiple \
+		"$cmd_prefix " "overload2_func" "tion(overload2_arg" $completion_list
+	    check_bp_locations_match_list \
+		"$cmd_prefix overload2_function" $completion_list
+	}
+    }
+
+    # Same, but restrict to functions/methods in some scope.
+    with_test_prefix "restrict scope" {
+	set completion_list {
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::overload2_function(overload2_arg9)"
+	    "ns_overload2_test::overload2_function(overload2_arg5)"
+	}
+	foreach cmd_prefix {"b" "b -function"} {
+	    test_gdb_complete_multiple \
+		"$cmd_prefix " "ns_overload2_test::overload2_func" "tion(overload2_arg" $completion_list
+	    check_bp_locations_match_list \
+		"$cmd_prefix ns_overload2_test::overload2_function" $completion_list
+	}
+    }
+
+    # Restrict to anonymous namespace scopes.
+    with_test_prefix "restrict scope 2" {
+	set completion_list {
+	    "(anonymous namespace)::overload2_function(overload2_arg3)"
+	    "ns_overload2_test::(anonymous namespace)::overload2_function(overload2_arg7)"
+	}
+	foreach cmd_prefix {"b" "b -function"} {
+	    test_gdb_complete_multiple \
+		"$cmd_prefix " "(anonymous namespace)::overload2_func" "tion(overload2_arg" $completion_list
+	    check_bp_locations_match_list \
+		"$cmd_prefix (anonymous namespace)::overload2_function" $completion_list
+	}
+    }
+
+    # Add enough scopes, and we get a unique completion.
+    with_test_prefix "unique completion" {
+	foreach cmd_prefix {"b" "b -function"} {
+	    test_gdb_complete_unique \
+		"$cmd_prefix ns_overload2_test::(anonymous namespace)::overload2_func" \
+		"$cmd_prefix ns_overload2_test::(anonymous namespace)::overload2_function(overload2_arg7)"
+	    check_setting_bp_fails "$cmd_prefix ns_overload2_test::(anonymous namespace)::overload2_func"
+	    check_bp_locations_match_list \
+		"$cmd_prefix ns_overload2_test::(anonymous namespace)::overload2_function" \
+		{"ns_overload2_test::(anonymous namespace)::overload2_function(overload2_arg7)"}
+	}
+    }
+}
+
+# Test linespecs / locations using fully-qualified names.
+
+proc_with_prefix fqn {} {
+
+    # "-qualified" works with both explicit locations and linespecs.
+    # Also test that combining a source file with a function name
+    # still results in a full match, with both linespecs and explicit
+    # locations.
+    foreach cmd_prefix {
+	"b -qualified "
+	"b -qualified -function "
+	"b -qualified cpls.cc:"
+	"b -qualified -source cpls.cc -function "
+	"b -source cpls.cc -qualified -function "
+    } {
+	test_gdb_complete_unique \
+	    "${cmd_prefix}overload2_func" \
+	    "${cmd_prefix}overload2_function(overload2_arg1)"
+
+	# Drill down until we find a unique completion.
+	test_gdb_complete_multiple "${cmd_prefix}" "ns_overload2_test::" "" {
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::overload2_function(overload2_arg9)"
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::struct_overload2_test::overload2_function(overload2_arga)"
+	    "ns_overload2_test::(anonymous namespace)::overload2_function(overload2_arg7)"
+	    "ns_overload2_test::(anonymous namespace)::struct_overload2_test::overload2_function(overload2_arg8)"
+	    "ns_overload2_test::overload2_function(overload2_arg5)"
+	    "ns_overload2_test::struct_overload2_test::overload2_function(overload2_arg6)"
+	}
+
+	test_gdb_complete_multiple "${cmd_prefix}" "ns_overload2_test::(anonymous namespace)::" "" {
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::overload2_function(overload2_arg9)"
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::struct_overload2_test::overload2_function(overload2_arga)"
+	    "ns_overload2_test::(anonymous namespace)::overload2_function(overload2_arg7)"
+	    "ns_overload2_test::(anonymous namespace)::struct_overload2_test::overload2_function(overload2_arg8)"
+	}
+
+	test_gdb_complete_multiple "${cmd_prefix}" "ns_overload2_test::(anonymous namespace)::ns_overload2_test::" "" {
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::overload2_function(overload2_arg9)"
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::struct_overload2_test::overload2_function(overload2_arga)"
+	}
+
+	test_gdb_complete_unique \
+	    "${cmd_prefix}ns_overload2_test::(anonymous namespace)::ns_overload2_test::overload2_func" \
+	    "${cmd_prefix}ns_overload2_test::(anonymous namespace)::ns_overload2_test::overload2_function(overload2_arg9)"
+
+    }
+}
+
+# Check that a fully-qualified lookup name doesn't match symbols in
+# nested scopes.
+
+proc_with_prefix fqn-2 {} {
+    set linespec "struct_overload2_test::overload2_function(overload2_arg6)"
+    set cmd_prefix "b -qualified"
+    check_setting_bp_fails "$cmd_prefix $linespec"
+    test_gdb_complete_none "$cmd_prefix $linespec"
+
+    # Check that using the same name, but not fully-qualifying it,
+    # would find something, just to make sure the test above is
+    # testing what we intend to test.
+    set cmd_prefix "b -function"
+    test_gdb_complete_unique "$cmd_prefix $linespec" "$cmd_prefix $linespec"
+    check_bp_locations_match_list \
+	"$cmd_prefix $linespec" \
+	{"ns_overload2_test::struct_overload2_test::overload2_function(overload2_arg6)"}
+}
+
+# Test completion of functions in different scopes that have the same
+# name and parameters.  Restricting the scopes should find fewer and
+# fewer matches.
+
+proc_with_prefix overload-3 {} {
+    with_test_prefix "all overloads" {
+	set completion_list {
+	    "(anonymous namespace)::overload3_function(int)"
+	    "(anonymous namespace)::overload3_function(long)"
+	    "(anonymous namespace)::struct_overload3_test::overload3_function(int)"
+	    "(anonymous namespace)::struct_overload3_test::overload3_function(long)"
+	    "ns_overload3_test::(anonymous namespace)::ns_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::(anonymous namespace)::ns_overload3_test::overload3_function(long)"
+	    "ns_overload3_test::(anonymous namespace)::ns_overload3_test::struct_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::(anonymous namespace)::ns_overload3_test::struct_overload3_test::overload3_function(long)"
+	    "ns_overload3_test::(anonymous namespace)::overload3_function(int)"
+	    "ns_overload3_test::(anonymous namespace)::overload3_function(long)"
+	    "ns_overload3_test::(anonymous namespace)::struct_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::(anonymous namespace)::struct_overload3_test::overload3_function(long)"
+	    "ns_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::overload3_function(long)"
+	    "ns_overload3_test::struct_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::struct_overload3_test::overload3_function(long)"
+	    "overload3_function(int)"
+	    "overload3_function(long)"
+	    "struct_overload3_test::overload3_function(int)"
+	    "struct_overload3_test::overload3_function(long)"
+	}
+	foreach cmd_prefix {"b" "b -function"} {
+	    test_gdb_complete_multiple "$cmd_prefix " "overload3_func" "tion(" $completion_list
+	    check_bp_locations_match_list "$cmd_prefix overload3_function" $completion_list
+	}
+    }
+
+    with_test_prefix "restrict overload" {
+	foreach cmd_prefix {"b" "b -function"} {
+	    test_gdb_complete_unique \
+		"$cmd_prefix overload3_function(int)" \
+		"$cmd_prefix overload3_function(int)"
+	    check_bp_locations_match_list "$cmd_prefix overload3_function(int)" {
+		"(anonymous namespace)::overload3_function(int)"
+		"(anonymous namespace)::struct_overload3_test::overload3_function(int)"
+		"ns_overload3_test::(anonymous namespace)::ns_overload3_test::overload3_function(int)"
+		"ns_overload3_test::(anonymous namespace)::ns_overload3_test::struct_overload3_test::overload3_function(int)"
+		"ns_overload3_test::(anonymous namespace)::overload3_function(int)"
+		"ns_overload3_test::(anonymous namespace)::struct_overload3_test::overload3_function(int)"
+		"ns_overload3_test::overload3_function(int)"
+		"ns_overload3_test::struct_overload3_test::overload3_function(int)"
+		"overload3_function(int)"
+		"struct_overload3_test::overload3_function(int)"
+	    }
+	}
+    }
+
+    with_test_prefix "restrict scope" {
+	set completion_list {
+	    "(anonymous namespace)::struct_overload3_test::overload3_function(int)"
+	    "(anonymous namespace)::struct_overload3_test::overload3_function(long)"
+	    "ns_overload3_test::(anonymous namespace)::ns_overload3_test::struct_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::(anonymous namespace)::ns_overload3_test::struct_overload3_test::overload3_function(long)"
+	    "ns_overload3_test::(anonymous namespace)::struct_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::(anonymous namespace)::struct_overload3_test::overload3_function(long)"
+	    "ns_overload3_test::struct_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::struct_overload3_test::overload3_function(long)"
+	    "struct_overload3_test::overload3_function(int)"
+	    "struct_overload3_test::overload3_function(long)"
+	}
+	foreach cmd_prefix {"b" "b -function"} {
+	    test_gdb_complete_multiple \
+		"$cmd_prefix " "struct_overload3_test::overload3_func" "tion(" \
+		$completion_list
+	    check_bp_locations_match_list \
+		"$cmd_prefix struct_overload3_test::overload3_function" \
+		$completion_list
+	}
+    }
+}
+
+# Test completing an overloaded template method.
+
+proc_with_prefix template-overload {} {
+    set completion_list {
+	"template_struct<int>::template_overload_fn(int)"
+	"template_struct<long>::template_overload_fn(long)"
+    }
+    foreach cmd_prefix {"b" "b -function"} {
+	test_gdb_complete_multiple "$cmd_prefix " "template_overload_fn" "(" $completion_list
+	check_bp_locations_match_list "$cmd_prefix template_overload_fn" $completion_list
+	check_bp_locations_match_list \
+	    "$cmd_prefix template_struct<int>::template_overload_fn" \
+	    "template_struct<int>::template_overload_fn(int)"
+    }
+}
+
+# Test completing template methods with non-void return type.
+
+proc_with_prefix template-ret-type {} {
+    set method_name "template2_fn<int, int>"
+    set param_list "(template2_ret_type<int>, int, int)"
+    set struct_type "template2_struct<template2_ret_type<int> >"
+    set ret_type "template2_ret_type<int>"
+
+    # Templates are listed both with and without return type, making
+    # "template2_<tab>" ambiguous.
+    foreach cmd_prefix {"b" "b -function"} {
+	set completion_list \
+	    [list \
+		 "${ret_type} ${struct_type}::${method_name}${param_list}" \
+		 "${struct_type}::${method_name}${param_list}"]
+	test_gdb_complete_multiple "$cmd_prefix " "template2_" "" $completion_list
+
+	# Add one character more after "2_", and the linespec becomes
+	# unambiguous.  Test completing the whole prefix range after that,
+	# thus testing completing either with or without return type.
+	foreach {s t} [list \
+			   "template2_r" \
+			   "${ret_type} ${struct_type}::${method_name}${param_list}" \
+			   "template2_s" \
+			   "${struct_type}::${method_name}${param_list}"] {
+	    set linespec $t
+	    set complete_line "$cmd_prefix $linespec"
+	    set start [index_after $s $complete_line]
+	    test_complete_prefix_range $complete_line $start
+	}
+
+	# Setting a breakpoint without the template params doesn't work.
+	check_setting_bp_fails "$cmd_prefix template2_fn"
+	# However, setting a breakpoint with template params and without
+	# the method params does work, just like with non-template
+	# functions.  It also works with or without return type.
+	foreach linespec [list \
+			      "${method_name}" \
+			      "${method_name}${param_list}" \
+			      "${struct_type}::${method_name}" \
+			      "${struct_type}::${method_name}${param_list}" \
+			      "${ret_type} ${struct_type}::${method_name}" \
+			      "${ret_type} ${struct_type}::${method_name}${param_list}"] {
+	    check_bp_locations_match_list \
+		"$cmd_prefix $linespec" \
+		[list "${struct_type}::${method_name}${param_list}"]
+	}
+    }
+}
+
+# Test completion of a const-overloaded funtion (const-overload).
+# Note that "const" appears after the function/method parameters.
+
+proc_with_prefix const-overload {} {
+    set completion_list {
+	"struct_with_const_overload::const_overload_fn()"
+	"struct_with_const_overload::const_overload_fn() const"
+    }
+    foreach cmd_prefix {"b" "b -function"} {
+	test_gdb_complete_multiple \
+	    "$cmd_prefix " "const_overload_fn" "()" \
+	    $completion_list
+	test_gdb_complete_multiple \
+	    "$cmd_prefix " "const_overload_fn ( " ")" \
+	    $completion_list
+	test_gdb_complete_multiple \
+	    "$cmd_prefix " "const_overload_fn()" "" \
+	    $completion_list
+
+	check_bp_locations_match_list \
+	    "$cmd_prefix const_overload_fn" \
+	    {"struct_with_const_overload::const_overload_fn()"
+		"struct_with_const_overload::const_overload_fn() const"}
+
+	check_setting_bp_fails "$cmd_prefix const_overload_fn("
+	check_bp_locations_match_list \
+	    "$cmd_prefix const_overload_fn()" \
+	    {"struct_with_const_overload::const_overload_fn()"}
+	check_bp_locations_match_list \
+	    "$cmd_prefix const_overload_fn() const" \
+	    {"struct_with_const_overload::const_overload_fn() const"}
+    }
+}
+
+# Same but quote-enclose the function name.  This makes the overload
+# no longer be ambiguous.
+
+proc_with_prefix const-overload-quoted {} {
+    foreach cmd_prefix {"b" "b -function"} {
+	set linespec "'const_overload_fn()'"
+	test_gdb_complete_unique "$cmd_prefix $linespec" "$cmd_prefix $linespec"
+	check_bp_locations_match_list \
+	    "$cmd_prefix $linespec" {
+		"struct_with_const_overload::const_overload_fn()"
+	    }
+
+	set linespec "'const_overload_fn() const'"
+	test_gdb_complete_unique "$cmd_prefix $linespec" "$cmd_prefix $linespec"
+	check_bp_locations_match_list \
+	    "$cmd_prefix $linespec" {
+		"struct_with_const_overload::const_overload_fn() const"
+	    }
+    }
+}
+
 # Test that when the function is unambiguous, linespec completion
 # appends the end quote char automatically, both ' and ".
 
@@ -341,6 +674,73 @@ proc_with_prefix incomplete-scope-colon {} {
     }
 }
 
+# Test completing functions/methods in anonymous namespaces.
+
+proc_with_prefix anon-ns {} {
+    foreach cmd_prefix {"b" "b -function"} {
+	foreach qc $completion::maybe_quoted_list {
+	    test_gdb_complete_unique \
+		"$cmd_prefix ${qc}anon_ns_function" \
+		"$cmd_prefix ${qc}anon_ns_function()${qc}"
+	    check_bp_locations_match_list "$cmd_prefix ${qc}anon_ns_function()${qc}" {
+		"(anonymous namespace)::anon_ns_function()"
+		"(anonymous namespace)::anon_ns_struct::anon_ns_function()"
+		"the_anon_ns_wrapper_ns::(anonymous namespace)::anon_ns_function()"
+		"the_anon_ns_wrapper_ns::(anonymous namespace)::anon_ns_struct::anon_ns_function()"
+	    }
+	}
+
+	# A "(" finds all anonymous namespace functions/methods in all
+	# scopes.
+	test_gdb_complete_multiple "$cmd_prefix " "(" "anonymous namespace)::" {
+	    "(anonymous namespace)::anon_ns_function()"
+	    "(anonymous namespace)::anon_ns_struct::anon_ns_function()"
+	    "(anonymous namespace)::overload2_function(overload2_arg3)"
+	    "(anonymous namespace)::overload3_function(int)"
+	    "(anonymous namespace)::overload3_function(long)"
+	    "(anonymous namespace)::struct_overload2_test::overload2_function(overload2_arg4)"
+	    "(anonymous namespace)::struct_overload3_test::overload3_function(int)"
+	    "(anonymous namespace)::struct_overload3_test::overload3_function(long)"
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::overload2_function(overload2_arg9)"
+	    "ns_overload2_test::(anonymous namespace)::ns_overload2_test::struct_overload2_test::overload2_function(overload2_arga)"
+	    "ns_overload2_test::(anonymous namespace)::overload2_function(overload2_arg7)"
+	    "ns_overload2_test::(anonymous namespace)::struct_overload2_test::overload2_function(overload2_arg8)"
+	    "ns_overload3_test::(anonymous namespace)::ns_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::(anonymous namespace)::ns_overload3_test::overload3_function(long)"
+	    "ns_overload3_test::(anonymous namespace)::ns_overload3_test::struct_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::(anonymous namespace)::ns_overload3_test::struct_overload3_test::overload3_function(long)"
+	    "ns_overload3_test::(anonymous namespace)::overload3_function(int)"
+	    "ns_overload3_test::(anonymous namespace)::overload3_function(long)"
+	    "ns_overload3_test::(anonymous namespace)::struct_overload3_test::overload3_function(int)"
+	    "ns_overload3_test::(anonymous namespace)::struct_overload3_test::overload3_function(long)"
+	    "the_anon_ns_wrapper_ns::(anonymous namespace)::anon_ns_function()"
+	    "the_anon_ns_wrapper_ns::(anonymous namespace)::anon_ns_struct::anon_ns_function()"
+	}
+
+	set function "the_anon_ns_wrapper_ns::(anonymous namespace)::anon_ns_function()"
+	test_gdb_complete_unique "$cmd_prefix $function" "$cmd_prefix $function"
+	check_bp_locations_match_list "$cmd_prefix $function" [list $function]
+
+	# Test completing after the "(anonymous namespace)" part.
+	test_gdb_complete_unique \
+	    "$cmd_prefix the_anon_ns_wrapper_ns::(anonymous namespace)::anon_ns_fu" \
+	    "$cmd_prefix $function"
+
+	# Test whitespace in the "(anonymous namespace)" component.
+
+	test_gdb_complete_unique \
+	    "$cmd_prefix the_anon_ns_wrapper_ns::( anonymous   namespace )::anon_ns_fu" \
+	    "$cmd_prefix the_anon_ns_wrapper_ns::( anonymous   namespace )::anon_ns_function()"
+	check_setting_bp_fails \
+	    "$cmd_prefix the_anon_ns_wrapper_ns::( anonymous   namespace )::anon_ns_fu"
+
+	set function_ws \
+	    "the_anon_ns_wrapper_ns::( anonymous   namespace )::anon_ns_function ( )"
+	test_gdb_complete_unique "$cmd_prefix $function_ws" "$cmd_prefix $function_ws"
+	check_bp_locations_match_list "$cmd_prefix $function_ws" [list $function]
+    }
+}
+
 # Basic test for completing "operator<".  More extensive C++ operator
 # tests in cpls-op.exp.
 
@@ -365,6 +765,19 @@ proc_with_prefix operator< {} {
 	test_gdb_complete_unique $input_line $cmd
 	test_gdb_complete_unique $cmd $cmd
 	check_bp_locations_match_list $cmd [list "$location"]
+    }
+}
+
+# Test completion of scopes with an ambiguous prefix.
+
+proc_with_prefix ambiguous-prefix {} {
+    foreach cmd_prefix {"b" "b -function"} {
+	test_gdb_complete_multiple "$cmd_prefix " "ambiguous_pre" "fix_" {
+	    "ambiguous_prefix_global_func()"
+	    "the_ambiguous_prefix_ns::ambiguous_prefix_ns_func()"
+	    "the_ambiguous_prefix_struct::ambiguous_prefix_method()"
+	}
+	check_setting_bp_fails "$cmd_prefix ambiguous_prefix_"
     }
 }
 
@@ -516,13 +929,23 @@ proc_with_prefix if-expression {} {
 proc test_driver {} {
     all-param-prefixes
     overload
+    overload-2
+    fqn
+    fqn-2
+    overload-3
+    template-overload
+    template-ret-type
+    const-overload
+    const-overload-quoted
     append-end-quote-char-when-unambiguous
     in-source-file-unconstrained
     in-source-file-unambiguous
     in-source-file-ambiguous
     source-complete-appends-colon
     incomplete-scope-colon
+    anon-ns
     operator<
+    ambiguous-prefix
     function-labels
     keywords-after-function
     keywords-after-label

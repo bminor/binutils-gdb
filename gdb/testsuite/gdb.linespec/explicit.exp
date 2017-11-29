@@ -401,50 +401,65 @@ namespace eval $testfile {
 	    "-function"
 	    "-label"
 	    "-line"
+	    "-qualified"
 	    "-source"
 	    "if"
 	    "task"
 	    "thread"
 	}
 	foreach what { "-function" "-label" "-line" "-source" } {
-	    with_test_prefix "complete after $what" {
-		if {$what != "-line"} {
-		    set w "$what argument "
-		    test_gdb_complete_multiple \
-			"b $w" "" "" $completions_list
-		    test_gdb_complete_unique \
-			"b $w thr" \
-			"b $w thread"
-		    test_gdb_complete_unique \
-			"b $w -fun" \
-			"b $w -function"
-		} else {
-		    # After -line, we expect a number / offset.
-		    foreach line {"10" "+10" "-10"} {
-			set w "-line $line"
-			test_gdb_complete_multiple \
-			    "b $w " "" "" $completions_list
-			test_gdb_complete_unique \
-			    "b $w thr" \
-			    "b $w thread"
-			test_gdb_complete_unique \
-			    "b $w -fun" \
-			    "b $w -function"
+	    # Also test with "-qualified" appearing before the
+	    # explicit location.
+	    foreach prefix {"" "-qualified "} {
+
+		# ... and with "-qualified" appearing after the
+		# explicit location.
+		foreach suffix {"" " -qualified"} {
+		    with_test_prefix "complete after $prefix$what$suffix" {
+			if {$what != "-line"} {
+			    set w "$prefix$what argument$suffix "
+			    test_gdb_complete_multiple \
+				"b $w" "" "" $completions_list
+			    test_gdb_complete_unique \
+				"b $w thr" \
+				"b $w thread"
+			    test_gdb_complete_unique \
+				"b $w -fun" \
+				"b $w -function"
+			} else {
+			    # After -line, we expect a number / offset.
+			    foreach line {"10" "+10" "-10"} {
+				set w "$prefix-line $line$suffix"
+				test_gdb_complete_multiple \
+				    "b $w " "" "" $completions_list
+				test_gdb_complete_unique \
+				    "b $w thr" \
+				    "b $w thread"
+				test_gdb_complete_unique \
+				    "b $w -fun" \
+				    "b $w -function"
+			    }
+
+			    # With an invalid -line argument, we don't get any
+			    # completions.
+			    test_gdb_complete_none "b $prefix-line argument$suffix "
+			}
+
 		    }
 
-		    # With an invalid -line argument, we don't get any
-		    # completions.
-		    test_gdb_complete_none "b -line argument "
 		}
 
-		# Don't complete a linespec keyword ("thread") or
-		# another option name when expecting an option
-		# argument.
-		test_gdb_complete_none "b $what thr"
-		test_gdb_complete_none "b $what -fun"
+		# These tests don't make sense with "-qualified" after
+		# the location.
+		with_test_prefix "complete after $prefix$what" {
+		    # Don't complete a linespec keyword ("thread") or
+		    # another option name when expecting an option
+		    # argument.
+		    test_gdb_complete_none "b $prefix$what thr"
+		    test_gdb_complete_none "b $prefix$what -fun"
+		}
 	    }
 	}
-
 
 	# Tests that ensure that after "if" we complete on expressions
 	# are in cpcompletion.exp.
@@ -518,6 +533,7 @@ namespace eval $testfile {
 	    "-probe"
 	    "-probe-dtrace"
 	    "-probe-stap"
+	    "-qualified"
 	    "-source"
 	}
 	with_test_prefix "complete with no arguments and no symbols" {

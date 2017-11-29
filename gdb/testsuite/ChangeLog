@@ -1,3 +1,21 @@
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/langs.exp: Use -qualified.
+	* gdb.cp/meth-typedefs.exp: Use -qualified, and add tests without
+	it.
+	* gdb.cp/namespace.exp: Use -qualified.
+	* gdb.linespec/cpcompletion.exp (overload-2, fqn, fqn-2)
+	(overload-3, template-overload, template-ret-type, const-overload)
+	(const-overload-quoted, anon-ns, ambiguous-prefix): New
+	procedures.
+	(test_driver): Call them.
+	* gdb.cp/save-bp-qualified.cc: New.
+	* gdb.cp/save-bp-qualified.exp: New.
+	* gdb.linespec/explicit.exp: Test -qualified.
+	* lib/completion-support.exp (completion::explicit_opts_list): Add
+	"-qualified".
+	* lib/gdb.exp (gdb_breakpoint): Handle "qualified".
+
 2017-11-29  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-rbreak.exp: Set nosharedlibrary before tests.

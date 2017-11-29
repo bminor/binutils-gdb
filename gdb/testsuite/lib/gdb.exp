@@ -422,7 +422,7 @@ proc gdb_starti_cmd {args} {
 
 # Set a breakpoint at FUNCTION.  If there is an additional argument it is
 # a list of options; the supported options are allow-pending, temporary,
-# message, no-message, and passfail.
+# message, no-message, passfail and qualified.
 # The result is 1 for success, 0 for failure.
 #
 # Note: The handling of message vs no-message is messed up, but it's based
@@ -445,6 +445,10 @@ proc gdb_breakpoint { function args } {
     if {[lsearch -exact $args temporary] != -1} {
 	set break_command "tbreak"
 	set break_message "Temporary breakpoint"
+    }
+
+    if {[lsearch -exact $args qualified] != -1} {
+	append break_command " -qualified"
     }
 
     set print_pass 0

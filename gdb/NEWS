@@ -52,6 +52,26 @@
 
   ** The "complete" command now mimics TAB completion accurately.
 
+* Breakpoints on C++ functions are now set on all scopes by default
+
+  By default, breakpoints on functions/methods are now interpreted as
+  specifying all functions with the given name ignoring missing
+  leading scopes (namespaces and classes).
+
+  For example, assuming a C++ program with symbols named:
+
+    A::B::func()
+    B::func()
+
+  both commands "break func()" and "break B::func()" set a breakpoint
+  on both symbols.
+
+  You can use the new flag "-qualified" to override this.  This makes
+  GDB interpret the specified function name as a complete
+  fully-qualified name instead.  For example, using the same C++
+  program, the "break -q B::func" command sets a breakpoint on
+  "B::func", only.
+
 * Python Scripting
 
   ** New events gdb.new_inferior, gdb.inferior_deleted, and

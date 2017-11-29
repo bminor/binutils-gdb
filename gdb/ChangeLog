@@ -1,5 +1,102 @@
 2017-11-29  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention that breakpoints on C++ functions are now set on
+	on all namespaces/classes by default, and mention "break
+	-qualified".
+	* ax-gdb.c (agent_command_1): Adjust to pass a
+	symbol_name_match_type to new_linespec_location.
+	* breakpoint.c (parse_breakpoint_sals): Adjust to
+	get_linespec_location's return type change.
+	(strace_marker_create_sals_from_location): Adjust to pass a
+	symbol_name_match_type to new_linespec_location.
+	(strace_marker_decode_location): Adjust to get_linespec_location's
+	return type change.
+	(strace_command): Adjust to pass a symbol_name_match_type to
+	new_linespec_location.
+	(LOCATION_HELP_STRING): Add paragraph about wildmatching, and
+	mention "-qualified".
+	* c-lang.c (cplus_language_defn): Install cp_search_name_hash.
+	* completer.c (explicit_location_match_type::MATCH_QUALIFIED): New
+	enumerator.
+	(complete_address_and_linespec_locations): New parameter
+	'match_type'.  Pass it down.
+	(explicit_options): Add "-qualified".
+	(collect_explicit_location_matches): Pass the requested match type
+	to the linespec completers.  Handle MATCH_QUALIFIED.
+	(location_completer): Handle "-qualified" combined with linespecs.
+	* cp-support.c (cp_search_name_hash): New.
+	(cp_symbol_name_matches_1): Implement wild matching for C++.
+	(cp_fq_symbol_name_matches): Reimplement.
+	(cp_get_symbol_name_matcher): Return different matchers depending
+	on the lookup name's match type.
+	(selftests::test_cp_symbol_name_matches): Add wild matching tests.
+	* cp-support.h (cp_search_name_hash): New declaration.
+	* dwarf2read.c
+	(selftests::dw2_expand_symtabs_matching::test_symbols): Add
+	symbols.
+	(test_dw2_expand_symtabs_matching_symbol): Add wild matching
+	tests.
+	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x): Adjust to
+	pass a symbol_name_match_type to new_linespec_location.
+	* linespec.c (linespec_parse_basic): Lookup function symbols using
+	the parser's symbol name match type.
+	(convert_explicit_location_to_linespec): New
+	symbol_name_match_type parameter.  Pass it down to
+	find_linespec_symbols.
+	(convert_explicit_location_to_sals): Pass the location's name
+	match type to convert_explicit_location_to_linespec.
+	(parse_linespec): New match_type parameter.  Save it in the
+	parser.
+	(linespec_parser_new): Default to symbol_name_match_type::WILD.
+	(linespec_complete_function): New symbol_name_match_type
+	parameter.  Use it.
+	(complete_linespec_component): Pass down the parser's recorded
+	name match type.
+	(linespec_complete_label): New symbol_name_match_type parameter.
+	Use it.
+	(linespec_complete): New symbol_name_match_type parameter.  Save
+	it in the parser and pass it down.  Adjust to
+	get_linespec_location's prototype change.
+	(find_function_symbols, find_linespec_symbols): New
+	symbol_name_match_type parameter.  Pass it down instead of
+	assuming symbol_name_match_type::WILD.
+	* linespec.h (linespec_complete, linespec_complete_function)
+	(linespec_complete_label): New symbol_name_match_type parameter.
+	* location.c (event_location::linespec_location): Now a struct
+	linespec_location.
+	(EL_LINESPEC): Adjust.
+	(initialize_explicit_location): Default to
+	symbol_name_match_type::WILD.
+	(new_linespec_location): New symbol_name_match_type parameter.
+	Record it in the location.
+	(get_linespec_location): Now returns a struct linespec_location.
+	(new_explicit_location): Also copy func_name_match_type.
+	(explicit_to_string_internal)
+	(string_to_explicit_location): Handle "-qualified".
+	(copy_event_location): Adjust to LINESPEC_LOCATION type change.
+	Copy symbol_name_match_type fields.
+	(event_location_deleter::operator()): Adjust to LINESPEC_LOCATION
+	type change.
+	(event_location_to_string): Adjust to LINESPEC_LOCATION type
+	change.  Handle "-qualfied".
+	(string_to_explicit_location): Handle "-qualified".
+	(string_to_event_location_basic): New symbol_name_match_type
+	parameter.  Pass it down.
+	(string_to_event_location): Handle "-qualified".
+	* location.h (struct linespec_location): New.
+	(explicit_location::func_name_match_type): New field.
+	(new_linespec_location): Now returns a const linespec_location *.
+	(string_to_event_location_basic): New symbol_name_match_type
+	parameter.
+	(explicit_completion_info::saw_explicit_location_option): New
+	field.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Adjust to pass a
+	symbol_name_match_type to new_linespec_location.
+	* python/py-breakpoint.c (bppy_init): Likewise.
+	* python/python.c (gdbpy_decode_line): Likewise.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_lookup_name_info::matches): Change type of
 	parameter from completion_match to completion_match_result.
 	Adjust.

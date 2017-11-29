@@ -38,7 +38,7 @@ if [get_compiler_info] {
     return -1
 }
 
-gdb_test_multiple "b langs0" "break on nonexistent function in langs.exp" {
+gdb_test_multiple "b -qualified langs0" "break on nonexistent function in langs.exp" {
 	-re "Function \"langs0\" not defined\..*Make breakpoint pending on future shared library load.*y or .n.. $" {
 
 		gdb_test "n" "" "break on nonexistent function in langs.exp"

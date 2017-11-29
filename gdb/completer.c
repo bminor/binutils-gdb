@@ -76,6 +76,9 @@ enum explicit_location_match_type
     /* The name of a function or method.  */
     MATCH_FUNCTION,
 
+    /* The fully-qualified name of a function or method.  */
+    MATCH_QUALIFIED,
+
     /* A line number.  */
     MATCH_LINE,
 
@@ -579,7 +582,8 @@ complete_source_filenames (const char *text)
 
 static void
 complete_address_and_linespec_locations (completion_tracker &tracker,
-					 const char *text)
+					 const char *text,
+					 symbol_name_match_type match_type)
 {
   if (*text == '*')
     {
@@ -591,7 +595,7 @@ complete_address_and_linespec_locations (completion_tracker &tracker,
     }
   else
     {
-      linespec_complete (tracker, text);
+      linespec_complete (tracker, text, match_type);
     }
 }
 
@@ -602,6 +606,7 @@ static const char *const explicit_options[] =
   {
     "-source",
     "-function",
+    "-qualified",
     "-line",
     "-label",
     NULL
@@ -638,6 +643,9 @@ collect_explicit_location_matches (completion_tracker &tracker,
   const struct explicit_location *explicit_loc
     = get_explicit_location (location);
 
+  /* True if the option expects an argument.  */
+  bool needs_arg = true;
+
   /* Note, in the various MATCH_* below, we complete on
      explicit_loc->foo instead of WORD, because only the former will
      have already skipped past any quote char.  */
@@ -656,10 +664,14 @@ collect_explicit_location_matches (completion_tracker &tracker,
       {
 	const char *function = string_or_empty (explicit_loc->function_name);
 	linespec_complete_function (tracker, function,
+				    explicit_loc->func_name_match_type,
 				    explicit_loc->source_filename);
       }
       break;
 
+    case MATCH_QUALIFIED:
+      needs_arg = false;
+      break;
     case MATCH_LINE:
       /* Nothing to offer.  */
       break;
@@ -670,6 +682,7 @@ collect_explicit_location_matches (completion_tracker &tracker,
 	linespec_complete_label (tracker, language,
 				 explicit_loc->source_filename,
 				 explicit_loc->function_name,
+				 explicit_loc->func_name_match_type,
 				 label);
       }
       break;
@@ -678,7 +691,7 @@ collect_explicit_location_matches (completion_tracker &tracker,
       gdb_assert_not_reached ("unhandled explicit_location_match_type");
     }
 
-  if (tracker.completes_to_completion_word (word))
+  if (!needs_arg || tracker.completes_to_completion_word (word))
     {
       tracker.discard_completions ();
       tracker.advance_custom_word_point_by (strlen (word));
@@ -867,7 +880,7 @@ location_completer (struct cmd_list_element *ignore,
       tracker.advance_custom_word_point_by (1);
     }
 
-  if (location != NULL)
+  if (completion_info.saw_explicit_location_option)
     {
       if (*copy != '\0')
 	{
@@ -907,10 +920,29 @@ location_completer (struct cmd_list_element *ignore,
 
 	}
     }
+  /* This is an address or linespec location.  */
+  else if (location != NULL)
+    {
+      /* Handle non-explicit location options.  */
+
+      int keyword = skip_keyword (tracker, explicit_options, &text);
+      if (keyword == -1)
+	complete_on_enum (tracker, explicit_options, text, text);
+      else
+	{
+	  tracker.advance_custom_word_point_by (copy - text);
+	  text = copy;
+
+	  symbol_name_match_type match_type
+	    = get_explicit_location (location.get ())->func_name_match_type;
+	  complete_address_and_linespec_locations (tracker, text, match_type);
+	}
+    }
   else
     {
-      /* This is an address or linespec location.  */
-      complete_address_and_linespec_locations (tracker, text);
+      /* No options.  */
+      complete_address_and_linespec_locations (tracker, text,
+					       symbol_name_match_type::WILD);
     }
 
   /* Add matches for option names, if either:
