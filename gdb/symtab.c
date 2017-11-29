@@ -4698,7 +4698,7 @@ compare_symbol_name (const char *symbol_name, language symbol_language,
   symbol_name_matcher_ftype *name_match
     = language_get_symbol_name_matcher (lang, lookup_name);
 
-  return name_match (symbol_name, lookup_name, &match_res.match);
+  return name_match (symbol_name, lookup_name, &match_res);
 }
 
 /*  See symtab.h.  */
@@ -4751,7 +4751,14 @@ completion_list_add_name (completion_tracker &tracker,
 
     gdb::unique_xmalloc_ptr<char> completion (newobj);
 
-    tracker.add_completion (std::move (completion));
+    /* Here we pass the match-for-lcd object to add_completion.  Some
+       languages match the user text against substrings of symbol
+       names in some cases.  E.g., in C++, "b push_ba" completes to
+       "std::vector::push_back", "std::string::push_back", etc., and
+       in this case we want the completion lowest common denominator
+       to be "push_back" instead of "std::".  */
+    tracker.add_completion (std::move (completion),
+			    &match_res.match_for_lcd);
   }
 }
 

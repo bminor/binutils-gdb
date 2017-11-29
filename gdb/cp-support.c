@@ -1634,14 +1634,14 @@ cp_symbol_name_matches_1 (const char *symbol_search_name,
 			  const char *lookup_name,
 			  size_t lookup_name_len,
 			  strncmp_iw_mode mode,
-			  completion_match *match)
+			  completion_match_result *comp_match_res)
 {
   if (strncmp_iw_with_mode (symbol_search_name,
 			    lookup_name, lookup_name_len,
 			    mode, language_cplus) == 0)
     {
-      if (match != NULL)
-	match->set_match (symbol_search_name);
+      if (comp_match_res != NULL)
+	comp_match_res->set_match (symbol_search_name);
       return true;
     }
 
@@ -1653,7 +1653,7 @@ cp_symbol_name_matches_1 (const char *symbol_search_name,
 static bool
 cp_fq_symbol_name_matches (const char *symbol_search_name,
 			   const lookup_name_info &lookup_name,
-			   completion_match *match)
+			   completion_match_result *comp_match_res)
 {
   /* Get the demangled name.  */
   const std::string &name = lookup_name.cplus ().lookup_name ();
@@ -1664,7 +1664,7 @@ cp_fq_symbol_name_matches (const char *symbol_search_name,
 
   return cp_symbol_name_matches_1 (symbol_search_name,
 				   name.c_str (), name.size (),
-				   mode, match);
+				   mode, comp_match_res);
 }
 
 /* See cp-support.h.  */

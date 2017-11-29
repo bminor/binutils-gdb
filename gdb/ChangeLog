@@ -1,5 +1,40 @@
 2017-11-29  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_lookup_name_info::matches): Change type of
+	parameter from completion_match to completion_match_result.
+	Adjust.
+	(do_wild_match, do_full_match, ada_symbol_name_matches): Likewise.
+	* completer.c (completion_tracker::maybe_add_completion): Add
+	match_for_lcd parameter and use it.
+	(completion_tracker::add_completion): Likewise.
+	* completer.h (class completion_match_for_lcd): New class.
+	(completion_match_result::match_for_lcd): New field.
+	(completion_match_result::set_match): New method.
+	(completion_tracker): Add comments.
+	(completion_tracker::add_completion): Add match_for_lcd parameter.
+	(completion_tracker::reset_completion_match_result): Reset
+	match_for_lcd too.
+	(completion_tracker::maybe_add_completion): Add match_for_lcd
+	parameter.
+	(completion_tracker::m_lowest_common_denominator_unique): Extend
+	comments.
+	* cp-support.c (cp_symbol_name_matches_1)
+	(cp_fq_symbol_name_matches): Change type of parameter from
+	completion_match to completion_match_result.  Adjust.
+	* language.c (default_symbol_name_matcher): Change type of
+	parameter from completion_match to completion_match_result.
+	Adjust.
+	* language.h (completion_match_for_lcd): Forward declare.
+	(default_symbol_name_matcher): Change type of parameter from
+	completion_match to completion_match_result.
+	* symtab.c (compare_symbol_name): Adjust.
+	(completion_list_add_name): Pass the match_for_lcd to the tracker.
+	* symtab.h (ada_lookup_name_info::matches): Change type of
+	parameter from completion_match to completion_match_result.
+	(symbol_name_matcher_ftype): Likewise, and update comments.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
 	* linespec.c (minsym_found, add_minsym): Use msymbol_is_function.
 	* minsyms.c (msymbol_is_text): Delete.
 	(msymbol_is_function): New function.

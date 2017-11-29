@@ -704,7 +704,7 @@ default_get_string (struct value *value, gdb_byte **buffer, int *length,
 bool
 default_symbol_name_matcher (const char *symbol_search_name,
 			     const lookup_name_info &lookup_name,
-			     completion_match *match)
+			     completion_match_result *comp_match_res)
 {
   const std::string &name = lookup_name.name ();
 
@@ -715,8 +715,8 @@ default_symbol_name_matcher (const char *symbol_search_name,
   if (strncmp_iw_with_mode (symbol_search_name, name.c_str (), name.size (),
 			    mode, language_minimal) == 0)
     {
-      if (match != NULL)
-	match->set_match (symbol_search_name);
+      if (comp_match_res != NULL)
+	comp_match_res->set_match (symbol_search_name);
       return true;
     }
   else

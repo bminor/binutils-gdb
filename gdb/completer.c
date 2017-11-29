@@ -1502,7 +1502,9 @@ completion_tracker::~completion_tracker ()
 /* See completer.h.  */
 
 bool
-completion_tracker::maybe_add_completion (gdb::unique_xmalloc_ptr<char> name)
+completion_tracker::maybe_add_completion
+  (gdb::unique_xmalloc_ptr<char> name,
+   completion_match_for_lcd *match_for_lcd)
 {
   void **slot;
 
@@ -1515,7 +1517,13 @@ completion_tracker::maybe_add_completion (gdb::unique_xmalloc_ptr<char> name)
   slot = htab_find_slot (m_entries_hash, name.get (), INSERT);
   if (*slot == HTAB_EMPTY_ENTRY)
     {
-      const char *match_for_lcd_str = name.get ();
+      const char *match_for_lcd_str = NULL;
+
+      if (match_for_lcd != NULL)
+	match_for_lcd_str = match_for_lcd->finish ();
+
+      if (match_for_lcd_str == NULL)
+	match_for_lcd_str = name.get ();
 
       recompute_lowest_common_denominator (match_for_lcd_str);
 
@@ -1529,9 +1537,10 @@ completion_tracker::maybe_add_completion (gdb::unique_xmalloc_ptr<char> name)
 /* See completer.h.  */
 
 void
-completion_tracker::add_completion (gdb::unique_xmalloc_ptr<char> name)
+completion_tracker::add_completion (gdb::unique_xmalloc_ptr<char> name,
+				    completion_match_for_lcd *match_for_lcd)
 {
-  if (!maybe_add_completion (std::move (name)))
+  if (!maybe_add_completion (std::move (name), match_for_lcd))
     throw_error (MAX_COMPLETIONS_REACHED_ERROR, _("Max completions reached."));
 }
 

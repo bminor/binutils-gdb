@@ -84,7 +84,7 @@ class ada_lookup_name_info final
      otherwise.  If non-NULL, store the matching results in MATCH.  */
   bool matches (const char *symbol_search_name,
 		symbol_name_match_type match_type,
-		completion_match *match) const;
+		completion_match_result *comp_match_res) const;
 
   /* The Ada-encoded lookup name.  */
   const std::string &lookup_name () const
@@ -295,15 +295,21 @@ private:
 
    SYMBOL_SEARCH_NAME should be a symbol's "search" name.
 
-   On success and if non-NULL, MATCH is set to point to the symbol
-   name as should be presented to the user as a completion match list
-   element.  In most languages, this is the same as the symbol's
-   search name, but in some, like Ada, the display name is dynamically
-   computed within the comparison routine.  */
+   On success and if non-NULL, COMP_MATCH_RES->match is set to point
+   to the symbol name as should be presented to the user as a
+   completion match list element.  In most languages, this is the same
+   as the symbol's search name, but in some, like Ada, the display
+   name is dynamically computed within the comparison routine.
+
+   Also, on success and if non-NULL, COMP_MATCH_RES->match_for_lcd
+   points the part of SYMBOL_SEARCH_NAME that was considered to match
+   LOOKUP_NAME.  E.g., in C++, in linespec/wild mode, if the symbol is
+   "foo::function()" and LOOKUP_NAME is "function(", MATCH_FOR_LCD
+   points to "function()" inside SYMBOL_SEARCH_NAME.  */
 typedef bool (symbol_name_matcher_ftype)
   (const char *symbol_search_name,
    const lookup_name_info &lookup_name,
-   completion_match *match);
+   completion_match_result *comp_match_res);
 
 /* Some of the structures in this file are space critical.
    The space-critical structures are:
