@@ -11688,6 +11688,10 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
 
       type = create_static_range_type (alloc_type_copy (raw_type),
 				       base_type, L, U);
+      /* create_static_range_type alters the resulting type's length
+         to match the size of the base_type, which is not what we want.
+         Set it back to the original range type's length.  */
+      TYPE_LENGTH (type) = TYPE_LENGTH (raw_type);
       TYPE_NAME (type) = name;
       return type;
     }
