@@ -74,7 +74,8 @@ usage and use x86-64 as target platform).
 @item -n
 By default, x86 GAS replaces multiple nop instructions used for
 alignment within code sections with multi-byte nop instructions such
-as leal 0(%esi,1),%esi.  This switch disables the optimization.
+as leal 0(%esi,1),%esi.  This switch disables the optimization if a single
+byte nop (0x90) is explicitly specified as the fill byte for alignment.
 
 @cindex @samp{--divide} option, i386
 @item --divide

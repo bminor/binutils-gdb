@@ -1,3 +1,8 @@
+2017-11-29  Jim Wilson  <jimw@sifive.com>
+
+	PR gas/22464
+	* doc/c-i386.texi (-n): Clarify docs.
+
 2017-11-29  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-aarch64.c (reg_names): Fix IP1 register alias typo.
