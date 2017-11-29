@@ -1,3 +1,9 @@
+2017-11-29  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (reg_names): Fix IP1 register alias typo.
+	* testsuite/gas/aarch64/register_aliases.s: Add IP0 and IP1 tests.
+	* testsuite/gas/aarch64/register_aliases.d: Update.
+
 2017-11-29  Stefan Stroe  <stroestefan@gmail.com>
 
 	* po/Make-in (datadir): Define as @datadir@.
