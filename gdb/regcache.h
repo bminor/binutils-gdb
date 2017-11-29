@@ -295,6 +295,13 @@ public:
   void raw_update (int regnum) override
   {}
 
+  void raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
+			   bool is_signed);
+
+  void raw_supply_zeroed (int regnum);
+
+  void invalidate (int regnum);
+
   DISABLE_COPY_AND_ASSIGN (reg_buffer_rw);
 };
 
@@ -336,13 +343,6 @@ public:
   void raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
 			    bool is_signed) const;
 
-  void raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
-			   bool is_signed);
-
-  void raw_supply_zeroed (int regnum);
-
-  void invalidate (int regnum);
-
   void raw_write_part (int regnum, int offset, int len, const gdb_byte *buf);
 
   void cooked_write_part (int regnum, int offset, int len,
@@ -371,7 +371,7 @@ public:
 
   static void regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid);
 protected:
-  regcache (gdbarch *gdbarch, const address_space *aspace_, bool readonly_p_);
+  regcache (gdbarch *gdbarch, const address_space *aspace_);
   static std::forward_list<regcache *> current_regcache;
 
 private:
@@ -389,12 +389,6 @@ private:
      makes sense, like PC or SP).  */
   const address_space * const m_aspace;
 
-  /* Is this a read-only cache?  A read-only cache is used for saving
-     the target's register state (e.g, across an inferior function
-     call or just before forcing a function return).  A read-only
-     cache can only be created via a constructor.  The actual contents
-     are determined by the save and restore methods.  */
-  const bool m_readonly_p;
   /* If this is a read-write cache, which thread's registers is
      it connected to?  */
   ptid_t m_ptid;
