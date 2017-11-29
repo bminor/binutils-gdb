@@ -1,4 +1,5 @@
 2017-11-29  Jim Wilson  <jimw@sifive.com>
+	    Palmer Dabbelt  <palmer@sifive.com>
 
 	* config/tc-riscv.c (riscv_frag_align_code): New local insn_alignment.
 	Early return if bytes less than or equal to insn_alignment.
