@@ -745,6 +745,11 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	      if (PARSER_STREAM (parser)[1] == ':')
 		++(PARSER_STREAM (parser));
 
+	      /* Do not tokenize ABI tags such as "[abi:cxx11]".  */
+	      else if (PARSER_STREAM (parser) - start > 4
+		       && startswith (PARSER_STREAM (parser) - 4, "[abi"))
+		++(PARSER_STREAM (parser));
+
 	      /* Do not tokenify if the input length so far is one
 		 (i.e, a single-letter drive name) and the next character
 		 is a directory separator.  This allows Windows-style

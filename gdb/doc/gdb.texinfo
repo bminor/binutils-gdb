@@ -15128,6 +15128,49 @@ the same notation that is used to declare such symbols in C@t{++}: type
 also use the @value{GDBN} command-line word completion facilities to list the
 available choices, or to finish the type list for you.
 @xref{Completion,, Command Completion}, for details on how to do this.
+
+@item @r{Breakpoints in functions with ABI tags}
+
+The GNU C@t{++} compiler introduced the notion of ABI ``tags'', which
+correspond to changes in the ABI of a type, function, or variable that
+would not otherwise be reflected in a mangled name.  See
+@url{https://developers.redhat.com/blog/2015/02/05/gcc5-and-the-c11-abi/}
+for more detail.
+
+The ABI tags are visible in C@t{++} demangled names.  For example, a
+function that returns a std::string:
+
+@smallexample
+std::string function(int);
+@end smallexample
+
+@noindent
+when compiled for the C++11 ABI is marked with the @code{cxx11} ABI
+tag, and @value{GDBN} displays the symbol like this:
+
+@smallexample
+function[abi:cxx11](int)
+@end smallexample
+
+You can set a breakpoint on such functions simply as if they had no
+tag.  For example:
+
+@smallexample
+(gdb) b function(int)
+Breakpoint 2 at 0x40060d: file main.cc, line 10.
+(gdb) info breakpoints
+Num     Type           Disp Enb Address    What
+1       breakpoint     keep y   0x0040060d in function[abi:cxx11](int)
+                                           at main.cc:10
+@end smallexample
+
+On the rare occasion you need to disambiguate between different ABI
+tags, you can do so by simply including the ABI tag in the function
+name, like:
+
+@smallexample
+(@value{GDBP}) b ambiguous[abi:other_tag](int)
+@end smallexample
 @end table
 
 @node Decimal Floating Point

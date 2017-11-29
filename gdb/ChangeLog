@@ -1,5 +1,51 @@
 2017-11-29  Pedro Alves  <palves@redhat.com>
 
+	PR c++/19436
+	* NEWS: Mention setting breakpoints on functions with C++ ABI
+	tags.
+	* completer.h (completion_match_for_lcd) <match,
+	mark_ignored_range>: New methods.
+	<finish>: Consider ignored ranges.
+	<clear>: Clear ignored ranges.
+	<m_ignored_ranges, m_finished_storage>: New fields.
+	* cp-support.c (cp_search_name_hash): Ignore ABI tags.
+	(cp_symbol_name_matches_1, cp_fq_symbol_name_matches): Pass the
+	completion_match_for_lcd pointer to strncmp_iw_with_mode.
+	(test_cp_symbol_name_cmp): Add [abi:...] tags unit tests.
+	* language.c (default_symbol_name_matcher): Pass the
+	completion_match_for_lcd pointer to strncmp_iw_with_mode.
+	* linespec.c (linespec_lexer_lex_string): Don't tokenize ABI tags.
+	* utils.c (skip_abi_tag): New function.
+	(strncmp_iw_with_mode): Add completion_match_for_lcd parameter.
+	Handle ABI tags.
+	* utils.h (strncmp_iw_with_mode): Add completion_match_for_lcd
+	parameter.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	PR c++/19436
+	* NEWS: Mention setting breakpoints on functions with C++ ABI
+	tags.
+	* completer.h (completion_match_for_lcd) <match,
+	mark_ignored_range>: New methods.
+	<finish>: Consider ignored ranges.
+	<clear>: Clear ignored ranges.
+	<m_ignored_ranges, m_finished_storage>: New fields.
+	* cp-support.c (cp_search_name_hash): Ignore ABI tags.
+	(cp_symbol_name_matches_1, cp_fq_symbol_name_matches): Pass the
+	completion_match_for_lcd pointer to strncmp_iw_with_mode.
+	(test_cp_symbol_name_cmp): Add [abi:...] tags unit tests.
+	* language.c (default_symbol_name_matcher): Pass the
+	completion_match_for_lcd pointer to strncmp_iw_with_mode.
+	* linespec.c (linespec_lexer_lex_string): Don't tokenize ABI tags.
+	* utils.c (skip_abi_tag): New function.
+	(strncmp_iw_with_mode): Add completion_match_for_lcd parameter.
+	Handle ABI tags.
+	* utils.h (strncmp_iw_with_mode): Add completion_match_for_lcd
+	parameter.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention that breakpoints on C++ functions are now set on
 	on all namespaces/classes by default, and mention "break
 	-qualified".

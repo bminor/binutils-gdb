@@ -1,5 +1,11 @@
 2017-11-29  Pedro Alves  <palves@redhat.com>
 
+	PR c++/19436
+	* gdb.linespec/cpls-abi-tag.cc: New file.
+	* gdb.linespec/cpls-abi-tag.exp: New file.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/langs.exp: Use -qualified.
 	* gdb.cp/meth-typedefs.exp: Use -qualified, and add tests without
 	it.

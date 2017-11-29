@@ -122,28 +122,82 @@ private:
    "b push_ba" on a C++ program usually completes to
    std::vector<...>::push_back, std::string::push_back etc.  In such
    case, the symbol comparison routine will set the LCD match to point
-   into the "push_back" substring within the symbol's name string.  */
+   into the "push_back" substring within the symbol's name string.
+   Also, in some cases, the symbol comparison routine will want to
+   ignore parts of the symbol name for LCD purposes, such as for
+   example symbols with abi tags in C++.  In such cases, the symbol
+   comparison routine will set MARK_IGNORED_RANGE to mark the ignored
+   substrings of the matched string.  The resulting LCD string with
+   the ignored parts stripped out is computed at the end of a
+   completion match sequence iff we had a positive match.  */
 
 class completion_match_for_lcd
 {
 public:
+  /* Get the resulting LCD, after a successful match.  */
+  const char *match ()
+  { return m_match; }
+
   /* Set the match for LCD.  See m_match's description.  */
   void set_match (const char *match)
   { m_match = match; }
 
-  /* Get the resulting LCD, after a successful match.  */
+  /* Mark the range between [BEGIN, END) as ignored.  */
+  void mark_ignored_range (const char *begin, const char *end)
+  { m_ignored_ranges.emplace_back (begin, end); }
+
+  /* Get the resulting LCD, after a successful match.  If there are
+     ignored ranges, then this builds a new string with the ignored
+     parts removed (and stores it internally).  As such, the result of
+     this call is only good for the current completion match
+     sequence.  */
   const char *finish ()
-  { return m_match; }
+  {
+    if (m_ignored_ranges.empty ())
+      return m_match;
+    else
+      {
+	m_finished_storage.clear ();
+
+	const char *prev = m_match;
+	for (const auto &range : m_ignored_ranges)
+	  {
+	    m_finished_storage.append (prev, range.first);
+	    prev = range.second;
+	  }
+	m_finished_storage.append (prev);
+
+	return m_finished_storage.c_str ();
+      }
+  }
 
   /* Prepare for another completion matching sequence.  */
   void clear ()
-  { m_match = NULL; }
+  {
+    m_match = NULL;
+    m_ignored_ranges.clear ();
+  }
 
 private:
   /* The completion match result for LCD.  This is usually either a
      pointer into to a substring within a symbol's name, or to the
      storage of the pairing completion_match object.  */
   const char *m_match;
+
+  /* The ignored substring ranges within M_MATCH.  E.g., if we were
+     looking for completion matches for C++ functions starting with
+       "functio"
+     and successfully match:
+       "function[abi:cxx11](int)"
+     the ignored ranges vector will contain an entry that delimits the
+     "[abi:cxx11]" substring, such that calling finish() results in:
+       "function(int)"
+   */
+  std::vector<std::pair<const char *, const char *>> m_ignored_ranges;
+
+  /* Storage used by the finish() method, if it has to compute a new
+     string.  */
+  std::string m_finished_storage;
 };
 
 /* Convenience aggregate holding info returned by the symbol name
