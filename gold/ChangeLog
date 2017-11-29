@@ -1,5 +1,10 @@
 2017-11-28  Cary Coutant  <ccoutant@gmail.com>
 
+	* resolve.cc (Symbol_table::resolve): Allow multiply-defined absolute
+	symbols when they have the same value.
+
+2017-11-28  Cary Coutant  <ccoutant@gmail.com>
+
 	* object.h (class Sized_relobj_file): Remove discarded_eh_frame_shndx_.
 	* object.cc (Sized_relobj_file::Sized_relobj_file): Likewise.
 	(Sized_relobj_file::layout_eh_frame_section): Likewise.

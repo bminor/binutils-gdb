@@ -247,18 +247,28 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 		      Object* object, const char* version,
 		      bool is_default_version)
 {
+  bool to_is_ordinary;
+  const unsigned int to_shndx = to->shndx(&to_is_ordinary);
+
   // It's possible for a symbol to be defined in an object file
   // using .symver to give it a version, and for there to also be
   // a linker script giving that symbol the same version.  We
   // don't want to give a multiple-definition error for this
   // harmless redefinition.
-  bool to_is_ordinary;
   if (to->source() == Symbol::FROM_OBJECT
       && to->object() == object
-      && is_ordinary
       && to->is_defined()
-      && to->shndx(&to_is_ordinary) == st_shndx
+      && is_ordinary
       && to_is_ordinary
+      && to_shndx == st_shndx
+      && to->value() == sym.get_st_value())
+    return;
+
+  // Likewise for an absolute symbol defined twice with the same value.
+  if (!is_ordinary
+      && st_shndx == elfcpp::SHN_ABS
+      && !to_is_ordinary
+      && to_shndx == elfcpp::SHN_ABS
       && to->value() == sym.get_st_value())
     return;
 
@@ -350,8 +360,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       && (sym.get_st_bind() == elfcpp::STB_WEAK
 	  || to->binding() == elfcpp::STB_WEAK)
       && orig_st_shndx != elfcpp::SHN_UNDEF
-      && to->shndx(&to_is_ordinary) != elfcpp::SHN_UNDEF
       && to_is_ordinary
+      && to_shndx != elfcpp::SHN_UNDEF
       && sym.get_st_size() != 0    // Ignore weird 0-sized symbols.
       && to->symsize() != 0
       && (sym.get_st_type() != to->type()
@@ -362,7 +372,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
     {
       Symbol_location fromloc
           = { object, orig_st_shndx, static_cast<off_t>(sym.get_st_value()) };
-      Symbol_location toloc = { to->object(), to->shndx(&to_is_ordinary),
+      Symbol_location toloc = { to->object(), to_shndx,
 				static_cast<off_t>(to->value()) };
       this->candidate_odr_violations_[to->name()].insert(fromloc);
       this->candidate_odr_violations_[to->name()].insert(toloc);
