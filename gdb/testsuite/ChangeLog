@@ -1,5 +1,11 @@
 2017-11-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* gdb.cp/psymtab-parameter.cc (func): Change return type back to long.
+	Return 0 as a long.
+	* gdb.cp/psymtab-parameter.exp: Change func's return type back to long.
+
+2017-11-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* gdb.cp/breakpoint.cc (bar): Set return type to void.
 	* gdb.cp/psymtab-parameter.cc (func): Likewise.
 	* gdb.cp/psymtab-parameter.exp: Update comment regarding prototype of

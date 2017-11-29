@@ -16,9 +16,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 template <typename T>
-void
+long
 func ()
 {
+  return 0L;
 }
 
 void
