@@ -1,3 +1,12 @@
+2017-11-28  Cary Coutant  <ccoutant@gmail.com>
+
+	* object.h (class Sized_relobj_file): Remove discarded_eh_frame_shndx_.
+	* object.cc (Sized_relobj_file::Sized_relobj_file): Likewise.
+	(Sized_relobj_file::layout_eh_frame_section): Likewise.
+	(Sized_relobj_file::do_count_local_symbols): Check for optimized
+	.eh_frame section by other means.
+	(Sized_relobj_file::compute_final_local_value_internal): Likewise.
+
 2017-11-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/pr22266_a.c: Add a newline at end of file.
