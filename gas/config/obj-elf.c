@@ -1829,7 +1829,7 @@ obj_elf_version (int ignore ATTRIBUTE_UNUSED)
       bfd_set_section_flags (stdoutput,
 			     note_secp,
 			     SEC_HAS_CONTENTS | SEC_READONLY);
-      bfd_set_section_alignment (stdoutput, note_secp, 2);
+      record_alignment (note_secp, 2);
 
       /* Process the version string.  */
       len = strlen (name) + 1;

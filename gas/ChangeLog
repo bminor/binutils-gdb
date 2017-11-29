@@ -1,8 +1,13 @@
+2017-11-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 22492
+	* config/obj-elf.c (obj_elf_version): Use record_alignment rather
+	than bfd_set_section_alignment.
+
 2017-11-27  Andrew Waterman <andrew@sifive.com>
 	    Palmer Dabbelt  <palmer@sifive.com>
 	    Jim Wilson  <jimw@sifive.com>
 
-	gas/
 	* config/tc-riscv.c (riscv_handle_implicit_zero_offset): New.
 	(riscv_ip): Cases 'k', 'l', 'm', 'n', 'M', 'N', add call to
 	riscv_handle_implicit_zero_offset.  At label load_store, replace
