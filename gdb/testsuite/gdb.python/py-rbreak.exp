@@ -32,6 +32,7 @@ if ![runto_main] then {
     return 0
 }
 
+gdb_test_no_output "nosharedlibrary"
 gdb_py_test_silent_cmd "py sl = gdb.rbreak(\"\",minsyms=False)" \
     "get all function breakpoints" 0
 gdb_test "py print(len(sl))" "11" \
