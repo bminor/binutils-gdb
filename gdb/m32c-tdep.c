@@ -483,17 +483,16 @@ m32c_cat_read (struct m32c_reg *reg, struct regcache *cache, gdb_byte *buf)
 
   if (gdbarch_byte_order (reg->arch) == BFD_ENDIAN_BIG)
     {
-      status = regcache_cooked_read (cache, reg->rx->num, buf);
+      status = cache->cooked_read (reg->rx->num, buf);
       if (status == REG_VALID)
-	status = regcache_cooked_read (cache, reg->ry->num, buf + high_bytes);
+	status = cache->cooked_read (reg->ry->num, buf + high_bytes);
     }
   else
     {
-      status = regcache_cooked_read (cache, reg->rx->num, buf + low_bytes);
+      status = cache->cooked_read (reg->rx->num, buf + low_bytes);
       if (status == REG_VALID)
-	status = regcache_cooked_read (cache, reg->ry->num, buf);
+	status = cache->cooked_read (reg->ry->num, buf);
     }
-
   return status;
 }
 
@@ -537,23 +536,23 @@ m32c_r3r2r1r0_read (struct m32c_reg *reg, struct regcache *cache, gdb_byte *buf)
 
   if (gdbarch_byte_order (reg->arch) == BFD_ENDIAN_BIG)
     {
-      status = regcache_cooked_read (cache, tdep->r0->num, buf + len * 3);
+      status = cache->cooked_read (tdep->r0->num, buf + len * 3);
       if (status == REG_VALID)
-	status = regcache_cooked_read (cache, tdep->r1->num, buf + len * 2);
+	status = cache->cooked_read (tdep->r1->num, buf + len * 2);
       if (status == REG_VALID)
-	status = regcache_cooked_read (cache, tdep->r2->num, buf + len * 1);
+	status = cache->cooked_read (tdep->r2->num, buf + len * 1);
       if (status == REG_VALID)
-	status = regcache_cooked_read (cache, tdep->r3->num, buf);
+	status = cache->cooked_read (tdep->r3->num, buf);
     }
   else
     {
-      status = regcache_cooked_read (cache, tdep->r0->num, buf);
+      status = cache->cooked_read (tdep->r0->num, buf);
       if (status == REG_VALID)
-	status = regcache_cooked_read (cache, tdep->r1->num, buf + len * 1);
+	status = cache->cooked_read (tdep->r1->num, buf + len * 1);
       if (status == REG_VALID)
-	status = regcache_cooked_read (cache, tdep->r2->num, buf + len * 2);
+	status = cache->cooked_read (tdep->r2->num, buf + len * 2);
       if (status == REG_VALID)
-	status = regcache_cooked_read (cache, tdep->r3->num, buf + len * 3);
+	status = cache->cooked_read (tdep->r3->num, buf + len * 3);
     }
 
   return status;

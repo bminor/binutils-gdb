@@ -292,14 +292,14 @@ m68hc11_pseudo_register_read (struct gdbarch *gdbarch,
       const int regsize = 4;
       enum register_status status;
 
-      status = regcache_cooked_read_unsigned (regcache, HARD_PC_REGNUM, &pc);
+      status = regcache->cooked_read (HARD_PC_REGNUM, &pc);
       if (status != REG_VALID)
 	return status;
       if (pc >= 0x8000 && pc < 0xc000)
         {
           ULONGEST page;
 
-          regcache_cooked_read_unsigned (regcache, HARD_PAGE_REGNUM, &page);
+	  regcache->cooked_read (HARD_PAGE_REGNUM, &page);
           pc -= 0x8000;
           pc += (page << 14);
           pc += 0x1000000;

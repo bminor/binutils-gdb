@@ -951,13 +951,11 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	  ULONGEST bsp;
 	  CORE_ADDR reg;
 
-	  status = regcache_cooked_read_unsigned (regcache,
-						  IA64_BSP_REGNUM, &bsp);
+	  status = regcache->cooked_read (IA64_BSP_REGNUM, &bsp);
 	  if (status != REG_VALID)
 	    return status;
 
-	  status = regcache_cooked_read_unsigned (regcache,
-						  IA64_CFM_REGNUM, &cfm);
+	  status = regcache->cooked_read (IA64_CFM_REGNUM, &cfm);
 	  if (status != REG_VALID)
 	    return status;
 
@@ -982,7 +980,8 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       ULONGEST unatN_val;
       ULONGEST unat;
-      status = regcache_cooked_read_unsigned (regcache, IA64_UNAT_REGNUM, &unat);
+
+      status = regcache->cooked_read (IA64_UNAT_REGNUM, &unat);
       if (status != REG_VALID)
 	return status;
       unatN_val = (unat & (1LL << (regnum - IA64_NAT0_REGNUM))) != 0;
@@ -995,10 +994,12 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       ULONGEST bsp;
       ULONGEST cfm;
       CORE_ADDR gr_addr = 0;
-      status = regcache_cooked_read_unsigned (regcache, IA64_BSP_REGNUM, &bsp);
+
+      status = regcache->cooked_read (IA64_BSP_REGNUM, &bsp);
       if (status != REG_VALID)
 	return status;
-      status = regcache_cooked_read_unsigned (regcache, IA64_CFM_REGNUM, &cfm);
+
+      status = regcache->cooked_read (IA64_CFM_REGNUM, &cfm);
       if (status != REG_VALID)
 	return status;
 
@@ -1013,14 +1014,13 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	{
 	  /* Compute address of nat collection bits.  */
 	  CORE_ADDR nat_addr = gr_addr | 0x1f8;
-	  CORE_ADDR nat_collection;
+	  ULONGEST nat_collection;
 	  int nat_bit;
 	  /* If our nat collection address is bigger than bsp, we have to get
 	     the nat collection from rnat.  Otherwise, we fetch the nat
 	     collection from the computed address.  */
 	  if (nat_addr >= bsp)
-	    regcache_cooked_read_unsigned (regcache, IA64_RNAT_REGNUM,
-					   &nat_collection);
+	    regcache->cooked_read (IA64_RNAT_REGNUM, &nat_collection);
 	  else
 	    nat_collection = read_memory_integer (nat_addr, 8, byte_order);
 	  nat_bit = (gr_addr >> 3) & 0x3f;
@@ -1036,10 +1036,11 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
          It can be calculated as the bsp - sof (sizeof frame).  */
       ULONGEST bsp, vbsp;
       ULONGEST cfm;
-      status = regcache_cooked_read_unsigned (regcache, IA64_BSP_REGNUM, &bsp);
+
+      status = regcache->cooked_read (IA64_BSP_REGNUM, &bsp);
       if (status != REG_VALID)
 	return status;
-      status = regcache_cooked_read_unsigned (regcache, IA64_CFM_REGNUM, &cfm);
+      status = regcache->cooked_read (IA64_CFM_REGNUM, &cfm);
       if (status != REG_VALID)
 	return status;
 
@@ -1054,10 +1055,11 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       ULONGEST pr;
       ULONGEST cfm;
       ULONGEST prN_val;
-      status = regcache_cooked_read_unsigned (regcache, IA64_PR_REGNUM, &pr);
+
+      status = regcache->cooked_read (IA64_PR_REGNUM, &pr);
       if (status != REG_VALID)
 	return status;
-      status = regcache_cooked_read_unsigned (regcache, IA64_CFM_REGNUM, &cfm);
+      status = regcache->cooked_read (IA64_CFM_REGNUM, &cfm);
       if (status != REG_VALID)
 	return status;
 
