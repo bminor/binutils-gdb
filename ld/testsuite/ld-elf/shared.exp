@@ -47,6 +47,40 @@ if [istarget "tic6x-*-*"] {
     append LFLAGS " -melf32_tic6x_le"
 }
 
+if [is_underscore_target] {
+    set ASFLAGS "$ASFLAGS --defsym UNDERSCORE=1"
+}
+
+run_ld_link_tests [list \
+    [list \
+	"Build pr22471a.so" \
+	"$LFLAGS -shared" \
+	"" \
+	"$AFLAGS_PIC" \
+	{pr22471a.s} \
+	{} \
+	"pr22471a.so" \
+    ] \
+    [list \
+	"Build pr22471b.so" \
+	"$LFLAGS -shared --version-script pr22471.t" \
+	"tmpdir/pr22471a.so" \
+	"$AFLAGS_PIC" \
+	{pr22471a.s} \
+	{} \
+	"pr22471b.so" \
+    ] \
+    [list \
+	"Build pr22471" \
+	"$LFLAGS -rpath-link ." \
+	"tmpdir/pr22471b.so" \
+	"" \
+	{pr22471b.s} \
+	{} \
+	"pr22471" \
+    ] \
+]
+
 # PR ld/20828 check for correct dynamic symbol table entries where:
 # - symbols have been defined with a linker script,
 # - the same symbols have been seen in shared library used in the link,
