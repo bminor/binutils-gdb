@@ -2319,9 +2319,17 @@ bfd_boolean
 riscv_frag_align_code (int n)
 {
   bfd_vma bytes = (bfd_vma) 1 << n;
-  bfd_vma worst_case_bytes = bytes - (riscv_opts.rvc ? 2 : 4);
-  char *nops = frag_more (worst_case_bytes);
+  bfd_vma insn_alignment = riscv_opts.rvc ? 2 : 4;
+  bfd_vma worst_case_bytes = bytes - insn_alignment;
+  char *nops;
   expressionS ex;
+
+  /* If we are moving to a smaller alignment than the instruction size, then no
+     alignment is required. */
+  if (bytes <= insn_alignment)
+    return TRUE;
+
+  nops = frag_more (worst_case_bytes);
 
   /* When not relaxing, riscv_handle_align handles code alignment.  */
   if (!riscv_opts.relax)

@@ -1,5 +1,12 @@
 2017-11-29  Jim Wilson  <jimw@sifive.com>
 
+	* config/tc-riscv.c (riscv_frag_align_code): New local insn_alignment.
+	Early return if bytes less than or equal to insn_alignment.
+	* testsuite/gas/riscv/align-1.l: New.
+	* testsuite/gas/riscv/align-1.s: New.
+	* testsuite/gas/riscv/riscv.exp: Use run_dump_tests.  Use run_list_test
+	for align-1.
+
 	PR gas/22464
 	* doc/c-i386.texi (-n): Clarify docs.
 
