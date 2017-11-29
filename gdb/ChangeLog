@@ -1,3 +1,11 @@
+2017-12-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* symfile.c (symbol_file_command): Call
+	'symbol_file_add_main_1' only after processing all command
+	line options.
+	(add_symbol_file_command): Modify logic to make arguments
+	position-independent.
+
 2017-12-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (symbol_list_obstack): Delete.

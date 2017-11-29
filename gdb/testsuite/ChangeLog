@@ -1,3 +1,9 @@
+2017-12-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/relocate.exp: Add tests to guarantee that arguments
+	to 'symbol-file' and 'add-symbol-file' can be
+	position-independent.
+
 2017-12-01  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.arch/aarch64-atomic-inst.exp: Replace mail address with
