@@ -1,5 +1,9 @@
 2017-11-29  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (distclean): Handle the case where rmdir fails.
+
+2017-11-29  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (_initialize_symfile): Update usage text for
 	add-symbol-file, symbol-file, load.
 

@@ -1995,7 +1995,7 @@ distclean: clean
 	rm -f Makefile
 	rm -rf $(DEPDIR)
 	for i in $(CONFIG_SRC_SUBDIR); do \
-		rmdir $$i/$(DEPDIR); \
+		if test -d $$i/$(DEPDIR); then rmdir $$i/$(DEPDIR); fi \
 	done
 
 maintainer-clean: local-maintainer-clean do-maintainer-clean distclean
