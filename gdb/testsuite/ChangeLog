@@ -1,3 +1,9 @@
+2017-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.cell/gcore.exp: Fix typo when setting spu_bin.
+	Update for changed thread numbering.
+	* gdb.cell/bt.exp: Update for changed GDB output.
+
 2017-11-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* boards/cc-with-tweaks.exp: Include local-board.exp instead of

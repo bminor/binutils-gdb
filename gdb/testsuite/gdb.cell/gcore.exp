@@ -26,7 +26,7 @@ set ppu_src ${srcdir}/${subdir}/${ppu_file}.c
 set ppu_bin [standard_output_file ${ppu_file}]
 set spu_file "coremaker-spu"
 set spu_src ${srcdir}/${subdir}/${spu_file}.c
-set spu_bin [standard_output_file ${ppu_file}]
+set spu_bin [standard_output_file ${spu_file}]
 
 if {![isnative]} then {
     return 0
@@ -92,10 +92,9 @@ gdb_expect {
     timeout			{ fail "(timeout) core-file command" }
 }
 
-gdb_test "t 6" "Switching to thread 6.*"
 gdb_test "backtrace" ".*abort.*main.*at.*$ppu_file.c.*"
 
-for {set thread_id 1} {$thread_id < 6} {incr thread_id} {
+for {set thread_id 2} {$thread_id < 7} {incr thread_id} {
   gdb_test "t $thread_id" \
            "Switching to thread $thread_id.*" \
            "switch to thread $thread_id"
