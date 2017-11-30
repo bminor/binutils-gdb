@@ -1,3 +1,11 @@
+2017-11-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* boards/cc-with-tweaks.exp: Include local-board.exp instead of
+	setting isremote by hand.
+	* boards/dwarf4-gdb-index.exp: Likewise.
+	* boards/fission.exp: Likewise.
+	* boards/stabs.exp: Likewise.
+
 2017-11-30  Pedro Alves  <palves@redhat.com>
 
 	* gdb.linespec/cpls-ops.exp
