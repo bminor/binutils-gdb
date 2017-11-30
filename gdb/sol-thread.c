@@ -1122,9 +1122,9 @@ info_cb (const td_thrhandle_t *th, void *s)
    inferior.  */
 
 static void
-info_solthreads (char *args, int from_tty)
+info_solthreads (const char *args, int from_tty)
 {
-  p_td_ta_thr_iter (main_ta, info_cb, args,
+  p_td_ta_thr_iter (main_ta, info_cb, (void *) args,
 		    TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
 		    TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
 }

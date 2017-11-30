@@ -1,3 +1,8 @@
+2017-11-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* sol-thread.c (info_solthreads): Constify args.
+	Cast args to void *.
+
 2017-11-29  John Baldwin  <jhb@FreeBSD.org>
 
 	* target-float.c [HAVE_LIBMPFR]: Define MPFR_USE_INTMAX_T.
