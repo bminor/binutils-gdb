@@ -427,4 +427,24 @@ public:
 extern void registers_changed (void);
 extern void registers_changed_ptid (ptid_t);
 
+/* An abstract base class for register dump.  */
+
+class register_dump
+{
+public:
+  void dump (ui_file *file);
+  virtual ~register_dump () {};
+
+protected:
+  register_dump (gdbarch *arch)
+    : m_gdbarch (arch)
+  {}
+
+  /* Dump the register REGNUM contents.  If REGNUM is -1, print the
+     header.  */
+  virtual void dump_reg (ui_file *file, int regnum) = 0;
+
+  gdbarch *m_gdbarch;
+};
+
 #endif /* REGCACHE_H */
