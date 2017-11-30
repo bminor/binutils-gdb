@@ -1,5 +1,22 @@
 2017-11-29  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (active_cpu_flags, active_isstring, enum stage):
+	New.
+	(output_cpu_flags): Update active_cpu_flags.
+	(process_i386_opcode_modifier): Update active_isstring.
+	(output_operand_type): Rename "macro" 	parameter to "stage",
+	changing its type.
+	(process_i386_operand_type): Likewise. Track presence of
+	BaseIndex and emit DispN accordingly.
+	(output_i386_opcode, process_i386_registers,
+	process_i386_initializers): Adjust calls to
+	process_i386_operand_type() for its changed parameter type.
+	* i386-opc.tbl: Drop Disp8, Disp16, Disp32, and Disp32S from
+	all insns operands having BaseIndex set.
+	* i386-tbl.h: Re-generate.
+
+2017-11-29  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (operand_type_init): Remove OPERAND_TYPE_VEC_DISP8
 	entry.
 	(operand_types): Remove Vec_Disp8 entry.
