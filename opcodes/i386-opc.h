@@ -797,9 +797,6 @@ enum
   /* Bound register.  */
   RegBND,
 
-  /* Vector 8bit displacement */
-  Vec_Disp8,
-
   /* The last bitfield in i386_operand_type.  */
   OTMax
 };
@@ -866,7 +863,6 @@ typedef union i386_operand_type
       unsigned int anysize:1;
       unsigned int vec_imm4:1;
       unsigned int regbnd:1;
-      unsigned int vec_disp8:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);
 #endif

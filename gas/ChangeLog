@@ -1,5 +1,17 @@
 2017-11-29  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (enum i386_error): Remove try_vector_disp8.
+	(mode_from_disp_size, build_modrm_byte, build_modrm_byte,
+	disp_size): Remove reference to .vec_disp8.
+	(output_disp): Likewise. Unconditionally use i.memshift.
+	(fits_in_vec_disp8): Rename to fits_in_disp8.
+	(type_names): Remove OPERAND_TYPE_VEC_DISP8 entry.
+	(optimize_disp): Use fits_in_disp8.
+	(check_VecOperands): Re-work (simplify) .disp8memshift
+	conditional handling.
+
+2017-11-29  Jan Beulich  <jbeulich@suse.com>
+
 	PR gas/21874
 	* config/tc-i386-intel.c (i386_intel_simplify): Chain together
 	multiple segment override expressions.

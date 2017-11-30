@@ -439,8 +439,6 @@ static initializer operand_type_init[] =
     "Vec_Imm4" },
   { "OPERAND_TYPE_REGBND",
     "RegBND" },
-  { "OPERAND_TYPE_VEC_DISP8",
-    "Vec_Disp8" },
 };
 
 typedef struct bitfield
@@ -682,7 +680,6 @@ static bitfield operand_types[] =
   BITFIELD (Anysize),
   BITFIELD (Vec_Imm4),
   BITFIELD (RegBND),
-  BITFIELD (Vec_Disp8),
 #ifdef OTUnused
   BITFIELD (OTUnused),
 #endif

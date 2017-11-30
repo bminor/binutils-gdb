@@ -1,3 +1,13 @@
+2017-11-29  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (operand_type_init): Remove OPERAND_TYPE_VEC_DISP8
+	entry.
+	(operand_types): Remove Vec_Disp8 entry.
+	* i386-opc.h (Vec_Disp8): Delete.
+	(union i386_operand_type): Remove vec_disp8.
+	(i386-opc.tbl): Remove Vec_Disp8.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
 2017-11-29  Stefan Stroe  <stroestefan@gmail.com>
 
 	* po/Make-in (datadir): Define as @datadir@.
