@@ -43,8 +43,17 @@ proc check_explicit_skips_function_argument {function} {
 # testing operator new.
 
 proc test_operator_new {class_name brackets} {
-    # The type size_t is typedef-ed to.
-    set size_t "unsigned long"
+    global gdb_prompt
+
+    # Extract the type size_t is typedef-ed to.
+    set size_t ""
+    set test "get size_t underlying type"
+    gdb_test_multiple "ptype size_t" $test {
+	-re " = (\[ a-z\]*)\r\n$gdb_prompt $" {
+	    set size_t $expect_out(1,string)
+	    pass "$test"
+	}
+    }
 
     # Complete all prefixes between "operato" and the full prototype.
     foreach cmd_prefix {"b" "b -function"} {

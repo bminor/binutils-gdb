@@ -1,3 +1,9 @@
+2017-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/cpls-ops.exp
+	(check_explicit_skips_function_argument): Extract the underlying
+	type of size_t instead of hardcoding it.
+
 2017-11-29  Pedro Alves  <palves@redhat.com>
 
 	PR c++/19436
