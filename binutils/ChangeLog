@@ -1,3 +1,9 @@
+2017-11-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 22510
+	* readelf.c (load_debug_section): Fail if there are no section
+	headers available.
+
 2017-11-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 22508

@@ -13574,6 +13574,10 @@ load_debug_section (enum dwarf_section_display_enum debug, void * data)
   Elf_Internal_Shdr * sec;
   Filedata * filedata = (Filedata *) data;
 
+  /* Without section headers we cannot find any sections.  */
+  if (filedata->section_headers == NULL)
+    return FALSE;
+
   if (filedata->string_table == NULL)
     {
       Elf_Internal_Shdr * strs;
