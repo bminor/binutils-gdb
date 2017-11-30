@@ -3427,7 +3427,16 @@ dump_relocs_in_section (bfd *abfd,
     }
 
   if ((bfd_get_file_flags (abfd) & (BFD_IN_MEMORY | BFD_LINKER_CREATED)) == 0
-      && (ufile_ptr) relsize > bfd_get_file_size (abfd))
+      && (((ufile_ptr) relsize > bfd_get_file_size (abfd))
+	  /* Also check the section's reloc count since if this is negative
+	     (or very large) the computation in bfd_get_reloc_upper_bound
+	     may have resulted in returning a small, positive integer.
+	     See PR 22508 for a reproducer.
+
+	     Note - we check against file size rather than section size as
+	     it is possible for there to be more relocs that apply to a
+	     section than there are bytes in that section.  */
+	  || (section->reloc_count > bfd_get_file_size (abfd))))
     {
       printf (" (too many: 0x%x)\n", section->reloc_count);
       bfd_set_error (bfd_error_file_truncated);

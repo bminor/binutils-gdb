@@ -116,12 +116,110 @@ private:
   std::string m_storage;
 };
 
+/* The result of a successful completion match, but for least common
+   denominator (LCD) computation.  Some completers provide matches
+   that don't start with the completion "word".  E.g., completing on
+   "b push_ba" on a C++ program usually completes to
+   std::vector<...>::push_back, std::string::push_back etc.  In such
+   case, the symbol comparison routine will set the LCD match to point
+   into the "push_back" substring within the symbol's name string.
+   Also, in some cases, the symbol comparison routine will want to
+   ignore parts of the symbol name for LCD purposes, such as for
+   example symbols with abi tags in C++.  In such cases, the symbol
+   comparison routine will set MARK_IGNORED_RANGE to mark the ignored
+   substrings of the matched string.  The resulting LCD string with
+   the ignored parts stripped out is computed at the end of a
+   completion match sequence iff we had a positive match.  */
+
+class completion_match_for_lcd
+{
+public:
+  /* Get the resulting LCD, after a successful match.  */
+  const char *match ()
+  { return m_match; }
+
+  /* Set the match for LCD.  See m_match's description.  */
+  void set_match (const char *match)
+  { m_match = match; }
+
+  /* Mark the range between [BEGIN, END) as ignored.  */
+  void mark_ignored_range (const char *begin, const char *end)
+  { m_ignored_ranges.emplace_back (begin, end); }
+
+  /* Get the resulting LCD, after a successful match.  If there are
+     ignored ranges, then this builds a new string with the ignored
+     parts removed (and stores it internally).  As such, the result of
+     this call is only good for the current completion match
+     sequence.  */
+  const char *finish ()
+  {
+    if (m_ignored_ranges.empty ())
+      return m_match;
+    else
+      {
+	m_finished_storage.clear ();
+
+	const char *prev = m_match;
+	for (const auto &range : m_ignored_ranges)
+	  {
+	    m_finished_storage.append (prev, range.first);
+	    prev = range.second;
+	  }
+	m_finished_storage.append (prev);
+
+	return m_finished_storage.c_str ();
+      }
+  }
+
+  /* Prepare for another completion matching sequence.  */
+  void clear ()
+  {
+    m_match = NULL;
+    m_ignored_ranges.clear ();
+  }
+
+private:
+  /* The completion match result for LCD.  This is usually either a
+     pointer into to a substring within a symbol's name, or to the
+     storage of the pairing completion_match object.  */
+  const char *m_match;
+
+  /* The ignored substring ranges within M_MATCH.  E.g., if we were
+     looking for completion matches for C++ functions starting with
+       "functio"
+     and successfully match:
+       "function[abi:cxx11](int)"
+     the ignored ranges vector will contain an entry that delimits the
+     "[abi:cxx11]" substring, such that calling finish() results in:
+       "function(int)"
+   */
+  std::vector<std::pair<const char *, const char *>> m_ignored_ranges;
+
+  /* Storage used by the finish() method, if it has to compute a new
+     string.  */
+  std::string m_finished_storage;
+};
+
 /* Convenience aggregate holding info returned by the symbol name
    matching routines (see symbol_name_matcher_ftype).  */
 struct completion_match_result
 {
   /* The completion match candidate.  */
   completion_match match;
+
+  /* The completion match, for LCD computation purposes.  */
+  completion_match_for_lcd match_for_lcd;
+
+  /* Convenience that sets both MATCH and MATCH_FOR_LCD.  M_FOR_LCD is
+     optional.  If not specified, defaults to M.  */
+  void set_match (const char *m, const char *m_for_lcd = NULL)
+  {
+    match.set_match (m);
+    if (m_for_lcd == NULL)
+      match_for_lcd.set_match (m);
+    else
+      match_for_lcd.set_match (m_for_lcd);
+  }
 };
 
 /* The final result of a completion that is handed over to either
@@ -188,6 +286,21 @@ public:
      that necessitates the time consuming expansion of many symbol
      tables.
 
+   - The completer's idea of least common denominator (aka the common
+     prefix) between all completion matches to hand over to readline.
+     Some completers provide matches that don't start with the
+     completion "word".  E.g., completing on "b push_ba" on a C++
+     program usually completes to std::vector<...>::push_back,
+     std::string::push_back etc.  If all matches happen to start with
+     "std::", then readline would figure out that the lowest common
+     denominator is "std::", and thus would do a partial completion
+     with that.  I.e., it would replace "push_ba" in the input buffer
+     with "std::", losing the original "push_ba", which is obviously
+     undesirable.  To avoid that, such completers pass the substring
+     of the match that matters for common denominator computation as
+     MATCH_FOR_LCD argument to add_completion.  The end result is
+     passed to readline in gdb_rl_attempted_completion_function.
+
    - The custom word point to hand over to readline, for completers
      that parse the input string in order to dynamically adjust
      themselves depending on exactly what they're completing.  E.g.,
@@ -205,7 +318,8 @@ public:
   /* Add the completion NAME to the list of generated completions if
      it is not there already.  If too many completions were already
      found, this throws an error.  */
-  void add_completion (gdb::unique_xmalloc_ptr<char> name);
+  void add_completion (gdb::unique_xmalloc_ptr<char> name,
+		       completion_match_for_lcd *match_for_lcd = NULL);
 
   /* Add all completions matches in LIST.  Elements are moved out of
      LIST.  */
@@ -268,6 +382,7 @@ public:
 
     /* Clear any previous match.  */
     res.match.clear ();
+    res.match_for_lcd.clear ();
     return m_completion_match_result;
   }
 
@@ -290,10 +405,19 @@ private:
   /* Add the completion NAME to the list of generated completions if
      it is not there already.  If false is returned, too many
      completions were found.  */
-  bool maybe_add_completion (gdb::unique_xmalloc_ptr<char> name);
+  bool maybe_add_completion (gdb::unique_xmalloc_ptr<char> name,
+			     completion_match_for_lcd *match_for_lcd);
 
   /* Given a new match, recompute the lowest common denominator (LCD)
-     to hand over to readline.  */
+     to hand over to readline.  Normally readline computes this itself
+     based on the whole set of completion matches.  However, some
+     completers want to override readline, in order to be able to
+     provide a LCD that is not really a prefix of the matches, but the
+     lowest common denominator of some relevant substring of each
+     match.  E.g., "b push_ba" completes to
+     "std::vector<..>::push_back", "std::string::push_back", etc., and
+     in this case we want the lowest common denominator to be
+     "push_back" instead of "std::".  */
   void recompute_lowest_common_denominator (const char *new_match);
 
   /* Completion match outputs returned by the symbol name matching
@@ -348,8 +472,13 @@ private:
      See intro.  */
   char *m_lowest_common_denominator = NULL;
 
-  /* If true, the LCD is unique.  I.e., all completion candidates had
-     the same string.  */
+  /* If true, the LCD is unique.  I.e., all completions had the same
+     MATCH_FOR_LCD substring, even if the completions were different.
+     For example, if "break function<tab>" found "a::function()" and
+     "b::function()", the LCD will be "function()" in both cases and
+     so we want to tell readline to complete the line with
+     "function()", instead of showing all the possible
+     completions.  */
   bool m_lowest_common_denominator_unique = false;
 };
 

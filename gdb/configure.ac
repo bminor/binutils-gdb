@@ -1305,17 +1305,11 @@ AC_HEADER_STDC
 # elf_hp.h is for HP/UX 64-bit shared library support.
 AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
                   thread_db.h \
-		  sys/fault.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
-		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
+		  sys/reg.h sys/debugreg.h sys/select.h \
 		  termios.h elf_hp.h \
 		  dlfcn.h])
-AC_CHECK_HEADERS(sys/proc.h, [], [],
-[#if HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
-])
 AC_CHECK_HEADERS(sys/user.h, [], [],
 [#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
@@ -1533,21 +1527,6 @@ AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_tdname], [], [],
 AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_syscall_code], [], [],
                  [#include <sys/ptrace.h>])
 
-# Detect which type of /proc is in use, such as for Solaris.
-
-if test "${target}" = "${host}"; then
-  case "${host}" in
-  *-*-sysv4.2* | *-*-sysv5* )
-      AC_DEFINE(NEW_PROC_API, 1,
-      [Define if you want to use new multi-fd /proc interface.])
-      ;;
-  *-*-solaris2.[[6789]] | *-*-solaris2.1[[0-9]]*)
-      AC_DEFINE(NEW_PROC_API, 1,
-      [Define if you want to use new multi-fd /proc interface.])
-      ;;
-  esac
-fi
-
 if test "$ac_cv_header_sys_procfs_h" = yes; then
   BFD_HAVE_SYS_PROCFS_TYPE(gregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(fpregset_t)
@@ -1556,11 +1535,6 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
   BFD_HAVE_SYS_PROCFS_TYPE(prgregset32_t)
   BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
   BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prsysent_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(pr_sigset_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(pr_sigaction64_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(pr_siginfo64_t)
-
 
   dnl Check for broken prfpregset_t type
 

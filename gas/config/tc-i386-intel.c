@@ -413,7 +413,19 @@ static int i386_intel_simplify (expressionS *e)
 			       intel_state.index))
 	return 0;
       if (!intel_state.in_offset)
-	intel_state.seg = e->X_add_symbol;
+	{
+	  if (!intel_state.seg)
+	    intel_state.seg = e->X_add_symbol;
+	  else
+	    {
+	      expressionS exp;
+
+	      exp.X_op = O_full_ptr;
+	      exp.X_add_symbol = e->X_add_symbol;
+	      exp.X_op_symbol = intel_state.seg;
+	      intel_state.seg = make_expr_symbol (&exp);
+	    }
+	}
       i386_intel_fold (e, e->X_op_symbol);
       break;
 
@@ -956,7 +968,15 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
       if (intel_state.seg)
 	{
-	  expP = symbol_get_value_expression (intel_state.seg);
+	  for (ret = check_none; ; ret = operand_check)
+	    {
+	      expP = symbol_get_value_expression (intel_state.seg);
+	      if (expP->X_op != O_full_ptr 
+		  || symbol_get_value_expression (expP->X_op_symbol)->X_op
+		     != O_register)
+		break;
+	      intel_state.seg = expP->X_add_symbol;
+	    }
 	  if (expP->X_op != O_register)
 	    {
 	      as_bad (_("segment register name expected"));
@@ -967,6 +987,15 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	    {
 	      as_bad (_("invalid use of register"));
 	      return 0;
+	    }
+	  switch (ret)
+	    {
+	    case check_error:
+	      as_bad (_("redundant segment overrides"));
+	      return 0;
+	    case check_warning:
+	      as_warn (_("redundant segment overrides"));
+	      break;
 	    }
 	  switch (i386_regtab[expP->X_add_number].reg_num)
 	    {

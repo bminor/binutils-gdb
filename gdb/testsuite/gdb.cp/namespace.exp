@@ -120,7 +120,7 @@ gdb_test "break AAA::xyzq" \
 
 # Break on a function in the global namespace.
 
-gdb_test "break ::ensureOtherRefs" \
+gdb_test "break -qualified ::ensureOtherRefs" \
     "Breakpoint.*at $hex: file.*$srcfile2, line $decimal\\."
 
 # Call a function in a nested namespace

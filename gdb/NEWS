@@ -52,6 +52,48 @@
 
   ** The "complete" command now mimics TAB completion accurately.
 
+* Breakpoints on C++ functions are now set on all scopes by default
+
+  By default, breakpoints on functions/methods are now interpreted as
+  specifying all functions with the given name ignoring missing
+  leading scopes (namespaces and classes).
+
+  For example, assuming a C++ program with symbols named:
+
+    A::B::func()
+    B::func()
+
+  both commands "break func()" and "break B::func()" set a breakpoint
+  on both symbols.
+
+  You can use the new flag "-qualified" to override this.  This makes
+  GDB interpret the specified function name as a complete
+  fully-qualified name instead.  For example, using the same C++
+  program, the "break -q B::func" command sets a breakpoint on
+  "B::func", only.
+
+* Breakpoints on functions marked with C++ ABI tags
+
+  GDB can now set breakpoints on functions marked with C++ ABI tags
+  (e.g., [abi:cxx11]).  See here for a description of ABI tags:
+  https://developers.redhat.com/blog/2015/02/05/gcc5-and-the-c11-abi/
+
+  Functions with a C++11 abi tag are demangled/displayed like this:
+
+    function[abi:cxx11](int)
+            ^^^^^^^^^^^
+
+  You can now set a breakpoint on such functions simply as if they had
+  no tag, like:
+
+    (gdb) b function(int)
+
+  Or if you need to disambiguate between tags, like:
+
+    (gdb) b function[abi:other_tag](int)
+
+  Tab completion was adjusted accordingly as well.
+
 * Python Scripting
 
   ** New events gdb.new_inferior, gdb.inferior_deleted, and

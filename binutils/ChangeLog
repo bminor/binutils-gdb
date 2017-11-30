@@ -1,3 +1,22 @@
+2017-11-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 22510
+	* readelf.c (load_debug_section): Fail if there are no section
+	headers available.
+
+2017-11-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 22508
+	* objdump.c (dump_relocs_in_section): Also check the section's
+	relocation count to make sure that it is reasonable before
+	attempting to allocate space for the relocs.
+
+2017-11-29  Stefan Stroe  <stroestefan@gmail.com>
+
+	* po/Make-in (datadir): Define as @datadir@.
+	(localedir): Define as @localedir@.
+	(gnulocaledir, gettextsrcdir): Use @datarootdir@.
+
 2017-11-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/22490

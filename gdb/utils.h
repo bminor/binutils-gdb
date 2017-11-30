@@ -49,15 +49,19 @@ enum class strncmp_iw_mode
 /* Helper for strcmp_iw and strncmp_iw.  Exported so that languages
    can implement both NORMAL and MATCH_PARAMS variants in a single
    function and defer part of the work to strncmp_iw_with_mode.
+
    LANGUAGE is used to implement some context-sensitive
    language-specific comparisons.  For example, for C++,
    "string1=operator()" should not match "string2=operator" even in
-   MATCH_PARAMS mode.  */
-extern int strncmp_iw_with_mode (const char *string1,
-				 const char *string2,
-				 size_t string2_len,
-				 strncmp_iw_mode mode,
-				 enum language language);
+   MATCH_PARAMS mode.
+
+   MATCH_FOR_LCD is passed down so that the function can mark parts of
+   the symbol name as ignored for completion matching purposes (e.g.,
+   to handle abi tags).  */
+extern int strncmp_iw_with_mode
+  (const char *string1, const char *string2, size_t string2_len,
+   strncmp_iw_mode mode, enum language language,
+   completion_match_for_lcd *match_for_lcd = NULL);
 
 /* Do a strncmp() type operation on STRING1 and STRING2, ignoring any
    differences in whitespace.  STRING2_LEN is STRING2's length.

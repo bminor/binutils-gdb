@@ -1,3 +1,64 @@
+2017-11-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* boards/cc-with-tweaks.exp: Include local-board.exp instead of
+	setting isremote by hand.
+	* boards/dwarf4-gdb-index.exp: Likewise.
+	* boards/fission.exp: Likewise.
+	* boards/stabs.exp: Likewise.
+
+2017-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/cpls-ops.exp
+	(check_explicit_skips_function_argument): Extract the underlying
+	type of size_t instead of hardcoding it.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	PR c++/19436
+	* gdb.linespec/cpls-abi-tag.cc: New file.
+	* gdb.linespec/cpls-abi-tag.exp: New file.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/langs.exp: Use -qualified.
+	* gdb.cp/meth-typedefs.exp: Use -qualified, and add tests without
+	it.
+	* gdb.cp/namespace.exp: Use -qualified.
+	* gdb.linespec/cpcompletion.exp (overload-2, fqn, fqn-2)
+	(overload-3, template-overload, template-ret-type, const-overload)
+	(const-overload-quoted, anon-ns, ambiguous-prefix): New
+	procedures.
+	(test_driver): Call them.
+	* gdb.cp/save-bp-qualified.cc: New.
+	* gdb.cp/save-bp-qualified.exp: New.
+	* gdb.linespec/explicit.exp: Test -qualified.
+	* lib/completion-support.exp (completion::explicit_opts_list): Add
+	"-qualified".
+	* lib/gdb.exp (gdb_breakpoint): Handle "qualified".
+
+2017-11-29  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-rbreak.exp: Set nosharedlibrary before tests.
+
+2017-11-29  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/relocate.exp: Update invalid argument test.
+	Add new tests for invalid arguments.
+
+2017-11-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.cp/psymtab-parameter.cc (func): Change return type back to long.
+	Return 0 as a long.
+	* gdb.cp/psymtab-parameter.exp: Change func's return type back to long.
+
+2017-11-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.cp/breakpoint.cc (bar): Set return type to void.
+	* gdb.cp/psymtab-parameter.cc (func): Likewise.
+	* gdb.cp/psymtab-parameter.exp: Update comment regarding prototype of
+	func ().
+	* gdb.cp/shadow.cc (B.func): Return 0.
+
 2017-11-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_catch_ex.exp (continue_to_exception): Adjust

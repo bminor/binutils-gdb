@@ -1,3 +1,21 @@
+2017-11-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 22509
+	* coffcode.h (coff_slurp_reloc_table): Check for a NULL symbol
+	pointer when processing relocs.
+
+2017-11-29  Stefan Stroe  <stroestefan@gmail.com>
+
+	* po/Make-in (datadir): Define as @datadir@.
+	(localedir): Define as @localedir@.
+	(gnulocaledir, gettextsrcdir): Use @datarootdir@.
+
+2017-11-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 22507
+	* coffgen.c (_bfd_coff_read_string_table): Check for an excessive
+	size of the external string table.
+
 2017-11-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 22506

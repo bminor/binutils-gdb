@@ -281,7 +281,6 @@ enum i386_error
     unsupported_rc_sae,
     rc_sae_operand_not_last_imm,
     invalid_register_operand,
-    try_vector_disp8
   };
 
 struct _i386_insn
@@ -2008,7 +2007,7 @@ register_number (const reg_entry *r)
 static INLINE unsigned int
 mode_from_disp_size (i386_operand_type t)
 {
-  if (t.bitfield.disp8 || t.bitfield.vec_disp8)
+  if (t.bitfield.disp8)
     return 1;
   else if (t.bitfield.disp16
 	   || t.bitfield.disp32
@@ -2063,7 +2062,7 @@ fits_in_unsigned_long (addressT num ATTRIBUTE_UNUSED)
 }				/* fits_in_unsigned_long() */
 
 static INLINE int
-fits_in_vec_disp8 (offsetT num)
+fits_in_disp8 (offsetT num)
 {
   int shift = i.memshift;
   unsigned int mask;
@@ -2917,7 +2916,6 @@ const type_names[] =
   { OPERAND_TYPE_DISP32, "d32" },
   { OPERAND_TYPE_DISP32S, "d32s" },
   { OPERAND_TYPE_DISP64, "d64" },
-  { OPERAND_TYPE_VEC_DISP8, "Vector d8" },
   { OPERAND_TYPE_INOUTPORTREG, "InOutPortReg" },
   { OPERAND_TYPE_SHIFTCOUNT, "ShiftCount" },
   { OPERAND_TYPE_CONTROL, "control reg" },
@@ -4571,7 +4569,7 @@ optimize_disp (void)
 	    if ((i.types[op].bitfield.disp32
 		 || i.types[op].bitfield.disp32s
 		 || i.types[op].bitfield.disp16)
-		&& fits_in_signed_byte (op_disp))
+		&& fits_in_disp8 (op_disp))
 	      i.types[op].bitfield.disp8 = 1;
 	  }
 	else if (i.reloc[op] == BFD_RELOC_386_TLS_DESC_CALL
@@ -4777,7 +4775,8 @@ check_VecOperands (const insn_template *t)
     }
 
   /* Check vector Disp8 operand.  */
-  if (t->opcode_modifier.disp8memshift)
+  if (t->opcode_modifier.disp8memshift
+      && i.disp_encoding != disp_encoding_32bit)
     {
       if (i.broadcast)
 	i.memshift = t->opcode_modifier.vecesize ? 3 : 2;
@@ -4788,34 +4787,16 @@ check_VecOperands (const insn_template *t)
 	if (operand_type_check (i.types[op], disp)
 	    && i.op[op].disps->X_op == O_constant)
 	  {
-	    offsetT value = i.op[op].disps->X_add_number;
-	    int vec_disp8_ok
-	      = (i.disp_encoding != disp_encoding_32bit
-		 && fits_in_vec_disp8 (value));
-	    if (t->operand_types [op].bitfield.vec_disp8)
+	    if (fits_in_disp8 (i.op[op].disps->X_add_number))
 	      {
-		if (vec_disp8_ok)
-		  i.types[op].bitfield.vec_disp8 = 1;
-		else
-		  {
-		    /* Vector insn doesn't allow plain Disp8.  */
-		    i.types[op].bitfield.disp8 = 0;
-		  }
+		i.types[op].bitfield.disp8 = 1;
+		return 0;
 	      }
-	    else if (flag_code != CODE_16BIT)
-	      {
-		/* One form of this instruction supports vector Disp8.
-		   Try vector Disp8 if we need to use Disp32.  */
-		if (vec_disp8_ok && !fits_in_signed_byte (value))
-		  {
-		    i.error = try_vector_disp8;
-		    return 1;
-		  }
-	      }
+	    i.types[op].bitfield.disp8 = 0;
 	  }
     }
-  else
-    i.memshift = -1;
+
+  i.memshift = 0;
 
   return 0;
 }
@@ -6557,8 +6538,6 @@ build_modrm_byte (void)
 		{
 		  i.sib.base = NO_BASE_REGISTER;
 		  i.sib.scale = i.log2_scale_factor;
-		  /* No Vec_Disp8 if there is no base.  */
-		  i.types[op].bitfield.vec_disp8 = 0;
 		  i.types[op].bitfield.disp8 = 0;
 		  i.types[op].bitfield.disp16 = 0;
 		  i.types[op].bitfield.disp64 = 0;
@@ -6627,8 +6606,6 @@ build_modrm_byte (void)
 		  i.sib.base = NO_BASE_REGISTER;
 		  i.sib.scale = i.log2_scale_factor;
 		  i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
-		  /* No Vec_Disp8 if there is no base.  */
-		  i.types[op].bitfield.vec_disp8 = 0;
 		  i.types[op].bitfield.disp8 = 0;
 		  i.types[op].bitfield.disp16 = 0;
 		  i.types[op].bitfield.disp64 = 0;
@@ -6658,7 +6635,6 @@ build_modrm_byte (void)
 	      i.types[op].bitfield.disp32 = 0;
 	      i.types[op].bitfield.disp32s = 1;
 	      i.types[op].bitfield.disp64 = 0;
-	      i.types[op].bitfield.vec_disp8 = 0;
 	      i.flags[op] |= Operand_PCrel;
 	      if (! i.disp_operands)
 		fake_zero_displacement = 1;
@@ -6682,10 +6658,7 @@ build_modrm_byte (void)
 		      if (operand_type_check (i.types[op], disp) == 0)
 			{
 			  /* fake (%bp) into 0(%bp)  */
-			  if (i.tm.operand_types[op].bitfield.vec_disp8)
-			    i.types[op].bitfield.vec_disp8 = 1;
-			  else
-			    i.types[op].bitfield.disp8 = 1;
+			  i.types[op].bitfield.disp8 = 1;
 			  fake_zero_displacement = 1;
 			}
 		    }
@@ -6705,8 +6678,6 @@ build_modrm_byte (void)
 		  i386_operand_type temp;
 		  operand_type_set (&temp, 0);
 		  temp.bitfield.disp8 = i.types[op].bitfield.disp8;
-		  temp.bitfield.vec_disp8
-		    = i.types[op].bitfield.vec_disp8;
 		  i.types[op] = temp;
 		  if (i.prefix[ADDR_PREFIX] == 0)
 		    i.types[op].bitfield.disp32s = 1;
@@ -6728,10 +6699,7 @@ build_modrm_byte (void)
 	      if (i.base_reg->reg_num == 5 && i.disp_operands == 0)
 		{
 		  fake_zero_displacement = 1;
-		  if (i.tm.operand_types [op].bitfield.vec_disp8)
-		    i.types[op].bitfield.vec_disp8 = 1;
-		  else
-		    i.types[op].bitfield.disp8 = 1;
+		  i.types[op].bitfield.disp8 = 1;
 		}
 	      i.sib.scale = i.log2_scale_factor;
 	      if (i.index_reg == 0)
@@ -7411,10 +7379,7 @@ disp_size (unsigned int n)
 {
   int size = 4;
 
-  /* Vec_Disp8 has to be 8bit.  */
-  if (i.types[n].bitfield.vec_disp8)
-    size = 1;
-  else if (i.types[n].bitfield.disp64)
+  if (i.types[n].bitfield.disp64)
     size = 8;
   else if (i.types[n].bitfield.disp8)
     size = 1;
@@ -7446,17 +7411,14 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 
   for (n = 0; n < i.operands; n++)
     {
-      if (i.types[n].bitfield.vec_disp8
-	  || operand_type_check (i.types[n], disp))
+      if (operand_type_check (i.types[n], disp))
 	{
 	  if (i.op[n].disps->X_op == O_constant)
 	    {
 	      int size = disp_size (n);
 	      offsetT val = i.op[n].disps->X_add_number;
 
-	      if (i.types[n].bitfield.vec_disp8)
-		val >>= i.memshift;
-	      val = offset_in_range (val, size);
+	      val = offset_in_range (val >> i.memshift, size);
 	      p = frag_more (size);
 	      md_number_to_chars (p, val, size);
 	    }

@@ -5335,7 +5335,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 #else
       cache_ptr->address = dst.r_vaddr;
 
-      if (dst.r_symndx != -1)
+      if (dst.r_symndx != -1 && symbols != NULL)
 	{
 	  if (dst.r_symndx < 0 || dst.r_symndx >= obj_conv_table_size (abfd))
 	    {

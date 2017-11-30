@@ -28,9 +28,7 @@
 
 #include <inttypes.h>
 
-#ifdef HAVE_SYS_SYSCALL_H
 #include <sys/syscall.h>
-#endif
 
 #if HAVE_LINUX_PERF_EVENT_H && defined(SYS_perf_event_open)
 #include <unistd.h>

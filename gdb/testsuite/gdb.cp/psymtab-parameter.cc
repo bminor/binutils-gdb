@@ -19,6 +19,7 @@ template <typename T>
 long
 func ()
 {
+  return 0L;
 }
 
 void

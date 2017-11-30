@@ -12041,10 +12041,9 @@ fi
 # elf_hp.h is for HP/UX 64-bit shared library support.
 for ac_header in nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
                   thread_db.h \
-		  sys/fault.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
-		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
+		  sys/reg.h sys/debugreg.h sys/select.h \
 		  termios.h elf_hp.h \
 		  dlfcn.h
 do :
@@ -12054,22 +12053,6 @@ eval as_val=\$$as_ac_Header
    if test "x$as_val" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-for ac_header in sys/proc.h
-do :
-  ac_fn_c_check_header_compile "$LINENO" "sys/proc.h" "ac_cv_header_sys_proc_h" "#if HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
-
-"
-if test "x$ac_cv_header_sys_proc_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_SYS_PROC_H 1
 _ACEOF
 
 fi
@@ -13559,7 +13542,7 @@ $as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
   fi
 
 
-  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h sys/syscall.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h 		   termios.h
+  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h 		   termios.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -14275,23 +14258,6 @@ _ACEOF
 fi
 
 
-# Detect which type of /proc is in use, such as for Solaris.
-
-if test "${target}" = "${host}"; then
-  case "${host}" in
-  *-*-sysv4.2* | *-*-sysv5* )
-
-$as_echo "#define NEW_PROC_API 1" >>confdefs.h
-
-      ;;
-  *-*-solaris2.[6789] | *-*-solaris2.1[0-9]*)
-
-$as_echo "#define NEW_PROC_API 1" >>confdefs.h
-
-      ;;
-  esac
-fi
-
 if test "$ac_cv_header_sys_procfs_h" = yes; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gregset_t in sys/procfs.h" >&5
 $as_echo_n "checking for gregset_t in sys/procfs.h... " >&6; }
@@ -14551,155 +14517,6 @@ $as_echo "#define HAVE_PSADDR_T 1" >>confdefs.h
  fi
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_psaddr_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_psaddr_t" >&6; }
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for prsysent_t in sys/procfs.h" >&5
-$as_echo_n "checking for prsysent_t in sys/procfs.h... " >&6; }
- if test "${bfd_cv_have_sys_procfs_type_prsysent_t+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
-#include <sys/procfs.h>
-int
-main ()
-{
-prsysent_t avar
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  bfd_cv_have_sys_procfs_type_prsysent_t=yes
-else
-  bfd_cv_have_sys_procfs_type_prsysent_t=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
- if test $bfd_cv_have_sys_procfs_type_prsysent_t = yes; then
-
-$as_echo "#define HAVE_PRSYSENT_T 1" >>confdefs.h
-
- fi
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_prsysent_t" >&5
-$as_echo "$bfd_cv_have_sys_procfs_type_prsysent_t" >&6; }
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pr_sigset_t in sys/procfs.h" >&5
-$as_echo_n "checking for pr_sigset_t in sys/procfs.h... " >&6; }
- if test "${bfd_cv_have_sys_procfs_type_pr_sigset_t+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
-#include <sys/procfs.h>
-int
-main ()
-{
-pr_sigset_t avar
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  bfd_cv_have_sys_procfs_type_pr_sigset_t=yes
-else
-  bfd_cv_have_sys_procfs_type_pr_sigset_t=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
- if test $bfd_cv_have_sys_procfs_type_pr_sigset_t = yes; then
-
-$as_echo "#define HAVE_PR_SIGSET_T 1" >>confdefs.h
-
- fi
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_pr_sigset_t" >&5
-$as_echo "$bfd_cv_have_sys_procfs_type_pr_sigset_t" >&6; }
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pr_sigaction64_t in sys/procfs.h" >&5
-$as_echo_n "checking for pr_sigaction64_t in sys/procfs.h... " >&6; }
- if test "${bfd_cv_have_sys_procfs_type_pr_sigaction64_t+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
-#include <sys/procfs.h>
-int
-main ()
-{
-pr_sigaction64_t avar
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  bfd_cv_have_sys_procfs_type_pr_sigaction64_t=yes
-else
-  bfd_cv_have_sys_procfs_type_pr_sigaction64_t=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
- if test $bfd_cv_have_sys_procfs_type_pr_sigaction64_t = yes; then
-
-$as_echo "#define HAVE_PR_SIGACTION64_T 1" >>confdefs.h
-
- fi
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_pr_sigaction64_t" >&5
-$as_echo "$bfd_cv_have_sys_procfs_type_pr_sigaction64_t" >&6; }
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pr_siginfo64_t in sys/procfs.h" >&5
-$as_echo_n "checking for pr_siginfo64_t in sys/procfs.h... " >&6; }
- if test "${bfd_cv_have_sys_procfs_type_pr_siginfo64_t+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
-#include <sys/procfs.h>
-int
-main ()
-{
-pr_siginfo64_t avar
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  bfd_cv_have_sys_procfs_type_pr_siginfo64_t=yes
-else
-  bfd_cv_have_sys_procfs_type_pr_siginfo64_t=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
- if test $bfd_cv_have_sys_procfs_type_pr_siginfo64_t = yes; then
-
-$as_echo "#define HAVE_PR_SIGINFO64_T 1" >>confdefs.h
-
- fi
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_pr_siginfo64_t" >&5
-$as_echo "$bfd_cv_have_sys_procfs_type_pr_siginfo64_t" >&6; }
-
 
 
 

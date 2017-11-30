@@ -1,3 +1,24 @@
+2017-11-30  Alan Modra  <amodra@gmail.com>
+
+	PR 22471
+	* testsuite/ld-elf/shared.exp: Save and restore ASFLAGS.
+
+2017-11-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22471
+	* testsuite/ld-elf/pr22471.t: New file.
+	* testsuite/ld-elf/pr22471a.s: Likewise.
+	* testsuite/ld-elf/pr22471b.s: Likewise.
+	* testsuite/ld-elf/shared.exp (ASFLAGS): Define UNDERSCORE for
+	underscore targets.
+	Run PR ld/22471 tests.
+
+2017-11-29  Stefan Stroe  <stroestefan@gmail.com>
+
+	* po/Make-in (datadir): Define as @datadir@.
+	(localedir): Define as @localedir@.
+	(gnulocaledir, gettextsrcdir): Use @datarootdir@.
+
 2017-11-28  Alan Modra  <amodra@gmail.com>
 
 	PR 22471

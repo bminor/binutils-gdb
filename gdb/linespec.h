@@ -180,14 +180,17 @@ extern const char * const linespec_keywords[];
 /* Complete a linespec.  */
 
 extern void linespec_complete (completion_tracker &tracker,
-			       const char *text);
+			       const char *text,
+			       symbol_name_match_type match_type);
 
-/* Complete a function symbol, in linespec mode.  If SOURCE_FILENAME
-   is non-NULL, limits completion to the list of functions defined in
-   source files that match SOURCE_FILENAME.  */
+/* Complete a function symbol, in linespec mode, according to
+   FUNC_MATCH_TYPE.  If SOURCE_FILENAME is non-NULL, limits completion
+   to the list of functions defined in source files that match
+   SOURCE_FILENAME.  */
 
 extern void linespec_complete_function (completion_tracker &tracker,
 					const char *function,
+					symbol_name_match_type func_match_type,
 					const char *source_filename);
 
 /* Complete a label symbol, in linespec mode.  Only labels of
@@ -199,6 +202,7 @@ extern void linespec_complete_label (completion_tracker &tracker,
 				     const struct language_defn *language,
 				     const char *source_filename,
 				     const char *function_name,
+				     symbol_name_match_type name_match_type,
 				     const char *label_name);
 
 /* Evaluate the expression pointed to by EXP_PTR into a CORE_ADDR,

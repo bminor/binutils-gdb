@@ -1,3 +1,307 @@
+2017-11-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* configure.ac Don't check for sys/fault.h, sys/syscall.h,
+	sys/proc.h.
+	(NEW_PROC_API): Remove.
+	(prsysent_t, pr_sigset_t, pr_sigaction64_t, pr_siginfo64_t):
+	Likewise.
+	* common/common.m4 (GDB_AC_COMMON): Don't check for sys/syscall.h.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* gdbserver/configure: Regenerate.
+	* gdbserver/config.in: Regenerate.
+
+	* i386-sol2-nat.c (_initialize_amd64_sol2_nat): Remove
+	NEW_PROC_API test.
+	* sparc-sol2-nat.c (_initialize_sparc_sol2_nat): Likewise.
+
+	* linux-btrace.c: Remove HAVE_SYS_SYSCALL_H test.
+
+	* proc-api.c: Remove !NEW_PROC_API support.
+	Remove HAVE_SYS_PROC_H and HAVE_SYS_USER_H tests.
+	Remove tests for macros always defined on Solaris.
+	* proc-events.c: Remove !NEW_PROC_API support.
+	Remove Remove HAVE_SYS_SYSCALL_H, HAVE_SYS_PROC_H and
+	HAVE_SYS_USER_H tests.
+	(init_syscall_table): Remove non-Solaris syscalls.
+	Remove tests for syscalls present on all Solaris versions.
+	Add missing Solaris 10+ syscalls.
+	(signal_table): Remove non-Solaris signals.
+	Remove tests for signals present on all Solaris versions.
+	(fault_table): Remove non-Solaris faults.
+	Remove tests for faults present on all Solaris versions.
+	* proc-flags.c: Remove !NEW_PROC_API support.
+	(pr_flag_table): Remove non-Solaris and pre-Solaris 7 comments.
+	Remove non-Solaris flags.
+	* proc-why.c: Remove !NEW_PROC_API support.
+	(pr_why_table): Remove meaningless comments.
+	Remove tests for reasons present on all Solaris versions.
+	Remove OSF/1 cases.
+	(proc_prettyfprint_why): Likewise.
+
+	* procfs.c: Remove !NEW_PROC_API and DYNAMIC_SYSCALLS support.
+	Remove HAVE_SYS_FAULT_H and HAVE_SYS_SYSCALL_H tests.
+	Remove WA_READ test, IRIX watchpoint support.
+	(gdb_sigset_t, gdb_sigaction_t, gdb_siginfo_t): Replace by base
+	types.  Change users.
+	(gdb_praddset, gdb_prdelset, gdb_premptysysset, gdb_praddsysset)
+	(gdb_prdelset, gdb_pr_issyssetmember): Replace by base macros.
+	Change callers.
+	Remove CTL_PROC_NAME_FMT tests.
+	(gdb_prstatus_t, gdb_lwpstatus_t): Replace by base types.  Change
+	users.
+	(sysset_t_size): Remove.  Use sizeof (sysset_t) in callers.
+	Remove PROCFS_DONT_PIOCSSIG_CURSIG support.
+	(proc_modify_flag): Replace GDBRESET by PCUNSET.
+	Remove PR_ASYNC, PR_KLC tests.
+	(proc_unset_inherit_on_fork): Remove PR_ASYNC test.
+	(proc_parent_pid): Remove PCWATCH etc. tests.
+	(proc_set_watchpoint): Remove !PCWATCH && !PIOCSWATCH support.
+	Remove PCAGENT test.
+	(proc_get_nthreads) [PIOCNTHR && PIOCTLIST]: Remove.
+	Remove SYS_lwpcreate || SYS_lwp_create test.
+	(proc_get_current_thread): Likewise.
+	[PIOCNTHR && PIOCTLIST]: Remove.
+	[PIOCLSTATUS]: Remove.
+	(procfs_debug_inferior): Remove non-Solaris cases, conditionals.
+	[PRFS_STOPEXEC]: Remove.
+	(syscall_is_lwp_exit): Remove non-Solaris cases, conditionals.
+	(syscall_is_exit): Likewise.
+	(syscall_is_exec): Likewise.
+	(syscall_is_lwp_create): Likewise.
+	Remove SYS_syssgi support.
+	(procfs_wait): Remove PR_ASYNC, !PIOCSSPCACT tests.
+	[SYS_syssgi]: Remove.
+	Remove non-Solaris cases, conditionals.
+	(unconditionally_kill_inferior) [PROCFS_NEED_PIOCSSIG_FOR_KILL]:
+	Remove.
+	(procfs_init_inferior) [SYS_syssgi]: Remove.
+	(procfs_set_exec_trap) [PRFS_STOPEXEC]: Remove.
+	(procfs_inferior_created) [SYS_syssgi]: Remove.
+	(procfs_set_watchpoint): Remove !AIX5 test.
+	(procfs_stopped_by_watchpoint): Remove FLTWATCH test, FLTKWATCH
+	case.
+	(mappingflags) [MA_PHYS]: Remove.
+	(info_mappings_callback): Remove PCAGENT test.
+	Remove PIOCOPENLWP || PCAGENT test.
+
+2017-11-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* sol-thread.c (info_solthreads): Constify args.
+	Cast args to void *.
+
+2017-11-29  John Baldwin  <jhb@FreeBSD.org>
+
+	* target-float.c [HAVE_LIBMPFR]: Define MPFR_USE_INTMAX_T.
+
+2017-11-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (to_fixed_range_type): Make sure that the size
+	of the range type being returned is the same as the size
+	of the range type being fixed.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	PR c++/19436
+	* NEWS: Mention setting breakpoints on functions with C++ ABI
+	tags.
+	* completer.h (completion_match_for_lcd) <match,
+	mark_ignored_range>: New methods.
+	<finish>: Consider ignored ranges.
+	<clear>: Clear ignored ranges.
+	<m_ignored_ranges, m_finished_storage>: New fields.
+	* cp-support.c (cp_search_name_hash): Ignore ABI tags.
+	(cp_symbol_name_matches_1, cp_fq_symbol_name_matches): Pass the
+	completion_match_for_lcd pointer to strncmp_iw_with_mode.
+	(test_cp_symbol_name_cmp): Add [abi:...] tags unit tests.
+	* language.c (default_symbol_name_matcher): Pass the
+	completion_match_for_lcd pointer to strncmp_iw_with_mode.
+	* linespec.c (linespec_lexer_lex_string): Don't tokenize ABI tags.
+	* utils.c (skip_abi_tag): New function.
+	(strncmp_iw_with_mode): Add completion_match_for_lcd parameter.
+	Handle ABI tags.
+	* utils.h (strncmp_iw_with_mode): Add completion_match_for_lcd
+	parameter.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	PR c++/19436
+	* NEWS: Mention setting breakpoints on functions with C++ ABI
+	tags.
+	* completer.h (completion_match_for_lcd) <match,
+	mark_ignored_range>: New methods.
+	<finish>: Consider ignored ranges.
+	<clear>: Clear ignored ranges.
+	<m_ignored_ranges, m_finished_storage>: New fields.
+	* cp-support.c (cp_search_name_hash): Ignore ABI tags.
+	(cp_symbol_name_matches_1, cp_fq_symbol_name_matches): Pass the
+	completion_match_for_lcd pointer to strncmp_iw_with_mode.
+	(test_cp_symbol_name_cmp): Add [abi:...] tags unit tests.
+	* language.c (default_symbol_name_matcher): Pass the
+	completion_match_for_lcd pointer to strncmp_iw_with_mode.
+	* linespec.c (linespec_lexer_lex_string): Don't tokenize ABI tags.
+	* utils.c (skip_abi_tag): New function.
+	(strncmp_iw_with_mode): Add completion_match_for_lcd parameter.
+	Handle ABI tags.
+	* utils.h (strncmp_iw_with_mode): Add completion_match_for_lcd
+	parameter.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention that breakpoints on C++ functions are now set on
+	on all namespaces/classes by default, and mention "break
+	-qualified".
+	* ax-gdb.c (agent_command_1): Adjust to pass a
+	symbol_name_match_type to new_linespec_location.
+	* breakpoint.c (parse_breakpoint_sals): Adjust to
+	get_linespec_location's return type change.
+	(strace_marker_create_sals_from_location): Adjust to pass a
+	symbol_name_match_type to new_linespec_location.
+	(strace_marker_decode_location): Adjust to get_linespec_location's
+	return type change.
+	(strace_command): Adjust to pass a symbol_name_match_type to
+	new_linespec_location.
+	(LOCATION_HELP_STRING): Add paragraph about wildmatching, and
+	mention "-qualified".
+	* c-lang.c (cplus_language_defn): Install cp_search_name_hash.
+	* completer.c (explicit_location_match_type::MATCH_QUALIFIED): New
+	enumerator.
+	(complete_address_and_linespec_locations): New parameter
+	'match_type'.  Pass it down.
+	(explicit_options): Add "-qualified".
+	(collect_explicit_location_matches): Pass the requested match type
+	to the linespec completers.  Handle MATCH_QUALIFIED.
+	(location_completer): Handle "-qualified" combined with linespecs.
+	* cp-support.c (cp_search_name_hash): New.
+	(cp_symbol_name_matches_1): Implement wild matching for C++.
+	(cp_fq_symbol_name_matches): Reimplement.
+	(cp_get_symbol_name_matcher): Return different matchers depending
+	on the lookup name's match type.
+	(selftests::test_cp_symbol_name_matches): Add wild matching tests.
+	* cp-support.h (cp_search_name_hash): New declaration.
+	* dwarf2read.c
+	(selftests::dw2_expand_symtabs_matching::test_symbols): Add
+	symbols.
+	(test_dw2_expand_symtabs_matching_symbol): Add wild matching
+	tests.
+	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x): Adjust to
+	pass a symbol_name_match_type to new_linespec_location.
+	* linespec.c (linespec_parse_basic): Lookup function symbols using
+	the parser's symbol name match type.
+	(convert_explicit_location_to_linespec): New
+	symbol_name_match_type parameter.  Pass it down to
+	find_linespec_symbols.
+	(convert_explicit_location_to_sals): Pass the location's name
+	match type to convert_explicit_location_to_linespec.
+	(parse_linespec): New match_type parameter.  Save it in the
+	parser.
+	(linespec_parser_new): Default to symbol_name_match_type::WILD.
+	(linespec_complete_function): New symbol_name_match_type
+	parameter.  Use it.
+	(complete_linespec_component): Pass down the parser's recorded
+	name match type.
+	(linespec_complete_label): New symbol_name_match_type parameter.
+	Use it.
+	(linespec_complete): New symbol_name_match_type parameter.  Save
+	it in the parser and pass it down.  Adjust to
+	get_linespec_location's prototype change.
+	(find_function_symbols, find_linespec_symbols): New
+	symbol_name_match_type parameter.  Pass it down instead of
+	assuming symbol_name_match_type::WILD.
+	* linespec.h (linespec_complete, linespec_complete_function)
+	(linespec_complete_label): New symbol_name_match_type parameter.
+	* location.c (event_location::linespec_location): Now a struct
+	linespec_location.
+	(EL_LINESPEC): Adjust.
+	(initialize_explicit_location): Default to
+	symbol_name_match_type::WILD.
+	(new_linespec_location): New symbol_name_match_type parameter.
+	Record it in the location.
+	(get_linespec_location): Now returns a struct linespec_location.
+	(new_explicit_location): Also copy func_name_match_type.
+	(explicit_to_string_internal)
+	(string_to_explicit_location): Handle "-qualified".
+	(copy_event_location): Adjust to LINESPEC_LOCATION type change.
+	Copy symbol_name_match_type fields.
+	(event_location_deleter::operator()): Adjust to LINESPEC_LOCATION
+	type change.
+	(event_location_to_string): Adjust to LINESPEC_LOCATION type
+	change.  Handle "-qualfied".
+	(string_to_explicit_location): Handle "-qualified".
+	(string_to_event_location_basic): New symbol_name_match_type
+	parameter.  Pass it down.
+	(string_to_event_location): Handle "-qualified".
+	* location.h (struct linespec_location): New.
+	(explicit_location::func_name_match_type): New field.
+	(new_linespec_location): Now returns a const linespec_location *.
+	(string_to_event_location_basic): New symbol_name_match_type
+	parameter.
+	(explicit_completion_info::saw_explicit_location_option): New
+	field.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Adjust to pass a
+	symbol_name_match_type to new_linespec_location.
+	* python/py-breakpoint.c (bppy_init): Likewise.
+	* python/python.c (gdbpy_decode_line): Likewise.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_lookup_name_info::matches): Change type of
+	parameter from completion_match to completion_match_result.
+	Adjust.
+	(do_wild_match, do_full_match, ada_symbol_name_matches): Likewise.
+	* completer.c (completion_tracker::maybe_add_completion): Add
+	match_for_lcd parameter and use it.
+	(completion_tracker::add_completion): Likewise.
+	* completer.h (class completion_match_for_lcd): New class.
+	(completion_match_result::match_for_lcd): New field.
+	(completion_match_result::set_match): New method.
+	(completion_tracker): Add comments.
+	(completion_tracker::add_completion): Add match_for_lcd parameter.
+	(completion_tracker::reset_completion_match_result): Reset
+	match_for_lcd too.
+	(completion_tracker::maybe_add_completion): Add match_for_lcd
+	parameter.
+	(completion_tracker::m_lowest_common_denominator_unique): Extend
+	comments.
+	* cp-support.c (cp_symbol_name_matches_1)
+	(cp_fq_symbol_name_matches): Change type of parameter from
+	completion_match to completion_match_result.  Adjust.
+	* language.c (default_symbol_name_matcher): Change type of
+	parameter from completion_match to completion_match_result.
+	Adjust.
+	* language.h (completion_match_for_lcd): Forward declare.
+	(default_symbol_name_matcher): Change type of parameter from
+	completion_match to completion_match_result.
+	* symtab.c (compare_symbol_name): Adjust.
+	(completion_list_add_name): Pass the match_for_lcd to the tracker.
+	* symtab.h (ada_lookup_name_info::matches): Change type of
+	parameter from completion_match to completion_match_result.
+	(symbol_name_matcher_ftype): Likewise, and update comments.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	* linespec.c (minsym_found, add_minsym): Use msymbol_is_function.
+	* minsyms.c (msymbol_is_text): Delete.
+	(msymbol_is_function): New function.
+	* minsyms.h (msymbol_is_text): Delete.
+	(msymbol_is_function): New declaration.
+	* symtab.c (find_function_alias_target): Use msymbol_is_function.
+
+2017-11-29  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (distclean): Handle the case where rmdir fails.
+
+2017-11-29  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (_initialize_symfile): Update usage text for
+	add-symbol-file, symbol-file, load.
+
+2017-11-29  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (add_symbol_file_command): Error if some arguments to
+	-s are missing.  Change unrecognized-argument error message.
+	(_initialize_symfile): Fix usage text for add-symbol-file.
+
 2017-11-27  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (REMOTE_OBS): Remove.

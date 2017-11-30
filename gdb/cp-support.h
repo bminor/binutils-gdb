@@ -116,6 +116,13 @@ extern struct symbol **make_symbol_overload_list_adl (struct type **arg_types,
 extern struct type *cp_lookup_rtti_type (const char *name,
 					 struct block *block);
 
+/* Produce an unsigned hash value from SEARCH_NAME that is compatible
+   with cp_symbol_name_matches.  Only the last component in
+   "foo::bar::function()" is considered for hashing purposes (i.e.,
+   the entire prefix is skipped), so that later on looking up for
+   "function" or "bar::function" in all namespaces is possible.  */
+extern unsigned int cp_search_name_hash (const char *search_name);
+
 /* Implement the "la_get_symbol_name_matcher" language_defn method for
    C++.  */
 extern symbol_name_matcher_ftype *cp_get_symbol_name_matcher

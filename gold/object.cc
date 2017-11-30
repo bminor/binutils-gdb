@@ -476,7 +476,6 @@ Sized_relobj_file<size, big_endian>::Sized_relobj_file(
     local_plt_offsets_(),
     kept_comdat_sections_(),
     has_eh_frame_(false),
-    discarded_eh_frame_shndx_(-1U),
     is_deferred_layout_(false),
     deferred_layout_(),
     deferred_layout_relocs_(),
@@ -1303,13 +1302,7 @@ Sized_relobj_file<size, big_endian>::layout_eh_frame_section(
 					       &offset);
   this->output_sections()[shndx] = os;
   if (os == NULL || offset == -1)
-    {
-      // An object can contain at most one section holding exception
-      // frame information.
-      gold_assert(this->discarded_eh_frame_shndx_ == -1U);
-      this->discarded_eh_frame_shndx_ = shndx;
-      this->section_offsets()[shndx] = invalid_address;
-    }
+    this->section_offsets()[shndx] = invalid_address;
   else
     this->section_offsets()[shndx] = convert_types<Address, off_t>(offset);
 
@@ -2226,9 +2219,13 @@ Sized_relobj_file<size, big_endian>::do_count_local_symbols(Stringpool* pool,
       // Decide whether this symbol should go into the output file.
 
       if (is_ordinary
-	  && ((shndx < shnum && out_sections[shndx] == NULL)
-	      || shndx == this->discarded_eh_frame_shndx_))
+	  && shndx < shnum
+	  && (out_sections[shndx] == NULL
+	      || (out_sections[shndx]->order() == ORDER_EHFRAME
+		  && out_section_offsets[shndx] == invalid_address)))
 	{
+	  // This is either a discarded section or an optimized .eh_frame
+	  // section.
 	  lv.set_no_output_symtab_entry();
 	  gold_assert(!lv.needs_output_dynsym_entry());
 	  continue;
@@ -2393,10 +2390,10 @@ Sized_relobj_file<size, big_endian>::compute_final_local_value_internal(
 
 	  // This is a SHF_MERGE section or one which otherwise
 	  // requires special handling.
-	  if (shndx == this->discarded_eh_frame_shndx_)
+	  if (os->order() == ORDER_EHFRAME)
 	    {
-	      // This local symbol belongs to a discarded .eh_frame
-	      // section.  Just treat it like the case in which
+	      // This local symbol belongs to a discarded or optimized
+	      // .eh_frame section.  Just treat it like the case in which
 	      // os == NULL above.
 	      gold_assert(this->has_eh_frame_);
 	      return This::CFLV_DISCARDED;

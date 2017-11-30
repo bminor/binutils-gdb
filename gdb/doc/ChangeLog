@@ -1,3 +1,16 @@
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	PR c++/19436
+	* gdb.texinfo (Debugging C Plus Plus): Document setting
+	breakpoints in functions with ABI tags.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Linespec Locations): Document how "function" is
+	interpreted in C++ and Ada.  Document "-qualified".
+	(Explicit Locations): Document how "-function" is interpreted in
+	C++ and Ada.  Document "-qualified".
+
 2017-11-26  Dominik Czarnota  <dominik.b.czarnota@gmail.com>
 
 	PR gdb/21945

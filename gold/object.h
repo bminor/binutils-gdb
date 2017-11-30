@@ -2842,9 +2842,6 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   Kept_comdat_section_table kept_comdat_sections_;
   // Whether this object has a GNU style .eh_frame section.
   bool has_eh_frame_;
-  // If this object has a GNU style .eh_frame section that is discarded in
-  // output, record the index here.  Otherwise it is -1U.
-  unsigned int discarded_eh_frame_shndx_;
   // True if the layout of this object was deferred, waiting for plugin
   // replacement files.
   bool is_deferred_layout_;

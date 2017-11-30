@@ -359,6 +359,7 @@ static VEC (symbolp) *find_label_symbols (struct linespec_state *self,
 static void find_linespec_symbols (struct linespec_state *self,
 				   VEC (symtab_ptr) *file_symtabs,
 				   const char *name,
+				   symbol_name_match_type name_match_type,
 				   VEC (symbolp) **symbols,
 				   VEC (bound_minimal_symbol_d) **minsyms);
 
@@ -742,6 +743,11 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	    {
 	      /* Do not tokenize the C++ scope operator. */
 	      if (PARSER_STREAM (parser)[1] == ':')
+		++(PARSER_STREAM (parser));
+
+	      /* Do not tokenize ABI tags such as "[abi:cxx11]".  */
+	      else if (PARSER_STREAM (parser) - start > 4
+		       && startswith (PARSER_STREAM (parser) - 4, "[abi"))
 		++(PARSER_STREAM (parser));
 
 	      /* Do not tokenify if the input length so far is one
@@ -1865,9 +1871,12 @@ linespec_parse_basic (linespec_parser *parser)
 	  completion_tracker tmp_tracker;
 	  const char *source_filename
 	    = PARSER_EXPLICIT (parser)->source_filename;
+	  symbol_name_match_type match_type
+	    = PARSER_EXPLICIT (parser)->func_name_match_type;
 
 	  linespec_complete_function (tmp_tracker,
 				      parser->completion_word,
+				      match_type,
 				      source_filename);
 
 	  if (tmp_tracker.have_completions ())
@@ -1892,6 +1901,7 @@ linespec_parse_basic (linespec_parser *parser)
   /* Try looking it up as a function/method.  */
   find_linespec_symbols (PARSER_STATE (parser),
 			 PARSER_RESULT (parser)->file_symtabs, name,
+			 PARSER_EXPLICIT (parser)->func_name_match_type,
 			 &symbols, &minimal_symbols);
 
   if (symbols != NULL || minimal_symbols != NULL)
@@ -2383,11 +2393,14 @@ convert_explicit_location_to_linespec (struct linespec_state *self,
 				       linespec_p result,
 				       const char *source_filename,
 				       const char *function_name,
+				       symbol_name_match_type fname_match_type,
 				       const char *label_name,
 				       struct line_offset line_offset)
 {
   VEC (symbolp) *symbols, *labels;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
+
+  result->explicit_loc.func_name_match_type = fname_match_type;
 
   if (source_filename != NULL)
     {
@@ -2412,8 +2425,8 @@ convert_explicit_location_to_linespec (struct linespec_state *self,
   if (function_name != NULL)
     {
       find_linespec_symbols (self, result->file_symtabs,
-			     function_name, &symbols,
-			     &minimal_symbols);
+			     function_name, fname_match_type,
+			     &symbols, &minimal_symbols);
 
       if (symbols == NULL && minimal_symbols == NULL)
 	symbol_not_found_error (function_name,
@@ -2453,6 +2466,7 @@ convert_explicit_location_to_sals (struct linespec_state *self,
   convert_explicit_location_to_linespec (self, result,
 					 explicit_loc->source_filename,
 					 explicit_loc->function_name,
+					 explicit_loc->func_name_match_type,
 					 explicit_loc->label_name,
 					 explicit_loc->line_offset);
   return convert_linespec_to_sals (self, result);
@@ -2506,10 +2520,12 @@ convert_explicit_location_to_sals (struct linespec_state *self,
    if no file is validly specified.  Callers must check that.
    Also, the line number returned may be invalid.  */
 
-/* Parse the linespec in ARG.  */
+/* Parse the linespec in ARG.  MATCH_TYPE indicates how function names
+   should be matched.  */
 
 static std::vector<symtab_and_line>
-parse_linespec (linespec_parser *parser, const char *arg)
+parse_linespec (linespec_parser *parser, const char *arg,
+		symbol_name_match_type match_type)
 {
   linespec_token token;
   struct gdb_exception file_exception = exception_none;
@@ -2539,6 +2555,7 @@ parse_linespec (linespec_parser *parser, const char *arg)
   parser->lexer.stream = arg;
   parser->completion_word = arg;
   parser->complete_what = linespec_complete_what::FUNCTION;
+  PARSER_EXPLICIT (parser)->func_name_match_type = match_type;
 
   /* Initialize the default symtab and line offset.  */
   initialize_defaults (&PARSER_STATE (parser)->default_symtab,
@@ -2747,6 +2764,8 @@ linespec_parser_new (linespec_parser *parser,
   memset (parser, 0, sizeof (linespec_parser));
   parser->lexer.current.type = LSTOKEN_CONSUMED;
   memset (PARSER_RESULT (parser), 0, sizeof (struct linespec));
+  PARSER_EXPLICIT (parser)->func_name_match_type
+    = symbol_name_match_type::WILD;
   PARSER_EXPLICIT (parser)->line_offset.sign = LINE_OFFSET_UNKNOWN;
   linespec_state_constructor (PARSER_STATE (parser), flags, language,
 			      search_pspace,
@@ -2828,10 +2847,10 @@ linespec_lex_to_end (const char **stringp)
 void
 linespec_complete_function (completion_tracker &tracker,
 			    const char *function,
+			    symbol_name_match_type func_match_type,
 			    const char *source_filename)
 {
   complete_symbol_mode mode = complete_symbol_mode::LINESPEC;
-  symbol_name_match_type func_match_type = symbol_name_match_type::WILD;
 
   if (source_filename != NULL)
     {
@@ -2870,7 +2889,9 @@ complete_linespec_component (linespec_parser *parser,
     {
       completion_list fn_list;
 
-      linespec_complete_function (tracker, text, source_filename);
+      symbol_name_match_type match_type
+	= PARSER_EXPLICIT (parser)->func_name_match_type;
+      linespec_complete_function (tracker, text, match_type, source_filename);
       if (source_filename == NULL)
 	{
 	  /* Haven't seen a source component, like in "b
@@ -2940,6 +2961,7 @@ linespec_complete_label (completion_tracker &tracker,
 			 const struct language_defn *language,
 			 const char *source_filename,
 			 const char *function_name,
+			 symbol_name_match_type func_name_match_type,
 			 const char *label_name)
 {
   linespec_parser parser;
@@ -2956,6 +2978,7 @@ linespec_complete_label (completion_tracker &tracker,
 					     PARSER_RESULT (&parser),
 					     source_filename,
 					     function_name,
+					     func_name_match_type,
 					     NULL, unknown_offset);
     }
   CATCH (ex, RETURN_MASK_ERROR)
@@ -2973,7 +2996,8 @@ linespec_complete_label (completion_tracker &tracker,
 /* See description in linespec.h.  */
 
 void
-linespec_complete (completion_tracker &tracker, const char *text)
+linespec_complete (completion_tracker &tracker, const char *text,
+		   symbol_name_match_type match_type)
 {
   linespec_parser parser;
   struct cleanup *cleanup;
@@ -2982,6 +3006,7 @@ linespec_complete (completion_tracker &tracker, const char *text)
   linespec_parser_new (&parser, 0, current_language, NULL, NULL, 0, NULL);
   cleanup = make_cleanup (linespec_parser_delete, &parser);
   parser.lexer.saved_arg = text;
+  PARSER_EXPLICIT (&parser)->func_name_match_type = match_type;
   PARSER_STREAM (&parser) = text;
 
   parser.completion_tracker = &tracker;
@@ -2991,7 +3016,7 @@ linespec_complete (completion_tracker &tracker, const char *text)
      furthest completion point we managed to parse to.  */
   TRY
     {
-      parse_linespec (&parser, text);
+      parse_linespec (&parser, text, match_type);
     }
   CATCH (except, RETURN_MASK_ERROR)
     {
@@ -3039,7 +3064,7 @@ linespec_complete (completion_tracker &tracker, const char *text)
       VEC (bound_minimal_symbol_d) *minimal_symbols;
       find_linespec_symbols (PARSER_STATE (&parser),
 			     PARSER_RESULT (&parser)->file_symtabs,
-			     func_name,
+			     func_name, match_type,
 			     &function_symbols, &minimal_symbols);
 
       PARSER_RESULT (&parser)->function_symbols = function_symbols;
@@ -3181,7 +3206,9 @@ event_location_to_sals (linespec_parser *parser,
 	PARSER_STATE (parser)->is_linespec = 1;
 	TRY
 	  {
-	    result = parse_linespec (parser, get_linespec_location (location));
+	    const linespec_location *ls = get_linespec_location (location);
+	    result = parse_linespec (parser,
+				     ls->spec_string, ls->match_type);
 	  }
 	CATCH (except, RETURN_MASK_ERROR)
 	  {
@@ -3492,7 +3519,8 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 	  else
 	    str = saved_arg;
 
-	  self->canonical->location = new_linespec_location (&str);
+	  self->canonical->location
+	    = new_linespec_location (&str, symbol_name_match_type::FULL);
 	}
     }
 
@@ -3936,6 +3964,7 @@ symtabs_from_filename (const char *filename,
 static void
 find_function_symbols (struct linespec_state *state,
 		       VEC (symtab_ptr) *file_symtabs, const char *name,
+		       symbol_name_match_type name_match_type,
 		       VEC (symbolp) **symbols,
 		       VEC (bound_minimal_symbol_d) **minsyms)
 {
@@ -3955,8 +3984,7 @@ find_function_symbols (struct linespec_state *state,
     add_all_symbol_names_from_pspace (&info, state->search_pspace,
 				      symbol_names, FUNCTIONS_DOMAIN);
   else
-    add_matching_symbols_to_info (name, symbol_name_match_type::WILD,
-				  FUNCTIONS_DOMAIN,
+    add_matching_symbols_to_info (name, name_match_type, FUNCTIONS_DOMAIN,
 				  &info, state->search_pspace);
 
   do_cleanups (cleanup);
@@ -3985,6 +4013,7 @@ static void
 find_linespec_symbols (struct linespec_state *state,
 		       VEC (symtab_ptr) *file_symtabs,
 		       const char *lookup_name,
+		       symbol_name_match_type name_match_type,
 		       VEC (symbolp) **symbols,
 		       VEC (bound_minimal_symbol_d) **minsyms)
 {
@@ -4002,6 +4031,7 @@ find_linespec_symbols (struct linespec_state *state,
      2) break class::method where method is in class (and not a baseclass)  */
 
   find_function_symbols (state, file_symtabs, lookup_name,
+			 name_match_type,
 			 symbols, minsyms);
 
   /* If we were unable to locate a symbol of the same name, try dividing
@@ -4309,22 +4339,12 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 	      struct minimal_symbol *msymbol,
 	      std::vector<symtab_and_line> *result)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  CORE_ADDR pc;
   struct symtab_and_line sal;
 
-  if (msymbol_is_text (msymbol))
+  CORE_ADDR func_addr;
+  if (msymbol_is_function (objfile, msymbol, &func_addr))
     {
-      sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (objfile, msymbol),
-			       (struct obj_section *) 0, 0);
-      sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
-
-      /* The minimal symbol might point to a function descriptor;
-	 resolve it to the actual code address instead.  */
-      pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc,
-					       &current_target);
-      if (pc != sal.pc)
-	sal = find_pc_sect_line (pc, NULL, 0);
+      sal = find_pc_sect_line (func_addr, NULL, 0);
 
       if (self->funfirstline)
 	{
@@ -4332,14 +4352,9 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 	      && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
 		  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
 	    {
-	      /* If gdbarch_convert_from_func_ptr_addr does not apply then
-		 sal.SECTION, sal.LINE&co. will stay correct from above.
-		 If gdbarch_convert_from_func_ptr_addr applies then
-		 sal.SECTION is cleared from above and sal.LINE&co. will
-		 stay correct from the last find_pc_sect_line above.  */
-	      sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
-	      sal.pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc,
-							   &current_target);
+	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
+	      sal.pc = func_addr;
 	      if (gdbarch_skip_entrypoint_p (gdbarch))
 		sal.pc = gdbarch_skip_entrypoint (gdbarch, sal.pc);
 	    }
@@ -4424,52 +4439,26 @@ static void
 add_minsym (struct minimal_symbol *minsym, void *d)
 {
   struct collect_minsyms *info = (struct collect_minsyms *) d;
-  bound_minimal_symbol_d mo;
-
-  mo.minsym = minsym;
-  mo.objfile = info->objfile;
 
   if (info->symtab != NULL)
     {
-      CORE_ADDR pc;
-      struct symtab_and_line sal;
-      struct gdbarch *gdbarch = get_objfile_arch (info->objfile);
+      /* We're looking for a label for which we don't have debug
+	 info.  */
+      CORE_ADDR func_addr;
+      if (msymbol_is_function (info->objfile, minsym, &func_addr))
+	{
+	  symtab_and_line sal = find_pc_sect_line (func_addr, NULL, 0);
 
-      sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (info->objfile, minsym),
-			       NULL, 0);
-      sal.section = MSYMBOL_OBJ_SECTION (info->objfile, minsym);
-      pc
-	= gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc, &current_target);
-      if (pc != sal.pc)
-	sal = find_pc_sect_line (pc, NULL, 0);
-
-      if (info->symtab != sal.symtab)
-	return;
+	  if (info->symtab != sal.symtab)
+	    return;
+	}
     }
 
-  /* Exclude data symbols when looking for breakpoint locations.   */
-  if (!info->list_mode)
-    switch (minsym->type)
-      {
-	case mst_slot_got_plt:
-	case mst_data:
-	case mst_bss:
-	case mst_abs:
-	case mst_file_data:
-	case mst_file_bss:
-	  {
-	    /* Make sure this minsym is not a function descriptor
-	       before we decide to discard it.  */
-	    struct gdbarch *gdbarch = get_objfile_arch (info->objfile);
-	    CORE_ADDR addr = gdbarch_convert_from_func_ptr_addr
-			       (gdbarch, BMSYMBOL_VALUE_ADDRESS (mo),
-				&current_target);
+  /* Exclude data symbols when looking for breakpoint locations.  */
+  if (!info->list_mode && !msymbol_is_function (info->objfile, minsym))
+    return;
 
-	    if (addr == BMSYMBOL_VALUE_ADDRESS (mo))
-	      return;
-	  }
-      }
-
+  bound_minimal_symbol_d mo = {minsym, info->objfile};
   VEC_safe_push (bound_minimal_symbol_d, info->msyms, &mo);
 }
 

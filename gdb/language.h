@@ -37,6 +37,7 @@ struct type_print_options;
 struct lang_varobj_ops;
 struct parser_state;
 struct compile_instance;
+struct completion_match_for_lcd;
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
 
@@ -629,7 +630,7 @@ void c_get_string (struct value *value, gdb_byte **buffer, int *length,
 extern bool default_symbol_name_matcher
   (const char *symbol_search_name,
    const lookup_name_info &lookup_name,
-   completion_match *match);
+   completion_match_result *comp_match_res);
 
 /* Get LANG's symbol_name_matcher method for LOOKUP_NAME.  Returns
    default_symbol_name_matcher if not set.  */

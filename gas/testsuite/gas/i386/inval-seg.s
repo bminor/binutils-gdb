@@ -4,7 +4,8 @@
 	movl	(%eax),%ds
 
 	.intel_syntax noprefix
-	mov	eax, DWORD PTR fs:foobar:16
-	mov	eax, DWORD PTR fs:foobar:barfoo:16
-	mov	eax, DWORD PTR fs:ds:16
-	mov	eax, DWORD PTR fs:ds:cs:16
+	mov	eax, es:foo:[eax]
+	mov	eax, es:fs:foo:[eax]
+	mov	eax, fs:foo:bar:[eax]
+	mov	eax, fs:foo:gs:[eax]
+	mov	eax, bar:gs:[eax]

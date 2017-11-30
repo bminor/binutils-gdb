@@ -1016,7 +1016,7 @@ extern const struct language_defn cplus_language_defn =
   c_watch_location_expression,
   cp_get_symbol_name_matcher,
   iterate_over_symbols,
-  default_search_name_hash,
+  cp_search_name_hash,
   &cplus_varobj_ops,
   NULL,
   NULL,

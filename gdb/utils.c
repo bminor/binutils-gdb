@@ -2247,12 +2247,40 @@ cp_is_operator (const char *string, const char *start)
 	  && !valid_identifier_name_char (string[CP_OPERATOR_LEN]));
 }
 
+/* If *NAME points at an ABI tag, skip it and return true.  Otherwise
+   leave *NAME unmodified and return false.  (see GCC's abi_tag
+   attribute), such names are demangled as e.g.,
+   "function[abi:cxx11]()".  */
+
+static bool
+skip_abi_tag (const char **name)
+{
+  const char *p = *name;
+
+  if (startswith (p, "[abi:"))
+    {
+      p += 5;
+
+      while (valid_identifier_name_char (*p))
+	p++;
+
+      if (*p == ']')
+	{
+	  p++;
+	  *name = p;
+	  return true;
+	}
+    }
+  return false;
+}
+
 /* See utils.h.  */
 
 int
 strncmp_iw_with_mode (const char *string1, const char *string2,
 		      size_t string2_len, strncmp_iw_mode mode,
-		      enum language language)
+		      enum language language,
+		      completion_match_for_lcd *match_for_lcd)
 {
   const char *string1_start = string1;
   const char *end_str2 = string2 + string2_len;
@@ -2269,6 +2297,37 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
 	{
 	  skip_ws (string1, string2, end_str2);
 	  skip_spaces = false;
+	}
+
+      /* Skip [abi:cxx11] tags in the symbol name if the lookup name
+	 doesn't include them.  E.g.:
+
+	 string1: function[abi:cxx1](int)
+	 string2: function
+
+	 string1: function[abi:cxx1](int)
+	 string2: function(int)
+
+	 string1: Struct[abi:cxx1]::function()
+	 string2: Struct::function()
+
+	 string1: function(Struct[abi:cxx1], int)
+	 string2: function(Struct, int)
+      */
+      if (string2 == end_str2
+	  || (*string2 != '[' && !valid_identifier_name_char (*string2)))
+	{
+	  const char *abi_start = string1;
+
+	  /* There can be more than one tag.  */
+	  while (*string1 == '[' && skip_abi_tag (&string1))
+	    ;
+
+	  if (match_for_lcd != NULL && abi_start != string1)
+	    match_for_lcd->mark_ignored_range (abi_start, string1);
+
+	  while (isspace (*string1))
+	    string1++;
 	}
 
       if (*string1 == '\0' || string2 == end_str2)
@@ -2405,7 +2464,40 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
   if (string2 == end_str2)
     {
       if (mode == strncmp_iw_mode::NORMAL)
-	return 0;
+	{
+	  /* Strip abi tag markers from the matched symbol name.
+	     Usually the ABI marker will be found on function name
+	     (automatically added because the function returns an
+	     object marked with an ABI tag).  However, it's also
+	     possible to see a marker in one of the function
+	     parameters, for example.
+
+	     string2 (lookup name):
+	       func
+	     symbol name:
+	       function(some_struct[abi:cxx11], int)
+
+	     and for completion LCD computation we want to say that
+	     the match was for:
+	       function(some_struct, int)
+	  */
+	  if (match_for_lcd != NULL)
+	    {
+	      while ((string1 = strstr (string1, "[abi:")) != NULL)
+		{
+		  const char *abi_start = string1;
+
+		  /* There can be more than one tag.  */
+		  while (skip_abi_tag (&string1) && *string1 == '[')
+		    ;
+
+		  if (abi_start != string1)
+		    match_for_lcd->mark_ignored_range (abi_start, string1);
+		}
+	    }
+
+	  return 0;
+	}
       else
 	return (*string1 != '\0' && *string1 != '(');
     }

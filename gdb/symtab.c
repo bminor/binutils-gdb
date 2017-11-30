@@ -3927,14 +3927,14 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 symbol *
 find_function_alias_target (bound_minimal_symbol msymbol)
 {
-  if (!msymbol_is_text (msymbol.minsym))
+  CORE_ADDR func_addr;
+  if (!msymbol_is_function (msymbol.objfile, msymbol.minsym, &func_addr))
     return NULL;
 
-  CORE_ADDR addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
-  symbol *sym = find_pc_function (addr);
+  symbol *sym = find_pc_function (func_addr);
   if (sym != NULL
       && SYMBOL_CLASS (sym) == LOC_BLOCK
-      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == addr)
+      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == func_addr)
     return sym;
 
   return NULL;
@@ -4698,7 +4698,7 @@ compare_symbol_name (const char *symbol_name, language symbol_language,
   symbol_name_matcher_ftype *name_match
     = language_get_symbol_name_matcher (lang, lookup_name);
 
-  return name_match (symbol_name, lookup_name, &match_res.match);
+  return name_match (symbol_name, lookup_name, &match_res);
 }
 
 /*  See symtab.h.  */
@@ -4751,7 +4751,14 @@ completion_list_add_name (completion_tracker &tracker,
 
     gdb::unique_xmalloc_ptr<char> completion (newobj);
 
-    tracker.add_completion (std::move (completion));
+    /* Here we pass the match-for-lcd object to add_completion.  Some
+       languages match the user text against substrings of symbol
+       names in some cases.  E.g., in C++, "b push_ba" completes to
+       "std::vector::push_back", "std::string::push_back", etc., and
+       in this case we want the completion lowest common denominator
+       to be "push_back" instead of "std::".  */
+    tracker.add_completion (std::move (completion),
+			    &match_res.match_for_lcd);
   }
 }
 

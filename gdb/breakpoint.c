@@ -9100,9 +9100,9 @@ parse_breakpoint_sals (const struct event_location *location,
 
   if (event_location_type (location) == LINESPEC_LOCATION)
     {
-      const char *address = get_linespec_location (location);
+      const char *spec = get_linespec_location (location)->spec_string;
 
-      if (address == NULL)
+      if (spec == NULL)
 	{
 	  /* The last displayed codepoint, if it's valid, is our default
 	     breakpoint address.  */
@@ -9148,15 +9148,15 @@ parse_breakpoint_sals (const struct event_location *location,
   cursal = get_current_source_symtab_and_line ();
   if (last_displayed_sal_is_valid ())
     {
-      const char *address = NULL;
+      const char *spec = NULL;
 
       if (event_location_type (location) == LINESPEC_LOCATION)
-	address = get_linespec_location (location);
+	spec = get_linespec_location (location)->spec_string;
 
       if (!cursal.symtab
-	  || (address != NULL
-	      && strchr ("+-", address[0]) != NULL
-	      && address[1] != '['))
+	  || (spec != NULL
+	      && strchr ("+-", spec[0]) != NULL
+	      && spec[1] != '['))
 	{
 	  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE, NULL,
 			    get_last_displayed_symtab (),
@@ -13147,12 +13147,13 @@ strace_marker_create_sals_from_location (const struct event_location *location,
   struct linespec_sals lsal;
   const char *arg_start, *arg;
 
-  arg = arg_start = get_linespec_location (location);
+  arg = arg_start = get_linespec_location (location)->spec_string;
   lsal.sals = decode_static_tracepoint_spec (&arg);
 
   std::string str (arg_start, arg - arg_start);
   const char *ptr = str.c_str ();
-  canonical->location = new_linespec_location (&ptr);
+  canonical->location
+    = new_linespec_location (&ptr, symbol_name_match_type::FULL);
 
   lsal.canonical
     = xstrdup (event_location_to_string (canonical->location.get ()));
@@ -13213,7 +13214,7 @@ strace_marker_decode_location (struct breakpoint *b,
 			       struct program_space *search_pspace)
 {
   struct tracepoint *tp = (struct tracepoint *) b;
-  const char *s = get_linespec_location (location);
+  const char *s = get_linespec_location (location)->spec_string;
 
   std::vector<symtab_and_line> sals = decode_static_tracepoint_spec (&s);
   if (sals.size () > tp->static_trace_marker_id_idx)
@@ -14759,7 +14760,7 @@ strace_command (const char *arg, int from_tty)
   if (arg && startswith (arg, "-m") && isspace (arg[2]))
     {
       ops = &strace_marker_breakpoint_ops;
-      location = new_linespec_location (&arg);
+      location = new_linespec_location (&arg, symbol_name_match_type::FULL);
     }
   else
     {
@@ -15289,7 +15290,14 @@ Explicit locations are similar to linespecs but use an option/argument\n\
 syntax to specify location parameters.\n\
 Example: To specify the start of the label named \"the_top\" in the\n\
 function \"fact\" in the file \"factorial.c\", use \"-source factorial.c\n\
--function fact -label the_top\".\n"
+-function fact -label the_top\".\n\
+\n\
+By default, a specified function is matched against the program's\n\
+functions in all scopes.  For C++, this means in all namespaces and\n\
+classes.  For Ada, this means in all packages.  E.g., in C++,\n\
+\"func()\" matches \"A::func()\", \"A::B::func()\", etc.  The\n\
+\"-qualified\" flag overrides this behavior, making GDB interpret the\n\
+specified name as a complete fully-qualified name instead.\n"
 
 /* This help string is used for the break, hbreak, tbreak and thbreak
    commands.  It is defined as a macro to prevent duplication.
