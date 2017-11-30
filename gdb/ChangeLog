@@ -1,5 +1,92 @@
 2017-11-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	* configure.ac Don't check for sys/fault.h, sys/syscall.h,
+	sys/proc.h.
+	(NEW_PROC_API): Remove.
+	(prsysent_t, pr_sigset_t, pr_sigaction64_t, pr_siginfo64_t):
+	Likewise.
+	* common/common.m4 (GDB_AC_COMMON): Don't check for sys/syscall.h.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* gdbserver/configure: Regenerate.
+	* gdbserver/config.in: Regenerate.
+
+	* i386-sol2-nat.c (_initialize_amd64_sol2_nat): Remove
+	NEW_PROC_API test.
+	* sparc-sol2-nat.c (_initialize_sparc_sol2_nat): Likewise.
+
+	* linux-btrace.c: Remove HAVE_SYS_SYSCALL_H test.
+
+	* proc-api.c: Remove !NEW_PROC_API support.
+	Remove HAVE_SYS_PROC_H and HAVE_SYS_USER_H tests.
+	Remove tests for macros always defined on Solaris.
+	* proc-events.c: Remove !NEW_PROC_API support.
+	Remove Remove HAVE_SYS_SYSCALL_H, HAVE_SYS_PROC_H and
+	HAVE_SYS_USER_H tests.
+	(init_syscall_table): Remove non-Solaris syscalls.
+	Remove tests for syscalls present on all Solaris versions.
+	Add missing Solaris 10+ syscalls.
+	(signal_table): Remove non-Solaris signals.
+	Remove tests for signals present on all Solaris versions.
+	(fault_table): Remove non-Solaris faults.
+	Remove tests for faults present on all Solaris versions.
+	* proc-flags.c: Remove !NEW_PROC_API support.
+	(pr_flag_table): Remove non-Solaris and pre-Solaris 7 comments.
+	Remove non-Solaris flags.
+	* proc-why.c: Remove !NEW_PROC_API support.
+	(pr_why_table): Remove meaningless comments.
+	Remove tests for reasons present on all Solaris versions.
+	Remove OSF/1 cases.
+	(proc_prettyfprint_why): Likewise.
+
+	* procfs.c: Remove !NEW_PROC_API and DYNAMIC_SYSCALLS support.
+	Remove HAVE_SYS_FAULT_H and HAVE_SYS_SYSCALL_H tests.
+	Remove WA_READ test, IRIX watchpoint support.
+	(gdb_sigset_t, gdb_sigaction_t, gdb_siginfo_t): Replace by base
+	types.  Change users.
+	(gdb_praddset, gdb_prdelset, gdb_premptysysset, gdb_praddsysset)
+	(gdb_prdelset, gdb_pr_issyssetmember): Replace by base macros.
+	Change callers.
+	Remove CTL_PROC_NAME_FMT tests.
+	(gdb_prstatus_t, gdb_lwpstatus_t): Replace by base types.  Change
+	users.
+	(sysset_t_size): Remove.  Use sizeof (sysset_t) in callers.
+	Remove PROCFS_DONT_PIOCSSIG_CURSIG support.
+	(proc_modify_flag): Replace GDBRESET by PCUNSET.
+	Remove PR_ASYNC, PR_KLC tests.
+	(proc_unset_inherit_on_fork): Remove PR_ASYNC test.
+	(proc_parent_pid): Remove PCWATCH etc. tests.
+	(proc_set_watchpoint): Remove !PCWATCH && !PIOCSWATCH support.
+	Remove PCAGENT test.
+	(proc_get_nthreads) [PIOCNTHR && PIOCTLIST]: Remove.
+	Remove SYS_lwpcreate || SYS_lwp_create test.
+	(proc_get_current_thread): Likewise.
+	[PIOCNTHR && PIOCTLIST]: Remove.
+	[PIOCLSTATUS]: Remove.
+	(procfs_debug_inferior): Remove non-Solaris cases, conditionals.
+	[PRFS_STOPEXEC]: Remove.
+	(syscall_is_lwp_exit): Remove non-Solaris cases, conditionals.
+	(syscall_is_exit): Likewise.
+	(syscall_is_exec): Likewise.
+	(syscall_is_lwp_create): Likewise.
+	Remove SYS_syssgi support.
+	(procfs_wait): Remove PR_ASYNC, !PIOCSSPCACT tests.
+	[SYS_syssgi]: Remove.
+	Remove non-Solaris cases, conditionals.
+	(unconditionally_kill_inferior) [PROCFS_NEED_PIOCSSIG_FOR_KILL]:
+	Remove.
+	(procfs_init_inferior) [SYS_syssgi]: Remove.
+	(procfs_set_exec_trap) [PRFS_STOPEXEC]: Remove.
+	(procfs_inferior_created) [SYS_syssgi]: Remove.
+	(procfs_set_watchpoint): Remove !AIX5 test.
+	(procfs_stopped_by_watchpoint): Remove FLTWATCH test, FLTKWATCH
+	case.
+	(mappingflags) [MA_PHYS]: Remove.
+	(info_mappings_callback): Remove PCAGENT test.
+	Remove PIOCOPENLWP || PCAGENT test.
+
+2017-11-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	* sol-thread.c (info_solthreads): Constify args.
 	Cast args to void *.
 
