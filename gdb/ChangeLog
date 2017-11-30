@@ -1,3 +1,8 @@
+2017-12-01  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (all_deps_files): New variable.
+	Include .Po files using all_deps_files.
+
 2017-12-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS: Update list of maintainers, moving those who
