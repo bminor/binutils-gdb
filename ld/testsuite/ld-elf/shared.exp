@@ -83,6 +83,31 @@ run_ld_link_tests [list \
     ] \
 ]
 
+run_ld_link_tests [list \
+    [list \
+	"DT_TEXTREL in shared lib" \
+	"$LFLAGS -shared --warn-shared-textrel" \
+	"" \
+	"$AFLAGS_PIC" \
+	{textrel.s} \
+	 {{ld textrel.warn} \
+	  {readelf {-d --wide} textrel.rd}} \
+	"textrel.so" \
+    ] \
+] "xtensa-*-*"
+
+run_ld_link_tests [list \
+    [list \
+	"DT_TEXTREL map file warning" \
+	"$LFLAGS -shared -M" \
+	"" \
+	"$AFLAGS_PIC" \
+	{textrel.s} \
+	 {{ld textrel.map}} \
+	"textrel.so" \
+    ] \
+] "cris*-*-*"
+
 # PR ld/20828 check for correct dynamic symbol table entries where:
 # - symbols have been defined with a linker script,
 # - the same symbols have been seen in shared library used in the link,

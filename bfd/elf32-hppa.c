@@ -2098,8 +2098,8 @@ maybe_set_textrel (struct elf_link_hash_entry *eh, void *inf)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation in read-only section `%A'\n"),
-	 sec->owner, sec);
+	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	 sec->owner, eh->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
       return FALSE;

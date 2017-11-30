@@ -1,5 +1,57 @@
 2017-12-01  Alan Modra  <amodra@gmail.com>
 
+	* elf32-hppa.c (maybe_set_textrel): Print symbol for map file output.
+	* elf32-ppc.c (maybe_set_textrel): Likewise.
+	* elf64-ppc.c (maybe_set_textrel): Likewise.
+	* elf32-arm.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing..
+	(elf32_arm_readonly_dynrelocs): ..this.
+	* elf32-lm32.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elf32-m32r.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elf32-metag.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elf32-nds32.c: Delete unnecessary forward declarations.
+	(readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elf32-or1k.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elf32-s390.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elf32-sh.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elf32-tic6x.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing..
+	(elf32_tic6x_readonly_dynrelocs): ..this.
+	* elf32-tilepro.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elf64-s390.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elfnn-aarch64.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing..
+	(aarch64_readonly_readonly_dynrelocs): ..this.
+	* elfnn-riscv.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elfxx-sparc.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+	* elfxx-tilegx.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function, replacing old version of..
+	(readonly_dynrelocs): ..this.
+
+2017-12-01  Alan Modra  <amodra@gmail.com>
+
 	PR 22533
 	* elf32-hppa.c (elf32_hppa_copy_indirect_symbol): Don't do anything
 	special with non_got_ref for weak aliases.
