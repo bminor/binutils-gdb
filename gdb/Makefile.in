@@ -1042,6 +1042,7 @@ COMMON_SFILES = \
 	record-btrace.c \
 	record-full.c \
 	regcache.c \
+	regcache-dump.c \
 	reggroups.c \
 	registry.c \
 	remote.c \
@@ -1550,6 +1551,14 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	new-op.o \
 	print-utils.o \
 	ptid.o \
+	record.o \
+	record-btrace.o \
+	record-full.o \
+	regcache.o \
+	regcache-dump.o \
+	reggroups.o \
+	registry.o \
+	reverse.o \
 	rsp-low.o \
 	run-time-clock.o \
 	signals.o \
