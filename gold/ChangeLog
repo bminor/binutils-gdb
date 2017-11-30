@@ -1,4 +1,11 @@
 2017-11-30  Peter Smith  <peter.smith@linaro.org>
+
+	PR gold/20765
+	* aarch64.cc (Aarch64_relobj::update_erratum_address): New method.
+	(AArch64_relobj::scan_errata): Update addresses in stub table after
+	relaxation pass.
+
+2017-11-30  Peter Smith  <peter.smith@linaro.org>
 	    Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/20765
