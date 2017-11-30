@@ -1147,6 +1147,8 @@ host_float_ops<T>::compare (const gdb_byte *x, const struct type *type_x,
 
 #ifdef HAVE_LIBMPFR
 
+#define MPFR_USE_INTMAX_T
+
 #include <mpfr.h>
 
 class mpfr_float_ops : public target_float_ops
