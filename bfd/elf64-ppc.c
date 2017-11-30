@@ -4761,18 +4761,11 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
   if (eind->oh != NULL)
     edir->oh = ppc_follow_link (eind->oh);
 
-  /* If called to transfer flags for a weakdef during processing
-     of elf_adjust_dynamic_symbol, don't copy NON_GOT_REF.
-     We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-  if (!(ELIMINATE_COPY_RELOCS
-	&& eind->elf.root.type != bfd_link_hash_indirect
-	&& edir->elf.dynamic_adjusted))
-    edir->elf.non_got_ref |= eind->elf.non_got_ref;
-
   if (edir->elf.versioned != versioned_hidden)
     edir->elf.ref_dynamic |= eind->elf.ref_dynamic;
   edir->elf.ref_regular |= eind->elf.ref_regular;
   edir->elf.ref_regular_nonweak |= eind->elf.ref_regular_nonweak;
+  edir->elf.non_got_ref |= eind->elf.non_got_ref;
   edir->elf.needs_plt |= eind->elf.needs_plt;
   edir->elf.pointer_equality_needed |= eind->elf.pointer_equality_needed;
 
@@ -7216,8 +7209,9 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       BFD_ASSERT (def->root.type == bfd_link_hash_defined);
       h->root.u.def.section = def->root.u.def.section;
       h->root.u.def.value = def->root.u.def.value;
-      if (ELIMINATE_COPY_RELOCS)
-	h->non_got_ref = def->non_got_ref;
+      if (def->root.u.def.section == htab->elf.sdynbss
+	  || def->root.u.def.section == htab->elf.sdynrelro)
+	((struct ppc_link_hash_entry *) h)->dyn_relocs = NULL;
       return TRUE;
     }
 
@@ -7275,11 +7269,6 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      determine the address it must put in the global offset table, so
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
-
-  /* We must generate a R_PPC64_COPY reloc to tell the dynamic linker
-     to copy the initial value out of the dynamic object and into the
-     runtime process image.  We need to remember the offset into the
-     .rela.bss section we are going to use.  */
   if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
     {
       s = htab->elf.sdynrelro;
@@ -7292,6 +7281,9 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
+      /* We must generate a R_PPC64_COPY reloc to tell the dynamic
+	 linker to copy the initial value out of the dynamic object
+	 and into the runtime process image.  */
       srel->size += sizeof (Elf64_External_Rela);
       h->needs_copy = 1;
     }

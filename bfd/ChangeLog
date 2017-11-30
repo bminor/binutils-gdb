@@ -1,3 +1,24 @@
+2017-12-01  Alan Modra  <amodra@gmail.com>
+
+	PR 22533
+	* elf32-hppa.c (elf32_hppa_copy_indirect_symbol): Don't do anything
+	special with non_got_ref for weak aliases.
+	(elf32_hppa_check_relocs): Tweak setting of non_got_ref.
+	(elf32_hppa_adjust_dynamic_symbol): When initialising weak aliases,
+	don't uselessly copy non_got_ref.  Clear dyn_relocs instead if
+	strong symbol is allocated in dynbss.  Tidy comments.
+	(elf32_hppa_relocate_section): Comment fix.
+	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Don't do anything
+	special with non_got_ref for weak aliases.
+	(ppc_elf_adjust_dynamic_symbol): When initialising weak aliases,
+	don't uselessly copy non_got_ref.  Clear dyn_relocs instead if
+	strong symbol is allocated in dynbss.  Tidy comments.
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Don't do anything
+	special with non_got_ref for weak aliases.
+	(ppc64_elf_adjust_dynamic_symbol): When initialising weak aliases,
+	don't uselessly copy non_got_ref.  Clear dyn_relocs instead if
+	strong symbol is allocated in dynbss.  Tidy comments.
+
 2017-11-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 22509
