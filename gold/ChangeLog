@@ -1,4 +1,12 @@
 2017-11-30  Peter Smith  <peter.smith@linaro.org>
+	    Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/20765
+	* aarch64.cc (Erratum_stub::invalidate_erratum_stub): Use erratum_insn_
+	instead of relobj_ to invalidate the stub.
+	(Erratum_stub::is_invalidated_erratum_stub): Likewise.
+
+2017-11-30  Peter Smith  <peter.smith@linaro.org>
 
 	PR gold/22233
 	* aarch64.cc (AArch64_relobj::fix_errata_and_relocate_erratum_stubs):
