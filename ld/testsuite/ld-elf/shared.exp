@@ -34,6 +34,8 @@ if ![check_shared_lib_support] {
 # Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
 global NOPIE_CFLAGS NOPIE_LDFLAGS
 
+set old_ASFLAGS $ASFLAGS
+
 # This target requires extra GAS options when building code for shared
 # libraries.
 set AFLAGS_PIC ""
@@ -220,6 +222,8 @@ if { [check_gc_sections_available] } {
 	] \
     ]
 }
+
+set ASFLAGS $old_ASFLAGS
 
 # Check to see if the C compiler works
 if { [which $CC] == 0 } {

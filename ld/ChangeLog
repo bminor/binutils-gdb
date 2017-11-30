@@ -1,3 +1,8 @@
+2017-11-30  Alan Modra  <amodra@gmail.com>
+
+	PR 22471
+	* testsuite/ld-elf/shared.exp: Save and restore ASFLAGS.
+
 2017-11-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22471
