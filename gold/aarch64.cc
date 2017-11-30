@@ -2041,7 +2041,7 @@ AArch64_relobj<size, big_endian>::fix_errata_and_relocate_erratum_stubs(
           // executed.
           stub_table->relocate_erratum_stub(
 	    stub,
-	    pview.view + view_offset + (stub_table->address() - pview.address));
+	    pview.view + (stub_table->address() - pview.address));
 
           // Next erratum stub.
 	  ++p;
