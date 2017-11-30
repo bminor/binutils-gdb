@@ -1,3 +1,15 @@
+2017-11-29  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/21874
+	* config/tc-i386-intel.c (i386_intel_simplify): Chain together
+	multiple segment override expressions.
+	(i386_intel_operand): Issue diagnostic for redundant segment
+	overrides.
+	* testsuite/gas/i386/intelok.e: New.
+	* testsuite/gas/i386/intelok.d: Reference intelok.e.
+	* testsuite/gas/i386/inval-seg.s: Add redundant override checks.
+	* testsuite/gas/i386/inval-seg.l: Adjust expectations.
+
 2017-11-29  Jim Wilson  <jimw@sifive.com>
 	    Palmer Dabbelt  <palmer@sifive.com>
 
