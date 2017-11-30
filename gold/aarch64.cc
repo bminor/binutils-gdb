@@ -1052,13 +1052,13 @@ public:
   void
   invalidate_erratum_stub()
   {
-     gold_assert(this->relobj_ != NULL);
-     this->relobj_ = NULL;
+     gold_assert(this->erratum_insn_ != invalid_insn);
+     this->erratum_insn_ = invalid_insn;
   }
 
   bool
   is_invalidated_erratum_stub()
-  { return this->relobj_ == NULL; }
+  { return this->erratum_insn_ == invalid_insn; }
 
 protected:
   virtual void
