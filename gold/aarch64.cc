@@ -1031,6 +1031,18 @@ public:
   set_erratum_address(AArch64_address addr)
   { this->erratum_address_ = addr; }
 
+  // Later relaxation passes of may alter the recorded erratum and destination
+  // address. Given an up to date output section address of shidx_ in
+  // relobj_ we can derive the erratum_address and destination address.
+  void
+  update_erratum_address(AArch64_address output_section_addr)
+  {
+    const int BPI = AArch64_insn_utilities<big_endian>::BYTES_PER_INSN;
+    AArch64_address updated_addr = output_section_addr + this->sh_offset_;
+    this->set_erratum_address(updated_addr);
+    this->set_destination_address(updated_addr + BPI);
+  }
+
   // Comparator used to group Erratum_stubs in a set by (obj, shndx,
   // sh_offset). We do not include 'type' in the calculation, because there is
   // at most one stub type at (obj, shndx, sh_offset).
@@ -2302,6 +2314,19 @@ AArch64_relobj<size, big_endian>::scan_errata(
 	os->find_relaxed_input_section(this, shndx);
       if (!poris) return;
       output_address = poris->address();
+    }
+
+  // Update the addresses in previously generated erratum stubs. Unlike when
+  // we scan relocations for stubs, if section addresses have changed due to
+  // other relaxations we are unlikely to scan the same erratum instances
+  // again.
+  The_stub_table* stub_table = this->stub_table(shndx);
+  if (stub_table)
+    {
+      std::pair<Erratum_stub_set_iter, Erratum_stub_set_iter>
+	  ipair(stub_table->find_erratum_stubs_for_input_section(this, shndx));
+      for (Erratum_stub_set_iter p = ipair.first;  p != ipair.second; ++p)
+          (*p)->update_erratum_address(output_address);
     }
 
   section_size_type input_view_size = 0;
