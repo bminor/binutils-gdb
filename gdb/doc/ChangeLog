@@ -1,3 +1,7 @@
+2017-12-04  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Rust): Update trait object status
+
 2017-12-01  Andrew Cagney  <cagney@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>

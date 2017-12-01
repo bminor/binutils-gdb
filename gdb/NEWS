@@ -139,6 +139,9 @@
   information is provided as an extra field named "exception-message"
   in the *stopped notification.
 
+* Trait objects can now be inspected When debugging Rust code.  This
+  requires compiler support which will appear in Rust 1.24.
+
 * New remote packets
 
 QEnvironmentHexEncoded

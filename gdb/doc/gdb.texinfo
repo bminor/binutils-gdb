@@ -15565,9 +15565,6 @@ features from being implemented by @value{GDBN}:
 Method calls cannot be made via traits.
 
 @item
-Trait objects cannot be created or inspected.
-
-@item
 Operator overloading is not implemented.
 
 @item

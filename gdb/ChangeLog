@@ -1,3 +1,7 @@
+2017-12-04  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Mention Rust trait object inspection.
+
 2017-12-04  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/22499
