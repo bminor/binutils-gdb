@@ -81,7 +81,6 @@ static void clear_symtab_users_cleanup (void *ignore);
 
 /* Global variables owned by this file.  */
 int readnow_symbol_files;	/* Read full symbols immediately.  */
-int readnever_symbol_files;	/* Never read full symbols.  */
 
 /* Functions this file defines.  */
 
@@ -1132,12 +1131,6 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
       flags |= OBJF_READNOW;
       add_flags &= ~SYMFILE_NO_READ;
     }
-  else if (readnever_symbol_files
-	   || (parent != NULL && (parent->flags & OBJF_READNEVER)))
-    {
-      flags |= OBJF_READNEVER;
-      add_flags |= SYMFILE_NO_READ;
-    }
 
   /* Give user a chance to burp if we'd be
      interactively wiping out any existing symbols.  */
@@ -1601,16 +1594,6 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
   return debugfile;
 }
 
-/* Make sure that OBJF_{READNOW,READNEVER} are not set
-   simultaneously.  */
-
-static void
-validate_readnow_readnever (objfile_flags flags)
-{
-  if ((flags & OBJF_READNOW) && (flags & OBJF_READNEVER))
-    error (_("-readnow and -readnever cannot be used simultaneously"));
-}
-
 /* This is the symbol-file command.  Read the file, analyze its
    symbols, and add a struct symtab to a symtab list.  The syntax of
    the command is rather bizarre:
@@ -1648,20 +1631,17 @@ symbol_file_command (const char *args, int from_tty)
 	{
 	  if (strcmp (arg, "-readnow") == 0)
 	    flags |= OBJF_READNOW;
-	  else if (strcmp (arg, "-readnever") == 0)
-	    flags |= OBJF_READNEVER;
 	  else if (*arg == '-')
 	    error (_("unknown option `%s'"), arg);
 	  else
-	    name = arg;
+	    {
+	      symbol_file_add_main_1 (arg, add_flags, flags);
+	      name = arg;
+	    }
 	}
 
       if (name == NULL)
 	error (_("no symbol file name was specified"));
-
-      validate_readnow_readnever (flags);
-
-      symbol_file_add_main_1 (name, add_flags, flags);
     }
 }
 
@@ -2258,8 +2238,6 @@ add_symbol_file_command (const char *args, int from_tty)
 	    }
 	  else if (strcmp (arg, "-readnow") == 0)
 	    flags |= OBJF_READNOW;
-	  else if (strcmp (arg, "-readnever") == 0)
-	    flags |= OBJF_READNEVER;
 	  else if (strcmp (arg, "-s") == 0)
 	    {
 	      expecting_sec_name = 1;
@@ -2269,8 +2247,6 @@ add_symbol_file_command (const char *args, int from_tty)
 	    error (_("Unrecognized argument \"%s\""), arg);
 	}
     }
-
-  validate_readnow_readnever (flags);
 
   /* This command takes at least two arguments.  The first one is a
      filename, and the second is the address where this file has been
@@ -3902,29 +3878,26 @@ _initialize_symfile (void)
 
   observer_attach_free_objfile (symfile_free_objfile);
 
-#define READNOW_READNEVER_HELP \
+#define READNOW_HELP \
   "The '-readnow' option will cause GDB to read the entire symbol file\n\
 immediately.  This makes the command slower, but may make future operations\n\
-faster.\n\
-The '-readnever' option will prevent GDB from reading the symbol file's\n\
-symbolic debug information."
+faster."
 
   c = add_cmd ("symbol-file", class_files, symbol_file_command, _("\
 Load symbol table from executable file FILE.\n\
-Usage: symbol-file [-readnow | -readnever] FILE\n\
+Usage: symbol-file [-readnow] FILE\n\
 The `file' command can also load symbol tables, as well as setting the file\n\
-to execute.\n" READNOW_READNEVER_HELP), &cmdlist);
+to execute.\n" READNOW_HELP), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command, _("\
 Load symbols from FILE, assuming FILE has been dynamically loaded.\n\
-Usage: add-symbol-file FILE ADDR [-readnow | -readnever | \
--s SECT-NAME SECT-ADDR]...\n\
+Usage: add-symbol-file FILE ADDR [-readnow | -s SECT-NAME SECT-ADDR]...\n\
 ADDR is the starting address of the file's text.\n\
 Each '-s' argument provides a section name and address, and\n\
 should be specified if the data and bss segments are not contiguous\n\
 with the text.  SECT-NAME is a section name to be loaded at SECT-ADDR.\n"
-READNOW_READNEVER_HELP),
+READNOW_HELP),
 	       &cmdlist);
   set_cmd_completer (c, filename_completer);
 

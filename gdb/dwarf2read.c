@@ -2319,9 +2319,6 @@ int
 dwarf2_has_info (struct objfile *objfile,
                  const struct dwarf2_debug_sections *names)
 {
-  if (objfile->flags & OBJF_READNEVER)
-    return 0;
-
   dwarf2_per_objfile = ((struct dwarf2_per_objfile *)
 			objfile_data (objfile, dwarf2_objfile_data_key));
   if (!dwarf2_per_objfile)

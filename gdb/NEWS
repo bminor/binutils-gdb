@@ -3,12 +3,6 @@
 
 *** Changes since GDB 8.0
 
-* New "--readnever" command line option instructs GDB to not read each
-  symbol file's symbolic debug information.  This makes startup faster
-  but at the expense of not being able to perform symbolic debugging.
-  This option is intended for use cases where symbolic debugging will
-  not be used, e.g., when you only need to dump the debuggee's core.
-
 * GDB now uses the GNU MPFR library, if available, to emulate target
   floating-point arithmetic during expression evaluation when the target
   uses different floating-point formats than the host.  At least version

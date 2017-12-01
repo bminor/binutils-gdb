@@ -1,11 +1,3 @@
-2017-12-01  Andrew Cagney  <cagney@redhat.com>
-	    Joel Brobecker  <brobecker@adacore.com>
-	    Sergio Durigan Junior  <sergiodj@redhat.com>
-
-	* gdb.texinfo (File Options): Document --readnever.
-	(Commands to Specify Files): Likewise, for 'symbol-file' and
-	'add-symbol-file'.
-
 2017-11-29  Pedro Alves  <palves@redhat.com>
 
 	PR c++/19436

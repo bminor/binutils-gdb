@@ -1037,16 +1037,6 @@ Read each symbol file's entire symbol table immediately, rather than
 the default, which is to read it incrementally as it is needed.
 This makes startup slower, but makes future operations faster.
 
-@item --readnever
-@anchor{--readnever}
-@cindex @code{--readnever}, command-line option
-Do not read each symbol file's symbolic debug information.  This makes
-startup faster but at the expense of not being able to perform
-symbolic debugging.  DWARF unwind information is also not read,
-meaning backtraces may become incomplete or inaccurate.  One use of
-this is when a user simply wants to do the following sequence: attach,
-dump core, detach.  Loading the debugging information in this case is
-an unnecessary cause of delay.
 @end table
 
 @node Mode Options
@@ -18586,15 +18576,6 @@ tables by using the @samp{-readnow} option with any of the commands that
 load symbol table information, if you want to be sure @value{GDBN} has the
 entire symbol table available.
 
-@cindex @code{-readnever}, option for symbol-file command
-@cindex never read symbols
-@cindex symbols, never read
-@item symbol-file @r{[} -readnever @r{]} @var{filename}
-@itemx file @r{[} -readnever @r{]} @var{filename}
-You can instruct @value{GDBN} to never read the symbolic information
-contained in @var{filename} by using the @samp{-readnever} option.
-@xref{--readnever}.
-
 @c FIXME: for now no mention of directories, since this seems to be in
 @c flux.  13mar1992 status is that in theory GDB would look either in
 @c current dir or in same dir as myprog; but issues like competing
@@ -18623,7 +18604,7 @@ the program is running.  To do this, use the @code{kill} command
 @kindex add-symbol-file
 @cindex dynamic linking
 @item add-symbol-file @var{filename} @var{address}
-@itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{|} -readnever @r{]}
+@itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{]}
 @itemx add-symbol-file @var{filename} @var{address} -s @var{section} @var{address} @dots{}
 The @code{add-symbol-file} command reads additional symbol table
 information from the file @var{filename}.  You would use this command

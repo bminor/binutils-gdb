@@ -1171,8 +1171,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   struct elfinfo ei;
 
   memset ((char *) &ei, 0, sizeof (ei));
-  if (!(objfile->flags & OBJF_READNEVER))
-    bfd_map_over_sections (abfd, elf_locate_sections, (void *) & ei);
+  bfd_map_over_sections (abfd, elf_locate_sections, (void *) & ei);
 
   elf_read_minimal_symbols (objfile, symfile_flags, &ei);
 
