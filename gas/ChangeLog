@@ -1,3 +1,14 @@
+2017-12-01  Palmer Dabbelt  <palmer@sifive.com>
+	    Jim Wilson  <jimw@sifive.com>
+
+	* doc/as.texinfo (RISC-V): Alphabetize RISC-V entries.  Change
+	RISC-V-Opts to RISC-V-Options.  Delete redundant space.  Add -fpic
+	and related options to option list.
+	* doc/c-riscv.texi: (RISC-V-Options): Renamed from RISC-V-Opts.
+	(RISC-V Options): Renamed from Options.  Add missing period.
+	(-fpic): Also mention -fPIC.
+	(RISC-V Directives): New node.
+
 2017-12-01  Peter Bergner <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (last_insn): Update type.
