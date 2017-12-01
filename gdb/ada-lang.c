@@ -345,9 +345,6 @@ static const char *known_auxiliary_function_name_patterns[] = {
   ADA_KNOWN_AUXILIARY_FUNCTION_NAME_PATTERNS NULL
 };
 
-/* Space for allocating results of ada_lookup_symbol_list.  */
-static struct obstack symbol_list_obstack;
-
 /* Maintenance-related settings for this module.  */
 
 static struct cmd_list_element *maint_set_ada_cmdlist;
@@ -3269,6 +3266,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
   struct value **argvec;        /* Vector of operand types (alloca'ed).  */
   int nargs;                    /* Number of operands.  */
   int oplen;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   argvec = NULL;
   nargs = 0;
@@ -3441,6 +3439,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
                                     (exp->elts[pc + 2].symbol),
                                     exp->elts[pc + 1].block, VAR_DOMAIN,
                                     &candidates);
+	  make_cleanup (xfree, candidates);
 
           if (n_candidates > 1)
             {
@@ -3533,6 +3532,8 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
                                       (exp->elts[pc + 5].symbol),
                                       exp->elts[pc + 4].block, VAR_DOMAIN,
                                       &candidates);
+	    make_cleanup (xfree, candidates);
+
             if (n_candidates == 1)
               i = 0;
             else
@@ -3585,6 +3586,8 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
             ada_lookup_symbol_list (ada_decoded_op_name (op),
                                     (struct block *) NULL, VAR_DOMAIN,
                                     &candidates);
+	  make_cleanup (xfree, candidates);
+
           i = ada_resolve_function (candidates, n_candidates, argvec, nargs,
                                     ada_decoded_op_name (op), NULL);
           if (i < 0)
@@ -3599,10 +3602,12 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
     case OP_TYPE:
     case OP_REGISTER:
+      do_cleanups (old_chain);
       return NULL;
     }
 
   *pos = pc;
+  do_cleanups (old_chain);
   if (exp->elts[pc].opcode == OP_VAR_MSYM_VALUE)
     return evaluate_var_msym_value (EVAL_AVOID_SIDE_EFFECTS,
 				    exp->elts[pc + 1].objfile,
@@ -5801,10 +5806,10 @@ ada_add_all_symbols (struct obstack *obstackp,
 /* Find symbols in DOMAIN matching LOOKUP_NAME, in BLOCK and, if FULL_SEARCH
    is non-zero, enclosing scope and in global scopes, returning the number of
    matches.
-   Sets *RESULTS to point to a vector of (SYM,BLOCK) tuples,
+   Sets *RESULTS to point to a newly allocated vector of (SYM,BLOCK) tuples,
    indicating the symbols found and the blocks and symbol tables (if
-   any) in which they were found.  This vector is transient---good only to
-   the next call of ada_lookup_symbol_list.
+   any) in which they were found.  This vector should be freed when
+   no longer useful.
 
    When full_search is non-zero, any non-function/non-enumeral
    symbol match within the nest of blocks whose innermost member is BLOCK,
@@ -5824,14 +5829,17 @@ ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
 {
   int syms_from_global_search;
   int ndefns;
+  int results_size;
+  auto_obstack obstack;
 
-  obstack_free (&symbol_list_obstack, NULL);
-  obstack_init (&symbol_list_obstack);
-  ada_add_all_symbols (&symbol_list_obstack, block, lookup_name,
+  ada_add_all_symbols (&obstack, block, lookup_name,
 		       domain, full_search, &syms_from_global_search);
 
-  ndefns = num_defns_collected (&symbol_list_obstack);
-  *results = defns_collected (&symbol_list_obstack, 1);
+  ndefns = num_defns_collected (&obstack);
+
+  results_size = obstack_object_size (&obstack);
+  *results = (struct block_symbol *) malloc (results_size);
+  memcpy (*results, defns_collected (&obstack, 1), results_size);
 
   ndefns = remove_extra_symbols (*results, ndefns);
 
@@ -5843,12 +5851,15 @@ ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
 		  (*results)[0].symbol, (*results)[0].block);
 
   ndefns = remove_irrelevant_renamings (*results, ndefns, block);
+
   return ndefns;
 }
 
 /* Find symbols in DOMAIN matching NAME, in BLOCK and enclosing scope and
    in global scopes, returning the number of matches, and setting *RESULTS
-   to a vector of (SYM,BLOCK) tuples.
+   to a newly-allocated vector of (SYM,BLOCK) tuples.  This newly-allocated
+   vector should be freed when no longer useful.
+
    See ada_lookup_symbol_list_worker for further details.  */
 
 int
@@ -5871,13 +5882,18 @@ ada_iterate_over_symbols
 {
   int ndefs, i;
   struct block_symbol *results;
+  struct cleanup *old_chain;
 
   ndefs = ada_lookup_symbol_list_worker (name, block, domain, &results, 0);
+  old_chain = make_cleanup (xfree, results);
+
   for (i = 0; i < ndefs; ++i)
     {
       if (!callback (results[i].symbol))
 	break;
     }
+
+  do_cleanups (old_chain);
 }
 
 /* The result is as for ada_lookup_symbol_list with FULL_SEARCH set
@@ -5894,6 +5910,7 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
 {
   struct block_symbol *candidates;
   int n_candidates;
+  struct cleanup *old_chain;
 
   /* Since we already have an encoded name, wrap it in '<>' to force a
      verbatim match.  Otherwise, if the name happens to not look like
@@ -5908,11 +5925,18 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
 
   n_candidates = ada_lookup_symbol_list (verbatim.c_str (), block,
 					 domain, &candidates);
+  old_chain = make_cleanup (xfree, candidates);
+
   if (n_candidates == 0)
-    return;
+    {
+      do_cleanups (old_chain);
+      return;
+    }
 
   *info = candidates[0];
   info->symbol = fixup_symbol_section (info->symbol, NULL);
+
+  do_cleanups (old_chain);
 }
 
 /* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing
@@ -11565,16 +11589,20 @@ get_var_value (const char *name, const char *err_msg)
   int nsyms = ada_lookup_symbol_list_worker (lookup_name,
 					     get_selected_block (0),
 					     VAR_DOMAIN, &syms, 1);
+  struct cleanup *old_chain = make_cleanup (xfree, syms);
 
   if (nsyms != 1)
     {
+      do_cleanups (old_chain);
       if (err_msg == NULL)
         return 0;
       else
         error (("%s"), err_msg);
     }
 
-  return value_of_variable (syms[0].symbol, syms[0].block);
+  struct value *result = value_of_variable (syms[0].symbol, syms[0].block);
+  do_cleanups (old_chain);
+  return result;
 }
 
 /* Value of integer variable named NAME in the current environment.
@@ -14261,8 +14289,6 @@ the regular expression are listed."));
 When enabled, the debugger will stop using the DW_AT_GNAT_descriptive_type\n\
 DWARF attribute."),
      NULL, NULL, &maint_set_ada_cmdlist, &maint_show_ada_cmdlist);
-
-  obstack_init (&symbol_list_obstack);
 
   decoded_names_store = htab_create_alloc
     (256, htab_hash_string, (int (*)(const void *, const void *)) streq,

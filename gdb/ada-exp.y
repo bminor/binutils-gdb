@@ -957,6 +957,8 @@ block_lookup (const struct block *context, const char *raw_name)
   struct block_symbol *syms;
   int nsyms;
   struct symtab *symtab;
+  struct cleanup *old_chain;
+  const struct block *result = NULL;
 
   if (raw_name[0] == '\'')
     {
@@ -967,6 +969,8 @@ block_lookup (const struct block *context, const char *raw_name)
     name = ada_encode (raw_name);
 
   nsyms = ada_lookup_symbol_list (name, context, VAR_DOMAIN, &syms);
+  old_chain = make_cleanup (xfree, syms);
+
   if (context == NULL
       && (nsyms == 0 || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK))
     symtab = lookup_symtab (name);
@@ -974,7 +978,7 @@ block_lookup (const struct block *context, const char *raw_name)
     symtab = NULL;
 
   if (symtab != NULL)
-    return BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
+    result = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
   else if (nsyms == 0 || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK)
     {
       if (context == NULL)
@@ -986,8 +990,11 @@ block_lookup (const struct block *context, const char *raw_name)
     {
       if (nsyms > 1)
 	warning (_("Function name \"%s\" ambiguous here"), raw_name);
-      return SYMBOL_BLOCK_VALUE (syms[0].symbol);
+      result = SYMBOL_BLOCK_VALUE (syms[0].symbol);
     }
+
+  do_cleanups (old_chain);
+  return result;
 }
 
 static struct symbol*
@@ -1201,6 +1208,7 @@ write_var_or_type (struct parser_state *par_state,
   int depth;
   char *encoded_name;
   int name_len;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   if (block == NULL)
     block = expression_context_block;
@@ -1228,6 +1236,7 @@ write_var_or_type (struct parser_state *par_state,
 	  encoded_name[tail_index] = '\0';
 	  nsyms = ada_lookup_symbol_list (encoded_name, block,
 					  VAR_DOMAIN, &syms);
+          make_cleanup (xfree, syms);
 	  encoded_name[tail_index] = terminator;
 
 	  /* A single symbol may rename a package or object. */
@@ -1274,6 +1283,7 @@ write_var_or_type (struct parser_state *par_state,
 	      write_object_renaming (par_state, block, renaming, renaming_len,
 				     renaming_expr, MAX_RENAMING_CHAIN_LENGTH);
 	      write_selectors (par_state, encoded_name + tail_index);
+              do_cleanups (old_chain);
 	      return NULL;
 	    default:
 	      internal_error (__FILE__, __LINE__,
@@ -1285,7 +1295,10 @@ write_var_or_type (struct parser_state *par_state,
               struct type *field_type;
               
               if (tail_index == name_len)
-                return SYMBOL_TYPE (type_sym);
+                {
+                  do_cleanups (old_chain);
+		  return SYMBOL_TYPE (type_sym);
+                }
 
               /* We have some extraneous characters after the type name.
                  If this is an expression "TYPE_NAME.FIELD0.[...].FIELDN",
@@ -1293,7 +1306,10 @@ write_var_or_type (struct parser_state *par_state,
               field_type
                 = get_symbol_field_type (type_sym, encoded_name + tail_index);
               if (field_type != NULL)
-                return field_type;
+		{
+		  do_cleanups (old_chain);
+		  return field_type;
+		}
 	      else 
 		error (_("Invalid attempt to select from type: \"%s\"."),
                        name0.ptr);
@@ -1304,13 +1320,17 @@ write_var_or_type (struct parser_state *par_state,
 						       encoded_name);
 
 	      if (type != NULL)
-		return type;
+		{
+		  do_cleanups (old_chain);
+		  return type;
+		}
 	    }
 
 	  if (nsyms == 1)
 	    {
 	      write_var_from_sym (par_state, syms[0].block, syms[0].symbol);
 	      write_selectors (par_state, encoded_name + tail_index);
+	      do_cleanups (old_chain);
 	      return NULL;
 	    }
 	  else if (nsyms == 0) 
@@ -1322,6 +1342,7 @@ write_var_or_type (struct parser_state *par_state,
 		  write_exp_msymbol (par_state, msym);
 		  /* Maybe cause error here rather than later? FIXME? */
 		  write_selectors (par_state, encoded_name + tail_index);
+		  do_cleanups (old_chain);
 		  return NULL;
 		}
 
@@ -1337,6 +1358,7 @@ write_var_or_type (struct parser_state *par_state,
 	      write_ambiguous_var (par_state, block, encoded_name,
 				   tail_index);
 	      write_selectors (par_state, encoded_name + tail_index);
+	      do_cleanups (old_chain);
 	      return NULL;
 	    }
 	}
@@ -1378,11 +1400,14 @@ write_name_assoc (struct parser_state *par_state, struct stoken name)
       struct block_symbol *syms;
       int nsyms = ada_lookup_symbol_list (name.ptr, expression_context_block,
 					  VAR_DOMAIN, &syms);
+      struct cleanup *old_chain = make_cleanup (xfree, syms);
 
       if (nsyms != 1 || SYMBOL_CLASS (syms[0].symbol) == LOC_TYPEDEF)
 	write_exp_op_with_string (par_state, OP_NAME, name);
       else
 	write_var_from_sym (par_state, syms[0].block, syms[0].symbol);
+
+      do_cleanups (old_chain);
     }
   else
     if (write_var_or_type (par_state, NULL, name) != NULL)

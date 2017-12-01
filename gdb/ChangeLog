@@ -1,3 +1,19 @@
+2017-12-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (symbol_list_obstack): Delete.
+	(resolve_subexp): Make sure "candidates" gets xfree'ed.
+	(ada_lookup_symbol_list_worker): Remove the limitation that
+	the result is only good until the next call, now making it
+	the responsibility of the caller to free the result when no
+	longer needed.  Adjust the function's intro comment accordingly.
+	(ada_lookup_symbol_list): Adjust the function's intro comment.
+	(ada_iterate_over_symbols): Make sure "results" gets xfree'ed.
+	(ada_lookup_encoded_symbol, get_var_value): Likewise.
+	(_initialize_ada_language): Remove symbol_list_obstack
+	initialization.
+	* ada-exp.y (block_lookup): Make sure "syms" gets xfree'ed.
+	(write_var_or_type, write_name_assoc): Likewise.
+
 2017-12-01  Andrew Cagney  <cagney@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
