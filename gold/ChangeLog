@@ -1,3 +1,9 @@
+2017-11-17  Stephen Crane  <sjc@immunant.com>
+
+	PR gold/22448
+	* symtab.cc (Symbol_table::add_from_object): Only rescan for
+	undefined symbols in regular, not dynamic, objects.
+
 2017-11-30  Peter Smith  <peter.smith@linaro.org>
 
 	PR gold/20765

@@ -990,7 +990,7 @@ Symbol_table::add_from_object(Object* object,
   // ins.second: true if new entry was inserted, false if not.
 
   Sized_symbol<size>* ret;
-  bool was_undefined;
+  bool was_undefined_in_reg;
   bool was_common;
   if (!ins.second)
     {
@@ -998,7 +998,7 @@ Symbol_table::add_from_object(Object* object,
       ret = this->get_sized_symbol<size>(ins.first->second);
       gold_assert(ret != NULL);
 
-      was_undefined = ret->is_undefined();
+      was_undefined_in_reg = ret->is_undefined() && ret->in_reg();
       // Commons from plugins are just placeholders.
       was_common = ret->is_common() && ret->object()->pluginobj() == NULL;
 
@@ -1049,7 +1049,7 @@ Symbol_table::add_from_object(Object* object,
 	  // it, then change it to NAME/VERSION.
 	  ret = this->get_sized_symbol<size>(insdefault.first->second);
 
-	  was_undefined = ret->is_undefined();
+	  was_undefined_in_reg = ret->is_undefined() && ret->in_reg();
 	  // Commons from plugins are just placeholders.
 	  was_common = ret->is_common() && ret->object()->pluginobj() == NULL;
 
@@ -1061,7 +1061,7 @@ Symbol_table::add_from_object(Object* object,
 	}
       else
 	{
-	  was_undefined = false;
+	  was_undefined_in_reg = false;
 	  was_common = false;
 
 	  Sized_target<size, big_endian>* target =
@@ -1105,9 +1105,10 @@ Symbol_table::add_from_object(Object* object,
 	ret->set_is_default();
     }
 
-  // Record every time we see a new undefined symbol, to speed up
-  // archive groups.
-  if (!was_undefined && ret->is_undefined())
+  // Record every time we see a new undefined symbol, to speed up archive
+  // groups. We only care about symbols undefined in regular objects here
+  // because undefined symbols only in dynamic objects should't trigger rescans.
+  if (!was_undefined_in_reg && ret->is_undefined() && ret->in_reg())
     {
       ++this->saw_undefined_;
       if (parameters->options().has_plugins())
