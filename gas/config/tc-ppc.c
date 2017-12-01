@@ -217,7 +217,7 @@ static enum {
 
 /* Warn on emitting data to code sections.  */
 int warn_476;
-unsigned long last_insn;
+uint64_t last_insn;
 segT last_seg;
 subsegT last_subseg;
 
@@ -1497,7 +1497,7 @@ static bfd_boolean
 insn_validate (const struct powerpc_opcode *op)
 {
   const unsigned char *o;
-  unsigned long omask = op->mask;
+  uint64_t omask = op->mask;
 
   /* The mask had better not trim off opcode bits.  */
   if ((op->opcode & omask) != op->opcode)
@@ -1519,7 +1519,7 @@ insn_validate (const struct powerpc_opcode *op)
 	  const struct powerpc_operand *operand = &powerpc_operands[*o];
 	  if (operand->shift != (int) PPC_OPSHIFT_INV)
 	    {
-	      unsigned long mask;
+	      uint64_t mask;
 
 	      if (operand->shift >= 0)
 		mask = operand->bitm << operand->shift;
@@ -1570,8 +1570,8 @@ ppc_setup_opcodes (void)
 	 all the 1's in the mask are contiguous.  */
       for (i = 0; i < num_powerpc_operands; ++i)
 	{
-	  unsigned long mask = powerpc_operands[i].bitm;
-	  unsigned long right_bit;
+	  uint64_t mask = powerpc_operands[i].bitm;
+	  uint64_t right_bit;
 	  unsigned int j;
 
 	  right_bit = mask & -mask;
@@ -1604,10 +1604,10 @@ ppc_setup_opcodes (void)
 	      int new_opcode = PPC_OP (op[0].opcode);
 
 #ifdef PRINT_OPCODE_TABLE
-	      printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%x\tmask: 0x%x\tflags: 0x%llx\n",
+	      printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
 		      op->name, (unsigned int) (op - powerpc_opcodes),
-		      (unsigned int) new_opcode, (unsigned int) op->opcode,
-		      (unsigned int) op->mask, (unsigned long long) op->flags);
+		      (unsigned int) new_opcode, (unsigned long long) op->opcode,
+		      (unsigned long long) op->mask, (unsigned long long) op->flags);
 #endif
 
 	      /* The major opcodes had better be sorted.  Code in the
@@ -1669,10 +1669,10 @@ ppc_setup_opcodes (void)
 	      new_seg = VLE_OP_TO_SEG (new_seg);
 
 #ifdef PRINT_OPCODE_TABLE
-	      printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%x\tmask: 0x%x\tflags: 0x%llx\n",
+	      printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
 		      op->name, (unsigned int) (op - powerpc_opcodes),
-		      (unsigned int) new_seg, (unsigned int) op->opcode,
-		      (unsigned int) op->mask, (unsigned long long) op->flags);
+		      (unsigned int) new_seg, (unsigned long long) op->opcode,
+		      (unsigned long long) op->mask, (unsigned long long) op->flags);
 #endif
 	      /* The major opcodes had better be sorted.  Code in the
 		 disassembler assumes the insns are sorted according to
@@ -1884,15 +1884,15 @@ ppc_cleanup (void)
 
 /* Insert an operand value into an instruction.  */
 
-static unsigned long
-ppc_insert_operand (unsigned long insn,
+static uint64_t
+ppc_insert_operand (uint64_t insn,
 		    const struct powerpc_operand *operand,
-		    offsetT val,
+		    int64_t val,
 		    ppc_cpu_t cpu,
 		    const char *file,
 		    unsigned int line)
 {
-  long min, max, right;
+  int64_t min, max, right;
 
   max = operand->bitm;
   right = max & -max;
@@ -1921,7 +1921,7 @@ ppc_insert_operand (unsigned long insn,
 
   if ((operand->flags & PPC_OPERAND_NEGATIVE) != 0)
     {
-      long tmp = min;
+      int64_t tmp = min;
       min = -max;
       max = -tmp;
     }
@@ -1934,18 +1934,18 @@ ppc_insert_operand (unsigned long insn,
 	 sign extend the 32-bit value to 64 bits if so doing makes the
 	 value valid.  */
       if (val > max
-	  && (offsetT) (val - 0x80000000 - 0x80000000) >= min
-	  && (offsetT) (val - 0x80000000 - 0x80000000) <= max
-	  && ((val - 0x80000000 - 0x80000000) & (right - 1)) == 0)
-	val = val - 0x80000000 - 0x80000000;
+	  && (val - (1LL << 32)) >= min
+	  && (val - (1LL << 32)) <= max
+	  && ((val - (1LL << 32)) & (right - 1)) == 0)
+	val = val - (1LL << 32);
 
       /* Similarly, people write expressions like ~(1<<15), and expect
 	 this to be OK for a 32-bit unsigned value.  */
       else if (val < min
-	       && (offsetT) (val + 0x80000000 + 0x80000000) >= min
-	       && (offsetT) (val + 0x80000000 + 0x80000000) <= max
-	       && ((val + 0x80000000 + 0x80000000) & (right - 1)) == 0)
-	val = val + 0x80000000 + 0x80000000;
+	       && (val + (1LL << 32)) >= min
+	       && (val + (1LL << 32)) <= max
+	       && ((val + (1LL << 32)) & (right - 1)) == 0)
+	val = val + (1LL << 32);
 
       else if (val < min
 	       || val > max
@@ -1958,14 +1958,14 @@ ppc_insert_operand (unsigned long insn,
       const char *errmsg;
 
       errmsg = NULL;
-      insn = (*operand->insert) (insn, (long) val, cpu, &errmsg);
+      insn = (*operand->insert) (insn, val, cpu, &errmsg);
       if (errmsg != (const char *) NULL)
 	as_bad_where (file, line, "%s", errmsg);
     }
   else if (operand->shift >= 0)
-    insn |= ((long) val & operand->bitm) << operand->shift;
+    insn |= (val & operand->bitm) << operand->shift;
   else
-    insn |= ((long) val & operand->bitm) >> -operand->shift;
+    insn |= (val & operand->bitm) >> -operand->shift;
 
   return insn;
 }
@@ -2739,7 +2739,7 @@ md_assemble (char *str)
 {
   char *s;
   const struct powerpc_opcode *opcode;
-  unsigned long insn;
+  uint64_t insn;
   const unsigned char *opindex_ptr;
   int skip_optional;
   int need_paren;
@@ -2868,7 +2868,7 @@ md_assemble (char *str)
 	  && !((operand->flags & PPC_OPERAND_OPTIONAL32) != 0 && ppc_obj64)
 	  && skip_optional)
 	{
-	  long val = ppc_optional_operand_value (operand);
+	  int64_t val = ppc_optional_operand_value (operand);
 	  if (operand->insert)
 	    {
 	      insn = (*operand->insert) (insn, val, ppc_cpu, &errmsg);
@@ -2876,9 +2876,9 @@ md_assemble (char *str)
 		as_bad ("%s", errmsg);
 	    }
 	  else if (operand->shift >= 0)
-	    insn |= ((long) val & operand->bitm) << operand->shift;
+	    insn |= (val & operand->bitm) << operand->shift;
 	  else
-	    insn |= ((long) val & operand->bitm) >> -operand->shift;
+	    insn |= (val & operand->bitm) >> -operand->shift;
 
 	  if ((operand->flags & PPC_OPERAND_NEXT) != 0)
 	    next_opindex = *opindex_ptr + 1;
@@ -3219,7 +3219,7 @@ md_assemble (char *str)
 	      /* If VLE-mode convert LO/HI/HA relocations.  */
       	      if (opcode->flags & PPC_OPCODE_VLE)
 		{
-		  int tmp_insn = insn & opcode->mask;
+		  uint64_t tmp_insn = insn & opcode->mask;
 
 		  int use_a_reloc = (tmp_insn == E_OR2I_INSN
 				     || tmp_insn == E_AND2I_DOT_INSN

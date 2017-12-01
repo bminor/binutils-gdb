@@ -1,3 +1,54 @@
+2017-12-01  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* opcodes/ppc-dis.c (disassemble_init_powerpc): Fix white space.
+	(operand_value_powerpc): Update return and argument type.
+	<value, top>: Update type.
+	(skip_optional_operands): Update argument type.
+	(lookup_powerpc): Likewise.
+	(lookup_vle): Likewise.
+	<table_opcd, table_mask, insn2>: Update type.
+	(lookup_spe2): Update argument type.
+	<table_opcd, table_mask, insn2>: Update type.
+	(print_insn_powerpc) <insn, value>: Update type.
+	Use PPC_INT_FMT for printing instructions and operands.
+	* opcodes/ppc-opc.c (insert_arx, extract_arx, insert_ary, extract_ary,
+	insert_rx, extract_rx, insert_ry, extract_ry, insert_bat, extract_bat,
+	insert_bba, extract_bba, insert_bdm, extract_bdm, insert_bdp,
+	extract_bdp, valid_bo_pre_v2, valid_bo_post_v2, valid_bo, insert_bo,
+	extract_bo, insert_boe, extract_boe, insert_dcmxs, extract_dcmxs,
+	insert_dxd, extract_dxd, insert_dxdn, extract_dxdn, insert_fxm,
+	extract_fxm, insert_li20, extract_li20, insert_ls, extract_ls,
+	insert_esync, extract_esync, insert_mbe, extract_mbe, insert_mb6,
+	extract_mb6, extract_nb, insert_nbi, insert_nsi, extract_nsi,
+	insert_ral, extract_ral, insert_ram, extract_ram, insert_raq,
+	extract_raq, insert_ras, extract_ras, insert_rbs, extract_rbs,
+	insert_rbx, extract_rbx, insert_sci8, extract_sci8, insert_sci8n,
+	extract_sci8n, insert_sd4h, extract_sd4h, insert_sd4w, extract_sd4w,
+	insert_oimm, extract_oimm, insert_sh6, extract_sh6, insert_spr,
+	extract_spr, insert_sprg, extract_sprg, insert_tbr, extract_tbr,
+	insert_xt6, extract_xt6, insert_xtq6, extract_xtq6, insert_xa6,
+	extract_xa6, insert_xb6, extract_xb6, insert_xb6s, extract_xb6s,
+	insert_xc6, extract_xc6, insert_dm, extract_dm, insert_vlesi,
+	extract_vlesi, insert_vlensi, extract_vlensi, insert_vleui,
+	extract_vleui, insert_vleil, extract_vleil, insert_evuimm1_ex0,
+	extract_evuimm1_ex0, insert_evuimm2_ex0, extract_evuimm2_ex0,
+	insert_evuimm4_ex0, extract_evuimm4_ex0, insert_evuimm8_ex0,
+	extract_evuimm8_ex0, insert_evuimm_lt8, extract_evuimm_lt8,
+	insert_evuimm_lt16, extract_evuimm_lt16, insert_rD_rS_even,
+	extract_rD_rS_even, insert_off_lsp, extract_off_lsp, insert_off_spe2,
+	extract_off_spe2, insert_Ddd, extract_Ddd): Update types.
+	(OP, OPTO, OPL, OPVUP, OPVUPRT, A, AFRALFRC_MASK, B, BD8, BD8IO, BD15,
+	BD24, BBO, Y_MASK  , AT1_MASK, AT2_MASK, BBOCB, C_LK, C, CTX, UCTX,
+	DX, EVSEL, IA16, I16A, I16L, IM7, LI20, MME, MD, MDS, SC, SC_MASK,
+	SCI8, SCI8BF, SD4, SE_IM5, SE_R, SE_RR, VX, VX_LSP, VX_RA_CONST,
+	VX_RB_CONST, VX_SPE_CRFD, VX_SPE2_CLR, VX_SPE2_SPLATB, VX_SPE2_OCTET,
+	VX_SPE2_DDHH, VX_SPE2_HH, VX_SPE2_EVMAR, VX_SPE2_EVMAR_MASK, VXA,
+	VXR, VXASH, X, EX, XX2, XX3, XX3RC, XX4, Z, XWRA_MASK, XLRT_MASK,
+	XRLARB_MASK, XLRAND_MASK, XRTLRA_MASK, XRTLRARB_MASK, XRTARARB_MASK,
+	XRTBFRARB_MASK, XOPL, XOPL2, XRCL, XRT, XRTRA, XCMP_MASK, XCMPL_MASK,
+	XTO, XTLB, XSYNC, XEH_MASK, XDSS, XFL, XISEL, XL, XLO, XLYLK, XLOCB,
+	XMBAR, XO, XOPS, XS, XFXM, XSPR, XUC, XW, APU): Update types in casts.
+
 2017-11-29  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (active_cpu_flags, active_isstring, enum stage):

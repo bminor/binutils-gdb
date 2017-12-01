@@ -1,3 +1,13 @@
+2017-12-01  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* opcode/ppc.h (PPC_INT_FMT): Define.
+	(struct powerpc_opcode) <opcode>: Update type.
+	(struct powerpc_opcode) <mask>: Likewise.
+	(struct powerpc_opcode) <bitm>: Likewise.
+	(struct powerpc_opcode) <insert>: Likewise.
+	(struct powerpc_opcode) <extract>: Likewise.
+	(ppc_optional_operand_value): Likewise.
+
 2017-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/22444

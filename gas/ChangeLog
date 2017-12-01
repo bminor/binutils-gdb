@@ -1,3 +1,15 @@
+2017-12-01  Peter Bergner <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (last_insn): Update type.
+	(insn_validate) <omask, mask>: Likewise.
+	(ppc_setup_opcodes) <mask, right_bit>: Likewise.
+	<PRINT_OPCODE_TABLE>: Update types and printf format specifiers.
+	(ppc_insert_operand): Update return and argument types and remove
+	unneeded type casts.
+	<min, max, right, tmp>: Update type.
+	(md_assemble): Remove unneeded type casts.
+	<insn, val, tmp_insn>: Update type.
+
 2017-11-29  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (enum i386_error): Remove try_vector_disp8.
