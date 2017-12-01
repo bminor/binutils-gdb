@@ -1,3 +1,13 @@
+2017-12-01  Benjamin Peterson  <bp@benjamin.pe>
+
+	PR gold/22406
+	* gold.cc (queue_initial_tasks) Check for number of real input files.
+	* options.cc (Command_line::process) Check for unterminated --start-lib
+	options.
+	* testsuite/Makefile.am: Add new test script.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/check_empty_command_lines.sh: New test script.
+
 2017-11-17  Stephen Crane  <sjc@immunant.com>
 
 	PR gold/22448

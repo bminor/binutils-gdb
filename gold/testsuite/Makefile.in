@@ -74,7 +74,20 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @NATIVE_OR_CROSS_LINKER_TRUE@am__append_1 = object_unittest \
 @NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest leb128_unittest \
 @NATIVE_OR_CROSS_LINKER_TRUE@	overflow_unittest
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = incremental_test.sh \
+
+# ---------------------------------------------------------------------
+# These tests test the output of gold (end-to-end tests).  In
+# particular, they make sure that gold can link "difficult" object
+# files, and the resulting object files run correctly.  These can only
+# run if we've built ld-new for the native architecture (that is,
+# we're not cross-compiling it), since we run ld-new as part of these
+# tests.  We use the gcc-specific flag '-B' to use our linker instead
+# of the default linker, which is why we only run our tests under gcc.
+
+# Test empty command line error conditions.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	empty_command_line_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.sh gc_tls_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	pr14265.sh pr20717.sh \
@@ -5137,6 +5150,8 @@ check-html recheck-html:
 	rv=0; $(MAKE) $(AM_MAKEFLAGS) $$target || rv=$$?; \
 	$(MAKE) $(AM_MAKEFLAGS) $(TEST_SUITE_HTML) TEST_LOGS= || exit 4; \
 	exit $$rv
+empty_command_line_test.sh.log: empty_command_line_test.sh
+	@p='empty_command_line_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 incremental_test.sh.log: incremental_test.sh
 	@p='incremental_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 gc_comdat_test.sh.log: gc_comdat_test.sh
@@ -5906,15 +5921,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	(cd gcctestdir && $(LN_S) $(abs_top_builddir)/../gas/as-new as)
 @NATIVE_OR_CROSS_LINKER_TRUE@overflow_unittest.o: overflow_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(CXXCOMPILE) -O3 -c -o $@ $<
-
-# ---------------------------------------------------------------------
-# These tests test the output of gold (end-to-end tests).  In
-# particular, they make sure that gold can link "difficult" object
-# files, and the resulting object files run correctly.  These can only
-# run if we've built ld-new for the native architecture (that is,
-# we're not cross-compiling it), since we run ld-new as part of these
-# tests.  We use the gcc-specific flag '-B' to use our linker instead
-# of the default linker, which is why we only run our tests under gcc.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@empty_command_line_test.sh: gcctestdir/ld
 
 # Each of these .o's is a useful, small complete program.  They're
 # particularly useful for making sure ld-new's flags do what they're

@@ -175,7 +175,7 @@ queue_initial_tasks(const General_options& options,
 		    Workqueue* workqueue, Input_objects* input_objects,
 		    Symbol_table* symtab, Layout* layout, Mapfile* mapfile)
 {
-  if (cmdline.begin() == cmdline.end())
+  if (cmdline.number_of_input_files() == 0)
     {
       bool is_ok = false;
       if (options.printed_version())

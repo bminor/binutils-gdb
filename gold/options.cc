@@ -1569,6 +1569,12 @@ Command_line::process(int argc, const char** argv)
       usage();
     }
 
+  if (this->inputs_.in_lib())
+    {
+      fprintf(stderr, _("%s: missing lib end\n"), program_name);
+      usage();
+    }
+
   // Normalize the options and ensure they don't contradict each other.
   this->options_.finalize();
 }

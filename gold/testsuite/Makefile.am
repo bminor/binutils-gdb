@@ -157,6 +157,10 @@ endif NATIVE_OR_CROSS_LINKER
 if NATIVE_LINKER
 if GCC
 
+# Test empty command line error conditions.
+check_SCRIPTS += empty_command_line_test.sh
+empty_command_line_test.sh: gcctestdir/ld
+
 # Each of these .o's is a useful, small complete program.  They're
 # particularly useful for making sure ld-new's flags do what they're
 # supposed to (hence their names), but are used for many tests that
