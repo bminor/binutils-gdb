@@ -1,3 +1,7 @@
+2017-12-01  Oleksandr Pikozh  <o.pikozh@gmail.com>
+
+	* doc/binutils.texi: Add --strip-unneeded to objcopy synopsis.
+
 2017-11-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 22510
