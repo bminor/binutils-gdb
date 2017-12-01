@@ -1,3 +1,8 @@
+2017-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.c (_bfd_x86_elf_readonly_dynrelocs): Print symbol
+	for map file output.
+
 2017-12-01  Alan Modra  <amodra@gmail.com>
 
 	* elf32-hppa.c (maybe_set_textrel): Print symbol for map file output.

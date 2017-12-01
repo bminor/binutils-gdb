@@ -551,6 +551,11 @@ _bfd_x86_elf_readonly_dynrelocs (struct elf_link_hash_entry *h,
 	    info->callbacks->einfo (_("%P: %B: warning: relocation against `%s' in readonly section `%A'\n"),
 				    p->sec->owner, h->root.root.string,
 				    p->sec);
+	  else
+	    /* xgettext:c-format */
+	    info->callbacks->minfo
+	      (_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	       p->sec->owner, h->root.root.string, p->sec);
 
 	  /* Not an error, just cut short the traversal.  */
 	  return FALSE;
