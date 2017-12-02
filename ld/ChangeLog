@@ -1,5 +1,12 @@
 2017-12-04  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-i386/pr17935-1.d: Adjust expected error.
+	* testsuite/ld-i386/pr17935-2.d: Likewise.
+	* testsuite/ld-x86-64/pr17935-1.d: Likewise.
+	* testsuite/ld-x86-64/pr17935-2.d: Likewise.
+
+2017-12-04  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/powerpc.exp (ppceabitests): Add -a32 -mbig
 	to assembler options, and -melf32ppc to linker options.  Always
 	run these tests.

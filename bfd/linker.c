@@ -632,7 +632,7 @@ unwrap_hash_lookup (struct bfd_link_info *info,
 /* Traverse a generic link hash table.  Differs from bfd_hash_traverse
    in the treatment of warning symbols.  When warning symbols are
    created they replace the real symbol, so you don't get to see the
-   real symbol in a bfd_hash_travere.  This traversal calls func with
+   real symbol in a bfd_hash_traverse.  This traversal calls func with
    the real symbol.  */
 
 void

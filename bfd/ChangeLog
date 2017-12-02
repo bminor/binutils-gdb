@@ -1,3 +1,14 @@
+2017-12-04  Alan Modra  <amodra@gmail.com>
+
+	* elfxx-x86.c (readonly_dynrelocs): New function.
+	(maybe_set_textrel): New function.  Always prints via minfo and
+	correct "readonly" to "read-only" in warning message., replacing..
+	(_bfd_x86_elf_readonly_dynrelocs): ..this.
+	(_bfd_x86_elf_size_dynamic_sections): Correct "readonly" to
+	"read-only" in warning message.  Formatting.
+	(_bfd_x86_elf_adjust_dynamic_symbol): Use readonly_dynrelocs.
+	* linker.c (bfd_link_hash_traverse): Comment typo fix.
+
 2017-12-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-x86.c (_bfd_x86_elf_readonly_dynrelocs): Print symbol
