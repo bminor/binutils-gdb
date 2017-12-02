@@ -1,5 +1,11 @@
 2017-12-01  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/21841
+	* testsuite/debug_msg.sh: Adjust expected line numbers.
+	* testsuite/odr_violation2.cc (DummyFunction): New function.
+
+2017-12-01  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/22309
 	* testsuite/Makefile.am (two_file_test_1_v1_ndebug.o): Compile with
 	no EH information.
