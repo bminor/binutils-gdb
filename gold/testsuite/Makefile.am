@@ -2970,9 +2970,9 @@ pr20976-d.o: pr20976.o gcctestdir/ld
 if DEFAULT_TARGET_X86_64
 
 two_file_test_1_v1_ndebug.o: two_file_test_1_v1.cc
-	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
+	$(CXXCOMPILE) -O0 -g0 -fno-exceptions -fno-asynchronous-unwind-tables -c -o $@ $<
 two_file_test_1_ndebug.o: two_file_test_1.cc
-	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
+	$(CXXCOMPILE) -O0 -g0 -fno-exceptions -fno-asynchronous-unwind-tables -c -o $@ $<
 two_file_test_1b_ndebug.o: two_file_test_1b.cc
 	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
 two_file_test_2_ndebug.o: two_file_test_2.cc

@@ -7244,9 +7244,9 @@ uninstall-am:
 # Incremental linking is currently supported only on the x86_64 target.
 
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_1_v1_ndebug.o: two_file_test_1_v1.cc
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -fno-exceptions -fno-asynchronous-unwind-tables -c -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_1_ndebug.o: two_file_test_1.cc
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -fno-exceptions -fno-asynchronous-unwind-tables -c -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_1b_ndebug.o: two_file_test_1b.cc
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_2_ndebug.o: two_file_test_2.cc
