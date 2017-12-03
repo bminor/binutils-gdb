@@ -30,18 +30,6 @@ struct thread_info *current_thread;
 /* The current working directory used to start the inferior.  */
 static const char *current_inferior_cwd = NULL;
 
-thread_info *
-find_inferior (std::list<thread_info *> *thread_list,
-	       int (*func) (thread_info *, void *),
-	       void *arg)
-{
-  gdb_assert (thread_list == &all_threads);
-
-  return find_thread ([&] (thread_info *thread) {
-    return func (thread, arg);
-  });
-}
-
 void
 for_each_inferior (std::list<thread_info *> *thread_list,
 		   void (*action) (thread_info *))

@@ -1,5 +1,10 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* inferiors.h (find_inferior): Remove.
+	* inferiors.c (find_inferior): Remove.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (resume_status_pending_p): Update comment.
 	(need_step_over_p): Update comment.
 
