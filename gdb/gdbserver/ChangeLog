@@ -1,5 +1,15 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (send_sigstop_callback): Return void, change
+	parameter type.  Rename to...
+	(send_sigstop): ... this.
+	(suspend_and_send_sigstop_callback): Return void, change parameter
+	type.  Rename to...
+	(suspend_and_send_sigstop): ... this.
+	(stop_all_lwps): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (lwp_running): Return bool, remove unused
 	argument.
 	(linux_stabilize_threads): Use find_thread.

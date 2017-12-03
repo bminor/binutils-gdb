@@ -3933,36 +3933,35 @@ send_sigstop (struct lwp_info *lwp)
   kill_lwp (pid, SIGSTOP);
 }
 
-static int
-send_sigstop_callback (thread_info *thread, void *except)
+static void
+send_sigstop (thread_info *thread, lwp_info *except)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   /* Ignore EXCEPT.  */
   if (lwp == except)
-    return 0;
+    return;
 
   if (lwp->stopped)
-    return 0;
+    return;
 
   send_sigstop (lwp);
-  return 0;
 }
 
 /* Increment the suspend count of an LWP, and stop it, if not stopped
    yet.  */
-static int
-suspend_and_send_sigstop_callback (thread_info *thread, void *except)
+static void
+suspend_and_send_sigstop (thread_info *thread, lwp_info *except)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   /* Ignore EXCEPT.  */
   if (lwp == except)
-    return 0;
+    return;
 
   lwp_suspended_inc (lwp);
 
-  return send_sigstop_callback (thread, except);
+  send_sigstop (thread, except);
 }
 
 static void
@@ -4157,9 +4156,16 @@ stop_all_lwps (int suspend, struct lwp_info *except)
 		      : STOPPING_THREADS);
 
   if (suspend)
-    find_inferior (&all_threads, suspend_and_send_sigstop_callback, except);
+    for_each_thread ([&] (thread_info *thread)
+      {
+	suspend_and_send_sigstop (thread, except);
+      });
   else
-    find_inferior (&all_threads, send_sigstop_callback, except);
+    for_each_thread ([&] (thread_info *thread)
+      {
+	 send_sigstop (thread, except);
+      });
+
   wait_for_sigstop ();
   stopping_threads = NOT_STOPPING_THREADS;
 
