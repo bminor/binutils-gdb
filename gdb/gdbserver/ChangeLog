@@ -1,5 +1,10 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (resume_status_pending_p): Update comment.
+	(need_step_over_p): Update comment.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (proceed_one_lwp): Return void, change parameter
 	type.
 	(unsuspend_and_proceed_one_lwp): Likewise.

@@ -4625,8 +4625,8 @@ linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
   lwp->resume = NULL;
 }
 
-/* find_inferior callback for linux_resume.
-   Set *FLAG_P if this lwp has an interesting status pending.  */
+/* find_thread callback for linux_resume.  Return true if this lwp has an
+   interesting status pending.  */
 
 static bool
 resume_status_pending_p (thread_info *thread)
@@ -4760,7 +4760,7 @@ need_step_over_p (thread_info *thread)
 			  lwpid_of (thread), paddress (pc));
 
 	  /* We've found an lwp that needs stepping over --- return 1 so
-	     that find_inferior stops looking.  */
+	     that find_thread stops looking.  */
 	  current_thread = saved_thread;
 
 	  return true;
