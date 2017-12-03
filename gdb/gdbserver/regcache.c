@@ -93,24 +93,13 @@ regcache_invalidate_thread (struct thread_info *thread)
   regcache->registers_valid = 0;
 }
 
-static int
-regcache_invalidate_one (thread_info *thread, void *pid_p)
-{
-  int pid = *(int *) pid_p;
-
-  /* Only invalidate the regcaches of threads of this process.  */
-  if (thread->id.pid () == pid)
-    regcache_invalidate_thread (thread);
-
-  return 0;
-}
-
 /* See regcache.h.  */
 
 void
 regcache_invalidate_pid (int pid)
 {
-  find_inferior (&all_threads, regcache_invalidate_one, &pid);
+  /* Only invalidate the regcaches of threads of this process.  */
+  for_each_thread (pid, regcache_invalidate_thread);
 }
 
 /* See regcache.h.  */
