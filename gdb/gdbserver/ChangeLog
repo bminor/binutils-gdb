@@ -1,5 +1,11 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (struct counter): Remove.
+	(second_thread_of_pid_p): Remove.
+	(last_thread_of_process_p): Use find_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* inferiors.c (find_inferior_in_random): Remove.
 	* inferiors.h (find_inferior_in_random): Remove.
 	* linux-low.c (status_pending_p_callback): Return bool, accept

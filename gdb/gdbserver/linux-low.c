@@ -1241,33 +1241,27 @@ linux_attach (unsigned long pid)
   return 0;
 }
 
-struct counter
-{
-  int pid;
-  int count;
-};
-
-static int
-second_thread_of_pid_p (thread_info *thread, void *args)
-{
-  struct counter *counter = (struct counter *) args;
-
-  if (thread->id.pid () == counter->pid)
-    {
-      if (++counter->count > 1)
-	return 1;
-    }
-
-  return 0;
-}
-
 static int
 last_thread_of_process_p (int pid)
 {
-  struct counter counter = { pid , 0 };
+  bool seen_one = false;
 
-  return (find_inferior (&all_threads,
-			 second_thread_of_pid_p, &counter) == NULL);
+  thread_info *thread = find_thread (pid, [&] (thread_info *thread)
+    {
+      if (!seen_one)
+	{
+	  /* This is the first thread of this process we see.  */
+	  seen_one = true;
+	  return false;
+	}
+      else
+	{
+	  /* This is the second thread of this process we see.  */
+	  return true;
+	}
+    });
+
+  return thread == NULL;
 }
 
 /* Kill LWP.  */
