@@ -2919,7 +2919,7 @@ unsuspend_all_lwps (struct lwp_info *except)
 
 static void move_out_of_jump_pad_callback (thread_info *thread);
 static bool stuck_in_jump_pad_callback (thread_info *thread);
-static int lwp_running (thread_info *thread, void *data);
+static bool lwp_running (thread_info *thread);
 static ptid_t linux_wait_1 (ptid_t ptid,
 			    struct target_waitstatus *ourstatus,
 			    int target_options);
@@ -2975,7 +2975,7 @@ linux_stabilize_threads (void)
   for_each_inferior (&all_threads, move_out_of_jump_pad_callback);
 
   /* Loop until all are stopped out of the jump pads.  */
-  while (find_inferior (&all_threads, lwp_running, NULL) != NULL)
+  while (find_thread (lwp_running) != NULL)
     {
       struct target_waitstatus ourstatus;
       struct lwp_info *lwp;
@@ -4121,16 +4121,15 @@ move_out_of_jump_pad_callback (thread_info *thread)
   current_thread = saved_thread;
 }
 
-static int
-lwp_running (thread_info *thread, void *data)
+static bool
+lwp_running (thread_info *thread)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   if (lwp_is_marked_dead (lwp))
-    return 0;
-  if (lwp->stopped)
-    return 0;
-  return 1;
+    return false;
+
+  return !lwp->stopped;
 }
 
 /* Stop all lwps that aren't stopped yet, except EXCEPT, if not NULL.

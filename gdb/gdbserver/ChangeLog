@@ -1,5 +1,11 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (lwp_running): Return bool, remove unused
+	argument.
+	(linux_stabilize_threads): Use find_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (select_singlestep_lwp_callback): Remove.
 	(count_events_callback): Remove.
 	(select_event_lwp_callback): Remove.
