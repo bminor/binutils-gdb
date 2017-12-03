@@ -1,3 +1,8 @@
+2017-12-03  Jim Wilson  <jimw@sifive.com>
+
+	* doc/c-riscv.texi (RISC-V-Directives): Move @section immediately after
+	@node.
+
 2017-12-01  Palmer Dabbelt  <palmer@sifive.com>
 	    Jim Wilson  <jimw@sifive.com>
 

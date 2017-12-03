@@ -51,10 +51,9 @@ the soft-float calling convention.
 @c man end
 
 @node RISC-V-Directives
+@section RISC-V Directives
 @cindex machine directives, RISC-V
 @cindex RISC-V machine directives
-
-@section RISC-V Directives
 
 The following table lists all available RISC-V specific directives.
 
