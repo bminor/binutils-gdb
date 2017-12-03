@@ -4923,15 +4923,14 @@ complete_ongoing_step_over (void)
    event to report, so we don't need to preserve any step requests;
    they should be re-issued if necessary.  */
 
-static int
-linux_resume_one_thread (thread_info *thread, void *arg)
+static void
+linux_resume_one_thread (thread_info *thread, bool leave_all_stopped)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
-  int leave_all_stopped = * (int *) arg;
   int leave_pending;
 
   if (lwp->resume == NULL)
-    return 0;
+    return;
 
   if (lwp->resume->kind == resume_stop)
     {
@@ -4978,7 +4977,7 @@ linux_resume_one_thread (thread_info *thread, void *arg)
       /* For stop requests, we're done.  */
       lwp->resume = NULL;
       thread->last_status.kind = TARGET_WAITKIND_IGNORE;
-      return 0;
+      return;
     }
 
   /* If this thread which is about to be resumed has a pending status,
@@ -5026,14 +5025,12 @@ linux_resume_one_thread (thread_info *thread, void *arg)
 
   thread->last_status.kind = TARGET_WAITKIND_IGNORE;
   lwp->resume = NULL;
-  return 0;
 }
 
 static void
 linux_resume (struct thread_resume *resume_info, size_t n)
 {
   struct thread_info *need_step_over = NULL;
-  int leave_all_stopped;
 
   if (debug_threads)
     {
@@ -5065,7 +5062,7 @@ linux_resume (struct thread_resume *resume_info, size_t n)
   if (!any_pending && supports_breakpoints ())
     need_step_over = find_thread (need_step_over_p);
 
-  leave_all_stopped = (need_step_over != NULL || any_pending);
+  bool leave_all_stopped = (need_step_over != NULL || any_pending);
 
   if (debug_threads)
     {
@@ -5080,7 +5077,10 @@ linux_resume (struct thread_resume *resume_info, size_t n)
 
   /* Even if we're leaving threads stopped, queue all signals we'd
      otherwise deliver.  */
-  find_inferior (&all_threads, linux_resume_one_thread, &leave_all_stopped);
+  for_each_thread ([&] (thread_info *thread)
+    {
+      linux_resume_one_thread (thread, leave_all_stopped);
+    });
 
   if (need_step_over)
     start_step_over (get_thread_lwp (need_step_over));

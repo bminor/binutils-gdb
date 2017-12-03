@@ -1,5 +1,11 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (linux_resume_one_thread): Return void, take
+	parameter directly.
+	(linux_resume): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (send_sigstop_callback): Return void, change
 	parameter type.  Rename to...
 	(send_sigstop): ... this.
