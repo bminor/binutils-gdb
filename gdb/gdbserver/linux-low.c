@@ -1920,23 +1920,18 @@ check_zombie_leaders (void)
     });
 }
 
-/* Callback for `find_inferior'.  Returns the first LWP that is not
-   stopped.  ARG is a PTID filter.  */
+/* Callback for `find_thread'.  Returns the first LWP that is not
+   stopped.  */
 
-static int
-not_stopped_callback (thread_info *thread, void *arg)
+static bool
+not_stopped_callback (thread_info *thread, ptid_t filter)
 {
-  struct lwp_info *lwp;
-  ptid_t filter = *(ptid_t *) arg;
+  if (!thread->id.matches (filter))
+    return false;
 
-  if (!ptid_match (ptid_of (thread), filter))
-    return 0;
+  lwp_info *lwp = get_thread_lwp (thread);
 
-  lwp = get_thread_lwp (thread);
-  if (!lwp->stopped)
-    return 1;
-
-  return 0;
+  return !lwp->stopped;
 }
 
 /* Increment LWP's suspend count.  */
@@ -2763,6 +2758,11 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 	 until all other threads in the thread group are.  */
       check_zombie_leaders ();
 
+      auto not_stopped = [&] (thread_info *thread)
+	{
+	  return not_stopped_callback (thread, wait_ptid);
+	};
+
       /* If there are no resumed children left in the set of LWPs we
 	 want to wait for, bail.  We can't just block in
 	 waitpid/sigsuspend, because lwps might have been left stopped
@@ -2770,9 +2770,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 	 their status to change (which would only happen if we resumed
 	 them).  Even if WNOHANG is set, this return code is preferred
 	 over 0 (below), as it is more detailed.  */
-      if ((find_inferior (&all_threads,
-			  not_stopped_callback,
-			  &wait_ptid) == NULL))
+      if (find_thread (not_stopped) == NULL)
 	{
 	  if (debug_threads)
 	    debug_printf ("LLW: exit (no unwaited-for LWP)\n");
@@ -3165,12 +3163,15 @@ linux_wait_1 (ptid_t ptid,
       return status_pending_p_callback (thread, minus_one_ptid);
     };
 
+  auto not_stopped = [&] (thread_info *thread)
+    {
+      return not_stopped_callback (thread, minus_one_ptid);
+    };
+
   /* Find a resumed LWP, if any.  */
   if (find_thread (status_pending_p_any) != NULL)
     any_resumed = 1;
-  else if ((find_inferior (&all_threads,
-			   not_stopped_callback,
-			   &minus_one_ptid) != NULL))
+  else if (find_thread (not_stopped) != NULL)
     any_resumed = 1;
   else
     any_resumed = 0;

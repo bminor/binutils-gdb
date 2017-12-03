@@ -1,5 +1,12 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (not_stopped_callback): Return bool, take filter
+	argument directly.
+	(linux_wait_for_event_filtered): Use find_thread.
+	(linux_wait_1): Likewise.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (same_lwp): Remove.
 	(find_lwp_pid): Use find_thread.
 
