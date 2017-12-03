@@ -1,3 +1,7 @@
+2017-12-03  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (extract_li20): Rewrite.
+
 2017-12-01  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* opcodes/ppc-dis.c (disassemble_init_powerpc): Fix white space.

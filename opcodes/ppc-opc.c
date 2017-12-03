@@ -571,13 +571,9 @@ extract_li20 (uint64_t insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      int *invalid ATTRIBUTE_UNUSED)
 {
-  int64_t ext = ((insn & 0x4000) == 0x4000) ? 0xfff00000 : 0x00000000;
-
-  return (ext
-	  | (((insn >> 11) & 0xf) << 16)
-	  | (((insn >> 17) & 0xf) << 12)
-	  | (((insn >> 16) & 0x1) << 11)
-	  | (insn & 0x7ff));
+  return ((((insn << 5) & 0xf0000)
+	   | ((insn >> 5) & 0xf800)
+	   | (insn & 0x7ff)) ^ 0x80000) - 0x80000;
 }
 
 /* The 2-bit L field in a SYNC or WC field in a WAIT instruction.
