@@ -30,18 +30,6 @@ struct thread_info *current_thread;
 /* The current working directory used to start the inferior.  */
 static const char *current_inferior_cwd = NULL;
 
-void
-for_each_inferior_with_data (std::list<thread_info *> *thread_list,
-			     void (*action) (thread_info *, void *),
-			     void *data)
-{
-  gdb_assert (thread_list == &all_threads);
-
-  for_each_thread ([&] (thread_info *thread) {
-    action (thread, data);
-  });
-}
-
 struct thread_info *
 add_thread (ptid_t thread_id, void *target_data)
 {

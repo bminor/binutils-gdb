@@ -1,5 +1,12 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* inferiors.c (for_each_inferior_with_data): Remove.
+	* inferiors.h (for_each_inferior_with_data): Remove.
+	* server.c (handle_qxfer_threads_worker): Change parameter type.
+	(handle_qxfer_threads_proper): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* inferiors.c (for_each_inferior): Remove.
 	(clear_inferiors): Use for_each_thread.
 	* inferiors.h (for_each_inferior): Remove.

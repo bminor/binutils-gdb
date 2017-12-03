@@ -140,10 +140,6 @@ int have_attached_inferiors_p (void);
 
 void clear_inferiors (void);
 
-void for_each_inferior_with_data (std::list<thread_info *> *thread_list,
-				  void (*action) (thread_info *, void *),
-				  void *data);
-
 void *thread_target_data (struct thread_info *);
 struct regcache *thread_regcache_data (struct thread_info *);
 void set_thread_regcache_data (struct thread_info *, struct regcache *);

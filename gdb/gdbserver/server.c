@@ -1650,9 +1650,8 @@ handle_qxfer_statictrace (const char *annex,
    Emit the XML to describe the thread of INF.  */
 
 static void
-handle_qxfer_threads_worker (thread_info *thread, void *arg)
+handle_qxfer_threads_worker (thread_info *thread, struct buffer *buffer)
 {
-  struct buffer *buffer = (struct buffer *) arg;
   ptid_t ptid = ptid_of (thread);
   char ptid_s[100];
   int core = target_core_of_thread (ptid);
@@ -1692,8 +1691,10 @@ handle_qxfer_threads_proper (struct buffer *buffer)
 {
   buffer_grow_str (buffer, "<threads>\n");
 
-  for_each_inferior_with_data (&all_threads, handle_qxfer_threads_worker,
-			       buffer);
+  for_each_thread ([&] (thread_info *thread)
+    {
+      handle_qxfer_threads_worker (thread, buffer);
+    });
 
   buffer_grow_str0 (buffer, "</threads>\n");
 }
