@@ -1807,16 +1807,15 @@ lwp_resumed (struct lwp_info *lwp)
   return 0;
 }
 
-/* Return 1 if this lwp has an interesting status pending.  */
-static int
-status_pending_p_callback (thread_info *thread, void *arg)
+/* Return true if this lwp has an interesting status pending.  */
+static bool
+status_pending_p_callback (thread_info *thread, ptid_t ptid)
 {
   struct lwp_info *lp = get_thread_lwp (thread);
-  ptid_t ptid = * (ptid_t *) arg;
 
   /* Check if we're only interested in events from a specific process
      or a specific LWP.  */
-  if (!ptid_match (ptid_of (thread), ptid))
+  if (!thread->id.matches (ptid))
     return 0;
 
   if (!lwp_resumed (lp))
@@ -2667,9 +2666,11 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 
   if (ptid_equal (filter_ptid, minus_one_ptid) || ptid_is_pid (filter_ptid))
     {
-      event_thread = (struct thread_info *)
-	find_inferior_in_random (&all_threads, status_pending_p_callback,
-				 &filter_ptid);
+      event_thread = find_thread_in_random ([&] (thread_info *thread)
+	{
+	  return status_pending_p_callback (thread, filter_ptid);
+	});
+
       if (event_thread != NULL)
 	event_child = get_thread_lwp (event_thread);
       if (debug_threads && event_thread)
@@ -2780,9 +2781,11 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 
       /* ... and find an LWP with a status to report to the core, if
 	 any.  */
-      event_thread = (struct thread_info *)
-	find_inferior_in_random (&all_threads, status_pending_p_callback,
-				 &filter_ptid);
+      event_thread = find_thread_in_random ([&] (thread_info *thread)
+	{
+	  return status_pending_p_callback (thread, filter_ptid);
+	});
+
       if (event_thread != NULL)
 	{
 	  event_child = get_thread_lwp (event_thread);
@@ -3193,10 +3196,13 @@ linux_wait_1 (ptid_t ptid,
   in_step_range = 0;
   ourstatus->kind = TARGET_WAITKIND_IGNORE;
 
+  auto status_pending_p_any = [&] (thread_info *thread)
+    {
+      return status_pending_p_callback (thread, minus_one_ptid);
+    };
+
   /* Find a resumed LWP, if any.  */
-  if (find_inferior (&all_threads,
-		     status_pending_p_callback,
-		     &minus_one_ptid) != NULL)
+  if (find_thread (status_pending_p_any) != NULL)
     any_resumed = 1;
   else if ((find_inferior (&all_threads,
 			   not_stopped_callback,

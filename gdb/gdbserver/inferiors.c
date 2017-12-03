@@ -42,18 +42,6 @@ find_inferior (std::list<thread_info *> *thread_list,
   });
 }
 
-thread_info *
-find_inferior_in_random (std::list<thread_info *> *thread_list,
-			 int (*func) (thread_info *, void *),
-			 void *arg)
-{
-  gdb_assert (thread_list == &all_threads);
-
-  return find_thread_in_random ([&] (thread_info *thread) {
-    return func (thread, arg);
-  });
-}
-
 void
 for_each_inferior (std::list<thread_info *> *thread_list,
 		   void (*action) (thread_info *))

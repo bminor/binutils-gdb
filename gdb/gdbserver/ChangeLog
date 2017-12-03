@@ -1,5 +1,14 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* inferiors.c (find_inferior_in_random): Remove.
+	* inferiors.h (find_inferior_in_random): Remove.
+	* linux-low.c (status_pending_p_callback): Return bool, accept
+	parameter ptid directly.
+	(linux_wait_for_event_filtered): Use find_thread_in_random.
+	(linux_wait_1): Likewise.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* inferiors.c (find_inferior_id): Remove.
 	(find_thread_ptid): Move implemention from find_inferior_id to
 	here.
