@@ -1,5 +1,12 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (select_singlestep_lwp_callback): Remove.
+	(count_events_callback): Remove.
+	(select_event_lwp_callback): Remove.
+	(select_event_lwp): Use find_thread/for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (not_stopped_callback): Return bool, take filter
 	argument directly.
 	(linux_wait_for_event_filtered): Use find_thread.

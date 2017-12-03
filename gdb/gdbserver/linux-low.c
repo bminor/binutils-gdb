@@ -2818,64 +2818,11 @@ linux_wait_for_event (ptid_t ptid, int *wstatp, int options)
   return linux_wait_for_event_filtered (ptid, ptid, wstatp, options);
 }
 
-/* Count the LWP's that have had events.  */
-
-static int
-count_events_callback (thread_info *thread, void *data)
-{
-  struct lwp_info *lp = get_thread_lwp (thread);
-  int *count = (int *) data;
-
-  gdb_assert (count != NULL);
-
-  /* Count only resumed LWPs that have an event pending. */
-  if (thread->last_status.kind == TARGET_WAITKIND_IGNORE
-      && lp->status_pending_p)
-    (*count)++;
-
-  return 0;
-}
-
-/* Select the LWP (if any) that is currently being single-stepped.  */
-
-static int
-select_singlestep_lwp_callback (thread_info *thread, void *data)
-{
-  struct lwp_info *lp = get_thread_lwp (thread);
-
-  if (thread->last_status.kind == TARGET_WAITKIND_IGNORE
-      && thread->last_resume_kind == resume_step
-      && lp->status_pending_p)
-    return 1;
-  else
-    return 0;
-}
-
-/* Select the Nth LWP that has had an event.  */
-
-static int
-select_event_lwp_callback (thread_info *thread, void *data)
-{
-  struct lwp_info *lp = get_thread_lwp (thread);
-  int *selector = (int *) data;
-
-  gdb_assert (selector != NULL);
-
-  /* Select only resumed LWPs that have an event pending. */
-  if (thread->last_status.kind == TARGET_WAITKIND_IGNORE
-      && lp->status_pending_p)
-    if ((*selector)-- == 0)
-      return 1;
-
-  return 0;
-}
-
 /* Select one LWP out of those that have events pending.  */
 
 static void
 select_event_lwp (struct lwp_info **orig_lp)
 {
-  int num_events = 0;
   int random_selector;
   struct thread_info *event_thread = NULL;
 
@@ -2889,10 +2836,15 @@ select_event_lwp (struct lwp_info **orig_lp)
      would report it to the user as a random signal.  */
   if (!non_stop)
     {
-      event_thread
-	= (struct thread_info *) find_inferior (&all_threads,
-						select_singlestep_lwp_callback,
-						NULL);
+      event_thread = find_thread ([] (thread_info *thread)
+	{
+	  lwp_info *lp = get_thread_lwp (thread);
+
+	  return (thread->last_status.kind == TARGET_WAITKIND_IGNORE
+		  && thread->last_resume_kind == resume_step
+		  && lp->status_pending_p);
+	});
+
       if (event_thread != NULL)
 	{
 	  if (debug_threads)
@@ -2906,7 +2858,16 @@ select_event_lwp (struct lwp_info **orig_lp)
          which have had events.  */
 
       /* First see how many events we have.  */
-      find_inferior (&all_threads, count_events_callback, &num_events);
+      int num_events = 0;
+      for_each_thread ([&] (thread_info *thread)
+	{
+	  lwp_info *lp = get_thread_lwp (thread);
+
+	  /* Count only resumed LWPs that have an event pending. */
+	  if (thread->last_status.kind == TARGET_WAITKIND_IGNORE
+	      && lp->status_pending_p)
+	    num_events++;
+	});
       gdb_assert (num_events > 0);
 
       /* Now randomly pick a LWP out of those that have had
@@ -2918,10 +2879,18 @@ select_event_lwp (struct lwp_info **orig_lp)
 	debug_printf ("SEL: Found %d SIGTRAP events, selecting #%d\n",
 		      num_events, random_selector);
 
-      event_thread
-	= (struct thread_info *) find_inferior (&all_threads,
-						select_event_lwp_callback,
-						&random_selector);
+      event_thread = find_thread ([&] (thread_info *thread)
+	{
+	  lwp_info *lp = get_thread_lwp (thread);
+
+	  /* Select only resumed LWPs that have an event pending.  */
+	  if (thread->last_status.kind == TARGET_WAITKIND_IGNORE
+	      && lp->status_pending_p)
+	    if (random_selector-- == 0)
+	      return true;
+
+	  return false;
+	});
     }
 
   if (event_thread != NULL)
