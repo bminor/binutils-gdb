@@ -2148,29 +2148,29 @@ debug_get_memory_xfer_limit (struct target_ops *self)
   return result;
 }
 
-static mem_region_vector
+static std::vector<mem_region>
 delegate_memory_map (struct target_ops *self)
 {
   self = self->beneath;
   return self->to_memory_map (self);
 }
 
-static mem_region_vector
+static std::vector<mem_region>
 tdefault_memory_map (struct target_ops *self)
 {
   return std::vector<mem_region> ();
 }
 
-static mem_region_vector
+static std::vector<mem_region>
 debug_memory_map (struct target_ops *self)
 {
-  mem_region_vector result;
+  std::vector<mem_region> result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_memory_map (...)\n", debug_target.to_shortname);
   result = debug_target.to_memory_map (&debug_target);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_memory_map (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_mem_region_vector (result);
+  target_debug_print_std_vector_mem_region (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }
