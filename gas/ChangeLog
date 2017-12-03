@@ -1,3 +1,24 @@
+2017-12-04  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/ppc.exp: Don't exclude VLE tests when little-endian.
+	* testsuite/gas/ppc/efs.d: Add -mbig to assembler options.
+	* testsuite/gas/ppc/efs2.d: Likewise.
+	* testsuite/gas/ppc/lsp-checks.d: Likewise.
+	* testsuite/gas/ppc/lsp.d: Likewise.
+	* testsuite/gas/ppc/spe.d: Likewise.
+	* testsuite/gas/ppc/spe2-checks.d: Likewise.
+	* testsuite/gas/ppc/spe2.d: Likewise.
+	* testsuite/gas/ppc/spe_ambiguous.d: Likewise.
+	* testsuite/gas/ppc/vle-mult-ld-st-insns.d: Likewise.
+	* testsuite/gas/ppc/vle-reloc.d: Likewise.
+	* testsuite/gas/ppc/vle-simple-1.d: Likewise.
+	* testsuite/gas/ppc/vle-simple-2.d: Likewise.
+	* testsuite/gas/ppc/vle-simple-3.d: Likewise.
+	* testsuite/gas/ppc/vle-simple-4.d: Likewise.
+	* testsuite/gas/ppc/vle-simple-5.d: Likewise.
+	* testsuite/gas/ppc/vle-simple-6.d: Likewise.
+	* testsuite/gas/ppc/vle.d: Likewise.
+
 2017-12-03  Jim Wilson  <jimw@sifive.com>
 
 	* doc/c-riscv.texi (RISC-V-Directives): Move @section immediately after

@@ -1,4 +1,4 @@
-#as: -a32 -mvle -mspe2
+#as: -a32 -mbig -mvle -mspe2
 #objdump: -d -Mspe2 -Mefs2
 #name: Validate SPE2 instructions
 
