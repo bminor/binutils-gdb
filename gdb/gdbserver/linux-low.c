@@ -1581,28 +1581,20 @@ linux_detach_one_lwp (struct lwp_info *lwp)
   delete_lwp (lwp);
 }
 
-/* Callback for find_inferior.  Detaches from non-leader threads of a
+/* Callback for for_each_thread.  Detaches from non-leader threads of a
    given process.  */
 
-static int
-linux_detach_lwp_callback (thread_info *thread, void *args)
+static void
+linux_detach_lwp_callback (thread_info *thread)
 {
-  struct lwp_info *lwp = get_thread_lwp (thread);
-  int pid = *(int *) args;
-  int lwpid = lwpid_of (thread);
-
-  /* Skip other processes.  */
-  if (thread->id.pid () != pid)
-    return 0;
-
   /* We don't actually detach from the thread group leader just yet.
      If the thread group exits, we must reap the zombie clone lwps
      before we're able to reap the leader.  */
-  if (thread->id.pid () == lwpid)
-    return 0;
+  if (thread->id.pid () == thread->id.lwp ())
+    return;
 
+  lwp_info *lwp = get_thread_lwp (thread);
   linux_detach_one_lwp (lwp);
-  return 0;
 }
 
 static int
@@ -1636,7 +1628,7 @@ linux_detach (int pid)
   /* Detach from the clone lwps first.  If the thread group exits just
      while we're detaching, we must reap the clone lwps before we're
      able to reap the leader.  */
-  find_inferior (&all_threads, linux_detach_lwp_callback, &pid);
+  for_each_thread (pid, linux_detach_lwp_callback);
 
   main_lwp = find_lwp_pid (pid_to_ptid (pid));
   linux_detach_one_lwp (main_lwp);

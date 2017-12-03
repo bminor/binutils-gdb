@@ -1,5 +1,11 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (linux_detach_lwp_callback): Return void, remove
+	args parameter, don't check for pid.
+	(linux_detach): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (struct counter): Remove.
 	(second_thread_of_pid_p): Remove.
 	(last_thread_of_process_p): Use find_thread.
