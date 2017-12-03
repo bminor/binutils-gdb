@@ -1,3 +1,19 @@
+2017-12-03  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/process-dies-while-detaching.c: Include <errno.h>
+	and <string.h>.
+	(parent_function): Print distinct messages when waitpid fails, or
+	the child exits with a signal, or the child exits for an unhandled
+	reason.
+	* gdb.threads/process-dies-while-detaching.exp
+	(detach_and_expect_exit): New 'inf_output_re' parameter and use
+	it.  Wait for both inferior output and GDB's prompt.  Use an
+	indirect spawn id list.
+	(do_detach): New parameter 'child_exit'.  Use it to compute
+	expected inferior output.
+	(test_detach, test_detach_watch, test_detach_killed_outside):
+	Adjust to pass down the expected child exit kind.
+
 2017-12-01  Joel Brobecker  <brobecker@adacore.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
