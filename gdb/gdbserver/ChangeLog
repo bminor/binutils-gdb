@@ -1,5 +1,10 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (delete_lwp_callback): Remove.
+	(linux_mourn): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (linux_detach_lwp_callback): Return void, remove
 	args parameter, don't check for pid.
 	(linux_detach): Use for_each_thread.

@@ -1643,18 +1643,6 @@ linux_detach (int pid)
 
 /* Remove all LWPs that belong to process PROC from the lwp list.  */
 
-static int
-delete_lwp_callback (thread_info *thread, void *proc)
-{
-  struct lwp_info *lwp = get_thread_lwp (thread);
-  struct process_info *process = (struct process_info *) proc;
-
-  if (pid_of (thread) == pid_of (process))
-    delete_lwp (lwp);
-
-  return 0;
-}
-
 static void
 linux_mourn (struct process_info *process)
 {
@@ -1664,7 +1652,10 @@ linux_mourn (struct process_info *process)
   thread_db_mourn (process);
 #endif
 
-  find_inferior (&all_threads, delete_lwp_callback, process);
+  for_each_thread (process->pid, [] (thread_info *thread)
+    {
+      delete_lwp (get_thread_lwp (thread));
+    });
 
   /* Freeing all private data.  */
   priv = process->priv;
