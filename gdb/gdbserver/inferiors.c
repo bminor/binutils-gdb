@@ -43,16 +43,6 @@ find_inferior (std::list<thread_info *> *thread_list,
 }
 
 thread_info *
-find_inferior_id (std::list<thread_info *> *thread_list, ptid_t id)
-{
-  gdb_assert (thread_list == &all_threads);
-
-  return find_thread ([&] (thread_info *thread) {
-    return thread->id == id;
-  });
-}
-
-thread_info *
 find_inferior_in_random (std::list<thread_info *> *thread_list,
 			 int (*func) (thread_info *, void *),
 			 void *arg)
@@ -120,7 +110,9 @@ get_first_thread (void)
 struct thread_info *
 find_thread_ptid (ptid_t ptid)
 {
-  return (struct thread_info *) find_inferior_id (&all_threads, ptid);
+  return find_thread ([&] (thread_info *thread) {
+    return thread->id == ptid;
+  });
 }
 
 /* Find a thread associated with the given PROCESS, or NULL if no

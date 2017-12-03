@@ -1,5 +1,20 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* inferiors.c (find_inferior_id): Remove.
+	(find_thread_ptid): Move implemention from find_inferior_id to
+	here.
+	* inferiors.h (find_inferior_id): Remove.
+	* server.c (handle_status): Use find_thread_ptid.
+	(process_serial_event): Likewise.
+	* thread-db.c (find_one_thread): Likewise.
+	(thread_db_thread_handle): Likewise.
+	* win32-low.c (thread_rec): Likewise.
+	(child_delete_thread): Likewise.
+	(win32_thread_alive): Likewise.
+	(get_child_debug_event): Likewise.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-mips-low.c (update_watch_registers_callback): Return
 	void, remove pid_p parameter, don't check for pid.
 	(mips_insert_point, mips_remove_point): Use for_each_thread.

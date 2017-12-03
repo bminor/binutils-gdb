@@ -142,8 +142,6 @@ void clear_inferiors (void);
 
 thread_info *find_inferior (std::list<thread_info *> *thread_list,
 			    int (*func) (thread_info *, void *), void *arg);
-thread_info *find_inferior_id (std::list<thread_info *> *thread_list,
-			       ptid_t id);
 thread_info *find_inferior_in_random (std::list<thread_info *> *thread_list,
 				      int (*func) (thread_info *, void *),
 				      void *arg);

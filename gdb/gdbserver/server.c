@@ -3355,7 +3355,7 @@ handle_status (char *own_buf)
       if (last_status.kind != TARGET_WAITKIND_IGNORE
 	  && last_status.kind != TARGET_WAITKIND_EXITED
 	  && last_status.kind != TARGET_WAITKIND_SIGNALLED)
-	thread = find_inferior_id (&all_threads, last_ptid);
+	thread = find_thread_ptid (last_ptid);
 
       /* If the last event thread is not found for some reason, look
 	 for some other thread that might have an event to report.  */
@@ -4081,9 +4081,7 @@ process_serial_event (void)
 		  /* GDB is telling us to choose any thread.  Check if
 		     the currently selected thread is still valid. If
 		     it is not, select the first available.  */
-		  struct thread_info *thread =
-		    (struct thread_info *) find_inferior_id (&all_threads,
-							     general_thread);
+		  thread_info *thread = find_thread_ptid (general_thread);
 		  if (thread == NULL)
 		    thread = get_first_thread ();
 		  thread_id = thread->id;

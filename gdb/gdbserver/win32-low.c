@@ -193,14 +193,11 @@ win32_require_context (win32_thread_info *th)
 static win32_thread_info *
 thread_rec (ptid_t ptid, int get_context)
 {
-  struct thread_info *thread;
-  win32_thread_info *th;
-
-  thread = (struct thread_info *) find_inferior_id (&all_threads, ptid);
+  thread_info *thread = find_thread_ptid (ptid);
   if (thread == NULL)
     return NULL;
 
-  th = (win32_thread_info *) thread_target_data (thread);
+  win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
   if (get_context)
     win32_require_context (th);
   return th;
@@ -244,14 +241,11 @@ delete_thread_info (thread_info *thread)
 static void
 child_delete_thread (DWORD pid, DWORD tid)
 {
-  ptid_t ptid;
-
   /* If the last thread is exiting, just return.  */
   if (all_threads.size () == 1)
     return;
 
-  ptid = ptid_build (pid, tid, 0);
-  thread_info *thread = find_inferior_id (&all_threads, ptid);
+  thread_info *thread = find_thread_ptid (ptid_t (pid, tid));
   if (thread == NULL)
     return;
 
@@ -892,15 +886,9 @@ win32_join (int pid)
 static int
 win32_thread_alive (ptid_t ptid)
 {
-  int res;
-
   /* Our thread list is reliable; don't bother to poll target
      threads.  */
-  if (find_inferior_id (&all_threads, ptid) != NULL)
-    res = 1;
-  else
-    res = 0;
-  return res;
+  return find_thread_ptid (ptid) != NULL;
 }
 
 /* Resume the inferior process.  RESUME_INFO describes how we want
@@ -1582,8 +1570,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
     }
 
   ptid = debug_event_ptid (&current_event);
-  current_thread =
-    (struct thread_info *) find_inferior_id (&all_threads, ptid);
+  current_thread = find_thread_ptid (ptid);
   return 1;
 }
 
