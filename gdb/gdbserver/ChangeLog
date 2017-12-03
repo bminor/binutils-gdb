@@ -1,5 +1,10 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* lynx.low (lynx_delete_thread_callback): Remove.
+	(lynx_mourn): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* regcache.c (regcache_invalidate_one): Remove.
 	(regcache_invalidate_pid): use for_each_thread.
 
