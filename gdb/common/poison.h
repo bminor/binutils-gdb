@@ -130,7 +130,7 @@ data type.  Use operator delete instead.");
 }
 
 #undef XDELETE
-#define XDELETE(P) xdelete (p)
+#define XDELETE(P) xdelete (P)
 
 template<typename T>
 static T *

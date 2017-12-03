@@ -1,3 +1,7 @@
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/poison.h (XDELETE): Fix typo.
+
 2017-12-01  Andrew Cagney  <cagney@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
