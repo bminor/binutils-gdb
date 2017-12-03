@@ -1808,27 +1808,14 @@ status_pending_p_callback (thread_info *thread, ptid_t ptid)
   return lp->status_pending_p;
 }
 
-static int
-same_lwp (thread_info *thread, void *data)
-{
-  ptid_t ptid = *(ptid_t *) data;
-  int lwp;
-
-  if (ptid_get_lwp (ptid) != 0)
-    lwp = ptid_get_lwp (ptid);
-  else
-    lwp = ptid_get_pid (ptid);
-
-  if (thread->id.lwp () == lwp)
-    return 1;
-
-  return 0;
-}
-
 struct lwp_info *
 find_lwp_pid (ptid_t ptid)
 {
-  thread_info *thread = find_inferior (&all_threads, same_lwp, &ptid);
+  thread_info *thread = find_thread ([&] (thread_info *thread)
+    {
+      int lwp = ptid.lwp () != 0 ? ptid.lwp () : ptid.pid ();
+      return thread->id.lwp () == lwp;
+    });
 
   if (thread == NULL)
     return NULL;

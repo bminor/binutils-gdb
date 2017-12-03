@@ -1,5 +1,10 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (same_lwp): Remove.
+	(find_lwp_pid): Use find_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (delete_lwp_callback): Remove.
 	(linux_mourn): Use for_each_thread.
 
