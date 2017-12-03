@@ -281,7 +281,7 @@ void
 regcache_release (void)
 {
   /* Flush and release all pre-existing register caches.  */
-  for_each_inferior (&all_threads, free_register_cache_thread);
+  for_each_thread (free_register_cache_thread);
 }
 #endif
 

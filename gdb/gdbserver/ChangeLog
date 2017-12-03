@@ -1,5 +1,22 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* inferiors.c (for_each_inferior): Remove.
+	(clear_inferiors): Use for_each_thread.
+	* inferiors.h (for_each_inferior): Remove.
+	* linux-low.c (linux_wait_for_event_filtered): Use
+	for_each_thread.
+	(linux_stabilize_threads): Likewise.
+	* regcache.c (regcache_release): Likewise.
+	* server.c (gdb_wants_all_threads_stopped): Likewise.
+	(clear_pending_status_callback): Remove.
+	(handle_status): Use for_each_thread.
+	(captured_main): Likewise.
+	* win32-low.c (child_init_thread_list): Likewise.
+	(win32_clear_inferiors): Likewise.
+	(fake_breakpoint_event): Likewise.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* inferiors.h (find_inferior): Remove.
 	* inferiors.c (find_inferior): Remove.
 

@@ -2736,7 +2736,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
       /* Now that we've pulled all events out of the kernel, resume
 	 LWPs that don't have an interesting event to report.  */
       if (stopping_threads == NOT_STOPPING_THREADS)
-	for_each_inferior (&all_threads, resume_stopped_resumed_lwps);
+	for_each_thread (resume_stopped_resumed_lwps);
 
       /* ... and find an LWP with a status to report to the core, if
 	 any.  */
@@ -2972,7 +2972,7 @@ linux_stabilize_threads (void)
   stabilizing_threads = 1;
 
   /* Kick 'em all.  */
-  for_each_inferior (&all_threads, move_out_of_jump_pad_callback);
+  for_each_thread (move_out_of_jump_pad_callback);
 
   /* Loop until all are stopped out of the jump pads.  */
   while (find_thread (lwp_running) != NULL)

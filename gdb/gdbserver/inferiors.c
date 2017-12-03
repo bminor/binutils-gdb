@@ -31,17 +31,6 @@ struct thread_info *current_thread;
 static const char *current_inferior_cwd = NULL;
 
 void
-for_each_inferior (std::list<thread_info *> *thread_list,
-		   void (*action) (thread_info *))
-{
-  gdb_assert (thread_list == &all_threads);
-
-  for_each_thread ([&] (thread_info *thread) {
-    action (thread);
-  });
-}
-
-void
 for_each_inferior_with_data (std::list<thread_info *> *thread_list,
 			     void (*action) (thread_info *, void *),
 			     void *data)
@@ -151,7 +140,7 @@ set_thread_regcache_data (struct thread_info *thread, struct regcache *data)
 void
 clear_inferiors (void)
 {
-  for_each_inferior (&all_threads, free_one_thread);
+  for_each_thread (free_one_thread);
   all_threads.clear ();
 
   clear_dlls ();

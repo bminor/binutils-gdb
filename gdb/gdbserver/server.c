@@ -3216,7 +3216,7 @@ myresume (char *own_buf, int step, int sig)
   resume (resume_info, n);
 }
 
-/* Callback for for_each_inferior.  Make a new stop reply for each
+/* Callback for for_each_thread.  Make a new stop reply for each
    stopped thread.  */
 
 static void
@@ -3281,19 +3281,10 @@ gdb_wants_thread_stopped (thread_info *thread)
 static void
 gdb_wants_all_threads_stopped (void)
 {
-  for_each_inferior (&all_threads, gdb_wants_thread_stopped);
+  for_each_thread (gdb_wants_thread_stopped);
 }
 
-/* Callback for for_each_inferior.  Clear the thread's pending status
-   flag.  */
-
-static void
-clear_pending_status_callback (thread_info *thread)
-{
-  thread->status_pending_p = 0;
-}
-
-/* Callback for for_each_inferior.  If the thread is stopped with an
+/* Callback for for_each_thread.  If the thread is stopped with an
    interesting event, mark it as having a pending event.  */
 
 static void
@@ -3348,7 +3339,7 @@ handle_status (char *own_buf)
 	 reporting now pending.  They'll be reported the next time the
 	 threads are resumed.  Start by marking all interesting events
 	 as pending.  */
-      for_each_inferior (&all_threads, set_pending_status_callback);
+      for_each_thread (set_pending_status_callback);
 
       /* Prefer the last thread that reported an event to GDB (even if
 	 that was a GDB_SIGNAL_TRAP).  */
@@ -3869,8 +3860,10 @@ captured_main (int argc, char *argv[])
 	     (by the same GDB instance or another) will refresh all its
 	     state from scratch.  */
 	  discard_queued_stop_replies (minus_one_ptid);
-	  for_each_inferior (&all_threads,
-			     clear_pending_status_callback);
+	  for_each_thread ([] (thread_info *thread)
+	    {
+	      thread->status_pending_p = 0;
+	    });
 
 	  if (tracing)
 	    {

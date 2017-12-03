@@ -140,8 +140,6 @@ int have_attached_inferiors_p (void);
 
 void clear_inferiors (void);
 
-void for_each_inferior (std::list<thread_info *> *thread_list,
-			void (*action) (thread_info *));
 void for_each_inferior_with_data (std::list<thread_info *> *thread_list,
 				  void (*action) (thread_info *, void *),
 				  void *data);

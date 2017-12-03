@@ -339,7 +339,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
 static void
 child_init_thread_list (void)
 {
-  for_each_inferior (&all_threads, delete_thread_info);
+  for_each_thread (delete_thread_info);
 }
 
 /* Zero during the child initialization phase, and nonzero otherwise.  */
@@ -793,7 +793,7 @@ win32_clear_inferiors (void)
   if (current_process_handle != NULL)
     CloseHandle (current_process_handle);
 
-  for_each_inferior (&all_threads, delete_thread_info);
+  for_each_thread (delete_thread_info);
   clear_inferiors ();
 }
 
@@ -1362,7 +1362,7 @@ fake_breakpoint_event (void)
   current_event.u.Exception.ExceptionRecord.ExceptionCode
     = EXCEPTION_BREAKPOINT;
 
-  for_each_inferior (&all_threads, suspend_one_thread);
+  for_each_thread (suspend_one_thread);
 }
 
 #ifdef _WIN32_WCE
