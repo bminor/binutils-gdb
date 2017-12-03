@@ -1,5 +1,11 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-mips-low.c (update_watch_registers_callback): Return
+	void, remove pid_p parameter, don't check for pid.
+	(mips_insert_point, mips_remove_point): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* lynx.low (lynx_delete_thread_callback): Remove.
 	(lynx_mourn): Use for_each_thread.
 
