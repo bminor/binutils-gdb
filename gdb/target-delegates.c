@@ -3352,7 +3352,7 @@ debug_static_tracepoint_markers_by_strid (struct target_ops *self, const char *a
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_const_char_p (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_VEC_static_tracepoint_marker_p__p (result);
+  target_debug_print_VEC_static_tracepoint_marker_p_p (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }

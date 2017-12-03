@@ -1,3 +1,14 @@
+2017-12-03  Pedro Alves  <palves@redhat.com>
+
+	* make-target-delegates (munge_type): Also munge '<', '>', and
+	':'.  Avoid double underscores in identifiers, and trailing
+	underscores.
+	* target-debug.h
+	(target_debug_print_VEC_static_tracepoint_marker_p__p): Rename to
+	...
+	(target_debug_print_VEC_static_tracepoint_marker_p_p): ... this.
+	* target-delegates.c: Regenerate.
+
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common/poison.h (XDELETE): Fix typo.
