@@ -1,5 +1,13 @@
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (proceed_one_lwp): Return void, change parameter
+	type.
+	(unsuspend_and_proceed_one_lwp): Likewise.
+	(proceed_all_lwps): Use for_each_thread.
+	(unstop_all_lwps): Likewise.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (linux_resume_one_thread): Return void, take
 	parameter directly.
 	(linux_resume): Use for_each_thread.

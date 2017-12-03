@@ -279,7 +279,7 @@ static void enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t 
 static void complete_ongoing_step_over (void);
 static int linux_low_ptrace_options (int attached);
 static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
-static int proceed_one_lwp (thread_info *thread, void *except);
+static void proceed_one_lwp (thread_info *thread, lwp_info *except);
 
 /* When the event-loop is doing a step-over, this points at the thread
    being stepped.  */
@@ -5106,14 +5106,14 @@ linux_resume (struct thread_resume *resume_info, size_t n)
    breakpoint that needs stepping over, we start a step-over operation
    on that particular thread, and leave all others stopped.  */
 
-static int
-proceed_one_lwp (thread_info *thread, void *except)
+static void
+proceed_one_lwp (thread_info *thread, lwp_info *except)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
   int step;
 
   if (lwp == except)
-    return 0;
+    return;
 
   if (debug_threads)
     debug_printf ("proceed_one_lwp: lwp %ld\n", lwpid_of (thread));
@@ -5122,7 +5122,7 @@ proceed_one_lwp (thread_info *thread, void *except)
     {
       if (debug_threads)
 	debug_printf ("   LWP %ld already running\n", lwpid_of (thread));
-      return 0;
+      return;
     }
 
   if (thread->last_resume_kind == resume_stop
@@ -5131,7 +5131,7 @@ proceed_one_lwp (thread_info *thread, void *except)
       if (debug_threads)
 	debug_printf ("   client wants LWP to remain %ld stopped\n",
 		      lwpid_of (thread));
-      return 0;
+      return;
     }
 
   if (lwp->status_pending_p)
@@ -5139,7 +5139,7 @@ proceed_one_lwp (thread_info *thread, void *except)
       if (debug_threads)
 	debug_printf ("   LWP %ld has pending status, leaving stopped\n",
 		      lwpid_of (thread));
-      return 0;
+      return;
     }
 
   gdb_assert (lwp->suspended >= 0);
@@ -5148,7 +5148,7 @@ proceed_one_lwp (thread_info *thread, void *except)
     {
       if (debug_threads)
 	debug_printf ("   LWP %ld is suspended\n", lwpid_of (thread));
-      return 0;
+      return;
     }
 
   if (thread->last_resume_kind == resume_stop
@@ -5201,20 +5201,19 @@ proceed_one_lwp (thread_info *thread, void *except)
     step = 0;
 
   linux_resume_one_lwp (lwp, step, 0, NULL);
-  return 0;
 }
 
-static int
-unsuspend_and_proceed_one_lwp (thread_info *thread, void *except)
+static void
+unsuspend_and_proceed_one_lwp (thread_info *thread, lwp_info *except)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   if (lwp == except)
-    return 0;
+    return;
 
   lwp_suspended_decr (lwp);
 
-  return proceed_one_lwp (thread, except);
+  proceed_one_lwp (thread, except);
 }
 
 /* When we finish a step-over, set threads running again.  If there's
@@ -5250,7 +5249,10 @@ proceed_all_lwps (void)
   if (debug_threads)
     debug_printf ("Proceeding, no step-over needed\n");
 
-  find_inferior (&all_threads, proceed_one_lwp, NULL);
+  for_each_thread ([] (thread_info *thread)
+    {
+      proceed_one_lwp (thread, NULL);
+    });
 }
 
 /* Stopped LWPs that the client wanted to be running, that don't have
@@ -5271,9 +5273,15 @@ unstop_all_lwps (int unsuspend, struct lwp_info *except)
     }
 
   if (unsuspend)
-    find_inferior (&all_threads, unsuspend_and_proceed_one_lwp, except);
+    for_each_thread ([&] (thread_info *thread)
+      {
+	unsuspend_and_proceed_one_lwp (thread, except);
+      });
   else
-    find_inferior (&all_threads, proceed_one_lwp, except);
+    for_each_thread ([&] (thread_info *thread)
+      {
+	proceed_one_lwp (thread, except);
+      });
 
   if (debug_threads)
     {
