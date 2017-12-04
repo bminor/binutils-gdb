@@ -58,6 +58,11 @@
 
   ** The "complete" command now mimics TAB completion accurately.
 
+* New command line options (gcore)
+
+-a
+  Dump all memory mappings.
+
 * Breakpoints on C++ functions are now set on all scopes by default
 
   By default, breakpoints on functions/methods are now interpreted as

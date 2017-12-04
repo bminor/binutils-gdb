@@ -43048,7 +43048,7 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 
 @format
 @c man begin SYNOPSIS gcore
-gcore [-o @var{filename}] @var{pid}
+gcore [-a] [-o @var{filename}] @var{pid}
 @c man end
 @end format
 
@@ -43062,6 +43062,13 @@ running without any change.
 
 @c man begin OPTIONS gcore
 @table @env
+@item -a
+Dump all memory mappings.  The actual effect of this option depends on
+the Operating System.  On @sc{gnu}/Linux, it will disable
+@code{use-coredump-filter} (@pxref{set use-coredump-filter}) and
+enable @code{dump-excluded-mappings} (@pxref{set
+dump-excluded-mappings}).
+
 @item -o @var{filename}
 The optional argument
 @var{filename} specifies the file name where to put the core dump.
