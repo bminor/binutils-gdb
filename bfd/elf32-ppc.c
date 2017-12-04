@@ -5611,7 +5611,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (info->nocopyreloc)
     return TRUE;
 
-   /* If we didn't find any dynamic relocs in read-only sections, then
+   /* If we don't find any dynamic relocs in read-only sections, then
       we'll be keeping the dynamic relocs and avoiding the copy reloc.
       We can't do this if there are any small data relocations.  This
       doesn't work on VxWorks, where we can not have dynamic

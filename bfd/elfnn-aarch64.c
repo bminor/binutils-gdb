@@ -6811,7 +6811,7 @@ elfNN_aarch64_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (ELIMINATE_COPY_RELOCS)
     {
       struct elf_aarch64_link_hash_entry *eh;
-      /* If we didn't find any dynamic relocs in read-only sections, then
+      /* If we don't find any dynamic relocs in read-only sections, then
 	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
       eh = (struct elf_aarch64_link_hash_entry *) h;
       if (!need_copy_relocation_p (eh))

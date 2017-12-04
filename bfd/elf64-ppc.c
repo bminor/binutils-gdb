@@ -7233,7 +7233,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       /* If -z nocopyreloc was given, don't generate them either.  */
       || info->nocopyreloc
 
-      /* If we didn't find any dynamic relocs in read-only sections, then
+      /* If we don't find any dynamic relocs in read-only sections, then
 	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
       || (ELIMINATE_COPY_RELOCS && !alias_readonly_dynrelocs (h))
 

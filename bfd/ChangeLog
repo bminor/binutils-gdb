@@ -1,3 +1,9 @@
+2017-12-06  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Comment tidy.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_adjust_dynamic_symbol): Likewise.
+
 2017-12-04  Alan Modra  <amodra@gmail.com>
 
 	* elfxx-x86.c (readonly_dynrelocs): New function.
