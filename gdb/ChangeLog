@@ -1,3 +1,94 @@
+2017-12-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.h (mem_region_vector): Remove.
+	(struct target_ops) <to_memory_map>: Change return type to
+	std::vector<mem_region>.
+	* target-debug.h (target_debug_print_mem_region_vector): Rename
+	to ...
+	(target_debug_print_std_vector_mem_region): ... this.
+	* target-delegates.c: Re-generate.
+
+2017-12-03  Pedro Alves  <palves@redhat.com>
+
+	* make-target-delegates (munge_type): Also munge '<', '>', and
+	':'.  Avoid double underscores in identifiers, and trailing
+	underscores.
+	* target-debug.h
+	(target_debug_print_VEC_static_tracepoint_marker_p__p): Rename to
+	...
+	(target_debug_print_VEC_static_tracepoint_marker_p_p): ... this.
+	* target-delegates.c: Regenerate.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/poison.h (XDELETE): Fix typo.
+
+2017-12-01  Andrew Cagney  <cagney@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* NEWS (Changes since GDB 8.0: Mention new '--readnever'
+	feature.
+	* coffread.c (coff_symfile_read): Do not map over sections with
+	'coff_locate_sections' if readnever is on.
+	* dwarf2read.c (dwarf2_has_info): Return 0 if
+	readnever is on.
+	* elfread.c (elf_symfile_read): Do not map over sections with
+	'elf_locate_sections' if readnever is on.
+	* main.c (validate_readnow_readnever): New function.
+	(captured_main_1): Add support for --readnever.
+	(print_gdb_help): Document --readnever.
+	* objfile-flags.h (enum objfile_flag) <OBJF_READNEVER>: New
+	flag.
+	* symfile.c (readnever_symbol_files): New global.
+	(symbol_file_add_with_addrs): Set 'OBJF_READNEVER' when
+	'READNEVER_SYMBOL_FILES' is set.
+	(validate_readnow_readnever): New function.
+	(symbol_file_command): Handle '-readnever' option.
+	Call 'validate_readnow_readnever'.
+	(add_symbol_file_command): Handle '-readnever' option.
+	Call 'validate_readnow_readnever'.
+	(_initialize_symfile): Document new '-readnever' option for
+	both 'symbol-file' and 'add-symbol-file' commands.
+	* top.h (readnever_symbol_files): New extern global.
+	* xcoffread.c (xcoff_initial_scan): Do not read debug
+	information if readnever is on.
+
+2017-12-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* symfile.c (symbol_file_command): Call
+	'symbol_file_add_main_1' only after processing all command
+	line options.
+	(add_symbol_file_command): Modify logic to make arguments
+	position-independent.
+
+2017-12-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (symbol_list_obstack): Delete.
+	(resolve_subexp): Make sure "candidates" gets xfree'ed.
+	(ada_lookup_symbol_list_worker): Remove the limitation that
+	the result is only good until the next call, now making it
+	the responsibility of the caller to free the result when no
+	longer needed.  Adjust the function's intro comment accordingly.
+	(ada_lookup_symbol_list): Adjust the function's intro comment.
+	(ada_iterate_over_symbols): Make sure "results" gets xfree'ed.
+	(ada_lookup_encoded_symbol, get_var_value): Likewise.
+	(_initialize_ada_language): Remove symbol_list_obstack
+	initialization.
+	* ada-exp.y (block_lookup): Make sure "syms" gets xfree'ed.
+	(write_var_or_type, write_name_assoc): Likewise.
+
+2017-12-01  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (all_deps_files): New variable.
+	Include .Po files using all_deps_files.
+
+2017-12-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS: Update list of maintainers, moving those who
+	stepped down or became inactive to the "Past Maintainers"
+	section.
+
 2017-11-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* configure.ac Don't check for sys/fault.h, sys/syscall.h,

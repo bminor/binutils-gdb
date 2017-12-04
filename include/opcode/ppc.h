@@ -30,6 +30,14 @@ extern "C" {
 
 typedef uint64_t ppc_cpu_t;
 
+#if BFD_HOST_64BIT_LONG
+# define PPC_INT_FMT "l"
+#elif defined (__MSVCRT__)
+# define PPC_INT_FMT "I64"
+#else
+# define PPC_INT_FMT "ll"
+#endif
+
 /* The opcode table is an array of struct powerpc_opcode.  */
 
 struct powerpc_opcode
@@ -39,13 +47,13 @@ struct powerpc_opcode
 
   /* The opcode itself.  Those bits which will be filled in with
      operands are zeroes.  */
-  unsigned long opcode;
+  uint64_t opcode;
 
   /* The opcode mask.  This is used by the disassembler.  This is a
      mask containing ones indicating those bits which must match the
      opcode field, and zeroes indicating those bits which need not
      match (and are presumably filled in by operands).  */
-  unsigned long mask;
+  uint64_t mask;
 
   /* One bit flags for the opcode.  These are used to indicate which
      specific processors support the instructions.  The defined values
@@ -249,7 +257,7 @@ extern const int spe2_num_opcodes;
 struct powerpc_operand
 {
   /* A bitmask of bits in the operand.  */
-  unsigned int bitm;
+  uint64_t bitm;
 
   /* The shift operation to be applied to the operand.  No shift
      is made if this is zero.  For positive values, the operand
@@ -277,8 +285,8 @@ struct powerpc_operand
      string (the operand will be inserted in any case).  If the
      operand value is legal, *ERRMSG will be unchanged (most operands
      can accept any value).  */
-  unsigned long (*insert)
-    (unsigned long instruction, long op, ppc_cpu_t dialect, const char **errmsg);
+  uint64_t (*insert)
+    (uint64_t instruction, int64_t op, ppc_cpu_t dialect, const char **errmsg);
 
   /* Extraction function.  This is used by the disassembler.  To
      extract this operand type from an instruction, check this field.
@@ -299,7 +307,7 @@ struct powerpc_operand
      non-zero if this operand type can not actually be extracted from
      this operand (i.e., the instruction does not match).  If the
      operand is valid, *INVALID will not be changed.  */
-  long (*extract) (unsigned long instruction, ppc_cpu_t dialect, int *invalid);
+  int64_t (*extract) (uint64_t instruction, ppc_cpu_t dialect, int *invalid);
 
   /* One bit syntax flags.  */
   unsigned long flags;
@@ -463,7 +471,7 @@ extern const int powerpc_num_macros;
 
 extern ppc_cpu_t ppc_parse_cpu (ppc_cpu_t, ppc_cpu_t *, const char *);
 
-static inline long
+static inline int64_t
 ppc_optional_operand_value (const struct powerpc_operand *operand)
 {
   if ((operand->flags & PPC_OPERAND_OPTIONAL_VALUE) != 0)

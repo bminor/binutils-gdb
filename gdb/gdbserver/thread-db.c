@@ -165,13 +165,12 @@ find_one_thread (ptid_t ptid)
   td_thrhandle_t th;
   td_thrinfo_t ti;
   td_err_e err;
-  struct thread_info *inferior;
   struct lwp_info *lwp;
   struct thread_db *thread_db = current_process ()->priv->thread_db;
   int lwpid = ptid_get_lwp (ptid);
 
-  inferior = (struct thread_info *) find_inferior_id (&all_threads, ptid);
-  lwp = get_thread_lwp (inferior);
+  thread_info *thread = find_thread_ptid (ptid);
+  lwp = get_thread_lwp (thread);
   if (lwp->thread_known)
     return 1;
 
@@ -452,8 +451,7 @@ thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len)
 {
   struct thread_db *thread_db;
   struct lwp_info *lwp;
-  struct thread_info *thread
-    = (struct thread_info *) find_inferior_id (&all_threads, ptid);
+  thread_info *thread = find_thread_ptid (ptid);
 
   if (thread == NULL)
     return false;

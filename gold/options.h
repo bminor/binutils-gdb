@@ -894,7 +894,7 @@ class General_options
 
   DEFINE_string(fuse_ld, options::ONE_DASH, '\0', "",
 		N_("Ignored for GCC linker option compatibility"),
-		"");
+		NULL);
 
   // g
 

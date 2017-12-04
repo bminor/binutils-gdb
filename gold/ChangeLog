@@ -1,3 +1,91 @@
+2017-12-02  Vladimir Kondratyev  <vladimir@kondratyev.su>
+	    Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/22540
+	* output.cc (gold_fallocate): Trivial return for len == 0.
+	Add fallback options when posix_fallocate and fallocate return
+	not-supported errors.
+
+2017-12-01  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/21090
+	* incremental.cc (Sized_relobj_incr::do_relocate): Fix comment.
+	* options.cc (General_options::finalize): Disallow -pie with
+	incremental linking.
+	* x86_64.cc (Target_x86_64::Scan::local): Don't do mov-to-lea
+	or callq-to-direct optimizations for incremental links.
+	(Target_x86_64::Scan::global): Likewise.
+	(Target_x86_64::Relocate::relocate): Likewise.
+	* testsuite/Makefile.am (incremental_test): Force -no-pie.
+	(incremental_test_2): Likewise.
+	(incremental_test_3): Likewise.
+	(incremental_test_4): Likewise.
+	(incremental_test_5): Likewise.
+	(incremental_test_6): Likewise.
+	(incremental_copy_test): Likewise.
+	(incremental_common_test_1): Likewise.
+	(incremental_comdat_test_1):  Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
+2017-12-01  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/21841
+	* testsuite/debug_msg.sh: Adjust expected line numbers.
+	* testsuite/odr_violation2.cc (DummyFunction): New function.
+
+2017-12-01  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/22309
+	* testsuite/Makefile.am (two_file_test_1_v1_ndebug.o): Compile with
+	no EH information.
+	(two_file_test_1_ndebug.o): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/two_file_test_1.cc: Touch to force recompilation with new
+	flags.
+	* testsuite/two_file_test_1_v1.cc: Likewise.
+
+2017-12-01  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/22042
+	* options.h (-fuse-ld): Use NULL instead of empty string.
+
+2017-12-01  Benjamin Peterson  <bp@benjamin.pe>
+
+	PR gold/22406
+	* gold.cc (queue_initial_tasks) Check for number of real input files.
+	* options.cc (Command_line::process) Check for unterminated --start-lib
+	options.
+	* testsuite/Makefile.am: Add new test script.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/check_empty_command_lines.sh: New test script.
+
+2017-11-17  Stephen Crane  <sjc@immunant.com>
+
+	PR gold/22448
+	* symtab.cc (Symbol_table::add_from_object): Only rescan for
+	undefined symbols in regular, not dynamic, objects.
+
+2017-11-30  Peter Smith  <peter.smith@linaro.org>
+
+	PR gold/20765
+	* aarch64.cc (Aarch64_relobj::update_erratum_address): New method.
+	(AArch64_relobj::scan_errata): Update addresses in stub table after
+	relaxation pass.
+
+2017-11-30  Peter Smith  <peter.smith@linaro.org>
+	    Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/20765
+	* aarch64.cc (Erratum_stub::invalidate_erratum_stub): Use erratum_insn_
+	instead of relobj_ to invalidate the stub.
+	(Erratum_stub::is_invalidated_erratum_stub): Likewise.
+
+2017-11-30  Peter Smith  <peter.smith@linaro.org>
+
+	PR gold/22233
+	* aarch64.cc (AArch64_relobj::fix_errata_and_relocate_erratum_stubs):
+	Fix calculation of stub address.
+
 2017-11-29  Stefan Stroe  <stroestefan@gmail.com>
 
 	* po/Make-in (datadir): Define as @datadir@.

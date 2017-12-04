@@ -140,19 +140,6 @@ int have_attached_inferiors_p (void);
 
 void clear_inferiors (void);
 
-thread_info *find_inferior (std::list<thread_info *> *thread_list,
-			    int (*func) (thread_info *, void *), void *arg);
-thread_info *find_inferior_id (std::list<thread_info *> *thread_list,
-			       ptid_t id);
-thread_info *find_inferior_in_random (std::list<thread_info *> *thread_list,
-				      int (*func) (thread_info *, void *),
-				      void *arg);
-void for_each_inferior (std::list<thread_info *> *thread_list,
-			void (*action) (thread_info *));
-void for_each_inferior_with_data (std::list<thread_info *> *thread_list,
-				  void (*action) (thread_info *, void *),
-				  void *data);
-
 void *thread_target_data (struct thread_info *);
 struct regcache *thread_regcache_data (struct thread_info *);
 void set_thread_regcache_data (struct thread_info *, struct regcache *);

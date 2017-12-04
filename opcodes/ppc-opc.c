@@ -39,9 +39,9 @@
 
 /* The ARX, ARY, RX and RY operands are alternate encodings of GPRs.  */
 
-static unsigned long
-insert_arx (unsigned long insn,
-	    long value,
+static uint64_t
+insert_arx (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
@@ -54,17 +54,17 @@ insert_arx (unsigned long insn,
     }
 }
 
-static long
-extract_arx (unsigned long insn,
+static int64_t
+extract_arx (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
   return (insn & 0xf) + 8;
 }
 
-static unsigned long
-insert_ary (unsigned long insn,
-	    long value,
+static uint64_t
+insert_ary (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
@@ -77,17 +77,17 @@ insert_ary (unsigned long insn,
     }
 }
 
-static long
-extract_ary (unsigned long insn,
+static int64_t
+extract_ary (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 4) & 0xf) + 8;
 }
 
-static unsigned long
-insert_rx (unsigned long insn,
-	   long value,
+static uint64_t
+insert_rx (uint64_t insn,
+	   int64_t value,
 	   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	   const char **errmsg)
 {
@@ -102,21 +102,21 @@ insert_rx (unsigned long insn,
     }
 }
 
-static long
-extract_rx (unsigned long insn,
+static int64_t
+extract_rx (uint64_t insn,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    int *invalid ATTRIBUTE_UNUSED)
 {
-  int value = insn & 0xf;
+  int64_t value = insn & 0xf;
   if (value >= 0 && value < 8)
     return value;
   else
     return value + 16;
 }
 
-static unsigned long
-insert_ry (unsigned long insn,
-	   long value,
+static uint64_t
+insert_ry (uint64_t insn,
+	   int64_t value,
 	   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	   const char **errmsg)
 {
@@ -131,12 +131,12 @@ insert_ry (unsigned long insn,
     }
 }
 
-static long
-extract_ry (unsigned long insn,
+static int64_t
+extract_ry (uint64_t insn,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    int *invalid ATTRIBUTE_UNUSED)
 {
-  int value = (insn >> 4) & 0xf;
+  int64_t value = (insn >> 4) & 0xf;
   if (value >= 0 && value < 8)
     return value;
   else
@@ -149,17 +149,17 @@ extract_ry (unsigned long insn,
    and the extraction function just checks that the fields are the
    same.  */
 
-static unsigned long
-insert_bat (unsigned long insn,
-	    long value ATTRIBUTE_UNUSED,
+static uint64_t
+insert_bat (uint64_t insn,
+	    int64_t value ATTRIBUTE_UNUSED,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((insn >> 21) & 0x1f) << 16);
 }
 
-static long
-extract_bat (unsigned long insn,
+static int64_t
+extract_bat (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
@@ -174,17 +174,17 @@ extract_bat (unsigned long insn,
    and the extraction function just checks that the fields are the
    same.  */
 
-static unsigned long
-insert_bba (unsigned long insn,
-	    long value ATTRIBUTE_UNUSED,
+static uint64_t
+insert_bba (uint64_t insn,
+	    int64_t value ATTRIBUTE_UNUSED,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((insn >> 16) & 0x1f) << 11);
 }
 
-static long
-extract_bba (unsigned long insn,
+static int64_t
+extract_bba (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
@@ -212,9 +212,9 @@ extract_bba (unsigned long insn,
 
 #define ISA_V2 (PPC_OPCODE_POWER4 | PPC_OPCODE_E500MC | PPC_OPCODE_TITAN)
 
-static unsigned long
-insert_bdm (unsigned long insn,
-	    long value,
+static uint64_t
+insert_bdm (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
@@ -233,8 +233,8 @@ insert_bdm (unsigned long insn,
   return insn | (value & 0xfffc);
 }
 
-static long
-extract_bdm (unsigned long insn,
+static int64_t
+extract_bdm (uint64_t insn,
 	     ppc_cpu_t dialect,
 	     int *invalid)
 {
@@ -257,9 +257,9 @@ extract_bdm (unsigned long insn,
    This is like BDM, above, except that the branch is expected to be
    taken.  */
 
-static unsigned long
-insert_bdp (unsigned long insn,
-	    long value,
+static uint64_t
+insert_bdp (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
@@ -278,8 +278,8 @@ insert_bdp (unsigned long insn,
   return insn | (value & 0xfffc);
 }
 
-static long
-extract_bdp (unsigned long insn,
+static int64_t
+extract_bdp (uint64_t insn,
 	     ppc_cpu_t dialect,
 	     int *invalid)
 {
@@ -299,7 +299,7 @@ extract_bdp (unsigned long insn,
 }
 
 static inline int
-valid_bo_pre_v2 (long value)
+valid_bo_pre_v2 (int64_t value)
 {
   /* Certain encodings have bits that are required to be zero.
      These are (z must be zero, y may be anything):
@@ -324,7 +324,7 @@ valid_bo_pre_v2 (long value)
 }
 
 static inline int
-valid_bo_post_v2 (long value)
+valid_bo_post_v2 (int64_t value)
 {
   /* Certain encodings have bits that are required to be zero.
      These are (z must be zero, a & t may be anything):
@@ -349,7 +349,7 @@ valid_bo_post_v2 (long value)
 /* Check for legal values of a BO field.  */
 
 static int
-valid_bo (long value, ppc_cpu_t dialect, int extract)
+valid_bo (int64_t value, ppc_cpu_t dialect, int extract)
 {
   int valid_y = valid_bo_pre_v2 (value);
   int valid_at = valid_bo_post_v2 (value);
@@ -367,9 +367,9 @@ valid_bo (long value, ppc_cpu_t dialect, int extract)
 /* The BO field in a B form instruction.  Warn about attempts to set
    the field to an illegal value.  */
 
-static unsigned long
-insert_bo (unsigned long insn,
-	   long value,
+static uint64_t
+insert_bo (uint64_t insn,
+	   int64_t value,
 	   ppc_cpu_t dialect,
 	   const char **errmsg)
 {
@@ -380,14 +380,12 @@ insert_bo (unsigned long insn,
   return insn | ((value & 0x1f) << 21);
 }
 
-static long
-extract_bo (unsigned long insn,
+static int64_t
+extract_bo (uint64_t insn,
 	    ppc_cpu_t dialect,
 	    int *invalid)
 {
-  long value;
-
-  value = (insn >> 21) & 0x1f;
+  int64_t value = (insn >> 21) & 0x1f;
   if (!valid_bo (value, dialect, 1))
     *invalid = 1;
   return value;
@@ -397,9 +395,9 @@ extract_bo (unsigned long insn,
    used.  This is like the BO field, but it must be even.  When
    extracting it, we force it to be even.  */
 
-static unsigned long
-insert_boe (unsigned long insn,
-	    long value,
+static uint64_t
+insert_boe (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect,
 	    const char **errmsg)
 {
@@ -413,14 +411,12 @@ insert_boe (unsigned long insn,
   return insn | ((value & 0x1f) << 21);
 }
 
-static long
-extract_boe (unsigned long insn,
+static int64_t
+extract_boe (uint64_t insn,
 	     ppc_cpu_t dialect,
 	     int *invalid)
 {
-  long value;
-
-  value = (insn >> 21) & 0x1f;
+  int64_t value = (insn >> 21) & 0x1f;
   if (!valid_bo (value, dialect, 1))
     *invalid = 1;
   return value & 0x1e;
@@ -429,9 +425,9 @@ extract_boe (unsigned long insn,
 /* The DCMX field in a X form instruction when the field is split
    into separate DC, DM and DX fields.  */
 
-static unsigned long
-insert_dcmxs (unsigned long insn,
-	      long value,
+static uint64_t
+insert_dcmxs (uint64_t insn,
+	      int64_t value,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      const char **errmsg ATTRIBUTE_UNUSED)
 {
@@ -441,8 +437,8 @@ insert_dcmxs (unsigned long insn,
 	  | (value & 0x40));
 }
 
-static long
-extract_dcmxs (unsigned long insn,
+static int64_t
+extract_dcmxs (uint64_t insn,
 	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	       int *invalid ATTRIBUTE_UNUSED)
 {
@@ -452,35 +448,35 @@ extract_dcmxs (unsigned long insn,
 /* The D field in a DX form instruction when the field is split
    into separate D0, D1 and D2 fields.  */
 
-static unsigned long
-insert_dxd (unsigned long insn,
-	    long value,
+static uint64_t
+insert_dxd (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (value & 0xffc1) | ((value & 0x3e) << 15);
 }
 
-static long
-extract_dxd (unsigned long insn,
+static int64_t
+extract_dxd (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
-  unsigned long dxd = (insn & 0xffc1) | ((insn >> 15) & 0x3e);
+  uint64_t dxd = (insn & 0xffc1) | ((insn >> 15) & 0x3e);
   return (dxd ^ 0x8000) - 0x8000;
 }
 
-static unsigned long
-insert_dxdn (unsigned long insn,
-	     long value,
+static uint64_t
+insert_dxdn (uint64_t insn,
+	     int64_t value,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insert_dxd (insn, -value, dialect, errmsg);
 }
 
-static long
-extract_dxdn (unsigned long insn,
+static int64_t
+extract_dxdn (uint64_t insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      int *invalid ATTRIBUTE_UNUSED)
 {
@@ -489,9 +485,9 @@ extract_dxdn (unsigned long insn,
 
 /* FXM mask in mfcr and mtcrf instructions.  */
 
-static unsigned long
-insert_fxm (unsigned long insn,
-	    long value,
+static uint64_t
+insert_fxm (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect,
 	    const char **errmsg)
 {
@@ -531,12 +527,12 @@ insert_fxm (unsigned long insn,
   return insn | ((value & 0xff) << 12);
 }
 
-static long
-extract_fxm (unsigned long insn,
+static int64_t
+extract_fxm (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
-  long mask = (insn >> 12) & 0xff;
+  int64_t mask = (insn >> 12) & 0xff;
 
   /* Is this a Power4 insn?  */
   if ((insn & (1 << 20)) != 0)
@@ -558,9 +554,9 @@ extract_fxm (unsigned long insn,
   return mask;
 }
 
-static unsigned long
-insert_li20 (unsigned long insn,
-	     long value,
+static uint64_t
+insert_li20 (uint64_t insn,
+	     int64_t value,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     const char **errmsg ATTRIBUTE_UNUSED)
 {
@@ -570,18 +566,14 @@ insert_li20 (unsigned long insn,
 	  | (value & 0x7ff));
 }
 
-static long
-extract_li20 (unsigned long insn,
+static int64_t
+extract_li20 (uint64_t insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      int *invalid ATTRIBUTE_UNUSED)
 {
-  long ext = ((insn & 0x4000) == 0x4000) ? 0xfff00000 : 0x00000000;
-
-  return (ext
-	  | (((insn >> 11) & 0xf) << 16)
-	  | (((insn >> 17) & 0xf) << 12)
-	  | (((insn >> 16) & 0x1) << 11)
-	  | (insn & 0x7ff));
+  return ((((insn << 5) & 0xf0000)
+	   | ((insn >> 5) & 0xf800)
+	   | (insn & 0x7ff)) ^ 0x80000) - 0x80000;
 }
 
 /* The 2-bit L field in a SYNC or WC field in a WAIT instruction.
@@ -589,16 +581,16 @@ extract_li20 (unsigned long insn,
      * Value 3 is reserved on newer server cpus.
      * Values 2 and 3 are reserved on all other cpus.  */
 
-static unsigned long
-insert_ls (unsigned long insn,
-	   long value,
+static uint64_t
+insert_ls (uint64_t insn,
+	   int64_t value,
 	   ppc_cpu_t dialect,
 	   const char **errmsg)
 {
   /* For SYNC, some L values are illegal.  */
   if (((insn >> 1) & 0x3ff) == 598)
     {
-      long max_lvalue = (dialect & PPC_OPCODE_POWER4) ? 2 : 1;
+      int64_t max_lvalue = (dialect & PPC_OPCODE_POWER4) ? 2 : 1;
       if (value > max_lvalue)
 	{
 	  *errmsg = _("illegal L operand value");
@@ -609,16 +601,16 @@ insert_ls (unsigned long insn,
   return insn | ((value & 0x3) << 21);
 }
 
-static long
-extract_ls (unsigned long insn,
+static int64_t
+extract_ls (uint64_t insn,
 	    ppc_cpu_t dialect,
 	    int *invalid)
 {
-  unsigned long lvalue = (insn >> 21) & 3;
+  uint64_t lvalue = (insn >> 21) & 3;
 
   if (((insn >> 1) & 0x3ff) == 598)
     {
-      unsigned long max_lvalue = (dialect & PPC_OPCODE_POWER4) ? 2 : 1;
+      uint64_t max_lvalue = (dialect & PPC_OPCODE_POWER4) ? 2 : 1;
       if (lvalue > max_lvalue)
 	*invalid = 1;
     }
@@ -629,13 +621,13 @@ extract_ls (unsigned long insn,
    If ESYNC is non-zero, then the L field must be either 0 or 1 and
    the complement of ESYNC-bit2.  */
 
-static unsigned long
-insert_esync (unsigned long insn,
-	      long value,
+static uint64_t
+insert_esync (uint64_t insn,
+	      int64_t value,
 	      ppc_cpu_t dialect,
 	      const char **errmsg)
 {
-  unsigned long ls = (insn >> 21) & 0x03;
+  uint64_t ls = (insn >> 21) & 0x03;
 
   if (value == 0)
     {
@@ -652,13 +644,13 @@ insert_esync (unsigned long insn,
   return insn | ((value & 0xf) << 16);
 }
 
-static long
-extract_esync (unsigned long insn,
+static int64_t
+extract_esync (uint64_t insn,
 	       ppc_cpu_t dialect,
 	       int *invalid)
 {
-  unsigned long ls = (insn >> 21) & 0x3;
-  unsigned long lvalue = (insn >> 16) & 0xf;
+  uint64_t ls = (insn >> 21) & 0x3;
+  uint64_t lvalue = (insn >> 16) & 0xf;
 
   if (lvalue == 0)
     {
@@ -678,14 +670,14 @@ extract_esync (unsigned long insn,
    marks it as invalid, since we never want to recognize an
    instruction which uses a field of this type.  */
 
-static unsigned long
-insert_mbe (unsigned long insn,
-	    long value,
+static uint64_t
+insert_mbe (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
-  unsigned long uval, mask;
-  int mb, me, mx, count, last;
+  uint64_t uval, mask;
+  long mb, me, mx, count, last;
 
   uval = value;
 
@@ -707,7 +699,7 @@ insert_mbe (unsigned long insn,
   /* me: location of last 1->0 transition */
   /* count: # transitions */
 
-  for (mx = 0, mask = 1L << 31; mx < 32; ++mx, mask >>= 1)
+  for (mx = 0, mask = (uint64_t) 1 << 31; mx < 32; ++mx, mask >>= 1)
     {
       if ((uval & mask) && !last)
 	{
@@ -731,14 +723,14 @@ insert_mbe (unsigned long insn,
   return insn | (mb << 6) | ((me - 1) << 1);
 }
 
-static long
-extract_mbe (unsigned long insn,
+static int64_t
+extract_mbe (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
-  long ret;
-  int mb, me;
-  int i;
+  int64_t ret;
+  long mb, me;
+  long i;
 
   *invalid = 1;
 
@@ -748,7 +740,7 @@ extract_mbe (unsigned long insn,
     {
       ret = 0;
       for (i = mb; i <= me; i++)
-	ret |= 1L << (31 - i);
+	ret |= (uint64_t) 1 << (31 - i);
     }
   else if (mb == me + 1)
     ret = ~0;
@@ -756,7 +748,7 @@ extract_mbe (unsigned long insn,
     {
       ret = ~0;
       for (i = me + 1; i < mb; i++)
-	ret &= ~(1L << (31 - i));
+	ret &= ~((uint64_t) 1 << (31 - i));
     }
   return ret;
 }
@@ -764,17 +756,17 @@ extract_mbe (unsigned long insn,
 /* The MB or ME field in an MD or MDS form instruction.  The high bit
    is wrapped to the low end.  */
 
-static unsigned long
-insert_mb6 (unsigned long insn,
-	    long value,
+static uint64_t
+insert_mb6 (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 6) | (value & 0x20);
 }
 
-static long
-extract_mb6 (unsigned long insn,
+static int64_t
+extract_mb6 (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
@@ -784,12 +776,12 @@ extract_mb6 (unsigned long insn,
 /* The NB field in an X form instruction.  The value 32 is stored as
    0.  */
 
-static long
-extract_nb (unsigned long insn,
+static int64_t
+extract_nb (uint64_t insn,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    int *invalid ATTRIBUTE_UNUSED)
 {
-  long ret;
+  int64_t ret;
 
   ret = (insn >> 11) & 0x1f;
   if (ret == 0)
@@ -800,14 +792,14 @@ extract_nb (unsigned long insn,
 /* The NB field in an lswi instruction, which has special value
    restrictions.  The value 32 is stored as 0.  */
 
-static unsigned long
-insert_nbi (unsigned long insn,
-	    long value,
+static uint64_t
+insert_nbi (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
-  long rtvalue = (insn >> 21) & 0x1f;
-  long ravalue = (insn >> 16) & 0x1f;
+  int64_t rtvalue = (insn >> 21) & 0x1f;
+  int64_t ravalue = (insn >> 16) & 0x1f;
 
   if (value == 0)
     value = 32;
@@ -822,17 +814,17 @@ insert_nbi (unsigned long insn,
    invalid, since we never want to recognize an instruction which uses
    a field of this type.  */
 
-static unsigned long
-insert_nsi (unsigned long insn,
-	    long value,
+static uint64_t
+insert_nsi (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (-value & 0xffff);
 }
 
-static long
-extract_nsi (unsigned long insn,
+static int64_t
+extract_nsi (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
@@ -844,25 +836,25 @@ extract_nsi (unsigned long insn,
    load, which means that the RA field may not be zero and may not
    equal the RT field.  */
 
-static unsigned long
-insert_ral (unsigned long insn,
-	    long value,
+static uint64_t
+insert_ral (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
   if (value == 0
-      || (unsigned long) value == ((insn >> 21) & 0x1f))
+      || (uint64_t) value == ((insn >> 21) & 0x1f))
     *errmsg = "invalid register operand when updating";
   return insn | ((value & 0x1f) << 16);
 }
 
-static long
-extract_ral (unsigned long insn,
+static int64_t
+extract_ral (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
-  long rtvalue = (insn >> 21) & 0x1f;
-  long ravalue = (insn >> 16) & 0x1f;
+  int64_t rtvalue = (insn >> 21) & 0x1f;
+  int64_t ravalue = (insn >> 16) & 0x1f;
 
   if (rtvalue == ravalue || ravalue == 0)
     *invalid = 1;
@@ -872,24 +864,24 @@ extract_ral (unsigned long insn,
 /* The RA field in an lmw instruction, which has special value
    restrictions.  */
 
-static unsigned long
-insert_ram (unsigned long insn,
-	    long value,
+static uint64_t
+insert_ram (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
-  if ((unsigned long) value >= ((insn >> 21) & 0x1f))
+  if ((uint64_t) value >= ((insn >> 21) & 0x1f))
     *errmsg = _("index register in load range");
   return insn | ((value & 0x1f) << 16);
 }
 
-static long
-extract_ram (unsigned long insn,
+static int64_t
+extract_ram (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
-  unsigned long rtvalue = (insn >> 21) & 0x1f;
-  unsigned long ravalue = (insn >> 16) & 0x1f;
+  uint64_t rtvalue = (insn >> 21) & 0x1f;
+  uint64_t ravalue = (insn >> 16) & 0x1f;
 
   if (ravalue >= rtvalue)
     *invalid = 1;
@@ -899,26 +891,26 @@ extract_ram (unsigned long insn,
 /* The RA field in the DQ form lq or an lswx instruction, which have special
    value restrictions.  */
 
-static unsigned long
-insert_raq (unsigned long insn,
-	    long value,
+static uint64_t
+insert_raq (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
-  long rtvalue = (insn >> 21) & 0x1f;
+  int64_t rtvalue = (insn >> 21) & 0x1f;
 
   if (value == rtvalue)
     *errmsg = _("source and target register operands must be different");
   return insn | ((value & 0x1f) << 16);
 }
 
-static long
-extract_raq (unsigned long insn,
+static int64_t
+extract_raq (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
-  unsigned long rtvalue = (insn >> 21) & 0x1f;
-  unsigned long ravalue = (insn >> 16) & 0x1f;
+  uint64_t rtvalue = (insn >> 21) & 0x1f;
+  uint64_t ravalue = (insn >> 16) & 0x1f;
 
   if (ravalue == rtvalue)
     *invalid = 1;
@@ -929,9 +921,9 @@ extract_raq (unsigned long insn,
    store or an updating floating point load, which means that the RA
    field may not be zero.  */
 
-static unsigned long
-insert_ras (unsigned long insn,
-	    long value,
+static uint64_t
+insert_ras (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
@@ -940,12 +932,12 @@ insert_ras (unsigned long insn,
   return insn | ((value & 0x1f) << 16);
 }
 
-static long
-extract_ras (unsigned long insn,
+static int64_t
+extract_ras (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
-  unsigned long ravalue = (insn >> 16) & 0x1f;
+  uint64_t ravalue = (insn >> 16) & 0x1f;
 
   if (ravalue == 0)
     *invalid = 1;
@@ -958,17 +950,17 @@ extract_ras (unsigned long insn,
    function just copies the BT field into the BA field, and the
    extraction function just checks that the fields are the same.  */
 
-static unsigned long
-insert_rbs (unsigned long insn,
-	    long value ATTRIBUTE_UNUSED,
+static uint64_t
+insert_rbs (uint64_t insn,
+	    int64_t value ATTRIBUTE_UNUSED,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((insn >> 21) & 0x1f) << 11);
 }
 
-static long
-extract_rbs (unsigned long insn,
+static int64_t
+extract_rbs (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
@@ -980,26 +972,26 @@ extract_rbs (unsigned long insn,
 /* The RB field in an lswx instruction, which has special value
    restrictions.  */
 
-static unsigned long
-insert_rbx (unsigned long insn,
-	    long value,
+static uint64_t
+insert_rbx (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
-  long rtvalue = (insn >> 21) & 0x1f;
+  int64_t rtvalue = (insn >> 21) & 0x1f;
 
   if (value == rtvalue)
     *errmsg = _("source and target register operands must be different");
   return insn | ((value & 0x1f) << 11);
 }
 
-static long
-extract_rbx (unsigned long insn,
+static int64_t
+extract_rbx (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
-  unsigned long rtvalue = (insn >> 21) & 0x1f;
-  unsigned long rbvalue = (insn >> 11) & 0x1f;
+  uint64_t rtvalue = (insn >> 21) & 0x1f;
+  uint64_t rbvalue = (insn >> 11) & 0x1f;
 
   if (rbvalue == rtvalue)
     *invalid = 1;
@@ -1007,14 +999,14 @@ extract_rbx (unsigned long insn,
 }
 
 /* The SCI8 field is made up of SCL and {U,N}I8 fields.  */
-static unsigned long
-insert_sci8 (unsigned long insn,
-	     long value,
+static uint64_t
+insert_sci8 (uint64_t insn,
+	     int64_t value,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     const char **errmsg)
 {
-  unsigned int fill_scale = 0;
-  unsigned long ui8 = value;
+  uint64_t fill_scale = 0;
+  uint64_t ui8 = value;
 
   if ((ui8 & 0xffffff00) == 0)
     ;
@@ -1059,82 +1051,82 @@ insert_sci8 (unsigned long insn,
   return insn | fill_scale | (ui8 & 0xff);
 }
 
-static long
-extract_sci8 (unsigned long insn,
+static int64_t
+extract_sci8 (uint64_t insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      int *invalid ATTRIBUTE_UNUSED)
 {
-  int fill = insn & 0x400;
-  int scale_factor = (insn & 0x300) >> 5;
-  long value = (insn & 0xff) << scale_factor;
+  int64_t fill = insn & 0x400;
+  int64_t scale_factor = (insn & 0x300) >> 5;
+  int64_t value = (insn & 0xff) << scale_factor;
 
   if (fill != 0)
-    value |= ~((long) 0xff << scale_factor);
+    value |= ~((int64_t) 0xff << scale_factor);
   return value;
 }
 
-static unsigned long
-insert_sci8n (unsigned long insn,
-	      long value,
+static uint64_t
+insert_sci8n (uint64_t insn,
+	      int64_t value,
 	      ppc_cpu_t dialect,
 	      const char **errmsg)
 {
   return insert_sci8 (insn, -value, dialect, errmsg);
 }
 
-static long
-extract_sci8n (unsigned long insn,
+static int64_t
+extract_sci8n (uint64_t insn,
 	       ppc_cpu_t dialect,
 	       int *invalid)
 {
   return -extract_sci8 (insn, dialect, invalid);
 }
 
-static unsigned long
-insert_sd4h (unsigned long insn,
-	     long value,
+static uint64_t
+insert_sd4h (uint64_t insn,
+	     int64_t value,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1e) << 7);
 }
 
-static long
-extract_sd4h (unsigned long insn,
+static int64_t
+extract_sd4h (uint64_t insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 8) & 0xf) << 1;
 }
 
-static unsigned long
-insert_sd4w (unsigned long insn,
-	     long value,
+static uint64_t
+insert_sd4w (uint64_t insn,
+	     int64_t value,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x3c) << 6);
 }
 
-static long
-extract_sd4w (unsigned long insn,
+static int64_t
+extract_sd4w (uint64_t insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 8) & 0xf) << 2;
 }
 
-static unsigned long
-insert_oimm (unsigned long insn,
-	     long value,
+static uint64_t
+insert_oimm (uint64_t insn,
+	     int64_t value,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((value - 1) & 0x1f) << 4);
 }
 
-static long
-extract_oimm (unsigned long insn,
+static int64_t
+extract_oimm (uint64_t insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      int *invalid ATTRIBUTE_UNUSED)
 {
@@ -1143,9 +1135,9 @@ extract_oimm (unsigned long insn,
 
 /* The SH field in an MD form instruction.  This is split.  */
 
-static unsigned long
-insert_sh6 (unsigned long insn,
-	    long value,
+static uint64_t
+insert_sh6 (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
@@ -1156,8 +1148,8 @@ insert_sh6 (unsigned long insn,
     return insn | ((value & 0x1f) << 11) | ((value & 0x20) >> 4);
 }
 
-static long
-extract_sh6 (unsigned long insn,
+static int64_t
+extract_sh6 (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
@@ -1171,17 +1163,17 @@ extract_sh6 (unsigned long insn,
 /* The SPR field in an XFX form instruction.  This is flipped--the
    lower 5 bits are stored in the upper 5 and vice- versa.  */
 
-static unsigned long
-insert_spr (unsigned long insn,
-	    long value,
+static uint64_t
+insert_spr (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 16) | ((value & 0x3e0) << 6);
 }
 
-static long
-extract_spr (unsigned long insn,
+static int64_t
+extract_spr (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
@@ -1191,9 +1183,9 @@ extract_spr (unsigned long insn,
 /* Some dialects have 8 SPRG registers instead of the standard 4.  */
 #define ALLOW8_SPRG (PPC_OPCODE_BOOKE | PPC_OPCODE_405)
 
-static unsigned long
-insert_sprg (unsigned long insn,
-	     long value,
+static uint64_t
+insert_sprg (uint64_t insn,
+	     int64_t value,
 	     ppc_cpu_t dialect,
 	     const char **errmsg)
 {
@@ -1209,12 +1201,12 @@ insert_sprg (unsigned long insn,
   return insn | ((value & 0x17) << 16);
 }
 
-static long
-extract_sprg (unsigned long insn,
+static int64_t
+extract_sprg (uint64_t insn,
 	      ppc_cpu_t dialect,
 	      int *invalid)
 {
-  unsigned long val = (insn >> 16) & 0x1f;
+  uint64_t val = (insn >> 16) & 0x1f;
 
   /* mfsprg can use 260..263 and 272..279.  mtsprg only uses spr 272..279
      If not BOOKE, 405 or VLE, then both use only 272..275.  */
@@ -1229,9 +1221,9 @@ extract_sprg (unsigned long insn,
 /* The TBR field in an XFX instruction.  This is just like SPR, but it
    is optional.  */
 
-static unsigned long
-insert_tbr (unsigned long insn,
-	    long value,
+static uint64_t
+insert_tbr (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
@@ -1240,14 +1232,12 @@ insert_tbr (unsigned long insn,
   return insn | ((value & 0x1f) << 16) | ((value & 0x3e0) << 6);
 }
 
-static long
-extract_tbr (unsigned long insn,
+static int64_t
+extract_tbr (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
-  long ret;
-
-  ret = ((insn >> 16) & 0x1f) | ((insn >> 6) & 0x3e0);
+  int64_t ret = ((insn >> 16) & 0x1f) | ((insn >> 6) & 0x3e0);
   if (ret != 268 && ret != 269)
     *invalid = 1;
   return ret;
@@ -1255,17 +1245,17 @@ extract_tbr (unsigned long insn,
 
 /* The XT and XS fields in an XX1 or XX3 form instruction.  This is split.  */
 
-static unsigned long
-insert_xt6 (unsigned long insn,
-	    long value,
+static uint64_t
+insert_xt6 (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 21) | ((value & 0x20) >> 5);
 }
 
-static long
-extract_xt6 (unsigned long insn,
+static int64_t
+extract_xt6 (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
@@ -1273,17 +1263,17 @@ extract_xt6 (unsigned long insn,
 }
 
 /* The XT and XS fields in an DQ form VSX instruction.  This is split.  */
-static unsigned long
-insert_xtq6 (unsigned long insn,
-	     long value,
+static uint64_t
+insert_xtq6 (uint64_t insn,
+	     int64_t value,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 21) | ((value & 0x20) >> 2);
 }
 
-static long
-extract_xtq6 (unsigned long insn,
+static int64_t
+extract_xtq6 (uint64_t insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      int *invalid ATTRIBUTE_UNUSED)
 {
@@ -1292,17 +1282,17 @@ extract_xtq6 (unsigned long insn,
 
 /* The XA field in an XX3 form instruction.  This is split.  */
 
-static unsigned long
-insert_xa6 (unsigned long insn,
-	    long value,
+static uint64_t
+insert_xa6 (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 16) | ((value & 0x20) >> 3);
 }
 
-static long
-extract_xa6 (unsigned long insn,
+static int64_t
+extract_xa6 (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
@@ -1311,17 +1301,17 @@ extract_xa6 (unsigned long insn,
 
 /* The XB field in an XX3 form instruction.  This is split.  */
 
-static unsigned long
-insert_xb6 (unsigned long insn,
-	    long value,
+static uint64_t
+insert_xb6 (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 11) | ((value & 0x20) >> 4);
 }
 
-static long
-extract_xb6 (unsigned long insn,
+static int64_t
+extract_xb6 (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
@@ -1334,17 +1324,17 @@ extract_xb6 (unsigned long insn,
    function just copies the XA field into the XB field, and the
    extraction function just checks that the fields are the same.  */
 
-static unsigned long
-insert_xb6s (unsigned long insn,
-	     long value ATTRIBUTE_UNUSED,
+static uint64_t
+insert_xb6s (uint64_t insn,
+	     int64_t value ATTRIBUTE_UNUSED,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((insn >> 16) & 0x1f) << 11) | (((insn >> 2) & 0x1) << 1);
 }
 
-static long
-extract_xb6s (unsigned long insn,
+static int64_t
+extract_xb6s (uint64_t insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      int *invalid)
 {
@@ -1356,26 +1346,26 @@ extract_xb6s (unsigned long insn,
 
 /* The XC field in an XX4 form instruction.  This is split.  */
 
-static unsigned long
-insert_xc6 (unsigned long insn,
-	    long value,
+static uint64_t
+insert_xc6 (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 6) | ((value & 0x20) >> 2);
 }
 
-static long
-extract_xc6 (unsigned long insn,
+static int64_t
+extract_xc6 (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn << 2) & 0x20) | ((insn >> 6) & 0x1f);
 }
 
-static unsigned long
-insert_dm (unsigned long insn,
-	   long value,
+static uint64_t
+insert_dm (uint64_t insn,
+	   int64_t value,
 	   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	   const char **errmsg)
 {
@@ -1384,14 +1374,12 @@ insert_dm (unsigned long insn,
   return insn | (((value) ? 3 : 0) << 8);
 }
 
-static long
-extract_dm (unsigned long insn,
+static int64_t
+extract_dm (uint64_t insn,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    int *invalid)
 {
-  long value;
-
-  value = (insn >> 8) & 3;
+  int64_t value = (insn >> 8) & 3;
   if (value != 0 && value != 3)
     *invalid = 1;
   return (value) ? 1 : 0;
@@ -1399,40 +1387,40 @@ extract_dm (unsigned long insn,
 
 /* The VLESIMM field in an I16A form instruction.  This is split.  */
 
-static unsigned long
-insert_vlesi (unsigned long insn,
-	      long value,
+static uint64_t
+insert_vlesi (uint64_t insn,
+	      int64_t value,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0xf800) << 10) | (value & 0x7ff);
 }
 
-static long
-extract_vlesi (unsigned long insn,
+static int64_t
+extract_vlesi (uint64_t insn,
 	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	       int *invalid ATTRIBUTE_UNUSED)
 {
-  long value = ((insn >> 10) & 0xf800) | (insn & 0x7ff);
+  int64_t value = ((insn >> 10) & 0xf800) | (insn & 0x7ff);
   value = (value ^ 0x8000) - 0x8000;
   return value;
 }
 
-static unsigned long
-insert_vlensi (unsigned long insn,
-	       long value,
+static uint64_t
+insert_vlensi (uint64_t insn,
+	       int64_t value,
 	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	       const char **errmsg ATTRIBUTE_UNUSED)
 {
   value = -value;
   return insn | ((value & 0xf800) << 10) | (value & 0x7ff);
 }
-static long
-extract_vlensi (unsigned long insn,
+static int64_t
+extract_vlensi (uint64_t insn,
 		ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		int *invalid ATTRIBUTE_UNUSED)
 {
-  long value = ((insn >> 10) & 0xf800) | (insn & 0x7ff);
+  int64_t value = ((insn >> 10) & 0xf800) | (insn & 0x7ff);
   value = (value ^ 0x8000) - 0x8000;
   /* Don't use for disassembly.  */
   *invalid = 1;
@@ -1441,17 +1429,17 @@ extract_vlensi (unsigned long insn,
 
 /* The VLEUIMM field in an I16A form instruction.  This is split.  */
 
-static unsigned long
-insert_vleui (unsigned long insn,
-	      long value,
+static uint64_t
+insert_vleui (uint64_t insn,
+	      int64_t value,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0xf800) << 10) | (value & 0x7ff);
 }
 
-static long
-extract_vleui (unsigned long insn,
+static int64_t
+extract_vleui (uint64_t insn,
 	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	       int *invalid ATTRIBUTE_UNUSED)
 {
@@ -1460,26 +1448,26 @@ extract_vleui (unsigned long insn,
 
 /* The VLEUIMML field in an I16L form instruction.  This is split.  */
 
-static unsigned long
-insert_vleil (unsigned long insn,
-	      long value,
+static uint64_t
+insert_vleil (uint64_t insn,
+	      int64_t value,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0xf800) << 5) | (value & 0x7ff);
 }
 
-static long
-extract_vleil (unsigned long insn,
+static int64_t
+extract_vleil (uint64_t insn,
 	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	       int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 5) & 0xf800) | (insn & 0x7ff);
 }
 
-static unsigned long
-insert_evuimm1_ex0 (unsigned long insn,
-		    long value,
+static uint64_t
+insert_evuimm1_ex0 (uint64_t insn,
+		    int64_t value,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    const char **errmsg)
 {
@@ -1492,21 +1480,21 @@ insert_evuimm1_ex0 (unsigned long insn,
     }
 }
 
-static long
-extract_evuimm1_ex0 (unsigned long insn,
+static int64_t
+extract_evuimm1_ex0 (uint64_t insn,
 		     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		     int *invalid)
 {
-  long value = ((insn >> 11) & 0x1f);
+  int64_t value = ((insn >> 11) & 0x1f);
   if (value == 0)
     *invalid = 1;
 
   return value;
 }
 
-static unsigned long
-insert_evuimm2_ex0 (unsigned long insn,
-		    long value,
+static uint64_t
+insert_evuimm2_ex0 (uint64_t insn,
+		    int64_t value,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    const char **errmsg)
 {
@@ -1519,21 +1507,21 @@ insert_evuimm2_ex0 (unsigned long insn,
     }
 }
 
-static long
-extract_evuimm2_ex0 (unsigned long insn,
+static int64_t
+extract_evuimm2_ex0 (uint64_t insn,
 		     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		     int *invalid)
 {
-  long value = ((insn >> 10) & 0x3e);
+  int64_t value = ((insn >> 10) & 0x3e);
   if (value == 0)
     *invalid = 1;
 
   return value;
 }
 
-static unsigned long
-insert_evuimm4_ex0 (unsigned long insn,
-		    long value,
+static uint64_t
+insert_evuimm4_ex0 (uint64_t insn,
+		    int64_t value,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    const char **errmsg)
 {
@@ -1546,21 +1534,21 @@ insert_evuimm4_ex0 (unsigned long insn,
     }
 }
 
-static long
-extract_evuimm4_ex0 (unsigned long insn,
+static int64_t
+extract_evuimm4_ex0 (uint64_t insn,
 		     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		     int *invalid)
 {
-  long value = ((insn >> 9) & 0x7c);
+  int64_t value = ((insn >> 9) & 0x7c);
   if (value == 0)
     *invalid = 1;
 
   return value;
 }
 
-static unsigned long
-insert_evuimm8_ex0 (unsigned long insn,
-		    long value,
+static uint64_t
+insert_evuimm8_ex0 (uint64_t insn,
+		    int64_t value,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    const char **errmsg)
 {
@@ -1573,21 +1561,21 @@ insert_evuimm8_ex0 (unsigned long insn,
     }
 }
 
-static long
-extract_evuimm8_ex0 (unsigned long insn,
+static int64_t
+extract_evuimm8_ex0 (uint64_t insn,
 		     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		     int *invalid)
 {
-  long value = ((insn >> 8) & 0xf8);
+  int64_t value = ((insn >> 8) & 0xf8);
   if (value == 0)
     *invalid = 1;
 
   return value;
 }
 
-static unsigned long
-insert_evuimm_lt8 (unsigned long insn,
-		   long value,
+static uint64_t
+insert_evuimm_lt8 (uint64_t insn,
+		   int64_t value,
 		   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		   const char **errmsg)
 {
@@ -1600,21 +1588,21 @@ insert_evuimm_lt8 (unsigned long insn,
     }
 }
 
-static long
-extract_evuimm_lt8 (unsigned long insn,
+static int64_t
+extract_evuimm_lt8 (uint64_t insn,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    int *invalid)
 {
-  long value = ((insn >> 11) & 0x1f);
+  int64_t value = ((insn >> 11) & 0x1f);
   if (value > 7)
     *invalid = 1;
 
   return value;
 }
 
-static unsigned long
-insert_evuimm_lt16 (unsigned long insn,
-		    long value,
+static uint64_t
+insert_evuimm_lt16 (uint64_t insn,
+		    int64_t value,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    const char **errmsg)
 {
@@ -1627,21 +1615,21 @@ insert_evuimm_lt16 (unsigned long insn,
     }
 }
 
-static long
-extract_evuimm_lt16 (unsigned long insn,
+static int64_t
+extract_evuimm_lt16 (uint64_t insn,
 		     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		     int *invalid)
 {
-  long value = ((insn >> 11) & 0x1f);
+  int64_t value = ((insn >> 11) & 0x1f);
   if (value > 15)
     *invalid = 1;
 
   return value;
 }
 
-static unsigned long
-insert_rD_rS_even (unsigned long insn,
-		   long value,
+static uint64_t
+insert_rD_rS_even (uint64_t insn,
+		   int64_t value,
 		   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		   const char **errmsg)
 {
@@ -1654,21 +1642,21 @@ insert_rD_rS_even (unsigned long insn,
     }
 }
 
-static long
-extract_rD_rS_even (unsigned long insn,
+static int64_t
+extract_rD_rS_even (uint64_t insn,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    int *invalid)
 {
-  long value = ((insn >> 21) & 0x1f);
+  int64_t value = ((insn >> 21) & 0x1f);
   if ((value & 0x1) != 0)
     *invalid = 1;
 
   return value;
 }
 
-static unsigned long
-insert_off_lsp (unsigned long insn,
-		long value,
+static uint64_t
+insert_off_lsp (uint64_t insn,
+		int64_t value,
 		ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		const char **errmsg)
 {
@@ -1681,21 +1669,21 @@ insert_off_lsp (unsigned long insn,
     }
 }
 
-static long
-extract_off_lsp (unsigned long insn,
+static int64_t
+extract_off_lsp (uint64_t insn,
 		 ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		 int *invalid)
 {
-  long value = (insn & 0x3);
+  int64_t value = (insn & 0x3);
   if (value == 0)
     *invalid = 1;
 
   return value;
 }
 
-static unsigned long
-insert_off_spe2 (unsigned long insn,
-		 long value,
+static uint64_t
+insert_off_spe2 (uint64_t insn,
+		 int64_t value,
 		 ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		 const char **errmsg)
 {
@@ -1708,21 +1696,21 @@ insert_off_spe2 (unsigned long insn,
     }
 }
 
-static long
-extract_off_spe2 (unsigned long insn,
+static int64_t
+extract_off_spe2 (uint64_t insn,
 		  ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		  int *invalid)
 {
-  long value = (insn & 0x7);
+  int64_t value = (insn & 0x7);
   if (value == 0)
     *invalid = 1;
 
   return value;
 }
 
-static unsigned long
-insert_Ddd (unsigned long insn,
-	    long value,
+static uint64_t
+insert_Ddd (uint64_t insn,
+	    int64_t value,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
@@ -1735,8 +1723,8 @@ insert_Ddd (unsigned long insn,
     }
 }
 
-static long
-extract_Ddd (unsigned long insn,
+static int64_t
+extract_Ddd (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
@@ -2636,24 +2624,24 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* Macros used to form opcodes.  */
 
 /* The main opcode.  */
-#define OP(x) ((((unsigned long)(x)) & 0x3f) << 26)
+#define OP(x) ((((uint64_t)(x)) & 0x3f) << 26)
 #define OP_MASK OP (0x3f)
 
 /* The main opcode combined with a trap code in the TO field of a D
    form instruction.  Used for extended mnemonics for the trap
    instructions.  */
-#define OPTO(x,to) (OP (x) | ((((unsigned long)(to)) & 0x1f) << 21))
+#define OPTO(x,to) (OP (x) | ((((uint64_t)(to)) & 0x1f) << 21))
 #define OPTO_MASK (OP_MASK | TO_MASK)
 
 /* The main opcode combined with a comparison size bit in the L field
    of a D form or X form instruction.  Used for extended mnemonics for
    the comparison instructions.  */
-#define OPL(x,l) (OP (x) | ((((unsigned long)(l)) & 1) << 21))
+#define OPL(x,l) (OP (x) | ((((uint64_t)(l)) & 1) << 21))
 #define OPL_MASK OPL (0x3f,1)
 
 /* The main opcode combined with an update code in D form instruction.
    Used for extended mnemonics for VLE memory instructions.  */
-#define OPVUP(x,vup) (OP (x) | ((((unsigned long)(vup)) & 0xff) << 8))
+#define OPVUP(x,vup) (OP (x) | ((((uint64_t)(vup)) & 0xff) << 8))
 #define OPVUP_MASK OPVUP (0x3f,  0xff)
 
 /* The main opcode combined with an update code and the RT fields
@@ -2661,14 +2649,14 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
    save/restore instructions.  */
 #define OPVUPRT(x,vup,rt)			\
   (OPVUP (x, vup)				\
-   | ((((unsigned long)(rt)) & 0x1f) << 21))
+   | ((((uint64_t)(rt)) & 0x1f) << 21))
 #define OPVUPRT_MASK OPVUPRT (0x3f, 0xff, 0x1f)
 
 /* An A form instruction.  */
 #define A(op, xop, rc)				\
   (OP (op)					\
-   | ((((unsigned long)(xop)) & 0x1f) << 1)	\
-   | (((unsigned long)(rc)) & 1))
+   | ((((uint64_t)(xop)) & 0x1f) << 1)	\
+   | (((uint64_t)(rc)) & 1))
 #define A_MASK A (0x3f, 0x1f, 1)
 
 /* An A_MASK with the FRB field fixed.  */
@@ -2681,24 +2669,24 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define AFRAFRC_MASK (A_MASK | FRA_MASK | FRC_MASK)
 
 /* An AFRAFRC_MASK, but with L bit clear.  */
-#define AFRALFRC_MASK (AFRAFRC_MASK & ~((unsigned long) 1 << 16))
+#define AFRALFRC_MASK (AFRAFRC_MASK & ~((uint64_t) 1 << 16))
 
 /* A B form instruction.  */
 #define B(op, aa, lk)				\
   (OP (op)					\
-   | ((((unsigned long)(aa)) & 1) << 1)		\
+   | ((((uint64_t)(aa)) & 1) << 1)		\
    | ((lk) & 1))
 #define B_MASK B (0x3f, 1, 1)
 
 /* A BD8 form instruction.  This is a 16-bit instruction.  */
 #define BD8(op, aa, lk)				\
-  (((((unsigned long)(op)) & 0x3f) << 10)	\
+  (((((uint64_t)(op)) & 0x3f) << 10)	\
    | (((aa) & 1) << 9)				\
    | (((lk) & 1) << 8))
 #define BD8_MASK BD8 (0x3f, 1, 1)
 
 /* Another BD8 form instruction.  This is a 16-bit instruction.  */
-#define BD8IO(op) ((((unsigned long)(op)) & 0x1f) << 11)
+#define BD8IO(op) ((((uint64_t)(op)) & 0x1f) << 11)
 #define BD8IO_MASK BD8IO (0x1f)
 
 /* A BD8 form instruction for simplified mnemonics.  */
@@ -2713,7 +2701,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* A BD15 form instruction.  */
 #define BD15(op, aa, lk)			\
   (OP (op)					\
-   | ((((unsigned long)(aa)) & 0xf) << 22)	\
+   | ((((uint64_t)(aa)) & 0xf) << 22)	\
    | ((lk) & 1))
 #define BD15_MASK BD15 (0x3f, 0xf, 1)
 
@@ -2739,29 +2727,29 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* A BD24 form instruction.  */
 #define BD24(op, aa, lk)			\
   (OP (op)					\
-   | ((((unsigned long)(aa)) & 1) << 25)	\
+   | ((((uint64_t)(aa)) & 1) << 25)	\
    | ((lk) & 1))
 #define BD24_MASK BD24 (0x3f, 1, 1)
 
 /* A B form instruction setting the BO field.  */
 #define BBO(op, bo, aa, lk)			\
   (B ((op), (aa), (lk))				\
-   | ((((unsigned long)(bo)) & 0x1f) << 21))
+   | ((((uint64_t)(bo)) & 0x1f) << 21))
 #define BBO_MASK BBO (0x3f, 0x1f, 1, 1)
 
 /* A BBO_MASK with the y bit of the BO field removed.  This permits
    matching a conditional branch regardless of the setting of the y
    bit.  Similarly for the 'at' bits used for power4 branch hints.  */
-#define Y_MASK	 (((unsigned long) 1) << 21)
-#define AT1_MASK (((unsigned long) 3) << 21)
-#define AT2_MASK (((unsigned long) 9) << 21)
+#define Y_MASK	 (((uint64_t) 1) << 21)
+#define AT1_MASK (((uint64_t) 3) << 21)
+#define AT2_MASK (((uint64_t) 9) << 21)
 #define BBOY_MASK  (BBO_MASK &~ Y_MASK)
 #define BBOAT_MASK (BBO_MASK &~ AT1_MASK)
 
 /* A B form instruction setting the BO field and the condition bits of
    the BI field.  */
 #define BBOCB(op, bo, cb, aa, lk) \
-  (BBO ((op), (bo), (aa), (lk)) | ((((unsigned long)(cb)) & 0x3) << 16))
+  (BBO ((op), (bo), (aa), (lk)) | ((((uint64_t)(cb)) & 0x3) << 16))
 #define BBOCB_MASK BBOCB (0x3f, 0x1f, 0x3, 1, 1)
 
 /* A BBOCB_MASK with the y bit of the BO field removed.  */
@@ -2774,17 +2762,17 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define BBOATBI_MASK (BBOAT2CB_MASK | BI_MASK)
 
 /* A VLE C form instruction.  */
-#define C_LK(x, lk) (((((unsigned long)(x)) & 0x7fff) << 1) | ((lk) & 1))
+#define C_LK(x, lk) (((((uint64_t)(x)) & 0x7fff) << 1) | ((lk) & 1))
 #define C_LK_MASK C_LK(0x7fff, 1)
-#define C(x) ((((unsigned long)(x)) & 0xffff))
+#define C(x) ((((uint64_t)(x)) & 0xffff))
 #define C_MASK C(0xffff)
 
 /* An Context form instruction.  */
-#define CTX(op, xop)   (OP (op) | (((unsigned long)(xop)) & 0x7))
+#define CTX(op, xop)   (OP (op) | (((uint64_t)(xop)) & 0x7))
 #define CTX_MASK CTX(0x3f, 0x7)
 
 /* An User Context form instruction.  */
-#define UCTX(op, xop)  (OP (op) | (((unsigned long)(xop)) & 0x1f))
+#define UCTX(op, xop)  (OP (op) | (((uint64_t)(xop)) & 0x1f))
 #define UCTX_MASK UCTX(0x3f, 0x1f)
 
 /* The main opcode mask with the RA field clear.  */
@@ -2799,29 +2787,29 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define DS_MASK DSO (0x3f, 3)
 
 /* An DX form instruction.  */
-#define DX(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x1f) << 1))
+#define DX(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0x1f) << 1))
 #define DX_MASK DX (0x3f, 0x1f)
 /* An DX form instruction with the D bits specified.  */
 #define NODX_MASK (DX_MASK | 0x1fffc1)
 
 /* An EVSEL form instruction.  */
-#define EVSEL(op, xop) (OP (op) | (((unsigned long)(xop)) & 0xff) << 3)
+#define EVSEL(op, xop) (OP (op) | (((uint64_t)(xop)) & 0xff) << 3)
 #define EVSEL_MASK EVSEL(0x3f, 0xff)
 
 /* An IA16 form instruction.  */
-#define IA16(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x1f) << 11)
+#define IA16(op, xop) (OP (op) | (((uint64_t)(xop)) & 0x1f) << 11)
 #define IA16_MASK IA16(0x3f, 0x1f)
 
 /* An I16A form instruction.  */
-#define I16A(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x1f) << 11)
+#define I16A(op, xop) (OP (op) | (((uint64_t)(xop)) & 0x1f) << 11)
 #define I16A_MASK I16A(0x3f, 0x1f)
 
 /* An I16L form instruction.  */
-#define I16L(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x1f) << 11)
+#define I16L(op, xop) (OP (op) | (((uint64_t)(xop)) & 0x1f) << 11)
 #define I16L_MASK I16L(0x3f, 0x1f)
 
 /* An IM7 form instruction.  */
-#define IM7(op) ((((unsigned long)(op)) & 0x1f) << 11)
+#define IM7(op) ((((uint64_t)(op)) & 0x1f) << 11)
 #define IM7_MASK IM7(0x1f)
 
 /* An M form instruction.  */
@@ -2829,13 +2817,13 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define M_MASK M (0x3f, 1)
 
 /* An LI20 form instruction.  */
-#define LI20(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x1) << 15)
+#define LI20(op, xop) (OP (op) | (((uint64_t)(xop)) & 0x1) << 15)
 #define LI20_MASK LI20(0x3f, 0x1)
 
 /* An M form instruction with the ME field specified.  */
 #define MME(op, me, rc)				\
   (M ((op), (rc))				\
-   | ((((unsigned long)(me)) & 0x1f) << 1))
+   | ((((uint64_t)(me)) & 0x1f) << 1))
 
 /* An M_MASK with the MB and ME fields fixed.  */
 #define MMBME_MASK (M_MASK | MB_MASK | ME_MASK)
@@ -2846,7 +2834,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* An MD form instruction.  */
 #define MD(op, xop, rc)				\
   (OP (op)					\
-   | ((((unsigned long)(xop)) & 0x7) << 2)	\
+   | ((((uint64_t)(xop)) & 0x7) << 2)	\
    | ((rc) & 1))
 #define MD_MASK MD (0x3f, 0x7, 1)
 
@@ -2859,7 +2847,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* An MDS form instruction.  */
 #define MDS(op, xop, rc)			\
   (OP (op)					\
-   | ((((unsigned long)(xop)) & 0xf) << 1)	\
+   | ((((uint64_t)(xop)) & 0xf) << 1)	\
    | ((rc) & 1))
 #define MDS_MASK MDS (0x3f, 0xf, 1)
 
@@ -2869,55 +2857,55 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* An SC form instruction.  */
 #define SC(op, sa, lk)				\
   (OP (op)					\
-   | ((((unsigned long)(sa)) & 1) << 1)		\
+   | ((((uint64_t)(sa)) & 1) << 1)		\
    | ((lk) & 1))
 #define SC_MASK					\
   (OP_MASK					\
-   | (((unsigned long) 0x3ff) << 16)		\
-   | (((unsigned long) 1) << 1)			\
+   | (((uint64_t) 0x3ff) << 16)		\
+   | (((uint64_t) 1) << 1)			\
    | 1)
 
 /* An SCI8 form instruction.  */
-#define SCI8(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x1f) << 11))
+#define SCI8(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0x1f) << 11))
 #define SCI8_MASK SCI8(0x3f, 0x1f)
 
 /* An SCI8 form instruction.  */
 #define SCI8BF(op, fop, xop)			\
   (OP (op)					\
-   | ((((unsigned long)(xop)) & 0x1f) << 11)	\
+   | ((((uint64_t)(xop)) & 0x1f) << 11)	\
    | (((fop) & 7) << 23))
 #define SCI8BF_MASK SCI8BF(0x3f, 7, 0x1f)
 
 /* An SD4 form instruction.  This is a 16-bit instruction.  */
-#define SD4(op) ((((unsigned long)(op)) & 0xf) << 12)
+#define SD4(op) ((((uint64_t)(op)) & 0xf) << 12)
 #define SD4_MASK SD4(0xf)
 
 /* An SE_IM5 form instruction.  This is a 16-bit instruction.  */
 #define SE_IM5(op, xop)				\
-  (((((unsigned long)(op)) & 0x3f) << 10)	\
+  (((((uint64_t)(op)) & 0x3f) << 10)	\
    | (((xop) & 0x1) << 9))
 #define SE_IM5_MASK SE_IM5(0x3f, 1)
 
 /* An SE_R form instruction.  This is a 16-bit instruction.  */
 #define SE_R(op, xop)				\
-  (((((unsigned long)(op)) & 0x3f) << 10)	\
+  (((((uint64_t)(op)) & 0x3f) << 10)	\
    | (((xop) & 0x3f) << 4))
 #define SE_R_MASK SE_R(0x3f, 0x3f)
 
 /* An SE_RR form instruction.  This is a 16-bit instruction.  */
 #define SE_RR(op, xop)				\
-  (((((unsigned long)(op)) & 0x3f) << 10)	\
+  (((((uint64_t)(op)) & 0x3f) << 10)	\
    | (((xop) & 0x3) << 8))
 #define SE_RR_MASK SE_RR(0x3f, 3)
 
 /* A VX form instruction.  */
-#define VX(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x7ff))
+#define VX(op, xop) (OP (op) | (((uint64_t)(xop)) & 0x7ff))
 
 /* The mask for an VX form instruction.  */
 #define VX_MASK	VX(0x3f, 0x7ff)
 
 /* A VX LSP form instruction.  */
-#define VX_LSP(op, xop) (OP (op) | (((unsigned long)(xop)) & 0xffff))
+#define VX_LSP(op, xop) (OP (op) | (((uint64_t)(xop)) & 0xffff))
 
 /* The mask for an VX LSP form instruction.  */
 #define VX_LSP_MASK	VX_LSP(0x3f, 0xffff)
@@ -2926,62 +2914,62 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* Additional format of VX SPE2 form instruction.   */
 #define VX_RA_CONST(op, xop, bits11_15)			\
   (OP (op)						\
-   | (((unsigned long)(bits11_15) & 0x1f) << 16)	\
-   | (((unsigned long)(xop)) & 0x7ff))
+   | (((uint64_t)(bits11_15) & 0x1f) << 16)	\
+   | (((uint64_t)(xop)) & 0x7ff))
 #define VX_RA_CONST_MASK VX_RA_CONST(0x3f, 0x7ff, 0x1f)
 
 #define VX_RB_CONST(op, xop, bits16_20)			\
   (OP (op)						\
-   | (((unsigned long)(bits16_20) & 0x1f) << 11)	\
-   | (((unsigned long)(xop)) & 0x7ff))
+   | (((uint64_t)(bits16_20) & 0x1f) << 11)	\
+   | (((uint64_t)(xop)) & 0x7ff))
 #define VX_RB_CONST_MASK VX_RB_CONST(0x3f, 0x7ff, 0x1f)
 
 #define VX_OFF_SPE2_MASK VX(0x3f, 0x7f8)
 
 #define VX_SPE_CRFD(op, xop, bits9_10)			\
   (OP (op)						\
-   | (((unsigned long)(bits9_10) & 0x3) << 21)		\
-   | (((unsigned long)(xop)) & 0x7ff))
+   | (((uint64_t)(bits9_10) & 0x3) << 21)		\
+   | (((uint64_t)(xop)) & 0x7ff))
 #define VX_SPE_CRFD_MASK VX_SPE_CRFD(0x3f, 0x7ff, 0x3)
 
 #define VX_SPE2_CLR(op, xop, bit16)			\
   (OP (op)						\
-   | (((unsigned long)(bit16) & 0x1) << 15)		\
-   | (((unsigned long)(xop)) & 0x7ff))
+   | (((uint64_t)(bit16) & 0x1) << 15)		\
+   | (((uint64_t)(xop)) & 0x7ff))
 #define VX_SPE2_CLR_MASK VX_SPE2_CLR(0x3f, 0x7ff, 0x1)
 
 #define VX_SPE2_SPLATB(op, xop, bits19_20)		\
   (OP (op)						\
-   | (((unsigned long)(bits19_20) & 0x3) << 11)		\
-   | (((unsigned long)(xop)) & 0x7ff))
+   | (((uint64_t)(bits19_20) & 0x3) << 11)		\
+   | (((uint64_t)(xop)) & 0x7ff))
 #define VX_SPE2_SPLATB_MASK VX_SPE2_SPLATB(0x3f, 0x7ff, 0x3)
 
 #define VX_SPE2_OCTET(op, xop, bits16_17)		\
   (OP (op)						\
-   | (((unsigned long)(bits16_17) & 0x3) << 14)		\
-   | (((unsigned long)(xop)) & 0x7ff))
+   | (((uint64_t)(bits16_17) & 0x3) << 14)		\
+   | (((uint64_t)(xop)) & 0x7ff))
 #define VX_SPE2_OCTET_MASK VX_SPE2_OCTET(0x3f, 0x7ff, 0x7)
 
 #define VX_SPE2_DDHH(op, xop, bit16) 			\
   (OP (op)						\
-   | (((unsigned long)(bit16) & 0x1) << 15)		\
-   | (((unsigned long)(xop)) & 0x7ff))
+   | (((uint64_t)(bit16) & 0x1) << 15)		\
+   | (((uint64_t)(xop)) & 0x7ff))
 #define VX_SPE2_DDHH_MASK VX_SPE2_DDHH(0x3f, 0x7ff, 0x1)
 
 #define VX_SPE2_HH(op, xop, bit16, bits19_20)		\
   (OP (op)						\
-   | (((unsigned long)(bit16) & 0x1) << 15)		\
-   | (((unsigned long)(bits19_20) & 0x3) << 11)	\
-   | (((unsigned long)(xop)) & 0x7ff))
+   | (((uint64_t)(bit16) & 0x1) << 15)		\
+   | (((uint64_t)(bits19_20) & 0x3) << 11)	\
+   | (((uint64_t)(xop)) & 0x7ff))
 #define VX_SPE2_HH_MASK VX_SPE2_HH(0x3f, 0x7ff, 0x1, 0x3)
 
 #define VX_SPE2_EVMAR(op, xop)				\
   (OP (op)						\
-   | ((unsigned long)(0x1) << 11)			\
-   | (((unsigned long)(xop)) & 0x7ff))
+   | ((uint64_t)(0x1) << 11)			\
+   | (((uint64_t)(xop)) & 0x7ff))
 #define VX_SPE2_EVMAR_MASK				\
   (VX_SPE2_EVMAR(0x3f, 0x7ff)				\
-   | ((unsigned long)(0x1) << 11))
+   | ((uint64_t)(0x1) << 11))
 
 /* A VX_MASK with the VA field fixed.  */
 #define VXVA_MASK (VX_MASK | (0x1f << 16))
@@ -3011,7 +2999,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define VXVAPS_MASK ((VX_MASK | (0x1f << 16)) & ~(0x1 << 9))
 
 /* A VA form instruction.  */
-#define VXA(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x03f))
+#define VXA(op, xop) (OP (op) | (((uint64_t)(xop)) & 0x03f))
 
 /* The mask for an VA form instruction.  */
 #define VXA_MASK VXA(0x3f, 0x3f)
@@ -3022,8 +3010,8 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* A VXR form instruction.  */
 #define VXR(op, xop, rc)			\
   (OP (op)					\
-   | (((rc) & 1) << 10)				\
-   | (((unsigned long)(xop)) & 0x3ff))
+   | (((uint64_t)(rc) & 1) << 10)		\
+   | (((uint64_t)(xop)) & 0x3ff))
 
 /* The mask for a VXR form instruction.  */
 #define VXR_MASK VXR(0x3f, 0x3ff, 1)
@@ -3031,41 +3019,41 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* A VX form instruction with a VA tertiary opcode.  */
 #define VXVA(op, xop, vaop) (VX(op,xop) | (((vaop) & 0x1f) << 16))
 
-#define VXASH(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x1f) << 1))
+#define VXASH(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0x1f) << 1))
 #define VXASH_MASK VXASH (0x3f, 0x1f)
 
 /* An X form instruction.  */
-#define X(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x3ff) << 1))
+#define X(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0x3ff) << 1))
 
 /* A X form instruction for Quad-Precision FP Instructions.  */
 #define XVA(op, xop, vaop) (X(op,xop) | (((vaop) & 0x1f) << 16))
 
 /* An EX form instruction.  */
-#define EX(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x7ff))
+#define EX(op, xop) (OP (op) | (((uint64_t)(xop)) & 0x7ff))
 
 /* The mask for an EX form instruction.  */
 #define EX_MASK EX (0x3f, 0x7ff)
 
 /* An XX2 form instruction.  */
-#define XX2(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x1ff) << 2))
+#define XX2(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0x1ff) << 2))
 
 /* A XX2 form instruction with the VA bits specified.  */
 #define XX2VA(op, xop, vaop) (XX2(op,xop) | (((vaop) & 0x1f) << 16))
 
 /* An XX3 form instruction.  */
-#define XX3(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0xff) << 3))
+#define XX3(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0xff) << 3))
 
 /* An XX3 form instruction with the RC bit specified.  */
 #define XX3RC(op, xop, rc)			\
   (OP (op)					\
-   | (((rc) & 1) << 10)				\
-   | ((((unsigned long)(xop)) & 0x7f) << 3))
+   | (((uint64_t)(rc) & 1) << 10)		\
+   | ((((uint64_t)(xop)) & 0x7f) << 3))
 
 /* An XX4 form instruction.  */
-#define XX4(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x3) << 4))
+#define XX4(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0x3) << 4))
 
 /* A Z form instruction.  */
-#define Z(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x1ff) << 1))
+#define Z(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0x1ff) << 1))
 
 /* An X form instruction with the RC bit specified.  */
 #define XRC(op, xop, rc) (X ((op), (xop)) | ((rc) & 1))
@@ -3148,7 +3136,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define XVA_MASK XRA_MASK
 
 /* An XRA_MASK with the A_L/W field clear.  */
-#define XWRA_MASK (XRA_MASK & ~((unsigned long) 1 << 16))
+#define XWRA_MASK (XRA_MASK & ~((uint64_t) 1 << 16))
 #define XRLA_MASK XWRA_MASK
 
 /* An X_MASK with the RB field fixed.  */
@@ -3158,7 +3146,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define XRT_MASK (X_MASK | RT_MASK)
 
 /* An XRT_MASK mask with the L bits clear.  */
-#define XLRT_MASK (XRT_MASK & ~((unsigned long) 0x3 << 21))
+#define XLRT_MASK (XRT_MASK & ~((uint64_t) 0x3 << 21))
 
 /* An X_MASK with the RA and RB fields fixed.  */
 #define XRARB_MASK (X_MASK | RA_MASK | RB_MASK)
@@ -3167,10 +3155,10 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define XBFRARB_MASK (XBF_MASK | RA_MASK | RB_MASK)
 
 /* An XRARB_MASK, but with the L bit clear.  */
-#define XRLARB_MASK (XRARB_MASK & ~((unsigned long) 1 << 16))
+#define XRLARB_MASK (XRARB_MASK & ~((uint64_t) 1 << 16))
 
 /* An XRARB_MASK, but with the L bits in a darn instruction clear.  */
-#define XLRAND_MASK (XRARB_MASK & ~((unsigned long) 3 << 16))
+#define XLRAND_MASK (XRARB_MASK & ~((uint64_t) 3 << 16))
 
 /* An X_MASK with the RT and RA fields fixed.  */
 #define XRTRA_MASK (X_MASK | RT_MASK | RA_MASK)
@@ -3179,69 +3167,69 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define XRTRB_MASK (X_MASK | RT_MASK | RB_MASK)
 
 /* An XRTRA_MASK, but with L bit clear.  */
-#define XRTLRA_MASK (XRTRA_MASK & ~((unsigned long) 1 << 21))
+#define XRTLRA_MASK (XRTRA_MASK & ~((uint64_t) 1 << 21))
 
 /* An X_MASK with the RT, RA and RB fields fixed.  */
 #define XRTRARB_MASK (X_MASK | RT_MASK | RA_MASK | RB_MASK)
 
 /* An XRTRARB_MASK, but with L bit clear.  */
-#define XRTLRARB_MASK (XRTRARB_MASK & ~((unsigned long) 1 << 21))
+#define XRTLRARB_MASK (XRTRARB_MASK & ~((uint64_t) 1 << 21))
 
 /* An XRTRARB_MASK, but with A bit clear.  */
-#define XRTARARB_MASK (XRTRARB_MASK & ~((unsigned long) 1 << 25))
+#define XRTARARB_MASK (XRTRARB_MASK & ~((uint64_t) 1 << 25))
 
 /* An XRTRARB_MASK, but with BF bits clear.  */
-#define XRTBFRARB_MASK (XRTRARB_MASK & ~((unsigned long) 7 << 23))
+#define XRTBFRARB_MASK (XRTRARB_MASK & ~((uint64_t) 7 << 23))
 
 /* An X form instruction with the L bit specified.  */
 #define XOPL(op, xop, l)			\
   (X ((op), (xop))				\
-   | ((((unsigned long)(l)) & 1) << 21))
+   | ((((uint64_t)(l)) & 1) << 21))
 
 /* An X form instruction with the L bits specified.  */
 #define XOPL2(op, xop, l)			\
   (X ((op), (xop))				\
-   | ((((unsigned long)(l)) & 3) << 21))
+   | ((((uint64_t)(l)) & 3) << 21))
 
 /* An X form instruction with the L bit and RC bit specified.  */
 #define XRCL(op, xop, l, rc)			\
   (XRC ((op), (xop), (rc))			\
-   | ((((unsigned long)(l)) & 1) << 21))
+   | ((((uint64_t)(l)) & 1) << 21))
 
 /* An X form instruction with RT fields specified */
 #define XRT(op, xop, rt)			\
   (X ((op), (xop))				\
-   | ((((unsigned long)(rt)) & 0x1f) << 21))
+   | ((((uint64_t)(rt)) & 0x1f) << 21))
 
 /* An X form instruction with RT and RA fields specified */
 #define XRTRA(op, xop, rt, ra)			\
   (X ((op), (xop))				\
-   | ((((unsigned long)(rt)) & 0x1f) << 21)	\
-   | ((((unsigned long)(ra)) & 0x1f) << 16))
+   | ((((uint64_t)(rt)) & 0x1f) << 21)	\
+   | ((((uint64_t)(ra)) & 0x1f) << 16))
 
 /* The mask for an X form comparison instruction.  */
-#define XCMP_MASK (X_MASK | (((unsigned long)1) << 22))
+#define XCMP_MASK (X_MASK | (((uint64_t)1) << 22))
 
 /* The mask for an X form comparison instruction with the L field
    fixed.  */
-#define XCMPL_MASK (XCMP_MASK | (((unsigned long)1) << 21))
+#define XCMPL_MASK (XCMP_MASK | (((uint64_t)1) << 21))
 
 /* An X form trap instruction with the TO field specified.  */
 #define XTO(op, xop, to)			\
   (X ((op), (xop))				\
-   | ((((unsigned long)(to)) & 0x1f) << 21))
+   | ((((uint64_t)(to)) & 0x1f) << 21))
 #define XTO_MASK (X_MASK | TO_MASK)
 
 /* An X form tlb instruction with the SH field specified.  */
 #define XTLB(op, xop, sh)			\
   (X ((op), (xop))				\
-   | ((((unsigned long)(sh)) & 0x1f) << 11))
+   | ((((uint64_t)(sh)) & 0x1f) << 11))
 #define XTLB_MASK (X_MASK | SH_MASK)
 
 /* An X form sync instruction.  */
 #define XSYNC(op, xop, l)			\
   (X ((op), (xop))				\
-   | ((((unsigned long)(l)) & 3) << 21))
+   | ((((uint64_t)(l)) & 3) << 21))
 
 /* An X form sync instruction with everything filled in except the LS
    field.  */
@@ -3252,25 +3240,25 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define XSYNCLE_MASK (0xff90ffff)
 
 /* An X_MASK, but with the EH bit clear.  */
-#define XEH_MASK (X_MASK & ~((unsigned long )1))
+#define XEH_MASK (X_MASK & ~((uint64_t )1))
 
 /* An X form AltiVec dss instruction.  */
-#define XDSS(op, xop, a) (X ((op), (xop)) | ((((unsigned long)(a)) & 1) << 25))
+#define XDSS(op, xop, a) (X ((op), (xop)) | ((((uint64_t)(a)) & 1) << 25))
 #define XDSS_MASK XDSS(0x3f, 0x3ff, 1)
 
 /* An XFL form instruction.  */
 #define XFL(op, xop, rc)			\
   (OP (op)					\
-   | ((((unsigned long)(xop)) & 0x3ff) << 1)	\
-   | (((unsigned long)(rc)) & 1))
+   | ((((uint64_t)(xop)) & 0x3ff) << 1)	\
+   | (((uint64_t)(rc)) & 1))
 #define XFL_MASK XFL (0x3f, 0x3ff, 1)
 
 /* An X form isel instruction.  */
-#define XISEL(op, xop)	(OP (op) | ((((unsigned long)(xop)) & 0x1f) << 1))
+#define XISEL(op, xop)	(OP (op) | ((((uint64_t)(xop)) & 0x1f) << 1))
 #define XISEL_MASK	XISEL(0x3f, 0x1f)
 
 /* An XL form instruction with the LK field set to 0.  */
-#define XL(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x3ff) << 1))
+#define XL(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0x3ff) << 1))
 
 /* An XL form instruction which uses the LK field.  */
 #define XLLK(op, xop, lk) (XL ((op), (xop)) | ((lk) & 1))
@@ -3283,20 +3271,20 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 
 /* An XL form instruction which explicitly sets the BO field.  */
 #define XLO(op, bo, xop, lk) \
-  (XLLK ((op), (xop), (lk)) | ((((unsigned long)(bo)) & 0x1f) << 21))
+  (XLLK ((op), (xop), (lk)) | ((((uint64_t)(bo)) & 0x1f) << 21))
 #define XLO_MASK (XL_MASK | BO_MASK)
 
 /* An XL form instruction which explicitly sets the y bit of the BO
    field.  */
 #define XLYLK(op, xop, y, lk)			\
   (XLLK ((op), (xop), (lk))			\
-   | ((((unsigned long)(y)) & 1) << 21))
+   | ((((uint64_t)(y)) & 1) << 21))
 #define XLYLK_MASK (XL_MASK | Y_MASK)
 
 /* An XL form instruction which sets the BO field and the condition
    bits of the BI field.  */
 #define XLOCB(op, bo, cb, xop, lk) \
-  (XLO ((op), (bo), (xop), (lk)) | ((((unsigned long)(cb)) & 3) << 16))
+  (XLO ((op), (bo), (xop), (lk)) | ((((uint64_t)(cb)) & 3) << 16))
 #define XLOCB_MASK XLOCB (0x3f, 0x1f, 0x3, 0x3ff, 1)
 
 /* An XL_MASK or XLYLK_MASK or XLOCB_MASK with the BB field fixed.  */
@@ -3316,13 +3304,13 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* An X form mbar instruction with MO field.  */
 #define XMBAR(op, xop, mo)			\
   (X ((op), (xop))				\
-   | ((((unsigned long)(mo)) & 1) << 21))
+   | ((((uint64_t)(mo)) & 1) << 21))
 
 /* An XO form instruction.  */
 #define XO(op, xop, oe, rc)			\
   (OP (op)					\
-   | ((((unsigned long)(xop)) & 0x1ff) << 1)	\
-   | ((((unsigned long)(oe)) & 1) << 10)	\
+   | ((((uint64_t)(xop)) & 0x1ff) << 1)	\
+   | ((((uint64_t)(oe)) & 1) << 10)	\
    | (((unsigned long)(rc)) & 1))
 #define XO_MASK XO (0x3f, 0x1ff, 1, 1)
 
@@ -3332,16 +3320,16 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* An XOPS form instruction for paired singles.  */
 #define XOPS(op, xop, rc)			\
   (OP (op)					\
-   | ((((unsigned long)(xop)) & 0x3ff) << 1)	\
-   | (((unsigned long)(rc)) & 1))
+   | ((((uint64_t)(xop)) & 0x3ff) << 1)	\
+   | (((uint64_t)(rc)) & 1))
 #define XOPS_MASK XOPS (0x3f, 0x3ff, 1)
 
 
 /* An XS form instruction.  */
 #define XS(op, xop, rc)				\
   (OP (op)					\
-   | ((((unsigned long)(xop)) & 0x1ff) << 2)	\
-   | (((unsigned long)(rc)) & 1))
+   | ((((uint64_t)(xop)) & 0x1ff) << 2)	\
+   | (((uint64_t)(rc)) & 1))
 #define XS_MASK XS (0x3f, 0x1ff, 1)
 
 /* A mask for the FXM version of an XFX form instruction.  */
@@ -3350,14 +3338,14 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* An XFX form instruction with the FXM field filled in.  */
 #define XFXM(op, xop, fxm, p4)			\
   (X ((op), (xop))				\
-   | ((((unsigned long)(fxm)) & 0xff) << 12)	\
-   | ((unsigned long)(p4) << 20))
+   | ((((uint64_t)(fxm)) & 0xff) << 12)	\
+   | ((uint64_t)(p4) << 20))
 
 /* An XFX form instruction with the SPR field filled in.  */
 #define XSPR(op, xop, spr)			\
   (X ((op), (xop))				\
-   | ((((unsigned long)(spr)) & 0x1f) << 16)	\
-   | ((((unsigned long)(spr)) & 0x3e0) << 6))
+   | ((((uint64_t)(spr)) & 0x1f) << 16)	\
+   | ((((uint64_t)(spr)) & 0x3e0) << 6))
 #define XSPR_MASK (X_MASK | SPR_MASK)
 
 /* An XFX form instruction with the SPR field filled in except for the
@@ -3372,13 +3360,13 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define XE_MASK (0xffff7fff)
 
 /* An X form user context instruction.  */
-#define XUC(op, xop)  (OP (op) | (((unsigned long)(xop)) & 0x1f))
+#define XUC(op, xop)  (OP (op) | (((uint64_t)(xop)) & 0x1f))
 #define XUC_MASK      XUC(0x3f, 0x1f)
 
 /* An XW form instruction.  */
 #define XW(op, xop, rc)				\
   (OP (op)					\
-   | ((((unsigned long)(xop)) & 0x3f) << 1)	\
+   | ((((uint64_t)(xop)) & 0x3f) << 1)	\
    | ((rc) & 1))
 /* The mask for a G form instruction. rc not supported at present.  */
 #define XW_MASK XW (0x3f, 0x3f, 0)
@@ -3386,7 +3374,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* An APU form instruction.  */
 #define APU(op, xop, rc)			\
   (OP (op)					\
-   | (((unsigned long)(xop)) & 0x3ff) << 1	\
+   | (((uint64_t)(xop)) & 0x3ff) << 1	\
    | ((rc) & 1))
 
 /* The mask for an APU form instruction.  */

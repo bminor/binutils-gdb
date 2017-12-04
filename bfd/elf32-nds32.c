@@ -56,56 +56,8 @@ static bfd_reloc_status_type nds32_elf_sda15_reloc
 static bfd_reloc_status_type nds32_elf_do_9_pcrel_reloc
   (bfd *, reloc_howto_type *, asection *, bfd_byte *, bfd_vma,
    asection *, bfd_vma, bfd_vma);
-static void nds32_elf_relocate_hi20
-  (bfd *, int, Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_byte *, bfd_vma);
-static reloc_howto_type *bfd_elf32_bfd_reloc_type_table_lookup
-  (enum elf_nds32_reloc_type);
-static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
-  (bfd *, bfd_reloc_code_real_type);
-
-/* Target hooks.  */
-static void nds32_info_to_howto_rel
-  (bfd *, arelent *, Elf_Internal_Rela *dst);
-static void nds32_info_to_howto
-  (bfd *, arelent *, Elf_Internal_Rela *dst);
-static bfd_boolean nds32_elf_add_symbol_hook
-  (bfd *, struct bfd_link_info *, Elf_Internal_Sym *, const char **,
-   flagword *, asection **, bfd_vma *);
-static bfd_boolean nds32_elf_relocate_section
-  (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
-static bfd_boolean nds32_elf_object_p (bfd *);
-static void nds32_elf_final_write_processing (bfd *, bfd_boolean);
-static bfd_boolean nds32_elf_set_private_flags (bfd *, flagword);
-static bfd_boolean nds32_elf_merge_private_bfd_data
-  (bfd *, struct bfd_link_info *);
-static bfd_boolean nds32_elf_print_private_bfd_data (bfd *, void *);
-static bfd_boolean nds32_elf_check_relocs
-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
-static asection *nds32_elf_gc_mark_hook
-  (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-   struct elf_link_hash_entry *, Elf_Internal_Sym *);
-static bfd_boolean nds32_elf_adjust_dynamic_symbol
-  (struct bfd_link_info *, struct elf_link_hash_entry *);
-static bfd_boolean nds32_elf_size_dynamic_sections
-  (bfd *, struct bfd_link_info *);
-static bfd_boolean nds32_elf_create_dynamic_sections
-  (bfd *, struct bfd_link_info *);
-static bfd_boolean nds32_elf_finish_dynamic_sections
-  (bfd *, struct bfd_link_info *info);
-static bfd_boolean nds32_elf_finish_dynamic_symbol
-  (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
-   Elf_Internal_Sym *);
-static bfd_boolean nds32_elf_mkobject (bfd *);
 
 /* Nds32 helper functions.  */
-static bfd_reloc_status_type nds32_elf_final_sda_base
-  (bfd *, struct bfd_link_info *, bfd_vma *, bfd_boolean);
-static bfd_boolean allocate_dynrelocs (struct elf_link_hash_entry *, void *);
-static bfd_boolean readonly_dynrelocs (struct elf_link_hash_entry *, void *);
-static Elf_Internal_Rela *find_relocs_at_address
-  (Elf_Internal_Rela *, Elf_Internal_Rela *,
-   Elf_Internal_Rela *, enum elf_nds32_reloc_type);
 static bfd_vma calculate_memory_address
 (bfd *, Elf_Internal_Rela *, Elf_Internal_Sym *, Elf_Internal_Shdr *);
 static int nds32_get_section_contents (bfd *, asection *,
@@ -134,13 +86,6 @@ static bfd_boolean  nds32_relax_fp_as_gp
 static bfd_boolean nds32_fag_remove_unused_fpbase
   (bfd *abfd, asection *sec, Elf_Internal_Rela *internal_relocs,
    Elf_Internal_Rela *irelend);
-static bfd_byte *
-nds32_elf_get_relocated_section_contents (bfd *abfd,
-					  struct bfd_link_info *link_info,
-					  struct bfd_link_order *link_order,
-					  bfd_byte *data,
-					  bfd_boolean relocatable,
-					  asymbol **symbols);
 
 enum
 {
@@ -3561,6 +3506,22 @@ nds32_elf_copy_indirect_symbol (struct bfd_link_info *info,
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
+/* Find dynamic relocs for H that apply to read-only sections.  */
+
+static asection *
+readonly_dynrelocs (struct elf_link_hash_entry *h)
+{
+  struct elf_nds32_dyn_relocs *p;
+
+  for (p = elf32_nds32_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+    {
+      asection *s = p->sec->output_section;
+
+      if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	return p->sec;
+    }
+  return NULL;
+}
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
@@ -3893,31 +3854,29 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
-/* Find any dynamic relocs that apply to read-only sections.  */
+/* Set DF_TEXTREL if we find any dynamic relocs that apply to
+   read-only sections.  */
 
 static bfd_boolean
-readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 {
-  struct elf_nds32_link_hash_entry *eh;
-  struct elf_nds32_dyn_relocs *p;
+  asection *sec;
 
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
 
-  eh = (struct elf_nds32_link_hash_entry *) h;
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  sec = readonly_dynrelocs (h);
+  if (sec != NULL)
     {
-      asection *s = p->sec->output_section;
+      struct bfd_link_info *info = (struct bfd_link_info *) info_p;
 
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	{
-	  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+      info->flags |= DF_TEXTREL;
+      info->callbacks->minfo
+	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	 sec->owner, h->root.root.string, sec);
 
-	  info->flags |= DF_TEXTREL;
-
-	  /* Not an error, just cut short the traversal.  */
-	  return FALSE;
-	}
+      /* Not an error, just cut short the traversal.  */
+      return FALSE;
     }
   return TRUE;
 }
@@ -4113,7 +4072,7 @@ nds32_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
 	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->root, readonly_dynrelocs,
+	    elf_link_hash_traverse (&htab->root, maybe_set_textrel,
 				    (void *) info);
 
 	  if ((info->flags & DF_TEXTREL) != 0)

@@ -1,4 +1,4 @@
-#as: -a32 -mvle
+#as: -a32 -mbig -mvle
 #objdump: -d -Mefs -Mvle -Mefs2
 #name: Validate EFS instructions
 

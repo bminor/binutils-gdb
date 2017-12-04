@@ -1,3 +1,143 @@
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inferiors.c (for_each_inferior_with_data): Remove.
+	* inferiors.h (for_each_inferior_with_data): Remove.
+	* server.c (handle_qxfer_threads_worker): Change parameter type.
+	(handle_qxfer_threads_proper): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inferiors.c (for_each_inferior): Remove.
+	(clear_inferiors): Use for_each_thread.
+	* inferiors.h (for_each_inferior): Remove.
+	* linux-low.c (linux_wait_for_event_filtered): Use
+	for_each_thread.
+	(linux_stabilize_threads): Likewise.
+	* regcache.c (regcache_release): Likewise.
+	* server.c (gdb_wants_all_threads_stopped): Likewise.
+	(clear_pending_status_callback): Remove.
+	(handle_status): Use for_each_thread.
+	(captured_main): Likewise.
+	* win32-low.c (child_init_thread_list): Likewise.
+	(win32_clear_inferiors): Likewise.
+	(fake_breakpoint_event): Likewise.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inferiors.h (find_inferior): Remove.
+	* inferiors.c (find_inferior): Remove.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (resume_status_pending_p): Update comment.
+	(need_step_over_p): Update comment.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (proceed_one_lwp): Return void, change parameter
+	type.
+	(unsuspend_and_proceed_one_lwp): Likewise.
+	(proceed_all_lwps): Use for_each_thread.
+	(unstop_all_lwps): Likewise.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (linux_resume_one_thread): Return void, take
+	parameter directly.
+	(linux_resume): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (send_sigstop_callback): Return void, change
+	parameter type.  Rename to...
+	(send_sigstop): ... this.
+	(suspend_and_send_sigstop_callback): Return void, change parameter
+	type.  Rename to...
+	(suspend_and_send_sigstop): ... this.
+	(stop_all_lwps): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (lwp_running): Return bool, remove unused
+	argument.
+	(linux_stabilize_threads): Use find_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (select_singlestep_lwp_callback): Remove.
+	(count_events_callback): Remove.
+	(select_event_lwp_callback): Remove.
+	(select_event_lwp): Use find_thread/for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (not_stopped_callback): Return bool, take filter
+	argument directly.
+	(linux_wait_for_event_filtered): Use find_thread.
+	(linux_wait_1): Likewise.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (same_lwp): Remove.
+	(find_lwp_pid): Use find_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (delete_lwp_callback): Remove.
+	(linux_mourn): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (linux_detach_lwp_callback): Return void, remove
+	args parameter, don't check for pid.
+	(linux_detach): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (struct counter): Remove.
+	(second_thread_of_pid_p): Remove.
+	(last_thread_of_process_p): Use find_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inferiors.c (find_inferior_in_random): Remove.
+	* inferiors.h (find_inferior_in_random): Remove.
+	* linux-low.c (status_pending_p_callback): Return bool, accept
+	parameter ptid directly.
+	(linux_wait_for_event_filtered): Use find_thread_in_random.
+	(linux_wait_1): Likewise.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inferiors.c (find_inferior_id): Remove.
+	(find_thread_ptid): Move implemention from find_inferior_id to
+	here.
+	* inferiors.h (find_inferior_id): Remove.
+	* server.c (handle_status): Use find_thread_ptid.
+	(process_serial_event): Likewise.
+	* thread-db.c (find_one_thread): Likewise.
+	(thread_db_thread_handle): Likewise.
+	* win32-low.c (thread_rec): Likewise.
+	(child_delete_thread): Likewise.
+	(win32_thread_alive): Likewise.
+	(get_child_debug_event): Likewise.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-mips-low.c (update_watch_registers_callback): Return
+	void, remove pid_p parameter, don't check for pid.
+	(mips_insert_point, mips_remove_point): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lynx.low (lynx_delete_thread_callback): Remove.
+	(lynx_mourn): Use for_each_thread.
+
+2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.c (regcache_invalidate_one): Remove.
+	(regcache_invalidate_pid): use for_each_thread.
+
 2017-11-26  Tom Tromey  <tom@tromey.com>
 
 	* linux-low.c (linux_create_inferior): Update.

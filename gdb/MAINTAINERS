@@ -154,9 +154,7 @@ Kevin Buettner			kevinb@redhat.com
 Doug Evans			dje@google.com
 Simon Marchi			simon.marchi@ericsson.com
 Yao Qi				yao.qi@arm.com
-Stan Shebs			stanshebs@google.com
 Ulrich Weigand			Ulrich.Weigand@de.ibm.com
-Elena Zannoni			elena.zannoni@oracle.com
 Eli Zaretskii			eliz@gnu.org
 
 
@@ -185,8 +183,7 @@ patches; and ensure that contributors are given credit.
 
 Current patch champions (in alphabetical order):
 
-	Randolph Chung     <tausq@debian.org>
-
+	<none>
 
 
 			Responsible Maintainers
@@ -261,9 +258,6 @@ the native maintainer when resolving ABI issues.
 
 	m32r		--target=m32r-elf ,-Werror
 
-	m68hc11		--target=m68hc11-elf ,-Werror ,
-			Stephane Carrez		Stephane.Carrez@gmail.com
-
 	m68k		--target=m68k-elf ,-Werror
 
 	m88k		--target=m88k-openbsd ,-Werror
@@ -306,9 +300,6 @@ the native maintainer when resolving ABI issues.
 	s390		--target=s390-linux-gnu ,-Werror
 			Andreas Arnez		arnez@linux.vnet.ibm.com
 
-	score	--target=score-elf
-			Qinwei		qinwei@sunnorth.com.cn
-
 	sh		--target=sh-elf ,-Werror
 			--target=sh64-elf ,-Werror
 
@@ -326,9 +317,6 @@ the native maintainer when resolving ABI issues.
 	vax		--target=vax-netbsd ,-Werror
 
 	x86-64		--target=x86_64-linux-gnu ,-Werror
-
-	xstormy16	--target=xstormy16-elf
-			Corinna Vinschen	vinschen@redhat.com
 
 	xtensa		--target=xtensa-elf
 
@@ -352,7 +340,6 @@ their platform.
 Darwin			Tristan Gingold		tgingold@free.fr
 djgpp native		Eli Zaretskii		eliz@gnu.org
 FreeBSD			John Baldwin		jhb@freebsd.org
-GNU Hurd		Alfred M. Szmidt	ams@gnu.org
 GNU/Linux m68k		Andreas Schwab		schwab@linux-m68k.org
 
 
@@ -363,9 +350,7 @@ linespec		Keith Seitz             keiths@redhat.com
 
 language support
   Ada			Joel Brobecker		brobecker@adacore.com
-			Paul Hilfinger		hilfinger@gnat.com
   D			Iain Buclaw		ibuclaw@gdcproject.org
-  Objective C support   Adam Fedor		fedor@gnu.org
   Rust			Tom Tromey		tom@tromey.com
 shared libs		Kevin Buettner		kevinb@redhat.com
 MI interface		Vladimir Prus		vladimir@codesourcery.com
@@ -426,28 +411,14 @@ Blackfin		Mike Frysinger		vapier@gentoo.org
 CRIS			Hans-Peter Nilsson	hp@axis.com
 IA64			Jeff Johnston		jjohnstn@redhat.com
 MIPS			Joel Brobecker		brobecker@adacore.com
-m32r			Kei Sakamoto		sakamoto.kei@renesas.com
 PowerPC			Kevin Buettner		kevinb@redhat.com
-CRIS			Orjan Friberg		orjanf@axis.com
-HPPA			Randolph Chung		tausq@debian.org
 S390			Ulrich Weigand		uweigand@de.ibm.com
 djgpp			DJ Delorie		dj@delorie.com
 			[Please use this address to contact DJ about DJGPP]
-tui			Stephane Carrez		Stephane.Carrez@gmail.com
 ia64			Kevin Buettner		kevinb@redhat.com
 AIX			Kevin Buettner		kevinb@redhat.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@redhat.com
-FreeBSD native & host	David O'Brien		obrien@freebsd.org
-event loop		Elena Zannoni		elena.zannoni@oracle.com
-generic symtabs		Elena Zannoni		elena.zannoni@oracle.com
-dwarf readers		Elena Zannoni		elena.zannoni@oracle.com
-elf reader		Elena Zannoni		elena.zannoni@oracle.com
-stabs reader		Elena Zannoni		elena.zannoni@oracle.com
-readline/		Elena Zannoni		elena.zannoni@oracle.com
-NetBSD native & host	Jason Thorpe		thorpej@netbsd.org
 Pascal support		Pierre Muller		muller@sourceware.org
-avr			Theodore A. Roth	troth@openavr.org
-Modula-2 support	Gaius Mulley		gaius@glam.ac.uk
 
 
 			Write After Approval
@@ -536,7 +507,7 @@ Ben Harris					bjh21@netbsd.org
 Bernhard Heckel					heckel_bernhard@web.de
 Richard Henderson				rth@redhat.com
 Aldy Hernandez					aldyh@redhat.com
-Paul Hilfinger					hilfinger@gnat.com
+Paul Hilfinger					hilfingr@eecs.berkeley.edu
 Matt Hiller					hiller@redhat.com
 Kazu Hirata					kazu@cs.umass.edu
 James Hogan					james.hogan@imgtec.com
@@ -656,6 +627,7 @@ Jackie Smith Cashion				jsmith@redhat.com
 Petr Sorfa					petrs@caldera.com
 Andrew Stubbs					ams@codesourcery.com
 Emi Suzuki					emi-suzuki@tjsys.co.jp
+Alfred M. Szmidt				ams@gnu.org
 David Taylor					david.taylor@emc.com
 Ian Lance Taylor				ian@airs.com
 Walfred Tedeschi				walfred.tedeschi@intel.com
@@ -686,7 +658,7 @@ Jim Wilson					wilson@tuliptree.org
 Andy Wingo					wingo@igalia.com
 Mike Wrighton					wrighton@codesourcery.com
 Kwok Cheung Yeung				kcy@codesourcery.com
-Elena Zannoni					elena.zannoni@oracle.com
+Elena Zannoni					ezannoni@gmail.com
 Eli Zaretskii					eliz@gnu.org
 Jie Zhang					jzhang918@gmail.com
 Wu Zhou						woodzltc@cn.ibm.com
@@ -732,6 +704,23 @@ Maxim Grigoriev (xtensa)			maxim2405 at gmail dot com
 Andrew Cagney (acting head maintainer,
   release manager, global, MIPS, PPC, d10v,
   d30v, sim, mi, multi-arch, unwinder)		cagney at gnu dot org
+Paul Hilfinger (Ada)				hilfingr@eecs.berkeley.edu
+David O'Brien (FreeBSD, host & native)		obrien@freebsd.org
+Jason Thorpe (NetBSD, host & native)		thorpej@netbsd.org
+Gaius Mulley (Modula-2)				gaius@glam.ac.uk
+Kei Sakamoto (m32r)				sakamoto.kei@renesas.com
+Orjan Friberg (CRIS)				orjanf@axis.com
+Qinwei (score-elf)				qinwei@sunnorth.com.cn
+Randolph Chung (HPPA)				tausq@debian.org
+Elena Zannoni (Global, event loop, generic
+  symtabs, DWARF readers, ELF readers, stabs
+  readers, readline)				ezannoni@gmail.com
+Adam Fedor (Objective C)			fedor@gnu.org
+Corinna Vinschen (xstormy16-elf)		vinschen@redhat.com
+Theodore A. Roth (avr)				troth@openavr.org
+Stephane Carrez (m68hc11-elf, tui)		Stephane.Carrez@gmail.com
+Alfred M. Szmidt (GNU Hurd)			ams@gnu.org
+Stan Shebs (Global)				stanshebs@google.com
 
 
 Folks that have been caught up in a paper trail:

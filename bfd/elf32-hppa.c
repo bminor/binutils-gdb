@@ -1057,30 +1057,14 @@ elf32_hppa_copy_indirect_symbol (struct bfd_link_info *info,
       hh_ind->dyn_relocs = NULL;
     }
 
-  if (ELIMINATE_COPY_RELOCS
-      && eh_ind->root.type != bfd_link_hash_indirect
-      && eh_dir->dynamic_adjusted)
+  if (eh_ind->root.type == bfd_link_hash_indirect)
     {
-      /* If called to transfer flags for a weakdef during processing
-	 of elf_adjust_dynamic_symbol, don't copy non_got_ref.
-	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-      if (eh_dir->versioned != versioned_hidden)
-	eh_dir->ref_dynamic |= eh_ind->ref_dynamic;
-      eh_dir->ref_regular |= eh_ind->ref_regular;
-      eh_dir->ref_regular_nonweak |= eh_ind->ref_regular_nonweak;
-      eh_dir->needs_plt |= eh_ind->needs_plt;
+      hh_dir->plabel |= hh_ind->plabel;
+      hh_dir->tls_type |= hh_ind->tls_type;
+      hh_ind->tls_type = GOT_UNKNOWN;
     }
-  else
-    {
-      if (eh_ind->root.type == bfd_link_hash_indirect)
-	{
-	  hh_dir->plabel |= hh_ind->plabel;
-	  hh_dir->tls_type |= hh_ind->tls_type;
-	  hh_ind->tls_type = GOT_UNKNOWN;
-	}
 
-      _bfd_elf_link_hash_copy_indirect (info, eh_dir, eh_ind);
-    }
+  _bfd_elf_link_hash_copy_indirect (info, eh_dir, eh_ind);
 }
 
 static int
@@ -1424,7 +1408,7 @@ elf32_hppa_check_relocs (bfd *abfd,
 	  /* Flag this symbol as having a non-got, non-plt reference
 	     so that we generate copy relocs if it turns out to be
 	     dynamic.  */
-	  if (hh != NULL && !bfd_link_pic (info))
+	  if (hh != NULL)
 	    hh->eh.non_got_ref = 1;
 
 	  /* If we are creating a shared library then we need to copy
@@ -1748,6 +1732,10 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   else
     eh->plt.offset = (bfd_vma) -1;
 
+  htab = hppa_link_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
@@ -1757,8 +1745,9 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
       BFD_ASSERT (def->root.type == bfd_link_hash_defined);
       eh->root.u.def.section = def->root.u.def.section;
       eh->root.u.def.value = def->root.u.def.value;
-      if (ELIMINATE_COPY_RELOCS)
-	eh->non_got_ref = def->non_got_ref;
+      if (def->root.u.def.section == htab->etab.sdynbss
+	  || def->root.u.def.section == htab->etab.sdynrelro)
+	hppa_elf_hash_entry (eh)->dyn_relocs = NULL;
       return TRUE;
     }
 
@@ -1798,14 +1787,6 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
      determine the address it must put in the global offset table, so
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
-
-  htab = hppa_link_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  /* We must generate a COPY reloc to tell the dynamic linker to
-     copy the initial value out of the dynamic object and into the
-     runtime process image.  */
   if ((eh->root.u.def.section->flags & SEC_READONLY) != 0)
     {
       sec = htab->etab.sdynrelro;
@@ -1818,6 +1799,9 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
   if ((eh->root.u.def.section->flags & SEC_ALLOC) != 0 && eh->size != 0)
     {
+      /* We must generate a COPY reloc to tell the dynamic linker to
+	 copy the initial value out of the dynamic object and into the
+	 runtime process image.  */
       srel->size += sizeof (Elf32_External_Rela);
       eh->needs_copy = 1;
     }
@@ -2114,8 +2098,8 @@ maybe_set_textrel (struct elf_link_hash_entry *eh, void *inf)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation in read-only section `%A'\n"),
-	 sec->owner, sec);
+	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	 sec->owner, eh->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
       return FALSE;
@@ -3797,7 +3781,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 							 bfd_link_pic (info),
 							 &hh->eh))
 		    {
-		      /* In a non-shared link, adjust_dynamic_symbols
+		      /* In a non-shared link, adjust_dynamic_symbol
 			 isn't called for symbols forced local.  We
 			 need to write out the plt entry here.  */
 		      if ((off & 1) != 0)

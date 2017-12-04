@@ -1,3 +1,32 @@
+2017-12-04  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/powerpc.exp (ppceabitests): Add -a32 -mbig
+	to assembler options, and -melf32ppc to linker options.  Always
+	run these tests.
+
+2017-12-01  Tobias Ulmer  <tobiasu@tmux.org>
+
+	* ldwrite.c (build_link_order): Check return value of all
+	bfd_new_link_order calls.
+
+2017-12-01  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elfweak/alias.c,
+	* testsuite/ld-elfweak/alias.dat,
+	* testsuite/ld-elfweak/aliasmain.c,
+	* testsuite/ld-elfweak/weakref1.c,
+	* testsuite/ld-elfweak/weakref2.c: New test.
+	* testsuite/ld-elfweak/elfweak.exp: Run it.  Don't return on fails,
+	attempt other tests.
+
+2017-12-01  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/shared.exp: Run new textrel tests.
+	* testsuite/ld-elf/textrel.map: New file.
+	* testsuite/ld-elf/textrel.rd: New file.
+	* testsuite/ld-elf/textrel.s: New file.
+	* testsuite/ld-elf/textrel.warn: New file.
+
 2017-11-30  Alan Modra  <amodra@gmail.com>
 
 	PR 22471

@@ -1,3 +1,56 @@
+2017-12-03  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/process-dies-while-detaching.c: Include <errno.h>
+	and <string.h>.
+	(parent_function): Print distinct messages when waitpid fails, or
+	the child exits with a signal, or the child exits for an unhandled
+	reason.
+	* gdb.threads/process-dies-while-detaching.exp
+	(detach_and_expect_exit): New 'inf_output_re' parameter and use
+	it.  Wait for both inferior output and GDB's prompt.  Use an
+	indirect spawn id list.
+	(do_detach): New parameter 'child_exit'.  Use it to compute
+	expected inferior output.
+	(test_detach, test_detach_watch, test_detach_killed_outside):
+	Adjust to pass down the expected child exit kind.
+
+2017-12-01  Joel Brobecker  <brobecker@adacore.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/readnever.c, gdb.base/readnever.exp: New files.
+
+2017-12-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/relocate.exp: Add tests to guarantee that arguments
+	to 'symbol-file' and 'add-symbol-file' can be
+	position-independent.
+
+2017-12-01  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/aarch64-atomic-inst.exp: Replace mail address with
+	the URL in copyright header.
+	* gdb.arch/aarch64-fp.exp: Likewise.
+	* gdb.arch/ppc64-atomic-inst.exp: Likewise.
+	* gdb.arch/ppc64-isa207-atomic-inst.exp: Likewise.
+	* gdb.base/expand-psymtabs.exp: Likewise.
+	* gdb.cp/expand-psymtabs-cxx.exp: Likewise.
+	* gdb.fortran/common-block.exp: Likewise.
+	* gdb.fortran/common-block.f90: Likewise.
+	* gdb.fortran/logical.exp: Likewise.
+	* gdb.fortran/vla-datatypes.f90: Likewise.
+	* gdb.fortran/vla-sub.f90: Likewise.
+
+2017-11-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/repeat_dyn: New testcase.
+
+2017-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.cell/gcore.exp: Fix typo when setting spu_bin.
+	Update for changed thread numbering.
+	* gdb.cell/bt.exp: Update for changed GDB output.
+
 2017-11-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* boards/cc-with-tweaks.exp: Include local-board.exp instead of

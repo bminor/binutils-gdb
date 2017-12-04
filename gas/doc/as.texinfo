@@ -502,6 +502,13 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mnolink-relax}]
    [@b{-mno-warn-regname-label}]
 @end ifset
+@ifset RISCV
+
+@emph{Target RISC-V options:}
+   [@b{-fpic}|@b{-fPIC}|@b{-fno-pic}]
+   [@b{-march}=@var{ISA}]
+   [@b{-mabi}=@var{ABI}]
+@end ifset
 @ifset RL78
 
 @emph{Target RL78 options:}
@@ -519,12 +526,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mrelax}]
    [@b{-mint-register=@var{number}}]
    [@b{-mgcc-abi}|@b{-mrx-abi}]
-@end ifset
-@ifset RISCV
-
-@emph{Target RISC-V options:}
-   [@b{-march}=@var{ISA}]
-   [@b{-mabi}=@var{ABI}]
 @end ifset
 @ifset S390
 
@@ -1702,14 +1703,14 @@ PowerPC processor.
 @ifset RISCV
 
 @ifclear man
-@xref{RISC-V-Opts}, for the options available when @value{AS} is configured
+@xref{RISC-V-Options}, for the options available when @value{AS} is configured
 for a RISC-V processor.
 @end ifclear
 
 @ifset man
 @c man begin OPTIONS
 The following options are available when @value{AS} is configured for a
-RISC-V  processor.
+RISC-V processor.
 @c man end
 @c man begin INCLUDE
 @include c-riscv.texi
@@ -7400,7 +7401,7 @@ long values into the output.
 @cindex eight-byte integer
 @cindex integer, 8-byte
 
-Like the @option{.8byte} directive, except that it inserts unaligned, eight
+Like the @option{.2byte} directive, except that it inserts unaligned, eight
 byte long bignum values into the output.
 
 @end ifset
@@ -7710,11 +7711,11 @@ subject, see the hardware manufacturer's manual.
 @ifset PRU
 * PRU-Dependent::               PRU Dependent Features
 @end ifset
-@ifset RL78
-* RL78-Dependent::              RL78 Dependent Features
-@end ifset
 @ifset RISCV
 * RISC-V-Dependent::            RISC-V Dependent Features
+@end ifset
+@ifset RL78
+* RL78-Dependent::              RL78 Dependent Features
 @end ifset
 @ifset RX
 * RX-Dependent::                RX Dependent Features
@@ -7946,12 +7947,12 @@ family.
 @include c-pru.texi
 @end ifset
 
-@ifset RL78
-@include c-rl78.texi
-@end ifset
-
 @ifset RISCV
 @include c-riscv.texi
+@end ifset
+
+@ifset RL78
+@include c-rl78.texi
 @end ifset
 
 @ifset RX

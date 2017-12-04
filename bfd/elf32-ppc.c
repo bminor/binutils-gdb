@@ -3579,18 +3579,11 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir->tls_mask |= eind->tls_mask;
   edir->has_sda_refs |= eind->has_sda_refs;
 
-  /* If called to transfer flags for a weakdef during processing
-     of elf_adjust_dynamic_symbol, don't copy non_got_ref.
-     We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-  if (!(ELIMINATE_COPY_RELOCS
-	&& eind->elf.root.type != bfd_link_hash_indirect
-	&& edir->elf.dynamic_adjusted))
-    edir->elf.non_got_ref |= eind->elf.non_got_ref;
-
   if (edir->elf.versioned != versioned_hidden)
     edir->elf.ref_dynamic |= eind->elf.ref_dynamic;
   edir->elf.ref_regular |= eind->elf.ref_regular;
   edir->elf.ref_regular_nonweak |= eind->elf.ref_regular_nonweak;
+  edir->elf.non_got_ref |= eind->elf.non_got_ref;
   edir->elf.needs_plt |= eind->elf.needs_plt;
   edir->elf.pointer_equality_needed |= eind->elf.pointer_equality_needed;
 
@@ -5571,8 +5564,10 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       BFD_ASSERT (def->root.type == bfd_link_hash_defined);
       h->root.u.def.section = def->root.u.def.section;
       h->root.u.def.value = def->root.u.def.value;
-      if (ELIMINATE_COPY_RELOCS)
-	h->non_got_ref = def->non_got_ref;
+      if (def->root.u.def.section == htab->elf.sdynbss
+	  || def->root.u.def.section == htab->elf.sdynrelro
+	  || def->root.u.def.section == htab->dynsbss)
+	ppc_elf_hash_entry (h)->dyn_relocs = NULL;
       return TRUE;
     }
 
@@ -5641,7 +5636,6 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
      Of course, if the symbol is referenced using SDAREL relocs, we
      must instead allocate it in .sbss.  */
-
   if (ppc_elf_hash_entry (h)->has_sda_refs)
     s = htab->dynsbss;
   else if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
@@ -5650,14 +5644,13 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     s = htab->elf.sdynbss;
   BFD_ASSERT (s != NULL);
 
-  /* We must generate a R_PPC_COPY reloc to tell the dynamic linker to
-     copy the initial value out of the dynamic object and into the
-     runtime process image.  We need to remember the offset into the
-     .rela.bss section we are going to use.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
       asection *srel;
 
+      /* We must generate a R_PPC_COPY reloc to tell the dynamic
+	 linker to copy the initial value out of the dynamic object
+	 and into the runtime process image.  */
       if (ppc_elf_hash_entry (h)->has_sda_refs)
 	srel = htab->relsbss;
       else if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
@@ -6160,8 +6153,8 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation in read-only section `%A'\n"),
-	 sec->owner, sec);
+	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
       return FALSE;

@@ -81,6 +81,7 @@ static void clear_symtab_users_cleanup (void *ignore);
 
 /* Global variables owned by this file.  */
 int readnow_symbol_files;	/* Read full symbols immediately.  */
+int readnever_symbol_files;	/* Never read full symbols.  */
 
 /* Functions this file defines.  */
 
@@ -1131,6 +1132,12 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
       flags |= OBJF_READNOW;
       add_flags &= ~SYMFILE_NO_READ;
     }
+  else if (readnever_symbol_files
+	   || (parent != NULL && (parent->flags & OBJF_READNEVER)))
+    {
+      flags |= OBJF_READNEVER;
+      add_flags |= SYMFILE_NO_READ;
+    }
 
   /* Give user a chance to burp if we'd be
      interactively wiping out any existing symbols.  */
@@ -1594,6 +1601,16 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
   return debugfile;
 }
 
+/* Make sure that OBJF_{READNOW,READNEVER} are not set
+   simultaneously.  */
+
+static void
+validate_readnow_readnever (objfile_flags flags)
+{
+  if ((flags & OBJF_READNOW) && (flags & OBJF_READNEVER))
+    error (_("-readnow and -readnever cannot be used simultaneously"));
+}
+
 /* This is the symbol-file command.  Read the file, analyze its
    symbols, and add a struct symtab to a symtab list.  The syntax of
    the command is rather bizarre:
@@ -1622,26 +1639,39 @@ symbol_file_command (const char *args, int from_tty)
       objfile_flags flags = OBJF_USERLOADED;
       symfile_add_flags add_flags = 0;
       char *name = NULL;
+      bool stop_processing_options = false;
+      int idx;
+      char *arg;
 
       if (from_tty)
 	add_flags |= SYMFILE_VERBOSE;
 
       gdb_argv built_argv (args);
-      for (char *arg : built_argv)
+      for (arg = built_argv[0], idx = 0; arg != NULL; arg = built_argv[++idx])
 	{
-	  if (strcmp (arg, "-readnow") == 0)
-	    flags |= OBJF_READNOW;
-	  else if (*arg == '-')
-	    error (_("unknown option `%s'"), arg);
-	  else
+	  if (stop_processing_options || *arg != '-')
 	    {
-	      symbol_file_add_main_1 (arg, add_flags, flags);
-	      name = arg;
+	      if (name == NULL)
+		name = arg;
+	      else
+		error (_("Unrecognized argument \"%s\""), arg);
 	    }
+	  else if (strcmp (arg, "-readnow") == 0)
+	    flags |= OBJF_READNOW;
+	  else if (strcmp (arg, "-readnever") == 0)
+	    flags |= OBJF_READNEVER;
+	  else if (strcmp (arg, "--") == 0)
+	    stop_processing_options = true;
+	  else
+	    error (_("Unrecognized argument \"%s\""), arg);
 	}
 
       if (name == NULL)
 	error (_("no symbol file name was specified"));
+
+      validate_readnow_readnever (flags);
+
+      symbol_file_add_main_1 (name, add_flags, flags);
     }
 }
 
@@ -2180,8 +2210,6 @@ add_symbol_file_command (const char *args, int from_tty)
   char *arg;
   int argcnt = 0;
   int sec_num = 0;
-  int expecting_sec_name = 0;
-  int expecting_sec_addr = 0;
   struct objfile *objf;
   objfile_flags flags = OBJF_USERLOADED | OBJF_SHARED;
   symfile_add_flags add_flags = 0;
@@ -2196,7 +2224,8 @@ add_symbol_file_command (const char *args, int from_tty)
   };
 
   struct section_addr_info *section_addrs;
-  std::vector<sect_opt> sect_opts;
+  std::vector<sect_opt> sect_opts = { { ".text", NULL } };
+  bool stop_processing_options = false;
   struct cleanup *my_cleanups = make_cleanup (null_cleanup, NULL);
 
   dont_repeat ();
@@ -2204,62 +2233,62 @@ add_symbol_file_command (const char *args, int from_tty)
   if (args == NULL)
     error (_("add-symbol-file takes a file name and an address"));
 
+  bool seen_addr = false;
   gdb_argv argv (args);
 
   for (arg = argv[0], argcnt = 0; arg != NULL; arg = argv[++argcnt])
     {
-      /* Process the argument.  */
-      if (argcnt == 0)
+      if (stop_processing_options || *arg != '-')
 	{
-	  /* The first argument is the file name.  */
-	  filename.reset (tilde_expand (arg));
-	}
-      else if (argcnt == 1)
-	{
-	  /* The second argument is always the text address at which
-	     to load the program.  */
-	  sect_opt sect = { ".text", arg };
-	  sect_opts.push_back (sect);
-	}
-      else
-	{
-	  /* It's an option (starting with '-') or it's an argument
-	     to an option.  */
-	  if (expecting_sec_name)
+	  if (filename == NULL)
 	    {
-	      sect_opt sect = { arg, NULL };
-	      sect_opts.push_back (sect);
-	      expecting_sec_name = 0;
+	      /* First non-option argument is always the filename.  */
+	      filename.reset (tilde_expand (arg));
 	    }
-	  else if (expecting_sec_addr)
+	  else if (!seen_addr)
 	    {
-	      sect_opts.back ().value = arg;
-	      expecting_sec_addr = 0;
-	    }
-	  else if (strcmp (arg, "-readnow") == 0)
-	    flags |= OBJF_READNOW;
-	  else if (strcmp (arg, "-s") == 0)
-	    {
-	      expecting_sec_name = 1;
-	      expecting_sec_addr = 1;
+	      /* The second non-option argument is always the text
+		 address at which to load the program.  */
+	      sect_opts[0].value = arg;
+	      seen_addr = true;
 	    }
 	  else
 	    error (_("Unrecognized argument \"%s\""), arg);
 	}
+      else if (strcmp (arg, "-readnow") == 0)
+	flags |= OBJF_READNOW;
+      else if (strcmp (arg, "-readnever") == 0)
+	flags |= OBJF_READNEVER;
+      else if (strcmp (arg, "-s") == 0)
+	{
+	  if (argv[argcnt + 1] == NULL)
+	    error (_("Missing section name after \"-s\""));
+	  else if (argv[argcnt + 2] == NULL)
+	    error (_("Missing section address after \"-s\""));
+
+	  sect_opt sect = { argv[argcnt + 1], argv[argcnt + 2] };
+
+	  sect_opts.push_back (sect);
+	  argcnt += 2;
+	}
+      else if (strcmp (arg, "--") == 0)
+	stop_processing_options = true;
+      else
+	error (_("Unrecognized argument \"%s\""), arg);
     }
+
+  if (filename == NULL)
+    error (_("You must provide a filename to be loaded."));
+
+  validate_readnow_readnever (flags);
 
   /* This command takes at least two arguments.  The first one is a
      filename, and the second is the address where this file has been
      loaded.  Abort now if this address hasn't been provided by the
      user.  */
-  if (sect_opts.empty ())
+  if (!seen_addr)
     error (_("The address where %s has been loaded is missing"),
 	   filename.get ());
-
-  if (expecting_sec_name)
-    error (_("Missing section name after \"-s\""));
-  else if (expecting_sec_addr)
-    error (_("Missing section address after \"-s\""));
 
   /* Print the prompt for the query below.  And save the arguments into
      a sect_addr_info structure to be passed around to other
@@ -3878,26 +3907,29 @@ _initialize_symfile (void)
 
   observer_attach_free_objfile (symfile_free_objfile);
 
-#define READNOW_HELP \
+#define READNOW_READNEVER_HELP \
   "The '-readnow' option will cause GDB to read the entire symbol file\n\
 immediately.  This makes the command slower, but may make future operations\n\
-faster."
+faster.\n\
+The '-readnever' option will prevent GDB from reading the symbol file's\n\
+symbolic debug information."
 
   c = add_cmd ("symbol-file", class_files, symbol_file_command, _("\
 Load symbol table from executable file FILE.\n\
-Usage: symbol-file [-readnow] FILE\n\
+Usage: symbol-file [-readnow | -readnever] FILE\n\
 The `file' command can also load symbol tables, as well as setting the file\n\
-to execute.\n" READNOW_HELP), &cmdlist);
+to execute.\n" READNOW_READNEVER_HELP), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command, _("\
 Load symbols from FILE, assuming FILE has been dynamically loaded.\n\
-Usage: add-symbol-file FILE ADDR [-readnow | -s SECT-NAME SECT-ADDR]...\n\
+Usage: add-symbol-file FILE ADDR [-readnow | -readnever | \
+-s SECT-NAME SECT-ADDR]...\n\
 ADDR is the starting address of the file's text.\n\
 Each '-s' argument provides a section name and address, and\n\
 should be specified if the data and bss segments are not contiguous\n\
 with the text.  SECT-NAME is a section name to be loaded at SECT-ADDR.\n"
-READNOW_HELP),
+READNOW_READNEVER_HELP),
 	       &cmdlist);
   set_cmd_completer (c, filename_completer);
 

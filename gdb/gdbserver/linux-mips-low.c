@@ -289,29 +289,21 @@ mips_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
-/* Mark the watch registers of lwp, represented by ENTRY, as changed,
-   if the lwp's process id is *PID_P.  */
+/* Mark the watch registers of lwp, represented by ENTRY, as changed.  */
 
-static int
-update_watch_registers_callback (thread_info *thread, void *pid_p)
+static void
+update_watch_registers_callback (thread_info *thread)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
-  int pid = *(int *) pid_p;
 
-  /* Only update the threads of this process.  */
-  if (pid_of (thread) == pid)
-    {
-      /* The actual update is done later just before resuming the lwp,
-	 we just mark that the registers need updating.  */
-      lwp->arch_private->watch_registers_changed = 1;
+  /* The actual update is done later just before resuming the lwp,
+     we just mark that the registers need updating.  */
+  lwp->arch_private->watch_registers_changed = 1;
 
-      /* If the lwp isn't stopped, force it to momentarily pause, so
-	 we can update its watch registers.  */
-      if (!lwp->stopped)
-	linux_stop_lwp (lwp);
-    }
-
-  return 0;
+  /* If the lwp isn't stopped, force it to momentarily pause, so
+     we can update its watch registers.  */
+  if (!lwp->stopped)
+    linux_stop_lwp (lwp);
 }
 
 /* This is the implementation of linux_target_ops method
@@ -471,7 +463,6 @@ mips_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   struct process_info *proc = current_process ();
   struct arch_process_info *priv = proc->priv->arch_private;
   struct pt_watch_regs regs;
-  int pid;
   long lwpid;
   enum target_hw_bp_type watch_type;
   uint32_t irw;
@@ -502,8 +493,7 @@ mips_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   priv->watch_mirror = regs;
 
   /* Only update the threads of this process.  */
-  pid = pid_of (proc);
-  find_inferior (&all_threads, update_watch_registers_callback, &pid);
+  for_each_thread (proc->pid, update_watch_registers_callback);
 
   return 0;
 }
@@ -519,7 +509,6 @@ mips_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
   struct arch_process_info *priv = proc->priv->arch_private;
 
   int deleted_one;
-  int pid;
   enum target_hw_bp_type watch_type;
 
   struct mips_watchpoint **pw;
@@ -553,8 +542,8 @@ mips_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 				  &priv->watch_mirror);
 
   /* Only update the threads of this process.  */
-  pid = pid_of (proc);
-  find_inferior (&all_threads, update_watch_registers_callback, &pid);
+  for_each_thread (proc->pid, update_watch_registers_callback);
+
   return 0;
 }
 

@@ -30,63 +30,6 @@ struct thread_info *current_thread;
 /* The current working directory used to start the inferior.  */
 static const char *current_inferior_cwd = NULL;
 
-thread_info *
-find_inferior (std::list<thread_info *> *thread_list,
-	       int (*func) (thread_info *, void *),
-	       void *arg)
-{
-  gdb_assert (thread_list == &all_threads);
-
-  return find_thread ([&] (thread_info *thread) {
-    return func (thread, arg);
-  });
-}
-
-thread_info *
-find_inferior_id (std::list<thread_info *> *thread_list, ptid_t id)
-{
-  gdb_assert (thread_list == &all_threads);
-
-  return find_thread ([&] (thread_info *thread) {
-    return thread->id == id;
-  });
-}
-
-thread_info *
-find_inferior_in_random (std::list<thread_info *> *thread_list,
-			 int (*func) (thread_info *, void *),
-			 void *arg)
-{
-  gdb_assert (thread_list == &all_threads);
-
-  return find_thread_in_random ([&] (thread_info *thread) {
-    return func (thread, arg);
-  });
-}
-
-void
-for_each_inferior (std::list<thread_info *> *thread_list,
-		   void (*action) (thread_info *))
-{
-  gdb_assert (thread_list == &all_threads);
-
-  for_each_thread ([&] (thread_info *thread) {
-    action (thread);
-  });
-}
-
-void
-for_each_inferior_with_data (std::list<thread_info *> *thread_list,
-			     void (*action) (thread_info *, void *),
-			     void *data)
-{
-  gdb_assert (thread_list == &all_threads);
-
-  for_each_thread ([&] (thread_info *thread) {
-    action (thread, data);
-  });
-}
-
 struct thread_info *
 add_thread (ptid_t thread_id, void *target_data)
 {
@@ -120,7 +63,9 @@ get_first_thread (void)
 struct thread_info *
 find_thread_ptid (ptid_t ptid)
 {
-  return (struct thread_info *) find_inferior_id (&all_threads, ptid);
+  return find_thread ([&] (thread_info *thread) {
+    return thread->id == ptid;
+  });
 }
 
 /* Find a thread associated with the given PROCESS, or NULL if no
@@ -183,7 +128,7 @@ set_thread_regcache_data (struct thread_info *thread, struct regcache *data)
 void
 clear_inferiors (void)
 {
-  for_each_inferior (&all_threads, free_one_thread);
+  for_each_thread (free_one_thread);
   all_threads.clear ();
 
   clear_dlls ();

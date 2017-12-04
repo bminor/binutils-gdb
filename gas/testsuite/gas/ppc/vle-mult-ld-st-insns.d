@@ -1,4 +1,4 @@
-#as: -a32 -mvle -mregnames
+#as: -a32 -mbig -mvle -mregnames
 #objdump: -dr -Mvle
 #name: VLE Instructions for improving interrupt handler efficiency
 

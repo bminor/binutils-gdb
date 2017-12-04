@@ -127,14 +127,26 @@ namespace gold
 static int
 gold_fallocate(int o, off_t offset, off_t len)
 {
+  if (len <= 0)
+    return 0;
+
 #ifdef HAVE_POSIX_FALLOCATE
   if (parameters->options().posix_fallocate())
-    return ::posix_fallocate(o, offset, len);
+    {
+      int err = ::posix_fallocate(o, offset, len);
+      if (err != EINVAL && err != ENOSYS && err != EOPNOTSUPP)
+	return err;
+    }
 #endif // defined(HAVE_POSIX_FALLOCATE)
+
 #ifdef HAVE_FALLOCATE
-  if (::fallocate(o, 0, offset, len) == 0)
-    return 0;
+  {
+    int err = ::fallocate(o, 0, offset, len);
+    if (err != EINVAL && err != ENOSYS && err != EOPNOTSUPP)
+      return err;
+  }
 #endif // defined(HAVE_FALLOCATE)
+
   if (::ftruncate(o, offset + len) < 0)
     return errno;
   return 0;

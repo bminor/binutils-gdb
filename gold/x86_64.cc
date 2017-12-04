@@ -3066,9 +3066,10 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 	// mov foo@GOTPCREL(%rip), %reg
 	// to lea foo(%rip), %reg.
 	// in Relocate::relocate.
-	if ((r_type == elfcpp::R_X86_64_GOTPCREL
-	     || r_type == elfcpp::R_X86_64_GOTPCRELX
-	     || r_type == elfcpp::R_X86_64_REX_GOTPCRELX)
+	if (!parameters->incremental()
+	    && (r_type == elfcpp::R_X86_64_GOTPCREL
+		|| r_type == elfcpp::R_X86_64_GOTPCRELX
+		|| r_type == elfcpp::R_X86_64_REX_GOTPCRELX)
 	    && reloc.get_r_offset() >= 2
 	    && !is_ifunc)
 	  {
@@ -3078,7 +3079,6 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 	    if (view[reloc.get_r_offset() - 2] == 0x8b)
 	      break;
 	  }
-
 
 	// The symbol requires a GOT entry.
 	unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
@@ -3546,15 +3546,21 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 	// (callq|jmpq) *foo@GOTPCRELX(%rip) to
 	// (callq|jmpq) foo
 	// in Relocate::relocate, then there is nothing to do here.
+	// We cannot make these optimizations in incremental linking mode,
+	// because we look at the opcode to decide whether or not to make
+	// change, and during an incremental update, the change may have
+	// already been applied.
 
         Lazy_view<size> view(object, data_shndx);
         size_t r_offset = reloc.get_r_offset();
-        if (r_offset >= 2
+        if (!parameters->incremental()
+	    && r_offset >= 2
             && Target_x86_64<size>::can_convert_mov_to_lea(gsym, r_type,
                                                            r_offset, &view))
           break;
 
-	if (r_offset >= 2
+	if (!parameters->incremental()
+	    && r_offset >= 2
 	    && Target_x86_64<size>::can_convert_callq_to_direct(gsym, r_type,
 								r_offset,
 								&view))
@@ -4243,14 +4249,15 @@ Target_x86_64<size>::Relocate::relocate(
       // mov foo@GOTPCREL(%rip), %reg
       // to lea foo(%rip), %reg.
       // if possible.
-       if ((gsym == NULL
-             && rela.get_r_offset() >= 2
-             && view[-2] == 0x8b
-             && !psymval->is_ifunc_symbol())
-            || (gsym != NULL
-                && rela.get_r_offset() >= 2
-                && Target_x86_64<size>::can_convert_mov_to_lea(gsym, r_type,
-                                                               0, &view)))
+      if (!parameters->incremental()
+	  && ((gsym == NULL
+	       && rela.get_r_offset() >= 2
+	       && view[-2] == 0x8b
+	       && !psymval->is_ifunc_symbol())
+	      || (gsym != NULL
+		  && rela.get_r_offset() >= 2
+		  && Target_x86_64<size>::can_convert_mov_to_lea(gsym, r_type,
+								 0, &view))))
 	{
 	  view[-2] = 0x8d;
 	  Reloc_funcs::pcrela32(view, object, psymval, addend, address);
@@ -4261,7 +4268,8 @@ Target_x86_64<size>::Relocate::relocate(
       // and jmpq *foo@GOTPCRELX(%rip) to
       // jmpq foo
       // nop
-      else if (gsym != NULL
+      else if (!parameters->incremental()
+	       && gsym != NULL
 	       && rela.get_r_offset() >= 2
 	       && Target_x86_64<size>::can_convert_callq_to_direct(gsym,
 								   r_type,
