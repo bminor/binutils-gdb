@@ -11594,7 +11594,9 @@ this writing, @sc{gnu}/Linux, FreeBSD, Solaris, and S390).
 
 On @sc{gnu}/Linux, this command can take into account the value of the
 file @file{/proc/@var{pid}/coredump_filter} when generating the core
-dump (@pxref{set use-coredump-filter}).
+dump (@pxref{set use-coredump-filter}), and by default honors the
+@code{VM_DONTDUMP} flag for mappings where it is present in the file
+@file{/proc/@var{pid}/smaps} (@pxref{set dump-excluded-mappings}).
 
 @kindex set use-coredump-filter
 @anchor{set use-coredump-filter}
@@ -11624,6 +11626,16 @@ value is currently @code{0x33}, which means that bits @code{0}
 (anonymous private mappings), @code{1} (anonymous shared mappings),
 @code{4} (ELF headers) and @code{5} (private huge pages) are active.
 This will cause these memory mappings to be dumped automatically.
+
+@kindex set dump-excluded-mappings
+@anchor{set dump-excluded-mappings}
+@item set dump-excluded-mappings on
+@itemx set dump-excluded-mappings off
+If @code{on} is specified, @value{GDBN} will dump memory mappings
+marked with the @code{VM_DONTDUMP} flag.  This flag is represented in
+the file @file{/proc/@var{pid}/smaps} with the acronym @code{dd}.
+
+The default value is @code{off}.
 @end table
 
 @node Character Sets

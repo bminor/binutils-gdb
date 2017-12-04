@@ -185,6 +185,11 @@ set debug separate-debug-file
 show debug separate-debug-file
   Control the display of debug output about separate debug file search.
 
+set dump-excluded-mappings
+show dump-excluded-mappings
+  Control whether mappings marked with the VM_DONTDUMP flag should be
+  dumped when generating a core file.
+
 maint info selftests
   List the registered selftests.
 
