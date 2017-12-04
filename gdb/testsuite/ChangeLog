@@ -1,3 +1,9 @@
+2017-12-04  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22499
+	* gdb.arch/amd64-disp-step-avx.S: New file.
+	* gdb.arch/amd64-disp-step-avx.exp: New file.
+
 2017-12-03  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/process-dies-while-detaching.c: Include <errno.h>

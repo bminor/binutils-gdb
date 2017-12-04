@@ -1,3 +1,13 @@
+2017-12-04  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22499
+	* amd64-tdep.c (amd64_insn::rex_offset): Rename to...
+	(amd64_insn::enc_prefix_offset): ... this, and tweak comment.
+	(vex2_prefix_p, vex3_prefix_p): New functions.
+	(amd64_get_insn_details): Adjust to rename.  Also skip VEX2 and
+	VEX3 prefixes.
+	(fixup_riprel): Set VEX3.!B.
+
 2017-12-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* target.h (mem_region_vector): Remove.
