@@ -1,5 +1,10 @@
 2017-12-04  Alan Modra  <amodra@gmail.com>
 
+	PR 22544
+	* doc/as.texinfo (8byte): Correct.
+
+2017-12-04  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/ppc/ppc.exp: Don't exclude VLE tests when little-endian.
 	* testsuite/gas/ppc/efs.d: Add -mbig to assembler options.
 	* testsuite/gas/ppc/efs2.d: Likewise.
