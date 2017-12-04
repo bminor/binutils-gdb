@@ -86,8 +86,6 @@ static const unsigned int plt_pic_entry[] =
    bfd_hash_table containing stubs "bstab"
    elf_metag_stub_hash_entry       "hsh"
 
-   elf_metag_dyn_reloc_entry       "hdh"
-
    Always remember to use GNU Coding Style.  */
 
 #define PLT_ENTRY_SIZE sizeof(plt_entry)
@@ -789,20 +787,7 @@ struct elf_metag_link_hash_entry
 
   /* Used to count relocations for delayed sizing of relocation
      sections.  */
-  struct elf_metag_dyn_reloc_entry {
-
-    /* Next relocation in the chain.  */
-    struct elf_metag_dyn_reloc_entry *hdh_next;
-
-    /* The input section of the reloc.  */
-    asection *sec;
-
-    /* Number of relocs copied in this section.  */
-    bfd_size_type count;
-
-    /* Number of relative relocs copied for the input section.  */
-    bfd_size_type relative_count;
-  } *dyn_relocs;
+  struct elf_dyn_relocs *dyn_relocs;
 
   enum
     {
@@ -2312,8 +2297,8 @@ elf_metag_check_relocs (bfd *abfd,
 		  && (hh->eh.root.type == bfd_link_hash_defweak
 		      || !hh->eh.def_regular)))
 	    {
-	      struct elf_metag_dyn_reloc_entry *hdh_p;
-	      struct elf_metag_dyn_reloc_entry **hdh_head;
+	      struct elf_dyn_relocs *hdh_p;
+	      struct elf_dyn_relocs **hdh_head;
 
 	      if (dynobj == NULL)
 		htab->etab.dynobj = dynobj = abfd;
@@ -2350,26 +2335,26 @@ elf_metag_check_relocs (bfd *abfd,
 		    sr = sec;
 
 		  vpp = &elf_section_data (sr)->local_dynrel;
-		  hdh_head = (struct elf_metag_dyn_reloc_entry **) vpp;
+		  hdh_head = (struct elf_dyn_relocs **) vpp;
 		}
 
 	      hdh_p = *hdh_head;
 	      if (hdh_p == NULL || hdh_p->sec != sec)
 		{
-		  hdh_p = ((struct elf_metag_dyn_reloc_entry *)
+		  hdh_p = ((struct elf_dyn_relocs *)
 			   bfd_alloc (dynobj, sizeof *hdh_p));
 		  if (hdh_p == NULL)
 		    return FALSE;
-		  hdh_p->hdh_next = *hdh_head;
+		  hdh_p->next = *hdh_head;
 		  *hdh_head = hdh_p;
 		  hdh_p->sec = sec;
 		  hdh_p->count = 0;
-		  hdh_p->relative_count = 0;
+		  hdh_p->pc_count = 0;
 		}
 
 	      hdh_p->count += 1;
 	      if (ELF32_R_TYPE (rel->r_info) == R_METAG_RELBRANCH)
-		hdh_p->relative_count += 1;
+		hdh_p->pc_count += 1;
 	    }
 	  break;
 
@@ -2411,8 +2396,8 @@ elf_metag_copy_indirect_symbol (struct bfd_link_info *info,
     {
       if (hh_dir->dyn_relocs != NULL)
 	{
-	  struct elf_metag_dyn_reloc_entry **hdh_pp;
-	  struct elf_metag_dyn_reloc_entry *hdh_p;
+	  struct elf_dyn_relocs **hdh_pp;
+	  struct elf_dyn_relocs *hdh_p;
 
 	  if (eh_ind->root.type == bfd_link_hash_indirect)
 	    abort ();
@@ -2421,19 +2406,19 @@ elf_metag_copy_indirect_symbol (struct bfd_link_info *info,
 	     list.  Merge any entries against the same section.  */
 	  for (hdh_pp = &hh_ind->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
 	    {
-	      struct elf_metag_dyn_reloc_entry *hdh_q;
+	      struct elf_dyn_relocs *hdh_q;
 
 	      for (hdh_q = hh_dir->dyn_relocs; hdh_q != NULL;
-		   hdh_q = hdh_q->hdh_next)
+		   hdh_q = hdh_q->next)
 		if (hdh_q->sec == hdh_p->sec)
 		  {
-		    hdh_q->relative_count += hdh_p->relative_count;
+		    hdh_q->pc_count += hdh_p->pc_count;
 		    hdh_q->count += hdh_p->count;
-		    *hdh_pp = hdh_p->hdh_next;
+		    *hdh_pp = hdh_p->next;
 		    break;
 		  }
 	      if (hdh_q == NULL)
-		hdh_pp = &hdh_p->hdh_next;
+		hdh_pp = &hdh_p->next;
 	    }
 	  *hdh_pp = hh_dir->dyn_relocs;
 	}
@@ -2457,9 +2442,9 @@ elf_metag_copy_indirect_symbol (struct bfd_link_info *info,
 static asection *
 readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
-  struct elf_metag_dyn_reloc_entry *p;
+  struct elf_dyn_relocs *p;
 
-  for (p = metag_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->hdh_next)
+  for (p = metag_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
     {
       asection *s = p->sec->output_section;
 
@@ -2480,8 +2465,6 @@ elf_metag_adjust_dynamic_symbol (struct bfd_link_info *info,
 				 struct elf_link_hash_entry *eh)
 {
   struct elf_metag_link_hash_table *htab;
-  struct elf_metag_link_hash_entry *hh;
-  struct elf_metag_dyn_reloc_entry *hdh_p;
   asection *s, *srel;
 
   /* If this is a function, put it in the procedure linkage table.  We
@@ -2544,17 +2527,9 @@ elf_metag_adjust_dynamic_symbol (struct bfd_link_info *info,
       return TRUE;
     }
 
-  hh = (struct elf_metag_link_hash_entry *) eh;
-  for (hdh_p = hh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->hdh_next)
-    {
-      s = hdh_p->sec->output_section;
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	break;
-    }
-
-  /* If we didn't find any dynamic relocs in read-only sections, then
+  /* If we don't find any dynamic relocs in read-only sections, then
      we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-  if (hdh_p == NULL)
+  if (!readonly_dynrelocs (eh))
     {
       eh->non_got_ref = 0;
       return TRUE;
@@ -2603,7 +2578,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
   struct bfd_link_info *info;
   struct elf_metag_link_hash_table *htab;
   struct elf_metag_link_hash_entry *hh;
-  struct elf_metag_dyn_reloc_entry *hdh_p;
+  struct elf_dyn_relocs *hdh_p;
 
   if (eh->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -2722,16 +2697,16 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
     {
       if (SYMBOL_CALLS_LOCAL (info, eh))
 	{
-	  struct elf_metag_dyn_reloc_entry **hdh_pp;
+	  struct elf_dyn_relocs **hdh_pp;
 
 	  for (hdh_pp = &hh->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
 	    {
-	      hdh_p->count -= hdh_p->relative_count;
-	      hdh_p->relative_count = 0;
+	      hdh_p->count -= hdh_p->pc_count;
+	      hdh_p->pc_count = 0;
 	      if (hdh_p->count == 0)
-		*hdh_pp = hdh_p->hdh_next;
+		*hdh_pp = hdh_p->next;
 	      else
-		hdh_pp = &hdh_p->hdh_next;
+		hdh_pp = &hdh_p->next;
 	    }
 	}
 
@@ -2787,7 +2762,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
     }
 
   /* Finally, allocate space.  */
-  for (hdh_p = hh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->hdh_next)
+  for (hdh_p = hh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->next)
     {
       asection *sreloc = elf_section_data (hdh_p->sec)->sreloc;
       sreloc->size += hdh_p->count * sizeof (Elf32_External_Rela);
@@ -2869,12 +2844,12 @@ elf_metag_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  struct elf_metag_dyn_reloc_entry *hdh_p;
+	  struct elf_dyn_relocs *hdh_p;
 
-	  for (hdh_p = ((struct elf_metag_dyn_reloc_entry *)
+	  for (hdh_p = ((struct elf_dyn_relocs *)
 			elf_section_data (s)->local_dynrel);
 	       hdh_p != NULL;
-	       hdh_p = hdh_p->hdh_next)
+	       hdh_p = hdh_p->next)
 	    {
 	      if (!bfd_is_abs_section (hdh_p->sec)
 		  && bfd_is_abs_section (hdh_p->sec->output_section))

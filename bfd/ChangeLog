@@ -1,5 +1,52 @@
 2017-12-06  Alan Modra  <amodra@gmail.com>
 
+	* elf32-hppa.c (struct elf32_hppa_dyn_reloc_entry): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(elf32_hppa_adjust_dynamic_symbol): Comment tidy.
+	* elf32-lm32.c (struct elf_lm32_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(lm32_elf_adjust_dynamic_symbol): Use readonly_dynrelocs.
+	* elf32-m32r.c (struct elf_m32r_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(m32r_elf_adjust_dynamic_symbol): Use readonly_dynrelocs, but disable.
+	Disable -z no-copyreloc too.
+	* elf32-metag.c (struct elf_metag_dyn_reloc_entry): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(elf_metag_adjust_dynamic_symbol): Use readonly_dynrelocs.
+	* elf32-microblaze.c (struct elf32_mb_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(readonly_dynrelocs): New function.
+	(microblaze_elf_adjust_dynamic_symbol): Use it.
+	* elf32-nds32.c (struct elf_nds32_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(nds32_elf_adjust_dynamic_symbol): Use readonly_dynrelocs, but disable.
+	Disable -z no-copyreloc too.
+	* elf32-nios2.c (struct elf32_nios2_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	* elf32-or1k.c (struct elf_or1k_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(or1k_elf_adjust_dynamic_symbol): Use readonly_dynrelocs.
+	* elf32-sh.c (struct elf_sh_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(sh_elf_adjust_dynamic_symbol): Use readonly_dynrelocs, but disable.
+	Disable -z no-copyreloc too.
+	* elf32-tilepro.c (struct tilepro_elf_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(tilepro_elf_adjust_dynamic_symbol): Use readonly_dynrelocs.
+	* elfnn-riscv.c (struct riscv_elf_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(riscv_elf_adjust_dynamic_symbol): Use readonly_dynrelocs.
+	* elfxx-sparc.c (struct _bfd_sparc_elf_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(_bfd_sparc_elf_adjust_dynamic_symbol): Use readonly_dynrelocs.
+	* elfxx-tilegx.c (struct tilegx_elf_dyn_relocs): Delete.  Use
+	struct elf_dyn_relocs throughout file instead.
+	(tilegx_elf_adjust_dynamic_symbol): Use readonly_dynrelocs.
+	* elf32-s390.c (elf_s390_adjust_dynamic_symbol): Use readonly_dynrelocs.
+	* elf64-s390.c (elf_s390_adjust_dynamic_symbol): Use readonly_dynrelocs.
+
+2017-12-06  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Comment tidy.
 	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
 	* elfnn-aarch64.c (elfNN_aarch64_adjust_dynamic_symbol): Likewise.

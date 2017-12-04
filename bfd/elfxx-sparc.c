@@ -663,26 +663,6 @@ _bfd_sparc_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
 
 #define SPARC_INSN_BYTES	4
 
-/* The SPARC linker needs to keep track of the number of relocs that it
-   decides to copy as dynamic relocs in check_relocs for each symbol.
-   This is so that it can later discard them if they are found to be
-   unnecessary.  We store the information in a field extending the
-   regular ELF linker hash table.  */
-
-struct _bfd_sparc_elf_dyn_relocs
-{
-  struct _bfd_sparc_elf_dyn_relocs *next;
-
-  /* The input section of the reloc.  */
-  asection *sec;
-
-  /* Total number of relocs copied for the input section.  */
-  bfd_size_type count;
-
-  /* Number of pc-relative relocs copied for the input section.  */
-  bfd_size_type pc_count;
-};
-
 /* Is an undefined weak symbol resolved to 0 ?
    Reference to an undefined weak symbol is resolved to 0 when
    building an executable if it isn't dynamic and
@@ -704,7 +684,7 @@ struct _bfd_sparc_elf_link_hash_entry
   struct elf_link_hash_entry elf;
 
   /* Track dynamic relocs copied for this symbol.  */
-  struct _bfd_sparc_elf_dyn_relocs *dyn_relocs;
+  struct elf_dyn_relocs *dyn_relocs;
 
 #define GOT_UNKNOWN     0
 #define GOT_NORMAL      1
@@ -1303,14 +1283,14 @@ _bfd_sparc_elf_copy_indirect_symbol (struct bfd_link_info *info,
     {
       if (edir->dyn_relocs != NULL)
 	{
-	  struct _bfd_sparc_elf_dyn_relocs **pp;
-	  struct _bfd_sparc_elf_dyn_relocs *p;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
-	      struct _bfd_sparc_elf_dyn_relocs *q;
+	      struct elf_dyn_relocs *q;
 
 	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
@@ -1813,8 +1793,8 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  && h != NULL
 		  && h->type == STT_GNU_IFUNC))
 	    {
-	      struct _bfd_sparc_elf_dyn_relocs *p;
-	      struct _bfd_sparc_elf_dyn_relocs **head;
+	      struct elf_dyn_relocs *p;
+	      struct elf_dyn_relocs **head;
 
 	      /* When creating a shared object, we must copy these
 		 relocs into the output file.  We create a reloc
@@ -1847,14 +1827,14 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
-		  head = (struct _bfd_sparc_elf_dyn_relocs **) vpp;
+		  head = (struct elf_dyn_relocs **) vpp;
 		}
 
 	      p = *head;
 	      if (p == NULL || p->sec != sec)
 		{
 		  bfd_size_type amt = sizeof *p;
-		  p = ((struct _bfd_sparc_elf_dyn_relocs *)
+		  p = ((struct elf_dyn_relocs *)
 		       bfd_alloc (htab->elf.dynobj, amt));
 		  if (p == NULL)
 		    return FALSE;
@@ -1974,7 +1954,7 @@ _bfd_sparc_elf_fixup_symbol (struct bfd_link_info *info,
 static asection *
 readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
-  struct _bfd_sparc_elf_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
 
   for (p = _bfd_sparc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
     {
@@ -1997,8 +1977,6 @@ _bfd_sparc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 				     struct elf_link_hash_entry *h)
 {
   struct _bfd_sparc_elf_link_hash_table *htab;
-  struct _bfd_sparc_elf_link_hash_entry * eh;
-  struct _bfd_sparc_elf_dyn_relocs *p;
   asection *s, *srel;
 
   htab = _bfd_sparc_elf_hash_table (info);
@@ -2082,17 +2060,9 @@ _bfd_sparc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       return TRUE;
     }
 
-  eh = (struct _bfd_sparc_elf_link_hash_entry *) h;
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
-    {
-      s = p->sec->output_section;
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	break;
-    }
-
-  /* If we didn't find any dynamic relocs in read-only sections, then
+  /* If we don't find any dynamic relocs in read-only sections, then
      we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-  if (p == NULL)
+  if (!readonly_dynrelocs (h))
     {
       h->non_got_ref = 0;
       return TRUE;
@@ -2140,7 +2110,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   struct bfd_link_info *info;
   struct _bfd_sparc_elf_link_hash_table *htab;
   struct _bfd_sparc_elf_link_hash_entry *eh;
-  struct _bfd_sparc_elf_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
   bfd_boolean resolved_to_zero;
 
   if (h->root.type == bfd_link_hash_indirect)
@@ -2324,7 +2294,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
     {
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
-	  struct _bfd_sparc_elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs **pp;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -2339,7 +2309,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
       if (htab->is_vxworks)
 	{
-	  struct _bfd_sparc_elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs **pp;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -2365,7 +2335,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
                 {
                   /* Keep dynamic non-GOT/non-PLT relocation so that we
                      can branch to 0 without PLT.  */
-                  struct _bfd_sparc_elf_dyn_relocs **pp;
+                  struct elf_dyn_relocs **pp;
 
                   for (pp = &eh->dyn_relocs; (p = *pp) != NULL;)
                     if (p->pc_count == 0)
@@ -2555,7 +2525,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  struct _bfd_sparc_elf_dyn_relocs *p;
+	  struct elf_dyn_relocs *p;
 
 	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {

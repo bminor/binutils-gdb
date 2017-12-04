@@ -50,26 +50,6 @@ extern const bfd_target lm32_elf32_fdpic_vec;
 static bfd_reloc_status_type lm32_elf_gprel_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 
-/* The linker needs to keep track of the number of relocs that it
-   decides to copy as dynamic relocs in check_relocs for each symbol.
-   This is so that it can later discard them if they are found to be
-   unnecessary.  We store the information in a field extending the
-   regular ELF linker hash table.  */
-
-struct elf_lm32_dyn_relocs
-{
-  struct elf_lm32_dyn_relocs *next;
-
-  /* The input section of the reloc.  */
-  asection *sec;
-
-  /* Total number of relocs copied for the input section.  */
-  bfd_size_type count;
-
-  /* Number of pc-relative relocs copied for the input section.  */
-  bfd_size_type pc_count;
-};
-
 /* lm32 ELF linker hash entry.  */
 
 struct elf_lm32_link_hash_entry
@@ -77,7 +57,7 @@ struct elf_lm32_link_hash_entry
   struct elf_link_hash_entry root;
 
   /* Track dynamic relocs copied for this symbol.  */
-  struct elf_lm32_dyn_relocs *dyn_relocs;
+  struct elf_dyn_relocs *dyn_relocs;
 };
 
 /* lm32 ELF linker hash table.  */
@@ -1648,7 +1628,7 @@ lm32_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 static asection *
 readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
-  struct elf_lm32_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
   struct elf_lm32_link_hash_entry *eh = (struct elf_lm32_link_hash_entry *) h;
 
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
@@ -1672,8 +1652,6 @@ lm32_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 				struct elf_link_hash_entry *h)
 {
   struct elf_lm32_link_hash_table *htab;
-  struct elf_lm32_link_hash_entry *eh;
-  struct elf_lm32_dyn_relocs *p;
   bfd *dynobj;
   asection *s;
 
@@ -1741,24 +1719,15 @@ lm32_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     return TRUE;
 
   /* If -z nocopyreloc was given, we won't generate them either.  */
-  if (info->nocopyreloc)
+  if (0 && info->nocopyreloc)
     {
       h->non_got_ref = 0;
       return TRUE;
     }
 
-  eh = (struct elf_lm32_link_hash_entry *) h;
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
-    {
-      s = p->sec->output_section;
-      if (s != NULL && (s->flags & (SEC_READONLY | SEC_HAS_CONTENTS)) != 0)
-        break;
-    }
-
-  /* If we didn't find any dynamic relocs in sections which needs the
-     copy reloc, then we'll be keeping the dynamic relocs and avoiding
-     the copy reloc.  */
-  if (p == NULL)
+  /* If we don't find any dynamic relocs in read-only sections, then
+     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
+  if (0 && !readonly_dynrelocs (h))
     {
       h->non_got_ref = 0;
       return TRUE;
@@ -1807,7 +1776,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   struct bfd_link_info *info;
   struct elf_lm32_link_hash_table *htab;
   struct elf_lm32_link_hash_entry *eh;
-  struct elf_lm32_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -1916,7 +1885,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
           && (h->forced_local
               || info->symbolic))
         {
-          struct elf_lm32_dyn_relocs **pp;
+          struct elf_dyn_relocs **pp;
 
           for (pp = &eh->dyn_relocs; (p = *pp) != NULL;)
             {
@@ -2063,9 +2032,9 @@ lm32_elf_size_dynamic_sections (bfd *output_bfd,
 
       for (s = ibfd->sections; s != NULL; s = s->next)
         {
-          struct elf_lm32_dyn_relocs *p;
+          struct elf_dyn_relocs *p;
 
-          for (p = ((struct elf_lm32_dyn_relocs *)
+          for (p = ((struct elf_dyn_relocs *)
                     elf_section_data (s)->local_dynrel);
                p != NULL;
                p = p->next)
@@ -2483,14 +2452,14 @@ lm32_elf_copy_indirect_symbol (struct bfd_link_info *info,
     {
       if (edir->dyn_relocs != NULL)
         {
-          struct elf_lm32_dyn_relocs **pp;
-          struct elf_lm32_dyn_relocs *p;
+          struct elf_dyn_relocs **pp;
+          struct elf_dyn_relocs *p;
 
           /* Add reloc counts against the indirect sym to the direct sym
              list.  Merge any entries against the same section.  */
           for (pp = &eind->dyn_relocs; (p = *pp) != NULL;)
             {
-              struct elf_lm32_dyn_relocs *q;
+              struct elf_dyn_relocs *q;
 
               for (q = edir->dyn_relocs; q != NULL; q = q->next)
                 if (q->sec == p->sec)
