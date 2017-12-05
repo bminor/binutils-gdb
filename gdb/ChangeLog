@@ -1,5 +1,19 @@
 2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* target-descriptions.c (struct tdesc_reg) <tdesc_reg>: Change
+	type of name_ parameter, adjust to std::string change.
+	<name, group, type>: Change type to std::string.
+	<~tdesc_reg>: Replace with default implementation.
+	<operator==>: Adjust.
+	(tdesc_find_register_early): Adjust.
+	(tdesc_register_name): Adjust.
+	(tdesc_register_type): Adjust.
+	(tdesc_register_in_reggroup_p): Adjust.
+	(class print_c_tdesc) <visit>: Adjust.
+	(class print_c_feature) <visit>: Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* target-descriptions.c (tdesc_reg_p): Remove typedef.
 	(DEF_VEC_P (tdesc_reg_p)): Remove.
 	(struct tdesc_feature) <registers>: Change type to std::vector.

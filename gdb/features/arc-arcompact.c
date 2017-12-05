@@ -48,7 +48,7 @@ initialize_tdesc_arc_arcompact (void)
   tdesc_create_reg (feature, "ilink2", 30, 1, NULL, 32, "code_ptr");
   tdesc_create_reg (feature, "blink", 31, 1, NULL, 32, "code_ptr");
   tdesc_create_reg (feature, "lp_count", 32, 1, NULL, 32, "uint32");
-  tdesc_create_reg (feature, "pcl", 33, 1, "", 32, "code_ptr");
+  tdesc_create_reg (feature, "pcl", 33, 1, NULL, 32, "code_ptr");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.arc.aux-minimal");
   struct tdesc_type *field_type;

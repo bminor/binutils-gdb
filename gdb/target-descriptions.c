@@ -75,33 +75,28 @@ struct property
 
 struct tdesc_reg : tdesc_element
 {
-  tdesc_reg (struct tdesc_feature *feature, const char *name_,
+  tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
 	     int regnum, int save_restore_, const char *group_,
 	     int bitsize_, const char *type_)
-    : name (xstrdup (name_)), target_regnum (regnum),
+    : name (name_), target_regnum (regnum),
       save_restore (save_restore_),
-      group (group_ != NULL ? xstrdup (group_) : NULL),
+      group (group_ != NULL ? group_ : ""),
       bitsize (bitsize_),
-      type (type_ != NULL ? xstrdup (type_) : xstrdup ("<unknown>"))
+      type (type_ != NULL ? type_ : "<unknown>")
   {
     /* If the register's type is target-defined, look it up now.  We may not
        have easy access to the containing feature when we want it later.  */
-    tdesc_type = tdesc_named_type (feature, type);
+    tdesc_type = tdesc_named_type (feature, type.c_str ());
   }
 
-  virtual ~tdesc_reg ()
-  {
-    xfree (name);
-    xfree (type);
-    xfree (group);
-  }
+  virtual ~tdesc_reg () = default;
 
   DISABLE_COPY_AND_ASSIGN (tdesc_reg);
 
   /* The name of this register.  In standard features, it may be
      recognized by the architecture support code, or it may be purely
      for the user.  */
-  char *name;
+  std::string name;
 
   /* The register number used by this target to refer to this
      register.  This is used for remote p/P packets and to determine
@@ -112,14 +107,14 @@ struct tdesc_reg : tdesc_element
      around calls to an inferior function.  */
   int save_restore;
 
-  /* The name of the register group containing this register, or NULL
+  /* The name of the register group containing this register, or empty
      if the group should be automatically determined from the
      register's type.  If this is "general", "float", or "vector", the
      corresponding "info" command should display this register's
      value.  It can be an arbitrary string, but should be limited to
      alphanumeric characters and internal hyphens.  Currently other
-     strings are ignored (treated as NULL).  */
-  char *group;
+     strings are ignored (treated as empty).  */
+  std::string group;
 
   /* The size of the register, in bits.  */
   int bitsize;
@@ -127,7 +122,7 @@ struct tdesc_reg : tdesc_element
   /* The type of the register.  This string corresponds to either
      a named type from the target description or a predefined
      type from GDB.  */
-  char *type;
+  std::string type;
 
   /* The target-described type corresponding to TYPE, if found.  */
   struct tdesc_type *tdesc_type;
@@ -139,12 +134,12 @@ struct tdesc_reg : tdesc_element
 
   bool operator== (const tdesc_reg &other) const
   {
-    return (streq (name, other.name)
+    return (name == other.name
 	    && target_regnum == other.target_regnum
 	    && save_restore == other.save_restore
 	    && bitsize == other.bitsize
-	    && (group == other.group || streq (group, other.group))
-	    && streq (type, other.type));
+	    && group == other.group
+	    && type == other.type);
   }
 
   bool operator!= (const tdesc_reg &other) const
@@ -1088,7 +1083,7 @@ tdesc_find_register_early (const struct tdesc_feature *feature,
 			   const char *name)
 {
   for (const tdesc_reg_up &reg : feature->registers)
-    if (strcasecmp (reg->name, name) == 0)
+    if (strcasecmp (reg->name.c_str (), name) == 0)
       return reg.get ();
 
   return NULL;
@@ -1194,7 +1189,7 @@ tdesc_register_name (struct gdbarch *gdbarch, int regno)
   int num_pseudo_regs = gdbarch_num_pseudo_regs (gdbarch);
 
   if (reg != NULL)
-    return reg->name;
+    return reg->name.c_str ();
 
   if (regno >= num_regs && regno < num_regs + num_pseudo_regs)
     {
@@ -1236,7 +1231,7 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
         arch_reg->type = tdesc_gdb_type (gdbarch, reg->tdesc_type);
 
       /* Next try size-sensitive type shortcuts.  */
-      else if (strcmp (reg->type, "float") == 0)
+      else if (reg->type == "float")
 	{
 	  if (reg->bitsize == gdbarch_float_bit (gdbarch))
 	    arch_reg->type = builtin_type (gdbarch)->builtin_float;
@@ -1247,11 +1242,11 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
 	  else
 	    {
 	      warning (_("Register \"%s\" has an unsupported size (%d bits)"),
-		       reg->name, reg->bitsize);
+		       reg->name.c_str (), reg->bitsize);
 	      arch_reg->type = builtin_type (gdbarch)->builtin_double;
 	    }
 	}
-      else if (strcmp (reg->type, "int") == 0)
+      else if (reg->type == "int")
 	{
 	  if (reg->bitsize == gdbarch_long_bit (gdbarch))
 	    arch_reg->type = builtin_type (gdbarch)->builtin_long;
@@ -1269,7 +1264,7 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
 	  else
 	    {
 	      warning (_("Register \"%s\" has an unsupported size (%d bits)"),
-		       reg->name, reg->bitsize);
+		       reg->name.c_str (), reg->bitsize);
 	      arch_reg->type = builtin_type (gdbarch)->builtin_long;
 	    }
 	}
@@ -1277,7 +1272,7 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
       if (arch_reg->type == NULL)
 	internal_error (__FILE__, __LINE__,
 			"Register \"%s\" has an unknown type \"%s\"",
-			reg->name, reg->type);
+			reg->name.c_str (), reg->type.c_str ());
     }
 
   return arch_reg->type;
@@ -1315,15 +1310,15 @@ tdesc_register_in_reggroup_p (struct gdbarch *gdbarch, int regno,
 {
   struct tdesc_reg *reg = tdesc_find_register (gdbarch, regno);
 
-  if (reg != NULL && reg->group != NULL)
+  if (reg != NULL && !reg->group.empty ())
     {
       int general_p = 0, float_p = 0, vector_p = 0;
 
-      if (strcmp (reg->group, "general") == 0)
+      if (reg->group == "general")
 	general_p = 1;
-      else if (strcmp (reg->group, "float") == 0)
+      else if (reg->group == "float")
 	float_p = 1;
-      else if (strcmp (reg->group, "vector") == 0)
+      else if (reg->group == "vector")
 	vector_p = 1;
 
       if (reggroup == float_reggroup)
@@ -2054,12 +2049,13 @@ public:
   void visit (const tdesc_reg *reg) override
   {
     printf_unfiltered ("  tdesc_create_reg (feature, \"%s\", %ld, %d, ",
-		       reg->name, reg->target_regnum, reg->save_restore);
-    if (reg->group)
-      printf_unfiltered ("\"%s\", ", reg->group);
+		       reg->name.c_str (), reg->target_regnum,
+		       reg->save_restore);
+    if (!reg->group.empty ())
+      printf_unfiltered ("\"%s\", ", reg->group.c_str ());
     else
       printf_unfiltered ("NULL, ");
-    printf_unfiltered ("%d, \"%s\");\n", reg->bitsize, reg->type);
+    printf_unfiltered ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
   }
 
 protected:
@@ -2170,12 +2166,12 @@ public:
       }
 
     printf_unfiltered ("  tdesc_create_reg (feature, \"%s\", regnum++, %d, ",
-		       reg->name, reg->save_restore);
-    if (reg->group)
-      printf_unfiltered ("\"%s\", ", reg->group);
+		       reg->name.c_str (), reg->save_restore);
+    if (!reg->group.empty ())
+      printf_unfiltered ("\"%s\", ", reg->group.c_str ());
     else
       printf_unfiltered ("NULL, ");
-    printf_unfiltered ("%d, \"%s\");\n", reg->bitsize, reg->type);
+    printf_unfiltered ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
 
     m_next_regnum++;
   }
