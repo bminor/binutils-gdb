@@ -194,8 +194,8 @@ enum tdesc_type_kind
 
 struct tdesc_type : tdesc_element
 {
-  tdesc_type (const char *name_, enum tdesc_type_kind kind_)
-    : name (xstrdup (name_)), kind (kind_)
+  tdesc_type (const std::string &name_, enum tdesc_type_kind kind_)
+    : name (name_), kind (kind_)
   {
     memset (&u, 0, sizeof (u));
   }
@@ -224,15 +224,12 @@ struct tdesc_type : tdesc_element
       default:
 	break;
       }
-    xfree ((char *) name);
   }
 
   DISABLE_COPY_AND_ASSIGN (tdesc_type);
 
-  /* The name of this type.  If this type is a built-in type, this is
-     a pointer to a constant string.  Otherwise, it's a
-     malloc-allocated string (and thus must be freed).  */
-  const char *name;
+  /* The name of this type.   */
+  std::string name;
 
   /* Identify the kind of this type.  */
   enum tdesc_type_kind kind;
@@ -262,7 +259,7 @@ struct tdesc_type : tdesc_element
 
   bool operator== (const tdesc_type &other) const
   {
-    return (streq (name, other.name) && kind == other.kind);
+    return name == other.name && kind == other.kind;
   }
 
   bool operator!= (const tdesc_type &other) const
@@ -758,12 +755,12 @@ tdesc_named_type (const struct tdesc_feature *feature, const char *id)
 {
   /* First try target-defined types.  */
   for (const tdesc_type_up &type : feature->types)
-    if (strcmp (type->name, id) == 0)
+    if (type->name == id)
       return type.get ();
 
   /* Next try the predefined types.  */
   for (int ix = 0; ix < ARRAY_SIZE (tdesc_predefined_types); ix++)
-    if (strcmp (tdesc_predefined_types[ix].name, id) == 0)
+    if (tdesc_predefined_types[ix].name == id)
       return &tdesc_predefined_types[ix];
 
   return NULL;
@@ -786,7 +783,7 @@ tdesc_find_type (struct gdbarch *gdbarch, const char *id)
       if (reg->reg
 	  && reg->reg->tdesc_type
 	  && reg->type
-	  && strcmp (id, reg->reg->tdesc_type->name) == 0)
+	  && reg->reg->tdesc_type->name == id)
 	return reg->type;
     }
 
@@ -847,7 +844,7 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
       break;
     }
 
-  type = tdesc_find_type (gdbarch, tdesc_type->name);
+  type = tdesc_find_type (gdbarch, tdesc_type->name.c_str ());
   if (type)
     return type;
 
@@ -876,7 +873,7 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 
 	field_type = tdesc_gdb_type (gdbarch, tdesc_type->u.v.type);
 	type = init_vector_type (field_type, tdesc_type->u.v.count);
-	TYPE_NAME (type) = xstrdup (tdesc_type->name);
+	TYPE_NAME (type) = xstrdup (tdesc_type->name.c_str ());
 
 	return type;
       }
@@ -888,7 +885,7 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	int ix;
 
 	type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
-	TYPE_NAME (type) = xstrdup (tdesc_type->name);
+	TYPE_NAME (type) = xstrdup (tdesc_type->name.c_str ());
 	TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
 	for (ix = 0;
@@ -950,7 +947,7 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	int ix;
 
 	type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
-	TYPE_NAME (type) = xstrdup (tdesc_type->name);
+	TYPE_NAME (type) = xstrdup (tdesc_type->name.c_str ());
 
 	for (ix = 0;
 	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
@@ -973,7 +970,7 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	struct tdesc_type_field *f;
 	int ix;
 
-	type = arch_flags_type (gdbarch, tdesc_type->name,
+	type = arch_flags_type (gdbarch, tdesc_type->name.c_str (),
 				tdesc_type->u.u.size * TARGET_CHAR_BIT);
 	for (ix = 0;
 	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
@@ -998,7 +995,7 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 
 	type = arch_type (gdbarch, TYPE_CODE_ENUM,
 			  tdesc_type->u.u.size * TARGET_CHAR_BIT,
-			  tdesc_type->name);
+			  tdesc_type->name.c_str ());
 	TYPE_UNSIGNED (type) = 1;
 	for (ix = 0;
 	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
@@ -1017,7 +1014,7 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 
   internal_error (__FILE__, __LINE__,
 		  "Type \"%s\" has an unknown kind %d",
-		  tdesc_type->name, tdesc_type->kind);
+		  tdesc_type->name.c_str (), tdesc_type->kind);
 }
 
 
@@ -1914,10 +1911,10 @@ public:
       case TDESC_TYPE_VECTOR:
 	printf_unfiltered
 	  ("  field_type = tdesc_named_type (feature, \"%s\");\n",
-	   type->u.v.type->name);
+	   type->u.v.type->name.c_str ());
 	printf_unfiltered
 	  ("  tdesc_create_vector (feature, \"%s\", field_type, %d);\n",
-	   type->name, type->u.v.count);
+	   type->name.c_str (), type->u.v.count);
 	break;
       case TDESC_TYPE_STRUCT:
       case TDESC_TYPE_FLAGS:
@@ -1925,7 +1922,7 @@ public:
 	  {
 	    printf_unfiltered
 	      ("  type = tdesc_create_struct (feature, \"%s\");\n",
-	       type->name);
+	       type->name.c_str ());
 	    if (type->u.u.size != 0)
 	      printf_unfiltered
 		("  tdesc_set_struct_size (type, %d);\n",
@@ -1935,7 +1932,7 @@ public:
 	  {
 	    printf_unfiltered
 	      ("  type = tdesc_create_flags (feature, \"%s\", %d);\n",
-	       type->name, type->u.u.size);
+	       type->name.c_str (), type->u.u.size);
 	  }
 	for (int ix3 = 0;
 	     VEC_iterate (tdesc_type_field, type->u.u.fields, ix3, f);
@@ -1944,7 +1941,7 @@ public:
 	    const char *type_name;
 
 	    gdb_assert (f->type != NULL);
-	    type_name = f->type->name;
+	    type_name = f->type->name.c_str ();
 
 	    /* To minimize changes to generated files, don't emit type
 	       info for fields that have defaulted types.  */
@@ -1996,14 +1993,14 @@ public:
       case TDESC_TYPE_UNION:
 	printf_unfiltered
 	  ("  type = tdesc_create_union (feature, \"%s\");\n",
-	   type->name);
+	   type->name.c_str ());
 	for (int ix3 = 0;
 	     VEC_iterate (tdesc_type_field, type->u.u.fields, ix3, f);
 	     ix3++)
 	  {
 	    printf_unfiltered
 	      ("  field_type = tdesc_named_type (feature, \"%s\");\n",
-	       f->type->name);
+	       f->type->name.c_str ());
 	    printf_unfiltered
 	      ("  tdesc_add_field (type, \"%s\", field_type);\n",
 	       f->name);
@@ -2012,7 +2009,7 @@ public:
       case TDESC_TYPE_ENUM:
 	printf_unfiltered
 	  ("  type = tdesc_create_enum (feature, \"%s\", %d);\n",
-	   type->name, type->u.u.size);
+	   type->name.c_str (), type->u.u.size);
 	for (int ix3 = 0;
 	     VEC_iterate (tdesc_type_field, type->u.u.fields, ix3, f);
 	     ix3++)
@@ -2021,7 +2018,7 @@ public:
 	     f->start, f->name);
 	break;
       default:
-	error (_("C output is not supported type \"%s\"."), type->name);
+	error (_("C output is not supported type \"%s\"."), type->name.c_str ());
       }
     printf_unfiltered ("\n");
   }
