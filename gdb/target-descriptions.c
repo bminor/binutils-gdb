@@ -281,8 +281,8 @@ DEF_VEC_P(tdesc_type_p);
 
 struct tdesc_feature : tdesc_element
 {
-  tdesc_feature (const char *name_)
-    : name (xstrdup (name_))
+  tdesc_feature (const std::string &name_)
+    : name (name_)
   {}
 
   virtual ~tdesc_feature ()
@@ -298,15 +298,13 @@ struct tdesc_feature : tdesc_element
     for (ix = 0; VEC_iterate (tdesc_type_p, types, ix, type); ix++)
       delete type;
     VEC_free (tdesc_type_p, types);
-
-    xfree (name);
   }
 
   DISABLE_COPY_AND_ASSIGN (tdesc_feature);
 
   /* The name of this feature.  It may be recognized by the architecture
      support code.  */
-  char *name;
+  std::string name;
 
   /* The registers associated with this feature.  */
   VEC(tdesc_reg_p) *registers = NULL;
@@ -338,7 +336,7 @@ struct tdesc_feature : tdesc_element
 
   bool operator== (const tdesc_feature &other) const
   {
-    if (strcmp (name, other.name) != 0)
+    if (name != other.name)
       return false;
 
     if (VEC_length (tdesc_reg_p, registers)
@@ -741,7 +739,7 @@ tdesc_find_feature (const struct target_desc *target_desc,
 		    const char *name)
 {
   for (const tdesc_feature_up &feature : target_desc->features)
-    if (strcmp (feature->name, name) == 0)
+    if (feature->name == name)
       return feature.get ();
 
   return NULL;
@@ -752,7 +750,7 @@ tdesc_find_feature (const struct target_desc *target_desc,
 const char *
 tdesc_feature_name (const struct tdesc_feature *feature)
 {
-  return feature->name;
+  return feature->name.c_str ();
 }
 
 /* Predefined types.  */
@@ -1925,7 +1923,7 @@ public:
   void visit_pre (const tdesc_feature *e) override
   {
     printf_unfiltered ("\n  feature = tdesc_create_feature (result, \"%s\");\n",
-		       e->name);
+		       e->name.c_str ());
   }
 
   void visit_post (const tdesc_feature *e) override
@@ -2143,7 +2141,7 @@ public:
 
     printf_unfiltered
       ("\n  feature = tdesc_create_feature (result, \"%s\", \"%s\");\n",
-       e->name, lbasename (m_filename_after_features.c_str ()));
+       e->name.c_str (), lbasename (m_filename_after_features.c_str ()));
   }
 
   void visit_post (const tdesc_feature *e) override

@@ -1,5 +1,16 @@
 2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target-descriptions.c (tdesc_feature) <name>: Change type to
+	std::string.
+	<~tdesc_feature>: Don't manually free name.
+	<operator==>: Adjust.
+	(tdesc_find_feature): Adjust.
+	(tdesc_feature_name): Adjust.
+	(class print_c_tdesc) <visit_pre>: Adjust.
+	(class print_c_feature) <visit_pre>: Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* target-descriptions.c (tdesc_feature_p): Remove typedef.
 	(DEF_VEC_P (tdesc_feature_p)): Remove.
 	(struct target_desc) <features>: Change type to std::vector.
