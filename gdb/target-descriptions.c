@@ -73,7 +73,7 @@ struct property
 
 /* An individual register from a target description.  */
 
-typedef struct tdesc_reg : tdesc_element
+struct tdesc_reg : tdesc_element
 {
   tdesc_reg (struct tdesc_feature *feature, const char *name_,
 	     int regnum, int save_restore_, const char *group_,
@@ -151,8 +151,9 @@ typedef struct tdesc_reg : tdesc_element
   {
     return !(*this == other);
   }
-} *tdesc_reg_p;
-DEF_VEC_P(tdesc_reg_p);
+};
+
+typedef std::unique_ptr<tdesc_reg> tdesc_reg_up;
 
 /* A named type from a target description.  */
 
@@ -287,13 +288,8 @@ struct tdesc_feature : tdesc_element
 
   virtual ~tdesc_feature ()
   {
-    struct tdesc_reg *reg;
     struct tdesc_type *type;
     int ix;
-
-    for (ix = 0; VEC_iterate (tdesc_reg_p, registers, ix, reg); ix++)
-      delete reg;
-    VEC_free (tdesc_reg_p, registers);
 
     for (ix = 0; VEC_iterate (tdesc_type_p, types, ix, type); ix++)
       delete type;
@@ -307,7 +303,7 @@ struct tdesc_feature : tdesc_element
   std::string name;
 
   /* The registers associated with this feature.  */
-  VEC(tdesc_reg_p) *registers = NULL;
+  std::vector<std::unique_ptr<tdesc_reg>> registers;
 
   /* The types associated with this feature.  */
   VEC(tdesc_type_p) *types = NULL;
@@ -323,13 +319,8 @@ struct tdesc_feature : tdesc_element
 	 ix++)
       type->accept (v);
 
-    struct tdesc_reg *reg;
-
-    for (int ix = 0;
-	 VEC_iterate (tdesc_reg_p, registers, ix, reg);
-	 ix++)
+    for (const tdesc_reg_up &reg : registers)
       reg->accept (v);
-
 
     v.visit_post (this);
   }
@@ -339,20 +330,15 @@ struct tdesc_feature : tdesc_element
     if (name != other.name)
       return false;
 
-    if (VEC_length (tdesc_reg_p, registers)
-	!= VEC_length (tdesc_reg_p, other.registers))
+    if (registers.size () != other.registers.size ())
       return false;
 
-    struct tdesc_reg *reg;
-
-    for (int ix = 0;
-	 VEC_iterate (tdesc_reg_p, registers, ix, reg);
-	 ix++)
+    for (int ix = 0; ix < registers.size (); ix++)
       {
-	tdesc_reg *reg2
-	  = VEC_index (tdesc_reg_p, other.registers, ix);
+	const tdesc_reg_up &reg1 = registers[ix];
+	const tdesc_reg_up &reg2 = other.registers[ix];
 
-	if (reg != reg2 && *reg != *reg2)
+	if (reg1 != reg2 && *reg1 != *reg2)
 	  return false;
       }
 
@@ -725,7 +711,7 @@ tdesc_has_registers (const struct target_desc *target_desc)
     return 0;
 
   for (const tdesc_feature_up &feature : target_desc->features)
-    if (! VEC_empty (tdesc_reg_p, feature->registers))
+    if (!feature->registers.empty ())
       return 1;
 
   return 0;
@@ -1101,14 +1087,9 @@ static struct tdesc_reg *
 tdesc_find_register_early (const struct tdesc_feature *feature,
 			   const char *name)
 {
-  int ixr;
-  struct tdesc_reg *reg;
-
-  for (ixr = 0;
-       VEC_iterate (tdesc_reg_p, feature->registers, ixr, reg);
-       ixr++)
+  for (const tdesc_reg_up &reg : feature->registers)
     if (strcasecmp (reg->name, name) == 0)
-      return reg;
+      return reg.get ();
 
   return NULL;
 }
@@ -1433,8 +1414,6 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 		     struct tdesc_arch_data *early_data)
 {
   int num_regs = gdbarch_num_regs (gdbarch);
-  int ixr;
-  struct tdesc_reg *reg;
   struct tdesc_arch_data *data;
   struct tdesc_arch_reg *arch_reg, new_arch_reg = { 0 };
   htab_t reg_hash;
@@ -1454,18 +1433,16 @@ tdesc_use_registers (struct gdbarch *gdbarch,
      the initial size is arbitrary.  */
   reg_hash = htab_create (37, htab_hash_pointer, htab_eq_pointer, NULL);
   for (const tdesc_feature_up &feature : target_desc->features)
-    for (ixr = 0;
-	 VEC_iterate (tdesc_reg_p, feature->registers, ixr, reg);
-	 ixr++)
+    for (const tdesc_reg_up &reg : feature->registers)
       {
-	void **slot = htab_find_slot (reg_hash, reg, INSERT);
+	void **slot = htab_find_slot (reg_hash, reg.get (), INSERT);
 
-	*slot = reg;
+	*slot = reg.get ();
       }
 
   /* Remove any registers which were assigned numbers by the
      architecture.  */
-  for (ixr = 0;
+  for (int ixr = 0;
        VEC_iterate (tdesc_arch_reg, data->arch_regs, ixr, arch_reg);
        ixr++)
     if (arch_reg->reg)
@@ -1480,12 +1457,10 @@ tdesc_use_registers (struct gdbarch *gdbarch,
   while (VEC_length (tdesc_arch_reg, data->arch_regs) < num_regs)
     VEC_safe_push (tdesc_arch_reg, data->arch_regs, &new_arch_reg);
   for (const tdesc_feature_up &feature : target_desc->features)
-    for (ixr = 0;
-	 VEC_iterate (tdesc_reg_p, feature->registers, ixr, reg);
-	 ixr++)
-      if (htab_find (reg_hash, reg) != NULL)
+    for (const tdesc_reg_up &reg : feature->registers)
+      if (htab_find (reg_hash, reg.get ()) != NULL)
 	{
-	  new_arch_reg.reg = reg;
+	  new_arch_reg.reg = reg.get ();
 	  VEC_safe_push (tdesc_arch_reg, data->arch_regs, &new_arch_reg);
 	  num_regs++;
 	}
@@ -1512,7 +1487,7 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
   tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
 				  group, bitsize, type);
 
-  VEC_safe_push (tdesc_reg_p, feature->registers, reg);
+  feature->registers.emplace_back (reg);
 }
 
 /* See arch/tdesc.h.  */
