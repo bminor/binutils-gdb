@@ -424,12 +424,15 @@ struct target_desc : tdesc_element
    target description may be shared by multiple architectures, but
    this data is private to one gdbarch.  */
 
-typedef struct tdesc_arch_reg
+struct tdesc_arch_reg
 {
+  tdesc_arch_reg (tdesc_reg *reg_, struct type *type_)
+  : reg (reg_), type (type_)
+  {}
+
   struct tdesc_reg *reg;
   struct type *type;
-} tdesc_arch_reg;
-DEF_VEC_O(tdesc_arch_reg);
+};
 
 struct tdesc_arch_data
 {
@@ -439,13 +442,13 @@ struct tdesc_arch_data
      Registers which are NULL in this array, or off the end, are
      treated as zero-sized and nameless (i.e. placeholders in the
      numbering).  */
-  VEC(tdesc_arch_reg) *arch_regs;
+  std::vector<tdesc_arch_reg> arch_regs;
 
   /* Functions which report the register name, type, and reggroups for
      pseudo-registers.  */
-  gdbarch_register_name_ftype *pseudo_register_name;
-  gdbarch_register_type_ftype *pseudo_register_type;
-  gdbarch_register_reggroup_p_ftype *pseudo_register_reggroup_p;
+  gdbarch_register_name_ftype *pseudo_register_name = NULL;
+  gdbarch_register_type_ftype *pseudo_register_type = NULL;
+  gdbarch_register_reggroup_p_ftype *pseudo_register_reggroup_p = NULL;
 };
 
 /* Info about an inferior's target description.  There's one of these
@@ -586,7 +589,7 @@ target_find_description (void)
 	  data = ((struct tdesc_arch_data *)
 		  gdbarch_data (target_gdbarch (), tdesc_data));
 	  if (tdesc_has_registers (current_target_desc)
-	      && data->arch_regs == NULL)
+	      && data->arch_regs.empty ())
 	    warning (_("Target-supplied registers are not supported "
 		       "by the current architecture"));
 	}
@@ -778,20 +781,16 @@ tdesc_named_type (const struct tdesc_feature *feature, const char *id)
 struct type *
 tdesc_find_type (struct gdbarch *gdbarch, const char *id)
 {
-  struct tdesc_arch_reg *reg;
-  struct tdesc_arch_data *data;
-  int i, num_regs;
+  tdesc_arch_data *data
+    = (struct tdesc_arch_data *) gdbarch_data (gdbarch, tdesc_data);
 
-  data = (struct tdesc_arch_data *) gdbarch_data (gdbarch, tdesc_data);
-  num_regs = VEC_length (tdesc_arch_reg, data->arch_regs);
-  for (i = 0; i < num_regs; i++)
+  for (const tdesc_arch_reg &reg : data->arch_regs)
     {
-      reg = VEC_index (tdesc_arch_reg, data->arch_regs, i);
-      if (reg->reg
-	  && reg->reg->tdesc_type
-	  && reg->type
-	  && reg->reg->tdesc_type->name == id)
-	return reg->type;
+      if (reg.reg
+	  && reg.reg->tdesc_type
+	  && reg.type
+	  && reg.reg->tdesc_type->name == id)
+	return reg.type;
     }
 
   return NULL;
@@ -1019,6 +1018,8 @@ tdesc_data_init (struct obstack *obstack)
   struct tdesc_arch_data *data;
 
   data = OBSTACK_ZALLOC (obstack, struct tdesc_arch_data);
+  new (data) tdesc_arch_data ();
+
   return data;
 }
 
@@ -1028,7 +1029,7 @@ tdesc_data_init (struct obstack *obstack)
 struct tdesc_arch_data *
 tdesc_data_alloc (void)
 {
-  return XCNEW (struct tdesc_arch_data);
+  return new tdesc_arch_data ();
 }
 
 /* Free something allocated by tdesc_data_alloc, if it is not going
@@ -1040,8 +1041,7 @@ tdesc_data_cleanup (void *data_untyped)
 {
   struct tdesc_arch_data *data = (struct tdesc_arch_data *) data_untyped;
 
-  VEC_free (tdesc_arch_reg, data->arch_regs);
-  xfree (data);
+  delete data;
 }
 
 /* Search FEATURE for a register named NAME.  */
@@ -1064,18 +1064,17 @@ tdesc_numbered_register (const struct tdesc_feature *feature,
 			 struct tdesc_arch_data *data,
 			 int regno, const char *name)
 {
-  struct tdesc_arch_reg arch_reg = { 0 };
   struct tdesc_reg *reg = tdesc_find_register_early (feature, name);
 
   if (reg == NULL)
     return 0;
 
   /* Make sure the vector includes a REGNO'th element.  */
-  while (regno >= VEC_length (tdesc_arch_reg, data->arch_regs))
-    VEC_safe_push (tdesc_arch_reg, data->arch_regs, &arch_reg);
+  while (regno >= data->arch_regs.size ())
+    data->arch_regs.emplace_back (nullptr, nullptr);
 
-  arch_reg.reg = reg;
-  VEC_replace (tdesc_arch_reg, data->arch_regs, regno, &arch_reg);
+  data->arch_regs[regno] = tdesc_arch_reg (reg, NULL);
+
   return 1;
 }
 
@@ -1132,8 +1131,8 @@ tdesc_find_arch_register (struct gdbarch *gdbarch, int regno)
   struct tdesc_arch_data *data;
 
   data = (struct tdesc_arch_data *) gdbarch_data (gdbarch, tdesc_data);
-  if (regno < VEC_length (tdesc_arch_reg, data->arch_regs))
-    return VEC_index (tdesc_arch_reg, data->arch_regs, regno);
+  if (regno < data->arch_regs.size ())
+    return &data->arch_regs[regno];
   else
     return NULL;
 }
@@ -1378,7 +1377,6 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 {
   int num_regs = gdbarch_num_regs (gdbarch);
   struct tdesc_arch_data *data;
-  struct tdesc_arch_reg *arch_reg, new_arch_reg = { 0 };
   htab_t reg_hash;
 
   /* We can't use the description for registers if it doesn't describe
@@ -1389,7 +1387,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 
   data = (struct tdesc_arch_data *) gdbarch_data (gdbarch, tdesc_data);
   data->arch_regs = early_data->arch_regs;
-  xfree (early_data);
+  delete early_data;
 
   /* Build up a set of all registers, so that we can assign register
      numbers where needed.  The hash table expands as necessary, so
@@ -1405,26 +1403,24 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 
   /* Remove any registers which were assigned numbers by the
      architecture.  */
-  for (int ixr = 0;
-       VEC_iterate (tdesc_arch_reg, data->arch_regs, ixr, arch_reg);
-       ixr++)
-    if (arch_reg->reg)
-      htab_remove_elt (reg_hash, arch_reg->reg);
+  for (const tdesc_arch_reg &arch_reg : data->arch_regs)
+    if (arch_reg.reg != NULL)
+      htab_remove_elt (reg_hash, arch_reg.reg);
 
   /* Assign numbers to the remaining registers and add them to the
      list of registers.  The new numbers are always above gdbarch_num_regs.
      Iterate over the features, not the hash table, so that the order
      matches that in the target description.  */
 
-  gdb_assert (VEC_length (tdesc_arch_reg, data->arch_regs) <= num_regs);
-  while (VEC_length (tdesc_arch_reg, data->arch_regs) < num_regs)
-    VEC_safe_push (tdesc_arch_reg, data->arch_regs, &new_arch_reg);
+  gdb_assert (data->arch_regs.size () <= num_regs);
+  while (data->arch_regs.size () < num_regs)
+    data->arch_regs.emplace_back (nullptr, nullptr);
+
   for (const tdesc_feature_up &feature : target_desc->features)
     for (const tdesc_reg_up &reg : feature->registers)
       if (htab_find (reg_hash, reg.get ()) != NULL)
 	{
-	  new_arch_reg.reg = reg.get ();
-	  VEC_safe_push (tdesc_arch_reg, data->arch_regs, &new_arch_reg);
+	  data->arch_regs.emplace_back (reg.get (), nullptr);
 	  num_regs++;
 	}
 

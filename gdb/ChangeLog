@@ -1,5 +1,21 @@
 2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target-descriptions.c (tdesc_arch_reg): Remove typedef.
+	(struct tdesc_arch_reg): Add constructor.
+	(DEF_VEC_O (tdesc_arch_reg)): Remove.
+	(struct tdesc_arch_data): Initialize fields.
+	<arch_regs>: Change type to std::vector.
+	(target_find_description): Adjust.
+	(tdesc_find_type): Adjust.
+	(tdesc_data_init): Call tdesc_arch_data constructor.
+	(tdesc_data_alloc): Allocate tdesc_arch_data with new.
+	(tdesc_data_cleanup): Free data with delete.
+	(tdesc_numbered_register): Adjust.
+	(tdesc_find_arch_register): Adjust.
+	(tdesc_use_registers): Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* target-descriptions.c (tdesc_type_field): Remove typedef.
 	(DEF_VEC_O (tdesc_type_field)): Remove.
 	(struct tdesc_type_field): Add constructor.
