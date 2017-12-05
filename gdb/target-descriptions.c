@@ -386,10 +386,6 @@ typedef struct tdesc_feature : tdesc_element
 } *tdesc_feature_p;
 DEF_VEC_P(tdesc_feature_p);
 
-/* A compatible architecture from a target description.  */
-typedef const struct bfd_arch_info *arch_p;
-DEF_VEC_P(arch_p);
-
 /* A target description.  */
 
 struct target_desc : tdesc_element
@@ -407,8 +403,6 @@ struct target_desc : tdesc_element
 	 ix++)
       delete feature;
     VEC_free (tdesc_feature_p, features);
-
-    VEC_free (arch_p, compatible);
   }
 
   target_desc (const target_desc &) = delete;
@@ -422,7 +416,7 @@ struct target_desc : tdesc_element
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* The list of compatible architectures reported by the target.  */
-  VEC(arch_p) *compatible = NULL;
+  std::vector<const bfd_arch_info *> compatible;
 
   /* Any architecture-specific properties specified by the target.  */
   std::vector<property> properties;
@@ -695,11 +689,7 @@ int
 tdesc_compatible_p (const struct target_desc *target_desc,
 		    const struct bfd_arch_info *arch)
 {
-  const struct bfd_arch_info *compat;
-  int ix;
-
-  for (ix = 0; VEC_iterate (arch_p, target_desc->compatible, ix, compat);
-       ix++)
+  for (const bfd_arch_info *compat : target_desc->compatible)
     {
       if (compat == arch
 	  || arch->compatible (arch, compat)
@@ -1765,24 +1755,20 @@ void
 tdesc_add_compatible (struct target_desc *target_desc,
 		      const struct bfd_arch_info *compatible)
 {
-  const struct bfd_arch_info *compat;
-  int ix;
-
   /* If this instance of GDB is compiled without BFD support for the
      compatible architecture, simply ignore it -- we would not be able
      to handle it anyway.  */
   if (compatible == NULL)
     return;
 
-  for (ix = 0; VEC_iterate (arch_p, target_desc->compatible, ix, compat);
-       ix++)
+  for (const bfd_arch_info *compat : target_desc->compatible)
     if (compat == compatible)
       internal_error (__FILE__, __LINE__,
 		      _("Attempted to add duplicate "
 			"compatible architecture \"%s\""),
 		      compatible->printable_name);
 
-  VEC_safe_push (arch_p, target_desc->compatible, compatible);
+  target_desc->compatible.push_back (compatible);
 }
 
 void
@@ -1953,19 +1939,12 @@ public:
 	printf_unfiltered ("\n");
       }
 
-    int ix;
-    const struct bfd_arch_info *compatible;
-    struct property *prop;
+    for (const struct bfd_arch_info *compatible : e->compatible)
+      printf_unfiltered
+	("  tdesc_add_compatible (result, bfd_scan_arch (\"%s\"));\n",
+	 compatible->printable_name);
 
-    for (ix = 0; VEC_iterate (arch_p, e->compatible, ix, compatible);
-	 ix++)
-      {
-	printf_unfiltered
-	  ("  tdesc_add_compatible (result, bfd_scan_arch (\"%s\"));\n",
-	   compatible->printable_name);
-      }
-
-    if (ix)
+    if (!e->compatible.empty ())
       printf_unfiltered ("\n");
 
     for (const property &prop : e->properties)
