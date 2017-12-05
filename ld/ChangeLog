@@ -1,3 +1,8 @@
+2017-12-06  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Return true
+	for frv, lm32, m32r, microblaze, nds32 and or1k linux targets.
+
 2017-12-05  Jim Wilson  <jimw@sifive.com>
 	    Andrew Waterman  <andrew@sifive.com>
 
