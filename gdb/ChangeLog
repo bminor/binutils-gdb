@@ -1,3 +1,13 @@
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (property_s): Remove typedef.
+	(DEF_VEC_O (property_s)): Remove.
+	(struct target_desc) <properties>: Make an std::vector.
+	<~target_desc>: Don't manually free properties.
+	(tdesc_property): Adjust.
+	(set_tdesc_property): Adjust.
+	(class print_c_tdesc) <visit_pre>: Adjust.
+
 2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/gdb_assert.h (gdb_static_assert): Redefine using

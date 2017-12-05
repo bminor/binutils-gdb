@@ -61,12 +61,15 @@ public:
 
 /* Types.  */
 
-typedef struct property
+struct property
 {
-  char *key;
-  char *value;
-} property_s;
-DEF_VEC_O(property_s);
+  property (const std::string &key_, const std::string &value_)
+  : key (key_), value (value_)
+  {}
+
+  std::string key;
+  std::string value;
+};
 
 /* An individual register from a target description.  */
 
@@ -397,7 +400,6 @@ struct target_desc : tdesc_element
   virtual ~target_desc ()
   {
     struct tdesc_feature *feature;
-    struct property *prop;
     int ix;
 
     for (ix = 0;
@@ -406,15 +408,6 @@ struct target_desc : tdesc_element
       delete feature;
     VEC_free (tdesc_feature_p, features);
 
-    for (ix = 0;
-	 VEC_iterate (property_s, properties, ix, prop);
-	 ix++)
-      {
-	xfree (prop->key);
-	xfree (prop->value);
-      }
-
-    VEC_free (property_s, properties);
     VEC_free (arch_p, compatible);
   }
 
@@ -432,7 +425,7 @@ struct target_desc : tdesc_element
   VEC(arch_p) *compatible = NULL;
 
   /* Any architecture-specific properties specified by the target.  */
-  VEC(property_s) *properties = NULL;
+  std::vector<property> properties;
 
   /* The features associated with this target.  */
   VEC(tdesc_feature_p) *features = NULL;
@@ -726,13 +719,9 @@ tdesc_compatible_p (const struct target_desc *target_desc,
 const char *
 tdesc_property (const struct target_desc *target_desc, const char *key)
 {
-  struct property *prop;
-  int ix;
-
-  for (ix = 0; VEC_iterate (property_s, target_desc->properties, ix, prop);
-       ix++)
-    if (strcmp (prop->key, key) == 0)
-      return prop->value;
+  for (const property &prop : target_desc->properties)
+    if (prop.key == key)
+      return prop.value.c_str ();
 
   return NULL;
 }
@@ -1800,20 +1789,13 @@ void
 set_tdesc_property (struct target_desc *target_desc,
 		    const char *key, const char *value)
 {
-  struct property *prop, new_prop;
-  int ix;
-
   gdb_assert (key != NULL && value != NULL);
 
-  for (ix = 0; VEC_iterate (property_s, target_desc->properties, ix, prop);
-       ix++)
-    if (strcmp (prop->key, key) == 0)
-      internal_error (__FILE__, __LINE__,
-		      _("Attempted to add duplicate property \"%s\""), key);
+  if (tdesc_property (target_desc, key) != NULL)
+    internal_error (__FILE__, __LINE__,
+		    _("Attempted to add duplicate property \"%s\""), key);
 
-  new_prop.key = xstrdup (key);
-  new_prop.value = xstrdup (value);
-  VEC_safe_push (property_s, target_desc->properties, &new_prop);
+  target_desc->properties.emplace_back (key, value);
 }
 
 /* See arch/tdesc.h.  */
@@ -1986,12 +1968,10 @@ public:
     if (ix)
       printf_unfiltered ("\n");
 
-    for (ix = 0; VEC_iterate (property_s, e->properties, ix, prop);
-	 ix++)
-      {
-	printf_unfiltered ("  set_tdesc_property (result, \"%s\", \"%s\");\n",
-			   prop->key, prop->value);
-      }
+    for (const property &prop : e->properties)
+      printf_unfiltered ("  set_tdesc_property (result, \"%s\", \"%s\");\n",
+			 prop.key.c_str (), prop.value.c_str ());
+
     printf_unfiltered ("  struct tdesc_feature *feature;\n");
   }
 
