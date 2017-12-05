@@ -1,3 +1,20 @@
+2017-12-04  Jim Wilson  <jimw@sifive.com>
+
+	* emulparams/elf32lriscv-defs.sh (SDATA_START_SYMBOLS): Mark
+	__global_pointer$ as HIDDEN.
+	* testsuite/ld-riscv-elf/gp-hidden-64.rd: New.
+	* testsuite/ld-riscv-elf/gp-hidden-lib.rd: New.
+	* testsuite/ld-riscv-elf/gp-hidden-lib.s: New.
+	* testsuite/ld-riscv-elf/gp-hidden-ver-64.rd: New.
+	* testsuite/ld-riscv-elf/gp-hidden-ver.rd: New.
+	* testsuite/ld-riscv-elf/gp-hidden-ver.s: New.
+	* testsuite/ld-riscv-elf/gp-hidder-ver.ver: New.
+	* testsuite/ld-riscv-elf/gp-hidden.rd: New.
+	* testsuite/ld-riscv-elf/gp-hidden.s: New.
+	* testsuite/ld-riscv-elf/gp-hidden.sd: New.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Change riscv to riscv*.
+	Run the new tests with run_ld_link_tests.
+
 2017-12-04  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-i386/pr17935-1.d: Adjust expected error.

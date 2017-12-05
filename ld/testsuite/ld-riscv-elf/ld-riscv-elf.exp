@@ -19,6 +19,38 @@
 # MA 02110-1301, USA.
 #
 
-if [istarget "riscv-*-*"] {
+if [istarget "riscv*-*-*"] {
     run_dump_test "c-lui"
+
+    set abis { rv32gc ilp32 elf32lriscv rv64gc lp64 elf64lriscv }
+    foreach { arch abi emul } $abis {
+	# This checks whether our linker scripts get the scope of
+	# __global_pointer$ right, and thus must therefore use default scripts.
+	set suff64 [string map {ilp32 "" lp64 -64} $abi]
+	run_ld_link_tests [list \
+			       [list "gp scope test ($abi shared library)" \
+				    "-m$emul -shared" "" \
+				    "-march=$arch -mabi=$abi -fpic" \
+				    { gp-hidden-lib.s } \
+				    [list \
+					 "readelf --relocs gp-hidden-lib.rd" \
+					 "readelf --syms gp-hidden.sd"] \
+				    "gp-hidden-lib-${abi}.so"] \
+			       [list "gp scope test ($abi versioned lib)" \
+				    "-m$emul -shared -version-script gp-hidden-ver.ver tmpdir/gp-hidden-lib-${abi}.so" "" \
+				    "-march=$arch -mabi=$abi -fpic" \
+				    { gp-hidden-ver.s } \
+				    [list \
+					 "readelf --relocs gp-hidden-ver${suff64}.rd" \
+					 "readelf --syms gp-hidden.sd"] \
+				    "gp-hidden-ver-${abi}.so"] \
+			       [list "gp scope test ($abi executable)" \
+				    "-m$emul -e 0 -rpath-link . tmpdir/gp-hidden-ver-${abi}.so" "" \
+				    "-march=$arch -mabi=$abi" \
+				    {gp-hidden.s} \
+				    [list \
+					 "readelf --relocs gp-hidden${suff64}.rd" \
+					 "readelf --syms gp-hidden.sd"]\
+				    "gp-hidden-${abi}"]]
+    }
 }
