@@ -152,16 +152,20 @@ typedef std::unique_ptr<tdesc_reg> tdesc_reg_up;
 
 /* A named type from a target description.  */
 
-typedef struct tdesc_type_field
+struct tdesc_type_field
 {
-  char *name;
+  tdesc_type_field (const std::string &name_, tdesc_type *type_,
+		    int start_, int end_)
+  : name (name_), type (type_), start (start_), end (end_)
+  {}
+
+  std::string name;
   struct tdesc_type *type;
   /* For non-enum-values, either both are -1 (non-bitfield), or both are
      not -1 (bitfield).  For enum values, start is the value (which could be
      -1), end is -1.  */
   int start, end;
-} tdesc_type_field;
-DEF_VEC_O(tdesc_type_field);
+};
 
 enum tdesc_type_kind
 {
@@ -198,6 +202,19 @@ struct tdesc_type : tdesc_element
     : name (name_), kind (kind_)
   {
     memset (&u, 0, sizeof (u));
+
+    switch (kind)
+      {
+      case TDESC_TYPE_STRUCT:
+      case TDESC_TYPE_UNION:
+      case TDESC_TYPE_FLAGS:
+      case TDESC_TYPE_ENUM:
+	u.u.fields = new std::vector<tdesc_type_field> ();
+	break;
+
+      default:
+	break;
+      }
   }
 
   virtual ~tdesc_type ()
@@ -208,17 +225,7 @@ struct tdesc_type : tdesc_element
       case TDESC_TYPE_UNION:
       case TDESC_TYPE_FLAGS:
       case TDESC_TYPE_ENUM:
-	{
-	  struct tdesc_type_field *f;
-	  int ix;
-
-	  for (ix = 0;
-	       VEC_iterate (tdesc_type_field, u.u.fields, ix, f);
-	       ix++)
-	    xfree (f->name);
-
-	  VEC_free (tdesc_type_field, u.u.fields);
-	}
+	delete u.u.fields;
 	break;
 
       default:
@@ -247,7 +254,7 @@ struct tdesc_type : tdesc_element
     /* Struct, union, flags, or enum type.  */
     struct
     {
-      VEC(tdesc_type_field) *fields;
+      std::vector<tdesc_type_field> *fields;
       int size;
     } u;
   } u;
@@ -881,18 +888,14 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
     case TDESC_TYPE_STRUCT:
       {
 	struct type *type, *field_type;
-	struct tdesc_type_field *f;
-	int ix;
 
 	type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
 	TYPE_NAME (type) = xstrdup (tdesc_type->name.c_str ());
 	TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
-	for (ix = 0;
-	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
-	     ix++)
+	for (const tdesc_type_field &f : *tdesc_type->u.u.fields)
 	  {
-	    if (f->start != -1 && f->end != -1)
+	    if (f.start != -1 && f.end != -1)
 	      {
 		/* Bitfield.  */
 		struct field *fld;
@@ -901,15 +904,15 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 
 		/* This invariant should be preserved while creating types.  */
 		gdb_assert (tdesc_type->u.u.size != 0);
-		if (f->type != NULL)
-		  field_type = tdesc_gdb_type (gdbarch, f->type);
+		if (f.type != NULL)
+		  field_type = tdesc_gdb_type (gdbarch, f.type);
 		else if (tdesc_type->u.u.size > 4)
 		  field_type = builtin_type (gdbarch)->builtin_uint64;
 		else
 		  field_type = builtin_type (gdbarch)->builtin_uint32;
 
-		fld = append_composite_type_field_raw (type, xstrdup (f->name),
-						       field_type);
+		fld = append_composite_type_field_raw
+		  (type, xstrdup (f.name.c_str ()), field_type);
 
 		/* For little-endian, BITPOS counts from the LSB of
 		   the structure and marks the LSB of the field.  For
@@ -918,19 +921,19 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 		   way, it is the number of bits to the "left" of the
 		   field.  To calculate this in big-endian, we need
 		   the total size of the structure.  */
-		bitsize = f->end - f->start + 1;
+		bitsize = f.end - f.start + 1;
 		total_size = tdesc_type->u.u.size * TARGET_CHAR_BIT;
 		if (gdbarch_bits_big_endian (gdbarch))
-		  SET_FIELD_BITPOS (fld[0], total_size - f->start - bitsize);
+		  SET_FIELD_BITPOS (fld[0], total_size - f.start - bitsize);
 		else
-		  SET_FIELD_BITPOS (fld[0], f->start);
+		  SET_FIELD_BITPOS (fld[0], f.start);
 		FIELD_BITSIZE (fld[0]) = bitsize;
 	      }
 	    else
 	      {
-		gdb_assert (f->start == -1 && f->end == -1);
-		field_type = tdesc_gdb_type (gdbarch, f->type);
-		append_composite_type_field (type, xstrdup (f->name),
+		gdb_assert (f.start == -1 && f.end == -1);
+		field_type = tdesc_gdb_type (gdbarch, f.type);
+		append_composite_type_field (type, xstrdup (f.name.c_str ()),
 					     field_type);
 	      }
 	  }
@@ -943,18 +946,15 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
     case TDESC_TYPE_UNION:
       {
 	struct type *type, *field_type;
-	struct tdesc_type_field *f;
-	int ix;
 
 	type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
 	TYPE_NAME (type) = xstrdup (tdesc_type->name.c_str ());
 
-	for (ix = 0;
-	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
-	     ix++)
+	for (const tdesc_type_field &f : *tdesc_type->u.u.fields)
 	  {
-	    field_type = tdesc_gdb_type (gdbarch, f->type);
-	    append_composite_type_field (type, xstrdup (f->name), field_type);
+	    field_type = tdesc_gdb_type (gdbarch, f.type);
+	    append_composite_type_field (type, xstrdup (f.name.c_str ()),
+					 field_type);
 
 	    /* If any of the children of a union are vectors, flag the
 	       union as a vector also.  This allows e.g. a union of two
@@ -967,22 +967,17 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 
     case TDESC_TYPE_FLAGS:
       {
-	struct tdesc_type_field *f;
-	int ix;
-
 	type = arch_flags_type (gdbarch, tdesc_type->name.c_str (),
 				tdesc_type->u.u.size * TARGET_CHAR_BIT);
-	for (ix = 0;
-	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
-	     ix++)
+	for (const tdesc_type_field &f : *tdesc_type->u.u.fields)
 	  {
 	    struct type *field_type;
-	    int bitsize = f->end - f->start + 1;
+	    int bitsize = f.end - f.start + 1;
 
-	    gdb_assert (f->type != NULL);
-	    field_type = tdesc_gdb_type (gdbarch, f->type);
-	    append_flags_type_field (type, f->start, bitsize,
-				     field_type, f->name);
+	    gdb_assert (f.type != NULL);
+	    field_type = tdesc_gdb_type (gdbarch, f.type);
+	    append_flags_type_field (type, f.start, bitsize,
+				     field_type, f.name.c_str ());
 	  }
 
 	return type;
@@ -990,22 +985,18 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 
     case TDESC_TYPE_ENUM:
       {
-	struct tdesc_type_field *f;
-	int ix;
-
 	type = arch_type (gdbarch, TYPE_CODE_ENUM,
 			  tdesc_type->u.u.size * TARGET_CHAR_BIT,
 			  tdesc_type->name.c_str ());
 	TYPE_UNSIGNED (type) = 1;
-	for (ix = 0;
-	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
-	     ix++)
+	for (const tdesc_type_field &f : *tdesc_type->u.u.fields)
 	  {
 	    struct field *fld
-	      = append_composite_type_field_raw (type, xstrdup (f->name),
+	      = append_composite_type_field_raw (type,
+						 xstrdup (f.name.c_str ()),
 						 NULL);
 
-	    SET_FIELD_BITPOS (fld[0], f->start);
+	    SET_FIELD_BITPOS (fld[0], f.start);
 	  }
 
 	return type;
@@ -1545,37 +1536,23 @@ void
 tdesc_add_field (struct tdesc_type *type, const char *field_name,
 		 struct tdesc_type *field_type)
 {
-  struct tdesc_type_field f = { 0 };
-
   gdb_assert (type->kind == TDESC_TYPE_UNION
 	      || type->kind == TDESC_TYPE_STRUCT);
 
-  f.name = xstrdup (field_name);
-  f.type = field_type;
-  /* Initialize these values so we know this is not a bit-field
+  /* Initialize start and end so we know this is not a bit-field
      when we print-c-tdesc.  */
-  f.start = -1;
-  f.end = -1;
-
-  VEC_safe_push (tdesc_type_field, type->u.u.fields, &f);
+  type->u.u.fields->emplace_back (field_name, field_type, -1, -1);
 }
 
 void
 tdesc_add_typed_bitfield (struct tdesc_type *type, const char *field_name,
 			  int start, int end, struct tdesc_type *field_type)
 {
-  struct tdesc_type_field f = { 0 };
-
   gdb_assert (type->kind == TDESC_TYPE_STRUCT
 	      || type->kind == TDESC_TYPE_FLAGS);
   gdb_assert (start >= 0 && end >= start);
 
-  f.name = xstrdup (field_name);
-  f.start = start;
-  f.end = end;
-  f.type = field_type;
-
-  VEC_safe_push (tdesc_type_field, type->u.u.fields, &f);
+  type->u.u.fields->emplace_back (field_name, field_type, start, end);
 }
 
 /* See arch/tdesc.h.  */
@@ -1602,33 +1579,23 @@ void
 tdesc_add_flag (struct tdesc_type *type, int start,
 		const char *flag_name)
 {
-  struct tdesc_type_field f = { 0 };
-
   gdb_assert (type->kind == TDESC_TYPE_FLAGS
 	      || type->kind == TDESC_TYPE_STRUCT);
 
-  f.name = xstrdup (flag_name);
-  f.start = start;
-  f.end = start;
-  f.type = tdesc_predefined_type (TDESC_TYPE_BOOL);
-
-  VEC_safe_push (tdesc_type_field, type->u.u.fields, &f);
+  type->u.u.fields->emplace_back (flag_name,
+				   tdesc_predefined_type (TDESC_TYPE_BOOL),
+				   start, start);
 }
 
 void
 tdesc_add_enum_value (struct tdesc_type *type, int value,
 		      const char *name)
 {
-  struct tdesc_type_field f = { 0 };
-
   gdb_assert (type->kind == TDESC_TYPE_ENUM);
 
-  f.name = xstrdup (name);
-  f.start = value;
-  f.end = -1;
-  f.type = tdesc_predefined_type (TDESC_TYPE_INT32);
-
-  VEC_safe_push (tdesc_type_field, type->u.u.fields, &f);
+  type->u.u.fields->emplace_back (name,
+				   tdesc_predefined_type (TDESC_TYPE_INT32),
+				   value, -1);
 }
 
 /* See arch/tdesc.h.  */
@@ -1884,8 +1851,6 @@ public:
 
   void visit (const tdesc_type *type) override
   {
-    struct tdesc_type_field *f;
-
     /* Now we do some "filtering" in order to know which variables to
        declare.  This is needed because otherwise we would declare unused
        variables `field_type' and `type'.  */
@@ -1899,7 +1864,7 @@ public:
 	 || type->kind == TDESC_TYPE_STRUCT
 	 || type->kind == TDESC_TYPE_FLAGS
 	 || type->kind == TDESC_TYPE_ENUM)
-	&& VEC_length (tdesc_type_field, type->u.u.fields) > 0
+	&& !type->u.u.fields->empty ()
 	&& !m_printed_type)
       {
 	printf_unfiltered ("  struct tdesc_type *type;\n");
@@ -1934,35 +1899,33 @@ public:
 	      ("  type = tdesc_create_flags (feature, \"%s\", %d);\n",
 	       type->name.c_str (), type->u.u.size);
 	  }
-	for (int ix3 = 0;
-	     VEC_iterate (tdesc_type_field, type->u.u.fields, ix3, f);
-	     ix3++)
+	for (const tdesc_type_field &f : *type->u.u.fields)
 	  {
 	    const char *type_name;
 
-	    gdb_assert (f->type != NULL);
-	    type_name = f->type->name.c_str ();
+	    gdb_assert (f.type != NULL);
+	    type_name = f.type->name.c_str ();
 
 	    /* To minimize changes to generated files, don't emit type
 	       info for fields that have defaulted types.  */
-	    if (f->start != -1)
+	    if (f.start != -1)
 	      {
-		gdb_assert (f->end != -1);
-		if (f->type->kind == TDESC_TYPE_BOOL)
+		gdb_assert (f.end != -1);
+		if (f.type->kind == TDESC_TYPE_BOOL)
 		  {
-		    gdb_assert (f->start == f->end);
+		    gdb_assert (f.start == f.end);
 		    printf_unfiltered
 		      ("  tdesc_add_flag (type, %d, \"%s\");\n",
-		       f->start, f->name);
+		       f.start, f.name.c_str ());
 		  }
 		else if ((type->u.u.size == 4
-			  && f->type->kind == TDESC_TYPE_UINT32)
+			  && f.type->kind == TDESC_TYPE_UINT32)
 			 || (type->u.u.size == 8
-			     && f->type->kind == TDESC_TYPE_UINT64))
+			     && f.type->kind == TDESC_TYPE_UINT64))
 		  {
 		    printf_unfiltered
 		      ("  tdesc_add_bitfield (type, \"%s\", %d, %d);\n",
-		       f->name, f->start, f->end);
+		       f.name.c_str (), f.start, f.end);
 		  }
 		else
 		  {
@@ -1973,12 +1936,12 @@ public:
 		    printf_unfiltered
 		      ("  tdesc_add_typed_bitfield (type, \"%s\","
 		       " %d, %d, field_type);\n",
-		       f->name, f->start, f->end);
+		       f.name.c_str (), f.start, f.end);
 		  }
 	      }
 	    else /* Not a bitfield.  */
 	      {
-		gdb_assert (f->end == -1);
+		gdb_assert (f.end == -1);
 		gdb_assert (type->kind == TDESC_TYPE_STRUCT);
 		printf_unfiltered
 		  ("  field_type = tdesc_named_type (feature,"
@@ -1986,7 +1949,7 @@ public:
 		   type_name);
 		printf_unfiltered
 		  ("  tdesc_add_field (type, \"%s\", field_type);\n",
-		   f->name);
+		   f.name.c_str ());
 	      }
 	  }
 	break;
@@ -1994,28 +1957,24 @@ public:
 	printf_unfiltered
 	  ("  type = tdesc_create_union (feature, \"%s\");\n",
 	   type->name.c_str ());
-	for (int ix3 = 0;
-	     VEC_iterate (tdesc_type_field, type->u.u.fields, ix3, f);
-	     ix3++)
+	for (const tdesc_type_field &f : *type->u.u.fields)
 	  {
 	    printf_unfiltered
 	      ("  field_type = tdesc_named_type (feature, \"%s\");\n",
-	       f->type->name.c_str ());
+	       f.type->name.c_str ());
 	    printf_unfiltered
 	      ("  tdesc_add_field (type, \"%s\", field_type);\n",
-	       f->name);
+	       f.name.c_str ());
 	  }
 	break;
       case TDESC_TYPE_ENUM:
 	printf_unfiltered
 	  ("  type = tdesc_create_enum (feature, \"%s\", %d);\n",
 	   type->name.c_str (), type->u.u.size);
-	for (int ix3 = 0;
-	     VEC_iterate (tdesc_type_field, type->u.u.fields, ix3, f);
-	     ix3++)
+	for (const tdesc_type_field &f : *type->u.u.fields)
 	  printf_unfiltered
 	    ("  tdesc_add_enum_value (type, %d, \"%s\");\n",
-	     f->start, f->name);
+	     f.start, f.name.c_str ());
 	break;
       default:
 	error (_("C output is not supported type \"%s\"."), type->name.c_str ());

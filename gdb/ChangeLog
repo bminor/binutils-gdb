@@ -1,5 +1,22 @@
 2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target-descriptions.c (tdesc_type_field): Remove typedef.
+	(DEF_VEC_O (tdesc_type_field)): Remove.
+	(struct tdesc_type_field): Add constructor.
+	<name>: Change type to std::string.
+	(struct tdesc_type) <tdesc_type>: Instantiate vector if the type
+	kind uses it.
+	<~tdesc_type>: Destroy vector if the type kind uses it.
+	<u::u::fields>: Change type to std::vector.
+	(tdesc_gdb_type): Adjust.
+	(tdesc_add_field): Adjust.
+	(tdesc_add_typed_bitfield): Adjust.
+	(tdesc_add_field): Adjust.
+	(tdesc_add_enum_value): Adjust.
+	(class print_c_tdesc) <visit>: Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* target-descriptions.c (struct tdesc_type) <name>: Change type
 	to std::string.
 	<~tdesc_type>: Don't manually free name.
