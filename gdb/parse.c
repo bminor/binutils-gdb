@@ -502,8 +502,6 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
   if (address_p != NULL)
     *address_p = addr;
 
-  struct type *the_type;
-
   switch (type)
     {
     case mst_text:

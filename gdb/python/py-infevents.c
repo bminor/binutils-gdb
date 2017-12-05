@@ -29,7 +29,6 @@ create_inferior_call_event_object (inferior_call_kind flag, ptid_t ptid,
 				   CORE_ADDR addr)
 {
   gdbpy_ref<> event;
-  int failed;
 
   switch (flag)
     {

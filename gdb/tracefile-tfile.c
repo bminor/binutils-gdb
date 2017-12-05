@@ -422,7 +422,6 @@ tfile_read (gdb_byte *readbuf, int size)
 static void
 tfile_open (const char *arg, int from_tty)
 {
-  char *temp;
   int flags;
   int scratch_chan;
   char header[TRACE_HEADER_SIZE];

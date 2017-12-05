@@ -1521,7 +1521,6 @@ static void
 info_auto_load_cmd (const char *args, int from_tty)
 {
   struct cmd_list_element *list;
-  struct cleanup *infolist_chain;
   struct ui_out *uiout = current_uiout;
 
   ui_out_emit_tuple tuple_emitter (uiout, "infolist");

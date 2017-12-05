@@ -927,8 +927,6 @@ current_ccr_names (void)
 static const char *
 mep_register_name (struct gdbarch *gdbarch, int regnr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);  
-
   /* General-purpose registers.  */
   static const char *gpr_names[] = {
     "r0",   "r1",   "r2",   "r3",   /* 0 */
@@ -1673,7 +1671,6 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
   CORE_ADDR pc;
   unsigned long insn;
   int rn;
-  int found_lp = 0;
   pv_t reg[MEP_NUM_REGS];
   CORE_ADDR after_last_frame_setup_insn = start_pc;
 

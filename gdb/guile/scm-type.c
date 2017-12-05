@@ -1090,7 +1090,7 @@ gdbscm_type_next_field_x (SCM self)
   type_smob *t_smob;
   struct type *type;
   SCM it_scm, result, progress, object;
-  int field, rc;
+  int field;
 
   it_scm = itscm_get_iterator_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   i_smob = (iterator_smob *) SCM_SMOB_DATA (it_scm);

@@ -975,7 +975,6 @@ gdbscm_breakpoint_commands (SCM self)
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct breakpoint *bp;
-  long length;
   SCM result;
 
   bp = bp_smob->bp;

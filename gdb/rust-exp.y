@@ -1011,7 +1011,6 @@ super_name (const struct rust_op *ident, unsigned int n_supers)
 
   if (n_supers > 0)
     {
-      int i;
       int len;
       std::vector<int> offsets;
       unsigned int current_len;
@@ -1251,7 +1250,6 @@ lex_string (void)
 {
   int is_byte = lexptr[0] == 'b';
   int raw_length;
-  int len_in_chars = 0;
 
   if (is_byte)
     ++lexptr;
@@ -2069,7 +2067,6 @@ convert_ast_to_type (struct parser_state *state,
 	std::vector<struct type *> args
 	  (convert_params_to_types (state, operation->left.params));
 	int i;
-	struct type *type;
 	const char *name;
 
 	obstack_1grow (work_obstack, '(');
@@ -2397,7 +2394,6 @@ convert_ast_to_expression (struct parser_state *state,
 
     case OP_AGGREGATE:
       {
-	int i;
 	int length;
 	rust_set_vector *fields = operation->right.field_inits;
 	struct type *type;

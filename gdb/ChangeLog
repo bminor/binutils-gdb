@@ -1,3 +1,164 @@
+2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ada-lang.c (ada_collect_symbol_completion_matches): Remove
+	unused variables.
+	(ada_is_redundant_range_encoding): Likewise.
+	* ada-varobj.c (ada_varobj_get_value_of_array_variable):
+	Likewise.
+	* alpha-tdep.c (alpha_software_single_step): Likewise.
+	* arm-tdep.c (_initialize_arm_tdep): Likewise.
+	* auto-load.c (info_auto_load_cmd): Likewise.
+	* break-catch-syscall.c (insert_catch_syscall): Likewise.
+	(remove_catch_syscall): Likewise.
+	* breakpoint.c (condition_completer): Likewise.
+	(clear_command): Likewise.
+	(update_breakpoint_locations): Likewise.
+	* btrace.c (btrace_disable): Likewise.
+	(btrace_teardown): Likewise.
+	(btrace_maint_update_pt_packets): Likewise.
+	(maint_btrace_clear_cmd): Likewise.
+	* cli/cli-decode.c (lookup_cmd_1): Likewise.
+	(lookup_cmd_composition): Likewise.
+	* cli/cli-dump.c (scan_filename): Likewise.
+	(restore_command): Likewise.
+	* compile/compile-loc2c.c (compute_stack_depth): Likewise.
+	* compile/compile-object-load.c (compile_object_load): Likewise.
+	* compile/compile-object-run.c (compile_object_run): Likewise.
+	* compile/compile.c (compile_to_object): Likewise.
+	* completer.c (filename_completer): Likewise.
+	(complete_files_symbols): Likewise.
+	(complete_expression): Likewise.
+	* corelow.c (core_open): Likewise.
+	* ctf.c (ctf_start): Likewise.
+	(ctf_write_status): Likewise.
+	(ctf_write_uploaded_tsv): Likewise.
+	(ctf_write_definition_end): Likewise.
+	(ctf_open_dir): Likewise.
+	(ctf_xfer_partial): Likewise.
+	(ctf_trace_find): Likewise.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn):
+	Likewise.
+	* dwarf2loc.c (allocate_piece_closure): Likewise.
+	(indirect_pieced_value): Likewise.
+	(dwarf2_evaluate_loc_desc_full): Likewise.
+	* dwarf2read.c (dw2_expand_marked_cus): Likewise.
+	(dw2_expand_symtabs_matching): Likewise.
+	(dw2_map_symbol_filenames): Likewise.
+	(read_and_check_comp_unit_head): Likewise.
+	(read_cutu_die_from_dwo): Likewise.
+	(lookup_dwo_unit): Likewise.
+	(read_comp_units_from_section): Likewise.
+	(dwarf2_compute_name): Likewise.
+	(handle_DW_AT_stmt_list): Likewise.
+	(create_cus_hash_table): Likewise.
+	(create_dwp_v2_section): Likewise.
+	(dwarf2_rnglists_process): Likewise.
+	(dwarf2_ranges_process): Likewise.
+	(dwarf2_record_block_ranges): Likewise.
+	(is_vtable_name): Likewise.
+	(read_formatted_entries): Likewise.
+	(skip_form_bytes): Likewise.
+	* elfread.c (elf_symtab_read): Likewise.
+	* exec.c (exec_file_command): Likewise.
+	* f-valprint.c (f_val_print): Likewise.
+	(info_common_command_for_block): Likewise.
+	* guile/guile.c (initialize_scheme_side): Likewise.
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_commands): Likewise.
+	* guile/scm-cmd.c (cmdscm_completer): Likewise.
+	(gdbscm_register_command_x): Likewise.
+	* guile/scm-frame.c (gdbscm_frame_read_var): Likewise.
+	* guile/scm-param.c (gdbscm_parameter_value): Likewise.
+	* guile/scm-ports.c (file_port_magic): Likewise.
+	* guile/scm-pretty-print.c (ppscm_search_pp_list): Likewise.
+	(ppscm_pretty_print_one_value): Likewise.
+	(ppscm_print_children): Likewise.
+	* guile/scm-string.c (gdbscm_string_to_argv): Likewise.
+	* guile/scm-symtab.c (gdbscm_sal_symtab): Likewise.
+	* guile/scm-type.c (gdbscm_type_next_field_x): Likewise.
+	* guile/scm-utils.c (gdbscm_parse_function_args): Likewise.
+	* i386-tdep.c (i386_register_reggroup_p): Likewise.
+	* infcmd.c (run_command_1): Likewise.
+	(until_next_fsm_clean_up): Likewise.
+	* linespec.c (linespec_complete): Likewise.
+	(find_label_symbols): Likewise.
+	* m2-valprint.c (m2_val_print): Likewise.
+	* memattr.c (require_user_regions): Likewise.
+	(lookup_mem_region): Likewise.
+	(disable_mem_command): Likewise.
+	(mem_delete): Likewise.
+	* mep-tdep.c (mep_register_name): Likewise.
+	(mep_analyze_prologue): Likewise.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Likewise.
+	* mi/mi-interp.c (mi_on_sync_execution_done): Likewise.
+	* mi/mi-main.c (mi_cmd_trace_frame_collected): Likewise.
+	* microblaze-linux-tdep.c (microblaze_linux_init_abi): Likewise.
+	* minidebug.c (lzma_open): Likewise.
+	* minsyms.c (lookup_minimal_symbol): Likewise.
+	* mips-linux-tdep.c (mips64_fill_fpregset): Likewise.
+	* mips-tdep.c (mips_stub_frame_sniffer): Likewise.
+	(mips_o64_return_value): Likewise.
+	(mips_single_step_through_delay): Likewise.
+	(_initialize_mips_tdep): Likewise.
+	* nios2-tdep.c (nios2_push_dummy_call): Likewise.
+	(nios2_software_single_step): Likewise.
+	* parse.c (find_minsym_type_and_address): Likewise.
+	* psymtab.c (psym_relocate): Likewise.
+	* python/py-breakpoint.c (bppy_get_commands): Likewise.
+	(gdbpy_breakpoint_modified): Likewise.
+	* python/py-infevents.c (create_inferior_call_event_object):
+	Likewise.
+	* python/py-record-btrace.c (btpy_list_item): Likewise.
+	* python/py-type.c (typy_str): Likewise.
+	* python/py-value.c (valpy_call): Likewise.
+	* python/python.c (do_start_initialization): Likewise.
+	* record-btrace.c (record_btrace_insn_history_range): Likewise.
+	(record_btrace_call_history_range): Likewise.
+	(record_btrace_record_method): Likewise.
+	(record_btrace_xfer_partial): Likewise.
+	(btrace_get_frame_function): Likewise.
+	* record-full.c (record_full_open): Likewise.
+	* record.c (get_context_size): Likewise.
+	* registry.h (DEFINE_REGISTRY): Likewise.
+	* remote-fileio.c (remote_fileio_request): Likewise.
+	* remote.c (remote_update_thread_list): Likewise.
+	(remote_check_symbols): Likewise.
+	(remote_commit_resume): Likewise.
+	(remote_interrupt): Likewise.
+	(remote_insert_breakpoint): Likewise.
+	(compare_sections_command): Likewise.
+	* rust-exp.y (super_name): Likewise.
+	(lex_string): Likewise.
+	(convert_ast_to_type): Likewise.
+	(convert_ast_to_expression): Likewise.
+	* rust-lang.c (rust_print_struct_def): Likewise.
+	(rust_print_type): Likewise.
+	(rust_evaluate_subexp): Likewise.
+	* rx-tdep.c (rx_register_type): Likewise.
+	* ser-event.c (serial_event_clear): Likewise.
+	* serial.c (serial_open): Likewise.
+	* spu-tdep.c (spu_overlay_new_objfile): Likewise.
+	* symfile.c (section_is_overlay): Likewise.
+	(overlay_unmapped_address): Likewise.
+	(overlay_mapped_address): Likewise.
+	(simple_overlay_update_1): Likewise.
+	(simple_overlay_update): Likewise.
+	* symtab.c (symbol_find_demangled_name): Likewise.
+	(search_symbols): Likewise.
+	* target-descriptions.c (tdesc_predefined_type): Likewise.
+	* target.c (target_commit_resume): Likewise.
+	* thread.c (print_selected_thread_frame): Likewise.
+	* top.c (new_ui_command): Likewise.
+	(gdb_readline_no_editing): Likewise.
+	* tracefile-tfile.c (tfile_open): Likewise.
+	* tracepoint.c (create_tsv_from_upload): Likewise.
+	* utils.c (quit): Likewise.
+	(defaulted_query): Likewise.
+	* valarith.c (value_concat): Likewise.
+	* xml-syscall.c (xml_list_syscalls_by_group): Likewise.
+	* xml-tdesc.c (target_fetch_description_xml): Likewise.
+	* xtensa-tdep.c (xtensa_pseudo_register_read): Likewise.
+	(xtensa_pseudo_register_write): Likewise.
+
 2017-12-04  Tom Tromey  <tom@tromey.com>
 
 	* NEWS: Mention Rust trait object inspection.

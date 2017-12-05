@@ -284,7 +284,6 @@ mi_execute_command_wrapper (const char *cmd)
 static void
 mi_on_sync_execution_done (void)
 {
-  struct ui *ui = current_ui;
   struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
 
   if (mi == NULL)

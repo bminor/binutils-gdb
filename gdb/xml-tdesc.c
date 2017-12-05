@@ -740,8 +740,6 @@ target_fetch_description_xml (struct target_ops *ops)
 
   return {};
 #else
-  struct target_desc *tdesc;
-
   gdb::unique_xmalloc_ptr<char>
     tdesc_str = fetch_available_features_from_target ("target.xml", ops);
   if (tdesc_str == NULL)

@@ -326,10 +326,8 @@ open_terminal_stream (const char *name)
 static void
 new_ui_command (const char *args, int from_tty)
 {
-  struct interp *interp;
   gdb_file_up stream[3];
   int i;
-  int res;
   int argc;
   const char *interpreter_name;
   const char *tty_name;
@@ -750,7 +748,6 @@ gdb_readline_no_editing (const char *prompt)
   while (1)
     {
       int c;
-      int numfds;
       fd_set readfds;
 
       QUIT;

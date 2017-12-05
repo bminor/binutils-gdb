@@ -484,8 +484,6 @@ bppy_get_commands (PyObject *self, void *closure)
 {
   gdbpy_breakpoint_object *self_bp = (gdbpy_breakpoint_object *) self;
   struct breakpoint *bp = self_bp->bp;
-  long length;
-  PyObject *result;
 
   BPPY_REQUIRE_VALID (self_bp);
 
@@ -936,7 +934,6 @@ gdbpy_breakpoint_modified (struct breakpoint *b)
   int num = b->number;
   PyGILState_STATE state;
   struct breakpoint *bp = NULL;
-  gdbpy_breakpoint_object *bp_obj;
 
   state = PyGILState_Ensure ();
   bp = get_breakpoint (num);

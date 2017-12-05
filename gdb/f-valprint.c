@@ -214,7 +214,6 @@ f_val_print (struct type *type, int embedded_offset,
 	     const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int printed_field = 0; /* Number of fields printed.  */
   struct type *elttype;
   CORE_ADDR addr;
@@ -376,7 +375,6 @@ info_common_command_for_block (const struct block *block, const char *comname,
 {
   struct block_iterator iter;
   struct symbol *sym;
-  const char *name;
   struct value_print_options opts;
 
   get_user_print_options (&opts);

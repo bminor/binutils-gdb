@@ -202,7 +202,6 @@ void
 serial_event_clear (struct serial_event *event)
 {
   struct serial *ser = (struct serial *) event;
-  struct serial_event_state *state = (struct serial_event_state *) ser->state;
 #ifndef USE_WIN32API
   int r;
 
@@ -214,6 +213,7 @@ serial_event_clear (struct serial_event *event)
     }
   while (r > 0 || (r < 0 && errno == EINTR));
 #else
+  struct serial_event_state *state = (struct serial_event_state *) ser->state;
   ResetEvent (state->event);
 #endif
 }

@@ -657,7 +657,6 @@ value_concat (struct value *arg1, struct value *arg2)
   struct value *outval = NULL;
   int inval1len, inval2len;
   int count, idx;
-  char *ptr;
   char inchar;
   struct type *type1 = check_typedef (value_type (arg1));
   struct type *type2 = check_typedef (value_type (arg2));

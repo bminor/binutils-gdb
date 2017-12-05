@@ -1501,7 +1501,6 @@ allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
 			struct frame_info *frame)
 {
   struct piece_closure *c = new piece_closure;
-  int i;
 
   c->refc = 1;
   c->per_cu = per_cu;
@@ -2179,7 +2178,6 @@ indirect_pieced_value (struct value *value)
     = (struct piece_closure *) value_computed_closure (value);
   struct type *type;
   struct frame_info *frame;
-  struct dwarf2_locexpr_baton baton;
   int i, bit_length;
   LONGEST bit_offset;
   struct dwarf_expr_piece *piece = NULL;
@@ -2387,7 +2385,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
     {
       struct piece_closure *c;
       ULONGEST bit_size = 0;
-      int i;
 
       for (dwarf_expr_piece &piece : ctx.pieces)
 	bit_size += piece.size;

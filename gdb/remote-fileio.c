@@ -1169,8 +1169,6 @@ remote_fileio_reset (void)
 void
 remote_fileio_request (char *buf, int ctrlc_pending_p)
 {
-  int ex;
-
   /* Save the previous quit handler, so we can restore it.  No need
      for a cleanup since we catch all exceptions below.  Note that the
      quit handler is also restored by remote_fileio_reply just before

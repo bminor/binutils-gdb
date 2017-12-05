@@ -1062,7 +1062,6 @@ gdbscm_parameter_value (SCM self)
       char *name;
       SCM except_scm;
       struct cmd_list_element *alias, *prefix, *cmd;
-      const char *arg;
       char *newarg;
       int found = -1;
       struct gdb_exception except = exception_none;

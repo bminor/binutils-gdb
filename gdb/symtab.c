@@ -729,7 +729,6 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 {
   char *demangled = NULL;
   int i;
-  int recognized;
 
   if (gsymbol->language == language_unknown)
     gsymbol->language = language_auto;
@@ -4283,7 +4282,6 @@ search_symbols (const char *regexp, enum search_domain kind,
          and <TYPENAME> or <OPERATOR>.  */
       const char *opend;
       const char *opname = operator_chars (regexp, &opend);
-      int errcode;
 
       if (*opname)
 	{

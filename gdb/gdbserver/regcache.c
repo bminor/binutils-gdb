@@ -207,8 +207,6 @@ registers_to_string (struct regcache *regcache, char *buf)
 
   for (int i = 0; i < tdesc->reg_defs.size (); ++i)
     {
-      struct reg *reg = tdesc->reg_defs[i];
-
       if (regcache->register_status[i] == REG_VALID)
 	{
 	  bin2hex (registers, buf, register_size (tdesc, i));

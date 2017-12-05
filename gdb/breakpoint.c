@@ -921,7 +921,6 @@ condition_completer (struct cmd_list_element *cmd,
     {
       int len;
       struct breakpoint *b;
-      VEC (char_ptr) *result = NULL;
 
       if (text[0] == '$')
 	{
@@ -11479,7 +11478,6 @@ clear_command (const char *arg, int from_tty)
 {
   struct breakpoint *b;
   int default_match;
-  int i;
 
   std::vector<symtab_and_line> decoded_sals;
   symtab_and_line last_sal;
@@ -13664,7 +13662,6 @@ update_breakpoint_locations (struct breakpoint *b,
 			     gdb::array_view<const symtab_and_line> sals,
 			     gdb::array_view<const symtab_and_line> sals_end)
 {
-  int i;
   struct bp_location *existing_locations;
 
   if (!sals_end.empty () && (sals.size () != 1 || sals_end.size () != 1))

@@ -1723,10 +1723,7 @@ alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
 std::vector<CORE_ADDR>
 alpha_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = regcache->arch ();
-  CORE_ADDR pc;
-
-  pc = alpha_next_pc (regcache, regcache_read_pc (regcache));
+  CORE_ADDR pc = alpha_next_pc (regcache, regcache_read_pc (regcache));
 
   return {pc};
 }

@@ -4938,7 +4938,6 @@ dw2_expand_marked_cus
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    search_domain kind)
 {
-  const char *name;
   offset_type *vec, vec_len, vec_idx;
   bool global_seen = false;
 
@@ -5029,7 +5028,6 @@ dw2_expand_symtabs_matching
    enum search_domain kind)
 {
   int i;
-  offset_type iter;
 
   dw2_setup (objfile);
 
@@ -5213,7 +5211,6 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 
       for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
 	{
-	  int j;
 	  struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 	  struct quick_file_names *file_data;
 	  void **slot;
@@ -5553,7 +5550,6 @@ read_and_check_comp_unit_head (struct comp_unit_head *header,
 			       rcuh_kind section_kind)
 {
   const gdb_byte *beg_of_comp_unit = info_ptr;
-  bfd *abfd = get_section_bfd_owner (section);
 
   header->sect_off = (sect_offset) (beg_of_comp_unit - section->buffer);
 
@@ -6196,7 +6192,6 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
   struct dwarf2_section_info *section;
   bfd *abfd;
   const gdb_byte *begin_info_ptr, *info_ptr;
-  ULONGEST signature; /* Or dwo_id.  */
   struct attribute *comp_dir, *stmt_list, *low_pc, *high_pc, *ranges;
   int i,num_extra_attrs;
   struct dwarf2_section_info *dwo_abbrev_section;
@@ -6383,7 +6378,6 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
 		 struct die_info *comp_unit_die)
 {
   struct dwarf2_cu *cu = this_cu->cu;
-  struct attribute *attr;
   ULONGEST signature;
   struct dwo_unit *dwo_unit;
   const char *comp_dir, *dwo_name;
@@ -7651,7 +7645,6 @@ read_comp_units_from_section (struct objfile *objfile,
 			      struct dwarf2_per_cu_data ***all_comp_units)
 {
   const gdb_byte *info_ptr;
-  bfd *abfd = get_section_bfd_owner (section);
 
   if (dwarf_read_debug)
     fprintf_unfiltered (gdb_stdlog, "Reading %s for %s\n",
@@ -9666,7 +9659,6 @@ dwarf2_compute_name (const char *name,
     {
       if (die_needs_namespace (die, cu))
 	{
-	  long length;
 	  const char *prefix;
 	  const char *canonical_name = NULL;
 
@@ -10267,7 +10259,6 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
   struct attribute *attr;
   struct line_header line_header_local;
   hashval_t line_header_local_hash;
-  unsigned u;
   void **slot;
   int decode_mapping;
 
@@ -10739,7 +10730,6 @@ create_cus_hash_table (struct dwo_file &dwo_file, dwarf2_section_info &section,
 		       htab_t &cus_htab)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  const struct dwarf2_section_info *abbrev_section = &dwo_file.sections.abbrev;
   const gdb_byte *info_ptr, *end_ptr;
 
   dwarf2_read_section (objfile, &section);
@@ -11359,8 +11349,6 @@ create_dwp_v2_section (struct dwarf2_section_info *section,
   if (sectp == NULL
       || offset + size > bfd_get_section_size (sectp))
     {
-      bfd *abfd = sectp->owner;
-
       error (_("Dwarf Error: Bad DWP V2 section info, doesn't fit"
 	       " in section %s [in module %s]"),
 	     sectp ? bfd_section_name (abfd, sectp) : "<unknown>",
@@ -13118,18 +13106,11 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 			 Callback &&callback)
 {
   struct objfile *objfile = cu->objfile;
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct comp_unit_head *cu_header = &cu->header;
   bfd *obfd = objfile->obfd;
-  unsigned int addr_size = cu_header->addr_size;
-  CORE_ADDR mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Base address selection entry.  */
   CORE_ADDR base;
   int found_base;
-  unsigned int dummy;
   const gdb_byte *buffer;
-  CORE_ADDR low = 0;
-  CORE_ADDR high = 0;
   CORE_ADDR baseaddr;
   bool overflow = false;
 
@@ -13291,7 +13272,6 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
 		       Callback &&callback)
 {
   struct objfile *objfile = cu->objfile;
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct comp_unit_head *cu_header = &cu->header;
   bfd *obfd = objfile->obfd;
   unsigned int addr_size = cu_header->addr_size;
@@ -13665,7 +13645,6 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
   attr = dwarf2_attr (die, DW_AT_ranges, cu);
   if (attr)
     {
-      bfd *obfd = objfile->obfd;
       /* DW_AT_ranges_base does not apply to DIEs from the DWO skeleton.
 	 We take advantage of the fact that DW_AT_ranges does not appear
 	 in DW_TAG_compile_unit of DWO files.  */
@@ -14441,7 +14420,6 @@ static int
 is_vtable_name (const char *name, struct dwarf2_cu *cu)
 {
   static const char vptr[] = "_vptr";
-  static const char vtable[] = "vtable";
 
   /* Look for the C++ form of the vtable.  */
   if (startswith (name, vptr) && is_cplus_marker (name[sizeof (vptr) - 1]))
@@ -18733,7 +18711,6 @@ read_formatted_entries (bfd *abfd, const gdb_byte **bufp,
   ULONGEST data_count, datai;
   const gdb_byte *buf = *bufp;
   const gdb_byte *format_header_data;
-  int i;
   unsigned int bytes_read;
 
   format_count = read_1_byte (abfd, buf);
@@ -22793,7 +22770,6 @@ skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
 
     default:
       {
-      complain:
 	complaint (&symfile_complaints,
 		   _("invalid form 0x%x in `%s'"),
 		   form, get_section_name (section));

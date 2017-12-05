@@ -965,7 +965,6 @@ static PyObject *
 typy_str (PyObject *self)
 {
   string_file thetype;
-  PyObject *result;
 
   TRY
     {

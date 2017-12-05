@@ -98,10 +98,6 @@ static SCM input_port_scm;
 static SCM output_port_scm;
 static SCM error_port_scm;
 
-/* Magic number to identify port ui-files.
-   Actually, the address of this variable is the magic number.  */
-static int file_port_magic;
-
 /* Internal enum for specifying output port.  */
 enum oport { GDB_STDOUT, GDB_STDERR };
 

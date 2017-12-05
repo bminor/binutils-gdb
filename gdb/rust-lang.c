@@ -848,8 +848,6 @@ rust_print_struct_def (struct type *type, const char *varstring,
 
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     {
-      const char *name;
-
       QUIT;
       if (field_is_static (&TYPE_FIELD (type, i)))
 	continue;
@@ -997,7 +995,7 @@ rust_print_type (struct type *type, const char *varstring,
     case TYPE_CODE_UNION:
       {
 	/* ADT enums.  */
-	int i, len = 0;
+	int i;
 	/* Skip the discriminant field.  */
 	int skip_to = 1;
 
@@ -1780,7 +1778,6 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
 	if (noside == EVAL_NORMAL)
 	  {
-	    CORE_ADDR addr;
 	    int i;
 	    std::vector<struct value *> eltvec (copies);
 

@@ -464,7 +464,6 @@ static PyObject *
 btpy_list_item (PyObject *self, Py_ssize_t index)
 {
   const btpy_list_object * const obj = (btpy_list_object *) self;
-  struct thread_info * const tinfo = find_thread_ptid (obj->ptid);
   Py_ssize_t number;
 
   if (index < 0 || index >= btpy_list_length (self))

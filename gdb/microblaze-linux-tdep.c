@@ -119,8 +119,6 @@ static void
 microblaze_linux_init_abi (struct gdbarch_info info,
 			   struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   linux_init_abi (info, gdbarch);
 
   set_gdbarch_memory_remove_breakpoint (gdbarch,

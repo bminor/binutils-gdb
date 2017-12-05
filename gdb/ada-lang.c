@@ -6475,7 +6475,6 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
   const struct block *b, *surrounding_static_block = 0;
-  int i;
   struct block_iterator iter;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
@@ -8652,7 +8651,6 @@ static int
 ada_is_redundant_range_encoding (struct type *range_type,
 				 struct type *encoding_type)
 {
-  struct type *fixed_range_type;
   const char *bounds_str;
   int n;
   LONGEST lo, hi;

@@ -104,8 +104,6 @@ insert_catch_syscall (struct bp_location *bl)
     {
       for (int iter : c->syscalls_to_be_caught)
 	{
-          int elem;
-
 	  if (iter >= inf_data->syscalls_counts.size ())
 	    inf_data->syscalls_counts.resize (iter + 1);
 	  ++inf_data->syscalls_counts[iter];
@@ -137,7 +135,6 @@ remove_catch_syscall (struct bp_location *bl, enum remove_bp_reason reason)
     {
       for (int iter : c->syscalls_to_be_caught)
 	{
-          int elem;
 	  if (iter >= inf_data->syscalls_counts.size ())
 	    /* Shouldn't happen.  */
 	    continue;

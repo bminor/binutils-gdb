@@ -828,8 +828,6 @@ static void record_full_init_record_breakpoints (void);
 static void
 record_full_open (const char *name, int from_tty)
 {
-  struct target_ops *t;
-
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog, "Process record: record_full_open\n");
 

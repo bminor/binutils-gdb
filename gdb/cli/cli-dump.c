@@ -55,7 +55,6 @@ static gdb::unique_xmalloc_ptr<char>
 scan_filename (const char **cmd, const char *defname)
 {
   gdb::unique_xmalloc_ptr<char> filename;
-  char *fullname;
 
   /* FIXME: Need to get the ``/a(ppend)'' flag from somewhere.  */
 
@@ -516,7 +515,6 @@ static void
 restore_command (const char *args, int from_tty)
 {
   struct callback_data data;
-  bfd *ibfd;
   int binary_flag = 0;
 
   if (!target_has_execution)

@@ -241,7 +241,6 @@ static SCM
 gdbscm_string_to_argv (SCM string_scm)
 {
   char *string;
-  int i;
   SCM result = SCM_EOL;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, NULL, "s",

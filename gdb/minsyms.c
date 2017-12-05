@@ -330,8 +330,6 @@ lookup_minimal_symbol (const char *name, const char *sfile,
        objfile != NULL && found.external_symbol.minsym == NULL;
        objfile = objfile->next)
     {
-      struct minimal_symbol *msymbol;
-
       if (objf == NULL || objf == objfile
 	  || objf == objfile->separate_debug_objfile_backlink)
 	{

@@ -154,7 +154,6 @@ filename_completer (struct cmd_list_element *ignore,
 		    const char *text, const char *word)
 {
   int subsequent_name;
-  VEC (char_ptr) *return_val = NULL;
 
   subsequent_name = 0;
   while (1)
@@ -429,7 +428,6 @@ static void
 complete_files_symbols (completion_tracker &tracker,
 			const char *text, const char *word)
 {
-  int ix;
   completion_list fn_list;
   const char *p;
   int quote_found = 0;
@@ -524,8 +522,6 @@ complete_files_symbols (completion_tracker &tracker,
 
   if (!fn_list.empty () && !tracker.have_completions ())
     {
-      char *fn;
-
       /* If we only have file names as possible completion, we should
 	 bring them in sync with what rl_complete expects.  The
 	 problem is that if the user types "break /foo/b TAB", and the
@@ -1081,7 +1077,6 @@ complete_expression (completion_tracker &tracker,
     }
   else if (fieldname && code != TYPE_CODE_UNDEF)
     {
-      VEC (char_ptr) *result;
       struct cleanup *cleanup = make_cleanup (xfree, fieldname);
 
       collect_symbol_completion_matches_type (tracker, fieldname, fieldname,

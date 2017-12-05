@@ -3781,7 +3781,6 @@ mips_stub_frame_sniffer (const struct frame_unwind *self,
 			 struct frame_info *this_frame, void **this_cache)
 {
   gdb_byte dummy[4];
-  struct obj_section *s;
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
   struct bound_minimal_symbol msym;
 
@@ -6074,7 +6073,6 @@ mips_o64_return_value (struct gdbarch *gdbarch, struct value *function,
 {
   CORE_ADDR func_addr = function ? find_function_addr (function, NULL) : 0;
   int mips16 = mips_pc_is_mips16 (gdbarch, func_addr);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum mips_fval_reg fval_reg;
 
   fval_reg = readbuf ? mips16 ? mips_fval_gpr : mips_fval_fpr : mips_fval_both;
@@ -6593,11 +6591,9 @@ static int
 mips_single_step_through_delay (struct gdbarch *gdbarch,
 				struct frame_info *frame)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc = get_frame_pc (frame);
   enum mips_isa isa;
   ULONGEST insn;
-  int status;
   int size;
 
   if ((mips_pc_is_mips (pc)
@@ -8969,7 +8965,6 @@ void
 _initialize_mips_tdep (void)
 {
   static struct cmd_list_element *mipsfpulist = NULL;
-  struct cmd_list_element *c;
 
   mips_abi_string = mips_abi_strings[MIPS_ABI_UNKNOWN];
   if (MIPS_ABI_LAST + 1

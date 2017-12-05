@@ -831,10 +831,7 @@ static struct tdesc_type tdesc_predefined_types[] =
 static struct tdesc_type *
 tdesc_predefined_type (enum tdesc_type_kind kind)
 {
-  int ix;
-  struct tdesc_type *type;
-
-  for (ix = 0; ix < ARRAY_SIZE (tdesc_predefined_types); ix++)
+  for (int ix = 0; ix < ARRAY_SIZE (tdesc_predefined_types); ix++)
     if (tdesc_predefined_types[ix].kind == kind)
       return &tdesc_predefined_types[ix];
 

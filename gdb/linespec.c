@@ -3113,7 +3113,6 @@ linespec_complete (completion_tracker &tracker, const char *text,
 	 the ':', then complete_linespec_component won't try to
 	 complete on source filenames.  */
 
-      const char *text = parser.completion_word;
       const char *word = parser.completion_word;
 
       complete_linespec_component (&parser, tracker,
@@ -4159,7 +4158,6 @@ find_label_symbols (struct linespec_state *self,
 {
   int ix;
   const struct block *block;
-  struct symbol *sym;
   struct symbol *fn_sym;
   VEC (symbolp) *result = NULL;
 

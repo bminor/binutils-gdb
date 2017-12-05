@@ -2231,8 +2231,6 @@ static int defer_target_commit_resume;
 void
 target_commit_resume (void)
 {
-  struct target_ops *t;
-
   if (defer_target_commit_resume)
     return;
 

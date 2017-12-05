@@ -1386,7 +1386,7 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 	      struct cmd_list_element **result_list, int ignore_help_classes)
 {
   char *command;
-  int len, tmp, nfound;
+  int len, nfound;
   struct cmd_list_element *found, *c;
   const char *line = *text;
 
@@ -1715,7 +1715,7 @@ lookup_cmd_composition (const char *text,
                       struct cmd_list_element **cmd)
 {
   char *command;
-  int len, tmp, nfound;
+  int len, nfound;
   struct cmd_list_element *cur_list;
   struct cmd_list_element *prev_cmd;
 

@@ -3222,7 +3222,6 @@ remote_update_thread_list (struct target_ops *ops)
       || remote_get_threads_with_qthreadinfo (ops, &context)
       || remote_get_threads_with_ql (ops, &context))
     {
-      int i;
       struct thread_info *tp, *tmp;
 
       got_list = 1;
@@ -4352,7 +4351,6 @@ init_all_packet_configs (void)
 static void
 remote_check_symbols (void)
 {
-  struct remote_state *rs = get_remote_state ();
   char *msg, *reply, *tmp;
   int end;
   long reply_size;
@@ -5869,7 +5867,6 @@ vcont_builder_push_action (struct vcont_builder *builder,
 static void
 remote_commit_resume (struct target_ops *ops)
 {
-  struct remote_state *rs = get_remote_state ();
   struct inferior *inf;
   struct thread_info *tp;
   int any_process_wildcard;
@@ -6167,8 +6164,6 @@ remote_stop (struct target_ops *self, ptid_t ptid)
 static void
 remote_interrupt (struct target_ops *self, ptid_t ptid)
 {
-  struct remote_state *rs = get_remote_state ();
-
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
 
@@ -9768,7 +9763,6 @@ remote_insert_breakpoint (struct target_ops *ops,
       CORE_ADDR addr = bp_tgt->reqstd_address;
       struct remote_state *rs;
       char *p, *endbuf;
-      int bpsize;
 
       /* Make sure the remote is pointing at the right process, if
 	 necessary.  */
@@ -10226,7 +10220,6 @@ static void
 compare_sections_command (const char *args, int from_tty)
 {
   asection *s;
-  gdb_byte *sectdata;
   const char *sectname;
   bfd_size_type size;
   bfd_vma lma;

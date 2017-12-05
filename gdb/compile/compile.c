@@ -462,7 +462,6 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   int argc;
   char **argv;
   int ok;
-  FILE *src;
   struct gdbarch *gdbarch = get_current_arch ();
   char *triplet_rx;
   char *error_message;

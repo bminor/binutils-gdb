@@ -608,15 +608,13 @@ compile_object_load (const compile_file_names &file_names,
 {
   struct cleanup *cleanups;
   struct setup_sections_data setup_sections_data;
-  CORE_ADDR addr, regs_addr, out_value_addr = 0;
+  CORE_ADDR regs_addr, out_value_addr = 0;
   struct symbol *func_sym;
   struct type *func_type;
   struct bound_minimal_symbol bmsym;
   long storage_needed;
   asymbol **symbol_table, **symp;
   long number_of_symbols, missing_symbols;
-  struct type *dptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
-  unsigned dptr_type_len = TYPE_LENGTH (dptr_type);
   struct compile_module *retval;
   struct type *regs_type, *out_value_type = NULL;
   char **matching;

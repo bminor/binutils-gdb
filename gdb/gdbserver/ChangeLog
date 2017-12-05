@@ -1,3 +1,7 @@
+2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* regcache.c (registers_to_string): Remove unused variable.
+
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* inferiors.c (for_each_inferior_with_data): Remove.

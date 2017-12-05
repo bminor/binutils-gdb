@@ -605,7 +605,6 @@ static void
 initialize_scheme_side (void)
 {
   char *boot_scm_path;
-  char *msg;
 
   guile_datadir = concat (gdb_datadir, SLASH_STRING, "guile", (char *) NULL);
   boot_scm_path = concat (guile_datadir, SLASH_STRING, "gdb",

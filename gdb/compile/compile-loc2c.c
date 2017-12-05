@@ -389,7 +389,6 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
 		     int initial_depth,
 		     std::vector<struct insn_info> *info)
 {
-  unsigned char *set;
   std::vector<int> to_do;
   int stack_depth, i;
 

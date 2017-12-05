@@ -263,7 +263,6 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
       {
 	CORE_ADDR end_pc;
 	bfd_byte data;
-	int err;
 	const char *spacer = "";
 
 	/* Build the opcodes using a temporary stream so we can
