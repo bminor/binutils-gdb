@@ -209,13 +209,13 @@ void set_tdesc_property (struct target_desc *,
 			 const char *key, const char *value);
 void tdesc_add_compatible (struct target_desc *,
 			   const struct bfd_arch_info *);
-struct tdesc_type *tdesc_create_enum (struct tdesc_feature *feature,
-				      const char *name,
-				      int size);
-void tdesc_add_typed_bitfield (struct tdesc_type *type, const char *field_name,
+tdesc_type_with_fields *tdesc_create_enum (struct tdesc_feature *feature,
+					   const char *name,
+					   int size);
+void tdesc_add_typed_bitfield (tdesc_type_with_fields *type, const char *field_name,
 			       int start, int end,
 			       struct tdesc_type *field_type);
-void tdesc_add_enum_value (struct tdesc_type *type, int value,
+void tdesc_add_enum_value (tdesc_type_with_fields *type, int value,
 			   const char *name);
 
 #if GDB_SELF_TEST

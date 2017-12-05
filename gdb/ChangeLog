@@ -1,5 +1,54 @@
 2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target-descriptions.c (struct tdesc_type): Use default
+	destructor.
+	<u>: Remove.
+	<accept>: Remove.
+	(struct tdesc_type_builtin): New.
+	(struct tdesc_type_vector): New.
+	(struct tdesc_type_with_fields): New.
+	(tdesc_predefined_types): Change type to tdesc_type_builtin[].
+	(tdesc_gdb_type): Remove.
+	(tdesc_register_type): Adjust.
+	(tdesc_create_vector): Create tdesc_type_vector.
+	(tdesc_create_struct): Create tdesc_type_with_fields.
+	(tdesc_set_struct_size): Change parameter type.
+	(tdesc_create_union): Create tdesc_type_with_fields.
+	(tdesc_create_flags): Likewise.
+	(tdesc_create_enum): Likewise.
+	(tdesc_add_field): Change parameter type.
+	(tdesc_add_typed_bitfield): Likewise.
+	(tdesc_add_bitfield): Likewise.
+	(tdesc_add_flag): Likewise.
+	(tdesc_add_enum_value): Likewise.
+	(print_c_tdesc) <visit>: Remove overload with tdesc_type
+	parameter, add overloads for tdesc_type_builtin,
+	tdesc_type_with_fields and tdesc_type_vector.
+	<m_printed_type>: Remove.
+	<m_printed_element_type, m_printed_type_with_fields>: Add.
+	* target-descriptions.h (tdesc_create_enum): Change return type.
+	(tdesc_add_typed_bitfield): Change parameter type.
+	(tdesc_add_enum_value): Change parameter type.
+	* xml-tdesc.c (struct tdesc_parsing_data) <current_type>: Change
+	type to tdesc_type_with_fields.
+	(tdesc_start_struct): Adjust.
+	(tdesc_start_flags): Adjust.
+	(tdesc_start_enum): Adjust.
+	(tdesc_start_field): Adjust.
+	* arch/tdesc.h (struct tdesc_type_builtin): Forward-declare.
+	(struct tdesc_type_vector): Forward-declare.
+	(struct tdesc_type_with_fields): Forward-declare.
+	(tdesc_create_struct): Change return type.
+	(tdesc_create_union): Likewise.
+	(tdesc_create_flags): Likewise.
+	(tdesc_add_field): Change parameter type.
+	(tdesc_set_struct_size): Likewise.
+	(tdesc_add_bitfield): Likewise.
+	(tdesc_add_flag): Likewise.
+	* features: Re-generate C files.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* target-descriptions.c (tdesc_arch_reg): Remove typedef.
 	(struct tdesc_arch_reg): Add constructor.
 	(DEF_VEC_O (tdesc_arch_reg)): Remove.

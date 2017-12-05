@@ -9,9 +9,9 @@ create_feature_i386_32bit_avx512 (struct target_desc *result, long regnum)
   struct tdesc_feature *feature;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.avx512", "32bit-avx512.xml");
-  struct tdesc_type *field_type;
-  field_type = tdesc_named_type (feature, "uint128");
-  tdesc_create_vector (feature, "v2ui128", field_type, 2);
+  tdesc_type *element_type;
+  element_type = tdesc_named_type (feature, "uint128");
+  tdesc_create_vector (feature, "v2ui128", element_type, 2);
 
   tdesc_create_reg (feature, "k0", regnum++, 1, NULL, 64, "uint64");
   tdesc_create_reg (feature, "k1", regnum++, 1, NULL, 64, "uint64");

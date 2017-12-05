@@ -9,57 +9,58 @@ create_feature_i386_64bit_sse (struct target_desc *result, long regnum)
   struct tdesc_feature *feature;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.sse", "64bit-sse.xml");
-  struct tdesc_type *field_type;
-  field_type = tdesc_named_type (feature, "ieee_single");
-  tdesc_create_vector (feature, "v4f", field_type, 4);
+  tdesc_type *element_type;
+  element_type = tdesc_named_type (feature, "ieee_single");
+  tdesc_create_vector (feature, "v4f", element_type, 4);
 
-  field_type = tdesc_named_type (feature, "ieee_double");
-  tdesc_create_vector (feature, "v2d", field_type, 2);
+  element_type = tdesc_named_type (feature, "ieee_double");
+  tdesc_create_vector (feature, "v2d", element_type, 2);
 
-  field_type = tdesc_named_type (feature, "int8");
-  tdesc_create_vector (feature, "v16i8", field_type, 16);
+  element_type = tdesc_named_type (feature, "int8");
+  tdesc_create_vector (feature, "v16i8", element_type, 16);
 
-  field_type = tdesc_named_type (feature, "int16");
-  tdesc_create_vector (feature, "v8i16", field_type, 8);
+  element_type = tdesc_named_type (feature, "int16");
+  tdesc_create_vector (feature, "v8i16", element_type, 8);
 
-  field_type = tdesc_named_type (feature, "int32");
-  tdesc_create_vector (feature, "v4i32", field_type, 4);
+  element_type = tdesc_named_type (feature, "int32");
+  tdesc_create_vector (feature, "v4i32", element_type, 4);
 
-  field_type = tdesc_named_type (feature, "int64");
-  tdesc_create_vector (feature, "v2i64", field_type, 2);
+  element_type = tdesc_named_type (feature, "int64");
+  tdesc_create_vector (feature, "v2i64", element_type, 2);
 
-  struct tdesc_type *type;
-  type = tdesc_create_union (feature, "vec128");
+  tdesc_type_with_fields *type_with_fields;
+  tdesc_type *field_type;
+  type_with_fields = tdesc_create_union (feature, "vec128");
   field_type = tdesc_named_type (feature, "v4f");
-  tdesc_add_field (type, "v4_float", field_type);
+  tdesc_add_field (type_with_fields, "v4_float", field_type);
   field_type = tdesc_named_type (feature, "v2d");
-  tdesc_add_field (type, "v2_double", field_type);
+  tdesc_add_field (type_with_fields, "v2_double", field_type);
   field_type = tdesc_named_type (feature, "v16i8");
-  tdesc_add_field (type, "v16_int8", field_type);
+  tdesc_add_field (type_with_fields, "v16_int8", field_type);
   field_type = tdesc_named_type (feature, "v8i16");
-  tdesc_add_field (type, "v8_int16", field_type);
+  tdesc_add_field (type_with_fields, "v8_int16", field_type);
   field_type = tdesc_named_type (feature, "v4i32");
-  tdesc_add_field (type, "v4_int32", field_type);
+  tdesc_add_field (type_with_fields, "v4_int32", field_type);
   field_type = tdesc_named_type (feature, "v2i64");
-  tdesc_add_field (type, "v2_int64", field_type);
+  tdesc_add_field (type_with_fields, "v2_int64", field_type);
   field_type = tdesc_named_type (feature, "uint128");
-  tdesc_add_field (type, "uint128", field_type);
+  tdesc_add_field (type_with_fields, "uint128", field_type);
 
-  type = tdesc_create_flags (feature, "i386_mxcsr", 4);
-  tdesc_add_flag (type, 0, "IE");
-  tdesc_add_flag (type, 1, "DE");
-  tdesc_add_flag (type, 2, "ZE");
-  tdesc_add_flag (type, 3, "OE");
-  tdesc_add_flag (type, 4, "UE");
-  tdesc_add_flag (type, 5, "PE");
-  tdesc_add_flag (type, 6, "DAZ");
-  tdesc_add_flag (type, 7, "IM");
-  tdesc_add_flag (type, 8, "DM");
-  tdesc_add_flag (type, 9, "ZM");
-  tdesc_add_flag (type, 10, "OM");
-  tdesc_add_flag (type, 11, "UM");
-  tdesc_add_flag (type, 12, "PM");
-  tdesc_add_flag (type, 15, "FZ");
+  type_with_fields = tdesc_create_flags (feature, "i386_mxcsr", 4);
+  tdesc_add_flag (type_with_fields, 0, "IE");
+  tdesc_add_flag (type_with_fields, 1, "DE");
+  tdesc_add_flag (type_with_fields, 2, "ZE");
+  tdesc_add_flag (type_with_fields, 3, "OE");
+  tdesc_add_flag (type_with_fields, 4, "UE");
+  tdesc_add_flag (type_with_fields, 5, "PE");
+  tdesc_add_flag (type_with_fields, 6, "DAZ");
+  tdesc_add_flag (type_with_fields, 7, "IM");
+  tdesc_add_flag (type_with_fields, 8, "DM");
+  tdesc_add_flag (type_with_fields, 9, "ZM");
+  tdesc_add_flag (type_with_fields, 10, "OM");
+  tdesc_add_flag (type_with_fields, 11, "UM");
+  tdesc_add_flag (type_with_fields, 12, "PM");
+  tdesc_add_flag (type_with_fields, 15, "FZ");
 
   regnum = 40;
   tdesc_create_reg (feature, "xmm0", regnum++, 1, NULL, 128, "vec128");
