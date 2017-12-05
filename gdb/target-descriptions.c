@@ -192,7 +192,7 @@ enum tdesc_type_kind
   TDESC_TYPE_ENUM
 };
 
-typedef struct tdesc_type : tdesc_element
+struct tdesc_type : tdesc_element
 {
   tdesc_type (const char *name_, enum tdesc_type_kind kind_)
     : name (xstrdup (name_)), kind (kind_)
@@ -269,8 +269,9 @@ typedef struct tdesc_type : tdesc_element
   {
     return !(*this == other);
   }
-} *tdesc_type_p;
-DEF_VEC_P(tdesc_type_p);
+};
+
+typedef std::unique_ptr<tdesc_type> tdesc_type_up;
 
 /* A feature from a target description.  Each feature is a collection
    of other elements, e.g. registers and types.  */
@@ -281,15 +282,7 @@ struct tdesc_feature : tdesc_element
     : name (name_)
   {}
 
-  virtual ~tdesc_feature ()
-  {
-    struct tdesc_type *type;
-    int ix;
-
-    for (ix = 0; VEC_iterate (tdesc_type_p, types, ix, type); ix++)
-      delete type;
-    VEC_free (tdesc_type_p, types);
-  }
+  virtual ~tdesc_feature () = default;
 
   DISABLE_COPY_AND_ASSIGN (tdesc_feature);
 
@@ -301,17 +294,13 @@ struct tdesc_feature : tdesc_element
   std::vector<std::unique_ptr<tdesc_reg>> registers;
 
   /* The types associated with this feature.  */
-  VEC(tdesc_type_p) *types = NULL;
+  std::vector<tdesc_type_up> types;
 
   void accept (tdesc_element_visitor &v) const override
   {
     v.visit_pre (this);
 
-    struct tdesc_type *type;
-
-    for (int ix = 0;
-	 VEC_iterate (tdesc_type_p, types, ix, type);
-	 ix++)
+    for (const tdesc_type_up &type : types)
       type->accept (v);
 
     for (const tdesc_reg_up &reg : registers)
@@ -337,20 +326,15 @@ struct tdesc_feature : tdesc_element
 	  return false;
       }
 
-    if (VEC_length (tdesc_type_p, types)
-	!= VEC_length (tdesc_type_p, other.types))
+    if (types.size () != other.types.size ())
       return false;
 
-    tdesc_type *type;
-
-    for (int ix = 0;
-	 VEC_iterate (tdesc_type_p, types, ix, type);
-	 ix++)
+    for (int ix = 0; ix < types.size (); ix++)
       {
-	tdesc_type *type2
-	  = VEC_index (tdesc_type_p, other.types, ix);
+	const tdesc_type_up &type1 = types[ix];
+	const tdesc_type_up &type2 = other.types[ix];
 
-	if (type != type2 && *type != *type2)
+	if (type1 != type2 && *type1 != *type2)
 	  return false;
       }
 
@@ -361,7 +345,6 @@ struct tdesc_feature : tdesc_element
   {
     return !(*this == other);
   }
-
 };
 
 typedef std::unique_ptr<tdesc_feature> tdesc_feature_up;
@@ -773,16 +756,13 @@ tdesc_predefined_type (enum tdesc_type_kind kind)
 struct tdesc_type *
 tdesc_named_type (const struct tdesc_feature *feature, const char *id)
 {
-  int ix;
-  struct tdesc_type *type;
-
   /* First try target-defined types.  */
-  for (ix = 0; VEC_iterate (tdesc_type_p, feature->types, ix, type); ix++)
+  for (const tdesc_type_up &type : feature->types)
     if (strcmp (type->name, id) == 0)
-      return type;
+      return type.get ();
 
   /* Next try the predefined types.  */
-  for (ix = 0; ix < ARRAY_SIZE (tdesc_predefined_types); ix++)
+  for (int ix = 0; ix < ARRAY_SIZE (tdesc_predefined_types); ix++)
     if (strcmp (tdesc_predefined_types[ix].name, id) == 0)
       return &tdesc_predefined_types[ix];
 
@@ -1496,7 +1476,7 @@ tdesc_create_vector (struct tdesc_feature *feature, const char *name,
   type->u.v.type = field_type;
   type->u.v.count = count;
 
-  VEC_safe_push (tdesc_type_p, feature->types, type);
+  feature->types.emplace_back (type);
   return type;
 }
 
@@ -1507,7 +1487,7 @@ tdesc_create_struct (struct tdesc_feature *feature, const char *name)
 {
   struct tdesc_type *type = new tdesc_type (name, TDESC_TYPE_STRUCT);
 
-  VEC_safe_push (tdesc_type_p, feature->types, type);
+  feature->types.emplace_back (type);
   return type;
 }
 
@@ -1528,7 +1508,7 @@ tdesc_create_union (struct tdesc_feature *feature, const char *name)
 {
   struct tdesc_type *type = new tdesc_type (name, TDESC_TYPE_UNION);
 
-  VEC_safe_push (tdesc_type_p, feature->types, type);
+  feature->types.emplace_back (type);
   return type;
 }
 
@@ -1544,7 +1524,7 @@ tdesc_create_flags (struct tdesc_feature *feature, const char *name,
 
   type->u.u.size = size;
 
-  VEC_safe_push (tdesc_type_p, feature->types, type);
+  feature->types.emplace_back (type);
   return type;
 }
 
@@ -1558,7 +1538,7 @@ tdesc_create_enum (struct tdesc_feature *feature, const char *name,
 
   type->u.u.size = size;
 
-  VEC_safe_push (tdesc_type_p, feature->types, type);
+  feature->types.emplace_back (type);
   return type;
 }
 

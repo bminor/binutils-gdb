@@ -1,3 +1,17 @@
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (tdesc_type_p): Remove typedef.
+	(DEF_VEC_P (tdesc_type_p)): Remove.
+	(struct tdesc_feature) <types>: Change type to std::vector.
+	<~tdesc_feature>: Replace with default implementation.
+	<accept>: Adjust.
+	(tdesc_named_type): Adjust.
+	(tdesc_create_vector): Adjust.
+	(tdesc_create_struct): Adjust.
+	(tdesc_create_union): Adjust.
+	(tdesc_create_flags): Adjust.
+	(tdesc_create_enum): Adjust.
+
 2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* target-descriptions.c (struct tdesc_reg) <tdesc_reg>: Change
