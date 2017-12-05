@@ -146,11 +146,11 @@ do_sections (bfd *abfd, struct coreout *coreout)
 
 static asection *
 make_bfd_asection (bfd *abfd,
-                   const char *name,
-                   flagword flags,
-                   bfd_size_type size,
-                   bfd_vma vma,
-                   file_ptr filepos)
+		   const char *name,
+		   flagword flags,
+		   bfd_size_type size,
+		   bfd_vma vma,
+		   file_ptr filepos)
 {
   asection *asect;
 
@@ -289,7 +289,7 @@ const bfd_target core_irix_vec =
      HAS_LINENO | HAS_DEBUG |
      HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
     (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-    0,			                                   /* symbol prefix */
+    0,							   /* symbol prefix */
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
     0,							   /* match_priority */

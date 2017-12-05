@@ -31,7 +31,7 @@
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
-#include "libaout.h"           /* BFD a.out internal data structures */
+#include "libaout.h"	       /* BFD a.out internal data structures */
 
 #define TARGET_IS_BIG_ENDIAN_P
 #define DEFAULT_ARCH bfd_arch_m68k

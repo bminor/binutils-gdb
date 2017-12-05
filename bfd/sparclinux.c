@@ -31,7 +31,7 @@
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
-#include "libaout.h"           /* BFD a.out internal data structures */
+#include "libaout.h"	       /* BFD a.out internal data structures */
 
 #define DEFAULT_ARCH bfd_arch_sparc
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not

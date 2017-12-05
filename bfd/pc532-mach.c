@@ -20,7 +20,7 @@
 
 
 /* Written by Ian Dall
-              19-Apr-94
+	      19-Apr-94
 
    Formerly part of aout-pc532-mach.c. Split out to allow more
    flexibility with multiple formats.  */

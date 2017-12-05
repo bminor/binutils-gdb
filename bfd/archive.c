@@ -1437,16 +1437,16 @@ normalize (bfd *abfd ATTRIBUTE_UNUSED, const char *file)
 
      Relative path  Reference path  Result
      -------------  --------------  ------
-     bar.o          lib.a           bar.o
-     foo/bar.o      lib.a           foo/bar.o
-     bar.o          foo/lib.a       ../bar.o
-     foo/bar.o      baz/lib.a       ../foo/bar.o
-     bar.o          ../lib.a        <parent of current dir>/bar.o
-   ; ../bar.o       ../lib.a        bar.o
-   ; ../bar.o       lib.a           ../bar.o
-     foo/bar.o      ../lib.a        <parent of current dir>/foo/bar.o
-     bar.o          ../../lib.a     <grandparent>/<parent>/bar.o
-     bar.o          foo/baz/lib.a   ../../bar.o
+     bar.o	    lib.a	    bar.o
+     foo/bar.o	    lib.a	    foo/bar.o
+     bar.o	    foo/lib.a	    ../bar.o
+     foo/bar.o	    baz/lib.a	    ../foo/bar.o
+     bar.o	    ../lib.a	    <parent of current dir>/bar.o
+   ; ../bar.o	    ../lib.a	    bar.o
+   ; ../bar.o	    lib.a	    ../bar.o
+     foo/bar.o	    ../lib.a	    <parent of current dir>/foo/bar.o
+     bar.o	    ../../lib.a	    <grandparent>/<parent>/bar.o
+     bar.o	    foo/baz/lib.a   ../../bar.o
 
    Note - the semicolons above are there to prevent the BFD chew
    utility from interpreting those lines as prototypes to put into
@@ -2018,7 +2018,7 @@ bfd_generic_stat_arch_elt (bfd *abfd, struct stat *buf)
     return -1;
 #define foo(arelt, stelt, size)				\
   buf->stelt = strtol (hdr->arelt, &aloser, size);	\
-  if (aloser == hdr->arelt)	      			\
+  if (aloser == hdr->arelt)				\
     return -1;
 
   /* Some platforms support special notations for large IDs.  */

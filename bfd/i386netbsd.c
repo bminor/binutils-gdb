@@ -25,7 +25,7 @@
 #define	SEGMENT_SIZE	TARGET_PAGE_SIZE
 
 #define	DEFAULT_ARCH	bfd_arch_i386
-#define	DEFAULT_MID 	M_386_NETBSD
+#define	DEFAULT_MID	M_386_NETBSD
 
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate

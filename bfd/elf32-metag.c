@@ -73,18 +73,18 @@ static const unsigned int plt_pic_entry[] =
 /* Variable names follow a coding style.
    Please follow this (Apps Hungarian) style:
 
-   Structure/Variable              Prefix
-   elf_link_hash_table             "etab"
-   elf_link_hash_entry             "eh"
+   Structure/Variable		   Prefix
+   elf_link_hash_table		   "etab"
+   elf_link_hash_entry		   "eh"
 
-   elf_metag_link_hash_table       "htab"
-   elf_metag_link_hash_entry       "hh"
+   elf_metag_link_hash_table	   "htab"
+   elf_metag_link_hash_entry	   "hh"
 
-   bfd_link_hash_table             "btab"
-   bfd_link_hash_entry             "bh"
+   bfd_link_hash_table		   "btab"
+   bfd_link_hash_entry		   "bh"
 
    bfd_hash_table containing stubs "bstab"
-   elf_metag_stub_hash_entry       "hsh"
+   elf_metag_stub_hash_entry	   "hsh"
 
    Always remember to use GNU Coding Style.  */
 
@@ -699,44 +699,44 @@ struct metag_reloc_map
 
 static const struct metag_reloc_map metag_reloc_map [] =
   {
-    { BFD_RELOC_NONE,                R_METAG_NONE },
-    { BFD_RELOC_32,                  R_METAG_ADDR32 },
-    { BFD_RELOC_METAG_HIADDR16,      R_METAG_HIADDR16 },
-    { BFD_RELOC_METAG_LOADDR16,      R_METAG_LOADDR16 },
+    { BFD_RELOC_NONE,		     R_METAG_NONE },
+    { BFD_RELOC_32,		     R_METAG_ADDR32 },
+    { BFD_RELOC_METAG_HIADDR16,	     R_METAG_HIADDR16 },
+    { BFD_RELOC_METAG_LOADDR16,	     R_METAG_LOADDR16 },
     { BFD_RELOC_METAG_RELBRANCH,     R_METAG_RELBRANCH },
     { BFD_RELOC_METAG_GETSETOFF,     R_METAG_GETSETOFF },
-    { BFD_RELOC_VTABLE_INHERIT,      R_METAG_GNU_VTINHERIT },
-    { BFD_RELOC_VTABLE_ENTRY,        R_METAG_GNU_VTENTRY },
-    { BFD_RELOC_METAG_REL8,          R_METAG_REL8 },
-    { BFD_RELOC_METAG_REL16,         R_METAG_REL16 },
+    { BFD_RELOC_VTABLE_INHERIT,	     R_METAG_GNU_VTINHERIT },
+    { BFD_RELOC_VTABLE_ENTRY,	     R_METAG_GNU_VTENTRY },
+    { BFD_RELOC_METAG_REL8,	     R_METAG_REL8 },
+    { BFD_RELOC_METAG_REL16,	     R_METAG_REL16 },
     { BFD_RELOC_METAG_HI16_GOTOFF,   R_METAG_HI16_GOTOFF },
     { BFD_RELOC_METAG_LO16_GOTOFF,   R_METAG_LO16_GOTOFF },
     { BFD_RELOC_METAG_GETSET_GOTOFF, R_METAG_GETSET_GOTOFF },
     { BFD_RELOC_METAG_GETSET_GOT,    R_METAG_GETSET_GOT },
     { BFD_RELOC_METAG_HI16_GOTPC,    R_METAG_HI16_GOTPC },
     { BFD_RELOC_METAG_LO16_GOTPC,    R_METAG_LO16_GOTPC },
-    { BFD_RELOC_METAG_HI16_PLT,      R_METAG_HI16_PLT },
-    { BFD_RELOC_METAG_LO16_PLT,      R_METAG_LO16_PLT },
+    { BFD_RELOC_METAG_HI16_PLT,	     R_METAG_HI16_PLT },
+    { BFD_RELOC_METAG_LO16_PLT,	     R_METAG_LO16_PLT },
     { BFD_RELOC_METAG_RELBRANCH_PLT, R_METAG_RELBRANCH_PLT },
-    { BFD_RELOC_METAG_GOTOFF,        R_METAG_GOTOFF },
-    { BFD_RELOC_METAG_PLT,           R_METAG_PLT },
-    { BFD_RELOC_METAG_COPY,          R_METAG_COPY },
-    { BFD_RELOC_METAG_JMP_SLOT,      R_METAG_JMP_SLOT },
-    { BFD_RELOC_METAG_RELATIVE,      R_METAG_RELATIVE },
-    { BFD_RELOC_METAG_GLOB_DAT,      R_METAG_GLOB_DAT },
-    { BFD_RELOC_METAG_TLS_GD,        R_METAG_TLS_GD },
-    { BFD_RELOC_METAG_TLS_LDM,       R_METAG_TLS_LDM },
+    { BFD_RELOC_METAG_GOTOFF,	     R_METAG_GOTOFF },
+    { BFD_RELOC_METAG_PLT,	     R_METAG_PLT },
+    { BFD_RELOC_METAG_COPY,	     R_METAG_COPY },
+    { BFD_RELOC_METAG_JMP_SLOT,	     R_METAG_JMP_SLOT },
+    { BFD_RELOC_METAG_RELATIVE,	     R_METAG_RELATIVE },
+    { BFD_RELOC_METAG_GLOB_DAT,	     R_METAG_GLOB_DAT },
+    { BFD_RELOC_METAG_TLS_GD,	     R_METAG_TLS_GD },
+    { BFD_RELOC_METAG_TLS_LDM,	     R_METAG_TLS_LDM },
     { BFD_RELOC_METAG_TLS_LDO_HI16,  R_METAG_TLS_LDO_HI16 },
     { BFD_RELOC_METAG_TLS_LDO_LO16,  R_METAG_TLS_LDO_LO16 },
-    { BFD_RELOC_METAG_TLS_LDO,       R_METAG_TLS_LDO },
-    { BFD_RELOC_METAG_TLS_IE,        R_METAG_TLS_IE },
+    { BFD_RELOC_METAG_TLS_LDO,	     R_METAG_TLS_LDO },
+    { BFD_RELOC_METAG_TLS_IE,	     R_METAG_TLS_IE },
     { BFD_RELOC_METAG_TLS_IENONPIC,  R_METAG_TLS_IENONPIC },
     { BFD_RELOC_METAG_TLS_IENONPIC_HI16, R_METAG_TLS_IENONPIC_HI16 },
     { BFD_RELOC_METAG_TLS_IENONPIC_LO16, R_METAG_TLS_IENONPIC_LO16 },
     { BFD_RELOC_METAG_TLS_TPOFF,     R_METAG_TLS_TPOFF },
     { BFD_RELOC_METAG_TLS_DTPMOD,    R_METAG_TLS_DTPMOD },
     { BFD_RELOC_METAG_TLS_DTPOFF,    R_METAG_TLS_DTPOFF },
-    { BFD_RELOC_METAG_TLS_LE,        R_METAG_TLS_LE },
+    { BFD_RELOC_METAG_TLS_LE,	     R_METAG_TLS_LE },
     { BFD_RELOC_METAG_TLS_LE_HI16,   R_METAG_TLS_LE_HI16 },
     { BFD_RELOC_METAG_TLS_LE_LO16,   R_METAG_TLS_LE_LO16 },
   };

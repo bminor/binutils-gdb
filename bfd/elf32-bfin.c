@@ -45,12 +45,12 @@ bfin_pltpc_reloc (
 
 static bfd_reloc_status_type
 bfin_pcrel24_reloc (bfd *abfd,
-                    arelent *reloc_entry,
-                    asymbol *symbol,
-                    void * data,
-                    asection *input_section,
-                    bfd *output_bfd,
-                    char **error_message ATTRIBUTE_UNUSED)
+		    arelent *reloc_entry,
+		    asymbol *symbol,
+		    void * data,
+		    asection *input_section,
+		    bfd *output_bfd,
+		    char **error_message ATTRIBUTE_UNUSED)
 {
   bfd_vma relocation;
   bfd_size_type addr = reloc_entry->address;
@@ -214,12 +214,12 @@ bfin_imm16_reloc (bfd *abfd,
 
 static bfd_reloc_status_type
 bfin_byte4_reloc (bfd *abfd,
-                  arelent *reloc_entry,
-                  asymbol *symbol,
-                  void * data,
-                  asection *input_section,
-                  bfd *output_bfd,
-                  char **error_message ATTRIBUTE_UNUSED)
+		  arelent *reloc_entry,
+		  asymbol *symbol,
+		  void * data,
+		  asection *input_section,
+		  bfd *output_bfd,
+		  char **error_message ATTRIBUTE_UNUSED)
 {
   bfd_vma relocation, x;
   bfd_size_type addr = reloc_entry->address;
@@ -334,7 +334,7 @@ bfin_bfd_reloc (bfd *abfd,
       relocation -= input_section->output_section->vma + input_section->output_offset;
 
       if (howto->pcrel_offset)
-        relocation -= reloc_entry->address;
+	relocation -= reloc_entry->address;
     }
 
   if (relocatable)
@@ -348,10 +348,10 @@ bfin_bfd_reloc (bfd *abfd,
       bfd_reloc_status_type status;
 
       status = bfd_check_overflow (howto->complain_on_overflow,
-                                  howto->bitsize,
-                                  howto->rightshift,
-                                  bfd_arch_bits_per_address(abfd),
-                                  relocation);
+				  howto->bitsize,
+				  howto->rightshift,
+				  bfd_arch_bits_per_address(abfd),
+				  relocation);
       if (status != bfd_reloc_ok)
 	return status;
     }
@@ -377,17 +377,17 @@ bfin_bfd_reloc (bfd *abfd,
     {
     case 0:
       {
-        char x = bfd_get_8 (abfd, (char *) data + addr);
-        DOIT (x);
-        bfd_put_8 (abfd, x, (unsigned char *) data + addr);
+	char x = bfd_get_8 (abfd, (char *) data + addr);
+	DOIT (x);
+	bfd_put_8 (abfd, x, (unsigned char *) data + addr);
       }
       break;
 
     case 1:
       {
-        unsigned short x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
-        DOIT (x);
-        bfd_put_16 (abfd, (bfd_vma) x, (unsigned char *) data + addr);
+	unsigned short x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
+	DOIT (x);
+	bfd_put_16 (abfd, (bfd_vma) x, (unsigned char *) data + addr);
       }
       break;
 
@@ -552,13 +552,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 TRUE),			/* pcrel_offset.  */
 
   HOWTO (R_BFIN_PCREL24_JUMP_X,	/* type.  */
-         1,			/* rightshift.  */
-         2,			/* size (0 = byte, 1 = short, 2 = long).  */
-         24,			/* bitsize.  */
-         TRUE,			/* pc_relative.  */
-         0,			/* bitpos.  */
-         complain_overflow_signed, /* complain_on_overflow.  */
-         bfin_pcrel24_reloc,	/* special_function.  */
+	 1,			/* rightshift.  */
+	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 24,			/* bitsize.  */
+	 TRUE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_signed, /* complain_on_overflow.  */
+	 bfin_pcrel24_reloc,	/* special_function.  */
 	"R_BFIN_PCREL24_JUMP_X", /* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
@@ -708,7 +708,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   /* A 18-bit signed operand with the GOT offset for the address of
      the symbol.  */
-  HOWTO (R_BFIN_GOT17M4,        /* type */
+  HOWTO (R_BFIN_GOT17M4,	/* type */
 	 2,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -718,13 +718,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_BFIN_GOT17M4",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xffff,	        /* src_mask */
-	 0xffff,	        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the GOT offset for the address of the
      symbol.  */
-  HOWTO (R_BFIN_GOTHI,	        /* type */
+  HOWTO (R_BFIN_GOTHI,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -734,13 +734,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_BFIN_GOTHI",		/* name */
 	 FALSE,			/* partial_inplace */
-	 0xffff,		        /* src_mask */
+	 0xffff,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the GOT offset for the address of the
      symbol.  */
-  HOWTO (R_BFIN_GOTLO,	        /* type */
+  HOWTO (R_BFIN_GOTLO,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -752,7 +752,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The 32-bit address of the canonical descriptor of a function.  */
   HOWTO (R_BFIN_FUNCDESC,	/* type */
@@ -781,9 +781,9 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_BFIN_FUNCDESC_GOT17M4", /* name */
 	 FALSE,			/* partial_inplace */
-	 0xffff,	        /* src_mask */
-	 0xffff,	        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the GOT offset for the address of the
      canonical descriptor of a function.  */
@@ -799,7 +799,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the GOT offset for the address of the
      canonical descriptor of a function.  */
@@ -815,7 +815,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The 32-bit address of the canonical descriptor of a function.  */
   HOWTO (R_BFIN_FUNCDESC_VALUE,	/* type */
@@ -844,9 +844,9 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_BFIN_FUNCDESC_GOTOFF17M4", /* name */
 	 FALSE,			/* partial_inplace */
-	 0xffff,	        /* src_mask */
-	 0xffff,	        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the GOT offset for the address of the
      canonical descriptor of a function.  */
@@ -862,7 +862,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the GOT offset for the address of the
      canonical descriptor of a function.  */
@@ -878,11 +878,11 @@ static reloc_howto_type bfin_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 12-bit signed operand with the GOT offset for the address of
      the symbol.  */
-  HOWTO (R_BFIN_GOTOFF17M4,     /* type */
+  HOWTO (R_BFIN_GOTOFF17M4,	/* type */
 	 2,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -892,13 +892,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_BFIN_GOTOFF17M4",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xffff,	        /* src_mask */
-	 0xffff,	        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the GOT offset for the address of the
      symbol.  */
-  HOWTO (R_BFIN_GOTOFFHI,        /* type */
+  HOWTO (R_BFIN_GOTOFFHI,	 /* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -910,7 +910,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the GOT offset for the address of the
      symbol.  */
@@ -926,7 +926,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 };
 
 static reloc_howto_type bfin_gnuext_howto_table [] =
@@ -960,39 +960,39 @@ static reloc_howto_type bfin_gnuext_howto_table [] =
 	 FALSE),		/* pcrel_offset.  */
 
 /* GNU extension to record C++ vtable hierarchy.  */
-  HOWTO (R_BFIN_GNU_VTINHERIT, /* type.  */
-         0,                     /* rightshift.  */
-         2,                     /* size (0 = byte, 1 = short, 2 = long).  */
-         0,                     /* bitsize.  */
-         FALSE,                 /* pc_relative.  */
-         0,                     /* bitpos.  */
-         complain_overflow_dont, /* complain_on_overflow.  */
-         NULL,                  /* special_function.  */
-         "R_BFIN_GNU_VTINHERIT", /* name.  */
-         FALSE,                 /* partial_inplace.  */
-         0,                     /* src_mask.  */
-         0,                     /* dst_mask.  */
-         FALSE),                /* pcrel_offset.  */
+  HOWTO (R_BFIN_GNU_VTINHERIT,	/* type.  */
+	 0,			/* rightshift.  */
+	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* bitsize.  */
+	 FALSE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_dont, /* complain_on_overflow.  */
+	 NULL,			/* special_function.  */
+	 "R_BFIN_GNU_VTINHERIT", /* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0,			/* src_mask.  */
+	 0,			/* dst_mask.  */
+	 FALSE),		/* pcrel_offset.  */
 
 /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_BFIN_GNU_VTENTRY,	/* type.  */
-         0,                     /* rightshift.  */
-         2,                     /* size (0 = byte, 1 = short, 2 = long).  */
-         0,                     /* bitsize.  */
-         FALSE,                 /* pc_relative.  */
-         0,			/* bitpos.  */
-         complain_overflow_dont, /* complain_on_overflow.  */
-         _bfd_elf_rel_vtable_reloc_fn, /* special_function.  */
-         "R_BFIN_GNU_VTENTRY",	/* name.  */
-         FALSE,                 /* partial_inplace.  */
-         0,                     /* src_mask.  */
-         0,                     /* dst_mask.  */
-         FALSE)                 /* pcrel_offset.  */
+	 0,			/* rightshift.  */
+	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* bitsize.  */
+	 FALSE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_dont, /* complain_on_overflow.  */
+	 _bfd_elf_rel_vtable_reloc_fn, /* special_function.  */
+	 "R_BFIN_GNU_VTENTRY",	/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0,			/* src_mask.  */
+	 0,			/* dst_mask.  */
+	 FALSE)			/* pcrel_offset.  */
 };
 
 struct bfin_reloc_map
 {
-  bfd_reloc_code_real_type 	bfd_reloc_val;
+  bfd_reloc_code_real_type	bfd_reloc_val;
   unsigned int			bfin_reloc_val;
 };
 
@@ -1042,8 +1042,8 @@ static const struct bfin_reloc_map bfin_reloc_map [] =
 
 static void
 bfin_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
-                    arelent *cache_ptr,
-                    Elf_Internal_Rela *dst)
+		    arelent *cache_ptr,
+		    Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
@@ -1154,7 +1154,7 @@ static bfd_boolean
 bfin_check_relocs (bfd * abfd,
 		   struct bfd_link_info *info,
 		   asection *sec,
-                   const Elf_Internal_Rela *relocs)
+		   const Elf_Internal_Rela *relocs)
 {
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
@@ -1193,20 +1193,20 @@ bfin_check_relocs (bfd * abfd,
       switch (ELF32_R_TYPE (rel->r_info))
 	{
        /* This relocation describes the C++ object vtable hierarchy.
-           Reconstruct it for later use during GC.  */
-        case R_BFIN_GNU_VTINHERIT:
-          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-            return FALSE;
-          break;
+	   Reconstruct it for later use during GC.  */
+	case R_BFIN_GNU_VTINHERIT:
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	    return FALSE;
+	  break;
 
-        /* This relocation describes which C++ vtable entries
-           are actually used.  Record for later use during GC.  */
-        case R_BFIN_GNU_VTENTRY:
-          BFD_ASSERT (h != NULL);
-          if (h != NULL
-              && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-            return FALSE;
-          break;
+	/* This relocation describes which C++ vtable entries
+	   are actually used.  Record for later use during GC.  */
+	case R_BFIN_GNU_VTENTRY:
+	  BFD_ASSERT (h != NULL);
+	  if (h != NULL
+	      && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	    return FALSE;
+	  break;
 
 	case R_BFIN_GOT:
 	  if (h != NULL
@@ -1265,8 +1265,8 @@ bfin_check_relocs (bfd * abfd,
 		  if (bfd_link_pic (info))
 		    {
 		      /* If we are generating a shared object, we need to
-		         output a R_68K_RELATIVE reloc so that the dynamic
-		         linker can adjust this GOT entry.  */
+			 output a R_68K_RELATIVE reloc so that the dynamic
+			 linker can adjust this GOT entry.  */
 		      srelgot->size += sizeof (Elf32_External_Rela);
 		    }
 		}
@@ -1396,7 +1396,7 @@ bfin_relocate_section (bfd * output_bfd,
 	}
 
       if (r_type == R_BFIN_GNU_VTENTRY
-          || r_type == R_BFIN_GNU_VTINHERIT)
+	  || r_type == R_BFIN_GNU_VTINHERIT)
 	continue;
 
       howto = bfin_reloc_type_lookup (input_bfd, r_type);
@@ -1550,8 +1550,8 @@ bfin_relocate_section (bfd * output_bfd,
 
 	    relocation = sgot->output_offset + off;
 	    rel->r_addend = 0;
-            /* bfin : preg = [preg + 17bitdiv4offset] relocation is div by 4.  */
-            relocation /= 4;
+	    /* bfin : preg = [preg + 17bitdiv4offset] relocation is div by 4.  */
+	    relocation /= 4;
 	  }
 	  goto do_default;
 
@@ -1565,8 +1565,8 @@ bfin_relocate_section (bfd * output_bfd,
 	}
 
       /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
-         because such sections are not SEC_ALLOC and thus ld.so will
-         not process them.  */
+	 because such sections are not SEC_ALLOC and thus ld.so will
+	 not process them.  */
       if (unresolved_reloc
 	  && !((input_section->flags & SEC_DEBUGGING) != 0 && h->def_dynamic)
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
@@ -1620,7 +1620,7 @@ bfin_gc_mark_hook (asection * sec,
 		   struct bfd_link_info *info,
 		   Elf_Internal_Rela * rel,
 		   struct elf_link_hash_entry *h,
-                   Elf_Internal_Sym * sym)
+		   Elf_Internal_Sym * sym)
 {
   if (h != NULL)
     switch (ELF32_R_TYPE (rel->r_info))
@@ -1801,7 +1801,7 @@ struct bfinfdpic_relocs_info
      for symbol+addend.  Should be implied by something like:
      (plt || fdgotoff17m4 || fdgotofflohi
       || ((fd || fdgot17m4 || fdgothilo)
-          && (symndx != -1 || BFINFDPIC_FUNCDESC_LOCAL (info, d.h))))  */
+	  && (symndx != -1 || BFINFDPIC_FUNCDESC_LOCAL (info, d.h))))  */
   unsigned privfd:1;
   /* Whether a lazy PLT entry is needed for this symbol+addend.
      Should be implied by something like:
@@ -4530,9 +4530,9 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
-        h = NULL;
+	h = NULL;
       else
-        h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
       switch (ELF32_R_TYPE (rel->r_info))
 	{
@@ -4598,7 +4598,7 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
 
       switch (ELF32_R_TYPE (rel->r_info))
-        {
+	{
 	case R_BFIN_PCREL24:
 	case R_BFIN_PCREL24_JUMP_L:
 	  if (IS_FDPIC (abfd))
@@ -4658,21 +4658,21 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  picrel->relocsfd++;
 	  break;
 
-        /* This relocation describes the C++ object vtable hierarchy.
-           Reconstruct it for later use during GC.  */
-        case R_BFIN_GNU_VTINHERIT:
-          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-            return FALSE;
-          break;
+	/* This relocation describes the C++ object vtable hierarchy.
+	   Reconstruct it for later use during GC.  */
+	case R_BFIN_GNU_VTINHERIT:
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	    return FALSE;
+	  break;
 
-        /* This relocation describes which C++ vtable entries are actually
-           used.  Record for later use during GC.  */
-        case R_BFIN_GNU_VTENTRY:
-          BFD_ASSERT (h != NULL);
-          if (h != NULL
-              && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-            return FALSE;
-          break;
+	/* This relocation describes which C++ vtable entries are actually
+	   used.  Record for later use during GC.  */
+	case R_BFIN_GNU_VTENTRY:
+	  BFD_ASSERT (h != NULL);
+	  if (h != NULL
+	      && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	    return FALSE;
+	  break;
 
 	case R_BFIN_HUIMM16:
 	case R_BFIN_LUIMM16:
@@ -4687,7 +4687,7 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    (_("%B: unsupported relocation type %d"),
 	     abfd, (int) ELF32_R_TYPE (rel->r_info));
 	  return FALSE;
-        }
+	}
     }
 
   return TRUE;
@@ -4908,7 +4908,7 @@ bfin_finish_dynamic_symbol (bfd * output_bfd,
       bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.
-         Set it up.  */
+	 Set it up.  */
 
       sgot = elf_hash_table (info)->sgot;
       srela = elf_hash_table (info)->srelgot;
@@ -4919,10 +4919,10 @@ bfin_finish_dynamic_symbol (bfd * output_bfd,
 		       + (h->got.offset & ~(bfd_vma) 1));
 
       /* If this is a -Bsymbolic link, and the symbol is defined
-         locally, we just want to emit a RELATIVE reloc.  Likewise if
-         the symbol was forced to be local because of a version file.
-         The entry in the global offset table will already have been
-         initialized in the relocate_section function.  */
+	 locally, we just want to emit a RELATIVE reloc.  Likewise if
+	 the symbol was forced to be local because of a version file.
+	 The entry in the global offset table will already have been
+	 initialized in the relocate_section function.  */
       if (bfd_link_pic (info)
 	  && (info->symbolic
 	      || h->dynindx == -1 || h->forced_local) && h->def_regular)
@@ -5158,10 +5158,10 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
   else
     {
       /* We may have created entries in the .rela.got section.
-         However, if we are not creating the dynamic sections, we will
-         not actually use these entries.  Reset the size of .rela.got,
-         which will cause it to get stripped from the output file
-         below.  */
+	 However, if we are not creating the dynamic sections, we will
+	 not actually use these entries.  Reset the size of .rela.got,
+	 which will cause it to get stripped from the output file
+	 below.  */
       s = elf_hash_table (info)->srelgot;
       if (s != NULL)
 	s->size = 0;
@@ -5190,7 +5190,7 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	continue;
 
       /* It's OK to base decisions on the section name, because none
-         of the dynobj section names depend upon the input files.  */
+	 of the dynobj section names depend upon the input files.  */
       name = bfd_get_section_name (dynobj, s);
 
       strip = FALSE;
@@ -5200,14 +5200,14 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	  if (s->size == 0)
 	    {
 	      /* If we don't need this section, strip it from the
-	         output file.  This is mostly to handle .rela.bss and
-	         .rela.plt.  We must create both sections in
-	         create_dynamic_sections, because they must be created
-	         before the linker maps input sections to output
-	         sections.  The linker does that before
-	         adjust_dynamic_symbol is called, and it is that
-	         function which decides whether anything needs to go
-	         into these sections.  */
+		 output file.  This is mostly to handle .rela.bss and
+		 .rela.plt.  We must create both sections in
+		 create_dynamic_sections, because they must be created
+		 before the linker maps input sections to output
+		 sections.  The linker does that before
+		 adjust_dynamic_symbol is called, and it is that
+		 function which decides whether anything needs to go
+		 into these sections.  */
 	      strip = TRUE;
 	    }
 	  else
@@ -5215,7 +5215,7 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	      relocs = TRUE;
 
 	      /* We use the reloc_count field as a counter if we need
-	         to copy relocs into the output file.  */
+		 to copy relocs into the output file.  */
 	      s->reloc_count = 0;
 	    }
 	}
@@ -5233,10 +5233,10 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 
       /* Allocate memory for the section contents.  */
       /* FIXME: This should be a call to bfd_alloc not bfd_zalloc.
-         Unused entries should be reclaimed before the section's contents
-         are written out, but at the moment this does not happen.  Thus in
-         order to prevent writing out garbage, we initialise the section's
-         contents to zero.  */
+	 Unused entries should be reclaimed before the section's contents
+	 are written out, but at the moment this does not happen.  Thus in
+	 order to prevent writing out garbage, we initialise the section's
+	 contents to zero.  */
       s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL && s->size != 0)
 	return FALSE;
@@ -5245,10 +5245,10 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Add some entries to the .dynamic section.  We fill in the
-         values later, in bfin_finish_dynamic_sections, but we
-         must add the entries now so that we get the correct size for
-         the .dynamic section.  The DT_DEBUG entry is filled in by the
-         dynamic linker and used by the debugger.  */
+	 values later, in bfin_finish_dynamic_sections, but we
+	 must add the entries now so that we get the correct size for
+	 the .dynamic section.  The DT_DEBUG entry is filled in by the
+	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
@@ -5405,7 +5405,7 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 {
   { ".l1.text",		8, -2, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { ".l1.data",		8, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { NULL,		0,  0, 0,            0 }
+  { NULL,		0,  0, 0,	     0 }
 };
 
 
@@ -5425,38 +5425,38 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 #define elf_backend_object_p		elf32_bfin_object_p
 
 #define bfd_elf32_bfd_is_local_label_name \
-                                        bfin_is_local_label_name
+					bfin_is_local_label_name
 #define bfin_hash_table(p) \
   ((struct bfin_link_hash_table *) (p)->hash)
 
 
 
 #define elf_backend_create_dynamic_sections \
-                                        _bfd_elf_create_dynamic_sections
+					_bfd_elf_create_dynamic_sections
 #define bfd_elf32_bfd_link_hash_table_create \
-                                        bfin_link_hash_table_create
-#define bfd_elf32_bfd_final_link        bfd_elf_gc_common_final_link
+					bfin_link_hash_table_create
+#define bfd_elf32_bfd_final_link	bfd_elf_gc_common_final_link
 
-#define elf_backend_check_relocs        bfin_check_relocs
+#define elf_backend_check_relocs	bfin_check_relocs
 #define elf_backend_adjust_dynamic_symbol \
-                                        bfin_adjust_dynamic_symbol
+					bfin_adjust_dynamic_symbol
 #define elf_backend_size_dynamic_sections \
-                                        bfin_size_dynamic_sections
-#define elf_backend_relocate_section    bfin_relocate_section
+					bfin_size_dynamic_sections
+#define elf_backend_relocate_section	bfin_relocate_section
 #define elf_backend_finish_dynamic_symbol \
-                                        bfin_finish_dynamic_symbol
+					bfin_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
-                                        bfin_finish_dynamic_sections
-#define elf_backend_gc_mark_hook        bfin_gc_mark_hook
+					bfin_finish_dynamic_sections
+#define elf_backend_gc_mark_hook	bfin_gc_mark_hook
 #define bfd_elf32_bfd_merge_private_bfd_data \
-                                        elf32_bfin_merge_private_bfd_data
+					elf32_bfin_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags \
-                                        elf32_bfin_set_private_flags
+					elf32_bfin_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data \
-                                        elf32_bfin_print_private_bfd_data
+					elf32_bfin_print_private_bfd_data
 #define elf_backend_final_write_processing \
-                                        elf32_bfin_final_write_processing
-#define elf_backend_reloc_type_class    elf32_bfin_reloc_type_class
+					elf32_bfin_final_write_processing
+#define elf_backend_reloc_type_class	elf32_bfin_reloc_type_class
 #define elf_backend_stack_align		8
 #define elf_backend_can_gc_sections 1
 #define elf_backend_special_sections	elf32_bfin_special_sections
@@ -5464,25 +5464,25 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 1
 #define elf_backend_want_plt_sym 0
-#define elf_backend_got_header_size     12
-#define elf_backend_rela_normal         1
+#define elf_backend_got_header_size	12
+#define elf_backend_rela_normal		1
 
 #include "elf32-target.h"
 
 #undef TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM          bfin_elf32_fdpic_vec
+#define TARGET_LITTLE_SYM		bfin_elf32_fdpic_vec
 #undef TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf32-bfinfdpic"
 #undef	elf32_bed
-#define	elf32_bed		elf32_bfinfdpic_bed
+#define	elf32_bed			elf32_bfinfdpic_bed
 
 #undef elf_backend_got_header_size
-#define elf_backend_got_header_size     0
+#define elf_backend_got_header_size	0
 
 #undef elf_backend_relocate_section
-#define elf_backend_relocate_section    bfinfdpic_relocate_section
+#define elf_backend_relocate_section	bfinfdpic_relocate_section
 #undef elf_backend_check_relocs
-#define elf_backend_check_relocs        bfinfdpic_check_relocs
+#define elf_backend_check_relocs	bfinfdpic_check_relocs
 
 #undef bfd_elf32_bfd_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_create \
@@ -5521,12 +5521,12 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 		bfinfdpic_elf_encode_eh_address
 
 #undef elf_backend_may_use_rel_p
-#define elf_backend_may_use_rel_p       1
+#define elf_backend_may_use_rel_p	1
 #undef elf_backend_may_use_rela_p
-#define elf_backend_may_use_rela_p      1
+#define elf_backend_may_use_rela_p	1
 /* We use REL for dynamic relocations only.  */
 #undef elf_backend_default_use_rela_p
-#define elf_backend_default_use_rela_p  1
+#define elf_backend_default_use_rela_p	1
 
 #undef elf_backend_omit_section_dynsym
 #define elf_backend_omit_section_dynsym _bfinfdpic_link_omit_section_dynsym

@@ -38,6 +38,6 @@
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
-#include "libaout.h"           /* BFD a.out internal data structures */
+#include "libaout.h"	       /* BFD a.out internal data structures */
 
 #include "aout-target.h"

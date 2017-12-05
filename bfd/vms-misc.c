@@ -252,7 +252,7 @@ _bfd_vms_output_end_subrec (struct vms_rec_wr *recwr)
 
   /* Put length to buffer.  */
   bfd_putl16 ((bfd_vma) (recwr->size - recwr->subrec_offset),
-              recwr->buf + recwr->subrec_offset + 2);
+	      recwr->buf + recwr->subrec_offset + 2);
 
   /* Close the subrecord.  */
   recwr->subrec_offset = 0;
@@ -516,12 +516,12 @@ vms_get_module_name (const char *filename, bfd_boolean upcase)
   for (fptr = fname; *fptr != 0; fptr++)
     {
       if (*fptr == ';' || (fptr - fname) >= 31)
-        {
-          *fptr = 0;
-          break;
-        }
+	{
+	  *fptr = 0;
+	  break;
+	}
       if (upcase)
-        *fptr = TOUPPER (*fptr);
+	*fptr = TOUPPER (*fptr);
     }
   return fname;
 }

@@ -1400,7 +1400,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 	 TRUE,
 	 6,
 	 complain_overflow_signed,
-	 bfd_elf_generic_reloc, 	/* FIXME? */
+	 bfd_elf_generic_reloc,		/* FIXME? */
 	 "R_NIOS2_R2_I10_1_PCREL",
 	 FALSE,
 	 0xffc0,

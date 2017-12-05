@@ -113,32 +113,32 @@ enum
 /* The first entry in a procedure linkage table are reserved,
    and the initial contents are unimportant (we zero them out).
    Subsequent entries look like this.  */
-#define PLT0_ENTRY_WORD0  0x46f00000		/* sethi   r15, HI20(.got+4)      */
-#define PLT0_ENTRY_WORD1  0x58f78000		/* ori     r15, r25, LO12(.got+4) */
-#define PLT0_ENTRY_WORD2  0x05178000		/* lwi     r17, [r15+0]           */
-#define PLT0_ENTRY_WORD3  0x04f78001		/* lwi     r15, [r15+4]           */
-#define PLT0_ENTRY_WORD4  0x4a003c00		/* jr      r15                    */
+#define PLT0_ENTRY_WORD0  0x46f00000		/* sethi   r15, HI20(.got+4)	  */
+#define PLT0_ENTRY_WORD1  0x58f78000		/* ori	   r15, r25, LO12(.got+4) */
+#define PLT0_ENTRY_WORD2  0x05178000		/* lwi	   r17, [r15+0]		  */
+#define PLT0_ENTRY_WORD3  0x04f78001		/* lwi	   r15, [r15+4]		  */
+#define PLT0_ENTRY_WORD4  0x4a003c00		/* jr	   r15			  */
 
 /* $ta is change to $r15 (from $r25).  */
 #define PLT0_PIC_ENTRY_WORD0  0x46f00000	/* sethi   r15, HI20(got[1]@GOT)  */
-#define PLT0_PIC_ENTRY_WORD1  0x58f78000	/* ori     r15, r15, LO12(got[1]@GOT) */
-#define PLT0_PIC_ENTRY_WORD2  0x40f7f400	/* add     r15, gp, r15           */
-#define PLT0_PIC_ENTRY_WORD3  0x05178000	/* lwi     r17, [r15+0]           */
-#define PLT0_PIC_ENTRY_WORD4  0x04f78001	/* lwi     r15, [r15+4]           */
-#define PLT0_PIC_ENTRY_WORD5  0x4a003c00	/* jr      r15                    */
+#define PLT0_PIC_ENTRY_WORD1  0x58f78000	/* ori	   r15, r15, LO12(got[1]@GOT) */
+#define PLT0_PIC_ENTRY_WORD2  0x40f7f400	/* add	   r15, gp, r15		  */
+#define PLT0_PIC_ENTRY_WORD3  0x05178000	/* lwi	   r17, [r15+0]		  */
+#define PLT0_PIC_ENTRY_WORD4  0x04f78001	/* lwi	   r15, [r15+4]		  */
+#define PLT0_PIC_ENTRY_WORD5  0x4a003c00	/* jr	   r15			  */
 
-#define PLT_ENTRY_WORD0  0x46f00000		/* sethi   r15, HI20(&got[n+3])      */
-#define PLT_ENTRY_WORD1  0x04f78000		/* lwi     r15, r15, LO12(&got[n+3]) */
-#define PLT_ENTRY_WORD2  0x4a003c00		/* jr      r15                       */
-#define PLT_ENTRY_WORD3  0x45000000		/* movi    r16, sizeof(RELA) * n     */
-#define PLT_ENTRY_WORD4  0x48000000		/* j      .plt0.                     */
+#define PLT_ENTRY_WORD0	 0x46f00000		/* sethi   r15, HI20(&got[n+3])	     */
+#define PLT_ENTRY_WORD1	 0x04f78000		/* lwi	   r15, r15, LO12(&got[n+3]) */
+#define PLT_ENTRY_WORD2	 0x4a003c00		/* jr	   r15			     */
+#define PLT_ENTRY_WORD3	 0x45000000		/* movi	   r16, sizeof(RELA) * n     */
+#define PLT_ENTRY_WORD4	 0x48000000		/* j	  .plt0.		     */
 
 #define PLT_PIC_ENTRY_WORD0  0x46f00000		/* sethi  r15, HI20(got[n+3]@GOT)    */
-#define PLT_PIC_ENTRY_WORD1  0x58f78000		/* ori    r15, r15,    LO12(got[n+3]@GOT) */
-#define PLT_PIC_ENTRY_WORD2  0x38febc02		/* lw     r15, [gp+r15]              */
-#define PLT_PIC_ENTRY_WORD3  0x4a003c00		/* jr     r15                        */
-#define PLT_PIC_ENTRY_WORD4  0x45000000		/* movi   r16, sizeof(RELA) * n      */
-#define PLT_PIC_ENTRY_WORD5  0x48000000		/* j      .plt0                      */
+#define PLT_PIC_ENTRY_WORD1  0x58f78000		/* ori	  r15, r15,    LO12(got[n+3]@GOT) */
+#define PLT_PIC_ENTRY_WORD2  0x38febc02		/* lw	  r15, [gp+r15]		     */
+#define PLT_PIC_ENTRY_WORD3  0x4a003c00		/* jr	  r15			     */
+#define PLT_PIC_ENTRY_WORD4  0x45000000		/* movi	  r16, sizeof(RELA) * n	     */
+#define PLT_PIC_ENTRY_WORD5  0x48000000		/* j	  .plt0			     */
 
 /* These are macros used to get the relocation accurate value.  */
 #define ACCURATE_8BIT_S1	(0x100)
@@ -4350,14 +4350,14 @@ dtpoff_base (struct bfd_link_info *info)
 }
 
 static bfd_boolean
-nds32_elf_relocate_section (bfd *                  output_bfd ATTRIBUTE_UNUSED,
+nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info * info,
-			    bfd *                  input_bfd,
-			    asection *             input_section,
-			    bfd_byte *             contents,
-			    Elf_Internal_Rela *    relocs,
-			    Elf_Internal_Sym *     local_syms,
-			    asection **            local_sections)
+			    bfd *		   input_bfd,
+			    asection *		   input_section,
+			    bfd_byte *		   contents,
+			    Elf_Internal_Rela *	   relocs,
+			    Elf_Internal_Sym *	   local_syms,
+			    asection **		   local_sections)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -8803,19 +8803,19 @@ nds32_elf_relax_longcall1 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
 {
   /* There are 3 variations for LONGCALL1
      case 4-4-2; 16-bit on, optimize off or optimize for space
-     sethi ta, hi20(symbol)     ; LONGCALL1/HI20
+     sethi ta, hi20(symbol)	; LONGCALL1/HI20
      ori   ta, ta, lo12(symbol) ; LO12S0
-     jral5 ta                   ;
+     jral5 ta			;
 
      case 4-4-4; 16-bit off, optimize don't care
-     sethi ta, hi20(symbol)     ; LONGCALL1/HI20
+     sethi ta, hi20(symbol)	; LONGCALL1/HI20
      ori   ta, ta, lo12(symbol) ; LO12S0
-     jral  ta                   ;
+     jral  ta			;
 
      case 4-4-4; 16-bit on, optimize for speed
-     sethi ta, hi20(symbol)     ; LONGCALL1/HI20
+     sethi ta, hi20(symbol)	; LONGCALL1/HI20
      ori   ta, ta, lo12(symbol) ; LO12S0
-     jral  ta                   ;
+     jral  ta			;
      Check code for -mlong-calls output.  */
 
   /* Get the reloc for the address from which the register is
@@ -8984,24 +8984,24 @@ nds32_elf_relax_longcall3 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
 {
   /* There are 3 variations for LONGCALL3
      case 4-4-4-2; 16-bit on, optimize off or optimize for space
-     bltz  rt,   $1                ; LONGCALL3
-     sethi ta,   hi20(symbol)      ; HI20
+     bltz  rt,	 $1		   ; LONGCALL3
+     sethi ta,	 hi20(symbol)	   ; HI20
      ori   ta, ta,  lo12(symbol)   ; LO12S0
-     jral5 ta                      ;
+     jral5 ta			   ;
      $1
 
      case 4-4-4-4; 16-bit off, optimize don't care
-     bltz  rt,   $1                ; LONGCALL3
-     sethi ta,   hi20(symbol)      ; HI20
+     bltz  rt,	 $1		   ; LONGCALL3
+     sethi ta,	 hi20(symbol)	   ; HI20
      ori   ta, ta,  lo12(symbol)   ; LO12S0
-     jral  ta                      ;
+     jral  ta			   ;
      $1
 
      case 4-4-4-4; 16-bit on, optimize for speed
-     bltz  rt,   $1                ; LONGCALL3
-     sethi ta,   hi20(symbol)      ; HI20
+     bltz  rt,	 $1		   ; LONGCALL3
+     sethi ta,	 hi20(symbol)	   ; HI20
      ori   ta, ta,  lo12(symbol)   ; LO12S0
-     jral  ta                      ;
+     jral  ta			   ;
      $1 */
 
   /* Get the reloc for the address from which the register is
@@ -9122,19 +9122,19 @@ nds32_elf_relax_longjump1 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
 {
   /* There are 3 variations for LONGJUMP1
      case 4-4-2; 16-bit bit on, optimize off or optimize for space
-     sethi ta, hi20(symbol)      ; LONGJUMP1/HI20
-     ori   ta, ta, lo12(symbol)  ; LO12S0
-     jr5   ta                    ;
+     sethi ta, hi20(symbol)	 ; LONGJUMP1/HI20
+     ori   ta, ta, lo12(symbol)	 ; LO12S0
+     jr5   ta			 ;
 
      case 4-4-4; 16-bit off, optimize don't care
-     sethi ta, hi20(symbol)      ; LONGJUMP1/HI20
-     ori   ta, ta, lo12(symbol)  ; LO12S0
-     jr    ta                    ;
+     sethi ta, hi20(symbol)	 ; LONGJUMP1/HI20
+     ori   ta, ta, lo12(symbol)	 ; LO12S0
+     jr	   ta			 ;
 
      case 4-4-4; 16-bit on, optimize for speed
-     sethi ta, hi20(symbol)      ; LONGJUMP1/HI20
-     ori   ta, ta, lo12(symbol)  ; LO12S0
-     jr    ta                    ;	*/
+     sethi ta, hi20(symbol)	 ; LONGJUMP1/HI20
+     ori   ta, ta, lo12(symbol)	 ; LO12S0
+     jr	   ta			 ;	*/
 
   /* Get the reloc for the address from which the register is
      being loaded.  This reloc will tell us which function is
@@ -9476,42 +9476,42 @@ nds32_elf_relax_longjump3 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   /* There are 5 variations for LONGJUMP3
      case 1: 2-4-4-2; 1st insn convertible, 16-bit on,
      optimize off or optimize for space
-     bnes38   rt, ra, $1            ; LONGJUMP3
-     sethi    ta, hi20(symbol)      ; HI20
+     bnes38   rt, ra, $1	    ; LONGJUMP3
+     sethi    ta, hi20(symbol)	    ; HI20
      ori      ta, ta, lo12(symbol)  ; LO12S0
-     jr5      ta                    ;
-     $1:                            ;
+     jr5      ta		    ;
+     $1:			    ;
 
      case 2: 2-4-4-2; 1st insn convertible, 16-bit on, optimize for speed
-     bnes38   rt, ra, $1           ; LONGJUMP3
-     sethi    ta, hi20(symbol)     ; HI20
+     bnes38   rt, ra, $1	   ; LONGJUMP3
+     sethi    ta, hi20(symbol)	   ; HI20
      ori      ta, ta, lo12(symbol) ; LO12S0
-     jr5      ta                   ;
-     $1:                           ; LABEL
+     jr5      ta		   ;
+     $1:			   ; LABEL
 
      case 3: 4-4-4-2; 1st insn not convertible, 16-bit on,
      optimize off or optimize for space
-     bne   rt, ra, $1           ; LONGJUMP3
-     sethi ta, hi20(symbol)     ; HI20
+     bne   rt, ra, $1		; LONGJUMP3
+     sethi ta, hi20(symbol)	; HI20
      ori   ta, ta, lo12(symbol) ; LO12S0
-     jr5   ta                   ;
-     $1:                        ;
+     jr5   ta			;
+     $1:			;
 
      case 4: 4-4-4-4; 1st insn don't care, 16-bit off, optimize don't care
      16-bit off if no INSN16
-     bne   rt, ra, $1           ; LONGJUMP3
-     sethi ta, hi20(symbol)     ; HI20
+     bne   rt, ra, $1		; LONGJUMP3
+     sethi ta, hi20(symbol)	; HI20
      ori   ta, ta, lo12(symbol) ; LO12S0
-     jr    ta                   ;
-     $1:                        ;
+     jr	   ta			;
+     $1:			;
 
      case 5: 4-4-4-4; 1st insn not convertible, 16-bit on, optimize for speed
      16-bit off if no INSN16
-     bne   rt, ra, $1           ; LONGJUMP3
-     sethi ta, hi20(symbol)     ; HI20
+     bne   rt, ra, $1		; LONGJUMP3
+     sethi ta, hi20(symbol)	; HI20
      ori   ta, ta, lo12(symbol) ; LO12S0
-     jr    ta                   ;
-     $1:                        ; LABEL */
+     jr	   ta			;
+     $1:			; LABEL */
 
   /* Get the reloc for the address from which the register is
      being loaded.  This reloc will tell us which function is
@@ -10893,9 +10893,9 @@ nds32_elf_relax_letlsadd (struct bfd_link_info *link_info, bfd *abfd,
 			  Elf_Internal_Shdr *symtab_hdr, bfd_boolean *again)
 {
   /* Local TLS non-pic
-     sethi    ta, hi20(symbol@tpoff)      ; TLS_LE_HI20
+     sethi    ta, hi20(symbol@tpoff)	  ; TLS_LE_HI20
      ori      ta, ta, lo12(symbol@tpoff)  ; TLS_LE_LO12
-     add      ra, ta, tp                  ; TLS_LE_ADD */
+     add      ra, ta, tp		  ; TLS_LE_ADD */
 
   uint32_t insn;
   bfd_vma laddr;
@@ -15432,7 +15432,7 @@ nds32_elf_ex9_itb_base (struct bfd_link_info *link_info)
 #define ELF_ARCH				bfd_arch_nds32
 #define ELF_MACHINE_CODE			EM_NDS32
 #define ELF_MAXPAGESIZE				0x1000
-#define ELF_TARGET_ID                           NDS32_ELF_DATA
+#define ELF_TARGET_ID				NDS32_ELF_DATA
 
 #define TARGET_BIG_SYM				nds32_elf32_be_vec
 #define TARGET_BIG_NAME				"elf32-nds32be"
@@ -15448,7 +15448,7 @@ nds32_elf_ex9_itb_base (struct bfd_link_info *link_info)
 #define bfd_elf32_bfd_relax_section		nds32_elf_relax_section
 #define bfd_elf32_bfd_set_private_flags		nds32_elf_set_private_flags
 
-#define bfd_elf32_mkobject		        nds32_elf_mkobject
+#define bfd_elf32_mkobject			nds32_elf_mkobject
 #define elf_backend_action_discarded		nds32_elf_action_discarded
 #define elf_backend_add_symbol_hook		nds32_elf_add_symbol_hook
 #define elf_backend_check_relocs		nds32_elf_check_relocs
@@ -15469,7 +15469,7 @@ nds32_elf_ex9_itb_base (struct bfd_link_info *link_info)
 #define elf_backend_final_write_processing	nds32_elf_final_write_processing
 #define elf_backend_special_sections		nds32_elf_special_sections
 #define bfd_elf32_bfd_get_relocated_section_contents \
-                                nds32_elf_get_relocated_section_contents
+				nds32_elf_get_relocated_section_contents
 
 #define elf_backend_can_gc_sections		1
 #define elf_backend_can_refcount		1

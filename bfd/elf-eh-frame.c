@@ -483,7 +483,7 @@ bfd_elf_discard_eh_frame_entry (struct eh_frame_hdr_info *hdr_info)
 	  hdr_info->array_count--;
 	  hdr_info->u.compact.entries[hdr_info->array_count] = NULL;
 	  i--;
-        }
+	}
     }
 }
 
@@ -656,7 +656,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
   sec_info = (struct eh_frame_sec_info *)
       bfd_zmalloc (sizeof (struct eh_frame_sec_info)
-                   + (num_entries - 1) * sizeof (struct eh_cie_fde));
+		   + (num_entries - 1) * sizeof (struct eh_cie_fde));
   REQUIRE (sec_info);
 
   /* We need to have a "struct cie" for each CIE in this section.  */
@@ -791,7 +791,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 		{
 		  aug++;
 		  REQUIRE (read_uleb128 (&buf, end, &cie->augmentation_size));
-	  	  ENSURE_NO_RELOCS (buf);
+		  ENSURE_NO_RELOCS (buf);
 		}
 
 	      while (*aug != '\0')
@@ -1010,7 +1010,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  bfd_byte *p;
 
 	  this_inf->set_loc = (unsigned int *)
-              bfd_malloc ((set_loc_count + 1) * sizeof (unsigned int));
+	      bfd_malloc ((set_loc_count + 1) * sizeof (unsigned int));
 	  REQUIRE (this_inf->set_loc);
 	  this_inf->set_loc[0] = set_loc_count;
 	  p = insns;
@@ -1632,7 +1632,7 @@ _bfd_elf_discard_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
   if (info->eh_frame_hdr_type == COMPACT_EH_HDR)
     {
       /* For compact frames we only add the header.  The actual table comes
-         from the .eh_frame_entry sections.  */
+	 from the .eh_frame_entry sections.  */
       sec->size = 8;
     }
   else
@@ -1937,7 +1937,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
     {
       hdr_info->frame_hdr_is_compact = FALSE;
       hdr_info->u.dwarf.array = (struct eh_frame_array_ent *)
-        bfd_malloc (hdr_info->u.dwarf.fde_count
+	bfd_malloc (hdr_info->u.dwarf.fde_count
 		    * sizeof (*hdr_info->u.dwarf.array));
     }
   if (hdr_info->u.dwarf.array == NULL)
@@ -2321,7 +2321,7 @@ _bfd_elf_fixup_eh_frame_hdr (struct bfd_link_info *info)
 
       p->offset = p->u.indirect.section->output_offset;
       if (p->next != NULL)
-        i--;
+	i--;
     }
 
   if (i != 0)
@@ -2376,7 +2376,7 @@ write_compact_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 /* The .eh_frame_hdr format for DWARF frames:
 
    ubyte version		(currently 1)
-   ubyte eh_frame_ptr_enc  	(DW_EH_PE_* encoding of pointer to start of
+   ubyte eh_frame_ptr_enc	(DW_EH_PE_* encoding of pointer to start of
 				 .eh_frame section)
    ubyte fde_count_enc		(DW_EH_PE_* encoding of total FDE count
 				 number (or DW_EH_PE_omit if there is no

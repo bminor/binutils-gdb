@@ -57,7 +57,7 @@ nios2_compatible (const bfd_arch_info_type *a,
     DEFAULT,						\
     nios2_compatible,					\
     bfd_default_scan,					\
-    bfd_arch_default_fill,			       	\
+    bfd_arch_default_fill,				\
     NEXT						\
   }
 

@@ -6011,7 +6011,7 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		  if (local_got_refcounts == NULL)
 		    return FALSE;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-#ifdef 	INCLUDE_SHMEDIA
+#ifdef INCLUDE_SHMEDIA
 		  /* Take care of both the datalabel and codelabel local
 		     GOT offsets.  */
 		  sh_elf_local_got_type (abfd)

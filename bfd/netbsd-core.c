@@ -22,7 +22,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
-#include "libaout.h"           /* BFD a.out internal data structures.  */
+#include "libaout.h"	       /* BFD a.out internal data structures.  */
 
 #include <sys/param.h>
 #include <sys/dir.h>
@@ -314,5 +314,5 @@ const bfd_target core_netbsd_vec =
 
     NULL,
 
-    NULL			        /* Backend_data.  */
+    NULL				/* Backend_data.  */
   };

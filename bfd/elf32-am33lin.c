@@ -33,9 +33,9 @@
 #define ELF_MAXPAGESIZE		0x1000
 
 /* Rename global functions.  */
-#define _bfd_mn10300_elf_merge_private_bfd_data  _bfd_am33_elf_merge_private_bfd_data
-#define _bfd_mn10300_elf_object_p                _bfd_am33_elf_object_p
-#define _bfd_mn10300_elf_final_write_processing  _bfd_am33_elf_final_write_processing
+#define _bfd_mn10300_elf_merge_private_bfd_data	 _bfd_am33_elf_merge_private_bfd_data
+#define _bfd_mn10300_elf_object_p		 _bfd_am33_elf_object_p
+#define _bfd_mn10300_elf_final_write_processing	 _bfd_am33_elf_final_write_processing
 
 /* Support for core dump NOTE sections.  */
 static bfd_boolean

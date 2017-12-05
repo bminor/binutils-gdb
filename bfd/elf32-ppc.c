@@ -78,14 +78,14 @@ static bfd_reloc_status_type ppc_elf_unhandled_reloc
 static const bfd_vma ppc_elf_vxworks_plt_entry
     [VXWORKS_PLT_ENTRY_SIZE / 4] =
   {
-    0x3d800000, /* lis     r12,0                 */
-    0x818c0000, /* lwz     r12,0(r12)            */
-    0x7d8903a6, /* mtctr   r12                   */
-    0x4e800420, /* bctr                          */
-    0x39600000, /* li      r11,0                 */
-    0x48000000, /* b       14 <.PLT0resolve+0x4> */
-    0x60000000, /* nop                           */
-    0x60000000, /* nop                           */
+    0x3d800000, /* lis	   r12,0		 */
+    0x818c0000, /* lwz	   r12,0(r12)		 */
+    0x7d8903a6, /* mtctr   r12			 */
+    0x4e800420, /* bctr				 */
+    0x39600000, /* li	   r11,0		 */
+    0x48000000, /* b	   14 <.PLT0resolve+0x4> */
+    0x60000000, /* nop				 */
+    0x60000000, /* nop				 */
   };
 static const bfd_vma ppc_elf_vxworks_pic_plt_entry
     [VXWORKS_PLT_ENTRY_SIZE / 4] =
@@ -105,26 +105,26 @@ static const bfd_vma ppc_elf_vxworks_pic_plt_entry
 static const bfd_vma ppc_elf_vxworks_plt0_entry
     [VXWORKS_PLT_INITIAL_ENTRY_SIZE / 4] =
   {
-    0x3d800000, /* lis     r12,0        */
-    0x398c0000, /* addi    r12,r12,0    */
-    0x800c0008, /* lwz     r0,8(r12)    */
-    0x7c0903a6, /* mtctr   r0           */
-    0x818c0004, /* lwz     r12,4(r12)   */
-    0x4e800420, /* bctr                 */
-    0x60000000, /* nop                  */
-    0x60000000, /* nop                  */
+    0x3d800000, /* lis	   r12,0	*/
+    0x398c0000, /* addi	   r12,r12,0	*/
+    0x800c0008, /* lwz	   r0,8(r12)	*/
+    0x7c0903a6, /* mtctr   r0		*/
+    0x818c0004, /* lwz	   r12,4(r12)	*/
+    0x4e800420, /* bctr			*/
+    0x60000000, /* nop			*/
+    0x60000000, /* nop			*/
   };
 static const bfd_vma ppc_elf_vxworks_pic_plt0_entry
     [VXWORKS_PLT_INITIAL_ENTRY_SIZE / 4] =
   {
     0x819e0008, /* lwz	 r12,8(r30) */
-    0x7d8903a6, /* mtctr r12        */
+    0x7d8903a6, /* mtctr r12	    */
     0x819e0004, /* lwz	 r12,4(r30) */
-    0x4e800420, /* bctr             */
-    0x60000000, /* nop              */
-    0x60000000, /* nop              */
-    0x60000000, /* nop              */
-    0x60000000, /* nop              */
+    0x4e800420, /* bctr		    */
+    0x60000000, /* nop		    */
+    0x60000000, /* nop		    */
+    0x60000000, /* nop		    */
+    0x60000000, /* nop		    */
   };
 
 /* For executables, we have some additional relocations in
@@ -2596,7 +2596,7 @@ static const struct bfd_elf_special_section ppc_elf_special_sections[] =
 
 /* This is what we want for new plt/got.  */
 static struct bfd_elf_special_section ppc_alt_plt =
-  { STRING_COMMA_LEN (".plt"),             0, SHT_PROGBITS, SHF_ALLOC };
+  { STRING_COMMA_LEN (".plt"),		   0, SHT_PROGBITS, SHF_ALLOC };
 
 static const struct bfd_elf_special_section *
 ppc_elf_get_sec_type_attr (bfd *abfd, asection *sec)
@@ -9755,12 +9755,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	     . new_page:		new_page:
 	     .  */
 	  insn = bfd_get_32 (input_bfd, contents + offset);
-	  if ((insn & (0x3f << 26)) == (18u << 26)          /* b,bl,ba,bla */
-	      || ((insn & (0x3f << 26)) == (16u << 26)      /* bc,bcl,bca,bcla*/
-		  && (insn & (0x14 << 21)) == (0x14 << 21)) /*   with BO=0x14 */
+	  if ((insn & (0x3f << 26)) == (18u << 26)	    /* b,bl,ba,bla */
+	      || ((insn & (0x3f << 26)) == (16u << 26)	    /* bc,bcl,bca,bcla*/
+		  && (insn & (0x14 << 21)) == (0x14 << 21)) /*	 with BO=0x14 */
 	      || ((insn & (0x3f << 26)) == (19u << 26)
 		  && (insn & (0x3ff << 1)) == (16u << 1)    /* bclr,bclrl */
-		  && (insn & (0x14 << 21)) == (0x14 << 21)))/*   with BO=0x14 */
+		  && (insn & (0x14 << 21)) == (0x14 << 21)))/*	 with BO=0x14 */
 	    continue;
 
 	  patch_addr = (start_addr + input_section->size
@@ -10531,13 +10531,13 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
        * 1: addi 11,11,(1b-res_0)@l
        *    mflr 12
        *    mtlr 0
-       *    sub 11,11,12                # r11 = index * 4
+       *    sub 11,11,12		# r11 = index * 4
        *    addis 12,12,(got+4-1b)@ha
-       *    lwz 0,(got+4-1b)@l(12)      # got[1] address of dl_runtime_resolve
-       *    lwz 12,(got+8-1b)@l(12)     # got[2] contains the map address
+       *    lwz 0,(got+4-1b)@l(12)	# got[1] address of dl_runtime_resolve
+       *    lwz 12,(got+8-1b)@l(12)	# got[2] contains the map address
        *    mtctr 0
        *    add 0,11,11
-       *    add 11,0,11                 # r11 = index * 12 = reloc offset.
+       *    add 11,0,11			# r11 = index * 12 = reloc offset.
        *    bctr
        */
       static const unsigned int pic_plt_resolve[] =
@@ -10574,12 +10574,12 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
        * PLTresolve:
        *    lis 12,(got+4)@ha
        *    addis 11,11,(-res_0)@ha
-       *    lwz 0,(got+4)@l(12)         # got[1] address of dl_runtime_resolve
-       *    addi 11,11,(-res_0)@l       # r11 = index * 4
+       *    lwz 0,(got+4)@l(12)		# got[1] address of dl_runtime_resolve
+       *    addi 11,11,(-res_0)@l	# r11 = index * 4
        *    mtctr 0
        *    add 0,11,11
-       *    lwz 12,(got+8)@l(12)        # got[2] contains the map address
-       *    add 11,0,11                 # r11 = index * 12 = reloc offset.
+       *    lwz 12,(got+8)@l(12)	# got[2] contains the map address
+       *    add 11,0,11			# r11 = index * 12 = reloc offset.
        *    bctr
        */
       static const unsigned int plt_resolve[] =

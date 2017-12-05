@@ -33,22 +33,22 @@ const bfd_arch_info_type arch_info_struct[] =
   "mt",				/* Architecture name.  */
   "ms1-003",			/* Printable name.  */
   1,				/* Section align power.  */
-  FALSE,		        /* The default ?  */
+  FALSE,			/* The default ?  */
   bfd_default_compatible,	/* Architecture comparison fn.  */
   bfd_default_scan,		/* String to architecture convert fn.  */
   bfd_arch_default_fill,	/* Default fill.  */
-  &arch_info_struct[1]          /* Next in list.  */
+  &arch_info_struct[1]		/* Next in list.  */
 },
 {
   32,				/* Bits per word - not really true.  */
   32,				/* Bits per address.  */
   8,				/* Bits per byte.  */
   bfd_arch_mt,			/* Architecture.  */
-  bfd_mach_ms2,		        /* Machine.  */
+  bfd_mach_ms2,			/* Machine.  */
   "mt",				/* Architecture name.  */
   "ms2",			/* Printable name.  */
   1,				/* Section align power.  */
-  FALSE,		        /* The default ?  */
+  FALSE,			/* The default ?  */
   bfd_default_compatible,	/* Architecture comparison fn.  */
   bfd_default_scan,		/* String to architecture convert fn.  */
   bfd_arch_default_fill,	/* Default fill.  */
@@ -66,7 +66,7 @@ const bfd_arch_info_type bfd_mt_arch =
   "mt",				/* Architecture name.  */
   "ms1",			/* Printable name.  */
   1,				/* Section align power.  */
-  TRUE,		        	/* The default ?  */
+  TRUE,				/* The default ?  */
   bfd_default_compatible,	/* Architecture comparison fn.  */
   bfd_default_scan,		/* String to architecture convert fn.  */
   bfd_arch_default_fill,	/* Default fill.  */

@@ -36,12 +36,12 @@
 #ifndef TARGET_LITTLE_SYM
 #define TARGET_LITTLE_SYM    arm_pe_le_vec
 #define TARGET_LITTLE_NAME   "pe-arm-little"
-#define TARGET_BIG_SYM       arm_pe_be_vec
-#define TARGET_BIG_NAME      "pe-arm-big"
+#define TARGET_BIG_SYM	     arm_pe_be_vec
+#define TARGET_BIG_NAME	     "pe-arm-big"
 #endif
 
 #define COFF_WITH_PE
-#define PCRELOFFSET          TRUE
+#define PCRELOFFSET	     TRUE
 #define COFF_LONG_SECTION_NAMES
 
 #define COFF_SECTION_ALIGNMENT_ENTRIES \

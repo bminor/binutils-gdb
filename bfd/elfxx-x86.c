@@ -119,7 +119,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       && h->got.refcount > 0)
     {
       /* Don't use the regular PLT if there are both GOT and GOTPLT
-         reloctions.  */
+	 reloctions.  */
       h->plt.offset = (bfd_vma) -1;
 
       /* Use the GOT PLT.  */
@@ -1017,7 +1017,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
   if (htab->tls_ld_or_ldm_got.refcount > 0)
     {
       /* Allocate 2 got entries and 1 dynamic reloc for R_386_TLS_LDM
-         or R_X86_64_TLSLD relocs.  */
+	 or R_X86_64_TLSLD relocs.  */
       htab->tls_ld_or_ldm_got.offset = htab->elf.sgot->size;
       htab->elf.sgot->size += 2 * htab->got_entry_size;
       htab->elf.srelgot->size += htab->sizeof_reloc;
@@ -1345,7 +1345,7 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 		      : sdyn->output_section->vma + sdyn->output_offset);
 
       /* Set the first entry in the global offset table to the address
-         of the dynamic section.  Write GOT[1] and GOT[2], needed for
+	 of the dynamic section.  Write GOT[1] and GOT[2], needed for
 	 the dynamic linker.  */
       if (htab->got_entry_size == 8)
 	{

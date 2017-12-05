@@ -48,7 +48,7 @@ compatible (const bfd_arch_info_type * a,
     {
       /* Special case for ATmega[16]03 (avr:3) and ATmega83 (avr:4).  */
       if ((a->mach == bfd_mach_avr3 && b->mach == bfd_mach_avr4)
-         || (a->mach == bfd_mach_avr4 && b->mach == bfd_mach_avr3))
+	 || (a->mach == bfd_mach_avr4 && b->mach == bfd_mach_avr3))
        return NULL;
 
       if (a->mach <= b->mach)

@@ -383,7 +383,7 @@ CODE_FRAGMENT
 #define COFFLONGSECTIONCATHELPER(x,y)    x ## y
 /* If the input macro Y is blank or '1', return an odd number; if it is
    '0', return an even number.  Result undefined in all other cases.  */
-#define BLANKOR1TOODD(y)                 COFFLONGSECTIONCATHELPER(1,y)
+#define BLANKOR1TOODD(y)		 COFFLONGSECTIONCATHELPER(1,y)
 /* Defined to numerical 0 or 1 according to whether generation of long
    section names is disabled or enabled by default.  */
 #define COFF_ENABLE_LONG_SECTION_NAMES   (BLANKOR1TOODD(COFF_LONG_SECTION_NAMES) & 1)
@@ -548,7 +548,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
 #endif /* _LIT */
     }
   else if (CONST_STRNEQ (sec_name, DOT_DEBUG)
-           || CONST_STRNEQ (sec_name, DOT_ZDEBUG))
+	   || CONST_STRNEQ (sec_name, DOT_ZDEBUG))
     {
       /* Handle the XCOFF debug section and DWARF2 debug sections.  */
       if (!sec_name[6])
@@ -562,7 +562,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
     }
 #ifdef COFF_LONG_SECTION_NAMES
   else if (CONST_STRNEQ (sec_name, GNU_LINKONCE_WI)
-  	   || CONST_STRNEQ (sec_name, GNU_LINKONCE_WT))
+	   || CONST_STRNEQ (sec_name, GNU_LINKONCE_WT))
     {
       styp_flags = STYP_DEBUG_INFO;
     }
@@ -589,11 +589,11 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
       int i;
 
       for (i = 0; i < XCOFF_DWSECT_NBR_NAMES; i++)
-        if (!strcmp (sec_name, xcoff_dwsect_names[i].name))
-          {
-            styp_flags = STYP_DWARF | xcoff_dwsect_names[i].flag;
-            break;
-          }
+	if (!strcmp (sec_name, xcoff_dwsect_names[i].name))
+	  {
+	    styp_flags = STYP_DWARF | xcoff_dwsect_names[i].flag;
+	    break;
+	  }
     }
 #endif
   /* Try and figure out what it should be */
@@ -675,8 +675,8 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
   if (is_dbg)
     {
       sec_flags &= (SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD
-      		    | SEC_LINK_DUPLICATES_SAME_CONTENTS
-      		    | SEC_LINK_DUPLICATES_SAME_SIZE);
+		    | SEC_LINK_DUPLICATES_SAME_CONTENTS
+		    | SEC_LINK_DUPLICATES_SAME_SIZE);
       sec_flags |= SEC_DEBUGGING | SEC_READONLY;
     }
 
@@ -706,7 +706,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
     styp_flags |= IMAGE_SCN_LNK_COMDAT;
   if ((sec_flags
        & (SEC_LINK_DUPLICATES_DISCARD | SEC_LINK_DUPLICATES_SAME_CONTENTS
-          | SEC_LINK_DUPLICATES_SAME_SIZE)) != 0)
+	  | SEC_LINK_DUPLICATES_SAME_SIZE)) != 0)
     styp_flags |= IMAGE_SCN_LNK_COMDAT;
 
   /* skip LINKER_CREATED */
@@ -1457,19 +1457,19 @@ Special entry points for gdb to swap in coff symbol table parts:
 .
 .  bfd_boolean (*_bfd_coff_pointerize_aux_hook)
 .    (bfd *, combined_entry_type *, combined_entry_type *,
-.	     unsigned int, combined_entry_type *);
+.     unsigned int, combined_entry_type *);
 .
 .  bfd_boolean (*_bfd_coff_print_aux)
 .    (bfd *, FILE *, combined_entry_type *, combined_entry_type *,
-.	     combined_entry_type *, unsigned int);
+.     combined_entry_type *, unsigned int);
 .
 .  void (*_bfd_coff_reloc16_extra_cases)
 .    (bfd *, struct bfd_link_info *, struct bfd_link_order *, arelent *,
-.	    bfd_byte *, unsigned int *, unsigned int *);
+.     bfd_byte *, unsigned int *, unsigned int *);
 .
 .  int (*_bfd_coff_reloc16_estimate)
 .    (bfd *, asection *, arelent *, unsigned int,
-.	     struct bfd_link_info *);
+.     struct bfd_link_info *);
 .
 .  enum coff_symbol_classification (*_bfd_coff_classify_symbol)
 .    (bfd *, struct internal_syment *);
@@ -1482,21 +1482,20 @@ Special entry points for gdb to swap in coff symbol table parts:
 .
 .  bfd_boolean (*_bfd_coff_relocate_section)
 .    (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-.	     struct internal_reloc *, struct internal_syment *, asection **);
+.     struct internal_reloc *, struct internal_syment *, asection **);
 .
 .  reloc_howto_type *(*_bfd_coff_rtype_to_howto)
 .    (bfd *, asection *, struct internal_reloc *,
-.	     struct coff_link_hash_entry *, struct internal_syment *,
-.	     bfd_vma *);
+.     struct coff_link_hash_entry *, struct internal_syment *, bfd_vma *);
 .
 .  bfd_boolean (*_bfd_coff_adjust_symndx)
 .    (bfd *, struct bfd_link_info *, bfd *, asection *,
-.	     struct internal_reloc *, bfd_boolean *);
+.     struct internal_reloc *, bfd_boolean *);
 .
 .  bfd_boolean (*_bfd_coff_link_add_one_symbol)
 .    (struct bfd_link_info *, bfd *, const char *, flagword,
-.	     asection *, bfd_vma, const char *, bfd_boolean, bfd_boolean,
-.	     struct bfd_link_hash_entry **);
+.     asection *, bfd_vma, const char *, bfd_boolean, bfd_boolean,
+.     struct bfd_link_hash_entry **);
 .
 .  bfd_boolean (*_bfd_coff_link_output_has_begun)
 .    (bfd *, struct coff_final_link_info *);
@@ -1606,7 +1605,7 @@ Special entry points for gdb to swap in coff symbol table parts:
 .   (abfd, file, base, symbol, aux, indaux))
 .
 .#define bfd_coff_reloc16_extra_cases(abfd, link_info, link_order,\
-.                                     reloc, data, src_ptr, dst_ptr)\
+.				      reloc, data, src_ptr, dst_ptr)\
 .  ((coff_backend_info (abfd)->_bfd_coff_reloc16_extra_cases)\
 .   (abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr))
 .
@@ -1635,7 +1634,7 @@ Special entry points for gdb to swap in coff symbol table parts:
 .  ((coff_backend_info (abfd)->_bfd_coff_adjust_symndx)\
 .   (obfd, info, ibfd, sec, rel, adjustedp))
 .#define bfd_coff_link_add_one_symbol(info, abfd, name, flags, section,\
-.                                     value, string, cp, coll, hashp)\
+.				      value, string, cp, coll, hashp)\
 .  ((coff_backend_info (abfd)->_bfd_coff_link_add_one_symbol)\
 .   (info, abfd, name, flags, section, value, string, cp, coll, hashp))
 .
@@ -1794,13 +1793,13 @@ coff_new_section_hook (bfd * abfd, asection * section)
       int i;
 
       for (i = 0; i < XCOFF_DWSECT_NBR_NAMES; i++)
-        if (strcmp (bfd_get_section_name (abfd, section),
-                    xcoff_dwsect_names[i].name) == 0)
-          {
-            section->alignment_power = 0;
-            sclass = C_DWARF;
-            break;
-          }
+	if (strcmp (bfd_get_section_name (abfd, section),
+		    xcoff_dwsect_names[i].name) == 0)
+	  {
+	    section->alignment_power = 0;
+	    sclass = C_DWARF;
+	    break;
+	  }
     }
 #endif
 
@@ -3417,8 +3416,8 @@ coff_compute_section_file_positions (bfd * abfd)
 	     and the native linker doesn't try to align the text sections.
 	     For example:
 
-	     0 .text         000054cc  10000128  10000128  00000128  2**5
-                             CONTENTS, ALLOC, LOAD, CODE
+	     0 .text	     000054cc  10000128	 10000128  00000128  2**5
+			     CONTENTS, ALLOC, LOAD, CODE
 	  */
 
 	  if (!strcmp (current->name, _TEXT)
@@ -3873,12 +3872,12 @@ coff_write_object_contents (bfd * abfd)
 	    /* xgettext:c-format */
 	    (_("%B:%s section %s: alignment 2**%u not representable"),
 	    abfd, warn ? " warning:" : "", current->name,
-            current->alignment_power);
+	    current->alignment_power);
 	  if (!warn)
 	    {
 	      bfd_set_error (bfd_error_nonrepresentable_section);
 	      return FALSE;
-	    }  
+	    }
 	}
 #endif
 
@@ -4478,7 +4477,7 @@ coff_set_section_contents (bfd * abfd,
       - a (four byte) word holding the length of this record, in words,
       - a word that always seems to be set to "2",
       - the path to a shared library, null-terminated and then padded
-        to a whole word boundary.
+	to a whole word boundary.
 
       bfd_assert calls have been added to alert if an attempt is made
       to write a section which doesn't follow these assumptions.  The
@@ -4928,8 +4927,8 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_THUMBSTATFUNC:/* Thumb static function.  */
 #endif
 #ifdef RS6000COFF_C
-            case C_DWARF:	 /* A label in a dwarf section.  */
-            case C_INFO:	 /* A label in a comment section.  */
+	    case C_DWARF:	 /* A label in a dwarf section.  */
+	    case C_INFO:	 /* A label in a comment section.  */
 #endif
 	    case C_LABEL:	 /* Label.  */
 	      if (src->u.syment.n_scnum == N_DEBUG)
@@ -5078,9 +5077,9 @@ coff_slurp_symbol_table (bfd * abfd)
 		  && src->u.syment.n_scnum == 0)
 		break;
 #ifdef RS6000COFF_C
-              /* XCOFF specific: deleted entry.  */
-              if (src->u.syment.n_value == C_NULL_VALUE)
-                break;
+	      /* XCOFF specific: deleted entry.  */
+	      if (src->u.syment.n_value == C_NULL_VALUE)
+		break;
 #endif
 	      /* Fall through.  */
 	    case C_EXTDEF:	/* External definition.  */
@@ -5202,10 +5201,10 @@ coff_classify_symbol (bfd *abfd,
 	{
 	  asection *sec;
 	  char * name;
- 	  char buf[SYMNMLEN + 1];
+	  char buf[SYMNMLEN + 1];
 
 	  name = _bfd_coff_internal_syment_name (abfd, syment, buf)
- 	  sec = coff_section_from_bfd_index (abfd, syment->n_scnum);
+	  sec = coff_section_from_bfd_index (abfd, syment->n_scnum);
 	  if (sec != NULL && name != NULL
 	      && (strcmp (bfd_get_section_name (abfd, sec), name) == 0))
 	    return COFF_SYMBOL_PE_SECTION;

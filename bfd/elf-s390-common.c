@@ -102,7 +102,7 @@ s390_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
   if (h->plt.refcount <= 0 && h->got.refcount <= 0)
     {
       /* When building shared library, we need to handle the case
-         where it is marked with regular reference, but not non-GOT
+	 where it is marked with regular reference, but not non-GOT
 	 reference.  It may happen if we didn't see STT_GNU_IFUNC
 	 symbol at the time when checking relocations.  */
       if (bfd_link_pic (info)
@@ -207,9 +207,9 @@ elf_s390_allocate_local_syminfo (bfd *abfd, Elf_Internal_Shdr *symtab_hdr)
   bfd_size_type size;
 
   size = symtab_hdr->sh_info;
-  size *= (sizeof (bfd_signed_vma)       /* local got */
-	   + sizeof (struct plt_entry)   /* local plt */
-	   + sizeof(char));              /* local tls type */
+  size *= (sizeof (bfd_signed_vma)	 /* local got */
+	   + sizeof (struct plt_entry)	 /* local plt */
+	   + sizeof(char));		 /* local tls type */
   elf_local_got_refcounts (abfd) = ((bfd_signed_vma *)
 				    bfd_zalloc (abfd, size));
   if (elf_local_got_refcounts (abfd) == NULL)

@@ -348,8 +348,8 @@ struct eh_cie_fde
 	   .eh_frame input section that contains the CIE.  */
       union {
 	struct cie *full_cie;
- 	struct eh_cie_fde *merged_with;
- 	asection *sec;
+	struct eh_cie_fde *merged_with;
+	asection *sec;
       } u;
 
       /* The offset of the personality data from the start of the CIE,
@@ -669,7 +669,7 @@ struct elf_link_hash_table
 #define elf_hash_table_id(table)	((table) -> hash_table_id)
 
 /* Returns TRUE if the hash table is a struct elf_link_hash_table.  */
-#define is_elf_hash_table(htab)					      	\
+#define is_elf_hash_table(htab)						\
   (((struct bfd_link_hash_table *) (htab))->type == bfd_link_elf_hash_table)
 
 /* Used by bfd_sym_from_r_symndx to cache a small number of local
@@ -1410,7 +1410,7 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_copy_special_section_fields)
     (const bfd *ibfd, bfd *obfd, const Elf_Internal_Shdr *isection,
      Elf_Internal_Shdr *osection);
-		
+
   /* Used to handle bad SHF_LINK_ORDER input.  */
   void (*link_order_error_handler) (const char *, ...);
 
@@ -1809,8 +1809,8 @@ enum elf_gnu_symbols
 
 typedef struct elf_section_list
 {
-  Elf_Internal_Shdr          hdr;
-  unsigned int               ndx;
+  Elf_Internal_Shdr	     hdr;
+  unsigned int		     ndx;
   struct elf_section_list *  next;
 } elf_section_list;
 

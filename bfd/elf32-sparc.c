@@ -238,7 +238,7 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
 #define elf_backend_gc_mark_hook	_bfd_sparc_elf_gc_mark_hook
 #define elf_backend_plt_sym_val		_bfd_sparc_elf_plt_sym_val
 #define elf_backend_init_index_section	_bfd_elf_init_1_index_section
-#define elf_backend_fixup_symbol        _bfd_sparc_elf_fixup_symbol
+#define elf_backend_fixup_symbol	_bfd_sparc_elf_fixup_symbol
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1
@@ -267,10 +267,10 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
 
 /* The 32-bit static TLS arena size is rounded to the nearest 8-byte
    boundary.  */
-#undef  elf_backend_static_tls_alignment
+#undef	elf_backend_static_tls_alignment
 #define elf_backend_static_tls_alignment	8
 
-#undef  elf_backend_strtab_flags
+#undef	elf_backend_strtab_flags
 #define elf_backend_strtab_flags	SHF_STRINGS
 
 static bfd_boolean

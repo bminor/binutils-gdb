@@ -1046,7 +1046,7 @@ struct frvfdpic_relocs_info
      for symbol+addend.  Should be implied by something like:
      (plt || fdgotoff12 || fdgotofflos || fdgotofflohi
       || ((fd || fdgot12 || fdgotlos || fdgothilo)
-          && (symndx != -1 || FRVFDPIC_FUNCDESC_LOCAL (info, d.h))))  */
+	  && (symndx != -1 || FRVFDPIC_FUNCDESC_LOCAL (info, d.h))))  */
   unsigned privfd:1;
   /* Whether a lazy PLT entry is needed for this symbol+addend.
      Should be implied by something like:
@@ -2299,8 +2299,8 @@ elf32_frv_relocate_gprelhi (struct bfd_link_info *info,
   h = bfd_link_hash_lookup (info->hash, "_gp", FALSE, FALSE, TRUE);
 
   gp = (h->u.def.value
-        + h->u.def.section->output_section->vma
-        + h->u.def.section->output_offset);
+	+ h->u.def.section->output_section->vma
+	+ h->u.def.section->output_offset);
 
   value -= input_section->output_section->vma;
   value -= (gp - input_section->output_section->vma);
@@ -2332,8 +2332,8 @@ elf32_frv_relocate_gprello (struct bfd_link_info *info,
   h = bfd_link_hash_lookup (info->hash, "_gp", FALSE, FALSE, TRUE);
 
   gp = (h->u.def.value
-        + h->u.def.section->output_section->vma
-        + h->u.def.section->output_offset);
+	+ h->u.def.section->output_section->vma
+	+ h->u.def.section->output_offset);
 
   value -= input_section->output_section->vma;
   value -= (gp - input_section->output_section->vma);
@@ -3179,8 +3179,8 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
 
 		/* #tlsoff(symbol+offset) is just a relaxation
-                    annotation, so there's nothing left to
-                    relocate.  */
+		    annotation, so there's nothing left to
+		    relocate.  */
 		continue;
 	      }
 
@@ -6032,7 +6032,7 @@ elf32_frv_check_relocs (bfd *abfd,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
-        h = NULL;
+	h = NULL;
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
@@ -6121,7 +6121,7 @@ elf32_frv_check_relocs (bfd *abfd,
 	}
 
       switch (ELF32_R_TYPE (rel->r_info))
-        {
+	{
 	case R_FRV_LABEL24:
 	  if (IS_FDPIC (abfd))
 	    picrel->call = 1;
@@ -6219,21 +6219,21 @@ elf32_frv_check_relocs (bfd *abfd,
 	  info->flags |= DF_STATIC_TLS;
 	  goto bad_reloc;
 
-        /* This relocation describes the C++ object vtable hierarchy.
-           Reconstruct it for later use during GC.  */
-        case R_FRV_GNU_VTINHERIT:
-          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-            return FALSE;
-          break;
+	/* This relocation describes the C++ object vtable hierarchy.
+	   Reconstruct it for later use during GC.  */
+	case R_FRV_GNU_VTINHERIT:
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	    return FALSE;
+	  break;
 
-        /* This relocation describes which C++ vtable entries are actually
-           used.  Record for later use during GC.  */
-        case R_FRV_GNU_VTENTRY:
-          BFD_ASSERT (h != NULL);
-          if (h != NULL
-              && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-            return FALSE;
-          break;
+	/* This relocation describes which C++ vtable entries are actually
+	   used.  Record for later use during GC.  */
+	case R_FRV_GNU_VTENTRY:
+	  BFD_ASSERT (h != NULL);
+	  if (h != NULL
+	      && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	    return FALSE;
+	  break;
 
 	case R_FRV_LABEL16:
 	case R_FRV_LO16:
@@ -6255,7 +6255,7 @@ elf32_frv_check_relocs (bfd *abfd,
 	    (_("%B: unsupported relocation type %i\n"),
 	     abfd, ELF32_R_TYPE (rel->r_info));
 	  return FALSE;
-        }
+	}
     }
 
   return TRUE;
@@ -6369,7 +6369,7 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   else						/* Possibly incompatible flags.  */
     {
       /* Warn if different # of gprs are used.  Note, 0 means nothing is
-         said about the size of gprs.  */
+	 said about the size of gprs.  */
       new_partial = (new_flags & EF_FRV_GPR_MASK);
       old_partial = (old_flags & EF_FRV_GPR_MASK);
       if (new_partial == old_partial)
@@ -6399,7 +6399,7 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	}
 
       /* Warn if different # of fprs are used.  Note, 0 means nothing is
-         said about the size of fprs.  */
+	 said about the size of fprs.  */
       new_partial = (new_flags & EF_FRV_FPR_MASK);
       old_partial = (old_flags & EF_FRV_FPR_MASK);
       if (new_partial == old_partial)
@@ -6431,7 +6431,7 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	}
 
       /* Warn if different dword support was used.  Note, 0 means nothing is
-         said about the dword support.  */
+	 said about the dword support.  */
       new_partial = (new_flags & EF_FRV_DWORD_MASK);
       old_partial = (old_flags & EF_FRV_DWORD_MASK);
       if (new_partial == old_partial)
@@ -6476,14 +6476,14 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 		   | (old_flags & new_flags & EF_FRV_NOPACK));
 
       /* We don't have to do anything if the pic flags are the same, or the new
-         module(s) were compiled with -mlibrary-pic.  */
+	 module(s) were compiled with -mlibrary-pic.  */
       new_partial = (new_flags & EF_FRV_PIC_FLAGS);
       old_partial = (old_flags & EF_FRV_PIC_FLAGS);
       if ((new_partial == old_partial) || ((new_partial & EF_FRV_LIBPIC) != 0))
 	;
 
       /* If the old module(s) were compiled with -mlibrary-pic, copy in the pic
-         flags if any from the new module.  */
+	 flags if any from the new module.  */
       else if ((old_partial & EF_FRV_LIBPIC) != 0)
 	old_flags = (old_flags & ~ EF_FRV_PIC_FLAGS) | new_partial;
 
@@ -6492,7 +6492,7 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	old_flags |= new_partial;
 
       /* One module was compiled for pic and the other was not, see if we have
-         had any relocations that are not pic-safe.  */
+	 had any relocations that are not pic-safe.  */
       else
 	{
 	  if ((old_flags & EF_FRV_NON_PIC_RELOCS) == 0)
@@ -6703,7 +6703,7 @@ elf32_frv_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 	return FALSE;
 
       /* The Linux/FRV elf_prstatus struct is 268 bytes long.  The other
-         hardcoded offsets and sizes listed below (and contained within
+	 hardcoded offsets and sizes listed below (and contained within
 	 this lexical block) refer to fields in the target's elf_prstatus
 	 struct.  */
       case 268:
@@ -6773,15 +6773,15 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define ELF_MACHINE_CODE	EM_CYGNUS_FRV
 #define ELF_MAXPAGESIZE		0x1000
 
-#define TARGET_BIG_SYM          frv_elf32_vec
+#define TARGET_BIG_SYM		frv_elf32_vec
 #define TARGET_BIG_NAME		"elf32-frv"
 
 #define elf_info_to_howto			frv_info_to_howto_rela
 #define elf_backend_relocate_section		elf32_frv_relocate_section
 #define elf_backend_gc_mark_hook		elf32_frv_gc_mark_hook
-#define elf_backend_check_relocs                elf32_frv_check_relocs
+#define elf_backend_check_relocs		elf32_frv_check_relocs
 #define elf_backend_object_p			elf32_frv_object_p
-#define elf_backend_add_symbol_hook             elf32_frv_add_symbol_hook
+#define elf_backend_add_symbol_hook		elf32_frv_add_symbol_hook
 
 #define elf_backend_stack_align			8
 #define elf_backend_can_gc_sections		1
@@ -6816,7 +6816,7 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define ELF_MAXPAGESIZE		0x4000
 
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM          frv_elf32_fdpic_vec
+#define TARGET_BIG_SYM		frv_elf32_fdpic_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME		"elf32-frvfdpic"
 #undef	elf32_bed
@@ -6865,12 +6865,12 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 		frvfdpic_elf_encode_eh_address
 
 #undef elf_backend_may_use_rel_p
-#define elf_backend_may_use_rel_p       1
+#define elf_backend_may_use_rel_p	1
 #undef elf_backend_may_use_rela_p
-#define elf_backend_may_use_rela_p      1
+#define elf_backend_may_use_rela_p	1
 /* We use REL for dynamic relocations only.  */
 #undef elf_backend_default_use_rela_p
-#define elf_backend_default_use_rela_p  1
+#define elf_backend_default_use_rela_p	1
 
 #undef elf_backend_omit_section_dynsym
 #define elf_backend_omit_section_dynsym _frvfdpic_link_omit_section_dynsym

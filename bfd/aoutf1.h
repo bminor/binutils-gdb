@@ -775,7 +775,7 @@ static const struct aout_backend_data sunos4_aout_backend =
   MY_finish_dynamic_link
 };
 
-#define	MY_core_file_failing_command 	sunos4_core_file_failing_command
+#define	MY_core_file_failing_command	sunos4_core_file_failing_command
 #define	MY_core_file_failing_signal	sunos4_core_file_failing_signal
 #define	MY_core_file_matches_executable_p sunos4_core_file_matches_executable_p
 

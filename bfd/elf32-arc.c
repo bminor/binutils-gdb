@@ -58,16 +58,16 @@ name_for_global_symbol (struct elf_link_hash_entry *h)
     if (_htab->dynamic_sections_created == TRUE)				\
       {									\
 	BFD_ASSERT (_htab->srel##SECTION &&_htab->srel##SECTION->contents); \
-    	_loc = _htab->srel##SECTION->contents				\
-    	  + ((_htab->srel##SECTION->reloc_count)			\
-    	     * sizeof (Elf32_External_Rela));				\
-    	_htab->srel##SECTION->reloc_count++;				\
-    	_rel.r_addend = ADDEND;						\
-    	_rel.r_offset = (_htab->s##SECTION)->output_section->vma	\
-    	  + (_htab->s##SECTION)->output_offset + OFFSET;		\
-    	BFD_ASSERT ((long) SYM_IDX != -1);				\
-    	_rel.r_info = ELF32_R_INFO (SYM_IDX, TYPE);			\
-    	bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
+	_loc = _htab->srel##SECTION->contents				\
+	  + ((_htab->srel##SECTION->reloc_count)			\
+	     * sizeof (Elf32_External_Rela));				\
+	_htab->srel##SECTION->reloc_count++;				\
+	_rel.r_addend = ADDEND;						\
+	_rel.r_offset = (_htab->s##SECTION)->output_section->vma	\
+	  + (_htab->s##SECTION)->output_offset + OFFSET;		\
+	BFD_ASSERT ((long) SYM_IDX != -1);				\
+	_rel.r_info = ELF32_R_INFO (SYM_IDX, TYPE);			\
+	bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
       }									\
   }
 
@@ -1236,7 +1236,7 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 #else
 
 #define PRINT_DEBUG_RELOC_INFO_BEFORE(...)
-#define PRINT_DEBUG_RELOC_INFO_AFTER 
+#define PRINT_DEBUG_RELOC_INFO_AFTER
 
 #endif /* ARC_ENABLE_DEBUG */
 
@@ -1381,20 +1381,20 @@ arc_do_relocation (bfd_byte * contents,
 			      corresponding to the st_shndx field of each
 			      local symbol.  */
 static bfd_boolean
-elf_arc_relocate_section (bfd *		          output_bfd,
+elf_arc_relocate_section (bfd *			  output_bfd,
 			  struct bfd_link_info *  info,
-			  bfd *		          input_bfd,
-			  asection *	          input_section,
-			  bfd_byte *	          contents,
+			  bfd *			  input_bfd,
+			  asection *		  input_section,
+			  bfd_byte *		  contents,
 			  Elf_Internal_Rela *     relocs,
 			  Elf_Internal_Sym *      local_syms,
-			  asection **	          local_sections)
+			  asection **		  local_sections)
 {
-  Elf_Internal_Shdr *	         symtab_hdr;
+  Elf_Internal_Shdr *		 symtab_hdr;
   struct elf_link_hash_entry **  sym_hashes;
-  Elf_Internal_Rela *	         rel;
-  Elf_Internal_Rela *	         wrel;
-  Elf_Internal_Rela *	         relend;
+  Elf_Internal_Rela *		 rel;
+  Elf_Internal_Rela *		 wrel;
+  Elf_Internal_Rela *		 relend;
   struct elf_link_hash_table *   htab = elf_hash_table (info);
 
   symtab_hdr = &((elf_tdata (input_bfd))->symtab_hdr);
@@ -1404,14 +1404,14 @@ elf_arc_relocate_section (bfd *		          output_bfd,
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; wrel++, rel++)
     {
-      enum elf_arc_reloc_type       r_type;
+      enum elf_arc_reloc_type	    r_type;
       reloc_howto_type *	    howto;
       unsigned long		    r_symndx;
       struct elf_link_hash_entry *  h;
       Elf_Internal_Sym *	    sym;
       asection *		    sec;
       struct elf_link_hash_entry *  h2;
-      const char *                  msg;
+      const char *		    msg;
       bfd_boolean		    unresolved_reloc = FALSE;
 
       struct arc_relocation_data reloc_data =
@@ -1419,7 +1419,7 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 	.reloc_offset = 0,
 	.reloc_addend = 0,
 	.got_offset_value = 0,
-	.sym_value = 0,	
+	.sym_value = 0,
 	.sym_section = NULL,
 	.howto = NULL,
 	.input_section = NULL,
@@ -1717,7 +1717,7 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 	    {
 	      create_got_dynrelocs_for_single_entry (
 		  got_entry_for_type (list,
-		      		arc_got_entry_type_for_reloc (howto)),
+				arc_got_entry_type_for_reloc (howto)),
 		  output_bfd, info, NULL);
 	    }
 	}
@@ -2955,8 +2955,8 @@ elf32_arc_section_from_shdr (bfd *abfd,
 #define elf_backend_obj_attrs_arg_type		elf32_arc_obj_attrs_arg_type
 #undef  elf_backend_obj_attrs_section_type
 #define elf_backend_obj_attrs_section_type	SHT_ARC_ATTRIBUTES
-#define elf_backend_obj_attrs_handle_unknown 	elf32_arc_obj_attrs_handle_unknown
+#define elf_backend_obj_attrs_handle_unknown	elf32_arc_obj_attrs_handle_unknown
 
-#define elf_backend_section_from_shdr  		elf32_arc_section_from_shdr
+#define elf_backend_section_from_shdr		elf32_arc_section_from_shdr
 
 #include "elf32-target.h"

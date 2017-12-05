@@ -25,15 +25,15 @@
 #define	SEGMENT_SIZE		TARGET_PAGE_SIZE
 
 #define	DEFAULT_ARCH		bfd_arch_arm
-#define	DEFAULT_MID 		M_ARM6_NETBSD
+#define	DEFAULT_MID		M_ARM6_NETBSD
 /*#define MACHTYPE_OK(mtype) ((mtype) == M_ARM6_NETBSD)*/
 
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
-#define MY(OP) 			CONCAT2 (arm_aout_nbsd_, OP)
+#define MY(OP)			CONCAT2 (arm_aout_nbsd_, OP)
 
 /* This needs to start with a.out so GDB knows it is an a.out variant.  */
-#define TARGETNAME 		"a.out-arm-netbsd"
+#define TARGETNAME		"a.out-arm-netbsd"
 
 #include "netbsd.h"

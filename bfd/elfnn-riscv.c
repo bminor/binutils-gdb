@@ -175,13 +175,13 @@ riscv_make_plt_header (bfd_vma gotplt_addr, bfd_vma addr, uint32_t *entry)
   bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, addr);
 
   /* auipc  t2, %hi(.got.plt)
-     sub    t1, t1, t3               # shifted .got.plt offset + hdr size + 12
+     sub    t1, t1, t3		     # shifted .got.plt offset + hdr size + 12
      l[w|d] t3, %lo(.got.plt)(t2)    # _dl_runtime_resolve
      addi   t1, t1, -(hdr size + 12) # shifted .got.plt offset
      addi   t0, t2, %lo(.got.plt)    # &.got.plt
      srli   t1, t1, log2(16/PTRSIZE) # .got.plt offset
-     l[w|d] t0, PTRSIZE(t0)          # link map
-     jr     t3 */
+     l[w|d] t0, PTRSIZE(t0)	     # link map
+     jr	    t3 */
 
   entry[0] = RISCV_UTYPE (AUIPC, X_T2, gotplt_offset_high);
   entry[1] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
@@ -1501,14 +1501,14 @@ typedef struct
 
 typedef struct riscv_pcrel_lo_reloc
 {
-  asection *                     input_section;
-  struct bfd_link_info *         info;
-  reloc_howto_type *             howto;
-  const Elf_Internal_Rela *      reloc;
-  bfd_vma                        addr;
-  const char *                   name;
-  bfd_byte *                     contents;
-  struct riscv_pcrel_lo_reloc *  next;
+  asection *			 input_section;
+  struct bfd_link_info *	 info;
+  reloc_howto_type *		 howto;
+  const Elf_Internal_Rela *	 reloc;
+  bfd_vma			 addr;
+  const char *			 name;
+  bfd_byte *			 contents;
+  struct riscv_pcrel_lo_reloc *	 next;
 } riscv_pcrel_lo_reloc;
 
 typedef struct
@@ -1644,12 +1644,12 @@ riscv_resolve_pcrel_lo_relocs (riscv_pcrel_relocs *p)
       riscv_pcrel_hi_reloc search = {r->addr, 0};
       riscv_pcrel_hi_reloc *entry = htab_find (p->hi_relocs, &search);
       if (entry == NULL)
-        {
+	{
 	  ((*r->info->callbacks->reloc_overflow)
 	   (r->info, NULL, r->name, r->howto->name, (bfd_vma) 0,
 	    input_bfd, r->input_section, r->reloc->r_offset));
 	  return TRUE;
-        }
+	}
 
       perform_relocation (r->howto, r->reloc, entry->value, r->input_section,
 			  input_bfd, r->contents);
@@ -2108,7 +2108,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 		}
 
 	      /* The GOT entries have not been initialized yet.  Do it
-	         now, and emit any relocations.  */
+		 now, and emit any relocations.  */
 	      if ((bfd_link_pic (info) || indx != 0)
 		  && (h == NULL
 		      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -3147,7 +3147,7 @@ _bfd_riscv_relax_pc  (bfd *abfd,
       /* If the cooresponding lo relocation has already been seen then it's not
        * safe to relax this relocation.  */
       if (riscv_find_pcgp_lo_reloc (pcgp_relocs, rel->r_offset))
-        return TRUE;
+	return TRUE;
 
       break;
 
@@ -3187,7 +3187,7 @@ _bfd_riscv_relax_pc  (bfd *abfd,
 	  return riscv_delete_pcgp_lo_reloc (pcgp_relocs, rel->r_offset, 4);
 
 	case R_RISCV_PCREL_HI20:
-          riscv_record_pcgp_hi_reloc (pcgp_relocs,
+	  riscv_record_pcgp_hi_reloc (pcgp_relocs,
 				      rel->r_offset,
 				      rel->r_addend,
 				      symval,
@@ -3316,7 +3316,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  i++;
 	}
       else if (info->relax_pass == 1 && type == R_RISCV_DELETE)
-        relax_func = _bfd_riscv_relax_delete;
+	relax_func = _bfd_riscv_relax_delete;
       else if (info->relax_pass == 2 && type == R_RISCV_ALIGN)
 	relax_func = _bfd_riscv_relax_align;
       else
@@ -3524,9 +3524,9 @@ riscv_elf_object_p (bfd *abfd)
 #define elf_backend_finish_dynamic_sections  riscv_elf_finish_dynamic_sections
 #define elf_backend_gc_mark_hook	     riscv_elf_gc_mark_hook
 #define elf_backend_plt_sym_val		     riscv_elf_plt_sym_val
-#define elf_backend_grok_prstatus            riscv_elf_grok_prstatus
-#define elf_backend_grok_psinfo              riscv_elf_grok_psinfo
-#define elf_backend_object_p                 riscv_elf_object_p
+#define elf_backend_grok_prstatus	     riscv_elf_grok_prstatus
+#define elf_backend_grok_psinfo		     riscv_elf_grok_psinfo
+#define elf_backend_object_p		     riscv_elf_object_p
 #define elf_info_to_howto_rel		     NULL
 #define elf_info_to_howto		     riscv_info_to_howto_rela
 #define bfd_elfNN_bfd_relax_section	     _bfd_riscv_relax_section

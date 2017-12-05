@@ -77,7 +77,7 @@ _bfd_elf_section_for_symbol (struct elf_reloc_cookie *cookie,
       if ((h->root.type == bfd_link_hash_defined
 	   || h->root.type == bfd_link_hash_defweak)
 	   && discarded_section (h->root.u.def.section))
-        return h->root.u.def.section;
+	return h->root.u.def.section;
       else
 	return NULL;
     }
@@ -8042,12 +8042,12 @@ struct elf_outext_info
    addend field.  The symbol mangling format is:
 
    <node> := <literal>
-          |  <unary-operator> ':' <node>
-          |  <binary-operator> ':' <node> ':' <node>
+	  |  <unary-operator> ':' <node>
+	  |  <binary-operator> ':' <node> ':' <node>
 	  ;
 
    <literal> := 's' <digits=N> ':' <N character symbol name>
-             |  'S' <digits=N> ':' <N character section name>
+	     |  'S' <digits=N> ':' <N character section name>
 	     |  '#' <hexdigits>
 	     ;
 
@@ -8164,7 +8164,7 @@ resolve_symbol (const char *name,
 /* Looks up NAME in SECTIONS.  If found sets RESULT to NAME's address (in
    bytes) and returns TRUE, otherwise returns FALSE.  Accepts pseudo-section
    names like "foo.end" which is the end address of section "foo".  */
-   
+
 static bfd_boolean
 resolve_section (const char *name,
 		 asection *sections,
@@ -8476,8 +8476,8 @@ decode_complex_addend (unsigned long *start,   /* in bits */
 		       unsigned long *trunc_p,
 		       unsigned long encoded)
 {
-  * start     =  encoded        & 0x3F;
-  * len       = (encoded >>  6) & 0x3F;
+  * start     =	 encoded	& 0x3F;
+  * len	      = (encoded >>  6) & 0x3F;
   * oplen     = (encoded >> 12) & 0x3F;
   * wordsz    = (encoded >> 18) & 0xF;
   * chunksz   = (encoded >> 22) & 0xF;
@@ -13067,7 +13067,7 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 	      ilen = strlen (isec->name);
 
 	      /* Association is determined by the name of the debug
-	         section containing the name of the code section as
+		 section containing the name of the code section as
 		 a suffix.  For example .debug_line.text.foo is a
 		 debug section associated with .text.foo.  */
 	      for (dsec = ibfd->sections; dsec != NULL; dsec = dsec->next)

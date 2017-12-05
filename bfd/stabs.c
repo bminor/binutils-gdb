@@ -127,7 +127,7 @@ stab_link_includes_newfunc (struct bfd_hash_entry *entry,
      subclass.  */
   if (ret == NULL)
     ret = (struct stab_link_includes_entry *)
-        bfd_hash_allocate (table, sizeof (struct stab_link_includes_entry));
+	bfd_hash_allocate (table, sizeof (struct stab_link_includes_entry));
   if (ret == NULL)
     return NULL;
 
@@ -389,12 +389,12 @@ _bfd_link_section_stabs (bfd *abfd,
 	      /* This is the first time we have seen this header file
 		 with this set of stabs strings.  */
 	      t = (struct stab_link_includes_totals *)
-                  bfd_hash_allocate (&sinfo->includes, sizeof *t);
+		  bfd_hash_allocate (&sinfo->includes, sizeof *t);
 	      if (t == NULL)
 		goto error_return;
 	      t->sum_chars = sum_chars;
 	      t->num_chars = num_chars;
-              /* Trim data down.  */
+	      /* Trim data down.  */
 	      t->symb = symb = (char *) bfd_realloc_or_free (symb, num_chars);
 	      t->next = incl_entry->totals;
 	      incl_entry->totals = t;

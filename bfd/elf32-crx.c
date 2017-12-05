@@ -272,7 +272,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_CRX_NUM8",		/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0,	  		/* src_mask */
+	 0x0,			/* src_mask */
 	 0xff,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -286,7 +286,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_CRX_NUM16",		/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0,	  		/* src_mask */
+	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -300,7 +300,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_CRX_NUM32",		/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0,	  		/* src_mask */
+	 0x0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -314,7 +314,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_CRX_IMM16",		/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0, 	 		/* src_mask */
+	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -328,7 +328,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_CRX_IMM32",		/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0,  			/* src_mask */
+	 0x0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 

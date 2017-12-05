@@ -460,7 +460,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 FALSE,			/* partial_inplace */
 	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
-	 TRUE),		       	/* pcrel_offset */
+	 TRUE),			/* pcrel_offset */
 
   HOWTO (R_MMIX_CBRANCH_J,	/* type */
 	 2,			/* rightshift */
@@ -1836,7 +1836,7 @@ mmix_elf_check_common_relocs  (bfd *abfd,
   for (rel = relocs; rel < rel_end; rel++)
     {
       switch (ELF64_R_TYPE (rel->r_info))
-        {
+	{
 	  /* This relocation causes a GREG allocation.  We need to count
 	     them, and we need to create a section for them, so we need an
 	     object to fake as the owner of that section.  We can't use
@@ -1979,7 +1979,7 @@ mmix_elf_check_relocs (bfd *abfd,
 
       r_symndx = ELF64_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
-        h = NULL;
+	h = NULL;
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
@@ -1990,21 +1990,21 @@ mmix_elf_check_relocs (bfd *abfd,
 
       switch (ELF64_R_TYPE (rel->r_info))
 	{
-        /* This relocation describes the C++ object vtable hierarchy.
-           Reconstruct it for later use during GC.  */
-        case R_MMIX_GNU_VTINHERIT:
-          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-            return FALSE;
-          break;
+	/* This relocation describes the C++ object vtable hierarchy.
+	   Reconstruct it for later use during GC.  */
+	case R_MMIX_GNU_VTINHERIT:
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	    return FALSE;
+	  break;
 
-        /* This relocation describes which C++ vtable entries are actually
-           used.  Record for later use during GC.  */
-        case R_MMIX_GNU_VTENTRY:
-          BFD_ASSERT (h != NULL);
-          if (h != NULL
-              && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-            return FALSE;
-          break;
+	/* This relocation describes which C++ vtable entries are actually
+	   used.  Record for later use during GC.  */
+	case R_MMIX_GNU_VTENTRY:
+	  BFD_ASSERT (h != NULL);
+	  if (h != NULL
+	      && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	    return FALSE;
+	  break;
 	}
     }
 
@@ -2555,7 +2555,7 @@ mmix_elf_relax_section (bfd *abfd,
       || (sec->flags & SEC_CODE) == 0
       || (sec->flags & SEC_LINKER_CREATED) != 0
       /* If no R_MMIX_BASE_PLUS_OFFSET relocs and no PUSHJ-stub relocs,
-         then nothing to do.  */
+	 then nothing to do.  */
       || (bpodata == NULL
 	  && mmix_elf_section_data (sec)->pjs.n_pushj_relocs == 0))
     return TRUE;
@@ -2871,7 +2871,7 @@ mmix_elf_relax_section (bfd *abfd,
 }
 
 #define ELF_ARCH		bfd_arch_mmix
-#define ELF_MACHINE_CODE 	EM_MMIX
+#define ELF_MACHINE_CODE	EM_MMIX
 
 /* According to mmix-doc page 36 (paragraph 45), this should be (1LL << 48LL).
    However, that's too much for something somewhere in the linker part of

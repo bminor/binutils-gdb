@@ -24,9 +24,9 @@
 
 #define FRV_ARCH(MACHINE, NAME, DEFAULT, NEXT)				\
 {									\
-  32,	                        /* 32 bits in a word */			\
-  32,	                        /* 32 bits in an address */		\
-  8,	                        /* 8 bits in a byte */			\
+  32,				/* 32 bits in a word */			\
+  32,				/* 32 bits in an address */		\
+  8,				/* 8 bits in a byte */			\
   bfd_arch_frv,			/* architecture */			\
   MACHINE,			/* which machine */			\
   "frv",			/* architecture name */			\

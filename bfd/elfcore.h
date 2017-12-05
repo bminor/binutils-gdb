@@ -161,9 +161,9 @@ elf_core_file_p (bfd *abfd)
 	    continue;
 	  if (back->elf_machine_code == i_ehdrp->e_machine
 	      || (back->elf_machine_alt1 != 0
-	          && i_ehdrp->e_machine == back->elf_machine_alt1)
+		  && i_ehdrp->e_machine == back->elf_machine_alt1)
 	      || (back->elf_machine_alt2 != 0
-	          && i_ehdrp->e_machine == back->elf_machine_alt2))
+		  && i_ehdrp->e_machine == back->elf_machine_alt2))
 	    {
 	      /* target_ptr is an ELF backend which matches this
 		 object file, so reject the generic ELF target.  */

@@ -169,7 +169,7 @@ ieee_write_id (bfd *abfd, const char *id)
 /* Functions for reading from ieee files in the strange way that the
    standard requires.  */
 
-#define this_byte(ieee)           *((ieee)->input_p)
+#define this_byte(ieee)		  *((ieee)->input_p)
 #define this_byte_and_next(ieee) ((ieee)->input_p < (ieee)->end_p ? *((ieee)->input_p++) : 0)
 
 static bfd_boolean
@@ -913,9 +913,9 @@ ieee_slurp_external_symbols (bfd *abfd)
 	      return FALSE;
 
 	    /* Fully linked IEEE-695 files tend to give every symbol
-               an absolute value.  Try to convert that back into a
-               section relative value.  FIXME: This won't always to
-               the right thing.  */
+	       an absolute value.  Try to convert that back into a
+	       section relative value.  FIXME: This won't always to
+	       the right thing.  */
 	    if (bfd_is_abs_section (symbol->symbol.section)
 		&& (abfd->flags & HAS_RELOC) == 0)
 	      {
@@ -1398,7 +1398,7 @@ ieee_archive_p (bfd *abfd)
 
   library = read_id (&(ieee->h));
   if (library == NULL)
-    goto got_wrong_format_error;    
+    goto got_wrong_format_error;
   if (strcmp (library, "LIBRARY") != 0)
     goto got_wrong_format_error;
 
@@ -1927,7 +1927,7 @@ ieee_object_p (bfd *abfd)
 
   processor = ieee->mb.processor = read_id (&(ieee->h));
   if (processor == NULL)
-    goto got_wrong_format;    
+    goto got_wrong_format;
   if (strcmp (processor, "LIBRARY") == 0)
     goto got_wrong_format;
   ieee->mb.module_name = read_id (&(ieee->h));
@@ -1967,7 +1967,7 @@ ieee_object_p (bfd *abfd)
 	      case '4':
 		if (processor[4] == '9')    /* 68349 */
 		  strcpy (family, "68030"); /* CPU030 */
-		else		            /* 68340, 68341 */
+		else			    /* 68340, 68341 */
 		  strcpy (family, "68332"); /* CPU32 and CPU32+ */
 		break;
 
@@ -1976,7 +1976,7 @@ ieee_object_p (bfd *abfd)
 	      }
 	  }
 	else if (TOUPPER (processor[3]) == 'F')  /* 68F333 */
-	  strcpy (family, "68332");	           /* CPU32 */
+	  strcpy (family, "68332");		   /* CPU32 */
 	else if ((TOUPPER (processor[3]) == 'C') /* Embedded controllers.  */
 		 && ((TOUPPER (processor[2]) == 'E')
 		     || (TOUPPER (processor[2]) == 'H')
@@ -3309,7 +3309,7 @@ ieee_write_data_part (bfd *abfd)
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
       /* Skip sections that have no loadable contents (.bss,
-         debugging, etc.)  */
+	 debugging, etc.)  */
       if ((s->flags & SEC_LOAD) == 0)
 	continue;
 
@@ -3372,7 +3372,7 @@ ieee_set_section_contents (bfd *abfd,
 	    return FALSE;
 	}
       /* bfd_set_section_contents has already checked that everything
-         is within range.  */
+	 is within range.  */
       memcpy (section->contents + offset, location, (size_t) count);
       return TRUE;
     }
@@ -3491,7 +3491,7 @@ ieee_write_external_part (bfd *abfd)
 	  else
 	    {
 	      /* This can happen - when there are gaps in the symbols read
-	         from an input ieee file.  */
+		 from an input ieee file.  */
 	    }
 	}
     }
@@ -3810,7 +3810,7 @@ ieee_openr_next_archived_file (bfd *arch, bfd *prev)
 }
 
 #define ieee_find_nearest_line _bfd_nosymbols_find_nearest_line
-#define ieee_find_line         _bfd_nosymbols_find_line
+#define ieee_find_line	       _bfd_nosymbols_find_line
 #define ieee_find_inliner_info _bfd_nosymbols_find_inliner_info
 
 static int
