@@ -1,3 +1,23 @@
+2017-12-05  Jim Wilson  <jimw@sifive.com>
+	    Andrew Waterman  <andrew@sifive.com>
+
+	* emulparams/elf32lriscv-defs.sh (SDATA_START_SYMBOLS): Remove HIDDEN.
+	Don't define __global_pointer$ when CREATE_SHLIB.
+	* testsuite/ld-riscv-elf/gp-hidden-64.rd,
+	* testsuite/ld-riscv-elf/gp-hidden-lib.rd,
+	* testsuite/ld-riscv-elf/gp-hidden-lib.s,
+	* testsuite/ld-riscv-elf/gp-hidden-ver-64.rd,
+	* testsuite/ld-riscv-elf/gp-hidden-ver.rd,
+	* testsuite/ld-riscv-elf/gp-hidden-ver.s,
+	* testsuite/ld-riscv-elf/gp-hidden-ver.ver,
+	* testsuite/ld-riscv-elf/gp-hidden.rd,
+	* testsuite/ld-riscv-elf/gp-hidden.s,
+	* testsuite/ld-riscv-elf/gp-hidden.sd: Delete.
+	* testsuite/ld-riscv-elf/gp-test-lib.sd,
+	* testsuite/ld-riscv-elf/gp-test.s,
+	* testsuite/ld-riscv-elf/gp-test.sd: New.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Rewrite gp tests.
+
 2017-12-04  Jim Wilson  <jimw@sifive.com>
 
 	* emulparams/elf32lriscv-defs.sh (SDATA_START_SYMBOLS): Mark

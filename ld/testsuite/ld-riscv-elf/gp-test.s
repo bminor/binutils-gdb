@@ -2,6 +2,5 @@
 	.globl	blah
 	.type	blah, @object
 blah:
-	.dc.a	foo
-	.dc.a	__global_pointer$
+	.dc.a	0
 	.size	blah, . - blah

@@ -24,33 +24,22 @@ if [istarget "riscv*-*-*"] {
 
     set abis { rv32gc ilp32 elf32lriscv rv64gc lp64 elf64lriscv }
     foreach { arch abi emul } $abis {
-	# This checks whether our linker scripts get the scope of
-	# __global_pointer$ right, and thus must therefore use default scripts.
+	# This checks whether our linker scripts handle __global_pointer$
+	# correctly.  It should be defined in executables and PIE, but not
+	# in shared libraries.
 	set suff64 [string map {ilp32 "" lp64 -64} $abi]
 	run_ld_link_tests [list \
-			       [list "gp scope test ($abi shared library)" \
+			       [list "gp test ($abi shared library)" \
 				    "-m$emul -shared" "" \
 				    "-march=$arch -mabi=$abi -fpic" \
-				    { gp-hidden-lib.s } \
-				    [list \
-					 "readelf --relocs gp-hidden-lib.rd" \
-					 "readelf --syms gp-hidden.sd"] \
-				    "gp-hidden-lib-${abi}.so"] \
-			       [list "gp scope test ($abi versioned lib)" \
-				    "-m$emul -shared -version-script gp-hidden-ver.ver tmpdir/gp-hidden-lib-${abi}.so" "" \
-				    "-march=$arch -mabi=$abi -fpic" \
-				    { gp-hidden-ver.s } \
-				    [list \
-					 "readelf --relocs gp-hidden-ver${suff64}.rd" \
-					 "readelf --syms gp-hidden.sd"] \
-				    "gp-hidden-ver-${abi}.so"] \
-			       [list "gp scope test ($abi executable)" \
-				    "-m$emul -e 0 -rpath-link . tmpdir/gp-hidden-ver-${abi}.so" "" \
+				    { gp-test.s } \
+				    [list "readelf --syms gp-test-lib.sd"] \
+				    "gp-test-lib-${abi}.so"] \
+			       [list "gp test ($abi executable)" \
+				    "-m$emul" "" \
 				    "-march=$arch -mabi=$abi" \
-				    {gp-hidden.s} \
-				    [list \
-					 "readelf --relocs gp-hidden${suff64}.rd" \
-					 "readelf --syms gp-hidden.sd"]\
-				    "gp-hidden-${abi}"]]
+				    { gp-test.s } \
+				    [list "readelf --syms gp-test.sd"] \
+				    "gp-test-${abi}"]]
     }
 }
