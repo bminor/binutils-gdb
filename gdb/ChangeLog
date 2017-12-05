@@ -1,3 +1,9 @@
+2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target-descriptions.c (struct tdesc_feature) <registers>: Use
+	tdesc_reg_up typedef.
+	(struct target_desc) <features>: Use tdesc_feature_up typedef.
+
 2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target-descriptions.c (struct tdesc_type): Use default
@@ -118,6 +124,8 @@
 	(tdesc_register_in_reggroup_p): Adjust.
 	(class print_c_tdesc) <visit>: Adjust.
 	(class print_c_feature) <visit>: Adjust.
+	* features/arc-arcompact.c: Re-generate.
+	* features/arc-v2.c: Re-generate.
 
 2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
 

@@ -529,7 +529,7 @@ struct tdesc_feature : tdesc_element
   std::string name;
 
   /* The registers associated with this feature.  */
-  std::vector<std::unique_ptr<tdesc_reg>> registers;
+  std::vector<tdesc_reg_up> registers;
 
   /* The types associated with this feature.  */
   std::vector<tdesc_type_up> types;
@@ -613,7 +613,7 @@ struct target_desc : tdesc_element
   std::vector<property> properties;
 
   /* The features associated with this target.  */
-  std::vector<std::unique_ptr<tdesc_feature>> features;
+  std::vector<tdesc_feature_up> features;
 
   void accept (tdesc_element_visitor &v) const override
   {
