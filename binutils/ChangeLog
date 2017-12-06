@@ -1,3 +1,11 @@
+2017-12-06  Alan Modra  <amodra@gmail.com>
+
+	PR 22552
+	* readelf.c (process_file_header): Don't assume XINDEX case
+	value for e_shstrndx is within bounds.
+	(load_debug_section): Sanity test e_shstrndx before attempting
+	to read .shstrtab.  Wrap long lines.
+
 2017-12-01  Oleksandr Pikozh  <o.pikozh@gmail.com>
 
 	* doc/binutils.texi: Add --strip-unneeded to objcopy synopsis.

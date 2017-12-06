@@ -4761,7 +4761,7 @@ process_file_header (Filedata * filedata)
 	header->e_shnum = filedata->section_headers[0].sh_size;
       if (header->e_shstrndx == (SHN_XINDEX & 0xffff))
 	header->e_shstrndx = filedata->section_headers[0].sh_link;
-      else if (header->e_shstrndx >= header->e_shnum)
+      if (header->e_shstrndx >= header->e_shnum)
 	header->e_shstrndx = SHN_UNDEF;
       free (filedata->section_headers);
       filedata->section_headers = NULL;
@@ -13578,7 +13578,9 @@ load_debug_section (enum dwarf_section_display_enum debug, void * data)
   if (filedata->section_headers == NULL)
     return FALSE;
 
-  if (filedata->string_table == NULL)
+  if (filedata->string_table == NULL
+      && filedata->file_header.e_shstrndx != SHN_UNDEF
+      && filedata->file_header.e_shstrndx < filedata->file_header.e_shnum)
     {
       Elf_Internal_Shdr * strs;
 
@@ -13587,11 +13589,12 @@ load_debug_section (enum dwarf_section_display_enum debug, void * data)
 
       if (strs != NULL && strs->sh_size != 0)
 	{
-	  filedata->string_table = (char *) get_data (NULL, filedata, strs->sh_offset,
-						      1, strs->sh_size,
-						      _("string table"));
+	  filedata->string_table
+	    = (char *) get_data (NULL, filedata, strs->sh_offset,
+				 1, strs->sh_size, _("string table"));
 
-	  filedata->string_table_length = filedata->string_table != NULL ? strs->sh_size : 0;
+	  filedata->string_table_length
+	    = filedata->string_table != NULL ? strs->sh_size : 0;
 	}
     }
 
