@@ -1805,6 +1805,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget ip2k-*-*]
 	 && ![istarget iq2000-*-*]
 	 && ![istarget lm32-*-elf]
+	 && ![istarget lm32-*-rtems*]
 	 && ![istarget m32c-*-*]
 	 && ![istarget m32r-*-elf]
 	 && ![istarget m6811-*-*]
