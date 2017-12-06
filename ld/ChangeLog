@@ -1,3 +1,8 @@
+2017-12-06  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/ld-elf/interleave-0.d, testsuite/ld-elf/interleave-4.d,
+	* testsuite/ld-elf/interleave.ld, testsuite/ld-elf/interleave.s: New.
+
 2017-12-06  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Return

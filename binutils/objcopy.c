@@ -3898,6 +3898,15 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	  char *end = (char *) memhunk + size;
 	  int i;
 
+	  /* If the section address is not exactly divisible by the interleave,
+	     then we must bias the from address.  If the copy_byte is less than
+	     the bias, then we must skip forward one interleave, and increment
+	     the final lma.  */
+	  int extra = isection->lma % interleave;
+	  from -= extra;
+	  if (copy_byte < extra)
+	    from += interleave;
+
 	  for (; from < end; from += interleave)
 	    for (i = 0; i < copy_width; i++)
 	      {
@@ -3908,6 +3917,8 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
 	  size = (size + interleave - 1 - copy_byte) / interleave * copy_width;
 	  osection->lma /= interleave;
+	  if (copy_byte < extra)
+	    osection->lma++;
 	}
 
       if (!bfd_set_section_contents (obfd, osection, memhunk, 0, size))
