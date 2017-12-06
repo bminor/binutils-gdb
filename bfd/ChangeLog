@@ -1,5 +1,13 @@
 2017-12-06  Alan Modra  <amodra@gmail.com>
 
+	* elf32-lm32.c (lm32_elf_check_relocs): Skip non-ALLOC sections.
+	* elf32-m32r.c (m32r_elf_check_relocs): Likewise.
+	* elf32-nds32.c (nds32_elf_check_relocs): Likewise.
+	* elf32-or1k.c (or1k_elf_check_relocs): Likewise.
+	* elf32-sh.c (sh_elf_check_relocs): Likewise.
+
+2017-12-06  Alan Modra  <amodra@gmail.com>
+
 	* elf32-hppa.c (struct elf32_hppa_dyn_reloc_entry): Delete.  Use
 	struct elf_dyn_relocs throughout file instead.
 	(elf32_hppa_adjust_dynamic_symbol): Comment tidy.
