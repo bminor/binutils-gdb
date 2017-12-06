@@ -559,7 +559,6 @@ catch_syscall_completer (struct cmd_list_element *cmd,
   struct gdbarch *gdbarch = get_current_arch ();
   gdb::unique_xmalloc_ptr<const char *> group_list;
   const char *prefix;
-  int i;
 
   /* Completion considers ':' to be a word separator, so we use this to
      verify whether the previous word was a group prefix.  If so, we
@@ -587,14 +586,11 @@ catch_syscall_completer (struct cmd_list_element *cmd,
       std::vector<std::string> holders;
 
       /* Append "group:" prefix to syscall groups.  */
-      for (i = 0; group_ptr[i] != NULL; i++)
-	{
-	  std::string prefixed_group = string_printf ("group:%s",
-						      group_ptr[i]);
+      for (int i = 0; group_ptr[i] != NULL; i++)
+	holders.push_back (string_printf ("group:%s", group_ptr[i]));
 
-	  group_ptr[i] = prefixed_group.c_str ();
-	  holders.push_back (std::move (prefixed_group));
-	}
+      for (int i = 0; group_ptr[i] != NULL; i++)
+	group_ptr[i] = holders[i].c_str ();
 
       if (syscall_list != NULL)
 	complete_on_enum (tracker, syscall_list.get (), word, word);

@@ -1,3 +1,8 @@
+2017-12-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* break-catch-syscall.c (catch_syscall_completer): Get pointers
+	to syscall group strings after building the string vector.
+
 2017-12-06  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_query_supported): Don't send "xmlRegisters=" if
