@@ -4745,7 +4745,8 @@ remote_query_supported (void)
 
       /* Keep this one last to work around a gdbserver <= 7.10 bug in
 	 the qSupported:xmlRegisters=i386 handling.  */
-      if (remote_support_xml != NULL)
+      if (remote_support_xml != NULL
+	  && packet_support (PACKET_qXfer_features) != PACKET_DISABLE)
 	q = remote_query_supported_append (q, remote_support_xml);
 
       q = reconcat (q, "qSupported:", q, (char *) NULL);
@@ -10302,7 +10303,7 @@ remote_write_qxfer (struct target_ops *ops, const char *object_name,
   struct remote_state *rs = get_remote_state ();
   int max_size = get_memory_write_packet_size (); 
 
-  if (packet->support == PACKET_DISABLE)
+  if (packet_config_support (packet) == PACKET_DISABLE)
     return TARGET_XFER_E_IO;
 
   /* Insert header.  */
@@ -10344,7 +10345,7 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
   struct remote_state *rs = get_remote_state ();
   LONGEST i, n, packet_len;
 
-  if (packet->support == PACKET_DISABLE)
+  if (packet_config_support (packet) == PACKET_DISABLE)
     return TARGET_XFER_E_IO;
 
   /* Check whether we've cached an end-of-object packet that matches
@@ -10656,9 +10657,10 @@ remote_search_memory (struct target_ops* ops,
   int found;
   ULONGEST found_addr;
 
-  /* Don't go to the target if we don't have to.
-     This is done before checking packet->support to avoid the possibility that
-     a success for this edge case means the facility works in general.  */
+  /* Don't go to the target if we don't have to.  This is done before
+     checking packet_config_support to avoid the possibility that a
+     success for this edge case means the facility works in
+     general.  */
   if (pattern_len > search_space_len)
     return 0;
   if (pattern_len == 0)
@@ -10703,7 +10705,7 @@ remote_search_memory (struct target_ops* ops,
     {
       /* The request may not have worked because the command is not
 	 supported.  If so, fall back to the simple way.  */
-      if (packet->support == PACKET_DISABLE)
+      if (packet_config_support (packet) == PACKET_DISABLE)
 	{
 	  return simple_search_memory (ops, start_addr, search_space_len,
 				       pattern, pattern_len, found_addrp);

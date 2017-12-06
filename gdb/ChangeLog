@@ -1,3 +1,10 @@
+2017-12-06  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_query_supported): Don't send "xmlRegisters=" if
+	"qXfer:features:read"" is disabled.
+	(remote_write_qxfer, remote_read_qxfer, remote_search_memory):
+	Check packet_config_support instead of packet->support directly.
+
 2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* target-descriptions.c (struct tdesc_feature) <registers>: Use
