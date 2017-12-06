@@ -113,8 +113,7 @@ insert_catch_syscall (struct bp_location *bl)
   return target_set_syscall_catchpoint (ptid_get_pid (inferior_ptid),
 					inf_data->total_syscalls_count != 0,
 					inf_data->any_syscall_count,
-					inf_data->syscalls_counts.size (),
-					inf_data->syscalls_counts.data ());
+					inf_data->syscalls_counts);
 }
 
 /* Implement the "remove" breakpoint_ops method for syscall
@@ -145,8 +144,7 @@ remove_catch_syscall (struct bp_location *bl, enum remove_bp_reason reason)
   return target_set_syscall_catchpoint (ptid_get_pid (inferior_ptid),
 					inf_data->total_syscalls_count != 0,
 					inf_data->any_syscall_count,
-					inf_data->syscalls_counts.size (),
-					inf_data->syscalls_counts.data ());
+					inf_data->syscalls_counts);
 }
 
 /* Implement the "breakpoint_hit" breakpoint_ops method for syscall

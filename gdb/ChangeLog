@@ -1,3 +1,19 @@
+2017-12-06  Pedro Alves  <palves@redhat.com>
+
+	* break-catch-syscall.c (insert_catch_syscall)
+	(remove_catch_syscall): Adjust to pass reference to
+	inf_data->syscalls_counts directly via gdb::array_view.
+	* fbsd-nat.c (fbsd_set_syscall_catchpoint): Adjust to use bool
+	and gdb::array_view.
+	* linux-nat.c (linux_child_set_syscall_catchpoint): Likewise.
+	* remote.c (remote_set_syscall_catchpoint): Likewise.
+	* target-debug.h (target_debug_print_bool): New.
+	(define target_debug_print_gdb_array_view_const_int): New.
+	* target-delegates.c: Regenerate.
+	* target.h (target_ops) <to_set_syscall_catchpoint>: Use
+	gdb::array_view and bool.
+	(target_set_syscall_catchpoint): Likewise.
+
 2017-12-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* break-catch-syscall.c (catch_syscall_completer): Get pointers

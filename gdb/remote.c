@@ -2024,8 +2024,8 @@ remote_pass_signals (struct target_ops *self,
 
 static int
 remote_set_syscall_catchpoint (struct target_ops *self,
-			       int pid, int needed, int any_count,
-			       int table_size, int *table)
+			       int pid, bool needed, int any_count,
+			       gdb::array_view<const int> syscall_counts)
 {
   const char *catch_packet;
   enum packet_result result;
@@ -2037,14 +2037,12 @@ remote_set_syscall_catchpoint (struct target_ops *self,
       return 1;
     }
 
-  if (needed && !any_count)
+  if (needed && any_count == 0)
     {
-      int i;
-
-      /* Count how many syscalls are to be caught (table[sysno] != 0).  */
-      for (i = 0; i < table_size; i++)
+      /* Count how many syscalls are to be caught.  */
+      for (size_t i = 0; i < syscall_counts.size (); i++)
 	{
-	  if (table[i] != 0)
+	  if (syscall_counts[i] != 0)
 	    n_sysno++;
 	}
     }
@@ -2066,13 +2064,13 @@ remote_set_syscall_catchpoint (struct target_ops *self,
       const int maxpktsz = strlen ("QCatchSyscalls:1") + n_sysno * 9 + 1;
       built_packet.reserve (maxpktsz);
       built_packet = "QCatchSyscalls:1";
-      if (!any_count)
+      if (any_count == 0)
 	{
-	  /* Add in catch_packet each syscall to be caught (table[i] != 0).  */
-	  for (int i = 0; i < table_size; i++)
+	  /* Add in each syscall to be caught.  */
+	  for (size_t i = 0; i < syscall_counts.size (); i++)
 	    {
-	      if (table[i] != 0)
-		string_appendf (built_packet, ";%x", i);
+	      if (syscall_counts[i] != 0)
+		string_appendf (built_packet, ";%zx", i);
 	    }
 	}
       if (built_packet.size () > get_remote_packet_size ())
