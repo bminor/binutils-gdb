@@ -17071,6 +17071,19 @@ cause @value{GDBN} to omit the methods.
 This command shows the current setting of method display when printing
 classes.
 
+@kindex set print type nested-type-limit
+@item set print type nested-type-limit @var{limit}
+@itemx set print type nested-type-limit unlimited
+Set the limit of displayed nested types that the type printer will
+show.  A @var{limit} of @code{unlimited} or @code{-1} will show all
+nested definitions.  By default, the type printer will not show any nested
+types defined in classes.
+
+@kindex show print type nested-type-limit
+@item show print type nested-type-limit
+This command shows the current display limit of nested types when
+printing classes.
+
 @kindex set print type typedefs
 @item set print type typedefs
 @itemx set print type typedefs on

@@ -1529,10 +1529,10 @@ struct fnfieldlist
   struct nextfnfield *head;
 };
 
-struct typedef_field_list
+struct decl_field_list
 {
-  struct typedef_field field;
-  struct typedef_field_list *next;
+  struct decl_field field;
+  struct decl_field_list *next;
 };
 
 /* The routines that read and process dies for a C struct or C++ class
@@ -1562,8 +1562,13 @@ struct field_info
 
     /* typedefs defined inside this class.  TYPEDEF_FIELD_LIST contains head of
        a NULL terminated list of TYPEDEF_FIELD_LIST_COUNT elements.  */
-    struct typedef_field_list *typedef_field_list;
+    struct decl_field_list *typedef_field_list;
     unsigned typedef_field_list_count;
+
+    /* Nested types defined by this class and the number of elements in this
+       list.  */
+    struct decl_field_list *nested_types_list;
+    unsigned nested_types_list_count;
   };
 
 /* One item on the queue of compilation units to read in full symbols
@@ -13988,28 +13993,44 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
     }
 }
 
-/* Add a typedef defined in the scope of the FIP's class.  */
+/* Can the type given by DIE define another type?  */
+
+static bool
+type_can_define_types (const struct die_info *die)
+{
+  switch (die->tag)
+    {
+    case DW_TAG_typedef:
+    case DW_TAG_class_type:
+    case DW_TAG_structure_type:
+    case DW_TAG_union_type:
+    case DW_TAG_enumeration_type:
+      return true;
+
+    default:
+      return false;
+    }
+}
+
+/* Add a type definition defined in the scope of the FIP's class.  */
 
 static void
-dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
-		    struct dwarf2_cu *cu)
+dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
+		      struct dwarf2_cu *cu)
 {
-  struct typedef_field_list *new_field;
-  struct typedef_field *fp;
+  struct decl_field_list *new_field;
+  struct decl_field *fp;
 
   /* Allocate a new field list entry and link it in.  */
-  new_field = XCNEW (struct typedef_field_list);
+  new_field = XCNEW (struct decl_field_list);
   make_cleanup (xfree, new_field);
 
-  gdb_assert (die->tag == DW_TAG_typedef);
+  gdb_assert (type_can_define_types (die));
 
   fp = &new_field->field;
 
-  /* Get name of field.  */
+  /* Get name of field.  NULL is okay here, meaning an anonymous type.  */
   fp->name = dwarf2_name (die, cu);
-  if (fp->name == NULL)
-    return;
-
   fp->type = read_type_die (die, cu);
 
   /* Save accessibility.  */
@@ -14035,9 +14056,18 @@ dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
 		 _("Unhandled DW_AT_accessibility value (%x)"), accessibility);
     }
 
-  new_field->next = fip->typedef_field_list;
-  fip->typedef_field_list = new_field;
-  fip->typedef_field_list_count++;
+  if (die->tag == DW_TAG_typedef)
+    {
+      new_field->next = fip->typedef_field_list;
+      fip->typedef_field_list = new_field;
+      fip->typedef_field_list_count++;
+    }
+  else
+    {
+      new_field->next = fip->nested_types_list;
+      fip->nested_types_list = new_field;
+      fip->nested_types_list_count++;
+    }
 }
 
 /* Create the vector of fields, and attach it to the type.  */
@@ -14660,8 +14690,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      /* C++ base class field.  */
 	      dwarf2_add_field (&fi, child_die, cu);
 	    }
-	  else if (child_die->tag == DW_TAG_typedef)
-	    dwarf2_add_typedef (&fi, child_die, cu);
+	  else if (type_can_define_types (child_die))
+	    dwarf2_add_type_defn (&fi, child_die, cu);
 	  else if (child_die->tag == DW_TAG_template_type_param
 		   || child_die->tag == DW_TAG_template_value_param)
 	    {
@@ -14768,18 +14798,42 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
 	  TYPE_TYPEDEF_FIELD_ARRAY (type)
-	    = ((struct typedef_field *)
+	    = ((struct decl_field *)
 	       TYPE_ALLOC (type, sizeof (TYPE_TYPEDEF_FIELD (type, 0)) * i));
 	  TYPE_TYPEDEF_FIELD_COUNT (type) = i;
 
 	  /* Reverse the list order to keep the debug info elements order.  */
 	  while (--i >= 0)
 	    {
-	      struct typedef_field *dest, *src;
+	      struct decl_field *dest, *src;
 
 	      dest = &TYPE_TYPEDEF_FIELD (type, i);
 	      src = &fi.typedef_field_list->field;
 	      fi.typedef_field_list = fi.typedef_field_list->next;
+	      *dest = *src;
+	    }
+	}
+
+      /* Copy fi.nested_types_list linked list elements content into the
+	 allocated array TYPE_NESTED_TYPES_ARRAY (type).  */
+      if (fi.nested_types_list != NULL && cu->language != language_ada)
+	{
+	  int i = fi.nested_types_list_count;
+
+	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
+	  TYPE_NESTED_TYPES_ARRAY (type)
+	    = ((struct decl_field *)
+	       TYPE_ALLOC (type, sizeof (struct decl_field) * i));
+	  TYPE_NESTED_TYPES_COUNT (type) = i;
+
+	  /* Reverse the list order to keep the debug info elements order.  */
+	  while (--i >= 0)
+	    {
+	      struct decl_field *dest, *src;
+
+	      dest = &TYPE_NESTED_TYPES_FIELD (type, i);
+	      src = &fi.nested_types_list->field;
+	      fi.nested_types_list = fi.nested_types_list->next;
 	      *dest = *src;
 	    }
 	}

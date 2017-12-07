@@ -35,6 +35,9 @@ struct type_print_options
   /* True means print typedefs in a class.  */
   unsigned int print_typedefs : 1;
 
+  /* The number of nested type definitions to print.  -1 == all.  */
+  int print_nested_type_limit;
+
   /* If not NULL, a local typedef hash table used when printing a
      type.  */
   struct typedef_hash_table *local_typedefs;

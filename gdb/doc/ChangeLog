@@ -1,3 +1,8 @@
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.texinfo (Symbols): Document "set print type nested-type-limit"
+	and "show print type nested-type-limit".
+
 2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
 
        * python.texi (Breakpoints In Python): Add text relating

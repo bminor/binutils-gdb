@@ -42,6 +42,7 @@ const struct type_print_options type_print_raw_options =
   1,				/* raw */
   1,				/* print_methods */
   1,				/* print_typedefs */
+  0,				/* print_nested_type_limit  */
   NULL,				/* local_typedefs */
   NULL,				/* global_table */
   NULL				/* global_printers */
@@ -54,6 +55,7 @@ static struct type_print_options default_ptype_flags =
   0,				/* raw */
   1,				/* print_methods */
   1,				/* print_typedefs */
+  0,				/* print_nested_type_limit  */
   NULL,				/* local_typedefs */
   NULL,				/* global_table */
   NULL				/* global_printers */
@@ -79,7 +81,7 @@ struct typedef_hash_table
 static hashval_t
 hash_typedef_field (const void *p)
 {
-  const struct typedef_field *tf = (const struct typedef_field *) p;
+  const struct decl_field *tf = (const struct decl_field *) p;
   struct type *t = check_typedef (tf->type);
 
   return htab_hash_string (TYPE_SAFE_NAME (t));
@@ -90,8 +92,8 @@ hash_typedef_field (const void *p)
 static int
 eq_typedef_field (const void *a, const void *b)
 {
-  const struct typedef_field *tfa = (const struct typedef_field *) a;
-  const struct typedef_field *tfb = (const struct typedef_field *) b;
+  const struct decl_field *tfa = (const struct decl_field *) a;
+  const struct decl_field *tfb = (const struct decl_field *) b;
 
   return types_equal (tfa->type, tfb->type);
 }
@@ -109,7 +111,7 @@ recursively_update_typedef_hash (struct typedef_hash_table *table,
 
   for (i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (t); ++i)
     {
-      struct typedef_field *tdef = &TYPE_TYPEDEF_FIELD (t, i);
+      struct decl_field *tdef = &TYPE_TYPEDEF_FIELD (t, i);
       void **slot;
 
       slot = htab_find_slot (table->table, tdef, INSERT);
@@ -137,14 +139,14 @@ add_template_parameters (struct typedef_hash_table *table, struct type *t)
 
   for (i = 0; i < TYPE_N_TEMPLATE_ARGUMENTS (t); ++i)
     {
-      struct typedef_field *tf;
+      struct decl_field *tf;
       void **slot;
 
       /* We only want type-valued template parameters in the hash.  */
       if (SYMBOL_CLASS (TYPE_TEMPLATE_ARGUMENT (t, i)) != LOC_TYPEDEF)
 	continue;
 
-      tf = XOBNEW (&table->storage, struct typedef_field);
+      tf = XOBNEW (&table->storage, struct decl_field);
       tf->name = SYMBOL_LINKAGE_NAME (TYPE_TEMPLATE_ARGUMENT (t, i));
       tf->type = SYMBOL_TYPE (TYPE_TEMPLATE_ARGUMENT (t, i));
 
@@ -262,7 +264,7 @@ find_global_typedef (const struct type_print_options *flags,
 {
   char *applied;
   void **slot;
-  struct typedef_field tf, *new_tf;
+  struct decl_field tf, *new_tf;
 
   if (flags->global_typedefs == NULL)
     return NULL;
@@ -273,13 +275,13 @@ find_global_typedef (const struct type_print_options *flags,
   slot = htab_find_slot (flags->global_typedefs->table, &tf, INSERT);
   if (*slot != NULL)
     {
-      new_tf = (struct typedef_field *) *slot;
+      new_tf = (struct decl_field *) *slot;
       return new_tf->name;
     }
 
   /* Put an entry into the hash table now, in case
      apply_ext_lang_type_printers recurses.  */
-  new_tf = XOBNEW (&flags->global_typedefs->storage, struct typedef_field);
+  new_tf = XOBNEW (&flags->global_typedefs->storage, struct decl_field);
   new_tf->name = NULL;
   new_tf->type = t;
 
@@ -308,12 +310,12 @@ find_typedef_in_hash (const struct type_print_options *flags, struct type *t)
 {
   if (flags->local_typedefs != NULL)
     {
-      struct typedef_field tf, *found;
+      struct decl_field tf, *found;
 
       tf.name = NULL;
       tf.type = t;
-      found = (struct typedef_field *) htab_find (flags->local_typedefs->table,
-						  &tf);
+      found = (struct decl_field *) htab_find (flags->local_typedefs->table,
+					       &tf);
 
       if (found != NULL)
 	return found->name;
@@ -703,6 +705,41 @@ show_print_type_typedefs (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* Limit on the number of nested type definitions to print or -1 to print
+   all nested type definitions in a class.  By default, we do not print
+   nested definitions.  */
+
+static int print_nested_type_limit = 0;
+
+/* Set how many nested type definitions should be printed by the type
+   printer.  */
+
+static void
+set_print_type_nested_types (const char *args, int from_tty,
+			     struct cmd_list_element *c)
+{
+  default_ptype_flags.print_nested_type_limit = print_nested_type_limit;
+}
+
+/* Show how many nested type definitions the type printer will print.  */
+
+static void
+show_print_type_nested_types  (struct ui_file *file, int from_tty,
+			       struct cmd_list_element *c, const char *value)
+{
+  if (*value == '0')
+    {
+      fprintf_filtered (file,
+			_("Will not print nested types defined in a class\n"));
+    }
+  else
+    {
+      fprintf_filtered (file,
+			_("Will print %s nested types defined in a class\n"),
+			value);
+    }
+}
+
 void
 _initialize_typeprint (void)
 {
@@ -751,6 +788,16 @@ Show printing of typedefs defined in classes."), NULL,
 			   set_print_type_typedefs,
 			   show_print_type_typedefs,
 			   &setprinttypelist, &showprinttypelist);
+
+  add_setshow_zuinteger_unlimited_cmd ("nested-type-limit", no_class,
+				       &print_nested_type_limit,
+				       _("\
+Set the number of recursive nested type definitions to print \
+(\"unlimited\" or -1 to show all)."), _("\
+Show the number of recursive nested type definitions to print."), NULL,
+				       set_print_type_nested_types,
+				       show_print_type_nested_types,
+				       &setprinttypelist, &showprinttypelist);
 }
 
 /* Print <not allocated> status to stream STREAM.  */

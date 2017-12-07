@@ -205,6 +205,10 @@ maint info selftests
 starti
   Start the debugged program stopping at the first instruction.
 
+set|show print type nested-type-limit
+  Set and show the limit of nesting level for nested types that the
+  type printer will show.
+
 * TUI Single-Key mode now supports two new shortcut keys: `i' for stepi and
   `o' for nexti.
 

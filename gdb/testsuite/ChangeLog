@@ -1,3 +1,17 @@
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/nested-types.cc: New file.
+	* gdb.cp/nested-types.exp: New file.
+	* lib/cp-support.exp: Load data-structures.exp library.
+	(debug_cp_test_ptype_class): New global.
+	(cp_ptype_class_verbose, next_line): New procedures.
+	(cp_test_ptype_class): Add and document new parameter `recursive_qid'.
+	Add and document new return value.
+	Switch the list of lines to a queue.
+	Add support for new `type' key for nested type definitions.
+	Add debugging/troubleshooting messages.
+	* lib/data-structures.exp: New file.
+
 2017-12-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/py-breakpoint.exp (test_bkpt_explicit_loc): Define

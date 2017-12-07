@@ -1,3 +1,39 @@
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
+	* NEWS (New commands): Mention set/show print type nested-type-limit.
+	* c-typeprint.c (c_type_print_base): Print out nested types.
+	* dwarf2read.c (struct typedef_field_list): Rename to ...
+	(struct decl_field_list): ... this.  Change all uses.
+	(struct field_info) <nested_types_list, nested_types_list_count>:
+	New fields.
+	(add_partial_symbol): Look for nested type definitions in C++, too.
+	(dwarf2_add_typedef): Rename to ...
+	(dwarf2_add_type_defn): ... this.
+	(type_can_define_types): New function.
+	Update assertion to use type_can_define_types.
+	Permit NULL for a field's name.
+	(process_structure_scope): Handle child DIEs of types that can
+	define types.
+	Copy the list of nested types into the type struct.
+	* gdbtypes.h (struct typedef_field): Rename to ...
+	(struct decl_field): ... this.  Change all uses.
+	[is_protected, is_private]: New fields.
+	(struct cplus_struct_type) <nested_types, nested_types_count>: New
+	fields.
+	(TYPE_NESTED_TYPES_ARRAY, TYPE_NESTED_TYPES_FIELD)
+	(TYPE_NESTED_TYPES_FIELD_NAME, TYPE_NESTED_TYPES_FIELD_TYPE)
+	(TYPE_NESTED_TYPES_COUNT, TYPE_NESTED_TYPES_FIELD_PROTECTED)
+	(TYPE_NESTED_TYPES_FIELD_PRIVATE): New macros.
+	* typeprint.c (type_print_raw_options, default_ptype_flags): Add
+	default value for print_nested_type_limit.
+	(print_nested_type_limit): New static variable.
+	(set_print_type_nested_types, show_print_type_nested_types): New
+	functions.
+	(_initialize_typeprint): Register new commands for set/show
+	`print-nested-type-limit'.
+	* typeprint.h (struct type_print_options) [print_nested_type_limit]:
+	New field.
+
 2017-12-07  Tom Tromey  <tom@tromey.com>
 
 	PR breakpoints/22511:
