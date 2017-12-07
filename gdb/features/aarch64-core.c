@@ -8,7 +8,7 @@ create_feature_aarch64_core (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.aarch64.core", "aarch64-core.xml");
+  feature = tdesc_create_feature (result, "org.gnu.gdb.aarch64.core");
   tdesc_type_with_fields *type_with_fields;
   type_with_fields = tdesc_create_flags (feature, "cpsr_flags", 4);
   tdesc_add_flag (type_with_fields, 0, "SP");
