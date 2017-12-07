@@ -1,5 +1,13 @@
 2017-12-07  Alan Modra  <amodra@gmail.com>
 
+	PR 22465
+	* testsuite/ld-elf/interleave.s: Use .data sections and provide
+	section attrs.
+	* testsuite/ld-elf/interleave.ld: Discard other sections.  Adjust
+	for changed section names.
+
+2017-12-07  Alan Modra  <amodra@gmail.com>
+
 	* emulparams/elf32mcore.sh (GENERATE_SHLIB_SCRIPT): Don't define.
 
 2017-12-07  Alan Modra  <amodra@gmail.com>

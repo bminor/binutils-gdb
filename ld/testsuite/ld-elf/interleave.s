@@ -1,4 +1,4 @@
-	.section ".text.a0"
+	.section ".data.a0","aw",%progbits
 	.byte 0x00
 	.byte 0x01
 	.byte 0x02
@@ -7,7 +7,7 @@
 	.byte 0x05
 	.byte 0x06
 	.byte 0x07
-	.section ".text.a1"
+	.section ".data.a1","aw",%progbits
 	.byte 0x10
 	.byte 0x11
 	.byte 0x12

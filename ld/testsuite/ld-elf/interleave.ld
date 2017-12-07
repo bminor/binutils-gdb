@@ -5,6 +5,7 @@ MEMORY
 }
 SECTIONS
 {
-  .a0 : { *(.text.a0) } > x0
-  .a1 : { *(.text.a1) } > x1
+  .a0 : { *(.data.a0) } > x0
+  .a1 : { *(.data.a1) } > x1
+  /DISCARD/ : { *(*) }
 }
