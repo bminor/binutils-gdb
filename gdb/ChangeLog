@@ -1,3 +1,9 @@
+2017-12-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS: Restore target entries for m68hc11-elf,
+	score-elf and xstormy16-elf, incorrectly removed in a previous
+	patch meant to only update the list of active maintainers.
+
 2017-12-06  Pedro Alves  <palves@redhat.com>
 
 	* break-catch-syscall.c (insert_catch_syscall)
