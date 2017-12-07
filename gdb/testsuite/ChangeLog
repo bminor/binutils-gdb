@@ -1,3 +1,8 @@
+2017-12-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-breakpoint.exp (test_bkpt_explicit_loc): Define
+	with proc_with_prefix, don't use with_test_prefix.
+
 2017-12-07  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/break.exp: Add test for empty "commands".
