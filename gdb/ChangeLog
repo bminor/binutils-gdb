@@ -1,3 +1,10 @@
+2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/py-breakpoint.c (bppy_init): Use string_to_event_location
+	over basic location code. Implement explicit location keywords.
+	(bppy_init_validate_args): New function.
+	* NEWS: Document Python explicit breakpoint locations.
+
 2017-12-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS: Restore target entries for m68hc11-elf,

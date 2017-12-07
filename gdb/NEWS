@@ -115,6 +115,10 @@
      command allows the setting of a large number of breakpoints via a
      regex pattern in Python.  See the manual for further details.
 
+  ** Python breakpoints can now accept explicit locations.  See the
+     manual for a further description of this feature.
+
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now able to start inferior processes with a

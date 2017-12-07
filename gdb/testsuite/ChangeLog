@@ -1,3 +1,8 @@
+2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+       * gdb.python/py-breakpoint.exp (test_bkpt_explicit_loc): Add new
+	tests for explicit locations.
+
 2017-12-06  Pedro Alves  <palves@redhat.com>
 
 	* gdb.arch/i386-avx.exp: If testing with a RSP target, check

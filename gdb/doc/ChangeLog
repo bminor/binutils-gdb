@@ -1,3 +1,8 @@
+2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+       * python.texi (Breakpoints In Python): Add text relating
+	to allowed explicit locations and keywords in gdb.Breakpoints.
+
 2017-12-04  Tom Tromey  <tom@tromey.com>
 
 	* gdb.texinfo (Rust): Update trait object status
