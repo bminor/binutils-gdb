@@ -1782,61 +1782,20 @@ proc check_gc_sections_available { } {
 }
 
 # Returns true if -shared is supported on the target
-# Only used and accurate for ELF targets at the moment
 
 proc check_shared_lib_support { } {
-    if {![istarget aarch64*-*-elf]
-	 && ![istarget arc*-*-elf*]
-	 && ![istarget arm*-*-elf]
-	 && ![istarget avr-*-*]
-	 && ![istarget cr16-*-*]
-	 && ![istarget cris*-*-elf]
-	 && ![istarget crx-*-*]
-	 && ![istarget d10v-*-*]
-	 && ![istarget d30v-*-*]
-	 && ![istarget dlx-*-*]
-	 && ![istarget epiphany-*-*]
-	 && ![istarget fr30-*-*]
-	 && ![istarget frv-*-elf]
-	 && ![istarget ft32-*-*]
-	 && ![istarget h8300-*-*]
-	 && ![istarget i860-*-*]
-	 && ![istarget i960-*-*]
-	 && ![istarget ip2k-*-*]
-	 && ![istarget iq2000-*-*]
-	 && ![istarget lm32-*-elf]
-	 && ![istarget lm32-*-rtems*]
-	 && ![istarget m32c-*-*]
-	 && ![istarget m32r-*-elf]
-	 && ![istarget m6811-*-*]
-	 && ![istarget m6812-*-*]
-	 && ![istarget m68hc1*-*-*]
-	 && ![istarget mcore*-*-*]
-	 && ![istarget mep-*-*]
-	 && ![istarget microblaze-*-elf]
-	 && ![istarget mips*-*-elf]
-	 && ![istarget mn10200-*-*]
-	 && ![istarget moxie-*-*]
-	 && ![istarget msp430-*-*]
-	 && ![istarget mt-*-*]
-	 && ![istarget nds32*-*-elf]
-	 && ![istarget nios2-*-elf]
-	 && ![istarget or1k*-*-elf]
-	 && ![istarget pj-*-*]
-	 && ![istarget pru-*-*]
-	 && ![istarget rl78-*-*]
-	 && ![istarget rx-*-*]
-	 && ![istarget spu-*-*]
-	 && ![istarget v850*-*-*]
-	 && ![istarget visium-*-*]
-	 && ![istarget xc16x-*-elf]
-	 && ![istarget xgate-*-*]
-	 && ![istarget xstormy16-*-*]
-	 && ![istarget *-*-irix*]
-	 && ![istarget *-*-rtems] } {
-	return 1
+    global shared_available_saved
+    global ld
+
+    if {![info exists shared_available_saved]} {
+	set ld_output [remote_exec host $ld "-shared"]
+	if { [ string first "not supported" $ld_output ] >= 0 } {
+	    set shared_available_saved 0
+	} else {
+	    set shared_available_saved 1
+	}
     }
-    return 0
+    return $shared_available_saved
 }
 
 # Return true if target uses genelf.em (assuming it is ELF).

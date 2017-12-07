@@ -1,3 +1,8 @@
+2017-12-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Ask ld
+	under test whether -shared is supported.
+
 2017-12-06  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/ld-elf/interleave-0.d, testsuite/ld-elf/interleave-4.d,
