@@ -843,7 +843,7 @@ string_to_explicit_location (const char **argp,
 	     Stop parsing and return whatever explicit location was
 	     parsed.  */
 	  *argp = start;
-	  return location;
+	  break;
 	}
 
       *argp = skip_spaces (*argp);

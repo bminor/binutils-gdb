@@ -1,5 +1,11 @@
 2017-12-07  Keith Seitz  <keiths@redhat.com>
 
+	PR breakpoints/22569
+	* location.c (string_to_explicit_location): When terminating
+	parsing early, break out of enclosing loop instead of returning.
+
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
 	* NEWS (New commands): Mention set/show print type nested-type-limit.
 	* c-typeprint.c (c_type_print_base): Print out nested types.
 	* dwarf2read.c (struct typedef_field_list): Rename to ...

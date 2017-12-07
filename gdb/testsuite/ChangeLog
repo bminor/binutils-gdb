@@ -1,5 +1,13 @@
 2017-12-07  Keith Seitz  <keiths@redhat.com>
 
+	PR breakpoints/22569
+	* gdb.linespec/ls-errs.exp: Change expected result of "break
+	-source this file has spaces.c -line 3".
+	Check that an explicit source file followed by whitespace is
+	identified as an invalid explicit location.
+
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
 	* gdb.cp/nested-types.cc: New file.
 	* gdb.cp/nested-types.exp: New file.
 	* lib/cp-support.exp: Load data-structures.exp library.
