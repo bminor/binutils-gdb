@@ -1,3 +1,7 @@
+2017-12-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/selftest.h (struct selftest): Add virtual destructor.
+
 2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/py-breakpoint.c (bppy_init): Use string_to_event_location

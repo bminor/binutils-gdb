@@ -31,6 +31,7 @@ namespace selftests
 
 struct selftest
 {
+  virtual ~selftest () = default;
   virtual void operator() () const = 0;
 };
 
