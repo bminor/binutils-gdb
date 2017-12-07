@@ -289,3 +289,137 @@ tdesc_add_enum_value (tdesc_type_with_fields *type, int value,
 			     tdesc_predefined_type (TDESC_TYPE_INT32),
 			     value, -1);
 }
+
+void print_xml_feature::visit_post (const target_desc *e)
+{
+  *m_buffer += "</target>\n";
+}
+
+void print_xml_feature::visit_pre (const tdesc_feature *e)
+{
+  *m_buffer += "<feature name=\"";
+  *m_buffer += e->name;
+  *m_buffer += "\">\n";
+}
+
+void print_xml_feature::visit_post (const tdesc_feature *e)
+{
+  *m_buffer += "</feature>\n";
+}
+
+void print_xml_feature::visit (const tdesc_type_builtin *type)
+{
+  error (_("xml output is not supported type \"%s\"."), type->name.c_str ());
+}
+
+void print_xml_feature::visit (const tdesc_type_vector *type)
+{
+  *m_buffer += "<vector id=\"";
+  *m_buffer += type->name;
+  *m_buffer += "\" type=\"";
+  *m_buffer += type->element_type->name;
+  *m_buffer += "\" count=\"";
+  *m_buffer += std::to_string (type->count);
+  *m_buffer += "\"/>\n";
+}
+
+void print_xml_feature::visit (const tdesc_type_with_fields *type)
+{
+  struct tdesc_type_field *f;
+  const static char *types[] = { "struct", "union", "flags", "enum" };
+
+  gdb_assert (type->kind >= TDESC_TYPE_STRUCT && type->kind <= TDESC_TYPE_ENUM);
+  *m_buffer += "<";
+  *m_buffer += types[type->kind - TDESC_TYPE_STRUCT];
+
+  switch (type->kind)
+    {
+    case TDESC_TYPE_STRUCT:
+    case TDESC_TYPE_FLAGS:
+      *m_buffer += " id=\"";
+      *m_buffer += type->name;
+      if (type->size > 0)
+	{
+	  *m_buffer += "\" size=\"";
+	  *m_buffer += std::to_string (type->size);
+	}
+	*m_buffer += "\">\n";
+
+      for (const tdesc_type_field &f : type->fields)
+	{
+	  *m_buffer += "  <field name=\"";
+	  *m_buffer += f.name;
+	  if (f.start == -1)
+	  {
+	    *m_buffer += "\" type=\"";
+	    *m_buffer += f.type->name;
+	  }
+	  else
+	  {
+	    *m_buffer += "\" start=\"";
+	    *m_buffer += std::to_string (f.start);
+	    *m_buffer += "\" end=\"";
+	    *m_buffer += std::to_string (f.end);
+	  }
+
+	  *m_buffer += "\"/>\n";
+	}
+    break;
+
+    case TDESC_TYPE_ENUM:
+      *m_buffer += " id=\"";
+      *m_buffer += type->name;
+      *m_buffer += "\">\n";
+
+      for (const tdesc_type_field &f : type->fields)
+	{
+	  *m_buffer += "  <field name=\"";
+	  *m_buffer += f.name;
+	  *m_buffer += "\" start=\"";
+	  *m_buffer += std::to_string (f.start);
+	  *m_buffer += "\"/>\n";
+	}
+      break;
+
+    case TDESC_TYPE_UNION:
+      *m_buffer += " id=\"";
+      *m_buffer += type->name;
+      *m_buffer += "\">\n";
+
+      for (const tdesc_type_field &f : type->fields)
+	{
+	  *m_buffer += "  <field name=\"";
+	  *m_buffer += f.name;
+	  *m_buffer += "\" type=\"";
+	  *m_buffer += f.type->name;
+	  *m_buffer += "\"/>\n";
+	}
+      break;
+
+    default:
+      error (_("xml output is not supported type \"%s\"."),
+	     type->name.c_str ());
+    }
+
+  *m_buffer += "</";
+  *m_buffer += types[type->kind - TDESC_TYPE_STRUCT];
+  *m_buffer += ">\n";
+}
+
+void print_xml_feature::visit (const tdesc_reg *reg)
+{
+  *m_buffer += "<reg name=\"";
+  *m_buffer += reg->name;
+  *m_buffer += "\" bitsize=\"";
+  *m_buffer += std::to_string (reg->bitsize);
+  *m_buffer += "\" type=\"";
+  *m_buffer += reg->type;
+  *m_buffer += "\" regnum=\"";
+  *m_buffer += std::to_string (reg->target_regnum);
+  if (reg->group.length () > 0)
+    {
+      *m_buffer += "\" group=\"";
+      *m_buffer += reg->group;
+    }
+  *m_buffer += "\"/>\n";
+}

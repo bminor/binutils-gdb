@@ -59,6 +59,18 @@ bool target_desc::operator== (const target_desc &other) const
 
 #endif
 
+void target_desc::accept (tdesc_element_visitor &v) const
+{
+#ifndef IN_PROCESS_AGENT
+  v.visit_pre (this);
+
+  for (const tdesc_feature_up &feature : features)
+    feature->accept (v);
+
+  v.visit_post (this);
+#endif
+}
+
 void
 init_target_desc (struct target_desc *tdesc)
 {
@@ -155,30 +167,9 @@ tdesc_get_features_xml (target_desc *tdesc)
 
   if (tdesc->xmltarget == NULL)
     {
-      std::string buffer ("@<?xml version=\"1.0\"?>");
-
-      buffer += "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">";
-      buffer += "<target>";
-      buffer += "<architecture>";
-      buffer += tdesc->arch;
-      buffer += "</architecture>";
-
-      if (tdesc->osabi != nullptr)
-	{
-	  buffer += "<osabi>";
-	  buffer += tdesc->osabi;
-	  buffer += "</osabi>";
-	}
-
-      for (const tdesc_feature_up &feature : tdesc->features)
-	{
-	  buffer += "<xi:include href=\"";
-	  buffer += feature->name;
-	  buffer += "\"/>";
-	}
-
-      buffer += "</target>";
-
+      std::string buffer ("");
+      print_xml_feature v (&buffer);
+      tdesc->accept (v);
       tdesc->xmltarget = xstrdup (buffer.c_str ());
     }
 
@@ -211,3 +202,22 @@ type *tdesc_type_with_fields::make_gdb_type (struct gdbarch *gdbarch) const
 {
   error (_("Cannot create gdbtypes."));
 }
+
+void print_xml_feature::visit_pre (const target_desc *e)
+{
+#ifndef IN_PROCESS_AGENT
+  *m_buffer += "@<?xml version=\"1.0\"?>\n";
+  *m_buffer += "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">\n";
+  *m_buffer += "<target>\n";
+  *m_buffer += "<architecture>";
+  *m_buffer += e->arch;
+  *m_buffer += "</architecture>\n";
+
+  if (e->osabi != nullptr)
+    {
+      *m_buffer += "<osabi>";
+      *m_buffer += e->osabi;
+      *m_buffer += "</osabi>\n";
+    }
+#endif
+  }

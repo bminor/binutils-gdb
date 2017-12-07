@@ -180,7 +180,6 @@ echo
 cat <<EOF
 #ifndef IN_PROCESS_AGENT
   result->expedite_regs = expedite_regs_${name};
-  result->xmltarget = xmltarget_${name};
 #endif
 
   init_target_desc (result);
