@@ -1,5 +1,9 @@
 2017-12-07  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/elf32mcore.sh (GENERATE_SHLIB_SCRIPT): Don't define.
+
+2017-12-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Ask ld
 	under test whether -shared is supported.
 
