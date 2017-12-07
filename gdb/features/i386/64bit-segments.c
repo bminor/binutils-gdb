@@ -8,7 +8,7 @@ create_feature_i386_64bit_segments (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.segments", "64bit-segments.xml");
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.segments");
   tdesc_create_reg (feature, "fs_base", regnum++, 1, NULL, 64, "int");
   tdesc_create_reg (feature, "gs_base", regnum++, 1, NULL, 64, "int");
   return regnum;

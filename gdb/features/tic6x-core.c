@@ -8,7 +8,7 @@ create_feature_tic6x_core (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.tic6x.core", "tic6x-core.xml");
+  feature = tdesc_create_feature (result, "org.gnu.gdb.tic6x.core");
   tdesc_create_reg (feature, "A0", regnum++, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "A1", regnum++, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "A2", regnum++, 1, NULL, 32, "uint32");

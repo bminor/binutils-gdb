@@ -180,8 +180,7 @@ tdesc_get_features_xml (target_desc *tdesc)
 /* See arch/tdesc.h.  */
 
 struct tdesc_feature *
-tdesc_create_feature (struct target_desc *tdesc, const char *name,
-		      const char *xml)
+tdesc_create_feature (struct target_desc *tdesc, const char *name)
 {
   struct tdesc_feature *new_feature = new tdesc_feature (name);
   tdesc->features.emplace_back (new_feature);
