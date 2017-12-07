@@ -1,3 +1,9 @@
+2017-12-07  Adam Stylinski  <adam.stylinski@etegent.com>
+
+	PR c++/21222
+	* target-descriptions.c (print_c_tdesc::visit_pre): Change type of
+	range-for variable.
+
 2017-12-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/selftest.h (struct selftest): Add virtual destructor.

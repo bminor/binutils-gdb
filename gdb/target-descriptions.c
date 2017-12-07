@@ -1833,7 +1833,7 @@ public:
 	printf_unfiltered ("\n");
       }
 
-    for (const struct bfd_arch_info *compatible : e->compatible)
+    for (const bfd_arch_info_type *compatible : e->compatible)
       printf_unfiltered
 	("  tdesc_add_compatible (result, bfd_scan_arch (\"%s\"));\n",
 	 compatible->printable_name);
