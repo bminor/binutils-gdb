@@ -1,5 +1,10 @@
 2017-12-08  Yao Qi  <yao.qi@linaro.org>
 
+	* breakpoint.c (update_watchpoint): Call
+	address_significant.
+
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
 	* breakpoint.c (adjust_breakpoint_address): Call
 	address_significant.
 

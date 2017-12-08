@@ -1864,7 +1864,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		  loc->gdbarch = get_type_arch (value_type (v));
 
 		  loc->pspace = frame_pspace;
-		  loc->address = addr;
+		  loc->address = address_significant (loc->gdbarch, addr);
 
 		  if (bitsize != 0)
 		    {

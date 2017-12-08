@@ -89,3 +89,17 @@ foreach_with_prefix bptype {"hbreak" "break"} {
     gdb_test "up" "\\(\*func_ptr\\) \\(\\).*" "caller is *func_ptr"
     delete_breakpoints
 }
+
+gdb_test "down"
+gdb_test "finish"
+# Watch on tagged pointer.
+gdb_test "watch *sp2"
+gdb_test "continue" \
+    "Continuing\\..*Hardware watchpoint \[0-9\]+.*" \
+    "run until watchpoint on s1"
+delete_breakpoints
+
+gdb_test "watch *p2"
+gdb_test "continue" \
+    "Continuing\\..*Hardware watchpoint \[0-9\]+.*" \
+    "run until watchpoint on i"
