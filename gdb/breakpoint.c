@@ -6973,16 +6973,11 @@ static CORE_ADDR
 adjust_breakpoint_address (struct gdbarch *gdbarch,
 			   CORE_ADDR bpaddr, enum bptype bptype)
 {
-  if (!gdbarch_adjust_breakpoint_address_p (gdbarch))
-    {
-      /* Very few targets need any kind of breakpoint adjustment.  */
-      return bpaddr;
-    }
-  else if (bptype == bp_watchpoint
-           || bptype == bp_hardware_watchpoint
-           || bptype == bp_read_watchpoint
-           || bptype == bp_access_watchpoint
-           || bptype == bp_catchpoint)
+  if (bptype == bp_watchpoint
+      || bptype == bp_hardware_watchpoint
+      || bptype == bp_read_watchpoint
+      || bptype == bp_access_watchpoint
+      || bptype == bp_catchpoint)
     {
       /* Watchpoints and the various bp_catch_* eventpoints should not
          have their addresses modified.  */
@@ -7000,11 +6995,16 @@ adjust_breakpoint_address (struct gdbarch *gdbarch,
     }
   else
     {
-      CORE_ADDR adjusted_bpaddr;
+      CORE_ADDR adjusted_bpaddr = bpaddr;
 
-      /* Some targets have architectural constraints on the placement
-         of breakpoint instructions.  Obtain the adjusted address.  */
-      adjusted_bpaddr = gdbarch_adjust_breakpoint_address (gdbarch, bpaddr);
+      if (gdbarch_adjust_breakpoint_address_p (gdbarch))
+	{
+	  /* Some targets have architectural constraints on the placement
+	     of breakpoint instructions.  Obtain the adjusted address.  */
+	  adjusted_bpaddr = gdbarch_adjust_breakpoint_address (gdbarch, bpaddr);
+	}
+
+      adjusted_bpaddr = address_significant (gdbarch, adjusted_bpaddr);
 
       /* An adjusted breakpoint address can significantly alter
          a user's expectations.  Print a warning if an adjustment

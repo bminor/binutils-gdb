@@ -45,4 +45,12 @@ main (void)
   void (*func_ptr) (void) = foo;
   func_ptr = (void (*) (void)) ((uintptr_t) func_ptr | 0xf000000000000000ULL);
   sp2->i = 4321; /* breakpoint here.  */
+
+  for (int i = 0; i < 2; i++)
+    {
+      foo ();
+      (*func_ptr) ();
+    }
+
+  sp1->i = 8765;
 }

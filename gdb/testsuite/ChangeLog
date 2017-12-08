@@ -1,5 +1,10 @@
 2017-12-08  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.arch/aarch64-tagged-pointer.c (main): Update.
+	* gdb.arch/aarch64-tagged-pointer.exp: Add test for breakpoint.
+
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.arch/aarch64-tagged-pointer.c: New file.
 	* gdb.arch/aarch64-tagged-pointer.exp: New file.
 

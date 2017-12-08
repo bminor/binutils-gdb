@@ -65,3 +65,27 @@ gdb_test_multiple $test $test {
 
 gdb_test "disassemble func_ptr,+8" \
     ":\[\t \]+$insn1\[ \r\n\]+.*:\[\t \]+$insn2.*"
+
+foreach_with_prefix bptype {"hbreak" "break"} {
+
+    # Set a breakpoint on a tagged address, func_ptr,
+    gdb_test "$bptype *func_ptr" \
+	"warning: Breakpoint address adjusted from .*reakpoint $decimal at .*" \
+	"breakpoint at *func_ptr"
+    # Resume the program and expect it hits foo,
+    gdb_test "continue" \
+	"Continuing\\..*Breakpoint \[0-9\]+, foo \\(\\) at .*" \
+	"run until breakpoint set *func_ptr"
+    gdb_test "up" "foo \\(\\).*" "caller is foo"
+    delete_breakpoints
+
+    # Set a breakpoint on normal function, call it through tagged
+    # function pointer.
+    gdb_test "$bptype foo" "reakpoint $decimal at .*" \
+	"hardware breakpoint at foo"
+    gdb_test "continue" \
+	"Continuing\\..*Breakpoint \[0-9\]+, foo \\(\\) at .*" \
+	"run until breakpoint set foo"
+    gdb_test "up" "\\(\*func_ptr\\) \\(\\).*" "caller is *func_ptr"
+    delete_breakpoints
+}
