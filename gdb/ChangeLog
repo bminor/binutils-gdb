@@ -1,5 +1,14 @@
 2017-12-08  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (mock_mapped_index): Reimplement as an extension of
+	mapped_index_base.
+	(check_match): Adjust to use mock_index directly.
+	(check_find_bounds_finds)
+	(test_mapped_index_find_name_component_bounds): Adjust to work
+	with a mapped_index_base.
+
+2017-12-08  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (struct mapped_index_base): New, partially factored
 	out from ...
 	(struct mapped_index): ... this.  Inherit mapped_index_base.

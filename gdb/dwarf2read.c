@@ -4838,50 +4838,33 @@ dw2_expand_symtabs_matching_symbol
 
 namespace selftests { namespace dw2_expand_symtabs_matching {
 
-/* A wrapper around mapped_index that builds a mock mapped_index, from
-   the symbol list passed as parameter to the constructor.  */
-class mock_mapped_index
+/* A mock .gdb_index/.debug_names-like name index table, enough to
+   exercise dw2_expand_symtabs_matching_symbol, which works with the
+   mapped_index_base interface.  Builds an index from the symbol list
+   passed as parameter to the constructor.  */
+class mock_mapped_index : public mapped_index_base
 {
 public:
-  template<size_t N>
-  mock_mapped_index (const char *(&symbols)[N])
-    : mock_mapped_index (symbols, N)
+  mock_mapped_index (gdb::array_view<const char *> symbols)
+    : m_symbol_table (symbols)
   {}
 
-  /* Access the built index.  */
-  mapped_index &index ()
-  { return m_index; }
+  DISABLE_COPY_AND_ASSIGN (mock_mapped_index);
 
-  /* Disable copy.  */
-  mock_mapped_index(const mock_mapped_index &) = delete;
-  void operator= (const mock_mapped_index &) = delete;
-
-private:
-  mock_mapped_index (const char **symbols, size_t symbols_size)
+  /* Return the number of names in the symbol table.  */
+  virtual size_t symbol_name_count () const
   {
-    /* No string can live at offset zero.  Add a dummy entry.  */
-    obstack_grow_str0 (&m_constant_pool, "");
-
-    for (size_t i = 0; i < symbols_size; i++)
-      {
-	const char *sym = symbols[i];
-	size_t offset = obstack_object_size (&m_constant_pool);
-	obstack_grow_str0 (&m_constant_pool, sym);
-	m_symbol_table.push_back ({offset, 0});
-      };
-
-    m_index.constant_pool = (const char *) obstack_base (&m_constant_pool);
-    m_index.symbol_table = m_symbol_table;
+    return m_symbol_table.size ();
   }
 
-public:
-  /* The built mapped_index.  */
-  mapped_index m_index{};
+  /* Get the name of the symbol at IDX in the symbol table.  */
+  virtual const char *symbol_name_at (offset_type idx) const
+  {
+    return m_symbol_table[idx];
+  }
 
-  /* The storage that the built mapped_index uses for symbol and
-     constant pool tables.  */
-  std::vector<mapped_index::symbol_table_slot> m_symbol_table;
-  auto_obstack m_constant_pool;
+private:
+  gdb::array_view<const char *> m_symbol_table;
 };
 
 /* Convenience function that converts a NULL pointer to a "<null>"
@@ -4926,11 +4909,11 @@ check_match (const char *file, int line,
   auto expected_it = expected_list.begin ();
   auto expected_end = expected_list.end ();
 
-  dw2_expand_symtabs_matching_symbol (mock_index.index (), lookup_name,
+  dw2_expand_symtabs_matching_symbol (mock_index, lookup_name,
 				      NULL, ALL_DOMAIN,
 				      [&] (offset_type idx)
   {
-    const char *matched_name = mock_index.index ().symbol_name_at (idx);
+    const char *matched_name = mock_index.symbol_name_at (idx);
     const char *expected_str
       = expected_it == expected_end ? NULL : *expected_it++;
 
@@ -4990,12 +4973,12 @@ static const char *test_symbols[] = {
   Z_SYM_NAME
 };
 
-/* Returns true if the mapped_index::find_name_component_bounds method
-   finds EXPECTED_SYMS in INDEX when looking for SEARCH_NAME, in
-   completion mode.  */
+/* Returns true if the mapped_index_base::find_name_component_bounds
+   method finds EXPECTED_SYMS in INDEX when looking for SEARCH_NAME,
+   in completion mode.  */
 
 static bool
-check_find_bounds_finds (mapped_index &index,
+check_find_bounds_finds (mapped_index_base &index,
 			 const char *search_name,
 			 gdb::array_view<const char *> expected_syms)
 {
@@ -5027,7 +5010,7 @@ test_mapped_index_find_name_component_bounds ()
 {
   mock_mapped_index mock_index (test_symbols);
 
-  mock_index.index ().build_name_components ();
+  mock_index.build_name_components ();
 
   /* Test the lower-level mapped_index::find_name_component_bounds
      method in completion mode.  */
@@ -5037,7 +5020,7 @@ test_mapped_index_find_name_component_bounds ()
       "t1_func1",
     };
 
-    SELF_CHECK (check_find_bounds_finds (mock_index.index (),
+    SELF_CHECK (check_find_bounds_finds (mock_index,
 					 "t1_func", expected_syms));
   }
 
@@ -5048,13 +5031,13 @@ test_mapped_index_find_name_component_bounds ()
       "\377",
       "\377\377123",
     };
-    SELF_CHECK (check_find_bounds_finds (mock_index.index (),
+    SELF_CHECK (check_find_bounds_finds (mock_index,
 					 "\377", expected_syms1));
 
     static const char *expected_syms2[] = {
       "\377\377123",
     };
-    SELF_CHECK (check_find_bounds_finds (mock_index.index (),
+    SELF_CHECK (check_find_bounds_finds (mock_index,
 					 "\377\377", expected_syms2));
   }
 }
