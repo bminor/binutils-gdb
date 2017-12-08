@@ -1,6 +1,20 @@
 2017-12-12  Stafford Horne  <shorne@gmail.com>
 	    Peter Gavin  <pgavin@gmail.com>
 
+	* or1k/arch.c: Generated.
+	* or1k/arch.h: Generated.
+	* or1k/cpu.c: Generated.
+	* or1k/cpu.h: Generated.
+	* or1k/cpuall.h: Generated.
+	* or1k/decode.c: Generated.
+	* or1k/decode.h: Generated.
+	* or1k/model.c: Generated.
+	* or1k/sem-switch.c: Generated.
+	* or1k/sem.c: Generated.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Peter Gavin  <pgavin@gmail.com>
+
 	* configure.tgt: Add or1k sim.
 	* or1k/README: New file.
 	* or1k/Makefile.in: New file.
