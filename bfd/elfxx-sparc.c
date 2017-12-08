@@ -3212,10 +3212,6 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 		    off &= ~1;
 		  else
 		    {
-		      SPARC_ELF_PUT_WORD (htab, output_bfd, relocation,
-					  htab->elf.sgot->contents + off);
-		      h->got.offset |= 1;
-
 		      if (h->dynindx == -1
 			  && !h->forced_local
 			  && h->root.type != bfd_link_hash_undefweak
@@ -3225,6 +3221,10 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 			     generate R_SPARC_RELATIVE here.  */
 			  relative_reloc = TRUE;
 			}
+		      else
+			SPARC_ELF_PUT_WORD (htab, output_bfd, relocation,
+					    htab->elf.sgot->contents + off);
+		      h->got.offset |= 1;
 		    }
 		}
 	      else
@@ -3245,12 +3245,10 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	      else
 		{
 		  if (bfd_link_pic (info))
-		    {
-		      relative_reloc = TRUE;
-		    }
-
-		  SPARC_ELF_PUT_WORD (htab, output_bfd, relocation,
-				      htab->elf.sgot->contents + off);
+		    relative_reloc = TRUE;
+		  else
+		    SPARC_ELF_PUT_WORD (htab, output_bfd, relocation,
+					htab->elf.sgot->contents + off);
 		  local_got_offsets[r_symndx] |= 1;
 		}
 	    }
@@ -3271,8 +3269,14 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	      outrel.r_info = SPARC_ELF_R_INFO (htab, NULL,
 						0, R_SPARC_RELATIVE);
 	      outrel.r_addend = relocation;
-	      relocation = 0;
 	      sparc_elf_append_rela (output_bfd, s, &outrel);
+	      /* Versions of glibc ld.so at least up to 2.26 wrongly
+		 add the section contents to the value calculated for
+		 a RELATIVE reloc.  Zero the contents to work around
+		 this bug.  */
+	      relocation = 0;
+	      SPARC_ELF_PUT_WORD (htab, output_bfd, relocation,
+				  htab->elf.sgot->contents + off);
 	    }
 
 	  relocation = htab->elf.sgot->output_offset + off - got_base;

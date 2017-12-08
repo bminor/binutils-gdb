@@ -1,3 +1,9 @@
+2017-12-09  Alan Modra  <amodra@gmail.com>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): When emitting
+	dynamic R_SPARC_RELATIVE for GOT entries, ensure the section
+	contents are zeroed.
+
 2017-12-08  Nick Clifton  <nickc@redhat.com>
 
 	* elfcode.h (elf_write_relocs): Check for an empty howto field.
