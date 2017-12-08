@@ -1,5 +1,26 @@
 2017-12-08  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (struct mapped_index_base): New, partially factored
+	out from ...
+	(struct mapped_index): ... this.  Inherit mapped_index_base.
+	(mapped_index::symbol_name_slot_invalid):
+	(mapped_index::symbol_name_at): Add override marker.
+	(mapped_index::symbol_name_count): New.
+	(struct mapped_debug_names): Inherit mapped_index_base.
+	(mapped_debug_names::symbol_name_at): New.
+	(mapped_debug_names::symbol_name_count): New.
+	(mapped_index::find_name_components_bounds): Rename to ...
+	(mapped_index_base::find_name_components_bounds): ... this.
+	(mapped_index::build_name_components): Rename to ...
+	(mapped_index_base::build_name_components): ... this.  Adjust to
+	use mapped_index_base::symbol_name_count and
+	mapped_index_base::symbol_name_slot_invalid.
+	(dw2_expand_symtabs_matching_symbol): Take a mapped_index_base
+	instead of a mapped_index.  Use
+	dw2_expand_symtabs_matching_symbol.
+
+2017-12-08  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (mapped_index::symbol_table_slot): New.
 	(mapped_index::address_table): Now a gdb::array_view of const
 	gdb_byte.

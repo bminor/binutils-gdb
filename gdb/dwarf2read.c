@@ -234,9 +234,50 @@ struct name_component
   offset_type idx;
 };
 
+/* Base class containing bits shared by both .gdb_index and
+   .debug_name indexes.  */
+
+struct mapped_index_base
+{
+  /* The name_component table (a sorted vector).  See name_component's
+     description above.  */
+  std::vector<name_component> name_components;
+
+  /* How NAME_COMPONENTS is sorted.  */
+  enum case_sensitivity name_components_casing;
+
+  /* Return the number of names in the symbol table.  */
+  virtual size_t symbol_name_count () const = 0;
+
+  /* Get the name of the symbol at IDX in the symbol table.  */
+  virtual const char *symbol_name_at (offset_type idx) const = 0;
+
+  /* Return whether the name at IDX in the symbol table should be
+     ignored.  */
+  virtual bool symbol_name_slot_invalid (offset_type idx) const
+  {
+    return false;
+  }
+
+  /* Build the symbol name component sorted vector, if we haven't
+     yet.  */
+  void build_name_components ();
+
+  /* Returns the lower (inclusive) and upper (exclusive) bounds of the
+     possible matches for LN_NO_PARAMS in the name component
+     vector.  */
+  std::pair<std::vector<name_component>::const_iterator,
+	    std::vector<name_component>::const_iterator>
+    find_name_components_bounds (const lookup_name_info &ln_no_params) const;
+
+  /* Prevent deleting/destroying via a base class pointer.  */
+protected:
+  ~mapped_index_base() = default;
+};
+
 /* A description of the mapped index.  The file format is described in
    a comment by the code that writes the index.  */
-struct mapped_index
+struct mapped_index : public mapped_index_base
 {
   /* A slot/bucket in the symbol table hash.  */
   struct symbol_table_slot
@@ -260,33 +301,24 @@ struct mapped_index
   /* A pointer to the constant pool.  */
   const char *constant_pool;
 
-  /* The name_component table (a sorted vector).  See name_component's
-     description above.  */
-  std::vector<name_component> name_components;
-
-  /* How NAME_COMPONENTS is sorted.  */
-  enum case_sensitivity name_components_casing;
+  bool symbol_name_slot_invalid (offset_type idx) const override
+  {
+    const auto &bucket = this->symbol_table[idx];
+    return bucket.name == 0 && bucket.vec;
+  }
 
   /* Convenience method to get at the name of the symbol at IDX in the
      symbol table.  */
-  const char *symbol_name_at (offset_type idx) const
+  const char *symbol_name_at (offset_type idx) const override
   { return this->constant_pool + MAYBE_SWAP (this->symbol_table[idx].name); }
 
-  /* Build the symbol name component sorted vector, if we haven't
-     yet.  */
-  void build_name_components ();
-
-  /* Returns the lower (inclusive) and upper (exclusive) bounds of the
-     possible matches for LN_NO_PARAMS in the name component
-     vector.  */
-  std::pair<std::vector<name_component>::const_iterator,
-	    std::vector<name_component>::const_iterator>
-    find_name_components_bounds (const lookup_name_info &ln_no_params) const;
+  size_t symbol_name_count () const override
+  { return this->symbol_table.size (); }
 };
 
 /* A description of the mapped .debug_names.
    Uninitialized map has CU_COUNT 0.  */
-struct mapped_debug_names
+struct mapped_debug_names : public mapped_index_base
 {
   bfd_endian dwarf5_byte_order;
   bool dwarf5_is_dwarf64;
@@ -320,6 +352,15 @@ struct mapped_debug_names
   std::unordered_map<ULONGEST, index_val> abbrev_map;
 
   const char *namei_to_name (uint32_t namei) const;
+
+  /* Implementation of the mapped_index_base virtual interface, for
+     the name_components cache.  */
+
+  const char *symbol_name_at (offset_type idx) const override
+  { return namei_to_name (idx); }
+
+  size_t symbol_name_count () const override
+  { return this->name_count; }
 };
 
 typedef struct dwarf2_per_cu_data *dwarf2_per_cu_ptr;
@@ -4595,7 +4636,7 @@ make_sort_after_prefix_name (const char *search_name)
 
 std::pair<std::vector<name_component>::const_iterator,
 	  std::vector<name_component>::const_iterator>
-mapped_index::find_name_components_bounds
+mapped_index_base::find_name_components_bounds
   (const lookup_name_info &lookup_name_without_params) const
 {
   auto *name_cmp
@@ -4668,7 +4709,7 @@ mapped_index::find_name_components_bounds
 /* See declaration.  */
 
 void
-mapped_index::build_name_components ()
+mapped_index_base::build_name_components ()
 {
   if (!this->name_components.empty ())
     return;
@@ -4684,11 +4725,10 @@ mapped_index::build_name_components ()
      D use '.'), then we'll need to try splitting the symbol name
      according to that language too.  Note that Ada does support wild
      matching, but doesn't currently support .gdb_index.  */
-  for (offset_type idx = 0; idx < this->symbol_table.size (); ++idx)
+  auto count = this->symbol_name_count ();
+  for (offset_type idx = 0; idx < count; idx++)
     {
-      auto &bucket = this->symbol_table[idx];
-
-      if (bucket.name == 0 && bucket.vec == 0)
+      if (this->symbol_name_slot_invalid (idx))
 	continue;
 
       const char *name = this->symbol_name_at (idx);
@@ -4727,15 +4767,15 @@ mapped_index::build_name_components ()
 }
 
 /* Helper for dw2_expand_symtabs_matching that works with a
-   mapped_index instead of the containing objfile.  This is split to a
-   separate function in order to be able to unit test the
-   name_components matching using a mock mapped_index.  For each
+   mapped_index_base instead of the containing objfile.  This is split
+   to a separate function in order to be able to unit test the
+   name_components matching using a mock mapped_index_base.  For each
    symbol name that matches, calls MATCH_CALLBACK, passing it the
-   symbol's index in the mapped_index symbol table.  */
+   symbol's index in the mapped_index_base symbol table.  */
 
 static void
 dw2_expand_symtabs_matching_symbol
-  (mapped_index &index,
+  (mapped_index_base &index,
    const lookup_name_info &lookup_name_in,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    enum search_domain kind,
@@ -5435,8 +5475,6 @@ dw2_expand_symtabs_matching
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind)
 {
-  int i;
-
   dw2_setup (objfile);
 
   /* index_table is NULL if OBJF_READNOW.  */
@@ -6393,16 +6431,12 @@ dw2_debug_names_expand_symtabs_matching
 
   dw_expand_symtabs_matching_file_matcher (file_matcher);
 
-  const mapped_debug_names &map = *dwarf2_per_objfile->debug_names_table;
+  mapped_debug_names &map = *dwarf2_per_objfile->debug_names_table;
 
-  for (uint32_t namei = 0; namei < map.name_count; ++namei)
+  dw2_expand_symtabs_matching_symbol (map, lookup_name,
+				      symbol_matcher,
+				      kind, [&] (offset_type namei)
     {
-      QUIT;
-
-      const char *const namei_string = map.namei_to_name (namei);
-      if (symbol_matcher != NULL && !symbol_matcher (namei_string))
-	continue;
-
       /* The name was matched, now expand corresponding CUs that were
 	 marked.  */
       dw2_debug_names_iterator iter (map, kind, namei);
@@ -6411,7 +6445,7 @@ dw2_debug_names_expand_symtabs_matching
       while ((per_cu = iter.next ()) != NULL)
 	dw2_expand_symtabs_matching_one (per_cu, file_matcher,
 					 expansion_notify);
-    }
+    });
 }
 
 const struct quick_symbol_functions dwarf2_debug_names_functions =
