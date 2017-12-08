@@ -1,3 +1,17 @@
+2017-12-08  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (mapped_index::symbol_table_slot): New.
+	(mapped_index::address_table): Now a gdb::array_view of const
+	gdb_byte.
+	(mapped_index::symbol_table): Now a gdb::array_view of
+	symbol_table_slot.
+	(mapped_index::address_table_size)
+	(mapped_index::symbol_table_slots): Delete.
+	(create_addrmap_from_index): Adjust.
+	(find_slot_in_mapped_hash): Adjust.
+	(read_index_from_section): Adjust.
+	(dwarf2_read_index): Adjust.
+
 2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 

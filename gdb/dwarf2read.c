@@ -238,23 +238,24 @@ struct name_component
    a comment by the code that writes the index.  */
 struct mapped_index
 {
+  /* A slot/bucket in the symbol table hash.  */
+  struct symbol_table_slot
+  {
+    const offset_type name;
+    const offset_type vec;
+  };
+
   /* Index data format version.  */
   int version;
 
   /* The total length of the buffer.  */
   off_t total_size;
 
-  /* A pointer to the address table data.  */
-  const gdb_byte *address_table;
-
-  /* Size of the address table data in bytes.  */
-  offset_type address_table_size;
+  /* The address table data.  */
+  gdb::array_view<const gdb_byte> address_table;
 
   /* The symbol table, implemented as a hash table.  */
-  const offset_type *symbol_table;
-
-  /* Size in slots, each slot is 2 offset_types.  */
-  offset_type symbol_table_slots;
+  gdb::array_view<symbol_table_slot> symbol_table;
 
   /* A pointer to the constant pool.  */
   const char *constant_pool;
@@ -269,7 +270,7 @@ struct mapped_index
   /* Convenience method to get at the name of the symbol at IDX in the
      symbol table.  */
   const char *symbol_name_at (offset_type idx) const
-  { return this->constant_pool + MAYBE_SWAP (this->symbol_table[idx]); }
+  { return this->constant_pool + MAYBE_SWAP (this->symbol_table[idx].name); }
 
   /* Build the symbol name component sorted vector, if we haven't
      yet.  */
@@ -3331,8 +3332,8 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
 
   mutable_map = addrmap_create_mutable (&temp_obstack);
 
-  iter = index->address_table;
-  end = iter + index->address_table_size;
+  iter = index->address_table.data ();
+  end = iter + index->address_table.size ();
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -3593,27 +3594,27 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
 				    ? 5 : index->version),
 				   name);
 
-  slot = hash & (index->symbol_table_slots - 1);
-  step = ((hash * 17) & (index->symbol_table_slots - 1)) | 1;
+  slot = hash & (index->symbol_table.size () - 1);
+  step = ((hash * 17) & (index->symbol_table.size () - 1)) | 1;
   cmp = (case_sensitivity == case_sensitive_on ? strcmp : strcasecmp);
 
   for (;;)
     {
-      /* Convert a slot number to an offset into the table.  */
-      offset_type i = 2 * slot;
       const char *str;
-      if (index->symbol_table[i] == 0 && index->symbol_table[i + 1] == 0)
+
+      const auto &bucket = index->symbol_table[slot];
+      if (bucket.name == 0 && bucket.vec == 0)
 	return false;
 
-      str = index->constant_pool + MAYBE_SWAP (index->symbol_table[i]);
+      str = index->constant_pool + MAYBE_SWAP (bucket.name);
       if (!cmp (name, str))
 	{
 	  *vec_out = (offset_type *) (index->constant_pool
-				      + MAYBE_SWAP (index->symbol_table[i + 1]));
+				      + MAYBE_SWAP (bucket.vec));
 	  return true;
 	}
 
-      slot = (slot + step) & (index->symbol_table_slots - 1);
+      slot = (slot + step) & (index->symbol_table.size () - 1);
     }
 }
 
@@ -3724,17 +3725,20 @@ to use the section anyway."),
 			  / 8);
   ++i;
 
-  map->address_table = addr + MAYBE_SWAP (metadata[i]);
-  map->address_table_size = (MAYBE_SWAP (metadata[i + 1])
-			     - MAYBE_SWAP (metadata[i]));
+  const gdb_byte *address_table = addr + MAYBE_SWAP (metadata[i]);
+  const gdb_byte *address_table_end = addr + MAYBE_SWAP (metadata[i + 1]);
+  map->address_table
+    = gdb::array_view<const gdb_byte> (address_table, address_table_end);
   ++i;
 
-  map->symbol_table = (offset_type *) (addr + MAYBE_SWAP (metadata[i]));
-  map->symbol_table_slots = ((MAYBE_SWAP (metadata[i + 1])
-			      - MAYBE_SWAP (metadata[i]))
-			     / (2 * sizeof (offset_type)));
-  ++i;
+  const gdb_byte *symbol_table = addr + MAYBE_SWAP (metadata[i]);
+  const gdb_byte *symbol_table_end = addr + MAYBE_SWAP (metadata[i + 1]);
+  map->symbol_table
+    = gdb::array_view<mapped_index::symbol_table_slot>
+       ((mapped_index::symbol_table_slot *) symbol_table,
+	(mapped_index::symbol_table_slot *) symbol_table_end);
 
+  ++i;
   map->constant_pool = (char *) (addr + MAYBE_SWAP (metadata[i]));
 
   return 1;
@@ -3759,7 +3763,7 @@ dwarf2_read_index (struct objfile *objfile)
     return 0;
 
   /* Don't use the index if it's empty.  */
-  if (local_map.symbol_table_slots == 0)
+  if (local_map.symbol_table.empty ())
     return 0;
 
   /* If there is a .dwz file, read it so we can get its CU list as
@@ -4680,12 +4684,11 @@ mapped_index::build_name_components ()
      D use '.'), then we'll need to try splitting the symbol name
      according to that language too.  Note that Ada does support wild
      matching, but doesn't currently support .gdb_index.  */
-  for (size_t iter = 0; iter < this->symbol_table_slots; ++iter)
+  for (offset_type idx = 0; idx < this->symbol_table.size (); ++idx)
     {
-      offset_type idx = 2 * iter;
+      auto &bucket = this->symbol_table[idx];
 
-      if (this->symbol_table[idx] == 0
-	  && this->symbol_table[idx + 1] == 0)
+      if (bucket.name == 0 && bucket.vec == 0)
 	continue;
 
       const char *name = this->symbol_name_at (idx);
@@ -4824,13 +4827,11 @@ private:
 	const char *sym = symbols[i];
 	size_t offset = obstack_object_size (&m_constant_pool);
 	obstack_grow_str0 (&m_constant_pool, sym);
-	m_symbol_table.push_back (offset);
-	m_symbol_table.push_back (0);
+	m_symbol_table.push_back ({offset, 0});
       };
 
     m_index.constant_pool = (const char *) obstack_base (&m_constant_pool);
-    m_index.symbol_table = m_symbol_table.data ();
-    m_index.symbol_table_slots = m_symbol_table.size () / 2;
+    m_index.symbol_table = m_symbol_table;
   }
 
 public:
@@ -4839,7 +4840,7 @@ public:
 
   /* The storage that the built mapped_index uses for symbol and
      constant pool tables.  */
-  std::vector<offset_type> m_symbol_table;
+  std::vector<mapped_index::symbol_table_slot> m_symbol_table;
   auto_obstack m_constant_pool;
 };
 
@@ -5276,7 +5277,7 @@ dw2_expand_marked_cus
   bool global_seen = false;
 
   vec = (offset_type *) (index.constant_pool
-			 + MAYBE_SWAP (index.symbol_table[idx + 1]));
+			 + MAYBE_SWAP (index.symbol_table[idx].vec));
   vec_len = MAYBE_SWAP (vec[0]);
   for (vec_idx = 0; vec_idx < vec_len; ++vec_idx)
     {
