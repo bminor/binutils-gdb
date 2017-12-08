@@ -4365,8 +4365,9 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
       sal.objfile = objfile;
       sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
       sal.pspace = current_program_space;
-      sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
     }
+
+  sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
 
   if (maybe_add_address (self->addr_set, objfile->pspace, sal.pc))
     add_sal_to_sals (self, result, &sal, MSYMBOL_NATURAL_NAME (msymbol), 0);

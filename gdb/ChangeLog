@@ -1,3 +1,8 @@
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
+	PR breakpionts/22567
+	* linespec.c (minsym_found): Set sal.section.
+
 2017-12-08  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* configure.tgt (s390*-*-linux*): Add symfile-mem.o.
