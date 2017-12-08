@@ -1,3 +1,7 @@
+2017-12-08  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
+
+	* bfd.c (bfd_get_sign_extend_vma): Handle aix5coff64-rs6000.
+
 2017-12-06  Alan Modra  <amodra@gmail.com>
 
 	* doc/header.sed: Trim trailing space when splitting lines.
