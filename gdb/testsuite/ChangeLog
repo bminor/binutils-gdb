@@ -1,5 +1,9 @@
 2017-12-12  Stafford Horne  <shorne@gmail.com>
 
+	* gdb.xml/tdesc-regs.exp: Add or1k support.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+
 	* gdb.base/bp-permanent.c: Define nop of or1k.
 
 2017-12-11  Joel Brobecker  <brobecker@adacore.com>

@@ -50,6 +50,9 @@ switch -glob -- [istarget] {
     "nios2-*-*" {
 	set core-regs {nios2-cpu.xml}
     }
+    "or1k-*-*" {
+	set core-regs {or1k-core.xml}
+    }
     "powerpc*-*-*" {
 	set regdir "rs6000/"
 	set core-regs {power-core.xml}
