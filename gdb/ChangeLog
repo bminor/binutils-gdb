@@ -1,3 +1,7 @@
+2017-12-08  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* configure.tgt (s390*-*-linux*): Add symfile-mem.o.
+
 2017-12-07  Keith Seitz  <keiths@redhat.com>
 
 	PR breakpoints/22569
