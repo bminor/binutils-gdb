@@ -1,3 +1,17 @@
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Peter Gavin  <pgavin@gmail.com>
+
+	* configure.tgt: Add or1k sim.
+	* or1k/README: New file.
+	* or1k/Makefile.in: New file.
+	* or1k/configure.ac: New file.
+	* or1k/mloop.in: New file.
+	* or1k/or1k-sim.h: New file.
+	* or1k/or1k.c: New file.
+	* or1k/sim-if.c: New file.
+	* or1k/sim-main.h: New file.
+	* or1k/traps.c: New file.
+
 2017-11-01  James Bowman  <james.bowman@ftdichip.com>
 
 	* ft32/interp.c (step_once): Add ft32 shortcode decoder.
