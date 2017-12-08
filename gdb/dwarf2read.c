@@ -74,6 +74,7 @@
 #include "common/gdb_optional.h"
 #include "common/underlying.h"
 #include "common/byte-vector.h"
+#include "common/hash_enum.h"
 #include "filename-seen-cache.h"
 #include "producer.h"
 #include <fcntl.h>
@@ -282,6 +283,44 @@ struct mapped_index
     find_name_components_bounds (const lookup_name_info &ln_no_params) const;
 };
 
+/* A description of the mapped .debug_names.
+   Uninitialized map has CU_COUNT 0.  */
+struct mapped_debug_names
+{
+  bfd_endian dwarf5_byte_order;
+  bool dwarf5_is_dwarf64;
+  bool augmentation_is_gdb;
+  uint8_t offset_size;
+  uint32_t cu_count = 0;
+  uint32_t tu_count, bucket_count, name_count;
+  const gdb_byte *cu_table_reordered, *tu_table_reordered;
+  const uint32_t *bucket_table_reordered, *hash_table_reordered;
+  const gdb_byte *name_table_string_offs_reordered;
+  const gdb_byte *name_table_entry_offs_reordered;
+  const gdb_byte *entry_pool;
+
+  struct index_val
+  {
+    ULONGEST dwarf_tag;
+    struct attr
+    {
+      /* Attribute name DW_IDX_*.  */
+      ULONGEST dw_idx;
+
+      /* Attribute form DW_FORM_*.  */
+      ULONGEST form;
+
+      /* Value if FORM is DW_FORM_implicit_const.  */
+      LONGEST implicit_const;
+    };
+    std::vector<attr> attr_vec;
+  };
+
+  std::unordered_map<ULONGEST, index_val> abbrev_map;
+
+  const char *namei_to_name (uint32_t namei) const;
+};
+
 typedef struct dwarf2_per_cu_data *dwarf2_per_cu_ptr;
 DEF_VEC_P (dwarf2_per_cu_ptr);
 
@@ -334,6 +373,8 @@ public:
   dwarf2_section_info frame {};
   dwarf2_section_info eh_frame {};
   dwarf2_section_info gdb_index {};
+  dwarf2_section_info debug_names {};
+  dwarf2_section_info debug_aranges {};
 
   VEC (dwarf2_section_info_def) *types = NULL;
 
@@ -399,6 +440,9 @@ public:
   /* The mapped index, or NULL if .gdb_index is missing or not being used.  */
   mapped_index *index_table = NULL;
 
+  /* The mapped index, or NULL if .debug_names is missing or not being used.  */
+  std::unique_ptr<mapped_debug_names> debug_names_table;
+
   /* When using index_table, this keeps track of all quick_file_names entries.
      TUs typically share line table entries with a CU, so we maintain a
      separate table of all line table entries to support the sharing.
@@ -453,6 +497,8 @@ static const struct dwarf2_debug_sections dwarf2_elf_names =
   { ".debug_frame", ".zdebug_frame" },
   { ".eh_frame", NULL },
   { ".gdb_index", ".zgdb_index" },
+  { ".debug_names", ".zdebug_names" },
+  { ".debug_aranges", ".zdebug_aranges" },
   23
 };
 
@@ -1119,6 +1165,7 @@ struct dwz_file
   struct dwarf2_section_info line;
   struct dwarf2_section_info macro;
   struct dwarf2_section_info gdb_index;
+  struct dwarf2_section_info debug_names;
 
   /* The dwz's BFD.  */
   bfd *dwz_bfd;
@@ -1725,6 +1772,9 @@ static const char *read_indirect_string (bfd *, const gdb_byte *,
 static const char *read_indirect_line_string (bfd *, const gdb_byte *,
 					      const struct comp_unit_head *,
 					      unsigned int *);
+
+static const char *read_indirect_string_at_offset (bfd *abfd,
+						   LONGEST str_offset);
 
 static const char *read_indirect_string_from_dwz (struct dwz_file *, LONGEST);
 
@@ -2547,6 +2597,16 @@ dwarf2_per_objfile::locate_sections (bfd *abfd, asection *sectp,
       this->gdb_index.s.section = sectp;
       this->gdb_index.size = bfd_get_section_size (sectp);
     }
+  else if (section_is_p (sectp->name, &names.debug_names))
+    {
+      this->debug_names.s.section = sectp;
+      this->debug_names.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &names.debug_aranges))
+    {
+      this->debug_aranges.s.section = sectp;
+      this->debug_aranges.size = bfd_get_section_size (sectp);
+    }
 
   if ((bfd_get_section_flags (abfd, sectp) & (SEC_LOAD | SEC_ALLOC))
       && bfd_section_vma (abfd, sectp) == 0)
@@ -2742,6 +2802,11 @@ locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
     {
       dwz_file->gdb_index.s.section = sectp;
       dwz_file->gdb_index.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &dwarf2_elf_names.debug_names))
+    {
+      dwz_file->debug_names.s.section = sectp;
+      dwz_file->debug_names.size = bfd_get_section_size (sectp);
     }
 }
 
@@ -3192,6 +3257,65 @@ create_signatured_type_table_from_index (struct objfile *objfile,
   dwarf2_per_objfile->signatured_types = sig_types_hash;
 }
 
+/* Create the signatured type hash table from .debug_names.  */
+
+static void
+create_signatured_type_table_from_debug_names
+  (struct objfile *objfile,
+   const mapped_debug_names &map,
+   struct dwarf2_section_info *section,
+   struct dwarf2_section_info *abbrev_section)
+{
+  dwarf2_read_section (objfile, section);
+  dwarf2_read_section (objfile, abbrev_section);
+
+  dwarf2_per_objfile->n_type_units
+    = dwarf2_per_objfile->n_allocated_type_units
+    = map.tu_count;
+  dwarf2_per_objfile->all_type_units
+    = XNEWVEC (struct signatured_type *, dwarf2_per_objfile->n_type_units);
+
+  htab_t sig_types_hash = allocate_signatured_type_table (objfile);
+
+  for (uint32_t i = 0; i < map.tu_count; ++i)
+    {
+      struct signatured_type *sig_type;
+      ULONGEST signature;
+      void **slot;
+      cu_offset type_offset_in_tu;
+
+      sect_offset sect_off
+	= (sect_offset) (extract_unsigned_integer
+			 (map.tu_table_reordered + i * map.offset_size,
+			  map.offset_size,
+			  map.dwarf5_byte_order));
+
+      comp_unit_head cu_header;
+      read_and_check_comp_unit_head (&cu_header, section, abbrev_section,
+				     section->buffer + to_underlying (sect_off),
+				     rcuh_kind::TYPE);
+
+      sig_type = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+				 struct signatured_type);
+      sig_type->signature = cu_header.signature;
+      sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
+      sig_type->per_cu.is_debug_types = 1;
+      sig_type->per_cu.section = section;
+      sig_type->per_cu.sect_off = sect_off;
+      sig_type->per_cu.objfile = objfile;
+      sig_type->per_cu.v.quick
+	= OBSTACK_ZALLOC (&objfile->objfile_obstack,
+			  struct dwarf2_per_cu_quick_data);
+
+      slot = htab_find_slot (sig_types_hash, sig_type, INSERT);
+      *slot = sig_type;
+
+      dwarf2_per_objfile->all_type_units[i] = sig_type;
+    }
+
+  dwarf2_per_objfile->signatured_types = sig_types_hash;
+}
+
 /* Read the address map data from the mapped index, and use it to
    populate the objfile's psymtabs_addrmap.  */
 
@@ -3241,6 +3365,165 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
       lo = gdbarch_adjust_dwarf2_addr (gdbarch, lo + baseaddr);
       hi = gdbarch_adjust_dwarf2_addr (gdbarch, hi + baseaddr);
       addrmap_set_empty (mutable_map, lo, hi - 1, dw2_get_cutu (cu_index));
+    }
+
+  objfile->psymtabs_addrmap = addrmap_create_fixed (mutable_map,
+						    &objfile->objfile_obstack);
+}
+
+/* Read the address map data from DWARF-5 .debug_aranges, and use it to
+   populate the objfile's psymtabs_addrmap.  */
+
+static void
+create_addrmap_from_aranges (struct objfile *objfile,
+			     struct dwarf2_section_info *section)
+{
+  bfd *abfd = objfile->obfd;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  const CORE_ADDR baseaddr = ANOFFSET (objfile->section_offsets,
+				       SECT_OFF_TEXT (objfile));
+
+  auto_obstack temp_obstack;
+  addrmap *mutable_map = addrmap_create_mutable (&temp_obstack);
+
+  std::unordered_map<sect_offset,
+		     dwarf2_per_cu_data *,
+		     gdb::hash_enum<sect_offset>>
+    debug_info_offset_to_per_cu;
+  for (int cui = 0; cui < dwarf2_per_objfile->n_comp_units; ++cui)
+    {
+      dwarf2_per_cu_data *per_cu = dw2_get_cutu (cui);
+      const auto insertpair
+	= debug_info_offset_to_per_cu.emplace (per_cu->sect_off, per_cu);
+      if (!insertpair.second)
+	{
+	  warning (_("Section .debug_aranges in %s has duplicate "
+		     "debug_info_offset %u, ignoring .debug_aranges."),
+		   objfile_name (objfile), to_underlying (per_cu->sect_off));
+	  return;
+	}
+    }
+
+  dwarf2_read_section (objfile, section);
+
+  const bfd_endian dwarf5_byte_order = gdbarch_byte_order (gdbarch);
+
+  const gdb_byte *addr = section->buffer;
+
+  while (addr < section->buffer + section->size)
+    {
+      const gdb_byte *const entry_addr = addr;
+      unsigned int bytes_read;
+
+      const LONGEST entry_length = read_initial_length (abfd, addr,
+							&bytes_read);
+      addr += bytes_read;
+
+      const gdb_byte *const entry_end = addr + entry_length;
+      const bool dwarf5_is_dwarf64 = bytes_read != 4;
+      const uint8_t offset_size = dwarf5_is_dwarf64 ? 8 : 4;
+      if (addr + entry_length > section->buffer + section->size)
+	{
+	  warning (_("Section .debug_aranges in %s entry at offset %zu "
+	             "length %s exceeds section length %s, "
+		     "ignoring .debug_aranges."),
+		   objfile_name (objfile), entry_addr - section->buffer,
+		   plongest (bytes_read + entry_length),
+		   pulongest (section->size));
+	  return;
+	}
+
+      /* The version number.  */
+      const uint16_t version = read_2_bytes (abfd, addr);
+      addr += 2;
+      if (version != 2)
+	{
+	  warning (_("Section .debug_aranges in %s entry at offset %zu "
+		     "has unsupported version %d, ignoring .debug_aranges."),
+		   objfile_name (objfile), entry_addr - section->buffer,
+		   version);
+	  return;
+	}
+
+      const uint64_t debug_info_offset
+	= extract_unsigned_integer (addr, offset_size, dwarf5_byte_order);
+      addr += offset_size;
+      const auto per_cu_it
+	= debug_info_offset_to_per_cu.find (sect_offset (debug_info_offset));
+      if (per_cu_it == debug_info_offset_to_per_cu.cend ())
+	{
+	  warning (_("Section .debug_aranges in %s entry at offset %zu "
+		     "debug_info_offset %s does not exists, "
+		     "ignoring .debug_aranges."),
+		   objfile_name (objfile), entry_addr - section->buffer,
+		   pulongest (debug_info_offset));
+	  return;
+	}
+      dwarf2_per_cu_data *const per_cu = per_cu_it->second;
+
+      const uint8_t address_size = *addr++;
+      if (address_size < 1 || address_size > 8)
+	{
+	  warning (_("Section .debug_aranges in %s entry at offset %zu "
+		     "address_size %u is invalid, ignoring .debug_aranges."),
+		   objfile_name (objfile), entry_addr - section->buffer,
+		   address_size);
+	  return;
+	}
+
+      const uint8_t segment_selector_size = *addr++;
+      if (segment_selector_size != 0)
+	{
+	  warning (_("Section .debug_aranges in %s entry at offset %zu "
+		     "segment_selector_size %u is not supported, "
+		     "ignoring .debug_aranges."),
+		   objfile_name (objfile), entry_addr - section->buffer,
+		   segment_selector_size);
+	  return;
+	}
+
+      /* Must pad to an alignment boundary that is twice the address
+         size.  It is undocumented by the DWARF standard but GCC does
+         use it.  */
+      for (size_t padding = ((-(addr - section->buffer))
+			     & (2 * address_size - 1));
+           padding > 0; padding--)
+	if (*addr++ != 0)
+	  {
+	    warning (_("Section .debug_aranges in %s entry at offset %zu "
+		       "padding is not zero, ignoring .debug_aranges."),
+		     objfile_name (objfile), entry_addr - section->buffer);
+	    return;
+	  }
+
+      for (;;)
+	{
+	  if (addr + 2 * address_size > entry_end)
+	    {
+	      warning (_("Section .debug_aranges in %s entry at offset %zu "
+			 "address list is not properly terminated, "
+			 "ignoring .debug_aranges."),
+		       objfile_name (objfile), entry_addr - section->buffer);
+	      return;
+	    }
+	  ULONGEST start = extract_unsigned_integer (addr, address_size,
+						     dwarf5_byte_order);
+	  addr += address_size;
+	  ULONGEST length = extract_unsigned_integer (addr, address_size,
+						      dwarf5_byte_order);
+	  addr += address_size;
+	  if (start == 0 && length == 0)
+	    break;
+	  if (start == 0 && !dwarf2_per_objfile->has_section_at_zero)
+	    {
+	      /* Symbol was eliminated due to a COMDAT group.  */
+	      continue;
+	    }
+	  ULONGEST end = start + length;
+	  start = gdbarch_adjust_dwarf2_addr (gdbarch, start + baseaddr);
+	  end = gdbarch_adjust_dwarf2_addr (gdbarch, end + baseaddr);
+	  addrmap_set_empty (mutable_map, start, end - 1, per_cu);
+	}
     }
 
   objfile->psymtabs_addrmap = addrmap_create_fixed (mutable_map,
@@ -3457,8 +3740,7 @@ to use the section anyway."),
   return 1;
 }
 
-
-/* Read the index file.  If everything went ok, initialize the "quick"
+/* Read .gdb_index.  If everything went ok, initialize the "quick"
    elements of all the CUs and return 1.  Otherwise, return 0.  */
 
 static int
@@ -5330,6 +5612,827 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_map_symbol_filenames
 };
 
+/* DWARF-5 debug_names reader.  */
+
+/* DWARF-5 augmentation string for GDB's DW_IDX_GNU_* extension.  */
+static const gdb_byte dwarf5_augmentation[] = { 'G', 'D', 'B', 0 };
+
+/* A helper function that reads the .debug_names section in SECTION
+   and fills in MAP.  FILENAME is the name of the file containing the
+   section; it is used for error reporting.
+
+   Returns true if all went well, false otherwise.  */
+
+static bool
+read_debug_names_from_section (struct objfile *objfile,
+			       const char *filename,
+			       struct dwarf2_section_info *section,
+			       mapped_debug_names &map)
+{
+  if (dwarf2_section_empty_p (section))
+    return false;
+
+  /* Older elfutils strip versions could keep the section in the main
+     executable while splitting it for the separate debug info file.  */
+  if ((get_section_flags (section) & SEC_HAS_CONTENTS) == 0)
+    return false;
+
+  dwarf2_read_section (objfile, section);
+
+  map.dwarf5_byte_order = gdbarch_byte_order (get_objfile_arch (objfile));
+
+  const gdb_byte *addr = section->buffer;
+
+  bfd *const abfd = get_section_bfd_owner (section);
+
+  unsigned int bytes_read;
+  LONGEST length = read_initial_length (abfd, addr, &bytes_read);
+  addr += bytes_read;
+
+  map.dwarf5_is_dwarf64 = bytes_read != 4;
+  map.offset_size = map.dwarf5_is_dwarf64 ? 8 : 4;
+  if (bytes_read + length != section->size)
+    {
+      /* There may be multiple per-CU indices.  */
+      warning (_("Section .debug_names in %s length %s does not match "
+		 "section length %s, ignoring .debug_names."),
+	       filename, plongest (bytes_read + length),
+	       pulongest (section->size));
+      return false;
+    }
+
+  /* The version number.  */
+  uint16_t version = read_2_bytes (abfd, addr);
+  addr += 2;
+  if (version != 5)
+    {
+      warning (_("Section .debug_names in %s has unsupported version %d, "
+		 "ignoring .debug_names."),
+	       filename, version);
+      return false;
+    }
+
+  /* Padding.  */
+  uint16_t padding = read_2_bytes (abfd, addr);
+  addr += 2;
+  if (padding != 0)
+    {
+      warning (_("Section .debug_names in %s has unsupported padding %d, "
+		 "ignoring .debug_names."),
+	       filename, padding);
+      return false;
+    }
+
+  /* comp_unit_count - The number of CUs in the CU list.  */
+  map.cu_count = read_4_bytes (abfd, addr);
+  addr += 4;
+
+  /* local_type_unit_count - The number of TUs in the local TU
+     list.  */
+  map.tu_count = read_4_bytes (abfd, addr);
+  addr += 4;
+
+  /* foreign_type_unit_count - The number of TUs in the foreign TU
+     list.  */
+  uint32_t foreign_tu_count = read_4_bytes (abfd, addr);
+  addr += 4;
+  if (foreign_tu_count != 0)
+    {
+      warning (_("Section .debug_names in %s has unsupported %lu foreign TUs, "
+		 "ignoring .debug_names."),
+	       filename, static_cast<unsigned long> (foreign_tu_count));
+      return false;
+    }
+
+  /* bucket_count - The number of hash buckets in the hash lookup
+     table.  */
+  map.bucket_count = read_4_bytes (abfd, addr);
+  addr += 4;
+
+  /* name_count - The number of unique names in the index.  */
+  map.name_count = read_4_bytes (abfd, addr);
+  addr += 4;
+
+  /* abbrev_table_size - The size in bytes of the abbreviations
+     table.  */
+  uint32_t abbrev_table_size = read_4_bytes (abfd, addr);
+  addr += 4;
+
+  /* augmentation_string_size - The size in bytes of the augmentation
+     string.  This value is rounded up to a multiple of 4.  */
+  uint32_t augmentation_string_size = read_4_bytes (abfd, addr);
+  addr += 4;
+  map.augmentation_is_gdb = ((augmentation_string_size
+			      == sizeof (dwarf5_augmentation))
+			     && memcmp (addr, dwarf5_augmentation,
+					sizeof (dwarf5_augmentation)) == 0);
+  augmentation_string_size += (-augmentation_string_size) & 3;
+  addr += augmentation_string_size;
+
+  /* List of CUs */
+  map.cu_table_reordered = addr;
+  addr += map.cu_count * map.offset_size;
+
+  /* List of Local TUs */
+  map.tu_table_reordered = addr;
+  addr += map.tu_count * map.offset_size;
+
+  /* Hash Lookup Table */
+  map.bucket_table_reordered = reinterpret_cast<const uint32_t *> (addr);
+  addr += map.bucket_count * 4;
+  map.hash_table_reordered = reinterpret_cast<const uint32_t *> (addr);
+  addr += map.name_count * 4;
+
+  /* Name Table */
+  map.name_table_string_offs_reordered = addr;
+  addr += map.name_count * map.offset_size;
+  map.name_table_entry_offs_reordered = addr;
+  addr += map.name_count * map.offset_size;
+
+  const gdb_byte *abbrev_table_start = addr;
+  for (;;)
+    {
+      unsigned int bytes_read;
+      const ULONGEST index_num = read_unsigned_leb128 (abfd, addr, &bytes_read);
+      addr += bytes_read;
+      if (index_num == 0)
+	break;
+
+      const auto insertpair
+	= map.abbrev_map.emplace (index_num, mapped_debug_names::index_val ());
+      if (!insertpair.second)
+	{
+	  warning (_("Section .debug_names in %s has duplicate index %s, "
+		     "ignoring .debug_names."),
+		   filename, pulongest (index_num));
+	  return false;
+	}
+      mapped_debug_names::index_val &indexval = insertpair.first->second;
+      indexval.dwarf_tag = read_unsigned_leb128 (abfd, addr, &bytes_read);
+      addr += bytes_read;
+
+      for (;;)
+	{
+	  mapped_debug_names::index_val::attr attr;
+	  attr.dw_idx = read_unsigned_leb128 (abfd, addr, &bytes_read);
+	  addr += bytes_read;
+	  attr.form = read_unsigned_leb128 (abfd, addr, &bytes_read);
+	  addr += bytes_read;
+	  if (attr.form == DW_FORM_implicit_const)
+	    {
+	      attr.implicit_const = read_signed_leb128 (abfd, addr,
+							&bytes_read);
+	      addr += bytes_read;
+	    }
+	  if (attr.dw_idx == 0 && attr.form == 0)
+	    break;
+	  indexval.attr_vec.push_back (std::move (attr));
+	}
+    }
+  if (addr != abbrev_table_start + abbrev_table_size)
+    {
+      warning (_("Section .debug_names in %s has abbreviation_table "
+                 "of size %zu vs. written as %u, ignoring .debug_names."),
+	       filename, addr - abbrev_table_start, abbrev_table_size);
+      return false;
+    }
+  map.entry_pool = addr;
+
+  return true;
+}
+
+/* A helper for create_cus_from_debug_names that handles the MAP's CU
+   list.  */
+
+static void
+create_cus_from_debug_names_list (struct objfile *objfile,
+				  const mapped_debug_names &map,
+				  dwarf2_section_info &section,
+				  bool is_dwz, int base_offset)
+{
+  sect_offset sect_off_prev;
+  for (uint32_t i = 0; i <= map.cu_count; ++i)
+    {
+      sect_offset sect_off_next;
+      if (i < map.cu_count)
+	{
+	  sect_off_next
+	    = (sect_offset) (extract_unsigned_integer
+			     (map.cu_table_reordered + i * map.offset_size,
+			      map.offset_size,
+			      map.dwarf5_byte_order));
+	}
+      else
+	sect_off_next = (sect_offset) section.size;
+      if (i >= 1)
+	{
+	  const ULONGEST length = sect_off_next - sect_off_prev;
+	  dwarf2_per_objfile->all_comp_units[base_offset + (i - 1)]
+	    = create_cu_from_index_list (objfile, &section, is_dwz,
+					 sect_off_prev, length);
+	}
+      sect_off_prev = sect_off_next;
+    }
+}
+
+/* Read the CU list from the mapped index, and use it to create all
+   the CU objects for this objfile.  */
+
+static void
+create_cus_from_debug_names (struct objfile *objfile,
+			     const mapped_debug_names &map,
+			     const mapped_debug_names &dwz_map)
+{
+
+  dwarf2_per_objfile->n_comp_units = map.cu_count + dwz_map.cu_count;
+  dwarf2_per_objfile->all_comp_units
+    = XOBNEWVEC (&objfile->objfile_obstack, struct dwarf2_per_cu_data *,
+		 dwarf2_per_objfile->n_comp_units);
+
+  create_cus_from_debug_names_list (objfile, map, dwarf2_per_objfile->info,
+				    false /* is_dwz */,
+				    0 /* base_offset */);
+
+  if (dwz_map.cu_count == 0)
+    return;
+
+  dwz_file *dwz = dwarf2_get_dwz_file ();
+  create_cus_from_debug_names_list (objfile, dwz_map, dwz->info,
+				    true /* is_dwz */,
+				    map.cu_count /* base_offset */);
+}
+
+/* Read .debug_names.  If everything went ok, initialize the "quick"
+   elements of all the CUs and return true.  Otherwise, return false.  */
+
+static bool
+dwarf2_read_debug_names (struct objfile *objfile)
+{
+  mapped_debug_names local_map, dwz_map;
+
+  if (!read_debug_names_from_section (objfile, objfile_name (objfile),
+				      &dwarf2_per_objfile->debug_names,
+				      local_map))
+    return false;
+
+  /* Don't use the index if it's empty.  */
+  if (local_map.name_count == 0)
+    return false;
+
+  /* If there is a .dwz file, read it so we can get its CU list as
+     well.  */
+  dwz_file *dwz = dwarf2_get_dwz_file ();
+  if (dwz != NULL)
+    {
+      if (!read_debug_names_from_section (objfile,
+					  bfd_get_filename (dwz->dwz_bfd),
+					  &dwz->debug_names, dwz_map))
+	{
+	  warning (_("could not read '.debug_names' section from %s; skipping"),
+		   bfd_get_filename (dwz->dwz_bfd));
+	  return false;
+	}
+    }
+
+  create_cus_from_debug_names (objfile, local_map, dwz_map);
+
+  if (local_map.tu_count != 0)
+    {
+      /* We can only handle a single .debug_types when we have an
+	 index.  */
+      if (VEC_length (dwarf2_section_info_def, dwarf2_per_objfile->types) != 1)
+	return false;
+
+      dwarf2_section_info *section = VEC_index (dwarf2_section_info_def,
+						dwarf2_per_objfile->types, 0);
+
+      create_signatured_type_table_from_debug_names
+	(objfile, local_map, section, &dwarf2_per_objfile->abbrev);
+    }
+
+  create_addrmap_from_aranges (objfile, &dwarf2_per_objfile->debug_aranges);
+
+  dwarf2_per_objfile->debug_names_table.reset (new mapped_debug_names);
+  *dwarf2_per_objfile->debug_names_table = std::move (local_map);
+  dwarf2_per_objfile->using_index = 1;
+  dwarf2_per_objfile->quick_file_names_table =
+    create_quick_file_names_table (dwarf2_per_objfile->n_comp_units);
+
+  return true;
+}
+
+/* Symbol name hashing function as specified by DWARF-5.  */
+
+static uint32_t
+dwarf5_djb_hash (const char *str_)
+{
+  const unsigned char *str = (const unsigned char *) str_;
+
+  /* Note: tolower here ignores UTF-8, which isn't fully compliant.
+     See http://dwarfstd.org/ShowIssue.php?issue=161027.1.  */
+
+  uint32_t hash = 5381;
+  while (int c = *str++)
+    hash = hash * 33 + tolower (c);
+  return hash;
+}
+
+/* Type used to manage iterating over all CUs looking for a symbol for
+   .debug_names.  */
+
+class dw2_debug_names_iterator
+{
+public:
+  /* If WANT_SPECIFIC_BLOCK is true, only look for symbols in block
+     BLOCK_INDEX.  Otherwise BLOCK_INDEX is ignored.  */
+  dw2_debug_names_iterator (const mapped_debug_names &map,
+			    bool want_specific_block,
+			    block_enum block_index, domain_enum domain,
+			    const char *name)
+    : m_map (map), m_want_specific_block (want_specific_block),
+      m_block_index (block_index), m_domain (domain),
+      m_addr (find_vec_in_debug_names (map, name))
+  {}
+
+  dw2_debug_names_iterator (const mapped_debug_names &map,
+			    search_domain search, uint32_t namei)
+    : m_map (map),
+      m_search (search),
+      m_addr (find_vec_in_debug_names (map, namei))
+  {}
+
+  /* Return the next matching CU or NULL if there are no more.  */
+  dwarf2_per_cu_data *next ();
+
+private:
+  static const gdb_byte *find_vec_in_debug_names (const mapped_debug_names &map,
+						  const char *name);
+  static const gdb_byte *find_vec_in_debug_names (const mapped_debug_names &map,
+						  uint32_t namei);
+
+  /* The internalized form of .debug_names.  */
+  const mapped_debug_names &m_map;
+
+  /* If true, only look for symbols that match BLOCK_INDEX.  */
+  const bool m_want_specific_block = false;
+
+  /* One of GLOBAL_BLOCK or STATIC_BLOCK.
+     Unused if !WANT_SPECIFIC_BLOCK - FIRST_LOCAL_BLOCK is an invalid
+     value.  */
+  const block_enum m_block_index = FIRST_LOCAL_BLOCK;
+
+  /* The kind of symbol we're looking for.  */
+  const domain_enum m_domain = UNDEF_DOMAIN;
+  const search_domain m_search = ALL_DOMAIN;
+
+  /* The list of CUs from the index entry of the symbol, or NULL if
+     not found.  */
+  const gdb_byte *m_addr;
+};
+
+const char *
+mapped_debug_names::namei_to_name (uint32_t namei) const
+{
+  const ULONGEST namei_string_offs
+    = extract_unsigned_integer ((name_table_string_offs_reordered
+				 + namei * offset_size),
+				offset_size,
+				dwarf5_byte_order);
+  return read_indirect_string_at_offset
+    (dwarf2_per_objfile->objfile->obfd, namei_string_offs);
+}
+
+/* Find a slot in .debug_names for the object named NAME.  If NAME is
+   found, return pointer to its pool data.  If NAME cannot be found,
+   return NULL.  */
+
+const gdb_byte *
+dw2_debug_names_iterator::find_vec_in_debug_names
+  (const mapped_debug_names &map, const char *name)
+{
+  int (*cmp) (const char *, const char *);
+
+  if (current_language->la_language == language_cplus
+      || current_language->la_language == language_fortran
+      || current_language->la_language == language_d)
+    {
+      /* NAME is already canonical.  Drop any qualifiers as
+	 .debug_names does not contain any.  */
+
+      if (strchr (name, '(') != NULL)
+	{
+	  gdb::unique_xmalloc_ptr<char> without_params
+	    = cp_remove_params (name);
+
+	  if (without_params != NULL)
+	    {
+	      name = without_params.get();
+	    }
+	}
+    }
+
+  cmp = (case_sensitivity == case_sensitive_on ? strcmp : strcasecmp);
+
+  const uint32_t full_hash = dwarf5_djb_hash (name);
+  uint32_t namei
+    = extract_unsigned_integer (reinterpret_cast<const gdb_byte *>
+				(map.bucket_table_reordered
+				 + (full_hash % map.bucket_count)), 4,
+				map.dwarf5_byte_order);
+  if (namei == 0)
+    return NULL;
+  --namei;
+  if (namei >= map.name_count)
+    {
+      complaint (&symfile_complaints,
+		 _("Wrong .debug_names with name index %u but name_count=%u "
+		   "[in module %s]"),
+		 namei, map.name_count,
+		 objfile_name (dwarf2_per_objfile->objfile));
+      return NULL;
+    }
+
+  for (;;)
+    {
+      const uint32_t namei_full_hash
+	= extract_unsigned_integer (reinterpret_cast<const gdb_byte *>
+				    (map.hash_table_reordered + namei), 4,
+				    map.dwarf5_byte_order);
+      if (full_hash % map.bucket_count != namei_full_hash % map.bucket_count)
+	return NULL;
+
+      if (full_hash == namei_full_hash)
+	{
+	  const char *const namei_string = map.namei_to_name (namei);
+
+#if 0 /* An expensive sanity check.  */
+	  if (namei_full_hash != dwarf5_djb_hash (namei_string))
+	    {
+	      complaint (&symfile_complaints,
+			 _("Wrong .debug_names hash for string at index %u "
+			   "[in module %s]"),
+			 namei, objfile_name (dwarf2_per_objfile->objfile));
+	      return NULL;
+	    }
+#endif
+
+	  if (cmp (namei_string, name) == 0)
+	    {
+	      const ULONGEST namei_entry_offs
+		= extract_unsigned_integer ((map.name_table_entry_offs_reordered
+					     + namei * map.offset_size),
+					    map.offset_size, map.dwarf5_byte_order);
+	      return map.entry_pool + namei_entry_offs;
+	    }
+	}
+
+      ++namei;
+      if (namei >= map.name_count)
+	return NULL;
+    }
+}
+
+const gdb_byte *
+dw2_debug_names_iterator::find_vec_in_debug_names
+  (const mapped_debug_names &map, uint32_t namei)
+{
+  if (namei >= map.name_count)
+    {
+      complaint (&symfile_complaints,
+		 _("Wrong .debug_names with name index %u but name_count=%u "
+		   "[in module %s]"),
+		 namei, map.name_count,
+		 objfile_name (dwarf2_per_objfile->objfile));
+      return NULL;
+    }
+
+  const ULONGEST namei_entry_offs
+    = extract_unsigned_integer ((map.name_table_entry_offs_reordered
+				 + namei * map.offset_size),
+				map.offset_size, map.dwarf5_byte_order);
+  return map.entry_pool + namei_entry_offs;
+}
+
+/* See dw2_debug_names_iterator.  */
+
+dwarf2_per_cu_data *
+dw2_debug_names_iterator::next ()
+{
+  if (m_addr == NULL)
+    return NULL;
+
+  bfd *const abfd = dwarf2_per_objfile->objfile->obfd;
+
+ again:
+
+  unsigned int bytes_read;
+  const ULONGEST abbrev = read_unsigned_leb128 (abfd, m_addr, &bytes_read);
+  m_addr += bytes_read;
+  if (abbrev == 0)
+    return NULL;
+
+  const auto indexval_it = m_map.abbrev_map.find (abbrev);
+  if (indexval_it == m_map.abbrev_map.cend ())
+    {
+      complaint (&symfile_complaints,
+		 _("Wrong .debug_names undefined abbrev code %s "
+		   "[in module %s]"),
+		 pulongest (abbrev), objfile_name (dwarf2_per_objfile->objfile));
+      return NULL;
+    }
+  const mapped_debug_names::index_val &indexval = indexval_it->second;
+  bool have_is_static = false;
+  bool is_static;
+  dwarf2_per_cu_data *per_cu = NULL;
+  for (const mapped_debug_names::index_val::attr &attr : indexval.attr_vec)
+    {
+      ULONGEST ull;
+      switch (attr.form)
+	{
+	case DW_FORM_implicit_const:
+	  ull = attr.implicit_const;
+	  break;
+	case DW_FORM_flag_present:
+	  ull = 1;
+	  break;
+	case DW_FORM_udata:
+	  ull = read_unsigned_leb128 (abfd, m_addr, &bytes_read);
+	  m_addr += bytes_read;
+	  break;
+	default:
+	  complaint (&symfile_complaints,
+		     _("Unsupported .debug_names form %s [in module %s]"),
+		     dwarf_form_name (attr.form),
+		     objfile_name (dwarf2_per_objfile->objfile));
+	  return NULL;
+	}
+      switch (attr.dw_idx)
+	{
+	case DW_IDX_compile_unit:
+	  /* Don't crash on bad data.  */
+	  if (ull >= (dwarf2_per_objfile->n_comp_units
+		      + dwarf2_per_objfile->n_type_units))
+	    {
+	      complaint (&symfile_complaints,
+			 _(".debug_names entry has bad CU index %s"
+			   " [in module %s]"),
+			 pulongest (ull),
+			 objfile_name (dwarf2_per_objfile->objfile));
+	      continue;
+	    }
+	  per_cu = dw2_get_cutu (ull);
+	  break;
+	case DW_IDX_GNU_internal:
+	  if (!m_map.augmentation_is_gdb)
+	    break;
+	  have_is_static = true;
+	  is_static = true;
+	  break;
+	case DW_IDX_GNU_external:
+	  if (!m_map.augmentation_is_gdb)
+	    break;
+	  have_is_static = true;
+	  is_static = false;
+	  break;
+	}
+    }
+
+  /* Skip if already read in.  */
+  if (per_cu->v.quick->compunit_symtab)
+    goto again;
+
+  /* Check static vs global.  */
+  if (have_is_static)
+    {
+      const bool want_static = m_block_index != GLOBAL_BLOCK;
+      if (m_want_specific_block && want_static != is_static)
+	goto again;
+    }
+
+  /* Match dw2_symtab_iter_next, symbol_kind
+     and debug_names::psymbol_tag.  */
+  switch (m_domain)
+    {
+    case VAR_DOMAIN:
+      switch (indexval.dwarf_tag)
+	{
+	case DW_TAG_variable:
+	case DW_TAG_subprogram:
+	/* Some types are also in VAR_DOMAIN.  */
+	case DW_TAG_typedef:
+	case DW_TAG_structure_type:
+	  break;
+	default:
+	  goto again;
+	}
+      break;
+    case STRUCT_DOMAIN:
+      switch (indexval.dwarf_tag)
+	{
+	case DW_TAG_typedef:
+	case DW_TAG_structure_type:
+	  break;
+	default:
+	  goto again;
+	}
+      break;
+    case LABEL_DOMAIN:
+      switch (indexval.dwarf_tag)
+	{
+	case 0:
+	case DW_TAG_variable:
+	  break;
+	default:
+	  goto again;
+	}
+      break;
+    default:
+      break;
+    }
+
+  /* Match dw2_expand_symtabs_matching, symbol_kind and
+     debug_names::psymbol_tag.  */
+  switch (m_search)
+    {
+    case VARIABLES_DOMAIN:
+      switch (indexval.dwarf_tag)
+	{
+	case DW_TAG_variable:
+	  break;
+	default:
+	  goto again;
+	}
+      break;
+    case FUNCTIONS_DOMAIN:
+      switch (indexval.dwarf_tag)
+	{
+	case DW_TAG_subprogram:
+	  break;
+	default:
+	  goto again;
+	}
+      break;
+    case TYPES_DOMAIN:
+      switch (indexval.dwarf_tag)
+	{
+	case DW_TAG_typedef:
+	case DW_TAG_structure_type:
+	  break;
+	default:
+	  goto again;
+	}
+      break;
+    default:
+      break;
+    }
+
+  return per_cu;
+}
+
+static struct compunit_symtab *
+dw2_debug_names_lookup_symbol (struct objfile *objfile, int block_index_int,
+			       const char *name, domain_enum domain)
+{
+  const block_enum block_index = static_cast<block_enum> (block_index_int);
+  dw2_setup (objfile);
+
+  const auto &mapp = dwarf2_per_objfile->debug_names_table;
+  if (!mapp)
+    {
+      /* index is NULL if OBJF_READNOW.  */
+      return NULL;
+    }
+  const auto &map = *mapp;
+
+  dw2_debug_names_iterator iter (map, true /* want_specific_block */,
+				 block_index, domain, name);
+
+  struct compunit_symtab *stab_best = NULL;
+  struct dwarf2_per_cu_data *per_cu;
+  while ((per_cu = iter.next ()) != NULL)
+    {
+      struct symbol *sym, *with_opaque = NULL;
+      struct compunit_symtab *stab = dw2_instantiate_symtab (per_cu);
+      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
+      struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
+
+      sym = block_find_symbol (block, name, domain,
+			       block_find_non_opaque_type_preferred,
+			       &with_opaque);
+
+      /* Some caution must be observed with overloaded functions and
+	 methods, since the index will not contain any overload
+	 information (but NAME might contain it).  */
+
+      if (sym != NULL
+	  && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+	return stab;
+      if (with_opaque != NULL
+	  && strcmp_iw (SYMBOL_SEARCH_NAME (with_opaque), name) == 0)
+	stab_best = stab;
+
+      /* Keep looking through other CUs.  */
+    }
+
+  return stab_best;
+}
+
+/* This dumps minimal information about .debug_names.  It is called
+   via "mt print objfiles".  The gdb.dwarf2/gdb-index.exp testcase
+   uses this to verify that .debug_names has been loaded.  */
+
+static void
+dw2_debug_names_dump (struct objfile *objfile)
+{
+  dw2_setup (objfile);
+  gdb_assert (dwarf2_per_objfile->using_index);
+  printf_filtered (".debug_names:");
+  if (dwarf2_per_objfile->debug_names_table)
+    printf_filtered (" exists\n");
+  else
+    printf_filtered (" faked for \"readnow\"\n");
+  printf_filtered ("\n");
+}
+
+static void
+dw2_debug_names_expand_symtabs_for_function (struct objfile *objfile,
+					     const char *func_name)
+{
+  dw2_setup (objfile);
+
+  /* dwarf2_per_objfile->debug_names_table is NULL if OBJF_READNOW.  */
+  if (dwarf2_per_objfile->debug_names_table)
+    {
+      const mapped_debug_names &map = *dwarf2_per_objfile->debug_names_table;
+
+      /* Note: It doesn't matter what we pass for block_index here.  */
+      dw2_debug_names_iterator iter (map, false /* want_specific_block */,
+				     GLOBAL_BLOCK, VAR_DOMAIN, func_name);
+
+      struct dwarf2_per_cu_data *per_cu;
+      while ((per_cu = iter.next ()) != NULL)
+	dw2_instantiate_symtab (per_cu);
+    }
+}
+
+static void
+dw2_debug_names_expand_symtabs_matching
+  (struct objfile *objfile,
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   const lookup_name_info &lookup_name,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   enum search_domain kind)
+{
+  dw2_setup (objfile);
+
+  /* debug_names_table is NULL if OBJF_READNOW.  */
+  if (!dwarf2_per_objfile->debug_names_table)
+    return;
+
+  dw_expand_symtabs_matching_file_matcher (file_matcher);
+
+  const mapped_debug_names &map = *dwarf2_per_objfile->debug_names_table;
+
+  for (uint32_t namei = 0; namei < map.name_count; ++namei)
+    {
+      QUIT;
+
+      const char *const namei_string = map.namei_to_name (namei);
+      if (symbol_matcher != NULL && !symbol_matcher (namei_string))
+	continue;
+
+      /* The name was matched, now expand corresponding CUs that were
+	 marked.  */
+      dw2_debug_names_iterator iter (map, kind, namei);
+
+      struct dwarf2_per_cu_data *per_cu;
+      while ((per_cu = iter.next ()) != NULL)
+	dw2_expand_symtabs_matching_one (per_cu, file_matcher,
+					 expansion_notify);
+    }
+}
+
+const struct quick_symbol_functions dwarf2_debug_names_functions =
+{
+  dw2_has_symbols,
+  dw2_find_last_source_symtab,
+  dw2_forget_cached_source_info,
+  dw2_map_symtabs_matching_filename,
+  dw2_debug_names_lookup_symbol,
+  dw2_print_stats,
+  dw2_debug_names_dump,
+  dw2_relocate,
+  dw2_debug_names_expand_symtabs_for_function,
+  dw2_expand_all_symtabs,
+  dw2_expand_symtabs_with_fullname,
+  dw2_map_matching_symbols,
+  dw2_debug_names_expand_symtabs_matching,
+  dw2_find_pc_sect_compunit_symtab,
+  NULL,
+  dw2_map_symbol_filenames
+};
+
 /* Initialize for reading DWARF for this objfile.  Return 0 if this
    file will use psymtabs, or 1 if using the GNU index.  */
 
@@ -5364,6 +6467,9 @@ dwarf2_initialize_objfile (struct objfile *objfile)
 	 all symtabs.  */
       return elf_sym_fns_gdb_index;
     }
+
+  if (dwarf2_read_debug_names (objfile))
+    return elf_sym_fns_debug_names;
 
   if (dwarf2_read_index (objfile))
     return elf_sym_fns_gdb_index;
@@ -24865,22 +25971,6 @@ recursively_write_psymbols (struct objfile *objfile,
 		  &objfile->static_psymbols[psymtab->statics_offset],
 		  psymtab->n_static_syms, cu_index,
 		  1);
-}
-
-/* Symbol name hashing function as specified by DWARF-5.  */
-
-static uint32_t
-dwarf5_djb_hash (const char *str_)
-{
-  const unsigned char *str = (const unsigned char *) str_;
-
-  /* Note: tolower here ignores UTF-8, which isn't fully compliant.
-     See http://dwarfstd.org/ShowIssue.php?issue=161027.1.  */
-
-  uint32_t hash = 5381;
-  while (int c = *str++)
-    hash = hash * 33 + tolower (c);
-  return hash;
 }
 
 /* DWARF-5 .debug_names builder.  */

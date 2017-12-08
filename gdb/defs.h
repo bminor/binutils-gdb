@@ -683,6 +683,7 @@ extern void initialize_inferiors (void);
 
 extern const struct sym_fns elf_sym_fns_lazy_psyms;
 extern const struct sym_fns elf_sym_fns_gdb_index;
+extern const struct sym_fns elf_sym_fns_debug_names;
 
 /* * Special block numbers */
 

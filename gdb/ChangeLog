@@ -1,3 +1,42 @@
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* defs.h (elf_sym_fns_debug_names): New declaration.
+	* dwarf2read.c: Include "hash_enum.h".
+	(mapped_debug_names): New.
+	(struct dwarf2_per_objfile): Add debug_names, debug_aranges and
+	debug_names_table.
+	(dwarf2_elf_names): Add ".debug_names" and ".debug_aranges".
+	(struct dwz_file): Add debug_names.
+	(dwarf2_per_objfile::locate_sections): Handle debug_names and
+	debug_aranges.
+	(locate_dwz_sections): Handle debug_names.
+	(create_signatured_type_table_from_debug_names)
+	(create_addrmap_from_aranges): New.
+	(dwarf2_read_index): Update function comment.
+	(dwarf5_augmentation): Moved up.
+	(read_debug_names_from_section, create_cus_from_debug_names_list)
+	(create_cus_from_debug_names, dwarf2_read_debug_names): New.
+	(dwarf5_djb_hash): Moved up.
+	(dw2_debug_names_iterator): New.
+	(read_indirect_string_at_offset): New declaration.
+	(mapped_debug_names::namei_to_name)
+	(dw2_debug_names_iterator::find_vec_in_debug_names)
+	(dw2_debug_names_iterator::next, dw2_debug_names_lookup_symbol)
+	(dw2_debug_names_dump, dw2_debug_names_expand_symtabs_for_function)
+	(dw2_debug_names_expand_symtabs_matching, dwarf2_debug_names_functions):
+	New.
+	(dwarf2_initialize_objfile): Return also elf_sym_fns_debug_names.
+	(debug_names::djb_hash): Rename it to dwarf5_djb_hash.
+	(debug_names::build): Update djb_hash caller.
+	(write_debug_names): Move out and rename augmentation to
+	dwarf5_augmentation.
+	* elfread.c (elf_sym_fns_debug_names): New.
+	* psymtab.h (dwarf2_debug_names_functions): New declaration.
+	* symfile.h (struct dwarf2_debug_sections): Add debug_names and
+	debug_aranges.
+	* xcoffread.c (dwarf2_xcoff_names): Add debug_names and debug_aranges.
+
 2017-12-08  Pedro Alves  <palves@redhat.com>
 
 	* common/hash_enum.h: New file.

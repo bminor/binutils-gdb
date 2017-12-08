@@ -174,6 +174,8 @@ static const struct dwarf2_debug_sections dwarf2_xcoff_names = {
   { ".dwframe", NULL },
   { NULL, NULL }, /* eh_frame */
   { NULL, NULL }, /* gdb_index */
+  { NULL, NULL }, /* debug_names */
+  { NULL, NULL }, /* debug_aranges */
   23
 };
 

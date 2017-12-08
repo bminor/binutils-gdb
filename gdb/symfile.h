@@ -582,6 +582,8 @@ struct dwarf2_debug_sections {
   struct dwarf2_section_names frame;
   struct dwarf2_section_names eh_frame;
   struct dwarf2_section_names gdb_index;
+  struct dwarf2_section_names debug_names;
+  struct dwarf2_section_names debug_aranges;
   /* This field has no meaning, but exists solely to catch changes to
      this structure which are not reflected in some instance.  */
   int sentinel;
