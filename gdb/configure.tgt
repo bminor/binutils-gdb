@@ -463,6 +463,12 @@ nios2*-*-*)
 	gdb_target_obs="nios2-tdep.o"
 	;;
 
+or1k-*-* | or1knd-*-*)
+	# Target: OpenCores OpenRISC 1000 32-bit implementation bare metal
+	gdb_target_obs="or1k-tdep.o"
+	gdb_sim=../sim/or1k/libsim.a
+	;;
+
 powerpc*-*-freebsd*)
 	# Target: FreeBSD/powerpc
 	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o ppc64-tdep.o \

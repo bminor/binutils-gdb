@@ -1,3 +1,10 @@
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Stefan Wallentowitz  <stefan@wallentowitz.de>
+	    Franck Jullien  <franck.jullien@gmail.com>
+	    Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
+	* gdb.texinfo: Add OpenRISC documentation.
+
 2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Index Files): Document .debug_names and -dwarf-5.

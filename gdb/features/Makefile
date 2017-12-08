@@ -93,6 +93,7 @@ mips64-expedite = r29,pc
 mips64-dsp-expedite = r29,pc
 microblaze-expedite = r1,rpc
 nios2-linux-expedite = sp,pc
+or1k-expedite = r1,npc
 powerpc-expedite = r1,pc
 rs6000/powerpc-cell32l-expedite = r1,pc,r0,orig_r3,r4
 rs6000/powerpc-cell64l-expedite = r1,pc,r0,orig_r3,r4
@@ -136,6 +137,7 @@ XMLTOC = \
 	mips64-linux.xml \
 	nds32.xml \
 	nios2.xml \
+	or1k.xml \
 	rs6000/powerpc-32.xml \
 	rs6000/powerpc-32l.xml \
 	rs6000/powerpc-403.xml \

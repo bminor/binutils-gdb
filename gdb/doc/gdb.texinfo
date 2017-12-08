@@ -546,6 +546,11 @@ was developed by SRI International and the University of Cambridge
 Computer Laboratory under DARPA/AFRL contract FA8750-10-C-0237
 ("CTSRD"), as part of the DARPA CRASH research programme.
 
+The original port to the OpenRISC 1000 is believed to be due to
+Alessandro Forin and Per Bothner.  More recent ports have been the work
+of Jeremy Bennett, Franck Jullien, Stefan Wallentowitz and
+Stafford Horne.
+
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
 
@@ -22442,6 +22447,7 @@ acceptable commands.
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
+* OpenRISC 1000::               OpenRISC 1000 (or1k)
 * PowerPC Embedded::            PowerPC Embedded
 * AVR::                         Atmel AVR
 * CRIS::                        CRIS
@@ -22649,6 +22655,38 @@ and @samp{set mipsfpu off} will select no floating point.
 
 As usual, you can inquire about the @code{mipsfpu} variable with
 @samp{show mipsfpu}.
+@end table
+
+@node OpenRISC 1000
+@subsection OpenRISC 1000
+@cindex OpenRISC 1000
+
+@noindent
+The OpenRISC 1000 provides a free RISC instruction set architecture.  It is
+mainly provided as a soft-core which can run on Xilinx, Altera and other
+FPGA's.
+
+@value{GDBN} for OpenRISC supports the below commands when connecting to
+a target:
+
+@table @code
+
+@kindex target sim
+@item target sim
+
+Runs the builtin CPU simulator which can run very basic
+programs but does not support most hardware functions like MMU.
+For more complex use cases the user is advised to run an external
+target, and connect using @samp{target remote}.
+
+Example: @code{target sim}
+
+@item set debug or1k
+Toggle whether to display OpenRISC-specific debugging messages from the
+OpenRISC target support subsystem.
+
+@item show debug or1k
+Show whether OpenRISC-specific debugging messages are enabled.
 @end table
 
 @node PowerPC Embedded
@@ -41739,6 +41777,7 @@ registers using the capitalization used in the description.
 * M68K Features::
 * NDS32 Features::
 * Nios II Features::
+* OpenRISC 1000 Features::
 * PowerPC Features::
 * S/390 and System z Features::
 * Sparc Features::
@@ -42024,6 +42063,14 @@ targets.  It should contain the 32 core registers (@samp{zero},
 @samp{at}, @samp{r2} through @samp{r23}, @samp{et} through @samp{ra}),
 @samp{pc}, and the 16 control registers (@samp{status} through
 @samp{mpuacc}).
+
+@node OpenRISC 1000 Features
+@subsection Openrisc 1000 Features
+@cindex target descriptions, OpenRISC 1000 features
+
+The @samp{org.gnu.gdb.or1k.group0} feature is required for OpenRISC 1000
+targets.  It should contain the 32 general purpose registers (@samp{r0}
+through @samp{r31}), @samp{ppc}, @samp{npc} and @samp{sr}.
 
 @node PowerPC Features
 @subsection PowerPC Features

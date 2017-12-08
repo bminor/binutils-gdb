@@ -1,3 +1,17 @@
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Stefan Wallentowitz  <stefan@wallentowitz.de>
+	    Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
+	    Franck Jullien  <franck.jullien@gmail.com>
+	    Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
+	* configure.tgt: Add targets for or1k and or1knd.
+	* or1k-tdep.c: New file.
+	* or1k-tdep.h: New file.
+	* features/Makefile: Add or1k.xml to build.
+	* features/or1k.xml: New file.
+	* features/or1k-core.xml: New file.
+	* features/or1k.c: Generated.
+
 2017-12-12  Alan Modra  <amodra@gmail.com>
 
 	PR tdep/22576
