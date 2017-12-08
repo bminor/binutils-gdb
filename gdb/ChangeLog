@@ -1,5 +1,13 @@
 2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2read.c (create_cu_from_index_list): New from ...
+	(create_cus_from_index_list): ... this function, use it.
+	(dw_expand_symtabs_matching_file_matcher)
+	(dw2_expand_symtabs_matching_one): New from ...
+	(dw2_expand_symtabs_matching): ... this function, use them.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* defs.h (elf_sym_fns_lazy_psyms, elf_sym_fns_gdb_index): Move here
 	declarations from elfread.c.
 	(dwarf2_initialize_objfile): Change return value.

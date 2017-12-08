@@ -3061,6 +3061,29 @@ dw2_get_cu (int index)
   return dwarf2_per_objfile->all_comp_units[index];
 }
 
+/* Return a new dwarf2_per_cu_data allocated on OBJFILE's
+   objfile_obstack, and constructed with the specified field
+   values.  */
+
+static dwarf2_per_cu_data *
+create_cu_from_index_list (struct objfile *objfile,
+                          struct dwarf2_section_info *section,
+                          int is_dwz,
+                          sect_offset sect_off, ULONGEST length)
+{
+  dwarf2_per_cu_data *the_cu
+    = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+                     struct dwarf2_per_cu_data);
+  the_cu->sect_off = sect_off;
+  the_cu->length = length;
+  the_cu->objfile = objfile;
+  the_cu->section = section;
+  the_cu->v.quick = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+                                   struct dwarf2_per_cu_quick_data);
+  the_cu->is_dwz = is_dwz;
+  return the_cu;
+}
+
 /* A helper for create_cus_from_index that handles a given list of
    CUs.  */
 
@@ -3082,17 +3105,8 @@ create_cus_from_index_list (struct objfile *objfile,
       ULONGEST length = extract_unsigned_integer (cu_list + 8, 8, BFD_ENDIAN_LITTLE);
       cu_list += 2 * 8;
 
-      dwarf2_per_cu_data *the_cu
-	= OBSTACK_ZALLOC (&objfile->objfile_obstack,
-			  struct dwarf2_per_cu_data);
-      the_cu->sect_off = sect_off;
-      the_cu->length = length;
-      the_cu->objfile = objfile;
-      the_cu->section = section;
-      the_cu->v.quick = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-					struct dwarf2_per_cu_quick_data);
-      the_cu->is_dwz = is_dwz;
-      dwarf2_per_objfile->all_comp_units[base_offset + i / 2] = the_cu;
+      dwarf2_per_objfile->all_comp_units[base_offset + i / 2]
+	= create_cu_from_index_list (objfile, section, is_dwz, sect_off, length);
     }
 }
 
@@ -4939,6 +4953,31 @@ run_test ()
 
 #endif /* GDB_SELF_TEST */
 
+/* If FILE_MATCHER is NULL or if PER_CU has
+   dwarf2_per_cu_quick_data::MARK set (see
+   dw_expand_symtabs_matching_file_matcher), expand the CU and call
+   EXPANSION_NOTIFY on it.  */
+
+static void
+dw2_expand_symtabs_matching_one
+  (struct dwarf2_per_cu_data *per_cu,
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify)
+{
+  if (file_matcher == NULL || per_cu->v.quick->mark)
+    {
+      bool symtab_was_null
+	= (per_cu->v.quick->compunit_symtab == NULL);
+
+      dw2_instantiate_symtab (per_cu);
+
+      if (expansion_notify != NULL
+	  && symtab_was_null
+	  && per_cu->v.quick->compunit_symtab != NULL)
+	expansion_notify (per_cu->v.quick->compunit_symtab);
+    }
+}
+
 /* Helper for dw2_expand_matching symtabs.  Called on each symbol
    matched, to expand corresponding CUs that were marked.  IDX is the
    index of the symbol name that matched.  */
@@ -5016,18 +5055,91 @@ dw2_expand_marked_cus
 	}
 
       per_cu = dw2_get_cutu (cu_index);
-      if (file_matcher == NULL || per_cu->v.quick->mark)
+      dw2_expand_symtabs_matching_one (per_cu, file_matcher,
+				       expansion_notify);
+    }
+}
+
+/* If FILE_MATCHER is non-NULL, set all the
+   dwarf2_per_cu_quick_data::MARK of the current DWARF2_PER_OBJFILE
+   that match FILE_MATCHER.  */
+
+static void
+dw_expand_symtabs_matching_file_matcher
+  (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher)
+{
+  if (file_matcher == NULL)
+    return;
+
+  objfile *const objfile = dwarf2_per_objfile->objfile;
+
+  htab_up visited_found (htab_create_alloc (10, htab_hash_pointer,
+					    htab_eq_pointer,
+					    NULL, xcalloc, xfree));
+  htab_up visited_not_found (htab_create_alloc (10, htab_hash_pointer,
+						htab_eq_pointer,
+						NULL, xcalloc, xfree));
+
+  /* The rule is CUs specify all the files, including those used by
+     any TU, so there's no need to scan TUs here.  */
+
+  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+    {
+      int j;
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+      struct quick_file_names *file_data;
+      void **slot;
+
+      QUIT;
+
+      per_cu->v.quick->mark = 0;
+
+      /* We only need to look at symtabs not already expanded.  */
+      if (per_cu->v.quick->compunit_symtab)
+	continue;
+
+      file_data = dw2_get_file_names (per_cu);
+      if (file_data == NULL)
+	continue;
+
+      if (htab_find (visited_not_found.get (), file_data) != NULL)
+	continue;
+      else if (htab_find (visited_found.get (), file_data) != NULL)
 	{
-	  int symtab_was_null =
-	    (per_cu->v.quick->compunit_symtab == NULL);
-
-	  dw2_instantiate_symtab (per_cu);
-
-	  if (expansion_notify != NULL
-	      && symtab_was_null
-	      && per_cu->v.quick->compunit_symtab != NULL)
-	    expansion_notify (per_cu->v.quick->compunit_symtab);
+	  per_cu->v.quick->mark = 1;
+	  continue;
 	}
+
+      for (j = 0; j < file_data->num_file_names; ++j)
+	{
+	  const char *this_real_name;
+
+	  if (file_matcher (file_data->file_names[j], false))
+	    {
+	      per_cu->v.quick->mark = 1;
+	      break;
+	    }
+
+	  /* Before we invoke realpath, which can get expensive when many
+	     files are involved, do a quick comparison of the basenames.  */
+	  if (!basenames_may_differ
+	      && !file_matcher (lbasename (file_data->file_names[j]),
+				true))
+	    continue;
+
+	  this_real_name = dw2_get_real_path (objfile, file_data, j);
+	  if (file_matcher (this_real_name, false))
+	    {
+	      per_cu->v.quick->mark = 1;
+	      break;
+	    }
+	}
+
+      slot = htab_find_slot (per_cu->v.quick->mark
+			     ? visited_found.get ()
+			     : visited_not_found.get (),
+			     file_data, INSERT);
+      *slot = file_data;
     }
 }
 
@@ -5048,77 +5160,7 @@ dw2_expand_symtabs_matching
   if (!dwarf2_per_objfile->index_table)
     return;
 
-  if (file_matcher != NULL)
-    {
-      htab_up visited_found (htab_create_alloc (10, htab_hash_pointer,
-						htab_eq_pointer,
-						NULL, xcalloc, xfree));
-      htab_up visited_not_found (htab_create_alloc (10, htab_hash_pointer,
-						    htab_eq_pointer,
-						    NULL, xcalloc, xfree));
-
-      /* The rule is CUs specify all the files, including those used by
-	 any TU, so there's no need to scan TUs here.  */
-
-      for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
-	{
-	  int j;
-	  struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
-	  struct quick_file_names *file_data;
-	  void **slot;
-
-	  QUIT;
-
-	  per_cu->v.quick->mark = 0;
-
-	  /* We only need to look at symtabs not already expanded.  */
-	  if (per_cu->v.quick->compunit_symtab)
-	    continue;
-
-	  file_data = dw2_get_file_names (per_cu);
-	  if (file_data == NULL)
-	    continue;
-
-	  if (htab_find (visited_not_found.get (), file_data) != NULL)
-	    continue;
-	  else if (htab_find (visited_found.get (), file_data) != NULL)
-	    {
-	      per_cu->v.quick->mark = 1;
-	      continue;
-	    }
-
-	  for (j = 0; j < file_data->num_file_names; ++j)
-	    {
-	      const char *this_real_name;
-
-	      if (file_matcher (file_data->file_names[j], false))
-		{
-		  per_cu->v.quick->mark = 1;
-		  break;
-		}
-
-	      /* Before we invoke realpath, which can get expensive when many
-		 files are involved, do a quick comparison of the basenames.  */
-	      if (!basenames_may_differ
-		  && !file_matcher (lbasename (file_data->file_names[j]),
-				    true))
-		continue;
-
-	      this_real_name = dw2_get_real_path (objfile, file_data, j);
-	      if (file_matcher (this_real_name, false))
-		{
-		  per_cu->v.quick->mark = 1;
-		  break;
-		}
-	    }
-
-	  slot = htab_find_slot (per_cu->v.quick->mark
-				 ? visited_found.get ()
-				 : visited_not_found.get (),
-				 file_data, INSERT);
-	  *slot = file_data;
-	}
-    }
+  dw_expand_symtabs_matching_file_matcher (file_matcher);
 
   mapped_index &index = *dwarf2_per_objfile->index_table;
 
