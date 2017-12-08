@@ -1,4 +1,11 @@
 2017-12-12  Peter Gavin  <pgavin@gmail.com>
+	    Stafford Horne  <shorne@gmail.com>
+
+	* cgen-ops.h (MUL2OFSI): New function, 2's complement overflow
+	flag.
+	(MUL1OFSI): New function, 1's complement overflow flag.
+
+2017-12-12  Peter Gavin  <pgavin@gmail.com>
 	    Stafford Horne <shorne@gmail.com>
 
 	* cgen-accfp.c (remsf, remdf): New function.
