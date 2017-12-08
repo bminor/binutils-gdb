@@ -621,6 +621,12 @@ m;CORE_ADDR;convert_from_func_ptr_addr;CORE_ADDR addr, struct target_ops *targ;a
 # possible it should be in TARGET_READ_PC instead).
 m;CORE_ADDR;addr_bits_remove;CORE_ADDR addr;addr;;core_addr_identity;;0
 
+# On some machines, not all bits of an address word are significant.
+# For example, on AArch64, the top bits of an address known as the "tag"
+# are ignored by the kernel, the hardware, etc. and can be regarded as
+# additional data associated with the address.
+v;int;significant_addr_bit;;;;;gdbarch_addr_bit (gdbarch);
+
 # FIXME/cagney/2001-01-18: This should be split in two.  A target method that
 # indicates if the target needs software single step.  An ISA method to
 # implement it.

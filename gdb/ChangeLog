@@ -1,3 +1,13 @@
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_gdbarch_init): Install gdbarch
+	significant_addr_bit.
+	* gdbarch.sh (significant_addr_bit): New.
+	* gdbarch.c, gdbarch.h: Re-generated.
+	* target.c (memory_xfer_partial): Call address_significant.
+	* utils.c (address_significant): New function.
+	* utils.h (address_significant): Declare.
+
 2017-12-08  Tom Tromey  <tom@tromey.com>
 
 	* printcmd.c (ui_printf): Update.  Use std::vector.
