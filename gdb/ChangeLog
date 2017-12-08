@@ -1,3 +1,7 @@
+2017-12-08  Pedro Alves  <palves@redhat.com>
+
+	* common/hash_enum.h: New file.
+
 2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (create_cu_from_index_list): New from ...
