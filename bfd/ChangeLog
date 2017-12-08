@@ -1,3 +1,7 @@
+2017-12-08  Nick Clifton  <nickc@redhat.com>
+
+	* elfcode.h (elf_write_relocs): Check for an empty howto field.
+
 2017-12-08  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
 
 	* bfd.c (bfd_get_sign_extend_vma): Handle aix5coff64-rs6000.
