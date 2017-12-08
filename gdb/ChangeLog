@@ -1,6 +1,33 @@
 2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
+	* contrib/gdb-add-index.sh (index): Rename to ...
+	(index4): ... here.
+	(index5, debugstr, debugstrmerge, debugstrerr): New variables.
+	Support also .debug_names and .debug_str.
+	* dwarf2read.c: Include cmath, set, list.
+	(INDEX_SUFFIX): Rename to ...
+	(INDEX4_SUFFIX): ... here.
+	(INDEX5_SUFFIX, DEBUG_STR_SUFFIX): New.
+	(file_write(FILE *, const void *, size_t)): New.
+	(file_write(FILE *, const std::vector<Elem, Alloc> &)): New.
+	(data_buf::append_unsigned_leb128, data_buf::empty): New.
+	(data_buf::file_write): Use ::file_write.
+	(data_buf::c_str, dwarf5_djb_hash, debug_names)
+	(check_dwarf64_offsets): New.
+	(psyms_seen_size, write_gdbindex): New from
+	write_psymtabs_to_index code.
+	(dwarf5_gdb_augmentation, write_debug_names, assert_file_size)
+	(enum dw_index_kind): New.
+	(write_psymtabs_to_index): New parameter index_kind.  Support
+	filename_str and out_file_str.  Move code to write_gdbindex,
+	possibly call write_debug_names.
+	(save_gdb_index_command): New parameter -dwarf-5.
+	(_initialize_dwarf2_read): Document the new parameter -dwarf-5.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
 	* contrib/cc-with-tweaks.sh: Change interpreter to bash, incl. initial
 	comment.
 	(GDB_ADD_INDEX): New variable.

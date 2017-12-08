@@ -19565,12 +19565,16 @@ using @command{objcopy}.
 To create an index file, use the @code{save gdb-index} command:
 
 @table @code
-@item save gdb-index @var{directory}
+@item save gdb-index [-dwarf-5] @var{directory}
 @kindex save gdb-index
-Create an index file for each symbol file currently known by
-@value{GDBN}.  Each file is named after its corresponding symbol file,
-with @samp{.gdb-index} appended, and is written into the given
-@var{directory}.
+Create index files for all symbol files currently known by
+@value{GDBN}.  For each known @var{symbol-file}, this command by
+default creates it produces a single file
+@file{@var{symbol-file}.gdb-index}.  If you invoke this command with
+the @option{-dwarf-5} option, it produces 2 files:
+@file{@var{symbol-file}.debug_names} and
+@file{@var{symbol-file}.debug_str}.  The files are created in the
+given @var{directory}.
 @end table
 
 Once you have created an index file you can merge it into your symbol
@@ -19579,6 +19583,16 @@ file, here named @file{symfile}, using @command{objcopy}:
 @smallexample
 $ objcopy --add-section .gdb_index=symfile.gdb-index \
     --set-section-flags .gdb_index=readonly symfile symfile
+@end smallexample
+
+Or for @code{-dwarf-5}:
+
+@smallexample
+$ objcopy --dump-section .debug_str=symfile.debug_str.new symfile
+$ cat symfile.debug_str >>symfile.debug_str.new
+$ objcopy --add-section .debug_names=symfile.gdb-index \
+    --set-section-flags .debug_names=readonly \
+    --update-section .debug_str=symfile.debug_str.new symfile symfile
 @end smallexample
 
 @value{GDBN} will normally ignore older versions of @file{.gdb_index}

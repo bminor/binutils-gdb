@@ -82,6 +82,12 @@
 #include <unordered_set>
 #include <unordered_map>
 #include "selftest.h"
+#include <cmath>
+#include <set>
+#include <forward_list>
+
+typedef struct symbol *symbolp;
+DEF_VEC_P (symbolp);
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
@@ -2267,7 +2273,9 @@ attr_value_as_address (struct attribute *attr)
 }
 
 /* The suffix for an index file.  */
-#define INDEX_SUFFIX ".gdb-index"
+#define INDEX4_SUFFIX ".gdb-index"
+#define INDEX5_SUFFIX ".debug_names"
+#define DEBUG_STR_SUFFIX ".debug_str"
 
 /* See declaration.  */
 
@@ -24232,6 +24240,25 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 
 /* The "save gdb-index" command.  */
 
+/* Write SIZE bytes from the buffer pointed to by DATA to FILE, with
+   error checking.  */
+
+static void
+file_write (FILE *file, const void *data, size_t size)
+{
+  if (fwrite (data, 1, size, file) != size)
+    error (_("couldn't data write to file"));
+}
+
+/* Write the contents of VEC to FILE, with error checking.  */
+
+template<typename Elem, typename Alloc>
+static void
+file_write (FILE *file, const std::vector<Elem, Alloc> &vec)
+{
+  file_write (file, vec.data (), vec.size () * sizeof (vec[0]));
+}
+
 /* In-memory buffer to prepare data to be written later to a file.  */
 class data_buf
 {
@@ -24253,6 +24280,21 @@ public:
     std::copy (cstr, cstr + size, grow (size));
   }
 
+  /* Store INPUT as ULEB128 to the end of buffer.  */
+  void append_unsigned_leb128 (ULONGEST input)
+  {
+    for (;;)
+      {
+	gdb_byte output = input & 0x7f;
+	input >>= 7;
+	if (input)
+	  output |= 0x80;
+	append_data (output);
+	if (input == 0)
+	  break;
+      }
+  }
+
   /* Accept a host-format integer in VAL and append it to the buffer
      as a target-format integer which is LEN bytes long.  */
   void append_uint (size_t len, bfd_endian byte_order, ULONGEST val)
@@ -24266,11 +24308,16 @@ public:
     return m_vec.size ();
   }
 
+  /* Return true iff the buffer is empty.  */
+  bool empty () const
+  {
+    return m_vec.empty ();
+  }
+
   /* Write the buffer to FILE.  */
   void file_write (FILE *file) const
   {
-    if (::fwrite (m_vec.data (), 1, m_vec.size (), file) != m_vec.size ())
-      error (_("couldn't write data to file"));
+    ::file_write (file, m_vec);
   }
 
 private:
@@ -24417,6 +24464,13 @@ public:
   bool operator== (const c_str_view &other) const
   {
     return strcmp (m_cstr, other.m_cstr) == 0;
+  }
+
+  /* Return the underlying C string.  Note, the returned string is
+     only a reference with lifetime of this object.  */
+  const char *c_str () const
+  {
+    return m_cstr;
   }
 
 private:
@@ -24771,38 +24825,596 @@ recursively_write_psymbols (struct objfile *objfile,
 		  1);
 }
 
-/* Create an index file for OBJFILE in the directory DIR.  */
+/* Symbol name hashing function as specified by DWARF-5.  */
 
-static void
-write_psymtabs_to_index (struct objfile *objfile, const char *dir)
+static uint32_t
+dwarf5_djb_hash (const char *str_)
 {
-  if (dwarf2_per_objfile->using_index)
-    error (_("Cannot use an index to create the index"));
+  const unsigned char *str = (const unsigned char *) str_;
 
-  if (VEC_length (dwarf2_section_info_def, dwarf2_per_objfile->types) > 1)
-    error (_("Cannot make an index when the file has multiple .debug_types sections"));
+  /* Note: tolower here ignores UTF-8, which isn't fully compliant.
+     See http://dwarfstd.org/ShowIssue.php?issue=161027.1.  */
 
-  if (!objfile->psymtabs || !objfile->psymtabs_addrmap)
-    return;
+  uint32_t hash = 5381;
+  while (int c = *str++)
+    hash = hash * 33 + tolower (c);
+  return hash;
+}
 
-  struct stat st;
-  if (stat (objfile_name (objfile), &st) < 0)
-    perror_with_name (objfile_name (objfile));
+/* DWARF-5 .debug_names builder.  */
+class debug_names
+{
+public:
+  debug_names (bool is_dwarf64, bfd_endian dwarf5_byte_order)
+    : m_dwarf5_byte_order (dwarf5_byte_order),
+      m_dwarf32 (dwarf5_byte_order),
+      m_dwarf64 (dwarf5_byte_order),
+      m_dwarf (is_dwarf64
+	       ? static_cast<dwarf &> (m_dwarf64)
+	       : static_cast<dwarf &> (m_dwarf32)),
+      m_name_table_string_offs (m_dwarf.name_table_string_offs),
+      m_name_table_entry_offs (m_dwarf.name_table_entry_offs)
+  {}
 
-  std::string filename (std::string (dir) + SLASH_STRING
-			+ lbasename (objfile_name (objfile)) + INDEX_SUFFIX);
+  /* Insert one symbol.  */
+  void insert (const partial_symbol *psym, int cu_index, bool is_static)
+  {
+    const int dwarf_tag = psymbol_tag (psym);
+    if (dwarf_tag == 0)
+      return;
+    const char *const name = SYMBOL_SEARCH_NAME (psym);
+    const auto insertpair
+      = m_name_to_value_set.emplace (c_str_view (name),
+				     std::set<symbol_value> ());
+    std::set<symbol_value> &value_set = insertpair.first->second;
+    value_set.emplace (symbol_value (dwarf_tag, cu_index, is_static));
+  }
 
-  FILE *out_file = gdb_fopen_cloexec (filename.c_str (), "wb").release ();
-  if (!out_file)
-    error (_("Can't open `%s' for writing"), filename.c_str ());
+  /* Build all the tables.  All symbols must be already inserted.
+     This function does not call file_write, caller has to do it
+     afterwards.  */
+  void build ()
+  {
+    /* Verify the build method has not be called twice.  */
+    gdb_assert (m_abbrev_table.empty ());
+    const size_t name_count = m_name_to_value_set.size ();
+    m_bucket_table.resize
+      (std::pow (2, std::ceil (std::log2 (name_count * 4 / 3))));
+    m_hash_table.reserve (name_count);
+    m_name_table_string_offs.reserve (name_count);
+    m_name_table_entry_offs.reserve (name_count);
 
-  /* Order matters here; we want FILE to be closed before FILENAME is
-     unlinked, because on MS-Windows one cannot delete a file that is
-     still open.  (Don't call anything here that might throw until
-     file_closer is created.)  */
-  gdb::unlinker unlink_file (filename.c_str ());
-  gdb_file_up close_out_file (out_file);
+    /* Map each hash of symbol to its name and value.  */
+    struct hash_it_pair
+    {
+      uint32_t hash;
+      decltype (m_name_to_value_set)::const_iterator it;
+    };
+    std::vector<std::forward_list<hash_it_pair>> bucket_hash;
+    bucket_hash.resize (m_bucket_table.size ());
+    for (decltype (m_name_to_value_set)::const_iterator it
+	   = m_name_to_value_set.cbegin ();
+	 it != m_name_to_value_set.cend ();
+	 ++it)
+      {
+	const char *const name = it->first.c_str ();
+	const uint32_t hash = dwarf5_djb_hash (name);
+	hash_it_pair hashitpair;
+	hashitpair.hash = hash;
+	hashitpair.it = it;
+	auto &slot = bucket_hash[hash % bucket_hash.size()];
+	slot.push_front (std::move (hashitpair));
+      }
+    for (size_t bucket_ix = 0; bucket_ix < bucket_hash.size (); ++bucket_ix)
+      {
+	const std::forward_list<hash_it_pair> &hashitlist
+	  = bucket_hash[bucket_ix];
+	if (hashitlist.empty ())
+	  continue;
+	uint32_t &bucket_slot = m_bucket_table[bucket_ix];
+	/* The hashes array is indexed starting at 1.  */
+	store_unsigned_integer (reinterpret_cast<gdb_byte *> (&bucket_slot),
+				sizeof (bucket_slot), m_dwarf5_byte_order,
+				m_hash_table.size () + 1);
+	for (const hash_it_pair &hashitpair : hashitlist)
+	  {
+	    m_hash_table.push_back (0);
+	    store_unsigned_integer (reinterpret_cast<gdb_byte *>
+							(&m_hash_table.back ()),
+				    sizeof (m_hash_table.back ()),
+				    m_dwarf5_byte_order, hashitpair.hash);
+	    const c_str_view &name = hashitpair.it->first;
+	    const std::set<symbol_value> &value_set = hashitpair.it->second;
+	    m_name_table_string_offs.push_back_reorder
+	      (m_debugstrlookup.lookup (name.c_str ()));
+	    m_name_table_entry_offs.push_back_reorder (m_entry_pool.size ());
+	    gdb_assert (!value_set.empty ());
+	    for (const symbol_value &value : value_set)
+	      {
+		int &idx = m_indexkey_to_idx[index_key (value.dwarf_tag,
+							value.is_static)];
+		if (idx == 0)
+		  {
+		    idx = m_idx_next++;
+		    m_abbrev_table.append_unsigned_leb128 (idx);
+		    m_abbrev_table.append_unsigned_leb128 (value.dwarf_tag);
+		    m_abbrev_table.append_unsigned_leb128 (DW_IDX_compile_unit);
+		    m_abbrev_table.append_unsigned_leb128 (DW_FORM_udata);
+		    m_abbrev_table.append_unsigned_leb128 (value.is_static
+							   ? DW_IDX_GNU_internal
+							   : DW_IDX_GNU_external);
+		    m_abbrev_table.append_unsigned_leb128 (DW_FORM_flag_present);
 
+		    /* Terminate attributes list.  */
+		    m_abbrev_table.append_unsigned_leb128 (0);
+		    m_abbrev_table.append_unsigned_leb128 (0);
+		  }
+
+		m_entry_pool.append_unsigned_leb128 (idx);
+		m_entry_pool.append_unsigned_leb128 (value.cu_index);
+	      }
+
+	    /* Terminate the list of CUs.  */
+	    m_entry_pool.append_unsigned_leb128 (0);
+	  }
+      }
+    gdb_assert (m_hash_table.size () == name_count);
+
+    /* Terminate tags list.  */
+    m_abbrev_table.append_unsigned_leb128 (0);
+  }
+
+  /* Return .debug_names bucket count.  This must be called only after
+     calling the build method.  */
+  uint32_t bucket_count () const
+  {
+    /* Verify the build method has been already called.  */
+    gdb_assert (!m_abbrev_table.empty ());
+    const uint32_t retval = m_bucket_table.size ();
+
+    /* Check for overflow.  */
+    gdb_assert (retval == m_bucket_table.size ());
+    return retval;
+  }
+
+  /* Return .debug_names names count.  This must be called only after
+     calling the build method.  */
+  uint32_t name_count () const
+  {
+    /* Verify the build method has been already called.  */
+    gdb_assert (!m_abbrev_table.empty ());
+    const uint32_t retval = m_hash_table.size ();
+
+    /* Check for overflow.  */
+    gdb_assert (retval == m_hash_table.size ());
+    return retval;
+  }
+
+  /* Return number of bytes of .debug_names abbreviation table.  This
+     must be called only after calling the build method.  */
+  uint32_t abbrev_table_bytes () const
+  {
+    gdb_assert (!m_abbrev_table.empty ());
+    return m_abbrev_table.size ();
+  }
+
+  /* Recurse into all "included" dependencies and store their symbols
+     as if they appeared in this psymtab.  */
+  void recursively_write_psymbols
+    (struct objfile *objfile,
+     struct partial_symtab *psymtab,
+     std::unordered_set<partial_symbol *> &psyms_seen,
+     int cu_index)
+  {
+    for (int i = 0; i < psymtab->number_of_dependencies; ++i)
+      if (psymtab->dependencies[i]->user != NULL)
+	recursively_write_psymbols (objfile, psymtab->dependencies[i],
+				    psyms_seen, cu_index);
+
+    write_psymbols (psyms_seen,
+		    &objfile->global_psymbols[psymtab->globals_offset],
+		    psymtab->n_global_syms, cu_index, false);
+    write_psymbols (psyms_seen,
+		    &objfile->static_psymbols[psymtab->statics_offset],
+		    psymtab->n_static_syms, cu_index, true);
+  }
+
+  /* Return number of bytes the .debug_names section will have.  This
+     must be called only after calling the build method.  */
+  size_t bytes () const
+  {
+    /* Verify the build method has been already called.  */
+    gdb_assert (!m_abbrev_table.empty ());
+    size_t expected_bytes = 0;
+    expected_bytes += m_bucket_table.size () * sizeof (m_bucket_table[0]);
+    expected_bytes += m_hash_table.size () * sizeof (m_hash_table[0]);
+    expected_bytes += m_name_table_string_offs.bytes ();
+    expected_bytes += m_name_table_entry_offs.bytes ();
+    expected_bytes += m_abbrev_table.size ();
+    expected_bytes += m_entry_pool.size ();
+    return expected_bytes;
+  }
+
+  /* Write .debug_names to FILE_NAMES and .debug_str addition to
+     FILE_STR.  This must be called only after calling the build
+     method.  */
+  void file_write (FILE *file_names, FILE *file_str) const
+  {
+    /* Verify the build method has been already called.  */
+    gdb_assert (!m_abbrev_table.empty ());
+    ::file_write (file_names, m_bucket_table);
+    ::file_write (file_names, m_hash_table);
+    m_name_table_string_offs.file_write (file_names);
+    m_name_table_entry_offs.file_write (file_names);
+    m_abbrev_table.file_write (file_names);
+    m_entry_pool.file_write (file_names);
+    m_debugstrlookup.file_write (file_str);
+  }
+
+private:
+
+  /* Storage for symbol names mapping them to their .debug_str section
+     offsets.  */
+  class debug_str_lookup
+  {
+  public:
+
+    /* Object costructor to be called for current DWARF2_PER_OBJFILE.
+       All .debug_str section strings are automatically stored.  */
+    debug_str_lookup ()
+      : m_abfd (dwarf2_per_objfile->objfile->obfd)
+    {
+      dwarf2_read_section (dwarf2_per_objfile->objfile,
+			   &dwarf2_per_objfile->str);
+      if (dwarf2_per_objfile->str.buffer == NULL)
+	return;
+      for (const gdb_byte *data = dwarf2_per_objfile->str.buffer;
+	   data < (dwarf2_per_objfile->str.buffer
+		   + dwarf2_per_objfile->str.size);)
+	{
+	  const char *const s = reinterpret_cast<const char *> (data);
+	  const auto insertpair
+	    = m_str_table.emplace (c_str_view (s),
+				   data - dwarf2_per_objfile->str.buffer);
+	  if (!insertpair.second)
+	    complaint (&symfile_complaints,
+		       _("Duplicate string \"%s\" in "
+			 ".debug_str section [in module %s]"),
+		       s, bfd_get_filename (m_abfd));
+	  data += strlen (s) + 1;
+	}
+    }
+
+    /* Return offset of symbol name S in the .debug_str section.  Add
+       such symbol to the section's end if it does not exist there
+       yet.  */
+    size_t lookup (const char *s)
+    {
+      const auto it = m_str_table.find (c_str_view (s));
+      if (it != m_str_table.end ())
+	return it->second;
+      const size_t offset = (dwarf2_per_objfile->str.size
+			     + m_str_add_buf.size ());
+      m_str_table.emplace (c_str_view (s), offset);
+      m_str_add_buf.append_cstr0 (s);
+      return offset;
+    }
+
+    /* Append the end of the .debug_str section to FILE.  */
+    void file_write (FILE *file) const
+    {
+      m_str_add_buf.file_write (file);
+    }
+
+  private:
+    std::unordered_map<c_str_view, size_t, c_str_view_hasher> m_str_table;
+    bfd *const m_abfd;
+
+    /* Data to add at the end of .debug_str for new needed symbol names.  */
+    data_buf m_str_add_buf;
+  };
+
+  /* Container to map used DWARF tags to their .debug_names abbreviation
+     tags.  */
+  class index_key
+  {
+  public:
+    index_key (int dwarf_tag_, bool is_static_)
+      : dwarf_tag (dwarf_tag_), is_static (is_static_)
+    {
+    }
+
+    bool
+    operator== (const index_key &other) const
+    {
+      return dwarf_tag == other.dwarf_tag && is_static == other.is_static;
+    }
+
+    const int dwarf_tag;
+    const bool is_static;
+  };
+
+  /* Provide std::unordered_map::hasher for index_key.  */
+  class index_key_hasher
+  {
+  public:
+    size_t
+    operator () (const index_key &key) const
+    {
+      return (std::hash<int>() (key.dwarf_tag) << 1) | key.is_static;
+    }
+  };
+
+  /* Parameters of one symbol entry.  */
+  class symbol_value
+  {
+  public:
+    const int dwarf_tag, cu_index;
+    const bool is_static;
+
+    symbol_value (int dwarf_tag_, int cu_index_, bool is_static_)
+      : dwarf_tag (dwarf_tag_), cu_index (cu_index_), is_static (is_static_)
+    {}
+
+    bool
+    operator< (const symbol_value &other) const
+    {
+#define X(n) \
+  do \
+    { \
+      if (n < other.n) \
+	return true; \
+      if (n > other.n) \
+	return false; \
+    } \
+  while (0)
+      X (dwarf_tag);
+      X (is_static);
+      X (cu_index);
+#undef X
+      return false;
+    }
+  };
+
+  /* Abstract base class to unify DWARF-32 and DWARF-64 name table
+     output.  */
+  class offset_vec
+  {
+  protected:
+    const bfd_endian dwarf5_byte_order;
+  public:
+    explicit offset_vec (bfd_endian dwarf5_byte_order_)
+      : dwarf5_byte_order (dwarf5_byte_order_)
+    {}
+
+    /* Call std::vector::reserve for NELEM elements.  */
+    virtual void reserve (size_t nelem) = 0;
+
+    /* Call std::vector::push_back with store_unsigned_integer byte
+       reordering for ELEM.  */
+    virtual void push_back_reorder (size_t elem) = 0;
+
+    /* Return expected output size in bytes.  */
+    virtual size_t bytes () const = 0;
+
+    /* Write name table to FILE.  */
+    virtual void file_write (FILE *file) const = 0;
+  };
+
+  /* Template to unify DWARF-32 and DWARF-64 output.  */
+  template<typename OffsetSize>
+  class offset_vec_tmpl : public offset_vec
+  {
+  public:
+    explicit offset_vec_tmpl (bfd_endian dwarf5_byte_order_)
+      : offset_vec (dwarf5_byte_order_)
+    {}
+
+    /* Implement offset_vec::reserve.  */
+    void reserve (size_t nelem) override
+    {
+      m_vec.reserve (nelem);
+    }
+
+    /* Implement offset_vec::push_back_reorder.  */
+    void push_back_reorder (size_t elem) override
+    {
+      m_vec.push_back (elem);
+      /* Check for overflow.  */
+      gdb_assert (m_vec.back () == elem);
+      store_unsigned_integer (reinterpret_cast<gdb_byte *> (&m_vec.back ()),
+			      sizeof (m_vec.back ()), dwarf5_byte_order, elem);
+    }
+
+    /* Implement offset_vec::bytes.  */
+    size_t bytes () const override
+    {
+      return m_vec.size () * sizeof (m_vec[0]);
+    }
+
+    /* Implement offset_vec::file_write.  */
+    void file_write (FILE *file) const override
+    {
+      ::file_write (file, m_vec);
+    }
+
+  private:
+    std::vector<OffsetSize> m_vec;
+  };
+
+  /* Base class to unify DWARF-32 and DWARF-64 .debug_names output
+     respecting name table width.  */
+  class dwarf
+  {
+  public:
+    offset_vec &name_table_string_offs, &name_table_entry_offs;
+
+    dwarf (offset_vec &name_table_string_offs_,
+	   offset_vec &name_table_entry_offs_)
+      : name_table_string_offs (name_table_string_offs_),
+	name_table_entry_offs (name_table_entry_offs_)
+    {
+    }
+  };
+
+  /* Template to unify DWARF-32 and DWARF-64 .debug_names output
+     respecting name table width.  */
+  template<typename OffsetSize>
+  class dwarf_tmpl : public dwarf
+  {
+  public:
+    explicit dwarf_tmpl (bfd_endian dwarf5_byte_order_)
+      : dwarf (m_name_table_string_offs, m_name_table_entry_offs),
+	m_name_table_string_offs (dwarf5_byte_order_),
+	m_name_table_entry_offs (dwarf5_byte_order_)
+    {}
+
+  private:
+    offset_vec_tmpl<OffsetSize> m_name_table_string_offs;
+    offset_vec_tmpl<OffsetSize> m_name_table_entry_offs;
+  };
+
+  /* Try to reconstruct original DWARF tag for given partial_symbol.
+     This function is not DWARF-5 compliant but it is sufficient for
+     GDB as a DWARF-5 index consumer.  */
+  static int psymbol_tag (const struct partial_symbol *psym)
+  {
+    domain_enum domain = PSYMBOL_DOMAIN (psym);
+    enum address_class aclass = PSYMBOL_CLASS (psym);
+
+    switch (domain)
+      {
+      case VAR_DOMAIN:
+	switch (aclass)
+	  {
+	  case LOC_BLOCK:
+	    return DW_TAG_subprogram;
+	  case LOC_TYPEDEF:
+	    return DW_TAG_typedef;
+	  case LOC_COMPUTED:
+	  case LOC_CONST_BYTES:
+	  case LOC_OPTIMIZED_OUT:
+	  case LOC_STATIC:
+	    return DW_TAG_variable;
+	  case LOC_CONST:
+	    /* Note: It's currently impossible to recognize psyms as enum values
+	       short of reading the type info.  For now punt.  */
+	    return DW_TAG_variable;
+	  default:
+	    /* There are other LOC_FOO values that one might want to classify
+	       as variables, but dwarf2read.c doesn't currently use them.  */
+	    return DW_TAG_variable;
+	  }
+      case STRUCT_DOMAIN:
+	return DW_TAG_structure_type;
+      default:
+	return 0;
+      }
+  }
+
+  /* Call insert for all partial symbols and mark them in PSYMS_SEEN.  */
+  void write_psymbols (std::unordered_set<partial_symbol *> &psyms_seen,
+		       struct partial_symbol **psymp, int count, int cu_index,
+		       bool is_static)
+  {
+    for (; count-- > 0; ++psymp)
+      {
+	struct partial_symbol *psym = *psymp;
+
+	if (SYMBOL_LANGUAGE (psym) == language_ada)
+	  error (_("Ada is not currently supported by the index"));
+
+	/* Only add a given psymbol once.  */
+	if (psyms_seen.insert (psym).second)
+	  insert (psym, cu_index, is_static);
+      }
+  }
+
+  /* Store value of each symbol.  */
+  std::unordered_map<c_str_view, std::set<symbol_value>, c_str_view_hasher>
+    m_name_to_value_set;
+
+  /* Tables of DWARF-5 .debug_names.  They are in object file byte
+     order.  */
+  std::vector<uint32_t> m_bucket_table;
+  std::vector<uint32_t> m_hash_table;
+
+  const bfd_endian m_dwarf5_byte_order;
+  dwarf_tmpl<uint32_t> m_dwarf32;
+  dwarf_tmpl<uint64_t> m_dwarf64;
+  dwarf &m_dwarf;
+  offset_vec &m_name_table_string_offs, &m_name_table_entry_offs;
+  debug_str_lookup m_debugstrlookup;
+
+  /* Map each used .debug_names abbreviation tag parameter to its
+     index value.  */
+  std::unordered_map<index_key, int, index_key_hasher> m_indexkey_to_idx;
+
+  /* Next unused .debug_names abbreviation tag for
+     m_indexkey_to_idx.  */
+  int m_idx_next = 1;
+
+  /* .debug_names abbreviation table.  */
+  data_buf m_abbrev_table;
+
+  /* .debug_names entry pool.  */
+  data_buf m_entry_pool;
+};
+
+/* Return iff any of the needed offsets does not fit into 32-bit
+   .debug_names section.  */
+
+static bool
+check_dwarf64_offsets ()
+{
+  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+    {
+      const dwarf2_per_cu_data &per_cu = *dwarf2_per_objfile->all_comp_units[i];
+
+      if (to_underlying (per_cu.sect_off) >= (static_cast<uint64_t> (1) << 32))
+	return true;
+    }
+  for (int i = 0; i < dwarf2_per_objfile->n_type_units; ++i)
+    {
+      const signatured_type &sigtype = *dwarf2_per_objfile->all_type_units[i];
+      const dwarf2_per_cu_data &per_cu = sigtype.per_cu;
+
+      if (to_underlying (per_cu.sect_off) >= (static_cast<uint64_t> (1) << 32))
+	return true;
+    }
+  return false;
+}
+
+/* The psyms_seen set is potentially going to be largish (~40k
+   elements when indexing a -g3 build of GDB itself).  Estimate the
+   number of elements in order to avoid too many rehashes, which
+   require rebuilding buckets and thus many trips to
+   malloc/free.  */
+
+static size_t
+psyms_seen_size ()
+{
+  size_t psyms_count = 0;
+  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+    {
+      struct dwarf2_per_cu_data *per_cu
+	= dwarf2_per_objfile->all_comp_units[i];
+      struct partial_symtab *psymtab = per_cu->v.psymtab;
+
+      if (psymtab != NULL && psymtab->user == NULL)
+	recursively_count_psymbols (psymtab, psyms_count);
+    }
+  /* Generating an index for gdb itself shows a ratio of
+     TOTAL_SEEN_SYMS/UNIQUE_SYMS or ~5.  4 seems like a good bet.  */
+  return psyms_count / 4;
+}
+
+/* Write new .gdb_index section for OBJFILE into OUT_FILE.
+   Return how many bytes were expected to be written into OUT_FILE.  */
+
+static size_t
+write_gdbindex (struct objfile *objfile, FILE *out_file)
+{
   mapped_symtab symtab;
   data_buf cu_list;
 
@@ -24817,24 +25429,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
      work here.  Also, the debug_types entries do not appear in
      all_comp_units, but only in their own hash table.  */
 
-  /* The psyms_seen set is potentially going to be largish (~40k
-     elements when indexing a -g3 build of GDB itself).  Estimate the
-     number of elements in order to avoid too many rehashes, which
-     require rebuilding buckets and thus many trips to
-     malloc/free.  */
-  size_t psyms_count = 0;
-  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
-    {
-      struct dwarf2_per_cu_data *per_cu
-	= dwarf2_per_objfile->all_comp_units[i];
-      struct partial_symtab *psymtab = per_cu->v.psymtab;
-
-      if (psymtab != NULL && psymtab->user == NULL)
-	recursively_count_psymbols (psymtab, psyms_count);
-    }
-  /* Generating an index for gdb itself shows a ratio of
-     TOTAL_SEEN_SYMS/UNIQUE_SYMS or ~5.  4 seems like a good bet.  */
-  std::unordered_set<partial_symbol *> psyms_seen (psyms_count / 4);
+  std::unordered_set<partial_symbol *> psyms_seen (psyms_seen_size ());
   for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
       struct dwarf2_per_cu_data *per_cu
@@ -24920,22 +25515,241 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   symtab_vec.file_write (out_file);
   constant_pool.file_write (out_file);
 
+  return total_len;
+}
+
+/* DWARF-5 augmentation string for GDB's DW_IDX_GNU_* extension.  */
+static const gdb_byte dwarf5_gdb_augmentation[] = { 'G', 'D', 'B', 0 };
+
+/* Write a new .debug_names section for OBJFILE into OUT_FILE, write
+   needed addition to .debug_str section to OUT_FILE_STR.  Return how
+   many bytes were expected to be written into OUT_FILE.  */
+
+static size_t
+write_debug_names (struct objfile *objfile, FILE *out_file, FILE *out_file_str)
+{
+  const bool dwarf5_is_dwarf64 = check_dwarf64_offsets ();
+  const int dwarf5_offset_size = dwarf5_is_dwarf64 ? 8 : 4;
+  const enum bfd_endian dwarf5_byte_order
+    = gdbarch_byte_order (get_objfile_arch (objfile));
+
+  /* The CU list is already sorted, so we don't need to do additional
+     work here.  Also, the debug_types entries do not appear in
+     all_comp_units, but only in their own hash table.  */
+  data_buf cu_list;
+  debug_names nametable (dwarf5_is_dwarf64, dwarf5_byte_order);
+  std::unordered_set<partial_symbol *> psyms_seen (psyms_seen_size ());
+  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+    {
+      const dwarf2_per_cu_data *per_cu = dwarf2_per_objfile->all_comp_units[i];
+      partial_symtab *psymtab = per_cu->v.psymtab;
+
+      /* CU of a shared file from 'dwz -m' may be unused by this main
+	 file.  It may be referenced from a local scope but in such
+	 case it does not need to be present in .debug_names.  */
+      if (psymtab == NULL)
+	continue;
+
+      if (psymtab->user == NULL)
+	nametable.recursively_write_psymbols (objfile, psymtab, psyms_seen, i);
+
+      cu_list.append_uint (dwarf5_offset_size, dwarf5_byte_order,
+			   to_underlying (per_cu->sect_off));
+    }
+  nametable.build ();
+
+  /* No addr_vec - DWARF-5 uses .debug_aranges generated by GCC.  */
+
+  data_buf types_cu_list;
+  for (int i = 0; i < dwarf2_per_objfile->n_type_units; ++i)
+    {
+      const signatured_type &sigtype = *dwarf2_per_objfile->all_type_units[i];
+      const dwarf2_per_cu_data &per_cu = sigtype.per_cu;
+
+      types_cu_list.append_uint (dwarf5_offset_size, dwarf5_byte_order,
+				 to_underlying (per_cu.sect_off));
+    }
+
+  const offset_type bytes_of_header
+    = ((dwarf5_is_dwarf64 ? 12 : 4)
+       + 2 + 2 + 7 * 4
+       + sizeof (dwarf5_gdb_augmentation));
+  size_t expected_bytes = 0;
+  expected_bytes += bytes_of_header;
+  expected_bytes += cu_list.size ();
+  expected_bytes += types_cu_list.size ();
+  expected_bytes += nametable.bytes ();
+  data_buf header;
+
+  if (!dwarf5_is_dwarf64)
+    {
+      const uint64_t size64 = expected_bytes - 4;
+      gdb_assert (size64 < 0xfffffff0);
+      header.append_uint (4, dwarf5_byte_order, size64);
+    }
+  else
+    {
+      header.append_uint (4, dwarf5_byte_order, 0xffffffff);
+      header.append_uint (8, dwarf5_byte_order, expected_bytes - 12);
+    }
+
+  /* The version number.  */
+  header.append_uint (2, dwarf5_byte_order, 5);
+
+  /* Padding.  */
+  header.append_uint (2, dwarf5_byte_order, 0);
+
+  /* comp_unit_count - The number of CUs in the CU list.  */
+  header.append_uint (4, dwarf5_byte_order, dwarf2_per_objfile->n_comp_units);
+
+  /* local_type_unit_count - The number of TUs in the local TU
+     list.  */
+  header.append_uint (4, dwarf5_byte_order, dwarf2_per_objfile->n_type_units);
+
+  /* foreign_type_unit_count - The number of TUs in the foreign TU
+     list.  */
+  header.append_uint (4, dwarf5_byte_order, 0);
+
+  /* bucket_count - The number of hash buckets in the hash lookup
+     table.  */
+  header.append_uint (4, dwarf5_byte_order, nametable.bucket_count ());
+
+  /* name_count - The number of unique names in the index.  */
+  header.append_uint (4, dwarf5_byte_order, nametable.name_count ());
+
+  /* abbrev_table_size - The size in bytes of the abbreviations
+     table.  */
+  header.append_uint (4, dwarf5_byte_order, nametable.abbrev_table_bytes ());
+
+  /* augmentation_string_size - The size in bytes of the augmentation
+     string.  This value is rounded up to a multiple of 4.  */
+  static_assert (sizeof (dwarf5_gdb_augmentation) % 4 == 0, "");
+  header.append_uint (4, dwarf5_byte_order, sizeof (dwarf5_gdb_augmentation));
+  header.append_data (dwarf5_gdb_augmentation);
+
+  gdb_assert (header.size () == bytes_of_header);
+
+  header.file_write (out_file);
+  cu_list.file_write (out_file);
+  types_cu_list.file_write (out_file);
+  nametable.file_write (out_file, out_file_str);
+
+  return expected_bytes;
+}
+
+/* Assert that FILE's size is EXPECTED_SIZE.  Assumes file's seek
+   position is at the end of the file.  */
+
+static void
+assert_file_size (FILE *file, const char *filename, size_t expected_size)
+{
+  const auto file_size = ftell (file);
+  if (file_size == -1)
+    error (_("Can't get `%s' size"), filename);
+  gdb_assert (file_size == expected_size);
+}
+
+/* An index variant.  */
+enum dw_index_kind
+{
+  /* GDB's own .gdb_index format.   */
+  GDB_INDEX,
+
+  /* DWARF5 .debug_names.  */
+  DEBUG_NAMES,
+};
+
+/* Create an index file for OBJFILE in the directory DIR.  */
+
+static void
+write_psymtabs_to_index (struct objfile *objfile, const char *dir,
+			 dw_index_kind index_kind)
+{
+  if (dwarf2_per_objfile->using_index)
+    error (_("Cannot use an index to create the index"));
+
+  if (VEC_length (dwarf2_section_info_def, dwarf2_per_objfile->types) > 1)
+    error (_("Cannot make an index when the file has multiple .debug_types sections"));
+
+  if (!objfile->psymtabs || !objfile->psymtabs_addrmap)
+    return;
+
+  struct stat st;
+  if (stat (objfile_name (objfile), &st) < 0)
+    perror_with_name (objfile_name (objfile));
+
+  std::string filename (std::string (dir) + SLASH_STRING
+			+ lbasename (objfile_name (objfile))
+			+ (index_kind == dw_index_kind::DEBUG_NAMES
+			   ? INDEX5_SUFFIX : INDEX4_SUFFIX));
+
+  FILE *out_file = gdb_fopen_cloexec (filename.c_str (), "wb").release ();
+  if (!out_file)
+    error (_("Can't open `%s' for writing"), filename.c_str ());
+
+  /* Order matters here; we want FILE to be closed before FILENAME is
+     unlinked, because on MS-Windows one cannot delete a file that is
+     still open.  (Don't call anything here that might throw until
+     file_closer is created.)  */
+  gdb::unlinker unlink_file (filename.c_str ());
+  gdb_file_up close_out_file (out_file);
+
+  if (index_kind == dw_index_kind::DEBUG_NAMES)
+    {
+      std::string filename_str (std::string (dir) + SLASH_STRING
+				+ lbasename (objfile_name (objfile))
+				+ DEBUG_STR_SUFFIX);
+      FILE *out_file_str
+	= gdb_fopen_cloexec (filename_str.c_str (), "wb").release ();
+      if (!out_file_str)
+	error (_("Can't open `%s' for writing"), filename_str.c_str ());
+      gdb::unlinker unlink_file_str (filename_str.c_str ());
+      gdb_file_up close_out_file_str (out_file_str);
+
+      const size_t total_len
+	= write_debug_names (objfile, out_file, out_file_str);
+      assert_file_size (out_file, filename.c_str (), total_len);
+
+      /* We want to keep the file .debug_str file too.  */
+      unlink_file_str.keep ();
+    }
+  else
+    {
+      const size_t total_len
+	= write_gdbindex (objfile, out_file);
+      assert_file_size (out_file, filename.c_str (), total_len);
+    }
+
   /* We want to keep the file.  */
   unlink_file.keep ();
 }
 
 /* Implementation of the `save gdb-index' command.
    
-   Note that the file format used by this command is documented in the
-   GDB manual.  Any changes here must be documented there.  */
+   Note that the .gdb_index file format used by this command is
+   documented in the GDB manual.  Any changes here must be documented
+   there.  */
 
 static void
 save_gdb_index_command (const char *arg, int from_tty)
 {
   struct objfile *objfile;
+  const char dwarf5space[] = "-dwarf-5 ";
+  dw_index_kind index_kind = dw_index_kind::GDB_INDEX;
 
-  if (!arg || !*arg)
-    error (_("usage: save gdb-index DIRECTORY"));
+  if (!arg)
+    arg = "";
+
+  arg = skip_spaces (arg);
+  if (strncmp (arg, dwarf5space, strlen (dwarf5space)) == 0)
+    {
+      index_kind = dw_index_kind::DEBUG_NAMES;
+      arg += strlen (dwarf5space);
+      arg = skip_spaces (arg);
+    }
+
+  if (!*arg)
+    error (_("usage: save gdb-index [-dwarf-5] DIRECTORY"));
 
   ALL_OBJFILES (objfile)
   {
@@ -24953,7 +25767,7 @@ save_gdb_index_command (const char *arg, int from_tty)
 
 	TRY
 	  {
-	    write_psymtabs_to_index (objfile, arg);
+	    write_psymtabs_to_index (objfile, arg, index_kind);
 	  }
 	CATCH (except, RETURN_MASK_ERROR)
 	  {
@@ -25085,7 +25899,11 @@ Warning: This option must be enabled before gdb reads the file."),
   c = add_cmd ("gdb-index", class_files, save_gdb_index_command,
 	       _("\
 Save a gdb-index file.\n\
-Usage: save gdb-index DIRECTORY"),
+Usage: save gdb-index [-dwarf-5] DIRECTORY\n\
+\n\
+No options create one file with .gdb-index extension for pre-DWARF-5\n\
+compatible .gdb_index section.  With -dwarf-5 creates two files with\n\
+extension .debug_names and .debug_str for DWARF-5 .debug_names section."),
 	       &save_cmdlist);
   set_cmd_completer (c, filename_completer);
 
