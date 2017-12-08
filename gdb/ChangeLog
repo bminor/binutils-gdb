@@ -1,3 +1,11 @@
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* contrib/cc-with-tweaks.sh: Change interpreter to bash, incl. initial
+	comment.
+	(GDB_ADD_INDEX): New variable.
+	<$want_index>: Call $GDB_ADD_INDEX.
+
 2017-12-08  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* dtrace-probe.c (dtrace_process_dof_probe): Do not declare a new
