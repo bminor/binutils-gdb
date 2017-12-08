@@ -5291,7 +5291,7 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
 /* Initialize for reading DWARF for this objfile.  Return 0 if this
    file will use psymtabs, or 1 if using the GNU index.  */
 
-int
+const sym_fns &
 dwarf2_initialize_objfile (struct objfile *objfile)
 {
   /* If we're about to read full symbols, don't bother with the
@@ -5320,13 +5320,13 @@ dwarf2_initialize_objfile (struct objfile *objfile)
       /* Return 1 so that gdb sees the "quick" functions.  However,
 	 these functions will be no-ops because we will have expanded
 	 all symtabs.  */
-      return 1;
+      return elf_sym_fns_gdb_index;
     }
 
   if (dwarf2_read_index (objfile))
-    return 1;
+    return elf_sym_fns_gdb_index;
 
-  return 0;
+  return elf_sym_fns_lazy_psyms;
 }
 
 

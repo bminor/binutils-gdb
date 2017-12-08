@@ -1,4 +1,14 @@
 2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* defs.h (elf_sym_fns_lazy_psyms, elf_sym_fns_gdb_index): Move here
+	declarations from elfread.c.
+	(dwarf2_initialize_objfile): Change return value.
+	* elfread.c (elf_sym_fns_lazy_psyms, elf_sym_fns_gdb_index): Move these
+	declarations to defs.h.
+	(elf_symfile_read): Adjust dwarf2_initialize_objfile caller.
+	* symfile.h (dwarf2_initialize_objfile): Change return type.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* contrib/gdb-add-index.sh (index): Rename to ...

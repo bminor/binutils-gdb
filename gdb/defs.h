@@ -679,6 +679,11 @@ extern int (*deprecated_ui_load_progress_hook) (const char *section,
 extern void initialize_progspace (void);
 extern void initialize_inferiors (void);
 
+/* From elfread.c */
+
+extern const struct sym_fns elf_sym_fns_lazy_psyms;
+extern const struct sym_fns elf_sym_fns_gdb_index;
+
 /* * Special block numbers */
 
 enum block_enum

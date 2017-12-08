@@ -48,10 +48,6 @@
 #include "location.h"
 #include "auxv.h"
 
-/* Forward declarations.  */
-extern const struct sym_fns elf_sym_fns_gdb_index;
-extern const struct sym_fns elf_sym_fns_lazy_psyms;
-
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
    It's local to elf_symfile_read.  */
@@ -1219,10 +1215,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	 information present in OBJFILE.  If there is such debug info present
 	 never use .gdb_index.  */
 
-      if (!objfile_has_partial_symbols (objfile)
-	  && dwarf2_initialize_objfile (objfile))
-	objfile_set_sym_fns (objfile, &elf_sym_fns_gdb_index);
-      else
+      if (objfile_has_partial_symbols (objfile))
 	{
 	  /* It is ok to do this even if the stabs reader made some
 	     partial symbols, because OBJF_PSYMTABS_READ has not been
@@ -1230,6 +1223,8 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	     when needed.  */
 	  objfile_set_sym_fns (objfile, &elf_sym_fns_lazy_psyms);
 	}
+      else
+	objfile_set_sym_fns (objfile, &dwarf2_initialize_objfile (objfile));
     }
   /* If the file has its own symbol tables it has no separate debug
      info.  `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to
