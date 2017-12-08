@@ -1,6 +1,14 @@
 2017-12-12  Stafford Horne  <shorne@gmail.com>
 	    Peter Gavin  <pgavin@gmail.com>
 
+	* configure: Regenerated.
+	* or1k/aclocal.m4: Generated.
+	* or1k/config.in: Generated.
+	* or1k/configure: Generated.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Peter Gavin  <pgavin@gmail.com>
+
 	* or1k/arch.c: Generated.
 	* or1k/arch.h: Generated.
 	* or1k/cpu.c: Generated.
