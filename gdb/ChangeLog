@@ -1,3 +1,8 @@
+2017-12-08  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* dtrace-probe.c (dtrace_process_dof_probe): Do not declare a new
+	"expression_up" inside the TRY block.
+
 2017-12-08  Yao Qi  <yao.qi@linaro.org>
 
 	* breakpoint.c (update_watchpoint): Call

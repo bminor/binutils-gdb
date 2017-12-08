@@ -486,17 +486,16 @@ dtrace_process_dof_probe (struct objfile *objfile,
 
 	  TRY
 	    {
-	      expression_up expr
-		= parse_expression_with_language (type_str.c_str (),
-						  language_c);
+	      expr = parse_expression_with_language (type_str.c_str (),
+						     language_c);
 	    }
 	  CATCH (ex, RETURN_MASK_ERROR)
 	    {
 	    }
 	  END_CATCH
 
-	  if (expr != NULL && expr->elts[0].opcode == OP_TYPE)
-	    type = expr->elts[1].type;
+	  if (expr != NULL && expr.get ()->elts[0].opcode == OP_TYPE)
+	    type = expr.get ()->elts[1].type;
 
 	  args.emplace_back (type, std::move (type_str), std::move (expr));
 	}
