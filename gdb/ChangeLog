@@ -1,3 +1,15 @@
+2017-12-12  Alan Modra  <amodra@gmail.com>
+
+	PR tdep/22576
+	* ppc64-tdep.c (ppc64_plt_entry_point): Rewrite to take TOC-relative
+	PLT offset, and retrieve r2 from stack when executing in reverse.
+	(ppc64_standard_linkage1_target): Drop pc param.  Calculate offset
+	rather than PLT address.
+	(ppc64_standard_linkage2_target): Likewise.
+	(ppc64_standard_linkage3_target): Likewise.
+	(ppc64_standard_linkage4_target): Likewise.
+	(ppc64_skip_trampoline_code_1): Adjust to suit.
+
 2017-12-11  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/22556
