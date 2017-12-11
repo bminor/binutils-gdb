@@ -1,5 +1,10 @@
 2017-12-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/variant_record_packed_array.exp: Adapt test to accept
+	output with components being reordered.
+
+2017-12-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/pkd_arr_elem.exp: Adapt "print test" test to accept
 	output with components being reordered.
 
