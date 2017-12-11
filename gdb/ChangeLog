@@ -1,3 +1,8 @@
+2017-12-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* target-float.c (mpfr_float_ops::from_target): Use mpfr_set_ui
+	instead of mpfr_set_si to convert mantissa bits.
+
 2017-12-11  Xavier Roirand <roirand@adacore.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 

@@ -1312,7 +1312,7 @@ mpfr_float_ops::from_target (const struct floatformat *fmt,
 
       mant = get_field (from, order, fmt->totalsize, mant_off, mant_bits);
 
-      mpfr_set_si (tmp.val, mant, MPFR_RNDN);
+      mpfr_set_ui (tmp.val, mant, MPFR_RNDN);
       mpfr_mul_2si (tmp.val, tmp.val, exponent - mant_bits, MPFR_RNDN);
       mpfr_add (to.val, to.val, tmp.val, MPFR_RNDN);
       exponent -= mant_bits;
