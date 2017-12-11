@@ -1,3 +1,13 @@
+2017-12-11  Xavier Roirand <roirand@adacore.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_tag_value_at_base_address): Change the way
+	tagged type base address is computed.
+	(enum ada_primitive_types) <ada_primitive_type_storage_offset>:
+	New enumerate.
+	(ada_language_arch_info): Set the ada_primitive_type_storage_offset
+	element of lai->primitive_type_vector.
+
 2017-12-08  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2read.c (mock_mapped_index): Reimplement as an extension of

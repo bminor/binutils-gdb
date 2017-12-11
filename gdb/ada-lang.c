@@ -6761,7 +6761,8 @@ ada_tag_value_at_base_address (struct value *obj)
   if (is_ada95_tag (tag))
     return obj;
 
-  ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  ptr_type = language_lookup_primitive_type
+    (language_def (language_ada), target_gdbarch(), "storage_offset");
   ptr_type = lookup_pointer_type (ptr_type);
   val = value_cast (ptr_type, tag);
   if (!val)
@@ -6795,7 +6796,18 @@ ada_tag_value_at_base_address (struct value *obj)
   if (offset_to_top == -1)
     return obj;
 
-  base_address = value_address (obj) - offset_to_top;
+  /* OFFSET_TO_TOP used to be a positive value to be subtracted
+     from the base address.  This was however incompatible with
+     C++ dispatch table: C++ uses a *negative* value to *add*
+     to the base address.  Ada's convention has therefore been
+     changed in GNAT 19.0w 20171023: since then, C++ and Ada
+     use the same convention.  Here, we support both cases by
+     checking the sign of OFFSET_TO_TOP.  */
+
+  if (offset_to_top > 0)
+    offset_to_top = -offset_to_top;
+
+  base_address = value_address (obj) + offset_to_top;
   tag = value_tag_from_contents_and_address (obj_type, NULL, base_address);
 
   /* Make sure that we have a proper tag at the new address.
@@ -13866,6 +13878,7 @@ enum ada_primitive_types {
   ada_primitive_type_natural,
   ada_primitive_type_positive,
   ada_primitive_type_system_address,
+  ada_primitive_type_storage_offset,
   nr_ada_primitive_types
 };
 
@@ -13917,6 +13930,18 @@ ada_language_arch_info (struct gdbarch *gdbarch,
 				      "void"));
   TYPE_NAME (lai->primitive_type_vector [ada_primitive_type_system_address])
     = "system__address";
+
+  /* Create the equivalent of the System.Storage_Elements.Storage_Offset
+     type.  This is a signed integral type whose size is the same as
+     the size of addresses.  */
+  {
+    unsigned int addr_length = TYPE_LENGTH
+      (lai->primitive_type_vector [ada_primitive_type_system_address]);
+
+    lai->primitive_type_vector [ada_primitive_type_storage_offset]
+      = arch_integer_type (gdbarch, addr_length * HOST_CHAR_BIT, 0,
+			   "storage_offset");
+  }
 
   lai->bool_type_symbol = NULL;
   lai->bool_type_default = builtin->builtin_bool;
