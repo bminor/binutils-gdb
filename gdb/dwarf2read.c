@@ -9065,11 +9065,13 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 
       if (pdi->name != NULL || pdi->tag == DW_TAG_namespace
 	  || pdi->tag == DW_TAG_module || pdi->tag == DW_TAG_enumeration_type
-	  || pdi->tag == DW_TAG_imported_unit)
+	  || pdi->tag == DW_TAG_imported_unit
+	  || pdi->tag == DW_TAG_inlined_subroutine)
 	{
 	  switch (pdi->tag)
 	    {
 	    case DW_TAG_subprogram:
+	    case DW_TAG_inlined_subroutine:
 	      add_partial_subprogram (pdi, lowpc, highpc, set_addrmap, cu);
 	      break;
 	    case DW_TAG_constant:
@@ -9304,6 +9306,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 
   switch (pdi->tag)
     {
+    case DW_TAG_inlined_subroutine:
     case DW_TAG_subprogram:
       addr = gdbarch_adjust_dwarf2_addr (gdbarch, pdi->lowpc + baseaddr);
       if (pdi->is_external || cu->language == language_ada)
@@ -9501,12 +9504,12 @@ add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
     scan_partial_symbols (pdi->die_child, lowpc, highpc, set_addrmap, cu);
 }
 
-/* Read a partial die corresponding to a subprogram and create a partial
-   symbol for that subprogram.  When the CU language allows it, this
-   routine also defines a partial symbol for each nested subprogram
-   that this subprogram contains.  If SET_ADDRMAP is true, record the
-   covered ranges in the addrmap.  Set *LOWPC and *HIGHPC to the lowest
-   and highest PC values found in PDI.
+/* Read a partial die corresponding to a subprogram or an inlined
+   subprogram and create a partial symbol for that subprogram.
+   When the CU language allows it, this routine also defines a partial
+   symbol for each nested subprogram that this subprogram contains.
+   If SET_ADDRMAP is true, record the covered ranges in the addrmap.
+   Set *LOWPC and *HIGHPC to the lowest and highest PC values found in PDI.
 
    PDI may also be a lexical block, in which case we simply search
    recursively for subprograms defined inside that lexical block.
@@ -9518,7 +9521,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
 			CORE_ADDR *lowpc, CORE_ADDR *highpc,
 			int set_addrmap, struct dwarf2_cu *cu)
 {
-  if (pdi->tag == DW_TAG_subprogram)
+  if (pdi->tag == DW_TAG_subprogram || pdi->tag == DW_TAG_inlined_subroutine)
     {
       if (pdi->has_pc_info)
         {
@@ -9566,6 +9569,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	{
 	  fixup_partial_die (pdi, cu);
 	  if (pdi->tag == DW_TAG_subprogram
+	      || pdi->tag == DW_TAG_inlined_subroutine
 	      || pdi->tag == DW_TAG_lexical_block)
 	    add_partial_subprogram (pdi, lowpc, highpc, set_addrmap, cu);
 	  pdi = pdi->die_sibling;
@@ -18409,6 +18413,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  && abbrev->tag != DW_TAG_constant
 	  && abbrev->tag != DW_TAG_enumerator
 	  && abbrev->tag != DW_TAG_subprogram
+	  && abbrev->tag != DW_TAG_inlined_subroutine
 	  && abbrev->tag != DW_TAG_lexical_block
 	  && abbrev->tag != DW_TAG_variable
 	  && abbrev->tag != DW_TAG_namespace
