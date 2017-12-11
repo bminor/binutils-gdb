@@ -1,3 +1,12 @@
+2017-12-11  Stephen Crane  <sjc@immunant.com>
+
+	* plugin-api.h: Add new plugin hook to allow processing of input
+	files added by a plugin.
+	(ld_plugin_new_input_handler): New function hook type.
+	(ld_plugin_register_new_input): New interface.
+	(LDPT_REGISTER_NEW_INPUT_HOOK): New enum val.
+	(tv_register_new_input): New member.
+
 2017-12-01  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* opcode/ppc.h (PPC_INT_FMT): Define.
