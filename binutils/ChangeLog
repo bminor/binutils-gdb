@@ -1,3 +1,8 @@
+2017-12-11  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/binutils-all/aarch64/objdump.d: New.
+	* testsuite/binutils-all/aarch64/objdump.s: New.
+
 2017-12-08  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_relocations_in_section): Use the orelocations

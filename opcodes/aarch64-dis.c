@@ -3097,6 +3097,10 @@ get_sym_code_type (struct disassemble_info *info, int n,
   unsigned int type;
   const char *name;
 
+  /* If the symbol is in a different section, ignore it.  */
+  if (info->section != NULL && info->section != info->symtab[n]->section)
+    return FALSE;
+
   es = *(elf_symbol_type **)(info->symtab + n);
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
@@ -3171,9 +3175,7 @@ print_insn_aarch64 (bfd_vma pc,
 	  addr = bfd_asymbol_value (info->symtab[n]);
 	  if (addr > pc)
 	    break;
-	  if ((info->section == NULL
-	       || info->section == info->symtab[n]->section)
-	      && get_sym_code_type (info, n, &type))
+	  if (get_sym_code_type (info, n, &type))
 	    {
 	      last_sym = n;
 	      found = TRUE;

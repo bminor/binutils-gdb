@@ -1,3 +1,9 @@
+2017-12-11  Petr Pavlu  <petr.pavlu@arm.com>
+	    Renlin Li  <renlin.li@arm.com>
+
+	* aarch64-dis.c (print_insn_aarch64): Move symbol section check ...
+	(get_sym_code_type): Here.
+
 2017-12-03  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (extract_li20): Rewrite.
