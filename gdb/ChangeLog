@@ -1,3 +1,19 @@
+2017-12-11  Pedro Alves  <palves@redhat.com>
+
+	* defs.h (elf_sym_fns_lazy_psyms, elf_sym_fns_gdb_index)
+	(elf_sym_fns_debug_names): Move to elfread.c.
+	* dwarf2read.c (dwarf2_initialize_objfile): Return a boolean
+	instead of a sym_fns and add 'index_kind' output parameter.  Fill
+	the latter in with the index variant kind if using an index.
+	(enum dw_index_kind): Moved to symfile.h.
+	* elfread.c (elf_sym_fns_gdb_index, elf_sym_fns_debug_names)
+	(elf_sym_fns_lazy_psyms): Move from defs.h.
+	(elf_symfile_read): Adjust to new dwarf2_initialize_objfile
+	interface.
+	* symfile.h (enum class dw_index_kind): New, moved from
+	dwarf2read.c.
+	(dwarf2_initialize_objfile): Change prototype.
+
 2017-12-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* target-float.c (mpfr_float_ops::from_target): Use mpfr_set_ui

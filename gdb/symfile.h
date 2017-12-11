@@ -603,7 +603,22 @@ extern void dwarf2_get_section_info (struct objfile *,
 				     asection **, const gdb_byte **,
 				     bfd_size_type *);
 
-extern const sym_fns &dwarf2_initialize_objfile (struct objfile *);
+/* A DWARF names index variant.  */
+enum class dw_index_kind
+{
+  /* GDB's own .gdb_index format.   */
+  GDB_INDEX,
+
+  /* DWARF5 .debug_names.  */
+  DEBUG_NAMES,
+};
+
+/* Initialize for reading DWARF for OBJFILE.  Return false if this
+   file will use psymtabs, or true if using an index, in which case
+   *INDEX_KIND is set to the index variant in use.  */
+extern bool dwarf2_initialize_objfile (struct objfile *objfile,
+				       dw_index_kind *index_kind);
+
 extern void dwarf2_build_psymtabs (struct objfile *);
 extern void dwarf2_build_frame_info (struct objfile *);
 

@@ -6451,11 +6451,10 @@ const struct quick_symbol_functions dwarf2_debug_names_functions =
   dw2_map_symbol_filenames
 };
 
-/* Initialize for reading DWARF for this objfile.  Return 0 if this
-   file will use psymtabs, or 1 if using the GNU index.  */
+/* See symfile.h.  */
 
-const sym_fns &
-dwarf2_initialize_objfile (struct objfile *objfile)
+bool
+dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
 {
   /* If we're about to read full symbols, don't bother with the
      indices.  In this case we also don't care if some other debug
@@ -6483,16 +6482,23 @@ dwarf2_initialize_objfile (struct objfile *objfile)
       /* Return 1 so that gdb sees the "quick" functions.  However,
 	 these functions will be no-ops because we will have expanded
 	 all symtabs.  */
-      return elf_sym_fns_gdb_index;
+      *index_kind = dw_index_kind::GDB_INDEX;
+      return true;
     }
 
   if (dwarf2_read_debug_names (objfile))
-    return elf_sym_fns_debug_names;
+    {
+      *index_kind = dw_index_kind::DEBUG_NAMES;
+      return true;
+    }
 
   if (dwarf2_read_index (objfile))
-    return elf_sym_fns_gdb_index;
+    {
+      *index_kind = dw_index_kind::GDB_INDEX;
+      return true;
+    }
 
-  return elf_sym_fns_lazy_psyms;
+  return false;
 }
 
 
@@ -26798,16 +26804,6 @@ assert_file_size (FILE *file, const char *filename, size_t expected_size)
     error (_("Can't get `%s' size"), filename);
   gdb_assert (file_size == expected_size);
 }
-
-/* An index variant.  */
-enum dw_index_kind
-{
-  /* GDB's own .gdb_index format.   */
-  GDB_INDEX,
-
-  /* DWARF5 .debug_names.  */
-  DEBUG_NAMES,
-};
 
 /* Create an index file for OBJFILE in the directory DIR.  */
 
