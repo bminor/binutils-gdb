@@ -2268,7 +2268,10 @@ static const char *
 remote_thread_name (struct target_ops *ops, struct thread_info *info)
 {
   if (info->priv != NULL)
-    return get_remote_thread_info (info)->name.c_str ();
+    {
+      const std::string &name = get_remote_thread_info (info)->name;
+      return !name.empty () ? name.c_str () : NULL;
+    }
 
   return NULL;
 }
@@ -3319,7 +3322,10 @@ remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
       struct thread_info *info = find_thread_ptid (tp->ptid);
 
       if (info != NULL && info->priv != NULL)
-	return get_remote_thread_info (info)->extra.c_str ();
+	{
+	  const std::string &extra = get_remote_thread_info (info)->extra;
+	  return !extra.empty () ? extra.c_str () : NULL;
+	}
       else
 	return NULL;
     }
