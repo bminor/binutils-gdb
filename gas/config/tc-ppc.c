@@ -2977,7 +2977,7 @@ md_assemble (char *str)
 		   && ex.X_add_number != 0
 		   && (operand->flags & PPC_OPERAND_GPR_0) != 0))
 	    as_warn (_("invalid register expression"));
-	  insn = ppc_insert_operand (insn, operand, ex.X_add_number & 0xff,
+	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
 				     ppc_cpu, (char *) NULL, 0);
 	}
       else if (ex.X_op == O_constant)

@@ -1,3 +1,8 @@
+2017-12-12  Alan Modra  <amodra@gmail.com>
+
+	PR 21118
+	* config/tc-ppc.c (md_assemble): Don't mask register number.
+
 2017-11-01  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
