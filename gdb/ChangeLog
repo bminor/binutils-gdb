@@ -1,3 +1,7 @@
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* contrib/ari/gdb_ari.sh: Fix typo in help.
+
 2017-12-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* event-top.c (handle_line_of_input): Set server_command.
