@@ -1,5 +1,10 @@
 2017-12-13  Pedro Alves  <palves@redhat.com>
 
+	* lib/completion-support.exp (test_gdb_complete_tab_multiple):
+	Tighten regexp by matching with an anchor.
+
+2017-12-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.cp/cpcompletion.exp: Load completion-support.exp.
 	("expression with namespace"): New set of tests.
 	* gdb.cp/pr9594.cc (Test_NS::foo, Test_NS::bar)
