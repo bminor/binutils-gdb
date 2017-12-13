@@ -1,3 +1,8 @@
+2017-12-13  Jim Wilson  <jimw@sifive.com>
+
+	PR 22599
+	* testsuite/gas/riscv/fsxxi.d, testsuite/gas/riscv/fsxxi.s: New.
+
 2017-12-13  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* testsuite/gas/pru/extern.s: New test for print of U16_PMEMM

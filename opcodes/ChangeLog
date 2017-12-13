@@ -1,3 +1,8 @@
+2017-12-13  Jim Wilson  <jimw@sifive.com>
+
+	PR 22599
+	* riscv-opc.c (riscv_opcodes) <fsrmi, fsflagsi>: New.
+
 2017-12-13  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* disassemble.c: Enable disassembler_needs_relocs for PRU.
