@@ -1,3 +1,9 @@
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Manipulating breakpoints using Python): Split doc
+	of Breakpoint.__init__ in two, split text in multiple
+	paragraphs, don't nest parameter square brackets.
+
 2017-12-12  Stafford Horne  <shorne@gmail.com>
 	    Stefan Wallentowitz  <stefan@wallentowitz.de>
 	    Franck Jullien  <franck.jullien@gmail.com>
