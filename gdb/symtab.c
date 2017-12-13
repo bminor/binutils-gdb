@@ -4735,7 +4735,7 @@ completion_list_add_name (completion_tracker &tracker,
        in this case we want the completion lowest common denominator
        to be "push_back" instead of "std::".  */
     tracker.add_completion (std::move (completion),
-			    &match_res.match_for_lcd);
+			    &match_res.match_for_lcd, text, word);
   }
 }
 

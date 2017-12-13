@@ -1,5 +1,22 @@
 2017-12-13  Pedro Alves  <palves@redhat.com>
 
+	* completer.c (completion_tracker::maybe_add_completion): New
+	'text' and 'word' parameters.  Use make_completion_match_str.
+	(completion_tracker::add_completion): New 'text' and 'word'
+	parameters.  Pass down.
+	(completion_tracker::recompute_lowest_common_denominator): Change
+	parameter type to gdb::unique_xmalloc_ptr rval ref.  Adjust.
+	* completer.h (completion_tracker::add_completion): New 'text' and
+	'word' parameters.
+	(completion_tracker::recompute_lowest_common_denominator): Change
+	parameter type to gdb::unique_xmalloc_ptr rval ref.
+	(completion_tracker::recompute_lowest_common_denominator): Change
+	parameter type to gdb::unique_xmalloc_ptr rval ref.
+	* symtab.c (completion_list_add_name): Pass down 'text' and 'word'
+	as well.
+
+2017-12-13  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-decode.c (complete_on_cmdlist, complete_on_enum): Use
 	make_completion_match_str.
 	* completer.c: Use gdb::unique_xmalloc_ptr and

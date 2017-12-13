@@ -1,3 +1,12 @@
+2017-12-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.cp/cpcompletion.exp: Load completion-support.exp.
+	("expression with namespace"): New set of tests.
+	* gdb.cp/pr9594.cc (Test_NS::foo, Test_NS::bar)
+	(Nested::Test_NS::qux): New.
+	* lib/completion-support.exp (test_gdb_complete_cmd_multiple): Add
+	defaults to 'start_quote_char' and 'end_quote_char' parameters.
+
 2017-12-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/server-del-break.c: New file.

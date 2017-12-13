@@ -178,7 +178,7 @@ proc test_gdb_complete_cmd_unique { input_line complete_line_re } {
 # complete command displays the COMPLETION_LIST completion list.  Each
 # entry in the list should be prefixed by CMD_PREFIX.
 
-proc test_gdb_complete_cmd_multiple { cmd_prefix completion_word completion_list start_quote_char end_quote_char } {
+proc test_gdb_complete_cmd_multiple { cmd_prefix completion_word completion_list {start_quote_char ""} {end_quote_char ""} } {
     global gdb_prompt
 
     set expected_re [make_cmd_completion_list_re $cmd_prefix $completion_list $start_quote_char $end_quote_char]

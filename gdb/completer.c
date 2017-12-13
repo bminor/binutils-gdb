@@ -1510,7 +1510,8 @@ completion_tracker::~completion_tracker ()
 bool
 completion_tracker::maybe_add_completion
   (gdb::unique_xmalloc_ptr<char> name,
-   completion_match_for_lcd *match_for_lcd)
+   completion_match_for_lcd *match_for_lcd,
+   const char *text, const char *word)
 {
   void **slot;
 
@@ -1531,7 +1532,10 @@ completion_tracker::maybe_add_completion
       if (match_for_lcd_str == NULL)
 	match_for_lcd_str = name.get ();
 
-      recompute_lowest_common_denominator (match_for_lcd_str);
+      gdb::unique_xmalloc_ptr<char> lcd
+	= make_completion_match_str (match_for_lcd_str, text, word);
+
+      recompute_lowest_common_denominator (std::move (lcd));
 
       *slot = name.get ();
       m_entries_vec.push_back (std::move (name));
@@ -1544,9 +1548,10 @@ completion_tracker::maybe_add_completion
 
 void
 completion_tracker::add_completion (gdb::unique_xmalloc_ptr<char> name,
-				    completion_match_for_lcd *match_for_lcd)
+				    completion_match_for_lcd *match_for_lcd,
+				    const char *text, const char *word)
 {
-  if (!maybe_add_completion (std::move (name), match_for_lcd))
+  if (!maybe_add_completion (std::move (name), match_for_lcd, text, word))
     throw_error (MAX_COMPLETIONS_REACHED_ERROR, _("Max completions reached."));
 }
 
@@ -1904,21 +1909,23 @@ completion_find_completion_word (completion_tracker &tracker, const char *text,
 /* See completer.h.  */
 
 void
-completion_tracker::recompute_lowest_common_denominator (const char *new_match)
+completion_tracker::recompute_lowest_common_denominator
+  (gdb::unique_xmalloc_ptr<char> &&new_match_up)
 {
   if (m_lowest_common_denominator == NULL)
     {
       /* We don't have a lowest common denominator yet, so simply take
-	 the whole NEW_MATCH as being it.  */
-      m_lowest_common_denominator = xstrdup (new_match);
+	 the whole NEW_MATCH_UP as being it.  */
+      m_lowest_common_denominator = new_match_up.release ();
       m_lowest_common_denominator_unique = true;
     }
   else
     {
       /* Find the common denominator between the currently-known
-	 lowest common denominator and NEW_MATCH.  That becomes the
+	 lowest common denominator and NEW_MATCH_UP.  That becomes the
 	 new lowest common denominator.  */
       size_t i;
+      const char *new_match = new_match_up.get ();
 
       for (i = 0;
 	   (new_match[i] != '\0'
