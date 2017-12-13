@@ -482,6 +482,21 @@ private:
   bool m_lowest_common_denominator_unique = false;
 };
 
+/* Return a string to hand off to readline as a completion match
+   candidate, potentially composed of parts of MATCH_NAME and of
+   TEXT/WORD.  For a description of TEXT/WORD see completer_ftype.  */
+
+extern gdb::unique_xmalloc_ptr<char>
+  make_completion_match_str (const char *match_name,
+			     const char *text, const char *word);
+
+/* Like above, but takes ownership of MATCH_NAME (i.e., can
+   reuse/return it).  */
+
+extern gdb::unique_xmalloc_ptr<char>
+  make_completion_match_str (gdb::unique_xmalloc_ptr<char> &&match_name,
+			     const char *text, const char *word);
+
 extern void gdb_display_match_list (char **matches, int len, int max,
 				    const struct match_list_displayer *);
 

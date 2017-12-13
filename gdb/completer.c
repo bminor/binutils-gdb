@@ -158,10 +158,9 @@ filename_completer (struct cmd_list_element *ignore,
   subsequent_name = 0;
   while (1)
     {
-      char *p, *q;
-
-      p = rl_filename_completion_function (text, subsequent_name);
-      if (p == NULL)
+      gdb::unique_xmalloc_ptr<char> p_rl
+	(rl_filename_completion_function (text, subsequent_name));
+      if (p_rl == NULL)
 	break;
       /* We need to set subsequent_name to a non-zero value before the
 	 continue line below, because otherwise, if the first file
@@ -170,32 +169,12 @@ filename_completer (struct cmd_list_element *ignore,
       subsequent_name = 1;
       /* Like emacs, don't complete on old versions.  Especially
          useful in the "source" command.  */
+      const char *p = p_rl.get ();
       if (p[strlen (p) - 1] == '~')
-	{
-	  xfree (p);
-	  continue;
-	}
+	continue;
 
-      if (word == text)
-	/* Return exactly p.  */
-	q = p;
-      else if (word > text)
-	{
-	  /* Return some portion of p.  */
-	  q = (char *) xmalloc (strlen (p) + 5);
-	  strcpy (q, p + (word - text));
-	  xfree (p);
-	}
-      else
-	{
-	  /* Return some of TEXT plus p.  */
-	  q = (char *) xmalloc (strlen (p) + (text - word) + 5);
-	  strncpy (q, word, text - word);
-	  q[text - word] = '\0';
-	  strcat (q, p);
-	  xfree (p);
-	}
-      tracker.add_completion (gdb::unique_xmalloc_ptr<char> (q));
+      tracker.add_completion
+	(make_completion_match_str (std::move (p_rl), text, word));
     }
 #if 0
   /* There is no way to do this just long enough to affect quote
@@ -1578,6 +1557,63 @@ completion_tracker::add_completions (completion_list &&list)
 {
   for (auto &candidate : list)
     add_completion (std::move (candidate));
+}
+
+/* Helper for the make_completion_match_str overloads.  Returns NULL
+   as an indication that we want MATCH_NAME exactly.  It is up to the
+   caller to xstrdup that string if desired.  */
+
+static char *
+make_completion_match_str_1 (const char *match_name,
+			     const char *text, const char *word)
+{
+  char *newobj;
+
+  if (word == text)
+    {
+      /* Return NULL as an indication that we want MATCH_NAME
+	 exactly.  */
+      return NULL;
+    }
+  else if (word > text)
+    {
+      /* Return some portion of MATCH_NAME.  */
+      newobj = xstrdup (match_name + (word - text));
+    }
+  else
+    {
+      /* Return some of WORD plus MATCH_NAME.  */
+      size_t len = strlen (match_name);
+      newobj = (char *) xmalloc (text - word + len + 1);
+      memcpy (newobj, word, text - word);
+      memcpy (newobj + (text - word), match_name, len + 1);
+    }
+
+  return newobj;
+}
+
+/* See completer.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+make_completion_match_str (const char *match_name,
+			   const char *text, const char *word)
+{
+  char *newobj = make_completion_match_str_1 (match_name, text, word);
+  if (newobj == NULL)
+    newobj = xstrdup (match_name);
+  return gdb::unique_xmalloc_ptr<char> (newobj);
+}
+
+/* See completer.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+make_completion_match_str (gdb::unique_xmalloc_ptr<char> &&match_name,
+			   const char *text, const char *word)
+{
+  char *newobj = make_completion_match_str_1 (match_name.get (), text, word);
+  if (newobj == NULL)
+    return std::move (match_name);
+  return gdb::unique_xmalloc_ptr<char> (newobj);
 }
 
 /* Generate completions all at once.  Does nothing if max_completions

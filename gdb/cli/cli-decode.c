@@ -1816,8 +1816,6 @@ complete_on_cmdlist (struct cmd_list_element *list,
 	    && (!ignore_help_classes || ptr->func
 		|| ptr->prefixlist))
 	  {
-	    char *match;
-
 	    if (pass == 0)
 	      {
 		if (ptr->cmd_deprecated)
@@ -1827,22 +1825,8 @@ complete_on_cmdlist (struct cmd_list_element *list,
 		  }
 	      }
 
-	    match = (char *) xmalloc (strlen (word) + strlen (ptr->name) + 1);
-	    if (word == text)
-	      strcpy (match, ptr->name);
-	    else if (word > text)
-	      {
-		/* Return some portion of ptr->name.  */
-		strcpy (match, ptr->name + (word - text));
-	      }
-	    else
-	      {
-		/* Return some of text plus ptr->name.  */
-		strncpy (match, word, text - word);
-		match[text - word] = '\0';
-		strcat (match, ptr->name);
-	      }
-	    tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
+	    tracker.add_completion
+	      (make_completion_match_str (ptr->name, text, word));
 	    got_matches = true;
 	  }
 
@@ -1876,26 +1860,7 @@ complete_on_enum (completion_tracker &tracker,
 
   for (i = 0; (name = enumlist[i]) != NULL; i++)
     if (strncmp (name, text, textlen) == 0)
-      {
-	char *match;
-
-	match = (char *) xmalloc (strlen (word) + strlen (name) + 1);
-	if (word == text)
-	  strcpy (match, name);
-	else if (word > text)
-	  {
-	    /* Return some portion of name.  */
-	    strcpy (match, name + (word - text));
-	  }
-	else
-	  {
-	    /* Return some of text plus name.  */
-	    strncpy (match, word, text - word);
-	    match[text - word] = '\0';
-	    strcat (match, name);
-	  }
-	tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
-      }
+      tracker.add_completion (make_completion_match_str (name, text, word));
 }
 
 
