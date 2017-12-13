@@ -132,7 +132,7 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
 
 	  /* Check we got something, and if so skip on.  */
 	  if (start_ptr == end_ptr)
-	    error ("bitstring \"%s\" at offset %d has no length field.\n",
+	    error (_("bitstring \"%s\" at offset %d has no length field."),
 			format, i);
 
 	  i += end_ptr - start_ptr;
@@ -141,7 +141,7 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
 	     still give a fatal error, because these are fixed strings that
 	     just should not be wrong.  */
 	  if ('b' != format[i++])
-	    error ("bitstring \"%s\" at offset %d has no terminating 'b'.\n",
+	    error (_("bitstring \"%s\" at offset %d has no terminating 'b'."),
 			format, i);
 
 	  /* Break out the field.  There is a special case with a bit width
@@ -158,7 +158,7 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
 	  break;
 
 	default:
-	  error ("invalid character in bitstring \"%s\" at offset %d.\n",
+	  error (_("invalid character in bitstring \"%s\" at offset %d."),
 		      format, i);
 	  break;
 	}
@@ -541,8 +541,8 @@ or1k_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
   pc = frame_unwind_register_unsigned (next_frame, OR1K_NPC_REGNUM);
 
   if (or1k_debug)
-    fprintf_unfiltered (gdb_stdlog, "or1k_unwind_pc, pc=0x%p\n",
-			(void *) pc);
+    fprintf_unfiltered (gdb_stdlog, "or1k_unwind_pc, pc=%s\n",
+			paddress (gdbarch, pc));
 
   return pc;
 }
@@ -561,8 +561,8 @@ or1k_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
   sp = frame_unwind_register_unsigned (next_frame, OR1K_SP_REGNUM);
 
   if (or1k_debug)
-    fprintf_unfiltered (gdb_stdlog, "or1k_unwind_sp, sp=0x%p\n",
-			(void *) sp);
+    fprintf_unfiltered (gdb_stdlog, "or1k_unwind_sp, sp=%s\n",
+			paddress (gdbarch, sp));
 
   return sp;
 }
@@ -882,8 +882,8 @@ or1k_frame_cache (struct frame_info *this_frame, void **prologue_cache)
 
   if (or1k_debug)
     fprintf_unfiltered (gdb_stdlog,
-			"or1k_frame_cache, prologue_cache = 0x%p\n",
-			*prologue_cache);
+			"or1k_frame_cache, prologue_cache = %s\n",
+			host_address_to_string (*prologue_cache));
 
   /* Nothing to do if we already have this info.  */
   if (NULL != *prologue_cache)
@@ -942,7 +942,7 @@ or1k_frame_cache (struct frame_info *this_frame, void **prologue_cache)
      have executed the code.  Check we have a sane prologue size, and if
      zero we are frameless and can give up here.  */
   if (end_addr < start_addr)
-    error ("end addr 0x%08x is less than start addr 0x%08x\n",
+    error (_("end addr 0x%08x is less than start addr 0x%08x"),
 		(unsigned int) end_addr, (unsigned int) start_addr);
 
   if (end_addr == start_addr)
@@ -1068,10 +1068,10 @@ or1k_frame_cache (struct frame_info *this_frame, void **prologue_cache)
 
   if (or1k_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "  this_sp_for_id = 0x%p\n",
-			  (void *) this_sp_for_id);
-      fprintf_unfiltered (gdb_stdlog, "  start_addr     = 0x%p\n",
-			  (void *) start_addr);
+      fprintf_unfiltered (gdb_stdlog, "  this_sp_for_id = %s\n",
+			  paddress (gdbarch, this_sp_for_id));
+      fprintf_unfiltered (gdb_stdlog, "  start_addr     = %s\n",
+			  paddress (gdbarch, start_addr));
     }
 
   return info;

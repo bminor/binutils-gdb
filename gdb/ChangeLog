@@ -1,3 +1,12 @@
+2017-12-13  Stafford Horne  <shorne@gmail.com>
+
+	* or1k-tdep.c (or1k_analyse_inst): Use _() wrapper for message
+	strings.
+	(or1k_unwind_pc): Use paddress() instead of %p.
+	(or1k_unwind_sp): Likewise.
+	(or1k_frame_cache): Use host_address_to_string()/paddress()
+	instead of %p and use _() wrapper for message strings.
+
 2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* contrib/ari/gdb_ari.sh: Fix typo in help.
