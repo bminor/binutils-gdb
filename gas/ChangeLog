@@ -1,3 +1,9 @@
+2017-12-13  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* testsuite/gas/pru/extern.s: New test for print of U16_PMEMM
+	relocation.
+	* testsuite/gas/pru/extern.d: New test driver.
+
 2017-12-12  Alan Modra  <amodra@gmail.com>
 
 	PR 21118

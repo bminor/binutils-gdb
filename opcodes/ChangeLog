@@ -1,3 +1,7 @@
+2017-12-13  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* disassemble.c: Enable disassembler_needs_relocs for PRU.
+
 2017-12-11  Petr Pavlu  <petr.pavlu@arm.com>
 	    Renlin Li  <renlin.li@arm.com>
 
