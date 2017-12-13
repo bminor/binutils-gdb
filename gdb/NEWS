@@ -81,7 +81,9 @@
   GDB interpret the specified function name as a complete
   fully-qualified name instead.  For example, using the same C++
   program, the "break -q B::func" command sets a breakpoint on
-  "B::func", only.
+  "B::func", only.  A parameter has been added to the Python
+  gdb.Breakpoint constructor to achieve the same result when creating
+  a breakpoint from Python.
 
 * Breakpoints on functions marked with C++ ABI tags
 

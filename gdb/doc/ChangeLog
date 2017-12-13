@@ -1,5 +1,10 @@
 2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* python.texi (Manipulating breakpoints using Python): Document
+	qualified parameter to gdb.Breakpoint.
+
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* python.texi (Manipulating breakpoints using Python): Split doc
 	of Breakpoint.__init__ in two, split text in multiple
 	paragraphs, don't nest parameter square brackets.

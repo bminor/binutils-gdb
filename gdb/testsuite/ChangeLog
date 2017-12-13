@@ -1,3 +1,10 @@
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-breakpoint.c (foo_ns::multiply): New function.
+	* gdb.python/py-breakpoint.exp: Compile the test case as c++,
+	call test_bkpt_qualified.
+	(test_bkpt_qualified): New proc.
+
 2017-12-13  Pedro Alves  <palves@redhat.com>
 
 	* lib/completion-support.exp (test_gdb_complete_tab_multiple):

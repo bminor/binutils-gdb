@@ -1,3 +1,11 @@
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* location.h (string_to_event_location): Add match_type
+	parameter.
+	* location.c (string_to_event_location): Likewise.
+	* python/py-breakpoint.c (bppy_init): Handle qualified
+	parameter.
+
 2017-12-13  Pedro Alves  <palves@redhat.com>
 
 	* completer.c (completion_tracker::maybe_add_completion): New

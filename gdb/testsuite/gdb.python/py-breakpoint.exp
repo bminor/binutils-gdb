@@ -20,7 +20,9 @@ load_lib gdb-python.exp
 
 standard_testfile
 
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
+set options {debug c++}
+
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} ${options}] } {
     return -1
 }
 
@@ -608,6 +610,77 @@ proc_with_prefix test_bkpt_explicit_loc {} {
 	"set invalid explicit breakpoint by missing function"
 }
 
+proc_with_prefix test_bkpt_qualified {} {
+    global decimal hex testfile
+
+    # Start with a fresh gdb.
+    clean_restart ${testfile}
+
+    set one_location_re "Breakpoint $decimal at $hex:.*line $decimal."
+    set two_location_re "Breakpoint $decimal at $hex:.*2 locations."
+
+    if ![runto_main] then {
+	fail "cannot run to main."
+	return 0
+    }
+
+    # Test the default value of "qualified".
+    delete_breakpoints
+    gdb_test \
+	"python gdb.Breakpoint(\"multiply\")" \
+	$two_location_re \
+	"qualified implicitly false"
+
+    # Test qualified=False.
+    delete_breakpoints
+    gdb_test \
+	"python gdb.Breakpoint(\"multiply\", qualified=False)" \
+	$two_location_re \
+	"qualified false"
+
+    # Test qualified=True.
+    delete_breakpoints
+    gdb_test \
+	"python gdb.Breakpoint(\"multiply\", qualified=True)" \
+	$one_location_re \
+	"qualified true"
+
+    # Test qualified=True with an explicit function.
+    delete_breakpoints
+    gdb_test \
+	"python gdb.Breakpoint(function=\"multiply\", qualified=True)" \
+	$one_location_re \
+	"qualified true and explicit"
+
+    # Test qualified=False with an explicit function.
+    delete_breakpoints
+    gdb_test \
+	"python gdb.Breakpoint(function=\"multiply\", qualified=False)" \
+	$two_location_re \
+	"qualified false and explicit"
+
+    # Test -q in the spec string.
+    delete_breakpoints
+    gdb_test \
+	"python gdb.Breakpoint(\"-q multiply\")" \
+	$one_location_re \
+	"-q in spec string"
+
+    # Test -q in the spec string with explicit location.
+    delete_breakpoints
+    gdb_test \
+	"python gdb.Breakpoint(\"-q -function multiply\")" \
+	$one_location_re \
+	"-q in spec string with explicit location"
+
+    # Test -q in the spec string and qualified=False (-q should win).
+    delete_breakpoints
+    gdb_test \
+	"python gdb.Breakpoint(\"-q multiply\", qualified=False)" \
+	$one_location_re \
+	"-q in spec string and qualified false"
+}
+
 test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
@@ -620,3 +693,4 @@ test_bkpt_address
 test_bkpt_pending
 test_bkpt_events
 test_bkpt_explicit_loc
+test_bkpt_qualified

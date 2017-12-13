@@ -694,7 +694,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 {
   static const char *keywords[] = { "spec", "type", "wp_class", "internal",
 				    "temporary","source", "function",
-				    "label", "line", NULL };
+				    "label", "line", "qualified", NULL };
   const char *spec = NULL;
   enum bptype type = bp_breakpoint;
   int access_type = hw_write;
@@ -707,12 +707,14 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   char *label = NULL;
   char *source = NULL;
   char *function = NULL;
+  int qualified = 0;
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "|siiOOsssO", keywords,
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "|siiOOsssOp", keywords,
 					&spec, &type, &access_type,
 					&internal,
 					&temporary, &source,
-					&function, &label, &lineobj))
+					&function, &label, &lineobj,
+					&qualified))
     return -1;
 
 
@@ -759,6 +761,10 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	case bp_breakpoint:
 	  {
 	    event_location_up location;
+	    symbol_name_match_type func_name_match_type
+	      = (qualified
+		  ? symbol_name_match_type::FULL
+		  : symbol_name_match_type::WILD);
 
 	    if (spec != NULL)
 	      {
@@ -767,7 +773,8 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 		const char *copy = copy_holder.get ();
 
 		location  = string_to_event_location (&copy,
-						      current_language);
+						      current_language,
+						      func_name_match_type);
 	      }
 	    else
 	      {
@@ -781,6 +788,8 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 		if (line != NULL)
 		  explicit_loc.line_offset =
 		    linespec_parse_line_offset (line.get ());
+
+		explicit_loc.func_name_match_type = func_name_match_type;
 
 		location = new_explicit_location (&explicit_loc);
 	      }

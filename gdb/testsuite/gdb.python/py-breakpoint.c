@@ -17,6 +17,14 @@
 
 int result = 0;
 
+namespace foo_ns
+{
+  int multiply (int i)
+  {
+    return i * i;
+  }
+}
+
 int multiply (int i)
 {
   return i * i;
