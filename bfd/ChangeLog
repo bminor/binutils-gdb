@@ -1,3 +1,9 @@
+2017-12-13  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Disallow
+	BFD_RELOC_AARCH64_16 in shared object const section. Disallow
+	BFD_RELOC_AARCH64_32 in shared object const section under LP64.
+
 2017-12-11  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
 
 	* bfd.c (bfd_get_sign_extend_vma): Correct typo.

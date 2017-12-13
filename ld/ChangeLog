@@ -1,3 +1,13 @@
+2017-12-13  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new test cases.
+	* testsuite/ld-aarch64/emit-relocs-258-dyn-bad.d: New.
+	* testsuite/ld-aarch64/emit-relocs-258.s: New.
+	* testsuite/ld-aarch64/emit-relocs-259-dyn-bad.d: New.
+	* testsuite/ld-aarch64/emit-relocs-259.s: New.
+	* testsuite/ld-aarch64/gc-relocs-257.s: Put R_AARCH64_ABS32,
+	R_AARCH64_ABS16 data into data section.
+
 2017-12-07  Alan Modra  <amodra@gmail.com>
 
 	PR 22465
