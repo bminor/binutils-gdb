@@ -1,3 +1,9 @@
+2017-12-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-tasks.c (read_atcb): Properly set task_info->ptid
+	when !target_has_execution as well.
+	(task_command): Remove error when !target_has_execution.
+
 2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* location.h (string_to_event_location): Add match_type
