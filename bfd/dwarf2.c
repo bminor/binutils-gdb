@@ -117,11 +117,11 @@ struct dwarf2_debug
      This includes a pointer to an alternate bfd which contains *extra*,
      possibly duplicate debug sections, and pointers to the loaded
      .debug_str and .debug_info sections from this bfd.  */
-  bfd *          alt_bfd_ptr;
-  bfd_byte *     alt_dwarf_str_buffer;
-  bfd_size_type  alt_dwarf_str_size;
-  bfd_byte *     alt_dwarf_info_buffer;
-  bfd_size_type  alt_dwarf_info_size;
+  bfd *		 alt_bfd_ptr;
+  bfd_byte *	 alt_dwarf_str_buffer;
+  bfd_size_type	 alt_dwarf_str_size;
+  bfd_byte *	 alt_dwarf_info_buffer;
+  bfd_size_type	 alt_dwarf_info_size;
 
   /* A pointer to the memory block allocated for info_ptr.  Neither
      info_ptr nor sec_info_ptr are guaranteed to stay pointing to the
@@ -193,8 +193,8 @@ struct dwarf2_debug
 
   /* Status of info hash.  */
   int info_hash_status;
-#define STASH_INFO_HASH_OFF        0
-#define STASH_INFO_HASH_ON         1
+#define STASH_INFO_HASH_OFF	   0
+#define STASH_INFO_HASH_ON	   1
 #define STASH_INFO_HASH_DISABLED   2
 
   /* True if we opened bfd_ptr.  */
@@ -517,7 +517,7 @@ lookup_info_hash_table (struct info_hash_table *hash_table, const char *key)
    the located section does not contain at least OFFSET bytes.  */
 
 static bfd_boolean
-read_section (bfd *           abfd,
+read_section (bfd *	      abfd,
 	      const struct dwarf_debug_section *sec,
 	      asymbol **      syms,
 	      bfd_uint64_t    offset,
@@ -639,9 +639,9 @@ read_n_bytes (bfd *abfd ATTRIBUTE_UNUSED,
    problem, or if the string is empty.  */
 
 static char *
-read_string (bfd *          abfd ATTRIBUTE_UNUSED,
-	     bfd_byte *     buf,
-	     bfd_byte *     buf_end,
+read_string (bfd *	    abfd ATTRIBUTE_UNUSED,
+	     bfd_byte *	    buf,
+	     bfd_byte *	    buf_end,
 	     unsigned int * bytes_read_ptr)
 {
   bfd_byte *str = buf;
@@ -679,9 +679,9 @@ read_string (bfd *          abfd ATTRIBUTE_UNUSED,
 
 static char *
 read_indirect_string (struct comp_unit * unit,
-		      bfd_byte *         buf,
-		      bfd_byte *         buf_end,
-		      unsigned int *     bytes_read_ptr)
+		      bfd_byte *	 buf,
+		      bfd_byte *	 buf_end,
+		      unsigned int *	 bytes_read_ptr)
 {
   bfd_uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
@@ -717,8 +717,8 @@ read_indirect_string (struct comp_unit * unit,
 
 static char *
 read_indirect_line_string (struct comp_unit * unit,
-			   bfd_byte *         buf,
-			   bfd_byte *         buf_end,
+			   bfd_byte *	      buf,
+			   bfd_byte *	      buf_end,
 			   unsigned int *     bytes_read_ptr)
 {
   bfd_uint64_t offset;
@@ -758,8 +758,8 @@ read_indirect_line_string (struct comp_unit * unit,
 
 static char *
 read_alt_indirect_string (struct comp_unit * unit,
-			  bfd_byte *         buf,
-			  bfd_byte *         buf_end,
+			  bfd_byte *	     buf,
+			  bfd_byte *	     buf_end,
 			  unsigned int *     bytes_read_ptr)
 {
   bfd_uint64_t offset;
@@ -1073,11 +1073,11 @@ is_str_attr (enum dwarf_form form)
 
 static bfd_byte *
 read_attribute_value (struct attribute *  attr,
-		      unsigned            form,
-		      bfd_vma             implicit_const,
+		      unsigned		  form,
+		      bfd_vma		  implicit_const,
 		      struct comp_unit *  unit,
-		      bfd_byte *          info_ptr,
-		      bfd_byte *          info_ptr_end)
+		      bfd_byte *	  info_ptr,
+		      bfd_byte *	  info_ptr_end)
 {
   bfd *abfd = unit->abfd;
   unsigned int bytes_read;
@@ -1272,8 +1272,8 @@ static bfd_byte *
 read_attribute (struct attribute *    attr,
 		struct attr_abbrev *  abbrev,
 		struct comp_unit *    unit,
-		bfd_byte *            info_ptr,
-		bfd_byte *            info_ptr_end)
+		bfd_byte *	      info_ptr,
+		bfd_byte *	      info_ptr_end)
 {
   attr->name = abbrev->name;
   info_ptr = read_attribute_value (attr, abbrev->form, abbrev->implicit_const,
@@ -1335,24 +1335,24 @@ struct fileinfo
 
 struct line_sequence
 {
-  bfd_vma               low_pc;
+  bfd_vma		low_pc;
   struct line_sequence* prev_sequence;
-  struct line_info*     last_line;  /* Largest VMA.  */
-  struct line_info**    line_info_lookup;
+  struct line_info*	last_line;  /* Largest VMA.  */
+  struct line_info**	line_info_lookup;
   bfd_size_type		num_lines;
 };
 
 struct line_info_table
 {
-  bfd *                 abfd;
-  unsigned int          num_files;
-  unsigned int          num_dirs;
-  unsigned int          num_sequences;
-  char *                comp_dir;
-  char **               dirs;
-  struct fileinfo*      files;
+  bfd *			abfd;
+  unsigned int		num_files;
+  unsigned int		num_dirs;
+  unsigned int		num_sequences;
+  char *		comp_dir;
+  char **		dirs;
+  struct fileinfo*	files;
   struct line_sequence* sequences;
-  struct line_info*     lcl_head;   /* Local head; used in 'add_line_info'.  */
+  struct line_info*	lcl_head;   /* Local head; used in 'add_line_info'.  */
 };
 
 /* Remember some information about each function.  If the function is
@@ -1388,12 +1388,12 @@ struct lookup_funcinfo
   struct funcinfo *	funcinfo;
 
   /* The lowest address for this specific function.  */
-  bfd_vma 		low_addr;
+  bfd_vma		low_addr;
 
   /* The highest address of this function before the lookup table is sorted.
      The highest address of all prior functions after the lookup table is
      sorted, which is used for binary search.  */
-  bfd_vma 		high_addr;
+  bfd_vma		high_addr;
 };
 
 struct varinfo
@@ -1747,12 +1747,12 @@ build_line_info_table (struct line_info_table *  table,
 static bfd_boolean
 sort_line_sequences (struct line_info_table* table)
 {
-  bfd_size_type          amt;
-  struct line_sequence*  sequences;
-  struct line_sequence*  seq;
-  unsigned int           n = 0;
-  unsigned int           num_sequences = table->num_sequences;
-  bfd_vma                last_high_pc;
+  bfd_size_type		 amt;
+  struct line_sequence*	 sequences;
+  struct line_sequence*	 seq;
+  unsigned int		 n = 0;
+  unsigned int		 num_sequences = table->num_sequences;
+  bfd_vma		 last_high_pc;
 
   if (num_sequences == 0)
     return TRUE;
@@ -2644,7 +2644,7 @@ lookup_address_in_function_table (struct comp_unit *unit,
 
   if (unit->lookup_funcinfo_table[number_of_functions - 1].high_addr < addr)
     return FALSE;
-  
+
   /* Find the first function in the lookup table which may contain the
      specified address.  */
   low = 0;
@@ -4297,19 +4297,19 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   if (stash != NULL)
     {
       if (stash->orig_bfd == abfd
-          && section_vma_same (abfd, stash))
-        {
-          /* Check that we did previously find some debug information
-             before attempting to make use of it.  */
-          if (stash->bfd_ptr != NULL)
-            {
-              if (do_place && !place_sections (abfd, stash))
-                return FALSE;
-              return TRUE;
-            }
+	  && section_vma_same (abfd, stash))
+	{
+	  /* Check that we did previously find some debug information
+	     before attempting to make use of it.  */
+	  if (stash->bfd_ptr != NULL)
+	    {
+	      if (do_place && !place_sections (abfd, stash))
+		return FALSE;
+	      return TRUE;
+	    }
 
-          return FALSE;
-        }
+	  return FALSE;
+	}
       _bfd_dwarf2_cleanup_debug_info (abfd, pinfo);
       memset (stash, 0, amt);
     }
@@ -4550,18 +4550,18 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       addr = offset;
 
       /* If we have no SYMBOL but the section we're looking at is not a
-         code section, then take a look through the list of symbols to see
-         if we have a symbol at the address we're looking for.  If we do
-         then use this to look up line information.  This will allow us to
-         give file and line results for data symbols.  We exclude code
-         symbols here, if we look up a function symbol and then look up the
-         line information we'll actually return the line number for the
-         opening '{' rather than the function definition line.  This is
-         because looking up by symbol uses the line table, in which the
-         first line for a function is usually the opening '{', while
-         looking up the function by section + offset uses the
-         DW_AT_decl_line from the function DW_TAG_subprogram for the line,
-         which will be the line of the function name.  */
+	 code section, then take a look through the list of symbols to see
+	 if we have a symbol at the address we're looking for.  If we do
+	 then use this to look up line information.  This will allow us to
+	 give file and line results for data symbols.  We exclude code
+	 symbols here, if we look up a function symbol and then look up the
+	 line information we'll actually return the line number for the
+	 opening '{' rather than the function definition line.  This is
+	 because looking up by symbol uses the line table, in which the
+	 first line for a function is usually the opening '{', while
+	 looking up the function by section + offset uses the
+	 DW_AT_decl_line from the function DW_TAG_subprogram for the line,
+	 which will be the line of the function name.  */
       if (symbols != NULL && (section->flags & SEC_CODE) == 0)
 	{
 	  asymbol **tmp;
@@ -4574,10 +4574,10 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	      {
 		symbol = *tmp;
 		do_line = TRUE;
-                /* For local symbols, keep going in the hope we find a
-                   global.  */
-                if ((symbol->flags & BSF_GLOBAL) != 0)
-                  break;
+		/* For local symbols, keep going in the hope we find a
+		   global.  */
+		if ((symbol->flags & BSF_GLOBAL) != 0)
+		  break;
 	      }
 	}
     }

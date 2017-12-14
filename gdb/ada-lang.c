@@ -6475,7 +6475,6 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
   const struct block *b, *surrounding_static_block = 0;
-  int i;
   struct block_iterator iter;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
@@ -6762,7 +6761,8 @@ ada_tag_value_at_base_address (struct value *obj)
   if (is_ada95_tag (tag))
     return obj;
 
-  ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  ptr_type = language_lookup_primitive_type
+    (language_def (language_ada), target_gdbarch(), "storage_offset");
   ptr_type = lookup_pointer_type (ptr_type);
   val = value_cast (ptr_type, tag);
   if (!val)
@@ -6796,7 +6796,18 @@ ada_tag_value_at_base_address (struct value *obj)
   if (offset_to_top == -1)
     return obj;
 
-  base_address = value_address (obj) - offset_to_top;
+  /* OFFSET_TO_TOP used to be a positive value to be subtracted
+     from the base address.  This was however incompatible with
+     C++ dispatch table: C++ uses a *negative* value to *add*
+     to the base address.  Ada's convention has therefore been
+     changed in GNAT 19.0w 20171023: since then, C++ and Ada
+     use the same convention.  Here, we support both cases by
+     checking the sign of OFFSET_TO_TOP.  */
+
+  if (offset_to_top > 0)
+    offset_to_top = -offset_to_top;
+
+  base_address = value_address (obj) + offset_to_top;
   tag = value_tag_from_contents_and_address (obj_type, NULL, base_address);
 
   /* Make sure that we have a proper tag at the new address.
@@ -8652,7 +8663,6 @@ static int
 ada_is_redundant_range_encoding (struct type *range_type,
 				 struct type *encoding_type)
 {
-  struct type *fixed_range_type;
   const char *bounds_str;
   int n;
   LONGEST lo, hi;
@@ -9719,23 +9729,28 @@ ada_value_equal (struct value *arg1, struct value *arg2)
   if (ada_is_direct_array_type (value_type (arg1))
       || ada_is_direct_array_type (value_type (arg2)))
     {
+      struct type *arg1_type, *arg2_type;
+
       /* Automatically dereference any array reference before
          we attempt to perform the comparison.  */
       arg1 = ada_coerce_ref (arg1);
       arg2 = ada_coerce_ref (arg2);
-      
+
       arg1 = ada_coerce_to_simple_array (arg1);
       arg2 = ada_coerce_to_simple_array (arg2);
-      if (TYPE_CODE (value_type (arg1)) != TYPE_CODE_ARRAY
-          || TYPE_CODE (value_type (arg2)) != TYPE_CODE_ARRAY)
+
+      arg1_type = ada_check_typedef (value_type (arg1));
+      arg2_type = ada_check_typedef (value_type (arg2));
+
+      if (TYPE_CODE (arg1_type) != TYPE_CODE_ARRAY
+          || TYPE_CODE (arg2_type) != TYPE_CODE_ARRAY)
         error (_("Attempt to compare array with non-array"));
       /* FIXME: The following works only for types whose
          representations use all bits (no padding or undefined bits)
          and do not have user-defined equality.  */
-      return
-        TYPE_LENGTH (value_type (arg1)) == TYPE_LENGTH (value_type (arg2))
-        && memcmp (value_contents (arg1), value_contents (arg2),
-                   TYPE_LENGTH (value_type (arg1))) == 0;
+      return (TYPE_LENGTH (arg1_type) == TYPE_LENGTH (arg2_type)
+	      && memcmp (value_contents (arg1), value_contents (arg2),
+			 TYPE_LENGTH (arg1_type)) == 0);
     }
   return value_equal (arg1, arg2);
 }
@@ -13868,6 +13883,7 @@ enum ada_primitive_types {
   ada_primitive_type_natural,
   ada_primitive_type_positive,
   ada_primitive_type_system_address,
+  ada_primitive_type_storage_offset,
   nr_ada_primitive_types
 };
 
@@ -13919,6 +13935,18 @@ ada_language_arch_info (struct gdbarch *gdbarch,
 				      "void"));
   TYPE_NAME (lai->primitive_type_vector [ada_primitive_type_system_address])
     = "system__address";
+
+  /* Create the equivalent of the System.Storage_Elements.Storage_Offset
+     type.  This is a signed integral type whose size is the same as
+     the size of addresses.  */
+  {
+    unsigned int addr_length = TYPE_LENGTH
+      (lai->primitive_type_vector [ada_primitive_type_system_address]);
+
+    lai->primitive_type_vector [ada_primitive_type_storage_offset]
+      = arch_integer_type (gdbarch, addr_length * HOST_CHAR_BIT, 0,
+			   "storage_offset");
+  }
 
   lai->bool_type_symbol = NULL;
   lai->bool_type_default = builtin->builtin_bool;

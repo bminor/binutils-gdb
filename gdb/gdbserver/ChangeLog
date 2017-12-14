@@ -1,3 +1,30 @@
+2017-12-08  Tom Tromey  <tom@tromey.com>
+
+	* ax.c (ax_printf): Update.
+
+2017-12-07  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-ipa.c (initialize_low_tracepoint): Call
+	aarch64_linux_read_description.
+	* linux-amd64-ipa.c (idx2mask): New array.
+	(get_ipa_tdesc): Move idx2mask out.
+	(initialize_low_tracepoint): Initialize target descriptions.
+	* linux-i386-ipa.c (idx2mask): New array.
+	(get_ipa_tdesc): Move idx2mask out.
+	(initialize_low_tracepoint): Initialize target descriptions.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* tdesc.c (struct tdesc_type): Change return type.
+	(tdesc_add_flag): Change parameter type.
+	(tdesc_add_bitfield): Likewise.
+	(tdesc_add_field): Likewise.
+	(tdesc_set_struct_size): Likewise.
+
+2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* regcache.c (registers_to_string): Remove unused variable.
+
 2017-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* inferiors.c (for_each_inferior_with_data): Remove.

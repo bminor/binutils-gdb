@@ -1,5 +1,5 @@
-/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
-   generated from "libbfd-in.h", "libbfd.c", "bfdio.c", "bfdwin.c", 
+/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically
+   generated from "libbfd-in.h", "libbfd.c", "bfdio.c", "bfdwin.c",
    "cache.c", "reloc.c", "archures.c" and "linker.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
@@ -243,9 +243,9 @@ int bfd_generic_stat_arch_elt
   (bfd *, struct stat *);
 
 #define _bfd_read_ar_hdr(abfd) \
-  BFD_SEND (abfd, _bfd_read_ar_hdr_fn, (abfd))
-#define _bfd_write_ar_hdr(archive, abfd)         \
-  BFD_SEND (abfd, _bfd_write_ar_hdr_fn, (archive, abfd))
+	BFD_SEND (abfd, _bfd_read_ar_hdr_fn, (abfd))
+#define _bfd_write_ar_hdr(archive, abfd)	 \
+	BFD_SEND (abfd, _bfd_write_ar_hdr_fn, (archive, abfd))
 
 /* Generic routines to use for BFD_JUMP_TABLE_GENERIC.  Use
    BFD_JUMP_TABLE_GENERIC (_bfd_generic).  */
@@ -450,7 +450,7 @@ extern long _bfd_norelocs_get_reloc_upper_bound (bfd *, asection *);
 extern long _bfd_norelocs_canonicalize_reloc (bfd *, asection *,
 					      arelent **, asymbol **);
 extern void _bfd_norelocs_set_reloc (bfd *, asection *,
-                                     arelent **, unsigned int);
+				     arelent **, unsigned int);
 #define _bfd_norelocs_bfd_reloc_type_lookup \
   ((reloc_howto_type *(*) (bfd *, bfd_reloc_code_real_type)) bfd_nullvoidptr)
 #define _bfd_norelocs_bfd_reloc_name_lookup \
@@ -886,7 +886,7 @@ struct bfd_iovec
      if an error occurs.  */
   file_ptr (*btell) (struct bfd *abfd);
   /* For the following, on successful completion a value of 0 is returned.
-     Otherwise, a value of -1 is returned (and  <<bfd_error>> is set).  */
+     Otherwise, a value of -1 is returned (and <<bfd_error>> is set).  */
   int (*bseek) (struct bfd *abfd, file_ptr offset, int whence);
   int (*bclose) (struct bfd *abfd);
   int (*bflush) (struct bfd *abfd);

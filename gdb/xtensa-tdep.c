@@ -551,8 +551,6 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
 			     int regnum,
 			     gdb_byte *buffer)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-
   DEBUGTRACE ("xtensa_pseudo_register_read (... regnum = %d (%s) ...)\n",
 	      regnum, xtensa_register_name (gdbarch, regnum));
 
@@ -647,8 +645,6 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 			      int regnum,
 			      const gdb_byte *buffer)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-
   DEBUGTRACE ("xtensa_pseudo_register_write (... regnum = %d (%s) ...)\n",
 	      regnum, xtensa_register_name (gdbarch, regnum));
 

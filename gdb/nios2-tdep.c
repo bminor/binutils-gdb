@@ -1817,7 +1817,6 @@ nios2_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                        int struct_return, CORE_ADDR struct_addr)
 {
   int argreg;
-  int float_argreg;
   int argnum;
   int len = 0;
   int stack_offset = 0;
@@ -2209,7 +2208,6 @@ nios2_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 static std::vector<CORE_ADDR>
 nios2_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR next_pc = nios2_get_next_pc (regcache, regcache_read_pc (regcache));
 
   return {next_pc};

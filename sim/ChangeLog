@@ -1,3 +1,39 @@
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Peter Gavin  <pgavin@gmail.com>
+
+	* configure: Regenerated.
+	* or1k/aclocal.m4: Generated.
+	* or1k/config.in: Generated.
+	* or1k/configure: Generated.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Peter Gavin  <pgavin@gmail.com>
+
+	* or1k/arch.c: Generated.
+	* or1k/arch.h: Generated.
+	* or1k/cpu.c: Generated.
+	* or1k/cpu.h: Generated.
+	* or1k/cpuall.h: Generated.
+	* or1k/decode.c: Generated.
+	* or1k/decode.h: Generated.
+	* or1k/model.c: Generated.
+	* or1k/sem-switch.c: Generated.
+	* or1k/sem.c: Generated.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Peter Gavin  <pgavin@gmail.com>
+
+	* configure.tgt: Add or1k sim.
+	* or1k/README: New file.
+	* or1k/Makefile.in: New file.
+	* or1k/configure.ac: New file.
+	* or1k/mloop.in: New file.
+	* or1k/or1k-sim.h: New file.
+	* or1k/or1k.c: New file.
+	* or1k/sim-if.c: New file.
+	* or1k/sim-main.h: New file.
+	* or1k/traps.c: New file.
+
 2017-11-01  James Bowman  <james.bowman@ftdichip.com>
 
 	* ft32/interp.c (step_once): Add ft32 shortcode decoder.

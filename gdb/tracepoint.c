@@ -3265,7 +3265,6 @@ create_tsv_from_upload (struct uploaded_tsv *utsv)
   std::string buf;
   int try_num = 0;
   struct trace_state_variable *tsv;
-  struct cleanup *old_chain;
 
   if (utsv->name)
     {

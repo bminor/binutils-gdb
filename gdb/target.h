@@ -607,7 +607,8 @@ struct target_ops
     void (*to_follow_exec) (struct target_ops *, struct inferior *, char *)
       TARGET_DEFAULT_IGNORE ();
     int (*to_set_syscall_catchpoint) (struct target_ops *,
-				      int, int, int, int, int *)
+				      int, bool, int,
+				      gdb::array_view<const int>)
       TARGET_DEFAULT_RETURN (1);
     int (*to_has_exited) (struct target_ops *, int, int, int *)
       TARGET_DEFAULT_RETURN (0);
@@ -1615,28 +1616,24 @@ void target_follow_exec (struct inferior *inf, char *execd_pathname);
 
 /* Syscall catch.
 
-   NEEDED is nonzero if any syscall catch (of any kind) is requested.
-   If NEEDED is zero, it means the target can disable the mechanism to
+   NEEDED is true if any syscall catch (of any kind) is requested.
+   If NEEDED is false, it means the target can disable the mechanism to
    catch system calls because there are no more catchpoints of this type.
 
    ANY_COUNT is nonzero if a generic (filter-less) syscall catch is
-   being requested.  In this case, both TABLE_SIZE and TABLE should
-   be ignored.
+   being requested.  In this case, SYSCALL_COUNTS should be ignored.
 
-   TABLE_SIZE is the number of elements in TABLE.  It only matters if
-   ANY_COUNT is zero.
-
-   TABLE is an array of ints, indexed by syscall number.  An element in
-   this array is nonzero if that syscall should be caught.  This argument
-   only matters if ANY_COUNT is zero.
+   SYSCALL_COUNTS is an array of ints, indexed by syscall number.  An
+   element in this array is nonzero if that syscall should be caught.
+   This argument only matters if ANY_COUNT is zero.
 
    Return 0 for success, 1 if syscall catchpoints are not supported or -1
    for failure.  */
 
-#define target_set_syscall_catchpoint(pid, needed, any_count, table_size, table) \
+#define target_set_syscall_catchpoint(pid, needed, any_count, syscall_counts) \
      (*current_target.to_set_syscall_catchpoint) (&current_target,	\
 						  pid, needed, any_count, \
-						  table_size, table)
+						  syscall_counts)
 
 /* Returns TRUE if PID has exited.  And, also sets EXIT_STATUS to the
    exit code of PID, if any.  */

@@ -874,7 +874,6 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
   struct value *function = ((value_object *) self)->value;
   struct value **vargs = NULL;
   struct type *ftype = NULL;
-  struct value *mark = value_mark ();
   PyObject *result = NULL;
 
   TRY

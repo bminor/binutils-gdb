@@ -358,10 +358,10 @@ static reloc_howto_type cris_elf_howto_table [] =
      relocs for cross-format linking.  */
 #define TLSHOWTO32(name) \
  HOWTO (name, 0, 2, 32, FALSE, 0, complain_overflow_bitfield, \
-        bfd_elf_generic_reloc, #name, FALSE, 0, 0xffffffff, FALSE)
+	bfd_elf_generic_reloc, #name, FALSE, 0, 0xffffffff, FALSE)
 #define TLSHOWTO16X(name, X)	     \
  HOWTO (name, 0, 1, 16, FALSE, 0, complain_overflow_ ## X, \
-        bfd_elf_generic_reloc, #name, FALSE, 0, 0xffff, FALSE)
+	bfd_elf_generic_reloc, #name, FALSE, 0, 0xffff, FALSE)
 #define TLSHOWTO16(name) TLSHOWTO16X(name, unsigned)
 #define TLSHOWTO16S(name) TLSHOWTO16X(name, signed)
 
@@ -913,11 +913,11 @@ elf_cris_link_hash_table_create (bfd *abfd)
 
 static bfd_reloc_status_type
 cris_final_link_relocate (reloc_howto_type *  howto,
-			  bfd *               input_bfd,
-			  asection *          input_section,
-			  bfd_byte *          contents,
+			  bfd *		      input_bfd,
+			  asection *	      input_section,
+			  bfd_byte *	      contents,
 			  Elf_Internal_Rela * rel,
-			  bfd_vma             relocation)
+			  bfd_vma	      relocation)
 {
   bfd_reloc_status_type r;
   enum elf_cris_reloc_type r_type = ELF32_R_TYPE (rel->r_info);
@@ -1549,8 +1549,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      /* This reloc will be computed at runtime, so there's no
-                 need to do anything now, except for R_CRIS_32 relocations
-                 that have been turned into R_CRIS_RELATIVE.  */
+		 need to do anything now, except for R_CRIS_32 relocations
+		 that have been turned into R_CRIS_RELATIVE.  */
 	      if (!relocate)
 		continue;
 	    }
@@ -2409,7 +2409,7 @@ elf_cris_finish_dynamic_sections (bfd *output_bfd,
 		  elf_section_data (splt->output_section)->this_hdr.sh_entsize
 		    = PLT_ENTRY_SIZE;
 		}
-            }
+	    }
 	}
     }
 
@@ -3150,7 +3150,7 @@ cris_elf_check_relocs (bfd *abfd,
 	}
 
       switch (r_type)
-        {
+	{
 	case R_CRIS_16_GOTPLT:
 	case R_CRIS_32_GOTPLT:
 	  /* Mark that we need a GOT entry if the PLT entry (and its GOT
@@ -3277,10 +3277,10 @@ cris_elf_check_relocs (bfd *abfd,
 	case R_CRIS_32_PLT_PCREL:
 	  /* This symbol requires a procedure linkage table entry.  We
 	     actually build the entry in adjust_dynamic_symbol,
-             because this might be a case of linking PIC code which is
-             never referenced by a dynamic object, in which case we
-             don't need to generate a procedure linkage table entry
-             after all.  */
+	     because this might be a case of linking PIC code which is
+	     never referenced by a dynamic object, in which case we
+	     don't need to generate a procedure linkage table entry
+	     after all.  */
 
 	  /* Beware: if we'd check for visibility of the symbol here
 	     (and not marking the need for a PLT when non-visible), we'd
@@ -3472,21 +3472,21 @@ cris_elf_check_relocs (bfd *abfd,
 	  }
 	  break;
 
-        /* This relocation describes the C++ object vtable hierarchy.
-           Reconstruct it for later use during GC.  */
-        case R_CRIS_GNU_VTINHERIT:
-          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-            return FALSE;
-          break;
+	/* This relocation describes the C++ object vtable hierarchy.
+	   Reconstruct it for later use during GC.  */
+	case R_CRIS_GNU_VTINHERIT:
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	    return FALSE;
+	  break;
 
-        /* This relocation describes which C++ vtable entries are actually
-           used.  Record for later use during GC.  */
-        case R_CRIS_GNU_VTENTRY:
-          BFD_ASSERT (h != NULL);
-          if (h != NULL
-              && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-            return FALSE;
-          break;
+	/* This relocation describes which C++ vtable entries are actually
+	   used.  Record for later use during GC.  */
+	case R_CRIS_GNU_VTENTRY:
+	  BFD_ASSERT (h != NULL);
+	  if (h != NULL
+	      && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	    return FALSE;
+	  break;
 
 	case R_CRIS_16_TPREL:
 	case R_CRIS_32_TPREL:
@@ -3497,7 +3497,7 @@ cris_elf_check_relocs (bfd *abfd,
 	  /* Other relocs do not appear here.  */
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
-        }
+	}
     }
 
   return TRUE;
@@ -3604,7 +3604,7 @@ elf_cris_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (s->size != 0)
 	    {
 	      /* Remember whether there are any reloc sections other
-                 than .rela.plt.  */
+		 than .rela.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
 		  relocs = TRUE;
 
@@ -4107,7 +4107,7 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_relocate_section		cris_elf_relocate_section
 #define elf_backend_gc_mark_hook		cris_elf_gc_mark_hook
 #define elf_backend_plt_sym_val			cris_elf_plt_sym_val
-#define elf_backend_check_relocs                cris_elf_check_relocs
+#define elf_backend_check_relocs		cris_elf_check_relocs
 #define elf_backend_grok_prstatus		cris_elf_grok_prstatus
 #define elf_backend_grok_psinfo			cris_elf_grok_psinfo
 

@@ -589,7 +589,7 @@ h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
       value = bfd_h8300_pad_address (abfd, value);
 
       /* If the address is a sign-extended 16-bit value then we can
-         relax this instruction.  */
+	 relax this instruction.  */
       if (value <= 0x7fff || value >= 0xffff8000u)
 	{
 	  /* Change the reloc type.  */

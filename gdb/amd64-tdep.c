@@ -1037,8 +1037,9 @@ struct amd64_insn
 {
   /* The number of opcode bytes.  */
   int opcode_len;
-  /* The offset of the rex prefix or -1 if not present.  */
-  int rex_offset;
+  /* The offset of the REX/VEX instruction encoding prefix or -1 if
+     not present.  */
+  int enc_prefix_offset;
   /* The offset to the first opcode byte.  */
   int opcode_offset;
   /* The offset to the modrm byte or -1 if not present.  */
@@ -1122,6 +1123,22 @@ static int
 rex_prefix_p (gdb_byte pfx)
 {
   return REX_PREFIX_P (pfx);
+}
+
+/* True if PFX is the start of the 2-byte VEX prefix.  */
+
+static bool
+vex2_prefix_p (gdb_byte pfx)
+{
+  return pfx == 0xc5;
+}
+
+/* True if PFX is the start of the 3-byte VEX prefix.  */
+
+static bool
+vex3_prefix_p (gdb_byte pfx)
+{
+  return pfx == 0xc4;
 }
 
 /* Skip the legacy instruction prefixes in INSN.
@@ -1242,18 +1259,29 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
   details->raw_insn = insn;
 
   details->opcode_len = -1;
-  details->rex_offset = -1;
+  details->enc_prefix_offset = -1;
   details->opcode_offset = -1;
   details->modrm_offset = -1;
 
   /* Skip legacy instruction prefixes.  */
   insn = amd64_skip_prefixes (insn);
 
-  /* Skip REX instruction prefix.  */
+  /* Skip REX/VEX instruction encoding prefixes.  */
   if (rex_prefix_p (*insn))
     {
-      details->rex_offset = insn - start;
+      details->enc_prefix_offset = insn - start;
       ++insn;
+    }
+  else if (vex2_prefix_p (*insn))
+    {
+      /* Don't record the offset in this case because this prefix has
+	 no REX.B equivalent.  */
+      insn += 2;
+    }
+  else if (vex3_prefix_p (*insn))
+    {
+      details->enc_prefix_offset = insn - start;
+      insn += 3;
     }
 
   details->opcode_offset = insn - start;
@@ -1329,10 +1357,22 @@ fixup_riprel (struct gdbarch *gdbarch, amd64_displaced_step_closure *dsc,
   arch_tmp_regno = amd64_get_unused_input_int_reg (insn_details);
   tmp_regno = amd64_arch_reg_to_regnum (arch_tmp_regno);
 
-  /* REX.B should be unset as we were using rip-relative addressing,
-     but ensure it's unset anyway, tmp_regno is not r8-r15.  */
-  if (insn_details->rex_offset != -1)
-    dsc->insn_buf[insn_details->rex_offset] &= ~REX_B;
+  /* Position of the not-B bit in the 3-byte VEX prefix (in byte 1).  */
+  static constexpr gdb_byte VEX3_NOT_B = 0x20;
+
+  /* REX.B should be unset (VEX.!B set) as we were using rip-relative
+     addressing, but ensure it's unset (set for VEX) anyway, tmp_regno
+     is not r8-r15.  */
+  if (insn_details->enc_prefix_offset != -1)
+    {
+      gdb_byte *pfx = &dsc->insn_buf[insn_details->enc_prefix_offset];
+      if (rex_prefix_p (pfx[0]))
+	pfx[0] &= ~REX_B;
+      else if (vex3_prefix_p (pfx[0]))
+	pfx[1] |= VEX3_NOT_B;
+      else
+	gdb_assert_not_reached ("unhandled prefix");
+    }
 
   regcache_cooked_read_unsigned (regs, tmp_regno, &orig_value);
   dsc->tmp_regno = tmp_regno;

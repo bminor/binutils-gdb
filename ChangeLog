@@ -1,3 +1,12 @@
+2017-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* COPYING.LIBGLOSS: Update address of FSF in copyright notice.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+
+	* configure.ac: Remove logic adding gdb to noconfigsdirs for or1k.
+	* configure: Regenerate.
+
 2017-09-15  Nick Clifton  <nickc@redhat.com>
 
 	* src-release.sh (LZIPPROG): New define.  Provides the name of the

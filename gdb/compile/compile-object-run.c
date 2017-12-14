@@ -116,8 +116,6 @@ void
 compile_object_run (struct compile_module *module)
 {
   struct value *func_val;
-  struct frame_id dummy_id;
-  struct cleanup *cleanups;
   struct do_module_cleanup *data;
   const char *objfile_name_s = objfile_name (module->objfile);
   int dtor_found, executed = 0;

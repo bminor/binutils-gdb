@@ -154,15 +154,13 @@ filename_completer (struct cmd_list_element *ignore,
 		    const char *text, const char *word)
 {
   int subsequent_name;
-  VEC (char_ptr) *return_val = NULL;
 
   subsequent_name = 0;
   while (1)
     {
-      char *p, *q;
-
-      p = rl_filename_completion_function (text, subsequent_name);
-      if (p == NULL)
+      gdb::unique_xmalloc_ptr<char> p_rl
+	(rl_filename_completion_function (text, subsequent_name));
+      if (p_rl == NULL)
 	break;
       /* We need to set subsequent_name to a non-zero value before the
 	 continue line below, because otherwise, if the first file
@@ -171,32 +169,12 @@ filename_completer (struct cmd_list_element *ignore,
       subsequent_name = 1;
       /* Like emacs, don't complete on old versions.  Especially
          useful in the "source" command.  */
+      const char *p = p_rl.get ();
       if (p[strlen (p) - 1] == '~')
-	{
-	  xfree (p);
-	  continue;
-	}
+	continue;
 
-      if (word == text)
-	/* Return exactly p.  */
-	q = p;
-      else if (word > text)
-	{
-	  /* Return some portion of p.  */
-	  q = (char *) xmalloc (strlen (p) + 5);
-	  strcpy (q, p + (word - text));
-	  xfree (p);
-	}
-      else
-	{
-	  /* Return some of TEXT plus p.  */
-	  q = (char *) xmalloc (strlen (p) + (text - word) + 5);
-	  strncpy (q, word, text - word);
-	  q[text - word] = '\0';
-	  strcat (q, p);
-	  xfree (p);
-	}
-      tracker.add_completion (gdb::unique_xmalloc_ptr<char> (q));
+      tracker.add_completion
+	(make_completion_match_str (std::move (p_rl), text, word));
     }
 #if 0
   /* There is no way to do this just long enough to affect quote
@@ -429,7 +407,6 @@ static void
 complete_files_symbols (completion_tracker &tracker,
 			const char *text, const char *word)
 {
-  int ix;
   completion_list fn_list;
   const char *p;
   int quote_found = 0;
@@ -524,8 +501,6 @@ complete_files_symbols (completion_tracker &tracker,
 
   if (!fn_list.empty () && !tracker.have_completions ())
     {
-      char *fn;
-
       /* If we only have file names as possible completion, we should
 	 bring them in sync with what rl_complete expects.  The
 	 problem is that if the user types "break /foo/b TAB", and the
@@ -1081,7 +1056,6 @@ complete_expression (completion_tracker &tracker,
     }
   else if (fieldname && code != TYPE_CODE_UNDEF)
     {
-      VEC (char_ptr) *result;
       struct cleanup *cleanup = make_cleanup (xfree, fieldname);
 
       collect_symbol_completion_matches_type (tracker, fieldname, fieldname,
@@ -1536,7 +1510,8 @@ completion_tracker::~completion_tracker ()
 bool
 completion_tracker::maybe_add_completion
   (gdb::unique_xmalloc_ptr<char> name,
-   completion_match_for_lcd *match_for_lcd)
+   completion_match_for_lcd *match_for_lcd,
+   const char *text, const char *word)
 {
   void **slot;
 
@@ -1557,7 +1532,10 @@ completion_tracker::maybe_add_completion
       if (match_for_lcd_str == NULL)
 	match_for_lcd_str = name.get ();
 
-      recompute_lowest_common_denominator (match_for_lcd_str);
+      gdb::unique_xmalloc_ptr<char> lcd
+	= make_completion_match_str (match_for_lcd_str, text, word);
+
+      recompute_lowest_common_denominator (std::move (lcd));
 
       *slot = name.get ();
       m_entries_vec.push_back (std::move (name));
@@ -1570,9 +1548,10 @@ completion_tracker::maybe_add_completion
 
 void
 completion_tracker::add_completion (gdb::unique_xmalloc_ptr<char> name,
-				    completion_match_for_lcd *match_for_lcd)
+				    completion_match_for_lcd *match_for_lcd,
+				    const char *text, const char *word)
 {
-  if (!maybe_add_completion (std::move (name), match_for_lcd))
+  if (!maybe_add_completion (std::move (name), match_for_lcd, text, word))
     throw_error (MAX_COMPLETIONS_REACHED_ERROR, _("Max completions reached."));
 }
 
@@ -1583,6 +1562,63 @@ completion_tracker::add_completions (completion_list &&list)
 {
   for (auto &candidate : list)
     add_completion (std::move (candidate));
+}
+
+/* Helper for the make_completion_match_str overloads.  Returns NULL
+   as an indication that we want MATCH_NAME exactly.  It is up to the
+   caller to xstrdup that string if desired.  */
+
+static char *
+make_completion_match_str_1 (const char *match_name,
+			     const char *text, const char *word)
+{
+  char *newobj;
+
+  if (word == text)
+    {
+      /* Return NULL as an indication that we want MATCH_NAME
+	 exactly.  */
+      return NULL;
+    }
+  else if (word > text)
+    {
+      /* Return some portion of MATCH_NAME.  */
+      newobj = xstrdup (match_name + (word - text));
+    }
+  else
+    {
+      /* Return some of WORD plus MATCH_NAME.  */
+      size_t len = strlen (match_name);
+      newobj = (char *) xmalloc (text - word + len + 1);
+      memcpy (newobj, word, text - word);
+      memcpy (newobj + (text - word), match_name, len + 1);
+    }
+
+  return newobj;
+}
+
+/* See completer.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+make_completion_match_str (const char *match_name,
+			   const char *text, const char *word)
+{
+  char *newobj = make_completion_match_str_1 (match_name, text, word);
+  if (newobj == NULL)
+    newobj = xstrdup (match_name);
+  return gdb::unique_xmalloc_ptr<char> (newobj);
+}
+
+/* See completer.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+make_completion_match_str (gdb::unique_xmalloc_ptr<char> &&match_name,
+			   const char *text, const char *word)
+{
+  char *newobj = make_completion_match_str_1 (match_name.get (), text, word);
+  if (newobj == NULL)
+    return std::move (match_name);
+  return gdb::unique_xmalloc_ptr<char> (newobj);
 }
 
 /* Generate completions all at once.  Does nothing if max_completions
@@ -1873,21 +1909,23 @@ completion_find_completion_word (completion_tracker &tracker, const char *text,
 /* See completer.h.  */
 
 void
-completion_tracker::recompute_lowest_common_denominator (const char *new_match)
+completion_tracker::recompute_lowest_common_denominator
+  (gdb::unique_xmalloc_ptr<char> &&new_match_up)
 {
   if (m_lowest_common_denominator == NULL)
     {
       /* We don't have a lowest common denominator yet, so simply take
-	 the whole NEW_MATCH as being it.  */
-      m_lowest_common_denominator = xstrdup (new_match);
+	 the whole NEW_MATCH_UP as being it.  */
+      m_lowest_common_denominator = new_match_up.release ();
       m_lowest_common_denominator_unique = true;
     }
   else
     {
       /* Find the common denominator between the currently-known
-	 lowest common denominator and NEW_MATCH.  That becomes the
+	 lowest common denominator and NEW_MATCH_UP.  That becomes the
 	 new lowest common denominator.  */
       size_t i;
+      const char *new_match = new_match_up.get ();
 
       for (i = 0;
 	   (new_match[i] != '\0'

@@ -177,7 +177,7 @@ static reloc_howto_type elf_mips_howto_table_rel[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 			/* This needs complex overflow
+				/* This needs complex overflow
 				   detection, because the upper four
 				   bits must match the PC + 4.  */
 	 _bfd_mips_elf_generic_reloc, /* special_function */
@@ -592,7 +592,7 @@ static reloc_howto_type elf_mips_howto_table_rel[] =
 
   /* Protected jump conversion.  This is an optimization hint.  No
      relocation is required for correctness.  */
-  HOWTO (R_MIPS_JALR,	        /* type */
+  HOWTO (R_MIPS_JALR,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
@@ -600,7 +600,7 @@ static reloc_howto_type elf_mips_howto_table_rel[] =
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 _bfd_mips_elf_generic_reloc, /* special_function */
-	 "R_MIPS_JALR",	        /* name */
+	 "R_MIPS_JALR",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x00000000,		/* dst_mask */
@@ -1374,7 +1374,7 @@ static reloc_howto_type elf_mips_howto_table_rela[] =
 
   /* Protected jump conversion.  This is an optimization hint.  No
      relocation is required for correctness.  */
-  HOWTO (R_MIPS_JALR,	        /* type */
+  HOWTO (R_MIPS_JALR,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
@@ -1382,7 +1382,7 @@ static reloc_howto_type elf_mips_howto_table_rela[] =
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 _bfd_mips_elf_generic_reloc, /* special_function */
-	 "R_MIPS_JALR",	        /* name */
+	 "R_MIPS_JALR",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
@@ -1662,7 +1662,7 @@ static reloc_howto_type elf_mips16_howto_table_rel[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 			/* This needs complex overflow
+				/* This needs complex overflow
 				   detection, because the upper four
 				   bits must match the PC.  */
 	 _bfd_mips_elf_generic_reloc, /* special_function */
@@ -1684,7 +1684,7 @@ static reloc_howto_type elf_mips16_howto_table_rel[] =
 	 "R_MIPS16_GPREL",	/* name */
 	 TRUE,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
-	 0x0000ffff,	        /* dst_mask */
+	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* A MIPS16 reference to the global offset table.  */
@@ -1699,7 +1699,7 @@ static reloc_howto_type elf_mips16_howto_table_rel[] =
 	 "R_MIPS16_GOT16",	/* name */
 	 TRUE,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
-	 0x0000ffff,	        /* dst_mask */
+	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* A MIPS16 call through the global offset table.  */
@@ -1714,7 +1714,7 @@ static reloc_howto_type elf_mips16_howto_table_rel[] =
 	 "R_MIPS16_CALL16",	/* name */
 	 TRUE,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
-	 0x0000ffff,	        /* dst_mask */
+	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* MIPS16 high 16 bits of symbol value.  */
@@ -1878,7 +1878,7 @@ static reloc_howto_type elf_mips16_howto_table_rela[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 			/* This needs complex overflow
+				/* This needs complex overflow
 				   detection, because the upper four
 				   bits must match the PC.  */
 	 _bfd_mips_elf_generic_reloc, /* special_function */
@@ -1900,7 +1900,7 @@ static reloc_howto_type elf_mips16_howto_table_rela[] =
 	 "R_MIPS16_GPREL",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x0000ffff,	        /* dst_mask */
+	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* A MIPS16 reference to the global offset table.  */
@@ -1915,7 +1915,7 @@ static reloc_howto_type elf_mips16_howto_table_rela[] =
 	 "R_MIPS16_GOT16",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x0000ffff,	        /* dst_mask */
+	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* A MIPS16 call through the global offset table.  */
@@ -1930,7 +1930,7 @@ static reloc_howto_type elf_mips16_howto_table_rela[] =
 	 "R_MIPS16_CALL16",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x0000ffff,	        /* dst_mask */
+	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* MIPS16 high 16 bits of symbol value.  */
@@ -2098,7 +2098,7 @@ static reloc_howto_type elf_micromips_howto_table_rel[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 			/* This needs complex overflow
+				/* This needs complex overflow
 				   detection, because the upper four
 				   bits must match the PC.  */
 	 _bfd_mips_elf_generic_reloc, /* special_function */
@@ -2417,7 +2417,7 @@ static reloc_howto_type elf_micromips_howto_table_rela[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 			/* This needs complex overflow
+				/* This needs complex overflow
 				   detection, because the upper four
 				   bits must match the PC.  */
 	 _bfd_mips_elf_generic_reloc, /* special_function */
@@ -2838,8 +2838,8 @@ static reloc_howto_type elf_mips_copy_howto =
 	 _bfd_mips_elf_generic_reloc, /* special_function */
 	 "R_MIPS_COPY",		/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0,         		/* src_mask */
-	 0x0,		        /* dst_mask */
+	 0x0,			/* src_mask */
+	 0x0,			/* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
 /* Originally a VxWorks extension, but now used for other systems too.  */
@@ -2854,8 +2854,8 @@ static reloc_howto_type elf_mips_jump_slot_howto =
 	 _bfd_mips_elf_generic_reloc, /* special_function */
 	 "R_MIPS_JUMP_SLOT",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0,         		/* src_mask */
-	 0x0,		        /* dst_mask */
+	 0x0,			/* src_mask */
+	 0x0,			/* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
 /* Used in EH tables.  */
@@ -2871,7 +2871,7 @@ static reloc_howto_type elf_mips_eh_howto =
 	 "R_MIPS_EH",		/* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
-	 0xffffffff,	        /* dst_mask */
+	 0xffffffff,		/* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
 
@@ -3837,10 +3837,10 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 
 /* Support for SGI-ish mips targets using n32 ABI.  */
 
-#define TARGET_LITTLE_SYM               mips_elf32_n_le_vec
-#define TARGET_LITTLE_NAME              "elf32-nlittlemips"
-#define TARGET_BIG_SYM                  mips_elf32_n_be_vec
-#define TARGET_BIG_NAME                 "elf32-nbigmips"
+#define TARGET_LITTLE_SYM		mips_elf32_n_le_vec
+#define TARGET_LITTLE_NAME		"elf32-nlittlemips"
+#define TARGET_BIG_SYM			mips_elf32_n_be_vec
+#define TARGET_BIG_NAME			"elf32-nbigmips"
 
 #define ELF_MAXPAGESIZE			0x10000
 #define ELF_COMMONPAGESIZE		0x1000
@@ -3856,10 +3856,10 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #undef ELF_MAXPAGESIZE
 #undef ELF_COMMONPAGESIZE
 
-#define TARGET_LITTLE_SYM               mips_elf32_ntrad_le_vec
-#define TARGET_LITTLE_NAME              "elf32-ntradlittlemips"
-#define TARGET_BIG_SYM                  mips_elf32_ntrad_be_vec
-#define TARGET_BIG_NAME                 "elf32-ntradbigmips"
+#define TARGET_LITTLE_SYM		mips_elf32_ntrad_le_vec
+#define TARGET_LITTLE_NAME		"elf32-ntradlittlemips"
+#define TARGET_BIG_SYM			mips_elf32_ntrad_be_vec
+#define TARGET_BIG_NAME			"elf32-ntradbigmips"
 
 #define ELF_MAXPAGESIZE			0x10000
 #define ELF_COMMONPAGESIZE		0x1000

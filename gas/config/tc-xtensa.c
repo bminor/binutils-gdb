@@ -7646,10 +7646,28 @@ xg_get_best_chain_entry (struct trampoline_chain *tc, addressT source)
 
 static int xg_order_trampoline_chain (const void *a, const void *b)
 {
-  const struct trampoline_chain *pa = a;
-  const struct trampoline_chain *pb = b;
+  const struct trampoline_chain *_pa = a;
+  const struct trampoline_chain *_pb = b;
+  const struct trampoline_chain_entry *pa = &_pa->target;
+  const struct trampoline_chain_entry *pb = &_pb->target;
+  symbolS *s1 = pa->sym;
+  symbolS *s2 = pb->sym;
 
-  return xg_order_trampoline_chain_entry (&pa->target, &pb->target);
+  if (s1->sy_flags.sy_local_symbol
+      && local_symbol_converted_p ((struct local_symbol *) s1))
+    s1 = local_symbol_get_real_symbol ((struct local_symbol *) s1);
+
+  if (s2->sy_flags.sy_local_symbol
+      && local_symbol_converted_p ((struct local_symbol *) s2))
+    s2 = local_symbol_get_real_symbol ((struct local_symbol *) s2);
+
+  if (s1 == s2)
+    if (pa->offset == pb->offset)
+      return 0;
+    else
+      return pa->offset < pb->offset ? -1 : 1;
+  else
+    return s1 < s2 ? -1 : 1;
 }
 
 static struct trampoline_chain *

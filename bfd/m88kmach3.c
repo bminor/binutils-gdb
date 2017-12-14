@@ -21,7 +21,7 @@
 #define	TARGET_PAGE_SIZE	(4096*2)
 #define SEGMENT_SIZE	0x20000
 #define TEXT_START_ADDR	0
-#define N_HEADER_IN_TEXT(x)	1 		/* (N_MAGIG(x) == ZMAGIC) */
+#define N_HEADER_IN_TEXT(x)	1		/* (N_MAGIG(x) == ZMAGIC) */
 
 #define N_TXTSIZE(x)	((x)->a_text)
 

@@ -825,7 +825,6 @@ ada_varobj_get_value_of_array_variable (struct value *value,
 					struct type *type,
 					struct value_print_options *opts)
 {
-  char *result;
   const int numchild = ada_varobj_get_array_number_of_children (value, type);
 
   /* If we have a string, provide its contents in the "value" field.

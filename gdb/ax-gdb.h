@@ -120,10 +120,8 @@ extern void gen_expr (struct expression *exp, union exp_element **pc,
 
 extern void require_rvalue (struct agent_expr *ax, struct axs_value *value);
 
-struct format_piece;
 extern agent_expr_up gen_printf (CORE_ADDR, struct gdbarch *,
 				 CORE_ADDR, LONGEST, const char *, int,
-				 struct format_piece *,
 				 int, struct expression **);
 
 #endif /* AX_GDB_H */

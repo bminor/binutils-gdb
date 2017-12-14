@@ -109,7 +109,7 @@ sec_merge_hash_newfunc (struct bfd_hash_entry *entry,
      subclass.  */
   if (entry == NULL)
     entry = (struct bfd_hash_entry *)
-        bfd_hash_allocate (table, sizeof (struct sec_merge_hash_entry));
+	bfd_hash_allocate (table, sizeof (struct sec_merge_hash_entry));
   if (entry == NULL)
     return NULL;
 
@@ -410,7 +410,7 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
     {
       /* Initialize the information we need to keep track of.  */
       sinfo = (struct sec_merge_info *)
-          bfd_alloc (abfd, sizeof (struct sec_merge_info));
+	  bfd_alloc (abfd, sizeof (struct sec_merge_info));
       if (sinfo == NULL)
 	goto error_return;
       sinfo->next = (struct sec_merge_info *) *psinfo;

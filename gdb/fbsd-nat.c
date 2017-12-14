@@ -1163,8 +1163,9 @@ fbsd_remove_exec_catchpoint (struct target_ops *self, int pid)
 
 #ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
 static int
-fbsd_set_syscall_catchpoint (struct target_ops *self, int pid, int needed,
-			     int any_count, int table_size, int *table)
+fbsd_set_syscall_catchpoint (struct target_ops *self, int pid, bool needed,
+			     int any_count,
+			     gdb::array_view<const int> syscall_counts)
 {
 
   /* Ignore the arguments.  inf-ptrace.c will use PT_SYSCALL which

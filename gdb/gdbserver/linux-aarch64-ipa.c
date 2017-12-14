@@ -204,4 +204,5 @@ alloc_jump_pad_buffer (size_t size)
 void
 initialize_low_tracepoint (void)
 {
+  aarch64_linux_read_description ();
 }

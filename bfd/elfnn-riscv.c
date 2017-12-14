@@ -55,26 +55,6 @@
 #define ELF_MAXPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
 
-/* The RISC-V linker needs to keep track of the number of relocs that it
-   decides to copy as dynamic relocs in check_relocs for each symbol.
-   This is so that it can later discard them if they are found to be
-   unnecessary.  We store the information in a field extending the
-   regular ELF linker hash table.  */
-
-struct riscv_elf_dyn_relocs
-{
-  struct riscv_elf_dyn_relocs *next;
-
-  /* The input section of the reloc.  */
-  asection *sec;
-
-  /* Total number of relocs copied for the input section.  */
-  bfd_size_type count;
-
-  /* Number of pc-relative relocs copied for the input section.  */
-  bfd_size_type pc_count;
-};
-
 /* RISC-V ELF linker hash entry.  */
 
 struct riscv_elf_link_hash_entry
@@ -82,7 +62,7 @@ struct riscv_elf_link_hash_entry
   struct elf_link_hash_entry elf;
 
   /* Track dynamic relocs copied for this symbol.  */
-  struct riscv_elf_dyn_relocs *dyn_relocs;
+  struct elf_dyn_relocs *dyn_relocs;
 
 #define GOT_UNKNOWN     0
 #define GOT_NORMAL      1
@@ -195,13 +175,13 @@ riscv_make_plt_header (bfd_vma gotplt_addr, bfd_vma addr, uint32_t *entry)
   bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, addr);
 
   /* auipc  t2, %hi(.got.plt)
-     sub    t1, t1, t3               # shifted .got.plt offset + hdr size + 12
+     sub    t1, t1, t3		     # shifted .got.plt offset + hdr size + 12
      l[w|d] t3, %lo(.got.plt)(t2)    # _dl_runtime_resolve
      addi   t1, t1, -(hdr size + 12) # shifted .got.plt offset
      addi   t0, t2, %lo(.got.plt)    # &.got.plt
      srli   t1, t1, log2(16/PTRSIZE) # .got.plt offset
-     l[w|d] t0, PTRSIZE(t0)          # link map
-     jr     t3 */
+     l[w|d] t0, PTRSIZE(t0)	     # link map
+     jr	    t3 */
 
   entry[0] = RISCV_UTYPE (AUIPC, X_T2, gotplt_offset_high);
   entry[1] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
@@ -398,14 +378,14 @@ riscv_elf_copy_indirect_symbol (struct bfd_link_info *info,
     {
       if (edir->dyn_relocs != NULL)
 	{
-	  struct riscv_elf_dyn_relocs **pp;
-	  struct riscv_elf_dyn_relocs *p;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
-	      struct riscv_elf_dyn_relocs *q;
+	      struct elf_dyn_relocs *q;
 
 	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
@@ -657,8 +637,8 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  && (h->root.type == bfd_link_hash_defweak
 		      || !h->def_regular)))
 	    {
-	      struct riscv_elf_dyn_relocs *p;
-	      struct riscv_elf_dyn_relocs **head;
+	      struct elf_dyn_relocs *p;
+	      struct elf_dyn_relocs **head;
 
 	      /* When creating a shared object, we must copy these
 		 relocs into the output file.  We create a reloc
@@ -697,14 +677,14 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
-		  head = (struct riscv_elf_dyn_relocs **) vpp;
+		  head = (struct elf_dyn_relocs **) vpp;
 		}
 
 	      p = *head;
 	      if (p == NULL || p->sec != sec)
 		{
 		  bfd_size_type amt = sizeof *p;
-		  p = ((struct riscv_elf_dyn_relocs *)
+		  p = ((struct elf_dyn_relocs *)
 		       bfd_alloc (htab->elf.dynobj, amt));
 		  if (p == NULL)
 		    return FALSE;
@@ -762,7 +742,7 @@ riscv_elf_gc_mark_hook (asection *sec,
 static asection *
 readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
-  struct riscv_elf_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
 
   for (p = riscv_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
     {
@@ -786,7 +766,6 @@ riscv_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 {
   struct riscv_elf_link_hash_table *htab;
   struct riscv_elf_link_hash_entry * eh;
-  struct riscv_elf_dyn_relocs *p;
   bfd *dynobj;
   asection *s, *srel;
 
@@ -861,17 +840,9 @@ riscv_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       return TRUE;
     }
 
-  eh = (struct riscv_elf_link_hash_entry *) h;
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
-    {
-      s = p->sec->output_section;
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	break;
-    }
-
-  /* If we didn't find any dynamic relocs in read-only sections, then
+  /* If we don't find any dynamic relocs in read-only sections, then
      we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-  if (p == NULL)
+  if (!readonly_dynrelocs (h))
     {
       h->non_got_ref = 0;
       return TRUE;
@@ -891,6 +862,7 @@ riscv_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      to copy the initial value out of the dynamic object and into the
      runtime process image.  We need to remember the offset into the
      .rel.bss section we are going to use.  */
+  eh = (struct riscv_elf_link_hash_entry *) h;
   if (eh->tls_type & ~GOT_NORMAL)
     {
       s = htab->sdyntdata;
@@ -924,7 +896,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   struct bfd_link_info *info;
   struct riscv_elf_link_hash_table *htab;
   struct riscv_elf_link_hash_entry *eh;
-  struct riscv_elf_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -1045,7 +1017,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
-	  struct riscv_elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs **pp;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -1187,7 +1159,7 @@ riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  struct riscv_elf_dyn_relocs *p;
+	  struct elf_dyn_relocs *p;
 
 	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
@@ -1529,14 +1501,14 @@ typedef struct
 
 typedef struct riscv_pcrel_lo_reloc
 {
-  asection *                     input_section;
-  struct bfd_link_info *         info;
-  reloc_howto_type *             howto;
-  const Elf_Internal_Rela *      reloc;
-  bfd_vma                        addr;
-  const char *                   name;
-  bfd_byte *                     contents;
-  struct riscv_pcrel_lo_reloc *  next;
+  asection *			 input_section;
+  struct bfd_link_info *	 info;
+  reloc_howto_type *		 howto;
+  const Elf_Internal_Rela *	 reloc;
+  bfd_vma			 addr;
+  const char *			 name;
+  bfd_byte *			 contents;
+  struct riscv_pcrel_lo_reloc *	 next;
 } riscv_pcrel_lo_reloc;
 
 typedef struct
@@ -1672,12 +1644,12 @@ riscv_resolve_pcrel_lo_relocs (riscv_pcrel_relocs *p)
       riscv_pcrel_hi_reloc search = {r->addr, 0};
       riscv_pcrel_hi_reloc *entry = htab_find (p->hi_relocs, &search);
       if (entry == NULL)
-        {
+	{
 	  ((*r->info->callbacks->reloc_overflow)
 	   (r->info, NULL, r->name, r->howto->name, (bfd_vma) 0,
 	    input_bfd, r->input_section, r->reloc->r_offset));
 	  return TRUE;
-        }
+	}
 
       perform_relocation (r->howto, r->reloc, entry->value, r->input_section,
 			  input_bfd, r->contents);
@@ -2136,7 +2108,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 		}
 
 	      /* The GOT entries have not been initialized yet.  Do it
-	         now, and emit any relocations.  */
+		 now, and emit any relocations.  */
 	      if ((bfd_link_pic (info) || indx != 0)
 		  && (h == NULL
 		      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -3175,7 +3147,7 @@ _bfd_riscv_relax_pc  (bfd *abfd,
       /* If the cooresponding lo relocation has already been seen then it's not
        * safe to relax this relocation.  */
       if (riscv_find_pcgp_lo_reloc (pcgp_relocs, rel->r_offset))
-        return TRUE;
+	return TRUE;
 
       break;
 
@@ -3215,7 +3187,7 @@ _bfd_riscv_relax_pc  (bfd *abfd,
 	  return riscv_delete_pcgp_lo_reloc (pcgp_relocs, rel->r_offset, 4);
 
 	case R_RISCV_PCREL_HI20:
-          riscv_record_pcgp_hi_reloc (pcgp_relocs,
+	  riscv_record_pcgp_hi_reloc (pcgp_relocs,
 				      rel->r_offset,
 				      rel->r_addend,
 				      symval,
@@ -3344,7 +3316,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  i++;
 	}
       else if (info->relax_pass == 1 && type == R_RISCV_DELETE)
-        relax_func = _bfd_riscv_relax_delete;
+	relax_func = _bfd_riscv_relax_delete;
       else if (info->relax_pass == 2 && type == R_RISCV_ALIGN)
 	relax_func = _bfd_riscv_relax_align;
       else
@@ -3552,9 +3524,9 @@ riscv_elf_object_p (bfd *abfd)
 #define elf_backend_finish_dynamic_sections  riscv_elf_finish_dynamic_sections
 #define elf_backend_gc_mark_hook	     riscv_elf_gc_mark_hook
 #define elf_backend_plt_sym_val		     riscv_elf_plt_sym_val
-#define elf_backend_grok_prstatus            riscv_elf_grok_prstatus
-#define elf_backend_grok_psinfo              riscv_elf_grok_psinfo
-#define elf_backend_object_p                 riscv_elf_object_p
+#define elf_backend_grok_prstatus	     riscv_elf_grok_prstatus
+#define elf_backend_grok_psinfo		     riscv_elf_grok_psinfo
+#define elf_backend_object_p		     riscv_elf_object_p
 #define elf_info_to_howto_rel		     NULL
 #define elf_info_to_howto		     riscv_info_to_howto_rela
 #define bfd_elfNN_bfd_relax_section	     _bfd_riscv_relax_section

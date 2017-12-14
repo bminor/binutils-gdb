@@ -80,7 +80,7 @@ struct xgate_elf_link_hash_table
 
   /* Assorted information used by elf32_hppa_size_stubs.  */
   unsigned int bfd_count;
-  int          top_index;
+  int	       top_index;
   asection **  input_list;
 
   /* Small local sym cache.  */

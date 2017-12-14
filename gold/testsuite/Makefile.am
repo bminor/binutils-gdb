@@ -2401,6 +2401,23 @@ plugin_section_order.so: plugin_section_order.o gcctestdir/ld
 plugin_section_order.o: plugin_section_order.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
 
+# Uses the plugin_final_layout.sh script above to avoid duplication
+check_DATA += plugin_layout_new_file.stdout plugin_layout_new_file_readelf.stdout
+MOSTLYCLEANFILES += plugin_layout_new_file
+plugin_final_layout.o.syms: plugin_final_layout.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+plugin_layout_new_file: plugin_final_layout.o.syms plugin_test.so plugin_new_section_layout.so gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_test.so"  -Wl,--plugin,"./plugin_new_section_layout.so" plugin_final_layout.o.syms
+plugin_layout_new_file.stdout: plugin_layout_new_file
+	$(TEST_NM) -n --synthetic plugin_layout_new_file > plugin_layout_new_file.stdout
+plugin_layout_new_file_readelf.stdout: plugin_layout_new_file
+	$(TEST_READELF) -Wl plugin_layout_new_file > plugin_layout_new_file_readelf.stdout
+
+plugin_new_section_layout.so: plugin_new_section_layout.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared plugin_new_section_layout.o
+plugin_new_section_layout.o: plugin_new_section_layout.c
+	$(COMPILE) -O0 -c -fpic -o $@ $<
+
 check_SCRIPTS += plugin_layout_with_alignment.sh
 check_DATA += plugin_layout_with_alignment.stdout
 MOSTLYCLEANFILES += plugin_layout_with_alignment

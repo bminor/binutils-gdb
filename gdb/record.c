@@ -452,7 +452,6 @@ get_context_size (const char **arg)
 {
   const char *pos;
   char *end;
-  int number;
 
   pos = skip_spaces (*arg);
 

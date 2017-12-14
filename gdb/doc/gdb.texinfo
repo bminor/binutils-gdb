@@ -546,6 +546,11 @@ was developed by SRI International and the University of Cambridge
 Computer Laboratory under DARPA/AFRL contract FA8750-10-C-0237
 ("CTSRD"), as part of the DARPA CRASH research programme.
 
+The original port to the OpenRISC 1000 is believed to be due to
+Alessandro Forin and Per Bothner.  More recent ports have been the work
+of Jeremy Bennett, Franck Jullien, Stefan Wallentowitz and
+Stafford Horne.
+
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
 
@@ -11594,7 +11599,9 @@ this writing, @sc{gnu}/Linux, FreeBSD, Solaris, and S390).
 
 On @sc{gnu}/Linux, this command can take into account the value of the
 file @file{/proc/@var{pid}/coredump_filter} when generating the core
-dump (@pxref{set use-coredump-filter}).
+dump (@pxref{set use-coredump-filter}), and by default honors the
+@code{VM_DONTDUMP} flag for mappings where it is present in the file
+@file{/proc/@var{pid}/smaps} (@pxref{set dump-excluded-mappings}).
 
 @kindex set use-coredump-filter
 @anchor{set use-coredump-filter}
@@ -11624,6 +11631,16 @@ value is currently @code{0x33}, which means that bits @code{0}
 (anonymous private mappings), @code{1} (anonymous shared mappings),
 @code{4} (ELF headers) and @code{5} (private huge pages) are active.
 This will cause these memory mappings to be dumped automatically.
+
+@kindex set dump-excluded-mappings
+@anchor{set dump-excluded-mappings}
+@item set dump-excluded-mappings on
+@itemx set dump-excluded-mappings off
+If @code{on} is specified, @value{GDBN} will dump memory mappings
+marked with the @code{VM_DONTDUMP} flag.  This flag is represented in
+the file @file{/proc/@var{pid}/smaps} with the acronym @code{dd}.
+
+The default value is @code{off}.
 @end table
 
 @node Character Sets
@@ -15565,9 +15582,6 @@ features from being implemented by @value{GDBN}:
 Method calls cannot be made via traits.
 
 @item
-Trait objects cannot be created or inspected.
-
-@item
 Operator overloading is not implemented.
 
 @item
@@ -17061,6 +17075,19 @@ cause @value{GDBN} to omit the methods.
 @item show print type methods
 This command shows the current setting of method display when printing
 classes.
+
+@kindex set print type nested-type-limit
+@item set print type nested-type-limit @var{limit}
+@itemx set print type nested-type-limit unlimited
+Set the limit of displayed nested types that the type printer will
+show.  A @var{limit} of @code{unlimited} or @code{-1} will show all
+nested definitions.  By default, the type printer will not show any nested
+types defined in classes.
+
+@kindex show print type nested-type-limit
+@item show print type nested-type-limit
+This command shows the current display limit of nested types when
+printing classes.
 
 @kindex set print type typedefs
 @item set print type typedefs
@@ -19543,12 +19570,16 @@ using @command{objcopy}.
 To create an index file, use the @code{save gdb-index} command:
 
 @table @code
-@item save gdb-index @var{directory}
+@item save gdb-index [-dwarf-5] @var{directory}
 @kindex save gdb-index
-Create an index file for each symbol file currently known by
-@value{GDBN}.  Each file is named after its corresponding symbol file,
-with @samp{.gdb-index} appended, and is written into the given
-@var{directory}.
+Create index files for all symbol files currently known by
+@value{GDBN}.  For each known @var{symbol-file}, this command by
+default creates it produces a single file
+@file{@var{symbol-file}.gdb-index}.  If you invoke this command with
+the @option{-dwarf-5} option, it produces 2 files:
+@file{@var{symbol-file}.debug_names} and
+@file{@var{symbol-file}.debug_str}.  The files are created in the
+given @var{directory}.
 @end table
 
 Once you have created an index file you can merge it into your symbol
@@ -19557,6 +19588,16 @@ file, here named @file{symfile}, using @command{objcopy}:
 @smallexample
 $ objcopy --add-section .gdb_index=symfile.gdb-index \
     --set-section-flags .gdb_index=readonly symfile symfile
+@end smallexample
+
+Or for @code{-dwarf-5}:
+
+@smallexample
+$ objcopy --dump-section .debug_str=symfile.debug_str.new symfile
+$ cat symfile.debug_str >>symfile.debug_str.new
+$ objcopy --add-section .debug_names=symfile.gdb-index \
+    --set-section-flags .debug_names=readonly \
+    --update-section .debug_str=symfile.debug_str.new symfile symfile
 @end smallexample
 
 @value{GDBN} will normally ignore older versions of @file{.gdb_index}
@@ -22406,6 +22447,7 @@ acceptable commands.
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
+* OpenRISC 1000::               OpenRISC 1000 (or1k)
 * PowerPC Embedded::            PowerPC Embedded
 * AVR::                         Atmel AVR
 * CRIS::                        CRIS
@@ -22613,6 +22655,38 @@ and @samp{set mipsfpu off} will select no floating point.
 
 As usual, you can inquire about the @code{mipsfpu} variable with
 @samp{show mipsfpu}.
+@end table
+
+@node OpenRISC 1000
+@subsection OpenRISC 1000
+@cindex OpenRISC 1000
+
+@noindent
+The OpenRISC 1000 provides a free RISC instruction set architecture.  It is
+mainly provided as a soft-core which can run on Xilinx, Altera and other
+FPGA's.
+
+@value{GDBN} for OpenRISC supports the below commands when connecting to
+a target:
+
+@table @code
+
+@kindex target sim
+@item target sim
+
+Runs the builtin CPU simulator which can run very basic
+programs but does not support most hardware functions like MMU.
+For more complex use cases the user is advised to run an external
+target, and connect using @samp{target remote}.
+
+Example: @code{target sim}
+
+@item set debug or1k
+Toggle whether to display OpenRISC-specific debugging messages from the
+OpenRISC target support subsystem.
+
+@item show debug or1k
+Show whether OpenRISC-specific debugging messages are enabled.
 @end table
 
 @node PowerPC Embedded
@@ -41703,6 +41777,7 @@ registers using the capitalization used in the description.
 * M68K Features::
 * NDS32 Features::
 * Nios II Features::
+* OpenRISC 1000 Features::
 * PowerPC Features::
 * S/390 and System z Features::
 * Sparc Features::
@@ -41988,6 +42063,14 @@ targets.  It should contain the 32 core registers (@samp{zero},
 @samp{at}, @samp{r2} through @samp{r23}, @samp{et} through @samp{ra}),
 @samp{pc}, and the 16 control registers (@samp{status} through
 @samp{mpuacc}).
+
+@node OpenRISC 1000 Features
+@subsection Openrisc 1000 Features
+@cindex target descriptions, OpenRISC 1000 features
+
+The @samp{org.gnu.gdb.or1k.group0} feature is required for OpenRISC 1000
+targets.  It should contain the 32 general purpose registers (@samp{r0}
+through @samp{r31}), @samp{ppc}, @samp{npc} and @samp{sr}.
 
 @node PowerPC Features
 @subsection PowerPC Features
@@ -43039,7 +43122,7 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 
 @format
 @c man begin SYNOPSIS gcore
-gcore [-o @var{filename}] @var{pid}
+gcore [-a] [-o @var{filename}] @var{pid}
 @c man end
 @end format
 
@@ -43053,6 +43136,13 @@ running without any change.
 
 @c man begin OPTIONS gcore
 @table @env
+@item -a
+Dump all memory mappings.  The actual effect of this option depends on
+the Operating System.  On @sc{gnu}/Linux, it will disable
+@code{use-coredump-filter} (@pxref{set use-coredump-filter}) and
+enable @code{dump-excluded-mappings} (@pxref{set
+dump-excluded-mappings}).
+
 @item -o @var{filename}
 The optional argument
 @var{filename} specifies the file name where to put the core dump.

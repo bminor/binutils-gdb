@@ -214,8 +214,6 @@ rx_fpsw_type (struct gdbarch *gdbarch)
 static struct type *
 rx_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   if (reg_nr == RX_PC_REGNUM)
     return builtin_type (gdbarch)->builtin_func_ptr;
   else if (reg_nr == RX_PSW_REGNUM || reg_nr == RX_BPSW_REGNUM)

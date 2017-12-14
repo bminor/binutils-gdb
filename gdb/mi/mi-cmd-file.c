@@ -119,7 +119,6 @@ mi_cmd_file_list_shared_libraries (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
   const char *pattern;
   struct so_list *so = NULL;
-  struct gdbarch *gdbarch = target_gdbarch ();
 
   switch (argc)
     {

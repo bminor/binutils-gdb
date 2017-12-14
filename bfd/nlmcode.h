@@ -1575,7 +1575,7 @@ nlm_external_reloc_compare (const void *p1, const void *p2)
      code sections
      data sections
      other sections (custom data, messages, help, shared NLM, RPC,
-     		     module dependencies)
+		     module dependencies)
      relocation fixups
      external references (imports)
      public symbols (exports)

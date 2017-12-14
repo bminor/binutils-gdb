@@ -93,6 +93,11 @@ struct smaps_vmflags
 
 static int use_coredump_filter = 1;
 
+/* Whether the value of smaps_vmflags->exclude_coredump should be
+   ignored, including mappings marked with the VM_DONTDUMP flag in
+   the dump.  */
+static int dump_excluded_mappings = 0;
+
 /* This enum represents the signals' numbers on a generic architecture
    running the Linux kernel.  The definition of "generic" comes from
    the file <include/uapi/asm-generic/signal.h>, from the Linux kernel
@@ -655,7 +660,7 @@ dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
 	return 0;
 
       /* Check if we should exclude this mapping.  */
-      if (v->exclude_coredump)
+      if (!dump_excluded_mappings && v->exclude_coredump)
 	return 0;
 
       /* Update our notion of whether this mapping is shared or
@@ -2469,6 +2474,17 @@ show_use_coredump_filter (struct ui_file *file, int from_tty,
 			    " corefiles is %s.\n"), value);
 }
 
+/* Display whether the gcore command is dumping mappings marked with
+   the VM_DONTDUMP flag.  */
+
+static void
+show_dump_excluded_mappings (struct ui_file *file, int from_tty,
+			     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Dumping of mappings marked with the VM_DONTDUMP"
+			    " flag is %s.\n"), value);
+}
+
 /* To be called from the various GDB_OSABI_LINUX handlers for the
    various GNU/Linux architectures and machine types.  */
 
@@ -2516,5 +2532,17 @@ Use this command to set whether gcore should consider the contents\n\
 of /proc/PID/coredump_filter when generating the corefile.  For more information\n\
 about this file, refer to the manpage of core(5)."),
 			   NULL, show_use_coredump_filter,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("dump-excluded-mappings", class_files,
+			   &dump_excluded_mappings, _("\
+Set whether gcore should dump mappings marked with the VM_DONTDUMP flag."),
+			   _("\
+Show whether gcore should dump mappings marked with the VM_DONTDUMP flag."),
+			   _("\
+Use this command to set whether gcore should dump mappings marked with the\n\
+VM_DONTDUMP flag (\"dd\" in /proc/PID/smaps) when generating the corefile.  For\n\
+more information about this file, refer to the manpage of proc(5) and core(5)."),
+			   NULL, show_dump_excluded_mappings,
 			   &setlist, &showlist);
 }

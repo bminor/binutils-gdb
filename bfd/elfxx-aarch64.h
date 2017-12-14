@@ -23,7 +23,7 @@
 #include "stdint.h"
 
 /* Take the PAGE component of an address or offset.  */
-#define PG(x)        ((x) & ~ (bfd_vma) 0xfff)
+#define PG(x)	     ((x) & ~ (bfd_vma) 0xfff)
 #define PG_OFFSET(x) ((x) &   (bfd_vma) 0xfff)
 
 #define AARCH64_ADR_OP		0x10000000
@@ -63,5 +63,5 @@ _bfd_aarch64_elf_write_core_note (bfd *, char *, int *, int, ...);
 
 #define elf_backend_add_symbol_hook	_bfd_aarch64_elf_add_symbol_hook
 #define elf_backend_grok_prstatus	_bfd_aarch64_elf_grok_prstatus
-#define elf_backend_grok_psinfo         _bfd_aarch64_elf_grok_psinfo
-#define elf_backend_write_core_note     _bfd_aarch64_elf_write_core_note
+#define elf_backend_grok_psinfo		_bfd_aarch64_elf_grok_psinfo
+#define elf_backend_write_core_note	_bfd_aarch64_elf_write_core_note

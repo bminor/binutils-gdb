@@ -3785,14 +3785,24 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     }
   else
     {
-      relpp = (arelent **) xmalloc (relsize);
-      relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, isympp);
-      if (relcount < 0)
+      if (isection->orelocation != NULL)
 	{
-	  status = 1;
-	  bfd_nonfatal_message (NULL, ibfd, isection,
-				_("relocation count is negative"));
-	  return;
+	  /* Some other function has already set up the output relocs
+	     for us, so scan those instead of the default relocs.  */
+	  relcount = isection->reloc_count;
+	  relpp = isection->orelocation;
+	}
+      else
+	{
+	  relpp = (arelent **) xmalloc (relsize);
+	  relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, isympp);
+	  if (relcount < 0)
+	    {
+	      status = 1;
+	      bfd_nonfatal_message (NULL, ibfd, isection,
+				    _("relocation count is negative"));
+	      return;
+	    }
 	}
 
       if (strip_symbols == STRIP_ALL)
@@ -3815,7 +3825,8 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 		  temp_relpp [temp_relcount++] = relpp [i];
 	    }
 	  relcount = temp_relcount;
-	  free (relpp);
+	  if (isection->orelocation == NULL)
+	    free (relpp);
 	  relpp = temp_relpp;
 	}
 
@@ -3898,6 +3909,15 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	  char *end = (char *) memhunk + size;
 	  int i;
 
+	  /* If the section address is not exactly divisible by the interleave,
+	     then we must bias the from address.  If the copy_byte is less than
+	     the bias, then we must skip forward one interleave, and increment
+	     the final lma.  */
+	  int extra = isection->lma % interleave;
+	  from -= extra;
+	  if (copy_byte < extra)
+	    from += interleave;
+
 	  for (; from < end; from += interleave)
 	    for (i = 0; i < copy_width; i++)
 	      {
@@ -3908,6 +3928,8 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
 	  size = (size + interleave - 1 - copy_byte) / interleave * copy_width;
 	  osection->lma /= interleave;
+	  if (copy_byte < extra)
+	    osection->lma++;
 	}
 
       if (!bfd_set_section_contents (obfd, osection, memhunk, 0, size))

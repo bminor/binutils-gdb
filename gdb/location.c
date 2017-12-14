@@ -843,7 +843,7 @@ string_to_explicit_location (const char **argp,
 	     Stop parsing and return whatever explicit location was
 	     parsed.  */
 	  *argp = start;
-	  return location;
+	  break;
 	}
 
       *argp = skip_spaces (*argp);
@@ -915,10 +915,10 @@ string_to_event_location_basic (const char **stringp,
 
 event_location_up
 string_to_event_location (const char **stringp,
-			  const struct language_defn *language)
+			  const struct language_defn *language,
+			  symbol_name_match_type match_type)
 {
   const char *arg, *orig;
-  symbol_name_match_type match_type = symbol_name_match_type::WILD;
 
   /* Try an explicit location.  */
   orig = arg = *stringp;

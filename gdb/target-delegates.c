@@ -1286,36 +1286,34 @@ debug_follow_exec (struct target_ops *self, struct inferior *arg1, char *arg2)
 }
 
 static int
-delegate_set_syscall_catchpoint (struct target_ops *self, int arg1, int arg2, int arg3, int arg4, int *arg5)
+delegate_set_syscall_catchpoint (struct target_ops *self, int arg1, bool arg2, int arg3, gdb::array_view<const int> arg4)
 {
   self = self->beneath;
-  return self->to_set_syscall_catchpoint (self, arg1, arg2, arg3, arg4, arg5);
+  return self->to_set_syscall_catchpoint (self, arg1, arg2, arg3, arg4);
 }
 
 static int
-tdefault_set_syscall_catchpoint (struct target_ops *self, int arg1, int arg2, int arg3, int arg4, int *arg5)
+tdefault_set_syscall_catchpoint (struct target_ops *self, int arg1, bool arg2, int arg3, gdb::array_view<const int> arg4)
 {
   return 1;
 }
 
 static int
-debug_set_syscall_catchpoint (struct target_ops *self, int arg1, int arg2, int arg3, int arg4, int *arg5)
+debug_set_syscall_catchpoint (struct target_ops *self, int arg1, bool arg2, int arg3, gdb::array_view<const int> arg4)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_set_syscall_catchpoint (...)\n", debug_target.to_shortname);
-  result = debug_target.to_set_syscall_catchpoint (&debug_target, arg1, arg2, arg3, arg4, arg5);
+  result = debug_target.to_set_syscall_catchpoint (&debug_target, arg1, arg2, arg3, arg4);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_set_syscall_catchpoint (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg2);
+  target_debug_print_bool (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg3);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg4);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int_p (arg5);
+  target_debug_print_gdb_array_view_const_int (arg4);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);

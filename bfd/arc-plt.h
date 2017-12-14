@@ -43,11 +43,11 @@ enum plt_reloc_symbol
   MIDDLE_ENDIAN = (1 << 11)
 };
 
-#define IS_RELATIVE(S)      ((S & (RELATIVE | RELATIVE_INSN_24 | RELATIVE_INSN_32)) != 0)
-#define IS_INSN_32(S)       ((S & RELATIVE_INSN_32) != 0)
-#define IS_INSN_24(S)       ((S & RELATIVE_INSN_24) != 0)
+#define IS_RELATIVE(S)	    ((S & (RELATIVE | RELATIVE_INSN_24 | RELATIVE_INSN_32)) != 0)
+#define IS_INSN_32(S)	    ((S & RELATIVE_INSN_32) != 0)
+#define IS_INSN_24(S)	    ((S & RELATIVE_INSN_24) != 0)
 #define IS_MIDDLE_ENDIAN(S) ((S & MIDDLE_ENDIAN) != 0)
-#define SYM_ONLY(S)         (S & 0xFF)
+#define SYM_ONLY(S)	    (S & 0xFF)
 
 struct plt_reloc
 {
@@ -115,7 +115,7 @@ struct plt_version_t
 #define PLT_TYPE_END(NAME) \
     {0, 0, 0, LAST_RELOC, 0} \
   };
-#define PLT_ENTRY(...) 
+#define PLT_ENTRY(...)
 #define PLT_ELEM(...)
 #define ENTRY_RELOC(...) { __VA_ARGS__ },
 #define ELEM_RELOC(...)
@@ -152,7 +152,7 @@ struct plt_version_t
 #define PLT_TYPE_END(NAME) \
     {0, 0, 0, LAST_RELOC, 0} \
   };
-#define PLT_ENTRY(...) 
+#define PLT_ENTRY(...)
 #define PLT_ELEM(...)
 #define ENTRY_RELOC(...)
 #define ELEM_RELOC(...) { __VA_ARGS__ },

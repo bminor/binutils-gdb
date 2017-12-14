@@ -100,59 +100,59 @@ CODE_FRAGMENT
 .     the object_flags values have mostly just been copied from backend
 .     to another, and are not necessarily correct).  *}
 .
-.#define BFD_NO_FLAGS	0x00
+.#define BFD_NO_FLAGS                0x0
 .
 .  {* BFD contains relocation entries.  *}
-.#define HAS_RELOC   	0x01
+.#define HAS_RELOC                   0x1
 .
 .  {* BFD is directly executable.  *}
-.#define EXEC_P      	0x02
+.#define EXEC_P                      0x2
 .
 .  {* BFD has line number information (basically used for F_LNNO in a
 .     COFF header).  *}
-.#define HAS_LINENO  	0x04
+.#define HAS_LINENO                  0x4
 .
 .  {* BFD has debugging information.  *}
-.#define HAS_DEBUG   	0x08
+.#define HAS_DEBUG                  0x08
 .
 .  {* BFD has symbols.  *}
-.#define HAS_SYMS    	0x10
+.#define HAS_SYMS                   0x10
 .
 .  {* BFD has local symbols (basically used for F_LSYMS in a COFF
 .     header).  *}
-.#define HAS_LOCALS  	0x20
+.#define HAS_LOCALS                 0x20
 .
 .  {* BFD is a dynamic object.  *}
-.#define DYNAMIC     	0x40
+.#define DYNAMIC                    0x40
 .
 .  {* Text section is write protected (if D_PAGED is not set, this is
 .     like an a.out NMAGIC file) (the linker sets this by default, but
 .     clears it for -r or -N).  *}
-.#define WP_TEXT     	0x80
+.#define WP_TEXT                    0x80
 .
 .  {* BFD is dynamically paged (this is like an a.out ZMAGIC file) (the
 .     linker sets this by default, but clears it for -r or -n or -N).  *}
-.#define D_PAGED     	0x100
+.#define D_PAGED                   0x100
 .
 .  {* BFD is relaxable (this means that bfd_relax_section may be able to
 .     do something) (sometimes bfd_relax_section can do something even if
 .     this is not set).  *}
-.#define BFD_IS_RELAXABLE 0x200
+.#define BFD_IS_RELAXABLE          0x200
 .
 .  {* This may be set before writing out a BFD to request using a
 .     traditional format.  For example, this is used to request that when
 .     writing out an a.out object the symbols not be hashed to eliminate
 .     duplicates.  *}
-.#define BFD_TRADITIONAL_FORMAT 0x400
+.#define BFD_TRADITIONAL_FORMAT    0x400
 .
 .  {* This flag indicates that the BFD contents are actually cached
 .     in memory.  If this is set, iostream points to a bfd_in_memory
 .     struct.  *}
-.#define BFD_IN_MEMORY 0x800
+.#define BFD_IN_MEMORY             0x800
 .
 .  {* This BFD has been created by the linker and doesn't correspond
 .     to any input file.  *}
-.#define BFD_LINKER_CREATED 0x1000
+.#define BFD_LINKER_CREATED       0x1000
 .
 .  {* This may be set before writing out a BFD to request that it
 .     be written using values for UIDs, GIDs, timestamps, etc. that
@@ -160,23 +160,23 @@ CODE_FRAGMENT
 .#define BFD_DETERMINISTIC_OUTPUT 0x2000
 .
 .  {* Compress sections in this BFD.  *}
-.#define BFD_COMPRESS 0x4000
+.#define BFD_COMPRESS             0x4000
 .
 .  {* Decompress sections in this BFD.  *}
-.#define BFD_DECOMPRESS 0x8000
+.#define BFD_DECOMPRESS           0x8000
 .
 .  {* BFD is a dummy, for plugins.  *}
-.#define BFD_PLUGIN 0x10000
+.#define BFD_PLUGIN              0x10000
 .
 .  {* Compress sections in this BFD with SHF_COMPRESSED from gABI.  *}
-.#define BFD_COMPRESS_GABI 0x20000
+.#define BFD_COMPRESS_GABI       0x20000
 .
 .  {* Convert ELF common symbol type to STT_COMMON or STT_OBJECT in this
 .     BFD.  *}
-.#define BFD_CONVERT_ELF_COMMON 0x40000
+.#define BFD_CONVERT_ELF_COMMON  0x40000
 .
 .  {* Use the ELF STT_COMMON type in this BFD.  *}
-.#define BFD_USE_ELF_STT_COMMON 0x80000
+.#define BFD_USE_ELF_STT_COMMON  0x80000
 .
 .  {* Flags bits to be saved in bfd_preserve_save.  *}
 .#define BFD_FLAGS_SAVED \
@@ -290,7 +290,7 @@ CODE_FRAGMENT
 .  struct bfd *archive_next;    {* The next BFD in the archive.  *}
 .  struct bfd *archive_head;    {* The first BFD in the archive.  *}
 .  struct bfd *nested_archives; {* List of nested archive in a flattened
-.                                  thin archive.  *}
+.				   thin archive.  *}
 .
 .  union {
 .    {* For input BFDs, a chain of BFDs involved in a link.  *}
@@ -402,7 +402,7 @@ SECTION
 	individual documentation for precise semantics).  On an error,
 	they call <<bfd_set_error>> to set an error condition that callers
 	can check by calling <<bfd_get_error>>.
-        If that returns <<bfd_error_system_call>>, then check
+	If that returns <<bfd_error_system_call>>, then check
 	<<errno>>.
 
 	The easiest way to report a BFD error to the user is to
@@ -1249,9 +1249,9 @@ SUBSECTION
 CODE_FRAGMENT
 .
 .typedef void (*bfd_assert_handler_type) (const char *bfd_formatmsg,
-.                                         const char *bfd_version,
-.                                         const char *bfd_file,
-.                                         int bfd_line);
+.					  const char *bfd_version,
+.					  const char *bfd_file,
+.					  int bfd_line);
 .
 */
 
@@ -1387,7 +1387,7 @@ DESCRIPTION
 	The argument @var{abfd} is ignored.
 
 .#define bfd_set_reloc(abfd, asect, location, count) \
-.     BFD_SEND (abfd, _bfd_set_reloc, (abfd, asect, location, count))
+.	BFD_SEND (abfd, _bfd_set_reloc, (abfd, asect, location, count))
 */
 
 /*
@@ -1468,7 +1468,7 @@ FUNCTION
 	bfd_get_arch_size
 
 SYNOPSIS
- 	int bfd_get_arch_size (bfd *abfd);
+	int bfd_get_arch_size (bfd *abfd);
 
 DESCRIPTION
 	Returns the normalized architecture address size, in bits, as
@@ -1495,7 +1495,7 @@ FUNCTION
 	bfd_get_sign_extend_vma
 
 SYNOPSIS
- 	int bfd_get_sign_extend_vma (bfd *abfd);
+	int bfd_get_sign_extend_vma (bfd *abfd);
 
 DESCRIPTION
 	Indicates if the target architecture "naturally" sign extends
@@ -1533,7 +1533,8 @@ bfd_get_sign_extend_vma (bfd *abfd)
       || strcmp (name, "pei-x86-64") == 0
       || strcmp (name, "pe-arm-wince-little") == 0
       || strcmp (name, "pei-arm-wince-little") == 0
-      || strcmp (name, "aixcoff-rs6000") == 0)
+      || strcmp (name, "aixcoff-rs6000") == 0
+      || strcmp (name, "aix5coff64-rs6000") == 0)
     return 1;
 
   if (CONST_STRNEQ (name, "mach-o"))
@@ -1548,7 +1549,7 @@ FUNCTION
 	bfd_set_start_address
 
 SYNOPSIS
- 	bfd_boolean bfd_set_start_address (bfd *abfd, bfd_vma vma);
+	bfd_boolean bfd_set_start_address (bfd *abfd, bfd_vma vma);
 
 DESCRIPTION
 	Make @var{vma} the entry point of output BFD @var{abfd}.
@@ -1762,8 +1763,8 @@ DESCRIPTION
 	Not enough memory exists to create private data for @var{obfd}.
 
 .#define bfd_copy_private_header_data(ibfd, obfd) \
-.     BFD_SEND (obfd, _bfd_copy_private_header_data, \
-.		(ibfd, obfd))
+.	BFD_SEND (obfd, _bfd_copy_private_header_data, \
+.		  (ibfd, obfd))
 
 */
 
@@ -1783,8 +1784,8 @@ DESCRIPTION
 	Not enough memory exists to create private data for @var{obfd}.
 
 .#define bfd_copy_private_bfd_data(ibfd, obfd) \
-.     BFD_SEND (obfd, _bfd_copy_private_bfd_data, \
-.		(ibfd, obfd))
+.	BFD_SEND (obfd, _bfd_copy_private_bfd_data, \
+.		  (ibfd, obfd))
 
 */
 
@@ -1804,7 +1805,7 @@ DESCRIPTION
 	Not enough memory exists to create private data for @var{obfd}.
 
 .#define bfd_set_private_flags(abfd, flags) \
-.     BFD_SEND (abfd, _bfd_set_private_flags, (abfd, flags))
+.	BFD_SEND (abfd, _bfd_set_private_flags, (abfd, flags))
 
 */
 
@@ -1816,45 +1817,45 @@ DESCRIPTION
 	The following functions exist but have not yet been documented.
 
 .#define bfd_sizeof_headers(abfd, info) \
-.       BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, info))
+.	BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, info))
 .
 .#define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
-.       BFD_SEND (abfd, _bfd_find_nearest_line, \
-.                 (abfd, syms, sec, off, file, func, line, NULL))
+.	BFD_SEND (abfd, _bfd_find_nearest_line, \
+.		  (abfd, syms, sec, off, file, func, line, NULL))
 .
 .#define bfd_find_nearest_line_discriminator(abfd, sec, syms, off, file, func, \
-.                                            line, disc) \
-.       BFD_SEND (abfd, _bfd_find_nearest_line, \
-.                 (abfd, syms, sec, off, file, func, line, disc))
+.					    line, disc) \
+.	BFD_SEND (abfd, _bfd_find_nearest_line, \
+.		  (abfd, syms, sec, off, file, func, line, disc))
 .
 .#define bfd_find_line(abfd, syms, sym, file, line) \
-.       BFD_SEND (abfd, _bfd_find_line, \
-.                 (abfd, syms, sym, file, line))
+.	BFD_SEND (abfd, _bfd_find_line, \
+.		  (abfd, syms, sym, file, line))
 .
 .#define bfd_find_inliner_info(abfd, file, func, line) \
-.       BFD_SEND (abfd, _bfd_find_inliner_info, \
-.                 (abfd, file, func, line))
+.	BFD_SEND (abfd, _bfd_find_inliner_info, \
+.		  (abfd, file, func, line))
 .
 .#define bfd_debug_info_start(abfd) \
-.       BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
+.	BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
 .
 .#define bfd_debug_info_end(abfd) \
-.       BFD_SEND (abfd, _bfd_debug_info_end, (abfd))
+.	BFD_SEND (abfd, _bfd_debug_info_end, (abfd))
 .
 .#define bfd_debug_info_accumulate(abfd, section) \
-.       BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
+.	BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
 .
 .#define bfd_stat_arch_elt(abfd, stat) \
-.       BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
+.	BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
 .
 .#define bfd_update_armap_timestamp(abfd) \
-.       BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
+.	BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
 .
 .#define bfd_set_arch_mach(abfd, arch, mach)\
-.       BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
+.	BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 .
 .#define bfd_relax_section(abfd, section, link_info, again) \
-.       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, link_info, again))
+.	BFD_SEND (abfd, _bfd_relax_section, (abfd, section, link_info, again))
 .
 .#define bfd_gc_sections(abfd, link_info) \
 .	BFD_SEND (abfd, _bfd_gc_sections, (abfd, link_info))
@@ -1884,7 +1885,7 @@ DESCRIPTION
 .	BFD_SEND (abfd, _bfd_final_link, (abfd, info))
 .
 .#define bfd_free_cached_info(abfd) \
-.       BFD_SEND (abfd, _bfd_free_cached_info, (abfd))
+.	BFD_SEND (abfd, _bfd_free_cached_info, (abfd))
 .
 .#define bfd_get_dynamic_symtab_upper_bound(abfd) \
 .	BFD_SEND (abfd, _bfd_get_dynamic_symtab_upper_bound, (abfd))
@@ -2086,7 +2087,7 @@ FUNCTION
 	bfd_emul_get_maxpagesize
 
 SYNOPSIS
- 	bfd_vma bfd_emul_get_maxpagesize (const char *);
+	bfd_vma bfd_emul_get_maxpagesize (const char *);
 
 DESCRIPTION
 	Returns the maximum page size, in bytes, as determined by
@@ -2132,7 +2133,7 @@ FUNCTION
 	bfd_emul_set_maxpagesize
 
 SYNOPSIS
- 	void bfd_emul_set_maxpagesize (const char *, bfd_vma);
+	void bfd_emul_set_maxpagesize (const char *, bfd_vma);
 
 DESCRIPTION
 	For ELF, set the maximum page size for the emulation.  It is
@@ -2157,7 +2158,7 @@ FUNCTION
 	bfd_emul_get_commonpagesize
 
 SYNOPSIS
- 	bfd_vma bfd_emul_get_commonpagesize (const char *);
+	bfd_vma bfd_emul_get_commonpagesize (const char *);
 
 DESCRIPTION
 	Returns the common page size, in bytes, as determined by
@@ -2185,7 +2186,7 @@ FUNCTION
 	bfd_emul_set_commonpagesize
 
 SYNOPSIS
- 	void bfd_emul_set_commonpagesize (const char *, bfd_vma);
+	void bfd_emul_set_commonpagesize (const char *, bfd_vma);
 
 DESCRIPTION
 	For ELF, set the common page size for the emulation.  It is

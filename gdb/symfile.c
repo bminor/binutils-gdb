@@ -2979,7 +2979,6 @@ section_is_overlay (struct obj_section *section)
 {
   if (overlay_debugging && section)
     {
-      bfd *abfd = section->objfile->obfd;
       asection *bfd_section = section->the_bfd_section;
 
       if (bfd_section_lma (abfd, bfd_section) != 0
@@ -3109,7 +3108,6 @@ overlay_unmapped_address (CORE_ADDR pc, struct obj_section *section)
 {
   if (section_is_overlay (section) && pc_in_mapped_range (pc, section))
     {
-      bfd *abfd = section->objfile->obfd;
       asection *bfd_section = section->the_bfd_section;
 
       return pc + bfd_section_lma (abfd, bfd_section)
@@ -3128,7 +3126,6 @@ overlay_mapped_address (CORE_ADDR pc, struct obj_section *section)
 {
   if (section_is_overlay (section) && pc_in_unmapped_range (pc, section))
     {
-      bfd *abfd = section->objfile->obfd;
       asection *bfd_section = section->the_bfd_section;
 
       return pc + bfd_section_vma (abfd, bfd_section)
@@ -3526,7 +3523,6 @@ static int
 simple_overlay_update_1 (struct obj_section *osect)
 {
   int i;
-  bfd *obfd = osect->objfile->obfd;
   asection *bsect = osect->the_bfd_section;
   struct gdbarch *gdbarch = get_objfile_arch (osect->objfile);
   int word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
@@ -3599,7 +3595,6 @@ simple_overlay_update (struct obj_section *osect)
     if (section_is_overlay (osect))
     {
       int i;
-      bfd *obfd = osect->objfile->obfd;
       asection *bsect = osect->the_bfd_section;
 
       for (i = 0; i < cache_novlys; i++)

@@ -4878,27 +4878,55 @@ represented as Python @code{Long} values.
 Python code can manipulate breakpoints via the @code{gdb.Breakpoint}
 class.
 
-@defun Breakpoint.__init__ (spec @r{[}, type @r{[}, wp_class @r{[},internal @r{[},temporary@r{]]]]})
-Create a new breakpoint according to @var{spec}, which is a string
-naming the location of the breakpoint, or an expression that defines a
-watchpoint.  The contents can be any location recognized by the
-@code{break} command, or in the case of a watchpoint, by the
-@code{watch} command.  The optional @var{type} denotes the breakpoint
-to create from the types defined later in this chapter.  This argument
-can be either @code{gdb.BP_BREAKPOINT} or @code{gdb.BP_WATCHPOINT}; it
-defaults to @code{gdb.BP_BREAKPOINT}.  The optional @var{internal}
-argument allows the breakpoint to become invisible to the user.  The
-breakpoint will neither be reported when created, nor will it be
-listed in the output from @code{info breakpoints} (but will be listed
-with the @code{maint info breakpoints} command).  The optional
-@var{temporary} argument makes the breakpoint a temporary breakpoint.
-Temporary breakpoints are deleted after they have been hit.  Any
-further access to the Python breakpoint after it has been hit will
-result in a runtime error (as that breakpoint has now been
-automatically deleted).  The optional @var{wp_class} argument defines
-the class of watchpoint to create, if @var{type} is
-@code{gdb.BP_WATCHPOINT}.  If a watchpoint class is not provided, it
-is assumed to be a @code{gdb.WP_WRITE} class.
+A breakpoint can be created using one of the two forms of the
+@code{gdb.Breakpoint} constructor.  The first one accepts a string
+like one would pass to the @code{break}
+(@pxref{Set Breaks,,Setting Breakpoints}) and @code{watch}
+(@pxref{Set Watchpoints, , Setting Watchpoints}) commands, and can be used to
+create both breakpoints and watchpoints.  The second accepts separate Python
+arguments similar to @ref{Explicit Locations}, and can only be used to create
+breakpoints.
+
+@defun Breakpoint.__init__ (spec @r{[}, type @r{][}, wp_class @r{][}, internal @r{][}, temporary @r{][}, qualified @r{]})
+Create a new breakpoint according to @var{spec}, which is a string naming the
+location of a breakpoint, or an expression that defines a watchpoint.  The
+string should describe a location in a format recognized by the @code{break}
+command (@pxref{Set Breaks,,Setting Breakpoints}) or, in the case of a
+watchpoint, by the @code{watch} command
+(@pxref{Set Watchpoints, , Setting Watchpoints}).
+
+The optional @var{type} argument specifies the type of the breakpoint to create,
+as defined below.
+
+The optional @var{wp_class} argument defines the class of watchpoint to create,
+if @var{type} is @code{gdb.BP_WATCHPOINT}.  If @var{wp_class} is omitted, it
+defaults to @code{gdb.WP_WRITE}.
+
+The optional @var{internal} argument allows the breakpoint to become invisible
+to the user.  The breakpoint will neither be reported when created, nor will it
+be listed in the output from @code{info breakpoints} (but will be listed with
+the @code{maint info breakpoints} command).
+
+The optional @var{temporary} argument makes the breakpoint a temporary
+breakpoint.  Temporary breakpoints are deleted after they have been hit.  Any
+further access to the Python breakpoint after it has been hit will result in a
+runtime error (as that breakpoint has now been automatically deleted).
+
+The optional @var{qualified} argument is a boolean that allows interpreting
+the function passed in @code{spec} as a fully-qualified name.  It is equivalent
+to @code{break}'s @code{-qualified} flag (@pxref{Linespec Locations} and
+@ref{Explicit Locations}).
+
+@end defun
+
+@defun Breakpoint.__init__ (@r{[} source @r{][}, function @r{][}, label @r{][}, line @r{]}, @r{][} internal @r{][}, temporary @r{][}, qualified @r{]})
+This second form of creating a new breakpoint specifies the explicit
+location (@pxref{Explicit Locations}) using keywords.  The new breakpoint will
+be created in the specified source file @var{source}, at the specified
+@var{function}, @var{label} and @var{line}.
+
+@var{internal}, @var{temporary} and @var{qualified} have the same usage as
+explained previously.
 @end defun
 
 The available types are represented by constants defined in the @code{gdb}

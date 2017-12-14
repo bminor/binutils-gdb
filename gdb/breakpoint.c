@@ -921,7 +921,6 @@ condition_completer (struct cmd_list_element *cmd,
     {
       int len;
       struct breakpoint *b;
-      VEC (char_ptr) *result = NULL;
 
       if (text[0] == '$')
 	{
@@ -1273,9 +1272,6 @@ commands_command_1 (const char *arg, int from_tty,
 	   observer_notify_breakpoint_modified (b);
 	 }
      });
-
-  if (cmd == NULL)
-    error (_("No breakpoints specified."));
 }
 
 static void
@@ -1868,7 +1864,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		  loc->gdbarch = get_type_arch (value_type (v));
 
 		  loc->pspace = frame_pspace;
-		  loc->address = addr;
+		  loc->address = address_significant (loc->gdbarch, addr);
 
 		  if (bitsize != 0)
 		    {
@@ -2230,12 +2226,8 @@ build_target_condition_list (struct bp_location *bl)
 static agent_expr_up
 parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 {
-  struct cleanup *old_cleanups = 0;
-  struct expression **argvec;
   const char *cmdrest;
   const char *format_start, *format_end;
-  struct format_piece *fpieces;
-  int nargs;
   struct gdbarch *gdbarch = get_current_arch ();
 
   if (cmd == NULL)
@@ -2252,9 +2244,7 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 
   format_start = cmdrest;
 
-  fpieces = parse_format_string (&cmdrest);
-
-  old_cleanups = make_cleanup (free_format_pieces_cleanup, &fpieces);
+  format_pieces fpieces (&cmdrest);
 
   format_end = cmdrest;
 
@@ -2272,17 +2262,14 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 
   /* For each argument, make an expression.  */
 
-  argvec = (struct expression **) alloca (strlen (cmd)
-					 * sizeof (struct expression *));
-
-  nargs = 0;
+  std::vector<struct expression *> argvec;
   while (*cmdrest != '\0')
     {
       const char *cmd1;
 
       cmd1 = cmdrest;
       expression_up expr = parse_exp_1 (&cmd1, scope, block_for_pc (scope), 1);
-      argvec[nargs++] = expr.release ();
+      argvec.push_back (expr.release ());
       cmdrest = cmd1;
       if (*cmdrest == ',')
 	++cmdrest;
@@ -2296,7 +2283,7 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
     {
       aexpr = gen_printf (scope, gdbarch, 0, 0,
 			  format_start, format_end - format_start,
-			  fpieces, nargs, argvec);
+			  argvec.size (), argvec.data ());
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -2305,8 +2292,6 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 	 It's no use iterating through the other commands.  */
     }
   END_CATCH
-
-  do_cleanups (old_cleanups);
 
   /* We have a valid agent expression, return it.  */
   return aexpr;
@@ -6988,16 +6973,11 @@ static CORE_ADDR
 adjust_breakpoint_address (struct gdbarch *gdbarch,
 			   CORE_ADDR bpaddr, enum bptype bptype)
 {
-  if (!gdbarch_adjust_breakpoint_address_p (gdbarch))
-    {
-      /* Very few targets need any kind of breakpoint adjustment.  */
-      return bpaddr;
-    }
-  else if (bptype == bp_watchpoint
-           || bptype == bp_hardware_watchpoint
-           || bptype == bp_read_watchpoint
-           || bptype == bp_access_watchpoint
-           || bptype == bp_catchpoint)
+  if (bptype == bp_watchpoint
+      || bptype == bp_hardware_watchpoint
+      || bptype == bp_read_watchpoint
+      || bptype == bp_access_watchpoint
+      || bptype == bp_catchpoint)
     {
       /* Watchpoints and the various bp_catch_* eventpoints should not
          have their addresses modified.  */
@@ -7015,11 +6995,16 @@ adjust_breakpoint_address (struct gdbarch *gdbarch,
     }
   else
     {
-      CORE_ADDR adjusted_bpaddr;
+      CORE_ADDR adjusted_bpaddr = bpaddr;
 
-      /* Some targets have architectural constraints on the placement
-         of breakpoint instructions.  Obtain the adjusted address.  */
-      adjusted_bpaddr = gdbarch_adjust_breakpoint_address (gdbarch, bpaddr);
+      if (gdbarch_adjust_breakpoint_address_p (gdbarch))
+	{
+	  /* Some targets have architectural constraints on the placement
+	     of breakpoint instructions.  Obtain the adjusted address.  */
+	  adjusted_bpaddr = gdbarch_adjust_breakpoint_address (gdbarch, bpaddr);
+	}
+
+      adjusted_bpaddr = address_significant (gdbarch, adjusted_bpaddr);
 
       /* An adjusted breakpoint address can significantly alter
          a user's expectations.  Print a warning if an adjustment
@@ -11479,7 +11464,6 @@ clear_command (const char *arg, int from_tty)
 {
   struct breakpoint *b;
   int default_match;
-  int i;
 
   std::vector<symtab_and_line> decoded_sals;
   symtab_and_line last_sal;
@@ -13664,7 +13648,6 @@ update_breakpoint_locations (struct breakpoint *b,
 			     gdb::array_view<const symtab_and_line> sals,
 			     gdb::array_view<const symtab_and_line> sals_end)
 {
-  int i;
   struct bp_location *existing_locations;
 
   if (!sals_end.empty () && (sals.size () != 1 || sals_end.size () != 1))

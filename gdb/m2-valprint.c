@@ -313,7 +313,6 @@ m2_val_print (struct type *type, int embedded_offset,
 	      struct value *original_value,
 	      const struct value_print_options *options)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
   unsigned len;
   struct type *elttype;
   CORE_ADDR addr;

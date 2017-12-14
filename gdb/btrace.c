@@ -1636,7 +1636,6 @@ void
 btrace_disable (struct thread_info *tp)
 {
   struct btrace_thread_info *btp = &tp->btrace;
-  int errcode = 0;
 
   if (btp->target == NULL)
     return;
@@ -1656,7 +1655,6 @@ void
 btrace_teardown (struct thread_info *tp)
 {
   struct btrace_thread_info *btp = &tp->btrace;
-  int errcode = 0;
 
   if (btp->target == NULL)
     return;
@@ -3021,7 +3019,6 @@ btrace_maint_decode_pt (struct btrace_maint_info *maint,
 static void
 btrace_maint_update_pt_packets (struct btrace_thread_info *btinfo)
 {
-  volatile struct gdb_exception except;
   struct pt_packet_decoder *decoder;
   struct btrace_data_pt *pt;
   struct pt_config config;
@@ -3358,7 +3355,6 @@ maint_btrace_clear_packet_history_cmd (const char *args, int from_tty)
 static void
 maint_btrace_clear_cmd (const char *args, int from_tty)
 {
-  struct btrace_thread_info *btinfo;
   struct thread_info *tp;
 
   if (args != NULL && *args != 0)

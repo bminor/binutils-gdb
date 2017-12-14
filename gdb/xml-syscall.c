@@ -455,7 +455,6 @@ xml_list_syscalls_by_group (struct gdbarch *gdbarch, const char *group)
 {
   struct syscalls_info *syscalls_info = gdbarch_syscalls_info (gdbarch);
   struct syscall_group_desc *groupdesc;
-  struct syscall_desc *sysdesc;
   struct syscall *syscalls = NULL;
   int nsyscalls;
   int i;

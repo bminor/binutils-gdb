@@ -23,7 +23,7 @@
 #define TARGET_PAGE_SIZE	0x1000
 
 #define DEFAULT_ARCH	bfd_arch_m68k
-#define DEFAULT_MID 	M_68K4K_NETBSD
+#define DEFAULT_MID	M_68K4K_NETBSD
 
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate

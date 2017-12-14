@@ -2605,8 +2605,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
   /* Explicitly wholly collected variables.  */
   {
-    int i;
-
     ui_out_emit_list list_emitter (uiout, "explicit-variables");
     const std::vector<std::string> &wholly_collected
       = clist->wholly_collected ();
@@ -2619,9 +2617,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
   /* Computed expressions.  */
   {
-    char *p;
-    int i;
-
     ui_out_emit_list list_emitter (uiout, "computed-expressions");
 
     const std::vector<std::string> &computed = clist->computed ();

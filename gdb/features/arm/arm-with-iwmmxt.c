@@ -34,26 +34,27 @@ initialize_tdesc_arm_with_iwmmxt (void)
   tdesc_create_reg (feature, "cpsr", 25, 1, NULL, 32, "int");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.xscale.iwmmxt");
-  struct tdesc_type *field_type;
-  field_type = tdesc_named_type (feature, "uint8");
-  tdesc_create_vector (feature, "iwmmxt_v8u8", field_type, 8);
+  tdesc_type *element_type;
+  element_type = tdesc_named_type (feature, "uint8");
+  tdesc_create_vector (feature, "iwmmxt_v8u8", element_type, 8);
 
-  field_type = tdesc_named_type (feature, "uint16");
-  tdesc_create_vector (feature, "iwmmxt_v4u16", field_type, 4);
+  element_type = tdesc_named_type (feature, "uint16");
+  tdesc_create_vector (feature, "iwmmxt_v4u16", element_type, 4);
 
-  field_type = tdesc_named_type (feature, "uint32");
-  tdesc_create_vector (feature, "iwmmxt_v2u32", field_type, 2);
+  element_type = tdesc_named_type (feature, "uint32");
+  tdesc_create_vector (feature, "iwmmxt_v2u32", element_type, 2);
 
-  struct tdesc_type *type;
-  type = tdesc_create_union (feature, "iwmmxt_vec64i");
+  tdesc_type_with_fields *type_with_fields;
+  tdesc_type *field_type;
+  type_with_fields = tdesc_create_union (feature, "iwmmxt_vec64i");
   field_type = tdesc_named_type (feature, "iwmmxt_v8u8");
-  tdesc_add_field (type, "u8", field_type);
+  tdesc_add_field (type_with_fields, "u8", field_type);
   field_type = tdesc_named_type (feature, "iwmmxt_v4u16");
-  tdesc_add_field (type, "u16", field_type);
+  tdesc_add_field (type_with_fields, "u16", field_type);
   field_type = tdesc_named_type (feature, "iwmmxt_v2u32");
-  tdesc_add_field (type, "u32", field_type);
+  tdesc_add_field (type_with_fields, "u32", field_type);
   field_type = tdesc_named_type (feature, "uint64");
-  tdesc_add_field (type, "u64", field_type);
+  tdesc_add_field (type_with_fields, "u64", field_type);
 
   tdesc_create_reg (feature, "wR0", 26, 1, NULL, 64, "iwmmxt_vec64i");
   tdesc_create_reg (feature, "wR1", 27, 1, NULL, 64, "iwmmxt_vec64i");

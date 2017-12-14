@@ -50,7 +50,7 @@ static const bfd_target *
 bfd_mach_o_arm64_core_p (bfd *abfd)
 {
   return bfd_mach_o_header_p (abfd, 0,
-                              BFD_MACH_O_MH_CORE, BFD_MACH_O_CPU_TYPE_ARM64);
+			      BFD_MACH_O_MH_CORE, BFD_MACH_O_CPU_TYPE_ARM64);
 }
 
 static bfd_boolean
@@ -213,18 +213,18 @@ bfd_mach_o_arm64_canonicalize_one_reloc (bfd *       abfd,
       break;
     case BFD_MACH_O_ARM64_RELOC_SUBTRACTOR:
       if (reloc.r_pcrel)
-        return FALSE;
+	return FALSE;
       switch (reloc.r_length)
-        {
-        case 2:
-          res->howto = &arm64_howto_table[11];
-          return TRUE;
-        case 3:
-          res->howto = &arm64_howto_table[12];
-          return TRUE;
-        default:
-          return FALSE;
-        }
+	{
+	case 2:
+	  res->howto = &arm64_howto_table[11];
+	  return TRUE;
+	case 3:
+	  res->howto = &arm64_howto_table[12];
+	  return TRUE;
+	default:
+	  return FALSE;
+	}
       break;
     case BFD_MACH_O_ARM64_RELOC_BRANCH26:
       if (reloc.r_length == 2 && reloc.r_pcrel == 1)
@@ -295,12 +295,12 @@ bfd_mach_o_arm64_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
-#define TARGET_NAME 		aarch64_mach_o_vec
-#define TARGET_STRING     	"mach-o-arm64"
+#define TARGET_NAME		aarch64_mach_o_vec
+#define TARGET_STRING		"mach-o-arm64"
 #define TARGET_ARCHITECTURE	bfd_arch_aarch64
 #define TARGET_PAGESIZE		4096
-#define TARGET_BIG_ENDIAN 	0
-#define TARGET_ARCHIVE 		0
+#define TARGET_BIG_ENDIAN	0
+#define TARGET_ARCHIVE		0
 #define TARGET_PRIORITY		0
 #include "mach-o-target.c"
 

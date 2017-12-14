@@ -97,9 +97,9 @@ struct elf32_mn10300_link_hash_table
   struct
   {
     bfd_signed_vma  refcount;
-    bfd_vma         offset;
-    char            got_allocated;
-    char            rel_emitted;
+    bfd_vma	    offset;
+    char	    got_allocated;
+    char	    rel_emitted;
   } tls_ldm_got;
 };
 
@@ -611,7 +611,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
-	 NULL, 			/* special handler.  */
+	 NULL,			/* special handler.  */
 	 "R_MN10300_SYM_DIFF",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -625,7 +625,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
-	 NULL, 			/* special handler.  */
+	 NULL,			/* special handler.  */
 	 "R_MN10300_ALIGN",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -818,11 +818,11 @@ mn10300_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static int
-elf_mn10300_tls_transition (struct bfd_link_info *        info,
-			    int                           r_type,
+elf_mn10300_tls_transition (struct bfd_link_info *	  info,
+			    int				  r_type,
 			    struct elf_link_hash_entry *  h,
-			    asection *                    sec,
-			    bfd_boolean                   counting)
+			    asection *			  sec,
+			    bfd_boolean			  counting)
 {
   bfd_boolean is_local;
 
@@ -888,11 +888,11 @@ tpoff (struct bfd_link_info * info, bfd_vma address)
    this reloc and the PLT reloc.  */
 
 static int
-mn10300_do_tls_transition (bfd *         input_bfd,
-			   unsigned int  r_type,
-			   unsigned int  tls_r_type,
-			   bfd_byte *    contents,
-			   bfd_vma       offset)
+mn10300_do_tls_transition (bfd *	 input_bfd,
+			   unsigned int	 r_type,
+			   unsigned int	 tls_r_type,
+			   bfd_byte *	 contents,
+			   bfd_vma	 offset)
 {
   bfd_byte *op = contents + offset;
   int gotreg = 0;
@@ -962,13 +962,13 @@ mn10300_do_tls_transition (bfd *         input_bfd,
 	accordingly, copying the operands as needed.  The conversions
 	we do are as follows (IE,GOTIE,LE):
 
-	           1111 1100  1010 01Dn  [-- abs32 --]  MOV (x@indntpoff),Dn
-	           1111 1100  0000 DnAm  [-- abs32 --]  MOV (x@gotntpoff,Am),Dn
-	           1111 1100  1100 11Dn  [-- abs32 --]  MOV x@tpoff,Dn
+		   1111 1100  1010 01Dn  [-- abs32 --]  MOV (x@indntpoff),Dn
+		   1111 1100  0000 DnAm  [-- abs32 --]  MOV (x@gotntpoff,Am),Dn
+		   1111 1100  1100 11Dn  [-- abs32 --]  MOV x@tpoff,Dn
 
-	           1111 1100  1010 00An  [-- abs32 --]  MOV (x@indntpoff),An
-	           1111 1100  0010 AnAm  [-- abs32 --]  MOV (x@gotntpoff,Am),An
-	           1111 1100  1101 11An  [-- abs32 --]  MOV x@tpoff,An
+		   1111 1100  1010 00An  [-- abs32 --]  MOV (x@indntpoff),An
+		   1111 1100  0010 AnAm  [-- abs32 --]  MOV (x@gotntpoff,Am),An
+		   1111 1100  1101 11An  [-- abs32 --]  MOV x@tpoff,An
 
 	1111 1110  0000 1110  Rnnn Xxxx  [-- abs32 --]  MOV (x@indntpoff),Rn
 	1111 1110  0000 1010  Rnnn Rmmm  [-- abs32 --]  MOV (x@indntpoff,Rm),Rn
@@ -1167,7 +1167,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 	    case R_MN10300_TLS_IE:
 	    case R_MN10300_TLS_GOTIE: tls_type = GOT_TLS_IE; break;
 	    case R_MN10300_TLS_GD:    tls_type = GOT_TLS_GD; break;
-	    default:                  tls_type = GOT_NORMAL; break;
+	    default:		      tls_type = GOT_NORMAL; break;
 	    }
 
 	  sgot = htab->root.sgot;
@@ -2592,7 +2592,7 @@ mn10300_elf_symbol_address_p (bfd *abfd,
 
    There are quite a few relaxing opportunities available on the mn10300:
 
-	* calls:32 -> calls:16 					   2 bytes
+	* calls:32 -> calls:16					   2 bytes
 	* call:32  -> call:16					   2 bytes
 
 	* call:32 -> calls:32					   1 byte
@@ -4556,9 +4556,9 @@ elf32_mn10300_link_hash_newfunc (struct bfd_hash_entry *entry,
 }
 
 static void
-_bfd_mn10300_copy_indirect_symbol (struct bfd_link_info *        info,
-				   struct elf_link_hash_entry *  dir,
-				   struct elf_link_hash_entry *  ind)
+_bfd_mn10300_copy_indirect_symbol (struct bfd_link_info *	 info,
+				   struct elf_link_hash_entry *	 dir,
+				   struct elf_link_hash_entry *	 ind)
 {
   struct elf32_mn10300_link_hash_entry * edir;
   struct elf32_mn10300_link_hash_entry * eind;
@@ -5203,11 +5203,11 @@ _bfd_mn10300_elf_finish_dynamic_symbol (bfd * output_bfd,
 
   if (h->plt.offset != (bfd_vma) -1)
     {
-      asection *        splt;
-      asection *        sgot;
-      asection *        srel;
-      bfd_vma           plt_index;
-      bfd_vma           got_offset;
+      asection *	splt;
+      asection *	sgot;
+      asection *	srel;
+      bfd_vma		plt_index;
+      bfd_vma		got_offset;
       Elf_Internal_Rela rel;
 
       /* This symbol has an entry in the procedure linkage table.  Set
@@ -5289,8 +5289,8 @@ _bfd_mn10300_elf_finish_dynamic_symbol (bfd * output_bfd,
 
   if (h->got.offset != (bfd_vma) -1)
     {
-      asection *        sgot;
-      asection *        srel;
+      asection *	sgot;
+      asection *	srel;
       Elf_Internal_Rela rel;
 
       /* This symbol has an entry in the global offset table.  Set it up.  */
@@ -5364,7 +5364,7 @@ _bfd_mn10300_elf_finish_dynamic_symbol (bfd * output_bfd,
 
   if (h->needs_copy)
     {
-      asection *        s;
+      asection *	s;
       Elf_Internal_Rela rel;
 
       /* This symbol needs a copy reloc.  Set it up.  */
@@ -5412,7 +5412,7 @@ _bfd_mn10300_elf_finish_dynamic_sections (bfd * output_bfd,
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
-      asection *           splt;
+      asection *	   splt;
       Elf32_External_Dyn * dyncon;
       Elf32_External_Dyn * dynconend;
 

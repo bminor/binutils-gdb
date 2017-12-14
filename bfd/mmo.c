@@ -113,7 +113,7 @@ SUBSECTION
 	@samp{YZ} in lop_fixr: it is xor:ed into the current location
 	minus @math{4 * L}.  The first byte of the word is 0 or 1.  If it
 	is 1, then @math{L = (@var{lowest 24 bits of word}) - 2^Z}, if 0,
- 	then @math{L = (@var{lowest 24 bits of word})}.
+	then @math{L = (@var{lowest 24 bits of word})}.
 
 	@item lop_file
 	0x9806YYZZ.  @samp{Y} is the file number, @samp{Z} is count of
@@ -963,7 +963,7 @@ mmo_write_loc_chunk (bfd *abfd, bfd_vma vma, const bfd_byte *loc,
 	}
 
       /* We always write the location as 64 bits; no use saving bytes
-         here.  */
+	 here.  */
       mmo_write_tetra_raw (abfd, (LOP << 24) | (LOP_LOC << 16) | 2);
       mmo_write_octa_raw (abfd, vma);
     }
@@ -2508,7 +2508,7 @@ mmo_internal_write_section (bfd *abfd, asection *sec)
     /* Not handled here.  */
     {
       /* This would normally be an abort call since this can't happen, but
-         we don't do that.  */
+	 we don't do that.  */
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }

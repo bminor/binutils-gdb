@@ -56,65 +56,65 @@ static reloc_howto_type elf_howto_table[] =
 	 0,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  HOWTO(R_390_8,         0, 0,  8, FALSE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_8",        FALSE, 0,0x000000ff, FALSE),
-  HOWTO(R_390_12,        0, 1, 12, FALSE, 0, complain_overflow_dont,
-	bfd_elf_generic_reloc, "R_390_12",       FALSE, 0,0x00000fff, FALSE),
-  HOWTO(R_390_16,        0, 1, 16, FALSE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_16",       FALSE, 0,0x0000ffff, FALSE),
-  HOWTO(R_390_32,        0, 2, 32, FALSE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_32",       FALSE, 0,0xffffffff, FALSE),
+  HOWTO(R_390_8,	 0, 0,	8, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_8",	 FALSE, 0,0x000000ff, FALSE),
+  HOWTO(R_390_12,	 0, 1, 12, FALSE, 0, complain_overflow_dont,
+	bfd_elf_generic_reloc, "R_390_12",	 FALSE, 0,0x00000fff, FALSE),
+  HOWTO(R_390_16,	 0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_16",	 FALSE, 0,0x0000ffff, FALSE),
+  HOWTO(R_390_32,	 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_32",	 FALSE, 0,0xffffffff, FALSE),
   HOWTO(R_390_PC32,	 0, 2, 32,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_PC32",     FALSE, 0,0xffffffff, TRUE),
+	bfd_elf_generic_reloc, "R_390_PC32",	 FALSE, 0,0xffffffff, TRUE),
   HOWTO(R_390_GOT12,	 0, 1, 12, FALSE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_GOT12",    FALSE, 0,0x00000fff, FALSE),
+	bfd_elf_generic_reloc, "R_390_GOT12",	 FALSE, 0,0x00000fff, FALSE),
   HOWTO(R_390_GOT32,	 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_GOT32",    FALSE, 0,0xffffffff, FALSE),
+	bfd_elf_generic_reloc, "R_390_GOT32",	 FALSE, 0,0xffffffff, FALSE),
   HOWTO(R_390_PLT32,	 0, 2, 32,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_PLT32",    FALSE, 0,0xffffffff, TRUE),
-  HOWTO(R_390_COPY,      0, 4, 64, FALSE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_COPY",     FALSE, 0,MINUS_ONE,  FALSE),
-  HOWTO(R_390_GLOB_DAT,  0, 4, 64, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PLT32",	 FALSE, 0,0xffffffff, TRUE),
+  HOWTO(R_390_COPY,	 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_COPY",	 FALSE, 0,MINUS_ONE,  FALSE),
+  HOWTO(R_390_GLOB_DAT,	 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GLOB_DAT", FALSE, 0,MINUS_ONE,  FALSE),
-  HOWTO(R_390_JMP_SLOT,  0, 4, 64, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_JMP_SLOT,	 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_JMP_SLOT", FALSE, 0,MINUS_ONE,  FALSE),
-  HOWTO(R_390_RELATIVE,  0, 4, 64,  TRUE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_RELATIVE,	 0, 4, 64,  TRUE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_RELATIVE", FALSE, 0,MINUS_ONE,  FALSE),
-  HOWTO(R_390_GOTOFF32,  0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTOFF32,	 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTOFF32", FALSE, 0,MINUS_ONE,  FALSE),
-  HOWTO(R_390_GOTPC,     0, 4, 64,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_GOTPC",    FALSE, 0,MINUS_ONE,  TRUE),
-  HOWTO(R_390_GOT16,     0, 1, 16, FALSE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_GOT16",    FALSE, 0,0x0000ffff, FALSE),
-  HOWTO(R_390_PC16,      0, 1, 16,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_PC16",     FALSE, 0,0x0000ffff, TRUE),
-  HOWTO(R_390_PC16DBL,   1, 1, 16,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_PC16DBL",  FALSE, 0,0x0000ffff, TRUE),
-  HOWTO(R_390_PLT16DBL,  1, 1, 16,  TRUE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTPC,	 0, 4, 64,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOTPC",	 FALSE, 0,MINUS_ONE,  TRUE),
+  HOWTO(R_390_GOT16,	 0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOT16",	 FALSE, 0,0x0000ffff, FALSE),
+  HOWTO(R_390_PC16,	 0, 1, 16,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PC16",	 FALSE, 0,0x0000ffff, TRUE),
+  HOWTO(R_390_PC16DBL,	 1, 1, 16,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PC16DBL",	 FALSE, 0,0x0000ffff, TRUE),
+  HOWTO(R_390_PLT16DBL,	 1, 1, 16,  TRUE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLT16DBL", FALSE, 0,0x0000ffff, TRUE),
   HOWTO(R_390_PC32DBL,	 1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_PC32DBL",  FALSE, 0,0xffffffff, TRUE),
+	bfd_elf_generic_reloc, "R_390_PC32DBL",	 FALSE, 0,0xffffffff, TRUE),
   HOWTO(R_390_PLT32DBL,	 1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLT32DBL", FALSE, 0,0xffffffff, TRUE),
-  HOWTO(R_390_GOTPCDBL,  1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTPCDBL,	 1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTPCDBL", FALSE, 0,MINUS_ONE,  TRUE),
-  HOWTO(R_390_64,        0, 4, 64, FALSE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_64",       FALSE, 0,MINUS_ONE,  FALSE),
+  HOWTO(R_390_64,	 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_64",	 FALSE, 0,MINUS_ONE,  FALSE),
   HOWTO(R_390_PC64,	 0, 4, 64,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_PC64",     FALSE, 0,MINUS_ONE,  TRUE),
+	bfd_elf_generic_reloc, "R_390_PC64",	 FALSE, 0,MINUS_ONE,  TRUE),
   HOWTO(R_390_GOT64,	 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_GOT64",    FALSE, 0,MINUS_ONE,  FALSE),
+	bfd_elf_generic_reloc, "R_390_GOT64",	 FALSE, 0,MINUS_ONE,  FALSE),
   HOWTO(R_390_PLT64,	 0, 4, 64,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_PLT64",    FALSE, 0,MINUS_ONE,  TRUE),
+	bfd_elf_generic_reloc, "R_390_PLT64",	 FALSE, 0,MINUS_ONE,  TRUE),
   HOWTO(R_390_GOTENT,	 1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_GOTENT",   FALSE, 0,MINUS_ONE,  TRUE),
-  HOWTO(R_390_GOTOFF16,  0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOTENT",	 FALSE, 0,MINUS_ONE,  TRUE),
+  HOWTO(R_390_GOTOFF16,	 0, 1, 16, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTOFF16", FALSE, 0,0x0000ffff, FALSE),
-  HOWTO(R_390_GOTOFF64,  0, 4, 64, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTOFF64,	 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTOFF64", FALSE, 0,MINUS_ONE,  FALSE),
   HOWTO(R_390_GOTPLT12,	 0, 1, 12, FALSE, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_390_GOTPLT12", FALSE, 0,0x00000fff, FALSE),
-  HOWTO(R_390_GOTPLT16,  0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTPLT16,	 0, 1, 16, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTPLT16", FALSE, 0,0x0000ffff, FALSE),
   HOWTO(R_390_GOTPLT32,	 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTPLT32", FALSE, 0,0xffffffff, FALSE),
@@ -122,11 +122,11 @@ static reloc_howto_type elf_howto_table[] =
 	bfd_elf_generic_reloc, "R_390_GOTPLT64", FALSE, 0,MINUS_ONE,  FALSE),
   HOWTO(R_390_GOTPLTENT, 1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTPLTENT",FALSE, 0,MINUS_ONE,  TRUE),
-  HOWTO(R_390_PLTOFF16,  0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLTOFF16,	 0, 1, 16, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLTOFF16", FALSE, 0,0x0000ffff, FALSE),
-  HOWTO(R_390_PLTOFF32,  0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLTOFF32,	 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLTOFF32", FALSE, 0,0xffffffff, FALSE),
-  HOWTO(R_390_PLTOFF64,  0, 4, 64, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLTOFF64,	 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLTOFF64", FALSE, 0,MINUS_ONE,  FALSE),
   HOWTO(R_390_TLS_LOAD, 0, 0, 0, FALSE, 0, complain_overflow_dont,
 	s390_tls_reloc, "R_390_TLS_LOAD", FALSE, 0, 0, FALSE),
@@ -135,7 +135,7 @@ static reloc_howto_type elf_howto_table[] =
   HOWTO(R_390_TLS_LDCALL, 0, 0, 0, FALSE, 0, complain_overflow_dont,
 	s390_tls_reloc, "R_390_TLS_LDCALL", FALSE, 0, 0, FALSE),
   EMPTY_HOWTO (R_390_TLS_GD32),	/* Empty entry for R_390_TLS_GD32.  */
-  HOWTO(R_390_TLS_GD64,  0, 4, 64, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_GD64,	 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_GD64", FALSE, 0, MINUS_ONE, FALSE),
   HOWTO(R_390_TLS_GOTIE12, 0, 1, 12, FALSE, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_390_TLS_GOTIE12", FALSE, 0, 0x00000fff, FALSE),
@@ -146,12 +146,12 @@ static reloc_howto_type elf_howto_table[] =
   HOWTO(R_390_TLS_LDM64, 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_LDM64", FALSE, 0, MINUS_ONE, FALSE),
   EMPTY_HOWTO (R_390_TLS_IE32),	/* Empty entry for R_390_TLS_IE32.  */
-  HOWTO(R_390_TLS_IE64,  0, 4, 64, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_IE64,	 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_IE64", FALSE, 0, MINUS_ONE, FALSE),
   HOWTO(R_390_TLS_IEENT, 1, 2, 32, TRUE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_IEENT", FALSE, 0, MINUS_ONE, TRUE),
   EMPTY_HOWTO (R_390_TLS_LE32),	/* Empty entry for R_390_TLS_LE32.  */
-  HOWTO(R_390_TLS_LE64,  0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_LE64,	 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_LE64", FALSE, 0, MINUS_ONE, FALSE),
   EMPTY_HOWTO (R_390_TLS_LDO32),	/* Empty entry for R_390_TLS_LDO32.  */
   HOWTO(R_390_TLS_LDO64, 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
@@ -162,23 +162,23 @@ static reloc_howto_type elf_howto_table[] =
 	bfd_elf_generic_reloc, "R_390_TLS_DTPOFF", FALSE, 0, MINUS_ONE, FALSE),
   HOWTO(R_390_TLS_TPOFF, 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_TPOFF", FALSE, 0, MINUS_ONE, FALSE),
-  HOWTO(R_390_20,        0, 2, 20, FALSE, 8, complain_overflow_dont,
+  HOWTO(R_390_20,	 0, 2, 20, FALSE, 8, complain_overflow_dont,
 	s390_elf_ldisp_reloc, "R_390_20",      FALSE, 0,0x0fffff00, FALSE),
   HOWTO(R_390_GOT20,	 0, 2, 20, FALSE, 8, complain_overflow_dont,
 	s390_elf_ldisp_reloc, "R_390_GOT20",   FALSE, 0,0x0fffff00, FALSE),
-  HOWTO(R_390_GOTPLT20,  0, 2, 20, FALSE, 8, complain_overflow_dont,
+  HOWTO(R_390_GOTPLT20,	 0, 2, 20, FALSE, 8, complain_overflow_dont,
 	s390_elf_ldisp_reloc, "R_390_GOTPLT20", FALSE, 0,0x0fffff00, FALSE),
   HOWTO(R_390_TLS_GOTIE20, 0, 2, 20, FALSE, 8, complain_overflow_dont,
 	s390_elf_ldisp_reloc, "R_390_TLS_GOTIE20", FALSE, 0,0x0fffff00, FALSE),
   HOWTO(R_390_IRELATIVE, 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_IRELATIVE", FALSE, 0, MINUS_ONE, FALSE),
-  HOWTO(R_390_PC12DBL,   1, 1, 12,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_PC12DBL",  FALSE, 0,0x00000fff, TRUE),
-  HOWTO(R_390_PLT12DBL,  1, 1, 12,  TRUE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PC12DBL,	 1, 1, 12,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PC12DBL",	 FALSE, 0,0x00000fff, TRUE),
+  HOWTO(R_390_PLT12DBL,	 1, 1, 12,  TRUE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLT12DBL", FALSE, 0,0x00000fff, TRUE),
-  HOWTO(R_390_PC24DBL,   1, 2, 24,  TRUE, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_390_PC24DBL",  FALSE, 0,0x00ffffff, TRUE),
-  HOWTO(R_390_PLT24DBL,  1, 2, 24,  TRUE, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PC24DBL,	 1, 2, 24,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PC24DBL",	 FALSE, 0,0x00ffffff, TRUE),
+  HOWTO(R_390_PLT24DBL,	 1, 2, 24,  TRUE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLT24DBL", FALSE, 0,0x00ffffff, TRUE),
 };
 
@@ -501,12 +501,12 @@ elf_s390_is_local_label_name (bfd *abfd, const char *name)
    and insert the address in the GOT.
 
    PLT1: LARL 1,<fn>@GOTENT # 6 bytes  Load address of GOT entry in r1
-         LG   1,0(1)      # 6 bytes  Load address from GOT in r1
-         BCR  15,1        # 2 bytes  Jump to address
-   RET1: BASR 1,0         # 2 bytes  Return from GOT 1st time
-         LGF  1,12(1)     # 6 bytes  Load offset in symbl table in r1
-         BRCL 15,-x       # 6 bytes  Jump to start of PLT
-         .long ?          # 4 bytes  offset into .rela.plt
+	 LG   1,0(1)	  # 6 bytes  Load address from GOT in r1
+	 BCR  15,1	  # 2 bytes  Jump to address
+   RET1: BASR 1,0	  # 2 bytes  Return from GOT 1st time
+	 LGF  1,12(1)	  # 6 bytes  Load offset in symbl table in r1
+	 BRCL 15,-x	  # 6 bytes  Jump to start of PLT
+	 .long ?	  # 4 bytes  offset into .rela.plt
 
    Total = 32 bytes per PLT entry
    Fixup at offset 2: relative address to GOT entry
@@ -521,13 +521,13 @@ elf_s390_is_local_label_name (bfd *abfd, const char *name)
 
 static const bfd_byte elf_s390x_plt_entry[PLT_ENTRY_SIZE] =
   {
-    0xc0, 0x10, 0x00, 0x00, 0x00, 0x00,     /* larl    %r1,.       */
-    0xe3, 0x10, 0x10, 0x00, 0x00, 0x04,     /* lg      %r1,0(%r1)  */
-    0x07, 0xf1,                             /* br      %r1         */
-    0x0d, 0x10,                             /* basr    %r1,%r0     */
-    0xe3, 0x10, 0x10, 0x0c, 0x00, 0x14,     /* lgf     %r1,12(%r1) */
-    0xc0, 0xf4, 0x00, 0x00, 0x00, 0x00,     /* jg      first plt   */
-    0x00, 0x00, 0x00, 0x00                  /* .long   0x00000000  */
+    0xc0, 0x10, 0x00, 0x00, 0x00, 0x00,	    /* larl    %r1,.	   */
+    0xe3, 0x10, 0x10, 0x00, 0x00, 0x04,	    /* lg      %r1,0(%r1)  */
+    0x07, 0xf1,				    /* br      %r1	   */
+    0x0d, 0x10,				    /* basr    %r1,%r0	   */
+    0xe3, 0x10, 0x10, 0x0c, 0x00, 0x14,	    /* lgf     %r1,12(%r1) */
+    0xc0, 0xf4, 0x00, 0x00, 0x00, 0x00,	    /* jg      first plt   */
+    0x00, 0x00, 0x00, 0x00		    /* .long   0x00000000  */
   };
 
 /* The first PLT entry pushes the offset into the symbol table
@@ -547,14 +547,14 @@ static const bfd_byte elf_s390x_plt_entry[PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_s390x_first_plt_entry[PLT_FIRST_ENTRY_SIZE] =
   {
-    0xe3, 0x10, 0xf0, 0x38, 0x00, 0x24,     /* stg     %r1,56(%r15)      */
-    0xc0, 0x10, 0x00, 0x00, 0x00, 0x00,     /* larl    %r1,.             */
-    0xd2, 0x07, 0xf0, 0x30, 0x10, 0x08,     /* mvc     48(8,%r15),8(%r1) */
-    0xe3, 0x10, 0x10, 0x10, 0x00, 0x04,     /* lg      %r1,16(%r1)       */
-    0x07, 0xf1,                             /* br      %r1               */
-    0x07, 0x00,                             /* nopr    %r0               */
-    0x07, 0x00,                             /* nopr    %r0               */
-    0x07, 0x00                              /* nopr    %r0               */
+    0xe3, 0x10, 0xf0, 0x38, 0x00, 0x24,	    /* stg     %r1,56(%r15)	 */
+    0xc0, 0x10, 0x00, 0x00, 0x00, 0x00,	    /* larl    %r1,.		 */
+    0xd2, 0x07, 0xf0, 0x30, 0x10, 0x08,	    /* mvc     48(8,%r15),8(%r1) */
+    0xe3, 0x10, 0x10, 0x10, 0x00, 0x04,	    /* lg      %r1,16(%r1)	 */
+    0x07, 0xf1,				    /* br      %r1		 */
+    0x07, 0x00,				    /* nopr    %r0		 */
+    0x07, 0x00,				    /* nopr    %r0		 */
+    0x07, 0x00				    /* nopr    %r0		 */
   };
 
 
@@ -1433,8 +1433,7 @@ elf_s390_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       if (h->plt.refcount <= 0
 	  || SYMBOL_CALLS_LOCAL (info, h)
-	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	      && h->root.type == bfd_link_hash_undefweak))
+	  || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	{
 	  /* This case can occur if we saw a PLT32 reloc in an input
 	     file, but the symbol was never referred to by a dynamic
@@ -1492,26 +1491,12 @@ elf_s390_adjust_dynamic_symbol (struct bfd_link_info *info,
       return TRUE;
     }
 
-  if (ELIMINATE_COPY_RELOCS)
+  /* If we don't find any dynamic relocs in read-only sections, then
+     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
+  if (ELIMINATE_COPY_RELOCS && !readonly_dynrelocs (h))
     {
-      struct elf_s390_link_hash_entry * eh;
-      struct elf_dyn_relocs *p;
-
-      eh = (struct elf_s390_link_hash_entry *) h;
-      for (p = eh->dyn_relocs; p != NULL; p = p->next)
-	{
-	  s = p->sec->output_section;
-	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	    break;
-	}
-
-      /* If we didn't find any dynamic relocs in read-only sections, then
-	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-      if (p == NULL)
-	{
-	  h->non_got_ref = 0;
-	  return TRUE;
-	}
+      h->non_got_ref = 0;
+      return TRUE;
     }
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -1683,8 +1668,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h,
 	htab->elf.srelgot->size += sizeof (Elf64_External_Rela);
       else if (tls_type == GOT_TLS_GD)
 	htab->elf.srelgot->size += 2 * sizeof (Elf64_External_Rela);
-      else if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		|| h->root.type != bfd_link_hash_undefweak)
+      else if (!UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)
 	       && (bfd_link_pic (info)
 		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
 	htab->elf.srelgot->size += sizeof (Elf64_External_Rela);
@@ -2327,8 +2311,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 							  h)
 		       || (bfd_link_pic (info)
 			   && SYMBOL_REFERENCES_LOCAL (info, h))
-		       || (ELF_ST_VISIBILITY (h->other)
-			   && h->root.type == bfd_link_hash_undefweak))
+		       || resolved_to_zero)
 		{
 		  /* This is actually a static link, or it is a
 		     -Bsymbolic link and the symbol is defined
@@ -2860,7 +2843,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 		{
 		  if (indx == 0)
 		    {
-	    	      BFD_ASSERT (! unresolved_reloc);
+		      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_64 (output_bfd,
 				  relocation - dtpoff_base (info),
 				  htab->elf.sgot->contents + off + GOT_ENTRY_SIZE);
@@ -3431,6 +3414,9 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
       else if (bfd_link_pic (info)
 	       && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
+	  if (UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
+	    return TRUE;
+
 	  /* If this is a static link, or it is a -Bsymbolic link and
 	     the symbol is defined locally or was forced to be local
 	     because of a version file, we just want to emit a
@@ -3950,7 +3936,7 @@ const struct elf_size_info s390_elf64_size_info =
 #define bfd_elf64_bfd_is_local_label_name     elf_s390_is_local_label_name
 #define bfd_elf64_bfd_link_hash_table_create  elf_s390_link_hash_table_create
 #define bfd_elf64_bfd_reloc_type_lookup	      elf_s390_reloc_type_lookup
-#define bfd_elf64_bfd_reloc_name_lookup       elf_s390_reloc_name_lookup
+#define bfd_elf64_bfd_reloc_name_lookup	      elf_s390_reloc_name_lookup
 #define bfd_elf64_bfd_merge_private_bfd_data  elf64_s390_merge_private_bfd_data
 
 #define elf_backend_adjust_dynamic_symbol     elf_s390_adjust_dynamic_symbol
@@ -3968,8 +3954,8 @@ const struct elf_size_info s390_elf64_size_info =
 #define elf_backend_grok_psinfo		      elf_s390_grok_psinfo
 #define elf_backend_write_core_note	      elf_s390_write_core_note
 #define elf_backend_plt_sym_val		      elf_s390_plt_sym_val
-#define elf_backend_add_symbol_hook           elf_s390_add_symbol_hook
-#define elf_backend_sort_relocs_p             elf_s390_elf_sort_relocs_p
+#define elf_backend_add_symbol_hook	      elf_s390_add_symbol_hook
+#define elf_backend_sort_relocs_p	      elf_s390_elf_sort_relocs_p
 #define elf_backend_additional_program_headers elf_s390_additional_program_headers
 #define elf_backend_modify_segment_map	      elf_s390_modify_segment_map
 

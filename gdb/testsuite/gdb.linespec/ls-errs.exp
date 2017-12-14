@@ -175,7 +175,7 @@ proc do_test {lang} {
     # Test that option lexing stops at whitespace boundaries, except
     # when lexing function names, where we want to handle setting
     # breakpoints on e.g., "int template_function<int>()".
-    test_break "-source this file has spaces.c -line 3" invalid_file "this"
+    test_break "-source this file has spaces.c -line 3" source_incomplete
     test_break "-function ret_type tmpl_function" \
 	invalid_function "ret_type tmpl_function"
     test_break "-source $srcfile -function ret_type tmpl_function" \
@@ -267,6 +267,7 @@ proc do_test {lang} {
 
     # Explicit linespec-specific tests
     test_break "-source $srcfile" source_incomplete
+    test_break "-source $srcfile main" source_incomplete
 }
 
 foreach_with_prefix lang {"C" "C++"} {

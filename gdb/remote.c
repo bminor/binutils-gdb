@@ -2024,8 +2024,8 @@ remote_pass_signals (struct target_ops *self,
 
 static int
 remote_set_syscall_catchpoint (struct target_ops *self,
-			       int pid, int needed, int any_count,
-			       int table_size, int *table)
+			       int pid, bool needed, int any_count,
+			       gdb::array_view<const int> syscall_counts)
 {
   const char *catch_packet;
   enum packet_result result;
@@ -2037,14 +2037,12 @@ remote_set_syscall_catchpoint (struct target_ops *self,
       return 1;
     }
 
-  if (needed && !any_count)
+  if (needed && any_count == 0)
     {
-      int i;
-
-      /* Count how many syscalls are to be caught (table[sysno] != 0).  */
-      for (i = 0; i < table_size; i++)
+      /* Count how many syscalls are to be caught.  */
+      for (size_t i = 0; i < syscall_counts.size (); i++)
 	{
-	  if (table[i] != 0)
+	  if (syscall_counts[i] != 0)
 	    n_sysno++;
 	}
     }
@@ -2066,13 +2064,13 @@ remote_set_syscall_catchpoint (struct target_ops *self,
       const int maxpktsz = strlen ("QCatchSyscalls:1") + n_sysno * 9 + 1;
       built_packet.reserve (maxpktsz);
       built_packet = "QCatchSyscalls:1";
-      if (!any_count)
+      if (any_count == 0)
 	{
-	  /* Add in catch_packet each syscall to be caught (table[i] != 0).  */
-	  for (int i = 0; i < table_size; i++)
+	  /* Add in each syscall to be caught.  */
+	  for (size_t i = 0; i < syscall_counts.size (); i++)
 	    {
-	      if (table[i] != 0)
-		string_appendf (built_packet, ";%x", i);
+	      if (syscall_counts[i] != 0)
+		string_appendf (built_packet, ";%zx", i);
 	    }
 	}
       if (built_packet.size () > get_remote_packet_size ())
@@ -2270,7 +2268,10 @@ static const char *
 remote_thread_name (struct target_ops *ops, struct thread_info *info)
 {
   if (info->priv != NULL)
-    return get_remote_thread_info (info)->name.c_str ();
+    {
+      const std::string &name = get_remote_thread_info (info)->name;
+      return !name.empty () ? name.c_str () : NULL;
+    }
 
   return NULL;
 }
@@ -3222,7 +3223,6 @@ remote_update_thread_list (struct target_ops *ops)
       || remote_get_threads_with_qthreadinfo (ops, &context)
       || remote_get_threads_with_ql (ops, &context))
     {
-      int i;
       struct thread_info *tp, *tmp;
 
       got_list = 1;
@@ -3322,7 +3322,10 @@ remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
       struct thread_info *info = find_thread_ptid (tp->ptid);
 
       if (info != NULL && info->priv != NULL)
-	return get_remote_thread_info (info)->extra.c_str ();
+	{
+	  const std::string &extra = get_remote_thread_info (info)->extra;
+	  return !extra.empty () ? extra.c_str () : NULL;
+	}
       else
 	return NULL;
     }
@@ -4352,7 +4355,6 @@ init_all_packet_configs (void)
 static void
 remote_check_symbols (void)
 {
-  struct remote_state *rs = get_remote_state ();
   char *msg, *reply, *tmp;
   int end;
   long reply_size;
@@ -4747,7 +4749,8 @@ remote_query_supported (void)
 
       /* Keep this one last to work around a gdbserver <= 7.10 bug in
 	 the qSupported:xmlRegisters=i386 handling.  */
-      if (remote_support_xml != NULL)
+      if (remote_support_xml != NULL
+	  && packet_support (PACKET_qXfer_features) != PACKET_DISABLE)
 	q = remote_query_supported_append (q, remote_support_xml);
 
       q = reconcat (q, "qSupported:", q, (char *) NULL);
@@ -5869,7 +5872,6 @@ vcont_builder_push_action (struct vcont_builder *builder,
 static void
 remote_commit_resume (struct target_ops *ops)
 {
-  struct remote_state *rs = get_remote_state ();
   struct inferior *inf;
   struct thread_info *tp;
   int any_process_wildcard;
@@ -6167,8 +6169,6 @@ remote_stop (struct target_ops *self, ptid_t ptid)
 static void
 remote_interrupt (struct target_ops *self, ptid_t ptid)
 {
-  struct remote_state *rs = get_remote_state ();
-
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
 
@@ -9768,7 +9768,6 @@ remote_insert_breakpoint (struct target_ops *ops,
       CORE_ADDR addr = bp_tgt->reqstd_address;
       struct remote_state *rs;
       char *p, *endbuf;
-      int bpsize;
 
       /* Make sure the remote is pointing at the right process, if
 	 necessary.  */
@@ -10226,7 +10225,6 @@ static void
 compare_sections_command (const char *args, int from_tty)
 {
   asection *s;
-  gdb_byte *sectdata;
   const char *sectname;
   bfd_size_type size;
   bfd_vma lma;
@@ -10309,7 +10307,7 @@ remote_write_qxfer (struct target_ops *ops, const char *object_name,
   struct remote_state *rs = get_remote_state ();
   int max_size = get_memory_write_packet_size (); 
 
-  if (packet->support == PACKET_DISABLE)
+  if (packet_config_support (packet) == PACKET_DISABLE)
     return TARGET_XFER_E_IO;
 
   /* Insert header.  */
@@ -10351,7 +10349,7 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
   struct remote_state *rs = get_remote_state ();
   LONGEST i, n, packet_len;
 
-  if (packet->support == PACKET_DISABLE)
+  if (packet_config_support (packet) == PACKET_DISABLE)
     return TARGET_XFER_E_IO;
 
   /* Check whether we've cached an end-of-object packet that matches
@@ -10663,9 +10661,10 @@ remote_search_memory (struct target_ops* ops,
   int found;
   ULONGEST found_addr;
 
-  /* Don't go to the target if we don't have to.
-     This is done before checking packet->support to avoid the possibility that
-     a success for this edge case means the facility works in general.  */
+  /* Don't go to the target if we don't have to.  This is done before
+     checking packet_config_support to avoid the possibility that a
+     success for this edge case means the facility works in
+     general.  */
   if (pattern_len > search_space_len)
     return 0;
   if (pattern_len == 0)
@@ -10710,7 +10709,7 @@ remote_search_memory (struct target_ops* ops,
     {
       /* The request may not have worked because the command is not
 	 supported.  If so, fall back to the simple way.  */
-      if (packet->support == PACKET_DISABLE)
+      if (packet_config_support (packet) == PACKET_DISABLE)
 	{
 	  return simple_search_memory (ops, start_addr, search_space_len,
 				       pattern, pattern_len, found_addrp);

@@ -21,11 +21,11 @@
 #include "sysdep.h"
 #include "bfd.h"
 
-#define TARGET_SYM 		i386_pe_vec
-#define TARGET_NAME 		"pe-i386"
+#define TARGET_SYM		i386_pe_vec
+#define TARGET_NAME		"pe-i386"
 #define COFF_WITH_PE
-#define PCRELOFFSET 		TRUE
-#define TARGET_UNDERSCORE 	'_'
+#define PCRELOFFSET		TRUE
+#define TARGET_UNDERSCORE	'_'
 #define COFF_LONG_SECTION_NAMES
 #define COFF_SUPPORT_GNU_LINKONCE
 #define COFF_LONG_FILENAMES

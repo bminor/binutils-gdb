@@ -729,7 +729,6 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 {
   char *demangled = NULL;
   int i;
-  int recognized;
 
   if (gsymbol->language == language_unknown)
     gsymbol->language = language_auto;
@@ -4283,7 +4282,6 @@ search_symbols (const char *regexp, enum search_domain kind,
          and <TYPENAME> or <OPERATOR>.  */
       const char *opend;
       const char *opname = operator_chars (regexp, &opend);
-      int errcode;
 
       if (*opname)
 	{
@@ -4727,29 +4725,8 @@ completion_list_add_name (completion_tracker &tracker,
      of matches.  Note that the name is moved to freshly malloc'd space.  */
 
   {
-    char *newobj;
-
-    if (word == text)
-      {
-	newobj = (char *) xmalloc (strlen (symname) + 5);
-	strcpy (newobj, symname);
-      }
-    else if (word > text)
-      {
-	/* Return some portion of symname.  */
-	newobj = (char *) xmalloc (strlen (symname) + 5);
-	strcpy (newobj, symname + (word - text));
-      }
-    else
-      {
-	/* Return some of SYM_TEXT plus symname.  */
-	newobj = (char *) xmalloc (strlen (symname) + (text - word) + 5);
-	strncpy (newobj, word, text - word);
-	newobj[text - word] = '\0';
-	strcat (newobj, symname);
-      }
-
-    gdb::unique_xmalloc_ptr<char> completion (newobj);
+    gdb::unique_xmalloc_ptr<char> completion
+      = make_completion_match_str (symname, text, word);
 
     /* Here we pass the match-for-lcd object to add_completion.  Some
        languages match the user text against substrings of symbol
@@ -4758,7 +4735,7 @@ completion_list_add_name (completion_tracker &tracker,
        in this case we want the completion lowest common denominator
        to be "push_back" instead of "std::".  */
     tracker.add_completion (std::move (completion),
-			    &match_res.match_for_lcd);
+			    &match_res.match_for_lcd, text, word);
   }
 }
 
@@ -5324,30 +5301,7 @@ static void
 add_filename_to_list (const char *fname, const char *text, const char *word,
 		      completion_list *list)
 {
-  char *newobj;
-  size_t fnlen = strlen (fname);
-
-  if (word == text)
-    {
-      /* Return exactly fname.  */
-      newobj = (char *) xmalloc (fnlen + 5);
-      strcpy (newobj, fname);
-    }
-  else if (word > text)
-    {
-      /* Return some portion of fname.  */
-      newobj = (char *) xmalloc (fnlen + 5);
-      strcpy (newobj, fname + (word - text));
-    }
-  else
-    {
-      /* Return some of TEXT plus fname.  */
-      newobj = (char *) xmalloc (fnlen + (text - word) + 5);
-      strncpy (newobj, word, text - word);
-      newobj[text - word] = '\0';
-      strcat (newobj, fname);
-    }
-  list->emplace_back (newobj);
+  list->emplace_back (make_completion_match_str (fname, text, word));
 }
 
 static int

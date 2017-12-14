@@ -74,9 +74,6 @@ show_inaccessible_by_default (struct ui_file *file, int from_tty,
 static void
 require_user_regions (int from_tty)
 {
-  struct mem_region *m;
-  int ix, length;
-
   /* If we're already using a user-provided list, nothing to do.  */
   if (!mem_use_target ())
     return;
@@ -166,10 +163,8 @@ struct mem_region *
 lookup_mem_region (CORE_ADDR addr)
 {
   static struct mem_region region (0, 0);
-  struct mem_region *m;
   CORE_ADDR lo;
   CORE_ADDR hi;
-  int ix;
 
   require_target_regions ();
 
@@ -531,9 +526,6 @@ disable_mem_command (const char *args, int from_tty)
 
   if (args == NULL || *args == '\0')
     {
-      struct mem_region *m;
-      int ix;
-
       for (mem_region &m : *mem_region_list)
 	m.enabled_p = false;
     }
@@ -553,9 +545,6 @@ disable_mem_command (const char *args, int from_tty)
 static void
 mem_delete (int num)
 {
-  struct mem_region *m;
-  int ix;
-
   if (!mem_region_list)
     {
       printf_unfiltered (_("No memory region number %d.\n"), num);

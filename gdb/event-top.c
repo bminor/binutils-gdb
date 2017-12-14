@@ -669,7 +669,8 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
     }
 
 #define SERVER_COMMAND_PREFIX "server "
-  if (startswith (cmd, SERVER_COMMAND_PREFIX))
+  server_command = startswith (cmd, SERVER_COMMAND_PREFIX);
+  if (server_command)
     {
       /* Note that we don't set `saved_command_line'.  Between this
          and the check in dont_repeat, this insures that repeating

@@ -3113,7 +3113,6 @@ linespec_complete (completion_tracker &tracker, const char *text,
 	 the ':', then complete_linespec_component won't try to
 	 complete on source filenames.  */
 
-      const char *text = parser.completion_word;
       const char *word = parser.completion_word;
 
       complete_linespec_component (&parser, tracker,
@@ -4159,7 +4158,6 @@ find_label_symbols (struct linespec_state *self,
 {
   int ix;
   const struct block *block;
-  struct symbol *sym;
   struct symbol *fn_sym;
   VEC (symbolp) *result = NULL;
 
@@ -4367,8 +4365,9 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
       sal.objfile = objfile;
       sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
       sal.pspace = current_program_space;
-      sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
     }
+
+  sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
 
   if (maybe_add_address (self->addr_set, objfile->pspace, sal.pc))
     add_sal_to_sals (self, result, &sal, MSYMBOL_NATURAL_NAME (msymbol), 0);

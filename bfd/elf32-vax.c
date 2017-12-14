@@ -640,10 +640,10 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	case R_VAX_PLT32:
 	  /* This symbol requires a procedure linkage table entry.  We
 	     actually build the entry in adjust_dynamic_symbol,
-             because this might be a case of linking PIC code which is
-             never referenced by a dynamic object, in which case we
-             don't need to generate a procedure linkage table entry
-             after all.  */
+	     because this might be a case of linking PIC code which is
+	     never referenced by a dynamic object, in which case we
+	     don't need to generate a procedure linkage table entry
+	     after all.  */
 	  BFD_ASSERT (h != NULL);
 
 	  /* If this is a local symbol, we resolve it directly without
@@ -1084,7 +1084,7 @@ elf_vax_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	      asection *target;
 
 	      /* Remember whether there are any reloc sections other
-                 than .rela.plt.  */
+		 than .rela.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
 		{
 		  const char *outname;
@@ -1501,7 +1501,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 	      if (skip)
 		  memset (&outrel, 0, sizeof outrel);
 	      /* h->dynindx may be -1 if the symbol was marked to
-                 become local.  */
+		 become local.  */
 	      else if (h != NULL
 		       && ((! info->symbolic && h->dynindx != -1)
 			   || !h->def_regular))
@@ -1583,9 +1583,9 @@ elf_vax_relocate_section (bfd *output_bfd,
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      /* This reloc will be computed at runtime, so there's no
-                 need to do anything now, except for R_VAX_32
-                 relocations that have been turned into
-                 R_VAX_RELATIVE.  */
+		 need to do anything now, except for R_VAX_32
+		 relocations that have been turned into
+		 R_VAX_RELATIVE.  */
 	      if (!relocate)
 		continue;
 	    }
@@ -1602,8 +1602,8 @@ elf_vax_relocate_section (bfd *output_bfd,
 	}
 
       /* VAX PCREL relocations are from the end of relocation, not the start.
-         So subtract the difference from the relocation amount since we can't
-         add it to the offset.  */
+	 So subtract the difference from the relocation amount since we can't
+	 add it to the offset.  */
       if (howto->pc_relative && howto->pcrel_offset)
 	relocation -= bfd_get_reloc_size(howto);
 
@@ -1694,7 +1694,7 @@ elf_vax_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 
       /* Fill in the entry in the procedure linkage table.  */
       memcpy (splt->contents + h->plt.offset, elf_vax_plt_entry,
-	          PLT_ENTRY_SIZE);
+		  PLT_ENTRY_SIZE);
 
       /* The offset is relative to the first extension word.  */
       bfd_put_32 (output_bfd,
@@ -1844,17 +1844,17 @@ elf_vax_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	{
 	  memcpy (splt->contents, elf_vax_plt0_entry, PLT_ENTRY_SIZE);
 	  bfd_put_32 (output_bfd,
-		          (sgot->output_section->vma
-		           + sgot->output_offset + 4
-		           - (splt->output_section->vma + 6)),
-		          splt->contents + 2);
+			  (sgot->output_section->vma
+			   + sgot->output_offset + 4
+			   - (splt->output_section->vma + 6)),
+			  splt->contents + 2);
 	  bfd_put_32 (output_bfd,
-		          (sgot->output_section->vma
-		           + sgot->output_offset + 8
-		           - (splt->output_section->vma + 12)),
-		          splt->contents + 8);
-          elf_section_data (splt->output_section)->this_hdr.sh_entsize
-           = PLT_ENTRY_SIZE;
+			  (sgot->output_section->vma
+			   + sgot->output_offset + 8
+			   - (splt->output_section->vma + 12)),
+			  splt->contents + 8);
+	  elf_section_data (splt->output_section)->this_hdr.sh_entsize
+	   = PLT_ENTRY_SIZE;
 	}
     }
 
@@ -1930,11 +1930,11 @@ elf_vax_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_gc_mark_hook	elf_vax_gc_mark_hook
 #define elf_backend_plt_sym_val		elf_vax_plt_sym_val
 #define bfd_elf32_bfd_merge_private_bfd_data \
-                                        elf32_vax_merge_private_bfd_data
+					elf32_vax_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags \
-                                        elf32_vax_set_private_flags
+					elf32_vax_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data \
-                                        elf32_vax_print_private_bfd_data
+					elf32_vax_print_private_bfd_data
 
 #define elf_backend_can_gc_sections	1
 #define elf_backend_want_got_plt	1

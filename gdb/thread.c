@@ -1943,7 +1943,6 @@ print_selected_thread_frame (struct ui_out *uiout,
 			     user_selected_what selection)
 {
   struct thread_info *tp = inferior_thread ();
-  struct inferior *inf = current_inferior ();
 
   if (selection & USER_SELECTED_THREAD)
     {

@@ -863,7 +863,7 @@ struct fn_field
 
 };
 
-struct typedef_field
+struct decl_field
 {
   /* * Unqualified name to be prefixed by owning class qualified
      name.  */
@@ -978,9 +978,16 @@ struct cplus_struct_type
     /* * typedefs defined inside this class.  typedef_field points to
        an array of typedef_field_count elements.  */
 
-    struct typedef_field *typedef_field;
+    struct decl_field *typedef_field;
 
     unsigned typedef_field_count;
+
+    /* * The nested types defined by this type.  nested_types points to
+       an array of nested_types_count elements.  */
+
+    struct decl_field *nested_types;
+
+    unsigned nested_types_count;
 
     /* * The template arguments.  This is an array with
        N_TEMPLATE_ARGUMENTS elements.  This is NULL for non-template
@@ -1423,6 +1430,21 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   TYPE_TYPEDEF_FIELD (thistype, n).is_protected
 #define TYPE_TYPEDEF_FIELD_PRIVATE(thistype, n)        \
   TYPE_TYPEDEF_FIELD (thistype, n).is_private
+
+#define TYPE_NESTED_TYPES_ARRAY(thistype)	\
+  TYPE_CPLUS_SPECIFIC (thistype)->nested_types
+#define TYPE_NESTED_TYPES_FIELD(thistype, n) \
+  TYPE_CPLUS_SPECIFIC (thistype)->nested_types[n]
+#define TYPE_NESTED_TYPES_FIELD_NAME(thistype, n) \
+  TYPE_NESTED_TYPES_FIELD (thistype, n).name
+#define TYPE_NESTED_TYPES_FIELD_TYPE(thistype, n) \
+  TYPE_NESTED_TYPES_FIELD (thistype, n).type
+#define TYPE_NESTED_TYPES_COUNT(thistype) \
+  TYPE_CPLUS_SPECIFIC (thistype)->nested_types_count
+#define TYPE_NESTED_TYPES_FIELD_PROTECTED(thistype, n) \
+  TYPE_NESTED_TYPES_FIELD (thistype, n).is_protected
+#define TYPE_NESTED_TYPES_FIELD_PRIVATE(thistype, n)	\
+  TYPE_NESTED_TYPES_FIELD (thistype, n).is_private
 
 #define TYPE_IS_OPAQUE(thistype) \
   (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) \

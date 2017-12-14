@@ -174,7 +174,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 4,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_FT32_SC0",	        /* name */
+	 "R_FT32_SC0",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x00000000,		/* dst_mask */
@@ -187,7 +187,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 7,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_FT32_SC1",	        /* name */
+	 "R_FT32_SC1",		/* name */
 	 TRUE,			/* partial_inplace */
 	 0x07ffff80,		/* src_mask */
 	 0x07ffff80,		/* dst_mask */
@@ -205,19 +205,19 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 0x00000000,		/* src_mask */
 	 0x00007fff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
-  HOWTO (R_FT32_DIFF32,  	/* type */
-	 0,             	/* rightshift */
-	 2,         		/* size (0 = byte, 1 = short, 2 = long) */
-	 32,        		/* bitsize */
-	 FALSE,         	/* pc_relative */
-	 0,             	/* bitpos */
+  HOWTO (R_FT32_DIFF32,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_ft32_diff_reloc, /* special_function */
-	 "R_FT32_DIFF32",     	/* name */
-	 FALSE,         	/* partial_inplace */
-	 0,             	/* src_mask */
-	 0xffffffff,    	/* dst_mask */
-	 FALSE),        	/* pcrel_offset */
+	 "R_FT32_DIFF32",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
 
@@ -231,19 +231,19 @@ struct ft32_reloc_map
 
 static const struct ft32_reloc_map ft32_reloc_map [] =
 {
-  { BFD_RELOC_NONE,             R_FT32_NONE },
-  { BFD_RELOC_32,               R_FT32_32 },
-  { BFD_RELOC_16,               R_FT32_16 },
-  { BFD_RELOC_8,                R_FT32_8 },
-  { BFD_RELOC_FT32_10,          R_FT32_10 },
-  { BFD_RELOC_FT32_20,          R_FT32_20 },
-  { BFD_RELOC_FT32_17,          R_FT32_17 },
-  { BFD_RELOC_FT32_18,          R_FT32_18 },
-  { BFD_RELOC_FT32_RELAX,       R_FT32_RELAX },
-  { BFD_RELOC_FT32_SC0,         R_FT32_SC0 },
-  { BFD_RELOC_FT32_SC1,         R_FT32_SC1 },
-  { BFD_RELOC_FT32_15,          R_FT32_15 },
-  { BFD_RELOC_FT32_DIFF32,      R_FT32_DIFF32 },
+  { BFD_RELOC_NONE,		R_FT32_NONE },
+  { BFD_RELOC_32,		R_FT32_32 },
+  { BFD_RELOC_16,		R_FT32_16 },
+  { BFD_RELOC_8,		R_FT32_8 },
+  { BFD_RELOC_FT32_10,		R_FT32_10 },
+  { BFD_RELOC_FT32_20,		R_FT32_20 },
+  { BFD_RELOC_FT32_17,		R_FT32_17 },
+  { BFD_RELOC_FT32_18,		R_FT32_18 },
+  { BFD_RELOC_FT32_RELAX,	R_FT32_RELAX },
+  { BFD_RELOC_FT32_SC0,		R_FT32_SC0 },
+  { BFD_RELOC_FT32_SC1,		R_FT32_SC1 },
+  { BFD_RELOC_FT32_15,		R_FT32_15 },
+  { BFD_RELOC_FT32_DIFF32,	R_FT32_DIFF32 },
 };
 
 /* Perform a diff relocation. Nothing to do, as the difference value is
@@ -511,13 +511,13 @@ ft32_elf_relocate_section (bfd *output_bfd,
 
 static bfd_boolean
 ft32_reloc_shortable
-    (bfd *                  abfd,
-     asection *             sec,
-     Elf_Internal_Sym *     isymbuf ATTRIBUTE_UNUSED,
-     bfd_byte *             contents,
-     bfd_vma                pc ATTRIBUTE_UNUSED,
+    (bfd *		    abfd,
+     asection *		    sec,
+     Elf_Internal_Sym *	    isymbuf ATTRIBUTE_UNUSED,
+     bfd_byte *		    contents,
+     bfd_vma		    pc ATTRIBUTE_UNUSED,
      Elf_Internal_Rela *    irel,
-     unsigned int *         sc)
+     unsigned int *	    sc)
 {
   Elf_Internal_Shdr *symtab_hdr ATTRIBUTE_UNUSED;
   bfd_vma symval;
@@ -724,10 +724,10 @@ elf32_ft32_adjust_reloc_if_spans_insn (bfd *abfd,
   if (elf32_ft32_is_diff_reloc (irel))
     {
       if (!elf32_ft32_adjust_diff_reloc_value (abfd, isec, irel,
-                                               symval,
-                                               shrinked_insn_address,
-                                               count))
-        return FALSE;
+					       symval,
+					       shrinked_insn_address,
+					       count))
+	return FALSE;
     }
   else
     {
@@ -873,12 +873,12 @@ elf32_ft32_relax_delete_bytes (struct bfd_link_info *link_info, bfd * abfd,
 			  printf
 			    ("Relocation's addend needed to be fixed \n");
 
-                        if (!elf32_ft32_adjust_reloc_if_spans_insn (abfd, isec,
-                                                                    irel, symval,
-                                                                    shrinked_insn_address,
-                                                                    shrink_boundary,
-                                                                    count))
-                          return FALSE;
+			if (!elf32_ft32_adjust_reloc_if_spans_insn (abfd, isec,
+								    irel, symval,
+								    shrinked_insn_address,
+								    shrink_boundary,
+								    count))
+			  return FALSE;
 		      }
 		  }
 		/* else reference symbol is absolute. No adjustment needed. */
@@ -913,12 +913,12 @@ elf32_ft32_relax_delete_bytes (struct bfd_link_info *link_info, bfd * abfd,
       struct elf_link_hash_entry *sym_hash = *sym_hashes;
 
       /* The '--wrap SYMBOL' option is causing a pain when the object file,
-         containing the definition of __wrap_SYMBOL, includes a direct
-         call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference
-         the same symbol (which is __wrap_SYMBOL), but still exist as two
-         different symbols in 'sym_hashes', we don't want to adjust
-         the global symbol __wrap_SYMBOL twice.
-         This check is only relevant when symbols are being wrapped.  */
+	 containing the definition of __wrap_SYMBOL, includes a direct
+	 call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference
+	 the same symbol (which is __wrap_SYMBOL), but still exist as two
+	 different symbols in 'sym_hashes', we don't want to adjust
+	 the global symbol __wrap_SYMBOL twice.
+	 This check is only relevant when symbols are being wrapped.  */
       if (link_info->wrap_hash != NULL)
 	{
 	  struct elf_link_hash_entry **cur_sym_hashes;
@@ -1006,7 +1006,7 @@ elf32_ft32_relax_is_branch_target (struct bfd_link_info *link_info,
 	      if (sym_sec == sec)
 		{
 		  symval += sym_sec->output_section->vma
-                            + sym_sec->output_offset;
+			    + sym_sec->output_offset;
 
 		  if (debug_relax)
 		    printf ("0x%x: Address of anchor symbol: 0x%x "
@@ -1066,16 +1066,16 @@ elf32_ft32_relax_is_branch_target (struct bfd_link_info *link_info,
 
 static bfd_boolean
 ft32_elf_relax_section
-    (bfd *                  abfd,
-     asection *             sec,
+    (bfd *		    abfd,
+     asection *		    sec,
      struct bfd_link_info * link_info,
-     bfd_boolean *          again)
+     bfd_boolean *	    again)
 {
   Elf_Internal_Rela * free_relocs = NULL;
   Elf_Internal_Rela * internal_relocs;
   Elf_Internal_Rela * irelend;
   Elf_Internal_Rela * irel;
-  bfd_byte *          contents = NULL;
+  bfd_byte *	      contents = NULL;
   Elf_Internal_Shdr * symtab_hdr;
   Elf_Internal_Sym *  isymbuf = NULL;
 
@@ -1161,12 +1161,12 @@ ft32_elf_relax_section
 	  if (ELF32_R_TYPE (irel->r_info) == R_FT32_18)
 	    {
 	      irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-                                           R_FT32_SC0);
+					   R_FT32_SC0);
 	    }
 	  else
 	    {
 	      irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-                                           R_FT32_NONE);
+					   R_FT32_NONE);
 	    }
 
 	  if (ELF32_R_TYPE (irel_next->r_info) == R_FT32_18)

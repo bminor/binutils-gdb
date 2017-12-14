@@ -654,6 +654,11 @@ disassemble_init_for_target (struct disassemble_info * info)
 #ifdef ARCH_powerpc
     case bfd_arch_powerpc:
 #endif
+#ifdef ARCH_pru
+    case bfd_arch_pru:
+      info->disassembler_needs_relocs = TRUE;
+      break;
+#endif
 #ifdef ARCH_rs6000
     case bfd_arch_rs6000:
 #endif

@@ -1214,6 +1214,8 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
   if (len == 0)
     return TARGET_XFER_EOF;
 
+  memaddr = address_significant (target_gdbarch (), memaddr);
+
   /* Fill in READBUF with breakpoint shadows, or WRITEBUF with
      breakpoint insns, thus hiding out from higher layers whether
      there are software breakpoints inserted in the code stream.  */
@@ -2231,8 +2233,6 @@ static int defer_target_commit_resume;
 void
 target_commit_resume (void)
 {
-  struct target_ops *t;
-
   if (defer_target_commit_resume)
     return;
 

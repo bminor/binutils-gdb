@@ -429,7 +429,7 @@ coff_swap_aux_in (bfd *abfd,
 	  in->x_scn.x_nlinno = GET_SCN_NLINNO (abfd, ext);
 
 	  /* PE defines some extra fields; we zero them out for
-             safety.  */
+	     safety.  */
 	  in->x_scn.x_checksum = 0;
 	  in->x_scn.x_associated = 0;
 	  in->x_scn.x_comdat = 0;

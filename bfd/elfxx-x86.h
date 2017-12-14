@@ -284,12 +284,12 @@ struct elf_x86_lazy_plt_layout
   /* The first entry in an absolute lazy procedure linkage table looks
      like this.  */
   const bfd_byte *plt0_entry;
-  unsigned int plt0_entry_size;          /* Size of PLT0 entry.  */
+  unsigned int plt0_entry_size;		 /* Size of PLT0 entry.  */
 
   /* Later entries in an absolute lazy procedure linkage table look
      like this.  */
   const bfd_byte *plt_entry;
-  unsigned int plt_entry_size;          /* Size of each PLT entry.  */
+  unsigned int plt_entry_size;		/* Size of each PLT entry.  */
 
   /* Offsets into plt0_entry that are to be replaced with GOT[1] and
      GOT[2].  */
@@ -338,7 +338,7 @@ struct elf_x86_non_lazy_plt_layout
   /* Entries in a PIC non-lazy procedure linkage table look like this.  */
   const bfd_byte *pic_plt_entry;
 
-  unsigned int plt_entry_size;          /* Size of each PLT entry.  */
+  unsigned int plt_entry_size;		/* Size of each PLT entry.  */
 
   /* Offsets into plt_entry that are to be replaced with...  */
   unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
@@ -360,7 +360,7 @@ struct elf_x86_plt_layout
   const bfd_byte *plt0_entry;
   /* Entries in a procedure linkage table look like this.  */
   const bfd_byte *plt_entry;
-  unsigned int plt_entry_size;          /* Size of each PLT entry.  */
+  unsigned int plt_entry_size;		/* Size of each PLT entry.  */
 
   /* 1 has PLT0.  */
   unsigned int has_plt0;

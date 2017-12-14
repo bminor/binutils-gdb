@@ -58,6 +58,11 @@
 
   ** The "complete" command now mimics TAB completion accurately.
 
+* New command line options (gcore)
+
+-a
+  Dump all memory mappings.
+
 * Breakpoints on C++ functions are now set on all scopes by default
 
   By default, breakpoints on functions/methods are now interpreted as
@@ -76,7 +81,9 @@
   GDB interpret the specified function name as a complete
   fully-qualified name instead.  For example, using the same C++
   program, the "break -q B::func" command sets a breakpoint on
-  "B::func", only.
+  "B::func", only.  A parameter has been added to the Python
+  gdb.Breakpoint constructor to achieve the same result when creating
+  a breakpoint from Python.
 
 * Breakpoints on functions marked with C++ ABI tags
 
@@ -110,6 +117,10 @@
      command allows the setting of a large number of breakpoints via a
      regex pattern in Python.  See the manual for further details.
 
+  ** Python breakpoints can now accept explicit locations.  See the
+     manual for a further description of this feature.
+
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now able to start inferior processes with a
@@ -138,6 +149,9 @@
   the message in the catchpoint hit notification. In GDB/MI mode, that
   information is provided as an extra field named "exception-message"
   in the *stopped notification.
+
+* Trait objects can now be inspected When debugging Rust code.  This
+  requires compiler support which will appear in Rust 1.24.
 
 * New remote packets
 
@@ -182,11 +196,20 @@ set debug separate-debug-file
 show debug separate-debug-file
   Control the display of debug output about separate debug file search.
 
+set dump-excluded-mappings
+show dump-excluded-mappings
+  Control whether mappings marked with the VM_DONTDUMP flag should be
+  dumped when generating a core file.
+
 maint info selftests
   List the registered selftests.
 
 starti
   Start the debugged program stopping at the first instruction.
+
+set|show print type nested-type-limit
+  Set and show the limit of nesting level for nested types that the
+  type printer will show.
 
 * TUI Single-Key mode now supports two new shortcut keys: `i' for stepi and
   `o' for nexti.

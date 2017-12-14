@@ -4518,8 +4518,8 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int fp_regnum_p, mmx_regnum_p, xmm_regnum_p, mxcsr_regnum_p,
       ymm_regnum_p, ymmh_regnum_p, ymm_avx512_regnum_p, ymmh_avx512_regnum_p,
-      bndr_regnum_p, bnd_regnum_p, k_regnum_p, zmm_regnum_p, zmmh_regnum_p,
-      zmm_avx512_regnum_p, mpx_ctrl_regnum_p, xmm_avx512_regnum_p,
+      bndr_regnum_p, bnd_regnum_p, zmm_regnum_p, zmmh_regnum_p,
+      mpx_ctrl_regnum_p, xmm_avx512_regnum_p,
       avx512_p, avx_p, sse_p, pkru_regnum_p;
 
   /* Don't include pseudo registers, except for MMX, in any register

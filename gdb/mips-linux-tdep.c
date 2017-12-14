@@ -530,7 +530,6 @@ mips64_fill_fpregset (const struct regcache *regcache,
 		      mips64_elf_fpregset_t *fpregsetp, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte *to;
 
   if ((regno >= gdbarch_fp0_regnum (gdbarch))

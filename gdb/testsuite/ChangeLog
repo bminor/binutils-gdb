@@ -1,3 +1,138 @@
+2017-12-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/str_binop_equal: New testcase.
+
+2017-12-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/task_switch_in_core: New testcase.
+
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-breakpoint.c (foo_ns::multiply): New function.
+	* gdb.python/py-breakpoint.exp: Compile the test case as c++,
+	call test_bkpt_qualified.
+	(test_bkpt_qualified): New proc.
+
+2017-12-13  Pedro Alves  <palves@redhat.com>
+
+	* lib/completion-support.exp (test_gdb_complete_tab_multiple):
+	Tighten regexp by matching with an anchor.
+
+2017-12-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.cp/cpcompletion.exp: Load completion-support.exp.
+	("expression with namespace"): New set of tests.
+	* gdb.cp/pr9594.cc (Test_NS::foo, Test_NS::bar)
+	(Nested::Test_NS::qux): New.
+	* lib/completion-support.exp (test_gdb_complete_cmd_multiple): Add
+	defaults to 'start_quote_char' and 'end_quote_char' parameters.
+
+2017-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/server-del-break.c: New file.
+	* gdb.base/server-del-break.exp: New file.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+
+	* gdb.xml/tdesc-regs.exp: Add or1k support.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+
+	* gdb.base/bp-permanent.c: Define nop of or1k.
+
+2017-12-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/variant_record_packed_array.exp: Adapt test to accept
+	output with components being reordered.
+
+2017-12-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/pkd_arr_elem.exp: Adapt "print test" test to accept
+	output with components being reordered.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/maint.exp (check for .gdb_index): Check also for
+	.debug_names.
+	* gdb.dlang/watch-loc.c (.debug_aranges): New.
+	* gdb.dwarf2/dw2-case-insensitive-debug.S: Likewise.
+	* gdb.dwarf2/gdb-index.exp (check if index present, .gdb_index used)
+	(.gdb_index used after symbol reloading): Support also .debug_names.
+	* gdb.mi/dw2-ref-missing-frame-func.c (.debug_aranges): New.
+
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/aarch64-tagged-pointer.c (main): Update.
+	* gdb.arch/aarch64-tagged-pointer.exp: Add tests for watchpoint.
+
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/aarch64-tagged-pointer.c (main): Update.
+	* gdb.arch/aarch64-tagged-pointer.exp: Add test for breakpoint.
+
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/aarch64-tagged-pointer.c: New file.
+	* gdb.arch/aarch64-tagged-pointer.exp: New file.
+
+2017-12-08  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.arch/i386-sse-stack-align.exp: Cast "print" function call
+	"int".
+
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
+	PR breakpoints/22569
+	* gdb.linespec/ls-errs.exp: Change expected result of "break
+	-source this file has spaces.c -line 3".
+	Check that an explicit source file followed by whitespace is
+	identified as an invalid explicit location.
+
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/nested-types.cc: New file.
+	* gdb.cp/nested-types.exp: New file.
+	* lib/cp-support.exp: Load data-structures.exp library.
+	(debug_cp_test_ptype_class): New global.
+	(cp_ptype_class_verbose, next_line): New procedures.
+	(cp_test_ptype_class): Add and document new parameter `recursive_qid'.
+	Add and document new return value.
+	Switch the list of lines to a queue.
+	Add support for new `type' key for nested type definitions.
+	Add debugging/troubleshooting messages.
+	* lib/data-structures.exp: New file.
+
+2017-12-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-breakpoint.exp (test_bkpt_explicit_loc): Define
+	with proc_with_prefix, don't use with_test_prefix.
+
+2017-12-07  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/break.exp: Add test for empty "commands".
+
+2017-12-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.trace/ftrace.exp (run_trace_experiment): Set breakpoint on
+	malloc and catch syscall.
+
+2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+       * gdb.python/py-breakpoint.exp (test_bkpt_explicit_loc): Add new
+	tests for explicit locations.
+
+2017-12-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/i386-avx.exp: If testing with a RSP target, check
+	force-disabling XML descriptions.
+
+2017-12-04  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22499
+	* gdb.arch/amd64-disp-step-avx.S: New file.
+	* gdb.arch/amd64-disp-step-avx.exp: New file.
+
 2017-12-03  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/process-dies-while-detaching.c: Include <errno.h>

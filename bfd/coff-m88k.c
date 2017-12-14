@@ -81,7 +81,7 @@ m88k_special_reloc (bfd *abfd,
 					   * bfd_octets_per_byte (abfd)))
 	    return bfd_reloc_outofrange;
 
-	  x = bfd_get_16 (abfd, (bfd_byte *) data + addr);	  
+	  x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
 
 	  /* Work out which section the relocation is targeted at and the
 	     initial relocation command value.  */

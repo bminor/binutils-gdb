@@ -958,6 +958,12 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
 	  return;
 	}
 
+      if (ptr->howto == NULL)
+	{
+	  *failedp = TRUE;
+	  return;
+	}
+
       src_rela.r_offset = ptr->address + addr_offset;
       src_rela.r_info = ELF_R_INFO (n, ptr->howto->type);
       src_rela.r_addend = ptr->addend;

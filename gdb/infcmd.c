@@ -569,7 +569,6 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
   struct ui_out *uiout = current_uiout;
   struct target_ops *run_target;
   int async_exec;
-  CORE_ADDR pc;
 
   dont_repeat ();
 
@@ -1497,8 +1496,6 @@ until_next_fsm_should_stop (struct thread_fsm *self,
 static void
 until_next_fsm_clean_up (struct thread_fsm *self, struct thread_info *thread)
 {
-  struct until_next_fsm *sm = (struct until_next_fsm *) self;
-
   delete_longjmp_breakpoint (thread->global_num);
 }
 

@@ -1,7 +1,7 @@
 /* 32-bit ELF support for TI C6X
    Copyright (C) 2010-2017 Free Software Foundation, Inc.
    Contributed by Joseph Myers <joseph@codesourcery.com>
-   		  Bernd Schmidt  <bernds@codesourcery.com>
+		  Bernd Schmidt  <bernds@codesourcery.com>
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1823,17 +1823,17 @@ elf32_tic6x_finish_dynamic_symbol (bfd * output_bfd,
       asection *srela;
 
       /* This symbol has an entry in the global offset table.
-         Set it up.  */
+	 Set it up.  */
 
       sgot = htab->elf.sgot;
       srela = htab->elf.srelgot;
       BFD_ASSERT (sgot != NULL && srela != NULL);
 
       /* If this is a -Bsymbolic link, and the symbol is defined
-         locally, we just want to emit a RELATIVE reloc.  Likewise if
-         the symbol was forced to be local because of a version file.
-         The entry in the global offset table will already have been
-         initialized in the relocate_section function.  */
+	 locally, we just want to emit a RELATIVE reloc.  Likewise if
+	 the symbol was forced to be local because of a version file.
+	 The entry in the global offset table will already have been
+	 initialized in the relocate_section function.  */
       if (bfd_link_pic (info)
 	  && (SYMBOLIC_BIND (info, h)
 	      || h->dynindx == -1 || h->forced_local) && h->def_regular)
@@ -2986,18 +2986,18 @@ elf32_tic6x_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED, asymbol *asym)
     {
     case SHN_TIC6X_SCOMMON:
       if (tic6x_elf_scom_section.name == NULL)
-        {
-          /* Initialize the small common section.  */
-          tic6x_elf_scom_section.name = ".scommon";
-          tic6x_elf_scom_section.flags = SEC_IS_COMMON;
-          tic6x_elf_scom_section.output_section = &tic6x_elf_scom_section;
-          tic6x_elf_scom_section.symbol = &tic6x_elf_scom_symbol;
-          tic6x_elf_scom_section.symbol_ptr_ptr = &tic6x_elf_scom_symbol_ptr;
-          tic6x_elf_scom_symbol.name = ".scommon";
-          tic6x_elf_scom_symbol.flags = BSF_SECTION_SYM;
-          tic6x_elf_scom_symbol.section = &tic6x_elf_scom_section;
-          tic6x_elf_scom_symbol_ptr = &tic6x_elf_scom_symbol;
-        }
+	{
+	  /* Initialize the small common section.  */
+	  tic6x_elf_scom_section.name = ".scommon";
+	  tic6x_elf_scom_section.flags = SEC_IS_COMMON;
+	  tic6x_elf_scom_section.output_section = &tic6x_elf_scom_section;
+	  tic6x_elf_scom_section.symbol = &tic6x_elf_scom_symbol;
+	  tic6x_elf_scom_section.symbol_ptr_ptr = &tic6x_elf_scom_symbol_ptr;
+	  tic6x_elf_scom_symbol.name = ".scommon";
+	  tic6x_elf_scom_symbol.flags = BSF_SECTION_SYM;
+	  tic6x_elf_scom_symbol.section = &tic6x_elf_scom_section;
+	  tic6x_elf_scom_symbol_ptr = &tic6x_elf_scom_symbol;
+	}
       asym->section = &tic6x_elf_scom_section;
       asym->value = elfsym->internal_elf_sym.st_size;
       break;
@@ -3971,7 +3971,7 @@ elf32_tic6x_insert_cantunwind_after (asection *text_sec, asection *exidx_sec)
 
      1. Regions without unwind data are marked with EXIDX_CANTUNWIND entries.
      2. Duplicate entries are merged together (EXIDX_CANTUNWIND, or unwind
-        codes which have been inlined into the index).
+	codes which have been inlined into the index).
 
    If MERGE_EXIDX_ENTRIES is false, duplicate entries are not merged.
 
@@ -3998,7 +3998,7 @@ elf32_tic6x_fix_exidx_coverage (asection **text_section_order,
       asection *sec;
 
       for (sec = inp->sections; sec != NULL; sec = sec->next)
-        {
+	{
 	  struct bfd_elf_section_data *elf_sec = elf_section_data (sec);
 	  Elf_Internal_Shdr *hdr = &elf_sec->this_hdr;
 
@@ -4008,12 +4008,12 @@ elf32_tic6x_fix_exidx_coverage (asection **text_section_order,
 	  if (elf_sec->linked_to)
 	    {
 	      Elf_Internal_Shdr *linked_hdr
-	        = &elf_section_data (elf_sec->linked_to)->this_hdr;
+		= &elf_section_data (elf_sec->linked_to)->this_hdr;
 	      struct _tic6x_elf_section_data *linked_sec_tic6x_data
-	        = get_tic6x_elf_section_data (linked_hdr->bfd_section);
+		= get_tic6x_elf_section_data (linked_hdr->bfd_section);
 
 	      if (linked_sec_tic6x_data == NULL)
-	        continue;
+		continue;
 
 	      /* Link this .c6xabi.exidx section back from the
 		 text section it describes.  */
@@ -4031,7 +4031,7 @@ elf32_tic6x_fix_exidx_coverage (asection **text_section_order,
       asection *sec = text_section_order[i];
       asection *exidx_sec;
       struct _tic6x_elf_section_data *tic6x_data
-       	= get_tic6x_elf_section_data (sec);
+	= get_tic6x_elf_section_data (sec);
       struct _tic6x_elf_section_data *exidx_data;
       bfd_byte *contents = NULL;
       int deleted_exidx_bytes = 0;
@@ -4042,7 +4042,7 @@ elf32_tic6x_fix_exidx_coverage (asection **text_section_order,
       bfd *ibfd;
 
       if (tic6x_data == NULL)
-        continue;
+	continue;
 
       exidx_sec = tic6x_data->u.text.tic6x_exidx_sec;
       if (exidx_sec == NULL)
@@ -4066,11 +4066,11 @@ elf32_tic6x_fix_exidx_coverage (asection **text_section_order,
 
       hdr = &elf_section_data (exidx_sec)->this_hdr;
       if (hdr->sh_type != SHT_C6000_UNWIND)
-        continue;
+	continue;
 
       exidx_data = get_tic6x_elf_section_data (exidx_sec);
       if (exidx_data == NULL)
-        continue;
+	continue;
 
       ibfd = exidx_sec->owner;
 
@@ -4121,7 +4121,7 @@ elf32_tic6x_fix_exidx_coverage (asection **text_section_order,
 
       /* Free contents if we allocated it ourselves.  */
       if (contents != hdr->contents)
-        free (contents);
+	free (contents);
 
       /* Record edits to be applied later (in elf32_tic6x_write_section).  */
       exidx_data->u.exidx.unwind_edit_list = unwind_edit_head;
@@ -4325,7 +4325,7 @@ elf32_tic6x_write_section (bfd *output_bfd,
   elf32_tic6x_create_dynamic_sections
 #define elf_backend_adjust_dynamic_symbol \
   elf32_tic6x_adjust_dynamic_symbol
-#define elf_backend_check_relocs        elf32_tic6x_check_relocs
+#define elf_backend_check_relocs	elf32_tic6x_check_relocs
 #define elf_backend_add_symbol_hook     elf32_tic6x_add_symbol_hook
 #define elf_backend_symbol_processing   elf32_tic6x_symbol_processing
 #define elf_backend_link_output_symbol_hook \

@@ -161,31 +161,31 @@ static bfd_vma opd_entry_value
 #define LD_R11_0R11	0xe96b0000	/* ld	 %r11,xxx+16@l(%r11) */
 #define BCTR		0x4e800420	/* bctr			     */
 
-#define ADDI_R11_R11	0x396b0000	/* addi %r11,%r11,off@l  */
-#define ADDIS_R2_R2	0x3c420000	/* addis %r2,%r2,off@ha  */
-#define ADDI_R2_R2	0x38420000	/* addi  %r2,%r2,off@l   */
+#define ADDI_R11_R11	0x396b0000	/* addi %r11,%r11,off@l	 */
+#define ADDIS_R2_R2	0x3c420000	/* addis %r2,%r2,off@ha	 */
+#define ADDI_R2_R2	0x38420000	/* addi	 %r2,%r2,off@l	 */
 
-#define XOR_R2_R12_R12	0x7d826278	/* xor   %r2,%r12,%r12   */
-#define ADD_R11_R11_R2	0x7d6b1214	/* add   %r11,%r11,%r2   */
-#define XOR_R11_R12_R12	0x7d8b6278	/* xor   %r11,%r12,%r12  */
-#define ADD_R2_R2_R11	0x7c425a14	/* add   %r2,%r2,%r11    */
-#define CMPLDI_R2_0	0x28220000	/* cmpldi %r2,0          */
-#define BNECTR		0x4ca20420	/* bnectr+               */
-#define BNECTR_P4	0x4ce20420	/* bnectr+               */
+#define XOR_R2_R12_R12	0x7d826278	/* xor	 %r2,%r12,%r12	 */
+#define ADD_R11_R11_R2	0x7d6b1214	/* add	 %r11,%r11,%r2	 */
+#define XOR_R11_R12_R12	0x7d8b6278	/* xor	 %r11,%r12,%r12	 */
+#define ADD_R2_R2_R11	0x7c425a14	/* add	 %r2,%r2,%r11	 */
+#define CMPLDI_R2_0	0x28220000	/* cmpldi %r2,0		 */
+#define BNECTR		0x4ca20420	/* bnectr+		 */
+#define BNECTR_P4	0x4ce20420	/* bnectr+		 */
 
 #define LD_R12_0R2	0xe9820000	/* ld	 %r12,xxx+0(%r2) */
 #define LD_R11_0R2	0xe9620000	/* ld	 %r11,xxx+0(%r2) */
-#define LD_R2_0R2	0xe8420000	/* ld	 %r2,xxx+0(%r2)  */
+#define LD_R2_0R2	0xe8420000	/* ld	 %r2,xxx+0(%r2)	 */
 
-#define LD_R2_0R1	0xe8410000	/* ld    %r2,0(%r1)      */
-#define LD_R2_0R12	0xe84c0000	/* ld    %r2,0(%r12)     */
-#define ADD_R2_R2_R12	0x7c426214	/* add   %r2,%r2,%r12    */
+#define LD_R2_0R1	0xe8410000	/* ld	 %r2,0(%r1)	 */
+#define LD_R2_0R12	0xe84c0000	/* ld	 %r2,0(%r12)	 */
+#define ADD_R2_R2_R12	0x7c426214	/* add	 %r2,%r2,%r12	 */
 
-#define LIS_R2		0x3c400000	/* lis %r2,xxx@ha         */
+#define LIS_R2		0x3c400000	/* lis %r2,xxx@ha	  */
 #define ADDIS_R2_R12	0x3c4c0000	/* addis %r2,%r12,xxx@ha  */
 #define ADDIS_R12_R2	0x3d820000	/* addis %r12,%r2,xxx@ha  */
 #define ADDIS_R12_R12	0x3d8c0000	/* addis %r12,%r12,xxx@ha */
-#define LD_R12_0R12	0xe98c0000	/* ld    %r12,xxx@l(%r12) */
+#define LD_R12_0R12	0xe98c0000	/* ld	 %r12,xxx@l(%r12) */
 
 /* glink call stub instructions.  We enter with the index in R0.  */
 #define GLINK_CALL_STUB_SIZE (16*4)
@@ -3025,13 +3025,13 @@ ppc64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
 
 static const struct bfd_elf_special_section ppc64_elf_special_sections[]=
 {
-  { STRING_COMMA_LEN (".plt"),    0, SHT_NOBITS,   0 },
-  { STRING_COMMA_LEN (".sbss"),  -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".plt"),	  0, SHT_NOBITS,   0 },
+  { STRING_COMMA_LEN (".sbss"),	 -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
   { STRING_COMMA_LEN (".sdata"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".toc"),    0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".toc1"),   0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".toc"),	  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".toc1"),	  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { STRING_COMMA_LEN (".tocbss"), 0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { NULL,                     0,  0, 0,            0 }
+  { NULL,		      0,  0, 0,		   0 }
 };
 
 enum _ppc64_sec_type {
@@ -7233,7 +7233,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       /* If -z nocopyreloc was given, don't generate them either.  */
       || info->nocopyreloc
 
-      /* If we didn't find any dynamic relocs in read-only sections, then
+      /* If we don't find any dynamic relocs in read-only sections, then
 	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
       || (ELIMINATE_COPY_RELOCS && !alias_readonly_dynrelocs (h))
 
@@ -14994,7 +14994,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
       /* Multi-instruction sequences that access the TOC can be
 	 optimized, eg. addis ra,r2,0; addi rb,ra,x;
-	 to             nop;           addi rb,r2,x;  */
+	 to		nop;	       addi rb,r2,x;  */
       howto = ppc64_elf_howto_table[(int) r_type];
       switch (r_type)
 	{

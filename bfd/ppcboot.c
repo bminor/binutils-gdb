@@ -354,8 +354,8 @@ ppcboot_set_section_contents (bfd *abfd,
       asection *s;
 
       /* The lowest section VMA sets the virtual address of the start
-         of the file.  We use the set the file position of all the
-         sections.  */
+	 of the file.  We use the set the file position of all the
+	 sections.  */
       low = abfd->sections->vma;
       for (s = abfd->sections->next; s != NULL; s = s->next)
 	if (s->vma < low)

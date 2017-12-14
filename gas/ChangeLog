@@ -1,3 +1,35 @@
+2017-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-m32c.c: Update address of FSF in copyright notice.
+	* config/tc-m32c.h: Likewise.
+	* config/tc-mt.c: Likewise.
+	* config/tc-mt.h: Likewise.
+	* config/tc-visium.c: Likewise.
+	* config/tc-visium.h: Likewise.
+	* testsuite/gas/rx/explode: Likewise.
+
+2017-12-13  Jim Wilson  <jimw@sifive.com>
+
+	PR 22599
+	* testsuite/gas/riscv/fsxxi.d, testsuite/gas/riscv/fsxxi.s: New.
+
+2017-12-13  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* testsuite/gas/pru/extern.s: New test for print of U16_PMEMM
+	relocation.
+	* testsuite/gas/pru/extern.d: New test driver.
+
+2017-12-12  Alan Modra  <amodra@gmail.com>
+
+	PR 21118
+	* config/tc-ppc.c (md_assemble): Don't mask register number.
+
+2017-12-07  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xg_order_trampoline_chain): Replace
+	xg_order_trampoline_chain_entry call with check for
+	canonicalized symbol equality and offset equality.
+
 2017-12-04  Alan Modra  <amodra@gmail.com>
 
 	PR 22544

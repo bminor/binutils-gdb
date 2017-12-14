@@ -428,7 +428,7 @@ elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
       int pr_version = bfd_get_32 (abfd, note->descdata);
 
       if (pr_version != 1)
- 	return FALSE;
+	return FALSE;
 
       /* pr_cursig */
       elf_tdata (abfd)->core->signal = bfd_get_32 (abfd, note->descdata + 20);
@@ -607,9 +607,9 @@ static const bfd_byte elf_i386_pic_non_lazy_plt_entry[NON_LAZY_PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_i386_lazy_ibt_plt0_entry[LAZY_PLT_ENTRY_SIZE] =
 {
-  0xff, 0x35, 0, 0, 0, 0,	/* pushl GOT[1]       */
-  0xff, 0x25, 0, 0, 0, 0,	/* jmp *GOT[2]        */
-  0x0f, 0x1f, 0x40, 0x00	/* nopl 0(%rax)       */
+  0xff, 0x35, 0, 0, 0, 0,	/* pushl GOT[1]	      */
+  0xff, 0x25, 0, 0, 0, 0,	/* jmp *GOT[2]	      */
+  0x0f, 0x1f, 0x40, 0x00	/* nopl 0(%rax)	      */
 };
 
 /* Subsequent entries for an absolute IBT-enabled lazy procedure linkage
@@ -618,10 +618,10 @@ static const bfd_byte elf_i386_lazy_ibt_plt0_entry[LAZY_PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_i386_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 {
-  0xf3, 0x0f, 0x1e, 0xfb,       /* endbr32                    */
-  0x68, 0, 0, 0, 0,             /* pushl immediate            */
-  0xe9, 0, 0, 0, 0,             /* jmp relative               */
-  0x66, 0x90	                /* xchg %ax,%ax               */
+  0xf3, 0x0f, 0x1e, 0xfb,	/* endbr32		      */
+  0x68, 0, 0, 0, 0,		/* pushl immediate	      */
+  0xe9, 0, 0, 0, 0,		/* jmp relative		      */
+  0x66, 0x90			/* xchg %ax,%ax		      */
 };
 
 /* The first entry in a PIC IBT-enabled lazy procedure linkage table
@@ -630,8 +630,8 @@ static const bfd_byte elf_i386_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 static const bfd_byte elf_i386_pic_lazy_ibt_plt0_entry[LAZY_PLT_ENTRY_SIZE] =
 {
   0xff, 0xb3, 4, 0, 0, 0,	/* pushl 4(%ebx)      */
-  0xff, 0xa3, 8, 0, 0, 0,	/* jmp *8(%ebx)       */
-  0x0f, 0x1f, 0x40, 0x00	/* nopl 0(%rax)       */
+  0xff, 0xa3, 8, 0, 0, 0,	/* jmp *8(%ebx)	      */
+  0x0f, 0x1f, 0x40, 0x00	/* nopl 0(%rax)	      */
 };
 
 /* Entries for branches with IBT-enabled in the absolute non-lazey
@@ -640,7 +640,7 @@ static const bfd_byte elf_i386_pic_lazy_ibt_plt0_entry[LAZY_PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_i386_non_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 {
-  0xf3, 0x0f, 0x1e, 0xfb,            /* endbr32               */
+  0xf3, 0x0f, 0x1e, 0xfb,	     /* endbr32		      */
   0xff, 0x25, 0, 0, 0, 0,	     /* jmp *name@GOT	      */
   0x66, 0x0f, 0x1f, 0x44, 0x00, 0x00 /* nopw 0x0(%rax,%rax,1) */
 };
@@ -651,7 +651,7 @@ static const bfd_byte elf_i386_non_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_i386_pic_non_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 {
-  0xf3, 0x0f, 0x1e, 0xfb,            /* endbr32               */
+  0xf3, 0x0f, 0x1e, 0xfb,	     /* endbr32		      */
   0xff, 0xa3, 0, 0, 0, 0,	     /* jmp *name@GOT(%ebx)   */
   0x66, 0x0f, 0x1f, 0x44, 0x00, 0x00 /* nopw 0x0(%rax,%rax,1) */
 };
@@ -755,65 +755,65 @@ static const bfd_byte elf_i386_eh_frame_non_lazy_plt[] =
 /* These are the standard parameters.  */
 static const struct elf_x86_lazy_plt_layout elf_i386_lazy_plt =
   {
-    elf_i386_lazy_plt0_entry,           /* plt0_entry */
-    sizeof (elf_i386_lazy_plt0_entry),  /* plt0_entry_size */
-    elf_i386_lazy_plt_entry,            /* plt_entry */
-    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
-    2,                                  /* plt0_got1_offset */
-    8,                                  /* plt0_got2_offset */
-    0,                                  /* plt0_got2_insn_end */
-    2,                                  /* plt_got_offset */
-    7,                                  /* plt_reloc_offset */
-    12,                                 /* plt_plt_offset */
-    0,                                  /* plt_got_insn_size */
-    0,                                  /* plt_plt_insn_end */
-    6,                                  /* plt_lazy_offset */
-    elf_i386_pic_lazy_plt0_entry,       /* pic_plt0_entry */
-    elf_i386_pic_lazy_plt_entry,        /* pic_plt_entry */
-    elf_i386_eh_frame_lazy_plt,         /* eh_frame_plt */
+    elf_i386_lazy_plt0_entry,		/* plt0_entry */
+    sizeof (elf_i386_lazy_plt0_entry),	/* plt0_entry_size */
+    elf_i386_lazy_plt_entry,		/* plt_entry */
+    LAZY_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    2,					/* plt0_got1_offset */
+    8,					/* plt0_got2_offset */
+    0,					/* plt0_got2_insn_end */
+    2,					/* plt_got_offset */
+    7,					/* plt_reloc_offset */
+    12,					/* plt_plt_offset */
+    0,					/* plt_got_insn_size */
+    0,					/* plt_plt_insn_end */
+    6,					/* plt_lazy_offset */
+    elf_i386_pic_lazy_plt0_entry,	/* pic_plt0_entry */
+    elf_i386_pic_lazy_plt_entry,	/* pic_plt_entry */
+    elf_i386_eh_frame_lazy_plt,		/* eh_frame_plt */
     sizeof (elf_i386_eh_frame_lazy_plt) /* eh_frame_plt_size */
   };
 
 static const struct elf_x86_non_lazy_plt_layout elf_i386_non_lazy_plt =
   {
-    elf_i386_non_lazy_plt_entry,        /* plt_entry */
-    elf_i386_pic_non_lazy_plt_entry,    /* pic_plt_entry */
-    NON_LAZY_PLT_ENTRY_SIZE,            /* plt_entry_size */
-    2,                                  /* plt_got_offset */
-    0,                                  /* plt_got_insn_size */
-    elf_i386_eh_frame_non_lazy_plt,     /* eh_frame_plt */
+    elf_i386_non_lazy_plt_entry,	/* plt_entry */
+    elf_i386_pic_non_lazy_plt_entry,	/* pic_plt_entry */
+    NON_LAZY_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    2,					/* plt_got_offset */
+    0,					/* plt_got_insn_size */
+    elf_i386_eh_frame_non_lazy_plt,	/* eh_frame_plt */
     sizeof (elf_i386_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
   };
 
 static const struct elf_x86_lazy_plt_layout elf_i386_lazy_ibt_plt =
   {
-    elf_i386_lazy_ibt_plt0_entry,       /* plt0_entry */
+    elf_i386_lazy_ibt_plt0_entry,	/* plt0_entry */
     sizeof (elf_i386_lazy_ibt_plt0_entry), /* plt0_entry_size */
-    elf_i386_lazy_ibt_plt_entry,        /* plt_entry */
-    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
-    2,                                  /* plt0_got1_offset */
-    8,                                  /* plt0_got2_offset */
-    0,                                  /* plt0_got2_insn_end */
-    4+2,                                /* plt_got_offset */
-    4+1,                                /* plt_reloc_offset */
-    4+6,                                /* plt_plt_offset */
-    0,                                  /* plt_got_insn_size */
-    0,                                  /* plt_plt_insn_end */
-    0,                                  /* plt_lazy_offset */
-    elf_i386_pic_lazy_ibt_plt0_entry,   /* pic_plt0_entry */
-    elf_i386_lazy_ibt_plt_entry,        /* pic_plt_entry */
-    elf_i386_eh_frame_lazy_ibt_plt,     /* eh_frame_plt */
+    elf_i386_lazy_ibt_plt_entry,	/* plt_entry */
+    LAZY_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    2,					/* plt0_got1_offset */
+    8,					/* plt0_got2_offset */
+    0,					/* plt0_got2_insn_end */
+    4+2,				/* plt_got_offset */
+    4+1,				/* plt_reloc_offset */
+    4+6,				/* plt_plt_offset */
+    0,					/* plt_got_insn_size */
+    0,					/* plt_plt_insn_end */
+    0,					/* plt_lazy_offset */
+    elf_i386_pic_lazy_ibt_plt0_entry,	/* pic_plt0_entry */
+    elf_i386_lazy_ibt_plt_entry,	/* pic_plt_entry */
+    elf_i386_eh_frame_lazy_ibt_plt,	/* eh_frame_plt */
     sizeof (elf_i386_eh_frame_lazy_ibt_plt) /* eh_frame_plt_size */
   };
 
 static const struct elf_x86_non_lazy_plt_layout elf_i386_non_lazy_ibt_plt =
   {
-    elf_i386_non_lazy_ibt_plt_entry,    /* plt_entry */
+    elf_i386_non_lazy_ibt_plt_entry,	/* plt_entry */
     elf_i386_pic_non_lazy_ibt_plt_entry,/* pic_plt_entry */
-    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
-    4+2,                                /* plt_got_offset */
-    0,                                  /* plt_got_insn_size */
-    elf_i386_eh_frame_non_lazy_plt,     /* eh_frame_plt */
+    LAZY_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    4+2,				/* plt_got_offset */
+    0,					/* plt_got_insn_size */
+    elf_i386_eh_frame_non_lazy_plt,	/* eh_frame_plt */
     sizeof (elf_i386_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
   };
 
@@ -827,7 +827,7 @@ static const struct elf_x86_non_lazy_plt_layout elf_i386_non_lazy_ibt_plt =
 /* These are the standard parameters.  */
 static const struct elf_x86_backend_data elf_i386_arch_bed =
   {
-    is_normal                           /* os */
+    is_normal				/* os */
   };
 
 #define	elf_backend_arch_data	&elf_i386_arch_bed
@@ -1665,7 +1665,7 @@ elf_i386_check_relocs (bfd *abfd,
 		    size *= (sizeof (bfd_signed_vma)
 			     + sizeof (bfd_vma) + sizeof(char));
 		    local_got_refcounts = (bfd_signed_vma *)
-                        bfd_zalloc (abfd, size);
+			bfd_zalloc (abfd, size);
 		    if (local_got_refcounts == NULL)
 		      goto error_return;
 		    elf_local_got_refcounts (abfd) = local_got_refcounts;
@@ -1850,7 +1850,7 @@ do_size:
 		{
 		  bfd_size_type amt = sizeof *p;
 		  p = (struct elf_dyn_relocs *) bfd_alloc (htab->elf.dynobj,
-                                                           amt);
+							   amt);
 		  if (p == NULL)
 		    goto error_return;
 		  p->next = *head;
@@ -2006,7 +2006,7 @@ elf_i386_relocate_section (bfd *output_bfd,
   /* We have to handle relocations in vxworks .tls_vars sections
      specially, because the dynamic loader is 'weird'.  */
   is_vxworks_tls = (htab->target_os == is_vxworks
-                    && bfd_link_pic (info)
+		    && bfd_link_pic (info)
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
 
@@ -3113,7 +3113,7 @@ disallow_got32:
 		{
 		  if (indx == 0)
 		    {
-	    	      BFD_ASSERT (! unresolved_reloc);
+		      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_32 (output_bfd,
 				  relocation - _bfd_x86_elf_dtpoff_base (info),
 				  htab->elf.sgot->contents + off + 4);
@@ -3616,7 +3616,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		       + gotplt->output_offset
 		       + got_offset),
 		      resolved_plt->contents + plt_offset
-                      + htab->plt.plt_got_offset);
+		      + htab->plt.plt_got_offset);
 
 	  if (htab->target_os == is_vxworks)
 	    {
@@ -3627,7 +3627,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 
 	      /* S: Current slot number (zero-based).  */
 	      s = ((h->plt.offset - htab->plt.plt_entry_size)
-                   / htab->plt.plt_entry_size);
+		   / htab->plt.plt_entry_size);
 	      /* K: Number of relocations for PLTResolve. */
 	      if (bfd_link_pic (info))
 		k = PLTRESOLVE_RELOCS_SHLIB;
@@ -3659,7 +3659,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	{
 	  bfd_put_32 (output_bfd, got_offset,
 		      resolved_plt->contents + plt_offset
-                      + htab->plt.plt_got_offset);
+		      + htab->plt.plt_got_offset);
 	}
 
       /* Fill in the entry in the global offset table.  Leave the entry
@@ -3957,7 +3957,7 @@ elf_i386_reloc_type_class (const struct bfd_link_info *info,
       && htab->dynsym->contents != NULL)
     {
       /* Check relocation against STT_GNU_IFUNC symbol if there are
-         dynamic symbols.  */
+	 dynamic symbols.  */
       unsigned long r_symndx = ELF32_R_SYM (rela->r_info);
       if (r_symndx != STN_UNDEF)
 	{
@@ -4479,7 +4479,7 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 #define elf_backend_strtab_flags	SHF_STRINGS
 
 /* Called to set the sh_flags, sh_link and sh_info fields of OSECTION which
-   has a type >= SHT_LOOS.  Returns TRUE if these fields were initialised 
+   has a type >= SHT_LOOS.  Returns TRUE if these fields were initialised
    FALSE otherwise.  ISECTION is the best guess matching section from the
    input bfd IBFD, but it might be NULL.  */
 
@@ -4499,60 +4499,60 @@ elf32_i386_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED
 http://docs.oracle.com/cd/E53394_01/html/E54813/chapter6-94076.html#scrolltoc
 
      The following values should be set:
-     
-Type                 Link                           Info
+
+Type		     Link			    Info
 -----------------------------------------------------------------------------
 SHT_SUNW_ancillary   The section header index of    0
- [0x6fffffee]        the associated string table.
-	
+ [0x6fffffee]	     the associated string table.
+
 SHT_SUNW_capinfo     The section header index of    For a dynamic object, the
- [0x6ffffff0]        the associated symbol table.   section header index of
-                                                    the associated
+ [0x6ffffff0]	     the associated symbol table.   section header index of
+						    the associated
 						    SHT_SUNW_capchain table,
 						    otherwise 0.
 
 SHT_SUNW_symsort     The section header index of    0
- [0x6ffffff1]        the associated symbol table.
+ [0x6ffffff1]	     the associated symbol table.
 
 SHT_SUNW_tlssort     The section header index of    0
- [0x6ffffff2]        the associated symbol table.
-	
-SHT_SUNW_LDYNSYM     The section header index of    One greater than the 
- [0x6ffffff3]        the associated string table.   symbol table index of the
-		     This index is the same string  last local symbol, 
+ [0x6ffffff2]	     the associated symbol table.
+
+SHT_SUNW_LDYNSYM     The section header index of    One greater than the
+ [0x6ffffff3]	     the associated string table.   symbol table index of the
+		     This index is the same string  last local symbol,
 		     table used by the SHT_DYNSYM   STB_LOCAL. Since
-		     section.                       SHT_SUNW_LDYNSYM only
-		                                    contains local symbols,
+		     section.			    SHT_SUNW_LDYNSYM only
+						    contains local symbols,
 						    sh_info is equivalent to
 						    the number of symbols in
 						    the table.
 
-SHT_SUNW_cap         If symbol capabilities exist,  If any capabilities refer
- [0x6ffffff5]        the section header index of    to named strings, the
-                     the associated                 section header index of
-		     SHT_SUNW_capinfo table,        the associated string 
-			  otherwise 0.              table, otherwise 0.
+SHT_SUNW_cap	     If symbol capabilities exist,  If any capabilities refer
+ [0x6ffffff5]	     the section header index of    to named strings, the
+		     the associated		    section header index of
+		     SHT_SUNW_capinfo table,	    the associated string
+			  otherwise 0.		    table, otherwise 0.
 
-SHT_SUNW_move        The section header index of    0
- [0x6ffffffa]        the associated symbol table.
-	
-SHT_SUNW_COMDAT      0                              0
+SHT_SUNW_move	     The section header index of    0
+ [0x6ffffffa]	     the associated symbol table.
+
+SHT_SUNW_COMDAT	     0				    0
  [0x6ffffffb]
 
 SHT_SUNW_syminfo     The section header index of    The section header index
- [0x6ffffffc]        the associated symbol table.   of the associated
-		                                    .dynamic section.
+ [0x6ffffffc]	     the associated symbol table.   of the associated
+						    .dynamic section.
 
-SHT_SUNW_verdef      The section header index of    The number of version 
- [0x6ffffffd]        the associated string table.   definitions within the
-		                                    section.
+SHT_SUNW_verdef	     The section header index of    The number of version
+ [0x6ffffffd]	     the associated string table.   definitions within the
+						    section.
 
 SHT_SUNW_verneed     The section header index of    The number of version
- [0x6ffffffe]        the associated string table.   dependencies within the
-                                                    section.
+ [0x6ffffffe]	     the associated string table.   dependencies within the
+						    section.
 
-SHT_SUNW_versym      The section header index of    0
- [0x6fffffff]        the associated symbol table.  */
+SHT_SUNW_versym	     The section header index of    0
+ [0x6fffffff]	     the associated symbol table.  */
 }
 
 #undef  elf_backend_copy_special_section_fields
@@ -4591,7 +4591,7 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 #undef	elf_backend_static_tls_alignment
 
 #undef	elf_backend_want_plt_sym
-#define elf_backend_want_plt_sym	    0
+#define elf_backend_want_plt_sym	0
 
 #undef  elf_backend_strtab_flags
 #undef  elf_backend_copy_special_section_fields
@@ -4633,9 +4633,9 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 static const bfd_byte elf_i386_nacl_plt0_entry[] =
   {
     0xff, 0x35,			  /* pushl contents of address */
-    0, 0, 0, 0,			  /* replaced with address of .got + 4.	 */
-    0x8b, 0x0d,                   /* movl contents of address, %ecx */
-    0, 0, 0, 0,			  /* replaced with address of .got + 8.	 */
+    0, 0, 0, 0,			  /* replaced with address of .got + 4.  */
+    0x8b, 0x0d,			  /* movl contents of address, %ecx */
+    0, 0, 0, 0,			  /* replaced with address of .got + 8.  */
     0x83, 0xe1, NACLMASK,	  /* andl $NACLMASK, %ecx */
     0xff, 0xe1			  /* jmp *%ecx */
   };
@@ -4647,7 +4647,7 @@ static const bfd_byte elf_i386_nacl_plt_entry[NACL_PLT_ENTRY_SIZE] =
     0x83, 0xe1, NACLMASK,		/* andl $NACLMASK, %ecx */
     0xff, 0xe1,				/* jmp *%ecx */
 
-    /* Pad to the next 32-byte boundary with nop instructions.	*/
+    /* Pad to the next 32-byte boundary with nop instructions.  */
     0x90,
     0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
     0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
@@ -4656,9 +4656,9 @@ static const bfd_byte elf_i386_nacl_plt_entry[NACL_PLT_ENTRY_SIZE] =
     0x68,			       /* pushl immediate */
     0, 0, 0, 0,			       /* replaced with reloc offset.  */
     0xe9,			       /* jmp relative */
-    0, 0, 0, 0,			       /* replaced with offset to .plt.	 */
+    0, 0, 0, 0,			       /* replaced with offset to .plt.  */
 
-    /* Pad to the next 32-byte boundary with nop instructions.	*/
+    /* Pad to the next 32-byte boundary with nop instructions.  */
     0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
     0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
     0x90, 0x90
@@ -4679,23 +4679,23 @@ elf_i386_nacl_pic_plt0_entry[sizeof (elf_i386_nacl_plt0_entry)] =
 
 static const bfd_byte elf_i386_nacl_pic_plt_entry[NACL_PLT_ENTRY_SIZE] =
   {
-    0x8b, 0x8b,          /* movl offset(%ebx), %ecx */
-    0, 0, 0, 0,          /* replaced with offset of this symbol in .got.  */
-    0x83, 0xe1, 0xe0,    /* andl $NACLMASK, %ecx */
-    0xff, 0xe1,          /* jmp *%ecx */
+    0x8b, 0x8b,		 /* movl offset(%ebx), %ecx */
+    0, 0, 0, 0,		 /* replaced with offset of this symbol in .got.  */
+    0x83, 0xe1, 0xe0,	 /* andl $NACLMASK, %ecx */
+    0xff, 0xe1,		 /* jmp *%ecx */
 
-    /* Pad to the next 32-byte boundary with nop instructions.	*/
+    /* Pad to the next 32-byte boundary with nop instructions.  */
     0x90,
     0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
     0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
 
     /* Lazy GOT entries point here (32-byte aligned).  */
-    0x68,                /* pushl immediate */
-    0, 0, 0, 0,          /* replaced with offset into relocation table.  */
-    0xe9,                /* jmp relative */
-    0, 0, 0, 0,          /* replaced with offset to start of .plt.  */
+    0x68,		 /* pushl immediate */
+    0, 0, 0, 0,		 /* replaced with offset into relocation table.  */
+    0xe9,		 /* jmp relative */
+    0, 0, 0, 0,		 /* replaced with offset to start of .plt.  */
 
-    /* Pad to the next 32-byte boundary with nop instructions.	*/
+    /* Pad to the next 32-byte boundary with nop instructions.  */
     0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
     0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
     0x90, 0x90
@@ -4703,38 +4703,38 @@ static const bfd_byte elf_i386_nacl_pic_plt_entry[NACL_PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_i386_nacl_eh_frame_plt[] =
   {
-#if (PLT_CIE_LENGTH != 20                               \
-     || PLT_FDE_LENGTH != 36                            \
-     || PLT_FDE_START_OFFSET != 4 + PLT_CIE_LENGTH + 8  \
+#if (PLT_CIE_LENGTH != 20				\
+     || PLT_FDE_LENGTH != 36				\
+     || PLT_FDE_START_OFFSET != 4 + PLT_CIE_LENGTH + 8	\
      || PLT_FDE_LEN_OFFSET != 4 + PLT_CIE_LENGTH + 12)
 # error "Need elf_x86_backend_data parameters for eh_frame_plt offsets!"
 #endif
     PLT_CIE_LENGTH, 0, 0, 0,		/* CIE length */
-    0, 0, 0, 0,                         /* CIE ID */
-    1,                                  /* CIE version */
-    'z', 'R', 0,                        /* Augmentation string */
-    1,                                  /* Code alignment factor */
-    0x7c,                               /* Data alignment factor: -4 */
-    8,                                  /* Return address column */
+    0, 0, 0, 0,				/* CIE ID */
+    1,					/* CIE version */
+    'z', 'R', 0,			/* Augmentation string */
+    1,					/* Code alignment factor */
+    0x7c,				/* Data alignment factor: -4 */
+    8,					/* Return address column */
     1,					/* Augmentation size */
     DW_EH_PE_pcrel | DW_EH_PE_sdata4,	/* FDE encoding */
     DW_CFA_def_cfa, 4, 4,		/* DW_CFA_def_cfa: r4 (esp) ofs 4 */
     DW_CFA_offset + 8, 1,		/* DW_CFA_offset: r8 (eip) at cfa-4 */
     DW_CFA_nop, DW_CFA_nop,
 
-    PLT_FDE_LENGTH, 0, 0, 0,     /* FDE length */
+    PLT_FDE_LENGTH, 0, 0, 0,	 /* FDE length */
     PLT_CIE_LENGTH + 8, 0, 0, 0, /* CIE pointer */
-    0, 0, 0, 0,                  /* R_386_PC32 .plt goes here */
-    0, 0, 0, 0,                  /* .plt size goes here */
-    0,                           /* Augmentation size */
-    DW_CFA_def_cfa_offset, 8,    /* DW_CFA_def_cfa_offset: 8 */
-    DW_CFA_advance_loc + 6,      /* DW_CFA_advance_loc: 6 to __PLT__+6 */
-    DW_CFA_def_cfa_offset, 12,   /* DW_CFA_def_cfa_offset: 12 */
-    DW_CFA_advance_loc + 58,     /* DW_CFA_advance_loc: 58 to __PLT__+64 */
-    DW_CFA_def_cfa_expression,   /* DW_CFA_def_cfa_expression */
-    13,                          /* Block length */
-    DW_OP_breg4, 4,              /* DW_OP_breg4 (esp): 4 */
-    DW_OP_breg8, 0,              /* DW_OP_breg8 (eip): 0 */
+    0, 0, 0, 0,			 /* R_386_PC32 .plt goes here */
+    0, 0, 0, 0,			 /* .plt size goes here */
+    0,				 /* Augmentation size */
+    DW_CFA_def_cfa_offset, 8,	 /* DW_CFA_def_cfa_offset: 8 */
+    DW_CFA_advance_loc + 6,	 /* DW_CFA_advance_loc: 6 to __PLT__+6 */
+    DW_CFA_def_cfa_offset, 12,	 /* DW_CFA_def_cfa_offset: 12 */
+    DW_CFA_advance_loc + 58,	 /* DW_CFA_advance_loc: 58 to __PLT__+64 */
+    DW_CFA_def_cfa_expression,	 /* DW_CFA_def_cfa_expression */
+    13,				 /* Block length */
+    DW_OP_breg4, 4,		 /* DW_OP_breg4 (esp): 4 */
+    DW_OP_breg8, 0,		 /* DW_OP_breg8 (eip): 0 */
     DW_OP_const1u, 63, DW_OP_and, DW_OP_const1u, 37, DW_OP_ge,
     DW_OP_lit2, DW_OP_shl, DW_OP_plus,
     DW_CFA_nop, DW_CFA_nop
@@ -4763,7 +4763,7 @@ static const struct elf_x86_lazy_plt_layout elf_i386_nacl_plt =
 
 static const struct elf_x86_backend_data elf_i386_nacl_arch_bed =
   {
-    is_nacl                             /* os */
+    is_nacl				/* os */
   };
 
 static bfd_boolean
@@ -4808,7 +4808,7 @@ elf32_i386_nacl_elf_object_p (bfd *abfd)
 
 static const struct elf_x86_backend_data elf_i386_vxworks_arch_bed =
   {
-    is_vxworks                          /* os */
+    is_vxworks				/* os */
   };
 
 #undef	elf_backend_arch_data

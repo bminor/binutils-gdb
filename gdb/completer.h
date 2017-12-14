@@ -319,7 +319,8 @@ public:
      it is not there already.  If too many completions were already
      found, this throws an error.  */
   void add_completion (gdb::unique_xmalloc_ptr<char> name,
-		       completion_match_for_lcd *match_for_lcd = NULL);
+		       completion_match_for_lcd *match_for_lcd = NULL,
+		       const char *text = NULL, const char *word = NULL);
 
   /* Add all completions matches in LIST.  Elements are moved out of
      LIST.  */
@@ -406,7 +407,8 @@ private:
      it is not there already.  If false is returned, too many
      completions were found.  */
   bool maybe_add_completion (gdb::unique_xmalloc_ptr<char> name,
-			     completion_match_for_lcd *match_for_lcd);
+			     completion_match_for_lcd *match_for_lcd,
+			     const char *text, const char *word);
 
   /* Given a new match, recompute the lowest common denominator (LCD)
      to hand over to readline.  Normally readline computes this itself
@@ -418,7 +420,8 @@ private:
      "std::vector<..>::push_back", "std::string::push_back", etc., and
      in this case we want the lowest common denominator to be
      "push_back" instead of "std::".  */
-  void recompute_lowest_common_denominator (const char *new_match);
+  void recompute_lowest_common_denominator
+    (gdb::unique_xmalloc_ptr<char> &&new_match);
 
   /* Completion match outputs returned by the symbol name matching
      routines (see symbol_name_matcher_ftype).  These results are only
@@ -481,6 +484,21 @@ private:
      completions.  */
   bool m_lowest_common_denominator_unique = false;
 };
+
+/* Return a string to hand off to readline as a completion match
+   candidate, potentially composed of parts of MATCH_NAME and of
+   TEXT/WORD.  For a description of TEXT/WORD see completer_ftype.  */
+
+extern gdb::unique_xmalloc_ptr<char>
+  make_completion_match_str (const char *match_name,
+			     const char *text, const char *word);
+
+/* Like above, but takes ownership of MATCH_NAME (i.e., can
+   reuse/return it).  */
+
+extern gdb::unique_xmalloc_ptr<char>
+  make_completion_match_str (gdb::unique_xmalloc_ptr<char> &&match_name,
+			     const char *text, const char *word);
 
 extern void gdb_display_match_list (char **matches, int len, int max,
 				    const struct match_list_displayer *);

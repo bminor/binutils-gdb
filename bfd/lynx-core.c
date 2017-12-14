@@ -162,11 +162,11 @@ lynx_core_file_p (bfd *abfd)
 			       pagesize + tcontext_size + pss.ssize
 #if defined (SPARC) || defined (__SPARC__)
 			       /* SPARC Lynx seems to start dumping
-                                  the .data section at a page
-                                  boundary.  It's OK to check a
-                                  #define like SPARC here because this
-                                  file can only be compiled on a Lynx
-                                  host.  */
+				  the .data section at a page
+				  boundary.  It's OK to check a
+				  #define like SPARC here because this
+				  file can only be compiled on a Lynx
+				  host.  */
 			       + pss.data_start % pagesize
 #endif
 			       );

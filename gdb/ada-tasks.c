@@ -783,18 +783,10 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
     = value_as_long (value_field (common_value,
 				  pspace_data->atcb_fieldno.base_cpu));
 
-  /* And finally, compute the task ptid.  Note that there are situations
-     where this cannot be determined:
-       - The task is no longer alive - the ptid is irrelevant;
-       - We are debugging a core file - the thread is not always
-         completely preserved for us to link back a task to its
-         underlying thread.  Since we do not support task switching
-         when debugging core files anyway, we don't need to compute
-         that task ptid.
-     In either case, we don't need that ptid, and it is just good enough
-     to set it to null_ptid.  */
-
-  if (target_has_execution && ada_task_is_alive (task_info))
+  /* And finally, compute the task ptid.  Note that there is not point
+     in computing it if the task is no longer alive, in which case
+     it is good enough to set its ptid to the null_ptid.  */
+  if (ada_task_is_alive (task_info))
     task_info->ptid = ptid_from_atcb_common (common_value);
   else
     task_info->ptid = null_ptid;
@@ -1366,23 +1358,7 @@ task_command (const char *taskno_str, int from_tty)
   if (taskno_str == NULL || taskno_str[0] == '\0')
     display_current_task_id ();
   else
-    {
-      /* Task switching in core files doesn't work, either because:
-           1. Thread support is not implemented with core files
-           2. Thread support is implemented, but the thread IDs created
-              after having read the core file are not the same as the ones
-              that were used during the program life, before the crash.
-              As a consequence, there is no longer a way for the debugger
-              to find the associated thead ID of any given Ada task.
-         So, instead of attempting a task switch without giving the user
-         any clue as to what might have happened, just error-out with
-         a message explaining that this feature is not supported.  */
-      if (!target_has_execution)
-        error (_("\
-Task switching not supported when debugging from core files\n\
-(use thread support instead)"));
-      task_command_1 (taskno_str, from_tty, current_inferior ());
-    }
+    task_command_1 (taskno_str, from_tty, current_inferior ());
 }
 
 /* Indicate that the given inferior's task list may have changed,

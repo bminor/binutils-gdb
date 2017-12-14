@@ -103,6 +103,8 @@ run_dump_test_lp64 "emit-relocs-257"
 run_dump_test_lp64 "emit-relocs-257-be"
 # 258 is tested in 257
 # 259 is tested in 257
+run_dump_test_lp64 "emit-relocs-258-dyn-bad"
+run_dump_test_lp64 "emit-relocs-259-dyn-bad"
 run_dump_test_lp64 "emit-relocs-260"
 run_dump_test_lp64 "emit-relocs-260-be"
 # 261 is tested by 260

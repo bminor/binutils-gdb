@@ -31,29 +31,29 @@ elf_m68k_discard_copies (struct elf_link_hash_entry *, void *);
 
 static reloc_howto_type howto_table[] =
 {
-  HOWTO(R_68K_NONE,       0, 3, 0, FALSE,0, complain_overflow_dont,     bfd_elf_generic_reloc, "R_68K_NONE",      FALSE, 0, 0x00000000,FALSE),
-  HOWTO(R_68K_32,         0, 2,32, FALSE,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_32",        FALSE, 0, 0xffffffff,FALSE),
-  HOWTO(R_68K_16,         0, 1,16, FALSE,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_16",        FALSE, 0, 0x0000ffff,FALSE),
-  HOWTO(R_68K_8,          0, 0, 8, FALSE,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_8",         FALSE, 0, 0x000000ff,FALSE),
-  HOWTO(R_68K_PC32,       0, 2,32, TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_PC32",      FALSE, 0, 0xffffffff,TRUE),
-  HOWTO(R_68K_PC16,       0, 1,16, TRUE, 0, complain_overflow_signed,   bfd_elf_generic_reloc, "R_68K_PC16",      FALSE, 0, 0x0000ffff,TRUE),
-  HOWTO(R_68K_PC8,        0, 0, 8, TRUE, 0, complain_overflow_signed,   bfd_elf_generic_reloc, "R_68K_PC8",       FALSE, 0, 0x000000ff,TRUE),
-  HOWTO(R_68K_GOT32,      0, 2,32, TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_GOT32",     FALSE, 0, 0xffffffff,TRUE),
-  HOWTO(R_68K_GOT16,      0, 1,16, TRUE, 0, complain_overflow_signed,   bfd_elf_generic_reloc, "R_68K_GOT16",     FALSE, 0, 0x0000ffff,TRUE),
-  HOWTO(R_68K_GOT8,       0, 0, 8, TRUE, 0, complain_overflow_signed,   bfd_elf_generic_reloc, "R_68K_GOT8",      FALSE, 0, 0x000000ff,TRUE),
-  HOWTO(R_68K_GOT32O,     0, 2,32, FALSE,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_GOT32O",    FALSE, 0, 0xffffffff,FALSE),
-  HOWTO(R_68K_GOT16O,     0, 1,16, FALSE,0, complain_overflow_signed,   bfd_elf_generic_reloc, "R_68K_GOT16O",    FALSE, 0, 0x0000ffff,FALSE),
-  HOWTO(R_68K_GOT8O,      0, 0, 8, FALSE,0, complain_overflow_signed,   bfd_elf_generic_reloc, "R_68K_GOT8O",     FALSE, 0, 0x000000ff,FALSE),
-  HOWTO(R_68K_PLT32,      0, 2,32, TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_PLT32",     FALSE, 0, 0xffffffff,TRUE),
-  HOWTO(R_68K_PLT16,      0, 1,16, TRUE, 0, complain_overflow_signed,   bfd_elf_generic_reloc, "R_68K_PLT16",     FALSE, 0, 0x0000ffff,TRUE),
-  HOWTO(R_68K_PLT8,       0, 0, 8, TRUE, 0, complain_overflow_signed,   bfd_elf_generic_reloc, "R_68K_PLT8",      FALSE, 0, 0x000000ff,TRUE),
-  HOWTO(R_68K_PLT32O,     0, 2,32, FALSE,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_PLT32O",    FALSE, 0, 0xffffffff,FALSE),
-  HOWTO(R_68K_PLT16O,     0, 1,16, FALSE,0, complain_overflow_signed,   bfd_elf_generic_reloc, "R_68K_PLT16O",    FALSE, 0, 0x0000ffff,FALSE),
-  HOWTO(R_68K_PLT8O,      0, 0, 8, FALSE,0, complain_overflow_signed,   bfd_elf_generic_reloc, "R_68K_PLT8O",     FALSE, 0, 0x000000ff,FALSE),
-  HOWTO(R_68K_COPY,       0, 0, 0, FALSE,0, complain_overflow_dont,     bfd_elf_generic_reloc, "R_68K_COPY",      FALSE, 0, 0xffffffff,FALSE),
-  HOWTO(R_68K_GLOB_DAT,   0, 2,32, FALSE,0, complain_overflow_dont,     bfd_elf_generic_reloc, "R_68K_GLOB_DAT",  FALSE, 0, 0xffffffff,FALSE),
-  HOWTO(R_68K_JMP_SLOT,   0, 2,32, FALSE,0, complain_overflow_dont,     bfd_elf_generic_reloc, "R_68K_JMP_SLOT",  FALSE, 0, 0xffffffff,FALSE),
-  HOWTO(R_68K_RELATIVE,   0, 2,32, FALSE,0, complain_overflow_dont,     bfd_elf_generic_reloc, "R_68K_RELATIVE",  FALSE, 0, 0xffffffff,FALSE),
+  HOWTO(R_68K_NONE,	  0, 3, 0, FALSE,0, complain_overflow_dont,	bfd_elf_generic_reloc, "R_68K_NONE",	  FALSE, 0, 0x00000000,FALSE),
+  HOWTO(R_68K_32,	  0, 2,32, FALSE,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_32",	  FALSE, 0, 0xffffffff,FALSE),
+  HOWTO(R_68K_16,	  0, 1,16, FALSE,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_16",	  FALSE, 0, 0x0000ffff,FALSE),
+  HOWTO(R_68K_8,	  0, 0, 8, FALSE,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_8",	  FALSE, 0, 0x000000ff,FALSE),
+  HOWTO(R_68K_PC32,	  0, 2,32, TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_PC32",	  FALSE, 0, 0xffffffff,TRUE),
+  HOWTO(R_68K_PC16,	  0, 1,16, TRUE, 0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_PC16",	  FALSE, 0, 0x0000ffff,TRUE),
+  HOWTO(R_68K_PC8,	  0, 0, 8, TRUE, 0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_PC8",	  FALSE, 0, 0x000000ff,TRUE),
+  HOWTO(R_68K_GOT32,	  0, 2,32, TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_GOT32",	  FALSE, 0, 0xffffffff,TRUE),
+  HOWTO(R_68K_GOT16,	  0, 1,16, TRUE, 0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_GOT16",	  FALSE, 0, 0x0000ffff,TRUE),
+  HOWTO(R_68K_GOT8,	  0, 0, 8, TRUE, 0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_GOT8",	  FALSE, 0, 0x000000ff,TRUE),
+  HOWTO(R_68K_GOT32O,	  0, 2,32, FALSE,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_GOT32O",	  FALSE, 0, 0xffffffff,FALSE),
+  HOWTO(R_68K_GOT16O,	  0, 1,16, FALSE,0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_GOT16O",	  FALSE, 0, 0x0000ffff,FALSE),
+  HOWTO(R_68K_GOT8O,	  0, 0, 8, FALSE,0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_GOT8O",	  FALSE, 0, 0x000000ff,FALSE),
+  HOWTO(R_68K_PLT32,	  0, 2,32, TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_PLT32",	  FALSE, 0, 0xffffffff,TRUE),
+  HOWTO(R_68K_PLT16,	  0, 1,16, TRUE, 0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_PLT16",	  FALSE, 0, 0x0000ffff,TRUE),
+  HOWTO(R_68K_PLT8,	  0, 0, 8, TRUE, 0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_PLT8",	  FALSE, 0, 0x000000ff,TRUE),
+  HOWTO(R_68K_PLT32O,	  0, 2,32, FALSE,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_PLT32O",	  FALSE, 0, 0xffffffff,FALSE),
+  HOWTO(R_68K_PLT16O,	  0, 1,16, FALSE,0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_PLT16O",	  FALSE, 0, 0x0000ffff,FALSE),
+  HOWTO(R_68K_PLT8O,	  0, 0, 8, FALSE,0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_PLT8O",	  FALSE, 0, 0x000000ff,FALSE),
+  HOWTO(R_68K_COPY,	  0, 0, 0, FALSE,0, complain_overflow_dont,	bfd_elf_generic_reloc, "R_68K_COPY",	  FALSE, 0, 0xffffffff,FALSE),
+  HOWTO(R_68K_GLOB_DAT,	  0, 2,32, FALSE,0, complain_overflow_dont,	bfd_elf_generic_reloc, "R_68K_GLOB_DAT",  FALSE, 0, 0xffffffff,FALSE),
+  HOWTO(R_68K_JMP_SLOT,	  0, 2,32, FALSE,0, complain_overflow_dont,	bfd_elf_generic_reloc, "R_68K_JMP_SLOT",  FALSE, 0, 0xffffffff,FALSE),
+  HOWTO(R_68K_RELATIVE,	  0, 2,32, FALSE,0, complain_overflow_dont,	bfd_elf_generic_reloc, "R_68K_RELATIVE",  FALSE, 0, 0xffffffff,FALSE),
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_68K_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
@@ -519,13 +519,13 @@ static const struct elf_m68k_plt_info elf_m68k_plt_info =
 
 static const bfd_byte elf_isab_plt0_entry[ISAB_PLT_ENTRY_SIZE] =
 {
-  0x20, 0x3c,             /* move.l #offset,%d0 */
-  0, 0, 0, 0,             /* + (.got + 4) - . */
+  0x20, 0x3c,		  /* move.l #offset,%d0 */
+  0, 0, 0, 0,		  /* + (.got + 4) - . */
   0x2f, 0x3b, 0x08, 0xfa, /* move.l (-6,%pc,%d0:l),-(%sp) */
-  0x20, 0x3c,             /* move.l #offset,%d0 */
-  0, 0, 0, 0,             /* + (.got + 8) - . */
+  0x20, 0x3c,		  /* move.l #offset,%d0 */
+  0, 0, 0, 0,		  /* + (.got + 8) - . */
   0x20, 0x7b, 0x08, 0xfa, /* move.l (-6,%pc,%d0:l), %a0 */
-  0x4e, 0xd0,             /* jmp (%a0) */
+  0x4e, 0xd0,		  /* jmp (%a0) */
   0x4e, 0x71		  /* nop */
 };
 
@@ -533,14 +533,14 @@ static const bfd_byte elf_isab_plt0_entry[ISAB_PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_isab_plt_entry[ISAB_PLT_ENTRY_SIZE] =
 {
-  0x20, 0x3c,             /* move.l #offset,%d0 */
-  0, 0, 0, 0,             /* + (.got.plt entry) - . */
+  0x20, 0x3c,		  /* move.l #offset,%d0 */
+  0, 0, 0, 0,		  /* + (.got.plt entry) - . */
   0x20, 0x7b, 0x08, 0xfa, /* move.l (-6,%pc,%d0:l), %a0 */
-  0x4e, 0xd0,             /* jmp (%a0) */
-  0x2f, 0x3c,             /* move.l #offset,-(%sp) */
-  0, 0, 0, 0,             /* + reloc index */
-  0x60, 0xff,             /* bra.l .plt */
-  0, 0, 0, 0              /* + .plt - . */
+  0x4e, 0xd0,		  /* jmp (%a0) */
+  0x2f, 0x3c,		  /* move.l #offset,-(%sp) */
+  0, 0, 0, 0,		  /* + reloc index */
+  0x60, 0xff,		  /* bra.l .plt */
+  0, 0, 0, 0		  /* + .plt - . */
 };
 
 static const struct elf_m68k_plt_info elf_isab_plt_info =
@@ -575,7 +575,7 @@ static const bfd_byte elf_isac_plt_entry[ISAC_PLT_ENTRY_SIZE] =
   0x2f, 0x3c,		  /* move.l #offset,-(%sp) */
   0, 0, 0, 0,		  /* replaced with offset into relocation table */
   0x61, 0xff,		  /* bsr.l .plt */
-  0, 0, 0, 0 		  /* replaced with .plt - . */
+  0, 0, 0, 0		  /* replaced with .plt - . */
 };
 
 static const struct elf_m68k_plt_info elf_isac_plt_info =
@@ -590,23 +590,23 @@ static const struct elf_m68k_plt_info elf_isac_plt_info =
 static const bfd_byte elf_cpu32_plt0_entry[CPU32_PLT_ENTRY_SIZE] =
 {
   0x2f, 0x3b, 0x01, 0x70, /* move.l (%pc,addr),-(%sp) */
-  0, 0, 0, 2,             /* + (.got + 4) - . */
+  0, 0, 0, 2,		  /* + (.got + 4) - . */
   0x22, 0x7b, 0x01, 0x70, /* moveal %pc@(0xc), %a1 */
-  0, 0, 0, 2,             /* + (.got + 8) - . */
-  0x4e, 0xd1,             /* jmp %a1@ */
-  0, 0, 0, 0,             /* pad out to 24 bytes.  */
+  0, 0, 0, 2,		  /* + (.got + 8) - . */
+  0x4e, 0xd1,		  /* jmp %a1@ */
+  0, 0, 0, 0,		  /* pad out to 24 bytes.  */
   0, 0
 };
 
 static const bfd_byte elf_cpu32_plt_entry[CPU32_PLT_ENTRY_SIZE] =
 {
   0x22, 0x7b, 0x01, 0x70,  /* moveal %pc@(0xc), %a1 */
-  0, 0, 0, 2,              /* + (.got.plt entry) - . */
-  0x4e, 0xd1,              /* jmp %a1@ */
-  0x2f, 0x3c,              /* move.l #offset,-(%sp) */
-  0, 0, 0, 0,              /* + reloc index */
-  0x60, 0xff,              /* bra.l .plt */
-  0, 0, 0, 0,              /* + .plt - . */
+  0, 0, 0, 2,		   /* + (.got.plt entry) - . */
+  0x4e, 0xd1,		   /* jmp %a1@ */
+  0x2f, 0x3c,		   /* move.l #offset,-(%sp) */
+  0, 0, 0, 0,		   /* + reloc index */
+  0x60, 0xff,		   /* bra.l .plt */
+  0, 0, 0, 0,		   /* + .plt - . */
   0, 0
 };
 
@@ -2610,10 +2610,10 @@ elf_m68k_check_relocs (bfd *abfd,
 	case R_68K_PLT32:
 	  /* This symbol requires a procedure linkage table entry.  We
 	     actually build the entry in adjust_dynamic_symbol,
-             because this might be a case of linking PIC code which is
-             never referenced by a dynamic object, in which case we
-             don't need to generate a procedure linkage table entry
-             after all.  */
+	     because this might be a case of linking PIC code which is
+	     never referenced by a dynamic object, in which case we
+	     don't need to generate a procedure linkage table entry
+	     after all.  */
 
 	  /* If this is a local symbol, we resolve it directly without
 	     creating a procedure linkage table entry.  */
@@ -2899,7 +2899,7 @@ elf_m68k_adjust_dynamic_symbol (struct bfd_link_info *info,
       || h->needs_plt)
     {
       if ((h->plt.refcount <= 0
-           || SYMBOL_CALLS_LOCAL (info, h)
+	   || SYMBOL_CALLS_LOCAL (info, h)
 	   || ((ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 		|| UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	       && h->root.type == bfd_link_hash_undefweak))
@@ -3863,9 +3863,9 @@ elf_m68k_relocate_section (bfd *output_bfd,
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      /* This reloc will be computed at runtime, so there's no
-                 need to do anything now, except for R_68K_32
-                 relocations that have been turned into
-                 R_68K_RELATIVE.  */
+		 need to do anything now, except for R_68K_32
+		 relocations that have been turned into
+		 R_68K_RELATIVE.  */
 	      if (!relocate)
 		continue;
 	    }
@@ -4631,11 +4631,11 @@ elf_m68k_add_symbol_hook (bfd *abfd,
 #define elf_backend_gc_mark_hook	elf_m68k_gc_mark_hook
 #define elf_backend_copy_indirect_symbol elf_m68k_copy_indirect_symbol
 #define bfd_elf32_bfd_merge_private_bfd_data \
-                                        elf32_m68k_merge_private_bfd_data
+					elf32_m68k_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags \
-                                        elf32_m68k_set_private_flags
+					elf32_m68k_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data \
-                                        elf32_m68k_print_private_bfd_data
+					elf32_m68k_print_private_bfd_data
 #define elf_backend_reloc_type_class	elf32_m68k_reloc_type_class
 #define elf_backend_plt_sym_val		elf_m68k_plt_sym_val
 #define elf_backend_object_p		elf32_m68k_object_p

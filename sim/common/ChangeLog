@@ -1,3 +1,21 @@
+2017-12-12  Peter Gavin  <pgavin@gmail.com>
+	    Stafford Horne  <shorne@gmail.com>
+
+	* cgen-ops.h (MUL2OFSI): New function, 2's complement overflow
+	flag.
+	(MUL1OFSI): New function, 1's complement overflow flag.
+
+2017-12-12  Peter Gavin  <pgavin@gmail.com>
+	    Stafford Horne <shorne@gmail.com>
+
+	* cgen-accfp.c (remsf, remdf): New function.
+	(cgen_init_accurate_fpu): Add remsf and remdf.
+	* cgen-fpu.h (cgen_fp_ops): Add remsf, remdf, remxf and remtf.
+	* sim-fpu.c (sim_fpu_rem): New function.
+	* sim-fpu.h (sim_fpu_status_invalid_irx): New enum.
+	(sim_fpu_rem): New function.
+	(sim_fpu_print_status): Add case for sim_fpu_status_invalid_irx.
+
 2017-09-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* acinclude.m4 (SIM_AC_COMMON): Honor existing CC_FOR_BUILD in

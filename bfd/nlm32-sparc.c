@@ -163,9 +163,9 @@ nlm_sparc_write_reloc (bfd * abfd, asection * sec, arelent * rel)
 
   /* Netware wants a list of relocs for each address.
      Format is:
-    	long	offset
-    	long	addend
-    	char	type
+	long	offset
+	long	addend
+	char	type
      That should be it.  */
 
   /* The value we write out is the offset into the appropriate

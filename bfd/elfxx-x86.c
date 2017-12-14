@@ -119,7 +119,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       && h->got.refcount > 0)
     {
       /* Don't use the regular PLT if there are both GOT and GOTPLT
-         reloctions.  */
+	 reloctions.  */
       h->plt.offset = (bfd_vma) -1;
 
       /* Use the GOT PLT.  */
@@ -521,45 +521,58 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
-/* Find any dynamic relocs that apply to read-only sections.  */
+/* Find dynamic relocs for H that apply to read-only sections.  */
 
-bfd_boolean
-_bfd_x86_elf_readonly_dynrelocs (struct elf_link_hash_entry *h,
-				 void *inf)
+static asection *
+readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
-  struct elf_x86_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
+
+  for (p = elf_x86_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+    {
+      asection *s = p->sec->output_section;
+
+      if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	return p->sec;
+    }
+  return NULL;
+}
+
+/* Set DF_TEXTREL if we find any dynamic relocs that apply to
+   read-only sections.  */
+
+static bfd_boolean
+maybe_set_textrel (struct elf_link_hash_entry *h, void *inf)
+{
+  asection *sec;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
 
   /* Skip local IFUNC symbols. */
   if (h->forced_local && h->type == STT_GNU_IFUNC)
     return TRUE;
 
-  eh = (struct elf_x86_link_hash_entry *) h;
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  sec = readonly_dynrelocs (h);
+  if (sec != NULL)
     {
-      asection *s = p->sec->output_section;
+      struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	{
-	  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+      info->flags |= DF_TEXTREL;
+      /* xgettext:c-format */
+      info->callbacks->minfo (_("%B: dynamic relocation against `%T' "
+				"in read-only section `%A'\n"),
+			      sec->owner, h->root.root.string, sec);
 
-	  info->flags |= DF_TEXTREL;
+      if ((info->warn_shared_textrel && bfd_link_pic (info))
+	  || info->error_textrel)
+	/* xgettext:c-format */
+	info->callbacks->einfo (_("%P: %B: warning: relocation against `%s' "
+				  "in read-only section `%A'\n"),
+				sec->owner, h->root.root.string, sec);
 
-	  if ((info->warn_shared_textrel && bfd_link_pic (info))
-	      || info->error_textrel)
-	    /* xgettext:c-format */
-	    info->callbacks->einfo (_("%P: %B: warning: relocation against `%s' in readonly section `%A'\n"),
-				    p->sec->owner, h->root.root.string,
-				    p->sec);
-	  else
-	    /* xgettext:c-format */
-	    info->callbacks->minfo
-	      (_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
-	       p->sec->owner, h->root.root.string, p->sec);
-
-	  /* Not an error, just cut short the traversal.  */
-	  return FALSE;
-	}
+      /* Not an error, just cut short the traversal.  */
+      return FALSE;
     }
   return TRUE;
 }
@@ -937,8 +950,10 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 		      if ((info->warn_shared_textrel && bfd_link_pic (info))
 			  || info->error_textrel)
 			/* xgettext:c-format */
-			info->callbacks->einfo (_("%P: %B: warning: relocation in readonly section `%A'\n"),
-						p->sec->owner, p->sec);
+			info->callbacks->einfo
+			  (_("%P: %B: warning: relocation "
+			     "in read-only section `%A'\n"),
+			   p->sec->owner, p->sec);
 		    }
 		}
 	    }
@@ -1002,7 +1017,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
   if (htab->tls_ld_or_ldm_got.refcount > 0)
     {
       /* Allocate 2 got entries and 1 dynamic reloc for R_386_TLS_LDM
-         or R_X86_64_TLSLD relocs.  */
+	 or R_X86_64_TLSLD relocs.  */
       htab->tls_ld_or_ldm_got.offset = htab->elf.sgot->size;
       htab->elf.sgot->size += 2 * htab->got_entry_size;
       htab->elf.srelgot->size += htab->sizeof_reloc;
@@ -1262,16 +1277,15 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
 	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->elf,
-				    _bfd_x86_elf_readonly_dynrelocs,
-				    info);
+	    elf_link_hash_traverse (&htab->elf, maybe_set_textrel, info);
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
 	      if (htab->readonly_dynrelocs_against_ifunc)
 		{
 		  info->callbacks->einfo
-		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
+		    (_("%P%X: read-only segment has dynamic IFUNC relocations;"
+		       " recompile with -fPIC\n"));
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -1331,7 +1345,7 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 		      : sdyn->output_section->vma + sdyn->output_offset);
 
       /* Set the first entry in the global offset table to the address
-         of the dynamic section.  Write GOT[1] and GOT[2], needed for
+	 of the dynamic section.  Write GOT[1] and GOT[2], needed for
 	 the dynamic linker.  */
       if (htab->got_entry_size == 8)
 	{
@@ -1824,17 +1838,10 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  || (!eh->gotoff_ref
 	      && htab->target_os != is_vxworks)))
     {
-      for (p = eh->dyn_relocs; p != NULL; p = p->next)
-	{
-	  s = p->sec->output_section;
-	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	    break;
-	}
-
-      /* If we didn't find any dynamic relocs in read-only sections,
+      /* If we don't find any dynamic relocs in read-only sections,
 	 then we'll be keeping the dynamic relocs and avoiding the copy
 	 reloc.  */
-      if (p == NULL)
+      if (!readonly_dynrelocs (h))
 	{
 	  h->non_got_ref = 0;
 	  return TRUE;

@@ -107,10 +107,10 @@ enum
 extern void nds32_insertion_sort
   (void *, size_t, size_t, int (*) (const void *, const void *));
 
-extern int         nds32_elf_ex9_init (void);
-extern int         nds32_convert_32_to_16 (bfd *, uint32_t, uint16_t *, int *);
-extern int         nds32_convert_16_to_32 (bfd *, uint16_t, uint32_t *);
-extern void        bfd_elf32_nds32_set_target_option (struct bfd_link_info *,
+extern int	   nds32_elf_ex9_init (void);
+extern int	   nds32_convert_32_to_16 (bfd *, uint32_t, uint16_t *, int *);
+extern int	   nds32_convert_16_to_32 (bfd *, uint16_t, uint32_t *);
+extern void	   bfd_elf32_nds32_set_target_option (struct bfd_link_info *,
 						      int, int, FILE *, int,
 						      int, int, int, FILE *,
 						      FILE *, int, int,

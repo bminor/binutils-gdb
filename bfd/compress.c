@@ -54,7 +54,7 @@ decompress_contents (bfd_byte *compressed_buffer,
       if (rc != Z_OK)
 	break;
       strm.next_out = ((Bytef*) uncompressed_buffer
-                       + (uncompressed_size - strm.avail_out));
+		       + (uncompressed_size - strm.avail_out));
       rc = inflate (&strm, Z_FINISH);
       if (rc != Z_STREAM_END)
 	break;
@@ -397,7 +397,7 @@ bfd_is_section_compressed_with_header (bfd *abfd, sec_ptr sec,
   if (bfd_get_section_contents (abfd, sec, header, 0, header_size))
     {
       if (compression_header_size == 0)
-        /* In this case, it should be "ZLIB" followed by the uncompressed
+	/* In this case, it should be "ZLIB" followed by the uncompressed
 	   section size, 8 bytes in big-endian order.  */
 	compressed = CONST_STRNEQ ((char*) header , "ZLIB");
       else

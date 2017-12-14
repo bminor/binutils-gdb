@@ -676,8 +676,8 @@ linux_child_remove_exec_catchpoint (struct target_ops *self, int pid)
 
 static int
 linux_child_set_syscall_catchpoint (struct target_ops *self,
-				    int pid, int needed, int any_count,
-				    int table_size, int *table)
+				    int pid, bool needed, int any_count,
+				    gdb::array_view<const int> syscall_counts)
 {
   if (!linux_supports_tracesysgood ())
     return 1;
@@ -685,7 +685,7 @@ linux_child_set_syscall_catchpoint (struct target_ops *self,
   /* On GNU/Linux, we ignore the arguments.  It means that we only
      enable the syscall catchpoints, but do not disable them.
 
-     Also, we do not use the `table' information because we do not
+     Also, we do not use the `syscall_counts' information because we do not
      filter system calls here.  We let GDB do the logic for us.  */
   return 0;
 }

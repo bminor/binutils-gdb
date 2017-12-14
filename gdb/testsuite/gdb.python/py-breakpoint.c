@@ -17,6 +17,14 @@
 
 int result = 0;
 
+namespace foo_ns
+{
+  int multiply (int i)
+  {
+    return i * i;
+  }
+}
+
 int multiply (int i)
 {
   return i * i;
@@ -24,7 +32,7 @@ int multiply (int i)
 
 int add (int i)
 {
-  return i + i; 
+  return i + i;  /* Break at function add.  */
 }
 
 

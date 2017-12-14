@@ -803,7 +803,6 @@ psym_relocate (struct objfile *objfile,
 	       const struct section_offsets *new_offsets,
 	       const struct section_offsets *delta)
 {
-  struct partial_symbol **psym;
   struct partial_symtab *p;
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, p)

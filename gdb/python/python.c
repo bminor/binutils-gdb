@@ -1660,7 +1660,6 @@ static bool
 do_start_initialization ()
 {
 #ifdef IS_PY3K
-  int i;
   size_t progsize, count;
   wchar_t *progname_copy;
 #endif

@@ -20,6 +20,9 @@
 
 struct tdesc_feature;
 struct tdesc_type;
+struct tdesc_type_builtin;
+struct tdesc_type_vector;
+struct tdesc_type_with_fields;
 struct tdesc_reg;
 struct target_desc;
 
@@ -51,37 +54,37 @@ struct tdesc_type *tdesc_create_vector (struct tdesc_feature *feature,
 					int count);
 
 /* Return the created struct tdesc_type named NAME in FEATURE.  */
-struct tdesc_type *tdesc_create_struct (struct tdesc_feature *feature,
-					const char *name);
+tdesc_type_with_fields *tdesc_create_struct (struct tdesc_feature *feature,
+					     const char *name);
 
 /* Return the created union tdesc_type named NAME in FEATURE.  */
-struct tdesc_type *tdesc_create_union (struct tdesc_feature *feature,
-				       const char *name);
+tdesc_type_with_fields *tdesc_create_union (struct tdesc_feature *feature,
+					    const char *name);
 
 /* Return the created flags tdesc_type named NAME in FEATURE.  */
-struct tdesc_type *tdesc_create_flags (struct tdesc_feature *feature,
-				       const char *name,
-				       int size);
+tdesc_type_with_fields *tdesc_create_flags (struct tdesc_feature *feature,
+					    const char *name,
+					    int size);
 
 /* Add a new field to TYPE.  FIELD_NAME is its name, and FIELD_TYPE is
    its type.  */
-void tdesc_add_field (struct tdesc_type *type, const char *field_name,
+void tdesc_add_field (tdesc_type_with_fields *type, const char *field_name,
 		      struct tdesc_type *field_type);
 
 /* Set the total length of TYPE.  Structs which contain bitfields may
    omit the reserved bits, so the end of the last field may not
    suffice.  */
-void tdesc_set_struct_size (struct tdesc_type *type, int size);
+void tdesc_set_struct_size (tdesc_type_with_fields *type, int size);
 
 /* Add a new untyped bitfield to TYPE.
    Untyped bitfields become either uint32 or uint64 depending on the size
    of the underlying type.  */
-void tdesc_add_bitfield (struct tdesc_type *type, const char *field_name,
+void tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
 			 int start, int end);
 
 /* A flag is just a typed(bool) single-bit bitfield.
    This function is kept to minimize changes in generated files.  */
-void tdesc_add_flag (struct tdesc_type *type, int start,
+void tdesc_add_flag (tdesc_type_with_fields *type, int start,
 		     const char *flag_name);
 
 /* Create a register in feature FEATURE.  */

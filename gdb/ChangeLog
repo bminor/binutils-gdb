@@ -1,3 +1,810 @@
+2017-12-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dw2_debug_names_iterator::next): Support
+	DW_IDX_type_unit.
+	(debug_names::dwarf5_offset_size, unit_kind): New.
+	(debug_names::insert): Add parameter kind.
+	(debug_names::build): Support DW_IDX_type_unit.
+	(debug_names::recursively_write_psymbols): Update
+	(debug_names::write_psymbols caller.
+	(debug_names::write_one_signatured_type_data)
+	(debug_names::write_one_signatured_type): New.
+	(debug_names::index_key, debug_names::symbol_value)
+	(debug_names::write_psymbols): Add kind.
+	(debug_names::write_one_signatured_type): New.
+	(write_debug_names): Move dwarf5_offset_size to debug_names.
+	Use debug_names::write_one_signatured_type for type units.
+
+2017-12-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_equal): Add handling of typedef types
+	when comparing array objects.
+
+2017-12-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-tasks.c (read_atcb): Properly set task_info->ptid
+	when !target_has_execution as well.
+	(task_command): Remove error when !target_has_execution.
+
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* location.h (string_to_event_location): Add match_type
+	parameter.
+	* location.c (string_to_event_location): Likewise.
+	* python/py-breakpoint.c (bppy_init): Handle qualified
+	parameter.
+
+2017-12-13  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (completion_tracker::maybe_add_completion): New
+	'text' and 'word' parameters.  Use make_completion_match_str.
+	(completion_tracker::add_completion): New 'text' and 'word'
+	parameters.  Pass down.
+	(completion_tracker::recompute_lowest_common_denominator): Change
+	parameter type to gdb::unique_xmalloc_ptr rval ref.  Adjust.
+	* completer.h (completion_tracker::add_completion): New 'text' and
+	'word' parameters.
+	(completion_tracker::recompute_lowest_common_denominator): Change
+	parameter type to gdb::unique_xmalloc_ptr rval ref.
+	(completion_tracker::recompute_lowest_common_denominator): Change
+	parameter type to gdb::unique_xmalloc_ptr rval ref.
+	* symtab.c (completion_list_add_name): Pass down 'text' and 'word'
+	as well.
+
+2017-12-13  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-decode.c (complete_on_cmdlist, complete_on_enum): Use
+	make_completion_match_str.
+	* completer.c: Use gdb::unique_xmalloc_ptr and
+	make_completion_match_str.
+	(make_completion_match_str_1): New.
+	(make_completion_match_str(const char *, const char *,
+	const char *)): New.
+	(make_completion_match_str(gdb::unique_xmalloc_ptr<char> &&,
+	const char *, const char *)): New.
+	* completer.h (make_completion_match_str(const char *,
+	const char *, const char *)): New.
+	(make_completion_match_str(gdb::unique_xmalloc_ptr<char> &&,
+	const char *, const char *)): New.
+	* interps.c (interpreter_completer): Use make_completion_match_str.
+	* symtab.c (completion_list_add_name, add_filename_to_list): Use
+	make_completion_match_str.
+
+2017-12-13  Stafford Horne  <shorne@gmail.com>
+
+	* or1k-tdep.c (or1k_analyse_inst): Use _() wrapper for message
+	strings.
+	(or1k_unwind_pc): Use paddress() instead of %p.
+	(or1k_unwind_sp): Likewise.
+	(or1k_frame_cache): Use host_address_to_string()/paddress()
+	instead of %p and use _() wrapper for message strings.
+
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* contrib/ari/gdb_ari.sh: Fix typo in help.
+
+2017-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* event-top.c (handle_line_of_input): Set server_command.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Stefan Wallentowitz  <stefan@wallentowitz.de>
+	    Stefan Kristiansson  <stefan.kristiansson@saunalahti.fi>
+	    Franck Jullien  <franck.jullien@gmail.com>
+	    Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
+	* configure.tgt: Add targets for or1k and or1knd.
+	* or1k-tdep.c: New file.
+	* or1k-tdep.h: New file.
+	* features/Makefile: Add or1k.xml to build.
+	* features/or1k.xml: New file.
+	* features/or1k-core.xml: New file.
+	* features/or1k.c: Generated.
+
+2017-12-12  Alan Modra  <amodra@gmail.com>
+
+	PR tdep/22576
+	* ppc64-tdep.c (ppc64_plt_entry_point): Rewrite to take TOC-relative
+	PLT offset, and retrieve r2 from stack when executing in reverse.
+	(ppc64_standard_linkage1_target): Drop pc param.  Calculate offset
+	rather than PLT address.
+	(ppc64_standard_linkage2_target): Likewise.
+	(ppc64_standard_linkage3_target): Likewise.
+	(ppc64_standard_linkage4_target): Likewise.
+	(ppc64_skip_trampoline_code_1): Adjust to suit.
+
+2017-12-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/22556
+	* remote.c (remote_thread_name): Return NULL if name is empty.
+	(remote_threads_extra_info): Return NULL if extra info is empty.
+
+2017-12-11  Pedro Alves  <palves@redhat.com>
+
+	* defs.h (elf_sym_fns_lazy_psyms, elf_sym_fns_gdb_index)
+	(elf_sym_fns_debug_names): Move to elfread.c.
+	* dwarf2read.c (dwarf2_initialize_objfile): Return a boolean
+	instead of a sym_fns and add 'index_kind' output parameter.  Fill
+	the latter in with the index variant kind if using an index.
+	(enum dw_index_kind): Moved to symfile.h.
+	* elfread.c (elf_sym_fns_gdb_index, elf_sym_fns_debug_names)
+	(elf_sym_fns_lazy_psyms): Move from defs.h.
+	(elf_symfile_read): Adjust to new dwarf2_initialize_objfile
+	interface.
+	* symfile.h (enum class dw_index_kind): New, moved from
+	dwarf2read.c.
+	(dwarf2_initialize_objfile): Change prototype.
+
+2017-12-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* target-float.c (mpfr_float_ops::from_target): Use mpfr_set_ui
+	instead of mpfr_set_si to convert mantissa bits.
+
+2017-12-11  Xavier Roirand <roirand@adacore.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_tag_value_at_base_address): Change the way
+	tagged type base address is computed.
+	(enum ada_primitive_types) <ada_primitive_type_storage_offset>:
+	New enumerate.
+	(ada_language_arch_info): Set the ada_primitive_type_storage_offset
+	element of lai->primitive_type_vector.
+
+2017-12-08  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (mock_mapped_index): Reimplement as an extension of
+	mapped_index_base.
+	(check_match): Adjust to use mock_index directly.
+	(check_find_bounds_finds)
+	(test_mapped_index_find_name_component_bounds): Adjust to work
+	with a mapped_index_base.
+
+2017-12-08  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (struct mapped_index_base): New, partially factored
+	out from ...
+	(struct mapped_index): ... this.  Inherit mapped_index_base.
+	(mapped_index::symbol_name_slot_invalid):
+	(mapped_index::symbol_name_at): Add override marker.
+	(mapped_index::symbol_name_count): New.
+	(struct mapped_debug_names): Inherit mapped_index_base.
+	(mapped_debug_names::symbol_name_at): New.
+	(mapped_debug_names::symbol_name_count): New.
+	(mapped_index::find_name_components_bounds): Rename to ...
+	(mapped_index_base::find_name_components_bounds): ... this.
+	(mapped_index::build_name_components): Rename to ...
+	(mapped_index_base::build_name_components): ... this.  Adjust to
+	use mapped_index_base::symbol_name_count and
+	mapped_index_base::symbol_name_slot_invalid.
+	(dw2_expand_symtabs_matching_symbol): Take a mapped_index_base
+	instead of a mapped_index.  Use
+	dw2_expand_symtabs_matching_symbol.
+
+2017-12-08  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (mapped_index::symbol_table_slot): New.
+	(mapped_index::address_table): Now a gdb::array_view of const
+	gdb_byte.
+	(mapped_index::symbol_table): Now a gdb::array_view of
+	symbol_table_slot.
+	(mapped_index::address_table_size)
+	(mapped_index::symbol_table_slots): Delete.
+	(create_addrmap_from_index): Adjust.
+	(find_slot_in_mapped_hash): Adjust.
+	(read_index_from_section): Adjust.
+	(dwarf2_read_index): Adjust.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* defs.h (elf_sym_fns_debug_names): New declaration.
+	* dwarf2read.c: Include "hash_enum.h".
+	(mapped_debug_names): New.
+	(struct dwarf2_per_objfile): Add debug_names, debug_aranges and
+	debug_names_table.
+	(dwarf2_elf_names): Add ".debug_names" and ".debug_aranges".
+	(struct dwz_file): Add debug_names.
+	(dwarf2_per_objfile::locate_sections): Handle debug_names and
+	debug_aranges.
+	(locate_dwz_sections): Handle debug_names.
+	(create_signatured_type_table_from_debug_names)
+	(create_addrmap_from_aranges): New.
+	(dwarf2_read_index): Update function comment.
+	(dwarf5_augmentation): Moved up.
+	(read_debug_names_from_section, create_cus_from_debug_names_list)
+	(create_cus_from_debug_names, dwarf2_read_debug_names): New.
+	(dwarf5_djb_hash): Moved up.
+	(dw2_debug_names_iterator): New.
+	(read_indirect_string_at_offset): New declaration.
+	(mapped_debug_names::namei_to_name)
+	(dw2_debug_names_iterator::find_vec_in_debug_names)
+	(dw2_debug_names_iterator::next, dw2_debug_names_lookup_symbol)
+	(dw2_debug_names_dump, dw2_debug_names_expand_symtabs_for_function)
+	(dw2_debug_names_expand_symtabs_matching, dwarf2_debug_names_functions):
+	New.
+	(dwarf2_initialize_objfile): Return also elf_sym_fns_debug_names.
+	(debug_names::djb_hash): Rename it to dwarf5_djb_hash.
+	(debug_names::build): Update djb_hash caller.
+	(write_debug_names): Move out and rename augmentation to
+	dwarf5_augmentation.
+	* elfread.c (elf_sym_fns_debug_names): New.
+	* psymtab.h (dwarf2_debug_names_functions): New declaration.
+	* symfile.h (struct dwarf2_debug_sections): Add debug_names and
+	debug_aranges.
+	* xcoffread.c (dwarf2_xcoff_names): Add debug_names and debug_aranges.
+
+2017-12-08  Pedro Alves  <palves@redhat.com>
+
+	* common/hash_enum.h: New file.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (create_cu_from_index_list): New from ...
+	(create_cus_from_index_list): ... this function, use it.
+	(dw_expand_symtabs_matching_file_matcher)
+	(dw2_expand_symtabs_matching_one): New from ...
+	(dw2_expand_symtabs_matching): ... this function, use them.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* defs.h (elf_sym_fns_lazy_psyms, elf_sym_fns_gdb_index): Move here
+	declarations from elfread.c.
+	(dwarf2_initialize_objfile): Change return value.
+	* elfread.c (elf_sym_fns_lazy_psyms, elf_sym_fns_gdb_index): Move these
+	declarations to defs.h.
+	(elf_symfile_read): Adjust dwarf2_initialize_objfile caller.
+	* symfile.h (dwarf2_initialize_objfile): Change return type.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* contrib/gdb-add-index.sh (index): Rename to ...
+	(index4): ... here.
+	(index5, debugstr, debugstrmerge, debugstrerr): New variables.
+	Support also .debug_names and .debug_str.
+	* dwarf2read.c: Include cmath, set, list.
+	(INDEX_SUFFIX): Rename to ...
+	(INDEX4_SUFFIX): ... here.
+	(INDEX5_SUFFIX, DEBUG_STR_SUFFIX): New.
+	(file_write(FILE *, const void *, size_t)): New.
+	(file_write(FILE *, const std::vector<Elem, Alloc> &)): New.
+	(data_buf::append_unsigned_leb128, data_buf::empty): New.
+	(data_buf::file_write): Use ::file_write.
+	(data_buf::c_str, dwarf5_djb_hash, debug_names)
+	(check_dwarf64_offsets): New.
+	(psyms_seen_size, write_gdbindex): New from
+	write_psymtabs_to_index code.
+	(dwarf5_gdb_augmentation, write_debug_names, assert_file_size)
+	(enum dw_index_kind): New.
+	(write_psymtabs_to_index): New parameter index_kind.  Support
+	filename_str and out_file_str.  Move code to write_gdbindex,
+	possibly call write_debug_names.
+	(save_gdb_index_command): New parameter -dwarf-5.
+	(_initialize_dwarf2_read): Document the new parameter -dwarf-5.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* contrib/cc-with-tweaks.sh: Change interpreter to bash, incl. initial
+	comment.
+	(GDB_ADD_INDEX): New variable.
+	<$want_index>: Call $GDB_ADD_INDEX.
+
+2017-12-08  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* dtrace-probe.c (dtrace_process_dof_probe): Do not declare a new
+	"expression_up" inside the TRY block.
+
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
+	* breakpoint.c (update_watchpoint): Call
+	address_significant.
+
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
+	* breakpoint.c (adjust_breakpoint_address): Call
+	address_significant.
+
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_gdbarch_init): Install gdbarch
+	significant_addr_bit.
+	* gdbarch.sh (significant_addr_bit): New.
+	* gdbarch.c, gdbarch.h: Re-generated.
+	* target.c (memory_xfer_partial): Call address_significant.
+	* utils.c (address_significant): New function.
+	* utils.h (address_significant): Declare.
+
+2017-12-08  Tom Tromey  <tom@tromey.com>
+
+	* printcmd.c (ui_printf): Update.  Use std::vector.
+	* common/format.h (struct format_piece): Add constructor.
+	<string>: Now const.
+	(class format_pieces): New class.
+	(parse_format_string, free_format_pieces)
+	(free_format_pieces_cleanup): Remove.
+	* common/format.c (format_pieces::format_pieces): Rename from
+	parse_format_string.  Update.
+	(free_format_pieces, free_format_pieces_cleanup): Remove.
+	* breakpoint.c (parse_cmd_to_aexpr): Update.  Use std::vector.
+	* ax-gdb.h (gen_printf): Remove argument.
+	* ax-gdb.c (gen_printf): Remove "frags" argument.
+	(maint_agent_printf_command): Update.  Use std::vector.
+
+2017-12-08  Yao Qi  <yao.qi@linaro.org>
+
+	PR breakpionts/22567
+	* linespec.c (minsym_found): Set sal.section.
+
+2017-12-08  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* configure.tgt (s390*-*-linux*): Add symfile-mem.o.
+
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
+	PR breakpoints/22569
+	* location.c (string_to_explicit_location): When terminating
+	parsing early, break out of enclosing loop instead of returning.
+
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
+	* NEWS (New commands): Mention set/show print type nested-type-limit.
+	* c-typeprint.c (c_type_print_base): Print out nested types.
+	* dwarf2read.c (struct typedef_field_list): Rename to ...
+	(struct decl_field_list): ... this.  Change all uses.
+	(struct field_info) <nested_types_list, nested_types_list_count>:
+	New fields.
+	(add_partial_symbol): Look for nested type definitions in C++, too.
+	(dwarf2_add_typedef): Rename to ...
+	(dwarf2_add_type_defn): ... this.
+	(type_can_define_types): New function.
+	Update assertion to use type_can_define_types.
+	Permit NULL for a field's name.
+	(process_structure_scope): Handle child DIEs of types that can
+	define types.
+	Copy the list of nested types into the type struct.
+	* gdbtypes.h (struct typedef_field): Rename to ...
+	(struct decl_field): ... this.  Change all uses.
+	[is_protected, is_private]: New fields.
+	(struct cplus_struct_type) <nested_types, nested_types_count>: New
+	fields.
+	(TYPE_NESTED_TYPES_ARRAY, TYPE_NESTED_TYPES_FIELD)
+	(TYPE_NESTED_TYPES_FIELD_NAME, TYPE_NESTED_TYPES_FIELD_TYPE)
+	(TYPE_NESTED_TYPES_COUNT, TYPE_NESTED_TYPES_FIELD_PROTECTED)
+	(TYPE_NESTED_TYPES_FIELD_PRIVATE): New macros.
+	* typeprint.c (type_print_raw_options, default_ptype_flags): Add
+	default value for print_nested_type_limit.
+	(print_nested_type_limit): New static variable.
+	(set_print_type_nested_types, show_print_type_nested_types): New
+	functions.
+	(_initialize_typeprint): Register new commands for set/show
+	`print-nested-type-limit'.
+	* typeprint.h (struct type_print_options) [print_nested_type_limit]:
+	New field.
+
+2017-12-07  Tom Tromey  <tom@tromey.com>
+
+	PR breakpoints/22511:
+	* breakpoint.c (commands_command_1): Don't throw an exception when
+	no commands have been read.
+
+2017-12-07  Adam Stylinski  <adam.stylinski@etegent.com>
+
+	PR c++/21222
+	* target-descriptions.c (print_c_tdesc::visit_pre): Change type of
+	range-for variable.
+
+2017-12-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/selftest.h (struct selftest): Add virtual destructor.
+
+2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/py-breakpoint.c (bppy_init): Use string_to_event_location
+	over basic location code. Implement explicit location keywords.
+	(bppy_init_validate_args): New function.
+	* NEWS: Document Python explicit breakpoint locations.
+
+2017-12-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS: Restore target entries for m68hc11-elf,
+	score-elf and xstormy16-elf, incorrectly removed in a previous
+	patch meant to only update the list of active maintainers.
+
+2017-12-06  Pedro Alves  <palves@redhat.com>
+
+	* break-catch-syscall.c (insert_catch_syscall)
+	(remove_catch_syscall): Adjust to pass reference to
+	inf_data->syscalls_counts directly via gdb::array_view.
+	* fbsd-nat.c (fbsd_set_syscall_catchpoint): Adjust to use bool
+	and gdb::array_view.
+	* linux-nat.c (linux_child_set_syscall_catchpoint): Likewise.
+	* remote.c (remote_set_syscall_catchpoint): Likewise.
+	* target-debug.h (target_debug_print_bool): New.
+	(define target_debug_print_gdb_array_view_const_int): New.
+	* target-delegates.c: Regenerate.
+	* target.h (target_ops) <to_set_syscall_catchpoint>: Use
+	gdb::array_view and bool.
+	(target_set_syscall_catchpoint): Likewise.
+
+2017-12-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* break-catch-syscall.c (catch_syscall_completer): Get pointers
+	to syscall group strings after building the string vector.
+
+2017-12-06  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_query_supported): Don't send "xmlRegisters=" if
+	"qXfer:features:read"" is disabled.
+	(remote_write_qxfer, remote_read_qxfer, remote_search_memory):
+	Check packet_config_support instead of packet->support directly.
+
+2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target-descriptions.c (struct tdesc_feature) <registers>: Use
+	tdesc_reg_up typedef.
+	(struct target_desc) <features>: Use tdesc_feature_up typedef.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (struct tdesc_type): Use default
+	destructor.
+	<u>: Remove.
+	<accept>: Remove.
+	(struct tdesc_type_builtin): New.
+	(struct tdesc_type_vector): New.
+	(struct tdesc_type_with_fields): New.
+	(tdesc_predefined_types): Change type to tdesc_type_builtin[].
+	(tdesc_gdb_type): Remove.
+	(tdesc_register_type): Adjust.
+	(tdesc_create_vector): Create tdesc_type_vector.
+	(tdesc_create_struct): Create tdesc_type_with_fields.
+	(tdesc_set_struct_size): Change parameter type.
+	(tdesc_create_union): Create tdesc_type_with_fields.
+	(tdesc_create_flags): Likewise.
+	(tdesc_create_enum): Likewise.
+	(tdesc_add_field): Change parameter type.
+	(tdesc_add_typed_bitfield): Likewise.
+	(tdesc_add_bitfield): Likewise.
+	(tdesc_add_flag): Likewise.
+	(tdesc_add_enum_value): Likewise.
+	(print_c_tdesc) <visit>: Remove overload with tdesc_type
+	parameter, add overloads for tdesc_type_builtin,
+	tdesc_type_with_fields and tdesc_type_vector.
+	<m_printed_type>: Remove.
+	<m_printed_element_type, m_printed_type_with_fields>: Add.
+	* target-descriptions.h (tdesc_create_enum): Change return type.
+	(tdesc_add_typed_bitfield): Change parameter type.
+	(tdesc_add_enum_value): Change parameter type.
+	* xml-tdesc.c (struct tdesc_parsing_data) <current_type>: Change
+	type to tdesc_type_with_fields.
+	(tdesc_start_struct): Adjust.
+	(tdesc_start_flags): Adjust.
+	(tdesc_start_enum): Adjust.
+	(tdesc_start_field): Adjust.
+	* arch/tdesc.h (struct tdesc_type_builtin): Forward-declare.
+	(struct tdesc_type_vector): Forward-declare.
+	(struct tdesc_type_with_fields): Forward-declare.
+	(tdesc_create_struct): Change return type.
+	(tdesc_create_union): Likewise.
+	(tdesc_create_flags): Likewise.
+	(tdesc_add_field): Change parameter type.
+	(tdesc_set_struct_size): Likewise.
+	(tdesc_add_bitfield): Likewise.
+	(tdesc_add_flag): Likewise.
+	* features: Re-generate C files.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (tdesc_arch_reg): Remove typedef.
+	(struct tdesc_arch_reg): Add constructor.
+	(DEF_VEC_O (tdesc_arch_reg)): Remove.
+	(struct tdesc_arch_data): Initialize fields.
+	<arch_regs>: Change type to std::vector.
+	(target_find_description): Adjust.
+	(tdesc_find_type): Adjust.
+	(tdesc_data_init): Call tdesc_arch_data constructor.
+	(tdesc_data_alloc): Allocate tdesc_arch_data with new.
+	(tdesc_data_cleanup): Free data with delete.
+	(tdesc_numbered_register): Adjust.
+	(tdesc_find_arch_register): Adjust.
+	(tdesc_use_registers): Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (tdesc_type_field): Remove typedef.
+	(DEF_VEC_O (tdesc_type_field)): Remove.
+	(struct tdesc_type_field): Add constructor.
+	<name>: Change type to std::string.
+	(struct tdesc_type) <tdesc_type>: Instantiate vector if the type
+	kind uses it.
+	<~tdesc_type>: Destroy vector if the type kind uses it.
+	<u::u::fields>: Change type to std::vector.
+	(tdesc_gdb_type): Adjust.
+	(tdesc_add_field): Adjust.
+	(tdesc_add_typed_bitfield): Adjust.
+	(tdesc_add_field): Adjust.
+	(tdesc_add_enum_value): Adjust.
+	(class print_c_tdesc) <visit>: Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (struct tdesc_type) <name>: Change type
+	to std::string.
+	<~tdesc_type>: Don't manually free name.
+	<operator==>: Adjust.
+	(tdesc_named_type): Adjust.
+	(tdesc_find_type): Adjust.
+	(tdesc_gdb_type): Adjust.
+	(class print_c_tdesc) <visit>: Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (tdesc_type_p): Remove typedef.
+	(DEF_VEC_P (tdesc_type_p)): Remove.
+	(struct tdesc_feature) <types>: Change type to std::vector.
+	<~tdesc_feature>: Replace with default implementation.
+	<accept>: Adjust.
+	(tdesc_named_type): Adjust.
+	(tdesc_create_vector): Adjust.
+	(tdesc_create_struct): Adjust.
+	(tdesc_create_union): Adjust.
+	(tdesc_create_flags): Adjust.
+	(tdesc_create_enum): Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target-descriptions.c (struct tdesc_reg) <tdesc_reg>: Change
+	type of name_ parameter, adjust to std::string change.
+	<name, group, type>: Change type to std::string.
+	<~tdesc_reg>: Replace with default implementation.
+	<operator==>: Adjust.
+	(tdesc_find_register_early): Adjust.
+	(tdesc_register_name): Adjust.
+	(tdesc_register_type): Adjust.
+	(tdesc_register_in_reggroup_p): Adjust.
+	(class print_c_tdesc) <visit>: Adjust.
+	(class print_c_feature) <visit>: Adjust.
+	* features/arc-arcompact.c: Re-generate.
+	* features/arc-v2.c: Re-generate.
+
+2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target-descriptions.c (tdesc_reg_p): Remove typedef.
+	(DEF_VEC_P (tdesc_reg_p)): Remove.
+	(struct tdesc_feature) <registers>: Change type to std::vector.
+	<~tdesc_feature>: Don't manually free registers.
+	<accept>: Adjust.
+	<operator==>: Adjust.
+	(tdesc_has_registers): Adjust.
+	(tdesc_find_register_early): Adjust.
+	(tdesc_use_registers): Adjust.
+	(tdesc_create_reg): Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (tdesc_feature) <name>: Change type to
+	std::string.
+	<~tdesc_feature>: Don't manually free name.
+	<operator==>: Adjust.
+	(tdesc_find_feature): Adjust.
+	(tdesc_feature_name): Adjust.
+	(class print_c_tdesc) <visit_pre>: Adjust.
+	(class print_c_feature) <visit_pre>: Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (tdesc_feature_p): Remove typedef.
+	(DEF_VEC_P (tdesc_feature_p)): Remove.
+	(struct target_desc) <features>: Change type to std::vector.
+	<~target_desc>: Replace with default implementation.
+	<accept>: Adjust.
+	<operator==>: Adjust.
+	(tdesc_has_registers): Adjust.
+	(tdesc_find_feature): Adjust.
+	(tdesc_use_registers): Adjust.
+	(tdesc_create_feature): Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (arch_p): Remove typedef.
+	(DEF_VEC_P (arch_p)): Remove.
+	(struct target_desc) <compatible>: Change type to std::vector.
+	<~target_desc>: Don't manually free compatible.
+	(tdesc_compatible_p): Adjust.
+	(tdesc_add_compatible): Adjust.
+	(class print_c_tdesc) <visit_pre>: Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (property_s): Remove typedef.
+	(DEF_VEC_O (property_s)): Remove.
+	(struct target_desc) <properties>: Make an std::vector.
+	<~target_desc>: Don't manually free properties.
+	(tdesc_property): Adjust.
+	(set_tdesc_property): Adjust.
+	(class print_c_tdesc) <visit_pre>: Adjust.
+
+2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/gdb_assert.h (gdb_static_assert): Redefine using
+	static_assert.
+
+2017-12-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ada-lang.c (ada_collect_symbol_completion_matches): Remove
+	unused variables.
+	(ada_is_redundant_range_encoding): Likewise.
+	* ada-varobj.c (ada_varobj_get_value_of_array_variable):
+	Likewise.
+	* alpha-tdep.c (alpha_software_single_step): Likewise.
+	* arm-tdep.c (_initialize_arm_tdep): Likewise.
+	* auto-load.c (info_auto_load_cmd): Likewise.
+	* break-catch-syscall.c (insert_catch_syscall): Likewise.
+	(remove_catch_syscall): Likewise.
+	* breakpoint.c (condition_completer): Likewise.
+	(clear_command): Likewise.
+	(update_breakpoint_locations): Likewise.
+	* btrace.c (btrace_disable): Likewise.
+	(btrace_teardown): Likewise.
+	(btrace_maint_update_pt_packets): Likewise.
+	(maint_btrace_clear_cmd): Likewise.
+	* cli/cli-decode.c (lookup_cmd_1): Likewise.
+	(lookup_cmd_composition): Likewise.
+	* cli/cli-dump.c (scan_filename): Likewise.
+	(restore_command): Likewise.
+	* compile/compile-loc2c.c (compute_stack_depth): Likewise.
+	* compile/compile-object-load.c (compile_object_load): Likewise.
+	* compile/compile-object-run.c (compile_object_run): Likewise.
+	* compile/compile.c (compile_to_object): Likewise.
+	* completer.c (filename_completer): Likewise.
+	(complete_files_symbols): Likewise.
+	(complete_expression): Likewise.
+	* corelow.c (core_open): Likewise.
+	* ctf.c (ctf_start): Likewise.
+	(ctf_write_status): Likewise.
+	(ctf_write_uploaded_tsv): Likewise.
+	(ctf_write_definition_end): Likewise.
+	(ctf_open_dir): Likewise.
+	(ctf_xfer_partial): Likewise.
+	(ctf_trace_find): Likewise.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn):
+	Likewise.
+	* dwarf2loc.c (allocate_piece_closure): Likewise.
+	(indirect_pieced_value): Likewise.
+	(dwarf2_evaluate_loc_desc_full): Likewise.
+	* dwarf2read.c (dw2_expand_marked_cus): Likewise.
+	(dw2_expand_symtabs_matching): Likewise.
+	(dw2_map_symbol_filenames): Likewise.
+	(read_and_check_comp_unit_head): Likewise.
+	(read_cutu_die_from_dwo): Likewise.
+	(lookup_dwo_unit): Likewise.
+	(read_comp_units_from_section): Likewise.
+	(dwarf2_compute_name): Likewise.
+	(handle_DW_AT_stmt_list): Likewise.
+	(create_cus_hash_table): Likewise.
+	(create_dwp_v2_section): Likewise.
+	(dwarf2_rnglists_process): Likewise.
+	(dwarf2_ranges_process): Likewise.
+	(dwarf2_record_block_ranges): Likewise.
+	(is_vtable_name): Likewise.
+	(read_formatted_entries): Likewise.
+	(skip_form_bytes): Likewise.
+	* elfread.c (elf_symtab_read): Likewise.
+	* exec.c (exec_file_command): Likewise.
+	* f-valprint.c (f_val_print): Likewise.
+	(info_common_command_for_block): Likewise.
+	* guile/guile.c (initialize_scheme_side): Likewise.
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_commands): Likewise.
+	* guile/scm-cmd.c (cmdscm_completer): Likewise.
+	(gdbscm_register_command_x): Likewise.
+	* guile/scm-frame.c (gdbscm_frame_read_var): Likewise.
+	* guile/scm-param.c (gdbscm_parameter_value): Likewise.
+	* guile/scm-ports.c (file_port_magic): Likewise.
+	* guile/scm-pretty-print.c (ppscm_search_pp_list): Likewise.
+	(ppscm_pretty_print_one_value): Likewise.
+	(ppscm_print_children): Likewise.
+	* guile/scm-string.c (gdbscm_string_to_argv): Likewise.
+	* guile/scm-symtab.c (gdbscm_sal_symtab): Likewise.
+	* guile/scm-type.c (gdbscm_type_next_field_x): Likewise.
+	* guile/scm-utils.c (gdbscm_parse_function_args): Likewise.
+	* i386-tdep.c (i386_register_reggroup_p): Likewise.
+	* infcmd.c (run_command_1): Likewise.
+	(until_next_fsm_clean_up): Likewise.
+	* linespec.c (linespec_complete): Likewise.
+	(find_label_symbols): Likewise.
+	* m2-valprint.c (m2_val_print): Likewise.
+	* memattr.c (require_user_regions): Likewise.
+	(lookup_mem_region): Likewise.
+	(disable_mem_command): Likewise.
+	(mem_delete): Likewise.
+	* mep-tdep.c (mep_register_name): Likewise.
+	(mep_analyze_prologue): Likewise.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Likewise.
+	* mi/mi-interp.c (mi_on_sync_execution_done): Likewise.
+	* mi/mi-main.c (mi_cmd_trace_frame_collected): Likewise.
+	* microblaze-linux-tdep.c (microblaze_linux_init_abi): Likewise.
+	* minidebug.c (lzma_open): Likewise.
+	* minsyms.c (lookup_minimal_symbol): Likewise.
+	* mips-linux-tdep.c (mips64_fill_fpregset): Likewise.
+	* mips-tdep.c (mips_stub_frame_sniffer): Likewise.
+	(mips_o64_return_value): Likewise.
+	(mips_single_step_through_delay): Likewise.
+	(_initialize_mips_tdep): Likewise.
+	* nios2-tdep.c (nios2_push_dummy_call): Likewise.
+	(nios2_software_single_step): Likewise.
+	* parse.c (find_minsym_type_and_address): Likewise.
+	* psymtab.c (psym_relocate): Likewise.
+	* python/py-breakpoint.c (bppy_get_commands): Likewise.
+	(gdbpy_breakpoint_modified): Likewise.
+	* python/py-infevents.c (create_inferior_call_event_object):
+	Likewise.
+	* python/py-record-btrace.c (btpy_list_item): Likewise.
+	* python/py-type.c (typy_str): Likewise.
+	* python/py-value.c (valpy_call): Likewise.
+	* python/python.c (do_start_initialization): Likewise.
+	* record-btrace.c (record_btrace_insn_history_range): Likewise.
+	(record_btrace_call_history_range): Likewise.
+	(record_btrace_record_method): Likewise.
+	(record_btrace_xfer_partial): Likewise.
+	(btrace_get_frame_function): Likewise.
+	* record-full.c (record_full_open): Likewise.
+	* record.c (get_context_size): Likewise.
+	* registry.h (DEFINE_REGISTRY): Likewise.
+	* remote-fileio.c (remote_fileio_request): Likewise.
+	* remote.c (remote_update_thread_list): Likewise.
+	(remote_check_symbols): Likewise.
+	(remote_commit_resume): Likewise.
+	(remote_interrupt): Likewise.
+	(remote_insert_breakpoint): Likewise.
+	(compare_sections_command): Likewise.
+	* rust-exp.y (super_name): Likewise.
+	(lex_string): Likewise.
+	(convert_ast_to_type): Likewise.
+	(convert_ast_to_expression): Likewise.
+	* rust-lang.c (rust_print_struct_def): Likewise.
+	(rust_print_type): Likewise.
+	(rust_evaluate_subexp): Likewise.
+	* rx-tdep.c (rx_register_type): Likewise.
+	* ser-event.c (serial_event_clear): Likewise.
+	* serial.c (serial_open): Likewise.
+	* spu-tdep.c (spu_overlay_new_objfile): Likewise.
+	* symfile.c (section_is_overlay): Likewise.
+	(overlay_unmapped_address): Likewise.
+	(overlay_mapped_address): Likewise.
+	(simple_overlay_update_1): Likewise.
+	(simple_overlay_update): Likewise.
+	* symtab.c (symbol_find_demangled_name): Likewise.
+	(search_symbols): Likewise.
+	* target-descriptions.c (tdesc_predefined_type): Likewise.
+	* target.c (target_commit_resume): Likewise.
+	* thread.c (print_selected_thread_frame): Likewise.
+	* top.c (new_ui_command): Likewise.
+	(gdb_readline_no_editing): Likewise.
+	* tracefile-tfile.c (tfile_open): Likewise.
+	* tracepoint.c (create_tsv_from_upload): Likewise.
+	* utils.c (quit): Likewise.
+	(defaulted_query): Likewise.
+	* valarith.c (value_concat): Likewise.
+	* xml-syscall.c (xml_list_syscalls_by_group): Likewise.
+	* xml-tdesc.c (target_fetch_description_xml): Likewise.
+	* xtensa-tdep.c (xtensa_pseudo_register_read): Likewise.
+	(xtensa_pseudo_register_write): Likewise.
+
+2017-12-04  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Mention Rust trait object inspection.
+
+2017-12-04  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22499
+	* amd64-tdep.c (amd64_insn::rex_offset): Rename to...
+	(amd64_insn::enc_prefix_offset): ... this, and tweak comment.
+	(vex2_prefix_p, vex3_prefix_p): New functions.
+	(amd64_get_insn_details): Adjust to rename.  Also skip VEX2 and
+	VEX3 prefixes.
+	(fixup_riprel): Set VEX3.!B.
+
 2017-12-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* target.h (mem_region_vector): Remove.

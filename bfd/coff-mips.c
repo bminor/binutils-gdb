@@ -131,7 +131,7 @@ static reloc_howto_type mips_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 			/* This needs complex overflow
+				/* This needs complex overflow
 				   detection, because the upper four
 				   bits must match the PC.  */
 	 mips_generic_reloc,	/* special_function */
@@ -509,7 +509,7 @@ mips_reflo_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 					   reloc_entry->address
 					   * bfd_octets_per_byte (abfd)))
 	    return bfd_reloc_outofrange;
-	  
+
 	  /* Do the REFHI relocation.  Note that we actually don't
 	     need to know anything about the REFLO itself, except
 	     where to find the low 16 bits of the addend needed by the
@@ -892,7 +892,7 @@ mips_relocate_section (bfd *output_bfd,
 	  struct external_reloc *lo_ext_rel;
 
 	  /* As a GNU extension, permit an arbitrary number of REFHI
-             relocs before the REFLO reloc.  This permits gcc to emit
+	     relocs before the REFLO reloc.  This permits gcc to emit
 	     the HI and LO relocs itself.  */
 	  for (lo_ext_rel = ext_rel + 1;
 	       lo_ext_rel < ext_rel_end;

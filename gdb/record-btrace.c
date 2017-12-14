@@ -810,7 +810,6 @@ record_btrace_insn_history_range (struct target_ops *self,
 				  gdb_disassembly_flags flags)
 {
   struct btrace_thread_info *btinfo;
-  struct btrace_insn_history *history;
   struct btrace_insn_iterator begin, end;
   struct ui_out *uiout;
   unsigned int low, high;
@@ -1167,7 +1166,6 @@ record_btrace_call_history_range (struct target_ops *self,
 				  int int_flags)
 {
   struct btrace_thread_info *btinfo;
-  struct btrace_call_history *history;
   struct btrace_call_iterator begin, end;
   struct ui_out *uiout;
   unsigned int low, high;
@@ -1251,7 +1249,6 @@ record_btrace_call_history_from (struct target_ops *self,
 static enum record_method
 record_btrace_record_method (struct target_ops *self, ptid_t ptid)
 {
-  const struct btrace_config *config;
   struct thread_info * const tp = find_thread_ptid (ptid);
 
   if (tp == NULL)
@@ -1293,8 +1290,6 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
 			    const gdb_byte *writebuf, ULONGEST offset,
 			    ULONGEST len, ULONGEST *xfered_len)
 {
-  struct target_ops *t;
-
   /* Filter out requests that don't make sense during replay.  */
   if (replay_memory_access == replay_memory_access_read_only
       && !record_btrace_generating_corefile
@@ -1545,7 +1540,6 @@ static const struct btrace_function *
 btrace_get_frame_function (struct frame_info *frame)
 {
   const struct btrace_frame_cache *cache;
-  const struct btrace_function *bfun;
   struct btrace_frame_cache pattern;
   void **slot;
 

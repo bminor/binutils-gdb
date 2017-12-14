@@ -220,11 +220,14 @@ extern event_location_up
    This function is intended to be used by CLI commands and will parse
    explicit locations in a CLI-centric way.  Other interfaces should use
    string_to_event_location_basic if they want to maintain support for
-   legacy specifications of probe, address, and linespec locations.  */
+   legacy specifications of probe, address, and linespec locations.
 
-extern event_location_up
-  string_to_event_location (const char **argp,
-			    const struct language_defn *langauge);
+   MATCH_TYPE should be either WILD or FULL.  If -q/--qualified is specified
+   in the input string, it will take precedence over this parameter.  */
+
+extern event_location_up string_to_event_location
+  (const char **argp, const struct language_defn *langauge,
+   symbol_name_match_type match_type = symbol_name_match_type::WILD);
 
 /* Like string_to_event_location, but does not attempt to parse
    explicit locations.  MATCH_TYPE indicates how function names should

@@ -26,9 +26,9 @@ const bfd_arch_info_type bfd_or1knd_arch;
 
 const bfd_arch_info_type bfd_or1k_arch =
   {
-    32,           /* 32 bits in a word.  */
-    32,	          /* 32 bits in an address.  */
-    8,	          /* 8 bits in a byte.  */
+    32,		  /* 32 bits in a word.  */
+    32,		  /* 32 bits in an address.  */
+    8,		  /* 8 bits in a byte.  */
     bfd_arch_or1k,
     bfd_mach_or1k,
     "or1k",
@@ -43,9 +43,9 @@ const bfd_arch_info_type bfd_or1k_arch =
 
 const bfd_arch_info_type bfd_or1knd_arch =
   {
-    32,           /* 32 bits in a word.  */
-    32,	          /* 32 bits in an address.  */
-    8,	          /* 8 bits in a byte.  */
+    32,		  /* 32 bits in a word.  */
+    32,		  /* 32 bits in an address.  */
+    8,		  /* 8 bits in a byte.  */
     bfd_arch_or1k,
     bfd_mach_or1knd,
     "or1knd",

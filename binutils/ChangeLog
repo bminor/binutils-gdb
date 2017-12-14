@@ -1,3 +1,36 @@
+2017-12-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/utils-lib.exp (default_binutils_assemble_flags):
+	Don't perror on assembler diagnostic output.
+	* testsuite/binutils-all/nm.exp: Run unique symbol test on all
+	ELF targets.  Resolve as "unsupported" on assembly failure.
+
+2017-12-11  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/binutils-all/aarch64/objdump.d: New.
+	* testsuite/binutils-all/aarch64/objdump.s: New.
+
+2017-12-08  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_relocations_in_section): Use the orelocations
+	field of the input section, if it has been initialised.
+	* testsuite/binutils-all/note-2-64.d: Skip test on Sparc64.
+
+2017-12-06  Jim Wilson  <jimw@sifive.com>
+
+	PR 22465
+	* objcopy.c (copy_section): New local extra.  If isection->lma not
+	exactly divisible by interleave, then bias from.  Also adjust
+	osection->lma if necessary.
+
+2017-12-06  Alan Modra  <amodra@gmail.com>
+
+	PR 22552
+	* readelf.c (process_file_header): Don't assume XINDEX case
+	value for e_shstrndx is within bounds.
+	(load_debug_section): Sanity test e_shstrndx before attempting
+	to read .shstrtab.  Wrap long lines.
+
 2017-12-01  Oleksandr Pikozh  <o.pikozh@gmail.com>
 
 	* doc/binutils.texi: Add --strip-unneeded to objcopy synopsis.

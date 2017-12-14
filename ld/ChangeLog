@@ -1,3 +1,94 @@
+2017-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-mn10300/mn10300.exp: Update address of FSF in
+	copyright notice.
+
+2017-12-13  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new test cases.
+	* testsuite/ld-aarch64/emit-relocs-258-dyn-bad.d: New.
+	* testsuite/ld-aarch64/emit-relocs-258.s: New.
+	* testsuite/ld-aarch64/emit-relocs-259-dyn-bad.d: New.
+	* testsuite/ld-aarch64/emit-relocs-259.s: New.
+	* testsuite/ld-aarch64/gc-relocs-257.s: Put R_AARCH64_ABS32,
+	R_AARCH64_ABS16 data into data section.
+
+2017-12-07  Alan Modra  <amodra@gmail.com>
+
+	PR 22465
+	* testsuite/ld-elf/interleave.s: Use .data sections and provide
+	section attrs.
+	* testsuite/ld-elf/interleave.ld: Discard other sections.  Adjust
+	for changed section names.
+
+2017-12-07  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf32mcore.sh (GENERATE_SHLIB_SCRIPT): Don't define.
+
+2017-12-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Ask ld
+	under test whether -shared is supported.
+
+2017-12-06  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/ld-elf/interleave-0.d, testsuite/ld-elf/interleave-4.d,
+	* testsuite/ld-elf/interleave.ld, testsuite/ld-elf/interleave.s: New.
+
+2017-12-06  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Return
+	false for lm32-rtems targets.
+
+2017-12-06  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Return true
+	for frv, lm32, m32r, microblaze, nds32 and or1k linux targets.
+
+2017-12-05  Jim Wilson  <jimw@sifive.com>
+	    Andrew Waterman  <andrew@sifive.com>
+
+	* emulparams/elf32lriscv-defs.sh (SDATA_START_SYMBOLS): Remove HIDDEN.
+	Don't define __global_pointer$ when CREATE_SHLIB.
+	* testsuite/ld-riscv-elf/gp-hidden-64.rd,
+	* testsuite/ld-riscv-elf/gp-hidden-lib.rd,
+	* testsuite/ld-riscv-elf/gp-hidden-lib.s,
+	* testsuite/ld-riscv-elf/gp-hidden-ver-64.rd,
+	* testsuite/ld-riscv-elf/gp-hidden-ver.rd,
+	* testsuite/ld-riscv-elf/gp-hidden-ver.s,
+	* testsuite/ld-riscv-elf/gp-hidden-ver.ver,
+	* testsuite/ld-riscv-elf/gp-hidden.rd,
+	* testsuite/ld-riscv-elf/gp-hidden.s,
+	* testsuite/ld-riscv-elf/gp-hidden.sd: Delete.
+	* testsuite/ld-riscv-elf/gp-test-lib.sd,
+	* testsuite/ld-riscv-elf/gp-test.s,
+	* testsuite/ld-riscv-elf/gp-test.sd: New.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Rewrite gp tests.
+
+2017-12-04  Jim Wilson  <jimw@sifive.com>
+
+	* emulparams/elf32lriscv-defs.sh (SDATA_START_SYMBOLS): Mark
+	__global_pointer$ as HIDDEN.
+	* testsuite/ld-riscv-elf/gp-hidden-64.rd: New.
+	* testsuite/ld-riscv-elf/gp-hidden-lib.rd: New.
+	* testsuite/ld-riscv-elf/gp-hidden-lib.s: New.
+	* testsuite/ld-riscv-elf/gp-hidden-ver-64.rd: New.
+	* testsuite/ld-riscv-elf/gp-hidden-ver.rd: New.
+	* testsuite/ld-riscv-elf/gp-hidden-ver.s: New.
+	* testsuite/ld-riscv-elf/gp-hidder-ver.ver: New.
+	* testsuite/ld-riscv-elf/gp-hidden.rd: New.
+	* testsuite/ld-riscv-elf/gp-hidden.s: New.
+	* testsuite/ld-riscv-elf/gp-hidden.sd: New.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Change riscv to riscv*.
+	Run the new tests with run_ld_link_tests.
+
+2017-12-04  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-i386/pr17935-1.d: Adjust expected error.
+	* testsuite/ld-i386/pr17935-2.d: Likewise.
+	* testsuite/ld-x86-64/pr17935-1.d: Likewise.
+	* testsuite/ld-x86-64/pr17935-2.d: Likewise.
+
 2017-12-04  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/powerpc.exp (ppceabitests): Add -a32 -mbig

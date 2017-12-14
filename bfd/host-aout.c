@@ -65,7 +65,7 @@
 #undef  TARGET_IS_BIG_ENDIAN_P
 #endif
 
-#include "libaout.h"           /* BFD a.out internal data structures */
+#include "libaout.h"	       /* BFD a.out internal data structures */
 #include "aout/aout64.h"
 
 #ifdef HOST_MACHINE_ARCH

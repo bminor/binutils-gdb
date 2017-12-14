@@ -439,24 +439,8 @@ interpreter_completer (struct cmd_list_element *ignore,
     {
       if (strncmp (interp.name, text, textlen) == 0)
 	{
-	  char *match;
-
-	  match = (char *) xmalloc (strlen (word) + strlen (interp.name) + 1);
-	  if (word == text)
-	    strcpy (match, interp.name);
-	  else if (word > text)
-	    {
-	      /* Return some portion of interp->name.  */
-	      strcpy (match, interp.name + (word - text));
-	    }
-	  else
-	    {
-	      /* Return some of text plus interp->name.  */
-	      strncpy (match, word, text - word);
-	      match[text - word] = '\0';
-	      strcat (match, interp.name);
-	    }
-	  tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
+	  tracker.add_completion
+	    (make_completion_match_str (interp.name, text, word));
 	}
     }
 }

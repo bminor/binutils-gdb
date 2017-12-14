@@ -1,3 +1,18 @@
+2017-12-11  Stephen Crane  <sjc@immunant.com>
+
+	* plugin.cc (Plugin::load): Include hooks for register_new_input
+	in transfer vector.
+	(Plugin::new_input): New function.
+	(register_new_input): New function.
+	(Plugin_manager::claim_file): Call Plugin::new_input if in
+	replacement phase.
+	* plugin.h (Plugin::set_new_input_handler): New function.
+	* testsuite/plugin_new_section_layout.c: New plugin to test
+	new_input plugin API.
+	* testsuite/plugin_final_layout.sh: Add new input test.
+	* testsuite/Makefile.am (plugin_layout_new_file): New test case.
+	* testsuite/Makefile.in: Regenerate.
+
 2017-12-02  Vladimir Kondratyev  <vladimir@kondratyev.su>
 	    Cary Coutant  <ccoutant@gmail.com>
 

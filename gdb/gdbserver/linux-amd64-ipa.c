@@ -169,6 +169,19 @@ supply_static_tracepoint_registers (struct regcache *regcache,
 
 #endif /* HAVE_UST */
 
+#if !defined __ILP32__
+/* Map the tdesc index to xcr0 mask.  */
+static uint64_t idx2mask[X86_TDESC_LAST] = {
+  X86_XSTATE_X87_MASK,
+  X86_XSTATE_SSE_MASK,
+  X86_XSTATE_AVX_MASK,
+  X86_XSTATE_MPX_MASK,
+  X86_XSTATE_AVX_MPX_MASK,
+  X86_XSTATE_AVX_AVX512_MASK,
+  X86_XSTATE_AVX_MPX_AVX512_PKU_MASK,
+};
+#endif
+
 /* Return target_desc to use for IPA, given the tdesc index passed by
    gdbserver.  */
 
@@ -194,17 +207,6 @@ get_ipa_tdesc (int idx)
       break;
     }
 #else
-  /* Map the tdesc index to xcr0 mask.  */
-  uint64_t idx2mask[X86_TDESC_LAST] = {
-    X86_XSTATE_X87_MASK,
-    X86_XSTATE_SSE_MASK,
-    X86_XSTATE_AVX_MASK,
-    X86_XSTATE_MPX_MASK,
-    X86_XSTATE_AVX_MPX_MASK,
-    X86_XSTATE_AVX_AVX512_MASK,
-    X86_XSTATE_AVX_MPX_AVX512_PKU_MASK,
-  };
-
   return amd64_linux_read_description (idx2mask[idx], false);
 #endif
 
@@ -276,4 +278,12 @@ alloc_jump_pad_buffer (size_t size)
 void
 initialize_low_tracepoint (void)
 {
+#if defined __ILP32__
+  amd64_linux_read_description (X86_XSTATE_SSE_MASK, true);
+  amd64_linux_read_description (X86_XSTATE_AVX_MASK, true);
+  amd64_linux_read_description (X86_XSTATE_AVX_AVX512_MASK, true);
+#else
+  for (auto i = 0; i < X86_TDESC_LAST; i++)
+    amd64_linux_read_description (idx2mask[i], false);
+#endif
 }

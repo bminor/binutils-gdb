@@ -1915,7 +1915,6 @@ spu_overlay_new_objfile (struct objfile *objfile)
   /* Now go and fiddle with all the LMAs.  */
   ALL_OBJFILE_OSECTIONS (objfile, osect)
     {
-      bfd *obfd = objfile->obfd;
       asection *bsect = osect->the_bfd_section;
       int ndx = osect - objfile->sections;
 

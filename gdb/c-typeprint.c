@@ -1327,11 +1327,31 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		}
 	    }
 
+	  /* Print out nested types.  */
+	  if (TYPE_NESTED_TYPES_COUNT (type) != 0
+	      && semi_local_flags.print_nested_type_limit != 0)
+	    {
+	      if (semi_local_flags.print_nested_type_limit > 0)
+		--semi_local_flags.print_nested_type_limit;
+
+	      if (TYPE_NFIELDS (type) != 0 || TYPE_NFN_FIELDS (type) != 0)
+		fprintf_filtered (stream, "\n");
+
+	      for (i = 0; i < TYPE_NESTED_TYPES_COUNT (type); ++i)
+		{
+		  print_spaces_filtered (level + 4, stream);
+		  c_print_type (TYPE_NESTED_TYPES_FIELD_TYPE (type, i),
+				"", stream, show, level + 4, &semi_local_flags);
+		  fprintf_filtered (stream, ";\n");
+		}
+	    }
+
 	  /* Print typedefs defined in this class.  */
 
 	  if (TYPE_TYPEDEF_FIELD_COUNT (type) != 0 && flags->print_typedefs)
 	    {
-	      if (TYPE_NFIELDS (type) != 0 || TYPE_NFN_FIELDS (type) != 0)
+	      if (TYPE_NFIELDS (type) != 0 || TYPE_NFN_FIELDS (type) != 0
+		  || TYPE_NESTED_TYPES_COUNT (type) != 0)
 		fprintf_filtered (stream, "\n");
 
 	      for (i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (type); i++)

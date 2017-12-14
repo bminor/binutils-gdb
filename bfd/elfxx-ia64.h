@@ -30,4 +30,4 @@ void ia64_elf_relax_brl (bfd_byte *contents, bfd_vma off);
 void ia64_elf_relax_ldxmov (bfd_byte *contents, bfd_vma off);
 
 bfd_reloc_status_type ia64_elf_install_value (bfd_byte *hit_addr, bfd_vma v,
-                                              unsigned int r_type);
+					      unsigned int r_type);

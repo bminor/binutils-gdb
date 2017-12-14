@@ -9546,8 +9546,6 @@ void
 _initialize_arm_tdep (void)
 {
   long length;
-  const char *setname;
-  const char *setdesc;
   int i, j;
   char regdesc[1024], *rdptr = regdesc;
   size_t rest = sizeof (regdesc);

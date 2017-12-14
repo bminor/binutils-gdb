@@ -32,7 +32,7 @@ static const bfd_arch_info_type d10v_ts3_info =
   bfd_mach_d10v_ts3,
   "d10v",
   "d10v:ts3",
-  4, 	/* Section alignment power.  */
+  4,	/* Section alignment power.  */
   FALSE,
   bfd_default_compatible,
   bfd_default_scan,

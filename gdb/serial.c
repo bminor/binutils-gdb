@@ -203,7 +203,6 @@ static struct serial *serial_open_ops_1 (const struct serial_ops *ops,
 struct serial *
 serial_open (const char *name)
 {
-  struct serial *scb;
   const struct serial_ops *ops;
   const char *open_name = name;
 

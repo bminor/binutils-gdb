@@ -272,7 +272,6 @@ core_open (const char *arg, int from_tty)
   const char *p;
   int siggy;
   struct cleanup *old_chain;
-  char *temp;
   int scratch_chan;
   int flags;
 

@@ -19,6 +19,27 @@
 # MA 02110-1301, USA.
 #
 
-if [istarget "riscv-*-*"] {
+if [istarget "riscv*-*-*"] {
     run_dump_test "c-lui"
+
+    set abis { rv32gc ilp32 elf32lriscv rv64gc lp64 elf64lriscv }
+    foreach { arch abi emul } $abis {
+	# This checks whether our linker scripts handle __global_pointer$
+	# correctly.  It should be defined in executables and PIE, but not
+	# in shared libraries.
+	set suff64 [string map {ilp32 "" lp64 -64} $abi]
+	run_ld_link_tests [list \
+			       [list "gp test ($abi shared library)" \
+				    "-m$emul -shared" "" \
+				    "-march=$arch -mabi=$abi -fpic" \
+				    { gp-test.s } \
+				    [list "readelf --syms gp-test-lib.sd"] \
+				    "gp-test-lib-${abi}.so"] \
+			       [list "gp test ($abi executable)" \
+				    "-m$emul" "" \
+				    "-march=$arch -mabi=$abi" \
+				    { gp-test.s } \
+				    [list "readelf --syms gp-test.sd"] \
+				    "gp-test-${abi}"]]
+    }
 }

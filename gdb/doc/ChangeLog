@@ -1,3 +1,39 @@
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Manipulating breakpoints using Python): Document
+	qualified parameter to gdb.Breakpoint.
+
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Manipulating breakpoints using Python): Split doc
+	of Breakpoint.__init__ in two, split text in multiple
+	paragraphs, don't nest parameter square brackets.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Stefan Wallentowitz  <stefan@wallentowitz.de>
+	    Franck Jullien  <franck.jullien@gmail.com>
+	    Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
+	* gdb.texinfo: Add OpenRISC documentation.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Index Files): Document .debug_names and -dwarf-5.
+
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.texinfo (Symbols): Document "set print type nested-type-limit"
+	and "show print type nested-type-limit".
+
+2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+       * python.texi (Breakpoints In Python): Add text relating
+	to allowed explicit locations and keywords in gdb.Breakpoints.
+
+2017-12-04  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Rust): Update trait object status
+
 2017-12-01  Andrew Cagney  <cagney@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
