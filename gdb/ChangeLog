@@ -1,3 +1,20 @@
+2017-12-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dw2_debug_names_iterator::next): Support
+	DW_IDX_type_unit.
+	(debug_names::dwarf5_offset_size, unit_kind): New.
+	(debug_names::insert): Add parameter kind.
+	(debug_names::build): Support DW_IDX_type_unit.
+	(debug_names::recursively_write_psymbols): Update
+	(debug_names::write_psymbols caller.
+	(debug_names::write_one_signatured_type_data)
+	(debug_names::write_one_signatured_type): New.
+	(debug_names::index_key, debug_names::symbol_value)
+	(debug_names::write_psymbols): Add kind.
+	(debug_names::write_one_signatured_type): New.
+	(write_debug_names): Move dwarf5_offset_size to debug_names.
+	Use debug_names::write_one_signatured_type for type units.
+
 2017-12-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_value_equal): Add handling of typedef types
