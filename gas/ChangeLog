@@ -1,3 +1,13 @@
+2017-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-m32c.c: Update address of FSF in copyright notice.
+	* config/tc-m32c.h: Likewise.
+	* config/tc-mt.c: Likewise.
+	* config/tc-mt.h: Likewise.
+	* config/tc-visium.c: Likewise.
+	* config/tc-visium.h: Likewise.
+	* testsuite/gas/rx/explode: Likewise.
+
 2017-12-13  Jim Wilson  <jimw@sifive.com>
 
 	PR 22599

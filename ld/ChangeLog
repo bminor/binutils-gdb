@@ -1,3 +1,8 @@
+2017-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-mn10300/mn10300.exp: Update address of FSF in
+	copyright notice.
+
 2017-12-13  Renlin Li  <renlin.li@arm.com>
 
 	* testsuite/ld-aarch64/aarch64-elf.exp: Run new test cases.

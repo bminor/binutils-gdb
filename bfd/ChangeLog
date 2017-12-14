@@ -1,3 +1,14 @@
+2017-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* cpu-mt.c: Update address of FSF in copyright notice.
+	* elf32-m32c.c: Likewise.
+	* elf32-mt.c: Likewise.
+	* elf32-rl78.c: Likewise.
+	* elf32-rx.c: Likewise.
+	* elf32-rx.h: Likewise.
+	* elf32-spu.h: Likewise.
+	* hosts/x86-64linux.h: Likewise.
+
 2017-12-13  Renlin Li  <renlin.li@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Disallow
