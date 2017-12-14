@@ -1,5 +1,10 @@
 2017-12-14  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_value_equal): Add handling of typedef types
+	when comparing array objects.
+
+2017-12-14  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c (read_atcb): Properly set task_info->ptid
 	when !target_has_execution as well.
 	(task_command): Remove error when !target_has_execution.

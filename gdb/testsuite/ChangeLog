@@ -1,5 +1,9 @@
 2017-12-14  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/str_binop_equal: New testcase.
+
+2017-12-14  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/task_switch_in_core: New testcase.
 
 2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>

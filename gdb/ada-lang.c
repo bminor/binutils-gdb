@@ -9729,23 +9729,28 @@ ada_value_equal (struct value *arg1, struct value *arg2)
   if (ada_is_direct_array_type (value_type (arg1))
       || ada_is_direct_array_type (value_type (arg2)))
     {
+      struct type *arg1_type, *arg2_type;
+
       /* Automatically dereference any array reference before
          we attempt to perform the comparison.  */
       arg1 = ada_coerce_ref (arg1);
       arg2 = ada_coerce_ref (arg2);
-      
+
       arg1 = ada_coerce_to_simple_array (arg1);
       arg2 = ada_coerce_to_simple_array (arg2);
-      if (TYPE_CODE (value_type (arg1)) != TYPE_CODE_ARRAY
-          || TYPE_CODE (value_type (arg2)) != TYPE_CODE_ARRAY)
+
+      arg1_type = ada_check_typedef (value_type (arg1));
+      arg2_type = ada_check_typedef (value_type (arg2));
+
+      if (TYPE_CODE (arg1_type) != TYPE_CODE_ARRAY
+          || TYPE_CODE (arg2_type) != TYPE_CODE_ARRAY)
         error (_("Attempt to compare array with non-array"));
       /* FIXME: The following works only for types whose
          representations use all bits (no padding or undefined bits)
          and do not have user-defined equality.  */
-      return
-        TYPE_LENGTH (value_type (arg1)) == TYPE_LENGTH (value_type (arg2))
-        && memcmp (value_contents (arg1), value_contents (arg2),
-                   TYPE_LENGTH (value_type (arg1))) == 0;
+      return (TYPE_LENGTH (arg1_type) == TYPE_LENGTH (arg2_type)
+	      && memcmp (value_contents (arg1), value_contents (arg2),
+			 TYPE_LENGTH (arg1_type)) == 0);
     }
   return value_equal (arg1, arg2);
 }
