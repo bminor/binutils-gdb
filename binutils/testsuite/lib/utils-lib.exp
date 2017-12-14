@@ -127,7 +127,6 @@ proc default_binutils_assemble_flags { source object asflags } {
     } else {
 	send_log "$exec_output\n"
 	verbose "$exec_output"
-	perror "$source: assembly failed"
 	return 0
     }
 }

@@ -1,3 +1,10 @@
+2017-12-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/utils-lib.exp (default_binutils_assemble_flags):
+	Don't perror on assembler diagnostic output.
+	* testsuite/binutils-all/nm.exp: Run unique symbol test on all
+	ELF targets.  Resolve as "unsupported" on assembly failure.
+
 2017-12-11  Renlin Li  <renlin.li@arm.com>
 
 	* testsuite/binutils-all/aarch64/objdump.d: New.
