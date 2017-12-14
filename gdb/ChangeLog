@@ -1,3 +1,8 @@
+2017-12-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/py-breakpoint.c (bppy_init): Use 'O' format specifier
+	for "qualified" and use PyObject_IsTrue.
+
 2017-12-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dw2_debug_names_iterator::next): Support
