@@ -3102,10 +3102,10 @@ Target_powerpc<size, big_endian>::Branch_info::mark_pltcall(
     return false;
 
   Symbol* sym = this->object_->global_symbol(this->r_sym_);
-  if (target->replace_tls_get_addr(sym))
-    sym = target->tls_get_addr_opt();
   if (sym != NULL && sym->is_forwarder())
     sym = symtab->resolve_forwards(sym);
+  if (target->replace_tls_get_addr(sym))
+    sym = target->tls_get_addr_opt();
   const Sized_symbol<size>* gsym = static_cast<const Sized_symbol<size>*>(sym);
   if (gsym != NULL
       ? (gsym->use_plt_offset(Scan::get_reference_flags(this->r_type_, target))
@@ -3132,10 +3132,10 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
   Target_powerpc<size, big_endian>* target =
     static_cast<Target_powerpc<size, big_endian>*>(
       parameters->sized_target<size, big_endian>());
-  if (target->replace_tls_get_addr(sym))
-    sym = target->tls_get_addr_opt();
   if (sym != NULL && sym->is_forwarder())
     sym = symtab->resolve_forwards(sym);
+  if (target->replace_tls_get_addr(sym))
+    sym = target->tls_get_addr_opt();
   const Sized_symbol<size>* gsym = static_cast<const Sized_symbol<size>*>(sym);
   bool ok = true;
 
