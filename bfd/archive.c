@@ -764,10 +764,11 @@ SYNOPSIS
 DESCRIPTION
 	Provided a BFD, @var{archive}, containing an archive and NULL, open
 	an input BFD on the first contained element and returns that.
-	Subsequent calls should pass
-	the archive and the previous return value to return a created
-	BFD to the next contained element. NULL is returned when there
-	are no more.
+	Subsequent calls should pass the archive and the previous return
+	value to return a created BFD to the next contained element.  NULL
+	is returned when there are no more.
+	Note - if you want to process the bfd returned by this call be
+	sure to call bfd_check_format() on it first.
 */
 
 bfd *
