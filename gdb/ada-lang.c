@@ -7232,6 +7232,56 @@ ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
    number of fields if not found.   A NULL value of NAME never
    matches; the function just counts visible fields in this case.
    
+   Notice that we need to handle when a tagged record hierarchy
+   has some components with the same name, like in this scenario:
+
+      type Top_T is tagged record
+         N : Integer := 1;
+         U : Integer := 974;
+         A : Integer := 48;
+      end record;
+
+      type Middle_T is new Top.Top_T with record
+         N : Character := 'a';
+         C : Integer := 3;
+      end record;
+
+     type Bottom_T is new Middle.Middle_T with record
+        N : Float := 4.0;
+        C : Character := '5';
+        X : Integer := 6;
+        A : Character := 'J';
+     end record;
+
+   Let's say we now have a variable declared and initialized as follow:
+
+     TC : Top_A := new Bottom_T;
+
+   And then we use this variable to call this function
+
+     procedure Assign (Obj: in out Top_T; TV : Integer);
+
+   as follow:
+
+      Assign (Top_T (B), 12);
+
+   Now, we're in the debugger, and we're inside that procedure
+   then and we want to print the value of obj.c:
+
+   Usually, the tagged record or one of the parent type owns the
+   component to print and there's no issue but in this particular
+   case, what does it mean to ask for Obj.C? Since the actual
+   type for object is type Bottom_T, it could mean two things: type
+   component C from the Middle_T view, but also component C from
+   Bottom_T.  So in that "undefined" case, when the component is
+   not found in the non-resolved type (which includes all the
+   components of the parent type), then resolve it and see if we
+   get better luck once expanded.
+
+   In the case of homonyms in the derived tagged type, we don't
+   guaranty anything, and pick the one that's easiest for us
+   to program.
+
    Returns 1 if found, 0 otherwise.  */
 
 static int
@@ -7241,6 +7291,7 @@ find_struct_field (const char *name, struct type *type, int offset,
 		   int *index_p)
 {
   int i;
+  int parent_offset = -1;
 
   type = ada_check_typedef (type);
 
@@ -7261,6 +7312,20 @@ find_struct_field (const char *name, struct type *type, int offset,
 
       if (t_field_name == NULL)
         continue;
+
+      else if (ada_is_parent_field (type, i))
+        {
+	  /* This is a field pointing us to the parent type of a tagged
+	     type.  As hinted in this function's documentation, we give
+	     preference to fields in the current record first, so what
+	     we do here is just record the index of this field before
+	     we skip it.  If it turns out we couldn't find our field
+	     in the current record, then we'll get back to it and search
+	     inside it whether the field might exist in the parent.  */
+
+          parent_offset = i;
+          continue;
+        }
 
       else if (name != NULL && field_name_match (t_field_name, name))
         {
@@ -7304,6 +7369,21 @@ find_struct_field (const char *name, struct type *type, int offset,
       else if (index_p != NULL)
 	*index_p += 1;
     }
+
+  /* Field not found so far.  If this is a tagged type which
+     has a parent, try finding that field in the parent now.  */
+
+  if (parent_offset != -1)
+    {
+      int bit_pos = TYPE_FIELD_BITPOS (type, parent_offset);
+      int fld_offset = offset + bit_pos / 8;
+
+      if (find_struct_field (name, TYPE_FIELD_TYPE (type, parent_offset),
+                             fld_offset, field_type_p, byte_offset_p,
+                             bit_offset_p, bit_size_p, index_p))
+        return 1;
+    }
+
   return 0;
 }
 
@@ -7323,13 +7403,17 @@ num_visible_fields (struct type *type)
    and search in it assuming it has (class) type TYPE.
    If found, return value, else return NULL.
 
-   Searches recursively through wrapper fields (e.g., '_parent').  */
+   Searches recursively through wrapper fields (e.g., '_parent').
+
+   In the case of homonyms in the tagged types, please refer to the
+   long explanation in find_struct_field's function documentation.  */
 
 static struct value *
 ada_search_struct_field (const char *name, struct value *arg, int offset,
                          struct type *type)
 {
   int i;
+  int parent_offset = -1;
 
   type = ada_check_typedef (type);
   for (i = 0; i < TYPE_NFIELDS (type); i += 1)
@@ -7338,6 +7422,20 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
 
       if (t_field_name == NULL)
         continue;
+
+      else if (ada_is_parent_field (type, i))
+        {
+	  /* This is a field pointing us to the parent type of a tagged
+	     type.  As hinted in this function's documentation, we give
+	     preference to fields in the current record first, so what
+	     we do here is just record the index of this field before
+	     we skip it.  If it turns out we couldn't find our field
+	     in the current record, then we'll get back to it and search
+	     inside it whether the field might exist in the parent.  */
+
+          parent_offset = i;
+          continue;
+        }
 
       else if (field_name_match (t_field_name, name))
         return ada_value_primitive_field (arg, offset, i, type);
@@ -7374,6 +7472,20 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
             }
         }
     }
+
+  /* Field not found so far.  If this is a tagged type which
+     has a parent, try finding that field in the parent now.  */
+
+  if (parent_offset != -1)
+    {
+      struct value *v = ada_search_struct_field (
+	name, arg, offset + TYPE_FIELD_BITPOS (type, parent_offset) / 8,
+	TYPE_FIELD_TYPE (type, parent_offset));
+
+      if (v != NULL)
+        return v;
+    }
+
   return NULL;
 }
 
@@ -7498,7 +7610,29 @@ ada_value_struct_elt (struct value *arg, const char *name, int no_err)
       else
 	address = value_address (ada_coerce_ref (arg));
 
-      t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL, address, NULL, 1);
+      /* Check to see if this is a tagged type.  We also need to handle
+         the case where the type is a reference to a tagged type, but
+         we have to be careful to exclude pointers to tagged types.
+         The latter should be shown as usual (as a pointer), whereas
+         a reference should mostly be transparent to the user.  */
+
+      if (ada_is_tagged_type (t1, 0)
+          || (TYPE_CODE (t1) == TYPE_CODE_REF
+              && ada_is_tagged_type (TYPE_TARGET_TYPE (t1), 0)))
+        {
+          /* We first try to find the searched field in the current type.
+	     If not found then let's look in the fixed type.  */
+
+          if (!find_struct_field (name, t1, 0,
+                                  &field_type, &byte_offset, &bit_offset,
+                                  &bit_size, NULL))
+	    t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL,
+                                    address, NULL, 1);
+        }
+      else
+        t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL,
+                                address, NULL, 1);
+
       if (find_struct_field (name, t1, 0,
                              &field_type, &byte_offset, &bit_offset,
                              &bit_size, NULL))
@@ -7557,6 +7691,9 @@ type_as_string (struct type *type)
 
    Looks recursively into variant clauses and parent types.
 
+   In the case of homonyms in the tagged types, please refer to the
+   long explanation in find_struct_field's function documentation.
+
    If NOERR is nonzero, return NULL if NAME is not suitably defined or
    TYPE is not a type of the right kind.  */
 
@@ -7565,6 +7702,7 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
                             int noerr)
 {
   int i;
+  int parent_offset = -1;
 
   if (name == NULL)
     goto BadName;
@@ -7599,6 +7737,20 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
 
       if (t_field_name == NULL)
         continue;
+
+      else if (ada_is_parent_field (type, i))
+        {
+	  /* This is a field pointing us to the parent type of a tagged
+	     type.  As hinted in this function's documentation, we give
+	     preference to fields in the current record first, so what
+	     we do here is just record the index of this field before
+	     we skip it.  If it turns out we couldn't find our field
+	     in the current record, then we'll get back to it and search
+	     inside it whether the field might exist in the parent.  */
+
+          parent_offset = i;
+          continue;
+        }
 
       else if (field_name_match (t_field_name, name))
 	return TYPE_FIELD_TYPE (type, i);
@@ -7639,6 +7791,19 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
         }
 
     }
+
+    /* Field not found so far.  If this is a tagged type which
+       has a parent, try finding that field in the parent now.  */
+
+    if (parent_offset != -1)
+      {
+        struct type *t;
+
+        t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (type, parent_offset),
+                                        name, 0, 1);
+        if (t != NULL)
+	  return t;
+      }
 
 BadName:
   if (!noerr)

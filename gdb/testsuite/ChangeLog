@@ -1,3 +1,7 @@
+2017-12-15  Xavier Roirand  <roirand@adacore.com>
+
+	* gdb.ada/same_component_name: New testcase.
+
 2017-12-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/str_binop_equal: New testcase.

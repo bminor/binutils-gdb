@@ -1,3 +1,12 @@
+2017-12-15  Xavier Roirand  <roirand@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_field): Handle field search
+	in case of homonyms.
+	(find_struct_field): Ditto.
+	(ada_search_struct_field): Ditto.
+	(ada_value_struct_elt): Ditto.
+	(ada_lookup_struct_elt_type): Ditto.
+
 2017-12-14  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python/py-breakpoint.c (bppy_init): Use 'O' format specifier
