@@ -47,7 +47,6 @@ proc objcopy_test {testname srcfile} {
     global copyfile
 
     if {![binutils_assemble $srcdir/$subdir/${srcfile} $tempfile]} then {
- 	perror "unresolved $testname"
 	unresolved "objcopy ($testname)"
 	remote_file host delete $tempfile
 	return
