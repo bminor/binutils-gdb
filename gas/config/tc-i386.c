@@ -6437,7 +6437,7 @@ build_modrm_byte (void)
 	  if (i.tm.opcode_modifier.vexvvvv == VEXXDS)
 	    {
 	      /* For instructions with VexNDS, the register-only source
-		 operand must be 32/64bit integer, XMM, YMM or ZMM
+		 operand must be a 32/64bit integer, XMM, YMM, ZMM, or mask
 		 register.  It is encoded in VEX prefix.  We need to
 		 clear RegMem bit before calling operand_type_equal.  */
 
@@ -6459,7 +6459,7 @@ build_modrm_byte (void)
 	      op.bitfield.regmem = 0;
 	      if ((dest + 1) >= i.operands
 		  || (!op.bitfield.reg32
-		      && op.bitfield.reg64
+		      && !op.bitfield.reg64
 		      && !operand_type_equal (&op, &regxmm)
 		      && !operand_type_equal (&op, &regymm)
 		      && !operand_type_equal (&op, &regzmm)
