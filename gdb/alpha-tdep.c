@@ -767,10 +767,8 @@ static const int stq_c_opcode = 0x2f;
    the sequence.  */
 
 static std::vector<CORE_ADDR>
-alpha_deal_with_atomic_sequence (struct regcache *regcache)
+alpha_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = regcache->arch ();
-  CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
   CORE_ADDR closing_insn; /* Instruction that closes the atomic sequence.  */
@@ -1723,9 +1721,17 @@ alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
 std::vector<CORE_ADDR>
 alpha_software_single_step (struct regcache *regcache)
 {
-  CORE_ADDR pc = alpha_next_pc (regcache, regcache_read_pc (regcache));
+  struct gdbarch *gdbarch = regcache->arch ();
 
-  return {pc};
+  CORE_ADDR pc = regcache_read_pc (regcache);
+
+  std::vector<CORE_ADDR> next_pcs
+    = alpha_deal_with_atomic_sequence (gdbarch, pc);
+  if (!next_pcs.empty ())
+    return next_pcs;
+
+  CORE_ADDR next_pc = alpha_next_pc (regcache, pc);
+  return {next_pc};
 }
 
 
@@ -1821,7 +1827,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_cannot_step_breakpoint (gdbarch, 1);
 
   /* Handles single stepping of atomic sequences.  */
-  set_gdbarch_software_single_step (gdbarch, alpha_deal_with_atomic_sequence);
+  set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

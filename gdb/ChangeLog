@@ -1,3 +1,14 @@
+2017-12-15  Richard Henderson  <rth@redhat.com>
+	    Uros Bizjak  <ubizjak@gmail.com>
+
+	PR gdb/19061
+	* alpha-tdep.c (alpha_software_single_step): Call
+	alpha_deal_with_atomic_sequence here.
+	(set_gdbarch_software_single_step): Set to
+	alpha_software_single_step.
+	* nat/linux-ptrace.h [__alpha__]: Define GDB_ARCH_IS_TRAP_BRKPT
+	and GDB_ARCH_IS_TRAP_HWBKPT.
+
 2017-12-15  Yao Qi  <yao.qi@linaro.org>
 
 	* unittests/memory-map-selftests.c: Wrap test with HAVE_LIBEXPAT.
