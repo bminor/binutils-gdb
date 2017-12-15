@@ -1,3 +1,7 @@
+2017-12-15  Yao Qi  <yao.qi@linaro.org>
+
+	* unittests/memory-map-selftests.c: Wrap test with HAVE_LIBEXPAT.
+
 2017-12-15  Xavier Roirand  <roirand@adacore.com>
 
 	* ada-lang.c (ada_value_primitive_field): Handle field search
