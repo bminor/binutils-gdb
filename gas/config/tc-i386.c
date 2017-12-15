@@ -4968,9 +4968,9 @@ match_template (char mnem_suffix)
 	       && !operand_types[0].bitfield.regymm
 	       && !operand_types[0].bitfield.regzmm)
 	      || (!operand_types[t->operands > 1].bitfield.regmmx
-		  && operand_types[t->operands > 1].bitfield.regxmm
-		  && operand_types[t->operands > 1].bitfield.regymm
-		  && operand_types[t->operands > 1].bitfield.regzmm))
+		  && !operand_types[t->operands > 1].bitfield.regxmm
+		  && !operand_types[t->operands > 1].bitfield.regymm
+		  && !operand_types[t->operands > 1].bitfield.regzmm))
 	  && (t->base_opcode != 0x0fc7
 	      || t->extension_opcode != 1 /* cmpxchg8b */))
 	continue;
@@ -4985,7 +4985,7 @@ match_template (char mnem_suffix)
 	       && ((!operand_types[0].bitfield.regmmx
 		    && !operand_types[0].bitfield.regxmm)
 		   || (!operand_types[t->operands > 1].bitfield.regmmx
-		       && operand_types[t->operands > 1].bitfield.regxmm)))
+		       && !operand_types[t->operands > 1].bitfield.regxmm)))
 	continue;
 
       /* Do not verify operands when there are none.  */

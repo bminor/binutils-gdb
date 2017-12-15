@@ -1,5 +1,10 @@
 2017-12-15  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (match_template): Add missing ! to
+	reg{x,y,z}mm checks in q- and l-suffix handling.
+
+2017-12-15  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (build_modrm_byte): Add missing ! to reg64
 	check leading to abort().
 
