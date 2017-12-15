@@ -1,3 +1,12 @@
+2017-12-15  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (adc, add, and, cmp, cmps, in, ins, lods, mov,
+	movabs, movq, movs, or, out, outs, ptwrite, rcl, rcr, rol, ror,
+	sal, sar, sbb, scas, scmp, shl, shr, slod, smov, ssca, ssto,
+	stos, sub, test, xor): Drop CheckRegSize from variants not
+	allowing for two (or more) register operands.
+	* i386-tbl.h: Re-generate.
+
 2017-12-13  Jim Wilson  <jimw@sifive.com>
 
 	PR 22599
