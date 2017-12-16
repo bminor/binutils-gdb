@@ -55,7 +55,7 @@ static int or1k_debug = 0;
 
 static void
 show_or1k_debug (struct ui_file *file, int from_tty,
-		  struct cmd_list_element *c, const char *value)
+		 struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("OpenRISC debugging is %s.\n"), value);
 }
@@ -133,7 +133,7 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
 	  /* Check we got something, and if so skip on.  */
 	  if (start_ptr == end_ptr)
 	    error (_("bitstring \"%s\" at offset %d has no length field."),
-			format, i);
+		   format, i);
 
 	  i += end_ptr - start_ptr;
 
@@ -142,7 +142,7 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
 	     just should not be wrong.  */
 	  if ('b' != format[i++])
 	    error (_("bitstring \"%s\" at offset %d has no terminating 'b'."),
-			format, i);
+		   format, i);
 
 	  /* Break out the field.  There is a special case with a bit width
 	     of 32.  */
@@ -159,7 +159,7 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
 
 	default:
 	  error (_("invalid character in bitstring \"%s\" at offset %d."),
-		      format, i);
+		 format, i);
 	  break;
 	}
     }
@@ -372,9 +372,9 @@ or1k_single_step_through_delay (struct gdbarch *gdbarch,
     return 0;
 
   insn = cgen_lookup_insn (tdep->gdb_cgen_cpu_desc,
-			    NULL,
-			    or1k_fetch_instruction (gdbarch, ppc),
-			    NULL, 32, &tmp_fields, 0);
+			   NULL,
+			   or1k_fetch_instruction (gdbarch, ppc),
+			   NULL, 32, &tmp_fields, 0);
 
   /* NULL here would mean the last instruction was not understood by cgen.
      This should not usually happen, but if does its not a delay slot.  */
@@ -942,8 +942,8 @@ or1k_frame_cache (struct frame_info *this_frame, void **prologue_cache)
      have executed the code.  Check we have a sane prologue size, and if
      zero we are frameless and can give up here.  */
   if (end_addr < start_addr)
-    error (_("end addr 0x%08x is less than start addr 0x%08x"),
-		(unsigned int) end_addr, (unsigned int) start_addr);
+    error (_("end addr %s is less than start addr %s"),
+	   paddress (gdbarch, end_addr), paddress (gdbarch, start_addr));
 
   if (end_addr == start_addr)
     frame_size = 0;

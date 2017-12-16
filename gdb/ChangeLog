@@ -1,5 +1,13 @@
 2017-12-17  Stafford Horne  <shorne@gmail.com>
 
+	* gdb/or1k-tdep.c (show_or1k_debug): Fix function parameter alignment.
+	(or1k_analyse_inst): Likewise.
+	(or1k_single_step_through_delay): Likewise.
+	(or1k_frame_cache): Fix parameter alignment and use paddress()
+	instead of %x.
+
+2017-12-17  Stafford Horne  <shorne@gmail.com>
+
 	* NEWS (Changes since GDB 8.0): Mention new or1k target and new
 	commands to set/show or1k debug.
 
