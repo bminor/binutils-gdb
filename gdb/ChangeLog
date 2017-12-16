@@ -1,4 +1,9 @@
 2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* typeprint.c (whatis_exp): Fix ARI warning and reindent "if"
+	condition.
+
+2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	PR cli/16224

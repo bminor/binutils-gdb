@@ -446,9 +446,9 @@ whatis_exp (const char *exp, int show)
 		  {
 		    /* Filter out languages which don't implement the
 		       feature.  */
-		    if (show > 0 &&
-			(current_language->la_language == language_c
-			 || current_language->la_language == language_cplus))
+		    if (show > 0
+			&& (current_language->la_language == language_c
+			    || current_language->la_language == language_cplus))
 		      {
 			flags.print_offsets = 1;
 			flags.print_typedefs = 0;
