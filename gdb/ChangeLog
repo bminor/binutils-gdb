@@ -1,3 +1,8 @@
+2017-12-17  Stafford Horne  <shorne@gmail.com>
+
+	* NEWS (Changes since GDB 8.0): Mention new or1k target and new
+	commands to set/show or1k debug.
+
 2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* typeprint.c (whatis_exp): Fix ARI warning and reindent "if"

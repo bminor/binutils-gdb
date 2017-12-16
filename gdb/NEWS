@@ -210,6 +210,9 @@ maint info selftests
 starti
   Start the debugged program stopping at the first instruction.
 
+set|show debug or1k
+  Control display of debugging messages related to OpenRISC targets.
+
 set|show print type nested-type-limit
   Set and show the limit of nesting level for nested types that the
   type printer will show.
@@ -252,6 +255,7 @@ FreeBSD/arm			arm*-*-freebsd*
 
 FreeBSD/aarch64			aarch64*-*-freebsd*
 FreeBSD/arm			arm*-*-freebsd*
+OpenRISC ELF 			or1k*-*-elf
 
 * Removed targets and native configurations
 
