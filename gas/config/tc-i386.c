@@ -7258,6 +7258,12 @@ check_prefix:
 	      break;
 	    case 1:
 	      break;
+	    case 0:
+	      /* Check for pseudo prefixes.  */
+	      as_bad_where (insn_start_frag->fr_file,
+			    insn_start_frag->fr_line,
+			     _("pseudo prefix without instruction"));
+	      return;
 	    default:
 	      abort ();
 	    }
