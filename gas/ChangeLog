@@ -1,5 +1,15 @@
 2017-12-18  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (operand_type_check): Extend comment.
+	(match_reg_size): Also check .tbyte.
+	(match_mem_size): No longer check .tbyte here.
+	(md_assemble): Drop .floatacc check.
+	(check_byte_reg): Drop .floatreg and .floatacc checks.
+	(process_operands, parse_real_register): Replace .floatreg
+	check.
+
+2017-12-18  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (operand_type_check, pi): Switch .reg<N> to
 	just .reg.
 	(operand_size_match): Qualify .anysize check with .reg one.

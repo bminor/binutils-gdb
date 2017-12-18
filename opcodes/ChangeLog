@@ -1,5 +1,15 @@
 2017-12-18  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_type_shorthands): Add FloatAcc and
+	FloatReg.
+	(operand_types): Drop FloatAcc and FloatReg.
+	* i386-opc.h (enum of operand types): Likewise. Extend comment.
+	(union i386_operand_type): Drop floatacc and floatreg.
+	* i386-reg.tbl (st, st(0)): Replace FloatAcc by Acc.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2017-12-18  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (operand_type_shorthands): New.
 	(opcode_modifiers): Replace Reg<N> with just Reg.
 	(set_bitfield_from_cpu_flag_init): Rename to

@@ -1807,7 +1807,7 @@ operand_type_check (i386_operand_type t, enum operand_type c)
   return 0;
 }
 
-/* Return 1 if there is no conflict in 8bit/16bit/32bit/64bit on
+/* Return 1 if there is no conflict in 8bit/16bit/32bit/64bit/80bit on
    operand J for instruction template T.  */
 
 static INLINE int
@@ -1820,7 +1820,9 @@ match_reg_size (const insn_template *t, unsigned int j)
 	   || (i.types[j].bitfield.dword
 	       && !t->operand_types[j].bitfield.dword)
 	   || (i.types[j].bitfield.qword
-	       && !t->operand_types[j].bitfield.qword));
+	       && !t->operand_types[j].bitfield.qword)
+	   || (i.types[j].bitfield.tbyte
+	       && !t->operand_types[j].bitfield.tbyte));
 }
 
 /* Return 1 if there is no conflict in any size on operand J for
@@ -1835,8 +1837,6 @@ match_mem_size (const insn_template *t, unsigned int j)
 		&& !t->operand_types[j].bitfield.unspecified)
 	       || (i.types[j].bitfield.fword
 		   && !t->operand_types[j].bitfield.fword)
-	       || (i.types[j].bitfield.tbyte
-		   && !t->operand_types[j].bitfield.tbyte)
 	       || (i.types[j].bitfield.xmmword
 		   && !t->operand_types[j].bitfield.xmmword)
 	       || (i.types[j].bitfield.ymmword
@@ -3768,8 +3768,7 @@ md_assemble (char *line)
     for (j = 0; j < i.operands; j++)
       if (i.types[j].bitfield.inoutportreg
 	  || i.types[j].bitfield.shiftcount
-	  || i.types[j].bitfield.acc
-	  || i.types[j].bitfield.floatacc)
+	  || i.types[j].bitfield.acc)
 	i.reg_operands--;
 
   /* ImmExt should be processed after SSE2AVX.  */
@@ -5661,9 +5660,7 @@ check_byte_reg (void)
 	  || i.types[op].bitfield.sreg3
 	  || i.types[op].bitfield.control
 	  || i.types[op].bitfield.debug
-	  || i.types[op].bitfield.test
-	  || i.types[op].bitfield.floatreg
-	  || i.types[op].bitfield.floatacc)
+	  || i.types[op].bitfield.test)
 	{
 	  as_bad (_("`%s%s' not allowed with `%s%c'"),
 		  register_prefix,
@@ -6122,7 +6119,7 @@ duplicate:
 	     0 or 1.  */
 	  unsigned int op;
 
-	  if (i.types[0].bitfield.floatreg
+	  if ((i.types[0].bitfield.reg && i.types[0].bitfield.tbyte)
 	      || operand_type_check (i.types[0], reg))
 	    op = 0;
 	  else
@@ -9774,7 +9771,7 @@ parse_real_register (char *reg_string, char **end_op)
       && !cpu_arch_flags.bitfield.cpui386)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.floatreg
+  if (r->reg_type.bitfield.tbyte
       && !cpu_arch_flags.bitfield.cpu8087
       && !cpu_arch_flags.bitfield.cpu287
       && !cpu_arch_flags.bitfield.cpu387)

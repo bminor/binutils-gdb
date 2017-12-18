@@ -687,8 +687,6 @@ enum
 {
   /* Register (qualified by Byte, Word, etc) */
   Reg = 0,
-  /* Floating pointer stack register */
-  FloatReg,
   /* MMX register */
   RegMMX,
   /* SSE register */
@@ -740,10 +738,8 @@ enum
   Disp32S,
   /* 64 bit displacement */
   Disp64,
-  /* Accumulator %al/%ax/%eax/%rax */
+  /* Accumulator %al/%ax/%eax/%rax/%st(0) */
   Acc,
-  /* Floating pointer top stack register %st(0) */
-  FloatAcc,
   /* Register which can be used for base or index in memory operand.  */
   BaseIndex,
   /* Register to hold in/out port addr = dx */
@@ -809,7 +805,6 @@ typedef union i386_operand_type
   struct
     {
       unsigned int reg:1;
-      unsigned int floatreg:1;
       unsigned int regmmx:1;
       unsigned int regxmm:1;
       unsigned int regymm:1;
@@ -833,7 +828,6 @@ typedef union i386_operand_type
       unsigned int disp32s:1;
       unsigned int disp64:1;
       unsigned int acc:1;
-      unsigned int floatacc:1;
       unsigned int baseindex:1;
       unsigned int inoutportreg:1;
       unsigned int shiftcount:1;
