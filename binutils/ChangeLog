@@ -1,3 +1,10 @@
+2017-12-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 22532
+	* dwarf.c (read_and_display_attr_value): Add attributes that might
+	use the DW_FORM_exprloc form, and if so, display the decoded
+	location expression list.
+
 2017-12-14  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/utils-lib.exp (default_binutils_assemble_flags):
