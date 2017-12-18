@@ -335,6 +335,14 @@ static initializer cpu_flag_init[] =
     "CpuAVX512_BITALG" },
 };
 
+static const initializer operand_type_shorthands[] =
+{
+  { "Reg8",     "Reg|Byte" },
+  { "Reg16",    "Reg|Word" },
+  { "Reg32",    "Reg|Dword" },
+  { "Reg64",    "Reg|Qword" },
+};
+
 static initializer operand_type_init[] =
 {
   { "OPERAND_TYPE_NONE",
@@ -631,10 +639,7 @@ static bitfield opcode_modifiers[] =
 
 static bitfield operand_types[] =
 {
-  BITFIELD (Reg8),
-  BITFIELD (Reg16),
-  BITFIELD (Reg32),
-  BITFIELD (Reg64),
+  BITFIELD (Reg),
   BITFIELD (FloatReg),
   BITFIELD (RegMMX),
   BITFIELD (RegXMM),
@@ -789,9 +794,8 @@ next_field (char *str, char sep, char **next, char *last)
 static void set_bitfield (char *, bitfield *, int, unsigned int, int);
 
 static int
-set_bitfield_from_cpu_flag_init (char *f, bitfield *array,
-				 int value, unsigned int size,
-				 int lineno)
+set_bitfield_from_shorthand (char *f, bitfield *array, unsigned int size,
+			     int lineno)
 {
   char *str, *next, *last;
   unsigned int i;
@@ -801,6 +805,22 @@ set_bitfield_from_cpu_flag_init (char *f, bitfield *array,
       {
 	/* Turn on selective bits.  */
 	char *init = xstrdup (cpu_flag_init[i].init);
+	last = init + strlen (init);
+	for (next = init; next && next < last; )
+	  {
+	    str = next_field (next, '|', &next, last);
+	    if (str)
+	      set_bitfield (str, array, 1, size, lineno);
+	  }
+	free (init);
+	return 0;
+      }
+
+  for (i = 0; i < ARRAY_SIZE (operand_type_shorthands); i++)
+    if (strcmp (operand_type_shorthands[i].name, f) == 0)
+      {
+	/* Turn on selective bits.  */
+	char *init = xstrdup (operand_type_shorthands[i].init);
 	last = init + strlen (init);
 	for (next = init; next && next < last; )
 	  {
@@ -862,8 +882,8 @@ set_bitfield (char *f, bitfield *array, int value,
 	}
     }
 
-  /* Handle CPU_XXX_FLAGS.  */
-  if (!set_bitfield_from_cpu_flag_init (f, array, value, size, lineno))
+  /* Handle shorthands.  */
+  if (value == 1 && !set_bitfield_from_shorthand (f, array, size, lineno))
     return;
 
   if (lineno != -1)

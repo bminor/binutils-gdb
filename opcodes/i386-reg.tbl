@@ -21,7 +21,7 @@
 // Make %st first as we test for it.
 st, FloatReg|FloatAcc, 0, 0, 11, 33
 // 8 bit regs
-al, Reg8|Acc|Byte, 0, 0, Dw2Inval, Dw2Inval
+al, Reg8|Acc, 0, 0, Dw2Inval, Dw2Inval
 cl, Reg8|ShiftCount, 0, 1, Dw2Inval, Dw2Inval
 dl, Reg8, 0, 2, Dw2Inval, Dw2Inval
 bl, Reg8, 0, 3, Dw2Inval, Dw2Inval
@@ -46,7 +46,7 @@ r13b, Reg8, RegRex|RegRex64, 5, Dw2Inval, Dw2Inval
 r14b, Reg8, RegRex|RegRex64, 6, Dw2Inval, Dw2Inval
 r15b, Reg8, RegRex|RegRex64, 7, Dw2Inval, Dw2Inval
 // 16 bit regs
-ax, Reg16|Acc|Word, 0, 0, Dw2Inval, Dw2Inval
+ax, Reg16|Acc, 0, 0, Dw2Inval, Dw2Inval
 cx, Reg16, 0, 1, Dw2Inval, Dw2Inval
 dx, Reg16|InOutPortReg, 0, 2, Dw2Inval, Dw2Inval
 bx, Reg16|BaseIndex, 0, 3, Dw2Inval, Dw2Inval
@@ -63,7 +63,7 @@ r13w, Reg16, RegRex, 5, Dw2Inval, Dw2Inval
 r14w, Reg16, RegRex, 6, Dw2Inval, Dw2Inval
 r15w, Reg16, RegRex, 7, Dw2Inval, Dw2Inval
 // 32 bit regs
-eax, Reg32|BaseIndex|Acc|Dword, 0, 0, 0, Dw2Inval
+eax, Reg32|BaseIndex|Acc, 0, 0, 0, Dw2Inval
 ecx, Reg32|BaseIndex, 0, 1, 1, Dw2Inval
 edx, Reg32|BaseIndex, 0, 2, 2, Dw2Inval
 ebx, Reg32|BaseIndex, 0, 3, 3, Dw2Inval
@@ -79,7 +79,7 @@ r12d, Reg32|BaseIndex, RegRex, 4, Dw2Inval, Dw2Inval
 r13d, Reg32|BaseIndex, RegRex, 5, Dw2Inval, Dw2Inval
 r14d, Reg32|BaseIndex, RegRex, 6, Dw2Inval, Dw2Inval
 r15d, Reg32|BaseIndex, RegRex, 7, Dw2Inval, Dw2Inval
-rax, Reg64|BaseIndex|Acc|Qword, 0, 0, Dw2Inval, 0
+rax, Reg64|BaseIndex|Acc, 0, 0, Dw2Inval, 0
 rcx, Reg64|BaseIndex, 0, 1, Dw2Inval, 2
 rdx, Reg64|BaseIndex, 0, 2, Dw2Inval, 1
 rbx, Reg64|BaseIndex, 0, 3, Dw2Inval, 3

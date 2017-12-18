@@ -685,14 +685,8 @@ typedef struct i386_opcode_modifier
 
 enum
 {
-  /* 8bit register */
-  Reg8 = 0,
-  /* 16bit register */
-  Reg16,
-  /* 32bit register */
-  Reg32,
-  /* 64bit register */
-  Reg64,
+  /* Register (qualified by Byte, Word, etc) */
+  Reg = 0,
   /* Floating pointer stack register */
   FloatReg,
   /* MMX register */
@@ -814,10 +808,7 @@ typedef union i386_operand_type
 {
   struct
     {
-      unsigned int reg8:1;
-      unsigned int reg16:1;
-      unsigned int reg32:1;
-      unsigned int reg64:1;
+      unsigned int reg:1;
       unsigned int floatreg:1;
       unsigned int regmmx:1;
       unsigned int regxmm:1;

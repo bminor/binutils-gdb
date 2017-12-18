@@ -451,7 +451,7 @@ static int i386_intel_simplify (expressionS *e)
 	    {
 	      resolve_expression (scale);
 	      if (scale->X_op != O_constant
-		  || intel_state.index->reg_type.bitfield.reg16)
+		  || intel_state.index->reg_type.bitfield.word)
 		scale->X_add_number = 0;
 	      intel_state.scale_factor *= scale->X_add_number;
 	    }
@@ -897,8 +897,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	 mode we have to do this here.  */
       if (intel_state.base
 	  && intel_state.index
-	  && intel_state.base->reg_type.bitfield.reg16
-	  && intel_state.index->reg_type.bitfield.reg16
+	  && intel_state.base->reg_type.bitfield.word
+	  && intel_state.index->reg_type.bitfield.word
 	  && intel_state.base->reg_num >= 6
 	  && intel_state.index->reg_num < 6)
 	{

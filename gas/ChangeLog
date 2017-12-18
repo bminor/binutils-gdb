@@ -1,3 +1,23 @@
+2017-12-18  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (operand_type_check, pi): Switch .reg<N> to
+	just .reg.
+	(operand_size_match): Qualify .anysize check with .reg one.
+	Extend .acc check to also cover .reg.
+	(operand_type_register_match): Drop m0 and m1 parameters. Switch
+	.reg<N> to .byte/.word/.dword/.qword. Drop .acc special
+	handling. 
+	(md_assemble): Expand .reg8 checks to .reg plus .bytes ones.
+	(optimize_imm, process_suffix, check_byte_reg, check_long_reg,
+	check_qword_reg, check_word_reg): Expand .reg<N> checks to .reg
+	plus size ones.
+	(match_template): Drop arguments from calls to
+	operand_type_register_match().
+	(build_modrm_byte, i386_addressing_mode, i386_index_check,
+	parse_real_register): Replace .reg<N> checks.
+	* config/tc-i386-intel.c (i386_intel_simplify,
+	i386_intel_operand): Switch .reg16 to .word.
+
 2017-12-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/22623

@@ -1,3 +1,23 @@
+2017-12-18  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (operand_type_shorthands): New.
+	(opcode_modifiers): Replace Reg<N> with just Reg.
+	(set_bitfield_from_cpu_flag_init): Rename to
+	set_bitfield_from_shorthand. Drop value parameter. Process
+	operand_type_shorthands.
+	(set_bitfield): Adjust call accordingly.
+	* i386-opc.h (enum of operand types): Replace Reg<N> with just
+	Reg.
+	(union i386_operand_type): Replace reg<N> with just reg.
+	* i386-opc.tbl (extractps, pextrb, pextrw, pinsrb, pinsrw,
+	vextractps, vpextrb, vpextrw, vpinsrb, vpinsrw): Split into
+	separate register and memory forms.
+	* i386-reg.tbl (al): Drop Byte.
+	(ax): Drop Word.
+	(eax): Drop Dword.
+	(rax): Drop Qword.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
 2017-12-15  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* disassemble.c (disassemble_init_for_target): Don't put PRU
