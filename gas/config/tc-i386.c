@@ -1747,8 +1747,6 @@ static const i386_operand_type disp16_32 = OPERAND_TYPE_DISP16_32;
 static const i386_operand_type anydisp
   = OPERAND_TYPE_ANYDISP;
 static const i386_operand_type regxmm = OPERAND_TYPE_REGXMM;
-static const i386_operand_type regymm = OPERAND_TYPE_REGYMM;
-static const i386_operand_type regzmm = OPERAND_TYPE_REGZMM;
 static const i386_operand_type regmask = OPERAND_TYPE_REGMASK;
 static const i386_operand_type imm8 = OPERAND_TYPE_IMM8;
 static const i386_operand_type imm8s = OPERAND_TYPE_IMM8S;
@@ -1973,7 +1971,9 @@ mismatch:
 }
 
 /* If given types g0 and g1 are registers they must be of the same type
-   unless the expected operand type register overlap is null.  */
+   unless the expected operand type register overlap is null.
+   Memory operand size of certain SIMD instructions is also being checked
+   here.  */
 
 static INLINE int
 operand_type_register_match (i386_operand_type g0,
@@ -1981,22 +1981,36 @@ operand_type_register_match (i386_operand_type g0,
 			     i386_operand_type g1,
 			     i386_operand_type t1)
 {
-  if (!operand_type_check (g0, reg))
+  if (!g0.bitfield.reg
+      && !g0.bitfield.regsimd
+      && (!operand_type_check (g0, anymem)
+	  || g0.bitfield.unspecified
+	  || !t0.bitfield.regsimd))
     return 1;
 
-  if (!operand_type_check (g1, reg))
+  if (!g1.bitfield.reg
+      && !g1.bitfield.regsimd
+      && (!operand_type_check (g1, anymem)
+	  || g1.bitfield.unspecified
+	  || !t1.bitfield.regsimd))
     return 1;
 
   if (g0.bitfield.byte == g1.bitfield.byte
       && g0.bitfield.word == g1.bitfield.word
       && g0.bitfield.dword == g1.bitfield.dword
-      && g0.bitfield.qword == g1.bitfield.qword)
+      && g0.bitfield.qword == g1.bitfield.qword
+      && g0.bitfield.xmmword == g1.bitfield.xmmword
+      && g0.bitfield.ymmword == g1.bitfield.ymmword
+      && g0.bitfield.zmmword == g1.bitfield.zmmword)
     return 1;
 
   if (!(t0.bitfield.byte & t1.bitfield.byte)
       && !(t0.bitfield.word & t1.bitfield.word)
       && !(t0.bitfield.dword & t1.bitfield.dword)
-      && !(t0.bitfield.qword & t1.bitfield.qword))
+      && !(t0.bitfield.qword & t1.bitfield.qword)
+      && !(t0.bitfield.xmmword & t1.bitfield.xmmword)
+      && !(t0.bitfield.ymmword & t1.bitfield.ymmword)
+      && !(t0.bitfield.zmmword & t1.bitfield.zmmword))
     return 1;
 
   i.error = register_type_mismatch;
@@ -3240,8 +3254,22 @@ build_vex_prefix (const insn_template *t)
 
   if (i.tm.opcode_modifier.vex == VEXScalar)
     vector_length = avxscalar;
+  else if (i.tm.opcode_modifier.vex == VEX256)
+    vector_length = 1;
   else
-    vector_length = i.tm.opcode_modifier.vex == VEX256 ? 1 : 0;
+    {
+      unsigned int op;
+
+      vector_length = 0;
+      for (op = 0; op < t->operands; ++op)
+	if (t->operand_types[op].bitfield.xmmword
+	    && t->operand_types[op].bitfield.ymmword
+	    && i.types[op].bitfield.ymmword)
+	  {
+	    vector_length = 1;
+	    break;
+	  }
+    }
 
   switch ((i.tm.base_opcode >> 8) & 0xff)
     {
@@ -6066,10 +6094,7 @@ duplicate:
   else if (i.tm.opcode_modifier.implicitquadgroup)
     {
       /* The second operand must be {x,y,z}mmN, where N is a multiple of 4. */
-      gas_assert (i.operands >= 2
-          && (operand_type_equal (&i.types[1], &regxmm)
-              || operand_type_equal (&i.types[1], &regymm)
-              || operand_type_equal (&i.types[1], &regzmm)));
+      gas_assert (i.operands >= 2 && i.types[1].bitfield.regsimd);
       unsigned int regnum = register_number (i.op[1].regs);
       unsigned int first_reg_in_group = regnum & ~3;
       unsigned int last_reg_in_group = first_reg_in_group + 3;
@@ -6230,9 +6255,7 @@ build_modrm_byte (void)
                           && i.types[0].bitfield.vec_imm4
                           && (i.tm.opcode_modifier.vexw == VEXW0
                               || i.tm.opcode_modifier.vexw == VEXW1)
-                          && (operand_type_equal (&i.tm.operand_types[dest], &regxmm)
-                              || operand_type_equal (&i.tm.operand_types[dest], &regymm)
-                              || operand_type_equal (&i.tm.operand_types[dest], &regzmm)))));
+                          && i.tm.operand_types[dest].bitfield.regsimd)));
 
       if (i.imm_operands == 0)
         {
@@ -6264,12 +6287,7 @@ build_modrm_byte (void)
               nds = tmp;
             }
 
-          gas_assert (operand_type_equal (&i.tm.operand_types[reg_slot],
-					  &regxmm)
-                      || operand_type_equal (&i.tm.operand_types[reg_slot],
-                                             &regymm)
-                      || operand_type_equal (&i.tm.operand_types[reg_slot],
-                                             &regzmm));
+          gas_assert (i.tm.operand_types[reg_slot].bitfield.regsimd);
           exp->X_op = O_constant;
           exp->X_add_number = register_number (i.op[reg_slot].regs) << 4;
 	  gas_assert ((i.op[reg_slot].regs->reg_flags & RegVRex) == 0);
@@ -6311,22 +6329,13 @@ build_modrm_byte (void)
               i.types[imm_slot].bitfield.imm8 = 1;
             }
 
-          gas_assert (operand_type_equal (&i.tm.operand_types[reg_slot],
-					  &regxmm)
-		      || operand_type_equal (&i.tm.operand_types[reg_slot],
-					     &regymm)
-		      || operand_type_equal (&i.tm.operand_types[reg_slot],
-					     &regzmm));
+          gas_assert (i.tm.operand_types[reg_slot].bitfield.regsimd);
           i.op[imm_slot].imms->X_add_number
               |= register_number (i.op[reg_slot].regs) << 4;
 	  gas_assert ((i.op[reg_slot].regs->reg_flags & RegVRex) == 0);
         }
 
-      gas_assert (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
-                  || operand_type_equal (&i.tm.operand_types[nds],
-                                         &regymm)
-                  || operand_type_equal (&i.tm.operand_types[nds],
-                                         &regzmm));
+      gas_assert (i.tm.operand_types[nds].bitfield.regsimd);
       i.vex.register_specifier = i.op[nds].regs;
     }
   else
@@ -6450,9 +6459,7 @@ build_modrm_byte (void)
 	      if ((dest + 1) >= i.operands
 		  || ((!op.bitfield.reg
 		       || (!op.bitfield.dword && !op.bitfield.qword))
-		      && !operand_type_equal (&op, &regxmm)
-		      && !operand_type_equal (&op, &regymm)
-		      && !operand_type_equal (&op, &regzmm)
+		      && !op.bitfield.regsimd
 		      && !operand_type_equal (&op, &regmask)))
 		abort ();
 	      i.vex.register_specifier = i.op[vvvv].regs;
@@ -6879,9 +6886,7 @@ build_modrm_byte (void)
 
 	      if ((!type->bitfield.reg
 		   || (!type->bitfield.dword && !type->bitfield.qword))
-		  && !operand_type_equal (type, &regxmm)
-		  && !operand_type_equal (type, &regymm)
-		  && !operand_type_equal (type, &regzmm)
+		  && !type->bitfield.regsimd
 		  && !operand_type_equal (type, &regmask))
 		abort ();
 

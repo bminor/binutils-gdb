@@ -1,5 +1,43 @@
 2017-12-18  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_type_init): Delete OPERAND_TYPE_REGYMM and
+	OPERAND_TYPE_REGZMM entries.
+	* i386-opc.h (enum of opcode modifiers): Extend comment.
+	i386-opc.tbl (vaddpd, vaddps, vaddsubpd, vaddsubps, vandnpd,
+	vandnps, vandpd, vandps, vblendpd, vblendps, vblendvpd,
+	vblendvps, vbroadcastss, vcmpeq_ospd, vcmpeq_osps, vcmpeqpd,
+	vcmpeqps, vcmpeq_uqpd, vcmpeq_uqps, vcmpeq_uspd, vcmpeq_usps,
+	vcmpfalse_ospd, vcmpfalse_osps, vcmpfalsepd, vcmpfalseps,
+	vcmpge_oqpd, vcmpge_oqps, vcmpgepd, vcmpgeps, vcmpgt_oqpd,
+	vcmpgt_oqps, vcmpgtpd, vcmpgtps, vcmple_oqpd, vcmple_oqps,
+	vcmplepd, vcmpleps, vcmplt_oqpd, vcmplt_oqps, vcmpltpd,
+	vcmpltps, vcmpneq_oqpd, vcmpneq_oqps, vcmpneq_ospd,
+	vcmpneq_osps, vcmpneqpd, vcmpneqps, vcmpneq_uspd, vcmpneq_usps,
+	vcmpngepd, vcmpngeps, vcmpnge_uqpd, vcmpnge_uqps, vcmpngtpd,
+	vcmpngtps, vcmpngt_uqpd, vcmpngt_uqps, vcmpnlepd, vcmpnleps,
+	vcmpnle_uqpd, vcmpnle_uqps, vcmpnltpd, vcmpnltps, vcmpnlt_uqpd,
+	vcmpnlt_uqps, vcmpordpd, vcmpordps, vcmpord_spd, vcmpord_sps,
+	vcmppd, vcmpps, vcmptruepd, vcmptrueps, vcmptrue_uspd,
+	vcmptrue_usps, vcmpunordpd, vcmpunordps, vcmpunord_spd,
+	vcmpunord_sps, vcvtdq2ps, vcvtpd2dq, vcvtpd2ps, vcvtps2dq,
+	vcvttpd2dq, vcvttps2dq, vdivpd, vdivps, vdpps, vhaddpd, vhaddps,
+	vhsubpd, vhsubps, vlddqu, vmaskmovpd, vmaskmovps, vmaxpd,
+	vmaxps, vminpd, vminps, vmovapd, vmovaps, vmovdqa, vmovdqu,
+	vmovmskpd, vmovmskps, vmovntdq, vmovntpd, vmovntps, vmovshdup,
+	vmovsldup, vmovupd, vmovups, vmulpd, vmulps, vorpd, vorps,
+	vpermilpd, vpermilps, vptest, vrcpps, vroundpd, vroundps,
+	vrsqrtps, vshufpd, vshufps, vsqrtpd, vsqrtps, vsubpd, vsubps,
+	vtestpd, vtestps, vunpckhpd, vunpckhps, vunpcklpd, vunpcklps,
+	vxorpd, vxorps, vpblendd, vpbroadcastb, vpbroadcastd,
+	vpbroadcastw, vpbroadcastq, vpmaskmovd, vpmaskmovq, vpsllvd,
+	vpsllvq, vpsravd, vpsravq, vpsrlvd, vpsrlvq): Fold 128- and
+	256-bit forms. Use CheckRegSize instead of IgnoreSize where
+	appropriate. Drop Xmmword and Ymmword from the results where
+	possible.
+	* i386-tbl.h: Re-generate.
+
+2017-12-18  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (operand_type_shorthands): Add RegXMM, RegYMM, and
 	RegZMM.
 	(opcode_modifiers): Drop FirstXmm0.

@@ -461,7 +461,7 @@ enum
   /* deprecated fp insn, gets a warning */
   Ugh,
   /* insn has VEX prefix:
-	1: 128bit VEX prefix.
+	1: 128bit VEX prefix (or operand dependent).
 	2: 256bit VEX prefix.
 	3: Scalar VEX prefix.
    */

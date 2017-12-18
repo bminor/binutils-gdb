@@ -1,5 +1,14 @@
 2017-12-18  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (regymm, regzmm): Delete.
+	(operand_type_register_match). Extend comment. Also handle some
+	memory operands here. Extend to cover .regsimd.
+	(build_vex_prefix): Derive vector_length from actual operand
+	size.
+	(process_operands, build_modrm_byte): Use .regsimd.
+
+2017-12-18  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (match_simd_size): New.
 	(match_mem_size): Use it.
 	(operand_size_match): Likewise. Split .reg and .acc checks.
