@@ -1,3 +1,11 @@
+2017-12-19  Alan Modra  <amodra@gmail.com>
+
+	PR 22626
+	* elflink.c (_bfd_elf_link_renumber_dynsyms): Don't set section
+	dynindx when section_sym_count is NULL.
+	(bfd_elf_size_dynamic_sections): Pass NULL section_sym_count to
+	preliminary _bfd_elf_link_renumber_dynsyms call.
+
 2017-11-24  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
