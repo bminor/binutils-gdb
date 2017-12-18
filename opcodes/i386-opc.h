@@ -430,8 +430,6 @@ enum
   /* fake an extra reg operand for clr, imul and special register
      processing for some instructions.  */
   RegKludge,
-  /* The first operand must be xmm0 */
-  FirstXmm0,
   /* An implicit xmm0 as the first operand */
   Implicit1stXmm0,
   /* The HLE prefix is OK:
@@ -643,7 +641,6 @@ typedef struct i386_opcode_modifier
   unsigned int notrackprefixok:1;
   unsigned int islockable:1;
   unsigned int regkludge:1;
-  unsigned int firstxmm0:1;
   unsigned int implicit1stxmm0:1;
   unsigned int hleprefixok:2;
   unsigned int repprefixok:1;
@@ -689,12 +686,8 @@ enum
   Reg = 0,
   /* MMX register */
   RegMMX,
-  /* SSE register */
-  RegXMM,
-  /* AVX registers */
-  RegYMM,
-  /* AVX512 registers */
-  RegZMM,
+  /* Vector registers */
+  RegSIMD,
   /* Vector Mask registers */
   RegMask,
   /* Control register */
@@ -738,7 +731,7 @@ enum
   Disp32S,
   /* 64 bit displacement */
   Disp64,
-  /* Accumulator %al/%ax/%eax/%rax/%st(0) */
+  /* Accumulator %al/%ax/%eax/%rax/%st(0)/%xmm0 */
   Acc,
   /* Register which can be used for base or index in memory operand.  */
   BaseIndex,
@@ -806,9 +799,7 @@ typedef union i386_operand_type
     {
       unsigned int reg:1;
       unsigned int regmmx:1;
-      unsigned int regxmm:1;
-      unsigned int regymm:1;
-      unsigned int regzmm:1;
+      unsigned int regsimd:1;
       unsigned int regmask:1;
       unsigned int control:1;
       unsigned int debug:1;

@@ -1,5 +1,23 @@
 2017-12-18  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_type_shorthands): Add RegXMM, RegYMM, and
+	RegZMM.
+	(opcode_modifiers): Drop FirstXmm0.
+	(operand_types): Replace RegXMM, RegYMM, and RegZMM with just
+	RegSIMD.
+	* i386-opc.h (enum of opcode modifiers): Drop FirstXmm0.
+	(struct i386_opcode_modifier): Drop firstxmm0.
+	(enum of operand types): Replace RegXMM, RegYMM, and RegZMM with
+	just RegSIMD. Extend comment.
+	(union i386_operand_type): Replace regxmm, regymm, and regzmm
+	with just regsimd.
+	* i386-opc.tbl (blendvpd, blendvps, pblendvb, sha256rnds2): Use
+	Acc|Xmmword.
+	* i386-reg.tbl (xmm0): Add Acc.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2017-12-18  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (operand_type_shorthands): Add FloatAcc and
 	FloatReg.
 	(operand_types): Drop FloatAcc and FloatReg.

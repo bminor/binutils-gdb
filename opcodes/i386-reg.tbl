@@ -180,7 +180,7 @@ mm4, RegMMX, 0, 4, 33, 45
 mm5, RegMMX, 0, 5, 34, 46
 mm6, RegMMX, 0, 6, 35, 47
 mm7, RegMMX, 0, 7, 36, 48
-xmm0, RegXMM, 0, 0, 21, 17
+xmm0, RegXMM|Acc, 0, 0, 21, 17
 xmm1, RegXMM, 0, 1, 22, 18
 xmm2, RegXMM, 0, 2, 23, 19
 xmm3, RegXMM, 0, 3, 24, 20

@@ -1,5 +1,23 @@
 2017-12-18  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (match_simd_size): New.
+	(match_mem_size): Use it.
+	(operand_size_match): Likewise. Split .reg and .acc checks.
+	(pi, check_VecOperands, match_template, check_byte_reg,
+	check_long_reg, check_qword_reg, build_modrm_byte,
+	parse_real_register): Replace .regxmm, .regymm, and .regzmm
+	checks.
+	(md_assemble): Qualify .acc check with .xmmword one.
+	(bad_implicit_operand): Delete.
+	(process_operands): Replace .firstxmm0 checks with .acc plus
+	.xmmword ones. Drop now pointless assertions. Convert .acc to
+	.regsimd.
+	* config/tc-i386-intel.c (i386_intel_simplify_register): Replace
+	.regxmm, .regymm, and .regzmm checks.
+	* testsuite/gas/i386/x86-64-specific-reg.l: Adjust expectations.
+
+2017-12-18  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (operand_type_check): Extend comment.
 	(match_reg_size): Also check .tbyte.
 	(match_mem_size): No longer check .tbyte here.

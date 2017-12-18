@@ -286,9 +286,9 @@ i386_intel_simplify_register (expressionS *e)
       i.op[this_operand].regs = i386_regtab + reg_num;
     }
   else if (!intel_state.index
-	   && (i386_regtab[reg_num].reg_type.bitfield.regxmm
-	       || i386_regtab[reg_num].reg_type.bitfield.regymm
-	       || i386_regtab[reg_num].reg_type.bitfield.regzmm
+	   && (i386_regtab[reg_num].reg_type.bitfield.xmmword
+	       || i386_regtab[reg_num].reg_type.bitfield.ymmword
+	       || i386_regtab[reg_num].reg_type.bitfield.zmmword
 	       || i386_regtab[reg_num].reg_num == RegRiz
 	       || i386_regtab[reg_num].reg_num == RegEiz))
     intel_state.index = i386_regtab + reg_num;

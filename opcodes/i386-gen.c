@@ -343,6 +343,9 @@ static const initializer operand_type_shorthands[] =
   { "Reg64",    "Reg|Qword" },
   { "FloatAcc", "Acc|Tbyte" },
   { "FloatReg", "Reg|Tbyte" },
+  { "RegXMM",   "RegSIMD|Xmmword" },
+  { "RegYMM",   "RegSIMD|Ymmword" },
+  { "RegZMM",   "RegSIMD|Zmmword" },
 };
 
 static initializer operand_type_init[] =
@@ -601,7 +604,6 @@ static bitfield opcode_modifiers[] =
   BITFIELD (NoTrackPrefixOk),
   BITFIELD (IsLockable),
   BITFIELD (RegKludge),
-  BITFIELD (FirstXmm0),
   BITFIELD (Implicit1stXmm0),
   BITFIELD (RepPrefixOk),
   BITFIELD (HLEPrefixOk),
@@ -643,9 +645,7 @@ static bitfield operand_types[] =
 {
   BITFIELD (Reg),
   BITFIELD (RegMMX),
-  BITFIELD (RegXMM),
-  BITFIELD (RegYMM),
-  BITFIELD (RegZMM),
+  BITFIELD (RegSIMD),
   BITFIELD (RegMask),
   BITFIELD (Imm1),
   BITFIELD (Imm8),
