@@ -1,5 +1,13 @@
 2017-12-18  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_to_fixed_type_1): Rethrow errors with
+	a more detailed exception message when getting an exception
+	while trying to read the value of an XVZ variable.
+	* ada-valprint.c (ada_val_print): Only catch RETURN_MASK_ERROR
+	exceptions.  Print an error message when an exception is caught.
+
+2017-12-18  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (assign_component): Strip any TYPE_CODE_TYPEDEF
 	layer from lhs' type.
 	(assign_aggregate): Likewise.

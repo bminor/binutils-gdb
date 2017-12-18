@@ -9101,11 +9101,28 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
             const char *name = ada_type_name (fixed_record_type);
             char *xvz_name
 	      = (char *) alloca (strlen (name) + 7 /* "___XVZ\0" */);
+	    bool xvz_found = false;
             LONGEST size;
 
             xsnprintf (xvz_name, strlen (name) + 7, "%s___XVZ", name);
-            if (get_int_var_value (xvz_name, size)
-		&& TYPE_LENGTH (fixed_record_type) != size)
+	    TRY
+	      {
+		xvz_found = get_int_var_value (xvz_name, size);
+	      }
+	    CATCH (except, RETURN_MASK_ERROR)
+	      {
+		/* We found the variable, but somehow failed to read
+		   its value.  Rethrow the same error, but with a little
+		   bit more information, to help the user understand
+		   what went wrong (Eg: the variable might have been
+		   optimized out).  */
+		throw_error (except.error,
+			     _("unable to read value of %s (%s)"),
+			     xvz_name, except.message);
+	      }
+	    END_CATCH
+
+            if (xvz_found && TYPE_LENGTH (fixed_record_type) != size)
               {
                 fixed_record_type = copy_type (fixed_record_type);
                 TYPE_LENGTH (fixed_record_type) = size;

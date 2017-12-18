@@ -1,5 +1,10 @@
 2017-12-18  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.dwarf2/ada-valprint-error.c: New file.
+	* gdb.dwarf2/ada-valprint-error.exp: New file.
+
+2017-12-18  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/assign_arr: New testcase.
 
 2017-12-18  Xavier Roirand  <roirand@adacore.com>
