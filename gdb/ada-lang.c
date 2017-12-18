@@ -9960,8 +9960,9 @@ assign_component (struct value *container, struct value *lhs, LONGEST index,
 {
   struct value *mark = value_mark ();
   struct value *elt;
+  struct type *lhs_type = check_typedef (value_type (lhs));
 
-  if (TYPE_CODE (value_type (lhs)) == TYPE_CODE_ARRAY)
+  if (TYPE_CODE (lhs_type) == TYPE_CODE_ARRAY)
     {
       struct type *index_type = builtin_type (exp->gdbarch)->builtin_int;
       struct value *index_val = value_from_longest (index_type, index);
@@ -10020,11 +10021,11 @@ assign_aggregate (struct value *container,
   if (!deprecated_value_modifiable (lhs))
     error (_("Left operand of assignment is not a modifiable lvalue."));
 
-  lhs_type = value_type (lhs);
+  lhs_type = check_typedef (value_type (lhs));
   if (ada_is_direct_array_type (lhs_type))
     {
       lhs = ada_coerce_to_simple_array (lhs);
-      lhs_type = value_type (lhs);
+      lhs_type = check_typedef (value_type (lhs));
       low_index = TYPE_ARRAY_LOWER_BOUND_VALUE (lhs_type);
       high_index = TYPE_ARRAY_UPPER_BOUND_VALUE (lhs_type);
     }

@@ -1,3 +1,9 @@
+2017-12-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (assign_component): Strip any TYPE_CODE_TYPEDEF
+	layer from lhs' type.
+	(assign_aggregate): Likewise.
+
 2017-12-18  Xavier Roirand  <roirand@adacore.com>
 
 	* ada-lang.c (ada_convert_actual): Change the way actual value
