@@ -1,3 +1,9 @@
+2017-12-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 22493
+	* config/tc-arm.c (encode_ldmstm): Do not use A2 encoding of the
+	PUSH insn when pushing the stack pointer.
+
 2017-12-18  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (regymm, regzmm): Delete.
