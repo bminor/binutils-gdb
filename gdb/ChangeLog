@@ -1,3 +1,8 @@
+2017-12-18  Xavier Roirand  <roirand@adacore.com>
+
+	* ada-lang.c (ada_convert_actual): Change the way actual value
+	are passed to the inferior when the inferior expects a pointer type.
+
 2017-12-17  Stafford Horne  <shorne@gmail.com>
 
 	* gdb/or1k-tdep.c (show_or1k_debug): Fix function parameter alignment.

@@ -4513,7 +4513,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0)
       if (TYPE_CODE (formal_target) == TYPE_CODE_ARRAY
           && ada_is_array_descriptor_type (actual_target))
 	result = desc_data (actual);
-      else if (TYPE_CODE (actual_type) != TYPE_CODE_PTR)
+      else if (TYPE_CODE (formal_type) != TYPE_CODE_PTR)
         {
           if (VALUE_LVAL (actual) != lval_memory)
             {
