@@ -1,3 +1,10 @@
+2017-12-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 22587
+	* readelf.c (process_section_headers): Do not complain about an
+	sh_info field of 0 in relocation sections of ET_EXEC or ET_DYN
+	type executables.
+
 2017-12-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/ar.exp (unique_symbol): Don't run AR
