@@ -2588,6 +2588,22 @@ read_and_display_attr_value (unsigned long           attribute,
 	}
       break;
 
+    case DW_AT_data_bit_offset:
+    case DW_AT_byte_size:
+    case DW_AT_bit_size:
+    case DW_AT_string_length_byte_size:
+    case DW_AT_string_length_bit_size:
+    case DW_AT_bit_stride:
+      if (form == DW_FORM_exprloc)
+	{
+	  printf ("\t(");
+	  (void) decode_location_expression (block_start, pointer_size,
+					     offset_size, dwarf_version,
+					     uvalue, cu_offset, section);
+	  printf (")");
+	}
+      break;
+
     case DW_AT_import:
       {
 	if (form == DW_FORM_ref_sig8

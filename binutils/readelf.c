@@ -6268,12 +6268,15 @@ process_section_headers (Filedata * filedata)
 		  && filedata->section_headers[section->sh_info].sh_type < SHT_LOOS))
 	    {
 	      if (section->sh_info == 0
-		  && (streq (SECTION_NAME (section), ".rel.dyn")
+		  && (filedata->file_header.e_type == ET_EXEC
+		      || filedata->file_header.e_type == ET_DYN
+		      /* These next two tests may be redundant, but
+			 they have been left in for paranoia's sake.  */
+		      || streq (SECTION_NAME (section), ".rel.dyn")
 		      || streq (SECTION_NAME (section), ".rela.dyn")))
-		/* The .rel.dyn and .rela.dyn sections have an sh_info field
-		   of zero.  The relocations in these sections may apply
-		   to many different sections.  */
-		   ;
+		/* Dynamic relocations apply to segments, not sections, so
+		   they do not need an sh_info value.  */
+		;
 	      else
 		warn (_("[%2u]: Info field (%u) should index a relocatable section.\n"),
 		      i, section->sh_info);

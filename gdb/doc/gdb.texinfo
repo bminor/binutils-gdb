@@ -17216,6 +17216,130 @@ names are substituted when printing other types.
 @item T
 Print typedefs defined in the class.  This is the default, but the flag
 exists in case you change the default with @command{set print type typedefs}.
+
+@item o
+Print the offsets and sizes of fields in a struct, similar to what the
+@command{pahole} tool does.  This option implies the @code{/tm} flags.
+
+For example, given the following declarations:
+
+@smallexample
+struct tuv
+@{
+  int a1;
+  char *a2;
+  int a3;
+@};
+
+struct xyz
+@{
+  int f1;
+  char f2;
+  void *f3;
+  struct tuv f4;
+@};
+
+union qwe
+@{
+  struct tuv fff1;
+  struct xyz fff2;
+@};
+
+struct tyu
+@{
+  int a1 : 1;
+  int a2 : 3;
+  int a3 : 23;
+  char a4 : 2;
+  int64_t a5;
+  int a6 : 5;
+  int64_t a7 : 3;
+@};
+@end smallexample
+
+Issuing a @kbd{ptype /o struct tuv} command would print:
+
+@smallexample
+(@value{GDBP}) ptype /o struct tuv
+/* offset    |  size */  type = struct tuv @{
+/*    0      |     4 */    int a1;
+/* XXX  4-byte hole  */
+/*    8      |     8 */    char *a2;
+/*   16      |     4 */    int a3;
+
+                           /* total size (bytes):   24 */
+                         @}
+@end smallexample
+
+Notice the format of the first column of comments.  There, you can
+find two parts separated by the @samp{|} character: the @emph{offset},
+which indicates where the field is located inside the struct, in
+bytes, and the @emph{size} of the field.  Another interesting line is
+the marker of a @emph{hole} in the struct, indicating that it may be
+possible to pack the struct and make it use less space by reorganizing
+its fields.
+
+It is also possible to print offsets inside an union:
+
+@smallexample
+(@value{GDBP}) ptype /o union qwe
+/* offset    |  size */  type = union qwe @{
+/*                24 */    struct tuv @{
+/*    0      |     4 */        int a1;
+/* XXX  4-byte hole  */
+/*    8      |     8 */        char *a2;
+/*   16      |     4 */        int a3;
+
+                               /* total size (bytes):   24 */
+                           @} fff1;
+/*                40 */    struct xyz @{
+/*    0      |     4 */        int f1;
+/*    4      |     1 */        char f2;
+/* XXX  3-byte hole  */
+/*    8      |     8 */        void *f3;
+/*   16      |    24 */        struct tuv @{
+/*   16      |     4 */            int a1;
+/* XXX  4-byte hole  */
+/*   24      |     8 */            char *a2;
+/*   32      |     4 */            int a3;
+
+                                   /* total size (bytes):   24 */
+                               @} f4;
+
+                               /* total size (bytes):   40 */
+                           @} fff2;
+
+                           /* total size (bytes):   40 */
+                         @}
+@end smallexample
+
+In this case, since @code{struct tuv} and @code{struct xyz} occupy the
+same space (because we are dealing with an union), the offset is not
+printed for them.  However, you can still examine the offset of each
+of these structures' fields.
+
+Another useful scenario is printing the offsets of a struct containing
+bitfields:
+
+@smallexample
+(@value{GDBP}) ptype /o struct tyu
+/* offset    |  size */  type = struct tyu @{
+/*    0:31   |     4 */    int a1 : 1;
+/*    0:28   |     4 */    int a2 : 3;
+/*    0: 5   |     4 */    int a3 : 23;
+/*    3: 3   |     1 */    signed char a4 : 2;
+/* XXX  3-bit hole   */
+/* XXX  4-byte hole  */
+/*    8      |     8 */    int64_t a5;
+/*   16:27   |     4 */    int a6 : 5;
+/*   16:56   |     8 */    int64_t a7 : 3;
+
+                           /* total size (bytes):   24 */
+                         @}
+@end smallexample
+
+Note how the offset information is now extended to also include how
+many bits are left to be used in each bitfield.
 @end table
 
 @kindex ptype

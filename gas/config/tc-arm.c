@@ -8908,6 +8908,11 @@ encode_ldmstm(int from_push_pop_mnem)
     {
       int is_push = (inst.instruction & A_PUSH_POP_OP_MASK) == A1_OPCODE_PUSH;
 
+      if (is_push && one_reg == 13 /* SP */)
+	/* PR 22483: The A2 encoding cannot be used when
+	   pushing the stack pointer as this is UNPREDICTABLE.  */
+	return;
+
       inst.instruction &= A_COND_MASK;
       inst.instruction |= is_push ? A2_OPCODE_PUSH : A2_OPCODE_POP;
       inst.instruction |= one_reg << 12;

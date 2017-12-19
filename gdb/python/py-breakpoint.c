@@ -707,9 +707,9 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   char *label = NULL;
   char *source = NULL;
   char *function = NULL;
-  int qualified = 0;
+  PyObject * qualified = NULL;
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "|siiOOsssOp", keywords,
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "|siiOOsssOO", keywords,
 					&spec, &type, &access_type,
 					&internal,
 					&temporary, &source,
@@ -762,7 +762,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	  {
 	    event_location_up location;
 	    symbol_name_match_type func_name_match_type
-	      = (qualified
+	      = (qualified != NULL && PyObject_IsTrue (qualified)
 		  ? symbol_name_match_type::FULL
 		  : symbol_name_match_type::WILD);
 

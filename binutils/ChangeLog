@@ -1,3 +1,34 @@
+2017-12-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 22587
+	* readelf.c (process_section_headers): Do not complain about an
+	sh_info field of 0 in relocation sections of ET_EXEC or ET_DYN
+	type executables.
+
+2017-12-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/ar.exp (unique_symbol): Don't run AR
+	if assembly fails.
+	* testsuite/binutils-all/arc/objdump.exp (check_assembly): If
+	objfile is empty, fail test.
+	* testsuite/binutils-all/arm/objdump.exp: Don't return if assembly
+	fails for a test, continue on to other tests.
+	* testsuite/binutils-all/bfin/objdump.exp: Likewise.
+	* testsuite/binutils-all/hppa/objdump.exp: Likewise.
+	* testsuite/binutils-all/m68k/objdump.exp: Likewise.
+	* testsuite/binutils-all/vax/objdump.exp: Likewise.
+	* testsuite/binutils-all/size.exp: Likewise.
+	* testsuite/binutils-all/nm.exp: Likewise.  Move PR12753 test.
+	* testsuite/binutils-all/objcopy.exp: Don't perror on assembly fail.
+	* testsuite/binutils-all/objdump.exp: Report assembly fails.
+
+2017-12-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 22532
+	* dwarf.c (read_and_display_attr_value): Add attributes that might
+	use the DW_FORM_exprloc form, and if so, display the decoded
+	location expression list.
+
 2017-12-14  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/utils-lib.exp (default_binutils_assemble_flags):

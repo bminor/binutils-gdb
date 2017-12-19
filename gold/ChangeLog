@@ -1,3 +1,10 @@
+2017-12-15  Alan Modra  <amodra@gmail.com>
+
+	PR 22602
+	* powerpc.cc (Target_powerpc::Branch_info::mark_pltcall): Resolve
+	forwards before replacing __tls_get_addr.
+	(Target_powerpc::Branch_info::make_stub): Likewise.
+
 2017-12-11  Stephen Crane  <sjc@immunant.com>
 
 	* plugin.cc (Plugin::load): Include hooks for register_new_input

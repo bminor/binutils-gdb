@@ -13,10 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+set do_xml_test [expr ![gdb_skip_xml_test]]
+
 gdb_start
 gdb_test "maintenance selftest" "Ran $decimal unit tests, 0 failed"
 
-if { ![is_remote host] } {
+if { ![is_remote host] && $do_xml_test } {
     gdb_test "maintenance check xml-descriptions ${srcdir}/../features" \
 	"Tested $decimal XML files, 0 failed" \
 	"maintenance check xml-descriptions \${srcdir}/../features"

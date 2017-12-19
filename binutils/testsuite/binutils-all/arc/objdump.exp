@@ -52,6 +52,10 @@ proc check_assembly { testname objfile expected { disas_flags "" } } {
     global OBJDUMP
     global OBJDUMPFLAGS
 
+    if [string equal "" $objfile] then {
+	fail $testname
+	return
+    }
     set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble $disas_flags \
 	$objfile"]
 

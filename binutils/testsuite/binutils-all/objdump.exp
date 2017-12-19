@@ -62,9 +62,11 @@ if [regexp $want $got] then {
 
 
 if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
+    fail "objdump (assembling)"
     return
 }
 if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest2.o]} then {
+    fail "objdump (assembling)"
     return
 }
 if [is_remote host] {

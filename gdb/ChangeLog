@@ -1,3 +1,111 @@
+2017-12-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_to_fixed_type_1): Rethrow errors with
+	a more detailed exception message when getting an exception
+	while trying to read the value of an XVZ variable.
+	* ada-valprint.c (ada_val_print): Only catch RETURN_MASK_ERROR
+	exceptions.  Print an error message when an exception is caught.
+
+2017-12-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (assign_component): Strip any TYPE_CODE_TYPEDEF
+	layer from lhs' type.
+	(assign_aggregate): Likewise.
+
+2017-12-18  Xavier Roirand  <roirand@adacore.com>
+
+	* ada-lang.c (ada_convert_actual): Change the way actual value
+	are passed to the inferior when the inferior expects a pointer type.
+
+2017-12-17  Stafford Horne  <shorne@gmail.com>
+
+	* gdb/or1k-tdep.c (show_or1k_debug): Fix function parameter alignment.
+	(or1k_analyse_inst): Likewise.
+	(or1k_single_step_through_delay): Likewise.
+	(or1k_frame_cache): Fix parameter alignment and use paddress()
+	instead of %x.
+
+2017-12-17  Stafford Horne  <shorne@gmail.com>
+
+	* NEWS (Changes since GDB 8.0): Mention new or1k target and new
+	commands to set/show or1k debug.
+
+2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* typeprint.c (whatis_exp): Fix ARI warning and reindent "if"
+	condition.
+
+2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR cli/16224
+	* NEWS (Changes since GDB 8.0): Mention new '/o' flag.
+	* c-typeprint.c (OFFSET_SPC_LEN): New define.
+	(c_type_print_varspec_prefix): New argument 'struct
+	print_offset_data *'.
+	(c_type_print_base_1): New function and prototype.
+	(c_print_type_1): New function, with code from 'c_print_type'.
+	(c_print_type): Use 'c_print_type_1'.
+	(c_type_print_varspec_prefix): New argument 'struct
+	print_offset_data *'.  Use it.  Call 'c_type_print_base_1'
+	instead of 'c_print_type_base'.
+	(print_spaces_filtered_with_print_options): New function.
+	(output_access_specifier): Take new argument FLAGS.  Modify
+	function to call 'print_spaces_filtered_with_print_options'.
+	(c_print_type_vtable_offset_marker): New function.
+	(c_print_type_union_field_offset): New function.
+	(c_print_type_struct_field_offset): New function.
+	(c_print_type_no_offsets): New function.
+	(c_type_print_base_struct_union): New argument 'struct
+	print_offset_data *'.  Print offsets and sizes for
+	struct/union/class fields.
+	* typeprint.c (const struct type_print_options
+	type_print_raw_options): Initialize 'print_offsets'.
+	(static struct type_print_options default_ptype_flags):
+	Likewise.
+	(struct print_offset_data print_offset_default_data): New
+	variable.
+	(whatis_exp): Handle '/o' option.
+	(_initialize_typeprint): Add '/o' flag to ptype's help.
+	* typeprint.h (struct print_offset_data): New struct.
+	(struct type_print_options) <print_offsets>: New field.
+
+2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* c-typeprint.c (need_access_label_p): New function.
+	(c_type_print_base_struct_union): New function.
+	(c_type_print_base): Move code to handle
+	TYPE_CODE_{STRUCT,UNION} to the functions mentioned above.
+
+2017-12-15  Richard Henderson  <rth@redhat.com>
+	    Uros Bizjak  <ubizjak@gmail.com>
+
+	PR gdb/19061
+	* alpha-tdep.c (alpha_software_single_step): Call
+	alpha_deal_with_atomic_sequence here.
+	(set_gdbarch_software_single_step): Set to
+	alpha_software_single_step.
+	* nat/linux-ptrace.h [__alpha__]: Define GDB_ARCH_IS_TRAP_BRKPT
+	and GDB_ARCH_IS_TRAP_HWBKPT.
+
+2017-12-15  Yao Qi  <yao.qi@linaro.org>
+
+	* unittests/memory-map-selftests.c: Wrap test with HAVE_LIBEXPAT.
+
+2017-12-15  Xavier Roirand  <roirand@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_field): Handle field search
+	in case of homonyms.
+	(find_struct_field): Ditto.
+	(ada_search_struct_field): Ditto.
+	(ada_value_struct_elt): Ditto.
+	(ada_lookup_struct_elt_type): Ditto.
+
+2017-12-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/py-breakpoint.c (bppy_init): Use 'O' format specifier
+	for "qualified" and use PyObject_IsTrue.
+
 2017-12-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dw2_debug_names_iterator::next): Support

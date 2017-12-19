@@ -1,3 +1,31 @@
+2017-12-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/ada-valprint-error.c: New file.
+	* gdb.dwarf2/ada-valprint-error.exp: New file.
+
+2017-12-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/assign_arr: New testcase.
+
+2017-12-18  Xavier Roirand  <roirand@adacore.com>
+
+	* gdb.ada/funcall_ptr: New testcase.
+
+2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/16224
+	* gdb.base/ptype-offsets.cc: New file.
+	* gdb.base/ptype-offsets.exp: New file.
+
+2017-12-15  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.gdb/unittest.exp: Skip 'maintenance check xml-descriptions'
+	if XML is disabled.
+
+2017-12-15  Xavier Roirand  <roirand@adacore.com>
+
+	* gdb.ada/same_component_name: New testcase.
+
 2017-12-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/str_binop_equal: New testcase.

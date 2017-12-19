@@ -396,6 +396,11 @@ enum aarch64_opnd_qualifier
   AARCH64_OPND_QLF_S_S,
   AARCH64_OPND_QLF_S_D,
   AARCH64_OPND_QLF_S_Q,
+  /* This type qualifier has a special meaning in that it means that 4 x 1 byte
+     are selected by the instruction.  Other than that it has no difference
+     with AARCH64_OPND_QLF_S_B in encoding.  It is here purely for syntactical
+     reasons and is an exception from normal AArch64 disassembly scheme.  */
+  AARCH64_OPND_QLF_S_4B,
 
   /* Qualifying an operand which is a SIMD vector register or a SIMD vector
      register list; indicating register shape.
@@ -403,6 +408,7 @@ enum aarch64_opnd_qualifier
      a use is only for the ease of operand encoding/decoding and qualifier
      sequence matching; such a use should not be applied widely; use the value
      constraint qualifiers for immediate operands wherever possible.  */
+  AARCH64_OPND_QLF_V_4B,
   AARCH64_OPND_QLF_V_8B,
   AARCH64_OPND_QLF_V_16B,
   AARCH64_OPND_QLF_V_2H,

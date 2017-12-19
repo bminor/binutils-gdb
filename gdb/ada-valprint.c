@@ -1168,16 +1168,16 @@ ada_val_print (struct type *type,
 	       struct value *val,
 	       const struct value_print_options *options)
 {
-
-  /* XXX: this catches QUIT/ctrl-c as well.  Isn't that busted?  */
   TRY
     {
       ada_val_print_1 (type, embedded_offset, address,
 		       stream, recurse, val, options,
 		       current_language);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  CATCH (except, RETURN_MASK_ERROR)
     {
+      fprintf_filtered (stream, _("<error reading variable: %s>"),
+			except.message);
     }
   END_CATCH
 }

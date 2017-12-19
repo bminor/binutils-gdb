@@ -21,6 +21,8 @@
 #include "selftest.h"
 #include "memory-map.h"
 
+#if defined(HAVE_LIBEXPAT)
+
 namespace selftests {
 namespace memory_map_tests {
 
@@ -72,10 +74,14 @@ parse_memory_map_tests ()
 } /* namespace memory_map_tests */
 } /* namespace selftests */
 
+#endif /* HAVE_LIBEXPAT */
+
 void
 _initialize_memory_map_selftests ()
 {
+#if defined(HAVE_LIBEXPAT)
   selftests::register_test
     ("parse_memory_map",
      selftests::memory_map_tests::parse_memory_map_tests);
+#endif
 }

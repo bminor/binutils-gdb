@@ -126,7 +126,7 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
       unsigned reglane_index = info->reglane.index;
       switch (info->qualifier)
 	{
-	case AARCH64_OPND_QLF_S_B:
+	case AARCH64_OPND_QLF_S_4B:
 	  /* L:H */
 	  assert (reglane_index < 4);
 	  insert_fields (code, reglane_index, 0, 2, FLD_L, FLD_H);

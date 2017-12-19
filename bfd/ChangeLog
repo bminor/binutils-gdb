@@ -1,3 +1,18 @@
+2017-12-19  Alan Modra  <amodra@gmail.com>
+
+	PR 22626
+	* elflink.c (_bfd_elf_link_renumber_dynsyms): Don't set section
+	dynindx when section_sym_count is NULL.
+	(bfd_elf_size_dynamic_sections): Pass NULL section_sym_count to
+	preliminary _bfd_elf_link_renumber_dynsyms call.
+
+2017-12-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 22571
+	* archive.c (bfd_openr_next_archived_file): Extend the
+	documentation to note that it is necessary to call
+	bfd_check_format on the rrturned bfd before using it.
+
 2017-12-14  Nick Clifton  <nickc@redhat.com>
 
 	* cpu-mt.c: Update address of FSF in copyright notice.

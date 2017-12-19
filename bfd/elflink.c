@@ -917,7 +917,10 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
    symbol for each output section, which come first.  Next come symbols
    which have been forced to local binding.  Then all of the back-end
    allocated local dynamic syms, followed by the rest of the global
-   symbols.  */
+   symbols.  If SECTION_SYM_COUNT is NULL, section dynindx is not set.
+   (This prevents the early call before elf_backend_init_index_section
+   and strip_excluded_output_sections setting dynindx for sections
+   that are stripped.)  */
 
 static unsigned long
 _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
@@ -925,6 +928,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 				unsigned long *section_sym_count)
 {
   unsigned long dynsymcount = 0;
+  bfd_boolean do_sec = section_sym_count != NULL;
 
   if (bfd_link_pic (info)
       || elf_hash_table (info)->is_relocatable_executable)
@@ -935,11 +939,16 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 	if ((p->flags & SEC_EXCLUDE) == 0
 	    && (p->flags & SEC_ALLOC) != 0
 	    && !(*bed->elf_backend_omit_section_dynsym) (output_bfd, info, p))
-	  elf_section_data (p)->dynindx = ++dynsymcount;
-	else
+	  {
+	    ++dynsymcount;
+	    if (do_sec)
+	      elf_section_data (p)->dynindx = dynsymcount;
+	  }
+	else if (do_sec)
 	  elf_section_data (p)->dynindx = 0;
     }
-  *section_sym_count = dynsymcount;
+  if (do_sec)
+    *section_sym_count = dynsymcount;
 
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_link_renumber_local_hash_table_dynsyms,
@@ -6831,8 +6840,6 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
   if (dynobj != NULL && elf_hash_table (info)->dynamic_sections_created)
     {
-      unsigned long section_sym_count;
-
       if (elf_tdata (output_bfd)->cverdefs)
 	{
 	  unsigned int crefs = elf_tdata (output_bfd)->cverdefs;
@@ -6874,8 +6881,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
       if ((elf_tdata (output_bfd)->cverrefs == 0
 	   && elf_tdata (output_bfd)->cverdefs == 0)
-	  || _bfd_elf_link_renumber_dynsyms (output_bfd, info,
-					     &section_sym_count) <= 1)
+	  || _bfd_elf_link_renumber_dynsyms (output_bfd, info, NULL) <= 1)
 	{
 	  asection *s;
 
