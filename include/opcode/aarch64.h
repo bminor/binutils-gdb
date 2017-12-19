@@ -389,6 +389,7 @@ enum aarch64_opnd_qualifier
      a use is only for the ease of operand encoding/decoding and qualifier
      sequence matching; such a use should not be applied widely; use the value
      constraint qualifiers for immediate operands wherever possible.  */
+  AARCH64_OPND_QLF_V_4B,
   AARCH64_OPND_QLF_V_8B,
   AARCH64_OPND_QLF_V_16B,
   AARCH64_OPND_QLF_V_2H,
