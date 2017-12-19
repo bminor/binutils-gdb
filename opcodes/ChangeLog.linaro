@@ -4,6 +4,16 @@
 
 	2017-12-19  Tamar Christina  <tamar.christina@arm.com>
 
+	PR gas/22559
+	* aarch64-asm.c (aarch64_ins_reglane): Change AARCH64_OPND_QLF_S_B to
+	AARCH64_OPND_QLF_S_4B
+	* aarch64-dis.c (aarch64_ext_reglane): Change AARCH64_OPND_QLF_S_B to
+	AARCH64_OPND_QLF_S_4B
+	* aarch64-opc.c (aarch64_opnd_qualifiers): Add 4b variant.
+	* aarch64-tbl.h (QL_V2DOT): Change S_B to S_4B.
+
+	2017-12-19  Tamar Christina  <tamar.christina@arm.com>
+
 	PR gas/22529
 	* aarch64-opc.c (aarch64_opnd_qualifiers): Add 4b variant.
 

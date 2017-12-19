@@ -1992,8 +1992,8 @@
 /* e.g. UDOT <Vd>.2S, <Vn>.8B, <Vm>.4B[<index>].  */
 #define QL_V2DOT	 \
 {			 \
-  QLF3(V_2S, V_8B,  S_B),\
-  QLF3(V_4S, V_16B, S_B),\
+  QLF3(V_2S, V_8B,  S_4B),\
+  QLF3(V_4S, V_16B, S_4B),\
 }
 
 /* Opcode table.  */
