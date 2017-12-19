@@ -1,5 +1,11 @@
 2017-12-19  Tamar Christina  <tamar.christina@arm.com>
 
+	PR 22559
+	* config/tc-aarch64.c (vectype_to_qualifier): Support AARCH64_OPND_QLF_S_4B.
+	* gas/testsuite/gas/aarch64/dotproduct.d: Update disassembly.
+
+2017-12-19  Tamar Christina  <tamar.christina@arm.com>
+
 	PR 22529
 	* config/tc-aarch64.c (vectype_to_qualifier): Support AARCH64_OPND_QLF_V_4B.
 	* gas/testsuite/gas/aarch64/pr22529.s: New.

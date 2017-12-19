@@ -4929,8 +4929,14 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
   gas_assert (vectype->type >= NT_b && vectype->type <= NT_q);
 
   if (vectype->defined & (NTA_HASINDEX | NTA_HASVARWIDTH))
-    /* Vector element register.  */
-    return AARCH64_OPND_QLF_S_B + vectype->type;
+    {
+      /* Special case S_4B.  */
+      if (vectype->type == NT_b && vectype->width == 4)
+	return AARCH64_OPND_QLF_S_4B;
+
+      /* Vector element register.  */
+      return AARCH64_OPND_QLF_S_B + vectype->type;
+    }
   else
     {
       /* Vector register.  */

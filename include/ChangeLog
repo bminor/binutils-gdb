@@ -1,5 +1,10 @@
 2017-12-19  Tamar Christina  <tamar.christina@arm.com>
 
+	PR gas/22559
+	* aarch64.h (aarch64_opnd_qualifier): Add AARCH64_OPND_QLF_S_4B.
+
+2017-12-19  Tamar Christina  <tamar.christina@arm.com>
+
 	PR gas/22529
 	* opcode/aarch64.h (aarch64_opnd_qualifier): Add AARCH64_OPND_QLF_V_4B.
 
