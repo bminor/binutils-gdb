@@ -1,3 +1,11 @@
+2017-12-19  Tamar Christina  <tamar.christina@arm.com>
+
+	PR 22529
+	* config/tc-aarch64.c (vectype_to_qualifier): Support AARCH64_OPND_QLF_V_4B.
+	* gas/testsuite/gas/aarch64/pr22529.s: New.
+	* gas/testsuite/gas/aarch64/pr22529.d: New.
+	* gas/testsuite/gas/aarch64/pr22529.l: New.
+
 2017-12-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 22493

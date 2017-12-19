@@ -1,3 +1,8 @@
+2017-12-19  Tamar Christina  <tamar.christina@arm.com>
+
+	PR gas/22529
+	* aarch64-opc.c (aarch64_opnd_qualifiers): Add 4b variant.
+
 2017-12-18  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (operand_type_init): Delete OPERAND_TYPE_REGYMM and

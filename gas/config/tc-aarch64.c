@@ -4911,7 +4911,7 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
     = {1, 2, 4, 8, 16};
   const unsigned int ele_base [5] =
     {
-      AARCH64_OPND_QLF_V_8B,
+      AARCH64_OPND_QLF_V_4B,
       AARCH64_OPND_QLF_V_2H,
       AARCH64_OPND_QLF_V_2S,
       AARCH64_OPND_QLF_V_1D,
@@ -4946,7 +4946,7 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
 	 a vector-type dependent amount.  */
       shift = 0;
       if (vectype->type == NT_b)
-	shift = 4;
+	shift = 3;
       else if (vectype->type == NT_h || vectype->type == NT_s)
 	shift = 2;
       else if (vectype->type >= NT_d)
@@ -4955,7 +4955,7 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
 	gas_assert (0);
 
       offset = ele_base [vectype->type] + (vectype->width >> shift);
-      gas_assert (AARCH64_OPND_QLF_V_8B <= offset
+      gas_assert (AARCH64_OPND_QLF_V_4B <= offset
 		  && offset <= AARCH64_OPND_QLF_V_1Q);
       return offset;
     }
