@@ -2720,6 +2720,9 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_address_class_name_to_type_flags
     (gdbarch, spu_address_class_name_to_type_flags);
 
+  /* We need to support more than "addr_bit" significant address bits
+     in order to support SPUADDR_ADDR encoded values.  */
+  set_gdbarch_significant_addr_bit (gdbarch, 64);
 
   /* Inferior function calls.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);

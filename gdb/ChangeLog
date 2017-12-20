@@ -1,3 +1,9 @@
+2017-12-20  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-tdep.c (spu_gdbarch_init): Set set_gdbarch_significant_addr_bit
+	to 64 bits.
+	(ppc_linux_init_abi): Likewise, if Cell/B.E. is supported.
+
 2017-12-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_to_fixed_type_1): Rethrow errors with
