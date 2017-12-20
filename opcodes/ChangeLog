@@ -1,3 +1,14 @@
+2017-12-20  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-opc.c (match_c_add_with_hint, match_c_lui_with_hint): New.
+	(riscv_opcodes) <li>: Delete "d,0" line.  Change Cj to Co.
+	<andi, and, add, addiw, addw, c.addi>: Change Cj to Co.
+	<add>: Add explanatory comment for 4-operand add instruction.
+	<c.nop>: Add support for immediate operand.
+	<c.mv, c.add>: Use match_c_add_with_hint instead of match_c_add.
+	<c.lui>: Use match_c_lui_with_hint instead of match_c_lui.
+	<c.li, c.slli>: Use match_opcode instead of match_rd_nonzero.
+
 2017-12-19  Tamar Christina  <tamar.christina@arm.com>
 
 	PR gas/22559

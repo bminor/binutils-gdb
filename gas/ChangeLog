@@ -1,3 +1,18 @@
+2017-12-20  Jim Wilson  <jimw@sifive.com>
+
+	* config/tc-riscv.c (risc_ip) <o>: Add comment.
+	* testsuite/gas/riscv/c-nonzero-imm.d,
+	* testsuite/gas/riscv/c-nonzero-imm.l,
+	* testsuite/gas/riscv/c-nonzero-imm.s,
+	* testsuite/gas/riscv/c-nonzero-reg.d,
+	* testsuite/gas/riscv/c-nonzero-reg.l,
+	* testsuite/gas/riscv/c-nonzero-reg.s,
+	* testsuite/gas/riscv/c-zero-imm-64.d,
+	* testsuite/gas/riscv/c-zero-imm-64.s,
+	* testsuite/gas/riscv/c-zero-imm.d, testsuite/gas/riscv/c-zero-imm.s,
+	* testsuite/gas/riscv/c-zero-reg.d,
+	* testsuite/gas/riscv/c-zero-reg.s: New.
+
 2017-12-19  Tamar Christina  <tamar.christina@arm.com>
 
 	PR 22559

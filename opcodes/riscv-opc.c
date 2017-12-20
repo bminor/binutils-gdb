@@ -113,6 +113,15 @@ match_c_add (const struct riscv_opcode *op, insn_t insn)
   return match_rd_nonzero (op, insn) && ((insn & MASK_CRS2) != 0);
 }
 
+/* We don't allow mv zero,X to become a c.mv hint, so we need a separate
+   matching function for this.  */
+
+static int
+match_c_add_with_hint (const struct riscv_opcode *op, insn_t insn)
+{
+  return match_opcode (op, insn) && ((insn & MASK_CRS2) != 0);
+}
+
 static int
 match_c_addi16sp (const struct riscv_opcode *op, insn_t insn)
 {
@@ -125,6 +134,17 @@ static int
 match_c_lui (const struct riscv_opcode *op, insn_t insn)
 {
   return (match_rd_nonzero (op, insn)
+	  && (((insn & MASK_RD) >> OP_SH_RD) != 2)
+	  && EXTRACT_RVC_LUI_IMM (insn) != 0);
+}
+
+/* We don't allow lui zero,X to become a c.lui hint, so we need a separate
+   matching function for this.  */
+
+static int
+match_c_lui_with_hint (const struct riscv_opcode *op, insn_t insn)
+{
+  return (match_opcode (op, insn)
 	  && (((insn & MASK_RD) >> OP_SH_RD) != 2)
 	  && EXTRACT_RVC_LUI_IMM (insn) != 0);
 }
@@ -171,19 +191,18 @@ const struct riscv_opcode riscv_opcodes[] =
 {"lui",       "C",   "d,Cu",  MATCH_C_LUI, MASK_C_LUI, match_c_lui, INSN_ALIAS },
 {"lui",       "I",   "d,u",  MATCH_LUI, MASK_LUI, match_opcode, 0 },
 {"li",        "C",   "d,Cv",  MATCH_C_LUI, MASK_C_LUI, match_c_lui, INSN_ALIAS },
-{"li",        "C",   "d,Cj",  MATCH_C_LI, MASK_C_LI, match_rd_nonzero, INSN_ALIAS },
-{"li",        "C",   "d,0",  MATCH_C_LI, MASK_C_LI | MASK_RVC_IMM, match_rd_nonzero, INSN_ALIAS },
+{"li",        "C",   "d,Co",  MATCH_C_LI, MASK_C_LI, match_rd_nonzero, INSN_ALIAS },
 {"li",        "I",   "d,j",      MATCH_ADDI, MASK_ADDI | MASK_RS1, match_opcode, INSN_ALIAS }, /* addi */
 {"li",        "I",   "d,I",  0,    (int) M_LI,  match_never, INSN_MACRO },
 {"mv",        "C",   "d,CV",  MATCH_C_MV, MASK_C_MV, match_c_add, INSN_ALIAS },
 {"mv",        "I",   "d,s",  MATCH_ADDI, MASK_ADDI | MASK_IMM, match_opcode, INSN_ALIAS },
 {"move",      "C",   "d,CV",  MATCH_C_MV, MASK_C_MV, match_c_add, INSN_ALIAS },
 {"move",      "I",   "d,s",  MATCH_ADDI, MASK_ADDI | MASK_IMM, match_opcode, INSN_ALIAS },
-{"andi",      "C",   "Cs,Cw,Cj",  MATCH_C_ANDI, MASK_C_ANDI, match_opcode, INSN_ALIAS },
+{"andi",      "C",   "Cs,Cw,Co",  MATCH_C_ANDI, MASK_C_ANDI, match_opcode, INSN_ALIAS },
 {"andi",      "I",   "d,s,j",  MATCH_ANDI, MASK_ANDI, match_opcode, 0 },
 {"and",       "C",   "Cs,Cw,Ct",  MATCH_C_AND, MASK_C_AND, match_opcode, INSN_ALIAS },
 {"and",       "C",   "Cs,Ct,Cw",  MATCH_C_AND, MASK_C_AND, match_opcode, INSN_ALIAS },
-{"and",       "C",   "Cs,Cw,Cj",  MATCH_C_ANDI, MASK_C_ANDI, match_opcode, INSN_ALIAS },
+{"and",       "C",   "Cs,Cw,Co",  MATCH_C_ANDI, MASK_C_ANDI, match_opcode, INSN_ALIAS },
 {"and",       "I",   "d,s,t",  MATCH_AND, MASK_AND, match_opcode, 0 },
 {"and",       "I",   "d,s,j",  MATCH_ANDI, MASK_ANDI, match_opcode, INSN_ALIAS },
 {"beqz",      "C",   "Cs,Cp",  MATCH_C_BEQZ, MASK_C_BEQZ, match_opcode, INSN_ALIAS },
@@ -210,10 +229,12 @@ const struct riscv_opcode riscv_opcodes[] =
 {"addi",      "I",   "d,s,j",  MATCH_ADDI, MASK_ADDI, match_opcode, 0 },
 {"add",       "C",   "d,CU,CV",  MATCH_C_ADD, MASK_C_ADD, match_c_add, INSN_ALIAS },
 {"add",       "C",   "d,CV,CU",  MATCH_C_ADD, MASK_C_ADD, match_c_add, INSN_ALIAS },
-{"add",       "C",   "d,CU,Cj",  MATCH_C_ADDI, MASK_C_ADDI, match_rd_nonzero, INSN_ALIAS },
+{"add",       "C",   "d,CU,Co",  MATCH_C_ADDI, MASK_C_ADDI, match_rd_nonzero, INSN_ALIAS },
 {"add",       "C",   "Ct,Cc,CK", MATCH_C_ADDI4SPN, MASK_C_ADDI4SPN, match_c_addi4spn, INSN_ALIAS },
 {"add",       "C",   "Cc,Cc,CL", MATCH_C_ADDI16SP, MASK_C_ADDI16SP, match_c_addi16sp, INSN_ALIAS },
 {"add",       "I",   "d,s,t",  MATCH_ADD, MASK_ADD, match_opcode, 0 },
+/* This is used for TLS, where the fourth arg is %tprel_add, to get a reloc
+   applied to an add instruction, for relaxation to use.  */
 {"add",       "I",   "d,s,t,0",MATCH_ADD, MASK_ADD, match_opcode, 0 },
 {"add",       "I",   "d,s,j",  MATCH_ADDI, MASK_ADDI, match_opcode, INSN_ALIAS },
 {"la",        "I",   "d,A",  0,    (int) M_LA,  match_never, INSN_MACRO },
@@ -305,11 +326,11 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sd",        "64I", "t,A,s",  0, (int) M_SD, match_never, INSN_MACRO },
 {"sext.w",    "64C", "d,CU",  MATCH_C_ADDIW, MASK_C_ADDIW | MASK_RVC_IMM, match_rd_nonzero, INSN_ALIAS },
 {"sext.w",    "64I", "d,s",  MATCH_ADDIW, MASK_ADDIW | MASK_IMM, match_opcode, INSN_ALIAS },
-{"addiw",     "64C", "d,CU,Cj",  MATCH_C_ADDIW, MASK_C_ADDIW, match_rd_nonzero, INSN_ALIAS },
+{"addiw",     "64C", "d,CU,Co",  MATCH_C_ADDIW, MASK_C_ADDIW, match_rd_nonzero, INSN_ALIAS },
 {"addiw",     "64I", "d,s,j",  MATCH_ADDIW, MASK_ADDIW, match_opcode, 0 },
 {"addw",      "64C", "Cs,Cw,Ct",  MATCH_C_ADDW, MASK_C_ADDW, match_opcode, INSN_ALIAS },
 {"addw",      "64C", "Cs,Ct,Cw",  MATCH_C_ADDW, MASK_C_ADDW, match_opcode, INSN_ALIAS },
-{"addw",      "64C", "d,CU,Cj",  MATCH_C_ADDIW, MASK_C_ADDIW, match_rd_nonzero, INSN_ALIAS },
+{"addw",      "64C", "d,CU,Co",  MATCH_C_ADDIW, MASK_C_ADDIW, match_rd_nonzero, INSN_ALIAS },
 {"addw",      "64I", "d,s,t",  MATCH_ADDW, MASK_ADDW, match_opcode, 0 },
 {"addw",      "64I", "d,s,j",  MATCH_ADDIW, MASK_ADDIW, match_opcode, INSN_ALIAS },
 {"negw",      "64I", "d,t",  MATCH_SUBW, MASK_SUBW | MASK_RS1, match_opcode, INSN_ALIAS }, /* sub 0 */
@@ -645,18 +666,19 @@ const struct riscv_opcode riscv_opcodes[] =
 {"c.swsp",    "C",   "CV,CM(Cc)",  MATCH_C_SWSP, MASK_C_SWSP, match_opcode, 0 },
 {"c.sw",      "C",   "Ct,Ck(Cs)",  MATCH_C_SW, MASK_C_SW, match_opcode, 0 },
 {"c.nop",     "C",   "",  MATCH_C_ADDI, 0xffff, match_opcode, INSN_ALIAS },
-{"c.mv",      "C",   "d,CV",  MATCH_C_MV, MASK_C_MV, match_c_add, 0 },
-{"c.lui",     "C",   "d,Cu",  MATCH_C_LUI, MASK_C_LUI, match_c_lui, 0 },
-{"c.li",      "C",   "d,Co",  MATCH_C_LI, MASK_C_LI, match_rd_nonzero, 0 },
+{"c.nop",     "C",   "Cj",  MATCH_C_ADDI, MASK_C_ADDI | MASK_RD, match_opcode, INSN_ALIAS },
+{"c.mv",      "C",   "d,CV",  MATCH_C_MV, MASK_C_MV, match_c_add_with_hint, 0 },
+{"c.lui",     "C",   "d,Cu",  MATCH_C_LUI, MASK_C_LUI, match_c_lui_with_hint, 0 },
+{"c.li",      "C",   "d,Co",  MATCH_C_LI, MASK_C_LI, match_opcode, 0 },
 {"c.addi4spn","C",   "Ct,Cc,CK", MATCH_C_ADDI4SPN, MASK_C_ADDI4SPN, match_c_addi4spn, 0 },
 {"c.addi16sp","C",   "Cc,CL", MATCH_C_ADDI16SP, MASK_C_ADDI16SP, match_c_addi16sp, 0 },
-{"c.addi",    "C",   "d,Cj",  MATCH_C_ADDI, MASK_C_ADDI, match_opcode, 0 },
-{"c.add",     "C",   "d,CV",  MATCH_C_ADD, MASK_C_ADD, match_c_add, 0 },
+{"c.addi",    "C",   "d,Co",  MATCH_C_ADDI, MASK_C_ADDI, match_opcode, 0 },
+{"c.add",     "C",   "d,CV",  MATCH_C_ADD, MASK_C_ADD, match_c_add_with_hint, 0 },
 {"c.sub",     "C",   "Cs,Ct",  MATCH_C_SUB, MASK_C_SUB, match_opcode, 0 },
 {"c.and",     "C",   "Cs,Ct",  MATCH_C_AND, MASK_C_AND, match_opcode, 0 },
 {"c.or",      "C",   "Cs,Ct",  MATCH_C_OR, MASK_C_OR, match_opcode, 0 },
 {"c.xor",     "C",   "Cs,Ct",  MATCH_C_XOR, MASK_C_XOR, match_opcode, 0 },
-{"c.slli",    "C",   "d,C>",  MATCH_C_SLLI, MASK_C_SLLI, match_rd_nonzero, 0 },
+{"c.slli",    "C",   "d,C>",  MATCH_C_SLLI, MASK_C_SLLI, match_opcode, 0 },
 {"c.srli",    "C",   "Cs,C>",  MATCH_C_SRLI, MASK_C_SRLI, match_opcode, 0 },
 {"c.srai",    "C",   "Cs,C>",  MATCH_C_SRAI, MASK_C_SRAI, match_opcode, 0 },
 {"c.andi",    "C",   "Cs,Co",  MATCH_C_ANDI, MASK_C_ANDI, match_opcode, 0 },
