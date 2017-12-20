@@ -827,7 +827,7 @@
 	instead of on dejagnu remote boards.
 
 2017-10-12  Pedro Alves  <palves@redhat.com>
-	    Simon Marchi <simon.marchi@polymtl.ca>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/inferior-died.exp: Remove is_remote and isnative
 	checks.  Use build_executable + clean_restart instead of
