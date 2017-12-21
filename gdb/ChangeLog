@@ -1,3 +1,8 @@
+2017-12-20  Uros Bizjak  <ubizjak@gmail.com>
+
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Remove
+	write-only assignment to "insn" variable.
+
 2017-12-20  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_gdbarch_init): Set set_gdbarch_significant_addr_bit
