@@ -45,8 +45,8 @@ initialize_tdesc_arm_with_iwmmxt (void)
   tdesc_create_vector (feature, "iwmmxt_v2u32", element_type, 2);
 
   tdesc_type_with_fields *type_with_fields;
-  tdesc_type *field_type;
   type_with_fields = tdesc_create_union (feature, "iwmmxt_vec64i");
+  tdesc_type *field_type;
   field_type = tdesc_named_type (feature, "iwmmxt_v8u8");
   tdesc_add_field (type_with_fields, "u8", field_type);
   field_type = tdesc_named_type (feature, "iwmmxt_v4u16");

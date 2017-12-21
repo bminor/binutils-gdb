@@ -135,8 +135,8 @@ initialize_tdesc_s390_tevx_linux64 (void)
   tdesc_create_vector (feature, "v2i64", element_type, 2);
 
   tdesc_type_with_fields *type_with_fields;
-  tdesc_type *field_type;
   type_with_fields = tdesc_create_union (feature, "vec128");
+  tdesc_type *field_type;
   field_type = tdesc_named_type (feature, "v4f");
   tdesc_add_field (type_with_fields, "v4_float", field_type);
   field_type = tdesc_named_type (feature, "v2d");

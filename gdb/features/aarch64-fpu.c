@@ -47,8 +47,8 @@ create_feature_aarch64_fpu (struct target_desc *result, long regnum)
   tdesc_create_vector (feature, "v1i", element_type, 1);
 
   tdesc_type_with_fields *type_with_fields;
-  tdesc_type *field_type;
   type_with_fields = tdesc_create_union (feature, "vnd");
+  tdesc_type *field_type;
   field_type = tdesc_named_type (feature, "v2d");
   tdesc_add_field (type_with_fields, "f", field_type);
   field_type = tdesc_named_type (feature, "v2u");

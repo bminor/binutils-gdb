@@ -10,8 +10,8 @@ create_feature_i386_64bit_mpx (struct target_desc *result, long regnum)
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.mpx", "64bit-mpx.xml");
   tdesc_type_with_fields *type_with_fields;
-  tdesc_type *field_type;
   type_with_fields = tdesc_create_struct (feature, "br128");
+  tdesc_type *field_type;
   field_type = tdesc_named_type (feature, "uint64");
   tdesc_add_field (type_with_fields, "lbound", field_type);
   field_type = tdesc_named_type (feature, "uint64");

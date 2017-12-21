@@ -1894,13 +1894,6 @@ public:
 	m_printed_type_with_fields = true;
       }
 
-    if (!type->fields.empty ()
-	&& !m_printed_field_type)
-      {
-	printf_unfiltered ("  tdesc_type *field_type;\n");
-	m_printed_field_type = true;
-      }
-
     switch (type->kind)
       {
       case TDESC_TYPE_STRUCT:
@@ -1949,8 +1942,8 @@ public:
 		  }
 		else
 		  {
-		    printf_unfiltered
-		      ("  field_type = tdesc_named_type (feature, \"%s\");\n",
+		    printf_field_type_assignment
+		      ("tdesc_named_type (feature, \"%s\");\n",
 		       type_name);
 		    printf_unfiltered
 		      ("  tdesc_add_typed_bitfield (type_with_fields, \"%s\","
@@ -1962,10 +1955,8 @@ public:
 	      {
 		gdb_assert (f.end == -1);
 		gdb_assert (type->kind == TDESC_TYPE_STRUCT);
-		printf_unfiltered
-		  ("  field_type = tdesc_named_type (feature,"
-		   " \"%s\");\n",
-		   type_name);
+		printf_field_type_assignment
+		  ("tdesc_named_type (feature, \"%s\");\n", type_name);
 		printf_unfiltered
 		  ("  tdesc_add_field (type_with_fields, \"%s\", field_type);\n",
 		   f.name.c_str ());
@@ -1978,9 +1969,8 @@ public:
 	   type->name.c_str ());
 	for (const tdesc_type_field &f : type->fields)
 	  {
-	    printf_unfiltered
-	      ("  field_type = tdesc_named_type (feature, \"%s\");\n",
-	       f.type->name.c_str ());
+	    printf_field_type_assignment
+	      ("tdesc_named_type (feature, \"%s\");\n", f.type->name.c_str ());
 	    printf_unfiltered
 	      ("  tdesc_add_field (type_with_fields, \"%s\", field_type);\n",
 	       f.name.c_str ());
@@ -2018,6 +2008,25 @@ protected:
   std::string m_filename_after_features;
 
 private:
+
+  /* Print an assignment to the field_type variable.  Print the declaration
+     of field_type if that has not been done yet.  */
+  void printf_field_type_assignment (const char *fmt, ...)
+  {
+    if (!m_printed_field_type)
+      {
+	printf_unfiltered ("  tdesc_type *field_type;\n");
+	m_printed_field_type = true;
+      }
+
+    printf_unfiltered ("  field_type = ");
+
+    va_list args;
+    va_start (args, fmt);
+    vprintf_unfiltered (fmt, args);
+    va_end (args);
+  }
+
   char *m_function;
 
   /* Did we print "struct tdesc_type *element_type;" yet?  */

@@ -16,7 +16,6 @@ initialize_tdesc_or1k (void)
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.or1k.group0");
   tdesc_type_with_fields *type_with_fields;
-  tdesc_type *field_type;
   type_with_fields = tdesc_create_flags (feature, "sr_flags", 4);
   tdesc_add_flag (type_with_fields, 0, "SM");
   tdesc_add_flag (type_with_fields, 1, "TEE");

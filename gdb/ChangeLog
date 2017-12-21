@@ -1,3 +1,36 @@
+2017-12-21  Simon Marchi  <simon.marchi@ericsson.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* target-descriptions.c (print_c_tdesc) <visit>: Don't output
+	field_type declaration, use printf_field_type_assignment
+	instead.
+	<printf_field_type_assignment>: New method.
+	* features/aarch64-core.c, features/aarch64-fpu.c
+	features/arc-arcompact.c, features/arc-v2.c,
+	features/arm/arm-with-iwmmxt.c, features/i386/32bit-core.c,
+	features/i386/32bit-mpx.c, features/i386/32bit-sse.c,
+	features/i386/64bit-avx512.c, features/i386/64bit-core.c,
+	features/i386/64bit-mpx.c, features/i386/64bit-sse.c,
+	features/i386/x32-core.c, features/or1k.c,
+	features/rs6000/powerpc-7400.c,
+	features/rs6000/powerpc-altivec32.c,
+	features/rs6000/powerpc-altivec32l.c,
+	features/rs6000/powerpc-altivec64.c,
+	features/rs6000/powerpc-altivec64l.c,
+	features/rs6000/powerpc-cell32l.c,
+	features/rs6000/powerpc-cell64l.c,
+	features/rs6000/powerpc-isa205-altivec32l.c,
+	features/rs6000/powerpc-isa205-altivec64l.c,
+	features/rs6000/powerpc-isa205-vsx32l.c,
+	features/rs6000/powerpc-isa205-vsx64l.c,
+	features/rs6000/powerpc-vsx32.c,
+	features/rs6000/powerpc-vsx32l.c,
+	features/rs6000/powerpc-vsx64.c,
+	features/rs6000/powerpc-vsx64l.c, features/s390-gs-linux64.c,
+	features/s390-tevx-linux64.c, features/s390-vx-linux64.c,
+	features/s390x-gs-linux64.c, features/s390x-tevx-linux64.c,
+	features/s390x-vx-linux64.c: Re-generate.
+
 2017-12-20  Uros Bizjak  <ubizjak@gmail.com>
 
 	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Remove
