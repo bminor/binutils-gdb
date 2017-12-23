@@ -1,3 +1,8 @@
+2017-12-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (print_c_tdesc)
+	<printf_field_type_assignment>: Add ATTRIBUTE_PRINTF.
+
 2017-12-21  Simon Marchi  <simon.marchi@ericsson.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 

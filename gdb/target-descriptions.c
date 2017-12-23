@@ -2011,6 +2011,7 @@ private:
 
   /* Print an assignment to the field_type variable.  Print the declaration
      of field_type if that has not been done yet.  */
+  ATTRIBUTE_PRINTF (2, 3)
   void printf_field_type_assignment (const char *fmt, ...)
   {
     if (!m_printed_field_type)
