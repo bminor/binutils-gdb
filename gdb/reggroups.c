@@ -46,6 +46,20 @@ reggroup_new (const char *name, enum reggroup_type type)
   return group;
 }
 
+/* See reggroups.h.  */
+
+struct reggroup *
+reggroup_gdbarch_new (struct gdbarch *gdbarch, const char *name,
+		      enum reggroup_type type)
+{
+  struct reggroup *group = GDBARCH_OBSTACK_ZALLOC (gdbarch,
+						   struct reggroup);
+
+  group->name = gdbarch_obstack_strdup (gdbarch, name);
+  group->type = type;
+  return group;
+}
+
 /* Register group attributes.  */
 
 const char *
@@ -199,6 +213,23 @@ default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   if (group == save_reggroup || group == restore_reggroup)
     return raw_p;
   return 0;   
+}
+
+/* See reggroups.h.  */
+
+reggroup *
+reggroup_find (struct gdbarch *gdbarch, const char *name)
+{
+  struct reggroup *group;
+
+  for (group = reggroup_next (gdbarch, NULL);
+       group != NULL;
+       group = reggroup_next (gdbarch, group))
+    {
+      if (strcmp (name, reggroup_name (group)) == 0)
+	return group;
+    }
+  return NULL;
 }
 
 /* Dump out a table of register groups for the current architecture.  */

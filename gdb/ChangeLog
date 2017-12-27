@@ -1,5 +1,12 @@
 2017-12-27  Stafford Horne  <shorne@gmail.com>
 
+	* reggroups.c (reggroup_gdbarch_new): New function.
+	(reggroup_find): New function.
+	* reggroups.h (reggroup_gdbarch_new): New function.
+	(reggroup_find): New function.
+
+2017-12-27  Stafford Horne  <shorne@gmail.com>
+
 	* reggroups.c (reggroups_init): Change to depend only on
 	obstack rather than gdbarch.
 	(reggroup_add): Remove logic for forcing premature init.
