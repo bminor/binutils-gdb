@@ -1,3 +1,14 @@
+2017-12-27  Franck Jullien  <franck.jullien@gmail.com>
+	    Stafford Horne  <shorne@gmail.com>
+
+	* target-descriptions.c (tdesc_register_in_reggroup_p): Support
+	arbitrary strings.
+	(tdesc_use_registers): Add logic to register new reggroups.
+	(tdesc_reg::group): Update comment to indicate we allow
+	arbitrary strings.
+	* NEWS (Changes since GDB 8.0): Announce that GDB supports
+	arbitrary reggroups.
+
 2017-12-27  Stafford Horne  <shorne@gmail.com>
 
 	* reggroups.c (reggroup_gdbarch_new): New function.

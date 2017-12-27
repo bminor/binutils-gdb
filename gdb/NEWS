@@ -3,6 +3,10 @@
 
 *** Changes since GDB 8.0
 
+* GDB now supports dynamically creating arbitrary register groups specified
+  in XML target descriptions.  This allows for finer grain grouping of
+  registers on systems with a large amount of registers.
+
 * The 'ptype' command now accepts a '/o' flag, which prints the
   offsets and sizes of fields in a struct, like the pahole(1) tool.
 

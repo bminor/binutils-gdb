@@ -1,5 +1,10 @@
 2017-12-27  Stafford Horne  <shorne@gmail.com>
 
+	* gdb.texinfo (Target Description Format): Explain that arbitrary
+	strings are now allowed for register groups.
+
+2017-12-27  Stafford Horne  <shorne@gmail.com>
+
 	* gdb.texinfo (Registers): Document info reg $reggroup feature.
 
 2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>

@@ -1,5 +1,10 @@
 2017-12-27  Stafford Horne  <shorne@gmail.com>
 
+	* gdb.xml/extra-regs.xml: Add example foo reggroup.
+	* gdb.xml/tdesc-regs.exp: Add test to check for foo reggroup.
+
+2017-12-27  Stafford Horne  <shorne@gmail.com>
+
 	* gdb.base/reggroups.c: New file.
 	* gdb.base/reggroups.exp: New file.
 

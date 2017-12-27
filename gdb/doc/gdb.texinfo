@@ -41761,10 +41761,13 @@ architecture's normal floating point format) of the correct size for
 @var{bitsize}.  The default is @code{int}.
 
 @item group
-The register group to which this register belongs.  It must
-be either @code{general}, @code{float}, or @code{vector}.  If no
-@var{group} is specified, @value{GDBN} will not display the register
-in @code{info registers}.
+The register group to which this register belongs.  It can be one of the
+standard register groups @code{general}, @code{float}, @code{vector} or an
+arbitrary string.  Group names should be limited to alphanumeric characters.
+If a group name is made up of multiple words the words may be separated by
+hyphens; e.g.@: @code{special-group} or @code{ultra-special-group}.  If no
+@var{group} is specified, @value{GDBN} will not display the register in
+@code{info registers}.
 
 @end table
 
