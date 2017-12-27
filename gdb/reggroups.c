@@ -26,6 +26,7 @@
 #include "regcache.h"
 #include "command.h"
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */
+#include "gdb_obstack.h"
 
 /* Individual register groups.  */
 
@@ -76,10 +77,9 @@ struct reggroups
 static struct gdbarch_data *reggroups_data;
 
 static void *
-reggroups_init (struct gdbarch *gdbarch)
+reggroups_init (struct obstack *obstack)
 {
-  struct reggroups *groups = GDBARCH_OBSTACK_ZALLOC (gdbarch,
-						     struct reggroups);
+  struct reggroups *groups = OBSTACK_ZALLOC (obstack, struct reggroups);
 
   groups->last = &groups->first;
   return groups;
@@ -105,13 +105,6 @@ reggroup_add (struct gdbarch *gdbarch, struct reggroup *group)
   struct reggroups *groups
     = (struct reggroups *) gdbarch_data (gdbarch, reggroups_data);
 
-  if (groups == NULL)
-    {
-      /* ULGH, called during architecture initialization.  Patch
-         things up.  */
-      groups = (struct reggroups *) reggroups_init (gdbarch);
-      deprecated_set_gdbarch_data (gdbarch, reggroups_data, groups);
-    }
   add_group (groups, group,
 	     GDBARCH_OBSTACK_ZALLOC (gdbarch, struct reggroup_el));
 }
@@ -298,7 +291,7 @@ struct reggroup *const restore_reggroup = &restore_group;
 void
 _initialize_reggroup (void)
 {
-  reggroups_data = gdbarch_data_register_post_init (reggroups_init);
+  reggroups_data = gdbarch_data_register_pre_init (reggroups_init);
 
   /* The pre-defined list of groups.  */
   add_group (&default_groups, general_reggroup, XNEW (struct reggroup_el));
