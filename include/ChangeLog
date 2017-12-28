@@ -1,3 +1,9 @@
+2017-12-28  Jim Wilson  <jimw@sifive.com>
+
+	* opcode/riscv-opc.h (DECLARE_CSR): Add missing privileged registers.
+	Sort to match privileged spec documentation order.
+	(DECLARE_CSR_ALIAS): Add ubadaddr, and comments.
+
 2017-12-19  Tamar Christina  <tamar.christina@arm.com>
 
 	PR gas/22559

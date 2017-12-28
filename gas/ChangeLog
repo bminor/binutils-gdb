@@ -1,3 +1,7 @@
+2017-12-28  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/gas/riscv/priv-reg.d, testsuite/gas/riscv/priv-reg.s: New.
+
 2017-12-20  Jim Wilson  <jimw@sifive.com>
 
 	* config/tc-riscv.c (risc_ip) <o>: Add comment.
