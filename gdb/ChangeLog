@@ -1,3 +1,8 @@
+2017-12-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target.h (enum target_object) <TARGET_OBJECT_HPUX_UREGS,
+	TARGET_OBJECT_HPUX_SOLIB_GOT>: Remove.
+
 2017-12-27  Franck Jullien  <franck.jullien@gmail.com>
 	    Stafford Horne  <shorne@gmail.com>
 
