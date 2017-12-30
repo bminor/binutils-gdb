@@ -277,7 +277,7 @@ protected:
 
 /* A description of the mapped index.  The file format is described in
    a comment by the code that writes the index.  */
-struct mapped_index : public mapped_index_base
+struct mapped_index final : public mapped_index_base
 {
   /* A slot/bucket in the symbol table hash.  */
   struct symbol_table_slot
@@ -318,7 +318,7 @@ struct mapped_index : public mapped_index_base
 
 /* A description of the mapped .debug_names.
    Uninitialized map has CU_COUNT 0.  */
-struct mapped_debug_names : public mapped_index_base
+struct mapped_debug_names final : public mapped_index_base
 {
   bfd_endian dwarf5_byte_order;
   bool dwarf5_is_dwarf64;

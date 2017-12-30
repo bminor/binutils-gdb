@@ -1,3 +1,8 @@
+2017-12-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2read.c (struct mapped_debug_names): Make final.
+	(struct mapped_index): Make final.
+
 2017-12-29  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/diagnostics.h
