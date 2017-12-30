@@ -1337,21 +1337,21 @@ recursively_search_psymtabs
     }
 
   partial_symbol **gbound
-    = &objfile->global_psymbols[ps->globals_offset + ps->n_global_syms];
+    = objfile->global_psymbols.data () + ps->globals_offset + ps->n_global_syms;
   partial_symbol **sbound
-    = &objfile->static_psymbols[ps->statics_offset + ps->n_static_syms];
+    = objfile->static_psymbols.data () + ps->statics_offset + ps->n_static_syms;
   partial_symbol **bound = gbound;
 
   /* Go through all of the symbols stored in a partial
      symtab in one loop.  */
-  partial_symbol **psym = &objfile->global_psymbols[ps->globals_offset];
+  partial_symbol **psym = objfile->global_psymbols.data () + ps->globals_offset;
   while (keep_going)
     {
       if (psym >= bound)
 	{
 	  if (bound == gbound && ps->n_static_syms != 0)
 	    {
-	      psym = &objfile->static_psymbols[ps->statics_offset];
+	      psym = objfile->static_psymbols.data () + ps->statics_offset;
 	      bound = sbound;
 	    }
 	  else

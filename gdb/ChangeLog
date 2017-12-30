@@ -1,3 +1,8 @@
+2017-12-31  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* psymtab.c (recursively_search_psymtabs): Use pointer arithmetic
+	instead of dereferencing std::vector past the end.
+
 2017-12-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/diagnostics.h
