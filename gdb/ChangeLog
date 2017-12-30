@@ -1,5 +1,11 @@
 2017-12-29  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* common/diagnostics.h
+	(DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES): New macro.
+	* amd64-linux-tdep.c (amd64_canonicalize_syscall): Use it.
+
+2017-12-29  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-thread-db.c (thread_db_detach): Remove call to
 	delete_thread_db_info.
 
