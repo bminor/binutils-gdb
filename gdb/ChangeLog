@@ -1,5 +1,11 @@
 2017-12-30  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* common/diagnostics.h
+	(DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES): Only
+	define if the compiler knows about -Wenum-compare-switch.
+
+2017-12-30  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* dwarf2read.c (dwarf_decode_macro_bytes): Ignore
 	-Wenum-compare-switch warning.
 	(dwarf_decode_macros): Likewise.

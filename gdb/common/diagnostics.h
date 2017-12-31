@@ -38,9 +38,12 @@
   DIAGNOSTIC_IGNORE ("-Wdeprecated-register")
 # define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION \
   DIAGNOSTIC_IGNORE ("-Wunused-function")
-# define DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES \
-  DIAGNOSTIC_IGNORE ("-Wenum-compare-switch")
-
+# if __has_warning ("-Wenum-compare-switch")
+#  define DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES \
+   DIAGNOSTIC_IGNORE ("-Wenum-compare-switch")
+# else
+#  define DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
+# endif
 #elif defined (__GNUC__) /* GCC */
 
 # define DIAGNOSTIC_IGNORE_SELF_MOVE
