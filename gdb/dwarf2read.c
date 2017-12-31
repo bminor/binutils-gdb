@@ -24179,6 +24179,8 @@ dwarf_decode_macro_bytes (bfd *abfd,
 
       /* Note that we rely on the fact that the corresponding GNU and
 	 DWARF constants are the same.  */
+      DIAGNOSTIC_PUSH
+      DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
       switch (macinfo_type)
 	{
 	  /* A zero macinfo type indicates the end of the macro
@@ -24403,6 +24405,7 @@ dwarf_decode_macro_bytes (bfd *abfd,
 	    return;
 	  break;
         }
+      DIAGNOSTIC_POP
     } while (macinfo_type != 0);
 }
 
@@ -24495,6 +24498,8 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 
       /* Note that we rely on the fact that the corresponding GNU and
 	 DWARF constants are the same.  */
+      DIAGNOSTIC_PUSH
+      DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
       switch (macinfo_type)
         {
           /* A zero macinfo type indicates the end of the macro
@@ -24575,6 +24580,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 	    return;
 	  break;
 	}
+      DIAGNOSTIC_POP
     } while (macinfo_type != 0 && current_file == NULL);
 
   /* Second pass: Process all entries.
