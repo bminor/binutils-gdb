@@ -1,6 +1,6 @@
 /* Functions and data responsible for forking the inferior process.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

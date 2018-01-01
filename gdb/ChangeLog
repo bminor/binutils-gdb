@@ -1,5 +1,9 @@
 2018-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	Update copyright year range in all GDB files.
+
+2018-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py (BY_HAND): Remove gdb/testsuite/gdb.base/step-line.inp
 	and gdb/testsuite/gdb.base/step-line.c.
 

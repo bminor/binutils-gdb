@@ -1,5 +1,5 @@
 /* Common multi-process/thread control defs for GDB and gdbserver.
-   Copyright (C) 1987-2017 Free Software Foundation, Inc.
+   Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
