@@ -1,5 +1,10 @@
 2018-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* copyright.py (BY_HAND): Remove gdb/testsuite/gdb.base/step-line.inp
+	and gdb/testsuite/gdb.base/step-line.c.
+
+2018-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py (main): Dump the contents of
 	MULTIPLE_COPYRIGHT_HEADERS (separately) from BY_HAND,
 	even if BY_HAND is empty.

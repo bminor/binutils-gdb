@@ -200,9 +200,7 @@ EXCLUDE_ALL_LIST = (
 
 # The list of files to update by hand.
 BY_HAND = (
-    # These files are sensitive to line numbering.
-    "gdb/testsuite/gdb.base/step-line.inp",
-    "gdb/testsuite/gdb.base/step-line.c",
+    # Nothing at the moment :-).
 )
 
 # Files containing multiple copyright headers.  This script is only
