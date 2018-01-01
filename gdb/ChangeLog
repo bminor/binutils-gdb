@@ -1,5 +1,11 @@
 2018-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* copyright.py (main): Dump the contents of
+	MULTIPLE_COPYRIGHT_HEADERS (separately) from BY_HAND,
+	even if BY_HAND is empty.
+
+2018-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* top.c (print_gdb_version): Update Copyright year in version
 	message.
 

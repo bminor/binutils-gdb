@@ -150,11 +150,20 @@ def main ():
     update_files (update_list)
 
     # Remind the user that some files need to be updated by HAND...
+
+    if MULTIPLE_COPYRIGHT_HEADERS:
+        print
+        print("\033[31m"
+              "REMINDER: Multiple copyright headers must be updated by hand:"
+              "\033[0m")
+        for filename in MULTIPLE_COPYRIGHT_HEADERS:
+            print "  ", filename
+
     if BY_HAND:
         print
         print "\033[31mREMINDER: The following files must be updated by hand." \
               "\033[0m"
-        for filename in BY_HAND + MULTIPLE_COPYRIGHT_HEADERS:
+        for filename in BY_HAND:
             print "  ", filename
 
 ############################################################################
