@@ -1,5 +1,18 @@
 2018-01-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbtypes.h (enum dynamic_prop_node_kind) <DYN_PROP_BYTE_STRIDE>:
+	New enum value.
+	(create_array_type_with_stride): Add byte_stride_prop parameter.
+	* gdbtypes.c (create_array_type_with_stride) <byte_stride_prop>:
+	New parameter.  Update all callers in this file.
+	(array_type_has_dynamic_stride): New function.
+	(is_dynamic_type_internal, resolve_dynamic_array): Add handling
+	of arrays with dynamic byte strides.
+	* dwarf2read.c (read_array_type): Add support for dynamic
+	DW_AT_byte_stride attributes.
+
+2018-01-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2read.c (read_unspecified_type): Treat
 	DW_TAG_enumeration_type DIEs from Ada units as stubs.
 

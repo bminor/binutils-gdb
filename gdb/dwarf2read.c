@@ -16312,6 +16312,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *element_type, *range_type, *index_type;
   struct attribute *attr;
   const char *name;
+  struct dynamic_prop *byte_stride_prop = NULL;
   unsigned int bit_stride = 0;
 
   element_type = die_type (die, cu);
@@ -16323,7 +16324,25 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 
   attr = dwarf2_attr (die, DW_AT_byte_stride, cu);
   if (attr != NULL)
-    bit_stride = DW_UNSND (attr) * 8;
+    {
+      int stride_ok;
+
+      byte_stride_prop
+	= (struct dynamic_prop *) alloca (sizeof (struct dynamic_prop));
+      stride_ok = attr_to_dynamic_prop (attr, die, cu, byte_stride_prop);
+      if (!stride_ok)
+	{
+	  complaint (&symfile_complaints,
+		     _("unable to read array DW_AT_byte_stride "
+		       " - DIE at 0x%x [in module %s]"),
+		     to_underlying (die->sect_off),
+		     objfile_name (cu->objfile));
+	  /* Ignore this attribute.  We will likely not be able to print
+	     arrays of this type correctly, but there is little we can do
+	     to help if we cannot read the attribute's value.  */
+	  byte_stride_prop = NULL;
+	}
+    }
 
   attr = dwarf2_attr (die, DW_AT_bit_stride, cu);
   if (attr != NULL)
@@ -16336,7 +16355,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
       index_type = objfile_type (objfile)->builtin_int;
       range_type = create_static_range_type (NULL, index_type, 0, -1);
       type = create_array_type_with_stride (NULL, element_type, range_type,
-					    bit_stride);
+					    byte_stride_prop, bit_stride);
       return set_die_type (die, type, cu);
     }
 
@@ -16369,14 +16388,14 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 
       while (i < range_types.size ())
 	type = create_array_type_with_stride (NULL, type, range_types[i++],
-					      bit_stride);
+					      byte_stride_prop, bit_stride);
     }
   else
     {
       size_t ndim = range_types.size ();
       while (ndim-- > 0)
 	type = create_array_type_with_stride (NULL, type, range_types[ndim],
-					      bit_stride);
+					      byte_stride_prop, bit_stride);
     }
 
   /* Understand Dwarf2 support for vector types (like they occur on
