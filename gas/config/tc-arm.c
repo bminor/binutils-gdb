@@ -9243,7 +9243,7 @@ do_mrs (void)
   if (inst.operands[1].isreg)
     {
       br = inst.operands[1].reg;
-      if (((br & 0x200) == 0) && ((br & 0xf0000) != 0xf000))
+      if (((br & 0x200) == 0) && ((br & 0xf0000) != 0xf0000))
 	as_bad (_("bad register for mrs"));
     }
   else
