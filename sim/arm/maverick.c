@@ -880,7 +880,7 @@ DSPCDP4 (ARMul_State * state,
 	  mv_setRegDouble (DEST_REG,
 			   -mv_getRegDouble (SRC1_REG));
 	  printfdbg ("cfnegd mvd%d = -mvd%d = %g\n",
-		     DEST_REG,
+		     DEST_REG, DEST_REG,
 		     mv_getRegDouble (DEST_REG));
 	  break;
 
