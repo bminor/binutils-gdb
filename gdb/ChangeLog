@@ -1,5 +1,11 @@
 2018-01-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_value_slice_from_ptr): Take array stride into
+	account when creating the array type of the slice.
+	(ada_value_slice): Likewise.
+
+2018-01-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbtypes.h (enum dynamic_prop_node_kind) <DYN_PROP_BYTE_STRIDE>:
 	New enum value.
 	(create_array_type_with_stride): Add byte_stride_prop parameter.

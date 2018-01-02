@@ -1,5 +1,9 @@
 2018-01-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/dyn_stride.exp: Add slice test.
+
+2018-01-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/dyn_stride: New testcase.
 
 2017-12-27  Stafford Horne  <shorne@gmail.com>

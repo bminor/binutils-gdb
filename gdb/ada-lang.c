@@ -2910,8 +2910,10 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
   struct type *base_index_type = TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type0));
   struct type *index_type
     = create_static_range_type (NULL, base_index_type, low, high);
-  struct type *slice_type =
-    create_array_type (NULL, TYPE_TARGET_TYPE (type0), index_type);
+  struct type *slice_type = create_array_type_with_stride
+			      (NULL, TYPE_TARGET_TYPE (type0), index_type,
+			       get_dyn_prop (DYN_PROP_BYTE_STRIDE, type0),
+			       TYPE_FIELD_BITSIZE (type0, 0));
   int base_low =  ada_discrete_type_low_bound (TYPE_INDEX_TYPE (type0));
   LONGEST base_low_pos, low_pos;
   CORE_ADDR base;
@@ -2938,8 +2940,10 @@ ada_value_slice (struct value *array, int low, int high)
   struct type *base_index_type = TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type));
   struct type *index_type
     = create_static_range_type (NULL, TYPE_INDEX_TYPE (type), low, high);
-  struct type *slice_type =
-    create_array_type (NULL, TYPE_TARGET_TYPE (type), index_type);
+  struct type *slice_type = create_array_type_with_stride
+			      (NULL, TYPE_TARGET_TYPE (type), index_type,
+			       get_dyn_prop (DYN_PROP_BYTE_STRIDE, type),
+			       TYPE_FIELD_BITSIZE (type, 0));
   LONGEST low_pos, high_pos;
 
   if (!discrete_position (base_index_type, low, &low_pos)
