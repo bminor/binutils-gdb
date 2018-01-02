@@ -1,3 +1,8 @@
+2018-01-02  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (operand_type_init): Restore OPERAND_TYPE_REGYMM
+	and OPERAND_TYPE_REGZMM entries.
+
 2017-12-20  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-opc.c (match_c_add_with_hint, match_c_lui_with_hint): New.
