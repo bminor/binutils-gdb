@@ -1,3 +1,8 @@
+2018-01-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (read_unspecified_type): Treat
+	DW_TAG_enumeration_type DIEs from Ada units as stubs.
+
 2018-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	Update copyright year range in all GDB files.

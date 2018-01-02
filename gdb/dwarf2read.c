@@ -17693,10 +17693,15 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct type *type;
 
-  /* For now, we only support the C meaning of an unspecified type: void.  */
-
   type = init_type (cu->objfile, TYPE_CODE_VOID, 0, NULL);
   TYPE_NAME (type) = dwarf2_name (die, cu);
+
+  /* In Ada, an unspecified type is typically used when the description
+     of the type is defered to a different unit.  When encountering
+     such a type, we treat it as a stub, and try to resolve it later on,
+     when needed.  */
+  if (cu->language == language_ada)
+    TYPE_STUB (type) = 1;
 
   return set_die_type (die, type, cu);
 }
