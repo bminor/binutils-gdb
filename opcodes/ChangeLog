@@ -1,3 +1,7 @@
+2018-01-03  Alan Modra  <amodra@gmail.com>
+
+	Update year range in copyright notice of all files.
+
 2018-01-02  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (operand_type_init): Restore OPERAND_TYPE_REGYMM
