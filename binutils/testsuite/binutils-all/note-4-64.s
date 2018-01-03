@@ -1,23 +1,34 @@
 	.text
 	.org 0x100
-	.global note_1.s
-	.size   note_1.s, 0x22
-note_1.s:
-	.word 0
-	
+note_4.s:
+	.dc.l 0
+	.dc.l 0
+	.dc.l 0
+	.dc.l 0
+
+	.type	bar, @function
+bar:
+	.dc.l 0
+	.dc.l 0
+	.dc.l 0
+bar_end:
+	.dc.l 0
+note_4.s_end:
+
 	.pushsection .gnu.build.attributes, "", %note
 	.balign 4
 
 	.dc.l 8
-	.dc.l 4
+	.dc.l 16
 	.dc.l 0x100
-	.asciz "GA$2p1"
-	.dc.l note_1.s
+	.asciz "GA$3p3"
+	.8byte note_4.s
+	.8byte note_4.s_end
 
 	.dc.l 23
 	.dc.l 0
 	.dc.l 0x100
-	.asciz "GA$gcc 6.3.1 20161221"
+	.asciz "GA$gcc 7.2.1 20170915"
 	.dc.b 0
 
 	.dc.l 10
@@ -55,4 +66,13 @@ note_1.s:
 	.dc.l 0x100
 	.dc.b 0x47, 0x41, 0x2a, 0x6, 0xf2, 0x3, 0x38, 0xee, 0xce, 0xfa, 0x5e, 0x3c, 0
 	.dc.b 0, 0, 0
+
+	.dc.l 6
+	.dc.l 16
+	.dc.l 0x101
+	.dc.b 0x47, 0x41, 0x2a, 0x2, 0x3, 0
+	.dc.b 0, 0
+	.8byte bar
+	.8byte bar_end
+	
 	.popsection

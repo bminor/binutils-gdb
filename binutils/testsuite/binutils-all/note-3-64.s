@@ -1,6 +1,7 @@
 	.text
 	.org 0x100
 	.global note_1.s
+	.size   note_1.s, 0x22
 note_1.s:
 	.word 0
 	

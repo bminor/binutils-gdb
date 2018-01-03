@@ -1,3 +1,41 @@
+2018-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (objcopy_internal_note): New structure.
+	(gap_exists): New function.
+	(is_open_note): New function.
+	(is_func_note): New function.
+	(is_64bit): New function.
+	(merge_gnu_build_notes): Handle v3 notes.  Do not merge
+	if there are relocations against the notes.
+	* readelf.c (get_note_type): Use short names for build attribute
+	notes.
+	(print_symbol_for_build_attribute): Rename to
+	get_symbol_for_build_attribute.  Returns the found symbol rather
+	than printing it.
+	(print_gnu_build_attribute_description): Maintain address ranges
+	for function notes as well as global notes.  Handle v3 notes.
+	(print_gnu_build_attribute_name): Use more space for printing the
+	name in wide mode.
+	* testsuite/binutils-all/note-2-32.s: Use .dc.l instead of .word.
+	Eliminate symbol references in order to remove the need for
+	relocations.
+	* testsuite/binutils-all/note-2-64.s: Likewise.
+	* testsuite/binutils-all/note-3-32.s: Add a size to the note_1
+	symbol.
+	* testsuite/binutils-all/note-3-64.s: Likewise.
+	* testsuite/binutils-all/mips/mips-note-2r-n32.d: Update expected
+	output.
+	* testsuite/binutils-all/mips/mips-note-2r-n64.d: Likewise.
+	* testsuite/binutils-all/mips/mips-note-2r.d: Likewise.
+	* testsuite/binutils-all/note-2-32.d: Likewise.
+	* testsuite/binutils-all/note-2-64.d: Likewise.
+	* testsuite/binutils-all/note-3-32.d: Likewise.
+	* testsuite/binutils-all/note-3-64.d: Likewise.
+	* testsuite/binutils-all/note-4-64.s: New test.  Checks v3 notes.
+	* testsuite/binutils-all/note-4-32.s: New test.
+	* testsuite/binutils-all/note-4-64.d: New test result file.
+	* testsuite/binutils-all/note-4-32.d: New test result file.
+
 2018-01-03  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
