@@ -2064,7 +2064,7 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 	     For now though, since v1 and v2 was not intended to
 	     handle gaps, we chose an artificially large end
 	     address.  */
-	  end = 0x7ffffffffffffffUL;
+	  end = (bfd_vma) 0x7ffffffffffffffUL;
 	  break;
 	  
 	case 8:
@@ -2083,7 +2083,7 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 		 For now though, since v1 and v2 was not intended to
 		 handle gaps, we chose an artificially large end
 		 address.  */
-	      end = 0x7ffffffffffffffUL;
+	      end = (bfd_vma) 0x7ffffffffffffffUL;
 	    }
 	  break;
 

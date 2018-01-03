@@ -1,5 +1,10 @@
 2018-01-03  Nick Clifton  <nickc@redhat.com>
 
+	* objcopy.c (merge_gnu_build_notes): Add cast to maximum address
+	constants.
+
+2018-01-03  Nick Clifton  <nickc@redhat.com>
+
 	* objcopy.c (objcopy_internal_note): New structure.
 	(gap_exists): New function.
 	(is_open_note): New function.
