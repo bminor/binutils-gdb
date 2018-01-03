@@ -1,3 +1,9 @@
+2018-01-03  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_freebsd_note): Handle
+	NT_FREEBSD_PROCSTAT_PROC, NT_FREEBSD_PROCSTAT_FILES, and
+	NT_FREEBSD_PROCSTAT_VMMAP.
+
 2018-01-03  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

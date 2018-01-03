@@ -10014,6 +10014,18 @@ elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
       else
 	return TRUE;
 
+    case NT_FREEBSD_PROCSTAT_PROC:
+      return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.proc",
+					      note);
+
+    case NT_FREEBSD_PROCSTAT_FILES:
+      return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.files",
+					      note);
+
+    case NT_FREEBSD_PROCSTAT_VMMAP:
+      return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.vmmap",
+					      note);
+
     case NT_FREEBSD_PROCSTAT_AUXV:
       {
 	asection *sect = bfd_make_section_anyway_with_flags (abfd, ".auxv",
