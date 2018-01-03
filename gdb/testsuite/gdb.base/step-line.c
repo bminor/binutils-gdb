@@ -1,4 +1,5 @@
 /* Test step/next in presence of #line directives.
+
    Copyright (C) 2001-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.

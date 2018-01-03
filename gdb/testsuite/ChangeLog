@@ -1,3 +1,8 @@
+2018-01-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/step-line.c: Add extra empty line in copyright header.
+	* gdb.base/step-line.inp: Likewise.
+
 2018-01-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/dyn_stride.exp: Add slice test.
