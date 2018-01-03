@@ -1,3 +1,8 @@
+2018-01-15  Tom Tromey  <tom@tromey.com>
+
+	* gdb.guile/scm-ports.exp (test_mem_port_rw): Use get_valueof to
+	compute sp_reg.
+
 2018-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/whatis-ptype-typedefs.exp: Don't run tests if we failed
