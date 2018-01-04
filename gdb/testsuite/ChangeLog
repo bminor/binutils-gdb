@@ -1,3 +1,8 @@
+2018-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/22670
+	* gdb.ada/info_addr_mixed_case: New testcase.
+
 2018-01-03  Xavier Roirand  <roirand@adacore.com>
 
 	* gdb.ada/excep_handle.exp: New testcase.
