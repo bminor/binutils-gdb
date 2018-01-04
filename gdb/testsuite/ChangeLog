@@ -1,6 +1,11 @@
 2018-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	PR gdb/22670
+	* gdb.ada/maint_with_ada: New testcase.
+
+2018-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/22670
 	* gdb.ada/bp_c_mixed_case: New testcase.
 
 2018-01-04  Joel Brobecker  <brobecker@adacore.com>
