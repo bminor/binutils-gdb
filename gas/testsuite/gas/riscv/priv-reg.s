@@ -241,9 +241,11 @@
 	csr utval
 
 	csr scounteren
+	csr stval
 	csr satp
 
 	csr mcounteren
+	csr mtval
 
 	csr pmpcfg0
 	csr pmpcfg1

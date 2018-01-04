@@ -651,7 +651,7 @@
 #define CSR_SSCRATCH 0x140
 #define CSR_SEPC 0x141
 #define CSR_SCAUSE 0x142
-#define CSR_SBADADDR 0x143
+#define CSR_STVAL 0x143
 #define CSR_SIP 0x144
 #define CSR_SATP 0x180
 #define CSR_MVENDORID 0xf11
@@ -668,7 +668,7 @@
 #define CSR_MSCRATCH 0x340
 #define CSR_MEPC 0x341
 #define CSR_MCAUSE 0x342
-#define CSR_MBADADDR 0x343
+#define CSR_MTVAL 0x343
 #define CSR_MIP 0x344
 #define CSR_PMPCFG0 0x3a0
 #define CSR_PMPCFG1 0x3a1
@@ -1192,7 +1192,7 @@ DECLARE_CSR(scounteren, CSR_SCOUNTEREN)
 DECLARE_CSR(sscratch, CSR_SSCRATCH)
 DECLARE_CSR(sepc, CSR_SEPC)
 DECLARE_CSR(scause, CSR_SCAUSE)
-DECLARE_CSR(sbadaddr, CSR_SBADADDR)
+DECLARE_CSR(stval, CSR_STVAL)
 DECLARE_CSR(sip, CSR_SIP)
 DECLARE_CSR(satp, CSR_SATP)
 DECLARE_CSR(mvendorid, CSR_MVENDORID)
@@ -1209,7 +1209,7 @@ DECLARE_CSR(mcounteren, CSR_MCOUNTEREN)
 DECLARE_CSR(mscratch, CSR_MSCRATCH)
 DECLARE_CSR(mepc, CSR_MEPC)
 DECLARE_CSR(mcause, CSR_MCAUSE)
-DECLARE_CSR(mbadaddr, CSR_MBADADDR)
+DECLARE_CSR(mtval, CSR_MTVAL)
 DECLARE_CSR(mip, CSR_MIP)
 DECLARE_CSR(pmpcfg0, CSR_PMPCFG0)
 DECLARE_CSR(pmpcfg1, CSR_PMPCFG1)
@@ -1353,8 +1353,12 @@ DECLARE_CSR(mhcounteren, CSR_MHCOUNTEREN)
 #ifdef DECLARE_CSR_ALIAS
 /* Ubadaddr is 0x043 in 1.9.1, but 0x043 is utval in 1.10.  */
 DECLARE_CSR_ALIAS(ubadaddr, CSR_UTVAL)
+/* Sbadaddr is 0x143 in 1.9.1, but 0x143 is stval in 1.10.  */
+DECLARE_CSR_ALIAS(sbadaddr, CSR_STVAL)
 /* Sptbr is 0x180 in 1.9.1, but 0x180 is satp in 1.10.  */
 DECLARE_CSR_ALIAS(sptbr, CSR_SATP)
+/* Mbadaddr is 0x343 in 1.9.1, but 0x343 is mtval in 1.10.  */
+DECLARE_CSR_ALIAS(mbadaddr, CSR_MTVAL)
 #endif
 #ifdef DECLARE_CAUSE
 DECLARE_CAUSE("misaligned fetch", CAUSE_MISALIGNED_FETCH)

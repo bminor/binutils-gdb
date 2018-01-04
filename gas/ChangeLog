@@ -1,3 +1,8 @@
+2018-01-04  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/gas/riscv/priv-reg.s: Add missing stval and mtval.
+	* testsuite/gas/riscv/priv-reg.d: Likewise.
+
 2018-01-03  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
