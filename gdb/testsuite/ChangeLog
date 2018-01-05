@@ -1,4 +1,4 @@
-2018-01-05  Xavier Roirand  <brobecker@adacore.com>
+2018-01-05  Xavier Roirand  <roirand@adacore.com>
 
 	* testsuite/gdb.ada/array_char_idx/pck.ads (Table): New type.
 	(My_Table): New global variable.
