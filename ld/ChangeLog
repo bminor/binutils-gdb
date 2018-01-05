@@ -1,3 +1,9 @@
+2018-01-05  Jim Wilson  <jimw@sifive.com>
+
+	* emulparams/elf32lriscv-defs.sh (GENERATE_SHLIB_SCRIPT): Move inside
+	case on $target, and don't set for riscv*-elf targets.
+	(GENERATE_PIE_SCRIPT): Likewise.
+
 2018-01-03  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

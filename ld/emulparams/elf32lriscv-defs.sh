@@ -16,8 +16,15 @@ if test `echo "$host" | sed -e s/64//` = `echo "$target" | sed -e s/64//`; then
   esac
 fi
 
-GENERATE_SHLIB_SCRIPT=yes
-GENERATE_PIE_SCRIPT=yes
+# Enable shared library support for everything except an embedded elf target.
+case "$target" in
+  riscv*-elf)
+    ;;
+  *)
+    GENERATE_SHLIB_SCRIPT=yes
+    GENERATE_PIE_SCRIPT=yes
+    ;;
+esac
 
 TEXT_START_ADDR=0x10000
 MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
