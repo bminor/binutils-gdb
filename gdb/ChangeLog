@@ -1,5 +1,10 @@
 2018-01-05  Pedro Alves  <palves@redhat.com>
 
+	* spu-tdep.c (spu_catch_start): Pass
+	symbol_name_match_type::SEARCH_NAME to block_lookup_symbol.
+
+2018-01-05  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/22670
 	* ada-lang.c (literal_symbol_name_matcher): New function.
 	(ada_get_symbol_name_matcher): Use it for

@@ -1966,7 +1966,9 @@ spu_catch_start (struct objfile *objfile)
       struct symbol *sym;
       struct symtab_and_line sal;
 
-      sym = block_lookup_symbol (block, "main", VAR_DOMAIN);
+      sym = block_lookup_symbol (block, "main",
+				 symbol_name_match_type::SEARCH_NAME,
+				 VAR_DOMAIN);
       if (sym)
 	{
 	  fixup_symbol_section (sym, objfile);
