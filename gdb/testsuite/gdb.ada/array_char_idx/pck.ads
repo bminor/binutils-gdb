@@ -19,5 +19,8 @@ package Pck is
       of Natural;
    Global_Char_Table : Char_Table := (others => 0);
 
+   type Table is array (Character) of Natural;
+   My_Table : Table := (others => 4874);
+
    procedure Do_Nothing (A : System.Address);
 end Pck;

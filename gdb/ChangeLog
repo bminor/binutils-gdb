@@ -1,3 +1,9 @@
+2018-01-03  Xavier Roirand  <roirand@adacore.com>
+
+	* ada-valprint.c (print_optional_low_bound): Handle
+	character-indexed array printing like boolean-indexed array
+	printing.
+
 2018-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.

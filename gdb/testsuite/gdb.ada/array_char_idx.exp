@@ -30,3 +30,6 @@ gdb_test "ptype char_table" \
 
 gdb_test "ptype global_char_table" \
          "= array \\(character\\) of natural"
+
+gdb_test "print my_table" "= \\(0 <repeats 256 times>\\)" \
+         "Display my_table"
