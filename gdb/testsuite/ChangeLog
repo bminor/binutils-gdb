@@ -1,3 +1,9 @@
+2018-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/22670
+	* gdb.ada/access_tagged_param.exp: New file.
+	* gdb.ada/access_tagged_param/foo.adb: New file.
+
 2018-01-05  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/22670

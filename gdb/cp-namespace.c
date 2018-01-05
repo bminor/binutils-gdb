@@ -141,7 +141,9 @@ cp_basic_lookup_symbol (const char *name, const struct block *block,
 
       if (global_block != NULL)
 	{
-	  sym.symbol = lookup_symbol_in_block (name, global_block, domain);
+	  sym.symbol = lookup_symbol_in_block (name,
+					       symbol_name_match_type::FULL,
+					       global_block, domain);
 	  sym.block = global_block;
 	}
     }

@@ -2254,7 +2254,8 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
     length = ps->n_static_syms;
     while (length--)
       {
-	sym = block_lookup_symbol (b, SYMBOL_LINKAGE_NAME (*psym),
+	sym = block_lookup_symbol (b, SYMBOL_SEARCH_NAME (*psym),
+				   symbol_name_match_type::SEARCH_NAME,
 				   SYMBOL_DOMAIN (*psym));
 	if (!sym)
 	  {
@@ -2271,7 +2272,8 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
     length = ps->n_global_syms;
     while (length--)
       {
-	sym = block_lookup_symbol (b, SYMBOL_LINKAGE_NAME (*psym),
+	sym = block_lookup_symbol (b, SYMBOL_SEARCH_NAME (*psym),
+				   symbol_name_match_type::SEARCH_NAME,
 				   SYMBOL_DOMAIN (*psym));
 	if (!sym)
 	  {

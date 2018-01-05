@@ -1,6 +1,43 @@
 2018-01-05  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/22670
+	* ada-lang.c (literal_symbol_name_matcher): New function.
+	(ada_get_symbol_name_matcher): Use it for
+	symbol_name_match_type::SEARCH_NAME.
+	* block.c (block_lookup_symbol): New parameter 'match_type'.  Pass
+	it down instead of assuming symbol_name_match_type::FULL.
+	* block.h (block_lookup_symbol): New parameter 'match_type'.
+	* c-valprint.c (print_unpacked_pointer): Use
+	lookup_symbol_search_name instead of lookup_symbol.
+	* compile/compile-object-load.c (get_out_value_type): Pass down
+	symbol_name_match_type::SEARCH_NAME.
+	* cp-namespace.c (cp_basic_lookup_symbol): Pass down
+	symbol_name_match_type::FULL.
+	* cp-support.c (cp_get_symbol_name_matcher): Handle
+	symbol_name_match_type::SEARCH_NAME.
+	* infrun.c (insert_exception_resume_breakpoint): Use
+	lookup_symbol_search_name.
+	* p-valprint.c (pascal_val_print): Use lookup_symbol_search_name.
+	* psymtab.c (maintenance_check_psymtabs): Use
+	symbol_name_match_type::SEARCH_NAME and SYMBOL_SEARCH_NAME.
+	* stack.c (print_frame_args): Use lookup_symbol_search_name and
+	SYMBOL_SEARCH_NAME.
+	* symtab.c (lookup_local_symbol): Don't demangle the lookup name
+	if symbol_name_match_type::SEARCH_NAME.
+	(lookup_symbol_in_language): Pass down
+	symbol_name_match_type::FULL.
+	(lookup_symbol_search_name): New.
+	(lookup_language_this): Pass down
+	symbol_name_match_type::SEARCH_NAME.
+	(lookup_symbol_aux, lookup_local_symbol): New parameter
+	'match_type'.  Pass it down.
+	* symtab.h (symbol_name_match_type::SEARCH_NAME): New enumerator.
+	(lookup_symbol_search_name): New declaration.
+	(lookup_symbol_in_block): New 'match_type' parameter.
+
+2018-01-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
 	* ada-lang.c (ada_lookup_encoded_symbol): Reimplement in terms of
 	ada_lookup_symbol.
 	(ada_lookup_symbol): Reimplement in terms of

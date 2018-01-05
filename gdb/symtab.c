@@ -75,6 +75,7 @@ static int find_line_common (struct linetable *, int, int *, int);
 
 static struct block_symbol
   lookup_symbol_aux (const char *name,
+		     symbol_name_match_type match_type,
 		     const struct block *block,
 		     const domain_enum domain,
 		     enum language language,
@@ -82,6 +83,7 @@ static struct block_symbol
 
 static
 struct block_symbol lookup_local_symbol (const char *name,
+					 symbol_name_match_type match_type,
 					 const struct block *block,
 					 const domain_enum domain,
 					 enum language language);
@@ -1773,14 +1775,18 @@ demangle_for_lookup_info::demangle_for_lookup_info
 
       if (without_params != NULL)
 	{
-	  m_demangled_name = demangle_for_lookup (without_params.get (),
-						  lang, storage);
+	  if (lookup_name.match_type () != symbol_name_match_type::SEARCH_NAME)
+	    m_demangled_name = demangle_for_lookup (without_params.get (),
+						    lang, storage);
 	  return;
 	}
     }
 
-  m_demangled_name = demangle_for_lookup (lookup_name.name ().c_str (),
-					  lang, storage);
+  if (lookup_name.match_type () == symbol_name_match_type::SEARCH_NAME)
+    m_demangled_name = lookup_name.name ();
+  else
+    m_demangled_name = demangle_for_lookup (lookup_name.name ().c_str (),
+					    lang, storage);
 }
 
 /* See symtab.h.  */
@@ -1876,7 +1882,9 @@ lookup_symbol_in_language (const char *name, const struct block *block,
   demangle_result_storage storage;
   const char *modified_name = demangle_for_lookup (name, lang, storage);
 
-  return lookup_symbol_aux (modified_name, block, domain, lang,
+  return lookup_symbol_aux (modified_name,
+			    symbol_name_match_type::FULL,
+			    block, domain, lang,
 			    is_a_field_of_this);
 }
 
@@ -1890,6 +1898,16 @@ lookup_symbol (const char *name, const struct block *block,
   return lookup_symbol_in_language (name, block, domain,
 				    current_language->la_language,
 				    is_a_field_of_this);
+}
+
+/* See symtab.h.  */
+
+struct block_symbol
+lookup_symbol_search_name (const char *search_name, const struct block *block,
+			   domain_enum domain)
+{
+  return lookup_symbol_aux (search_name, symbol_name_match_type::SEARCH_NAME,
+			    block, domain, language_asm, NULL);
 }
 
 /* See symtab.h.  */
@@ -1915,7 +1933,9 @@ lookup_language_this (const struct language_defn *lang,
     {
       struct symbol *sym;
 
-      sym = block_lookup_symbol (block, lang->la_name_of_this, VAR_DOMAIN);
+      sym = block_lookup_symbol (block, lang->la_name_of_this,
+				 symbol_name_match_type::SEARCH_NAME,
+				 VAR_DOMAIN);
       if (sym != NULL)
 	{
 	  if (symbol_lookup_debug > 1)
@@ -1986,7 +2006,8 @@ check_field (struct type *type, const char *name,
    (e.g., demangled name) of the symbol that we're looking for.  */
 
 static struct block_symbol
-lookup_symbol_aux (const char *name, const struct block *block,
+lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
+		   const struct block *block,
 		   const domain_enum domain, enum language language,
 		   struct field_of_this_result *is_a_field_of_this)
 {
@@ -2015,7 +2036,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
-  result = lookup_local_symbol (name, block, domain, language);
+  result = lookup_local_symbol (name, match_type, block, domain, language);
   if (result.symbol != NULL)
     {
       if (symbol_lookup_debug)
@@ -2097,7 +2118,9 @@ lookup_symbol_aux (const char *name, const struct block *block,
    Don't search STATIC_BLOCK or GLOBAL_BLOCK.  */
 
 static struct block_symbol
-lookup_local_symbol (const char *name, const struct block *block,
+lookup_local_symbol (const char *name,
+		     symbol_name_match_type match_type,
+		     const struct block *block,
 		     const domain_enum domain,
 		     enum language language)
 {
@@ -2112,7 +2135,7 @@ lookup_local_symbol (const char *name, const struct block *block,
 
   while (block != static_block)
     {
-      sym = lookup_symbol_in_block (name, block, domain);
+      sym = lookup_symbol_in_block (name, match_type, block, domain);
       if (sym != NULL)
 	return (struct block_symbol) {sym, block};
 
@@ -2165,7 +2188,8 @@ lookup_objfile_from_block (const struct block *block)
 /* See symtab.h.  */
 
 struct symbol *
-lookup_symbol_in_block (const char *name, const struct block *block,
+lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
+			const struct block *block,
 			const domain_enum domain)
 {
   struct symbol *sym;
@@ -2181,7 +2205,7 @@ lookup_symbol_in_block (const char *name, const struct block *block,
 			  domain_name (domain));
     }
 
-  sym = block_lookup_symbol (block, name, domain);
+  sym = block_lookup_symbol (block, name, match_type, domain);
   if (sym)
     {
       if (symbol_lookup_debug > 1)
@@ -2370,7 +2394,8 @@ lookup_symbol_via_quick_fns (struct objfile *objfile, int block_index,
 
   bv = COMPUNIT_BLOCKVECTOR (cust);
   block = BLOCKVECTOR_BLOCK (bv, block_index);
-  result.symbol = block_lookup_symbol (block, name, domain);
+  result.symbol = block_lookup_symbol (block, name,
+				       symbol_name_match_type::FULL, domain);
   if (result.symbol == NULL)
     error_in_psymtab_expansion (block_index, name, cust);
 
@@ -2483,7 +2508,9 @@ lookup_symbol_in_static_block (const char *name,
 			  domain_name (domain));
     }
 
-  sym = lookup_symbol_in_block (name, static_block, domain);
+  sym = lookup_symbol_in_block (name,
+				symbol_name_match_type::FULL,
+				static_block, domain);
   if (symbol_lookup_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
