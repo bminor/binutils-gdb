@@ -1,3 +1,9 @@
+2018-01-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18653
+	* server.c (captured_main): Pass quiet=false to
+	save_original_signals_state.
+
 2018-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbreplay.c (gdbreplay_version): Update copyright year in

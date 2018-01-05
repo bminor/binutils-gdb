@@ -3712,7 +3712,7 @@ captured_main (int argc, char *argv[])
      opened by remote_prepare.  */
   notice_open_fds ();
 
-  save_original_signals_state ();
+  save_original_signals_state (false);
 
   /* We need to know whether the remote connection is stdio before
      starting the inferior.  Inferiors created in this scenario have

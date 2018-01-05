@@ -1,5 +1,17 @@
 2018-01-05  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/18653
+	* common/signals-state-save-restore.c
+	(save_original_signals_state): New parameter 'quiet'.  Warn if we
+	find a custom handler preinstalled, instead of internal erroring.
+	But only warn if !quiet.
+	* common/signals-state-save-restore.h
+	(save_original_signals_state): New parameter 'quiet'.
+	* main.c (captured_main_1): Move save_original_signals_state call
+	after option handling, and pass QUIET.
+
+2018-01-05  Pedro Alves  <palves@redhat.com>
+
 	* spu-tdep.c (spu_catch_start): Pass
 	symbol_name_match_type::SEARCH_NAME to block_lookup_symbol.
 

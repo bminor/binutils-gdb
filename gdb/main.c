@@ -506,7 +506,6 @@ captured_main_1 (struct captured_main_args *context)
 
   bfd_init ();
   notice_open_fds ();
-  save_original_signals_state ();
 
   saved_command_line = (char *) xstrdup ("");
 
@@ -848,6 +847,8 @@ captured_main_1 (struct captured_main_args *context)
     if (batch_flag)
       quiet = 1;
   }
+
+  save_original_signals_state (quiet);
 
   /* Try to set up an alternate signal stack for SIGSEGV handlers.  */
   setup_alternate_signal_stack ();
