@@ -1,3 +1,8 @@
+2018-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 8.1 branch created (5219ac6237c272b938c28517bf371429260c71e7):
+	* version.in: Bump version to 8.0.90.DATE-git.
+
 2018-01-03  Xavier Roirand  <roirand@adacore.com>
 
 	* ada-lang.h (ada_exception_catchpoint_kind) <ada_catch_handlers>:
