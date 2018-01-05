@@ -1793,6 +1793,7 @@ cp_get_symbol_name_matcher (const lookup_name_info &lookup_name)
     {
     case symbol_name_match_type::FULL:
     case symbol_name_match_type::EXPRESSION:
+    case symbol_name_match_type::SEARCH_NAME:
       return cp_fq_symbol_name_matches;
     case symbol_name_match_type::WILD:
       return cp_symbol_name_matches;

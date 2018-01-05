@@ -60,6 +60,16 @@ enum class symbol_name_match_type
      namespace/module/package.  */
   FULL,
 
+  /* Search name matching.  This is like FULL, but the search name did
+     not come from the user; instead it is already a search name
+     retrieved from a SYMBOL_SEARCH_NAME/MSYMBOL_SEARCH_NAME call.
+     For Ada, this avoids re-encoding an already-encoded search name
+     (which would potentially incorrectly lowercase letters in the
+     linkage/search name that should remain uppercase).  For C++, it
+     avoids trying to demangle a name we already know is
+     demangled.  */
+  SEARCH_NAME,
+
   /* Expression matching.  The same as FULL matching in most
      languages.  The same as WILD matching in Ada.  */
   EXPRESSION,
@@ -1554,6 +1564,20 @@ extern struct block_symbol lookup_symbol (const char *,
 					  const domain_enum,
 					  struct field_of_this_result *);
 
+/* Find the definition for a specified symbol search name in domain
+   DOMAIN, visible from lexical block BLOCK if non-NULL or from
+   global/static blocks if BLOCK is NULL.  The passed-in search name
+   should not come from the user; instead it should already be a
+   search name as retrieved from a
+   SYMBOL_SEARCH_NAME/MSYMBOL_SEARCH_NAME call.  See definition of
+   symbol_name_match_type::SEARCH_NAME.  Returns the struct symbol
+   pointer, or NULL if no symbol is found.  The symbol's section is
+   fixed up if necessary.  */
+
+extern struct block_symbol lookup_symbol_search_name (const char *search_name,
+						      const struct block *block,
+						      domain_enum domain);
+
 /* A default version of lookup_symbol_nonlocal for use by languages
    that can't think of anything better to do.
    This implements the C lookup rules.  */
@@ -1603,6 +1627,7 @@ extern struct block_symbol
 
 extern struct symbol *
   lookup_symbol_in_block (const char *name,
+			  symbol_name_match_type match_type,
 			  const struct block *block,
 			  const domain_enum domain);
 

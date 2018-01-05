@@ -673,12 +673,13 @@ block_iter_match_next (const lookup_name_info &name,
 
 struct symbol *
 block_lookup_symbol (const struct block *block, const char *name,
+		     symbol_name_match_type match_type,
 		     const domain_enum domain)
 {
   struct block_iterator iter;
   struct symbol *sym;
 
-  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+  lookup_name_info lookup_name (name, match_type);
 
   if (!BLOCK_FUNCTION (block))
     {

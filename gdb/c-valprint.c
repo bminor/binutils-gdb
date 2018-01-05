@@ -198,14 +198,17 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 	  struct symbol *wsym = NULL;
 	  struct type *wtype;
 	  struct block *block = NULL;
-	  struct field_of_this_result is_this_fld;
 
 	  if (want_space)
 	    fputs_filtered (" ", stream);
 
 	  if (msymbol.minsym != NULL)
-	    wsym = lookup_symbol (MSYMBOL_LINKAGE_NAME(msymbol.minsym), block,
-				  VAR_DOMAIN, &is_this_fld).symbol;
+	    {
+	      const char *search_name
+		= MSYMBOL_SEARCH_NAME (msymbol.minsym);
+	      wsym = lookup_symbol_search_name (search_name, block,
+						VAR_DOMAIN).symbol;
+	    }
 
 	  if (wsym)
 	    {

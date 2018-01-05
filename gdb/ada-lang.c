@@ -14404,12 +14404,38 @@ ada_symbol_name_matches (const char *symbol_search_name,
 				     comp_match_res);
 }
 
+/* A name matcher that matches the symbol name exactly, with
+   strcmp.  */
+
+static bool
+literal_symbol_name_matcher (const char *symbol_search_name,
+			     const lookup_name_info &lookup_name,
+			     completion_match_result *comp_match_res)
+{
+  const std::string &name = lookup_name.name ();
+
+  int cmp = (lookup_name.completion_mode ()
+	     ? strncmp (symbol_search_name, name.c_str (), name.size ())
+	     : strcmp (symbol_search_name, name.c_str ()));
+  if (cmp == 0)
+    {
+      if (comp_match_res != NULL)
+	comp_match_res->set_match (symbol_search_name);
+      return true;
+    }
+  else
+    return false;
+}
+
 /* Implement the "la_get_symbol_name_matcher" language_defn method for
    Ada.  */
 
 static symbol_name_matcher_ftype *
 ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
 {
+  if (lookup_name.match_type () == symbol_name_match_type::SEARCH_NAME)
+    return literal_symbol_name_matcher;
+
   if (lookup_name.completion_mode ())
     return ada_symbol_name_matches;
   else
