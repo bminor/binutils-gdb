@@ -1,3 +1,12 @@
+2018-01-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
+	* ada-lang.c (ada_lookup_encoded_symbol): Reimplement in terms of
+	ada_lookup_symbol.
+	(ada_lookup_symbol): Reimplement in terms of
+	ada_lookup_symbol_list, bits factored out from
+	ada_lookup_encoded_symbol.
+
 2018-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 8.1 branch created (5219ac6237c272b938c28517bf371429260c71e7):
