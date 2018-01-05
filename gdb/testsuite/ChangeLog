@@ -1,3 +1,7 @@
+2018-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/rename_subscript_param: New testcase.
+
 2018-01-05  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.ada/arr_acc_idx_w_gap: New testcase.

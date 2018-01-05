@@ -1,3 +1,9 @@
+2018-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-exp.y (write_object_renaming): When subscripting an array
+	using a symbol as the index, pass the block in call to
+	ada_lookup_encoded_symbol when looking that symbol up.
+
 2018-01-05  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (ada_array_length): Use ada_index_type instead of
