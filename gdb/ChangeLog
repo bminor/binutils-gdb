@@ -1,3 +1,8 @@
+2018-01-05  Jerome Guitton  <guitton@adacore.com>
+
+	* ada-lang.c (ada_array_length): Use ada_index_type instead of
+	TYPE_INDEX_TYPE.
+
 2018-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_to_fixed_value_create): Add handling of

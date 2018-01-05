@@ -3179,7 +3179,7 @@ ada_array_length (struct value *arr, int n)
     }
 
   arr_type = check_typedef (arr_type);
-  index_type = TYPE_INDEX_TYPE (arr_type);
+  index_type = ada_index_type (arr_type, n, "length");
   if (index_type != NULL)
     {
       struct type *base_type;
