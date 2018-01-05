@@ -1,3 +1,8 @@
+2018-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_to_fixed_value_create): Add handling of
+	the case where VALUE_LVAL (val0) is not lval_memory.
+
 2018-01-05  Xavier Roirand  <roirand@adacore.com>
 
 	* ada-valprint.c (print_optional_low_bound): Handle

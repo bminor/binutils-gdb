@@ -9344,8 +9344,16 @@ ada_to_fixed_value_create (struct type *type0, CORE_ADDR address,
 
   if (type == type0 && val0 != NULL)
     return val0;
-  else
-    return value_from_contents_and_address (type, 0, address);
+
+  if (VALUE_LVAL (val0) != lval_memory)
+    {
+      /* Our value does not live in memory; it could be a convenience
+	 variable, for instance.  Create a not_lval value using val0's
+	 contents.  */
+      return value_from_contents (type, value_contents (val0));
+    }
+
+  return value_from_contents_and_address (type, 0, address);
 }
 
 /* A value representing VAL, but with a standard (static-sized) type

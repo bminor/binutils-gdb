@@ -1,3 +1,7 @@
+2018-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/convvar_comp: New testcase.
+
 2018-01-05  Xavier Roirand  <roirand@adacore.com>
 
 	* testsuite/gdb.ada/array_char_idx/pck.ads (Table): New type.
