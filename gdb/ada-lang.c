@@ -5911,10 +5911,6 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
 			   domain_enum domain,
 			   struct block_symbol *info)
 {
-  struct block_symbol *candidates;
-  int n_candidates;
-  struct cleanup *old_chain;
-
   /* Since we already have an encoded name, wrap it in '<>' to force a
      verbatim match.  Otherwise, if the name happens to not look like
      an encoded name (because it doesn't include a "__"),
@@ -5924,22 +5920,7 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
   std::string verbatim = std::string ("<") + name + '>';
 
   gdb_assert (info != NULL);
-  memset (info, 0, sizeof (struct block_symbol));
-
-  n_candidates = ada_lookup_symbol_list (verbatim.c_str (), block,
-					 domain, &candidates);
-  old_chain = make_cleanup (xfree, candidates);
-
-  if (n_candidates == 0)
-    {
-      do_cleanups (old_chain);
-      return;
-    }
-
-  *info = candidates[0];
-  info->symbol = fixup_symbol_section (info->symbol, NULL);
-
-  do_cleanups (old_chain);
+  *info = ada_lookup_symbol (verbatim.c_str (), block, domain, NULL);
 }
 
 /* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing
@@ -5952,13 +5933,27 @@ struct block_symbol
 ada_lookup_symbol (const char *name, const struct block *block0,
                    domain_enum domain, int *is_a_field_of_this)
 {
-  struct block_symbol info;
-
   if (is_a_field_of_this != NULL)
     *is_a_field_of_this = 0;
 
-  ada_lookup_encoded_symbol (ada_encode (ada_fold_name (name)),
-			     block0, domain, &info);
+  struct block_symbol *candidates;
+  int n_candidates;
+  struct cleanup *old_chain;
+
+  n_candidates = ada_lookup_symbol_list (name, block0, domain, &candidates);
+  old_chain = make_cleanup (xfree, candidates);
+
+  if (n_candidates == 0)
+    {
+      do_cleanups (old_chain);
+      return {};
+    }
+
+  block_symbol info = candidates[0];
+  info.symbol = fixup_symbol_section (info.symbol, NULL);
+
+  do_cleanups (old_chain);
+
   return info;
 }
 

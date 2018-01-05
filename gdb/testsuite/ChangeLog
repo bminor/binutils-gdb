@@ -1,3 +1,10 @@
+2018-01-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
+	* gdb.ada/info_addr_mixed_case.exp: Remove kfail.  Extend test to
+	exercise lower case too, and to exercise both full matching and
+	wild matching.
+
 2018-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/rename_subscript_param: New testcase.

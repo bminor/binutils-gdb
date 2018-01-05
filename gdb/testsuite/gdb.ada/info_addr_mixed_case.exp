@@ -31,12 +31,11 @@ if ![runto "foo.adb:$bp_location" ] then {
 
 # The following test exercises the situation when uppercase letters
 # are used in the name of the symbol passed to the "info address"
-# command.  This should not make a difference, as the language is
-# Ada, and Ada is case-insensitive.
+# command.  This should not make a difference, as the language is Ada,
+# and Ada is case-insensitive.  Also, exercise both fully-qualified
+# name matching and wild matching.
 
-# commit b5ec771e60c1a0863e51eb491c85c674097e9e13 (Introduce
-# lookup_name_info and generalize Ada's FULL/WILD name matching)
-# caused the following test to fail. KFAIL it while investigating...
-setup_kfail gdb/22670 "*-*-*"
-gdb_test "info address My_Table" \
-         "Symbol \"pck\\.my_table\" is static storage at address $hex\\."
+foreach sym {"my_table" "My_Table" "pck.my_table" "Pck.My_Table"} {
+    gdb_test "info address $sym" \
+	"Symbol \"pck\\.my_table\" is static storage at address $hex\\."
+}
