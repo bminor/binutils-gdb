@@ -1,5 +1,14 @@
 2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ldexp.h (union etree_union): Remove defsym field.
+	* ldexp.c (exp_assop): Remove defsym parameter, and use of defsym
+	parameter.
+	(exp_assign): Remove passing of defsym parameter.
+	(exp_defsym): Likewise.
+	(exp_provide): Likewise.
+
+2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ldexp.c (exp_fold_tree_1): Rework condition underwhich provide
 	nodes are ignored in the tree walk, and move the location at which
 	we change provide nodes into provided nodes.

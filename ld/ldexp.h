@@ -66,7 +66,6 @@ typedef union etree_union {
     node_type type;
     const char *dst;
     union etree_union *src;
-    bfd_boolean defsym;
     bfd_boolean hidden;
   } assign;
   struct {
