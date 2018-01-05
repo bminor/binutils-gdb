@@ -2,5 +2,5 @@
 Linker script and memory map
 #...
                 0x0+10 +foo = 0x10
-                \[!provide\] +PROVIDE \(foo, bar\)
+                \[!provide\] +PROVIDE \(foo = bar\)
 #...

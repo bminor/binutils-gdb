@@ -1423,7 +1423,7 @@ exp_print_tree (etree_type *tree)
       break;
     case etree_provide:
     case etree_provided:
-      fprintf (config.map_file, "PROVIDE (%s, ", tree->assign.dst);
+      fprintf (config.map_file, "PROVIDE (%s = ", tree->assign.dst);
       exp_print_tree (tree->assign.src);
       fputc (')', config.map_file);
       break;

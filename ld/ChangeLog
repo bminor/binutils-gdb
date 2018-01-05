@@ -1,3 +1,10 @@
+2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldexp.c (exp_print_tree): Use '=' instead of ',' when printing
+	PROVIDE statements.
+	* testsuite/ld-scripts/provide-4.map: Update expected output.
+	* testsuite/ld-scripts/provide-5.map: Likewise.
+
 2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22696
