@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 8.0
+*** Changes since GDB 8.1
+
+*** Changes in GDB 8.1
 
 * GDB now supports dynamically creating arbitrary register groups specified
   in XML target descriptions.  This allows for finer grain grouping of
