@@ -1884,10 +1884,7 @@ static struct compunit_symtab *dwarf2_start_symtab (struct dwarf2_cu *,
 						    CORE_ADDR);
 
 static struct symbol *new_symbol (struct die_info *, struct type *,
-				  struct dwarf2_cu *);
-
-static struct symbol *new_symbol_full (struct die_info *, struct type *,
-				       struct dwarf2_cu *, struct symbol *);
+				  struct dwarf2_cu *, struct symbol * = NULL);
 
 static void dwarf2_const_value (const struct attribute *, struct symbol *,
 				struct dwarf2_cu *);
@@ -10940,7 +10937,7 @@ dwarf2_compute_name (const char *name,
      but otherwise compute it by typename_concat inside GDB.
      FIXME: Actually this is not really true, or at least not always true.
      It's all very confusing.  SYMBOL_SET_NAMES doesn't try to demangle
-     Fortran names because there is no mangling standard.  So new_symbol_full
+     Fortran names because there is no mangling standard.  So new_symbol
      will set the demangled name to the result of dwarf2_full_name, and it is
      the demangled name that GDB uses if it exists.  */
   if (cu->language == language_ada
@@ -11213,8 +11210,8 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 
       if (cu->language == language_go)
 	{
-	  /* This is a lie, but we already lie to the caller new_symbol_full.
-	     new_symbol_full assumes we return the mangled name.
+	  /* This is a lie, but we already lie to the caller new_symbol.
+	     new_symbol assumes we return the mangled name.
 	     This just undoes that lie until things are cleaned up.  */
 	}
       else
@@ -13880,8 +13877,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   newobj = push_context (0, lowpc);
-  newobj->name = new_symbol_full (die, read_type_die (die, cu), cu,
-			       (struct symbol *) templ_func);
+  newobj->name = new_symbol (die, read_type_die (die, cu), cu,
+			     (struct symbol *) templ_func);
 
   /* If there is a location expression for DW_AT_frame_base, record
      it.  */
@@ -14436,7 +14433,7 @@ read_variable (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  new_symbol_full (die, NULL, cu, storage);
+  new_symbol (die, NULL, cu, storage);
 }
 
 /* Call CALLBACK from DW_AT_ranges attribute value OFFSET
@@ -21381,8 +21378,8 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
    NULL, allocate a new symbol on the objfile's obstack.  */
 
 static struct symbol *
-new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
-		 struct symbol *space)
+new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
+	    struct symbol *space)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = cu->per_cu->dwarf2_per_objfile;
@@ -21762,14 +21759,6 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	cp_scan_for_anonymous_namespaces (sym, objfile);
     }
   return (sym);
-}
-
-/* A wrapper for new_symbol_full that always allocates a new symbol.  */
-
-static struct symbol *
-new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
-{
-  return new_symbol_full (die, type, cu, NULL);
 }
 
 /* Given an attr with a DW_FORM_dataN value in host byte order,
