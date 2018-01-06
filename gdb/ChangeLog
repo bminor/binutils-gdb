@@ -1,4 +1,17 @@
 2018-01-17  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (delayed_method_info): Remove typedef.
+	(dwarf2_cu::method_info): Now a std::vector.
+	(add_to_method_list): Update.
+	(free_delayed_list): Remove.
+	(compute_delayed_physnames): Update.
+	(process_full_comp_unit, process_full_type_unit): Clear the method
+	list.  Remove cleanups.
+	(psymtab_include_file_name): Add name_holder parameter.  Use
+	unique_xmalloc_ptr.
+	(dwarf_decode_lines): Update.
+
+2018-01-17  Tom Tromey  <tom@tromey.com>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2read.c (struct dwarf2_cu): Add constructor, destructor.

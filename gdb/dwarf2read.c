@@ -655,9 +655,6 @@ struct delayed_method_info
   struct die_info *die;
 };
 
-typedef struct delayed_method_info delayed_method_info;
-DEF_VEC_O (delayed_method_info);
-
 /* Internal state when decoding a particular compilation unit.  */
 struct dwarf2_cu
 {
@@ -735,7 +732,7 @@ struct dwarf2_cu
 
   /* A list of methods which need to have physnames computed
      after all type information has been read.  */
-  VEC (delayed_method_info) *method_list = nullptr;
+  std::vector<delayed_method_info> method_list;
 
   /* To be copied to symtab->call_site_htab.  */
   htab_t call_site_htab = nullptr;
@@ -10102,20 +10099,7 @@ add_to_method_list (struct type *type, int fnfield_index, int index,
   mi.index = index;
   mi.name = name;
   mi.die = die;
-  VEC_safe_push (delayed_method_info, cu->method_list, &mi);
-}
-
-/* A cleanup for freeing the delayed method list.  */
-
-static void
-free_delayed_list (void *ptr)
-{
-  struct dwarf2_cu *cu = (struct dwarf2_cu *) ptr;
-  if (cu->method_list != NULL)
-    {
-      VEC_free (delayed_method_info, cu->method_list);
-      cu->method_list = NULL;
-    }
+  cu->method_list.push_back (mi);
 }
 
 /* Check whether [PHYSNAME, PHYSNAME+LEN) ends with a modifier like
@@ -10144,21 +10128,18 @@ check_modifier (const char *physname, size_t &len, const char (&mod)[N])
 static void
 compute_delayed_physnames (struct dwarf2_cu *cu)
 {
-  int i;
-  struct delayed_method_info *mi;
-
   /* Only C++ delays computing physnames.  */
-  if (VEC_empty (delayed_method_info, cu->method_list))
+  if (cu->method_list.empty ())
     return;
   gdb_assert (cu->language == language_cplus);
 
-  for (i = 0; VEC_iterate (delayed_method_info, cu->method_list, i, mi) ; ++i)
+  for (struct delayed_method_info &mi : cu->method_list)
     {
       const char *physname;
       struct fn_fieldlist *fn_flp
-	= &TYPE_FN_FIELDLIST (mi->type, mi->fnfield_index);
-      physname = dwarf2_physname (mi->name, mi->die, cu);
-      TYPE_FN_FIELD_PHYSNAME (fn_flp->fn_fields, mi->index)
+	= &TYPE_FN_FIELDLIST (mi.type, mi.fnfield_index);
+      physname = dwarf2_physname (mi.name, mi.die, cu);
+      TYPE_FN_FIELD_PHYSNAME (fn_flp->fn_fields, mi.index)
 	= physname ? physname : "";
 
       /* Since there's no tag to indicate whether a method is a
@@ -10173,14 +10154,17 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
 	      if (physname[len] == ')') /* shortcut */
 		break;
 	      else if (check_modifier (physname, len, " const"))
-		TYPE_FN_FIELD_CONST (fn_flp->fn_fields, mi->index) = 1;
+		TYPE_FN_FIELD_CONST (fn_flp->fn_fields, mi.index) = 1;
 	      else if (check_modifier (physname, len, " volatile"))
-		TYPE_FN_FIELD_VOLATILE (fn_flp->fn_fields, mi->index) = 1;
+		TYPE_FN_FIELD_VOLATILE (fn_flp->fn_fields, mi.index) = 1;
 	      else
 		break;
 	    }
 	}
     }
+
+  /* The list is no longer needed.  */
+  cu->method_list.clear ();
 }
 
 /* Go objects should be embedded in a DW_TAG_module DIE,
@@ -10418,7 +10402,6 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   CORE_ADDR lowpc, highpc;
   struct compunit_symtab *cust;
-  struct cleanup *delayed_list_cleanup;
   CORE_ADDR baseaddr;
   struct block *static_block;
   CORE_ADDR addr;
@@ -10427,7 +10410,9 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
 
   buildsym_init ();
   scoped_free_pendings free_pending;
-  delayed_list_cleanup = make_cleanup (free_delayed_list, cu);
+
+  /* Clear the list here in case something was left over.  */
+  cu->method_list.clear ();
 
   cu->list_in_scope = &file_symbols;
 
@@ -10445,7 +10430,6 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
      should be complete, and it should now be safe to compute all of the
      physnames.  */
   compute_delayed_physnames (cu);
-  do_cleanups (delayed_list_cleanup);
 
   /* Some compilers don't define a DW_AT_high_pc attribute for the
      compilation unit.  If the DW_AT_high_pc is missing, synthesize
@@ -10521,7 +10505,6 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
   struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct compunit_symtab *cust;
-  struct cleanup *delayed_list_cleanup;
   struct signatured_type *sig_type;
 
   gdb_assert (per_cu->is_debug_types);
@@ -10529,7 +10512,9 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
 
   buildsym_init ();
   scoped_free_pendings free_pending;
-  delayed_list_cleanup = make_cleanup (free_delayed_list, cu);
+
+  /* Clear the list here in case something was left over.  */
+  cu->method_list.clear ();
 
   cu->list_in_scope = &file_symbols;
 
@@ -10547,7 +10532,6 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
      should be complete, and it should now be safe to compute all of the
      physnames.  */
   compute_delayed_physnames (cu);
-  do_cleanups (delayed_list_cleanup);
 
   /* TUs share symbol tables.
      If this is the first TU to use this symtab, complete the construction
@@ -20349,25 +20333,24 @@ dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu)
    Return the file name of the psymtab for included file FILE_INDEX
    in line header LH of PST.
    COMP_DIR is the compilation directory (DW_AT_comp_dir) or NULL if unknown.
-   If space for the result is malloc'd, it will be freed by a cleanup.
-   Returns NULL if FILE_INDEX should be ignored, i.e., it is pst->filename.
-
-   The function creates dangling cleanup registration.  */
+   If space for the result is malloc'd, *NAME_HOLDER will be set.
+   Returns NULL if FILE_INDEX should be ignored, i.e., it is pst->filename.  */
 
 static const char *
 psymtab_include_file_name (const struct line_header *lh, int file_index,
 			   const struct partial_symtab *pst,
-			   const char *comp_dir)
+			   const char *comp_dir,
+			   gdb::unique_xmalloc_ptr<char> *name_holder)
 {
   const file_entry &fe = lh->file_names[file_index];
   const char *include_name = fe.name;
   const char *include_name_to_compare = include_name;
   const char *pst_filename;
-  char *copied_name = NULL;
   int file_is_pst;
 
   const char *dir_name = fe.include_dir (lh);
 
+  gdb::unique_xmalloc_ptr<char> hold_compare;
   if (!IS_ABSOLUTE_PATH (include_name)
       && (dir_name != NULL || comp_dir != NULL))
     {
@@ -20394,35 +20377,29 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
 
       if (dir_name != NULL)
 	{
-	  char *tem = concat (dir_name, SLASH_STRING,
-			      include_name, (char *)NULL);
-
-	  make_cleanup (xfree, tem);
-	  include_name = tem;
+	  name_holder->reset (concat (dir_name, SLASH_STRING,
+				      include_name, (char *) NULL));
+	  include_name = name_holder->get ();
 	  include_name_to_compare = include_name;
 	}
       if (!IS_ABSOLUTE_PATH (include_name) && comp_dir != NULL)
 	{
-	  char *tem = concat (comp_dir, SLASH_STRING,
-			      include_name, (char *)NULL);
-
-	  make_cleanup (xfree, tem);
-	  include_name_to_compare = tem;
+	  hold_compare.reset (concat (comp_dir, SLASH_STRING,
+				      include_name, (char *) NULL));
+	  include_name_to_compare = hold_compare.get ();
 	}
     }
 
   pst_filename = pst->filename;
+  gdb::unique_xmalloc_ptr<char> copied_name;
   if (!IS_ABSOLUTE_PATH (pst_filename) && pst->dirname != NULL)
     {
-      copied_name = concat (pst->dirname, SLASH_STRING,
-			    pst_filename, (char *)NULL);
-      pst_filename = copied_name;
+      copied_name.reset (concat (pst->dirname, SLASH_STRING,
+				 pst_filename, (char *) NULL));
+      pst_filename = copied_name.get ();
     }
 
   file_is_pst = FILENAME_CMP (include_name_to_compare, pst_filename) == 0;
-
-  if (copied_name != NULL)
-    xfree (copied_name);
 
   if (file_is_pst)
     return NULL;
@@ -21081,8 +21058,10 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
       for (file_index = 0; file_index < lh->file_names.size (); file_index++)
         if (lh->file_names[file_index].included_p == 1)
           {
+	    gdb::unique_xmalloc_ptr<char> name_holder;
 	    const char *include_name =
-	      psymtab_include_file_name (lh, file_index, pst, comp_dir);
+	      psymtab_include_file_name (lh, file_index, pst, comp_dir,
+					 &name_holder);
 	    if (include_name != NULL)
               dwarf2_create_include_psymtab (include_name, pst, objfile);
           }
