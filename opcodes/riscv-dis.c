@@ -226,6 +226,8 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 
 	case 'b':
 	case 's':
+	  if ((l & MASK_JALR) == MATCH_JALR)
+	    maybe_print_address (pd, rs1, 0);
 	  print (info->stream, "%s", riscv_gpr_names[rs1]);
 	  break;
 

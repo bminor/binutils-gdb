@@ -21,6 +21,7 @@
 
 if [istarget "riscv*-*-*"] {
     run_dump_test "c-lui"
+    run_dump_test "disas-jalr"
 
     set abis { rv32gc ilp32 elf32lriscv rv64gc lp64 elf64lriscv }
     foreach { arch abi emul } $abis {

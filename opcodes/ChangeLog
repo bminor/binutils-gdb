@@ -1,3 +1,8 @@
+2018-01-05  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-dis.c (print_insn_args) <'s'>: Call maybe_print_address for a
+	jalr.
+
 2018-01-03  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
