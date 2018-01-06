@@ -25276,7 +25276,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   if (attr_form_is_block (attr))
     {
       if (attr_to_dynamic_prop (attr, die, cu, &prop))
-        add_dyn_prop (DYN_PROP_ALLOCATED, prop, type, objfile);
+        add_dyn_prop (DYN_PROP_ALLOCATED, prop, type);
     }
   else if (attr != NULL)
     {
@@ -25291,7 +25291,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   if (attr_form_is_block (attr))
     {
       if (attr_to_dynamic_prop (attr, die, cu, &prop))
-        add_dyn_prop (DYN_PROP_ASSOCIATED, prop, type, objfile);
+        add_dyn_prop (DYN_PROP_ASSOCIATED, prop, type);
     }
   else if (attr != NULL)
     {
@@ -25304,7 +25304,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   /* Read DW_AT_data_location and set in type.  */
   attr = dwarf2_attr (die, DW_AT_data_location, cu);
   if (attr_to_dynamic_prop (attr, die, cu, &prop))
-    add_dyn_prop (DYN_PROP_DATA_LOCATION, prop, type, objfile);
+    add_dyn_prop (DYN_PROP_DATA_LOCATION, prop, type);
 
   if (dwarf2_per_objfile->die_type_hash == NULL)
     {

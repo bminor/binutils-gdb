@@ -1841,11 +1841,10 @@ extern struct dynamic_prop *get_dyn_prop
 /* * Given a dynamic property PROP of a given KIND, add this dynamic
    property to the given TYPE.
 
-   This function assumes that TYPE is objfile-owned, and that OBJFILE
-   is the TYPE's objfile.  */
+   This function assumes that TYPE is objfile-owned.  */
 extern void add_dyn_prop
   (enum dynamic_prop_node_kind kind, struct dynamic_prop prop,
-   struct type *type, struct objfile *objfile);
+   struct type *type);
 
 extern void remove_dyn_prop (enum dynamic_prop_node_kind prop_kind,
                              struct type *type);
