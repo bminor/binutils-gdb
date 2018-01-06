@@ -87,9 +87,6 @@
 #include <set>
 #include <forward_list>
 
-typedef struct symbol *symbolp;
-DEF_VEC_P (symbolp);
-
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
    This is in contrast to the low level DIE reading of dwarf_die_debug.  */

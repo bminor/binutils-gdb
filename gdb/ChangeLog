@@ -1,5 +1,9 @@
 2018-01-17  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (symbolp): Remove typedef.  Don't instantiate VEC.
+
+2018-01-17  Tom Tromey  <tom@tromey.com>
+
 	* gdbtypes.h (add_dyn_prop): Remove objfile parameter.
 	* gdbtypes.c (add_dyn_prop): Remove objfile parameter.
 	(create_array_type_with_stride): Update.
