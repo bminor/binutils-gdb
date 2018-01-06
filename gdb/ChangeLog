@@ -1,4 +1,32 @@
 2018-01-17  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2read.c (struct dwarf2_cu) <abbrev_table>: Remove.
+	(struct die_reader_specs) <abbrev_table>: New member.
+	(struct abbrev_table): Add constructor.
+	<alloc_abbrev, add_abbrev, lookup_abbrev>: Declare.
+	<abbrev_obstack>: Now an auto_obstack.
+	(abbrev_table_up): New typedef.
+	(init_cu_die_reader): Add abbrev_table parameter.
+	(read_cutu_die_from_dwo): Remove abbrev_table_provided parameter.
+	Add result_dwo_abbrev_table.
+	(init_tu_and_read_dwo_dies, init_cutu_and_read_dies)
+	(init_cutu_and_read_dies_no_follow, build_type_psymtabs_1):
+	Update.
+	(peek_die_abbrev): Take die_reader_specs, not dwarf_cu as
+	parameter.
+	(skip_children): Update.
+	(abbrev_table::alloc_abbrev): Rename from
+	abbrev_table_alloc_abbrev.
+	(abbrev_table::add_abbrev): Rename from abbrev_table_add_abbrev.
+	(abbrev_table::lookup_abbrev): Rename from
+	abbrev_table_lookup_abbrev.
+	(abbrev_table_read_table): Return abbrev_table_up.
+	(abbrev_table_free, abbrev_table_free_cleanup)
+	(dwarf2_read_abbrevs, dwarf2_free_abbrev_table): Remove.
+	(load_partial_dies): Update.
+
+2018-01-17  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (dwarf2_compute_name): Update comment.
 	(read_func_scope, read_variable): Update.
