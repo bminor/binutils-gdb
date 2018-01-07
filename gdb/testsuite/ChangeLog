@@ -1,3 +1,16 @@
+2018-01-19  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* gdb.arch/powerpc-d128-regs.exp: Replace expected "\[\t\]*" from
+	"info reg" with "\[ \t\]*".
+	* gdb.arch/altivec-regs.exp: Replace expected "\t" from "info reg" with
+	"\[ \t\]+".
+	* gdb.arch/s390-multiarch.exp: Ditto.
+	* gdb.base/pc-fp.exp: Ditto.
+	* gdb.reverse/i386-precsave.exp: Ditto.
+	* gdb.reverse/i386-reverse.exp: Ditto.
+	* gdb.reverse/i387-env-reverse.exp: Ditto.
+	* gdb.reverse/i387-stack-reverse.exp: Ditto.
+
 2018-01-18  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* lib/gdb.exp (gdb_compile): Re-enable use of
