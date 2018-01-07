@@ -1,3 +1,100 @@
+2018-01-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2read.c (struct dwarf2_cu) <dwarf2_per_objfile>: Remove.
+	(dw2_get_file_names_reader): Adjust.
+	(lookup_dwo_signatured_type): Adjust.
+	(lookup_dwp_signatured_type): Adjust.
+	(lookup_signatured_type): Adjust.
+	(create_type_unit_group): Adjust.
+	(get_type_unit_group): Adjust.
+	(process_psymtab_comp_unit_reader): Adjust.
+	(build_type_psymtabs_reader): Adjust.
+	(scan_partial_symbols): Adjust.
+	(add_partial_symbol): Adjust.
+	(add_partial_subprogram): Adjust.
+	(peek_die_abbrev): Adjust.
+	(fixup_go_packaging): Adjust.
+	(process_imported_unit_die): Adjust.
+	(dwarf2_compute_name): Adjust.
+	(dwarf2_physname): Adjust.
+	(read_import_statement): Adjust.
+	(handle_DW_AT_stmt_list): Adjust.
+	(read_file_scope): Adjust.
+	(read_func_scope): Adjust.
+	(read_lexical_block_scope): Adjust.
+	(read_call_site_scope): Adjust.
+	(read_variable): Adjust.
+	(dwarf2_rnglists_process): Adjust.
+	(dwarf2_ranges_process): Adjust.
+	(dwarf2_ranges_read): Adjust.
+	(dwarf2_get_pc_bounds): Adjust.
+	(dwarf2_record_block_ranges): Adjust.
+	(dwarf2_add_field): Adjust.
+	(dwarf2_add_member_fn): Adjust.
+	(read_structure_type): Adjust.
+	(process_structure_scope): Adjust.
+	(read_enumeration_type): Adjust.
+	(read_array_type): Adjust.
+	(mark_common_block_symbol_computed): Adjust.
+	(read_common_block): Adjust.
+	(read_namespace_type): Adjust.
+	(read_namespace): Adjust.
+	(read_module_type): Adjust.
+	(read_tag_pointer_type): Adjust.
+	(read_tag_ptr_to_member_type): Adjust.
+	(read_tag_string_type): Adjust.
+	(read_subroutine_type): Adjust.
+	(read_typedef): Adjust.
+	(read_base_type): Adjust.
+	(attr_to_dynamic_prop): Adjust.
+	(read_subrange_type): Adjust.
+	(read_unspecified_type): Adjust.
+	(dwarf2_read_abbrevs): Adjust.
+	(load_partial_dies): Adjust.
+	(read_partial_die): Adjust.
+	(find_partial_die): Adjust.
+	(guess_partial_die_structure_name): Adjust.
+	(fixup_partial_die): Adjust.
+	(read_attribute_value): Adjust.
+	(read_addr_index): Adjust.
+	(read_addr_index_from_leb128): Adjust.
+	(read_str_index): Adjust.
+	(dwarf2_string_attr): Adjust.
+	(get_debug_line_section): Adjust.
+	(dwarf_decode_line_header): Adjust.
+	(lnp_state_machine::check_line_address): Adjust.
+	(dwarf_decode_lines_1): Adjust.
+	(dwarf_decode_lines): Adjust.
+	(dwarf2_start_symtab): Adjust.
+	(var_decode_location): Adjust.
+	(new_symbol_full): Adjust.
+	(dwarf2_const_value_data): Adjust.
+	(dwarf2_const_value_attr): Adjust.
+	(dwarf2_const_value): Adjust.
+	(die_type): Adjust.
+	(die_containing_type): Adjust.
+	(build_error_marker_type): Adjust.
+	(lookup_die_type): Adjust.
+	(guess_full_die_structure_name): Adjust.
+	(anonymous_struct_prefix): Adjust.
+	(determine_prefix): Adjust.
+	(dwarf2_name): Adjust.
+	(follow_die_ref_or_sig): Adjust.
+	(follow_die_offset): Adjust.
+	(follow_die_ref): Adjust.
+	(follow_die_sig_1): Adjust.
+	(follow_die_sig): Adjust.
+	(get_signatured_type): Adjust.
+	(get_DW_AT_signature_type): Adjust.
+	(decode_locdesc): Adjust.
+	(dwarf_decode_macros): Adjust.
+	(cu_debug_loc_section): Adjust.
+	(fill_in_loclist_baton): Adjust.
+	(dwarf2_symbol_mark_computed): Adjust.
+	(init_one_comp_unit): Don't assign
+	dwarf2_cu::dwarf2_per_objfile.
+	(set_die_type): Adjust.
+
 2018-01-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2read.c (struct mapped_debug_names): Add constructor.
