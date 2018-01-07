@@ -70,9 +70,6 @@ struct converted_character
   int repeat_count;
 };
 
-typedef struct converted_character converted_character_d;
-DEF_VEC_O (converted_character_d);
-
 /* Command lists for set/show print raw.  */
 struct cmd_list_element *setprintrawlist;
 struct cmd_list_element *showprintrawlist;
@@ -2438,11 +2435,11 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
 
 static int
 count_next_character (wchar_iterator *iter,
-		      VEC (converted_character_d) **vec)
+		      std::vector<converted_character> *vec)
 {
   struct converted_character *current;
 
-  if (VEC_empty (converted_character_d, *vec))
+  if (vec->empty ())
     {
       struct converted_character tmp;
       gdb_wchar_t *chars;
@@ -2454,10 +2451,10 @@ count_next_character (wchar_iterator *iter,
 	  gdb_assert (tmp.num_chars < MAX_WCHARS);
 	  memcpy (tmp.chars, chars, tmp.num_chars * sizeof (gdb_wchar_t));
 	}
-      VEC_safe_push (converted_character_d, *vec, &tmp);
+      vec->push_back (tmp);
     }
 
-  current = VEC_last (converted_character_d, *vec);
+  current = &vec->back ();
 
   /* Count repeated characters or bytes.  */
   current->repeat_count = 1;
@@ -2511,7 +2508,7 @@ count_next_character (wchar_iterator *iter,
 
       /* Push this next converted character onto the result vector.  */
       repeat = current->repeat_count;
-      VEC_safe_push (converted_character_d, *vec, &d);
+      vec->push_back (d);
       return repeat;
     }
 }
@@ -2523,13 +2520,13 @@ count_next_character (wchar_iterator *iter,
 
 static void
 print_converted_chars_to_obstack (struct obstack *obstack,
-				  VEC (converted_character_d) *chars,
+				  const std::vector<converted_character> &chars,
 				  int quote_char, int width,
 				  enum bfd_endian byte_order,
 				  const struct value_print_options *options)
 {
   unsigned int idx;
-  struct converted_character *elem;
+  const converted_character *elem;
   enum {START, SINGLE, REPEAT, INCOMPLETE, FINISH} state, last;
   gdb_wchar_t wide_quote_char = gdb_btowc (quote_char);
   int need_escape = 0;
@@ -2646,7 +2643,7 @@ print_converted_chars_to_obstack (struct obstack *obstack,
       last = state;
       if (state != FINISH)
 	{
-	  elem = VEC_index (converted_character_d, chars, idx++);
+	  elem = &chars[idx++];
 	  switch (elem->result)
 	    {
 	    case wchar_iterate_ok:
@@ -2689,10 +2686,8 @@ generic_printstr (struct ui_file *stream, struct type *type,
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   unsigned int i;
   int width = TYPE_LENGTH (type);
-  struct cleanup *cleanup;
   int finished = 0;
   struct converted_character *last;
-  VEC (converted_character_d) *converted_chars;
 
   if (length == -1)
     {
@@ -2725,9 +2720,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 
   /* Arrange to iterate over the characters, in wchar_t form.  */
   wchar_iterator iter (string, length * width, encoding, width);
-  converted_chars = NULL;
-  cleanup = make_cleanup (VEC_cleanup (converted_character_d),
-			  &converted_chars);
+  std::vector<converted_character> converted_chars;
 
   /* Convert characters until the string is over or the maximum
      number of printed characters has been reached.  */
@@ -2752,7 +2745,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 
   /* Get the last element and determine if the entire string was
      processed.  */
-  last = VEC_last (converted_character_d, converted_chars);
+  last = &converted_chars.back ();
   finished = (last->result == wchar_iterate_eof);
 
   /* Ensure that CONVERTED_CHARS is terminated.  */
@@ -2779,8 +2772,6 @@ generic_printstr (struct ui_file *stream, struct type *type,
   obstack_1grow (&output, '\0');
 
   fputs_filtered ((const char *) obstack_base (&output), stream);
-
-  do_cleanups (cleanup);
 }
 
 /* Print a string from the inferior, starting at ADDR and printing up to LEN

@@ -1,3 +1,11 @@
+2018-01-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valprint.c (converted_character_d): Remove typedef.
+	(DEF_VEC_O (converted_character_d)): Remove.
+	(count_next_character): Use std::vector.
+	(print_converted_chars_to_obstack): Likewise.
+	(generic_printstr): Likewise.
+
 2018-01-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* xml-support.h (struct gdb_xml_value): Add constructor.
