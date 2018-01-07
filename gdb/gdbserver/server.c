@@ -1295,7 +1295,7 @@ handle_detach (char *own_buf)
    to gdb's "set debug foo on|off" because we also use this function to
    parse "--debug-format=foo,bar".  */
 
-static char *
+static std::string
 parse_debug_format_options (const char *arg, int is_monitor)
 {
   VEC (char_ptr) *options;
@@ -1338,8 +1338,8 @@ parse_debug_format_options (const char *arg, int is_monitor)
 	}
       else
 	{
-	  char *msg = xstrprintf ("Unknown debug-format argument: \"%s\"\n",
-				  option);
+	  std::string msg
+	    = string_printf ("Unknown debug-format argument: \"%s\"\n", option);
 
 	  free_char_ptr_vec (options);
 	  return msg;
@@ -1347,7 +1347,7 @@ parse_debug_format_options (const char *arg, int is_monitor)
     }
 
   free_char_ptr_vec (options);
-  return NULL;
+  return std::string ();
 }
 
 /* Handle monitor commands not handled by target-specific handlers.  */
@@ -1387,16 +1387,15 @@ handle_monitor_command (char *mon, char *own_buf)
     }
   else if (startswith (mon, "set debug-format "))
     {
-      char *error_msg
+      std::string error_msg
 	= parse_debug_format_options (mon + sizeof ("set debug-format ") - 1,
 				      1);
 
-      if (error_msg != NULL)
+      if (!error_msg.empty ())
 	{
-	  monitor_output (error_msg);
+	  monitor_output (error_msg.c_str ());
 	  monitor_show_help ();
 	  write_enn (own_buf);
-	  xfree (error_msg);
 	}
     }
   else if (strcmp (mon, "help") == 0)
@@ -3611,13 +3610,13 @@ captured_main (int argc, char *argv[])
 	debug_threads = 1;
       else if (startswith (*next_arg, "--debug-format="))
 	{
-	  char *error_msg
+	  std::string error_msg
 	    = parse_debug_format_options ((*next_arg)
 					  + sizeof ("--debug-format=") - 1, 0);
 
-	  if (error_msg != NULL)
+	  if (!error_msg.empty ())
 	    {
-	      fprintf (stderr, "%s", error_msg);
+	      fprintf (stderr, "%s", error_msg.c_str ());
 	      exit (1);
 	    }
 	}

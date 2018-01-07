@@ -1,3 +1,8 @@
+2018-01-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* server.c (parse_debug_format_options): Return std::string.
+	(handle_monitor_command, captured_main): Adjust.
+
 2018-01-05  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/18653
