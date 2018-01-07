@@ -2778,7 +2778,7 @@ find_overload_match (struct value **args, int nargs,
 	}
       else
 	*valp = value_from_xmethod
-	  (xm_worker_vec[ext_method_oload_champ]->clone ());
+	  (std::move (xm_worker_vec[ext_method_oload_champ]));
     }
   else
     *symp = oload_syms[func_oload_champ];

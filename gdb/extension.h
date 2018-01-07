@@ -182,13 +182,6 @@ struct xmethod_worker
 
   virtual value *invoke (value *obj, value **args, int nargs) = 0;
 
-  /* Clone this worker, returns a new but identical worker.
-     The function get_matching_xmethod_workers returns a vector of matching
-     workers.  If a particular worker is selected by GDB to invoke a method,
-     then this function can help in cloning the selected worker.  */
-
-  virtual std::unique_ptr<xmethod_worker> clone () = 0;
-
   /* Return the arg types of the xmethod encapsulated in this worker.
      An array of arg types is returned.  The length of the array is returned in
      NARGS.  The type of the 'this' object is returned as the first element of

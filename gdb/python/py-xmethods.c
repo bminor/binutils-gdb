@@ -48,10 +48,6 @@ struct python_xmethod_worker : xmethod_worker
 
   value *invoke (value *obj, value **args, int nargs) override;
 
-  /* Implementation of xmethod_worker::clone for Python.  */
-
-  xmethod_worker_up clone () override;
-
   /* Implementation of xmethod_worker::do_get_arg_types for Python.  */
 
   ext_lang_rc do_get_arg_types (int *nargs, type ***arg_types) override;
@@ -78,19 +74,6 @@ python_xmethod_worker::~python_xmethod_worker ()
 
   Py_DECREF (m_py_worker);
   Py_DECREF (m_this_type);
-}
-
-/* See declaration.  */
-
-xmethod_worker_up
-python_xmethod_worker::clone ()
-{
-  /* We don't do much here, but we still need the GIL.  */
-  gdbpy_enter enter_py (get_current_arch (), current_language);
-
-  xmethod_worker *worker = new python_xmethod_worker (m_py_worker, m_this_type);
-
-  return xmethod_worker_up (worker);
 }
 
 /* Invoke the "match" method of the MATCHER and return a new reference

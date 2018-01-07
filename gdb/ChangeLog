@@ -1,5 +1,14 @@
 2018-01-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* extension.h (struct xmethod_worker) <clone>: Remove.
+	* python/py-xmethods.c (struct python_xmethod_worker) <clone>:
+	Remove.
+	(python_xmethod_worker::clone): Remove.
+	* valops.c (find_overload_match): Use std::move instead of
+	clone.
+
+2018-01-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* extension-priv.h (enum ext_lang_rc): Remove, move to extension.h.
 	(struct extension_language_ops) <clone_xmethod_worker_data>: Remove.
 	<free_xmethod_worker_data>: Remove.
