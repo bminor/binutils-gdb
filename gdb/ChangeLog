@@ -1,5 +1,227 @@
 2018-01-07  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dwarf2read.c (struct mapped_debug_names): Add constructor.
+	<dwarf2_per_objfile>: New field.
+	(dwarf2_per_objfile): Remove global.
+	(get_dwarf2_per_objfile): New function.
+	(set_dwarf2_per_objfile): New function.
+	(dwarf2_build_psymtabs_hard): Change objfile parameter to
+	dwarf2_per_objfile.
+	(abbrev_table_read_table): Add dwarf2_per_objfile parameter.
+	(read_abbrev_offset): Likewise.
+	(read_indirect_string): Likewise.
+	(read_indirect_line_string): Likewise.
+	(read_indirect_string_at_offset): Likewise.
+	(read_indirect_string_from_dwz): Likewise.
+	(dwarf2_find_containing_comp_unit): Change objfile parameter to
+	dwarf2_per_objfile.
+	(age_cached_comp_units): Add dwarf2_per_objfile parameter.
+	(create_all_comp_units): Change objfile parameter to
+	dwarf2_per_objfile.
+	(create_all_type_units): Likewise.
+	(process_queue): Add dwarf2_per_objfile parameter.
+	(read_and_check_comp_unit_head): Likewise.
+	(lookup_dwo_unit_in_dwp): Likewise.
+	(get_dwp_file): Likewise.
+	(process_cu_includes): Likewise.
+	(struct free_dwo_file_cleanup_data): New struct.
+	(dwarf2_has_info): Use get_dwarf2_per_objfile and
+	set_dwarf2_per_objfile.
+	(dwarf2_get_dwz_file): Add dwarf2_per_objfile parameter.
+	(dw2_do_instantiate_symtab): Get dwarf2_per_objfile from
+	context, adjust calls.
+	(dw2_instantiate_symtab): Likewise.
+	(dw2_get_cutu): Add dwarf2_per_objfile parameter.
+	(dw2_get_cu): Likewise.
+	(create_cu_from_index_list): Change objfile parameter to
+	dwarf2_per_objfile.
+	(create_cus_from_index_list): Get dwarf2_per_objfile from
+	context, adjust calls.
+	(create_cus_from_index): Likewise.
+	(create_signatured_type_table_from_index): Change objfile
+	parameter to dwarf2_per_objfile.
+	(create_signatured_type_table_from_debug_names): Change objfile
+	parameter to dwarf2_per_objfile.
+	(create_addrmap_from_index): Likewise.
+	(create_addrmap_from_aranges): Likewise.
+	(dwarf2_read_index): Use get_dwarf2_per_objfile, adjust calls.
+	(dw2_setup): Remove.
+	(dw2_get_file_names_reader): Get dwarf2_per_objfile from
+	context.
+	(dw2_find_last_source_symtab): Get dwarf2_per_objfile using
+	get_dwarf2_per_objfile.
+	(dw2_forget_cached_source_info): Likewise.
+	(dw2_map_symtabs_matching_filename): Likewise.
+	(struct dw2_symtab_iterator) <index>: Remove.
+	<dwarf2_per_objfile>: New field.
+	(dw2_symtab_iter_init): Replace index parameter with
+	dwarf2_per_objfile.
+	(dw2_symtab_iter_next): Use dwarf2_per_objfile from iter.
+	(dw2_lookup_symbol): Use get_dwarf2_per_objfile and adjust.
+	(dw2_print_stats): Likewise.
+	(dw2_dump): Likewise.
+	(dw2_expand_symtabs_for_function): Likewise.
+	(dw2_expand_all_symtabs): Likewise.
+	(dw2_expand_symtabs_with_fullname): Likewise.
+	(dw2_expand_marked_cus): Replace index and objfile parameters
+	with dwarf2_per_objfile.
+	(dw_expand_symtabs_matching_file_matcher): Add
+	dwarf2_per_objfile parameter and adjust calls.
+	(dw2_expand_symtabs_matching): Use get_dwarf2_per_objfile and
+	adjust calls.
+	(dw2_find_pc_sect_compunit_symtab): Don't call dw2_setup.
+	(dw2_map_symbol_filenames): Use get_dwarf2_per_objfile and
+	adjust calls.
+	(create_cus_from_debug_names_list): Replace objfile parameter
+	with dwarf2_per_objfile and adjust calls.
+	(create_cus_from_debug_names): Likewise.
+	(dwarf2_read_debug_names): Likewise.
+	(mapped_debug_names::namei_to_name): Adjust call.
+	(dw2_debug_names_iterator::next): Likewise.
+	(dw2_debug_names_iterator::find_vec_in_debug_names): Likewise.
+	(dw2_debug_names_lookup_symbol): Use get_dwarf2_per_objfile.
+	(dw2_debug_names_dump): Likewise.
+	(dw2_debug_names_expand_symtabs_for_function): Likewise.
+	(dw2_debug_names_expand_symtabs_matching): Likewise.
+	(dwarf2_initialize_objfile): Likewise.
+	(dwarf2_build_psymtabs): Likewise.
+	(get_abbrev_section_for_cu): Get dwarf2_per_objfile from
+	this_cu.
+	(error_check_comp_unit_head): Add dwarf2_per_objfile parameter.
+	(read_and_check_comp_unit_head): Likewise.
+	(read_abbrev_offset): Likewise.
+	(create_debug_type_hash_table): Likewise.
+	(create_debug_types_hash_table): Likewise.
+	(create_all_type_units): Replace objfile parameter with
+	dwarf2_per_objfile.
+	(add_type_unit): Add dwarf2_per_objfile parameter.
+	(fill_in_sig_entry_from_dwo_entry): Replace objfile parameter
+	with dwarf2_per_objfile.
+	(lookup_dwo_signatured_type): Get dwarf2_per_objfile from cu.
+	(lookup_dwp_signatured_type): Likewise.
+	(lookup_signatured_type): Likewise.
+	(read_cutu_die_from_dwo): Likewise.
+	(init_tu_and_read_dwo_dies): Likewise.
+	(init_cutu_and_read_dies): Likewise.
+	(init_cutu_and_read_dies_no_follow): Likewise.
+	(allocate_type_unit_groups_table): Add objfile parameter.
+	(create_type_unit_group): Use dwarf2_per_objfile from cu.
+	(get_type_unit_group): Likewise.
+	(process_psymtab_comp_unit): Update call.
+	(build_type_psymtabs_reader): Use dwarf2_per_objfile from cu.
+	(build_type_psymtabs_1): Add dwarf2_per_objfile parameter.
+	(print_tu_stats): Likewise.
+	(build_type_psymtab_dependencies): Use dwarf2_per_objfile passed
+	in void* parameter.
+	(build_type_psymtabs): Change objfile parameter to
+	dwarf2_per_objfile.
+	(process_skeletonless_type_unit): Use dwarf2_per_objfile
+	passed in void* parameter.
+	(process_skeletonless_type_units): Change objfile parameter to
+	dwarf2_per_objfile.
+	(set_partial_user): Likewise.
+	(dwarf2_build_psymtabs_hard): Likewise.
+	(read_comp_units_from_section): Likewise.
+	(create_all_comp_units): Likewise.
+	(scan_partial_symbols): Update calls.
+	(add_partial_symbol): Likewise.
+	(dwarf2_read_symtab): Use get_dwarf2_per_objfile.
+	(maybe_queue_comp_unit): Use dwarf2_read_symtab from cu.
+	(process_queue): Add dwarf2_per_objfile parameter.
+	(get_compunit_symtab): Use dwarf2_per_objfile from cu.
+	(compute_compunit_symtab_includes): Likewise.
+	(process_cu_includes): Add dwarf2_per_objfile parameter.
+	(process_full_comp_unit): Use dwarf2_per_objfile from cu.
+	(process_full_type_unit): Likewise.
+	(process_imported_unit_die): Update call.
+	(handle_DW_AT_stmt_list): Use dwarf2_per_objfile from cu.
+	(read_file_scope): Likewise.
+	(allocate_dwo_file_hash_table): Add objfile parameter.
+	(lookup_dwo_file_slot): Add dwarf2_per_objfile parameter.
+	(create_cus_hash_table): Likewise.
+	(create_dwp_hash_table): Likewise.
+	(create_dwo_unit_in_dwp_v1): Likewise.
+	(create_dwp_v2_section): Likewise.
+	(create_dwo_unit_in_dwp_v2): Likewise.
+	(lookup_dwo_unit_in_dwp): Likewise.
+	(try_open_dwop_file): Likewise.
+	(open_dwo_file): Likewise. Use dwarf2_per_objfile from cu.
+	(open_and_init_dwo_file): Use dwarf2_per_objfile from cu, update
+	cleanup to include a reference to dwarf2_per_objfile.
+	(open_dwp_file): Add dwarf2_per_objfile parameter.
+	(open_and_init_dwp_file): Likewise.
+	(get_dwp_file): Likewise.
+	(lookup_dwo_cutu): Use dwarf2_per_objfile from cu.
+	(queue_and_load_all_dwo_tus): Update call.
+	(free_dwo_file_cleanup): Use dwarf2_per_objfile from cleanup
+	data.
+	(dwarf2_rnglists_process): Use dwarf2_per_objfile from cu.
+	(dwarf2_ranges_process): Likewise.
+	(dwarf2_get_pc_bounds): Likewise.
+	(mark_common_block_symbol_computed): Likewise.
+	(abbrev_table_read_table): Add dwarf2_per_objfile parameter.
+	(dwarf2_read_abbrevs): Update call.
+	(read_partial_die): Use dwarf2_per_objfile from cu.
+	(find_partial_die): Likewise.
+	(fixup_partial_die): Likewise.
+	(read_attribute_value): Likewise.
+	(read_indirect_string_at_offset_from): Add objfile parameter.
+	(read_indirect_string_at_offset): Add dwarf2_per_objfile
+	parameter.
+	(read_indirect_string_from_dwz): Add objfile parameter.
+	(read_indirect_string): Add objfile parameter.
+	(read_addr_index_1): Add dwarf2_per_objfile parameter.
+	(read_addr_index): Use dwarf2_per_objfile from cu.
+	(dwarf2_read_addr_index): Use dwarf2_per_objfile from cu, don't
+	call dw2_setup.
+	(read_str_index): Use dwarf2_per_objfile from cu.
+	(get_debug_line_section): Likewise.
+	(read_formatted_entries): Add dwarf2_per_objfile parameter.
+	(dwarf_decode_line_header): Use dwarf2_per_objfile from cu.
+	(new_symbol_full): Use dwarf2_per_objfile from cu.
+	(build_error_marker_type): Likewise.
+	(lookup_die_type): Likewise.
+	(determine_prefix): Likewise.
+	(follow_die_offset): Likewise.
+	(dwarf2_fetch_die_loc_sect_off): Use get_dwarf2_per_objfile.
+	(dwarf2_fetch_constant_bytes): Don't call dw2_setup.
+	(dwarf2_fetch_die_type_sect_off): Likewise.
+	(dwarf2_get_die_type): Likewise.
+	(follow_die_sig_1): Use dwarf2_per_objfile from cu.
+	(get_signatured_type): Likewise.
+	(get_DW_AT_signature_type): Likewise.
+	(dwarf_decode_macro_bytes): Add dwarf2_per_objfile parameter.
+	(dwarf_decode_macros): Use dwarf2_per_objfile from cu.
+	(cu_debug_loc_section): Likewise.
+	(fill_in_loclist_baton): Likewise.
+	(dwarf2_symbol_mark_computed): Likewise.
+	(dwarf2_find_containing_comp_unit): Change objfile parameter to
+	dwarf2_per_objfile.
+	(free_cached_comp_units): Use dwarf2_per_objfile passed in void*
+	parameter.
+	(age_cached_comp_units): Add dwarf2_per_objfile parameter.
+	(free_one_cached_comp_unit): Use dwarf2_per_objfile from cu.
+	(dwarf2_free_objfile): Use get_dwarf2_per_objfile.
+	(set_die_type): Use dwarf2_free_objfile from cu.
+	(get_die_type_at_offset): Likewise.
+	(dwarf2_per_objfile_free): Don't assign global variable.
+	(debug_names) <constructor>: Add dwarf2_per_objfile
+	parameter, update m_debugstrlookup construction.
+	(debug_names::debug_str_lookup): Add dwarf2_per_objfile
+	parameter.
+	<m_dwarf2_per_objfile>: New field.
+	<lookup>: Use m_dwarf2_per_objfile.
+	(check_dwarf64_offsets): Add dwarf2_per_objfile parameter.
+	(psyms_seen_size): Likewise.
+	(write_gdbindex): Replace objfile parameter with
+	dwarf2_per_objfile.
+	(write_debug_names): Likewise.
+	(write_psymtabs_to_index): Likewise.
+	(save_gdb_index_command): Use get_dwarf2_per_objfile, update
+	calls.
+
+2018-01-07  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* dwarf2read.c (struct dwarf2_cu) <objfile>: Remove.
 	<dwarf2_per_objfile>: New field.
 	(struct dwarf2_per_cu_data) <objfile>: Remove.
