@@ -1,5 +1,103 @@
 2018-01-07  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dwarf2read.c (struct dwarf2_cu) <objfile>: Remove.
+	<dwarf2_per_objfile>: New field.
+	(struct dwarf2_per_cu_data) <objfile>: Remove.
+	<dwarf2_per_objfile>: New field.
+	(create_cu_from_index_list): Assign dwarf2_per_objfile instead
+	of objfile.
+	(create_signatured_type_table_from_index): Likewise.
+	(create_debug_type_hash_table): Likewise.
+	(fill_in_sig_entry_from_dwo_entry): Likewise.
+	(lookup_dwo_unit): Access objfile through dwarf2_per_objfile.
+	(create_type_unit_group): Assign dwarf2_per_objfile instead of
+	objfile.
+	(create_partial_symtab): Access objfile through
+	dwarf2_per_objfile.
+	(process_psymtab_comp_unit_reader): Likewise.
+	(read_comp_units_from_section): Likewise.
+	(scan_partial_symbols): Likewise.
+	(add_partial_symbol): Likewise.
+	(add_partial_subprogram): Likewise.
+	(peek_die_abbrev): Likewise.
+	(fixup_go_packaging): Likewise.
+	(process_full_comp_unit): Likewise.
+	(process_full_type_unit): Likewise.
+	(process_imported_unit_die): Likewise.
+	(dwarf2_compute_name): Likewise.
+	(dwarf2_physname): Likewise.
+	(read_import_statement): Likewise.
+	(create_cus_hash_table): Assign dwarf2_physname instead of
+	objfile.
+	(read_func_scope): Access objfile through dwarf2_per_objfile.
+	(read_lexical_block_scope): Likewise.
+	(read_call_site_scope): Likewise.
+	(read_variable): Likewise.
+	(dwarf2_rnglists_process): Likewise.
+	(dwarf2_ranges_process): Likewise.
+	(dwarf2_ranges_read): Likewise.
+	(dwarf2_record_block_ranges): Likewise.
+	(dwarf2_add_field): Likewise.
+	(dwarf2_add_member_fn): Likewise.
+	(read_structure_type): Likewise.
+	(process_structure_scope): Likewise.
+	(read_enumeration_type): Likewise.
+	(read_array_type): Likewise.
+	(read_common_block): Likewise.
+	(read_namespace_type): Likewise.
+	(read_namespace): Likewise.
+	(read_module_type): Likewise.
+	(read_tag_pointer_type): Likewise.
+	(read_tag_ptr_to_member_type): Likewise.
+	(read_tag_string_type): Likewise.
+	(read_subroutine_type): Likewise.
+	(read_typedef): Likewise.
+	(read_base_type): Likewise.
+	(attr_to_dynamic_prop): Likewise.
+	(read_subrange_type): Likewise.
+	(read_unspecified_type): Likewise.
+	(load_partial_dies): Likewise.
+	(read_partial_die): Likewise.
+	(find_partial_die): Likewise.
+	(guess_partial_die_structure_name): Likewise.
+	(fixup_partial_die): Likewise.
+	(read_attribute_value): Likewise.
+	(read_addr_index_from_leb128): Likewise.
+	(dwarf2_read_addr_index): Likewise.
+	(dwarf2_string_attr): Likewise.
+	(lnp_state_machine::check_line_address): Likewise.
+	(dwarf_decode_lines_1): Likewise.
+	(dwarf_decode_lines): Likewise.
+	(dwarf2_start_symtab): Likewise.
+	(var_decode_location): Likewise.
+	(new_symbol_full): Likewise.
+	(dwarf2_const_value_data): Likewise.
+	(dwarf2_const_value_attr): Likewise.
+	(dwarf2_const_value): Likewise.
+	(die_type): Likewise.
+	(die_containing_type): Likewise.
+	(lookup_die_type): Likewise.
+	(guess_full_die_structure_name): Likewise.
+	(anonymous_struct_prefix): Likewise.
+	(dwarf2_name): Likewise.
+	(follow_die_ref_or_sig): Likewise.
+	(follow_die_offset): Likewise.
+	(follow_die_ref): Likewise.
+	(dwarf2_fetch_die_loc_sect_off): Likewise.
+	(dwarf2_fetch_constant_bytes): Likewise.
+	(dwarf2_fetch_die_type_sect_off): Likewise.
+	(dwarf2_get_die_type): Likewise.
+	(follow_die_sig): Likewise.
+	(decode_locdesc): Likewise.
+	(dwarf2_per_cu_objfile): Likewise.
+	(dwarf2_per_cu_text_offset): Likewise.
+	(init_one_comp_unit): Assign dwarf2_per_objfile instead of
+	objfile.
+	(set_die_type): Access objfile through
+	dwarf2_per_objfile.
+
+2018-01-07  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* valprint.c (converted_character_d): Remove typedef.
 	(DEF_VEC_O (converted_character_d)): Remove.
 	(count_next_character): Use std::vector.
