@@ -1,3 +1,87 @@
+2018-01-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* extension-priv.h (enum ext_lang_rc): Remove, move to extension.h.
+	(struct extension_language_ops) <clone_xmethod_worker_data>: Remove.
+	<free_xmethod_worker_data>: Remove.
+	<get_matching_xmethod_workers>: Chance VEC to std::vector.
+	<get_xmethod_arg_types>: Remove.
+	<get_xmethod_result_type>: Remove.
+	<invoke_xmethod>: Remove.
+	* extension.c (new_xmethod_worker): Remove.
+	(clone_xmethod_worker): Remove.
+	(get_matching_xmethod_workers): Return void, pass std::vector by
+	pointer.
+	(get_xmethod_arg_types): Rename to...
+	(xmethod_worker::get_arg_types): ... this, and adjust.
+	(get_xmethod_result_type): Rename to...
+	(xmethod_worker::get_result_type): ... this, and adjust.
+	(invoke_xmethod): Remove.
+	(free_xmethod_worker): Remove.
+	(free_xmethod_worker_vec): Remove.
+	* extension.h (enum ext_lang_rc): Move here from
+	extension-priv.h.
+	(struct xmethod_worker): Add constructor and destructor.
+	<data>: Remove.
+	<value>: Remove.
+	<invoke, clone, do_get_result_type, do_get_arg_types>: New
+	virtual pure methods.
+	<get_arg_types, get_result_type>: New methods.
+	(xmethod_worker_ptr): Remove typedef.
+	(DEF_VEC_P (xmethod_worker_ptr)): Remove.
+	(xmethod_worker_vec): Remove typedef.
+	(xmethod_worker_up): New typedef.
+	(invoke_xmethod): Remove.
+	(clone_xmethod_worker): Remove.
+	(free_xmethod_worker): Remove.
+	(free_xmethod_worker_vec): Remove.
+	(get_xmethod_arg_types): Remove.
+	(get_xmethod_result_type): Remove.
+	* valops.c (find_method_list): Use std::vector, don't use
+	intermediate vector.
+	(value_find_oload_method_list): Use std::vector.
+	(find_overload_match): Use std::vector.
+	(find_oload_champ): Use std::vector.
+	* value.c (value_free): Use operator delete.
+	(value_of_xmethod): Rename to...
+	(value_from_xmethod): ... this.  Don't assign
+	xmethod_worker::value, take rvalue-reference.
+	(result_type_of_xmethod): Adjust.
+	(call_xmethod): Adjust.
+	* value.h: Include extension.h.
+	(struct xmethod_worker): Don't forward-declare.
+	(value_of_xmethod): Rename to...
+	(value_from_xmethod): ... this, take rvalue-reference.
+	* python/py-xmethods.c (struct gdbpy_worker_data): Rename to...
+	(struct python_xmethod_worker): ... this, add constructor and
+	destructor.
+	<invoke, clone, do_get_arg_types, do_get_result_type>: Implement.
+	(gdbpy_free_xmethod_worker_data): Rename to...
+	(python_xmethod_worker::~python_xmethod_worker): ... this and
+	adjust.
+	(gdbpy_clone_xmethod_worker_data): Rename to...
+	(python_xmethod_worker::clone): ... this and adjust.
+	(gdbpy_get_matching_xmethod_workers): Use std::vector, don't use
+	temporary vector.
+	(gdbpy_get_xmethod_arg_types): Rename to...
+	(python_xmethod_worker::do_get_arg_types): ... this and adjust.
+	(gdbpy_get_xmethod_result_type): Rename to...
+	(python_xmethod_worker::do_get_result_type): ... this and
+	adjust.
+	(gdbpy_invoke_xmethod): Rename to...
+	(python_xmethod_worker::invoke): ... this and adjust.
+	(new_python_xmethod_worker): Rename to...
+	(python_xmethod_worker::python_xmethod_worker): ... this and
+	adjust.
+	* python/python-internal.h (gdbpy_clone_xmethod_worker_data):
+	Remove.
+	(gdbpy_free_xmethod_worker_data): Remove.
+	(gdbpy_get_matching_xmethod_workers): Use std::vector.
+	(gdbpy_get_xmethod_arg_types): Remove.
+	(gdbpy_get_xmethod_result_type): Remove.
+	(gdbpy_invoke_xmethod): Remove.
+	* python/python.c (python_extension_ops): Remove obsolete
+	callbacks.
+
 2018-01-05  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/18653

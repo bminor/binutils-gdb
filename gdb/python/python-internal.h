@@ -463,28 +463,11 @@ extern enum ext_lang_bp_stop gdbpy_breakpoint_cond_says_stop
 extern int gdbpy_breakpoint_has_cond (const struct extension_language_defn *,
 				      struct breakpoint *b);
 
-extern void *gdbpy_clone_xmethod_worker_data
-  (const struct extension_language_defn *extlang, void *data);
-extern void gdbpy_free_xmethod_worker_data
-  (const struct extension_language_defn *extlang, void *data);
 extern enum ext_lang_rc gdbpy_get_matching_xmethod_workers
   (const struct extension_language_defn *extlang,
    struct type *obj_type, const char *method_name,
-   xmethod_worker_vec **dm_vec);
-extern enum ext_lang_rc gdbpy_get_xmethod_arg_types
-  (const struct extension_language_defn *extlang,
-   struct xmethod_worker *worker,
-   int *nargs,
-   struct type ***arg_types);
-extern enum ext_lang_rc gdbpy_get_xmethod_result_type
-  (const struct extension_language_defn *extlang,
-   struct xmethod_worker *worker,
-   struct value *object, struct value **args, int nargs,
-   struct type **result_type);
-extern struct value *gdbpy_invoke_xmethod
-  (const struct extension_language_defn *extlang,
-   struct xmethod_worker *worker,
-   struct value *obj, struct value **args, int nargs);
+   std::vector<xmethod_worker_up> *dm_vec);
+
 
 PyObject *gdbpy_history (PyObject *self, PyObject *args);
 PyObject *gdbpy_breakpoints (PyObject *, PyObject *);

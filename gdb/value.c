@@ -1627,7 +1627,7 @@ value_free (struct value *val)
 	    funcs->free_closure (val);
 	}
       else if (VALUE_LVAL (val) == lval_xcallable)
-	  free_xmethod_worker (val->location.xm_worker);
+	  delete val->location.xm_worker;
 
       xfree (val->contents);
       VEC_free (range_s, val->unavailable);
@@ -2697,23 +2697,20 @@ show_convenience (const char *ignore, int from_tty)
     }
 }
 
-/* Return the TYPE_CODE_XMETHOD value corresponding to WORKER.  */
+
+/* See value.h.  */
 
 struct value *
-value_of_xmethod (struct xmethod_worker *worker)
+value_from_xmethod (xmethod_worker_up &&worker)
 {
-  if (worker->value == NULL)
-    {
-      struct value *v;
+  struct value *v;
 
-      v = allocate_value (builtin_type (target_gdbarch ())->xmethod);
-      v->lval = lval_xcallable;
-      v->location.xm_worker = worker;
-      v->modifiable = 0;
-      worker->value = v;
-    }
+  v = allocate_value (builtin_type (target_gdbarch ())->xmethod);
+  v->lval = lval_xcallable;
+  v->location.xm_worker = worker.release ();
+  v->modifiable = 0;
 
-  return worker->value;
+  return v;
 }
 
 /* Return the type of the result of TYPE_CODE_XMETHOD value METHOD.  */
@@ -2724,8 +2721,8 @@ result_type_of_xmethod (struct value *method, int argc, struct value **argv)
   gdb_assert (TYPE_CODE (value_type (method)) == TYPE_CODE_XMETHOD
 	      && method->lval == lval_xcallable && argc > 0);
 
-  return get_xmethod_result_type (method->location.xm_worker,
-				  argv[0], argv + 1, argc - 1);
+  return method->location.xm_worker->get_result_type
+    (argv[0], argv + 1, argc - 1);
 }
 
 /* Call the xmethod corresponding to the TYPE_CODE_XMETHOD value METHOD.  */
@@ -2736,8 +2733,7 @@ call_xmethod (struct value *method, int argc, struct value **argv)
   gdb_assert (TYPE_CODE (value_type (method)) == TYPE_CODE_XMETHOD
 	      && method->lval == lval_xcallable && argc > 0);
 
-  return invoke_xmethod (method->location.xm_worker,
-			 argv[0], argv + 1, argc - 1);
+  return method->location.xm_worker->invoke (argv[0], argv + 1, argc - 1);
 }
 
 /* Extract a value as a C number (either long or double).

@@ -146,26 +146,85 @@ struct ext_lang_type_printers
   void *py_type_printers;
 };
 
+/* The return code for some API calls.  */
+
+enum ext_lang_rc
+{
+  /* The operation completed successfully.  */
+  EXT_LANG_RC_OK,
+
+  /* The operation was not performed (e.g., no pretty-printer).  */
+  EXT_LANG_RC_NOP,
+
+  /* There was an error (e.g., Python error while printing a value).
+     When an error occurs no further extension languages are tried.
+     This is to preserve existing behaviour, and because it's convenient
+     for Python developers.
+     Note: This is different than encountering a memory error trying to read
+     a value for pretty-printing.  Here we're referring to, e.g., programming
+     errors that trigger an exception in the extension language.  */
+  EXT_LANG_RC_ERROR
+};
+
 /* A type which holds its extension language specific xmethod worker data.  */
 
 struct xmethod_worker
 {
+  xmethod_worker (const extension_language_defn *extlang)
+  : m_extlang (extlang)
+  {}
+
+  virtual ~xmethod_worker () = default;
+
+  /* Invoke the xmethod encapsulated in this worker and return the result.
+     The method is invoked on OBJ with arguments in the ARGS array.  NARGS is
+     the length of the this array.  */
+
+  virtual value *invoke (value *obj, value **args, int nargs) = 0;
+
+  /* Clone this worker, returns a new but identical worker.
+     The function get_matching_xmethod_workers returns a vector of matching
+     workers.  If a particular worker is selected by GDB to invoke a method,
+     then this function can help in cloning the selected worker.  */
+
+  virtual std::unique_ptr<xmethod_worker> clone () = 0;
+
+  /* Return the arg types of the xmethod encapsulated in this worker.
+     An array of arg types is returned.  The length of the array is returned in
+     NARGS.  The type of the 'this' object is returned as the first element of
+     array.  */
+
+  type **get_arg_types (int *nargs);
+
+  /* Return the type of the result of the xmethod encapsulated in this worker.
+     OBJECT, ARGS, NARGS are the same as for invoke.  */
+
+  type *get_result_type (value *object, value **args, int nargs);
+
+private:
+
+  /* Return the types of the arguments the method takes.  The number of
+     arguments is returned in NARGS, and their types are returned in the array
+     ARGTYPES.  */
+
+  virtual enum ext_lang_rc do_get_arg_types
+    (int *nargs, struct type ***arg_types) = 0;
+
+  /* Fetch the type of the result of the method implemented by this worker.
+     OBJECT, ARGS, NARGS are the same as for the invoked method.  The result
+     type is stored in *RESULT_TYPE.  */
+
+  virtual enum ext_lang_rc do_get_result_type
+    (struct value *obj, struct value **args, int nargs,
+     struct type **result_type_ptr) = 0;
+
   /* The language the xmethod worker is implemented in.  */
-  const struct extension_language_defn *extlang;
 
-  /* The extension language specific data for this xmethod worker.  */
-  void *data;
-
-  /* The TYPE_CODE_XMETHOD value corresponding to this worker.
-     Always use value_of_xmethod to access it.  */
-  struct value *value;
+  const extension_language_defn *m_extlang;
 };
 
-typedef struct xmethod_worker *xmethod_worker_ptr;
-DEF_VEC_P (xmethod_worker_ptr);
-typedef VEC (xmethod_worker_ptr) xmethod_worker_vec;
+typedef std::unique_ptr<xmethod_worker> xmethod_worker_up;
 
-
 /* The interface for gdb's own extension(/scripting) language.  */
 extern const struct extension_language_defn extension_language_gdb;
 
@@ -242,26 +301,13 @@ extern const struct extension_language_defn *get_breakpoint_cond_ext_lang
 
 extern int breakpoint_ext_lang_cond_says_stop (struct breakpoint *);
 
-extern struct value *invoke_xmethod (struct xmethod_worker *,
-				     struct value *,
-				     struct value **, int nargs);
+/* If a method with name METHOD_NAME is to be invoked on an object of type
+   TYPE, then all extension languages are searched for implementations of
+   methods with name METHOD_NAME.  All matches found are appended to the WORKERS
+   vector.  */
 
-extern struct xmethod_worker *clone_xmethod_worker (struct xmethod_worker *);
-
-extern struct xmethod_worker *new_xmethod_worker
-  (const struct extension_language_defn *extlang, void *data);
-
-extern void free_xmethod_worker (struct xmethod_worker *);
-
-extern void free_xmethod_worker_vec (void *vec);
-
-extern xmethod_worker_vec *get_matching_xmethod_workers
-  (struct type *, const char *);
-
-extern struct type **get_xmethod_arg_types (struct xmethod_worker *, int *);
-
-extern struct type *get_xmethod_result_type (struct xmethod_worker *,
-					     struct value *object,
-					     struct value **args, int nargs);
+extern void get_matching_xmethod_workers
+  (struct type *type, const char *method_name,
+   std::vector<xmethod_worker_up> *workers);
 
 #endif /* EXTENSION_H */

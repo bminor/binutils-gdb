@@ -21,6 +21,7 @@
 #define VALUE_H 1
 
 #include "frame.h"		/* For struct frame_id.  */
+#include "extension.h"
 
 struct block;
 struct expression;
@@ -30,7 +31,6 @@ struct type;
 struct ui_file;
 struct language_defn;
 struct value_print_options;
-struct xmethod_worker;
 
 /* Values can be partially 'optimized out' and/or 'unavailable'.
    These are distinct states and have different string representations
@@ -1158,7 +1158,10 @@ struct value *call_internal_function (struct gdbarch *gdbarch,
 
 char *value_internal_function_name (struct value *);
 
-extern struct value *value_of_xmethod (struct xmethod_worker *);
+/* Build a value wrapping and representing WORKER.  The value takes ownership
+   of the xmethod_worker object.  */
+
+extern struct value *value_from_xmethod (xmethod_worker_up &&worker);
 
 extern struct type *result_type_of_xmethod (struct value *method,
 					    int argc, struct value **argv);

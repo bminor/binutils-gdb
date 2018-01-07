@@ -68,7 +68,8 @@ int find_oload_champ_namespace_loop (struct value **, int,
 				     const int no_adl);
 
 static int find_oload_champ (struct value **, int, int,
-			     struct fn_field *, VEC (xmethod_worker_ptr) *,
+			     struct fn_field *,
+			     const std::vector<xmethod_worker_up> *,
 			     struct symbol **, struct badness_vector **);
 
 static int oload_method_static_p (struct fn_field *, int);
@@ -98,7 +99,7 @@ static struct value *cast_into_complex (struct type *, struct value *);
 
 static void find_method_list (struct value **, const char *,
 			      LONGEST, struct type *, struct fn_field **, int *,
-			      VEC (xmethod_worker_ptr) **,
+			      std::vector<xmethod_worker_up> *,
 			      struct type **, LONGEST *);
 
 #if 0
@@ -2282,12 +2283,11 @@ static void
 find_method_list (struct value **argp, const char *method,
 		  LONGEST offset, struct type *type,
 		  struct fn_field **fn_list, int *num_fns,
-		  VEC (xmethod_worker_ptr) **xm_worker_vec,
+		  std::vector<xmethod_worker_up> *xm_worker_vec,
 		  struct type **basetype, LONGEST *boffset)
 {
   int i;
   struct fn_field *f = NULL;
-  VEC (xmethod_worker_ptr) *worker_vec = NULL, *new_vec = NULL;
 
   gdb_assert (fn_list != NULL && xm_worker_vec != NULL);
   type = check_typedef (type);
@@ -2328,12 +2328,7 @@ find_method_list (struct value **argp, const char *method,
      and hence there is no point restricting them with something like method
      hiding.  Moreover, if hiding is done for xmethods as well, then we will
      have to provide a mechanism to un-hide (like the 'using' construct).  */
-  worker_vec = get_matching_xmethod_workers (type, method);
-  new_vec = VEC_merge (xmethod_worker_ptr, *xm_worker_vec, worker_vec);
-
-  VEC_free (xmethod_worker_ptr, *xm_worker_vec);
-  VEC_free (xmethod_worker_ptr, worker_vec);
-  *xm_worker_vec = new_vec;
+  get_matching_xmethod_workers (type, method, xm_worker_vec);
 
   /* If source methods are not found in current class, look for them in the
      base classes.  We also have to go through the base classes to gather
@@ -2382,7 +2377,7 @@ static void
 value_find_oload_method_list (struct value **argp, const char *method,
                               LONGEST offset, struct fn_field **fn_list,
                               int *num_fns,
-                              VEC (xmethod_worker_ptr) **xm_worker_vec,
+			      std::vector<xmethod_worker_up> *xm_worker_vec,
 			      struct type **basetype, LONGEST *boffset)
 {
   struct type *t;
@@ -2409,7 +2404,7 @@ value_find_oload_method_list (struct value **argp, const char *method,
   /* Clear the lists.  */
   *fn_list = NULL;
   *num_fns = 0;
-  *xm_worker_vec = NULL;
+  xm_worker_vec->clear ();
 
   find_method_list (argp, method, 0, t, fn_list, num_fns, xm_worker_vec,
 		    basetype, boffset);
@@ -2488,8 +2483,8 @@ find_overload_match (struct value **args, int nargs,
   struct fn_field *fns_ptr = NULL;
   /* For non-methods, the list of overloaded function symbols.  */
   struct symbol **oload_syms = NULL;
-  /* For xmethods, the VEC of xmethod workers.  */
-  VEC (xmethod_worker_ptr) *xm_worker_vec = NULL;
+  /* For xmethods, the vector of xmethod workers.  */
+  std::vector<xmethod_worker_up> xm_worker_vec;
   /* Number of overloaded instances being considered.  */
   int num_fns = 0;
   struct type *basetype = NULL;
@@ -2534,8 +2529,8 @@ find_overload_match (struct value **args, int nargs,
       value_find_oload_method_list (&temp, name, 0, &fns_ptr, &num_fns,
 				    &xm_worker_vec, &basetype, &boffset);
       /* If this is a method only search, and no methods were found
-         the search has faild.  */
-      if (method == METHOD && (!fns_ptr || !num_fns) && !xm_worker_vec)
+         the search has failed.  */
+      if (method == METHOD && (!fns_ptr || !num_fns) && xm_worker_vec.empty ())
 	error (_("Couldn't find method %s%s%s"),
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
@@ -2558,15 +2553,14 @@ find_overload_match (struct value **args, int nargs,
 	  make_cleanup (xfree, src_method_badness);
 	}
 
-      if (VEC_length (xmethod_worker_ptr, xm_worker_vec) > 0)
+      if (!xm_worker_vec.empty ())
 	{
 	  ext_method_oload_champ = find_oload_champ (args, nargs,
-						     0, NULL, xm_worker_vec,
+						     0, NULL, &xm_worker_vec,
 						     NULL, &ext_method_badness);
 	  ext_method_match_quality = classify_oload_match (ext_method_badness,
 							   nargs, 0);
 	  make_cleanup (xfree, ext_method_badness);
-	  make_cleanup (free_xmethod_worker_vec, xm_worker_vec);
 	}
 
       if (src_method_oload_champ >= 0 && ext_method_oload_champ >= 0)
@@ -2783,11 +2777,8 @@ find_overload_match (struct value **args, int nargs,
 				    basetype, boffset);
 	}
       else
-	{
-	  *valp = value_of_xmethod (clone_xmethod_worker
-	    (VEC_index (xmethod_worker_ptr, xm_worker_vec,
-			ext_method_oload_champ)));
-	}
+	*valp = value_from_xmethod
+	  (xm_worker_vec[ext_method_oload_champ]->clone ());
     }
   else
     *symp = oload_syms[func_oload_champ];
@@ -2992,12 +2983,11 @@ find_oload_champ_namespace_loop (struct value **args, int nargs,
 static int
 find_oload_champ (struct value **args, int nargs,
 		  int num_fns, struct fn_field *fns_ptr,
-		  VEC (xmethod_worker_ptr) *xm_worker_vec,
+		  const std::vector<xmethod_worker_up> *xm_worker_vec,
 		  struct symbol **oload_syms,
 		  struct badness_vector **oload_champ_bv)
 {
   int ix;
-  int fn_count;
   /* A measure of how good an overloaded instance is.  */
   struct badness_vector *bv;
   /* Index of best overloaded function.  */
@@ -3014,9 +3004,8 @@ find_oload_champ (struct value **args, int nargs,
 
   *oload_champ_bv = NULL;
 
-  fn_count = (xm_worker_vec != NULL
-	      ? VEC_length (xmethod_worker_ptr, xm_worker_vec)
-	      : num_fns);
+  int fn_count = xm_worker_vec != NULL ? xm_worker_vec->size () : num_fns;
+
   /* Consider each candidate in turn.  */
   for (ix = 0; ix < fn_count; ix++)
     {
@@ -3024,12 +3013,11 @@ find_oload_champ (struct value **args, int nargs,
       int static_offset = 0;
       int nparms;
       struct type **parm_types;
-      struct xmethod_worker *worker = NULL;
 
       if (xm_worker_vec != NULL)
 	{
-	  worker = VEC_index (xmethod_worker_ptr, xm_worker_vec, ix);
-	  parm_types = get_xmethod_arg_types (worker, &nparms);
+	  xmethod_worker *worker = (*xm_worker_vec)[ix].get ();
+	  parm_types = worker->get_arg_types (&nparms);
 	}
       else
 	{
