@@ -3959,15 +3959,16 @@ parse_traceframe_info (const char *tframe_info)
 static void
 traceframe_info_start_memory (struct gdb_xml_parser *parser,
 			      const struct gdb_xml_element *element,
-			      void *user_data, VEC(gdb_xml_value_s) *attributes)
+			      void *user_data,
+			      std::vector<gdb_xml_value> &attributes)
 {
   struct traceframe_info *info = (struct traceframe_info *) user_data;
   ULONGEST *start_p, *length_p;
 
   start_p
-    = (ULONGEST *) xml_find_attribute (attributes, "start")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "start")->value.get ();
   length_p
-    = (ULONGEST *) xml_find_attribute (attributes, "length")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "length")->value.get ();
 
   info->memory.emplace_back (*start_p, *length_p);
 }
@@ -3978,11 +3979,11 @@ static void
 traceframe_info_start_tvar (struct gdb_xml_parser *parser,
 			     const struct gdb_xml_element *element,
 			     void *user_data,
-			     VEC(gdb_xml_value_s) *attributes)
+			     std::vector<gdb_xml_value> &attributes)
 {
   struct traceframe_info *info = (struct traceframe_info *) user_data;
   const char *id_attrib
-    = (const char *) xml_find_attribute (attributes, "id")->value;
+    = (const char *) xml_find_attribute (attributes, "id")->value.get ();
   int id = gdb_xml_parse_ulongest (parser, id_attrib);
 
   info->tvars.push_back (id);

@@ -227,29 +227,26 @@ syscall_create_syscall_desc (struct syscalls_info *syscalls_info,
 static void
 syscall_start_syscall (struct gdb_xml_parser *parser,
                        const struct gdb_xml_element *element,
-                       void *user_data, VEC(gdb_xml_value_s) *attributes)
+                       void *user_data,
+		       std::vector<gdb_xml_value> &attributes)
 {
   struct syscall_parsing_data *data = (struct syscall_parsing_data *) user_data;
-  struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
-  int len, i;
   /* syscall info.  */
   char *name = NULL;
   int number = 0;
   char *groups = NULL;
 
-  len = VEC_length (gdb_xml_value_s, attributes);
-
-  for (i = 0; i < len; i++)
+  for (const gdb_xml_value &attr : attributes)
     {
-      if (strcmp (attrs[i].name, "name") == 0)
-        name = (char *) attrs[i].value;
-      else if (strcmp (attrs[i].name, "number") == 0)
-        number = * (ULONGEST *) attrs[i].value;
-      else if (strcmp (attrs[i].name, "groups") == 0)
-        groups = (char *) attrs[i].value;
+      if (strcmp (attr.name, "name") == 0)
+        name = (char *) attr.value.get ();
+      else if (strcmp (attr.name, "number") == 0)
+        number = * (ULONGEST *) attr.value.get ();
+      else if (strcmp (attr.name, "groups") == 0)
+        groups = (char *) attr.value.get ();
       else
         internal_error (__FILE__, __LINE__,
-                        _("Unknown attribute name '%s'."), attrs[i].name);
+                        _("Unknown attribute name '%s'."), attr.name);
     }
 
   gdb_assert (name);

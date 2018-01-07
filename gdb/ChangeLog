@@ -1,5 +1,54 @@
 2018-01-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* xml-support.h (struct gdb_xml_value): Add constructor.
+	<value>: Change type to unique_xmalloc_ptr.
+	(gdb_xml_value_s): Remove typedef.
+	(DEF_VEC_O (gdb_xml_value_s)): Remove.
+	(gdb_xml_element_start_handler): Change parameter type to
+	std::vector.
+	(xml_find_attribute): Likewise.
+	* xml-support.c (xml_find_attribute): Change parameter type to
+	std::vector and adjust.
+	(gdb_xml_values_cleanup): Remove.
+	(gdb_xml_parser::start_element): Adjust to std::vector.
+	(xinclude_start_include): Change paraeter type to std::vector
+	and adjust.
+	* btrace.c (check_xml_btrace_version): Likewise.
+	(parse_xml_btrace_block): Likewise.
+	(parse_xml_btrace_pt_config_cpu): Likewise.
+	(parse_xml_btrace_pt): Likewise.
+	(parse_xml_btrace_conf_bts): Likewise.
+	(parse_xml_btrace_conf_pt): Likewise.
+	* memory-map.c (memory_map_start_memory): Likewise.
+	(memory_map_start_property): Likewise.
+	* osdata.c (osdata_start_osdata): Likewise.
+	(osdata_start_item): Likewise.
+	(osdata_start_column): Likewise.
+	* remote.c (start_thread): Likewise.
+	* solib-aix.c (library_list_start_library): Likewise.
+	(library_list_start_list): Likewise.
+	* solib-svr4.c (library_list_start_library): Likewise.
+	(svr4_library_list_start_list): Likewise.
+	* solib-target.c (library_list_start_segment): Likewise.
+	(library_list_start_section): Likewise.
+	(library_list_start_library): Likewise.
+	(library_list_start_list): Likewise.
+	* tracepoint.c (traceframe_info_start_memory): Likewise.
+	(traceframe_info_start_tvar): Likewise.
+	* xml-syscall.c (syscall_start_syscall): Likewise.
+	* xml-tdesc.c (tdesc_start_target): Likewise.
+	(tdesc_start_feature): Likewise.
+	(tdesc_start_reg): Likewise.
+	(tdesc_start_union): Likewise.
+	(tdesc_start_struct): Likewise.
+	(tdesc_start_flags): Likewise.
+	(tdesc_start_enum): Likewise.
+	(tdesc_start_field): Likewise.
+	(tdesc_start_enum_value): Likewise.
+	(tdesc_start_vector): Likewise.
+
+2018-01-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* extension.h (struct xmethod_worker) <clone>: Remove.
 	* python/py-xmethods.c (struct python_xmethod_worker) <clone>:
 	Remove.

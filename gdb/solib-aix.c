@@ -134,30 +134,30 @@ static void
 library_list_start_library (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
 			    void *user_data,
-			    VEC (gdb_xml_value_s) *attributes)
+			    std::vector<gdb_xml_value> &attributes)
 {
   VEC (lm_info_aix_p) **list = (VEC (lm_info_aix_p) **) user_data;
   lm_info_aix *item = new lm_info_aix;
   struct gdb_xml_value *attr;
 
   attr = xml_find_attribute (attributes, "name");
-  item->filename = xstrdup ((const char *) attr->value);
+  item->filename = xstrdup ((const char *) attr->value.get ());
 
   attr = xml_find_attribute (attributes, "member");
   if (attr != NULL)
-    item->member_name = xstrdup ((const char *) attr->value);
+    item->member_name = xstrdup ((const char *) attr->value.get ());
 
   attr = xml_find_attribute (attributes, "text_addr");
-  item->text_addr = * (ULONGEST *) attr->value;
+  item->text_addr = * (ULONGEST *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "text_size");
-  item->text_size = * (ULONGEST *) attr->value;
+  item->text_size = * (ULONGEST *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "data_addr");
-  item->data_addr = * (ULONGEST *) attr->value;
+  item->data_addr = * (ULONGEST *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "data_size");
-  item->data_size = * (ULONGEST *) attr->value;
+  item->data_size = * (ULONGEST *) attr->value.get ();
 
   VEC_safe_push (lm_info_aix_p, *list, item);
 }
@@ -167,9 +167,11 @@ library_list_start_library (struct gdb_xml_parser *parser,
 static void
 library_list_start_list (struct gdb_xml_parser *parser,
                          const struct gdb_xml_element *element,
-                         void *user_data, VEC (gdb_xml_value_s) *attributes)
+                         void *user_data,
+			 std::vector<gdb_xml_value> &attributes)
 {
-  char *version = (char *) xml_find_attribute (attributes, "version")->value;
+  char *version
+    = (char *) xml_find_attribute (attributes, "version")->value.get ();
 
   if (strcmp (version, "1.0") != 0)
     gdb_xml_error (parser,

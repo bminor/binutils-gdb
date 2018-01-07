@@ -3077,13 +3077,14 @@ remote_get_threads_with_ql (struct target_ops *ops,
 static void
 start_thread (struct gdb_xml_parser *parser,
 	      const struct gdb_xml_element *element,
-	      void *user_data, VEC(gdb_xml_value_s) *attributes)
+	      void *user_data,
+	      std::vector<gdb_xml_value> &attributes)
 {
   struct threads_listing_context *data
     = (struct threads_listing_context *) user_data;
   struct gdb_xml_value *attr;
 
-  char *id = (char *) xml_find_attribute (attributes, "id")->value;
+  char *id = (char *) xml_find_attribute (attributes, "id")->value.get ();
   ptid_t ptid = read_ptid (id, NULL);
 
   data->items.emplace_back (ptid);
@@ -3091,15 +3092,15 @@ start_thread (struct gdb_xml_parser *parser,
 
   attr = xml_find_attribute (attributes, "core");
   if (attr != NULL)
-    item.core = *(ULONGEST *) attr->value;
+    item.core = *(ULONGEST *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "name");
   if (attr != NULL)
-    item.name = (const char *) attr->value;
+    item.name = (const char *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "handle");
   if (attr != NULL)
-    item.thread_handle = hex2bin ((const char *) attr->value);
+    item.thread_handle = hex2bin ((const char *) attr->value.get ());
 }
 
 static void
