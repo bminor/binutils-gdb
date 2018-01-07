@@ -1,6 +1,18 @@
 2018-01-17  Tom Tromey  <tom@tromey.com>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dwarf2read.c (struct dwarf2_cu): Add constructor, destructor.
+	(dwarf2_per_objfile::free_cached_comp_units)
+	(init_tu_and_read_dwo_dies, init_cutu_and_read_dies)
+	(init_cutu_and_read_dies_no_follow): Update.
+	(dwarf2_cu::dwarf2_cu): Rename from init_one_comp_unit.
+	(dwarf2_cu::~dwarf2_cu): New.
+	(free_heap_comp_unit, free_stack_comp_unit): Remove.
+	(age_cached_comp_units, free_one_cached_comp_unit): Update.
+
+2018-01-17  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
 	* dwarf2read.c (struct dwarf2_cu) <abbrev_table>: Remove.
 	(struct die_reader_specs) <abbrev_table>: New member.
 	(struct abbrev_table): Add constructor.
