@@ -1,6 +1,6 @@
 /* Partial symbol tables.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1337,21 +1337,21 @@ recursively_search_psymtabs
     }
 
   partial_symbol **gbound
-    = &objfile->global_psymbols[ps->globals_offset + ps->n_global_syms];
+    = objfile->global_psymbols.data () + ps->globals_offset + ps->n_global_syms;
   partial_symbol **sbound
-    = &objfile->static_psymbols[ps->statics_offset + ps->n_static_syms];
+    = objfile->static_psymbols.data () + ps->statics_offset + ps->n_static_syms;
   partial_symbol **bound = gbound;
 
   /* Go through all of the symbols stored in a partial
      symtab in one loop.  */
-  partial_symbol **psym = &objfile->global_psymbols[ps->globals_offset];
+  partial_symbol **psym = objfile->global_psymbols.data () + ps->globals_offset;
   while (keep_going)
     {
       if (psym >= bound)
 	{
 	  if (bound == gbound && ps->n_static_syms != 0)
 	    {
-	      psym = &objfile->static_psymbols[ps->statics_offset];
+	      psym = objfile->static_psymbols.data () + ps->statics_offset;
 	      bound = sbound;
 	    }
 	  else
@@ -2254,7 +2254,8 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
     length = ps->n_static_syms;
     while (length--)
       {
-	sym = block_lookup_symbol (b, SYMBOL_LINKAGE_NAME (*psym),
+	sym = block_lookup_symbol (b, SYMBOL_SEARCH_NAME (*psym),
+				   symbol_name_match_type::SEARCH_NAME,
 				   SYMBOL_DOMAIN (*psym));
 	if (!sym)
 	  {
@@ -2271,7 +2272,8 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
     length = ps->n_global_syms;
     while (length--)
       {
-	sym = block_lookup_symbol (b, SYMBOL_LINKAGE_NAME (*psym),
+	sym = block_lookup_symbol (b, SYMBOL_SEARCH_NAME (*psym),
+				   symbol_name_match_type::SEARCH_NAME,
 				   SYMBOL_DOMAIN (*psym));
 	if (!sym)
 	  {

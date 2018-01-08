@@ -1,6 +1,6 @@
 /* Parser definitions for GDB.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo.
@@ -37,13 +37,26 @@ extern int parser_debug;
 
 struct parser_state
 {
-  /* The expression related to this parser state.  */
+  /* Constructor.  INITIAL_SIZE is the initial size of the expout
+     array.  LANG is the language used to parse the expression.  And
+     GDBARCH is the gdbarch to use during parsing.  */
 
-  struct expression *expout;
+  parser_state (size_t initial_size, const struct language_defn *lang,
+		struct gdbarch *gdbarch);
+
+  DISABLE_COPY_AND_ASSIGN (parser_state);
+
+  /* Resize the allocated expression to the correct size, and return
+     it as an expression_up -- passing ownership to the caller.  */
+  expression_up release ();
 
   /* The size of the expression above.  */
 
   size_t expout_size;
+
+  /* The expression related to this parser state.  */
+
+  expression_up expout;
 
   /* The number of elements already in the expression.  This is used
      to know where to put new elements.  */
@@ -156,23 +169,6 @@ struct type_stack
   int size;
 };
 
-/* Helper function to initialize the expout, expout_size, expout_ptr
-   trio inside PS before it is used to store expression elements created
-   during the parsing of an expression.  INITIAL_SIZE is the initial size of
-   the expout array.  LANG is the language used to parse the expression.
-   And GDBARCH is the gdbarch to use during parsing.  */
-
-extern void initialize_expout (struct parser_state *ps,
-			       size_t initial_size,
-			       const struct language_defn *lang,
-			       struct gdbarch *gdbarch);
-
-/* Helper function that reallocates the EXPOUT inside PS in order to
-   eliminate any unused space.  It is generally used when the expression
-   has just been parsed and created.  */
-
-extern void reallocate_expout (struct parser_state *ps);
-
 /* Reverse an expression from suffix form (in which it is constructed)
    to prefix form (in which we can conveniently print or execute it).
    Ordinarily this always returns -1.  However, if EXPOUT_LAST_STRUCT
@@ -265,7 +261,7 @@ extern struct type *follow_types (struct type *);
 
 extern type_instance_flags follow_type_instance_flags ();
 
-extern void null_post_parser (struct expression **, int);
+extern void null_post_parser (expression_up *, int);
 
 extern bool parse_float (const char *p, int len,
 			 const struct type *type, gdb_byte *data);

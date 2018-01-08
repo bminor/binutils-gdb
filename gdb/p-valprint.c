@@ -1,6 +1,6 @@
 /* Support for printing Pascal values for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -246,15 +246,17 @@ pascal_val_print (struct type *type,
 	      struct symbol *wsym = NULL;
 	      struct type *wtype;
 	      struct block *block = NULL;
-	      struct field_of_this_result is_this_fld;
 
 	      if (want_space)
 		fputs_filtered (" ", stream);
 
 	      if (msymbol.minsym != NULL)
-		wsym = lookup_symbol (MSYMBOL_LINKAGE_NAME (msymbol.minsym),
-				      block,
-				      VAR_DOMAIN, &is_this_fld).symbol;
+		{
+		  const char *search_name
+		    = MSYMBOL_SEARCH_NAME (msymbol.minsym);
+		  wsym = lookup_symbol_search_name (search_name, block,
+						    VAR_DOMAIN).symbol;
+		}
 
 	      if (wsym)
 		{

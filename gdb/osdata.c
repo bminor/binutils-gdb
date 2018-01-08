@@ -1,6 +1,6 @@
 /* Routines for handling XML generic OS data provided by target.
 
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -56,14 +56,15 @@ struct osdata_parsing_data
 static void
 osdata_start_osdata (struct gdb_xml_parser *parser,
                         const struct gdb_xml_element *element,
-                        void *user_data, VEC(gdb_xml_value_s) *attributes)
+                        void *user_data,
+			std::vector<gdb_xml_value> &attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
 
   if (data->osdata != NULL)
     gdb_xml_error (parser, _("Seen more than on osdata element"));
 
-  char *type = (char *) xml_find_attribute (attributes, "type")->value;
+  char *type = (char *) xml_find_attribute (attributes, "type")->value.get ();
   data->osdata.reset (new struct osdata (std::string (type)));
 }
 
@@ -72,7 +73,8 @@ osdata_start_osdata (struct gdb_xml_parser *parser,
 static void
 osdata_start_item (struct gdb_xml_parser *parser,
                   const struct gdb_xml_element *element,
-                  void *user_data, VEC(gdb_xml_value_s) *attributes)
+                  void *user_data,
+		  std::vector<gdb_xml_value> &attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
   data->osdata->items.emplace_back ();
@@ -83,11 +85,12 @@ osdata_start_item (struct gdb_xml_parser *parser,
 static void
 osdata_start_column (struct gdb_xml_parser *parser,
                     const struct gdb_xml_element *element,
-                    void *user_data, VEC(gdb_xml_value_s) *attributes)
+                    void *user_data,
+		    std::vector<gdb_xml_value> &attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
   const char *name
-    = (const char *) xml_find_attribute (attributes, "name")->value;
+    = (const char *) xml_find_attribute (attributes, "name")->value.get ();
 
   data->property_name.assign (name);
 }

@@ -1,3 +1,30 @@
+2018-01-08  Yao Qi  <yao.qi@linaro.org>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (OBS): Remove selftest.o.
+	* configure.ac: Set srv_selftest_objs if $development is true.
+	(GDBSERVER_DEPFILES): Append $srv_selftest_objs.
+	* configure: Re-generated.
+	* server.c (captured_main): Wrap variable selftest_filter with
+	GDB_SELF_TEST.
+
+2018-01-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* server.c (parse_debug_format_options): Return std::string.
+	(handle_monitor_command, captured_main): Adjust.
+
+2018-01-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18653
+	* server.c (captured_main): Pass quiet=false to
+	save_original_signals_state.
+
+2018-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbreplay.c (gdbreplay_version): Update copyright year in
+	version message.
+	* server.c (gdbserver_version): Likewise.
+
 2017-12-08  Tom Tromey  <tom@tromey.com>
 
 	* ax.c (ax_printf): Update.

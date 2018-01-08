@@ -1,4 +1,4 @@
-#   Copyright (C) 1994-2017 Free Software Foundation, Inc.
+#   Copyright (C) 1994-2018 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1056,9 +1056,11 @@ if [is_elf_format] {
     if [is_elf64 tmpdir/bintest.o] {
 	run_dump_test "note-2-64"
 	run_dump_test "note-3-64"
+	run_dump_test "note-4-64"
     } else {
 	run_dump_test "note-2-32"
 	run_dump_test "note-3-32"
+	run_dump_test "note-4-32"
     }
 }
 

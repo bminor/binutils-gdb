@@ -1,6 +1,6 @@
 /* Interface between GDB and target environments, including files and processes
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -181,15 +181,6 @@ enum target_object
   TARGET_OBJECT_THREADS,
   /* Collected static trace data.  */
   TARGET_OBJECT_STATIC_TRACE_DATA,
-  /* The HP-UX registers (those that can be obtained or modified by using
-     the TT_LWP_RUREGS/TT_LWP_WUREGS ttrace requests).  */
-  TARGET_OBJECT_HPUX_UREGS,
-  /* The HP-UX shared library linkage pointer.  ANNEX should be a string
-     image of the code address whose linkage pointer we are looking for.
-
-     The size of the data transfered is always 8 bytes (the size of an
-     address on ia64).  */
-  TARGET_OBJECT_HPUX_SOLIB_GOT,
   /* Traceframe info, in XML format.  */
   TARGET_OBJECT_TRACEFRAME_INFO,
   /* Load maps for FDPIC systems.  */

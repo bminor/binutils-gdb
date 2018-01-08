@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1809,6 +1809,10 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
       /* Cell/B.E. cross-architecture unwinder support.  */
       frame_unwind_prepend_unwinder (gdbarch, &ppu2spu_unwind);
+
+      /* We need to support more than "addr_bit" significant address bits
+         in order to support SPUADDR_ADDR encoded values.  */
+      set_gdbarch_significant_addr_bit (gdbarch, 64);
     }
 
   set_gdbarch_displaced_step_location (gdbarch,

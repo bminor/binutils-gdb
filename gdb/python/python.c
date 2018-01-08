@@ -1,6 +1,6 @@
 /* General python/gdb code
 
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -190,12 +190,7 @@ const struct extension_language_ops python_extension_ops =
 
   gdbpy_before_prompt_hook,
 
-  gdbpy_clone_xmethod_worker_data,
-  gdbpy_free_xmethod_worker_data,
   gdbpy_get_matching_xmethod_workers,
-  gdbpy_get_xmethod_arg_types,
-  gdbpy_get_xmethod_result_type,
-  gdbpy_invoke_xmethod
 };
 
 /* Architecture and language to be used in callbacks from

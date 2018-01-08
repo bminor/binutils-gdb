@@ -52,7 +52,6 @@ initialize_tdesc_arc_v2 (void)
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.arc.aux-minimal");
   tdesc_type_with_fields *type_with_fields;
-  tdesc_type *field_type;
   type_with_fields = tdesc_create_flags (feature, "status32_type", 4);
   tdesc_add_flag (type_with_fields, 0, "H");
   tdesc_add_bitfield (type_with_fields, "E", 1, 4);

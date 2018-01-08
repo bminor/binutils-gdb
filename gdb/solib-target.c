@@ -1,6 +1,6 @@
 /* Definitions for targets which report shared library events.
 
-   Copyright (C) 2007-2017 Free Software Foundation, Inc.
+   Copyright (C) 2007-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -79,12 +79,13 @@ solib_target_parse_libraries (const char *library)
 static void
 library_list_start_segment (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
-			    void *user_data, VEC(gdb_xml_value_s) *attributes)
+			    void *user_data,
+			    std::vector<gdb_xml_value> &attributes)
 {
   VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
   lm_info_target *last = VEC_last (lm_info_target_p, *list);
   ULONGEST *address_p
-    = (ULONGEST *) xml_find_attribute (attributes, "address")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "address")->value.get ();
   CORE_ADDR address = (CORE_ADDR) *address_p;
 
   if (!last->section_bases.empty ())
@@ -97,12 +98,13 @@ library_list_start_segment (struct gdb_xml_parser *parser,
 static void
 library_list_start_section (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
-			    void *user_data, VEC(gdb_xml_value_s) *attributes)
+			    void *user_data,
+			    std::vector<gdb_xml_value> &attributes)
 {
   VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
   lm_info_target *last = VEC_last (lm_info_target_p, *list);
   ULONGEST *address_p
-    = (ULONGEST *) xml_find_attribute (attributes, "address")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "address")->value.get ();
   CORE_ADDR address = (CORE_ADDR) *address_p;
 
   if (!last->segment_bases.empty ())
@@ -117,12 +119,13 @@ library_list_start_section (struct gdb_xml_parser *parser,
 static void
 library_list_start_library (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
-			    void *user_data, VEC(gdb_xml_value_s) *attributes)
+			    void *user_data,
+			    std::vector<gdb_xml_value> &attributes)
 {
   VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
   lm_info_target *item = new lm_info_target;
   const char *name
-    = (const char *) xml_find_attribute (attributes, "name")->value;
+    = (const char *) xml_find_attribute (attributes, "name")->value.get ();
 
   item->name = xstrdup (name);
   VEC_safe_push (lm_info_target_p, *list, item);
@@ -146,14 +149,15 @@ library_list_end_library (struct gdb_xml_parser *parser,
 static void
 library_list_start_list (struct gdb_xml_parser *parser,
 			 const struct gdb_xml_element *element,
-			 void *user_data, VEC(gdb_xml_value_s) *attributes)
+			 void *user_data,
+			 std::vector<gdb_xml_value> &attributes)
 {
   struct gdb_xml_value *version = xml_find_attribute (attributes, "version");
 
   /* #FIXED attribute may be omitted, Expat returns NULL in such case.  */
   if (version != NULL)
     {
-      const char *string = (const char *) version->value;
+      const char *string = (const char *) version->value.get ();
 
       if (strcmp (string, "1.0") != 0)
 	gdb_xml_error (parser,

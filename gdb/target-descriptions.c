@@ -1,6 +1,6 @@
 /* Target description support for GDB.
 
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    Contributed by CodeSourcery.
 
@@ -111,12 +111,11 @@ struct tdesc_reg : tdesc_element
   int save_restore;
 
   /* The name of the register group containing this register, or empty
-     if the group should be automatically determined from the
-     register's type.  If this is "general", "float", or "vector", the
-     corresponding "info" command should display this register's
-     value.  It can be an arbitrary string, but should be limited to
-     alphanumeric characters and internal hyphens.  Currently other
-     strings are ignored (treated as empty).  */
+     if the group should be automatically determined from the register's
+     type.  This is traditionally "general", "float", "vector" but can
+     also be an arbitrary string.  If defined the corresponding "info"
+     command should display this register's value.  The string should be
+     limited to alphanumeric characters and internal hyphens.  */
   std::string group;
 
   /* The size of the register, in bits.  */
@@ -1279,17 +1278,13 @@ tdesc_remote_register_number (struct gdbarch *gdbarch, int regno)
 }
 
 /* Check whether REGNUM is a member of REGGROUP.  Registers from the
-   target description may be classified as general, float, or vector.
-   Unlike a gdbarch register_reggroup_p method, this function will
-   return -1 if it does not know; the caller should handle registers
-   with no specified group.
+   target description may be classified as general, float, vector or other
+   register groups registered with reggroup_add().  Unlike a gdbarch
+   register_reggroup_p method, this function will return -1 if it does not
+   know; the caller should handle registers with no specified group.
 
-   Arbitrary strings (other than "general", "float", and "vector")
-   from the description are not used; they cause the register to be
-   displayed in "info all-registers" but excluded from "info
-   registers" et al.  The names of containing features are also not
-   used.  This might be extended to display registers in some more
-   useful groupings.
+   The names of containing features are not used.  This might be extended
+   to display registers in some more useful groupings.
 
    The save-restore flag is also implemented here.  */
 
@@ -1299,26 +1294,9 @@ tdesc_register_in_reggroup_p (struct gdbarch *gdbarch, int regno,
 {
   struct tdesc_reg *reg = tdesc_find_register (gdbarch, regno);
 
-  if (reg != NULL && !reg->group.empty ())
-    {
-      int general_p = 0, float_p = 0, vector_p = 0;
-
-      if (reg->group == "general")
-	general_p = 1;
-      else if (reg->group == "float")
-	float_p = 1;
-      else if (reg->group == "vector")
-	vector_p = 1;
-
-      if (reggroup == float_reggroup)
-	return float_p;
-
-      if (reggroup == vector_reggroup)
-	return vector_p;
-
-      if (reggroup == general_reggroup)
-	return general_p;
-    }
+  if (reg != NULL && !reg->group.empty ()
+      && (reg->group == reggroup_name (reggroup)))
+	return 1;
 
   if (reg != NULL
       && (reggroup == save_reggroup || reggroup == restore_reggroup))
@@ -1421,6 +1399,12 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 	void **slot = htab_find_slot (reg_hash, reg.get (), INSERT);
 
 	*slot = reg.get ();
+	/* Add reggroup if its new.  */
+	if (!reg->group.empty ())
+	  if (reggroup_find (gdbarch, reg->group.c_str ()) == NULL)
+	    reggroup_add (gdbarch, reggroup_gdbarch_new (gdbarch,
+							 reg->group.c_str (),
+							 USER_REGGROUP));
       }
 
   /* Remove any registers which were assigned numbers by the
@@ -1894,13 +1878,6 @@ public:
 	m_printed_type_with_fields = true;
       }
 
-    if (!type->fields.empty ()
-	&& !m_printed_field_type)
-      {
-	printf_unfiltered ("  tdesc_type *field_type;\n");
-	m_printed_field_type = true;
-      }
-
     switch (type->kind)
       {
       case TDESC_TYPE_STRUCT:
@@ -1949,8 +1926,8 @@ public:
 		  }
 		else
 		  {
-		    printf_unfiltered
-		      ("  field_type = tdesc_named_type (feature, \"%s\");\n",
+		    printf_field_type_assignment
+		      ("tdesc_named_type (feature, \"%s\");\n",
 		       type_name);
 		    printf_unfiltered
 		      ("  tdesc_add_typed_bitfield (type_with_fields, \"%s\","
@@ -1962,10 +1939,8 @@ public:
 	      {
 		gdb_assert (f.end == -1);
 		gdb_assert (type->kind == TDESC_TYPE_STRUCT);
-		printf_unfiltered
-		  ("  field_type = tdesc_named_type (feature,"
-		   " \"%s\");\n",
-		   type_name);
+		printf_field_type_assignment
+		  ("tdesc_named_type (feature, \"%s\");\n", type_name);
 		printf_unfiltered
 		  ("  tdesc_add_field (type_with_fields, \"%s\", field_type);\n",
 		   f.name.c_str ());
@@ -1978,9 +1953,8 @@ public:
 	   type->name.c_str ());
 	for (const tdesc_type_field &f : type->fields)
 	  {
-	    printf_unfiltered
-	      ("  field_type = tdesc_named_type (feature, \"%s\");\n",
-	       f.type->name.c_str ());
+	    printf_field_type_assignment
+	      ("tdesc_named_type (feature, \"%s\");\n", f.type->name.c_str ());
 	    printf_unfiltered
 	      ("  tdesc_add_field (type_with_fields, \"%s\", field_type);\n",
 	       f.name.c_str ());
@@ -2018,6 +1992,26 @@ protected:
   std::string m_filename_after_features;
 
 private:
+
+  /* Print an assignment to the field_type variable.  Print the declaration
+     of field_type if that has not been done yet.  */
+  ATTRIBUTE_PRINTF (2, 3)
+  void printf_field_type_assignment (const char *fmt, ...)
+  {
+    if (!m_printed_field_type)
+      {
+	printf_unfiltered ("  tdesc_type *field_type;\n");
+	m_printed_field_type = true;
+      }
+
+    printf_unfiltered ("  field_type = ");
+
+    va_list args;
+    va_start (args, fmt);
+    vprintf_unfiltered (fmt, args);
+    va_end (args);
+  }
+
   char *m_function;
 
   /* Did we print "struct tdesc_type *element_type;" yet?  */

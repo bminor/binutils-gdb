@@ -108,8 +108,8 @@ initialize_tdesc_powerpc_vsx32l (void)
   tdesc_create_vector (feature, "v16i8", element_type, 16);
 
   tdesc_type_with_fields *type_with_fields;
-  tdesc_type *field_type;
   type_with_fields = tdesc_create_union (feature, "vec128");
+  tdesc_type *field_type;
   field_type = tdesc_named_type (feature, "uint128");
   tdesc_add_field (type_with_fields, "uint128", field_type);
   field_type = tdesc_named_type (feature, "v4f");

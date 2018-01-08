@@ -1,6 +1,6 @@
 /* Support for GDB maintenance commands.
 
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 
@@ -939,16 +939,26 @@ show_per_command_cmd (const char *args, int from_tty)
 static void
 maintenance_selftest (const char *args, int from_tty)
 {
+#if GDB_SELF_TEST
   selftests::run_tests (args);
+#else
+  printf_filtered (_("\
+Selftests are not available in a non-development build.\n"));
+#endif
 }
 
 static void
 maintenance_info_selftests (const char *arg, int from_tty)
 {
+#if GDB_SELF_TEST
   printf_filtered ("Registered selftests:\n");
   selftests::for_each_selftest ([] (const std::string &name) {
     printf_filtered (" - %s\n", name.c_str ());
   });
+#else
+  printf_filtered (_("\
+Selftests are not available in a non-development build.\n"));
+#endif
 }
 
 

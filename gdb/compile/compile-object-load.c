@@ -1,6 +1,6 @@
 /* Load module for 'compile' command.
 
-   Copyright (C) 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2014-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -439,7 +439,10 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       block = BLOCKVECTOR_BLOCK (bv, block_loop);
       if (BLOCK_FUNCTION (block) != NULL)
 	continue;
-      gdb_val_sym = block_lookup_symbol (block, COMPILE_I_EXPR_VAL, VAR_DOMAIN);
+      gdb_val_sym = block_lookup_symbol (block,
+					 COMPILE_I_EXPR_VAL,
+					 symbol_name_match_type::SEARCH_NAME,
+					 VAR_DOMAIN);
       if (gdb_val_sym == NULL)
 	continue;
 
@@ -466,6 +469,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   gdb_type = check_typedef (gdb_type);
 
   gdb_ptr_type_sym = block_lookup_symbol (block, COMPILE_I_EXPR_PTR_TYPE,
+					  symbol_name_match_type::SEARCH_NAME,
 					  VAR_DOMAIN);
   if (gdb_ptr_type_sym == NULL)
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);

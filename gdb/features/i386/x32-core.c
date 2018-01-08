@@ -10,7 +10,6 @@ create_feature_i386_x32_core (struct target_desc *result, long regnum)
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.core", "x32-core.xml");
   tdesc_type_with_fields *type_with_fields;
-  tdesc_type *field_type;
   type_with_fields = tdesc_create_flags (feature, "i386_eflags", 4);
   tdesc_add_flag (type_with_fields, 0, "CF");
   tdesc_add_flag (type_with_fields, 1, "");

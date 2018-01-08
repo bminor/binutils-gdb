@@ -1,5 +1,5 @@
 /* YACC parser for Ada expressions, for GDB.
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -891,8 +891,8 @@ write_object_renaming (struct parser_state *par_state,
 					end - renaming_expr);
 	    renaming_expr = end;
 
-	    ada_lookup_encoded_symbol (index_name, NULL, VAR_DOMAIN,
-				       &index_sym_info);
+	    ada_lookup_encoded_symbol (index_name, orig_left_context,
+				       VAR_DOMAIN, &index_sym_info);
 	    if (index_sym_info.symbol == NULL)
 	      error (_("Could not find %s"), index_name);
 	    else if (SYMBOL_CLASS (index_sym_info.symbol) == LOC_TYPEDEF)

@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 Free Software Foundation, Inc.
+/* Copyright (C) 2017-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,19 +38,27 @@
   DIAGNOSTIC_IGNORE ("-Wdeprecated-register")
 # define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION \
   DIAGNOSTIC_IGNORE ("-Wunused-function")
-
+# if __has_warning ("-Wenum-compare-switch")
+#  define DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES \
+   DIAGNOSTIC_IGNORE ("-Wenum-compare-switch")
+# else
+#  define DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
+# endif
 #elif defined (__GNUC__) /* GCC */
 
 # define DIAGNOSTIC_IGNORE_SELF_MOVE
 # define DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER
 # define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION \
   DIAGNOSTIC_IGNORE ("-Wunused-function")
+# define DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
 
 #else /* Other compilers */
 
 # define DIAGNOSTIC_IGNORE_SELF_MOVE
 # define DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER
 # define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION
+# define DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
+
 #endif
 
 #endif /* COMMON_DIAGNOSTICS_H */

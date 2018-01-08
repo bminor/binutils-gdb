@@ -5815,6 +5815,7 @@ fi
 
 
 if $development; then
+  srv_selftest_objs="selftest.o"
 
 $as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
 
@@ -8287,7 +8288,7 @@ $as_echo "#define USE_XML 1" >>confdefs.h
   done
 fi
 
-GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles $srv_host_obs"
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles $srv_host_obs $srv_selftest_objs"
 GDBSERVER_LIBS="$srv_libs"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the target supports __sync_*_compare_and_swap" >&5

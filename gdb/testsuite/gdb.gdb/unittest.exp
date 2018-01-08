@@ -1,4 +1,4 @@
-# Copyright 2016-2017 Free Software Foundation, Inc.
+# Copyright 2016-2018 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,18 @@
 set do_xml_test [expr ![gdb_skip_xml_test]]
 
 gdb_start
-gdb_test "maintenance selftest" "Ran $decimal unit tests, 0 failed"
+
+set test "maintenance selftest"
+gdb_test_multiple $test $test {
+  -re "Ran ($decimal) unit tests, 0 failed\r\n$gdb_prompt $" {
+	set num_ran $expect_out(1,string)
+	gdb_assert "$num_ran > 0" $test
+  }
+
+  -re "Selftests are not available in a non-development build.\r\n$gdb_prompt $" {
+	unsupported $test
+  }
+}
 
 if { ![is_remote host] && $do_xml_test } {
     gdb_test "maintenance check xml-descriptions ${srcdir}/../features" \

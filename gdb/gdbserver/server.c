@@ -1,5 +1,5 @@
 /* Main code for remote server for GDB.
-   Copyright (C) 1989-2017 Free Software Foundation, Inc.
+   Copyright (C) 1989-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1295,7 +1295,7 @@ handle_detach (char *own_buf)
    to gdb's "set debug foo on|off" because we also use this function to
    parse "--debug-format=foo,bar".  */
 
-static char *
+static std::string
 parse_debug_format_options (const char *arg, int is_monitor)
 {
   VEC (char_ptr) *options;
@@ -1338,8 +1338,8 @@ parse_debug_format_options (const char *arg, int is_monitor)
 	}
       else
 	{
-	  char *msg = xstrprintf ("Unknown debug-format argument: \"%s\"\n",
-				  option);
+	  std::string msg
+	    = string_printf ("Unknown debug-format argument: \"%s\"\n", option);
 
 	  free_char_ptr_vec (options);
 	  return msg;
@@ -1347,7 +1347,7 @@ parse_debug_format_options (const char *arg, int is_monitor)
     }
 
   free_char_ptr_vec (options);
-  return NULL;
+  return std::string ();
 }
 
 /* Handle monitor commands not handled by target-specific handlers.  */
@@ -1387,16 +1387,15 @@ handle_monitor_command (char *mon, char *own_buf)
     }
   else if (startswith (mon, "set debug-format "))
     {
-      char *error_msg
+      std::string error_msg
 	= parse_debug_format_options (mon + sizeof ("set debug-format ") - 1,
 				      1);
 
-      if (error_msg != NULL)
+      if (!error_msg.empty ())
 	{
-	  monitor_output (error_msg);
+	  monitor_output (error_msg.c_str ());
 	  monitor_show_help ();
 	  write_enn (own_buf);
-	  xfree (error_msg);
 	}
     }
   else if (strcmp (mon, "help") == 0)
@@ -3387,7 +3386,7 @@ static void
 gdbserver_version (void)
 {
   printf ("GNU gdbserver %s%s\n"
-	  "Copyright (C) 2017 Free Software Foundation, Inc.\n"
+	  "Copyright (C) 2018 Free Software Foundation, Inc.\n"
 	  "gdbserver is free software, covered by the "
 	  "GNU General Public License.\n"
 	  "This gdbserver was configured as \"%s\"\n",
@@ -3560,7 +3559,9 @@ captured_main (int argc, char *argv[])
   volatile int attach = 0;
   int was_running;
   bool selftest = false;
+#if GDB_SELF_TEST
   const char *selftest_filter = NULL;
+#endif
 
   while (*next_arg != NULL && **next_arg == '-')
     {
@@ -3611,13 +3612,13 @@ captured_main (int argc, char *argv[])
 	debug_threads = 1;
       else if (startswith (*next_arg, "--debug-format="))
 	{
-	  char *error_msg
+	  std::string error_msg
 	    = parse_debug_format_options ((*next_arg)
 					  + sizeof ("--debug-format=") - 1, 0);
 
-	  if (error_msg != NULL)
+	  if (!error_msg.empty ())
 	    {
-	      fprintf (stderr, "%s", error_msg);
+	      fprintf (stderr, "%s", error_msg.c_str ());
 	      exit (1);
 	    }
 	}
@@ -3684,7 +3685,9 @@ captured_main (int argc, char *argv[])
       else if (startswith (*next_arg, "--selftest="))
 	{
 	  selftest = true;
+#if GDB_SELF_TEST
 	  selftest_filter = *next_arg + strlen ("--selftest=");
+#endif
 	}
       else
 	{
@@ -3712,7 +3715,7 @@ captured_main (int argc, char *argv[])
      opened by remote_prepare.  */
   notice_open_fds ();
 
-  save_original_signals_state ();
+  save_original_signals_state (false);
 
   /* We need to know whether the remote connection is stdio before
      starting the inferior.  Inferiors created in this scenario have
@@ -3762,7 +3765,11 @@ captured_main (int argc, char *argv[])
 
   if (selftest)
     {
+#if GDB_SELF_TEST
       selftests::run_tests (selftest_filter);
+#else
+      printf (_("Selftests are not available in a non-development build.\n"));
+#endif
       throw_quit ("Quit");
     }
 

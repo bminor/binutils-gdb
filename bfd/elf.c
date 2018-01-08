@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
 
-   Copyright (C) 1993-2017 Free Software Foundation, Inc.
+   Copyright (C) 1993-2018 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -10013,6 +10013,18 @@ elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
 	return elfcore_make_note_pseudosection (abfd, ".thrmisc", note);
       else
 	return TRUE;
+
+    case NT_FREEBSD_PROCSTAT_PROC:
+      return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.proc",
+					      note);
+
+    case NT_FREEBSD_PROCSTAT_FILES:
+      return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.files",
+					      note);
+
+    case NT_FREEBSD_PROCSTAT_VMMAP:
+      return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.vmmap",
+					      note);
 
     case NT_FREEBSD_PROCSTAT_AUXV:
       {

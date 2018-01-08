@@ -1,6 +1,6 @@
 /* Handle SVR4 shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1144,17 +1144,18 @@ svr4_copy_library_list (struct so_list *src)
 static void
 library_list_start_library (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
-			    void *user_data, VEC(gdb_xml_value_s) *attributes)
+			    void *user_data,
+			    std::vector<gdb_xml_value> &attributes)
 {
   struct svr4_library_list *list = (struct svr4_library_list *) user_data;
   const char *name
-    = (const char *) xml_find_attribute (attributes, "name")->value;
+    = (const char *) xml_find_attribute (attributes, "name")->value.get ();
   ULONGEST *lmp
-    = (ULONGEST *) xml_find_attribute (attributes, "lm")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "lm")->value.get ();
   ULONGEST *l_addrp
-    = (ULONGEST *) xml_find_attribute (attributes, "l_addr")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "l_addr")->value.get ();
   ULONGEST *l_ldp
-    = (ULONGEST *) xml_find_attribute (attributes, "l_ld")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "l_ld")->value.get ();
   struct so_list *new_elem;
 
   new_elem = XCNEW (struct so_list);
@@ -1177,11 +1178,12 @@ library_list_start_library (struct gdb_xml_parser *parser,
 static void
 svr4_library_list_start_list (struct gdb_xml_parser *parser,
 			      const struct gdb_xml_element *element,
-			      void *user_data, VEC(gdb_xml_value_s) *attributes)
+			      void *user_data,
+			      std::vector<gdb_xml_value> &attributes)
 {
   struct svr4_library_list *list = (struct svr4_library_list *) user_data;
   const char *version
-    = (const char *) xml_find_attribute (attributes, "version")->value;
+    = (const char *) xml_find_attribute (attributes, "version")->value.get ();
   struct gdb_xml_value *main_lm = xml_find_attribute (attributes, "main-lm");
 
   if (strcmp (version, "1.0") != 0)
@@ -1190,7 +1192,7 @@ svr4_library_list_start_list (struct gdb_xml_parser *parser,
 		   version);
 
   if (main_lm)
-    list->main_lm = *(ULONGEST *) main_lm->value;
+    list->main_lm = *(ULONGEST *) main_lm->value.get ();
 }
 
 /* The allowed elements and attributes for an XML library list.

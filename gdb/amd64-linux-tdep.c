@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux x86-64.
 
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -363,6 +363,9 @@ amd64_all_but_ip_registers_record (struct regcache *regcache)
 static enum gdb_syscall
 amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
 {
+  DIAGNOSTIC_PUSH
+  DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
+
   switch (syscall_number) {
   case amd64_sys_read:
   case amd64_x32_sys_read:
@@ -1430,6 +1433,8 @@ amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
   default:
     return gdb_sys_no_syscall;
   }
+
+  DIAGNOSTIC_POP
 }
 
 /* Parse the arguments of current system call instruction and record

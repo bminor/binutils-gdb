@@ -1,6 +1,6 @@
 /* Ada language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -124,10 +124,10 @@ static int num_defns_collected (struct obstack *);
 
 static struct block_symbol *defns_collected (struct obstack *, int);
 
-static struct value *resolve_subexp (struct expression **, int *, int,
+static struct value *resolve_subexp (expression_up *, int *, int,
                                      struct type *);
 
-static void replace_operator_with_call (struct expression **, int, int, int,
+static void replace_operator_with_call (expression_up *, int, int, int,
                                         struct symbol *, const struct block *);
 
 static int possible_user_operator_p (enum exp_opcode, struct value **);
@@ -2910,8 +2910,10 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
   struct type *base_index_type = TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type0));
   struct type *index_type
     = create_static_range_type (NULL, base_index_type, low, high);
-  struct type *slice_type =
-    create_array_type (NULL, TYPE_TARGET_TYPE (type0), index_type);
+  struct type *slice_type = create_array_type_with_stride
+			      (NULL, TYPE_TARGET_TYPE (type0), index_type,
+			       get_dyn_prop (DYN_PROP_BYTE_STRIDE, type0),
+			       TYPE_FIELD_BITSIZE (type0, 0));
   int base_low =  ada_discrete_type_low_bound (TYPE_INDEX_TYPE (type0));
   LONGEST base_low_pos, low_pos;
   CORE_ADDR base;
@@ -2938,8 +2940,10 @@ ada_value_slice (struct value *array, int low, int high)
   struct type *base_index_type = TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type));
   struct type *index_type
     = create_static_range_type (NULL, TYPE_INDEX_TYPE (type), low, high);
-  struct type *slice_type =
-    create_array_type (NULL, TYPE_TARGET_TYPE (type), index_type);
+  struct type *slice_type = create_array_type_with_stride
+			      (NULL, TYPE_TARGET_TYPE (type), index_type,
+			       get_dyn_prop (DYN_PROP_BYTE_STRIDE, type),
+			       TYPE_FIELD_BITSIZE (type, 0));
   LONGEST low_pos, high_pos;
 
   if (!discrete_position (base_index_type, low, &low_pos)
@@ -3175,7 +3179,7 @@ ada_array_length (struct value *arr, int n)
     }
 
   arr_type = check_typedef (arr_type);
-  index_type = TYPE_INDEX_TYPE (arr_type);
+  index_type = ada_index_type (arr_type, n, "length");
   if (index_type != NULL)
     {
       struct type *base_type;
@@ -3235,7 +3239,7 @@ ada_decoded_op_name (enum exp_opcode op)
    return type is preferred.  May change (expand) *EXP.  */
 
 static void
-resolve (struct expression **expp, int void_context_p)
+resolve (expression_up *expp, int void_context_p)
 {
   struct type *context_type = NULL;
   int pc = 0;
@@ -3256,7 +3260,7 @@ resolve (struct expression **expp, int void_context_p)
    are as in ada_resolve, above.  */
 
 static struct value *
-resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
+resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
                 struct type *context_type)
 {
   int pc = *pos;
@@ -3270,7 +3274,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
   argvec = NULL;
   nargs = 0;
-  exp = *expp;
+  exp = expp->get ();
 
   /* Pass one: resolve operands, saving their types and updating *pos,
      if needed.  */
@@ -3420,7 +3424,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
   for (i = 0; i < nargs; i += 1)
     argvec[i] = resolve_subexp (expp, pos, 1, NULL);
   argvec[i] = NULL;
-  exp = *expp;
+  exp = expp->get ();
 
   /* Pass two: perform any resolution on principal operator.  */
   switch (op)
@@ -3515,7 +3519,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
           replace_operator_with_call (expp, pc, 0, 0,
                                       exp->elts[pc + 2].symbol,
                                       exp->elts[pc + 1].block);
-          exp = *expp;
+          exp = expp->get ();
         }
       break;
 
@@ -3596,7 +3600,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 	  replace_operator_with_call (expp, pc, nargs, 1,
 				      candidates[i].symbol,
 				      candidates[i].block);
-          exp = *expp;
+          exp = expp->get ();
         }
       break;
 
@@ -4115,7 +4119,7 @@ get_selections (int *choices, int n_choices, int max_results,
    arguments.  Update *EXPP as needed to hold more space.  */
 
 static void
-replace_operator_with_call (struct expression **expp, int pc, int nargs,
+replace_operator_with_call (expression_up *expp, int pc, int nargs,
                             int oplen, struct symbol *sym,
                             const struct block *block)
 {
@@ -4124,7 +4128,7 @@ replace_operator_with_call (struct expression **expp, int pc, int nargs,
   struct expression *newexp = (struct expression *)
     xzalloc (sizeof (struct expression)
              + EXP_ELEM_TO_BYTES ((*expp)->nelts + 7 - oplen));
-  struct expression *exp = *expp;
+  struct expression *exp = expp->get ();
 
   newexp->nelts = exp->nelts + 7 - oplen;
   newexp->language_defn = exp->language_defn;
@@ -4140,8 +4144,7 @@ replace_operator_with_call (struct expression **expp, int pc, int nargs,
   newexp->elts[pc + 4].block = block;
   newexp->elts[pc + 5].symbol = sym;
 
-  *expp = newexp;
-  xfree (exp);
+  expp->reset (newexp);
 }
 
 /* Type-class predicates */
@@ -5908,10 +5911,6 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
 			   domain_enum domain,
 			   struct block_symbol *info)
 {
-  struct block_symbol *candidates;
-  int n_candidates;
-  struct cleanup *old_chain;
-
   /* Since we already have an encoded name, wrap it in '<>' to force a
      verbatim match.  Otherwise, if the name happens to not look like
      an encoded name (because it doesn't include a "__"),
@@ -5921,22 +5920,7 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
   std::string verbatim = std::string ("<") + name + '>';
 
   gdb_assert (info != NULL);
-  memset (info, 0, sizeof (struct block_symbol));
-
-  n_candidates = ada_lookup_symbol_list (verbatim.c_str (), block,
-					 domain, &candidates);
-  old_chain = make_cleanup (xfree, candidates);
-
-  if (n_candidates == 0)
-    {
-      do_cleanups (old_chain);
-      return;
-    }
-
-  *info = candidates[0];
-  info->symbol = fixup_symbol_section (info->symbol, NULL);
-
-  do_cleanups (old_chain);
+  *info = ada_lookup_symbol (verbatim.c_str (), block, domain, NULL);
 }
 
 /* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing
@@ -5949,13 +5933,27 @@ struct block_symbol
 ada_lookup_symbol (const char *name, const struct block *block0,
                    domain_enum domain, int *is_a_field_of_this)
 {
-  struct block_symbol info;
-
   if (is_a_field_of_this != NULL)
     *is_a_field_of_this = 0;
 
-  ada_lookup_encoded_symbol (ada_encode (ada_fold_name (name)),
-			     block0, domain, &info);
+  struct block_symbol *candidates;
+  int n_candidates;
+  struct cleanup *old_chain;
+
+  n_candidates = ada_lookup_symbol_list (name, block0, domain, &candidates);
+  old_chain = make_cleanup (xfree, candidates);
+
+  if (n_candidates == 0)
+    {
+      do_cleanups (old_chain);
+      return {};
+    }
+
+  block_symbol info = candidates[0];
+  info.symbol = fixup_symbol_section (info.symbol, NULL);
+
+  do_cleanups (old_chain);
+
   return info;
 }
 
@@ -9341,8 +9339,16 @@ ada_to_fixed_value_create (struct type *type0, CORE_ADDR address,
 
   if (type == type0 && val0 != NULL)
     return val0;
-  else
-    return value_from_contents_and_address (type, 0, address);
+
+  if (VALUE_LVAL (val0) != lval_memory)
+    {
+      /* Our value does not live in memory; it could be a convenience
+	 variable, for instance.  Create a not_lval value using val0's
+	 contents.  */
+      return value_from_contents (type, value_contents (val0));
+    }
+
+  return value_from_contents_and_address (type, 0, address);
 }
 
 /* A value representing VAL, but with a standard (static-sized) type
@@ -12021,6 +12027,10 @@ struct exception_support_info
       a catchpoint on failed assertions.  */
    const char *catch_assert_sym;
 
+   /* The name of the symbol to break on in order to insert
+      a catchpoint on exception handling.  */
+   const char *catch_handlers_sym;
+
    /* Assuming that the inferior just triggered an unhandled exception
       catchpoint, this function is responsible for returning the address
       in inferior memory where the name of that exception is stored.
@@ -12040,6 +12050,7 @@ static const struct exception_support_info default_exception_support_info =
   "__gnat_debug_raise_exception", /* catch_exception_sym */
   "__gnat_unhandled_exception", /* catch_exception_unhandled_sym */
   "__gnat_debug_raise_assert_failure", /* catch_assert_sym */
+  "__gnat_begin_handler", /* catch_handlers_sym */
   ada_unhandled_exception_name_addr
 };
 
@@ -12052,6 +12063,7 @@ static const struct exception_support_info exception_support_info_fallback =
   "__gnat_raise_nodefer_with_msg", /* catch_exception_sym */
   "__gnat_unhandled_exception", /* catch_exception_unhandled_sym */
   "system__assertions__raise_assert_failure",  /* catch_assert_sym */
+  "__gnat_begin_handler", /* catch_handlers_sym */
   ada_unhandled_exception_name_addr_from_raise
 };
 
@@ -12320,7 +12332,12 @@ ada_exception_name_addr_1 (enum ada_exception_catchpoint_kind ex,
       case ada_catch_exception_unhandled:
         return data->exception_info->unhandled_exception_name_addr ();
         break;
-      
+
+      case ada_catch_handlers:
+        return 0;  /* The runtimes does not provide access to the exception
+		      name.  */
+        break;
+
       case ada_catch_assert:
         return 0;  /* Exception name is not relevant in this case.  */
         break;
@@ -12426,7 +12443,9 @@ ada_exception_name_addr (enum ada_exception_catchpoint_kind ex,
   return result;
 }
 
-static char *ada_exception_catchpoint_cond_string (const char *excep_string);
+static char *ada_exception_catchpoint_cond_string
+  (const char *excep_string,
+   enum ada_exception_catchpoint_kind ex);
 
 /* Ada catchpoints.
 
@@ -12489,7 +12508,8 @@ struct ada_catchpoint : public breakpoint
    catchpoint's locations, and store them for later evaluation.  */
 
 static void
-create_excep_cond_exprs (struct ada_catchpoint *c)
+create_excep_cond_exprs (struct ada_catchpoint *c,
+                         enum ada_exception_catchpoint_kind ex)
 {
   struct cleanup *old_chain;
   struct bp_location *bl;
@@ -12505,7 +12525,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 
   /* Compute the condition expression in text form, from the specific
      expection we want to catch.  */
-  cond_string = ada_exception_catchpoint_cond_string (c->excep_string);
+  cond_string = ada_exception_catchpoint_cond_string (c->excep_string, ex);
   old_chain = make_cleanup (xfree, cond_string);
 
   /* Iterate over all the catchpoint's locations, and parse an
@@ -12573,7 +12593,7 @@ re_set_exception (enum ada_exception_catchpoint_kind ex, struct breakpoint *b)
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */
-  create_excep_cond_exprs (c);
+  create_excep_cond_exprs (c, ex);
 }
 
 /* Returns true if we should stop for this breakpoint hit.  If the
@@ -12662,6 +12682,7 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
     {
       case ada_catch_exception:
       case ada_catch_exception_unhandled:
+      case ada_catch_handlers:
 	{
 	  const CORE_ADDR addr = ada_exception_name_addr (ex, b);
 	  char exception_name[256];
@@ -12759,6 +12780,17 @@ print_one_exception (enum ada_exception_catchpoint_kind ex,
         uiout->field_string ("what", "unhandled Ada exceptions");
         break;
       
+      case ada_catch_handlers:
+        if (c->excep_string != NULL)
+          {
+	    uiout->field_fmt ("what",
+			      _("`%s' Ada exception handlers"),
+			      c->excep_string);
+          }
+        else
+	  uiout->field_string ("what", "all Ada exceptions handlers");
+        break;
+
       case ada_catch_assert:
         uiout->field_string ("what", "failed Ada assertions");
         break;
@@ -12802,7 +12834,19 @@ print_mention_exception (enum ada_exception_catchpoint_kind ex,
       case ada_catch_exception_unhandled:
         uiout->text (_("unhandled Ada exceptions"));
         break;
-      
+
+      case ada_catch_handlers:
+        if (c->excep_string != NULL)
+	  {
+	    std::string info
+	      = string_printf (_("`%s' Ada exception handlers"),
+			       c->excep_string);
+	    uiout->text (info.c_str ());
+	  }
+        else
+          uiout->text (_("all Ada exceptions handlers"));
+        break;
+
       case ada_catch_assert:
         uiout->text (_("failed Ada assertions"));
         break;
@@ -12832,6 +12876,10 @@ print_recreate_exception (enum ada_exception_catchpoint_kind ex,
 
       case ada_catch_exception_unhandled:
 	fprintf_filtered (fp, "catch exception unhandled");
+	break;
+
+      case ada_catch_handlers:
+	fprintf_filtered (fp, "catch handlers");
 	break;
 
       case ada_catch_assert:
@@ -12984,6 +13032,54 @@ print_recreate_catch_assert (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops catch_assert_breakpoint_ops;
 
+/* Virtual table for "catch handlers" breakpoints.  */
+
+static struct bp_location *
+allocate_location_catch_handlers (struct breakpoint *self)
+{
+  return allocate_location_exception (ada_catch_handlers, self);
+}
+
+static void
+re_set_catch_handlers (struct breakpoint *b)
+{
+  re_set_exception (ada_catch_handlers, b);
+}
+
+static void
+check_status_catch_handlers (bpstat bs)
+{
+  check_status_exception (ada_catch_handlers, bs);
+}
+
+static enum print_stop_action
+print_it_catch_handlers (bpstat bs)
+{
+  return print_it_exception (ada_catch_handlers, bs);
+}
+
+static void
+print_one_catch_handlers (struct breakpoint *b,
+			  struct bp_location **last_loc)
+{
+  print_one_exception (ada_catch_handlers, b, last_loc);
+}
+
+static void
+print_mention_catch_handlers (struct breakpoint *b)
+{
+  print_mention_exception (ada_catch_handlers, b);
+}
+
+static void
+print_recreate_catch_handlers (struct breakpoint *b,
+			       struct ui_file *fp)
+{
+  print_recreate_exception (ada_catch_handlers, b, fp);
+}
+
+static struct breakpoint_ops catch_handlers_breakpoint_ops;
+
 /* Return a newly allocated copy of the first space-separated token
    in ARGSP, and then adjust ARGSP to point immediately after that
    token.
@@ -13022,12 +13118,15 @@ ada_get_next_arg (const char **argsp)
    Set EX to the appropriate catchpoint type.
    Set EXCEP_STRING to the name of the specific exception if
    specified by the user.
+   IS_CATCH_HANDLERS_CMD: True if the arguments are for a
+   "catch handlers" command.  False otherwise.
    If a condition is found at the end of the arguments, the condition
    expression is stored in COND_STRING (memory must be deallocated
    after use).  Otherwise COND_STRING is set to NULL.  */
 
 static void
 catch_ada_exception_command_split (const char *args,
+				   bool is_catch_handlers_cmd,
                                    enum ada_exception_catchpoint_kind *ex,
 				   char **excep_string,
 				   char **cond_string)
@@ -13073,7 +13172,13 @@ catch_ada_exception_command_split (const char *args,
 
   discard_cleanups (old_chain);
 
-  if (exception_name == NULL)
+  if (is_catch_handlers_cmd)
+    {
+      /* Catch handling of exceptions.  */
+      *ex = ada_catch_handlers;
+      *excep_string = exception_name;
+    }
+  else if (exception_name == NULL)
     {
       /* Catch all exceptions.  */
       *ex = ada_catch_exception;
@@ -13115,6 +13220,9 @@ ada_exception_sym_name (enum ada_exception_catchpoint_kind ex)
       case ada_catch_assert:
         return (data->exception_info->catch_assert_sym);
         break;
+      case ada_catch_handlers:
+        return (data->exception_info->catch_handlers_sym);
+        break;
       default:
         internal_error (__FILE__, __LINE__,
                         _("unexpected catchpoint kind (%d)"), ex);
@@ -13138,6 +13246,9 @@ ada_exception_breakpoint_ops (enum ada_exception_catchpoint_kind ex)
       case ada_catch_assert:
         return (&catch_assert_breakpoint_ops);
         break;
+      case ada_catch_handlers:
+        return (&catch_handlers_breakpoint_ops);
+        break;
       default:
         internal_error (__FILE__, __LINE__,
                         _("unexpected catchpoint kind (%d)"), ex);
@@ -13148,14 +13259,29 @@ ada_exception_breakpoint_ops (enum ada_exception_catchpoint_kind ex)
    being raised with the exception that the user wants to catch.  This
    assumes that this condition is used when the inferior just triggered
    an exception catchpoint.
+   EX: the type of catchpoints used for catching Ada exceptions.
    
    The string returned is a newly allocated string that needs to be
    deallocated later.  */
 
 static char *
-ada_exception_catchpoint_cond_string (const char *excep_string)
+ada_exception_catchpoint_cond_string (const char *excep_string,
+                                      enum ada_exception_catchpoint_kind ex)
 {
   int i;
+  bool is_standard_exc = false;
+  const char *actual_exc_expr;
+  char *ref_exc_expr;
+
+  if (ex == ada_catch_handlers)
+    {
+      /* For exception handlers catchpoints, the condition string does
+         not use the same parameter as for the other exceptions.  */
+      actual_exc_expr = ("long_integer (GNAT_GCC_exception_Access"
+			 "(gcc_exception).all.occurrence.id)");
+    }
+  else
+    actual_exc_expr = "long_integer (e)";
 
   /* The standard exceptions are a special case.  They are defined in
      runtime units that have been compiled without debugging info; if
@@ -13180,11 +13306,19 @@ ada_exception_catchpoint_cond_string (const char *excep_string)
     {
       if (strcmp (standard_exc [i], excep_string) == 0)
 	{
-          return xstrprintf ("long_integer (e) = long_integer (&standard.%s)",
-                             excep_string);
+	  is_standard_exc = true;
+	  break;
 	}
     }
-  return xstrprintf ("long_integer (e) = long_integer (&%s)", excep_string);
+
+  if (is_standard_exc)
+    ref_exc_expr = xstrprintf ("long_integer (&standard.%s)", excep_string);
+  else
+    ref_exc_expr = xstrprintf ("long_integer (&%s)", excep_string);
+
+  char *result =  xstrprintf ("%s = %s", actual_exc_expr, ref_exc_expr);
+  xfree (ref_exc_expr);
+  return result;
 }
 
 /* Return the symtab_and_line that should be used to insert an exception
@@ -13267,7 +13401,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
   init_ada_exception_breakpoint (c.get (), gdbarch, sal, addr_string,
 				 ops, tempflag, disabled, from_tty);
   c->excep_string = excep_string;
-  create_excep_cond_exprs (c.get ());
+  create_excep_cond_exprs (c.get (), ex_kind);
   if (cond_string != NULL)
     set_breakpoint_condition (c.get (), cond_string, from_tty);
   install_breakpoint (0, std::move (c), 1);
@@ -13290,7 +13424,32 @@ catch_ada_exception_command (const char *arg_entry, int from_tty,
 
   if (!arg)
     arg = "";
-  catch_ada_exception_command_split (arg, &ex_kind, &excep_string,
+  catch_ada_exception_command_split (arg, false, &ex_kind, &excep_string,
+				     &cond_string);
+  create_ada_exception_catchpoint (gdbarch, ex_kind,
+				   excep_string, cond_string,
+				   tempflag, 1 /* enabled */,
+				   from_tty);
+}
+
+/* Implement the "catch handlers" command.  */
+
+static void
+catch_ada_handlers_command (const char *arg_entry, int from_tty,
+			    struct cmd_list_element *command)
+{
+  const char *arg = arg_entry;
+  struct gdbarch *gdbarch = get_current_arch ();
+  int tempflag;
+  enum ada_exception_catchpoint_kind ex_kind;
+  char *excep_string = NULL;
+  char *cond_string = NULL;
+
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  if (!arg)
+    arg = "";
+  catch_ada_exception_command_split (arg, true, &ex_kind, &excep_string,
 				     &cond_string);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
 				   excep_string, cond_string,
@@ -14253,12 +14412,38 @@ ada_symbol_name_matches (const char *symbol_search_name,
 				     comp_match_res);
 }
 
+/* A name matcher that matches the symbol name exactly, with
+   strcmp.  */
+
+static bool
+literal_symbol_name_matcher (const char *symbol_search_name,
+			     const lookup_name_info &lookup_name,
+			     completion_match_result *comp_match_res)
+{
+  const std::string &name = lookup_name.name ();
+
+  int cmp = (lookup_name.completion_mode ()
+	     ? strncmp (symbol_search_name, name.c_str (), name.size ())
+	     : strcmp (symbol_search_name, name.c_str ()));
+  if (cmp == 0)
+    {
+      if (comp_match_res != NULL)
+	comp_match_res->set_match (symbol_search_name);
+      return true;
+    }
+  else
+    return false;
+}
+
 /* Implement the "la_get_symbol_name_matcher" language_defn method for
    Ada.  */
 
 static symbol_name_matcher_ftype *
 ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
 {
+  if (lookup_name.match_type () == symbol_name_match_type::SEARCH_NAME)
+    return literal_symbol_name_matcher;
+
   if (lookup_name.completion_mode ())
     return ada_symbol_name_matches;
   else
@@ -14405,6 +14590,16 @@ initialize_ada_catchpoint_ops (void)
   ops->print_one = print_one_catch_assert;
   ops->print_mention = print_mention_catch_assert;
   ops->print_recreate = print_recreate_catch_assert;
+
+  ops = &catch_handlers_breakpoint_ops;
+  *ops = bkpt_breakpoint_ops;
+  ops->allocate_location = allocate_location_catch_handlers;
+  ops->re_set = re_set_catch_handlers;
+  ops->check_status = check_status_catch_handlers;
+  ops->print_it = print_it_catch_handlers;
+  ops->print_one = print_one_catch_handlers;
+  ops->print_mention = print_mention_catch_handlers;
+  ops->print_recreate = print_recreate_catch_handlers;
 }
 
 /* This module's 'new_objfile' observer.  */
@@ -14462,6 +14657,14 @@ overloads selection menu is activated"),
 Catch Ada exceptions, when raised.\n\
 With an argument, catch only exceptions with the given name."),
 		     catch_ada_exception_command,
+                     NULL,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
+
+  add_catch_command ("handlers", _("\
+Catch Ada exceptions, when handled.\n\
+With an argument, catch only exceptions with the given name."),
+		     catch_ada_handlers_command,
                      NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);

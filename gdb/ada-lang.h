@@ -1,6 +1,6 @@
 /* Ada language support definitions for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -108,7 +108,8 @@ enum ada_exception_catchpoint_kind
 {
   ada_catch_exception,
   ada_catch_exception_unhandled,
-  ada_catch_assert
+  ada_catch_assert,
+  ada_catch_handlers
 };
 
 /* Ada task structures.  */

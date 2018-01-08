@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2017 Free Software Foundation, Inc.
+# Copyright (C) 1989-2018 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -1050,7 +1050,6 @@ COMMON_SFILES = \
 	remote-notif.c \
 	reverse.c \
 	rust-lang.c \
-	selftest-arch.c \
 	sentinel-frame.c \
 	ser-event.c \
 	serial.c \
@@ -1139,7 +1138,6 @@ SFILES = \
 	common/ptid.c \
 	common/rsp-low.c \
 	common/run-time-clock.c \
-	common/selftest.c \
 	common/signals.c \
 	common/signals-state-save-restore.c \
 	common/vec.c \
@@ -1555,7 +1553,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	ptid.o \
 	rsp-low.o \
 	run-time-clock.o \
-	selftest.o \
 	signals.o \
 	signals-state-save-restore.o \
 	vec.o \

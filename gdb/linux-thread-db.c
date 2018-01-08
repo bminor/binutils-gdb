@@ -1,6 +1,6 @@
 /* libthread_db assisted debugging support, generic parts.
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1093,12 +1093,8 @@ static void
 thread_db_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   struct target_ops *target_beneath = find_target_beneath (ops);
-  struct thread_db_info *info;
 
-  info = get_thread_db_info (ptid_get_pid (inferior_ptid));
-
-  if (info)
-    delete_thread_db_info (ptid_get_pid (inferior_ptid));
+  delete_thread_db_info (ptid_get_pid (inferior_ptid));
 
   target_beneath->to_detach (target_beneath, args, from_tty);
 

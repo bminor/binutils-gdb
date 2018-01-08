@@ -1,5 +1,5 @@
 /* SPU target-dependent code for GDB, the GNU debugger.
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
    Based on a port by Sid Manning <sid@us.ibm.com>.
@@ -1966,7 +1966,9 @@ spu_catch_start (struct objfile *objfile)
       struct symbol *sym;
       struct symtab_and_line sal;
 
-      sym = block_lookup_symbol (block, "main", VAR_DOMAIN);
+      sym = block_lookup_symbol (block, "main",
+				 symbol_name_match_type::SEARCH_NAME,
+				 VAR_DOMAIN);
       if (sym)
 	{
 	  fixup_symbol_section (sym, objfile);
@@ -2720,6 +2722,9 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_address_class_name_to_type_flags
     (gdbarch, spu_address_class_name_to_type_flags);
 
+  /* We need to support more than "addr_bit" significant address bits
+     in order to support SPUADDR_ADDR encoded values.  */
+  set_gdbarch_significant_addr_bit (gdbarch, 64);
 
   /* Inferior function calls.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);

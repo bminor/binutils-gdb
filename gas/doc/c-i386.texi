@@ -1,4 +1,4 @@
-@c Copyright (C) 1991-2017 Free Software Foundation, Inc.
+@c Copyright (C) 1991-2018 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 @c man end
@@ -431,8 +431,17 @@ specifies the desired alignment of the symbol in the bss section.
 
 This directive is only available for COFF based x86 targets.
 
+@cindex @code{largecomm} directive, ELF
+@item .largecomm @var{symbol} , @var{length}[, @var{alignment}]
+This directive behaves in the same way as the @code{comm} directive
+except that the data is placed into the @var{.lbss} section instead of
+the @var{.bss} section @ref{Comm}.
+
+The directive is intended to be used for data which requires a large
+amount of space, and it is only available for ELF based x86_64
+targets.
+
 @c FIXME: Document other x86 specific directives ?  Eg: .code16gcc,
-@c .largecomm
 
 @end table
 

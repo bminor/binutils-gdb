@@ -1,5 +1,5 @@
 /* RISC-V disassembler
-   Copyright (C) 2011-2017 Free Software Foundation, Inc.
+   Copyright (C) 2011-2018 Free Software Foundation, Inc.
 
    Contributed by Andrew Waterman (andrew@sifive.com).
    Based on MIPS target.
@@ -226,6 +226,8 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 
 	case 'b':
 	case 's':
+	  if ((l & MASK_JALR) == MATCH_JALR)
+	    maybe_print_address (pd, rs1, 0);
 	  print (info->stream, "%s", riscv_gpr_names[rs1]);
 	  break;
 

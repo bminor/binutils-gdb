@@ -1,7 +1,7 @@
 
 /* Internal type definitions for GDB.
 
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -418,6 +418,9 @@ enum dynamic_prop_node_kind
   /* A property representing DW_AT_allocated.  The presence of this attribute
      indicated that the object of the type can be associated.  */
   DYN_PROP_ASSOCIATED,
+
+  /* A property providing an array's byte stride.  */
+  DYN_PROP_BYTE_STRIDE,
 };
 
 /* * List for dynamic type attributes.  */
@@ -1791,7 +1794,8 @@ extern struct type *create_static_range_type (struct type *, struct type *,
 
 
 extern struct type *create_array_type_with_stride
-  (struct type *, struct type *, struct type *, unsigned int);
+  (struct type *, struct type *, struct type *,
+   struct dynamic_prop *, unsigned int);
 
 extern struct type *create_range_type (struct type *, struct type *,
 				       const struct dynamic_prop *,

@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -16594,9 +16594,9 @@ get_note_type (Filedata * filedata, unsigned e_type)
       case NT_ARCH:
 	return _("NT_ARCH (architecture)");
       case NT_GNU_BUILD_ATTRIBUTE_OPEN:
-	return _("NT_GNU_BUILD_ATTRIBUTE_OPEN");
+	return _("OPEN");
       case NT_GNU_BUILD_ATTRIBUTE_FUNC:
-	return _("NT_GNU_BUILD_ATTRIBUTE_FUNC");
+	return _("func");
       default:
 	break;
       }
@@ -17416,13 +17416,16 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
   return TRUE;
 }
 
-/* Print the name of the symbol associated with a build attribute
-   that is attached to address OFFSET.  */
+/* Find the symbol associated with a build attribute that is attached
+   to address OFFSET.  If PNAME is non-NULL then store the name of
+   the symbol (if found) in the provided pointer,  Returns NULL if a
+   symbol could not be found.  */
 
-static bfd_boolean
-print_symbol_for_build_attribute (Filedata *     filedata,
-				  unsigned long  offset,
-				  bfd_boolean    is_open_attr)
+static Elf_Internal_Sym *
+get_symbol_for_build_attribute (Filedata *       filedata,
+				unsigned long    offset,
+				bfd_boolean      is_open_attr,
+				const char **    pname)
 {
   static Filedata *         saved_filedata = NULL;
   static char *             strtab;
@@ -17461,10 +17464,7 @@ print_symbol_for_build_attribute (Filedata *     filedata,
     }
 
   if (symtab == NULL || strtab == NULL)
-    {
-      printf ("\n");
-      return FALSE;
-    }
+    return NULL;
 
   /* Find a symbol whose value matches offset.  */
   for (sym = symtab; sym < symtab + nsyms; sym ++)
@@ -17484,14 +17484,15 @@ print_symbol_for_build_attribute (Filedata *     filedata,
 	       FUNC symbols entirely.  */
 	    switch (ELF_ST_TYPE (sym->st_info))
 	      {
+	      case STT_OBJECT:
 	      case STT_FILE:
 		saved_sym = sym;
-		/* We can stop searching now.  */
-		sym = symtab + nsyms;
-		continue;
-
-	      case STT_OBJECT:
-		saved_sym = sym;
+		if (sym->st_size)
+		  {
+		    /* If the symbol has a size associated
+		       with it then we can stop searching.  */
+		    sym = symtab + nsyms;
+		  }
 		continue;
 
 	      case STT_FUNC:
@@ -17529,55 +17530,118 @@ print_symbol_for_build_attribute (Filedata *     filedata,
 	  }
       }
 
-  printf (" (%s: %s)\n",
-	  is_open_attr ? _("file") : _("func"),
-	  saved_sym ? strtab + saved_sym->st_name : _("<no symbol found>)"));
-  return TRUE;
+  if (saved_sym && pname)
+    * pname = strtab + saved_sym->st_name;
+
+  return saved_sym;
 }
 
 static bfd_boolean
 print_gnu_build_attribute_description (Elf_Internal_Note *  pnote,
 				       Filedata *           filedata)
 {
-  static unsigned long global_offset = 0;
-  unsigned long        offset;
-  unsigned int         desc_size = is_32bit_elf ? 4 : 8;
-  bfd_boolean          is_open_attr = pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN;
+  static unsigned long  global_offset = 0;
+  static unsigned long  global_end = 0;
+  static unsigned long  func_offset = 0;
+  static unsigned long  func_end = 0;
 
-  if (pnote->descsz == 0)
+  Elf_Internal_Sym *    sym;
+  const char *          name;
+  unsigned long         start;
+  unsigned long         end;
+  bfd_boolean           is_open_attr = pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN;
+
+  switch (pnote->descsz)
     {
+    case 0:
+      /* A zero-length description means that the range of
+	 the previous note of the same type should be used.  */
       if (is_open_attr)
 	{
-	  printf (_("    Applies from offset %#lx\n"), global_offset);
-	  return TRUE;
+	  if (global_end > global_offset)
+	    printf (_("    Applies to region from %#lx to %#lx\n"),
+		    global_offset, global_end);
+	  else
+	    printf (_("    Applies to region from %#lx\n"), global_offset);
 	}
       else
 	{
-	  printf (_("    Applies to func at %#lx"), global_offset);
-	  return print_symbol_for_build_attribute (filedata, global_offset, is_open_attr);
+	  if (func_end > func_offset)
+	    printf (_("    Applies to region from %#lx to %#lx\n"), func_offset, func_end);
+	  else
+	    printf (_("    Applies to region from %#lx\n"), func_offset);
 	}
-    }
+      return TRUE;
 
-  if (pnote->descsz != desc_size)
-    {
+    case 4:
+      start = byte_get ((unsigned char *) pnote->descdata, 4);
+      end = 0;
+      break;
+
+    case 8:
+      if (is_32bit_elf)
+	{
+	  /* FIXME: We should check that version 3+ notes are being used here...  */
+	  start = byte_get ((unsigned char *) pnote->descdata, 4);
+	  end = byte_get ((unsigned char *) pnote->descdata + 4, 4);
+	}
+      else
+	{
+	  start = byte_get ((unsigned char *) pnote->descdata, 8);
+	  end = 0;
+	}
+      break;
+
+    case 16:
+      start = byte_get ((unsigned char *) pnote->descdata, 8);
+      end = byte_get ((unsigned char *) pnote->descdata + 8, 8);
+      break;
+      
+    default:
       error (_("    <invalid description size: %lx>\n"), pnote->descsz);
       printf (_("    <invalid descsz>"));
       return FALSE;
     }
 
-  offset = byte_get ((unsigned char *) pnote->descdata, desc_size);
+  name = NULL;
+  sym = get_symbol_for_build_attribute (filedata, start, is_open_attr, & name);
+
+  if (end == 0 && sym != NULL && sym->st_size > 0)
+    end = start + sym->st_size;
 
   if (is_open_attr)
     {
-      printf (_("    Applies from offset %#lx"), offset);
-      global_offset = offset;
+      /* FIXME: Need to properly allow for section alignment.  16 is just the alignment used on x86_64.  */
+      if (global_end > 0 && start > BFD_ALIGN (global_end, 16))
+	warn (_("Gap in build notes detected from %#lx to %#lx\n"),
+	      global_end + 1, start - 1);
+
+      printf (_("    Applies to region from %#lx"), start);
+      global_offset = start;
+
+      if (end)
+	{
+	  printf (_(" to %#lx"), end);
+	  global_end = end;
+	}
     }
   else
     {
-      printf (_("    Applies to func at %#lx"), offset);
+      printf (_("    Applies to region from %#lx"), start);
+      func_offset = start;
+
+      if (end)
+	{
+	  printf (_(" to %#lx"), end);
+	  func_end = end;
+	}
     }
 
-  return print_symbol_for_build_attribute (filedata, offset, is_open_attr);
+  if (sym && name)
+    printf (_(" (%s)"), name);
+
+  printf ("\n");
+  return TRUE;
 }
 
 static bfd_boolean
@@ -17600,11 +17664,21 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       return FALSE;
     }
 
-  left = 20;
+  if (do_wide)
+    left = 28;
+  else
+    left = 20;
 
   /* Version 2 of the spec adds a "GA" prefix to the name field.  */
   if (name[0] == 'G' && name[1] == 'A')
     {
+      if (pnote->namesz < 4)
+	{
+	  error (_("corrupt name field in GNU build attribute note: size = %ld\n"), pnote->namesz);
+	  print_symbol (-20, _("  <corrupt name>"));
+	  return FALSE;
+	}
+
       printf ("GA");
       name += 2;
       left -= 2;

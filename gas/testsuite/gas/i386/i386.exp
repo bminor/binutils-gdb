@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2017 Free Software Foundation, Inc.
+# Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -900,6 +900,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-notrack"
     run_dump_test "x86-64-notrack-intel"
     run_list_test "x86-64-notrackbad" "-al"
+    run_dump_test "x86-64-movd"
+    run_dump_test "x86-64-movd-intel"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]

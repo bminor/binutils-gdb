@@ -1,7 +1,7 @@
 /* Target-struct-independent code to start (run) and stop an inferior
    process.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -7489,7 +7489,8 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
       CORE_ADDR handler;
       struct breakpoint *bp;
 
-      vsym = lookup_symbol (SYMBOL_LINKAGE_NAME (sym), b, VAR_DOMAIN, NULL);
+      vsym = lookup_symbol_search_name (SYMBOL_SEARCH_NAME (sym),
+					b, VAR_DOMAIN);
       value = read_var_value (vsym.symbol, vsym.block, frame);
       /* If the value was optimized out, revert to the old behavior.  */
       if (! value_optimized_out (value))

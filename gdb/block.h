@@ -1,6 +1,6 @@
 /* Code dealing with blocks for GDB.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -258,6 +258,7 @@ extern struct symbol *block_iter_match_next
 
 extern struct symbol *block_lookup_symbol (const struct block *block,
 					   const char *name,
+					   symbol_name_match_type match_type,
 					   const domain_enum domain);
 
 /* Search BLOCK for symbol NAME in DOMAIN but only in primary symbol table of

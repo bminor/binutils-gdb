@@ -1,3 +1,108 @@
+2018-01-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.server/unittest.exp: Match the output in non-development
+	mode.
+
+2018-01-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.gdb/unittest.exp: Match output in non-development mode.
+
+2018-01-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/access_tagged_param.exp: Relax expected output
+	for value of "ObjL" in "continue" to pck.inspect breakpoint
+	test.
+
+2018-01-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/arr_enum_idx_w_gap.exp: New file.
+	* gdb.ada/arr_enum_idx_w_gap/foo_q418_043.adb: New file.
+
+2018-01-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18653
+	* gdb.base/libsegfault.exp: New.
+
+2018-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/22670
+	* gdb.ada/access_tagged_param.exp: New file.
+	* gdb.ada/access_tagged_param/foo.adb: New file.
+
+2018-01-05  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
+	* gdb.ada/info_addr_mixed_case.exp: Remove kfail.  Extend test to
+	exercise lower case too, and to exercise both full matching and
+	wild matching.
+
+2018-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/rename_subscript_param: New testcase.
+
+2018-01-05  Jerome Guitton  <guitton@adacore.com>
+
+	* gdb.ada/arr_acc_idx_w_gap: New testcase.
+
+2018-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/convvar_comp: New testcase.
+
+2018-01-05  Xavier Roirand  <roirand@adacore.com>
+
+	* testsuite/gdb.ada/array_char_idx/pck.ads (Table): New type.
+	(My_Table): New global variable.
+	* testsuite/gdb.ada/array_char_idx.exp: Add test.
+
+2018-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/22670
+	* gdb.ada/maint_with_ada: New testcase.
+
+2018-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/22670
+	* gdb.ada/bp_c_mixed_case: New testcase.
+
+2018-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/22670
+	* gdb.ada/complete.exp: Add "complete break ada" test.
+
+2018-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/22670
+	* gdb.ada/info_addr_mixed_case: New testcase.
+
+2018-01-03  Xavier Roirand  <roirand@adacore.com>
+
+	* gdb.ada/excep_handle.exp: New testcase.
+	* gdb.ada/excep_handle/foo.adb: New file.
+	* gdb.ada/excep_handle/pck.ads: New file.
+
+2018-01-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/step-line.c: Add extra empty line in copyright header.
+	* gdb.base/step-line.inp: Likewise.
+
+2018-01-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/dyn_stride.exp: Add slice test.
+
+2018-01-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/dyn_stride: New testcase.
+
+2017-12-27  Stafford Horne  <shorne@gmail.com>
+
+	* gdb.xml/extra-regs.xml: Add example foo reggroup.
+	* gdb.xml/tdesc-regs.exp: Add test to check for foo reggroup.
+
+2017-12-27  Stafford Horne  <shorne@gmail.com>
+
+	* gdb.base/reggroups.c: New file.
+	* gdb.base/reggroups.exp: New file.
+
 2017-12-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.dwarf2/ada-valprint-error.c: New file.
@@ -827,7 +932,7 @@
 	instead of on dejagnu remote boards.
 
 2017-10-12  Pedro Alves  <palves@redhat.com>
-	    Simon Marchi <simon.marchi@polymtl.ca>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/inferior-died.exp: Remove is_remote and isnative
 	checks.  Use build_executable + clean_restart instead of
@@ -13088,6 +13193,6 @@ For older changes see ChangeLog-1993-2013.
 ;; version-control: never
 ;; End:
 
-    Copyright 2014-2017 Free Software Foundation, Inc.
+    Copyright 2014-2018 Free Software Foundation, Inc.
   Copying and distribution of this file, with or without modification,
   are permitted provided the copyright notice and this notice are preserved.

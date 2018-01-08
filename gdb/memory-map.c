@@ -1,6 +1,6 @@
 /* Routines for handling XML memory maps provided by target.
 
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -58,18 +58,19 @@ struct memory_map_parsing_data
 static void
 memory_map_start_memory (struct gdb_xml_parser *parser,
 			 const struct gdb_xml_element *element,
-			 void *user_data, VEC(gdb_xml_value_s) *attributes)
+			 void *user_data,
+			 std::vector<gdb_xml_value> &attributes)
 {
   struct memory_map_parsing_data *data
     = (struct memory_map_parsing_data *) user_data;
   ULONGEST *start_p, *length_p, *type_p;
 
   start_p
-    = (ULONGEST *) xml_find_attribute (attributes, "start")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "start")->value.get ();
   length_p
-    = (ULONGEST *) xml_find_attribute (attributes, "length")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "length")->value.get ();
   type_p
-    = (ULONGEST *) xml_find_attribute (attributes, "type")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "type")->value.get ();
 
   data->memory_map->emplace_back (*start_p, *start_p + *length_p,
 				  (enum mem_access_mode) *type_p);
@@ -97,13 +98,14 @@ memory_map_end_memory (struct gdb_xml_parser *parser,
 static void
 memory_map_start_property (struct gdb_xml_parser *parser,
 			   const struct gdb_xml_element *element,
-			   void *user_data, VEC(gdb_xml_value_s) *attributes)
+			   void *user_data,
+			   std::vector<gdb_xml_value> &attributes)
 {
   struct memory_map_parsing_data *data
     = (struct memory_map_parsing_data *) user_data;
   char *name;
 
-  name = (char *) xml_find_attribute (attributes, "name")->value;
+  name = (char *) xml_find_attribute (attributes, "name")->value.get ();
   data->property_name.assign (name);
 }
 

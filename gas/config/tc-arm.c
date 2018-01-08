@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright (C) 1994-2017 Free Software Foundation, Inc.
+   Copyright (C) 1994-2018 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 	Cirrus coprocessor mods by Aldy Hernandez (aldyh@redhat.com)
@@ -9243,7 +9243,7 @@ do_mrs (void)
   if (inst.operands[1].isreg)
     {
       br = inst.operands[1].reg;
-      if (((br & 0x200) == 0) && ((br & 0xf0000) != 0xf000))
+      if (((br & 0x200) == 0) && ((br & 0xf0000) != 0xf0000))
 	as_bad (_("bad register for mrs"));
     }
   else

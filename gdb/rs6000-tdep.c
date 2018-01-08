@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1226,7 +1226,6 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
 
   closing_insn = loc;
   loc += PPC_INSN_SIZE;
-  insn = read_memory_integer (loc, PPC_INSN_SIZE, byte_order);
 
   /* Insert a breakpoint right after the end of the atomic sequence.  */
   breaks[0] = loc;

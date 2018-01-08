@@ -1,6 +1,6 @@
 /* Print and select stack frames for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -616,8 +616,8 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	    {
 	      struct symbol *nsym;
 
-	      nsym = lookup_symbol (SYMBOL_LINKAGE_NAME (sym),
-				    b, VAR_DOMAIN, NULL).symbol;
+	      nsym = lookup_symbol_search_name (SYMBOL_SEARCH_NAME (sym),
+						b, VAR_DOMAIN).symbol;
 	      gdb_assert (nsym != NULL);
 	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER
 		  && !SYMBOL_IS_ARGUMENT (nsym))
@@ -2141,8 +2141,8 @@ iterate_over_block_arg_vars (const struct block *b,
 	     float).  There are also LOC_ARG/LOC_REGISTER pairs which
 	     are not combined in symbol-reading.  */
 
-	  sym2 = lookup_symbol (SYMBOL_LINKAGE_NAME (sym),
-				b, VAR_DOMAIN, NULL).symbol;
+	  sym2 = lookup_symbol_search_name (SYMBOL_SEARCH_NAME (sym),
+					    b, VAR_DOMAIN).symbol;
 	  (*cb) (SYMBOL_PRINT_NAME (sym), sym2, cb_data);
 	}
     }

@@ -1,6 +1,6 @@
 /* Branch trace support for GDB, the GNU debugger.
 
-   Copyright (C) 2013-2017 Free Software Foundation, Inc.
+   Copyright (C) 2013-2018 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -2002,10 +2002,11 @@ btrace_free_objfile (struct objfile *objfile)
 static void
 check_xml_btrace_version (struct gdb_xml_parser *parser,
 			  const struct gdb_xml_element *element,
-			  void *user_data, VEC (gdb_xml_value_s) *attributes)
+			  void *user_data,
+			  std::vector<gdb_xml_value> &attributes)
 {
   const char *version
-    = (const char *) xml_find_attribute (attributes, "version")->value;
+    = (const char *) xml_find_attribute (attributes, "version")->value.get ();
 
   if (strcmp (version, "1.0") != 0)
     gdb_xml_error (parser, _("Unsupported btrace version: \"%s\""), version);
@@ -2016,7 +2017,8 @@ check_xml_btrace_version (struct gdb_xml_parser *parser,
 static void
 parse_xml_btrace_block (struct gdb_xml_parser *parser,
 			const struct gdb_xml_element *element,
-			void *user_data, VEC (gdb_xml_value_s) *attributes)
+			void *user_data,
+			std::vector<gdb_xml_value> &attributes)
 {
   struct btrace_data *btrace;
   struct btrace_block *block;
@@ -2038,8 +2040,8 @@ parse_xml_btrace_block (struct gdb_xml_parser *parser,
       gdb_xml_error (parser, _("Btrace format error."));
     }
 
-  begin = (ULONGEST *) xml_find_attribute (attributes, "begin")->value;
-  end = (ULONGEST *) xml_find_attribute (attributes, "end")->value;
+  begin = (ULONGEST *) xml_find_attribute (attributes, "begin")->value.get ();
+  end = (ULONGEST *) xml_find_attribute (attributes, "end")->value.get ();
 
   block = VEC_safe_push (btrace_block_s, btrace->variant.bts.blocks, NULL);
   block->begin = *begin;
@@ -2092,16 +2094,20 @@ static void
 parse_xml_btrace_pt_config_cpu (struct gdb_xml_parser *parser,
 				const struct gdb_xml_element *element,
 				void *user_data,
-				VEC (gdb_xml_value_s) *attributes)
+				std::vector<gdb_xml_value> &attributes)
 {
   struct btrace_data *btrace;
   const char *vendor;
   ULONGEST *family, *model, *stepping;
 
-  vendor = (const char *) xml_find_attribute (attributes, "vendor")->value;
-  family = (ULONGEST *) xml_find_attribute (attributes, "family")->value;
-  model = (ULONGEST *) xml_find_attribute (attributes, "model")->value;
-  stepping = (ULONGEST *) xml_find_attribute (attributes, "stepping")->value;
+  vendor =
+    (const char *) xml_find_attribute (attributes, "vendor")->value.get ();
+  family
+    = (ULONGEST *) xml_find_attribute (attributes, "family")->value.get ();
+  model
+    = (ULONGEST *) xml_find_attribute (attributes, "model")->value.get ();
+  stepping
+    = (ULONGEST *) xml_find_attribute (attributes, "stepping")->value.get ();
 
   btrace = (struct btrace_data *) user_data;
 
@@ -2132,7 +2138,8 @@ parse_xml_btrace_pt_raw (struct gdb_xml_parser *parser,
 static void
 parse_xml_btrace_pt (struct gdb_xml_parser *parser,
 		     const struct gdb_xml_element *element,
-		     void *user_data, VEC (gdb_xml_value_s) *attributes)
+		     void *user_data,
+		     std::vector<gdb_xml_value> &attributes)
 {
   struct btrace_data *btrace;
 
@@ -2226,7 +2233,8 @@ parse_xml_btrace (struct btrace_data *btrace, const char *buffer)
 static void
 parse_xml_btrace_conf_bts (struct gdb_xml_parser *parser,
 			  const struct gdb_xml_element *element,
-			  void *user_data, VEC (gdb_xml_value_s) *attributes)
+			  void *user_data,
+			  std::vector<gdb_xml_value> &attributes)
 {
   struct btrace_config *conf;
   struct gdb_xml_value *size;
@@ -2237,7 +2245,7 @@ parse_xml_btrace_conf_bts (struct gdb_xml_parser *parser,
 
   size = xml_find_attribute (attributes, "size");
   if (size != NULL)
-    conf->bts.size = (unsigned int) *(ULONGEST *) size->value;
+    conf->bts.size = (unsigned int) *(ULONGEST *) size->value.get ();
 }
 
 /* Parse a btrace-conf "pt" xml record.  */
@@ -2245,7 +2253,8 @@ parse_xml_btrace_conf_bts (struct gdb_xml_parser *parser,
 static void
 parse_xml_btrace_conf_pt (struct gdb_xml_parser *parser,
 			  const struct gdb_xml_element *element,
-			  void *user_data, VEC (gdb_xml_value_s) *attributes)
+			  void *user_data,
+			  std::vector<gdb_xml_value> &attributes)
 {
   struct btrace_config *conf;
   struct gdb_xml_value *size;
@@ -2256,7 +2265,7 @@ parse_xml_btrace_conf_pt (struct gdb_xml_parser *parser,
 
   size = xml_find_attribute (attributes, "size");
   if (size != NULL)
-    conf->pt.size = (unsigned int) *(ULONGEST *) size->value;
+    conf->pt.size = (unsigned int) *(ULONGEST *) size->value.get ();
 }
 
 static const struct gdb_xml_attribute btrace_conf_pt_attributes[] = {

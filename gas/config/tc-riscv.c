@@ -1,5 +1,5 @@
 /* tc-riscv.c -- RISC-V assembler
-   Copyright (C) 2011-2017 Free Software Foundation, Inc.
+   Copyright (C) 2011-2018 Free Software Foundation, Inc.
 
    Contributed by Andrew Waterman (andrew@sifive.com).
    Based on MIPS target.
@@ -1384,6 +1384,9 @@ rvc_imm_done:
 		case 'o':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
+		      /* C.addiw, c.li, and c.andi allow zero immediate.
+			 C.addi allows zero immediate as hint.  Otherwise this
+			 is same as 'j'.  */
 		      || !VALID_RVC_IMM (imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
