@@ -1,3 +1,10 @@
+2018-01-08  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* gdb/gnu-nat.c: Include <elf.h> and <link.h>.
+	(gnu_xfer_auxv): New function.
+	(gnu_xfer_partial): Call gnu_xfer_auxv when `object' is
+	TARGET_OBJECT_AUXV.
+
 2018-01-08  Yao Qi  <yao.qi@linaro.org>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 

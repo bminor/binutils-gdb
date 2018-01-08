@@ -52,6 +52,8 @@ extern "C"
 #include <setjmp.h>
 #include <signal.h>
 #include <sys/ptrace.h>
+#include <elf.h>
+#include <link.h>
 
 #include "inferior.h"
 #include "symtab.h"
@@ -2541,6 +2543,60 @@ gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
     }
 }
 
+/* GNU does not have auxv, but we can at least fake the AT_ENTRY entry for PIE
+   binaries.  */
+static enum target_xfer_status
+gnu_xfer_auxv (gdb_byte *readbuf, const gdb_byte *writebuf,
+	       CORE_ADDR memaddr, ULONGEST len, ULONGEST *xfered_len)
+{
+  task_t task = (gnu_current_inf
+		 ? (gnu_current_inf->task
+		    ? gnu_current_inf->task->port : 0)
+		 : 0);
+  process_t proc;
+  int res;
+  kern_return_t err;
+  vm_address_t entry;
+  ElfW(auxv_t) auxv[2];
+
+  if (task == MACH_PORT_NULL)
+    return TARGET_XFER_E_IO;
+  if (writebuf != NULL)
+    return TARGET_XFER_E_IO;
+
+  if (memaddr == sizeof (auxv))
+    return TARGET_XFER_EOF;
+  if (memaddr > sizeof (auxv))
+    return TARGET_XFER_E_IO;
+
+  err = proc_task2proc (proc_server, task, &proc);
+  if (err != 0)
+    return TARGET_XFER_E_IO;
+
+  /* Get entry from proc server.  */
+  err = proc_get_entry (proc, &entry);
+  if (err != 0)
+    return TARGET_XFER_E_IO;
+
+  /* Fake auxv entry.  */
+  auxv[0].a_type = AT_ENTRY;
+  auxv[0].a_un.a_val = entry;
+  auxv[1].a_type = AT_NULL;
+  auxv[1].a_un.a_val = 0;
+
+  inf_debug (gnu_current_inf, "reading auxv %s[%s] --> %s",
+	     paddress (target_gdbarch (), memaddr), pulongest (len),
+	     host_address_to_string (readbuf));
+
+  if (memaddr + len > sizeof (auxv))
+    len = sizeof (auxv) - memaddr;
+
+  memcpy (readbuf, (gdb_byte *) &auxv + memaddr, len);
+  *xfered_len = len;
+
+  return TARGET_XFER_OK;
+}
+
 /* Target to_xfer_partial implementation.  */
 
 static enum target_xfer_status
@@ -2553,6 +2609,8 @@ gnu_xfer_partial (struct target_ops *ops, enum target_object object,
     {
     case TARGET_OBJECT_MEMORY:
       return gnu_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
+    case TARGET_OBJECT_AUXV:
+      return gnu_xfer_auxv (readbuf, writebuf, offset, len, xfered_len);
     default:
       return TARGET_XFER_E_IO;
     }
