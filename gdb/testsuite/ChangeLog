@@ -6,8 +6,8 @@
 
 2018-01-08  Joel Brobecker  <brobecker@adacore.com>
 
-	* gdb.ada/arr_enum_idx_w_gap.exp
-	* gdb.ada/arr_enum_idx_w_gap/foo_q418_043.adb
+	* gdb.ada/arr_enum_idx_w_gap.exp: New file.
+	* gdb.ada/arr_enum_idx_w_gap/foo_q418_043.adb: New file.
 
 2018-01-05  Pedro Alves  <palves@redhat.com>
 
