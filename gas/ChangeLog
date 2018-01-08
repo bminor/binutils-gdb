@@ -1,3 +1,12 @@
+2018-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/22681
+	* testsuite/gas/i386/i386.exp: Run x86-64-movd and
+	x86-64-movd-intel.
+	* testsuite/gas/i386/x86-64-movd-intel.d: New file.
+	* testsuite/gas/i386/x86-64-movd.d: Likewise.
+	* testsuite/gas/i386/x86-64-movd.s: Likewise.
+
 2018-01-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 22553
