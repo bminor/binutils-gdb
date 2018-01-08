@@ -3560,7 +3560,9 @@ captured_main (int argc, char *argv[])
   volatile int attach = 0;
   int was_running;
   bool selftest = false;
+#if GDB_SELF_TEST
   const char *selftest_filter = NULL;
+#endif
 
   while (*next_arg != NULL && **next_arg == '-')
     {
@@ -3684,7 +3686,9 @@ captured_main (int argc, char *argv[])
       else if (startswith (*next_arg, "--selftest="))
 	{
 	  selftest = true;
+#if GDB_SELF_TEST
 	  selftest_filter = *next_arg + strlen ("--selftest=");
+#endif
 	}
       else
 	{
@@ -3762,7 +3766,11 @@ captured_main (int argc, char *argv[])
 
   if (selftest)
     {
+#if GDB_SELF_TEST
       selftests::run_tests (selftest_filter);
+#else
+      printf (_("Selftests are not available in a non-development build.\n"));
+#endif
       throw_quit ("Quit");
     }
 

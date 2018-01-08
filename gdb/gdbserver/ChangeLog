@@ -1,3 +1,13 @@
+2018-01-08  Yao Qi  <yao.qi@linaro.org>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (OBS): Remove selftest.o.
+	* configure.ac: Set srv_selftest_objs if $development is true.
+	(GDBSERVER_DEPFILES): Append $srv_selftest_objs.
+	* configure: Re-generated.
+	* server.c (captured_main): Wrap variable selftest_filter with
+	GDB_SELF_TEST.
+
 2018-01-05  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/18653
