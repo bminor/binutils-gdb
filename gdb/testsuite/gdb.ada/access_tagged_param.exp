@@ -37,4 +37,4 @@ gdb_breakpoint "pck.inspect"
 # the value of all the parameters.
 
 gdb_test "continue" \
-         ".*Breakpoint $decimal, pck\\.inspect \\(obj=$hex, <objL>=2\\) at .*"
+         ".*Breakpoint $decimal, pck\\.inspect \\(obj=$hex, <objL>=\[1-9\]\\) at .*"

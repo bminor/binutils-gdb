@@ -1,5 +1,11 @@
 2018-01-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/access_tagged_param.exp: Relax expected output
+	for value of "ObjL" in "continue" to pck.inspect breakpoint
+	test.
+
+2018-01-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/arr_enum_idx_w_gap.exp
 	* gdb.ada/arr_enum_idx_w_gap/foo_q418_043.adb
 
