@@ -1,5 +1,10 @@
 2018-01-08  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.server/unittest.exp: Match the output in non-development
+	mode.
+
+2018-01-08  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.gdb/unittest.exp: Match output in non-development mode.
 
 2018-01-08  Joel Brobecker  <brobecker@adacore.com>

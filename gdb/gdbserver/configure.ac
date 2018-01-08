@@ -57,6 +57,7 @@ fi
 GDB_AC_LIBMCHECK(${libmcheck_default})
 
 if $development; then
+  srv_selftest_objs="selftest.o"
   AC_DEFINE(GDB_SELF_TEST, 1,
             [Define if self-testing features should be enabled])
 fi
@@ -410,7 +411,7 @@ if test "$srv_xmlfiles" != ""; then
   done
 fi
 
-GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles $srv_host_obs"
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles $srv_host_obs $srv_selftest_objs"
 GDBSERVER_LIBS="$srv_libs"
 
 dnl Check whether the target supports __sync_*_compare_and_swap.
