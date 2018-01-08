@@ -1,3 +1,9 @@
+2018-01-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 22553
+	* doc/c-i386.texi (i386-Directives): Document the .largecomm
+	directive.
+
 2018-01-04  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/gas/riscv/priv-reg.s: Add missing stval and mtval.
