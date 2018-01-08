@@ -2293,8 +2293,8 @@ AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
 if $development; then
   AC_DEFINE(GDB_SELF_TEST, 1,
             [Define if self-testing features should be enabled])
-  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_UNITTESTS_OBS)"
-  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_UNITTESTS_SRCS)"
+  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_UNITTESTS_OBS) selftest.o selftest-arch.o"
+  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_UNITTESTS_SRCS) common/selftest.c selftest-arch.c"
 fi
 
 GDB_AC_TRANSFORM([gdb], [GDB_TRANSFORM_NAME])

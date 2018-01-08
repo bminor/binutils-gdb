@@ -17599,8 +17599,8 @@ if $development; then
 
 $as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
 
-  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_UNITTESTS_OBS)"
-  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_UNITTESTS_SRCS)"
+  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_UNITTESTS_OBS) selftest.o selftest-arch.o"
+  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_UNITTESTS_SRCS) common/selftest.c selftest-arch.c"
 fi
 
 

@@ -1,3 +1,16 @@
+2018-01-08  Yao Qi  <yao.qi@linaro.org>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (COMMON_SFILES): Remove selftest-arch.c and
+	common/selftest.c.
+	(COMMON_OBS): Remove selftest.o.
+	* configure.ac: Append selftest-arch.c and common/selftest.c to
+	CONFIG_SRCS.  Append selftest-arch.o and selftest.o to COMMON_OBS.
+	* configure: Re-generated.
+	* maint.c (maintenance_selftest): Wrap selftests::run_tests with
+	GDB_SELF_TEST.
+	(maintenance_info_selftests): Likewise.
+
 2018-01-05  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/18653
