@@ -1,3 +1,8 @@
+2017-09-27  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	PR 22662
+	* elf32-nds32.c (nds32_elf_relax_loadstore): Fix a typographical error.
+
 2018-01-03  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf.c (elfcore_grok_freebsd_note): Handle

@@ -10606,7 +10606,7 @@ nds32_elf_relax_loadstore (struct bfd_link_info *link_info, bfd *abfd,
 	break;
 
       if (range_type == NDS32_LOADSTORE_FLOAT_S
-	  || range_type == NDS32_LOADSTORE_FLOAT_S)
+	  || range_type == NDS32_LOADSTORE_FLOAT_D)
 	{
 	  range_l = sdata_range[0][0];
 	  range_h = sdata_range[0][1];
