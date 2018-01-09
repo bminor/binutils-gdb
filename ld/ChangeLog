@@ -1,3 +1,11 @@
+2018-01-08  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/ld-riscv-elf/c-lui.d: Don't use -shared.  Check for _start
+	instead of .text.
+	* testsuite/ld-riscv-elf/c-lui.s: Add _start label.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Before __global_pointer$
+	tests, add call to check_shared_lib_support.
+
 2018-01-05  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/ld-riscv-elf/disas-jalr.d: New.
