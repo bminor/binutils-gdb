@@ -10,3 +10,4 @@
 [^:]*:19: Error: instruction is always unconditional -- `bkpteq 0'
 [^:]*:20: Error: instruction not allowed in IT block -- `setendeq le'
 [^:]*:22: Error: IT falling in the range of a previous IT block -- `iteq eq'
+[^:]*:25: Error: instruction not allowed in IT block -- `csdbeq'

@@ -1,5 +1,15 @@
 2018-01-09  James Greenhalgh  <james.greenhalgh@arm.com>
 
+	* config/tc-arm.c (insns): Add csdb, enable for Armv3 and above
+	in Arm execution state, and Armv6T2 and above in Thumb execution
+	state.
+	* testsuite/gas/arm/csdb.s: New.
+	* testsuite/gas/arm/csdb.d: New.
+	* testsuite/gas/arm/thumb2_it_bad.l: Add csdb.
+	* testsuite/gas/arm/thumb2_it_bad.s: Add csdb.
+
+2018-01-09  James Greenhalgh  <james.greenhalgh@arm.com>
+
 	* testsuite/gas/aarch64/system.d: Update expected results to expect
 	CSDB for hint 0x14.
 

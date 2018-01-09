@@ -1,5 +1,10 @@
 2018-01-09  James Greenhalgh  <james.greenhalgh@arm.com>
 
+	* arm-dis.c (arm_opcodes): Add csdb.
+	(thumb32_opcodes): Add csdb.
+
+2018-01-09  James Greenhalgh  <james.greenhalgh@arm.com>
+
 	* aarch64-tbl.h (aarch64_opcode_table): Add "csdb".
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
