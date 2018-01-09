@@ -1,5 +1,9 @@
 2018-01-09  John Baldwin  <jhb@FreeBSD.org>
 
+	* NEWS: Document that 'info proc' now works on FreeBSD.
+
+2018-01-09  John Baldwin  <jhb@FreeBSD.org>
+
 	* configure.ac: Check for kinfo_getfile in libutil.
 	* configure: Regenerate.
 	* config.in: Regenerate.
