@@ -1,3 +1,11 @@
+2018-01-09  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/ld-elf/eh-frame-hdr.d (#xfail): Delete
+	(#alltargets): Renamed from #target.  Add shared.
+	* testsuite/lib/ld-lib.exp (run_dump_test): Document shared target.
+	Document alltargets option.  Add support for alltargets option.
+	(istarget): Add support for shared target.
+
 2018-01-08  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/ld-riscv-elf/c-lui.d: Don't use -shared.  Check for _start
