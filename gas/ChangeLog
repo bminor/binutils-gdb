@@ -1,3 +1,8 @@
+2018-01-09  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* testsuite/gas/aarch64/system.d: Update expected results to expect
+	CSDB for hint 0x14.
+
 2018-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/22681
