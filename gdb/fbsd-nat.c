@@ -63,7 +63,10 @@ fbsd_pid_to_exec_file (struct target_ops *self, int pid)
   mib[3] = pid;
   buflen = sizeof buf;
   if (sysctl (mib, 4, buf, &buflen, NULL, 0) == 0)
-    return buf;
+    /* The kern.proc.pathname.<pid> sysctl returns a length of zero
+       for processes without an associated executable such as kernel
+       processes.  */
+    return buflen == 0 ? NULL : buf;
 #endif
 
   xsnprintf (name, PATH_MAX, "/proc/%d/exe", pid);

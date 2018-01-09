@@ -1,5 +1,10 @@
 2018-01-09  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (fbsd_pid_to_exec_file) [KERN_PROC_PATHNAME]: Return
+	NULL for an empty pathname.
+
+2018-01-09  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-tdep.c (KVE_STRUCTSIZE, KVE_START, KVE_END, KVE_OFFSET)
 	(KVE_FLAGS, KVE_PROTECTION, KVE_PATH, KINFO_VME_PROT_READ)
 	(KINFO_VME_PROT_WRITE, KINFO_VME_PROT_EXEC, KINFO_VME_FLAG_COW)
