@@ -1,5 +1,10 @@
 2018-01-09  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (struct free_deleter): Remove.
+	(fbsd_find_memory_regions): Use gdb::unique_xmalloc_ptr<>.
+
+2018-01-09  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c (fbsd_pid_to_exec_file) [KERN_PROC_PATHNAME]: Return
 	NULL for an empty pathname.
 

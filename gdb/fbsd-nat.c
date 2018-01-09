@@ -81,14 +81,6 @@ fbsd_pid_to_exec_file (struct target_ops *self, int pid)
 }
 
 #ifdef HAVE_KINFO_GETVMMAP
-/* Deleter for std::unique_ptr that invokes free.  */
-
-template <typename T>
-struct free_deleter
-{
-  void operator() (T *ptr) const { free (ptr); }
-};
-
 /* Iterate over all the memory regions in the current inferior,
    calling FUNC for each memory region.  OBFD is passed as the last
    argument to FUNC.  */
@@ -102,7 +94,7 @@ fbsd_find_memory_regions (struct target_ops *self,
   uint64_t size;
   int i, nitems;
 
-  std::unique_ptr<struct kinfo_vmentry, free_deleter<struct kinfo_vmentry>>
+  gdb::unique_xmalloc_ptr<struct kinfo_vmentry>
     vmentl (kinfo_getvmmap (pid, &nitems));
   if (vmentl == NULL)
     perror_with_name (_("Couldn't fetch VM map entries."));
