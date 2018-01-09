@@ -1,3 +1,7 @@
+2018-02-20  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/buffer-size.exp: Do not force BTS.
+
 2018-02-14  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/bp-cmds-continue-ctrl-c.exp (do_test): Test "bt" after
