@@ -1,6 +1,14 @@
 2018-01-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/22670
+	* ada-lang.c (ada_collect_symbol_completion_matches): If the
+	minsym's language is language_auto or language_cplus, pass down
+	language_ada instead.
+	* symtab.c (compare_symbol_name): Don't frob symbol language here.
+
+2018-01-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
 	* minsyms.c (linkage_name_str): New function.
 	(iterate_over_minimal_symbols): Use it.
 

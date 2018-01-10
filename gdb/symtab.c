@@ -4704,21 +4704,7 @@ compare_symbol_name (const char *symbol_name, language symbol_language,
 		     const lookup_name_info &lookup_name,
 		     completion_match_result &match_res)
 {
-  const language_defn *lang;
-
-  /* If we're completing for an expression and the symbol doesn't have
-     an explicit language set, fallback to the current language.  Ada
-     minimal symbols won't have their language set to Ada, for
-     example, and if we compared using the default/C-like matcher,
-     then when completing e.g., symbols in a package named "pck", we'd
-     match internal Ada symbols like "pckS", which are invalid in an
-     Ada expression, unless you wrap them in '<' '>' to request a
-     verbatim match.  */
-  if (symbol_language == language_auto
-      && lookup_name.match_type () == symbol_name_match_type::EXPRESSION)
-    lang = current_language;
-  else
-    lang = language_def (symbol_language);
+  const language_defn *lang = language_def (symbol_language);
 
   symbol_name_matcher_ftype *name_match
     = language_get_symbol_name_matcher (lang, lookup_name);
