@@ -359,8 +359,8 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 		       % MINIMAL_SYMBOL_HASH_SIZE);
 
 		  symbol_name_matcher_ftype *match
-		    = language_get_symbol_name_matcher (language_def (lang),
-							lookup_name);
+		    = get_symbol_name_matcher (language_def (lang),
+					       lookup_name);
 		  struct minimal_symbol **msymbol_demangled_hash
 		    = objfile->per_bfd->msymbol_demangled_hash;
 
@@ -501,7 +501,7 @@ iterate_over_minimal_symbols (struct objfile *objf,
     {
       const language_defn *lang_def = language_def (lang);
       symbol_name_matcher_ftype *name_match
-	= language_get_symbol_name_matcher (lang_def, lookup_name);
+	= get_symbol_name_matcher (lang_def, lookup_name);
 
       unsigned int hash
 	= lookup_name.search_name_hash (lang) % MINIMAL_SYMBOL_HASH_SIZE;

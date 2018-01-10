@@ -4530,7 +4530,7 @@ gdb_index_symbol_name_matcher::gdb_index_symbol_name_matcher
     {
       const language_defn *lang = language_def ((enum language) i);
       symbol_name_matcher_ftype *name_matcher
-	= language_get_symbol_name_matcher (lang, m_lookup_name);
+	= get_symbol_name_matcher (lang, m_lookup_name);
 
       /* Don't insert the same comparison routine more than once.
 	 Note that we do this linear walk instead of a seemingly
