@@ -1,3 +1,10 @@
+2018-01-10  Nick Clifton  <nickc@redhat.com>
+
+	* config-ml.in: Sync with gcc sources.
+	* config.guess: Likewise.
+	* config.sub: Likewise.
+	* configure.ac: Likewise.
+
 2017-12-14  Nick Clifton  <nickc@redhat.com>
 
 	* COPYING.LIBGLOSS: Update address of FSF in copyright notice.

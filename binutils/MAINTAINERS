@@ -22,10 +22,13 @@ top level config.guess and config.sub scripts should be sent to:
   config-patches@gnu.org
 
 and not to the binutils lists.  Patches to the other top level
-configure files (configure, configure.in, config-ml.in) should
+configure files (configure, configure.ac, config-ml.in) should
 be sent to the binutils lists, and copied to the gcc and gdb
 lists as well (gcc-patches@gcc.gnu.org and
 gdb-patches@sourceware.org).
+
+Patches to the libiberty sources should be sent to
+gcc-patches@gcc.gnu.org.
 
 		--------- Blanket Write Privs ---------
 
