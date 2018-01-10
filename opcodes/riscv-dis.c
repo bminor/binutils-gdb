@@ -101,7 +101,7 @@ maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset)
 {
   if (pd->hi_addr[base_reg] != (bfd_vma)-1)
     {
-      pd->print_addr = pd->hi_addr[base_reg] + offset;
+      pd->print_addr = (base_reg != 0 ? pd->hi_addr[base_reg] : 0) + offset;
       pd->hi_addr[base_reg] = -1;
     }
   else if (base_reg == X_GP && pd->gp != (bfd_vma)-1)

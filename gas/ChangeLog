@@ -1,3 +1,8 @@
+2018-01-09  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/gas/riscv/auipc-x0.d: New.
+	* testsuite/gas/riscv/auipc-x0.s: New.
+
 2018-01-09  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* config/tc-arm.c (insns): Add csdb, enable for Armv3 and above

@@ -1,3 +1,8 @@
+2018-01-09  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-dis.c (maybe_print_address): If base_reg is zero,
+	then the hi_addr value is zero.
+
 2018-01-09  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* arm-dis.c (arm_opcodes): Add csdb.
