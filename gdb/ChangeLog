@@ -1,6 +1,18 @@
 2018-01-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/22670
+	* dwarf2read.c
+	(gdb_index_symbol_name_matcher::gdb_index_symbol_name_matcher):
+	Adjust to use language_get_symbol_name_matcher instead of
+	language_defn::la_get_symbol_name_matcher.
+	* language.c (language_get_symbol_name_matcher): If in Ada mode
+	and the lookup name is a verbatim match, return Ada's matcher.
+	* language.h (language_get_symbol_name_matcher): Adjust comment.
+	(ada_lookup_name_info::verbatim_p):: New method.
+
+2018-01-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
 	* ada-lang.c (ada_collect_symbol_completion_matches): If the
 	minsym's language is language_auto or language_cplus, pass down
 	language_ada instead.

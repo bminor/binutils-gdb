@@ -110,7 +110,11 @@ class ada_lookup_name_info final
   bool standard_p () const
   { return m_standard_p; }
 
- private:
+  /* Return true if doing a verbatim match.  */
+  bool verbatim_p () const
+  { return m_verbatim_p; }
+
+private:
   /* The Ada-encoded lookup name.  */
   std::string m_encoded_name;
 

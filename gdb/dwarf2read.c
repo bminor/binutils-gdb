@@ -4571,23 +4571,21 @@ gdb_index_symbol_name_matcher::gdb_index_symbol_name_matcher
   for (int i = 0; i < nr_languages; i++)
     {
       const language_defn *lang = language_def ((enum language) i);
-      if (lang->la_get_symbol_name_matcher != NULL)
-	{
-	  symbol_name_matcher_ftype *name_matcher
-	    = lang->la_get_symbol_name_matcher (m_lookup_name);
+      symbol_name_matcher_ftype *name_matcher
+	= language_get_symbol_name_matcher (lang, m_lookup_name);
 
-	  /* Don't insert the same comparison routine more than once.
-	     Note that we do this linear walk instead of a cheaper
-	     sorted insert, or use a std::set or something like that,
-	     because relative order of function addresses is not
-	     stable.  This is not a problem in practice because the
-	     number of supported languages is low, and the cost here
-	     is tiny compared to the number of searches we'll do
-	     afterwards using this object.  */
-	  if (std::find (matchers.begin (), matchers.end (), name_matcher)
-	      == matchers.end ())
-	    matchers.push_back (name_matcher);
-	}
+      /* Don't insert the same comparison routine more than once.
+	 Note that we do this linear walk instead of a seemingly
+	 cheaper sorted insert, or use a std::set or something like
+	 that, because relative order of function addresses is not
+	 stable.  This is not a problem in practice because the number
+	 of supported languages is low, and the cost here is tiny
+	 compared to the number of searches we'll do afterwards using
+	 this object.  */
+      if (name_matcher != default_symbol_name_matcher
+	  && (std::find (matchers.begin (), matchers.end (), name_matcher)
+	      == matchers.end ()))
+	matchers.push_back (name_matcher);
     }
 }
 
