@@ -1,5 +1,18 @@
 2018-02-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (struct variant_field): New.
+	(struct nextfield) <variant>: New field.
+	(dwarf2_add_field): Handle DW_TAG_variant_part.
+	(dwarf2_attach_fields_to_type): Attach a discriminant_info to a
+	discriminated union.
+	(read_structure_type): Handle DW_TAG_variant_part.
+	(handle_struct_member_die): New function, extracted from
+	process_structure_scope.  Handle DW_TAG_variant.
+	(process_structure_scope): Handle discriminated unions.  Call
+	handle_struct_member_die.
+
+2018-02-26  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.h (rust_last_path_segment): Declare.
 	* rust-lang.c (rust_last_path_segment): Now public.  Change
 	contract.

@@ -1,5 +1,10 @@
 2018-02-26  Tom Tromey  <tom@tromey.com>
 
+	* gdb.dwarf2/variant.c: New file.
+	* gdb.dwarf2/variant.exp: New file.
+
+2018-02-26  Tom Tromey  <tom@tromey.com>
+
 	* gdb.rust/simple.exp: Accept more possible results in enum test.
 
 2018-02-25  Simon Marchi  <simon.marchi@polymtl.ca>

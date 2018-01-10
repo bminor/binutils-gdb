@@ -1705,11 +1705,30 @@ struct dwarf_block
    and friends.  */
 static int bits_per_byte = 8;
 
+/* When reading a variant or variant part, we track a bit more
+   information about the field, and store it in an object of this
+   type.  */
+
+struct variant_field
+{
+  /* If we see a DW_TAG_variant, then this will be the discriminant
+     value.  */
+  ULONGEST discriminant_value;
+  /* If we see a DW_TAG_variant, then this will be set if this is the
+     default branch.  */
+  bool default_branch;
+  /* While reading a DW_TAG_variant_part, this will be set if this
+     field is the discriminant.  */
+  bool is_discriminant;
+};
+
 struct nextfield
 {
   struct nextfield *next;
   int accessibility;
   int virtuality;
+  /* Extra information to describe a variant or variant part.  */
+  struct variant_field variant;
   struct field field;
 };
 
@@ -15644,6 +15663,20 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       FIELD_NAME (*fp) = type_name_no_tag (fp->type);
       fip->nbaseclasses++;
     }
+  else if (die->tag == DW_TAG_variant_part)
+    {
+      /* process_structure_scope will treat this DIE as a union.  */
+      process_structure_scope (die, cu);
+
+      /* The variant part is relative to the start of the enclosing
+	 structure.  */
+      SET_FIELD_BITPOS (*fp, 0);
+      fp->type = get_die_type (die, cu);
+      fp->artificial = 1;
+      fp->name = "<<variant>>";
+    }
+  else
+    gdb_assert_not_reached ("missing case in dwarf2_add_field");
 }
 
 /* Can the type given by DIE define another type?  */
@@ -15767,6 +15800,27 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
       TYPE_FIELD_VIRTUAL_BITS (type) = pointer;
       B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), fip->nbaseclasses);
       TYPE_N_BASECLASSES (type) = fip->nbaseclasses;
+    }
+
+  if (TYPE_FLAG_DISCRIMINATED_UNION (type))
+    {
+      struct discriminant_info *di = alloc_discriminant_info (type, -1, -1);
+
+      int index = nfields - 1;
+      struct nextfield *field = fip->fields;
+
+      while (index >= 0)
+	{
+	  if (field->variant.is_discriminant)
+	    di->discriminant_index = index;
+	  else if (field->variant.default_branch)
+	    di->default_index = index;
+	  else
+	    di->discriminants[index] = field->variant.discriminant_value;
+
+	  --index;
+	  field = field->next;
+	}
     }
 
   /* Copy the saved-up fields into the field vector.  Start from the head of
@@ -16230,6 +16284,11 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       TYPE_CODE (type) = TYPE_CODE_UNION;
     }
+  else if (die->tag == DW_TAG_variant_part)
+    {
+      TYPE_CODE (type) = TYPE_CODE_UNION;
+      TYPE_FLAG_DISCRIMINATED_UNION (type) = 1;
+    }
   else
     {
       TYPE_CODE (type) = TYPE_CODE_STRUCT;
@@ -16289,6 +16348,92 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   return type;
 }
 
+/* A helper for process_structure_scope that handles a single member
+   DIE.  */
+
+static void
+handle_struct_member_die (struct die_info *child_die, struct type *type,
+			  struct field_info *fi,
+			  std::vector<struct symbol *> *template_args,
+			  struct dwarf2_cu *cu)
+{
+  if (child_die->tag == DW_TAG_member
+      || child_die->tag == DW_TAG_variable
+      || child_die->tag == DW_TAG_variant_part)
+    {
+      /* NOTE: carlton/2002-11-05: A C++ static data member
+	 should be a DW_TAG_member that is a declaration, but
+	 all versions of G++ as of this writing (so through at
+	 least 3.2.1) incorrectly generate DW_TAG_variable
+	 tags for them instead.  */
+      dwarf2_add_field (fi, child_die, cu);
+    }
+  else if (child_die->tag == DW_TAG_subprogram)
+    {
+      /* Rust doesn't have member functions in the C++ sense.
+	 However, it does emit ordinary functions as children
+	 of a struct DIE.  */
+      if (cu->language == language_rust)
+	read_func_scope (child_die, cu);
+      else
+	{
+	  /* C++ member function.  */
+	  dwarf2_add_member_fn (fi, child_die, type, cu);
+	}
+    }
+  else if (child_die->tag == DW_TAG_inheritance)
+    {
+      /* C++ base class field.  */
+      dwarf2_add_field (fi, child_die, cu);
+    }
+  else if (type_can_define_types (child_die))
+    dwarf2_add_type_defn (fi, child_die, cu);
+  else if (child_die->tag == DW_TAG_template_type_param
+	   || child_die->tag == DW_TAG_template_value_param)
+    {
+      struct symbol *arg = new_symbol (child_die, NULL, cu);
+
+      if (arg != NULL)
+	template_args->push_back (arg);
+    }
+  else if (child_die->tag == DW_TAG_variant)
+    {
+      /* In a variant we want to get the discriminant and also add a
+	 field for our sole member child.  */
+      struct attribute *discr = dwarf2_attr (child_die, DW_AT_discr_value, cu);
+
+      for (struct die_info *variant_child = child_die->child;
+	   variant_child != NULL;
+	   variant_child = sibling_die (variant_child))
+	{
+	  if (variant_child->tag == DW_TAG_member)
+	    {
+	      handle_struct_member_die (variant_child, type, fi,
+					template_args, cu);
+	      /* Only handle the one.  */
+	      break;
+	    }
+	}
+
+      /* We don't handle this but we might as well report it if we see
+	 it.  */
+      if (dwarf2_attr (child_die, DW_AT_discr_list, cu) != nullptr)
+	  complaint (&symfile_complaints,
+		     _("DW_AT_discr_list is not supported yet"
+		       " - DIE at %s [in module %s]"),
+		     sect_offset_str (child_die->sect_off),
+		     objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+
+      /* The first field was just added, so we can stash the
+	 discriminant there.  */
+      gdb_assert (fi->fields != NULL);
+      if (discr == NULL)
+	fi->fields->variant.default_branch = true;
+      else
+	fi->fields->variant.discriminant_value = DW_UNSND (discr);
+    }
+}
+
 /* Finish creating a structure or union type, including filling in
    its members and creating a symbol for it.  */
 
@@ -16303,6 +16448,39 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (type == NULL)
     type = read_structure_type (die, cu);
 
+  /* When reading a DW_TAG_variant_part, we need to notice when we
+     read the discriminant member, so we can record it later in the
+     discriminant_info.  */
+  bool is_variant_part = TYPE_FLAG_DISCRIMINATED_UNION (type);
+  sect_offset discr_offset;
+
+  if (is_variant_part)
+    {
+      struct attribute *discr = dwarf2_attr (die, DW_AT_discr, cu);
+      if (discr == NULL)
+	{
+	  /* Maybe it's a univariant form, an extension we support.
+	     In this case arrange not to check the offset.  */
+	  is_variant_part = false;
+	}
+      else if (attr_form_is_ref (discr))
+	{
+	  struct dwarf2_cu *target_cu = cu;
+	  struct die_info *target_die = follow_die_ref (die, discr, &target_cu);
+
+	  discr_offset = target_die->sect_off;
+	}
+      else
+	{
+	  complaint (&symfile_complaints,
+		     _("DW_AT_discr does not have DIE reference form"
+		       " - DIE at %s [in module %s]"),
+		     sect_offset_str (die->sect_off),
+		     objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+	  is_variant_part = false;
+	}
+    }
+
   if (die->child != NULL && ! die_is_declaration (die, cu))
     {
       struct field_info fi;
@@ -16315,44 +16493,10 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       while (child_die && child_die->tag)
 	{
-	  if (child_die->tag == DW_TAG_member
-	      || child_die->tag == DW_TAG_variable)
-	    {
-	      /* NOTE: carlton/2002-11-05: A C++ static data member
-		 should be a DW_TAG_member that is a declaration, but
-		 all versions of G++ as of this writing (so through at
-		 least 3.2.1) incorrectly generate DW_TAG_variable
-		 tags for them instead.  */
-	      dwarf2_add_field (&fi, child_die, cu);
-	    }
-	  else if (child_die->tag == DW_TAG_subprogram)
-	    {
-	      /* Rust doesn't have member functions in the C++ sense.
-		 However, it does emit ordinary functions as children
-		 of a struct DIE.  */
-	      if (cu->language == language_rust)
-		read_func_scope (child_die, cu);
-	      else
-		{
-		  /* C++ member function.  */
-		  dwarf2_add_member_fn (&fi, child_die, type, cu);
-		}
-	    }
-	  else if (child_die->tag == DW_TAG_inheritance)
-	    {
-	      /* C++ base class field.  */
-	      dwarf2_add_field (&fi, child_die, cu);
-	    }
-	  else if (type_can_define_types (child_die))
-	    dwarf2_add_type_defn (&fi, child_die, cu);
-	  else if (child_die->tag == DW_TAG_template_type_param
-		   || child_die->tag == DW_TAG_template_value_param)
-	    {
-	      struct symbol *arg = new_symbol (child_die, NULL, cu);
+	  handle_struct_member_die (child_die, type, &fi, &template_args, cu);
 
-	      if (arg != NULL)
-		template_args.push_back (arg);
-	    }
+	  if (is_variant_part && discr_offset == child_die->sect_off)
+	    fi.fields->variant.is_discriminant = true;
 
 	  child_die = sibling_die (child_die);
 	}
