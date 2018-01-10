@@ -633,7 +633,10 @@ extern bool default_symbol_name_matcher
    completion_match_result *comp_match_res);
 
 /* Get LANG's symbol_name_matcher method for LOOKUP_NAME.  Returns
-   default_symbol_name_matcher if not set.  */
+   default_symbol_name_matcher if not set.  LANG is used as a hint;
+   the function may ignore it depending on the current language and
+   LOOKUP_NAME.  Specifically, if the current language is Ada, this
+   may return an Ada matcher regardless of LANG.  */
 symbol_name_matcher_ftype *language_get_symbol_name_matcher
   (const language_defn *lang, const lookup_name_info &lookup_name);
 

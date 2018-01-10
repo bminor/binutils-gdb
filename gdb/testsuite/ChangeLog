@@ -1,6 +1,14 @@
 2018-01-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/22670
+	* gdb.ada/bp_c_mixed_case.exp: Add intro comment.  Test printing C
+	functions too.  Test setting breakpoints and printing C functions
+	with no debug info too.
+	* gdb.ada/bp_c_mixed_case/qux.c: New file.
+
+2018-01-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
 	* gdb.ada/complete.exp ("complete break ada"): Replace kfail with
 	a fail.
 

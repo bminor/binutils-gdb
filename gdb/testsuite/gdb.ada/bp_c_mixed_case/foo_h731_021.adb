@@ -15,7 +15,10 @@
 
 procedure Foo_H731_021 is
    Procedure C_Func;
+   Procedure C_FuncNoDebug;
    pragma Import (C, C_Func, "MixedCaseFunc");
+   pragma Import (C, C_FuncNoDebug, "NoDebugMixedCaseFunc");
 begin
    C_Func;
+   C_FuncNoDebug;
 end Foo_H731_021;
