@@ -1,5 +1,5 @@
 /* simple-object.c -- simple routines to read and write object files.
-   Copyright (C) 2010-2017 Free Software Foundation, Inc.
+   Copyright (C) 2010-2018 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Google.
 
 This program is free software; you can redistribute it and/or modify it
@@ -273,6 +273,9 @@ handle_lto_debug_sections (const char **name)
       *name = *name + sizeof (".gnu.lto_") - 1;
       return 1;
     }
+  /* Copy over .note.GNU-stack section under the same name if present.  */
+  else if (strcmp (*name, ".note.GNU-stack") == 0)
+    return 1;
   return 0;
 }
 
