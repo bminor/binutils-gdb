@@ -955,8 +955,7 @@ symbol_matches_search_name (const struct general_symbol_info *gsymbol,
 			    const lookup_name_info &name)
 {
   symbol_name_matcher_ftype *name_match
-    = language_get_symbol_name_matcher (language_def (gsymbol->language),
-					name);
+    = get_symbol_name_matcher (language_def (gsymbol->language), name);
   return name_match (symbol_search_name (gsymbol), name, NULL);
 }
 
@@ -4707,7 +4706,7 @@ compare_symbol_name (const char *symbol_name, language symbol_language,
   const language_defn *lang = language_def (symbol_language);
 
   symbol_name_matcher_ftype *name_match
-    = language_get_symbol_name_matcher (lang, lookup_name);
+    = get_symbol_name_matcher (lang, lookup_name);
 
   return name_match (symbol_name, lookup_name, &match_res);
 }

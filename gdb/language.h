@@ -637,7 +637,7 @@ extern bool default_symbol_name_matcher
    the function may ignore it depending on the current language and
    LOOKUP_NAME.  Specifically, if the current language is Ada, this
    may return an Ada matcher regardless of LANG.  */
-symbol_name_matcher_ftype *language_get_symbol_name_matcher
+symbol_name_matcher_ftype *get_symbol_name_matcher
   (const language_defn *lang, const lookup_name_info &lookup_name);
 
 /* The languages supported by GDB.  */

@@ -727,8 +727,8 @@ default_symbol_name_matcher (const char *symbol_search_name,
 /* See language.h.  */
 
 symbol_name_matcher_ftype *
-language_get_symbol_name_matcher (const language_defn *lang,
-				  const lookup_name_info &lookup_name)
+get_symbol_name_matcher (const language_defn *lang,
+			 const lookup_name_info &lookup_name)
 {
   /* If currently in Ada mode, and the lookup name is wrapped in
      '<...>', hijack all symbol name comparisons using the Ada

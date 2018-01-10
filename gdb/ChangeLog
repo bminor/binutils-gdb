@@ -1,5 +1,13 @@
 2018-01-10  Pedro Alves  <palves@redhat.com>
 
+	* language.h (language_get_symbol_name_matcher): Rename ...
+	(get_symbol_name_matcher): ... this.
+	* language.c (language_get_symbol_name_matcher): Ditto.
+	* dictionary.c, linespec.c, minsyms.c, psymtab.c, symtab.c: All
+	callers adjusted.
+
+2018-01-10  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/22670
 	* dwarf2read.c
 	(gdb_index_symbol_name_matcher::gdb_index_symbol_name_matcher):
