@@ -1,3 +1,8 @@
+2018-01-11  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-opc.tbl: Remove VL variants for 4FMAPS and 4VNNIW insns.
+	* i386-tbl.h: Regenerate.
+
 2018-01-10  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (v4fmaddss, v4fnmaddss): Adjust Disp8MemShift.

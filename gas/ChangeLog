@@ -1,3 +1,23 @@
+2018-01-11  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* testsuite/i386/avx512_4fmaps_vl-warn.l: Likewise.
+	* testsuite/i386/avx512_4fmaps_vl-warn.s: Likewise.
+	* testsuite/i386/avx512_4fmaps_vl.d: Likewise.
+	* testsuite/i386/avx512_4fmaps_vl.s: Likewise.
+	* testsuite/i386/avx512_4vnniw_vl-intel.d: Likewise.
+	* testsuite/i386/avx512_4vnniw_vl.d: Likewise.
+	* testsuite/i386/avx512_4vnniw_vl.s: Likewise.
+	* testsuite/i386/i386.exp: Removed _vl tests for 4fmaps an 4vnniw
+	tests.
+	* testsuite/i386/x86-64-avx512_4fmaps_vl-intel.d: Removed.
+	* testsuite/i386/x86-64-avx512_4fmaps_vl-warn.l: Likewise.
+	* testsuite/i386/x86-64-avx512_4fmaps_vl-warn.s: Likewise.
+	* testsuite/i386/x86-64-avx512_4fmaps_vl.d: Likewise.
+	* testsuite/i386/x86-64-avx512_4fmaps_vl.s: Likewise.
+	* testsuite/i386/x86-64-avx512_4vnniw_vl-intel.d: Likewise.
+	* testsuite/i386/x86-64-avx512_4vnniw_vl.d: Likewise.
+	* testsuite/i386/x86-64-avx512_4vnniw_vl.s: Likewise.
+
 2018-01-11  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-arm.c (aeabi_set_public_attributes): Avoid false
