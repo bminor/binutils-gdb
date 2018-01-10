@@ -447,6 +447,25 @@ find_minimal_symbol_address (const char *name, CORE_ADDR *addr,
   return sym.minsym == NULL;
 }
 
+/* Get the lookup name form best suitable for linkage name
+   matching.  */
+
+static const char *
+linkage_name_str (const lookup_name_info &lookup_name)
+{
+  /* Unlike most languages (including C++), Ada uses the
+     encoded/linkage name as the search name recorded in symbols.  So
+     if debugging in Ada mode, prefer the Ada-encoded name.  This also
+     makes Ada's verbatim match syntax ("<...>") work, because
+     "lookup_name.name()" includes the "<>"s, while
+     "lookup_name.ada().lookup_name()" is the encoded name with "<>"s
+     stripped.  */
+  if (current_language->la_language == language_ada)
+    return lookup_name.ada ().lookup_name ().c_str ();
+
+  return lookup_name.name ().c_str ();
+}
+
 /* See minsyms.h.  */
 
 void
@@ -459,7 +478,7 @@ iterate_over_minimal_symbols (struct objfile *objf,
 
   /* The first pass is over the ordinary hash table.  */
     {
-      const char *name = lookup_name.name ().c_str ();
+      const char *name = linkage_name_str (lookup_name);
       unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
       auto *mangled_cmp
 	= (case_sensitivity == case_sensitive_on

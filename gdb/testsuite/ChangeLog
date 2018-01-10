@@ -1,3 +1,8 @@
+2018-01-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
+	* gdb.ada/bp_c_mixed_case.exp: Remove setup_kfail calls.
+
 2018-01-08  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.server/unittest.exp: Match the output in non-development
