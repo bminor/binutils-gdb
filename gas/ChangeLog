@@ -1,5 +1,23 @@
 2018-01-10  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/avx512_4fmaps.s,
+	testsuite/gas/i386/avx512_4fmaps_vl.s,
+	testsuite/gas/i386/x86-64-avx512_4fmaps.s,
+	testsuite/gas/i386/x86-64-avx512_4fmaps_vl.s: Actually test
+	Disp8 forms (and the transition happening at the right
+	boundary).
+	* testsuite/gas/i386/avx512_4fmaps.d,
+	testsuite/gas/i386/avx512_4fmaps-intel.d,
+	testsuite/gas/i386/avx512_4fmaps_vl.d,
+	testsuite/gas/i386/avx512_4fmaps_vl-intel.d,
+	testsuite/gas/i386/x86-64-avx512_4fmaps.d,
+	testsuite/gas/i386/x86-64-avx512_4fmaps-intel.d,
+	testsuite/gas/i386/x86-64-avx512_4fmaps_vl.d,
+	testsuite/gas/i386/x86-64-avx512_4fmaps_vl-intel.d: Adjust
+	expectations.
+
+2018-01-10  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/avx512bw.s,
 	testsuite/gas/i386/avx512bw_vl.s: Add VPCMP* tests with memory
 	operands.

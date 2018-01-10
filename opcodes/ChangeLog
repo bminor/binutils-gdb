@@ -1,5 +1,10 @@
 2018-01-10  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (v4fmaddss, v4fnmaddss): Adjust Disp8MemShift.
+	* i386-tbl.h: Re-generate.
+
+2018-01-10  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (vpcmpeqb, vpcmpleb, vpcmpltb, vpcmpneqb,
 	vpcmpnleb, vpcmpnltb, vpcmpequb, vpcmpleub, vpcmpltub,
 	vpcmpnequb, vpcmpnleub, vpcmpnltub, vpcmpeqw, vpcmplew,
