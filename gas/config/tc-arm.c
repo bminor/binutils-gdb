@@ -27104,7 +27104,7 @@ found:
 static void
 aeabi_set_public_attributes (void)
 {
-  char profile;
+  char profile = '\0';
   int arch = -1;
   int virt_sec = 0;
   int fp16_optional = 0;
