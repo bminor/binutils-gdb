@@ -1,3 +1,13 @@
+2018-01-10  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/avx512bw.s,
+	testsuite/gas/i386/avx512bw_vl.s: Add VPCMP* tests with memory
+	operands.
+	* testsuite/gas/i386/avx512bw-intel.d,
+	testsuite/gas/i386/avx512bw.d,
+	testsuite/gas/i386/avx512bw_vl-intel.d.
+	testsuite/gas/i386/avx512bw_vl.d: Adjust expectations.
+
 2018-01-09  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/gas/riscv/auipc-x0.d: New.

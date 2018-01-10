@@ -1268,7 +1268,11 @@ _start:
 	vpcmpb	$0, %xmm5, %xmm6, %k5	 # AVX512{BW,VL}
 	vpcmpb	$0, %ymm5, %ymm6, %k5	 # AVX512{BW,VL}
 	vpcmpleb	%xmm5, %xmm6, %k5	 # AVX512{BW,VL}
+	vpcmpleb	0x7f0(%eax), %xmm6, %k5	 # AVX512{BW,VL} Disp8
+	vpcmpleb	0x800(%eax), %xmm6, %k5	 # AVX512{BW,VL}
 	vpcmpleb	%ymm5, %ymm6, %k5	 # AVX512{BW,VL}
+	vpcmpleb	0xfe0(%eax), %ymm6, %k5	 # AVX512{BW,VL} Disp8
+	vpcmpleb	0x1000(%eax), %ymm6, %k5 # AVX512{BW,VL}
 	vpcmpltb	%xmm5, %xmm6, %k5	 # AVX512{BW,VL}
 	vpcmpltb	%ymm5, %ymm6, %k5	 # AVX512{BW,VL}
 	vpcmpneqb	%xmm5, %xmm6, %k5	 # AVX512{BW,VL}
@@ -1296,7 +1300,11 @@ _start:
 	vpcmpw	$0, %xmm5, %xmm6, %k5	 # AVX512{BW,VL}
 	vpcmpw	$0, %ymm5, %ymm6, %k5	 # AVX512{BW,VL}
 	vpcmplew	%xmm5, %xmm6, %k5	 # AVX512{BW,VL}
+	vpcmplew	0x7f0(%eax), %xmm6, %k5	 # AVX512{BW,VL} Disp8
+	vpcmplew	0x800(%eax), %xmm6, %k5	 # AVX512{BW,VL}
 	vpcmplew	%ymm5, %ymm6, %k5	 # AVX512{BW,VL}
+	vpcmplew	0xfe0(%eax), %ymm6, %k5	 # AVX512{BW,VL} Disp8
+	vpcmplew	0x1000(%eax), %ymm6, %k5 # AVX512{BW,VL}
 	vpcmpltw	%xmm5, %xmm6, %k5	 # AVX512{BW,VL}
 	vpcmpltw	%ymm5, %ymm6, %k5	 # AVX512{BW,VL}
 	vpcmpneqw	%xmm5, %xmm6, %k5	 # AVX512{BW,VL}

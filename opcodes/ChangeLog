@@ -1,3 +1,13 @@
+2018-01-10  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (vpcmpeqb, vpcmpleb, vpcmpltb, vpcmpneqb,
+	vpcmpnleb, vpcmpnltb, vpcmpequb, vpcmpleub, vpcmpltub,
+	vpcmpnequb, vpcmpnleub, vpcmpnltub, vpcmpeqw, vpcmplew,
+	vpcmpltw, vpcmpneqw, vpcmpnlew, vpcmpnltw, vpcmpequw, vpcmpleuw,
+	vpcmpltuw, vpcmpnequw, vpcmpnleuw, vpcmpnltuw): Adjust
+	Disp8MemShift of AVX512VL forms.
+	* i386-tbl.h: Re-generate.
+
 2018-01-09  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-dis.c (maybe_print_address): If base_reg is zero,
