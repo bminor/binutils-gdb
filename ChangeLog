@@ -4,6 +4,7 @@
 	* config.guess: Likewise.
 	* config.sub: Likewise.
 	* configure.ac: Likewise.
+	* configure: Regenerate.
 
 2017-12-14  Nick Clifton  <nickc@redhat.com>
 
