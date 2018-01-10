@@ -212,7 +212,7 @@ test_gdb_complete "ambiguous_func" \
 # However, we want to sanity-check each one of them, knowing that
 # each result should start with "break ada" and that the proposed
 # completion should look like a valid symbol name (in particular,
-# no uppercase letters...).
+# no uppercase letters...).  See gdb/22670.
 
 gdb_test_no_output "set max-completions unlimited"
 
@@ -222,6 +222,6 @@ gdb_test_multiple "$test" $test {
         pass $test
     }
     -re "\[A-Z\].*$gdb_prompt $" {
-        kfail gdb/22670 $test
+	fail "$test (gdb/22670)"
     }
 }

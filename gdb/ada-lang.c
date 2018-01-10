@@ -6499,8 +6499,25 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
     if (completion_skip_symbol (mode, msymbol))
       continue;
 
+    language symbol_language = MSYMBOL_LANGUAGE (msymbol);
+
+    /* Ada minimal symbols won't have their language set to Ada.  If
+       we let completion_list_add_name compare using the
+       default/C-like matcher, then when completing e.g., symbols in a
+       package named "pck", we'd match internal Ada symbols like
+       "pckS", which are invalid in an Ada expression, unless you wrap
+       them in '<' '>' to request a verbatim match.
+
+       Unfortunately, some Ada encoded names successfully demangle as
+       C++ symbols (using an old mangling scheme), such as "name__2Xn"
+       -> "Xn::name(void)" and thus some Ada minimal symbols end up
+       with the wrong language set.  Paper over that issue here.  */
+    if (symbol_language == language_auto
+	|| symbol_language == language_cplus)
+      symbol_language = language_ada;
+
     completion_list_add_name (tracker,
-			      MSYMBOL_LANGUAGE (msymbol),
+			      symbol_language,
 			      MSYMBOL_LINKAGE_NAME (msymbol),
 			      lookup_name, text, word);
   }
