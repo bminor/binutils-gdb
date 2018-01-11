@@ -1,3 +1,8 @@
+2017-01-12  Tom Tromey  <tom@tromey.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (install-only): Install gdb-add-index.
+
 2018-01-12  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-tdep.c (KVE_PROTECTION): Correct value.

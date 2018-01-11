@@ -174,7 +174,7 @@ POD2MAN5 = pod2man --center="GNU Development Tools" \
 		   --release="gdb-`sed q version.subst`" --section=5
 
 # List of man pages generated from gdb.texi
-MAN1S = gdb.1 gdbserver.1 gcore.1
+MAN1S = gdb.1 gdbserver.1 gcore.1 gdb-add-index.1
 MAN5S = gdbinit.5
 MANS = $(MAN1S) $(MAN5S)
 
@@ -632,6 +632,13 @@ gcore.1: $(GDB_DOC_FILES)
 	-($(POD2MAN1) gcore.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f gcore.pod
+
+gdb-add-index.1: $(GDB_DOC_FILES)
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dgdb-add-index < $(srcdir)/gdb.texinfo > gdb-add-index.pod
+	-($(POD2MAN1) gdb-add-index.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f gdb-add-index.pod
 
 gdbinit.5: $(GDB_DOC_FILES)
 	touch $@

@@ -1,3 +1,11 @@
+2017-01-12  Tom Tromey  <tom@tromey.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Index Files): Mention gdb-add-index.
+	(gdb-add-index man): New section.
+	* Makefile.in (gdb-add-index.1): New rule to generate manpage
+	from gdb.texinfo.
+
 2018-01-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* gdb.texinfo (pwd): Fix whitespace.

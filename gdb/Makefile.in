@@ -1770,6 +1770,15 @@ install-only: $(CONFIG_INSTALL)
 		  $(INSTALL_SCRIPT) gcore \
 			  $(DESTDIR)$(bindir)/$$transformed_name; \
 	fi
+	transformed_name=`t='$(program_transform_name)'; \
+			  echo gdb-add-index | sed -e "$$t"` ; \
+	if test "x$$transformed_name" = x; then \
+	  transformed_name=gdb-add-index ; \
+	else \
+	  true ; \
+	fi ; \
+	$(INSTALL_PROGRAM) $(srcdir)/contrib/gdb-add-index.sh \
+		$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT)
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 
 install-strip:
