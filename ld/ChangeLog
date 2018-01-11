@@ -1,3 +1,11 @@
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22677
+	* scripttempl/elf.sc (PREINIT_ARRAY): New.
+	Don't add .preinit_array for ld -r.
+	* testsuite/ld-elf/pr22677.d: New file.
+	* testsuite/ld-elf/pr22677.s: Likewise.
+
 2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ldexp.h (union etree_union): Remove defsym field.

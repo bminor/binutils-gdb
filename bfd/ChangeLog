@@ -1,3 +1,9 @@
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22677
+	* elflink.c (bfd_elf_gc_sections): Keep all PREINIT_ARRAY,
+	INIT_ARRAY as well as FINI_ARRAY sections for ld -r --gc-section.
+
 2017-09-27  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	PR 22662
