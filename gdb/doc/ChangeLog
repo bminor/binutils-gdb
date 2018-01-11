@@ -1,3 +1,7 @@
+2018-01-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* gdb.texinfo (pwd): Fix whitespace.
+
 2018-01-09  John Baldwin  <jhb@FreeBSD.org>
 
 	* gdb.texinfo (pwd): Update cross-reference for Process Information

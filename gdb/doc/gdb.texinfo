@@ -2524,7 +2524,7 @@ Print the @value{GDBN} working directory.
 It is generally impossible to find the current working directory of
 the process being debugged (since a program can change its directory
 during its run).  If you work on a system where @value{GDBN} supports
-the @code {info proc} command (@pxref{Process Information}), you can
+the @code{info proc} command (@pxref{Process Information}), you can
 use the @code{info proc} command to find out the
 current working directory of the debuggee.
 
