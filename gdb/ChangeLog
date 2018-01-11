@@ -1,5 +1,12 @@
 2018-01-11  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/22583
+	* infrun.c (resume): Rename to ...
+	(resume_1): ... this.
+	(resume): Reimplement as wrapper around resume_1.
+
+2018-01-11  Pedro Alves  <palves@redhat.com>
+
 	PR remote/22597
 	* remote.c (remote_parse_stop_reply): Default to the last-set
 	general thread instead of to 'magic_null_ptid'.
