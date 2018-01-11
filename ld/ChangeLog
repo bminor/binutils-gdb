@@ -1,3 +1,8 @@
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22696
+	* scripttempl/elf.sc: Fix the order of SHLIB_RODATA_ADDR.
+
 2018-01-09  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/ld-elf/eh-frame-hdr.d (#xfail): Delete
