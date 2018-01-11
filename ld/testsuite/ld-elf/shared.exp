@@ -81,6 +81,51 @@ run_ld_link_tests [list \
 	{} \
 	"pr22471" \
     ] \
+    [list \
+	"Build pr22649-1.so" \
+	"$LFLAGS -shared" \
+	"" \
+	"$AFLAGS_PIC" \
+	{pr22649-1.s} \
+	{} \
+	"pr22649-1.so" \
+    ] \
+    [list \
+	"Build pr22649-2a.so" \
+	"$LFLAGS -shared -gc-sections -print-gc-sections" \
+	"" \
+	"$AFLAGS_PIC" \
+	{pr22649-2a.s} \
+	{{ld pr22649.msg}} \
+	"pr22649-2a.so" \
+    ] \
+    [list \
+	"Build pr22649-2b.so" \
+	"$LFLAGS -shared -gc-sections -print-gc-sections" \
+	"tmpdir/pr22649-1.so" \
+	"$AFLAGS_PIC" \
+	{pr22649-2a.s} \
+	{{ld pr22649.msg}} \
+	"pr22649-2b.so" \
+    ] \
+    [list \
+	"Build pr22649-2c.so" \
+	"$LFLAGS -shared -gc-sections -print-gc-sections" \
+	"" \
+	"$AFLAGS_PIC" \
+	{pr22649-2b.s} \
+	{} \
+	"pr22649-2b.so" \
+    ] \
+    [list \
+	"Build pr22649-2d.so" \
+	"$LFLAGS -shared -gc-sections -print-gc-sections" \
+	"tmpdir/pr22649-1.so" \
+	"$AFLAGS_PIC" \
+	{pr22649-2b.s} \
+	{} \
+	"pr22649-2b.so" \
+    ] \
 ]
 
 run_ld_link_tests [list \

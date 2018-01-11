@@ -13277,7 +13277,7 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
 
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
-      && (h->ref_dynamic
+      && ((h->ref_dynamic && !h->forced_local)
 	  || ((h->def_regular || ELF_COMMON_DEF_P (h))
 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
 	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
