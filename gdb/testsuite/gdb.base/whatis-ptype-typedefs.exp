@@ -45,13 +45,15 @@ proc prepare {lang} {
 
     if { [prepare_for_testing "failed to prepare" \
 	      ${out} [list $srcfile] $options] } {
-	return -1
+	return 0
     }
 
     if ![runto_main] then {
 	fail "can't run to main"
 	return 0
     }
+
+    return 1
 }
 
 # The following list is layed out as a table.  It is composed by
@@ -300,6 +302,7 @@ proc run_tests {lang} {
 }
 
 foreach_with_prefix lang {"c" "c++"} {
-    prepare $lang
-    run_tests $lang
+    if { [prepare $lang] } then {
+	run_tests $lang
+    }
 }

@@ -1,3 +1,9 @@
+2018-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/whatis-ptype-typedefs.exp: Don't run tests if we failed
+	to prepare.
+	(prepare): Return 0 on error, 1 on success.
+
 2018-01-12  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/continue-after-aborted-step-over.c: New.
