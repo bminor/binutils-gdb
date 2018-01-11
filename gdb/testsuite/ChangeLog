@@ -1,3 +1,9 @@
+2018-01-11  Pedro Alves  <palves@redhat.com>
+
+	PR remote/22597
+	* gdb.server/stop-reply-no-thread.c: New file.
+	* gdb.server/stop-reply-no-thread.exp: New file.
+
 2018-01-10  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/22670
