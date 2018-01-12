@@ -1,5 +1,14 @@
 2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/22393
+	* elf.c (_bfd_elf_map_sections_to_segments): When generating
+	separate code and read-only data LOAD segments, create a new
+	LOAD segment if the previous section contains text and the
+	current section doesn't or vice versa.  Don't put a writable
+	section in a read-only segment if there is a RELRO segment.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/22649
 	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Ignore dynamic
 	references on forced local symbols.
