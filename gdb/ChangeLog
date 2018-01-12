@@ -1,5 +1,10 @@
 2018-01-12  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 8.0.91.
+	* PROBLEMS: Likewise.
+
+2018-01-12  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Rename "Changes since 8.0" into "Changes in 8.1".
 
 2018-01-11  Pedro Alves  <palves@redhat.com>
