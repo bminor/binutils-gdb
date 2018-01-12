@@ -1,3 +1,9 @@
+2018-01-12  Gunther Nikl  <gnikl@users.sourceforge.net>
+
+	* gas/config/aout_gnu.h (USE_EXTENDED_RELOC): Explicitly
+	define to 0 and 1. Remove a dangling reference to "AMD 29000"
+	in a comment.
+
 2018-01-11  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* testsuite/i386/avx512_4fmaps_vl-warn.l: Likewise.
