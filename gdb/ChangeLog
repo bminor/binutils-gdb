@@ -1,3 +1,8 @@
+2018-01-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* infrun.c (keep_going_pass_signal): Clear step-over info when
+	insert_breakpoints fails.
+
 2018-01-11  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/22583
