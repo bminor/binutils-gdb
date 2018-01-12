@@ -7778,6 +7778,7 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 	{
 	  exception_print (gdb_stderr, e);
 	  stop_waiting (ecs);
+	  clear_step_over_info ();
 	  return;
 	}
       END_CATCH

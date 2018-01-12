@@ -1,3 +1,8 @@
+2018-01-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* infrun.c (keep_going_pass_signal): Clear step-over info when
+	insert_breakpoints fails.
+
 2018-01-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 8.0.91.DATE-git.
