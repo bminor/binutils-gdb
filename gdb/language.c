@@ -727,9 +727,16 @@ default_symbol_name_matcher (const char *symbol_search_name,
 /* See language.h.  */
 
 symbol_name_matcher_ftype *
-language_get_symbol_name_matcher (const language_defn *lang,
-				  const lookup_name_info &lookup_name)
+get_symbol_name_matcher (const language_defn *lang,
+			 const lookup_name_info &lookup_name)
 {
+  /* If currently in Ada mode, and the lookup name is wrapped in
+     '<...>', hijack all symbol name comparisons using the Ada
+     matcher, which handles the verbatim matching.  */
+  if (current_language->la_language == language_ada
+      && lookup_name.ada ().verbatim_p ())
+    return current_language->la_get_symbol_name_matcher (lookup_name);
+
   if (lang->la_get_symbol_name_matcher != nullptr)
     return lang->la_get_symbol_name_matcher (lookup_name);
   return default_symbol_name_matcher;

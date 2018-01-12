@@ -737,10 +737,14 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 
   if (num_group != (unsigned) -1)
     {
-      unsigned int i;
+      unsigned int search_offset = elf_tdata (abfd)->group_search_offset;
+      unsigned int j;
 
-      for (i = 0; i < num_group; i++)
+      for (j = 0; j < num_group; j++)
 	{
+	  /* Begin search from previous found group.  */
+	  unsigned i = (j + search_offset) % num_group;
+
 	  Elf_Internal_Shdr *shdr = elf_tdata (abfd)->group_sect_ptr[i];
 	  Elf_Internal_Group *idx;
 	  bfd_size_type n_elt;
@@ -803,7 +807,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		if (shdr->bfd_section != NULL)
 		  elf_next_in_group (shdr->bfd_section) = newsect;
 
-		i = num_group - 1;
+		elf_tdata (abfd)->group_search_offset = i;
+		j = num_group - 1;
 		break;
 	      }
 	}
@@ -4566,6 +4571,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       asection **hdrpp;
       bfd_boolean phdr_in_segment = TRUE;
       bfd_boolean writable;
+      bfd_boolean executable;
       int tls_count = 0;
       asection *first_tls = NULL;
       asection *first_mbind = NULL;
@@ -4654,6 +4660,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       if (maxpagesize == 0)
 	maxpagesize = 1;
       writable = FALSE;
+      executable = FALSE;
       dynsec = bfd_get_section_by_name (abfd, ".dynamic");
       if (dynsec != NULL
 	  && (dynsec->flags & SEC_LOAD) == 0)
@@ -4756,18 +4763,27 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		 file, then there is no other reason for a new segment.  */
 	      new_segment = FALSE;
 	    }
+	  else if (info != NULL
+		   && info->separate_code
+		   && executable != ((hdr->flags & SEC_CODE) != 0))
+	    {
+	      new_segment = TRUE;
+	    }
 	  else if (! writable
 		   && (hdr->flags & SEC_READONLY) == 0
-		   && (((last_hdr->lma + last_size - 1) & -maxpagesize)
-		       != (hdr->lma & -maxpagesize)))
+		   && ((info != NULL
+			&& info->relro_end > info->relro_start)
+		       || (((last_hdr->lma + last_size - 1) & -maxpagesize)
+			   != (hdr->lma & -maxpagesize))))
 	    {
 	      /* We don't want to put a writable section in a read only
 		 segment, unless they are on the same page in memory
-		 anyhow.  We already know that the last section does not
-		 bring us past the current section on the page, so the
-		 only case in which the new section is not on the same
-		 page as the previous section is when the previous section
-		 ends precisely on a page boundary.  */
+		 anyhow and there is no RELRO segment.  We already
+		 know that the last section does not bring us past the
+		 current section on the page, so the only case in which
+		 the new section is not on the same page as the previous
+		 section is when the previous section ends precisely on
+		 a page boundary.  */
 	      new_segment = TRUE;
 	    }
 	  else
@@ -4789,6 +4805,8 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      if ((hdr->flags & SEC_READONLY) == 0)
 		writable = TRUE;
+	      if ((hdr->flags & SEC_CODE) != 0)
+		executable = TRUE;
 	      last_hdr = hdr;
 	      /* .tbss sections effectively have zero size.  */
 	      if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD))
@@ -4813,6 +4831,11 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	    writable = TRUE;
 	  else
 	    writable = FALSE;
+
+	  if ((hdr->flags & SEC_CODE) == 0)
+	    executable = FALSE;
+	  else
+	    executable = TRUE;
 
 	  last_hdr = hdr;
 	  /* .tbss sections effectively have zero size.  */

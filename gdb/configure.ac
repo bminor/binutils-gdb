@@ -523,6 +523,11 @@ AC_SEARCH_LIBS(kinfo_getvmmap, util util-freebsd,
   [AC_DEFINE(HAVE_KINFO_GETVMMAP, 1,
             [Define to 1 if your system has the kinfo_getvmmap function. ])])
 
+# fbsd-nat.c can also use kinfo_getfile.
+AC_SEARCH_LIBS(kinfo_getfile, util util-freebsd,
+  [AC_DEFINE(HAVE_KINFO_GETFILE, 1,
+            [Define to 1 if your system has the kinfo_getfile function. ])])
+
 AM_ICONV
 
 # GDB may fork/exec the iconv program to get the list of supported character

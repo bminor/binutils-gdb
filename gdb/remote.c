@@ -6940,7 +6940,13 @@ Packet: '%s'\n"),
 			event->ptid = read_ptid (thr + strlen (";thread:"),
 						 NULL);
 		      else
-			event->ptid = magic_null_ptid;
+			{
+			  /* Either the current thread hasn't changed,
+			     or the inferior is not multi-threaded.
+			     The event must be for the thread we last
+			     set as (or learned as being) current.  */
+			  event->ptid = event->rs->general_thread;
+			}
 		    }
 
 		  if (rsa == NULL)

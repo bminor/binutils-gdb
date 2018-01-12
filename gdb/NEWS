@@ -3,6 +3,9 @@
 
 *** Changes since GDB 8.1
 
+* 'info proc' now works on running processes on FreeBSD systems and core
+  files created on FreeBSD systems.
+
 *** Changes in GDB 8.1
 
 * GDB now supports dynamically creating arbitrary register groups specified

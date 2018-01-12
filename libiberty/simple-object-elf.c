@@ -1,5 +1,5 @@
 /* simple-object-elf.c -- routines to manipulate ELF object files.
-   Copyright (C) 2010-2017 Free Software Foundation, Inc.
+   Copyright (C) 2010-2018 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Google.
 
 This program is free software; you can redistribute it and/or modify it
@@ -196,6 +196,7 @@ typedef struct {
 
 /* Values for sh_flags field.  */
 
+#define SHF_EXECINSTR	0x00000004	/* Executable section.  */
 #define SHF_EXCLUDE	0x80000000	/* Link editor is to exclude this
 					   section from executable and
 					   shared library that it builds
@@ -235,8 +236,10 @@ typedef struct
 
 #define STB_LOCAL	0	/* Local symbol */
 #define STB_GLOBAL	1	/* Global symbol */
+#define STB_WEAK	2	/* Weak global */
 
 #define STV_DEFAULT	0	/* Visibility is specified by binding type */
+#define STV_HIDDEN	2	/* Can only be seen inside currect component */
 
 /* Functions to fetch and store different ELF types, depending on the
    endianness and size.  */
@@ -1085,8 +1088,10 @@ simple_object_elf_copy_lto_debug_sections (simple_object_read *sobj,
   off_t shstroff;
   unsigned char *names;
   unsigned int i;
+  int changed;
   int *pfnret;
   const char **pfnname;
+  unsigned first_shndx = 0;
 
   shdr_size = (ei_class == ELFCLASS32
 	       ? sizeof (Elf32_External_Shdr)
@@ -1154,11 +1159,13 @@ simple_object_elf_copy_lto_debug_sections (simple_object_read *sobj,
       ret = (*pfn) (&name);
       pfnret[i - 1] = ret == 1 ? 0 : -1;
       pfnname[i - 1] = name;
+      if (first_shndx == 0
+	  && pfnret[i - 1] == 0)
+	first_shndx = i;
     }
 
   /* Mark sections as preserved that are required by to be preserved
      sections.  */
-  int changed;
   do
     {
       changed = 0;
@@ -1324,6 +1331,15 @@ simple_object_elf_copy_lto_debug_sections (simple_object_read *sobj,
 					   sobj->offset + stroff,
 					   (unsigned char *)strings,
 					   strsz, &errmsg, err);
+	      /* Find gnu_lto_ in strings.  */
+	      char *gnu_lto = strings;
+	      while ((gnu_lto = memchr (gnu_lto, 'g',
+					strings + strsz - gnu_lto)))
+		if (strncmp (gnu_lto, "gnu_lto_v1",
+			     strings + strsz - gnu_lto) == 0)
+		  break;
+		else
+		  gnu_lto++;
 	      for (ent = buf; ent < buf + length; ent += entsize)
 		{
 		  unsigned st_shndx = ELF_FETCH_FIELD (type_functions, ei_class,
@@ -1346,9 +1362,6 @@ simple_object_elf_copy_lto_debug_sections (simple_object_read *sobj,
 		     and __gnu_lto_slim which otherwise cause endless
 		     LTO plugin invocation.  */
 		  if (st_shndx == SHN_COMMON)
-		    /* Setting st_name to "" seems to work to purge
-		       COMMON symbols (in addition to setting their
-		       size to zero).  */
 		    discard = 1;
 		  /* We also need to remove symbols refering to sections
 		     we'll eventually remove as with fat LTO objects
@@ -1364,18 +1377,36 @@ simple_object_elf_copy_lto_debug_sections (simple_object_read *sobj,
 		    {
 		      /* Make discarded symbols undefined and unnamed
 		         in case it is local.  */
-		      if (ELF_ST_BIND (*st_info) == STB_LOCAL)
-			ELF_SET_FIELD (type_functions, ei_class, Sym,
-				       ent, st_name, Elf_Word, 0);
+		      int bind = ELF_ST_BIND (*st_info);
+		      int other = STV_DEFAULT;
+		      if (bind == STB_LOCAL)
+			{
+			  /* Make discarded local symbols unnamed and
+			     defined in the first prevailing section.  */
+			  ELF_SET_FIELD (type_functions, ei_class, Sym,
+					 ent, st_name, Elf_Word, 0);
+			  ELF_SET_FIELD (type_functions, ei_class, Sym,
+					 ent, st_shndx, Elf_Half, first_shndx);
+			}
+		      else
+			{
+			  /* Make discarded global symbols hidden weak
+			     undefined and sharing the gnu_lto_ name.  */
+			  bind = STB_WEAK;
+			  other = STV_HIDDEN;
+			  if (gnu_lto)
+			    ELF_SET_FIELD (type_functions, ei_class, Sym,
+					   ent, st_name, Elf_Word,
+					   gnu_lto - strings);
+			  ELF_SET_FIELD (type_functions, ei_class, Sym,
+					 ent, st_shndx, Elf_Half, SHN_UNDEF);
+			}
+		      *st_other = other;
+		      *st_info = ELF_ST_INFO (bind, STT_NOTYPE);
 		      ELF_SET_FIELD (type_functions, ei_class, Sym,
 				     ent, st_value, Elf_Addr, 0);
 		      ELF_SET_FIELD (type_functions, ei_class, Sym,
 				     ent, st_size, Elf_Word, 0);
-		      ELF_SET_FIELD (type_functions, ei_class, Sym,
-				     ent, st_shndx, Elf_Half, SHN_UNDEF);
-		      *st_info = ELF_ST_INFO (ELF_ST_BIND (*st_info),
-					      STT_NOTYPE);
-		      *st_other = STV_DEFAULT;
 		    }
 		}
 	      XDELETEVEC (strings);
@@ -1398,12 +1429,23 @@ simple_object_elf_copy_lto_debug_sections (simple_object_read *sobj,
 	     link.  */
 	  ELF_SET_FIELD (type_functions, ei_class, Shdr,
 			 shdr, sh_type, Elf_Word, SHT_NULL);
+	  ELF_SET_FIELD (type_functions, ei_class, Shdr,
+			 shdr, sh_info, Elf_Word, 0);
+	  ELF_SET_FIELD (type_functions, ei_class, Shdr,
+			 shdr, sh_link, Elf_Word, 0);
 	}
 
       flags = ELF_FETCH_FIELD (type_functions, ei_class, Shdr,
 			       shdr, sh_flags, Elf_Addr);
       if (ret == 0)
-	flags &= ~SHF_EXCLUDE;
+	{
+	  /* The debugobj doesn't contain any code, thus no trampolines.
+	     Even when the original object needs trampolines, debugobj
+	     doesn't.  */
+	  if (strcmp (name, ".note.GNU-stack") == 0)
+	    flags &= ~SHF_EXECINSTR;
+	  flags &= ~SHF_EXCLUDE;
+	}
       else if (ret == -1)
 	flags = SHF_EXCLUDE;
       ELF_SET_FIELD (type_functions, ei_class, Shdr,

@@ -1,3 +1,33 @@
+2018-01-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (gdb_compile): Ignore shlib= and shlib_load
+	options when not creating an executable.
+
+2018-01-11  Pedro Alves  <palves@redhat.com>
+
+	PR remote/22597
+	* gdb.server/stop-reply-no-thread.c: New file.
+	* gdb.server/stop-reply-no-thread.exp: New file.
+
+2018-01-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
+	* gdb.ada/bp_c_mixed_case.exp: Add intro comment.  Test printing C
+	functions too.  Test setting breakpoints and printing C functions
+	with no debug info too.
+	* gdb.ada/bp_c_mixed_case/qux.c: New file.
+
+2018-01-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
+	* gdb.ada/complete.exp ("complete break ada"): Replace kfail with
+	a fail.
+
+2018-01-10  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22670
+	* gdb.ada/bp_c_mixed_case.exp: Remove setup_kfail calls.
+
 2018-01-08  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.server/unittest.exp: Match the output in non-development

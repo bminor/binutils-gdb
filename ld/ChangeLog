@@ -1,3 +1,158 @@
+2018-01-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/elf.exp: xfail "pr22374 function pointer
+	initialization" for currently failing targets.
+
+2018-01-12  Alan Modra  <amodra@gmail.com>
+
+	PR ld/22649
+	* testsuite/ld-elf/pr22649.msg: Allow other messages.
+	* testsuite/ld-elf/shared.exp: Check that --gc-sections is
+	supported before running ld/22649 tests.
+
+2018-01-12  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em (_handle_option): Add support for "-z undefs"
+	as the opposite of "-z defs".
+	* ld.texinfo: Document the new option.  Update the description of
+	the -z defs option to make it clear that it does generate an error
+	if an undefined symbol reference is found in an object file whilst
+	creating a shared library.
+	* NEWS: Document this new feature.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr22393-2a.rd: Replace "-z textonly" with
+	"-z separate-code".
+	* testsuite/ld-elf/pr22393-2b.rd: Likewise.
+	* testsuite/ld-x86-64/pr22393-3a.rd: Likewise.
+	* testsuite/ld-x86-64/pr22393-3b.rd: Likewise.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22393
+	* testsuite/ld-x86-64/pr22393-3a.c: New file.
+	* testsuite/ld-x86-64/pr22393-3a.rd: Likewise.
+	* testsuite/ld-x86-64/pr22393-3b.c: Likewise.
+	* testsuite/ld-x86-64/pr22393-3b.rd: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run tests for -z separate-code
+	-z max-page-size=0x1000.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22393
+	* testsuite/ld-elf/pr16322.d: Add -z noseparate-code.
+	* testsuite/ld-elf/pr22393-1.s: New file.
+	* testsuite/ld-elf/pr22393-1a.d: Likewise.
+	* testsuite/ld-elf/pr22393-1b.d: Likewise.
+	* testsuite/ld-elf/pr22393-1c.d: Likewise.
+	* testsuite/ld-elf/pr22393-1d.d: Likewise.
+	* testsuite/ld-elf/pr22393-1e.d: Likewise.
+	* testsuite/ld-elf/pr22393-1f.d: Likewise.
+	* testsuite/ld-elf/pr22393-2a.c: Likewise.
+	* testsuite/ld-elf/pr22393-2a.rd: Likewise.
+	* testsuite/ld-elf/pr22393-2b.c: Likewise.
+	* testsuite/ld-elf/pr22393-2b.rd: Likewise.
+	* testsuite/ld-elf/shared.exp: Run tests for -z separate-code.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22393
+	* NEWS: Mention "-z separate-code".
+	* emultempl/elf32.em (gld${EMULATION_NAME}_get_script): Get
+	builtin linker scripts and return linker scripts from disk for
+	"-z separate-code".
+	(gld${EMULATION_NAME}_handle_option): Handle "-z separate-code"
+	and "-z noseparate-code".
+	* genscripts.sh: Generate linker scripts for "-z separate-code".
+	(LD_FLAG): Set to *textonly for "-z separate-code".
+	* ld.texinfo: Document "-z separate-code".
+	* lexsup.c (elf_shlib_list_options): Add linker help messsages
+	for "-z separate-code" and "-z noseparate-code".
+	* scripttempl/elf.sc (SEPARATE_TEXT): New
+	(TEXT_SEGMENT_ALIGN): Likewise.
+	Use ${TEXT_SEGMENT_ALIGN} to align and pad text segment to
+	${MAXPAGESIZE}.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22649
+	* testsuite/ld-elf/pr22649-1.s: New file.
+	* testsuite/ld-elf/pr22649-2a.s: Likewise.
+	* testsuite/ld-elf/pr22649-2b.s: Likewise.
+	* testsuite/ld-elf/pr22649.msg: Likewise.
+	* testsuite/ld-elf/shared.exp: Run ld/22649 tests.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22677
+	* scripttempl/elf.sc (PREINIT_ARRAY): New.
+	Don't add .preinit_array for ld -r.
+	* testsuite/ld-elf/pr22677.d: New file.
+	* testsuite/ld-elf/pr22677.s: Likewise.
+
+2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldexp.h (union etree_union): Remove defsym field.
+	* ldexp.c (exp_assop): Remove defsym parameter, and use of defsym
+	parameter.
+	(exp_assign): Remove passing of defsym parameter.
+	(exp_defsym): Likewise.
+	(exp_provide): Likewise.
+
+2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldexp.c (exp_fold_tree_1): Rework condition underwhich provide
+	nodes are ignored in the tree walk, and move the location at which
+	we change provide nodes into provided nodes.
+	(exp_init_os): Add etree_provided.
+	* testsuite/ld-scripts/provide-6.d: New file.
+	* testsuite/ld-scripts/provide-6.t: New file.
+	* testsuite/ld-scripts/provide-7.d: New file.
+	* testsuite/ld-scripts/provide-7.t: New file.
+	* testsuite/ld-scripts/provide-8.d: New file.
+	* testsuite/ld-scripts/provide-8.t: New file.
+
+2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/ld-scripts/provide-3.d: Add xfail directive.
+	* testsuite/ld-scripts/provide-4.d: Use new map file name.
+	* testsuite/ld-scripts/provide-5.d: Use new map file name.
+	* testsuite/ld-scripts/provide-4-map.d: Renamed to...
+	* testsuite/ld-scripts/provide-4.map: ...this.
+	* testsuite/ld-scripts/provide-5-map.d: Renamed to...
+	* testsuite/ld-scripts/provide-5.map: ...this.
+	* testsuite/ld-scripts/provide.exp: Move xfail into provide-3.d
+	file, and run tests in a loop.
+
+2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldexp.c (exp_print_tree): Use '=' instead of ',' when printing
+	PROVIDE statements.
+	* testsuite/ld-scripts/provide-4.map: Update expected output.
+	* testsuite/ld-scripts/provide-5.map: Likewise.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22696
+	* scripttempl/elf.sc: Fix the order of SHLIB_RODATA_ADDR.
+
+2018-01-09  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/ld-elf/eh-frame-hdr.d (#xfail): Delete
+	(#alltargets): Renamed from #target.  Add shared.
+	* testsuite/lib/ld-lib.exp (run_dump_test): Document shared target.
+	Document alltargets option.  Add support for alltargets option.
+	(istarget): Add support for shared target.
+
+2018-01-08  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/ld-riscv-elf/c-lui.d: Don't use -shared.  Check for _start
+	instead of .text.
+	* testsuite/ld-riscv-elf/c-lui.s: Add _start label.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Before __global_pointer$
+	tests, add call to check_shared_lib_support.
+
 2018-01-05  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/ld-riscv-elf/disas-jalr.d: New.

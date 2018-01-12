@@ -21,4 +21,6 @@ thumb2_it_bad:
 	it	eq
 	iteq	eq
 	nop
+	it	eq
+	csdbeq
 foo:

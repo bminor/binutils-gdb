@@ -11275,6 +11275,12 @@ do_t_clz (void)
 }
 
 static void
+do_t_csdb (void)
+{
+  set_it_insn_type (OUTSIDE_IT_INSN);
+}
+
+static void
 do_t_cps (void)
 {
   set_it_insn_type (OUTSIDE_IT_INSN);
@@ -19984,6 +19990,15 @@ static const struct asm_opcode insns[] =
  TC3("ldrsbt",	03000d0, f9100e00, 2, (RRnpc_npcsp, ADDR), ldsttv4, t_ldstt),
  TC3("strht",	02000b0, f8200e00, 2, (RRnpc_npcsp, ADDR), ldsttv4, t_ldstt),
 
+#undef  ARM_VARIANT
+#define ARM_VARIANT    & arm_ext_v3
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v6t2
+
+ TUE("csdb",	320f014, f3af8014, 0, (), noargs, t_csdb),
+
+#undef  ARM_VARIANT
+#define ARM_VARIANT    & arm_ext_v6t2
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2_v8m
  TCE("movw",	3000000, f2400000, 2, (RRnpc, HALF),		    mov16, t_mov16),
@@ -27089,7 +27104,7 @@ found:
 static void
 aeabi_set_public_attributes (void)
 {
-  char profile;
+  char profile = '\0';
   int arch = -1;
   int virt_sec = 0;
   int fp16_optional = 0;

@@ -1,7 +1,7 @@
 #name: lui to c.lui relaxation
 #source: c-lui.s
 #as: -march=rv32ic
-#ld: -shared -melf32lriscv
+#ld: -melf32lriscv
 #objdump: -d -M no-aliases,numeric
 
 .*:     file format .*
@@ -9,7 +9,7 @@
 
 Disassembly of section \.text:
 
-.* <.text>:
+.* <_start>:
 .*:	6085                	c.lui	x1,0x1
 .*:	000000b7          	lui	x1,0x0
 .*:	00001037          	lui	x0,0x1

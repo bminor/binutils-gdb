@@ -773,6 +773,8 @@ _start:
 	vpcmpb	$123, -8256(%edx), %zmm6, %k5	 # AVX512BW
 	vpcmpb	$0, %zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpleb	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmpleb	0x1fc0(%eax), %zmm6, %k5 # AVX512{BW,VL} Disp8
+	vpcmpleb	0x2000(%eax), %zmm6, %k5 # AVX512{BW,VL}
 	vpcmpltb	%zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpneqb	%zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpnleb	%zmm5, %zmm6, %k5	 # AVX512BW
@@ -788,6 +790,8 @@ _start:
 	vpcmpw	$123, -8256(%edx), %zmm6, %k5	 # AVX512BW
 	vpcmpw	$0, %zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmplew	%zmm5, %zmm6, %k5	 # AVX512BW
+	vpcmplew	0x1fc0(%eax), %zmm6, %k5 # AVX512{BW,VL} Disp8
+	vpcmplew	0x2000(%eax), %zmm6, %k5 # AVX512{BW,VL}
 	vpcmpltw	%zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpneqw	%zmm5, %zmm6, %k5	 # AVX512BW
 	vpcmpnlew	%zmm5, %zmm6, %k5	 # AVX512BW

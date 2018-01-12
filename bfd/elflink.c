@@ -13277,7 +13277,7 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
 
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
-      && (h->ref_dynamic
+      && ((h->ref_dynamic && !h->forced_local)
 	  || ((h->def_regular || ELF_COMMON_DEF_P (h))
 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
 	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
@@ -13428,11 +13428,19 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 
       /* Start at sections marked with SEC_KEEP (ref _bfd_elf_gc_keep).
 	 Also treat note sections as a root, if the section is not part
-	 of a group.  */
+	 of a group.  We must keep all PREINIT_ARRAY, INIT_ARRAY as
+	 well as FINI_ARRAY sections for ld -r.  */
       for (o = sub->sections; o != NULL; o = o->next)
 	if (!o->gc_mark
 	    && (o->flags & SEC_EXCLUDE) == 0
 	    && ((o->flags & SEC_KEEP) != 0
+		|| (bfd_link_relocatable (info)
+		    && ((elf_section_data (o)->this_hdr.sh_type
+			 == SHT_PREINIT_ARRAY)
+			|| (elf_section_data (o)->this_hdr.sh_type
+			    == SHT_INIT_ARRAY)
+			|| (elf_section_data (o)->this_hdr.sh_type
+			    == SHT_FINI_ARRAY)))
 		|| (elf_section_data (o)->this_hdr.sh_type == SHT_NOTE
 		    && elf_next_in_group (o) == NULL )))
 	  {

@@ -3513,7 +3513,8 @@ proc gdb_compile {source dest type options} {
     set shlib_found 0
     set shlib_load 0
     foreach opt $options {
-        if [regexp {^shlib=(.*)} $opt dummy_var shlib_name] {
+        if {[regexp {^shlib=(.*)} $opt dummy_var shlib_name]
+	    && $type == "executable"} {
             if [test_compiler_info "xlc-*"] {
 		# IBM xlc compiler doesn't accept shared library named other
 		# than .so: use "-Wl," to bypass this
@@ -3539,7 +3540,7 @@ proc gdb_compile {source dest type options} {
 		    lappend new_options "early_flags=-Wl,--no-as-needed"
 		}
             }
-	} elseif { $opt == "shlib_load" } {
+	} elseif { $opt == "shlib_load" && $type == "executable" } {
 	    set shlib_load 1
         } else {
             lappend new_options $opt

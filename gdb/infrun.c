@@ -2355,10 +2355,11 @@ do_target_resume (ptid_t resume_ptid, int step, enum gdb_signal sig)
 }
 
 /* Resume the inferior.  SIG is the signal to give the inferior
-   (GDB_SIGNAL_0 for none).  */
+   (GDB_SIGNAL_0 for none).  Note: don't call this directly; instead
+   call 'resume', which handles exceptions.  */
 
-void
-resume (enum gdb_signal sig)
+static void
+resume_1 (enum gdb_signal sig)
 {
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = regcache->arch ();
@@ -2730,6 +2731,32 @@ resume (enum gdb_signal sig)
   do_target_resume (resume_ptid, step, sig);
   tp->resumed = 1;
 }
+
+/* Resume the inferior.  SIG is the signal to give the inferior
+   (GDB_SIGNAL_0 for none).  This is a wrapper around 'resume_1' that
+   rolls back state on error.  */
+
+void
+resume (gdb_signal sig)
+{
+  TRY
+    {
+      resume_1 (sig);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      /* If resuming is being aborted for any reason, delete any
+	 single-step breakpoint resume_1 may have created, to avoid
+	 confusing the following resumption, and to avoid leaving
+	 single-step breakpoints perturbing other threads, in case
+	 we're running in non-stop mode.  */
+      if (inferior_ptid != null_ptid)
+	delete_single_step_breakpoints (inferior_thread ());
+      throw_exception (ex);
+    }
+  END_CATCH
+}
+
 
 /* Proceeding.  */
 

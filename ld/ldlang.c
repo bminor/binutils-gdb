@@ -2207,6 +2207,7 @@ exp_init_os (etree_type *exp)
     {
     case etree_assign:
     case etree_provide:
+    case etree_provided:
       exp_init_os (exp->assign.src);
       break;
 

@@ -556,7 +556,7 @@ psymbol_name_matches (partial_symbol *psym,
 {
   const language_defn *lang = language_def (SYMBOL_LANGUAGE (psym));
   symbol_name_matcher_ftype *name_match
-    = language_get_symbol_name_matcher (lang, lookup_name);
+    = get_symbol_name_matcher (lang, lookup_name);
   return name_match (SYMBOL_SEARCH_NAME (psym), lookup_name, NULL);
 }
 

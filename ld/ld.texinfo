@@ -1147,8 +1147,9 @@ layout will be optimized to minimize memory pages if the system is
 using pages of this size.
 
 @item defs
-Disallows undefined symbols in object files.  Undefined symbols in
-shared libraries are still allowed.
+Report unresolved symbol references from regular object files.  This
+is done even if the linker is creating a non-symbolic shared library.
+This option is the inverse of @samp{-z undefs}.
 
 @item dynamic-undefined-weak
 @itemx nodynamic-undefined-weak
@@ -1264,6 +1265,13 @@ relocation, if supported.  Specifying @samp{common-page-size} smaller
 than the system page size will render this protection ineffective.
 Don't create an ELF @code{PT_GNU_RELRO} segment if @samp{norelro}.
 
+@item separate-code
+@itemx noseparate-code
+Create separate code @code{PT_LOAD} segment header in the object.  This
+specifies a memory segment that should contain only instructions and must
+be in wholly disjoint pages from any other data.  Don't create separate
+code @code{PT_LOAD} segment if @samp{noseparate-code} is used.
+
 @item shstk
 Generate GNU_PROPERTY_X86_FEATURE_1_SHSTK in .note.gnu.property section
 to indicate compatibility with Intel Shadow Stack.  Supported for
@@ -1280,6 +1288,11 @@ Specifying zero will override any default non-zero sized
 Report an error if DT_TEXTREL is set, i.e., if the binary has dynamic
 relocations in read-only sections.  Don't report an error if
 @samp{notext} or @samp{textoff}.
+
+@item undefs
+Do not report unresolved symbol references from regular object files,
+either when creating an executable, or when creating a shared library.
+This option is the inverse of @samp{-z defs}.
 
 @end table
 
@@ -1686,6 +1699,7 @@ while linking a large executable.
 
 @kindex --no-undefined
 @kindex -z defs
+@kindex -z undefs
 @item --no-undefined
 @itemx -z defs
 Report unresolved symbol references from regular object files.  This
@@ -1693,6 +1707,8 @@ is done even if the linker is creating a non-symbolic shared library.
 The switch @option{--[no-]allow-shlib-undefined} controls the
 behaviour for reporting unresolved references found in shared
 libraries being linked in.
+
+The effects of this option can be reverted by using @code{-z undefs}.
 
 @kindex --allow-multiple-definition
 @kindex -z muldefs

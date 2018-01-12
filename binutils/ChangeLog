@@ -1,3 +1,9 @@
+2018-01-10  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Note that it is now the configure.ac file and not
+	the configure.in file that needs to be kept in sync with gcc.
+	Add a note about sending patches for libiberty to gcc.
+
 2018-01-03  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (merge_gnu_build_notes): Add cast to maximum address

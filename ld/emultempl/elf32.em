@@ -2367,13 +2367,25 @@ if test -n "$GENERATE_PIE_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
 echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
+echo '             && link_info.separate_code'		>> e${EMULATION_NAME}.c
+echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xdwe		>> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
+echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
 echo '             && link_info.relro'			>> e${EMULATION_NAME}.c
 echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xdw			>> e${EMULATION_NAME}.c
 echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
+echo '             && link_info.separate_code'		>> e${EMULATION_NAME}.c
+echo '             && link_info.combreloc) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xdce		>> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
 echo '             && link_info.combreloc) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xdc			>> e${EMULATION_NAME}.c
 fi
+echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
+echo '             && link_info.separate_code) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xde			>> e${EMULATION_NAME}.c
 echo '  ; else if (bfd_link_pie (&link_info)) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xd			>> e${EMULATION_NAME}.c
 fi
@@ -2381,24 +2393,45 @@ if test -n "$GENERATE_SHLIB_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
 echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
+echo '             && link_info.separate_code'		>> e${EMULATION_NAME}.c
+echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xswe		>> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
+echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
 echo '             && link_info.relro'			>> e${EMULATION_NAME}.c
 echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xsw			>> e${EMULATION_NAME}.c
 echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
+echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
+echo '             && link_info.separate_code) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xsce			>> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
 echo '             && link_info.combreloc) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xsc			>> e${EMULATION_NAME}.c
 fi
+echo '  ; else if (bfd_link_dll (&link_info)'		>> e${EMULATION_NAME}.c
+echo '             && link_info.separate_code) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xse			>> e${EMULATION_NAME}.c
 echo '  ; else if (bfd_link_dll (&link_info)) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xs			>> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 echo '  ; else if (link_info.combreloc'			>> e${EMULATION_NAME}.c
+echo '             && link_info.separate_code'		>> e${EMULATION_NAME}.c
+echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xwe			>> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.combreloc'			>> e${EMULATION_NAME}.c
 echo '             && link_info.relro'			>> e${EMULATION_NAME}.c
 echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xw			>> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.combreloc'			>> e${EMULATION_NAME}.c
+echo '             && link_info.separate_code) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xce			>> e${EMULATION_NAME}.c
 echo '  ; else if (link_info.combreloc) return'		>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xc			>> e${EMULATION_NAME}.c
 fi
+echo '  ; else if (link_info.separate_code) return'		>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xe			>> e${EMULATION_NAME}.c
 echo '  ; else return'					>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.x			>> e${EMULATION_NAME}.c
 echo '; }'						>> e${EMULATION_NAME}.c
@@ -2431,15 +2464,30 @@ fragment <<EOF
 	   && link_info.combreloc
 	   && link_info.relro
 	   && (link_info.flags & DF_BIND_NOW))
-    return "ldscripts/${EMULATION_NAME}.xdw";
+    {
+      if (link_info.separate_code)
+	return "ldscripts/${EMULATION_NAME}.xdwe";
+      else
+	return "ldscripts/${EMULATION_NAME}.xdw";
+    }
   else if (bfd_link_pie (&link_info)
 	   && link_info.combreloc)
-    return "ldscripts/${EMULATION_NAME}.xdc";
+    {
+      if (link_info.separate_code)
+	return "ldscripts/${EMULATION_NAME}.xdce";
+      else
+	return "ldscripts/${EMULATION_NAME}.xdc";
+    }
 EOF
 fi
 fragment <<EOF
   else if (bfd_link_pie (&link_info))
-    return "ldscripts/${EMULATION_NAME}.xd";
+    {
+      if (link_info.separate_code)
+	return "ldscripts/${EMULATION_NAME}.xde";
+      else
+	return "ldscripts/${EMULATION_NAME}.xd";
+    }
 EOF
 fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
@@ -2447,28 +2495,58 @@ if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 fragment <<EOF
   else if (bfd_link_dll (&link_info) && link_info.combreloc
 	   && link_info.relro && (link_info.flags & DF_BIND_NOW))
-    return "ldscripts/${EMULATION_NAME}.xsw";
+    {
+      if (link_info.separate_code)
+	return "ldscripts/${EMULATION_NAME}.xswe";
+      else
+	return "ldscripts/${EMULATION_NAME}.xsw";
+    }
   else if (bfd_link_dll (&link_info) && link_info.combreloc)
-    return "ldscripts/${EMULATION_NAME}.xsc";
+    {
+      if (link_info.separate_code)
+	return "ldscripts/${EMULATION_NAME}.xsce";
+      else
+	return "ldscripts/${EMULATION_NAME}.xsc";
+    }
 EOF
 fi
 fragment <<EOF
   else if (bfd_link_dll (&link_info))
-    return "ldscripts/${EMULATION_NAME}.xs";
+    {
+      if (link_info.separate_code)
+	return "ldscripts/${EMULATION_NAME}.xse";
+      else
+	return "ldscripts/${EMULATION_NAME}.xs";
+    }
 EOF
 fi
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 fragment <<EOF
   else if (link_info.combreloc && link_info.relro
 	   && (link_info.flags & DF_BIND_NOW))
-    return "ldscripts/${EMULATION_NAME}.xw";
+    {
+      if (link_info.separate_code)
+	return "ldscripts/${EMULATION_NAME}.xwe";
+      else
+	return "ldscripts/${EMULATION_NAME}.xw";
+    }
   else if (link_info.combreloc)
-    return "ldscripts/${EMULATION_NAME}.xc";
+    {
+      if (link_info.separate_code)
+	return "ldscripts/${EMULATION_NAME}.xce";
+      else
+	return "ldscripts/${EMULATION_NAME}.xc";
+    }
 EOF
 fi
 fragment <<EOF
   else
-    return "ldscripts/${EMULATION_NAME}.x";
+    {
+      if (link_info.separate_code)
+	return "ldscripts/${EMULATION_NAME}.xe";
+      else
+	return "ldscripts/${EMULATION_NAME}.x";
+    }
 }
 
 EOF
@@ -2648,6 +2726,8 @@ fragment <<EOF
     case 'z':
       if (strcmp (optarg, "defs") == 0)
 	link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
+      else if (strcmp (optarg, "undefs") == 0)
+	link_info.unresolved_syms_in_objects = RM_IGNORE;
       else if (strcmp (optarg, "muldefs") == 0)
 	link_info.allow_multiple_definition = TRUE;
       else if (CONST_STRNEQ (optarg, "max-page-size="))
@@ -2738,6 +2818,10 @@ fragment <<EOF
 	link_info.relro = TRUE;
       else if (strcmp (optarg, "norelro") == 0)
 	link_info.relro = FALSE;
+      else if (strcmp (optarg, "separate-code") == 0)
+	link_info.separate_code = TRUE;
+      else if (strcmp (optarg, "noseparate-code") == 0)
+	link_info.separate_code = FALSE;
       else if (strcmp (optarg, "common") == 0)
 	link_info.elf_stt_common = elf_stt_common;
       else if (strcmp (optarg, "nocommon") == 0)
