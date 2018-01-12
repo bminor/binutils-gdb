@@ -1105,6 +1105,51 @@ if { [isnative] && [which $CC] != 0 } {
 	    {} \
 	    "pr22064.so" \
 	] \
+	[list \
+	    "Build pr22393-3a.so" \
+	    "-shared -Wl,-z,separate-code,-z,max-page-size=0x1000" \
+	    "-fPIC" \
+	    {pr22393-3a.c} \
+	    {{readelf -lW pr22393-3a.rd} \
+	     {readelf -lW pr22393-3b.rd}} \
+	    "pr22393-3a.so" \
+	] \
+	[list \
+	    "Build pr22393-3a-now.so" \
+	    "-shared -Wl,-z,separate-code,-z,now,-z,max-page-size=0x1000" \
+	    "-fPIC" \
+	    {pr22393-3a.c} \
+	    {{readelf -lW pr22393-3a.rd} \
+	     {readelf -lW pr22393-3b.rd}} \
+	    "pr22393-3a-now.so" \
+	] \
+	[list \
+	    "Build pr22393-3" \
+	    "$NOPIE_LDFLAGS -Wl,-z,separate-code,-z,max-page-size=0x1000,--no-as-needed tmpdir/pr22393-2a.so" \
+	    "$NOPIE_CFLAGS" \
+	    {pr22393-3b.c} \
+	    {{readelf -lW pr22393-3a.rd} \
+	     {readelf -lW pr22393-3b.rd}} \
+	    "pr22393-3" \
+	] \
+	[list \
+	    "Build pr22393-3 (PIE)" \
+	    "-pie -Wl,-z,separate-code,-z,max-page-size=0x1000,--no-as-needed tmpdir/pr22393-2a-now.so" \
+	    "-fPIE" \
+	    {pr22393-3b.c} \
+	    {{readelf -lW pr22393-3a.rd} \
+	     {readelf -lW pr22393-3b.rd}} \
+	    "pr22393-3-pie" \
+	] \
+	[list \
+	    "Build pr22393-3 (static)" \
+	    "-static -Wl,-z,separate-code,-z,max-page-size=0x1000" \
+	    "" \
+	    {pr22393-3a.c pr22393-3b.c} \
+	    {{readelf -lW pr22393-3a.rd} \
+	     {readelf -lW pr22393-3b.rd}} \
+	    "pr22393-3-static" \
+	] \
     ]
 
     if  {[istarget "x86_64-*-linux*-gnux32"]} {
@@ -1403,6 +1448,32 @@ if { [isnative] && [which $CC] != 0 } {
 	    "pr22064-pie" \
 	    "pass.out" \
 	    "-fPIE" \
+	] \
+	[list \
+	    "Run pr22393-3" \
+	    "$NOPIE_LDFLAGS -Wl,-z,separate-code,-z,max-page-size=0x1000,--no-as-needed tmpdir/pr22393-3a.so" \
+	    "" \
+	    {pr22393-3b.c} \
+	    "pr22393-3" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run pr22393-3 (PIE)" \
+	    "-pie -Wl,-z,separate-code,-z,max-page-size=0x1000,--no-as-needed tmpdir/pr22393-3a-now.so" \
+	    "" \
+	    {pr22393-3b.c} \
+	    "pr22393-3-pie" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
+	    "Run pr22393-3 (static)" \
+	    "-static -Wl,-z,separate-code,-z,max-page-size=0x1000" \
+	    "" \
+	    {pr22393-3a.c pr22393-3b.c} \
+	    "pr22393-3-static" \
+	    "pass.out" \
 	] \
     ]
 

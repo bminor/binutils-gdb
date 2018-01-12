@@ -1,6 +1,16 @@
 2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22393
+	* testsuite/ld-x86-64/pr22393-3a.c: New file.
+	* testsuite/ld-x86-64/pr22393-3a.rd: Likewise.
+	* testsuite/ld-x86-64/pr22393-3b.c: Likewise.
+	* testsuite/ld-x86-64/pr22393-3b.rd: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run tests for -z separate-code
+	-z max-page-size=0x1000.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22393
 	* testsuite/ld-elf/pr16322.d: Add -z noseparate-code.
 	* testsuite/ld-elf/pr22393-1.s: New file.
 	* testsuite/ld-elf/pr22393-1a.d: Likewise.
