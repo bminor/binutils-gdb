@@ -1,6 +1,23 @@
 2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22393
+	* testsuite/ld-elf/pr16322.d: Add -z noseparate-code.
+	* testsuite/ld-elf/pr22393-1.s: New file.
+	* testsuite/ld-elf/pr22393-1a.d: Likewise.
+	* testsuite/ld-elf/pr22393-1b.d: Likewise.
+	* testsuite/ld-elf/pr22393-1c.d: Likewise.
+	* testsuite/ld-elf/pr22393-1d.d: Likewise.
+	* testsuite/ld-elf/pr22393-1e.d: Likewise.
+	* testsuite/ld-elf/pr22393-1f.d: Likewise.
+	* testsuite/ld-elf/pr22393-2a.c: Likewise.
+	* testsuite/ld-elf/pr22393-2a.rd: Likewise.
+	* testsuite/ld-elf/pr22393-2b.c: Likewise.
+	* testsuite/ld-elf/pr22393-2b.rd: Likewise.
+	* testsuite/ld-elf/shared.exp: Run tests for -z separate-code.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22393
 	* NEWS: Mention "-z separate-code".
 	* emultempl/elf32.em (gld${EMULATION_NAME}_get_script): Get
 	builtin linker scripts and return linker scripts from disk for
