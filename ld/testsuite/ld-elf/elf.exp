@@ -234,6 +234,21 @@ if { [check_shared_lib_support] } then {
     run_ld_link_tests {
 	{"Build pr22374 shared library"
 	    "-shared" "" "" "pr22374b.s" {} "pr22374.so" }
+    }
+    if { ![istarget "alpha-*-*"]
+	 && ![istarget "frv-*-*"]
+	 && ![istarget "hppa*-*-*"]
+	 && ![istarget "i?86-*-*"]
+	 && ![istarget "ia64-*-*"]
+	 && ![istarget "microblaze-*-*"]
+	 && ![istarget "powerpc*-*-*"]
+	 && ![istarget "x86_64-*-*"]
+	 && ![istarget "xtensa-*-*"] } {
+	# The next test checks that copy relocs are not used unnecessarily,
+	# but that is just an optimization so don't complain loudly.
+	setup_xfail "*-*-*"
+    }
+    run_ld_link_tests {
 	{"pr22374 function pointer initialization"
 	    "" "tmpdir/pr22374.so" "" "pr22374a.s"
 	    { {readelf {--wide -r --dyn-syms} "pr22374-1.r"}

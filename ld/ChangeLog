@@ -1,5 +1,10 @@
 2018-01-12  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/elf.exp: xfail "pr22374 function pointer
+	initialization" for currently failing targets.
+
+2018-01-12  Alan Modra  <amodra@gmail.com>
+
 	PR ld/22649
 	* testsuite/ld-elf/pr22649.msg: Allow other messages.
 	* testsuite/ld-elf/shared.exp: Check that --gc-sections is
