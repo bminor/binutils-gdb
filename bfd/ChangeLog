@@ -1,3 +1,9 @@
+2018-01-12  Jens Widell  <jl@opera.com>
+
+	* elf.c (setup_group): Optimize search for group by remembering
+	last found group and restarting search at that index.
+	* elf-bfd.h (struct elf_obj_tdata): Add group_search_offset field.
+
 2018-01-12  Gunther Nikl  <gnikl@users.sourceforge.net>
 
 	* aoutx.h (aout_link_check_ar_symbols): Remove default and handle

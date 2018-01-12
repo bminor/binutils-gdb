@@ -737,10 +737,14 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 
   if (num_group != (unsigned) -1)
     {
-      unsigned int i;
+      unsigned int search_offset = elf_tdata (abfd)->group_search_offset;
+      unsigned int j;
 
-      for (i = 0; i < num_group; i++)
+      for (j = 0; j < num_group; j++)
 	{
+	  /* Begin search from previous found group.  */
+	  unsigned i = (j + search_offset) % num_group;
+
 	  Elf_Internal_Shdr *shdr = elf_tdata (abfd)->group_sect_ptr[i];
 	  Elf_Internal_Group *idx;
 	  bfd_size_type n_elt;
@@ -803,7 +807,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		if (shdr->bfd_section != NULL)
 		  elf_next_in_group (shdr->bfd_section) = newsect;
 
-		i = num_group - 1;
+		elf_tdata (abfd)->group_search_offset = i;
+		j = num_group - 1;
 		break;
 	      }
 	}
