@@ -1,3 +1,8 @@
+2018-01-12  Gunther Nikl  <gnikl@users.sourceforge.net>
+
+	* aoutx.h (aout_link_check_ar_symbols): Remove default and handle
+	bfd_link_common_skip_none in switch.
+
 2018-01-12  Alan Modra  <amodra@gmail.com>
 
 	PR ld/22649

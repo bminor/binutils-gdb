@@ -3366,13 +3366,14 @@ aout_link_check_ar_symbols (bfd *abfd,
 
 	      switch (info->common_skip_ar_symbols)
 		{
+		case bfd_link_common_skip_none:
+		  break;
 		case bfd_link_common_skip_text:
 		  skip = (type == (N_TEXT | N_EXT));
 		  break;
 		case bfd_link_common_skip_data:
 		  skip = (type == (N_DATA | N_EXT));
 		  break;
-		default:
 		case bfd_link_common_skip_all:
 		  skip = 1;
 		  break;
