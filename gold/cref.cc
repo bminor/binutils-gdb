@@ -236,8 +236,12 @@ Cref_inputs::Cref_table_compare::operator()(const Symbol* s1,
     }
 
   // We should never have two different symbols with the same name and
-  // version.
+  // version, where one doesn't forward to the other.
   if (s1 == s2)
+    return false;
+  if (s1->is_forwarder() && !s2->is_forwarder())
+    return true;
+  if (!s1->is_forwarder() && s2->is_forwarder())
     return false;
   gold_unreachable();
 }

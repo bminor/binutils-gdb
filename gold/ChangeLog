@@ -1,3 +1,8 @@
+2018-01-12 Sterling Augustine <saugustine@google.com>
+
+	* cref.cc (Cref_inputs::Cref_table_compare::operator): Add
+	conditionals and calls to is_forwarder.
+
 2018-01-03  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
