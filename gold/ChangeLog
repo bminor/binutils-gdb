@@ -1,3 +1,11 @@
+2018-01-12  Eric Christopher  <echristo@gmail.com>
+
+	Apply from master:
+	2018-01-12 Sterling Augustine <saugustine@google.com>
+
+	* cref.cc (Cref_inputs::Cref_table_compare::operator): Add
+	conditionals and calls to is_forwarder.
+
 2017-11-21  Ian Lance Taylor  <iant@google.com>
 
 	Apply from master:
