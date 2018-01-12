@@ -1,5 +1,24 @@
 2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/22393
+	* NEWS: Mention "-z separate-code".
+	* emultempl/elf32.em (gld${EMULATION_NAME}_get_script): Get
+	builtin linker scripts and return linker scripts from disk for
+	"-z separate-code".
+	(gld${EMULATION_NAME}_handle_option): Handle "-z separate-code"
+	and "-z noseparate-code".
+	* genscripts.sh: Generate linker scripts for "-z separate-code".
+	(LD_FLAG): Set to *textonly for "-z separate-code".
+	* ld.texinfo: Document "-z separate-code".
+	* lexsup.c (elf_shlib_list_options): Add linker help messsages
+	for "-z separate-code" and "-z noseparate-code".
+	* scripttempl/elf.sc (SEPARATE_TEXT): New
+	(TEXT_SEGMENT_ALIGN): Likewise.
+	Use ${TEXT_SEGMENT_ALIGN} to align and pad text segment to
+	${MAXPAGESIZE}.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/22649
 	* testsuite/ld-elf/pr22649-1.s: New file.
 	* testsuite/ld-elf/pr22649-2a.s: Likewise.

@@ -1,4 +1,6 @@
 -*- text -*-
+* Add -z separate-code to generate separate code PT_LOAD segment.
+
 * Add -z globalaudit command line option to force audit libraries to be run
   for every dynamic object loaded by an executable - provided that the loader
   supports this functionality.
