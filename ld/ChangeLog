@@ -1,5 +1,13 @@
 2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/pr22393-2a.rd: Replace "-z textonly" with
+	"-z separate-code".
+	* testsuite/ld-elf/pr22393-2b.rd: Likewise.
+	* testsuite/ld-x86-64/pr22393-3a.rd: Likewise.
+	* testsuite/ld-x86-64/pr22393-3b.rd: Likewise.
+
+2018-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/22393
 	* testsuite/ld-x86-64/pr22393-3a.c: New file.
 	* testsuite/ld-x86-64/pr22393-3a.rd: Likewise.
