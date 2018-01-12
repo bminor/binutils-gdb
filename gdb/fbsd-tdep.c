@@ -62,7 +62,7 @@
 #define	KVE_END			0x10
 #define	KVE_OFFSET		0x18
 #define	KVE_FLAGS		0x2c
-#define	KVE_PROTECTION		0x56
+#define	KVE_PROTECTION		0x38
 #define	KVE_PATH		0x88
 
 /* Flags in the 'kve_protection' field in struct kinfo_vmentry.  These
