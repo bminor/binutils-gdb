@@ -1147,8 +1147,9 @@ layout will be optimized to minimize memory pages if the system is
 using pages of this size.
 
 @item defs
-Disallows undefined symbols in object files.  Undefined symbols in
-shared libraries are still allowed.
+Report unresolved symbol references from regular object files.  This
+is done even if the linker is creating a non-symbolic shared library.
+This option is the inverse of @samp{-z undefs}.
 
 @item dynamic-undefined-weak
 @itemx nodynamic-undefined-weak
@@ -1287,6 +1288,11 @@ Specifying zero will override any default non-zero sized
 Report an error if DT_TEXTREL is set, i.e., if the binary has dynamic
 relocations in read-only sections.  Don't report an error if
 @samp{notext} or @samp{textoff}.
+
+@item undefs
+Do not report unresolved symbol references from regular object files,
+either when creating an executable, or when creating a shared library.
+This option is the inverse of @samp{-z defs}.
 
 @end table
 
@@ -1693,6 +1699,7 @@ while linking a large executable.
 
 @kindex --no-undefined
 @kindex -z defs
+@kindex -z undefs
 @item --no-undefined
 @itemx -z defs
 Report unresolved symbol references from regular object files.  This
@@ -1700,6 +1707,8 @@ is done even if the linker is creating a non-symbolic shared library.
 The switch @option{--[no-]allow-shlib-undefined} controls the
 behaviour for reporting unresolved references found in shared
 libraries being linked in.
+
+The effects of this option can be reverted by using @code{-z undefs}.
 
 @kindex --allow-multiple-definition
 @kindex -z muldefs

@@ -2726,6 +2726,8 @@ fragment <<EOF
     case 'z':
       if (strcmp (optarg, "defs") == 0)
 	link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
+      else if (strcmp (optarg, "undefs") == 0)
+	link_info.unresolved_syms_in_objects = RM_IGNORE;
       else if (strcmp (optarg, "muldefs") == 0)
 	link_info.allow_multiple_definition = TRUE;
       else if (CONST_STRNEQ (optarg, "max-page-size="))
