@@ -1,3 +1,8 @@
+2018-01-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/continue-after-aborted-step-over.c: New.
+	* gdb.base/continue-after-aborted-step-over.exp: New.
+
 2018-01-11  Pedro Alves  <palves@redhat.com>
 
 	PR remote/22597
