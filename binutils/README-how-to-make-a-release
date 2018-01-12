@@ -19,6 +19,70 @@ permissions.
 How to perform a release.
 -------------------------------------------------
 
+  1. Send an email out warning contributors about the forthcoming
+     branch.  Set a date for the branch (weekends are better because
+     they are less busy).
+  
+  2. Update the libiberty and config directories and the top level
+     configure files.  
+
+  3. When branch day arrives add markers for the upcoming release to
+     gas, ld, gold and binutils NEWS files.  Likewise for all of the
+     ChangeLog files.  Add a note of the name of the new branch to
+     binutils/BRANCHES.  Commit these changes.
+     
+  4. Create the release branch using:
+
+	git tag -a binutils-2_30-branch   [eg for the 2.30 branch...]
+        git push --tags origin binutils-2_30-branch
+
+  5. Update bfd/configure and bfd/configure.ac on HEAD to indicate
+     snapshot of the following release.
+
+  6. Rename the current HEAD version entry in Bugzilla, and create a
+     new one.  E.g. rename "2.30 (HEAD)" to 2.30, and create "2.31
+     (HEAD)".  Go to "Edit products" from the bottom toolbar, click on
+     "binutils", then on "Edit versions".  If you don't have
+     permissions to do this, either ask Daniel Berlin to fix your
+     account or ask Daniel Jacobowitz to do it.
+
+  7. Regenerate various files on both branch and HEAD by configuring
+     with --enable-maintainer-mode.  No need to check in changes to
+     the autoconf/automake/etc files, but be sure the .pot files are
+     up to date.
+
+  8. Create an initial prerelease:
+
+     a. Bump the version on the branch, and check this in.
+
+     b. Create a source tarball:
+     
+          git clean -f -d -x
+          CFLAGS="-O -g0" ./src-release.sh -b binutils
+          rm -rf $release_dir/proto-toplev
+          rm $release_dir/binutils-$version
+          rm $release_dir/binutils-$version.tar
+          mv $release_dir/binutils-$version.tar.lzip ..
+ 
+     c. Build a test target using this tarball.
+
+     d. Upload the prerelease snapshot to the FTP:
+
+          scp ../binutils-$version.tar.bz2 sourceware.org:~ftp/pub/binutils/snapshots
+          ssh sourceware.org md5sum \~ftp/pub/binutils/snapshots/binutils-$version.tar.bz2
+          md5sum ../binutils-$version.tar.bz2
+
+   9. Send it to the Translation Project:
+   
+        http://translationproject.org/html/maintainers.html
+	
+      Sending mail for one of the POT files is sufficient.
+
+  10. Announce the availability of the snapshot and the branch on the
+      binutils mailing list.  Set a date for when the release will
+      actually happen.  Nag maintainers to fix any testsuite failures
+      for their architectures...
+
 xxx -- fill in stuff here -- xxx
 
 -------------------------------------------------
@@ -45,6 +109,9 @@ looks like this:
   2. Make sure that the branch sources build, test and install
      correctly.
 
+  2.5 Prepare a list of the bugs which have been fixed.  This
+      will be needed for step 8.
+      
   3. In the branch sources:
   
        a. Update the minor release number in bfd/version.m4.
@@ -124,6 +191,12 @@ Hi Everyone,
 
   Our thanks go out to all of the binutils contributors, past and
   present, for helping to make this release possible.
+
+  Here is a list of the bugs that have been fixed:
+    xx
+    xx
+    xx
+    xx
 --------------------------------------------------------------------------
 
 

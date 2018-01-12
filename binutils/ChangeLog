@@ -1,3 +1,9 @@
+2018-01-12  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Add notes on how to make the
+	branch and prelease snapshot.
+	* BRANCHES: Add binutils-2_29-branch.
+
 2018-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Note that it is now the configure.ac file and not
