@@ -1,3 +1,8 @@
+2018-01-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (gdb_compile): Ignore shlib= and shlib_load
+	options when not creating an executable.
+
 2018-01-11  Pedro Alves  <palves@redhat.com>
 
 	PR remote/22597
