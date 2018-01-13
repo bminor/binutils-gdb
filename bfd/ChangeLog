@@ -1,5 +1,10 @@
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
+	* version.m4: Bump version to 2.30.51
+	* configure: Regenerate.
+
+2018-01-13  Nick Clifton  <nickc@redhat.com>
+
 	2.30 branch created.
 
 2018-01-12  Jens Widell  <jl@opera.com>

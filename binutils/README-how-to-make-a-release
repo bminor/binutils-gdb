@@ -42,6 +42,7 @@ How to perform a release.
 
   5. Update bfd/configure and bfd/configure.ac on HEAD to indicate
      snapshot of the following release.
+       [make-prerelease.sh command hv + C]
 
   6. Rename the current HEAD version entry in Bugzilla, and create a
      new one.  E.g. rename "2.30 (HEAD)" to 2.30, and create "2.31

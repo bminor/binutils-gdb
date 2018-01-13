@@ -1,5 +1,9 @@
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+
+2018-01-13  Nick Clifton  <nickc@redhat.com>
+
 	2.30 branch created.
 	* NEWS: Add marker for 2.30.
 

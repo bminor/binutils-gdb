@@ -1,5 +1,9 @@
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+
+2018-01-13  Nick Clifton  <nickc@redhat.com>
+
 	2.30 branch created.
 
 2018-01-11  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
