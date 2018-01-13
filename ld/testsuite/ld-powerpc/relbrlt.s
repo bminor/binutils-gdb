@@ -20,7 +20,7 @@ far:
  blr
 
  .section .text.pad2,"ax"
- .space 0x40ffe0
+ .space 0x40ffec
 
  .section .text.far2far,"ax"
 far2far:

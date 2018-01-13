@@ -55,9 +55,6 @@ Disassembly of section \.text:
 .*	(7d 89 03 a6|a6 03 89 7d) 	mtctr   r12
 .*	(e9 6b 00 10|10 00 6b e9) 	ld      r11,16\(r11\)
 .*	(4e 80 04 20|20 04 80 4e) 	bctr
-.*	(60 00 00 00|00 00 00 60) 	nop
-.*	(60 00 00 00|00 00 00 60) 	nop
-.*	(60 00 00 00|00 00 00 60) 	nop
 .* <__tls_get_addr@plt>:
 .*	(38 00 00 00|00 00 00 38) 	li      r0,0
-.*	(4b ff ff c4|c4 ff ff 4b) 	b       .*
+.*	(4b ff ff d0|d0 ff ff 4b) 	b       .*

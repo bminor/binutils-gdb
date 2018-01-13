@@ -3524,7 +3524,7 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 
       if (this->glink_ != NULL)
 	{
-	  int stub_size = this->glink_->pltresolve_size;
+	  int stub_size = this->glink_->pltresolve_size();
 	  Address value = -stub_size;
 	  if (size == 64)
 	    {
@@ -3580,7 +3580,7 @@ Target_powerpc<size, big_endian>::do_plt_fde_location(const Output_data* plt,
 	  // There are two FDEs for a position independent glink.
 	  // The first covers the branch table, the second
 	  // __glink_PLTresolve at the end of glink.
-	  off_t resolve_size = this->glink_->pltresolve_size;
+	  off_t resolve_size = this->glink_->pltresolve_size();
 	  if (oview[9] == elfcpp::DW_CFA_nop)
 	    len -= resolve_size;
 	  else
@@ -4391,9 +4391,9 @@ class Stub_table : public Output_relaxed_input_section
   unsigned int
   stub_align() const
   {
-    if (size == 32)
-      return 16;
-    unsigned int min_align = 32;
+    unsigned int min_align = 4;
+    if (!parameters->options().user_set_plt_align())
+      return size == 64 ? 32 : min_align;
     unsigned int user_align = 1 << parameters->options().plt_align();
     return std::max(user_align, min_align);
   }
@@ -4425,9 +4425,8 @@ class Stub_table : public Output_relaxed_input_section
     if (size == 32)
       {
 	const Symbol* gsym = p->first.sym_;
-	if (this->targ_->is_tls_get_addr_opt(gsym))
-	  return 12 * 4;
-	return 4 * 4;
+	return (4 * 4
+		+ (this->targ_->is_tls_get_addr_opt(gsym) ? 8 * 4 : 0));
       }
 
     bool is_iplt;
@@ -4460,10 +4459,8 @@ class Stub_table : public Output_relaxed_input_section
   unsigned int
   plt_call_align(unsigned int bytes) const
   {
-    unsigned int align = 1 << parameters->options().plt_align();
-    if (align > 1)
-      bytes = (bytes + align - 1) & -align;
-    return bytes;
+    unsigned int align = this->stub_align();
+    return (bytes + align - 1) & -align;
   }
 
   // Return long branch stub size.
@@ -4473,9 +4470,10 @@ class Stub_table : public Output_relaxed_input_section
     Address loc = this->stub_address() + this->last_plt_size_ + p->second;
     if (p->first.dest_ - loc + (1 << 25) < 2 << 25)
       return 4;
-    if (size == 64 || !parameters->options().output_is_position_independent())
-      return 16;
-    return 32;
+    unsigned int bytes = 16;
+    if (size == 32 && parameters->options().output_is_position_independent())
+      bytes += 16;
+    return bytes;
   }
 
   // Write out stubs.
@@ -4884,7 +4882,6 @@ class Output_data_glink : public Output_section_data
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   static const Address invalid_address = static_cast<Address>(0) - 1;
-  static const int pltresolve_size = 16*4;
 
   Output_data_glink(Target_powerpc<size, big_endian>* targ)
     : Output_section_data(16), targ_(targ), global_entry_stubs_(),
@@ -4900,12 +4897,35 @@ class Output_data_glink : public Output_section_data
   Address
   find_global_entry(const Symbol*) const;
 
+  unsigned int
+  global_entry_align(unsigned int off) const
+  {
+    unsigned int align = 1 << parameters->options().plt_align();
+    if (!parameters->options().user_set_plt_align())
+      align = size == 64 ? 32 : 4;
+    return (off + align - 1) & -align;
+  }
+
+  unsigned int
+  global_entry_off() const
+  {
+    return this->global_entry_align(this->end_branch_table_);
+  }
+
   Address
   global_entry_address() const
   {
     gold_assert(this->is_data_size_valid());
-    unsigned int global_entry_off = (this->end_branch_table_ + 15) & -16;
-    return this->address() + global_entry_off;
+    return this->address() + this->global_entry_off();
+  }
+
+  int
+  pltresolve_size() const
+  {
+    if (size == 64)
+      return (8
+	      + (this->targ_->abiversion() < 2 ? 11 * 4 : 14 * 4));
+    return 16 * 4;
   }
 
  protected:
@@ -4977,10 +4997,11 @@ template<int size, bool big_endian>
 void
 Output_data_glink<size, big_endian>::add_global_entry(const Symbol* gsym)
 {
+  unsigned int off = this->global_entry_align(this->ge_size_);
   std::pair<typename Global_entry_stub_entries::iterator, bool> p
-    = this->global_entry_stubs_.insert(std::make_pair(gsym, this->ge_size_));
+    = this->global_entry_stubs_.insert(std::make_pair(gsym, off));
   if (p.second)
-    this->ge_size_ += 16;
+    this->ge_size_ = off + 16;
 }
 
 template<int size, bool big_endian>
@@ -5007,11 +5028,11 @@ Output_data_glink<size, big_endian>::set_final_data_size()
 	  total += 4 * (count - 1);
 
 	  total += -total & 15;
-	  total += this->pltresolve_size;
+	  total += this->pltresolve_size();
 	}
       else
 	{
-	  total += this->pltresolve_size;
+	  total += this->pltresolve_size();
 
 	  // space for branch table
 	  total += 4 * count;
@@ -5024,7 +5045,7 @@ Output_data_glink<size, big_endian>::set_final_data_size()
 	}
     }
   this->end_branch_table_ = total;
-  total = (total + 15) & -16;
+  total = this->global_entry_align(total);
   total += this->ge_size_;
 
   this->set_data_size(total);
@@ -5175,7 +5196,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		    = ((pltoff - this->targ_->first_plt_entry_offset())
 		       / this->targ_->plt_entry_size());
 		  Address glinkoff
-		    = (this->targ_->glink_section()->pltresolve_size
+		    = (this->targ_->glink_section()->pltresolve_size()
 		       + pltindex * 8);
 		  if (pltindex > 32768)
 		    glinkoff += (pltindex - 32768) * 4;
@@ -5441,26 +5462,24 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 
 		  Address off = plt_addr - got_addr;
 		  if (ha(off) == 0)
-		    {
-		      write_insn<big_endian>(p +  0, lwz_11_30 + l(off));
-		      write_insn<big_endian>(p +  4, mtctr_11);
-		      write_insn<big_endian>(p +  8, bctr);
-		    }
+		    write_insn<big_endian>(p, lwz_11_30 + l(off));
 		  else
 		    {
-		      write_insn<big_endian>(p +  0, addis_11_30 + ha(off));
-		      write_insn<big_endian>(p +  4, lwz_11_11 + l(off));
-		      write_insn<big_endian>(p +  8, mtctr_11);
-		      write_insn<big_endian>(p + 12, bctr);
+		      write_insn<big_endian>(p, addis_11_30 + ha(off));
+		      p += 4;
+		      write_insn<big_endian>(p, lwz_11_11 + l(off));
 		    }
 		}
 	      else
 		{
-		  write_insn<big_endian>(p +  0, lis_11 + ha(plt_addr));
-		  write_insn<big_endian>(p +  4, lwz_11_11 + l(plt_addr));
-		  write_insn<big_endian>(p +  8, mtctr_11);
-		  write_insn<big_endian>(p + 12, bctr);
+		  write_insn<big_endian>(p, lis_11 + ha(plt_addr));
+		  p += 4;
+		  write_insn<big_endian>(p, lwz_11_11 + l(plt_addr));
 		}
+	      p += 4;
+	      write_insn<big_endian>(p, mtctr_11);
+	      p += 4;
+	      write_insn<big_endian>(p, bctr);
 	    }
 	}
 
@@ -5479,23 +5498,29 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	    write_insn<big_endian>(p, b | (delta & 0x3fffffc));
 	  else if (!parameters->options().output_is_position_independent())
 	    {
-	      write_insn<big_endian>(p +  0, lis_12 + ha(bs->first.dest_));
-	      write_insn<big_endian>(p +  4, addi_12_12 + l(bs->first.dest_));
-	      write_insn<big_endian>(p +  8, mtctr_12);
-	      write_insn<big_endian>(p + 12, bctr);
+	      write_insn<big_endian>(p, lis_12 + ha(bs->first.dest_));
+	      p += 4;
+	      write_insn<big_endian>(p, addi_12_12 + l(bs->first.dest_));
 	    }
 	  else
 	    {
 	      delta -= 8;
-	      write_insn<big_endian>(p +  0, mflr_0);
-	      write_insn<big_endian>(p +  4, bcl_20_31);
-	      write_insn<big_endian>(p +  8, mflr_12);
-	      write_insn<big_endian>(p + 12, addis_12_12 + ha(delta));
-	      write_insn<big_endian>(p + 16, addi_12_12 + l(delta));
-	      write_insn<big_endian>(p + 20, mtlr_0);
-	      write_insn<big_endian>(p + 24, mtctr_12);
-	      write_insn<big_endian>(p + 28, bctr);
+	      write_insn<big_endian>(p, mflr_0);
+	      p += 4;
+	      write_insn<big_endian>(p, bcl_20_31);
+	      p += 4;
+	      write_insn<big_endian>(p, mflr_12);
+	      p += 4;
+	      write_insn<big_endian>(p, addis_12_12 + ha(delta));
+	      p += 4;
+	      write_insn<big_endian>(p, addi_12_12 + l(delta));
+	      p += 4;
+	      write_insn<big_endian>(p, mtlr_0);
 	    }
+	  p += 4;
+	  write_insn<big_endian>(p, mtctr_12);
+	  p += 4;
+	  write_insn<big_endian>(p, bctr);
 	}
     }
   if (this->need_save_res_)
@@ -5563,8 +5588,7 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 	      write_insn<big_endian>(p, ld_11_11 + 8),		p += 4;
 	    }
 	  write_insn<big_endian>(p, bctr),			p += 4;
-	  while (p < oview + this->pltresolve_size)
-	    write_insn<big_endian>(p, nop), p += 4;
+	  gold_assert(p == oview + this->pltresolve_size());
 
 	  // Write lazy link call stubs.
 	  uint32_t indx = 0;
@@ -5590,7 +5614,7 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 
       Address plt_base = this->targ_->plt_section()->address();
       Address iplt_base = invalid_address;
-      unsigned int global_entry_off = (this->end_branch_table_ + 15) & -16;
+      unsigned int global_entry_off = this->global_entry_off();
       Address global_entry_base = this->address() + global_entry_off;
       typename Global_entry_stub_entries::const_iterator ge;
       for (ge = this->global_entry_stubs_.begin();
@@ -5631,7 +5655,7 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 
       // Write out pltresolve branch table.
       p = oview;
-      unsigned int the_end = oview_size - this->pltresolve_size;
+      unsigned int the_end = oview_size - this->pltresolve_size();
       unsigned char* end_p = oview + the_end;
       while (p < end_p - 8 * 4)
 	write_insn<big_endian>(p, b + end_p - p), p += 4;
@@ -5639,68 +5663,85 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 	write_insn<big_endian>(p, nop), p += 4;
 
       // Write out pltresolve call stub.
+      end_p = oview + oview_size;
       if (parameters->options().output_is_position_independent())
 	{
 	  Address res0_off = 0;
 	  Address after_bcl_off = the_end + 12;
 	  Address bcl_res0 = after_bcl_off - res0_off;
 
-	  write_insn<big_endian>(p +  0, addis_11_11 + ha(bcl_res0));
-	  write_insn<big_endian>(p +  4, mflr_0);
-	  write_insn<big_endian>(p +  8, bcl_20_31);
-	  write_insn<big_endian>(p + 12, addi_11_11 + l(bcl_res0));
-	  write_insn<big_endian>(p + 16, mflr_12);
-	  write_insn<big_endian>(p + 20, mtlr_0);
-	  write_insn<big_endian>(p + 24, sub_11_11_12);
+	  write_insn<big_endian>(p, addis_11_11 + ha(bcl_res0));
+	  p += 4;
+	  write_insn<big_endian>(p, mflr_0);
+	  p += 4;
+	  write_insn<big_endian>(p, bcl_20_31);
+	  p += 4;
+	  write_insn<big_endian>(p, addi_11_11 + l(bcl_res0));
+	  p += 4;
+	  write_insn<big_endian>(p, mflr_12);
+	  p += 4;
+	  write_insn<big_endian>(p, mtlr_0);
+	  p += 4;
+	  write_insn<big_endian>(p, sub_11_11_12);
+	  p += 4;
 
 	  Address got_bcl = g_o_t + 4 - (after_bcl_off + this->address());
 
-	  write_insn<big_endian>(p + 28, addis_12_12 + ha(got_bcl));
+	  write_insn<big_endian>(p, addis_12_12 + ha(got_bcl));
+	  p += 4;
 	  if (ha(got_bcl) == ha(got_bcl + 4))
 	    {
-	      write_insn<big_endian>(p + 32, lwz_0_12 + l(got_bcl));
-	      write_insn<big_endian>(p + 36, lwz_12_12 + l(got_bcl + 4));
+	      write_insn<big_endian>(p, lwz_0_12 + l(got_bcl));
+	      p += 4;
+	      write_insn<big_endian>(p, lwz_12_12 + l(got_bcl + 4));
 	    }
 	  else
 	    {
-	      write_insn<big_endian>(p + 32, lwzu_0_12 + l(got_bcl));
-	      write_insn<big_endian>(p + 36, lwz_12_12 + 4);
+	      write_insn<big_endian>(p, lwzu_0_12 + l(got_bcl));
+	      p += 4;
+	      write_insn<big_endian>(p, lwz_12_12 + 4);
 	    }
-	  write_insn<big_endian>(p + 40, mtctr_0);
-	  write_insn<big_endian>(p + 44, add_0_11_11);
-	  write_insn<big_endian>(p + 48, add_11_0_11);
-	  write_insn<big_endian>(p + 52, bctr);
-	  write_insn<big_endian>(p + 56, nop);
-	  write_insn<big_endian>(p + 60, nop);
+	  p += 4;
+	  write_insn<big_endian>(p, mtctr_0);
+	  p += 4;
+	  write_insn<big_endian>(p, add_0_11_11);
+	  p += 4;
+	  write_insn<big_endian>(p, add_11_0_11);
 	}
       else
 	{
 	  Address res0 = this->address();
 
-	  write_insn<big_endian>(p + 0, lis_12 + ha(g_o_t + 4));
-	  write_insn<big_endian>(p + 4, addis_11_11 + ha(-res0));
+	  write_insn<big_endian>(p, lis_12 + ha(g_o_t + 4));
+	  p += 4;
+	  write_insn<big_endian>(p, addis_11_11 + ha(-res0));
+	  p += 4;
 	  if (ha(g_o_t + 4) == ha(g_o_t + 8))
-	    write_insn<big_endian>(p + 8, lwz_0_12 + l(g_o_t + 4));
+	    write_insn<big_endian>(p, lwz_0_12 + l(g_o_t + 4));
 	  else
-	    write_insn<big_endian>(p + 8, lwzu_0_12 + l(g_o_t + 4));
-	  write_insn<big_endian>(p + 12, addi_11_11 + l(-res0));
-	  write_insn<big_endian>(p + 16, mtctr_0);
-	  write_insn<big_endian>(p + 20, add_0_11_11);
+	    write_insn<big_endian>(p, lwzu_0_12 + l(g_o_t + 4));
+	  p += 4;
+	  write_insn<big_endian>(p, addi_11_11 + l(-res0));
+	  p += 4;
+	  write_insn<big_endian>(p, mtctr_0);
+	  p += 4;
+	  write_insn<big_endian>(p, add_0_11_11);
+	  p += 4;
 	  if (ha(g_o_t + 4) == ha(g_o_t + 8))
-	    write_insn<big_endian>(p + 24, lwz_12_12 + l(g_o_t + 8));
+	    write_insn<big_endian>(p, lwz_12_12 + l(g_o_t + 8));
 	  else
-	    write_insn<big_endian>(p + 24, lwz_12_12 + 4);
-	  write_insn<big_endian>(p + 28, add_11_0_11);
-	  write_insn<big_endian>(p + 32, bctr);
-	  write_insn<big_endian>(p + 36, nop);
-	  write_insn<big_endian>(p + 40, nop);
-	  write_insn<big_endian>(p + 44, nop);
-	  write_insn<big_endian>(p + 48, nop);
-	  write_insn<big_endian>(p + 52, nop);
-	  write_insn<big_endian>(p + 56, nop);
-	  write_insn<big_endian>(p + 60, nop);
+	    write_insn<big_endian>(p, lwz_12_12 + 4);
+	  p += 4;
+	  write_insn<big_endian>(p, add_11_0_11);
 	}
-      p += 64;
+      p += 4;
+      write_insn<big_endian>(p, bctr);
+      p += 4;
+      while (p < end_p)
+	{
+	  write_insn<big_endian>(p, nop);
+	  p += 4;
+	}
     }
 
   of->write_output_view(off, oview_size, oview);
@@ -8161,7 +8202,7 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
 	      this->glink_->finalize_data_size();
 	      odyn->add_section_plus_offset(elfcpp::DT_PPC64_GLINK,
 					    this->glink_,
-					    (this->glink_->pltresolve_size
+					    (this->glink_->pltresolve_size()
 					     - 32));
 	    }
 	  if (this->has_localentry0_ || this->has_tls_get_addr_opt_)
@@ -10186,8 +10227,6 @@ Target_selector_powerpc<64, true> target_selector_ppc64;
 Target_selector_powerpc<64, false> target_selector_ppc64le;
 
 // Instantiate these constants for -O0
-template<int size, bool big_endian>
-const int Output_data_glink<size, big_endian>::pltresolve_size;
 template<int size, bool big_endian>
 const typename Output_data_glink<size, big_endian>::Address
   Output_data_glink<size, big_endian>::invalid_address;

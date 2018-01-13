@@ -68,8 +68,13 @@ static bfd_reloc_status_type ppc_elf_unhandled_reloc
 
 /* For new-style .glink and .plt.  */
 #define GLINK_PLTRESOLVE 16*4
-#define GLINK_ENTRY_SIZE 4*4
-#define TLS_GET_ADDR_GLINK_SIZE 12*4
+#define GLINK_ENTRY_SIZE(htab, h)					\
+  ((4*4									\
+    + (h != NULL							\
+       && h == htab->tls_get_addr					\
+       && !htab->params->no_tls_get_addr_opt ? 8*4 : 0)			\
+    + (1u << htab->params->plt_stub_align) - 1)				\
+   & -(1u << htab->params->plt_stub_align))
 
 /* VxWorks uses its own plt layout, filled in by the static linker.  */
 
@@ -2873,9 +2878,9 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 static bfd_boolean
 is_nonpic_glink_stub (bfd *abfd, asection *glink, bfd_vma off)
 {
-  bfd_byte buf[GLINK_ENTRY_SIZE];
+  bfd_byte buf[4 * 4];
 
-  if (!bfd_get_section_contents (abfd, glink, buf, off, GLINK_ENTRY_SIZE))
+  if (!bfd_get_section_contents (abfd, glink, buf, off, sizeof buf))
     return FALSE;
 
   return ((bfd_get_32 (abfd, buf + 0) & 0xffff0000) == LIS_11
@@ -2902,10 +2907,10 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
   asection *plt, *relplt, *dynamic, *glink;
   bfd_vma glink_vma = 0;
   bfd_vma resolv_vma = 0;
-  bfd_vma stub_vma;
+  bfd_vma stub_off;
   asymbol *s;
   arelent *p;
-  long count, i;
+  long count, i, stub_delta;
   size_t size;
   char *names;
   bfd_byte buf[4];
@@ -3016,9 +3021,14 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
   /* If the stubs are those for -shared/-pie then we might have
      multiple stubs for each plt entry.  If that is the case then
      there is no way to associate stubs with their plt entries short
-     of figuring out the GOT pointer value used in the stub.  */
-  if (!is_nonpic_glink_stub (abfd, glink,
-			     glink_vma - GLINK_ENTRY_SIZE - glink->vma))
+     of figuring out the GOT pointer value used in the stub.
+     The offsets tested here need to cover all possible values of
+     GLINK_ENTRY_SIZE for other than __tls_get_addr_opt.  */
+  stub_off = glink_vma - glink->vma;
+  for (stub_delta = 16; stub_delta <= 32; stub_delta += 8)
+    if (is_nonpic_glink_stub (abfd, glink, stub_off - stub_delta))
+      break;
+  if (stub_delta > 32)
     return 0;
 
   slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
@@ -3043,13 +3053,16 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
   if (s == NULL)
     return -1;
 
-  stub_vma = glink_vma;
+  stub_off = glink_vma - glink->vma;
   names = (char *) (s + count + 1 + (resolv_vma != 0));
   p = relplt->relocation + count - 1;
   for (i = 0; i < count; i++)
     {
       size_t len;
 
+      stub_off -= stub_delta;
+      if (strcmp ((*p->sym_ptr_ptr)->name, "__tls_get_addr_opt") == 0)
+	stub_off -= 32;
       *s = **p->sym_ptr_ptr;
       /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
 	 we are defining a symbol, ensure one of them is set.  */
@@ -3057,10 +3070,7 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
 	s->flags |= BSF_GLOBAL;
       s->flags |= BSF_SYNTHETIC;
       s->section = glink;
-      stub_vma -= 16;
-      if (strcmp ((*p->sym_ptr_ptr)->name, "__tls_get_addr_opt") == 0)
-	stub_vma -= 32;
-      s->value = stub_vma - glink->vma;
+      s->value = stub_off;
       s->name = names;
       s->udata.p = NULL;
       len = strlen ((*p->sym_ptr_ptr)->name);
@@ -3355,7 +3365,7 @@ ppc_elf_link_hash_table_create (bfd *abfd)
 {
   struct ppc_elf_link_hash_table *ret;
   static struct ppc_elf_params default_params
-    = { PLT_OLD, 0, 1, 0, 0, 12, 0, 0, 0 };
+    = { PLT_OLD, 0, 0, 1, 0, 0, 12, 0, 0, 0 };
 
   ret = bfd_zmalloc (sizeof (struct ppc_elf_link_hash_table));
   if (ret == NULL)
@@ -6015,10 +6025,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		if (!doneone || bfd_link_pic (info))
 		  {
 		    glink_offset = s->size;
-		    s->size += GLINK_ENTRY_SIZE;
-		    if (h == htab->tls_get_addr
-			&& !htab->params->no_tls_get_addr_opt)
-		      s->size += TLS_GET_ADDR_GLINK_SIZE - GLINK_ENTRY_SIZE;
+		    s->size += GLINK_ENTRY_SIZE (htab, h);
 		  }
 		if (!doneone
 		    && !bfd_link_pic (info)
@@ -6333,7 +6340,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 		if (!doneone || bfd_link_pic (info))
 		  {
 		    glink_offset = s->size;
-		    s->size += GLINK_ENTRY_SIZE;
+		    s->size += GLINK_ENTRY_SIZE (htab, NULL);
 		  }
 		ent->glink_offset = glink_offset;
 
@@ -6401,10 +6408,9 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
       && htab->elf.dynamic_sections_created)
     {
       htab->glink_pltresolve = htab->glink->size;
-      /* Space for the branch table.  ??? We don't need entries for
-	 non-dynamic symbols in this table.  This case can arise with
-	 static ifuncs or forced local ifuncs.  */
-      htab->glink->size += htab->glink->size / (GLINK_ENTRY_SIZE / 4) - 4;
+      /* Space for the branch table.  */
+      htab->glink->size
+	+= htab->elf.srelplt->size / (sizeof (Elf32_External_Rela) / 4) - 4;
       /* Pad out to align the start of PLTresolve.  */
       htab->glink->size += -htab->glink->size & (htab->params->ppc476_workaround
 						 ? 63 : 15);
@@ -7443,12 +7449,36 @@ elf_finish_pointer_linker_section (bfd *input_bfd,
 #define PPC_HA(v) PPC_HI ((v) + 0x8000)
 
 static void
-write_glink_stub (struct plt_entry *ent, asection *plt_sec, unsigned char *p,
+write_glink_stub (struct elf_link_hash_entry *h, struct plt_entry *ent,
+		  asection *plt_sec, unsigned char *p,
 		  struct bfd_link_info *info)
 {
   struct ppc_elf_link_hash_table *htab = ppc_elf_hash_table (info);
   bfd *output_bfd = info->output_bfd;
   bfd_vma plt;
+  unsigned char *end = p + GLINK_ENTRY_SIZE (htab, h);
+
+  if (h != NULL
+      && h == htab->tls_get_addr
+      && !htab->params->no_tls_get_addr_opt)
+    {
+      bfd_put_32 (output_bfd, LWZ_11_3, p);
+      p += 4;
+      bfd_put_32 (output_bfd, LWZ_12_3 + 4, p);
+      p += 4;
+      bfd_put_32 (output_bfd, MR_0_3, p);
+      p += 4;
+      bfd_put_32 (output_bfd, CMPWI_11_0, p);
+      p += 4;
+      bfd_put_32 (output_bfd, ADD_3_12_2, p);
+      p += 4;
+      bfd_put_32 (output_bfd, BEQLR, p);
+      p += 4;
+      bfd_put_32 (output_bfd, MR_3_0, p);
+      p += 4;
+      bfd_put_32 (output_bfd, NOP, p);
+      p += 4;
+    }
 
   plt = ((ent->plt.offset & ~1)
 	 + plt_sec->output_section->vma
@@ -7468,26 +7498,12 @@ write_glink_stub (struct plt_entry *ent, asection *plt_sec, unsigned char *p,
       plt -= got;
 
       if (plt + 0x8000 < 0x10000)
-	{
-	  bfd_put_32 (output_bfd, LWZ_11_30 + PPC_LO (plt), p);
-	  p += 4;
-	  bfd_put_32 (output_bfd, MTCTR_11, p);
-	  p += 4;
-	  bfd_put_32 (output_bfd, BCTR, p);
-	  p += 4;
-	  bfd_put_32 (output_bfd, htab->params->ppc476_workaround ? BA : NOP, p);
-	  p += 4;
-	}
+	bfd_put_32 (output_bfd, LWZ_11_30 + PPC_LO (plt), p);
       else
 	{
 	  bfd_put_32 (output_bfd, ADDIS_11_30 + PPC_HA (plt), p);
 	  p += 4;
 	  bfd_put_32 (output_bfd, LWZ_11_11 + PPC_LO (plt), p);
-	  p += 4;
-	  bfd_put_32 (output_bfd, MTCTR_11, p);
-	  p += 4;
-	  bfd_put_32 (output_bfd, BCTR, p);
-	  p += 4;
 	}
     }
   else
@@ -7495,10 +7511,15 @@ write_glink_stub (struct plt_entry *ent, asection *plt_sec, unsigned char *p,
       bfd_put_32 (output_bfd, LIS_11 + PPC_HA (plt), p);
       p += 4;
       bfd_put_32 (output_bfd, LWZ_11_11 + PPC_LO (plt), p);
-      p += 4;
-      bfd_put_32 (output_bfd, MTCTR_11, p);
-      p += 4;
-      bfd_put_32 (output_bfd, BCTR, p);
+    }
+  p += 4;
+  bfd_put_32 (output_bfd, MTCTR_11, p);
+  p += 4;
+  bfd_put_32 (output_bfd, BCTR, p);
+  p += 4;
+  while (p < end)
+    {
+      bfd_put_32 (output_bfd, htab->params->ppc476_workaround ? BA : NOP, p);
       p += 4;
     }
 }
@@ -8253,7 +8274,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		{
 		  unsigned char *p = ((unsigned char *) htab->glink->contents
 				      + ent->glink_offset);
-		  write_glink_stub (ent, htab->elf.iplt, p, info);
+
+		  write_glink_stub (NULL, ent, htab->elf.iplt, p, info);
 		  ent->glink_offset |= 1;
 		}
 
@@ -10191,33 +10213,13 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 	  {
 	    unsigned char *p;
 	    asection *splt = htab->elf.splt;
+
 	    if (!htab->elf.dynamic_sections_created
 		|| h->dynindx == -1)
 	      splt = htab->elf.iplt;
 
 	    p = (unsigned char *) htab->glink->contents + ent->glink_offset;
-
-	    if (h == htab->tls_get_addr && !htab->params->no_tls_get_addr_opt)
-	      {
-		bfd_put_32 (output_bfd, LWZ_11_3, p);
-		p += 4;
-		bfd_put_32 (output_bfd, LWZ_12_3 + 4, p);
-		p += 4;
-		bfd_put_32 (output_bfd, MR_0_3, p);
-		p += 4;
-		bfd_put_32 (output_bfd, CMPWI_11_0, p);
-		p += 4;
-		bfd_put_32 (output_bfd, ADD_3_12_2, p);
-		p += 4;
-		bfd_put_32 (output_bfd, BEQLR, p);
-		p += 4;
-		bfd_put_32 (output_bfd, MR_3_0, p);
-		p += 4;
-		bfd_put_32 (output_bfd, NOP, p);
-		p += 4;
-	      }
-
-	    write_glink_stub (ent, splt, p, info);
+	    write_glink_stub (h, ent, splt, p, info);
 
 	    if (!bfd_link_pic (info))
 	      /* We only need one non-PIC glink stub.  */
@@ -10502,7 +10504,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
       unsigned char *p;
       unsigned char *endp;
       bfd_vma res0;
-      unsigned int i;
 
       /*
        * PIC glink code is the following:
@@ -10539,28 +10540,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
        *    add 0,11,11
        *    add 11,0,11			# r11 = index * 12 = reloc offset.
        *    bctr
-       */
-      static const unsigned int pic_plt_resolve[] =
-	{
-	  ADDIS_11_11,
-	  MFLR_0,
-	  BCL_20_31,
-	  ADDI_11_11,
-	  MFLR_12,
-	  MTLR_0,
-	  SUB_11_11_12,
-	  ADDIS_12_12,
-	  LWZ_0_12,
-	  LWZ_12_12,
-	  MTCTR_0,
-	  ADD_0_11_11,
-	  ADD_11_0_11,
-	  BCTR,
-	  NOP,
-	  NOP
-	};
-
-      /*
+       *
        * Non-PIC glink code is a little simpler.
        *
        * # ith PLT code stub.
@@ -10582,30 +10562,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
        *    add 11,0,11			# r11 = index * 12 = reloc offset.
        *    bctr
        */
-      static const unsigned int plt_resolve[] =
-	{
-	  LIS_12,
-	  ADDIS_11_11,
-	  LWZ_0_12,
-	  ADDI_11_11,
-	  MTCTR_0,
-	  ADD_0_11_11,
-	  LWZ_12_12,
-	  ADD_11_0_11,
-	  BCTR,
-	  NOP,
-	  NOP,
-	  NOP,
-	  NOP,
-	  NOP,
-	  NOP,
-	  NOP
-	};
-
-      if (ARRAY_SIZE (pic_plt_resolve) != GLINK_PLTRESOLVE / 4)
-	abort ();
-      if (ARRAY_SIZE (plt_resolve) != GLINK_PLTRESOLVE / 4)
-	abort ();
 
       /* Build the branch table, one for each plt entry (less one),
 	 and perhaps some padding.  */
@@ -10662,80 +10618,83 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
 
       /* Last comes the PLTresolve stub.  */
+      endp = p + GLINK_PLTRESOLVE;
       if (bfd_link_pic (info))
 	{
 	  bfd_vma bcl;
-
-	  for (i = 0; i < ARRAY_SIZE (pic_plt_resolve); i++)
-	    {
-	      unsigned int insn = pic_plt_resolve[i];
-
-	      if (htab->params->ppc476_workaround && insn == NOP)
-		insn = BA + 0;
-	      bfd_put_32 (output_bfd, insn, p);
-	      p += 4;
-	    }
-	  p -= 4 * ARRAY_SIZE (pic_plt_resolve);
 
 	  bcl = (htab->glink->size - GLINK_PLTRESOLVE + 3*4
 		 + htab->glink->output_section->vma
 		 + htab->glink->output_offset);
 
-	  bfd_put_32 (output_bfd,
-		      ADDIS_11_11 + PPC_HA (bcl - res0), p + 0*4);
-	  bfd_put_32 (output_bfd,
-		      ADDI_11_11 + PPC_LO (bcl - res0), p + 3*4);
-	  bfd_put_32 (output_bfd,
-		      ADDIS_12_12 + PPC_HA (got + 4 - bcl), p + 7*4);
+	  bfd_put_32 (output_bfd, ADDIS_11_11 + PPC_HA (bcl - res0), p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, MFLR_0, p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, BCL_20_31, p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, ADDI_11_11 + PPC_LO (bcl - res0), p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, MFLR_12, p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, MTLR_0, p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, SUB_11_11_12, p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, ADDIS_12_12 + PPC_HA (got + 4 - bcl), p);
+	  p += 4;
 	  if (PPC_HA (got + 4 - bcl) == PPC_HA (got + 8 - bcl))
 	    {
-	      bfd_put_32 (output_bfd,
-			  LWZ_0_12 + PPC_LO (got + 4 - bcl), p + 8*4);
-	      bfd_put_32 (output_bfd,
-			  LWZ_12_12 + PPC_LO (got + 8 - bcl), p + 9*4);
+	      bfd_put_32 (output_bfd, LWZ_0_12 + PPC_LO (got + 4 - bcl), p);
+	      p += 4;
+	      bfd_put_32 (output_bfd, LWZ_12_12 + PPC_LO (got + 8 - bcl), p);
+	      p += 4;
 	    }
 	  else
 	    {
-	      bfd_put_32 (output_bfd,
-			  LWZU_0_12 + PPC_LO (got + 4 - bcl), p + 8*4);
-	      bfd_put_32 (output_bfd,
-			  LWZ_12_12 + 4, p + 9*4);
+	      bfd_put_32 (output_bfd, LWZU_0_12 + PPC_LO (got + 4 - bcl), p);
+	      p += 4;
+	      bfd_put_32 (output_bfd, LWZ_12_12 + 4, p);
+	      p += 4;
 	    }
+	  bfd_put_32 (output_bfd, MTCTR_0, p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, ADD_0_11_11, p);
 	}
       else
 	{
-	  for (i = 0; i < ARRAY_SIZE (plt_resolve); i++)
-	    {
-	      unsigned int insn = plt_resolve[i];
-
-	      if (htab->params->ppc476_workaround && insn == NOP)
-		insn = BA + 0;
-	      bfd_put_32 (output_bfd, insn, p);
-	      p += 4;
-	    }
-	  p -= 4 * ARRAY_SIZE (plt_resolve);
-
-	  bfd_put_32 (output_bfd,
-		      LIS_12 + PPC_HA (got + 4), p + 0*4);
-	  bfd_put_32 (output_bfd,
-		      ADDIS_11_11 + PPC_HA (-res0), p + 1*4);
-	  bfd_put_32 (output_bfd,
-		      ADDI_11_11 + PPC_LO (-res0), p + 3*4);
+	  bfd_put_32 (output_bfd, LIS_12 + PPC_HA (got + 4), p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, ADDIS_11_11 + PPC_HA (-res0), p);
+	  p += 4;
 	  if (PPC_HA (got + 4) == PPC_HA (got + 8))
-	    {
-	      bfd_put_32 (output_bfd,
-			  LWZ_0_12 + PPC_LO (got + 4), p + 2*4);
-	      bfd_put_32 (output_bfd,
-			  LWZ_12_12 + PPC_LO (got + 8), p + 6*4);
-	    }
+	    bfd_put_32 (output_bfd, LWZ_0_12 + PPC_LO (got + 4), p);
 	  else
-	    {
-	      bfd_put_32 (output_bfd,
-			  LWZU_0_12 + PPC_LO (got + 4), p + 2*4);
-	      bfd_put_32 (output_bfd,
-			  LWZ_12_12 + 4, p + 6*4);
-	    }
+	    bfd_put_32 (output_bfd, LWZU_0_12 + PPC_LO (got + 4), p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, ADDI_11_11 + PPC_LO (-res0), p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, MTCTR_0, p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, ADD_0_11_11, p);
+	  p += 4;
+	  if (PPC_HA (got + 4) == PPC_HA (got + 8))
+	    bfd_put_32 (output_bfd, LWZ_12_12 + PPC_LO (got + 8), p);
+	  else
+	    bfd_put_32 (output_bfd, LWZ_12_12 + 4, p);
 	}
+      p += 4;
+      bfd_put_32 (output_bfd, ADD_11_0_11, p);
+      p += 4;
+      bfd_put_32 (output_bfd, BCTR, p);
+      p += 4;
+      while (p < endp)
+	{
+	  bfd_put_32 (output_bfd,
+		      htab->params->ppc476_workaround ? BA : NOP, p);
+	  p += 4;
+	}
+      BFD_ASSERT (p == endp);
     }
 
   if (htab->glink_eh_frame != NULL

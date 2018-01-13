@@ -1,3 +1,28 @@
+2018-01-18  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc32elf.em (params): Init new field.
+	(enum ppc32_opt): New enum to define OPTION_* values.  Add
+	OPTION_PLT_ALIGN and OPTION_NO_PLT_ALIGN.
+	(PARSE_AND_LIST_LONGOPTS): Handle new options.
+	(PARSE_AND_LIST_ARGS_CASES): Likewise.
+	(PARSE_AND_LIST_OPTIONS): Likewise.  Break up help output.
+	* emultempl/ppc64elf.em (ppc_add_stub_section): Init alignment
+	correctly for negative --plt-stub-align.
+	* testsuite/ld-powerpc/elfv2exe.d,
+	* testsuite/ld-powerpc/elfv2so.d,
+	* testsuite/ld-powerpc/relbrlt.d,
+	* testsuite/ld-powerpc/relbrlt.s,
+	* testsuite/ld-powerpc/tlsexe.d,
+	* testsuite/ld-powerpc/tlsexe.r,
+	* testsuite/ld-powerpc/tlsexe32.d,
+	* testsuite/ld-powerpc/tlsexe32.g,
+	* testsuite/ld-powerpc/tlsexe32.r,
+	* testsuite/ld-powerpc/tlsexetoc.d,
+	* testsuite/ld-powerpc/tlsexetoc.r,
+	* testsuite/ld-powerpc/tlsopt5_32.d,
+	* testsuite/ld-powerpc/tlsso.d,
+	* testsuite/ld-powerpc/tlstocso.d: Update for changed stub order.
+
 2018-01-16  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt_BR.po: Updated Brazilian Portugese translation.

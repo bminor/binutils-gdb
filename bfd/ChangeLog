@@ -1,3 +1,40 @@
+2018-01-18  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (GLINK_ENTRY_SIZE): Add parameters, handle
+	__tls_get_addr_opt, and alignment sizing.
+	(TLS_GET_ADDR_GLINK_SIZE): Delete.
+	(is_nonpic_glink_stub): Don't use GLINK_ENTRY_SIZE.
+	(ppc_elf_get_synthetic_symtab): Recognize stubs spaced at 4, 6,
+	or 8 insns.
+	(ppc_elf_link_hash_table_create): Init new ppc_elf_params field.
+	(allocate_dynrelocs): Use new GLINK_ENTRY_SIZE.
+	(ppc_elf_size_dynamic_sections): Likewise.  Size branch table
+	by PLT reloc count.
+	(write_glink_stub): Handle __tls_get_addr_opt stub.
+	Pad out to size given by GLINK_ENTRY_SIZE.
+	(ppc_elf_relocate_section): Adjust write_glink_stub call.
+	(ppc_elf_finish_dynamic_symbol): Likewise.
+	(ppc_elf_finish_dynamic_sections): Write PLTresolve without using
+	insn array since so many need rewriting.
+	* elf32-ppc.h (struct ppc_elf_params): Add plt_stub_align.
+	* elf64-ppc.c (GLINK_PLTRESOLVE_SIZE): Rename from
+	GLINK_CALL_STUB_SIZE.  Add htab param and evaluate to size without
+	nops.  Adjust all uses.
+	(ppc64_elf_get_synthetic_symtab): Don't use GLINK_CALL_STUB_SIZE
+	in glink_vma calculation.
+	(struct ppc_link_hash_table): Add global_entry section pointer.
+	(create_linkage_sections): Create separate section for global
+	entry stubs.
+	(PPC_LO, PPC_HI, PPC_HA): Move earlier.
+	(size_global_entry_stubs): Handle sizing for aligned stubs.
+	(ppc64_elf_size_dynamic_sections): Handle global_entry alloc,
+	and don't stash end of glink branch table in rawsize.
+	(ppc_build_one_stub): Rewrite stub size calculations.
+	(build_global_entry_stubs): Use new section.
+	(ppc64_elf_build_stubs): Don't pad __glink_PLTresolve with nops.
+	Build lazy link stubs out to end of section.  Build global entry
+	stubs in new section.
+
 2018-01-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.
