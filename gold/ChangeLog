@@ -1,3 +1,19 @@
+2018-01-17  Alan Modra  <amodra@gmail.com>
+
+	* options.h (plt_align): Support for PowerPC32 too.
+	* powerpc.cc (Stub_table::stub_align): Heed --plt-align for 32-bit.
+	(Stub_table::plt_call_size, branch_stub_size): Tidy.
+	(Stub_table::plt_call_align): Implement using stub_align.
+	(Output_data_glink::global_entry_align): New function.
+	(Output_data_glink::global_entry_off): New function.
+	(Output_data_glink::global_entry_address): Use global_entry_off.
+	(Output_data_glink::pltresolve_size): New function, replacing
+	pltresolve_size_ constant.  Update all uses.
+	(Output_data_glink::add_global_entry): Align offset.
+	(Output_data_glink::set_final_data_size): Use global_entry_align.
+	(Stub_table::do_write): Don't pad __glink_PLTrelsolve with nops.
+	Tidy stub output.  Use global_entry_off.
+
 2018-01-15  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/22694

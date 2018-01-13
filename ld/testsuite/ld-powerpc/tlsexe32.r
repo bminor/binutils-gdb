@@ -16,7 +16,7 @@ Section Headers:
  +\[[ 0-9]+\] \.dynstr +.*
  +\[[ 0-9]+\] \.rela\.dyn +.*
  +\[[ 0-9]+\] \.rela\.plt +.*
- +\[[ 0-9]+\] \.text +PROGBITS +[0-9a-f]+ [0-9a-f]+ 000100 00 +AX +0 +0 +16
+ +\[[ 0-9]+\] \.text +PROGBITS +[0-9a-f]+ [0-9a-f]+ 0000f0 00 +AX +0 +0 +16
  +\[[ 0-9]+\] \.tdata +PROGBITS +[0-9a-f]+ [0-9a-f]+ 00001c 00 WAT +0 +0 +4
  +\[[ 0-9]+\] \.tbss +NOBITS +[0-9a-f]+ [0-9a-f]+ 00001c 00 WAT +0 +0 +4
  +\[[ 0-9]+\] \.dynamic +DYNAMIC +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 08 +WA +4 +0 +4

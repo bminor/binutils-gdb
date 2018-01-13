@@ -38,7 +38,8 @@ static int notlsopt = 0;
 /* Choose the correct place for .got.  */
 static int old_got = 0;
 
-static struct ppc_elf_params params = { PLT_UNSET, -1, 0, 0, 0, 0, 0, 0, 0 };
+static struct ppc_elf_params params = { PLT_UNSET, 0, -1,
+					0, 0, 0, 0, 0, 0, 0 };
 
 static void
 ppc_after_open_output (void)
@@ -239,17 +240,22 @@ fi
 # parse_args and list_options functions.
 #
 PARSE_AND_LIST_PROLOGUE=${PARSE_AND_LIST_PROLOGUE}'
-#define OPTION_NO_TLS_OPT		321
-#define OPTION_NO_TLS_GET_ADDR_OPT	(OPTION_NO_TLS_OPT + 1)
-#define OPTION_NEW_PLT			(OPTION_NO_TLS_GET_ADDR_OPT + 1)
-#define OPTION_OLD_PLT			(OPTION_NEW_PLT + 1)
-#define OPTION_OLD_GOT			(OPTION_OLD_PLT + 1)
-#define OPTION_STUBSYMS			(OPTION_OLD_GOT + 1)
-#define OPTION_NO_STUBSYMS		(OPTION_STUBSYMS + 1)
-#define OPTION_PPC476_WORKAROUND	(OPTION_NO_STUBSYMS + 1)
-#define OPTION_NO_PPC476_WORKAROUND	(OPTION_PPC476_WORKAROUND + 1)
-#define OPTION_NO_PICFIXUP		(OPTION_NO_PPC476_WORKAROUND + 1)
-#define OPTION_VLE_RELOC_FIXUP		(OPTION_NO_PICFIXUP + 1)
+enum ppc32_opt
+{
+  OPTION_NO_TLS_OPT = 321,
+  OPTION_NO_TLS_GET_ADDR_OPT,
+  OPTION_NEW_PLT,
+  OPTION_OLD_PLT,
+  OPTION_PLT_ALIGN,
+  OPTION_NO_PLT_ALIGN,
+  OPTION_OLD_GOT,
+  OPTION_STUBSYMS,
+  OPTION_NO_STUBSYMS,
+  OPTION_PPC476_WORKAROUND,
+  OPTION_NO_PPC476_WORKAROUND,
+  OPTION_NO_PICFIXUP,
+  OPTION_VLE_RELOC_FIXUP
+};
 '
 
 PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
@@ -261,6 +267,8 @@ if test -z "$VXWORKS_BASE_EM_FILE" ; then
   PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "secure-plt", no_argument, NULL, OPTION_NEW_PLT },
   { "bss-plt", no_argument, NULL, OPTION_OLD_PLT },
+  { "plt-align", no_argument, NULL, OPTION_PLT_ALIGN },
+  { "no-plt-align", no_argument, NULL, OPTION_NO_PLT_ALIGN },
   { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },'
 fi
 PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
@@ -272,21 +280,47 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
 
 PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("\
-  --emit-stub-syms            Label linker stubs with a symbol.\n\
-  --no-emit-stub-syms         Don'\''t label linker stubs with a symbol.\n\
-  --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n\
-  --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n'
+  --emit-stub-syms            Label linker stubs with a symbol.\n"
+		   ));
+  fprintf (file, _("\
+  --no-emit-stub-syms         Don'\''t label linker stubs with a symbol.\n"
+		   ));
+  fprintf (file, _("\
+  --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n"
+		   ));
+  fprintf (file, _("\
+  --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n"
+		   ));'
 if test -z "$VXWORKS_BASE_EM_FILE" ; then
   PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'\
-  --secure-plt                Use new-style PLT if possible.\n\
-  --bss-plt                   Force old-style BSS PLT.\n\
-  --sdata-got                 Force GOT location just before .sdata.\n'
+  fprintf (file, _("\
+  --secure-plt                Use new-style PLT if possible.\n"
+		   ));
+  fprintf (file, _("\
+  --bss-plt                   Force old-style BSS PLT.\n"
+		   ));
+  fprintf (file, _("\
+  --plt-align                 Align PLT call stubs to fit cache lines.\n"
+		   ));
+  fprintf (file, _("\
+  --no-plt-align              Dont'\''t align individual PLT call stubs.\n"
+		   ));
+  fprintf (file, _("\
+  --sdata-got                 Force GOT location just before .sdata.\n"
+		   ));'
 fi
 PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'\
+  fprintf (file, _("\
   --ppc476-workaround [=pagesize]\n\
-                              Avoid a cache bug on ppc476.\n\
-  --no-ppc476-workaround      Disable workaround.\n\
-  --no-pic-fixup              Don'\''t edit non-pic to pic.\n\
+                              Avoid a cache bug on ppc476.\n"
+		   ));
+  fprintf (file, _("\
+  --no-ppc476-workaround      Disable workaround.\n"
+		   ));
+  fprintf (file, _("\
+  --no-pic-fixup              Don'\''t edit non-pic to pic.\n"
+		   ));
+  fprintf (file, _("\
   --vle-reloc-fixup           Correct old object file 16A/16D relocation.\n"
 		   ));
 '
@@ -314,6 +348,14 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_OLD_PLT:
       params.plt_style = PLT_OLD;
+      break;
+
+    case OPTION_PLT_ALIGN:
+      params.plt_stub_align = 5;
+      break;
+
+    case OPTION_NO_PLT_ALIGN:
+      params.plt_stub_align = 0;
       break;
 
     case OPTION_OLD_GOT:

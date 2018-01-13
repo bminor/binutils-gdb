@@ -187,8 +187,9 @@ static bfd_vma opd_entry_value
 #define ADDIS_R12_R12	0x3d8c0000	/* addis %r12,%r12,xxx@ha */
 #define LD_R12_0R12	0xe98c0000	/* ld	 %r12,xxx@l(%r12) */
 
-/* glink call stub instructions.  We enter with the index in R0.  */
-#define GLINK_CALL_STUB_SIZE (16*4)
+/* __glink_PLTresolve stub instructions.  We enter with the index in R0.  */
+#define GLINK_PLTRESOLVE_SIZE(htab)			\
+  (8u + (htab->opd_abi ? 11 * 4 : 14 * 4))
 					/* 0:				*/
 					/*  .quad plt0-1f		*/
 					/* __glink:			*/
@@ -3515,9 +3516,9 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
 	      if (dyn.d_tag == DT_PPC64_GLINK)
 		{
-		  /* The first glink stub starts at offset 32; see
-		     comment in ppc64_elf_finish_dynamic_sections. */
-		  glink_vma = dyn.d_un.d_val + GLINK_CALL_STUB_SIZE - 8 * 4;
+		  /* The first glink stub starts at DT_PPC64_GLINK plus 32.
+		     See comment in ppc64_elf_finish_dynamic_sections. */
+		  glink_vma = dyn.d_un.d_val + 8 * 4;
 		  /* The .glink section usually does not survive the final
 		     link; search for the section (usually .text) where the
 		     glink stubs now reside.  */
@@ -4092,6 +4093,7 @@ struct ppc_link_hash_table
 
   /* Shortcuts to get to dynamic linker sections.  */
   asection *glink;
+  asection *global_entry;
   asection *sfpr;
   asection *brlt;
   asection *relbrlt;
@@ -4429,6 +4431,14 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 						    flags);
   if (htab->glink == NULL
       || ! bfd_set_section_alignment (dynobj, htab->glink, 3))
+    return FALSE;
+
+  /* The part of .glink used by global entry stubs, separate so that
+     it can be aligned appropriately without affecting htab->glink.  */
+  htab->global_entry = bfd_make_section_anyway_with_flags (dynobj, ".glink",
+							   flags);
+  if (htab->global_entry == NULL
+      || ! bfd_set_section_alignment (dynobj, htab->global_entry, 2))
     return FALSE;
 
   if (!info->no_ld_generated_unwind_info)
@@ -9793,11 +9803,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		/* Make room for the .glink code.  */
 		s = htab->glink;
 		if (s->size == 0)
-		  s->size += GLINK_CALL_STUB_SIZE;
+		  s->size += GLINK_PLTRESOLVE_SIZE (htab);
 		if (htab->opd_abi)
 		  {
 		    /* We need bigger stubs past index 32767.  */
-		    if (s->size >= GLINK_CALL_STUB_SIZE + 32768*2*4)
+		    if (s->size >= GLINK_PLTRESOLVE_SIZE (htab) + 32768*2*4)
 		      s->size += 4;
 		    s->size += 2*4;
 		  }
@@ -9827,6 +9837,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
+#define PPC_LO(v) ((v) & 0xffff)
+#define PPC_HI(v) (((v) >> 16) & 0xffff)
+#define PPC_HA(v) PPC_HI ((v) + 0x8000)
+
 /* Called via elf_link_hash_traverse from ppc64_elf_size_dynamic_sections
    to set up space for global entry stubs.  These are put in glink,
    after the branch table.  */
@@ -9837,7 +9851,7 @@ size_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
   struct bfd_link_info *info;
   struct ppc_link_hash_table *htab;
   struct plt_entry *pent;
-  asection *s;
+  asection *s, *plt;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -9853,7 +9867,8 @@ size_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
   if (htab == NULL)
     return FALSE;
 
-  s = htab->glink;
+  s = htab->global_entry;
+  plt = htab->elf.splt;
   for (pent = h->plt.plist; pent != NULL; pent = pent->next)
     if (pent->plt.offset != (bfd_vma) -1
 	&& pent->addend == 0)
@@ -9862,11 +9877,39 @@ size_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 	   and we are not generating a shared library or pie, then we
 	   need to define the symbol in the executable on a call stub.
 	   This is to avoid text relocations.  */
-	s->size = (s->size + 15) & -16;
+	bfd_vma off, stub_align, stub_off, stub_size;
+	unsigned int align_power;
+
+	stub_size = 16;
+	stub_off = s->size;
+	if (htab->params->plt_stub_align >= 0)
+	  align_power = htab->params->plt_stub_align;
+	else
+	  align_power = -htab->params->plt_stub_align;
+	/* Setting section alignment is delayed until we know it is
+	   non-empty.  Otherwise the .text output section will be
+	   aligned at least to plt_stub_align even when no global
+	   entry stubs are needed.  */
+	if (s->alignment_power < align_power)
+	  s->alignment_power = align_power;
+	stub_align = (bfd_vma) 1 << align_power;
+	if (htab->params->plt_stub_align >= 0
+	    || ((((stub_off + stub_size - 1) & -stub_align)
+		 - (stub_off & -stub_align))
+		> ((stub_size - 1) & -stub_align)))
+	  stub_off = (stub_off + stub_align - 1) & -stub_align;
+	off = pent->plt.offset + plt->output_offset + plt->output_section->vma;
+	off -= stub_off + s->output_offset + s->output_section->vma;
+	/* Note that for --plt-stub-align negative we have a possible
+	   dependency between stub offset and size.  Break that
+	   dependency by assuming the max stub size when calculating
+	   the stub offset.  */
+	if (PPC_HA (off) == 0)
+	  stub_size -= 4;
 	h->root.type = bfd_link_hash_defined;
 	h->root.u.def.section = s;
-	h->root.u.def.value = s->size;
-	s->size += 16;
+	h->root.u.def.value = stub_off;
+	s->size = stub_off + stub_size;
 	break;
       }
   return TRUE;
@@ -10051,9 +10094,6 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
   elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, info);
-  /* Stash the end of glink branch table.  */
-  if (htab->glink != NULL)
-    htab->glink->rawsize = htab->glink->size;
 
   if (!htab->opd_abi && !bfd_link_pic (info))
     elf_link_hash_traverse (&htab->elf, size_global_entry_stubs, info);
@@ -10108,6 +10148,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	       || s == htab->elf.splt
 	       || s == htab->elf.iplt
 	       || s == htab->glink
+	       || s == htab->global_entry
 	       || s == htab->elf.sdynbss
 	       || s == htab->elf.sdynrelro)
 	{
@@ -10393,10 +10434,6 @@ ppc_type_of_stub (asection *input_sec,
 #define ALWAYS_USE_FAKE_DEP 0
 #define ALWAYS_EMIT_R2SAVE 0
 
-#define PPC_LO(v) ((v) & 0xffff)
-#define PPC_HI(v) (((v) >> 16) & 0xffff)
-#define PPC_HA(v) PPC_HI ((v) + 0x8000)
-
 static inline unsigned int
 plt_stub_size (struct ppc_link_hash_table *htab,
 	       struct ppc_stub_hash_entry *stub_entry,
@@ -10492,7 +10529,7 @@ build_plt_stub (struct ppc_link_hash_table *htab,
       bfd_vma pltoff = stub_entry->plt_ent->plt.offset & ~1;
       bfd_vma pltindex = ((pltoff - PLT_INITIAL_ENTRY_SIZE (htab))
 			  / PLT_ENTRY_SIZE (htab));
-      bfd_vma glinkoff = GLINK_CALL_STUB_SIZE + pltindex * 8;
+      bfd_vma glinkoff = GLINK_PLTRESOLVE_SIZE (htab) + pltindex * 8;
       bfd_vma to, from;
 
       if (pltindex > 32768)
@@ -10767,7 +10804,6 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   bfd_byte *loc;
   bfd_byte *p;
   bfd_vma dest, off;
-  int size;
   Elf_Internal_Rela *r;
   asection *plt;
 
@@ -10800,7 +10836,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      + stub_entry->group->stub_sec->output_offset
 	      + stub_entry->group->stub_sec->output_section->vma);
 
-      size = 4;
+      p = loc;
       if (stub_entry->stub_type == ppc_stub_long_branch_r2off)
 	{
 	  bfd_vma r2off = get_r2off (info, stub_entry);
@@ -10810,26 +10846,24 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      htab->stub_error = TRUE;
 	      return FALSE;
 	    }
-	  bfd_put_32 (htab->params->stub_bfd, STD_R2_0R1 + STK_TOC (htab), loc);
-	  loc += 4;
-	  size = 8;
+	  bfd_put_32 (htab->params->stub_bfd, STD_R2_0R1 + STK_TOC (htab), p);
+	  p += 4;
 	  if (PPC_HA (r2off) != 0)
 	    {
 	      bfd_put_32 (htab->params->stub_bfd,
-			  ADDIS_R2_R2 | PPC_HA (r2off), loc);
-	      loc += 4;
-	      size += 4;
+			  ADDIS_R2_R2 | PPC_HA (r2off), p);
+	      p += 4;
 	    }
 	  if (PPC_LO (r2off) != 0)
 	    {
 	      bfd_put_32 (htab->params->stub_bfd,
-			  ADDI_R2_R2 | PPC_LO (r2off), loc);
-	      loc += 4;
-	      size += 4;
+			  ADDI_R2_R2 | PPC_LO (r2off), p);
+	      p += 4;
 	    }
-	  off -= size - 4;
+	  off -= p - loc;
 	}
-      bfd_put_32 (htab->params->stub_bfd, B_DOT | (off & 0x3fffffc), loc);
+      bfd_put_32 (htab->params->stub_bfd, B_DOT | (off & 0x3fffffc), p);
+      p += 4;
 
       if (off + (1 << 25) >= (bfd_vma) (1 << 26))
 	{
@@ -10845,7 +10879,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  r = get_relocs (stub_entry->group->stub_sec, 1);
 	  if (r == NULL)
 	    return FALSE;
-	  r->r_offset = loc - stub_entry->group->stub_sec->contents;
+	  r->r_offset = p - 4 - stub_entry->group->stub_sec->contents;
 	  r->r_info = ELF64_R_INFO (0, R_PPC64_REL24);
 	  r->r_addend = dest;
 	  if (stub_entry->h != NULL)
@@ -10985,23 +11019,20 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    }
 	}
 
+      p = loc;
       if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
 	{
 	  if (PPC_HA (off) != 0)
 	    {
-	      size = 16;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  ADDIS_R12_R2 | PPC_HA (off), loc);
-	      loc += 4;
+			  ADDIS_R12_R2 | PPC_HA (off), p);
+	      p += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  LD_R12_0R12 | PPC_LO (off), loc);
+			  LD_R12_0R12 | PPC_LO (off), p);
 	    }
 	  else
-	    {
-	      size = 12;
-	      bfd_put_32 (htab->params->stub_bfd,
-			  LD_R12_0R2 | PPC_LO (off), loc);
-	    }
+	    bfd_put_32 (htab->params->stub_bfd,
+			LD_R12_0R2 | PPC_LO (off), p);
 	}
       else
 	{
@@ -11013,40 +11044,37 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      return FALSE;
 	    }
 
-	  bfd_put_32 (htab->params->stub_bfd, STD_R2_0R1 + STK_TOC (htab), loc);
-	  loc += 4;
-	  size = 16;
+	  bfd_put_32 (htab->params->stub_bfd, STD_R2_0R1 + STK_TOC (htab), p);
+	  p += 4;
 	  if (PPC_HA (off) != 0)
 	    {
-	      size += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  ADDIS_R12_R2 | PPC_HA (off), loc);
-	      loc += 4;
+			  ADDIS_R12_R2 | PPC_HA (off), p);
+	      p += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  LD_R12_0R12 | PPC_LO (off), loc);
+			  LD_R12_0R12 | PPC_LO (off), p);
 	    }
 	  else
-	    bfd_put_32 (htab->params->stub_bfd, LD_R12_0R2 | PPC_LO (off), loc);
+	    bfd_put_32 (htab->params->stub_bfd, LD_R12_0R2 | PPC_LO (off), p);
 
 	  if (PPC_HA (r2off) != 0)
 	    {
-	      size += 4;
-	      loc += 4;
+	      p += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  ADDIS_R2_R2 | PPC_HA (r2off), loc);
+			  ADDIS_R2_R2 | PPC_HA (r2off), p);
 	    }
 	  if (PPC_LO (r2off) != 0)
 	    {
-	      size += 4;
-	      loc += 4;
+	      p += 4;
 	      bfd_put_32 (htab->params->stub_bfd,
-			  ADDI_R2_R2 | PPC_LO (r2off), loc);
+			  ADDI_R2_R2 | PPC_LO (r2off), p);
 	    }
 	}
-      loc += 4;
-      bfd_put_32 (htab->params->stub_bfd, MTCTR_R12, loc);
-      loc += 4;
-      bfd_put_32 (htab->params->stub_bfd, BCTR, loc);
+      p += 4;
+      bfd_put_32 (htab->params->stub_bfd, MTCTR_R12, p);
+      p += 4;
+      bfd_put_32 (htab->params->stub_bfd, BCTR, p);
+      p += 4;
       break;
 
     case ppc_stub_plt_call:
@@ -11150,7 +11178,6 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	p = build_tls_get_addr_stub (htab, stub_entry, loc, off, r);
       else
 	p = build_plt_stub (htab, stub_entry, loc, off, r);
-      size = p - loc;
       break;
 
     case ppc_stub_save_res:
@@ -11161,7 +11188,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       return FALSE;
     }
 
-  stub_entry->group->stub_sec->size += size;
+  stub_entry->group->stub_sec->size += p - loc;
 
   if (htab->params->emit_stub_syms)
     {
@@ -12951,7 +12978,7 @@ build_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
   if (htab == NULL)
     return FALSE;
 
-  s = htab->glink;
+  s = htab->global_entry;
   for (pent = h->plt.plist; pent != NULL; pent = pent->next)
     if (pent->plt.offset != (bfd_vma) -1
 	&& pent->addend == 0)
@@ -13144,15 +13171,11 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	}
       bfd_put_32 (htab->glink->owner, BCTR, p);
       p += 4;
-      while (p - htab->glink->contents < GLINK_CALL_STUB_SIZE)
-	{
-	  bfd_put_32 (htab->glink->owner, NOP, p);
-	  p += 4;
-	}
+      BFD_ASSERT (p - htab->glink->contents == GLINK_PLTRESOLVE_SIZE (htab));
 
       /* Build the .glink lazy link call stubs.  */
       indx = 0;
-      while (p < htab->glink->contents + htab->glink->rawsize)
+      while (p < htab->glink->contents + htab->glink->size)
 	{
 	  if (htab->opd_abi)
 	    {
@@ -13175,11 +13198,11 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	  indx++;
 	  p += 4;
 	}
-
-      /* Build .glink global entry stubs.  */
-      if (htab->glink->size > htab->glink->rawsize)
-	elf_link_hash_traverse (&htab->elf, build_global_entry_stubs, info);
     }
+
+  /* Build .glink global entry stubs.  */
+  if (htab->global_entry != NULL && htab->global_entry->size != 0)
+    elf_link_hash_traverse (&htab->elf, build_global_entry_stubs, info);
 
   if (htab->brlt != NULL && htab->brlt->size != 0)
     {
@@ -15557,7 +15580,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 		 of glink rather than the first entry point, which is
 		 what ld.so needs, and now have a bigger stub to
 		 support automatic multiple TOCs.  */
-	      dyn.d_un.d_ptr += GLINK_CALL_STUB_SIZE - 8 * 4;
+	      dyn.d_un.d_ptr += GLINK_PLTRESOLVE_SIZE (htab) - 8 * 4;
 	      break;
 
 	    case DT_PPC64_OPD:

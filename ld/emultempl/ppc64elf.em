@@ -412,6 +412,8 @@ ppc_add_stub_section (const char *stub_sec_name, asection *input_section)
       || !bfd_set_section_alignment (stub_file->the_bfd, stub_sec,
 				     (params.plt_stub_align > 5
 				      ? params.plt_stub_align
+				      : params.plt_stub_align < -5
+				      ? -params.plt_stub_align
 				      : 5)))
     goto err_ret;
 

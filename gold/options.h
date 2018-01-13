@@ -1101,7 +1101,7 @@ class General_options
 	      NULL, N_("(ARM only) Ignore for backward compatibility"));
 
   DEFINE_var(plt_align, options::TWO_DASHES, '\0', 0, "5",
-	     N_("(PowerPC64 only) Align PLT call stubs to fit cache lines"),
+	     N_("(PowerPC only) Align PLT call stubs to fit cache lines"),
 	     N_("[=P2ALIGN]"), true, int, int, options::parse_uint, false);
 
   DEFINE_bool(plt_localentry, options::TWO_DASHES, '\0', false,
