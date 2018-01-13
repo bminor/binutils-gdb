@@ -1,4 +1,9 @@
-2018-01-12 Sterling Augustine <saugustine@google.com>
+2018-01-12  Cary Coutant  <ccoutant@gmail.com>
+
+	* NEWS: Add new features in 1.15.
+	* version.cc (version_string): Bump to 1.15.
+
+2018-01-12  Sterling Augustine  <saugustine@google.com>
 
 	* cref.cc (Cref_inputs::Cref_table_compare::operator): Add
 	conditionals and calls to is_forwarder.
