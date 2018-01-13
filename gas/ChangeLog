@@ -1,6 +1,7 @@
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
-	* po/gas.pot: Regenerated.
+	* po/gas.pot: Regenerate.
+	* configure: Regenerate.
 
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 

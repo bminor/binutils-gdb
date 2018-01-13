@@ -1,6 +1,8 @@
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
-	* po/bfd.pot: Regenerated.
+	* version.m4 (BFD_VERSION): Change to 2.30.0.
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
 
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 

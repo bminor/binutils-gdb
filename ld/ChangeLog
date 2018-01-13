@@ -1,6 +1,7 @@
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
-	* po/ld.pot: Regenerated.
+	* po/ld.pot: Regenerate.
+	* configure: Regenerate.
 
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 

@@ -1,6 +1,7 @@
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
-	* po/binutils.pot: Regenerated.
+	* po/binutils.pot: Regenerate.
+	* configure: Regenerate.
 
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
