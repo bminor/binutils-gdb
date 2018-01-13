@@ -1,3 +1,7 @@
+2018-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Add marker for 2.30.
+
 2018-01-12  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/elf.exp: xfail "pr22374 function pointer

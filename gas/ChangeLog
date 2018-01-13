@@ -1,3 +1,7 @@
+2018-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Add marker for 2.30.
+
 2018-01-12  Gunther Nikl  <gnikl@users.sourceforge.net>
 
 	* gas/config/aout_gnu.h (USE_EXTENDED_RELOC): Explicitly

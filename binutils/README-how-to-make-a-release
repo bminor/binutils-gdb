@@ -27,9 +27,13 @@ How to perform a release.
      configure files.  
 
   3. When branch day arrives add markers for the upcoming release to
-     gas, ld, gold and binutils NEWS files.  Likewise for all of the
-     ChangeLog files.  Add a note of the name of the new branch to
-     binutils/BRANCHES.  Commit these changes.
+     gas, ld, gold and binutils NEWS files.
+       [make-prelease.sh command i]
+       [make-prelease.sh command C]
+     Likewise for all of the ChangeLog files.
+     Add a note of the name of the new branch to binutils/BRANCHES.
+     Commit these changes.
+       [make-prerelease.sh command C]
      
   4. Create the release branch using:
 

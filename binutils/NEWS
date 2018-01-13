@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.30:
+
 * Add --debug-dump=links option to readelf and --dwarf=links option to objdump
   which displays the contents of any .gnu_debuglink or .gnu_debugaltlink
   sections.

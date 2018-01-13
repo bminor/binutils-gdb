@@ -1,3 +1,7 @@
+2018-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Add marker for 2.30.
+
 2018-01-12  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Add notes on how to make the

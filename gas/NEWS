@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.30:
+
 * Add support for loaction views in DWARF debug line information.
 
 Changes in 2.29:
