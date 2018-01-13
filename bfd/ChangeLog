@@ -1,5 +1,9 @@
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
+	* po/bfd.pot: Regenerated.
+
+2018-01-13  Nick Clifton  <nickc@redhat.com>
+
 	* version.m4: Bump version to 2.30.51
 	* configure: Regenerate.
 
