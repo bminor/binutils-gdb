@@ -1,5 +1,6 @@
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
+	* README-how-to-make-a-release: Update notes.
 	* po/binutils.pot: Regenerated.
 
 2018-01-13  Nick Clifton  <nickc@redhat.com>

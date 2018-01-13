@@ -28,6 +28,8 @@ How to perform a release.
 
   3. When branch day arrives add markers for the upcoming release to
      gas, ld, gold and binutils NEWS files.
+       [If using the make-prerelease.sh script, check that
+        common.sh has the right values].       
        [make-prelease.sh command i]
        [make-prelease.sh command C]
      Likewise for all of the ChangeLog files.
@@ -54,28 +56,23 @@ How to perform a release.
   7. Regenerate various files on both branch and HEAD by configuring
      with --enable-maintainer-mode.  No need to check in changes to
      the autoconf/automake/etc files, but be sure the .pot files are
-     up to date.
+     up to date.  NB/ Remember to include gold and gprof.
 
   8. Create an initial prerelease:
 
-     a. Bump the version on the branch, and check this in.
+     a. Change the version on the branch (bfd/version.m4), regenerate
+        the files, and check this in.
 
-     b. Create a source tarball:
+     b. Create a source tarball of the branch sources:
      
-          git clean -f -d -x
-          CFLAGS="-O -g0" ./src-release.sh -b binutils
-          rm -rf $release_dir/proto-toplev
-          rm $release_dir/binutils-$version
-          rm $release_dir/binutils-$version.tar
-          mv $release_dir/binutils-$version.tar.lzip ..
+           ./src-release -x binutils
  
      c. Build a test target using this tarball.
 
      d. Upload the prerelease snapshot to the FTP:
 
-          scp ../binutils-$version.tar.bz2 sourceware.org:~ftp/pub/binutils/snapshots
-          ssh sourceware.org md5sum \~ftp/pub/binutils/snapshots/binutils-$version.tar.bz2
-          md5sum ../binutils-$version.tar.bz2
+          scp ../binutils-$version.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
+          ssh sourceware.org md5sum ~ftp/pub/binutils/snapshots/binutils-$version.tar.xz
 
    9. Send it to the Translation Project:
    

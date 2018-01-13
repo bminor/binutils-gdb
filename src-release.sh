@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#   Copyright (C) 1990-2017 Free Software Foundation
+#   Copyright (C) 1990-2018 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ MAKEINFOFLAGS=--split-size=5000000
 #
 # Support for building net releases
 
-# Files in devo used in any net release.
+# Files in root used in any net release.
 DEVO_SUPPORT="README Makefile.in configure configure.ac \
 	config.guess config.sub config move-if-change \
 	COPYING COPYING.LIB install-sh config-ml.in symlink-tree \

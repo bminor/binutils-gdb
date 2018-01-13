@@ -1,3 +1,8 @@
+2018-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* src-release.sh: Update copyright notice.  Change reference to devo
+	to be a reference to root.
+
 2018-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* config-ml.in: Sync with gcc sources.
