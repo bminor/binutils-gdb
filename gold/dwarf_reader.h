@@ -764,6 +764,13 @@ class Dwarf_info_reader
   address_size() const
   { return this->address_size_; }
 
+  // Return the size of a DW_FORM_ref_addr.
+  // In DWARF v2, this was the size of an address; in DWARF v3 and later,
+  // it is the size of an DWARF offset.
+  unsigned int
+  ref_addr_size() const
+  { return this->cu_version_ > 2 ? this->offset_size_ : this->address_size_; }
+
   // Set the section index of the .debug_abbrev section.
   // We use this if there are no relocations for the .debug_info section.
   // If not set, the code parse() routine will search for the section by name.

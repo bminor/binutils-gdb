@@ -1,3 +1,87 @@
+2017-09-28  Alan Modra  <amodra@gmail.com>
+
+	PR 22220
+	* elflink.c (_bfd_elf_merge_symbol): Set non_ir_ref_dynamic in
+	a case where plugin_notice isn't called.
+
+2017-09-27  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-05-16  Alan Modra  <amodra@gmail.com>
+	* elf-m10300.c: Rename occurrences of non_ir_ref.
+	* elf32-arm.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-cr16.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-d10v.c: Likewise.
+	* elf32-dlx.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-iq2000.c: Likewise.
+	* elf32-lm32.c: Likewise.
+	* elf32-m32c.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-metag.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-moxie.c: Likewise.
+	* elf32-msp430.c: Likewise.
+	* elf32-mt.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elf32-or1k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-rl78.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-tic6x.c: Likewise.
+	* elf32-tilepro.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-xstormy16.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfnn-riscv.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-tilegx.c: Likewise.
+	* linker.c: Likewise.
+
+	2017-05-16  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (add_symbol_adjust): Transfer non_ir_ref_dynamic.
+	* elflink.c (elf_link_add_object_symbols): Update to use
+	non_ir_ref_dynamic.
+	(elf_link_input_bfd): Test non_ir_ref_dynamic in addition to
+	non_ir_ref.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+
+	2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/21382
+	* elflink.c (elf_link_add_object_symbols): Preserve
+	dynamic_ref_after_ir_def when restoring the symbol table for
+	unneeded dynamic object.
+
+2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_perform_relocation): Correct microMIPS
+	branch offset interpretation.
+
 2017-07-28  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	Backport from mainline

@@ -1,3 +1,63 @@
+2017-09-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/pr22220.h,
+	* testsuite/ld-plugin/pr22220lib.cc,
+	* testsuite/ld-plugin/pr22220lib.ver,
+	* testsuite/ld-plugin/pr22220main.cc: New test.
+	* testsuite/ld-plugin/lto.exp: Run it.
+
+2017-09-27  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-05-16  Alan Modra  <amodra@gmail.com>
+	* plugin.c: Rename occurrences of non_ir_ref.
+
+	2017-05-16  Alan Modra  <amodra@gmail.com>
+	* plugin.c (is_visible_from_outside): Use non_ir_ref_dynamic.
+	(plugin_notice): Set non_ir_ref for references from regular
+	objects, non_ir_ref_dynamic for references from dynamic objects.
+
+	2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/21382
+	* plugin.c (is_visible_from_outside): Symbol may be visible
+	from outside if dynamic_ref_after_ir_def is set.
+	(plugin_notice): Set dynamic_ref_after_ir_def if the symbol is
+	defined in an IR object and referenced in a dynamic object.
+	* testsuite/ld-plugin/lto.exp: Run PR ld/21382 tests.
+	* testsuite/ld-plugin/pr21382a.c: New file.
+	* testsuite/ld-plugin/pr21382b.c: Likewise.
+
+	2017-01-24  Jiong Wang  <jiong.wang@arm.com>
+	* testsuite/ld-plugin/lto.exp (lto_link_elf_tests): Move "Compile 7",
+	"Compile 8a", "Compile 8b"...
+	(lto_compile_elf_tests): ...to here.  Always run these tests.
+	(lto_run_elf_tests): Move "LTO 7"...
+	(lto_run_elf_shared_tests): ...to here.  Restrict these tests on
+	environment where share library is supported.
+
+2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/bal-jalx-addend-micromips.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-addend-micromips-n32.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-addend-micromips-n64.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-local-micromips.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-local-micromips-n32.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-local-micromips-n64.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips-n32.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips-n64.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips-n32.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips-n64.d: New
+	test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2017-07-25  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
