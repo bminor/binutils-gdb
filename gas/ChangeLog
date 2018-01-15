@@ -1,3 +1,8 @@
+2018-01-15  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/gas/riscv/c-zero-imm.s: Test addi that compresses to c.nop.
+	* testsuite/gas/riscv/c-zero-imm.d: Likewise.
+
 2018-01-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (ToC): Define macro.
