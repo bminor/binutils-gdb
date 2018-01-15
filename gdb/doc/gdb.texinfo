@@ -43442,6 +43442,7 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 
 @node gdb-add-index man
 @heading gdb-add-index
+@pindex gdb-add-index
 @anchor{gdb-add-index}
 
 @c man title gdb-add-index Add index files to speed up GDB
