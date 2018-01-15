@@ -1,5 +1,12 @@
 2018-01-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (ToC): Define macro.
+	(ToU): Likewise.
+	(insns): Make use of above macros for new instructions introduced in
+	Armv8-M.
+
+2018-01-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (insns): Make blxns, bxns, tt, ttt, tta, ttat, vlldm
 	and vlstm conditionally executable and reindent parameters.
 	* testsuite/gas/arm/archv8m-cmse-main.s: Add conditional version of

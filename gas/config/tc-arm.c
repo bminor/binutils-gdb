@@ -19413,6 +19413,17 @@ static struct asm_barrier_opt barrier_opt_names[] =
 #define C3(mnem, op, nops, ops, ae)	\
   { #mnem, OPS##nops ops, OT_cinfix3, 0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
 
+/* Thumb-only variants of TCE and TUE.  */
+#define ToC(mnem, top, nops, ops, te) \
+  { mnem, OPS##nops ops, OT_csuffix, 0x0, 0x##top, 0, THUMB_VARIANT, NULL, \
+    do_##te }
+      //TCE (mnem, 0, top, nops, ops, NULL, te)
+
+#define ToU(mnem, top, nops, ops, te) \
+  { mnem, OPS##nops ops, OT_unconditional, 0x0, 0x##top, 0, THUMB_VARIANT, \
+    NULL, do_##te }
+      //TUE(mnem, 0, top, nops, ops, NULL, te)
+
 /* Legacy mnemonics that always have conditional infix after the third
    character.  */
 #define CL(mnem, op, nops, ops, ae)	\
@@ -21456,20 +21467,20 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT NULL
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8m
- TUE("sg",    0, e97fe97f, 0, (),	      0, noargs),
- TCE("blxns", 0, 4784,	   1, (RRnpc),	      0, t_blx),
- TCE("bxns",  0, 4704,	   1, (RRnpc),	      0, t_bx),
- TCE("tt",    0, e840f000, 2, (RRnpc, RRnpc), 0, tt),
- TCE("ttt",   0, e840f040, 2, (RRnpc, RRnpc), 0, tt),
- TCE("tta",   0, e840f080, 2, (RRnpc, RRnpc), 0, tt),
- TCE("ttat",  0, e840f0c0, 2, (RRnpc, RRnpc), 0, tt),
+ ToU("sg",    e97fe97f,	0, (),		   noargs),
+ ToC("blxns", 4784,	1, (RRnpc),	   t_blx),
+ ToC("bxns",  4704,	1, (RRnpc),	   t_bx),
+ ToC("tt",    e840f000,	2, (RRnpc, RRnpc), tt),
+ ToC("ttt",   e840f040,	2, (RRnpc, RRnpc), tt),
+ ToC("tta",   e840f080,	2, (RRnpc, RRnpc), tt),
+ ToC("ttat",  e840f0c0,	2, (RRnpc, RRnpc), tt),
 
  /* FP for ARMv8-M Mainline.  Enabled for ARMv8-M Mainline because the
     instructions behave as nop if no VFP is present.  */
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8m_main
- TCE("vlldm", 0, ec300a00, 1, (RRnpc), 0, rn),
- TCE("vlstm", 0, ec200a00, 1, (RRnpc), 0, rn),
+ ToC("vlldm", ec300a00, 1, (RRnpc), rn),
+ ToC("vlstm", ec200a00, 1, (RRnpc), rn),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
