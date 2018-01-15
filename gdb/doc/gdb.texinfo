@@ -2495,7 +2495,7 @@ fallback.
 
 You can also change @value{GDBN}'s current working directory by using
 the @code{cd} command.
-@xref{cd command}
+@xref{cd command}.
 
 @kindex show cwd
 @cindex show inferior's working directory
@@ -2514,7 +2514,7 @@ given, @var{directory} uses @file{'~'}.
 The @value{GDBN} working directory serves as a default for the
 commands that specify files for @value{GDBN} to operate on.
 @xref{Files, ,Commands to Specify Files}.
-@xref{set cwd command}
+@xref{set cwd command}.
 
 @kindex pwd
 @item pwd
@@ -43441,9 +43441,8 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 @c man end
 
 @node gdb-add-index man
-@pindex gdb-add-index
-@anchor{gdb-add-index}
 @heading gdb-add-index
+@anchor{gdb-add-index}
 
 @c man title gdb-add-index Add index files to speed up GDB
 
