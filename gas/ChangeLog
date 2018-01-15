@@ -1,3 +1,18 @@
+2018-01-16  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Backport from mainline
+	2018-01-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (it_fsm_post_encode): Do not warn if targeting M
+	profile architecture or if in autodetection mode.  Clarify that
+	deprecation is for performance reason and concerns Armv8-A and Armv8-R.
+	* testsuite/gas/arm/armv8-ar-bad.l: Adapt to new IT deprecation warning
+	message.
+	* testsuite/gas/arm/armv8-ar-it-bad.l: Likewise.
+	* testsuite/gas/arm/sp-pc-validations-bad-t-v8a.l: Likewise.
+	* testsuite/gas/arm/udf.l: Likewise.
+	* testsuite/gas/arm/udf.d: Assemble for Armv8-A explicitely.
+
 2018-01-16  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
