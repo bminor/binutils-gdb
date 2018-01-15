@@ -21456,20 +21456,20 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT NULL
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8m
- TUE("sg", 0, e97fe97f, 0, (), 0, noargs),
- TUE("blxns", 0, 4784, 1, (RRnpc), 0, t_blx),
- TUE("bxns", 0, 4704, 1, (RRnpc), 0, t_bx),
- TUE("tt", 0, e840f000, 2, (RRnpc, RRnpc), 0, tt),
- TUE("ttt", 0, e840f040, 2, (RRnpc, RRnpc), 0, tt),
- TUE("tta", 0, e840f080, 2, (RRnpc, RRnpc), 0, tt),
- TUE("ttat", 0, e840f0c0, 2, (RRnpc, RRnpc), 0, tt),
+ TUE("sg",    0, e97fe97f, 0, (),	      0, noargs),
+ TCE("blxns", 0, 4784,	   1, (RRnpc),	      0, t_blx),
+ TCE("bxns",  0, 4704,	   1, (RRnpc),	      0, t_bx),
+ TCE("tt",    0, e840f000, 2, (RRnpc, RRnpc), 0, tt),
+ TCE("ttt",   0, e840f040, 2, (RRnpc, RRnpc), 0, tt),
+ TCE("tta",   0, e840f080, 2, (RRnpc, RRnpc), 0, tt),
+ TCE("ttat",  0, e840f0c0, 2, (RRnpc, RRnpc), 0, tt),
 
  /* FP for ARMv8-M Mainline.  Enabled for ARMv8-M Mainline because the
     instructions behave as nop if no VFP is present.  */
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8m_main
- TUEc("vlldm",	0,	 ec300a00, 1, (RRnpc),	rn),
- TUEc("vlstm",	0,	 ec200a00, 1, (RRnpc),	rn),
+ TCE("vlldm", 0, ec300a00, 1, (RRnpc), 0, rn),
+ TCE("vlstm", 0, ec200a00, 1, (RRnpc), 0, rn),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT

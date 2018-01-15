@@ -1,5 +1,12 @@
 2018-01-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (insns): Make blxns, bxns, tt, ttt, tta, ttat, vlldm
+	and vlstm conditionally executable and reindent parameters.
+	* testsuite/gas/arm/archv8m-cmse-main.s: Add conditional version of
+	aforementionned instructions.
+
+2018-01-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (it_fsm_post_encode): Do not warn if targeting M
 	profile architecture or if in autodetection mode.  Clarify that
 	deprecation is for performance reason and concerns Armv8-A and Armv8-R.
