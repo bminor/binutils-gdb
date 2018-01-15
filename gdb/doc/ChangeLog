@@ -1,5 +1,9 @@
 2018-01-15  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* gdb.texinfo (gdb-add-index man): Add pindex.
+
+2018-01-15  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* gdb.texinfo (set cwd): Add period.
 	(gdb-add-index man): Move anchor.
 
