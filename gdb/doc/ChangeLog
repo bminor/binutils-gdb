@@ -1,3 +1,8 @@
+2018-01-15  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* gdb.texinfo (set cwd): Add period.
+	(gdb-add-index man): Move anchor.
+
 2017-01-12  Tom Tromey  <tom@tromey.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 
