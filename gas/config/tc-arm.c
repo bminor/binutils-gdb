@@ -18559,12 +18559,13 @@ it_fsm_post_encode (void)
   if (now_it.insn_cond
       && !now_it.warn_deprecated
       && warn_on_deprecated
-      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
+      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8)
+      && !ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_m))
     {
       if (inst.instruction >= 0x10000)
 	{
 	  as_tsktsk (_("IT blocks containing 32-bit Thumb instructions are "
-		     "deprecated in ARMv8"));
+		     "performance deprecated in ARMv8-A and ARMv8-R"));
 	  now_it.warn_deprecated = TRUE;
 	}
       else
@@ -18575,9 +18576,10 @@ it_fsm_post_encode (void)
 	    {
 	      if ((inst.instruction & p->mask) == p->pattern)
 		{
-		  as_tsktsk (_("IT blocks containing 16-bit Thumb instructions "
-			     "of the following class are deprecated in ARMv8: "
-			     "%s"), p->description);
+		  as_tsktsk (_("IT blocks containing 16-bit Thumb "
+			       "instructions of the following class are "
+			       "performance deprecated in ARMv8-A and "
+			       "ARMv8-R: %s"), p->description);
 		  now_it.warn_deprecated = TRUE;
 		  break;
 		}
@@ -18589,7 +18591,8 @@ it_fsm_post_encode (void)
       if (now_it.block_length > 1)
 	{
 	  as_tsktsk (_("IT blocks containing more than one conditional "
-		     "instruction are deprecated in ARMv8"));
+		     "instruction are performance deprecated in ARMv8-A and "
+		     "ARMv8-R"));
 	  now_it.warn_deprecated = TRUE;
 	}
     }
