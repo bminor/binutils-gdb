@@ -72,8 +72,7 @@ save_original_signals_state (bool quiet)
 	  found_preinstalled = true;
 
 	  /* Use raw fprintf here because we're being called in early
-	     startup, because GDB's filtered streams are are
-	     created.  */
+	     startup, before GDB's filtered streams are created.  */
 	  fprintf (stderr,
 		   _("warning: Found custom handler for signal "
 		     "%d (%s) preinstalled.\n"), i,
