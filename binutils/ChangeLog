@@ -1,5 +1,10 @@
 2018-01-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* README-how-to-make-a-release: Add reminder to update the
+	branch name in gdbadmin's crontab on sourceware.
+
+2018-01-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* README-how-to-make-a-release: Remove trailing spaces.
 
 2018-01-16  Nick Clifton  <nickc@redhat.com>

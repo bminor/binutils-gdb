@@ -42,23 +42,36 @@ How to perform a release.
 	git tag -a binutils-2_30-branch   [eg for the 2.30 branch...]
         git push --tags origin binutils-2_30-branch
 
-  5. Update bfd/configure and bfd/configure.ac on HEAD to indicate
+  5. Update "BINUTILS_BRANCH" in gdbadmin's crontab:
+
+     Log in as gdbadmin on sourceware.org, and then:
+
+        $ cd crontab
+        $ vi crontab
+        [change BINUTILS_BRANCH]
+        $ cvs ci crontab
+        $ crontab crontab
+
+     If you do not have access to this account, please feel free to
+     ask Joel Brobecker <brobecker AT adacore DOT com>.
+
+  6. Update bfd/configure and bfd/configure.ac on HEAD to indicate
      snapshot of the following release.
        [make-prerelease.sh command hv + C]
 
-  6. Rename the current HEAD version entry in Bugzilla, and create a
+  7. Rename the current HEAD version entry in Bugzilla, and create a
      new one.  E.g. rename "2.30 (HEAD)" to 2.30, and create "2.31
      (HEAD)".  Go to "Edit products" from the bottom toolbar, click on
      "binutils", then on "Edit versions".  If you don't have
      permissions to do this, either ask Daniel Berlin to fix your
      account or ask Daniel Jacobowitz to do it.
 
-  7. Regenerate various files on both branch and HEAD by configuring
+  8. Regenerate various files on both branch and HEAD by configuring
      with --enable-maintainer-mode.  No need to check in changes to
      the autoconf/automake/etc files, but be sure the .pot files are
      up to date.  NB/ Remember to include gold and gprof.
 
-  8. Create an initial prerelease:
+  9. Create an initial prerelease:
 
      a. Change the version on the branch (bfd/version.m4), regenerate
         the files, and check this in.
@@ -74,13 +87,13 @@ How to perform a release.
           scp ../binutils-$version.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
           ssh sourceware.org md5sum ~ftp/pub/binutils/snapshots/binutils-$version.tar.xz
 
-   9. Send it to the Translation Project:
+  10. Send it to the Translation Project:
 
         http://translationproject.org/html/maintainers.html
 
       Sending mail for one of the POT files is sufficient.
 
-  10. Announce the availability of the snapshot and the branch on the
+  11. Announce the availability of the snapshot and the branch on the
       binutils mailing list.  Set a date for when the release will
       actually happen.  Nag maintainers to fix any testsuite failures
       for their architectures...
