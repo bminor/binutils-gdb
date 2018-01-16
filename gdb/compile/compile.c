@@ -463,7 +463,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   char **argv;
   int ok;
   struct gdbarch *gdbarch = get_current_arch ();
-  char *triplet_rx;
+  std::string triplet_rx;
   char *error_message;
 
   if (!target_has_execution)
@@ -531,11 +531,11 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
       const char *arch_rx = gdbarch_gnu_triplet_regexp (gdbarch);
 
       /* Allow triplets with or without vendor set.  */
-      triplet_rx = concat (arch_rx, "(-[^-]*)?-", os_rx, (char *) NULL);
-      make_cleanup (xfree, triplet_rx);
+      triplet_rx = std::string (arch_rx) + "(-[^-]*)?-" + os_rx;
 
       if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
-	compiler->fe->ops->set_triplet_regexp (compiler->fe, triplet_rx);
+	compiler->fe->ops->set_triplet_regexp (compiler->fe,
+					       triplet_rx.c_str ());
     }
 
   /* Set compiler command-line arguments.  */
@@ -545,7 +545,8 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
     error_message = compiler->fe->ops->set_arguments (compiler->fe, argc, argv);
   else
-    error_message = compiler->fe->ops->set_arguments_v0 (compiler->fe, triplet_rx,
+    error_message = compiler->fe->ops->set_arguments_v0 (compiler->fe,
+							 triplet_rx.c_str (),
 							 argc, argv);
   if (error_message != NULL)
     {
