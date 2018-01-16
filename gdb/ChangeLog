@@ -1,3 +1,8 @@
+2018-01-17  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* compile/compile.c (compile_to_object): Convert "triplet_rx"
+	to "std::string".
+
 2018-01-17  Eldar Abusalimov  <eldar.abusalimov@jetbrains.com>
 
 	PR gdb/21559
