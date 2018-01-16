@@ -5555,7 +5555,11 @@ fetch_register (const struct usrregs_info *usrregs,
 		(PTRACE_TYPE_ARG3) (uintptr_t) regaddr, (PTRACE_TYPE_ARG4) 0);
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
-	error ("reading register %d: %s", regno, strerror (errno));
+	{
+	  /* Mark register REGNO unavailable.  */
+	  supply_register (regcache, regno, NULL);
+	  return;
+	}
     }
 
   if (the_low_target.supply_ptrace_register)

@@ -1,3 +1,9 @@
+2018-01-16  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/18749
+	* linux-low.c (fetch_register): Call supply_register instead of
+	error.
+
 2018-01-08  Yao Qi  <yao.qi@linaro.org>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 
