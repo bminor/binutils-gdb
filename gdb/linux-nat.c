@@ -1224,10 +1224,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
     {
       pid_t pid = parse_pid_to_attach (args);
       struct buffer buffer;
-      char *message, *buffer_s;
-
-      message = xstrdup (ex.message);
-      make_cleanup (xfree, message);
+      char *buffer_s;
 
       buffer_init (&buffer);
       linux_ptrace_attach_fail_reason (pid, &buffer);
@@ -1237,9 +1234,9 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
       make_cleanup (xfree, buffer_s);
 
       if (*buffer_s != '\0')
-	throw_error (ex.error, "warning: %s\n%s", buffer_s, message);
+	throw_error (ex.error, "warning: %s\n%s", buffer_s, ex.message);
       else
-	throw_error (ex.error, "%s", message);
+	throw_error (ex.error, "%s", ex.message);
     }
   END_CATCH
 
