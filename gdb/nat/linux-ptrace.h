@@ -180,14 +180,12 @@ struct buffer;
 # define TRAP_HWBKPT 4
 #endif
 
-extern void linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer);
+extern std::string linux_ptrace_attach_fail_reason (pid_t pid);
 
 /* Find all possible reasons we could have failed to attach to PTID
    and return them as a string.  ERR is the error PTRACE_ATTACH failed
-   with (an errno).  The result is stored in a static buffer.  This
-   string should be copied into a buffer by the client if the string
-   will not be immediately used, or if it must persist.  */
-extern char *linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err);
+   with (an errno).  */
+extern std::string linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err);
 
 extern void linux_ptrace_init_warnings (void);
 extern void linux_check_ptrace_features (void);

@@ -1167,10 +1167,11 @@ attach_proc_task_lwp_callback (ptid_t ptid)
 	    }
 	  else
 	    {
+	      std::string reason
+		= linux_ptrace_attach_fail_reason_string (ptid, err);
+
 	      warning (_("Cannot attach to lwp %d: %s"),
-		       lwpid,
-		       linux_ptrace_attach_fail_reason_string (ptid,
-							       err));
+		       lwpid, reason.c_str ());
 	    }
 	}
       else
@@ -1223,18 +1224,10 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
   CATCH (ex, RETURN_MASK_ERROR)
     {
       pid_t pid = parse_pid_to_attach (args);
-      struct buffer buffer;
-      char *buffer_s;
+      std::string reason = linux_ptrace_attach_fail_reason (pid);
 
-      buffer_init (&buffer);
-      linux_ptrace_attach_fail_reason (pid, &buffer);
-
-      buffer_grow_str0 (&buffer, "");
-      buffer_s = buffer_finish (&buffer);
-      make_cleanup (xfree, buffer_s);
-
-      if (*buffer_s != '\0')
-	throw_error (ex.error, "warning: %s\n%s", buffer_s, ex.message);
+      if (!reason.empty ())
+	throw_error (ex.error, "warning: %s\n%s", reason.c_str (), ex.message);
       else
 	throw_error (ex.error, "%s", ex.message);
     }

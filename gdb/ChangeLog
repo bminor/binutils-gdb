@@ -1,5 +1,15 @@
 2018-01-17  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* nat/linux-ptrace.h (linux_ptrace_attach_fail_reason): Return
+	std::string.
+	(linux_ptrace_attach_fail_reason_string): Likewise.
+	* nat/linux-ptrace.c (linux_ptrace_attach_fail_reason):
+	Likewise.
+	(linux_ptrace_attach_fail_reason_string): Likewise.
+	* linux-nat.c (attach_proc_task_lwp_callback): Adjust.
+
+2018-01-17  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-nat.c (linux_nat_attach): Remove xstrdup.
 
 2018-01-17  Eldar Abusalimov  <eldar.abusalimov@jetbrains.com>

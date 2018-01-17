@@ -225,9 +225,11 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
   err = linux_attach_lwp (ptid);
   if (err != 0)
     {
+      std::string reason = linux_ptrace_attach_fail_reason_string (ptid, err);
+
       warning ("Could not attach to thread %ld (LWP %d): %s\n",
-	       (unsigned long) ti_p->ti_tid, ti_p->ti_lid,
-	       linux_ptrace_attach_fail_reason_string (ptid, err));
+	       (unsigned long) ti_p->ti_tid, ti_p->ti_lid, reason.c_str ());
+
       return 0;
     }
 

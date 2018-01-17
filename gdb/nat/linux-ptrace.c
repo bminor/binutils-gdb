@@ -32,51 +32,42 @@
    of 0 means there are no supported features.  */
 static int supported_ptrace_options = -1;
 
-/* Find all possible reasons we could fail to attach PID and append
-   these as strings to the already initialized BUFFER.  '\0'
-   termination of BUFFER must be done by the caller.  */
+/* Find all possible reasons we could fail to attach PID and return these
+   as a string.  An empty string is returned if we didn't find any reason.  */
 
-void
-linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer)
+std::string
+linux_ptrace_attach_fail_reason (pid_t pid)
 {
-  pid_t tracerpid;
+  pid_t tracerpid = linux_proc_get_tracerpid_nowarn (pid);
+  std::string result;
 
-  tracerpid = linux_proc_get_tracerpid_nowarn (pid);
   if (tracerpid > 0)
-    buffer_xml_printf (buffer, _("process %d is already traced "
-				 "by process %d"),
-		       (int) pid, (int) tracerpid);
+    string_appendf (result,
+		    _("process %d is already traced by process %d"),
+		    (int) pid, (int) tracerpid);
 
   if (linux_proc_pid_is_zombie_nowarn (pid))
-    buffer_xml_printf (buffer, _("process %d is a zombie "
-				 "- the process has already terminated"),
-		       (int) pid);
+    string_appendf (result,
+		    _("process %d is a zombie - the process has already "
+		      "terminated"),
+		    (int) pid);
+
+  return result;
 }
 
 /* See linux-ptrace.h.  */
 
-char *
+std::string
 linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err)
 {
-  static char *reason_string;
-  struct buffer buffer;
-  char *warnings;
-  long lwpid = ptid_get_lwp (ptid);
+  long lwpid = ptid.lwp ();
+  std::string reason = linux_ptrace_attach_fail_reason (lwpid);
 
-  xfree (reason_string);
-
-  buffer_init (&buffer);
-  linux_ptrace_attach_fail_reason (lwpid, &buffer);
-  buffer_grow_str0 (&buffer, "");
-  warnings = buffer_finish (&buffer);
-  if (warnings[0] != '\0')
-    reason_string = xstrprintf ("%s (%d), %s",
-				safe_strerror (err), err, warnings);
+  if (!reason.empty ())
+    return string_printf ("%s (%d), %s", safe_strerror (err), err,
+			  reason.c_str ());
   else
-    reason_string = xstrprintf ("%s (%d)",
-				safe_strerror (err), err);
-  xfree (warnings);
-  return reason_string;
+    return string_printf ("%s (%d)", safe_strerror (err), err);
 }
 
 #if defined __i386__ || defined __x86_64__
