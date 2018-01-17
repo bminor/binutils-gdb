@@ -1,5 +1,9 @@
 2018-01-17  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_build_stubs): Silence gcc warning.
+
+2018-01-17  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (GLINK_ENTRY_SIZE): Handle speculation barrier.
 	(CRSETEQ, BEQCTRM): Define.
 	(is_nonpic_glink_stub): Don't check bctr.
