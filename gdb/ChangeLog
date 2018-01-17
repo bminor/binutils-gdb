@@ -1,3 +1,10 @@
+2018-01-17  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-tdep.c (aarch64_linux_gcc_target_options): New
+	function.
+	(aarch64_linux_init_abi): Install it to gdbarch hook
+	gcc_target_options.
+
 2018-01-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* infrun.c (keep_going_pass_signal): Clear step-over info when
