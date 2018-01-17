@@ -214,8 +214,9 @@ enum
   CpuRDPID,
   /* PTWRITE instruction required */
   CpuPTWRITE,
-  /* CET instruction support required */
-  CpuCET,
+  /* CET instructions support required */
+  CpuIBT,
+  CpuSHSTK,
   /* GFNI instructions required */
   CpuGFNI,
   /* VAES instructions required */
@@ -346,7 +347,8 @@ typedef union i386_cpu_flags
       unsigned int cpuospke:1;
       unsigned int cpurdpid:1;
       unsigned int cpuptwrite:1;
-      unsigned int cpucet:1;
+      unsigned int cpuibt:1;
+      unsigned int cpushstk:1;
       unsigned int cpugfni:1;
       unsigned int cpuvaes:1;
       unsigned int cpuvpclmulqdq:1;

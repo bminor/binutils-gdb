@@ -997,8 +997,10 @@ static const arch_entry cpu_arch[] =
     CPU_RDPID_FLAGS, 0 },
   { STRING_COMMA_LEN (".ptwrite"), PROCESSOR_UNKNOWN,
     CPU_PTWRITE_FLAGS, 0 },
-  { STRING_COMMA_LEN (".cet"), PROCESSOR_UNKNOWN,
-    CPU_CET_FLAGS, 0 },
+  { STRING_COMMA_LEN (".ibt"), PROCESSOR_UNKNOWN,
+    CPU_IBT_FLAGS, 0 },
+  { STRING_COMMA_LEN (".shstk"), PROCESSOR_UNKNOWN,
+    CPU_SHSTK_FLAGS, 0 },
   { STRING_COMMA_LEN (".gfni"), PROCESSOR_UNKNOWN,
     CPU_GFNI_FLAGS, 0 },
   { STRING_COMMA_LEN (".vaes"), PROCESSOR_UNKNOWN,
@@ -1038,6 +1040,8 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noavx512_vbmi2"), CPU_ANY_AVX512_VBMI2_FLAGS },
   { STRING_COMMA_LEN ("noavx512_vnni"), CPU_ANY_AVX512_VNNI_FLAGS },
   { STRING_COMMA_LEN ("noavx512_bitalg"), CPU_ANY_AVX512_BITALG_FLAGS },
+  { STRING_COMMA_LEN ("noibt"), CPU_ANY_IBT_FLAGS },
+  { STRING_COMMA_LEN ("noshstk"), CPU_ANY_SHSTK_FLAGS },
 };
 
 #ifdef I386COFF
@@ -4048,7 +4052,7 @@ parse_insn (char *line, char *mnemonic)
 		case PREFIX_EXIST:
 		  return NULL;
 		case PREFIX_DS:
-		  if (current_templates->start->cpu_flags.bitfield.cpucet)
+		  if (current_templates->start->cpu_flags.bitfield.cpuibt)
 		    i.notrack_prefix = current_templates->start->name;
 		  break;
 		case PREFIX_REP:

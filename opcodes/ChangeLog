@@ -1,3 +1,15 @@
+2018-01-17  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Delete CPU_CET_FLAGS, CpuCET.
+	Add CPU_IBT_FLAGS, CPU_SHSTK_FLAGS, CPY_ANY_IBT_FLAGS,
+	CPU_ANY_SHSTK_FLAGS, CpuIBT, CpuSHSTK.
+	(cpu_flags): Add CpuIBT, CpuSHSTK.
+	* i386-opc.h (enum): Add CpuIBT, CpuSHSTK.
+	(i386_cpu_flags): Add cpuibt, cpushstk.
+	* i386-opc.tbl: Change CpuCET to CpuSHSTK and CpuIBT.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
 2018-01-16  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt_BR.po: Updated Brazilian Portugese translation.
