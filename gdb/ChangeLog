@@ -1,3 +1,10 @@
+2018-01-17  Eldar Abusalimov  <eldar.abusalimov@jetbrains.com>
+
+	PR gdb/21559
+	* configure.ac: Include <sys/types.h> prior to <sys/user.h> when
+	checking for fs_base/gs_base fields in struct user_regs_struct.
+	* configure: Regenerate.
+
 2018-01-17  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-tdep.c (aarch64_linux_gcc_target_options): New
