@@ -139,8 +139,11 @@ gdb_test "compile code func_doesnotexist ();" "warning: Could not find symbol \"
 gdb_test "compile code *(volatile int *) 0 = 0;" \
     "The program being debugged was signaled while in a function called from GDB\\.\r\nGDB remains in the frame where the signal was received\\.\r\n.*" \
     "compile code segfault first"
-gdb_test "bt" \
-    "\r\n#0  \[^\r\n\]* in _gdb_expr \[^\r\n\]*\r\n#1  <function called from gdb>\r\n.*"
+gdb_test "bt" [multi_line \
+		   "#0  ($hex in )?_gdb_expr .*" \
+		   "#1  <function called from gdb>" \
+		   "#2  .*" \
+		  ]
 
 set test "p/x \$pc"
 set infcall_pc 0
