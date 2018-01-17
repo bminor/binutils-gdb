@@ -13171,7 +13171,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	}
       bfd_put_32 (htab->glink->owner, BCTR, p);
       p += 4;
-      BFD_ASSERT (p - htab->glink->contents == GLINK_PLTRESOLVE_SIZE (htab));
+      BFD_ASSERT (p == htab->glink->contents + GLINK_PLTRESOLVE_SIZE (htab));
 
       /* Build the .glink lazy link call stubs.  */
       indx = 0;

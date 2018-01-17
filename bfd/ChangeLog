@@ -1,5 +1,9 @@
 2018-01-18  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_build_stubs): Silence gcc warning.
+
+2018-01-18  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (GLINK_ENTRY_SIZE): Add parameters, handle
 	__tls_get_addr_opt, and alignment sizing.
 	(TLS_GET_ADDR_GLINK_SIZE): Delete.
