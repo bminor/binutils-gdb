@@ -7635,7 +7635,7 @@ chain since there is never any need to do so on a PLT call.
 @kindex --plt-thread-safe
 @kindex --no-plt-thread-safe
 @item --plt-thread-safe
-@itemx --no-thread-safe
+@itemx --no-plt-thread-safe
 With power7's weakly ordered memory model, it is possible when using
 lazy binding for ld.so to update a plt entry in one thread and have
 another thread see the individual plt entry words update in the wrong
@@ -7645,6 +7645,15 @@ barrier in the call stub, or use LD_BIND_NOW=1.  By default, @code{ld}
 looks for calls to commonly used functions that create threads, and if
 seen, adds the necessary barriers.  Use these options to change the
 default behaviour.
+
+@cindex PowerPC64 PLT call stub speculative execution barrier
+@kindex --speculate-indirect-jumps
+@kindex --no-speculate-indirect-jumps
+@item --speculate-indirect-jumps
+@itemx --no-speculate-indirect-jumps
+Use these options to control whether all indirect branch instructions
+emitted by @code{ld}, such as those in the PLT, have a speculative
+execution barrier to mitigate Spectre variant 2 attacks.
 
 @cindex PowerPC64 ELFv2 PLT localentry optimization
 @kindex --plt-localentry

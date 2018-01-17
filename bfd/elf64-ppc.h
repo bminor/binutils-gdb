@@ -51,6 +51,9 @@ struct ppc64_elf_params
   /* Set if PLT call stubs for localentry:0 functions should omit r2 save.  */
   int plt_localentry0;
 
+  /* Clear if PLT call stubs should use a speculative execution barrier.  */
+  int speculate_indirect_jumps;
+
   /* Whether to canonicalize .opd so that there are no overlapping
      .opd entries.  */
   int non_overlapping_opd;
