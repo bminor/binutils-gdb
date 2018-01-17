@@ -69,7 +69,7 @@ static bfd_reloc_status_type ppc_elf_unhandled_reloc
 /* For new-style .glink and .plt.  */
 #define GLINK_PLTRESOLVE 16*4
 #define GLINK_ENTRY_SIZE(htab, h)					\
-  ((4*4									\
+  (((!htab->params->speculate_indirect_jumps ? 6*4 : 4*4)			\
     + (h != NULL							\
        && h == htab->tls_get_addr					\
        && !htab->params->no_tls_get_addr_opt ? 8*4 : 0)			\
@@ -155,6 +155,8 @@ static const bfd_vma ppc_elf_vxworks_pic_plt0_entry
 #define BA		0x48000002
 #define BCL_20_31	0x429f0005
 #define BCTR		0x4e800420
+#define CRSETEQ		0x4c421242
+#define BEQCTRM		0x4dc20420
 #define BEQLR		0x4d820020
 #define CMPWI_11_0	0x2c0b0000
 #define LIS_11		0x3d600000
@@ -2878,15 +2880,14 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 static bfd_boolean
 is_nonpic_glink_stub (bfd *abfd, asection *glink, bfd_vma off)
 {
-  bfd_byte buf[4 * 4];
+  bfd_byte buf[3 * 4];
 
   if (!bfd_get_section_contents (abfd, glink, buf, off, sizeof buf))
     return FALSE;
 
   return ((bfd_get_32 (abfd, buf + 0) & 0xffff0000) == LIS_11
 	  && (bfd_get_32 (abfd, buf + 4) & 0xffff0000) == LWZ_11_11
-	  && bfd_get_32 (abfd, buf + 8) == MTCTR_11
-	  && bfd_get_32 (abfd, buf + 12) == BCTR);
+	  && bfd_get_32 (abfd, buf + 8) == MTCTR_11);
 }
 
 static bfd_boolean
@@ -3365,7 +3366,7 @@ ppc_elf_link_hash_table_create (bfd *abfd)
 {
   struct ppc_elf_link_hash_table *ret;
   static struct ppc_elf_params default_params
-    = { PLT_OLD, 0, 0, 1, 0, 0, 12, 0, 0, 0 };
+    = { PLT_OLD, 0, 1, 0, 1, 0, 0, 12, 0, 0, 0 };
 
   ret = bfd_zmalloc (sizeof (struct ppc_elf_link_hash_table));
   if (ret == NULL)
@@ -7167,6 +7168,8 @@ ppc_elf_relax_section (bfd *abfd,
 		  size = 4 * ARRAY_SIZE (stub_entry);
 		  insn_offset = 0;
 		}
+	      if (!htab->params->speculate_indirect_jumps)
+		size += 8;
 	      stub_rtype = R_PPC_RELAX;
 	      if (tsec == htab->elf.splt
 		  || tsec == htab->glink)
@@ -7448,6 +7451,26 @@ elf_finish_pointer_linker_section (bfd *input_bfd,
 #define PPC_HI(v) (((v) >> 16) & 0xffff)
 #define PPC_HA(v) PPC_HI ((v) + 0x8000)
 
+static inline bfd_byte *
+output_bctr (struct ppc_elf_link_hash_table *htab, bfd *obfd, bfd_byte *p)
+{
+  if (!htab->params->speculate_indirect_jumps)
+    {
+      bfd_put_32 (obfd, CRSETEQ, p);
+      p += 4;
+      bfd_put_32 (obfd, BEQCTRM, p);
+      p += 4;
+      bfd_put_32 (obfd, B, p);
+      p += 4;
+    }
+  else
+    {
+      bfd_put_32 (obfd, BCTR, p);
+      p += 4;
+    }
+  return p;
+}
+
 static void
 write_glink_stub (struct elf_link_hash_entry *h, struct plt_entry *ent,
 		  asection *plt_sec, unsigned char *p,
@@ -7515,8 +7538,7 @@ write_glink_stub (struct elf_link_hash_entry *h, struct plt_entry *ent,
   p += 4;
   bfd_put_32 (output_bfd, MTCTR_11, p);
   p += 4;
-  bfd_put_32 (output_bfd, BCTR, p);
-  p += 4;
+  p = output_bctr (htab, output_bfd, p);
   while (p < end)
     {
       bfd_put_32 (output_bfd, htab->params->ppc476_workaround ? BA : NOP, p);
@@ -8954,6 +8976,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		stub = stub_entry;
 		size = ARRAY_SIZE (stub_entry);
 	      }
+	    --size;
 
 	    relocation += addend;
 	    if (bfd_link_relocatable (info))
@@ -8978,6 +9001,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		bfd_put_32 (input_bfd, insn, contents + insn_offset);
 		insn_offset += 4;
 	      }
+	    output_bctr (htab, input_bfd, contents + insn_offset);
 
 	    /* Rewrite the reloc and convert one of the trailing nop
 	       relocs to describe this relocation.  */
@@ -10686,8 +10710,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
       p += 4;
       bfd_put_32 (output_bfd, ADD_11_0_11, p);
       p += 4;
-      bfd_put_32 (output_bfd, BCTR, p);
-      p += 4;
+      p = output_bctr (htab, output_bfd, p);
       while (p < endp)
 	{
 	  bfd_put_32 (output_bfd,

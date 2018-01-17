@@ -1,6 +1,28 @@
 2018-01-17  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc32elf.em (params): Init new field.
+	(OPTION_SPECULATE_INDIRECT_JUMPS): Define.
+	(OPTION_NO_SPECULATE_INDIRECT_JUMPS): Define.
+	(PARSE_AND_LIST_LONGOPTS): Handle new options.
+	(PARSE_AND_LIST_ARGS_CASES): Likewise.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	* emultempl/ppc64elf.em (params): Init new field.
+	(OPTION_SPECULATE_INDIRECT_JUMPS): Define.
+	(OPTION_NO_SPECULATE_INDIRECT_JUMPS): Define.
+	(PARSE_AND_LIST_LONGOPTS): Handle --speculate-indirect-jumps.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Likewise.
+	* ld.texinfo (--no-plt-thread-safe): Correct itemx.
+	(--speculate-indirect-jumps): Document.
+	* testsuite/ld-powerpc/elfv2exe.d,
+	* testsuite/ld-powerpc/elfv2so.d,
+	* testsuite/ld-powerpc/relbrlt.d,
+	* testsuite/ld-powerpc/powerpc.exp: Disable plt alignment and
+	speculation barriers on various tests.
+
+2018-01-17  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc32elf.em (params): Init new field.
 	(enum ppc32_opt): New enum to define OPTION_* values.  Add
 	OPTION_PLT_ALIGN and OPTION_NO_PLT_ALIGN.
 	(PARSE_AND_LIST_LONGOPTS): Handle new options.

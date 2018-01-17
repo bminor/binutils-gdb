@@ -1,5 +1,15 @@
 2018-01-17  Alan Modra  <amodra@gmail.com>
 
+	* options.h (speculate_indirect_jumps): New option.
+	* powerpc.cc (beqctrm, beqctrlm, crseteq): New insn constants.
+	(output_bctr): New function.
+	(Stub_table::plt_call_size): Add space for speculation barrier.
+	(Stub_table::branch_stub_size): Likewise.
+	(Output_data_glink::pltresolve_size): Likewise.
+	(Stub_table::do_write): Output speculation barriers.
+
+2018-01-17  Alan Modra  <amodra@gmail.com>
+
 	* options.h (plt_align): Support for PowerPC32 too.
 	* powerpc.cc (Stub_table::stub_align): Heed --plt-align for 32-bit.
 	(Stub_table::plt_call_size, branch_stub_size): Tidy.

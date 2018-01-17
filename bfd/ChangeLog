@@ -1,5 +1,31 @@
 2018-01-17  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (GLINK_ENTRY_SIZE): Handle speculation barrier.
+	(CRSETEQ, BEQCTRM): Define.
+	(is_nonpic_glink_stub): Don't check bctr.
+	(ppc_elf_link_hash_table_create): Init new ppc_elf_params field.
+	(ppc_elf_relax_section): Size speculation barrier.
+	(output_bctr): New function.
+	(write_glink_stub): Use output_bctr.
+	(ppc_elf_relocate_section): Use output_bctr for long branch stub.
+	(ppc_elf_finish_dynamic_symbol): Likewise.
+	(ppc_elf_finish_dynamic_sections): Use output_bctr.
+	* elf32-ppc.h (struct ppc_elf_params): Add speculate_indirect_jumps.
+	* elf64-ppc.c (CRSETEQ, BEQCTRM, BEQCTRLM): Define.
+	(GLINK_PLTRESOLVE_SIZE): Size speculation barrier.
+	(size_global_entry_stubs): Handle speculation barrier sizing.
+	(plt_stub_size): Likewise.
+	(output_bctr): New function.
+	(build_plt_stub, build_tls_get_addr_stub): Output speculation
+	barrier.
+	(ppc_build_one_stub): Likewise for ppc_stub_plt_branch.
+	(ppc_size_one_stub): Size speculation barrier in ppc_stub_plt_branch.
+	(build_global_entry_stubs): Output speculation barrier.
+	(ppc64_elf_build_stubs): Likewise in __glink_PLTresolve stub.
+	* elf64-ppc.h (struct ppc64_elf_params): Add speculate_indirect_jumps.
+
+2018-01-17  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (GLINK_ENTRY_SIZE): Add parameters, handle
 	__tls_get_addr_opt, and alignment sizing.
 	(TLS_GET_ADDR_GLINK_SIZE): Delete.
