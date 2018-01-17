@@ -570,6 +570,7 @@ validate_riscv_insn (const struct riscv_opcode *opc)
       case 'p':	used_bits |= ENCODE_SBTYPE_IMM (-1U); break;
       case 'q':	used_bits |= ENCODE_STYPE_IMM (-1U); break;
       case 'u':	used_bits |= ENCODE_UTYPE_IMM (-1U); break;
+      case 'z': break;
       case '[': break;
       case ']': break;
       case '0': break;
@@ -1710,6 +1711,15 @@ jump:
 		}
 	      else
 		*imm_reloc = BFD_RELOC_RISCV_CALL;
+	      continue;
+
+	    case 'z':
+	      if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
+		  || imm_expr->X_op != O_constant
+		  || imm_expr->X_add_number != 0)
+		break;
+	      s = expr_end;
+	      imm_expr->X_op = O_absent;
 	      continue;
 
 	    default:
