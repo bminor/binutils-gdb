@@ -7071,6 +7071,43 @@ ENUMDOC
   of a signed value.  Changes instruction to MOVZ or MOVN depending on the
   value's sign.
 ENUM
+  BFD_RELOC_AARCH64_MOVW_PREL_G0
+ENUMDOC
+  AArch64 MOV[NZ] instruction with most significant bits 0 to 15
+  of a signed value.  Changes instruction to MOVZ or MOVN depending on the
+  value's sign.
+ENUM
+  BFD_RELOC_AARCH64_MOVW_PREL_G0_NC
+ENUMDOC
+  AArch64 MOV[NZ] instruction with most significant bits 0 to 15
+  of a signed value.  Changes instruction to MOVZ or MOVN depending on the
+  value's sign.
+ENUM
+  BFD_RELOC_AARCH64_MOVW_PREL_G1
+ENUMDOC
+  AArch64 MOVK instruction with most significant bits 16 to 31
+  of a signed value.
+ENUM
+  BFD_RELOC_AARCH64_MOVW_PREL_G1_NC
+ENUMDOC
+  AArch64 MOVK instruction with most significant bits 16 to 31
+  of a signed value.
+ENUM
+  BFD_RELOC_AARCH64_MOVW_PREL_G2
+ENUMDOC
+  AArch64 MOVK instruction with most significant bits 32 to 47
+  of a signed value.
+ENUM
+  BFD_RELOC_AARCH64_MOVW_PREL_G2_NC
+ENUMDOC
+  AArch64 MOVK instruction with most significant bits 32 to 47
+  of a signed value.
+ENUM
+  BFD_RELOC_AARCH64_MOVW_PREL_G3
+ENUMDOC
+  AArch64 MOVK instruction with most significant bits 47 to 63
+  of a signed value.
+ENUM
   BFD_RELOC_AARCH64_LD_LO19_PCREL
 ENUMDOC
   AArch64 Load Literal instruction, holding a 19 bit pc-relative word

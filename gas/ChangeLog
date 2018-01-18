@@ -1,3 +1,27 @@
+2018-01-24  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): add entries for
+	BFD_RELOC_AARCH64_MOVW_PREL_G0, BFD_RELOC_AARCH64_MOVW_PREL_G0_NC,
+	BFD_RELOC_AARCH64_MOVW_PREL_G1, BFD_RELOC_AARCH64_MOVW_PREL_G1_NC,
+	BFD_RELOC_AARCH64_MOVW_PREL_G2, BFD_RELOC_AARCH64_MOVW_PREL_G2_NC,
+	BFD_RELOC_AARCH64_MOVW_PREL_G3.
+	(process_movw_reloc_info): Supports newly added MOVW_PREL relocations.
+	(md_apply_fix): Likewise
+	* testsuite/gas/aarch64/prel_g0.s: New.
+	* testsuite/gas/aarch64/prel_g0.d: New.
+	* testsuite/gas/aarch64/prel_g0_nc.s: New.
+	* testsuite/gas/aarch64/prel_g0_nc.d: New.
+	* testsuite/gas/aarch64/prel_g1.s: New.
+	* testsuite/gas/aarch64/prel_g1.d: New.
+	* testsuite/gas/aarch64/prel_g1_nc.s: New.
+	* testsuite/gas/aarch64/prel_g1_nc.d: New.
+	* testsuite/gas/aarch64/prel_g2.s: New.
+	* testsuite/gas/aarch64/prel_g2.d: New.
+	* testsuite/gas/aarch64/prel_g2_nc.s: New.
+	* testsuite/gas/aarch64/prel_g2_nc.d: New.
+	* testsuite/gas/aarch64/prel_g3.s: New.
+	* testsuite/gas/aarch64/prel_g3.d: New.
+
 2018-01-23  Maciej W. Rozycki  <macro@mips.com>
 
 	* configure.ac: Also set `mips_default_abi' to N32_ABI for

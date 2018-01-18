@@ -2577,6 +2577,69 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0},
 
+  /* Most significant bits 0-15 of signed/unsigned address/value: MOVZ */
+  {"prel_g0", 1,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_PREL_G0,
+   0,
+   0,
+   0},
+
+  /* Most significant bits 0-15 of signed/unsigned address/value: MOVK */
+  {"prel_g0_nc", 1,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_PREL_G0_NC,
+   0,
+   0,
+   0},
+
+  /* Most significant bits 16-31 of signed/unsigned address/value: MOVZ */
+  {"prel_g1", 1,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_PREL_G1,
+   0,
+   0,
+   0},
+
+  /* Most significant bits 16-31 of signed/unsigned address/value: MOVK */
+  {"prel_g1_nc", 1,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_PREL_G1_NC,
+   0,
+   0,
+   0},
+
+  /* Most significant bits 32-47 of signed/unsigned address/value: MOVZ */
+  {"prel_g2", 1,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_PREL_G2,
+   0,
+   0,
+   0},
+
+  /* Most significant bits 32-47 of signed/unsigned address/value: MOVK */
+  {"prel_g2_nc", 1,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_PREL_G2_NC,
+   0,
+   0,
+   0},
+
+  /* Most significant bits 48-63 of signed/unsigned address/value: MOVZ */
+  {"prel_g3", 1,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_PREL_G3,
+   0,
+   0,
+   0},
+
   /* Get to the page containing GOT entry for a symbol.  */
   {"got", 1,
    0,				/* adr_type */
@@ -5079,6 +5142,10 @@ process_movw_reloc_info (void)
       case BFD_RELOC_AARCH64_MOVW_G0_S:
       case BFD_RELOC_AARCH64_MOVW_G1_S:
       case BFD_RELOC_AARCH64_MOVW_G2_S:
+      case BFD_RELOC_AARCH64_MOVW_PREL_G0:
+      case BFD_RELOC_AARCH64_MOVW_PREL_G1:
+      case BFD_RELOC_AARCH64_MOVW_PREL_G2:
+      case BFD_RELOC_AARCH64_MOVW_PREL_G3:
       case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
@@ -5096,6 +5163,8 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G0:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G0_NC:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
     case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
@@ -5109,6 +5178,8 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G1:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G1_NC:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
     case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
     case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
@@ -5121,6 +5192,8 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G2:
     case BFD_RELOC_AARCH64_MOVW_G2_NC:
     case BFD_RELOC_AARCH64_MOVW_G2_S:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G2:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G2_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
       if (is32)
@@ -5133,6 +5206,7 @@ process_movw_reloc_info (void)
       shift = 32;
       break;
     case BFD_RELOC_AARCH64_MOVW_G3:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G3:
       if (is32)
 	{
 	  set_fatal_syntax_error
@@ -7608,12 +7682,16 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G0:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G0_NC:
       scale = 0;
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G1:
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G1:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G1_NC:
       scale = 16;
       goto movw_common;
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
@@ -7635,9 +7713,12 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_MOVW_G2:
     case BFD_RELOC_AARCH64_MOVW_G2_NC:
     case BFD_RELOC_AARCH64_MOVW_G2_S:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G2:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G2_NC:
       scale = 32;
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G3:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G3:
       scale = 48;
     movw_common:
       if (fixP->fx_done || !seg->use_rela_p)
@@ -7669,6 +7750,9 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 		case BFD_RELOC_AARCH64_MOVW_G0_S:
 		case BFD_RELOC_AARCH64_MOVW_G1_S:
 		case BFD_RELOC_AARCH64_MOVW_G2_S:
+		case BFD_RELOC_AARCH64_MOVW_PREL_G0:
+		case BFD_RELOC_AARCH64_MOVW_PREL_G1:
+		case BFD_RELOC_AARCH64_MOVW_PREL_G2:
 		  /* NOTE: We can only come here with movz or movn. */
 		  if (signed_overflow (value, scale + 16))
 		    as_bad_where (fixP->fx_file, fixP->fx_line,

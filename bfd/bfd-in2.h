@@ -5957,6 +5957,36 @@ of a signed value.  Changes instruction to MOVZ or MOVN depending on the
 value's sign.  */
   BFD_RELOC_AARCH64_MOVW_G2_S,
 
+/* AArch64 MOV[NZ] instruction with most significant bits 0 to 15
+of a signed value.  Changes instruction to MOVZ or MOVN depending on the
+value's sign.  */
+  BFD_RELOC_AARCH64_MOVW_PREL_G0,
+
+/* AArch64 MOV[NZ] instruction with most significant bits 0 to 15
+of a signed value.  Changes instruction to MOVZ or MOVN depending on the
+value's sign.  */
+  BFD_RELOC_AARCH64_MOVW_PREL_G0_NC,
+
+/* AArch64 MOVK instruction with most significant bits 16 to 31
+of a signed value.  */
+  BFD_RELOC_AARCH64_MOVW_PREL_G1,
+
+/* AArch64 MOVK instruction with most significant bits 16 to 31
+of a signed value.  */
+  BFD_RELOC_AARCH64_MOVW_PREL_G1_NC,
+
+/* AArch64 MOVK instruction with most significant bits 32 to 47
+of a signed value.  */
+  BFD_RELOC_AARCH64_MOVW_PREL_G2,
+
+/* AArch64 MOVK instruction with most significant bits 32 to 47
+of a signed value.  */
+  BFD_RELOC_AARCH64_MOVW_PREL_G2_NC,
+
+/* AArch64 MOVK instruction with most significant bits 47 to 63
+of a signed value.  */
+  BFD_RELOC_AARCH64_MOVW_PREL_G3,
+
 /* AArch64 Load Literal instruction, holding a 19 bit pc-relative word
 offset.  The lowest two bits must be zero and are not stored in the
 instruction, giving a 21 bit signed byte offset.  */
