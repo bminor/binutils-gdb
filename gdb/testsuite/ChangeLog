@@ -1,5 +1,10 @@
 2018-01-18  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* lib/gdb.exp (gdb_compile): Re-enable use of
+	universal_compile_options for languages other than Rust.
+
+2018-01-18  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.arch/s390-tdbregs.exp: Add the compile option -msoft-float.
 
 2018-01-17  Mike Gulick  <mgulick@mathworks.com>
