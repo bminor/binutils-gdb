@@ -271,7 +271,7 @@ if test -z "$VXWORKS_BASE_EM_FILE" ; then
   { "bss-plt", no_argument, NULL, OPTION_OLD_PLT },
   { "speculate-indirect-jumps", no_argument, NULL, OPTION_SPECULATE_INDIRECT_JUMPS },
   { "no-speculate-indirect-jumps", no_argument, NULL, OPTION_NO_SPECULATE_INDIRECT_JUMPS },
-  { "plt-align", no_argument, NULL, OPTION_PLT_ALIGN },
+  { "plt-align", optional_argument, NULL, OPTION_PLT_ALIGN },
   { "no-plt-align", no_argument, NULL, OPTION_NO_PLT_ALIGN },
   { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },'
 fi
@@ -369,7 +369,16 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
       break;
 
     case OPTION_PLT_ALIGN:
-      params.plt_stub_align = 5;
+      if (optarg != NULL)
+	{
+	  char *end;
+	  unsigned long val = strtoul (optarg, &end, 0);
+	  if (*end || val > 5)
+	    einfo (_("%P%F: invalid --plt-align `%s'\''\n"), optarg);
+	  params.plt_stub_align = val;
+	}
+      else
+	params.plt_stub_align = 5;
       break;
 
     case OPTION_NO_PLT_ALIGN:

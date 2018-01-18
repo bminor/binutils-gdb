@@ -3475,14 +3475,17 @@ ppc_elf_create_glink (bfd *abfd, struct bfd_link_info *info)
   struct ppc_elf_link_hash_table *htab = ppc_elf_hash_table (info);
   asection *s;
   flagword flags;
+  int p2align;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY | SEC_HAS_CONTENTS
 	   | SEC_IN_MEMORY | SEC_LINKER_CREATED);
   s = bfd_make_section_anyway_with_flags (abfd, ".glink", flags);
   htab->glink = s;
+  p2align = htab->params->ppc476_workaround ? 6 : 4;
+  if (p2align < htab->params->plt_stub_align)
+    p2align = htab->params->plt_stub_align;
   if (s == NULL
-      || !bfd_set_section_alignment (abfd, s,
-				     htab->params->ppc476_workaround ? 6 : 4))
+      || !bfd_set_section_alignment (abfd, s, p2align))
     return FALSE;
 
   if (!info->no_ld_generated_unwind_info)

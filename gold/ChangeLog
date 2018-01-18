@@ -1,5 +1,13 @@
 2018-01-18  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (param_plt_align): New function supplying default
+	--plt-align values.  Use it..
+	(Stub_table::plt_call_align): ..here, and..
+	(Output_data_glink::global_entry_align): ..here.
+	(Stub_table::stub_align): Correct 32-bit minimum alignment.
+
+2018-01-18  Alan Modra  <amodra@gmail.com>
+
 	* options.h (speculate_indirect_jumps): New option.
 	* powerpc.cc (beqctrm, beqctrlm, crseteq): New insn constants.
 	(output_bctr): New function.
