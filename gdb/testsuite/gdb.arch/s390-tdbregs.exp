@@ -26,7 +26,10 @@ if { ![istarget s390-*-*] && ![istarget s390x-*-* ] } {
 
 standard_testfile .c
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+# Use soft float, so the compiler doesn't use floating-point or vector
+# instructions.
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
+	  [list "debug" "additional_flags=-msoft-float"]] } {
     return -1
 }
 
