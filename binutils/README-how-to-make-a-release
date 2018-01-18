@@ -23,8 +23,8 @@ How to perform a release.
      branch.  Set a date for the branch (weekends are better because
      they are less busy).
 
-  2. Update the libiberty and config directories and the top level
-     configure files.
+  2. When the branch date is near:  Update the libiberty and config
+     directories and the top level configure files.
 
   3. When branch day arrives add markers for the upcoming release to
      gas, ld, gold and binutils NEWS files.
@@ -39,7 +39,7 @@ How to perform a release.
 
   4. Create the release branch using:
 
-	git tag -a binutils-2_30-branch   [eg for the 2.30 branch...]
+	git tag -a binutils-2_30-branch   [e.g. for the 2.30 branch...]
         git push --tags origin binutils-2_30-branch
 
   5. Update "BINUTILS_BRANCH" in gdbadmin's crontab:
@@ -61,10 +61,9 @@ How to perform a release.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
      new one.  E.g. rename "2.30 (HEAD)" to 2.30, and create "2.31
-     (HEAD)".  Go to "Edit products" from the bottom toolbar, click on
-     "binutils", then on "Edit versions".  If you don't have
-     permissions to do this, either ask Daniel Berlin to fix your
-     account or ask Daniel Jacobowitz to do it.
+     (HEAD)":
+     
+        https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
   8. Regenerate various files on both branch and HEAD by configuring
      with --enable-maintainer-mode.  No need to check in changes to
@@ -95,8 +94,37 @@ How to perform a release.
 
   11. Announce the availability of the snapshot and the branch on the
       binutils mailing list.  Set a date for when the release will
-      actually happen.  Nag maintainers to fix any testsuite failures
-      for their architectures...
+      actually happen.  Something like:
+------------------------------------------------------------------------
+Hi Everyone, 
+       
+  The 2.XX branch has now been created:
+
+     git clone git://sourceware.org/git/binutils-gdb.git -b binutils-2_XX-branch 2.XX
+
+  A snapshot of the sources is also available here:
+
+    ftp://sourceware.org/pub/binutils/snapshots/binutils-2.XX.0.tar.xz
+
+  Please could all patches for the branch be run by me.
+  The rules for the branch are:
+
+    * No new features.
+    * Target specific bug fixes are OK.
+    * Generic bug fixes are OK if they are important and widely tested.
+    * Documentation updates/fixes are OK.
+    * Translation updates are OK.
+    * Fixes for testsuite failures are OK.
+
+  Ideally I would like to make the release happen in two weeks time,
+  i.e. Saturday 27th Jan.  Which I hope will be enough time for everyone
+  to get their final fixes in.
+------------------------------------------------------------------------
+
+  12. Build various different toolchains, test them and nag
+      maintainers to fix any testsuite failures for their
+      architectures...
+
 
 xxx -- fill in stuff here -- xxx
 
