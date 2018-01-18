@@ -1269,11 +1269,7 @@ ppu2spu_prev_register (struct frame_info *this_frame,
 
   buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
 
-  if (regnum < gdbarch_num_regs (gdbarch))
-    regcache_raw_read (cache->regcache, regnum, buf);
-  else
-    gdbarch_pseudo_register_read (gdbarch, cache->regcache, regnum, buf);
-
+  cache->regcache->cooked_read (regnum, buf);
   return frame_unwind_got_bytes (this_frame, regnum, buf);
 }
 
