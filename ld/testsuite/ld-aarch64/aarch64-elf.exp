@@ -143,7 +143,17 @@ run_dump_test_lp64 "emit-relocs-284"
 run_dump_test_lp64 "emit-relocs-285"
 run_dump_test_lp64 "emit-relocs-286"
 run_dump_test_lp64 "emit-relocs-286-bad"
-# 287-298 are not done yet
+run_dump_test_lp64 "emit-relocs-287"
+run_dump_test_lp64 "emit-relocs-287-overflow"
+run_dump_test_lp64 "emit-relocs-288"
+run_dump_test_lp64 "emit-relocs-289"
+run_dump_test_lp64 "emit-relocs-289-overflow"
+run_dump_test_lp64 "emit-relocs-290"
+run_dump_test_lp64 "emit-relocs-291"
+run_dump_test_lp64 "emit-relocs-291-overflow"
+run_dump_test_lp64 "emit-relocs-292"
+run_dump_test_lp64 "emit-relocs-293"
+# 294-298 are not done yet
 run_dump_test_lp64 "emit-relocs-299"
 # 300 is not done yet
 run_dump_test_lp64 "emit-relocs-301"

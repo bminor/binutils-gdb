@@ -5462,6 +5462,13 @@ bad_ifunc_reloc:
     case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
     case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
     case BFD_RELOC_AARCH64_LD_LO19_PCREL:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G0:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G0_NC:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G1:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G1_NC:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G2:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G2_NC:
+    case BFD_RELOC_AARCH64_MOVW_PREL_G3:
       if (bfd_link_pic (info)
 	  && (input_section->flags & SEC_ALLOC) != 0
 	  && (input_section->flags & SEC_READONLY) != 0
