@@ -1514,9 +1514,9 @@ struct abbrev_table
   explicit abbrev_table (sect_offset off)
     : sect_off (off)
   {
-    abbrevs =
+    m_abbrevs =
       XOBNEWVEC (&abbrev_obstack, struct abbrev_info *, ABBREV_HASH_SIZE);
-    memset (abbrevs, 0, ABBREV_HASH_SIZE * sizeof (struct abbrev_info *));
+    memset (m_abbrevs, 0, ABBREV_HASH_SIZE * sizeof (struct abbrev_info *));
   }
 
   DISABLE_COPY_AND_ASSIGN (abbrev_table);
@@ -1541,11 +1541,13 @@ struct abbrev_table
   /* Storage for the abbrev table.  */
   auto_obstack abbrev_obstack;
 
+private:
+
   /* Hash table of abbrevs.
      This is an array of size ABBREV_HASH_SIZE allocated in abbrev_obstack.
      It could be statically allocated, but the previous code didn't so we
      don't either.  */
-  struct abbrev_info **abbrevs;
+  struct abbrev_info **m_abbrevs;
 };
 
 typedef std::unique_ptr<struct abbrev_table> abbrev_table_up;
@@ -18011,8 +18013,8 @@ abbrev_table::add_abbrev (unsigned int abbrev_number,
   unsigned int hash_number;
 
   hash_number = abbrev_number % ABBREV_HASH_SIZE;
-  abbrev->next = abbrevs[hash_number];
-  abbrevs[hash_number] = abbrev;
+  abbrev->next = m_abbrevs[hash_number];
+  m_abbrevs[hash_number] = abbrev;
 }
 
 /* Look up an abbrev in the table.
@@ -18025,7 +18027,7 @@ abbrev_table::lookup_abbrev (unsigned int abbrev_number)
   struct abbrev_info *abbrev;
 
   hash_number = abbrev_number % ABBREV_HASH_SIZE;
-  abbrev = abbrevs[hash_number];
+  abbrev = m_abbrevs[hash_number];
 
   while (abbrev)
     {

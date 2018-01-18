@@ -1,5 +1,12 @@
 2018-01-18  Yao Qi  <yao.qi@linaro.org>
 
+	* dwarf2read.c (abbrev_table) <abbrevs>: Rename it to
+	m_abbrevs.
+	(abbrev_table::add_abbrev): Update.
+	(abbrev_table::lookup_abbrev): Update.
+
+2018-01-18  Yao Qi  <yao.qi@linaro.org>
+
 	* ppc-linux-tdep.c (ppu2spu_prev_register): Call cooked_read.
 
 2018-01-17  Sergio Durigan Junior  <sergiodj@redhat.com>
