@@ -12743,9 +12743,11 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
       if (htab->params->plt_stub_align != 0)
 	for (group = htab->group; group != NULL; group = group->next)
 	  if (group->stub_sec != NULL)
-	    group->stub_sec->size = ((group->stub_sec->size
-				      + (1 << htab->params->plt_stub_align) - 1)
-				     & -(1 << htab->params->plt_stub_align));
+	    {
+	      int align = abs (htab->params->plt_stub_align);
+	      group->stub_sec->size
+		= (group->stub_sec->size + (1 << align) - 1) & -(1 << align);
+	    }
 
       for (group = htab->group; group != NULL; group = group->next)
 	if (group->stub_sec != NULL
@@ -13285,9 +13287,10 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
   if (htab->params->plt_stub_align != 0)
     for (group = htab->group; group != NULL; group = group->next)
       if ((stub_sec = group->stub_sec) != NULL)
-	stub_sec->size = ((stub_sec->size
-			   + (1 << htab->params->plt_stub_align) - 1)
-			  & -(1 << htab->params->plt_stub_align));
+	{
+	  int align = abs (htab->params->plt_stub_align);
+	  stub_sec->size = (stub_sec->size + (1 << align) - 1) & -(1 << align);
+	}
 
   for (group = htab->group; group != NULL; group = group->next)
     if ((stub_sec = group->stub_sec) != NULL)

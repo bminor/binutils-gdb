@@ -1,3 +1,8 @@
+2018-01-18  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc32elf.em: Support optional --plt-align arg.
+	* emultempl/ppc64elf.em: Support negative --plt-align arg.
+
 2018-01-17  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc32elf.em (params): Init new field.

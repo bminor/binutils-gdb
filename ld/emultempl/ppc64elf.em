@@ -872,8 +872,8 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
       if (optarg != NULL)
 	{
 	  char *end;
-	  unsigned long val = strtoul (optarg, &end, 0);
-	  if (*end || val > 8)
+	  long val = strtol (optarg, &end, 0);
+	  if (*end || (unsigned long) val + 8 > 16)
 	    einfo (_("%P%F: invalid --plt-align `%s'\''\n"), optarg);
 	  params.plt_stub_align = val;
 	}

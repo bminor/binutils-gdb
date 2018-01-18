@@ -4186,6 +4186,15 @@ output_bctr(unsigned char* p)
   return p;
 }
 
+template<int size>
+static inline unsigned int
+param_plt_align()
+{
+  if (!parameters->options().user_set_plt_align())
+    return size == 64 ? 32 : 8;
+  return 1 << parameters->options().plt_align();
+}
+
 // Stub_table holds information about plt and long branch stubs.
 // Stubs are built in an area following some input section determined
 // by group_sections().  This input section is converted to a relaxed
@@ -4412,9 +4421,7 @@ class Stub_table : public Output_relaxed_input_section
   unsigned int
   stub_align() const
   {
-    unsigned int min_align = 4;
-    if (!parameters->options().user_set_plt_align())
-      return size == 64 ? 32 : min_align;
+    unsigned int min_align = size == 64 ? 32 : 16;
     unsigned int user_align = 1 << parameters->options().plt_align();
     return std::max(user_align, min_align);
   }
@@ -4483,7 +4490,7 @@ class Stub_table : public Output_relaxed_input_section
   unsigned int
   plt_call_align(unsigned int bytes) const
   {
-    unsigned int align = this->stub_align();
+    unsigned int align = param_plt_align<size>();
     return (bytes + align - 1) & -align;
   }
 
@@ -4926,9 +4933,7 @@ class Output_data_glink : public Output_section_data
   unsigned int
   global_entry_align(unsigned int off) const
   {
-    unsigned int align = 1 << parameters->options().plt_align();
-    if (!parameters->options().user_set_plt_align())
-      align = size == 64 ? 32 : 4;
+    unsigned int align = param_plt_align<size>();
     return (off + align - 1) & -align;
   }
 
