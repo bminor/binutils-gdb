@@ -1888,6 +1888,10 @@ case "${target}" in
    msp430*-*-*)
        sim_arch=msp430
        ;;
+   or1k-*-* | or1knd-*-*)
+       sim_arch=or1k
+       sim_testsuite=yes
+       ;;
    rl78-*-*)
        sim_arch=rl78
        ;;

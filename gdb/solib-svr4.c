@@ -1,6 +1,6 @@
 /* Handle SVR4 shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -351,7 +351,7 @@ struct svr4_info
   /* Table of struct probe_and_action instances, used by the
      probes-based interface to map breakpoint addresses to probes
      and their associated actions.  Lookup is performed using
-     probe_and_action->probe->address.  */
+     probe_and_action->prob->address.  */
   htab_t probes_table;
 
   /* List of objects loaded into the inferior, used by the probes-
@@ -984,20 +984,14 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
   return (name_lm >= vaddr && name_lm < vaddr + size);
 }
 
-/* Implement the "open_symbol_file_object" target_so_ops method.
-
-   If no open symbol file, attempt to locate and open the main symbol
-   file.  On SVR4 systems, this is the first link map entry.  If its
-   name is here, we can open it.  Useful when attaching to a process
-   without first loading its symbol file.  */
+/* See solist.h.  */
 
 static int
-open_symbol_file_object (void *from_ttyp)
+open_symbol_file_object (int from_tty)
 {
   CORE_ADDR lm, l_name;
   char *filename;
   int errcode;
-  int from_tty = *(int *)from_ttyp;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   int l_name_size = TYPE_LENGTH (ptr_type);
@@ -1150,17 +1144,18 @@ svr4_copy_library_list (struct so_list *src)
 static void
 library_list_start_library (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
-			    void *user_data, VEC(gdb_xml_value_s) *attributes)
+			    void *user_data,
+			    std::vector<gdb_xml_value> &attributes)
 {
   struct svr4_library_list *list = (struct svr4_library_list *) user_data;
   const char *name
-    = (const char *) xml_find_attribute (attributes, "name")->value;
+    = (const char *) xml_find_attribute (attributes, "name")->value.get ();
   ULONGEST *lmp
-    = (ULONGEST *) xml_find_attribute (attributes, "lm")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "lm")->value.get ();
   ULONGEST *l_addrp
-    = (ULONGEST *) xml_find_attribute (attributes, "l_addr")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "l_addr")->value.get ();
   ULONGEST *l_ldp
-    = (ULONGEST *) xml_find_attribute (attributes, "l_ld")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "l_ld")->value.get ();
   struct so_list *new_elem;
 
   new_elem = XCNEW (struct so_list);
@@ -1183,11 +1178,12 @@ library_list_start_library (struct gdb_xml_parser *parser,
 static void
 svr4_library_list_start_list (struct gdb_xml_parser *parser,
 			      const struct gdb_xml_element *element,
-			      void *user_data, VEC(gdb_xml_value_s) *attributes)
+			      void *user_data,
+			      std::vector<gdb_xml_value> &attributes)
 {
   struct svr4_library_list *list = (struct svr4_library_list *) user_data;
   const char *version
-    = (const char *) xml_find_attribute (attributes, "version")->value;
+    = (const char *) xml_find_attribute (attributes, "version")->value.get ();
   struct gdb_xml_value *main_lm = xml_find_attribute (attributes, "main-lm");
 
   if (strcmp (version, "1.0") != 0)
@@ -1196,7 +1192,7 @@ svr4_library_list_start_list (struct gdb_xml_parser *parser,
 		   version);
 
   if (main_lm)
-    list->main_lm = *(ULONGEST *) main_lm->value;
+    list->main_lm = *(ULONGEST *) main_lm->value.get ();
 }
 
 /* The allowed elements and attributes for an XML library list.
@@ -1275,24 +1271,16 @@ static int
 svr4_current_sos_via_xfer_libraries (struct svr4_library_list *list,
 				     const char *annex)
 {
-  char *svr4_library_document;
-  int result;
-  struct cleanup *back_to;
-
   gdb_assert (annex == NULL || target_augmented_libraries_svr4_read ());
 
   /* Fetch the list of shared libraries.  */
-  svr4_library_document = target_read_stralloc (&current_target,
-						TARGET_OBJECT_LIBRARIES_SVR4,
-						annex);
+  gdb::unique_xmalloc_ptr<char> svr4_library_document
+    = target_read_stralloc (&current_target, TARGET_OBJECT_LIBRARIES_SVR4,
+			    annex);
   if (svr4_library_document == NULL)
     return 0;
 
-  back_to = make_cleanup (xfree, svr4_library_document);
-  result = svr4_parse_libraries (svr4_library_document, list);
-  do_cleanups (back_to);
-
-  return result;
+  return svr4_parse_libraries (svr4_library_document.get (), list);
 }
 
 #else
@@ -1350,21 +1338,15 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 
   for (; lm != 0; prev_lm = lm, lm = next_lm)
     {
-      struct so_list *newobj;
-      struct cleanup *old_chain;
       int errcode;
       char *buffer;
 
-      newobj = XCNEW (struct so_list);
-      old_chain = make_cleanup_free_so (newobj);
+      so_list_up newobj (XCNEW (struct so_list));
 
       lm_info_svr4 *li = lm_info_read (lm);
       newobj->lm_info = li;
       if (li == NULL)
-	{
-	  do_cleanups (old_chain);
-	  return 0;
-	}
+	return 0;
 
       next_lm = li->l_next;
 
@@ -1373,7 +1355,6 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 	  warning (_("Corrupted shared library list: %s != %s"),
 		   paddress (target_gdbarch (), prev_lm),
 		   paddress (target_gdbarch (), li->l_prev));
-	  do_cleanups (old_chain);
 	  return 0;
 	}
 
@@ -1388,7 +1369,6 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 
 	  first_l_name = li->l_name;
 	  info->main_lm_addr = li->lm_addr;
-	  do_cleanups (old_chain);
 	  continue;
 	}
 
@@ -1404,7 +1384,6 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 	  if (first_l_name == 0 || li->l_name != first_l_name)
 	    warning (_("Can't read pathname for load map: %s."),
 		     safe_strerror (errcode));
-	  do_cleanups (old_chain);
 	  continue;
 	}
 
@@ -1416,15 +1395,12 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
       /* If this entry has no name, or its name matches the name
 	 for the main executable, don't include it in the list.  */
       if (! newobj->so_name[0] || match_main (newobj->so_name))
-	{
-	  do_cleanups (old_chain);
-	  continue;
-	}
+	continue;
 
-      discard_cleanups (old_chain);
       newobj->next = 0;
-      **link_ptr_ptr = newobj;
-      *link_ptr_ptr = &newobj->next;
+      /* Don't free it now.  */
+      **link_ptr_ptr = newobj.release ();
+      *link_ptr_ptr = &(**link_ptr_ptr)->next;
     }
 
   return 1;
@@ -1690,7 +1666,7 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
 struct probe_and_action
 {
   /* The probe.  */
-  struct probe *probe;
+  probe *prob;
 
   /* The relocated address of the probe.  */
   CORE_ADDR address;
@@ -1725,7 +1701,7 @@ equal_probe_and_action (const void *p1, const void *p2)
    probes table.  */
 
 static void
-register_solib_event_probe (struct probe *probe, CORE_ADDR address,
+register_solib_event_probe (probe *prob, CORE_ADDR address,
 			    enum probe_action action)
 {
   struct svr4_info *info = get_svr4_info ();
@@ -1738,13 +1714,13 @@ register_solib_event_probe (struct probe *probe, CORE_ADDR address,
 					    equal_probe_and_action,
 					    xfree, xcalloc, xfree);
 
-  lookup.probe = probe;
+  lookup.prob = prob;
   lookup.address = address;
   slot = htab_find_slot (info->probes_table, &lookup, INSERT);
   gdb_assert (*slot == HTAB_EMPTY_ENTRY);
 
   pa = XCNEW (struct probe_and_action);
-  pa->probe = probe;
+  pa->prob = prob;
   pa->address = address;
   pa->action = action;
 
@@ -1793,7 +1769,7 @@ solib_event_probe_action (struct probe_and_action *pa)
        arg2: struct link_map *new (optional, for incremental updates)  */
   TRY
     {
-      probe_argc = get_probe_argument_count (pa->probe, frame);
+      probe_argc = pa->prob->get_argument_count (frame);
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -1802,11 +1778,11 @@ solib_event_probe_action (struct probe_and_action *pa)
     }
   END_CATCH
 
-  /* If get_probe_argument_count throws an exception, probe_argc will
-     be set to zero.  However, if pa->probe does not have arguments,
-     then get_probe_argument_count will succeed but probe_argc will
-     also be zero.  Both cases happen because of different things, but
-     they are treated equally here: action will be set to
+  /* If get_argument_count throws an exception, probe_argc will be set
+     to zero.  However, if pa->prob does not have arguments, then
+     get_argument_count will succeed but probe_argc will also be zero.
+     Both cases happen because of different things, but they are
+     treated equally here: action will be set to
      PROBES_INTERFACE_FAILED.  */
   if (probe_argc == 2)
     action = FULL_RELOAD;
@@ -1948,7 +1924,7 @@ svr4_handle_solib_event (void)
       return;
     }
 
-  /* evaluate_probe_argument looks up symbols in the dynamic linker
+  /* evaluate_argument looks up symbols in the dynamic linker
      using find_pc_section.  find_pc_section is accelerated by a cache
      called the section map.  The section map is invalidated every
      time a shared library is loaded or unloaded, and if the inferior
@@ -1957,14 +1933,14 @@ svr4_handle_solib_event (void)
      We called find_pc_section in svr4_create_solib_event_breakpoints,
      so we can guarantee that the dynamic linker's sections are in the
      section map.  We can therefore inhibit section map updates across
-     these calls to evaluate_probe_argument and save a lot of time.  */
+     these calls to evaluate_argument and save a lot of time.  */
   inhibit_section_map_updates (current_program_space);
   usm_chain = make_cleanup (resume_section_map_updates_cleanup,
 			    current_program_space);
 
   TRY
     {
-      val = evaluate_probe_argument (pa->probe, 1, frame);
+      val = pa->prob->evaluate_argument (1, frame);
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -2005,7 +1981,7 @@ svr4_handle_solib_event (void)
     {
       TRY
 	{
-	  val = evaluate_probe_argument (pa->probe, 2, frame);
+	  val = pa->prob->evaluate_argument (2, frame);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
@@ -2101,25 +2077,19 @@ svr4_update_solib_event_breakpoints (void)
 
 static void
 svr4_create_probe_breakpoints (struct gdbarch *gdbarch,
-			       VEC (probe_p) **probes,
+			       const std::vector<probe *> *probes,
 			       struct objfile *objfile)
 {
-  int i;
-
-  for (i = 0; i < NUM_PROBES; i++)
+  for (int i = 0; i < NUM_PROBES; i++)
     {
       enum probe_action action = probe_info[i].action;
-      struct probe *probe;
-      int ix;
 
-      for (ix = 0;
-	   VEC_iterate (probe_p, probes[i], ix, probe);
-	   ++ix)
+      for (probe *p : probes[i])
 	{
-	  CORE_ADDR address = get_probe_address (probe, objfile);
+	  CORE_ADDR address = p->get_relocated_address (objfile);
 
 	  create_solib_event_breakpoint (gdbarch, address);
-	  register_solib_event_probe (probe, address, action);
+	  register_solib_event_probe (p, address, action);
 	}
     }
 
@@ -2151,16 +2121,14 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 
       for (with_prefix = 0; with_prefix <= 1; with_prefix++)
 	{
-	  VEC (probe_p) *probes[NUM_PROBES];
+	  std::vector<probe *> probes[NUM_PROBES];
 	  int all_probes_found = 1;
 	  int checked_can_use_probe_arguments = 0;
-	  int i;
 
-	  memset (probes, 0, sizeof (probes));
-	  for (i = 0; i < NUM_PROBES; i++)
+	  for (int i = 0; i < NUM_PROBES; i++)
 	    {
 	      const char *name = probe_info[i].name;
-	      struct probe *p;
+	      probe *p;
 	      char buf[32];
 
 	      /* Fedora 17 and Red Hat Enterprise Linux 6.2-6.4
@@ -2184,7 +2152,7 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 	      if (strcmp (name, "rtld_map_failed") == 0)
 		continue;
 
-	      if (VEC_empty (probe_p, probes[i]))
+	      if (probes[i].empty ())
 		{
 		  all_probes_found = 0;
 		  break;
@@ -2193,8 +2161,8 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 	      /* Ensure probe arguments can be evaluated.  */
 	      if (!checked_can_use_probe_arguments)
 		{
-		  p = VEC_index (probe_p, probes[i], 0);
-		  if (!can_evaluate_probe_arguments (p))
+		  p = probes[i][0];
+		  if (!p->can_evaluate_arguments ())
 		    {
 		      all_probes_found = 0;
 		      break;
@@ -2205,9 +2173,6 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 
 	  if (all_probes_found)
 	    svr4_create_probe_breakpoints (gdbarch, probes, os->objfile);
-
-	  for (i = 0; i < NUM_PROBES; i++)
-	    VEC_free (probe_p, probes[i]);
 
 	  if (all_probes_found)
 	    return;
@@ -3304,8 +3269,6 @@ elf_lookup_lib_symbol (struct objfile *objfile,
 
   return lookup_global_symbol_from_objfile (objfile, name, domain);
 }
-
-extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */
 
 void
 _initialize_svr4_solib (void)

@@ -1,6 +1,6 @@
 /* Disassembly display.
 
-   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -305,7 +305,7 @@ tui_show_disassem_and_update_source (struct gdbarch *gdbarch,
       tui_update_source_window (TUI_SRC_WIN, gdbarch, sal.symtab, val, TRUE);
       if (sal.symtab)
 	{
-	  set_current_source_symtab_and_line (&sal);
+	  set_current_source_symtab_and_line (sal);
 	  tui_update_locator_fullname (symtab_to_fullname (sal.symtab));
 	}
       else

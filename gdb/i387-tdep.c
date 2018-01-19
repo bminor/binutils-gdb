@@ -1,6 +1,6 @@
 /* Intel 387 floating point stuff.
 
-   Copyright (C) 1988-2017 Free Software Foundation, Inc.
+   Copyright (C) 1988-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,13 +18,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "doublest.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "language.h"
 #include "regcache.h"
+#include "target-float.h"
 #include "value.h"
 
 #include "i386-tdep.h"
@@ -37,23 +36,13 @@ static void
 print_i387_value (struct gdbarch *gdbarch,
 		  const gdb_byte *raw, struct ui_file *file)
 {
-  DOUBLEST value;
-
-  /* Using extract_typed_floating here might affect the representation
-     of certain numbers such as NaNs, even if GDB is running natively.
-     This is fine since our caller already detects such special
-     numbers and we print the hexadecimal representation anyway.  */
-  value = extract_typed_floating (raw, i387_ext_type (gdbarch));
-
   /* We try to print 19 digits.  The last digit may or may not contain
      garbage, but we'd better print one too many.  We need enough room
      to print the value, 1 position for the sign, 1 for the decimal
      point, 19 for the digits and 6 for the exponent adds up to 27.  */
-#ifdef PRINTF_HAS_LONG_DOUBLE
-  fprintf_filtered (file, " %-+27.19Lg", (long double) value);
-#else
-  fprintf_filtered (file, " %-+27.19g", (double) value);
-#endif
+  const struct type *type = i387_ext_type (gdbarch);
+  std::string str = target_float_to_string (raw, type, " %-+27.19g");
+  fprintf_filtered (file, "%s", str.c_str ());
 }
 
 /* Print the classification for the register contents RAW.  */
@@ -380,7 +369,7 @@ i387_register_to_value (struct frame_info *frame, int regnum,
 				 from, optimizedp, unavailablep))
     return 0;
 
-  convert_typed_floating (from, i387_ext_type (gdbarch), to, type);
+  target_float_convert (from, i387_ext_type (gdbarch), to, type);
   *optimizedp = *unavailablep = 0;
   return 1;
 }
@@ -406,7 +395,7 @@ i387_value_to_register (struct frame_info *frame, int regnum,
     }
 
   /* Convert from TYPE.  */
-  convert_typed_floating (from, type, to, i387_ext_type (gdbarch));
+  target_float_convert (from, type, to, i387_ext_type (gdbarch));
   put_frame_register (frame, regnum, to);
 }
 
@@ -448,7 +437,7 @@ static int fsave_offset[] =
 void
 i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const gdb_byte *regs = (const gdb_byte *) fsave;
@@ -503,7 +492,7 @@ i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 void
 i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   gdb_byte *regs = (gdb_byte *) fsave;
   int i;
 
@@ -596,7 +585,7 @@ static int i387_tag (const gdb_byte *raw);
 void
 i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   const gdb_byte *regs = (const gdb_byte *) fxsave;
   int i;
 
@@ -679,7 +668,7 @@ i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 void
 i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   gdb_byte *regs = (gdb_byte *) fxsave;
   int i;
 
@@ -909,7 +898,7 @@ void
 i387_supply_xsave (struct regcache *regcache, int regnum,
 		   const void *xsave)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const gdb_byte *regs = (const gdb_byte *) xsave;
   int i;
@@ -1317,7 +1306,7 @@ void
 i387_collect_xsave (const struct regcache *regcache, int regnum,
 		    void *xsave, int gcore)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_byte *regs = (gdb_byte *) xsave;
   int i;

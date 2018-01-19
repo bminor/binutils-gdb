@@ -1,5 +1,5 @@
 /* POWER/PowerPC XCOFF linker support.
-   Copyright (C) 1995-2017 Free Software Foundation, Inc.
+   Copyright (C) 1995-2018 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1366,7 +1366,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (csect != NULL)
 	    *csect_cache = csect;
 	  else if (first_csect == NULL
-                   || sym.n_sclass == C_FILE || sym.n_sclass == C_DWARF)
+		   || sym.n_sclass == C_FILE || sym.n_sclass == C_DWARF)
 	    *csect_cache = coff_section_from_bfd_index (abfd, sym.n_scnum);
 	  else
 	    *csect_cache = NULL;
@@ -1499,7 +1499,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: bad XTY_ER symbol `%s': class %d scnum %d scnlen %d"),
+		(_("%B: bad XTY_ER symbol `%s': class %d scnum %d scnlen %Ld"),
 		 abfd, name, sym.n_sclass, sym.n_scnum,
 		 aux.x_csect.x_scnlen.l);
 	      bfd_set_error (bfd_error_bad_value);
@@ -1529,7 +1529,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: XMC_TC0 symbol `%s' is class %d scnlen %d"),
+		    (_("%B: XMC_TC0 symbol `%s' is class %d scnlen %Ld"),
 		     abfd, name, sym.n_sclass, aux.x_csect.x_scnlen.l);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
@@ -1789,7 +1789,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		bfd_set_error (bfd_error_bad_value);
 		goto error_return;
 	      }
- 	    csect = section;
+	    csect = section;
 	    value = sym.n_value - csect->vma;
 	  }
 	  break;
@@ -1926,7 +1926,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     We also have to handle the case of statically linking a
 	     shared object, which will cause symbol redefinitions,
 	     although this is an easier case to detect.  */
- 	  else if (info->output_bfd->xvec == abfd->xvec)
+	  else if (info->output_bfd->xvec == abfd->xvec)
 	    {
 	      if (! bfd_is_und_section (section))
 		*sym_hash = xcoff_link_hash_lookup (xcoff_hash_table (info),
@@ -2039,7 +2039,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		  = csect->alignment_power;
 	    }
 
- 	  if (info->output_bfd->xvec == abfd->xvec)
+	  if (info->output_bfd->xvec == abfd->xvec)
 	    {
 	      int flag;
 
@@ -2080,7 +2080,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
     {
       /* Debugging sections have no csects.  */
       if (bfd_get_section_flags (abfd, o) & SEC_DEBUGGING)
-        continue;
+	continue;
 
       /* Reset the section size and the line number count, since the
 	 data is now attached to the csects.  Don't reset the size of
@@ -2105,7 +2105,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: reloc %s:%d not in csect"),
+		    (_("%B: reloc %s:%Ld not in csect"),
 		     abfd, o->name, i);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
@@ -2114,7 +2114,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	      /* We identify all function symbols that are the target
 		 of a relocation, so that we can create glue code for
 		 functions imported from dynamic objects.  */
- 	      if (info->output_bfd->xvec == abfd->xvec
+	      if (info->output_bfd->xvec == abfd->xvec
 		  && *rel_csect != bfd_und_section_ptr
 		  && obj_xcoff_sym_hashes (abfd)[rel->r_symndx] != NULL)
 		{
@@ -2366,7 +2366,7 @@ xcoff_link_check_ar_symbols (bfd *abfd,
 	     undefined references in shared objects.  */
 	  if (h != NULL
 	      && h->type == bfd_link_hash_undefined
- 	      && (info->output_bfd->xvec != abfd->xvec
+	      && (info->output_bfd->xvec != abfd->xvec
 		  || (((struct xcoff_link_hash_entry *) h)->flags
 		      & XCOFF_DEF_DYNAMIC) == 0))
 	    {
@@ -3021,7 +3021,7 @@ xcoff_sweep (struct bfd_link_info *info)
 		  || o == xcoff_hash_table (info)->loader_section
 		  || o == xcoff_hash_table (info)->linkage_section
 		  || o == xcoff_hash_table (info)->descriptor_section
-                  || (bfd_get_section_flags (sub, o) & SEC_DEBUGGING)
+		  || (bfd_get_section_flags (sub, o) & SEC_DEBUGGING)
 		  || strcmp (o->name, ".debug") == 0)
 		o->flags |= SEC_MARK;
 	      else
@@ -4736,8 +4736,8 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
       flinfo->last_file.n_value = output_index;
       bfd_coff_swap_sym_out (output_bfd, (void *) &flinfo->last_file,
 			     (void *) (flinfo->outsyms
- 				    + ((flinfo->last_file_index - syment_base)
- 				       * osymesz)));
+				    + ((flinfo->last_file_index - syment_base)
+				       * osymesz)));
     }
 
   /* Write the modified symbols to the output file.  */
@@ -4943,24 +4943,24 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			     this case, but I don't think it's worth it.  */
 			  is = flinfo->internal_syms + r_symndx;
 
-                          if (is->n_sclass != C_DWARF)
-                            {
-                              name = (_bfd_coff_internal_syment_name
-                                      (input_bfd, is, buf));
+			  if (is->n_sclass != C_DWARF)
+			    {
+			      name = (_bfd_coff_internal_syment_name
+				      (input_bfd, is, buf));
 
-                              if (name == NULL)
-                                return FALSE;
+			      if (name == NULL)
+				return FALSE;
 
 			      (*flinfo->info->callbacks->unattached_reloc)
 				(flinfo->info, name,
 				 input_bfd, o, irel->r_vaddr);
-                            }
+			    }
 			}
 		    }
 		}
 
 	      if ((o->flags & SEC_DEBUGGING) == 0
-                  && xcoff_need_ldrel_p (flinfo->info, irel, h))
+		  && xcoff_need_ldrel_p (flinfo->info, irel, h))
 		{
 		  asection *sec;
 
@@ -5112,9 +5112,9 @@ xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *flinfo)
       if (best_address > toc_start + 0x8000)
 	{
 	  _bfd_error_handler
-	    (_("TOC overflow: 0x%lx > 0x10000; try -mminimal-toc "
+	    (_("TOC overflow: %#Lx > 0x10000; try -mminimal-toc "
 	       "when compiling"),
-	     (unsigned long) (toc_end - toc_start));
+	     toc_end - toc_start);
 	  bfd_set_error (bfd_error_file_too_big);
 	  return FALSE;
 	}
@@ -5310,7 +5310,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
 	tocoff += h->descriptor->u.toc_offset;
 
       /* The first instruction in the glink code needs to be
-	 cooked to to hold the correct offset in the toc.  The
+	 cooked to hold the correct offset in the toc.  The
 	 rest are just output raw.  */
       bfd_put_32 (output_bfd,
 		  bfd_xcoff_glink_code(output_bfd, 0) | (tocoff & 0xffff), p);

@@ -1,4 +1,4 @@
-# Copyright (C) 1993-2017 Free Software Foundation, Inc.
+# Copyright (C) 1993-2018 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -127,7 +127,6 @@ proc default_binutils_assemble_flags { source object asflags } {
     } else {
 	send_log "$exec_output\n"
 	verbose "$exec_output"
-	perror "$source: assembly failed"
 	return 0
     }
 }

@@ -1,5 +1,5 @@
 /* opncls.c -- open and close a BFD.
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -167,7 +167,7 @@ FUNCTION
 
 SYNOPSIS
 	bfd *bfd_fopen (const char *filename, const char *target,
-                        const char *mode, int fd);
+			const char *mode, int fd);
 
 DESCRIPTION
 	Open the file @var{filename} with the target @var{target}.
@@ -367,7 +367,7 @@ FUNCTION
 
 SYNOPSIS
 	bfd *bfd_openstreamr (const char * filename, const char * target,
-	                      void * stream);
+			      void * stream);
 
 DESCRIPTION
 	Open a BFD for read access on an existing stdio stream.  When
@@ -415,25 +415,25 @@ FUNCTION
 	bfd_openr_iovec
 
 SYNOPSIS
-        bfd *bfd_openr_iovec (const char *filename, const char *target,
-                              void *(*open_func) (struct bfd *nbfd,
-                                                  void *open_closure),
-                              void *open_closure,
-                              file_ptr (*pread_func) (struct bfd *nbfd,
-                                                      void *stream,
-                                                      void *buf,
-                                                      file_ptr nbytes,
-                                                      file_ptr offset),
-                              int (*close_func) (struct bfd *nbfd,
-                                                 void *stream),
+	bfd *bfd_openr_iovec (const char *filename, const char *target,
+			      void *(*open_func) (struct bfd *nbfd,
+						  void *open_closure),
+			      void *open_closure,
+			      file_ptr (*pread_func) (struct bfd *nbfd,
+						      void *stream,
+						      void *buf,
+						      file_ptr nbytes,
+						      file_ptr offset),
+			      int (*close_func) (struct bfd *nbfd,
+						 void *stream),
 			      int (*stat_func) (struct bfd *abfd,
-					        void *stream,
-					        struct stat *sb));
+						void *stream,
+						struct stat *sb));
 
 DESCRIPTION
-        Create and return a BFD backed by a read-only @var{stream}.
-        The @var{stream} is created using @var{open_func}, accessed using
-        @var{pread_func} and destroyed using @var{close_func}.
+	Create and return a BFD backed by a read-only @var{stream}.
+	The @var{stream} is created using @var{open_func}, accessed using
+	@var{pread_func} and destroyed using @var{close_func}.
 
 	Calls <<bfd_find_target>>, so @var{target} is interpreted as by
 	that function.
@@ -555,8 +555,8 @@ opncls_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
 	      int prot ATTRIBUTE_UNUSED,
 	      int flags ATTRIBUTE_UNUSED,
 	      file_ptr offset ATTRIBUTE_UNUSED,
-              void **map_addr ATTRIBUTE_UNUSED,
-              bfd_size_type *map_len ATTRIBUTE_UNUSED)
+	      void **map_addr ATTRIBUTE_UNUSED,
+	      bfd_size_type *map_len ATTRIBUTE_UNUSED)
 {
   return (void *) -1;
 }
@@ -726,25 +726,13 @@ RETURNS
 bfd_boolean
 bfd_close (bfd *abfd)
 {
-  bfd_boolean ret;
-
   if (bfd_write_p (abfd))
     {
       if (! BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)))
 	return FALSE;
     }
 
-  if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
-    return FALSE;
-
-  ret = abfd->iovec->bclose (abfd) == 0;
-
-  if (ret)
-    _maybe_make_executable (abfd);
-
-  _bfd_delete_bfd (abfd);
-
-  return ret;
+  return bfd_close_all_done (abfd);
 }
 
 /*
@@ -774,7 +762,10 @@ bfd_close_all_done (bfd *abfd)
 {
   bfd_boolean ret;
 
-  ret = bfd_cache_close (abfd);
+  if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
+    return FALSE;
+
+  ret = abfd->iovec->bclose (abfd) == 0;
 
   if (ret)
     _maybe_make_executable (abfd);
@@ -1209,7 +1200,7 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
   /* PR 17597: avoid reading off the end of the buffer.  */
   crc_offset = strnlen (name, bfd_get_section_size (sect)) + 1;
   crc_offset = (crc_offset + 3) & ~3;
-  if (crc_offset >= bfd_get_section_size (sect))
+  if (crc_offset + 4 > bfd_get_section_size (sect))
     return NULL;
 
   *crc32 = bfd_get_32 (abfd, contents + crc_offset);
@@ -1251,7 +1242,7 @@ FUNCTION
 SYNOPSIS
 	char *bfd_get_alt_debug_link_info (bfd * abfd,
 					   bfd_size_type *buildid_len,
-			                   bfd_byte **buildid_out);
+					   bfd_byte **buildid_out);
 
 DESCRIPTION
 	Fetch the filename and BuildID value for any alternate debuginfo
@@ -1404,12 +1395,12 @@ typedef char *      (* get_func_type) (bfd *, void *);
 typedef bfd_boolean (* check_func_type) (const char *, void *);
 
 static char *
-find_separate_debug_file (bfd *           abfd,
-			  const char *    debug_file_directory,
-			  bfd_boolean     include_dirs,
-			  get_func_type   get_func,
+find_separate_debug_file (bfd *		  abfd,
+			  const char *	  debug_file_directory,
+			  bfd_boolean	  include_dirs,
+			  get_func_type	  get_func,
 			  check_func_type check_func,
-			  void *          func_data)
+			  void *	  func_data)
 {
   char *base;
   char *dir;
@@ -1480,16 +1471,16 @@ find_separate_debug_file (bfd *           abfd,
 
   debugfile = (char *)
       bfd_malloc (strlen (debug_file_directory) + 1
-                  + (canon_dirlen > dirlen ? canon_dirlen : dirlen)
-                  + strlen (".debug/")
+		  + (canon_dirlen > dirlen ? canon_dirlen : dirlen)
+		  + strlen (".debug/")
 #ifdef EXTRA_DEBUG_ROOT1
 		  + strlen (EXTRA_DEBUG_ROOT1)
 #endif
 #ifdef EXTRA_DEBUG_ROOT2
 		  + strlen (EXTRA_DEBUG_ROOT2)
 #endif
-                  + strlen (base)
-                  + 1);
+		  + strlen (base)
+		  + 1);
   if (debugfile == NULL)
     goto found; /* Actually this returns NULL.  */
 

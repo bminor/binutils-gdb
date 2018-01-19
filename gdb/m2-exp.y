@@ -1,5 +1,5 @@
 /* YACC grammar for Modula-2 expressions, for GDB.
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
    Generated from expread.y (now c-exp.y) and contributed by the Department
    of Computer Science at the State University of New York at Buffalo, 1991.
 
@@ -82,7 +82,7 @@ static int number_sign = 1;
   {
     LONGEST lval;
     ULONGEST ulval;
-    DOUBLEST dval;
+    gdb_byte val[16];
     struct symbol *sym;
     struct type *tval;
     struct stoken sval;
@@ -103,7 +103,7 @@ static int number_sign = 1;
 
 %token <lval> INT HEX ERROR
 %token <ulval> UINT M2_TRUE M2_FALSE CHAR
-%token <dval> FLOAT
+%token <val> FLOAT
 
 /* Both NAME and TYPENAME tokens represent symbols in the input,
    and both convey their data as strings.
@@ -474,12 +474,12 @@ exp	:	CHAR
 
 
 exp	:	FLOAT
-			{ write_exp_elt_opcode (pstate, OP_DOUBLE);
+			{ write_exp_elt_opcode (pstate, OP_FLOAT);
 			  write_exp_elt_type (pstate,
 					      parse_m2_type (pstate)
 					      ->builtin_real);
-			  write_exp_elt_dblcst (pstate, $1);
-			  write_exp_elt_opcode (pstate, OP_DOUBLE); }
+			  write_exp_elt_floatcst (pstate, $1);
+			  write_exp_elt_opcode (pstate, OP_FLOAT); }
 	;
 
 exp	:	variable
@@ -650,7 +650,11 @@ parse_number (int olen)
     if (p[c] == '.' && base == 10)
       {
 	/* It's a float since it contains a point.  */
-	yylval.dval = atof (p);
+	if (!parse_float (p, len,
+			  parse_m2_type (pstate)->builtin_real,
+			  yylval.val))
+	  return ERROR;
+
 	lexptr += len;
 	return FLOAT;
       }
@@ -1036,17 +1040,12 @@ yylex (void)
 int
 m2_parse (struct parser_state *par_state)
 {
-  int result;
-  struct cleanup *c = make_cleanup_clear_parser_state (&pstate);
-
   /* Setting up the parser state.  */
+  scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
-  result = yyparse ();
-  do_cleanups (c);
-
-  return result;
+  return yyparse ();
 }
 
 void

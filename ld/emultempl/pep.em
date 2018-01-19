@@ -18,7 +18,7 @@ esac
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
-/* Copyright (C) 2006-2017 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2018 Free Software Foundation, Inc.
    Written by Kai Tietz, OneVision Software GmbH&CoKg.
 
    This file is part of the GNU Binutils.
@@ -493,10 +493,10 @@ set_entry_point (void)
   int i;
 
   static const struct
-    {
-      const int value;
-      const char *entry;
-    }
+  {
+    const int value;
+    const char *entry;
+  }
   v[] =
     {
       { 1, "NtProcessStartup"  },
@@ -518,14 +518,14 @@ set_entry_point (void)
   else
     {
       for (i = 0; v[i].entry; i++)
-        if (v[i].value == pep_subsystem)
-          break;
+	if (v[i].value == pep_subsystem)
+	  break;
 
       /* If no match, use the default.  */
       if (v[i].entry != NULL)
-        entry = v[i].entry;
+	entry = v[i].entry;
       else
-        entry = default_entry;
+	entry = default_entry;
     }
 
   /* Now we check target's default for getting proper symbol_char.  */
@@ -1257,9 +1257,9 @@ pecoff_checksum_contents (bfd *abfd,
 
       status = bfd_bread (&b, (bfd_size_type) 1, abfd);
       if (status < 1)
-        {
-          break;
-        }
+	{
+	  break;
+	}
 
       (*process) (&b, 1, arg);
       filepos += 1;
@@ -1284,25 +1284,25 @@ write_build_id (bfd *abfd)
     {
       struct bfd_link_order *l = NULL;
       for (l = asec->map_head.link_order; l != NULL; l = l->next)
-        {
-          if (l->type == bfd_indirect_link_order)
-            {
-              if (l->u.indirect.section == t->build_id.sec)
-                {
-                  link_order = l;
-                  break;
-                }
-            }
-        }
+	{
+	  if (l->type == bfd_indirect_link_order)
+	    {
+	      if (l->u.indirect.section == t->build_id.sec)
+		{
+		  link_order = l;
+		  break;
+		}
+	    }
+	}
 
       if (link_order)
-        break;
+	break;
     }
 
   if (!link_order)
     {
       einfo (_("%P: warning: .buildid section discarded,"
-               " --build-id ignored.\n"));
+	       " --build-id ignored.\n"));
       return TRUE;
     }
 
@@ -1374,7 +1374,7 @@ setup_build_id (bfd *ibfd)
 
   if (!validate_build_id_style (emit_build_id))
     {
-      einfo ("%P: warning: unrecognized --build-id style ignored.\n");
+      einfo (_("%P: warning: unrecognized --build-id style ignored.\n"));
       return FALSE;
     }
 
@@ -1398,8 +1398,8 @@ setup_build_id (bfd *ibfd)
       return TRUE;
     }
 
-  einfo ("%P: warning: Cannot create .buildid section,"
-	 " --build-id ignored.\n");
+  einfo (_("%P: warning: Cannot create .buildid section,"
+	   " --build-id ignored.\n"));
   return FALSE;
 }
 
@@ -1574,7 +1574,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		    if (nrelocs < 0)
 		      {
 			free (relocs);
-			einfo ("%X%P: unable to process relocs: %E\n");
+			einfo (_("%X%P: unable to process relocs: %E\n"));
 			return;
 		      }
 
@@ -2115,8 +2115,8 @@ gld_${EMULATION_NAME}_open_dynamic_archive
       /* Alternate explicit import library for dll's.  */
       { "%s.dll.a", FALSE },
       /* "libfoo.a" could be either an import lib or a static lib.
-          For backwards compatibility, libfoo.a needs to precede
-          libfoo.dll and foo.dll in the search.  */
+	 For backwards compatibility, libfoo.a needs to precede
+	 libfoo.dll and foo.dll in the search.  */
       { "lib%s.a", FALSE },
       /* The 'native' spelling of an import lib name is "foo.lib".  */
       { "%s.lib", FALSE },
@@ -2247,6 +2247,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   hll_default,
   gld_${EMULATION_NAME}_after_parse,
   gld_${EMULATION_NAME}_after_open,
+  after_check_relocs_default,
   after_allocation_default,
   set_output_arch_default,
   ldemul_default_target,

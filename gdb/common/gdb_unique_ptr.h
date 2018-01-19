@@ -1,6 +1,6 @@
 /* std::unique_ptr specializations for GDB.
 
-   Copyright (C) 2016-2017 Free Software Foundation, Inc.
+   Copyright (C) 2016-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +30,13 @@ namespace gdb
 /* The deleter for std::unique_xmalloc_ptr.  Uses xfree.  */
 template <typename T>
 struct xfree_deleter
+{
+  void operator() (T *ptr) const { xfree (ptr); }
+};
+
+/* Same, for arrays.  */
+template <typename T>
+struct xfree_deleter<T[]>
 {
   void operator() (T *ptr) const { xfree (ptr); }
 };

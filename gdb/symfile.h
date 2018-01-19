@@ -1,6 +1,6 @@
 /* Definitions for reading symbol files into GDB.
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,47 +34,16 @@ struct objfile;
 struct obj_section;
 struct obstack;
 struct block;
-struct probe;
 struct value;
 struct frame_info;
 struct agent_expr;
 struct axs_value;
+class probe;
 
 /* Comparison function for symbol look ups.  */
 
 typedef int (symbol_compare_ftype) (const char *string1,
 				    const char *string2);
-
-/* Partial symbols are stored in the psymbol_cache and pointers to
-   them are kept in a dynamically grown array that is obtained from
-   malloc and grown as necessary via realloc.  Each objfile typically
-   has two of these, one for global symbols and one for static
-   symbols.  Although this adds a level of indirection for storing or
-   accessing the partial symbols, it allows us to throw away duplicate
-   psymbols and set all pointers to the single saved instance.  */
-
-struct psymbol_allocation_list
-{
-
-  /* Pointer to beginning of dynamically allocated array of pointers
-     to partial symbols.  The array is dynamically expanded as
-     necessary to accommodate more pointers.  */
-
-  struct partial_symbol **list;
-
-  /* Pointer to next available slot in which to store a pointer to a
-     partial symbol.  */
-
-  struct partial_symbol **next;
-
-  /* Number of allocated pointer slots in current dynamic array (not
-     the number of bytes of storage).  The "next" pointer will always
-     point somewhere between list[0] and list[size], and when at
-     list[size] the array will be expanded on the next attempt to
-     store a pointer.  */
-
-  int size;
-};
 
 struct other_sections
 {
@@ -262,7 +231,7 @@ struct quick_symbol_functions
 				int (*callback) (struct block *,
 						 struct symbol *, void *),
 				void *data,
-				symbol_compare_ftype *match,
+				symbol_name_match_type match,
 				symbol_compare_ftype *ordered_compare);
 
   /* Expand all symbol tables in OBJFILE matching some criteria.
@@ -286,6 +255,7 @@ struct quick_symbol_functions
   void (*expand_symtabs_matching)
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info &lookup_name,
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      enum search_domain kind);
@@ -299,6 +269,14 @@ struct quick_symbol_functions
   struct compunit_symtab *(*find_pc_sect_compunit_symtab)
     (struct objfile *objfile, struct bound_minimal_symbol msymbol,
      CORE_ADDR pc, struct obj_section *section, int warn_if_readin);
+
+  /* Return the comp unit from OBJFILE that contains a symbol at
+     ADDRESS.  Return NULL if there is no such comp unit.  Unlike
+     find_pc_sect_compunit_symtab, any sort of symbol (not just text
+     symbols) can be considered, and only exact address matches are
+     considered.  This pointer may be NULL.  */
+  struct compunit_symtab *(*find_compunit_symtab_by_address)
+    (struct objfile *objfile, CORE_ADDR address);
 
   /* Call a callback for every file defined in OBJFILE whose symtab is
      not already read in.  FUN is the callback.  It is passed the file's
@@ -314,11 +292,8 @@ struct quick_symbol_functions
 
 struct sym_probe_fns
 {
-  /* If non-NULL, return an array of probe objects.
-
-     The returned value does not have to be freed and it has lifetime of the
-     OBJFILE.  */
-  VEC (probe_p) *(*sym_get_probes) (struct objfile *);
+  /* If non-NULL, return a reference to vector of probe objects.  */
+  const std::vector<probe *> &(*sym_get_probes) (struct objfile *);
 };
 
 /* Structure to keep track of symbol reading functions for various
@@ -560,6 +535,7 @@ extern scoped_restore_tmpl<int> increment_reading_symtab (void);
 
 void expand_symtabs_matching
   (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind);
@@ -606,6 +582,8 @@ struct dwarf2_debug_sections {
   struct dwarf2_section_names frame;
   struct dwarf2_section_names eh_frame;
   struct dwarf2_section_names gdb_index;
+  struct dwarf2_section_names debug_names;
+  struct dwarf2_section_names debug_aranges;
   /* This field has no meaning, but exists solely to catch changes to
      this structure which are not reflected in some instance.  */
   int sentinel;
@@ -625,7 +603,22 @@ extern void dwarf2_get_section_info (struct objfile *,
 				     asection **, const gdb_byte **,
 				     bfd_size_type *);
 
-extern int dwarf2_initialize_objfile (struct objfile *);
+/* A DWARF names index variant.  */
+enum class dw_index_kind
+{
+  /* GDB's own .gdb_index format.   */
+  GDB_INDEX,
+
+  /* DWARF5 .debug_names.  */
+  DEBUG_NAMES,
+};
+
+/* Initialize for reading DWARF for OBJFILE.  Return false if this
+   file will use psymtabs, or true if using an index, in which case
+   *INDEX_KIND is set to the index variant in use.  */
+extern bool dwarf2_initialize_objfile (struct objfile *objfile,
+				       dw_index_kind *index_kind);
+
 extern void dwarf2_build_psymtabs (struct objfile *);
 extern void dwarf2_build_frame_info (struct objfile *);
 

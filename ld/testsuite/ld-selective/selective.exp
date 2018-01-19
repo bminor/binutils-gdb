@@ -1,5 +1,5 @@
 # Expect script for LD selective linking tests
-#   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+#   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -102,7 +102,8 @@ foreach testitem $seltests {
 	# the functionality we try to test for cannot be expected to work.
 	set version [remote_exec host "$CXX -dumpversion"]
 	set version [lindex $version 1]
-	if [regexp "^(\[1-9\]\[0-9\]+|\[4-9\]|3.(\[1-9\]\[0-9\]+|\[4-9\]))\\." $version] {
+	if { [regexp "^(\[1-9\]\[0-9\]+|\[4-9\]|3.(\[1-9\]\[0-9\]+))\\." $version] \
+	     || [regexp "^(\[1-9\]\[0-9\]+|\[4-9\])" $version] } {
 	    set testflags "$cflags $cxxflags"
 	    setup_xfail {*-*-*}
 	} else {

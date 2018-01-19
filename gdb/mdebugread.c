@@ -1,6 +1,6 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
@@ -67,8 +67,6 @@
 #include "aout/stab_gnu.h"	/* STABS information.  */
 
 #include "expression.h"
-
-extern void _initialize_mdebugread (void);
 
 /* Provide a way to test if we have both ECOFF and ELF symbol tables.
    We use this define in order to know whether we should override a 
@@ -236,7 +234,7 @@ static struct type *new_type (char *);
 
 enum block_type { FUNCTION_BLOCK, NON_FUNCTION_BLOCK };
 
-static struct block *new_block (enum block_type);
+static struct block *new_block (enum block_type, enum language);
 
 static struct compunit_symtab *new_symtab (const char *, int, struct objfile *);
 
@@ -811,7 +809,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	TYPE_PROTOTYPED (SYMBOL_TYPE (s)) = 1;
 
       /* Create and enter a new lexical context.  */
-      b = new_block (FUNCTION_BLOCK);
+      b = new_block (FUNCTION_BLOCK, SYMBOL_LANGUAGE (s));
       SYMBOL_BLOCK_VALUE (s) = b;
       BLOCK_FUNCTION (b) = s;
       BLOCK_START (b) = BLOCK_END (b) = sh->value;
@@ -1144,7 +1142,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	}
 
       top_stack->blocktype = stBlock;
-      b = new_block (NON_FUNCTION_BLOCK);
+      b = new_block (NON_FUNCTION_BLOCK, psymtab_language);
       BLOCK_START (b) = sh->value + top_stack->procadr;
       BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
       top_stack->cur_block = b;
@@ -1471,14 +1469,13 @@ basic_type (int bt, struct objfile *objfile)
 
     case btFloatDec:
       tp = init_type (objfile, TYPE_CODE_ERROR,
-		      gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT,
-		      "floating decimal");
+		      gdbarch_double_bit (gdbarch), "floating decimal");
       break;
 
     case btString:
       /* Is a "string" the way btString means it the same as TYPE_CODE_STRING?
 	 FIXME.  */
-      tp = init_type (objfile, TYPE_CODE_STRING, 1, "string");
+      tp = init_type (objfile, TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
       break;
 
     case btVoid:
@@ -2660,8 +2657,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       pst = start_psymtab_common (objfile,
 				  fdr_name (fh),
 				  textlow,
-				  objfile->global_psymbols.next,
-				  objfile->static_psymbols.next);
+				  objfile->global_psymbols,
+				  objfile->static_psymbols);
       pst->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
 						sizeof (struct symloc));
       memset (pst->read_symtab_private, 0, sizeof (struct symloc));
@@ -4026,6 +4023,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	  if (ECOFF_IS_STAB (&sh) || (name[0] == '#'))
 	    {
 	      int type_code = ECOFF_UNMARK_STAB (sh.index);
+	      enum language language = PST_PRIVATE (pst)->pst_language;
 
 	      /* We should never get non N_STAB symbols here, but they
 	         should be harmless, so keep process_one_symbol from
@@ -4053,14 +4051,14 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 		    {
 		      last_symtab_ended = 0;
 		      process_one_symbol (type_code, 0, valu, name,
-					  section_offsets, objfile);
+					  section_offsets, objfile, language);
 		    }
 		}
 	      /* Similarly a hack.  */
 	      else if (name[0] == '#')
 		{
 		  process_one_symbol (N_SLINE, 0, valu, name,
-				      section_offsets, objfile);
+				      section_offsets, objfile, language);
 		}
 	      if (type_code == N_FUN)
 		{
@@ -4721,16 +4719,18 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   struct compunit_symtab *cust = allocate_compunit_symtab (objfile, name);
   struct symtab *symtab;
   struct blockvector *bv;
+  enum language lang;
 
   add_compunit_symtab_to_objfile (cust);
   symtab = allocate_symtab (cust, name);
 
   SYMTAB_LINETABLE (symtab) = new_linetable (maxlines);
+  lang = compunit_language (cust);
 
   /* All symtabs must have at least two blocks.  */
   bv = new_bvect (2);
-  BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = new_block (NON_FUNCTION_BLOCK);
-  BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = new_block (NON_FUNCTION_BLOCK);
+  BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = new_block (NON_FUNCTION_BLOCK, lang);
+  BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = new_block (NON_FUNCTION_BLOCK, lang);
   BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) =
     BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
   COMPUNIT_BLOCKVECTOR (cust) = bv;
@@ -4812,13 +4812,13 @@ new_bvect (int nblocks)
   return bv;
 }
 
-/* Allocate and zero a new block, and set its BLOCK_DICT.  If function
-   is non-zero, assume the block is associated to a function, and make
-   sure that the symbols are stored linearly; otherwise, store them
-   hashed.  */
+/* Allocate and zero a new block of language LANGUAGE, and set its
+   BLOCK_DICT.  If function is non-zero, assume the block is
+   associated to a function, and make sure that the symbols are stored
+   linearly; otherwise, store them hashed.  */
 
 static struct block *
-new_block (enum block_type type)
+new_block (enum block_type type, enum language language)
 {
   /* FIXME: carlton/2003-09-11: This should use allocate_block to
      allocate the block.  Which, in turn, suggests that the block
@@ -4826,9 +4826,9 @@ new_block (enum block_type type)
   struct block *retval = XCNEW (struct block);
 
   if (type == FUNCTION_BLOCK)
-    BLOCK_DICT (retval) = dict_create_linear_expandable ();
+    BLOCK_DICT (retval) = dict_create_linear_expandable (language);
   else
-    BLOCK_DICT (retval) = dict_create_hashed_expandable ();
+    BLOCK_DICT (retval) = dict_create_hashed_expandable (language);
 
   return retval;
 }

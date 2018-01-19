@@ -1,5 +1,5 @@
 /* Annotation routines for GDB.
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,8 +29,6 @@
 
 
 /* Prototypes for local functions.  */
-
-extern void _initialize_annotate (void);
 
 static void print_value_flags (struct type *);
 
@@ -65,14 +63,14 @@ annotate_breakpoints_invalid (void)
     {
       /* If the inferior owns the terminal (e.g., we're resuming),
 	 make sure to leave with the inferior still owning it.  */
-      int was_inferior = target_terminal_is_inferior ();
+      int was_inferior = target_terminal::is_inferior ();
 
-      target_terminal_ours_for_output ();
+      target_terminal::ours_for_output ();
 
       printf_unfiltered (("\n\032\032breakpoints-invalid\n"));
 
       if (was_inferior)
-	target_terminal_inferior ();
+	target_terminal::inferior ();
 
       breakpoints_invalid_emitted = 1;
     }
@@ -212,14 +210,14 @@ annotate_frames_invalid (void)
     {
       /* If the inferior owns the terminal (e.g., we're resuming),
 	 make sure to leave with the inferior still owning it.  */
-      int was_inferior = target_terminal_is_inferior ();
+      int was_inferior = target_terminal::is_inferior ();
 
-      target_terminal_ours_for_output ();
+      target_terminal::ours_for_output ();
 
       printf_unfiltered (("\n\032\032frames-invalid\n"));
 
       if (was_inferior)
-	target_terminal_inferior ();
+	target_terminal::inferior ();
 
       frames_invalid_emitted = 1;
     }

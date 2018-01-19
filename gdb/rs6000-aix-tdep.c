@@ -1,6 +1,6 @@
 /* Native support code for PPC AIX, for GDB the GNU debugger.
 
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    Free Software Foundation, Inc.
 
@@ -36,6 +36,7 @@
 #include "xcoffread.h"
 #include "solib.h"
 #include "solib-aix.h"
+#include "target-float.h"
 #include "xml-utils.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
@@ -258,8 +259,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	  gdb_assert (len <= 8);
 
-	  convert_typed_floating (value_contents (arg), type,
-				  reg_val, reg_type);
+	  target_float_convert (value_contents (arg), type, reg_val, reg_type);
 	  regcache_cooked_write (regcache, fp_regnum, reg_val);
 	  ++f_argno;
 	}
@@ -463,11 +463,11 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
       if (readbuf)
 	{
 	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, regval);
-	  convert_typed_floating (regval, regtype, readbuf, valtype);
+	  target_float_convert (regval, regtype, readbuf, valtype);
 	}
       if (writebuf)
 	{
-	  convert_typed_floating (writebuf, valtype, regval, regtype);
+	  target_float_convert (writebuf, valtype, regval, regtype);
 	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
 	}
 
@@ -600,7 +600,7 @@ static CORE_ADDR
 branch_dest (struct regcache *regcache, int opcode, int instr,
 	     CORE_ADDR pc, CORE_ADDR safety)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR dest;
@@ -676,7 +676,7 @@ branch_dest (struct regcache *regcache, int opcode, int instr,
 static std::vector<CORE_ADDR>
 rs6000_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int ii, insn;
   CORE_ADDR loc;
@@ -908,20 +908,16 @@ static void
 rs6000_aix_shared_library_to_xml (struct ld_info *ldi,
 				  struct obstack *obstack)
 {
-  char *p;
-
   obstack_grow_str (obstack, "<library name=\"");
-  p = xml_escape_text (ldi->filename);
-  obstack_grow_str (obstack, p);
-  xfree (p);
+  std::string p = xml_escape_text (ldi->filename);
+  obstack_grow_str (obstack, p.c_str ());
   obstack_grow_str (obstack, "\"");
 
   if (ldi->member_name[0] != '\0')
     {
       obstack_grow_str (obstack, " member=\"");
       p = xml_escape_text (ldi->member_name);
-      obstack_grow_str (obstack, p);
-      xfree (p);
+      obstack_grow_str (obstack, p.c_str ());
       obstack_grow_str (obstack, "\"");
     }
 
@@ -1088,9 +1084,6 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_solib_ops (gdbarch, &solib_aix_so_ops);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_rs6000_aix_tdep;
 
 void
 _initialize_rs6000_aix_tdep (void)

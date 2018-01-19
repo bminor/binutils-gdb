@@ -1,6 +1,6 @@
 /* Python interface to inferior threads.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -162,6 +162,7 @@ thpy_get_inferior (PyObject *self, void *ignore)
   thread_object *thread_obj = (thread_object *) self;
 
   THPY_REQUIRE_VALID (thread_obj);
+  Py_INCREF (thread_obj->inf_obj);
 
   return thread_obj->inf_obj;
 }

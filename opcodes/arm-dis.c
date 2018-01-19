@@ -1,5 +1,5 @@
 /* Instruction printing code for the ARM
-   Copyright (C) 1994-2017 Free Software Foundation, Inc.
+   Copyright (C) 1994-2018 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
    Modification by James G. Smith (jsmith@cygnus.co.uk)
 
@@ -503,6 +503,8 @@ static const struct opcode32 coprocessor_opcodes[] =
     0x0ee60a10, 0x0fff0fff, "vmsr%c\tmvfr1, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0ee70a10, 0x0fff0fff, "vmsr%c\tmvfr0, %12-15r"},
+  {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
+    0x0ee50a10, 0x0fff0fff, "vmsr%c\tmvfr2, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0ee80a10, 0x0fff0fff, "vmsr%c\tfpexc, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
@@ -515,6 +517,8 @@ static const struct opcode32 coprocessor_opcodes[] =
     0x0ef1fa10, 0x0fffffff, "vmrs%c\tAPSR_nzcv, fpscr"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0ef10a10, 0x0fff0fff, "vmrs%c\t%12-15r, fpscr"},
+  {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
+    0x0ef50a10, 0x0fff0fff, "vmrs%c\t%12-15r, mvfr2"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0ef60a10, 0x0fff0fff, "vmrs%c\t%12-15r, mvfr1"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
@@ -907,6 +911,24 @@ static const struct opcode32 coprocessor_opcodes[] =
     0xfc200d00, 0xffb00f00, "v%4?usdot.%4?us8\t%12-15,22V, %16-19,7V, %0-3,5V"},
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD),
     0xfe000d00, 0xff000f00, "v%4?usdot.%4?us8\t%12-15,22V, %16-19,7V, %0-3D[%5?10]"},
+
+  /* ARMv8.2 FMAC Long instructions in the space of coprocessor 8.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_V8_2A),
+    0xfc200810, 0xffb00f50, "vfmal.f16\t%12-15,22D, s%7,16-19d, s%5,0-3d"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_V8_2A),
+    0xfca00810, 0xffb00f50, "vfmsl.f16\t%12-15,22D, s%7,16-19d, s%5,0-3d"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_V8_2A),
+    0xfc200850, 0xffb00f50, "vfmal.f16\t%12-15,22Q, d%16-19,7d, d%0-3,5d"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_V8_2A),
+    0xfca00850, 0xffb00f50, "vfmsl.f16\t%12-15,22Q, d%16-19,7d, d%0-3,5d"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_V8_2A),
+    0xfe000810, 0xffb00f50, "vfmal.f16\t%12-15,22D, s%7,16-19d, s%5,0-2d[%3d]"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_V8_2A),
+    0xfe100810, 0xffb00f50, "vfmsl.f16\t%12-15,22D, s%7,16-19d, s%5,0-2d[%3d]"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_V8_2A),
+    0xfe000850, 0xffb00f50, "vfmal.f16\t%12-15,22Q, d%16-19,7d, d%0-2d[%3,5d]"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_V8_2A),
+    0xfe100850, 0xffb00f50, "vfmsl.f16\t%12-15,22Q, d%16-19,7d, d%0-2d[%3,5d]"},
 
   /* V5 coprocessor instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
@@ -1879,6 +1901,9 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6K),
     0x01e00f90, 0x0ff00ff0, "strexh%c\t%12-15R, %0-3R, [%16-19R]"},
 
+  /* CSDB.  */
+  {ARM_FEATURE_CORE_LOW (ARM_EXT_V3), 0xe320f014, 0xffffffff, "csdb"},
+
   /* ARM V6K NOP hints.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6K),
     0x0320f001, 0x0fffffff, "yield%c"},
@@ -2695,7 +2720,6 @@ static const struct opcode16 thumb_opcodes[] =
        %<bitfield>W	print bitfield*4 in decimal
        %<bitfield>r	print bitfield as an ARM register
        %<bitfield>R	as %<>r but r15 is UNPREDICTABLE
-       %<bitfield>S	as %<>R but r13 is UNPREDICTABLE
        %<bitfield>c	print bitfield as a condition code
 
        %<bitfield>'c	print specified char iff bitfield is all ones
@@ -2763,17 +2787,17 @@ static const struct opcode32 thumb32_opcodes[] =
 
   /* CRC32 instructions.  */
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfac0f080, 0xfff0f0f0, "crc32b\t%8-11S, %16-19S, %0-3S"},
+    0xfac0f080, 0xfff0f0f0, "crc32b\t%8-11R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfac0f090, 0xfff0f0f0, "crc32h\t%9-11S, %16-19S, %0-3S"},
+    0xfac0f090, 0xfff0f0f0, "crc32h\t%9-11R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfac0f0a0, 0xfff0f0f0, "crc32w\t%8-11S, %16-19S, %0-3S"},
+    0xfac0f0a0, 0xfff0f0f0, "crc32w\t%8-11R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfad0f080, 0xfff0f0f0, "crc32cb\t%8-11S, %16-19S, %0-3S"},
+    0xfad0f080, 0xfff0f0f0, "crc32cb\t%8-11R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfad0f090, 0xfff0f0f0, "crc32ch\t%8-11S, %16-19S, %0-3S"},
+    0xfad0f090, 0xfff0f0f0, "crc32ch\t%8-11R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfad0f0a0, 0xfff0f0f0, "crc32cw\t%8-11S, %16-19S, %0-3S"},
+    0xfad0f0a0, 0xfff0f0f0, "crc32cw\t%8-11R, %16-19R, %0-3R"},
 
   /* V7 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V7), 0xf910f000, 0xff70f000, "pli%c\t%a"},
@@ -2797,6 +2821,9 @@ static const struct opcode32 thumb32_opcodes[] =
 
   /* Security extension instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),  0xf7f08000, 0xfff0f000, "smc%c\t%K"},
+
+  /* CSDB.  */
+  {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2), 0xf3af8014, 0xffffffff, "csdb"},
 
   /* Instructions defined in the basic V6T2 set.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2), 0xf3af8000, 0xffffffff, "nop%c.w"},
@@ -5983,10 +6010,6 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      value_in_comment = val * 4;
 		      break;
 
-		    case 'S':
-		      if (val == 13)
-			is_unpredictable = TRUE;
-		      /* Fall through.  */
 		    case 'R':
 		      if (val == 15)
 			is_unpredictable = TRUE;

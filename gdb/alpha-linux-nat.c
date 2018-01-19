@@ -1,5 +1,5 @@
 /* Low level Alpha GNU/Linux interface, for GDB when running native.
-   Copyright (C) 2005-2017 Free Software Foundation, Inc.
+   Copyright (C) 2005-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -90,8 +90,6 @@ alpha_linux_register_u_offset (struct gdbarch *gdbarch, int regno, int store_p)
   else
     return FPR_BASE + regno - gdbarch_fp0_regnum (gdbarch);
 }
-
-void _initialize_alpha_linux_nat (void);
 
 void
 _initialize_alpha_linux_nat (void)

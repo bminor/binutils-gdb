@@ -1,4 +1,4 @@
-/* Copyright (C) 2013-2017 Free Software Foundation, Inc.
+/* Copyright (C) 2013-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -134,30 +134,30 @@ static void
 library_list_start_library (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
 			    void *user_data,
-			    VEC (gdb_xml_value_s) *attributes)
+			    std::vector<gdb_xml_value> &attributes)
 {
   VEC (lm_info_aix_p) **list = (VEC (lm_info_aix_p) **) user_data;
   lm_info_aix *item = new lm_info_aix;
   struct gdb_xml_value *attr;
 
   attr = xml_find_attribute (attributes, "name");
-  item->filename = xstrdup ((const char *) attr->value);
+  item->filename = xstrdup ((const char *) attr->value.get ());
 
   attr = xml_find_attribute (attributes, "member");
   if (attr != NULL)
-    item->member_name = xstrdup ((const char *) attr->value);
+    item->member_name = xstrdup ((const char *) attr->value.get ());
 
   attr = xml_find_attribute (attributes, "text_addr");
-  item->text_addr = * (ULONGEST *) attr->value;
+  item->text_addr = * (ULONGEST *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "text_size");
-  item->text_size = * (ULONGEST *) attr->value;
+  item->text_size = * (ULONGEST *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "data_addr");
-  item->data_addr = * (ULONGEST *) attr->value;
+  item->data_addr = * (ULONGEST *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "data_size");
-  item->data_size = * (ULONGEST *) attr->value;
+  item->data_size = * (ULONGEST *) attr->value.get ();
 
   VEC_safe_push (lm_info_aix_p, *list, item);
 }
@@ -167,9 +167,11 @@ library_list_start_library (struct gdb_xml_parser *parser,
 static void
 library_list_start_list (struct gdb_xml_parser *parser,
                          const struct gdb_xml_element *element,
-                         void *user_data, VEC (gdb_xml_value_s) *attributes)
+                         void *user_data,
+			 std::vector<gdb_xml_value> &attributes)
 {
-  char *version = (char *) xml_find_attribute (attributes, "version")->value;
+  char *version
+    = (char *) xml_find_attribute (attributes, "version")->value.get ();
 
   if (strcmp (version, "1.0") != 0)
     gdb_xml_error (parser,
@@ -271,39 +273,34 @@ static VEC (lm_info_aix_p) *
 solib_aix_get_library_list (struct inferior *inf, const char *warning_msg)
 {
   struct solib_aix_inferior_data *data;
-  char *library_document;
-  struct cleanup *cleanup;
 
   /* If already computed, return the cached value.  */
   data = get_solib_aix_inferior_data (inf);
   if (data->library_list != NULL)
     return data->library_list;
 
-  library_document = target_read_stralloc (&current_target,
-                                           TARGET_OBJECT_LIBRARIES_AIX,
-                                           NULL);
+  gdb::unique_xmalloc_ptr<char> library_document
+    = target_read_stralloc (&current_target, TARGET_OBJECT_LIBRARIES_AIX,
+			    NULL);
   if (library_document == NULL && warning_msg != NULL)
     {
       warning (_("%s (failed to read TARGET_OBJECT_LIBRARIES_AIX)"),
 	       warning_msg);
       return NULL;
     }
-  cleanup = make_cleanup (xfree, library_document);
 
   if (solib_aix_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"DEBUG: TARGET_OBJECT_LIBRARIES_AIX = \n%s\n",
-			library_document);
+			library_document.get ());
 
-  data->library_list = solib_aix_parse_libraries (library_document);
+  data->library_list = solib_aix_parse_libraries (library_document.get ());
   if (data->library_list == NULL && warning_msg != NULL)
     {
       warning (_("%s (missing XML support?)"), warning_msg);
-      do_cleanups (cleanup);
       return NULL;
     }
 
-  do_cleanups (cleanup);
   return data->library_list;
 }
 
@@ -589,7 +586,7 @@ solib_aix_current_sos (void)
 /* Implement the "open_symbol_file_object" target_so_ops method.  */
 
 static int
-solib_aix_open_symbol_file_object (void *from_ttyp)
+solib_aix_open_symbol_file_object (int from_tty)
 {
   return 0;
 }
@@ -774,9 +771,6 @@ show_solib_aix_debug (struct ui_file *file, int from_tty,
 
 /* The target_so_ops for AIX targets.  */
 struct target_so_ops solib_aix_so_ops;
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_solib_aix;
 
 void
 _initialize_solib_aix (void)

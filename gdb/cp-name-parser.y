@@ -1,6 +1,6 @@
 /* YACC parser for C++ names, for GDB.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    Parts of the lexer are based on c-exp.y from GDB.
 
@@ -1304,6 +1304,28 @@ d_binary (const char *name, struct demangle_component *lhs, struct demangle_comp
 		      fill_comp (DEMANGLE_COMPONENT_BINARY_ARGS, lhs, rhs));
 }
 
+/* Like ISALPHA, but also returns true for the union of all UTF-8
+   multi-byte sequence bytes and non-ASCII characters in
+   extended-ASCII charsets (e.g., Latin1).  I.e., returns true if the
+   high bit is set.  Note that not all UTF-8 ranges are allowed in C++
+   identifiers, but we don't need to be pedantic so for simplicity we
+   ignore that here.  Plus this avoids the complication of actually
+   knowing what was the right encoding.  */
+
+static inline bool
+cp_ident_is_alpha (unsigned char ch)
+{
+  return ISALPHA (ch) || ch >= 0x80;
+}
+
+/* Similarly, but Like ISALNUM.  */
+
+static inline bool
+cp_ident_is_alnum (unsigned char ch)
+{
+  return ISALNUM (ch) || ch >= 0x80;
+}
+
 /* Find the end of a symbol name starting at LEXPTR.  */
 
 static const char *
@@ -1311,7 +1333,7 @@ symbol_end (const char *lexptr)
 {
   const char *p = lexptr;
 
-  while (*p && (ISALNUM (*p) || *p == '_' || *p == '$' || *p == '.'))
+  while (*p && (cp_ident_is_alnum (*p) || *p == '_' || *p == '$' || *p == '.'))
     p++;
 
   return p;
@@ -1791,7 +1813,7 @@ yylex (void)
       return ERROR;
     }
 
-  if (!(c == '_' || c == '$' || ISALPHA (c)))
+  if (!(c == '_' || c == '$' || cp_ident_is_alpha (c)))
     {
       /* We must have come across a bad character (e.g. ';').  */
       yyerror (_("invalid character"));
@@ -1802,7 +1824,7 @@ yylex (void)
   namelen = 0;
   do
     c = tokstart[++namelen];
-  while (ISALNUM (c) || c == '_' || c == '$');
+  while (cp_ident_is_alnum (c) || c == '_' || c == '$');
 
   lexptr += namelen;
 
@@ -1963,13 +1985,14 @@ allocate_info (void)
    cplus_demangle_print does not, specifically the global destructor
    and constructor labels.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 cp_comp_to_string (struct demangle_component *result, int estimated_len)
 {
   size_t err;
 
-  return cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI, result, estimated_len,
-			       &err);
+  char *res = cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI,
+				    result, estimated_len, &err);
+  return gdb::unique_xmalloc_ptr<char> (res);
 }
 
 /* Constructor for demangle_parse_info.  */
@@ -2128,7 +2151,7 @@ internal_error (const char *file, int line, const char *fmt, ...)
 int
 main (int argc, char **argv)
 {
-  char *str2, *extra_chars = "", c;
+  char *str2, *extra_chars, c;
   char buf[65536];
   int arg;
   const char *errmsg;

@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux AArch64.
 
-   Copyright (C) 2011-2017 Free Software Foundation, Inc.
+   Copyright (C) 2011-2018 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -155,7 +155,7 @@ static void
 fetch_gregs_from_thread (struct regcache *regcache)
 {
   int ret, tid;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   elf_gregset_t regs;
   struct iovec iovec;
 
@@ -195,7 +195,7 @@ store_gregs_to_thread (const struct regcache *regcache)
   int ret, tid;
   elf_gregset_t regs;
   struct iovec iovec;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   /* Make sure REGS can hold all registers contents on both aarch64
      and arm.  */
@@ -238,7 +238,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
   int ret, tid;
   elf_fpregset_t regs;
   struct iovec iovec;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
@@ -286,7 +286,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
   int ret, tid;
   elf_fpregset_t regs;
   struct iovec iovec;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
@@ -501,7 +501,7 @@ aarch64_linux_read_description (struct target_ops *ops)
   if (ret == 0)
     return tdesc_arm_with_neon;
   else
-    return tdesc_aarch64;
+    return aarch64_read_description ();
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the
@@ -801,9 +801,6 @@ triggers a breakpoint or watchpoint."),
 			   &maintenance_show_cmdlist);
 }
 
-/* -Wmissing-prototypes.  */
-void _initialize_aarch64_linux_nat (void);
-
 void
 _initialize_aarch64_linux_nat (void)
 {
@@ -840,6 +837,7 @@ _initialize_aarch64_linux_nat (void)
   /* Register the target.  */
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, aarch64_linux_new_thread);
+  linux_nat_set_delete_thread (t, aarch64_linux_delete_thread);
   linux_nat_set_new_fork (t, aarch64_linux_new_fork);
   linux_nat_set_forget_process (t, aarch64_forget_process);
   linux_nat_set_prepare_to_resume (t, aarch64_linux_prepare_to_resume);

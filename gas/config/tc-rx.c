@@ -1,5 +1,5 @@
 /* tc-rx.c -- Assembler for the Renesas RX
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -560,7 +560,7 @@ rx_list (int ignore ATTRIBUTE_UNUSED)
 static void
 rx_rept (int ignore ATTRIBUTE_UNUSED)
 {
-  int count = get_absolute_expression ();
+  size_t count = get_absolute_expression ();
 
   do_repeat_with_expander (count, "MREPEAT", "ENDR", "..MACREP");
 }

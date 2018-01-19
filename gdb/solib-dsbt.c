@@ -1,5 +1,5 @@
 /* Handle TIC6X (DSBT) shared libraries for GDB, the GNU Debugger.
-   Copyright (C) 2010-2017 Free Software Foundation, Inc.
+   Copyright (C) 2010-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -507,16 +507,10 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
   return 0;
 }
 
-/* If no open symbol file, attempt to locate and open the main symbol
-   file.
-
-   If FROM_TTYP dereferences to a non-zero integer, allow messages to
-   be printed.  This parameter is a pointer rather than an int because
-   open_symbol_file_object is called via catch_errors and
-   catch_errors requires a pointer argument. */
+/* See solist.h. */
 
 static int
-open_symbol_file_object (void *from_ttyp)
+open_symbol_file_object (int from_tty)
 {
   /* Unimplemented.  */
   return 0;
@@ -1053,9 +1047,6 @@ show_dsbt_debug (struct ui_file *file, int from_tty,
 }
 
 struct target_so_ops dsbt_so_ops;
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_dsbt_solib;
 
 void
 _initialize_dsbt_solib (void)

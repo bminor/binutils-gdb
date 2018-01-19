@@ -1,7 +1,7 @@
 /* Functions specific to running gdb native on IA-64 running
    GNU/Linux.
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -694,7 +694,7 @@ ia64_linux_can_use_hw_breakpoint (struct target_ops *self,
 static void
 ia64_linux_fetch_register (struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
@@ -771,7 +771,7 @@ ia64_linux_fetch_registers (struct target_ops *ops,
 {
   if (regnum == -1)
     for (regnum = 0;
-	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum < gdbarch_num_regs (regcache->arch ());
 	 regnum++)
       ia64_linux_fetch_register (regcache, regnum);
   else
@@ -783,7 +783,7 @@ ia64_linux_fetch_registers (struct target_ops *ops,
 static void
 ia64_linux_store_register (const struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
@@ -826,7 +826,7 @@ ia64_linux_store_registers (struct target_ops *ops,
 {
   if (regnum == -1)
     for (regnum = 0;
-	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum < gdbarch_num_regs (regcache->arch ());
 	 regnum++)
       ia64_linux_store_register (regcache, regnum);
   else
@@ -890,8 +890,6 @@ ia64_linux_status_is_event (int status)
   return WIFSTOPPED (status) && (WSTOPSIG (status) == SIGTRAP
 				 || WSTOPSIG (status) == SIGILL);
 }
-
-void _initialize_ia64_linux_nat (void);
 
 void
 _initialize_ia64_linux_nat (void)

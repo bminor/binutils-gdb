@@ -1,27 +1,274 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 8.0
+*** Changes since GDB 8.1
 
-* On Unix systems, GDBserver now does globbing expansion and variable
-  substitution in inferior command line arguments.
+* 'info proc' now works on running processes on FreeBSD systems and core
+  files created on FreeBSD systems.
 
-  This is done by starting inferiors using a shell, like GDB does.
-  See "set startup-with-shell" in the user manual for how to disable
-  this from GDB when using "target extended-remote".  When using
-  "target remote", you can disable the startup with shell by using the
-  new "--no-startup-with-shell" GDBserver command line option.
+*** Changes in GDB 8.1
+
+* GDB now supports dynamically creating arbitrary register groups specified
+  in XML target descriptions.  This allows for finer grain grouping of
+  registers on systems with a large amount of registers.
+
+* The 'ptype' command now accepts a '/o' flag, which prints the
+  offsets and sizes of fields in a struct, like the pahole(1) tool.
+
+* New "--readnever" command line option instructs GDB to not read each
+  symbol file's symbolic debug information.  This makes startup faster
+  but at the expense of not being able to perform symbolic debugging.
+  This option is intended for use cases where symbolic debugging will
+  not be used, e.g., when you only need to dump the debuggee's core.
+
+* GDB now uses the GNU MPFR library, if available, to emulate target
+  floating-point arithmetic during expression evaluation when the target
+  uses different floating-point formats than the host.  At least version
+  3.1 of GNU MPFR is required.
+
+* GDB now supports access to the guarded-storage-control registers and the
+  software-based guarded-storage broadcast control registers on IBM z14.
+
+* On Unix systems, GDB now supports transmitting environment variables
+  that are to be set or unset to GDBserver.  These variables will
+  affect the environment to be passed to the remote inferior.
+
+  To inform GDB of environment variables that are to be transmitted to
+  GDBserver, use the "set environment" command.  Only user set
+  environment variables are sent to GDBserver.
+
+  To inform GDB of environment variables that are to be unset before
+  the remote inferior is started by the GDBserver, use the "unset
+  environment" command.
+
+* Completion improvements
+
+  ** GDB can now complete function parameters in linespecs and
+     explicit locations without quoting.  When setting breakpoints,
+     quoting around functions names to help with TAB-completion is
+     generally no longer necessary.  For example, this now completes
+     correctly:
+
+      (gdb) b function(in[TAB]
+      (gdb) b function(int)
+
+     Related, GDB is no longer confused with completing functions in
+     C++ anonymous namespaces:
+
+      (gdb) b (anon[TAB]
+      (gdb) b (anonymous namespace)::[TAB][TAB]
+      (anonymous namespace)::a_function()
+      (anonymous namespace)::b_function()
+
+  ** GDB now has much improved linespec and explicit locations TAB
+     completion support, that better understands what you're
+     completing and offers better suggestions.  For example, GDB no
+     longer offers data symbols as possible completions when you're
+     setting a breakpoint.
+
+  ** GDB now TAB-completes label symbol names.
+
+  ** The "complete" command now mimics TAB completion accurately.
+
+* New command line options (gcore)
+
+-a
+  Dump all memory mappings.
+
+* Breakpoints on C++ functions are now set on all scopes by default
+
+  By default, breakpoints on functions/methods are now interpreted as
+  specifying all functions with the given name ignoring missing
+  leading scopes (namespaces and classes).
+
+  For example, assuming a C++ program with symbols named:
+
+    A::B::func()
+    B::func()
+
+  both commands "break func()" and "break B::func()" set a breakpoint
+  on both symbols.
+
+  You can use the new flag "-qualified" to override this.  This makes
+  GDB interpret the specified function name as a complete
+  fully-qualified name instead.  For example, using the same C++
+  program, the "break -q B::func" command sets a breakpoint on
+  "B::func", only.  A parameter has been added to the Python
+  gdb.Breakpoint constructor to achieve the same result when creating
+  a breakpoint from Python.
+
+* Breakpoints on functions marked with C++ ABI tags
+
+  GDB can now set breakpoints on functions marked with C++ ABI tags
+  (e.g., [abi:cxx11]).  See here for a description of ABI tags:
+  https://developers.redhat.com/blog/2015/02/05/gcc5-and-the-c11-abi/
+
+  Functions with a C++11 abi tag are demangled/displayed like this:
+
+    function[abi:cxx11](int)
+            ^^^^^^^^^^^
+
+  You can now set a breakpoint on such functions simply as if they had
+  no tag, like:
+
+    (gdb) b function(int)
+
+  Or if you need to disambiguate between tags, like:
+
+    (gdb) b function[abi:other_tag](int)
+
+  Tab completion was adjusted accordingly as well.
+
+* Python Scripting
+
+  ** New events gdb.new_inferior, gdb.inferior_deleted, and
+     gdb.new_thread are emitted.  See the manual for further
+     description of these.
+
+  ** A new command, "rbreak" has been added to the Python API.  This
+     command allows the setting of a large number of breakpoints via a
+     regex pattern in Python.  See the manual for further details.
+
+  ** Python breakpoints can now accept explicit locations.  See the
+     manual for a further description of this feature.
+
+
+* New features in the GDB remote stub, GDBserver
+
+  ** GDBserver is now able to start inferior processes with a
+     specified initial working directory.
+
+     The user can set the desired working directory to be used from
+     GDB using the new "set cwd" command.
+
+  ** New "--selftest" command line option runs some GDBserver self
+     tests.  These self tests are disabled in releases.
+
+  ** On Unix systems, GDBserver now does globbing expansion and variable
+     substitution in inferior command line arguments.
+
+     This is done by starting inferiors using a shell, like GDB does.
+     See "set startup-with-shell" in the user manual for how to disable
+     this from GDB when using "target extended-remote".  When using
+     "target remote", you can disable the startup with shell by using the
+     new "--no-startup-with-shell" GDBserver command line option.
+
+  ** On Unix systems, GDBserver now supports receiving environment
+     variables that are to be set or unset from GDB.  These variables
+     will affect the environment to be passed to the inferior.
+
+* When catching an Ada exception raised with a message, GDB now prints
+  the message in the catchpoint hit notification. In GDB/MI mode, that
+  information is provided as an extra field named "exception-message"
+  in the *stopped notification.
+
+* Trait objects can now be inspected When debugging Rust code.  This
+  requires compiler support which will appear in Rust 1.24.
 
 * New remote packets
+
+QEnvironmentHexEncoded
+  Inform GDBserver of an environment variable that is to be passed to
+  the inferior when starting it.
+
+QEnvironmentUnset
+  Inform GDBserver of an environment variable that is to be unset
+  before starting the remote inferior.
+
+QEnvironmentReset
+  Inform GDBserver that the environment should be reset (i.e.,
+  user-set environment variables should be unset).
 
 QStartupWithShell
   Indicates whether the inferior must be started with a shell or not.
 
+QSetWorkingDir
+  Tell GDBserver that the inferior to be started should use a specific
+  working directory.
+
+* The "maintenance print c-tdesc" command now takes an optional
+  argument which is the file name of XML target description.
+
+* The "maintenance selftest" command now takes an optional argument to
+  filter the tests to be run.
+
+* The "enable", and "disable" commands now accept a range of
+  breakpoint locations, e.g. "enable 1.3-5".
+
 * New commands
+
+set|show cwd
+  Set and show the current working directory for the inferior.
+
+set|show compile-gcc
+  Set and show compilation command used for compiling and injecting code
+  with the 'compile' commands.
 
 set debug separate-debug-file
 show debug separate-debug-file
   Control the display of debug output about separate debug file search.
+
+set dump-excluded-mappings
+show dump-excluded-mappings
+  Control whether mappings marked with the VM_DONTDUMP flag should be
+  dumped when generating a core file.
+
+maint info selftests
+  List the registered selftests.
+
+starti
+  Start the debugged program stopping at the first instruction.
+
+set|show debug or1k
+  Control display of debugging messages related to OpenRISC targets.
+
+set|show print type nested-type-limit
+  Set and show the limit of nesting level for nested types that the
+  type printer will show.
+
+* TUI Single-Key mode now supports two new shortcut keys: `i' for stepi and
+  `o' for nexti.
+
+* Safer/improved support for debugging with no debug info
+
+  GDB no longer assumes functions with no debug information return
+  'int'.
+
+  This means that GDB now refuses to call such functions unless you
+  tell it the function's type, by either casting the call to the
+  declared return type, or by casting the function to a function
+  pointer of the right type, and calling that:
+
+    (gdb) p getenv ("PATH")
+    'getenv' has unknown return type; cast the call to its declared return type
+    (gdb) p (char *) getenv ("PATH")
+    $1 = 0x7fffffffe "/usr/local/bin:/"...
+    (gdb) p ((char * (*) (const char *)) getenv) ("PATH")
+    $2 = 0x7fffffffe "/usr/local/bin:/"...
+
+  Similarly, GDB no longer assumes that global variables with no debug
+  info have type 'int', and refuses to print the variable's value
+  unless you tell it the variable's type:
+
+    (gdb) p var
+    'var' has unknown type; cast it to its declared type
+    (gdb) p (float) var
+    $3 = 3.14
+
+* New native configurations
+
+FreeBSD/aarch64			aarch64*-*-freebsd*
+FreeBSD/arm			arm*-*-freebsd*
+
+* New targets
+
+FreeBSD/aarch64			aarch64*-*-freebsd*
+FreeBSD/arm			arm*-*-freebsd*
+OpenRISC ELF 			or1k*-*-elf
+
+* Removed targets and native configurations
+
+Solaris 2.0-9			i?86-*-solaris2.[0-9], sparc*-*-solaris2.[0-9]
 
 *** Changes in GDB 8.0
 
@@ -427,10 +674,10 @@ show max-value-size
 * Support for reading/writing memory and extracting values on architectures
   whose memory is addressable in units of any integral multiple of 8 bits.
 
-* New remote packets
+catch handlers
+  Allows to break when an Ada exception is handled.
 
-QStartupWithShell
-  Indicates whether the inferior must be started with a shell or not.
+* New remote packets
 
 exec stop reason
   Indicates that an exec system call was executed.

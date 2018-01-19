@@ -1,6 +1,6 @@
 /* Python frame unwinder interface.
 
-   Copyright (C) 2015-2017 Free Software Foundation, Inc.
+   Copyright (C) 2015-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -539,6 +539,13 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
 				   pyo_pending_frame.get (), NULL));
   if (pyo_unwind_info == NULL)
     {
+      /* If the unwinder is cancelled due to a Ctrl-C, then propagate
+	 the Ctrl-C as a GDB exception instead of swallowing it.  */
+      if (PyErr_ExceptionMatches (PyExc_KeyboardInterrupt))
+	{
+	  PyErr_Clear ();
+	  quit ();
+	}
       gdbpy_print_stack ();
       return 0;
     }
@@ -595,7 +602,7 @@ pyuw_dealloc_cache (struct frame_info *this_frame, void *cache)
   TRACE_PY_UNWIND (3, "%s: enter", __FUNCTION__);
   cached_frame_info *cached_frame = (cached_frame_info *) cache;
 
-  for (int i = 0; cached_frame->reg_count; i++)
+  for (int i = 0; i < cached_frame->reg_count; i++)
     xfree (cached_frame->reg[i].data);
 
   xfree (cache);

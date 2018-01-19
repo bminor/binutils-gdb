@@ -1,6 +1,6 @@
 /* Low level interface to i386 running the GNU Hurd.
 
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -127,7 +127,7 @@ gnu_fetch_registers (struct target_ops *ops,
       else
 	{
 	  proc_debug (thread, "fetching register %s",
-		      gdbarch_register_name (get_regcache_arch (regcache),
+		      gdbarch_register_name (regcache->arch (),
 					     regno));
 
 	  regcache_raw_supply (regcache, regno,
@@ -183,7 +183,7 @@ gnu_store_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
   struct proc *thread;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   ptid_t ptid = regcache_get_ptid (regcache);
 
   /* Make sure we know about new threads.  */
@@ -408,9 +408,6 @@ i386_gnu_dr_get_control (void)
   return i386_gnu_dr_get_reg (inferior_ptid, DR_CONTROL);
 }
 #endif /* i386_DEBUG_STATE */
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_i386gnu_nat;
 
 void
 _initialize_i386gnu_nat (void)

@@ -1,5 +1,5 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1987-2017 Free Software Foundation, Inc.
+   Copyright (C) 1987-2018 Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 
    This file is part of GDB.
@@ -42,8 +42,6 @@
 
 #include "psymtab.h"
 #include "build-id.h"
-
-extern void _initialize_coffread (void);
 
 /* Key for COFF-associated data.  */
 
@@ -394,7 +392,9 @@ coff_start_symtab (struct objfile *objfile, const char *name)
 		 NULL,
   /* The start address is irrelevant, since we set
      last_source_start_addr in coff_end_symtab.  */
-		 0);
+		 0,
+  /* Let buildsym.c deduce the language for this symtab.  */
+		 language_unknown);
   record_debugformat ("COFF");
 }
 
@@ -699,7 +699,8 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	}
     }
 
-  bfd_map_over_sections (abfd, coff_locate_sections, (void *) info);
+  if (!(objfile->flags & OBJF_READNEVER))
+    bfd_map_over_sections (abfd, coff_locate_sections, (void *) info);
 
   if (info->stabsects)
     {

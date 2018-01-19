@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/hppa
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -164,10 +164,6 @@ hppaobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, hppaobsd_iterate_over_regset_sections);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_hppabsd_tdep (void);
 
 void
 _initialize_hppabsd_tdep (void)

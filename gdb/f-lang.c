@@ -1,6 +1,6 @@
 /* Fortran language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1993-2017 Free Software Foundation, Inc.
+   Copyright (C) 1993-2018 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -36,8 +36,6 @@
 
 
 /* Local functions */
-
-extern void _initialize_f_language (void);
 
 static void f_printchar (int c, struct type *type, struct ui_file * stream);
 static void f_emit_char (int c, struct type *type,
@@ -228,11 +226,16 @@ f_word_break_characters (void)
 /* Consider the modules separator :: as a valid symbol name character
    class.  */
 
-static VEC (char_ptr) *
-f_make_symbol_completion_list (const char *text, const char *word,
-			       enum type_code code)
+static void
+f_collect_symbol_completion_matches (completion_tracker &tracker,
+				     complete_symbol_mode mode,
+				     symbol_name_match_type compare_name,
+				     const char *text, const char *word,
+				     enum type_code code)
 {
-  return default_make_symbol_completion_list_break_on (text, word, ":", code);
+  default_collect_symbol_completion_matches_break_on (tracker, mode,
+						      compare_name,
+						      text, word, ":", code);
 }
 
 static const char *f_extensions[] =
@@ -242,7 +245,7 @@ static const char *f_extensions[] =
   NULL
 };
 
-const struct language_defn f_language_defn =
+extern const struct language_defn f_language_defn =
 {
   "fortran",
   "Fortran",
@@ -282,14 +285,15 @@ const struct language_defn f_language_defn =
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
   f_word_break_characters,
-  f_make_symbol_completion_list,
+  f_collect_symbol_completion_matches,
   f_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
   default_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
@@ -303,7 +307,7 @@ build_fortran_types (struct gdbarch *gdbarch)
     = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_f_type);
 
   builtin_f_type->builtin_void
-    = arch_type (gdbarch, TYPE_CODE_VOID, 1, "VOID");
+    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "VOID");
 
   builtin_f_type->builtin_character
     = arch_integer_type (gdbarch, TARGET_CHAR_BIT, 0, "character");
@@ -366,6 +370,4 @@ void
 _initialize_f_language (void)
 {
   f_type_data = gdbarch_data_register_post_init (build_fortran_types);
-
-  add_language (&f_language_defn);
 }

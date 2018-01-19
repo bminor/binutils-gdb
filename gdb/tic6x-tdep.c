@@ -1,6 +1,6 @@
 /* Target dependent code for GDB on TI C6x systems.
 
-   Copyright (C) 2010-2017 Free Software Foundation, Inc.
+   Copyright (C) 2010-2018 Free Software Foundation, Inc.
    Contributed by Andrew Jenner <andrew@codesourcery.com>
    Contributed by Yao Qi <yao@codesourcery.com>
 
@@ -36,7 +36,6 @@
 #include "value.h"
 #include "symfile.h"
 #include "arch-utils.h"
-#include "floatformat.h"
 #include "glibc-tdep.h"
 #include "infcall.h"
 #include "regset.h"
@@ -49,10 +48,6 @@
 #include "language.h"
 #include "target-descriptions.h"
 #include <algorithm>
-
-#include "features/tic6x-c64xp.c"
-#include "features/tic6x-c64x.c"
-#include "features/tic6x-c62x.c"
 
 #define TIC6X_OPCODE_SIZE 4
 #define TIC6X_FETCH_PACKET_SIZE 32
@@ -598,7 +593,7 @@ tic6x_extract_signed_field (int value, int low_bit, int bits)
 static CORE_ADDR
 tic6x_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   unsigned long inst;
   int register_number;
   int last = 0;
@@ -1336,15 +1331,8 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_tic6x_tdep;
-
 void
 _initialize_tic6x_tdep (void)
 {
   register_gdbarch_init (bfd_arch_tic6x, tic6x_gdbarch_init);
-
-  initialize_tdesc_tic6x_c64xp ();
-  initialize_tdesc_tic6x_c64x ();
-  initialize_tdesc_tic6x_c62x ();
 }

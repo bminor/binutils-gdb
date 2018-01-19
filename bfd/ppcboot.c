@@ -1,5 +1,5 @@
 /* BFD back-end for PPCbug boot records.
-   Copyright (C) 1996-2017 Free Software Foundation, Inc.
+   Copyright (C) 1996-2018 Free Software Foundation, Inc.
    Written by Michael Meissner, Cygnus Support, <meissner@cygnus.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -354,8 +354,8 @@ ppcboot_set_section_contents (bfd *abfd,
       asection *s;
 
       /* The lowest section VMA sets the virtual address of the start
-         of the file.  We use the set the file position of all the
-         sections.  */
+	 of the file.  We use the set the file position of all the
+	 sections.  */
       low = abfd->sections->vma;
       for (s = abfd->sections->next; s != NULL; s = s->next)
 	if (s->vma < low)

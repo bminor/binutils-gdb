@@ -1,5 +1,5 @@
 /* i370-specific support for 32-bit ELF
-   Copyright (C) 1994-2017 Free Software Foundation, Inc.
+   Copyright (C) 1994-2018 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Hacked by Linas Vepstas for i370 linas@linas.org
 
@@ -356,8 +356,8 @@ i370_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
-	 ibfd, (long) new_flags, (long) old_flags);
+	(_("%B: uses different e_flags (%#x) fields than previous modules (%#x)"),
+	 ibfd, new_flags, old_flags);
 
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -478,7 +478,7 @@ i370_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
 	      && (h->needs_plt
-		  || h->u.weakdef != NULL
+		  || h->is_weakalias
 		  || (h->def_dynamic
 		      && h->ref_regular
 		      && !h->def_regular)));
@@ -490,12 +490,12 @@ i370_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      struct elf_link_hash_entry *def = weakdef (h);
+      BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+      h->root.u.def.section = def->root.u.def.section;
+      h->root.u.def.value = def->root.u.def.value;
       return TRUE;
     }
 
@@ -836,10 +836,6 @@ i370_elf_check_relocs (bfd *abfd,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  /* PR15323, ref flags aren't set for references in the same
-	     object.  */
-	  h->root.non_ir_ref_regular = 1;
 	}
 
       if (bfd_link_pic (info))
@@ -1053,9 +1049,9 @@ i370_elf_relocate_section (bfd *output_bfd,
   bfd_boolean ret = TRUE;
 
 #ifdef DEBUG
-  _bfd_error_handler ("i370_elf_relocate_section called for %B section %A, %ld relocations%s",
+  _bfd_error_handler ("i370_elf_relocate_section called for %B section %A, %u relocations%s",
 		      input_bfd, input_section,
-		      (long) input_section->reloc_count,
+		      input_section->reloc_count,
 		      (bfd_link_relocatable (info)) ? " (relocatable)" : "");
 #endif
 

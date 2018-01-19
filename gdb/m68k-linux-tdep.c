@@ -1,6 +1,6 @@
 /* Motorola m68k target-dependent support for GNU/Linux.
 
-   Copyright (C) 1996-2017 Free Software Foundation, Inc.
+   Copyright (C) 1996-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,8 +19,6 @@
 
 #include "defs.h"
 #include "gdbcore.h"
-#include "doublest.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "target.h"
 #include "gdbtypes.h"
@@ -422,9 +420,6 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_m68k_linux_tdep;
 
 void
 _initialize_m68k_linux_tdep (void)

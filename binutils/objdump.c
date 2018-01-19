@@ -1,5 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -181,7 +181,7 @@ static long dynsymcount = 0;
 static bfd_byte *stabs;
 static bfd_size_type stab_size;
 
-static char *strtab;
+static bfd_byte *strtab;
 static bfd_size_type stabstr_size;
 
 static bfd_boolean is_relocatable = FALSE;
@@ -214,11 +214,11 @@ usage (FILE *stream, int status)
   -g, --debugging          Display debug information in object file\n\
   -e, --debugging-tags     Display debug information using ctags style\n\
   -G, --stabs              Display (in raw form) any STABS info in the file\n\
-  -W[lLiaprmfFsoRt] or\n\
+  -W[lLiaprmfFsoRtUuTgAckK] or\n\
   --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
           =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
           =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n\
-          =addr,=cu_index]\n\
+          =addr,=cu_index,=links,=follow-links]\n\
                            Display DWARF info in the file\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
@@ -348,10 +348,10 @@ static struct option long_options[]=
   {"prefix", required_argument, NULL, OPTION_PREFIX},
   {"prefix-strip", required_argument, NULL, OPTION_PREFIX_STRIP},
   {"insn-width", required_argument, NULL, OPTION_INSN_WIDTH},
-  {"dwarf-depth",      required_argument, 0, OPTION_DWARF_DEPTH},
-  {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
-  {"dwarf-check",      no_argument, 0, OPTION_DWARF_CHECK},
-  {"inlines",          no_argument, 0, OPTION_INLINES},
+  {"dwarf-depth", required_argument, 0, OPTION_DWARF_DEPTH},
+  {"dwarf-start", required_argument, 0, OPTION_DWARF_START},
+  {"dwarf-check", no_argument, 0, OPTION_DWARF_CHECK},
+  {"inlines", no_argument, 0, OPTION_INLINES},
   {0, no_argument, 0, 0}
 };
 
@@ -799,10 +799,10 @@ compare_symbols (const void *ap, const void *bp)
       bfd_vma asz, bsz;
 
       asz = 0;
-      if ((a->flags & BSF_SYNTHETIC) == 0)
+      if ((a->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
 	asz = ((elf_symbol_type *) a)->internal_elf_sym.st_size;
       bsz = 0;
-      if ((b->flags & BSF_SYNTHETIC) == 0)
+      if ((b->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
 	bsz = ((elf_symbol_type *) b)->internal_elf_sym.st_size;
       if (asz != bsz)
 	return asz > bsz ? -1 : 1;
@@ -888,7 +888,7 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
 	name = alloc;
     }
 
-  if ((sym->flags & BSF_SYNTHETIC) == 0)
+  if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
     version_string = bfd_get_symbol_version_string (abfd, sym, &hidden);
 
   if (bfd_is_und_section (bfd_get_section (sym)))
@@ -1484,8 +1484,8 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
     return;
 
   if (! bfd_find_nearest_line_discriminator (abfd, section, syms, addr_offset,
-                                             &filename, &functionname,
-                                             &linenumber, &discriminator))
+					     &filename, &functionname,
+					     &linenumber, &discriminator))
     return;
 
   if (filename != NULL && *filename == '\0')
@@ -1537,16 +1537,22 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
       if (functionname != NULL
 	  && (prev_functionname == NULL
 	      || strcmp (functionname, prev_functionname) != 0))
-	printf ("%s():\n", functionname);
-      if (linenumber > 0 && (linenumber != prev_line ||
-                             (discriminator != prev_discriminator)))
-        {
-          if (discriminator > 0)
-            printf ("%s:%u (discriminator %u)\n", filename == NULL ? "???" : filename,
-                    linenumber, discriminator);
-          else
-            printf ("%s:%u\n", filename == NULL ? "???" : filename, linenumber);
-        }
+	{
+	  printf ("%s():\n", functionname);
+	  prev_line = -1;
+	}
+      if (linenumber > 0
+	  && (linenumber != prev_line
+	      || discriminator != prev_discriminator))
+	{
+	  if (discriminator > 0)
+	    printf ("%s:%u (discriminator %u)\n",
+		    filename == NULL ? "???" : filename,
+		    linenumber, discriminator);
+	  else
+	    printf ("%s:%u\n", filename == NULL ? "???" : filename,
+		    linenumber);
+	}
       if (unwind_inlines)
 	{
 	  const char *filename2;
@@ -2178,32 +2184,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
     }
   rel_ppend = rel_pp + rel_count;
 
-  /* PR 21665: Check for overlarge datasizes.
-     Note - we used to check for "datasize > bfd_get_file_size (abfd)" but
-     this fails when using compressed sections or compressed file formats
-     (eg MMO, tekhex).
-
-     The call to xmalloc below will fail if too much memory is requested,
-     which will catch the problem in the normal use case.  But if a memory
-     checker is in use, eg valgrind or sanitize, then an exception will
-     be still generated, so we try to catch the problem first.
-
-     Unfortunately there is no simple way to determine how much memory can
-     be allocated by calling xmalloc.  So instead we use a simple, arbitrary
-     limit of 2Gb.  Hopefully this should be enough for most users.  If
-     someone does start trying to disassemble sections larger then 2Gb in
-     size they will doubtless complain and we can increase the limit.  */
-#define MAX_XMALLOC (1024 * 1024 * 1024 * 2UL) /* 2Gb */
-  if (datasize > MAX_XMALLOC)
-    {
-      non_fatal (_("Reading section %s failed because it is too big (%#lx)"),
-		 section->name, (unsigned long) datasize);
-      return;
-    }
-
-  data = (bfd_byte *) xmalloc (datasize);
-
-  if (!bfd_get_section_contents (abfd, section, data, 0, datasize))
+  if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
       non_fatal (_("Reading section %s failed because: %s"),
 		 section->name, bfd_errmsg (bfd_get_error ()));
@@ -2478,36 +2459,45 @@ disassemble_data (bfd *abfd)
   free (sorted_syms);
 }
 
-static int
+static bfd_boolean
 load_specific_debug_section (enum dwarf_section_display_enum debug,
 			     asection *sec, void *file)
 {
   struct dwarf_section *section = &debug_displays [debug].section;
   bfd *abfd = (bfd *) file;
-  bfd_boolean ret;
+  bfd_byte *contents;
 
-  /* If it is already loaded, do nothing.  */
   if (section->start != NULL)
-    return 1;
+    {
+      /* If it is already loaded, do nothing.  */
+      if (streq (section->filename, bfd_get_filename (abfd)))
+	return TRUE;
+      free (section->start);
+    }
 
+  section->filename = bfd_get_filename (abfd);
   section->reloc_info = NULL;
   section->num_relocs = 0;
   section->address = bfd_get_section_vma (abfd, sec);
   section->size = bfd_get_section_size (sec);
-  section->start = NULL;
+  section->start = contents = malloc (section->size + 1);
   section->user_data = sec;
-  ret = bfd_get_full_section_contents (abfd, sec, &section->start);
-
-  if (! ret)
+  if (section->start == NULL
+      || !bfd_get_full_section_contents (abfd, sec, &contents))
     {
       free_debug_section (debug);
       printf (_("\nCan't get contents for section '%s'.\n"),
 	      section->name);
-      return 0;
+      return FALSE;
     }
+  /* Ensure any string section has a terminating NUL.  */
+  section->start[section->size] = 0;
 
   if (is_relocatable && debug_displays [debug].relocate)
     {
+      long         reloc_size;
+      bfd_boolean  ret;
+
       bfd_cache_section_contents (sec, section->start);
 
       ret = bfd_simple_get_relocated_section_contents (abfd,
@@ -2520,10 +2510,8 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
           free_debug_section (debug);
           printf (_("\nCan't get contents for section '%s'.\n"),
 	          section->name);
-          return 0;
+          return FALSE;
         }
-
-      long reloc_size;
 
       reloc_size = bfd_get_reloc_upper_bound (abfd, sec);
       if (reloc_size > 0)
@@ -2544,7 +2532,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	}
     }
 
-  return 1;
+  return TRUE;
 }
 
 bfd_boolean
@@ -2565,7 +2553,7 @@ reloc_at (struct dwarf_section * dsec, dwarf_vma offset)
   return FALSE;
 }
 
-int
+bfd_boolean
 load_debug_section (enum dwarf_section_display_enum debug, void *file)
 {
   struct dwarf_section *section = &debug_displays [debug].section;
@@ -2574,7 +2562,10 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
 
   /* If it is already loaded, do nothing.  */
   if (section->start != NULL)
-    return 1;
+    {
+      if (streq (section->filename, bfd_get_filename (abfd)))
+	return TRUE;
+    }
 
   /* Locate the debug section.  */
   sec = bfd_get_section_by_name (abfd, section->uncompressed_name);
@@ -2587,7 +2578,7 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
         section->name = section->compressed_name;
     }
   if (sec == NULL)
-    return 0;
+    return FALSE;
 
   return load_specific_debug_section (debug, sec, file);
 }
@@ -2621,6 +2612,29 @@ free_debug_section (enum dwarf_section_display_enum debug)
   section->start = NULL;
   section->address = 0;
   section->size = 0;
+}
+
+void
+close_debug_file (void * file)
+{
+  bfd * abfd = (bfd *) file;
+
+  bfd_close (abfd);
+}
+
+void *
+open_debug_file (const char * pathname)
+{
+  bfd * data;
+
+  data = bfd_openr (pathname, NULL);
+  if (data == NULL)
+    return NULL;
+
+  if (! bfd_check_format (data, bfd_object))
+    return NULL;
+  
+  return data;
 }
 
 static void
@@ -2665,6 +2679,8 @@ dump_dwarf_section (bfd *abfd, asection *section,
 static void
 dump_dwarf (bfd *abfd)
 {
+  bfd * separates;
+
   is_relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
 
   eh_addr_size = bfd_arch_bits_per_address (abfd) / 8;
@@ -2717,7 +2733,12 @@ dump_dwarf (bfd *abfd)
       break;
     }
 
+  separates = load_separate_debug_file (abfd, bfd_get_filename (abfd));
+
   bfd_map_over_sections (abfd, dump_dwarf_section, NULL);
+
+  if (separates)
+    bfd_map_over_sections (separates, dump_dwarf_section, NULL);
 
   free_debug_memory ();
 }
@@ -2725,12 +2746,11 @@ dump_dwarf (bfd *abfd)
 /* Read ABFD's stabs section STABSECT_NAME, and return a pointer to
    it.  Return NULL on failure.   */
 
-static char *
+static bfd_byte *
 read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
 {
   asection *stabsect;
-  bfd_size_type size;
-  char *contents;
+  bfd_byte *contents;
 
   stabsect = bfd_get_section_by_name (abfd, sect_name);
   if (stabsect == NULL)
@@ -2739,10 +2759,7 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
       return FALSE;
     }
 
-  size = bfd_section_size (abfd, stabsect);
-  contents  = (char *) xmalloc (size);
-
-  if (! bfd_get_section_contents (abfd, stabsect, contents, 0, size))
+  if (!bfd_malloc_and_get_section (abfd, stabsect, &contents))
     {
       non_fatal (_("reading %s section of %s failed: %s"),
 		 sect_name, bfd_get_filename (abfd),
@@ -2752,7 +2769,7 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
       return NULL;
     }
 
-  *size_ptr = size;
+  *size_ptr = bfd_section_size (abfd, stabsect);
 
   return contents;
 }
@@ -2879,8 +2896,7 @@ find_stabs_section (bfd *abfd, asection *section, void *names)
 
       if (strtab)
 	{
-	  stabs = (bfd_byte *) read_section_stabs (abfd, section->name,
-						   &stab_size);
+	  stabs = read_section_stabs (abfd, section->name, &stab_size);
 	  if (stabs)
 	    print_section_stabs (abfd, section->name, &sought->string_offset);
 	}
@@ -3411,7 +3427,16 @@ dump_relocs_in_section (bfd *abfd,
     }
 
   if ((bfd_get_file_flags (abfd) & (BFD_IN_MEMORY | BFD_LINKER_CREATED)) == 0
-      && (ufile_ptr) relsize > bfd_get_file_size (abfd))
+      && (((ufile_ptr) relsize > bfd_get_file_size (abfd))
+	  /* Also check the section's reloc count since if this is negative
+	     (or very large) the computation in bfd_get_reloc_upper_bound
+	     may have resulted in returning a small, positive integer.
+	     See PR 22508 for a reproducer.
+
+	     Note - we check against file size rather than section size as
+	     it is possible for there to be more relocs that apply to a
+	     section than there are bytes in that section.  */
+	  || (section->reloc_count > bfd_get_file_size (abfd))))
     {
       printf (" (too many: 0x%x)\n", section->reloc_count);
       bfd_set_error (bfd_error_file_truncated);

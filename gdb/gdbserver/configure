@@ -607,6 +607,7 @@ ustinc
 ustlibs
 ALLOCA
 CCDEPMODE
+CONFIG_SRC_SUBDIR
 DEPDIR
 am__leading_dot
 host_noncanonical
@@ -5813,6 +5814,13 @@ fi
   fi
 
 
+if $development; then
+  srv_selftest_objs="selftest.o"
+
+$as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
+
+fi
+
  case ${build_alias} in
   "") build_noncanonical=${build} ;;
   *) build_noncanonical=${build_alias} ;;
@@ -5846,6 +5854,14 @@ rmdir .tst 2>/dev/null
 DEPDIR="${am__leading_dot}deps"
 
 ac_config_commands="$ac_config_commands depdir"
+
+
+
+# Create sub-directories for objects and dependencies.
+CONFIG_SRC_SUBDIR="arch"
+
+
+ac_config_commands="$ac_config_commands gdbdepdir"
 
 
 depcc="$CC"   am_compiler_list=
@@ -6162,7 +6178,7 @@ $as_echo "$as_me: running $SHELL $ac_sub_configure $ac_sub_configure_args --cach
   cd "$ac_popdir"
 
 
-for ac_header in sgtty.h termio.h termios.h sys/reg.h string.h 		 proc_service.h sys/procfs.h linux/elf.h 		 fcntl.h signal.h sys/file.h 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h 		 netinet/tcp.h arpa/inet.h
+for ac_header in termios.h sys/reg.h string.h 		 proc_service.h sys/procfs.h linux/elf.h 		 fcntl.h signal.h sys/file.h 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h 		 netinet/tcp.h arpa/inet.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -6754,7 +6770,7 @@ $as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
   fi
 
 
-  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h sys/syscall.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h 		   termios.h termio.h sgtty.h
+  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h 		   termios.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -7151,10 +7167,17 @@ build_warnings="-Wall -Wpointer-arith \
 -Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized \
 -Wno-mismatched-tags"
 
-# Enable -Wno-format by default when using gcc on mingw since many
-# GCC versions complain about %I64.
 case "${host}" in
-  *-*-mingw32*) build_warnings="$build_warnings -Wno-format" ;;
+  *-*-mingw32*)
+    # Enable -Wno-format by default when using gcc on mingw since many
+    # GCC versions complain about %I64.
+    build_warnings="$build_warnings -Wno-format" ;;
+  *-*-solaris*)
+    # Solaris 11.4 <python2.7/ceval.h> uses #pragma no_inline that GCC
+    # doesn't understand.
+    build_warnings="$build_warnings -Wno-unknown-pragmas"
+    # Solaris 11 <unistd.h> marks vfork deprecated.
+    build_warnings="$build_warnings -Wno-deprecated-declarations" ;;
   *) build_warnings="$build_warnings -Wformat-nonliteral" ;;
 esac
 
@@ -8265,7 +8288,7 @@ $as_echo "#define USE_XML 1" >>confdefs.h
   done
 fi
 
-GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles $srv_host_obs"
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles $srv_host_obs $srv_selftest_objs"
 GDBSERVER_LIBS="$srv_libs"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the target supports __sync_*_compare_and_swap" >&5
@@ -9131,6 +9154,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 # INIT-COMMANDS
 #
 ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR CONFIG_SRC_SUBDIR="$CONFIG_SRC_SUBDIR"
 
 _ACEOF
 
@@ -9142,6 +9166,7 @@ do
   case $ac_config_target in
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
     "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
+    "gdbdepdir") CONFIG_COMMANDS="$CONFIG_COMMANDS gdbdepdir" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
@@ -9688,6 +9713,11 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
   case $ac_file$ac_mode in
     "depdir":C) $SHELL $ac_aux_dir/mkinstalldirs $DEPDIR ;;
+    "gdbdepdir":C)
+  for subdir in ${CONFIG_SRC_SUBDIR}
+  do
+      $SHELL $ac_aux_dir/mkinstalldirs $subdir/$DEPDIR
+  done ;;
     "Makefile":F) case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;

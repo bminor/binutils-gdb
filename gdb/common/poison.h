@@ -1,6 +1,6 @@
 /* Poison symbols at compile time.
 
-   Copyright (C) 2017 Free Software Foundation, Inc.
+   Copyright (C) 2017-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -83,5 +83,137 @@ template <typename D, typename S,
 void *memmove (D *dest, const S *src, size_t n) = delete;
 
 #endif /* HAVE_IS_TRIVIALLY_COPYABLE */
+
+/* Poison XNEW and friends to catch usages of malloc-style allocations on
+   objects that require new/delete.  */
+
+template<typename T>
+using IsMallocable = std::is_pod<T>;
+
+template<typename T>
+using IsFreeable = gdb::Or<std::is_trivially_destructible<T>, std::is_void<T>>;
+
+template <typename T, typename = gdb::Requires<gdb::Not<IsFreeable<T>>>>
+void free (T *ptr) = delete;
+
+template<typename T>
+static T *
+xnew ()
+{
+  static_assert (IsMallocable<T>::value, "Trying to use XNEW with a non-POD \
+data type.  Use operator new instead.");
+  return XNEW (T);
+}
+
+#undef XNEW
+#define XNEW(T) xnew<T>()
+
+template<typename T>
+static T *
+xcnew ()
+{
+  static_assert (IsMallocable<T>::value, "Trying to use XCNEW with a non-POD \
+data type.  Use operator new instead.");
+  return XCNEW (T);
+}
+
+#undef XCNEW
+#define XCNEW(T) xcnew<T>()
+
+template<typename T>
+static void
+xdelete (T *p)
+{
+  static_assert (IsFreeable<T>::value, "Trying to use XDELETE with a non-POD \
+data type.  Use operator delete instead.");
+  XDELETE (p);
+}
+
+#undef XDELETE
+#define XDELETE(P) xdelete (P)
+
+template<typename T>
+static T *
+xnewvec (size_t n)
+{
+  static_assert (IsMallocable<T>::value, "Trying to use XNEWVEC with a \
+non-POD data type.  Use operator new[] (or std::vector) instead.");
+  return XNEWVEC (T, n);
+}
+
+#undef XNEWVEC
+#define XNEWVEC(T, N) xnewvec<T> (N)
+
+template<typename T>
+static T *
+xcnewvec (size_t n)
+{
+  static_assert (IsMallocable<T>::value, "Trying to use XCNEWVEC with a \
+non-POD data type.  Use operator new[] (or std::vector) instead.");
+  return XCNEWVEC (T, n);
+}
+
+#undef XCNEWVEC
+#define XCNEWVEC(T, N) xcnewvec<T> (N)
+
+template<typename T>
+static T *
+xresizevec (T *p, size_t n)
+{
+  static_assert (IsMallocable<T>::value, "Trying to use XRESIZEVEC with a \
+non-POD data type.");
+  return XRESIZEVEC (T, p, n);
+}
+
+#undef XRESIZEVEC
+#define XRESIZEVEC(T, P, N) xresizevec<T> (P, N)
+
+template<typename T>
+static void
+xdeletevec (T *p)
+{
+  static_assert (IsFreeable<T>::value, "Trying to use XDELETEVEC with a \
+non-POD data type.  Use operator delete[] (or std::vector) instead.");
+  XDELETEVEC (p);
+}
+
+#undef XDELETEVEC
+#define XDELETEVEC(P) xdeletevec (P)
+
+template<typename T>
+static T *
+xnewvar (size_t s)
+{
+  static_assert (IsMallocable<T>::value, "Trying to use XNEWVAR with a \
+non-POD data type.");
+  return XNEWVAR (T, s);;
+}
+
+#undef XNEWVAR
+#define XNEWVAR(T, S) xnewvar<T> (S)
+
+template<typename T>
+static T *
+xcnewvar (size_t s)
+{
+  static_assert (IsMallocable<T>::value, "Trying to use XCNEWVAR with a \
+non-POD data type.");
+  return XCNEWVAR (T, s);
+}
+
+#undef XCNEWVAR
+#define XCNEWVAR(T, S) xcnewvar<T> (S)
+
+template<typename T>
+static T *
+xresizevar (T *p, size_t s)
+{
+  static_assert (IsMallocable<T>::value, "Trying to use XRESIZEVAR with a \
+non-POD data type.");
+  return XRESIZEVAR (T, p, s);
+}
+
+#undef XRESIZEVAR
+#define XRESIZEVAR(T, P, S) xresizevar<T> (P, S)
 
 #endif /* COMMON_POISON_H */

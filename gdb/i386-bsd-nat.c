@@ -1,6 +1,6 @@
 /* Native-dependent code for modern i386 BSD's.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -280,10 +280,6 @@ i386bsd_target (void)
   t->to_store_registers = i386bsd_store_inferior_registers;
   return t;
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386bsd_nat (void);
 
 void
 _initialize_i386bsd_nat (void)

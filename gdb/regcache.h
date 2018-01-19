@@ -1,6 +1,6 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,22 +35,9 @@ extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 							 struct gdbarch *,
 							 struct address_space *);
 
-void regcache_xfree (struct regcache *regcache);
-struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);
-struct regcache *regcache_xmalloc (struct gdbarch *gdbarch,
-				   struct address_space *aspace);
-
 /* Return REGCACHE's ptid.  */
 
 extern ptid_t regcache_get_ptid (const struct regcache *regcache);
-
-/* Return REGCACHE's architecture.  */
-
-extern struct gdbarch *get_regcache_arch (const struct regcache *regcache);
-
-/* Return REGCACHE's address space.  */
-
-extern struct address_space *get_regcache_aspace (const struct regcache *);
 
 enum register_status regcache_register_status (const struct regcache *regcache,
 					       int regnum);
@@ -84,7 +71,7 @@ extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
 /* Set a raw register's value in the regcache's buffer.  Unlike
    regcache_raw_write, this is not write-through.  The intention is
    allowing to change the buffer contents of a read-only regcache
-   allocated with regcache_xmalloc.  */
+   allocated with new.  */
 
 extern void regcache_raw_set_cached_value
   (struct regcache *regcache, int regnum, const gdb_byte *buf);
@@ -245,8 +232,8 @@ typedef struct cached_reg
 class regcache
 {
 public:
-  regcache (gdbarch *gdbarch, address_space *aspace_)
-    : regcache (gdbarch, aspace_, true)
+  regcache (gdbarch *gdbarch)
+    : regcache (gdbarch, nullptr, true)
   {}
 
   struct readonly_t {};
@@ -255,23 +242,19 @@ public:
   /* Create a readonly regcache from a non-readonly regcache.  */
   regcache (readonly_t, const regcache &src);
 
-  regcache (const regcache &) = delete;
-  void operator= (const regcache &) = delete;
+  DISABLE_COPY_AND_ASSIGN (regcache);
 
-  /* class regcache is only extended in unit test, so only mark it
-     virtual when selftest is enabled.  */
-#if GDB_SELF_TEST
-  virtual
-#endif
   ~regcache ()
   {
     xfree (m_registers);
     xfree (m_register_status);
   }
 
+  /* Return regcache's architecture.  */
   gdbarch *arch () const;
 
-  address_space *aspace () const
+  /* Return REGCACHE's address space.  */
+  const address_space *aspace () const
   {
     return m_aspace;
   }
@@ -283,11 +266,6 @@ public:
 
   enum register_status raw_read (int regnum, gdb_byte *buf);
 
-  /* class regcache is only extended in unit test, so only mark it
-     virtual when selftest is enabled.  */
-#if GDB_SELF_TEST
-  virtual
-#endif
   void raw_write (int regnum, const gdb_byte *buf);
 
   template<typename T, typename = RequireLongest<T>>
@@ -360,7 +338,9 @@ public:
 
   static void regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid);
 protected:
-  regcache (gdbarch *gdbarch, address_space *aspace_, bool readonly_p_);
+  regcache (gdbarch *gdbarch, const address_space *aspace_, bool readonly_p_);
+
+  int num_raw_registers () const;
 
   static std::forward_list<regcache *> current_regcache;
 
@@ -369,23 +349,22 @@ private:
 
   void restore (struct regcache *src);
 
-  void cpy_no_passthrough (struct regcache *src);
-
   enum register_status xfer_part (int regnum, int offset, int len, void *in,
-				  const void *out,
-				  decltype (regcache_raw_read) read,
-				  decltype (regcache_raw_write) write);
+				  const void *out, bool is_raw);
 
   void transfer_regset (const struct regset *regset,
 			struct regcache *out_regcache,
 			int regnum, const void *in_buf,
 			void *out_buf, size_t size) const;
 
+  /* Assert on the range of REGNUM.  */
+  void assert_regnum (int regnum) const;
+
   struct regcache_descr *m_descr;
 
   /* The address space of this register cache (for registers where it
      makes sense, like PC or SP).  */
-  struct address_space *m_aspace;
+  const address_space * const m_aspace;
 
   /* The register buffers.  A read-only register cache can hold the
      full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a read/write
@@ -399,7 +378,7 @@ private:
      cache can only be updated via the methods regcache_dup() and
      regcache_cpy().  The actual contents are determined by the
      reggroup_save and reggroup_restore methods.  */
-  bool m_readonly_p;
+  const bool m_readonly_p;
   /* If this is a read-write cache, which thread's registers is
      it connected to?  */
   ptid_t m_ptid;
@@ -415,13 +394,12 @@ private:
   regcache_cpy (struct regcache *dst, struct regcache *src);
 };
 
-/* Copy/duplicate the contents of a register cache.  By default, the
-   operation is pass-through.  Writes to DST and reads from SRC will
-   go through to the target.  See also regcache_cpy_no_passthrough.
-
-   regcache_cpy can not have overlapping SRC and DST buffers.  */
-
+/* Duplicate the contents of a register cache to a read-only register
+   cache.  The operation is pass-through.  */
 extern struct regcache *regcache_dup (struct regcache *regcache);
+
+/* Writes to DEST will go through to the target.  SRC is a read-only
+   register cache.  */
 extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 
 extern void registers_changed (void);

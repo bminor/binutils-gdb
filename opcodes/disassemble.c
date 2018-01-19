@@ -1,5 +1,5 @@
 /* Select disassembly routine for specified architecture.
-   Copyright (C) 1994-2017 Free Software Foundation, Inc.
+   Copyright (C) 1994-2018 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -110,21 +110,12 @@
 #endif
 
 disassembler_ftype
-disassembler (enum bfd_architecture a, bfd_boolean big, unsigned long mach,
-	      bfd *abfd)
+disassembler (enum bfd_architecture a,
+	      bfd_boolean big ATTRIBUTE_UNUSED,
+	      unsigned long mach ATTRIBUTE_UNUSED,
+	      bfd *abfd ATTRIBUTE_UNUSED)
 {
   disassembler_ftype disassemble;
-
-  if (abfd != NULL)
-    {
-      /* Do some asserts that the first three parameters should equal
-	 to what we can get from ABFD.  On the other hand, these
-	 asserts help removing some compiler errors on unused
-	 parameter.  */
-      assert (a == bfd_get_arch (abfd));
-      assert (big == bfd_big_endian (abfd));
-      assert (mach == bfd_get_mach (abfd));
-    }
 
   switch (a)
     {
@@ -658,6 +649,11 @@ disassemble_init_for_target (struct disassemble_info * info)
 	  else
 	    cgen_bitset_set (info->insn_sets, ISA_M32C);
 	}
+      break;
+#endif
+#ifdef ARCH_pru
+    case bfd_arch_pru:
+      info->disassembler_needs_relocs = TRUE;
       break;
 #endif
 #ifdef ARCH_powerpc

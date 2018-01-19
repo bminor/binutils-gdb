@@ -1,6 +1,6 @@
 /* Handle Darwin shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -67,7 +67,7 @@ struct gdb_dyld_all_image_infos
 
 /* Current all_image_infos version.  */
 #define DYLD_VERSION_MIN 1
-#define DYLD_VERSION_MAX 14
+#define DYLD_VERSION_MAX 15
 
 /* Per PSPACE specific data.  */
 struct darwin_info
@@ -222,7 +222,7 @@ find_program_interpreter (void)
     Note that darwin-nat.c implements pid_to_exec_file.  */
 
 static int
-open_symbol_file_object (void *from_ttyp)
+open_symbol_file_object (int from_tty)
 {
   return 0;
 }
@@ -647,9 +647,6 @@ darwin_bfd_open (char *pathname)
 }
 
 struct target_so_ops darwin_so_ops;
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_darwin_solib;
 
 void
 _initialize_darwin_solib (void)

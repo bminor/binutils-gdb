@@ -1,5 +1,5 @@
 /* Target-machine dependent code for Nios II, for GDB.
-   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+   Copyright (C) 2012-2018 Free Software Foundation, Inc.
    Contributed by Peter Brookes (pbrookes@altera.com)
    and Andrew Draper (adraper@altera.com).
    Contributed by Mentor Graphics, Inc.
@@ -37,7 +37,6 @@
 #include "value.h"
 #include "symfile.h"
 #include "arch-utils.h"
-#include "floatformat.h"
 #include "infcall.h"
 #include "regset.h"
 #include "target-descriptions.h"
@@ -1818,7 +1817,6 @@ nios2_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                        int struct_return, CORE_ADDR struct_addr)
 {
   int argreg;
-  int float_argreg;
   int argnum;
   int len = 0;
   int stack_offset = 0;
@@ -2116,7 +2114,7 @@ static const struct frame_unwind nios2_stub_frame_unwind =
 static CORE_ADDR
 nios2_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   unsigned long mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   unsigned int insn;
@@ -2210,7 +2208,6 @@ nios2_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 static std::vector<CORE_ADDR>
 nios2_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR next_pc = nios2_get_next_pc (regcache, regcache_read_pc (regcache));
 
   return {next_pc};
@@ -2353,8 +2350,6 @@ nios2_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
-
-extern initialize_file_ftype _initialize_nios2_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_nios2_tdep (void)

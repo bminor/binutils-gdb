@@ -1,6 +1,6 @@
 /* Modula 2 language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +28,6 @@
 #include "c-lang.h"
 #include "valprint.h"
 
-extern void _initialize_m2_language (void);
 static void m2_printchar (int, struct type *, struct ui_file *);
 static void m2_emit_char (int, struct type *, struct ui_file *, int);
 
@@ -354,7 +353,7 @@ const struct exp_descriptor exp_descriptor_modula2 =
   evaluate_subexp_modula2
 };
 
-const struct language_defn m2_language_defn =
+extern const struct language_defn m2_language_defn =
 {
   "modula-2",
   "Modula-2",
@@ -388,14 +387,15 @@ const struct language_defn m2_language_defn =
   0,				/* arrays are first-class (not c-style) */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   m2_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
   default_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
@@ -439,6 +439,4 @@ void
 _initialize_m2_language (void)
 {
   m2_type_data = gdbarch_data_register_post_init (build_m2_types);
-
-  add_language (&m2_language_defn);
 }

@@ -1,6 +1,6 @@
 /* Target-dependent code for Solaris x86.
 
-   Copyright (C) 2002-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -149,9 +149,6 @@ i386_sol2_osabi_sniffer (bfd *abfd)
 
   return GDB_OSABI_UNKNOWN;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386_sol2_tdep (void);
 
 void
 _initialize_i386_sol2_tdep (void)

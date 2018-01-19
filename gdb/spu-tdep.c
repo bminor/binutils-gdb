@@ -1,5 +1,5 @@
 /* SPU target-dependent code for GDB, the GNU debugger.
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
    Based on a port by Sid Manning <sid@us.ibm.com>.
@@ -38,7 +38,6 @@
 #include "language.h"
 #include "regcache.h"
 #include "reggroups.h"
-#include "floatformat.h"
 #include "block.h"
 #include "observer.h"
 #include "infcall.h"
@@ -186,7 +185,7 @@ static enum register_status
 spu_pseudo_register_read_spu (struct regcache *regcache, const char *regname,
 			      gdb_byte *buf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum register_status status;
   gdb_byte reg[32];
@@ -254,7 +253,7 @@ static void
 spu_pseudo_register_write_spu (struct regcache *regcache, const char *regname,
 			       const gdb_byte *buf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   char reg[32];
   char annex[32];
@@ -1179,7 +1178,7 @@ spu_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static CORE_ADDR
 spu_read_pc (struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   ULONGEST pc;
   regcache_cooked_read_unsigned (regcache, SPU_PC_REGNUM, &pc);
   /* Mask off interrupt enable bit.  */
@@ -1210,7 +1209,7 @@ static struct gdbarch *
 spu2ppu_prev_arch (struct frame_info *this_frame, void **this_cache)
 {
   struct spu2ppu_cache *cache = (struct spu2ppu_cache *) *this_cache;
-  return get_regcache_arch (cache->regcache);
+  return cache->regcache->arch ();
 }
 
 static void
@@ -1226,7 +1225,7 @@ spu2ppu_prev_register (struct frame_info *this_frame,
 		       void **this_cache, int regnum)
 {
   struct spu2ppu_cache *cache = (struct spu2ppu_cache *) *this_cache;
-  struct gdbarch *gdbarch = get_regcache_arch (cache->regcache);
+  struct gdbarch *gdbarch = cache->regcache->arch ();
   gdb_byte *buf;
 
   buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
@@ -1267,7 +1266,7 @@ spu2ppu_sniffer (const struct frame_unwind *self,
 
       if (fi)
 	{
-	  cache->regcache = frame_save_as_regcache (fi);
+	  cache->regcache = frame_save_as_regcache (fi).release ();
 	  *this_prologue_cache = cache;
 	  return 1;
 	}
@@ -1288,7 +1287,7 @@ static void
 spu2ppu_dealloc_cache (struct frame_info *self, void *this_cache)
 {
   struct spu2ppu_cache *cache = (struct spu2ppu_cache *) this_cache;
-  regcache_xfree (cache->regcache);
+  delete cache->regcache;
 }
 
 static const struct frame_unwind spu2ppu_unwind = {
@@ -1615,7 +1614,7 @@ spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
 static std::vector<CORE_ADDR>
 spu_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc, next_pc;
   unsigned int insn;
@@ -1633,8 +1632,8 @@ spu_software_single_step (struct regcache *regcache)
   insn = extract_unsigned_integer (buf, 4, byte_order);
 
   /* Get local store limit.  */
-  lslr = regcache_raw_get_unsigned (regcache, SPU_LSLR_REGNUM);
-  if (!lslr)
+  if ((regcache_cooked_read_unsigned (regcache, SPU_LSLR_REGNUM, &lslr)
+       != REG_VALID) || !lslr)
     lslr = (ULONGEST) -1;
 
   /* Next sequential instruction is at PC + 4, except if the current
@@ -1654,7 +1653,10 @@ spu_software_single_step (struct regcache *regcache)
       if (reg == SPU_PC_REGNUM)
 	target += SPUADDR_ADDR (pc);
       else if (reg != -1)
-	target += regcache_raw_get_unsigned (regcache, reg) & -4;
+      {
+	regcache_raw_read_part (regcache, reg, 0, 4, buf);
+	target += extract_unsigned_integer (buf, 4, byte_order) & -4;
+      }
 
       target = target & lslr;
       if (target != next_pc)
@@ -1913,7 +1915,6 @@ spu_overlay_new_objfile (struct objfile *objfile)
   /* Now go and fiddle with all the LMAs.  */
   ALL_OBJFILE_OSECTIONS (objfile, osect)
     {
-      bfd *obfd = objfile->obfd;
       asection *bsect = osect->the_bfd_section;
       int ndx = osect - objfile->sections;
 
@@ -1965,7 +1966,9 @@ spu_catch_start (struct objfile *objfile)
       struct symbol *sym;
       struct symtab_and_line sal;
 
-      sym = block_lookup_symbol (block, "main", VAR_DOMAIN);
+      sym = block_lookup_symbol (block, "main",
+				 symbol_name_match_type::SEARCH_NAME,
+				 VAR_DOMAIN);
       if (sym)
 	{
 	  fixup_symbol_section (sym, objfile);
@@ -2036,7 +2039,7 @@ flush_ea_cache (void)
       type = lookup_pointer_type (type);
       addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 
-      call_function_by_hand (value_from_pointer (type, addr), 0, NULL);
+      call_function_by_hand (value_from_pointer (type, addr), NULL, 0, NULL);
     }
 }
 
@@ -2059,12 +2062,11 @@ spu_attach_normal_stop (struct bpstats *bs, int print_frame)
 /* "info spu" commands.  */
 
 static void
-info_spu_event_command (char *args, int from_tty)
+info_spu_event_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   ULONGEST event_status = 0;
   ULONGEST event_mask = 0;
-  struct cleanup *chain;
   gdb_byte buf[100];
   char annex[32];
   LONGEST len;
@@ -2091,7 +2093,7 @@ info_spu_event_command (char *args, int from_tty)
   buf[len] = '\0';
   event_mask = strtoulst ((char *) buf, NULL, 16);
  
-  chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "SPUInfoEvent");
+  ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoEvent");
 
   if (current_uiout->is_mi_like_p ())
     {
@@ -2105,12 +2107,10 @@ info_spu_event_command (char *args, int from_tty)
       printf_filtered (_("Event Status 0x%s\n"), phex (event_status, 4));
       printf_filtered (_("Event Mask   0x%s\n"), phex (event_mask, 4));
     }
-
-  do_cleanups (chain);
 }
 
 static void
-info_spu_signal_command (char *args, int from_tty)
+info_spu_signal_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2121,7 +2121,6 @@ info_spu_signal_command (char *args, int from_tty)
   ULONGEST signal2 = 0;
   ULONGEST signal2_type = 0;
   int signal2_pending = 0;
-  struct cleanup *chain;
   char annex[32];
   gdb_byte buf[100];
   LONGEST len;
@@ -2168,7 +2167,7 @@ info_spu_signal_command (char *args, int from_tty)
   buf[len] = '\0';
   signal2_type = strtoulst ((char *) buf, NULL, 16);
 
-  chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "SPUInfoSignal");
+  ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoSignal");
 
   if (current_uiout->is_mi_like_p ())
     {
@@ -2201,48 +2200,42 @@ info_spu_signal_command (char *args, int from_tty)
       else
 	printf_filtered (_("(Type Overwrite)\n"));
     }
-
-  do_cleanups (chain);
 }
 
 static void
 info_spu_mailbox_list (gdb_byte *buf, int nr, enum bfd_endian byte_order,
 		       const char *field, const char *msg)
 {
-  struct cleanup *chain;
   int i;
 
   if (nr <= 0)
     return;
 
-  chain = make_cleanup_ui_out_table_begin_end (current_uiout, 1, nr, "mbox");
+  ui_out_emit_table table_emitter (current_uiout, 1, nr, "mbox");
 
   current_uiout->table_header (32, ui_left, field, msg);
   current_uiout->table_body ();
 
   for (i = 0; i < nr; i++)
     {
-      struct cleanup *val_chain;
-      ULONGEST val;
-      val_chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "mbox");
-      val = extract_unsigned_integer (buf + 4*i, 4, byte_order);
-      current_uiout->field_fmt (field, "0x%s", phex (val, 4));
-      do_cleanups (val_chain);
+      {
+	ULONGEST val;
+	ui_out_emit_tuple tuple_emitter (current_uiout, "mbox");
+	val = extract_unsigned_integer (buf + 4*i, 4, byte_order);
+	current_uiout->field_fmt (field, "0x%s", phex (val, 4));
+      }
 
       if (!current_uiout->is_mi_like_p ())
 	printf_filtered ("\n");
     }
-
-  do_cleanups (chain);
 }
 
 static void
-info_spu_mailbox_command (char *args, int from_tty)
+info_spu_mailbox_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct cleanup *chain;
   char annex[32];
   gdb_byte buf[1024];
   LONGEST len;
@@ -2253,7 +2246,7 @@ info_spu_mailbox_command (char *args, int from_tty)
 
   id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
 
-  chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "SPUInfoMailbox");
+  ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoMailbox");
 
   xsnprintf (annex, sizeof annex, "%d/mbox_info", id);
   len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
@@ -2281,8 +2274,6 @@ info_spu_mailbox_command (char *args, int from_tty)
 
   info_spu_mailbox_list (buf, len / 4, byte_order,
 			 "wbox", "SPU Inbound Mailbox");
-
-  do_cleanups (chain);
 }
 
 static ULONGEST
@@ -2333,7 +2324,6 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
 
   int *seq = XALLOCAVEC (int, nr);
   int done = 0;
-  struct cleanup *chain;
   int i, j;
 
 
@@ -2371,8 +2361,7 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
   nr = i;
 
 
-  chain = make_cleanup_ui_out_table_begin_end (current_uiout, 10, nr,
-					       "dma_cmd");
+  ui_out_emit_table table_emitter (current_uiout, 10, nr, "dma_cmd");
 
   current_uiout->table_header (7, ui_left, "opcode", "Opcode");
   current_uiout->table_header (3, ui_left, "tag", "Tag");
@@ -2389,7 +2378,6 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
 
   for (i = 0; i < nr; i++)
     {
-      struct cleanup *cmd_chain;
       ULONGEST mfc_cq_dw0;
       ULONGEST mfc_cq_dw1;
       ULONGEST mfc_cq_dw2;
@@ -2425,55 +2413,53 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
       ea_valid_p = spu_mfc_get_bitfield (mfc_cq_dw2, 39, 39);
       cmd_error_p = spu_mfc_get_bitfield (mfc_cq_dw2, 40, 40);
 
-      cmd_chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "cmd");
+      {
+	ui_out_emit_tuple tuple_emitter (current_uiout, "cmd");
 
-      if (spu_mfc_opcode[mfc_cmd_opcode])
-	current_uiout->field_string ("opcode", spu_mfc_opcode[mfc_cmd_opcode]);
-      else
-	current_uiout->field_int ("opcode", mfc_cmd_opcode);
+	if (spu_mfc_opcode[mfc_cmd_opcode])
+	  current_uiout->field_string ("opcode", spu_mfc_opcode[mfc_cmd_opcode]);
+	else
+	  current_uiout->field_int ("opcode", mfc_cmd_opcode);
 
-      current_uiout->field_int ("tag", mfc_cmd_tag);
-      current_uiout->field_int ("tid", tclass_id);
-      current_uiout->field_int ("rid", rclass_id);
+	current_uiout->field_int ("tag", mfc_cmd_tag);
+	current_uiout->field_int ("tid", tclass_id);
+	current_uiout->field_int ("rid", rclass_id);
 
-      if (ea_valid_p)
-	current_uiout->field_fmt ("ea", "0x%s", phex (mfc_ea, 8));
-      else
-	current_uiout->field_skip ("ea");
+	if (ea_valid_p)
+	  current_uiout->field_fmt ("ea", "0x%s", phex (mfc_ea, 8));
+	else
+	  current_uiout->field_skip ("ea");
 
-      current_uiout->field_fmt ("lsa", "0x%05x", mfc_lsa << 4);
-      if (qw_valid_p)
-	current_uiout->field_fmt ("size", "0x%05x", mfc_size << 4);
-      else
-	current_uiout->field_fmt ("size", "0x%05x", mfc_size);
+	current_uiout->field_fmt ("lsa", "0x%05x", mfc_lsa << 4);
+	if (qw_valid_p)
+	  current_uiout->field_fmt ("size", "0x%05x", mfc_size << 4);
+	else
+	  current_uiout->field_fmt ("size", "0x%05x", mfc_size);
 
-      if (list_valid_p)
-	{
-	  current_uiout->field_fmt ("lstaddr", "0x%05x", list_lsa << 3);
-	  current_uiout->field_fmt ("lstsize", "0x%05x", list_size << 3);
-	}
-      else
-	{
-	  current_uiout->field_skip ("lstaddr");
-	  current_uiout->field_skip ("lstsize");
-	}
+	if (list_valid_p)
+	  {
+	    current_uiout->field_fmt ("lstaddr", "0x%05x", list_lsa << 3);
+	    current_uiout->field_fmt ("lstsize", "0x%05x", list_size << 3);
+	  }
+	else
+	  {
+	    current_uiout->field_skip ("lstaddr");
+	    current_uiout->field_skip ("lstsize");
+	  }
 
-      if (cmd_error_p)
-	current_uiout->field_string ("error_p", "*");
-      else
-	current_uiout->field_skip ("error_p");
-
-      do_cleanups (cmd_chain);
+	if (cmd_error_p)
+	  current_uiout->field_string ("error_p", "*");
+	else
+	  current_uiout->field_skip ("error_p");
+      }
 
       if (!current_uiout->is_mi_like_p ())
 	printf_filtered ("\n");
     }
-
-  do_cleanups (chain);
 }
 
 static void
-info_spu_dma_command (char *args, int from_tty)
+info_spu_dma_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2483,7 +2469,6 @@ info_spu_dma_command (char *args, int from_tty)
   ULONGEST dma_info_status;
   ULONGEST dma_info_stall_and_notify;
   ULONGEST dma_info_atomic_command_status;
-  struct cleanup *chain;
   char annex[32];
   gdb_byte buf[1024];
   LONGEST len;
@@ -2511,7 +2496,7 @@ info_spu_dma_command (char *args, int from_tty)
   dma_info_atomic_command_status
     = extract_unsigned_integer (buf + 32, 8, byte_order);
   
-  chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "SPUInfoDMA");
+  ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoDMA");
 
   if (current_uiout->is_mi_like_p ())
     {
@@ -2550,11 +2535,10 @@ info_spu_dma_command (char *args, int from_tty)
     }
 
   info_spu_dma_cmdlist (buf + 40, 16, byte_order);
-  do_cleanups (chain);
 }
 
 static void
-info_spu_proxydma_command (char *args, int from_tty)
+info_spu_proxydma_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2562,7 +2546,6 @@ info_spu_proxydma_command (char *args, int from_tty)
   ULONGEST dma_info_type;
   ULONGEST dma_info_mask;
   ULONGEST dma_info_status;
-  struct cleanup *chain;
   char annex[32];
   gdb_byte buf[1024];
   LONGEST len;
@@ -2583,8 +2566,7 @@ info_spu_proxydma_command (char *args, int from_tty)
   dma_info_mask = extract_unsigned_integer (buf + 8, 8, byte_order);
   dma_info_status = extract_unsigned_integer (buf + 16, 8, byte_order);
   
-  chain = make_cleanup_ui_out_tuple_begin_end (current_uiout,
-					       "SPUInfoProxyDMA");
+  ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoProxyDMA");
 
   if (current_uiout->is_mi_like_p ())
     {
@@ -2615,11 +2597,10 @@ info_spu_proxydma_command (char *args, int from_tty)
     }
 
   info_spu_dma_cmdlist (buf + 24, 8, byte_order);
-  do_cleanups (chain);
 }
 
 static void
-info_spu_command (char *args, int from_tty)
+info_spu_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"info spu\" must be followed by "
 		       "the name of an SPU facility.\n"));
@@ -2630,13 +2611,13 @@ info_spu_command (char *args, int from_tty)
 /* Root of all "set spu "/"show spu " commands.  */
 
 static void
-show_spu_command (char *args, int from_tty)
+show_spu_command (const char *args, int from_tty)
 {
   help_list (showspucmdlist, "show spu ", all_commands, gdb_stdout);
 }
 
 static void
-set_spu_command (char *args, int from_tty)
+set_spu_command (const char *args, int from_tty)
 {
   help_list (setspucmdlist, "set spu ", all_commands, gdb_stdout);
 }
@@ -2668,8 +2649,8 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int id = -1;
 
   /* Which spufs ID was requested as address space?  */
-  if (info.tdep_info)
-    id = *(int *)info.tdep_info;
+  if (info.id)
+    id = *info.id;
   /* For objfile architectures of SPU solibs, decode the ID from the name.
      This assumes the filename convention employed by solib-spu.c.  */
   else if (info.abfd)
@@ -2741,6 +2722,9 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_address_class_name_to_type_flags
     (gdbarch, spu_address_class_name_to_type_flags);
 
+  /* We need to support more than "addr_bit" significant address bits
+     in order to support SPUADDR_ADDR encoded values.  */
+  set_gdbarch_significant_addr_bit (gdbarch, 64);
 
   /* Inferior function calls.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
@@ -2779,9 +2763,6 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_spu_tdep;
 
 void
 _initialize_spu_tdep (void)

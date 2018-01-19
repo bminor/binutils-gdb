@@ -9,6 +9,3 @@ TEMPLATE_NAME=elf32
 GENERATE_SHLIB_SCRIPT=yes
 TEXT_START_SYMBOLS='_btext = .;'
 ENTRY=_start
-# PR 17739.  Delay checking relocs until after all files have
-# been opened and linker garbage collection has taken place.
-CHECK_RELOCS_AFTER_OPEN_INPUT=yes

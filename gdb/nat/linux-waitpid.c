@@ -1,6 +1,6 @@
 /* Wrapper implementation for waitpid for GNU/Linux (LWP layer).
 
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,7 +34,7 @@
 /* Print debugging output based on the format string FORMAT and
    its parameters.  */
 
-static inline void
+static inline void ATTRIBUTE_PRINTF (1,2)
 linux_debug (const char *format, ...)
 {
 #ifdef GDBSERVER

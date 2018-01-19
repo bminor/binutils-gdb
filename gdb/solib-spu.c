@@ -1,5 +1,5 @@
 /* Cell SPU GNU/Linux support -- shared library handling.
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
 
@@ -541,9 +541,6 @@ spu_solib_loaded (struct so_list *so)
       ocl_enable_break (so->objfile);
     }
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_spu_solib;
 
 void
 _initialize_spu_solib (void)

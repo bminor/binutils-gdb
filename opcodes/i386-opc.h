@@ -1,5 +1,5 @@
 /* Declarations for Intel 80386 opcode table
-   Copyright (C) 2007-2017 Free Software Foundation, Inc.
+   Copyright (C) 2007-2018 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -198,6 +198,12 @@ enum
   CpuAVX512_4VNNIW,
   /* Intel AVX-512 VPOPCNTDQ Instructions support required.  */
   CpuAVX512_VPOPCNTDQ,
+  /* Intel AVX-512 VBMI2 Instructions support required.  */
+  CpuAVX512_VBMI2,
+  /* Intel AVX-512 VNNI Instructions support required.  */
+  CpuAVX512_VNNI,
+  /* Intel AVX-512 BITALG Instructions support required.  */
+  CpuAVX512_BITALG,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -210,6 +216,12 @@ enum
   CpuPTWRITE,
   /* CET instruction support required */
   CpuCET,
+  /* GFNI instructions required */
+  CpuGFNI,
+  /* VAES instructions required */
+  CpuVAES,
+  /* VPCLMULQDQ instructions required */
+  CpuVPCLMULQDQ,
   /* MMX register support required */
   CpuRegMMX,
   /* XMM register support required */
@@ -235,9 +247,7 @@ enum
 
 /* If you get a compiler error for zero width of the unused field,
    comment it out.  */
-#if 0
 #define CpuUnused	(CpuMax + 1)
-#endif
 
 /* We can check if an instruction is available with array instead
    of bitfield. */
@@ -328,12 +338,18 @@ typedef union i386_cpu_flags
       unsigned int cpuavx512_4fmaps:1;
       unsigned int cpuavx512_4vnniw:1;
       unsigned int cpuavx512_vpopcntdq:1;
+      unsigned int cpuavx512_vbmi2:1;
+      unsigned int cpuavx512_vnni:1;
+      unsigned int cpuavx512_bitalg:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;
       unsigned int cpurdpid:1;
       unsigned int cpuptwrite:1;
       unsigned int cpucet:1;
+      unsigned int cpugfni:1;
+      unsigned int cpuvaes:1;
+      unsigned int cpuvpclmulqdq:1;
       unsigned int cpuregmmx:1;
       unsigned int cpuregxmm:1;
       unsigned int cpuregymm:1;
@@ -414,8 +430,6 @@ enum
   /* fake an extra reg operand for clr, imul and special register
      processing for some instructions.  */
   RegKludge,
-  /* The first operand must be xmm0 */
-  FirstXmm0,
   /* An implicit xmm0 as the first operand */
   Implicit1stXmm0,
   /* The HLE prefix is OK:
@@ -447,7 +461,7 @@ enum
   /* deprecated fp insn, gets a warning */
   Ugh,
   /* insn has VEX prefix:
-	1: 128bit VEX prefix.
+	1: 128bit VEX prefix (or operand dependent).
 	2: 256bit VEX prefix.
 	3: Scalar VEX prefix.
    */
@@ -627,7 +641,6 @@ typedef struct i386_opcode_modifier
   unsigned int notrackprefixok:1;
   unsigned int islockable:1;
   unsigned int regkludge:1;
-  unsigned int firstxmm0:1;
   unsigned int implicit1stxmm0:1;
   unsigned int hleprefixok:2;
   unsigned int repprefixok:1;
@@ -669,24 +682,12 @@ typedef struct i386_opcode_modifier
 
 enum
 {
-  /* 8bit register */
-  Reg8 = 0,
-  /* 16bit register */
-  Reg16,
-  /* 32bit register */
-  Reg32,
-  /* 64bit register */
-  Reg64,
-  /* Floating pointer stack register */
-  FloatReg,
+  /* Register (qualified by Byte, Word, etc) */
+  Reg = 0,
   /* MMX register */
   RegMMX,
-  /* SSE register */
-  RegXMM,
-  /* AVX registers */
-  RegYMM,
-  /* AVX512 registers */
-  RegZMM,
+  /* Vector registers */
+  RegSIMD,
   /* Vector Mask registers */
   RegMask,
   /* Control register */
@@ -730,10 +731,8 @@ enum
   Disp32S,
   /* 64 bit displacement */
   Disp64,
-  /* Accumulator %al/%ax/%eax/%rax */
+  /* Accumulator %al/%ax/%eax/%rax/%st(0)/%xmm0 */
   Acc,
-  /* Floating pointer top stack register %st(0) */
-  FloatAcc,
   /* Register which can be used for base or index in memory operand.  */
   BaseIndex,
   /* Register to hold in/out port addr = dx */
@@ -781,9 +780,6 @@ enum
   /* Bound register.  */
   RegBND,
 
-  /* Vector 8bit displacement */
-  Vec_Disp8,
-
   /* The last bitfield in i386_operand_type.  */
   OTMax
 };
@@ -801,15 +797,9 @@ typedef union i386_operand_type
 {
   struct
     {
-      unsigned int reg8:1;
-      unsigned int reg16:1;
-      unsigned int reg32:1;
-      unsigned int reg64:1;
-      unsigned int floatreg:1;
+      unsigned int reg:1;
       unsigned int regmmx:1;
-      unsigned int regxmm:1;
-      unsigned int regymm:1;
-      unsigned int regzmm:1;
+      unsigned int regsimd:1;
       unsigned int regmask:1;
       unsigned int control:1;
       unsigned int debug:1;
@@ -829,7 +819,6 @@ typedef union i386_operand_type
       unsigned int disp32s:1;
       unsigned int disp64:1;
       unsigned int acc:1;
-      unsigned int floatacc:1;
       unsigned int baseindex:1;
       unsigned int inoutportreg:1;
       unsigned int shiftcount:1;
@@ -850,7 +839,6 @@ typedef union i386_operand_type
       unsigned int anysize:1;
       unsigned int vec_imm4:1;
       unsigned int regbnd:1;
-      unsigned int vec_disp8:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);
 #endif

@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2017 Free Software Foundation, Inc.
+# Copyright (C) 2016-2018 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,12 +55,18 @@ gdb_test "print *(&c as &i32)" " = 0"
 gdb_test "print *(&c as *const i32)" " = 0"
 gdb_test "print *(&c as *mut i32)" " = 0"
 
+gdb_test "print/c f\[0\]" " = 104 'h'"
+
 gdb_test "print j" " = simple::Unit"
 gdb_test "ptype j" " = struct simple::Unit"
 gdb_test "print j2" " = simple::Unit"
 gdb_test "ptype j2" " = struct simple::Unit"
 gdb_test "print simple::Unit" " = simple::Unit"
 gdb_test "print simple::Unit{}" " = simple::Unit"
+
+gdb_test "print f" " = \"hi bob\""
+gdb_test "print fslice" " = \"bob\""
+gdb_test "print &f\[3..\]" " = \"bob\""
 
 gdb_test "print g" " = \\(u8 \\(\\*\\)\\\[6\\\]\\) $hex b\"hi bob\""
 gdb_test "ptype g" " = u8 \\(\\*\\)\\\[6\\\]"
@@ -82,6 +88,25 @@ gdb_test "print w_ptr\[2\]" " = 3"
 gdb_test "print fromslice" " = 3"
 gdb_test "print slice\[0\]" " = 3"
 gdb_test "print slice as &\[i32\]\[0\]" " = 3"
+
+gdb_test_sequence "ptype slice" "" {
+    " = struct &\\\[i32\\\] \\{"
+    "  data_ptr: i32 \\*,"
+    "  length: usize,"
+    "\\}"
+}
+gdb_test_sequence "ptype &slice\[..\]" "" {
+    " = struct &\\\[i32\\\] \\{"
+    "  data_ptr: i32 \\*,"
+    "  length: usize,"
+    "\\}"
+}
+gdb_test_sequence "ptype &b\[..\]" "" {
+    " = struct &\\\[\\*gdb\\*\\\] \\{"
+    "  data_ptr: i32 \\*,"
+    "  length: usize,"
+    "\\}"
+}
 
 gdb_test "print x" " = \\(23, 25\\.5\\)"
 gdb_test "ptype x" " = \\(i32, f64\\)"
@@ -135,6 +160,9 @@ gdb_test "print simple::ByeBob\{field1: 0xff, field2:5\}" \
 
 gdb_test "print simple::HiBob(0xff, 5)" \
     "Type simple::HiBob is not a tuple struct"
+gdb_test "print sizeof(simple::HiBob)" " = \[0-9\]+"
+gdb_test "print simple::HiBob + 5" \
+    "Found type 'simple::HiBob', which can't be evaluated in this context"
 gdb_test "print nosuchsymbol" \
     "No symbol 'nosuchsymbol' in current context"
 
@@ -176,13 +204,9 @@ gdb_test "ptype empty" "fn \\(\\)"
 
 gdb_test "print (diff2 as fn(i32, i32) -> i32)(19, -2)" " = 21"
 
-# We need the ".*" because currently we don't extract the length and
-# use it to intelligently print the string data.
-gdb_test "print \"hello rust\"" \
-    " = &str \\{data_ptr: $hex \"hello rust.*\", length: 10\\}"
+gdb_test "print \"hello rust\"" " = \"hello rust.*\""
 gdb_test "print \"hello" "Unexpected EOF in string"
-gdb_test "print r##\"hello \" rust\"##" \
-    " = &str \\{data_ptr: $hex \"hello \\\\\" rust.*\", length: 12\\}"
+gdb_test "print r##\"hello \" rust\"##" " = \"hello \\\\\" rust.*\""
 gdb_test "print r\"hello" "Unexpected EOF in string"
 gdb_test "print r###\"###hello\"" "Unexpected EOF in string"
 gdb_test "print r###\"###hello\"##" "Unexpected EOF in string"
@@ -194,14 +218,14 @@ gdb_test "print 5.." " = .*::ops::RangeFrom.* \\{start: 5\\}"
 gdb_test "print .." " = .*::ops::RangeFull"
 
 gdb_test "print str_some" \
-    " = core::option::Option<collections::string::String>::Some\\(collections::string::String .*"
-gdb_test "print str_none" " = core::option::Option<collections::string::String>::None"
+    " = core::option::Option<\[a-z\]+::string::String>::Some\\(\[a-z\]+::string::String .*"
+gdb_test "print str_none" " = core::option::Option<\[a-z\]+::string::String>::None"
 gdb_test "print int_some" " = core::option::Option::Some\\(1\\)"
 gdb_test "print int_none" " = core::option::Option::None"
 gdb_test "print box_some" " = core::option::Option<\[a-z:\]*Box<u8>>::Some\\(.*\\)"
 gdb_test "print box_none" " = core::option::Option<\[a-z:\]*Box<u8>>::None"
 gdb_test "print custom_some" \
-    " = simple::NonZeroOptimized::Value\\(collections::string::String .*"
+    " = simple::NonZeroOptimized::Value\\(\[a-z\]+::string::String .*"
 gdb_test "print custom_none" " = simple::NonZeroOptimized::Empty"
 
 proc test_one_slice {svar length base range} {
@@ -246,3 +270,11 @@ gdb_test "print parametrized.next.val" \
     " = \\(simple::ParametrizedStruct<i32> \\*\\) $hex"
 gdb_test "print parametrized" \
     " = simple::ParametrizedStruct<i32> \\{next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>>>::Val\\{val: $hex\\}, value: 0\\}"
+
+
+load_lib gdb-python.exp
+if {[skip_python_tests]} {
+    continue
+}
+
+gdb_test "python print(gdb.lookup_type('simple::HiBob'))" "simple::HiBob"

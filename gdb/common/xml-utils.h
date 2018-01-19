@@ -1,6 +1,6 @@
 /* Shared helper routines for manipulating XML.
 
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,6 @@
 /* Return a malloc allocated string with special characters from TEXT
    replaced by entity references.  */
 
-extern char *xml_escape_text (const char *text);
+extern std::string xml_escape_text (const char *text);
 
 #endif

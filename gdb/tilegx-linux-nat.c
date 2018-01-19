@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux TILE-Gx.
 
-   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+   Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -153,9 +153,6 @@ store_inferior_registers (struct target_ops *ops,
   if (ptrace (PTRACE_SETREGS, tid, 0, (PTRACE_TYPE_ARG3) &regs) < 0)
     perror_with_name (_("Couldn't write registers"));
 }
-
-
-extern initialize_file_ftype _initialize_tile_linux_nat;
 
 void
 _initialize_tile_linux_nat (void)

@@ -1,7 +1,7 @@
 /* GNU/Linux/AArch64 specific low level interface, for the remote server for
    GDB.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -38,26 +38,12 @@
 #include <sys/uio.h>
 
 #include "gdb_proc_service.h"
-
-/* Defined in auto-generated files.  */
-void init_registers_aarch64 (void);
-extern const struct target_desc *tdesc_aarch64;
+#include "arch/aarch64.h"
+#include "linux-aarch64-tdesc.h"
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
-
-#define AARCH64_X_REGS_NUM 31
-#define AARCH64_V_REGS_NUM 32
-#define AARCH64_X0_REGNO    0
-#define AARCH64_SP_REGNO   31
-#define AARCH64_PC_REGNO   32
-#define AARCH64_CPSR_REGNO 33
-#define AARCH64_V0_REGNO   34
-#define AARCH64_FPSR_REGNO (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM)
-#define AARCH64_FPCR_REGNO (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM + 1)
-
-#define AARCH64_NUM_REGS (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM + 2)
 
 /* Per-process arch-specific data we want to keep.  */
 
@@ -109,10 +95,10 @@ aarch64_fill_gregset (struct regcache *regcache, void *buf)
   int i;
 
   for (i = 0; i < AARCH64_X_REGS_NUM; i++)
-    collect_register (regcache, AARCH64_X0_REGNO + i, &regset->regs[i]);
-  collect_register (regcache, AARCH64_SP_REGNO, &regset->sp);
-  collect_register (regcache, AARCH64_PC_REGNO, &regset->pc);
-  collect_register (regcache, AARCH64_CPSR_REGNO, &regset->pstate);
+    collect_register (regcache, AARCH64_X0_REGNUM + i, &regset->regs[i]);
+  collect_register (regcache, AARCH64_SP_REGNUM, &regset->sp);
+  collect_register (regcache, AARCH64_PC_REGNUM, &regset->pc);
+  collect_register (regcache, AARCH64_CPSR_REGNUM, &regset->pstate);
 }
 
 static void
@@ -122,10 +108,10 @@ aarch64_store_gregset (struct regcache *regcache, const void *buf)
   int i;
 
   for (i = 0; i < AARCH64_X_REGS_NUM; i++)
-    supply_register (regcache, AARCH64_X0_REGNO + i, &regset->regs[i]);
-  supply_register (regcache, AARCH64_SP_REGNO, &regset->sp);
-  supply_register (regcache, AARCH64_PC_REGNO, &regset->pc);
-  supply_register (regcache, AARCH64_CPSR_REGNO, &regset->pstate);
+    supply_register (regcache, AARCH64_X0_REGNUM + i, &regset->regs[i]);
+  supply_register (regcache, AARCH64_SP_REGNUM, &regset->sp);
+  supply_register (regcache, AARCH64_PC_REGNUM, &regset->pc);
+  supply_register (regcache, AARCH64_CPSR_REGNUM, &regset->pstate);
 }
 
 static void
@@ -135,9 +121,9 @@ aarch64_fill_fpregset (struct regcache *regcache, void *buf)
   int i;
 
   for (i = 0; i < AARCH64_V_REGS_NUM; i++)
-    collect_register (regcache, AARCH64_V0_REGNO + i, &regset->vregs[i]);
-  collect_register (regcache, AARCH64_FPSR_REGNO, &regset->fpsr);
-  collect_register (regcache, AARCH64_FPCR_REGNO, &regset->fpcr);
+    collect_register (regcache, AARCH64_V0_REGNUM + i, &regset->vregs[i]);
+  collect_register (regcache, AARCH64_FPSR_REGNUM, &regset->fpsr);
+  collect_register (regcache, AARCH64_FPCR_REGNUM, &regset->fpcr);
 }
 
 static void
@@ -148,9 +134,9 @@ aarch64_store_fpregset (struct regcache *regcache, const void *buf)
   int i;
 
   for (i = 0; i < AARCH64_V_REGS_NUM; i++)
-    supply_register (regcache, AARCH64_V0_REGNO + i, &regset->vregs[i]);
-  supply_register (regcache, AARCH64_FPSR_REGNO, &regset->fpsr);
-  supply_register (regcache, AARCH64_FPCR_REGNO, &regset->fpcr);
+    supply_register (regcache, AARCH64_V0_REGNUM + i, &regset->vregs[i]);
+  supply_register (regcache, AARCH64_FPSR_REGNUM, &regset->fpsr);
+  supply_register (regcache, AARCH64_FPCR_REGNUM, &regset->fpcr);
 }
 
 /* Enable miscellaneous debugging output.  The name is historical - it
@@ -429,7 +415,7 @@ aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
   return 0;
 }
 
-/* Implementation of linux_target_ops method "linux_new_process".  */
+/* Implementation of linux_target_ops method "new_process".  */
 
 static struct arch_process_info *
 aarch64_linux_new_process (void)
@@ -439,6 +425,14 @@ aarch64_linux_new_process (void)
   aarch64_init_debug_reg_state (&info->debug_reg_state);
 
   return info;
+}
+
+/* Implementation of linux_target_ops method "delete_process".  */
+
+static void
+aarch64_linux_delete_process (struct arch_process_info *info)
+{
+  xfree (info);
 }
 
 /* Implementation of linux_target_ops method "linux_new_fork".  */
@@ -470,11 +464,10 @@ aarch64_linux_new_fork (struct process_info *parent,
   *child->priv->arch_private = *parent->priv->arch_private;
 }
 
-/* Return the right target description according to the ELF file of
-   current thread.  */
+/* Implementation of linux_target_ops method "arch_setup".  */
 
-static const struct target_desc *
-aarch64_linux_read_description (void)
+static void
+aarch64_arch_setup (void)
 {
   unsigned int machine;
   int is_elf64;
@@ -485,17 +478,9 @@ aarch64_linux_read_description (void)
   is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 
   if (is_elf64)
-    return tdesc_aarch64;
+    current_process ()->tdesc = aarch64_linux_read_description ();
   else
-    return tdesc_arm_with_neon;
-}
-
-/* Implementation of linux_target_ops method "arch_setup".  */
-
-static void
-aarch64_arch_setup (void)
-{
-  current_process ()->tdesc = aarch64_linux_read_description ();
+    current_process ()->tdesc = tdesc_arm_with_neon;
 
   aarch64_linux_get_debug_reg_capacity (lwpid_of (current_thread));
 }
@@ -2990,7 +2975,9 @@ struct linux_target_ops the_low_target =
   NULL, /* supply_ptrace_register */
   aarch64_linux_siginfo_fixup,
   aarch64_linux_new_process,
+  aarch64_linux_delete_process,
   aarch64_linux_new_thread,
+  aarch64_linux_delete_thread,
   aarch64_linux_new_fork,
   aarch64_linux_prepare_to_resume,
   NULL, /* process_qsupported */
@@ -3008,9 +2995,11 @@ struct linux_target_ops the_low_target =
 void
 initialize_low_arch (void)
 {
-  init_registers_aarch64 ();
-
   initialize_low_arch_aarch32 ();
 
   initialize_regsets_info (&aarch64_regsets_info);
+
+#if GDB_SELF_TEST
+  initialize_low_tdesc ();
+#endif
 }

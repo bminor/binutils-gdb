@@ -1,6 +1,6 @@
 /* Minimal symbol table definitions for GDB.
 
-   Copyright (C) 2011-2017 Free Software Foundation, Inc.
+   Copyright (C) 2011-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,6 +19,8 @@
 
 #ifndef MINSYMS_H
 #define MINSYMS_H
+
+struct type;
 
 /* Several lookup functions return both a minimal symbol and the
    objfile in which it is found.  This structure is used in these
@@ -157,6 +159,15 @@ void terminate_minimal_symbol_table (struct objfile *objfile);
 
 
 
+/* Return whether MSYMBOL is a function/method.  If FUNC_ADDRESS_P is
+   non-NULL, and the MSYMBOL is a function, then *FUNC_ADDRESS_P is
+   set to the function's address, already resolved if MINSYM points to
+   a function descriptor.  */
+
+bool msymbol_is_function (struct objfile *objfile,
+			  minimal_symbol *minsym,
+			  CORE_ADDR *func_address_p = NULL);
+
 /* Compute a hash code for the string argument.  */
 
 unsigned int msymbol_hash (const char *);
@@ -171,7 +182,7 @@ unsigned int msymbol_hash_iw (const char *);
    requirements.  */
 
 #define SYMBOL_HASH_NEXT(hash, c)			\
-  ((hash) * 67 + tolower ((unsigned char) (c)) - 113)
+  ((hash) * 67 + TOLOWER ((unsigned char) (c)) - 113)
 
 
 
@@ -258,7 +269,7 @@ struct bound_minimal_symbol lookup_minimal_symbol_by_pc (CORE_ADDR);
    USER_DATA as arguments.  */
 
 void iterate_over_minimal_symbols (struct objfile *objf,
-				   const char *name,
+				   const lookup_name_info &name,
 				   void (*callback) (struct minimal_symbol *,
 						     void *),
 				   void *user_data);
@@ -270,5 +281,12 @@ void iterate_over_minimal_symbols (struct objfile *objf,
    of the function.  */
 
 CORE_ADDR minimal_symbol_upper_bound (struct bound_minimal_symbol minsym);
+
+/* Return the type of MSYMBOL, a minimal symbol of OBJFILE.  If
+   ADDRESS_P is not NULL, set it to the MSYMBOL's resolved
+   address.  */
+
+type *find_minsym_type_and_address (minimal_symbol *msymbol, objfile *objf,
+				    CORE_ADDR *address_p);
 
 #endif /* MINSYMS_H */

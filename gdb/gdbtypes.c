@@ -1,6 +1,6 @@
 /* Support routines for manipulating internal types for GDB.
 
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -38,6 +38,7 @@
 #include "bcache.h"
 #include "dwarf2loc.h"
 #include "gdbcore.h"
+#include "floatformat.h"
 
 /* Initialize BADNESS constants.  */
 
@@ -547,6 +548,8 @@ lookup_function_type_with_arguments (struct type *type,
 	  gdb_assert (nparams == 0);
 	  TYPE_PROTOTYPED (fn) = 1;
 	}
+      else
+	TYPE_PROTOTYPED (fn) = 1;
     }
 
   TYPE_NFIELDS (fn) = nparams;
@@ -1087,6 +1090,14 @@ discrete_position (struct type *type, LONGEST val, LONGEST *pos)
    Elements will be of type ELEMENT_TYPE, the indices will be of type
    RANGE_TYPE.
 
+   BYTE_STRIDE_PROP, when not NULL, provides the array's byte stride.
+   This byte stride property is added to the resulting array type
+   as a DYN_PROP_BYTE_STRIDE.  As a consequence, the BYTE_STRIDE_PROP
+   argument can only be used to create types that are objfile-owned
+   (see add_dyn_prop), meaning that either this function must be called
+   with an objfile-owned RESULT_TYPE, or an objfile-owned RANGE_TYPE.
+
+   BIT_STRIDE is taken into account only when BYTE_STRIDE_PROP is NULL.
    If BIT_STRIDE is not zero, build a packed array type whose element
    size is BIT_STRIDE.  Otherwise, ignore this parameter.
 
@@ -1098,14 +1109,27 @@ struct type *
 create_array_type_with_stride (struct type *result_type,
 			       struct type *element_type,
 			       struct type *range_type,
+			       struct dynamic_prop *byte_stride_prop,
 			       unsigned int bit_stride)
 {
+  if (byte_stride_prop != NULL
+      && byte_stride_prop->kind == PROP_CONST)
+    {
+      /* The byte stride is actually not dynamic.  Pretend we were
+	 called with bit_stride set instead of byte_stride_prop.
+	 This will give us the same result type, while avoiding
+	 the need to handle this as a special case.  */
+      bit_stride = byte_stride_prop->data.const_val * 8;
+      byte_stride_prop = NULL;
+    }
+
   if (result_type == NULL)
     result_type = alloc_type_copy (range_type);
 
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;
-  if (has_static_range (TYPE_RANGE_DATA (range_type))
+  if (byte_stride_prop == NULL
+      && has_static_range (TYPE_RANGE_DATA (range_type))
       && (!type_not_associated (result_type)
 	  && !type_not_allocated (result_type)))
     {
@@ -1141,7 +1165,10 @@ create_array_type_with_stride (struct type *result_type,
   TYPE_FIELDS (result_type) =
     (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
   TYPE_INDEX_TYPE (result_type) = range_type;
-  if (bit_stride > 0)
+  if (byte_stride_prop != NULL)
+    add_dyn_prop (DYN_PROP_BYTE_STRIDE, *byte_stride_prop, result_type,
+		  TYPE_OBJFILE (result_type));
+  else if (bit_stride > 0)
     TYPE_FIELD_BITSIZE (result_type, 0) = bit_stride;
 
   /* TYPE_TARGET_STUB will take care of zero length arrays.  */
@@ -1160,7 +1187,7 @@ create_array_type (struct type *result_type,
 		   struct type *range_type)
 {
   return create_array_type_with_stride (result_type, element_type,
-					range_type, 0);
+					range_type, NULL, 0);
 }
 
 struct type *
@@ -1821,6 +1848,17 @@ stub_noname_complaint (void)
   complaint (&symfile_complaints, _("stub type has NULL name"));
 }
 
+/* Return nonzero if TYPE has a DYN_PROP_BYTE_STRIDE dynamic property
+   attached to it, and that property has a non-constant value.  */
+
+static int
+array_type_has_dynamic_stride (struct type *type)
+{
+  struct dynamic_prop *prop = get_dyn_prop (DYN_PROP_BYTE_STRIDE, type);
+
+  return (prop != NULL && prop->kind != PROP_CONST);
+}
+
 /* Worker for is_dynamic_type.  */
 
 static int
@@ -1866,11 +1904,16 @@ is_dynamic_type_internal (struct type *type, int top_level)
       {
 	gdb_assert (TYPE_NFIELDS (type) == 1);
 
-	/* The array is dynamic if either the bounds are dynamic,
-	   or the elements it contains have a dynamic contents.  */
+	/* The array is dynamic if either the bounds are dynamic...  */
 	if (is_dynamic_type_internal (TYPE_INDEX_TYPE (type), 0))
 	  return 1;
-	return is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0);
+	/* ... or the elements it contains have a dynamic contents...  */
+	if (is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0))
+	  return 1;
+	/* ... or if it has a dynamic stride...  */
+	if (array_type_has_dynamic_stride (type))
+	  return 1;
+	return 0;
       }
 
     case TYPE_CODE_STRUCT:
@@ -1966,6 +2009,7 @@ resolve_dynamic_array (struct type *type,
   struct type *range_type;
   struct type *ary_dim;
   struct dynamic_prop *prop;
+  unsigned int bit_stride = 0;
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY);
 
@@ -1997,8 +2041,31 @@ resolve_dynamic_array (struct type *type,
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
-  return create_array_type_with_stride (type, elt_type, range_type,
-                                        TYPE_FIELD_BITSIZE (type, 0));
+  prop = get_dyn_prop (DYN_PROP_BYTE_STRIDE, type);
+  if (prop != NULL)
+    {
+      int prop_eval_ok
+	= dwarf2_evaluate_property (prop, NULL, addr_stack, &value);
+
+      if (prop_eval_ok)
+	{
+	  remove_dyn_prop (DYN_PROP_BYTE_STRIDE, type);
+	  bit_stride = (unsigned int) (value * 8);
+	}
+      else
+	{
+	  /* Could be a bug in our code, but it could also happen
+	     if the DWARF info is not correct.  Issue a warning,
+	     and assume no byte/bit stride (leave bit_stride = 0).  */
+	  warning (_("cannot determine array stride for type %s"),
+		   TYPE_NAME (type) ? TYPE_NAME (type) : "<no name>");
+	}
+    }
+  else
+    bit_stride = TYPE_FIELD_BITSIZE (type, 0);
+
+  return create_array_type_with_stride (type, elt_type, range_type, NULL,
+                                        bit_stride);
 }
 
 /* Resolve dynamic bounds of members of the union TYPE to static
@@ -2732,20 +2799,28 @@ set_type_code (struct type *type, enum type_code code)
    determined by the floatformat.  Returns size to be used.  */
 
 static int
-verify_floatformat (int bit, const struct floatformat **floatformats)
+verify_floatformat (int bit, const struct floatformat *floatformat)
 {
-  gdb_assert (floatformats != NULL);
-  gdb_assert (floatformats[0] != NULL && floatformats[1] != NULL);
+  gdb_assert (floatformat != NULL);
 
   if (bit == -1)
-    bit = floatformats[0]->totalsize;
-  gdb_assert (bit >= 0);
+    bit = floatformat->totalsize;
 
-  size_t len = bit / TARGET_CHAR_BIT;
-  gdb_assert (len >= floatformat_totalsize_bytes (floatformats[0]));
-  gdb_assert (len >= floatformat_totalsize_bytes (floatformats[1]));
+  gdb_assert (bit >= 0);
+  gdb_assert (bit >= floatformat->totalsize);
 
   return bit;
+}
+
+/* Return the floating-point format for a floating-point variable of
+   type TYPE.  */
+
+const struct floatformat *
+floatformat_from_type (const struct type *type)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+  gdb_assert (TYPE_FLOATFORMAT (type));
+  return TYPE_FLOATFORMAT (type);
 }
 
 /* Helper function to initialize the standard scalar types.
@@ -2755,17 +2830,28 @@ verify_floatformat (int bit, const struct floatformat **floatformats)
    least as long as OBJFILE.  */
 
 struct type *
-init_type (struct objfile *objfile, enum type_code code, int length,
+init_type (struct objfile *objfile, enum type_code code, int bit,
 	   const char *name)
 {
   struct type *type;
 
   type = alloc_type (objfile);
   set_type_code (type, code);
-  TYPE_LENGTH (type) = length;
+  gdb_assert ((bit % TARGET_CHAR_BIT) == 0);
+  TYPE_LENGTH (type) = bit / TARGET_CHAR_BIT;
   TYPE_NAME (type) = name;
 
   return type;
+}
+
+/* Allocate a TYPE_CODE_ERROR type structure associated with OBJFILE,
+   to use with variables that have no debug info.  NAME is the type
+   name.  */
+
+static struct type *
+init_nodebug_var_type (struct objfile *objfile, const char *name)
+{
+  return init_type (objfile, TYPE_CODE_ERROR, 0, name);
 }
 
 /* Allocate a TYPE_CODE_INT type structure associated with OBJFILE.
@@ -2778,7 +2864,7 @@ init_integer_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_INT, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_INT, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -2795,7 +2881,7 @@ init_character_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_CHAR, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_CHAR, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -2812,7 +2898,7 @@ init_boolean_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_BOOL, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_BOOL, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -2829,11 +2915,13 @@ init_float_type (struct objfile *objfile,
 		 int bit, const char *name,
 		 const struct floatformat **floatformats)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  const struct floatformat *fmt = floatformats[gdbarch_byte_order (gdbarch)];
   struct type *t;
 
-  bit = verify_floatformat (bit, floatformats);
-  t = init_type (objfile, TYPE_CODE_FLT, bit / TARGET_CHAR_BIT, name);
-  TYPE_FLOATFORMAT (t) = floatformats;
+  bit = verify_floatformat (bit, fmt);
+  t = init_type (objfile, TYPE_CODE_FLT, bit, name);
+  TYPE_FLOATFORMAT (t) = fmt;
 
   return t;
 }
@@ -2846,7 +2934,7 @@ init_decfloat_type (struct objfile *objfile, int bit, const char *name)
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_DECFLOAT, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_DECFLOAT, bit, name);
   return t;
 }
 
@@ -2860,7 +2948,7 @@ init_complex_type (struct objfile *objfile,
   struct type *t;
 
   t = init_type (objfile, TYPE_CODE_COMPLEX,
-		 2 * TYPE_LENGTH (target_type), name);
+		 2 * TYPE_LENGTH (target_type) * TARGET_CHAR_BIT, name);
   TYPE_TARGET_TYPE (t) = target_type;
   return t;
 }
@@ -2876,7 +2964,7 @@ init_pointer_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_PTR, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_PTR, bit, name);
   TYPE_TARGET_TYPE (t) = target_type;
   TYPE_UNSIGNED (t) = 1;
   return t;
@@ -2909,6 +2997,16 @@ is_integral_type (struct type *t)
 	 || (TYPE_CODE (t) == TYPE_CODE_CHAR)
 	 || (TYPE_CODE (t) == TYPE_CODE_RANGE)
 	 || (TYPE_CODE (t) == TYPE_CODE_BOOL)));
+}
+
+int
+is_floating_type (struct type *t)
+{
+  t = check_typedef (t);
+  return
+    ((t != NULL)
+     && ((TYPE_CODE (t) == TYPE_CODE_FLT)
+	 || (TYPE_CODE (t) == TYPE_CODE_DECFLOAT)));
 }
 
 /* Return true if TYPE is scalar.  */
@@ -4444,10 +4542,6 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_TARGET_STUB");
     }
-  if (TYPE_STATIC (type))
-    {
-      puts_filtered (" TYPE_STATIC");
-    }
   if (TYPE_PROTOTYPED (type))
     {
       puts_filtered (" TYPE_PROTOTYPED");
@@ -4535,26 +4629,11 @@ recursive_dump_type (struct type *type, int spaces)
 
       case TYPE_SPECIFIC_FLOATFORMAT:
 	printfi_filtered (spaces, "floatformat ");
-	if (TYPE_FLOATFORMAT (type) == NULL)
+	if (TYPE_FLOATFORMAT (type) == NULL
+	    || TYPE_FLOATFORMAT (type)->name == NULL)
 	  puts_filtered ("(null)");
 	else
-	  {
-	    puts_filtered ("{ ");
-	    if (TYPE_FLOATFORMAT (type)[0] == NULL
-		|| TYPE_FLOATFORMAT (type)[0]->name == NULL)
-	      puts_filtered ("(null)");
-	    else
-	      puts_filtered (TYPE_FLOATFORMAT (type)[0]->name);
-
-	    puts_filtered (", ");
-	    if (TYPE_FLOATFORMAT (type)[1] == NULL
-		|| TYPE_FLOATFORMAT (type)[1]->name == NULL)
-	      puts_filtered ("(null)");
-	    else
-	      puts_filtered (TYPE_FLOATFORMAT (type)[1]->name);
-
-	    puts_filtered (" }");
-	  }
+	  puts_filtered (TYPE_FLOATFORMAT (type)->name);
 	puts_filtered ("\n");
 	break;
 
@@ -4823,13 +4902,14 @@ copy_type (const struct type *type)
 
 struct type *
 arch_type (struct gdbarch *gdbarch,
-	   enum type_code code, int length, const char *name)
+	   enum type_code code, int bit, const char *name)
 {
   struct type *type;
 
   type = alloc_type_arch (gdbarch);
   set_type_code (type, code);
-  TYPE_LENGTH (type) = length;
+  gdb_assert ((bit % TARGET_CHAR_BIT) == 0);
+  TYPE_LENGTH (type) = bit / TARGET_CHAR_BIT;
 
   if (name)
     TYPE_NAME (type) = gdbarch_obstack_strdup (gdbarch, name);
@@ -4847,7 +4927,7 @@ arch_integer_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_INT, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_INT, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -4864,7 +4944,7 @@ arch_character_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_CHAR, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_CHAR, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -4881,7 +4961,7 @@ arch_boolean_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_BOOL, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_BOOL, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -4898,11 +4978,12 @@ arch_float_type (struct gdbarch *gdbarch,
 		 int bit, const char *name,
 		 const struct floatformat **floatformats)
 {
+  const struct floatformat *fmt = floatformats[gdbarch_byte_order (gdbarch)];
   struct type *t;
 
-  bit = verify_floatformat (bit, floatformats);
-  t = arch_type (gdbarch, TYPE_CODE_FLT, bit / TARGET_CHAR_BIT, name);
-  TYPE_FLOATFORMAT (t) = floatformats;
+  bit = verify_floatformat (bit, fmt);
+  t = arch_type (gdbarch, TYPE_CODE_FLT, bit, name);
+  TYPE_FLOATFORMAT (t) = fmt;
 
   return t;
 }
@@ -4915,7 +4996,7 @@ arch_decfloat_type (struct gdbarch *gdbarch, int bit, const char *name)
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_DECFLOAT, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_DECFLOAT, bit, name);
   return t;
 }
 
@@ -4929,7 +5010,7 @@ arch_complex_type (struct gdbarch *gdbarch,
   struct type *t;
 
   t = arch_type (gdbarch, TYPE_CODE_COMPLEX,
-		 2 * TYPE_LENGTH (target_type), name);
+		 2 * TYPE_LENGTH (target_type) * TARGET_CHAR_BIT, name);
   TYPE_TARGET_TYPE (t) = target_type;
   return t;
 }
@@ -4945,27 +5026,26 @@ arch_pointer_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_PTR, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_PTR, bit, name);
   TYPE_TARGET_TYPE (t) = target_type;
   TYPE_UNSIGNED (t) = 1;
   return t;
 }
 
 /* Allocate a TYPE_CODE_FLAGS type structure associated with GDBARCH.
-   NAME is the type name.  LENGTH is the size of the flag word in bytes.  */
+   NAME is the type name.  BIT is the size of the flag word in bits.  */
 
 struct type *
-arch_flags_type (struct gdbarch *gdbarch, const char *name, int length)
+arch_flags_type (struct gdbarch *gdbarch, const char *name, int bit)
 {
-  int max_nfields = length * TARGET_CHAR_BIT;
   struct type *type;
 
-  type = arch_type (gdbarch, TYPE_CODE_FLAGS, length, name);
+  type = arch_type (gdbarch, TYPE_CODE_FLAGS, bit, name);
   TYPE_UNSIGNED (type) = 1;
   TYPE_NFIELDS (type) = 0;
   /* Pre-allocate enough space assuming every field is one bit.  */
   TYPE_FIELDS (type)
-    = (struct field *) TYPE_ZALLOC (type, max_nfields * sizeof (struct field));
+    = (struct field *) TYPE_ZALLOC (type, bit * sizeof (struct field));
 
   return type;
 }
@@ -5110,7 +5190,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 
   /* Basic types.  */
   builtin_type->builtin_void
-    = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
+    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   builtin_type->builtin_char
     = arch_integer_type (gdbarch, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
@@ -5161,9 +5241,9 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     = arch_complex_type (gdbarch, "double complex",
 			 builtin_type->builtin_double);
   builtin_type->builtin_string
-    = arch_type (gdbarch, TYPE_CODE_STRING, 1, "string");
+    = arch_type (gdbarch, TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
   builtin_type->builtin_bool
-    = arch_type (gdbarch, TYPE_CODE_BOOL, 1, "bool");
+    = arch_type (gdbarch, TYPE_CODE_BOOL, TARGET_CHAR_BIT, "bool");
 
   /* The following three are about decimal floating point types, which
      are 32-bits, 64-bits and 128-bits respectively.  */
@@ -5260,7 +5340,7 @@ objfile_type (struct objfile *objfile)
 
   /* Basic types.  */
   objfile_type->builtin_void
-    = init_type (objfile, TYPE_CODE_VOID, 1, "void");
+    = init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   objfile_type->builtin_char
     = init_integer_type (objfile, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
@@ -5312,29 +5392,26 @@ objfile_type (struct objfile *objfile)
   /* The following set of types is used for symbols with no
      debug information.  */
   objfile_type->nodebug_text_symbol
-    = init_type (objfile, TYPE_CODE_FUNC, 1,
+    = init_type (objfile, TYPE_CODE_FUNC, TARGET_CHAR_BIT,
 		 "<text variable, no debug info>");
-  TYPE_TARGET_TYPE (objfile_type->nodebug_text_symbol)
-    = objfile_type->builtin_int;
   objfile_type->nodebug_text_gnu_ifunc_symbol
-    = init_type (objfile, TYPE_CODE_FUNC, 1,
+    = init_type (objfile, TYPE_CODE_FUNC, TARGET_CHAR_BIT,
 		 "<text gnu-indirect-function variable, no debug info>");
+  /* Ifunc resolvers return a function address.  */
   TYPE_TARGET_TYPE (objfile_type->nodebug_text_gnu_ifunc_symbol)
-    = objfile_type->nodebug_text_symbol;
+    = init_integer_type (objfile, gdbarch_addr_bit (gdbarch), 1,
+			 "__IFUNC_RESOLVER_RET");
   TYPE_GNU_IFUNC (objfile_type->nodebug_text_gnu_ifunc_symbol) = 1;
   objfile_type->nodebug_got_plt_symbol
     = init_pointer_type (objfile, gdbarch_addr_bit (gdbarch),
 			 "<text from jump slot in .got.plt, no debug info>",
 			 objfile_type->nodebug_text_symbol);
   objfile_type->nodebug_data_symbol
-    = init_integer_type (objfile, gdbarch_int_bit (gdbarch), 0,
-			 "<data variable, no debug info>");
+    = init_nodebug_var_type (objfile, "<data variable, no debug info>");
   objfile_type->nodebug_unknown_symbol
-    = init_integer_type (objfile, TARGET_CHAR_BIT, 0,
-			 "<variable (not text or data), no debug info>");
+    = init_nodebug_var_type (objfile, "<variable (not text or data), no debug info>");
   objfile_type->nodebug_tls_symbol
-    = init_integer_type (objfile, gdbarch_int_bit (gdbarch), 0,
-			 "<thread local variable, no debug info>");
+    = init_nodebug_var_type (objfile, "<thread local variable, no debug info>");
 
   /* NOTE: on some targets, addresses and pointers are not necessarily
      the same.
@@ -5362,8 +5439,6 @@ objfile_type (struct objfile *objfile)
   set_objfile_data (objfile, objfile_type_data, objfile_type);
   return objfile_type;
 }
-
-extern initialize_file_ftype _initialize_gdbtypes;
 
 void
 _initialize_gdbtypes (void)

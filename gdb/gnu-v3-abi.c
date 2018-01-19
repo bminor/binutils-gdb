@@ -1,7 +1,7 @@
 /* Abstraction of GNU v3 abi.
    Contributed by Jim Blandy <jimb@redhat.com>
 
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -46,7 +46,7 @@ gnuv3_is_vtable_name (const char *name)
 static int
 gnuv3_is_operator_name (const char *name)
 {
-  return startswith (name, "operator");
+  return startswith (name, CP_OPERATOR_STR);
 }
 
 
@@ -161,7 +161,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
   /* We assumed in the allocation above that there were four fields.  */
   gdb_assert (field == (field_list + 4));
 
-  t = arch_type (arch, TYPE_CODE_STRUCT, offset, NULL);
+  t = arch_type (arch, TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
   TYPE_NFIELDS (t) = field - field_list;
   TYPE_FIELDS (t) = field_list;
   TYPE_TAG_NAME (t) = "gdb_gnu_v3_abi_vtable";
@@ -1024,7 +1024,7 @@ build_std_type_info_type (struct gdbarch *arch)
 
   gdb_assert (field == (field_list + 2));
 
-  t = arch_type (arch, TYPE_CODE_STRUCT, offset, NULL);
+  t = arch_type (arch, TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
   TYPE_NFIELDS (t) = field - field_list;
   TYPE_FIELDS (t) = field_list;
   TYPE_TAG_NAME (t) = "gdb_gnu_v3_type_info";
@@ -1357,8 +1357,6 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.skip_trampoline = gnuv3_skip_trampoline;
   gnu_v3_abi_ops.pass_by_reference = gnuv3_pass_by_reference;
 }
-
-extern initialize_file_ftype _initialize_gnu_v3_abi; /* -Wmissing-prototypes */
 
 void
 _initialize_gnu_v3_abi (void)

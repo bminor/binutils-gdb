@@ -1,5 +1,5 @@
 /* Portable <regex.h>.
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -43,9 +43,7 @@ public:
 
   ~compiled_regex ();
 
-  /* Disable copy.  */
-  compiled_regex (const compiled_regex&) = delete;
-  void operator= (const compiled_regex&) = delete;
+  DISABLE_COPY_AND_ASSIGN (compiled_regex);
 
   /* Wrapper around ::regexec.  */
   int exec (const char *string,

@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2018 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -346,6 +346,7 @@ BFD32_BACKENDS = \
 	elf32-hppa.lo \
 	elf32-i370.lo \
 	elf32-i386.lo \
+	elfxx-x86.lo \
 	elf32-i860.lo \
 	elf32-i960.lo \
 	elf32-ip2k.lo \
@@ -542,6 +543,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-hppa.c \
 	elf32-i370.c \
 	elf32-i386.c \
+	elfxx-x86.c \
 	elf32-i860.c \
 	elf32-i960.c \
 	elf32-ip2k.c \
@@ -699,6 +701,7 @@ BFD64_BACKENDS = \
 	elf64-sparc.lo \
 	elf64-tilegx.lo \
 	elf64-x86-64.lo \
+	elfxx-x86.lo \
 	elf64.lo \
 	mach-o-aarch64.lo \
 	mach-o-x86-64.lo \
@@ -734,6 +737,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-sparc.c \
 	elf64-tilegx.c \
 	elf64-x86-64.c \
+	elfxx-x86.c \
 	elf64.c \
 	elfn32-mips.c \
 	elfxx-aarch64.c \

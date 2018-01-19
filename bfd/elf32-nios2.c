@@ -1,5 +1,5 @@
 /* 32-bit ELF support for Nios II.
-   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+   Copyright (C) 2012-2018 Free Software Foundation, Inc.
    Contributed by Nigel Gray (ngray@altera.com).
    Contributed by Mentor Graphics, Inc.
 
@@ -1400,7 +1400,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 	 TRUE,
 	 6,
 	 complain_overflow_signed,
-	 bfd_elf_generic_reloc, 	/* FIXME? */
+	 bfd_elf_generic_reloc,		/* FIXME? */
 	 "R_NIOS2_R2_I10_1_PCREL",
 	 FALSE,
 	 0xffc0,
@@ -1726,26 +1726,6 @@ struct elf32_nios2_stub_hash_entry
    bfd_hash_lookup ((table), (string), (create), (copy)))
 
 
-/* The Nios II linker needs to keep track of the number of relocs that it
-   decides to copy as dynamic relocs in check_relocs for each symbol.
-   This is so that it can later discard them if they are found to be
-   unnecessary.  We store the information in a field extending the
-   regular ELF linker hash table.  */
-
-struct elf32_nios2_dyn_relocs
-{
-  struct elf32_nios2_dyn_relocs *next;
-
-  /* The input section of the reloc.  */
-  asection *sec;
-
-  /* Total number of relocs copied for the input section.  */
-  bfd_size_type count;
-
-  /* Number of pc-relative relocs copied for the input section.  */
-  bfd_size_type pc_count;
-};
-
 /* Nios II ELF linker hash entry.  */
 
 struct elf32_nios2_link_hash_entry
@@ -1757,7 +1737,7 @@ struct elf32_nios2_link_hash_entry
   struct elf32_nios2_stub_hash_entry *hsh_cache;
 
   /* Track dynamic relocs copied for this symbol.  */
-  struct elf32_nios2_dyn_relocs *dyn_relocs;
+  struct elf_dyn_relocs *dyn_relocs;
 
 #define GOT_UNKNOWN	0
 #define GOT_NORMAL	1
@@ -3772,6 +3752,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 
       if (howto)
 	{
+	  bfd_boolean resolved_to_zero;
+
+	  resolved_to_zero = (h != NULL
+			      && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
 	  switch (howto->type)
 	    {
 	    case R_NIOS2_HI16:
@@ -4004,7 +3988,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 							 h)
 		      || (bfd_link_pic (info)
 			  && SYMBOL_REFERENCES_LOCAL (info, h))
-		      || (ELF_ST_VISIBILITY (h->other)
+		      || ((ELF_ST_VISIBILITY (h->other)
+			   || resolved_to_zero)
 			  && h->root.type == bfd_link_hash_undefweak))
 		    {
 		      /* This is actually a static link, or it is a -Bsymbolic
@@ -4258,7 +4243,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 
 		    if ((bfd_link_pic (info) || indx != 0)
 			&& (h == NULL
-			    || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			    || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+				&& !resolved_to_zero)
 			    || h->root.type != bfd_link_hash_undefweak))
 		      {
 			need_relocs = TRUE;
@@ -4369,10 +4355,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B(%A+0x%lx): R_NIOS2_TLS_LE16 relocation not "
+		    (_("%B(%A+%#Lx): %s relocation not "
 		       "permitted in shared object"),
 		     input_bfd, input_section,
-		     (long) rel->r_offset, howto->name);
+		     rel->r_offset, howto->name);
 		  return FALSE;
 		}
 	      else
@@ -4387,7 +4373,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	      if (bfd_link_pic (info)
 		  && (input_section->flags & SEC_ALLOC) != 0
 		  && (h == NULL
-		      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		      || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			  && !resolved_to_zero)
 		      || h->root.type != bfd_link_hash_undefweak))
 		{
 		  Elf_Internal_Rela outrel;
@@ -4626,14 +4613,14 @@ nios2_elf32_copy_indirect_symbol (struct bfd_link_info *info,
     {
       if (edir->dyn_relocs != NULL)
 	{
-	  struct elf32_nios2_dyn_relocs **pp;
-	  struct elf32_nios2_dyn_relocs *p;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
-	      struct elf32_nios2_dyn_relocs *q;
+	      struct elf_dyn_relocs *q;
 
 	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
@@ -4731,10 +4718,6 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  /* PR15323, ref flags aren't set for references in the same
-	     object.  */
-	  h->root.non_ir_ref_regular = 1;
 	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -4891,8 +4874,8 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  || (h != NULL && ! h->needs_plt
 		      && (! SYMBOLIC_BIND (info, h) || ! h->def_regular))))
 	    {
-	      struct elf32_nios2_dyn_relocs *p;
-	      struct elf32_nios2_dyn_relocs **head;
+	      struct elf_dyn_relocs *p;
+	      struct elf_dyn_relocs **head;
 
 	      /* When creating a shared object, we must copy these
 		 reloc types into the output file.  We create a reloc
@@ -4932,14 +4915,14 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
-		  head = (struct elf32_nios2_dyn_relocs **) vpp;
+		  head = (struct elf_dyn_relocs **) vpp;
 		}
 
 	      p = *head;
 	      if (p == NULL || p->sec != sec)
 		{
 		  bfd_size_type amt = sizeof *p;
-		  p = ((struct elf32_nios2_dyn_relocs *)
+		  p = ((struct elf_dyn_relocs *)
 		       bfd_alloc (htab->root.dynobj, amt));
 		  if (p == NULL)
 		    return FALSE;
@@ -4979,110 +4962,6 @@ nios2_elf32_gc_mark_hook (asection *sec,
 	return NULL;
       }
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
-}
-
-/* Implement elf_backend_gc_sweep_hook:
-   Update the got entry reference counts for the section being removed.  */
-static bfd_boolean
-nios2_elf32_gc_sweep_hook (bfd *abfd,
-			   struct bfd_link_info *info,
-			   asection *sec,
-			   const Elf_Internal_Rela *relocs)
-{
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-  bfd *dynobj;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  dynobj = elf_hash_table (info)->dynobj;
-  if (dynobj == NULL)
-    return TRUE;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      struct elf_link_hash_entry *h = NULL;
-      int r_type;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	}
-
-      r_type = ELF32_R_TYPE (rel->r_info);
-      switch (r_type)
-	{
-	case R_NIOS2_GOT16:
-	case R_NIOS2_GOT_LO:
-	case R_NIOS2_GOT_HA:
-	case R_NIOS2_CALL16:
-	case R_NIOS2_CALL_LO:
-	case R_NIOS2_CALL_HA:
-	  if (h != NULL)
-	    {
-	      if (h->got.refcount > 0)
-		--h->got.refcount;
-	    }
-	  else if (local_got_refcounts != NULL)
-	    {
-	      if (local_got_refcounts[r_symndx] > 0)
-		--local_got_refcounts[r_symndx];
-	    }
-	  break;
-
-	case R_NIOS2_PCREL_LO:
-	case R_NIOS2_PCREL_HA:
-	case R_NIOS2_BFD_RELOC_32:
-	case R_NIOS2_CALL26:
-	case R_NIOS2_CALL26_NOAT:
-	  if (h != NULL)
-	    {
-	      struct elf32_nios2_link_hash_entry *eh;
-	      struct elf32_nios2_dyn_relocs **pp;
-	      struct elf32_nios2_dyn_relocs *p;
-
-	      eh = (struct elf32_nios2_link_hash_entry *) h;
-
-	      if (h->plt.refcount > 0)
-		--h->plt.refcount;
-
-	      if (r_type == R_NIOS2_PCREL_LO || r_type == R_NIOS2_PCREL_HA
-		  || r_type == R_NIOS2_BFD_RELOC_32)
-		{
-		  for (pp = &eh->dyn_relocs; (p = *pp) != NULL;
-		       pp = &p->next)
-		    if (p->sec == sec)
-		      {
-			p->count -= 1;
-			if (p->count == 0)
-			  *pp = p->next;
-			break;
-		      }
-		}
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
 }
 
 /* Implement elf_backend_finish_dynamic_symbols:
@@ -5429,7 +5308,7 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
 	      && (h->needs_plt
-		  || h->u.weakdef != NULL
+		  || h->is_weakalias
 		  || (h->def_dynamic
 		      && h->ref_regular
 		      && !h->def_regular)));
@@ -5463,12 +5342,12 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      struct elf_link_hash_entry *def = weakdef (h);
+      BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+      h->root.u.def.section = def->root.u.def.section;
+      h->root.u.def.value = def->root.u.def.value;
       return TRUE;
     }
 
@@ -5578,7 +5457,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
   struct bfd_link_info *info;
   struct elf32_nios2_link_hash_table *htab;
   struct elf32_nios2_link_hash_entry *eh;
-  struct elf32_nios2_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
   int use_plt;
 
   if (h->root.type == bfd_link_hash_indirect)
@@ -5734,7 +5613,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
       if (h->def_regular
 	  && (h->forced_local || SYMBOLIC_BIND (info, h)))
 	{
-	  struct elf32_nios2_dyn_relocs **pp;
+	  struct elf_dyn_relocs **pp;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -5752,7 +5631,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
       if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
@@ -5859,7 +5739,7 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  struct elf32_nios2_dyn_relocs *p;
+	  struct elf_dyn_relocs *p;
 
 	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
@@ -6221,7 +6101,6 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 #define elf_backend_check_relocs	  nios2_elf32_check_relocs
 
 #define elf_backend_gc_mark_hook	  nios2_elf32_gc_mark_hook
-#define elf_backend_gc_sweep_hook	  nios2_elf32_gc_sweep_hook
 #define elf_backend_create_dynamic_sections \
 					  nios2_elf32_create_dynamic_sections
 #define elf_backend_finish_dynamic_symbol nios2_elf32_finish_dynamic_symbol

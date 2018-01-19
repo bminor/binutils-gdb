@@ -1,6 +1,6 @@
 /* Target-dependent code for Renesas Super-H, for GDB.
 
-   Copyright (C) 1993-2017 Free Software Foundation, Inc.
+   Copyright (C) 1993-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,7 +35,9 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "osabi.h"
+#include "target-float.h"
 #include "valprint.h"
+#include "target-float.h"
 
 #include "elf-bfd.h"
 
@@ -58,7 +60,22 @@ enum sh_abi
 struct gdbarch_tdep
   {
     enum sh_abi sh_abi;
+    /* ISA-specific data types.  */
+    struct type *sh_littlebyte_bigword_type;
   };
+
+struct type *
+sh64_littlebyte_bigword_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->sh_littlebyte_bigword_type == NULL)
+    tdep->sh_littlebyte_bigword_type
+      = arch_float_type (gdbarch, -1, "builtin_type_sh_littlebyte_bigword",
+                         floatformats_ieee_double_littlebyte_bigword);
+
+  return tdep->sh_littlebyte_bigword_type;
+}
 
 struct sh64_frame_cache
 {
@@ -1226,7 +1243,7 @@ static void
 sh64_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int len = TYPE_LENGTH (type);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -1240,18 +1257,11 @@ sh64_extract_return_value (struct type *type, struct regcache *regcache,
       else if (len == 8)
 	{
 	  /* return value stored in DR0_REGNUM.  */
-	  DOUBLEST val;
 	  gdb_byte buf[8];
-
 	  regcache_cooked_read (regcache, DR0_REGNUM, buf);
 	  
-	  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
-	    floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword,
-				     buf, &val);
-	  else
-	    floatformat_to_doublest (&floatformat_ieee_double_big,
-				     buf, &val);
-	  store_typed_floating (valbuf, type, val);
+	  target_float_convert (buf, sh64_littlebyte_bigword_type (gdbarch),
+				valbuf, type);
 	}
     }
   else
@@ -1287,7 +1297,7 @@ static void
 sh64_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   gdb_byte buf[64];	/* more than enough...  */
   int len = TYPE_LENGTH (type);
 
@@ -1460,12 +1470,8 @@ sh64_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum,
        && regnum <= DR_LAST_REGNUM)
       || (regnum >= DR0_C_REGNUM 
 	  && regnum <= DR_LAST_C_REGNUM))
-    {
-      DOUBLEST val;
-      floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword, 
-			       from, &val);
-      store_typed_floating (to, type, val);
-    }
+    target_float_convert (from, sh64_littlebyte_bigword_type (gdbarch),
+			  to, type);
   else
     error (_("sh64_register_convert_to_virtual "
 	     "called with non DR register number"));
@@ -1473,7 +1479,7 @@ sh64_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum,
 
 static void
 sh64_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
-			      int regnum, const void *from, void *to)
+			      int regnum, const gdb_byte *from, gdb_byte *to)
 {
   if (gdbarch_byte_order (gdbarch) != BFD_ENDIAN_LITTLE)
     {
@@ -1486,11 +1492,8 @@ sh64_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
        && regnum <= DR_LAST_REGNUM)
       || (regnum >= DR0_C_REGNUM 
 	  && regnum <= DR_LAST_C_REGNUM))
-    {
-      DOUBLEST val = extract_typed_floating (from, type);
-      floatformat_from_doublest (&floatformat_ieee_double_littlebyte_bigword, 
-				 &val, to);
-    }
+    target_float_convert (from, type,
+			  to, sh64_littlebyte_bigword_type (gdbarch));
   else
     error (_("sh64_register_convert_to_raw called "
 	     "with non DR register number"));
@@ -1914,8 +1917,6 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
 		     struct frame_info *frame, int regnum)
 {				/* Do values for FP (float) regs.  */
   unsigned char *raw_buffer;
-  double flt;	/* Double extracted from raw hex data.  */
-  int inv;
 
   /* Allocate space for the float.  */
   raw_buffer = (unsigned char *)
@@ -1926,20 +1927,15 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
     error (_("can't read register %d (%s)"),
 	   regnum, gdbarch_register_name (gdbarch, regnum));
 
-  /* Get the register as a number.  */ 
-  flt = unpack_double (builtin_type (gdbarch)->builtin_float,
-		       raw_buffer, &inv);
-
   /* Print the name and some spaces.  */
   fputs_filtered (gdbarch_register_name (gdbarch, regnum), file);
   print_spaces_filtered (15 - strlen (gdbarch_register_name
 					(gdbarch, regnum)), file);
 
   /* Print the value.  */
-  if (inv)
-    fprintf_filtered (file, "<invalid float>");
-  else
-    fprintf_filtered (file, "%-10.9g", flt);
+  const struct type *flt_type = builtin_type (gdbarch)->builtin_float;
+  std::string str = target_float_to_string (raw_buffer, flt_type, "%-10.9g");
+  fprintf_filtered (file, "%s", str.c_str ());
 
   /* Print the fp register as hex.  */
   fprintf_filtered (file, "\t(raw ");

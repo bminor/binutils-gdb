@@ -1,7 +1,7 @@
 /* Target-dependent code for PowerPC systems using the SVR4 ABI
    for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "objfiles.h"
 #include "infcall.h"
 #include "dwarf2.h"
+#include "target-float.h"
 #include <algorithm>
 
 
@@ -137,7 +138,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      gdb_byte regval[PPC_MAX_REGISTER_SIZE];
 		      struct type *regtype
 			= register_type (gdbarch, tdep->ppc_fp0_regnum + freg);
-		      convert_typed_floating (val, type, regval, regtype);
+		      target_float_convert (val, type, regval, regtype);
 		      regcache_cooked_write (regcache,
                                              tdep->ppc_fp0_regnum + freg,
 					     regval);
@@ -367,8 +368,8 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			      gdb_byte regval[PPC_MAX_REGISTER_SIZE];
 			      struct type *regtype
 				= register_type (gdbarch, regnum);
-			      convert_typed_floating (elval, eltype,
-						      regval, regtype);
+			      target_float_convert (elval, eltype,
+						    regval, regtype);
 			      regcache_cooked_write (regcache, regnum, regval);
 			    }
 			  freg++;
@@ -710,7 +711,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	  struct type *regtype = register_type (gdbarch,
                                                 tdep->ppc_fp0_regnum + 1);
 	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, regval);
-	  convert_typed_floating (regval, regtype, readbuf, type);
+	  target_float_convert (regval, regtype, readbuf, type);
 	}
       if (writebuf)
 	{
@@ -718,7 +719,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	     the register's "double" type.  */
 	  gdb_byte regval[PPC_MAX_REGISTER_SIZE];
 	  struct type *regtype = register_type (gdbarch, tdep->ppc_fp0_regnum);
-	  convert_typed_floating (writebuf, type, regval, regtype);
+	  target_float_convert (writebuf, type, regval, regtype);
 	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -852,15 +853,15 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
 
 	      if (writebuf != NULL)
 		{
-		  convert_typed_floating (writebuf + offset, eltype,
-					  regval, regtype);
+		  target_float_convert (writebuf + offset, eltype,
+					regval, regtype);
 		  regcache_cooked_write (regcache, regnum, regval);
 		}
 	      if (readbuf != NULL)
 		{
 		  regcache_cooked_read (regcache, regnum, regval);
-		  convert_typed_floating (regval, regtype,
-					  readbuf + offset, eltype);
+		  target_float_convert (regval, regtype,
+					readbuf + offset, eltype);
 		}
 	    }
 	  else
@@ -1371,7 +1372,7 @@ ppc64_sysv_abi_push_freg (struct gdbarch *gdbarch,
 	  struct type *regtype = register_type (gdbarch, regnum);
 	  gdb_byte regval[PPC_MAX_REGISTER_SIZE];
 
-	  convert_typed_floating (val, type, regval, regtype);
+	  target_float_convert (val, type, regval, regtype);
 	  regcache_cooked_write (argpos->regcache, regnum, regval);
 	}
 
@@ -1818,13 +1819,13 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
 
       if (writebuf != NULL)
 	{
-	  convert_typed_floating (writebuf, valtype, regval, regtype);
+	  target_float_convert (writebuf, valtype, regval, regtype);
 	  regcache_cooked_write (regcache, regnum, regval);
 	}
       if (readbuf != NULL)
 	{
 	  regcache_cooked_read (regcache, regnum, regval);
-	  convert_typed_floating (regval, regtype, readbuf, valtype);
+	  target_float_convert (regval, regtype, readbuf, valtype);
 	}
       return 1;
     }

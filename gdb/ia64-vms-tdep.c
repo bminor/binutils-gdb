@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenVMS IA-64.
 
-   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+   Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -153,9 +153,6 @@ ia64_openvms_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   libunwind_frame_set_descr (gdbarch, &ia64_vms_libunwind_descr);
 #endif
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ia64_vms_tdep;
 
 void
 _initialize_ia64_vms_tdep (void)

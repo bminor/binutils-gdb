@@ -1,6 +1,6 @@
 /* Self tests for optional for GDB, the GNU debugger.
 
-   Copyright (C) 2017 Free Software Foundation, Inc.
+   Copyright (C) 2017-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -90,5 +90,5 @@ run_tests ()
 void
 _initialize_optional_selftests ()
 {
-  register_self_test (selftests::optional::run_tests);
+  selftests::register_test ("optional", selftests::optional::run_tests);
 }

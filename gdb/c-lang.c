@@ -1,6 +1,6 @@
 /* C language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,8 +34,6 @@
 #include "gdb_obstack.h"
 #include <ctype.h>
 #include "gdbcore.h"
-
-extern void _initialize_c_language (void);
 
 /* Given a C string type, STR_TYPE, return the corresponding target
    character set name.  */
@@ -831,7 +829,7 @@ static const char *c_extensions[] =
   ".c", NULL
 };
 
-const struct language_defn c_language_defn =
+extern const struct language_defn c_language_defn =
 {
   "c",				/* Language name */
   "C",
@@ -865,14 +863,15 @@ const struct language_defn c_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   c_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &c_varobj_ops,
   c_get_compile_context,
   c_compute_program,
@@ -975,7 +974,7 @@ static const char *cplus_extensions[] =
   ".C", ".cc", ".cp", ".cpp", ".cxx", ".c++", NULL
 };
 
-const struct language_defn cplus_language_defn =
+extern const struct language_defn cplus_language_defn =
 {
   "c++",			/* Language name */
   "C++",
@@ -1009,14 +1008,15 @@ const struct language_defn cplus_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   cplus_language_arch_info,
   default_print_array_index,
   cp_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  cp_get_symbol_name_matcher,
   iterate_over_symbols,
+  cp_search_name_hash,
   &cplus_varobj_ops,
   NULL,
   NULL,
@@ -1028,7 +1028,7 @@ static const char *asm_extensions[] =
   ".s", ".sx", ".S", NULL
 };
 
-const struct language_defn asm_language_defn =
+extern const struct language_defn asm_language_defn =
 {
   "asm",			/* Language name */
   "assembly",
@@ -1062,14 +1062,15 @@ const struct language_defn asm_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   c_language_arch_info, 	/* FIXME: la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
@@ -1081,7 +1082,7 @@ const struct language_defn asm_language_defn =
    to do some simple operations when debugging applications that use
    a language currently not supported by GDB.  */
 
-const struct language_defn minimal_language_defn =
+extern const struct language_defn minimal_language_defn =
 {
   "minimal",			/* Language name */
   "Minimal",
@@ -1115,25 +1116,17 @@ const struct language_defn minimal_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   c_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
   LANG_MAGIC
 };
-
-void
-_initialize_c_language (void)
-{
-  add_language (&c_language_defn);
-  add_language (&cplus_language_defn);
-  add_language (&asm_language_defn);
-  add_language (&minimal_language_defn);
-}

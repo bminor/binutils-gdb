@@ -1,3 +1,249 @@
+2018-01-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* gdb.texinfo (pwd): Fix whitespace.
+
+2018-01-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (pwd): Update cross-reference for Process Information
+	node and remove explicit /proc reference.
+	(Native): Rename subsection from SVR4 Process Information to
+	Process Information.
+	(Process Information): Reword introduction to be less /proc
+	centric.  Document support for "info proc" on FreeBSD.
+
+2018-01-03  Xavier Roirand  <roirand@adacore.com>
+
+	* gdb.texinfo (Set Catchpoints): Add documentation for new
+	"catch handlers" action.
+
+2017-12-27  Stafford Horne  <shorne@gmail.com>
+
+	* gdb.texinfo (Target Description Format): Explain that arbitrary
+	strings are now allowed for register groups.
+
+2017-12-27  Stafford Horne  <shorne@gmail.com>
+
+	* gdb.texinfo (Registers): Document info reg $reggroup feature.
+
+2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/16224
+	* gdb.texinfo (ptype): Add documentation for new flag '/o'.
+
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Manipulating breakpoints using Python): Document
+	qualified parameter to gdb.Breakpoint.
+
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Manipulating breakpoints using Python): Split doc
+	of Breakpoint.__init__ in two, split text in multiple
+	paragraphs, don't nest parameter square brackets.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Stefan Wallentowitz  <stefan@wallentowitz.de>
+	    Franck Jullien  <franck.jullien@gmail.com>
+	    Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
+	* gdb.texinfo: Add OpenRISC documentation.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Index Files): Document .debug_names and -dwarf-5.
+
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.texinfo (Symbols): Document "set print type nested-type-limit"
+	and "show print type nested-type-limit".
+
+2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+       * python.texi (Breakpoints In Python): Add text relating
+	to allowed explicit locations and keywords in gdb.Breakpoints.
+
+2017-12-04  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Rust): Update trait object status
+
+2017-12-01  Andrew Cagney  <cagney@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (File Options): Document --readnever.
+	(Commands to Specify Files): Likewise, for 'symbol-file' and
+	'add-symbol-file'.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	PR c++/19436
+	* gdb.texinfo (Debugging C Plus Plus): Document setting
+	breakpoints in functions with ABI tags.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Linespec Locations): Document how "function" is
+	interpreted in C++ and Ada.  Document "-qualified".
+	(Explicit Locations): Document how "-function" is interpreted in
+	C++ and Ada.  Document "-qualified".
+
+2017-11-26  Dominik Czarnota  <dominik.b.czarnota@gmail.com>
+
+	PR gdb/21945
+	* gdb.texinfo (Search Memory): Update description and example
+	about how to search a string without NULL terminator.
+
+2017-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Ada Exception Information): Document
+	new "exception-message" field.
+
+2017-11-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Memory Map Format): Update gdb-memory-map.dtd.
+
+2017-11-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Completion): Update need-quoting examples.  Remove
+	false claim that GDB inserts quoting automatically.
+	(Symbols): Add anchor.
+
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.texinfo (Requirements): Document use of GNU MPFR.
+
+2017-11-16  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python.texi (Basic Python): Add rbreak documentation.
+
+2017-11-07  Xavier Roirand  <roirand@adacore.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Set Breaks): Document support for breakpoint
+	location ranges in the enable/disable commands.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Starting your Program) <The working directory.>:
+	Mention remote debugging.
+	(Working Directory) <Your Program's Working Directory>:
+	Likewise.
+	(Connecting) <Remote Packet>: Add "set-working-dir"
+	and "QSetWorkingDir" to the table.
+	(Remote Protocol) <QSetWorkingDir>: New item, explaining the
+	packet.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Starting your Program) <The working directory.>:
+	Mention new "set cwd" command.
+	(Working Directory) <Your Program's Working Directory>:
+	Rephrase to explain that "set cwd" exists and is the default
+	way to change the inferior's cwd.
+
+2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo (S/390 and System z Features): Document the new
+	features org.gnu.gdb.s390.gs and org.gnu.gdb.s390.gsbc.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.texinfo (qXfer:threads:read): Add documentation for handle
+	attribute.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (Inferiors In Python): Add description for method
+	Inferior.thread_from_thread_handle.
+
+2017-09-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Starting your Program): Add description of
+	starti command.  Mention starti command as an alternative for
+	debugging the elaboration phase.
+
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Maintenance Commands): Document filter parameter
+	of "maint selftest".  Document "maint info selftests" command.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Events In Python): Document new events.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Variables) <Program Variables>: Document inspecting
+	no-debug-info variables.
+	(Symbols) <Examining the Symbol Table>: Document inspecting
+	no-debug-info types.
+	(Calling) <Calling functions with no debug info>: New subsection,
+	documenting calling no-debug-info functions.
+	(Non-debug DLL Symbols) <Working with Minimal Symbols>: Update.
+
+2017-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (set environment): Add @anchor.  Explain that
+	environment variables set by the user are sent to GDBserver.
+	(unset environment): Likewise, but for unsetting variables.
+	(Connecting) <Remote Packet>: Add "environment-hex-encoded",
+	"QEnvironmentHexEncoded", "environment-unset", "QEnvironmentUnset",
+	"environment-reset" and "QEnvironmentReset" to the table.
+	(Remote Protocol) <QEnvironmentHexEncoded, QEnvironmentUnset,
+	QEnvironmentReset>: New item, explaining the packet.
+
+2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Compiling and Injecting Code): Add to subsection
+	"Compiler search for the compile command" descriptions of set
+	compile-gcc and show compile-gcc.
+
+2017-08-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb.texinfo (Architectures): Add new Sparc64 section to document
+	ADI support.
+	* NEWS: Add "adi examine" and "adi assign" commands.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Server): Document "--selftest".
+
+2017-08-16  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* gdb.texinfo (TUI Single Key Mode): Document the new shortcuts in
+	Single-Key mode.
+
+2017-08-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21925
+	* gdb.texinfo (Starting) <startup-with-shell>: Fix typo ("show
+	set...").
+
+2017-08-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Packets): Fix Z0 cmd_list doc referring to
+	conditional expression.
+
+2017-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* agentexpr.texi (rot): Fix symbolic description, improve
+	textual description.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Maintenance Commands): Document command
+	"maint check xml-descriptions".
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Maintenance Commands): Document optional
+	argument of "maint print c-tdesc".
+
+2017-07-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Maintenance Commands): Improve the doc to
+	command "maint print c-tdesc".
+
 2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21606

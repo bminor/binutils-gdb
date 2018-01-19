@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright (C) 1995-2017 Free Software Foundation, Inc.
+dnl Copyright (C) 1995-2018 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl
@@ -508,13 +508,6 @@ esac
 # We might need to link with -lm; most simulators need it.
 AC_CHECK_LIB(m, main)
 
-# We need to link with -lw to get `wctype' on Solaris before Solaris
-# 2.6.  Solaris 2.6 and beyond have this function in libc, and have a
-# libw that some versions of the GNU linker cannot hanle (GNU ld 2.9.1
-# is known to have this problem).  Therefore we avoid libw if we can.
-AC_CHECK_FUNC(wctype, [],
-  [AC_CHECK_LIB(w, wctype)])
-
 # Some systems (e.g. Solaris) have `gethostbyname' in libnsl.
 AC_SEARCH_LIBS(gethostbyname, nsl)
 
@@ -529,6 +522,11 @@ AM_ZLIB
 AC_SEARCH_LIBS(kinfo_getvmmap, util util-freebsd,
   [AC_DEFINE(HAVE_KINFO_GETVMMAP, 1,
             [Define to 1 if your system has the kinfo_getvmmap function. ])])
+
+# fbsd-nat.c can also use kinfo_getfile.
+AC_SEARCH_LIBS(kinfo_getfile, util util-freebsd,
+  [AC_DEFINE(HAVE_KINFO_GETFILE, 1,
+            [Define to 1 if your system has the kinfo_getfile function. ])])
 
 AM_ICONV
 
@@ -569,7 +567,7 @@ if test x"$prefer_curses" = xyes; then
   # search /usr/local/include, if ncurses is installed in /usr/local.  A
   # default installation of ncurses on alpha*-dec-osf* will lead to such
   # a situation.
-  AC_SEARCH_LIBS(waddstr, [ncurses cursesX curses])
+  AC_SEARCH_LIBS(waddstr, [ncursesw ncurses cursesX curses])
 
   if test "$ac_cv_search_waddstr" != no; then
     curses_found=yes
@@ -611,7 +609,7 @@ case $host_os in
 esac
 
 # These are the libraries checked by Readline.
-AC_SEARCH_LIBS(tgetent, [termcap tinfo curses ncurses])
+AC_SEARCH_LIBS(tgetent, [termcap tinfo curses ncursesw ncurses])
 
 if test "$ac_cv_search_tgetent" = no; then
   CONFIG_OBS="$CONFIG_OBS stub-termcap.o"
@@ -688,6 +686,28 @@ else
     LIBS="$LIBS $LIBEXPAT"
     AC_CHECK_FUNCS(XML_StopParser)
     LIBS=$save_LIBS
+  fi
+fi
+
+AC_ARG_WITH(mpfr,
+  AS_HELP_STRING([--with-mpfr], [include MPFR support (auto/yes/no)]),
+  [], [with_mpfr=auto])
+AC_MSG_CHECKING([whether to use MPFR])
+AC_MSG_RESULT([$with_mpfr])
+
+if test "${with_mpfr}" = no; then
+  AC_MSG_WARN([MPFR support disabled; some features may be unavailable.])
+  HAVE_LIBMPFR=no
+else
+  AC_LIB_HAVE_LINKFLAGS([mpfr], [], [#include <mpfr.h>],
+			[mpfr_exp_t exp; mpfr_t x;
+			 mpfr_frexp (&exp, x, x, MPFR_RNDN);])
+  if test "$HAVE_LIBMPFR" != yes; then
+    if test "$with_mpfr" = yes; then
+      AC_MSG_ERROR([MPFR is missing or unusable])
+    else
+      AC_MSG_WARN([MPFR is missing or unusable; some features may be unavailable.])
+    fi
   fi
 fi
 
@@ -1012,7 +1032,7 @@ if test "${have_libpython}" != no; then
 else
   # Even if Python support is not compiled in, we need to have this file
   # included so that the "python" command, et.al., still exists.
-  CONFIG_OBS="$CONFIG_OBS python.o"
+  CONFIG_OBS="$CONFIG_OBS python/python.o"
   CONFIG_SRCS="$CONFIG_SRCS python/python.c"
 fi
 
@@ -1134,7 +1154,7 @@ AC_MSG_RESULT([$with_guile])
 dnl We check guile with pkg-config.
 AC_PATH_PROG(pkg_config_prog_path, pkg-config, missing)
 
-try_guile_versions="guile-2.2 guile-2.0"
+try_guile_versions="guile-2.0"
 have_libguile=no
 case "${with_guile}" in
 no)
@@ -1212,7 +1232,7 @@ if test "${have_libguile}" != no; then
 else
   # Even if Guile support is not compiled in, we need to have these files
   # included.
-  CONFIG_OBS="$CONFIG_OBS guile.o"
+  CONFIG_OBS="$CONFIG_OBS guile/guile.o"
   CONFIG_SRCS="$CONFIG_SRCS guile/guile.c"
 fi
 AC_SUBST(GUILE_CPPFLAGS)
@@ -1290,36 +1310,18 @@ AC_HEADER_STDC
 # elf_hp.h is for HP/UX 64-bit shared library support.
 AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
                   thread_db.h \
-		  sys/fault.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
-		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
-		  termios.h termio.h \
-		  sgtty.h elf_hp.h \
+		  sys/reg.h sys/debugreg.h sys/select.h \
+		  termios.h elf_hp.h \
 		  dlfcn.h])
-AC_CHECK_HEADERS(sys/proc.h, [], [],
-[#if HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
-])
 AC_CHECK_HEADERS(sys/user.h, [], [],
 [#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
 ])
 
-# On Solaris 2.[789], we need to define _MSE_INT_H to avoid a clash
-# between <widec.h> and <wchar.h> that would cause AC_CHECK_HEADERS to
-# think that we don't have <curses.h> if we're using GCC.
-case $host_os in
-  solaris2.[[789]])
-    if test "$GCC" = yes; then
-      AC_DEFINE(_MSE_INT_H, 1,
-        [Define to 1 to avoid a clash between <widec.h> and <wchar.h> on
-   Solaris 2.[789] when using GCC. ])
-    fi ;;
-esac
-AC_CHECK_HEADERS(curses.h cursesX.h ncurses.h ncurses/ncurses.h ncurses/term.h)
+AC_CHECK_HEADERS(curses.h cursesX.h ncurses.h ncursesw/ncurses.h ncurses/ncurses.h ncurses/term.h)
 AC_CHECK_HEADERS(term.h, [], [],
 [#if HAVE_CURSES_H
 # include <curses.h>
@@ -1434,6 +1436,7 @@ AC_CHECK_MEMBERS([struct thread.td_pcb], [], [],
 # See if <sys/lwp.h> defines `struct lwp`.
 AC_CACHE_CHECK([for struct lwp], gdb_cv_struct_lwp,
 [AC_TRY_COMPILE([#include <sys/param.h>
+#define _KMEMUSER
 #include <sys/lwp.h>], [struct lwp l;],
 gdb_cv_struct_lwp=yes, gdb_cv_struct_lwp=no)])
 if test $gdb_cv_struct_lwp = yes; then
@@ -1529,21 +1532,6 @@ AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_tdname], [], [],
 AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_syscall_code], [], [],
                  [#include <sys/ptrace.h>])
 
-# Detect which type of /proc is in use, such as for Solaris.
-
-if test "${target}" = "${host}"; then
-  case "${host}" in
-  *-*-sysv4.2* | *-*-sysv5* )
-      AC_DEFINE(NEW_PROC_API, 1,
-      [Define if you want to use new multi-fd /proc interface.])
-      ;;
-  *-*-solaris2.[[6789]] | *-*-solaris2.1[[0-9]]*)
-      AC_DEFINE(NEW_PROC_API, 1,
-      [Define if you want to use new multi-fd /proc interface.])
-      ;;
-  esac
-fi
-
 if test "$ac_cv_header_sys_procfs_h" = yes; then
   BFD_HAVE_SYS_PROCFS_TYPE(gregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(fpregset_t)
@@ -1552,11 +1540,6 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
   BFD_HAVE_SYS_PROCFS_TYPE(prgregset32_t)
   BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
   BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prsysent_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(pr_sigset_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(pr_sigaction64_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(pr_siginfo64_t)
-
 
   dnl Check for broken prfpregset_t type
 
@@ -1768,41 +1751,6 @@ dnl and not doing a canadian cross build (build == host).
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
    case ${host_os} in
-   solaris*)
-      # See if thread_db library is around for Solaris thread debugging.
-      # Note that we must explicitly test for version 1 of the library
-      # because version 0 (present on Solaris 2.4 or earlier) doesn't have
-      # the same API.
-      AC_MSG_CHECKING(for Solaris thread debugging library)
-      if test -f /usr/lib/libthread_db.so.1 ; then
-         AC_MSG_RESULT(yes)
-         AC_DEFINE(HAVE_THREAD_DB_LIB, 1,
-         [Define if using Solaris thread debugging.])
-         CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
-         CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
-         AC_CHECK_LIB(dl, dlopen)
-	 CONFIG_LDFLAGS="${CONFIG_LDFLAGS} $RDYNAMIC"
-	 # Sun randomly tweaked the prototypes in <proc_service.h>
-	 # at one point.
-	 AC_MSG_CHECKING(if <proc_service.h> is old)
-	 AC_CACHE_VAL(gdb_cv_proc_service_is_old,[
-	    AC_TRY_COMPILE([
-		#include <proc_service.h>
-		ps_err_e ps_pdwrite
-		    (struct ps_prochandle*, psaddr_t, const void*, size_t);
-	    ],, gdb_cv_proc_service_is_old=no,
-	        gdb_cv_proc_service_is_old=yes)
-	 ])
-	 AC_MSG_RESULT($gdb_cv_proc_service_is_old)
-	 if test $gdb_cv_proc_service_is_old = yes; then
-	    AC_DEFINE(PROC_SERVICE_IS_OLD, 1,
-            [Define if <proc_service.h> on solaris uses int instead of
-             size_t, and assorted other type changes.])
-	 fi
-      else
-         AC_MSG_RESULT(no)
-      fi
-      ;;
    aix*)
       AC_MSG_CHECKING(for AiX thread debugging library)
       AC_CACHE_VAL(gdb_cv_have_aix_thread_debug,
@@ -2350,8 +2298,8 @@ AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
 if $development; then
   AC_DEFINE(GDB_SELF_TEST, 1,
             [Define if self-testing features should be enabled])
-  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_UNITTESTS_OBS)"
-  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_UNITTESTS_SRCS)"
+  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_UNITTESTS_OBS) selftest.o selftest-arch.o"
+  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_UNITTESTS_SRCS) common/selftest.c selftest-arch.c"
 fi
 
 GDB_AC_TRANSFORM([gdb], [GDB_TRANSFORM_NAME])

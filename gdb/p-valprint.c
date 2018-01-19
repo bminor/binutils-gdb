@@ -1,6 +1,6 @@
 /* Support for printing Pascal values for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,6 +38,7 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "objfiles.h"
+#include "common/byte-vector.h"
 
 
 /* Decorations for Pascal.  */
@@ -245,15 +246,17 @@ pascal_val_print (struct type *type,
 	      struct symbol *wsym = NULL;
 	      struct type *wtype;
 	      struct block *block = NULL;
-	      struct field_of_this_result is_this_fld;
 
 	      if (want_space)
 		fputs_filtered (" ", stream);
 
 	      if (msymbol.minsym != NULL)
-		wsym = lookup_symbol (MSYMBOL_LINKAGE_NAME (msymbol.minsym),
-				      block,
-				      VAR_DOMAIN, &is_this_fld).symbol;
+		{
+		  const char *search_name
+		    = MSYMBOL_SEARCH_NAME (msymbol.minsym);
+		  wsym = lookup_symbol_search_name (search_name, block,
+						    VAR_DOMAIN).symbol;
+		}
 
 	      if (wsym)
 		{
@@ -730,6 +733,7 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
       const gdb_byte *base_valaddr = NULL;
       LONGEST thisoffset;
       int skip = 0;
+      gdb::byte_vector buf;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -769,20 +773,15 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 
 	  if (boffset < 0 || boffset >= TYPE_LENGTH (type))
 	    {
-	      gdb_byte *buf;
-	      struct cleanup *back_to;
+	      buf.resize (TYPE_LENGTH (baseclass));
 
-	      buf = (gdb_byte *) xmalloc (TYPE_LENGTH (baseclass));
-	      back_to = make_cleanup (xfree, buf);
-
-	      base_valaddr = buf;
-	      if (target_read_memory (address + boffset, buf,
+	      base_valaddr = buf.data ();
+	      if (target_read_memory (address + boffset, buf.data (),
 				      TYPE_LENGTH (baseclass)) != 0)
 		skip = 1;
 	      address = address + boffset;
 	      thisoffset = 0;
 	      boffset = 0;
-	      do_cleanups (back_to);
 	    }
 	  else
 	    base_valaddr = valaddr;
@@ -890,9 +889,6 @@ pascal_object_print_static_field (struct value *val,
   opts.deref_ref = 0;
   common_val_print (val, stream, recurse, &opts, current_language);
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_pascal_valprint;
 
 void
 _initialize_pascal_valprint (void)

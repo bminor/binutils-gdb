@@ -1,6 +1,6 @@
 /* Python interface to values.
 
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,7 +21,7 @@
 #include "charset.h"
 #include "value.h"
 #include "language.h"
-#include "dfp.h"
+#include "target-float.h"
 #include "valprint.h"
 #include "infcall.h"
 #include "expression.h"
@@ -874,7 +874,6 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
   struct value *function = ((value_object *) self)->value;
   struct value **vargs = NULL;
   struct type *ftype = NULL;
-  struct value *mark = value_mark ();
   PyObject *result = NULL;
 
   TRY
@@ -925,7 +924,8 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
       scoped_value_mark free_values;
       struct value *return_value;
 
-      return_value = call_function_by_hand (function, args_count, vargs);
+      return_value = call_function_by_hand (function, NULL,
+					    args_count, vargs);
       result = value_to_value_object (return_value);
     }
   CATCH (except, RETURN_MASK_ALL)
@@ -1316,12 +1316,9 @@ valpy_nonzero (PyObject *self)
 
       if (is_integral_type (type) || TYPE_CODE (type) == TYPE_CODE_PTR)
 	nonzero = !!value_as_long (self_value->value);
-      else if (TYPE_CODE (type) == TYPE_CODE_FLT)
-	nonzero = value_as_double (self_value->value) != 0;
-      else if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
-	nonzero = !decimal_is_zero (value_contents (self_value->value),
-				 TYPE_LENGTH (type),
-				 gdbarch_byte_order (get_type_arch (type)));
+      else if (is_floating_value (self_value->value))
+	nonzero = !target_float_is_zero (value_contents (self_value->value),
+					 type);
       else
 	/* All other values are True.  */
 	nonzero = 1;
@@ -1562,10 +1559,10 @@ valpy_float (PyObject *self)
     {
       type = check_typedef (type);
 
-      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+      if (TYPE_CODE (type) != TYPE_CODE_FLT || !is_floating_value (value))
 	error (_("Cannot convert value to float."));
 
-      d = value_as_double (value);
+      d = target_float_to_host_double (value_contents (value), type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1683,7 +1680,11 @@ convert_value_from_python (PyObject *obj)
 	  double d = PyFloat_AsDouble (obj);
 
 	  if (! PyErr_Occurred ())
-	    value = value_from_double (builtin_type_pyfloat, d);
+	    {
+	      value = allocate_value (builtin_type_pyfloat);
+	      target_float_from_host_double (value_contents_raw (value),
+					     value_type (value), d);
+	    }
 	}
       else if (gdbpy_is_string (obj))
 	{

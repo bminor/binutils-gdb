@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/i386.
 
-   Copyright (C) 1988-2017 Free Software Foundation, Inc.
+   Copyright (C) 1988-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -190,7 +190,7 @@ static void
 i386obsd_supply_uthread (struct regcache *regcache,
 			 int regnum, CORE_ADDR addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp_addr = addr + I386OBSD_UTHREAD_ESP_OFFSET;
   CORE_ADDR sp = 0;
@@ -234,7 +234,7 @@ static void
 i386obsd_collect_uthread (const struct regcache *regcache,
 			  int regnum, CORE_ADDR addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp_addr = addr + I386OBSD_UTHREAD_ESP_OFFSET;
   CORE_ADDR sp = 0;
@@ -442,10 +442,6 @@ i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386obsd_tdep (void);
 
 void
 _initialize_i386obsd_tdep (void)

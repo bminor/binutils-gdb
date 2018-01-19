@@ -1,6 +1,6 @@
 /* Public partial symbol table definitions.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +33,7 @@ extern struct bcache *psymbol_bcache_get_bcache (struct psymbol_bcache *);
 extern const struct quick_symbol_functions psym_functions;
 
 extern const struct quick_symbol_functions dwarf2_gdb_index_functions;
+extern const struct quick_symbol_functions dwarf2_debug_names_functions;
 
 /* Ensure that the partial symbols for OBJFILE have been loaded.  If
    VERBOSE is non-zero, then this will print a message when symbols

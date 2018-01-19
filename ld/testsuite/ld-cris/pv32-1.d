@@ -1,6 +1,6 @@
 #source: pv32.s
 #as: --march=v32 --no-underscore --em=criself
-#ld: -e here -m crislinux tmpdir/libdso-12.so
+#ld: -e here -m crislinux tmpdir/libdso-12.so --hash-style=sysv
 #objdump: -s -T
 
 # Trivial test of linking a program to a v32 DSO.

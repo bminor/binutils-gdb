@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on AArch64 systems.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -27,7 +27,6 @@
 #include "dis-asm.h"
 #include "regcache.h"
 #include "reggroups.h"
-#include "doublest.h"
 #include "value.h"
 #include "arch-utils.h"
 #include "osabi.h"
@@ -55,9 +54,6 @@
 
 #include "record.h"
 #include "record-full.h"
-
-#include "features/aarch64.c"
-
 #include "arch/aarch64-insn.h"
 
 #include "opcode/aarch64.h"
@@ -235,13 +231,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
   int i;
   /* Track X registers and D registers in prologue.  */
   pv_t regs[AARCH64_X_REGISTER_COUNT + AARCH64_D_REGISTER_COUNT];
-  struct pv_area *stack;
-  struct cleanup *back_to;
 
   for (i = 0; i < AARCH64_X_REGISTER_COUNT + AARCH64_D_REGISTER_COUNT; i++)
     regs[i] = pv_register (i, 0);
-  stack = make_pv_area (AARCH64_SP_REGNUM, gdbarch_addr_bit (gdbarch));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (AARCH64_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
   for (; start < limit; start += 4)
     {
@@ -346,9 +339,9 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  gdb_assert (inst.operands[1].type == AARCH64_OPND_ADDR_SIMM9);
 	  gdb_assert (!inst.operands[1].addr.offset.is_reg);
 
-	  pv_area_store (stack, pv_add_constant (regs[rn],
-						 inst.operands[1].addr.offset.imm),
-			 is64 ? 8 : 4, regs[rt]);
+	  stack.store (pv_add_constant (regs[rn],
+					inst.operands[1].addr.offset.imm),
+		       is64 ? 8 : 4, regs[rt]);
 	}
       else if ((inst.opcode->iclass == ldstpair_off
 		|| (inst.opcode->iclass == ldstpair_indexed
@@ -371,12 +364,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  /* If recording this store would invalidate the store area
 	     (perhaps because rn is not known) then we should abandon
 	     further prologue analysis.  */
-	  if (pv_area_store_would_trash (stack,
-					 pv_add_constant (regs[rn], imm)))
+	  if (stack.store_would_trash (pv_add_constant (regs[rn], imm)))
 	    break;
 
-	  if (pv_area_store_would_trash (stack,
-					 pv_add_constant (regs[rn], imm + 8)))
+	  if (stack.store_would_trash (pv_add_constant (regs[rn], imm + 8)))
 	    break;
 
 	  rt1 = inst.operands[0].reg.regno;
@@ -390,10 +381,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	      rt2 += AARCH64_X_REGISTER_COUNT;
 	    }
 
-	  pv_area_store (stack, pv_add_constant (regs[rn], imm), 8,
-			 regs[rt1]);
-	  pv_area_store (stack, pv_add_constant (regs[rn], imm + 8), 8,
-			 regs[rt2]);
+	  stack.store (pv_add_constant (regs[rn], imm), 8,
+		       regs[rt1]);
+	  stack.store (pv_add_constant (regs[rn], imm + 8), 8,
+		       regs[rt2]);
 
 	  if (inst.operands[2].addr.writeback)
 	    regs[rn] = pv_add_constant (regs[rn], imm);
@@ -423,8 +414,8 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	      rt += AARCH64_X_REGISTER_COUNT;
 	    }
 
-	  pv_area_store (stack, pv_add_constant (regs[rn], imm),
-			 is64 ? 8 : 4, regs[rt]);
+	  stack.store (pv_add_constant (regs[rn], imm),
+		       is64 ? 8 : 4, regs[rt]);
 	  if (inst.operands[1].addr.writeback)
 	    regs[rn] = pv_add_constant (regs[rn], imm);
 	}
@@ -446,10 +437,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
     }
 
   if (cache == NULL)
-    {
-      do_cleanups (back_to);
-      return start;
-    }
+    return start;
 
   if (pv_is_register (regs[AARCH64_FP_REGNUM], AARCH64_SP_REGNUM))
     {
@@ -474,7 +462,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
     {
       CORE_ADDR offset;
 
-      if (pv_area_find_reg (stack, gdbarch, i, &offset))
+      if (stack.find_reg (gdbarch, i, &offset))
 	cache->saved_regs[i].addr = offset;
     }
 
@@ -483,12 +471,11 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       int regnum = gdbarch_num_regs (gdbarch);
       CORE_ADDR offset;
 
-      if (pv_area_find_reg (stack, gdbarch, i + AARCH64_X_REGISTER_COUNT,
-			    &offset))
+      if (stack.find_reg (gdbarch, i + AARCH64_X_REGISTER_COUNT,
+			  &offset))
 	cache->saved_regs[i + regnum + AARCH64_D0_REGNUM].addr = offset;
     }
 
-  do_cleanups (back_to);
   return start;
 }
 
@@ -1795,7 +1782,7 @@ static void
 aarch64_extract_return_value (struct type *type, struct regcache *regs,
 			      gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regs);
+  struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -1933,7 +1920,7 @@ static void
 aarch64_store_return_value (struct type *type, struct regcache *regs,
 			    const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regs);
+  struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -2420,7 +2407,7 @@ value_of_aarch64_user_reg (struct frame_info *frame, const void *baton)
 static std::vector<CORE_ADDR>
 aarch64_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   const int insn_size = 4;
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
@@ -2498,14 +2485,14 @@ aarch64_software_single_step (struct regcache *regcache)
   return next_pcs;
 }
 
-struct displaced_step_closure
+struct aarch64_displaced_step_closure : public displaced_step_closure
 {
   /* It is true when condition instruction, such as B.CON, TBZ, etc,
      is being displaced stepping.  */
-  int cond;
+  int cond = 0;
 
   /* PC adjustment offset after displaced stepping.  */
-  int32_t pc_adjust;
+  int32_t pc_adjust = 0;
 };
 
 /* Data when visiting instructions for displaced stepping.  */
@@ -2523,7 +2510,7 @@ struct aarch64_displaced_step_data
   /* Registers when doing displaced stepping.  */
   struct regcache *regs;
 
-  struct displaced_step_closure *dsc;
+  aarch64_displaced_step_closure *dsc;
 };
 
 /* Implementation of aarch64_insn_visitor method "b".  */
@@ -2737,7 +2724,6 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				  CORE_ADDR from, CORE_ADDR to,
 				  struct regcache *regs)
 {
-  struct displaced_step_closure *dsc = NULL;
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   uint32_t insn = read_memory_unsigned_integer (from, 4, byte_order_for_code);
   struct aarch64_displaced_step_data dsd;
@@ -2753,11 +2739,12 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
       return NULL;
     }
 
-  dsc = XCNEW (struct displaced_step_closure);
+  std::unique_ptr<aarch64_displaced_step_closure> dsc
+    (new aarch64_displaced_step_closure);
   dsd.base.insn_addr = from;
   dsd.new_addr = to;
   dsd.regs = regs;
-  dsd.dsc = dsc;
+  dsd.dsc = dsc.get ();
   dsd.insn_count = 0;
   aarch64_relocate_instruction (insn, &visitor,
 				(struct aarch64_insn_data *) &dsd);
@@ -2783,21 +2770,22 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
     }
   else
     {
-      xfree (dsc);
       dsc = NULL;
     }
 
-  return dsc;
+  return dsc.release ();
 }
 
 /* Implement the "displaced_step_fixup" gdbarch method.  */
 
 void
 aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
-			      struct displaced_step_closure *dsc,
+			      struct displaced_step_closure *dsc_,
 			      CORE_ADDR from, CORE_ADDR to,
 			      struct regcache *regs)
 {
+  aarch64_displaced_step_closure *dsc = (aarch64_displaced_step_closure *) dsc_;
+
   if (dsc->cond)
     {
       ULONGEST pc;
@@ -2837,6 +2825,20 @@ aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
   return 1;
 }
 
+/* Get the correct target description.  */
+
+const target_desc *
+aarch64_read_description ()
+{
+  static target_desc *aarch64_tdesc = NULL;
+  target_desc **tdesc = &aarch64_tdesc;
+
+  if (*tdesc == NULL)
+    *tdesc = aarch64_create_target_description ();
+
+  return *tdesc;
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -2860,7 +2862,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Ensure we always have a target descriptor.  */
   if (!tdesc_has_registers (tdesc))
-    tdesc = tdesc_aarch64;
+    tdesc = aarch64_read_description ();
 
   gdb_assert (tdesc);
 
@@ -2968,6 +2970,11 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_tdesc_pseudo_register_reggroup_p (gdbarch,
 					aarch64_pseudo_register_reggroup_p);
 
+  /* The top byte of an address is known as the "tag" and is
+     ignored by the kernel, the hardware, etc. and can be regarded
+     as additional data associated with the address.  */
+  set_gdbarch_significant_addr_bit (gdbarch, 56);
+
   /* ABI */
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
@@ -2997,7 +3004,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in the ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;
-  info.tdep_info = (void *) tdesc_data;
+  info.tdesc_data = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   dwarf2_frame_set_init_reg (gdbarch, aarch64_dwarf2_frame_init_reg);
@@ -3047,16 +3054,11 @@ static void aarch64_process_record_test (void);
 }
 #endif
 
-/* Suppress warning from -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_aarch64_tdep;
-
 void
 _initialize_aarch64_tdep (void)
 {
   gdbarch_register (bfd_arch_aarch64, aarch64_gdbarch_init,
 		    aarch64_dump_tdep);
-
-  initialize_tdesc_aarch64 ();
 
   /* Debug this file's internals.  */
   add_setshow_boolean_cmd ("aarch64", class_maintenance, &aarch64_debug, _("\
@@ -3068,8 +3070,12 @@ When on, AArch64 specific debugging is enabled."),
 			    &setdebuglist, &showdebuglist);
 
 #if GDB_SELF_TEST
-  register_self_test (selftests::aarch64_analyze_prologue_test);
-  register_self_test (selftests::aarch64_process_record_test);
+  selftests::register_test ("aarch64-analyze-prologue",
+			    selftests::aarch64_analyze_prologue_test);
+  selftests::register_test ("aarch64-process-record",
+			    selftests::aarch64_process_record_test);
+  selftests::record_xml_tdesc ("aarch64.xml",
+			       aarch64_create_target_description ());
 #endif
 }
 

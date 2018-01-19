@@ -1,5 +1,5 @@
 /* Generic COFF swapping routines, for BFD.
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -429,7 +429,7 @@ coff_swap_aux_in (bfd *abfd,
 	  in->x_scn.x_nlinno = GET_SCN_NLINNO (abfd, ext);
 
 	  /* PE defines some extra fields; we zero them out for
-             safety.  */
+	     safety.  */
 	  in->x_scn.x_checksum = 0;
 	  in->x_scn.x_associated = 0;
 	  in->x_scn.x_comdat = 0;

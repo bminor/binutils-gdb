@@ -1,6 +1,6 @@
 /* Native-dependent code for NetBSD/i386.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -70,10 +70,6 @@ i386nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   return 1;
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386nbsd_nat (void);
 
 void
 _initialize_i386nbsd_nat (void)

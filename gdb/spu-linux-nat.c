@@ -1,5 +1,5 @@
 /* SPU native-dependent code for GDB, the GNU debugger.
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
 
@@ -504,7 +504,7 @@ spu_fetch_inferior_registers (struct target_ops *ops,
   /* The ID register holds the spufs file handle.  */
   if (regno == -1 || regno == SPU_ID_REGNUM)
     {
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       gdb_byte buf[4];
       store_unsigned_integer (buf, 4, byte_order, fd);
@@ -633,9 +633,6 @@ spu_can_use_hw_breakpoint (struct target_ops *self,
 {
   return 0;
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_spu_nat;
 
 /* Initialize SPU native target.  */
 void 

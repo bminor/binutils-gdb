@@ -1,6 +1,6 @@
 #source: tls-dtprelm.s --defsym r=32767
 #as: --no-underscore --em=criself --pic
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #objdump: -s -j .got -j .text -j .tdata -R
 
 # Check that a R_CRIS_16_DTPREL just below the theoretical limit

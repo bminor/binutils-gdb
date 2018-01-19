@@ -1,5 +1,5 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -54,7 +54,6 @@
 #include "cp-support.h"
 #include "psympriv.h"
 #include "block.h"
-
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not
 				   native, now.  */
@@ -92,6 +91,7 @@ struct symloc
     int symbol_offset;
     int string_offset;
     int file_string_offset;
+    enum language pst_language;
   };
 
 #define LDSYMOFF(p) (((struct symloc *)((p)->read_symtab_private))->ldsymoff)
@@ -101,6 +101,7 @@ struct symloc
 #define SYMBOL_OFFSET(p) (SYMLOC(p)->symbol_offset)
 #define STRING_OFFSET(p) (SYMLOC(p)->string_offset)
 #define FILE_STRING_OFFSET(p) (SYMLOC(p)->file_string_offset)
+#define PST_LANGUAGE(p) (SYMLOC(p)->pst_language)
 
 
 /* The objfile we are currently reading.  */
@@ -249,8 +250,6 @@ static int bincls_allocated;
 
 /* Local function prototypes.  */
 
-extern void _initialize_dbxread (void);
-
 static void read_ofile_symtab (struct objfile *, struct partial_symtab *);
 
 static void dbx_read_symtab (struct partial_symtab *self,
@@ -293,8 +292,8 @@ static void add_this_object_header_file (int);
 
 static struct partial_symtab *start_psymtab (struct objfile *, const char *,
 					     CORE_ADDR, int,
-					     struct partial_symbol **,
-					     struct partial_symbol **);
+					     std::vector<partial_symbol *> &,
+					     std::vector<partial_symbol *> &);
 
 /* Free up old header file tables.  */
 
@@ -518,7 +517,6 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *sym_bfd;
   int val;
-  struct cleanup *back_to;
 
   sym_bfd = objfile->obfd;
 
@@ -533,14 +531,15 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
     perror_with_name (objfile_name (objfile));
 
   /* Size the symbol table.  */
-  if (objfile->global_psymbols.size == 0 && objfile->static_psymbols.size == 0)
+  if (objfile->global_psymbols.capacity () == 0
+      && objfile->static_psymbols.capacity () == 0)
     init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
 
   symbol_size = DBX_SYMBOL_SIZE (objfile);
   symbol_table_offset = DBX_SYMTAB_OFFSET (objfile);
 
   free_pending_blocks ();
-  back_to = make_cleanup (really_free_pendings, 0);
+  scoped_free_pendings free_pending;
 
   minimal_symbol_reader reader (objfile);
 
@@ -552,8 +551,6 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
      minimal symbols for this objfile.  */
 
   reader.install ();
-
-  do_cleanups (back_to);
 }
 
 /* Initialize anything that needs initializing when a completely new
@@ -1360,8 +1357,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		pst = start_psymtab (objfile,
 				     namestring, valu,
 				     first_so_symnum * symbol_size,
-				     objfile->global_psymbols.next,
-				     objfile->static_psymbols.next);
+				     objfile->global_psymbols,
+				     objfile->static_psymbols);
 		pst->dirname = dirname_nso;
 		dirname_nso = NULL;
 	      }
@@ -1999,12 +1996,12 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 
 static struct partial_symtab *
 start_psymtab (struct objfile *objfile, const char *filename, CORE_ADDR textlow,
-	       int ldsymoff, struct partial_symbol **global_syms,
-	       struct partial_symbol **static_syms)
+	       int ldsymoff, std::vector<partial_symbol *> &global_psymbols,
+	       std::vector<partial_symbol *> &static_psymbols)
 {
   struct partial_symtab *result =
     start_psymtab_common (objfile, filename, textlow,
-			  global_syms, static_syms);
+			  global_psymbols, static_psymbols);
 
   result->read_symtab_private =
     XOBNEW (&objfile->objfile_obstack, struct symloc);
@@ -2017,6 +2014,7 @@ start_psymtab (struct objfile *objfile, const char *filename, CORE_ADDR textlow,
 
   /* Deduce the source language from the filename for this psymtab.  */
   psymtab_language = deduce_language_from_filename (filename);
+  PST_LANGUAGE (result) = psymtab_language;
 
   return result;
 }
@@ -2187,7 +2185,6 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 static void
 dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
 {
-  struct cleanup *old_chain;
   int i;
 
   if (pst->readin)
@@ -2221,15 +2218,13 @@ dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
       /* Init stuff necessary for reading in symbols */
       stabsread_init ();
       buildsym_init ();
-      old_chain = make_cleanup (really_free_pendings, 0);
+      scoped_free_pendings free_pending;
       file_string_table_offset = FILE_STRING_OFFSET (pst);
       symbol_size = SYMBOL_SIZE (pst);
 
       /* Read in this file's symbols.  */
       bfd_seek (objfile->obfd, SYMBOL_OFFSET (pst), SEEK_SET);
       read_ofile_symtab (objfile, pst);
-
-      do_cleanups (old_chain);
     }
 
   pst->readin = 1;
@@ -2403,7 +2398,8 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		 positive offsets.  */
 	    nlist.n_value = (nlist.n_value ^ 0x80000000) - 0x80000000;
 	  process_one_symbol (type, nlist.n_desc, nlist.n_value,
-			      namestring, section_offsets, objfile);
+			      namestring, section_offsets, objfile,
+			      PST_LANGUAGE (pst));
 	}
       /* We skip checking for a new .o or -l file; that should never
          happen in this routine.  */
@@ -2498,12 +2494,14 @@ cp_set_block_scope (const struct symbol *symbol,
    the pst->section_offsets.  All symbols that refer to memory
    locations need to be offset by these amounts.
    OBJFILE is the object file from which we are reading symbols.  It
-   is used in end_symtab.  */
+   is used in end_symtab.
+   LANGUAGE is the language of the symtab.
+*/
 
 void
 process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		    const struct section_offsets *section_offsets,
-		    struct objfile *objfile)
+		    struct objfile *objfile, enum language language)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct context_stack *newobj;
@@ -2717,7 +2715,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
       function_start_offset = 0;
 
       start_stabs ();
-      start_symtab (objfile, name, NULL, valu);
+      start_symtab (objfile, name, NULL, valu, language);
       record_debugformat ("stabs");
       break;
 

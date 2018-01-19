@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux m32r.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -353,7 +353,7 @@ m32r_linux_supply_gregset (const struct regset *regset,
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;
   enum bfd_endian byte_order =
-    gdbarch_byte_order (get_regcache_arch (regcache));
+    gdbarch_byte_order (regcache->arch ());
   ULONGEST psw, bbpsw;
   gdb_byte buf[4];
   const gdb_byte *p;
@@ -397,7 +397,7 @@ m32r_linux_collect_gregset (const struct regset *regset,
   gdb_byte *regs = (gdb_byte *) gregs;
   int i;
   enum bfd_endian byte_order =
-    gdbarch_byte_order (get_regcache_arch (regcache));
+    gdbarch_byte_order (regcache->arch ());
   ULONGEST psw;
   gdb_byte buf[4];
 
@@ -469,9 +469,6 @@ m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_m32r_linux_tdep (void);
 
 void
 _initialize_m32r_linux_tdep (void)

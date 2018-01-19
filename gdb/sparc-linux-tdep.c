@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux SPARC.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -253,7 +253,7 @@ sparc32_linux_collect_core_fpregset (const struct regset *regset,
 static void
 sparc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   ULONGEST psr;
 
   regcache_cooked_write_unsigned (regcache, tdep->pc_regnum, pc);
@@ -464,9 +464,6 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gdb_signal_to_target (gdbarch,
 				    sparc32_linux_gdb_signal_to_target);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_sparc_linux_tdep (void);
 
 void
 _initialize_sparc_linux_tdep (void)

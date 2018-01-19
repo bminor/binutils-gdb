@@ -1,5 +1,5 @@
 /* Plugin control for the GNU linker.
-   Copyright (C) 2010-2017 Free Software Foundation, Inc.
+   Copyright (C) 2010-2018 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -726,7 +726,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
 	  && blhe->type != bfd_link_hash_common)
 	{
 	  /* We should not have a new, indirect or warning symbol here.  */
-	  einfo ("%P%F: %s: plugin symbol table corrupt (sym type %d)\n",
+	  einfo (_("%P%F: %s: plugin symbol table corrupt (sym type %d)\n"),
 		 called_plugin->name, blhe->type);
 	}
 
@@ -1017,7 +1017,7 @@ plugin_load_plugins (void)
       if (!onloadfn)
 	onloadfn = (ld_plugin_onload) dlsym (curplug->dlhandle, "_onload");
       if (!onloadfn)
-        einfo (_("%P%F: %s: error loading plugin: %s\n"),
+	einfo (_("%P%F: %s: error loading plugin: %s\n"),
 	       curplug->name, dlerror ());
       set_tv_plugin_args (curplug, &my_tv[tv_header_size]);
       called_plugin = curplug;

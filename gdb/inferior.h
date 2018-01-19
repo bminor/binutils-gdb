@@ -1,7 +1,7 @@
 /* Variables that describe the inferior process running under GDB:
    Where it is, why it stopped, and how to step it.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -73,11 +73,6 @@ extern void discard_infcall_control_state (struct infcall_control_state *);
 extern struct regcache *
   get_infcall_suspend_state_regcache (struct infcall_suspend_state *);
 
-/* Save value of inferior_ptid so that it may be restored by
-   a later call to do_cleanups().  Returns the struct cleanup
-   pointer needed for later doing the cleanup.  */
-extern struct cleanup * save_inferior_ptid (void);
-
 extern void set_sigint_trap (void);
 
 extern void clear_sigint_trap (void);
@@ -126,7 +121,7 @@ extern void default_print_float_info (struct gdbarch *gdbarch,
 
 extern void child_terminal_info (struct target_ops *self, const char *, int);
 
-extern void term_info (char *, int);
+extern void info_terminal_command (char *, int);
 
 extern void child_terminal_ours (struct target_ops *self);
 
@@ -157,15 +152,15 @@ extern void setup_inferior (int from_tty);
 
 extern void post_create_inferior (struct target_ops *, int);
 
-extern void attach_command (char *, int);
+extern void attach_command (const char *, int);
 
 extern char *get_inferior_args (void);
 
-extern void set_inferior_args (char *);
+extern void set_inferior_args (const char *);
 
 extern void set_inferior_args_vector (int, char **);
 
-extern void registers_info (char *, int);
+extern void registers_info (const char *, int);
 
 extern void continue_1 (int all_threads);
 
@@ -173,7 +168,7 @@ extern void interrupt_target_1 (int all_threads);
 
 extern void delete_longjmp_breakpoint_cleanup (void *arg);
 
-extern void detach_command (char *, int);
+extern void detach_command (const char *, int);
 
 extern void notice_new_inferior (ptid_t, int, int);
 
@@ -268,7 +263,12 @@ enum stop_kind
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
 
-struct private_inferior;
+/* Base class for target-specific inferior data.  */
+
+struct private_inferior
+{
+  virtual ~private_inferior () = 0;
+};
 
 /* Inferior process specific part of `struct infcall_control_state'.
 
@@ -360,6 +360,10 @@ public:
      should never be freed.  */
   char **argv = NULL;
 
+  /* The current working directory that will be used when starting
+     this inferior.  */
+  gdb::unique_xmalloc_ptr<char> cwd;
+
   /* The name of terminal device to use for I/O.  */
   char *terminal = NULL;
 
@@ -404,7 +408,7 @@ public:
   bool needs_setup = false;
 
   /* Private data used by the target vector implementation.  */
-  private_inferior *priv = NULL;
+  std::unique_ptr<private_inferior> priv;
 
   /* HAS_EXIT_CODE is true if the inferior exited with an exit code.
      In this case, the EXIT_CODE field is also valid.  */
@@ -532,11 +536,7 @@ public:
   ~scoped_restore_current_inferior ()
   { set_current_inferior (m_saved_inf); }
 
-  /* Disable copy.  */
-  scoped_restore_current_inferior
-    (const scoped_restore_current_inferior &) = delete;
-  void operator=
-    (const scoped_restore_current_inferior &) = delete;
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_inferior);
 
 private:
   inferior *m_saved_inf;

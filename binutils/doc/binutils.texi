@@ -10,7 +10,7 @@
 
 @copying
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2017 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2018 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -1117,6 +1117,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{-B} @var{bfdarch}|@option{--binary-architecture=}@var{bfdarch}]
         [@option{-S}|@option{--strip-all}]
         [@option{-g}|@option{--strip-debug}]
+        [@option{--strip-unneeded}]
         [@option{-K} @var{symbolname}|@option{--keep-symbol=}@var{symbolname}]
         [@option{-N} @var{symbolname}|@option{--strip-symbol=}@var{symbolname}]
         [@option{--strip-unneeded-symbol=}@var{symbolname}]
@@ -2071,11 +2072,8 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-r}|@option{--reloc}]
         [@option{-R}|@option{--dynamic-reloc}]
         [@option{-s}|@option{--full-contents}]
-        [@option{-W[lLiaprmfFsoRt]}|
-         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames]
-                 [=aranges,=macro,=frames,=frames-interp,=str,=loc]
-                 [=Ranges,=pubtypes,=trace_info,=trace_abbrev]
-                 [=trace_aranges,=gdb_index]
+        [@option{-W[lLiaprmfFsoRtUuTgAckK]}|
+         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
         [@option{-G}|@option{--stabs}]
         [@option{-t}|@option{--syms}]
         [@option{-T}|@option{--dynamic-syms}]
@@ -2313,6 +2311,10 @@ special QuarkSE-EM instructions, @option{fpuda} selects the printing
 of double precision assist instructions, @option{fpus} selects the
 printing of FPU single precision FP instructions, while @option{fpud}
 selects the printing of FPU souble precision FP instructions.
+Additionally, one can choose to have all the immediates printed in
+hexadecimal using @option{hex}.  By default, the short immediates are
+printed using the decimal representation, while the long immediate
+values are printed as hexadecimal.
 
 @option{cpu=...} allows to enforce a particular ISA when disassembling
 instructions, overriding the @option{-m} value or whatever is in the ELF file.
@@ -2556,42 +2558,9 @@ This is the default when @option{--prefix-addresses} is used.
 Display @var{width} bytes on a single line when disassembling
 instructions.
 
-@item -W[lLiaprmfFsoRt]
-@itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames]
-@itemx --dwarf[=aranges,=macro,=frames,=frames-interp,=str,=loc]
-@itemx --dwarf[=Ranges,=pubtypes,=trace_info,=trace_abbrev]
-@itemx --dwarf[=trace_aranges,=gdb_index]
-@cindex DWARF
-@cindex debug symbols
-Displays the contents of the debug sections in the file, if any are
-present.  If one of the optional letters or words follows the switch
-then only data found in those specific sections will be dumped.
-
-Note that there is no single letter option to display the content of
-trace sections or .gdb_index.
-
-Note: the output from the @option{=info} option can also be affected
-by the options @option{--dwarf-depth}, the @option{--dwarf-start} and
-the @option{--dwarf-check}.
-
-@item --dwarf-depth=@var{n}
-Limit the dump of the @code{.debug_info} section to @var{n} children.
-This is only useful with @option{--dwarf=info}.  The default is
-to print all DIEs; the special value 0 for @var{n} will also have this
-effect.
-
-With a non-zero value for @var{n}, DIEs at or deeper than @var{n}
-levels will not be printed.  The range for @var{n} is zero-based.
-
-@item --dwarf-start=@var{n}
-Print only DIEs beginning with the DIE numbered @var{n}.  This is only
-useful with @option{--dwarf=info}.
-
-If specified, this option will suppress printing of any header
-information and all DIEs before the DIE numbered @var{n}.  Only
-siblings and children of the specified DIE will be printed.
-
-This can be used in conjunction with @option{--dwarf-depth}.
+@item -W[lLiaprmfFsoRtUuTgAckK]
+@itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
+@include debug.options.texi
 
 @item --dwarf-check
 Enable additional checks for consistency of Dwarf information.
@@ -4623,8 +4592,8 @@ readelf [@option{-a}|@option{--all}]
         [@option{-R} <number or name>|@option{--relocated-dump=}<number or name>]
         [@option{-z}|@option{--decompress}]
         [@option{-c}|@option{--archive-index}]
-        [@option{-w[lLiaprmfFsoRt]}|
-         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index]]
+        [@option{-w[lLiaprmfFsoRtUuTgAckK]}|
+         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
         [@option{-I}|@option{--histogram}]
@@ -4661,8 +4630,13 @@ given.
 @itemx --all
 Equivalent to specifying @option{--file-header},
 @option{--program-headers}, @option{--sections}, @option{--symbols},
-@option{--relocs}, @option{--dynamic}, @option{--notes} and
-@option{--version-info}.
+@option{--relocs}, @option{--dynamic}, @option{--notes},
+@option{--version-info}, @option{--arch-specific}, @option{--unwind},
+@option{--section-groups} and @option{--histogram}.
+
+Note - this option does not enable @option{--use-dynamic} itself, so
+if that option is not present on the command line then dynamic symbols
+and dynamic relocs will not be displayed.
 
 @item -h
 @itemx --file-header
@@ -4758,6 +4732,9 @@ When displaying symbols, this option makes @command{readelf} use the
 symbol hash tables in the file's dynamic section, rather than the
 symbol table sections.
 
+When displaying relocations, this option makes @command{readelf}
+display the dynamic relocations rather than the static relocations.
+
 @item -x <number or name>
 @itemx --hex-dump=<number or name>
 Displays the contents of the indicated section as a hexadecimal bytes.
@@ -4791,44 +4768,9 @@ Displays the file symbol index information contained in the header part
 of binary archives.  Performs the same function as the @option{t}
 command to @command{ar}, but without using the BFD library.  @xref{ar}.
 
-@item -w[lLiaprmfFsoRt]
-@itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index]
-Displays the contents of the debug sections in the file, if any are
-present.  If one of the optional letters or words follows the switch
-then only data found in those specific sections will be dumped.
-
-Note that there is no single letter option to display the content of
-trace sections or .gdb_index.
-
-Note: the @option{=decodedline} option will display the interpreted
-contents of a .debug_line section whereas the @option{=rawline} option
-dumps the contents in a raw format.
-
-Note: the @option{=frames-interp} option will display the interpreted
-contents of a .debug_frame section whereas the @option{=frames} option
-dumps the contents in a raw format.
-
-Note: the output from the @option{=info} option can also be affected
-by the options @option{--dwarf-depth} and @option{--dwarf-start}.
-
-@item --dwarf-depth=@var{n}
-Limit the dump of the @code{.debug_info} section to @var{n} children.
-This is only useful with @option{--debug-dump=info}.  The default is
-to print all DIEs; the special value 0 for @var{n} will also have this
-effect.
-
-With a non-zero value for @var{n}, DIEs at or deeper than @var{n}
-levels will not be printed.  The range for @var{n} is zero-based.
-
-@item --dwarf-start=@var{n}
-Print only DIEs beginning with the DIE numbered @var{n}.  This is only
-useful with @option{--debug-dump=info}.
-
-If specified, this option will suppress printing of any header
-information and all DIEs before the DIE numbered @var{n}.  Only
-siblings and children of the specified DIE will be printed.
-
-This can be used in conjunction with @option{--dwarf-depth}.
+@item -w[lLiaprmfFsoRtUuTgAckK]
+@itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
+@include debug.options.texi
 
 @item -I
 @itemx --histogram

@@ -1,6 +1,6 @@
 /* Target-dependent code for SPARC.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,7 +22,6 @@
 #include "dis-asm.h"
 #include "dwarf2.h"
 #include "dwarf2-frame.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
@@ -410,7 +409,7 @@ sparc_psr_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = arch_flags_type (gdbarch, "builtin_type_sparc_psr", 4);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc_psr", 32);
       append_flags_type_flag (type, 5, "ET");
       append_flags_type_flag (type, 6, "PS");
       append_flags_type_flag (type, 7, "S");
@@ -432,7 +431,7 @@ sparc_fsr_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = arch_flags_type (gdbarch, "builtin_type_sparc_fsr", 4);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc_fsr", 32);
       append_flags_type_flag (type, 0, "NXA");
       append_flags_type_flag (type, 1, "DZA");
       append_flags_type_flag (type, 2, "UFA");
@@ -595,7 +594,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 			 struct value **args, CORE_ADDR sp,
 			 int struct_return, CORE_ADDR struct_addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* Number of words in the "parameter array".  */
   int num_elements = 0;
@@ -1588,7 +1587,7 @@ sparc_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
   uint64_t reg;
   int size = register_size (gdbarch, 0);
 
-  dwarf2_frame_state_alloc_regs (&fs->regs, 32);
+  fs->regs.alloc_regs (32);
   for (reg = 8; reg < 16; reg++)
     {
       fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_REG;
@@ -1663,7 +1662,7 @@ sparc_analyze_control_transfer (struct regcache *regcache,
       struct frame_info *frame = get_current_frame ();
 
       /* Trap instruction (TRAP).  */
-      return gdbarch_tdep (get_regcache_arch (regcache))->step_trap (frame,
+      return gdbarch_tdep (regcache->arch ())->step_trap (frame,
 								     insn);
     }
 
@@ -1713,7 +1712,7 @@ sparc_step_trap (struct frame_info *frame, unsigned long insn)
 static std::vector<CORE_ADDR>
 sparc_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *arch = get_regcache_arch (regcache);
+  struct gdbarch *arch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
   CORE_ADDR npc, nnpc;
 
@@ -1743,7 +1742,7 @@ sparc_software_single_step (struct regcache *regcache)
 static void
 sparc_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
 
   regcache_cooked_write_unsigned (regcache, tdep->pc_regnum, pc);
   regcache_cooked_write_unsigned (regcache, tdep->npc_regnum, pc + 4);
@@ -1906,7 +1905,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         }
 
       /* Target description may have changed. */
-      info.tdep_info = tdesc_data;
+      info.tdesc_data = tdesc_data;
       tdesc_use_registers (gdbarch, tdesc, tdesc_data);
     }
 
@@ -1925,7 +1924,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 void
 sparc_supply_rwindow (struct regcache *regcache, CORE_ADDR sp, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int offset = 0;
   gdb_byte buf[8];
@@ -1965,7 +1964,7 @@ sparc_supply_rwindow (struct regcache *regcache, CORE_ADDR sp, int regnum)
 
       /* Clear out the top half of the temporary buffer, and put the
 	 register value in the bottom half if we're in 64-bit mode.  */
-      if (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 64)
+      if (gdbarch_ptr_bit (regcache->arch ()) == 64)
 	{
 	  memset (buf, 0, 4);
 	  offset = 4;
@@ -1999,7 +1998,7 @@ void
 sparc_collect_rwindow (const struct regcache *regcache,
 		       CORE_ADDR sp, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int offset = 0;
   gdb_byte buf[8];
@@ -2037,7 +2036,7 @@ sparc_collect_rwindow (const struct regcache *regcache,
       sp &= 0xffffffffUL;
 
       /* Only use the bottom half if we're in 64-bit mode.  */
-      if (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 64)
+      if (gdbarch_ptr_bit (regcache->arch ()) == 64)
 	offset = 4;
 
       for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
@@ -2253,10 +2252,6 @@ const struct sparc_fpregmap sparc32_bsd_fpregmap =
   0 * 4,			/* %f0 */
   32 * 4,			/* %fsr */
 };
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc_tdep (void);
 
 void
 _initialize_sparc_tdep (void)

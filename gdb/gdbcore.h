@@ -1,6 +1,6 @@
 /* Machine independent variables that describe the core file under GDB.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,11 +37,11 @@ extern int have_core_file_p (void);
 
 extern void memory_error (enum target_xfer_status status, CORE_ADDR memaddr);
 
-/* The string 'memory_error' would use as exception message.  Space
-   for the result is malloc'd, caller must free.  */
+/* The string 'memory_error' would use as exception message.  */
 
-extern char *memory_error_message (enum target_xfer_status err,
-				   struct gdbarch *gdbarch, CORE_ADDR memaddr);
+extern std::string memory_error_message (enum target_xfer_status err,
+					 struct gdbarch *gdbarch,
+					 CORE_ADDR memaddr);
 
 /* Like target_read_memory, but report an error if can't read.  */
 
@@ -127,7 +127,7 @@ extern void (*deprecated_exec_file_display_hook) (const char *filename);
 /* Hook for "file_command", which is more useful than above
    (because it is invoked AFTER symbols are read, not before).  */
 
-extern void (*deprecated_file_changed_hook) (char *filename);
+extern void (*deprecated_file_changed_hook) (const char *filename);
 
 extern void specify_exec_file_hook (void (*hook) (const char *filename));
 
@@ -141,7 +141,7 @@ extern struct target_ops *core_target;
 
 extern int write_files;
 
-extern void core_file_command (char *filename, int from_tty);
+extern void core_file_command (const char *filename, int from_tty);
 
 extern void exec_file_attach (const char *filename, int from_tty);
 
@@ -225,6 +225,49 @@ struct core_fns
     struct core_fns *next;
 
   };
+
+/* Build either a single-thread or multi-threaded section name for
+   PTID.
+
+   If ptid's lwp member is zero, we want to do the single-threaded
+   thing: look for a section named NAME (as passed to the
+   constructor).  If ptid's lwp member is non-zero, we'll want do the
+   multi-threaded thing: look for a section named "NAME/LWP", where
+   LWP is the shortest ASCII decimal representation of ptid's lwp
+   member.  */
+
+class thread_section_name
+{
+public:
+  /* NAME is the single-threaded section name.  If PTID represents an
+     LWP, then the build section name is "NAME/LWP", otherwise it's
+     just "NAME" unmodified.  */
+  thread_section_name (const char *name, ptid_t ptid)
+  {
+    if (ptid.lwp_p ())
+      {
+	m_storage = string_printf ("%s/%ld", name, ptid.lwp ());
+	m_section_name = m_storage.c_str ();
+      }
+    else
+      m_section_name = name;
+  }
+
+  /* Return the computed section name.  The result is valid as long as
+     this thread_section_name object is live.  */
+  const char *c_str () const
+  { return m_section_name; }
+
+  DISABLE_COPY_AND_ASSIGN (thread_section_name);
+
+private:
+  /* Either a pointer into M_STORAGE, or a pointer to the name passed
+     as parameter to the constructor.  */
+  const char *m_section_name;
+  /* If we need to build a new section name, this is where we store
+     it.  */
+  std::string m_storage;
+};
 
 /* NOTE: cagney/2004-04-05: Replaced by "regset.h" and
    regset_from_core_section().  */

@@ -1,7 +1,7 @@
 /* Functions that provide the mechanism to parse a syscall XML file
    and get its values.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -94,48 +94,61 @@ get_syscall_group_names (struct gdbarch *gdbarch)
 #else /* ! HAVE_LIBEXPAT */
 
 /* Structure which describes a syscall.  */
-typedef struct syscall_desc
+struct syscall_desc
 {
+  syscall_desc (int number_, std::string name_)
+  : number (number_), name (name_)
+  {}
+
   /* The syscall number.  */
 
   int number;
 
   /* The syscall name.  */
 
-  char *name;
-} *syscall_desc_p;
-DEF_VEC_P(syscall_desc_p);
+  std::string name;
+};
+
+typedef std::unique_ptr<syscall_desc> syscall_desc_up;
 
 /* Structure of a syscall group.  */
-typedef struct syscall_group_desc
+struct syscall_group_desc
 {
+  syscall_group_desc (const std::string &name_)
+  : name (name_)
+  {}
+
   /* The group name.  */
 
-  char *name;
+  std::string name;
 
-  /* The syscalls that are part of the group.  */
+  /* The syscalls that are part of the group.  This is a non-owning
+     reference.  */
 
-  VEC(syscall_desc_p) *syscalls;
-} *syscall_group_desc_p;
-DEF_VEC_P(syscall_group_desc_p);
+  std::vector<syscall_desc *> syscalls;
+};
+
+typedef std::unique_ptr<syscall_group_desc> syscall_group_desc_up;
 
 /* Structure that represents syscalls information.  */
 struct syscalls_info
 {
   /* The syscalls.  */
 
-  VEC(syscall_desc_p) *syscalls;
+  std::vector<syscall_desc_up> syscalls;
 
   /* The syscall groups.  */
 
-  VEC(syscall_group_desc_p) *groups;
+  std::vector<syscall_group_desc_up> groups;
 
   /* Variable that will hold the last known data-directory.  This is
      useful to know whether we should re-read the XML info for the
      target.  */
 
-  char *my_gdb_datadir;
+  std::string my_gdb_datadir;
 };
+
+typedef std::unique_ptr<syscalls_info> syscalls_info_up;
 
 /* Callback data for syscall information parsing.  */
 struct syscall_parsing_data
@@ -145,66 +158,6 @@ struct syscall_parsing_data
   struct syscalls_info *syscalls_info;
 };
 
-static struct syscalls_info *
-allocate_syscalls_info (void)
-{
-  return XCNEW (struct syscalls_info);
-}
-
-static void
-syscalls_info_free_syscalls_desc (struct syscall_desc *sd)
-{
-  xfree (sd->name);
-}
-
-/* Free syscall_group_desc members but not the structure itself.  */
-
-static void
-syscalls_info_free_syscall_group_desc (struct syscall_group_desc *sd)
-{
-  VEC_free (syscall_desc_p, sd->syscalls);
-  xfree (sd->name);
-}
-
-static void
-free_syscalls_info (void *arg)
-{
-  struct syscalls_info *syscalls_info = (struct syscalls_info *) arg;
-  struct syscall_desc *sysdesc;
-  struct syscall_group_desc *groupdesc;
-  int i;
-
-  xfree (syscalls_info->my_gdb_datadir);
-
-  if (syscalls_info->syscalls != NULL)
-    {
-      for (i = 0;
-	   VEC_iterate (syscall_desc_p, syscalls_info->syscalls, i, sysdesc);
-	   i++)
-	syscalls_info_free_syscalls_desc (sysdesc);
-      VEC_free (syscall_desc_p, syscalls_info->syscalls);
-    }
-
-  if (syscalls_info->groups != NULL)
-    {
-      for (i = 0;
-	   VEC_iterate (syscall_group_desc_p,
-			syscalls_info->groups, i, groupdesc);
-	   i++)
-	syscalls_info_free_syscall_group_desc (groupdesc);
-
-      VEC_free (syscall_group_desc_p, syscalls_info->groups);
-    }
-
-  xfree (syscalls_info);
-}
-
-static struct cleanup *
-make_cleanup_free_syscalls_info (struct syscalls_info *syscalls_info)
-{
-  return make_cleanup (free_syscalls_info, syscalls_info);
-}
-
 /* Create a new syscall group.  Return pointer to the
    syscall_group_desc structure that represents the new group.  */
 
@@ -212,11 +165,9 @@ static struct syscall_group_desc *
 syscall_group_create_syscall_group_desc (struct syscalls_info *syscalls_info,
 					 const char *group)
 {
-  struct syscall_group_desc *groupdesc = XCNEW (struct syscall_group_desc);
+  syscall_group_desc *groupdesc = new syscall_group_desc (group);
 
-  groupdesc->name = xstrdup (group);
-
-  VEC_safe_push (syscall_group_desc_p, syscalls_info->groups, groupdesc);
+  syscalls_info->groups.emplace_back (groupdesc);
 
   return groupdesc;
 }
@@ -228,19 +179,21 @@ syscall_group_add_syscall (struct syscalls_info *syscalls_info,
 			   struct syscall_desc *syscall,
 			   const char *group)
 {
-  struct syscall_group_desc *groupdesc = NULL;
-  int i;
-
   /* Search for an existing group.  */
-  for (i = 0;
-       VEC_iterate (syscall_group_desc_p, syscalls_info->groups, i, groupdesc);
-       i++)
+  std::vector<syscall_group_desc_up>::iterator it
+    = syscalls_info->groups.begin ();
+
+  for (; it != syscalls_info->groups.end (); it++)
     {
-      if (strcmp (groupdesc->name, group) == 0)
+      if ((*it)->name == group)
 	break;
     }
 
-  if (groupdesc == NULL)
+  syscall_group_desc *groupdesc;
+
+  if (it != syscalls_info->groups.end ())
+    groupdesc = it->get ();
+  else
     {
       /* No group was found with this name.  We must create a new
 	 one.  */
@@ -248,7 +201,7 @@ syscall_group_add_syscall (struct syscalls_info *syscalls_info,
 							   group);
     }
 
-  VEC_safe_push (syscall_desc_p, groupdesc->syscalls, syscall);
+  groupdesc->syscalls.push_back (syscall);
 }
 
 static void
@@ -256,18 +209,14 @@ syscall_create_syscall_desc (struct syscalls_info *syscalls_info,
 			     const char *name, int number,
 			     char *groups)
 {
-  struct syscall_desc *sysdesc = XCNEW (struct syscall_desc);
-  char *group;
+  syscall_desc *sysdesc = new syscall_desc (number, name);
 
-  sysdesc->name = xstrdup (name);
-  sysdesc->number = number;
-
-  VEC_safe_push (syscall_desc_p, syscalls_info->syscalls, sysdesc);
+  syscalls_info->syscalls.emplace_back (sysdesc);
 
   /*  Add syscall to its groups.  */
   if (groups != NULL)
     {
-      for (group = strtok (groups, ",");
+      for (char *group = strtok (groups, ",");
 	   group != NULL;
 	   group = strtok (NULL, ","))
 	syscall_group_add_syscall (syscalls_info, sysdesc, group);
@@ -278,29 +227,26 @@ syscall_create_syscall_desc (struct syscalls_info *syscalls_info,
 static void
 syscall_start_syscall (struct gdb_xml_parser *parser,
                        const struct gdb_xml_element *element,
-                       void *user_data, VEC(gdb_xml_value_s) *attributes)
+                       void *user_data,
+		       std::vector<gdb_xml_value> &attributes)
 {
   struct syscall_parsing_data *data = (struct syscall_parsing_data *) user_data;
-  struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
-  int len, i;
   /* syscall info.  */
   char *name = NULL;
   int number = 0;
   char *groups = NULL;
 
-  len = VEC_length (gdb_xml_value_s, attributes);
-
-  for (i = 0; i < len; i++)
+  for (const gdb_xml_value &attr : attributes)
     {
-      if (strcmp (attrs[i].name, "name") == 0)
-        name = (char *) attrs[i].value;
-      else if (strcmp (attrs[i].name, "number") == 0)
-        number = * (ULONGEST *) attrs[i].value;
-      else if (strcmp (attrs[i].name, "groups") == 0)
-        groups = (char *) attrs[i].value;
+      if (strcmp (attr.name, "name") == 0)
+        name = (char *) attr.value.get ();
+      else if (strcmp (attr.name, "number") == 0)
+        number = * (ULONGEST *) attr.value.get ();
+      else if (strcmp (attr.name, "groups") == 0)
+        groups = (char *) attr.value.get ();
       else
         internal_error (__FILE__, __LINE__,
-                        _("Unknown attribute name '%s'."), attrs[i].name);
+                        _("Unknown attribute name '%s'."), attr.name);
     }
 
   gdb_assert (name);
@@ -333,23 +279,20 @@ static struct syscalls_info *
 syscall_parse_xml (const char *document, xml_fetch_another fetcher,
                    void *fetcher_baton)
 {
-  struct cleanup *result_cleanup;
   struct syscall_parsing_data data;
+  syscalls_info_up sysinfo (new syscalls_info ());
 
-  data.syscalls_info = allocate_syscalls_info ();
-  result_cleanup = make_cleanup_free_syscalls_info (data.syscalls_info);
+  data.syscalls_info = sysinfo.get ();
 
   if (gdb_xml_parse_quick (_("syscalls info"), NULL,
 			   syselements, document, &data) == 0)
     {
       /* Parsed successfully.  */
-      discard_cleanups (result_cleanup);
-      return data.syscalls_info;
+      return sysinfo.release ();
     }
   else
     {
       warning (_("Could not load XML syscalls info; ignoring"));
-      do_cleanups (result_cleanup);
       return NULL;
     }
 }
@@ -362,22 +305,14 @@ syscall_parse_xml (const char *document, xml_fetch_another fetcher,
 static struct syscalls_info *
 xml_init_syscalls_info (const char *filename)
 {
-  char *full_file;
-  struct syscalls_info *syscalls_info;
-  struct cleanup *back_to;
-
-  full_file = xml_fetch_content_from_file (filename, gdb_datadir);
+  gdb::unique_xmalloc_ptr<char> full_file
+    = xml_fetch_content_from_file (filename, gdb_datadir);
   if (full_file == NULL)
     return NULL;
 
-  back_to = make_cleanup (xfree, full_file);
-
-  syscalls_info = syscall_parse_xml (full_file,
-				     xml_fetch_content_from_file,
-				     (void *) ldirname (filename).c_str ());
-  do_cleanups (back_to);
-
-  return syscalls_info;
+  return syscall_parse_xml (full_file.get (),
+			    xml_fetch_content_from_file,
+			    (void *) ldirname (filename).c_str ());
 }
 
 /* Initializes the syscalls_info structure according to the
@@ -389,12 +324,13 @@ init_syscalls_info (struct gdbarch *gdbarch)
   const char *xml_syscall_file = gdbarch_xml_syscall_file (gdbarch);
 
   /* Should we re-read the XML info for this target?  */
-  if (syscalls_info != NULL && syscalls_info->my_gdb_datadir != NULL
-      && filename_cmp (syscalls_info->my_gdb_datadir, gdb_datadir) != 0)
+  if (syscalls_info != NULL && !syscalls_info->my_gdb_datadir.empty ()
+      && filename_cmp (syscalls_info->my_gdb_datadir.c_str (),
+		       gdb_datadir) != 0)
     {
       /* The data-directory changed from the last time we used it.
 	 It means that we have to re-read the XML info.  */
-      free_syscalls_info (syscalls_info);
+      delete syscalls_info;
       syscalls_info = NULL;
       set_gdbarch_syscalls_info (gdbarch, NULL);
     }
@@ -409,9 +345,9 @@ init_syscalls_info (struct gdbarch *gdbarch)
      gdbarch->syscalls_info anyway, in order to store information
      about our attempt.  */
   if (syscalls_info == NULL)
-    syscalls_info = allocate_syscalls_info ();
+    syscalls_info = new struct syscalls_info ();
 
-  if (syscalls_info->syscalls == NULL)
+  if (syscalls_info->syscalls.empty ())
     {
       if (xml_syscall_file != NULL)
 	warning (_("Could not load the syscall XML file `%s/%s'."),
@@ -425,7 +361,7 @@ init_syscalls_info (struct gdbarch *gdbarch)
     }
 
   /* Saving the data-directory used to read this XML info.  */
-  syscalls_info->my_gdb_datadir = xstrdup (gdb_datadir);
+  syscalls_info->my_gdb_datadir.assign (gdb_datadir);
 
   set_gdbarch_syscalls_info (gdbarch, syscalls_info);
 }
@@ -437,22 +373,17 @@ static struct syscall_group_desc *
 syscall_group_get_group_by_name (const struct syscalls_info *syscalls_info,
 				 const char *group)
 {
-  struct syscall_group_desc *groupdesc;
-  int i;
-
   if (syscalls_info == NULL)
     return NULL;
 
   if (group == NULL)
     return NULL;
 
-   /* Search for existing group.  */
-  for (i = 0;
-       VEC_iterate (syscall_group_desc_p, syscalls_info->groups, i, groupdesc);
-       i++)
+  /* Search for existing group.  */
+  for (const syscall_group_desc_up &groupdesc : syscalls_info->groups)
     {
-      if (strcmp (groupdesc->name, group) == 0)
-	return groupdesc;
+      if (groupdesc->name == group)
+	return groupdesc.get ();
     }
 
   return NULL;
@@ -463,17 +394,13 @@ xml_get_syscall_number (struct gdbarch *gdbarch,
                         const char *syscall_name)
 {
   struct syscalls_info *syscalls_info = gdbarch_syscalls_info (gdbarch);
-  struct syscall_desc *sysdesc;
-  int i;
 
   if (syscalls_info == NULL
       || syscall_name == NULL)
     return UNKNOWN_SYSCALL;
 
-  for (i = 0;
-       VEC_iterate(syscall_desc_p, syscalls_info->syscalls, i, sysdesc);
-       i++)
-    if (strcmp (sysdesc->name, syscall_name) == 0)
+  for (const syscall_desc_up &sysdesc : syscalls_info->syscalls)
+    if (sysdesc->name == syscall_name)
       return sysdesc->number;
 
   return UNKNOWN_SYSCALL;
@@ -484,18 +411,14 @@ xml_get_syscall_name (struct gdbarch *gdbarch,
                       int syscall_number)
 {
   struct syscalls_info *syscalls_info = gdbarch_syscalls_info (gdbarch);
-  struct syscall_desc *sysdesc;
-  int i;
 
   if (syscalls_info == NULL
       || syscall_number < 0)
     return NULL;
 
-  for (i = 0;
-       VEC_iterate(syscall_desc_p, syscalls_info->syscalls, i, sysdesc);
-       i++)
+  for (const syscall_desc_up &sysdesc : syscalls_info->syscalls)
     if (sysdesc->number == syscall_number)
-      return sysdesc->name;
+      return sysdesc->name.c_str ();
 
   return NULL;
 }
@@ -504,21 +427,16 @@ static const char **
 xml_list_of_syscalls (struct gdbarch *gdbarch)
 {
   struct syscalls_info *syscalls_info = gdbarch_syscalls_info (gdbarch);
-  struct syscall_desc *sysdesc;
-  const char **names = NULL;
-  int nsyscalls;
-  int i;
 
   if (syscalls_info == NULL)
     return NULL;
 
-  nsyscalls = VEC_length (syscall_desc_p, syscalls_info->syscalls);
-  names = XNEWVEC (const char *, nsyscalls + 1);
+  int nsyscalls = syscalls_info->syscalls.size ();
+  const char **names = XNEWVEC (const char *, nsyscalls + 1);
 
-  for (i = 0;
-       VEC_iterate (syscall_desc_p, syscalls_info->syscalls, i, sysdesc);
-       i++)
-    names[i] = sysdesc->name;
+  int i;
+  for (i = 0; i < syscalls_info->syscalls.size (); i++)
+    names[i] = syscalls_info->syscalls[i]->name.c_str ();
 
   names[i] = NULL;
 
@@ -534,7 +452,6 @@ xml_list_syscalls_by_group (struct gdbarch *gdbarch, const char *group)
 {
   struct syscalls_info *syscalls_info = gdbarch_syscalls_info (gdbarch);
   struct syscall_group_desc *groupdesc;
-  struct syscall_desc *sysdesc;
   struct syscall *syscalls = NULL;
   int nsyscalls;
   int i;
@@ -546,16 +463,14 @@ xml_list_syscalls_by_group (struct gdbarch *gdbarch, const char *group)
   if (groupdesc == NULL)
     return NULL;
 
-  nsyscalls = VEC_length (syscall_desc_p, groupdesc->syscalls);
+  nsyscalls = groupdesc->syscalls.size ();
   syscalls = (struct syscall*) xmalloc ((nsyscalls + 1)
 					* sizeof (struct syscall));
 
-  for (i = 0;
-       VEC_iterate (syscall_desc_p, groupdesc->syscalls, i, sysdesc);
-       i++)
+  for (i = 0; i < groupdesc->syscalls.size (); i++)
     {
-      syscalls[i].name = sysdesc->name;
-      syscalls[i].number = sysdesc->number;
+      syscalls[i].name = groupdesc->syscalls[i]->name.c_str ();
+      syscalls[i].number = groupdesc->syscalls[i]->number;
     }
 
   /* Add final element marker.  */
@@ -573,21 +488,18 @@ static const char **
 xml_list_of_groups (struct gdbarch *gdbarch)
 {
   struct syscalls_info *syscalls_info = gdbarch_syscalls_info (gdbarch);
-  struct syscall_group_desc *groupdesc;
   const char **names = NULL;
-  int i;
   int ngroups;
+  int i;
 
   if (syscalls_info == NULL)
     return NULL;
 
-  ngroups = VEC_length (syscall_group_desc_p, syscalls_info->groups);
+  ngroups = syscalls_info->groups.size ();
   names = (const char**) xmalloc ((ngroups + 1) * sizeof (char *));
 
-  for (i = 0;
-       VEC_iterate (syscall_group_desc_p, syscalls_info->groups, i, groupdesc);
-       i++)
-    names[i] = groupdesc->name;
+  for (i = 0; i < syscalls_info->groups.size (); i++)
+    names[i] = syscalls_info->groups[i]->name.c_str ();
 
   names[i] = NULL;
 

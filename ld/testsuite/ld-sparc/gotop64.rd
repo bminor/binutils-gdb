@@ -33,7 +33,7 @@ Program Headers:
  +DYNAMIC +0x0+2000 0x0+102000 0x0+102000 0x0+e0 0x0+e0 RW +0x8
 #...
 
-Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entry:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f ]+R_SPARC_GLOB_DAT +0+103000 +sym \+ 0
 

@@ -1,5 +1,5 @@
 /* stabs.c -- Parse stabs debugging information
-   Copyright (C) 1995-2017 Free Software Foundation, Inc.
+   Copyright (C) 1995-2018 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -995,7 +995,7 @@ parse_stab_string (void *dhandle, struct stab_handle *info, int stabtype,
       break;
 
     case 'T':
-      /* Struct, union, or enum tag.  For GNU C++, this can be be followed
+      /* Struct, union, or enum tag.  For GNU C++, this can be followed
 	 by 't' which means we are typedef'ing it as well.  */
       if (*p != 't')
 	{

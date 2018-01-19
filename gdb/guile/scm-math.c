@@ -1,6 +1,6 @@
 /* GDB/Scheme support for math operations on values.
 
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,9 +24,7 @@
 #include "arch-utils.h"
 #include "charset.h"
 #include "cp-abi.h"
-#include "doublest.h" /* Needed by dfp.h.  */
-#include "expression.h" /* Needed by dfp.h.  */
-#include "dfp.h"
+#include "target-float.h"
 #include "symtab.h" /* Needed by language.h.  */
 #include "language.h"
 #include "valprint.h"
@@ -599,7 +597,13 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 	}
     }
   else if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    return value_from_double (type, scm_to_double (obj));
+    {
+      struct value *value = allocate_value (type);
+      target_float_from_host_double (value_contents_raw (value),
+				     value_type (value),
+				     scm_to_double (obj));
+      return value;
+    }
   else
     {
       *except_scmp = gdbscm_make_type_error (func_name, obj_arg_pos, obj,
@@ -679,7 +683,13 @@ vlscm_convert_number (const char *func_name, int obj_arg_pos, SCM obj,
 				   gdbscm_scm_to_ulongest (obj));
     }
   else if (scm_is_real (obj))
-    return value_from_double (bt->builtin_double, scm_to_double (obj));
+    {
+      struct value *value = allocate_value (bt->builtin_double);
+      target_float_from_host_double (value_contents_raw (value),
+				     value_type (value),
+				     scm_to_double (obj));
+      return value;
+    }
 
   *except_scmp = gdbscm_make_out_of_range_error (func_name, obj_arg_pos, obj,
 			_("value not a number representable on the target"));

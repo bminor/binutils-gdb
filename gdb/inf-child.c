@@ -1,6 +1,6 @@
 /* Base/prototype target for default child (native) targets.
 
-   Copyright (C) 1988-2017 Free Software Foundation, Inc.
+   Copyright (C) 1988-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -77,7 +77,7 @@ inf_child_fetch_inferior_registers (struct target_ops *ops,
   if (regnum == -1)
     {
       for (regnum = 0;
-	   regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regnum < gdbarch_num_regs (regcache->arch ());
 	   regnum++)
 	regcache_raw_supply (regcache, regnum, NULL);
     }

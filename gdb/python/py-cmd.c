@@ -1,6 +1,6 @@
 /* gdb commands implemented in Python
 
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,7 +44,7 @@ static const struct cmdpy_completer completers[] =
   { "COMPLETE_FILENAME", filename_completer },
   { "COMPLETE_LOCATION", location_completer },
   { "COMPLETE_COMMAND", command_completer },
-  { "COMPLETE_SYMBOL", make_symbol_completion_list_fn },
+  { "COMPLETE_SYMBOL", symbol_completer },
   { "COMPLETE_EXPRESSION", expression_completer },
 };
 
@@ -110,9 +110,8 @@ cmdpy_destroyer (struct cmd_list_element *self, void *context)
 
 static void
 cmdpy_function (struct cmd_list_element *command,
-		char *args_entry, int from_tty)
+		const char *args, int from_tty)
 {
-  const char *args = args_entry;
   cmdpy_object *obj = (cmdpy_object *) get_cmd_context (command);
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
@@ -242,10 +241,21 @@ cmdpy_completer_helper (struct cmd_list_element *command,
 					 NULL));
   if (textobj == NULL)
     error (_("Could not convert argument to Python string."));
-  gdbpy_ref<> wordobj (PyUnicode_Decode (word, strlen (word), host_charset (),
-					 NULL));
-  if (wordobj == NULL)
-    error (_("Could not convert argument to Python string."));
+
+  gdbpy_ref<> wordobj;
+  if (word == NULL)
+    {
+      /* "brkchars" phase.  */
+      wordobj.reset (Py_None);
+      Py_INCREF (Py_None);
+    }
+  else
+    {
+      wordobj.reset (PyUnicode_Decode (word, strlen (word), host_charset (),
+				       NULL));
+      if (wordobj == NULL)
+	error (_("Could not convert argument to Python string."));
+    }
 
   gdbpy_ref<> resultobj (PyObject_CallMethodObjArgs ((PyObject *) obj,
 						     complete_cst,
@@ -267,6 +277,7 @@ cmdpy_completer_helper (struct cmd_list_element *command,
 
 static void
 cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
+				 completion_tracker &tracker,
 				 const char *text, const char *word)
 {
   gdbpy_enter enter_py (get_current_arch (), current_language);
@@ -293,23 +304,25 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
 	}
       else if (value >= 0 && value < (long) N_COMPLETERS)
 	{
+	  completer_handle_brkchars_ftype *brkchars_fn;
+
 	  /* This is the core of this function.  Depending on which
 	     completer type the Python function returns, we have to
 	     adjust the break characters accordingly.  */
-	  set_gdb_completion_word_break_characters
-	    (completers[value].completer);
+	  brkchars_fn = (completer_handle_brkchars_func_for_completer
+			 (completers[value].completer));
+	  brkchars_fn (command, tracker, text, word);
 	}
     }
 }
 
 /* Called by gdb for command completion.  */
 
-static VEC (char_ptr) *
+static void
 cmdpy_completer (struct cmd_list_element *command,
+		 completion_tracker &tracker,
 		 const char *text, const char *word)
 {
-  VEC (char_ptr) *result = NULL;
-
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* Calling our helper to obtain the PyObject of the Python
@@ -317,12 +330,10 @@ cmdpy_completer (struct cmd_list_element *command,
   gdbpy_ref<> resultobj (cmdpy_completer_helper (command, text, word));
 
   /* If the result object of calling the Python function is NULL, it
-     means that there was an error.  In this case, just give up and
-     return NULL.  */
+     means that there was an error.  In this case, just give up.  */
   if (resultobj == NULL)
-    return NULL;
+    return;
 
-  result = NULL;
   if (PyInt_Check (resultobj.get ()))
     {
       /* User code may also return one of the completion constants,
@@ -335,15 +346,16 @@ cmdpy_completer (struct cmd_list_element *command,
 	  PyErr_Clear ();
 	}
       else if (value >= 0 && value < (long) N_COMPLETERS)
-	result = completers[value].completer (command, text, word);
+	completers[value].completer (command, tracker, text, word);
     }
   else
     {
       gdbpy_ref<> iter (PyObject_GetIter (resultobj.get ()));
 
       if (iter == NULL)
-	return NULL;
+	return;
 
+      bool got_matches = false;
       while (true)
 	{
 	  gdbpy_ref<> elt (PyIter_Next (iter.get ()));
@@ -363,16 +375,15 @@ cmdpy_completer (struct cmd_list_element *command,
 	      PyErr_Clear ();
 	      continue;
 	    }
-	  VEC_safe_push (char_ptr, result, item.release ());
+	  tracker.add_completion (std::move (item));
+	  got_matches = true;
 	}
 
       /* If we got some results, ignore problems.  Otherwise, report
 	 the problem.  */
-      if (result != NULL && PyErr_Occurred ())
+      if (got_matches && PyErr_Occurred ())
 	PyErr_Clear ();
     }
-
-  return result;
 }
 
 /* Helper for cmdpy_init which locates the command list to use and
@@ -600,7 +611,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 				pfx_name, allow_unknown, cmd_list);
 	}
       else
-	cmd = add_cmd (cmd_name, (enum command_class) cmdtype, NULL,
+	cmd = add_cmd (cmd_name, (enum command_class) cmdtype,
 		       docstring, cmd_list);
 
       /* There appears to be no API to set this.  */
@@ -763,22 +774,16 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
 
   if (*input != '\0')
     {
-      char **c_argv = gdb_buildargv (input);
-      int i;
+      gdb_argv c_argv (input);
 
-      for (i = 0; c_argv[i] != NULL; ++i)
+      for (char *arg : c_argv)
 	{
-	  gdbpy_ref<> argp (PyString_FromString (c_argv[i]));
+	  gdbpy_ref<> argp (PyString_FromString (arg));
 
 	  if (argp == NULL
 	      || PyList_Append (py_argv.get (), argp.get ()) < 0)
-	    {
-	      freeargv (c_argv);
-	      return NULL;
-	    }
+	    return NULL;
 	}
-
-      freeargv (c_argv);
     }
 
   return py_argv.release ();

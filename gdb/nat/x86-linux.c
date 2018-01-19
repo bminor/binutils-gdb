@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux x86 (i386 and x86-64).
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -63,6 +63,14 @@ void
 x86_linux_new_thread (struct lwp_info *lwp)
 {
   lwp_set_debug_registers_changed (lwp, 1);
+}
+
+/* See nat/x86-linux.h.  */
+
+void
+x86_linux_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
 }
 
 /* See nat/x86-linux.h.  */

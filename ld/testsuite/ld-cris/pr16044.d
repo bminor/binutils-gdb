@@ -2,7 +2,7 @@
 #source: dso-2b.s
 #source: dso-1c.s
 #as: --pic --no-underscore --em=criself -I$srcdir/$subdir
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #readelf: -s -r
 
 # PR 16044 is about a (compile-time-non-local) hidden function symbol,
@@ -23,7 +23,7 @@
 # local, its absence from the dynamic symbol table and that the
 # relocation and symbol values match.
 
-Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 1 entry:
  Offset[ 	]+Info[ 	]+Type[ 	]+Sym\.Value  Sym\. Name \+ Addend
 [0-9a-f]+  0+[0-9a-f]+ R_CRIS_RELATIVE[ 	]+184
 

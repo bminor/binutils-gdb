@@ -1,5 +1,5 @@
 /* Language independent support for printing types for GDB, the GNU debugger.
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,20 @@ struct ui_file;
 struct typedef_hash_table;
 struct ext_lang_type_printers;
 
+struct print_offset_data
+{
+  /* The offset to be applied to bitpos when PRINT_OFFSETS is true.
+     This is needed for when we are printing nested structs and want
+     to make sure that the printed offset for each field carries over
+     the offset of the outter struct.  */
+  unsigned int offset_bitpos = 0;
+
+  /* END_BITPOS is the one-past-the-end bit position of the previous
+     field (where we expect the current field to be if there is no
+     hole).  */
+  unsigned int end_bitpos = 0;
+};
+
 struct type_print_options
 {
   /* True means that no special printing flags should apply.  */
@@ -34,6 +48,12 @@ struct type_print_options
 
   /* True means print typedefs in a class.  */
   unsigned int print_typedefs : 1;
+
+  /* True means to print offsets, a la 'pahole'.  */
+  unsigned int print_offsets : 1;
+
+  /* The number of nested type definitions to print.  -1 == all.  */
+  int print_nested_type_limit;
 
   /* If not NULL, a local typedef hash table used when printing a
      type.  */
@@ -73,6 +93,15 @@ void c_type_print_varspec_suffix (struct type *, struct ui_file *, int,
 
 void c_type_print_args (struct type *, struct ui_file *, int, enum language,
 			const struct type_print_options *);
+
+/* Print <unknown return type> to stream STREAM.  */
+
+void type_print_unknown_return_type (struct ui_file *stream);
+
+/* Throw an error indicating that the user tried to use a symbol that
+   has unknown type.  SYM_PRINT_NAME is the name of the symbol, to be
+   included in the error message.  */
+extern void error_unknown_type (const char *sym_print_name);
 
 extern void val_print_not_allocated (struct ui_file *stream);
 

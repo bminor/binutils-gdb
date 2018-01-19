@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux Super-H.
 
-   Copyright (C) 2005-2017 Free Software Foundation, Inc.
+   Copyright (C) 2005-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -211,9 +211,6 @@ sh_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       tramp_frame_prepend_unwinder (gdbarch, &sh_linux_rt_sigreturn_tramp_frame);
     }
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_sh_linux_tdep (void);
 
 void
 _initialize_sh_linux_tdep (void)

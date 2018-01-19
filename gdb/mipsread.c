@@ -1,6 +1,6 @@
 /* Read a symbol table in MIPS' format (Third-Eye).
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    Contributed by Alessandro Forin (af@cs.cmu.edu) at CMU.  Major work
    by Per Bothner, John Gilmore and Ian Lance Taylor at Cygnus Support.
@@ -412,9 +412,6 @@ static const struct sym_fns ecoff_sym_fns =
   NULL,				/* sym_probe_fns */
   &psym_functions
 };
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_mipsread (void);
 
 void
 _initialize_mipsread (void)

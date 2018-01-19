@@ -1,6 +1,6 @@
 /* Definitions for values of C expressions, for GDB.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,8 +20,8 @@
 #if !defined (VALUE_H)
 #define VALUE_H 1
 
-#include "doublest.h"
 #include "frame.h"		/* For struct frame_id.  */
+#include "extension.h"
 
 struct block;
 struct expression;
@@ -31,7 +31,6 @@ struct type;
 struct ui_file;
 struct language_defn;
 struct value_print_options;
-struct xmethod_worker;
 
 /* Values can be partially 'optimized out' and/or 'unavailable'.
    These are distinct states and have different string representations
@@ -550,12 +549,12 @@ extern void mark_value_bits_unavailable (struct value *value,
 
    then:
 
-     value_contents_eq(val, 0, val, 8, 6) => 1
-     value_contents_eq(val, 0, val, 4, 4) => 0
-     value_contents_eq(val, 0, val, 8, 8) => 0
-     value_contents_eq(val, 4, val, 12, 2) => 1
-     value_contents_eq(val, 4, val, 12, 4) => 0
-     value_contents_eq(val, 3, val, 4, 4) => 0
+     value_contents_eq(val, 0, val, 8, 6) => true
+     value_contents_eq(val, 0, val, 4, 4) => false
+     value_contents_eq(val, 0, val, 8, 8) => false
+     value_contents_eq(val, 4, val, 12, 2) => true
+     value_contents_eq(val, 4, val, 12, 4) => true
+     value_contents_eq(val, 3, val, 4, 4) => true
 
    If 'x's represent an unavailable byte, 'o' represents an optimized
    out byte, in a value with length 8:
@@ -565,9 +564,9 @@ extern void mark_value_bits_unavailable (struct value *value,
 
    then:
 
-     value_contents_eq(val, 0, val, 2, 2) => 1
-     value_contents_eq(val, 4, val, 6, 2) => 1
-     value_contents_eq(val, 0, val, 4, 4) => 0
+     value_contents_eq(val, 0, val, 2, 2) => true
+     value_contents_eq(val, 4, val, 6, 2) => true
+     value_contents_eq(val, 0, val, 4, 4) => true
 
    We only know whether a value chunk is unavailable or optimized out
    if we've tried to read it.  As this routine is used by printing
@@ -575,9 +574,9 @@ extern void mark_value_bits_unavailable (struct value *value,
    after the inferior is gone, it works with const values.  Therefore,
    this routine must not be called with lazy values.  */
 
-extern int value_contents_eq (const struct value *val1, LONGEST offset1,
-			      const struct value *val2, LONGEST offset2,
-			      LONGEST length);
+extern bool value_contents_eq (const struct value *val1, LONGEST offset1,
+			       const struct value *val2, LONGEST offset2,
+			       LONGEST length);
 
 /* Read LENGTH addressable memory units starting at MEMADDR into BUFFER,
    which is (or will be copied to) VAL's contents buffer offset by
@@ -608,13 +607,14 @@ extern int print_address_demangle (const struct value_print_options *,
 				   struct gdbarch *, CORE_ADDR,
 				   struct ui_file *, int);
 
+/* Returns true if VAL is of floating-point type.  In addition,
+   throws an error if the value is an invalid floating-point value.  */
+extern bool is_floating_value (struct value *val);
+
 extern LONGEST value_as_long (struct value *val);
-extern DOUBLEST value_as_double (struct value *val);
 extern CORE_ADDR value_as_address (struct value *val);
 
 extern LONGEST unpack_long (struct type *type, const gdb_byte *valaddr);
-extern DOUBLEST unpack_double (struct type *type, const gdb_byte *valaddr,
-			       int *invp);
 extern CORE_ADDR unpack_pointer (struct type *type, const gdb_byte *valaddr);
 
 extern LONGEST unpack_field_as_long (struct type *type,
@@ -640,9 +640,6 @@ extern void pack_long (gdb_byte *buf, struct type *type, LONGEST num);
 extern struct value *value_from_longest (struct type *type, LONGEST num);
 extern struct value *value_from_ulongest (struct type *type, ULONGEST num);
 extern struct value *value_from_pointer (struct type *type, CORE_ADDR addr);
-extern struct value *value_from_double (struct type *type, DOUBLEST num);
-extern struct value *value_from_decfloat (struct type *type,
-					  const gdb_byte *decbytes);
 extern struct value *value_from_history_ref (const char *, const char **);
 extern struct value *value_from_component (struct value *, struct type *,
 					   LONGEST);
@@ -729,6 +726,10 @@ class scoped_value_mark
   {
     free_to_mark ();
   }
+
+  scoped_value_mark (scoped_value_mark &&other) = default;
+
+  DISABLE_COPY_AND_ASSIGN (scoped_value_mark);
 
   /* Free the values currently on the value stack.  */
   void free_to_mark ()
@@ -874,6 +875,15 @@ extern struct value *evaluate_subexp (struct type *expect_type,
 extern struct value *evaluate_subexpression_type (struct expression *exp,
 						  int subexp);
 
+extern value *evaluate_var_value (enum noside noside, const block *blk,
+				  symbol *var);
+
+extern value *evaluate_var_msym_value (enum noside noside,
+				       struct objfile *objfile,
+				       minimal_symbol *msymbol);
+
+extern value *eval_skip_value (expression *exp);
+
 extern void fetch_subexp_value (struct expression *exp, int *pc,
 				struct value **valp, struct value **resultp,
 				struct value **val_chain,
@@ -927,7 +937,8 @@ extern struct internalvar *lookup_only_internalvar (const char *name);
 
 extern struct internalvar *create_internalvar (const char *name);
 
-extern VEC (char_ptr) *complete_internalvar (const char *name);
+extern void complete_internalvar (completion_tracker &tracker,
+				  const char *name);
 
 /* An internalvar can be dynamically computed by supplying a vector of
    function pointers to perform various operations.  */
@@ -1017,6 +1028,21 @@ extern void value_incref (struct value *val);
 
 extern void value_free (struct value *val);
 
+/* A free policy class to interface std::unique_ptr with
+   value_free.  */
+
+struct value_deleter
+{
+  void operator() (struct value *value) const
+  {
+    value_free (value);
+  }
+};
+
+/* A unique pointer to a struct value.  */
+
+typedef std::unique_ptr<struct value, value_deleter> gdb_value_up;
+
 extern void free_all_values (void);
 
 extern void free_value_chain (struct value *v);
@@ -1044,9 +1070,6 @@ extern void print_longest (struct ui_file *stream, int format,
 
 extern void print_floating (const gdb_byte *valaddr, struct type *type,
 			    struct ui_file *stream);
-
-extern void print_decimal_floating (const gdb_byte *valaddr, struct type *type,
-				    struct ui_file *stream);
 
 extern void value_print (struct value *val, struct ui_file *stream,
 			 const struct value_print_options *options);
@@ -1135,7 +1158,10 @@ struct value *call_internal_function (struct gdbarch *gdbarch,
 
 char *value_internal_function_name (struct value *);
 
-extern struct value *value_of_xmethod (struct xmethod_worker *);
+/* Build a value wrapping and representing WORKER.  The value takes ownership
+   of the xmethod_worker object.  */
+
+extern struct value *value_from_xmethod (xmethod_worker_up &&worker);
 
 extern struct type *result_type_of_xmethod (struct value *method,
 					    int argc, struct value **argv);

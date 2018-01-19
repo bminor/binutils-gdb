@@ -1,5 +1,5 @@
 /* x86_64 ELF support for BFD.
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
    Contributed by Jan Hubicka <jh@suse.cz>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -82,6 +82,7 @@ START_RELOC_NUMBERS (elf_x86_64_reloc_type)
      /* Load from 32 bit signed pc relative offset to GOT entry with
 	REX prefix, relaxable.  */
      RELOC_NUMBER (R_X86_64_REX_GOTPCRELX, 42)
+     RELOC_NUMBER (R_X86_64_GPOFF,    43)     /* 32 bit offset to __gp  */
      RELOC_NUMBER (R_X86_64_GNU_VTINHERIT, 250)       /* GNU C++ hack  */
      RELOC_NUMBER (R_X86_64_GNU_VTENTRY, 251)         /* GNU C++ hack  */
 END_RELOC_NUMBERS (R_X86_64_max)

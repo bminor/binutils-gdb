@@ -1,6 +1,6 @@
 /* Handle shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -546,14 +546,10 @@ static int
 solib_map_sections (struct so_list *so)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
-  char *filename;
   struct target_section *p;
-  struct cleanup *old_chain;
 
-  filename = tilde_expand (so->so_name);
-  old_chain = make_cleanup (xfree, filename);
-  gdb_bfd_ref_ptr abfd (ops->bfd_open (filename));
-  do_cleanups (old_chain);
+  gdb::unique_xmalloc_ptr<char> filename (tilde_expand (so->so_name));
+  gdb_bfd_ref_ptr abfd (ops->bfd_open (filename.get ()));
 
   if (abfd == NULL)
     return 0;
@@ -764,9 +760,19 @@ update_solib_list (int from_tty)
 	 have not opened a symbol file, we may be able to get its
 	 symbols now!  */
       if (inf->attach_flag && symfile_objfile == NULL)
-	catch_errors (ops->open_symbol_file_object, &from_tty,
-		      "Error reading attached process's symbol file.\n",
-		      RETURN_MASK_ALL);
+	{
+	  TRY
+	    {
+	      ops->open_symbol_file_object (from_tty);
+	    }
+	  CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      exception_fprintf (gdb_stderr, ex,
+				 "Error reading attached "
+				 "process's symbol file.\n");
+	    }
+	  END_CATCH
+	}
     }
 
   /* GDB and the inferior's dynamic linker each maintain their own
@@ -845,7 +851,7 @@ update_solib_list (int from_tty)
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */
 	  if (gdb->objfile && ! (gdb->objfile->flags & OBJF_USERLOADED)
 	      && !solib_used (gdb))
-	    free_objfile (gdb->objfile);
+	    delete gdb->objfile;
 
 	  /* Some targets' section tables might be referring to
 	     sections from so->abfd; remove them.  */
@@ -1039,13 +1045,12 @@ solib_add (const char *pattern, int from_tty, int readsyms)
    all.  */
 
 static void
-info_sharedlibrary_command (char *pattern, int from_tty)
+info_sharedlibrary_command (const char *pattern, int from_tty)
 {
   struct so_list *so = NULL;	/* link map state variable */
   int so_missing_debug_info = 0;
   int addr_width;
   int nr_libs;
-  struct cleanup *table_cleanup;
   struct gdbarch *gdbarch = target_gdbarch ();
   struct ui_out *uiout = current_uiout;
 
@@ -1062,8 +1067,8 @@ info_sharedlibrary_command (char *pattern, int from_tty)
 
   update_solib_list (from_tty);
 
-  /* make_cleanup_ui_out_table_begin_end needs to know the number of
-     rows, so we need to make two passes over the libs.  */
+  /* ui_out_emit_table table_emitter needs to know the number of rows,
+     so we need to make two passes over the libs.  */
 
   for (nr_libs = 0, so = so_list_head; so; so = so->next)
     {
@@ -1075,54 +1080,52 @@ info_sharedlibrary_command (char *pattern, int from_tty)
 	}
     }
 
-  table_cleanup =
-    make_cleanup_ui_out_table_begin_end (uiout, 4, nr_libs,
-					 "SharedLibraryTable");
+  {
+    ui_out_emit_table table_emitter (uiout, 4, nr_libs, "SharedLibraryTable");
 
-  /* The "- 1" is because ui_out adds one space between columns.  */
-  uiout->table_header (addr_width - 1, ui_left, "from", "From");
-  uiout->table_header (addr_width - 1, ui_left, "to", "To");
-  uiout->table_header (12 - 1, ui_left, "syms-read", "Syms Read");
-  uiout->table_header (0, ui_noalign, "name", "Shared Object Library");
+    /* The "- 1" is because ui_out adds one space between columns.  */
+    uiout->table_header (addr_width - 1, ui_left, "from", "From");
+    uiout->table_header (addr_width - 1, ui_left, "to", "To");
+    uiout->table_header (12 - 1, ui_left, "syms-read", "Syms Read");
+    uiout->table_header (0, ui_noalign, "name", "Shared Object Library");
 
-  uiout->table_body ();
+    uiout->table_body ();
 
-  ALL_SO_LIBS (so)
-    {
-      if (! so->so_name[0])
-	continue;
-      if (pattern && ! re_exec (so->so_name))
-	continue;
+    ALL_SO_LIBS (so)
+      {
+	if (! so->so_name[0])
+	  continue;
+	if (pattern && ! re_exec (so->so_name))
+	  continue;
 
-      ui_out_emit_tuple tuple_emitter (uiout, "lib");
+	ui_out_emit_tuple tuple_emitter (uiout, "lib");
 
-      if (so->addr_high != 0)
-	{
-	  uiout->field_core_addr ("from", gdbarch, so->addr_low);
-	  uiout->field_core_addr ("to", gdbarch, so->addr_high);
-	}
-      else
-	{
-	  uiout->field_skip ("from");
-	  uiout->field_skip ("to");
-	}
+	if (so->addr_high != 0)
+	  {
+	    uiout->field_core_addr ("from", gdbarch, so->addr_low);
+	    uiout->field_core_addr ("to", gdbarch, so->addr_high);
+	  }
+	else
+	  {
+	    uiout->field_skip ("from");
+	    uiout->field_skip ("to");
+	  }
 
-      if (! interp_ui_out (top_level_interpreter ())->is_mi_like_p ()
-	  && so->symbols_loaded
-	  && !objfile_has_symbols (so->objfile))
-	{
-	  so_missing_debug_info = 1;
-	  uiout->field_string ("syms-read", "Yes (*)");
-	}
-      else
-	uiout->field_string ("syms-read", so->symbols_loaded ? "Yes" : "No");
+	if (! interp_ui_out (top_level_interpreter ())->is_mi_like_p ()
+	    && so->symbols_loaded
+	    && !objfile_has_symbols (so->objfile))
+	  {
+	    so_missing_debug_info = 1;
+	    uiout->field_string ("syms-read", "Yes (*)");
+	  }
+	else
+	  uiout->field_string ("syms-read", so->symbols_loaded ? "Yes" : "No");
 
-      uiout->field_string ("name", so->so_name);
+	uiout->field_string ("name", so->so_name);
 
-      uiout->text ("\n");
-    }
-
-  do_cleanups (table_cleanup);
+	uiout->text ("\n");
+      }
+  }
 
   if (nr_libs == 0)
     {
@@ -1243,7 +1246,7 @@ in_solib_dynsym_resolve_code (CORE_ADDR pc)
 /* Implements the "sharedlibrary" command.  */
 
 static void
-sharedlibrary_command (char *args, int from_tty)
+sharedlibrary_command (const char *args, int from_tty)
 {
   dont_repeat ();
   solib_add (args, from_tty, 1);
@@ -1255,7 +1258,7 @@ sharedlibrary_command (char *args, int from_tty)
    are not discarded.  Also called from remote.c.  */
 
 void
-no_shared_libraries (char *ignored, int from_tty)
+no_shared_libraries (const char *ignored, int from_tty)
 {
   /* The order of the two routines below is important: clear_solib notifies
      the solib_unloaded observers, and some of these observers might need
@@ -1292,9 +1295,9 @@ handle_solib_event (void)
   /* Check for any newly added shared libraries if we're supposed to
      be adding them automatically.  Switch terminal for any messages
      produced by breakpoint_re_set.  */
-  target_terminal_ours_for_output ();
+  target_terminal::ours_for_output ();
   solib_add (NULL, 0, auto_solib_add);
-  target_terminal_inferior ();
+  target_terminal::inferior ();
 }
 
 /* Reload shared libraries, but avoid reloading the same symbol file
@@ -1304,28 +1307,24 @@ static void
 reload_shared_libraries_1 (int from_tty)
 {
   struct so_list *so;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   if (print_symbol_loading_p (from_tty, 0, 0))
     printf_unfiltered (_("Loading symbols for shared libraries.\n"));
 
   for (so = so_list_head; so != NULL; so = so->next)
     {
-      char *filename, *found_pathname = NULL;
+      char *found_pathname = NULL;
       int was_loaded = so->symbols_loaded;
       symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
 
       if (from_tty)
 	add_flags |= SYMFILE_VERBOSE;
 
-      filename = tilde_expand (so->so_original_name);
-      make_cleanup (xfree, filename);
-      gdb_bfd_ref_ptr abfd (solib_bfd_open (filename));
+      gdb::unique_xmalloc_ptr<char> filename
+	(tilde_expand (so->so_original_name));
+      gdb_bfd_ref_ptr abfd (solib_bfd_open (filename.get ()));
       if (abfd != NULL)
-	{
-	  found_pathname = xstrdup (bfd_get_filename (abfd.get ()));
-	  make_cleanup (xfree, found_pathname);
-	}
+	found_pathname = bfd_get_filename (abfd.get ());
 
       /* If this shared library is no longer associated with its previous
 	 symbol file, close that.  */
@@ -1335,7 +1334,7 @@ reload_shared_libraries_1 (int from_tty)
 	{
 	  if (so->objfile && ! (so->objfile->flags & OBJF_USERLOADED)
 	      && !solib_used (so))
-	    free_objfile (so->objfile);
+	    delete so->objfile;
 	  remove_target_sections (so);
 	  clear_so (so);
 	}
@@ -1367,12 +1366,10 @@ reload_shared_libraries_1 (int from_tty)
 	      solib_read_symbols (so, add_flags);
 	}
     }
-
-  do_cleanups (old_chain);
 }
 
 static void
-reload_shared_libraries (char *ignored, int from_tty,
+reload_shared_libraries (const char *ignored, int from_tty,
 			 struct cmd_list_element *e)
 {
   const struct target_so_ops *ops;
@@ -1427,7 +1424,7 @@ reload_shared_libraries (char *ignored, int from_tty,
    at the start of gdb_sysroot with "target:".  */
 
 static void
-gdb_sysroot_changed (char *ignored, int from_tty,
+gdb_sysroot_changed (const char *ignored, int from_tty,
 		     struct cmd_list_element *e)
 {
   const char *old_prefix = "remote:";
@@ -1612,8 +1609,6 @@ remove_user_added_objfile (struct objfile *objfile)
 	  so->objfile = NULL;
     }
 }
-
-extern initialize_file_ftype _initialize_solib; /* -Wmissing-prototypes */
 
 void
 _initialize_solib (void)

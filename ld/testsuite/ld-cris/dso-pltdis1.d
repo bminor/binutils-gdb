@@ -2,7 +2,7 @@
 #source: dsov32-2.s
 #source: dsofn4g.s
 #as: --pic --no-underscore --march=v32 --em=criself
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #objdump: -d -R
 
 # Check dissassembly of the .plt section, specifically the synthetic

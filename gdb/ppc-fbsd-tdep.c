@@ -1,6 +1,6 @@
 /* Target-dependent code for PowerPC systems running FreeBSD.
 
-   Copyright (C) 2013-2017 Free Software Foundation, Inc.
+   Copyright (C) 2013-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -335,10 +335,6 @@ ppcfbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-
-void _initialize_ppcfbsd_tdep (void);
 
 void
 _initialize_ppcfbsd_tdep (void)

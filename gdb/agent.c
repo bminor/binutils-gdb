@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2017 Free Software Foundation, Inc.
+/* Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,15 +44,12 @@ show_can_use_agent (struct ui_file *file, int from_tty,
 }
 
 static void
-set_can_use_agent (char *args, int from_tty, struct cmd_list_element *c)
+set_can_use_agent (const char *args, int from_tty, struct cmd_list_element *c)
 {
   if (target_use_agent (can_use_agent == can_use_agent_on) == 0)
     /* Something wrong during setting, set flag to default value.  */
     can_use_agent = can_use_agent_off;
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_agent;
 
 #include "observer.h"
 #include "objfiles.h"

@@ -157,6 +157,10 @@ endif NATIVE_OR_CROSS_LINKER
 if NATIVE_LINKER
 if GCC
 
+# Test empty command line error conditions.
+check_SCRIPTS += empty_command_line_test.sh
+empty_command_line_test.sh: gcctestdir/ld
+
 # Each of these .o's is a useful, small complete program.  They're
 # particularly useful for making sure ld-new's flags do what they're
 # supposed to (hence their names), but are used for many tests that
@@ -174,7 +178,7 @@ incremental_test_1.o: incremental_test_1.c
 incremental_test_2.o: incremental_test_2.c
 	$(COMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 incremental_test: incremental_test_1.o incremental_test_2.o gcctestdir/ld
-	$(LINK) -Bgcctestdir/ -Wl,--incremental-full -Wl,-z,norelro incremental_test_1.o incremental_test_2.o -Wl,-debug 2> incremental_test.cmdline
+	$(LINK) -Bgcctestdir/ -Wl,--incremental-full -Wl,-z,norelro,-no-pie incremental_test_1.o incremental_test_2.o -Wl,-debug 2> incremental_test.cmdline
 incremental_test.stdout: incremental_test ../incremental-dump
 	../incremental-dump incremental_test > $@
 
@@ -339,6 +343,16 @@ section_sorting_name: section_sorting_name.o gcctestdir/ld
 	$(CXXLINK)  -Bgcctestdir/ -Wl,--sort-section=name section_sorting_name.o
 section_sorting_name.stdout: section_sorting_name
 	$(TEST_NM) -n --synthetic section_sorting_name > section_sorting_name.stdout
+
+check_SCRIPTS += text_unlikely_segment.sh
+check_DATA += text_unlikely_segment_readelf.stdout
+MOSTLYCLEANFILES += text_unlikely_segment
+text_unlikely_segment.o: text_unlikely_segment.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+text_unlikely_segment: text_unlikely_segment.o gcctestdir/ld
+	$(CXXLINK)  -Bgcctestdir/ -Wl,-z,text-unlikely-segment text_unlikely_segment.o
+text_unlikely_segment_readelf.stdout: text_unlikely_segment
+	$(TEST_READELF) -Wl $< >$@
 
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test icf_virtual_function_folding_test.map
@@ -2295,6 +2309,18 @@ plugin_test_thin.a: two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 	rm -f $@
 	$(TEST_AR) crT $@ $^
 
+check_PROGRAMS += plugin_test_12
+check_SCRIPTS += plugin_test_12.sh
+check_DATA += plugin_test_12.err
+MOSTLYCLEANFILES += plugin_test_12.err
+export_dynamic_plugin.o.syms: export_dynamic_plugin.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+export_dynamic_plugin.o: export_dynamic_plugin.cc
+	$(COMPILE) -c -o $@ $<
+plugin_test_12: export_dynamic_plugin.o gcctestdir/ld plugin_test.so export_dynamic_plugin.o.syms
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z3foov" -Wl,--export-dynamic-symbol,"_Z3foov" export_dynamic_plugin.o.syms 2>plugin_test_12.err
+plugin_test_12.err: plugin_test_12
+	@touch plugin_test_12.err
 
 check_PROGRAMS += plugin_test_start_lib
 check_SCRIPTS += plugin_test_start_lib.sh
@@ -2373,6 +2399,23 @@ plugin_final_layout_readelf.stdout: plugin_final_layout
 plugin_section_order.so: plugin_section_order.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared plugin_section_order.o
 plugin_section_order.o: plugin_section_order.c
+	$(COMPILE) -O0 -c -fpic -o $@ $<
+
+# Uses the plugin_final_layout.sh script above to avoid duplication
+check_DATA += plugin_layout_new_file.stdout plugin_layout_new_file_readelf.stdout
+MOSTLYCLEANFILES += plugin_layout_new_file
+plugin_final_layout.o.syms: plugin_final_layout.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+plugin_layout_new_file: plugin_final_layout.o.syms plugin_test.so plugin_new_section_layout.so gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_test.so"  -Wl,--plugin,"./plugin_new_section_layout.so" plugin_final_layout.o.syms
+plugin_layout_new_file.stdout: plugin_layout_new_file
+	$(TEST_NM) -n --synthetic plugin_layout_new_file > plugin_layout_new_file.stdout
+plugin_layout_new_file_readelf.stdout: plugin_layout_new_file
+	$(TEST_READELF) -Wl plugin_layout_new_file > plugin_layout_new_file_readelf.stdout
+
+plugin_new_section_layout.so: plugin_new_section_layout.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared plugin_new_section_layout.o
+plugin_new_section_layout.o: plugin_new_section_layout.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
 
 check_SCRIPTS += plugin_layout_with_alignment.sh
@@ -2970,9 +3013,9 @@ pr20976-d.o: pr20976.o gcctestdir/ld
 if DEFAULT_TARGET_X86_64
 
 two_file_test_1_v1_ndebug.o: two_file_test_1_v1.cc
-	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
+	$(CXXCOMPILE) -O0 -g0 -fno-exceptions -fno-asynchronous-unwind-tables -c -o $@ $<
 two_file_test_1_ndebug.o: two_file_test_1.cc
-	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
+	$(CXXCOMPILE) -O0 -g0 -fno-exceptions -fno-asynchronous-unwind-tables -c -o $@ $<
 two_file_test_1b_ndebug.o: two_file_test_1b.cc
 	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
 two_file_test_2_ndebug.o: two_file_test_2.cc
@@ -2985,31 +3028,31 @@ MOSTLYCLEANFILES += two_file_test_tmp_2.o
 incremental_test_2: two_file_test_1_v1_ndebug.o two_file_test_1_ndebug.o two_file_test_1b_ndebug.o \
 		    two_file_test_2_ndebug.o two_file_test_main_ndebug.o gcctestdir/ld
 	cp -f two_file_test_1_v1_ndebug.o two_file_test_tmp_2.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b_ndebug.o two_file_test_2_ndebug.o two_file_test_main_ndebug.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b_ndebug.o two_file_test_2_ndebug.o two_file_test_main_ndebug.o
 	@sleep 1
 	cp -f two_file_test_1_ndebug.o two_file_test_tmp_2.o
-	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b_ndebug.o two_file_test_2_ndebug.o two_file_test_main_ndebug.o
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b_ndebug.o two_file_test_2_ndebug.o two_file_test_main_ndebug.o
 
 check_PROGRAMS += incremental_test_3
 MOSTLYCLEANFILES += two_file_test_tmp_3.o
 incremental_test_3: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 	cp -f two_file_test_1b_v1.o two_file_test_tmp_3.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie -Bgcctestdir/ two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
 	@sleep 1
 	cp -f two_file_test_1b.o two_file_test_tmp_3.o
-	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie -Bgcctestdir/ two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
 
 check_PROGRAMS += incremental_test_4
 MOSTLYCLEANFILES += incremental_test_4.base two_file_test_tmp_4.o
 incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 	cp -f two_file_test_2_v1.o two_file_test_tmp_4.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
 	mv -f incremental_test_4 incremental_test_4.base
 	@sleep 1
 	cp -f two_file_test_2.o two_file_test_tmp_4.o
-	$(CXXLINK) -Wl,--incremental-update,--incremental-base=incremental_test_4.base -Wl,-z,norelro -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
+	$(CXXLINK) -Wl,--incremental-update,--incremental-base=incremental_test_4.base -Wl,-z,norelro,-no-pie -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
 
 check_PROGRAMS += incremental_test_5
 MOSTLYCLEANFILES += two_file_test_5.a
@@ -3017,11 +3060,11 @@ incremental_test_5: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 	cp -f two_file_test_1b_v1.o two_file_test_tmp_5.o
 	$(TEST_AR) rc two_file_test_5.a two_file_test_1.o two_file_test_tmp_5.o two_file_test_2.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ two_file_test_main.o two_file_test_5.a
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie -Bgcctestdir/ two_file_test_main.o two_file_test_5.a
 	@sleep 1
 	cp -f two_file_test_1b.o two_file_test_tmp_5.o
 	$(TEST_AR) rc two_file_test_5.a two_file_test_1.o two_file_test_tmp_5.o two_file_test_2.o
-	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ two_file_test_main.o two_file_test_5.a
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie -Bgcctestdir/ two_file_test_main.o two_file_test_5.a
 
 # Test the --incremental-unchanged flag with an archive library.
 # The second link should not update the library.
@@ -3031,38 +3074,38 @@ incremental_test_6: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 	cp -f two_file_test_1b.o two_file_test_tmp_6.o
 	$(TEST_AR) rc two_file_test_6.a two_file_test_1.o two_file_test_tmp_6.o two_file_test_2.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ two_file_test_main.o two_file_test_6.a
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie -Bgcctestdir/ two_file_test_main.o two_file_test_6.a
 	@sleep 1
 	cp -f two_file_test_1b_v1.o two_file_test_tmp_6.o
 	$(TEST_AR) rc two_file_test_6.a two_file_test_1.o two_file_test_tmp_6.o two_file_test_2.o
-	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ two_file_test_main.o -Wl,--incremental-unchanged two_file_test_6.a -Wl,--incremental-unknown
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie -Bgcctestdir/ two_file_test_main.o -Wl,--incremental-unchanged two_file_test_6.a -Wl,--incremental-unknown
 
 check_PROGRAMS += incremental_copy_test
 incremental_copy_test: copy_test_v1.o copy_test.o copy_test_1.so copy_test_2.so
 	cp -f copy_test_v1.o copy_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie -Bgcctestdir/ -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
 	@sleep 1
 	cp -f copy_test.o copy_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie -Bgcctestdir/ -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
 
 check_PROGRAMS += incremental_common_test_1
 incremental_common_test_1: common_test_1_v1.o common_test_1_v2.o gcctestdir/ld
 	cp -f common_test_1_v1.o common_test_1_tmp.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ common_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie -Bgcctestdir/ common_test_1_tmp.o
 	@sleep 1
 	cp -f common_test_1_v2.o common_test_1_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ common_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie -Bgcctestdir/ common_test_1_tmp.o
 
 check_PROGRAMS += incremental_comdat_test_1
 incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_comdat_test_2_v2.o incr_comdat_test_2_v3.o gcctestdir/ld
 	cp -f incr_comdat_test_2_v1.o incr_comdat_test_1_tmp.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
 	@sleep 1
 	cp -f incr_comdat_test_2_v2.o incr_comdat_test_1_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
 	@sleep 1
 	cp -f incr_comdat_test_2_v3.o incr_comdat_test_1_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
 
 endif DEFAULT_TARGET_X86_64
 
@@ -3077,6 +3120,12 @@ exception_x86_64_bnd_1.o: exception_test_1.cc gcctestdir/as
 exception_x86_64_bnd_2.o: exception_test_2.cc gcctestdir/as
 	$(CXXCOMPILE) -c -Bgcctestdir/ -Wa,-madd-bnd-prefix -o $@ $<
 endif DEFAULT_TARGET_X86_64
+
+check_PROGRAMS += pr22266
+pr22266: pr22266_main.o pr22266_ar.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ pr22266_main.o pr22266_ar.o
+pr22266_ar.o: pr22266_a.o gcctestdir/ld
+	gcctestdir/ld -r -T $(srcdir)/pr22266_script.t -o $@ pr22266_a.o
 
 endif GCC
 endif NATIVE_LINKER
@@ -3710,6 +3759,38 @@ arm_farcall_thumb_thumb_6m.o: arm_farcall_thumb_thumb.s
 MOSTLYCLEANFILES += arm_farcall_thumb_thumb arm_farcall_thumb_thumb_5t \
 		    arm_farcall_thumb_thumb_7m arm_farcall_thumb_thumb_6m
 
+#Check ARM to ARM farcall veneers in the be8 mode addressing
+
+check_SCRIPTS += arm_farcall_arm_arm_be8.sh
+check_DATA += arm_farcall_arm_arm_be8.stdout
+
+arm_farcall_arm_arm_be8.stdout: arm_farcall_arm_arm_be8
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_arm_arm_be8: arm_farcall_arm_arm_be8.o ../ld-new
+	../ld-new --no-fix-arm1176 --section-start .text=0x1000 --section-start .foo=0x2001020 -EB --be8 -o $@ $<
+
+arm_farcall_arm_arm_be8.o: arm_farcall_arm_arm.s
+	$(TEST_AS) -EB -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_arm_arm_be8
+
+#Check THUMB  to  THUMB farcall veneers in the be8 mode addressing
+
+check_SCRIPTS += arm_farcall_thumb_thumb_be8.sh
+check_DATA += arm_farcall_thumb_thumb_be8.stdout
+
+arm_farcall_thumb_thumb_be8.stdout: arm_farcall_thumb_thumb_be8
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb_be8: arm_farcall_thumb_thumb_be8.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -EB --be8 -o $@ $<
+
+arm_farcall_thumb_thumb_be8.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv7-m -EB -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_thumb_thumb_be8
+
 # Check Thumb to ARM farcall veneers
 
 check_SCRIPTS += arm_farcall_thumb_arm.sh
@@ -3828,6 +3909,17 @@ pr21430.stdout: pr21430
 	$(TEST_NM) -S $< > $@
 
 MOSTLYCLEANFILES += pr21430
+
+check_SCRIPTS += aarch64_tlsdesc.sh
+check_DATA += aarch64_tlsdesc.stdout
+aarch64_tlsdesc.o: aarch64_tlsdesc.s
+	$(TEST_AS) -o $@ $<
+aarch64_tlsdesc: aarch64_tlsdesc.o $(srcdir)/aarch64_tlsdesc.t ../ld-new
+	../ld-new $< -shared -T $(srcdir)/aarch64_tlsdesc.t -o $@
+aarch64_tlsdesc.stdout: aarch64_tlsdesc
+	$(TEST_OBJDUMP) -dR -j.text -j.got.plt $< > $@
+
+MOSTLYCLEANFILES += aarch64_tlsdesc
 
 endif DEFAULT_TARGET_AARCH64
 

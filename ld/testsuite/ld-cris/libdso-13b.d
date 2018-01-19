@@ -1,7 +1,7 @@
 #source: dso-1.s
 #source: dsov32-3.s
 #as: --pic --no-underscore --march=v32 --em=criself
-#ld: --shared -m crislinux --version-script $srcdir/$subdir/hidedsofns2468
+#ld: --shared -m crislinux --version-script $srcdir/$subdir/hidedsofns2468 --hash-style=sysv
 #readelf: -d -r
 
 # Like libdso-13.d, but without -z nocombreloc and with a version

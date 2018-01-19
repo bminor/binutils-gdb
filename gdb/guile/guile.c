@@ -1,6 +1,6 @@
 /* General GDB/Guile code.
 
-   Copyright (C) 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2014-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -161,7 +161,7 @@ const struct extension_language_ops guile_extension_ops =
 /* Implementation of the gdb "guile-repl" command.  */
 
 static void
-guile_repl_command (char *arg, int from_tty)
+guile_repl_command (const char *arg, int from_tty)
 {
   scoped_restore restore_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -189,7 +189,7 @@ guile_repl_command (char *arg, int from_tty)
    TODO: Add the result to Guile's history?  */
 
 static void
-guile_command (char *arg, int from_tty)
+guile_command (const char *arg, int from_tty)
 {
   scoped_restore restore_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -390,7 +390,7 @@ gdbscm_target_config (void)
    commands. */
 
 static void
-guile_repl_command (char *arg, int from_tty)
+guile_repl_command (const char *arg, int from_tty)
 {
   arg = skip_spaces (arg);
   if (arg && *arg)
@@ -399,7 +399,7 @@ guile_repl_command (char *arg, int from_tty)
 }
 
 static void
-guile_command (char *arg, int from_tty)
+guile_command (const char *arg, int from_tty)
 {
   arg = skip_spaces (arg);
   if (arg && *arg)
@@ -425,7 +425,7 @@ static struct cmd_list_element *info_guile_list;
 /* Function for use by 'set guile' prefix command.  */
 
 static void
-set_guile_command (char *args, int from_tty)
+set_guile_command (const char *args, int from_tty)
 {
   help_list (set_guile_list, "set guile ", all_commands, gdb_stdout);
 }
@@ -433,7 +433,7 @@ set_guile_command (char *args, int from_tty)
 /* Function for use by 'show guile' prefix command.  */
 
 static void
-show_guile_command (char *args, int from_tty)
+show_guile_command (const char *args, int from_tty)
 {
   cmd_show_list (show_guile_list, from_tty, "");
 }
@@ -443,7 +443,7 @@ show_guile_command (char *args, int from_tty)
    "info scheme" with no args.  */
 
 static void
-info_guile_command (char *args, int from_tty)
+info_guile_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"info guile\" must be followed"
 		       " by the name of an info command.\n"));
@@ -605,7 +605,6 @@ static void
 initialize_scheme_side (void)
 {
   char *boot_scm_path;
-  char *msg;
 
   guile_datadir = concat (gdb_datadir, SLASH_STRING, "guile", (char *) NULL);
   boot_scm_path = concat (guile_datadir, SLASH_STRING, "gdb",
@@ -814,9 +813,6 @@ message == an error message without a stack will be printed."),
 			NULL, NULL,
 			&set_guile_list, &show_guile_list);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_guile;
 
 void
 _initialize_guile (void)

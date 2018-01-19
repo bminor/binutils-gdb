@@ -1,6 +1,6 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
 
-   Copyright (C) 1993-2017 Free Software Foundation, Inc.
+   Copyright (C) 1993-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "doublest.h"
 #include "frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"
@@ -475,7 +474,7 @@ static void
 alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 			    gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
@@ -544,7 +543,7 @@ static void
 alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 			  const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
 
@@ -768,10 +767,8 @@ static const int stq_c_opcode = 0x2f;
    the sequence.  */
 
 static std::vector<CORE_ADDR>
-alpha_deal_with_atomic_sequence (struct regcache *regcache)
+alpha_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
   CORE_ADDR closing_insn; /* Instruction that closes the atomic sequence.  */
@@ -1462,7 +1459,8 @@ static const struct frame_base alpha_heuristic_frame_base = {
    callable as an sfunc.  Used by the "set heuristic-fence-post" command.  */
 
 static void
-reinit_frame_cache_sfunc (char *args, int from_tty, struct cmd_list_element *c)
+reinit_frame_cache_sfunc (const char *args,
+			  int from_tty, struct cmd_list_element *c)
 {
   reinit_frame_cache ();
 }
@@ -1602,7 +1600,7 @@ fp_register_sign_bit (LONGEST reg)
 static CORE_ADDR
 alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   unsigned int insn;
   unsigned int op;
   int regno;
@@ -1723,12 +1721,17 @@ alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
 std::vector<CORE_ADDR>
 alpha_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  CORE_ADDR pc;
+  struct gdbarch *gdbarch = regcache->arch ();
 
-  pc = alpha_next_pc (regcache, regcache_read_pc (regcache));
+  CORE_ADDR pc = regcache_read_pc (regcache);
 
-  return {pc};
+  std::vector<CORE_ADDR> next_pcs
+    = alpha_deal_with_atomic_sequence (gdbarch, pc);
+  if (!next_pcs.empty ())
+    return next_pcs;
+
+  CORE_ADDR next_pc = alpha_next_pc (regcache, pc);
+  return {next_pc};
 }
 
 
@@ -1824,7 +1827,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_cannot_step_breakpoint (gdbarch, 1);
 
   /* Handles single stepping of atomic sequences.  */
-  set_gdbarch_software_single_step (gdbarch, alpha_deal_with_atomic_sequence);
+  set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
@@ -1849,8 +1852,6 @@ alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   dwarf2_append_unwinders (gdbarch);
   frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
 }
-
-extern initialize_file_ftype _initialize_alpha_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_alpha_tdep (void)

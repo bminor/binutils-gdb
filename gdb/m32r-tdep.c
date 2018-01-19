@@ -1,6 +1,6 @@
 /* Target-dependent code for Renesas M32R, for GDB.
 
-   Copyright (C) 1996-2017 Free Software Foundation, Inc.
+   Copyright (C) 1996-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -43,8 +43,6 @@
 #define M32R_ARG_REGISTER_SIZE 4
 
 /* Local functions */
-
-extern void _initialize_m32r_tdep (void);
 
 static CORE_ADDR
 m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
@@ -247,7 +245,7 @@ static void
 m32r_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR regval;
   int len = TYPE_LENGTH (type);
@@ -772,7 +770,7 @@ static void
 m32r_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *dst)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   ULONGEST tmp;

@@ -1,5 +1,5 @@
 /* SPARC ELF specific backend routines.
-   Copyright (C) 2005-2017 Free Software Foundation, Inc.
+   Copyright (C) 2005-2018 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -118,9 +118,6 @@ extern asection *_bfd_sparc_elf_gc_mark_hook
   (asection *, struct bfd_link_info *,
    Elf_Internal_Rela *, struct elf_link_hash_entry *,
    Elf_Internal_Sym *);
-extern bfd_boolean _bfd_sparc_elf_gc_sweep_hook
-  (bfd *, struct bfd_link_info *,
-   asection *, const Elf_Internal_Rela *);
 extern bfd_boolean _bfd_sparc_elf_adjust_dynamic_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);
 extern bfd_boolean _bfd_sparc_elf_omit_section_dynsym

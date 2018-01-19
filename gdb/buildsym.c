@@ -1,5 +1,5 @@
 /* Support routines for building symbol tables in GDB's internal format.
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,11 +26,10 @@
    The basic way this module is used is as follows:
 
    buildsym_init ();
-   cleanups = make_cleanup (really_free_pendings, NULL);
+   scoped_free_pendings free_pending;
    cust = start_symtab (...);
    ... read debug info ...
    cust = end_symtab (...);
-   do_cleanups (cleanups);
 
    The compunit symtab pointer ("cust") is returned from both start_symtab
    and end_symtab to simplify the debug info readers.
@@ -42,31 +41,28 @@
    Reading DWARF Type Units is another variation:
 
    buildsym_init ();
-   cleanups = make_cleanup (really_free_pendings, NULL);
+   scoped_free_pendings free_pending;
    cust = start_symtab (...);
    ... read debug info ...
    cust = end_expandable_symtab (...);
-   do_cleanups (cleanups);
 
    And then reading subsequent Type Units within the containing "Comp Unit"
    will use a second flow:
 
    buildsym_init ();
-   cleanups = make_cleanup (really_free_pendings, NULL);
+   scoped_free_pendings free_pending;
    cust = restart_symtab (...);
    ... read debug info ...
    cust = augment_type_symtab (...);
-   do_cleanups (cleanups);
 
    dbxread.c and xcoffread.c use another variation:
 
    buildsym_init ();
-   cleanups = make_cleanup (really_free_pendings, NULL);
+   scoped_free_pendings free_pending;
    cust = start_symtab (...);
    ... read debug info ...
    cust = end_symtab (...);
    ... start_symtab + read + end_symtab repeated ...
-   do_cleanups (cleanups);
 */
 
 #include "defs.h"
@@ -86,6 +82,7 @@
 #include "cp-support.h"
 #include "dictionary.h"
 #include "addrmap.h"
+#include <algorithm>
 
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
@@ -128,6 +125,9 @@ struct buildsym_compunit
 
   /* The compunit we are building.  */
   struct compunit_symtab *compunit_symtab;
+
+  /* Language of this compunit_symtab.  */
+  enum language language;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -268,15 +268,13 @@ find_symbol_in_list (struct pending *list, char *name, int length)
   return (NULL);
 }
 
-/* At end of reading syms, or in case of quit, ensure everything associated
-   with building symtabs is freed.  This is intended to be registered as a
-   cleanup before doing psymtab->symtab expansion.
+/* At end of reading syms, or in case of quit, ensure everything
+   associated with building symtabs is freed.
 
    N.B. This is *not* intended to be used when building psymtabs.  Some debug
    info readers call this anyway, which is harmless if confusing.  */
 
-void
-really_free_pendings (void *dummy)
+scoped_free_pendings::~scoped_free_pendings ()
 {
   struct pending *next, *next1;
 
@@ -351,20 +349,23 @@ finish_block_internal (struct symbol *symbol,
 
   if (symbol)
     {
-      BLOCK_DICT (block) = dict_create_linear (&objfile->objfile_obstack,
-					       *listhead);
+      BLOCK_DICT (block)
+	= dict_create_linear (&objfile->objfile_obstack,
+			      buildsym_compunit->language, *listhead);
     }
   else
     {
       if (expandable)
 	{
-	  BLOCK_DICT (block) = dict_create_hashed_expandable ();
+	  BLOCK_DICT (block)
+	    = dict_create_hashed_expandable (buildsym_compunit->language);
 	  dict_add_pending (BLOCK_DICT (block), *listhead);
 	}
       else
 	{
 	  BLOCK_DICT (block) =
-	    dict_create_hashed (&objfile->objfile_obstack, *listhead);
+	    dict_create_hashed (&objfile->objfile_obstack,
+				buildsym_compunit->language, *listhead);
 	}
     }
 
@@ -768,7 +769,8 @@ start_subfile (const char *name)
    (or NULL if not known).  */
 
 static struct buildsym_compunit *
-start_buildsym_compunit (struct objfile *objfile, const char *comp_dir)
+start_buildsym_compunit (struct objfile *objfile, const char *comp_dir,
+			 enum language language)
 {
   struct buildsym_compunit *bscu;
 
@@ -777,6 +779,7 @@ start_buildsym_compunit (struct objfile *objfile, const char *comp_dir)
 
   bscu->objfile = objfile;
   bscu->comp_dir = (comp_dir == NULL) ? NULL : xstrdup (comp_dir);
+  bscu->language = language;
 
   /* Initialize the debug format string to NULL.  We may supply it
      later via a call to record_debugformat.  */
@@ -1027,7 +1030,7 @@ prepare_for_building (const char *name, CORE_ADDR start_addr)
   context_stack_depth = 0;
 
   /* These should have been reset either by successful completion of building
-     a symtab, or by the really_free_pendings cleanup.  */
+     a symtab, or by the scoped_free_pendings destructor.  */
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
   gdb_assert (global_using_directives == NULL);
@@ -1041,17 +1044,20 @@ prepare_for_building (const char *name, CORE_ADDR start_addr)
    TAG_compile_unit DIE is seen.  It indicates the start of data for
    one original source file.
 
-   NAME is the name of the file (cannot be NULL).  COMP_DIR is the directory in
-   which the file was compiled (or NULL if not known).  START_ADDR is the
-   lowest address of objects in the file (or 0 if not known).  */
+   NAME is the name of the file (cannot be NULL).  COMP_DIR is the
+   directory in which the file was compiled (or NULL if not known).
+   START_ADDR is the lowest address of objects in the file (or 0 if
+   not known).  LANGUAGE is the language of the source file, or
+   language_unknown if not known, in which case it'll be deduced from
+   the filename.  */
 
 struct compunit_symtab *
 start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
-	      CORE_ADDR start_addr)
+	      CORE_ADDR start_addr, enum language language)
 {
   prepare_for_building (name, start_addr);
 
-  buildsym_compunit = start_buildsym_compunit (objfile, comp_dir);
+  buildsym_compunit = start_buildsym_compunit (objfile, comp_dir, language);
 
   /* Allocate the compunit symtab now.  The caller needs it to allocate
      non-primary symtabs.  It is also needed by get_macro_table.  */
@@ -1088,7 +1094,8 @@ restart_symtab (struct compunit_symtab *cust,
   prepare_for_building (name, start_addr);
 
   buildsym_compunit = start_buildsym_compunit (COMPUNIT_OBJFILE (cust),
-					       COMPUNIT_DIRNAME (cust));
+					       COMPUNIT_DIRNAME (cust),
+					       compunit_language (cust));
   buildsym_compunit->compunit_symtab = cust;
 }
 
@@ -1165,23 +1172,10 @@ watch_main_source_file_lossage (void)
     }
 }
 
-/* Helper function for qsort.  Parameters are `struct block *' pointers,
-   function sorts them in descending order by their BLOCK_START.  */
-
-static int
-block_compar (const void *ap, const void *bp)
-{
-  const struct block *a = *(const struct block **) ap;
-  const struct block *b = *(const struct block **) bp;
-
-  return ((BLOCK_START (b) > BLOCK_START (a))
-	  - (BLOCK_START (b) < BLOCK_START (a)));
-}
-
 /* Reset state after a successful building of a symtab.
    This exists because dbxread.c and xcoffread.c can call
    start_symtab+end_symtab multiple times after one call to buildsym_init,
-   and before the really_free_pendings cleanup is called.
+   and before the scoped_free_pendings destructor is called.
    We keep the free_pendings list around for dbx/xcoff sake.  */
 
 static void
@@ -1254,28 +1248,25 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
 
   if ((objfile->flags & OBJF_REORDERED) && pending_blocks)
     {
-      unsigned count = 0;
       struct pending_block *pb;
-      struct block **barray, **bp;
-      struct cleanup *back_to;
+
+      std::vector<block *> barray;
 
       for (pb = pending_blocks; pb != NULL; pb = pb->next)
-	count++;
+	barray.push_back (pb->block);
 
-      barray = XNEWVEC (struct block *, count);
-      back_to = make_cleanup (xfree, barray);
+      /* Sort blocks by start address in descending order.  Blocks with the
+	 same start address must remain in the original order to preserve
+	 inline function caller/callee relationships.  */
+      std::stable_sort (barray.begin (), barray.end (),
+			[] (const block *a, const block *b)
+			{
+			  return BLOCK_START (a) > BLOCK_START (b);
+			});
 
-      bp = barray;
+      int i = 0;
       for (pb = pending_blocks; pb != NULL; pb = pb->next)
-	*bp++ = pb->block;
-
-      qsort (barray, count, sizeof (*barray), block_compar);
-
-      bp = barray;
-      for (pb = pending_blocks; pb != NULL; pb = pb->next)
-	pb->block = *bp++;
-
-      do_cleanups (back_to);
+	pb->block = barray[i++];
     }
 
   /* Cleanup any undefined types that have been left hanging around
@@ -1768,7 +1759,7 @@ buildsym_init (void)
       context_stack = XNEWVEC (struct context_stack, context_stack_size);
     }
 
-  /* Ensure the really_free_pendings cleanup was called after
+  /* Ensure the scoped_free_pendings destructor was called after
      the last time.  */
   gdb_assert (free_pendings == NULL);
   gdb_assert (pending_blocks == NULL);

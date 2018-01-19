@@ -1,4 +1,4 @@
-# Copyright 2010-2017 Free Software Foundation, Inc.
+# Copyright 2010-2018 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -625,7 +625,8 @@ foreach ldprelink {NO YES} {
 				lappend opts {debug}
 			    }
 			    if {$binpie != "NO"} {
-				lappend opts {additional_flags=-fPIE -pie}
+				lappend opts {additional_flags=-fPIE}
+				lappend opts {ldflags=-pie}
 			    }
 
 			    set dir ${exec}.d

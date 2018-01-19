@@ -1,6 +1,6 @@
 /* CLI utilities.
 
-   Copyright (C) 2011-2017 Free Software Foundation, Inc.
+   Copyright (C) 2011-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +30,13 @@ get_number_trailer (const char **pp, int trailer)
 {
   int retval = 0;	/* default */
   const char *p = *pp;
+  bool negative = false;
+
+  if (*p == '-')
+    {
+      ++p;
+      negative = true;
+    }
 
   if (*p == '$')
     {
@@ -70,11 +77,10 @@ get_number_trailer (const char **pp, int trailer)
     }
   else
     {
-      if (*p == '-')
-	++p;
+      const char *p1 = p;
       while (*p >= '0' && *p <= '9')
 	++p;
-      if (p == *pp)
+      if (p == p1)
 	/* There is no number here.  (e.g. "cond a == b").  */
 	{
 	  /* Skip non-numeric token.  */
@@ -84,7 +90,7 @@ get_number_trailer (const char **pp, int trailer)
 	  retval = 0;
 	}
       else
-	retval = atoi (*pp);
+	retval = atoi (p1);
     }
   if (!(isspace (*p) || *p == '\0' || *p == trailer))
     {
@@ -93,15 +99,15 @@ get_number_trailer (const char **pp, int trailer)
 	++p;
       retval = 0;
     }
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
   *pp = p;
-  return retval;
+  return negative ? -retval : retval;
 }
 
 /* See documentation in cli-utils.h.  */
 
 int
-get_number_const (const char **pp)
+get_number (const char **pp)
 {
   return get_number_trailer (pp, '\0');
 }
@@ -172,8 +178,8 @@ number_or_range_parser::get_number ()
 	     and also remember the end of the final token.  */
 
 	  temp = &m_end_ptr;
-	  m_end_ptr = skip_spaces_const (m_cur_tok + 1);
-	  m_end_value = get_number_const (temp);
+	  m_end_ptr = skip_spaces (m_cur_tok + 1);
+	  m_end_value = ::get_number (temp);
 	  if (m_end_value < m_last_retval)
 	    {
 	      error (_("inverted range"));
@@ -249,38 +255,38 @@ remove_trailing_whitespace (const char *start, const char *s)
 
 /* See documentation in cli-utils.h.  */
 
-char *
-extract_arg_const (const char **arg)
+std::string
+extract_arg (const char **arg)
 {
   const char *result;
 
   if (!*arg)
-    return NULL;
+    return std::string ();
 
   /* Find the start of the argument.  */
-  *arg = skip_spaces_const (*arg);
+  *arg = skip_spaces (*arg);
   if (!**arg)
-    return NULL;
+    return std::string ();
   result = *arg;
 
   /* Find the end of the argument.  */
-  *arg = skip_to_space_const (*arg + 1);
+  *arg = skip_to_space (*arg + 1);
 
   if (result == *arg)
-    return NULL;
+    return std::string ();
 
-  return savestring (result, *arg - result);
+  return std::string (result, *arg - result);
 }
 
 /* See documentation in cli-utils.h.  */
 
-char *
+std::string
 extract_arg (char **arg)
 {
   const char *arg_const = *arg;
-  char *result;
+  std::string result;
 
-  result = extract_arg_const (&arg_const);
+  result = extract_arg (&arg_const);
   *arg += arg_const - *arg;
   return result;
 }

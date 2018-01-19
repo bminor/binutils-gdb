@@ -1,6 +1,6 @@
 /* Common target-dependent code for ppc64 GDB, the GNU debugger.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -49,15 +49,30 @@
    | (((spr) & 0x3e0) << 6)                     \
    | (((xo) & 0x3ff) << 1))
 
-/* If PLT is the address of a 64-bit PowerPC PLT entry,
-   return the function's entry point.  */
+/* PLT_OFF is the TOC-relative offset of a 64-bit PowerPC PLT entry.
+   Return the function's entry point.  */
 
 static CORE_ADDR
-ppc64_plt_entry_point (struct gdbarch *gdbarch, CORE_ADDR plt)
+ppc64_plt_entry_point (struct frame_info *frame, CORE_ADDR plt_off)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR tocp;
+
+  if (execution_direction == EXEC_REVERSE)
+    {
+      /* If executing in reverse, r2 will have been stored to the stack.  */
+      CORE_ADDR sp = get_frame_register_unsigned (frame,
+						  tdep->ppc_gp0_regnum + 1);
+      unsigned int sp_off = tdep->elf_abi == POWERPC_ELF_V1 ? 40 : 24;
+      tocp = read_memory_unsigned_integer (sp + sp_off, 8, byte_order);
+    }
+  else
+    tocp = get_frame_register_unsigned (frame, tdep->ppc_gp0_regnum + 2);
+
   /* The first word of the PLT entry is the function entry point.  */
-  return (CORE_ADDR) read_memory_unsigned_integer (plt, 8, byte_order);
+  return read_memory_unsigned_integer (tocp + plt_off, 8, byte_order);
 }
 
 /* Patterns for the standard linkage functions.  These are built by
@@ -377,74 +392,44 @@ static struct ppc_insn_pattern ppc64_standard_linkage8[] =
    the linkage function.  */
 
 /* If the current thread is about to execute a series of instructions
-   at PC matching the ppc64_standard_linkage pattern, and INSN is the result
+   matching the ppc64_standard_linkage pattern, and INSN is the result
    from that pattern match, return the code address to which the
    standard linkage function will send them.  (This doesn't deal with
    dynamic linker lazy symbol resolution stubs.)  */
 
 static CORE_ADDR
-ppc64_standard_linkage1_target (struct frame_info *frame,
-				CORE_ADDR pc, unsigned int *insn)
+ppc64_standard_linkage1_target (struct frame_info *frame, unsigned int *insn)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR plt_off = ((ppc_insn_d_field (insn[0]) << 16)
+		       + ppc_insn_ds_field (insn[2]));
 
-  /* The address of the PLT entry this linkage function references.  */
-  CORE_ADDR plt
-    = ((CORE_ADDR) get_frame_register_unsigned (frame,
-						tdep->ppc_gp0_regnum + 2)
-       + (ppc_insn_d_field (insn[0]) << 16)
-       + ppc_insn_ds_field (insn[2]));
-
-  return ppc64_plt_entry_point (gdbarch, plt);
+  return ppc64_plt_entry_point (frame, plt_off);
 }
 
 static CORE_ADDR
-ppc64_standard_linkage2_target (struct frame_info *frame,
-				CORE_ADDR pc, unsigned int *insn)
+ppc64_standard_linkage2_target (struct frame_info *frame, unsigned int *insn)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR plt_off = ((ppc_insn_d_field (insn[1]) << 16)
+		       + ppc_insn_ds_field (insn[3]));
 
-  /* The address of the PLT entry this linkage function references.  */
-  CORE_ADDR plt
-    = ((CORE_ADDR) get_frame_register_unsigned (frame,
-						tdep->ppc_gp0_regnum + 2)
-       + (ppc_insn_d_field (insn[1]) << 16)
-       + ppc_insn_ds_field (insn[3]));
-
-  return ppc64_plt_entry_point (gdbarch, plt);
+  return ppc64_plt_entry_point (frame, plt_off);
 }
 
 static CORE_ADDR
-ppc64_standard_linkage3_target (struct frame_info *frame,
-				CORE_ADDR pc, unsigned int *insn)
+ppc64_standard_linkage3_target (struct frame_info *frame, unsigned int *insn)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR plt_off = ppc_insn_ds_field (insn[1]);
 
-  /* The address of the PLT entry this linkage function references.  */
-  CORE_ADDR plt
-    = ((CORE_ADDR) get_frame_register_unsigned (frame,
-						tdep->ppc_gp0_regnum + 2)
-       + ppc_insn_ds_field (insn[1]));
-
-  return ppc64_plt_entry_point (gdbarch, plt);
+  return ppc64_plt_entry_point (frame, plt_off);
 }
 
 static CORE_ADDR
-ppc64_standard_linkage4_target (struct frame_info *frame,
-				CORE_ADDR pc, unsigned int *insn)
+ppc64_standard_linkage4_target (struct frame_info *frame, unsigned int *insn)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR plt_off = ((ppc_insn_d_field (insn[1]) << 16)
+		       + ppc_insn_ds_field (insn[2]));
 
-  CORE_ADDR plt
-    = ((CORE_ADDR) get_frame_register_unsigned (frame, tdep->ppc_gp0_regnum + 2)
-       + (ppc_insn_d_field (insn[1]) << 16)
-       + ppc_insn_ds_field (insn[2]));
-
-  return ppc64_plt_entry_point (gdbarch, plt);
+  return ppc64_plt_entry_point (frame, plt_off);
 }
 
 
@@ -480,39 +465,39 @@ ppc64_skip_trampoline_code_1 (struct frame_info *frame, CORE_ADDR pc)
     {
       if (i < ARRAY_SIZE (ppc64_standard_linkage8) - 1
 	  && ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage8, insns))
-	pc = ppc64_standard_linkage4_target (frame, pc, insns);
+	pc = ppc64_standard_linkage4_target (frame, insns);
       else if (i < ARRAY_SIZE (ppc64_standard_linkage7) - 1
 	       && ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage7,
 					   insns))
-	pc = ppc64_standard_linkage3_target (frame, pc, insns);
+	pc = ppc64_standard_linkage3_target (frame, insns);
       else if (i < ARRAY_SIZE (ppc64_standard_linkage6) - 1
 	       && ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage6,
 					   insns))
-	pc = ppc64_standard_linkage4_target (frame, pc, insns);
+	pc = ppc64_standard_linkage4_target (frame, insns);
       else if (i < ARRAY_SIZE (ppc64_standard_linkage5) - 1
 	       && ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage5,
 					   insns)
 	       && (insns[8] != 0 || insns[9] != 0))
-	pc = ppc64_standard_linkage3_target (frame, pc, insns);
+	pc = ppc64_standard_linkage3_target (frame, insns);
       else if (i < ARRAY_SIZE (ppc64_standard_linkage4) - 1
 	       && ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage4,
 					   insns)
 	       && (insns[9] != 0 || insns[10] != 0))
-	pc = ppc64_standard_linkage4_target (frame, pc, insns);
+	pc = ppc64_standard_linkage4_target (frame, insns);
       else if (i < ARRAY_SIZE (ppc64_standard_linkage3) - 1
 	       && ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage3,
 					   insns)
 	       && (insns[8] != 0 || insns[9] != 0))
-	pc = ppc64_standard_linkage3_target (frame, pc, insns);
+	pc = ppc64_standard_linkage3_target (frame, insns);
       else if (i < ARRAY_SIZE (ppc64_standard_linkage2) - 1
 	       && ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage2,
 					   insns)
 	       && (insns[10] != 0 || insns[11] != 0))
-	pc = ppc64_standard_linkage2_target (frame, pc, insns);
+	pc = ppc64_standard_linkage2_target (frame, insns);
       else if (i < ARRAY_SIZE (ppc64_standard_linkage1) - 1
 	       && ppc_insns_match_pattern (frame, pc, ppc64_standard_linkage1,
 					   insns))
-	pc = ppc64_standard_linkage1_target (frame, pc, insns);
+	pc = ppc64_standard_linkage1_target (frame, insns);
       else
 	{
 	  /* Scan backward one more instructions if doesn't match.  */

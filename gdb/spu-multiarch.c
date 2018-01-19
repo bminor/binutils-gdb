@@ -1,5 +1,5 @@
 /* Cell SPU GNU/Linux multi-architecture debugging support.
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
 
@@ -56,7 +56,6 @@ static int
 parse_spufs_run (ptid_t ptid, int *fd, CORE_ADDR *addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  struct cleanup *old_chain;
   struct gdbarch_tdep *tdep;
   struct regcache *regcache;
   gdb_byte buf[4];
@@ -76,10 +75,11 @@ parse_spufs_run (ptid_t ptid, int *fd, CORE_ADDR *addr)
   tdep = gdbarch_tdep (target_gdbarch ());
 
   /* Fetch instruction preceding current NIP.  */
-  old_chain = save_inferior_ptid ();
-  inferior_ptid = ptid;
-  regval = target_read_memory (regcache_read_pc (regcache) - 4, buf, 4);
-  do_cleanups (old_chain);
+  {
+    scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
+    inferior_ptid = ptid;
+    regval = target_read_memory (regcache_read_pc (regcache) - 4, buf, 4);
+  }
   if (regval != 0)
     return 0;
   /* It should be a "sc" instruction.  */
@@ -107,7 +107,7 @@ spu_gdbarch (int spufs_fd)
   info.bfd_arch_info = bfd_lookup_arch (bfd_arch_spu, bfd_mach_spu);
   info.byte_order = BFD_ENDIAN_BIG;
   info.osabi = GDB_OSABI_LINUX;
-  info.tdep_info = &spufs_fd;
+  info.id = &spufs_fd;
   return gdbarch_find_by_info (info);
 }
 
@@ -121,7 +121,8 @@ spu_thread_architecture (struct target_ops *ops, ptid_t ptid)
   if (parse_spufs_run (ptid, &spufs_fd, &spufs_addr))
     return spu_gdbarch (spufs_fd);
 
-  return target_gdbarch ();
+  target_ops *beneath = find_target_beneath (ops);
+  return beneath->to_thread_architecture (beneath, ptid);
 }
 
 /* Override the to_region_ok_for_hw_watchpoint routine.  */
@@ -143,7 +144,7 @@ static void
 spu_fetch_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct target_ops *ops_beneath = find_target_beneath (ops);
   int spufs_fd;
@@ -203,7 +204,7 @@ static void
 spu_store_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct target_ops *ops_beneath = find_target_beneath (ops);
   int spufs_fd;
   CORE_ADDR spufs_addr;
@@ -400,9 +401,6 @@ init_spu_ops (void)
   spu_ops.to_stratum = arch_stratum;
   spu_ops.to_magic = OPS_MAGIC;
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_spu_multiarch;
 
 void
 _initialize_spu_multiarch (void)

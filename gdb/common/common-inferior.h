@@ -1,7 +1,7 @@
 /* Functions to deal with the inferior being executed on GDB or
    GDBserver.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,5 +29,13 @@ extern const char *get_exec_wrapper ();
    ERR nonzero means get error if there is none specified;
    otherwise return 0 in that case.  */
 extern char *get_exec_file (int err);
+
+/* Return the inferior's current working directory.  If nothing has
+   been set, then return NULL.  */
+extern const char *get_inferior_cwd ();
+
+/* Set the inferior current working directory.  If CWD is NULL, unset
+   the directory.  */
+extern void set_inferior_cwd (const char *cwd);
 
 #endif /* ! COMMON_INFERIOR_H */

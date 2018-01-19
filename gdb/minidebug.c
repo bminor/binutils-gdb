@@ -1,6 +1,6 @@
 /* Read MiniDebugInfo data from an objfile.
 
-   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+   Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -83,7 +83,6 @@ lzma_open (struct bfd *nbfd, void *open_closure)
   gdb_byte footer[LZMA_STREAM_HEADER_SIZE];
   gdb_byte *indexdata;
   lzma_index *index;
-  int ret;
   uint64_t memlimit = UINT64_MAX;
   struct gdb_lzma_stream *lstream;
   size_t pos;

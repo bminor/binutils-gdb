@@ -1,5 +1,5 @@
 /* tc-i386.h -- Header file for tc-i386.c
-   Copyright (C) 1989-2017 Free Software Foundation, Inc.
+   Copyright (C) 1989-2018 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -126,6 +126,12 @@ extern const char *i386_comment_chars;
    this to be overridden if need be.  */
 #ifndef GLOBAL_OFFSET_TABLE_NAME
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
+#endif
+
+/* The name of the global pointer.  Allow this to be overridden if need
+   be.  */
+#ifndef GLOBAL_POINTER_NAME
+#define GLOBAL_POINTER_NAME "__gp"
 #endif
 
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && !defined (LEX_AT)

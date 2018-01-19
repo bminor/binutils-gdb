@@ -1,5 +1,5 @@
 /* 32-bit ELF support for TI PRU.
-   Copyright (C) 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2014-2018 Free Software Foundation, Inc.
    Contributed by Dimitar Dimitrov <dimitar@dinux.eu>
    Based on elf32-nios2.c
 
@@ -217,19 +217,19 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_GNU_DIFF8,	/* type */
 	 0,			/* rightshift */
-	 0, 			/* size (0 = byte, 1 = short, 2 = long) */
-	 8, 			/* bitsize */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_pru_diff_relocate, /* special_function */
-	 "R_PRU_DIFF8",     	/* name */
+	 "R_PRU_DIFF8",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  HOWTO (R_PRU_GNU_DIFF16,  	/* type */
+  HOWTO (R_PRU_GNU_DIFF16,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -237,13 +237,13 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_pru_diff_relocate,/* special_function */
-	 "R_PRU_DIFF16",     	/* name */
+	 "R_PRU_DIFF16",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  HOWTO (R_PRU_GNU_DIFF32,  	/* type */
+  HOWTO (R_PRU_GNU_DIFF32,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
@@ -251,10 +251,10 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_pru_diff_relocate,/* special_function */
-	 "R_PRU_DIFF32",     	/* name */
+	 "R_PRU_DIFF32",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffffffff,    	/* dst_mask */
+	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_PRU_GNU_DIFF16_PMEM,	/* type */
@@ -265,7 +265,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_pru_diff_relocate,/* special_function */
-	 "R_PRU_DIFF16_PMEM",   /* name */
+	 "R_PRU_DIFF16_PMEM",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
@@ -279,7 +279,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_pru_diff_relocate,/* special_function */
-	 "R_PRU_DIFF32_PMEM",   /* name */
+	 "R_PRU_DIFF32_PMEM",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */

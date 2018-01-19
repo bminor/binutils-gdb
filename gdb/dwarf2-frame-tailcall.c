@@ -1,6 +1,6 @@
 /* Virtual tail call frames unwinder for GDB.
 
-   Copyright (C) 2010-2017 Free Software Foundation, Inc.
+   Copyright (C) 2010-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -463,9 +463,6 @@ const struct frame_unwind dwarf2_tailcall_frame_unwind =
   tailcall_frame_dealloc_cache,
   tailcall_frame_prev_arch
 };
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tailcall_frame;
 
 void
 _initialize_tailcall_frame (void)

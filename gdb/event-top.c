@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
@@ -48,7 +48,7 @@
 /* readline defines this.  */
 #undef savestring
 
-static char *top_level_prompt (void);
+static std::string top_level_prompt ();
 
 /* Signal handlers.  */
 #ifdef SIGQUIT
@@ -68,8 +68,8 @@ static void async_do_nothing (gdb_client_data);
 static void async_disconnect (gdb_client_data);
 #endif
 static void async_float_handler (gdb_client_data);
-#ifdef STOP_SIGNAL
-static void async_stop_sig (gdb_client_data);
+#ifdef SIGTSTP
+static void async_sigtstp_handler (gdb_client_data);
 #endif
 static void async_sigterm_handler (gdb_client_data arg);
 
@@ -111,7 +111,7 @@ static struct async_signal_handler *sighup_token;
 static struct async_signal_handler *sigquit_token;
 #endif
 static struct async_signal_handler *sigfpe_token;
-#ifdef STOP_SIGNAL
+#ifdef SIGTSTP
 static struct async_signal_handler *sigtstp_token;
 #endif
 static struct async_signal_handler *async_sigterm_token;
@@ -352,15 +352,12 @@ gdb_rl_callback_handler_reinstall (void)
 void
 display_gdb_prompt (const char *new_prompt)
 {
-  char *actual_gdb_prompt = NULL;
-  struct cleanup *old_chain;
+  std::string actual_gdb_prompt;
 
   annotate_display_prompt ();
 
   /* Reset the nesting depth used when trace-commands is set.  */
   reset_command_nest_depth ();
-
-  old_chain = make_cleanup (free_current_contents, &actual_gdb_prompt);
 
   /* Do not call the python hook on an explicit prompt change as
      passed to this function, as this forms a secondary/local prompt,
@@ -391,7 +388,6 @@ display_gdb_prompt (const char *new_prompt)
 
 	  if (current_ui->command_editing)
 	    gdb_rl_callback_handler_remove ();
-	  do_cleanups (old_chain);
 	  return;
 	}
       else if (ui->prompt_state == PROMPT_NEEDED)
@@ -402,12 +398,12 @@ display_gdb_prompt (const char *new_prompt)
 	}
     }
   else
-    actual_gdb_prompt = xstrdup (new_prompt);
+    actual_gdb_prompt = new_prompt;
 
   if (current_ui->command_editing)
     {
       gdb_rl_callback_handler_remove ();
-      gdb_rl_callback_handler_install (actual_gdb_prompt);
+      gdb_rl_callback_handler_install (actual_gdb_prompt.c_str ());
     }
   /* new_prompt at this point can be the top of the stack or the one
      passed in.  It can't be NULL.  */
@@ -416,19 +412,16 @@ display_gdb_prompt (const char *new_prompt)
       /* Don't use a _filtered function here.  It causes the assumed
          character position to be off, since the newline we read from
          the user is not accounted for.  */
-      fputs_unfiltered (actual_gdb_prompt, gdb_stdout);
+      fputs_unfiltered (actual_gdb_prompt.c_str (), gdb_stdout);
       gdb_flush (gdb_stdout);
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Return the top level prompt, as specified by "set prompt", possibly
    overriden by the python gdb.prompt_hook hook, and then composed
-   with the prompt prefix and suffix (annotations).  The caller is
-   responsible for freeing the returned string.  */
+   with the prompt prefix and suffix (annotations).  */
 
-static char *
+static std::string
 top_level_prompt (void)
 {
   char *prompt;
@@ -448,10 +441,10 @@ top_level_prompt (void)
 	 beginning.  */
       const char suffix[] = "\n\032\032prompt\n";
 
-      return concat (prefix, prompt, suffix, (char *) NULL);
+      return std::string (prefix) + prompt + suffix;
     }
 
-  return xstrdup (prompt);
+  return prompt;
 }
 
 /* See top.h.  */
@@ -494,7 +487,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
       else
 	{
 	  /* Simply delete the UI.  */
-	  delete_ui (ui);
+	  delete ui;
 	}
     }
   else
@@ -548,7 +541,7 @@ async_enable_stdin (void)
 
   if (ui->prompt_state == PROMPT_BLOCKED)
     {
-      target_terminal_ours ();
+      target_terminal::ours ();
       ui_register_input_event_handler (ui);
       ui->prompt_state = PROMPT_NEEDED;
     }
@@ -572,10 +565,10 @@ async_disable_stdin (void)
    a whole command.  */
 
 void
-command_handler (char *command)
+command_handler (const char *command)
 {
   struct ui *ui = current_ui;
-  char *c;
+  const char *c;
 
   if (ui->instream == ui->stdin_stream)
     reinitialize_more_filter ();
@@ -676,7 +669,8 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
     }
 
 #define SERVER_COMMAND_PREFIX "server "
-  if (startswith (cmd, SERVER_COMMAND_PREFIX))
+  server_command = startswith (cmd, SERVER_COMMAND_PREFIX);
+  if (server_command)
     {
       /* Note that we don't set `saved_command_line'.  Between this
          and the check in dont_repeat, this insures that repeating
@@ -766,7 +760,7 @@ command_line_handler (char *rl)
 	 hung up but GDB is still alive.  In such a case, we just quit
 	 gdb killing the inferior program too.  */
       printf_unfiltered ("quit\n");
-      execute_command ((char *) "quit", 1);
+      execute_command ("quit", 1);
     }
   else if (cmd == NULL)
     {
@@ -919,9 +913,9 @@ async_init_signals (void)
   sigfpe_token =
     create_async_signal_handler (async_float_handler, NULL);
 
-#ifdef STOP_SIGNAL
+#ifdef SIGTSTP
   sigtstp_token =
-    create_async_signal_handler (async_stop_sig, NULL);
+    create_async_signal_handler (async_sigtstp_handler, NULL);
 #endif
 }
 
@@ -957,7 +951,7 @@ default_quit_handler (void)
 {
   if (check_quit_flag ())
     {
-      if (target_terminal_is_ours ())
+      if (target_terminal::is_ours ())
 	quit ();
       else
 	target_pass_ctrlc ();
@@ -966,51 +960,6 @@ default_quit_handler (void)
 
 /* See defs.h.  */
 quit_handler_ftype *quit_handler = default_quit_handler;
-
-/* Data for make_cleanup_override_quit_handler.  Wrap the previous
-   handler pointer in a data struct because it's not portable to cast
-   a function pointer to a data pointer, which is what make_cleanup
-   expects.  */
-struct quit_handler_cleanup_data
-{
-  /* The previous quit handler.  */
-  quit_handler_ftype *prev_handler;
-};
-
-/* Cleanup call that restores the previous quit handler.  */
-
-static void
-restore_quit_handler (void *arg)
-{
-  struct quit_handler_cleanup_data *data
-    = (struct quit_handler_cleanup_data *) arg;
-
-  quit_handler = data->prev_handler;
-}
-
-/* Destructor for the quit handler cleanup.  */
-
-static void
-restore_quit_handler_dtor (void *arg)
-{
-  xfree (arg);
-}
-
-/* See defs.h.  */
-
-struct cleanup *
-make_cleanup_override_quit_handler (quit_handler_ftype *new_quit_handler)
-{
-  struct cleanup *old_chain;
-  struct quit_handler_cleanup_data *data;
-
-  data = XNEW (struct quit_handler_cleanup_data);
-  data->prev_handler = quit_handler;
-  old_chain = make_cleanup_dtor (restore_quit_handler, data,
-				 restore_quit_handler_dtor);
-  quit_handler = new_quit_handler;
-  return old_chain;
-}
 
 /* Handle a SIGINT.  */
 
@@ -1164,20 +1113,19 @@ async_disconnect (gdb_client_data arg)
 }
 #endif
 
-#ifdef STOP_SIGNAL
+#ifdef SIGTSTP
 void
-handle_stop_sig (int sig)
+handle_sigtstp (int sig)
 {
   mark_async_signal_handler (sigtstp_token);
-  signal (sig, handle_stop_sig);
+  signal (sig, handle_sigtstp);
 }
 
 static void
-async_stop_sig (gdb_client_data arg)
+async_sigtstp_handler (gdb_client_data arg)
 {
   char *prompt = get_prompt ();
 
-#if STOP_SIGNAL == SIGTSTP
   signal (SIGTSTP, SIG_DFL);
 #if HAVE_SIGPROCMASK
   {
@@ -1190,10 +1138,7 @@ async_stop_sig (gdb_client_data arg)
   sigsetmask (0);
 #endif
   raise (SIGTSTP);
-  signal (SIGTSTP, handle_stop_sig);
-#else
-  signal (STOP_SIGNAL, handle_stop_sig);
-#endif
+  signal (SIGTSTP, handle_sigtstp);
   printf_unfiltered ("%s", prompt);
   gdb_flush (gdb_stdout);
 
@@ -1201,7 +1146,7 @@ async_stop_sig (gdb_client_data arg)
      nothing.  */
   dont_repeat ();
 }
-#endif /* STOP_SIGNAL */
+#endif /* SIGTSTP */
 
 /* Tell the event loop what to do if SIGFPE is received.
    See event-signal.c.  */

@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2017 Free Software Foundation, Inc.
+# Copyright (C) 1989-2018 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -194,6 +194,9 @@ LIBBABELTRACE = @LIBBABELTRACE@
 # Where is libipt?  This will be empty if libipt was not available.
 LIBIPT = @LIBIPT@
 
+# Where is libmpfr?  This will be empty if libmpfr was not available.
+LIBMPFR = @LIBMPFR@
+
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
 GDB_WARN_CFLAGS = $(WARN_CFLAGS)
@@ -232,16 +235,6 @@ GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
 #
 # CLI sub directory definitons
 #
-SUBDIR_CLI_OBS = \
-	cli-cmds.o \
-	cli-decode.o \
-	cli-dump.o \
-	cli-interp.o \
-	cli-logging.o \
-	cli-script.o \
-	cli-setshow.o \
-	cli-utils.o
-
 SUBDIR_CLI_SRCS = \
 	cli/cli-cmds.c \
 	cli/cli-decode.c \
@@ -252,6 +245,8 @@ SUBDIR_CLI_SRCS = \
 	cli/cli-setshow.c \
 	cli/cli-utils.c
 
+SUBDIR_CLI_OBS = $(patsubst %.c,%.o,$(SUBDIR_CLI_SRCS))
+
 SUBDIR_CLI_DEPS =
 SUBDIR_CLI_LDFLAGS =
 SUBDIR_CLI_CFLAGS =
@@ -259,25 +254,6 @@ SUBDIR_CLI_CFLAGS =
 #
 # MI sub directory definitons
 #
-SUBDIR_MI_OBS = \
-	mi-cmd-break.o \
-	mi-cmd-catch.o \
-	mi-cmd-disas.o \
-	mi-cmd-env.o \
-	mi-cmd-file.o \
-	mi-cmd-info.o \
-	mi-cmd-stack.o \
-	mi-cmd-target.o \
-	mi-cmd-var.o \
-	mi-cmds.o \
-	mi-console.o \
-	mi-getopt.o \
-	mi-interp.o \
-	mi-main.o \
-	mi-out.o \
-	mi-parse.o \
-	mi-symbol-cmds.o
-
 SUBDIR_MI_SRCS = \
 	mi/mi-cmd-break.c \
 	mi/mi-cmd-catch.c \
@@ -297,6 +273,8 @@ SUBDIR_MI_SRCS = \
 	mi/mi-parse.c \
 	mi/mi-symbol-cmds.c
 
+SUBDIR_MI_OBS = $(patsubst %.c,%.o,$(SUBDIR_MI_SRCS))
+
 SUBDIR_MI_DEPS =
 SUBDIR_MI_LDFLAGS =
 SUBDIR_MI_CFLAGS =
@@ -304,25 +282,6 @@ SUBDIR_MI_CFLAGS =
 #
 # TUI sub directory definitions
 #
-SUBDIR_TUI_OBS = \
-	tui.o \
-	tui-command.o \
-	tui-data.o \
-	tui-disasm.o \
-	tui-file.o \
-	tui-hooks.o \
-	tui-interp.o \
-	tui-io.o \
-	tui-layout.o \
-	tui-out.o \
-	tui-regs.o \
-	tui-source.o \
-	tui-stack.o \
-	tui-win.o \
-	tui-windata.o \
-	tui-wingeneral.o \
-	tui-winsource.o
-
 SUBDIR_TUI_SRCS = \
 	tui/tui.c \
 	tui/tui-command.c \
@@ -342,6 +301,8 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-wingeneral.c \
 	tui/tui-winsource.c
 
+SUBDIR_TUI_OBS = $(patsubst %.c,%.o,$(SUBDIR_TUI_SRCS))
+
 SUBDIR_TUI_DEPS =
 SUBDIR_TUI_LDFLAGS =
 SUBDIR_TUI_CFLAGS = -DTUI=1
@@ -349,15 +310,6 @@ SUBDIR_TUI_CFLAGS = -DTUI=1
 #
 # GCC Compile support sub-directory definitions
 #
-SUBDIR_GCC_COMPILE_OBS = \
-	compile.o \
-	compile-c-support.o \
-	compile-c-symbols.o \
-	compile-c-types.o \
-	compile-loc2c.o \
-	compile-object-load.o \
-	compile-object-run.o
-
 SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile.c \
 	compile/compile-c-support.c \
@@ -369,36 +321,11 @@ SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile-object-run.c \
 	compile/compile-object-run.h
 
+SUBDIR_GCC_COMPILE_OBS = $(patsubst %.c,%.o,$(filter %.c,$(SUBDIR_GCC_COMPILE_SRCS)))
+
 #
 # Guile sub directory definitons for guile support.
 #
-SUBDIR_GUILE_OBS = \
-	guile.o \
-	scm-arch.o \
-	scm-auto-load.o \
-	scm-block.o \
-	scm-breakpoint.o \
-	scm-cmd.o \
-	scm-disasm.o \
-	scm-exception.o \
-	scm-frame.o \
-	scm-gsmob.o \
-	scm-iterator.o \
-	scm-lazy-string.o \
-	scm-math.o \
-	scm-objfile.o \
-	scm-param.o \
-	scm-ports.o \
-	scm-pretty-print.o \
-	scm-progspace.o \
-	scm-safe-call.o \
-	scm-string.o \
-	scm-symbol.o \
-	scm-symtab.o \
-	scm-type.o \
-	scm-utils.o \
-	scm-value.o
-
 SUBDIR_GUILE_SRCS = \
 	guile/guile.c \
 	guile/scm-arch.c \
@@ -426,6 +353,8 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-utils.c \
 	guile/scm-value.c
 
+SUBDIR_GUILE_OBS = $(patsubst %.c,%.o,$(SUBDIR_GUILE_SRCS))
+
 SUBDIR_GUILE_DEPS =
 SUBDIR_GUILE_LDFLAGS =
 SUBDIR_GUILE_CFLAGS =
@@ -433,50 +362,6 @@ SUBDIR_GUILE_CFLAGS =
 #
 # python sub directory definitons
 #
-SUBDIR_PYTHON_OBS = \
-	py-arch.o \
-	py-auto-load.o \
-	py-block.o \
-	py-bpevent.o \
-	py-breakpoint.o \
-	py-cmd.o \
-	py-continueevent.o \
-	py-event.o \
-	py-evtregistry.o \
-	py-evts.o \
-	py-exitedevent.o \
-	py-finishbreakpoint.o \
-	py-frame.o \
-	py-framefilter.o \
-	py-function.o \
-	py-gdb-readline.o \
-	py-inferior.o \
-	py-infevents.o \
-	py-infthread.o \
-	py-instruction.o \
-	py-lazy-string.o \
-	py-linetable.o \
-	py-newobjfileevent.o \
-	py-objfile.o \
-	py-param.o \
-	py-prettyprint.o \
-	py-progspace.o \
-	py-record.o \
-	py-record-btrace.o \
-	py-record-full.o \
-	py-signalevent.o \
-	py-stopevent.o \
-	py-symbol.o \
-	py-symtab.o \
-	py-threadevent.o \
-	py-type.o \
-	py-unwind.o \
-	py-utils.o \
-	py-value.o \
-	py-varobj.o \
-	py-xmethods.o \
-	python.o
-
 SUBDIR_PYTHON_SRCS = \
 	python/py-arch.c \
 	python/py-auto-load.c \
@@ -521,25 +406,32 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-xmethods.c \
 	python/python.c
 
+SUBDIR_PYTHON_OBS = $(patsubst %.c,%.o,$(SUBDIR_PYTHON_SRCS))
+
 SUBDIR_PYTHON_DEPS =
 SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
 SUBDIR_UNITTESTS_SRCS = \
+	unittests/array-view-selftests.c \
+	unittests/common-utils-selftests.c \
 	unittests/environ-selftests.c \
 	unittests/function-view-selftests.c \
+	unittests/lookup_name_info-selftests.c \
+	unittests/memory-map-selftests.c \
+	unittests/memrange-selftests.c \
 	unittests/offset-type-selftests.c \
 	unittests/optional-selftests.c \
 	unittests/ptid-selftests.c \
-	unittests/scoped_restore-selftests.c
+	unittests/rsp-low-selftests.c \
+	unittests/scoped_restore-selftests.c \
+	unittests/xml-utils-selftests.c
 
-SUBDIR_UNITTESTS_OBS = \
-	environ-selftests.o \
-	function-view-selftests.o \
-	offset-type-selftests.o \
-	optional-selftests.o \
-	ptid-selftests.o \
-	scoped_restore-selftests.o
+SUBDIR_UNITTESTS_OBS = $(patsubst %.c,%.o,$(SUBDIR_UNITTESTS_SRCS))
+
+SUBDIR_TARGET_SRCS = target/waitstatus.c
+SUBDIR_TARGET_OBS = $(patsubst %.c,%.o,$(SUBDIR_TARGET_SRCS))
+
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -630,6 +522,9 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
+CONFIG_SRC_SUBDIR = arch cli mi compile tui unittests guile python target
+CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
+
 # -I. for config files.
 # -I$(srcdir) for gdb internal headers.
 # -I$(srcdir)/config for more generic config files.
@@ -690,7 +585,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(ZLIB) $(INTL) $(LIBIBERTY) $(LIBD
 	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) \
 	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
-	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU) $(LIBICONV)
+	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU) $(LIBICONV) $(LIBMPFR)
 CDEPS = $(XM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
 
@@ -720,27 +615,10 @@ XMLFILES = \
 	$(srcdir)/features/traceframe-info.dtd \
 	$(srcdir)/features/xinclude.dtd
 
-# This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
-# interface to the serial port.  Hopefully if get ported to OS/2, VMS,
-# etc., then there will be (as part of the C library or perhaps as
-# part of libiberty) a POSIX interface.  But at least for now the
-# host-dependent makefile fragment might need to use something else
-# besides ser-unix.o
+# Build the ser-*.o files the host supports.  This includes ser-unix.o
+# for any system that supports a POSIX interface to the serial port.
+# See configure.ac.
 SER_HARDWIRE = @SER_HARDWIRE@
-
-# The `remote' debugging target is supported for most architectures,
-# but not all (e.g. 960)
-REMOTE_OBS = \
-	ax-gdb.o \
-	ax-general.o \
-	ctf.o \
-	dcache.o \
-	remote.o \
-	remote-fileio.o \
-	remote-notif.o \
-	tracefile.o \
-	tracefile-tfile.o \
-	tracepoint.o
 
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS = @SIM_OBS@
@@ -751,7 +629,7 @@ TARGET_OBS = @TARGET_OBS@
 # All target-dependent objects files that require 64-bit CORE_ADDR
 # (used with --enable-targets=all --enable-64-bit-bfd).
 ALL_64_TARGET_OBS = \
-	aarch64-insn.o \
+	aarch64-fbsd-tdep.o \
 	aarch64-linux-tdep.o \
 	aarch64-newlib-tdep.o \
 	aarch64-tdep.o \
@@ -770,6 +648,9 @@ ALL_64_TARGET_OBS = \
 	amd64-sol2-tdep.o \
 	amd64-tdep.o \
 	amd64-windows-tdep.o \
+	arch/aarch64.o \
+	arch/aarch64-insn.o \
+	arch/amd64.o \
 	ia64-linux-tdep.o \
 	ia64-tdep.o \
 	ia64-vms-tdep.o \
@@ -784,10 +665,12 @@ ALL_64_TARGET_OBS = \
 # All other target-dependent objects files (used with --enable-targets=all).
 ALL_TARGET_OBS = \
 	arc-tdep.o \
-	arm.o \
+	arch/arm.o \
+	arch/arm-get-next-pcs.o \
+	arch/arm-linux.o \
+	arch/i386.o \
 	arm-bsd-tdep.o \
-	arm-get-next-pcs.o \
-	arm-linux.o \
+	arm-fbsd-tdep.o \
 	arm-linux-tdep.o \
 	arm-nbsd-tdep.o \
 	arm-obsd-tdep.o \
@@ -1016,11 +899,10 @@ TARGET_FLAGS_TO_PASS = \
 	"TESTS=$(TESTS)"
 
 # All source files that go into linking GDB.
-# Links made at configuration time should not be specified here, since
-# SFILES is used in building the distribution archive.
 
-SFILES = \
-	ada-exp.y \
+# Files that should wind up in SFILES and whose corresponding .o
+# should be in COMMON_OBS.
+COMMON_SFILES = \
 	ada-lang.c \
 	ada-tasks.c \
 	ada-typeprint.c \
@@ -1045,7 +927,6 @@ SFILES = \
 	btrace.c \
 	build-id.c \
 	buildsym.c \
-	c-exp.y \
 	c-lang.c \
 	c-typeprint.c \
 	c-valprint.c \
@@ -1061,40 +942,36 @@ SFILES = \
 	corefile.c \
 	corelow.c \
 	cp-abi.c \
-	cp-name-parser.y \
 	cp-namespace.c \
 	cp-support.c \
 	cp-valprint.c \
 	ctf.c \
-	d-exp.y \
 	d-lang.c \
 	d-namespace.c \
 	d-valprint.c \
 	dbxread.c \
+	dcache.c \
+	debug.c \
 	demangle.c \
-	dfp.c \
 	dictionary.c \
 	disasm.c \
 	disasm-selftests.c \
-	doublest.c \
-	dtrace-probe.c \
 	dummy-frame.c \
 	dwarf2-frame.c \
 	dwarf2-frame-tailcall.c \
 	dwarf2expr.c \
 	dwarf2loc.c \
 	dwarf2read.c \
-	elfread.c \
 	eval.c \
 	event-loop.c \
 	event-top.c \
 	exceptions.c \
 	expprint.c \
 	extension.c \
-	f-exp.y \
 	f-lang.c \
 	f-typeprint.c \
 	f-valprint.c \
+	filename-seen-cache.c \
 	filesystem.c \
 	findcmd.c \
 	findvar.c \
@@ -1102,7 +979,6 @@ SFILES = \
 	frame-base.c \
 	frame-unwind.c \
 	gcore.c \
-	gdb.c \
 	gdb_bfd.c \
 	gdb-dlfcn.c \
 	gdb_obstack.c \
@@ -1113,7 +989,6 @@ SFILES = \
 	gdbtypes.c \
 	gnu-v2-abi.c \
 	gnu-v3-abi.c \
-	go-exp.y \
 	go-lang.c \
 	go-typeprint.c \
 	go-valprint.c \
@@ -1122,7 +997,6 @@ SFILES = \
 	infcall.c \
 	infcmd.c \
 	inferior.c \
-	inflow.c \
 	infrun.c \
 	inline-frame.c \
 	interps.c \
@@ -1130,7 +1004,6 @@ SFILES = \
 	language.c \
 	linespec.c \
 	location.c \
-	m2-exp.y \
 	m2-lang.c \
 	m2-typeprint.c \
 	m2-valprint.c \
@@ -1155,14 +1028,13 @@ SFILES = \
 	opencl-lang.c \
 	osabi.c \
 	osdata.c \
-	p-exp.y \
 	p-lang.c \
 	p-typeprint.c \
 	p-valprint.c \
 	parse.c \
 	printcmd.c \
 	probe.c \
-	proc-service.list \
+	producer.c \
 	progspace.c \
 	progspace-and-thread.c \
 	prologue-value.c \
@@ -1172,32 +1044,24 @@ SFILES = \
 	record-full.c \
 	regcache.c \
 	reggroups.c \
+	registry.c \
 	remote.c \
 	remote-fileio.c \
 	remote-notif.c \
 	reverse.c \
-	rust-exp.y \
 	rust-lang.c \
-	selftest.c \
-	selftest-arch.c \
 	sentinel-frame.c \
-	ser-base.c \
 	ser-event.c \
-	ser-unix.c \
 	serial.c \
 	skip.c \
-	sol-thread.c \
 	solib.c \
 	solib-target.c \
 	source.c \
 	stabsread.c \
 	stack.c \
-	stap-probe.c \
 	std-regs.c \
-	stub-termcap.c \
 	symfile.c \
 	symfile-debug.c \
-	symfile-mem.c \
 	symmisc.c \
 	symtab.c \
 	target.c \
@@ -1205,14 +1069,17 @@ SFILES = \
 	target-descriptions.c \
 	target-memory.c \
 	thread.c \
+	thread-fsm.c \
 	tid-parse.c \
 	top.c \
+	tracefile.c \
+	tracefile-tfile.c \
 	tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
+	target-float.c \
 	typeprint.c \
 	ui-file.c \
-	ui-file.h \
 	ui-out.c \
 	user-regs.c \
 	utils.c \
@@ -1223,7 +1090,33 @@ SFILES = \
 	varobj.c \
 	xml-support.c \
 	xml-syscall.c \
-	xml-tdesc.c \
+	xml-tdesc.c
+
+# Links made at configuration time should not be specified here, since
+# SFILES is used in building the distribution archive.
+SFILES = \
+	ada-exp.y \
+	arch/i386.c \
+	c-exp.y \
+	cp-name-parser.y \
+	d-exp.y \
+	dtrace-probe.c \
+	elfread.c \
+	f-exp.y \
+	gdb.c \
+	go-exp.y \
+	inflow.c \
+	m2-exp.y \
+	p-exp.y \
+	proc-service.list \
+	rust-exp.y \
+	ser-base.c \
+	ser-unix.c \
+	sol-thread.c \
+	stap-probe.c \
+	stub-termcap.c \
+	symfile-mem.c \
+	ui-file.h \
 	common/agent.c \
 	common/btrace-common.c \
 	common/buffer.c \
@@ -1238,6 +1131,7 @@ SFILES = \
 	common/filestuff.c \
 	common/format.c \
 	common/job-control.c \
+	common/gdb_tilde_expand.c \
 	common/gdb_vecs.c \
 	common/new-op.c \
 	common/print-utils.c \
@@ -1249,7 +1143,8 @@ SFILES = \
 	common/vec.c \
 	common/xml-utils.c \
 	mi/mi-common.c \
-	target/waitstatus.c \
+	$(SUBDIR_TARGET_SRCS) \
+	$(COMMON_SFILES) \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -1303,11 +1198,9 @@ HFILES_NO_SRCDIR = \
 	darwin-nat.h \
 	dcache.h \
 	defs.h \
-	dfp.h \
 	dicos-tdep.h \
 	dictionary.h \
 	disasm.h \
-	doublest.h \
 	dummy-frame.h \
 	dwarf2-frame.h \
 	dwarf2-frame-tailcall.h \
@@ -1330,7 +1223,6 @@ HFILES_NO_SRCDIR = \
 	frv-tdep.h \
 	ft32-tdep.h \
 	gcore.h \
-	gdb.h \
 	gdb_bfd.h \
 	gdb_curses.h \
 	gdb-dlfcn.h \
@@ -1477,6 +1369,7 @@ HFILES_NO_SRCDIR = \
 	tracefile.h \
 	tracepoint.h \
 	trad-frame.h \
+	target-float.h \
 	tramp-frame.h \
 	typeprint.h \
 	ui-file.h \
@@ -1498,8 +1391,10 @@ HFILES_NO_SRCDIR = \
 	xml-syscall.h \
 	xml-tdesc.h \
 	xtensa-tdep.h \
+	arch/aarch64.h \
 	arch/aarch64-insn.h \
 	arch/arm.h \
+	arch/i386.h \
 	cli/cli-cmds.h \
 	cli/cli-decode.h \
 	cli/cli-script.h \
@@ -1520,11 +1415,11 @@ HFILES_NO_SRCDIR = \
 	common/fileio.h \
 	common/format.h \
 	common/gdb_assert.h \
+	common/gdb_tilde_expand.h \
 	common/gdb_locale.h \
 	common/gdb_setjmp.h \
 	common/gdb_signals.h \
 	common/gdb_sys_time.h \
-	common/gdb_termios.h \
 	common/gdb_vecs.h \
 	common/gdb_wait.h \
 	common/common-inferior.h \
@@ -1635,215 +1530,37 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
-	ada-lang.o \
-	ada-tasks.o \
-	ada-typeprint.o \
-	ada-valprint.o \
-	ada-varobj.o \
-	addrmap.o \
-	agent.o \
-	annotate.o \
-	arch-utils.o \
-	auto-load.o \
-	auxv.o \
-	bcache.o \
-	bfd-target.o \
-	block.o \
-	blockframe.o \
-	break-catch-sig.o \
-	break-catch-syscall.o \
-	break-catch-throw.o \
-	breakpoint.o \
-	btrace.o \
 	btrace-common.o \
 	buffer.o \
-	build-id.o \
-	buildsym.o \
-	c-lang.o \
-	c-typeprint.o \
-	c-valprint.o \
-	c-varobj.o \
-	charset.o \
 	cleanups.o \
-	cli-out.o \
-	coff-pe-read.o \
-	coffread.o \
 	common-agent.o \
 	common-debug.o \
 	common-exceptions.o \
 	job-control.o \
 	common-regcache.o \
 	common-utils.o \
-	complaints.o \
-	completer.o \
-	continuations.o \
-	copying.o \
-	corefile.o \
-	corelow.o \
-	cp-abi.o \
-	cp-namespace.o \
-	cp-support.o \
-	cp-valprint.o \
-	d-lang.o \
-	d-namespace.o \
-	d-valprint.o \
-	dbxread.o \
-	debug.o \
-	demangle.o \
-	dfp.o \
-	dictionary.o \
-	disasm.o \
-	disasm-selftests.o \
-	doublest.o \
-	dummy-frame.o \
-	dwarf2-frame.o \
-	dwarf2-frame-tailcall.o \
-	dwarf2expr.o \
-	dwarf2loc.o \
-	dwarf2read.o \
 	environ.o \
 	errors.o \
-	eval.o \
-	event-loop.o \
-	event-top.o \
-	exceptions.o \
 	exec.o \
-	expprint.o \
-	extension.o \
-	f-lang.o \
-	f-typeprint.o \
-	f-valprint.o \
 	fileio.o \
 	filestuff.o \
-	filesystem.o \
-	findcmd.o \
-	findvar.o \
 	format.o \
-	frame.o \
-	frame-base.o \
-	frame-unwind.o \
-	gcore.o \
-	gdb_bfd.o \
-	gdb-dlfcn.o \
-	gdb_obstack.o \
-	gdb_regex.o \
-	gdb_usleep.o \
+	gdb_tilde_expand.o \
 	gdb_vecs.o \
-	gdbarch.o \
-	gdbarch-selftests.o \
-	gdbtypes.o \
-	gnu-v2-abi.o \
-	gnu-v3-abi.o \
-	go-lang.o \
-	go-typeprint.o \
-	go-valprint.o \
-	inf-child.o \
-	inf-loop.o \
-	infcall.o \
-	infcmd.o \
-	inferior.o \
-	infrun.o \
-	inline-frame.o \
-	interps.o \
-	jit.o \
-	language.o \
-	linespec.o \
-	location.o \
-	m2-lang.o \
-	m2-typeprint.o \
-	m2-valprint.o \
-	macrocmd.o \
-	macroexp.o \
-	macroscope.o \
-	macrotab.o \
-	main.o \
-	maint.o \
-	mdebugread.o \
-	mem-break.o \
-	memattr.o \
-	memory-map.o \
-	memrange.o \
-	mi-common.o \
-	minidebug.o \
-	minsyms.o \
-	mipsread.o \
-	namespace.o \
+	mi/mi-common.o \
 	new-op.o \
-	objc-lang.o \
-	objfiles.o \
-	observer.o \
-	opencl-lang.o \
-	osabi.o \
-	osdata.o \
-	p-lang.o \
-	p-typeprint.o \
-	p-valprint.o \
-	parse.o \
 	print-utils.o \
-	printcmd.o \
-	probe.o \
-	progspace.o \
-	progspace-and-thread.o \
-	prologue-value.o \
-	psymtab.o \
 	ptid.o \
-	record.o \
-	record-btrace.o \
-	record-full.o \
-	regcache.o \
-	reggroups.o \
-	registry.o \
-	reverse.o \
 	rsp-low.o \
 	run-time-clock.o \
-	rust-lang.o \
-	selftest.o \
-	selftest-arch.o \
-	sentinel-frame.o \
-	ser-event.o \
-	serial.o \
 	signals.o \
 	signals-state-save-restore.o \
-	skip.o \
-	solib.o \
-	solib-target.o \
-	source.o \
-	stabsread.o \
-	stack.o \
-	std-regs.o \
-	symfile.o \
-	symfile-debug.o \
-	symmisc.o \
-	symtab.o \
-	target.o \
-	target-dcache.o \
-	target-descriptions.o \
-	target-memory.o \
-	thread.o \
-	thread-fsm.o \
-	tid-parse.o \
-	top.o \
-	trad-frame.o \
-	tramp-frame.o \
-	typeprint.o \
-	ui-file.o \
-	ui-out.o \
-	user-regs.o \
-	utils.o \
-	utils-selftests.o \
-	valarith.o \
-	valops.o \
-	valprint.o \
-	value.o \
-	varobj.o \
 	vec.o \
 	version.o \
-	waitstatus.o \
 	xml-builtin.o \
-	xml-support.o \
-	xml-syscall.o \
-	xml-tdesc.o \
 	xml-utils.o \
+	$(patsubst %.c,%.o,$(COMMON_SFILES)) \
+	$(SUBDIR_TARGET_OBS) \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -1857,7 +1574,7 @@ CLEANDIRS = $(SUBDIRS)
 # The format here is for the `case' shell command.
 REQUIRED_SUBDIRS = doc | testsuite | $(GNULIB_BUILDDIR) | data-directory
 
-# For now, shortcut the "configure GDB for fewer languages" stuff.
+# Parser intermediate files.
 YYFILES = \
 	ada-exp.c \
 	ada-lex.c \
@@ -1870,16 +1587,9 @@ YYFILES = \
 	p-exp.c \
 	rust-exp.c
 
-YYOBJ = \
-	ada-exp.o \
-	c-exp.o \
-	cp-name-parser.o \
-	d-exp.o \
-	f-exp.o \
-	go-exp.o \
-	m2-exp.o \
-	p-exp.o \
-	rust-exp.o
+# ada-lex.c is included by another file, so it shouldn't wind up as a
+# .o itself.
+YYOBJ = $(filter-out ada-lex.o,$(patsubst %.c,%.o,$(YYFILES)))
 
 # Things which need to be built when making a distribution.
 
@@ -1904,24 +1614,19 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
 # Rule for compiling .c files in the top-level gdb directory.
-%.o: %.c
+# The order-only dependencies ensure that we create the build subdirectories.
+%.o: %.c | $(CONFIG_DEP_SUBDIR)
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+
+$(CONFIG_DEP_SUBDIR):
+	$(SHELL) $(srcdir)/../mkinstalldirs $@
+
+# Python files need special flags.
+python/%.o: INTERNAL_CFLAGS += $(PYTHON_CFLAGS)
 
 # Rules for compiling .c files in the various source subdirectories.
-%.o: ${srcdir}/arch/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: $(srcdir)/cli/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 %.o: ${srcdir}/common/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: $(srcdir)/compile/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
@@ -1929,31 +1634,7 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 	$(COMPILE) $(all_gdbtk_cflags) $<
 	$(POSTCOMPILE)
 
-%.o: $(srcdir)/guile/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: $(srcdir)/mi/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 %.o: ${srcdir}/nat/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: $(srcdir)/python/%.c
-	$(COMPILE) $(PYTHON_CFLAGS) $<
-	$(POSTCOMPILE)
-
-%.o: ${srcdir}/target/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: $(srcdir)/tui/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: ${srcdir}/unittests/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
@@ -2288,6 +1969,10 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f test-cp-name-parser$(EXEEXT)
 	rm -f xml-builtin.c stamp-xml
 	rm -f $(DEPDIR)/*
+	for i in $(CONFIG_SRC_SUBDIR); do \
+		rm -f $$i/*.o;	\
+		rm -f $$i/$(DEPDIR)/*; \
+	done
 
 # This used to depend on c-exp.c m2-exp.c TAGS
 # I believe this is wrong; the makefile standards for distclean just
@@ -2306,6 +1991,9 @@ distclean: clean
 	rm -f config.log config.cache
 	rm -f Makefile
 	rm -rf $(DEPDIR)
+	for i in $(CONFIG_SRC_SUBDIR); do \
+		if test -d $$i/$(DEPDIR); then rmdir $$i/$(DEPDIR); fi \
+	done
 
 maintainer-clean: local-maintainer-clean do-maintainer-clean distclean
 realclean: maintainer-clean
@@ -2489,6 +2177,8 @@ force_update:
 MAKEOVERRIDES =
 
 ALLDEPFILES = \
+	aarch64-fbsd-nat.c \
+	aarch64-fbsd-tdep.c \
 	aarch64-linux-nat.c \
 	aarch64-linux-tdep.c \
 	aarch64-newlib-tdep.c \
@@ -2519,6 +2209,8 @@ ALLDEPFILES = \
 	arc-tdep.c \
 	arm.c \
 	arm-bsd-tdep.c \
+	arm-fbsd-nat.c \
+	arm-fbsd-tdep.c \
 	arm-get-next-pcs.c \
 	arm-linux.c \
 	arm-linux-nat.c \
@@ -2533,10 +2225,7 @@ ALLDEPFILES = \
 	bfin-tdep.c \
 	bsd-kvm.c \
 	bsd-uthread.c \
-	core-regset.c \
 	darwin-nat.c \
-	dcache.c \
-	dcache.c \
 	dicos-tdep.c \
 	exec.c \
 	fbsd-nat.c \
@@ -2699,23 +2388,17 @@ ALLDEPFILES = \
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
 
-# FIXME: cagney/2003-08-10: "monitor.c" gets -Wformat-nonliteral
-# errors.  It turns out that that is the least of monitor.c's
-# problems.  The function print_vsprintf appears to be using
-# va_arg(long) to extract CORE_ADDR parameters - something that
-# definitly will not work.  "monitor.c" needs to be rewritten so that
-# it doesn't use format strings and instead uses callbacks.
-monitor.o: $(srcdir)/monitor.c
-	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
-		$(COMPILE.post) $(srcdir)/monitor.c
-	$(POSTCOMPILE)
-
 # Do not try to build "printcmd.c" with -Wformat-nonliteral.  It manually
 # checks format strings.
 printcmd.o: $(srcdir)/printcmd.c
 	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
 		$(COMPILE.post) $(srcdir)/printcmd.c
 	$(POSTCOMPILE)
+
+# Same for "target-float.c".
+target-float.o: $(srcdir)/target-float.c
+	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
+		$(COMPILE.post) $(srcdir)/target-float.c
 
 # ada-exp.c can appear in srcdir, for releases; or in ., for
 # development builds.
@@ -2941,12 +2624,13 @@ ifeq ($(DEPMODE),depmode=gcc3)
 # into place if the compile succeeds.  We need this because gcc does
 # not atomically write the dependency output file.
 override COMPILE.post = -c -o $@ -MT $@ -MMD -MP \
-	-MF $(DEPDIR)/$(basename $(@F)).Tpo
-override POSTCOMPILE = @mv $(DEPDIR)/$(basename $(@F)).Tpo \
-	$(DEPDIR)/$(basename $(@F)).Po
+	-MF $(@D)/$(DEPDIR)/$(basename $(@F)).Tpo
+override POSTCOMPILE = @mv $(@D)/$(DEPDIR)/$(basename $(@F)).Tpo \
+	$(@D)/$(DEPDIR)/$(basename $(@F)).Po
 else
 override COMPILE.pre = source='$<' object='$@' libtool=no \
-	DEPDIR=$(DEPDIR) $(DEPMODE) $(depcomp) $(CC)
+	DEPDIR=$(DEPDIR) $(DEPMODE) $(depcomp) \
+	$(CXX) -x c++ $(CXX_DIALECT)
 # depcomp handles atomicity for us, so we don't need a postcompile
 # step.
 override POSTCOMPILE =
@@ -2956,6 +2640,10 @@ endif
 # dependency tracking.
 all_object_files = gdb.o $(LIBGDB_OBS) gdbtk-main.o \
 	test-cp-name-parser.o
+
+# All the .deps files to include.
+all_deps_files = $(foreach dep,$(patsubst %.o,%.Po,$(all_object_files)),\
+    $(dir $(dep))/$(DEPDIR)/$(notdir $(dep)))
 
 # Ensure that generated files are created early.  Use order-only
 # dependencies if available.  They require GNU make 3.80 or newer,
@@ -2967,7 +2655,7 @@ $(all_object_files) : $(generated_files)
 endif
 
 # Dependencies.
--include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
+-include $(all_deps_files)
 
 # Disable implicit make rules.
 include $(srcdir)/disable-implicit-rules.mk

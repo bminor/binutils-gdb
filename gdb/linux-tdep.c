@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux, architecture independent.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -92,6 +92,11 @@ struct smaps_vmflags
    generating a corefile.  */
 
 static int use_coredump_filter = 1;
+
+/* Whether the value of smaps_vmflags->exclude_coredump should be
+   ignored, including mappings marked with the VM_DONTDUMP flag in
+   the dump.  */
+static int dump_excluded_mappings = 0;
 
 /* This enum represents the signals' numbers on a generic architecture
    running the Linux kernel.  The definition of "generic" comes from
@@ -279,19 +284,20 @@ linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
 
   /* __pid_t */
   pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			TYPE_LENGTH (int_type), "__pid_t");
+			TYPE_LENGTH (int_type) * TARGET_CHAR_BIT, "__pid_t");
   TYPE_TARGET_TYPE (pid_type) = int_type;
   TYPE_TARGET_STUB (pid_type) = 1;
 
   /* __uid_t */
   uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			TYPE_LENGTH (uint_type), "__uid_t");
+			TYPE_LENGTH (uint_type) * TARGET_CHAR_BIT, "__uid_t");
   TYPE_TARGET_TYPE (uid_type) = uint_type;
   TYPE_TARGET_STUB (uid_type) = 1;
 
   /* __clock_t */
   clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			  TYPE_LENGTH (long_type), "__clock_t");
+			  TYPE_LENGTH (long_type) * TARGET_CHAR_BIT,
+			  "__clock_t");
   TYPE_TARGET_TYPE (clock_type) = long_type;
   TYPE_TARGET_STUB (clock_type) = 1;
 
@@ -440,7 +446,7 @@ read_mapping (const char *line,
     p++;
   *endaddr = strtoulst (p, &p, 16);
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
   *permissions = p;
   while (*p && !isspace (*p))
     p++;
@@ -448,7 +454,7 @@ read_mapping (const char *line,
 
   *offset = strtoulst (p, &p, 16);
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
   *device = p;
   while (*p && !isspace (*p))
     p++;
@@ -456,7 +462,7 @@ read_mapping (const char *line,
 
   *inode = strtoulst (p, &p, 10);
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
   *filename = p;
 }
 
@@ -654,7 +660,7 @@ dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
 	return 0;
 
       /* Check if we should exclude this mapping.  */
-      if (v->exclude_coredump)
+      if (!dump_excluded_mappings && v->exclude_coredump)
 	return 0;
 
       /* Update our notion of whether this mapping is shared or
@@ -740,7 +746,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
       pid = current_inferior ()->pid;
     }
 
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
   if (args && args[0])
     error (_("Too many parameters: %s"), args);
 
@@ -748,13 +754,10 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (cmdline_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/cmdline", pid);
-      data = target_fileio_read_stralloc (NULL, filename);
-      if (data)
-	{
-	  struct cleanup *cleanup = make_cleanup (xfree, data);
-          printf_filtered ("cmdline = '%s'\n", data);
-	  do_cleanups (cleanup);
-	}
+      gdb::unique_xmalloc_ptr<char> cmdline
+	= target_fileio_read_stralloc (NULL, filename);
+      if (cmdline)
+	printf_filtered ("cmdline = '%s'\n", cmdline.get ());
       else
 	warning (_("unable to open /proc file '%s'"), filename);
     }
@@ -787,10 +790,10 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (mappings_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/maps", pid);
-      data = target_fileio_read_stralloc (NULL, filename);
-      if (data)
+      gdb::unique_xmalloc_ptr<char> map
+	= target_fileio_read_stralloc (NULL, filename);
+      if (map != NULL)
 	{
-	  struct cleanup *cleanup = make_cleanup (xfree, data);
 	  char *line;
 
 	  printf_filtered (_("Mapped address spaces:\n\n"));
@@ -809,7 +812,9 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 			   "      Size", "    Offset", "objfile");
 	    }
 
-	  for (line = strtok (data, "\n"); line; line = strtok (NULL, "\n"))
+	  for (line = strtok (map.get (), "\n");
+	       line;
+	       line = strtok (NULL, "\n"))
 	    {
 	      ULONGEST addr, endaddr, offset, inode;
 	      const char *permissions, *device, *filename;
@@ -839,8 +844,6 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 				   *filename? filename : "");
 	        }
 	    }
-
-	  do_cleanups (cleanup);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), filename);
@@ -848,29 +851,26 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (status_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/status", pid);
-      data = target_fileio_read_stralloc (NULL, filename);
-      if (data)
-	{
-	  struct cleanup *cleanup = make_cleanup (xfree, data);
-          puts_filtered (data);
-	  do_cleanups (cleanup);
-	}
+      gdb::unique_xmalloc_ptr<char> status
+	= target_fileio_read_stralloc (NULL, filename);
+      if (status)
+	puts_filtered (status.get ());
       else
 	warning (_("unable to open /proc file '%s'"), filename);
     }
   if (stat_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/stat", pid);
-      data = target_fileio_read_stralloc (NULL, filename);
-      if (data)
+      gdb::unique_xmalloc_ptr<char> statstr
+	= target_fileio_read_stralloc (NULL, filename);
+      if (statstr)
 	{
-	  struct cleanup *cleanup = make_cleanup (xfree, data);
-	  const char *p = data;
+	  const char *p = statstr.get ();
 
 	  printf_filtered (_("Process: %s\n"),
 			   pulongest (strtoulst (p, &p, 10)));
 
-	  p = skip_spaces_const (p);
+	  p = skip_spaces (p);
 	  if (*p == '(')
 	    {
 	      /* ps command also relies on no trailing fields
@@ -884,7 +884,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 		}
 	    }
 
-	  p = skip_spaces_const (p);
+	  p = skip_spaces (p);
 	  if (*p)
 	    printf_filtered (_("State: %c\n"), *p++);
 
@@ -990,7 +990,6 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	    printf_filtered (_("wchan (system call): %s\n"),
 			     hex_string (strtoulst (p, &p, 10)));
 #endif
-	  do_cleanups (cleanup);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), filename);
@@ -1004,10 +1003,9 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 {
   asection *section;
   ULONGEST count, page_size;
-  unsigned char *descdata, *filenames, *descend, *contents;
+  unsigned char *descdata, *filenames, *descend;
   size_t note_size;
   unsigned int addr_size_bits, addr_size;
-  struct cleanup *cleanup;
   struct gdbarch *core_gdbarch = gdbarch_from_bfd (core_bfd);
   /* We assume this for reading 64-bit core files.  */
   gdb_static_assert (sizeof (ULONGEST) >= 8);
@@ -1026,12 +1024,12 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
   if (note_size < 2 * addr_size)
     error (_("malformed core note - too short for header"));
 
-  contents = (unsigned char *) xmalloc (note_size);
-  cleanup = make_cleanup (xfree, contents);
-  if (!bfd_get_section_contents (core_bfd, section, contents, 0, note_size))
+  gdb::def_vector<unsigned char> contents (note_size);
+  if (!bfd_get_section_contents (core_bfd, section, contents.data (),
+				 0, note_size))
     error (_("could not get core note contents"));
 
-  descdata = contents;
+  descdata = contents.data ();
   descend = descdata + note_size;
 
   if (descdata[note_size - 1] != '\0')
@@ -1096,8 +1094,6 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 
       filenames += 1 + strlen ((char *) filenames);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Implement "info proc" for a corefile.  */
@@ -1127,6 +1123,26 @@ linux_core_info_proc (struct gdbarch *gdbarch, const char *args,
     error (_("unable to handle request"));
 }
 
+/* Read siginfo data from the core, if possible.  Returns -1 on
+   failure.  Otherwise, returns the number of bytes read.  READBUF,
+   OFFSET, and LEN are all as specified by the to_xfer_partial
+   interface.  */
+
+static LONGEST
+linux_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
+			 ULONGEST offset, ULONGEST len)
+{
+  thread_section_name section_name (".note.linuxcore.siginfo", inferior_ptid);
+  asection *section = bfd_get_section_by_name (core_bfd, section_name.c_str ());
+  if (section == NULL)
+    return -1;
+
+  if (!bfd_get_section_contents (core_bfd, section, readbuf, offset, len))
+    return -1;
+
+  return len;
+}
+
 typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
 					    ULONGEST offset, ULONGEST inode,
 					    int read, int write,
@@ -1143,7 +1159,6 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 {
   char mapsfilename[100];
   char coredumpfilter_name[100];
-  char *data, *coredumpfilterdata;
   pid_t pid;
   /* Default dump behavior of coredump_filter (0x33), according to
      Documentation/filesystems/proc.txt from the Linux kernel
@@ -1163,20 +1178,20 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
     {
       xsnprintf (coredumpfilter_name, sizeof (coredumpfilter_name),
 		 "/proc/%d/coredump_filter", pid);
-      coredumpfilterdata = target_fileio_read_stralloc (NULL,
-							coredumpfilter_name);
+      gdb::unique_xmalloc_ptr<char> coredumpfilterdata
+	= target_fileio_read_stralloc (NULL, coredumpfilter_name);
       if (coredumpfilterdata != NULL)
 	{
 	  unsigned int flags;
 
-	  sscanf (coredumpfilterdata, "%x", &flags);
+	  sscanf (coredumpfilterdata.get (), "%x", &flags);
 	  filterflags = (enum filter_flag) flags;
-	  xfree (coredumpfilterdata);
 	}
     }
 
   xsnprintf (mapsfilename, sizeof mapsfilename, "/proc/%d/smaps", pid);
-  data = target_fileio_read_stralloc (NULL, mapsfilename);
+  gdb::unique_xmalloc_ptr<char> data
+    = target_fileio_read_stralloc (NULL, mapsfilename);
   if (data == NULL)
     {
       /* Older Linux kernels did not support /proc/PID/smaps.  */
@@ -1186,10 +1201,9 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 
   if (data != NULL)
     {
-      struct cleanup *cleanup = make_cleanup (xfree, data);
       char *line, *t;
 
-      line = strtok_r (data, "\n", &t);
+      line = strtok_r (data.get (), "\n", &t);
       while (line != NULL)
 	{
 	  ULONGEST addr, endaddr, offset, inode;
@@ -1308,7 +1322,6 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 		  filename, obfd);
 	}
 
-      do_cleanups (cleanup);
       return 0;
     }
 
@@ -1505,7 +1518,6 @@ static char *
 linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
 				    char *note_data, int *note_size)
 {
-  struct cleanup *cleanup;
   struct linux_make_mappings_data mapping_data;
   struct type *long_type
     = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch), 0, "long");
@@ -1607,7 +1619,7 @@ linux_collect_thread_registers (const struct regcache *regcache,
 				char *note_data, int *note_size,
 				enum gdb_signal stop_signal)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct linux_collect_regset_section_cb_data data;
 
   data.gdbarch = gdbarch;
@@ -1629,40 +1641,30 @@ linux_collect_thread_registers (const struct regcache *regcache,
   return data.note_data;
 }
 
-/* Fetch the siginfo data for the current thread, if it exists.  If
-   there is no data, or we could not read it, return NULL.  Otherwise,
-   return a newly malloc'd buffer holding the data and fill in *SIZE
-   with the size of the data.  The caller is responsible for freeing
-   the data.  */
+/* Fetch the siginfo data for the specified thread, if it exists.  If
+   there is no data, or we could not read it, return an empty
+   buffer.  */
 
-static gdb_byte *
-linux_get_siginfo_data (struct gdbarch *gdbarch, LONGEST *size)
+static gdb::byte_vector
+linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch)
 {
   struct type *siginfo_type;
-  gdb_byte *buf;
   LONGEST bytes_read;
-  struct cleanup *cleanups;
 
   if (!gdbarch_get_siginfo_type_p (gdbarch))
-    return NULL;
-  
+    return gdb::byte_vector ();
+
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
+  inferior_ptid = thread->ptid;
+
   siginfo_type = gdbarch_get_siginfo_type (gdbarch);
 
-  buf = (gdb_byte *) xmalloc (TYPE_LENGTH (siginfo_type));
-  cleanups = make_cleanup (xfree, buf);
+  gdb::byte_vector buf (TYPE_LENGTH (siginfo_type));
 
   bytes_read = target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,
-			    buf, 0, TYPE_LENGTH (siginfo_type));
-  if (bytes_read == TYPE_LENGTH (siginfo_type))
-    {
-      discard_cleanups (cleanups);
-      *size = bytes_read;
-    }
-  else
-    {
-      do_cleanups (cleanups);
-      buf = NULL;
-    }
+			    buf.data (), 0, TYPE_LENGTH (siginfo_type));
+  if (bytes_read != TYPE_LENGTH (siginfo_type))
+    buf.clear ();
 
   return buf;
 }
@@ -1683,20 +1685,12 @@ static void
 linux_corefile_thread (struct thread_info *info,
 		       struct linux_corefile_thread_data *args)
 {
-  struct cleanup *old_chain;
   struct regcache *regcache;
-  gdb_byte *siginfo_data;
-  LONGEST siginfo_size = 0;
 
   regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
 
-  old_chain = save_inferior_ptid ();
-  inferior_ptid = info->ptid;
   target_fetch_registers (regcache, -1);
-  siginfo_data = linux_get_siginfo_data (args->gdbarch, &siginfo_size);
-  do_cleanups (old_chain);
-
-  old_chain = make_cleanup (xfree, siginfo_data);
+  gdb::byte_vector siginfo_data = linux_get_siginfo_data (info, args->gdbarch);
 
   args->note_data = linux_collect_thread_registers
     (regcache, info->ptid, args->obfd, args->note_data,
@@ -1705,14 +1699,13 @@ linux_corefile_thread (struct thread_info *info,
   /* Don't return anything if we got no register information above,
      such a core file is useless.  */
   if (args->note_data != NULL)
-    if (siginfo_data != NULL)
+    if (!siginfo_data.empty ())
       args->note_data = elfcore_write_note (args->obfd,
 					    args->note_data,
 					    args->note_size,
 					    "CORE", NT_SIGINFO,
-					    siginfo_data, siginfo_size);
-
-  do_cleanups (old_chain);
+					    siginfo_data.data (),
+					    siginfo_data.size ());
 }
 
 /* Fill the PRPSINFO structure with information about the process being
@@ -1728,15 +1721,9 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   /* The filename which we will use to obtain some info about the process.
      We will basically use this to store the `/proc/PID/FILENAME' file.  */
   char filename[100];
-  /* The full name of the program which generated the corefile.  */
-  char *fname;
   /* The basename of the executable.  */
   const char *basename;
-  /* The arguments of the program.  */
-  char *psargs;
   char *infargs;
-  /* The contents of `/proc/PID/stat' and `/proc/PID/status' files.  */
-  char *proc_stat, *proc_status;
   /* Temporary buffer.  */
   char *tmpstr;
   /* The valid states of a process, according to the Linux kernel.  */
@@ -1753,56 +1740,54 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   long pr_nice;
   /* The number of fields read by `sscanf'.  */
   int n_fields = 0;
-  /* Cleanups.  */
-  struct cleanup *c;
 
   gdb_assert (p != NULL);
 
   /* Obtaining PID and filename.  */
   pid = ptid_get_pid (inferior_ptid);
   xsnprintf (filename, sizeof (filename), "/proc/%d/cmdline", (int) pid);
-  fname = target_fileio_read_stralloc (NULL, filename);
+  /* The full name of the program which generated the corefile.  */
+  gdb::unique_xmalloc_ptr<char> fname
+    = target_fileio_read_stralloc (NULL, filename);
 
-  if (fname == NULL || *fname == '\0')
+  if (fname == NULL || fname.get ()[0] == '\0')
     {
       /* No program name was read, so we won't be able to retrieve more
 	 information about the process.  */
-      xfree (fname);
       return 0;
     }
 
-  c = make_cleanup (xfree, fname);
   memset (p, 0, sizeof (*p));
 
   /* Defining the PID.  */
   p->pr_pid = pid;
 
   /* Copying the program name.  Only the basename matters.  */
-  basename = lbasename (fname);
+  basename = lbasename (fname.get ());
   strncpy (p->pr_fname, basename, sizeof (p->pr_fname));
   p->pr_fname[sizeof (p->pr_fname) - 1] = '\0';
 
   infargs = get_inferior_args ();
 
-  psargs = xstrdup (fname);
+  /* The arguments of the program.  */
+  std::string psargs = fname.get ();
   if (infargs != NULL)
-    psargs = reconcat (psargs, psargs, " ", infargs, (char *) NULL);
+    psargs = psargs + " " + infargs;
 
-  make_cleanup (xfree, psargs);
-
-  strncpy (p->pr_psargs, psargs, sizeof (p->pr_psargs));
+  strncpy (p->pr_psargs, psargs.c_str (), sizeof (p->pr_psargs));
   p->pr_psargs[sizeof (p->pr_psargs) - 1] = '\0';
 
   xsnprintf (filename, sizeof (filename), "/proc/%d/stat", (int) pid);
-  proc_stat = target_fileio_read_stralloc (NULL, filename);
-  make_cleanup (xfree, proc_stat);
+  /* The contents of `/proc/PID/stat'.  */
+  gdb::unique_xmalloc_ptr<char> proc_stat_contents
+    = target_fileio_read_stralloc (NULL, filename);
+  char *proc_stat = proc_stat_contents.get ();
 
   if (proc_stat == NULL || *proc_stat == '\0')
     {
       /* Despite being unable to read more information about the
 	 process, we return 1 here because at least we have its
 	 command line, PID and arguments.  */
-      do_cleanups (c);
       return 1;
     }
 
@@ -1824,10 +1809,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   /* ps command also relies on no trailing fields ever contain ')'.  */
   proc_stat = strrchr (proc_stat, ')');
   if (proc_stat == NULL)
-    {
-      do_cleanups (c);
-      return 1;
-    }
+    return 1;
   proc_stat++;
 
   proc_stat = skip_spaces (proc_stat);
@@ -1853,7 +1835,6 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
       /* Again, we couldn't read the complementary information about
 	 the process state.  However, we already have minimal
 	 information, so we just return 1 here.  */
-      do_cleanups (c);
       return 1;
     }
 
@@ -1875,13 +1856,14 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   /* Finally, obtaining the UID and GID.  For that, we read and parse the
      contents of the `/proc/PID/status' file.  */
   xsnprintf (filename, sizeof (filename), "/proc/%d/status", (int) pid);
-  proc_status = target_fileio_read_stralloc (NULL, filename);
-  make_cleanup (xfree, proc_status);
+  /* The contents of `/proc/PID/status'.  */
+  gdb::unique_xmalloc_ptr<char> proc_status_contents
+    = target_fileio_read_stralloc (NULL, filename);
+  char *proc_status = proc_status_contents.get ();
 
   if (proc_status == NULL || *proc_status == '\0')
     {
       /* Returning 1 since we already have a bunch of information.  */
-      do_cleanups (c);
       return 1;
     }
 
@@ -1911,8 +1893,6 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
 	p->pr_gid = strtol (tmpstr, &tmpstr, 10);
     }
 
-  do_cleanups (c);
-
   return 1;
 }
 
@@ -1934,23 +1914,14 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 
   if (linux_fill_prpsinfo (&prpsinfo))
     {
-      if (gdbarch_elfcore_write_linux_prpsinfo_p (gdbarch))
-	{
-	  note_data = gdbarch_elfcore_write_linux_prpsinfo (gdbarch, obfd,
-							    note_data, note_size,
-							    &prpsinfo);
-	}
+      if (gdbarch_ptr_bit (gdbarch) == 64)
+	note_data = elfcore_write_linux_prpsinfo64 (obfd,
+						    note_data, note_size,
+						    &prpsinfo);
       else
-	{
-	  if (gdbarch_ptr_bit (gdbarch) == 64)
-	    note_data = elfcore_write_linux_prpsinfo64 (obfd,
-							note_data, note_size,
-							&prpsinfo);
-	  else
-	    note_data = elfcore_write_linux_prpsinfo32 (obfd,
-							note_data, note_size,
-							&prpsinfo);
-	}
+	note_data = elfcore_write_linux_prpsinfo32 (obfd,
+						    note_data, note_size,
+						    &prpsinfo);
     }
 
   /* Thread register information.  */
@@ -2283,7 +2254,6 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
 {
   char filename[100];
   long pid;
-  char *data;
 
   if (target_auxv_search (&current_target, AT_SYSINFO_EHDR, &range->start) <= 0)
     return 0;
@@ -2332,14 +2302,14 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
      takes several seconds.  Also note that "smaps", what we read for
      determining core dump mappings, is even slower than "maps".  */
   xsnprintf (filename, sizeof filename, "/proc/%ld/task/%ld/maps", pid, pid);
-  data = target_fileio_read_stralloc (NULL, filename);
+  gdb::unique_xmalloc_ptr<char> data
+    = target_fileio_read_stralloc (NULL, filename);
   if (data != NULL)
     {
-      struct cleanup *cleanup = make_cleanup (xfree, data);
       char *line;
       char *saveptr = NULL;
 
-      for (line = strtok_r (data, "\n", &saveptr);
+      for (line = strtok_r (data.get (), "\n", &saveptr);
 	   line != NULL;
 	   line = strtok_r (NULL, "\n", &saveptr))
 	{
@@ -2353,12 +2323,9 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
 		p++;
 	      endaddr = strtoulst (p, &p, 16);
 	      range->length = endaddr - addr;
-	      do_cleanups (cleanup);
 	      return 1;
 	    }
 	}
-
-      do_cleanups (cleanup);
     }
   else
     warning (_("unable to open /proc file '%s'"), filename);
@@ -2427,7 +2394,7 @@ linux_infcall_mmap (CORE_ADDR size, unsigned prot)
   arg[ARG_FD] = value_from_longest (builtin_type (gdbarch)->builtin_int, -1);
   arg[ARG_OFFSET] = value_from_longest (builtin_type (gdbarch)->builtin_int64,
 					0);
-  addr_val = call_function_by_hand (mmap_val, ARG_LAST, arg);
+  addr_val = call_function_by_hand (mmap_val, NULL, ARG_LAST, arg);
   retval = value_as_address (addr_val);
   if (retval == (CORE_ADDR) -1)
     error (_("Failed inferior mmap call for %s bytes, errno is changed."),
@@ -2456,7 +2423,7 @@ linux_infcall_munmap (CORE_ADDR addr, CORE_ADDR size)
   /* Assuming sizeof (unsigned long) == sizeof (size_t).  */
   arg[ARG_LENGTH] = value_from_ulongest
 		    (builtin_type (gdbarch)->builtin_unsigned_long, size);
-  retval_val = call_function_by_hand (munmap_val, ARG_LAST, arg);
+  retval_val = call_function_by_hand (munmap_val, NULL, ARG_LAST, arg);
   retval = value_as_long (retval_val);
   if (retval != 0)
     warning (_("Failed inferior munmap call at %s for %s bytes, "
@@ -2507,6 +2474,17 @@ show_use_coredump_filter (struct ui_file *file, int from_tty,
 			    " corefiles is %s.\n"), value);
 }
 
+/* Display whether the gcore command is dumping mappings marked with
+   the VM_DONTDUMP flag.  */
+
+static void
+show_dump_excluded_mappings (struct ui_file *file, int from_tty,
+			     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Dumping of mappings marked with the VM_DONTDUMP"
+			    " flag is %s.\n"), value);
+}
+
 /* To be called from the various GDB_OSABI_LINUX handlers for the
    various GNU/Linux architectures and machine types.  */
 
@@ -2516,6 +2494,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_pid_to_str (gdbarch, linux_core_pid_to_str);
   set_gdbarch_info_proc (gdbarch, linux_info_proc);
   set_gdbarch_core_info_proc (gdbarch, linux_core_info_proc);
+  set_gdbarch_core_xfer_siginfo (gdbarch, linux_core_xfer_siginfo);
   set_gdbarch_find_memory_regions (gdbarch, linux_find_memory_regions);
   set_gdbarch_make_corefile_notes (gdbarch, linux_make_corefile_notes);
   set_gdbarch_has_shared_address_space (gdbarch,
@@ -2529,9 +2508,6 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_infcall_munmap (gdbarch, linux_infcall_munmap);
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_linux_tdep;
 
 void
 _initialize_linux_tdep (void)
@@ -2556,5 +2532,17 @@ Use this command to set whether gcore should consider the contents\n\
 of /proc/PID/coredump_filter when generating the corefile.  For more information\n\
 about this file, refer to the manpage of core(5)."),
 			   NULL, show_use_coredump_filter,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("dump-excluded-mappings", class_files,
+			   &dump_excluded_mappings, _("\
+Set whether gcore should dump mappings marked with the VM_DONTDUMP flag."),
+			   _("\
+Show whether gcore should dump mappings marked with the VM_DONTDUMP flag."),
+			   _("\
+Use this command to set whether gcore should dump mappings marked with the\n\
+VM_DONTDUMP flag (\"dd\" in /proc/PID/smaps) when generating the corefile.  For\n\
+more information about this file, refer to the manpage of proc(5) and core(5)."),
+			   NULL, show_dump_excluded_mappings,
 			   &setlist, &showlist);
 }

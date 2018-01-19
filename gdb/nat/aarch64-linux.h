@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2017 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2018 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -121,6 +121,9 @@ void aarch64_compat_siginfo_from_siginfo (compat_siginfo_t *to,
 void aarch64_linux_prepare_to_resume (struct lwp_info *lwp);
 
 void aarch64_linux_new_thread (struct lwp_info *lwp);
+
+/* Function to call when a thread is being deleted.  */
+void aarch64_linux_delete_thread (struct arch_lwp_info *arch_lwp);
 
 ps_err_e aarch64_ps_get_thread_area (struct ps_prochandle *ph,
 				       lwpid_t lwpid, int idx, void **base,

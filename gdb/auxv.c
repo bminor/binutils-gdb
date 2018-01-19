@@ -1,6 +1,6 @@
 /* Auxiliary vector support for GDB, the GNU debugger.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -552,7 +552,7 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 }
 
 static void
-info_auxv_command (char *cmd, int from_tty)
+info_auxv_command (const char *cmd, int from_tty)
 {
   if (! target_has_stack)
     error (_("The program has no auxiliary information now."));
@@ -566,9 +566,6 @@ info_auxv_command (char *cmd, int from_tty)
 	error (_("Auxiliary vector is empty."));
     }
 }
-
-
-extern initialize_file_ftype _initialize_auxv; /* -Wmissing-prototypes; */
 
 void
 _initialize_auxv (void)

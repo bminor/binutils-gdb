@@ -1,5 +1,5 @@
 /* BFD back-end for mmo objects (MMIX-specific object-format).
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com).
    Infrastructure and other bits originally copied from srec.c and
    binary.c.
@@ -113,7 +113,7 @@ SUBSECTION
 	@samp{YZ} in lop_fixr: it is xor:ed into the current location
 	minus @math{4 * L}.  The first byte of the word is 0 or 1.  If it
 	is 1, then @math{L = (@var{lowest 24 bits of word}) - 2^Z}, if 0,
- 	then @math{L = (@var{lowest 24 bits of word})}.
+	then @math{L = (@var{lowest 24 bits of word})}.
 
 	@item lop_file
 	0x9806YYZZ.  @samp{Y} is the file number, @samp{Z} is count of
@@ -956,14 +956,14 @@ mmo_write_loc_chunk (bfd *abfd, bfd_vma vma, const bfd_byte *loc,
 	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%B: attempt to emit contents at non-multiple-of-4"
-	       " address 0x%lx\n"),
-	     abfd, (unsigned long) vma);
+	       " address %#Lx"),
+	     abfd, vma);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
 
       /* We always write the location as 64 bits; no use saving bytes
-         here.  */
+	 here.  */
       mmo_write_tetra_raw (abfd, (LOP << 24) | (LOP_LOC << 16) | 2);
       mmo_write_octa_raw (abfd, vma);
     }
@@ -1602,7 +1602,7 @@ mmo_scan (bfd *abfd)
   bfd_size_type nbytes_read = 0;
   /* Buffer with room to read a 64-bit value.  */
   bfd_byte buf[8];
-  long stab_loc = -1;
+  file_ptr stab_loc = -1;
   char *file_names[256];
 
   abfd->symcount = 0;
@@ -2033,7 +2033,7 @@ mmo_scan (bfd *abfd)
 			 " not equal to the number of tetras to the preceding"
 			 " lop_stab (%ld)\n"),
 		       abfd, (long) (y * 256 + z),
-		       (curpos - stab_loc - 4)/4);
+		       (long) (curpos - stab_loc - 4)/4);
 		    bfd_set_error (bfd_error_bad_value);
 		    goto error_return;
 		  }
@@ -2508,7 +2508,7 @@ mmo_internal_write_section (bfd *abfd, asection *sec)
     /* Not handled here.  */
     {
       /* This would normally be an abort call since this can't happen, but
-         we don't do that.  */
+	 we don't do that.  */
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -3239,15 +3239,14 @@ mmo_write_object_contents (bfd *abfd)
 	       global registers.  */
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B: too many initialized registers; section length %ld\n"),
-	       abfd, (long) sec->size);
+	      (_("%B: too many initialized registers; section length %Ld"),
+	       abfd, sec->size);
 	  else
 	    _bfd_error_handler
 	      /* xgettext:c-format */
 	      (_("%B: invalid start address for initialized registers of"
-		 " length %ld: 0x%lx%08lx\n"),
-	       abfd, (long) sec->size,
-	       (unsigned long) (sec->vma >> 32), (unsigned long) (sec->vma));
+		 " length %Ld: %#Lx"),
+	       abfd, sec->size, sec->vma);
 
 	  return FALSE;
 	}

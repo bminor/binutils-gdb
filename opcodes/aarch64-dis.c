@@ -1,5 +1,5 @@
 /* aarch64-dis.c -- AArch64 disassembler.
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -331,7 +331,7 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
       info->qualifier = get_expected_qualifier (inst, info->idx);
       switch (info->qualifier)
 	{
-	case AARCH64_OPND_QLF_S_B:
+	case AARCH64_OPND_QLF_S_4B:
 	  /* L:H */
 	  info->reglane.index = extract_fields (code, 0, 2, FLD_H, FLD_L);
 	  info->reglane.regno &= 0x1f;
@@ -339,6 +339,11 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	default:
 	  return 0;
 	}
+    }
+  else if (inst->opcode->iclass == cryptosm3)
+    {
+      /* index for e.g. SM3TT2A <Vd>.4S, <Vn>.4S, <Vm>S[<imm2>].  */
+      info->reglane.index = extract_field (FLD_SM3_imm2, code, 0);
     }
   else
     {
@@ -933,6 +938,28 @@ aarch64_ext_addr_simple (const aarch64_operand *self ATTRIBUTE_UNUSED,
 {
   /* Rn */
   info->addr.base_regno = extract_field (FLD_Rn, code, 0);
+  return 1;
+}
+
+/* Decode the address operand for e.g.
+     stlur <Xt>, [<Xn|SP>{, <amount>}].  */
+int
+aarch64_ext_addr_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
+			 aarch64_opnd_info *info,
+			 aarch64_insn code, const aarch64_inst *inst)
+{
+  info->qualifier = get_expected_qualifier (inst, info->idx);
+
+  /* Rn */
+  info->addr.base_regno = extract_field (self->fields[0], code, 0);
+
+  /* simm9 */
+  aarch64_insn imm = extract_fields (code, 0, 1, self->fields[1]);
+  info->addr.offset.imm = sign_extend (imm, 8);
+  if (extract_field (self->fields[2], code, 0) == 1) {
+    info->addr.writeback = 1;
+    info->addr.preind = 1;
+  }
   return 1;
 }
 
@@ -3070,6 +3097,10 @@ get_sym_code_type (struct disassemble_info *info, int n,
   unsigned int type;
   const char *name;
 
+  /* If the symbol is in a different section, ignore it.  */
+  if (info->section != NULL && info->section != info->symtab[n]->section)
+    return FALSE;
+
   es = *(elf_symbol_type **)(info->symtab + n);
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
@@ -3144,9 +3175,7 @@ print_insn_aarch64 (bfd_vma pc,
 	  addr = bfd_asymbol_value (info->symtab[n]);
 	  if (addr > pc)
 	    break;
-	  if ((info->section == NULL
-	       || info->section == info->symtab[n]->section)
-	      && get_sym_code_type (info, n, &type))
+	  if (get_sym_code_type (info, n, &type))
 	    {
 	      last_sym = n;
 	      found = TRUE;

@@ -1,6 +1,6 @@
 /* Scheme interface to values.
 
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,7 @@
 #include "arch-utils.h"
 #include "charset.h"
 #include "cp-abi.h"
+#include "target-float.h"
 #include "infcall.h"
 #include "symtab.h" /* Needed by language.h.  */
 #include "language.h"
@@ -421,23 +422,18 @@ gdbscm_value_address (SCM self)
 
   if (SCM_UNBNDP (v_smob->address))
     {
-      struct value *res_val = NULL;
       struct cleanup *cleanup
 	= make_cleanup_value_free_to_mark (value_mark ());
-      SCM address;
+      SCM address = SCM_BOOL_F;
 
       TRY
 	{
-	  res_val = value_addr (value);
+	  address = vlscm_scm_from_value (value_addr (value));
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{
-	  address = SCM_BOOL_F;
 	}
       END_CATCH
-
-      if (res_val != NULL)
-	address = vlscm_scm_from_value (res_val);
 
       do_cleanups (cleanup);
 
@@ -864,7 +860,7 @@ gdbscm_value_call (SCM self, SCM args)
       struct cleanup *cleanup = make_cleanup_value_free_to_mark (mark);
       struct value *return_value;
 
-      return_value = call_function_by_hand (function, args_count, vargs);
+      return_value = call_function_by_hand (function, NULL, args_count, vargs);
       result = vlscm_scm_from_value (return_value);
       do_cleanups (cleanup);
     }
@@ -1024,7 +1020,8 @@ gdbscm_value_to_real (SCM self)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
   struct type *type;
-  DOUBLEST d = 0;
+  double d = 0;
+  struct value *check = nullptr;
 
   type = value_type (value);
 
@@ -1043,7 +1040,22 @@ gdbscm_value_to_real (SCM self)
 
   TRY
     {
-      d = value_as_double (value);
+      if (is_floating_value (value))
+	{
+	  d = target_float_to_host_double (value_contents (value), type);
+	  check = allocate_value (type);
+	  target_float_from_host_double (value_contents_raw (check), type, d);
+	}
+      else if (TYPE_UNSIGNED (type))
+	{
+	  d = (ULONGEST) value_as_long (value);
+	  check = value_from_ulongest (type, (ULONGEST) d);
+	}
+      else
+	{
+	  d = value_as_long (value);
+	  check = value_from_longest (type, (LONGEST) d);
+	}
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1052,7 +1064,7 @@ gdbscm_value_to_real (SCM self)
   END_CATCH
 
   /* TODO: Is there a better way to check if the value fits?  */
-  if (d != (double) d)
+  if (!value_equal (value, check))
     gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
 			       _("number can't be converted to a double"));
 

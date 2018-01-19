@@ -1,6 +1,6 @@
 /* Target-dependent code for the Motorola 88000 series.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -252,7 +252,7 @@ static CORE_ADDR
 m88k_store_arguments (struct regcache *regcache, int nargs,
 		      struct value **args, CORE_ADDR sp)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int num_register_words = 0;
   int num_stack_words = 0;
   int i;
@@ -861,10 +861,6 @@ m88k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_m88k_tdep (void);
 
 void
 _initialize_m88k_tdep (void)

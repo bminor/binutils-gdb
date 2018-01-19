@@ -1,6 +1,6 @@
 /* Target-dependent code for Motorola 68HC11 & 68HC12
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    Contributed by Stephane Carrez, stcarrez@nerim.fr
 
@@ -112,7 +112,7 @@ enum insn_return_kind {
 #define SOFT_D32_REGNUM     (SOFT_D1_REGNUM+31)
 #define M68HC11_MAX_SOFT_REGS 32
 
-#define M68HC11_NUM_REGS        (8)
+#define M68HC11_NUM_REGS        (M68HC11_LAST_HARD_REG + 1)
 #define M68HC11_NUM_PSEUDO_REGS (M68HC11_MAX_SOFT_REGS+5)
 #define M68HC11_ALL_REGS        (M68HC11_NUM_REGS+M68HC11_NUM_PSEUDO_REGS)
 
@@ -1542,9 +1542,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   return gdbarch;
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_m68hc11_tdep;
 
 void
 _initialize_m68hc11_tdep (void)

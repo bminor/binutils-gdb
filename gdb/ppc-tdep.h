@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -202,12 +202,24 @@ enum powerpc_vector_abi
   POWERPC_VEC_LAST
 };
 
+/* long double ABI version used by the inferior.  */
+enum powerpc_long_double_abi
+{
+  POWERPC_LONG_DOUBLE_AUTO,
+  POWERPC_LONG_DOUBLE_IBM128,
+  POWERPC_LONG_DOUBLE_IEEE128,
+  POWERPC_LONG_DOUBLE_LAST
+};
+
 struct gdbarch_tdep
   {
     int wordsize;		/* Size in bytes of fixed-point word.  */
     int soft_float;		/* Avoid FP registers for arguments?  */
 
     enum powerpc_elf_abi elf_abi;	/* ELF ABI version.  */
+
+    /* Format to use for the "long double" data type.  */
+    enum powerpc_long_double_abi long_double_abi;
 
     /* How to pass vector arguments.  Never set to AUTO or LAST.  */
     enum powerpc_vector_abi vector_abi;

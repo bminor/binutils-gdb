@@ -1,6 +1,6 @@
 /* Definitions for a frame unwinder, for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -46,7 +46,8 @@ struct value;
    the PC and attributes) and if SELF is the applicable unwinder,
    return non-zero.  Possibly also initialize THIS_PROLOGUE_CACHE; but
    only if returning 1.  Initializing THIS_PROLOGUE_CACHE in other
-   cases (0 return, or exception) is invalid.  */
+   cases (0 return) is invalid.  In case of exception, the caller has
+   to set *THIS_PROLOGUE_CACHE to NULL.  */
 
 typedef int (frame_sniffer_ftype) (const struct frame_unwind *self,
 				   struct frame_info *this_frame,

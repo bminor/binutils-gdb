@@ -1,5 +1,5 @@
 /* ELF object file format
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1855,6 +1855,7 @@ obj_elf_version (int ignore ATTRIBUTE_UNUSED)
       bfd_set_section_flags (stdoutput,
 			     note_secp,
 			     SEC_HAS_CONTENTS | SEC_READONLY);
+      record_alignment (note_secp, 2);
 
       /* Process the version string.  */
       len = strlen (name) + 1;
@@ -2378,10 +2379,11 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 struct group_list
 {
   asection **head;		/* Section lists.  */
-  unsigned int *elt_count;	/* Number of sections in each list.  */
   unsigned int num_group;	/* Number of lists.  */
   struct hash_control *indexes; /* Maps group name to index in head array.  */
 };
+
+static struct group_list groups;
 
 /* Called via bfd_map_over_sections.  If SEC is a member of a group,
    add it to a list of sections belonging to the group.  INF is a
@@ -2407,7 +2409,6 @@ build_group_lists (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
     {
       elf_next_in_group (sec) = list->head[*elem_idx];
       list->head[*elem_idx] = sec;
-      list->elt_count[*elem_idx] += 1;
       return;
     }
 
@@ -2418,10 +2419,8 @@ build_group_lists (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
     {
       unsigned int newsize = i + 128;
       list->head = XRESIZEVEC (asection *, list->head, newsize);
-      list->elt_count = XRESIZEVEC (unsigned int, list->elt_count, newsize);
     }
   list->head[i] = sec;
-  list->elt_count[i] = 1;
   list->num_group += 1;
 
   /* Add index to hash.  */
@@ -2435,38 +2434,37 @@ static void free_section_idx (const char *key ATTRIBUTE_UNUSED, void *val)
   free ((unsigned int *) val);
 }
 
+/* Create symbols for group signature.  */
+
 void
 elf_adjust_symtab (void)
 {
-  struct group_list list;
   unsigned int i;
 
   /* Go find section groups.  */
-  list.num_group = 0;
-  list.head = NULL;
-  list.elt_count = NULL;
-  list.indexes = hash_new ();
-  bfd_map_over_sections (stdoutput, build_group_lists, &list);
+  groups.num_group = 0;
+  groups.head = NULL;
+  groups.indexes = hash_new ();
+  bfd_map_over_sections (stdoutput, build_group_lists, &groups);
 
   /* Make the SHT_GROUP sections that describe each section group.  We
      can't set up the section contents here yet, because elf section
      indices have yet to be calculated.  elf.c:set_group_contents does
      the rest of the work.  */
- for (i = 0; i < list.num_group; i++)
+ for (i = 0; i < groups.num_group; i++)
     {
-      const char *group_name = elf_group_name (list.head[i]);
+      const char *group_name = elf_group_name (groups.head[i]);
       const char *sec_name;
       asection *s;
       flagword flags;
       struct symbol *sy;
-      bfd_size_type size;
 
       flags = SEC_READONLY | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_GROUP;
-      for (s = list.head[i]; s != NULL; s = elf_next_in_group (s))
+      for (s = groups.head[i]; s != NULL; s = elf_next_in_group (s))
 	if ((s->flags ^ flags) & SEC_LINK_ONCE)
 	  {
 	    flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
-	    if (s != list.head[i])
+	    if (s != groups.head[i])
 	      {
 		as_warn (_("assuming all members of group `%s' are COMDAT"),
 			 group_name);
@@ -2486,7 +2484,8 @@ elf_adjust_symtab (void)
       elf_section_type (s) = SHT_GROUP;
 
       /* Pass a pointer to the first section in this group.  */
-      elf_next_in_group (s) = list.head[i];
+      elf_next_in_group (s) = groups.head[i];
+      elf_sec_group (groups.head[i]) = s;
       /* Make sure that the signature symbol for the group has the
 	 name of the group.  */
       sy = symbol_find_exact (group_name);
@@ -2508,17 +2507,7 @@ elf_adjust_symtab (void)
 	  symbol_table_insert (sy);
 	}
       elf_group_id (s) = symbol_get_bfdsym (sy);
-
-      size = 4 * (list.elt_count[i] + 1);
-      bfd_set_section_size (stdoutput, s, size);
-      s->contents = (unsigned char *) frag_more (size);
-      frag_now->fr_fix = frag_now_fix_octets ();
-      frag_wane (frag_now);
     }
-
-  /* Cleanup hash.  */
-  hash_traverse (list.indexes, free_section_idx);
-  hash_die (list.indexes);
 }
 
 void
@@ -2582,6 +2571,31 @@ elf_frob_file_before_adjust (void)
 void
 elf_frob_file_after_relocs (void)
 {
+  unsigned int i;
+
+  /* Set SHT_GROUP section size.  */
+  for (i = 0; i < groups.num_group; i++)
+    {
+      asection *s, *head, *group;
+      bfd_size_type size;
+
+      head = groups.head[i];
+      size = 4;
+      for (s = head; s != NULL; s = elf_next_in_group (s))
+	size += (s->flags & SEC_RELOC) != 0 ? 8 : 4;
+
+      group = elf_sec_group (head);
+      subseg_set (group, 0);
+      bfd_set_section_size (stdoutput, group, size);
+      group->contents = (unsigned char *) frag_more (size);
+      frag_now->fr_fix = frag_now_fix_octets ();
+      frag_wane (frag_now);
+    }
+
+  /* Cleanup hash.  */
+  hash_traverse (groups.indexes, free_section_idx);
+  hash_die (groups.indexes);
+
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
     /* Generate the ECOFF debugging information.  */

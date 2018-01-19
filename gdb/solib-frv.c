@@ -1,5 +1,5 @@
 /* Handle FR-V (FDPIC) shared libraries for GDB, the GNU Debugger.
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -246,7 +246,7 @@ static int enable_break2 (void);
 /* Implement the "open_symbol_file_object" target_so_ops method.  */
 
 static int
-open_symbol_file_object (void *from_ttyp)
+open_symbol_file_object (int from_tty)
 {
   /* Unimplemented.  */
   return 0;
@@ -1152,9 +1152,6 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
 }
 
 struct target_so_ops frv_so_ops;
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_frv_solib;
 
 void
 _initialize_frv_solib (void)

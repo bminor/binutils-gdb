@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux m32r.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -230,8 +230,6 @@ m32r_linux_store_inferior_registers (struct target_ops *ops,
   internal_error (__FILE__, __LINE__,
 		  _("Got request to store bad register number %d."), regno);
 }
-
-void _initialize_m32r_linux_nat (void);
 
 void
 _initialize_m32r_linux_nat (void)

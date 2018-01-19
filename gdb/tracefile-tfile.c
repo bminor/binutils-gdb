@@ -1,6 +1,6 @@
 /* Trace file TFILE format support in GDB.
 
-   Copyright (C) 1997-2017 Free Software Foundation, Inc.
+   Copyright (C) 1997-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -89,7 +89,7 @@ tfile_start (struct trace_file_writer *self, const char *filename)
     = (struct tfile_trace_file_writer *) self;
 
   writer->pathname = tilde_expand (filename);
-  writer->fp = gdb_fopen_cloexec (writer->pathname, "wb");
+  writer->fp = gdb_fopen_cloexec (writer->pathname, "wb").release ();
   if (writer->fp == NULL)
     error (_("Unable to open file '%s' for saving trace data (%s)"),
 	   writer->pathname, safe_strerror (errno));
@@ -422,8 +422,6 @@ tfile_read (gdb_byte *readbuf, int size)
 static void
 tfile_open (const char *arg, int from_tty)
 {
-  char *temp;
-  struct cleanup *old_chain;
   int flags;
   int scratch_chan;
   char header[TRACE_HEADER_SIZE];
@@ -433,34 +431,27 @@ tfile_open (const char *arg, int from_tty)
   struct trace_status *ts;
   struct uploaded_tp *uploaded_tps = NULL;
   struct uploaded_tsv *uploaded_tsvs = NULL;
-  char *filename;
 
   target_preopen (from_tty);
   if (!arg)
     error (_("No trace file specified."));
 
-  filename = tilde_expand (arg);
-  if (!IS_ABSOLUTE_PATH(filename))
-    {
-      temp = concat (current_directory, "/", filename, (char *) NULL);
-      xfree (filename);
-      filename = temp;
-    }
-
-  old_chain = make_cleanup (xfree, filename);
+  gdb::unique_xmalloc_ptr<char> filename (tilde_expand (arg));
+  if (!IS_ABSOLUTE_PATH (filename.get ()))
+    filename.reset (concat (current_directory, "/", filename.get (),
+			    (char *) NULL));
 
   flags = O_BINARY | O_LARGEFILE;
   flags |= O_RDONLY;
-  scratch_chan = gdb_open_cloexec (filename, flags, 0);
+  scratch_chan = gdb_open_cloexec (filename.get (), flags, 0);
   if (scratch_chan < 0)
-    perror_with_name (filename);
+    perror_with_name (filename.get ());
 
   /* Looks semi-reasonable.  Toss the old trace file and work on the new.  */
 
-  discard_cleanups (old_chain);	/* Don't free filename any more.  */
   unpush_target (&tfile_ops);
 
-  trace_filename = xstrdup (filename);
+  trace_filename = filename.release ();
   trace_fd = scratch_chan;
 
   /* Make sure this is clear.  */
@@ -851,7 +842,7 @@ static void
 tfile_fetch_registers (struct target_ops *ops,
 		       struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int offset, regn, regsize, dummy;
 
   /* An uninitialized reg size says we're not going to be
@@ -867,7 +858,7 @@ tfile_fetch_registers (struct target_ops *ops,
 
       for (regn = 0; regn < gdbarch_num_regs (gdbarch); regn++)
 	{
-	  if (!remote_register_number_and_offset (get_regcache_arch (regcache),
+	  if (!remote_register_number_and_offset (regcache->arch (),
 						  regn, &dummy, &offset))
 	    continue;
 
@@ -1058,7 +1049,6 @@ build_traceframe_info (char blocktype, void *data)
     {
     case 'M':
       {
-	struct mem_range *r;
 	ULONGEST maddr;
 	unsigned short mlen;
 
@@ -1072,10 +1062,7 @@ build_traceframe_info (char blocktype, void *data)
 					  2, gdbarch_byte_order
 					  (target_gdbarch ()));
 
-	r = VEC_safe_push (mem_range_s, info->memory, NULL);
-
-	r->start = maddr;
-	r->length = mlen;
+	info->memory.emplace_back (maddr, mlen);
 	break;
       }
     case 'V':
@@ -1083,7 +1070,7 @@ build_traceframe_info (char blocktype, void *data)
 	int vnum;
 
 	tfile_read ((gdb_byte *) &vnum, 4);
-	VEC_safe_push (int, info->tvars, vnum);
+	info->tvars.push_back (vnum);
       }
     case 'R':
     case 'S':
@@ -1100,12 +1087,13 @@ build_traceframe_info (char blocktype, void *data)
   return 0;
 }
 
-static struct traceframe_info *
+static traceframe_info_up
 tfile_traceframe_info (struct target_ops *self)
 {
-  struct traceframe_info *info = XCNEW (struct traceframe_info);
+  traceframe_info_up info (new traceframe_info);
 
-  traceframe_walk_blocks (build_traceframe_info, 0, info);
+  traceframe_walk_blocks (build_traceframe_info, 0, info.get ());
+
   return info;
 }
 
@@ -1139,8 +1127,6 @@ init_tfile_ops (void)
     = tfile_get_trace_state_variable_value;
   tfile_ops.to_traceframe_info = tfile_traceframe_info;
 }
-
-extern initialize_file_ftype _initialize_tracefile_tfile;
 
 void
 _initialize_tracefile_tfile (void)

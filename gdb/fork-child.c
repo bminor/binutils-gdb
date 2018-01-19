@@ -1,6 +1,6 @@
 /* Fork a Unix child process, and set up to debug it, for GDB.
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -144,7 +144,7 @@ gdb_startup_inferior (pid_t pid, int num_traps)
 /* Implement the "unset exec-wrapper" command.  */
 
 static void
-unset_exec_wrapper_command (char *args, int from_tty)
+unset_exec_wrapper_command (const char *args, int from_tty)
 {
   xfree (exec_wrapper);
   exec_wrapper = NULL;
@@ -158,9 +158,6 @@ show_startup_with_shell (struct ui_file *file, int from_tty,
 		    _("Use of shell to start subprocesses is %s.\n"),
 		    value);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_fork_child;
 
 void
 _initialize_fork_child (void)

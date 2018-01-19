@@ -653,6 +653,7 @@ microblaze
 mips
 mn10300
 moxie
+or1k
 msp430
 rl78
 rx
@@ -3589,10 +3590,12 @@ fi
 
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
-if test "x$cross_compiling" = "xno"; then
-  CC_FOR_BUILD='$(CC)'
-else
-  CC_FOR_BUILD=gcc
+if test -z "$CC_FOR_BUILD"; then
+  if test "x$cross_compiling" = "xno"; then
+    CC_FOR_BUILD='$(CC)'
+  else
+    CC_FOR_BUILD=gcc
+  fi
 fi
 
 CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD-${CFLAGS}}
@@ -3767,6 +3770,14 @@ subdirs="$subdirs aarch64"
   subdirs="$subdirs msp430"
 
 
+       ;;
+   or1k-*-* | or1knd-*-*)
+
+  sim_arch=or1k
+  subdirs="$subdirs or1k"
+
+
+       sim_testsuite=yes
        ;;
    rl78-*-*)
 

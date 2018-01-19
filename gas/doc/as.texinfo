@@ -1,5 +1,5 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright (C) 1991-2017 Free Software Foundation, Inc.
+@c  Copyright (C) 1991-2018 Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
 @c         md_parse_option definitions in config/tc-*.c
@@ -100,7 +100,7 @@
 This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2017 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2018 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -149,7 +149,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991-2017 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2018 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.3
@@ -487,7 +487,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
     @b{-m620}|@b{-me500}|@b{-e500x2}|@b{-me500mc}|@b{-me500mc64}|@b{-me5500}|@b{-me6500}|@b{-mppc64bridge}|
     @b{-mbooke}|@b{-mpower4}|@b{-mpwr4}|@b{-mpower5}|@b{-mpwr5}|@b{-mpwr5x}|@b{-mpower6}|@b{-mpwr6}|
     @b{-mpower7}|@b{-mpwr7}|@b{-mpower8}|@b{-mpwr8}|@b{-mpower9}|@b{-mpwr9}@b{-ma2}|
-    @b{-mcell}|@b{-mspe}|@b{-mtitan}|@b{-me300}|@b{-mcom}]
+    @b{-mcell}|@b{-mspe}|@b{-mspe2}|@b{-mtitan}|@b{-me300}|@b{-mcom}]
    [@b{-many}] [@b{-maltivec}|@b{-mvsx}|@b{-mhtm}|@b{-mvle}]
    [@b{-mregnames}|@b{-mno-regnames}]
    [@b{-mrelocatable}|@b{-mrelocatable-lib}|@b{-K PIC}] [@b{-memb}]
@@ -501,6 +501,13 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-link-relax}]
    [@b{-mnolink-relax}]
    [@b{-mno-warn-regname-label}]
+@end ifset
+@ifset RISCV
+
+@emph{Target RISC-V options:}
+   [@b{-fpic}|@b{-fPIC}|@b{-fno-pic}]
+   [@b{-march}=@var{ISA}]
+   [@b{-mabi}=@var{ABI}]
 @end ifset
 @ifset RL78
 
@@ -519,12 +526,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mrelax}]
    [@b{-mint-register=@var{number}}]
    [@b{-mgcc-abi}|@b{-mrx-abi}]
-@end ifset
-@ifset RISCV
-
-@emph{Target RISC-V options:}
-   [@b{-march}=@var{ISA}]
-   [@b{-mabi}=@var{ABI}]
 @end ifset
 @ifset S390
 
@@ -1702,14 +1703,14 @@ PowerPC processor.
 @ifset RISCV
 
 @ifclear man
-@xref{RISC-V-Opts}, for the options available when @value{AS} is configured
+@xref{RISC-V-Options}, for the options available when @value{AS} is configured
 for a RISC-V processor.
 @end ifclear
 
 @ifset man
 @c man begin OPTIONS
 The following options are available when @value{AS} is configured for a
-RISC-V  processor.
+RISC-V processor.
 @c man end
 @c man begin INCLUDE
 @include c-riscv.texi
@@ -1740,7 +1741,7 @@ Specify which s390 processor variant is the target, @samp{g5} (or
 @samp{arch3}), @samp{g6}, @samp{z900} (or @samp{arch5}), @samp{z990} (or
 @samp{arch6}), @samp{z9-109}, @samp{z9-ec} (or @samp{arch7}), @samp{z10} (or
 @samp{arch8}), @samp{z196} (or @samp{arch9}), @samp{zEC12} (or @samp{arch10}),
-@samp{z13} (or @samp{arch11}), or @samp{arch12}.
+@samp{z13} (or @samp{arch11}), or @samp{z14} (or @samp{arch12}).
 @item -mregnames
 @itemx -mno-regnames
 Allow or disallow symbolic names for registers.
@@ -4607,7 +4608,7 @@ required, as described below.
 
 The second expression (also absolute) gives the fill value to be stored in the
 padding bytes.  It (and the comma) may be omitted.  If it is omitted, the
-padding bytes are normally zero.  However, on some systems, if the section is
+padding bytes are normally zero.  However, on most systems, if the section is
 marked as containing code and the fill value is omitted, the space is filled
 with no-op instructions.
 
@@ -4707,7 +4708,7 @@ is already a multiple of 8, no change is needed.
 
 The second expression (also absolute) gives the fill value to be stored in the
 padding bytes.  It (and the comma) may be omitted.  If it is omitted, the
-padding bytes are normally zero.  However, on some systems, if the section is
+padding bytes are normally zero.  However, on most systems, if the section is
 marked as containing code and the fill value is omitted, the space is filled
 with no-op instructions.
 
@@ -5834,6 +5835,19 @@ state machine to @var{value}, which must be an unsigned integer.
 This directive will set the @code{discriminator} register in the @code{.debug_line}
 state machine to @var{value}, which must be an unsigned integer.
 
+@item view @var{value}
+This option causes a row to be added to @code{.debug_line} in reference to the
+current address (which might not be the same as that of the following assembly
+instruction), and to associate @var{value} with the @code{view} register in the
+@code{.debug_line} state machine.  If @var{value} is a label, both the
+@code{view} register and the label are set to the number of prior @code{.loc}
+directives at the same program location.  If @var{value} is the literal
+@code{0}, the @code{view} register is set to zero, and the assembler asserts
+that there aren't any prior @code{.loc} directives at the same program
+location.  If @var{value} is the literal @code{-0}, the assembler arrange for
+the @code{view} register to be reset in this row, even if there are prior
+@code{.loc} directives at the same program location.
+
 @end table
 
 @node Loc_mark_labels
@@ -6160,7 +6174,7 @@ multiple of 8, no change is needed.
 
 The second expression (also absolute) gives the fill value to be stored in the
 padding bytes.  It (and the comma) may be omitted.  If it is omitted, the
-padding bytes are normally zero.  However, on some systems, if the section is
+padding bytes are normally zero.  However, on most systems, if the section is
 marked as containing code and the fill value is omitted, the space is filled
 with no-op instructions.
 
@@ -6387,6 +6401,9 @@ is equivalent to assembling
         .long   0
         .long   0
 @end example
+
+A count of zero is allowed, but nothing is generated.  Negative counts are not
+allowed and if encountered will be treated as if they were zero.
 
 @node Sbttl
 @section @code{.sbttl "@var{subheading}"}
@@ -7393,7 +7410,7 @@ long values into the output.
 @cindex eight-byte integer
 @cindex integer, 8-byte
 
-Like the @option{.8byte} directive, except that it inserts unaligned, eight
+Like the @option{.2byte} directive, except that it inserts unaligned, eight
 byte long bignum values into the output.
 
 @end ifset
@@ -7703,11 +7720,11 @@ subject, see the hardware manufacturer's manual.
 @ifset PRU
 * PRU-Dependent::               PRU Dependent Features
 @end ifset
-@ifset RL78
-* RL78-Dependent::              RL78 Dependent Features
-@end ifset
 @ifset RISCV
 * RISC-V-Dependent::            RISC-V Dependent Features
+@end ifset
+@ifset RL78
+* RL78-Dependent::              RL78 Dependent Features
 @end ifset
 @ifset RX
 * RX-Dependent::                RX Dependent Features
@@ -7939,12 +7956,12 @@ family.
 @include c-pru.texi
 @end ifset
 
-@ifset RL78
-@include c-rl78.texi
-@end ifset
-
 @ifset RISCV
 @include c-riscv.texi
+@end ifset
+
+@ifset RL78
+@include c-rl78.texi
 @end ifset
 
 @ifset RX

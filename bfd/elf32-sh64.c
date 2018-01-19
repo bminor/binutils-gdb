@@ -1,5 +1,5 @@
 /* SuperH SH64-specific support for 32-bit ELF
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -87,7 +87,7 @@ static void sh64_find_section_for_address
 #define elf_backend_link_output_symbol_hook \
 	sh64_elf_link_output_symbol_hook
 #define elf_backend_merge_symbol_attribute	sh64_elf_merge_symbol_attribute
-#define elf_backend_final_write_processing 	sh64_elf_final_write_processing
+#define elf_backend_final_write_processing	sh64_elf_final_write_processing
 #define elf_backend_section_from_shdr		sh64_backend_section_from_shdr
 #define elf_backend_special_sections		sh64_elf_special_sections
 #define elf_backend_section_flags		sh64_elf_section_flags
@@ -597,9 +597,9 @@ shmedia_prepare_reloc (struct bfd_link_info *info, bfd *abfd,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: error: unaligned relocation type %d at %08x reloc %p\n"),
-	 input_section->owner, ELF32_R_TYPE (rel->r_info),
-	 (unsigned) rel->r_offset, relocation);
+	(_("%B: error: unaligned relocation type %d at %#Lx reloc %#Lx"),
+	 input_section->owner, (int) ELF32_R_TYPE (rel->r_info),
+	 rel->r_offset, *relocation);
       return FALSE;
     }
 
@@ -762,7 +762,7 @@ sh64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 static const struct bfd_elf_special_section sh64_elf_special_sections[] =
 {
   { STRING_COMMA_LEN (".cranges"), 0, SHT_PROGBITS, 0 },
-  { NULL,                       0, 0, 0,            0 }
+  { NULL,			0, 0, 0,	    0 }
 };
 
 #undef	TARGET_BIG_SYM

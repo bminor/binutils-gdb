@@ -1,6 +1,6 @@
 /* Python interface to btrace instruction history.
 
-   Copyright 2016-2017 Free Software Foundation, Inc.
+   Copyright 2016-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -376,7 +376,7 @@ recpy_bt_func_instructions (PyObject *self, void *closure)
   if (func == NULL)
     return NULL;
 
-  len = VEC_length (btrace_insn_s, func->insn);
+  len = func->insn.size ();
 
   /* Gaps count as one instruction.  */
   if (len == 0)
@@ -464,7 +464,6 @@ static PyObject *
 btpy_list_item (PyObject *self, Py_ssize_t index)
 {
   const btpy_list_object * const obj = (btpy_list_object *) self;
-  struct thread_info * const tinfo = find_thread_ptid (obj->ptid);
   Py_ssize_t number;
 
   if (index < 0 || index >= btpy_list_length (self))

@@ -1,6 +1,6 @@
 /* BFD library -- caching of file descriptors.
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    Hacked by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
@@ -82,13 +82,13 @@ bfd_cache_max_open (void)
       /* PR ld/19260: 32-bit Solaris has very inelegant handling of the 255
 	 file descriptor limit.  The problem is that setrlimit(2) can raise
 	 RLIMIT_NOFILE to a value that is not supported by libc, resulting
-         in "Too many open files" errors.  This can happen here even though
+	 in "Too many open files" errors.  This can happen here even though
 	 max_open_files is set to rlim.rlim_cur / 8.  For example, if
 	 a parent process has set rlim.rlim_cur to 65536, then max_open_files
 	 will be computed as 8192.
 
 	 This check essentially reverts to the behavior from binutils 2.23.1
-         for 32-bit Solaris only.  (It is hoped that the 32-bit libc
+	 for 32-bit Solaris only.  (It is hoped that the 32-bit libc
 	 limitation will be removed soon).  64-bit Solaris libc does not have
 	 this limitation.  */
       max = 16;
@@ -104,7 +104,7 @@ bfd_cache_max_open (void)
 #ifdef _SC_OPEN_MAX
 	max = sysconf (_SC_OPEN_MAX) / 8;
 #else
-        max = 10;
+	max = 10;
 #endif
 #endif /* not 32-bit Solaris */
 
@@ -366,23 +366,23 @@ cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
       file_ptr chunk_nread;
 
       if (chunk_size > max_chunk_size)
-        chunk_size = max_chunk_size;
+	chunk_size = max_chunk_size;
 
       chunk_nread = cache_bread_1 (abfd, (char *) buf + nread, chunk_size);
 
       /* Update the nread count.
 
-         We just have to be careful of the case when cache_bread_1 returns
-         a negative count:  If this is our first read, then set nread to
-         that negative count in order to return that negative value to the
-         caller.  Otherwise, don't add it to our total count, or we would
-         end up returning a smaller number of bytes read than we actually
-         did.  */
+	 We just have to be careful of the case when cache_bread_1 returns
+	 a negative count:  If this is our first read, then set nread to
+	 that negative count in order to return that negative value to the
+	 caller.  Otherwise, don't add it to our total count, or we would
+	 end up returning a smaller number of bytes read than we actually
+	 did.  */
       if (nread == 0 || chunk_nread > 0)
-        nread += chunk_nread;
+	nread += chunk_nread;
 
       if (chunk_nread < chunk_size)
-        break;
+	break;
     }
 
   return nread;
@@ -446,8 +446,8 @@ cache_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
 	     int prot ATTRIBUTE_UNUSED,
 	     int flags ATTRIBUTE_UNUSED,
 	     file_ptr offset ATTRIBUTE_UNUSED,
-             void **map_addr ATTRIBUTE_UNUSED,
-             bfd_size_type *map_len ATTRIBUTE_UNUSED)
+	     void **map_addr ATTRIBUTE_UNUSED,
+	     bfd_size_type *map_len ATTRIBUTE_UNUSED)
 {
   void *ret = (void *) -1;
 
@@ -466,12 +466,12 @@ cache_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
 	return ret;
 
       if (pagesize_m1 == 0)
-        pagesize_m1 = getpagesize () - 1;
+	pagesize_m1 = getpagesize () - 1;
 
       /* Handle archive members.  */
       if (abfd->my_archive != NULL
 	  && !bfd_is_thin_archive (abfd->my_archive))
-        offset += abfd->origin;
+	offset += abfd->origin;
 
       /* Align.  */
       pg_offset = offset & ~pagesize_m1;
@@ -481,11 +481,11 @@ cache_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
       if (ret == (void *) -1)
 	bfd_set_error (bfd_error_system_call);
       else
-        {
-          *map_addr = ret;
-          *map_len = pg_len;
-          ret = (char *) ret + (offset & pagesize_m1);
-        }
+	{
+	  *map_addr = ret;
+	  *map_len = pg_len;
+	  ret = (char *) ret + (offset & pagesize_m1);
+	}
     }
 #endif
 

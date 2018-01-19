@@ -1,5 +1,5 @@
 /* Common things used by the various darwin files
-   Copyright (C) 1995-2017 Free Software Foundation, Inc.
+   Copyright (C) 1995-2018 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #define __DARWIN_NAT_H__
 
 #include <mach/mach.h>
+#include "gdbthread.h"
 
 /* Describe the mach exception handling state for a task.  This state is saved
    before being changed and restored when a process is detached.
@@ -26,21 +27,20 @@
 struct darwin_exception_info
 {
   /* Exceptions handled by the port.  */
-  exception_mask_t masks[EXC_TYPES_COUNT];
+  exception_mask_t masks[EXC_TYPES_COUNT] {};
 
   /* Ports receiving exception messages.  */
-  mach_port_t ports[EXC_TYPES_COUNT];
+  mach_port_t ports[EXC_TYPES_COUNT] {};
 
   /* Type of messages sent.  */
-  exception_behavior_t behaviors[EXC_TYPES_COUNT];
+  exception_behavior_t behaviors[EXC_TYPES_COUNT] {};
 
   /* Type of state to be sent.  */
-  thread_state_flavor_t flavors[EXC_TYPES_COUNT];
+  thread_state_flavor_t flavors[EXC_TYPES_COUNT] {};
 
   /* Number of elements set.  */
-  mach_msg_type_number_t count;
+  mach_msg_type_number_t count = 0;
 };
-typedef struct darwin_exception_info darwin_exception_info;
 
 struct darwin_exception_msg
 {
@@ -70,7 +70,7 @@ enum darwin_msg_state
   DARWIN_MESSAGE
 };
 
-struct private_thread_info
+struct darwin_thread_info : public private_thread_info
 {
   /* The thread port from a GDB point of view.  */
   thread_t gdb_port;
@@ -93,38 +93,47 @@ struct private_thread_info
   /* The last exception received.  */
   struct darwin_exception_msg event;
 };
-typedef struct private_thread_info darwin_thread_t;
+typedef struct darwin_thread_info darwin_thread_t;
 
-/* Define the threads vector type.  */
-DEF_VEC_O (darwin_thread_t);
-
+static inline darwin_thread_info *
+get_darwin_thread_info (class thread_info *thread)
+{
+  return static_cast<darwin_thread_info *> (thread->priv.get ());
+}
 
 /* Describe an inferior.  */
-struct private_inferior
+struct darwin_inferior : public private_inferior
 {
   /* Corresponding task port.  */
-  task_t task;
+  task_t task = 0;
 
   /* Port which will receive the dead-name notification for the task port.
      This is used to detect the death of the task.  */
-  mach_port_t notify_port;
+  mach_port_t notify_port = 0;
 
   /* Initial exception handling.  */
   darwin_exception_info exception_info;
 
   /* Number of messages that have been received but not yet replied.  */
-  unsigned int pending_messages;
+  unsigned int pending_messages = 0;
 
   /* Set if inferior is not controlled by ptrace(2) but through Mach.  */
-  unsigned char no_ptrace;
+  bool no_ptrace = false;
 
   /* True if this task is suspended.  */
-  unsigned char suspended;
+  bool suspended = false;
 
   /* Sorted vector of known threads.  */
-  VEC(darwin_thread_t) *threads;
+  std::vector<darwin_thread_t *> threads;
 };
-typedef struct private_inferior darwin_inferior;
+
+/* Return the darwin_inferior attached to INF.  */
+
+static inline darwin_inferior *
+get_darwin_inferior (inferior *inf)
+{
+  return static_cast<darwin_inferior *> (inf->priv.get ());
+}
 
 /* Exception port.  */
 extern mach_port_t darwin_ex_port;

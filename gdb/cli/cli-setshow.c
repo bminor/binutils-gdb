@@ -1,6 +1,6 @@
 /* Handle set and show GDB commands.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -134,7 +134,7 @@ is_unlimited_literal (const char *arg)
 {
   size_t len = sizeof ("unlimited") - 1;
 
-  arg = skip_spaces_const (arg);
+  arg = skip_spaces (arg);
 
   return (strncmp (arg, "unlimited", len) == 0
 	  && (isspace (arg[len]) || arg[len] == '\0'));
@@ -367,24 +367,16 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	   message.  */
 	if (arg == NULL)
 	  {
-	    char *msg;
-	    int msg_len = 0;
-
-	    for (i = 0; c->enums[i]; i++)
-	      msg_len += strlen (c->enums[i]) + 2;
-
-	    msg = (char *) xmalloc (msg_len);
-	    *msg = '\0';
-	    make_cleanup (xfree, msg);
+	    std::string msg;
 
 	    for (i = 0; c->enums[i]; i++)
 	      {
 		if (i != 0)
-		  strcat (msg, ", ");
-		strcat (msg, c->enums[i]);
+		  msg += ", ";
+		msg += c->enums[i];
 	      }
 	    error (_("Requires an argument. Valid arguments are %s."), 
-		   msg);
+		   msg.c_str ());
 	  }
 
 	p = strchr (arg, ' ');

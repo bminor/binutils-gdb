@@ -1,6 +1,6 @@
 # config.bfd
 #
-#   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2018 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -500,6 +500,7 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
+#ifdef BFD64
   cris-*-* | crisv32-*-*)
     targ_defvec=cris_aout_vec
     targ_selvecs="cris_elf32_us_vec cris_elf32_vec ieee_vec"
@@ -507,7 +508,9 @@ case "${targ}" in
 	*-*-linux*) ;;
 	*) targ_underscore=yes ;;
     esac
+    want64=true
     ;;
+#endif
 
   crx-*-elf*)
     targ_defvec=crx_elf32_vec

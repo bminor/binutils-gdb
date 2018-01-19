@@ -1,6 +1,6 @@
 /* varobj support for Ada.
 
-   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+   Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -825,7 +825,6 @@ ada_varobj_get_value_of_array_variable (struct value *value,
 					struct type *type,
 					struct value_print_options *opts)
 {
-  char *result;
   const int numchild = ada_varobj_get_array_number_of_children (value, type);
 
   /* If we have a string, provide its contents in the "value" field.
@@ -929,7 +928,7 @@ ada_value_of_variable (const struct varobj *var,
 
 /* Implement the "value_is_changeable_p" routine for Ada.  */
 
-static int
+static bool
 ada_value_is_changeable_p (const struct varobj *var)
 {
   struct type *type = var->value ? value_type (var->value) : var->type;
@@ -939,7 +938,7 @@ ada_value_is_changeable_p (const struct varobj *var)
     {
       /* This is in reality a pointer to an unconstrained array.
 	 its value is changeable.  */
-      return 1;
+      return true;
     }
 
   if (ada_is_string_type (type))
@@ -947,7 +946,7 @@ ada_value_is_changeable_p (const struct varobj *var)
       /* We display the contents of the string in the array's
 	 "value" field.  The contents can change, so consider
 	 that the array is changeable.  */
-      return 1;
+      return true;
     }
 
   return varobj_default_value_is_changeable_p (var);
@@ -955,11 +954,10 @@ ada_value_is_changeable_p (const struct varobj *var)
 
 /* Implement the "value_has_mutated" routine for Ada.  */
 
-static int
+static bool
 ada_value_has_mutated (const struct varobj *var, struct value *new_val,
 		       struct type *new_type)
 {
-  int i;
   int from = -1;
   int to = -1;
 
@@ -967,7 +965,7 @@ ada_value_has_mutated (const struct varobj *var, struct value *new_val,
      has mutated.  */
   if (ada_varobj_get_number_of_children (new_val, new_type)
       != var->num_children)
-    return 1;
+    return true;
 
   /* If the number of fields have remained the same, then we need
      to check the name of each field.  If they remain the same,
@@ -983,13 +981,13 @@ ada_value_has_mutated (const struct varobj *var, struct value *new_val,
      has mutated or not. So just assume it hasn't.  */
 
   varobj_restrict_range (var->children, &from, &to);
-  for (i = from; i < to; i++)
+  for (int i = from; i < to; i++)
     if (ada_varobj_get_name_of_child (new_val, new_type,
 				      var->name.c_str (), i)
-	!= VEC_index (varobj_p, var->children, i)->name)
-      return 1;
+	!= var->children[i]->name)
+      return true;
 
-  return 0;
+  return false;
 }
 
 /* varobj operations for ada.  */

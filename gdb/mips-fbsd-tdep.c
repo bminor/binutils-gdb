@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/mips.
 
-   Copyright (C) 2017 Free Software Foundation, Inc.
+   Copyright (C) 2017-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,7 +39,8 @@
 
 /* Number of registers in `struct fpreg' from <machine/reg.h>.  The
    first 32 hold floating point registers.  33 holds the FSR.  The
-   34th is a dummy for padding.  */
+   34th holds FIR on FreeBSD 12.0 and newer kernels.  On older kernels
+   it was a zero-filled dummy for padding.  */
 #define MIPS_FBSD_NUM_FPREGS	34
 
 /* Supply a single register.  The register size might not match, so use
@@ -70,16 +71,25 @@ void
 mips_fbsd_supply_fpregs (struct regcache *regcache, int regnum,
 			 const void *fpregs, size_t regsize)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const gdb_byte *regs = (const gdb_byte *) fpregs;
-  int i, fp0num, fsrnum;
+  int i, fp0num;
 
   fp0num = mips_regnum (gdbarch)->fp0;
-  fsrnum = mips_regnum (gdbarch)->fp_control_status;
-  for (i = fp0num; i <= fsrnum; i++)
-    if (regnum == i || regnum == -1)
-      mips_fbsd_supply_reg (regcache, i,
-			    regs + (i - fp0num) * regsize, regsize);
+  for (i = 0; i <= 32; i++)
+    if (regnum == fp0num + i || regnum == -1)
+      mips_fbsd_supply_reg (regcache, fp0num + i,
+			    regs + i * regsize, regsize);
+  if (regnum == mips_regnum (gdbarch)->fp_control_status || regnum == -1)
+    mips_fbsd_supply_reg (regcache, mips_regnum (gdbarch)->fp_control_status,
+			  regs + 32 * regsize, regsize);
+  if ((regnum == mips_regnum (gdbarch)->fp_implementation_revision
+       || regnum == -1)
+      && extract_unsigned_integer (regs + 33 * regsize, regsize,
+				   gdbarch_byte_order (gdbarch)) != 0)
+    mips_fbsd_supply_reg (regcache,
+			  mips_regnum (gdbarch)->fp_implementation_revision,
+			  regs + 33 * regsize, regsize);
 }
 
 /* Supply the general-purpose registers stored in GREGS to REGCACHE.
@@ -90,7 +100,7 @@ void
 mips_fbsd_supply_gregs (struct regcache *regcache, int regnum,
 			const void *gregs, size_t regsize)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const gdb_byte *regs = (const gdb_byte *) gregs;
   int i;
 
@@ -107,16 +117,23 @@ void
 mips_fbsd_collect_fpregs (const struct regcache *regcache, int regnum,
 			  void *fpregs, size_t regsize)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   gdb_byte *regs = (gdb_byte *) fpregs;
-  int i, fp0num, fsrnum;
+  int i, fp0num;
 
   fp0num = mips_regnum (gdbarch)->fp0;
-  fsrnum = mips_regnum (gdbarch)->fp_control_status;
-  for (i = fp0num; i <= fsrnum; i++)
-    if (regnum == i || regnum == -1)
-      mips_fbsd_collect_reg (regcache, i,
-			     regs + (i - fp0num) * regsize, regsize);
+  for (i = 0; i < 32; i++)
+    if (regnum == fp0num + i || regnum == -1)
+      mips_fbsd_collect_reg (regcache, fp0num + i,
+			     regs + i * regsize, regsize);
+  if (regnum == mips_regnum (gdbarch)->fp_control_status || regnum == -1)
+    mips_fbsd_collect_reg (regcache, mips_regnum (gdbarch)->fp_control_status,
+			   regs + 32 * regsize, regsize);
+  if (regnum == mips_regnum (gdbarch)->fp_implementation_revision
+      || regnum == -1)
+    mips_fbsd_collect_reg (regcache,
+			   mips_regnum (gdbarch)->fp_implementation_revision,
+			   regs + 33 * regsize, regsize);
 }
 
 /* Collect the general-purpose registers from REGCACHE and store them
@@ -127,7 +144,7 @@ void
 mips_fbsd_collect_gregs (const struct regcache *regcache, int regnum,
 			 void *gregs, size_t regsize)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   gdb_byte *regs = (gdb_byte *) gregs;
   int i;
 
@@ -145,7 +162,7 @@ mips_fbsd_supply_fpregset (const struct regset *regset,
 			   struct regcache *regcache,
 			   int regnum, const void *fpregs, size_t len)
 {
-  size_t regsize = mips_abi_regsize (get_regcache_arch (regcache));
+  size_t regsize = mips_abi_regsize (regcache->arch ());
 
   gdb_assert (len >= MIPS_FBSD_NUM_FPREGS * regsize);
 
@@ -162,7 +179,7 @@ mips_fbsd_collect_fpregset (const struct regset *regset,
 			    const struct regcache *regcache,
 			    int regnum, void *fpregs, size_t len)
 {
-  size_t regsize = mips_abi_regsize (get_regcache_arch (regcache));
+  size_t regsize = mips_abi_regsize (regcache->arch ());
 
   gdb_assert (len >= MIPS_FBSD_NUM_FPREGS * regsize);
 
@@ -178,7 +195,7 @@ mips_fbsd_supply_gregset (const struct regset *regset,
 			  struct regcache *regcache, int regnum,
 			  const void *gregs, size_t len)
 {
-  size_t regsize = mips_abi_regsize (get_regcache_arch (regcache));
+  size_t regsize = mips_abi_regsize (regcache->arch ());
 
   gdb_assert (len >= MIPS_FBSD_NUM_GREGS * regsize);
 
@@ -195,7 +212,7 @@ mips_fbsd_collect_gregset (const struct regset *regset,
 			   const struct regcache *regcache,
 			   int regnum, void *gregs, size_t len)
 {
-  size_t regsize = mips_abi_regsize (get_regcache_arch (regcache));
+  size_t regsize = mips_abi_regsize (regcache->arch ());
 
   gdb_assert (len >= MIPS_FBSD_NUM_GREGS * regsize);
 
@@ -409,6 +426,23 @@ mips64_fbsd_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (cache, frame_id_build (sp, func));
 }
 
+#define MIPS_INST_ADDIU_A0_SP_N32 (0x27a40000 \
+				   + N64_SIGFRAME_UCONTEXT_OFFSET)
+
+static const struct tramp_frame mipsn32_fbsd_sigframe =
+{
+  SIGTRAMP_FRAME,
+  MIPS_INSN32_SIZE,
+  {
+    { MIPS_INST_ADDIU_A0_SP_N32, -1 },	/* addiu   a0, sp, SIGF_UC */
+    { MIPS_INST_LI_V0_SIGRETURN, -1 },	/* li      v0, SYS_sigreturn */
+    { MIPS_INST_SYSCALL, -1 },		/* syscall */
+    { MIPS_INST_BREAK, -1 },		/* break */
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
+  mips64_fbsd_sigframe_init
+};
+
 #define MIPS_INST_DADDIU_A0_SP_N64 (0x67a40000 \
 				    + N64_SIGFRAME_UCONTEXT_OFFSET)
 
@@ -502,6 +536,7 @@ mips_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	tramp_frame_prepend_unwinder (gdbarch, &mips_fbsd_sigframe);
 	break;
       case MIPS_ABI_N32:
+	tramp_frame_prepend_unwinder (gdbarch, &mipsn32_fbsd_sigframe);
 	break;
       case MIPS_ABI_N64:
 	tramp_frame_prepend_unwinder (gdbarch, &mips64_fbsd_sigframe);
@@ -517,10 +552,6 @@ mips_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	       mips_fbsd_ilp32_fetch_link_map_offsets :
 	       mips_fbsd_lp64_fetch_link_map_offsets));
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_mips_fbsd_tdep (void);
 
 void
 _initialize_mips_fbsd_tdep (void)

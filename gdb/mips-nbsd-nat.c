@@ -1,6 +1,6 @@
 /* Native-dependent code for MIPS systems running NetBSD.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,7 +44,7 @@ mipsnbsd_fetch_inferior_registers (struct target_ops *ops,
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (regno == -1 || getregs_supplies (gdbarch, regno))
     {
       struct reg regs;
@@ -58,7 +58,7 @@ mipsnbsd_fetch_inferior_registers (struct target_ops *ops,
     }
 
   if (regno == -1
-      || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+      || regno >= gdbarch_fp0_regnum (regcache->arch ()))
     {
       struct fpreg fpregs;
 
@@ -75,7 +75,7 @@ mipsnbsd_store_inferior_registers (struct target_ops *ops,
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (regno == -1 || getregs_supplies (gdbarch, regno))
     {
       struct reg regs;
@@ -93,7 +93,7 @@ mipsnbsd_store_inferior_registers (struct target_ops *ops,
     }
 
   if (regno == -1
-      || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+      || regno >= gdbarch_fp0_regnum (regcache->arch ()))
     {
       struct fpreg fpregs; 
 
@@ -106,10 +106,6 @@ mipsnbsd_store_inferior_registers (struct target_ops *ops,
 	perror_with_name (_("Couldn't write floating point status"));
     }
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_mipsnbsd_nat (void);
 
 void
 _initialize_mipsnbsd_nat (void)

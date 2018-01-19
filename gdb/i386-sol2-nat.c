@@ -1,6 +1,6 @@
 /* Native-dependent code for Solaris x86.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -130,9 +130,6 @@ fill_fpregset (const struct regcache *regcache,
 
 #endif
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_amd64_sol2_nat (void);
-
 void
 _initialize_amd64_sol2_nat (void)
 {
@@ -141,9 +138,7 @@ _initialize_amd64_sol2_nat (void)
   /* Fill in the generic procfs methods.  */
   t = procfs_target ();
 
-#ifdef NEW_PROC_API	/* Solaris 6 and above can do HW watchpoints.  */
   procfs_use_watchpoints (t);
-#endif
 
 #if defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
   amd64_native_gregset32_reg_offset = amd64_sol2_gregset32_reg_offset;

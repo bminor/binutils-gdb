@@ -1,6 +1,6 @@
 /* Native-dependent code for OpenBSD/hppa.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -245,9 +245,6 @@ hppaobsd_store_registers (struct target_ops *ops,
 	perror_with_name (_("Couldn't write floating point status"));
     }
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_hppaobsd_nat (void);
 
 void
 _initialize_hppaobsd_nat (void)

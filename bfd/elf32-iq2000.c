@@ -1,5 +1,5 @@
 /* IQ2000-specific support for 32-bit ELF.
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -483,10 +483,6 @@ iq2000_elf_check_relocs (bfd *abfd,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  /* PR15323, ref flags aren't set for references in the same
-	     object.  */
-	  h->root.non_ir_ref_regular = 1;
 	}
 
       switch (ELF32_R_TYPE (rel->r_info))
@@ -843,8 +839,8 @@ iq2000_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
-	     ibfd, (long)new_flags, (long)old_flags);
+	    (_("%B: uses different e_flags (%#x) fields than previous modules (%#x)"),
+	     ibfd, new_flags, old_flags);
 	}
     }
 

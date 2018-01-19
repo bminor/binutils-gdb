@@ -1,6 +1,6 @@
 /* Print values for GNU debugger GDB.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,7 +38,7 @@
 #include "ui-out.h"
 #include "block.h"
 #include "disasm.h"
-#include "dfp.h"
+#include "target-float.h"
 #include "observer.h"
 #include "solist.h"
 #include "parser-defs.h"
@@ -157,10 +157,6 @@ static int display_number;
   for (B = display_chain;			\
        B ? (TMP = B->next, 1): 0;		\
        B = TMP)
-
-/* Prototypes for exported functions.  */
-
-void _initialize_printcmd (void);
 
 /* Prototypes for local functions.  */
 
@@ -413,7 +409,9 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       && (options->format == 'o'
 	  || options->format == 'x'
 	  || options->format == 't'
-	  || options->format == 'z'))
+	  || options->format == 'z'
+	  || options->format == 'd'
+	  || options->format == 'u'))
     {
       LONGEST val_long = unpack_long (type, valaddr);
       converted_float_bytes.resize (TYPE_LENGTH (type));
@@ -422,16 +420,29 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       valaddr = converted_float_bytes.data ();
     }
 
-  switch (options->format)
+  /* Printing a non-float type as 'f' will interpret the data as if it were
+     of a floating-point type of the same length, if that exists.  Otherwise,
+     the data is printed as integer.  */
+  char format = options->format;
+  if (format == 'f' && TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      type = float_type_from_length (type);
+      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+        format = 0;
+    }
+
+  switch (format)
     {
     case 'o':
       print_octal_chars (stream, valaddr, len, byte_order);
+      break;
+    case 'd':
+      print_decimal_chars (stream, valaddr, len, true, byte_order);
       break;
     case 'u':
       print_decimal_chars (stream, valaddr, len, false, byte_order);
       break;
     case 0:
-    case 'd':
       if (TYPE_CODE (type) != TYPE_CODE_FLT)
 	{
 	  print_decimal_chars (stream, valaddr, len, !TYPE_UNSIGNED (type),
@@ -440,7 +451,6 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	}
       /* FALLTHROUGH */
     case 'f':
-      type = float_type_from_length (type);
       print_floating (valaddr, type, stream);
       break;
 
@@ -478,7 +488,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       break;
 
     default:
-      error (_("Undefined output format \"%c\"."), options->format);
+      error (_("Undefined output format \"%c\"."), format);
     }
 }
 
@@ -898,8 +908,6 @@ find_string_backward (struct gdbarch *gdbarch,
                       int *strings_counted)
 {
   const int chunk_size = 0x20;
-  gdb_byte *buffer = NULL;
-  struct cleanup *cleanup = NULL;
   int read_error = 0;
   int chars_read = 0;
   int chars_to_read = chunk_size;
@@ -908,14 +916,13 @@ find_string_backward (struct gdbarch *gdbarch,
   CORE_ADDR string_start_addr = addr;
 
   gdb_assert (char_size == 1 || char_size == 2 || char_size == 4);
-  buffer = (gdb_byte *) xmalloc (chars_to_read * char_size);
-  cleanup = make_cleanup (xfree, buffer);
+  gdb::byte_vector buffer (chars_to_read * char_size);
   while (count > 0 && read_error == 0)
     {
       int i;
 
       addr -= chars_to_read * char_size;
-      chars_read = read_memory_backward (gdbarch, addr, buffer,
+      chars_read = read_memory_backward (gdbarch, addr, buffer.data (),
                                          chars_to_read * char_size);
       chars_read /= char_size;
       read_error = (chars_read == chars_to_read) ? 0 : 1;
@@ -924,7 +931,7 @@ find_string_backward (struct gdbarch *gdbarch,
         {
           int offset = (chars_to_read - i - 1) * char_size;
 
-          if (integer_is_zero (buffer + offset, char_size)
+          if (integer_is_zero (&buffer[offset], char_size)
               || chars_counted == options->print_max)
             {
               /* Found '\0' or reached print_max.  As OFFSET is the offset to
@@ -947,7 +954,6 @@ find_string_backward (struct gdbarch *gdbarch,
       string_start_addr -= chars_counted * char_size;
     }
 
-  do_cleanups (cleanup);
   return string_start_addr;
 }
 
@@ -1208,14 +1214,14 @@ print_command_1 (const char *exp, int voidprint)
 }
 
 static void
-print_command (char *exp, int from_tty)
+print_command (const char *exp, int from_tty)
 {
   print_command_1 (exp, 1);
 }
 
 /* Same as print, except it doesn't print void results.  */
 static void
-call_command (char *exp, int from_tty)
+call_command (const char *exp, int from_tty)
 {
   print_command_1 (exp, 0);
 }
@@ -1223,7 +1229,7 @@ call_command (char *exp, int from_tty)
 /* Implementation of the "output" command.  */
 
 static void
-output_command (char *exp, int from_tty)
+output_command (const char *exp, int from_tty)
 {
   output_command_const (exp, from_tty);
 }
@@ -1266,7 +1272,7 @@ output_command_const (const char *exp, int from_tty)
 }
 
 static void
-set_command (char *exp, int from_tty)
+set_command (const char *exp, int from_tty)
 {
   expression_up expr = parse_expression (exp);
 
@@ -1290,7 +1296,7 @@ set_command (char *exp, int from_tty)
 }
 
 static void
-sym_info (char *arg, int from_tty)
+info_symbol_command (const char *arg, int from_tty)
 {
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
@@ -1318,7 +1324,7 @@ sym_info (char *arg, int from_tty)
 	    = lookup_minimal_symbol_by_pc_section (sect_addr, osect).minsym))
       {
 	const char *obj_name, *mapped, *sec_name, *msym_name;
-	char *loc_string;
+	const char *loc_string;
 	struct cleanup *old_chain;
 
 	matches = 1;
@@ -1329,14 +1335,14 @@ sym_info (char *arg, int from_tty)
 
 	/* Don't print the offset if it is zero.
 	   We assume there's no need to handle i18n of "sym + offset".  */
+	std::string string_holder;
 	if (offset)
-	  loc_string = xstrprintf ("%s + %u", msym_name, offset);
+	  {
+	    string_holder = string_printf ("%s + %u", msym_name, offset);
+	    loc_string = string_holder.c_str ();
+	  }
 	else
-	  loc_string = xstrprintf ("%s", msym_name);
-
-	/* Use a cleanup to free loc_string in case the user quits
-	   a pagination request inside printf_filtered.  */
-	old_chain = make_cleanup (xfree, loc_string);
+	  loc_string = msym_name;
 
 	gdb_assert (osect->objfile && objfile_name (osect->objfile));
 	obj_name = objfile_name (osect->objfile);
@@ -1374,8 +1380,6 @@ sym_info (char *arg, int from_tty)
 	    else
 	      printf_filtered (_("%s in section %s\n"),
 			       loc_string, sec_name);
-
-	do_cleanups (old_chain);
       }
   }
   if (matches == 0)
@@ -1383,7 +1387,7 @@ sym_info (char *arg, int from_tty)
 }
 
 static void
-address_info (char *exp, int from_tty)
+info_address_command (const char *exp, int from_tty)
 {
   struct gdbarch *gdbarch;
   int regno;
@@ -1607,10 +1611,9 @@ address_info (char *exp, int from_tty)
 
 
 static void
-x_command (char *exp, int from_tty)
+x_command (const char *exp, int from_tty)
 {
   struct format_data fmt;
-  struct cleanup *old_chain;
   struct value *val;
 
   fmt.format = last_format ? last_format : 'x';
@@ -1635,7 +1638,7 @@ x_command (char *exp, int from_tty)
          repeated with Newline.  But don't clobber a user-defined
          command's definition.  */
       if (from_tty)
-	*exp = 0;
+	set_repeat_arguments ("");
       val = evaluate_expression (expr.get ());
       if (TYPE_IS_REFERENCE (value_type (val)))
 	val = coerce_ref (val);
@@ -1691,7 +1694,7 @@ x_command (char *exp, int from_tty)
    Specify the expression.  */
 
 static void
-display_command (char *arg, int from_tty)
+display_command (const char *arg, int from_tty)
 {
   struct format_data fmt;
   struct display *newobj;
@@ -1799,7 +1802,7 @@ delete_display (struct display *display)
    ARGS.  DATA is passed unmodified to FUNCTION.  */
 
 static void
-map_display_numbers (char *args,
+map_display_numbers (const char *args,
 		     void (*function) (struct display *,
 				       void *),
 		     void *data)
@@ -1844,7 +1847,7 @@ do_delete_display (struct display *d, void *data)
 /* "undisplay" command.  */
 
 static void
-undisplay_command (char *args, int from_tty)
+undisplay_command (const char *args, int from_tty)
 {
   if (args == NULL)
     {
@@ -2050,7 +2053,7 @@ disable_current_display (void)
 }
 
 static void
-display_info (char *ignore, int from_tty)
+info_display_command (const char *ignore, int from_tty)
 {
   struct display *d;
 
@@ -2089,7 +2092,7 @@ do_enable_disable_display (struct display *d, void *data)
    commands.  ENABLE decides what to do.  */
 
 static void
-enable_disable_display_command (char *args, int from_tty, int enable)
+enable_disable_display_command (const char *args, int from_tty, int enable)
 {
   if (args == NULL)
     {
@@ -2106,7 +2109,7 @@ enable_disable_display_command (char *args, int from_tty, int enable)
 /* The "enable display" command.  */
 
 static void
-enable_display_command (char *args, int from_tty)
+enable_display_command (const char *args, int from_tty)
 {
   enable_disable_display_command (args, from_tty, 1);
 }
@@ -2114,7 +2117,7 @@ enable_display_command (char *args, int from_tty)
 /* The "disable display" command.  */
 
 static void
-disable_display_command (char *args, int from_tty)
+disable_display_command (const char *args, int from_tty)
 {
   enable_disable_display_command (args, from_tty, 0);
 }
@@ -2285,88 +2288,73 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
 }
 
 /* Subroutine of ui_printf to simplify it.
-   Print VALUE, a decimal floating point value, to STREAM using FORMAT.  */
+   Print VALUE, a floating point value, to STREAM using FORMAT.  */
 
 static void
-printf_decfloat (struct ui_file *stream, const char *format,
-		 struct value *value)
+printf_floating (struct ui_file *stream, const char *format,
+		 struct value *value, enum argclass argclass)
 {
-  const gdb_byte *param_ptr = value_contents (value);
-
-#if defined (PRINTF_HAS_DECFLOAT)
-  /* If we have native support for Decimal floating
-     printing, handle it here.  */
-  fprintf_filtered (stream, format, param_ptr);
-#else
-  /* As a workaround until vasprintf has native support for DFP
-     we convert the DFP values to string and print them using
-     the %s format specifier.  */
-  const char *p;
-
   /* Parameter data.  */
   struct type *param_type = value_type (value);
   struct gdbarch *gdbarch = get_type_arch (param_type);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
-  /* DFP output data.  */
-  struct value *dfp_value = NULL;
-  gdb_byte *dfp_ptr;
-  int dfp_len = 16;
-  gdb_byte dec[16];
-  struct type *dfp_type = NULL;
-  char decstr[MAX_DECIMAL_STRING];
-
-  /* Points to the end of the string so that we can go back
-     and check for DFP length modifiers.  */
-  p = format + strlen (format);
-
-  /* Look for the float/double format specifier.  */
-  while (*p != 'f' && *p != 'e' && *p != 'E'
-	 && *p != 'g' && *p != 'G')
-    p--;
-
-  /* Search for the '%' char and extract the size and type of
-     the output decimal value based on its modifiers
-     (%Hf, %Df, %DDf).  */
-  while (*--p != '%')
+  /* Determine target type corresponding to the format string.  */
+  struct type *fmt_type;
+  switch (argclass)
     {
-      if (*p == 'H')
-	{
-	  dfp_len = 4;
-	  dfp_type = builtin_type (gdbarch)->builtin_decfloat;
-	}
-      else if (*p == 'D' && *(p - 1) == 'D')
-	{
-	  dfp_len = 16;
-	  dfp_type = builtin_type (gdbarch)->builtin_declong;
-	  p--;
-	}
-      else
-	{
-	  dfp_len = 8;
-	  dfp_type = builtin_type (gdbarch)->builtin_decdouble;
-	}
+      case double_arg:
+	fmt_type = builtin_type (gdbarch)->builtin_double;
+	break;
+      case long_double_arg:
+	fmt_type = builtin_type (gdbarch)->builtin_long_double;
+	break;
+      case dec32float_arg:
+	fmt_type = builtin_type (gdbarch)->builtin_decfloat;
+	break;
+      case dec64float_arg:
+	fmt_type = builtin_type (gdbarch)->builtin_decdouble;
+	break;
+      case dec128float_arg:
+	fmt_type = builtin_type (gdbarch)->builtin_declong;
+	break;
+      default:
+	gdb_assert_not_reached ("unexpected argument class");
     }
 
-  /* Conversion between different DFP types.  */
-  if (TYPE_CODE (param_type) == TYPE_CODE_DECFLOAT)
-    decimal_convert (param_ptr, TYPE_LENGTH (param_type),
-		     byte_order, dec, dfp_len, byte_order);
-  else
-    /* If this is a non-trivial conversion, just output 0.
-       A correct converted value can be displayed by explicitly
-       casting to a DFP type.  */
-    decimal_from_string (dec, dfp_len, byte_order, "0");
+  /* To match the traditional GDB behavior, the conversion is
+     done differently depending on the type of the parameter:
 
-  dfp_value = value_from_decfloat (dfp_type, dec);
+     - if the parameter has floating-point type, it's value
+       is converted to the target type;
 
-  dfp_ptr = (gdb_byte *) value_contents (dfp_value);
+     - otherwise, if the parameter has a type that is of the
+       same size as a built-in floating-point type, the value
+       bytes are interpreted as if they were of that type, and
+       then converted to the target type (this is not done for
+       decimal floating-point argument classes);
 
-  decimal_to_string (dfp_ptr, dfp_len, byte_order, decstr);
+     - otherwise, if the source value has an integer value,
+       it's value is converted to the target type;
 
-  /* Print the DFP value.  */
-  fprintf_filtered (stream, "%s", decstr);
-#endif
+     - otherwise, an error is raised.
+
+     In either case, the result of the conversion is a byte buffer
+     formatted in the target format for the target type.  */
+
+  if (TYPE_CODE (fmt_type) == TYPE_CODE_FLT)
+    {
+      param_type = float_type_from_length (param_type);
+      if (param_type != value_type (value))
+	value = value_from_contents (param_type, value_contents (value));
+    }
+
+  value = value_cast (fmt_type, value);
+
+  /* Convert the value to a string and print it.  */
+  std::string str
+    = target_float_to_string (value_contents (value), fmt_type, format);
+  fputs_filtered (str.c_str (), stream);
 }
 
 /* Subroutine of ui_printf to simplify it.
@@ -2439,49 +2427,40 @@ printf_pointer (struct ui_file *stream, const char *format,
 static void
 ui_printf (const char *arg, struct ui_file *stream)
 {
-  struct format_piece *fpieces;
   const char *s = arg;
-  struct value **val_args;
-  int allocated_args = 20;
-  struct cleanup *old_cleanups;
-
-  val_args = XNEWVEC (struct value *, allocated_args);
-  old_cleanups = make_cleanup (free_current_contents, &val_args);
+  std::vector<struct value *> val_args;
 
   if (s == 0)
     error_no_arg (_("format-control string and values to print"));
 
-  s = skip_spaces_const (s);
+  s = skip_spaces (s);
 
   /* A format string should follow, enveloped in double quotes.  */
   if (*s++ != '"')
     error (_("Bad format string, missing '\"'."));
 
-  fpieces = parse_format_string (&s);
-
-  make_cleanup (free_format_pieces_cleanup, &fpieces);
+  format_pieces fpieces (&s);
 
   if (*s++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
   
-  s = skip_spaces_const (s);
+  s = skip_spaces (s);
 
   if (*s != ',' && *s != 0)
     error (_("Invalid argument syntax"));
 
   if (*s == ',')
     s++;
-  s = skip_spaces_const (s);
+  s = skip_spaces (s);
 
   {
-    int nargs = 0;
     int nargs_wanted;
-    int i, fr;
-    char *current_substring;
+    int i;
+    const char *current_substring;
 
     nargs_wanted = 0;
-    for (fr = 0; fpieces[fr].string != NULL; fr++)
-      if (fpieces[fr].argclass != literal_piece)
+    for (auto &&piece : fpieces)
+      if (piece.argclass != literal_piece)
 	++nargs_wanted;
 
     /* Now, parse all arguments and evaluate them.
@@ -2491,28 +2470,23 @@ ui_printf (const char *arg, struct ui_file *stream)
       {
 	const char *s1;
 
-	if (nargs == allocated_args)
-	  val_args = (struct value **) xrealloc ((char *) val_args,
-						 (allocated_args *= 2)
-						 * sizeof (struct value *));
 	s1 = s;
-	val_args[nargs] = parse_to_comma_and_eval (&s1);
+	val_args.push_back (parse_to_comma_and_eval (&s1));
 
-	nargs++;
 	s = s1;
 	if (*s == ',')
 	  s++;
       }
 
-    if (nargs != nargs_wanted)
+    if (val_args.size () != nargs_wanted)
       error (_("Wrong number of arguments for specified format-string"));
 
     /* Now actually print them.  */
     i = 0;
-    for (fr = 0; fpieces[fr].string != NULL; fr++)
+    for (auto &&piece : fpieces)
       {
-	current_substring = fpieces[fr].string;
-	switch (fpieces[fr].argclass)
+	current_substring = piece.string;
+	switch (piece.argclass)
 	  {
 	  case string_arg:
 	    printf_c_string (stream, current_substring, val_args[i]);
@@ -2549,43 +2523,6 @@ ui_printf (const char *arg, struct ui_file *stream)
                                 obstack_base (&output));
 	    }
 	    break;
-	  case double_arg:
-	    {
-	      struct type *type = value_type (val_args[i]);
-	      DOUBLEST val;
-	      int inv;
-
-	      /* If format string wants a float, unchecked-convert the value
-		 to floating point of the same size.  */
-	      type = float_type_from_length (type);
-	      val = unpack_double (type, value_contents (val_args[i]), &inv);
-	      if (inv)
-		error (_("Invalid floating value found in program."));
-
-              fprintf_filtered (stream, current_substring, (double) val);
-	      break;
-	    }
-	  case long_double_arg:
-#ifdef HAVE_LONG_DOUBLE
-	    {
-	      struct type *type = value_type (val_args[i]);
-	      DOUBLEST val;
-	      int inv;
-
-	      /* If format string wants a float, unchecked-convert the value
-		 to floating point of the same size.  */
-	      type = float_type_from_length (type);
-	      val = unpack_double (type, value_contents (val_args[i]), &inv);
-	      if (inv)
-		error (_("Invalid floating value found in program."));
-
-	      fprintf_filtered (stream, current_substring,
-                                (long double) val);
-	      break;
-	    }
-#else
-	    error (_("long double not supported in printf"));
-#endif
 	  case long_long_arg:
 #ifdef PRINTF_HAS_LONG_LONG
 	    {
@@ -2611,9 +2548,14 @@ ui_printf (const char *arg, struct ui_file *stream)
               fprintf_filtered (stream, current_substring, val);
 	      break;
 	    }
-	  /* Handles decimal floating values.  */
-	  case decfloat_arg:
-	    printf_decfloat (stream, current_substring, val_args[i]);
+	  /* Handles floating-point values.  */
+	  case double_arg:
+	  case long_double_arg:
+	  case dec32float_arg:
+	  case dec64float_arg:
+	  case dec128float_arg:
+	    printf_floating (stream, current_substring, val_args[i],
+			     piece.argclass);
 	    break;
 	  case ptr_arg:
 	    printf_pointer (stream, current_substring, val_args[i]);
@@ -2634,17 +2576,16 @@ ui_printf (const char *arg, struct ui_file *stream)
 			    _("failed internal consistency check"));
 	  }
 	/* Maybe advance to the next argument.  */
-	if (fpieces[fr].argclass != literal_piece)
+	if (piece.argclass != literal_piece)
 	  ++i;
       }
   }
-  do_cleanups (old_cleanups);
 }
 
 /* Implement the "printf" command.  */
 
 static void
-printf_command (char *arg, int from_tty)
+printf_command (const char *arg, int from_tty)
 {
   ui_printf (arg, gdb_stdout);
   gdb_flush (gdb_stdout);
@@ -2653,7 +2594,7 @@ printf_command (char *arg, int from_tty)
 /* Implement the "eval" command.  */
 
 static void
-eval_command (char *arg, int from_tty)
+eval_command (const char *arg, int from_tty)
 {
   string_file stb;
 
@@ -2661,7 +2602,7 @@ eval_command (char *arg, int from_tty)
 
   std::string expanded = insert_user_defined_cmd_args (stb.c_str ());
 
-  execute_command (&expanded[0], from_tty);
+  execute_command (expanded.c_str (), from_tty);
 }
 
 void
@@ -2673,10 +2614,10 @@ _initialize_printcmd (void)
 
   observer_attach_free_objfile (clear_dangling_display_expressions);
 
-  add_info ("address", address_info,
+  add_info ("address", info_address_command,
 	    _("Describe where symbol SYM is stored."));
 
-  add_info ("symbol", sym_info, _("\
+  add_info ("symbol", info_symbol_command, _("\
 Describe what symbol is at location ADDR.\n\
 Only for symbols with fixed locations (global or static scope)."));
 
@@ -2700,7 +2641,7 @@ with this command or \"print\"."));
 	   _("Print line number and file of definition of variable."));
 #endif
 
-  add_info ("display", display_info, _("\
+  add_info ("display", info_display_command, _("\
 Expressions to display when program stops, with code numbers."));
 
   add_cmd ("undisplay", class_vars, undisplay_command, _("\

@@ -1,6 +1,6 @@
 /* Remote notification in GDB protocol
 
-   Copyright (C) 1988-2017 Free Software Foundation, Inc.
+   Copyright (C) 1988-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -269,9 +269,6 @@ remote_notif_state_xfree (struct remote_notif_state *state)
 
   xfree (state);
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_notif;
 
 void
 _initialize_notif (void)

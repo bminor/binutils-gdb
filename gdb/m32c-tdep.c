@@ -1,6 +1,6 @@
 /* Renesas M32C target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -190,7 +190,7 @@ make_types (struct gdbarch *arch)
 
   /* The builtin_type_mumble variables are sometimes uninitialized when
      this is called, so we avoid using them.  */
-  tdep->voyd = arch_type (arch, TYPE_CODE_VOID, 1, "void");
+  tdep->voyd = arch_type (arch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   tdep->ptr_voyd
     = arch_pointer_type (arch, gdbarch_ptr_bit (arch), NULL, tdep->voyd);
   tdep->func_voyd = lookup_function_type (tdep->voyd);
@@ -331,7 +331,7 @@ m32c_raw_write (struct m32c_reg *reg, struct regcache *cache,
 static int
 m32c_read_flg (struct regcache *cache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (cache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (cache->arch ());
   ULONGEST flg;
   regcache_raw_read_unsigned (cache, tdep->flg->num, &flg);
   return flg & 0xffff;
@@ -598,7 +598,7 @@ m32c_pseudo_register_read (struct gdbarch *arch,
   struct m32c_reg *reg;
 
   gdb_assert (0 <= cookednum && cookednum < tdep->num_regs);
-  gdb_assert (arch == get_regcache_arch (cache));
+  gdb_assert (arch == cache->arch ());
   gdb_assert (arch == tdep->regs[cookednum].arch);
   reg = &tdep->regs[cookednum];
 
@@ -616,7 +616,7 @@ m32c_pseudo_register_write (struct gdbarch *arch,
   struct m32c_reg *reg;
 
   gdb_assert (0 <= cookednum && cookednum < tdep->num_regs);
-  gdb_assert (arch == get_regcache_arch (cache));
+  gdb_assert (arch == cache->arch ());
   gdb_assert (arch == tdep->regs[cookednum].arch);
   reg = &tdep->regs[cookednum];
 
@@ -1079,11 +1079,11 @@ struct m32c_pv_state
 static int
 m32c_pv_push (struct m32c_pv_state *state, pv_t value, int size)
 {
-  if (pv_area_store_would_trash (state->stack, state->sp))
+  if (state->stack->store_would_trash (state->sp))
     return 1;
 
   state->sp = pv_add_constant (state->sp, -size);
-  pv_area_store (state->stack, state->sp, size, value);
+  state->stack->store (state->sp, size, value);
 
   return 0;
 }
@@ -1114,7 +1114,7 @@ static pv_t
 m32c_srcdest_fetch (struct m32c_pv_state *state, struct srcdest loc, int size)
 {
   if (loc.kind == srcdest_mem)
-    return pv_area_fetch (state->stack, loc.addr, size);
+    return state->stack->fetch (loc.addr, size);
   else if (loc.kind == srcdest_partial_reg)
     return pv_unknown ();
   else
@@ -1131,9 +1131,9 @@ m32c_srcdest_store (struct m32c_pv_state *state, struct srcdest loc,
 {
   if (loc.kind == srcdest_mem)
     {
-      if (pv_area_store_would_trash (state->stack, loc.addr))
+      if (state->stack->store_would_trash (loc.addr))
 	return 1;
-      pv_area_store (state->stack, loc.addr, size, value);
+      state->stack->store (loc.addr, size, value);
     }
   else if (loc.kind == srcdest_partial_reg)
     *loc.reg = pv_unknown ();
@@ -1350,7 +1350,7 @@ m32c_pv_enter (struct m32c_pv_state *state, int size)
   /* If simulating this store would require us to forget
      everything we know about the stack frame in the name of
      accuracy, it would be better to just quit now.  */
-  if (pv_area_store_would_trash (state->stack, state->sp))
+  if (state->stack->store_would_trash (state->sp))
     return 1;
 
   if (m32c_pv_push (state, state->fb, tdep->push_addr_bytes))
@@ -1441,7 +1441,7 @@ m32c_is_arg_spill (struct m32c_pv_state *st,
   return (m32c_is_arg_reg (st, value)
 	  && loc.kind == srcdest_mem
           && pv_is_register (loc.addr, tdep->sp->num)
-          && ! pv_area_find_reg (st->stack, st->arch, value.reg, 0));
+          && ! st->stack->find_reg (st->arch, value.reg, 0));
 }
 
 /* Return non-zero if a store of VALUE to LOC is probably 
@@ -1462,7 +1462,7 @@ m32c_is_struct_return (struct m32c_pv_state *st,
   struct gdbarch_tdep *tdep = gdbarch_tdep (st->arch);
 
   return (m32c_is_1st_arg_reg (st, value)
-	  && !pv_area_find_reg (st->stack, st->arch, value.reg, 0)
+	  && !st->stack->find_reg (st->arch, value.reg, 0)
 	  && loc.kind == srcdest_reg
 	  && (pv_is_register (*loc.reg, tdep->a0->num)
 	      || pv_is_register (*loc.reg, tdep->a1->num)));
@@ -1493,7 +1493,7 @@ m32c_pushm_is_reg_save (struct m32c_pv_state *st, int src)
 
 
 /* Function for finding saved registers in a 'struct pv_area'; we pass
-   this to pv_area_scan.
+   this to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -1546,7 +1546,6 @@ m32c_analyze_prologue (struct gdbarch *arch,
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
   unsigned long mach = gdbarch_bfd_arch_info (arch)->mach;
   CORE_ADDR after_last_frame_related_insn;
-  struct cleanup *back_to;
   struct m32c_pv_state st;
 
   st.arch = arch;
@@ -1560,8 +1559,8 @@ m32c_analyze_prologue (struct gdbarch *arch,
   st.fb = pv_register (tdep->fb->num, 0);
   st.sp = pv_register (tdep->sp->num, 0);
   st.pc = pv_register (tdep->pc->num, 0);
-  st.stack = make_pv_area (tdep->sp->num, gdbarch_addr_bit (arch));
-  back_to = make_cleanup_free_pv_area (st.stack);
+  pv_area stack (tdep->sp->num, gdbarch_addr_bit (arch));
+  st.stack = &stack;
 
   /* Record that the call instruction has saved the return address on
      the stack.  */
@@ -1812,11 +1811,9 @@ m32c_analyze_prologue (struct gdbarch *arch,
     prologue->kind = prologue_first_frame;
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (st.stack, check_for_saved, (void *) prologue);
+  st.stack->scan (check_for_saved, (void *) prologue);
 
   prologue->prologue_end = after_last_frame_related_insn;
-
-  do_cleanups (back_to);
 }
 
 
@@ -2680,9 +2677,6 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_m32c_tdep;
 
 void
 _initialize_m32c_tdep (void)

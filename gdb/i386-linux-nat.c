@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux i386.
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -112,7 +112,7 @@ fetch_register (struct regcache *regcache, int regno)
 		i386_linux_gregset_reg_offset[regno], 0);
   if (errno != 0)
     error (_("Couldn't read register %s (#%d): %s."), 
-	   gdbarch_register_name (get_regcache_arch (regcache), regno),
+	   gdbarch_register_name (regcache->arch (), regno),
 	   regno, safe_strerror (errno));
 
   regcache_raw_supply (regcache, regno, &val);
@@ -138,7 +138,7 @@ store_register (const struct regcache *regcache, int regno)
 	  i386_linux_gregset_reg_offset[regno], val);
   if (errno != 0)
     error (_("Couldn't write register %s (#%d): %s."),
-	   gdbarch_register_name (get_regcache_arch (regcache), regno),
+	   gdbarch_register_name (regcache->arch (), regno),
 	   regno, safe_strerror (errno));
 }
 
@@ -160,7 +160,7 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
 			 regp + i386_linux_gregset_reg_offset[i]);
 
   if (I386_LINUX_ORIG_EAX_REGNUM
-	< gdbarch_num_regs (get_regcache_arch (regcache)))
+	< gdbarch_num_regs (regcache->arch ()))
     regcache_raw_supply (regcache, I386_LINUX_ORIG_EAX_REGNUM, regp
 			 + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
 }
@@ -183,7 +183,7 @@ fill_gregset (const struct regcache *regcache,
 
   if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
       && I386_LINUX_ORIG_EAX_REGNUM
-	   < gdbarch_num_regs (get_regcache_arch (regcache)))
+	   < gdbarch_num_regs (regcache->arch ()))
     regcache_raw_collect (regcache, I386_LINUX_ORIG_EAX_REGNUM, regp
 			  + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
 }
@@ -458,7 +458,7 @@ i386_linux_fetch_inferior_registers (struct target_ops *ops,
     {
       int i;
 
-      for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
+      for (i = 0; i < gdbarch_num_regs (regcache->arch ()); i++)
 	if (regno == -1 || regno == i)
 	  fetch_register (regcache, i);
 
@@ -536,7 +536,7 @@ i386_linux_store_inferior_registers (struct target_ops *ops,
     {
       int i;
 
-      for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
+      for (i = 0; i < gdbarch_num_regs (regcache->arch ()); i++)
 	if (regno == -1 || regno == i)
 	  store_register (regcache, i);
 
@@ -650,7 +650,7 @@ i386_linux_resume (struct target_ops *ops,
   if (step)
     {
       struct regcache *regcache = get_thread_regcache (ptid);
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       ULONGEST pc;
       gdb_byte buf[LINUX_SYSCALL_LEN];
@@ -702,10 +702,6 @@ i386_linux_resume (struct target_ops *ops,
   if (ptrace (request, pid, 0, gdb_signal_to_host (signal)) == -1)
     perror_with_name (("ptrace"));
 }
-
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_i386_linux_nat;
 
 void
 _initialize_i386_linux_nat (void)

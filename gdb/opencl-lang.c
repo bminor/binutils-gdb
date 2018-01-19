@@ -1,5 +1,5 @@
 /* OpenCL language support for GDB, the GNU debugger.
-   Copyright (C) 2010-2017 Free Software Foundation, Inc.
+   Copyright (C) 2010-2018 Free Software Foundation, Inc.
 
    Contributed by Ken Werner <ken.werner@de.ibm.com>.
 
@@ -26,8 +26,6 @@
 #include "language.h"
 #include "varobj.h"
 #include "c-lang.h"
-
-extern void _initialize_opencl_language (void);
 
 /* This macro generates enum values from a given type.  */
 
@@ -1043,7 +1041,7 @@ const struct exp_descriptor exp_descriptor_opencl =
   evaluate_subexp_opencl
 };
 
-const struct language_defn opencl_language_defn =
+extern const struct language_defn opencl_language_defn =
 {
   "opencl",			/* Language name */
   "OpenCL C",
@@ -1077,14 +1075,15 @@ const struct language_defn opencl_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   opencl_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
@@ -1173,17 +1172,13 @@ build_opencl_types (struct gdbarch *gdbarch)
   types[opencl_primitive_type_uintptr_t]
     = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "uintptr_t");
   types[opencl_primitive_type_void]
-    = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
+    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
 
   return types;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_opencl_language;
 
 void
 _initialize_opencl_language (void)
 {
   opencl_type_data = gdbarch_data_register_post_init (build_opencl_types);
-  add_language (&opencl_language_defn);
 }

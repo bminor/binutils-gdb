@@ -1,0 +1,67 @@
+From 750e829be774166d9bd687154be59c7a9380726a Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Sun, 8 Feb 2015 17:53:24 -0800
+Subject: [PATCH 3/3] Don't check the plugin target twice
+
+If the plugin target is explicitly specified when a BFD file is opened,
+don't check it twice.
+
+	* format.c: Include "plugin-api.h" and "plugin.h" if
+	BFD_SUPPORTS_PLUGINS is defined.
+	(bfd_check_format_matches): Don't check the plugin target twice
+	if the plugin target is explicitly specified.
+---
+ bfd/format.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/bfd/format.c b/bfd/format.c
+index 1142a82..c49585c 100644
+--- a/bfd/format.c
++++ b/bfd/format.c
+@@ -46,6 +46,10 @@ SUBSECTION
+ #include "sysdep.h"
+ #include "bfd.h"
+ #include "libbfd.h"
++#if BFD_SUPPORTS_PLUGINS
++#include "plugin-api.h"
++#include "plugin.h"
++#endif
+ 
+ /* IMPORT from targets.c.  */
+ extern const size_t _bfd_target_vector_entries;
+@@ -233,9 +237,6 @@ bfd_boolean
+ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
+ {
+   extern const bfd_target binary_vec;
+-#if BFD_SUPPORTS_PLUGINS
+-  extern const bfd_target plugin_vec;
+-#endif
+   const bfd_target * const *target;
+   const bfd_target **matching_vector = NULL;
+   const bfd_target *save_targ, *right_targ, *ar_right_targ, *match_targ;
+@@ -321,6 +322,13 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
+ 	  || (*target)->match_priority > best_match)
+ 	continue;
+ 
++#if BFD_SUPPORTS_PLUGINS
++      /* If the plugin target is explicitly specified when a BFD file
++	 is opened, don't check it twice.  */
++      if (bfd_plugin_specified_p () && bfd_plugin_target_p (*target))
++	continue;
++#endif
++
+       /* If we already tried a match, the bfd is modified and may
+ 	 have sections attached, which will confuse the next
+ 	 _bfd_check_format call.  */
+@@ -347,7 +355,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
+ 	     lowest priority; objects both handled by a plugin and
+ 	     with an underlying object format will be claimed
+ 	     separately by the plugin.  */
+-	  if (*target == &plugin_vec)
++	  if (bfd_plugin_target_p (*target))
+ 	    match_priority = (*target)->match_priority;
+ #endif
+ 
+-- 
+2.9.4
+

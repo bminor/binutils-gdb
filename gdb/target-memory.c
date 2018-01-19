@@ -1,7 +1,7 @@
 /* Parts of target interface that deal with accessing memory and memory-like
    objects.
 
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -138,14 +138,18 @@ block_boundaries (CORE_ADDR address, CORE_ADDR *begin, CORE_ADDR *end)
 {
   struct mem_region *region;
   unsigned blocksize;
+  CORE_ADDR offset_in_region;
 
   region = lookup_mem_region (address);
   gdb_assert (region->attrib.mode == MEM_FLASH);
   blocksize = region->attrib.blocksize;
+
+  offset_in_region = address - region->lo;
+
   if (begin)
-    *begin = address / blocksize * blocksize;
+    *begin = region->lo + offset_in_region / blocksize * blocksize;
   if (end)
-    *end = (address + blocksize - 1) / blocksize * blocksize;
+    *end = region->lo + (offset_in_region + blocksize - 1) / blocksize * blocksize;
 }
 
 /* Given the list of memory requests to be WRITTEN, this function

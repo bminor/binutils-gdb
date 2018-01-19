@@ -1,5 +1,5 @@
 /* Support for printing Ada types for GDB, the GNU debugger.
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,7 @@
 #include "demangle.h"
 #include "c-lang.h"
 #include "typeprint.h"
+#include "target-float.h"
 #include "ada-lang.h"
 #include <ctype.h>
 
@@ -253,17 +254,11 @@ static void
 print_dynamic_range_bound (struct type *type, const char *name, int name_len,
 			   const char *suffix, struct ui_file *stream)
 {
-  static char *name_buf = NULL;
-  static size_t name_buf_len = 0;
   LONGEST B;
-  int OK;
+  std::string name_buf (name, name_len);
+  name_buf += suffix;
 
-  GROW_VECT (name_buf, name_buf_len, name_len + strlen (suffix) + 1);
-  strncpy (name_buf, name, name_len);
-  strcpy (name_buf + name_len, suffix);
-
-  B = get_int_var_value (name_buf, &OK);
-  if (OK)
+  if (get_int_var_value (name_buf.c_str (), B))
     ada_print_scalar (type, B, stream);
   else
     fprintf_filtered (stream, "?");
@@ -362,16 +357,23 @@ print_enum_type (struct type *type, struct ui_file *stream)
 static void
 print_fixed_point_type (struct type *type, struct ui_file *stream)
 {
-  DOUBLEST delta = ada_delta (type);
-  DOUBLEST small = ada_fixed_to_float (type, 1);
+  struct value *delta = ada_delta (type);
+  struct value *small = ada_scaling_factor (type);
 
-  if (delta < 0.0)
+  if (delta == nullptr)
     fprintf_filtered (stream, "delta ??");
   else
     {
-      fprintf_filtered (stream, "delta %g", (double) delta);
-      if (delta != small)
-	fprintf_filtered (stream, " <'small = %g>", (double) small);
+      std::string str;
+      str = target_float_to_string (value_contents (delta),
+				    value_type (delta), "%g");
+      fprintf_filtered (stream, "delta %s", str.c_str());
+      if (!value_equal (delta, small))
+	{
+	  str = target_float_to_string (value_contents (small),
+					value_type (small), "%g");
+	  fprintf_filtered (stream, " <'small = %s>", str.c_str());
+	}
     }
 }
 
@@ -775,7 +777,8 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 {
   int i, len = TYPE_NFIELDS (type);
 
-  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
+  if (TYPE_TARGET_TYPE (type) != NULL
+      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
     fprintf_filtered (stream, "procedure");
   else
     fprintf_filtered (stream, "function");
@@ -800,7 +803,9 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
       fprintf_filtered (stream, ")");
     }
 
-  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+  if (TYPE_TARGET_TYPE (type) == NULL)
+    fprintf_filtered (stream, " return <unknown return type>");
+  else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
     {
       fprintf_filtered (stream, " return ");
       ada_print_type (TYPE_TARGET_TYPE (type), "", stream, 0, 0, flags);

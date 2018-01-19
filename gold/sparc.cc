@@ -1,6 +1,6 @@
 // sparc.cc -- sparc target support for gold.
 
-// Copyright (C) 2008-2017 Free Software Foundation, Inc.
+// Copyright (C) 2008-2018 Free Software Foundation, Inc.
 // Written by David S. Miller <davem@davemloft.net>.
 
 // This file is part of gold.
@@ -4164,7 +4164,7 @@ Target_sparc<size, big_endian>::Relocate::relax_call(
   if (op3 != 0x3d)
     {
       // First check RS1
-      reg = (delay_insn >> 14) & 0x15;
+      reg = (delay_insn >> 14) & 0x1f;
       if (reg == 15)
 	return;
 

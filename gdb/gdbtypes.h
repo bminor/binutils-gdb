@@ -1,7 +1,7 @@
 
 /* Internal type definitions for GDB.
 
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -46,6 +46,7 @@
 
 #include "hashtab.h"
 #include "common/offset-type.h"
+#include "common/enum-flags.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -196,6 +197,8 @@ enum type_instance_flag_value
   TYPE_INSTANCE_FLAG_ATOMIC = (1 << 8)
 };
 
+DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
+
 /* * Unsigned integer type.  If this is not set for a TYPE_CODE_INT,
    the type is signed (unless TYPE_NOSIGN (below) is set).  */
 
@@ -220,13 +223,6 @@ enum type_instance_flag_value
    TYPE_CODE_TYPEDEF.  */
 
 #define TYPE_TARGET_STUB(t)	(TYPE_MAIN_TYPE (t)->flag_target_stub)
-
-/* * Static type.  If this is set, the corresponding type had 
-   a static modifier.
-   Note: This may be unnecessary, since static data members
-   are indicated by other means (bitpos == -1).  */
-
-#define TYPE_STATIC(t)		(TYPE_MAIN_TYPE (t)->flag_static)
 
 /* * This is a function type which appears to have a prototype.  We
    need this for function calls in order to tell us if it's necessary
@@ -311,25 +307,25 @@ enum type_instance_flag_value
 /* * Constant type.  If this is set, the corresponding type has a
    const modifier.  */
 
-#define TYPE_CONST(t) (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CONST)
+#define TYPE_CONST(t) ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CONST) != 0)
 
 /* * Volatile type.  If this is set, the corresponding type has a
    volatile modifier.  */
 
 #define TYPE_VOLATILE(t) \
-  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_VOLATILE)
+  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_VOLATILE) != 0)
 
 /* * Restrict type.  If this is set, the corresponding type has a
    restrict modifier.  */
 
 #define TYPE_RESTRICT(t) \
-  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_RESTRICT)
+  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_RESTRICT) != 0)
 
 /* * Atomic type.  If this is set, the corresponding type has an
    _Atomic modifier.  */
 
 #define TYPE_ATOMIC(t) \
-  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_ATOMIC)
+  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_ATOMIC) != 0)
 
 /* * True if this type represents either an lvalue or lvalue reference type.  */
 
@@ -356,10 +352,10 @@ enum type_instance_flag_value
    is instruction space, and for data objects is data memory.  */
 
 #define TYPE_CODE_SPACE(t) \
-  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CODE_SPACE)
+  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CODE_SPACE) != 0)
 
 #define TYPE_DATA_SPACE(t) \
-  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_DATA_SPACE)
+  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_DATA_SPACE) != 0)
 
 /* * Address class flags.  Some environments provide for pointers
    whose size is different from that of a normal pointer or address
@@ -422,6 +418,9 @@ enum dynamic_prop_node_kind
   /* A property representing DW_AT_allocated.  The presence of this attribute
      indicated that the object of the type can be associated.  */
   DYN_PROP_ASSOCIATED,
+
+  /* A property providing an array's byte stride.  */
+  DYN_PROP_BYTE_STRIDE,
 };
 
 /* * List for dynamic type attributes.  */
@@ -575,12 +574,11 @@ union type_specific
 
   struct gnat_aux_type *gnat_stuff;
 
-  /* * FLOATFORMAT is for TYPE_CODE_FLT.  It is a pointer to two
-     floatformat objects that describe the floating-point value
-     that resides within the type.  The first is for big endian
-     targets and the second is for little endian targets.  */
+  /* * FLOATFORMAT is for TYPE_CODE_FLT.  It is a pointer to a
+     floatformat object that describes the floating-point value
+     that resides within the type.  */
 
-  const struct floatformat **floatformat;
+  const struct floatformat *floatformat;
 
   /* * For TYPE_CODE_FUNC and TYPE_CODE_METHOD types.  */
 
@@ -844,12 +842,6 @@ struct fn_field
   unsigned int is_volatile:1;
   unsigned int is_private:1;
   unsigned int is_protected:1;
-  unsigned int is_public:1;
-  unsigned int is_abstract:1;
-  unsigned int is_static:1;
-  unsigned int is_final:1;
-  unsigned int is_synchronized:1;
-  unsigned int is_native:1;
   unsigned int is_artificial:1;
 
   /* * A stub method only has some fields valid (but they are enough
@@ -863,7 +855,7 @@ struct fn_field
 
   /* * Unused.  */
 
-  unsigned int dummy:3;
+  unsigned int dummy:9;
 
   /* * Index into that baseclass's virtual function table, minus 2;
      else if static: VOFFSET_STATIC; else: 0.  */
@@ -874,7 +866,7 @@ struct fn_field
 
 };
 
-struct typedef_field
+struct decl_field
 {
   /* * Unqualified name to be prefixed by owning class qualified
      name.  */
@@ -884,6 +876,12 @@ struct typedef_field
   /* * Type this typedef named NAME represents.  */
 
   struct type *type;
+
+  /* * True if this field was declared protected, false otherwise.  */
+  unsigned int is_protected : 1;
+
+  /* * True if this field was declared private, false otherwise.  */
+  unsigned int is_private : 1;
 };
 
 /* * C++ language-specific information for TYPE_CODE_STRUCT and
@@ -983,9 +981,16 @@ struct cplus_struct_type
     /* * typedefs defined inside this class.  typedef_field points to
        an array of typedef_field_count elements.  */
 
-    struct typedef_field *typedef_field;
+    struct decl_field *typedef_field;
 
     unsigned typedef_field_count;
+
+    /* * The nested types defined by this type.  nested_types points to
+       an array of nested_types_count elements.  */
+
+    struct decl_field *nested_types;
+
+    unsigned nested_types_count;
 
     /* * The template arguments.  This is an array with
        N_TEMPLATE_ARGUMENTS elements.  This is NULL for non-template
@@ -1405,13 +1410,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD_VOLATILE(thisfn, n) ((thisfn)[n].is_volatile)
 #define TYPE_FN_FIELD_PRIVATE(thisfn, n) ((thisfn)[n].is_private)
 #define TYPE_FN_FIELD_PROTECTED(thisfn, n) ((thisfn)[n].is_protected)
-#define TYPE_FN_FIELD_PUBLIC(thisfn, n) ((thisfn)[n].is_public)
-#define TYPE_FN_FIELD_STATIC(thisfn, n) ((thisfn)[n].is_static)
-#define TYPE_FN_FIELD_FINAL(thisfn, n) ((thisfn)[n].is_final)
-#define TYPE_FN_FIELD_SYNCHRONIZED(thisfn, n) ((thisfn)[n].is_synchronized)
-#define TYPE_FN_FIELD_NATIVE(thisfn, n) ((thisfn)[n].is_native)
 #define TYPE_FN_FIELD_ARTIFICIAL(thisfn, n) ((thisfn)[n].is_artificial)
-#define TYPE_FN_FIELD_ABSTRACT(thisfn, n) ((thisfn)[n].is_abstract)
 #define TYPE_FN_FIELD_STUB(thisfn, n) ((thisfn)[n].is_stub)
 #define TYPE_FN_FIELD_CONSTRUCTOR(thisfn, n) ((thisfn)[n].is_constructor)
 #define TYPE_FN_FIELD_FCONTEXT(thisfn, n) ((thisfn)[n].fcontext)
@@ -1419,6 +1418,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)
 #define TYPE_FN_FIELD_STATIC_P(thisfn, n) ((thisfn)[n].voffset == VOFFSET_STATIC)
 
+/* Accessors for typedefs defined by a class.  */
 #define TYPE_TYPEDEF_FIELD_ARRAY(thistype) \
   TYPE_CPLUS_SPECIFIC (thistype)->typedef_field
 #define TYPE_TYPEDEF_FIELD(thistype, n) \
@@ -1429,6 +1429,25 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   TYPE_TYPEDEF_FIELD (thistype, n).type
 #define TYPE_TYPEDEF_FIELD_COUNT(thistype) \
   TYPE_CPLUS_SPECIFIC (thistype)->typedef_field_count
+#define TYPE_TYPEDEF_FIELD_PROTECTED(thistype, n) \
+  TYPE_TYPEDEF_FIELD (thistype, n).is_protected
+#define TYPE_TYPEDEF_FIELD_PRIVATE(thistype, n)        \
+  TYPE_TYPEDEF_FIELD (thistype, n).is_private
+
+#define TYPE_NESTED_TYPES_ARRAY(thistype)	\
+  TYPE_CPLUS_SPECIFIC (thistype)->nested_types
+#define TYPE_NESTED_TYPES_FIELD(thistype, n) \
+  TYPE_CPLUS_SPECIFIC (thistype)->nested_types[n]
+#define TYPE_NESTED_TYPES_FIELD_NAME(thistype, n) \
+  TYPE_NESTED_TYPES_FIELD (thistype, n).name
+#define TYPE_NESTED_TYPES_FIELD_TYPE(thistype, n) \
+  TYPE_NESTED_TYPES_FIELD (thistype, n).type
+#define TYPE_NESTED_TYPES_COUNT(thistype) \
+  TYPE_CPLUS_SPECIFIC (thistype)->nested_types_count
+#define TYPE_NESTED_TYPES_FIELD_PROTECTED(thistype, n) \
+  TYPE_NESTED_TYPES_FIELD (thistype, n).is_protected
+#define TYPE_NESTED_TYPES_FIELD_PRIVATE(thistype, n)	\
+  TYPE_NESTED_TYPES_FIELD (thistype, n).is_private
 
 #define TYPE_IS_OPAQUE(thistype) \
   (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) \
@@ -1449,6 +1468,9 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 
 #define TYPE_ERROR_NAME(type) \
   (TYPE_NAME (type) ? TYPE_NAME (type) : _("<error type>"))
+
+/* Given TYPE, return its floatformat.  */
+const struct floatformat *floatformat_from_type (const struct type *type);
 
 struct builtin_type
 {
@@ -1699,7 +1721,7 @@ struct field *append_composite_type_field_raw (struct type *t, const char *name,
    type is created using arch_flag_type().  Flags are then added using
    append_flag_type_field() and append_flag_type_flag().  */
 extern struct type *arch_flags_type (struct gdbarch *gdbarch,
-				     const char *name, int length);
+				     const char *name, int bit);
 extern void append_flags_type_field (struct type *type,
 				     int start_bitpos, int nr_bits,
 				     struct type *field_type, const char *name);
@@ -1772,7 +1794,8 @@ extern struct type *create_static_range_type (struct type *, struct type *,
 
 
 extern struct type *create_array_type_with_stride
-  (struct type *, struct type *, struct type *, unsigned int);
+  (struct type *, struct type *, struct type *,
+   struct dynamic_prop *, unsigned int);
 
 extern struct type *create_range_type (struct type *, struct type *,
 				       const struct dynamic_prop *,
@@ -1941,13 +1964,15 @@ extern int can_dereference (struct type *);
 
 extern int is_integral_type (struct type *);
 
+extern int is_floating_type (struct type *);
+
 extern int is_scalar_type (struct type *type);
 
 extern int is_scalar_type_recursive (struct type *);
 
 extern int class_or_union_p (const struct type *);
 
-extern void maintenance_print_type (char *, int);
+extern void maintenance_print_type (const char *, int);
 
 extern htab_t create_copied_types_hash (struct objfile *objfile);
 

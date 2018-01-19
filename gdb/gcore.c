@@ -1,6 +1,6 @@
 /* Generate a core file for the inferior process.
 
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,6 +36,7 @@
 #include "readline/tilde.h"
 #include <algorithm>
 #include "common/gdb_unlinker.h"
+#include "byte-vector.h"
 
 /* The largest amount of memory to read from the target at once.  We
    must throttle it to limit the amount of memory used by GDB during
@@ -67,8 +68,7 @@ create_gcore_bfd (const char *filename)
 static void
 write_gcore_file_1 (bfd *obfd)
 {
-  struct cleanup *cleanup;
-  void *note_data = NULL;
+  gdb::unique_xmalloc_ptr<char> note_data;
   int note_size = 0;
   asection *note_sec = NULL;
 
@@ -77,11 +77,10 @@ write_gcore_file_1 (bfd *obfd)
      generation should be converted to gdbarch_make_corefile_notes; at that
      point, the target vector method can be removed.  */
   if (!gdbarch_make_corefile_notes_p (target_gdbarch ()))
-    note_data = target_make_corefile_notes (obfd, &note_size);
+    note_data.reset (target_make_corefile_notes (obfd, &note_size));
   else
-    note_data = gdbarch_make_corefile_notes (target_gdbarch (), obfd, &note_size);
-
-  cleanup = make_cleanup (xfree, note_data);
+    note_data.reset (gdbarch_make_corefile_notes (target_gdbarch (), obfd,
+						  &note_size));
 
   if (note_data == NULL || note_size == 0)
     error (_("Target does not support core file generation."));
@@ -104,10 +103,9 @@ write_gcore_file_1 (bfd *obfd)
     error (_("gcore: failed to get corefile memory sections from target."));
 
   /* Write out the contents of the note section.  */
-  if (!bfd_set_section_contents (obfd, note_sec, note_data, 0, note_size))
+  if (!bfd_set_section_contents (obfd, note_sec, note_data.get (), 0,
+				 note_size))
     warning (_("writing note section (%s)"), bfd_errmsg (bfd_get_error ()));
-
-  do_cleanups (cleanup);
 }
 
 /* write_gcore_file -- helper for gcore_command (exported).
@@ -140,7 +138,7 @@ write_gcore_file (bfd *obfd)
    Generate a core file from the inferior process.  */
 
 static void
-gcore_command (char *args, int from_tty)
+gcore_command (const char *args, int from_tty)
 {
   gdb::unique_xmalloc_ptr<char> corefilename;
 
@@ -302,7 +300,7 @@ call_target_sbrk (int sbrk_arg)
   target_sbrk_arg = value_from_longest (builtin_type (gdbarch)->builtin_int, 
 					sbrk_arg);
   gdb_assert (target_sbrk_arg);
-  ret = call_function_by_hand (sbrk_fn, 1, &target_sbrk_arg);
+  ret = call_function_by_hand (sbrk_fn, NULL, 1, &target_sbrk_arg);
   if (ret == NULL)
     return (bfd_vma) 0;
 
@@ -548,8 +546,6 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 {
   bfd_size_type size, total_size = bfd_section_size (obfd, osec);
   file_ptr offset = 0;
-  struct cleanup *old_chain = NULL;
-  gdb_byte *memhunk;
 
   /* Read-only sections are marked; we don't have to copy their contents.  */
   if ((bfd_get_section_flags (obfd, osec) & SEC_LOAD) == 0)
@@ -560,8 +556,7 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
     return;
 
   size = std::min (total_size, (bfd_size_type) MAX_COPY_BYTES);
-  memhunk = (gdb_byte *) xmalloc (size);
-  old_chain = make_cleanup (xfree, memhunk);
+  gdb::byte_vector memhunk (size);
 
   while (total_size > 0)
     {
@@ -569,7 +564,7 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 	size = total_size;
 
       if (target_read_memory (bfd_section_vma (obfd, osec) + offset,
-			      memhunk, size) != 0)
+			      memhunk.data (), size) != 0)
 	{
 	  warning (_("Memory read failed for corefile "
 		     "section, %s bytes at %s."),
@@ -577,7 +572,8 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 		   paddress (target_gdbarch (), bfd_section_vma (obfd, osec)));
 	  break;
 	}
-      if (!bfd_set_section_contents (obfd, osec, memhunk, offset, size))
+      if (!bfd_set_section_contents (obfd, osec, memhunk.data (),
+				     offset, size))
 	{
 	  warning (_("Failed to write corefile contents (%s)."),
 		   bfd_errmsg (bfd_get_error ()));
@@ -587,8 +583,6 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
       total_size -= size;
       offset += size;
     }
-
-  do_cleanups (old_chain);	/* Frees MEMHUNK.  */
 }
 
 static int
@@ -611,9 +605,6 @@ gcore_memory_sections (bfd *obfd)
 
   return 1;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_gcore;
 
 void
 _initialize_gcore (void)

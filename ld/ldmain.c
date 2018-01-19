@@ -1,5 +1,5 @@
 /* Main program of GNU linker.
-   Copyright (C) 1991-2017 Free Software Foundation, Inc.
+   Copyright (C) 1991-2018 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
    This file is part of the GNU Binutils.
@@ -49,12 +49,6 @@
 #endif
 
 #include <string.h>
-
-#ifdef HAVE_SBRK
-#if !HAVE_DECL_SBRK
-extern void *sbrk ();
-#endif
-#endif
 
 #ifndef TARGET_SYSTEM_ROOT
 #define TARGET_SYSTEM_ROOT ""
@@ -198,9 +192,6 @@ main (int argc, char **argv)
 {
   char *emulation;
   long start_time = get_run_time ();
-#ifdef HAVE_SBRK
-  char *start_sbrk = (char *) sbrk (0);
-#endif
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -285,7 +276,8 @@ main (int argc, char **argv)
   link_info.keep_memory = TRUE;
   link_info.combreloc = TRUE;
   link_info.strip_discarded = TRUE;
-  link_info.emit_hash = TRUE;
+  link_info.emit_hash = DEFAULT_EMIT_SYSV_HASH;
+  link_info.emit_gnu_hash = DEFAULT_EMIT_GNU_HASH;
   link_info.emit_secondary = TRUE;
   link_info.callbacks = &link_callbacks;
   link_info.input_bfds_tail = &link_info.input_bfds;
@@ -380,6 +372,9 @@ main (int argc, char **argv)
      to provide version information.  */
   if (argc == 2 && version_printed)
     xexit (0);
+
+  if (link_info.inhibit_common_definition && !bfd_link_dll (&link_info))
+    einfo (_("%P%F: --no-define-common may not be used without -shared\n"));
 
   if (!lang_has_input_file)
     {
@@ -521,18 +516,11 @@ main (int argc, char **argv)
 
   if (config.stats)
     {
-#ifdef HAVE_SBRK
-      char *lim = (char *) sbrk (0);
-#endif
       long run_time = get_run_time () - start_time;
 
       fflush (stdout);
       fprintf (stderr, _("%s: total time in link: %ld.%06ld\n"),
 	       program_name, run_time / 1000000, run_time % 1000000);
-#ifdef HAVE_SBRK
-      fprintf (stderr, _("%s: data size %ld\n"), program_name,
-	       (long) (lim - start_sbrk));
-#endif
       fflush (stderr);
     }
 
@@ -787,6 +775,7 @@ add_archive_element (struct bfd_link_info *info,
 		     bfd **subsbfd ATTRIBUTE_UNUSED)
 {
   lang_input_statement_type *input;
+  lang_input_statement_type *parent;
   lang_input_statement_type orig_input;
 
   input = (lang_input_statement_type *)
@@ -795,6 +784,10 @@ add_archive_element (struct bfd_link_info *info,
   input->filename = abfd->filename;
   input->local_sym_name = abfd->filename;
   input->the_bfd = abfd;
+
+  parent = abfd->my_archive->usrdata;
+  if (parent != NULL && !parent->flags.reload)
+    parent->next = (lang_statement_union_type *) input;
 
   /* Save the original data for trace files/tries below, as plugins
      (if enabled) may possibly alter it to point to a replacement
@@ -1477,9 +1470,9 @@ notice (struct bfd_link_info *info,
       && bfd_hash_lookup (info->notice_hash, name, FALSE, FALSE) != NULL)
     {
       if (bfd_is_und_section (section))
-	einfo ("%B: reference to %s\n", abfd, name);
+	einfo (_("%B: reference to %s\n"), abfd, name);
       else
-	einfo ("%B: definition of %s\n", abfd, name);
+	einfo (_("%B: definition of %s\n"), abfd, name);
     }
 
   if (command_line.cref || nocrossref_list != NULL)

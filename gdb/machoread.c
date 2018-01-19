@@ -1,5 +1,5 @@
 /* Darwin support for GDB, the GNU debugger.
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    Contributed by AdaCore.
 
@@ -993,9 +993,6 @@ static const struct sym_fns macho_sym_fns = {
   NULL,				/* sym_get_probes */
   &psym_functions
 };
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_machoread;
 
 void
 _initialize_machoread (void)

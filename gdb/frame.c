@@ -1,6 +1,6 @@
 /* Cache and manage frames for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -99,7 +99,7 @@ struct frame_info
   struct program_space *pspace;
 
   /* The frame's address space.  */
-  struct address_space *aspace;
+  const address_space *aspace;
 
   /* The frame's low-level unwinder and corresponding cache.  The
      low-level unwinder is responsible for unwinding register values
@@ -1017,16 +1017,13 @@ do_frame_register_read (void *src, int regnum, gdb_byte *buf)
     return REG_VALID;
 }
 
-struct regcache *
+std::unique_ptr<struct regcache>
 frame_save_as_regcache (struct frame_info *this_frame)
 {
-  struct address_space *aspace = get_frame_address_space (this_frame);
-  struct regcache *regcache = regcache_xmalloc (get_frame_arch (this_frame),
-						aspace);
-  struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
+  std::unique_ptr<struct regcache> regcache
+    (new struct regcache (get_frame_arch (this_frame)));
 
-  regcache_save (regcache, do_frame_register_read, this_frame);
-  discard_cleanups (cleanups);
+  regcache_save (regcache.get (), do_frame_register_read, this_frame);
   return regcache;
 }
 
@@ -1034,8 +1031,6 @@ void
 frame_pop (struct frame_info *this_frame)
 {
   struct frame_info *prev_frame;
-  struct regcache *scratch;
-  struct cleanup *cleanups;
 
   if (get_frame_type (this_frame) == DUMMY_FRAME)
     {
@@ -1062,8 +1057,8 @@ frame_pop (struct frame_info *this_frame)
      Save them in a scratch buffer so that there isn't a race between
      trying to extract the old values from the current regcache while
      at the same time writing new values into that same cache.  */
-  scratch = frame_save_as_regcache (prev_frame);
-  cleanups = make_cleanup_regcache_xfree (scratch);
+  std::unique_ptr<struct regcache> scratch
+    = frame_save_as_regcache (prev_frame);
 
   /* FIXME: cagney/2003-03-16: It should be possible to tell the
      target's register cache that it is about to be hit with a burst
@@ -1075,8 +1070,7 @@ frame_pop (struct frame_info *this_frame)
      (arguably a bug in the target code mind).  */
   /* Now copy those saved registers into the current regcache.
      Here, regcache_cpy() calls regcache_restore().  */
-  regcache_cpy (get_current_regcache (), scratch);
-  do_cleanups (cleanups);
+  regcache_cpy (get_current_regcache (), scratch.get ());
 
   /* We've made right mess of GDB's local state, just discard
      everything.  */
@@ -1526,7 +1520,7 @@ create_sentinel_frame (struct program_space *pspace, struct regcache *regcache)
 
   frame->level = -1;
   frame->pspace = pspace;
-  frame->aspace = get_regcache_aspace (regcache);
+  frame->aspace = regcache->aspace ();
   /* Explicitly initialize the sentinel frame's cache.  Provide it
      with the underlying regcache.  In the future additional
      information, such as the frame's thread will be added.  */
@@ -1720,23 +1714,6 @@ select_frame (struct frame_info *fi)
 	}
     }
 }
-
-#if GDB_SELF_TEST
-struct frame_info *
-create_test_frame (struct regcache *regcache)
-{
-  struct frame_info *this_frame = XCNEW (struct frame_info);
-
-  sentinel_frame = create_sentinel_frame (NULL, regcache);
-  sentinel_frame->prev = this_frame;
-  sentinel_frame->prev_p = 1;;
-  this_frame->prev_arch.p = 1;
-  this_frame->prev_arch.arch = get_regcache_arch (regcache);
-  this_frame->next = sentinel_frame;
-
-  return this_frame;
-}
-#endif
 
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
@@ -2506,8 +2483,8 @@ get_frame_address_in_block_if_available (struct frame_info *this_frame,
   return 1;
 }
 
-void
-find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
+symtab_and_line
+find_frame_sal (frame_info *frame)
 {
   struct frame_info *next_frame;
   int notcurrent;
@@ -2528,21 +2505,21 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 
       /* If frame is inline, it certainly has symbols.  */
       gdb_assert (sym);
-      init_sal (sal);
+
+      symtab_and_line sal;
       if (SYMBOL_LINE (sym) != 0)
 	{
-	  sal->symtab = symbol_symtab (sym);
-	  sal->line = SYMBOL_LINE (sym);
+	  sal.symtab = symbol_symtab (sym);
+	  sal.line = SYMBOL_LINE (sym);
 	}
       else
 	/* If the symbol does not have a location, we don't know where
 	   the call site is.  Do not pretend to.  This is jarring, but
 	   we can't do much better.  */
-	sal->pc = get_frame_pc (frame);
+	sal.pc = get_frame_pc (frame);
 
-      sal->pspace = get_frame_program_space (frame);
-
-      return;
+      sal.pspace = get_frame_program_space (frame);
+      return sal;
     }
 
   /* If FRAME is not the innermost frame, that normally means that
@@ -2555,13 +2532,10 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
      instruction/line, consequently, for such cases, want to get the
      line containing fi->pc.  */
   if (!get_frame_pc_if_available (frame, &pc))
-    {
-      init_sal (sal);
-      return;
-    }
+    return {};
 
   notcurrent = (pc != get_frame_address_in_block (frame));
-  (*sal) = find_pc_line (pc, notcurrent);
+  return find_pc_line (pc, notcurrent);
 }
 
 /* Per "frame.h", return the ``address'' of the frame.  Code should
@@ -2668,7 +2642,7 @@ frame_unwind_program_space (struct frame_info *this_frame)
   return this_frame->pspace;
 }
 
-struct address_space *
+const address_space *
 get_frame_address_space (struct frame_info *frame)
 {
   return frame->aspace;
@@ -2889,11 +2863,9 @@ frame_stop_reason_symbol_string (enum unwind_stop_reason reason)
 /* Clean up after a failed (wrong unwinder) attempt to unwind past
    FRAME.  */
 
-static void
-frame_cleanup_after_sniffer (void *arg)
+void
+frame_cleanup_after_sniffer (struct frame_info *frame)
 {
-  struct frame_info *frame = (struct frame_info *) arg;
-
   /* The sniffer should not allocate a prologue cache if it did not
      match this frame.  */
   gdb_assert (frame->prologue_cache == NULL);
@@ -2918,32 +2890,29 @@ frame_cleanup_after_sniffer (void *arg)
 }
 
 /* Set FRAME's unwinder temporarily, so that we can call a sniffer.
-   Return a cleanup which should be called if unwinding fails, and
-   discarded if it succeeds.  */
+   If sniffing fails, the caller should be sure to call
+   frame_cleanup_after_sniffer.  */
 
-struct cleanup *
+void
 frame_prepare_for_sniffer (struct frame_info *frame,
 			   const struct frame_unwind *unwind)
 {
   gdb_assert (frame->unwind == NULL);
   frame->unwind = unwind;
-  return make_cleanup (frame_cleanup_after_sniffer, frame);
 }
-
-extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */
 
 static struct cmd_list_element *set_backtrace_cmdlist;
 static struct cmd_list_element *show_backtrace_cmdlist;
 
 static void
-set_backtrace_cmd (char *args, int from_tty)
+set_backtrace_cmd (const char *args, int from_tty)
 {
   help_list (set_backtrace_cmdlist, "set backtrace ", all_commands,
 	     gdb_stdout);
 }
 
 static void
-show_backtrace_cmd (char *args, int from_tty)
+show_backtrace_cmd (const char *args, int from_tty)
 {
   cmd_show_list (show_backtrace_cmdlist, from_tty, "");
 }

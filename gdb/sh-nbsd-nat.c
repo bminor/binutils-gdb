@@ -1,6 +1,6 @@
 /* Native-dependent code for NetBSD/sh.
 
-   Copyright (C) 2002-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2018 Free Software Foundation, Inc.
 
    Contributed by Wasabi Systems, Inc.
 
@@ -47,7 +47,7 @@ shnbsd_fetch_inferior_registers (struct target_ops *ops,
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
-  if (regno == -1 || GETREGS_SUPPLIES (get_regcache_arch (regcache), regno))
+  if (regno == -1 || GETREGS_SUPPLIES (regcache->arch (), regno))
     {
       struct reg inferior_registers;
 
@@ -70,7 +70,7 @@ shnbsd_store_inferior_registers (struct target_ops *ops,
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
-  if (regno == -1 || GETREGS_SUPPLIES (get_regcache_arch (regcache), regno))
+  if (regno == -1 || GETREGS_SUPPLIES (regcache->arch (), regno))
     {
       struct reg inferior_registers;
 
@@ -90,9 +90,6 @@ shnbsd_store_inferior_registers (struct target_ops *ops,
 	return;
     }
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_shnbsd_nat (void);
 
 void
 _initialize_shnbsd_nat (void)

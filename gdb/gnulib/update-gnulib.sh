@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# Copyright (C) 2011-2017 Free Software Foundation, Inc.
+# Copyright (C) 2011-2018 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -37,6 +37,8 @@ IMPORTED_GNULIB_MODULES="\
     errno \
     fnmatch-gnu \
     frexpl \
+    getcwd \
+    glob \
     inttypes \
     lstat \
     limits-h \
@@ -46,12 +48,14 @@ IMPORTED_GNULIB_MODULES="\
     rawmemchr \
     readlink \
     rename \
+    setenv \
     signal-h \
     strchrnul \
     strstr \
     strtok_r \
     sys_stat \
     unistd \
+    unsetenv \
     update-copyright \
     wchar \
     wctype-h \

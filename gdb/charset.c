@@ -1,6 +1,6 @@
 /* Character set conversion support for GDB.
 
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -365,7 +365,7 @@ validate (struct gdbarch *gdbarch)
 
 /* This is the sfunc for the 'set charset' command.  */
 static void
-set_charset_sfunc (char *charset, int from_tty, 
+set_charset_sfunc (const char *charset, int from_tty, 
 		   struct cmd_list_element *c)
 {
   /* CAREFUL: set the target charset here as well.  */
@@ -376,7 +376,7 @@ set_charset_sfunc (char *charset, int from_tty,
 /* 'set host-charset' command sfunc.  We need a wrapper here because
    the function needs to have a specific signature.  */
 static void
-set_host_charset_sfunc (char *charset, int from_tty,
+set_host_charset_sfunc (const char *charset, int from_tty,
 			struct cmd_list_element *c)
 {
   validate (get_current_arch ());
@@ -384,7 +384,7 @@ set_host_charset_sfunc (char *charset, int from_tty,
 
 /* Wrapper for the 'set target-charset' command.  */
 static void
-set_target_charset_sfunc (char *charset, int from_tty,
+set_target_charset_sfunc (const char *charset, int from_tty,
 			  struct cmd_list_element *c)
 {
   validate (get_current_arch ());
@@ -392,7 +392,7 @@ set_target_charset_sfunc (char *charset, int from_tty,
 
 /* Wrapper for the 'set target-wide-charset' command.  */
 static void
-set_target_wide_charset_sfunc (char *charset, int from_tty,
+set_target_wide_charset_sfunc (const char *charset, int from_tty,
 			       struct cmd_list_element *c)
 {
   validate (get_current_arch ());
@@ -705,10 +705,7 @@ wchar_iterator::iterate (enum wchar_iterate_result *out_result,
   return -1;
 }
 
-
 /* The charset.c module initialization function.  */
-
-extern initialize_file_ftype _initialize_charset; /* -Wmissing-prototype */
 
 static VEC (char_ptr) *charsets;
 

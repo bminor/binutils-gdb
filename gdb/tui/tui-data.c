@@ -1,6 +1,6 @@
 /* TUI data manipulation routines.
 
-   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -29,7 +29,7 @@
 /****************************
 ** GLOBAL DECLARATIONS
 ****************************/
-struct tui_win_info *(tui_win_list[MAX_MAJOR_WINDOWS]);
+struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
 /***************************
 ** Private data

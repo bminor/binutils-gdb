@@ -1,5 +1,5 @@
 /* ARC-specific support for 32-bit ELF
-   Copyright (C) 1994-2017 Free Software Foundation, Inc.
+   Copyright (C) 1994-2018 Free Software Foundation, Inc.
    Contributed by Cupertino Miranda (cmiranda@synopsys.com).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -58,16 +58,16 @@ name_for_global_symbol (struct elf_link_hash_entry *h)
     if (_htab->dynamic_sections_created == TRUE)				\
       {									\
 	BFD_ASSERT (_htab->srel##SECTION &&_htab->srel##SECTION->contents); \
-    	_loc = _htab->srel##SECTION->contents				\
-    	  + ((_htab->srel##SECTION->reloc_count)			\
-    	     * sizeof (Elf32_External_Rela));				\
-    	_htab->srel##SECTION->reloc_count++;				\
-    	_rel.r_addend = ADDEND;						\
-    	_rel.r_offset = (_htab->s##SECTION)->output_section->vma	\
-    	  + (_htab->s##SECTION)->output_offset + OFFSET;		\
-    	BFD_ASSERT ((long) SYM_IDX != -1);				\
-    	_rel.r_info = ELF32_R_INFO (SYM_IDX, TYPE);			\
-    	bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
+	_loc = _htab->srel##SECTION->contents				\
+	  + ((_htab->srel##SECTION->reloc_count)			\
+	     * sizeof (Elf32_External_Rela));				\
+	_htab->srel##SECTION->reloc_count++;				\
+	_rel.r_addend = ADDEND;						\
+	_rel.r_offset = (_htab->s##SECTION)->output_section->vma	\
+	  + (_htab->s##SECTION)->output_offset + OFFSET;		\
+	BFD_ASSERT ((long) SYM_IDX != -1);				\
+	_rel.r_info = ELF32_R_INFO (SYM_IDX, TYPE);			\
+	bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
       }									\
   }
 
@@ -888,9 +888,9 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  /* Warn if different flags.  */
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: uses different e_flags (0x%lx) fields than "
-	       "previous modules (0x%lx)"),
-	     ibfd, (long) in_flags, (long) out_flags);
+	    (_("%B: uses different e_flags (%#x) fields than "
+	       "previous modules (%#x)"),
+	     ibfd, in_flags, out_flags);
 	  if (in_flags && out_flags)
 	    return FALSE;
 	  /* MWDT doesnt set the eflags hence make sure we choose the
@@ -1116,26 +1116,26 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	  if (reloc_data.reloc_addend == 0)
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+0x%lx): CMEM relocation to `%s' is invalid, "
-		 "16 MSB should be 0x%04x (value is 0x%lx)"),
+	      (_("%B(%A+%#Lx): CMEM relocation to `%s' is invalid, "
+		 "16 MSB should be %#x (value is %#Lx)"),
 	       reloc_data.input_section->owner,
 	       reloc_data.input_section,
 	       reloc_data.reloc_offset,
 	       reloc_data.symbol_name,
 	       NPS_CMEM_HIGH_VALUE,
-	       (relocation));
+	       relocation);
 	  else
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+0x%lx): CMEM relocation to `%s+0x%lx' is invalid, "
-		 "16 MSB should be 0x%04x (value is 0x%lx)"),
+	      (_("%B(%A+%#Lx): CMEM relocation to `%s+%#Lx' is invalid, "
+		 "16 MSB should be %#x (value is %#Lx)"),
 	       reloc_data.input_section->owner,
 	       reloc_data.input_section,
 	       reloc_data.reloc_offset,
 	       reloc_data.symbol_name,
 	       reloc_data.reloc_addend,
 	       NPS_CMEM_HIGH_VALUE,
-	       (relocation));
+	       relocation);
 	  return bfd_reloc_overflow;
 	}
       break;
@@ -1182,7 +1182,7 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	     + (reloc_data.reloc_offset))))
 #define SECTSTART (bfd_signed_vma) (reloc_data.sym_section->output_section->vma \
 				    + reloc_data.sym_section->output_offset)
-
+#define JLI (bfd_signed_vma) (reloc_data.sym_section->output_section->vma)
 #define _SDA_BASE_ (bfd_signed_vma) (reloc_data.sdata_begin_symbol_vma)
 #define TLS_REL (bfd_signed_vma) \
   ((elf_hash_table (info))->tls_sec->output_section->vma)
@@ -1236,7 +1236,7 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 #else
 
 #define PRINT_DEBUG_RELOC_INFO_BEFORE(...)
-#define PRINT_DEBUG_RELOC_INFO_AFTER 
+#define PRINT_DEBUG_RELOC_INFO_AFTER
 
 #endif /* ARC_ENABLE_DEBUG */
 
@@ -1359,6 +1359,7 @@ arc_do_relocation (bfd_byte * contents,
 #undef P
 #undef SECTSTAR
 #undef SECTSTART
+#undef JLI
 #undef _SDA_BASE_
 #undef none
 
@@ -1380,20 +1381,20 @@ arc_do_relocation (bfd_byte * contents,
 			      corresponding to the st_shndx field of each
 			      local symbol.  */
 static bfd_boolean
-elf_arc_relocate_section (bfd *		          output_bfd,
+elf_arc_relocate_section (bfd *			  output_bfd,
 			  struct bfd_link_info *  info,
-			  bfd *		          input_bfd,
-			  asection *	          input_section,
-			  bfd_byte *	          contents,
+			  bfd *			  input_bfd,
+			  asection *		  input_section,
+			  bfd_byte *		  contents,
 			  Elf_Internal_Rela *     relocs,
 			  Elf_Internal_Sym *      local_syms,
-			  asection **	          local_sections)
+			  asection **		  local_sections)
 {
-  Elf_Internal_Shdr *	         symtab_hdr;
+  Elf_Internal_Shdr *		 symtab_hdr;
   struct elf_link_hash_entry **  sym_hashes;
-  Elf_Internal_Rela *	         rel;
-  Elf_Internal_Rela *	         wrel;
-  Elf_Internal_Rela *	         relend;
+  Elf_Internal_Rela *		 rel;
+  Elf_Internal_Rela *		 wrel;
+  Elf_Internal_Rela *		 relend;
   struct elf_link_hash_table *   htab = elf_hash_table (info);
 
   symtab_hdr = &((elf_tdata (input_bfd))->symtab_hdr);
@@ -1403,14 +1404,14 @@ elf_arc_relocate_section (bfd *		          output_bfd,
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; wrel++, rel++)
     {
-      enum elf_arc_reloc_type       r_type;
+      enum elf_arc_reloc_type	    r_type;
       reloc_howto_type *	    howto;
       unsigned long		    r_symndx;
       struct elf_link_hash_entry *  h;
       Elf_Internal_Sym *	    sym;
       asection *		    sec;
       struct elf_link_hash_entry *  h2;
-      const char *                  msg;
+      const char *		    msg;
       bfd_boolean		    unresolved_reloc = FALSE;
 
       struct arc_relocation_data reloc_data =
@@ -1418,7 +1419,7 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 	.reloc_offset = 0,
 	.reloc_addend = 0,
 	.got_offset_value = 0,
-	.sym_value = 0,	
+	.sym_value = 0,
 	.sym_section = NULL,
 	.howto = NULL,
 	.input_section = NULL,
@@ -1716,7 +1717,7 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 	    {
 	      create_got_dynrelocs_for_single_entry (
 		  got_entry_for_type (list,
-		      		arc_got_entry_type_for_reloc (howto)),
+				arc_got_entry_type_for_reloc (howto)),
 		  output_bfd, info, NULL);
 	    }
 	}
@@ -2290,12 +2291,12 @@ elf_arc_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->is_weakalias)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
+      struct elf_link_hash_entry *def = weakdef (h);
+      BFD_ASSERT (def->root.type == bfd_link_hash_defined);
+      h->root.u.def.section = def->root.u.def.section;
+      h->root.u.def.value = def->root.u.def.value;
       return TRUE;
     }
 
@@ -2954,8 +2955,8 @@ elf32_arc_section_from_shdr (bfd *abfd,
 #define elf_backend_obj_attrs_arg_type		elf32_arc_obj_attrs_arg_type
 #undef  elf_backend_obj_attrs_section_type
 #define elf_backend_obj_attrs_section_type	SHT_ARC_ATTRIBUTES
-#define elf_backend_obj_attrs_handle_unknown 	elf32_arc_obj_attrs_handle_unknown
+#define elf_backend_obj_attrs_handle_unknown	elf32_arc_obj_attrs_handle_unknown
 
-#define elf_backend_section_from_shdr  		elf32_arc_section_from_shdr
+#define elf_backend_section_from_shdr		elf32_arc_section_from_shdr
 
 #include "elf32-target.h"

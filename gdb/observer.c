@@ -1,6 +1,6 @@
 /* GDB Notifications to Observers.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -181,11 +181,6 @@ int observer_test_first_observer = 0;
 int observer_test_second_observer = 0;
 int observer_test_third_observer = 0;
 
-/* Provide prototypes to silence -Wmissing-prototypes.  */
-extern void observer_test_first_notification_function (int arg);
-extern void observer_test_second_notification_function (int arg);
-extern void observer_test_third_notification_function (int arg);
-
 void
 observer_test_first_notification_function (int arg)
 {
@@ -203,8 +198,6 @@ observer_test_third_notification_function (int arg)
 {
   observer_test_third_observer++;
 }
-
-extern initialize_file_ftype _initialize_observer; /* -Wmissing-prototypes */
 
 void
 _initialize_observer (void)

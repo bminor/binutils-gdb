@@ -1,6 +1,6 @@
 /* Target-dependent code for Moxie.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -40,10 +40,6 @@
 
 #include "moxie-tdep.h"
 #include <algorithm>
-
-/* Local functions.  */
-
-extern void _initialize_moxie_tdep (void);
 
 /* Use an invalid address value as 'not available' marker.  */
 enum { REG_UNAVAIL = (CORE_ADDR) -1 };
@@ -112,7 +108,7 @@ static void
 moxie_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR regval;
   int len = TYPE_LENGTH (type);
@@ -302,7 +298,7 @@ moxie_process_readu (CORE_ADDR addr, gdb_byte *buf,
 static std::vector<CORE_ADDR>
 moxie_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR addr;
   gdb_byte buf[4];
   uint16_t inst;
@@ -486,7 +482,7 @@ static void
 moxie_extract_return_value (struct type *type, struct regcache *regcache,
 			    gdb_byte *dst)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   ULONGEST tmp;

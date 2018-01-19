@@ -2,7 +2,7 @@
 #source: tls128.s
 #source: tls-hx.s
 #as: --no-underscore --em=criself
-#ld: -m crislinux --shared
+#ld: -m crislinux --shared --hash-style=sysv
 #readelf: -a -x 6 -x 8 -x 5
 
 # A R_CRIS_16_GOT_TPREL in a DSO against a hidden symbol, at an offset
@@ -10,7 +10,7 @@
 # the right contents.
 
 #...
-Relocation section '.rela.dyn' at offset 0x.* contains 1 entries:
+Relocation section '.rela.dyn' at offset 0x.* contains 1 entry:
  Offset     Info    Type            Sym.Value  Sym. Name \+ Addend
 00002290  0000001c R_CRIS_32_TPREL[ ]+80
 

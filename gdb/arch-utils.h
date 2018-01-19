@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -72,18 +72,6 @@ struct bp_manipulation_endian
 #define BP_MANIPULATION_ENDIAN(BREAK_INSN_LITTLE, BREAK_INSN_BIG) \
   bp_manipulation_endian<sizeof (BREAK_INSN_LITTLE),		  \
   BREAK_INSN_LITTLE, BREAK_INSN_BIG>
-
-/* An implementation of gdbarch_displaced_step_copy_insn for
-   processors that don't need to modify the instruction before
-   single-stepping the displaced copy.
-
-   Simply copy gdbarch_max_insn_length (ARCH) bytes from FROM to TO.
-   The closure is an array of that many bytes containing the
-   instruction's bytes, allocated with xmalloc.  */
-extern struct displaced_step_closure *
-  simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
-                                   CORE_ADDR from, CORE_ADDR to,
-                                   struct regcache *regs);
 
 /* Default implementation of gdbarch_displaced_hw_singlestep.  */
 extern int
@@ -267,5 +255,11 @@ extern void default_guess_tracepoint_registers (struct gdbarch *gdbarch,
 						CORE_ADDR addr);
 
 extern int default_print_insn (bfd_vma memaddr, disassemble_info *info);
+
+/* Wrapper to gdbarch_skip_prologue, but doesn't throw exception.  Catch
+   exception thrown from gdbarch_skip_prologue, and return PC.  */
+
+extern CORE_ADDR gdbarch_skip_prologue_noexcept (gdbarch *gdbarch,
+						 CORE_ADDR pc) noexcept;
 
 #endif

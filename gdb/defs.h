@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
 		      for now.  */
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -155,12 +155,6 @@ extern void set_quit_flag (void);
 typedef void (quit_handler_ftype) (void);
 extern quit_handler_ftype *quit_handler;
 
-/* Override the current quit handler.  Sets NEW_QUIT_HANDLER as
-   current quit handler, and installs a cleanup that when run restores
-   the previous quit handler.  */
-struct cleanup *
-  make_cleanup_override_quit_handler (quit_handler_ftype *new_quit_handler);
-
 /* The default quit handler.  Checks whether Ctrl-C was pressed, and
    if so:
 
@@ -203,7 +197,8 @@ extern void quit_serial_event_clear (void);
    several languages.  For that reason, the constants here are sorted
    in the order we'll attempt demangling them.  For example: Rust uses
    C++ mangling, so must come after C++; Ada must come last (see
-   ada_sniff_from_mangled_name).  */
+   ada_sniff_from_mangled_name).  (Keep this order in sync with the
+   'languages' array in language.c.)  */
 
 enum language
   {
@@ -303,7 +298,7 @@ EXTERN_C char *re_comp (const char *);
 
 /* From symfile.c */
 
-extern void symbol_file_command (char *, int);
+extern void symbol_file_command (const char *, int);
 
 /* * Remote targets may wish to use this as their load function.  */
 extern void generic_load (const char *name, int from_tty);
@@ -355,11 +350,11 @@ extern int openp (const char *, int, const char *, int, char **);
 
 extern int source_full_path_of (const char *, char **);
 
-extern void mod_path (char *, char **);
+extern void mod_path (const char *, char **);
 
-extern void add_path (char *, char **, int);
+extern void add_path (const char *, char **, int);
 
-extern void directory_switch (char *, int);
+extern void directory_switch (const char *, int);
 
 extern char *source_path;
 
@@ -398,80 +393,6 @@ enum lval_type
        by its creator.  */
     lval_computed
   };
-
-/* * Control types for commands.  */
-
-enum misc_command_type
-  {
-    ok_command,
-    end_command,
-    else_command,
-    nop_command
-  };
-
-enum command_control_type
-  {
-    simple_control,
-    break_control,
-    continue_control,
-    while_control,
-    if_control,
-    commands_control,
-    python_control,
-    compile_control,
-    guile_control,
-    while_stepping_control,
-    invalid_control
-  };
-
-/* * Structure for saved commands lines (for breakpoints, defined
-   commands, etc).  */
-
-struct command_line
-  {
-    struct command_line *next;
-    char *line;
-    enum command_control_type control_type;
-    union
-      {
-	struct
-	  {
-	    enum compile_i_scope_types scope;
-	    void *scope_data;
-	  }
-	compile;
-      }
-    control_u;
-    /* * The number of elements in body_list.  */
-    int body_count;
-    /* * For composite commands, the nested lists of commands.  For
-       example, for "if" command this will contain the then branch and
-       the else branch, if that is available.  */
-    struct command_line **body_list;
-  };
-
-extern void free_command_lines (struct command_line **);
-
-/* A deleter for command_line that calls free_command_lines.  */
-
-struct command_lines_deleter
-{
-  void operator() (command_line *lines) const
-  {
-    free_command_lines (&lines);
-  }
-};
-
-/* A unique pointer to a command_line.  */
-
-typedef std::unique_ptr<command_line, command_lines_deleter> command_line_up;
-
-extern command_line_up read_command_lines (char *, int, int,
-					   void (*)(char *, void *),
-					   void *);
-extern command_line_up read_command_lines_1 (char * (*) (void), int,
-					     void (*)(char *, void *),
-					     void *);
 
 /* * Parameters of the "info proc" command.  */
 
@@ -739,7 +660,7 @@ extern ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
 extern void (*deprecated_attach_hook) (void);
 extern void (*deprecated_detach_hook) (void);
 extern void (*deprecated_call_command_hook) (struct cmd_list_element * c,
-					     char *cmd, int from_tty);
+					     const char *cmd, int from_tty);
 
 extern int (*deprecated_ui_load_progress_hook) (const char *section,
 						unsigned long num);

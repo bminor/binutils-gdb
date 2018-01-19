@@ -1,5 +1,5 @@
 /* Shared library declarations for GDB, the GNU Debugger.
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -121,11 +121,8 @@ struct target_so_ops
     struct so_list *(*current_sos) (void);
 
     /* Find, open, and read the symbols for the main executable.  If
-       FROM_TTYP dereferences to a non-zero integer, allow messages to
-       be printed.  This parameter is a pointer rather than an int
-       because open_symbol_file_object is called via catch_errors and
-       catch_errors requires a pointer argument.  */
-    int (*open_symbol_file_object) (void *from_ttyp);
+       FROM_TTY is non-zero, allow messages to be printed.  */
+    int (*open_symbol_file_object) (int from_ttyp);
 
     /* Determine if PC lies in the dynamic symbol resolution code of
        the run time loader.  */
@@ -178,6 +175,18 @@ struct target_so_ops
 
 /* Free the memory associated with a (so_list *).  */
 void free_so (struct so_list *so);
+
+/* A deleter that calls free_so.  */
+struct so_deleter
+{
+  void operator() (struct so_list *so) const
+  {
+    free_so (so);
+  }
+};
+
+/* A unique pointer to a so_list.  */
+typedef std::unique_ptr<so_list, so_deleter> so_list_up;
 
 /* Return address of first so_list entry in master shared object list.  */
 struct so_list *master_so_list (void);

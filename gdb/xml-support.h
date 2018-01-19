@@ -1,6 +1,6 @@
 /* Helper routines for parsing XML using Expat.
 
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,7 +52,8 @@ extern const char *xml_builtin[][2];
 
 /* Callback to fetch a new XML file, based on the provided HREF.  */
 
-typedef char *(*xml_fetch_another) (const char *href, void *baton);
+typedef gdb::unique_xmalloc_ptr<char> (*xml_fetch_another) (const char *href,
+							    void *baton);
 
 /* Append the expansion of TEXT after processing <xi:include> tags in
    RESULT.  FETCHER will be called (with FETCHER_BATON) to retrieve
@@ -73,11 +74,13 @@ bool xml_process_xincludes (std::string &result,
 
 struct gdb_xml_value
 {
+  gdb_xml_value (const char *name_, void *value_)
+  : name (name_), value (value_)
+  {}
+
   const char *name;
-  void *value;
+  gdb::unique_xmalloc_ptr<void> value;
 };
-typedef struct gdb_xml_value gdb_xml_value_s;
-DEF_VEC_O(gdb_xml_value_s);
 
 /* The type of an attribute handler.
 
@@ -145,7 +148,7 @@ enum gdb_xml_element_flag
 
 typedef void (gdb_xml_element_start_handler)
      (struct gdb_xml_parser *parser, const struct gdb_xml_element *element,
-      void *user_data, VEC(gdb_xml_value_s) *attributes);
+      void *user_data, std::vector<gdb_xml_value> &attributes);
 
 /* A handler called at the end of an element.
 
@@ -198,8 +201,8 @@ void gdb_xml_error (struct gdb_xml_parser *parser, const char *format, ...)
 /* Find the attribute named NAME in the set of parsed attributes
    ATTRIBUTES.  Returns NULL if not found.  */
 
-struct gdb_xml_value *xml_find_attribute (VEC(gdb_xml_value_s) *attributes,
-					  const char *name);
+struct gdb_xml_value *xml_find_attribute
+  (std::vector<gdb_xml_value> &attributes, const char *name);
 
 /* Parse an integer attribute into a ULONGEST.  */
 
@@ -230,7 +233,7 @@ ULONGEST gdb_xml_parse_ulongest (struct gdb_xml_parser *parser,
 /* Open FILENAME, read all its text into memory, close it, and return
    the text.  If something goes wrong, return NULL and warn.  */
 
-extern char *xml_fetch_content_from_file (const char *filename,
-                                          void *baton);
+extern gdb::unique_xmalloc_ptr<char> xml_fetch_content_from_file
+    (const char *filename, void *baton);
 
 #endif

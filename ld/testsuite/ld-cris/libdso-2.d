@@ -1,7 +1,7 @@
 #source: dso-1.s
 #source: dso-2.s
 #as: --pic --no-underscore --em=criself
-#ld: --shared -m crislinux --version-script $srcdir/$subdir/hide1
+#ld: --shared -m crislinux --hash-style=sysv --version-script $srcdir/$subdir/hide1
 #readelf: -S -s -r
 
 # Use "dsofn" from dso-1 in a GOTPLT reloc, but hide it in a
@@ -25,7 +25,7 @@ There are 13 section headers.*
  +\[11\] \.strtab +STRTAB +.*
  +\[12\] \.shstrtab +STRTAB +.*
 #...
-Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 1 entry:
 #...
 00002[12][0-9a-f][048c] +0000000c R_CRIS_RELATIVE +150
 #...

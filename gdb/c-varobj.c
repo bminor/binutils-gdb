@@ -1,6 +1,6 @@
 /* varobj support for C and C++.
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ static void cplus_class_num_children (struct type *type, int children[3]);
    This has already been determined by *_describe_child. The easiest
    thing to do is to compare the child's name with ANONYMOUS_*_NAME.  */
 
-int
+bool
 varobj_is_anonymous_child (const struct varobj *child)
 {
   return (child->name == ANONYMOUS_STRUCT_NAME
@@ -131,14 +131,14 @@ adjust_value_for_child_access (struct value **value,
 /* Is VAR a path expression parent, i.e., can it be used to construct
    a valid path expression?  */
 
-static int
+static bool
 c_is_path_expr_parent (const struct varobj *var)
 {
   struct type *type;
 
   /* "Fake" children are not path_expr parents.  */
   if (CPLUS_FAKE_CHILD (var))
-    return 0;
+    return false;
 
   type = varobj_get_gdb_type (var);
 
@@ -172,10 +172,10 @@ c_is_path_expr_parent (const struct varobj *var)
 	    }
 	}
 
-      return 0;
+      return false;
     }
 
-  return 1;
+  return true;
 }
 
 /* C */

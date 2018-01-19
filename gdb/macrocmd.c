@@ -1,5 +1,5 @@
 /* C preprocessor macro expansion commands for GDB.
-   Copyright (C) 2002-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2018 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of GDB.
@@ -33,7 +33,7 @@
 static struct cmd_list_element *macrolist;
 
 static void
-macro_command (char *arg, int from_tty)
+macro_command (const char *arg, int from_tty)
 {
   printf_unfiltered
     ("\"macro\" must be followed by the name of a macro command.\n");
@@ -53,7 +53,7 @@ macro_inform_no_debuginfo (void)
 }
 
 static void
-macro_expand_command (char *exp, int from_tty)
+macro_expand_command (const char *exp, int from_tty)
 {
   struct macro_scope *ms = NULL;
   char *expanded = NULL;
@@ -88,7 +88,7 @@ macro_expand_command (char *exp, int from_tty)
 
 
 static void
-macro_expand_once_command (char *exp, int from_tty)
+macro_expand_once_command (const char *exp, int from_tty)
 {
   struct macro_scope *ms = NULL;
   char *expanded = NULL;
@@ -188,19 +188,19 @@ print_macro_definition (const char *name,
 
 /* The implementation of the `info macro' command.  */
 static void
-info_macro_command (char *args, int from_tty)
+info_macro_command (const char *args, int from_tty)
 {
   struct macro_scope *ms = NULL;
   struct cleanup *cleanup_chain;
-  char *name;
+  const char *name;
   int show_all_macros_named = 0;
-  char *arg_start = args;
+  const char *arg_start = args;
   int processing_args = 1;
 
   while (processing_args
 	 && arg_start && *arg_start == '-' && *arg_start != '\0')
     {
-      char *p = skip_to_space (arg_start);
+      const char *p = skip_to_space (arg_start);
 
       if (strncmp (arg_start, "-a", p - arg_start) == 0
 	  || strncmp (arg_start, "-all", p - arg_start) == 0)
@@ -212,10 +212,9 @@ info_macro_command (char *args, int from_tty)
 	processing_args = 0;
       else
 	{
-	  /* Relies on modified 'args' not making it in to history */
-	  *p = '\0';
-	  error (_("Unrecognized option '%s' to info macro command.  "
-		   "Try \"help info macro\"."), arg_start);
+	  error (_("Unrecognized option '%.*s' to info macro command.  "
+		   "Try \"help info macro\"."),
+		 int (p - arg_start), arg_start);
 	}
 
         arg_start = skip_spaces (p);
@@ -270,7 +269,7 @@ info_macro_command (char *args, int from_tty)
 
 /* Implementation of the "info macros" command. */
 static void
-info_macros_command (char *args, int from_tty)
+info_macros_command (const char *args, int from_tty)
 {
   struct macro_scope *ms = NULL;
   struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &ms);
@@ -279,11 +278,11 @@ info_macros_command (char *args, int from_tty)
     ms = default_macro_scope ();
   else
     {
-      struct symtabs_and_lines sals =
-	decode_line_with_current_source (args, 0);
+      std::vector<symtab_and_line> sals
+	= decode_line_with_current_source (args, 0);
 
-      if (sals.nelts)
-        ms = sal_macro_scope (sals.sals[0]);
+      if (!sals.empty ())
+	ms = sal_macro_scope (sals[0]);
     }
 
   if (! ms || ! ms->file || ! ms->file->table)
@@ -298,7 +297,7 @@ info_macros_command (char *args, int from_tty)
 /* User-defined macros.  */
 
 static void
-skip_ws (char **expp)
+skip_ws (const char **expp)
 {
   while (macro_is_whitespace (**expp))
     ++*expp;
@@ -312,10 +311,10 @@ skip_ws (char **expp)
    parameters.  */
 
 static char *
-extract_identifier (char **expp, int is_parameter)
+extract_identifier (const char **expp, int is_parameter)
 {
   char *result;
-  char *p = *expp;
+  const char *p = *expp;
   unsigned int len;
 
   if (is_parameter && startswith (p, "..."))
@@ -358,7 +357,7 @@ free_macro_definition_ptr (void *ptr)
 }
 
 static void
-macro_define_command (char *exp, int from_tty)
+macro_define_command (const char *exp, int from_tty)
 {
   struct macro_definition new_macro;
   char *name = NULL;
@@ -440,7 +439,7 @@ macro_define_command (char *exp, int from_tty)
 
 
 static void
-macro_undef_command (char *exp, int from_tty)
+macro_undef_command (const char *exp, int from_tty)
 {
   char *name;
 
@@ -476,15 +475,12 @@ print_one_macro (const char *name, const struct macro_definition *macro,
 
 
 static void
-macro_list_command (char *exp, int from_tty)
+macro_list_command (const char *exp, int from_tty)
 {
   macro_for_each (macro_user_macros, print_one_macro);
 }
 
-
 /* Initializing the `macrocmd' module.  */
-
-extern initialize_file_ftype _initialize_macrocmd; /* -Wmissing-prototypes */
 
 void
 _initialize_macrocmd (void)

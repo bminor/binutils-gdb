@@ -1,7 +1,7 @@
 #name: FRV TLS relocs with addends, dynamic linking
 #source: tls-2.s
 #objdump: -DR -j .text -j .got -j .plt
-#ld: tmpdir/tls-1-dep.so
+#ld: --hash-style=sysv tmpdir/tls-1-dep.so
 
 .*:     file format elf.*frv.*
 

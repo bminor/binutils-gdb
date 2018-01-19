@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 Free Software Foundation, Inc.
+// Copyright (C) 2016-2018 Free Software Foundation, Inc.
 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -94,6 +94,8 @@ fn main () {
     let f = "hi bob";
     let g = b"hi bob";
     let h = b'9';
+
+    let fslice = &f[3..];
 
     let i = ["whatever"; 8];
 

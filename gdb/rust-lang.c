@@ -1,6 +1,6 @@
 /* Rust language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2016-2017 Free Software Foundation, Inc.
+   Copyright (C) 2016-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,13 +29,12 @@
 #include "gdbarch.h"
 #include "infcall.h"
 #include "objfiles.h"
+#include "psymtab.h"
 #include "rust-lang.h"
 #include "valprint.h"
 #include "varobj.h"
 #include <string>
 #include <vector>
-
-extern initialize_file_ftype _initialize_rust_language;
 
 /* Returns the last segment of a Rust path like foo::bar::baz.  Will
    not handle cases where the last segment contains generics.  This
@@ -342,7 +341,8 @@ rust_slice_type_p (struct type *type)
 {
   return (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	  && TYPE_TAG_NAME (type) != NULL
-	  && strncmp (TYPE_TAG_NAME (type), "&[", 2) == 0);
+	  && (strncmp (TYPE_TAG_NAME (type), "&[", 2) == 0
+	      || strcmp (TYPE_TAG_NAME (type), "&str") == 0));
 }
 
 /* Return true if TYPE is a range type, otherwise false.  */
@@ -395,6 +395,39 @@ rust_chartype_p (struct type *type)
   return (TYPE_CODE (type) == TYPE_CODE_CHAR
 	  && TYPE_LENGTH (type) == 4
 	  && TYPE_UNSIGNED (type));
+}
+
+/* If VALUE represents a trait object pointer, return the underlying
+   pointer with the correct (i.e., runtime) type.  Otherwise, return
+   NULL.  */
+
+static struct value *
+rust_get_trait_object_pointer (struct value *value)
+{
+  struct type *type = check_typedef (value_type (value));
+
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT || TYPE_NFIELDS (type) != 2)
+    return NULL;
+
+  /* Try to be a bit resilient if the ABI changes.  */
+  int vtable_field = 0;
+  for (int i = 0; i < 2; ++i)
+    {
+      if (strcmp (TYPE_FIELD_NAME (type, i), "vtable") == 0)
+	vtable_field = i;
+      else if (strcmp (TYPE_FIELD_NAME (type, i), "pointer") != 0)
+	return NULL;
+    }
+
+  CORE_ADDR vtable = value_as_address (value_field (value, vtable_field));
+  struct symbol *symbol = find_symbol_at_address (vtable);
+  if (symbol == NULL || symbol->subclass != SYMBOL_RUST_VTABLE)
+    return NULL;
+
+  struct rust_vtable_symbol *vtable_sym
+    = static_cast<struct rust_vtable_symbol *> (symbol);
+  struct type *pointer_type = lookup_pointer_type (vtable_sym->concrete_type);
+  return value_cast (pointer_type, value_field (value, 1 - vtable_field));
 }
 
 
@@ -468,6 +501,21 @@ rust_printstr (struct ui_file *stream, struct type *type,
 
 
 
+/* Helper function to print a string slice.  */
+
+static void
+rust_val_print_str (struct ui_file *stream, struct value *val,
+		    const struct value_print_options *options)
+{
+  struct value *base = value_struct_elt (&val, NULL, "data_ptr", NULL,
+					 "slice");
+  struct value *len = value_struct_elt (&val, NULL, "length", NULL, "slice");
+
+  val_print_string (TYPE_TARGET_TYPE (value_type (base)), "UTF-8",
+		    value_as_address (base), value_as_long (len), stream,
+		    options);
+}
+
 /* rust_print_type branch for structs and untagged unions.  */
 
 static void
@@ -478,6 +526,13 @@ val_print_struct (struct type *type, int embedded_offset,
 {
   int i;
   int first_field;
+
+  if (rust_slice_type_p (type) && strcmp (TYPE_NAME (type), "&str") == 0)
+    {
+      rust_val_print_str (stream, val, options);
+      return;
+    }
+
   bool is_tuple = rust_tuple_type_p (type);
   bool is_tuple_struct = !is_tuple && rust_tuple_struct_type_p (type);
   struct value_print_options opts;
@@ -793,8 +848,6 @@ rust_print_struct_def (struct type *type, const char *varstring,
 
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     {
-      const char *name;
-
       QUIT;
       if (field_is_static (&TYPE_FIELD (type, i)))
 	continue;
@@ -942,7 +995,7 @@ rust_print_type (struct type *type, const char *varstring,
     case TYPE_CODE_UNION:
       {
 	/* ADT enums.  */
-	int i, len = 0;
+	int i;
 	/* Skip the discriminant field.  */
 	int skip_to = 1;
 
@@ -1292,7 +1345,7 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     result = value_zero (TYPE_TARGET_TYPE (fn_type), not_lval);
   else
-    result = call_function_by_hand (function, num_args + 1, args.data ());
+    result = call_function_by_hand (function, NULL, num_args + 1, args.data ());
   return result;
 }
 
@@ -1457,17 +1510,53 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
   else
     low = value_as_long (rhs);
 
+  struct type *type = check_typedef (value_type (lhs));
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
-      struct type *type = check_typedef (value_type (lhs));
+      struct type *base_type = nullptr;
+      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	base_type = TYPE_TARGET_TYPE (type);
+      else if (rust_slice_type_p (type))
+	{
+	  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+	    {
+	      if (strcmp (TYPE_FIELD_NAME (type, i), "data_ptr") == 0)
+		{
+		  base_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, i));
+		  break;
+		}
+	    }
+	  if (base_type == nullptr)
+	    error (_("Could not find 'data_ptr' in slice type"));
+	}
+      else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+	base_type = TYPE_TARGET_TYPE (type);
+      else
+	error (_("Cannot subscript non-array type"));
 
-      result = value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (lhs));
+      struct type *new_type;
+      if (want_slice)
+	{
+	  if (rust_slice_type_p (type))
+	    new_type = type;
+	  else
+	    {
+	      struct type *usize
+		= language_lookup_primitive_type (exp->language_defn,
+						  exp->gdbarch,
+						  "usize");
+	      new_type = rust_slice_type ("&[*gdb*]", base_type, usize);
+	    }
+	}
+      else
+	new_type = base_type;
+
+      return value_zero (new_type, VALUE_LVAL (lhs));
     }
   else
     {
       LONGEST low_bound;
       struct value *base;
-      struct type *type = check_typedef (value_type (lhs));
 
       if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
 	{
@@ -1527,8 +1616,11 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
 	  usize = language_lookup_primitive_type (exp->language_defn,
 						  exp->gdbarch,
 						  "usize");
-	  slice = rust_slice_type ("&[*gdb*]", value_type (result),
-				   usize);
+	  const char *new_name = ((type != nullptr
+				   && rust_slice_type_p (type))
+				  ? TYPE_NAME (type) : "&[*gdb*]");
+
+	  slice = rust_slice_type (new_name, value_type (result), usize);
 
 	  addrval = value_allocate_space_in_inferior (TYPE_LENGTH (slice));
 	  addr = value_as_long (addrval);
@@ -1557,6 +1649,25 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
   switch (exp->elts[*pos].opcode)
     {
+    case UNOP_IND:
+      {
+	if (noside != EVAL_NORMAL)
+	  result = evaluate_subexp_standard (expect_type, exp, pos, noside);
+	else
+	  {
+	    ++*pos;
+	    struct value *value = evaluate_subexp (expect_type, exp, pos,
+						   noside);
+
+	    struct value *trait_ptr = rust_get_trait_object_pointer (value);
+	    if (trait_ptr != NULL)
+	      value = trait_ptr;
+
+	    result = value_ind (value);
+	  }
+      }
+      break;
+
     case UNOP_COMPLEMENT:
       {
 	struct value *value;
@@ -1667,7 +1778,6 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
 	if (noside == EVAL_NORMAL)
 	  {
-	    CORE_ADDR addr;
 	    int i;
 	    std::vector<struct value *> eltvec (copies);
 
@@ -2150,7 +2260,7 @@ static const char *rust_extensions[] =
   ".rs", NULL
 };
 
-static const struct language_defn rust_language_defn =
+extern const struct language_defn rust_language_defn =
 {
   "rust",
   "Rust",
@@ -2184,22 +2294,17 @@ static const struct language_defn rust_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   rust_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
   rust_watch_location_expression,
-  NULL,				/* la_get_symbol_name_cmp */
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
   LANG_MAGIC
 };
-
-void
-_initialize_rust_language (void)
-{
-  add_language (&rust_language_defn);
-}

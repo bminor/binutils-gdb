@@ -1,6 +1,6 @@
 #source: expdyn2.s
 #as: --pic --no-underscore --em=criself -I$srcdir/$subdir
-#ld: --shared -m crislinux --version-script $srcdir/$subdir/expalltst3
+#ld: --shared -m crislinux --version-script $srcdir/$subdir/expalltst3 --hash-style=sysv
 #objdump: -s -T
 
 # A DSO that has two versioned symbols, each with a weak alias.

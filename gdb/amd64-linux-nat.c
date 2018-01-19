@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux x86-64.
 
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -134,7 +134,7 @@ static void
 amd64_linux_fetch_inferior_registers (struct target_ops *ops,
 				      struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
@@ -213,7 +213,7 @@ static void
 amd64_linux_store_inferior_registers (struct target_ops *ops,
 				      struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
@@ -395,9 +395,6 @@ amd64_linux_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
   else
     return 0;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_amd64_linux_nat (void);
 
 void
 _initialize_amd64_linux_nat (void)

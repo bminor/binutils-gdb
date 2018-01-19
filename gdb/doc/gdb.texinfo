@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright (C) 1988-2017 Free Software Foundation, Inc.
+@c Copyright (C) 1988-2018 Free Software Foundation, Inc.
 @c
 @c %**start of header
 @c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
@@ -50,7 +50,7 @@
 
 @copying
 @c man begin COPYRIGHT
-Copyright @copyright{} 1988-2017 Free Software Foundation, Inc.
+Copyright @copyright{} 1988-2018 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -120,7 +120,7 @@ This is the @value{EDITION} Edition, for @value{GDBN}
 @end ifset
 Version @value{GDBVN}.
 
-Copyright (C) 1988-2017 Free Software Foundation, Inc.
+Copyright (C) 1988-2018 Free Software Foundation, Inc.
 
 This edition of the GDB manual is dedicated to the memory of Fred
 Fish.  Fred was a long-standing contributor to GDB and to Free
@@ -545,6 +545,11 @@ Initial support for the FreeBSD/mips target and native configuration
 was developed by SRI International and the University of Cambridge
 Computer Laboratory under DARPA/AFRL contract FA8750-10-C-0237
 ("CTSRD"), as part of the DARPA CRASH research programme.
+
+The original port to the OpenRISC 1000 is believed to be due to
+Alessandro Forin and Per Bothner.  More recent ports have been the work
+of Jeremy Bennett, Franck Jullien, Stefan Wallentowitz and
+Stafford Horne.
 
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
@@ -1037,6 +1042,16 @@ Read each symbol file's entire symbol table immediately, rather than
 the default, which is to read it incrementally as it is needed.
 This makes startup slower, but makes future operations faster.
 
+@item --readnever
+@anchor{--readnever}
+@cindex @code{--readnever}, command-line option
+Do not read each symbol file's symbolic debug information.  This makes
+startup faster but at the expense of not being able to perform
+symbolic debugging.  DWARF unwind information is also not read,
+meaning backtraces may become incomplete or inaccurate.  One use of
+this is when a user simply wants to do the following sequence: attach,
+dump core, detach.  Loading the debugging information in this case is
+an unnecessary cause of delay.
 @end table
 
 @node Mode Options
@@ -1638,39 +1653,56 @@ its notion of a word.  To permit word completion to work in this
 situation, you may enclose words in @code{'} (single quote marks) in
 @value{GDBN} commands.
 
-The most likely situation where you might need this is in typing the
-name of a C@t{++} function.  This is because C@t{++} allows function
-overloading (multiple definitions of the same function, distinguished
-by argument type).  For example, when you want to set a breakpoint you
-may need to distinguish whether you mean the version of @code{name}
-that takes an @code{int} parameter, @code{name(int)}, or the version
-that takes a @code{float} parameter, @code{name(float)}.  To use the
-word-completion facilities in this situation, type a single quote
+A likely situation where you might need this is in typing an
+expression that involves a C@t{++} symbol name with template
+parameters.  This is because when completing expressions, GDB treats
+the @samp{<} character as word delimiter, assuming that it's the
+less-than comparison operator (@pxref{C Operators, , C and C@t{++}
+Operators}).
+
+For example, when you want to call a C@t{++} template function
+interactively using the @code{print} or @code{call} commands, you may
+need to distinguish whether you mean the version of @code{name} that
+was specialized for @code{int}, @code{name<int>()}, or the version
+that was specialized for @code{float}, @code{name<float>()}.  To use
+the word-completion facilities in this situation, type a single quote
 @code{'} at the beginning of the function name.  This alerts
 @value{GDBN} that it may need to consider more information than usual
 when you press @key{TAB} or @kbd{M-?} to request word completion:
 
 @smallexample
-(@value{GDBP}) b 'bubble( @kbd{M-?}
-bubble(double,double)    bubble(int,int)
-(@value{GDBP}) b 'bubble(
+(@value{GDBP}) p 'func< @kbd{M-?}
+func<int>()    func<float>()
+(@value{GDBP}) p 'func<
 @end smallexample
 
-In some cases, @value{GDBN} can tell that completing a name requires using
-quotes.  When this happens, @value{GDBN} inserts the quote for you (while
-completing as much as it can) if you do not type the quote in the first
-place:
+When setting breakpoints however (@pxref{Specify Location}), you don't
+usually need to type a quote before the function name, because
+@value{GDBN} understands that you want to set a breakpoint on a
+function:
 
 @smallexample
-(@value{GDBP}) b bub @key{TAB}
-@exdent @value{GDBN} alters your input line to the following, and rings a bell:
-(@value{GDBP}) b 'bubble(
+(@value{GDBP}) b func< @kbd{M-?}
+func<int>()    func<float>()
+(@value{GDBP}) b func<
 @end smallexample
 
-@noindent
-In general, @value{GDBN} can tell that a quote is needed (and inserts it) if
-you have not yet started typing the argument list when you ask for
-completion on an overloaded symbol.
+This is true even in the case of typing the name of C@t{++} overloaded
+functions (multiple definitions of the same function, distinguished by
+argument type).  For example, when you want to set a breakpoint you
+don't need to distinguish whether you mean the version of @code{name}
+that takes an @code{int} parameter, @code{name(int)}, or the version
+that takes a @code{float} parameter, @code{name(float)}.
+
+@smallexample
+(@value{GDBP}) b bubble( @kbd{M-?}
+bubble(int)    bubble(double)
+(@value{GDBP}) b bubble(dou @kbd{M-?}
+bubble(double)
+@end smallexample
+
+See @ref{quoting names} for a description of other scenarios that
+require quoting.
 
 For more information about overloaded functions, see @ref{C Plus Plus
 Expressions, ,C@t{++} Expressions}.  You can use the command @code{set
@@ -2057,9 +2089,12 @@ environment} to change parts of the environment that affect
 your program.  @xref{Environment, ,Your Program's Environment}.
 
 @item The @emph{working directory.}
-Your program inherits its working directory from @value{GDBN}.  You can set
-the @value{GDBN} working directory with the @code{cd} command in @value{GDBN}.
-@xref{Working Directory, ,Your Program's Working Directory}.
+You can set your program's working directory with the command
+@kbd{set cwd}.  If you do not set any working directory with this
+command, your program will inherit @value{GDBN}'s working directory if
+native debugging, or the remote server's working directory if remote
+debugging.  @xref{Working Directory, ,Your Program's Working
+Directory}.
 
 @item The @emph{standard input and output.}
 Your program normally uses the same device for standard input and
@@ -2117,10 +2152,20 @@ reused if no argument is provided during subsequent calls to
 @samp{start} or @samp{run}.
 
 It is sometimes necessary to debug the program during elaboration.  In
-these cases, using the @code{start} command would stop the execution of
-your program too late, as the program would have already completed the
-elaboration phase.  Under these circumstances, insert breakpoints in your
-elaboration code before running your program.
+these cases, using the @code{start} command would stop the execution
+of your program too late, as the program would have already completed
+the elaboration phase.  Under these circumstances, either insert
+breakpoints in your elaboration code before running your program or
+use the @code{starti} command.
+
+@kindex starti
+@item starti
+@cindex run to first instruction
+The @samp{starti} command does the equivalent of setting a temporary
+breakpoint at the first instruction of a program's execution and then
+invoking the @samp{run} command.  For programs containing an
+elaboration phase, the @code{starti} command will stop execution at
+the start of the elaboration phase.
 
 @anchor{set exec-wrapper}
 @kindex set exec-wrapper
@@ -2157,7 +2202,7 @@ This command is available when debugging locally on most targets, excluding
 @item set startup-with-shell
 @itemx set startup-with-shell on
 @itemx set startup-with-shell off
-@itemx show set startup-with-shell
+@itemx show startup-with-shell
 On Unix systems, by default, if a shell is available on your target,
 @value{GDBN}) uses it to start your program.  Arguments of the
 @code{run} command are passed to the shell, which does variable
@@ -2363,6 +2408,7 @@ print the names and values of all environment variables to be given to
 your program.  You can abbreviate @code{environment} as @code{env}.
 
 @kindex set environment
+@anchor{set environment}
 @item set environment @var{varname} @r{[}=@var{value}@r{]}
 Set environment variable @var{varname} to @var{value}.  The value
 changes for your program (and the shell @value{GDBN} uses to launch
@@ -2391,12 +2437,21 @@ If necessary, you can avoid that by using the @samp{env} program as a
 wrapper instead of using @code{set environment}.  @xref{set
 exec-wrapper}, for an example doing just that.
 
+Environment variables that are set by the user are also transmitted to
+@command{gdbserver} to be used when starting the remote inferior.
+@pxref{QEnvironmentHexEncoded}.
+
 @kindex unset environment
+@anchor{unset environment}
 @item unset environment @var{varname}
 Remove variable @var{varname} from the environment to be passed to your
 program.  This is different from @samp{set env @var{varname} =};
 @code{unset environment} removes the variable from the environment,
 rather than assigning it an empty value.
+
+Environment variables that are unset by the user are also unset on
+@command{gdbserver} when starting the remote inferior.
+@pxref{QEnvironmentUnset}.
 @end table
 
 @emph{Warning:} On Unix systems, @value{GDBN} runs your program using
@@ -2414,22 +2469,52 @@ variables to files that are only run when you sign on, such as
 @section Your Program's Working Directory
 
 @cindex working directory (of your program)
-Each time you start your program with @code{run}, it inherits its
-working directory from the current working directory of @value{GDBN}.
-The @value{GDBN} working directory is initially whatever it inherited
-from its parent process (typically the shell), but you can specify a new
-working directory in @value{GDBN} with the @code{cd} command.
-
-The @value{GDBN} working directory also serves as a default for the commands
-that specify files for @value{GDBN} to operate on.  @xref{Files, ,Commands to
-Specify Files}.
+Each time you start your program with @code{run}, the inferior will be
+initialized with the current working directory specified by the
+@kbd{set cwd} command.  If no directory has been specified by this
+command, then the inferior will inherit @value{GDBN}'s current working
+directory as its working directory if native debugging, or it will
+inherit the remote server's current working directory if remote
+debugging.
 
 @table @code
+@kindex set cwd
+@cindex change inferior's working directory
+@anchor{set cwd command}
+@item set cwd @r{[}@var{directory}@r{]}
+Set the inferior's working directory to @var{directory}, which will be
+@code{glob}-expanded in order to resolve tildes (@file{~}).  If no
+argument has been specified, the command clears the setting and resets
+it to an empty state.  This setting has no effect on @value{GDBN}'s
+working directory, and it only takes effect the next time you start
+the inferior.  The @file{~} in @var{directory} is a short for the
+@dfn{home directory}, usually pointed to by the @env{HOME} environment
+variable.  On MS-Windows, if @env{HOME} is not defined, @value{GDBN}
+uses the concatenation of @env{HOMEDRIVE} and @env{HOMEPATH} as
+fallback.
+
+You can also change @value{GDBN}'s current working directory by using
+the @code{cd} command.
+@xref{cd command}
+
+@kindex show cwd
+@cindex show inferior's working directory
+@item show cwd
+Show the inferior's working directory.  If no directory has been
+specified by @kbd{set cwd}, then the default inferior's working
+directory is the same as @value{GDBN}'s working directory.
+
 @kindex cd
-@cindex change working directory
+@cindex change @value{GDBN}'s working directory
+@anchor{cd command}
 @item cd @r{[}@var{directory}@r{]}
 Set the @value{GDBN} working directory to @var{directory}.  If not
 given, @var{directory} uses @file{'~'}.
+
+The @value{GDBN} working directory serves as a default for the
+commands that specify files for @value{GDBN} to operate on.
+@xref{Files, ,Commands to Specify Files}.
+@xref{set cwd command}
 
 @kindex pwd
 @item pwd
@@ -2438,9 +2523,9 @@ Print the @value{GDBN} working directory.
 
 It is generally impossible to find the current working directory of
 the process being debugged (since a program can change its directory
-during its run).  If you work on a system where @value{GDBN} is
-configured with the @file{/proc} support, you can use the @code{info
-proc} command (@pxref{SVR4 Process Information}) to find out the
+during its run).  If you work on a system where @value{GDBN} supports
+the @code{info proc} command (@pxref{Process Information}), you can
+use the @code{info proc} command to find out the
 current working directory of the debuggee.
 
 @node Input/Output
@@ -3874,15 +3959,17 @@ Num     Type           Disp Enb  Address    What
 1.2                         y    0x080486ca in void foo<double>() at t.cc:8
 @end smallexample
 
-Each location can be individually enabled or disabled by passing
+You cannot delete the individual locations from a breakpoint.  However,
+each location can be individually enabled or disabled by passing
 @var{breakpoint-number}.@var{location-number} as argument to the
-@code{enable} and @code{disable} commands.  Note that you cannot
-delete the individual locations from the list, you can only delete the
-entire list of locations that belong to their parent breakpoint (with
-the @kbd{delete @var{num}} command, where @var{num} is the number of
-the parent breakpoint, 1 in the above example).  Disabling or enabling
-the parent breakpoint (@pxref{Disabling}) affects all of the locations
-that belong to that breakpoint.
+@code{enable} and @code{disable} commands.  It's also possible to
+@code{enable} and @code{disable} a range of @var{location-number}
+locations using a @var{breakpoint-number} and two @var{location-number}s,
+in increasing order, separated by a hyphen, like
+@kbd{@var{breakpoint-number}.@var{location-number1}-@var{location-number2}},
+in which case @value{GDBN} acts on all the locations in the range (inclusive).
+Disabling or enabling the parent breakpoint (@pxref{Disabling}) affects
+all of the locations that belong to that breakpoint.
 
 @cindex pending breakpoints
 It's quite common to have a breakpoint inside a shared library.
@@ -4370,6 +4457,26 @@ rather than the user-defined one.  For instance, assuming an exception
 called @code{Constraint_Error} is defined in package @code{Pck}, then
 the command to use to catch such exceptions is @kbd{catch exception
 Pck.Constraint_Error}.
+
+@item handlers
+@kindex catch handlers
+@cindex Ada exception handlers catching
+@cindex catch Ada exceptions when handled
+An Ada exception being handled.  If an exception name is
+specified at the end of the command
+ (eg @kbd{catch handlers Program_Error}), the debugger will stop
+only when this specific exception is handled.
+Otherwise, the debugger stops execution when any Ada exception is handled.
+
+When inserting a handlers catchpoint on a user-defined
+exception whose name is identical to one of the exceptions
+defined by the language, the fully qualified name must be used
+as the exception name.  Otherwise, @value{GDBN} will assume that it
+should stop on the pre-defined exception rather than the
+user-defined one.  For instance, assuming an exception called
+ @code{Constraint_Error} is defined in package @code{Pck}, then the
+command to use to catch such exceptions handling is
+@kbd{catch handlers Pck.Constraint_Error}.
 
 @item exception unhandled
 @kindex catch exception unhandled
@@ -7846,6 +7953,22 @@ name of @file{/build/trunk/gcc/expr.c}, but not
 Specifies the line that begins the body of the function @var{function}.
 For example, in C, this is the line with the open brace.
 
+By default, in C@t{++} and Ada, @var{function} is interpreted as
+specifying all functions named @var{function} in all scopes.  For
+C@t{++}, this means in all namespaces and classes.  For Ada, this
+means in all packages.
+
+For example, assuming a program with C@t{++} symbols named
+@code{A::B::func} and @code{B::func}, both commands @w{@kbd{break
+func}} and @w{@kbd{break B::func}} set a breakpoint on both symbols.
+
+Commands that accept a linespec let you override this with the
+@code{-qualified} option.  For example, @w{@kbd{break -qualified
+func}} sets a breakpoint on a free-function named @code{func} ignoring
+any C@t{++} class methods and namespace functions called @code{func}.
+
+@xref{Explicit Locations}.
+
 @item @var{function}:@var{label}
 Specifies the line where @var{label} appears in @var{function}.
 
@@ -7910,6 +8033,31 @@ on function locations unmodified by other options (such as @code{-label}
 or @code{-line}) refer to the line that begins the body of the function.
 In C, for example, this is the line with the open brace.
 
+By default, in C@t{++} and Ada, @var{function} is interpreted as
+specifying all functions named @var{function} in all scopes.  For
+C@t{++}, this means in all namespaces and classes.  For Ada, this
+means in all packages.
+
+For example, assuming a program with C@t{++} symbols named
+@code{A::B::func} and @code{B::func}, both commands @w{@kbd{break
+-function func}} and @w{@kbd{break -function B::func}} set a
+breakpoint on both symbols.
+
+You can use the @kbd{-qualified} flag to override this (see below).
+
+@item -qualified
+
+This flag makes @value{GDBN} interpret a function name specified with
+@kbd{-function} as a complete fully-qualified name.
+
+For example, assuming a C@t{++} program with symbols named
+@code{A::B::func} and @code{B::func}, the @w{@kbd{break -qualified
+-function B::func}} command sets a breakpoint on @code{B::func}, only.
+
+(Note: the @kbd{-qualified} option can precede a linespec as well
+(@pxref{Linespec Locations}), so the particular example above could be
+simplified as @w{@kbd{break -qualified B::func}}.)
+
 @item -label @var{label}
 The value specifies the name of a label.  When the function
 name is not specified, the label is searched in the function of the currently
@@ -7923,7 +8071,7 @@ relative to the current line.
 @end table
 
 Explicit location options may be abbreviated by omitting any non-unique
-trailing characters from the option name, e.g., @code{break -s main.c -li 3}.
+trailing characters from the option name, e.g., @w{@kbd{break -s main.c -li 3}}.
 
 @node Address Locations
 @subsection Address Locations
@@ -9113,6 +9261,22 @@ If you ask to print an object whose contents are unknown to
 @value{GDBN}, e.g., because its data type is not completely specified
 by the debug information, @value{GDBN} will say @samp{<incomplete
 type>}.  @xref{Symbols, incomplete type}, for more about this.
+
+@cindex no debug info variables
+If you try to examine or use the value of a (global) variable for
+which @value{GDBN} has no type information, e.g., because the program
+includes no debug information, @value{GDBN} displays an error message.
+@xref{Symbols, unknown type}, for more about unknown types.  If you
+cast the variable to its declared type, @value{GDBN} gets the
+variable's value using the cast-to type as the variable's type.  For
+example, in a C program:
+
+@smallexample
+  (@value{GDBP}) p var
+  'var' has unknown type; cast it to its declared type
+  (@value{GDBP}) p (float) var
+  $1 = 3.14
+@end smallexample
 
 If you append @kbd{@@entry} string to a function parameter name you get its
 value at the time the function got called.  If the value is not available an
@@ -10879,6 +11043,11 @@ and vector registers (in the selected stack frame).
 Print the names and values of all registers, including floating-point
 and vector registers (in the selected stack frame).
 
+@item info registers @var{reggroup} @dots{}
+Print the name and value of the registers in each of the specified
+@var{reggroup}s.  The @var{reggoup} can be any of those returned by
+@code{maint print reggroups} (@pxref{Maintenance Commands}).
+
 @item info registers @var{regname} @dots{}
 Print the @dfn{relativized} value of each specified register @var{regname}.
 As discussed in detail below, register values are normally relative to
@@ -11455,7 +11624,9 @@ this writing, @sc{gnu}/Linux, FreeBSD, Solaris, and S390).
 
 On @sc{gnu}/Linux, this command can take into account the value of the
 file @file{/proc/@var{pid}/coredump_filter} when generating the core
-dump (@pxref{set use-coredump-filter}).
+dump (@pxref{set use-coredump-filter}), and by default honors the
+@code{VM_DONTDUMP} flag for mappings where it is present in the file
+@file{/proc/@var{pid}/smaps} (@pxref{set dump-excluded-mappings}).
 
 @kindex set use-coredump-filter
 @anchor{set use-coredump-filter}
@@ -11485,6 +11656,16 @@ value is currently @code{0x33}, which means that bits @code{0}
 (anonymous private mappings), @code{1} (anonymous shared mappings),
 @code{4} (ELF headers) and @code{5} (private huge pages) are active.
 This will cause these memory mappings to be dumped automatically.
+
+@kindex set dump-excluded-mappings
+@anchor{set dump-excluded-mappings}
+@item set dump-excluded-mappings on
+@itemx set dump-excluded-mappings off
+If @code{on} is specified, @value{GDBN} will dump memory mappings
+marked with the @code{VM_DONTDUMP} flag.  This flag is represented in
+the file @file{/proc/@var{pid}/smaps} with the acronym @code{dd}.
+
+The default value is @code{off}.
 @end table
 
 @node Character Sets
@@ -11832,6 +12013,8 @@ giant words (eight bytes)
 All values are interpreted in the current language.
 This means, for example, that if the current source language is C/C@t{++}
 then searching for the string ``hello'' includes the trailing '\0'.
+The null terminator can be removed from searching by using casts,
+e.g.: @samp{@{char[5]@}"hello"}.
 
 If the value size is not specified, it is taken from the
 value's type in the current language.
@@ -11881,7 +12064,11 @@ you get during debugging:
 (gdb) find &hello[0], +sizeof(hello), 'h', 'e', 'l', 'l', 'o'
 0x8049567 <hello.1620>
 0x804956d <hello.1620+6>
-2 patterns found
+2 patterns found.
+(gdb) find &hello[0], +sizeof(hello), @{char[5]@}"hello"
+0x8049567 <hello.1620>
+0x804956d <hello.1620+6>
+2 patterns found.
 (gdb) find /b1 &hello[0], +sizeof(hello), 'h', 0x65, 'l'
 0x8049567 <hello.1620>
 1 pattern found
@@ -14993,6 +15180,49 @@ the same notation that is used to declare such symbols in C@t{++}: type
 also use the @value{GDBN} command-line word completion facilities to list the
 available choices, or to finish the type list for you.
 @xref{Completion,, Command Completion}, for details on how to do this.
+
+@item @r{Breakpoints in functions with ABI tags}
+
+The GNU C@t{++} compiler introduced the notion of ABI ``tags'', which
+correspond to changes in the ABI of a type, function, or variable that
+would not otherwise be reflected in a mangled name.  See
+@url{https://developers.redhat.com/blog/2015/02/05/gcc5-and-the-c11-abi/}
+for more detail.
+
+The ABI tags are visible in C@t{++} demangled names.  For example, a
+function that returns a std::string:
+
+@smallexample
+std::string function(int);
+@end smallexample
+
+@noindent
+when compiled for the C++11 ABI is marked with the @code{cxx11} ABI
+tag, and @value{GDBN} displays the symbol like this:
+
+@smallexample
+function[abi:cxx11](int)
+@end smallexample
+
+You can set a breakpoint on such functions simply as if they had no
+tag.  For example:
+
+@smallexample
+(gdb) b function(int)
+Breakpoint 2 at 0x40060d: file main.cc, line 10.
+(gdb) info breakpoints
+Num     Type           Disp Enb Address    What
+1       breakpoint     keep y   0x0040060d in function[abi:cxx11](int)
+                                           at main.cc:10
+@end smallexample
+
+On the rare occasion you need to disambiguate between different ABI
+tags, you can do so by simply including the ABI tag in the function
+name, like:
+
+@smallexample
+(@value{GDBP}) b ambiguous[abi:other_tag](int)
+@end smallexample
 @end table
 
 @node Decimal Floating Point
@@ -15375,9 +15605,6 @@ features from being implemented by @value{GDBN}:
 
 @item
 Method calls cannot be made via traits.
-
-@item
-Trait objects cannot be created or inspected.
 
 @item
 Operator overloading is not implemented.
@@ -16819,6 +17046,7 @@ file-management commands (@pxref{Files, ,Commands to Specify Files}).
 @cindex symbol names
 @cindex names of symbols
 @cindex quoting names
+@anchor{quoting names}
 Occasionally, you may need to refer to symbols that contain unusual
 characters, which @value{GDBN} ordinarily treats as word delimiters.  The
 most frequent case is in referring to static variables in other
@@ -16872,6 +17100,19 @@ cause @value{GDBN} to omit the methods.
 @item show print type methods
 This command shows the current setting of method display when printing
 classes.
+
+@kindex set print type nested-type-limit
+@item set print type nested-type-limit @var{limit}
+@itemx set print type nested-type-limit unlimited
+Set the limit of displayed nested types that the type printer will
+show.  A @var{limit} of @code{unlimited} or @code{-1} will show all
+nested definitions.  By default, the type printer will not show any nested
+types defined in classes.
+
+@kindex show print type nested-type-limit
+@item show print type nested-type-limit
+This command shows the current display limit of nested types when
+printing classes.
 
 @kindex set print type typedefs
 @item set print type typedefs
@@ -17000,6 +17241,130 @@ names are substituted when printing other types.
 @item T
 Print typedefs defined in the class.  This is the default, but the flag
 exists in case you change the default with @command{set print type typedefs}.
+
+@item o
+Print the offsets and sizes of fields in a struct, similar to what the
+@command{pahole} tool does.  This option implies the @code{/tm} flags.
+
+For example, given the following declarations:
+
+@smallexample
+struct tuv
+@{
+  int a1;
+  char *a2;
+  int a3;
+@};
+
+struct xyz
+@{
+  int f1;
+  char f2;
+  void *f3;
+  struct tuv f4;
+@};
+
+union qwe
+@{
+  struct tuv fff1;
+  struct xyz fff2;
+@};
+
+struct tyu
+@{
+  int a1 : 1;
+  int a2 : 3;
+  int a3 : 23;
+  char a4 : 2;
+  int64_t a5;
+  int a6 : 5;
+  int64_t a7 : 3;
+@};
+@end smallexample
+
+Issuing a @kbd{ptype /o struct tuv} command would print:
+
+@smallexample
+(@value{GDBP}) ptype /o struct tuv
+/* offset    |  size */  type = struct tuv @{
+/*    0      |     4 */    int a1;
+/* XXX  4-byte hole  */
+/*    8      |     8 */    char *a2;
+/*   16      |     4 */    int a3;
+
+                           /* total size (bytes):   24 */
+                         @}
+@end smallexample
+
+Notice the format of the first column of comments.  There, you can
+find two parts separated by the @samp{|} character: the @emph{offset},
+which indicates where the field is located inside the struct, in
+bytes, and the @emph{size} of the field.  Another interesting line is
+the marker of a @emph{hole} in the struct, indicating that it may be
+possible to pack the struct and make it use less space by reorganizing
+its fields.
+
+It is also possible to print offsets inside an union:
+
+@smallexample
+(@value{GDBP}) ptype /o union qwe
+/* offset    |  size */  type = union qwe @{
+/*                24 */    struct tuv @{
+/*    0      |     4 */        int a1;
+/* XXX  4-byte hole  */
+/*    8      |     8 */        char *a2;
+/*   16      |     4 */        int a3;
+
+                               /* total size (bytes):   24 */
+                           @} fff1;
+/*                40 */    struct xyz @{
+/*    0      |     4 */        int f1;
+/*    4      |     1 */        char f2;
+/* XXX  3-byte hole  */
+/*    8      |     8 */        void *f3;
+/*   16      |    24 */        struct tuv @{
+/*   16      |     4 */            int a1;
+/* XXX  4-byte hole  */
+/*   24      |     8 */            char *a2;
+/*   32      |     4 */            int a3;
+
+                                   /* total size (bytes):   24 */
+                               @} f4;
+
+                               /* total size (bytes):   40 */
+                           @} fff2;
+
+                           /* total size (bytes):   40 */
+                         @}
+@end smallexample
+
+In this case, since @code{struct tuv} and @code{struct xyz} occupy the
+same space (because we are dealing with an union), the offset is not
+printed for them.  However, you can still examine the offset of each
+of these structures' fields.
+
+Another useful scenario is printing the offsets of a struct containing
+bitfields:
+
+@smallexample
+(@value{GDBP}) ptype /o struct tyu
+/* offset    |  size */  type = struct tyu @{
+/*    0:31   |     4 */    int a1 : 1;
+/*    0:28   |     4 */    int a2 : 3;
+/*    0: 5   |     4 */    int a3 : 23;
+/*    3: 3   |     1 */    signed char a4 : 2;
+/* XXX  3-bit hole   */
+/* XXX  4-byte hole  */
+/*    8      |     8 */    int64_t a5;
+/*   16:27   |     4 */    int a6 : 5;
+/*   16:56   |     8 */    int64_t a7 : 3;
+
+                           /* total size (bytes):   24 */
+                         @}
+@end smallexample
+
+Note how the offset information is now extended to also include how
+many bits are left to be used in each bitfield.
 @end table
 
 @kindex ptype
@@ -17082,6 +17447,24 @@ but no definition for @code{struct foo} itself, @value{GDBN} will say:
 @noindent
 ``Incomplete type'' is C terminology for data types that are not
 completely specified.
+
+@cindex unknown type
+Othertimes, information about a variable's type is completely absent
+from the debug information included in the program.  This most often
+happens when the program or library where the variable is defined
+includes no debug information at all.  @value{GDBN} knows the variable
+exists from inspecting the linker/loader symbol table (e.g., the ELF
+dynamic symbol table), but such symbols do not contain type
+information.  Inspecting the type of a (global) variable for which
+@value{GDBN} has no type information shows:
+
+@smallexample
+  (@value{GDBP}) ptype var
+  type = <data variable, no debug info>
+@end smallexample
+
+@xref{Variables, no debug info variables}, for how to print the values
+of such variables.
 
 @kindex info types
 @item info types @var{regexp}
@@ -17798,14 +18181,73 @@ Show the current setting of stack unwinding in the functions called by
 
 @end table
 
-@cindex weak alias functions
-Sometimes, a function you wish to call is actually a @dfn{weak alias}
-for another function.  In such case, @value{GDBN} might not pick up
-the type information, including the types of the function arguments,
-which causes @value{GDBN} to call the inferior function incorrectly.
-As a result, the called function will function erroneously and may
-even crash.  A solution to that is to use the name of the aliased
-function instead.
+@subsection Calling functions with no debug info
+
+@cindex no debug info functions
+Sometimes, a function you wish to call is missing debug information.
+In such case, @value{GDBN} does not know the type of the function,
+including the types of the function's parameters.  To avoid calling
+the inferior function incorrectly, which could result in the called
+function functioning erroneously and even crash, @value{GDBN} refuses
+to call the function unless you tell it the type of the function.
+
+For prototyped (i.e.@: ANSI/ISO style) functions, there are two ways
+to do that.  The simplest is to cast the call to the function's
+declared return type.  For example:
+
+@smallexample
+(@value{GDBP}) p getenv ("PATH")
+'getenv' has unknown return type; cast the call to its declared return type
+(@value{GDBP}) p (char *) getenv ("PATH")
+$1 = 0x7fffffffe7ba "/usr/local/bin:/"...
+@end smallexample
+
+Casting the return type of a no-debug function is equivalent to
+casting the function to a pointer to a prototyped function that has a
+prototype that matches the types of the passed-in arguments, and
+calling that.  I.e., the call above is equivalent to:
+
+@smallexample
+(@value{GDBP}) p ((char * (*) (const char *)) getenv) ("PATH")
+@end smallexample
+
+@noindent
+and given this prototyped C or C++ function with float parameters:
+
+@smallexample
+float multiply (float v1, float v2) @{ return v1 * v2; @}
+@end smallexample
+
+@noindent
+these calls are equivalent:
+
+@smallexample
+(@value{GDBP}) p (float) multiply (2.0f, 3.0f)
+(@value{GDBP}) p ((float (*) (float, float)) multiply) (2.0f, 3.0f)
+@end smallexample
+
+If the function you wish to call is declared as unprototyped (i.e.@:
+old K&R style), you must use the cast-to-function-pointer syntax, so
+that @value{GDBN} knows that it needs to apply default argument
+promotions (promote float arguments to double).  @xref{ABI, float
+promotion}.  For example, given this unprototyped C function with
+float parameters, and no debug info:
+
+@smallexample
+float
+multiply_noproto (v1, v2)
+  float v1, v2;
+@{
+  return v1 * v2;
+@}
+@end smallexample
+
+@noindent
+you call it like this:
+
+@smallexample
+  (@value{GDBP}) p ((float (*) ()) multiply_noproto) (2.0f, 3.0f)
+@end smallexample
 
 @node Patching
 @section Patching Programs
@@ -18154,13 +18596,15 @@ will print to the console.
 
 @subsection Compiler search for the @code{compile} command
 
-@value{GDBN} needs to find @value{NGCC} for the inferior being debugged which
-may not be obvious for remote targets of different architecture than where
-@value{GDBN} is running.  Environment variable @code{PATH} (@code{PATH} from
-shell that executed @value{GDBN}, not the one set by @value{GDBN}
-command @code{set environment}).  @xref{Environment}.  @code{PATH} on
+@value{GDBN} needs to find @value{NGCC} for the inferior being debugged
+which may not be obvious for remote targets of different architecture
+than where @value{GDBN} is running.  Environment variable @code{PATH} on
 @value{GDBN} host is searched for @value{NGCC} binary matching the
-target architecture and operating system.
+target architecture and operating system.  This search can be overriden
+by @code{set compile-gcc} @value{GDBN} command below.  @code{PATH} is
+taken from shell that executed @value{GDBN}, it is not the value set by
+@value{GDBN} command @code{set environment}).  @xref{Environment}.
+
 
 Specifically @code{PATH} is searched for binaries matching regular expression
 @code{@var{arch}(-[^-]*)?-@var{os}-gcc} according to the inferior target being
@@ -18169,6 +18613,28 @@ example both @code{i386} and @code{x86_64} targets look for pattern
 @code{(x86_64|i.86)} and both @code{s390} and @code{s390x} targets look
 for pattern @code{s390x?}.  @var{os} is currently supported only for
 pattern @code{linux(-gnu)?}.
+
+On Posix hosts the compiler driver @value{GDBN} needs to find also
+shared library @file{libcc1.so} from the compiler.  It is searched in
+default shared library search path (overridable with usual environment
+variable @code{LD_LIBRARY_PATH}), unrelated to @code{PATH} or @code{set
+compile-gcc} settings.  Contrary to it @file{libcc1plugin.so} is found
+according to the installation of the found compiler --- as possibly
+specified by the @code{set compile-gcc} command.
+
+@table @code
+@item set compile-gcc
+@cindex compile command driver filename override
+Set compilation command used for compiling and injecting code with the
+@code{compile} commands.  If this option is not set (it is set to
+an empty string), the search described above will occur --- that is the
+default.
+
+@item show compile-gcc
+Displays the current compile command @value{NGCC} driver filename.
+If set, it is the main command @command{gcc}, found usually for example
+under name @file{x86_64-linux-gnu-gcc}.
+@end table
 
 @node GDB Files
 @chapter @value{GDBN} Files
@@ -18296,6 +18762,15 @@ tables by using the @samp{-readnow} option with any of the commands that
 load symbol table information, if you want to be sure @value{GDBN} has the
 entire symbol table available.
 
+@cindex @code{-readnever}, option for symbol-file command
+@cindex never read symbols
+@cindex symbols, never read
+@item symbol-file @r{[} -readnever @r{]} @var{filename}
+@itemx file @r{[} -readnever @r{]} @var{filename}
+You can instruct @value{GDBN} to never read the symbolic information
+contained in @var{filename} by using the @samp{-readnever} option.
+@xref{--readnever}.
+
 @c FIXME: for now no mention of directories, since this seems to be in
 @c flux.  13mar1992 status is that in theory GDB would look either in
 @c current dir or in same dir as myprog; but issues like competing
@@ -18324,7 +18799,7 @@ the program is running.  To do this, use the @code{kill} command
 @kindex add-symbol-file
 @cindex dynamic linking
 @item add-symbol-file @var{filename} @var{address}
-@itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{]}
+@itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{|} -readnever @r{]}
 @itemx add-symbol-file @var{filename} @var{address} -s @var{section} @var{address} @dots{}
 The @code{add-symbol-file} command reads additional symbol table
 information from the file @var{filename}.  You would use this command
@@ -19244,12 +19719,16 @@ using @command{objcopy}.
 To create an index file, use the @code{save gdb-index} command:
 
 @table @code
-@item save gdb-index @var{directory}
+@item save gdb-index [-dwarf-5] @var{directory}
 @kindex save gdb-index
-Create an index file for each symbol file currently known by
-@value{GDBN}.  Each file is named after its corresponding symbol file,
-with @samp{.gdb-index} appended, and is written into the given
-@var{directory}.
+Create index files for all symbol files currently known by
+@value{GDBN}.  For each known @var{symbol-file}, this command by
+default creates it produces a single file
+@file{@var{symbol-file}.gdb-index}.  If you invoke this command with
+the @option{-dwarf-5} option, it produces 2 files:
+@file{@var{symbol-file}.debug_names} and
+@file{@var{symbol-file}.debug_str}.  The files are created in the
+given @var{directory}.
 @end table
 
 Once you have created an index file you can merge it into your symbol
@@ -19258,6 +19737,16 @@ file, here named @file{symfile}, using @command{objcopy}:
 @smallexample
 $ objcopy --add-section .gdb_index=symfile.gdb-index \
     --set-section-flags .gdb_index=readonly symfile symfile
+@end smallexample
+
+Or for @code{-dwarf-5}:
+
+@smallexample
+$ objcopy --dump-section .debug_str=symfile.debug_str.new symfile
+$ cat symfile.debug_str >>symfile.debug_str.new
+$ objcopy --add-section .debug_names=symfile.gdb-index \
+    --set-section-flags .debug_names=readonly \
+    --update-section .debug_str=symfile.debug_str.new symfile symfile
 @end smallexample
 
 @value{GDBN} will normally ignore older versions of @file{.gdb_index}
@@ -20253,6 +20742,15 @@ environment:
 $ gdbserver --wrapper env LD_PRELOAD=libtest.so -- :2222 ./testprog
 @end smallexample
 
+@cindex @option{--selftest}
+The @option{--selftest} option runs the self tests in @code{gdbserver}:
+
+@smallexample
+$ gdbserver --selftest
+Ran 2 unit tests, 0 failed
+@end smallexample
+
+These tests are disabled in release.
 @subsection Connecting to @code{gdbserver}
 
 The basic procedure for connecting to the remote target is:
@@ -20816,6 +21314,22 @@ are:
 @tab @code{QStartupWithShell}
 @tab @code{set startup-with-shell}
 
+@item @code{environment-hex-encoded}
+@tab @code{QEnvironmentHexEncoded}
+@tab @code{set environment}
+
+@item @code{environment-unset}
+@tab @code{QEnvironmentUnset}
+@tab @code{unset environment}
+
+@item @code{environment-reset}
+@tab @code{QEnvironmentReset}
+@tab @code{Reset the inferior environment (i.e., unset user-set variables)}
+
+@item @code{set-working-dir}
+@tab @code{QSetWorkingDir}
+@tab @code{set cwd}
+
 @item @code{conditional-breakpoints-packet}
 @tab @code{Z0 and Z1}
 @tab @code{Support for target-side breakpoint condition evaluation}
@@ -21198,7 +21712,7 @@ configurations.
 
 @menu
 * BSD libkvm Interface::	Debugging BSD kernel memory images
-* SVR4 Process Information::    SVR4 process information
+* Process Information::         Process information
 * DJGPP Native::                Features specific to the DJGPP port
 * Cygwin Native::		Features specific to the Cygwin port
 * Hurd Native::                 Features specific to @sc{gnu} Hurd
@@ -21245,24 +21759,32 @@ Set current context from proc address.  This command isn't available on
 modern FreeBSD systems.
 @end table
 
-@node SVR4 Process Information
-@subsection SVR4 Process Information
+@node Process Information
+@subsection Process Information
 @cindex /proc
 @cindex examine process image
 @cindex process info via @file{/proc}
 
-Many versions of SVR4 and compatible systems provide a facility called
-@samp{/proc} that can be used to examine the image of a running
-process using file-system subroutines.
+Some operating systems provide interfaces to fetch additional
+information about running processes beyond memory and per-thread
+register state.  If @value{GDBN} is configured for an operating system
+with a supported interface, the command @code{info proc} is available
+to report information about the process running your program, or about
+any process running on your system.
 
-If @value{GDBN} is configured for an operating system with this
-facility, the command @code{info proc} is available to report
-information about the process running your program, or about any
-process running on your system.  This includes, as of this writing,
-@sc{gnu}/Linux and Solaris, for example.
+One supported interface is a facility called @samp{/proc} that can be
+used to examine the image of a running process using file-system
+subroutines.  This facility is supported on @sc{gnu}/Linux and Solaris
+systems.
 
-This command may also work on core files that were created on a system
-that has the @samp{/proc} facility.
+On FreeBSD systems, system control nodes are used to query process
+information.
+
+In addition, some systems may provide additional process information
+in core files.  Note that a core file may include a subset of the
+information available from a live process.  Process information is
+currently avaiable from cores created on @sc{gnu}/Linux and FreeBSD
+systems.
 
 @table @code
 @kindex info proc
@@ -21286,36 +21808,40 @@ a process ID rather than a thread ID).
 @item info proc cmdline
 @cindex info proc cmdline
 Show the original command line of the process.  This command is
-specific to @sc{gnu}/Linux.
+supported on @sc{gnu}/Linux and FreeBSD.
 
 @item info proc cwd
 @cindex info proc cwd
 Show the current working directory of the process.  This command is
-specific to @sc{gnu}/Linux.
+supported on @sc{gnu}/Linux and FreeBSD.
 
 @item info proc exe
 @cindex info proc exe
-Show the name of executable of the process.  This command is specific
-to @sc{gnu}/Linux.
+Show the name of executable of the process.  This command is supported
+on @sc{gnu}/Linux and FreeBSD.
 
 @item info proc mappings
 @cindex memory address space mappings
-Report the memory address space ranges accessible in the program, with
-information on whether the process has read, write, or execute access
-rights to each range.  On @sc{gnu}/Linux systems, each memory range
-includes the object file which is mapped to that range, instead of the
-memory access rights to that range.
+Report the memory address space ranges accessible in the program.  On
+Solaris and FreeBSD systems, each memory range includes information on
+whether the process has read, write, or execute access rights to each
+range.  On @sc{gnu}/Linux and FreeBSD systems, each memory range
+includes the object file which is mapped to that range.
 
 @item info proc stat
 @itemx info proc status
 @cindex process detailed status information
-These subcommands are specific to @sc{gnu}/Linux systems.  They show
-the process-related information, including the user ID and group ID;
-how many threads are there in the process; its virtual memory usage;
-the signals that are pending, blocked, and ignored; its TTY; its
-consumption of system and user time; its stack size; its @samp{nice}
-value; etc.  For more information, see the @samp{proc} man page
-(type @kbd{man 5 proc} from your shell prompt).
+Show additional process-related information, including the user ID and
+group ID; virtual memory usage; the signals that are pending, blocked,
+and ignored; its TTY; its consumption of system and user time; its
+stack size; its @samp{nice} value; etc.  These commands are supported
+on @sc{gnu}/Linux and FreeBSD.
+
+For @sc{gnu}/Linux systems, see the @samp{proc} man page for more
+information (type @kbd{man 5 proc} from your shell prompt).
+
+For FreeBSD systems, @code{info proc stat} is an alias for @code{info
+proc status}.
 
 @item info proc all
 Show all the information about the process described under all of the
@@ -21792,12 +22318,12 @@ problem:
 
 @smallexample
 (@value{GDBP}) print 'cygwin1!__argv'
-$1 = 268572168
+'cygwin1!__argv' has unknown type; cast it to its declared type
 @end smallexample
 
 @smallexample
 (@value{GDBP}) x 'cygwin1!__argv'
-0x10021610:      "\230y\""
+'cygwin1!__argv' has unknown type; cast it to its declared type
 @end smallexample
 
 And two possible solutions:
@@ -22082,6 +22608,7 @@ acceptable commands.
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
+* OpenRISC 1000::               OpenRISC 1000 (or1k)
 * PowerPC Embedded::            PowerPC Embedded
 * AVR::                         Atmel AVR
 * CRIS::                        CRIS
@@ -22291,6 +22818,38 @@ As usual, you can inquire about the @code{mipsfpu} variable with
 @samp{show mipsfpu}.
 @end table
 
+@node OpenRISC 1000
+@subsection OpenRISC 1000
+@cindex OpenRISC 1000
+
+@noindent
+The OpenRISC 1000 provides a free RISC instruction set architecture.  It is
+mainly provided as a soft-core which can run on Xilinx, Altera and other
+FPGA's.
+
+@value{GDBN} for OpenRISC supports the below commands when connecting to
+a target:
+
+@table @code
+
+@kindex target sim
+@item target sim
+
+Runs the builtin CPU simulator which can run very basic
+programs but does not support most hardware functions like MMU.
+For more complex use cases the user is advised to run an external
+target, and connect using @samp{target remote}.
+
+Example: @code{target sim}
+
+@item set debug or1k
+Toggle whether to display OpenRISC-specific debugging messages from the
+OpenRISC target support subsystem.
+
+@item show debug or1k
+Show whether OpenRISC-specific debugging messages are enabled.
+@end table
+
 @node PowerPC Embedded
 @subsection PowerPC Embedded
 
@@ -22465,6 +23024,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * SPU::                Cell Broadband Engine SPU architecture
 * PowerPC::
 * Nios II::
+* Sparc64::
 @end menu
 
 @node AArch64
@@ -22847,6 +23407,78 @@ target code in @value{GDBN}.
 @item show debug nios2
 @kindex show debug nios2
 Show the current setting of Nios II debugging messages.
+@end table
+
+@node Sparc64
+@subsection Sparc64
+@cindex Sparc64 support
+@cindex Application Data Integrity
+@subsubsection ADI Support
+
+The M7 processor supports an Application Data Integrity (ADI) feature that 
+detects invalid data accesses.  When software allocates memory and enables 
+ADI on the allocated memory, it chooses a 4-bit version number, sets the 
+version in the upper 4 bits of the 64-bit pointer to that data, and stores 
+the 4-bit version in every cacheline of that data.  Hardware saves the latter 
+in spare bits in the cache and memory hierarchy.  On each load and store, 
+the processor compares the upper 4 VA (virtual address) bits to the 
+cacheline's version.  If there is a mismatch, the processor generates a 
+version mismatch trap which can be either precise or disrupting.  The trap 
+is an error condition which the kernel delivers to the process as a SIGSEGV 
+signal.
+
+Note that only 64-bit applications can use ADI and need to be built with
+ADI-enabled.
+
+Values of the ADI version tags, which are in granularity of a 
+cacheline (64 bytes), can be viewed or modified. 
+
+
+@table @code
+@kindex adi examine
+@item adi (examine | x) [ / @var{n} ] @var{addr}
+
+The @code{adi examine} command displays the value of one ADI version tag per 
+cacheline. 
+
+@var{n} is a decimal integer specifying the number in bytes; the default 
+is 1.  It specifies how much ADI version information, at the ratio of 1:ADI 
+block size, to display. 
+
+@var{addr} is the address in user address space where you want @value{GDBN} 
+to begin displaying the ADI version tags. 
+
+Below is an example of displaying ADI versions of variable "shmaddr".
+
+@smallexample
+(@value{GDBP}) adi x/100 shmaddr
+   0xfff800010002c000:     0 0
+@end smallexample
+
+@kindex adi assign
+@item adi (assign | a) [ / @var{n} ] @var{addr} = @var{tag}
+
+The @code{adi assign} command is used to assign new ADI version tag 
+to an address. 
+
+@var{n} is a decimal integer specifying the number in bytes; 
+the default is 1.  It specifies how much ADI version information, at the 
+ratio of 1:ADI block size, to modify. 
+
+@var{addr} is the address in user address space where you want @value{GDBN} 
+to begin modifying the ADI version tags. 
+
+@var{tag} is the new ADI version tag.
+
+For example, do the following to modify then verify ADI versions of 
+variable "shmaddr":
+
+@smallexample
+(@value{GDBP}) adi a/100 shmaddr = 7
+(@value{GDBP}) adi x/100 shmaddr
+   0xfff800010002c000:     7 7
+@end smallexample
+
 @end table
 
 @node Controlling GDB
@@ -25415,6 +26047,10 @@ finish
 @item n
 next
 
+@kindex o @r{(SingleKey TUI key)}
+@item o
+nexti.  The shortcut letter @samp{o} stands for ``step Over''.
+
 @kindex q @r{(SingleKey TUI key)}
 @item q
 exit the SingleKey mode.
@@ -25426,6 +26062,10 @@ run
 @kindex s @r{(SingleKey TUI key)}
 @item s
 step
+
+@kindex i @r{(SingleKey TUI key)}
+@item i
+stepi.  The shortcut letter @samp{i} stands for ``step Into''.
 
 @kindex u @r{(SingleKey TUI key)}
 @item u
@@ -26905,7 +27545,9 @@ thread was last seen on.  This field is optional.
 Whenever a @code{*stopped} record is emitted because the program
 stopped after hitting an exception catchpoint (@pxref{Set Catchpoints}),
 @value{GDBN} provides the name of the exception that was raised via
-the @code{exception-name} field.
+the @code{exception-name} field.  Also, for exceptions that were raised
+with an exception message, @value{GDBN} provides that message via
+the @code{exception-message} field.
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Simple Examples
@@ -33992,6 +34634,21 @@ Branch trace (@pxref{Branch Trace Format},
 @pxref{Branch Trace Configuration Format})
 @end itemize
 
+@item MPFR
+@anchor{MPFR}
+@value{GDBN} can use the GNU MPFR multiple-precision floating-point
+library.  This library may be included with your operating system
+distribution; if it is not, you can get the latest version from
+@url{http://www.mpfr.org}.  The @file{configure} script will search
+for this library in several standard locations; if it is installed
+in an unusual path, you can use the @option{--with-libmpfr-prefix}
+option to specify its location.
+
+GNU MPFR is used to emulate target floating-point arithmetic during
+expression evaluation when the target uses different floating-point
+formats than the host.  If GNU MPFR it is not available, @value{GDBN}
+will fall back to using host floating-point arithmetic.
+
 @item zlib
 @cindex compressed debug sections 
 @value{GDBN} will use the @samp{zlib} library, if available, to read
@@ -34687,11 +35344,21 @@ checksum.
 Print the entire architecture configuration.  The optional argument
 @var{file} names the file where the output goes.
 
-@kindex maint print c-tdesc
+@kindex maint print c-tdesc @r{[}@var{file}@r{]}
 @item maint print c-tdesc
-Print the current target description (@pxref{Target Descriptions}) as
-a C source file.  The created source file can be used in @value{GDBN}
-when an XML parser is not available to parse the description.
+Print the target description (@pxref{Target Descriptions}) as
+a C source file.  By default, the target description is for the current
+target, but if the optional argument @var{file} is provided, that file
+is used to produce the description.  The @var{file} should be an XML
+document, of the form described in @ref{Target Description Format}.
+The created source file is built into @value{GDBN} when @value{GDBN} is
+built again.  This command is used by developers after they add or
+modify XML target descriptions.
+
+@kindex maint check xml-descriptions
+@item maint check xml-descriptions @var{dir}
+Check that the target descriptions dynamically created by @value{GDBN}
+equal the descriptions created from XML files found in @var{dir}.
 
 @kindex maint print dummy-frames
 @item maint print dummy-frames
@@ -34828,8 +35495,16 @@ data structures, including its flags and contained types.
 
 @kindex maint selftest
 @cindex self tests
+@item maint selftest @r{[}@var{filter}@r{]}
 Run any self tests that were compiled in to @value{GDBN}.  This will
 print a message showing how many tests were run, and how many failed.
+If a @var{filter} is passed, only the tests with @var{filter} in their
+name will by ran.
+
+@kindex "maint info selftests"
+@cindex self tests
+@item maint info selftests
+List the selftests compiled in to @value{GDBN}.
 
 @kindex maint set dwarf always-disassemble
 @kindex maint show dwarf always-disassemble
@@ -35956,7 +36631,7 @@ separators.  Each expression has the following form:
 
 @item X @var{len},@var{expr}
 @var{len} is the length of the bytecode expression and @var{expr} is the
-actual conditional expression in bytecode form.
+actual commands expression in bytecode form.
 
 @end table
 
@@ -36479,6 +37154,122 @@ actually support starting the inferior using a shell.
 
 Use of this packet is controlled by the @code{set startup-with-shell}
 command; @pxref{set startup-with-shell}.
+
+@item QEnvironmentHexEncoded:@var{hex-value}
+@anchor{QEnvironmentHexEncoded}
+@cindex set environment variable, remote request
+@cindex @samp{QEnvironmentHexEncoded} packet
+On UNIX-like targets, it is possible to set environment variables that
+will be passed to the inferior during the startup process.  This
+packet is used to inform @command{gdbserver} of an environment
+variable that has been defined by the user on @value{GDBN} (@pxref{set
+environment}).
+
+The packet is composed by @var{hex-value}, an hex encoded
+representation of the @var{name=value} format representing an
+environment variable.  The name of the environment variable is
+represented by @var{name}, and the value to be assigned to the
+environment variable is represented by @var{value}.  If the variable
+has no value (i.e., the value is @code{null}), then @var{value} will
+not be present.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).  This should only be done on targets that
+actually support passing environment variables to the starting
+inferior.
+
+This packet is related to the @code{set environment} command;
+@pxref{set environment}.
+
+@item QEnvironmentUnset:@var{hex-value}
+@anchor{QEnvironmentUnset}
+@cindex unset environment variable, remote request
+@cindex @samp{QEnvironmentUnset} packet
+On UNIX-like targets, it is possible to unset environment variables
+before starting the inferior in the remote target.  This packet is
+used to inform @command{gdbserver} of an environment variable that has
+been unset by the user on @value{GDBN} (@pxref{unset environment}).
+
+The packet is composed by @var{hex-value}, an hex encoded
+representation of the name of the environment variable to be unset.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).  This should only be done on targets that
+actually support passing environment variables to the starting
+inferior.
+
+This packet is related to the @code{unset environment} command;
+@pxref{unset environment}.
+
+@item QEnvironmentReset
+@anchor{QEnvironmentReset}
+@cindex reset environment, remote request
+@cindex @samp{QEnvironmentReset} packet
+On UNIX-like targets, this packet is used to reset the state of
+environment variables in the remote target before starting the
+inferior.  In this context, reset means unsetting all environment
+variables that were previously set by the user (i.e., were not
+initially present in the environment).  It is sent to
+@command{gdbserver} before the @samp{QEnvironmentHexEncoded}
+(@pxref{QEnvironmentHexEncoded}) and the @samp{QEnvironmentUnset}
+(@pxref{QEnvironmentUnset}) packets.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).  This should only be done on targets that
+actually support passing environment variables to the starting
+inferior.
+
+@item QSetWorkingDir:@r{[}@var{directory}@r{]}
+@anchor{QSetWorkingDir packet}
+@cindex set working directory, remote request
+@cindex @samp{QSetWorkingDir} packet
+This packet is used to inform the remote server of the intended
+current working directory for programs that are going to be executed.
+
+The packet is composed by @var{directory}, an hex encoded
+representation of the directory that the remote inferior will use as
+its current working directory.  If @var{directory} is an empty string,
+the remote server should reset the inferior's current working
+directory to its original, empty value.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
 
 @item qfThreadInfo
 @itemx qsThreadInfo
@@ -40395,18 +41186,17 @@ The formal DTD for memory map format is given below:
 <!-- .................................... .............. -->
 <!-- memory-map.dtd -->
 <!-- memory-map: Root element with versioning -->
-<!ELEMENT memory-map (memory | property)>
+<!ELEMENT memory-map (memory)*>
 <!ATTLIST memory-map    version CDATA   #FIXED  "1.0.0">
-<!ELEMENT memory (property)>
+<!ELEMENT memory (property)*>
 <!-- memory: Specifies a memory region,
              and its type, or device. -->
-<!ATTLIST memory        type    CDATA   #REQUIRED
+<!ATTLIST memory        type    (ram|rom|flash) #REQUIRED
                         start   CDATA   #REQUIRED
-                        length  CDATA   #REQUIRED
-                        device  CDATA   #IMPLIED>
+                        length  CDATA   #REQUIRED>
 <!-- property: Generic attribute tag -->
 <!ELEMENT property (#PCDATA | property)*>
-<!ATTLIST property      name    CDATA   #REQUIRED>
+<!ATTLIST property      name    (blocksize) #REQUIRED>
 @end smallexample
 
 @node Thread List Format
@@ -40433,7 +41223,9 @@ identifies the thread (@pxref{thread-id syntax}).  The
 the thread was last executing on.  The @samp{name} attribute, if
 present, specifies the human-readable name of the thread.  The content
 of the of @samp{thread} element is interpreted as human-readable
-auxiliary information.
+auxiliary information.  The @samp{handle} attribute, if present,
+is a hex encoded representation of the thread handle.
+
 
 @node Traceframe Info Format
 @section Traceframe Info Format
@@ -41001,10 +41793,13 @@ architecture's normal floating point format) of the correct size for
 @var{bitsize}.  The default is @code{int}.
 
 @item group
-The register group to which this register belongs.  It must
-be either @code{general}, @code{float}, or @code{vector}.  If no
-@var{group} is specified, @value{GDBN} will not display the register
-in @code{info registers}.
+The register group to which this register belongs.  It can be one of the
+standard register groups @code{general}, @code{float}, @code{vector} or an
+arbitrary string.  Group names should be limited to alphanumeric characters.
+If a group name is made up of multiple words the words may be separated by
+hyphens; e.g.@: @code{special-group} or @code{ultra-special-group}.  If no
+@var{group} is specified, @value{GDBN} will not display the register in
+@code{info registers}.
 
 @end table
 
@@ -41146,6 +41941,7 @@ registers using the capitalization used in the description.
 * M68K Features::
 * NDS32 Features::
 * Nios II Features::
+* OpenRISC 1000 Features::
 * PowerPC Features::
 * S/390 and System z Features::
 * Sparc Features::
@@ -41432,6 +42228,14 @@ targets.  It should contain the 32 core registers (@samp{zero},
 @samp{pc}, and the 16 control registers (@samp{status} through
 @samp{mpuacc}).
 
+@node OpenRISC 1000 Features
+@subsection Openrisc 1000 Features
+@cindex target descriptions, OpenRISC 1000 features
+
+The @samp{org.gnu.gdb.or1k.group0} feature is required for OpenRISC 1000
+targets.  It should contain the 32 general purpose registers (@samp{r0}
+through @samp{r31}), @samp{ppc}, @samp{npc} and @samp{sr}.
+
 @node PowerPC Features
 @subsection PowerPC Features
 @cindex target descriptions, PowerPC features
@@ -41503,6 +42307,14 @@ through @samp{f15} to present the 128-bit wide vector registers
 @samp{v0} through @samp{v15}.  In addition, this feature should
 contain the 128-bit wide vector registers @samp{v16} through
 @samp{v31}.
+
+The @samp{org.gnu.gdb.s390.gs} feature is optional.  It should contain
+the 64-bit wide guarded-storage-control registers @samp{gsd},
+@samp{gssm}, and @samp{gsepla}.
+
+The @samp{org.gnu.gdb.s390.gsbc} feature is optional.  It should contain
+the 64-bit wide guarded-storage broadcast control registers
+@samp{bc_gsd}, @samp{bc_gssm}, and @samp{bc_gsepla}.
 
 @node Sparc Features
 @subsection Sparc Features
@@ -42474,7 +43286,7 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 
 @format
 @c man begin SYNOPSIS gcore
-gcore [-o @var{filename}] @var{pid}
+gcore [-a] [-o @var{filename}] @var{pid}
 @c man end
 @end format
 
@@ -42488,6 +43300,13 @@ running without any change.
 
 @c man begin OPTIONS gcore
 @table @env
+@item -a
+Dump all memory mappings.  The actual effect of this option depends on
+the Operating System.  On @sc{gnu}/Linux, it will disable
+@code{use-coredump-filter} (@pxref{set use-coredump-filter}) and
+enable @code{dump-excluded-mappings} (@pxref{set
+dump-excluded-mappings}).
+
 @item -o @var{filename}
 The optional argument
 @var{filename} specifies the file name where to put the core dump.

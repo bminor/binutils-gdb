@@ -1,5 +1,5 @@
 /* Remote utility routines for the remote server for GDB.
-   Copyright (C) 1993-2017 Free Software Foundation, Inc.
+   Copyright (C) 1993-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +28,7 @@ int gdb_connected (void);
 #define STDIO_CONNECTION_NAME "stdio"
 int remote_connection_is_stdio (void);
 
-ptid_t read_ptid (char *buf, char **obuf);
+ptid_t read_ptid (const char *buf, const char **obuf);
 char *write_ptid (char *buf, ptid_t ptid);
 
 int putpkt (char *buf);

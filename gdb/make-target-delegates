@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright (C) 2013-2017 Free Software Foundation, Inc.
+# Copyright (C) 2013-2018 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -232,8 +232,18 @@ sub munge_type($) {
 	$result = $1;
     } else {
 	($result = $typename) =~ s/\s+$//;
-	$result =~ s/[ ()]/_/g;
+	$result =~ s/[ ()<>:]/_/g;
 	$result =~ s/[*]/p/g;
+
+	# Identifers with double underscores are reserved to the C++
+	# implementation.
+	$result =~ s/_+/_/g;
+
+	# Avoid ending the function name with underscore, for
+	# cosmetics.  Trailing underscores appear after munging types
+	# with template parameters, like e.g. "foo<int>".
+	$result =~ s/_$//g;
+
 	$result = 'target_debug_print_' . $result;
     }
 

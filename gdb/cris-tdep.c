@@ -1,6 +1,6 @@
 /* Target dependent code for CRIS, for GDB, the GNU debugger.
 
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
 
    Contributed by Axis Communications AB.
    Written by Hendrik Ruijter, Stefan Andersson, and Orjan Friberg.
@@ -634,13 +634,13 @@ static struct gdbarch *cris_gdbarch_init (struct gdbarch_info,
 
 static void cris_dump_tdep (struct gdbarch *, struct ui_file *);
 
-static void set_cris_version (char *ignore_args, int from_tty, 
+static void set_cris_version (const char *ignore_args, int from_tty, 
 			      struct cmd_list_element *c);
 
-static void set_cris_mode (char *ignore_args, int from_tty, 
+static void set_cris_mode (const char *ignore_args, int from_tty, 
 			   struct cmd_list_element *c);
 
-static void set_cris_dwarf2_cfi (char *ignore_args, int from_tty, 
+static void set_cris_dwarf2_cfi (const char *ignore_args, int from_tty, 
 				 struct cmd_list_element *c);
 
 static CORE_ADDR cris_scan_prologue (CORE_ADDR pc, 
@@ -1434,19 +1434,19 @@ cris_spec_reg_applicable (struct gdbarch *gdbarch,
       /* Indeterminate/obsolete.  */
       return 0;
     case cris_ver_v0_3:
-      return (version >= 0 && version <= 3);
+      return in_inclusive_range (version, 0U, 3U);
     case cris_ver_v3p:
       return (version >= 3);
     case cris_ver_v8:
-      return (version == 8 || version == 9);
+      return in_inclusive_range (version, 8U, 9U);
     case cris_ver_v8p:
       return (version >= 8);
     case cris_ver_v0_10:
-      return (version >= 0 && version <= 10);
+      return in_inclusive_range (version, 0U, 10U);
     case cris_ver_v3_10:
-      return (version >= 3 && version <= 10);
+      return in_inclusive_range (version, 3U, 10U);
     case cris_ver_v8_10:
-      return (version >= 8 && version <= 10);
+      return in_inclusive_range (version, 8U, 10U);
     case cris_ver_v10:
       return (version == 10);
     case cris_ver_v10p:
@@ -1643,7 +1643,7 @@ static void
 cris_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
   int len = TYPE_LENGTH (type);
@@ -1811,7 +1811,7 @@ static void
 cris_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
   int len = TYPE_LENGTH (type);
@@ -1994,7 +1994,7 @@ find_step_target (struct regcache *regcache, inst_env_type *inst_env)
   int i;
   int offset;
   unsigned short insn;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* Create a local register image and set the initial state.  */
@@ -2063,7 +2063,7 @@ find_step_target (struct regcache *regcache, inst_env_type *inst_env)
 static std::vector<CORE_ADDR>
 cris_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   inst_env_type inst_env;
   std::vector<CORE_ADDR> next_pcs;
 
@@ -3800,7 +3800,7 @@ typedef cris_elf_greg_t crisv32_elf_gregset_t[CRISV32_ELF_NGREG];
 static void 
 cris_supply_gregset (struct regcache *regcache, cris_elf_gregset_t *gregsetp)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i;
   cris_elf_greg_t *regp = *gregsetp;
@@ -3866,8 +3866,6 @@ static struct core_fns cris_elf_core_fns =
   NULL                                  /* next */
 };
 
-extern initialize_file_ftype _initialize_cris_tdep; /* -Wmissing-prototypes */
-
 void
 _initialize_cris_tdep (void)
 {
@@ -3928,7 +3926,7 @@ cris_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 }
 
 static void
-set_cris_version (char *ignore_args, int from_tty, 
+set_cris_version (const char *ignore_args, int from_tty, 
 		  struct cmd_list_element *c)
 {
   struct gdbarch_info info;
@@ -3943,7 +3941,7 @@ set_cris_version (char *ignore_args, int from_tty,
 }
 
 static void
-set_cris_mode (char *ignore_args, int from_tty, 
+set_cris_mode (const char *ignore_args, int from_tty, 
 	       struct cmd_list_element *c)
 {
   struct gdbarch_info info;
@@ -3956,7 +3954,7 @@ set_cris_mode (char *ignore_args, int from_tty,
 }
 
 static void
-set_cris_dwarf2_cfi (char *ignore_args, int from_tty, 
+set_cris_dwarf2_cfi (const char *ignore_args, int from_tty, 
 		     struct cmd_list_element *c)
 {
   struct gdbarch_info info;

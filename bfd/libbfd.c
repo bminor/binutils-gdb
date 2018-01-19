@@ -1,5 +1,5 @@
 /* Assorted BFD support routines, only used internally.
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -121,9 +121,9 @@ _bfd_norelocs_canonicalize_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 
 void
 _bfd_norelocs_set_reloc (bfd *abfd ATTRIBUTE_UNUSED,
-                         asection *sec ATTRIBUTE_UNUSED,
-                         arelent **relptr ATTRIBUTE_UNUSED,
-                         unsigned int count ATTRIBUTE_UNUSED)
+			 asection *sec ATTRIBUTE_UNUSED,
+			 arelent **relptr ATTRIBUTE_UNUSED,
+			 unsigned int count ATTRIBUTE_UNUSED)
 {
   /* Do nothing.  */
 }
@@ -332,8 +332,8 @@ bfd_write_bigendian_4byte_int (bfd *abfd, unsigned int i)
 
 /* FIXME: Should these take a count argument?
    Answer (gnu@cygnus.com):  No, but perhaps they should be inline
-                             functions in swap.h #ifdef __GNUC__.
-                             Gprof them later and find out.  */
+			     functions in swap.h #ifdef __GNUC__.
+			     Gprof them later and find out.  */
 
 /*
 FUNCTION
@@ -407,9 +407,9 @@ DESCRIPTION
 .
 .#define bfd_put(bits, abfd, val, ptr)			\
 .  ((bits) == 8 ? bfd_put_8  (abfd, val, ptr)		\
-.   : (bits) == 16 ? bfd_put_16 (abfd, val, ptr)		\
-.   : (bits) == 32 ? bfd_put_32 (abfd, val, ptr)		\
-.   : (bits) == 64 ? bfd_put_64 (abfd, val, ptr)		\
+.   : (bits) == 16 ? bfd_put_16 (abfd, val, ptr)	\
+.   : (bits) == 32 ? bfd_put_32 (abfd, val, ptr)	\
+.   : (bits) == 64 ? bfd_put_64 (abfd, val, ptr)	\
 .   : (abort (), (void) 0))
 .
 */

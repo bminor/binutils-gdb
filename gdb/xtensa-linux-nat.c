@@ -1,6 +1,6 @@
 /* Xtensa GNU/Linux native support.
 
-   Copyright (C) 2007-2017 Free Software Foundation, Inc.
+   Copyright (C) 2007-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -51,7 +51,7 @@ fill_gregset (const struct regcache *regcache,
 {
   int i;
   xtensa_elf_gregset_t *regs = (xtensa_elf_gregset_t *) gregsetp;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   if (regnum == gdbarch_pc_regnum (gdbarch) || regnum == -1)
     regcache_raw_collect (regcache, gdbarch_pc_regnum (gdbarch), &regs->pc);
@@ -121,7 +121,7 @@ supply_gregset_reg (struct regcache *regcache,
   int i;
   xtensa_elf_gregset_t *regs = (xtensa_elf_gregset_t *) gregsetp;
 
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   if (regnum == gdbarch_pc_regnum (gdbarch) || regnum == -1)
     regcache_raw_supply (regcache, gdbarch_pc_regnum (gdbarch), &regs->pc);
@@ -337,8 +337,6 @@ ps_get_thread_area (struct ps_prochandle *ph,
 
   return PS_OK;
 }
-
-void _initialize_xtensa_linux_nat (void);
 
 void
 _initialize_xtensa_linux_nat (void)

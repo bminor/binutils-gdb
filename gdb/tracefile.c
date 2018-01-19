@@ -1,6 +1,6 @@
 /* Trace file support in GDB.
 
-   Copyright (C) 1997-2017 Free Software Foundation, Inc.
+   Copyright (C) 1997-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -306,7 +306,7 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 }
 
 static void
-tsave_command (char *args, int from_tty)
+tsave_command (const char *args, int from_tty)
 {
   int target_does_save = 0;
   char **argv;
@@ -318,8 +318,8 @@ tsave_command (char *args, int from_tty)
   if (args == NULL)
     error_no_arg (_("file in which to save trace data"));
 
-  argv = gdb_buildargv (args);
-  back_to = make_cleanup_freeargv (argv);
+  gdb_argv built_argv (args);
+  argv = built_argv.get ();
 
   for (; *argv; ++argv)
     {
@@ -341,7 +341,7 @@ tsave_command (char *args, int from_tty)
   else
     writer = tfile_trace_file_writer_new ();
 
-  make_cleanup (trace_file_writer_xfree, writer);
+  back_to = make_cleanup (trace_file_writer_xfree, writer);
 
   trace_save (filename, writer, target_does_save);
 
@@ -387,7 +387,7 @@ trace_save_ctf (const char *dirname, int target_does_save)
 void
 tracefile_fetch_registers (struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct tracepoint *tp = get_tracepoint (get_tracepoint_number ());
   int regn;
 
@@ -494,8 +494,6 @@ init_tracefile_ops (struct target_ops *ops)
   ops->to_thread_alive = tracefile_thread_alive;
   ops->to_magic = OPS_MAGIC;
 }
-
-extern initialize_file_ftype _initialize_tracefile;
 
 void
 _initialize_tracefile (void)

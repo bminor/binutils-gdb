@@ -1,6 +1,6 @@
 
 /* YACC parser for Fortran expressions, for GDB.
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -91,7 +91,10 @@ static int match_string_literal (void);
       LONGEST val;
       struct type *type;
     } typed_val;
-    DOUBLEST dval;
+    struct {
+      gdb_byte val[16];
+      struct type *type;
+    } typed_val_float;
     struct symbol *sym;
     struct type *tval;
     struct stoken sval;
@@ -122,7 +125,7 @@ static int parse_number (struct parser_state *, const char *, int,
 %type <tval> ptype
 
 %token <typed_val> INT
-%token <dval> FLOAT
+%token <typed_val_float> FLOAT
 
 /* Both NAME and TYPENAME tokens represent symbols in the input,
    and both convey their data as strings.
@@ -414,12 +417,10 @@ exp	:	NAME_OR_INT
 	;
 
 exp	:	FLOAT
-			{ write_exp_elt_opcode (pstate, OP_DOUBLE);
-			  write_exp_elt_type (pstate,
-					      parse_f_type (pstate)
-					      ->builtin_real_s8);
-			  write_exp_elt_dblcst (pstate, $1);
-			  write_exp_elt_opcode (pstate, OP_DOUBLE); }
+			{ write_exp_elt_opcode (pstate, OP_FLOAT);
+			  write_exp_elt_type (pstate, $1.type);
+			  write_exp_elt_floatcst (pstate, $1.val);
+			  write_exp_elt_opcode (pstate, OP_FLOAT); }
 	;
 
 exp	:	variable
@@ -647,16 +648,22 @@ parse_number (struct parser_state *par_state,
   if (parsed_float)
     {
       /* It's a float since it contains a point or an exponent.  */
-      /* [dD] is not understood as an exponent by atof, change it to 'e'.  */
+      /* [dD] is not understood as an exponent by parse_float,
+	 change it to 'e'.  */
       char *tmp, *tmp2;
 
       tmp = xstrdup (p);
       for (tmp2 = tmp; *tmp2; ++tmp2)
 	if (*tmp2 == 'd' || *tmp2 == 'D')
 	  *tmp2 = 'e';
-      putithere->dval = atof (tmp);
+
+      /* FIXME: Should this use different types?  */
+      putithere->typed_val_float.type = parse_f_type (pstate)->builtin_real_s8;
+      bool parsed = parse_float (tmp, len,
+				 putithere->typed_val_float.type,
+				 putithere->typed_val_float.val);
       free (tmp);
-      return FLOAT;
+      return parsed? FLOAT : ERROR;
     }
 
   /* Handle base-switching prefixes 0x, 0t, 0d, 0 */
@@ -1206,16 +1213,12 @@ yylex (void)
 int
 f_parse (struct parser_state *par_state)
 {
-  int result;
-  struct cleanup *c = make_cleanup_clear_parser_state (&pstate);
-
   /* Setting up the parser state.  */
+  scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
-  result = yyparse ();
-  do_cleanups (c);
-  return result;
+  return yyparse ();
 }
 
 void

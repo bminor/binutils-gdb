@@ -1,6 +1,6 @@
 /* tc-i370.c -- Assembler for the IBM 360/370/390 instruction set.
    Loosely based on the ppc files by Linas Vepstas <linas@linas.org> 1998, 99
-   Copyright (C) 1994-2017 Free Software Foundation, Inc.
+   Copyright (C) 1994-2018 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -680,7 +680,9 @@ i370_elf_cons (int nbytes)   /* 1=.byte, 2=.word, 4=.long.  */
           int size = bfd_get_reloc_size (reloc_howto);
 
           if (size > nbytes)
-            as_bad (_("%s relocations do not fit in %d bytes\n"),
+	    as_bad (ngettext ("%s relocations do not fit in %u byte",
+			      "%s relocations do not fit in %u bytes",
+			      nbytes),
 		    reloc_howto->name, nbytes);
           else
             {

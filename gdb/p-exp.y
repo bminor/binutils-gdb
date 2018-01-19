@@ -1,5 +1,5 @@
 /* YACC parser for Pascal expressions, for GDB.
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -89,7 +89,7 @@ static char *uptok (const char *, int);
       struct type *type;
     } typed_val_int;
     struct {
-      DOUBLEST dval;
+      gdb_byte val[16];
       struct type *type;
     } typed_val_float;
     struct symbol *sym;
@@ -511,11 +511,11 @@ exp	:	NAME_OR_INT
 
 
 exp	:	FLOAT
-			{ write_exp_elt_opcode (pstate, OP_DOUBLE);
+			{ write_exp_elt_opcode (pstate, OP_FLOAT);
 			  write_exp_elt_type (pstate, $1.type);
 			  current_type = $1.type;
-			  write_exp_elt_dblcst (pstate, $1.dval);
-			  write_exp_elt_opcode (pstate, OP_DOUBLE); }
+			  write_exp_elt_floatcst (pstate, $1.val);
+			  write_exp_elt_opcode (pstate, OP_FLOAT); }
 	;
 
 exp	:	variable
@@ -854,9 +854,30 @@ parse_number (struct parser_state *par_state,
 
   if (parsed_float)
     {
-      if (! parse_c_float (parse_gdbarch (par_state), p, len,
-			   &putithere->typed_val_float.dval,
-			   &putithere->typed_val_float.type))
+      /* Handle suffixes: 'f' for float, 'l' for long double.
+         FIXME: This appears to be an extension -- do we want this?  */
+      if (len >= 1 && tolower (p[len - 1]) == 'f')
+	{
+	  putithere->typed_val_float.type
+	    = parse_type (par_state)->builtin_float;
+	  len--;
+	}
+      else if (len >= 1 && tolower (p[len - 1]) == 'l')
+	{
+	  putithere->typed_val_float.type
+	    = parse_type (par_state)->builtin_long_double;
+	  len--;
+	}
+      /* Default type for floating-point literals is double.  */
+      else
+	{
+	  putithere->typed_val_float.type
+	    = parse_type (par_state)->builtin_double;
+	}
+
+      if (!parse_float (p, len,
+			putithere->typed_val_float.type,
+			putithere->typed_val_float.val))
 	return ERROR;
       return FLOAT;
     }
@@ -1701,16 +1722,12 @@ yylex (void)
 int
 pascal_parse (struct parser_state *par_state)
 {
-  int result;
-  struct cleanup *c = make_cleanup_clear_parser_state (&pstate);
-
   /* Setting up the parser state.  */
+  scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
-  result = yyparse ();
-  do_cleanups (c);
-  return result;
+  return yyparse ();
 }
 
 void

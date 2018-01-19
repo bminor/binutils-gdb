@@ -1,7 +1,7 @@
 /* Job control and terminal related functions, for GDB and gdbserver
    when running under Unix.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,7 +20,10 @@
 
 #include "common-defs.h"
 #include "job-control.h"
-#include "gdb_termios.h"
+#ifdef HAVE_TERMIOS_H
+#include <termios.h>
+#endif
+#include <unistd.h>
 
 /* Nonzero if we have job control.  */
 int job_control;
@@ -41,7 +44,6 @@ gdb_setpgid ()
 
   if (job_control)
     {
-#if defined (HAVE_TERMIOS) || defined (TIOCGPGRP)
 #ifdef HAVE_SETPGID
       /* The call setpgid (0, 0) is supposed to work and mean the same
          thing as this, but on Ultrix 4.2A it fails with EPERM (and
@@ -56,7 +58,6 @@ gdb_setpgid ()
 #endif
 #endif /* HAVE_SETPGRP */
 #endif /* HAVE_SETPGID */
-#endif /* defined (HAVE_TERMIOS) || defined (TIOCGPGRP) */
     }
 
   return retval;
@@ -67,9 +68,9 @@ gdb_setpgid ()
 void
 have_job_control ()
 {
-  /* OK, figure out whether we have job control.  If neither termios nor
-     sgtty (i.e. termio or go32), leave job_control 0.  */
-#if defined (HAVE_TERMIOS)
+  /* OK, figure out whether we have job control.  If termios is not
+     available, leave job_control 0.  */
+#if defined (HAVE_TERMIOS_H)
   /* Do all systems with termios have the POSIX way of identifying job
      control?  I hope so.  */
 #ifdef _POSIX_JOB_CONTROL
@@ -81,13 +82,5 @@ have_job_control ()
   job_control = 0;		/* Have to assume the worst.  */
 #endif /* _SC_JOB_CONTROL */
 #endif /* _POSIX_JOB_CONTROL */
-#endif /* HAVE_TERMIOS */
-
-#ifdef HAVE_SGTTY
-#ifdef TIOCGPGRP
-  job_control = 1;
-#else
-  job_control = 0;
-#endif /* TIOCGPGRP */
-#endif /* sgtty */
+#endif /* HAVE_TERMIOS_H */
 }

@@ -1,5 +1,5 @@
 /* Darwin support for GDB, the GNU debugger.
-   Copyright (C) 1997-2017 Free Software Foundation, Inc.
+   Copyright (C) 1997-2018 Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
 
@@ -23,7 +23,6 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "target.h"
-#include "floatformat.h"
 #include "symtab.h"
 #include "regcache.h"
 #include "objfiles.h"
@@ -286,9 +285,6 @@ i386_mach_o_osabi_sniffer (bfd *abfd)
 
   return GDB_OSABI_UNKNOWN;
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_i386_darwin_tdep;
 
 void
 _initialize_i386_darwin_tdep (void)

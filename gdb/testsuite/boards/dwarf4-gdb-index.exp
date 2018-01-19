@@ -1,4 +1,4 @@
-# Copyright 2012-2017 Free Software Foundation, Inc.
+# Copyright 2012-2018 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,10 +20,7 @@
 # bash$ make check RUNTESTFLAGS='--target_board=dwarf4-gdb-index'
 
 # This is needed otherwise dejagnu tries to rsh to host "dwarf4-gdb-index".
-# set_board_info only sets the value if not already set.
-# find_gcc checks for this, so set early.
-unset_board_info isremote
-set_board_info isremote 0
+load_board_description "local-board"
 
 # This is based on baseboards/unix.exp.
 # At the moment we only support systems that unix.exp supports.

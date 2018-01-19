@@ -1,7 +1,7 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -238,9 +238,9 @@ int bfd_generic_stat_arch_elt
   (bfd *, struct stat *);
 
 #define _bfd_read_ar_hdr(abfd) \
-  BFD_SEND (abfd, _bfd_read_ar_hdr_fn, (abfd))
-#define _bfd_write_ar_hdr(archive, abfd)         \
-  BFD_SEND (abfd, _bfd_write_ar_hdr_fn, (archive, abfd))
+	BFD_SEND (abfd, _bfd_read_ar_hdr_fn, (abfd))
+#define _bfd_write_ar_hdr(archive, abfd)	 \
+	BFD_SEND (abfd, _bfd_write_ar_hdr_fn, (archive, abfd))
 
 /* Generic routines to use for BFD_JUMP_TABLE_GENERIC.  Use
    BFD_JUMP_TABLE_GENERIC (_bfd_generic).  */
@@ -445,7 +445,7 @@ extern long _bfd_norelocs_get_reloc_upper_bound (bfd *, asection *);
 extern long _bfd_norelocs_canonicalize_reloc (bfd *, asection *,
 					      arelent **, asymbol **);
 extern void _bfd_norelocs_set_reloc (bfd *, asection *,
-                                     arelent **, unsigned int);
+				     arelent **, unsigned int);
 #define _bfd_norelocs_bfd_reloc_type_lookup \
   ((reloc_howto_type *(*) (bfd *, bfd_reloc_code_real_type)) bfd_nullvoidptr)
 #define _bfd_norelocs_bfd_reloc_name_lookup \

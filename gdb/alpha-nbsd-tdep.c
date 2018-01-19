@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/alpha.
 
-   Copyright (C) 2002-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2018 Free Software Foundation, Inc.
 
    Contributed by Wasabi Systems, Inc.
 
@@ -275,9 +275,6 @@ alphanbsd_init_abi (struct gdbarch_info info,
     (gdbarch, alphanbsd_iterate_over_regset_sections);
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_alphanbsd_tdep (void);
 
 void
 _initialize_alphanbsd_tdep (void)

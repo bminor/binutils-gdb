@@ -1,5 +1,5 @@
 /* tc-m68k.c -- Assemble for the m68k family
-   Copyright (C) 1987-2017 Free Software Foundation, Inc.
+   Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -8068,7 +8068,9 @@ m68k_elf_cons (int nbytes /* 4=.long */)
 
 	  if (size > nbytes)
 	    {
-	      as_bad (_("%s relocations do not fit in %d bytes\n"),
+	      as_bad (ngettext ("%s relocations do not fit in %u byte",
+				"%s relocations do not fit in %u bytes",
+				nbytes),
 		      reloc_howto->name, nbytes);
 	    }
 	  else

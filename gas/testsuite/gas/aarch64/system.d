@@ -32,7 +32,7 @@ Disassembly of section \.text:
   60:	d503223f 	(hint	#0x11|psb	csync)
   64:	d503225f 	hint	#0x12
   68:	d503227f 	hint	#0x13
-  6c:	d503229f 	hint	#0x14
+  6c:	d503229f 	(hint	#0x14|csdb)
   70:	d50322bf 	hint	#0x15
   74:	d50322df 	hint	#0x16
   78:	d50322ff 	hint	#0x17

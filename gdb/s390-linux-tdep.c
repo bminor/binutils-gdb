@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
 
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
@@ -30,7 +30,6 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
-#include "floatformat.h"
 #include "regcache.h"
 #include "trad-frame.h"
 #include "frame-base.h"
@@ -69,12 +68,14 @@
 #include "features/s390-te-linux64.c"
 #include "features/s390-vx-linux64.c"
 #include "features/s390-tevx-linux64.c"
+#include "features/s390-gs-linux64.c"
 #include "features/s390x-linux64.c"
 #include "features/s390x-linux64v1.c"
 #include "features/s390x-linux64v2.c"
 #include "features/s390x-te-linux64.c"
 #include "features/s390x-vx-linux64.c"
 #include "features/s390x-tevx-linux64.c"
+#include "features/s390x-gs-linux64.c"
 
 #define XML_SYSCALL_FILENAME_S390 "syscalls/s390-linux.xml"
 #define XML_SYSCALL_FILENAME_S390X "syscalls/s390x-linux.xml"
@@ -113,6 +114,7 @@ struct gdbarch_tdep
   int have_linux_v1;
   int have_linux_v2;
   int have_tdb;
+  bool have_gs;
 };
 
 
@@ -155,7 +157,7 @@ s390_cannot_store_register (struct gdbarch *gdbarch, int regnum)
 static void
 s390_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   regcache_cooked_write_unsigned (regcache, tdep->pc_regnum, pc);
@@ -728,7 +730,7 @@ s390_is_partial_instruction (struct gdbarch *gdbarch, CORE_ADDR loc, int *len)
 static std::vector<CORE_ADDR>
 s390_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR loc = regcache_read_pc (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len;
@@ -834,6 +836,24 @@ static const struct regcache_map_entry s390_regmap_vxrs_high[] =
     { 0 }
   };
 
+static const struct regcache_map_entry s390_regmap_gs[] =
+  {
+    { 1, REGCACHE_MAP_SKIP, 8 },
+    { 1, S390_GSD_REGNUM, 8 },
+    { 1, S390_GSSM_REGNUM, 8 },
+    { 1, S390_GSEPLA_REGNUM, 8 },
+    { 0 }
+  };
+
+static const struct regcache_map_entry s390_regmap_gsbc[] =
+  {
+    { 1, REGCACHE_MAP_SKIP, 8 },
+    { 1, S390_BC_GSD_REGNUM, 8 },
+    { 1, S390_BC_GSSM_REGNUM, 8 },
+    { 1, S390_BC_GSEPLA_REGNUM, 8 },
+    { 0 }
+  };
+
 
 /* Supply the TDB regset.  Like regcache_supply_regset, but invalidate
    the TDB registers unless the TDB format field is valid.  */
@@ -905,6 +925,18 @@ const struct regset s390_vxrs_high_regset = {
   regcache_collect_regset
 };
 
+const struct regset s390_gs_regset = {
+  s390_regmap_gs,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+const struct regset s390_gsbc_regset = {
+  s390_regmap_gsbc,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
 /* Iterate over supported core file register note sections. */
 
 static void
@@ -951,6 +983,23 @@ s390_iterate_over_regset_sections (struct gdbarch *gdbarch,
       cb (".reg-s390-vxrs-high", 16 * 16, &s390_vxrs_high_regset,
 	  "s390 vector registers 16-31", cb_data);
     }
+
+  /* Iterate over the guarded-storage regsets if in "read" mode, or if
+     their registers are available.  */
+  if (tdep->have_gs)
+    {
+      if (regcache == NULL
+	  || REG_VALID == regcache_register_status (regcache,
+						    S390_GSD_REGNUM))
+	cb (".reg-s390-gs-cb", 4 * 8, &s390_gs_regset,
+	    "s390 guarded-storage registers", cb_data);
+
+      if (regcache == NULL
+	  || REG_VALID == regcache_register_status (regcache,
+						    S390_BC_GSD_REGNUM))
+	cb (".reg-s390-gs-bc", 4 * 8, &s390_gsbc_regset,
+	    "s390 guarded-storage broadcast control", cb_data);
+    }
 }
 
 static const struct target_desc *
@@ -959,7 +1008,7 @@ s390_core_read_description (struct gdbarch *gdbarch,
 {
   asection *section = bfd_get_section_by_name (abfd, ".reg");
   CORE_ADDR hwcap = 0;
-  int high_gprs, v1, v2, te, vx;
+  bool high_gprs, v1, v2, te, vx, gs;
 
   target_auxv_search (target, AT_HWCAP, &hwcap);
   if (!section)
@@ -971,12 +1020,14 @@ s390_core_read_description (struct gdbarch *gdbarch,
   v2 = (bfd_get_section_by_name (abfd, ".reg-s390-system-call") != NULL);
   vx = (hwcap & HWCAP_S390_VX);
   te = (hwcap & HWCAP_S390_TE);
+  gs = (hwcap & HWCAP_S390_GS);
 
   switch (bfd_section_size (abfd, section))
     {
     case s390_sizeof_gregset:
       if (high_gprs)
-	return (te && vx ? tdesc_s390_tevx_linux64 :
+	return (gs ? tdesc_s390_gs_linux64 :
+		te && vx ? tdesc_s390_tevx_linux64 :
 		vx ? tdesc_s390_vx_linux64 :
 		te ? tdesc_s390_te_linux64 :
 		v2 ? tdesc_s390_linux64v2 :
@@ -986,7 +1037,8 @@ s390_core_read_description (struct gdbarch *gdbarch,
 		v1 ? tdesc_s390_linux32v1 : tdesc_s390_linux32);
 
     case s390x_sizeof_gregset:
-      return (te && vx ? tdesc_s390x_tevx_linux64 :
+      return (gs ? tdesc_s390x_gs_linux64 :
+	      te && vx ? tdesc_s390x_tevx_linux64 :
 	      vx ? tdesc_s390x_vx_linux64 :
 	      te ? tdesc_s390x_te_linux64 :
 	      v2 ? tdesc_s390x_linux64v2 :
@@ -1323,8 +1375,8 @@ s390_store (struct s390_prologue_data *data,
 
 
   /* Check whether we are storing a register into the stack.  */
-  if (!pv_area_store_would_trash (data->stack, addr))
-    pv_area_store (data->stack, addr, size, value);
+  if (!data->stack->store_would_trash (addr))
+    data->stack->store (addr, size, value);
 
 
   /* Note: If this is some store we cannot identify, you might think we
@@ -1361,11 +1413,11 @@ s390_load (struct s390_prologue_data *data,
     }
 
   /* Check whether we are accessing one of our save slots.  */
-  return pv_area_fetch (data->stack, addr, size);
+  return data->stack->fetch (addr, size);
 }
 
 /* Function for finding saved registers in a 'struct pv_area'; we pass
-   this to pv_area_scan.
+   this to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -1434,11 +1486,12 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
   /* The address of the next instruction after that.  */
   CORE_ADDR next_pc;
 
+  pv_area stack (S390_SP_REGNUM, gdbarch_addr_bit (gdbarch));
+  scoped_restore restore_stack = make_scoped_restore (&data->stack, &stack);
+
   /* Set up everything's initial value.  */
   {
     int i;
-
-    data->stack = make_pv_area (S390_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
     /* For the purpose of prologue tracking, we consider the GPR size to
        be equal to the ABI word size, even if it is actually larger
@@ -1678,10 +1731,7 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
     }
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (data->stack, s390_check_for_saved, data);
-
-  free_pv_area (data->stack);
-  data->stack = NULL;
+  data->stack->scan (s390_check_for_saved, data);
 
   return result;
 }
@@ -1811,6 +1861,8 @@ is_non_branch_ril (gdb_byte *insn)
   return 0;
 }
 
+typedef buf_displaced_step_closure s390_displaced_step_closure;
+
 /* Implementation of gdbarch_displaced_step_copy_insn.  */
 
 static struct displaced_step_closure *
@@ -1819,8 +1871,9 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = (gdb_byte *) xmalloc (len);
-  struct cleanup *old_chain = make_cleanup (xfree, buf);
+  std::unique_ptr<s390_displaced_step_closure> closure
+    (new s390_displaced_step_closure (len));
+  gdb_byte *buf = closure->buf.data ();
 
   read_memory (from, buf, len);
 
@@ -1848,7 +1901,7 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				  "RIL instruction: offset %s out of range\n",
 				  plongest (offset));
 	    }
-	  do_cleanups (old_chain);
+
 	  return NULL;
 	}
 
@@ -1864,20 +1917,21 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
       displaced_step_dump_bytes (gdb_stdlog, buf, len);
     }
 
-  discard_cleanups (old_chain);
-  return (struct displaced_step_closure *) buf;
+  return closure.release ();
 }
 
 /* Fix up the state of registers and memory after having single-stepped
    a displaced instruction.  */
 static void
 s390_displaced_step_fixup (struct gdbarch *gdbarch,
-			   struct displaced_step_closure *closure,
+			   struct displaced_step_closure *closure_,
 			   CORE_ADDR from, CORE_ADDR to,
 			   struct regcache *regs)
 {
   /* Our closure is a copy of the instruction.  */
-  gdb_byte *insn = (gdb_byte *) closure;
+  s390_displaced_step_closure *closure
+    = (s390_displaced_step_closure *) closure_;
+  gdb_byte *insn = closure->buf.data ();
   static int s390_instrlen[] = { 2, 4, 4, 6 };
   int insnlen = s390_instrlen[insn[0] >> 6];
 
@@ -2643,7 +2697,7 @@ static struct linux_record_tdep s390x_linux_record_tdep;
 static int
 s390_all_but_pc_registers_record (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i;
 
@@ -2845,7 +2899,7 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
 static int
 s390_linux_syscall_record (struct regcache *regcache, LONGEST syscall_native)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int ret;
   enum gdb_syscall syscall_gdb;
@@ -4992,6 +5046,8 @@ ex:
         case 0xb9e9: /* SGRK - subtract */
         case 0xb9ea: /* ALGRK - add logical */
         case 0xb9eb: /* SLGRK - subtract logical */
+	case 0xb9ed: /* MSGRKC - multiply single 64x64 -> 64 */
+	case 0xb9fd: /* MSRKC - multiply single 32x32 -> 32 */
           /* 64-bit gpr destination + flags */
           if (s390_record_gpr_g (gdbarch, regcache, inib[6]))
             return -1;
@@ -5019,7 +5075,7 @@ ex:
         case 0xb914: /* LGFR - load */
         case 0xb916: /* LLGFR - load logical */
         case 0xb917: /* LLGTR - load logical thirty one bits */
-        case 0xb91c: /* MSGFR - load */
+	case 0xb91c: /* MSGFR - multiply single 64<32 */
         case 0xb946: /* BCTGR - branch on count */
         case 0xb984: /* LLGCR - load logical character */
         case 0xb985: /* LLGHR - load logical halfword */
@@ -5038,6 +5094,7 @@ ex:
         case 0xb91d: /* DSGFR - divide single */
         case 0xb986: /* MLGR - multiply logical */
         case 0xb987: /* DLGR - divide logical */
+	case 0xb9ec: /* MGRK - multiply 64x64 -> 128 */
           /* 64-bit gpr pair destination  */
           if (s390_record_gpr_g (gdbarch, regcache, inib[6]))
             return -1;
@@ -5106,8 +5163,8 @@ ex:
         /* 0xb922-0xb924 undefined */
         /* 0xb925 privileged */
         /* 0xb928 privileged */
-        /* 0xb929 undefined */
 
+	case 0xb929: /* KMA - cipher message with authentication */
         case 0xb92a: /* KMF - cipher message with cipher feedback [partial] */
         case 0xb92b: /* KMO - cipher message with output feedback [partial] */
         case 0xb92f: /* KMC - cipher message with chaining [partial] */
@@ -5170,6 +5227,15 @@ ex:
               if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
                 return -1;
             }
+	  if (tmp != 0 && insn[0] == 0xb929)
+	    {
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[4]))
+		return -1;
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + (inib[4] | 1)))
+		return -1;
+	    }
           if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
             return -1;
           break;
@@ -5571,10 +5637,11 @@ ex:
 
         /* 0xb9e3 undefined */
         /* 0xb9e5 undefined */
-        /* 0xb9ec-0xb9f1 undefined */
+	/* 0xb9ee-0xb9f1 undefined */
         /* 0xb9f3 undefined */
         /* 0xb9f5 undefined */
-        /* 0xb9fc-0xb9ff undefined */
+	/* 0xb9fc undefined */
+	/* 0xb9fe -0xb9ff undefined */
 
         default:
           goto UNKNOWN_OP;
@@ -5962,6 +6029,7 @@ ex:
       break;
 
     case 0xe3:
+    case 0xe6:
     case 0xe7:
     case 0xeb:
     case 0xed:
@@ -6006,6 +6074,7 @@ ex:
         case 0xe31c: /* MSGF - multiply single */
         case 0xe32a: /* LZRG - load and zero rightmost byte */
         case 0xe33a: /* LLZRGF - load logical and zero rightmost byte */
+	case 0xe33c: /* MGH - multiply halfword 64x16mem -> 64 */
         case 0xe346: /* BCTG - branch on count */
         case 0xe377: /* LGB - load byte */
         case 0xe390: /* LLGC - load logical character */
@@ -6036,6 +6105,7 @@ ex:
 
         case 0xe30d: /* DSG - divide single */
         case 0xe31d: /* DSGF - divide single */
+	case 0xe384: /* MG - multiply 64x64mem -> 128 */
         case 0xe386: /* MLG - multiply logical */
         case 0xe387: /* DLG - divide logical */
         case 0xe38f: /* LPQ - load pair from quadword */
@@ -6057,6 +6127,9 @@ ex:
         /* 0xe310-0xe311 undefined */
 
         case 0xe312: /* LT - load and test */
+	case 0xe338: /* AGH - add halfword to 64 bit value */
+	case 0xe339: /* SGH - subtract halfword from 64 bit value */
+	case 0xe353: /* MSC - multiply single 32x32mem -> 32 */
         case 0xe354: /* NY - and */
         case 0xe356: /* OY - or */
         case 0xe357: /* XY - xor */
@@ -6066,13 +6139,14 @@ ex:
         case 0xe35f: /* SLY - subtract logical */
         case 0xe37a: /* AHY - add halfword */
         case 0xe37b: /* SHY - subtract halfword */
+	case 0xe383: /* MSGC - multiply single 64x64mem -> 64 */
         case 0xe398: /* ALC - add logical with carry */
         case 0xe399: /* SLB - subtract logical with borrow */
         case 0xe727: /* LCBB - load count to block bounduary */
         case 0xeb81: /* ICMY - insert characters under mask */
         case 0xebdc: /* SRAK - shift left single */
         case 0xebdd: /* SLAK - shift left single */
-          /* 32-bit gpr destination + flags */
+	  /* 32/64-bit gpr destination + flags */
           if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
             return -1;
           if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
@@ -6160,7 +6234,7 @@ ex:
         case 0xe336: /* PFD - prefetch data */
           break;
 
-        /* 0xe337-0xe339 undefined */
+	/* 0xe337 undefined */
         /* 0xe33c-0xe33d undefined */
 
         case 0xe33e: /* STRV - store reversed */
@@ -6183,8 +6257,12 @@ ex:
           break;
 
         /* 0xe340-0xe345 undefined */
-        /* 0xe347-0xe34f undefined */
-        /* 0xe352-0xe353 undefined */
+
+	case 0xe347: /* BIC - branch indirect on condition */
+	  break;
+
+	/* 0xe348-0xe34f undefined */
+	/* 0xe352 undefined */
 
         case 0xe35c: /* MFY - multiply */
         case 0xe396: /* ML - multiply logical */
@@ -6216,11 +6294,12 @@ ex:
           break;
 
         /* 0xe37d-0xe37f undefined */
-        /* 0xe383-0xe384 undefined */
 
         case 0xe385: /* LGAT - load and trap */
         case 0xe39c: /* LLGTAT - load logical thirty one bits and trap */
         case 0xe39d: /* LLGFAT - load logical and trap */
+	case 0xe650: /* VCVB - vector convert to binary 32 bit*/
+	case 0xe652: /* VCVBG - vector convert to binary 64 bit*/
         case 0xe721: /* VLGV - vector load gr from vr element */
           /* 64-bit gpr destination + fpc for possible DXC write */
           if (s390_record_gpr_g (gdbarch, regcache, inib[2]))
@@ -6271,6 +6350,10 @@ ex:
         /* 0xe3ce undefined */
         /* 0xe3d0-0xe3ff undefined */
 
+	case 0xe634: /* VPKZ - vector pack zoned */
+	case 0xe635: /* VLRL - vector load rightmost with immed. length */
+	case 0xe637: /* VLRLR - vector load rightmost with length */
+	case 0xe649: /* VLIP - vector load immediate decimal */
         case 0xe700: /* VLEB - vector load element */
         case 0xe701: /* VLEH - vector load element */
         case 0xe702: /* VLEG - vector load element */
@@ -6311,7 +6394,10 @@ ex:
         case 0xe769: /* VNC - vector and with complement */
         case 0xe76a: /* VO - vector or */
         case 0xe76b: /* VNO - vector nor */
+	case 0xe76c: /* VNX - vector not exclusive or */
         case 0xe76d: /* VX - vector xor */
+	case 0xe76e: /* VNN - vector nand */
+	case 0xe76f: /* VOC - vector or with complement */
         case 0xe770: /* VESLV - vector element shift left */
         case 0xe772: /* VERIM - vector element rotate and insert under mask */
         case 0xe773: /* VERLLV - vector element rotate left logical */
@@ -6325,11 +6411,14 @@ ex:
         case 0xe77e: /* VSRA - vector shift right arithmetic */
         case 0xe77f: /* VSRAB - vector shift right arithmetic by byte */
         case 0xe784: /* VPDI - vector permute doubleword immediate */
+	case 0xe785: /* VBPERM - vector bit permute */
         case 0xe78c: /* VPERM - vector permute */
         case 0xe78d: /* VSEL - vector select */
         case 0xe78e: /* VFMS - vector fp multiply and subtract */
         case 0xe78f: /* VFMA - vector fp multiply and add */
         case 0xe794: /* VPK - vector pack */
+	case 0xe79e: /* VFNMS - vector fp negative multiply and subtract */
+	case 0xe79f: /* VFNMA - vector fp negative multiply and add */
         case 0xe7a1: /* VMLH - vector multiply logical high */
         case 0xe7a2: /* VML - vector multiply low */
         case 0xe7a3: /* VMH - vector multiply high */
@@ -6345,6 +6434,7 @@ ex:
         case 0xe7ae: /* VMAE - vector multiply and add even */
         case 0xe7af: /* VMAO - vector multiply and add odd */
         case 0xe7b4: /* VGFM - vector Galois field multiply sum */
+	case 0xe7b8: /* VMSL - vector multiply sum logical */
         case 0xe7b9: /* VACCC - vector add with carry compute carry */
         case 0xe7bb: /* VAC - vector add with carry */
         case 0xe7bc: /* VGFMA - vector Galois field multiply sum and accumulate */
@@ -6354,8 +6444,8 @@ ex:
         case 0xe7c1: /* VCDLG - vector convert from logical 64-bit */
         case 0xe7c2: /* VCGD - vector convert to fixed 64-bit */
         case 0xe7c3: /* VCDG - vector convert from fixed 64-bit */
-        case 0xe7c4: /* VLDE - vector fp load lengthened */
-        case 0xe7c5: /* VLED - vector fp load rounded */
+	case 0xe7c4: /* VLDE/VFLL - vector fp load lengthened */
+	case 0xe7c5: /* VLED/VFLR - vector fp load rounded */
         case 0xe7c7: /* VFI - vector load fp integer */
         case 0xe7cc: /* VFPSO - vector fp perform sign operation */
         case 0xe7ce: /* VFSQ - vector fp square root */
@@ -6369,6 +6459,8 @@ ex:
         case 0xe7e3: /* VFA - vector fp add */
         case 0xe7e5: /* VFD - vector fp divide */
         case 0xe7e7: /* VFM - vector fp multiply */
+	case 0xe7ee: /* VFMIN - vector fp minimum */
+	case 0xe7ef: /* VFMAX - vector fp maximum */
         case 0xe7f0: /* VAVGL - vector average logical */
         case 0xe7f1: /* VACC - vector add and compute carry */
         case 0xe7f2: /* VAVG - vector average */
@@ -6385,6 +6477,14 @@ ex:
           if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
             return -1;
           break;
+
+	case 0xe63d: /* VSTRL - vector store rightmost with immed. length */
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
+	  if (record_full_arch_list_add_mem (oaddr, inib[3] + 1))
+	    return -1;
+	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
+	    return -1;
+	  break;
 
         case 0xe708: /* VSTEB - vector store element */
           oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
@@ -6480,13 +6580,22 @@ ex:
             return -1;
           break;
 
+	case 0xe63c: /* VUPKZ - vector unpack zoned */
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
+	  if (record_full_arch_list_add_mem (oaddr, (ibyte[1] + 1) & 31))
+	    return -1;
+	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
+	    return -1;
+	  break;
+
+	case 0xe63f: /* VSTRLR - vector store rightmost with length */
         case 0xe73f: /* VSTL - vector store with length */
           oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
           regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[3], &tmp);
           tmp &= 0xffffffffu;
-          if (tmp > 16)
-            tmp = 16;
-          if (record_full_arch_list_add_mem (oaddr, tmp))
+	  if (tmp > 15)
+	    tmp = 15;
+	  if (record_full_arch_list_add_mem (oaddr, tmp + 1))
             return -1;
           if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
             return -1;
@@ -6494,6 +6603,17 @@ ex:
 
         /* 0xe747-0xe749 undefined */
 
+	case 0xe658: /* VCVD - vector convert to decimal 32 bit */
+	case 0xe659: /* VSRP - vector shift and round decimal */
+	case 0xe65a: /* VCVDG - vector convert to decimal 64 bit*/
+	case 0xe65b: /* VPSOP - vector perform sign operation decimal */
+	case 0xe671: /* VAP - vector add decimal */
+	case 0xe673: /* VSP - vector subtract decimal */
+	case 0xe678: /* VMP - vector multiply decimal */
+	case 0xe679: /* VMSP - vector multiply decimal */
+	case 0xe67a: /* VDP - vector divide decimal */
+	case 0xe67b: /* VRP - vector remainder decimal */
+	case 0xe67e: /* VSDP - vector shift and divide decimal */
         case 0xe74a: /* VFTCI - vector fp test data class immediate */
         case 0xe75c: /* VISTR - vector isolate string */
         case 0xe780: /* VFEE - vector find element equal */
@@ -6504,7 +6624,7 @@ ex:
         case 0xe797: /* VPKS - vector pack saturate */
         case 0xe7e8: /* VFCE - vector fp compare equal */
         case 0xe7ea: /* VFCHE - vector fp compare high or equal */
-        case 0xe7eb: /* VFCE - vector fp compare high */
+	case 0xe7eb: /* VFCH - vector fp compare high */
         case 0xe7f8: /* VCEQ - vector compare equal */
         case 0xe7f9: /* VCHL - vector compare high logical */
         case 0xe7fb: /* VCH - vector compare high */
@@ -6517,6 +6637,14 @@ ex:
             return -1;
           break;
 
+	case 0xe65f: /* VTP - vector test decimal */
+	  /* flags + FPC */
+	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
+	    return -1;
+	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
+	    return -1;
+	  break;
+
         /* 0xe74b-0xe74c undefined */
         /* 0xe74e-0xe74f undefined */
         /* 0xe751 undefined */
@@ -6524,26 +6652,26 @@ ex:
         /* 0xe757-0xe75b undefined */
         /* 0xe75d-0xe75e undefined */
         /* 0xe763 undefined */
-        /* 0xe76c undefined */
-        /* 0xe76e-0xe76f undefined */
         /* 0xe771 undefined */
         /* 0xe776 undefined */
         /* 0xe779 undefined */
         /* 0xe77b undefined */
         /* 0xe783 undefined */
-        /* 0xe785-0xe789 undefined */
+	/* 0xe786-0xe789 undefined */
         /* 0xe78b undefined */
         /* 0xe790-0xe793 undefined */
         /* 0xe796 undefined */
-        /* 0xe798-0xe7a0 undefined */
-        /* 0xe7a8 undefined */
+	/* 0xe798-0xe79d undefined */
+	/* 0xe7a0 undefined */
+	/* 0xe7a8 undefined */
         /* 0xe7b0-0xe7b3 undefined */
-        /* 0xe7b5-0xe7b8 undefined */
+	/* 0xe7b5-0xe7b7 undefined */
         /* 0xe7ba undefined */
         /* 0xe7be undefined */
         /* 0xe7c6 undefined */
         /* 0xe7c8-0xe7c9 undefined */
 
+	case 0xe677: /* VCP - vector compare decimal */
         case 0xe7ca: /* WFK - vector fp compare and signal scalar */
         case 0xe7cb: /* WFC - vector fp compare scalar */
         case 0xe7d8: /* VTM - vector test under mask */
@@ -6568,7 +6696,7 @@ ex:
         /* 0xe7e4 undefined */
         /* 0xe7e6 undefined */
         /* 0xe7e9 undefined */
-        /* 0xe7ec-0xe7ef undefined */
+	/* 0xe7ec-0xe7ed undefined */
         /* 0xe7f4 undefined */
         /* 0xe7f6 undefined */
         /* 0xe7fa undefined */
@@ -7047,8 +7175,6 @@ ex:
           goto UNKNOWN_OP;
         }
       break;
-
-    /* 0xe6 undefined */
 
     case 0xec:
       /* RIE/RIS/RRS-format instruction */
@@ -7695,6 +7821,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int have_linux_v2 = 0;
   int have_tdb = 0;
   int have_vx = 0;
+  int have_gs = 0;
   int first_pseudo_reg, last_pseudo_reg;
   static const char *const stap_register_prefixes[] = { "%", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "(",
@@ -7761,6 +7888,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       static const char *const vxrs_high[] = {
 	"v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24",
 	"v25", "v26", "v27", "v28", "v29", "v30", "v31",
+      };
+      static const char *const gs_cb[] = {
+	"gsd", "gssm", "gsepla",
+      };
+      static const char *const gs_bc[] = {
+	"bc_gsd", "bc_gssm", "bc_gsepla",
       };
       const struct tdesc_feature *feature;
       int i, valid_p = 1;
@@ -7865,6 +7998,29 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  have_vx = 1;
 	}
 
+      /* Guarded-storage registers.  */
+      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.gs");
+      if (feature)
+	{
+	  for (i = 0; i < 3; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						S390_GSD_REGNUM + i,
+						gs_cb[i]);
+	  have_gs = 1;
+	}
+
+      /* Guarded-storage broadcast control.  */
+      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.gsbc");
+      if (feature)
+	{
+	  valid_p &= have_gs;
+
+	  for (i = 0; i < 3; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						S390_BC_GSD_REGNUM + i,
+						gs_bc[i]);
+	}
+
       if (!valid_p)
 	{
 	  tdesc_data_cleanup (tdesc_data);
@@ -7898,6 +8054,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	continue;
       if ((tdep->gpr_full_regnum != -1) != have_upper)
 	continue;
+      if (tdep->have_gs != have_gs)
+	continue;
       if (tdesc_data != NULL)
 	tdesc_data_cleanup (tdesc_data);
       return arches->gdbarch;
@@ -7910,6 +8068,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->have_linux_v1 = have_linux_v1;
   tdep->have_linux_v2 = have_linux_v2;
   tdep->have_tdb = have_tdb;
+  tdep->have_gs = have_gs;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
@@ -8069,9 +8228,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-
-extern initialize_file_ftype _initialize_s390_tdep; /* -Wmissing-prototypes */
-
 void
 _initialize_s390_tdep (void)
 {
@@ -8088,10 +8244,12 @@ _initialize_s390_tdep (void)
   initialize_tdesc_s390_te_linux64 ();
   initialize_tdesc_s390_vx_linux64 ();
   initialize_tdesc_s390_tevx_linux64 ();
+  initialize_tdesc_s390_gs_linux64 ();
   initialize_tdesc_s390x_linux64 ();
   initialize_tdesc_s390x_linux64v1 ();
   initialize_tdesc_s390x_linux64v2 ();
   initialize_tdesc_s390x_te_linux64 ();
   initialize_tdesc_s390x_vx_linux64 ();
   initialize_tdesc_s390x_tevx_linux64 ();
+  initialize_tdesc_s390x_gs_linux64 ();
 }

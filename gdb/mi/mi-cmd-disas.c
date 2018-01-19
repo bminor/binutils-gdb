@@ -1,5 +1,5 @@
 /* MI Command Set - disassemble commands.
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -57,7 +57,8 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
   CORE_ADDR start;
 
-  int mode, disasm_flags;
+  int mode;
+  gdb_disassembly_flags disasm_flags;
   struct symtab *s;
 
   /* Which options have we processed ... */
@@ -73,7 +74,6 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   int how_many = -1;
   CORE_ADDR low = 0;
   CORE_ADDR high = 0;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Options processing stuff.  */
   int oind = 0;
@@ -103,9 +103,8 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
       switch ((enum opt) opt)
 	{
 	case FILE_OPT:
-	  file_string = xstrdup (oarg);
+	  file_string = oarg;
 	  file_seen = 1;
-	  make_cleanup (xfree, file_string);
 	  break;
 	case LINE_OPT:
 	  line_num = atoi (oarg);
@@ -189,6 +188,4 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   gdb_disassembly (gdbarch, uiout,
   		   disasm_flags,
 		   how_many, low, high);
-
-  do_cleanups (cleanups);
 }

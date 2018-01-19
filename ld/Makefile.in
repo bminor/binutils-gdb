@@ -16,7 +16,7 @@
 @SET_MAKE@
 
 #
-#   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2018 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -2374,7 +2374,7 @@ earmelfb_fbsd.c: $(srcdir)/emulparams/armelfb_fbsd.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-earmelf_fuchsia.c: $(srcdir)/emulparams/armelfb_fuchsia.sh \
+earmelfb_fuchsia.c: $(srcdir)/emulparams/armelfb_fuchsia.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 

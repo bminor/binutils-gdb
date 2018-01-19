@@ -3,7 +3,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -53,7 +53,6 @@ struct target_ops;
 struct obstack;
 struct bp_target_info;
 struct target_desc;
-struct objfile;
 struct symbol;
 struct displaced_step_closure;
 struct syscall;
@@ -62,7 +61,6 @@ struct axs_value;
 struct stap_parse_info;
 struct parser_state;
 struct ravenscar_arch_ops;
-struct elf_internal_linux_prpsinfo;
 struct mem_range;
 struct syscalls_info;
 struct thread_info;
@@ -679,6 +677,14 @@ typedef CORE_ADDR (gdbarch_addr_bits_remove_ftype) (struct gdbarch *gdbarch, COR
 extern CORE_ADDR gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_bits_remove_ftype *addr_bits_remove);
 
+/* On some machines, not all bits of an address word are significant.
+   For example, on AArch64, the top bits of an address known as the "tag"
+   are ignored by the kernel, the hardware, etc. and can be regarded as
+   additional data associated with the address. */
+
+extern int gdbarch_significant_addr_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_significant_addr_bit (struct gdbarch *gdbarch, int significant_addr_bit);
+
 /* FIXME/cagney/2001-01-18: This should be split in two.  A target method that
    indicates if the target needs software single step.  An ISA method to
    implement it.
@@ -876,18 +882,6 @@ typedef char * (gdbarch_make_corefile_notes_ftype) (struct gdbarch *gdbarch, bfd
 extern char * gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
 extern void set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch, gdbarch_make_corefile_notes_ftype *make_corefile_notes);
 
-/* The elfcore writer hook to use to write Linux prpsinfo notes to core
-   files.  Most Linux architectures use the same prpsinfo32 or
-   prpsinfo64 layouts, and so won't need to provide this hook, as we
-   call the Linux generic routines in bfd to write prpsinfo notes by
-   default. */
-
-extern int gdbarch_elfcore_write_linux_prpsinfo_p (struct gdbarch *gdbarch);
-
-typedef char * (gdbarch_elfcore_write_linux_prpsinfo_ftype) (bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info);
-extern char * gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info);
-extern void set_gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo);
-
 /* Find core file memory regions */
 
 extern int gdbarch_find_memory_regions_p (struct gdbarch *gdbarch);
@@ -932,6 +926,16 @@ extern int gdbarch_core_thread_name_p (struct gdbarch *gdbarch);
 typedef const char * (gdbarch_core_thread_name_ftype) (struct gdbarch *gdbarch, struct thread_info *thr);
 extern const char * gdbarch_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr);
 extern void set_gdbarch_core_thread_name (struct gdbarch *gdbarch, gdbarch_core_thread_name_ftype *core_thread_name);
+
+/* Read offset OFFSET of TARGET_OBJECT_SIGNAL_INFO signal information
+   from core file into buffer READBUF with length LEN.  Return the number
+   of bytes read (zero indicates EOF, a negative value indicates failure). */
+
+extern int gdbarch_core_xfer_siginfo_p (struct gdbarch *gdbarch);
+
+typedef LONGEST (gdbarch_core_xfer_siginfo_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+extern LONGEST gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+extern void set_gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch, gdbarch_core_xfer_siginfo_ftype *core_xfer_siginfo);
 
 /* BFD target to use when generating a core file. */
 
@@ -987,10 +991,6 @@ extern void set_gdbarch_max_insn_length (struct gdbarch *gdbarch, ULONGEST max_i
   
    If you do not provide this function, GDB assumes that the
    architecture does not support displaced stepping.
-  
-   If your architecture doesn't need to adjust instructions before
-   single-stepping them, consider using simple_displaced_step_copy_insn
-   here.
   
    If the instruction cannot execute out of line, return NULL.  The
    core falls back to stepping past the instruction in-line instead in
@@ -1637,7 +1637,21 @@ struct gdbarch_info
   bfd *abfd;
 
   /* Use default: NULL (ZERO).  */
-  void *tdep_info;
+  union
+    {
+      /* Architecture-specific information.  The generic form for targets
+	 that have extra requirements.  */
+      struct gdbarch_tdep_info *tdep_info;
+
+      /* Architecture-specific target description data.  Numerous targets
+	 need only this, so give them an easy way to hold it.  */
+      struct tdesc_arch_data *tdesc_data;
+
+      /* SPU file system ID.  This is a single integer, so using the
+	 generic form would only complicate code.  Other targets may
+	 reuse this member if suitable.  */
+      int *id;
+    };
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
   enum gdb_osabi osabi;

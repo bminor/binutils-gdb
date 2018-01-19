@@ -1,6 +1,6 @@
 /* General functions for the WDB TUI.
 
-   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -75,8 +75,10 @@ static const struct tui_char_command tui_commands[] = {
   { 'd', "down" },
   { 'f', "finish" },
   { 'n', "next" },
+  { 'o', "nexti" },
   { 'r', "run" },
   { 's', "step" },
+  { 'i', "stepi" },
   { 'u', "up" },
   { 'v', "info locals" },
   { 'w', "where" },
@@ -543,7 +545,7 @@ tui_disable (void)
 /* Command wrapper for enabling tui mode.  */
 
 static void
-tui_enable_command (char *args, int from_tty)
+tui_enable_command (const char *args, int from_tty)
 {
   tui_enable ();
 }
@@ -551,7 +553,7 @@ tui_enable_command (char *args, int from_tty)
 /* Command wrapper for leaving tui mode.  */
 
 static void
-tui_disable_command (char *args, int from_tty)
+tui_disable_command (const char *args, int from_tty)
 {
   tui_disable ();
 }
@@ -668,9 +670,6 @@ tui_get_command_dimension (unsigned int *width,
   *height = TUI_CMD_WIN->generic.height;
   return 1;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tui;
 
 void
 _initialize_tui (void)

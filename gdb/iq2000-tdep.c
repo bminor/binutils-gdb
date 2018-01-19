@@ -1,7 +1,7 @@
 /* Target-dependent code for the IQ2000 architecture, for GDB, the GNU
    Debugger.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -539,7 +539,7 @@ static void
 iq2000_extract_return_value (struct type *type, struct regcache *regcache,
 			     gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* If the function's return value is 8 bytes or less, it is
@@ -857,9 +857,6 @@ iq2000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Function: _initialize_iq2000_tdep
    Initializer function for the iq2000 module.
    Called by gdb at start-up.  */
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_iq2000_tdep;
 
 void
 _initialize_iq2000_tdep (void)

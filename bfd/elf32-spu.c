@@ -1,6 +1,6 @@
 /* SPU specific support for 32-bit ELF
 
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -37,13 +37,13 @@ static bfd_reloc_status_type spu_elf_rel9 (bfd *, arelent *, asymbol *,
    array, so it must be declared in the order of that type.  */
 
 static reloc_howto_type elf_howto_table[] = {
-  HOWTO (R_SPU_NONE,       0, 3,  0, FALSE,  0, complain_overflow_dont,
+  HOWTO (R_SPU_NONE,	   0, 3,  0, FALSE,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_NONE",
 	 FALSE, 0, 0x00000000, FALSE),
-  HOWTO (R_SPU_ADDR10,     4, 2, 10, FALSE, 14, complain_overflow_bitfield,
+  HOWTO (R_SPU_ADDR10,	   4, 2, 10, FALSE, 14, complain_overflow_bitfield,
 	 bfd_elf_generic_reloc, "SPU_ADDR10",
 	 FALSE, 0, 0x00ffc000, FALSE),
-  HOWTO (R_SPU_ADDR16,     2, 2, 16, FALSE,  7, complain_overflow_bitfield,
+  HOWTO (R_SPU_ADDR16,	   2, 2, 16, FALSE,  7, complain_overflow_bitfield,
 	 bfd_elf_generic_reloc, "SPU_ADDR16",
 	 FALSE, 0, 0x007fff80, FALSE),
   HOWTO (R_SPU_ADDR16_HI, 16, 2, 16, FALSE,  7, complain_overflow_bitfield,
@@ -52,43 +52,43 @@ static reloc_howto_type elf_howto_table[] = {
   HOWTO (R_SPU_ADDR16_LO,  0, 2, 16, FALSE,  7, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_ADDR16_LO",
 	 FALSE, 0, 0x007fff80, FALSE),
-  HOWTO (R_SPU_ADDR18,     0, 2, 18, FALSE,  7, complain_overflow_bitfield,
+  HOWTO (R_SPU_ADDR18,	   0, 2, 18, FALSE,  7, complain_overflow_bitfield,
 	 bfd_elf_generic_reloc, "SPU_ADDR18",
 	 FALSE, 0, 0x01ffff80, FALSE),
-  HOWTO (R_SPU_ADDR32,     0, 2, 32, FALSE,  0, complain_overflow_dont,
+  HOWTO (R_SPU_ADDR32,	   0, 2, 32, FALSE,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_ADDR32",
 	 FALSE, 0, 0xffffffff, FALSE),
-  HOWTO (R_SPU_REL16,      2, 2, 16,  TRUE,  7, complain_overflow_bitfield,
+  HOWTO (R_SPU_REL16,	   2, 2, 16,  TRUE,  7, complain_overflow_bitfield,
 	 bfd_elf_generic_reloc, "SPU_REL16",
 	 FALSE, 0, 0x007fff80, TRUE),
-  HOWTO (R_SPU_ADDR7,      0, 2,  7, FALSE, 14, complain_overflow_dont,
+  HOWTO (R_SPU_ADDR7,	   0, 2,  7, FALSE, 14, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_ADDR7",
 	 FALSE, 0, 0x001fc000, FALSE),
-  HOWTO (R_SPU_REL9,       2, 2,  9,  TRUE,  0, complain_overflow_signed,
-	 spu_elf_rel9,          "SPU_REL9",
+  HOWTO (R_SPU_REL9,	   2, 2,  9,  TRUE,  0, complain_overflow_signed,
+	 spu_elf_rel9,		"SPU_REL9",
 	 FALSE, 0, 0x0180007f, TRUE),
-  HOWTO (R_SPU_REL9I,      2, 2,  9,  TRUE,  0, complain_overflow_signed,
-	 spu_elf_rel9,          "SPU_REL9I",
+  HOWTO (R_SPU_REL9I,	   2, 2,  9,  TRUE,  0, complain_overflow_signed,
+	 spu_elf_rel9,		"SPU_REL9I",
 	 FALSE, 0, 0x0000c07f, TRUE),
-  HOWTO (R_SPU_ADDR10I,    0, 2, 10, FALSE, 14, complain_overflow_signed,
+  HOWTO (R_SPU_ADDR10I,	   0, 2, 10, FALSE, 14, complain_overflow_signed,
 	 bfd_elf_generic_reloc, "SPU_ADDR10I",
 	 FALSE, 0, 0x00ffc000, FALSE),
-  HOWTO (R_SPU_ADDR16I,    0, 2, 16, FALSE,  7, complain_overflow_signed,
+  HOWTO (R_SPU_ADDR16I,	   0, 2, 16, FALSE,  7, complain_overflow_signed,
 	 bfd_elf_generic_reloc, "SPU_ADDR16I",
 	 FALSE, 0, 0x007fff80, FALSE),
-  HOWTO (R_SPU_REL32,      0, 2, 32, TRUE,  0, complain_overflow_dont,
+  HOWTO (R_SPU_REL32,	   0, 2, 32, TRUE,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_REL32",
 	 FALSE, 0, 0xffffffff, TRUE),
-  HOWTO (R_SPU_ADDR16X,    0, 2, 16, FALSE,  7, complain_overflow_bitfield,
+  HOWTO (R_SPU_ADDR16X,	   0, 2, 16, FALSE,  7, complain_overflow_bitfield,
 	 bfd_elf_generic_reloc, "SPU_ADDR16X",
 	 FALSE, 0, 0x007fff80, FALSE),
-  HOWTO (R_SPU_PPU32,      0, 2, 32, FALSE,  0, complain_overflow_dont,
+  HOWTO (R_SPU_PPU32,	   0, 2, 32, FALSE,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_PPU32",
 	 FALSE, 0, 0xffffffff, FALSE),
-  HOWTO (R_SPU_PPU64,      0, 4, 64, FALSE,  0, complain_overflow_dont,
+  HOWTO (R_SPU_PPU64,	   0, 4, 64, FALSE,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_PPU64",
 	 FALSE, 0, -1, FALSE),
-  HOWTO (R_SPU_ADD_PIC,      0, 0, 0, FALSE,  0, complain_overflow_dont,
+  HOWTO (R_SPU_ADD_PIC,	     0, 0, 0, FALSE,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_ADD_PIC",
 	 FALSE, 0, 0x00000000, FALSE),
 };
@@ -5040,10 +5040,10 @@ spu_elf_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%s+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%B(%s+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     bfd_get_section_name (input_bfd, input_section),
-	     (long) rel->r_offset,
+	     rel->r_offset,
 	     howto->name,
 	     sym_name);
 	  ret = FALSE;
@@ -5437,7 +5437,7 @@ spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
 	      bfd_vma base_end;
 
 	      /* If there aren't any relocs, then there's nothing more
-	         to do.  */
+		 to do.  */
 	      if ((isec->flags & SEC_ALLOC) == 0
 		  || (isec->flags & SEC_RELOC) == 0
 		  || isec->reloc_count == 0)
@@ -5451,10 +5451,10 @@ spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
 		return FALSE;
 
 	      /* 1 quadword can contain up to 4 R_SPU_ADDR32
-	         relocations.  They are stored in a single word by
-	         saving the upper 28 bits of the address and setting the
-	         lower 4 bits to a bit mask of the words that have the
-	         relocation.  BASE_END keeps track of the next quadword. */
+		 relocations.  They are stored in a single word by
+		 saving the upper 28 bits of the address and setting the
+		 lower 4 bits to a bit mask of the words that have the
+		 relocation.  BASE_END keeps track of the next quadword. */
 	      irela = internal_relocs;
 	      irelaend = irela + isec->reloc_count;
 	      base_end = 0;
@@ -5486,7 +5486,7 @@ spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
 #define ELF_MACHINE_CODE	EM_SPU
 /* This matches the alignment need for DMA.  */
 #define ELF_MAXPAGESIZE		0x80
-#define elf_backend_rela_normal         1
+#define elf_backend_rela_normal		1
 #define elf_backend_can_gc_sections	1
 
 #define bfd_elf32_bfd_reloc_type_lookup		spu_elf_reloc_type_lookup
@@ -5504,7 +5504,7 @@ spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
 #define elf_backend_additional_program_headers	spu_elf_additional_program_headers
 #define elf_backend_modify_segment_map		spu_elf_modify_segment_map
 #define elf_backend_modify_program_headers	spu_elf_modify_program_headers
-#define elf_backend_post_process_headers        spu_elf_post_process_headers
+#define elf_backend_post_process_headers	spu_elf_post_process_headers
 #define elf_backend_fake_sections		spu_elf_fake_sections
 #define elf_backend_special_sections		spu_elf_special_sections
 #define bfd_elf32_bfd_final_link		spu_elf_final_link

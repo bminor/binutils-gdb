@@ -1,4 +1,4 @@
-@c Copyright (C) 2008-2017 Free Software Foundation, Inc.
+@c Copyright (C) 2008-2018 Free Software Foundation, Inc.
 @c Permission is granted to copy, distribute and/or modify this document
 @c under the terms of the GNU Free Documentation License, Version 1.3 or
 @c any later version published by the Free Software Foundation; with the
@@ -241,6 +241,23 @@ Return a sequence holding all of @value{GDBN}'s breakpoints.
 version 7.11 and earlier, this function returned @code{None} if there
 were no breakpoints.  This peculiarity was subsequently fixed, and now
 @code{gdb.breakpoints} returns an empty sequence in this case.
+@end defun
+
+@defun gdb.rbreak (regex @r{[}, minsyms @r{[}, throttle, @r{[}, symtabs @r{]]]})
+Return a Python list holding a collection of newly set
+@code{gdb.Breakpoint} objects matching function names defined by the
+@var{regex} pattern.  If the @var{minsyms} keyword is @code{True}, all
+system functions (those not explicitly defined in the inferior) will
+also be included in the match.  The @var{throttle} keyword takes an
+integer that defines the maximum number of pattern matches for
+functions matched by the @var{regex} pattern.  If the number of
+matches exceeds the integer value of @var{throttle}, a
+@code{RuntimeError} will be raised and no breakpoints will be created.
+If @var{throttle} is not defined then there is no imposed limit on the
+maximum number of matches and breakpoints to be created.  The
+@var{symtabs} keyword takes a Python iterable that yields a collection
+of @code{gdb.Symtab} objects and will restrict the search to those
+functions only contained within the @code{gdb.Symtab} objects.
 @end defun
 
 @findex gdb.parameter
@@ -2785,6 +2802,13 @@ containing the address where the pattern was found, or @code{None} if
 the pattern could not be found.
 @end defun
 
+@findex Inferior.thread_from_thread_handle
+@defun Inferior.thread_from_thread_handle (thread_handle)
+Return the thread object corresponding to @var{thread_handle}, a thread
+library specific data structure such as @code{pthread_t} for pthreads
+library implementations.
+@end defun
+
 @node Events In Python
 @subsubsection Events In Python
 @cindex inferior events in Python
@@ -2988,6 +3012,39 @@ invalid state; that is, the @code{is_valid} method will return
 @item events.before_prompt
 This event carries no payload.  It is emitted each time @value{GDBN}
 presents a prompt to the user.
+
+@item events.new_inferior
+This is emitted when a new inferior is created.  Note that the
+inferior is not necessarily running; in fact, it may not even have an
+associated executable.
+
+The event is of type @code{gdb.NewInferiorEvent}.  This has a single
+attribute:
+
+@defvar NewInferiorEvent.inferior
+The new inferior, a @code{gdb.Inferior} object.
+@end defvar
+
+@item events.inferior_deleted
+This is emitted when an inferior has been deleted.  Note that this is
+not the same as process exit; it is notified when the inferior itself
+is removed, say via @code{remove-inferiors}.
+
+The event is of type @code{gdb.InferiorDeletedEvent}.  This has a single
+attribute:
+
+@defvar NewInferiorEvent.inferior
+The inferior that is being removed, a @code{gdb.Inferior} object.
+@end defvar
+
+@item events.new_thread
+This is emitted when @value{GDBN} notices a new thread.  The event is of
+type @code{gdb.NewThreadEvent}, which extends @code{gdb.ThreadEvent}.
+This has a single attribute:
+
+@defvar NewThreadEvent.inferior_thread
+The new thread.
+@end defvar
 
 @end table
 
@@ -4821,27 +4878,55 @@ represented as Python @code{Long} values.
 Python code can manipulate breakpoints via the @code{gdb.Breakpoint}
 class.
 
-@defun Breakpoint.__init__ (spec @r{[}, type @r{[}, wp_class @r{[},internal @r{[},temporary@r{]]]]})
-Create a new breakpoint according to @var{spec}, which is a string
-naming the location of the breakpoint, or an expression that defines a
-watchpoint.  The contents can be any location recognized by the
-@code{break} command, or in the case of a watchpoint, by the
-@code{watch} command.  The optional @var{type} denotes the breakpoint
-to create from the types defined later in this chapter.  This argument
-can be either @code{gdb.BP_BREAKPOINT} or @code{gdb.BP_WATCHPOINT}; it
-defaults to @code{gdb.BP_BREAKPOINT}.  The optional @var{internal}
-argument allows the breakpoint to become invisible to the user.  The
-breakpoint will neither be reported when created, nor will it be
-listed in the output from @code{info breakpoints} (but will be listed
-with the @code{maint info breakpoints} command).  The optional
-@var{temporary} argument makes the breakpoint a temporary breakpoint.
-Temporary breakpoints are deleted after they have been hit.  Any
-further access to the Python breakpoint after it has been hit will
-result in a runtime error (as that breakpoint has now been
-automatically deleted).  The optional @var{wp_class} argument defines
-the class of watchpoint to create, if @var{type} is
-@code{gdb.BP_WATCHPOINT}.  If a watchpoint class is not provided, it
-is assumed to be a @code{gdb.WP_WRITE} class.
+A breakpoint can be created using one of the two forms of the
+@code{gdb.Breakpoint} constructor.  The first one accepts a string
+like one would pass to the @code{break}
+(@pxref{Set Breaks,,Setting Breakpoints}) and @code{watch}
+(@pxref{Set Watchpoints, , Setting Watchpoints}) commands, and can be used to
+create both breakpoints and watchpoints.  The second accepts separate Python
+arguments similar to @ref{Explicit Locations}, and can only be used to create
+breakpoints.
+
+@defun Breakpoint.__init__ (spec @r{[}, type @r{][}, wp_class @r{][}, internal @r{][}, temporary @r{][}, qualified @r{]})
+Create a new breakpoint according to @var{spec}, which is a string naming the
+location of a breakpoint, or an expression that defines a watchpoint.  The
+string should describe a location in a format recognized by the @code{break}
+command (@pxref{Set Breaks,,Setting Breakpoints}) or, in the case of a
+watchpoint, by the @code{watch} command
+(@pxref{Set Watchpoints, , Setting Watchpoints}).
+
+The optional @var{type} argument specifies the type of the breakpoint to create,
+as defined below.
+
+The optional @var{wp_class} argument defines the class of watchpoint to create,
+if @var{type} is @code{gdb.BP_WATCHPOINT}.  If @var{wp_class} is omitted, it
+defaults to @code{gdb.WP_WRITE}.
+
+The optional @var{internal} argument allows the breakpoint to become invisible
+to the user.  The breakpoint will neither be reported when created, nor will it
+be listed in the output from @code{info breakpoints} (but will be listed with
+the @code{maint info breakpoints} command).
+
+The optional @var{temporary} argument makes the breakpoint a temporary
+breakpoint.  Temporary breakpoints are deleted after they have been hit.  Any
+further access to the Python breakpoint after it has been hit will result in a
+runtime error (as that breakpoint has now been automatically deleted).
+
+The optional @var{qualified} argument is a boolean that allows interpreting
+the function passed in @code{spec} as a fully-qualified name.  It is equivalent
+to @code{break}'s @code{-qualified} flag (@pxref{Linespec Locations} and
+@ref{Explicit Locations}).
+
+@end defun
+
+@defun Breakpoint.__init__ (@r{[} source @r{][}, function @r{][}, label @r{][}, line @r{]}, @r{][} internal @r{][}, temporary @r{][}, qualified @r{]})
+This second form of creating a new breakpoint specifies the explicit
+location (@pxref{Explicit Locations}) using keywords.  The new breakpoint will
+be created in the specified source file @var{source}, at the specified
+@var{function}, @var{label} and @var{line}.
+
+@var{internal}, @var{temporary} and @var{qualified} have the same usage as
+explained previously.
 @end defun
 
 The available types are represented by constants defined in the @code{gdb}

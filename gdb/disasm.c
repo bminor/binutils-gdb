@@ -1,6 +1,6 @@
 /* Disassemble support for GDB.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,6 +29,7 @@
 #include "source.h"
 #include "safe-ctype.h"
 #include <algorithm>
+#include "common/gdb_optional.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -191,102 +192,101 @@ compare_lines (const void *mle1p, const void *mle2p)
 int
 gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
 						  const struct disasm_insn *insn,
-						  int flags)
+						  gdb_disassembly_flags flags)
 {
   /* parts of the symbolic representation of the address */
   int unmapped;
   int offset;
   int line;
   int size;
-  struct cleanup *ui_out_chain;
   char *filename = NULL;
   char *name = NULL;
   CORE_ADDR pc;
   struct gdbarch *gdbarch = arch ();
 
-  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-  pc = insn->addr;
+  {
+    ui_out_emit_tuple tuple_emitter (uiout, NULL);
+    pc = insn->addr;
 
-  if (insn->number != 0)
-    {
-      uiout->field_fmt ("insn-number", "%u", insn->number);
-      uiout->text ("\t");
-    }
+    if (insn->number != 0)
+      {
+	uiout->field_fmt ("insn-number", "%u", insn->number);
+	uiout->text ("\t");
+      }
 
-  if ((flags & DISASSEMBLY_SPECULATIVE) != 0)
-    {
-      if (insn->is_speculative)
-	{
-	  uiout->field_string ("is-speculative", "?");
+    if ((flags & DISASSEMBLY_SPECULATIVE) != 0)
+      {
+	if (insn->is_speculative)
+	  {
+	    uiout->field_string ("is-speculative", "?");
 
-	  /* The speculative execution indication overwrites the first
-	     character of the PC prefix.
-	     We assume a PC prefix length of 3 characters.  */
-	  if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-	    uiout->text (pc_prefix (pc) + 1);
-	  else
-	    uiout->text ("  ");
-	}
-      else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-	uiout->text (pc_prefix (pc));
-      else
-	uiout->text ("   ");
-    }
-  else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-    uiout->text (pc_prefix (pc));
-  uiout->field_core_addr ("address", gdbarch, pc);
+	    /* The speculative execution indication overwrites the first
+	       character of the PC prefix.
+	       We assume a PC prefix length of 3 characters.  */
+	    if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+	      uiout->text (pc_prefix (pc) + 1);
+	    else
+	      uiout->text ("  ");
+	  }
+	else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+	  uiout->text (pc_prefix (pc));
+	else
+	  uiout->text ("   ");
+      }
+    else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+      uiout->text (pc_prefix (pc));
+    uiout->field_core_addr ("address", gdbarch, pc);
 
-  if (!build_address_symbolic (gdbarch, pc, 0, &name, &offset, &filename,
-			       &line, &unmapped))
-    {
-      /* We don't care now about line, filename and unmapped.  But we might in
-	 the future.  */
-      uiout->text (" <");
-      if ((flags & DISASSEMBLY_OMIT_FNAME) == 0)
-	uiout->field_string ("func-name", name);
-      uiout->text ("+");
-      uiout->field_int ("offset", offset);
-      uiout->text (">:\t");
-    }
-  else
-    uiout->text (":\t");
+    if (!build_address_symbolic (gdbarch, pc, 0, &name, &offset, &filename,
+				 &line, &unmapped))
+      {
+	/* We don't care now about line, filename and unmapped.  But we might in
+	   the future.  */
+	uiout->text (" <");
+	if ((flags & DISASSEMBLY_OMIT_FNAME) == 0)
+	  uiout->field_string ("func-name", name);
+	uiout->text ("+");
+	uiout->field_int ("offset", offset);
+	uiout->text (">:\t");
+      }
+    else
+      uiout->text (":\t");
 
-  if (filename != NULL)
-    xfree (filename);
-  if (name != NULL)
-    xfree (name);
+    if (filename != NULL)
+      xfree (filename);
+    if (name != NULL)
+      xfree (name);
 
-  m_insn_stb.clear ();
+    m_insn_stb.clear ();
 
-  if (flags & DISASSEMBLY_RAW_INSN)
-    {
-      CORE_ADDR end_pc;
-      bfd_byte data;
-      int err;
-      const char *spacer = "";
+    if (flags & DISASSEMBLY_RAW_INSN)
+      {
+	CORE_ADDR end_pc;
+	bfd_byte data;
+	const char *spacer = "";
 
-      /* Build the opcodes using a temporary stream so we can
-	 write them out in a single go for the MI.  */
-      m_opcode_stb.clear ();
+	/* Build the opcodes using a temporary stream so we can
+	   write them out in a single go for the MI.  */
+	m_opcode_stb.clear ();
 
+	size = m_di.print_insn (pc);
+	end_pc = pc + size;
+
+	for (;pc < end_pc; ++pc)
+	  {
+	    read_code (pc, &data, 1);
+	    m_opcode_stb.printf ("%s%02x", spacer, (unsigned) data);
+	    spacer = " ";
+	  }
+
+	uiout->field_stream ("opcodes", m_opcode_stb);
+	uiout->text ("\t");
+      }
+    else
       size = m_di.print_insn (pc);
-      end_pc = pc + size;
 
-      for (;pc < end_pc; ++pc)
-	{
-	  read_code (pc, &data, 1);
-	  m_opcode_stb.printf ("%s%02x", spacer, (unsigned) data);
-	  spacer = " ";
-	}
-
-      uiout->field_stream ("opcodes", m_opcode_stb);
-      uiout->text ("\t");
-    }
-  else
-    size = m_di.print_insn (pc);
-
-  uiout->field_stream ("inst", m_insn_stb);
-  do_cleanups (ui_out_chain);
+    uiout->field_stream ("inst", m_insn_stb);
+  }
   uiout->text ("\n");
 
   return size;
@@ -295,7 +295,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
 static int
 dump_insns (struct gdbarch *gdbarch,
 	    struct ui_out *uiout, CORE_ADDR low, CORE_ADDR high,
-	    int how_many, int flags, CORE_ADDR *end_pc)
+	    int how_many, gdb_disassembly_flags flags, CORE_ADDR *end_pc)
 {
   struct disasm_insn insn;
   int num_displayed = 0;
@@ -338,7 +338,7 @@ do_mixed_source_and_assembly_deprecated
   (struct gdbarch *gdbarch, struct ui_out *uiout,
    struct symtab *symtab,
    CORE_ADDR low, CORE_ADDR high,
-   int how_many, int flags)
+   int how_many, gdb_disassembly_flags flags)
 {
   int newlines = 0;
   int nlines;
@@ -350,9 +350,6 @@ do_mixed_source_and_assembly_deprecated
   int next_line = 0;
   int num_displayed = 0;
   print_source_lines_flags psl_flags = 0;
-  struct cleanup *ui_out_chain;
-  struct cleanup *ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
-  struct cleanup *ui_out_list_chain = make_cleanup (null_cleanup, 0);
 
   gdb_assert (symtab != NULL && SYMTAB_LINETABLE (symtab) != NULL);
 
@@ -414,7 +411,10 @@ do_mixed_source_and_assembly_deprecated
      they have been emitted before), followed by the assembly code
      for that line.  */
 
-  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
+  ui_out_emit_list asm_insns_list (uiout, "asm_insns");
+
+  gdb::optional<ui_out_emit_tuple> outer_tuple_emitter;
+  gdb::optional<ui_out_emit_list> inner_list_emitter;
 
   for (i = 0; i < newlines; i++)
     {
@@ -426,9 +426,7 @@ do_mixed_source_and_assembly_deprecated
 	      /* Just one line to print.  */
 	      if (next_line == mle[i].line)
 		{
-		  ui_out_tuple_chain
-		    = make_cleanup_ui_out_tuple_begin_end (uiout,
-							   "src_and_asm_line");
+		  outer_tuple_emitter.emplace (uiout, "src_and_asm_line");
 		  print_source_lines (symtab, next_line, mle[i].line + 1, psl_flags);
 		}
 	      else
@@ -436,36 +434,27 @@ do_mixed_source_and_assembly_deprecated
 		  /* Several source lines w/o asm instructions associated.  */
 		  for (; next_line < mle[i].line; next_line++)
 		    {
-		      struct cleanup *ui_out_list_chain_line;
-		      
 		      ui_out_emit_tuple tuple_emitter (uiout,
 						       "src_and_asm_line");
 		      print_source_lines (symtab, next_line, next_line + 1,
 					  psl_flags);
-		      ui_out_list_chain_line
-			= make_cleanup_ui_out_list_begin_end (uiout,
-							      "line_asm_insn");
-		      do_cleanups (ui_out_list_chain_line);
+		      ui_out_emit_list inner_list_emitter (uiout,
+							   "line_asm_insn");
 		    }
 		  /* Print the last line and leave list open for
 		     asm instructions to be added.  */
-		  ui_out_tuple_chain
-		    = make_cleanup_ui_out_tuple_begin_end (uiout,
-							   "src_and_asm_line");
+		  outer_tuple_emitter.emplace (uiout, "src_and_asm_line");
 		  print_source_lines (symtab, next_line, mle[i].line + 1, psl_flags);
 		}
 	    }
 	  else
 	    {
-	      ui_out_tuple_chain
-		= make_cleanup_ui_out_tuple_begin_end (uiout,
-						       "src_and_asm_line");
+	      outer_tuple_emitter.emplace (uiout, "src_and_asm_line");
 	      print_source_lines (symtab, mle[i].line, mle[i].line + 1, psl_flags);
 	    }
 
 	  next_line = mle[i].line + 1;
-	  ui_out_list_chain
-	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
+	  inner_list_emitter.emplace (uiout, "line_asm_insn");
 	}
 
       num_displayed += dump_insns (gdbarch, uiout,
@@ -476,16 +465,13 @@ do_mixed_source_and_assembly_deprecated
          assembly range for this source line, close out the list/tuple.  */
       if (i == (newlines - 1) || mle[i + 1].line > mle[i].line)
 	{
-	  do_cleanups (ui_out_list_chain);
-	  do_cleanups (ui_out_tuple_chain);
-	  ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
-	  ui_out_list_chain = make_cleanup (null_cleanup, 0);
+	  inner_list_emitter.reset ();
+	  outer_tuple_emitter.reset ();
 	  uiout->text ("\n");
 	}
       if (how_many >= 0 && num_displayed >= how_many)
 	break;
     }
-  do_cleanups (ui_out_chain);
 }
 
 /* The idea here is to present a source-O-centric view of a
@@ -498,15 +484,12 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 			      struct ui_out *uiout,
 			      struct symtab *main_symtab,
 			      CORE_ADDR low, CORE_ADDR high,
-			      int how_many, int flags)
+			      int how_many, gdb_disassembly_flags flags)
 {
   const struct linetable_entry *le, *first_le;
   int i, nlines;
   int num_displayed = 0;
   print_source_lines_flags psl_flags = 0;
-  struct cleanup *ui_out_chain;
-  struct cleanup *ui_out_tuple_chain;
-  struct cleanup *ui_out_list_chain;
   CORE_ADDR pc;
   struct symtab *last_symtab;
   int last_line;
@@ -567,21 +550,21 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
      CLI output works on top of this because MI ignores ui_out_text output,
      which is where we put file name and source line contents output.
 
-     Cleanup usage:
-     ui_out_chain
+     Emitter usage:
+     asm_insns_emitter
        Handles the outer "asm_insns" list.
-     ui_out_tuple_chain
+     tuple_emitter
        The tuples for each group of consecutive disassemblies.
-     ui_out_list_chain
+     list_emitter
        List of consecutive source lines or disassembled insns.  */
 
   if (flags & DISASSEMBLY_FILENAME)
     psl_flags |= PRINT_SOURCE_LINES_FILENAME;
 
-  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
+  ui_out_emit_list asm_insns_emitter (uiout, "asm_insns");
 
-  ui_out_tuple_chain = NULL;
-  ui_out_list_chain = NULL;
+  gdb::optional<ui_out_emit_tuple> tuple_emitter;
+  gdb::optional<ui_out_emit_list> list_emitter;
 
   last_symtab = NULL;
   last_line = 0;
@@ -650,11 +633,11 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 	  /* Skip the newline if this is the first instruction.  */
 	  if (pc > low)
 	    uiout->text ("\n");
-	  if (ui_out_tuple_chain != NULL)
+	  if (tuple_emitter.has_value ())
 	    {
-	      gdb_assert (ui_out_list_chain != NULL);
-	      do_cleanups (ui_out_list_chain);
-	      do_cleanups (ui_out_tuple_chain);
+	      gdb_assert (list_emitter.has_value ());
+	      list_emitter.reset ();
+	      tuple_emitter.reset ();
 	    }
 	  if (sal.symtab != last_symtab
 	      && !(flags & DISASSEMBLY_FILENAME))
@@ -676,7 +659,6 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 		 We need to preserve the structure of the output, so output
 		 a bunch of line tuples with no asm entries.  */
 	      int l;
-	      struct cleanup *ui_out_list_chain_line;
 
 	      gdb_assert (sal.symtab != NULL);
 	      for (l = start_preceding_line_to_display;
@@ -685,28 +667,23 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 		{
 		  ui_out_emit_tuple tuple_emitter (uiout, "src_and_asm_line");
 		  print_source_lines (sal.symtab, l, l + 1, psl_flags);
-		  ui_out_list_chain_line
-		    = make_cleanup_ui_out_list_begin_end (uiout,
-							  "line_asm_insn");
-		  do_cleanups (ui_out_list_chain_line);
+		  ui_out_emit_list chain_line_emitter (uiout, "line_asm_insn");
 		}
 	    }
-	  ui_out_tuple_chain
-	    = make_cleanup_ui_out_tuple_begin_end (uiout, "src_and_asm_line");
+	  tuple_emitter.emplace (uiout, "src_and_asm_line");
 	  if (sal.symtab != NULL)
 	    print_source_lines (sal.symtab, sal.line, sal.line + 1, psl_flags);
 	  else
 	    uiout->text (_("--- no source info for this pc ---\n"));
-	  ui_out_list_chain
-	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
+	  list_emitter.emplace (uiout, "line_asm_insn");
 	}
       else
 	{
 	  /* Here we're appending instructions to an existing line.
 	     By construction the very first insn will have a symtab
 	     and follow the new_source_line path above.  */
-	  gdb_assert (ui_out_tuple_chain != NULL);
-	  gdb_assert (ui_out_list_chain != NULL);
+	  gdb_assert (tuple_emitter.has_value ());
+	  gdb_assert (list_emitter.has_value ());
 	}
 
       if (sal.end != 0)
@@ -723,14 +700,12 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
       last_symtab = sal.symtab;
       last_line = sal.line;
     }
-
-  do_cleanups (ui_out_chain);
 }
 
 static void
 do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
 		  CORE_ADDR low, CORE_ADDR high,
-		  int how_many, int flags)
+		  int how_many, gdb_disassembly_flags flags)
 {
   ui_out_emit_list list_emitter (uiout, "asm_insns");
 
@@ -803,7 +778,7 @@ gdb_disassembler::print_insn (CORE_ADDR memaddr,
 
 void
 gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
-		 int flags, int how_many,
+		 gdb_disassembly_flags flags, int how_many,
 		 CORE_ADDR low, CORE_ADDR high)
 {
   struct symtab *symtab;
@@ -962,7 +937,7 @@ set_disassembler_options (char *prospective_options)
 }
 
 static void
-set_disassembler_options_sfunc (char *args, int from_tty,
+set_disassembler_options_sfunc (const char *args, int from_tty,
 				struct cmd_list_element *c)
 {
   set_disassembler_options (prospective_options);
@@ -1030,8 +1005,9 @@ The following disassembler options are supported for use with the\n\
 
 /* A completion function for "set disassembler".  */
 
-static VEC (char_ptr) *
+static void
 disassembler_options_completer (struct cmd_list_element *ignore,
+				completion_tracker &tracker,
 				const char *text, const char *word)
 {
   struct gdbarch *gdbarch = get_current_arch ();
@@ -1043,17 +1019,13 @@ disassembler_options_completer (struct cmd_list_element *ignore,
       const char *separator = strrchr (text, ',');
       if (separator != NULL)
 	text = separator + 1;
-      text = skip_spaces_const (text);
-      return complete_on_enum (opts->name, text, word);
+      text = skip_spaces (text);
+      complete_on_enum (tracker, opts->name, text, word);
     }
-  return NULL;
 }
 
 
 /* Initialization code.  */
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_disasm;
 
 void
 _initialize_disasm (void)

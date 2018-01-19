@@ -1,6 +1,6 @@
 /* Target-dependent code for the Renesas RL78 for GDB, the GNU debugger.
 
-   Copyright (C) 2011-2017 Free Software Foundation, Inc.
+   Copyright (C) 2011-2018 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -271,7 +271,7 @@ rl78_psw_type (struct gdbarch *gdbarch)
   if (tdep->rl78_psw_type == NULL)
     {
       tdep->rl78_psw_type = arch_flags_type (gdbarch,
-					     "builtin_type_rl78_psw", 1);
+					     "builtin_type_rl78_psw", 8);
       append_flags_type_flag (tdep->rl78_psw_type, 0, "CY");
       append_flags_type_flag (tdep->rl78_psw_type, 1, "ISP0");
       append_flags_type_flag (tdep->rl78_psw_type, 2, "ISP1");
@@ -883,7 +883,7 @@ rl78_get_opcode_byte (void *handle)
 }
 
 /* Function for finding saved registers in a 'struct pv_area'; this
-   function is passed to pv_area_scan.
+   function is passed to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -912,8 +912,6 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
   CORE_ADDR pc, next_pc;
   int rn;
   pv_t reg[RL78_NUM_TOTAL_REGS];
-  struct pv_area *stack;
-  struct cleanup *back_to;
   CORE_ADDR after_last_frame_setup_insn = start_pc;
   int bank = 0;
 
@@ -925,12 +923,11 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (RL78_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (RL78_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
 
   /* The call instruction has saved the return address on the stack.  */
   reg[RL78_SP_REGNUM] = pv_add_constant (reg[RL78_SP_REGNUM], -4);
-  pv_area_store (stack, reg[RL78_SP_REGNUM], 4, reg[RL78_PC_REGNUM]);
+  stack.store (reg[RL78_SP_REGNUM], 4, reg[RL78_PC_REGNUM]);
 
   pc = start_pc;
   while (pc < limit_pc)
@@ -954,12 +951,12 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
 	       && opc.op[1].type == RL78_Operand_Register)
 	{
 	  int rsrc = (bank * RL78_REGS_PER_BANK) 
-	           + 2 * (opc.op[1].reg - RL78_Reg_AX);
+	    + 2 * (opc.op[1].reg - RL78_Reg_AX);
 
 	  reg[RL78_SP_REGNUM] = pv_add_constant (reg[RL78_SP_REGNUM], -1);
-	  pv_area_store (stack, reg[RL78_SP_REGNUM], 1, reg[rsrc]);
+	  stack.store (reg[RL78_SP_REGNUM], 1, reg[rsrc]);
 	  reg[RL78_SP_REGNUM] = pv_add_constant (reg[RL78_SP_REGNUM], -1);
-	  pv_area_store (stack, reg[RL78_SP_REGNUM], 1, reg[rsrc + 1]);
+	  stack.store (reg[RL78_SP_REGNUM], 1, reg[rsrc + 1]);
 	  after_last_frame_setup_insn = next_pc;
 	}
       else if (opc.id == RLO_sub
@@ -1016,11 +1013,9 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
     result->frame_size = reg[RL78_SP_REGNUM].k;
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (stack, check_for_saved, (void *) result);
+  stack.scan (check_for_saved, (void *) result);
 
   result->prologue_end = after_last_frame_setup_insn;
-
-  do_cleanups (back_to);
 }
 
 /* Implement the "addr_bits_remove" gdbarch method.  */
@@ -1417,7 +1412,8 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->elf_flags = elf_flags;
 
   /* Initialize types.  */
-  tdep->rl78_void = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
+  tdep->rl78_void = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT,
+			       "void");
   tdep->rl78_uint8 = arch_integer_type (gdbarch, 8, 1, "uint8_t");
   tdep->rl78_int8 = arch_integer_type (gdbarch, 8, 0, "int8_t");
   tdep->rl78_uint16 = arch_integer_type (gdbarch, 16, 1, "uint16_t");
@@ -1490,9 +1486,6 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_rl78_tdep;
 
 /* Register the above initialization routine.  */
 

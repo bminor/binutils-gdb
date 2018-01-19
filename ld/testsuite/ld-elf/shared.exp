@@ -1,5 +1,5 @@
 # Expect script for various ELF tests.
-#   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+#   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -34,6 +34,8 @@ if ![check_shared_lib_support] {
 # Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
 global NOPIE_CFLAGS NOPIE_LDFLAGS
 
+set old_ASFLAGS $ASFLAGS
+
 # This target requires extra GAS options when building code for shared
 # libraries.
 set AFLAGS_PIC ""
@@ -46,6 +48,115 @@ set LFLAGS ""
 if [istarget "tic6x-*-*"] {
     append LFLAGS " -melf32_tic6x_le"
 }
+
+if [is_underscore_target] {
+    set ASFLAGS "$ASFLAGS --defsym UNDERSCORE=1"
+}
+
+run_ld_link_tests [list \
+    [list \
+	"Build pr22471a.so" \
+	"$LFLAGS -shared" \
+	"" \
+	"$AFLAGS_PIC" \
+	{pr22471a.s} \
+	{} \
+	"pr22471a.so" \
+    ] \
+    [list \
+	"Build pr22471b.so" \
+	"$LFLAGS -shared --version-script pr22471.t" \
+	"tmpdir/pr22471a.so" \
+	"$AFLAGS_PIC" \
+	{pr22471a.s} \
+	{} \
+	"pr22471b.so" \
+    ] \
+    [list \
+	"Build pr22471" \
+	"$LFLAGS -rpath-link ." \
+	"tmpdir/pr22471b.so" \
+	"" \
+	{pr22471b.s} \
+	{} \
+	"pr22471" \
+    ] \
+    [list \
+	"Build pr22649-1.so" \
+	"$LFLAGS -shared" \
+	"" \
+	"$AFLAGS_PIC" \
+	{pr22649-1.s} \
+	{} \
+	"pr22649-1.so" \
+    ] \
+]
+
+if { [check_gc_sections_available] } {
+    run_ld_link_tests [list \
+	[list \
+	    "Build pr22649-2a.so" \
+	    "$LFLAGS -shared -gc-sections -print-gc-sections" \
+	    "" \
+	    "$AFLAGS_PIC" \
+	    {pr22649-2a.s} \
+	    {{ld pr22649.msg}} \
+	    "pr22649-2a.so" \
+	] \
+	[list \
+	    "Build pr22649-2b.so" \
+	    "$LFLAGS -shared -gc-sections -print-gc-sections" \
+	    "tmpdir/pr22649-1.so" \
+	    "$AFLAGS_PIC" \
+	    {pr22649-2a.s} \
+	    {{ld pr22649.msg}} \
+	    "pr22649-2b.so" \
+	] \
+	[list \
+	    "Build pr22649-2c.so" \
+	    "$LFLAGS -shared -gc-sections -print-gc-sections" \
+	    "" \
+	    "$AFLAGS_PIC" \
+	    {pr22649-2b.s} \
+	    {} \
+	    "pr22649-2b.so" \
+	] \
+	[list \
+	    "Build pr22649-2d.so" \
+	    "$LFLAGS -shared -gc-sections -print-gc-sections" \
+	    "tmpdir/pr22649-1.so" \
+	    "$AFLAGS_PIC" \
+	    {pr22649-2b.s} \
+	    {} \
+	    "pr22649-2b.so" \
+	] \
+    ]
+}
+
+run_ld_link_tests [list \
+    [list \
+	"DT_TEXTREL in shared lib" \
+	"$LFLAGS -shared --warn-shared-textrel" \
+	"" \
+	"$AFLAGS_PIC" \
+	{textrel.s} \
+	 {{ld textrel.warn} \
+	  {readelf {-d --wide} textrel.rd}} \
+	"textrel.so" \
+    ] \
+] "xtensa-*-*"
+
+run_ld_link_tests [list \
+    [list \
+	"DT_TEXTREL map file warning" \
+	"$LFLAGS -shared -M" \
+	"" \
+	"$AFLAGS_PIC" \
+	{textrel.s} \
+	 {{ld textrel.map}} \
+	"textrel.so" \
+    ] \
+] "cris*-*-*"
 
 # PR ld/20828 check for correct dynamic symbol table entries where:
 # - symbols have been defined with a linker script,
@@ -135,8 +246,6 @@ if { [check_gc_sections_available] } {
 	    {{readelf --dyn-syms pr21233-l.sd}} \
 	    "libpr21233.so"]]
 
-    setup_kfail "cris*-*-*" "ld/21233"
-
     run_ld_link_tests [list \
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC (--undefined)" \
@@ -145,8 +254,6 @@ if { [check_gc_sections_available] } {
 	    {pr21233.s} \
 	    {{readelf --dyn-syms pr21233.sd}} \
 	    "pr21233-1"]]
-
-    setup_kfail "cris*-*-*" "ld/21233"
 
     run_ld_link_tests [list \
 	[list \
@@ -158,8 +265,6 @@ if { [check_gc_sections_available] } {
 	    {{readelf --dyn-syms pr21233.sd}} \
 	    "pr21233-2"]]
 
-    setup_kfail "cris*-*-*" "ld/21233"
-
     run_ld_link_tests [list \
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC (EXTERN)" \
@@ -169,6 +274,31 @@ if { [check_gc_sections_available] } {
 	    {{readelf --dyn-syms pr21233.sd}} \
 	    "pr21233-3"]]
 }
+
+if { [check_gc_sections_available] } {
+    run_ld_link_tests [list \
+	[list \
+	    "Build pr22150.so" \
+	    "$LFLAGS -shared --version-script pr22150.ver" \
+	    "" \
+	    "$AFLAGS_PIC" \
+	    {pr22150a.s} \
+	    {} \
+	    "pr22150.so" \
+	] \
+	[list \
+	    "Build pr22150" \
+	    "$LFLAGS -e _start --gc-sections" \
+	    "tmpdir/pr22150.so" \
+	    "" \
+	    {pr22150b.s} \
+	    {{readelf -V pr22150.vd}} \
+	    "pr22150" \
+	] \
+    ]
+}
+
+set ASFLAGS $old_ASFLAGS
 
 # Check to see if the C compiler works
 if { [which $CC] == 0 } {
@@ -423,9 +553,37 @@ set build_tests {
   {"Build libpr19073.so"
    "-shared -Wl,--version-script=pr19073.map tmpdir/pr19073a.o" "-fPIC"
    {dummy.c} {{readelf {--dyn-syms --wide} pr19073.rd}} "libpr19073.so"}
+  {"Build pr21964-1a.so"
+   "-shared" "-fPIC"
+   {pr21964-1a.c} {} "pr21964-1a.so"}
+  {"Build pr21964-1b.so"
+   "-shared" "-fPIC"
+   {pr21964-1b.c} {} "pr21964-1b.so"}
+  {"Build pr21964-2a.so"
+   "-shared" "-fPIC"
+   {pr21964-2a.c} {} "pr21964-2a.so"}
+  {"Build pr21964-2b.so"
+   "-shared" "-fPIC"
+   {pr21964-2b.c} {} "pr21964-2b.so"}
+  {"Dump pr21978.so"
+   "-shared" "-fPIC -g -O2"
+   {pr21978a.c pr21978b.c} {{objdump {-Sl} pr21978.od}} "pr21978.so"}
 }
 
 run_cc_link_tests $build_tests
+
+run_ld_link_tests [list \
+    [list \
+	"Build pr22269-1" \
+	"-pie -e _start --no-dynamic-linker -z text" \
+	"" \
+	"" \
+	{ pr22269-1.c } \
+	{{readelf -rW pr22269-1.rd}} \
+	"pr22269-1" \
+	"-fPIE -O2" \
+    ] \
+]
 
 set run_tests [list \
     [list "Run normal with libfoo.so" \
@@ -540,6 +698,9 @@ set run_tests [list \
     [list "Run pr18458" \
      "-Wl,--no-as-needed,-z,now tmpdir/libpr18458a.so tmpdir/libpr18458b.so" "" \
      {pr18458c.c} "pr18458" "pass.out" ] \
+    [list "Run pr21964-1" \
+     "-Wl,--no-as-needed,-rpath,tmpdir tmpdir/pr21964-1a.so tmpdir/pr21964-1b.so" "" \
+     {pr21964-1c.c} "pr21964-1" "pass.out" ] \
 ]
 
 # NetBSD ELF systems do not currently support the .*_array sections.
@@ -586,6 +747,9 @@ set dlopen_run_tests [list \
     [list "Run dl6d1 with --dynamic-list-data and dlopen on libdl6d.so" \
      "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
      {dl6dmain.c} "dl6d1" "dl6b.out" ] \
+    [list "Run pr21964-2" \
+     "-Wl,--no-as-needed,-rpath,tmpdir tmpdir/pr21964-2a.so $extralibs" "" \
+     {pr21964-2c.c} "pr21964-2" "pass.out" ] \
 ]
 
 # Only run them when libdl is available.
@@ -704,6 +868,51 @@ if { [istarget *-*-linux*]
 	    {pr19579b.c} \
 	    {} \
 	    "libpr19579.so" \
+	] \
+	[list \
+	    "Build pr22393-2a.so" \
+	    "-shared -Wl,-z,separate-code" \
+	    "-fPIC" \
+	    {pr22393-2a.c} \
+	    {{readelf -lW pr22393-2a.rd} \
+	     {readelf -lW pr22393-2b.rd}} \
+	    "pr22393-2a.so" \
+	] \
+	[list \
+	    "Build pr22393-2a-now.so" \
+	    "-shared -Wl,-z,separate-code,-z,now" \
+	    "-fPIC" \
+	    {pr22393-2a.c} \
+	    {{readelf -lW pr22393-2a.rd} \
+	     {readelf -lW pr22393-2b.rd}} \
+	    "pr22393-2a-now.so" \
+	] \
+	[list \
+	    "Build pr22393-2" \
+	    "$NOPIE_LDFLAGS -Wl,-z,separate-code,--no-as-needed tmpdir/pr22393-2a.so" \
+	    "$NOPIE_CFLAGS" \
+	    {pr22393-2b.c} \
+	    {{readelf -lW pr22393-2a.rd} \
+	     {readelf -lW pr22393-2b.rd}} \
+	    "pr22393-2" \
+	] \
+	[list \
+	    "Build pr22393-2 (PIE)" \
+	    "-pie -Wl,-z,separate-code,--no-as-needed tmpdir/pr22393-2a-now.so" \
+	    "-fPIE" \
+	    {pr22393-2b.c} \
+	    {{readelf -lW pr22393-2a.rd} \
+	     {readelf -lW pr22393-2b.rd}} \
+	    "pr22393-2-pie" \
+	] \
+	[list \
+	    "Build pr22393-2 (static)" \
+	    "-static -Wl,-z,separate-code" \
+	    "" \
+	    {pr22393-2a.c pr22393-2b.c} \
+	    {{readelf -lW pr22393-2a.rd} \
+	     {readelf -lW pr22393-2b.rd}} \
+	    "pr22393-2-static" \
 	] \
     ]
     run_ld_link_exec_tests [list \
@@ -841,6 +1050,32 @@ if { [istarget *-*-linux*]
 	    "pr19579n" \
 	    "pass.out" \
 	    "-fPIE" \
+	] \
+	[list \
+	    "Run pr22393-2" \
+	    "$NOPIE_LDFLAGS -Wl,-z,separate-code,--no-as-needed tmpdir/pr22393-2a.so" \
+	    "" \
+	    {pr22393-2b.c} \
+	    "pr22393-2" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run pr22393-2 (PIE)" \
+	    "-pie -Wl,-z,separate-code,--no-as-needed tmpdir/pr22393-2a-now.so" \
+	    "" \
+	    {pr22393-2b.c} \
+	    "pr22393-2-pie" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
+	    "Run pr22393-2 (static)" \
+	    "-static -Wl,-z,separate-code" \
+	    "" \
+	    {pr22393-2a.c pr22393-2b.c} \
+	    "pr22393-2-static" \
+	    "pass.out" \
 	] \
     ]
 }

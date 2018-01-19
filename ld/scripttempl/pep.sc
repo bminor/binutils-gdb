@@ -1,7 +1,7 @@
 # Linker script for PE.
 #
-# Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+# Copyright (C) 2014-2018 Free Software Foundation, Inc.
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -21,13 +21,13 @@ if test "${RELOCATING}"; then
   R_TEXT='*(SORT(.text$*))'
   if test "x$LD_FLAG" = "xauto_import" ; then
     R_DATA='*(SORT(.data$*))
-            *(.rdata)
+	    *(.rdata)
 	    *(SORT(.rdata$*))'
     R_RDATA=''
   else
     R_DATA='*(SORT(.data$*))'
     R_RDATA='*(.rdata)
-             *(SORT(.rdata$*))'
+	     *(SORT(.rdata$*))'
   fi
   R_IDATA234='
     KEEP (SORT(*)(.idata$2))
@@ -70,7 +70,7 @@ else
 fi
 
 cat <<EOF
-/* Copyright (C) 2014-2017 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2018 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -98,18 +98,24 @@ SECTIONS
     ${RELOCATING+*(.glue_7t)}
     ${RELOCATING+*(.glue_7)}
     ${CONSTRUCTING+. = ALIGN(8);}
-    ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ;
-			LONG (-1); LONG (-1);
-			KEEP (*(.ctors));
-			KEEP (*(.ctor));
-			KEEP (*(SORT(.ctors.*)));
-			LONG (0); LONG (0); }
-    ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ;
-			LONG (-1); LONG (-1);
-			KEEP (*(.dtors));
-			KEEP (*(.dtor));
-			KEEP (*(SORT(.dtors.*)));
-			LONG (0); LONG (0); }
+    ${CONSTRUCTING+
+       PROVIDE(___CTOR_LIST__ = .);
+       PROVIDE(__CTOR_LIST__ = .);
+       LONG (-1); LONG (-1);
+       KEEP (*(.ctors));
+       KEEP (*(.ctor));
+       KEEP (*(SORT_BY_NAME(.ctors.*)));
+       LONG (0); LONG (0);
+     }
+    ${CONSTRUCTING+
+       PROVIDE(___DTOR_LIST__ = .);
+       PROVIDE(__DTOR_LIST__ = .);
+       LONG (-1); LONG (-1);
+       KEEP (*(.dtors));
+       KEEP (*(.dtor));
+       KEEP (*(SORT_BY_NAME(.dtors.*)));
+       LONG (0); LONG (0);
+     }
     ${RELOCATING+ KEEP (*(.fini))}
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}
@@ -197,7 +203,7 @@ SECTIONS
     ${R_IDATA67}
   }
   .CRT ${RELOCATING+BLOCK(__section_alignment__)} :
-  { 					
+  {
     ${RELOCATING+___crt_xc_start__ = . ;}
     ${R_CRT_XC}
     ${RELOCATING+___crt_xc_end__ = . ;}
@@ -220,7 +226,7 @@ SECTIONS
      be at the beginning of the section to enable SECREL32 relocations with TLS
      data.  */
   .tls ${RELOCATING+BLOCK(__section_alignment__)} :
-  { 					
+  {
     ${RELOCATING+___tls_start__ = . ;}
     ${R_TLS}
     ${RELOCATING+___tls_end__ = . ;}

@@ -1,5 +1,5 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987-2017 Free Software Foundation, Inc.
+   Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -2369,12 +2369,13 @@ get_symbol_name (char ** ilp_return)
   char c;
 
   * ilp_return = input_line_pointer;
-  /* We accept \001 in a name in case this is being called with a
+  /* We accept FAKE_LABEL_CHAR in a name in case this is being called with a
      constructed string.  */
-  if (is_name_beginner (c = *input_line_pointer++) || c == '\001')
+  if (is_name_beginner (c = *input_line_pointer++)
+      || (input_from_string && c == FAKE_LABEL_CHAR))
     {
       while (is_part_of_name (c = *input_line_pointer++)
-	     || c == '\001')
+	     || (input_from_string && c == FAKE_LABEL_CHAR))
 	;
       if (is_name_ender (c))
 	c = *input_line_pointer++;

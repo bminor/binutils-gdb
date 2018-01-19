@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on Xtensa processors.
 
-   Copyright (C) 2007-2017 Free Software Foundation, Inc.
+   Copyright (C) 2007-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -111,9 +111,6 @@ xtensa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_xtensa_linux_tdep;
 
 void
 _initialize_xtensa_linux_tdep (void)

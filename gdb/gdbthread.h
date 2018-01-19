@@ -1,5 +1,5 @@
 /* Multi-process/thread control defs for GDB, the GNU debugger.
-   Copyright (C) 1987-2017 Free Software Foundation, Inc.
+   Copyright (C) 1987-2018 Free Software Foundation, Inc.
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
    
 
@@ -179,6 +179,12 @@ typedef struct value *value_ptr;
 DEF_VEC_P (value_ptr);
 typedef VEC (value_ptr) value_vec;
 
+/* Base class for target-specific thread data.  */
+struct private_thread_info
+{
+  virtual ~private_thread_info () = 0;
+};
+
 /* Threads are intrusively refcounted objects.  Being the
    user-selected thread is normally considered an implicit strong
    reference and is thus not accounted in the refcount, unlike
@@ -345,11 +351,7 @@ public:
   struct frame_id initiating_frame = null_frame_id;
 
   /* Private data used by the target vector implementation.  */
-  struct private_thread_info *priv = NULL;
-
-  /* Function that is called to free PRIVATE.  If this is NULL, then
-     xfree will be called on PRIVATE.  */
-  void (*private_dtor) (struct private_thread_info *) = NULL;
+  std::unique_ptr<private_thread_info> priv;
 
   /* Branch trace information for this thread.  */
   struct btrace_thread_info btrace {};
@@ -410,7 +412,7 @@ extern int thread_has_single_step_breakpoints_set (struct thread_info *tp);
 /* Check whether the thread has software single stepping breakpoints
    set at PC.  */
 extern int thread_has_single_step_breakpoint_here (struct thread_info *tp,
-						   struct address_space *aspace,
+						   const address_space *aspace,
 						   CORE_ADDR addr);
 
 /* Translate the global integer thread id (GDB's homegrown id, not the
@@ -447,6 +449,10 @@ extern struct thread_info *find_thread_ptid (ptid_t ptid);
 
 /* Find thread by GDB global thread ID.  */
 struct thread_info *find_thread_global_id (int global_id);
+
+/* Find thread by thread library specific handle in inferior INF.  */
+struct thread_info *find_thread_by_handle (struct value *thread_handle,
+					   struct inferior *inf);
 
 /* Finds the first thread of the inferior given by PID.  If PID is -1,
    returns the first thread in the list.  */
@@ -573,7 +579,7 @@ extern void finish_thread_state_cleanup (void *ptid_p);
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;
 
-extern void thread_command (char *tidstr, int from_tty);
+extern void thread_command (const char *tidstr, int from_tty);
 
 /* Print notices on thread events (attach, detach, etc.), set with
    `set print thread-events'.  */
@@ -597,14 +603,12 @@ public:
   scoped_restore_current_thread ();
   ~scoped_restore_current_thread ();
 
-  /* Disable copy.  */
-  scoped_restore_current_thread
-    (const scoped_restore_current_thread &) = delete;
-  void operator=
-    (const scoped_restore_current_thread &) = delete;
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_thread);
 
 private:
-  thread_info *m_thread;
+  /* Use the "class" keyword here, because of a clash with a "thread_info"
+     function in the Darwin API.  */
+  class thread_info *m_thread;
   inferior *m_inf;
   frame_id m_selected_frame_id;
   int m_selected_frame_level;
@@ -678,6 +682,12 @@ extern int show_thread_that_caused_stop (void);
 /* Print the message for a thread or/and frame selected.  */
 extern void print_selected_thread_frame (struct ui_out *uiout,
 					 user_selected_what selection);
+
+/* Helper for the CLI's "thread" command and for MI's -thread-select.
+   Selects thread THR.  TIDSTR is the original string the thread ID
+   was parsed from.  This is used in the error message if THR is not
+   alive anymore.  */
+extern void thread_select (const char *tidstr, class thread_info *thr);
 
 extern struct thread_info *thread_list;
 

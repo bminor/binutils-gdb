@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD, architecture independent.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,5 +21,12 @@
 #define FBSD_TDEP_H
 
 extern void fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
+
+/* Helper function to generate mappings flags for a single VM map
+   entry in 'info proc mappings'.  The KVE_FLAGS and KVE_PROTECTION
+   parameters should contain the values of the corresponding fields in
+   a 'struct kinfo_vmentry'.  */
+
+extern const char *fbsd_vm_map_entry_flags (int kve_flags, int kve_protection);
 
 #endif /* fbsd-tdep.h */

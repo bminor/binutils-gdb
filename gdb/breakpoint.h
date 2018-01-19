@@ -1,5 +1,5 @@
 /* Data structures associated with breakpoints in GDB.
-   Copyright (C) 1992-2017 Free Software Foundation, Inc.
+   Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,8 @@
 #include "probe.h"
 #include "location.h"
 #include <vector>
+#include "common/array-view.h"
+#include "cli/cli-script.h"
 
 struct value;
 struct block;
@@ -484,6 +486,11 @@ public:
      to find the corresponding source file name.  */
 
   struct symtab *symtab = NULL;
+
+  /* The symbol found by the location parser, if any.  This may be used to
+     ascertain when an event location was set at a different location than
+     the one originally selected by parsing, e.g., inlined symbols.  */
+  const struct symbol *symbol = NULL;
 };
 
 /* The possible return values for print_bpstat, print_it_normal,
@@ -538,7 +545,7 @@ struct breakpoint_ops
      which the inferior stopped, and WS is the target_waitstatus
      describing the event.  */
   int (*breakpoint_hit) (const struct bp_location *bl,
-			 struct address_space *aspace,
+			 const address_space *aspace,
 			 CORE_ADDR bp_addr,
 			 const struct target_waitstatus *ws);
 
@@ -611,15 +618,15 @@ struct breakpoint_ops
 				  int, int, int, unsigned);
 
   /* Given the location (second parameter), this method decodes it and
-     provides the SAL locations related to it.  For ordinary
+     returns the SAL locations related to it.  For ordinary
      breakpoints, it calls `decode_line_full'.  If SEARCH_PSPACE is
      not NULL, symbol search is restricted to just that program space.
 
      This function is called inside `location_to_sals'.  */
-  void (*decode_location) (struct breakpoint *b,
-			   const struct event_location *location,
-			   struct program_space *search_pspace,
-			   struct symtabs_and_lines *sals);
+  std::vector<symtab_and_line> (*decode_location)
+    (struct breakpoint *b,
+     const struct event_location *location,
+     struct program_space *search_pspace);
 
   /* Return true if this breakpoint explains a signal.  See
      bpstat_explains_signal.  */
@@ -655,10 +662,9 @@ enum watchpoint_triggered
 typedef struct bp_location *bp_location_p;
 DEF_VEC_P(bp_location_p);
 
-/* A reference-counted struct command_line.  This lets multiple
-   breakpoints share a single command list.  This is an implementation
+/* A reference-counted struct command_line. This is an implementation
    detail to the breakpoints module.  */
-struct counted_command_line;
+typedef std::shared_ptr<command_line> counted_command_line;
 
 /* Some targets (e.g., embedded PowerPC) need two debug registers to set
    a watchpoint over a memory region.  If this flag is true, GDB will use
@@ -710,7 +716,7 @@ struct breakpoint
 
   /* Chain of command lines to execute when this breakpoint is
      hit.  */
-  counted_command_line *commands = NULL;
+  counted_command_line commands;
   /* Stack depth (address of frame).  If nonzero, break only if fp
      equals this.  */
   struct frame_id frame_id = null_frame_id;
@@ -911,7 +917,7 @@ extern void bpstat_clear (bpstat *);
    is part of the bpstat is copied as well.  */
 extern bpstat bpstat_copy (bpstat);
 
-extern bpstat bpstat_stop_status (struct address_space *aspace,
+extern bpstat bpstat_stop_status (const address_space *aspace,
 				  CORE_ADDR pc, ptid_t ptid,
 				  const struct target_waitstatus *ws);
 
@@ -1080,6 +1086,13 @@ enum bp_print_how
 
 struct bpstats
   {
+    bpstats ();
+    bpstats (struct bp_location *bl, bpstat **bs_link_pointer);
+    ~bpstats ();
+
+    bpstats (const bpstats &);
+    bpstats &operator= (const bpstats &) = delete;
+
     /* Linked list because there can be more than one breakpoint at
        the same place, and a bpstat reflects the fact that all have
        been hit.  */
@@ -1109,7 +1122,7 @@ struct bpstats
     struct breakpoint *breakpoint_at;
 
     /* The associated command list.  */
-    struct counted_command_line *commands;
+    counted_command_line commands;
 
     /* Old value associated with a watchpoint.  */
     struct value *old_val;
@@ -1150,41 +1163,39 @@ enum breakpoint_here
 
 extern int program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address);
 
-extern enum breakpoint_here breakpoint_here_p (struct address_space *, 
+extern enum breakpoint_here breakpoint_here_p (const address_space *,
 					       CORE_ADDR);
 
 /* Return true if an enabled breakpoint exists in the range defined by
    ADDR and LEN, in ASPACE.  */
-extern int breakpoint_in_range_p (struct address_space *aspace,
+extern int breakpoint_in_range_p (const address_space *aspace,
 				  CORE_ADDR addr, ULONGEST len);
 
-extern int moribund_breakpoint_here_p (struct address_space *, CORE_ADDR);
+extern int moribund_breakpoint_here_p (const address_space *, CORE_ADDR);
 
-extern int breakpoint_inserted_here_p (struct address_space *, CORE_ADDR);
+extern int breakpoint_inserted_here_p (const address_space *,
+				       CORE_ADDR);
 
-extern int regular_breakpoint_inserted_here_p (struct address_space *, 
-					       CORE_ADDR);
-
-extern int software_breakpoint_inserted_here_p (struct address_space *, 
+extern int software_breakpoint_inserted_here_p (const address_space *,
 						CORE_ADDR);
 
 /* Return non-zero iff there is a hardware breakpoint inserted at
    PC.  */
-extern int hardware_breakpoint_inserted_here_p (struct address_space *,
+extern int hardware_breakpoint_inserted_here_p (const address_space *,
 						CORE_ADDR);
 
 /* Check whether any location of BP is inserted at PC.  */
 
 extern int breakpoint_has_location_inserted_here (struct breakpoint *bp,
-						  struct address_space *aspace,
+						  const address_space *aspace,
 						  CORE_ADDR pc);
 
-extern int single_step_breakpoint_inserted_here_p (struct address_space *,
+extern int single_step_breakpoint_inserted_here_p (const address_space *,
 						   CORE_ADDR);
 
 /* Returns true if there's a hardware watchpoint or access watchpoint
    inserted in the range defined by ADDR and LEN.  */
-extern int hardware_watchpoint_inserted_in_range (struct address_space *,
+extern int hardware_watchpoint_inserted_in_range (const address_space *,
 						  CORE_ADDR addr,
 						  ULONGEST len);
 
@@ -1193,28 +1204,41 @@ extern int hardware_watchpoint_inserted_in_range (struct address_space *,
    if ASPACE1 matches ASPACE2.  On targets that have global
    breakpoints, the address space doesn't really matter.  */
 
-extern int breakpoint_address_match (struct address_space *aspace1,
+extern int breakpoint_address_match (const address_space *aspace1,
 				     CORE_ADDR addr1,
-				     struct address_space *aspace2,
+				     const address_space *aspace2,
 				     CORE_ADDR addr2);
 
-extern void until_break_command (char *, int, int);
+extern void until_break_command (const char *, int, int);
 
 /* Initialize a struct bp_location.  */
 
-extern void update_breakpoint_locations (struct breakpoint *b,
-					 struct program_space *filter_pspace,
-					 struct symtabs_and_lines sals,
-					 struct symtabs_and_lines sals_end);
+extern void update_breakpoint_locations
+  (struct breakpoint *b,
+   struct program_space *filter_pspace,
+   gdb::array_view<const symtab_and_line> sals,
+   gdb::array_view<const symtab_and_line> sals_end);
 
 extern void breakpoint_re_set (void);
 
 extern void breakpoint_re_set_thread (struct breakpoint *);
 
-extern struct breakpoint *set_momentary_breakpoint
+extern void delete_breakpoint (struct breakpoint *);
+
+struct breakpoint_deleter
+{
+  void operator() (struct breakpoint *b) const
+  {
+    delete_breakpoint (b);
+  }
+};
+
+typedef std::unique_ptr<struct breakpoint, breakpoint_deleter> breakpoint_up;
+
+extern breakpoint_up set_momentary_breakpoint
   (struct gdbarch *, struct symtab_and_line, struct frame_id, enum bptype);
 
-extern struct breakpoint *set_momentary_breakpoint_at_pc
+extern breakpoint_up set_momentary_breakpoint_at_pc
   (struct gdbarch *, CORE_ADDR pc, enum bptype type);
 
 extern struct breakpoint *clone_momentary_breakpoint (struct breakpoint *bpkt);
@@ -1222,10 +1246,6 @@ extern struct breakpoint *clone_momentary_breakpoint (struct breakpoint *bpkt);
 extern void set_ignore_count (int, int, int);
 
 extern void breakpoint_init_inferior (enum inf_context);
-
-extern struct cleanup *make_cleanup_delete_breakpoint (struct breakpoint *);
-
-extern void delete_breakpoint (struct breakpoint *);
 
 extern void breakpoint_auto_delete (bpstat);
 
@@ -1241,15 +1261,15 @@ extern struct command_line *breakpoint_commands (struct breakpoint *b);
    NOT be deallocated after use.  */
 const char *bpdisp_text (enum bpdisp disp);
 
-extern void break_command (char *, int);
+extern void break_command (const char *, int);
 
-extern void hbreak_command_wrapper (char *, int);
-extern void thbreak_command_wrapper (char *, int);
-extern void rbreak_command_wrapper (char *, int);
-extern void watch_command_wrapper (char *, int, int);
-extern void awatch_command_wrapper (char *, int, int);
-extern void rwatch_command_wrapper (char *, int, int);
-extern void tbreak_command (char *, int);
+extern void hbreak_command_wrapper (const char *, int);
+extern void thbreak_command_wrapper (const char *, int);
+extern void rbreak_command_wrapper (const char *, int);
+extern void watch_command_wrapper (const char *, int, int);
+extern void awatch_command_wrapper (const char *, int, int);
+extern void rwatch_command_wrapper (const char *, int, int);
+extern void tbreak_command (const char *, int);
 
 extern struct breakpoint_ops base_breakpoint_ops;
 extern struct breakpoint_ops bkpt_breakpoint_ops;
@@ -1268,7 +1288,7 @@ extern void initialize_breakpoint_ops (void);
 
 extern void
   add_catch_command (const char *name, const char *docstring,
-		     cmd_sfunc_ftype *sfunc,
+		     cmd_const_sfunc_ftype *sfunc,
 		     completer_ftype *completer,
 		     void *user_data_catch,
 		     void *user_data_tcatch);
@@ -1279,7 +1299,7 @@ extern void
   init_ada_exception_breakpoint (struct breakpoint *b,
 				 struct gdbarch *gdbarch,
 				 struct symtab_and_line sal,
-				 char *addr_string,
+				 const char *addr_string,
 				 const struct breakpoint_ops *ops,
 				 int tempflag,
 				 int enabled,
@@ -1296,7 +1316,7 @@ extern void init_catchpoint (struct breakpoint *b,
    the internal breakpoint count.  If UPDATE_GLL is non-zero,
    update_global_location_list will be called.  */
 
-extern void install_breakpoint (int internal, struct breakpoint *b,
+extern void install_breakpoint (int internal, std::unique_ptr<breakpoint> &&b,
 				int update_gll);
 
 /* Flags that can be passed down to create_breakpoint, etc., to affect
@@ -1346,13 +1366,6 @@ extern void insert_breakpoints (void);
 extern int remove_breakpoints (void);
 
 extern int remove_breakpoints_pid (int pid);
-
-/* This function can be used to physically insert eventpoints from the
-   specified traced inferior process, without modifying the breakpoint
-   package's state.  This can be useful for those targets which
-   support following the processes of a fork() or vfork() system call,
-   when both of the resulting two processes are to be followed.  */
-extern int reattach_breakpoints (int);
 
 /* This function can be used to update the breakpoint package's state
    after an exec() system call has been executed.
@@ -1512,16 +1525,12 @@ extern int is_catchpoint (struct breakpoint *);
 extern void add_solib_catchpoint (const char *arg, int is_load, int is_temp,
                                   int enabled);
 
-/* Enable breakpoints and delete when hit.  Called with ARG == NULL
-   deletes all breakpoints.  */
-extern void delete_command (char *arg, int from_tty);
-
 /* Create and insert a new software single step breakpoint for the
    current thread.  May be called multiple times; each time will add a
    new location to the set of potential addresses the next instruction
    is at.  */
 extern void insert_single_step_breakpoint (struct gdbarch *,
-					   struct address_space *, 
+					   const address_space *,
 					   CORE_ADDR);
 
 /* Insert all software single step breakpoints for the current frame.
@@ -1582,7 +1591,7 @@ extern struct tracepoint *get_tracepoint_by_number_on_target (int num);
 
 /* Find a tracepoint by parsing a number in the supplied string.  */
 extern struct tracepoint *
-  get_tracepoint_by_number (char **arg,
+  get_tracepoint_by_number (const char **arg,
 			    number_or_range_parser *parser);
 
 /* Return a vector of all tracepoints currently defined.  The vector
@@ -1600,10 +1609,18 @@ extern VEC(breakpoint_p) *static_tracepoints_here (CORE_ADDR addr);
    that each command is suitable for tracepoint command list.  */
 extern void check_tracepoint_command (char *line, void *closure);
 
-/* Call at the start and end of an "rbreak" command to register
-   breakpoint numbers for a later "commands" command.  */
-extern void start_rbreak_breakpoints (void);
-extern void end_rbreak_breakpoints (void);
+/* Create an instance of this to start registering breakpoint numbers
+   for a later "commands" command.  */
+
+class scoped_rbreak_breakpoints
+{
+public:
+
+  scoped_rbreak_breakpoints ();
+  ~scoped_rbreak_breakpoints ();
+
+  DISABLE_COPY_AND_ASSIGN (scoped_rbreak_breakpoints);
+};
 
 /* Breakpoint iterator function.
 
@@ -1619,7 +1636,7 @@ extern struct breakpoint *iterate_over_breakpoints (int (*) (struct breakpoint *
 /* Nonzero if the specified PC cannot be a location where functions
    have been inlined.  */
 
-extern int pc_at_non_inline_function (struct address_space *aspace,
+extern int pc_at_non_inline_function (const address_space *aspace,
 				      CORE_ADDR pc,
 				      const struct target_waitstatus *ws);
 
@@ -1638,5 +1655,8 @@ extern const char *ep_parse_optional_if_clause (const char **arg);
 /* Print the "Thread ID hit" part of "Thread ID hit Breakpoint N" to
    UIOUT iff debugging multiple threads.  */
 extern void maybe_print_thread_hit_breakpoint (struct ui_out *uiout);
+
+/* Print the specified breakpoint.  */
+extern void print_breakpoint (breakpoint *bp);
 
 #endif /* !defined (BREAKPOINT_H) */

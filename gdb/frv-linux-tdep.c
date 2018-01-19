@@ -1,7 +1,7 @@
 /* Target-dependent code for GNU/Linux running on the Fujitsu FR-V,
    for GDB.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -479,9 +479,6 @@ frv_linux_elf_osabi_sniffer (bfd *abfd)
   else
     return GDB_OSABI_UNKNOWN;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_frv_linux_tdep (void);
 
 void
 _initialize_frv_linux_tdep (void)

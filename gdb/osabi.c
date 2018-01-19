@@ -1,6 +1,6 @@
 /* OS ABI variant handling for GDB.
 
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -592,7 +592,7 @@ generic_elf_osabi_sniffer (bfd *abfd)
 }
 
 static void
-set_osabi (char *args, int from_tty, struct cmd_list_element *c)
+set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
 {
   struct gdbarch_info info;
 
@@ -653,8 +653,6 @@ show_osabi (struct ui_file *file, int from_tty, struct cmd_list_element *c,
     fprintf_filtered (file, _("The default OS ABI is \"%s\".\n"),
 		      gdbarch_osabi_name (GDB_OSABI_DEFAULT));
 }
-
-extern initialize_file_ftype _initialize_gdb_osabi; /* -Wmissing-prototype */
 
 void
 _initialize_gdb_osabi (void)

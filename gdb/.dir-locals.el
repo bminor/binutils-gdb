@@ -1,5 +1,5 @@
 ;; Emacs settings.
-;; Copyright (C) 2012-2017 Free Software Foundation, Inc.
+;; Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -26,4 +26,6 @@
 	    (c-basic-offset . 2)
 	    (eval . (c-set-offset 'innamespace 0))
 	    ))
+ (c++-mode . ((eval . (when (fboundp 'c-toggle-comment-style)
+			(c-toggle-comment-style 1)))))
 )

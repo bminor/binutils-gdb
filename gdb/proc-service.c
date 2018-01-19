@@ -1,6 +1,6 @@
 /* <proc_service.h> implementation.
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,24 +32,6 @@
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
-
-
-/* Fix-up some broken systems.  */
-
-/* The prototypes in <proc_service.h> are slightly different on older
-   systems.  Compensate for the discrepancies.  */
-
-#ifdef PROC_SERVICE_IS_OLD
-typedef const struct ps_prochandle *gdb_ps_prochandle_t;
-typedef char *gdb_ps_read_buf_t;
-typedef char *gdb_ps_write_buf_t;
-typedef int gdb_ps_size_t;
-#else
-typedef struct ps_prochandle *gdb_ps_prochandle_t;
-typedef void *gdb_ps_read_buf_t;
-typedef const void *gdb_ps_write_buf_t;
-typedef size_t gdb_ps_size_t;
-#endif
 
 
 /* Helper functions.  */
@@ -87,7 +69,7 @@ static ps_err_e
 ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
 		gdb_byte *buf, size_t len, int write)
 {
-  struct cleanup *old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   int ret;
   CORE_ADDR core_addr = ps_addr_to_core_addr (addr);
 
@@ -98,8 +80,6 @@ ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
   else
     ret = target_read_memory (core_addr, buf, len);
 
-  do_cleanups (old_chain);
-
   return (ret == 0 ? PS_OK : PS_ERR);
 }
 
@@ -109,7 +89,7 @@ ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
    symbol is stored in SYM_ADDR.  */
 
 ps_err_e
-ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
+ps_pglobal_lookup (struct ps_prochandle *ph, const char *obj,
 		   const char *name, psaddr_t *sym_addr)
 {
   struct inferior *inf = find_inferior_ptid (ph->ptid);
@@ -131,8 +111,7 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
    them into BUF.  */
 
 ps_err_e
-ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr,
-	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
+ps_pdread (struct ps_prochandle *ph, psaddr_t addr, void *buf, size_t size)
 {
   return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 0);
 }
@@ -140,8 +119,8 @@ ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr,
 /* Write SIZE bytes from BUF into the target process PH at address ADDR.  */
 
 ps_err_e
-ps_pdwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
-	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
+ps_pdwrite (struct ps_prochandle *ph, psaddr_t addr,
+	    const void *buf, size_t size)
 {
   return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 1);
 }
@@ -150,7 +129,7 @@ ps_pdwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
    and store them in GREGSET.  */
 
 ps_err_e
-ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
+ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
 {
   ptid_t ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
   struct regcache *regcache
@@ -166,7 +145,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
    from GREGSET.  */
 
 ps_err_e
-ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, const prgregset_t gregset)
+ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid, const prgregset_t gregset)
 {
   ptid_t ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
   struct regcache *regcache
@@ -182,8 +161,7 @@ ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, const prgregset_t gregset)
    process PH and store them in FPREGSET.  */
 
 ps_err_e
-ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
-	       gdb_prfpregset_t *fpregset)
+ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid, gdb_prfpregset_t *fpregset)
 {
   ptid_t ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
   struct regcache *regcache
@@ -199,7 +177,7 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
    process PH from FPREGSET.  */
 
 ps_err_e
-ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
+ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       const gdb_prfpregset_t *fpregset)
 {
   ptid_t ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
@@ -216,13 +194,10 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
    -- not used on Solaris.  */
 
 pid_t
-ps_getpid (gdb_ps_prochandle_t ph)
+ps_getpid (struct ps_prochandle *ph)
 {
   return ptid_get_pid (ph->ptid);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_proc_service;
 
 void
 _initialize_proc_service (void)

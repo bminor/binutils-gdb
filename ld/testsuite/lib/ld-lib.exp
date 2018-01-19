@@ -1,5 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright (C) 1994-2017 Free Software Foundation, Inc.
+#   Copyright (C) 1994-2018 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -519,7 +519,13 @@ proc ld_link_defsyms {} {
 #   target: TARGET
 #       Only run the test for TARGET.  This may occur more than once; the
 #       target being tested must match at least one.  You may provide target
-#       name "cfi" for any target supporting the CFI statements.
+#       name "cfi" for any target supporting the CFI statements.  You may
+#       provide target name "shared" for any target supporting shared
+#       libraries.
+#
+#   alltargets: TARGET
+#       Only run the test for TARGET.  This may occur more than once; the
+#       target being tested must match all of them.
 #
 #   notarget: TARGET
 #       Do not run the test for TARGET.  This may occur more than once;
@@ -599,6 +605,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(ld_after_inputfiles) {}
     set opts(xfail) {}
     set opts(target) {}
+    set opts(alltargets) {}
     set opts(notarget) {}
     set opts(objdump) {}
     set opts(nm) {}
@@ -628,6 +635,7 @@ proc run_dump_test { name {extra_options {}} } {
 	switch -- $opt_name {
 	    xfail {}
 	    target {}
+	    alltargets {}
 	    notarget {}
 	    warning {}
 	    error {}
@@ -723,6 +731,11 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	}
 	if { $targmatch == 0 } {
+	    return
+	}
+    }
+    foreach targ $opts(alltargets) {
+	if ![istarget $targ] {
 	    return
 	}
     }
@@ -976,7 +989,7 @@ proc run_dump_test { name {extra_options {}} } {
                  && (($cmdret == 0) == ($check_ld(terminal) == 0)) \
                  && ((($check_ld(source) == "regex") \
                       && ($check_ld(regex) == "") == ($comp_output == "") \
-                      && [regexp $check_ld(regex) $comp_output]) \
+                      && [regexp -- $check_ld(regex) $comp_output]) \
                      || (($check_ld(source) == "file") \
                          && (![regexp_diff "tmpdir/ld.messages" "$srcdir/$subdir/$check_ld(file)"]))) } {
                 # We have the expected output from ld.
@@ -1782,60 +1795,20 @@ proc check_gc_sections_available { } {
 }
 
 # Returns true if -shared is supported on the target
-# Only used and accurate for ELF targets at the moment
 
 proc check_shared_lib_support { } {
-    if {![istarget aarch64*-*-elf]
-	 && ![istarget arc*-*-elf*]
-	 && ![istarget arm*-*-elf]
-	 && ![istarget avr-*-*]
-	 && ![istarget cr16-*-*]
-	 && ![istarget cris*-*-elf]
-	 && ![istarget crx-*-*]
-	 && ![istarget d10v-*-*]
-	 && ![istarget d30v-*-*]
-	 && ![istarget dlx-*-*]
-	 && ![istarget epiphany-*-*]
-	 && ![istarget fr30-*-*]
-	 && ![istarget frv-*-*]
-	 && ![istarget ft32-*-*]
-	 && ![istarget h8300-*-*]
-	 && ![istarget i860-*-*]
-	 && ![istarget i960-*-*]
-	 && ![istarget ip2k-*-*]
-	 && ![istarget iq2000-*-*]
-	 && ![istarget lm32-*-*]
-	 && ![istarget m32c-*-*]
-	 && ![istarget m32r-*-*]
-	 && ![istarget m6811-*-*]
-	 && ![istarget m6812-*-*]
-	 && ![istarget m68hc1*-*-*]
-	 && ![istarget mcore*-*-*]
-	 && ![istarget mep-*-*]
-	 && ![istarget microblaze-*-*]
-	 && ![istarget mips*-*-elf]
-	 && ![istarget mn10200-*-*]
-	 && ![istarget moxie-*-*]
-	 && ![istarget msp430-*-*]
-	 && ![istarget mt-*-*]
-	 && ![istarget nds32*-*-*]
-	 && ![istarget nios2-*-elf]
-	 && ![istarget or1k*-*-*]
-	 && ![istarget pj-*-*]
-	 && ![istarget pru-*-*]
-	 && ![istarget rl78-*-*]
-	 && ![istarget rx-*-*]
-	 && ![istarget spu-*-*]
-	 && ![istarget v850*-*-*]
-	 && ![istarget visium-*-*]
-	 && ![istarget xc16x-*-elf]
-	 && ![istarget xgate-*-*]
-	 && ![istarget xstormy16-*-*]
-	 && ![istarget *-*-irix*]
-	 && ![istarget *-*-rtems] } {
-	return 1
+    global shared_available_saved
+    global ld
+
+    if {![info exists shared_available_saved]} {
+	set ld_output [remote_exec host $ld "-shared"]
+	if { [ string first "not supported" $ld_output ] >= 0 } {
+	    set shared_available_saved 0
+	} else {
+	    set shared_available_saved 1
+	}
     }
-    return 0
+    return $shared_available_saved
 }
 
 # Return true if target uses genelf.em (assuming it is ELF).
@@ -2191,6 +2164,9 @@ rename "istarget" "istarget_ld"
 proc istarget { target } {
     if {$target == "cfi"} {
 	return [check_as_cfi]
+    }
+    if {$target == "shared"} {
+	return [check_shared_lib_support]
     }
     return [istarget_ld $target]
 }

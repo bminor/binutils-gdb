@@ -1,5 +1,5 @@
 /* Base class of intrusively reference-counted objects.
-   Copyright (C) 2017 Free Software Foundation, Inc.
+   Copyright (C) 2017-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -45,9 +45,7 @@ public:
   int refcount () const { return m_refcount; }
 
 private:
-  /* Disable copy.  */
-  refcounted_object (const refcounted_object &) = delete;
-  refcounted_object &operator=(const refcounted_object &) = delete;
+  DISABLE_COPY_AND_ASSIGN (refcounted_object);
 
   /* The reference count.  */
   int m_refcount = 0;

@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB server.
-dnl Copyright (C) 2000-2017 Free Software Foundation, Inc.
+dnl Copyright (C) 2000-2018 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl
@@ -56,11 +56,29 @@ else
 fi
 GDB_AC_LIBMCHECK(${libmcheck_default})
 
+if $development; then
+  srv_selftest_objs="selftest.o"
+  AC_DEFINE(GDB_SELF_TEST, 1,
+            [Define if self-testing features should be enabled])
+fi
+
 ACX_NONCANONICAL_TARGET
 ACX_NONCANONICAL_HOST
 
 # Dependency checking.
 ZW_CREATE_DEPDIR
+
+# Create sub-directories for objects and dependencies.
+CONFIG_SRC_SUBDIR="arch"
+AC_SUBST(CONFIG_SRC_SUBDIR)
+
+AC_CONFIG_COMMANDS([gdbdepdir],[
+  for subdir in ${CONFIG_SRC_SUBDIR}
+  do
+      $SHELL $ac_aux_dir/mkinstalldirs $subdir/$DEPDIR
+  done],
+  [ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR CONFIG_SRC_SUBDIR="$CONFIG_SRC_SUBDIR"])
+
 ZW_PROG_COMPILER_DEPENDENCIES([CC])
 
 gnulib_extra_configure_args=
@@ -79,7 +97,7 @@ ACX_CONFIGURE_DIR(["../gnulib"], ["build-gnulib-gdbserver"],
 
 ACX_CONFIGURE_DIR(["../../libiberty"], ["build-libiberty-gdbserver"])
 
-AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
+AC_CHECK_HEADERS(termios.h sys/reg.h string.h dnl
 		 proc_service.h sys/procfs.h linux/elf.h dnl
 		 fcntl.h signal.h sys/file.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
@@ -393,7 +411,7 @@ if test "$srv_xmlfiles" != ""; then
   done
 fi
 
-GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles $srv_host_obs"
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles $srv_host_obs $srv_selftest_objs"
 GDBSERVER_LIBS="$srv_libs"
 
 dnl Check whether the target supports __sync_*_compare_and_swap.

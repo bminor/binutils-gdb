@@ -1,5 +1,5 @@
 /* Parse options for the GNU linker.
-   Copyright (C) 1991-2017 Free Software Foundation, Inc.
+   Copyright (C) 1991-2018 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -773,9 +773,9 @@ parse_args (unsigned argc, char **argv)
 	case 'd':
 	  command_line.force_common_definition = TRUE;
 	  break;
-        case OPTION_FORCE_GROUP_ALLOCATION:
-          command_line.force_group_allocation = TRUE;
-          break;
+	case OPTION_FORCE_GROUP_ALLOCATION:
+	  command_line.force_group_allocation = TRUE;
+	  break;
 	case OPTION_DEFSYM:
 	  lex_string = optarg;
 	  lex_redirect (optarg, "--defsym", ++defsym_count);
@@ -831,7 +831,7 @@ parse_args (unsigned argc, char **argv)
 	  if (command_line.auxiliary_filters == NULL)
 	    {
 	      command_line.auxiliary_filters = (char **)
-                  xmalloc (2 * sizeof (char *));
+		xmalloc (2 * sizeof (char *));
 	      command_line.auxiliary_filters[0] = optarg;
 	      command_line.auxiliary_filters[1] = NULL;
 	    }
@@ -844,8 +844,8 @@ parse_args (unsigned argc, char **argv)
 	      for (p = command_line.auxiliary_filters; *p != NULL; p++)
 		++c;
 	      command_line.auxiliary_filters = (char **)
-                  xrealloc (command_line.auxiliary_filters,
-			    (c + 2) * sizeof (char *));
+		xrealloc (command_line.auxiliary_filters,
+			  (c + 2) * sizeof (char *));
 	      command_line.auxiliary_filters[c] = optarg;
 	      command_line.auxiliary_filters[c + 1] = NULL;
 	    }
@@ -911,7 +911,7 @@ parse_args (unsigned argc, char **argv)
 	  input_flags.dynamic = FALSE;
 	  break;
 	case OPTION_NO_DEFINE_COMMON:
-	  command_line.inhibit_common_definition = TRUE;
+	  link_info.inhibit_common_definition = TRUE;
 	  break;
 	case OPTION_NO_DEMANGLE:
 	  demangling = FALSE;
@@ -955,7 +955,7 @@ parse_args (unsigned argc, char **argv)
 	      link_info.unresolved_syms_in_shared_libs
 		= how_to_report_unresolved_symbols;
 	    }
-      	  else if (strcmp (optarg, "ignore-in-shared-libs") == 0)
+	  else if (strcmp (optarg, "ignore-in-shared-libs") == 0)
 	    {
 	      link_info.unresolved_syms_in_objects
 		= how_to_report_unresolved_symbols;
@@ -1136,8 +1136,8 @@ parse_args (unsigned argc, char **argv)
 	      char *buf;
 
 	      buf = (char *) xmalloc (strlen (command_line.rpath_link)
-                                      + strlen (optarg)
-                                      + 2);
+				      + strlen (optarg)
+				      + 2);
 	      sprintf (buf, "%s%c%s", command_line.rpath_link,
 		       config.rpath_separator, optarg);
 	      free (command_line.rpath_link);
@@ -1204,8 +1204,8 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_SORT_COMMON:
 	  if (optarg == NULL
 	      || strcmp (optarg, N_("descending")) == 0)
-            config.sort_common = sort_descending;
-          else if (strcmp (optarg, N_("ascending")) == 0)
+	    config.sort_common = sort_descending;
+	  else if (strcmp (optarg, N_("ascending")) == 0)
 	    config.sort_common = sort_ascending;
 	  else
 	    einfo (_("%P%F: invalid common section sorting option: %s\n"),
@@ -1314,8 +1314,8 @@ parse_args (unsigned argc, char **argv)
 	case 'u':
 	  ldlang_add_undef (optarg, TRUE);
 	  break;
-        case OPTION_REQUIRE_DEFINED_SYMBOL:
-          ldlang_add_require_defined (optarg);
+	case OPTION_REQUIRE_DEFINED_SYMBOL:
+	  ldlang_add_require_defined (optarg);
 	  break;
 	case OPTION_UNIQUE:
 	  if (optarg != NULL)
@@ -1528,17 +1528,17 @@ parse_args (unsigned argc, char **argv)
 	    config.hash_table_size = 1021;
 	  break;
 
-        case OPTION_HASH_SIZE:
+	case OPTION_HASH_SIZE:
 	  {
 	    bfd_size_type new_size;
 
-            new_size = strtoul (optarg, NULL, 0);
-            if (new_size)
-              config.hash_table_size = new_size;
-            else
-              einfo (_("%P%X: --hash-size needs a numeric argument\n"));
-          }
-          break;
+	    new_size = strtoul (optarg, NULL, 0);
+	    if (new_size)
+	      config.hash_table_size = new_size;
+	    else
+	      einfo (_("%P%X: --hash-size needs a numeric argument\n"));
+	  }
+	  break;
 
 	case OPTION_PUSH_STATE:
 	  input_flags.pushed = xmemdup (&input_flags,
@@ -1794,6 +1794,10 @@ elf_shlib_list_options (FILE *file)
   -z norelro                  Don't create RELRO program header (default)\n"));
 #endif
   fprintf (file, _("\
+  -z separate-code            Create separate code program header\n"));
+  fprintf (file, _("\
+  -z noseparate-code          Don't create separate code program header (default)\n"));
+  fprintf (file, _("\
   -z common                   Generate common symbols with STT_COMMON type\n"));
   fprintf (file, _("\
   -z nocommon                 Generate common symbols with STT_OBJECT type\n"));
@@ -1836,6 +1840,8 @@ elf_static_list_options (FILE *file)
   -z execstack                Mark executable as requiring executable stack\n"));
   fprintf (file, _("\
   -z noexecstack              Mark executable as not requiring executable stack\n"));
+  fprintf (file, _("\
+  -z globalaudit              Mark executable requiring global auditing\n"));
 }
 
 static void

@@ -1,6 +1,6 @@
 /* GDB/Scheme pretty-printing.
 
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -381,7 +381,6 @@ ppscm_search_pp_list (SCM list, SCM value)
       SCM matcher = scm_car (list);
       SCM worker;
       pretty_printer_smob *pp_smob;
-      int rc;
 
       if (!ppscm_is_pretty_printer (matcher))
 	{
@@ -534,7 +533,6 @@ ppscm_pretty_print_one_value (SCM printer, struct value **out_value,
   *out_value = NULL;
   TRY
     {
-      int rc;
       pretty_printer_worker_smob *w_smob
 	= (pretty_printer_worker_smob *) SCM_SMOB_DATA (printer);
 
@@ -744,7 +742,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
     = (pretty_printer_worker_smob *) SCM_SMOB_DATA (printer);
   int is_map, is_array, done_flag, pretty;
   unsigned int i;
-  SCM children, status;
+  SCM children;
   SCM iter = SCM_BOOL_F; /* -Wall */
   struct cleanup *cleanups;
 
@@ -799,7 +797,6 @@ ppscm_print_children (SCM printer, enum display_hint hint,
   done_flag = 0;
   for (i = 0; i < options->print_max; ++i)
     {
-      int rc;
       SCM scm_name, v_scm;
       char *name;
       SCM item = itscm_safe_call_next_x (iter, gdbscm_memory_error_p);

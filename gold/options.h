@@ -1,6 +1,6 @@
 // options.h -- handle command line options for gold  -*- C++ -*-
 
-// Copyright (C) 2006-2017 Free Software Foundation, Inc.
+// Copyright (C) 2006-2018 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -711,7 +711,7 @@ class General_options
   DEFINE_string(format, options::TWO_DASHES, 'b', "elf",
 		N_("Set input format"), ("[elf,binary]"));
 
-  DEFINE_bool(be8,options::TWO_DASHES, '\0', false,
+  DEFINE_bool(be8, options::TWO_DASHES, '\0', false,
 	      N_("Output BE8 format image"), NULL);
 
   DEFINE_optional_string(build_id, options::TWO_DASHES, '\0', "tree",
@@ -894,7 +894,7 @@ class General_options
 
   DEFINE_string(fuse_ld, options::ONE_DASH, '\0', "",
 		N_("Ignored for GCC linker option compatibility"),
-		"");
+		NULL);
 
   // g
 
@@ -925,7 +925,7 @@ class General_options
 		N_("Min fraction of empty buckets in dynamic hash"),
 		N_("FRACTION"));
 
-  DEFINE_enum(hash_style, options::TWO_DASHES, '\0', "sysv",
+  DEFINE_enum(hash_style, options::TWO_DASHES, '\0', DEFAULT_HASH_STYLE,
 	      N_("Dynamic hash style"), N_("[sysv,gnu,both]"),
 	      {"sysv", "gnu", "both"});
 
@@ -1164,7 +1164,8 @@ class General_options
 	      N_("Generate relocatable output"), NULL);
 
   DEFINE_bool(relax, options::TWO_DASHES, '\0', false,
-	      N_("Relax branches on certain targets"), NULL);
+	      N_("Relax branches on certain targets"),
+	      N_("Do not relax branches"));
 
   DEFINE_string(retain_symbols_file, options::TWO_DASHES, '\0', NULL,
 		N_("keep only symbols listed in this file"), N_("FILE"));
@@ -1234,9 +1235,10 @@ class General_options
 		"stubs are always after the group. 1 means use default size"),
 	     N_("SIZE"));
 
-  DEFINE_bool(stub_group_multi, options::TWO_DASHES, '\0', false,
+  DEFINE_bool(stub_group_multi, options::TWO_DASHES, '\0', true,
 	      N_("(PowerPC only) Allow a group of stubs to serve multiple "
-		 "output sections"), NULL);
+		 "output sections"),
+	      N_("(PowerPC only) Each output section has its own stubs"));
 
   DEFINE_uint(split_stack_adjust_size, options::TWO_DASHES, '\0', 0x4000,
 	      N_("Stack size when -fsplit-stack function calls non-split"),
@@ -1289,6 +1291,13 @@ class General_options
 	      N_("Number of threads to use in middle pass"), N_("COUNT"));
   DEFINE_uint(thread_count_final, options::TWO_DASHES, '\0', 0,
 	      N_("Number of threads to use in final pass"), N_("COUNT"));
+
+  DEFINE_bool(tls_optimize, options::TWO_DASHES, '\0', true,
+	      N_("(PowerPC/64 only) Optimize GD/LD/IE code to IE/LE"),
+	      N_("(PowerPC/64 only) Don'\''t try to optimize TLS accesses"));
+  DEFINE_bool(tls_get_addr_optimize, options::TWO_DASHES, '\0', true,
+	      N_("(PowerPC/64 only) Use a special __tls_get_addr call"),
+	      N_("(PowerPC/64 only) Don't use a special __tls_get_addr call"));
 
   DEFINE_bool(toc_optimize, options::TWO_DASHES, '\0', true,
 	      N_("(PowerPC64 only) Optimize TOC code sequences"),
@@ -1483,6 +1492,11 @@ class General_options
   DEFINE_bool_alias(textoff, text, options::DASH_Z, '\0',
 		    N_("Permit relocations in read-only segments"),
 		    NULL, true);
+  DEFINE_bool(text_unlikely_segment, options::DASH_Z, '\0', false,
+	      N_("Move .text.unlikely sections to a separate segment."),
+	      N_("Do not move .text.unlikely sections to a separate "
+		 "segment."));
+
 
  public:
   typedef options::Dir_list Dir_list;

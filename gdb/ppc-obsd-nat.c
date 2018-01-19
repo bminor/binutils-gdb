@@ -1,6 +1,6 @@
 /* Native-dependent code for OpenBSD/powerpc.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -89,7 +89,7 @@ ppcobsd_fetch_registers (struct target_ops *ops,
 
 #ifdef PT_GETFPREGS
   if (regnum == -1
-      || getfpregs_supplies (get_regcache_arch (regcache), regnum))
+      || getfpregs_supplies (regcache->arch (), regnum))
     {
       struct fpreg fpregs;
 
@@ -127,7 +127,7 @@ ppcobsd_store_registers (struct target_ops *ops,
 
 #ifdef PT_GETFPREGS
   if (regnum == -1
-      || getfpregs_supplies (get_regcache_arch (regcache), regnum))
+      || getfpregs_supplies (regcache->arch (), regnum))
     {
       struct fpreg fpregs;
 
@@ -147,7 +147,7 @@ ppcobsd_store_registers (struct target_ops *ops,
 static int
 ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct switchframe sf;
   struct callframe cf;
@@ -180,10 +180,6 @@ ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   return 1;
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_ppcobsd_nat (void);
 
 void
 _initialize_ppcobsd_nat (void)

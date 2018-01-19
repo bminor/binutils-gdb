@@ -1,4 +1,4 @@
-#ld: -shared
+#ld: -shared --hash-style=sysv
 #objdump: -dw
 #target: aarch64*-*-*
 

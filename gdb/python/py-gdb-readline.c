@@ -1,6 +1,6 @@
 /* Readline support for Python.
 
-   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+   Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -76,7 +76,7 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
   q = (char *) PyMem_RawMalloc (n + 2);
   if (q != NULL)
     {
-      strncpy (q, p, n);
+      strcpy (q, p);
       q[n] = '\n';
       q[n + 1] = '\0';
     }

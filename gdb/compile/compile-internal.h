@@ -1,5 +1,5 @@
 /* Header file for GDB compile command and supporting functions.
-   Copyright (C) 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2014-2018 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -95,11 +95,10 @@ struct compile_c_instance
 
 /* Call gdbarch_register_name (GDBARCH, REGNUM) and convert its result
    to a form suitable for the compiler source.  The register names
-   should not clash with inferior defined macros.  Returned pointer is
-   never NULL.  Returned pointer needs to be deallocated by xfree.  */
+   should not clash with inferior defined macros. */
 
-extern char *compile_register_name_mangled (struct gdbarch *gdbarch,
-					    int regnum);
+extern std::string compile_register_name_mangled (struct gdbarch *gdbarch,
+						  int regnum);
 
 /* Convert compiler source register name to register number of
    GDBARCH.  Returned value is always >= 0, function throws an error
@@ -144,13 +143,12 @@ extern unsigned char *generate_c_for_variable_locations
 
 extern const char *c_get_mode_for_size (int size);
 
-/* Given a dynamic property, return an xmallocd name that is used to
-   represent its size.  The result must be freed by the caller.  The
-   contents of the resulting string will be the same each time for
-   each call with the same argument.  */
+/* Given a dynamic property, return a name that is used to represent
+   its size.  The contents of the resulting string will be the same
+   each time for each call with the same argument.  */
 
 struct dynamic_prop;
-extern char *c_get_range_decl_name (const struct dynamic_prop *prop);
+extern std::string c_get_range_decl_name (const struct dynamic_prop *prop);
 
 /* Type used to hold and pass around the source and object file names
    to use for compilation.  */

@@ -1,6 +1,6 @@
 /* Solaris threads debugging interface.
 
-   Copyright (C) 1996-2017 Free Software Foundation, Inc.
+   Copyright (C) 1996-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -367,10 +367,9 @@ static void
 sol_thread_resume (struct target_ops *ops,
 		   ptid_t ptid, int step, enum gdb_signal signo)
 {
-  struct cleanup *old_chain;
   struct target_ops *beneath = find_target_beneath (ops);
 
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   inferior_ptid = thread_to_lwp (inferior_ptid, ptid_get_pid (main_ph.ptid));
   if (ptid_get_pid (inferior_ptid) == -1)
@@ -389,8 +388,6 @@ sol_thread_resume (struct target_ops *ops,
     }
 
   beneath->to_resume (beneath, ptid, step, signo);
-
-  do_cleanups (old_chain);
 }
 
 /* Wait for any threads to stop.  We may have to convert PTID from a
@@ -403,10 +400,9 @@ sol_thread_wait (struct target_ops *ops,
   ptid_t rtnval;
   ptid_t save_ptid;
   struct target_ops *beneath = find_target_beneath (ops);
-  struct cleanup *old_chain;
 
   save_ptid = inferior_ptid;
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   inferior_ptid = thread_to_lwp (inferior_ptid, ptid_get_pid (main_ph.ptid));
   if (ptid_get_pid (inferior_ptid) == -1)
@@ -444,8 +440,6 @@ sol_thread_wait (struct target_ops *ops,
   /* During process initialization, we may get here without the thread
      package being initialized, since that can only happen after we've
      found the shared libs.  */
-
-  do_cleanups (old_chain);
 
   return rtnval;
 }
@@ -569,11 +563,9 @@ sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
 			  const gdb_byte *writebuf,
 			 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  enum target_xfer_status retval;
-  struct cleanup *old_chain;
   struct target_ops *beneath = find_target_beneath (ops);
 
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   if (ptid_tid_p (inferior_ptid) || !target_thread_alive (inferior_ptid))
     {
@@ -585,12 +577,8 @@ sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
       inferior_ptid = procfs_first_available ();
     }
 
-  retval = beneath->to_xfer_partial (beneath, object, annex, readbuf,
-				     writebuf, offset, len, xfered_len);
-
-  do_cleanups (old_chain);
-
-  return retval;
+  return beneath->to_xfer_partial (beneath, object, annex, readbuf,
+				   writebuf, offset, len, xfered_len);
 }
 
 static void
@@ -712,34 +700,6 @@ sol_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* These routines implement the lower half of the thread_db interface,
    i.e. the ps_* routines.  */
 
-/* Various versions of <proc_service.h> have slightly different
-   function prototypes.  In particular, we have
-
-   NEWER                        OLDER
-   struct ps_prochandle *       const struct ps_prochandle *
-   void*                        char*
-   const void*          	char*
-   int                  	size_t
-
-   Which one you have depends on the Solaris version and what patches
-   you've applied.  On the theory that there are only two major
-   variants, we have configure check the prototype of ps_pdwrite (),
-   and use that info to make appropriate typedefs here.  */
-
-#ifdef PROC_SERVICE_IS_OLD
-typedef const struct ps_prochandle *gdb_ps_prochandle_t;
-typedef char *gdb_ps_read_buf_t;
-typedef char *gdb_ps_write_buf_t;
-typedef int gdb_ps_size_t;
-typedef psaddr_t gdb_ps_addr_t;
-#else
-typedef struct ps_prochandle *gdb_ps_prochandle_t;
-typedef void *gdb_ps_read_buf_t;
-typedef const void *gdb_ps_write_buf_t;
-typedef size_t gdb_ps_size_t;
-typedef psaddr_t gdb_ps_addr_t;
-#endif
-
 /* The next four routines are called by libthread_db to tell us to
    stop and stop a particular process or lwp.  Since GDB ensures that
    these are all stopped by the time we call anything in thread_db,
@@ -748,7 +708,7 @@ typedef psaddr_t gdb_ps_addr_t;
 /* Process stop.  */
 
 ps_err_e
-ps_pstop (gdb_ps_prochandle_t ph)
+ps_pstop (struct ps_prochandle *ph)
 {
   return PS_OK;
 }
@@ -756,7 +716,7 @@ ps_pstop (gdb_ps_prochandle_t ph)
 /* Process continue.  */
 
 ps_err_e
-ps_pcontinue (gdb_ps_prochandle_t ph)
+ps_pcontinue (struct ps_prochandle *ph)
 {
   return PS_OK;
 }
@@ -764,7 +724,7 @@ ps_pcontinue (gdb_ps_prochandle_t ph)
 /* LWP stop.  */
 
 ps_err_e
-ps_lstop (gdb_ps_prochandle_t ph, lwpid_t lwpid)
+ps_lstop (struct ps_prochandle *ph, lwpid_t lwpid)
 {
   return PS_OK;
 }
@@ -772,7 +732,7 @@ ps_lstop (gdb_ps_prochandle_t ph, lwpid_t lwpid)
 /* LWP continue.  */
 
 ps_err_e
-ps_lcontinue (gdb_ps_prochandle_t ph, lwpid_t lwpid)
+ps_lcontinue (struct ps_prochandle *ph, lwpid_t lwpid)
 {
   return PS_OK;
 }
@@ -780,8 +740,8 @@ ps_lcontinue (gdb_ps_prochandle_t ph, lwpid_t lwpid)
 /* Looks up the symbol LD_SYMBOL_NAME in the debugger's symbol table.  */
 
 ps_err_e
-ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *ld_object_name,
-		   const char *ld_symbol_name, gdb_ps_addr_t *ld_symbol_addr)
+ps_pglobal_lookup (struct ps_prochandle *ph, const char *ld_object_name,
+		   const char *ld_symbol_name, psaddr_t *ld_symbol_addr)
 {
   struct bound_minimal_symbol ms;
 
@@ -796,13 +756,12 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *ld_object_name,
 /* Common routine for reading and writing memory.  */
 
 static ps_err_e
-rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
+rw_common (int dowrite, const struct ps_prochandle *ph, psaddr_t addr,
 	   gdb_byte *buf, int size)
 {
   int ret;
-  struct cleanup *old_chain;
 
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   if (ptid_tid_p (inferior_ptid) || !target_thread_alive (inferior_ptid))
     {
@@ -826,16 +785,13 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
   else
     ret = target_read_memory (addr, (gdb_byte *) buf, size);
 
-  do_cleanups (old_chain);
-
   return (ret == 0 ? PS_OK : PS_ERR);
 }
 
 /* Copies SIZE bytes from target process .data segment to debugger memory.  */
 
 ps_err_e
-ps_pdread (gdb_ps_prochandle_t ph, gdb_ps_addr_t addr,
-	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
+ps_pdread (struct ps_prochandle *ph, psaddr_t addr, void *buf, size_t size)
 {
   return rw_common (0, ph, addr, (gdb_byte *) buf, size);
 }
@@ -843,8 +799,8 @@ ps_pdread (gdb_ps_prochandle_t ph, gdb_ps_addr_t addr,
 /* Copies SIZE bytes from debugger memory .data segment to target process.  */
 
 ps_err_e
-ps_pdwrite (gdb_ps_prochandle_t ph, gdb_ps_addr_t addr,
-	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
+ps_pdwrite (struct ps_prochandle *ph, psaddr_t addr,
+	    const void *buf, size_t size)
 {
   return rw_common (1, ph, addr, (gdb_byte *) buf, size);
 }
@@ -852,8 +808,7 @@ ps_pdwrite (gdb_ps_prochandle_t ph, gdb_ps_addr_t addr,
 /* Copies SIZE bytes from target process .text segment to debugger memory.  */
 
 ps_err_e
-ps_ptread (gdb_ps_prochandle_t ph, gdb_ps_addr_t addr,
-	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
+ps_ptread (struct ps_prochandle *ph, psaddr_t addr, void *buf, size_t size)
 {
   return rw_common (0, ph, addr, (gdb_byte *) buf, size);
 }
@@ -861,8 +816,8 @@ ps_ptread (gdb_ps_prochandle_t ph, gdb_ps_addr_t addr,
 /* Copies SIZE bytes from debugger memory .text segment to target process.  */
 
 ps_err_e
-ps_ptwrite (gdb_ps_prochandle_t ph, gdb_ps_addr_t addr,
-	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
+ps_ptwrite (struct ps_prochandle *ph, psaddr_t addr,
+	    const void *buf, size_t size)
 {
   return rw_common (1, ph, addr, (gdb_byte *) buf, size);
 }
@@ -870,7 +825,7 @@ ps_ptwrite (gdb_ps_prochandle_t ph, gdb_ps_addr_t addr,
 /* Get general-purpose registers for LWP.  */
 
 ps_err_e
-ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
+ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
 {
   ptid_t ptid = ptid_build (ptid_get_pid (inferior_ptid), lwpid, 0);
   struct regcache *regcache
@@ -885,7 +840,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 /* Set general-purpose registers for LWP.  */
 
 ps_err_e
-ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
+ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	     const prgregset_t gregset)
 {
   ptid_t ptid = ptid_build (ptid_get_pid (inferior_ptid), lwpid, 0);
@@ -913,7 +868,7 @@ ps_plog (const char *fmt, ...)
 /* Get size of extra register set.  Currently a noop.  */
 
 ps_err_e
-ps_lgetxregsize (gdb_ps_prochandle_t ph, lwpid_t lwpid, int *xregsize)
+ps_lgetxregsize (struct ps_prochandle *ph, lwpid_t lwpid, int *xregsize)
 {
   return PS_OK;
 }
@@ -921,7 +876,7 @@ ps_lgetxregsize (gdb_ps_prochandle_t ph, lwpid_t lwpid, int *xregsize)
 /* Get extra register set.  Currently a noop.  */
 
 ps_err_e
-ps_lgetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
+ps_lgetxregs (struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
 {
   return PS_OK;
 }
@@ -929,7 +884,7 @@ ps_lgetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
 /* Set extra register set.  Currently a noop.  */
 
 ps_err_e
-ps_lsetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
+ps_lsetxregs (struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
 {
   return PS_OK;
 }
@@ -937,7 +892,7 @@ ps_lsetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
 /* Get floating-point registers for LWP.  */
 
 ps_err_e
-ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
+ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       prfpregset_t *fpregset)
 {
   ptid_t ptid = ptid_build (ptid_get_pid (inferior_ptid), lwpid, 0);
@@ -953,7 +908,7 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 /* Set floating-point regs for LWP.  */
 
 ps_err_e
-ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
+ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       const prfpregset_t * fpregset)
 {
   ptid_t ptid = ptid_build (ptid_get_pid (inferior_ptid), lwpid, 0);
@@ -972,7 +927,7 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
    (e.g. procfs) method, but this ought to work.  */
 
 ps_err_e
-ps_pdmodel (gdb_ps_prochandle_t ph, int *data_model)
+ps_pdmodel (struct ps_prochandle *ph, int *data_model)
 {
   if (exec_bfd == 0)
     *data_model = PR_MODEL_UNKNOWN;
@@ -993,7 +948,7 @@ ps_pdmodel (gdb_ps_prochandle_t ph, int *data_model)
    of libthread_db would fail because of ps_lgetLDT being undefined.  */
 
 ps_err_e
-ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
+ps_lgetLDT (struct ps_prochandle *ph, lwpid_t lwpid,
 	    struct ssd *pldt)
 {
   /* NOTE: only used on Solaris, therefore OK to refer to procfs.c.  */
@@ -1167,9 +1122,9 @@ info_cb (const td_thrhandle_t *th, void *s)
    inferior.  */
 
 static void
-info_solthreads (char *args, int from_tty)
+info_solthreads (const char *args, int from_tty)
 {
-  p_td_ta_thr_iter (main_ta, info_cb, args,
+  p_td_ta_thr_iter (main_ta, info_cb, (void *) args,
 		    TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
 		    TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
 }
@@ -1228,9 +1183,6 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_get_ada_task_ptid = sol_get_ada_task_ptid;
   sol_thread_ops.to_magic = OPS_MAGIC;
 }
-
-/* Silence -Wmissing-prototypes.  */
-extern void _initialize_sol_thread (void);
 
 void
 _initialize_sol_thread (void)

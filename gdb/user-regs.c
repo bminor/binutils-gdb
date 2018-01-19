@@ -1,6 +1,6 @@
 /* User visible, per-frame registers, for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2018 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -222,7 +222,7 @@ value_of_user_reg (int regnum, struct frame_info *frame)
 }
 
 static void
-maintenance_print_user_registers (char *args, int from_tty)
+maintenance_print_user_registers (const char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   struct gdb_user_regs *regs;
@@ -236,8 +236,6 @@ maintenance_print_user_registers (char *args, int from_tty)
   for (reg = regs->first; reg != NULL; reg = reg->next, ++regnum)
     fprintf_unfiltered (gdb_stdout, " %-11s %3d\n", reg->name, regnum);
 }
-
-extern initialize_file_ftype _initialize_user_regs; /* -Wmissing-prototypes */
 
 void
 _initialize_user_regs (void)

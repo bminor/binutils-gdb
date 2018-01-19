@@ -2,7 +2,7 @@
    convert to internal format, for GDB. Used as a last resort if no
    debugging symbols recognized.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -697,10 +697,6 @@ show_debug_coff_pe_read (struct ui_file *file, int from_tty,
 {
   fprintf_filtered (file, _("Coff PE read debugging is %s.\n"), value);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-
-void _initialize_coff_pe_read (void);
 
 /* Adds "Set/show debug coff_pe_read" commands.  */
 

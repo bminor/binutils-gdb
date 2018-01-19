@@ -1,6 +1,6 @@
 // layout.h -- lay out output file sections for gold  -*- C++ -*-
 
-// Copyright (C) 2006-2017 Free Software Foundation, Inc.
+// Copyright (C) 2006-2018 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -652,6 +652,13 @@ class Layout
   add_eh_frame_for_plt(Output_data* plt, const unsigned char* cie_data,
 		       size_t cie_length, const unsigned char* fde_data,
 		       size_t fde_length);
+
+  // Remove .eh_frame information for a PLT.  FDEs using the CIE must
+  // be removed in reverse order to the order they were added.
+  void
+  remove_eh_frame_for_plt(Output_data* plt, const unsigned char* cie_data,
+			  size_t cie_length, const unsigned char* fde_data,
+			  size_t fde_length);
 
   // Scan a .debug_info or .debug_types section, and add summary
   // information to the .gdb_index section.

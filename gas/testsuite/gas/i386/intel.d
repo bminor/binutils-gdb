@@ -221,8 +221,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	db 90 90 90 90 90 [ 	]*fistl  -0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	dc 90 90 90 90 90 [ 	]*fcoml  -0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	dd 90 90 90 90 90 [ 	]*fstl   -0x6f6f6f70\(%eax\)
-[ 	]*[a-f0-9]+:	de 90 90 90 90 90 [ 	]*ficom  -0x6f6f6f70\(%eax\)
-[ 	]*[a-f0-9]+:	df 90 90 90 90 90 [ 	]*fist   -0x6f6f6f70\(%eax\)
+[ 	]*[a-f0-9]+:	de 90 90 90 90 90 [ 	]*ficoms -0x6f6f6f70\(%eax\)
+[ 	]*[a-f0-9]+:	df 90 90 90 90 90 [ 	]*fists  -0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	e0 90 [ 	]*loopne (0x)?260.*
 [ 	]*[a-f0-9]+:	e1 90 [ 	]*loope  (0x)?262.*
 [ 	]*[a-f0-9]+:	e2 90 [ 	]*loop   (0x)?264.*
@@ -360,7 +360,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f b5 90 90 90 90 90 [ 	]*lgs    -0x6f6f6f70\(%eax\),%edx
 [ 	]*[a-f0-9]+:	0f b6 90 90 90 90 90 [ 	]*movzbl -0x6f6f6f70\(%eax\),%edx
 [ 	]*[a-f0-9]+:	0f b7 90 90 90 90 90 [ 	]*movzwl -0x6f6f6f70\(%eax\),%edx
-[ 	]*[a-f0-9]+:	0f b9 [ 	]*ud1    
+[ 	]*[a-f0-9]+:	0f 0b [ 	]*ud2[ 	]*
 [ 	]*[a-f0-9]+:	0f bb 90 90 90 90 90 [ 	]*btc    %edx,-0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	0f bc 90 90 90 90 90 [ 	]*bsf    -0x6f6f6f70\(%eax\),%edx
 [ 	]*[a-f0-9]+:	0f bd 90 90 90 90 90 [ 	]*bsr    -0x6f6f6f70\(%eax\),%edx
@@ -692,12 +692,15 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
-[ 	]*[a-f0-9]+:	de 3b                	fidivr \(%ebx\)
+[ 	]*[a-f0-9]+:	de 3b                	fidivrs \(%ebx\)
 [ 	]*[a-f0-9]+:	da 3b                	fidivrl \(%ebx\)
 [ 	]*[a-f0-9]+:	0f 4a 90 90 90 90 90 	cmovp  -0x6f6f6f70\(%eax\),%edx
 [ 	]*[a-f0-9]+:	0f 4b 90 90 90 90 90 	cmovnp -0x6f6f6f70\(%eax\),%edx
 [ 	]*[a-f0-9]+:	66 0f 4a 90 90 90 90 90 	cmovp  -0x6f6f6f70\(%eax\),%dx
 [ 	]*[a-f0-9]+:	66 0f 4b 90 90 90 90 90 	cmovnp -0x6f6f6f70\(%eax\),%dx
+[ 	]*[a-f0-9]+:	8b 04 04             	mov    \(%esp,%eax(,1)?\),%eax
+[ 	]*[a-f0-9]+:	8b 04 20             	mov    \(%eax(,%eiz)?(,1)?\),%eax
+[ 	]*[a-f0-9]+:	c4 e2 69 92 04 08    	vgatherdps %xmm2,\(%eax,%xmm1(,1)?\),%xmm0
 [ 	]*[a-f0-9]+:	24 2f                	and    \$0x2f,%al
 [ 	]*[a-f0-9]+:	0f                   	\.byte 0xf
 [a-f0-9]+ <barn>:

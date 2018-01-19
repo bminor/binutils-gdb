@@ -1,6 +1,6 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -717,9 +717,6 @@ am33_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tramp_frame_prepend_unwinder (gdbarch, &am33_linux_sigframe);
   tramp_frame_prepend_unwinder (gdbarch, &am33_linux_rt_sigframe);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_mn10300_linux_tdep;
 
 void
 _initialize_mn10300_linux_tdep (void)

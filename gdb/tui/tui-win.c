@@ -1,6 +1,6 @@
 /* TUI window generic functions.
 
-   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -61,16 +61,16 @@ static void make_invisible_and_set_new_height (struct tui_win_info *,
 static enum tui_status tui_adjust_win_heights (struct tui_win_info *, 
 					       int);
 static int new_height_ok (struct tui_win_info *, int);
-static void tui_set_tab_width_command (char *, int);
-static void tui_refresh_all_command (char *, int);
-static void tui_set_win_height_command (char *, int);
-static void tui_all_windows_info (char *, int);
-static void tui_set_focus_command (char *, int);
-static void tui_scroll_forward_command (char *, int);
-static void tui_scroll_backward_command (char *, int);
-static void tui_scroll_left_command (char *, int);
-static void tui_scroll_right_command (char *, int);
-static void parse_scrolling_args (char *, 
+static void tui_set_tab_width_command (const char *, int);
+static void tui_refresh_all_command (const char *, int);
+static void tui_set_win_height_command (const char *, int);
+static void tui_all_windows_info (const char *, int);
+static void tui_set_focus_command (const char *, int);
+static void tui_scroll_forward_command (const char *, int);
+static void tui_scroll_backward_command (const char *, int);
+static void tui_scroll_left_command (const char *, int);
+static void tui_scroll_right_command (const char *, int);
+static void parse_scrolling_args (const char *, 
 				  struct tui_win_info **, 
 				  int *);
 
@@ -316,19 +316,19 @@ tui_update_variables (void)
 }
 
 static void
-set_tui_cmd (char *args, int from_tty)
+set_tui_cmd (const char *args, int from_tty)
 {
 }
 
 static void
-show_tui_cmd (char *args, int from_tty)
+show_tui_cmd (const char *args, int from_tty)
 {
 }
 
 static struct cmd_list_element *tuilist;
 
 static void
-tui_command (char *args, int from_tty)
+tui_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"tui\" must be followed by the name of a "
                      "tui command.\n"));
@@ -348,7 +348,8 @@ tui_get_cmd_list (void)
 /* The set_func hook of "set tui ..." commands that affect the window
    borders on the TUI display.  */
 void
-tui_set_var_cmd (char *null_args, int from_tty, struct cmd_list_element *c)
+tui_set_var_cmd (const char *null_args,
+		 int from_tty, struct cmd_list_element *c)
 {
   if (tui_update_variables () && tui_active)
     tui_rehighlight_all ();
@@ -359,12 +360,12 @@ tui_set_var_cmd (char *null_args, int from_tty, struct cmd_list_element *c)
    window names 'next' and 'prev' will also be considered as possible
    completions of the window name.  */
 
-static VEC (char_ptr) *
-window_name_completer (int include_next_prev_p,
+static void
+window_name_completer (completion_tracker &tracker,
+		       int include_next_prev_p,
 		       const char *text, const char *word)
 {
-  VEC (const_char_ptr) *completion_name_vec = NULL;
-  VEC (char_ptr) *matches_vec;
+  std::vector<const char *> completion_name_vec;
   int win_type;
 
   for (win_type = SRC_WIN; win_type < MAX_MAJOR_WINDOWS; win_type++)
@@ -378,66 +379,60 @@ window_name_completer (int include_next_prev_p,
 
       completion_name = tui_win_name (&tui_win_list [win_type]->generic);
       gdb_assert (completion_name != NULL);
-      VEC_safe_push (const_char_ptr, completion_name_vec, completion_name);
+      completion_name_vec.push_back (completion_name);
     }
 
   /* If no windows are considered visible then the TUI has not yet been
      initialized.  But still "focus src" and "focus cmd" will work because
      invoking the focus command will entail initializing the TUI which sets the
      default layout to SRC_COMMAND.  */
-  if (VEC_length (const_char_ptr, completion_name_vec) == 0)
+  if (completion_name_vec.empty ())
     {
-      VEC_safe_push (const_char_ptr, completion_name_vec, SRC_NAME);
-      VEC_safe_push (const_char_ptr, completion_name_vec, CMD_NAME);
+      completion_name_vec.push_back (SRC_NAME);
+      completion_name_vec.push_back (CMD_NAME);
     }
 
   if (include_next_prev_p)
     {
-      VEC_safe_push (const_char_ptr, completion_name_vec, "next");
-      VEC_safe_push (const_char_ptr, completion_name_vec, "prev");
+      completion_name_vec.push_back ("next");
+      completion_name_vec.push_back ("prev");
     }
 
-  VEC_safe_push (const_char_ptr, completion_name_vec, NULL);
-  matches_vec
-    = complete_on_enum (VEC_address (const_char_ptr, completion_name_vec),
-			text, word);
 
-  VEC_free (const_char_ptr, completion_name_vec);
-
-  return matches_vec;
+  completion_name_vec.push_back (NULL);
+  complete_on_enum (tracker, completion_name_vec.data (), text, word);
 }
 
 /* Complete possible window names to focus on.  TEXT is the complete text
    entered so far, WORD is the word currently being completed.  */
 
-static VEC (char_ptr) *
+static void
 focus_completer (struct cmd_list_element *ignore,
-		  const char *text, const char *word)
+		 completion_tracker &tracker,
+		 const char *text, const char *word)
 {
-  return window_name_completer (1, text, word);
+  window_name_completer (tracker, 1, text, word);
 }
 
 /* Complete possible window names for winheight command.  TEXT is the
    complete text entered so far, WORD is the word currently being
    completed.  */
 
-static VEC (char_ptr) *
+static void
 winheight_completer (struct cmd_list_element *ignore,
+		     completion_tracker &tracker,
 		     const char *text, const char *word)
 {
   /* The first word is the window name.  That we can complete.  Subsequent
      words can't be completed.  */
   if (word != text)
-    return NULL;
+    return;
 
-  return window_name_completer (0, text, word);
+  window_name_completer (tracker, 0, text, word);
 }
 
 /* Function to initialize gdb commands, for tui window
    manipulation.  */
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tui_win;
 
 void
 _initialize_tui_win (void)
@@ -983,7 +978,7 @@ tui_initialize_win (void)
 
 
 static void
-tui_scroll_forward_command (char *arg, int from_tty)
+tui_scroll_forward_command (const char *arg, int from_tty)
 {
   int num_to_scroll = 1;
   struct tui_win_info *win_to_scroll;
@@ -999,7 +994,7 @@ tui_scroll_forward_command (char *arg, int from_tty)
 
 
 static void
-tui_scroll_backward_command (char *arg, int from_tty)
+tui_scroll_backward_command (const char *arg, int from_tty)
 {
   int num_to_scroll = 1;
   struct tui_win_info *win_to_scroll;
@@ -1015,7 +1010,7 @@ tui_scroll_backward_command (char *arg, int from_tty)
 
 
 static void
-tui_scroll_left_command (char *arg, int from_tty)
+tui_scroll_left_command (const char *arg, int from_tty)
 {
   int num_to_scroll;
   struct tui_win_info *win_to_scroll;
@@ -1028,7 +1023,7 @@ tui_scroll_left_command (char *arg, int from_tty)
 
 
 static void
-tui_scroll_right_command (char *arg, int from_tty)
+tui_scroll_right_command (const char *arg, int from_tty)
 {
   int num_to_scroll;
   struct tui_win_info *win_to_scroll;
@@ -1042,7 +1037,7 @@ tui_scroll_right_command (char *arg, int from_tty)
 
 /* Set focus to the window named by 'arg'.  */
 static void
-tui_set_focus (char *arg, int from_tty)
+tui_set_focus (const char *arg, int from_tty)
 {
   if (arg != (char *) NULL)
     {
@@ -1081,7 +1076,7 @@ The window name specified must be valid and visible.\n"));
 }
 
 static void
-tui_set_focus_command (char *arg, int from_tty)
+tui_set_focus_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -1090,7 +1085,7 @@ tui_set_focus_command (char *arg, int from_tty)
 
 
 static void
-tui_all_windows_info (char *arg, int from_tty)
+tui_all_windows_info (const char *arg, int from_tty)
 {
   int type;
   struct tui_win_info *win_with_focus = tui_win_with_focus ();
@@ -1112,7 +1107,7 @@ tui_all_windows_info (char *arg, int from_tty)
 
 
 static void
-tui_refresh_all_command (char *arg, int from_tty)
+tui_refresh_all_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -1123,7 +1118,7 @@ tui_refresh_all_command (char *arg, int from_tty)
 
 /* Set the tab width of the specified window.  */
 static void
-tui_set_tab_width_command (char *arg, int from_tty)
+tui_set_tab_width_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -1162,20 +1157,19 @@ tui_set_tab_width_command (char *arg, int from_tty)
 
 /* Set the height of the specified window.  */
 static void
-tui_set_win_height (char *arg, int from_tty)
+tui_set_win_height (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
   if (arg != (char *) NULL)
     {
-      char *buf = xstrdup (arg);
+      std::string copy = arg;
+      char *buf = &copy[0];
       char *buf_ptr = buf;
       char *wname = NULL;
       int new_height, i;
       struct tui_win_info *win_info;
-      struct cleanup *old_chain;
 
-      old_chain = make_cleanup (xfree, buf);
       wname = buf_ptr;
       buf_ptr = strchr (buf_ptr, ' ');
       if (buf_ptr != (char *) NULL)
@@ -1237,8 +1231,6 @@ The window name specified must be valid and visible.\n"));
 	}
       else
 	printf_filtered (WIN_HEIGHT_USAGE);
-
-      do_cleanups (old_chain);
     }
   else
     printf_filtered (WIN_HEIGHT_USAGE);
@@ -1246,7 +1238,7 @@ The window name specified must be valid and visible.\n"));
 
 /* Set the height of the specified window, with va_list.  */
 static void
-tui_set_win_height_command (char *arg, int from_tty)
+tui_set_win_height_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -1652,7 +1644,7 @@ new_height_ok (struct tui_win_info *primary_win_info,
 
 
 static void
-parse_scrolling_args (char *arg, 
+parse_scrolling_args (const char *arg, 
 		      struct tui_win_info **win_to_scroll,
 		      int *num_to_scroll)
 {
@@ -1664,12 +1656,11 @@ parse_scrolling_args (char *arg,
      window name arg.  */
   if (arg != (char *) NULL)
     {
-      char *buf, *buf_ptr;
-      struct cleanup *old_chain;
+      char *buf_ptr;
 
       /* Process the number of lines to scroll.  */
-      buf = buf_ptr = xstrdup (arg);
-      old_chain = make_cleanup (xfree, buf);
+      std::string copy = arg;
+      buf_ptr = &copy[0];
       if (isdigit (*buf_ptr))
 	{
 	  char *num_str;
@@ -1716,6 +1707,5 @@ The window name specified must be valid and visible.\n"));
 	  else if (*win_to_scroll == TUI_CMD_WIN)
 	    *win_to_scroll = (tui_source_windows ())->list[0];
 	}
-      do_cleanups (old_chain);
     }
 }

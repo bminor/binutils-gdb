@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright (C) 1993-2017 Free Software Foundation, Inc.
+   Copyright (C) 1993-2018 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -4897,7 +4897,7 @@ match_expression (struct mips_arg_info *arg, expressionS *value,
 }
 
 /* Try to get a constant expression from the next tokens in ARG.  Consume
-   the tokens and return return true on success, storing the constant value
+   the tokens and return true on success, storing the constant value
    in *VALUE.  */
 
 static bfd_boolean
@@ -15314,7 +15314,7 @@ fix_bad_misaligned_jump_p (fixS *fixP, int shift)
    We accept BFD_RELOC_16_PCREL_S2 relocations against MIPS16 and microMIPS
    symbols or BFD_RELOC_MICROMIPS_16_PCREL_S1 relocations against regular
    MIPS symbols and associated with BAL instructions as these instructions
-   may be be converted to JALX by the linker.  */
+   may be converted to JALX by the linker.  */
 
 static bfd_boolean
 fix_bad_cross_mode_branch_p (fixS *fixP)
@@ -17149,6 +17149,7 @@ s_nan (int ignore ATTRIBUTE_UNUSED)
 static void
 s_mips_stab (int type)
 {
+  file_mips_check_options ();
   mips_mark_labels ();
   s_stab (type);
 }
@@ -18135,7 +18136,6 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
     {
       char *buf;
       unsigned long insn;
-      expressionS exp;
       fixS *fixp;
 
       buf = fragp->fr_literal + fragp->fr_fix;
@@ -18146,12 +18146,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  /* We generate a fixup instead of applying it right now
 	     because, if there are linker relaxations, we're going to
 	     need the relocations.  */
-	  exp.X_op = O_symbol;
-	  exp.X_add_symbol = fragp->fr_symbol;
-	  exp.X_add_number = fragp->fr_offset;
-
-	  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp, TRUE,
-			      BFD_RELOC_16_PCREL_S2);
+	  fixp = fix_new (fragp, buf - fragp->fr_literal, 4,
+			  fragp->fr_symbol, fragp->fr_offset,
+			  TRUE, BFD_RELOC_16_PCREL_S2);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
@@ -18267,12 +18264,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      /* j or jal.  */
 	      insn = (RELAX_BRANCH_LINK (fragp->fr_subtype)
 		      ? 0x0c000000 : 0x08000000);
-	      exp.X_op = O_symbol;
-	      exp.X_add_symbol = fragp->fr_symbol;
-	      exp.X_add_number = fragp->fr_offset;
 
-	      fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp,
-				  FALSE, BFD_RELOC_MIPS_JMP);
+	      fixp = fix_new (fragp, buf - fragp->fr_literal, 4,
+			      fragp->fr_symbol, fragp->fr_offset,
+			      FALSE, BFD_RELOC_MIPS_JMP);
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
@@ -18285,18 +18280,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      /* lw/ld $at, <sym>($gp)  R_MIPS_GOT16 */
 	      insn = HAVE_64BIT_ADDRESSES ? 0xdf800000 : 0x8f800000;
 	      insn |= at << OP_SH_RT;
-	      exp.X_op = O_symbol;
-	      exp.X_add_symbol = fragp->fr_symbol;
-	      exp.X_add_number = fragp->fr_offset;
 
-	      if (fragp->fr_offset)
-		{
-		  exp.X_add_symbol = make_expr_symbol (&exp);
-		  exp.X_add_number = 0;
-		}
-
-	      fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp,
-				  FALSE, BFD_RELOC_MIPS_GOT16);
+	      fixp = fix_new (fragp, buf - fragp->fr_literal, 4,
+			      fragp->fr_symbol, fragp->fr_offset,
+			      FALSE, BFD_RELOC_MIPS_GOT16);
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
@@ -18310,8 +18297,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      insn = HAVE_64BIT_ADDRESSES ? 0x64000000 : 0x24000000;
 	      insn |= at << OP_SH_RS | at << OP_SH_RT;
 
-	      fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp,
-				  FALSE, BFD_RELOC_LO16);
+	      fixp = fix_new (fragp, buf - fragp->fr_literal, 4,
+			      fragp->fr_symbol, fragp->fr_offset,
+			      FALSE, BFD_RELOC_LO16);
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
@@ -18345,12 +18333,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       int type = RELAX_MICROMIPS_TYPE (fragp->fr_subtype);
       bfd_boolean short_ds;
       unsigned long insn;
-      expressionS exp;
       fixS *fixp;
-
-      exp.X_op = O_symbol;
-      exp.X_add_symbol = fragp->fr_symbol;
-      exp.X_add_number = fragp->fr_offset;
 
       fragp->fr_fix += fragp->fr_var;
 
@@ -18360,14 +18343,21 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  /* We generate a fixup instead of applying it right now,
 	     because if there is linker relaxation, we're going to
 	     need the relocations.  */
-	  if (type == 'D')
-	    fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 2, &exp, TRUE,
-				BFD_RELOC_MICROMIPS_10_PCREL_S1);
-	  else if (type == 'E')
-	    fixp = fix_new_exp (fragp, buf - fragp->fr_literal,	2, &exp, TRUE,
-				BFD_RELOC_MICROMIPS_7_PCREL_S1);
-	  else
-	    abort ();
+	  switch (type)
+	    {
+	    case 'D':
+	      fixp = fix_new (fragp, buf - fragp->fr_literal, 2,
+			      fragp->fr_symbol, fragp->fr_offset,
+			      TRUE, BFD_RELOC_MICROMIPS_10_PCREL_S1);
+	      break;
+	    case 'E':
+	      fixp = fix_new (fragp, buf - fragp->fr_literal, 2,
+			      fragp->fr_symbol, fragp->fr_offset,
+			      TRUE, BFD_RELOC_MICROMIPS_7_PCREL_S1);
+	      break;
+	    default:
+	      abort ();
+	    }
 
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
@@ -18386,8 +18376,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  /* We generate a fixup instead of applying it right now,
 	     because if there is linker relaxation, we're going to
 	     need the relocations.  */
-	  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp, TRUE,
-			      BFD_RELOC_MICROMIPS_16_PCREL_S1);
+	  fixp = fix_new (fragp, buf - fragp->fr_literal, 4,
+			  fragp->fr_symbol, fragp->fr_offset,
+			  TRUE, BFD_RELOC_MICROMIPS_16_PCREL_S1);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
@@ -18524,8 +18515,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  /* j/jal/jals <sym>  R_MICROMIPS_26_S1  */
 	  insn = al ? jal : 0xd4000000;
 
-	  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp, FALSE,
-			      BFD_RELOC_MICROMIPS_JMP);
+	  fixp = fix_new (fragp, buf - fragp->fr_literal, 4,
+			  fragp->fr_symbol, fragp->fr_offset,
+			  FALSE, BFD_RELOC_MICROMIPS_JMP);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
@@ -18548,14 +18540,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  insn = HAVE_64BIT_ADDRESSES ? 0xdc1c0000 : 0xfc1c0000;
 	  insn |= at << MICROMIPSOP_SH_RT;
 
-	  if (exp.X_add_number)
-	    {
-	      exp.X_add_symbol = make_expr_symbol (&exp);
-	      exp.X_add_number = 0;
-	    }
-
-	  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp, FALSE,
-			      BFD_RELOC_MICROMIPS_GOT16);
+	  fixp = fix_new (fragp, buf - fragp->fr_literal, 4,
+			  fragp->fr_symbol, fragp->fr_offset,
+			  FALSE, BFD_RELOC_MICROMIPS_GOT16);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
@@ -18565,8 +18552,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  insn = HAVE_64BIT_ADDRESSES ? 0x5c000000 : 0x30000000;
 	  insn |= at << MICROMIPSOP_SH_RT | at << MICROMIPSOP_SH_RS;
 
-	  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp, FALSE,
-			      BFD_RELOC_MICROMIPS_LO16);
+	  fixp = fix_new (fragp, buf - fragp->fr_literal, 4,
+			  fragp->fr_symbol, fragp->fr_offset,
+			  FALSE, BFD_RELOC_MICROMIPS_LO16);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
@@ -18643,7 +18631,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 
 	  if (pcrel_op->include_isa_bit && !need_reloc)
 	    {
-	      if (!ELF_ST_IS_MIPS16 (S_GET_OTHER (fragp->fr_symbol)))
+	      if (!mips_ignore_branch_isa
+		  && !ELF_ST_IS_MIPS16 (S_GET_OTHER (fragp->fr_symbol)))
 		as_bad_where (fragp->fr_file, fragp->fr_line,
 			      _("branch to a symbol in another ISA mode"));
 	      else if ((fragp->fr_offset & 0x1) != 0)
@@ -18770,7 +18759,6 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  if (need_reloc)
 	    {
 	      bfd_reloc_code_real_type reloc = BFD_RELOC_NONE;
-	      expressionS exp;
 	      fixS *fixp;
 
 	      switch (type)
@@ -18787,13 +18775,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 			      _("unsupported relocation"));
 	      else if (ext)
 		{
-		  exp.X_op = O_symbol;
-		  exp.X_add_symbol = fragp->fr_symbol;
-		  exp.X_add_number = fragp->fr_offset;
-
-		  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp,
-				      TRUE, reloc);
-
+		  fixp = fix_new (fragp, buf - fragp->fr_literal, 4,
+				  fragp->fr_symbol, fragp->fr_offset,
+				  TRUE, reloc);
 		  fixp->fx_file = fragp->fr_file;
 		  fixp->fx_line = fragp->fr_line;
 		}
@@ -19156,10 +19140,8 @@ mips_elf_final_processing (void)
       else
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
     }
-  else if (mips_abi == N32_ABI)
-    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI2;
 
-  /* Nothing to do for N64_ABI.  */
+  /* Nothing to do for N32_ABI or N64_ABI.  */
 
   if (mips_32bitmode)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_32BITMODE;

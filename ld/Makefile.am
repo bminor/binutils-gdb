@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2018 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -810,7 +810,7 @@ earmelfb_fbsd.c: $(srcdir)/emulparams/armelfb_fbsd.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-earmelf_fuchsia.c: $(srcdir)/emulparams/armelfb_fuchsia.sh \
+earmelfb_fuchsia.c: $(srcdir)/emulparams/armelfb_fuchsia.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
@@ -1938,6 +1938,7 @@ eelf64_ia64_vms.c: $(srcdir)/emulparams/elf64_ia64_vms.sh \
   $(srcdir)/scripttempl/ia64vms.sc ${GEN_DEPENDS}
 
 eelf64_s390.c: $(srcdir)/emulparams/elf64_s390.sh \
+  $(srcdir)/emultempl/s390.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf64_sparc.c: $(srcdir)/emulparams/elf64_sparc.sh \

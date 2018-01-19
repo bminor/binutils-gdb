@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,7 +29,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "regset.h"
-#include "doublest.h"
+#include "target-float.h"
 #include "value.h"
 #include "parser-defs.h"
 #include "osabi.h"
@@ -393,7 +393,7 @@ ppc_supply_reg (struct regcache *regcache, int regnum,
     {
       if (regsize > 4)
 	{
-	  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+	  struct gdbarch *gdbarch = regcache->arch ();
 	  int gdb_regsize = register_size (gdbarch, regnum);
 	  if (gdb_regsize < regsize
 	      && gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
@@ -414,7 +414,7 @@ ppc_collect_reg (const struct regcache *regcache, int regnum,
     {
       if (regsize > 4)
 	{
-	  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+	  struct gdbarch *gdbarch = regcache->arch ();
 	  int gdb_regsize = register_size (gdbarch, regnum);
 	  if (gdb_regsize < regsize)
 	    {
@@ -511,7 +511,7 @@ void
 ppc_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		    int regnum, const void *gregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct ppc_reg_offsets *offsets
     = (const struct ppc_reg_offsets *) regset->regmap;
@@ -561,7 +561,7 @@ void
 ppc_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *fpregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
   const struct ppc_reg_offsets *offsets;
   size_t offset;
@@ -599,7 +599,7 @@ void
 ppc_supply_vsxregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *vsxregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
 
   if (!ppc_vsx_support_p (gdbarch))
@@ -630,7 +630,7 @@ void
 ppc_supply_vrregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *vrregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
   const struct ppc_reg_offsets *offsets;
   size_t offset;
@@ -676,7 +676,7 @@ ppc_collect_gregset (const struct regset *regset,
 		     const struct regcache *regcache,
 		     int regnum, void *gregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct ppc_reg_offsets *offsets
     = (const struct ppc_reg_offsets *) regset->regmap;
@@ -727,7 +727,7 @@ ppc_collect_fpregset (const struct regset *regset,
 		      const struct regcache *regcache,
 		      int regnum, void *fpregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
   const struct ppc_reg_offsets *offsets;
   size_t offset;
@@ -767,7 +767,7 @@ ppc_collect_vsxregset (const struct regset *regset,
 		      const struct regcache *regcache,
 		      int regnum, void *vsxregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
 
   if (!ppc_vsx_support_p (gdbarch))
@@ -801,7 +801,7 @@ ppc_collect_vrregset (const struct regset *regset,
 		      const struct regcache *regcache,
 		      int regnum, void *vrregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
   const struct ppc_reg_offsets *offsets;
   size_t offset;
@@ -1014,8 +1014,9 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
 					 || (insn & STORE_CONDITIONAL_MASK) == STHCX_INSTRUCTION \
 					 || (insn & STORE_CONDITIONAL_MASK) == STQCX_INSTRUCTION)
 
-/* We can't displaced step atomic sequences.  Otherwise this is just
-   like simple_displaced_step_copy_insn.  */
+typedef buf_displaced_step_closure ppc_displaced_step_closure;
+
+/* We can't displaced step atomic sequences.  */
 
 static struct displaced_step_closure *
 ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
@@ -1023,8 +1024,9 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			      struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = (gdb_byte *) xmalloc (len);
-  struct cleanup *old_chain = make_cleanup (xfree, buf);
+  std::unique_ptr<ppc_displaced_step_closure> closure
+    (new ppc_displaced_step_closure (len));
+  gdb_byte *buf = closure->buf.data ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int insn;
 
@@ -1042,7 +1044,7 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			      "atomic sequence at %s\n",
 			      paddress (gdbarch, from));
 	}
-      do_cleanups (old_chain);
+
       return NULL;
     }
 
@@ -1055,22 +1057,22 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
       displaced_step_dump_bytes (gdb_stdlog, buf, len);
     }
 
-  discard_cleanups (old_chain);
-  return (struct displaced_step_closure *) buf;
+  return closure.release ();
 }
 
 /* Fix up the state of registers and memory after having single-stepped
    a displaced instruction.  */
 static void
 ppc_displaced_step_fixup (struct gdbarch *gdbarch,
-			  struct displaced_step_closure *closure,
+			  struct displaced_step_closure *closure_,
 			  CORE_ADDR from, CORE_ADDR to,
 			  struct regcache *regs)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* Our closure is a copy of the instruction.  */
-  ULONGEST insn  = extract_unsigned_integer ((gdb_byte *) closure,
-					      PPC_INSN_SIZE, byte_order);
+  ppc_displaced_step_closure *closure = (ppc_displaced_step_closure *) closure_;
+  ULONGEST insn  = extract_unsigned_integer (closure->buf.data (),
+					     PPC_INSN_SIZE, byte_order);
   ULONGEST opcode = 0;
   /* Offset for non PC-relative instructions.  */
   LONGEST offset = PPC_INSN_SIZE;
@@ -1168,7 +1170,7 @@ ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
 std::vector<CORE_ADDR>
 ppc_deal_with_atomic_sequence (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR breaks[2] = {-1, -1};
@@ -1224,7 +1226,6 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
 
   closing_insn = loc;
   loc += PPC_INSN_SIZE;
-  insn = read_memory_integer (loc, PPC_INSN_SIZE, byte_order);
 
   /* Insert a breakpoint right after the end of the atomic sequence.  */
   breaks[0] = loc;
@@ -2620,8 +2621,8 @@ rs6000_register_to_value (struct frame_info *frame,
 				 from, optimizedp, unavailablep))
     return 0;
 
-  convert_typed_floating (from, builtin_type (gdbarch)->builtin_double,
-			  to, type);
+  target_float_convert (from, builtin_type (gdbarch)->builtin_double,
+			to, type);
   *optimizedp = *unavailablep = 0;
   return 1;
 }
@@ -2637,8 +2638,8 @@ rs6000_value_to_register (struct frame_info *frame,
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
-  convert_typed_floating (from, type,
-			  to, builtin_type (gdbarch)->builtin_double);
+  target_float_convert (from, type,
+			to, builtin_type (gdbarch)->builtin_double);
   put_frame_register (frame, regnum, to);
 }
 
@@ -2675,7 +2676,7 @@ static enum register_status
 e500_move_ev_register (move_ev_register_func move,
 		       struct regcache *regcache, int ev_reg, void *buffer)
 {
-  struct gdbarch *arch = get_regcache_arch (regcache);
+  struct gdbarch *arch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch); 
   int reg_index;
   gdb_byte *byte_buffer = (gdb_byte *) buffer;
@@ -2889,7 +2890,7 @@ rs6000_pseudo_register_read (struct gdbarch *gdbarch,
 			     struct regcache *regcache,
 			     int reg_nr, gdb_byte *buffer)
 {
-  struct gdbarch *regcache_arch = get_regcache_arch (regcache);
+  struct gdbarch *regcache_arch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   gdb_assert (regcache_arch == gdbarch);
@@ -2914,7 +2915,7 @@ rs6000_pseudo_register_write (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
 			      int reg_nr, const gdb_byte *buffer)
 {
-  struct gdbarch *regcache_arch = get_regcache_arch (regcache);
+  struct gdbarch *regcache_arch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   gdb_assert (regcache_arch == gdbarch);
@@ -5947,6 +5948,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bfd abfd;
   enum auto_boolean soft_float_flag = powerpc_soft_float_global;
   int soft_float;
+  enum powerpc_long_double_abi long_double_abi = POWERPC_LONG_DOUBLE_AUTO;
   enum powerpc_vector_abi vector_abi = powerpc_vector_abi_global;
   enum powerpc_elf_abi elf_abi = POWERPC_ELF_AUTO;
   int have_fpu = 1, have_spe = 0, have_mq = 0, have_altivec = 0, have_dfp = 0,
@@ -6269,13 +6271,29 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (soft_float_flag == AUTO_BOOLEAN_AUTO && from_elf_exec)
     {
       switch (bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
-					Tag_GNU_Power_ABI_FP))
+					Tag_GNU_Power_ABI_FP) & 3)
 	{
 	case 1:
 	  soft_float_flag = AUTO_BOOLEAN_FALSE;
 	  break;
 	case 2:
 	  soft_float_flag = AUTO_BOOLEAN_TRUE;
+	  break;
+	default:
+	  break;
+	}
+    }
+
+  if (long_double_abi == POWERPC_LONG_DOUBLE_AUTO && from_elf_exec)
+    {
+      switch (bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
+					Tag_GNU_Power_ABI_FP) >> 2)
+	{
+	case 1:
+	  long_double_abi = POWERPC_LONG_DOUBLE_IBM128;
+	  break;
+	case 3:
+	  long_double_abi = POWERPC_LONG_DOUBLE_IEEE128;
 	  break;
 	default:
 	  break;
@@ -6363,6 +6381,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	continue;
       if (tdep && tdep->soft_float != soft_float)
 	continue;
+      if (tdep && tdep->long_double_abi != long_double_abi)
+	continue;
       if (tdep && tdep->vector_abi != vector_abi)
 	continue;
       if (tdep && tdep->wordsize == wordsize)
@@ -6385,6 +6405,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->wordsize = wordsize;
   tdep->elf_abi = elf_abi;
   tdep->soft_float = soft_float;
+  tdep->long_double_abi = long_double_abi;
   tdep->vector_abi = vector_abi;
 
   gdbarch = gdbarch_alloc (&info, tdep);
@@ -6529,7 +6550,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;
-  info.tdep_info = tdesc_data;
+  info.tdesc_data = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   switch (info.osabi)
@@ -6618,7 +6639,7 @@ rs6000_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 /* PowerPC-specific commands.  */
 
 static void
-set_powerpc_command (char *args, int from_tty)
+set_powerpc_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\
 \"set powerpc\" must be followed by an appropriate subcommand.\n"));
@@ -6626,13 +6647,13 @@ set_powerpc_command (char *args, int from_tty)
 }
 
 static void
-show_powerpc_command (char *args, int from_tty)
+show_powerpc_command (const char *args, int from_tty)
 {
   cmd_show_list (showpowerpccmdlist, from_tty, "");
 }
 
 static void
-powerpc_set_soft_float (char *args, int from_tty,
+powerpc_set_soft_float (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
   struct gdbarch_info info;
@@ -6644,7 +6665,7 @@ powerpc_set_soft_float (char *args, int from_tty,
 }
 
 static void
-powerpc_set_vector_abi (char *args, int from_tty,
+powerpc_set_vector_abi (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
   struct gdbarch_info info;
@@ -6750,9 +6771,6 @@ ppc_insn_ds_field (unsigned int insn)
 }
 
 /* Initialization code.  */
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_rs6000_tdep;
 
 void
 _initialize_rs6000_tdep (void)

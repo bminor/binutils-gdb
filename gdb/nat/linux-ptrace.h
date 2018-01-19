@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2017 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -155,6 +155,8 @@ struct buffer;
    Beginning with Linux 4.6, the MIPS port reports proper TRAP_BRKPT and
    TRAP_HWBKPT codes, so we also match them.
 
+   The Alpha kernel uses TRAP_BRKPT for all traps.
+
    The generic Linux target code should use GDB_ARCH_IS_TRAP_* instead
    of TRAP_* to abstract out these peculiarities.  */
 #if defined __i386__ || defined __x86_64__
@@ -166,6 +168,9 @@ struct buffer;
 #elif defined __mips__
 # define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
 # define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == SI_KERNEL || (X) == TRAP_HWBKPT)
+#elif defined __alpha__
+# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == TRAP_BRKPT)
+# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_BRKPT)
 #else
 # define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == TRAP_BRKPT)
 # define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)

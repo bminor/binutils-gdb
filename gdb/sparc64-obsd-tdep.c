@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/sparc64.
 
-   Copyright (C) 2004-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -323,7 +323,7 @@ static void
 sparc64obsd_supply_uthread (struct regcache *regcache,
 			    int regnum, CORE_ADDR addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR fp, fp_addr = addr + SPARC64OBSD_UTHREAD_FP_OFFSET;
   gdb_byte buf[8];
@@ -368,7 +368,7 @@ static void
 sparc64obsd_collect_uthread(const struct regcache *regcache,
 			    int regnum, CORE_ADDR addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp;
   gdb_byte buf[8];
@@ -439,10 +439,6 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   bsd_uthread_set_supply_uthread (gdbarch, sparc64obsd_supply_uthread);
   bsd_uthread_set_collect_uthread (gdbarch, sparc64obsd_collect_uthread);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc64obsd_tdep (void);
 
 void
 _initialize_sparc64obsd_tdep (void)

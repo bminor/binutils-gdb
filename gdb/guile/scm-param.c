@@ -1,6 +1,6 @@
 /* GDB parameters implemented in Guile.
 
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -269,7 +269,7 @@ pascm_signal_setshow_error (SCM exception, const char *msg)
    Note: ARGS is always passed as NULL.  */
 
 static void
-pascm_set_func (char *args, int from_tty, struct cmd_list_element *c)
+pascm_set_func (const char *args, int from_tty, struct cmd_list_element *c)
 {
   param_smob *p_smob = (param_smob *) get_cmd_context (c);
   SCM self, result, exception;
@@ -357,7 +357,7 @@ static void
 add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
 		     char *cmd_name, param_smob *self,
 		     char *set_doc, char *show_doc, char *help_doc,
-		     cmd_sfunc_ftype *set_func,
+		     cmd_const_sfunc_ftype *set_func,
 		     show_value_ftype *show_func,
 		     struct cmd_list_element **set_list,
 		     struct cmd_list_element **show_list,
@@ -1062,7 +1062,6 @@ gdbscm_parameter_value (SCM self)
       char *name;
       SCM except_scm;
       struct cmd_list_element *alias, *prefix, *cmd;
-      const char *arg;
       char *newarg;
       int found = -1;
       struct gdb_exception except = exception_none;

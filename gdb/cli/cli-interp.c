@@ -1,6 +1,6 @@
 /* CLI Definitions for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -80,7 +80,7 @@ as_cli_interp (struct interp *interp)
 
 /* Longjmp-safe wrapper for "execute_command".  */
 static struct gdb_exception safe_execute_command (struct ui_out *uiout,
-						  char *command, 
+						  const char *command, 
 						  int from_tty);
 
 /* See cli-interp.h.
@@ -332,11 +332,6 @@ cli_interp::exec (const char *command_str)
   struct ui_file *old_stream;
   struct gdb_exception result;
 
-  /* FIXME: cagney/2003-02-01: Need to const char *propogate
-     safe_execute_command.  */
-  char *str = (char *) alloca (strlen (command_str) + 1);
-  strcpy (str, command_str);
-
   /* gdb_stdout could change between the time cli_uiout was
      initialized and now.  Since we're probably using a different
      interpreter which has a new ui_file for gdb_stdout, use that one
@@ -345,7 +340,7 @@ cli_interp::exec (const char *command_str)
      It is important that it gets reset everytime, since the user
      could set gdb to use a different interpreter.  */
   old_stream = cli->cli_uiout->set_stream (gdb_stdout);
-  result = safe_execute_command (cli->cli_uiout, str, 1);
+  result = safe_execute_command (cli->cli_uiout, command_str, 1);
   cli->cli_uiout->set_stream (old_stream);
   return result;
 }
@@ -357,7 +352,8 @@ cli_interp_base::supports_command_editing ()
 }
 
 static struct gdb_exception
-safe_execute_command (struct ui_out *command_uiout, char *command, int from_tty)
+safe_execute_command (struct ui_out *command_uiout, const char *command,
+		      int from_tty)
 {
   struct gdb_exception e = exception_none;
   struct ui_out *saved_uiout;
@@ -458,7 +454,6 @@ cli_interp_factory (const char *name)
 }
 
 /* Standard gdb initialization hook.  */
-extern initialize_file_ftype _initialize_cli_interp; /* -Wmissing-prototypes */
 
 void
 _initialize_cli_interp (void)

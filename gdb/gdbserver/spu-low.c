@@ -1,5 +1,5 @@
 /* Low level interface to SPUs, for the remote server for GDB.
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2018 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
 
@@ -280,7 +280,7 @@ spu_ptrace_fun ()
 
 static int
 spu_create_inferior (const char *program,
-		     const std::vector<char *> &program_argv)
+		     const std::vector<char *> &program_args)
 {
   int pid;
   ptid_t ptid;

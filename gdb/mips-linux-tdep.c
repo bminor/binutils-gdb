@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -132,7 +132,7 @@ mips_supply_gregset (struct regcache *regcache,
 {
   int regi;
   const mips_elf_greg_t *regp = *gregsetp;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   for (regi = EF_REG0 + 1; regi <= EF_REG31; regi++)
     supply_32bit_reg (regcache, regi - EF_REG0, regp + regi);
@@ -171,7 +171,7 @@ void
 mips_fill_gregset (const struct regcache *regcache,
 		   mips_elf_gregset_t *gregsetp, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int regaddr, regi;
   mips_elf_greg_t *regp = *gregsetp;
   void *dst;
@@ -239,7 +239,7 @@ void
 mips_supply_fpregset (struct regcache *regcache,
 		      const mips_elf_fpregset_t *fpregsetp)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int regi;
 
   for (regi = 0; regi < 32; regi++)
@@ -273,7 +273,7 @@ void
 mips_fill_fpregset (const struct regcache *regcache,
 		    mips_elf_fpregset_t *fpregsetp, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   char *to;
 
   if ((regno >= gdbarch_fp0_regnum (gdbarch))
@@ -355,7 +355,7 @@ static void
 supply_64bit_reg (struct regcache *regcache, int regnum,
 		  const gdb_byte *buf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG
       && register_size (gdbarch, regnum) == 4)
     regcache_raw_supply (regcache, regnum, buf + 4);
@@ -371,7 +371,7 @@ mips64_supply_gregset (struct regcache *regcache,
 {
   int regi;
   const mips64_elf_greg_t *regp = *gregsetp;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   for (regi = MIPS64_EF_REG0 + 1; regi <= MIPS64_EF_REG31; regi++)
     supply_64bit_reg (regcache, regi - MIPS64_EF_REG0,
@@ -415,7 +415,7 @@ void
 mips64_fill_gregset (const struct regcache *regcache,
 		     mips64_elf_gregset_t *gregsetp, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int regaddr, regi;
   mips64_elf_greg_t *regp = *gregsetp;
   void *dst;
@@ -479,7 +479,7 @@ void
 mips64_supply_fpregset (struct regcache *regcache,
 			const mips64_elf_fpregset_t *fpregsetp)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int regi;
 
   /* See mips_linux_o32_sigframe_init for a description of the
@@ -529,8 +529,7 @@ void
 mips64_fill_fpregset (const struct regcache *regcache,
 		      mips64_elf_fpregset_t *fpregsetp, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct gdbarch *gdbarch = regcache->arch ();
   gdb_byte *to;
 
   if ((regno >= gdbarch_fp0_regnum (gdbarch))
@@ -1352,7 +1351,7 @@ micromips_linux_sigframe_validate (const struct tramp_frame *self,
 static void
 mips_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   mips_write_pc (regcache, pc);
 
@@ -1616,8 +1615,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum mips_abi abi = mips_abi (gdbarch);
-  struct tdesc_arch_data *tdesc_data
-    = (struct tdesc_arch_data *) info.tdep_info;
+  struct tdesc_arch_data *tdesc_data = info.tdesc_data;
 
   linux_init_abi (info, gdbarch);
 
@@ -1727,9 +1725,6 @@ mips_linux_init_abi (struct gdbarch_info info,
 				 "restart");
     }
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_mips_linux_tdep;
 
 void
 _initialize_mips_linux_tdep (void)

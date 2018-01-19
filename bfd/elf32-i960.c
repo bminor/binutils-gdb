@@ -1,5 +1,5 @@
 /* Intel 960 specific support for 32-bit ELF
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -117,8 +117,8 @@ elf32_i960_bfd_to_reloc_type (bfd_reloc_code_real_type code)
 }
 
 static void
-elf32_i960_info_to_howto (bfd *               abfd ATTRIBUTE_UNUSED,
-			  arelent *           cache_ptr ATTRIBUTE_UNUSED,
+elf32_i960_info_to_howto (bfd *		      abfd ATTRIBUTE_UNUSED,
+			  arelent *	      cache_ptr ATTRIBUTE_UNUSED,
 			  Elf_Internal_Rela * dst ATTRIBUTE_UNUSED)
 {
   abort ();
@@ -169,6 +169,6 @@ elf32_i960_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 #define TARGET_LITTLE_NAME	"elf32-i960"
 #define ELF_ARCH		bfd_arch_i960
 #define ELF_MACHINE_CODE	EM_960
-#define ELF_MAXPAGESIZE  	1 /* FIXME: This number is wrong,  It should be the page size in bytes.  */
+#define ELF_MAXPAGESIZE		1 /* FIXME: This number is wrong,  It should be the page size in bytes.  */
 
 #include "elf32-target.h"

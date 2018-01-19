@@ -3,7 +3,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -259,6 +259,7 @@ struct gdbarch
   int frame_red_zone_size;
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr;
   gdbarch_addr_bits_remove_ftype *addr_bits_remove;
+  int significant_addr_bit;
   gdbarch_software_single_step_ftype *software_single_step;
   gdbarch_single_step_through_delay_ftype *single_step_through_delay;
   gdbarch_print_insn_ftype *print_insn;
@@ -281,12 +282,12 @@ struct gdbarch
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
   gdbarch_iterate_over_regset_sections_ftype *iterate_over_regset_sections;
   gdbarch_make_corefile_notes_ftype *make_corefile_notes;
-  gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo;
   gdbarch_find_memory_regions_ftype *find_memory_regions;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix;
   gdbarch_core_pid_to_str_ftype *core_pid_to_str;
   gdbarch_core_thread_name_ftype *core_thread_name;
+  gdbarch_core_xfer_siginfo_ftype *core_xfer_siginfo;
   const char * gcore_bfd_target;
   int vtable_function_descriptors;
   int vbit_in_delta;
@@ -618,6 +619,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of stabs_argument_has_addr, invalid_p == 0 */
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
+  if (gdbarch->significant_addr_bit == 0)
+    gdbarch->significant_addr_bit = gdbarch_addr_bit (gdbarch);
   /* Skip verify of software_single_step, has predicate.  */
   /* Skip verify of single_step_through_delay, has predicate.  */
   /* Skip verify of print_insn, invalid_p == 0 */
@@ -640,12 +643,12 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of fetch_pointer_argument, has predicate.  */
   /* Skip verify of iterate_over_regset_sections, has predicate.  */
   /* Skip verify of make_corefile_notes, has predicate.  */
-  /* Skip verify of elfcore_write_linux_prpsinfo, has predicate.  */
   /* Skip verify of find_memory_regions, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries_aix, has predicate.  */
   /* Skip verify of core_pid_to_str, has predicate.  */
   /* Skip verify of core_thread_name, has predicate.  */
+  /* Skip verify of core_xfer_siginfo, has predicate.  */
   /* Skip verify of gcore_bfd_target, has predicate.  */
   /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
   /* Skip verify of vbit_in_delta, invalid_p == 0 */
@@ -884,6 +887,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: core_xfer_shared_libraries_aix = <%s>\n",
                       host_address_to_string (gdbarch->core_xfer_shared_libraries_aix));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_core_xfer_siginfo_p() = %d\n",
+                      gdbarch_core_xfer_siginfo_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: core_xfer_siginfo = <%s>\n",
+                      host_address_to_string (gdbarch->core_xfer_siginfo));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: decr_pc_after_break = %s\n",
                       core_addr_to_string_nz (gdbarch->decr_pc_after_break));
   fprintf_unfiltered (file,
@@ -964,12 +973,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: elf_make_msymbol_special = <%s>\n",
                       host_address_to_string (gdbarch->elf_make_msymbol_special));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_elfcore_write_linux_prpsinfo_p() = %d\n",
-                      gdbarch_elfcore_write_linux_prpsinfo_p (gdbarch));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: elfcore_write_linux_prpsinfo = <%s>\n",
-                      host_address_to_string (gdbarch->elfcore_write_linux_prpsinfo));
   fprintf_unfiltered (file,
                       "gdbarch_dump: execute_dwarf_cfa_vendor_op = <%s>\n",
                       host_address_to_string (gdbarch->execute_dwarf_cfa_vendor_op));
@@ -1324,6 +1327,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: short_bit = %s\n",
                       plongest (gdbarch->short_bit));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: significant_addr_bit = %s\n",
+                      plongest (gdbarch->significant_addr_bit));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_single_step_through_delay_p() = %d\n",
                       gdbarch_single_step_through_delay_p (gdbarch));
@@ -3216,6 +3222,22 @@ set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch,
 }
 
 int
+gdbarch_significant_addr_bit (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_significant_addr_bit called\n");
+  return gdbarch->significant_addr_bit;
+}
+
+void
+set_gdbarch_significant_addr_bit (struct gdbarch *gdbarch,
+                                  int significant_addr_bit)
+{
+  gdbarch->significant_addr_bit = significant_addr_bit;
+}
+
+int
 gdbarch_software_single_step_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -3653,30 +3675,6 @@ set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_elfcore_write_linux_prpsinfo_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->elfcore_write_linux_prpsinfo != NULL;
-}
-
-char *
-gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->elfcore_write_linux_prpsinfo != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_elfcore_write_linux_prpsinfo called\n");
-  return gdbarch->elfcore_write_linux_prpsinfo (obfd, note_data, note_size, info);
-}
-
-void
-set_gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch,
-                                          gdbarch_elfcore_write_linux_prpsinfo_ftype elfcore_write_linux_prpsinfo)
-{
-  gdbarch->elfcore_write_linux_prpsinfo = elfcore_write_linux_prpsinfo;
-}
-
-int
 gdbarch_find_memory_regions_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -3794,6 +3792,30 @@ set_gdbarch_core_thread_name (struct gdbarch *gdbarch,
                               gdbarch_core_thread_name_ftype core_thread_name)
 {
   gdbarch->core_thread_name = core_thread_name;
+}
+
+int
+gdbarch_core_xfer_siginfo_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->core_xfer_siginfo != NULL;
+}
+
+LONGEST
+gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->core_xfer_siginfo != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_core_xfer_siginfo called\n");
+  return gdbarch->core_xfer_siginfo (gdbarch,  readbuf, offset, len);
+}
+
+void
+set_gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch,
+                               gdbarch_core_xfer_siginfo_ftype core_xfer_siginfo)
+{
+  gdbarch->core_xfer_siginfo = core_xfer_siginfo;
 }
 
 int
@@ -5446,8 +5468,6 @@ target_gdbarch (void)
 {
   return current_inferior ()->gdbarch;
 }
-
-extern void _initialize_gdbarch (void);
 
 void
 _initialize_gdbarch (void)

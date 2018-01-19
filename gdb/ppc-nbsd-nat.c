@@ -1,6 +1,6 @@
 /* Native-dependent code for NetBSD/powerpc.
 
-   Copyright (C) 2002-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2018 Free Software Foundation, Inc.
 
    Contributed by Wasabi Systems, Inc.
 
@@ -80,7 +80,7 @@ static void
 ppcnbsd_fetch_inferior_registers (struct target_ops *ops,
 				  struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
   if (regnum == -1 || getregs_supplies (gdbarch, regnum))
@@ -110,7 +110,7 @@ static void
 ppcnbsd_store_inferior_registers (struct target_ops *ops,
 				  struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
   if (regnum == -1 || getregs_supplies (gdbarch, regnum))
@@ -147,7 +147,7 @@ ppcnbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 {
   struct switchframe sf;
   struct callframe cf;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i;
 
@@ -173,9 +173,6 @@ ppcnbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   return 1;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_ppcnbsd_nat (void);
 
 void
 _initialize_ppcnbsd_nat (void)

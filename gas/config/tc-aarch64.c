@@ -1,6 +1,6 @@
 /* tc-aarch64.c -- Assemble for the AArch64 ISA
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GAS.
@@ -304,10 +304,11 @@ struct reloc_entry
 		 | REG_TYPE(Z_32) | REG_TYPE(Z_64) | REG_TYPE(VN)	\
 		 | REG_TYPE(FP_B) | REG_TYPE(FP_H)			\
 		 | REG_TYPE(FP_S) | REG_TYPE(FP_D) | REG_TYPE(FP_Q))	\
-  /* Typecheck: as above, but also Zn and Pn.  This should only be	\
-     used for SVE instructions, since Zn and Pn are valid symbols	\
+  /* Typecheck: as above, but also Zn, Pn, and {W}SP.  This should only	\
+     be used for SVE instructions, since Zn and Pn are valid symbols	\
      in other contexts.  */						\
-  MULTI_REG_TYPE(R_Z_BHSDQ_VZP, REG_TYPE(R_32) | REG_TYPE(R_64)		\
+  MULTI_REG_TYPE(R_Z_SP_BHSDQ_VZP, REG_TYPE(R_32) | REG_TYPE(R_64)	\
+		 | REG_TYPE(SP_32) | REG_TYPE(SP_64)			\
 		 | REG_TYPE(Z_32) | REG_TYPE(Z_64) | REG_TYPE(VN)	\
 		 | REG_TYPE(FP_B) | REG_TYPE(FP_H)			\
 		 | REG_TYPE(FP_S) | REG_TYPE(FP_D) | REG_TYPE(FP_Q)	\
@@ -415,7 +416,7 @@ get_reg_expected_msg (aarch64_reg_type reg_type)
 	       "register expected");
       break;
     case REG_TYPE_R_Z_BHSDQ_V:
-    case REG_TYPE_R_Z_BHSDQ_VZP:
+    case REG_TYPE_R_Z_SP_BHSDQ_VZP:
       msg = N_("register expected");
       break;
     case REG_TYPE_BHSDQ:	/* any [BHSDQ]P FP  */
@@ -4910,7 +4911,7 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
     = {1, 2, 4, 8, 16};
   const unsigned int ele_base [5] =
     {
-      AARCH64_OPND_QLF_V_8B,
+      AARCH64_OPND_QLF_V_4B,
       AARCH64_OPND_QLF_V_2H,
       AARCH64_OPND_QLF_V_2S,
       AARCH64_OPND_QLF_V_1D,
@@ -4928,8 +4929,14 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
   gas_assert (vectype->type >= NT_b && vectype->type <= NT_q);
 
   if (vectype->defined & (NTA_HASINDEX | NTA_HASVARWIDTH))
-    /* Vector element register.  */
-    return AARCH64_OPND_QLF_S_B + vectype->type;
+    {
+      /* Special case S_4B.  */
+      if (vectype->type == NT_b && vectype->width == 4)
+	return AARCH64_OPND_QLF_S_4B;
+
+      /* Vector element register.  */
+      return AARCH64_OPND_QLF_S_B + vectype->type;
+    }
   else
     {
       /* Vector register.  */
@@ -4945,7 +4952,7 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
 	 a vector-type dependent amount.  */
       shift = 0;
       if (vectype->type == NT_b)
-	shift = 4;
+	shift = 3;
       else if (vectype->type == NT_h || vectype->type == NT_s)
 	shift = 2;
       else if (vectype->type >= NT_d)
@@ -4954,7 +4961,7 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
 	gas_assert (0);
 
       offset = ele_base [vectype->type] + (vectype->width >> shift);
-      gas_assert (AARCH64_OPND_QLF_V_8B <= offset
+      gas_assert (AARCH64_OPND_QLF_V_4B <= offset
 		  && offset <= AARCH64_OPND_QLF_V_1Q);
       return offset;
     }
@@ -4999,6 +5006,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_Sd:
     case AARCH64_OPND_Sn:
     case AARCH64_OPND_Sm:
+    case AARCH64_OPND_Va:
     case AARCH64_OPND_Vd:
     case AARCH64_OPND_Vn:
     case AARCH64_OPND_Vm:
@@ -5010,6 +5018,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_Ed:
     case AARCH64_OPND_En:
     case AARCH64_OPND_Em:
+    case AARCH64_OPND_SM3_IMM2:
       operand->reglane.regno = default_value;
       break;
 
@@ -5026,6 +5035,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_UIMM3_OP1:
     case AARCH64_OPND_UIMM3_OP2:
     case AARCH64_OPND_IMM:
+    case AARCH64_OPND_IMM_2:
     case AARCH64_OPND_WIDTH:
     case AARCH64_OPND_UIMM7:
     case AARCH64_OPND_NZCV:
@@ -5266,7 +5276,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
   skip_whitespace (str);
 
   if (AARCH64_CPU_HAS_FEATURE (AARCH64_FEATURE_SVE, *opcode->avariant))
-    imm_reg_type = REG_TYPE_R_Z_BHSDQ_VZP;
+    imm_reg_type = REG_TYPE_R_Z_SP_BHSDQ_VZP;
   else
     imm_reg_type = REG_TYPE_R_Z_BHSDQ_V;
 
@@ -5390,6 +5400,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  reg_type = REG_TYPE_ZN;
 	  goto vector_reg;
 
+	case AARCH64_OPND_Va:
 	case AARCH64_OPND_Vd:
 	case AARCH64_OPND_Vn:
 	case AARCH64_OPND_Vm:
@@ -5451,6 +5462,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Ed:
 	case AARCH64_OPND_En:
 	case AARCH64_OPND_Em:
+	case AARCH64_OPND_SM3_IMM2:
 	  reg_type = REG_TYPE_VN;
 	vector_reg_index:
 	  val = aarch64_reg_parse (&str, reg_type, NULL, &vectype);
@@ -5561,6 +5573,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_UIMM3_OP2:
 	case AARCH64_OPND_IMM_VLSL:
 	case AARCH64_OPND_IMM:
+	case AARCH64_OPND_IMM_2:
 	case AARCH64_OPND_WIDTH:
 	case AARCH64_OPND_SVE_INV_LIMM:
 	case AARCH64_OPND_SVE_LIMM:
@@ -5627,6 +5640,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_IDX:
+	case AARCH64_OPND_MASK:
 	case AARCH64_OPND_BIT_NUM:
 	case AARCH64_OPND_IMMR:
 	case AARCH64_OPND_IMMS:
@@ -6046,6 +6060,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_ADDR_SIMM10:
+	case AARCH64_OPND_ADDR_OFFSET:
 	  po_misc_or_fail (parse_address (&str, info));
 	  if (info->addr.pcrel || info->addr.offset.is_reg
 	      || !info->addr.preind || info->addr.postind)
@@ -6772,6 +6787,7 @@ aarch64_canonicalize_symbol_name (char *name)
    also have mixed-case names.	*/
 
 #define REGDEF(s,n,t) { #s, n, REG_TYPE_##t, TRUE }
+#define REGDEF_ALIAS(s, n, t) { #s, n, REG_TYPE_##t, FALSE}
 #define REGNUM(p,n,t) REGDEF(p##n, n, t)
 #define REGSET16(p,t) \
   REGNUM(p, 0,t), REGNUM(p, 1,t), REGNUM(p, 2,t), REGNUM(p, 3,t), \
@@ -6793,16 +6809,15 @@ static const reg_entry reg_names[] = {
   REGSET31 (x, R_64), REGSET31 (X, R_64),
   REGSET31 (w, R_32), REGSET31 (W, R_32),
 
+  REGDEF_ALIAS (ip0, 16, R_64), REGDEF_ALIAS (IP0, 16, R_64),
+  REGDEF_ALIAS (ip1, 17, R_64), REGDEF_ALIAS (IP1, 17, R_64),
+  REGDEF_ALIAS (fp, 29, R_64), REGDEF_ALIAS (FP, 29, R_64),
+  REGDEF_ALIAS (lr, 30, R_64), REGDEF_ALIAS (LR, 30, R_64),
   REGDEF (wsp, 31, SP_32), REGDEF (WSP, 31, SP_32),
   REGDEF (sp, 31, SP_64), REGDEF (SP, 31, SP_64),
 
   REGDEF (wzr, 31, Z_32), REGDEF (WZR, 31, Z_32),
   REGDEF (xzr, 31, Z_64), REGDEF (XZR, 31, Z_64),
-
-  REGDEF (ip0, 16, R_64), REGDEF (IP0, 16, R_64),
-  REGDEF (ip1, 17, R_64), REGDEF (IP1, 17, R_64),
-  REGDEF (fp, 29, R_64), REGDEF (FP, 29, R_64),
-  REGDEF (lr, 30, R_64), REGDEF (LR, 30, R_64),
 
   /* Floating-point single precision registers.  */
   REGSET (s, FP_S), REGSET (S, FP_S),
@@ -6830,6 +6845,7 @@ static const reg_entry reg_names[] = {
 };
 
 #undef REGDEF
+#undef REGDEF_ALIAS
 #undef REGNUM
 #undef REGSET16
 #undef REGSET31
@@ -6990,6 +7006,11 @@ aarch64_init_frag (fragS * fragP, int max_chars)
      later if the alignment ends up empty.  */
   if (!fragP->tc_frag_data.recorded)
     fragP->tc_frag_data.recorded = 1;
+
+  /* PR 21809: Do not set a mapping state for debug sections
+     - it just confuses other tools.  */
+  if (bfd_get_section_flags (NULL, now_seg) & SEC_DEBUGGING)
+    return;
 
   switch (fragP->fr_type)
     {
@@ -8398,20 +8419,25 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"cortex-a73", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				  AARCH64_FEATURE_CRC), "Cortex-A73"},
   {"cortex-a55", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
-				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16),
+				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16 | AARCH64_FEATURE_DOTPROD),
 				  "Cortex-A55"},
   {"cortex-a75", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
-				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16),
+				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16 | AARCH64_FEATURE_DOTPROD),
 				  "Cortex-A75"},
   {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
 				"Samsung Exynos M1"},
   {"falkor", AARCH64_FEATURE (AARCH64_ARCH_V8,
-			      AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+			      AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
+			      | AARCH64_FEATURE_RDMA),
    "Qualcomm Falkor"},
   {"qdf24xx", AARCH64_FEATURE (AARCH64_ARCH_V8,
-			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
+			       | AARCH64_FEATURE_RDMA),
    "Qualcomm QDF24XX"},
+  {"saphira", AARCH64_FEATURE (AARCH64_ARCH_V8_3,
+			       AARCH64_FEATURE_CRYPTO | AARCH64_FEATURE_PROFILE),
+   "Qualcomm Saphira"},
   {"thunderx", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
    "Cavium ThunderX"},
@@ -8444,6 +8470,7 @@ static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"armv8.1-a", AARCH64_ARCH_V8_1},
   {"armv8.2-a", AARCH64_ARCH_V8_2},
   {"armv8.3-a", AARCH64_ARCH_V8_3},
+  {"armv8.4-a", AARCH64_ARCH_V8_4},
   {NULL, AARCH64_ARCH_NONE}
 };
 
@@ -8458,7 +8485,9 @@ struct aarch64_option_cpu_value_table
 static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"crc",		AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0),
 			AARCH64_ARCH_NONE},
-  {"crypto",		AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO, 0),
+  {"crypto",		AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO
+					 | AARCH64_FEATURE_AES
+					 | AARCH64_FEATURE_SHA2, 0),
 			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
   {"fp",		AARCH64_FEATURE (AARCH64_FEATURE_FP, 0),
 			AARCH64_ARCH_NONE},
@@ -8476,6 +8505,9 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
   {"fp16",		AARCH64_FEATURE (AARCH64_FEATURE_F16, 0),
 			AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
+  {"fp16fml",		AARCH64_FEATURE (AARCH64_FEATURE_F16_FML, 0),
+			AARCH64_FEATURE (AARCH64_FEATURE_FP
+					 | AARCH64_FEATURE_F16, 0)},
   {"profile",		AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0),
 			AARCH64_ARCH_NONE},
   {"sve",		AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0),
@@ -8488,6 +8520,15 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"rcpc",		AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0),
 			AARCH64_ARCH_NONE},
   {"dotprod",		AARCH64_FEATURE (AARCH64_FEATURE_DOTPROD, 0),
+			AARCH64_ARCH_NONE},
+  {"sha2",		AARCH64_FEATURE (AARCH64_FEATURE_SHA2, 0),
+			AARCH64_ARCH_NONE},
+  {"aes",		AARCH64_FEATURE (AARCH64_FEATURE_AES, 0),
+			AARCH64_ARCH_NONE},
+  {"sm4",		AARCH64_FEATURE (AARCH64_FEATURE_SM4, 0),
+			AARCH64_ARCH_NONE},
+  {"sha3",		AARCH64_FEATURE (AARCH64_FEATURE_SHA2
+					 | AARCH64_FEATURE_SHA3, 0),
 			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };

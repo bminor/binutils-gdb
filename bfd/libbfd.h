@@ -1,12 +1,12 @@
-/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
-   generated from "libbfd-in.h", "libbfd.c", "bfdio.c", "bfdwin.c", 
+/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically
+   generated from "libbfd-in.h", "libbfd.c", "bfdio.c", "bfdwin.c",
    "cache.c", "reloc.c", "archures.c" and "linker.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -243,9 +243,9 @@ int bfd_generic_stat_arch_elt
   (bfd *, struct stat *);
 
 #define _bfd_read_ar_hdr(abfd) \
-  BFD_SEND (abfd, _bfd_read_ar_hdr_fn, (abfd))
-#define _bfd_write_ar_hdr(archive, abfd)         \
-  BFD_SEND (abfd, _bfd_write_ar_hdr_fn, (archive, abfd))
+	BFD_SEND (abfd, _bfd_read_ar_hdr_fn, (abfd))
+#define _bfd_write_ar_hdr(archive, abfd)	 \
+	BFD_SEND (abfd, _bfd_write_ar_hdr_fn, (archive, abfd))
 
 /* Generic routines to use for BFD_JUMP_TABLE_GENERIC.  Use
    BFD_JUMP_TABLE_GENERIC (_bfd_generic).  */
@@ -450,7 +450,7 @@ extern long _bfd_norelocs_get_reloc_upper_bound (bfd *, asection *);
 extern long _bfd_norelocs_canonicalize_reloc (bfd *, asection *,
 					      arelent **, asymbol **);
 extern void _bfd_norelocs_set_reloc (bfd *, asection *,
-                                     arelent **, unsigned int);
+				     arelent **, unsigned int);
 #define _bfd_norelocs_bfd_reloc_type_lookup \
   ((reloc_howto_type *(*) (bfd *, bfd_reloc_code_real_type)) bfd_nullvoidptr)
 #define _bfd_norelocs_bfd_reloc_name_lookup \
@@ -886,7 +886,7 @@ struct bfd_iovec
      if an error occurs.  */
   file_ptr (*btell) (struct bfd *abfd);
   /* For the following, on successful completion a value of 0 is returned.
-     Otherwise, a value of -1 is returned (and  <<bfd_error>> is set).  */
+     Otherwise, a value of -1 is returned (and <<bfd_error>> is set).  */
   int (*bseek) (struct bfd *abfd, file_ptr offset, int whence);
   int (*bclose) (struct bfd *abfd);
   int (*bflush) (struct bfd *abfd);
@@ -1216,6 +1216,11 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_FT32_20",
   "BFD_RELOC_FT32_17",
   "BFD_RELOC_FT32_18",
+  "BFD_RELOC_FT32_RELAX",
+  "BFD_RELOC_FT32_SC0",
+  "BFD_RELOC_FT32_SC1",
+  "BFD_RELOC_FT32_15",
+  "BFD_RELOC_FT32_DIFF32",
 
   "BFD_RELOC_FRV_LABEL16",
   "BFD_RELOC_FRV_LABEL24",
@@ -1752,6 +1757,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARC_S25W_PCREL_PLT",
   "BFD_RELOC_ARC_S21H_PCREL_PLT",
   "BFD_RELOC_ARC_NPS_CMEM16",
+  "BFD_RELOC_ARC_JLI_SECTOFF",
   "BFD_RELOC_BFIN_16_IMM",
   "BFD_RELOC_BFIN_16_HIGH",
   "BFD_RELOC_BFIN_4_PCREL",
@@ -3217,6 +3223,11 @@ void _bfd_generic_set_reloc
     sec_ptr section,
     arelent **relptr,
     unsigned int count);
+
+bfd_boolean _bfd_unrecognized_reloc
+   (bfd * abfd,
+    sec_ptr section,
+    unsigned int r_type);
 
 /* Extracted from archures.c.  */
 extern const bfd_arch_info_type bfd_default_arch_struct;

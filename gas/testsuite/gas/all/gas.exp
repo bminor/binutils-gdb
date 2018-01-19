@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2017 Free Software Foundation, Inc.
+# Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,10 +59,12 @@ if { ![istarget cris-*-*] && ![istarget crisv32-*-*]
 if {    ![istarget alpha*-*-*vms*]
      && ![istarget am3*-*-*]
      && ![istarget avr-*-*]
+     && ![istarget ft32-*-*]
      && ![istarget hppa*-*-*]
      && ![istarget microblaze-*-*]
      && ![istarget mn10300-*-*]
      && ![istarget msp430*-*-*]
+     && ![istarget riscv*-*-*]
      && ![istarget rl78-*-*]
      && ![istarget rx-*-*] } then {
     gas_test_error "diff1.s" "" "difference of two undefined symbols"
@@ -92,6 +94,7 @@ gas_test_error "assign-bad.s" "" "== assignment for symbol already set"
 # .equ works differently on some targets.
 # linkrelax-ing prevents most forward references from working.
 case $target_triplet in {
+    { am3*-*-* } { }
     { *c54x*-*-* } { }
     { cr16*-*-* } { }
     { crx*-*-* } { }
@@ -139,6 +142,7 @@ if { ![is_aout_format] } {
 # pdp11 gets unexpected reloc types.
 case $target_triplet in {
     { alpha*-*-* } { }
+    { am3*-*-* } { }
     { cr16*-*-* } { }
     { crx*-*-* } { }
     { h8300-*-* } { }
@@ -273,12 +277,13 @@ if {    ![istarget *c30*-*-*]
      && ![istarget *c54x*-*-*]
      && ![istarget cr16*-*-*]
      && ![istarget crx*-*-*]
+     && ![istarget ft32-*-*]
      && ![istarget h8300*-*-*]
      && ![istarget hppa*-*-*] } then {
     # The vax fails because VMS can apparently actually handle this
     # case in relocs, so gas doesn't handle it itself.
     # msp430, mn10[23]00 and riscv emit two relocs to handle the difference of two symbols.
-    setup_xfail "mn10200-*-*" "mn10300*-*-*" "msp430*-*-*" "riscv*-*-*" "vax*-*-vms*"
+    setup_xfail "am3*-*-*" "mn10200-*-*" "mn10300*-*-*" "msp430*-*-*" "riscv*-*-*" "vax*-*-vms*"
     do_930509a
 }
 
@@ -394,6 +399,7 @@ if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] } {
     run_dump_test sleb128-7
     run_dump_test sleb128-8
 }
+run_dump_test sleb128-9
 
 # .byte is 32 bits on tic4x, and .p2align isn't supported on tic54x
 # .space is different on hppa*-hpux.
@@ -483,3 +489,5 @@ run_dump_test "org-3"
 run_dump_test "org-4"
 run_dump_test "org-5"
 run_dump_test "org-6"
+
+run_dump_test "fill-1"

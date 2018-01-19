@@ -1,6 +1,6 @@
 /* TUI display locator.
 
-   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -53,7 +53,7 @@ static int tui_set_locator_info (struct gdbarch *gdbarch,
 				 const char *procname,
                                  int lineno, CORE_ADDR addr);
 
-static void tui_update_command (char *, int);
+static void tui_update_command (const char *, int);
 
 
 /* Create the status line to display as much information as we can on
@@ -366,10 +366,9 @@ tui_show_frame_info (struct frame_info *fi)
       CORE_ADDR low;
       struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
       int source_already_displayed;
-      struct symtab_and_line sal;
       CORE_ADDR pc;
 
-      find_frame_sal (fi, &sal);
+      symtab_and_line sal = find_frame_sal (fi);
 
       source_already_displayed = sal.symtab != 0
         && tui_source_is_displayed (symtab_to_fullname (sal.symtab));
@@ -488,9 +487,6 @@ tui_show_frame_info (struct frame_info *fi)
 /* Function to initialize gdb commands, for tui window stack
    manipulation.  */
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tui_stack;
-
 void
 _initialize_tui_stack (void)
 {
@@ -501,10 +497,7 @@ _initialize_tui_stack (void)
 
 /* Command to update the display with the current execution point.  */
 static void
-tui_update_command (char *arg, int from_tty)
+tui_update_command (const char *arg, int from_tty)
 {
-  char cmd[sizeof("frame 0")];
-
-  strcpy (cmd, "frame 0");
-  execute_command (cmd, from_tty);
+  execute_command ("frame 0", from_tty);
 }

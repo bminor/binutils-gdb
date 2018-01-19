@@ -1,6 +1,6 @@
 /* Program and address space management, for GDB, the GNU debugger.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -43,18 +43,6 @@ static int highest_address_space_num;
    modules.  */
 
 DEFINE_REGISTRY (program_space, REGISTRY_ACCESS_FIELD)
-
-/* An address space.  It is used for comparing if pspaces/inferior/threads
-   see the same address space and for associating caches to each address
-   space.  */
-
-struct address_space
-{
-  int num;
-
-  /* Per aspace data-pointers required by other GDB modules.  */
-  REGISTRY_FIELDS;
-};
 
 /* Keep a registry of per-address_space data-pointers required by other GDB
    modules.  */
@@ -259,7 +247,6 @@ print_program_space (struct ui_out *uiout, int requested)
 {
   struct program_space *pspace;
   int count = 0;
-  struct cleanup *old_chain;
 
   /* Compute number of pspaces we will print.  */
   ALL_PSPACES (pspace)
@@ -273,7 +260,7 @@ print_program_space (struct ui_out *uiout, int requested)
   /* There should always be at least one.  */
   gdb_assert (count > 0);
 
-  old_chain = make_cleanup_ui_out_table_begin_end (uiout, 3, count, "pspaces");
+  ui_out_emit_table table_emitter (uiout, 3, count, "pspaces");
   uiout->table_header (1, ui_left, "current", "");
   uiout->table_header (4, ui_left, "id", "Id");
   uiout->table_header (17, ui_left, "exec", "Executable");
@@ -325,8 +312,6 @@ print_program_space (struct ui_out *uiout, int requested)
 
       uiout->text ("\n");
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Boolean test for an already-known program space id.  */
@@ -348,7 +333,7 @@ valid_program_space_id (int num)
    indicating which the program space to print information about.  */
 
 static void
-maintenance_info_program_spaces_command (char *args, int from_tty)
+maintenance_info_program_spaces_command (const char *args, int from_tty)
 {
   int requested = -1;
 

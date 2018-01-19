@@ -1,5 +1,5 @@
 /* MI Command Set - MI Command Parser.
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -44,8 +44,7 @@ struct mi_parse
     mi_parse ();
     ~mi_parse ();
 
-    mi_parse (const mi_parse &) = delete;
-    mi_parse &operator= (const mi_parse &) = delete;
+    DISABLE_COPY_AND_ASSIGN (mi_parse);
 
     enum mi_command_type op;
     char *command;

@@ -1,6 +1,6 @@
 // mips.cc -- mips target support for gold.
 
-// Copyright (C) 2011-2017 Free Software Foundation, Inc.
+// Copyright (C) 2011-2018 Free Software Foundation, Inc.
 // Written by Sasa Stankovic <sasa.stankovic@imgtec.com>
 //        and Aleksandar Simeonov <aleksandar.simeonov@rt-rk.com>.
 // This file contains borrowed and adapted code from bfd/elfxx-mips.c.
@@ -5664,7 +5664,7 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
                                      : addend_a);
 
     Valtype x = psymval->value(object, addend);
-    x = ((x + (uint64_t) 0x800080008000) >> 48) & 0xffff;
+    x = ((x + (uint64_t) 0x800080008000llu) >> 48) & 0xffff;
     val = Bits<32>::bit_select32(val, x, 0xffff);
 
     if (calculate_only)

@@ -1,6 +1,6 @@
 // layout.cc -- lay out output file sections for gold
 
-// Copyright (C) 2006-2017 Free Software Foundation, Inc.
+// Copyright (C) 2006-2018 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1178,38 +1178,62 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
     }
   else
     {
-      // Plugins can choose to place one or more subsets of sections in
-      // unique segments and this is done by mapping these section subsets
-      // to unique output sections.  Check if this section needs to be
-      // remapped to a unique output section.
-      Section_segment_map::iterator it
-	  = this->section_segment_map_.find(Const_section_id(object, shndx));
-      if (it == this->section_segment_map_.end())
-	{
-	  os = this->choose_output_section(object, name, sh_type,
-					   shdr.get_sh_flags(), true,
-					   ORDER_INVALID, false, false,
-					   true);
-	}
-      else
-	{
-	  // We know the name of the output section, directly call
-	  // get_output_section here by-passing choose_output_section.
+      // All ".text.unlikely.*" sections can be moved to a unique
+      // segment with --text-unlikely-segment option.
+      bool text_unlikely_segment
+          = (parameters->options().text_unlikely_segment()
+             && is_prefix_of(".text.unlikely",
+                             object->section_name(shndx).c_str()));
+      if (text_unlikely_segment)
+        {
 	  elfcpp::Elf_Xword flags
 	    = this->get_output_section_flags(shdr.get_sh_flags());
 
-	  const char* os_name = it->second->name;
 	  Stringpool::Key name_key;
-	  os_name = this->namepool_.add(os_name, true, &name_key);
+	  const char* os_name = this->namepool_.add(".text.unlikely", true,
+						    &name_key);
 	  os = this->get_output_section(os_name, name_key, sh_type, flags,
 					ORDER_INVALID, false);
-	  if (!os->is_unique_segment())
+          // Map this output section to a unique segment.  This is done to
+          // separate "text" that is not likely to be executed from "text"
+          // that is likely executed.
+	  os->set_is_unique_segment();
+        }
+      else
+	{
+	  // Plugins can choose to place one or more subsets of sections in
+	  // unique segments and this is done by mapping these section subsets
+	  // to unique output sections.  Check if this section needs to be
+	  // remapped to a unique output section.
+	  Section_segment_map::iterator it
+	    = this->section_segment_map_.find(Const_section_id(object, shndx));
+	  if (it == this->section_segment_map_.end())
 	    {
-	      os->set_is_unique_segment();
-	      os->set_extra_segment_flags(it->second->flags);
-	      os->set_segment_alignment(it->second->align);
+	      os = this->choose_output_section(object, name, sh_type,
+					       shdr.get_sh_flags(), true,
+					       ORDER_INVALID, false, false,
+					       true);
 	    }
-	}
+	  else
+	    {
+	      // We know the name of the output section, directly call
+	      // get_output_section here by-passing choose_output_section.
+	      elfcpp::Elf_Xword flags
+	        = this->get_output_section_flags(shdr.get_sh_flags());
+
+	      const char* os_name = it->second->name;
+	      Stringpool::Key name_key;
+	      os_name = this->namepool_.add(os_name, true, &name_key);
+	      os = this->get_output_section(os_name, name_key, sh_type, flags,
+					ORDER_INVALID, false);
+	      if (!os->is_unique_segment())
+	        {
+	          os->set_is_unique_segment();
+	          os->set_extra_segment_flags(it->second->flags);
+	          os->set_segment_alignment(it->second->align);
+	        }
+	    }
+	  }
       if (os == NULL)
 	return NULL;
     }
@@ -1579,6 +1603,23 @@ Layout::add_eh_frame_for_plt(Output_data* plt, const unsigned char* cie_data,
       os->add_output_section_data(this->eh_frame_data_);
       this->added_eh_frame_data_ = true;
     }
+}
+
+// Remove .eh_frame information for a PLT.  FDEs using the CIE must
+// be removed in reverse order to the order they were added.
+
+void
+Layout::remove_eh_frame_for_plt(Output_data* plt, const unsigned char* cie_data,
+				size_t cie_length, const unsigned char* fde_data,
+				size_t fde_length)
+{
+  if (parameters->incremental())
+    {
+      // FIXME: Maybe this could work some day....
+      return;
+    }
+  this->eh_frame_data_->remove_ehframe_for_plt(plt, cie_data, cie_length,
+					       fde_data, fde_length);
 }
 
 // Scan a .debug_info or .debug_types section, and add summary
@@ -2211,7 +2252,7 @@ Layout::define_section_symbols(Symbol_table* symtab)
 					0, // symsize
 					elfcpp::STT_NOTYPE,
 					elfcpp::STB_GLOBAL,
-					elfcpp::STV_DEFAULT,
+					elfcpp::STV_PROTECTED,
 					0, // nonvis
 					false, // offset_is_from_end
 					true); // only_if_ref
@@ -2224,7 +2265,7 @@ Layout::define_section_symbols(Symbol_table* symtab)
 					0, // symsize
 					elfcpp::STT_NOTYPE,
 					elfcpp::STB_GLOBAL,
-					elfcpp::STV_DEFAULT,
+					elfcpp::STV_PROTECTED,
 					0, // nonvis
 					true, // offset_is_from_end
 					true); // only_if_ref
@@ -3432,7 +3473,8 @@ Layout::segment_precedes(const Output_segment* seg1,
   // here if plugins want unique segments for subsets of sections.
   gold_assert(this->script_options_->saw_phdrs_clause()
 	      || parameters->options().any_section_start()
-	      || this->is_unique_segment_for_sections_specified());
+	      || this->is_unique_segment_for_sections_specified()
+	      || parameters->options().text_unlikely_segment());
   return false;
 }
 
@@ -3464,7 +3506,7 @@ is_text_segment(const Target* target, const Output_segment* seg)
 }
 
 // Set the file offsets of all the segments, and all the sections they
-// contain.  They have all been created.  LOAD_SEG must be be laid out
+// contain.  They have all been created.  LOAD_SEG must be laid out
 // first.  Return the offset of the data to follow.
 
 off_t

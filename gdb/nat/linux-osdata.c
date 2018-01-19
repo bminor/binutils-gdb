@@ -1,6 +1,6 @@
 /* Linux-specific functions to retrieve OS data.
    
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,6 +37,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include "filestuff.h"
+#include <algorithm>
 
 #define NAMELEN(dirent) strlen ((dirent)->d_name)
 
@@ -61,7 +62,6 @@ int
 linux_common_core_of_thread (ptid_t ptid)
 {
   char filename[sizeof ("/proc//task//stat") + 2 * MAX_PID_T_STRLEN];
-  FILE *f;
   char *content = NULL;
   char *p;
   char *ts = 0;
@@ -71,7 +71,7 @@ linux_common_core_of_thread (ptid_t ptid)
 
   sprintf (filename, "/proc/%lld/task/%lld/stat",
 	   (PID_T) ptid_get_pid (ptid), (PID_T) ptid_get_lwp (ptid));
-  f = gdb_fopen_cloexec (filename, "r");
+  gdb_file_up f = gdb_fopen_cloexec (filename, "r");
   if (!f)
     return -1;
 
@@ -79,7 +79,7 @@ linux_common_core_of_thread (ptid_t ptid)
     {
       int n;
       content = (char *) xrealloc (content, content_read + 1024);
-      n = fread (content + content_read, 1, 1024, f);
+      n = fread (content + content_read, 1, 1024, f.get ());
       content_read += n;
       if (n < 1024)
 	{
@@ -104,7 +104,6 @@ linux_common_core_of_thread (ptid_t ptid)
     core = -1;
 
   xfree (content);
-  fclose (f);
 
   return core;
 }
@@ -117,7 +116,7 @@ static void
 command_from_pid (char *command, int maxlen, PID_T pid)
 {
   char *stat_path = xstrprintf ("/proc/%lld/stat", pid); 
-  FILE *fp = gdb_fopen_cloexec (stat_path, "r");
+  gdb_file_up fp = gdb_fopen_cloexec (stat_path, "r");
   
   command[0] = '\0';
  
@@ -128,15 +127,13 @@ command_from_pid (char *command, int maxlen, PID_T pid)
 	 (for the brackets).  */
       char cmd[18];
       PID_T stat_pid;
-      int items_read = fscanf (fp, "%lld %17s", &stat_pid, cmd);
+      int items_read = fscanf (fp.get (), "%lld %17s", &stat_pid, cmd);
 	  
       if (items_read == 2 && pid == stat_pid)
 	{
 	  cmd[strlen (cmd) - 1] = '\0'; /* Remove trailing parenthesis.  */
 	  strncpy (command, cmd + 1, maxlen); /* Ignore leading parenthesis.  */
 	}
-
-      fclose (fp);
     }
   else
     {
@@ -157,16 +154,16 @@ commandline_from_pid (PID_T pid)
 {
   char *pathname = xstrprintf ("/proc/%lld/cmdline", pid);
   char *commandline = NULL;
-  FILE *f = gdb_fopen_cloexec (pathname, "r");
+  gdb_file_up f = gdb_fopen_cloexec (pathname, "r");
 
   if (f)
     {
       size_t len = 0;
 
-      while (!feof (f))
+      while (!feof (f.get ()))
 	{
 	  char buf[1024];
-	  size_t read_bytes = fread (buf, 1, sizeof (buf), f);
+	  size_t read_bytes = fread (buf, 1, sizeof (buf), f.get ());
      
 	  if (read_bytes)
 	    {
@@ -175,8 +172,6 @@ commandline_from_pid (PID_T pid)
 	      len += read_bytes;
 	    }
 	}
-
-      fclose (f);
 
       if (commandline)
 	{
@@ -397,41 +392,40 @@ linux_xfer_osdata_processes (gdb_byte *readbuf,
   return len;
 }
 
-/* Auxiliary function used by qsort to sort processes by process
-   group.  Compares two processes with ids PROCESS1 and PROCESS2.
-   PROCESS1 comes before PROCESS2 if it has a lower process group id.
-   If they belong to the same process group, PROCESS1 comes before
-   PROCESS2 if it has a lower process id or is the process group
-   leader.  */
+/* A simple PID/PGID pair.  */
 
-static int
-compare_processes (const void *process1, const void *process2)
+struct pid_pgid_entry
 {
-  PID_T pid1 = *((PID_T *) process1);
-  PID_T pid2 = *((PID_T *) process2);
-  PID_T pgid1 = *((PID_T *) process1 + 1);
-  PID_T pgid2 = *((PID_T *) process2 + 1);
+  pid_pgid_entry (PID_T pid_, PID_T pgid_)
+  : pid (pid_), pgid (pgid_)
+  {}
 
-  /* Sort by PGID.  */
-  if (pgid1 < pgid2)
-    return -1;
-  else if (pgid1 > pgid2)
-    return 1;
-  else
-    {
-      /* Process group leaders always come first, else sort by PID.  */
-      if (pid1 == pgid1)
-	return -1;
-      else if (pid2 == pgid2)
-	return 1;
-      else if (pid1 < pid2)
-	return -1;
-      else if (pid1 > pid2)
-	return 1;
-      else
-	return 0;
-    }
-}
+  /* Return true if this pid is the leader of its process group.  */
+
+  bool is_leader () const
+  {
+    return pid == pgid;
+  }
+
+  bool operator< (const pid_pgid_entry &other) const
+  {
+    /* Sort by PGID.  */
+    if (this->pgid != other.pgid)
+      return this->pgid < other.pgid;
+
+    /* Process group leaders always come first...  */
+    if (this->is_leader ())
+      return true;
+
+    if (other.is_leader ())
+      return false;
+
+    /* ...else sort by PID.  */
+    return this->pid < other.pid;
+  }
+
+  PID_T pid, pgid;
+};
 
 /* Collect all process groups from /proc.  */
 
@@ -458,11 +452,10 @@ linux_xfer_osdata_processgroups (gdb_byte *readbuf,
       dirp = opendir ("/proc");
       if (dirp)
 	{
+	  std::vector<pid_pgid_entry> process_list;
 	  struct dirent *dp;
-	  const size_t list_block_size = 512;
-	  PID_T *process_list = XNEWVEC (PID_T, list_block_size * 2);
-	  size_t process_count = 0;
-	  size_t i;
+
+	  process_list.reserve (512);
 
 	  /* Build list consisting of PIDs followed by their
 	     associated PGID.  */
@@ -478,30 +471,18 @@ linux_xfer_osdata_processgroups (gdb_byte *readbuf,
 	      pgid = getpgid (pid);
 
 	      if (pgid > 0)
-		{
-		  process_list[2 * process_count] = pid;
-		  process_list[2 * process_count + 1] = pgid;
-		  ++process_count;
-
-		  /* Increase the size of the list if necessary.  */
-		  if (process_count % list_block_size == 0)
-		    process_list = (PID_T *) xrealloc (
-			process_list,
-			(process_count + list_block_size)
-			* 2 * sizeof (PID_T));
-		}
+		process_list.emplace_back (pid, pgid);
 	    }
 
 	  closedir (dirp);
 
 	  /* Sort the process list.  */
-	  qsort (process_list, process_count, 2 * sizeof (PID_T),
-		 compare_processes);
+	  std::sort (process_list.begin (), process_list.end ());
 
-	  for (i = 0; i < process_count; ++i)
+	  for (const pid_pgid_entry &entry : process_list)
 	    {
-	      PID_T pid = process_list[2 * i];
-	      PID_T pgid = process_list[2 * i + 1];
+	      PID_T pid = entry.pid;
+	      PID_T pgid = entry.pgid;
 	      char leader_command[32];
 	      char *command_line;
 
@@ -523,8 +504,6 @@ linux_xfer_osdata_processgroups (gdb_byte *readbuf,
 
 	      xfree (command_line);
 	    }
-
-	  xfree (process_list);
 	}   
 
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -675,7 +654,6 @@ linux_xfer_osdata_cpus (gdb_byte *readbuf,
 
   if (offset == 0)
     {
-      FILE *fp;
       int first_item = 1;
 
       if (len_avail != -1 && len_avail != 0)
@@ -685,14 +663,14 @@ linux_xfer_osdata_cpus (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"cpus\">\n");
 
-      fp = gdb_fopen_cloexec ("/proc/cpuinfo", "r");
+      gdb_file_up fp = gdb_fopen_cloexec ("/proc/cpuinfo", "r");
       if (fp != NULL)
 	{
 	  char buf[8192];
 
 	  do
 	    {
-	      if (fgets (buf, sizeof (buf), fp))
+	      if (fgets (buf, sizeof (buf), fp.get ()))
 		{
 		  char *key, *value;
 		  int i = 0;
@@ -732,12 +710,10 @@ linux_xfer_osdata_cpus (gdb_byte *readbuf,
 				     value);
 		}
 	    }
-	  while (!feof (fp));
+	  while (!feof (fp.get ()));
 
 	  if (first_item == 0)
 	    buffer_grow_str (&buffer, "</item>");
-
-	  fclose (fp);
 	}
 
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -942,7 +918,6 @@ static void
 print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 {
   const char *proc_file;
-  FILE *fp;
 
   if (family == AF_INET)
     proc_file = tcp ? "/proc/net/tcp" : "/proc/net/udp";
@@ -951,14 +926,14 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
   else
     return;
 
-  fp = gdb_fopen_cloexec (proc_file, "r");
+  gdb_file_up fp = gdb_fopen_cloexec (proc_file, "r");
   if (fp)
     {
       char buf[8192];
 
       do
 	{
-	  if (fgets (buf, sizeof (buf), fp))
+	  if (fgets (buf, sizeof (buf), fp.get ()))
 	    {
 	      uid_t uid;
 	      unsigned int local_port, remote_port, state;
@@ -1064,9 +1039,7 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 		}
 	    }
 	}
-      while (!feof (fp));
-
-      fclose (fp);
+      while (!feof (fp.get ()));
     }
 }
 
@@ -1163,8 +1136,6 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
 
   if (offset == 0)
     {
-      FILE *fp;
-
       if (len_avail != -1 && len_avail != 0)
 	buffer_free (&buffer);
       len_avail = 0;
@@ -1172,14 +1143,14 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"shared memory\">\n");
 
-      fp = gdb_fopen_cloexec ("/proc/sysvipc/shm", "r");
+      gdb_file_up fp = gdb_fopen_cloexec ("/proc/sysvipc/shm", "r");
       if (fp)
 	{
 	  char buf[8192];
 
 	  do
 	    {
-	      if (fgets (buf, sizeof (buf), fp))
+	      if (fgets (buf, sizeof (buf), fp.get ()))
 		{
 		  key_t key;
 		  uid_t uid, cuid;
@@ -1252,9 +1223,7 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
 		    }
 		}
 	    }
-	  while (!feof (fp));
-
-	  fclose (fp);
+	  while (!feof (fp.get ()));
 	}
       
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -1291,8 +1260,6 @@ linux_xfer_osdata_sem (gdb_byte *readbuf,
 
   if (offset == 0)
     {
-      FILE *fp;
-      
       if (len_avail != -1 && len_avail != 0)
 	buffer_free (&buffer);
       len_avail = 0;
@@ -1300,14 +1267,14 @@ linux_xfer_osdata_sem (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"semaphores\">\n");
 
-      fp = gdb_fopen_cloexec ("/proc/sysvipc/sem", "r");
+      gdb_file_up fp = gdb_fopen_cloexec ("/proc/sysvipc/sem", "r");
       if (fp)
 	{
 	  char buf[8192];
 	  
 	  do
 	    {
-	      if (fgets (buf, sizeof (buf), fp))
+	      if (fgets (buf, sizeof (buf), fp.get ()))
 		{
 		  key_t key;
 		  uid_t uid, cuid;
@@ -1364,9 +1331,7 @@ linux_xfer_osdata_sem (gdb_byte *readbuf,
 		    }
 		}
 	    }
-	  while (!feof (fp));
-
-	  fclose (fp);
+	  while (!feof (fp.get ()));
 	}
 
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -1403,8 +1368,6 @@ linux_xfer_osdata_msg (gdb_byte *readbuf,
 
   if (offset == 0)
     {
-      FILE *fp;
-      
       if (len_avail != -1 && len_avail != 0)
 	buffer_free (&buffer);
       len_avail = 0;
@@ -1412,14 +1375,14 @@ linux_xfer_osdata_msg (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"message queues\">\n");
       
-      fp = gdb_fopen_cloexec ("/proc/sysvipc/msg", "r");
+      gdb_file_up fp = gdb_fopen_cloexec ("/proc/sysvipc/msg", "r");
       if (fp)
 	{
 	  char buf[8192];
 	  
 	  do
 	    {
-	      if (fgets (buf, sizeof (buf), fp))
+	      if (fgets (buf, sizeof (buf), fp.get ()))
 		{
 		  key_t key;
 		  PID_T lspid, lrpid;
@@ -1490,9 +1453,7 @@ linux_xfer_osdata_msg (gdb_byte *readbuf,
 		    }
 		}
 	    }
-	  while (!feof (fp));
-
-	  fclose (fp);
+	  while (!feof (fp.get ()));
 	}
 
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -1529,8 +1490,6 @@ linux_xfer_osdata_modules (gdb_byte *readbuf,
 
   if (offset == 0)
     {
-      FILE *fp;
-
       if (len_avail != -1 && len_avail != 0)
 	buffer_free (&buffer);
       len_avail = 0;
@@ -1538,14 +1497,14 @@ linux_xfer_osdata_modules (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"modules\">\n");
 
-      fp = gdb_fopen_cloexec ("/proc/modules", "r");
+      gdb_file_up fp = gdb_fopen_cloexec ("/proc/modules", "r");
       if (fp)
 	{
 	  char buf[8192];
 	  
 	  do
 	    {
-	      if (fgets (buf, sizeof (buf), fp))
+	      if (fgets (buf, sizeof (buf), fp.get ()))
 		{
 		  char *name, *dependencies, *status, *tmp;
 		  unsigned int size;
@@ -1600,9 +1559,7 @@ linux_xfer_osdata_modules (gdb_byte *readbuf,
 			address);
 		}
 	    }
-	  while (!feof (fp));
-
-	  fclose (fp);
+	  while (!feof (fp.get ()));
 	}
 
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -1725,4 +1682,3 @@ linux_common_xfer_osdata (const char *annex, gdb_byte *readbuf,
       return 0;
     }
 }
-

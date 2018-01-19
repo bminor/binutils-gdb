@@ -1,6 +1,6 @@
 /* Do various things to symbol tables (other than lookup), for GDB.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -54,17 +54,8 @@ FILE *std_err;
 
 static int block_depth (struct block *);
 
-void _initialize_symmisc (void);
-
-struct print_symbol_args
-  {
-    struct gdbarch *gdbarch;
-    struct symbol *symbol;
-    int depth;
-    struct ui_file *outfile;
-  };
-
-static int print_symbol (void *);
+static void print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
+			  int depth, ui_file *outfile);
 
 
 void
@@ -359,14 +350,16 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	     block, not any blocks from included symtabs.  */
 	  ALL_DICT_SYMBOLS (BLOCK_DICT (b), iter, sym)
 	    {
-	      struct print_symbol_args s;
-
-	      s.gdbarch = gdbarch;
-	      s.symbol = sym;
-	      s.depth = depth + 1;
-	      s.outfile = outfile;
-	      catch_errors (print_symbol, &s, "Error printing symbol:\n",
-			    RETURN_MASK_ERROR);
+	      TRY
+		{
+		  print_symbol (gdbarch, sym, depth + 1, outfile);
+		}
+	      CATCH (ex, RETURN_MASK_ERROR)
+		{
+		  exception_fprintf (gdb_stderr, ex,
+				     "Error printing symbol:\n");
+		}
+	      END_CATCH
 	    }
 	}
       fprintf_filtered (outfile, "\n");
@@ -405,18 +398,15 @@ dump_symtab (struct symtab *symtab, struct ui_file *outfile)
 }
 
 static void
-maintenance_print_symbols (char *args, int from_tty)
+maintenance_print_symbols (const char *args, int from_tty)
 {
-  char **argv;
   struct ui_file *outfile = gdb_stdout;
-  struct cleanup *cleanups;
   char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
   int i, outfile_idx;
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   for (i = 0; argv != NULL && argv[i] != NULL; ++i)
     {
@@ -461,14 +451,12 @@ maintenance_print_symbols (char *args, int from_tty)
 
   if (argv != NULL && argv[outfile_idx] != NULL)
     {
-      char *outfile_name;
-
       if (argv[outfile_idx + 1] != NULL)
 	error (_("Junk at end of command"));
-      outfile_name = tilde_expand (argv[outfile_idx]);
-      make_cleanup (xfree, outfile_name);
-      if (!arg_outfile.open (outfile_name, FOPEN_WT))
-	perror_with_name (outfile_name);
+      gdb::unique_xmalloc_ptr<char> outfile_name
+	(tilde_expand (argv[outfile_idx]));
+      if (!arg_outfile.open (outfile_name.get (), FOPEN_WT))
+	perror_with_name (outfile_name.get ());
       outfile = &arg_outfile;
     }
 
@@ -520,22 +508,14 @@ maintenance_print_symbols (char *args, int from_tty)
       if (source_arg != NULL && !found)
 	error (_("No symtab for source file: %s"), source_arg);
     }
-
-  do_cleanups (cleanups);
 }
 
-/* Print symbol ARGS->SYMBOL on ARGS->OUTFILE.  ARGS->DEPTH says how
-   far to indent.  ARGS is really a struct print_symbol_args *, but is
-   declared as char * to get it past catch_errors.  Returns 0 for error,
-   1 for success.  */
+/* Print symbol SYMBOL on OUTFILE.  DEPTH says how far to indent.  */
 
-static int
-print_symbol (void *args)
+static void
+print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
+	      int depth, ui_file *outfile)
 {
-  struct gdbarch *gdbarch = ((struct print_symbol_args *) args)->gdbarch;
-  struct symbol *symbol = ((struct print_symbol_args *) args)->symbol;
-  int depth = ((struct print_symbol_args *) args)->depth;
-  struct ui_file *outfile = ((struct print_symbol_args *) args)->outfile;
   struct obj_section *section;
 
   if (SYMBOL_OBJFILE_OWNED (symbol))
@@ -555,8 +535,9 @@ print_symbol (void *args)
 					    section->the_bfd_section));
       else
 	fprintf_filtered (outfile, "\n");
-      return 1;
+      return;
     }
+
   if (SYMBOL_DOMAIN (symbol) == STRUCT_DOMAIN)
     {
       if (TYPE_TAG_NAME (SYMBOL_TYPE (symbol)))
@@ -703,23 +684,19 @@ print_symbol (void *args)
 	}
     }
   fprintf_filtered (outfile, "\n");
-  return 1;
 }
 
 static void
-maintenance_print_msymbols (char *args, int from_tty)
+maintenance_print_msymbols (const char *args, int from_tty)
 {
-  char **argv;
   struct ui_file *outfile = gdb_stdout;
-  struct cleanup *cleanups;
   char *objfile_arg = NULL;
   struct objfile *objfile;
   int i, outfile_idx;
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   for (i = 0; argv != NULL && argv[i] != NULL; ++i)
     {
@@ -749,14 +726,12 @@ maintenance_print_msymbols (char *args, int from_tty)
 
   if (argv != NULL && argv[outfile_idx] != NULL)
     {
-      char *outfile_name;
-
       if (argv[outfile_idx + 1] != NULL)
 	error (_("Junk at end of command"));
-      outfile_name = tilde_expand (argv[outfile_idx]);
-      make_cleanup (xfree, outfile_name);
-      if (!arg_outfile.open (outfile_name, FOPEN_WT))
-	perror_with_name (outfile_name);
+      gdb::unique_xmalloc_ptr<char> outfile_name
+	(tilde_expand (argv[outfile_idx]));
+      if (!arg_outfile.open (outfile_name.get (), FOPEN_WT))
+	perror_with_name (outfile_name.get ());
       outfile = &arg_outfile;
     }
 
@@ -767,12 +742,10 @@ maintenance_print_msymbols (char *args, int from_tty)
 	|| compare_filenames_for_search (objfile_name (objfile), objfile_arg))
       dump_msymbols (objfile, outfile);
   }
-
-  do_cleanups (cleanups);
 }
 
 static void
-maintenance_print_objfiles (char *regexp, int from_tty)
+maintenance_print_objfiles (const char *regexp, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
@@ -795,7 +768,7 @@ maintenance_print_objfiles (char *regexp, int from_tty)
 /* List all the symbol tables whose names match REGEXP (optional).  */
 
 static void
-maintenance_info_symtabs (char *regexp, int from_tty)
+maintenance_info_symtabs (const char *regexp, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
@@ -889,7 +862,7 @@ maintenance_info_symtabs (char *regexp, int from_tty)
    Use "maint check-psymtabs" for that.  */
 
 static void
-maintenance_check_symtabs (char *ignore, int from_tty)
+maintenance_check_symtabs (const char *ignore, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
@@ -940,18 +913,15 @@ maintenance_check_symtabs (char *ignore, int from_tty)
 /* Expand all symbol tables whose name matches an optional regexp.  */
 
 static void
-maintenance_expand_symtabs (char *args, int from_tty)
+maintenance_expand_symtabs (const char *args, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
-  struct cleanup *cleanups;
-  char **argv;
   char *regexp = NULL;
 
   /* We use buildargv here so that we handle spaces in the regexp
      in a way that allows adding more arguments later.  */
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   if (argv != NULL)
     {
@@ -979,6 +949,7 @@ maintenance_expand_symtabs (char *args, int from_tty)
 	       return (!basenames
 		       && (regexp == NULL || re_exec (filename)));
 	     },
+	     lookup_name_info::match_any (),
 	     [] (const char *symname)
 	     {
 	       /* Since we're not searching on symbols, just return true.  */
@@ -988,8 +959,6 @@ maintenance_expand_symtabs (char *args, int from_tty)
 	     ALL_DOMAIN);
 	}
     }
-
-  do_cleanups (cleanups);
 }
 
 
@@ -1059,7 +1028,7 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 /* Implement the 'maint info line-table' command.  */
 
 static void
-maintenance_info_line_tables (char *regexp, int from_tty)
+maintenance_info_line_tables (const char *regexp, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;

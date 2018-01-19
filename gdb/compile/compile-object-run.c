@@ -1,6 +1,6 @@
 /* Call module for 'compile' command.
 
-   Copyright (C) 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2014-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -87,7 +87,7 @@ do_module_cleanup (void *arg, int registers_valid)
     if ((objfile->flags & OBJF_USERLOADED) == 0
         && (strcmp (objfile_name (objfile), data->objfile_name_string) == 0))
       {
-	free_objfile (objfile);
+	delete objfile;
 
 	/* It may be a bit too pervasive in this dummy_frame dtor callback.  */
 	clear_symtab_users (0);
@@ -116,8 +116,6 @@ void
 compile_object_run (struct compile_module *module)
 {
   struct value *func_val;
-  struct frame_id dummy_id;
-  struct cleanup *cleanups;
   struct do_module_cleanup *data;
   const char *objfile_name_s = objfile_name (module->objfile);
   int dtor_found, executed = 0;
@@ -172,7 +170,8 @@ compile_object_run (struct compile_module *module)
 	  ++current_arg;
 	}
       gdb_assert (current_arg == TYPE_NFIELDS (func_type));
-      call_function_by_hand_dummy (func_val, TYPE_NFIELDS (func_type), vargs,
+      call_function_by_hand_dummy (func_val,
+				   NULL, TYPE_NFIELDS (func_type), vargs,
 				   do_module_cleanup, data);
     }
   CATCH (ex, RETURN_MASK_ERROR)

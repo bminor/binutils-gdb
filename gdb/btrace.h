@@ -1,6 +1,6 @@
 /* Branch trace support for GDB, the GNU debugger.
 
-   Copyright (C) 2013-2017 Free Software Foundation, Inc.
+   Copyright (C) 2013-2018 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>.
 
@@ -81,10 +81,6 @@ struct btrace_insn
   btrace_insn_flags flags;
 };
 
-/* A vector of branch trace instructions.  */
-typedef struct btrace_insn btrace_insn_s;
-DEF_VEC_O (btrace_insn_s);
-
 /* Flags for btrace function segments.  */
 enum btrace_function_flag
 {
@@ -161,7 +157,7 @@ struct btrace_function
   /* The instructions in this function segment.
      The instruction vector will be empty if the function segment
      represents a decode error.  */
-  VEC (btrace_insn_s) *insn = NULL;
+  std::vector<btrace_insn> insn;
 
   /* The error code of a decode error that led to a gap.
      Must be zero unless INSN is empty; non-zero otherwise.  */

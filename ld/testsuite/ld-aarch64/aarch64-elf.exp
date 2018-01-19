@@ -1,5 +1,5 @@
 # Expect script for various AARCH64 ELF tests.
-# Copyright (C) 2009-2017 Free Software Foundation, Inc.
+# Copyright (C) 2009-2018 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -103,6 +103,8 @@ run_dump_test_lp64 "emit-relocs-257"
 run_dump_test_lp64 "emit-relocs-257-be"
 # 258 is tested in 257
 # 259 is tested in 257
+run_dump_test_lp64 "emit-relocs-258-dyn-bad"
+run_dump_test_lp64 "emit-relocs-259-dyn-bad"
 run_dump_test_lp64 "emit-relocs-260"
 run_dump_test_lp64 "emit-relocs-260-be"
 # 261 is tested by 260

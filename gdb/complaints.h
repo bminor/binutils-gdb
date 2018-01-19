@@ -1,6 +1,6 @@
 /* Definitions for complaint handling during symbol reading in GDB.
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,10 +28,25 @@ struct complaints;
 /* Predefined categories.  */
 extern struct complaints *symfile_complaints;
 
-/* Register a complaint.  */
-extern void complaint (struct complaints **complaints,
-		       const char *fmt,
-		       ...) ATTRIBUTE_PRINTF (2, 3);
+/* Helper for complaint.  */
+extern void complaint_internal (struct complaints **complaints,
+				const char *fmt, ...)
+  ATTRIBUTE_PRINTF (2, 3);
+
+/* Register a complaint.  This is a macro around complaint_internal to
+   avoid computing complaint's arguments when complaints are disabled.
+   Running FMT via gettext [i.e., _(FMT)] can be quite expensive, for
+   example.  */
+#define complaint(COMPLAINTS, FMT, ...)				\
+  do								\
+    {								\
+      extern int stop_whining;					\
+								\
+      if (stop_whining > 0)					\
+	complaint_internal (COMPLAINTS, FMT, ##__VA_ARGS__);	\
+    }								\
+  while (0)
+
 extern void internal_complaint (struct complaints **complaints,
 				const char *file, int line,
 				const char *fmt,

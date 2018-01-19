@@ -1,5 +1,5 @@
 # ; -*- mode: sh ; -*-
-# Copyright (C) 2013-2017 Free Software Foundation, Inc.
+# Copyright (C) 2013-2018 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -68,6 +68,7 @@ case ${gdb_host} in
 	;;
     nbsd*)
 	NATDEPFILES='fork-child.o fork-inferior.o inf-ptrace.o'
+	HAVE_NATIVE_GCORE_HOST=1
 	;;
     obsd*)
 	NATDEPFILES='fork-child.o fork-inferior.o inf-ptrace.o'
@@ -84,6 +85,12 @@ case ${gdb_host} in
     darwin)
 	NATDEPFILES='fork-child.o fork-inferior.o darwin-nat.o \
 	    darwin-nat-info.o'
+	;;
+    sol2)
+	NATDEPFILES='fork-child.o fork-inferior.o \
+	    procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o \
+	    sol-thread.o'
+	HAVE_NATIVE_GCORE_HOST=1
         ;;
 esac
 
@@ -144,6 +151,16 @@ case ${gdb_host} in
 	;;
     fbsd)
 	case ${gdb_host_cpu} in
+	    aarch64)
+		# Host: FreeBSD/aarch64
+		NATDEPFILES="${NATDEPFILES} aarch64-fbsd-nat.o"
+		LOADLIBES=
+		;;
+	    arm)
+		# Host: FreeBSD/arm
+		NATDEPFILES="${NATDEPFILES} arm-fbsd-nat.o"
+		LOADLIBES=
+		;;
 	    i386)
 		# Host: FreeBSD/i386
 		NATDEPFILES="${NATDEPFILES} x86-nat.o x86-dregs.o \
@@ -203,16 +220,6 @@ case ${gdb_host} in
 		XM_CLIBS='-lshouldbeinlibc'
 
 		nat_makefile_frag="${srcdir}/config/${gdb_host_cpu}/i386gnu.mn"
-		;;
-	esac
-	;;
-    i386sol2)
-	case ${gdb_host_cpu} in
-	    i386)
-		# Host: Solaris x86
-		NATDEPFILES='fork-child.o i386-v4-nat.o i386-sol2-nat.o \
-		procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o'
-		HAVE_NATIVE_GCORE_HOST=1
 		;;
 	esac
 	;;
@@ -338,18 +345,19 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    i386)
 		# Host: NetBSD/amd64
-		NATDEPFILES="${NATDEPFILES} nbsd-nat.o amd64-nat.o \
-		x86-bsd-nat.o amd64-bsd-nat.o amd64-nbsd-nat.o"
+		NATDEPFILES="${NATDEPFILES} nbsd-nat.o amd64-nat.o x86-nat.o \
+		x86-dregs.o x86-bsd-nat.o amd64-bsd-nat.o amd64-nbsd-nat.o"
 		;;
 	    sparc)
 		# Host: NetBSD/sparc64
 		NATDEPFILES="${NATDEPFILES} sparc64-nbsd-nat.o sparc-nat.o \
 		bsd-kvm.o"
+		LOADLIBES='-lkvm'
 		;;
 
 	esac
 	;;
-    nbdself)
+    nbsdelf)
 	case ${gdb_host_cpu} in
 	    arm)
 		# Host: NetBSD/arm
@@ -357,8 +365,8 @@ case ${gdb_host} in
 		;;
 	    i386)
 		# Host: NetBSD/i386 ELF
-		NATDEPFILES="${NATDEPFILES} nbsd-nat.o x86-bsd-nat.o \
-		i386-bsd-nat.o i386-nbsd-nat.o bsd-kvm.o"
+		NATDEPFILES="${NATDEPFILES} nbsd-nat.o x86-nat.o x86-dregs.o \
+		x86-bsd-nat.o i386-bsd-nat.o i386-nbsd-nat.o bsd-kvm.o"
 		LOADLIBES='-lkvm'
 		;;
 	    m68k)
@@ -453,23 +461,15 @@ case ${gdb_host} in
 	;;
     sol2)
 	case ${gdb_host_cpu} in
+	    i386)
+		# Host: Solaris x86_64
+		NATDEPFILES="${NATDEPFILES} \
+		amd64-nat.o i386-v4-nat.o i386-sol2-nat.o"
+		;;
 	    sparc)
 		# Host: Solaris SPARC & UltraSPARC
 		NAT_FILE='nm-sol2.h'
-		NATDEPFILES='sparc-sol2-nat.o \
-		fork-child.o \
-		procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o'
-		HAVE_NATIVE_GCORE_HOST=1
-		;;
-	esac
-	;;
-    sol2-64)
-	case ${gdb_host_cpu} in
-	    i386)
-		# Host: Solaris x86_64
-		NATDEPFILES='fork-child.o amd64-nat.o i386-v4-nat.o i386-sol2-nat.o \
-		procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o'
-		HAVE_NATIVE_GCORE_HOST=1
+		NATDEPFILES="${NATDEPFILES} sparc-sol2-nat.o"
 		;;
 	esac
 	;;
@@ -482,7 +482,8 @@ case ${gdb_host} in
 		NAT_FILE=
 		NAT_CDEPS=
 		LOADLIBES=
-		NATDEPFILES='spu-linux-nat.o fork-child.o inf-ptrace.o \
+		NATDEPFILES='spu-linux-nat.o \
+		      inf-ptrace.o fork-child.o fork-inferior.o \
 		      linux-procfs.o linux-ptrace.o linux-waitpid.o \
 		      linux-personality.o linux-namespaces.o'
 		;;

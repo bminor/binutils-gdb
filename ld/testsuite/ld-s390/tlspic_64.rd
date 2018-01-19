@@ -62,7 +62,7 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 14 entries:
 [0-9a-f ]+R_390_TLS_DTPOFF +0+ sg1 \+ 0
 [0-9a-f ]+R_390_TLS_TPOFF +0+4 sg2 \+ 0
 
-Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entry:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f ]+R_390_JMP_SLOT +0+ __tls_get_offset \+ 0
 

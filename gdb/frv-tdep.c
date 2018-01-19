@@ -1,6 +1,6 @@
 /* Target-dependent code for the Fujitsu FR-V, for GDB, the GNU Debugger.
 
-   Copyright (C) 2002-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,8 +38,6 @@
 #include "solib.h"
 #include "frv-tdep.h"
 #include "objfiles.h"
-
-extern void _initialize_frv_tdep (void);
 
 struct frv_unwind_cache		/* was struct frame_extra_info */
   {
@@ -1112,7 +1110,7 @@ static void
 frv_extract_return_value (struct type *type, struct regcache *regcache,
                           gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
 

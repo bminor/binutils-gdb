@@ -1,6 +1,6 @@
 /* Self tests for offset types for GDB, the GNU debugger.
 
-   Copyright (C) 2017 Free Software Foundation, Inc.
+   Copyright (C) 2017-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -174,5 +174,5 @@ run_tests ()
 void
 _initialize_offset_type_selftests ()
 {
-  register_self_test (selftests::offset_type::run_tests);
+  selftests::register_test ("offset_type", selftests::offset_type::run_tests);
 }

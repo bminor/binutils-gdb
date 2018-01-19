@@ -1,6 +1,6 @@
 /* Native-dependent code for Alpha BSD's.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -101,7 +101,7 @@ alphabsd_fetch_inferior_registers (struct target_ops *ops,
     }
 
   if (regno == -1
-      || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+      || regno >= gdbarch_fp0_regnum (regcache->arch ()))
     {
       struct fpreg fpregs;
 
@@ -138,7 +138,7 @@ alphabsd_store_inferior_registers (struct target_ops *ops,
     }
 
   if (regno == -1
-      || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+      || regno >= gdbarch_fp0_regnum (regcache->arch ()))
     {
       struct fpreg fpregs;
 
@@ -186,9 +186,6 @@ alphabsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   return 1;
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_alphabsd_nat (void);
 
 void
 _initialize_alphabsd_nat (void)

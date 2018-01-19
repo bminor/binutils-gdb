@@ -1,5 +1,5 @@
 /* Functions for deciding which macros are currently in scope.
-   Copyright (C) 2002-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2018 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of GDB.
@@ -155,9 +155,6 @@ standard_macro_lookup (const char *name, void *baton)
     result = macro_lookup_definition (ms->file, ms->line, name);
   return result;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_macroscope;
 
 void
 _initialize_macroscope (void)

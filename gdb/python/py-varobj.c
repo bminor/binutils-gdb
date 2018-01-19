@@ -1,4 +1,4 @@
-/* Copyright (C) 2013-2017 Free Software Foundation, Inc.
+/* Copyright (C) 2013-2018 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -71,7 +71,6 @@ py_varobj_iter_next (struct varobj_iter *self)
       if (PyErr_ExceptionMatches (gdbpy_gdb_memory_error))
 	{
 	  PyObject *type, *value, *trace;
-	  char *name_str;
 
 	  PyErr_Fetch (&type, &value, &trace);
 	  gdb::unique_xmalloc_ptr<char>
@@ -85,10 +84,10 @@ py_varobj_iter_next (struct varobj_iter *self)
 	      return NULL;
 	    }
 
-	  name_str = xstrprintf ("<error at %d>",
-				 self->next_raw_index++);
-	  item.reset (Py_BuildValue ("(ss)", name_str, value_str.get ()));
-	  xfree (name_str);
+	  std::string name_str = string_printf ("<error at %d>",
+						self->next_raw_index++);
+	  item.reset (Py_BuildValue ("(ss)", name_str.c_str (),
+				     value_str.get ()));
 	  if (item == NULL)
 	    {
 	      gdbpy_print_stack ();

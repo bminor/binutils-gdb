@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux x86 (i386 and x86-64).
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -153,7 +153,7 @@ x86_linux_read_description (struct target_ops *ops)
 	{
 	  have_ptrace_getfpxregs = 0;
 	  have_ptrace_getregset = TRIBOOL_FALSE;
-	  return tdesc_i386_mmx_linux;
+	  return i386_linux_read_description (X86_XSTATE_X87_MASK);
 	}
     }
 #endif
@@ -192,59 +192,18 @@ x86_linux_read_description (struct target_ops *ops)
   if (is_64bit)
     {
 #ifdef __x86_64__
-      switch (xcr0_features_bits)
-	{
-	case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
-	  if (is_x32)
-	    /* No MPX, PKU on x32, fall back to AVX-AVX512.  */
-	    return tdesc_x32_avx_avx512_linux;
-	  else
-	    return tdesc_amd64_avx_mpx_avx512_pku_linux;
-	case X86_XSTATE_AVX_AVX512_MASK:
-	  if (is_x32)
-	    return tdesc_x32_avx_avx512_linux;
-	  else
-	    return tdesc_amd64_avx_avx512_linux;
-	case X86_XSTATE_MPX_MASK:
-	  if (is_x32)
-	    return tdesc_x32_avx_linux; /* No MPX on x32 using AVX.  */
-	  else
-	    return tdesc_amd64_mpx_linux;
-	case X86_XSTATE_AVX_MPX_MASK:
-	  if (is_x32)
-	    return tdesc_x32_avx_linux; /* No MPX on x32 using AVX.  */
-	  else
-	    return tdesc_amd64_avx_mpx_linux;
-	case X86_XSTATE_AVX_MASK:
-	  if (is_x32)
-	    return tdesc_x32_avx_linux;
-	  else
-	    return tdesc_amd64_avx_linux;
-	default:
-	  if (is_x32)
-	    return tdesc_x32_linux;
-	  else
-	    return tdesc_amd64_linux;
-	}
+      return amd64_linux_read_description (xcr0_features_bits, is_x32);
 #endif
     }
   else
     {
-      switch (xcr0_features_bits)
-	{
-	case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
-	  return tdesc_i386_avx_mpx_avx512_pku_linux;
-	case X86_XSTATE_AVX_AVX512_MASK:
-	  return tdesc_i386_avx_avx512_linux;
-	case X86_XSTATE_MPX_MASK:
-	  return tdesc_i386_mpx_linux;
-	case X86_XSTATE_AVX_MPX_MASK:
-	  return tdesc_i386_avx_mpx_linux;
-	case X86_XSTATE_AVX_MASK:
-	  return tdesc_i386_avx_linux;
-	default:
-	  return tdesc_i386_linux;
-	}
+      const struct target_desc * tdesc
+	= i386_linux_read_description (xcr0_features_bits);
+
+      if (tdesc == NULL)
+	tdesc = i386_linux_read_description (X86_XSTATE_SSE_MASK);
+
+      return tdesc;
     }
 
   gdb_assert_not_reached ("failed to return tdesc");
@@ -395,6 +354,7 @@ x86_linux_add_target (struct target_ops *t)
 {
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, x86_linux_new_thread);
+  linux_nat_set_delete_thread (t, x86_linux_delete_thread);
   linux_nat_set_new_fork (t, x86_linux_new_fork);
   linux_nat_set_forget_process (t, x86_forget_process);
   linux_nat_set_prepare_to_resume (t, x86_linux_prepare_to_resume);

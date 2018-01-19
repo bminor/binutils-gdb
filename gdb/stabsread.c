@@ -1,6 +1,6 @@
 /* Support routines for decoding "stabs" debugging information format.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,7 +41,7 @@
 #include "demangle.h"
 #include "gdb-demangle.h"
 #include "language.h"
-#include "doublest.h"
+#include "target-float.h"
 #include "cp-abi.h"
 #include "cp-support.h"
 #include <ctype.h>
@@ -51,8 +51,6 @@
 /**/
 #include "stabsread.h"		/* Our own declarations */
 #undef	EXTERN
-
-extern void _initialize_stabsread (void);
 
 struct nextfield
 {
@@ -370,7 +368,7 @@ dbx_init_float_type (struct objfile *objfile, int bits)
   if (format)
     type = init_float_type (objfile, bits, NULL, format);
   else
-    type = init_type (objfile, TYPE_CODE_ERROR, bits / TARGET_CHAR_BIT, NULL);
+    type = init_type (objfile, TYPE_CODE_ERROR, bits, NULL);
 
   return type;
 }
@@ -800,19 +798,15 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	{
 	case 'r':
 	  {
-	    double d = atof (p);
 	    gdb_byte *dbl_valu;
 	    struct type *dbl_type;
-
-	    /* FIXME-if-picky-about-floating-accuracy: Should be using
-	       target arithmetic to get the value.  real.c in GCC
-	       probably has the necessary code.  */
 
 	    dbl_type = objfile_type (objfile)->builtin_double;
 	    dbl_valu
 	      = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack,
 					    TYPE_LENGTH (dbl_type));
-	    store_typed_floating (dbl_valu, dbl_type, d);
+
+	    target_float_from_string (dbl_valu, dbl_type, std::string (p));
 
 	    SYMBOL_TYPE (sym) = dbl_type;
 	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
@@ -2155,7 +2149,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       rettype = init_integer_type (objfile, 32, 1, "unsigned long");
       break;
     case 11:
-      rettype = init_type (objfile, TYPE_CODE_VOID, 1, "void");
+      rettype = init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
       break;
     case 12:
       /* IEEE single precision (32 bit).  */
@@ -3837,7 +3831,8 @@ read_sun_builtin_type (const char **pp, int typenums[2], struct objfile *objfile
 
   if (type_bits == 0)
     {
-      struct type *type = init_type (objfile, TYPE_CODE_VOID, 1, NULL);
+      struct type *type = init_type (objfile, TYPE_CODE_VOID,
+				     TARGET_CHAR_BIT, NULL);
       if (unsigned_type)
         TYPE_UNSIGNED (type) = 1;
       return type;
@@ -4149,7 +4144,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 
   /* A type defined as a subrange of itself, with bounds both 0, is void.  */
   if (self_subrange && n2 == 0 && n3 == 0)
-    return init_type (objfile, TYPE_CODE_VOID, 1, NULL);
+    return init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, NULL);
 
   /* If n3 is zero and n2 is positive, we want a floating type, and n2
      is the width in bytes.
@@ -4195,7 +4190,8 @@ read_range_type (const char **pp, int typenums[2], int type_size,
      itself with range 0-127.  */
   else if (self_subrange && n2 == 0 && n3 == 127)
     {
-      struct type *type = init_integer_type (objfile, 1, 0, NULL);
+      struct type *type = init_integer_type (objfile, TARGET_CHAR_BIT,
+					     0, NULL);
       TYPE_NOSIGN (type) = 1;
       return type;
     }

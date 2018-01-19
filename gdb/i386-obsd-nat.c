@@ -1,6 +1,6 @@
 /* Native-dependent code for OpenBSD/i386.
 
-   Copyright (C) 2002-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,7 +34,7 @@
 static int
 i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct switchframe sf;
 
@@ -87,10 +87,6 @@ i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   return 1;
 }
-
-
-/* Prevent warning from -Wmissing-prototypes.  */
-void _initialize_i386obsd_nat (void);
 
 void
 _initialize_i386obsd_nat (void)

@@ -1,6 +1,6 @@
 /* Routines for name->symbol lookups in GDB.
    
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    Contributed by David Carlton <carlton@bactrian.org> and by Kealia,
    Inc.
@@ -35,42 +35,46 @@ struct dictionary;
 struct symbol;
 struct obstack;
 struct pending;
-
+struct language_defn;
 
 /* The creation functions for various implementations of
    dictionaries.  */
 
-/* Create a dictionary implemented via a fixed-size hashtable.  All
-   memory it uses is allocated on OBSTACK; the environment is
-   initialized from SYMBOL_LIST.  */
+/* Create a dictionary of symbols of language LANGUAGE implemented via
+   a fixed-size hashtable.  All memory it uses is allocated on
+   OBSTACK; the environment is initialized from SYMBOL_LIST.  */
 
 extern struct dictionary *dict_create_hashed (struct obstack *obstack,
+					      enum language language,
 					      const struct pending
 					      *symbol_list);
 
-/* Create a dictionary implemented via a hashtable that grows as
-   necessary.  The dictionary is initially empty; to add symbols to
-   it, call dict_add_symbol().  Call dict_free() when you're done with
-   it.  */
+/* Create a dictionary of symbols of language LANGUAGE, implemented
+   via a hashtable that grows as necessary.  The dictionary is
+   initially empty; to add symbols to it, call dict_add_symbol().
+   Call dict_free() when you're done with it.  */
 
-extern struct dictionary *dict_create_hashed_expandable (void);
+extern struct dictionary *
+  dict_create_hashed_expandable (enum language language);
 
-/* Create a dictionary implemented via a fixed-size array.  All memory
-   it uses is allocated on OBSTACK; the environment is initialized
-   from the SYMBOL_LIST.  The symbols are ordered in the same order
-   that they're found in SYMBOL_LIST.  */
+/* Create a dictionary of symbols of language LANGUAGE, implemented
+   via a fixed-size array.  All memory it uses is allocated on
+   OBSTACK; the environment is initialized from the SYMBOL_LIST.  The
+   symbols are ordered in the same order that they're found in
+   SYMBOL_LIST.  */
 
 extern struct dictionary *dict_create_linear (struct obstack *obstack,
+					      enum language language,
 					      const struct pending
 					      *symbol_list);
 
-/* Create a dictionary implemented via an array that grows as
-   necessary.  The dictionary is initially empty; to add symbols to
-   it, call dict_add_symbol().  Call dict_free() when you're done with
-   it.  */
+/* Create a dictionary of symbols of language LANGUAGE, implemented
+   via an array that grows as necessary.  The dictionary is initially
+   empty; to add symbols to it, call dict_add_symbol().  Call
+   dict_free() when you're done with it.  */
 
-extern struct dictionary *dict_create_linear_expandable (void);
-
+extern struct dictionary *
+  dict_create_linear_expandable (enum language language);
 
 /* The functions providing the interface to dictionaries.  Note that
    the most common parts of the interface, namely symbol lookup, are
@@ -123,33 +127,13 @@ extern struct symbol *dict_iterator_first (const struct dictionary *dict,
 extern struct symbol *dict_iterator_next (struct dict_iterator *iterator);
 
 /* Initialize ITERATOR to point at the first symbol in DICT whose
-   SYMBOL_SEARCH_NAME is NAME (as tested using strcmp_iw), and return
-   that first symbol, or NULL if there are no such symbols.  */
-
-extern struct symbol *dict_iter_name_first (const struct dictionary *dict,
-					    const char *name,
-					    struct dict_iterator *iterator);
-
-/* Advance ITERATOR to point at the next symbol in DICT whose
-   SYMBOL_SEARCH_NAME is NAME (as tested using strcmp_iw), or NULL if
-   there are no more such symbols.  Don't call this if you've
-   previously received NULL from dict_iterator_first or
-   dict_iterator_next on this iteration.  And don't call it unless
-   ITERATOR was created by a previous call to dict_iter_name_first
-   with the same NAME.  */
-
-extern struct symbol *dict_iter_name_next (const char *name,
-					   struct dict_iterator *iterator);
-
-/* Initialize ITERATOR to point at the first symbol in DICT whose
    SYMBOL_SEARCH_NAME is NAME, as tested using COMPARE (which must use
    the same conventions as strcmp_iw and be compatible with any
    dictionary hashing function), and return that first symbol, or NULL
    if there are no such symbols.  */
 
 extern struct symbol *dict_iter_match_first (const struct dictionary *dict,
-					     const char *name,
-					     symbol_compare_ftype *compare,
+					     const lookup_name_info &name,
 					     struct dict_iterator *iterator);
 
 /* Advance ITERATOR to point at the next symbol in DICT whose
@@ -160,8 +144,7 @@ extern struct symbol *dict_iter_match_first (const struct dictionary *dict,
    iteration.  And don't call it unless ITERATOR was created by a
    previous call to dict_iter_match_first with the same NAME and COMPARE.  */
 
-extern struct symbol *dict_iter_match_next (const char *name,
-					    symbol_compare_ftype *compare,
+extern struct symbol *dict_iter_match_next (const lookup_name_info &name,
 					    struct dict_iterator *iterator);
 
 /* Return some notion of the size of the dictionary: the number of

@@ -1,5 +1,5 @@
 /* aarch64-opc.h -- Header file for aarch64-opc.c and aarch64-opc-2.c.
-   Copyright (C) 2012-2017 Free Software Foundation, Inc.
+   Copyright (C) 2012-2018 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -67,7 +67,9 @@ enum aarch64_field_kind
   FLD_type,
   FLD_ldst_size,
   FLD_imm6,
+  FLD_imm6_2,
   FLD_imm4,
+  FLD_imm4_2,
   FLD_imm5,
   FLD_imm7,
   FLD_imm8,
@@ -143,6 +145,7 @@ enum aarch64_field_kind
   FLD_rotate1,
   FLD_rotate2,
   FLD_rotate3,
+  FLD_SM3_imm2
 };
 
 /* Field description.  */

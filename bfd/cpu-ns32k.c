@@ -1,5 +1,5 @@
 /* BFD support for the ns32k architecture.
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
    Almost totally rewritten by Ian Dall from initial work
    by Andrew Cagney.
 
@@ -483,23 +483,23 @@ do_ns32k_reloc (bfd *      abfd,
      R result
 
      Do this:
-     i i i i i o o o o o        from bfd_get<size>
-     and           S S S S S    to get the size offset we want
-     +   r r r r r r r r r r  to get the final value to place
-     and           D D D D D  to chop to right size
+     i i i i i o o o o o	from bfd_get<size>
+     and	   S S S S S	to get the size offset we want
+     +	 r r r r r r r r r r  to get the final value to place
+     and	   D D D D D  to chop to right size
      -----------------------
      A A A A A
      And this:
-     ...   i i i i i o o o o o  from bfd_get<size>
-     and   N N N N N            get instruction
+     ...   i i i i i o o o o o	from bfd_get<size>
+     and   N N N N N		get instruction
      -----------------------
      ...   B B B B B
 
      And then:
      B B B B B
-     or              A A A A A
+     or		     A A A A A
      -----------------------
-     R R R R R R R R R R        put into bfd_put<size>.  */
+     R R R R R R R R R R	put into bfd_put<size>.  */
 
 #define DOIT(x) \
   x = ( (x & ~howto->dst_mask) | (((x & howto->src_mask) +  relocation) & howto->dst_mask))

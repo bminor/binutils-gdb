@@ -1,6 +1,6 @@
 #source: pr20253-1.s
 #as: --64
-#ld: -shared -melf_x86_64
+#ld: -shared -melf_x86_64 --hash-style=sysv
 #objdump: -dw
 #notarget: x86_64-*-nacl*
 

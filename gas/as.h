@@ -1,5 +1,5 @@
 /* as.h - global header file
-   Copyright (C) 1987-2017 Free Software Foundation, Inc.
+   Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -486,6 +486,7 @@ void   cond_exit_macro (int);
 int    seen_at_least_1_file (void);
 void   app_pop (char *);
 const char * as_where (unsigned int *);
+const char * as_where_physical (unsigned int *);
 void   bump_line_counters (void);
 void   do_scrub_begin (int);
 void   input_scrub_begin (void);

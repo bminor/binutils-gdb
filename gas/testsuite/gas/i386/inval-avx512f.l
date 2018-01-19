@@ -18,10 +18,7 @@
 .*:26: Error: .*
 .*:27: Error: .*
 .*:28: Error: .*
-.*:28: Error: .*
 .*:29: Error: .*
-.*:29: Error: .*
-.*:30: Error: .*
 .*:30: Error: .*
 .*:32: Error: .*
 .*:33: Error: .*
@@ -39,6 +36,10 @@
 .*:48: Error: .*
 .*:49: Error: .*
 .*:50: Error: .*
+.*:53: Error: .*
+.*:54: Error: .*
+.*:57: Error: .*
+.*:58: Error: .*
 GAS LISTING .*
 
 
@@ -92,3 +93,13 @@ GAS LISTING .*
 [ 	]*48[ 	]+vaddps zmm2, zmm1, ZMMWORD PTR \[eax\]\{1to16\}
 [ 	]*49[ 	]+vaddps zmm2, zmm1, DWORD PTR \[eax\]
 [ 	]*50[ 	]+vaddpd zmm2, zmm1, QWORD PTR \[eax\]
+[ 	]*51[ 	]*
+[ 	]*52[ 	]+\.att_syntax prefix
+[ 	]*53[ 	]+vaddps %zmm0, %zmm1, %zmm2\{%ecx\}
+[ 	]*54[ 	]+vaddps %zmm0, %zmm1, %zmm2\{z\}
+[ 	]*55[ 	]*
+[ 	]*56[ 	]+\.intel_syntax noprefix
+[ 	]*57[ 	]+vaddps zmm2\{ecx\}, zmm1, zmm0
+GAS LISTING .*
+#...
+[ 	]*58[ 	]+vaddps zmm2\{z\}, zmm1, zmm0

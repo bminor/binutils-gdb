@@ -1,6 +1,6 @@
 /* Gdb/Python header for private use by Python module.
 
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -373,12 +373,12 @@ extern PyTypeObject symbol_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("symbol_object");
 extern PyTypeObject event_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-extern PyTypeObject stop_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 extern PyTypeObject breakpoint_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("breakpoint_object");
 extern PyTypeObject frame_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("frame_object");
+extern PyTypeObject thread_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
 
 typedef struct gdbpy_breakpoint_object
 {
@@ -463,28 +463,11 @@ extern enum ext_lang_bp_stop gdbpy_breakpoint_cond_says_stop
 extern int gdbpy_breakpoint_has_cond (const struct extension_language_defn *,
 				      struct breakpoint *b);
 
-extern void *gdbpy_clone_xmethod_worker_data
-  (const struct extension_language_defn *extlang, void *data);
-extern void gdbpy_free_xmethod_worker_data
-  (const struct extension_language_defn *extlang, void *data);
 extern enum ext_lang_rc gdbpy_get_matching_xmethod_workers
   (const struct extension_language_defn *extlang,
    struct type *obj_type, const char *method_name,
-   xmethod_worker_vec **dm_vec);
-extern enum ext_lang_rc gdbpy_get_xmethod_arg_types
-  (const struct extension_language_defn *extlang,
-   struct xmethod_worker *worker,
-   int *nargs,
-   struct type ***arg_types);
-extern enum ext_lang_rc gdbpy_get_xmethod_result_type
-  (const struct extension_language_defn *extlang,
-   struct xmethod_worker *worker,
-   struct value *object, struct value **args, int nargs,
-   struct type **result_type);
-extern struct value *gdbpy_invoke_xmethod
-  (const struct extension_language_defn *extlang,
-   struct xmethod_worker *worker,
-   struct value *obj, struct value **args, int nargs);
+   std::vector<xmethod_worker_up> *dm_vec);
+
 
 PyObject *gdbpy_history (PyObject *self, PyObject *args);
 PyObject *gdbpy_breakpoints (PyObject *, PyObject *);
@@ -606,30 +589,6 @@ int gdbpy_initialize_event (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_py_events (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_stop_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_signal_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_breakpoint_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_continue_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_inferior_call_pre_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_inferior_call_post_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_register_changed_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_memory_changed_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_exited_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_thread_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_new_objfile_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_clear_objfiles_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_arch (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_xmethods (void)
@@ -650,8 +609,7 @@ class gdbpy_enter
 
   ~gdbpy_enter ();
 
-  gdbpy_enter (const gdbpy_enter &) = delete;
-  gdbpy_enter &operator= (const gdbpy_enter &) = delete;
+  DISABLE_COPY_AND_ASSIGN (gdbpy_enter);
 
  private:
 

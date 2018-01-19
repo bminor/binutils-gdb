@@ -1,6 +1,6 @@
 /* Main header file for the bfd library -- portable access to object files.
 
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -104,7 +104,7 @@ typedef BFD_HOST_U_64_BIT bfd_uint64_t;
 #endif
 
 /* Declaring a type wide enough to hold a host long and a host pointer.  */
-#define BFD_HOSTPTR_T	@BFD_HOSTPTR_T@
+#define BFD_HOSTPTR_T @BFD_HOSTPTR_T@
 typedef BFD_HOSTPTR_T bfd_hostptr_t;
 
 /* Forward declaration.  */
@@ -247,7 +247,7 @@ carsym;			/* To make these you call a carsymogen.  */
 
 /* Used in generating armaps (archive tables of contents).
    Perhaps just a forward definition would do?  */
-struct orl 			/* Output ranlib.  */
+struct orl		/* Output ranlib.  */
 {
   char **name;		/* Symbol name.  */
   union
@@ -265,7 +265,7 @@ typedef struct lineno_cache_entry
   union
   {
     struct bfd_symbol *sym;	/* Function name.  */
-    bfd_vma offset;	    		/* Offset into section.  */
+    bfd_vma offset;		/* Offset into section.  */
   } u;
 }
 alent;
@@ -329,11 +329,11 @@ typedef struct _symbol_info
 {
   symvalue value;
   char type;
-  const char *name;            /* Symbol name.  */
-  unsigned char stab_type;     /* Stab type.  */
-  char stab_other;             /* Stab other.  */
-  short stab_desc;             /* Stab desc.  */
-  const char *stab_name;       /* String for stab type.  */
+  const char *name;		/* Symbol name.  */
+  unsigned char stab_type;	/* Stab type.  */
+  char stab_other;		/* Stab other.  */
+  short stab_desc;		/* Stab desc.  */
+  const char *stab_name;	/* String for stab type.  */
 } symbol_info;
 
 /* Get the name of a stabs type code.  */
@@ -371,7 +371,7 @@ struct bfd_hash_table
      only if the argument is NULL.  */
   struct bfd_hash_entry *(*newfunc)
     (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
-   /* An objalloc for this hash table.  This is a struct objalloc *,
+  /* An objalloc for this hash table.  This is a struct objalloc *,
      but we use void * to avoid requiring the inclusion of objalloc.h.  */
   void *memory;
   /* The number of slots in the hash table.  */
@@ -489,7 +489,7 @@ extern int bfd_stat (bfd *, struct stat *);
   (_bfd_warn_deprecated ("bfd_read", __FILE__, __LINE__, __FUNCTION__),	\
    bfd_bread ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
 #define bfd_write(BUF, ELTSIZE, NITEMS, ABFD)				\
-  (_bfd_warn_deprecated ("bfd_write", __FILE__, __LINE__, __FUNCTION__),	\
+  (_bfd_warn_deprecated ("bfd_write", __FILE__, __LINE__, __FUNCTION__), \
    bfd_bwrite ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
 #else
 #define bfd_read(BUF, ELTSIZE, NITEMS, ABFD)				\
@@ -935,7 +935,7 @@ extern void bfd_elf32_arm_keep_private_stub_output_sections
 /* ELF ARM mapping symbol support.  */
 #define BFD_ARM_SPECIAL_SYM_TYPE_MAP	(1 << 0)
 #define BFD_ARM_SPECIAL_SYM_TYPE_TAG	(1 << 1)
-#define BFD_ARM_SPECIAL_SYM_TYPE_OTHER  (1 << 2)
+#define BFD_ARM_SPECIAL_SYM_TYPE_OTHER	(1 << 2)
 #define BFD_ARM_SPECIAL_SYM_TYPE_ANY	(~0)
 
 extern bfd_boolean bfd_is_arm_special_symbol_name

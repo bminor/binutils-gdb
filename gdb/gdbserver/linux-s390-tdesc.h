@@ -1,6 +1,6 @@
 /* Low level support for s390, shared between gdbserver and IPA.
 
-   Copyright (C) 2016-2017 Free Software Foundation, Inc.
+   Copyright (C) 2016-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,7 @@ enum s390_linux_tdesc {
   S390_TDESC_TE,
   S390_TDESC_VX,
   S390_TDESC_TEVX,
+  S390_TDESC_GS,
 };
 
 #ifdef __s390x__
@@ -58,6 +59,10 @@ extern const struct target_desc *tdesc_s390x_vx_linux64;
 /* Defined in auto-generated file s390x-tevx-linux64.c.  */
 void init_registers_s390x_tevx_linux64 (void);
 extern const struct target_desc *tdesc_s390x_tevx_linux64;
+
+/* Defined in auto-generated file s390x-gs-linux64.c.  */
+void init_registers_s390x_gs_linux64 (void);
+extern const struct target_desc *tdesc_s390x_gs_linux64;
 
 #endif
 
@@ -98,5 +103,9 @@ extern const struct target_desc *tdesc_s390_vx_linux64;
 /* Defined in auto-generated file s390-tevx-linux64.c.  */
 void init_registers_s390_tevx_linux64 (void);
 extern const struct target_desc *tdesc_s390_tevx_linux64;
+
+/* Defined in auto-generated file s390-gs-linux64.c.  */
+void init_registers_s390_gs_linux64 (void);
+extern const struct target_desc *tdesc_s390_gs_linux64;
 
 #endif

@@ -1,6 +1,6 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -161,7 +161,7 @@ rs6000_ptrace64 (int req, int id, long long addr, int data, void *buf)
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int addr[PPC_MAX_REGISTER_SIZE];
   int nr, isfloat;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -220,7 +220,7 @@ fetch_register (struct regcache *regcache, int regno)
 static void
 store_register (struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int addr[PPC_MAX_REGISTER_SIZE];
   int nr, isfloat;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -281,7 +281,7 @@ static void
 rs6000_fetch_inferior_registers (struct target_ops *ops,
 				 struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (regno != -1)
     fetch_register (regcache, regno);
 
@@ -324,7 +324,7 @@ static void
 rs6000_store_inferior_registers (struct target_ops *ops,
 				 struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (regno != -1)
     store_register (regcache, regno);
 
@@ -654,8 +654,6 @@ rs6000_xfer_shared_libraries
       return TARGET_XFER_OK;
     }
 }
-
-void _initialize_rs6000_nat (void);
 
 void
 _initialize_rs6000_nat (void)

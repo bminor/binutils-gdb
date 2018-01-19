@@ -579,3 +579,48 @@ Note that it is also acceptable, and often preferable, to avoid
 running the test at all.  This is the better option if the limitation
 is intrinsic to the environment, rather than a bug expected to be
 fixed in the near future.
+
+Local vs Remote vs Native
+*************************
+
+It's unfortunately easy to get confused in the testsuite about what's
+native and what's not, what's remote and what's not.  The confusion is
+caused by the overlap in vocabulary between DejaGnu and GDB.
+
+From a DejaGnu point of view:
+
+ - native: the host or target board is considered native if the its
+   triplet is the same as the build system's triplet,
+
+ - remote: the host or target board is considered remote if it's
+   running on a different machine, and thus require ssh, for example,
+   to run commands, versus simply running commands directly.
+
+Note that they are not mutually exclusive, as you can have a remote
+machine that has the same triplet as the build machine.
+
+From a GDB point of view:
+
+ - native: when GDB uses system calls such as ptrace to interact
+   directly with processes on the same system its running on,
+
+ - remote: when GDB speaks the RSP (Remote Serial Protocol) with
+   another program doing the ptrace stuff.
+
+Note that they are mutually exclusive.  An inferior can only be either
+debugged with the native target, or with the remote target a specific
+time.
+
+That means that there are cases where the target is not remote for
+DejaGnu, but is remote for GDB (e.g. running GDBserver on the same
+machine).
+
+You can also have a remote target for DejaGnu, but native for GDB
+(e.g.  building on x86 a GDB that runs on ARM and running the
+testsuite with a remote host).
+
+Therefore, care must be taken to check for the right kind of remote.
+Use [is_remote target] to check whether the DejaGnu target board is
+remote.  When what you really want to know is whether GDB is using the
+remote protocol, because feature X is only available when GDB debugs
+natively, check gdb_protocol instead.

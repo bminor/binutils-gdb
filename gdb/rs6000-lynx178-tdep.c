@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2017 Free Software Foundation, Inc.
+/* Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #include "gdbtypes.h"
 #include "infcall.h"
 #include "ppc-tdep.h"
+#include "target-float.h"
 #include "value.h"
 #include "xcoffread.h"
 
@@ -110,8 +111,7 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
 
 	  gdb_assert (len <= 8);
 
-	  convert_typed_floating (value_contents (arg), type,
-				  reg_val, reg_type);
+	  target_float_convert (value_contents (arg), type, reg_val, reg_type);
 	  regcache_cooked_write (regcache, fp_regnum, reg_val);
 	  ++f_argno;
 	}
@@ -314,11 +314,11 @@ rs6000_lynx178_return_value (struct gdbarch *gdbarch, struct value *function,
       if (readbuf)
 	{
 	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, regval);
-	  convert_typed_floating (regval, regtype, readbuf, valtype);
+	  target_float_convert (regval, regtype, readbuf, valtype);
 	}
       if (writebuf)
 	{
-	  convert_typed_floating (writebuf, valtype, regval, regtype);
+	  target_float_convert (writebuf, valtype, regval, regtype);
 	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
 	}
 
@@ -410,9 +410,6 @@ rs6000_lynx178_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_return_value (gdbarch, rs6000_lynx178_return_value);
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
 }
-
-/* -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_rs6000_lynx178_tdep;
 
 void
 _initialize_rs6000_lynx178_tdep (void)

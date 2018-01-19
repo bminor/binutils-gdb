@@ -1,6 +1,6 @@
 /* YACC parser for D expressions, for GDB.
 
-   Copyright (C) 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2014-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -86,7 +86,7 @@ static int type_aggregate_p (struct type *);
       struct type *type;
     } typed_val_int;
     struct {
-      DOUBLEST dval;
+      gdb_byte val[16];
       struct type *type;
     } typed_val_float;
     struct symbol *sym;
@@ -470,15 +470,14 @@ PrimaryExpression:
 			      struct block_symbol sym;
 			      const char *type_name = TYPE_SAFE_NAME (type);
 			      int type_name_len = strlen (type_name);
-			      char *name;
-
-			      name = xstrprintf ("%.*s.%.*s",
+			      std::string name
+				= string_printf ("%.*s.%.*s",
 						 type_name_len, type_name,
 						 $3.length, $3.ptr);
-			      make_cleanup (xfree, name);
 
 			      sym =
-				lookup_symbol (name, (const struct block *) NULL,
+				lookup_symbol (name.c_str (),
+					       (const struct block *) NULL,
 					       VAR_DOMAIN, NULL);
 			      if (sym.symbol)
 				{
@@ -489,13 +488,14 @@ PrimaryExpression:
 				  break;
 				}
 
-			      msymbol = lookup_bound_minimal_symbol (name);
+			      msymbol = lookup_bound_minimal_symbol (name.c_str ());
 			      if (msymbol.minsym != NULL)
 				write_exp_msymbol (pstate, msymbol);
 			      else if (!have_full_symbols () && !have_partial_symbols ())
 				error (_("No symbol table is loaded.  Use the \"file\" command."));
 			      else
-				error (_("No symbol \"%s\" in current context."), name);
+				error (_("No symbol \"%s\" in current context."),
+				       name.c_str ());
 			    }
 
 			  /* Check if the qualified name resolves as a member
@@ -540,10 +540,10 @@ PrimaryExpression:
 		  write_exp_elt_longcst (pstate, (LONGEST)($1.val));
 		  write_exp_elt_opcode (pstate, OP_LONG); }
 |	FLOAT_LITERAL
-		{ write_exp_elt_opcode (pstate, OP_DOUBLE);
+		{ write_exp_elt_opcode (pstate, OP_FLOAT);
 		  write_exp_elt_type (pstate, $1.type);
-		  write_exp_elt_dblcst (pstate, $1.dval);
-		  write_exp_elt_opcode (pstate, OP_DOUBLE); }
+		  write_exp_elt_floatcst (pstate, $1.val);
+		  write_exp_elt_opcode (pstate, OP_FLOAT); }
 |	CHARACTER_LITERAL
 		{ struct stoken_vector vec;
 		  vec.len = 1;
@@ -682,8 +682,6 @@ parse_number (struct parser_state *ps, const char *p,
 
   if (parsed_float)
     {
-      const char *suffix;
-      int suffix_len;
       char *s, *sp;
 
       /* Strip out all embedded '_' before passing to parse_float.  */
@@ -698,54 +696,51 @@ parse_number (struct parser_state *ps, const char *p,
       *sp = '\0';
       len = strlen (s);
 
-      if (! parse_float (s, len, &putithere->typed_val_float.dval, &suffix))
-	return ERROR;
-
-      suffix_len = s + len - suffix;
-
-      if (suffix_len == 0)
+      /* Check suffix for `i' , `fi' or `li' (idouble, ifloat or ireal).  */
+      if (len >= 1 && tolower (s[len - 1]) == 'i')
+	{
+	  if (len >= 2 && tolower (s[len - 2]) == 'f')
+	    {
+	      putithere->typed_val_float.type
+		= parse_d_type (ps)->builtin_ifloat;
+	      len -= 2;
+	    }
+	  else if (len >= 2 && tolower (s[len - 2]) == 'l')
+	    {
+	      putithere->typed_val_float.type
+		= parse_d_type (ps)->builtin_ireal;
+	      len -= 2;
+	    }
+	  else
+	    {
+	      putithere->typed_val_float.type
+		= parse_d_type (ps)->builtin_idouble;
+	      len -= 1;
+	    }
+	}
+      /* Check suffix for `f' or `l'' (float or real).  */
+      else if (len >= 1 && tolower (s[len - 1]) == 'f')
+	{
+	  putithere->typed_val_float.type
+	    = parse_d_type (ps)->builtin_float;
+	  len -= 1;
+	}
+      else if (len >= 1 && tolower (s[len - 1]) == 'l')
+	{
+	  putithere->typed_val_float.type
+	    = parse_d_type (ps)->builtin_real;
+	  len -= 1;
+	}
+      /* Default type if no suffix.  */
+      else
 	{
 	  putithere->typed_val_float.type
 	    = parse_d_type (ps)->builtin_double;
 	}
-      else if (suffix_len == 1)
-	{
-	  /* Check suffix for `f', `l', or `i' (float, real, or idouble).  */
-	  if (tolower (*suffix) == 'f')
-	    {
-	      putithere->typed_val_float.type
-		= parse_d_type (ps)->builtin_float;
-	    }
-	  else if (tolower (*suffix) == 'l')
-	    {
-	      putithere->typed_val_float.type
-		= parse_d_type (ps)->builtin_real;
-	    }
-	  else if (tolower (*suffix) == 'i')
-	    {
-	      putithere->typed_val_float.type
-		= parse_d_type (ps)->builtin_idouble;
-	    }
-	  else
-	    return ERROR;
-	}
-      else if (suffix_len == 2)
-	{
-	  /* Check suffix for `fi' or `li' (ifloat or ireal).  */
-	  if (tolower (suffix[0]) == 'f' && tolower (suffix[1] == 'i'))
-	    {
-	      putithere->typed_val_float.type
-		= parse_d_type (ps)->builtin_ifloat;
-	    }
-	  else if (tolower (suffix[0]) == 'l' && tolower (suffix[1] == 'i'))
-	    {
-	      putithere->typed_val_float.type
-		= parse_d_type (ps)->builtin_ireal;
-	    }
-	  else
-	    return ERROR;
-	}
-      else
+
+      if (!parse_float (s, len,
+			putithere->typed_val_float.type,
+			putithere->typed_val_float.val))
 	return ERROR;
 
       return FLOAT_LITERAL;
@@ -1620,20 +1615,13 @@ yylex (void)
 int
 d_parse (struct parser_state *par_state)
 {
-  int result;
-  struct cleanup *back_to;
-
   /* Setting up the parser state.  */
+  scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
-  /* Note that parsing (within yyparse) freely installs cleanups
-     assuming they're run here (below).  */
-  back_to = make_cleanup (null_cleanup, NULL);
-
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
 							parser_debug);
-  make_cleanup_clear_parser_state (&pstate);
 
   /* Initialize some state used by the lexer.  */
   last_was_structop = 0;
@@ -1643,9 +1631,7 @@ d_parse (struct parser_state *par_state)
   popping = 0;
   name_obstack.clear ();
 
-  result = yyparse ();
-  do_cleanups (back_to);
-  return result;
+  return yyparse ();
 }
 
 void

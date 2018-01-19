@@ -1,6 +1,6 @@
 /* Pascal language support definitions for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -59,7 +59,7 @@ extern void pascal_printstr (struct ui_file *, struct type *, const gdb_byte *,
 			     unsigned int, const char *, int,
 			     const struct value_print_options *);
 
-extern struct type **const (pascal_builtin_types[]);
+extern struct type **const pascal_builtin_types[];
 
 /* These are in p-typeprint.c: */
 

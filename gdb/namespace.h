@@ -1,5 +1,5 @@
 /* Code dealing with "using" directives for GDB.
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -111,7 +111,7 @@ extern void add_using_directive (struct using_direct **using_directives,
 				 const char *src,
 				 const char *alias,
 				 const char *declaration,
-				 VEC (const_char_ptr) *excludes,
+				 const std::vector<const char *> &excludes,
 				 int copy_names,
                                  struct obstack *obstack);
 

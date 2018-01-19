@@ -1,5 +1,5 @@
 /* Define a target vector and some small routines for a variant of a.out.
-   Copyright (C) 1990-2017 Free Software Foundation, Inc.
+   Copyright (C) 1990-2018 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -669,11 +669,11 @@ const bfd_target MY (vec) =
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* Headers.  */
 #endif
-    {_bfd_dummy_target, MY_object_p, 		/* bfd_check_format.  */
+    {_bfd_dummy_target, MY_object_p,		/* bfd_check_format.  */
        bfd_generic_archive_p, MY_core_file_p},
     {bfd_false, MY_mkobject,			/* bfd_set_format.  */
        _bfd_generic_mkarchive, bfd_false},
-    {bfd_false, MY_write_object_contents, 	/* bfd_write_contents.  */
+    {bfd_false, MY_write_object_contents,	/* bfd_write_contents.  */
        _bfd_write_archive_contents, bfd_false},
 
      BFD_JUMP_TABLE_GENERIC (MY),

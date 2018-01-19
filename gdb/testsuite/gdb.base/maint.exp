@@ -1,4 +1,4 @@
-# Copyright 1998-2017 Free Software Foundation, Inc.
+# Copyright 1998-2018 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -89,10 +89,13 @@ if ![runto_main] then {
         perror "tests suppressed"
 }
 
-# If we're using .gdb_index there will be no psymtabs.
+# If we're using .gdb_index or .debug_names there will be no psymtabs.
 set have_gdb_index 0
-gdb_test_multiple "maint info sections .gdb_index" "check for .gdb_index" {
-    -re ": .gdb_index.*$gdb_prompt $" {
+gdb_test_multiple "maint info sections .gdb_index .debug_names" "check for .gdb_index" {
+    -re ": \\.gdb_index .*\r\n$gdb_prompt $" {
+	set have_gdb_index 1
+    }
+    -re ": \\.debug_names .*\r\n$gdb_prompt $" {
 	set have_gdb_index 1
     }
     -re ".*$gdb_prompt $" {

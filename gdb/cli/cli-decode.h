@@ -1,6 +1,6 @@
 /* Header file for GDB command decoding library.
 
-   Copyright (C) 2000-2017 Free Software Foundation, Inc.
+   Copyright (C) 2000-2018 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -107,16 +107,16 @@ struct cmd_list_element
        cagney/2002-02-02: This function signature is evolving.  For
        the moment suggest sticking with either set_cmd_cfunc() or
        set_cmd_sfunc().  */
-    void (*func) (struct cmd_list_element *c, char *args, int from_tty);
+    void (*func) (struct cmd_list_element *c, const char *args, int from_tty);
     /* The command's real callback.  At present func() bounces through
        to one of the below.  */
     union
       {
 	/* If type is not_set_cmd, call it like this: */
-	cmd_cfunc_ftype *cfunc;
+	cmd_const_cfunc_ftype *const_cfunc;
 	/* If type is set_cmd or show_cmd, first set the variables,
 	   and then call this: */
-	cmd_sfunc_ftype *sfunc;
+	cmd_const_sfunc_ftype *sfunc;
       }
     function;
 
@@ -160,19 +160,7 @@ struct cmd_list_element
     /* The prefix command of this command.  */
     struct cmd_list_element *prefix;
 
-    /* Completion routine for this command.  TEXT is the text beyond
-       what was matched for the command itself (leading whitespace is
-       skipped).  It stops where we are supposed to stop completing
-       (rl_point) and is '\0' terminated.
-
-       Return value is a malloc'd vector of pointers to possible
-       completions terminated with NULL.  If there are no completions,
-       returning a pointer to a NULL would work but returning NULL
-       itself is also valid.  WORD points in the same buffer as TEXT,
-       and completions should be returned relative to this position.
-       For example, suppose TEXT is "foo" and we want to complete to
-       "foobar".  If WORD is "oo", return "oobar"; if WORD is
-       "baz/foo", return "baz/foobar".  */
+    /* Completion routine for this command.  */
     completer_ftype *completer;
 
     /* Handle the word break characters for this completer.  Usually
@@ -181,8 +169,7 @@ struct cmd_list_element
        a class) the word break chars may need to be redefined
        depending on the completer type (e.g., for filename
        completers).  */
-
-    completer_ftype_void *completer_handle_brkchars;
+    completer_handle_brkchars_ftype *completer_handle_brkchars;
 
     /* Destruction routine for this command.  If non-NULL, this is
        called when this command instance is destroyed.  This may be
@@ -239,7 +226,7 @@ extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
    function field NULL, the command is interpreted as a help topic, or
    as a class of commands.  */
 
-extern void not_just_help_class_command (char *arg, int from_tty);
+extern void not_just_help_class_command (const char *arg, int from_tty);
 
 /* Exported to cli/cli-setshow.c */
 

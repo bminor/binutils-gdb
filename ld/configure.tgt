@@ -1,6 +1,6 @@
 # configure.tgt
 #
-#   Copyright (C) 2013-2017 Free Software Foundation, Inc.
+#   Copyright (C) 2013-2018 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@
 #  targ_extra_libpath	additional linker emulations using LIB_PATH
 #  targ_extra_ofiles	additional host-compiled objects needed by the emulation
 #  targ64_extra_emuls	additional linker emulations to provide if
-#  			--enable-64-bit-bfd is given or if host is 64 bit.
+#			--enable-64-bit-bfd is given or if host is 64 bit.
 #  targ64_extra_libpath	additional linker emulations using LIB_PATH if
-#  			--enable-64-bit-bfd is given or if host is 64 bit.
+#			--enable-64-bit-bfd is given or if host is 64 bit.
 #  NATIVE_LIB_DIRS	library directories to search on this host
 #			(if we are a native or sysrooted linker)
 
@@ -71,7 +71,7 @@ aarch64-*-linux*)	targ_emul=aarch64linux
 			targ_extra_libpath="aarch64linuxb aarch64linux32 aarch64linux32b armelfb_linux_eabi armelf_linux_eabi"
 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb $targ_extra_libpath" ;;
 alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
-		        targ_emul=elf64alpha_fbsd
+			targ_emul=elf64alpha_fbsd
 			targ_extra_emuls="elf64alpha alpha"
 			tdir_alpha=`echo ${targ_alias} | sed -e 's/freebsd/freebsdecoff/'` ;;
 alpha*-*-linux*ecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
@@ -87,7 +87,7 @@ alpha*-*-*vms*)		targ_emul=alphavms
 			;;
 arc*-*-elf*)		targ_emul=arcelf
 			targ_extra_emuls="arcelf_prof arclinux arclinux_nps arclinux_prof arcv2elf arcv2elfx"
-            		;;
+			;;
 arc*-*-linux*)		case "${with_cpu}" in
 			nps400)	targ_emul=arclinux_nps
 				targ_extra_emuls=arclinux
@@ -110,22 +110,22 @@ arm-*-coff)		targ_emul=armcoff ;;
 arm*b-*-freebsd*)	targ_emul=armelfb_fbsd
 			targ_extra_emuls="armelf_fbsd armelf" ;;
 arm*-*-freebsd* | arm-*-kfreebsd*-gnu)
-	       		targ_emul=armelf_fbsd
+			targ_emul=armelf_fbsd
 			targ_extra_emuls="armelfb_fbsd armelf" ;;
 armeb-*-netbsdelf*)	targ_emul=armelfb_nbsd;
 			targ_extra_emuls="armelf_nbsd armelf armnbsd" ;;
 arm-*-netbsdelf*)	targ_emul=armelf_nbsd;
 			targ_extra_emuls="armelfb_nbsd armelf armnbsd" ;;
 arm-*-netbsd*)		targ_emul=armnbsd;
-			targ_extra_emuls="armelf armelf_nbsd armelfb_nbsd"  ;;
+			targ_extra_emuls="armelf armelf_nbsd armelfb_nbsd" ;;
 arm-*-nto*)		targ_emul=armnto ;;
 arm-*-openbsd*)		targ_emul=armnbsd ;;
 arm-*-phoenix*)		targ_emul=armelf ;;
 armeb-*-elf | armeb-*-eabi*)
 			targ_emul=armelfb ;;
 arm-*-elf | arm*-*-eabi* | arm-*-rtems*)
-	  		targ_emul=armelf ;;
-arm*-*-symbianelf*)     targ_emul=armsymbian;;
+			targ_emul=armelf ;;
+arm*-*-symbianelf*)	targ_emul=armsymbian;;
 arm-*-kaos*)		targ_emul=armelf ;;
 arm9e-*-elf)		targ_emul=armelf ;;
 arm*b-*-linux-*eabi*)	targ_emul=armelfb_linux_eabi
@@ -140,7 +140,7 @@ arm*-*-linux-*eabi*)	targ_emul=armelf_linux_eabi
 			targ_extra_emuls=armelfb_linux_eabi
 			targ_extra_libpath=$targ_extra_emuls
 			;;
-arm*-*-linux-*)	        targ_emul=armelf_linux
+arm*-*-linux-*)		targ_emul=armelf_linux
 			targ_extra_emuls="armelf armelfb armelfb_linux"
 			targ_extra_libpath="armelfb_linux"
 			;;
@@ -185,8 +185,8 @@ bfin-*-linux-uclibc*)	targ_emul=elf32bfinfd;
 			targ_extra_emuls="elf32bfin"
 			targ_extra_libpath=$targ_extra_emuls
 			;;
-cr16-*-elf*)            targ_emul=elf32cr16 ;;
-cr16c-*-elf*)           targ_emul=elf32cr16c
+cr16-*-elf*)		targ_emul=elf32cr16 ;;
+cr16c-*-elf*)		targ_emul=elf32cr16c
 			;;
 cris-*-*aout*)		targ_emul=crisaout
 			targ_extra_emuls="criself crislinux"
@@ -269,8 +269,7 @@ i[3-7]86-*-linux*oldld)	targ_emul=i386linux
 i[3-7]86-*-linux-*)	targ_emul=elf_i386
 			targ_extra_emuls="i386linux elf_iamcu"
 			targ64_extra_emuls="elf_x86_64 elf32_x86_64 elf_l1om elf_k1om"
-			targ64_extra_libpath=elf_x86_64
-			targ_extra_libpath=elf32_x86_64
+			targ64_extra_libpath="elf_x86_64 elf32_x86_64"
 			tdir_i386linux=${targ_alias}aout ;;
 x86_64-*-linux-gnux32)	targ_emul=elf32_x86_64
 			targ_extra_emuls="elf_x86_64 elf_i386 elf_iamcu i386linux elf_l1om elf_k1om"
@@ -284,15 +283,15 @@ x86_64-*-linux-*)	targ_emul=elf_x86_64
 			tdir_i386linux=`echo ${targ_alias}aout | sed -e 's/x86_64/i386/'`
 			tdir_elf_i386=`echo ${targ_alias} | sed -e 's/x86_64/i386/'` ;;
 i[3-7]86-*-redox*)	targ_emul=elf_i386
-		 	targ_extra_emuls=elf_x86_64 ;;
+			targ_extra_emuls=elf_x86_64 ;;
 x86_64-*-redox*)	targ_emul=elf_x86_64
 			targ_extra_emuls=elf_i386 ;;
 i[3-7]86-*-sysv[45]*)	targ_emul=elf_i386
 			targ_extra_emuls=elf_iamcu ;;
 i[3-7]86-*-solaris2*)	targ_emul=elf_i386_sol2
-                        targ_extra_emuls="elf_i386_ldso elf_i386 elf_iamcu elf_x86_64_sol2 elf_x86_64 elf_l1om elf_k1om"
+			targ_extra_emuls="elf_i386_ldso elf_i386 elf_iamcu elf_x86_64_sol2 elf_x86_64 elf_l1om elf_k1om"
 			targ_extra_libpath=$targ_extra_emuls
-                        ;;
+			;;
 x86_64-*-solaris2*)
 			targ_emul=elf_x86_64_sol2
 			targ_extra_emuls="elf_x86_64 elf_i386_sol2 elf_i386_ldso elf_i386 elf_iamcu elf_l1om elf_k1om"
@@ -301,9 +300,9 @@ x86_64-*-solaris2*)
 i[3-7]86-*-unixware)	targ_emul=elf_i386
 			targ_extra_emuls=elf_iamcu ;;
 i[3-7]86-*-solaris*)	targ_emul=elf_i386_ldso
-                        targ_extra_emuls="elf_i386"
+			targ_extra_emuls="elf_i386"
 			targ_extra_libpath=$targ_extra_emuls
-                        ;;
+			;;
 i[3-7]86-*-netbsdelf* | \
 i[3-7]86-*-netbsd*-gnu* | \
 i[3-7]86-*-knetbsd*-gnu)
@@ -320,14 +319,14 @@ x86_64-*-netbsd*)	targ_emul=elf_x86_64
 			case "${tdir_elf_iamcu}" in
 			*-netbsdelf*)   ;;
 			*)		tdir_elf_iamcu=`echo ${tdir_elf_iamcu} | \
-				        sed -e 's/netbsd/netbsdelf/'`;;
+					sed -e 's/netbsd/netbsdelf/'`;;
 			esac
 			tdir_elf_i386=`echo ${targ_alias} | \
 			    sed -e 's/x86_64/i386/'`
 			case "${tdir_elf_i386}" in
 			*-netbsdelf*)   ;;
 			*)		tdir_elf_i386=`echo ${tdir_elf_i386} | \
-				        sed -e 's/netbsd/netbsdelf/'`;;
+					sed -e 's/netbsd/netbsdelf/'`;;
 			esac ;;
 i[3-7]86-*-netware)	targ_emul=i386nw ;;
 i[3-7]86-*-elfiamcu)	targ_emul=elf_iamcu
@@ -349,7 +348,7 @@ i[3-7]86-*-dragonfly*)	targ_emul=elf_i386
 x86_64-*-dragonfly*)	targ_emul=elf_x86_64
 			targ_extra_emuls="elf_i386 elf_iamcu elf_l1om elf_k1om" ;;
 i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu)
-		        targ_emul=elf_i386_fbsd
+			targ_emul=elf_i386_fbsd
 			targ_extra_emuls="elf_i386 elf_iamcu i386bsd" ;;
 x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
 			targ_emul=elf_x86_64_fbsd
@@ -388,7 +387,7 @@ x86_64-*-mingw*)	targ_emul=i386pep ;
 			targ_extra_emuls=i386pe
 			targ_extra_ofiles="deffilep.o pep-dll.o pe-dll.o" ;;
 i[3-7]86-*-interix*)	targ_emul=i386pe_posix;
- 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
+			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 i[3-7]86-*-beospe*)	targ_emul=i386beos ;;
 i[3-7]86-*-beos*)	targ_emul=elf_i386_be ;;
 i[3-7]86-*-vxworks*)	targ_emul=elf_i386_vxworks ;;
@@ -419,7 +418,7 @@ i960-*-elf*)		targ_emul=elf32_i960
 ia16-*-elf*)		targ_emul=elf_i386 targ_extra_emuls=i386msdos ;;
 ia64-*-elf*)		targ_emul=elf64_ia64 ;;
 ia64-*-freebsd* | ia64-*-kfreebsd*-gnu)
-		        targ_emul=elf64_ia64_fbsd
+			targ_emul=elf64_ia64_fbsd
 			targ_extra_emuls="elf64_ia64" ;;
 ia64-*-netbsd*)		targ_emul=elf64_ia64 ;;
 ia64-*-linux*)		targ_emul=elf64_ia64 ;;
@@ -428,19 +427,19 @@ ia64-*-aix*)		targ_emul=elf64_aix
 			;;
 ip2k-*-elf)		targ_emul=elf32ip2k
 			;;
-iq2000-*-elf)           targ_emul=elf32iq2000 ; targ_extra_emuls="elf32iq10"
+iq2000-*-elf)		targ_emul=elf32iq2000 ; targ_extra_emuls="elf32iq10"
 			;;
-lm32-*-*linux*)         targ_emul=elf32lm32fd ;;
-lm32-*-*)               targ_emul=elf32lm32 ; targ_extra_emuls="elf32lm32fd"
-                        ;;
+lm32-*-*linux*)		targ_emul=elf32lm32fd ;;
+lm32-*-*)		targ_emul=elf32lm32 ; targ_extra_emuls="elf32lm32fd"
+			;;
 m32c-*-elf | m32c-*-rtems*)
 			targ_emul=elf32m32c
 			;;
-m32r*le-*-elf*)         targ_emul=m32rlelf ;;
+m32r*le-*-elf*)		targ_emul=m32rlelf ;;
 m32r*-*-elf* | m32r*-*-rtems*)
 			targ_emul=m32relf ;;
-m32r*le-*-linux-*)      targ_emul=m32rlelf_linux ;;
-m32r*-*-linux-*)        targ_emul=m32relf_linux
+m32r*le-*-linux-*)	targ_emul=m32rlelf_linux ;;
+m32r*-*-linux-*)	targ_emul=m32relf_linux
 			;;
 m68hc11-*-*|m6811-*-*)	targ_emul=m68hc11elf
 			targ_extra_emuls="m68hc11elfb m68hc12elf m68hc12elfb" ;;
@@ -461,7 +460,7 @@ m68*-*-hpux*)		targ_emul=hp3hpux ;;
 m68k-*-linux*aout*)	targ_emul=m68klinux
 			targ_extra_emuls=m68kelf
 			tdir_m68kelf=`echo ${targ_alias} | sed -e 's/aout//'` ;;
-m68k-*-linux-*) 	targ_emul=m68kelf
+m68k-*-linux-*)		targ_emul=m68kelf
 			targ_extra_emuls=m68klinux
 			tdir_m68klinux=`echo ${targ_alias} | sed -e 's/linux/linuxaout/'` ;;
 m68k-*-uclinux*)	targ_emul=m68kelf ;;
@@ -496,14 +495,20 @@ microblaze*)		targ_emul=elf32microblaze
 			;;
 mips*-sgi-irix5*)	targ_emul=elf32bsmip ;;
 mips*-sgi-irix6*)	targ_emul=elf32bmipn32
-	                targ_extra_emuls="elf32bsmip elf64bmip"
+			targ_extra_emuls="elf32bsmip elf64bmip"
 			targ_extra_libpath=$targ_extra_emuls ;;
 mips*el-*-netbsd*)	targ_emul=elf32ltsmip
 			targ_extra_emuls="elf32btsmip elf64ltsmip elf64btsmip"
 			;;
 mips*-*-netbsd*)	targ_emul=elf32btsmip
 			targ_extra_emuls="elf32ltsmip elf64btsmip elf64ltsmip"
-  			;;
+			;;
+mips64el-*-openbsd*)	targ_emul=elf64ltsmip
+			targ_extra_emuls=elf64btsmip
+			;;
+mips64-*-openbsd*)	targ_emul=elf64btsmip
+			targ_extra_emuls=elf64ltsmip
+			;;
 mips*vr4300el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4300-*-elf*)	targ_emul=elf32b4300 ;;
 mips*vr4100el-*-elf*)	targ_emul=elf32l4300 ;;
@@ -528,7 +533,7 @@ mips*-*-elf* | mips*-*-rtems*)
 mips*el-*-vxworks*)	targ_emul=elf32elmipvxworks
 			targ_extra_emuls="elf32ebmipvxworks" ;;
 mips*-*-vxworks*)	targ_emul=elf32ebmipvxworks
-		        targ_extra_emuls="elf32elmipvxworks" ;;
+			targ_extra_emuls="elf32elmipvxworks" ;;
 mips*-*-windiss)	targ_emul=elf32mipswindiss ;;
 mips64*el-*-linux-*)	targ_emul=elf32ltsmipn32
 			targ_extra_emuls="elf32btsmipn32 elf32ltsmip elf32btsmip elf64ltsmip elf64btsmip"
@@ -558,7 +563,7 @@ mips*-*-freebsd* | mips*-*-kfreebsd*-gnu)
 			targ_emul=elf32btsmip_fbsd
 			targ_extra_emuls="elf32ltsmip elf32btsmip elf32ltsmipn32 elf32btsmipn32 elf64ltsmip elf64btsmip elf32ltsmip_fbsd elf32btsmipn32_fbsd elf32ltsmipn32_fbsd elf64ltsmip_fbsd elf64btsmip_fbsd"
 			targ_extra_libpath=$targ_extra_emuls ;;
-mips*-*-sysv4*)         targ_emul=elf32btsmip
+mips*-*-sysv4*)		targ_emul=elf32btsmip
 			;;
 mmix-*-*)		targ_emul=mmo
 			targ_extra_emuls=elf64mmix
@@ -567,9 +572,9 @@ am33_2.0-*-linux*)	targ_emul=elf32am33lin ;;
 mn10200-*-*)		targ_emul=mn10200 ;;
 mn10300-*-*)		targ_emul=mn10300
 			;;
-mt-*elf)                targ_emul=elf32mt
+mt-*elf)		targ_emul=elf32mt
 			;;
-msp430-*-*)             targ_emul=msp430elf
+msp430-*-*)		targ_emul=msp430elf
 			targ_extra_emuls="msp430X"
 			;;
 nds32*le-*-elf*)	targ_emul=nds32elf
@@ -590,9 +595,9 @@ or1k-*-elf | or1knd-*-elf | or1k-*-rtems* | or1knd-*-rtems*)
 or1k-*-linux* | or1knd-*-linux*)	targ_emul=elf32or1k_linux ;;
 pdp11-*-*)		targ_emul=pdp11
 			;;
-pjl*-*-*)	        targ_emul=pjlelf
+pjl*-*-*)		targ_emul=pjlelf
 			targ_extra_emuls="elf_i386 elf_iamcu" ;;
-pj*-*-*)	        targ_emul=pjelf
+pj*-*-*)		targ_emul=pjelf
 			;;
 powerpc-*-freebsd* | powerpc-*-kfreebsd*-gnu)
 			targ_emul=elf32ppc_fbsd
@@ -683,8 +688,8 @@ powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
 			eval test -n \"\$${td}sim\" || eval ${td}sim="${ta32}"
 			eval test -n \"\$${td64}\" || eval ${td64}="${ta64}"
 			;;
-powerpc-*-nto*)         targ_emul=elf32ppcnto ;;
-powerpcle-*-nto*)       targ_emul=elf32lppcnto ;;
+powerpc-*-nto*)		targ_emul=elf32ppcnto ;;
+powerpcle-*-nto*)	targ_emul=elf32lppcnto ;;
 powerpc-*-macos*)	targ_emul=ppcmacos ;;
 powerpc-*-netware*)	targ_emul=ppcnw ;;
 powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin*)
@@ -707,18 +712,18 @@ rs6000-*-aix*)		targ_emul=aixrs6
 			;;
 rl78-*-*)		targ_emul=elf32rl78 ;;
 rx-*-*)			targ_emul=elf32rx ;;
-s390x-*-linux*)         targ_emul=elf64_s390
+s390x-*-linux*)		targ_emul=elf64_s390
 			targ_extra_emuls=elf_s390
 			targ_extra_libpath=$targ_extra_emuls
 			tdir_elf_s390=`echo ${targ_alias} | sed -e 's/s390x/s390/'` ;;
 s390x-*-tpf*)		targ_emul=elf64_s390
 			tdir_elf_s390=`echo ${targ_alias} | sed -e 's/s390x/s390/'` ;;
-s390-*-linux*)          targ_emul=elf_s390
+s390-*-linux*)		targ_emul=elf_s390
 			targ64_extra_emuls=elf64_s390
 			targ64_extra_libpath=elf64_s390
 			tdir_elf64_s390=`echo ${targ_alias} | sed -e 's/s390/s390x/'`
 			;;
-score-*-elf)            targ_emul=score7_elf
+score-*-elf)		targ_emul=score7_elf
 			targ_extra_emuls=score3_elf ;;
 sh-*-linux*)		targ_emul=shlelf_linux
 			targ_extra_emuls="shelf_linux shlelf_fd shelf_fd"
@@ -770,7 +775,7 @@ sh64-*-elf*)		targ_emul=shelf
 sparc64-*-aout*)	targ_emul=sparcaout ;;
 sparc64-*-elf* | sparc64-*-rtems*)
 			targ_emul=elf64_sparc ;;
-sparc-sun-sunos4*) 	targ_emul=sun4 ;;
+sparc-sun-sunos4*)	targ_emul=sun4 ;;
 sparclite*-*-elf)	targ_emul=elf32_sparc ;;
 sparclite*-*-coff)	targ_emul=coff_sparc ;;
 sparclite*-fujitsu-*)	targ_emul=sparcaout ;;
@@ -823,7 +828,7 @@ sparc*-wrs-vxworks*)	targ_emul=sparcaout ;;
 spu-*-elf*)		targ_emul=elf32_spu ;;
 tic30-*-*aout*)		targ_emul=tic30aout ;;
 tic30-*-*coff*)		targ_emul=tic30coff ;;
-tic4x-*-* | c4x-*-*)    targ_emul=tic4xcoff ; targ_extra_emuls="tic3xcoff tic3xcoff_onchip" ;;
+tic4x-*-* | c4x-*-*)	targ_emul=tic4xcoff ; targ_extra_emuls="tic3xcoff tic3xcoff_onchip" ;;
 tic54x-*-* | c54x*-*-*)	targ_emul=tic54xcoff ;;
 tic6x-*-elf)		targ_emul=elf32_tic6x_elf_le
 			targ_extra_emuls="elf32_tic6x_elf_be elf32_tic6x_le elf32_tic6x_be"
@@ -853,24 +858,24 @@ vax-*-netbsdelf*)	targ_emul=elf32vax
 vax-*-netbsdaout* | vax-*-netbsd*)
 			targ_emul=vaxnbsd
 			targ_extra_emuls=elf32vax ;;
-vax-*-linux-*)  	targ_emul=elf32vax
+vax-*-linux-*)		targ_emul=elf32vax
 			;;
 visium-*-elf)		targ_emul=elf32visium
 			;;
 w65-*-*)		targ_emul=w65
 			;;
 xc16x-*-elf)		targ_emul=elf32xc16x
-                        targ_extra_emuls="elf32xc16xl elf32xc16xs"
-                        ;;
+			targ_extra_emuls="elf32xc16xl elf32xc16xs"
+			;;
 xstormy16-*-*)		targ_emul=elf32xstormy16
 			;;
 xtensa*-*-*)		targ_emul=elf32xtensa
 			;;
-xgate-*-*)  		targ_emul=xgateelf
+xgate-*-*)		targ_emul=xgateelf
 			;;
 z80-*-coff)		targ_emul=z80
 			;;
-z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001
+z8k-*-coff)		targ_emul=z8002; targ_extra_emuls=z8001
 			;;
 *-*-ieee*)		targ_emul=vanilla
 			;;

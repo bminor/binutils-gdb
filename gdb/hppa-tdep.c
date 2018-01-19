@@ -1,6 +1,6 @@
 /* Target-dependent code for the HP PA-RISC architecture.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -2572,7 +2572,7 @@ hppa_lookup_stub_minimal_symbol (const char *name,
 }
 
 static void
-unwind_command (char *exp, int from_tty)
+unwind_command (const char *exp, int from_tty)
 {
   CORE_ADDR address;
   struct unwind_table_entry *u;
@@ -3186,9 +3186,6 @@ hppa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
                       tdep->bytes_per_address);
   fprintf_unfiltered (file, "elf = %s\n", tdep->is_elf ? "yes" : "no");
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_hppa_tdep;
 
 void
 _initialize_hppa_tdep (void)

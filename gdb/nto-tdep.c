@@ -1,6 +1,6 @@
 /* nto-tdep.c - general QNX Neutrino target functionality.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 
@@ -142,7 +142,7 @@ nto_find_and_open_solib (const char *solib, unsigned o_flags,
       if (temp_pathname)
 	{
 	  if (ret >= 0)
-	    *temp_pathname = gdb_realpath (arch_path);
+	    *temp_pathname = gdb_realpath (arch_path).release ();
 	  else
 	    *temp_pathname = NULL;
 	}
@@ -380,9 +380,13 @@ static const char *nto_thread_state_str[] =
 const char *
 nto_extra_thread_info (struct target_ops *self, struct thread_info *ti)
 {
-  if (ti && ti->priv
-      && ti->priv->state < ARRAY_SIZE (nto_thread_state_str))
-    return (char *)nto_thread_state_str [ti->priv->state];
+  if (ti != NULL && ti->priv != NULL)
+    {
+      nto_thread_info *priv = get_nto_thread_info (ti);
+
+      if (priv->state < ARRAY_SIZE (nto_thread_state_str))
+	return nto_thread_state_str [priv->state];
+    }
   return "";
 }
 
@@ -532,9 +536,6 @@ nto_inferior_data (struct inferior *const inferior)
 
   return inf_data;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_nto_tdep;
 
 void
 _initialize_nto_tdep (void)

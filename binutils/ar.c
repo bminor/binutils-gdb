@@ -1,5 +1,5 @@
 /* ar.c - Archive modify and extract.
-   Copyright (C) 1991-2017 Free Software Foundation, Inc.
+   Copyright (C) 1991-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -738,9 +738,6 @@ main (int argc, char **argv)
 
   arg_index = 0;
 
-  if (argv[arg_index] == NULL)
-    usage (0);
-
   if (mri_mode)
     {
       default_deterministic ();
@@ -749,6 +746,12 @@ main (int argc, char **argv)
   else
     {
       bfd *arch;
+
+      /* Fail if no files are specified on the command line.
+	 (But not for MRI mode which allows for reading arguments
+	 and filenames from stdin).  */
+      if (argv[arg_index] == NULL)
+	usage (0);
 
       /* We don't use do_quick_append any more.  Too many systems
 	 expect ar to always rebuild the symbol table even when q is
@@ -1194,6 +1197,7 @@ write_archive (bfd *iarch)
   if (smart_rename (new_name, old_name, 0) != 0)
     xexit (1);
   free (old_name);
+  free (new_name);
 }
 
 /* Return a pointer to the pointer to the entry which should be rplacd'd

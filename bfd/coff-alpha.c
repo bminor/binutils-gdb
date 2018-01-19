@@ -1,5 +1,5 @@
 /* BFD back-end for ALPHA Extended-Coff files.
-   Copyright (C) 1993-2017 Free Software Foundation, Inc.
+   Copyright (C) 1993-2018 Free Software Foundation, Inc.
    Modified from coff-mips.c by Steve Chamberlain <sac@cygnus.com> and
    Ian Lance Taylor <ian@cygnus.com>.
 
@@ -614,8 +614,8 @@ alpha_adjust_reloc_in (bfd *abfd,
     case ALPHA_R_SREL32:
     case ALPHA_R_SREL64:
       /* This relocs appear to be fully resolved when they are against
-         internal symbols.  Against external symbols, BRADDR at least
-         appears to be resolved against the next instruction.  */
+	 internal symbols.  Against external symbols, BRADDR at least
+	 appears to be resolved against the next instruction.  */
       if (! intern->r_extern)
 	rptr->addend = 0;
       else
@@ -2027,7 +2027,7 @@ alpha_ecoff_read_ar_hdr (bfd *abfd)
       bfd_byte ab[8];
 
       /* This is a compressed file.  We must set the size correctly.
-         The size is the eight bytes after the dummy file header.  */
+	 The size is the eight bytes after the dummy file header.  */
       if (bfd_seek (abfd, (file_ptr) FILHSZ, SEEK_CUR) != 0
 	  || bfd_bread (ab, (bfd_size_type) 8, abfd) != 8
 	  || bfd_seek (abfd, (file_ptr) (- (FILHSZ + 8)), SEEK_CUR) != 0)
@@ -2187,7 +2187,7 @@ alpha_ecoff_openr_next_archived_file (bfd *archive, bfd *last_file)
       bfd_size_type size;
 
       /* We can't use arelt_size here, because that uses parsed_size,
-         which is the uncompressed size.  We need the compressed size.  */
+	 which is the uncompressed size.  We need the compressed size.  */
       t = (struct areltdata *) last_file->arelt_data;
       h = (struct ar_hdr *) t->arch_header;
       size = strtol (h->ar_size, (char **) NULL, 10);

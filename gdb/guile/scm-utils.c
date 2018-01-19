@@ -1,6 +1,6 @@
 /* General utility routines for GDB/Scheme code.
 
-   Copyright (C) 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2014-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -381,7 +381,7 @@ gdbscm_parse_function_args (const char *func_name,
 {
   va_list args;
   const char *p;
-  int i, have_rest, num_keywords, length, position;
+  int i, have_rest, num_keywords, position;
   int have_optional = 0;
   SCM status;
   SCM rest = SCM_EOL;

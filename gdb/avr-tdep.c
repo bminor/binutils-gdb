@@ -1,6 +1,6 @@
 /* Target-dependent code for Atmel AVR, for GDB.
 
-   Copyright (C) 1996-2017 Free Software Foundation, Inc.
+   Copyright (C) 1996-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1460,7 +1460,8 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Create a type for PC.  We can't use builtin types here, as they may not
      be defined.  */
-  tdep->void_type = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
+  tdep->void_type = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT,
+			       "void");
   tdep->func_void_type = make_function_type (tdep->void_type, NULL);
   tdep->pc_type = arch_pointer_type (gdbarch, 4 * TARGET_CHAR_BIT, NULL,
 				     tdep->func_void_type);
@@ -1545,7 +1546,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    All io registers are 8-bit.  */
 
 static void
-avr_io_reg_read_command (char *args, int from_tty)
+avr_io_reg_read_command (const char *args, int from_tty)
 {
   LONGEST bufsiz = 0;
   gdb_byte *buf;
@@ -1614,8 +1615,6 @@ avr_io_reg_read_command (char *args, int from_tty)
       xfree (buf);
     }
 }
-
-extern initialize_file_ftype _initialize_avr_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_avr_tdep (void)

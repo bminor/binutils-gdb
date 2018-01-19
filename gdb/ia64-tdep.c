@@ -1,6 +1,6 @@
 /* Target-dependent code for the IA-64 for GDB, the GNU debugger.
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +28,7 @@
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
-#include "doublest.h"
+#include "target-float.h"
 #include "value.h"
 #include "objfiles.h"
 #include "elf/common.h"		/* for DT_PLTGOT value */
@@ -644,7 +644,6 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
   long long instr_breakpoint;
   int val;
   int templ;
-  struct cleanup *cleanup;
 
   if (slotnum > 2)
     error (_("Can't insert breakpoint for slot numbers greater than 2."));
@@ -656,13 +655,11 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
      Otherwise, we could possibly store into the shadow parts of the adjacent
      placed breakpoints.  It is due to our SHADOW_CONTENTS overlapping the real
      breakpoint instruction bits region.  */
-  cleanup = make_show_memory_breakpoints_cleanup (0);
+  scoped_restore restore_memory_0
+    = make_scoped_restore_show_memory_breakpoints (0);
   val = target_read_memory (addr, bundle, BUNDLE_LEN);
   if (val != 0)
-    {
-      do_cleanups (cleanup);
-      return val;
-    }
+    return val;
 
   /* SHADOW_SLOTNUM saves the original slot number as expected by the caller
      for addressing the SHADOW_CONTENTS placement.  */
@@ -703,13 +700,11 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
      restoration mechanism kicks in and we would possibly remove parts of the
      adjacent placed breakpoints.  It is due to our SHADOW_CONTENTS overlapping
      the real breakpoint instruction bits region.  */
-  make_show_memory_breakpoints_cleanup (1);
+  scoped_restore restore_memory_1
+    = make_scoped_restore_show_memory_breakpoints (1);
   val = target_read_memory (addr, bundle, BUNDLE_LEN);
   if (val != 0)
-    {
-      do_cleanups (cleanup);
-      return val;
-    }
+    return val;
 
   /* Breakpoints already present in the code will get deteacted and not get
      reinserted by bp_loc_is_permanent.  Multiple breakpoints at the same
@@ -725,7 +720,6 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
   val = target_write_memory (addr + shadow_slotnum, bundle + shadow_slotnum,
 			     bp_tgt->shadow_len);
 
-  do_cleanups (cleanup);
   return val;
 }
 
@@ -739,7 +733,6 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
   long long instr_breakpoint, instr_saved;
   int val;
   int templ;
-  struct cleanup *cleanup;
 
   addr &= ~0x0f;
 
@@ -748,13 +741,11 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
      mechanism kicks in and we would possibly remove parts of the adjacent
      placed breakpoints.  It is due to our SHADOW_CONTENTS overlapping the real
      breakpoint instruction bits region.  */
-  cleanup = make_show_memory_breakpoints_cleanup (1);
+  scoped_restore restore_memory_1
+    = make_scoped_restore_show_memory_breakpoints (1);
   val = target_read_memory (addr, bundle_mem, BUNDLE_LEN);
   if (val != 0)
-    {
-      do_cleanups (cleanup);
-      return val;
-    }
+    return val;
 
   /* SHADOW_SLOTNUM saves the original slot number as expected by the caller
      for addressing the SHADOW_CONTENTS placement.  */
@@ -772,7 +763,6 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
       warning (_("Cannot remove breakpoint at address %s from non-existing "
 		 "X-type slot, memory has changed underneath"),
 	       paddress (gdbarch, bp_tgt->placed_address));
-      do_cleanups (cleanup);
       return -1;
     }
   if (template_encoding_table[templ][slotnum] == L)
@@ -792,7 +782,6 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
       warning (_("Cannot remove breakpoint at address %s, "
 		 "no break instruction at such address."),
 	       paddress (gdbarch, bp_tgt->placed_address));
-      do_cleanups (cleanup);
       return -1;
     }
 
@@ -808,7 +797,6 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
   replace_slotN_contents (bundle_mem, instr_saved, slotnum);
   val = target_write_raw_memory (addr, bundle_mem, BUNDLE_LEN);
 
-  do_cleanups (cleanup);
   return val;
 }
 
@@ -837,7 +825,6 @@ ia64_breakpoint_from_pc (struct gdbarch *gdbarch,
   long long instr_fetched;
   int val;
   int templ;
-  struct cleanup *cleanup;
 
   if (slotnum > 2)
     error (_("Can't insert breakpoint for slot numbers greater than 2."));
@@ -846,9 +833,11 @@ ia64_breakpoint_from_pc (struct gdbarch *gdbarch,
 
   /* Enable the automatic memory restoration from breakpoints while
      we read our instruction bundle to match bp_loc_is_permanent.  */
-  cleanup = make_show_memory_breakpoints_cleanup (0);
-  val = target_read_memory (addr, bundle, BUNDLE_LEN);
-  do_cleanups (cleanup);
+  {
+    scoped_restore restore_memory_0
+      = make_scoped_restore_show_memory_breakpoints (0);
+    val = target_read_memory (addr, bundle, BUNDLE_LEN);
+  }
 
   /* The memory might be unreachable.  This can happen, for instance,
      when the user inserts a breakpoint at an invalid address.  */
@@ -1239,7 +1228,7 @@ ia64_register_to_value (struct frame_info *frame, int regnum,
 				 in, optimizedp, unavailablep))
     return 0;
 
-  convert_typed_floating (in, ia64_ext_type (gdbarch), out, valtype);
+  target_float_convert (in, ia64_ext_type (gdbarch), out, valtype);
   *optimizedp = *unavailablep = 0;
   return 1;
 }
@@ -1250,7 +1239,7 @@ ia64_value_to_register (struct frame_info *frame, int regnum,
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte out[IA64_FP_REGISTER_SIZE];
-  convert_typed_floating (in, valtype, out, ia64_ext_type (gdbarch));
+  target_float_convert (in, valtype, out, ia64_ext_type (gdbarch));
   put_frame_register (frame, regnum, out);
 }
 
@@ -2564,7 +2553,7 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum,
   int regnum = ia64_uw2gdb_regnum (uw_regnum);
   unw_word_t bsp, sof, cfm, psr, ip;
   struct regcache *regcache = (struct regcache *) arg;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   long new_sof, old_sof;
   
@@ -3206,7 +3195,7 @@ static void
 ia64_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct type *float_elt_type;
 
   float_elt_type = is_float_or_hfa_type (type);
@@ -3220,8 +3209,8 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
       while (n-- > 0)
 	{
 	  regcache_cooked_read (regcache, regnum, from);
-	  convert_typed_floating (from, ia64_ext_type (gdbarch),
-				  (char *)valbuf + offset, float_elt_type);
+	  target_float_convert (from, ia64_ext_type (gdbarch),
+				valbuf + offset, float_elt_type);
 	  offset += TYPE_LENGTH (float_elt_type);
 	  regnum++;
 	}
@@ -3271,7 +3260,7 @@ static void
 ia64_store_return_value (struct type *type, struct regcache *regcache, 
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct type *float_elt_type;
 
   float_elt_type = is_float_or_hfa_type (type);
@@ -3284,8 +3273,8 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
 
       while (n-- > 0)
 	{
-	  convert_typed_floating ((char *)valbuf + offset, float_elt_type,
-				  to, ia64_ext_type (gdbarch));
+	  target_float_convert (valbuf + offset, float_elt_type,
+				to, ia64_ext_type (gdbarch));
 	  regcache_cooked_write (regcache, regnum, to);
 	  offset += TYPE_LENGTH (float_elt_type);
 	  regnum++;
@@ -3571,7 +3560,7 @@ find_extant_func_descr (struct gdbarch *gdbarch, CORE_ADDR faddr)
 static CORE_ADDR
 find_func_descr (struct regcache *regcache, CORE_ADDR faddr, CORE_ADDR *fdaptr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR fdesc;
 
@@ -3840,9 +3829,9 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  while (len > 0 && floatreg < IA64_FR16_REGNUM)
 	    {
 	      gdb_byte to[IA64_FP_REGISTER_SIZE];
-	      convert_typed_floating (value_contents (arg) + argoffset,
-				      float_elt_type, to,
-				      ia64_ext_type (gdbarch));
+	      target_float_convert (value_contents (arg) + argoffset,
+				    float_elt_type, to,
+				    ia64_ext_type (gdbarch));
 	      regcache_cooked_write (regcache, floatreg, to);
 	      floatreg++;
 	      argoffset += TYPE_LENGTH (float_elt_type);
@@ -4037,8 +4026,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
-
-extern initialize_file_ftype _initialize_ia64_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_ia64_tdep (void)

@@ -1,5 +1,5 @@
 /* GNU/Linux on ARM native support.
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -303,7 +303,7 @@ fetch_vfp_regs (struct regcache *regcache)
 {
   gdb_byte regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
@@ -332,7 +332,7 @@ store_vfp_regs (const struct regcache *regcache)
 {
   gdb_byte regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
@@ -378,7 +378,7 @@ static void
 arm_linux_fetch_inferior_registers (struct target_ops *ops,
 				    struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (-1 == regno)
@@ -402,7 +402,8 @@ arm_linux_fetch_inferior_registers (struct target_ops *ops,
 	fetch_wmmx_regs (regcache);
       else if (tdep->vfp_register_count > 0
 	       && regno >= ARM_D0_REGNUM
-	       && regno <= ARM_D0_REGNUM + tdep->vfp_register_count)
+	       && (regno < ARM_D0_REGNUM + tdep->vfp_register_count
+		   || regno == ARM_FPSCR_REGNUM))
 	fetch_vfp_regs (regcache);
     }
 }
@@ -415,7 +416,7 @@ static void
 arm_linux_store_inferior_registers (struct target_ops *ops,
 				    struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (-1 == regno)
@@ -439,7 +440,8 @@ arm_linux_store_inferior_registers (struct target_ops *ops,
 	store_wmmx_regs (regcache);
       else if (tdep->vfp_register_count > 0
 	       && regno >= ARM_D0_REGNUM
-	       && regno <= ARM_D0_REGNUM + tdep->vfp_register_count)
+	       && (regno < ARM_D0_REGNUM + tdep->vfp_register_count
+		   || regno == ARM_FPSCR_REGNUM))
 	store_vfp_regs (regcache);
     }
 }
@@ -1200,6 +1202,14 @@ arm_linux_new_thread (struct lwp_info *lp)
   lp->arch_private = info;
 }
 
+/* Function to call when a thread is being deleted.  */
+
+static void
+arm_linux_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
+}
+
 /* Called when resuming a thread.
    The hardware debug registers are updated when there is any change.  */
 
@@ -1281,8 +1291,6 @@ arm_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
   *child_state = *parent_state;
 }
 
-void _initialize_arm_linux_nat (void);
-
 void
 _initialize_arm_linux_nat (void)
 {
@@ -1313,6 +1321,7 @@ _initialize_arm_linux_nat (void)
 
   /* Handle thread creation and exit.  */
   linux_nat_set_new_thread (t, arm_linux_new_thread);
+  linux_nat_set_delete_thread (t, arm_linux_delete_thread);
   linux_nat_set_prepare_to_resume (t, arm_linux_prepare_to_resume);
 
   /* Handle process creation and exit.  */

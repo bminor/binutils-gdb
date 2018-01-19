@@ -1,6 +1,6 @@
 /* Native-dependent code for OpenBSD/amd64.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -124,10 +124,6 @@ amd64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   return 1;
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_amd64obsd_nat (void);
 
 void
 _initialize_amd64obsd_nat (void)

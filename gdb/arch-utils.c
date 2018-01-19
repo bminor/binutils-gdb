@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2017 Free Software Foundation, Inc.
+   Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,27 +38,6 @@
 #include "floatformat.h"
 
 #include "dis-asm.h"
-
-struct displaced_step_closure *
-simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
-                                 CORE_ADDR from, CORE_ADDR to,
-                                 struct regcache *regs)
-{
-  size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = (gdb_byte *) xmalloc (len);
-
-  read_memory (from, buf, len);
-  write_memory (to, buf, len);
-
-  if (debug_displaced)
-    {
-      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
-                          paddress (gdbarch, from), paddress (gdbarch, to));
-      displaced_step_dump_bytes (gdb_stdlog, buf, len);
-    }
-
-  return (struct displaced_step_closure *) buf;
-}
 
 int
 default_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
@@ -353,7 +332,7 @@ show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 }
 
 static void
-set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
+set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
 {
   struct gdbarch_info info;
 
@@ -511,7 +490,8 @@ show_architecture (struct ui_file *file, int from_tty,
    argument.  */
 
 static void
-set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
+set_architecture (const char *ignore_args,
+		  int from_tty, struct cmd_list_element *c)
 {
   struct gdbarch_info info;
 
@@ -895,7 +875,7 @@ int default_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
 void
 default_skip_permanent_breakpoint (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR current_pc = regcache_read_pc (regcache);
   int bp_len;
 
@@ -971,13 +951,6 @@ default_print_insn (bfd_vma memaddr, disassemble_info *info)
 {
   disassembler_ftype disassemble_fn;
 
-  if (exec_bfd != NULL)
-    {
-      gdb_assert (info->arch == bfd_get_arch (exec_bfd));
-      gdb_assert (info->endian == (bfd_big_endian (exec_bfd)
-				   ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE));
-      gdb_assert (info->mach == bfd_get_mach (exec_bfd));
-    }
   disassemble_fn = disassembler (info->arch, info->endian == BFD_ENDIAN_BIG,
 				 info->mach, exec_bfd);
 
@@ -985,8 +958,23 @@ default_print_insn (bfd_vma memaddr, disassemble_info *info)
   return (*disassemble_fn) (memaddr, info);
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_gdbarch_utils;
+/* See arch-utils.h.  */
+
+CORE_ADDR
+gdbarch_skip_prologue_noexcept (gdbarch *gdbarch, CORE_ADDR pc) noexcept
+{
+  CORE_ADDR new_pc = pc;
+
+  TRY
+    {
+      new_pc = gdbarch_skip_prologue (gdbarch, pc);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {}
+  END_CATCH
+
+  return new_pc;
+}
 
 void
 _initialize_gdbarch_utils (void)

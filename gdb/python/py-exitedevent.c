@@ -1,6 +1,6 @@
 /* Python interface to inferior exit events.
 
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,9 +19,6 @@
 
 #include "defs.h"
 #include "py-event.h"
-
-extern PyTypeObject exited_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 
 static PyObject *
 create_exited_event_object (const LONGEST *exit_code, struct inferior *inf)
@@ -67,10 +64,3 @@ emit_exited_event (const LONGEST *exit_code, struct inferior *inf)
 
   return -1;
 }
-
-
-GDBPY_NEW_EVENT_TYPE (exited,
-                      "gdb.ExitedEvent",
-                      "ExitedEvent",
-                      "GDB exited event object",
-                      event_object_type);

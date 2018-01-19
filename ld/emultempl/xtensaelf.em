@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+#   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -1432,7 +1432,7 @@ xtensa_wild_group_interleave_callback (lang_statement_union_type *statement)
 	  struct wildcard_list *l;
 	  for (l = w->section_list; l != NULL; l = l->next)
 	    {
-	      if (l->spec.sorted != none)
+	      if (l->spec.sorted == by_name)
 		{
 		  no_reorder = TRUE;
 		  break;

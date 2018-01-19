@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux x86 (i386 and x86-64).
 
-   Copyright (C) 1999-2017 Free Software Foundation, Inc.
+   Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,6 +38,10 @@ extern int lwp_debug_registers_changed (struct lwp_info *lwp);
 /* Function to call when a new thread is detected.  */
 
 extern void x86_linux_new_thread (struct lwp_info *lwp);
+
+/* Function to call when a thread is being deleted.  */
+
+extern void x86_linux_delete_thread (struct arch_lwp_info *arch_lwp);
 
 /* Function to call prior to resuming a thread.  */
 

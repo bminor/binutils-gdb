@@ -1,5 +1,5 @@
 /* read.c - read a source file -
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -62,6 +62,7 @@
 #endif
 
 char *input_line_pointer;	/*->next char of source file to parse.  */
+bfd_boolean input_from_string = FALSE;
 
 #if BITS_PER_CHAR != 8
 /*  The following table is indexed by[(char)] and will break if
@@ -713,19 +714,19 @@ assemble_one (char *line)
       /* Make sure this hasn't pushed the locked sequence
 	 past the bundle size.  */
       unsigned int bundle_size = pending_bundle_size (bundle_lock_frag);
-      if (bundle_size > (1U << bundle_align_p2))
-	as_bad (_("\
-.bundle_lock sequence at %u bytes but .bundle_align_mode limit is %u bytes"),
+      if (bundle_size > 1U << bundle_align_p2)
+	as_bad (_ (".bundle_lock sequence at %u bytes, "
+		   "but .bundle_align_mode limit is %u bytes"),
 		bundle_size, 1U << bundle_align_p2);
     }
   else if (bundle_align_p2 > 0)
     {
       unsigned int insn_size = pending_bundle_size (insn_start_frag);
 
-      if (insn_size > (1U << bundle_align_p2))
-	as_bad (_("\
-single instruction is %u bytes long but .bundle_align_mode limit is %u"),
-		(unsigned int) insn_size, 1U << bundle_align_p2);
+      if (insn_size > 1U << bundle_align_p2)
+	as_bad (_("single instruction is %u bytes long, "
+		  "but .bundle_align_mode limit is %u bytes"),
+		insn_size, 1U << bundle_align_p2);
 
       finish_bundle (insn_start_frag, insn_size);
     }
@@ -1684,16 +1685,16 @@ read_symbol_name (void)
       if (mbstowcs (NULL, name, len) == (size_t) -1)
 	as_warn (_("symbol name not recognised in the current locale"));
     }
-  else if (is_name_beginner (c) || c == '\001')
+  else if (is_name_beginner (c) || (input_from_string && c == FAKE_LABEL_CHAR))
     {
       ptrdiff_t len;
 
       name = input_line_pointer - 1;
 
-      /* We accept \001 in a name in case this is
+      /* We accept FAKE_LABEL_CHAR in a name in case this is
 	 being called with a constructed string.  */
       while (is_part_of_name (c = *input_line_pointer++)
-	     || c == '\001')
+	     || (input_from_string && c == FAKE_LABEL_CHAR))
 	;
 
       len = (input_line_pointer - name) - 1;
@@ -2202,7 +2203,7 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
   md_cons_align (1);
 #endif
 
-  get_known_segmented_expression (&rep_exp);
+  expression (&rep_exp);
   if (*input_line_pointer == ',')
     {
       input_line_pointer++;
@@ -3106,9 +3107,9 @@ s_bad_end (int endr)
 void
 s_rept (int ignore ATTRIBUTE_UNUSED)
 {
-  int count;
+  size_t count;
 
-  count = get_absolute_expression ();
+  count = (size_t) get_absolute_expression ();
 
   do_repeat (count, "REPT", "ENDR");
 }
@@ -3117,10 +3118,16 @@ s_rept (int ignore ATTRIBUTE_UNUSED)
    different directives to be used as the start/end keys.  */
 
 void
-do_repeat (int count, const char *start, const char *end)
+do_repeat (size_t count, const char *start, const char *end)
 {
   sb one;
   sb many;
+
+  if (((ssize_t) count) < 0)
+    {
+      as_bad (_("negative count for %s - ignored"), start);
+      count = 0;
+    }
 
   sb_new (&one);
   if (!buffer_and_nest (start, end, &one, get_non_macro_line_sb))
@@ -3144,13 +3151,19 @@ do_repeat (int count, const char *start, const char *end)
    block is replaced by the iteration count.  */
 
 void
-do_repeat_with_expander (int count,
+do_repeat_with_expander (size_t count,
 			 const char * start,
 			 const char * end,
 			 const char * expander)
 {
   sb one;
   sb many;
+
+  if (((ssize_t) count) < 0)
+    {
+      as_bad (_("negative count for %s - ignored"), start);
+      count = 0;
+    }
 
   sb_new (&one);
   if (!buffer_and_nest (start, end, &one, get_non_macro_line_sb))
@@ -3172,7 +3185,7 @@ do_repeat_with_expander (int count,
 	  sb_build (& processed, one.len);
 	  sb_add_sb (& processed, & one);
 	  sub = strstr (processed.ptr, expander);
-	  len = sprintf (sub, "%d", count);
+	  len = sprintf (sub, "%lu", (unsigned long) count);
 	  gas_assert (len < 8);
 	  strcpy (sub + len, sub + 8);
 	  processed.len -= (8 - len);
@@ -3870,7 +3883,7 @@ pseudo_set (symbolS *symbolP)
 	  symbolS *s = exp.X_add_symbol;
 
 	  if (S_IS_COMMON (s))
-	    as_bad (_("`%s' can't be equated to common symbol '%s'"),
+	    as_bad (_("`%s' can't be equated to common symbol `%s'"),
 		    S_GET_NAME (symbolP), S_GET_NAME (s));
 
 	  S_SET_SEGMENT (symbolP, seg);
@@ -4477,7 +4490,10 @@ emit_expr_with_reloc (expressionS *exp,
 	    }
 
 	  if (i < exp->X_add_number)
-	    as_warn (_("bignum truncated to %d bytes"), nbytes);
+	    as_warn (ngettext ("bignum truncated to %d byte",
+			       "bignum truncated to %d bytes",
+			       nbytes),
+		     nbytes);
 	  size = nbytes;
 	}
 
@@ -4553,7 +4569,9 @@ emit_expr_fix (expressionS *exp, unsigned int nbytes, fragS *frag, char *p,
 
       if (size > nbytes)
 	{
-	  as_bad (_("%s relocations do not fit in %u bytes\n"),
+	  as_bad (ngettext ("%s relocations do not fit in %u byte",
+			    "%s relocations do not fit in %u bytes",
+			    nbytes),
 		  reloc_howto->name, nbytes);
 	  return;
 	}
@@ -4662,7 +4680,11 @@ parse_bitfield_cons (expressionS *exp, unsigned int nbytes)
 
 	  if ((width = exp->X_add_number) > (BITS_PER_CHAR * nbytes))
 	    {
-	      as_warn (_("field width %lu too big to fit in %d bytes: truncated to %d bits"),
+	      as_warn (ngettext ("field width %lu too big to fit in %d byte:"
+				 " truncated to %d bits",
+				 "field width %lu too big to fit in %d bytes:"
+				 " truncated to %d bits",
+				 nbytes),
 		       width, nbytes, (BITS_PER_CHAR * nbytes));
 	      width = BITS_PER_CHAR * nbytes;
 	    }			/* Too big.  */
@@ -5384,7 +5406,7 @@ s_leb128 (int sign)
 
   do
     {
-      expression (&exp);
+      deferred_expression (&exp);
       emit_leb128_expr (&exp, sign);
     }
   while (*input_line_pointer++ == ',');
@@ -6223,9 +6245,10 @@ s_bundle_unlock (int arg ATTRIBUTE_UNUSED)
 
   size = pending_bundle_size (bundle_lock_frag);
 
-  if (size > (1U << bundle_align_p2))
-    as_bad (_(".bundle_lock sequence is %u bytes, but bundle size only %u"),
-	    size, 1 << bundle_align_p2);
+  if (size > 1U << bundle_align_p2)
+    as_bad (_(".bundle_lock sequence is %u bytes, "
+	      "but bundle size is only %u bytes"),
+	    size, 1u << bundle_align_p2);
   else
     finish_bundle (bundle_lock_frag, size);
 
@@ -6363,6 +6386,7 @@ temp_ilp (char *buf)
 
   input_line_pointer = buf;
   buffer_limit = buf + strlen (buf);
+  input_from_string = TRUE;
 }
 
 /* Restore a saved input line pointer.  */
@@ -6374,6 +6398,7 @@ restore_ilp (void)
 
   input_line_pointer = saved_ilp;
   buffer_limit = saved_limit;
+  input_from_string = FALSE;
 
   saved_ilp = NULL;
 }

@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/amd64.
 
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,6 +32,7 @@
 #include "obsd-tdep.h"
 #include "amd64-tdep.h"
 #include "i387-tdep.h"
+#include "x86-xstate.h"
 #include "solib-svr4.h"
 #include "bsd-uthread.h"
 
@@ -220,7 +221,7 @@ static void
 amd64obsd_supply_uthread (struct regcache *regcache,
 			  int regnum, CORE_ADDR addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp_addr = addr + AMD64OBSD_UTHREAD_RSP_OFFSET;
   CORE_ADDR sp = 0;
@@ -264,7 +265,7 @@ static void
 amd64obsd_collect_uthread (const struct regcache *regcache,
 			   int regnum, CORE_ADDR addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp_addr = addr + AMD64OBSD_UTHREAD_RSP_OFFSET;
   CORE_ADDR sp = 0;
@@ -419,7 +420,8 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  amd64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch,
+		  amd64_target_description (X86_XSTATE_SSE_MASK));
   obsd_init_abi (info, gdbarch);
 
   /* Initialize general-purpose register set details.  */
@@ -445,10 +447,6 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Unwind kernel trap frames correctly.  */
   frame_unwind_prepend_unwinder (gdbarch, &amd64obsd_trapframe_unwind);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_amd64obsd_tdep (void);
 
 void
 _initialize_amd64obsd_tdep (void)

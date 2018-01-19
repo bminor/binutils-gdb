@@ -1,6 +1,6 @@
 /* Target-dependent code for the VAX.
 
-   Copyright (C) 1986-2017 Free Software Foundation, Inc.
+   Copyright (C) 1986-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "dis-asm.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
@@ -108,7 +107,7 @@ static CORE_ADDR
 vax_store_arguments (struct regcache *regcache, int nargs,
 		     struct value **args, CORE_ADDR sp)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   int count = 0;
@@ -513,9 +512,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return (gdbarch);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_vax_tdep (void);
 
 void
 _initialize_vax_tdep (void)
