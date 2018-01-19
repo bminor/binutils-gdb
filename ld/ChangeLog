@@ -1,3 +1,11 @@
+2018-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22728
+	* emultempl/solaris2.em (elf_solaris2_after_allocation): Fold
+	into ...
+	(elf_solaris2_before_allocation): This.
+	(LDEMUL_AFTER_ALLOCATION): Removed.
+
 2018-01-18  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc32elf.em: Support optional --plt-align arg.
