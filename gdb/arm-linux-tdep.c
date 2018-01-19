@@ -1712,6 +1712,15 @@ arm_linux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   return find_solib_trampoline_target (frame, pc);
 }
 
+/* Implement the gcc_target_options gdbarch method.  */
+
+static char *
+arm_linux_gcc_target_options (struct gdbarch *gdbarch)
+{
+  /* GCC doesn't know "-m32".  */
+  return NULL;
+}
+
 static void
 arm_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
@@ -1992,6 +2001,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.arg5 = ARM_A1_REGNUM + 4;
   arm_linux_record_tdep.arg6 = ARM_A1_REGNUM + 5;
   arm_linux_record_tdep.arg7 = ARM_A1_REGNUM + 6;
+
+  set_gdbarch_gcc_target_options (gdbarch, arm_linux_gcc_target_options);
 }
 
 void

@@ -1,5 +1,10 @@
 2018-01-19  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-linux-tdep.c (arm_linux_gcc_target_options): New function.
+	(arm_linux_init_abi): Install it.
+
+2018-01-19  Yao Qi  <yao.qi@linaro.org>
+
 	* osabi.c (gdb_osabi_names): Extend the regexp for
 	arm-linux-gnueabihf.
 
