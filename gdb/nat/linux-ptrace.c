@@ -21,8 +21,6 @@
 #include "linux-procfs.h"
 #include "linux-waitpid.h"
 #include "buffer.h"
-#include "gdb_wait.h"
-#include "gdb_ptrace.h"
 #ifdef HAVE_SYS_PROCFS_H
 #include <sys/procfs.h>
 #endif

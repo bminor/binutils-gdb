@@ -1,3 +1,9 @@
+2018-01-19  James Clarke  <jrtc27@jrtc27.com>
+
+	* nat/linux-ptrace.c: Remove unnecessary reinclusion of
+	gdb_ptrace.h, and move including gdb_wait.h ...
+	* nat/linux-ptrace.h: ... to here.
+
 2018-01-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* inf-ptrace.c (inf_ptrace_detach): Adjust call to
