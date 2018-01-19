@@ -1,3 +1,8 @@
+2018-01-19  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (ToC macro): Remove spurious comment.
+	(ToU macro): Likewise.
+
 2018-01-17  Jim Wilson  <jimw@sifive.com>
 
 	* config/tc-riscv.c (validate_riscv_insn) <'z'>: New.

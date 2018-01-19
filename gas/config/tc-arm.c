@@ -19417,12 +19417,10 @@ static struct asm_barrier_opt barrier_opt_names[] =
 #define ToC(mnem, top, nops, ops, te) \
   { mnem, OPS##nops ops, OT_csuffix, 0x0, 0x##top, 0, THUMB_VARIANT, NULL, \
     do_##te }
-      //TCE (mnem, 0, top, nops, ops, NULL, te)
 
 #define ToU(mnem, top, nops, ops, te) \
   { mnem, OPS##nops ops, OT_unconditional, 0x0, 0x##top, 0, THUMB_VARIANT, \
     NULL, do_##te }
-      //TUE(mnem, 0, top, nops, ops, NULL, te)
 
 /* Legacy mnemonics that always have conditional infix after the third
    character.  */
