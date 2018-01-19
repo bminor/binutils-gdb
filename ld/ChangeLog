@@ -1,5 +1,11 @@
 2018-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/linkinfo1a.d: Updated for slightly different
+	PLT/GOT order/layout for Solaris/x86 targets.
+	* testsuite/ld-elf/linkinfo1b.d: Likewise.
+
+2018-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/22728
 	* emultempl/solaris2.em (elf_solaris2_after_allocation): Fold
 	into ...
