@@ -1,3 +1,7 @@
+2018-01-19  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
 2018-01-18  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_create_glink): Correct alignment of .glink.
