@@ -2283,6 +2283,16 @@ path_command (const char *dirname, int from_tty)
 }
 
 
+static void
+pad_to_column (string_file &stream, int col)
+{
+  /* At least one space must be printed to separate columns.  */
+  stream.putc (' ');
+  const int size = stream.size ();
+  if (size < col)
+    stream.puts (n_spaces (col - size));
+}
+
 /* Print out the register NAME with value VAL, to FILE, in the default
    fashion.  */
 
@@ -2293,9 +2303,17 @@ default_print_one_register_info (struct ui_file *file,
 {
   struct type *regtype = value_type (val);
   int print_raw_format;
+  string_file format_stream;
+  enum tab_stops
+    {
+      value_column_1 = 15,
+      /* Give enough room for "0x", 16 hex digits and two spaces in
+         preceding column.  */
+      value_column_2 = value_column_1 + 2 + 16 + 2,
+    };
 
-  fputs_filtered (name, file);
-  print_spaces_filtered (15 - strlen (name), file);
+  format_stream.puts (name);
+  pad_to_column (format_stream, value_column_1);
 
   print_raw_format = (value_entirely_available (val)
 		      && !value_optimized_out (val));
@@ -2314,14 +2332,15 @@ default_print_one_register_info (struct ui_file *file,
 
       val_print (regtype,
 		 value_embedded_offset (val), 0,
-		 file, 0, val, &opts, current_language);
+		 &format_stream, 0, val, &opts, current_language);
 
       if (print_raw_format)
 	{
-	  fprintf_filtered (file, "\t(raw ");
-	  print_hex_chars (file, valaddr, TYPE_LENGTH (regtype), byte_order,
-			   true);
-	  fprintf_filtered (file, ")");
+	  pad_to_column (format_stream, value_column_2);
+	  format_stream.puts ("(raw ");
+	  print_hex_chars (&format_stream, valaddr, TYPE_LENGTH (regtype),
+			   byte_order, true);
+	  format_stream.putc (')');
 	}
     }
   else
@@ -2333,20 +2352,21 @@ default_print_one_register_info (struct ui_file *file,
       opts.deref_ref = 1;
       val_print (regtype,
 		 value_embedded_offset (val), 0,
-		 file, 0, val, &opts, current_language);
+		 &format_stream, 0, val, &opts, current_language);
       /* If not a vector register, print it also according to its
 	 natural format.  */
       if (print_raw_format && TYPE_VECTOR (regtype) == 0)
 	{
+	  pad_to_column (format_stream, value_column_2);
 	  get_user_print_options (&opts);
 	  opts.deref_ref = 1;
-	  fprintf_filtered (file, "\t");
 	  val_print (regtype,
 		     value_embedded_offset (val), 0,
-		     file, 0, val, &opts, current_language);
+		     &format_stream, 0, val, &opts, current_language);
 	}
     }
 
+  fputs_filtered (format_stream.c_str (), file);
   fprintf_filtered (file, "\n");
 }
 

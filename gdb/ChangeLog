@@ -1,3 +1,9 @@
+2018-02-05  Ruslan Kabatsayev <b7.10110111@gmail.com>
+
+	* infcmd.c (default_print_one_register_info): Align natural-format
+	column values consistently one under another.
+	(pad_to_column): New function.
+
 2018-02-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (dwarf2_physname): Move commment.
