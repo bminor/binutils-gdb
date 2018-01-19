@@ -1,5 +1,14 @@
 2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* nat/linux-btrace.c (perf_event_pt_event_type): Improve error message.
+	Remove parameter and change return type.  Update callers.  Move it.
+	(linux_enable_bts, linux_enable_pt): Improve error message.
+	(linux_enable_pt): Remove zero buffer size check.
+	(linux_enable_btrace): Improve error messages.  Remove NULL return
+	check.
+
+2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (btrace_enable): Remove target_supports_btrace call.
 	* nat/linux-btrace.c (perf_event_pt_event_type): Move.
 	(kernel_supports_bts, kernel_supports_pt, linux_supports_bts)

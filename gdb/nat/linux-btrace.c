@@ -448,7 +448,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
   errno = 0;
   scoped_fd fd (syscall (SYS_perf_event_open, &bts->attr, pid, -1, -1, 0));
   if (fd.get () < 0)
-    return nullptr;
+    error (_("Failed to start recording: %s"), safe_strerror (errno));
 
   /* Convert the requested size in bytes to pages (rounding up).  */
   pages = ((size_t) conf->size / PAGE_SIZE
@@ -484,6 +484,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
       if ((__u64) length != data_size + PAGE_SIZE)
 	continue;
 
+      errno = 0;
       /* The number of pages we request needs to be a power of two.  */
       data.reset (nullptr, length, PROT_READ, MAP_SHARED, fd.get (), 0);
       if (data.get () != MAP_FAILED)
@@ -491,7 +492,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
     }
 
   if (pages == 0)
-    return nullptr;
+    error (_("Failed to map trace buffer: %s."), safe_strerror (errno));
 
   struct perf_event_mmap_page *header = (struct perf_event_mmap_page *)
     data.get ();
@@ -509,7 +510,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
       /* Check for overflows.  */
       if ((__u64) size != data_size)
-	return nullptr;
+	error (_("Failed to determine trace buffer size."));
     }
 #endif /* defined (PERF_ATTR_SIZE_VER5) */
 
@@ -528,21 +529,23 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
 #if defined (PERF_ATTR_SIZE_VER5)
 
-/* Determine the event type.
-   Returns zero on success and fills in TYPE; returns -1 otherwise.  */
+/* Determine the event type.  */
 
 static int
-perf_event_pt_event_type (int *type)
+perf_event_pt_event_type ()
 {
-  gdb_file_up file =
-    gdb_fopen_cloexec ("/sys/bus/event_source/devices/intel_pt/type", "r");
-  if (file.get () == nullptr)
-    return -1;
+  static const char filename[] = "/sys/bus/event_source/devices/intel_pt/type";
 
-  int found = fscanf (file.get (), "%d", type);
-  if (found == 1)
-    return 0;
-  return -1;
+  errno = 0;
+  gdb_file_up file = gdb_fopen_cloexec (filename, "r");
+  if (file.get () == nullptr)
+    error (_("Failed to open %s: %s."), filename, safe_strerror (errno));
+
+  int type, found = fscanf (file.get (), "%d", &type);
+  if (found != 1)
+    error (_("Failed to read the PT event type from %s."), filename);
+
+  return type;
 }
 
 /* Enable branch tracing in Intel Processor Trace format.  */
@@ -552,14 +555,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 {
   struct btrace_tinfo_pt *pt;
   size_t pages;
-  int pid, pg, errcode, type;
-
-  if (conf->size == 0)
-    return NULL;
-
-  errcode = perf_event_pt_event_type (&type);
-  if (errcode != 0)
-    return NULL;
+  int pid, pg;
 
   pid = ptid_get_lwp (ptid);
   if (pid == 0)
@@ -573,7 +569,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   pt = &tinfo->variant.pt;
 
   pt->attr.size = sizeof (pt->attr);
-  pt->attr.type = type;
+  pt->attr.type = perf_event_pt_event_type ();
 
   pt->attr.exclude_kernel = 1;
   pt->attr.exclude_hv = 1;
@@ -582,13 +578,13 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   errno = 0;
   scoped_fd fd (syscall (SYS_perf_event_open, &pt->attr, pid, -1, -1, 0));
   if (fd.get () < 0)
-    return nullptr;
+    error (_("Failed to start recording: %s"), safe_strerror (errno));
 
   /* Allocate the configuration page. */
   scoped_mmap data (nullptr, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
 		    fd.get (), 0);
   if (data.get () == MAP_FAILED)
-    return nullptr;
+    error (_("Failed to map trace user page: %s."), safe_strerror (errno));
 
   struct perf_event_mmap_page *header = (struct perf_event_mmap_page *)
     data.get ();
@@ -630,6 +626,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 
       header->aux_size = data_size;
 
+      errno = 0;
       aux.reset (nullptr, length, PROT_READ, MAP_SHARED, fd.get (),
 		 header->aux_offset);
       if (aux.get () != MAP_FAILED)
@@ -637,7 +634,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
     }
 
   if (pages == 0)
-    return nullptr;
+    error (_("Failed to map trace buffer: %s."), safe_strerror (errno));
 
   pt->pt.size = aux.size ();
   pt->pt.mem = (const uint8_t *) aux.release ();
@@ -656,8 +653,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 static struct btrace_target_info *
 linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 {
-  errno = EOPNOTSUPP;
-  return NULL;
+  error (_("Intel Processor Trace support was disabled at compile time."));
 }
 
 #endif /* !defined (PERF_ATTR_SIZE_VER5) */
@@ -667,27 +663,20 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 struct btrace_target_info *
 linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
 {
-  struct btrace_target_info *tinfo;
-
-  tinfo = NULL;
   switch (conf->format)
     {
     case BTRACE_FORMAT_NONE:
-      break;
+      error (_("Bad branch trace format."));
+
+    default:
+      error (_("Unknown branch trace format."));
 
     case BTRACE_FORMAT_BTS:
-      tinfo = linux_enable_bts (ptid, &conf->bts);
-      break;
+      return linux_enable_bts (ptid, &conf->bts);
 
     case BTRACE_FORMAT_PT:
-      tinfo = linux_enable_pt (ptid, &conf->pt);
-      break;
+      return linux_enable_pt (ptid, &conf->pt);
     }
-
-  if (tinfo == NULL)
-    error (_("Unknown error."));
-
-  return tinfo;
 }
 
 /* Disable BTS tracing.  */
