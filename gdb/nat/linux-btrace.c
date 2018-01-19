@@ -909,6 +909,9 @@ linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
       break;
     }
 
+  if (tinfo == NULL)
+    error (_("Unknown error."));
+
   return tinfo;
 }
 

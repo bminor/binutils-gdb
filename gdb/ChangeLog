@@ -1,5 +1,12 @@
 2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* nat/linux-btrace.c (linux_enable_btrace): Throw exception if enabling
+	btrace failed.
+	* x86-linux-nat.c (x86_linux_enable_btrace): Catch btrace enabling
+	exception and use message in own exception.
+
+2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* nat/linux-btrace.c: Include scoped_fd.h and scoped_mmap.h.
 	(perf_event_pt_event_type): Use gdb_file_up.
 	(linux_enable_bts, linux_enable_pt): Use gdb::unique_xmalloc_ptr,

@@ -1,3 +1,11 @@
+2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* server.c (handle_btrace_enable_bts, handle_btrace_enable_pt)
+	(handle_btrace_disable): Change return type to void.  Use exceptions
+	to report errors.
+	(handle_btrace_general_set): Catch exception and copy message to
+	return message.
+
 2018-02-08  Tom Tromey  <tom@tromey.com>
 
 	* linux-low.c (install_software_single_step_breakpoints): Use

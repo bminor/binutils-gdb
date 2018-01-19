@@ -216,14 +216,17 @@ static struct btrace_target_info *
 x86_linux_enable_btrace (struct target_ops *self, ptid_t ptid,
 			 const struct btrace_config *conf)
 {
-  struct btrace_target_info *tinfo;
-
-  errno = 0;
-  tinfo = linux_enable_btrace (ptid, conf);
-
-  if (tinfo == NULL)
-    error (_("Could not enable branch tracing for %s: %s."),
-	   target_pid_to_str (ptid), safe_strerror (errno));
+  struct btrace_target_info *tinfo = nullptr;
+  TRY
+    {
+      tinfo = linux_enable_btrace (ptid, conf);
+    }
+  CATCH (exception, RETURN_MASK_ERROR)
+    {
+      error (_("Could not enable branch tracing for %s: %s"),
+	     target_pid_to_str (ptid), exception.message);
+    }
+  END_CATCH
 
   return tinfo;
 }

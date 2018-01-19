@@ -380,50 +380,41 @@ write_qxfer_response (char *buf, const gdb_byte *data, int len, int is_more)
 
 /* Handle btrace enabling in BTS format.  */
 
-static const char *
+static void
 handle_btrace_enable_bts (struct thread_info *thread)
 {
   if (thread->btrace != NULL)
-    return "E.Btrace already enabled.";
+    error (_("Btrace already enabled."));
 
   current_btrace_conf.format = BTRACE_FORMAT_BTS;
   thread->btrace = target_enable_btrace (thread->id, &current_btrace_conf);
-  if (thread->btrace == NULL)
-    return "E.Could not enable btrace.";
-
-  return NULL;
 }
 
 /* Handle btrace enabling in Intel Processor Trace format.  */
 
-static const char *
+static void
 handle_btrace_enable_pt (struct thread_info *thread)
 {
   if (thread->btrace != NULL)
-    return "E.Btrace already enabled.";
+    error (_("Btrace already enabled."));
 
   current_btrace_conf.format = BTRACE_FORMAT_PT;
   thread->btrace = target_enable_btrace (thread->id, &current_btrace_conf);
-  if (thread->btrace == NULL)
-    return "E.Could not enable btrace.";
-
-  return NULL;
 }
 
 /* Handle btrace disabling.  */
 
-static const char *
+static void
 handle_btrace_disable (struct thread_info *thread)
 {
 
   if (thread->btrace == NULL)
-    return "E.Branch tracing not enabled.";
+    error (_("Branch tracing not enabled."));
 
   if (target_disable_btrace (thread->btrace) != 0)
-    return "E.Could not disable branch tracing.";
+    error (_("Could not disable branch tracing."));
 
   thread->btrace = NULL;
-  return NULL;
 }
 
 /* Handle the "Qbtrace" packet.  */
@@ -432,7 +423,6 @@ static int
 handle_btrace_general_set (char *own_buf)
 {
   struct thread_info *thread;
-  const char *err;
   char *op;
 
   if (!startswith (own_buf, "Qbtrace:"))
@@ -454,21 +444,24 @@ handle_btrace_general_set (char *own_buf)
       return -1;
     }
 
-  err = NULL;
+  TRY
+    {
+      if (strcmp (op, "bts") == 0)
+	handle_btrace_enable_bts (thread);
+      else if (strcmp (op, "pt") == 0)
+	handle_btrace_enable_pt (thread);
+      else if (strcmp (op, "off") == 0)
+	handle_btrace_disable (thread);
+      else
+	error (_("Bad Qbtrace operation.  Use bts, pt, or off."));
 
-  if (strcmp (op, "bts") == 0)
-    err = handle_btrace_enable_bts (thread);
-  else if (strcmp (op, "pt") == 0)
-    err = handle_btrace_enable_pt (thread);
-  else if (strcmp (op, "off") == 0)
-    err = handle_btrace_disable (thread);
-  else
-    err = "E.Bad Qbtrace operation. Use bts, pt, or off.";
-
-  if (err != 0)
-    strcpy (own_buf, err);
-  else
-    write_ok (own_buf);
+      write_ok (own_buf);
+    }
+  CATCH (exception, RETURN_MASK_ERROR)
+    {
+      sprintf (own_buf, "E.%s", exception.message);
+    }
+  END_CATCH
 
   return 1;
 }
