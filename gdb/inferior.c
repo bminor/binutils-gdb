@@ -253,15 +253,26 @@ exit_inferior_num_silent (int num)
   exit_inferior_1 (inf, 1);
 }
 
+/* See inferior.h.  */
+
 void
-detach_inferior (int pid)
+detach_inferior (inferior *inf)
 {
-  struct inferior *inf = find_inferior_pid (pid);
+  /* Save the pid, since exit_inferior_1 will reset it.  */
+  int pid = inf->pid;
 
   exit_inferior_1 (inf, 0);
 
   if (print_inferior_events)
     printf_unfiltered (_("[Inferior %d detached]\n"), pid);
+}
+
+/* See inferior.h.  */
+
+void
+detach_inferior (int pid)
+{
+  detach_inferior (find_inferior_pid (pid));
 }
 
 void

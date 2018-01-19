@@ -458,6 +458,9 @@ extern struct inferior *add_inferior_silent (int pid);
 extern void delete_inferior (struct inferior *todel);
 
 /* Delete an existing inferior list entry, due to inferior detaching.  */
+extern void detach_inferior (inferior *inf);
+
+/* Same as the above, but with the inferior specified by PID.  */
 extern void detach_inferior (int pid);
 
 extern void exit_inferior (int pid);

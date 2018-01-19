@@ -1,5 +1,20 @@
 2018-01-19  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* inf-ptrace.c (inf_ptrace_detach): Adjust call to
+	inf_ptrace_detach_success.
+	(inf_ptrace_detach_success): Add inferior parameter, use it
+	instead of inferior_ptid, pass it to detach_inferior.
+	* inf-ptrace.h (inf_ptrace_detach_success): Add inferior
+	parameter.
+	* inferior.c (detach_inferior): Add overload that takes an
+	inferior object.
+	* inferior.h (detach_inferior): Likewise.
+	* linux-nat.c (linux_nat_detach): Use the inf parameter, don't
+	use inferior_ptid, adjust call to inf_ptrace_detach_success.
+	* linux-thread-db.c (thread_db_detach): Use inf parameter.
+
+2018-01-19  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* target.h (struct target_ops) <to_detach>: Add inferior
 	parameter.
 	(target_detach): Likewise.

@@ -40,6 +40,6 @@ extern pid_t get_ptrace_pid (ptid_t);
 
 
 /* Cleanup the inferior after a successful ptrace detach.  */
-extern void inf_ptrace_detach_success (struct target_ops *ops);
+extern void inf_ptrace_detach_success (struct target_ops *ops, inferior *inf);
 
 #endif

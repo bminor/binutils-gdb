@@ -263,18 +263,16 @@ inf_ptrace_detach (struct target_ops *ops, inferior *inf, int from_tty)
   error (_("This system does not support detaching from a process"));
 #endif
 
-  inf_ptrace_detach_success (ops);
+  inf_ptrace_detach_success (ops, inf);
 }
 
 /* See inf-ptrace.h.  */
 
 void
-inf_ptrace_detach_success (struct target_ops *ops)
+inf_ptrace_detach_success (struct target_ops *ops, inferior *inf)
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
-
   inferior_ptid = null_ptid;
-  detach_inferior (pid);
+  detach_inferior (inf);
 
   inf_child_maybe_unpush_target (ops);
 }
