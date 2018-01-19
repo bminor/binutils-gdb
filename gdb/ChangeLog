@@ -1,5 +1,12 @@
 2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* nat/linux-btrace.c: Include scoped_fd.h and scoped_mmap.h.
+	(perf_event_pt_event_type): Use gdb_file_up.
+	(linux_enable_bts, linux_enable_pt): Use gdb::unique_xmalloc_ptr,
+	scoped_fd, and scoped_mmap.
+
+2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* common/scoped_mmap.h: New.
 	* unittests/scoped_mmap-selftest.c: New.
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add

@@ -25,6 +25,8 @@
 #include "gdb_wait.h"
 #include "x86-cpuid.h"
 #include "filestuff.h"
+#include "common/scoped_fd.h"
+#include "common/scoped_mmap.h"
 
 #include <inttypes.h>
 
@@ -179,17 +181,12 @@ perf_event_read_all (struct perf_event_buffer *pev, gdb_byte **data,
 static int
 perf_event_pt_event_type (int *type)
 {
-  FILE *file;
-  int found;
-
-  file = fopen ("/sys/bus/event_source/devices/intel_pt/type", "r");
-  if (file == NULL)
+  gdb_file_up file
+    =  gdb_fopen_cloexec ("/sys/bus/event_source/devices/intel_pt/type", "r");
+  if (file == nullptr)
     return -1;
 
-  found = fscanf (file, "%d", type);
-
-  fclose (file);
-
+  int found = fscanf (file.get (), "%d", type);
   if (found == 1)
     return 0;
   return -1;
@@ -662,14 +659,13 @@ linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
 static struct btrace_target_info *
 linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 {
-  struct perf_event_mmap_page *header;
-  struct btrace_target_info *tinfo;
   struct btrace_tinfo_bts *bts;
   size_t size, pages;
   __u64 data_offset;
   int pid, pg;
 
-  tinfo = XCNEW (struct btrace_target_info);
+  gdb::unique_xmalloc_ptr<btrace_target_info> tinfo
+    (XCNEW (btrace_target_info));
   tinfo->ptid = ptid;
 
   tinfo->conf.format = BTRACE_FORMAT_BTS;
@@ -692,9 +688,9 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
     pid = ptid_get_pid (ptid);
 
   errno = 0;
-  bts->file = syscall (SYS_perf_event_open, &bts->attr, pid, -1, -1, 0);
-  if (bts->file < 0)
-    goto err_out;
+  scoped_fd fd (syscall (SYS_perf_event_open, &bts->attr, pid, -1, -1, 0));
+  if (fd.get () < 0)
+    return nullptr;
 
   /* Convert the requested size in bytes to pages (rounding up).  */
   pages = ((size_t) conf->size / PAGE_SIZE
@@ -711,6 +707,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
   /* We try to allocate the requested size.
      If that fails, try to get as much as we can.  */
+  scoped_mmap data;
   for (; pages > 0; pages >>= 1)
     {
       size_t length;
@@ -730,15 +727,16 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 	continue;
 
       /* The number of pages we request needs to be a power of two.  */
-      header = ((struct perf_event_mmap_page *)
-		mmap (NULL, length, PROT_READ, MAP_SHARED, bts->file, 0));
-      if (header != MAP_FAILED)
+      data.reset (nullptr, length, PROT_READ, MAP_SHARED, fd.get (), 0);
+      if (data.get () != MAP_FAILED)
 	break;
     }
 
   if (pages == 0)
-    goto err_file;
+    return nullptr;
 
+  struct perf_event_mmap_page *header = (struct perf_event_mmap_page *)
+    data.get ();
   data_offset = PAGE_SIZE;
 
 #if defined (PERF_ATTR_SIZE_VER5)
@@ -753,29 +751,21 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
       /* Check for overflows.  */
       if ((__u64) size != data_size)
-	{
-	  munmap ((void *) header, size + PAGE_SIZE);
-	  goto err_file;
-	}
+	return nullptr;
     }
 #endif /* defined (PERF_ATTR_SIZE_VER5) */
 
-  bts->header = header;
-  bts->bts.mem = ((const uint8_t *) header) + data_offset;
   bts->bts.size = size;
   bts->bts.data_head = &header->data_head;
+  bts->bts.mem = (const uint8_t *) data.get () + data_offset;
   bts->bts.last_head = 0ull;
+  bts->header = header;
+  bts->file = fd.release ();
+
+  data.release ();
 
   tinfo->conf.bts.size = (unsigned int) size;
-  return tinfo;
-
- err_file:
-  /* We were not able to allocate any buffer.  */
-  close (bts->file);
-
- err_out:
-  xfree (tinfo);
-  return NULL;
+  return tinfo.release ();
 }
 
 #if defined (PERF_ATTR_SIZE_VER5)
@@ -785,10 +775,8 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 static struct btrace_target_info *
 linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 {
-  struct perf_event_mmap_page *header;
-  struct btrace_target_info *tinfo;
   struct btrace_tinfo_pt *pt;
-  size_t pages, size;
+  size_t pages;
   int pid, pg, errcode, type;
 
   if (conf->size == 0)
@@ -802,7 +790,8 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   if (pid == 0)
     pid = ptid_get_pid (ptid);
 
-  tinfo = XCNEW (struct btrace_target_info);
+  gdb::unique_xmalloc_ptr<btrace_target_info> tinfo
+    (XCNEW (btrace_target_info));
   tinfo->ptid = ptid;
 
   tinfo->conf.format = BTRACE_FORMAT_PT;
@@ -816,16 +805,18 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   pt->attr.exclude_idle = 1;
 
   errno = 0;
-  pt->file = syscall (SYS_perf_event_open, &pt->attr, pid, -1, -1, 0);
-  if (pt->file < 0)
-    goto err;
+  scoped_fd fd (syscall (SYS_perf_event_open, &pt->attr, pid, -1, -1, 0));
+  if (fd.get () < 0)
+    return nullptr;
 
   /* Allocate the configuration page. */
-  header = ((struct perf_event_mmap_page *)
-	    mmap (NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
-		  pt->file, 0));
-  if (header == MAP_FAILED)
-    goto err_file;
+  scoped_mmap data (nullptr, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
+		    fd.get (), 0);
+  if (data.get () == MAP_FAILED)
+    return nullptr;
+
+  struct perf_event_mmap_page *header = (struct perf_event_mmap_page *)
+    data.get ();
 
   header->aux_offset = header->data_offset + header->data_size;
 
@@ -844,6 +835,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 
   /* We try to allocate the requested size.
      If that fails, try to get as much as we can.  */
+  scoped_mmap aux;
   for (; pages > 0; pages >>= 1)
     {
       size_t length;
@@ -855,41 +847,33 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
       if ((__u64) UINT_MAX < data_size)
 	continue;
 
-      size = (size_t) data_size;
+      length = (size_t) data_size;
 
       /* Check for overflows.  */
-      if ((__u64) size != data_size)
+      if ((__u64) length != data_size)
 	continue;
 
       header->aux_size = data_size;
-      length = size;
 
-      pt->pt.mem = ((const uint8_t *)
-		    mmap (NULL, length, PROT_READ, MAP_SHARED, pt->file,
-			  header->aux_offset));
-      if (pt->pt.mem != MAP_FAILED)
+      aux.reset (nullptr, length, PROT_READ, MAP_SHARED, fd.get (),
+		 header->aux_offset);
+      if (aux.get () != MAP_FAILED)
 	break;
     }
 
   if (pages == 0)
-    goto err_conf;
+    return nullptr;
 
-  pt->header = header;
-  pt->pt.size = size;
+  pt->pt.size = aux.size ();
+  pt->pt.mem = (const uint8_t *) aux.release ();
   pt->pt.data_head = &header->aux_head;
+  pt->header = header;
+  pt->file = fd.release ();
 
-  tinfo->conf.pt.size = (unsigned int) size;
-  return tinfo;
+  data.release ();
 
- err_conf:
-  munmap((void *) header, PAGE_SIZE);
-
- err_file:
-  close (pt->file);
-
- err:
-  xfree (tinfo);
-  return NULL;
+  tinfo->conf.pt.size = (unsigned int) pt->pt.size;
+  return tinfo.release ();
 }
 
 #else /* !defined (PERF_ATTR_SIZE_VER5) */
