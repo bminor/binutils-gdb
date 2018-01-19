@@ -5126,7 +5126,7 @@ remote_detach_pid (int pid)
    one.  */
 
 static void
-remote_detach_1 (int from_tty)
+remote_detach_1 (int from_tty, inferior *inf)
 {
   int pid = ptid_get_pid (inferior_ptid);
   struct remote_state *rs = get_remote_state ();
@@ -5162,15 +5162,15 @@ remote_detach_1 (int from_tty)
 }
 
 static void
-remote_detach (struct target_ops *ops, int from_tty)
+remote_detach (struct target_ops *ops, inferior *inf, int from_tty)
 {
-  remote_detach_1 (from_tty);
+  remote_detach_1 (from_tty, inf);
 }
 
 static void
-extended_remote_detach (struct target_ops *ops, int from_tty)
+extended_remote_detach (struct target_ops *ops, inferior *inf, int from_tty)
 {
-  remote_detach_1 (from_tty);
+  remote_detach_1 (from_tty, inf);
 }
 
 /* Target follow-fork function for remote targets.  On entry, and

@@ -440,7 +440,7 @@ struct target_ops
     void (*to_attach) (struct target_ops *ops, const char *, int);
     void (*to_post_attach) (struct target_ops *, int)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_detach) (struct target_ops *ops, int)
+    void (*to_detach) (struct target_ops *ops, inferior *, int)
       TARGET_DEFAULT_IGNORE ();
     void (*to_disconnect) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
@@ -1326,7 +1326,7 @@ extern void target_announce_detach (int from_tty);
    in the program or it'll die when it hits one.  FROM_TTY says whether to be
    verbose or not.  */
 
-extern void target_detach (int from_tty);
+extern void target_detach (inferior *inf, int from_tty);
 
 /* Disconnect from the current target without resuming it (leaving it
    waiting for a debugger).  */

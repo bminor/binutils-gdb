@@ -464,7 +464,7 @@ core_open (const char *arg, int from_tty)
 }
 
 static void
-core_detach (struct target_ops *ops, int from_tty)
+core_detach (struct target_ops *ops, inferior *inf, int from_tty)
 {
   unpush_target (ops);
   reinit_frame_cache ();

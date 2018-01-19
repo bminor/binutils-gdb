@@ -348,14 +348,14 @@ lwp_to_thread (ptid_t lwp)
    program was started via the normal ptrace (PTRACE_TRACEME).  */
 
 static void
-sol_thread_detach (struct target_ops *ops, int from_tty)
+sol_thread_detach (struct target_ops *ops, inferior *inf, int from_tty)
 {
   struct target_ops *beneath = find_target_beneath (ops);
 
   sol_thread_active = 0;
   inferior_ptid = pid_to_ptid (ptid_get_pid (main_ph.ptid));
   unpush_target (ops);
-  beneath->to_detach (beneath, from_tty);
+  beneath->to_detach (beneath, inf, from_tty);
 }
 
 /* Resume execution of process PTID.  If STEP is nozero, then just

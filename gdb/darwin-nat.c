@@ -1938,10 +1938,9 @@ darwin_attach (struct target_ops *ops, const char *args, int from_tty)
    previously attached.  It *might* work if the program was
    started via fork.  */
 static void
-darwin_detach (struct target_ops *ops, int from_tty)
+darwin_detach (struct target_ops *ops, inferior *inf, int from_tty)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
-  struct inferior *inf = current_inferior ();
   darwin_inferior *priv = get_darwin_inferior (inf);
   kern_return_t kret;
   int res;

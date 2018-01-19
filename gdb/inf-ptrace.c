@@ -244,7 +244,7 @@ inf_ptrace_post_attach (struct target_ops *self, int pid)
 /* Detach from the inferior.  If FROM_TTY is non-zero, be chatty about it.  */
 
 static void
-inf_ptrace_detach (struct target_ops *ops, int from_tty)
+inf_ptrace_detach (struct target_ops *ops, inferior *inf, int from_tty)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
 

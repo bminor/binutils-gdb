@@ -77,7 +77,7 @@ static void gdbsim_open (const char *args, int from_tty);
 
 static void gdbsim_close (struct target_ops *self);
 
-static void gdbsim_detach (struct target_ops *ops, int from_tty);
+static void gdbsim_detach (struct target_ops *ops, inferior *inf, int from_tty);
 
 static void gdbsim_prepare_to_store (struct target_ops *self,
 				     struct regcache *regcache);
@@ -820,7 +820,7 @@ gdbsim_close (struct target_ops *self)
    Use this when you want to detach and do something else with your gdb.  */
 
 static void
-gdbsim_detach (struct target_ops *ops, int from_tty)
+gdbsim_detach (struct target_ops *ops, inferior *inf, int from_tty)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "gdbsim_detach\n");

@@ -1485,7 +1485,7 @@ kill_or_detach (struct inferior *inf, void *args)
       if (target_has_execution)
 	{
 	  if (inf->attach_flag)
-	    target_detach (qt->from_tty);
+	    target_detach (inf, qt->from_tty);
 	  else
 	    target_kill ();
 	}

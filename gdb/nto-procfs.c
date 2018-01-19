@@ -943,7 +943,7 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
    on signals, etc.  We'd better not have left any breakpoints
    in the program or it'll die when it hits one.  */
 static void
-procfs_detach (struct target_ops *ops, int from_tty)
+procfs_detach (struct target_ops *ops, inferior *inf, int from_tty)
 {
   int pid;
 

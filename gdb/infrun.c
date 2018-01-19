@@ -606,7 +606,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 				target_pid_to_str (process_ptid));
 	    }
 
-	  target_detach (0);
+	  target_detach (parent_inf, 0);
 	}
 
       /* Note that the detach above makes PARENT_INF dangling.  */
@@ -976,7 +976,7 @@ handle_vfork_child_exec_or_exit (int exec)
 		}
 	    }
 
-	  target_detach (0);
+	  target_detach (inf->vfork_parent, 0);
 
 	  /* Put it back.  */
 	  inf->pspace = pspace;

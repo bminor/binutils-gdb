@@ -1,5 +1,42 @@
 2018-01-19  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* target.h (struct target_ops) <to_detach>: Add inferior
+	parameter.
+	(target_detach): Likewise.
+	* target.c (dispose_inferior): Pass inferior down.
+	(target_detach): Pass inferior down.  Assert that it is equal to
+	the current inferior.
+	* aix-thread.c (aix_thread_detach): Pass inferior down.
+	* corefile.c (core_file_command): Pass current_inferior() down.
+	* corelow.c (core_detach): Add inferior parameter.
+	* darwin-nat.c (darwin_detach): Likewise.
+	* gnu-nat.c (gnu_detach): Likewise.
+	* inf-ptrace.c (inf_ptrace_detach): Likewise.
+	* infcmd.c (detach_command): Pass current_inferior() down to
+	target_detach.
+	* infrun.c (follow_fork_inferior): Pass parent_inf to
+	target_detach.
+	(handle_vfork_child_exec_or_exit): Pass inf->vfork_parent to
+	target_detach.
+	* linux-nat.c (linux_nat_detach): Add inferior parameter.
+	* linux-thread-db.c (thread_db_detach): Likewise.
+	* nto-procfs.c (procfs_detach): Likewise.
+	* procfs.c (procfs_detach): Likewise.
+	* record.c (record_detach): Likewise.
+	* record.h (struct inferior): Forward-declare.
+	(record_detach): Add inferior parameter.
+	* remote-sim.c (gdbsim_detach): Likewise.
+	* remote.c (remote_detach_1): Likewise.
+	(remote_detach): Likewise.
+	(extended_remote_detach): Likewise.
+	* sol-thread.c (sol_thread_detach): Likewise.
+	* target-debug.h (target_debug_print_inferior_p): New macro.
+	* target-delegates.c: Re-generate.
+	* top.c (kill_or_detach): Pass inferior down to target_detach.
+	* windows-nat.c (windows_detach): Add inferior parameter.
+
+2018-01-19  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* target.h (struct target_ops) <to_detach>: Remove args
 	parameter.
 	(target_detach): Likewise.

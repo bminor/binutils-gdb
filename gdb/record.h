@@ -24,6 +24,7 @@
 #include "common/enum-flags.h"
 
 struct cmd_list_element;
+struct inferior;
 
 extern unsigned int record_debug;
 
@@ -88,7 +89,7 @@ extern void record_goto (const char *arg);
 extern void record_disconnect (struct target_ops *, const char *, int);
 
 /* The default "to_detach" target method for record targets.  */
-extern void record_detach (struct target_ops *, int);
+extern void record_detach (struct target_ops *, inferior *, int);
 
 /* The default "to_mourn_inferior" target method for record targets.  */
 extern void record_mourn_inferior (struct target_ops *);

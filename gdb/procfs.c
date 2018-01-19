@@ -1924,7 +1924,7 @@ procfs_attach (struct target_ops *ops, const char *args, int from_tty)
 }
 
 static void
-procfs_detach (struct target_ops *ops, int from_tty)
+procfs_detach (struct target_ops *ops, inferior *inf, int from_tty)
 {
   int pid = ptid_get_pid (inferior_ptid);
 
