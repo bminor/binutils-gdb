@@ -409,6 +409,34 @@ cpu_supports_bts (void)
     }
 }
 
+/* The perf_event_open syscall failed.  Try to print a helpful error
+   message.  */
+
+static void
+diagnose_perf_event_open_fail ()
+{
+  switch (errno)
+    {
+    case EPERM:
+    case EACCES:
+      {
+	static const char filename[] = "/proc/sys/kernel/perf_event_paranoid";
+	gdb_file_up file = gdb_fopen_cloexec (filename, "r");
+	if (file.get () == nullptr)
+	  break;
+
+	int level, found = fscanf (file.get (), "%d", &level);
+	if (found == 1 && level > 2)
+	  error (_("You do not have permission to record the process.  "
+		   "Try setting %s to 2 or less."), filename);
+      }
+
+      break;
+    }
+
+  error (_("Failed to start recording: %s"), safe_strerror (errno));
+}
+
 /* Enable branch tracing in BTS format.  */
 
 static struct btrace_target_info *
@@ -448,7 +476,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
   errno = 0;
   scoped_fd fd (syscall (SYS_perf_event_open, &bts->attr, pid, -1, -1, 0));
   if (fd.get () < 0)
-    error (_("Failed to start recording: %s"), safe_strerror (errno));
+    diagnose_perf_event_open_fail ();
 
   /* Convert the requested size in bytes to pages (rounding up).  */
   pages = ((size_t) conf->size / PAGE_SIZE
@@ -578,7 +606,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   errno = 0;
   scoped_fd fd (syscall (SYS_perf_event_open, &pt->attr, pid, -1, -1, 0));
   if (fd.get () < 0)
-    error (_("Failed to start recording: %s"), safe_strerror (errno));
+    diagnose_perf_event_open_fail ();
 
   /* Allocate the configuration page. */
   scoped_mmap data (nullptr, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,

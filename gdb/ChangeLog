@@ -1,5 +1,11 @@
 2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* nat/linux-btrace.c (diagnose_perf_event_open_fail): New.
+	(linux_enable_pt, linux_enable_bts): Call
+	diagnose_perf_event_open_fail.
+
+2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* nat/linux-btrace.c (perf_event_pt_event_type): Improve error message.
 	Remove parameter and change return type.  Update callers.  Move it.
 	(linux_enable_bts, linux_enable_pt): Improve error message.
