@@ -1,5 +1,9 @@
 2018-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/group1.d: Also xfail Solaris.
+
+2018-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/linkinfo1a.d: Updated for slightly different
 	PLT/GOT order/layout for Solaris/x86 targets.
 	* testsuite/ld-elf/linkinfo1b.d: Likewise.
