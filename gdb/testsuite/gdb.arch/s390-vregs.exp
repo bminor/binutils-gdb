@@ -83,9 +83,9 @@ if [expr $before_pc + 6 != $after_pc] {
 # directory.
 
 if { $coredir != "" } {
-    gdb_test {print setrlimit (4, &(unsigned long [2]){~0UL, ~0UL})} \
+    gdb_test {print (int) setrlimit (4, &(unsigned long [2]){~0UL, ~0UL})} \
 	" = .*" "setrlimit"
-    gdb_test "print chdir (\"${coredir}\")" " = 0" "chdir"
+    gdb_test "print (int) chdir (\"${coredir}\")" " = 0" "chdir"
 }
 
 # Initialize all vector registers with GDB "set" commands, using

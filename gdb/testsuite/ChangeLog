@@ -1,5 +1,10 @@
 2018-01-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.arch/s390-vregs.exp: Explicitly cast the return values of
+	setrlimit and chdir to int.
+
+2018-01-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.arch/s390-tdbregs.c (my_tbegin): Add comment documenting the
 	function.
 	(my_tend): Likewise.
