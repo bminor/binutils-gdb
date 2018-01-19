@@ -1582,9 +1582,6 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
     error (_("GDB does not support Intel Processor Trace."));
 #endif /* !defined (HAVE_LIBIPT) */
 
-  if (!target_supports_btrace (conf->format))
-    error (_("Target does not support branch tracing."));
-
   DEBUG ("enable thread %s (%s)", print_thread_id (tp),
 	 target_pid_to_str (tp->ptid));
 

@@ -2104,27 +2104,10 @@ crc32 (CORE_ADDR base, int len, unsigned int crc)
 static void
 supported_btrace_packets (char *buf)
 {
-  int btrace_supported = 0;
-
-  if (target_supports_btrace (BTRACE_FORMAT_BTS))
-    {
-      strcat (buf, ";Qbtrace:bts+");
-      strcat (buf, ";Qbtrace-conf:bts:size+");
-
-      btrace_supported = 1;
-    }
-
-  if (target_supports_btrace (BTRACE_FORMAT_PT))
-    {
-      strcat (buf, ";Qbtrace:pt+");
-      strcat (buf, ";Qbtrace-conf:pt:size+");
-
-      btrace_supported = 1;
-    }
-
-  if (!btrace_supported)
-    return;
-
+  strcat (buf, ";Qbtrace:bts+");
+  strcat (buf, ";Qbtrace-conf:bts:size+");
+  strcat (buf, ";Qbtrace:pt+");
+  strcat (buf, ";Qbtrace-conf:pt:size+");
   strcat (buf, ";Qbtrace:off+");
   strcat (buf, ";qXfer:btrace:read+");
   strcat (buf, ";qXfer:btrace-conf:read+");

@@ -13095,37 +13095,6 @@ remote_btrace_reset (void)
   memset (&rs->btrace_config, 0, sizeof (rs->btrace_config));
 }
 
-/* Check whether the target supports branch tracing.  */
-
-static int
-remote_supports_btrace (struct target_ops *self, enum btrace_format format)
-{
-  if (packet_support (PACKET_Qbtrace_off) != PACKET_ENABLE)
-    return 0;
-  if (packet_support (PACKET_qXfer_btrace) != PACKET_ENABLE)
-    return 0;
-
-  switch (format)
-    {
-      case BTRACE_FORMAT_NONE:
-	return 0;
-
-      case BTRACE_FORMAT_BTS:
-	return (packet_support (PACKET_Qbtrace_bts) == PACKET_ENABLE);
-
-      case BTRACE_FORMAT_PT:
-	/* The trace is decoded on the host.  Even if our target supports it,
-	   we still need to have libipt to decode the trace.  */
-#if defined (HAVE_LIBIPT)
-	return (packet_support (PACKET_Qbtrace_pt) == PACKET_ENABLE);
-#else /* !defined (HAVE_LIBIPT)  */
-	return 0;
-#endif /* !defined (HAVE_LIBIPT)  */
-    }
-
-  internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));
-}
-
 /* Synchronize the configuration with the target.  */
 
 static void
@@ -13649,7 +13618,6 @@ Specify the serial device it is connected to\n\
   remote_ops.to_traceframe_info = remote_traceframe_info;
   remote_ops.to_use_agent = remote_use_agent;
   remote_ops.to_can_use_agent = remote_can_use_agent;
-  remote_ops.to_supports_btrace = remote_supports_btrace;
   remote_ops.to_enable_btrace = remote_enable_btrace;
   remote_ops.to_disable_btrace = remote_disable_btrace;
   remote_ops.to_teardown_btrace = remote_teardown_btrace;

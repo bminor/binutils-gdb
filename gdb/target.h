@@ -1110,10 +1110,6 @@ struct target_ops
     int (*to_can_use_agent) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
 
-    /* Check whether the target supports branch tracing.  */
-    int (*to_supports_btrace) (struct target_ops *, enum btrace_format)
-      TARGET_DEFAULT_RETURN (0);
-
     /* Enable branch tracing for PTID using CONF configuration.
        Return a branch trace target information struct for reading and for
        disabling branch trace.  */
@@ -2427,9 +2423,6 @@ extern void update_target_permissions (void);
 
 
 /* Imported from machine dependent code.  */
-
-/* See to_supports_btrace in struct target_ops.  */
-extern int target_supports_btrace (enum btrace_format);
 
 /* See to_enable_btrace in struct target_ops.  */
 extern struct btrace_target_info *

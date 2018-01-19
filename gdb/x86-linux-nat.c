@@ -340,7 +340,6 @@ x86_linux_create_target (void)
   t->to_read_description = x86_linux_read_description;
 
   /* Add btrace methods.  */
-  t->to_supports_btrace = linux_supports_btrace;
   t->to_enable_btrace = x86_linux_enable_btrace;
   t->to_disable_btrace = x86_linux_disable_btrace;
   t->to_teardown_btrace = x86_linux_teardown_btrace;

@@ -717,7 +717,6 @@ static struct target_ops spu_target_ops = {
   NULL, /* get_min_fast_tracepoint_insn_len */
   NULL, /* qxfer_libraries_svr4 */
   NULL, /* support_agent */
-  NULL, /* support_btrace */
   NULL, /* enable_btrace */
   NULL, /* disable_btrace */
   NULL, /* read_btrace */

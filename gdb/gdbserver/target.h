@@ -391,9 +391,6 @@ struct target_ops
   /* Return true if target supports debugging agent.  */
   int (*supports_agent) (void);
 
-  /* Check whether the target supports branch tracing.  */
-  int (*supports_btrace) (struct target_ops *, enum btrace_format);
-
   /* Enable branch tracing for PTID based on CONF and allocate a branch trace
      target information struct for reading and for disabling branch trace.  */
   struct btrace_target_info *(*enable_btrace)
@@ -622,10 +619,6 @@ int kill_inferior (int);
 #define target_supports_agent() \
   (the_target->supports_agent ? \
    (*the_target->supports_agent) () : 0)
-
-#define target_supports_btrace(format)			\
-  (the_target->supports_btrace				\
-   ? (*the_target->supports_btrace) (the_target, format) : 0)
 
 #define target_enable_btrace(ptid, conf) \
   (*the_target->enable_btrace) (ptid, conf)

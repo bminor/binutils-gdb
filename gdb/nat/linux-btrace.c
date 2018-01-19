@@ -175,23 +175,6 @@ perf_event_read_all (struct perf_event_buffer *pev, gdb_byte **data,
   pev->last_head = data_head;
 }
 
-/* Determine the event type.
-   Returns zero on success and fills in TYPE; returns -1 otherwise.  */
-
-static int
-perf_event_pt_event_type (int *type)
-{
-  gdb_file_up file
-    =  gdb_fopen_cloexec ("/sys/bus/event_source/devices/intel_pt/type", "r");
-  if (file == nullptr)
-    return -1;
-
-  int found = fscanf (file.get (), "%d", type);
-  if (found == 1)
-    return 0;
-  return -1;
-}
-
 /* Try to determine the start address of the Linux kernel.  */
 
 static uint64_t
@@ -376,176 +359,6 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
   return btrace;
 }
 
-/* Check whether the kernel supports BTS.  */
-
-static int
-kernel_supports_bts (void)
-{
-  struct perf_event_attr attr;
-  pid_t child, pid;
-  int status, file;
-
-  errno = 0;
-  child = fork ();
-  switch (child)
-    {
-    case -1:
-      warning (_("test bts: cannot fork: %s."), safe_strerror (errno));
-      return 0;
-
-    case 0:
-      status = ptrace (PTRACE_TRACEME, 0, NULL, NULL);
-      if (status != 0)
-	{
-	  warning (_("test bts: cannot PTRACE_TRACEME: %s."),
-		   safe_strerror (errno));
-	  _exit (1);
-	}
-
-      status = raise (SIGTRAP);
-      if (status != 0)
-	{
-	  warning (_("test bts: cannot raise SIGTRAP: %s."),
-		   safe_strerror (errno));
-	  _exit (1);
-	}
-
-      _exit (1);
-
-    default:
-      pid = waitpid (child, &status, 0);
-      if (pid != child)
-	{
-	  warning (_("test bts: bad pid %ld, error: %s."),
-		   (long) pid, safe_strerror (errno));
-	  return 0;
-	}
-
-      if (!WIFSTOPPED (status))
-	{
-	  warning (_("test bts: expected stop. status: %d."),
-		   status);
-	  return 0;
-	}
-
-      memset (&attr, 0, sizeof (attr));
-
-      attr.type = PERF_TYPE_HARDWARE;
-      attr.config = PERF_COUNT_HW_BRANCH_INSTRUCTIONS;
-      attr.sample_period = 1;
-      attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_ADDR;
-      attr.exclude_kernel = 1;
-      attr.exclude_hv = 1;
-      attr.exclude_idle = 1;
-
-      file = syscall (SYS_perf_event_open, &attr, child, -1, -1, 0);
-      if (file >= 0)
-	close (file);
-
-      kill (child, SIGKILL);
-      ptrace (PTRACE_KILL, child, NULL, NULL);
-
-      pid = waitpid (child, &status, 0);
-      if (pid != child)
-	{
-	  warning (_("test bts: bad pid %ld, error: %s."),
-		   (long) pid, safe_strerror (errno));
-	  if (!WIFSIGNALED (status))
-	    warning (_("test bts: expected killed. status: %d."),
-		     status);
-	}
-
-      return (file >= 0);
-    }
-}
-
-/* Check whether the kernel supports Intel Processor Trace.  */
-
-static int
-kernel_supports_pt (void)
-{
-  struct perf_event_attr attr;
-  pid_t child, pid;
-  int status, file, type;
-
-  errno = 0;
-  child = fork ();
-  switch (child)
-    {
-    case -1:
-      warning (_("test pt: cannot fork: %s."), safe_strerror (errno));
-      return 0;
-
-    case 0:
-      status = ptrace (PTRACE_TRACEME, 0, NULL, NULL);
-      if (status != 0)
-	{
-	  warning (_("test pt: cannot PTRACE_TRACEME: %s."),
-		   safe_strerror (errno));
-	  _exit (1);
-	}
-
-      status = raise (SIGTRAP);
-      if (status != 0)
-	{
-	  warning (_("test pt: cannot raise SIGTRAP: %s."),
-		   safe_strerror (errno));
-	  _exit (1);
-	}
-
-      _exit (1);
-
-    default:
-      pid = waitpid (child, &status, 0);
-      if (pid != child)
-	{
-	  warning (_("test pt: bad pid %ld, error: %s."),
-		   (long) pid, safe_strerror (errno));
-	  return 0;
-	}
-
-      if (!WIFSTOPPED (status))
-	{
-	  warning (_("test pt: expected stop. status: %d."),
-		   status);
-	  return 0;
-	}
-
-      status = perf_event_pt_event_type (&type);
-      if (status != 0)
-	file = -1;
-      else
-	{
-	  memset (&attr, 0, sizeof (attr));
-
-	  attr.size = sizeof (attr);
-	  attr.type = type;
-	  attr.exclude_kernel = 1;
-	  attr.exclude_hv = 1;
-	  attr.exclude_idle = 1;
-
-	  file = syscall (SYS_perf_event_open, &attr, child, -1, -1, 0);
-	  if (file >= 0)
-	    close (file);
-	}
-
-      kill (child, SIGKILL);
-      ptrace (PTRACE_KILL, child, NULL, NULL);
-
-      pid = waitpid (child, &status, 0);
-      if (pid != child)
-	{
-	  warning (_("test pt: bad pid %ld, error: %s."),
-		   (long) pid, safe_strerror (errno));
-	  if (!WIFSIGNALED (status))
-	    warning (_("test pt: expected killed. status: %d."),
-		     status);
-	}
-
-      return (file >= 0);
-    }
-}
-
 /* Check whether an Intel cpu supports BTS.  */
 
 static int
@@ -596,64 +409,6 @@ cpu_supports_bts (void)
     }
 }
 
-/* Check whether the linux target supports BTS.  */
-
-static int
-linux_supports_bts (void)
-{
-  static int cached;
-
-  if (cached == 0)
-    {
-      if (!kernel_supports_bts ())
-	cached = -1;
-      else if (!cpu_supports_bts ())
-	cached = -1;
-      else
-	cached = 1;
-    }
-
-  return cached > 0;
-}
-
-/* Check whether the linux target supports Intel Processor Trace.  */
-
-static int
-linux_supports_pt (void)
-{
-  static int cached;
-
-  if (cached == 0)
-    {
-      if (!kernel_supports_pt ())
-	cached = -1;
-      else
-	cached = 1;
-    }
-
-  return cached > 0;
-}
-
-/* See linux-btrace.h.  */
-
-int
-linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
-{
-  switch (format)
-    {
-    case BTRACE_FORMAT_NONE:
-      return 0;
-
-    case BTRACE_FORMAT_BTS:
-      return linux_supports_bts ();
-
-    case BTRACE_FORMAT_PT:
-      return linux_supports_pt ();
-    }
-
-  internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));
-}
-
 /* Enable branch tracing in BTS format.  */
 
 static struct btrace_target_info *
@@ -663,6 +418,9 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
   size_t size, pages;
   __u64 data_offset;
   int pid, pg;
+
+  if (!cpu_supports_bts ())
+    error (_("BTS support has been disabled for the target cpu."));
 
   gdb::unique_xmalloc_ptr<btrace_target_info> tinfo
     (XCNEW (btrace_target_info));
@@ -769,6 +527,23 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 }
 
 #if defined (PERF_ATTR_SIZE_VER5)
+
+/* Determine the event type.
+   Returns zero on success and fills in TYPE; returns -1 otherwise.  */
+
+static int
+perf_event_pt_event_type (int *type)
+{
+  gdb_file_up file =
+    gdb_fopen_cloexec ("/sys/bus/event_source/devices/intel_pt/type", "r");
+  if (file.get () == nullptr)
+    return -1;
+
+  int found = fscanf (file.get (), "%d", type);
+  if (found == 1)
+    return 0;
+  return -1;
+}
 
 /* Enable branch tracing in Intel Processor Trace format.  */
 
@@ -1143,14 +918,6 @@ linux_btrace_conf (const struct btrace_target_info *tinfo)
 }
 
 #else /* !HAVE_LINUX_PERF_EVENT_H */
-
-/* See linux-btrace.h.  */
-
-int
-linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
-{
-  return 0;
-}
 
 /* See linux-btrace.h.  */
 

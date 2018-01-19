@@ -1,5 +1,15 @@
 2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* linux-low.c (linux_target_ops): Remove linux_supports_btrace.
+	* nto-low.c (nto_target_ops): Remove NULL for supports_btrace.
+	* spu-low.c (spu_target_ops): Likewise.
+	* win32-low.c (win32_target_ops): Likewise.
+	* server.c (supported_btrace_packets): Report packets unconditionally.
+	* target.h (target_ops) <supports_btrace>: Remove.
+	(target_supports_btrace): Remove.
+
+2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* server.c (handle_btrace_enable_bts, handle_btrace_enable_pt)
 	(handle_btrace_disable): Change return type to void.  Use exceptions
 	to report errors.

@@ -7531,13 +7531,11 @@ static struct target_ops linux_target_ops = {
   linux_qxfer_libraries_svr4,
   linux_supports_agent,
 #ifdef HAVE_LINUX_BTRACE
-  linux_supports_btrace,
   linux_enable_btrace,
   linux_low_disable_btrace,
   linux_low_read_btrace,
   linux_low_btrace_conf,
 #else
-  NULL,
   NULL,
   NULL,
   NULL,

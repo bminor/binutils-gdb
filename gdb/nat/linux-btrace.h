@@ -103,9 +103,6 @@ struct btrace_target_info
 #endif /* HAVE_LINUX_PERF_EVENT_H */
 };
 
-/* See to_supports_btrace in target.h.  */
-extern int linux_supports_btrace (struct target_ops *, enum btrace_format);
-
 /* See to_enable_btrace in target.h.  */
 extern struct btrace_target_info *
   linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf);

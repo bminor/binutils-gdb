@@ -1,5 +1,22 @@
 2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (btrace_enable): Remove target_supports_btrace call.
+	* nat/linux-btrace.c (perf_event_pt_event_type): Move.
+	(kernel_supports_bts, kernel_supports_pt, linux_supports_bts)
+	(linux_supports_pt, linux_supports_btrace): Remove.
+	(linux_enable_bts): Call cpu_supports_bts.
+	* nat/linux-btrace.h (linux_supports_btrace): Remove.
+	* remote.c (remote_supports_btrace): Remove.
+	(init_remote_ops): Remove remote_supports_btrace.
+	* target-delegates.c: Regenerated.
+	* target.c (target_supports_btrace): Remove.
+	* target.h (target_ops) <to_supports_btrace>: Remove
+	(target_supports_btrace): Remove.
+	* x86-linux-nat.c (x86_linux_create_target): Remove
+	linux_supports_btrace.
+
+2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* nat/linux-btrace.c (linux_enable_btrace): Throw exception if enabling
 	btrace failed.
 	* x86-linux-nat.c (x86_linux_enable_btrace): Catch btrace enabling

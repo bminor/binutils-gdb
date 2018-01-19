@@ -3458,35 +3458,6 @@ debug_can_use_agent (struct target_ops *self)
   return result;
 }
 
-static int
-delegate_supports_btrace (struct target_ops *self, enum btrace_format arg1)
-{
-  self = self->beneath;
-  return self->to_supports_btrace (self, arg1);
-}
-
-static int
-tdefault_supports_btrace (struct target_ops *self, enum btrace_format arg1)
-{
-  return 0;
-}
-
-static int
-debug_supports_btrace (struct target_ops *self, enum btrace_format arg1)
-{
-  int result;
-  fprintf_unfiltered (gdb_stdlog, "-> %s->to_supports_btrace (...)\n", debug_target.to_shortname);
-  result = debug_target.to_supports_btrace (&debug_target, arg1);
-  fprintf_unfiltered (gdb_stdlog, "<- %s->to_supports_btrace (", debug_target.to_shortname);
-  target_debug_print_struct_target_ops_p (&debug_target);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_enum_btrace_format (arg1);
-  fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_int (result);
-  fputs_unfiltered ("\n", gdb_stdlog);
-  return result;
-}
-
 static struct btrace_target_info *
 delegate_enable_btrace (struct target_ops *self, ptid_t arg1, const struct btrace_config *arg2)
 {
@@ -4458,8 +4429,6 @@ install_delegators (struct target_ops *ops)
     ops->to_use_agent = delegate_use_agent;
   if (ops->to_can_use_agent == NULL)
     ops->to_can_use_agent = delegate_can_use_agent;
-  if (ops->to_supports_btrace == NULL)
-    ops->to_supports_btrace = delegate_supports_btrace;
   if (ops->to_enable_btrace == NULL)
     ops->to_enable_btrace = delegate_enable_btrace;
   if (ops->to_disable_btrace == NULL)
@@ -4647,7 +4616,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_traceframe_info = tdefault_traceframe_info;
   ops->to_use_agent = tdefault_use_agent;
   ops->to_can_use_agent = tdefault_can_use_agent;
-  ops->to_supports_btrace = tdefault_supports_btrace;
   ops->to_enable_btrace = tdefault_enable_btrace;
   ops->to_disable_btrace = tdefault_disable_btrace;
   ops->to_teardown_btrace = tdefault_teardown_btrace;
@@ -4808,7 +4776,6 @@ init_debug_target (struct target_ops *ops)
   ops->to_traceframe_info = debug_traceframe_info;
   ops->to_use_agent = debug_use_agent;
   ops->to_can_use_agent = debug_can_use_agent;
-  ops->to_supports_btrace = debug_supports_btrace;
   ops->to_enable_btrace = debug_enable_btrace;
   ops->to_disable_btrace = debug_disable_btrace;
   ops->to_teardown_btrace = debug_teardown_btrace;
