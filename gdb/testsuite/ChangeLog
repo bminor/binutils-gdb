@@ -1,3 +1,11 @@
+2018-01-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-tdbregs.c (my_tbegin): Add comment documenting the
+	function.
+	(my_tend): Likewise.
+	* gdb.arch/s390-tdbregs.exp: Enhance comment; explain the
+	rationale of avoiding FP- and vector instructions.
+
 2018-01-19  Ruslan Kabatsayev  <b7.10110111@gmail.com>
 
 	* gdb.arch/powerpc-d128-regs.exp: Replace expected "\[\t\]*" from
