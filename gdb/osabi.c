@@ -63,7 +63,7 @@ static const struct osabi_names gdb_osabi_names[] =
   { "SVR4", NULL },
   { "GNU/Hurd", NULL },
   { "Solaris", NULL },
-  { "GNU/Linux", "linux(-gnu)?" },
+  { "GNU/Linux", "linux(-gnu[^-]*)?" },
   { "FreeBSD", NULL },
   { "NetBSD", NULL },
   { "OpenBSD", NULL },

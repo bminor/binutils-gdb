@@ -1,3 +1,8 @@
+2018-01-19  Yao Qi  <yao.qi@linaro.org>
+
+	* osabi.c (gdb_osabi_names): Extend the regexp for
+	arm-linux-gnueabihf.
+
 2018-01-18  Yao Qi  <yao.qi@linaro.org>
 
 	* dwarf2read.c (abbrev_table) <abbrevs>: Rename it to
