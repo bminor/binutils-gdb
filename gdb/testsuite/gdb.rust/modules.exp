@@ -89,3 +89,5 @@ foreach mod {mod1::inner::innest mod1::inner mod1 {}} {
     gdb_breakpoint modules::${mod}f2 message
     gdb_breakpoint "*::${mod}f2" message
 }
+
+gdb_test "print ::TWENTY_THREE" " = 23"

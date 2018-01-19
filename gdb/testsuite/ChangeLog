@@ -1,3 +1,8 @@
+2018-01-19  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/modules.rs (TWENTY_THREE): New global.
+	* gdb.rust/modules.exp: Add ::-qualified lookup test.
+
 2018-01-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.arch/s390-vregs.exp: Explicitly cast the return values of

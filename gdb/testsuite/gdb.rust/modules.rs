@@ -21,6 +21,10 @@ fn f2() {
     println!("::f2");
 }
 
+// See https://github.com/rust-lang/rust/pull/46457
+#[no_mangle]
+pub static TWENTY_THREE : u16 = 23;
+
 pub struct Generic<T>(T);
 
 pub struct Type;
@@ -55,6 +59,8 @@ pub mod mod1 {
                 let f1tg = wrap(f1t);
 
                 let f2 = || println!("lambda f2");
+
+                let copy = ::TWENTY_THREE;
 
                 f2();           // set breakpoint here
                 f3();

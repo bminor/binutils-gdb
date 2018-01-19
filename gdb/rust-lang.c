@@ -2201,19 +2201,25 @@ rust_lookup_symbol_nonlocal (const struct language_defn *langdef,
     }
 
   /* Look up bare names in the block's scope.  */
+  std::string scopedname;
   if (name[cp_find_first_component (name)] == '\0')
     {
       const char *scope = block_scope (block);
 
       if (scope[0] != '\0')
 	{
-	  std::string scopedname = std::string (scope) + "::" + name;
-
-	  result = lookup_symbol_in_static_block (scopedname.c_str (), block,
-						  domain);
-	  if (result.symbol == NULL)
-	    result = lookup_global_symbol (scopedname.c_str (), block, domain);
+	  scopedname = std::string (scope) + "::" + name;
+	  name = scopedname.c_str ();
 	}
+      else
+	name = NULL;
+    }
+
+  if (name != NULL)
+    {
+      result = lookup_symbol_in_static_block (name, block, domain);
+      if (result.symbol == NULL)
+	result = lookup_global_symbol (name, block, domain);
     }
   return result;
 }
