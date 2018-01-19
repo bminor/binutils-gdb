@@ -241,18 +241,14 @@ inf_ptrace_post_attach (struct target_ops *self, int pid)
 
 #endif
 
-/* Detach from the inferior, optionally passing it the signal
-   specified by ARGS.  If FROM_TTY is non-zero, be chatty about it.  */
+/* Detach from the inferior.  If FROM_TTY is non-zero, be chatty about it.  */
 
 static void
-inf_ptrace_detach (struct target_ops *ops, const char *args, int from_tty)
+inf_ptrace_detach (struct target_ops *ops, int from_tty)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
-  int sig = 0;
 
   target_announce_detach (from_tty);
-  if (args)
-    sig = atoi (args);
 
 #ifdef PT_DETACH
   /* We'd better not have left any breakpoints in the program or it'll
@@ -260,7 +256,7 @@ inf_ptrace_detach (struct target_ops *ops, const char *args, int from_tty)
      previously attached to the inferior.  It *might* work if we
      started the process ourselves.  */
   errno = 0;
-  ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3)1, sig);
+  ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3)1, 0);
   if (errno != 0)
     perror_with_name (("ptrace"));
 #else

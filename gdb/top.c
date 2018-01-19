@@ -1461,7 +1461,6 @@ set_prompt (const char *s)
 
 struct qt_args
 {
-  char *args;
   int from_tty;
 };
 
@@ -1486,7 +1485,7 @@ kill_or_detach (struct inferior *inf, void *args)
       if (target_has_execution)
 	{
 	  if (inf->attach_flag)
-	    target_detach (qt->args, qt->from_tty);
+	    target_detach (qt->from_tty);
 	  else
 	    target_kill ();
 	}
@@ -1577,7 +1576,6 @@ quit_force (int *exit_arg, int from_tty)
   else if (return_child_result)
     exit_code = return_child_result_value;
 
-  qt.args = NULL;
   qt.from_tty = from_tty;
 
   /* We want to handle any quit errors and exit regardless.  */

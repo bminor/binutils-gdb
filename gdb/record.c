@@ -187,7 +187,7 @@ record_disconnect (struct target_ops *t, const char *args, int from_tty)
 /* See record.h.  */
 
 void
-record_detach (struct target_ops *t, const char *args, int from_tty)
+record_detach (struct target_ops *t, int from_tty)
 {
   gdb_assert (t->to_stratum == record_stratum);
 
@@ -196,7 +196,7 @@ record_detach (struct target_ops *t, const char *args, int from_tty)
   record_stop (t);
   record_unpush (t);
 
-  target_detach (args, from_tty);
+  target_detach (from_tty);
 }
 
 /* See record.h.  */

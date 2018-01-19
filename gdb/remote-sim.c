@@ -77,8 +77,7 @@ static void gdbsim_open (const char *args, int from_tty);
 
 static void gdbsim_close (struct target_ops *self);
 
-static void gdbsim_detach (struct target_ops *ops, const char *args,
-			   int from_tty);
+static void gdbsim_detach (struct target_ops *ops, int from_tty);
 
 static void gdbsim_prepare_to_store (struct target_ops *self,
 				     struct regcache *regcache);
@@ -815,17 +814,16 @@ gdbsim_close (struct target_ops *self)
 /* Takes a program previously attached to and detaches it.
    The program may resume execution (some targets do, some don't) and will
    no longer stop on signals, etc.  We better not have left any breakpoints
-   in the program or it'll die when it hits one.  ARGS is arguments
-   typed by the user (e.g. a signal to send the process).  FROM_TTY
-   says whether to be verbose or not.  */
+   in the program or it'll die when it hits one.  FROM_TTY says whether to be
+   verbose or not.  */
 /* Terminate the open connection to the remote debugger.
    Use this when you want to detach and do something else with your gdb.  */
 
 static void
-gdbsim_detach (struct target_ops *ops, const char *args, int from_tty)
+gdbsim_detach (struct target_ops *ops, int from_tty)
 {
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "gdbsim_detach: args \"%s\"\n", args);
+    fprintf_unfiltered (gdb_stdlog, "gdbsim_detach\n");
 
   unpush_target (ops);		/* calls gdbsim_close to do the real work */
   if (from_tty)

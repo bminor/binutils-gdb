@@ -1,3 +1,39 @@
+2018-01-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.h (struct target_ops) <to_detach>: Remove args
+	parameter.
+	(target_detach): Likewise.
+	* target.c (dispose_inferior): Adjust.
+	(target_detach): Remove args parameter, adjust.
+	* aix-thread.c (aix_thread_detach): Adjust.
+	* corefile.c (core_file_command): Adjust.
+	* corelow.c (core_detach): Adjust.
+	* darwin-nat.c (darwin_detach): Adjust.
+	* gnu-nat.c (gnu_detach): Adjust.
+	* inf-ptrace.c (inf_ptrace_detach): Adjust.
+	* infcmd.c (detach_command): Adjust
+	* infrun.c (follow_fork_inferior): Adjust.
+	(handle_vfork_child_exec_or_exit): Adjust.
+	* linux-fork.c (linux_fork_detach): Remove args parameter.
+	* linux-fork.h (linux_fork_detach): Likewise.
+	* linux-nat.c (linux_nat_detach): Likewise, and adjust.
+	* linux-thread-db.c (thread_db_detach): Likewise.
+	* nto-procfs.c (procfs_detach): Likewise.
+	* procfs.c (procfs_detach): Likewise.
+	(do_detach): Remove signo parameter.
+	* record.c (record_detach): Remove args parameter.
+	* record.h (record_detach): Likewise.
+	* remote-sim.c (gdbsim_detach): Likewise.
+	* remote.c (remote_detach_1): Likewise.
+	(remote_detach): Likewise.
+	(extended_remote_detach): Likewise.
+	* sol-thread.c (sol_thread_detach): Likewise.
+	* target-delegates.c: Re-generate.
+	* top.c (struct qt_args) <args>: Remove field.
+	(kill_or_detach): Don't pass args.
+	(quit_force): Don't set args.
+	* windows-nat.c (windows_detach): Remove args parameter.
+
 2018-01-19  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-linux-tdep.c (arm_linux_gcc_target_options): New function.

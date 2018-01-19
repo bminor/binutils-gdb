@@ -2976,7 +2976,7 @@ detach_command (const char *args, int from_tty)
 
   disconnect_tracing ();
 
-  target_detach (args, from_tty);
+  target_detach (from_tty);
 
   /* The current inferior process was just detached successfully.  Get
      rid of breakpoints that no longer make sense.  Note we don't do

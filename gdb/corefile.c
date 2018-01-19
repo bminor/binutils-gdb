@@ -68,7 +68,7 @@ core_file_command (const char *filename, int from_tty)
   gdb_assert (core_target != NULL);
 
   if (!filename)
-    (core_target->to_detach) (core_target, filename, from_tty);
+    (core_target->to_detach) (core_target, from_tty);
   else
     (core_target->to_open) (filename, from_tty);
 }

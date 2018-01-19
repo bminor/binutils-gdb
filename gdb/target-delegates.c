@@ -28,28 +28,26 @@ debug_post_attach (struct target_ops *self, int arg1)
 }
 
 static void
-delegate_detach (struct target_ops *self, const char *arg1, int arg2)
+delegate_detach (struct target_ops *self, int arg1)
 {
   self = self->beneath;
-  self->to_detach (self, arg1, arg2);
+  self->to_detach (self, arg1);
 }
 
 static void
-tdefault_detach (struct target_ops *self, const char *arg1, int arg2)
+tdefault_detach (struct target_ops *self, int arg1)
 {
 }
 
 static void
-debug_detach (struct target_ops *self, const char *arg1, int arg2)
+debug_detach (struct target_ops *self, int arg1)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_detach (...)\n", debug_target.to_shortname);
-  debug_target.to_detach (&debug_target, arg1, arg2);
+  debug_target.to_detach (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_detach (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_const_char_p (arg1);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg2);
+  target_debug_print_int (arg1);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 

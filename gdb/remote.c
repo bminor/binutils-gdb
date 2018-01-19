@@ -5126,15 +5126,12 @@ remote_detach_pid (int pid)
    one.  */
 
 static void
-remote_detach_1 (const char *args, int from_tty)
+remote_detach_1 (int from_tty)
 {
   int pid = ptid_get_pid (inferior_ptid);
   struct remote_state *rs = get_remote_state ();
   struct thread_info *tp = find_thread_ptid (inferior_ptid);
   int is_fork_parent;
-
-  if (args)
-    error (_("Argument given to \"detach\" when remotely debugging."));
 
   if (!target_has_execution)
     error (_("No process to detach from."));
@@ -5165,15 +5162,15 @@ remote_detach_1 (const char *args, int from_tty)
 }
 
 static void
-remote_detach (struct target_ops *ops, const char *args, int from_tty)
+remote_detach (struct target_ops *ops, int from_tty)
 {
-  remote_detach_1 (args, from_tty);
+  remote_detach_1 (from_tty);
 }
 
 static void
-extended_remote_detach (struct target_ops *ops, const char *args, int from_tty)
+extended_remote_detach (struct target_ops *ops, int from_tty)
 {
-  remote_detach_1 (args, from_tty);
+  remote_detach_1 (from_tty);
 }
 
 /* Target follow-fork function for remote targets.  On entry, and

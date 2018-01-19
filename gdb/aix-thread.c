@@ -981,12 +981,12 @@ aix_thread_inferior_created (struct target_ops *ops, int from_tty)
 /* Detach from the process attached to by aix_thread_attach().  */
 
 static void
-aix_thread_detach (struct target_ops *ops, const char *args, int from_tty)
+aix_thread_detach (struct target_ops *ops, int from_tty)
 {
   struct target_ops *beneath = find_target_beneath (ops);
 
   pd_disable ();
-  beneath->to_detach (beneath, args, from_tty);
+  beneath->to_detach (beneath, from_tty);
 }
 
 /* Tell the inferior process to continue running thread PID if != -1

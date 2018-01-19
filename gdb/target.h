@@ -440,7 +440,7 @@ struct target_ops
     void (*to_attach) (struct target_ops *ops, const char *, int);
     void (*to_post_attach) (struct target_ops *, int)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_detach) (struct target_ops *ops, const char *, int)
+    void (*to_detach) (struct target_ops *ops, int)
       TARGET_DEFAULT_IGNORE ();
     void (*to_disconnect) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
@@ -1323,11 +1323,10 @@ extern void target_announce_detach (int from_tty);
 /* Takes a program previously attached to and detaches it.
    The program may resume execution (some targets do, some don't) and will
    no longer stop on signals, etc.  We better not have left any breakpoints
-   in the program or it'll die when it hits one.  ARGS is arguments
-   typed by the user (e.g. a signal to send the process).  FROM_TTY
-   says whether to be verbose or not.  */
+   in the program or it'll die when it hits one.  FROM_TTY says whether to be
+   verbose or not.  */
 
-extern void target_detach (const char *, int);
+extern void target_detach (int from_tty);
 
 /* Disconnect from the current target without resuming it (leaving it
    waiting for a debugger).  */

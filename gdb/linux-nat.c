@@ -1497,7 +1497,7 @@ detach_callback (struct lwp_info *lp, void *data)
 }
 
 static void
-linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
+linux_nat_detach (struct target_ops *ops, int from_tty)
 {
   int pid;
   struct lwp_info *main_lwp;
@@ -1527,21 +1527,14 @@ linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 	 from, but there are other viable forks to debug.  Detach from
 	 the current fork, and context-switch to the first
 	 available.  */
-      linux_fork_detach (args, from_tty);
+      linux_fork_detach (from_tty);
     }
   else
     {
-      int signo;
-
       target_announce_detach (from_tty);
 
-      /* Pass on any pending signal for the last LWP, unless the user
-	 requested detaching with a different signal (most likely 0,
-	 meaning, discard the signal).  */
-      if (args != NULL)
-	signo = atoi (args);
-      else
-	signo = get_detach_signal (main_lwp);
+      /* Pass on any pending signal for the last LWP.  */
+      int signo = get_detach_signal (main_lwp);
 
       detach_one_lwp (main_lwp, &signo);
 

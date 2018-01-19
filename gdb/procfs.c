@@ -1829,7 +1829,7 @@ proc_iterate_over_threads (procinfo *pi,
    friends.  */
 
 static ptid_t do_attach (ptid_t ptid);
-static void do_detach (int signo);
+static void do_detach ();
 static void proc_trace_syscalls_1 (procinfo *pi, int syscallnum,
 				   int entry_or_exit, int mode, int from_tty);
 
@@ -1924,13 +1924,9 @@ procfs_attach (struct target_ops *ops, const char *args, int from_tty)
 }
 
 static void
-procfs_detach (struct target_ops *ops, const char *args, int from_tty)
+procfs_detach (struct target_ops *ops, int from_tty)
 {
-  int sig = 0;
   int pid = ptid_get_pid (inferior_ptid);
-
-  if (args)
-    sig = atoi (args);
 
   if (from_tty)
     {
@@ -1945,7 +1941,7 @@ procfs_detach (struct target_ops *ops, const char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  do_detach (sig);
+  do_detach ();
 
   inferior_ptid = null_ptid;
   detach_inferior (pid);
@@ -2023,16 +2019,13 @@ do_attach (ptid_t ptid)
 }
 
 static void
-do_detach (int signo)
+do_detach ()
 {
   procinfo *pi;
 
   /* Find procinfo for the main process.  */
   pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid),
 			     0); /* FIXME: threads */
-  if (signo)
-    if (!proc_set_current_signal (pi, signo))
-      proc_warn (pi, "do_detach, set_current_signal", __LINE__);
 
   if (!proc_set_traced_signals (pi, &pi->saved_sigset))
     proc_warn (pi, "do_detach, set_traced_signal", __LINE__);
@@ -2049,15 +2042,15 @@ do_detach (int signo)
   if (!proc_set_held_signals (pi, &pi->saved_sighold))
     proc_warn (pi, "do_detach, set_held_signals", __LINE__);
 
-  if (signo || (proc_flags (pi) & (PR_STOPPED | PR_ISTOP)))
-    if (signo || !(pi->was_stopped) ||
-	query (_("Was stopped when attached, make it runnable again? ")))
+  if (proc_flags (pi) & (PR_STOPPED | PR_ISTOP))
+    if (!(pi->was_stopped)
+	|| query (_("Was stopped when attached, make it runnable again? ")))
       {
 	/* Clear any pending signal.  */
 	if (!proc_clear_current_fault (pi))
 	  proc_warn (pi, "do_detach, clear_current_fault", __LINE__);
 
-	if (signo == 0 && !proc_clear_current_signal (pi))
+	if (!proc_clear_current_signal (pi))
 	  proc_warn (pi, "do_detach, clear_current_signal", __LINE__);
 
 	if (!proc_set_run_on_last_close (pi))

@@ -1090,13 +1090,13 @@ record_thread (struct thread_db_info *info,
 }
 
 static void
-thread_db_detach (struct target_ops *ops, const char *args, int from_tty)
+thread_db_detach (struct target_ops *ops, int from_tty)
 {
   struct target_ops *target_beneath = find_target_beneath (ops);
 
   delete_thread_db_info (ptid_get_pid (inferior_ptid));
 
-  target_beneath->to_detach (target_beneath, args, from_tty);
+  target_beneath->to_detach (target_beneath, from_tty);
 
   /* NOTE: From this point on, inferior_ptid is null_ptid.  */
 
