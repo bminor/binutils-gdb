@@ -87,6 +87,14 @@ gdb_test "p d9@entry" " = 11\\.5" "entry_stack: p d9@entry"
 gdb_test "p da" " = 4\\.5" "entry_stack: p da"
 gdb_test "p da@entry" " = 12\\.5" "entry_stack: p da@entry"
 
+# Test @entry values for a static file scoped variable, and for an
+# unknown symbol.  Both of these should give an error.
+gdb_test "p v@entry" \
+    "@entry can be used only for function parameters, not for \"v\"" \
+    "attempt to print global v@entry"
+gdb_test "p unknown@entry" \
+    "@entry can be used only for function parameters, not for \"unknown\"" \
+    "attempt to print unknown@entry"
 
 # Test various kinds of `set print entry-values'.
 

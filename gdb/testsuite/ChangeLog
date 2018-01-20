@@ -1,3 +1,8 @@
+2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/amd64-entry-value.exp: Test using @entry on a
+	non-parameter, and on an unknown symbol.
+
 2018-01-19  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/modules.rs (TWENTY_THREE): New global.
