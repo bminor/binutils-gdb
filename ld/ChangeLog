@@ -1,3 +1,11 @@
+2018-01-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22721
+	* testsuite/ld-plugin/lto.exp: Run PR ld/22721 tests.
+	* testsuite/ld-plugin/pr22721.t: New file.
+	* testsuite/ld-plugin/pr22721a.s: Likewise.
+	* testsuite/ld-plugin/pr22721b.c: Likewise.
+
 2018-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/group1.d: Also xfail Solaris.
