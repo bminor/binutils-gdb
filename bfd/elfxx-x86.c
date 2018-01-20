@@ -856,7 +856,16 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 				    htab->tls_get_addr,
 				    FALSE, FALSE, FALSE);
 	  if (h != NULL)
-	    elf_x86_hash_entry (h)->tls_get_addr = 1;
+	    {
+	      elf_x86_hash_entry (h)->tls_get_addr = 1;
+
+	      /* Check the versioned __tls_get_addr symbol.  */
+	      while (h->root.type == bfd_link_hash_indirect)
+		{
+		  h = (struct elf_link_hash_entry *) h->root.u.i.link;
+		  elf_x86_hash_entry (h)->tls_get_addr = 1;
+		}
+	    }
 
 	  /* "__ehdr_start" will be defined by linker as a hidden symbol
 	     later if it is referenced and not defined.  */

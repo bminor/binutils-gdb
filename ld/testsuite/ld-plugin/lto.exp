@@ -510,6 +510,32 @@ if { [at_least_gcc_version 4 7] } {
 	} {
 	    fail $testname
 	}
+
+	run_cc_link_tests [list \
+	    [list \
+		"Build pr22721a.so" \
+		"-shared -nostdlib -nostartfiles -Wl,-version-script,pr22721.t" \
+		"" \
+		{pr22721a.s} \
+		{} \
+		"pr22721a.so" \
+	    ] \
+	    [list \
+		"Build pr22721b.o" \
+		"$plug_opt" \
+		"-O2 -fPIC -flto $lto_no_fat" \
+		{pr22721b.c} \
+	    ] \
+	    [list \
+		"Build PR ld/pr22721" \
+		"-O2 -flto -fuse-linker-plugin -nostdlib -nostartfiles \
+		-Wl,-e,_start tmpdir/pr22721b.o tmpdir/pr22721a.so" \
+		"" \
+		{dummy.c} \
+		{} \
+		"pr22721.exe"
+	    ] \
+	]
     }
     set testname "PR ld/12942 (3)"
     set exec_output [run_host_cmd "$CXX" "-O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
