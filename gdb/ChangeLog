@@ -1,3 +1,8 @@
+2018-01-22  Yao Qi  <yao.qi@linaro.org>
+
+	* jit.c (jit_frame_prev_register): Call regcache::cooked_read
+	instead of gdbarch_pseudo_register_read_value.
+
 2018-01-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (need_gnat_info): Return nonzero if the cu's
