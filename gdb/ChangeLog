@@ -1,5 +1,14 @@
 2018-01-22  Yao Qi  <yao.qi@linaro.org>
 
+	* ia64-tdep.c (ia64_pseudo_register_read): Call
+	regcache->cooked_read instead of regcache_cooked_read_unsigned.
+	* m32c-tdep.c (m32c_cat_read): Likewise.
+	(m32c_r3r2r1r0_read): Likewise.
+	* m68hc11-tdep.c (m68hc11_pseudo_register_read): Likewise.
+	* xtensa-tdep.c (xtensa_register_read_masked): Likewise.
+
+2018-01-22  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (aarch64_pseudo_read_value): Call regcache
 	method raw_read instead of regcache_raw_read.
 	* amd64-tdep.c (amd64_pseudo_register_read_value): Likewise.

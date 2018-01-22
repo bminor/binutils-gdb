@@ -481,7 +481,7 @@ xtensa_register_read_masked (struct regcache *regcache,
 	  enum register_status status;
 	  ULONGEST val;
 
-	  status = regcache_cooked_read_unsigned (regcache, r, &val);
+	  status = regcache->cooked_read (r, &val);
 	  if (status != REG_VALID)
 	    return status;
 	  regval = (unsigned int) val;
