@@ -1,3 +1,8 @@
+2018-01-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* linespec.c (create_sals_line_offset): Remove code that preserved
+	the symtab_and_line's line number.
+
 2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* varobj.c (varobj_create): Don't set valid_block when creating a

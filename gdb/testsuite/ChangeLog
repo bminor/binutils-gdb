@@ -1,3 +1,14 @@
+2018-01-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/break-include.c, gdb.base/break-include.inc,
+	gdb.base/break-include.exp: New files.
+	* gdb.base/ending-run.exp: Minor adaptations due to the breakpoint's
+	line number now being the actual line number where the breakpoint
+	was inserted.
+	* gdb.mi/mi-break.exp: Likewise.
+	* gdb.mi/mi-reverse.exp: Likewise.
+	* gdb.mi/mi-simplerun.exp: Ditto.
+
 2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-mi.exp: Don't expect a thread-id for floating

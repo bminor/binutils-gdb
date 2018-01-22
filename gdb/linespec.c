@@ -2246,9 +2246,6 @@ create_sals_line_offset (struct linespec_state *self,
 
 	    if (self->funfirstline)
 	      skip_prologue_sal (&intermediate_results[i]);
-	    /* Make sure the line matches the request, not what was
-	       found.  */
-	    intermediate_results[i].line = val.line;
 	    add_sal_to_sals (self, &values, &intermediate_results[i],
 			     sym ? SYMBOL_NATURAL_NAME (sym) : NULL, 0);
 	  }
