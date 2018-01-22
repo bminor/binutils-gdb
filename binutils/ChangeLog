@@ -1,5 +1,10 @@
 2018-01-22  Maciej W. Rozycki  <macro@mips.com>
 
+	* doc/binutils.texi (objcopy): Fix a typo in `--rename-section'
+	option description.
+
+2018-01-22  Maciej W. Rozycki  <macro@mips.com>
+
 	* MAINTAINERS: Update my company e-mail address.
 
 2018-01-22  Nick Clifton  <nickc@redhat.com>

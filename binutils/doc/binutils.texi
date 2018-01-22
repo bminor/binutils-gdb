@@ -1635,7 +1635,7 @@ symbol table in the order they appear.
 @item --rename-section @var{oldname}=@var{newname}[,@var{flags}]
 Rename a section from @var{oldname} to @var{newname}, optionally
 changing the section's flags to @var{flags} in the process.  This has
-the advantage over usng a linker script to perform the rename in that
+the advantage over using a linker script to perform the rename in that
 the output stays as an object file and does not become a linked
 executable.
 
