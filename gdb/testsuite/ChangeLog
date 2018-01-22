@@ -1,3 +1,9 @@
+2018-01-22  Pedro Alves  <palves@redhat.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/whatis.exp: Add tests for 'set print object on' +
+	'whatis <struct>' 'whatis <struct> *' and 'whatis <struct> &'.
+
 2018-01-17  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.compile/compile.exp: Match the address printed for

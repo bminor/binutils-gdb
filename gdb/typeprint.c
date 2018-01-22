@@ -489,6 +489,10 @@ whatis_exp (const char *exp, int show)
 	  check_typedef (type);
 	  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
 	    type = TYPE_TARGET_TYPE (type);
+
+	  /* If the expression is actually a type, then there's no
+	     value to fetch the dynamic type from.  */
+	  val = NULL;
 	}
       else
 	{
@@ -506,7 +510,7 @@ whatis_exp (const char *exp, int show)
     }
 
   get_user_print_options (&opts);
-  if (opts.objectprint)
+  if (val != NULL && opts.objectprint)
     {
       if (((TYPE_CODE (type) == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
 	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
