@@ -27,7 +27,7 @@ m32c		DJ Delorie <dj@redhat.com>
 m32r		Doug Evans <dje@sebabeach.org>
 m68hc11		Stephane Carrez <Stephane.Carrez@gmail.com>
 microblaze	Michael Eager <eager@eagercon.com>
-mips		Maciej W. Rozycki <macro@imgtec.com>
+mips		Maciej W. Rozycki <macro@mips.com>
 moxie		Anthony Green <green@moxielogic.com>
 msp430		Nick Clifton <nickc@redhat.com>
 rx		DJ Delorie <dj@redhat.com>
