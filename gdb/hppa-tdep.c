@@ -2754,7 +2754,7 @@ hppa_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   ULONGEST tmp;
   enum register_status status;
 
-  status = regcache_raw_read_unsigned (regcache, regnum, &tmp);
+  status = regcache->raw_read (regnum, &tmp);
   if (status == REG_VALID)
     {
       if (regnum == HPPA_PCOQ_HEAD_REGNUM || regnum == HPPA_PCOQ_TAIL_REGNUM)

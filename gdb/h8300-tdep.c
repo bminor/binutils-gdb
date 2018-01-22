@@ -1167,7 +1167,7 @@ pseudo_from_raw_register (struct gdbarch *gdbarch, struct regcache *regcache,
   enum register_status status;
   ULONGEST val;
 
-  status = regcache_raw_read_unsigned (regcache, raw_regno, &val);
+  status = regcache->raw_read (raw_regno, &val);
   if (status == REG_VALID)
     store_unsigned_integer (buf,
 			    register_size (gdbarch, pseudo_regno),
@@ -1205,7 +1205,7 @@ h8300_pseudo_register_read (struct gdbarch *gdbarch,
 				       regno, E_EXR_REGNUM);
     }
   else
-    return regcache_raw_read (regcache, regno, buf);
+    return regcache->raw_read (regno, buf);
 }
 
 static void

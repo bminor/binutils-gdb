@@ -369,9 +369,8 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
       if (gpnum >= AMD64_NUM_LOWER_BYTE_REGS)
 	{
 	  /* Special handling for AH, BH, CH, DH.  */
-	  status = regcache_raw_read (regcache,
-				      gpnum - AMD64_NUM_LOWER_BYTE_REGS,
-				      raw_buf);
+	  status = regcache->raw_read (gpnum - AMD64_NUM_LOWER_BYTE_REGS,
+				       raw_buf);
 	  if (status == REG_VALID)
 	    memcpy (buf, raw_buf + 1, 1);
 	  else
@@ -380,7 +379,7 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
 	}
       else
 	{
-	  status = regcache_raw_read (regcache, gpnum, raw_buf);
+	  status = regcache->raw_read (gpnum, raw_buf);
 	  if (status == REG_VALID)
 	    memcpy (buf, raw_buf, 1);
 	  else
@@ -392,7 +391,7 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
     {
       int gpnum = regnum - tdep->eax_regnum;
       /* Extract (always little endian).  */
-      status = regcache_raw_read (regcache, gpnum, raw_buf);
+      status = regcache->raw_read (gpnum, raw_buf);
       if (status == REG_VALID)
 	memcpy (buf, raw_buf, 4);
       else

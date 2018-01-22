@@ -1,5 +1,27 @@
 2018-01-22  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_pseudo_read_value): Call regcache
+	method raw_read instead of regcache_raw_read.
+	* amd64-tdep.c (amd64_pseudo_register_read_value): Likewise.
+	* arm-tdep.c (arm_neon_quad_read): Likewise.
+	* avr-tdep.c (avr_pseudo_register_read): Likewise.
+	* bfin-tdep.c (bfin_pseudo_register_read): Likewise.
+	* frv-tdep.c (frv_pseudo_register_read): Likewise.
+	* h8300-tdep.c (h8300_pseudo_register_read): Likewise.
+	* i386-tdep.c (i386_mmx_regnum_to_fp_regnum): Likewise.
+	(i386_pseudo_register_read_into_value): Likewise.
+	* mep-tdep.c (mep_pseudo_cr32_read): Likewise.
+	* msp430-tdep.c (msp430_pseudo_register_read): Likewise.
+	* nds32-tdep.c (nds32_pseudo_register_read): Likewise.
+	* rl78-tdep.c (rl78_pseudo_register_read): Likewise.
+	* s390-linux-tdep.c (s390_pseudo_register_read): Likewise.
+	* sparc-tdep.c (sparc32_pseudo_register_read):  Likewise.
+	* sparc64-tdep.c (sparc64_pseudo_register_read): Likewise.
+	* spu-tdep.c (spu_pseudo_register_read_spu):  Likewise.
+	* xtensa-tdep.c (xtensa_pseudo_register_read): Likewise.
+
+2018-01-22  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (ALL_TARGET_OBS): Remove mt-tdep.o.
 	* configure.tgt: Remove target mt.
 	* mt-tdep.c: Remove.

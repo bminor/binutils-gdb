@@ -229,7 +229,7 @@ msp430_pseudo_register_read (struct gdbarch *gdbarch,
       int regsize = register_size (gdbarch, regnum);
       int raw_regnum = regnum - MSP430_NUM_REGS;
 
-      status = regcache_raw_read_unsigned (regcache, raw_regnum, &val);
+      status = regcache->raw_read (raw_regnum, &val);
       if (status == REG_VALID)
 	store_unsigned_integer (buffer, regsize, byte_order, val);
 

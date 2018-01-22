@@ -193,7 +193,7 @@ spu_pseudo_register_read_spu (struct regcache *regcache, const char *regname,
   ULONGEST id;
   ULONGEST ul;
 
-  status = regcache_raw_read_unsigned (regcache, SPU_ID_REGNUM, &id);
+  status = regcache->raw_read (SPU_ID_REGNUM, &id);
   if (status != REG_VALID)
     return status;
   xsnprintf (annex, sizeof annex, "%d/%s", (int) id, regname);
@@ -218,14 +218,14 @@ spu_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   switch (regnum)
     {
     case SPU_SP_REGNUM:
-      status = regcache_raw_read (regcache, SPU_RAW_SP_REGNUM, reg);
+      status = regcache->raw_read (SPU_RAW_SP_REGNUM, reg);
       if (status != REG_VALID)
 	return status;
       memcpy (buf, reg, 4);
       return status;
 
     case SPU_FPSCR_REGNUM:
-      status = regcache_raw_read_unsigned (regcache, SPU_ID_REGNUM, &id);
+      status = regcache->raw_read (SPU_ID_REGNUM, &id);
       if (status != REG_VALID)
 	return status;
       xsnprintf (annex, sizeof annex, "%d/fpcr", (int) id);

@@ -302,9 +302,9 @@ frv_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
   if (reg == iacc0_regnum)
     {
-      status = regcache_raw_read (regcache, iacc0h_regnum, buffer);
+      status = regcache->raw_read (iacc0h_regnum, buffer);
       if (status == REG_VALID)
-	status = regcache_raw_read (regcache, iacc0l_regnum, (bfd_byte *) buffer + 4);
+	status = regcache->raw_read (iacc0l_regnum, (bfd_byte *) buffer + 4);
     }
   else if (accg0_regnum <= reg && reg <= accg7_regnum)
     {
@@ -315,7 +315,7 @@ frv_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       int byte_num = (reg - accg0_regnum) % 4;
       gdb_byte buf[4];
 
-      status = regcache_raw_read (regcache, raw_regnum, buf);
+      status = regcache->raw_read (raw_regnum, buf);
       if (status == REG_VALID)
 	{
 	  memset (buffer, 0, 4);

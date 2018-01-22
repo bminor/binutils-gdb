@@ -1516,7 +1516,7 @@ pseudo_register_read_portions (struct gdbarch *gdbarch,
       gdb_byte *b;
 
       b = buffer + register_size (gdbarch, base_regnum) * portion;
-      status = regcache_raw_read (regcache, base_regnum + portion, b);
+      status = regcache->raw_read (base_regnum + portion, b);
       if (status != REG_VALID)
 	return status;
     }
@@ -1587,7 +1587,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       base_regnum = sh64_compact_reg_base_num (gdbarch, reg_nr);
 
       /* Build the value in the provided buffer.  */ 
-      status = regcache_raw_read (regcache, base_regnum, temp_buffer);
+      status = regcache->raw_read (base_regnum, temp_buffer);
       if (status != REG_VALID)
 	return status;
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
@@ -1605,7 +1605,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Build the value in the provided buffer.  */ 
       /* Floating point registers map 1-1 to the media fp regs,
 	 they have the same size and endianness.  */
-      return regcache_raw_read (regcache, base_regnum, buffer);
+      return regcache->raw_read (base_regnum, buffer);
     }
 
   else if (reg_nr >= DR0_C_REGNUM 
@@ -1692,7 +1692,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* FPUL_C register is floating point register 32,
 	 same size, same endianness.  */
-      return regcache_raw_read (regcache, base_regnum, buffer);
+      return regcache->raw_read (base_regnum, buffer);
     }
   else
     gdb_assert_not_reached ("invalid pseudo register number");

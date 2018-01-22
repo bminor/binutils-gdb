@@ -399,7 +399,7 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       enum register_status status;
 
-      status = regcache_raw_read_unsigned (regcache, S390_PSWA_REGNUM, &val);
+      status = regcache->raw_read (S390_PSWA_REGNUM, &val);
       if (status == REG_VALID)
 	{
 	  if (register_size (gdbarch, S390_PSWA_REGNUM) == 4)
@@ -413,7 +413,7 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       enum register_status status;
 
-      status = regcache_raw_read_unsigned (regcache, S390_PSWM_REGNUM, &val);
+      status = regcache->raw_read (S390_PSWM_REGNUM, &val);
       if (status == REG_VALID)
 	{
 	  if (register_size (gdbarch, S390_PSWA_REGNUM) == 4)
@@ -432,10 +432,10 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       regnum -= tdep->gpr_full_regnum;
 
-      status = regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + regnum, &val);
+      status = regcache->raw_read (S390_R0_REGNUM + regnum, &val);
       if (status == REG_VALID)
-	status = regcache_raw_read_unsigned (regcache, S390_R0_UPPER_REGNUM + regnum,
-					     &val_upper);
+	status = regcache->raw_read (S390_R0_UPPER_REGNUM + regnum,
+				     &val_upper);
       if (status == REG_VALID)
 	{
 	  val |= val_upper << 32;
@@ -450,10 +450,9 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       regnum -= tdep->v0_full_regnum;
 
-      status = regcache_raw_read (regcache, S390_F0_REGNUM + regnum, buf);
+      status = regcache->raw_read (S390_F0_REGNUM + regnum, buf);
       if (status == REG_VALID)
-	status = regcache_raw_read (regcache,
-				    S390_V0_LOWER_REGNUM + regnum, buf + 8);
+	status = regcache->raw_read (S390_V0_LOWER_REGNUM + regnum, buf + 8);
       return status;
     }
 

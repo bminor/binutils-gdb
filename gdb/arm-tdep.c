@@ -8696,13 +8696,13 @@ arm_neon_quad_read (struct gdbarch *gdbarch, struct regcache *regcache,
   else
     offset = 0;
 
-  status = regcache_raw_read (regcache, double_regnum, reg_buf);
+  status = regcache->raw_read (double_regnum, reg_buf);
   if (status != REG_VALID)
     return status;
   memcpy (buf + offset, reg_buf, 8);
 
   offset = 8 - offset;
-  status = regcache_raw_read (regcache, double_regnum + 1, reg_buf);
+  status = regcache->raw_read (double_regnum + 1, reg_buf);
   if (status != REG_VALID)
     return status;
   memcpy (buf + offset, reg_buf, 8);
@@ -8742,7 +8742,7 @@ arm_pseudo_read (struct gdbarch *gdbarch, struct regcache *regcache,
       double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 						   strlen (name_buf));
 
-      status = regcache_raw_read (regcache, double_regnum, reg_buf);
+      status = regcache->raw_read (double_regnum, reg_buf);
       if (status == REG_VALID)
 	memcpy (buf, reg_buf + offset, 4);
       return status;

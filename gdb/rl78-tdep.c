@@ -650,68 +650,67 @@ rl78_pseudo_register_read (struct gdbarch *gdbarch,
       int raw_regnum = RL78_RAW_BANK0_R0_REGNUM
                        + (reg - RL78_BANK0_R0_REGNUM);
 
-      status = regcache_raw_read (regcache, raw_regnum, buffer);
+      status = regcache->raw_read (raw_regnum, buffer);
     }
   else if (RL78_BANK0_RP0_REGNUM <= reg && reg <= RL78_BANK3_RP3_REGNUM)
     {
       int raw_regnum = 2 * (reg - RL78_BANK0_RP0_REGNUM)
                        + RL78_RAW_BANK0_R0_REGNUM;
 
-      status = regcache_raw_read (regcache, raw_regnum, buffer);
+      status = regcache->raw_read (raw_regnum, buffer);
       if (status == REG_VALID)
-	status = regcache_raw_read (regcache, raw_regnum + 1, buffer + 1);
+	status = regcache->raw_read (raw_regnum + 1, buffer + 1);
     }
   else if (RL78_BANK0_RP0_PTR_REGNUM <= reg && reg <= RL78_BANK3_RP3_PTR_REGNUM)
     {
       int raw_regnum = 2 * (reg - RL78_BANK0_RP0_PTR_REGNUM)
                        + RL78_RAW_BANK0_R0_REGNUM;
 
-      status = regcache_raw_read (regcache, raw_regnum, buffer);
+      status = regcache->raw_read (raw_regnum, buffer);
       if (status == REG_VALID)
-	status = regcache_raw_read (regcache, raw_regnum + 1, buffer + 1);
+	status = regcache->raw_read (raw_regnum + 1, buffer + 1);
     }
   else if (reg == RL78_SP_REGNUM)
     {
-      status = regcache_raw_read (regcache, RL78_SPL_REGNUM, buffer);
+      status = regcache->raw_read (RL78_SPL_REGNUM, buffer);
       if (status == REG_VALID)
-	status = regcache_raw_read (regcache, RL78_SPH_REGNUM, buffer + 1);
+	status = regcache->raw_read (RL78_SPH_REGNUM, buffer + 1);
     }
   else if (reg == RL78_PC_REGNUM)
     {
       gdb_byte rawbuf[4];
 
-      status = regcache_raw_read (regcache, RL78_RAW_PC_REGNUM, rawbuf);
+      status = regcache->raw_read (RL78_RAW_PC_REGNUM, rawbuf);
       memcpy (buffer, rawbuf, 3);
     }
   else if (RL78_X_REGNUM <= reg && reg <= RL78_H_REGNUM)
     {
       ULONGEST psw;
 
-      status = regcache_raw_read_unsigned (regcache, RL78_PSW_REGNUM, &psw);
+      status = regcache->raw_read (RL78_PSW_REGNUM, &psw);
       if (status == REG_VALID)
 	{
 	  /* RSB0 is at bit 3; RSBS1 is at bit 5.  */
 	  int bank = ((psw >> 3) & 1) | ((psw >> 4) & 1);
 	  int raw_regnum = RL78_RAW_BANK0_R0_REGNUM + bank * RL78_REGS_PER_BANK
 	                   + (reg - RL78_X_REGNUM);
-	  status = regcache_raw_read (regcache, raw_regnum, buffer);
+	  status = regcache->raw_read (raw_regnum, buffer);
 	}
     }
   else if (RL78_AX_REGNUM <= reg && reg <= RL78_HL_REGNUM)
     {
       ULONGEST psw;
 
-      status = regcache_raw_read_unsigned (regcache, RL78_PSW_REGNUM, &psw);
+      status = regcache->raw_read (RL78_PSW_REGNUM, &psw);
       if (status == REG_VALID)
 	{
 	  /* RSB0 is at bit 3; RSBS1 is at bit 5.  */
 	  int bank = ((psw >> 3) & 1) | ((psw >> 4) & 1);
 	  int raw_regnum = RL78_RAW_BANK0_R0_REGNUM + bank * RL78_REGS_PER_BANK
 	                   + 2 * (reg - RL78_AX_REGNUM);
-	  status = regcache_raw_read (regcache, raw_regnum, buffer);
+	  status = regcache->raw_read (raw_regnum, buffer);
 	  if (status == REG_VALID)
-	    status = regcache_raw_read (regcache, raw_regnum + 1,
-	                                buffer + 1);
+	    status = regcache->raw_read (raw_regnum + 1, buffer + 1);
 	}
     }
   else

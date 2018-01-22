@@ -744,19 +744,19 @@ mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   gdb_assert (cookednum >= gdbarch_num_regs (gdbarch)
 	      && cookednum < 2 * gdbarch_num_regs (gdbarch));
   if (register_size (gdbarch, rawnum) == register_size (gdbarch, cookednum))
-    return regcache_raw_read (regcache, rawnum, buf);
+    return regcache->raw_read (rawnum, buf);
   else if (register_size (gdbarch, rawnum) >
 	   register_size (gdbarch, cookednum))
     {
       if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p)
-	return regcache_raw_read_part (regcache, rawnum, 0, 4, buf);
+	return regcache->raw_read_part (rawnum, 0, 4, buf);
       else
 	{
 	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 	  LONGEST regval;
 	  enum register_status status;
 
-	  status = regcache_raw_read_signed (regcache, rawnum, &regval);
+	  status = regcache->raw_read (rawnum, &regval);
 	  if (status == REG_VALID)
 	    store_signed_integer (buf, 4, byte_order, regval);
 	  return status;

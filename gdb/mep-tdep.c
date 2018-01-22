@@ -1136,7 +1136,7 @@ mep_pseudo_cr32_read (struct gdbarch *gdbarch,
 
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, rawnum)) == sizeof (buf64));
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, cookednum)) == 4);
-  status = regcache_raw_read (regcache, rawnum, buf64);
+  status = regcache->raw_read (rawnum, buf64);
   if (status == REG_VALID)
     {
       /* Slow, but legible.  */
@@ -1153,7 +1153,7 @@ mep_pseudo_cr64_read (struct gdbarch *gdbarch,
                       int cookednum,
                       gdb_byte *buf)
 {
-  return regcache_raw_read (regcache, mep_pseudo_to_raw[cookednum], buf);
+  return regcache->raw_read (mep_pseudo_to_raw[cookednum], buf);
 }
 
 
@@ -1165,7 +1165,7 @@ mep_pseudo_register_read (struct gdbarch *gdbarch,
 {
   if (IS_CSR_REGNUM (cookednum)
       || IS_CCR_REGNUM (cookednum))
-    return regcache_raw_read (regcache, mep_pseudo_to_raw[cookednum], buf);
+    return regcache->raw_read (mep_pseudo_to_raw[cookednum], buf);
   else if (IS_CR32_REGNUM (cookednum)
            || IS_FP_CR32_REGNUM (cookednum))
     return mep_pseudo_cr32_read (gdbarch, regcache, cookednum, buf);
