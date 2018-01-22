@@ -1845,15 +1845,8 @@ cooked_read_test (struct gdbarch *gdbarch)
 
       SELF_CHECK (REG_VALID == readwrite.cooked_read (regnum, buf.data ()));
 
-      if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_mt)
-	{
-	  /* MT pseudo registers are banked, and different banks are
-	     selected by a raw registers, so GDB needs to write to
-	     that raw register to get different banked pseudo registers.
-	     See mt_select_coprocessor.  */
-	  SELF_CHECK (mock_target.fetch_registers_called == 0);
-	  SELF_CHECK (mock_target.store_registers_called == 0);
-	}
+      SELF_CHECK (mock_target.fetch_registers_called == 0);
+      SELF_CHECK (mock_target.store_registers_called == 0);
 
       /* Some SPU pseudo registers are got via TARGET_OBJECT_SPU.  */
       if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
@@ -1872,12 +1865,6 @@ cooked_read_test (struct gdbarch *gdbarch)
        regnum < gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
        regnum++)
     {
-      if (gdbarch_bfd_arch_info (gdbarch)->arch == bfd_arch_mt)
-	{
-	  /* Trigger an internal error otherwise.  */
-	  continue;
-	}
-
       if (register_size (gdbarch, regnum) == 0)
 	continue;
 

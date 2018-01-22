@@ -29,6 +29,7 @@ case $targ in
  hppa*-*-hpux* | \
  ia64-*-hpux* | \
  *-*-vxworks* | \
+ mt-*-* | \
  null)
     echo "*** Configuration $targ is obsolete." >&2
     echo "*** Support has been REMOVED." >&2
@@ -440,11 +441,6 @@ mn10300-*-*)
 msp430*-*-elf)
 	gdb_target_obs="msp430-tdep.o"
 	gdb_sim=../sim/msp430/libsim.a
-	;;
-
-mt-*-*)
-	# Target: Morpho Technologies ms1 processor
-	gdb_target_obs="mt-tdep.o"
 	;;
 
 nds32*-*-elf)

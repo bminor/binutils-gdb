@@ -733,7 +733,6 @@ ALL_TARGET_OBS = \
 	mn10300-tdep.o \
 	moxie-tdep.o \
 	msp430-tdep.o \
-	mt-tdep.o \
 	nbsd-tdep.o \
 	nds32-tdep.o \
 	nios2-linux-tdep.o \

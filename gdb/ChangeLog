@@ -1,5 +1,12 @@
 2018-01-22  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (ALL_TARGET_OBS): Remove mt-tdep.o.
+	* configure.tgt: Remove target mt.
+	* mt-tdep.c: Remove.
+	* regcache.c (cooked_read_test): Remove the check for mt.
+
+2018-01-22  Yao Qi  <yao.qi@linaro.org>
+
 	* jit.c (jit_frame_prev_register): Call regcache::cooked_read
 	instead of gdbarch_pseudo_register_read_value.
 
