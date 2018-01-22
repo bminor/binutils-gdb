@@ -1,3 +1,7 @@
+2018-01-22  Maciej W. Rozycki  <macro@mips.com>
+
+	* MAINTAINERS: Update my company e-mail address.
+
 2018-01-03  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (merge_gnu_build_notes): Add cast to maximum address
