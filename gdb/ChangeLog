@@ -1,5 +1,10 @@
 2018-01-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* dwarf2read.c (need_gnat_info): Return nonzero if the cu's
+	language is Ada.
+
+2018-01-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* linespec.c (create_sals_line_offset): Remove code that preserved
 	the symtab_and_line's line number.
 

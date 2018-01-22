@@ -21816,15 +21816,9 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
 static int
 need_gnat_info (struct dwarf2_cu *cu)
 {
-  /* FIXME: brobecker/2010-10-12: As of now, only the AdaCore version
-     of GNAT produces this auxiliary information, without any indication
-     that it is produced.  Part of enhancing the FSF version of GNAT
-     to produce that information will be to put in place an indicator
-     that we can use in order to determine whether the descriptive type
-     info is available or not.  One suggestion that has been made is
-     to use a new attribute, attached to the CU die.  For now, assume
-     that the descriptive type info is not available.  */
-  return 0;
+  /* Assume that the Ada compiler was GNAT, which always produces
+     the auxiliary information.  */
+  return (cu->language == language_ada);
 }
 
 /* Return the auxiliary type of the die in question using its
