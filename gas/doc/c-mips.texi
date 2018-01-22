@@ -1106,8 +1106,8 @@ from the XPA Extension from that point on in the assembly.  The
 @kindex @code{.set nomips16e2}
 The directive @code{.set mips16e2} makes the assembler accept instructions
 from the MIPS16e2 Application Specific Extension from that point on in the
-assembly, whenever in MIPS16 mode.  The @code{.set nomips16e2} prevents
-MIPS16e2 instructions from being accepted, in MIPS16 mode.  Neither
+assembly, whenever in MIPS16 mode.  The @code{.set nomips16e2} directive
+prevents MIPS16e2 instructions from being accepted, in MIPS16 mode.  Neither
 directive affects the state of MIPS16 mode being active itself which has
 separate controls.
 
