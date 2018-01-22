@@ -1,3 +1,11 @@
+2018-01-22  Oleg Endo  <olegendo@gcc.gnu.org>
+
+	PR 22737
+	* config/tc-rx.c (rx_start_line): Handle escaped double-quote character.
+	* testsuite/gas/rx/pr22737.s: New test.
+	* testsuite/gas/rx/pr22737.d: Likewise.
+	* testsuite/gas/rx/rx.exp: Run the new test.
+
 2018-01-19  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (ToC macro): Remove spurious comment.
