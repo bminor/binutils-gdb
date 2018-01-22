@@ -1609,6 +1609,7 @@ maintenance_print_remote_registers (const char *args, int from_tty)
 #include "selftest.h"
 #include "selftest-arch.h"
 #include "gdbthread.h"
+#include "target-float.h"
 
 namespace selftests {
 
@@ -1926,6 +1927,127 @@ cooked_read_test (struct gdbarch *gdbarch)
     }
 }
 
+/* Test regcache::cooked_write by writing some expected contents to
+   registers, and checking that contents read from registers and the
+   expected contents are the same.  */
+
+static void
+cooked_write_test (struct gdbarch *gdbarch)
+{
+  /* Error out if debugging something, because we're going to push the
+     test target, which would pop any existing target.  */
+  if (current_target.to_stratum >= process_stratum)
+    error (_("target already pushed"));
+
+  /* Create a mock environment.  A process_stratum target pushed.  */
+
+  target_ops_no_register mock_target;
+
+  /* Push the process_stratum target so we can mock accessing
+     registers.  */
+  push_target (&mock_target);
+
+  /* Pop it again on exit (return/exception).  */
+  struct on_exit
+  {
+    ~on_exit ()
+    {
+      pop_all_targets_at_and_above (process_stratum);
+    }
+  } pop_targets;
+
+  readwrite_regcache readwrite (gdbarch);
+
+  const int num_regs = (gdbarch_num_regs (gdbarch)
+			+ gdbarch_num_pseudo_regs (gdbarch));
+
+  for (auto regnum = 0; regnum < num_regs; regnum++)
+    {
+      if (register_size (gdbarch, regnum) == 0
+	  || gdbarch_cannot_store_register (gdbarch, regnum))
+	continue;
+
+      auto bfd_arch = gdbarch_bfd_arch_info (gdbarch)->arch;
+
+      if ((bfd_arch == bfd_arch_sparc
+	   /* SPARC64_CWP_REGNUM, SPARC64_PSTATE_REGNUM,
+	      SPARC64_ASI_REGNUM and SPARC64_CCR_REGNUM are hard to test.  */
+	   && gdbarch_ptr_bit (gdbarch) == 64
+	   && (regnum >= gdbarch_num_regs (gdbarch)
+	       && regnum <= gdbarch_num_regs (gdbarch) + 4))
+	  || (bfd_arch == bfd_arch_sh
+	      /* FPSCR_C_REGNUM in sh64 is hard to test.  */
+	      && gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_sh5
+	      && regnum == 243)
+	  || (bfd_arch == bfd_arch_spu
+	      /* SPU pseudo registers except SPU_SP_REGNUM are got by
+		 TARGET_OBJECT_SPU.  */
+	      && regnum >= gdbarch_num_regs (gdbarch) && regnum != 130))
+	continue;
+
+      std::vector<gdb_byte> expected (register_size (gdbarch, regnum), 0);
+      std::vector<gdb_byte> buf (register_size (gdbarch, regnum), 0);
+      const auto type = register_type (gdbarch, regnum);
+
+      if (TYPE_CODE (type) == TYPE_CODE_FLT
+	  || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
+	{
+	  /* Generate valid float format.  */
+	  target_float_from_string (expected.data (), type, "1.25");
+	}
+      else if (TYPE_CODE (type) == TYPE_CODE_INT
+	       || TYPE_CODE (type) == TYPE_CODE_ARRAY
+	       || TYPE_CODE (type) == TYPE_CODE_PTR
+	       || TYPE_CODE (type) == TYPE_CODE_UNION
+	       || TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	{
+	  if (bfd_arch == bfd_arch_ia64
+	      || (regnum >= gdbarch_num_regs (gdbarch)
+		  && (bfd_arch == bfd_arch_xtensa
+		      || bfd_arch == bfd_arch_bfin
+		      || bfd_arch == bfd_arch_m32c
+		      /* m68hc11 pseudo registers are in memory.  */
+		      || bfd_arch == bfd_arch_m68hc11
+		      || bfd_arch == bfd_arch_m68hc12
+		      || bfd_arch == bfd_arch_s390))
+	      || (bfd_arch == bfd_arch_frv
+		  /* FRV pseudo registers except iacc0.  */
+		  && regnum > gdbarch_num_regs (gdbarch)))
+	    {
+	      /* Skip setting the expected values for some architecture
+		 registers.  */
+	    }
+	  else if (bfd_arch == bfd_arch_rl78 && regnum == 40)
+	    {
+	      /* RL78_PC_REGNUM */
+	      for (auto j = 0; j < register_size (gdbarch, regnum) - 1; j++)
+		expected[j] = j;
+	    }
+	  else
+	    {
+	      for (auto j = 0; j < register_size (gdbarch, regnum); j++)
+		expected[j] = j;
+	    }
+	}
+      else if (TYPE_CODE (type) == TYPE_CODE_FLAGS)
+	{
+	  /* No idea how to test flags.  */
+	  continue;
+	}
+      else
+	{
+	  /* If we don't know how to create the expected value for the
+	     this type, make it fail.  */
+	  SELF_CHECK (0);
+	}
+
+      readwrite.cooked_write (regnum, expected.data ());
+
+      SELF_CHECK (readwrite.cooked_read (regnum, buf.data ()) == REG_VALID);
+      SELF_CHECK (expected == buf);
+    }
+}
+
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
@@ -1972,5 +2094,7 @@ Takes an optional file parameter."),
 
   selftests::register_test_foreach_arch ("regcache::cooked_read_test",
 					 selftests::cooked_read_test);
+  selftests::register_test_foreach_arch ("regcache::cooked_write_test",
+					 selftests::cooked_write_test);
 #endif
 }

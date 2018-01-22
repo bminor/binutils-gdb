@@ -1,5 +1,10 @@
 2018-01-22  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.c (cooked_write_test): New function.
+	(_initialize_regcache): Register the test.
+
+2018-01-22  Yao Qi  <yao.qi@linaro.org>
+
 	* ia64-tdep.c (ia64_pseudo_register_read): Call
 	regcache->cooked_read instead of regcache_cooked_read_unsigned.
 	* m32c-tdep.c (m32c_cat_read): Likewise.
