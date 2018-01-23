@@ -8045,15 +8045,13 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->tdesc = tdesc;
 
   /* Check any target description for validity.  */
-  if (tdesc_has_registers (tdesc))
+  gdb_assert (tdesc_has_registers (tdep->tdesc));
+  if (!s390_tdesc_valid (tdep, tdesc_data))
     {
-      if (!s390_tdesc_valid (tdep, tdesc_data))
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  xfree (tdep);
-	  gdbarch_free (gdbarch);
-	  return NULL;
-	}
+      tdesc_data_cleanup (tdesc_data);
+      xfree (tdep);
+      gdbarch_free (gdbarch);
+      return NULL;
     }
 
   /* Determine vector ABI.  */

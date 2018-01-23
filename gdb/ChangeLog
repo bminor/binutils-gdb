@@ -1,5 +1,10 @@
 2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c (s390_gdbarch_init): Use gdb_assert for
+	tdesc_has_registers check
+
+2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c (s390_tdesc_valid): New function.
 	(s390_validate_reg_range): New macro.
 	(s390_gdbarch_init): Adjust.
