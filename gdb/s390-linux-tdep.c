@@ -30,6 +30,7 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
+#include "osabi.h"
 #include "regcache.h"
 #include "trad-frame.h"
 #include "frame-base.h"
@@ -8017,32 +8018,107 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
   info.tdesc_data = tdesc_data;
 
-  /* Default ABI and register size.  */
+  set_gdbarch_believe_pcc_promotion (gdbarch, 0);
+  set_gdbarch_char_signed (gdbarch, 0);
+
+  /* S/390 GNU/Linux uses either 64-bit or 128-bit long doubles.
+     We can safely let them default to 128-bit, since the debug info
+     will give the size of type actually used in each case.  */
+  set_gdbarch_long_double_bit (gdbarch, 128);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+
+  /* Amount PC must be decremented by after a breakpoint.  This is
+     often the number of bytes returned by gdbarch_breakpoint_from_pc but not
+     always.  */
+  set_gdbarch_decr_pc_after_break (gdbarch, 2);
+  /* Stack grows downward.  */
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, s390_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, s390_breakpoint::bp_from_kind);
+  set_gdbarch_software_single_step (gdbarch, s390_software_single_step);
+  set_gdbarch_displaced_step_hw_singlestep (gdbarch, s390_displaced_step_hw_singlestep);
+  set_gdbarch_skip_prologue (gdbarch, s390_skip_prologue);
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, s390_stack_frame_destroyed_p);
+
+  set_gdbarch_num_regs (gdbarch, S390_NUM_REGS);
+  set_gdbarch_sp_regnum (gdbarch, S390_SP_REGNUM);
+  set_gdbarch_fp0_regnum (gdbarch, S390_F0_REGNUM);
+  set_gdbarch_stab_reg_to_regnum (gdbarch, s390_dwarf_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_dwarf_reg_to_regnum);
+  set_gdbarch_value_from_register (gdbarch, s390_value_from_register);
+  set_gdbarch_guess_tracepoint_registers (gdbarch, s390_guess_tracepoint_registers);
+  set_gdbarch_pseudo_register_read (gdbarch, s390_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, s390_pseudo_register_write);
+  set_tdesc_pseudo_register_name (gdbarch, s390_pseudo_register_name);
+  set_tdesc_pseudo_register_type (gdbarch, s390_pseudo_register_type);
+  set_tdesc_pseudo_register_reggroup_p (gdbarch,
+					s390_pseudo_register_reggroup_p);
+  set_gdbarch_ax_pseudo_register_collect (gdbarch,
+					  s390_ax_pseudo_register_collect);
+  set_gdbarch_ax_pseudo_register_push_stack
+      (gdbarch, s390_ax_pseudo_register_push_stack);
+  set_gdbarch_gen_return_address (gdbarch, s390_gen_return_address);
+
+  /* Inferior function calls.  */
+  set_gdbarch_push_dummy_call (gdbarch, s390_push_dummy_call);
+  set_gdbarch_dummy_id (gdbarch, s390_dummy_id);
+  set_gdbarch_frame_align (gdbarch, s390_frame_align);
+  set_gdbarch_return_value (gdbarch, s390_return_value);
+
+  /* Frame handling.  */
+  dwarf2_frame_set_init_reg (gdbarch, s390_dwarf2_frame_init_reg);
+  dwarf2_frame_set_adjust_regnum (gdbarch, s390_adjust_frame_regnum);
+  dwarf2_append_unwinders (gdbarch);
+  set_gdbarch_unwind_pc (gdbarch, s390_unwind_pc);
+  set_gdbarch_unwind_sp (gdbarch, s390_unwind_sp);
+
+  /* Displaced stepping.  */
+  set_gdbarch_displaced_step_copy_insn (gdbarch,
+					s390_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_fixup (gdbarch, s390_displaced_step_fixup);
+  set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
+  set_gdbarch_max_insn_length (gdbarch, S390_MAX_INSTR_SIZE);
+
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_s390_31:
-      tdep->abi = ABI_LINUX_S390;
+      set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
       break;
 
     case bfd_mach_s390_64:
-      tdep->abi = ABI_LINUX_ZSERIES;
+      set_gdbarch_long_bit (gdbarch, 64);
+      set_gdbarch_long_long_bit (gdbarch, 64);
+      set_gdbarch_ptr_bit (gdbarch, 64);
+      set_gdbarch_address_class_type_flags (gdbarch,
+					    s390_address_class_type_flags);
+      set_gdbarch_address_class_type_flags_to_name (gdbarch,
+						    s390_address_class_type_flags_to_name);
+      set_gdbarch_address_class_name_to_type_flags (gdbarch,
+						    s390_address_class_name_to_type_flags);
       break;
-
-    default:
-      xfree (tdep);
-      gdbarch_free (gdbarch);
-      return NULL;
     }
 
-  /* Use default target description if none provided by the target.  */
-  if (!tdesc_has_registers (tdesc))
-    {
-      if (tdep->abi == ABI_LINUX_S390)
-	tdesc = tdesc_s390_linux32;
-      else
-	tdesc = tdesc_s390x_linux64;
-    }
-  tdep->tdesc = tdesc;
+  /* SystemTap functions.  */
+  set_gdbarch_stap_register_prefixes (gdbarch, stap_register_prefixes);
+  set_gdbarch_stap_register_indirection_prefixes (gdbarch,
+					  stap_register_indirection_prefixes);
+  set_gdbarch_stap_register_indirection_suffixes (gdbarch,
+					  stap_register_indirection_suffixes);
+
+  set_gdbarch_disassembler_options (gdbarch, &s390_disassembler_options);
+  set_gdbarch_valid_disassembler_options (gdbarch,
+					  disassembler_options_s390 ());
+
+  /* Process record-replay */
+  set_gdbarch_process_record (gdbarch, s390_process_record);
+
+  /* Miscellaneous.  */
+  set_gdbarch_stap_is_single_operand (gdbarch, s390_stap_is_single_operand);
+  set_gdbarch_gcc_target_options (gdbarch, s390_gcc_target_options);
+  set_gdbarch_gnu_triplet_regexp (gdbarch, s390_gnu_triplet_regexp);
+
+  /* Initialize the OSABI.  */
+  gdbarch_init_osabi (info, gdbarch);
 
   /* Check any target description for validity.  */
   gdb_assert (tdesc_has_registers (tdep->tdesc));
@@ -8085,51 +8161,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return arches->gdbarch;
     }
 
-  set_gdbarch_believe_pcc_promotion (gdbarch, 0);
-  set_gdbarch_char_signed (gdbarch, 0);
-
-  /* S/390 GNU/Linux uses either 64-bit or 128-bit long doubles.
-     We can safely let them default to 128-bit, since the debug info
-     will give the size of type actually used in each case.  */
-  set_gdbarch_long_double_bit (gdbarch, 128);
-  set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
-
-  /* Amount PC must be decremented by after a breakpoint.  This is
-     often the number of bytes returned by gdbarch_breakpoint_from_pc but not
-     always.  */
-  set_gdbarch_decr_pc_after_break (gdbarch, 2);
-  /* Stack grows downward.  */
-  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_kind_from_pc (gdbarch, s390_breakpoint::kind_from_pc);
-  set_gdbarch_sw_breakpoint_from_kind (gdbarch, s390_breakpoint::bp_from_kind);
-  set_gdbarch_software_single_step (gdbarch, s390_software_single_step);
-  set_gdbarch_displaced_step_hw_singlestep (gdbarch, s390_displaced_step_hw_singlestep);
-  set_gdbarch_skip_prologue (gdbarch, s390_skip_prologue);
-  set_gdbarch_stack_frame_destroyed_p (gdbarch, s390_stack_frame_destroyed_p);
-
-  set_gdbarch_num_regs (gdbarch, S390_NUM_REGS);
-  set_gdbarch_sp_regnum (gdbarch, S390_SP_REGNUM);
-  set_gdbarch_fp0_regnum (gdbarch, S390_F0_REGNUM);
-  set_gdbarch_stab_reg_to_regnum (gdbarch, s390_dwarf_reg_to_regnum);
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_dwarf_reg_to_regnum);
-  set_gdbarch_value_from_register (gdbarch, s390_value_from_register);
-  set_gdbarch_core_read_description (gdbarch, s390_core_read_description);
-  set_gdbarch_iterate_over_regset_sections (gdbarch,
-					    s390_iterate_over_regset_sections);
-  set_gdbarch_cannot_store_register (gdbarch, s390_cannot_store_register);
-  set_gdbarch_write_pc (gdbarch, s390_write_pc);
-  set_gdbarch_guess_tracepoint_registers (gdbarch, s390_guess_tracepoint_registers);
-  set_gdbarch_pseudo_register_read (gdbarch, s390_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, s390_pseudo_register_write);
-  set_tdesc_pseudo_register_name (gdbarch, s390_pseudo_register_name);
-  set_tdesc_pseudo_register_type (gdbarch, s390_pseudo_register_type);
-  set_tdesc_pseudo_register_reggroup_p (gdbarch,
-					s390_pseudo_register_reggroup_p);
-  set_gdbarch_ax_pseudo_register_collect (gdbarch,
-					  s390_ax_pseudo_register_collect);
-  set_gdbarch_ax_pseudo_register_push_stack
-      (gdbarch, s390_ax_pseudo_register_push_stack);
-  set_gdbarch_gen_return_address (gdbarch, s390_gen_return_address);
   tdesc_use_registers (gdbarch, tdep->tdesc, tdesc_data);
   set_gdbarch_register_name (gdbarch, s390_register_name);
 
@@ -8151,93 +8182,83 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, tdep->pc_regnum);
   set_gdbarch_num_pseudo_regs (gdbarch, last_pseudo_reg - first_pseudo_reg);
 
-  /* Inferior function calls.  */
-  set_gdbarch_push_dummy_call (gdbarch, s390_push_dummy_call);
-  set_gdbarch_dummy_id (gdbarch, s390_dummy_id);
-  set_gdbarch_frame_align (gdbarch, s390_frame_align);
-  set_gdbarch_return_value (gdbarch, s390_return_value);
+  frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &s390_stub_frame_unwind);
+  frame_unwind_append_unwinder (gdbarch, &s390_frame_unwind);
+  frame_base_set_default (gdbarch, &s390_frame_base);
+
+  return gdbarch;
+}
+
+/* Initialize OSABI common for GNU/Linux on 31- and 64-bit systems.  */
+
+static void
+s390_linux_init_abi_any (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  linux_init_abi (info, gdbarch);
+
+  /* Register handling.  */
+  set_gdbarch_core_read_description (gdbarch, s390_core_read_description);
+  set_gdbarch_iterate_over_regset_sections (gdbarch,
+					    s390_iterate_over_regset_sections);
+  set_gdbarch_write_pc (gdbarch, s390_write_pc);
+  set_gdbarch_cannot_store_register (gdbarch, s390_cannot_store_register);
 
   /* Syscall handling.  */
   set_gdbarch_get_syscall_number (gdbarch, s390_linux_get_syscall_number);
 
   /* Frame handling.  */
-  dwarf2_frame_set_init_reg (gdbarch, s390_dwarf2_frame_init_reg);
-  dwarf2_frame_set_adjust_regnum (gdbarch, s390_adjust_frame_regnum);
-  dwarf2_append_unwinders (gdbarch);
-  frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
-  frame_unwind_append_unwinder (gdbarch, &s390_stub_frame_unwind);
   frame_unwind_append_unwinder (gdbarch, &s390_sigtramp_frame_unwind);
-  frame_unwind_append_unwinder (gdbarch, &s390_frame_unwind);
-  frame_base_set_default (gdbarch, &s390_frame_base);
-  set_gdbarch_unwind_pc (gdbarch, s390_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, s390_unwind_sp);
-
-  /* Displaced stepping.  */
-  set_gdbarch_displaced_step_copy_insn (gdbarch,
-					s390_displaced_step_copy_insn);
-  set_gdbarch_displaced_step_fixup (gdbarch, s390_displaced_step_fixup);
-  set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
-  set_gdbarch_max_insn_length (gdbarch, S390_MAX_INSTR_SIZE);
-
-  /* Note that GNU/Linux is the only OS supported on this
-     platform.  */
-  linux_init_abi (info, gdbarch);
-
-  switch (tdep->abi)
-    {
-    case ABI_LINUX_S390:
-      set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
-      set_solib_svr4_fetch_link_map_offsets
-	(gdbarch, svr4_ilp32_fetch_link_map_offsets);
-
-      set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390);
-      break;
-
-    case ABI_LINUX_ZSERIES:
-      set_gdbarch_long_bit (gdbarch, 64);
-      set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_ptr_bit (gdbarch, 64);
-      set_solib_svr4_fetch_link_map_offsets
-	(gdbarch, svr4_lp64_fetch_link_map_offsets);
-      set_gdbarch_address_class_type_flags (gdbarch,
-					    s390_address_class_type_flags);
-      set_gdbarch_address_class_type_flags_to_name (gdbarch,
-						    s390_address_class_type_flags_to_name);
-      set_gdbarch_address_class_name_to_type_flags (gdbarch,
-						    s390_address_class_name_to_type_flags);
-      set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390X);
-      break;
-    }
-
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
 
-  /* SystemTap functions.  */
-  set_gdbarch_stap_register_prefixes (gdbarch, stap_register_prefixes);
-  set_gdbarch_stap_register_indirection_prefixes (gdbarch,
-					  stap_register_indirection_prefixes);
-  set_gdbarch_stap_register_indirection_suffixes (gdbarch,
-					  stap_register_indirection_suffixes);
-  set_gdbarch_stap_is_single_operand (gdbarch, s390_stap_is_single_operand);
-  set_gdbarch_gcc_target_options (gdbarch, s390_gcc_target_options);
-  set_gdbarch_gnu_triplet_regexp (gdbarch, s390_gnu_triplet_regexp);
-
   /* Support reverse debugging.  */
-
-  set_gdbarch_process_record (gdbarch, s390_process_record);
   set_gdbarch_process_record_signal (gdbarch, s390_linux_record_signal);
-
   s390_init_linux_record_tdep (&s390_linux_record_tdep, ABI_LINUX_S390);
   s390_init_linux_record_tdep (&s390x_linux_record_tdep, ABI_LINUX_ZSERIES);
+}
 
-  set_gdbarch_disassembler_options (gdbarch, &s390_disassembler_options);
-  set_gdbarch_valid_disassembler_options (gdbarch,
-					  disassembler_options_s390 ());
+/* Initialize OSABI for GNU/Linux on 31-bit systems.  */
 
-  return gdbarch;
+static void
+s390_linux_init_abi_31 (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  const struct target_desc *tdesc = info.target_desc;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->abi = ABI_LINUX_S390;
+  if (!tdesc_has_registers (tdesc))
+    tdesc = tdesc_s390_linux32;
+  tdep->tdesc = tdesc;
+
+  s390_linux_init_abi_any (info, gdbarch);
+
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
+  set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390);
+}
+
+/* Initialize OSABI for GNU/Linux on 64-bit systems.  */
+
+static void
+s390_linux_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  const struct target_desc *tdesc = info.target_desc;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->abi = ABI_LINUX_ZSERIES;
+  if (!tdesc_has_registers (tdesc))
+    tdesc = tdesc_s390x_linux64;
+  tdep->tdesc = tdesc;
+
+  s390_linux_init_abi_any (info, gdbarch);
+
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_lp64_fetch_link_map_offsets);
+  set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390X);
 }
 
 void
@@ -8245,6 +8266,12 @@ _initialize_s390_tdep (void)
 {
   /* Hook us into the gdbarch mechanism.  */
   register_gdbarch_init (bfd_arch_s390, s390_gdbarch_init);
+
+  /* Hook us into the OSABI mechanism.  */
+  gdbarch_register_osabi (bfd_arch_s390, bfd_mach_s390_31, GDB_OSABI_LINUX,
+			  s390_linux_init_abi_31);
+  gdbarch_register_osabi (bfd_arch_s390, bfd_mach_s390_64, GDB_OSABI_LINUX,
+			  s390_linux_init_abi_64);
 
   /* Initialize the GNU/Linux target descriptions.  */
   initialize_tdesc_s390_linux32 ();

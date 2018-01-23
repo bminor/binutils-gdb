@@ -1,5 +1,12 @@
 2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c (osabi.h): New include.
+	(s390_linux_init_abi_31, s390_linux_init_abi_64)
+	(s390_linux_init_abi_any): New functions.
+	(s390_gdbarch_init, _initialize_s390_tdep): Adjust.
+
+2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c (s390_gdbarch_init): Use gdb_assert for
 	tdesc_has_registers check
 
