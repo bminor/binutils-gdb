@@ -1,5 +1,10 @@
 2018-01-23  Maciej W. Rozycki  <macro@mips.com>
 
+	* config/tc-mips.c (md_show_usage): Correctly indicate the
+	configuration-specific default ABI.
+
+2018-01-23  Maciej W. Rozycki  <macro@mips.com>
+
 	* config/tc-mips.c (md_show_usage): Report `-mmips16e2' and
 	`-mno-mips16e2' options.
 

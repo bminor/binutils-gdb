@@ -20047,9 +20047,14 @@ MIPS options:\n\
   fputc ('\n', stream);
 
   fprintf (stream, _("\
--32			create o32 ABI object file (default)\n\
--n32			create n32 ABI object file\n\
--64			create 64 ABI object file\n"));
+-32			create o32 ABI object file%s\n"),
+	   MIPS_DEFAULT_ABI == O32_ABI ? _(" (default)") : "");
+  fprintf (stream, _("\
+-n32			create n32 ABI object file%s\n"),
+	   MIPS_DEFAULT_ABI == N32_ABI ? _(" (default)") : "");
+  fprintf (stream, _("\
+-64			create 64 ABI object file%s\n"),
+	   MIPS_DEFAULT_ABI == N64_ABI ? _(" (default)") : "");
 }
 
 #ifdef TE_IRIX
