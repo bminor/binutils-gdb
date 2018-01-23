@@ -195,6 +195,72 @@ struct tdesc_type : tdesc_element
 
 typedef std::unique_ptr<tdesc_type> tdesc_type_up;
 
+struct tdesc_type_builtin : tdesc_type
+{
+  tdesc_type_builtin (const std::string &name, enum tdesc_type_kind kind)
+  : tdesc_type (name, kind)
+  {}
+
+  void accept (tdesc_element_visitor &v) const override
+  {
+    v.visit (this);
+  }
+};
+
+/* tdesc_type for vector types.  */
+
+struct tdesc_type_vector : tdesc_type
+{
+  tdesc_type_vector (const std::string &name, tdesc_type *element_type_,
+		     int count_)
+  : tdesc_type (name, TDESC_TYPE_VECTOR),
+    element_type (element_type_), count (count_)
+  {}
+
+  void accept (tdesc_element_visitor &v) const override
+  {
+    v.visit (this);
+  }
+
+  struct tdesc_type *element_type;
+  int count;
+};
+
+/* A named type from a target description.  */
+
+struct tdesc_type_field
+{
+  tdesc_type_field (const std::string &name_, tdesc_type *type_,
+		    int start_, int end_)
+  : name (name_), type (type_), start (start_), end (end_)
+  {}
+
+  std::string name;
+  struct tdesc_type *type;
+  /* For non-enum-values, either both are -1 (non-bitfield), or both are
+     not -1 (bitfield).  For enum values, start is the value (which could be
+     -1), end is -1.  */
+  int start, end;
+};
+
+/* tdesc_type for struct, union, flags, and enum types.  */
+
+struct tdesc_type_with_fields : tdesc_type
+{
+  tdesc_type_with_fields (const std::string &name, tdesc_type_kind kind,
+			  int size_ = 0)
+  : tdesc_type (name, kind), size (size_)
+  {}
+
+  void accept (tdesc_element_visitor &v) const override
+  {
+    v.visit (this);
+  }
+
+  std::vector<tdesc_type_field> fields;
+  int size;
+};
+
 /* A feature from a target description.  Each feature is a collection
    of other elements, e.g. registers and types.  */
 

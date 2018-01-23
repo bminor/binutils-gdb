@@ -39,6 +39,28 @@ tdesc_reg::tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
   tdesc_type = tdesc_named_type (feature, type.c_str ());
 }
 
+/* Predefined types.  */
+static tdesc_type_builtin tdesc_predefined_types[] =
+{
+  { "bool", TDESC_TYPE_BOOL },
+  { "int8", TDESC_TYPE_INT8 },
+  { "int16", TDESC_TYPE_INT16 },
+  { "int32", TDESC_TYPE_INT32 },
+  { "int64", TDESC_TYPE_INT64 },
+  { "int128", TDESC_TYPE_INT128 },
+  { "uint8", TDESC_TYPE_UINT8 },
+  { "uint16", TDESC_TYPE_UINT16 },
+  { "uint32", TDESC_TYPE_UINT32 },
+  { "uint64", TDESC_TYPE_UINT64 },
+  { "uint128", TDESC_TYPE_UINT128 },
+  { "code_ptr", TDESC_TYPE_CODE_PTR },
+  { "data_ptr", TDESC_TYPE_DATA_PTR },
+  { "ieee_single", TDESC_TYPE_IEEE_SINGLE },
+  { "ieee_double", TDESC_TYPE_IEEE_DOUBLE },
+  { "arm_fpa_ext", TDESC_TYPE_ARM_FPA_EXT },
+  { "i387_ext", TDESC_TYPE_I387_EXT }
+};
+
 void tdesc_feature::accept (tdesc_element_visitor &v) const
 {
   v.visit_pre (this);
@@ -84,6 +106,36 @@ bool tdesc_feature::operator== (const tdesc_feature &other) const
   return true;
 }
 
+/* Lookup a predefined type.  */
+
+static struct tdesc_type *
+tdesc_predefined_type (enum tdesc_type_kind kind)
+{
+  for (int ix = 0; ix < ARRAY_SIZE (tdesc_predefined_types); ix++)
+    if (tdesc_predefined_types[ix].kind == kind)
+      return &tdesc_predefined_types[ix];
+
+  gdb_assert_not_reached ("bad predefined tdesc type");
+}
+
+/* See common/tdesc.h.  */
+
+struct tdesc_type *
+tdesc_named_type (const struct tdesc_feature *feature, const char *id)
+{
+  /* First try target-defined types.  */
+  for (const tdesc_type_up &type : feature->types)
+    if (type->name == id)
+      return type.get ();
+
+  /* Next try the predefined types.  */
+  for (int ix = 0; ix < ARRAY_SIZE (tdesc_predefined_types); ix++)
+    if (tdesc_predefined_types[ix].name == id)
+      return &tdesc_predefined_types[ix];
+
+  return NULL;
+}
+
 /* See common/tdesc.h.  */
 
 void
@@ -95,4 +147,145 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 				  group, bitsize, type);
 
   feature->registers.emplace_back (reg);
+}
+
+/* See common/tdesc.h.  */
+
+struct tdesc_type *
+tdesc_create_vector (struct tdesc_feature *feature, const char *name,
+		     struct tdesc_type *field_type, int count)
+{
+  tdesc_type_vector *type = new tdesc_type_vector (name, field_type, count);
+  feature->types.emplace_back (type);
+
+  return type;
+}
+
+/* See common/tdesc.h.  */
+
+tdesc_type_with_fields *
+tdesc_create_struct (struct tdesc_feature *feature, const char *name)
+{
+  tdesc_type_with_fields *type
+    = new tdesc_type_with_fields (name, TDESC_TYPE_STRUCT);
+  feature->types.emplace_back (type);
+
+  return type;
+}
+
+/* See common/tdesc.h.  */
+
+void
+tdesc_set_struct_size (tdesc_type_with_fields *type, int size)
+{
+  gdb_assert (type->kind == TDESC_TYPE_STRUCT);
+  gdb_assert (size > 0);
+  type->size = size;
+}
+
+/* See common/tdesc.h.  */
+
+tdesc_type_with_fields *
+tdesc_create_union (struct tdesc_feature *feature, const char *name)
+{
+  tdesc_type_with_fields *type
+    = new tdesc_type_with_fields (name, TDESC_TYPE_UNION);
+  feature->types.emplace_back (type);
+
+  return type;
+}
+
+/* See common/tdesc.h.  */
+
+tdesc_type_with_fields *
+tdesc_create_flags (struct tdesc_feature *feature, const char *name,
+		    int size)
+{
+  gdb_assert (size > 0);
+
+  tdesc_type_with_fields *type
+    = new tdesc_type_with_fields (name, TDESC_TYPE_FLAGS, size);
+  feature->types.emplace_back (type);
+
+  return type;
+}
+
+tdesc_type_with_fields *
+tdesc_create_enum (struct tdesc_feature *feature, const char *name,
+		   int size)
+{
+  gdb_assert (size > 0);
+
+  tdesc_type_with_fields *type
+    = new tdesc_type_with_fields (name, TDESC_TYPE_ENUM, size);
+  feature->types.emplace_back (type);
+
+  return type;
+}
+
+/* See common/tdesc.h.  */
+
+void
+tdesc_add_field (tdesc_type_with_fields *type, const char *field_name,
+		 struct tdesc_type *field_type)
+{
+  gdb_assert (type->kind == TDESC_TYPE_UNION
+	      || type->kind == TDESC_TYPE_STRUCT);
+
+  /* Initialize start and end so we know this is not a bit-field
+     when we print-c-tdesc.  */
+  type->fields.emplace_back (field_name, field_type, -1, -1);
+}
+
+void
+tdesc_add_typed_bitfield (tdesc_type_with_fields *type, const char *field_name,
+			  int start, int end, struct tdesc_type *field_type)
+{
+  gdb_assert (type->kind == TDESC_TYPE_STRUCT
+	      || type->kind == TDESC_TYPE_FLAGS);
+  gdb_assert (start >= 0 && end >= start);
+
+  type->fields.emplace_back (field_name, field_type, start, end);
+}
+
+/* See common/tdesc.h.  */
+
+void
+tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
+		    int start, int end)
+{
+  struct tdesc_type *field_type;
+
+  gdb_assert (start >= 0 && end >= start);
+
+  if (type->size > 4)
+    field_type = tdesc_predefined_type (TDESC_TYPE_UINT64);
+  else
+    field_type = tdesc_predefined_type (TDESC_TYPE_UINT32);
+
+  tdesc_add_typed_bitfield (type, field_name, start, end, field_type);
+}
+
+/* See common/tdesc.h.  */
+
+void
+tdesc_add_flag (tdesc_type_with_fields *type, int start,
+		const char *flag_name)
+{
+  gdb_assert (type->kind == TDESC_TYPE_FLAGS
+	      || type->kind == TDESC_TYPE_STRUCT);
+
+  type->fields.emplace_back (flag_name,
+			     tdesc_predefined_type (TDESC_TYPE_BOOL),
+			     start, start);
+}
+
+void
+tdesc_add_enum_value (tdesc_type_with_fields *type, int value,
+		      const char *name)
+{
+  gdb_assert (type->kind == TDESC_TYPE_ENUM);
+  type->fields.emplace_back (name,
+			     tdesc_predefined_type (TDESC_TYPE_INT32),
+			     value, -1);
 }
