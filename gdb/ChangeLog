@@ -1,5 +1,20 @@
 2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c (s390_record_address_mask)
+	(s390_record_calc_disp_common, s390_record_calc_disp)
+	(s390_record_calc_disp_vsce, s390_record_calc_rl, s390_popcnt)
+	(s390_record_gpr_g, s390_record_gpr_h, s390_record_vr)
+	(s390_process_record): Move to s390-tdep.c.
+	(s390_linux_init_abi_any): Adjust.
+	* s390-tdep.c (s390_record_address_mask)
+	(s390_record_calc_disp_common, s390_record_calc_disp)
+	(s390_record_calc_disp_vsce, s390_record_calc_rl, s390_popcnt)
+	(s390_record_gpr_g, s390_record_gpr_h, s390_record_vr)
+	(s390_process_record): Moved from s390-linux-tdep.c
+	(s390_gdbarch_init): Adjust.
+
+2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
 	* s390-linux-nat.c (s390-tdep.h): New include.
 	* Makefile.in (ALL_TARGET_OBS): Add s390-tdep.o.
 	(HFILES_NO_SRCDIR): Add s390-tdep.h.
