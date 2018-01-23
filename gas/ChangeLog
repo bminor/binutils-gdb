@@ -1,5 +1,11 @@
 2018-01-23  Maciej W. Rozycki  <macro@mips.com>
 
+	* configure.ac: Also set `mips_default_abi' to N32_ABI for
+	`mips64*-ps2-elf*'.
+	* configure: Regenerate.
+
+2018-01-23  Maciej W. Rozycki  <macro@mips.com>
+
 	* config/tc-mips.c (options): Remove OPTION_COMPAT_ARCH_BASE
 	enum value.
 
