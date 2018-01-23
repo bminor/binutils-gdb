@@ -1,3 +1,8 @@
+2018-01-23  Maciej W. Rozycki  <macro@mips.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_final_link): Update a stale
+	`mips_elf32_section_processing' comment reference.
+
 2018-01-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22721
