@@ -1,3 +1,8 @@
+2018-01-23  Maciej W. Rozycki  <macro@mips.com>
+
+	* config/tc-mips.c (options): Remove OPTION_COMPAT_ARCH_BASE
+	enum value.
+
 2018-01-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .pconfig.
