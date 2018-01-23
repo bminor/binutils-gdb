@@ -1,5 +1,13 @@
 2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
+	* s390-linux-tdep (s390_abi_kind) <ABI_NONE>: New default field.
+	(gdbarch_tdep) <have_upper, have_vx>: New fields.
+	(s390_gdbarch_tdep_alloc): New function.
+	(s390_gdbarch_init): Allocate tdep at start and use its fields
+	instead of separate variables.
+
+2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c (s390_gdbarch_init): Remove duplicate checks
 	when looking for cached gdbarch and add comment for remaining.
 

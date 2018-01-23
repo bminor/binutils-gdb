@@ -85,6 +85,7 @@ static char *s390_disassembler_options;
 
 enum s390_abi_kind
 {
+  ABI_NONE,
   ABI_LINUX_S390,
   ABI_LINUX_ZSERIES
 };
@@ -111,9 +112,11 @@ struct gdbarch_tdep
   int cc_regnum;
   int v0_full_regnum;
 
+  bool have_upper;
   int have_linux_v1;
   int have_linux_v2;
   int have_tdb;
+  bool have_vx;
   bool have_gs;
 };
 
@@ -7804,6 +7807,32 @@ s390_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
   record_tdep->ioctl_FIOQSIZE = 0x545e;
 }
 
+/* Allocate and initialize new gdbarch_tdep.  Caller is responsible to free
+   memory after use.  */
+
+static struct gdbarch_tdep *
+s390_gdbarch_tdep_alloc ()
+{
+  struct gdbarch_tdep *tdep = XCNEW (struct gdbarch_tdep);
+
+  tdep->abi = ABI_NONE;
+  tdep->vector_abi = S390_VECTOR_ABI_NONE;
+
+  tdep->gpr_full_regnum = -1;
+  tdep->v0_full_regnum = -1;
+  tdep->pc_regnum = -1;
+  tdep->cc_regnum = -1;
+
+  tdep->have_upper = false;
+  tdep->have_linux_v1 = 0;
+  tdep->have_linux_v2 = 0;
+  tdep->have_tdb = 0;
+  tdep->have_vx = false;
+  tdep->have_gs = false;
+
+  return tdep;
+}
+
 /* Set up gdbarch struct.  */
 
 static struct gdbarch *
@@ -7811,16 +7840,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   const struct target_desc *tdesc = info.target_desc;
   struct tdesc_arch_data *tdesc_data = NULL;
-  struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
-  enum s390_abi_kind tdep_abi;
-  enum s390_vector_abi_kind vector_abi;
-  int have_upper = 0;
-  int have_linux_v1 = 0;
-  int have_linux_v2 = 0;
-  int have_tdb = 0;
-  int have_vx = 0;
-  int have_gs = 0;
   int first_pseudo_reg, last_pseudo_reg;
   static const char *const stap_register_prefixes[] = { "%", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "(",
@@ -7828,25 +7847,30 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   static const char *const stap_register_indirection_suffixes[] = { ")",
 								    NULL };
 
+  struct gdbarch_tdep *tdep = s390_gdbarch_tdep_alloc ();
+  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
+
   /* Default ABI and register size.  */
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_s390_31:
-      tdep_abi = ABI_LINUX_S390;
+      tdep->abi = ABI_LINUX_S390;
       break;
 
     case bfd_mach_s390_64:
-      tdep_abi = ABI_LINUX_ZSERIES;
+      tdep->abi = ABI_LINUX_ZSERIES;
       break;
 
     default:
+      xfree (tdep);
+      gdbarch_free (gdbarch);
       return NULL;
     }
 
   /* Use default target description if none provided by the target.  */
   if (!tdesc_has_registers (tdesc))
     {
-      if (tdep_abi == ABI_LINUX_S390)
+      if (tdep->abi == ABI_LINUX_S390)
 	tdesc = tdesc_s390_linux32;
       else
 	tdesc = tdesc_s390x_linux64;
@@ -7899,7 +7923,11 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.core");
       if (feature == NULL)
-	return NULL;
+	{
+	  xfree (tdep);
+	  gdbarch_free (gdbarch);
+	  return NULL;
+	}
 
       tdesc_data = tdesc_data_alloc ();
 
@@ -7916,7 +7944,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
       else
 	{
-	  have_upper = 1;
+	  tdep->have_upper = true;
 
 	  for (i = 0; i < 16; i++)
 	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
@@ -7932,6 +7960,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (feature == NULL)
 	{
 	  tdesc_data_cleanup (tdesc_data);
+	  xfree (tdep);
+	  gdbarch_free (gdbarch);
 	  return NULL;
 	}
 
@@ -7945,6 +7975,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (feature == NULL)
 	{
 	  tdesc_data_cleanup (tdesc_data);
+	  xfree (tdep);
+	  gdbarch_free (gdbarch);
 	  return NULL;
 	}
 
@@ -7961,13 +7993,13 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	  if (tdesc_numbered_register (feature, tdesc_data,
 				       S390_LAST_BREAK_REGNUM, "last_break"))
-	    have_linux_v1 = 1;
+	    tdep->have_linux_v1 = 1;
 
 	  if (tdesc_numbered_register (feature, tdesc_data,
 				       S390_SYSTEM_CALL_REGNUM, "system_call"))
-	    have_linux_v2 = 1;
+	    tdep->have_linux_v2 = 1;
 
-	  if (have_linux_v2 > have_linux_v1)
+	  if (tdep->have_linux_v2 > tdep->have_linux_v1)
 	    valid_p = 0;
 	}
 
@@ -7979,7 +8011,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
 						S390_TDB_DWORD0_REGNUM + i,
 						tdb_regs[i]);
-	  have_tdb = 1;
+	  tdep->have_tdb = 1;
 	}
 
       /* Vector registers.  */
@@ -7994,7 +8026,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
 						S390_V16_REGNUM + i,
 						vxrs_high[i]);
-	  have_vx = 1;
+	  tdep->have_vx = true;
 	}
 
       /* Guarded-storage registers.  */
@@ -8005,14 +8037,14 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
 						S390_GSD_REGNUM + i,
 						gs_cb[i]);
-	  have_gs = 1;
+	  tdep->have_gs = true;
 	}
 
       /* Guarded-storage broadcast control.  */
       feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.gsbc");
       if (feature)
 	{
-	  valid_p &= have_gs;
+	  valid_p &= tdep->have_gs;
 
 	  for (i = 0; i < 3; i++)
 	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
@@ -8023,20 +8055,21 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (!valid_p)
 	{
 	  tdesc_data_cleanup (tdesc_data);
+	  xfree (tdep);
+	  gdbarch_free (gdbarch);
 	  return NULL;
 	}
     }
 
   /* Determine vector ABI.  */
-  vector_abi = S390_VECTOR_ABI_NONE;
 #ifdef HAVE_ELF
-  if (have_vx
+  if (tdep->have_vx
       && info.abfd != NULL
       && info.abfd->format == bfd_object
       && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour
       && bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
 				   Tag_GNU_S390_ABI_Vector) == 2)
-    vector_abi = S390_VECTOR_ABI_128;
+    tdep->vector_abi = S390_VECTOR_ABI_128;
 #endif
 
   /* Find a candidate among extant architectures.  */
@@ -8044,28 +8077,20 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (!tdep)
+      struct gdbarch_tdep *tmp = gdbarch_tdep (arches->gdbarch);
+      if (!tmp)
 	continue;
       /* A program can 'choose' not to use the vector registers when they
 	 are present.  Leading to the same tdesc but different tdep and
 	 thereby a different gdbarch.  */
-      if (tdep->vector_abi != vector_abi)
+      if (tmp->vector_abi != tdep->vector_abi)
 	continue;
       if (tdesc_data != NULL)
 	tdesc_data_cleanup (tdesc_data);
+      xfree (tdep);
+      gdbarch_free (gdbarch);
       return arches->gdbarch;
     }
-
-  /* Otherwise create a new gdbarch for the specified machine type.  */
-  tdep = XCNEW (struct gdbarch_tdep);
-  tdep->abi = tdep_abi;
-  tdep->vector_abi = vector_abi;
-  tdep->have_linux_v1 = have_linux_v1;
-  tdep->have_linux_v2 = have_linux_v2;
-  tdep->have_tdb = have_tdb;
-  tdep->have_gs = have_gs;
-  gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
   set_gdbarch_char_signed (gdbarch, 0);
@@ -8118,14 +8143,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Assign pseudo register numbers.  */
   first_pseudo_reg = gdbarch_num_regs (gdbarch);
   last_pseudo_reg = first_pseudo_reg;
-  tdep->gpr_full_regnum = -1;
-  if (have_upper)
+  if (tdep->have_upper)
     {
       tdep->gpr_full_regnum = last_pseudo_reg;
       last_pseudo_reg += 16;
     }
-  tdep->v0_full_regnum = -1;
-  if (have_vx)
+  if (tdep->have_vx)
     {
       tdep->v0_full_regnum = last_pseudo_reg;
       last_pseudo_reg += 16;
