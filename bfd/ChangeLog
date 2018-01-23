@@ -1,5 +1,10 @@
 2018-01-26  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (bfd_elf_define_start_stop): Override symbols when
+	they are defined dynamically.
+
+2018-01-26  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_size_stubs): Iterate sizing when
 	.branch_lt changes size.
 

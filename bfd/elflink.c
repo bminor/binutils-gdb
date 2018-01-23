@@ -14338,7 +14338,7 @@ bfd_elf_define_start_stop (struct bfd_link_info *info,
   if (h != NULL
       && (h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak
-	  || (h->ref_regular && !h->def_regular)))
+	  || ((h->ref_regular || h->def_dynamic) && !h->def_regular)))
     {
       h->root.type = bfd_link_hash_defined;
       h->root.u.def.section = sec;
