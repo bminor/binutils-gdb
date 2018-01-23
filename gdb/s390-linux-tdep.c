@@ -7810,6 +7810,167 @@ s390_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
   record_tdep->ioctl_FIOQSIZE = 0x545e;
 }
 
+/* Validate the range of registers.  NAMES must be known at compile time.  */
+
+#define s390_validate_reg_range(feature, tdesc_data, start, names)	\
+do									\
+{									\
+  for (int i = 0; i < ARRAY_SIZE (names); i++)				\
+    if (!tdesc_numbered_register (feature, tdesc_data, start + i, names[i])) \
+      return false;							\
+}									\
+while (0)
+
+/* Validate the target description.  Also numbers registers contained in
+   tdesc.  */
+
+static bool
+s390_tdesc_valid (struct gdbarch_tdep *tdep,
+		  struct tdesc_arch_data *tdesc_data)
+{
+  static const char *const psw[] = {
+    "pswm", "pswa"
+  };
+  static const char *const gprs[] = {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
+  };
+  static const char *const fprs[] = {
+    "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
+    "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15"
+  };
+  static const char *const acrs[] = {
+    "acr0", "acr1", "acr2", "acr3", "acr4", "acr5", "acr6", "acr7",
+    "acr8", "acr9", "acr10", "acr11", "acr12", "acr13", "acr14", "acr15"
+  };
+  static const char *const gprs_lower[] = {
+    "r0l", "r1l", "r2l", "r3l", "r4l", "r5l", "r6l", "r7l",
+    "r8l", "r9l", "r10l", "r11l", "r12l", "r13l", "r14l", "r15l"
+  };
+  static const char *const gprs_upper[] = {
+    "r0h", "r1h", "r2h", "r3h", "r4h", "r5h", "r6h", "r7h",
+    "r8h", "r9h", "r10h", "r11h", "r12h", "r13h", "r14h", "r15h"
+  };
+  static const char *const tdb_regs[] = {
+    "tdb0", "tac", "tct", "atia",
+    "tr0", "tr1", "tr2", "tr3", "tr4", "tr5", "tr6", "tr7",
+    "tr8", "tr9", "tr10", "tr11", "tr12", "tr13", "tr14", "tr15"
+  };
+  static const char *const vxrs_low[] = {
+    "v0l", "v1l", "v2l", "v3l", "v4l", "v5l", "v6l", "v7l", "v8l",
+    "v9l", "v10l", "v11l", "v12l", "v13l", "v14l", "v15l",
+  };
+  static const char *const vxrs_high[] = {
+    "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24",
+    "v25", "v26", "v27", "v28", "v29", "v30", "v31",
+  };
+  static const char *const gs_cb[] = {
+    "gsd", "gssm", "gsepla",
+  };
+  static const char *const gs_bc[] = {
+    "bc_gsd", "bc_gssm", "bc_gsepla",
+  };
+
+  const struct target_desc *tdesc = tdep->tdesc;
+  const struct tdesc_feature *feature;
+
+  /* Core registers, i.e. general purpose and PSW.  */
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.core");
+  if (feature == NULL)
+    return false;
+
+  s390_validate_reg_range (feature, tdesc_data, S390_PSWM_REGNUM, psw);
+
+  if (tdesc_unnumbered_register (feature, "r0"))
+    {
+      s390_validate_reg_range (feature, tdesc_data, S390_R0_REGNUM, gprs);
+    }
+  else
+    {
+      tdep->have_upper = true;
+      s390_validate_reg_range (feature, tdesc_data, S390_R0_REGNUM,
+			       gprs_lower);
+      s390_validate_reg_range (feature, tdesc_data, S390_R0_UPPER_REGNUM,
+			       gprs_upper);
+    }
+
+  /* Floating point registers.  */
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.fpr");
+  if (feature == NULL)
+    return false;
+
+  if (!tdesc_numbered_register (feature, tdesc_data, S390_FPC_REGNUM, "fpc"))
+    return false;
+
+  s390_validate_reg_range (feature, tdesc_data, S390_F0_REGNUM, fprs);
+
+  /* Access control registers.  */
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.acr");
+  if (feature == NULL)
+    return false;
+
+  s390_validate_reg_range (feature, tdesc_data, S390_A0_REGNUM, acrs);
+
+  /* Optional GNU/Linux-specific "registers".  */
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.linux");
+  if (feature)
+    {
+      tdesc_numbered_register (feature, tdesc_data,
+			       S390_ORIG_R2_REGNUM, "orig_r2");
+
+      if (tdesc_numbered_register (feature, tdesc_data,
+				   S390_LAST_BREAK_REGNUM, "last_break"))
+	tdep->have_linux_v1 = true;
+
+      if (tdesc_numbered_register (feature, tdesc_data,
+				   S390_SYSTEM_CALL_REGNUM, "system_call"))
+	tdep->have_linux_v2 = true;
+
+      if (tdep->have_linux_v2 && !tdep->have_linux_v1)
+	return false;
+    }
+
+  /* Transaction diagnostic block.  */
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.tdb");
+  if (feature)
+    {
+      s390_validate_reg_range (feature, tdesc_data, S390_TDB_DWORD0_REGNUM,
+			       tdb_regs);
+      tdep->have_tdb = true;
+    }
+
+  /* Vector registers.  */
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.vx");
+  if (feature)
+    {
+      s390_validate_reg_range (feature, tdesc_data, S390_V0_LOWER_REGNUM,
+			       vxrs_low);
+      s390_validate_reg_range (feature, tdesc_data, S390_V16_REGNUM,
+			       vxrs_high);
+      tdep->have_vx = true;
+    }
+
+  /* Guarded-storage registers.  */
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.gs");
+  if (feature)
+    {
+      s390_validate_reg_range (feature, tdesc_data, S390_GSD_REGNUM, gs_cb);
+      tdep->have_gs = true;
+    }
+
+  /* Guarded-storage broadcast control.  */
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.gsbc");
+  if (feature)
+    {
+      if (!tdep->have_gs)
+	return false;
+      s390_validate_reg_range (feature, tdesc_data, S390_BC_GSD_REGNUM,
+			       gs_bc);
+    }
+
+  return true;
+}
+
 /* Allocate and initialize new gdbarch_tdep.  Caller is responsible to free
    memory after use.  */
 
@@ -7844,7 +8005,6 @@ static struct gdbarch *
 s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   const struct target_desc *tdesc = info.target_desc;
-  struct tdesc_arch_data *tdesc_data = NULL;
   int first_pseudo_reg, last_pseudo_reg;
   static const char *const stap_register_prefixes[] = { "%", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "(",
@@ -7854,6 +8014,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   struct gdbarch_tdep *tdep = s390_gdbarch_tdep_alloc ();
   struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
+  struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
+  info.tdesc_data = tdesc_data;
 
   /* Default ABI and register size.  */
   switch (info.bfd_arch_info->mach)
@@ -7885,180 +8047,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Check any target description for validity.  */
   if (tdesc_has_registers (tdesc))
     {
-      static const char *const gprs[] = {
-	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-	"r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
-      };
-      static const char *const fprs[] = {
-	"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
-	"f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15"
-      };
-      static const char *const acrs[] = {
-	"acr0", "acr1", "acr2", "acr3", "acr4", "acr5", "acr6", "acr7",
-	"acr8", "acr9", "acr10", "acr11", "acr12", "acr13", "acr14", "acr15"
-      };
-      static const char *const gprs_lower[] = {
-	"r0l", "r1l", "r2l", "r3l", "r4l", "r5l", "r6l", "r7l",
-	"r8l", "r9l", "r10l", "r11l", "r12l", "r13l", "r14l", "r15l"
-      };
-      static const char *const gprs_upper[] = {
-	"r0h", "r1h", "r2h", "r3h", "r4h", "r5h", "r6h", "r7h",
-	"r8h", "r9h", "r10h", "r11h", "r12h", "r13h", "r14h", "r15h"
-      };
-      static const char *const tdb_regs[] = {
-	"tdb0", "tac", "tct", "atia",
-	"tr0", "tr1", "tr2", "tr3", "tr4", "tr5", "tr6", "tr7",
-	"tr8", "tr9", "tr10", "tr11", "tr12", "tr13", "tr14", "tr15"
-      };
-      static const char *const vxrs_low[] = {
-	"v0l", "v1l", "v2l", "v3l", "v4l", "v5l", "v6l", "v7l", "v8l",
-	"v9l", "v10l", "v11l", "v12l", "v13l", "v14l", "v15l",
-      };
-      static const char *const vxrs_high[] = {
-	"v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24",
-	"v25", "v26", "v27", "v28", "v29", "v30", "v31",
-      };
-      static const char *const gs_cb[] = {
-	"gsd", "gssm", "gsepla",
-      };
-      static const char *const gs_bc[] = {
-	"bc_gsd", "bc_gssm", "bc_gsepla",
-      };
-      const struct tdesc_feature *feature;
-      int i, valid_p = 1;
-
-      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.core");
-      if (feature == NULL)
-	{
-	  xfree (tdep);
-	  gdbarch_free (gdbarch);
-	  return NULL;
-	}
-
-      tdesc_data = tdesc_data_alloc ();
-
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  S390_PSWM_REGNUM, "pswm");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  S390_PSWA_REGNUM, "pswa");
-
-      if (tdesc_unnumbered_register (feature, "r0"))
-	{
-	  for (i = 0; i < 16; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						S390_R0_REGNUM + i, gprs[i]);
-	}
-      else
-	{
-	  tdep->have_upper = true;
-
-	  for (i = 0; i < 16; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						S390_R0_REGNUM + i,
-						gprs_lower[i]);
-	  for (i = 0; i < 16; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						S390_R0_UPPER_REGNUM + i,
-						gprs_upper[i]);
-	}
-
-      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.fpr");
-      if (feature == NULL)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  xfree (tdep);
-	  gdbarch_free (gdbarch);
-	  return NULL;
-	}
-
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  S390_FPC_REGNUM, "fpc");
-      for (i = 0; i < 16; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					    S390_F0_REGNUM + i, fprs[i]);
-
-      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.acr");
-      if (feature == NULL)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  xfree (tdep);
-	  gdbarch_free (gdbarch);
-	  return NULL;
-	}
-
-      for (i = 0; i < 16; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					    S390_A0_REGNUM + i, acrs[i]);
-
-      /* Optional GNU/Linux-specific "registers".  */
-      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.linux");
-      if (feature)
-	{
-	  tdesc_numbered_register (feature, tdesc_data,
-				   S390_ORIG_R2_REGNUM, "orig_r2");
-
-	  if (tdesc_numbered_register (feature, tdesc_data,
-				       S390_LAST_BREAK_REGNUM, "last_break"))
-	    tdep->have_linux_v1 = true;
-
-	  if (tdesc_numbered_register (feature, tdesc_data,
-				       S390_SYSTEM_CALL_REGNUM, "system_call"))
-	    tdep->have_linux_v2 = true;
-
-	  if (tdep->have_linux_v2 && !tdep->have_linux_v1)
-	    valid_p = 0;
-	}
-
-      /* Transaction diagnostic block.  */
-      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.tdb");
-      if (feature)
-	{
-	  for (i = 0; i < ARRAY_SIZE (tdb_regs); i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						S390_TDB_DWORD0_REGNUM + i,
-						tdb_regs[i]);
-	  tdep->have_tdb = true;
-	}
-
-      /* Vector registers.  */
-      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.vx");
-      if (feature)
-	{
-	  for (i = 0; i < 16; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						S390_V0_LOWER_REGNUM + i,
-						vxrs_low[i]);
-	  for (i = 0; i < 16; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						S390_V16_REGNUM + i,
-						vxrs_high[i]);
-	  tdep->have_vx = true;
-	}
-
-      /* Guarded-storage registers.  */
-      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.gs");
-      if (feature)
-	{
-	  for (i = 0; i < 3; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						S390_GSD_REGNUM + i,
-						gs_cb[i]);
-	  tdep->have_gs = true;
-	}
-
-      /* Guarded-storage broadcast control.  */
-      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.gsbc");
-      if (feature)
-	{
-	  valid_p &= tdep->have_gs;
-
-	  for (i = 0; i < 3; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						S390_BC_GSD_REGNUM + i,
-						gs_bc[i]);
-	}
-
-      if (!valid_p)
+      if (!s390_tdesc_valid (tdep, tdesc_data))
 	{
 	  tdesc_data_cleanup (tdesc_data);
 	  xfree (tdep);
@@ -8091,8 +8080,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	 thereby a different gdbarch.  */
       if (tmp->vector_abi != tdep->vector_abi)
 	continue;
-      if (tdesc_data != NULL)
-	tdesc_data_cleanup (tdesc_data);
+
+      tdesc_data_cleanup (tdesc_data);
       xfree (tdep);
       gdbarch_free (gdbarch);
       return arches->gdbarch;
