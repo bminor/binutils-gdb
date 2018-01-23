@@ -21,45 +21,26 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "arch-utils.h"
-#include "frame.h"
-#include "inferior.h"
-#include "infrun.h"
-#include "symtab.h"
-#include "target.h"
+
+#include "auxv.h"
+#include "elf/common.h"
+#include "frame-base.h"
+#include "frame-unwind.h"
+#include "gdbarch.h"
 #include "gdbcore.h"
-#include "gdbcmd.h"
+#include "linux-record.h"
+#include "linux-tdep.h"
 #include "objfiles.h"
 #include "osabi.h"
 #include "regcache.h"
-#include "trad-frame.h"
-#include "frame-base.h"
-#include "frame-unwind.h"
-#include "dwarf2-frame.h"
-#include "reggroups.h"
+#include "record-full.h"
 #include "regset.h"
-#include "value.h"
-#include "dis-asm.h"
-#include "solib-svr4.h"
-#include "prologue-value.h"
-#include "linux-tdep.h"
 #include "s390-tdep.h"
 #include "s390-linux-tdep.h"
-#include "linux-record.h"
-#include "record-full.h"
-#include "auxv.h"
+#include "solib-svr4.h"
+#include "target.h"
+#include "trad-frame.h"
 #include "xml-syscall.h"
-
-#include "stap-probe.h"
-#include "ax.h"
-#include "ax-gdb.h"
-#include "user-regs.h"
-#include "cli/cli-utils.h"
-#include <ctype.h>
-#include "elf/common.h"
-#include "elf/s390.h"
-#include "elf-bfd.h"
-#include <algorithm>
 
 #include "features/s390-linux32.c"
 #include "features/s390-linux32v1.c"
@@ -82,12 +63,19 @@
 #define XML_SYSCALL_FILENAME_S390 "syscalls/s390-linux.xml"
 #define XML_SYSCALL_FILENAME_S390X "syscalls/s390x-linux.xml"
 
+
+/* Register handling.  */
+
+/* Implement cannot_store_register gdbarch method.  */
+
 static int
 s390_cannot_store_register (struct gdbarch *gdbarch, int regnum)
 {
   /* The last-break address is read-only.  */
   return regnum == S390_LAST_BREAK_REGNUM;
 }
+
+/* Implement write_pc gdbarch method.  */
 
 static void
 s390_write_pc (struct regcache *regcache, CORE_ADDR pc)
@@ -192,7 +180,6 @@ static const struct regcache_map_entry s390_regmap_gsbc[] =
     { 1, S390_BC_GSEPLA_REGNUM, 8 },
     { 0 }
   };
-
 
 /* Supply the TDB regset.  Like regcache_supply_regset, but invalidate
    the TDB registers unless the TDB format field is valid.  */
@@ -341,6 +328,8 @@ s390_iterate_over_regset_sections (struct gdbarch *gdbarch,
     }
 }
 
+/* Implement core_read_description gdbarch method.  */
+
 static const struct target_desc *
 s390_core_read_description (struct gdbarch *gdbarch,
 			    struct target_ops *target, bfd *abfd)
@@ -388,12 +377,17 @@ s390_core_read_description (struct gdbarch *gdbarch,
     }
 }
 
+/* Frame unwinding. */
+
 /* Signal trampoline stack frames.  */
 
 struct s390_sigtramp_unwind_cache {
   CORE_ADDR frame_base;
   struct trad_frame_saved_reg *saved_regs;
 };
+
+/* Unwind THIS_FRAME and return the corresponding unwind cache for
+   s390_sigtramp_frame_unwind.  */
 
 static struct s390_sigtramp_unwind_cache *
 s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
@@ -503,6 +497,8 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   return info;
 }
 
+/* Implement this_id frame_unwind method for s390_sigtramp_frame_unwind.  */
+
 static void
 s390_sigtramp_frame_this_id (struct frame_info *this_frame,
 			     void **this_prologue_cache,
@@ -513,6 +509,8 @@ s390_sigtramp_frame_this_id (struct frame_info *this_frame,
   *this_id = frame_id_build (info->frame_base, get_frame_pc (this_frame));
 }
 
+/* Implement prev_register frame_unwind method for sigtramp frames.  */
+
 static struct value *
 s390_sigtramp_frame_prev_register (struct frame_info *this_frame,
 				   void **this_prologue_cache, int regnum)
@@ -521,6 +519,8 @@ s390_sigtramp_frame_prev_register (struct frame_info *this_frame,
     = s390_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
   return s390_trad_frame_prev_register (this_frame, info->saved_regs, regnum);
 }
+
+/* Implement sniffer frame_unwind method for sigtramp frames.  */
 
 static int
 s390_sigtramp_frame_sniffer (const struct frame_unwind *self,
@@ -543,6 +543,8 @@ s390_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return 1;
 }
 
+/* S390 sigtramp frame unwinder.  */
+
 static const struct frame_unwind s390_sigtramp_frame_unwind = {
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
@@ -551,6 +553,8 @@ static const struct frame_unwind s390_sigtramp_frame_unwind = {
   NULL,
   s390_sigtramp_frame_sniffer
 };
+
+/* Syscall handling.  */
 
 /* Retrieve the syscall number at a ptrace syscall-stop.  Return -1
    upon error. */
@@ -622,6 +626,9 @@ s390_all_but_pc_registers_record (struct regcache *regcache)
 
   return 0;
 }
+
+/* Canonicalize system call SYSCALL belonging to ABI.  Helper for
+   s390_linux_syscall_record.  */
 
 static enum gdb_syscall
 s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
@@ -791,6 +798,9 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
     }
 }
 
+/* Record a system call.  Returns 0 on success, -1 otherwise.
+   Helper function for s390_process_record.  */
+
 static int
 s390_linux_syscall_record (struct regcache *regcache, LONGEST syscall_native)
 {
@@ -838,6 +848,8 @@ s390_linux_syscall_record (struct regcache *regcache, LONGEST syscall_native)
 
   return 0;
 }
+
+/* Implement process_record_signal gdbarch method.  */
 
 static int
 s390_linux_record_signal (struct gdbarch *gdbarch, struct regcache *regcache,
