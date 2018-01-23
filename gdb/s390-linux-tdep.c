@@ -8047,13 +8047,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep = gdbarch_tdep (arches->gdbarch);
       if (!tdep)
 	continue;
-      if (tdep->abi != tdep_abi)
-	continue;
+      /* A program can 'choose' not to use the vector registers when they
+	 are present.  Leading to the same tdesc but different tdep and
+	 thereby a different gdbarch.  */
       if (tdep->vector_abi != vector_abi)
-	continue;
-      if ((tdep->gpr_full_regnum != -1) != have_upper)
-	continue;
-      if (tdep->have_gs != have_gs)
 	continue;
       if (tdesc_data != NULL)
 	tdesc_data_cleanup (tdesc_data);

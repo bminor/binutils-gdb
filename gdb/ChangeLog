@@ -1,3 +1,8 @@
+2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_gdbarch_init): Remove duplicate checks
+	when looking for cached gdbarch and add comment for remaining.
+
 2018-01-22  Pedro Alves  <palves@redhat.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 
