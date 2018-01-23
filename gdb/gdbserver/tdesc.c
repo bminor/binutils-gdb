@@ -23,16 +23,8 @@
 
 target_desc::~target_desc ()
 {
-  int i;
-
   xfree ((char *) arch);
   xfree ((char *) osabi);
-
-  char *f;
-
-  for (i = 0; VEC_iterate (char_ptr, features, i, f); i++)
-    xfree (f);
-  VEC_free (char_ptr, features);
 }
 
 bool target_desc::operator== (const target_desc &other) const
@@ -70,35 +62,36 @@ init_target_desc (struct target_desc *tdesc)
   int offset = 0;
 
   /* Go through all the features and populate reg_defs.  */
-  for (const tdesc_reg_up &treg : tdesc->registers)
-    {
-      int current_size = tdesc->reg_defs.size ();
+  for (const tdesc_feature_up &feature : tdesc->features)
+    for (const tdesc_reg_up &treg : feature->registers)
+      {
+	int current_size = tdesc->reg_defs.size ();
 
-      /* Register number will either increase (possibly with gaps) or be
-	 zero.  */
-      gdb_assert (treg->target_regnum == 0
-		  || treg->target_regnum >= current_size);
+	/* Register number will either increase (possibly with gaps) or be
+	   zero.  */
+	gdb_assert (treg->target_regnum == 0
+		    || treg->target_regnum >= current_size);
 
-      tdesc->reg_defs.resize (treg->target_regnum != 0
+	tdesc->reg_defs.resize (treg->target_regnum != 0
 				? treg->target_regnum + 1
 				: current_size + 1);
 
-      /* Fill in any blank spaces.  */
-      while (current_size < treg->target_regnum)
-	{
-	  struct reg *reg = &tdesc->reg_defs[current_size];
-	  reg->name = "";
-	  reg->size = 0;
-	  reg->offset = offset;
-	  current_size++;
-	}
+	/* Fill in any blank spaces.  */
+	while (current_size < treg->target_regnum)
+	  {
+	    struct reg *reg = &tdesc->reg_defs[current_size];
+	    reg->name = "";
+	    reg->size = 0;
+	    reg->offset = offset;
+	    current_size++;
+	  }
 
-      struct reg *reg = &tdesc->reg_defs.back ();
-      reg->name = treg->name.c_str ();
-      reg->size = treg->bitsize;
-      reg->offset = offset;
-      offset += reg->size;
-    }
+	struct reg *reg = &tdesc->reg_defs.back ();
+	reg->name = treg->name.c_str ();
+	reg->size = treg->bitsize;
+	reg->offset = offset;
+	offset += reg->size;
+      }
 
   tdesc->registers_size = offset / 8;
 
@@ -161,7 +154,7 @@ tdesc_get_features_xml (target_desc *tdesc)
 {
   /* Either .xmltarget or .features is not NULL.  */
   gdb_assert (tdesc->xmltarget != NULL
-	      || (tdesc->features != NULL
+	      || (!tdesc->features.empty ()
 		  && tdesc->arch != NULL));
 
   if (tdesc->xmltarget == NULL)
@@ -181,12 +174,10 @@ tdesc_get_features_xml (target_desc *tdesc)
 	  buffer += "</osabi>";
 	}
 
-      char *xml;
-
-      for (int i = 0; VEC_iterate (char_ptr, tdesc->features, i, xml); i++)
+      for (const tdesc_feature_up &feature : tdesc->features)
 	{
 	  buffer += "<xi:include href=\"";
-	  buffer += xml;
+	  buffer += feature->name;
 	  buffer += "\"/>";
 	}
 
@@ -199,19 +190,16 @@ tdesc_get_features_xml (target_desc *tdesc)
 }
 #endif
 
-struct tdesc_type
-{};
-
 /* See common/tdesc.h.  */
 
 struct tdesc_feature *
 tdesc_create_feature (struct target_desc *tdesc, const char *name,
 		      const char *xml)
 {
-#ifndef IN_PROCESS_AGENT
-  VEC_safe_push (char_ptr, tdesc->features, xstrdup (xml));
-#endif
-  return tdesc;
+  struct tdesc_feature *new_feature = new tdesc_feature
+    (xml != nullptr ? xml : name);
+  tdesc->features.emplace_back (new_feature);
+  return new_feature;
 }
 
 /* See common/tdesc.h.  */
@@ -252,19 +240,6 @@ tdesc_type_with_fields *
 tdesc_create_struct (struct tdesc_feature *feature, const char *id)
 {
   return NULL;
-}
-
-/* See common/tdesc.h.  */
-
-void
-tdesc_create_reg (struct tdesc_feature *feature, const char *name,
-		  int regnum, int save_restore, const char *group,
-		  int bitsize, const char *type)
-{
-  tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
-				  group, bitsize, type);
-
-  tdesc->registers.emplace_back (reg);
 }
 
 /* See common/tdesc.h.  */
