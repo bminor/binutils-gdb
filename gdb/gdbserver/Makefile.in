@@ -215,6 +215,7 @@ SFILES = \
 	$(srcdir)/common/print-utils.c \
 	$(srcdir)/common/ptid.c \
 	$(srcdir)/common/rsp-low.c \
+	$(srcdir)/common/tdesc.c \
 	$(srcdir)/common/vec.c \
 	$(srcdir)/common/xml-utils.c \
 	$(srcdir)/nat/linux-btrace.c \
@@ -258,6 +259,7 @@ OBS = \
 	common/rsp-low.o \
 	common/signals.o \
 	common/signals-state-save-restore.o \
+	common/tdesc.o \
 	common/vec.o \
 	common/xml-utils.o \
 	debug.o \
@@ -403,6 +405,7 @@ IPA_OBJS = \
 	common/format-ipa.o \
 	common/print-utils-ipa.o \
 	common/rsp-low-ipa.o \
+	common/tdesc-ipa.o \
 	common/vec-ipa.o \
 	regcache-ipa.o \
 	remote-utils-ipa.o \
