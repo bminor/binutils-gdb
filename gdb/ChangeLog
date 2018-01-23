@@ -1,5 +1,11 @@
 2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c (gdbarch_tdep.s390_syscall_record): New hook.
+	(s390_process_record, s390_gdbarch_tdep_alloc)
+	(s390_linux_init_abi_any): Use/set new hook.
+
+2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c (osabi.h): New include.
 	(s390_linux_init_abi_31, s390_linux_init_abi_64)
 	(s390_linux_init_abi_any): New functions.

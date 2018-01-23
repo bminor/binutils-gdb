@@ -122,6 +122,9 @@ struct gdbarch_tdep
   bool have_tdb;
   bool have_vx;
   bool have_gs;
+
+  /* Hook to record OS specific systemcall.  */
+  int (*s390_syscall_record) (struct regcache *regcache, LONGEST svc_number);
 };
 
 
@@ -3808,6 +3811,7 @@ static int
 s390_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
                     CORE_ADDR addr)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   uint16_t insn[3] = {0};
   /* Instruction as bytes.  */
   uint8_t ibyte[6];
@@ -3964,8 +3968,16 @@ ex:
 
     case 0x0a:
       /* SVC - supervisor call */
-      if (s390_linux_syscall_record (regcache, ibyte[1]))
-        return -1;
+      if (tdep->s390_syscall_record != NULL)
+	{
+	  if (tdep->s390_syscall_record (regcache, ibyte[1]))
+	    return -1;
+	}
+      else
+	{
+	  printf_unfiltered (_("no syscall record support\n"));
+	  return -1;
+	}
       break;
 
     case 0x0b: /* BSM - branch and set mode */
@@ -7997,6 +8009,8 @@ s390_gdbarch_tdep_alloc ()
   tdep->have_vx = false;
   tdep->have_gs = false;
 
+  tdep->s390_syscall_record = NULL;
+
   return tdep;
 }
 
@@ -8195,6 +8209,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 s390_linux_init_abi_any (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->s390_syscall_record = s390_linux_syscall_record;
+
   linux_init_abi (info, gdbarch);
 
   /* Register handling.  */
