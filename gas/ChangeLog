@@ -1,3 +1,15 @@
+2018-01-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .wbnoinvd.
+	* doc/c-i386.texi: Document .wbnoinvd.
+	* testsuite/gas/i386/i386.exp: Add WBNOINVD tests.
+	* testsuite/gas/i386/wbnoinvd-intel.d: New test.
+	* testsuite/gas/i386/wbnoinvd.d: Likewise.
+	* testsuite/gas/i386/wbnoinvd.s: Likewise.
+	* testsuite/gas/i386/x86-64-wbnoinvd-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-wbnoinvd.d: Likewise.
+	* testsuite/gas/i386/x86-64-wbnoinvd.s: Likewise.
+
 2018-01-23  Maciej W. Rozycki  <macro@mips.com>
 
 	* config/tc-mips.c (md_show_usage): Correctly indicate the

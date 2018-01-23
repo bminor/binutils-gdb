@@ -223,6 +223,8 @@ enum
   CpuVAES,
   /* VPCLMULQDQ instructions required */
   CpuVPCLMULQDQ,
+  /* WBNOINVD instructions required */
+  CpuWBNOINVD,
   /* MMX register support required */
   CpuRegMMX,
   /* XMM register support required */
@@ -352,6 +354,7 @@ typedef union i386_cpu_flags
       unsigned int cpugfni:1;
       unsigned int cpuvaes:1;
       unsigned int cpuvpclmulqdq:1;
+      unsigned int cpuwbnoinvd:1;
       unsigned int cpuregmmx:1;
       unsigned int cpuregxmm:1;
       unsigned int cpuregymm:1;

@@ -6133,3 +6133,9 @@ endbr32, 0, 0xf30f1efb, None, 3, CpuIBT, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_s
 notrack, 0, 0x3e, None, 1, CpuIBT, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, { 0 }
 
 // CET instructions end.
+
+// WBNOINVD instruction.
+
+wbnoinvd, 0, 0xf30f09, None, 2, CpuWBNOINVD, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+
+// WBNOINVD instruction end.

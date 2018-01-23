@@ -956,6 +956,7 @@ enum
   PREFIX_MOD_0_0F01_REG_5,
   PREFIX_MOD_3_0F01_REG_5_RM_0,
   PREFIX_MOD_3_0F01_REG_5_RM_2,
+  PREFIX_0F09,
   PREFIX_0F10,
   PREFIX_0F11,
   PREFIX_0F12,
@@ -2869,7 +2870,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "sysret%LP",		{ XX }, 0 },
   /* 08 */
   { "invd",		{ XX }, 0 },
-  { "wbinvd",		{ XX }, 0 },
+  { PREFIX_TABLE (PREFIX_0F09) },
   { Bad_Opcode },
   { "ud2",		{ XX }, 0 },
   { Bad_Opcode },
@@ -3838,6 +3839,12 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { "saveprevssp",	{ Skip_MODRM }, PREFIX_OPCODE },
+  },
+
+  /* PREFIX_0F09 */
+  {
+    { "wbinvd",   { XX }, 0 },
+    { "wbnoinvd", { XX }, 0 },
   },
 
   /* PREFIX_0F10 */
