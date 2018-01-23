@@ -12259,6 +12259,7 @@ static const struct dis386 rm_table[][8] = {
     { "vmlaunch",	{ Skip_MODRM }, 0 },
     { "vmresume",	{ Skip_MODRM }, 0 },
     { "vmxoff",		{ Skip_MODRM }, 0 },
+    { "pconfig",	{ Skip_MODRM }, 0 },
   },
   {
     /* RM_0F01_REG_1 */

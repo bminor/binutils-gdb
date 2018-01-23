@@ -1009,6 +1009,8 @@ static const arch_entry cpu_arch[] =
     CPU_VPCLMULQDQ_FLAGS, 0 },
   { STRING_COMMA_LEN (".wbnoinvd"), PROCESSOR_UNKNOWN,
     CPU_WBNOINVD_FLAGS, 0 },
+  { STRING_COMMA_LEN (".pconfig"), PROCESSOR_UNKNOWN,
+    CPU_PCONFIG_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =

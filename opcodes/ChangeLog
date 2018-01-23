@@ -1,5 +1,16 @@
 2018-01-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
+	* i386-dis.c (enum): Add pconfig.
+	* i386-gen.c (cpu_flag_init): Add CPU_PCONFIG_FLAGS.
+	(cpu_flags): Add CpuPCONFIG.
+	* i386-opc.h (enum): Add CpuPCONFIG.
+	(i386_cpu_flags): Add cpupconfig.
+	* i386-opc.tbl: Add PCONFIG instruction.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
+2018-01-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
 	* i386-dis.c (enum): Add PREFIX_0F09.
 	* i386-gen.c (cpu_flag_init): Add CPU_WBNOINVD_FLAGS.
 	(cpu_flags): Add CpuWBNOINVD.

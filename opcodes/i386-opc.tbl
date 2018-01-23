@@ -6139,3 +6139,9 @@ notrack, 0, 0x3e, None, 1, CpuIBT, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ld
 wbnoinvd, 0, 0xf30f09, None, 2, CpuWBNOINVD, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // WBNOINVD instruction end.
+
+// PCONFIG instruction.
+
+pconfig, 0, 0x0f01c5, None, 3, CpuPCONFIG, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+
+// PCONFIG instruction end.
