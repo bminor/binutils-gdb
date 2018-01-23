@@ -78,80 +78,7 @@ struct tdesc_type_builtin : tdesc_type
     v.visit (this);
   }
 
-  type *make_gdb_type (struct gdbarch *gdbarch) const override
-  {
-    switch (this->kind)
-      {
-      /* Predefined types.  */
-      case TDESC_TYPE_BOOL:
-        return builtin_type (gdbarch)->builtin_bool;
-
-      case TDESC_TYPE_INT8:
-        return builtin_type (gdbarch)->builtin_int8;
-
-      case TDESC_TYPE_INT16:
-        return builtin_type (gdbarch)->builtin_int16;
-
-      case TDESC_TYPE_INT32:
-        return builtin_type (gdbarch)->builtin_int32;
-
-      case TDESC_TYPE_INT64:
-        return builtin_type (gdbarch)->builtin_int64;
-
-      case TDESC_TYPE_INT128:
-        return builtin_type (gdbarch)->builtin_int128;
-
-      case TDESC_TYPE_UINT8:
-        return builtin_type (gdbarch)->builtin_uint8;
-
-      case TDESC_TYPE_UINT16:
-        return builtin_type (gdbarch)->builtin_uint16;
-
-      case TDESC_TYPE_UINT32:
-        return builtin_type (gdbarch)->builtin_uint32;
-
-      case TDESC_TYPE_UINT64:
-        return builtin_type (gdbarch)->builtin_uint64;
-
-      case TDESC_TYPE_UINT128:
-        return builtin_type (gdbarch)->builtin_uint128;
-
-      case TDESC_TYPE_CODE_PTR:
-        return builtin_type (gdbarch)->builtin_func_ptr;
-
-      case TDESC_TYPE_DATA_PTR:
-        return builtin_type (gdbarch)->builtin_data_ptr;
-      }
-
-    type *gdb_type = tdesc_find_type (gdbarch, this->name.c_str ());
-    if (gdb_type != NULL)
-      return gdb_type;
-
-    switch (this->kind)
-      {
-      case TDESC_TYPE_IEEE_SINGLE:
-        return arch_float_type (gdbarch, -1, "builtin_type_ieee_single",
-				floatformats_ieee_single);
-
-      case TDESC_TYPE_IEEE_DOUBLE:
-        return arch_float_type (gdbarch, -1, "builtin_type_ieee_double",
-				floatformats_ieee_double);
-
-      case TDESC_TYPE_ARM_FPA_EXT:
-        return arch_float_type (gdbarch, -1, "builtin_type_arm_ext",
-				floatformats_arm_ext);
-
-      case TDESC_TYPE_I387_EXT:
-        return arch_float_type (gdbarch, -1, "builtin_type_i387_ext",
-				floatformats_i387_ext);
-      }
-
-    internal_error (__FILE__, __LINE__,
-		    "Type \"%s\" has an unknown kind %d",
-		    this->name.c_str (), this->kind);
-
-    return NULL;
-  }
+  type *make_gdb_type (struct gdbarch *gdbarch) const override;
 };
 
 /* tdesc_type for vector types.  */
@@ -168,18 +95,7 @@ struct tdesc_type_vector : tdesc_type
     v.visit (this);
   }
 
-  type *make_gdb_type (struct gdbarch *gdbarch) const override
-  {
-    type *vector_gdb_type = tdesc_find_type (gdbarch, this->name.c_str ());
-    if (vector_gdb_type != NULL)
-      return vector_gdb_type;
-
-    type *element_gdb_type = this->element_type->make_gdb_type (gdbarch);
-    vector_gdb_type = init_vector_type (element_gdb_type, this->count);
-    TYPE_NAME (vector_gdb_type) = xstrdup (this->name.c_str ());
-
-    return vector_gdb_type;
-  }
+  type *make_gdb_type (struct gdbarch *gdbarch) const override;
 
   struct tdesc_type *element_type;
   int count;
@@ -199,151 +115,252 @@ struct tdesc_type_with_fields : tdesc_type
     v.visit (this);
   }
 
-  type *make_gdb_type_struct (struct gdbarch *gdbarch) const
-  {
-    type *struct_gdb_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
-    TYPE_NAME (struct_gdb_type) = xstrdup (this->name.c_str ());
-    TYPE_TAG_NAME (struct_gdb_type) = TYPE_NAME (struct_gdb_type);
+  type *make_gdb_type_struct (struct gdbarch *gdbarch) const;
+  type *make_gdb_type_union (struct gdbarch *gdbarch) const;
+  type *make_gdb_type_flags (struct gdbarch *gdbarch) const;
+  type *make_gdb_type_enum (struct gdbarch *gdbarch) const;
+  type *make_gdb_type (struct gdbarch *gdbarch) const override;
 
-    for (const tdesc_type_field &f : this->fields)
-      {
-	if (f.start != -1 && f.end != -1)
-	  {
-	    /* Bitfield.  */
-	    struct field *fld;
-	    struct type *field_gdb_type;
-	    int bitsize, total_size;
+  std::vector<tdesc_type_field> fields;
+  int size;
+};
 
-	    /* This invariant should be preserved while creating types.  */
-	    gdb_assert (this->size != 0);
-	    if (f.type != NULL)
-	      field_gdb_type = f.type->make_gdb_type (gdbarch);
-	    else if (this->size > 4)
-	      field_gdb_type = builtin_type (gdbarch)->builtin_uint64;
-	    else
-	      field_gdb_type = builtin_type (gdbarch)->builtin_uint32;
+type *
+tdesc_type_builtin::make_gdb_type (struct gdbarch *gdbarch) const
+{
+  switch (this->kind)
+    {
+    /* Predefined types.  */
+    case TDESC_TYPE_BOOL:
+      return builtin_type (gdbarch)->builtin_bool;
 
-	    fld = append_composite_type_field_raw
-	      (struct_gdb_type, xstrdup (f.name.c_str ()), field_gdb_type);
+    case TDESC_TYPE_INT8:
+      return builtin_type (gdbarch)->builtin_int8;
 
-	    /* For little-endian, BITPOS counts from the LSB of
-	       the structure and marks the LSB of the field.  For
-	       big-endian, BITPOS counts from the MSB of the
-	       structure and marks the MSB of the field.  Either
-	       way, it is the number of bits to the "left" of the
-	       field.  To calculate this in big-endian, we need
-	       the total size of the structure.  */
-	    bitsize = f.end - f.start + 1;
-	    total_size = this->size * TARGET_CHAR_BIT;
-	    if (gdbarch_bits_big_endian (gdbarch))
-	      SET_FIELD_BITPOS (fld[0], total_size - f.start - bitsize);
-	    else
-	      SET_FIELD_BITPOS (fld[0], f.start);
-	    FIELD_BITSIZE (fld[0]) = bitsize;
-	  }
-	else
-	  {
-	    gdb_assert (f.start == -1 && f.end == -1);
-	    type *field_gdb_type = f.type->make_gdb_type (gdbarch);
-	    append_composite_type_field (struct_gdb_type,
-					 xstrdup (f.name.c_str ()),
-					 field_gdb_type);
-	  }
-      }
+    case TDESC_TYPE_INT16:
+      return builtin_type (gdbarch)->builtin_int16;
 
-    if (this->size != 0)
-      TYPE_LENGTH (struct_gdb_type) = this->size;
+    case TDESC_TYPE_INT32:
+      return builtin_type (gdbarch)->builtin_int32;
 
-    return struct_gdb_type;
-  }
+    case TDESC_TYPE_INT64:
+      return builtin_type (gdbarch)->builtin_int64;
 
-  type *make_gdb_type_union (struct gdbarch *gdbarch) const
-  {
-    type *union_gdb_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
-    TYPE_NAME (union_gdb_type) = xstrdup (this->name.c_str ());
+    case TDESC_TYPE_INT128:
+      return builtin_type (gdbarch)->builtin_int128;
 
-    for (const tdesc_type_field &f : this->fields)
-      {
-	type* field_gdb_type = f.type->make_gdb_type (gdbarch);
-	append_composite_type_field (union_gdb_type, xstrdup (f.name.c_str ()),
+    case TDESC_TYPE_UINT8:
+      return builtin_type (gdbarch)->builtin_uint8;
+
+    case TDESC_TYPE_UINT16:
+      return builtin_type (gdbarch)->builtin_uint16;
+
+    case TDESC_TYPE_UINT32:
+      return builtin_type (gdbarch)->builtin_uint32;
+
+    case TDESC_TYPE_UINT64:
+      return builtin_type (gdbarch)->builtin_uint64;
+
+    case TDESC_TYPE_UINT128:
+      return builtin_type (gdbarch)->builtin_uint128;
+
+    case TDESC_TYPE_CODE_PTR:
+      return builtin_type (gdbarch)->builtin_func_ptr;
+
+    case TDESC_TYPE_DATA_PTR:
+      return builtin_type (gdbarch)->builtin_data_ptr;
+    }
+
+  type *gdb_type = tdesc_find_type (gdbarch, this->name.c_str ());
+  if (gdb_type != NULL)
+    return gdb_type;
+
+  switch (this->kind)
+    {
+    case TDESC_TYPE_IEEE_SINGLE:
+      return arch_float_type (gdbarch, -1, "builtin_type_ieee_single",
+			      floatformats_ieee_single);
+
+    case TDESC_TYPE_IEEE_DOUBLE:
+      return arch_float_type (gdbarch, -1, "builtin_type_ieee_double",
+			      floatformats_ieee_double);
+
+    case TDESC_TYPE_ARM_FPA_EXT:
+      return arch_float_type (gdbarch, -1, "builtin_type_arm_ext",
+			      floatformats_arm_ext);
+
+    case TDESC_TYPE_I387_EXT:
+      return arch_float_type (gdbarch, -1, "builtin_type_i387_ext",
+			      floatformats_i387_ext);
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "Type \"%s\" has an unknown kind %d",
+		  this->name.c_str (), this->kind);
+
+  return NULL;
+}
+
+type *
+tdesc_type_vector::make_gdb_type (struct gdbarch *gdbarch) const
+{
+  type *vector_gdb_type = tdesc_find_type (gdbarch, this->name.c_str ());
+  if (vector_gdb_type != NULL)
+    return vector_gdb_type;
+
+  type *element_gdb_type = this->element_type->make_gdb_type (gdbarch);
+  vector_gdb_type = init_vector_type (element_gdb_type, this->count);
+  TYPE_NAME (vector_gdb_type) = xstrdup (this->name.c_str ());
+
+  return vector_gdb_type;
+}
+
+type *
+tdesc_type_with_fields::make_gdb_type_struct (struct gdbarch *gdbarch) const
+{
+  type *struct_gdb_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  TYPE_NAME (struct_gdb_type) = xstrdup (this->name.c_str ());
+  TYPE_TAG_NAME (struct_gdb_type) = TYPE_NAME (struct_gdb_type);
+
+  for (const tdesc_type_field &f : this->fields)
+    {
+      if (f.start != -1 && f.end != -1)
+	{
+	  /* Bitfield.  */
+	  struct field *fld;
+	  struct type *field_gdb_type;
+	  int bitsize, total_size;
+
+	  /* This invariant should be preserved while creating types.  */
+	  gdb_assert (this->size != 0);
+	  if (f.type != NULL)
+	    field_gdb_type = f.type->make_gdb_type (gdbarch);
+	  else if (this->size > 4)
+	    field_gdb_type = builtin_type (gdbarch)->builtin_uint64;
+	  else
+	    field_gdb_type = builtin_type (gdbarch)->builtin_uint32;
+
+	  fld = append_composite_type_field_raw
+	    (struct_gdb_type, xstrdup (f.name.c_str ()), field_gdb_type);
+
+	  /* For little-endian, BITPOS counts from the LSB of
+	     the structure and marks the LSB of the field.  For
+	     big-endian, BITPOS counts from the MSB of the
+	     structure and marks the MSB of the field.  Either
+	     way, it is the number of bits to the "left" of the
+	     field.  To calculate this in big-endian, we need
+	     the total size of the structure.  */
+	  bitsize = f.end - f.start + 1;
+	  total_size = this->size * TARGET_CHAR_BIT;
+	  if (gdbarch_bits_big_endian (gdbarch))
+	    SET_FIELD_BITPOS (fld[0], total_size - f.start - bitsize);
+	  else
+	    SET_FIELD_BITPOS (fld[0], f.start);
+	  FIELD_BITSIZE (fld[0]) = bitsize;
+	}
+      else
+	{
+	  gdb_assert (f.start == -1 && f.end == -1);
+	  type *field_gdb_type = f.type->make_gdb_type (gdbarch);
+	  append_composite_type_field (struct_gdb_type,
+				       xstrdup (f.name.c_str ()),
+				       field_gdb_type);
+	}
+    }
+
+  if (this->size != 0)
+    TYPE_LENGTH (struct_gdb_type) = this->size;
+
+  return struct_gdb_type;
+}
+
+type *
+tdesc_type_with_fields::make_gdb_type_union (struct gdbarch *gdbarch) const
+{
+  type *union_gdb_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
+  TYPE_NAME (union_gdb_type) = xstrdup (this->name.c_str ());
+
+  for (const tdesc_type_field &f : this->fields)
+    {
+      type* field_gdb_type = f.type->make_gdb_type (gdbarch);
+      append_composite_type_field (union_gdb_type, xstrdup (f.name.c_str ()),
 				     field_gdb_type);
 
-	/* If any of the children of a union are vectors, flag the
-	   union as a vector also.  This allows e.g. a union of two
-	   vector types to show up automatically in "info vector".  */
-	if (TYPE_VECTOR (field_gdb_type))
-	  TYPE_VECTOR (union_gdb_type) = 1;
-      }
+      /* If any of the children of a union are vectors, flag the
+	 union as a vector also.  This allows e.g. a union of two
+	 vector types to show up automatically in "info vector".  */
+      if (TYPE_VECTOR (field_gdb_type))
+	TYPE_VECTOR (union_gdb_type) = 1;
+    }
 
-    return union_gdb_type;
-  }
+  return union_gdb_type;
+}
 
-  type *make_gdb_type_flags (struct gdbarch *gdbarch) const
-  {
-    type *flags_gdb_type = arch_flags_type (gdbarch, this->name.c_str (),
+type *
+tdesc_type_with_fields::make_gdb_type_flags (struct gdbarch *gdbarch) const
+{
+  type *flags_gdb_type = arch_flags_type (gdbarch, this->name.c_str (),
 					  this->size * TARGET_CHAR_BIT);
 
-    for (const tdesc_type_field &f : this->fields)
-      {
+  for (const tdesc_type_field &f : this->fields)
+    {
       int bitsize = f.end - f.start + 1;
 
       gdb_assert (f.type != NULL);
       type *field_gdb_type = f.type->make_gdb_type (gdbarch);
       append_flags_type_field (flags_gdb_type, f.start, bitsize,
 			       field_gdb_type, f.name.c_str ());
-      }
+    }
 
-    return flags_gdb_type;
-  }
+  return flags_gdb_type;
+}
 
-  type *make_gdb_type_enum (struct gdbarch *gdbarch) const
-  {
-    type *enum_gdb_type = arch_type (gdbarch, TYPE_CODE_ENUM,
+type *
+tdesc_type_with_fields::make_gdb_type_enum (struct gdbarch *gdbarch) const
+{
+  type *enum_gdb_type = arch_type (gdbarch, TYPE_CODE_ENUM,
 				   this->size * TARGET_CHAR_BIT,
 				   this->name.c_str ());
 
-    TYPE_UNSIGNED (enum_gdb_type) = 1;
-    for (const tdesc_type_field &f : this->fields)
-      {
+  TYPE_UNSIGNED (enum_gdb_type) = 1;
+  for (const tdesc_type_field &f : this->fields)
+    {
       struct field *fld
 	= append_composite_type_field_raw (enum_gdb_type,
 					   xstrdup (f.name.c_str ()),
 					   NULL);
 
       SET_FIELD_BITPOS (fld[0], f.start);
-      }
-
-    return enum_gdb_type;
-  }
-
-  type *make_gdb_type (struct gdbarch *gdbarch) const override
-  {
-    type *gdb_type = tdesc_find_type (gdbarch, this->name.c_str ());
-    if (gdb_type != NULL)
-      return gdb_type;
-
-    switch (this->kind)
-    {
-      case TDESC_TYPE_STRUCT:
-	return make_gdb_type_struct (gdbarch);
-      case TDESC_TYPE_UNION:
-	return make_gdb_type_union (gdbarch);
-      case TDESC_TYPE_FLAGS:
-	return make_gdb_type_flags (gdbarch);
-      case TDESC_TYPE_ENUM:
-	return make_gdb_type_enum (gdbarch);
     }
 
-    internal_error (__FILE__, __LINE__,
-		    "Type \"%s\" has an unknown kind %d",
-		    this->name.c_str (), this->kind);
+  return enum_gdb_type;
+}
 
-    return NULL;
-  }
+type *
+tdesc_type_with_fields::make_gdb_type (struct gdbarch *gdbarch) const
+{
+  type *gdb_type = tdesc_find_type (gdbarch, this->name.c_str ());
+  if (gdb_type != NULL)
+    return gdb_type;
 
-  std::vector<tdesc_type_field> fields;
-  int size;
-};
+  switch (this->kind)
+    {
+    case TDESC_TYPE_STRUCT:
+      return make_gdb_type_struct (gdbarch);
+    case TDESC_TYPE_UNION:
+      return make_gdb_type_union (gdbarch);
+    case TDESC_TYPE_FLAGS:
+      return make_gdb_type_flags (gdbarch);
+    case TDESC_TYPE_ENUM:
+      return make_gdb_type_enum (gdbarch);
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "Type \"%s\" has an unknown kind %d",
+		  this->name.c_str (), this->kind);
+
+  return NULL;
+}
 
 /* A target description.  */
 
