@@ -19958,6 +19958,9 @@ MIPS options:\n\
 -mips16			generate mips16 instructions\n\
 -no-mips16		do not generate mips16 instructions\n"));
   fprintf (stream, _("\
+-mmips16e2		generate MIPS16e2 instructions\n\
+-mno-mips16e2		do not generate MIPS16e2 instructions\n"));
+  fprintf (stream, _("\
 -mmicromips		generate microMIPS instructions\n\
 -mno-micromips		do not generate microMIPS instructions\n"));
   fprintf (stream, _("\

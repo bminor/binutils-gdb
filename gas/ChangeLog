@@ -1,3 +1,8 @@
+2018-01-23  Maciej W. Rozycki  <macro@mips.com>
+
+	* config/tc-mips.c (md_show_usage): Report `-mmips16e2' and
+	`-mno-mips16e2' options.
+
 2018-01-22  Maciej W. Rozycki  <macro@mips.com>
 
 	* doc/c-mips.texi (MIPS ASE Instruction Generation Overrides):
