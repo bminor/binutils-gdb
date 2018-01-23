@@ -67,69 +67,6 @@ struct tdesc_type_field
   int start, end;
 };
 
-enum tdesc_type_kind
-{
-  /* Predefined types.  */
-  TDESC_TYPE_BOOL,
-  TDESC_TYPE_INT8,
-  TDESC_TYPE_INT16,
-  TDESC_TYPE_INT32,
-  TDESC_TYPE_INT64,
-  TDESC_TYPE_INT128,
-  TDESC_TYPE_UINT8,
-  TDESC_TYPE_UINT16,
-  TDESC_TYPE_UINT32,
-  TDESC_TYPE_UINT64,
-  TDESC_TYPE_UINT128,
-  TDESC_TYPE_CODE_PTR,
-  TDESC_TYPE_DATA_PTR,
-  TDESC_TYPE_IEEE_SINGLE,
-  TDESC_TYPE_IEEE_DOUBLE,
-  TDESC_TYPE_ARM_FPA_EXT,
-  TDESC_TYPE_I387_EXT,
-
-  /* Types defined by a target feature.  */
-  TDESC_TYPE_VECTOR,
-  TDESC_TYPE_STRUCT,
-  TDESC_TYPE_UNION,
-  TDESC_TYPE_FLAGS,
-  TDESC_TYPE_ENUM
-};
-
-struct tdesc_type : tdesc_element
-{
-  tdesc_type (const std::string &name_, enum tdesc_type_kind kind_)
-    : name (name_), kind (kind_)
-  {}
-
-  virtual ~tdesc_type () = default;
-
-  DISABLE_COPY_AND_ASSIGN (tdesc_type);
-
-  /* The name of this type.   */
-  std::string name;
-
-  /* Identify the kind of this type.  */
-  enum tdesc_type_kind kind;
-
-  bool operator== (const tdesc_type &other) const
-  {
-    return name == other.name && kind == other.kind;
-  }
-
-  bool operator!= (const tdesc_type &other) const
-  {
-    return !(*this == other);
-  }
-
-  /* Construct, if necessary, and return the GDB type implementing this
-     target type for architecture GDBARCH.  */
-
-  virtual type *make_gdb_type (struct gdbarch *gdbarch) const = 0;
-};
-
-typedef std::unique_ptr<tdesc_type> tdesc_type_up;
-
 struct tdesc_type_builtin : tdesc_type
 {
   tdesc_type_builtin (const std::string &name, enum tdesc_type_kind kind)
@@ -407,82 +344,6 @@ struct tdesc_type_with_fields : tdesc_type
   std::vector<tdesc_type_field> fields;
   int size;
 };
-
-/* A feature from a target description.  Each feature is a collection
-   of other elements, e.g. registers and types.  */
-
-struct tdesc_feature : tdesc_element
-{
-  tdesc_feature (const std::string &name_)
-    : name (name_)
-  {}
-
-  virtual ~tdesc_feature () = default;
-
-  DISABLE_COPY_AND_ASSIGN (tdesc_feature);
-
-  /* The name of this feature.  It may be recognized by the architecture
-     support code.  */
-  std::string name;
-
-  /* The registers associated with this feature.  */
-  std::vector<tdesc_reg_up> registers;
-
-  /* The types associated with this feature.  */
-  std::vector<tdesc_type_up> types;
-
-  void accept (tdesc_element_visitor &v) const override
-  {
-    v.visit_pre (this);
-
-    for (const tdesc_type_up &type : types)
-      type->accept (v);
-
-    for (const tdesc_reg_up &reg : registers)
-      reg->accept (v);
-
-    v.visit_post (this);
-  }
-
-  bool operator== (const tdesc_feature &other) const
-  {
-    if (name != other.name)
-      return false;
-
-    if (registers.size () != other.registers.size ())
-      return false;
-
-    for (int ix = 0; ix < registers.size (); ix++)
-      {
-	const tdesc_reg_up &reg1 = registers[ix];
-	const tdesc_reg_up &reg2 = other.registers[ix];
-
-	if (reg1 != reg2 && *reg1 != *reg2)
-	  return false;
-      }
-
-    if (types.size () != other.types.size ())
-      return false;
-
-    for (int ix = 0; ix < types.size (); ix++)
-      {
-	const tdesc_type_up &type1 = types[ix];
-	const tdesc_type_up &type2 = other.types[ix];
-
-	if (type1 != type2 && *type1 != *type2)
-	  return false;
-      }
-
-    return true;
-  }
-
-  bool operator!= (const tdesc_feature &other) const
-  {
-    return !(*this == other);
-  }
-};
-
-typedef std::unique_ptr<tdesc_feature> tdesc_feature_up;
 
 /* A target description.  */
 
@@ -1337,20 +1198,6 @@ tdesc_use_registers (struct gdbarch *gdbarch,
   set_gdbarch_remote_register_number (gdbarch,
 				      tdesc_remote_register_number);
   set_gdbarch_register_reggroup_p (gdbarch, tdesc_register_reggroup_p);
-}
-
-
-/* See arch/tdesc.h.  */
-
-void
-tdesc_create_reg (struct tdesc_feature *feature, const char *name,
-		  int regnum, int save_restore, const char *group,
-		  int bitsize, const char *type)
-{
-  tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
-				  group, bitsize, type);
-
-  feature->registers.emplace_back (reg);
 }
 
 /* See arch/tdesc.h.  */
