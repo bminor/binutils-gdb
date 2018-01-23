@@ -912,6 +912,7 @@ COMMON_SFILES = \
 	agent.c \
 	annotate.c \
 	arch-utils.c \
+	arch/tdesc.c \
 	auto-load.c \
 	auxv.c \
 	ax-gdb.c \

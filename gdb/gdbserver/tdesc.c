@@ -72,9 +72,27 @@ init_target_desc (struct target_desc *tdesc)
 {
   int offset = 0;
 
-  for (reg *reg : tdesc->reg_defs)
+  /* Go through all the features and populate reg_defs.  */
+  for (const tdesc_reg_up &treg : tdesc->registers)
     {
+      /* Fill in any blank spaces.  */
+      while (tdesc->reg_defs.size () < treg->target_regnum)
+	{
+	  struct reg *reg = XCNEW (struct reg);
+	  reg->name = "";
+	  reg->size = 0;
+	  reg->offset = offset;
+	  tdesc->reg_defs.push_back (reg);
+	}
+
+      gdb_assert (treg->target_regnum == 0
+		  || treg->target_regnum == tdesc->reg_defs.size ());
+
+      struct reg *reg = XCNEW (struct reg);
+      reg->name = treg->name.c_str ();
+      reg->size = treg->bitsize;
       reg->offset = offset;
+      tdesc->reg_defs.push_back (reg);
       offset += reg->size;
     }
 
@@ -241,23 +259,10 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 {
   struct target_desc *tdesc = (struct target_desc *) feature;
 
-  while (tdesc->reg_defs.size () < regnum)
-    {
-      struct reg *reg = XCNEW (struct reg);
+  tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
+				  group, bitsize, type);
 
-      reg->name = "";
-      reg->size = 0;
-      tdesc->reg_defs.push_back (reg);
-    }
-
-  gdb_assert (regnum == 0
-	      || regnum == tdesc->reg_defs.size ());
-
-  struct reg *reg = XCNEW (struct reg);
-
-  reg->name = name;
-  reg->size = bitsize;
-  tdesc->reg_defs.push_back (reg);
+  tdesc->registers.emplace_back (reg);
 }
 
 /* See arch/tdesc.h.  */

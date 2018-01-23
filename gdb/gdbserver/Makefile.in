@@ -194,6 +194,7 @@ SFILES = \
 	$(srcdir)/arch/arm.c \
 	$(srcdir)/arch/arm-get-next-pcs.c \
 	$(srcdir)/arch/arm-linux.c \
+	$(srcdir)/../arch/tdesc.c \
 	$(srcdir)/common/btrace-common.c \
 	$(srcdir)/common/buffer.c \
 	$(srcdir)/common/cleanups.c \
@@ -232,6 +233,7 @@ TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
 OBS = \
 	agent.o \
+	arch/tdesc.o \
 	ax.o \
 	btrace-common.o \
 	buffer.o \
@@ -391,6 +393,7 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS) $(LIBGNU) $(LIBIBERTY)
 	  $(XM_CLIBS) $(LIBGNU) $(LIBIBERTY)
 
 IPA_OBJS = \
+	arch/tdesc-ipa.o \
 	ax-ipa.o \
 	common-utils-ipa.o \
 	errors-ipa.o \
