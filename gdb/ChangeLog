@@ -1,5 +1,11 @@
 2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
+	* s390-linux-tdep.c (gdbarch_tdep) <tdesc>: New field.
+	(s390_gdbarch_tdep_alloc): Adjust.
+	(s390_gdbarch_init): Adjust.
+
+2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c (gdbarch_tdep) <have_linux_v1, have_linux_v2>
 	<have_tdb>: Change type to bool.
 	(s390_gdbarch_tdep_alloc): Adjust.

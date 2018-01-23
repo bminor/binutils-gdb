@@ -100,6 +100,9 @@ enum s390_vector_abi_kind
 
 struct gdbarch_tdep
 {
+  /* Target description.  */
+  const struct target_desc *tdesc;
+
   /* ABI version.  */
   enum s390_abi_kind abi;
 
@@ -7815,6 +7818,8 @@ s390_gdbarch_tdep_alloc ()
 {
   struct gdbarch_tdep *tdep = XCNEW (struct gdbarch_tdep);
 
+  tdep->tdesc = NULL;
+
   tdep->abi = ABI_NONE;
   tdep->vector_abi = S390_VECTOR_ABI_NONE;
 
@@ -7875,6 +7880,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       else
 	tdesc = tdesc_s390x_linux64;
     }
+  tdep->tdesc = tdesc;
 
   /* Check any target description for validity.  */
   if (tdesc_has_registers (tdesc))
@@ -8137,7 +8143,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ax_pseudo_register_push_stack
       (gdbarch, s390_ax_pseudo_register_push_stack);
   set_gdbarch_gen_return_address (gdbarch, s390_gen_return_address);
-  tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+  tdesc_use_registers (gdbarch, tdep->tdesc, tdesc_data);
   set_gdbarch_register_name (gdbarch, s390_register_name);
 
   /* Assign pseudo register numbers.  */
