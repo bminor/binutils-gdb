@@ -1,5 +1,58 @@
 2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
+	* s390-linux-nat.c (s390-tdep.h): New include.
+	* Makefile.in (ALL_TARGET_OBS): Add s390-tdep.o.
+	(HFILES_NO_SRCDIR): Add s390-tdep.h.
+	(ALLDEPFILES): Add s390-tdep.c.
+	* configure.tgt (s390*-*-linux*): Add s390-tdep.o.
+	* s390-linux-tdep.h (HWCAP_S390_*, S390_*_REGNUM): Move to...
+	* s390-tdep.h: ...this.  New file.
+	* s390-linux-tdep.c (s390-tdep.h): New include.
+	(_initialize_s390_tdep): Rename to...
+	(_initialize_s390_linux_tdep): ...this and adjust.
+	(s390_abi_kind, s390_vector_abi_kind, gdbarch_tdep)
+	(enum named opcodes, S390_NUM_GPRS, S390_NUM_FPRS): Move to
+	s390-tdep.h.
+	(s390_break_insn, s390_breakpoint, s390_readinstruction, is_ri)
+	(is_ril, is_rr, is_rre, is_rs, is_rsy, is_rx, is_rxy)
+	(s390_is_partial_instruction, s390_software_single_step)
+	(is_non_branch_ril, s390_displaced_step_copy_insn)
+	(s390_displaced_step_fixup, s390_displaced_step_hw_singlestep)
+	(s390_prologue_data, s390_addr, s390_store, s390_load)
+	(s390_check_for_saved, s390_analyze_prologue, s390_skip_prologue)
+	(s390_register_call_saved, s390_guess_tracepoint_registers)
+	(s390_register_name, s390_dwarf_regmap, s390_dwarf_reg_to_regnum)
+	(regnum_is_gpr_full, regnum_is_vxr_full, s390_value_from_register)
+	(s390_pseudo_register_name, s390_pseudo_register_type)
+	(s390_pseudo_register_read, s390_pseudo_register_write)
+	(s390_pseudo_register_reggroup_p, s390_ax_pseudo_register_collect)
+	(s390_ax_pseudo_register_push_stack, s390_gen_return_address)
+	(s390_addr_bits_remove, s390_address_class_type_flags)
+	(s390_address_class_type_flags_to_name)
+	(s390_address_class_name_to_type_flags, s390_effective_inner_type)
+	(s390_function_arg_float, s390_function_arg_vector)
+	(is_power_of_two, s390_function_arg_integer, s390_arg_state)
+	(s390_handle_arg, s390_push_dummy_call, s390_dummy_id)
+	(s390_frame_align, s390_register_return_value, s390_return_value)
+	(s390_stack_frame_destroyed_p, s390_unwind_pc, s390_unwind_sp)
+	(s390_unwind_pseudo_register, s390_adjust_frame_regnum)
+	(s390_dwarf2_prev_register, s390_dwarf2_frame_init_reg)
+	(s390_trad_frame_prev_register, s390_unwind_cache)
+	(s390_prologue_frame_unwind_cache)
+	(s390_backchain_frame_unwind_cache, s390_frame_unwind_cache)
+	(s390_frame_this_id, s390_frame_prev_register, s390_frame_unwind)
+	(s390_stub_unwind_cache, s390_stub_frame_unwind_cache)
+	(s390_stub_frame_this_id, s390_stub_frame_prev_register)
+	(s390_stub_frame_sniffer, s390_stub_frame_unwind)
+	(s390_frame_base_address, s390_local_base_address)
+	(s390_frame_base, s390_gcc_target_options)
+	(s390_gnu_triplet_regexp, s390_stap_is_single_operand)
+	(s390_validate_reg_range, s390_tdesc_valid)
+	(s390_gdbarch_tdep_alloc, s390_gdbarch_init): Move to...
+	* s390-tdep.c: ...this.  New file.
+
+2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
 	* s390-linux-tdep.c (gdbarch_tdep.s390_syscall_record): New hook.
 	(s390_process_record, s390_gdbarch_tdep_alloc)
 	(s390_linux_init_abi_any): Use/set new hook.

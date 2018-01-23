@@ -30,6 +30,7 @@
 #include "nat/linux-ptrace.h"
 #include "gdbcmd.h"
 
+#include "s390-tdep.h"
 #include "s390-linux-tdep.h"
 #include "elf/common.h"
 
