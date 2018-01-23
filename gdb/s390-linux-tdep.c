@@ -113,9 +113,9 @@ struct gdbarch_tdep
   int v0_full_regnum;
 
   bool have_upper;
-  int have_linux_v1;
-  int have_linux_v2;
-  int have_tdb;
+  bool have_linux_v1;
+  bool have_linux_v2;
+  bool have_tdb;
   bool have_vx;
   bool have_gs;
 };
@@ -7824,9 +7824,9 @@ s390_gdbarch_tdep_alloc ()
   tdep->cc_regnum = -1;
 
   tdep->have_upper = false;
-  tdep->have_linux_v1 = 0;
-  tdep->have_linux_v2 = 0;
-  tdep->have_tdb = 0;
+  tdep->have_linux_v1 = false;
+  tdep->have_linux_v2 = false;
+  tdep->have_tdb = false;
   tdep->have_vx = false;
   tdep->have_gs = false;
 
@@ -7993,13 +7993,13 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	  if (tdesc_numbered_register (feature, tdesc_data,
 				       S390_LAST_BREAK_REGNUM, "last_break"))
-	    tdep->have_linux_v1 = 1;
+	    tdep->have_linux_v1 = true;
 
 	  if (tdesc_numbered_register (feature, tdesc_data,
 				       S390_SYSTEM_CALL_REGNUM, "system_call"))
-	    tdep->have_linux_v2 = 1;
+	    tdep->have_linux_v2 = true;
 
-	  if (tdep->have_linux_v2 > tdep->have_linux_v1)
+	  if (tdep->have_linux_v2 && !tdep->have_linux_v1)
 	    valid_p = 0;
 	}
 
@@ -8011,7 +8011,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
 						S390_TDB_DWORD0_REGNUM + i,
 						tdb_regs[i]);
-	  tdep->have_tdb = 1;
+	  tdep->have_tdb = true;
 	}
 
       /* Vector registers.  */
