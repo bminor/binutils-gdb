@@ -292,8 +292,8 @@ main(int argc, char** argv)
 
 #ifdef HAVE_MALLINFO
       struct mallinfo m = mallinfo();
-      fprintf(stderr, _("%s: total space allocated by malloc: %d bytes\n"),
-	      program_name, m.arena);
+      fprintf(stderr, _("%s: total space allocated by malloc: %lld bytes\n"),
+	      program_name, static_cast<long long>(m.arena));
 #endif
       File_read::print_stats();
       Archive::print_stats();

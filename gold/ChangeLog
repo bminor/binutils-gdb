@@ -1,3 +1,7 @@
+2018-01-24  Franz Sirl  <franz.sirl-kernel@lauterbach.com>
+
+	* main.cc: Print m.arena as long long.
+
 2018-01-18  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (param_plt_align): New function supplying default
