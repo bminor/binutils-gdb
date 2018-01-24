@@ -404,6 +404,16 @@ struct dynamic_prop
   union dynamic_prop_data data;
 };
 
+/* Compare two dynamic_prop objects for equality.  dynamic_prop
+   instances are equal iff they have the same type and storage.  */
+extern bool operator== (const dynamic_prop &l, const dynamic_prop &r);
+
+/* Compare two dynamic_prop objects for inequality.  */
+static inline bool operator!= (const dynamic_prop &l, const dynamic_prop &r)
+{
+  return !(l == r);
+}
+
 /* * Define a type's dynamic property node kind.  */
 enum dynamic_prop_node_kind
 {
@@ -560,6 +570,16 @@ struct range_bounds
 
   int flag_bound_evaluated : 1;
 };
+
+/* Compare two range_bounds objects for equality.  Simply does
+   memberwise comparison.  */
+extern bool operator== (const range_bounds &l, const range_bounds &r);
+
+/* Compare two range_bounds objects for inequality.  */
+static inline bool operator!= (const range_bounds &l, const range_bounds &r)
+{
+  return !(l == r);
+}
 
 union type_specific
 {

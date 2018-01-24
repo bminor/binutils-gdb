@@ -1,3 +1,16 @@
+2018-01-24  Pedro Alves  <palves@redhat.com>
+
+	GCC PR libstdc++/83906
+	* gdbtypes.c (operator==(const dynamic_prop &,
+	const dynamic_prop &)): New.
+	(operator==(const range_bounds &, const range_bounds &)): New.
+	(check_types_equal): Use them instead of memcmp.
+	* gdbtypes.h (operator==(const dynamic_prop &,
+	const dynamic_prop &)): Declare.
+	(operator!=(const dynamic_prop &, const dynamic_prop &)): Declare.
+	(operator==(const range_bounds &, const range_bounds &)): Declare.
+	(operator!=(const range_bounds &, const range_bounds &)): Declare.
+
 2018-01-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
 	* s390-linux-tdep.c (s390_record_address_mask)
