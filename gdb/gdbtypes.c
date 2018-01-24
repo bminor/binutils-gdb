@@ -858,6 +858,44 @@ allocate_stub_method (struct type *type)
   return mtype;
 }
 
+/* See gdbtypes.h.  */
+
+bool
+operator== (const dynamic_prop &l, const dynamic_prop &r)
+{
+  if (l.kind != r.kind)
+    return false;
+
+  switch (l.kind)
+    {
+    case PROP_UNDEFINED:
+      return true;
+    case PROP_CONST:
+      return l.data.const_val == r.data.const_val;
+    case PROP_ADDR_OFFSET:
+    case PROP_LOCEXPR:
+    case PROP_LOCLIST:
+      return l.data.baton == r.data.baton;
+    }
+
+  gdb_assert_not_reached ("unhandled dynamic_prop kind");
+}
+
+/* See gdbtypes.h.  */
+
+bool
+operator== (const range_bounds &l, const range_bounds &r)
+{
+#define FIELD_EQ(FIELD) (l.FIELD == r.FIELD)
+
+  return (FIELD_EQ (low)
+	  && FIELD_EQ (high)
+	  && FIELD_EQ (flag_upper_bound_is_count)
+	  && FIELD_EQ (flag_bound_evaluated));
+
+#undef FIELD_EQ
+}
+
 /* Create a range type with a dynamic range from LOW_BOUND to
    HIGH_BOUND, inclusive.  See create_range_type for further details. */
 
@@ -3512,8 +3550,7 @@ check_types_equal (struct type *type1, struct type *type2,
 
   if (TYPE_CODE (type1) == TYPE_CODE_RANGE)
     {
-      if (memcmp (TYPE_RANGE_DATA (type1), TYPE_RANGE_DATA (type2),
-		  sizeof (*TYPE_RANGE_DATA (type1))) != 0)
+      if (*TYPE_RANGE_DATA (type1) != *TYPE_RANGE_DATA (type2))
 	return 0;
     }
   else
