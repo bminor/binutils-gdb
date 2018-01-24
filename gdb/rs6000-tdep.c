@@ -6717,17 +6717,17 @@ read_insn (struct frame_info *frame, CORE_ADDR pc)
    'struct ppc_insn_pattern' objects, terminated by an entry whose
    mask is zero.
 
-   When the match is successful, fill INSN[i] with what PATTERN[i]
+   When the match is successful, fill INSNS[i] with what PATTERN[i]
    matched.  If PATTERN[i] is optional, and the instruction wasn't
-   present, set INSN[i] to 0 (which is not a valid PPC instruction).
-   INSN should have as many elements as PATTERN.  Note that, if
-   PATTERN contains optional instructions which aren't present in
-   memory, then INSN will have holes, so INSN[i] isn't necessarily the
-   i'th instruction in memory.  */
+   present, set INSNS[i] to 0 (which is not a valid PPC instruction).
+   INSNS should have as many elements as PATTERN, minus the terminator.
+   Note that, if PATTERN contains optional instructions which aren't
+   present in memory, then INSNS will have holes, so INSNS[i] isn't
+   necessarily the i'th instruction in memory.  */
 
 int
 ppc_insns_match_pattern (struct frame_info *frame, CORE_ADDR pc,
-			 struct ppc_insn_pattern *pattern,
+			 const struct ppc_insn_pattern *pattern,
 			 unsigned int *insns)
 {
   int i;

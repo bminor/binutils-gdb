@@ -330,7 +330,7 @@ struct ppc_insn_pattern
 };
 
 extern int ppc_insns_match_pattern (struct frame_info *frame, CORE_ADDR pc,
-				    struct ppc_insn_pattern *pattern,
+				    const struct ppc_insn_pattern *pattern,
 				    unsigned int *insns);
 extern CORE_ADDR ppc_insn_d_field (unsigned int insn);
 

@@ -256,8 +256,8 @@ ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
 				      readbuf, writebuf);
 }
 
-/* PLT stub in executable.  */
-static struct ppc_insn_pattern powerpc32_plt_stub[] =
+/* PLT stub in an executable.  */
+static const struct ppc_insn_pattern powerpc32_plt_stub[] =
   {
     { 0xffff0000, 0x3d600000, 0 },	/* lis   r11, xxxx	 */
     { 0xffff0000, 0x816b0000, 0 },	/* lwz   r11, xxxx(r11)  */
@@ -266,16 +266,30 @@ static struct ppc_insn_pattern powerpc32_plt_stub[] =
     {          0,          0, 0 }
   };
 
-/* PLT stub in shared library.  */
-static struct ppc_insn_pattern powerpc32_plt_stub_so[] =
+/* PLT stubs in a shared library or PIE.
+   The first variant is used when the PLT entry is within +/-32k of
+   the GOT pointer (r30).  */
+static const struct ppc_insn_pattern powerpc32_plt_stub_so_1[] =
   {
     { 0xffff0000, 0x817e0000, 0 },	/* lwz   r11, xxxx(r30)  */
     { 0xffffffff, 0x7d6903a6, 0 },	/* mtctr r11		 */
     { 0xffffffff, 0x4e800420, 0 },	/* bctr			 */
-    { 0xffffffff, 0x60000000, 0 },	/* nop			 */
     {          0,          0, 0 }
   };
-#define POWERPC32_PLT_STUB_LEN 	ARRAY_SIZE (powerpc32_plt_stub)
+
+/* The second variant is used when the PLT entry is more than +/-32k
+   from the GOT pointer (r30).  */
+static const struct ppc_insn_pattern powerpc32_plt_stub_so_2[] =
+  {
+    { 0xffff0000, 0x3d7e0000, 0 },	/* addis r11, r30, xxxx  */
+    { 0xffff0000, 0x816b0000, 0 },	/* lwz   r11, xxxx(r11)  */
+    { 0xffffffff, 0x7d6903a6, 0 },	/* mtctr r11		 */
+    { 0xffffffff, 0x4e800420, 0 },	/* bctr			 */
+    {          0,          0, 0 }
+  };
+
+/* The max number of insns we check using ppc_insns_match_pattern.  */
+#define POWERPC32_PLT_CHECK_LEN (ARRAY_SIZE (powerpc32_plt_stub) - 1)
 
 /* Check if PC is in PLT stub.  For non-secure PLT, stub is in .plt
    section.  For secure PLT, stub is in .text and we need to check
@@ -306,13 +320,13 @@ powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 
    When the execution direction is EXEC_REVERSE, scan backward to
    check whether we are in the middle of a PLT stub.  Currently,
-   we only look-behind at most 4 instructions (the max length of PLT
+   we only look-behind at most 4 instructions (the max length of a PLT
    stub sequence.  */
 
 static CORE_ADDR
 ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
-  unsigned int insnbuf[POWERPC32_PLT_STUB_LEN];
+  unsigned int insnbuf[POWERPC32_PLT_CHECK_LEN];
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -323,40 +337,47 @@ ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   /* When reverse-debugging, scan backward to check whether we are
      in the middle of trampoline code.  */
   if (execution_direction == EXEC_REVERSE)
-    scan_limit = 4;	/* At more 4 instructions.  */
+    scan_limit = 4;	/* At most 4 instructions.  */
 
   for (i = 0; i < scan_limit; i++)
     {
       if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub, insnbuf))
 	{
-	  /* Insn pattern is
+	  /* Calculate PLT entry address from
 	     lis   r11, xxxx
-	     lwz   r11, xxxx(r11)
-	     Branch target is in r11.  */
-
-	  target = (ppc_insn_d_field (insnbuf[0]) << 16)
-		   | ppc_insn_d_field (insnbuf[1]);
-	  target = read_memory_unsigned_integer (target, 4, byte_order);
+	     lwz   r11, xxxx(r11).  */
+	  target = ((ppc_insn_d_field (insnbuf[0]) << 16)
+		    + ppc_insn_d_field (insnbuf[1]));
 	}
-      else if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub_so,
+      else if (i < ARRAY_SIZE (powerpc32_plt_stub_so_1) - 1
+	       && ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub_so_1,
+					   insnbuf))
+	{
+	  /* Calculate PLT entry address from
+	     lwz   r11, xxxx(r30).  */
+	  target = (ppc_insn_d_field (insnbuf[0])
+		    + get_frame_register_unsigned (frame,
+						   tdep->ppc_gp0_regnum + 30));
+	}
+      else if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub_so_2,
 					insnbuf))
 	{
-	  /* Insn pattern is
-	     lwz   r11, xxxx(r30)
-	     Branch target is in r11.  */
-
-	  target = get_frame_register_unsigned (frame,
-						tdep->ppc_gp0_regnum + 30)
-		   + ppc_insn_d_field (insnbuf[0]);
-	  target = read_memory_unsigned_integer (target, 4, byte_order);
+	  /* Calculate PLT entry address from
+	     addis r11, r30, xxxx
+	     lwz   r11, xxxx(r11).  */
+	  target = ((ppc_insn_d_field (insnbuf[0]) << 16)
+		    + ppc_insn_d_field (insnbuf[1])
+		    + get_frame_register_unsigned (frame,
+						   tdep->ppc_gp0_regnum + 30));
 	}
       else
 	{
-	  /* Scan backward one more instructions if doesn't match.  */
+	  /* Scan backward one more instruction if it doesn't match.  */
 	  pc -= 4;
 	  continue;
 	}
 
+      target = read_memory_unsigned_integer (target, 4, byte_order);
       return target;
     }
 

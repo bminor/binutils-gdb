@@ -80,7 +80,7 @@ ppc64_plt_entry_point (struct frame_info *frame, CORE_ADDR plt_off)
 
 /* Old ELFv1 PLT call stub.  */
 
-static struct ppc_insn_pattern ppc64_standard_linkage1[] =
+static const struct ppc_insn_pattern ppc64_standard_linkage1[] =
   {
     /* addis r12, r2, <any> */
     { insn_d (-1, -1, -1, 0), insn_d (15, 12, 2, 0), 0 },
@@ -119,7 +119,7 @@ static struct ppc_insn_pattern ppc64_standard_linkage1[] =
    instructions following "cmpldi r2, 0", "bnectr+" and "b <glink_i>",
    but there isn't any need to match them.  */
 
-static struct ppc_insn_pattern ppc64_standard_linkage2[] =
+static const struct ppc_insn_pattern ppc64_standard_linkage2[] =
   {
     /* std r2, 40(r1) <optional> */
     { -1, insn_ds (62, 2, 1, 40, 0), 1 },
@@ -162,7 +162,7 @@ static struct ppc_insn_pattern ppc64_standard_linkage2[] =
 
 /* ELFv1 PLT call stub to access PLT entries within +/- 32k of r2.  */
 
-static struct ppc_insn_pattern ppc64_standard_linkage3[] =
+static const struct ppc_insn_pattern ppc64_standard_linkage3[] =
   {
     /* std r2, 40(r1) <optional> */
     { -1, insn_ds (62, 2, 1, 40, 0), 1 },
@@ -201,7 +201,7 @@ static struct ppc_insn_pattern ppc64_standard_linkage3[] =
    A more modern variant of ppc64_standard_linkage2 differing in
    register usage.  */
 
-static struct ppc_insn_pattern ppc64_standard_linkage4[] =
+static const struct ppc_insn_pattern ppc64_standard_linkage4[] =
   {
     /* std r2, 40(r1) <optional> */
     { -1, insn_ds (62, 2, 1, 40, 0), 1 },
@@ -243,7 +243,7 @@ static struct ppc_insn_pattern ppc64_standard_linkage4[] =
    A more modern variant of ppc64_standard_linkage3 differing in
    register usage.  */
 
-static struct ppc_insn_pattern ppc64_standard_linkage5[] =
+static const struct ppc_insn_pattern ppc64_standard_linkage5[] =
   {
     /* std r2, 40(r1) <optional> */
     { -1, insn_ds (62, 2, 1, 40, 0), 1 },
@@ -280,7 +280,7 @@ static struct ppc_insn_pattern ppc64_standard_linkage5[] =
 
 /* ELFv2 PLT call stub to access PLT entries more than +/- 32k from r2.  */
 
-static struct ppc_insn_pattern ppc64_standard_linkage6[] =
+static const struct ppc_insn_pattern ppc64_standard_linkage6[] =
   {
     /* std r2, 24(r1) <optional> */
     { -1, insn_ds (62, 2, 1, 24, 0), 1 },
@@ -302,7 +302,7 @@ static struct ppc_insn_pattern ppc64_standard_linkage6[] =
 
 /* ELFv2 PLT call stub to access PLT entries within +/- 32k of r2.  */
 
-static struct ppc_insn_pattern ppc64_standard_linkage7[] =
+static const struct ppc_insn_pattern ppc64_standard_linkage7[] =
   {
     /* std r2, 24(r1) <optional> */
     { -1, insn_ds (62, 2, 1, 24, 0), 1 },
@@ -322,7 +322,7 @@ static struct ppc_insn_pattern ppc64_standard_linkage7[] =
 /* ELFv2 PLT call stub to access PLT entries more than +/- 32k from r2,
    supporting fusion.  */
 
-static struct ppc_insn_pattern ppc64_standard_linkage8[] =
+static const struct ppc_insn_pattern ppc64_standard_linkage8[] =
   {
     /* std r2, 24(r1) <optional> */
     { -1, insn_ds (62, 2, 1, 24, 0), 1 },

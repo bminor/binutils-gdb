@@ -1,3 +1,23 @@
+2018-01-26  Alan Modra  <amodra@gmail.com>
+
+	* ppc-linux-tdep.c (powerpc32_plt_stub): Make const.
+	(powerpc32_plt_stub_so_1): Rename from powerpc32_plt_stub_so.
+	Remove nop.  Make const.  Comment.
+	(powerpc32_plt_stub_so_2): New.
+	(POWERPC32_PLT_CHECK_LEN): Rename from POWERPC32_PLT_STUB_LEN.
+	Correct count.  Update uses.
+	(ppc_skip_trampoline_code): Match powerpc32_plt_stub_so_2 too.
+	Move common code reading PLT entry word.  Correct
+	powerpc32_plt_stub PLT address calculation.
+	* ppc64-tdep.c (ppc64_standard_linkage1): Make const.
+	(ppc64_standard_linkage2, ppc64_standard_linkage3): Likewise.
+	(ppc64_standard_linkage4, ppc64_standard_linkage5): Likewise.
+	(ppc64_standard_linkage6, ppc64_standard_linkage7): Likewise.
+	(ppc64_standard_linkage8): Likewise.
+	* rs6000-tdep.c (ppc_insns_match_pattern): Make pattern const.
+	Correct insns description.
+	* ppc-tdep.h (ppc_insns_match_pattern): Update prototype.
+
 2018-01-24  Pedro Alves  <palves@redhat.com>
 
 	GCC PR libstdc++/83906
