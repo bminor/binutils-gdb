@@ -1,3 +1,7 @@
+2018-07-11  Franz Sirl  <franz.sirl-kernel@lauterbach.com>
+
+	* main.cc: Print m.arena as long long.
+
 2018-07-09  Cary Coutant  <ccoutant@gmail.com>
 
 	* incremental.cc (Sized_incremental_binary::setup_readers): Use
