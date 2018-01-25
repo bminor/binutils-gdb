@@ -74,7 +74,8 @@ set sparctests {
      {{readelf -WSsrl tlssunpic32.rd} {objdump -drj.text tlssunpic32.dd}
       {objdump -sj.got tlssunpic32.sd} {objdump -sj.tdata tlssunpic32.td}}
       "libtlssunpic32.so"}
-    {"32-bit: Helper shared library" "-shared -melf32_sparc" ""
+    {"32-bit: Helper shared library"
+     "-shared -melf32_sparc -version-script tlslib.ver" ""
      "--32 -K PIC" {tlslib.s} {} "libtlslib32.so"}
     {"32-bit: Another helper shared library" "-shared -melf32_sparc" ""
      "--32 -K PIC" {tlssunbinpic32.s} {} "libtlssunbinpic32.so"}
@@ -92,6 +93,9 @@ set sparctests {
     {"32-bit: TLS in debug sections" "-melf32_sparc" ""
      "--32" {tlsg32.s}
      {{objdump -sj.debug_foobar tlsg32.sd}} "tlsg32"}
+    {"32-bit: TLS -fpie" "-melf32_sparc -pie tmpdir/libtlslib32.so" ""
+     "--32 -K PIC" {tlspie32.s}
+     {{objdump -drj.text tlspie32.dd}} "tlspie32"}
     {"32-bit: GOTDATA relocations"
      "-shared -melf32_sparc --hash-style=sysv" ""
      "--32 -K PIC" {gotop32.s}
@@ -109,7 +113,8 @@ set sparc64tests {
      {{readelf -WSsrl tlssunpic64.rd} {objdump -drj.text tlssunpic64.dd}
       {objdump -sj.got tlssunpic64.sd} {objdump -sj.tdata tlssunpic64.td}}
       "libtlssunpic64.so"}
-    {"64-bit: Helper shared library" "-shared -melf64_sparc" ""
+    {"64-bit: Helper shared library"
+     "-shared -melf64_sparc -version-script tlslib.ver" ""
      "--64 -Av9 -K PIC" {tlslib.s} {} "libtlslib64.so"}
     {"64-bit: Another helper shared library" "-shared -melf64_sparc" ""
      "--64 -Av9 -K PIC" {tlssunbinpic64.s} {} "libtlssunbinpic64.so"}
@@ -127,9 +132,12 @@ set sparc64tests {
     {"64-bit: TLS in debug sections" "-melf64_sparc" ""
      "--64 -Av9" {tlsg64.s}
      {{objdump -sj.debug_foobar tlsg64.sd}} "tlsg64"}
+    {"64-bit: TLS -fpie" "-melf64_sparc -pie tmpdir/libtlslib64.so" ""
+     "--64 -Av9 -K PIC" {tlspie64.s}
+     {{objdump -drj.text tlspie64.dd}} "tlspie64"}
     {"64-bit: GOTDATA relocations"
      "-shared -melf64_sparc --hash-style=sysv" ""
-     "--64 -K PIC" {gotop64.s}
+     "--64 -Av9 -K PIC" {gotop64.s}
      {{readelf -WSsrl gotop64.rd} {objdump -drj.text gotop64.dd}
       {objdump -sj.got gotop64.sd} {objdump -sj.data gotop64.td}}
      "libgotop64.so"}

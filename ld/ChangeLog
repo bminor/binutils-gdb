@@ -1,3 +1,23 @@
+2018-01-25  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* testsuite/ld-sparc/sparc.exp (32-bit: Helper shared library):
+	Link with a version script.
+	(32-bit: TLS -fpie): New test.
+	(64-bit: Helper shared library): Link with a version script.
+	(64-bit: TLS -fpie): New test.
+	(64-bit: GOTDATA relocations): Pass -Av9 to the assembler.
+	* testsuite/ld-sparc/tlslib.ver: New file.
+	* testsuite/ld-sparc/tlspie32.dd: Likewise.
+	* testsuite/ld-sparc/tlspie32.s: Likewise.
+	* testsuite/ld-sparc/tlspie64.dd: Likewise.
+	* testsuite/ld-sparc/tlspie64.s: Likewise.
+	* testsuite/ld-sparc/tlssunbin32.dd: Adjust for versioned symbol.
+	* testsuite/ld-sparc/tlssunbin32.rd: Likewise.
+	* testsuite/ld-sparc/tlssunbin32.sd: Likewise.
+	* testsuite/ld-sparc/tlssunbin64.dd: Likewise.
+	* testsuite/ld-sparc/tlssunbin64.rd: Likewise.
+	* testsuite/ld-sparc/tlssunbin64.sd: Likewise.
+
 2018-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
