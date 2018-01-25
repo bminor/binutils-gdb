@@ -379,8 +379,8 @@ extern std::string ada_name_for_lookup (const char *name);
 
 extern void create_ada_exception_catchpoint
   (struct gdbarch *gdbarch, enum ada_exception_catchpoint_kind ex_kind,
-   char *excep_string, char *cond_string, int tempflag, int disabled,
-   int from_tty);
+   char *excep_string, const std::string &cond_string, int tempflag,
+   int disabled, int from_tty);
 
 /* Some information about a given Ada exception.  */
 

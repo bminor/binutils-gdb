@@ -13142,7 +13142,7 @@ catch_ada_exception_command_split (const char *args,
 				   bool is_catch_handlers_cmd,
                                    enum ada_exception_catchpoint_kind *ex,
 				   char **excep_string,
-				   char **cond_string)
+				   std::string &cond_string)
 {
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   char *exception_name;
@@ -13209,7 +13209,8 @@ catch_ada_exception_command_split (const char *args,
       *ex = ada_catch_exception;
       *excep_string = exception_name;
     }
-  *cond_string = cond;
+  if (cond != NULL)
+    cond_string.assign (cond);
 }
 
 /* Return the name of the symbol on which we should break in order to
@@ -13400,7 +13401,7 @@ void
 create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 enum ada_exception_catchpoint_kind ex_kind,
 				 char *excep_string,
-				 char *cond_string,
+				 const std::string &cond_string,
 				 int tempflag,
 				 int disabled,
 				 int from_tty)
@@ -13415,8 +13416,8 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 ops, tempflag, disabled, from_tty);
   c->excep_string = excep_string;
   create_excep_cond_exprs (c.get (), ex_kind);
-  if (cond_string != NULL)
-    set_breakpoint_condition (c.get (), cond_string, from_tty);
+  if (!cond_string.empty ())
+    set_breakpoint_condition (c.get (), cond_string.c_str (), from_tty);
   install_breakpoint (0, std::move (c), 1);
 }
 
@@ -13431,14 +13432,14 @@ catch_ada_exception_command (const char *arg_entry, int from_tty,
   int tempflag;
   enum ada_exception_catchpoint_kind ex_kind;
   char *excep_string = NULL;
-  char *cond_string = NULL;
+  std::string cond_string;
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
   if (!arg)
     arg = "";
   catch_ada_exception_command_split (arg, false, &ex_kind, &excep_string,
-				     &cond_string);
+				     cond_string);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
 				   excep_string, cond_string,
 				   tempflag, 1 /* enabled */,
@@ -13456,14 +13457,14 @@ catch_ada_handlers_command (const char *arg_entry, int from_tty,
   int tempflag;
   enum ada_exception_catchpoint_kind ex_kind;
   char *excep_string = NULL;
-  char *cond_string = NULL;
+  std::string cond_string;
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
   if (!arg)
     arg = "";
   catch_ada_exception_command_split (arg, true, &ex_kind, &excep_string,
-				     &cond_string);
+				     cond_string);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
 				   excep_string, cond_string,
 				   tempflag, 1 /* enabled */,
@@ -13479,7 +13480,7 @@ catch_ada_handlers_command (const char *arg_entry, int from_tty,
    (the memory needs to be deallocated after use).  */
 
 static void
-catch_ada_assert_command_split (const char *args, char **cond_string)
+catch_ada_assert_command_split (const char *args, std::string &cond_string)
 {
   args = skip_spaces (args);
 
@@ -13491,7 +13492,7 @@ catch_ada_assert_command_split (const char *args, char **cond_string)
       args = skip_spaces (args);
       if (args[0] == '\0')
         error (_("condition missing after `if' keyword"));
-      *cond_string = xstrdup (args);
+      cond_string.assign (args);
     }
 
   /* Otherwise, there should be no other argument at the end of
@@ -13509,13 +13510,13 @@ catch_assert_command (const char *arg_entry, int from_tty,
   const char *arg = arg_entry;
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
-  char *cond_string = NULL;
+  std::string cond_string;
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
   if (!arg)
     arg = "";
-  catch_ada_assert_command_split (arg, &cond_string);
+  catch_ada_assert_command_split (arg, cond_string);
   create_ada_exception_catchpoint (gdbarch, ada_catch_assert,
 				   NULL, cond_string,
 				   tempflag, 1 /* enabled */,
