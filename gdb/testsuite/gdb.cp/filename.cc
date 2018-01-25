@@ -26,11 +26,31 @@ public:
   }
 
   void m() {
-    /* stop here */
+    /* stop inside C */
   }
 };
 
+class D {
+public:
+  int includefile();
+
+  void m() {
+    /* stop inside D */
+  }
+};
+
+int D::includefile() {
+  return 24;
+}
+
 int main() {
   C c;
+  C* pc = &c;
   c.m();
+
+  D d;
+  D* pd = &d;
+  d.m();
+
+  /* stop outside */
 }

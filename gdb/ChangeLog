@@ -1,3 +1,8 @@
+2018-02-01  Leszek Swirski  <leszeks@google.com>
+
+	* c-exp.y (lex_one_token, classify_name, yylex): Don't classify
+	names after a structop as a filename.
+
 2018-02-01  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (arm_record_data_proc_misc_ld_str): Rewrite it.

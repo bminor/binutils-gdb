@@ -1,3 +1,9 @@
+2018-02-01  Leszek Swirski  <leszeks@google.com>
+
+	* gdb.cp/filename.cc, gdb.cp/filename.exp: Test that member
+	functions with the same name as an include file are parsed
+	correctly.
+
 2018-02-01  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/attach.exp (do_attach_tests): Set sysroot to
