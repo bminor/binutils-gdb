@@ -680,7 +680,7 @@ elf_object_p (bfd *abfd)
       if (i_ehdrp->e_shnum > ((bfd_size_type) -1) / sizeof (*i_shdrp))
 	goto got_wrong_format_error;
 #endif
-      amt = sizeof (*i_shdrp) * i_ehdrp->e_shnum;
+      amt = sizeof (*i_shdrp) * (bfd_size_type) i_ehdrp->e_shnum;
       i_shdrp = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
       if (!i_shdrp)
 	goto got_no_match;
@@ -776,7 +776,7 @@ elf_object_p (bfd *abfd)
       if (i_ehdrp->e_phnum > ((bfd_size_type) -1) / sizeof (*i_phdr))
 	goto got_wrong_format_error;
 #endif
-      amt = i_ehdrp->e_phnum * sizeof (*i_phdr);
+      amt = (bfd_size_type) i_ehdrp->e_phnum * sizeof (*i_phdr);
       elf_tdata (abfd)->phdr = (Elf_Internal_Phdr *) bfd_alloc (abfd, amt);
       if (elf_tdata (abfd)->phdr == NULL)
 	goto got_no_match;

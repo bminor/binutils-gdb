@@ -1,3 +1,8 @@
+2018-01-25  Alan Modra  <amodra@gmail.com>
+
+	PR 22746
+	* elfcode.h (elf_object_p): Avoid integer overflow.
+
 2018-01-25  Eric Botcazou  <ebotcazou@adacore.com>
 
 	PR ld/22727
