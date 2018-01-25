@@ -1,3 +1,20 @@
+2018-01-25  Eric Botcazou  <ebotcazou@adacore.com>
+
+	PR ld/22727
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs) <R_SPARC_TLS_GD_CALL>:
+	Do a mere lookup of the __tls_get_addr symbol instead of adding it.
+
+	Revert
+	2017-10-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22263
+	* elfxx-sparc.c (sparc_elf_tls_transition): Replace
+	bfd_link_pic with !bfd_link_executable, !bfd_link_pic with
+	bfd_link_executable for TLS check.
+	(_bfd_sparc_elf_check_relocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(_bfd_sparc_elf_relocate_section): Likewise.
+
 2018-01-24  Renlin Li  <renlin.li@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Add support for

@@ -1333,7 +1333,7 @@ sparc_elf_tls_transition (struct bfd_link_info *info, bfd *abfd,
       && ! _bfd_sparc_elf_tdata (abfd)->has_tlsgd)
     r_type = R_SPARC_REV32;
 
-  if (!bfd_link_executable (info))
+  if (bfd_link_pic (info))
     return r_type;
 
   switch (r_type)
@@ -1505,13 +1505,13 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_SPARC_TLS_LE_HIX22:
 	case R_SPARC_TLS_LE_LOX10:
-	  if (!bfd_link_executable (info))
+	  if (bfd_link_pic (info))
 	    goto r_sparc_plt32;
 	  break;
 
 	case R_SPARC_TLS_IE_HI22:
 	case R_SPARC_TLS_IE_LO10:
-	  if (!bfd_link_executable (info))
+	  if (bfd_link_pic (info))
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
 
@@ -1625,18 +1625,13 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_SPARC_TLS_GD_CALL:
 	case R_SPARC_TLS_LDM_CALL:
-	  if (!bfd_link_executable (info))
+	  if (bfd_link_pic (info))
 	    {
 	      /* These are basically R_SPARC_TLS_WPLT30 relocs against
 		 __tls_get_addr.  */
-	      struct bfd_link_hash_entry *bh = NULL;
-	      if (! _bfd_generic_link_add_one_symbol (info, abfd,
-						      "__tls_get_addr", 0,
-						      bfd_und_section_ptr, 0,
-						      NULL, FALSE, FALSE,
-						      &bh))
-		return FALSE;
-	      h = (struct elf_link_hash_entry *) bh;
+	      h = (struct elf_link_hash_entry *)
+		  bfd_link_hash_lookup (info->hash, "__tls_get_addr", TRUE,
+					FALSE, TRUE);
 	    }
 	  else
 	    break;
@@ -2232,7 +2227,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   /* If R_SPARC_TLS_IE_{HI22,LO10} symbol is now local to the binary,
      make it a R_SPARC_TLS_LE_{HI22,LO10} requiring no TLS entry.  */
   if (h->got.refcount > 0
-      && bfd_link_executable (info)
+      && !bfd_link_pic (info)
       && h->dynindx == -1
       && _bfd_sparc_elf_hash_entry(h)->tls_type == GOT_TLS_IE)
     h->got.offset = (bfd_vma) -1;
@@ -3576,7 +3571,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  else if (h != NULL)
 	    {
 	      tls_type = _bfd_sparc_elf_hash_entry(h)->tls_type;
-	      if (bfd_link_executable (info)
+	      if (!bfd_link_pic (info)
 		  && h->dynindx == -1
 		  && tls_type == GOT_TLS_IE)
 		switch (SPARC_ELF_R_TYPE (rel->r_info))
@@ -3723,7 +3718,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
 	case R_SPARC_TLS_LE_HIX22:
 	case R_SPARC_TLS_LE_LOX10:
-	  if (!bfd_link_executable (info))
+	  if (bfd_link_pic (info))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip;
@@ -3755,7 +3750,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_SPARC_TLS_LDM_CALL:
-	  if (bfd_link_executable (info))
+	  if (! bfd_link_pic (info))
 	    {
 	      /* mov %g0, %o0 */
 	      bfd_put_32 (output_bfd, 0x90100000, contents + rel->r_offset);
@@ -3769,7 +3764,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	    tls_type = _bfd_sparc_elf_local_got_tls_type (input_bfd) [r_symndx];
 	  else if (h != NULL)
 	    tls_type = _bfd_sparc_elf_hash_entry(h)->tls_type;
-	  if (bfd_link_executable (info)
+	  if (! bfd_link_pic (info)
 	      || (r_type == R_SPARC_TLS_GD_CALL && tls_type == GOT_TLS_IE))
 	    {
 	      Elf_Internal_Rela *rel2;
@@ -3878,7 +3873,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
 	case R_SPARC_TLS_IE_LD:
 	case R_SPARC_TLS_IE_LDX:
-	  if (bfd_link_executable (info) && (h == NULL || h->dynindx == -1))
+	  if (! bfd_link_pic (info) && (h == NULL || h->dynindx == -1))
 	    {
 	      bfd_vma insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	      int rs2 = insn & 0x1f;
