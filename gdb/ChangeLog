@@ -1,3 +1,7 @@
+2018-01-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* MAINTAINERS (Write After Approval): Add Alan Hayward.
+
 2018-01-26  Alan Modra  <amodra@gmail.com>
 
 	* ppc-linux-tdep.c (powerpc32_plt_stub): Make const.
