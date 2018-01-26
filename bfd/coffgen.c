@@ -1555,7 +1555,8 @@ coff_pointerize_aux (bfd *abfd,
     }
   /* A negative tagndx is meaningless, but the SCO 3.2v4 cc can
      generate one, so we must be careful to ignore it.  */
-  if (auxent->u.auxent.x_sym.x_tagndx.l > 0)
+  if ((unsigned long) auxent->u.auxent.x_sym.x_tagndx.l
+      < obj_raw_syment_count (abfd))
     {
       auxent->u.auxent.x_sym.x_tagndx.p =
 	table_base + auxent->u.auxent.x_sym.x_tagndx.l;

@@ -1,3 +1,9 @@
+2018-01-29  Alan Modra  <amodra@gmail.com>
+
+	PR 22741
+	* coffgen.c (coff_pointerize_aux): Ensure auxent tagndx is in
+	range before converting to a symbol table pointer.
+
 2018-01-27  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.
