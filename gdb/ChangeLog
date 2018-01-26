@@ -1,5 +1,9 @@
 2018-01-26  Alan Hayward  <alan.hayward@arm.com>
 
+	* MAINTAINERS (Write After Approval): Fix ordering.
+
+2018-01-26  Alan Hayward  <alan.hayward@arm.com>
+
 	* MAINTAINERS (Write After Approval): Add Alan Hayward.
 
 2018-01-26  Alan Modra  <amodra@gmail.com>
