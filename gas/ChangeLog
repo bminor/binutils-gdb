@@ -1,3 +1,9 @@
+2018-01-26  Maciej W. Rozycki  <macro@mips.com>
+
+	* configure.ac: Also set `mips_default_abi' to N32_ABI for
+	`mips64*-ps2-elf*'.
+	* configure: Regenerate.
+
 2018-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
