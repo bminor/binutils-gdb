@@ -1,3 +1,8 @@
+2018-01-26  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Iterate sizing when
+	.branch_lt changes size.
+
 2018-01-25  Eric Botcazou  <ebotcazou@adacore.com>
 
 	PR ld/22727

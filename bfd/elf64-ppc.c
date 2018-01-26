@@ -12702,6 +12702,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	    stub_sec->flags &= ~SEC_RELOC;
 	  }
 
+      if (htab->stub_iteration <= STUB_SHRINK_ITER
+	  || htab->brlt->rawsize < htab->brlt->size)
+	htab->brlt->rawsize = htab->brlt->size;
       htab->brlt->size = 0;
       htab->brlt->reloc_count = 0;
       htab->brlt->flags &= ~SEC_RELOC;
@@ -12757,6 +12760,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  break;
 
       if (group == NULL
+	  && (htab->brlt->rawsize == htab->brlt->size
+	      || (htab->stub_iteration > STUB_SHRINK_ITER
+		  && htab->brlt->rawsize > htab->brlt->size))
 	  && (htab->glink_eh_frame == NULL
 	      || htab->glink_eh_frame->rawsize == htab->glink_eh_frame->size))
 	break;
