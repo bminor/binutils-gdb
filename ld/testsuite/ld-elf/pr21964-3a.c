@@ -1,0 +1,13 @@
+extern int __start___verbose[];
+extern int __stop___verbose[];
+int
+foo1 (void)
+{
+  static int my_var[5] __attribute__((used, section("__verbose")))
+    = { 5, 4, 3, 2, 1 };
+  if (__start___verbose == __stop___verbose
+      || __start___verbose[0] != 5)
+    return -1;
+  else
+    return 0;
+}

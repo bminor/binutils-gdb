@@ -565,6 +565,12 @@ set build_tests {
   {"Build pr21964-2b.so"
    "-shared" "-fPIC"
    {pr21964-2b.c} {} "pr21964-2b.so"}
+  {"Build pr21964-3a.so"
+   "-shared" "-fPIC"
+   {pr21964-3a.c} {} "pr21964-3a.so"}
+  {"Build pr21964-3b.so"
+   "-shared" "-fPIC"
+   {pr21964-3b.c} {} "pr21964-3b.so"}
   {"Dump pr21978.so"
    "-shared" "-fPIC -g -O2"
    {pr21978a.c pr21978b.c} {{objdump {-Sl} pr21978.od}} "pr21978.so"}
@@ -701,6 +707,9 @@ set run_tests [list \
     [list "Run pr21964-1" \
      "-Wl,--no-as-needed,-rpath,tmpdir tmpdir/pr21964-1a.so tmpdir/pr21964-1b.so" "" \
      {pr21964-1c.c} "pr21964-1" "pass.out" ] \
+    [list "Run pr21964-3" \
+     "-Wl,--no-as-needed,-rpath,tmpdir tmpdir/pr21964-3a.so tmpdir/pr21964-3b.so" "" \
+     {pr21964-3c.c} "pr21964-3" "pass.out" ] \
 ]
 
 # NetBSD ELF systems do not currently support the .*_array sections.
