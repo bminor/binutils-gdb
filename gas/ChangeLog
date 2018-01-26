@@ -1,3 +1,8 @@
+2018-01-26  Maciej W. Rozycki  <macro@mips.com>
+
+	* configure.tgt: Use `mips-*-sysv4*' rather than
+	`mips-*-sysv4*MP*'.
+
 2018-01-24  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): add entries for

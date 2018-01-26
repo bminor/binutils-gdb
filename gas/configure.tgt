@@ -345,7 +345,7 @@ case ${generic_target} in
   mips*-*-linux*)			fmt=elf em=tmips ;;
   mips*-*-freebsd* | mips*-*-kfreebsd*-gnu)
 					fmt=elf em=freebsd ;;
-  mips-*-sysv4*MP* | mips-*-gnu*)	fmt=elf em=tmips ;;
+  mips-*-sysv4* | mips-*-gnu*)		fmt=elf em=tmips ;;
   mips*-sde-elf* | mips*-mti-elf* | mips*-img-elf*)
 					fmt=elf em=tmips ;;
   mips-*-elf*)				fmt=elf ;;
