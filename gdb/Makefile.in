@@ -425,6 +425,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/ptid-selftests.c \
 	unittests/rsp-low-selftests.c \
 	unittests/scoped_fd-selftests.c \
+	unittests/scoped_mmap-selftests.c \
 	unittests/scoped_restore-selftests.c \
 	unittests/xml-utils-selftests.c
 

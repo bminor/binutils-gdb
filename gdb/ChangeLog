@@ -1,5 +1,12 @@
 2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* common/scoped_mmap.h: New.
+	* unittests/scoped_mmap-selftest.c: New.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/scoped_mmap-selftest.c.
+
+2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* common/scoped_fd.h: New.
 	* unittests/scoped_fd-selftest.c: New.
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
