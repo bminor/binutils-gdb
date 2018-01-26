@@ -28537,6 +28537,50 @@ times="0",original-location="__gnat_debug_raise_exception"@}
 (gdb)
 @end smallexample
 
+@subheading The @code{-catch-handlers} Command
+@findex -catch-handlers
+
+@subsubheading Synopsis
+
+@smallexample
+ -catch-handlers [ -c @var{condition}] [ -d ] [ -e @var{exception-name} ]
+    [ -t ]
+@end smallexample
+
+Add a catchpoint stopping when Ada exceptions are handled.
+By default, the command stops the program when any Ada exception
+gets handled.  But it is also possible, by using some of the
+optional parameters described below, to create more selective
+catchpoints.
+
+The possible optional parameters for this command are:
+
+@table @samp
+@item -c @var{condition}
+Make the catchpoint conditional on @var{condition}.
+@item -d
+Create a disabled catchpoint.
+@item -e @var{exception-name}
+Only stop when @var{exception-name} is handled.
+@item -t
+Create a temporary catchpoint.
+@end table
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{catch handlers}.
+
+@subsubheading Example
+
+@smallexample
+-catch-handlers -e Constraint_Error
+^done,bkptno="4",bkpt=@{number="4",type="breakpoint",disp="keep",
+enabled="y",addr="0x0000000000402f68",
+what="`Constraint_Error' Ada exception handlers",thread-groups=["i1"],
+times="0",original-location="__gnat_begin_handler"@}
+(gdb)
+@end smallexample
+
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Program Context
 @section @sc{gdb/mi}  Program Context

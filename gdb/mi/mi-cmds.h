@@ -41,6 +41,7 @@ extern mi_cmd_argv_ftype mi_cmd_break_passcount;
 extern mi_cmd_argv_ftype mi_cmd_break_watch;
 extern mi_cmd_argv_ftype mi_cmd_catch_assert;
 extern mi_cmd_argv_ftype mi_cmd_catch_exception;
+extern mi_cmd_argv_ftype mi_cmd_catch_handlers;
 extern mi_cmd_argv_ftype mi_cmd_catch_load;
 extern mi_cmd_argv_ftype mi_cmd_catch_unload;
 extern mi_cmd_argv_ftype mi_cmd_disassemble;

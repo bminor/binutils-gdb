@@ -377,6 +377,10 @@ show disassembler-options
   List the shared libraries in the program.  This is
   equivalent to the CLI command "info shared".
 
+-catch-handlers
+  Catchpoints stopping the program when Ada exceptions are
+  handled.  This is equivalent to the CLI command "catch handlers".
+
 *** Changes in GDB 7.12
 
 * GDB and GDBserver now build with a C++ compiler by default.

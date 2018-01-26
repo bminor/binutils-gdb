@@ -69,6 +69,8 @@ static struct mi_cmd mi_cmds[] =
                    &mi_suppress_notification.breakpoint),
   DEF_MI_CMD_MI_1 ("catch-exception", mi_cmd_catch_exception,
                    &mi_suppress_notification.breakpoint),
+  DEF_MI_CMD_MI_1 ("catch-handlers", mi_cmd_catch_handlers,
+                   &mi_suppress_notification.breakpoint),
   DEF_MI_CMD_MI_1 ("catch-load", mi_cmd_catch_load,
                    &mi_suppress_notification.breakpoint),
   DEF_MI_CMD_MI_1 ("catch-unload", mi_cmd_catch_unload,

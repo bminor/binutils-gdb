@@ -157,8 +157,76 @@ mi_cmd_catch_exception (const char *cmd, char *argv[], int argc)
   if (exception_name != NULL)
     exception_name = xstrdup (exception_name);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
-				   exception_name, condition,
-				   temp, enabled, 0);
+				   exception_name,
+				   condition, temp, enabled, 0);
+}
+
+/* Handler for the -catch-handlers command.  */
+
+void
+mi_cmd_catch_handlers (const char *cmd, char *argv[], int argc)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  std::string condition;
+  int enabled = 1;
+  char *exception_name = NULL;
+  int temp = 0;
+
+  int oind = 0;
+  char *oarg;
+
+  enum opt
+    {
+      OPT_CONDITION, OPT_DISABLED, OPT_EXCEPTION_NAME, OPT_TEMP
+    };
+  static const struct mi_opt opts[] =
+    {
+      { "c", OPT_CONDITION, 1},
+      { "d", OPT_DISABLED, 0 },
+      { "e", OPT_EXCEPTION_NAME, 1 },
+      { "t", OPT_TEMP, 0 },
+      { 0, 0, 0 }
+    };
+
+  for (;;)
+    {
+      int opt = mi_getopt ("-catch-handlers", argc, argv, opts,
+			   &oind, &oarg);
+
+      if (opt < 0)
+        break;
+
+      switch ((enum opt) opt)
+        {
+	case OPT_CONDITION:
+	  condition.assign (oarg);
+	  break;
+	case OPT_DISABLED:
+	  enabled = 0;
+	  break;
+	case OPT_EXCEPTION_NAME:
+	  exception_name = oarg;
+	  break;
+	case OPT_TEMP:
+	  temp = 1;
+	  break;
+        }
+    }
+
+  /* This command does not accept any argument.  Make sure the user
+     did not provide any.  */
+  if (oind != argc)
+    error (_("Invalid argument: %s"), argv[oind]);
+
+  scoped_restore restore_breakpoint_reporting
+    = setup_breakpoint_reporting ();
+  /* create_ada_exception_catchpoint needs EXCEPTION_NAME to be
+     xstrdup'ed, and will assume control of its lifetime.  */
+  if (exception_name != NULL)
+    exception_name = xstrdup (exception_name);
+  create_ada_exception_catchpoint (gdbarch, ada_catch_handlers,
+				   exception_name,
+				   condition, temp, enabled, 0);
 }
 
 /* Common path for the -catch-load and -catch-unload.  */
