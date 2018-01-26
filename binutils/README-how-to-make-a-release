@@ -65,10 +65,15 @@ How to perform a release.
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
-  8. Regenerate various files on both branch and HEAD by configuring
-     with --enable-maintainer-mode.  No need to check in changes to
-     the autoconf/automake/etc files, but be sure the .pot files are
-     up to date.  NB/ Remember to include gold and gprof.
+  8. Update the release number in bfd/version.m4 for the mainline and
+     the branch.  The mainline should have the minor number
+     incremented, but the branch only needs the point value set to 90
+     as the release has not actually happened yet.
+
+     Regenerate various files on both branch and HEAD by configuring
+     with --enable-maintainer-mode.  NB/ Remember to build gold and
+     gprof.  Commit the changes.  Make sure that this includes the
+     .pot files as well as the configure and makefiles.
 
   9. Create an initial prerelease:
 
@@ -95,38 +100,50 @@ How to perform a release.
   11. Announce the availability of the snapshot and the branch on the
       binutils mailing list.  Set a date for when the release will
       actually happen.  Something like:
-------------------------------------------------------------------------
-Hi Everyone, 
+        ------------------------------------------------------------------------
+        Hi Everyone, 
        
-  The 2.XX branch has now been created:
+          The 2.XX branch has now been created:
 
-     git clone git://sourceware.org/git/binutils-gdb.git -b binutils-2_XX-branch 2.XX
+             git clone git://sourceware.org/git/binutils-gdb.git -b binutils-2_XX-branch 2.XX
 
-  A snapshot of the sources is also available here:
+          A snapshot of the sources is also available here:
 
-    ftp://sourceware.org/pub/binutils/snapshots/binutils-2.XX.0.tar.xz
+            ftp://sourceware.org/pub/binutils/snapshots/binutils-2.XX.0.tar.xz
 
-  Please could all patches for the branch be run by me.
-  The rules for the branch are:
-
-    * No new features.
-    * Target specific bug fixes are OK.
-    * Generic bug fixes are OK if they are important and widely tested.
-    * Documentation updates/fixes are OK.
-    * Translation updates are OK.
-    * Fixes for testsuite failures are OK.
-
-  Ideally I would like to make the release happen in two weeks time,
-  i.e. Saturday 27th Jan.  Which I hope will be enough time for everyone
-  to get their final fixes in.
-------------------------------------------------------------------------
+          Please could all patches for the branch be run by me.
+          The rules for the branch are:
+        
+            * No new features.
+            * Target specific bug fixes are OK.
+            * Generic bug fixes are OK if they are important and widely tested.
+            * Documentation updates/fixes are OK.
+            * Translation updates are OK.
+            * Fixes for testsuite failures are OK.
+        
+          Ideally I would like to make the release happen in two weeks time,
+          i.e. Saturday 27th Jan.  Which I hope will be enough time for everyone
+          to get their final fixes in.
+        ------------------------------------------------------------------------
 
   12. Build various different toolchains, test them and nag
       maintainers to fix any testsuite failures for their
       architectures...
 
 
+When the time comes to actually make the release....
+
+
+  20. Update the release number in bfd/version.m4 on the release
+      branch to a whole new minor version number, without a point
+      value.  Eg "2.29.90" becomes "2.30".  Change bfd/development.sh
+      to set the value to "false".
+   
+
 xxx -- fill in stuff here -- xxx
+
+
+
 
 -------------------------------------------------
 How to perform a point release.

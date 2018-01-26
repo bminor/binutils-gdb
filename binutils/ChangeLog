@@ -1,3 +1,8 @@
+2018-01-26  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Add more details on updating
+	version numbers.
+
 2018-01-22  Maciej W. Rozycki  <macro@mips.com>
 
 	* doc/binutils.texi (objcopy): Fix a typo in `--rename-section'
