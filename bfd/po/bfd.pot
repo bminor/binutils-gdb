@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2018-01-13 13:44+0000\n"
+"POT-Creation-Date: 2018-01-27 14:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -206,7 +206,7 @@ msgid "warning: writing section `%A' at huge (ie negative) file offset"
 msgstr ""
 
 #: bout.c:1142 elf-m10300.c:2647 elf32-avr.c:2484 elf32-frv.c:5633
-#: elf64-ia64-vms.c:353 elfxx-sparc.c:2817 reloc.c:8059 reloc16.c:156
+#: elf64-ia64-vms.c:353 elfxx-sparc.c:2812 reloc.c:8059 reloc16.c:156
 #: elf32-ia64.c:351 elf64-ia64.c:351
 msgid "%P%F: --relax and -r may not be used together\n"
 msgstr ""
@@ -1029,7 +1029,7 @@ msgstr ""
 #: elf-m10300.c:2093 elf32-arm.c:12536 elf32-i386.c:3433 elf32-m32r.c:2526
 #: elf32-m68k.c:3895 elf32-s390.c:3204 elf32-sh.c:4121 elf32-tilepro.c:3401
 #: elf32-xtensa.c:2939 elf64-s390.c:3118 elf64-sh64.c:1636 elf64-x86-64.c:3790
-#: elfxx-sparc.c:3918 elfxx-tilegx.c:3781
+#: elfxx-sparc.c:3913 elfxx-tilegx.c:3781
 #: /work/sources/binutils/branches/2.30/bfd/elfnn-aarch64.c:5001
 #: /work/sources/binutils/branches/2.30/bfd/elfnn-aarch64.c:6457
 #: /work/sources/binutils/branches/2.30/bfd/elfnn-riscv.c:2206
@@ -1342,7 +1342,7 @@ msgstr ""
 
 #: elf32-arc.c:433 elf32-frv.c:6623 elf32-iq2000.c:866 elf32-m32c.c:912
 #: elf32-mt.c:560 elf32-rl78.c:1257 elf32-rx.c:3178 elf32-visium.c:837
-#: elf64-ppc.c:6067
+#: elf64-ppc.c:6082
 #, c-format
 msgid "private flags = 0x%lx:"
 msgstr ""
@@ -1381,7 +1381,7 @@ msgid "ERROR: Attempting to link %B with a binary %B of different architecture"
 msgstr ""
 
 #: elf32-arc.c:891 elf32-i370.c:359 elf32-iq2000.c:842 elf32-m32c.c:887
-#: elf32-m68hc1x.c:1384 elf32-ppc.c:4846 elf64-sparc.c:727 elfxx-mips.c:15082
+#: elf32-m68hc1x.c:1384 elf32-ppc.c:4860 elf64-sparc.c:727 elfxx-mips.c:15082
 #, c-format
 msgid "%B: uses different e_flags (%#x) fields than previous modules (%#x)"
 msgstr ""
@@ -1920,9 +1920,9 @@ msgid "%B: bad symbol index: %d"
 msgstr ""
 
 #: elf32-arm.c:15636 elf32-hppa.c:2082 elf32-lm32.c:1989 elf32-m32r.c:2097
-#: elf32-metag.c:2792 elf32-nds32.c:3844 elf32-or1k.c:2281 elf32-ppc.c:6156
+#: elf32-metag.c:2792 elf32-nds32.c:3844 elf32-or1k.c:2281 elf32-ppc.c:6167
 #: elf32-s390.c:1851 elf32-sh.c:3289 elf32-tic6x.c:3205 elf32-tilepro.c:2237
-#: elf64-ppc.c:9893 elf64-s390.c:1785 elfxx-sparc.c:2457 elfxx-tilegx.c:2479
+#: elf64-ppc.c:9943 elf64-s390.c:1785 elfxx-sparc.c:2452 elfxx-tilegx.c:2479
 #: elfxx-x86.c:563
 #: /work/sources/binutils/branches/2.30/bfd/elfnn-aarch64.c:8319
 #: /work/sources/binutils/branches/2.30/bfd/elfnn-riscv.c:1112
@@ -2472,8 +2472,8 @@ msgid "%B: Relocation %s is not yet supported for symbol %s."
 msgstr ""
 
 #. Unknown relocation.
-#: elf32-i386.c:384 elf32-m68k.c:352 elf32-ppc.c:2039 elf32-s390.c:346
-#: elf32-tic6x.c:2609 elf32-wasm32.c:106 elf64-ppc.c:2516 elf64-s390.c:373
+#: elf32-i386.c:384 elf32-m68k.c:352 elf32-ppc.c:2046 elf32-s390.c:346
+#: elf32-tic6x.c:2609 elf32-wasm32.c:106 elf64-ppc.c:2522 elf64-s390.c:373
 #: elf64-x86-64.c:285
 #, c-format
 msgid "%B: invalid relocation type %d"
@@ -2836,7 +2836,7 @@ msgid "%B: unrecognised MicroBlaze reloc number: %d"
 msgstr ""
 
 #: elf32-microblaze.c:1482 elf32-or1k.c:1052 elf32-tilepro.c:3147
-#: elfxx-sparc.c:3537 elfxx-tilegx.c:3531
+#: elfxx-sparc.c:3532 elfxx-tilegx.c:3531
 msgid "%B: probably compiled without -fPIC?"
 msgstr ""
 
@@ -3105,110 +3105,110 @@ msgstr ""
 msgid "%B: unrecognised PicoJava reloc number: %d"
 msgstr ""
 
-#: elf32-ppc.c:2027
+#: elf32-ppc.c:2034
 #, c-format
 msgid "%B: unrecognised PPC reloc number: %d"
 msgstr ""
 
-#: elf32-ppc.c:2112
+#: elf32-ppc.c:2119
 #, c-format
 msgid "generic linker can't handle %s"
 msgstr ""
 
-#: elf32-ppc.c:2732
+#: elf32-ppc.c:2739
 #, c-format
 msgid "corrupt %s section in %B"
 msgstr ""
 
-#: elf32-ppc.c:2752
+#: elf32-ppc.c:2759
 #, c-format
 msgid "unable to read in %s section from %B"
 msgstr ""
 
-#: elf32-ppc.c:2794
+#: elf32-ppc.c:2801
 #, c-format
 msgid "warning: unable to set size of %s section in %B"
 msgstr ""
 
-#: elf32-ppc.c:2844
+#: elf32-ppc.c:2851
 msgid "failed to allocate space for new APUinfo section."
 msgstr ""
 
-#: elf32-ppc.c:2863
+#: elf32-ppc.c:2870
 msgid "failed to compute new APUinfo section."
 msgstr ""
 
-#: elf32-ppc.c:2866
+#: elf32-ppc.c:2873
 msgid "failed to install new APUinfo section."
 msgstr ""
 
-#: elf32-ppc.c:3915
+#: elf32-ppc.c:3929
 #, c-format
 msgid "%B: relocation %s cannot be used when making a shared object"
 msgstr ""
 
-#: elf32-ppc.c:4266 elf64-ppc.c:5597
+#: elf32-ppc.c:4280 elf64-ppc.c:5612
 #, c-format
 msgid "%H: %s reloc against local symbol\n"
 msgstr ""
 
-#: elf32-ppc.c:4628 elf32-ppc.c:4632
+#: elf32-ppc.c:4642 elf32-ppc.c:4646
 #, c-format
 msgid "Warning: %B uses hard float, %B uses soft float"
 msgstr ""
 
-#: elf32-ppc.c:4636 elf32-ppc.c:4641
+#: elf32-ppc.c:4650 elf32-ppc.c:4655
 #, c-format
 msgid ""
 "Warning: %B uses double-precision hard float, %B uses single-precision hard "
 "float"
 msgstr ""
 
-#: elf32-ppc.c:4656 elf32-ppc.c:4661
+#: elf32-ppc.c:4670 elf32-ppc.c:4675
 #, c-format
 msgid "Warning: %B uses 64-bit long double, %B uses 128-bit long double"
 msgstr ""
 
-#: elf32-ppc.c:4666 elf32-ppc.c:4671
+#: elf32-ppc.c:4680 elf32-ppc.c:4685
 #, c-format
 msgid "Warning: %B uses IBM long double, %B uses IEEE long double"
 msgstr ""
 
-#: elf32-ppc.c:4722 elf32-ppc.c:4727
+#: elf32-ppc.c:4736 elf32-ppc.c:4741
 #, c-format
 msgid "Warning: %B uses AltiVec vector ABI, %B uses SPE vector ABI"
 msgstr ""
 
-#: elf32-ppc.c:4750 elf32-ppc.c:4755
+#: elf32-ppc.c:4764 elf32-ppc.c:4769
 #, c-format
 msgid "Warning: %B uses r3/r4 for small structure returns, %B uses memory"
 msgstr ""
 
-#: elf32-ppc.c:4810
+#: elf32-ppc.c:4824
 msgid ""
 "%B: compiled with -mrelocatable and linked with modules compiled normally"
 msgstr ""
 
-#: elf32-ppc.c:4818
+#: elf32-ppc.c:4832
 msgid ""
 "%B: compiled normally and linked with modules compiled with -mrelocatable"
 msgstr ""
 
-#: elf32-ppc.c:4887
+#: elf32-ppc.c:4901
 #, c-format
 msgid "%B(%A+0x%lx): expected 16A style relocation on 0x%08x insn"
 msgstr ""
 
-#: elf32-ppc.c:4906
+#: elf32-ppc.c:4920
 #, c-format
 msgid "%B(%A+0x%lx): expected 16D style relocation on 0x%08x insn"
 msgstr ""
 
-#: elf32-ppc.c:4997
+#: elf32-ppc.c:5011
 msgid "%P: bss-plt forced due to %B\n"
 msgstr ""
 
-#: elf32-ppc.c:5000
+#: elf32-ppc.c:5014
 msgid "%P: bss-plt forced by profiling\n"
 msgstr ""
 
@@ -3216,40 +3216,40 @@ msgstr ""
 #. could just mark this symbol to exclude it
 #. from tls optimization but it's safer to skip
 #. the entire optimization.
-#: elf32-ppc.c:5322 elf64-ppc.c:8654
+#: elf32-ppc.c:5336 elf64-ppc.c:8669
 #, c-format
 msgid "%H arg lost __tls_get_addr, TLS optimization disabled\n"
 msgstr ""
 
-#: elf32-ppc.c:6264 elf32-sh.c:3392 elf32-tilepro.c:2331 elfxx-sparc.c:2556
+#: elf32-ppc.c:6275 elf32-sh.c:3392 elf32-tilepro.c:2331 elfxx-sparc.c:2551
 #: elfxx-tilegx.c:2567
 msgid "%B: dynamic relocation in read-only section `%A'\n"
 msgstr ""
 
-#: elf32-ppc.c:8100
+#: elf32-ppc.c:8146
 msgid "%H: fixup branch overflow\n"
 msgstr ""
 
-#: elf32-ppc.c:8140 elf32-ppc.c:8175
+#: elf32-ppc.c:8186 elf32-ppc.c:8221
 #, c-format
 msgid "%B(%A+%#Lx): error: %s with unexpected instruction %#x"
 msgstr ""
 
-#: elf32-ppc.c:8231
+#: elf32-ppc.c:8277
 #, c-format
 msgid "%X%H: unsupported bss-plt -fPIC ifunc %s\n"
 msgstr ""
 
-#: elf32-ppc.c:8294 elf64-ppc.c:15070
+#: elf32-ppc.c:8341 elf64-ppc.c:15142
 msgid "%H: warning: %s unexpected insn %#x.\n"
 msgstr ""
 
-#: elf32-ppc.c:8319
+#: elf32-ppc.c:8366
 #, c-format
 msgid "%P: %B: unknown relocation type %d for symbol %s\n"
 msgstr ""
 
-#: elf32-ppc.c:8606
+#: elf32-ppc.c:8653
 #, c-format
 msgid "%H: non-zero addend on %s reloc against `%s'\n"
 msgstr ""
@@ -3262,62 +3262,62 @@ msgstr ""
 #. local won't have the +32k reloc addend trick marking
 #. -fPIC code, so the linker won't know whether r30 is
 #. _GLOBAL_OFFSET_TABLE_ or pointing into a .got2 section.
-#: elf32-ppc.c:8638
+#: elf32-ppc.c:8685
 #, c-format
 msgid "%X%H: @local call to ifunc %s\n"
 msgstr ""
 
-#: elf32-ppc.c:8808
+#: elf32-ppc.c:8855
 #, c-format
 msgid "%H: relocation %s for indirect function %s unsupported\n"
 msgstr ""
 
-#: elf32-ppc.c:9077 elf32-ppc.c:9108 elf32-ppc.c:9199
+#: elf32-ppc.c:9126 elf32-ppc.c:9157 elf32-ppc.c:9248
 #, c-format
 msgid ""
 "%P: %B: the target (%s) of a %s relocation is in the wrong output section "
 "(%s)\n"
 msgstr ""
 
-#: elf32-ppc.c:9287
+#: elf32-ppc.c:9336
 #, c-format
 msgid ""
 "%B: the target (%s) of a %s relocation is in the wrong output section (%s)"
 msgstr ""
 
-#: elf32-ppc.c:9395
+#: elf32-ppc.c:9444
 #, c-format
 msgid "%P: %B: relocation %s is not yet supported for symbol %s\n"
 msgstr ""
 
-#: elf32-ppc.c:9480
+#: elf32-ppc.c:9529
 #, c-format
 msgid "%H: error: %s against `%s' not a multiple of %u\n"
 msgstr ""
 
-#: elf32-ppc.c:9509
+#: elf32-ppc.c:9558
 #, c-format
 msgid "%H: unresolvable %s relocation against symbol `%s'\n"
 msgstr ""
 
-#: elf32-ppc.c:9590
+#: elf32-ppc.c:9639
 #, c-format
 msgid "%H: %s reloc against `%s': error %d\n"
 msgstr ""
 
-#: elf32-ppc.c:10354 elf64-ppc.c:15601
+#: elf32-ppc.c:10383 elf64-ppc.c:15673
 msgid ""
 "%X%P: text relocations and GNU indirect functions will result in a segfault "
 "at runtime\n"
 msgstr ""
 
-#: elf32-ppc.c:10358 elf64-ppc.c:15605
+#: elf32-ppc.c:10387 elf64-ppc.c:15677
 msgid ""
 "%P: warning: text relocations and GNU indirect functions may result in a "
 "segfault at runtime\n"
 msgstr ""
 
-#: elf32-ppc.c:10403
+#: elf32-ppc.c:10432
 #, c-format
 msgid "%P: %s not defined in linker created %s\n"
 msgstr ""
@@ -3819,7 +3819,7 @@ msgstr ""
 msgid "warning: %B and %B differ in whether code is compiled for DSBT"
 msgstr ""
 
-#: elf32-tilepro.c:3752 elfxx-tilegx.c:4132 elfxx-x86.c:1336
+#: elf32-tilepro.c:3752 elfxx-tilegx.c:4132 elfxx-x86.c:1345
 #: /work/sources/binutils/branches/2.30/bfd/elfnn-aarch64.c:9172
 #: /work/sources/binutils/branches/2.30/bfd/elfnn-riscv.c:2492
 #, c-format
@@ -4459,137 +4459,137 @@ msgid ""
 "  Please report this bug."
 msgstr ""
 
-#: elf64-ppc.c:4640
+#: elf64-ppc.c:4655
 #, c-format
 msgid "%P: %B: cannot create stub entry %s\n"
 msgstr ""
 
-#: elf64-ppc.c:4971
+#: elf64-ppc.c:4986
 msgid "%P: symbol '%s' has invalid st_other for ABI version 1\n"
 msgstr ""
 
-#: elf64-ppc.c:5146
+#: elf64-ppc.c:5161
 #, c-format
 msgid "%P: %B .opd not allowed in ABI version %d\n"
 msgstr ""
 
-#: elf64-ppc.c:5645
+#: elf64-ppc.c:5660
 #, c-format
 msgid "%H: %s reloc unsupported in shared libraries and PIEs.\n"
 msgstr ""
 
-#: elf64-ppc.c:6035
+#: elf64-ppc.c:6050
 #, c-format
 msgid "%B uses unknown e_flags 0x%lx"
 msgstr ""
 
-#: elf64-ppc.c:6043
+#: elf64-ppc.c:6058
 #, c-format
 msgid "%B: ABI version %ld is not compatible with ABI version %ld output"
 msgstr ""
 
-#: elf64-ppc.c:6071
+#: elf64-ppc.c:6086
 #, c-format
 msgid " [abiv%ld]"
 msgstr ""
 
-#: elf64-ppc.c:7255
+#: elf64-ppc.c:7270
 msgid ""
 "%P: copy reloc against `%T' requires lazy plt linking; avoid setting "
 "LD_BIND_NOW=1 or upgrade gcc\n"
 msgstr ""
 
-#: elf64-ppc.c:7522
+#: elf64-ppc.c:7537
 msgid "%B: undefined symbol on R_PPC64_TOCSAVE relocation"
 msgstr ""
 
-#: elf64-ppc.c:7749
+#: elf64-ppc.c:7764
 #, c-format
 msgid "%P: dynreloc miscount for %B, section %A\n"
 msgstr ""
 
-#: elf64-ppc.c:7838
+#: elf64-ppc.c:7853
 msgid "%B: .opd is not a regular array of opd entries"
 msgstr ""
 
-#: elf64-ppc.c:7848
+#: elf64-ppc.c:7863
 #, c-format
 msgid "%B: unexpected reloc type %u in .opd section"
 msgstr ""
 
-#: elf64-ppc.c:7870
+#: elf64-ppc.c:7885
 #, c-format
 msgid "%B: undefined sym `%s' in .opd section"
 msgstr ""
 
-#: elf64-ppc.c:8207
+#: elf64-ppc.c:8222
 msgid ""
 "%P: warning: --plt-localentry is especially dangerous without ld.so support "
 "to detect ABI violations.\n"
 msgstr ""
 
-#: elf64-ppc.c:8456
+#: elf64-ppc.c:8471
 msgid "%H __tls_get_addr lost arg, TLS optimization disabled\n"
 msgstr ""
 
-#: elf64-ppc.c:8800 elf64-ppc.c:9437
+#: elf64-ppc.c:8815 elf64-ppc.c:9452
 #, c-format
 msgid "%s defined on removed toc entry"
 msgstr ""
 
-#: elf64-ppc.c:9165
+#: elf64-ppc.c:9180
 #, c-format
 msgid "%H: toc optimization is not supported for %s instruction.\n"
 msgstr ""
 
-#: elf64-ppc.c:9394
+#: elf64-ppc.c:9409
 #, c-format
 msgid "%H: %s references optimized away TOC entry\n"
 msgstr ""
 
-#: elf64-ppc.c:10157
+#: elf64-ppc.c:10205
 #, c-format
 msgid "warning: discarding dynamic section %s"
 msgstr ""
 
-#: elf64-ppc.c:10746
+#: elf64-ppc.c:10823
 msgid "%P: cannot find opd entry toc for `%T'\n"
 msgstr ""
 
-#: elf64-ppc.c:10837
+#: elf64-ppc.c:10911
 msgid "%P: long branch stub `%s' offset overflow\n"
 msgstr ""
 
-#: elf64-ppc.c:10896
+#: elf64-ppc.c:10970
 msgid "%P: can't find branch stub `%s'\n"
 msgstr ""
 
-#: elf64-ppc.c:10960 elf64-ppc.c:11112 elf64-ppc.c:12974
+#: elf64-ppc.c:11034 elf64-ppc.c:11179 elf64-ppc.c:13050
 #, c-format
 msgid "%P: linkage table error against `%T'\n"
 msgstr ""
 
-#: elf64-ppc.c:11331
+#: elf64-ppc.c:11397
 msgid "%P: can't build branch stub `%s'\n"
 msgstr ""
 
-#: elf64-ppc.c:12104
+#: elf64-ppc.c:12172
 #, c-format
 msgid "%B section %A exceeds stub group size"
 msgstr ""
 
-#: elf64-ppc.c:13242
+#: elf64-ppc.c:13314
 msgid "%P: stubs don't match calculated size\n"
 msgstr ""
 
-#: elf64-ppc.c:13256
+#: elf64-ppc.c:13328
 #, c-format
 msgid "linker stubs in %u group\n"
 msgid_plural "linker stubs in %u groups\n"
 msgstr[0] ""
 msgstr[1] ""
 
-#: elf64-ppc.c:13260
+#: elf64-ppc.c:13332
 #, c-format
 msgid ""
 "  branch       %lu\n"
@@ -4601,59 +4601,59 @@ msgid ""
 "  global entry %lu"
 msgstr ""
 
-#: elf64-ppc.c:13579
+#: elf64-ppc.c:13651
 #, c-format
 msgid "%H: %s used with TLS symbol `%T'\n"
 msgstr ""
 
-#: elf64-ppc.c:13581
+#: elf64-ppc.c:13653
 #, c-format
 msgid "%H: %s used with non-TLS symbol `%T'\n"
 msgstr ""
 
-#: elf64-ppc.c:14191
+#: elf64-ppc.c:14263
 #, c-format
 msgid "%H: call to `%T' lacks nop, can't restore toc; recompile with -fPIC\n"
 msgstr ""
 
-#: elf64-ppc.c:14197
+#: elf64-ppc.c:14269
 #, c-format
 msgid ""
 "%H: call to `%T' lacks nop, can't restore toc; (-mcmodel=small toc adjust "
 "stub)\n"
 msgstr ""
 
-#: elf64-ppc.c:14325
+#: elf64-ppc.c:14397
 #, c-format
 msgid "%P: %B: unknown relocation type %d for `%T'\n"
 msgstr ""
 
-#: elf64-ppc.c:14874
+#: elf64-ppc.c:14946
 #, c-format
 msgid "%H: %s for indirect function `%T' unsupported\n"
 msgstr ""
 
-#: elf64-ppc.c:14986
+#: elf64-ppc.c:15058
 #, c-format
 msgid "%P: %B: %s is not supported for `%T'\n"
 msgstr ""
 
-#: elf64-ppc.c:15169
+#: elf64-ppc.c:15241
 #, c-format
 msgid "%H: error: %s not a multiple of %u\n"
 msgstr ""
 
-#: elf64-ppc.c:15191
+#: elf64-ppc.c:15263
 #, c-format
 msgid "%H: unresolvable %s against `%T'\n"
 msgstr ""
 
-#: elf64-ppc.c:15288
+#: elf64-ppc.c:15360
 #, c-format
 msgid "%H: %s against `%T': error %d\n"
 msgstr ""
 
-#: elf64-ppc.c:15678 elf64-ppc.c:15697
+#: elf64-ppc.c:15750 elf64-ppc.c:15769
 msgid "%P: %s offset too large for .eh_frame sdata4 encoding"
 msgstr ""
 
@@ -5373,7 +5373,7 @@ msgstr ""
 msgid "invalid relocation type %d"
 msgstr ""
 
-#: elfxx-sparc.c:3129
+#: elfxx-sparc.c:3124
 #: /work/sources/binutils/branches/2.30/bfd/elfnn-aarch64.c:5024
 #, c-format
 msgid "%B: relocation %s against STT_GNU_IFUNC symbol `%s' isn't handled by %s"
@@ -5389,69 +5389,69 @@ msgstr ""
 msgid "%P: %B: warning: relocation against `%s' in read-only section `%A'\n"
 msgstr ""
 
-#: elfxx-x86.c:954
+#: elfxx-x86.c:963
 msgid "%P: %B: warning: relocation in read-only section `%A'\n"
 msgstr ""
 
-#: elfxx-x86.c:1287
+#: elfxx-x86.c:1296
 msgid ""
 "%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"
 msgstr ""
 
-#: elfxx-x86.c:2241
+#: elfxx-x86.c:2250
 msgid "error: %B: <corrupt x86 ISA used size: 0x%x>"
 msgstr ""
 
-#: elfxx-x86.c:2243
+#: elfxx-x86.c:2252
 msgid "error: %B: <corrupt x86 ISA needed size: 0x%x>"
 msgstr ""
 
-#: elfxx-x86.c:2244
+#: elfxx-x86.c:2253
 msgid "error: %B: <corrupt x86 feature size: 0x%x>"
 msgstr ""
 
-#: elfxx-x86.c:2416
+#: elfxx-x86.c:2425
 msgid "%F%P: failed to create GNU property section\n"
 msgstr ""
 
-#: elfxx-x86.c:2421
+#: elfxx-x86.c:2430
 #, c-format
 msgid "%F%A: failed to align section\n"
 msgstr ""
 
-#: elfxx-x86.c:2571
+#: elfxx-x86.c:2580
 msgid "%F%P: failed to create VxWorks dynamic sections\n"
 msgstr ""
 
-#: elfxx-x86.c:2580
+#: elfxx-x86.c:2589
 msgid "%F%P: failed to create GOT sections\n"
 msgstr ""
 
-#: elfxx-x86.c:2598
+#: elfxx-x86.c:2607
 msgid "%F%P: failed to create ifunc sections\n"
 msgstr ""
 
-#: elfxx-x86.c:2639
+#: elfxx-x86.c:2648
 msgid "%F%P: failed to create GOT PLT section\n"
 msgstr ""
 
-#: elfxx-x86.c:2660
+#: elfxx-x86.c:2669
 msgid "%F%P: failed to create IBT-enabled PLT section\n"
 msgstr ""
 
-#: elfxx-x86.c:2675
+#: elfxx-x86.c:2684
 msgid "%F%P: failed to create BND PLT section\n"
 msgstr ""
 
-#: elfxx-x86.c:2696
+#: elfxx-x86.c:2705
 msgid "%F%P: failed to create PLT .eh_frame section\n"
 msgstr ""
 
-#: elfxx-x86.c:2709
+#: elfxx-x86.c:2718
 msgid "%F%P: failed to create GOT PLT .eh_frame section\n"
 msgstr ""
 
-#: elfxx-x86.c:2723
+#: elfxx-x86.c:2732
 msgid "%F%P: failed to create the second PLT .eh_frame section\n"
 msgstr ""
 

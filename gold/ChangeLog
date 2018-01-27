@@ -1,3 +1,10 @@
+2018-01-27  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.30 release:
+
+	* configure: Regenerate.
+	* po/gold.pot: Regenerate.
+
 2018-01-24  Franz Sirl  <franz.sirl-kernel@lauterbach.com>
 
 	* main.cc: Print m.arena as long long.
