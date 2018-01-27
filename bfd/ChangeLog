@@ -1,3 +1,7 @@
+2018-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
 2018-01-26  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (bfd_elf_define_start_stop): Override symbols when
