@@ -793,7 +793,6 @@ add_archive_element (struct bfd_link_info *info,
 		     bfd **subsbfd ATTRIBUTE_UNUSED)
 {
   lang_input_statement_type *input;
-  lang_input_statement_type *parent;
   lang_input_statement_type orig_input;
 
   input = (lang_input_statement_type *)
@@ -802,10 +801,6 @@ add_archive_element (struct bfd_link_info *info,
   input->filename = abfd->filename;
   input->local_sym_name = abfd->filename;
   input->the_bfd = abfd;
-
-  parent = abfd->my_archive->usrdata;
-  if (parent != NULL && !parent->flags.reload)
-    parent->next = (lang_statement_union_type *) input;
 
   /* Save the original data for trace files/tries below, as plugins
      (if enabled) may possibly alter it to point to a replacement

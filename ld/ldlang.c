@@ -2835,7 +2835,6 @@ load_symbols (lang_input_statement_type *entry,
     case bfd_archive:
       check_excluded_libs (entry->the_bfd);
 
-      entry->the_bfd->usrdata = entry;
       if (entry->flags.whole_archive)
 	{
 	  bfd *member = NULL;
@@ -6605,9 +6604,9 @@ lang_for_each_input_file (void (*func) (lang_input_statement_type *))
 {
   lang_input_statement_type *f;
 
-  for (f = &input_file_chain.head->input_statement;
+  for (f = (lang_input_statement_type *) input_file_chain.head;
        f != NULL;
-       f = &f->next_real_file->input_statement)
+       f = (lang_input_statement_type *) f->next_real_file)
     func (f);
 }
 
@@ -7005,51 +7004,6 @@ find_replacements_insert_point (void)
   return lastobject;
 }
 
-/* Find where to insert ADD, an archive element or shared library
-   added during a rescan.  */
-
-static lang_statement_union_type **
-find_rescan_insertion (lang_input_statement_type *add)
-{
-  bfd *add_bfd = add->the_bfd;
-  lang_input_statement_type *f;
-  lang_input_statement_type *last_loaded = NULL;
-  lang_input_statement_type *before = NULL;
-  lang_statement_union_type **iter = NULL;
-
-  if (add_bfd->my_archive != NULL)
-    add_bfd = add_bfd->my_archive;
-
-  /* First look through the input file chain, to find an object file
-     before the one we've rescanned.  Normal object files always
-     appear on both the input file chain and the file chain, so this
-     lets us get quickly to somewhere near the correct place on the
-     file chain if it is full of archive elements.  Archives don't
-     appear on the file chain, but if an element has been extracted
-     then their input_statement->next points at it.  */
-  for (f = &input_file_chain.head->input_statement;
-       f != NULL;
-       f = &f->next_real_file->input_statement)
-    {
-      if (f->the_bfd == add_bfd)
-	{
-	  before = last_loaded;
-	  if (f->next != NULL)
-	    return &f->next->input_statement.next;
-	}
-      if (f->the_bfd != NULL && f->next != NULL)
-	last_loaded = f;
-    }
-
-  for (iter = before ? &before->next : &file_chain.head->input_statement.next;
-       *iter != NULL;
-       iter = &(*iter)->input_statement.next)
-    if ((*iter)->input_statement.the_bfd->my_archive == NULL)
-      break;
-
-  return iter;
-}
-
 /* Insert SRCLIST into DESTLIST after given element by chaining
    on FIELD as the next-pointer.  (Counterintuitively does not need
    a pointer to the actual after-node itself, just its chain field.)  */
@@ -7221,37 +7175,8 @@ lang_process (void)
 	    lang_list_insert_after (&file_chain, &files, &file_chain.head);
 
 	  /* Rescan archives in case new undefined symbols have appeared.  */
-	  files = file_chain;
 	  lang_statement_iteration++;
 	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
-	  lang_list_remove_tail (&file_chain, &files);
-	  while (files.head != NULL)
-	    {
-	      lang_statement_union_type **insert;
-	      lang_statement_union_type **iter, *temp;
-	      bfd *my_arch;
-
-	      insert = find_rescan_insertion (&files.head->input_statement);
-	      /* All elements from an archive can be added at once.  */
-	      iter = &files.head->input_statement.next;
-	      my_arch = files.head->input_statement.the_bfd->my_archive;
-	      if (my_arch != NULL)
-		for (; *iter != NULL; iter = &(*iter)->input_statement.next)
-		  if ((*iter)->input_statement.the_bfd->my_archive != my_arch)
-		    break;
-	      temp = *insert;
-	      *insert = files.head;
-	      files.head = *iter;
-	      *iter = temp;
-	      if (my_arch != NULL)
-		{
-		  lang_input_statement_type *parent = my_arch->usrdata;
-		  if (parent != NULL)
-		    parent->next = (lang_statement_union_type *)
-		      ((char *) iter
-		       - offsetof (lang_input_statement_type, next));
-		}
-	    }
 	}
     }
 #endif /* ENABLE_PLUGINS */
