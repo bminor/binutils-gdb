@@ -7044,7 +7044,8 @@ find_rescan_insertion (lang_input_statement_type *add)
   for (iter = before ? &before->next : &file_chain.head->input_statement.next;
        *iter != NULL;
        iter = &(*iter)->input_statement.next)
-    if ((*iter)->input_statement.the_bfd->my_archive == NULL)
+    if (!(*iter)->input_statement.flags.claim_archive
+	&& (*iter)->input_statement.the_bfd->my_archive == NULL)
       break;
 
   return iter;

@@ -1,3 +1,9 @@
+2018-01-28  Alan Modra  <amodra@gmail.com>
+
+	PR 22751
+	* ldlang.c (find_rescan_insertion): Look past bfds with claim_archive
+	set.
+
 2018-01-26  Maciej W. Rozycki  <macro@mips.com>
 
 	* emulparams/elf32mipswindiss.sh (EXTRA_EM_FILE): Set to
