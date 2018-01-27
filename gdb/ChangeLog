@@ -1,3 +1,25 @@
+2018-01-27  Eli Zaretskii  <eliz@gnu.org>
+
+	Avoid compilation errors in MinGW native builds
+
+	The error is triggered by including python-internal.h, and the
+	error message is:
+
+	     In file included from d:\usr\lib\gcc\mingw32\6.3.0\include\c++\math.h:36:0,
+		      from build-gnulib/import/math.h:27,
+		      from d:/usr/Python26/include/pyport.h:235,
+		      from d:/usr/Python26/include/Python.h:58,
+		      from python/python-internal.h:94,
+		      from python/py-arch.c:24:
+	     d:\usr\lib\gcc\mingw32\6.3.0\include\c++\cmath:1157:11: error: '::hypot' has not been declared
+	using ::hypot;
+		^~~~~
+
+	This happens because Python headers define 'hypot' to expand t
+	'_hypot' in the Windows builds.
+	* python/python-internal.h (_hypot) [__MINGW32__]: Define back to
+	'hypoth'.  This avoids a compilation error.
+
 2018-01-24  Pedro Alves  <palves@redhat.com>
 
 	GCC PR libstdc++/83906
