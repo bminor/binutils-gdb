@@ -1,3 +1,9 @@
+2018-01-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* simple-object-xcoff.c (simple_object_xcoff_find_sections): Avoid
+	compilation warning in 32-bit builds not supported by
+	AC_SYS_LARGEFILE.
+
 2017-09-15  Nathan Sidwell  <nathan@acm.org>
 
 	PR demangler/82195
