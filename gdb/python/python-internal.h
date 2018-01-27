@@ -85,6 +85,12 @@
 #define HAVE_SNPRINTF 1
 #endif
 
+/* Another kludge to avoid compilation errors because MinGW defines
+   'hypot' to '_hypot', but the C++ headers says "using ::hypot".  */
+#ifdef __MINGW32__
+# define _hypot hypot
+#endif
+
 /* Request clean size types from Python.  */
 #define PY_SSIZE_T_CLEAN
 
