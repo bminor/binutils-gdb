@@ -1,5 +1,12 @@
 2018-01-27  Nick Clifton  <nickc@redhat.com>
 
+	Back to development.
+
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
+2018-01-27  Nick Clifton  <nickc@redhat.com>
+
 	This is the 2.30 release:
 
 	* configure: Regenerate.
