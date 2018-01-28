@@ -1,3 +1,13 @@
+2018-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22751
+	* testsuite/config/default.exp (INT128_CFLAGS): New.
+	* testsuite/ld-plugin/lto.exp (INT128_CFLAGS): New.
+	Run ld/22751 tests.
+	* testsuite/ld-plugin/pr22751.c: New file.
+	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Add
+	ld trailing options.
+
 2018-01-28  Alan Modra  <amodra@gmail.com>
 
 	PR 22751

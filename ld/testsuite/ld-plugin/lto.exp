@@ -29,6 +29,8 @@ if { ![check_plugin_api_available]
     return
 }
 
+global INT128_CFLAGS
+
 global CFLAGS
 global CXXFLAGS
 set saved_CFLAGS "$CFLAGS"
@@ -214,6 +216,9 @@ set lto_link_tests [list \
   [list "Build pr22502b.o" \
    "$plug_opt" "-flto $lto_no_fat" \
    {pr22502b.c}] \
+  [list "Build pr22751.a" \
+   "$plug_opt" "-flto $lto_no_fat $INT128_CFLAGS" \
+   {pr22751.c} {} "pr22751.a"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {
@@ -400,6 +405,10 @@ set lto_run_tests [list \
   [list "Run pr22502" \
    "-O2 -flto tmpdir/pr22502a.o tmpdir/pr22502b.o" "" \
    {dummy.c} "pr20267" "pass.out" "-flto -O2" "c"] \
+  [list "Run pr22751" \
+   "-O2 -flto" "" \
+   {dummy.c} "pr22751" "pass.out" "-flto -O2" "c" "" \
+   "-Wl,--whole-archive tmpdir/pr22751.a -Wl,--no-whole-archive"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {

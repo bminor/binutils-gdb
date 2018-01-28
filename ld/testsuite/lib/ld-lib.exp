@@ -1377,7 +1377,7 @@ if ![string length [info proc prune_warnings]] {
 # ldtests contains test-items with 3 items followed by 1 lists, 2 items
 # and 3 optional items:
 #   0:name
-#   1:ld options
+#   1:ld leading options, placed before object files
 #   2:assembler options
 #   3:filenames of source files
 #   4:name of output file
@@ -1385,6 +1385,7 @@ if ![string length [info proc prune_warnings]] {
 #   6:compiler flags (optional)
 #   7:language (optional)
 #   8:linker warning (optional)
+#   9:ld trailing options, placed after object files (optional)
 # args is an optional list of target triplets to be xfailed.
 
 proc run_ld_link_exec_tests { ldtests args } {
@@ -1424,6 +1425,7 @@ proc run_ld_link_exec_tests { ldtests args } {
 	set cflags [lindex $testitem 6]
 	set lang [lindex $testitem 7]
 	set warning [lindex $testitem 8]
+	set ld_after [lindex $testitem 9]
 	set objfiles {}
 	set failed 0
 
@@ -1466,7 +1468,7 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    # compile only
 	    pass $testname
 	    continue;
-	} elseif ![$link_proc $link_cmd $binfile "$board_cflags -L$srcdir/$subdir $ld_options $objfiles"] {
+	} elseif ![$link_proc $link_cmd $binfile "$board_cflags -L$srcdir/$subdir $ld_options $objfiles $ld_after"] {
 	    set failed 1
 	}
 
