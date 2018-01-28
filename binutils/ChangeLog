@@ -1,3 +1,8 @@
+2018-01-28  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Add note about checking gpg key
+	and the results of gnupload.
+
 2018-01-27  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Add details on how to actually

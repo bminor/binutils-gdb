@@ -170,6 +170,9 @@ When the time comes to actually make the release....
 	      [optional: add "-u XXXXX" to sign with a gpg key]
 	    git push origin binutils-2_XX
 
+        NB/ If you do sign the binaries make sure to use a key
+	that has been published with the FSF.
+
   27. Clean up the source tree.  (Use "git status" to find new
       files, and remove them).
 
@@ -180,11 +183,14 @@ When the time comes to actually make the release....
 
   29. Upload the tarballs to ftp.gnu.org.
 
-       gnupload --to ftp.gnu.org:binutils binutils-X.XX.X.tar.*
+       gnupload --to ftp.gnu.org:binutils binutils-X.XX.tar.*
 
       The gnupload script is in the gnulib/build-aux directory.
 
-  30. Upload the tarballs to sourceware.org:
+      Check for an email response from the upload.  If necessary
+      fix any problems.
+
+  30. Upload the tarballs (and signatures) to sourceware.org:
 
        sftp sourceware.org
          cd /sourceware/ftp/pub/binutils/releases
