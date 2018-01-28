@@ -2418,6 +2418,8 @@ dwarf2_per_objfile::dwarf2_per_objfile (struct objfile *objfile_,
     locate_sections (obfd, sec, *names);
 }
 
+static void free_dwo_files (htab_t dwo_files, struct objfile *objfile);
+
 dwarf2_per_objfile::~dwarf2_per_objfile ()
 {
   /* Cached DIE trees use xmalloc and the comp_unit_obstack.  */
@@ -2428,6 +2430,27 @@ dwarf2_per_objfile::~dwarf2_per_objfile ()
 
   if (line_header_hash)
     htab_delete (line_header_hash);
+
+  for (int ix = 0; ix < n_comp_units; ++ix)
+   VEC_free (dwarf2_per_cu_ptr, all_comp_units[ix]->imported_symtabs);
+
+  for (int ix = 0; ix < n_type_units; ++ix)
+    VEC_free (dwarf2_per_cu_ptr,
+	      all_type_units[ix]->per_cu.imported_symtabs);
+  xfree (all_type_units);
+
+  VEC_free (dwarf2_section_info_def, types);
+
+  if (dwo_files != NULL)
+    free_dwo_files (dwo_files, objfile);
+  if (dwp_file != NULL)
+    gdb_bfd_unref (dwp_file->dbfd);
+
+  if (dwz_file != NULL && dwz_file->dwz_bfd)
+    gdb_bfd_unref (dwz_file->dwz_bfd);
+
+  if (index_table != NULL)
+    index_table->~mapped_index ();
 
   /* Everything else should be on the objfile obstack.  */
 }
@@ -25470,37 +25493,6 @@ show_dwarf_cmd (const char *args, int from_tty)
   cmd_show_list (show_dwarf_cmdlist, from_tty, "");
 }
 
-/* Free data associated with OBJFILE, if necessary.  */
-
-static void
-dwarf2_per_objfile_free (struct objfile *objfile, void *d)
-{
-  struct dwarf2_per_objfile *data = (struct dwarf2_per_objfile *) d;
-  int ix;
-
-  for (ix = 0; ix < data->n_comp_units; ++ix)
-   VEC_free (dwarf2_per_cu_ptr, data->all_comp_units[ix]->imported_symtabs);
-
-  for (ix = 0; ix < data->n_type_units; ++ix)
-    VEC_free (dwarf2_per_cu_ptr,
-	      data->all_type_units[ix]->per_cu.imported_symtabs);
-  xfree (data->all_type_units);
-
-  VEC_free (dwarf2_section_info_def, data->types);
-
-  if (data->dwo_files)
-    free_dwo_files (data->dwo_files, objfile);
-  if (data->dwp_file)
-    gdb_bfd_unref (data->dwp_file->dbfd);
-
-  if (data->dwz_file && data->dwz_file->dwz_bfd)
-    gdb_bfd_unref (data->dwz_file->dwz_bfd);
-
-  if (data->index_table != NULL)
-    data->index_table->~mapped_index ();
-}
-
-
 /* The "save gdb-index" command.  */
 
 /* Write SIZE bytes from the buffer pointed to by DATA to FILE, with
@@ -27132,8 +27124,7 @@ _initialize_dwarf2_read (void)
 {
   struct cmd_list_element *c;
 
-  dwarf2_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, dwarf2_per_objfile_free);
+  dwarf2_objfile_data_key = register_objfile_data ();
 
   add_prefix_cmd ("dwarf", class_maintenance, set_dwarf_cmd, _("\
 Set DWARF specific variables.\n\

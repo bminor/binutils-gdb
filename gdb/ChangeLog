@@ -1,3 +1,12 @@
+2018-01-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2read.c (free_dwo_files): Add forward-declaration.
+	(dwarf2_per_objfile::~dwarf2_per_objfile): Move content from
+	dwarf2_per_objfile_free here.
+	(dwarf2_per_objfile_free): Remove.
+	(_initialize_dwarf2_read): Don't register
+	dwarf2_per_objfile_free as a registry cleanup.
+
 2018-01-27  Eli Zaretskii  <eliz@gnu.org>
 
 	Avoid compilation errors in MinGW native builds
