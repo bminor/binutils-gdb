@@ -325,6 +325,19 @@ init_default_arch (void)
   default_arch_type = sa->arch_type;
 }
 
+/* Called by TARGET_MACH.  */
+
+unsigned long
+sparc_mach (void)
+{
+  /* We don't get a chance to initialize anything before we're called,
+     so handle that now.  */
+  if (! default_init_p)
+    init_default_arch ();
+
+  return sparc_arch_size == 64 ? bfd_mach_sparc_v9 : bfd_mach_sparc;
+}
+
 /* Called by TARGET_FORMAT.  */
 
 const char *
@@ -1148,7 +1161,7 @@ md_begin (void)
 void
 sparc_md_end (void)
 {
-  unsigned long mach = bfd_mach_sparc;
+  unsigned long mach;
 #if defined(OBJ_ELF) && !defined(TE_SOLARIS)
   int hwcaps, hwcaps2;
 #endif
@@ -1182,7 +1195,7 @@ sparc_md_end (void)
       /* The sparclite is treated like a normal sparc.  Perhaps it shouldn't
 	 be but for now it is (since that's the way it's always been
 	 treated).  */
-      default: break;
+      default: mach = bfd_mach_sparc; break;
       }
   bfd_set_arch_mach (stdoutput, bfd_arch_sparc, mach);
 
