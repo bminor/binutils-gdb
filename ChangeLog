@@ -1,3 +1,8 @@
+2018-01-29  Nick Clifton  <nickc@redhat.com>
+
+	* src-release.sh (do_proto_toplev): Strip patch remnant files from
+	the sources before creating the tarball.
+
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
 	* src-release.sh: Update copyright notice.  Change reference to devo

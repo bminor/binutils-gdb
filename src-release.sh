@@ -77,6 +77,11 @@ do_proto_toplev()
     ver=$2
     tool=$3
     support_files=$4
+
+    echo "==> Cleaning sources."
+    find -name "*.orig" -exec rm {} \;
+    find -name "*.rej" -exec rm {} \;
+    
     echo "==> Making $package-$ver/"
     # Take out texinfo from a few places.
     sed -e '/^all\.normal: /s/\all-texinfo //' \
