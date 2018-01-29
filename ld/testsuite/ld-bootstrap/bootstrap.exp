@@ -29,6 +29,8 @@ if ![isnative] {
     return
 }
 
+global STATIC_LDFLAGS
+
 # Determine if plugin support is present.
 remote_exec host "$nm --help" "" "/dev/null" "plugin-support"
 set tmp [file_contents "plugin-support"]
@@ -91,6 +93,12 @@ foreach flags $test_flags {
     # This test can only be run if we have the ld build directory,
     # since we need the object files.
     if {$ld != "$objdir/ld-new"} {
+	untested $testname
+	continue
+    }
+
+    # If -static doesn't work, these tests will fail.
+    if { $flags == "--static" && [string match "" $STATIC_LDFLAGS] } then {
 	untested $testname
 	continue
     }

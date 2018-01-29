@@ -1,3 +1,14 @@
+2018-01-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22732
+	* testsuite/config/default.exp (STATIC_LDFLAGS): New.  Set to
+	"-static" if target compiler supports it.
+	* testsuite/ld-bootstrap/bootstrap.exp: Skip static executable
+	tests if target compiler doesn't support it.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Likewise.
+	(run_cc_link_tests): Likewise.
+
 2018-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22751

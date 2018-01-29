@@ -1401,6 +1401,7 @@ proc run_ld_link_exec_tests { ldtests args } {
     global errcnt
     global exec_output
     global board_cflags
+    global STATIC_LDFLAGS
 
     # When using GCC as the linker driver, we need to specify board cflags when
     # linking because cflags may contain linker options.  For example when
@@ -1468,8 +1469,15 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    # compile only
 	    pass $testname
 	    continue;
-	} elseif ![$link_proc $link_cmd $binfile "$board_cflags -L$srcdir/$subdir $ld_options $objfiles $ld_after"] {
-	    set failed 1
+	} else {
+	    if { [string match "" $STATIC_LDFLAGS] \
+		 && [regexp -- ".* \[-\]+static .*" " $board_cflags $ld_options $objfiles $ld_after "] } {
+		untested $testname
+		continue
+	    }
+	    if ![$link_proc $link_cmd $binfile "$board_cflags -L$srcdir/$subdir $ld_options $objfiles $ld_after"] {
+		set failed 1
+	    }
 	}
 
 	# Check if exec_output is expected.
@@ -1549,6 +1557,7 @@ proc run_cc_link_tests { ldtests } {
     global ar
     global exec_output
     global board_cflags
+    global STATIC_LDFLAGS
 
     if [board_info [target_info name] exists cflags] {
         set board_cflags " [board_info [target_info name] cflags]"
@@ -1646,6 +1655,11 @@ proc run_cc_link_tests { ldtests } {
 		set failed 1
 	    }
 	} else {
+	    if { [string match "" $STATIC_LDFLAGS] \
+		 && [regexp -- ".* \[-\]+static .*" " $board_cflags $ldflags $objfiles "] } {
+		untested $testname
+		continue
+	    }
 	    ld_link $cc_cmd $binfile "$board_cflags -L$srcdir/$subdir $ldflags $objfiles"
 	    set ld_output "$exec_output"
 

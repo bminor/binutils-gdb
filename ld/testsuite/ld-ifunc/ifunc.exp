@@ -218,13 +218,15 @@ if ![ld_link $CC "tmpdir/local_prog" "$NOPIE_LDFLAGS -Wl,--no-as-needed,-rpath=.
     fail "Could not link a dynamic executable using local ifunc"
     set fails [expr $fails + 1]
 }
-if ![ld_link $CC "tmpdir/static_prog" "-static -Ltmpdir tmpdir/static_prog.o -lifunc"] {
-    fail "Could not link a static executable"
-    set fails [expr $fails + 1]
-}
-if ![ld_link $ld "tmpdir/static_nonifunc_prog" "-static tmpdir/empty.o"] {
-    fail "Could not link a non-ifunc using static executable"
-    set fails [expr $fails + 1]
+if ![string match "" $STATIC_LDFLAGS] {
+    if ![ld_link $CC "tmpdir/static_prog" "-static -Ltmpdir tmpdir/static_prog.o -lifunc"] {
+	fail "Could not link a static executable"
+	set fails [expr $fails + 1]
+    }
+    if ![ld_link $ld "tmpdir/static_nonifunc_prog" "-static tmpdir/empty.o"] {
+	fail "Could not link a non-ifunc using static executable"
+	set fails [expr $fails + 1]
+    }
 }
 if ![ld_link $CC "tmpdir/test-1" "-Wl,--no-as-needed,-rpath=./tmpdir tmpdir/test-1.o tmpdir/libshared_ifunc.so"] {
     fail "Could not link test-1"
@@ -265,7 +267,8 @@ if {! [check_osabi tmpdir/local_prog {UNIX - GNU}]} {
     fail "Local ifunc-using executable does not have an OS/ABI field of GNU"
     set fails [expr $fails + 1]
 }
-if {! [check_osabi tmpdir/static_prog {UNIX - GNU}]} {
+if { ![string match "" $STATIC_LDFLAGS] \
+     && ![check_osabi tmpdir/static_prog {UNIX - GNU}]} {
     fail "Static ifunc-using executable does not have an OS/ABI field of GNU"
     set fails [expr $fails + 1]
 }
@@ -290,7 +293,8 @@ if {[contains_ifunc_symbol tmpdir/local_prog] != 1} {
     fail "Local ifunc-using executable does not contain an IFUNC symbol"
     set fails [expr $fails + 1]
 }
-if {[contains_ifunc_symbol tmpdir/static_prog] != 1} {
+if { ![string match "" $STATIC_LDFLAGS] \
+     && [contains_ifunc_symbol tmpdir/static_prog] != 1} {
     fail "Static ifunc-using executable does not contain an IFUNC symbol"
     set fails [expr $fails + 1]
 }
@@ -328,7 +332,8 @@ if {[contains_irelative_reloc tmpdir/local_prog] != 1} {
     fail "Local ifunc-using executable does not contain R_*_IRELATIVE relocation"
     set fails [expr $fails + 1]
 }
-if {[contains_irelative_reloc tmpdir/static_prog] != 1} {
+if { ![string match "" $STATIC_LDFLAGS] \
+    && [contains_irelative_reloc tmpdir/static_prog] != 1} {
     fail "Static ifunc-using executable does not contain R_*_IRELATIVE relocation"
     set fails [expr $fails + 1]
 }
