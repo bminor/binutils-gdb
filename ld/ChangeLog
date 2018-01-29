@@ -1,3 +1,9 @@
+2018-01-29  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/pr21964-3a.c: New file.
+	* testsuite/ld-elf/pr21964-3c.c: New file.
+	* testsuite/ld-elf/shared.exp: Run new __start/__stop testcase.
+
 2018-01-29  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* testsuite/ld-elf/shared.exp (AFLAGS_PIC): Define on SPARC.

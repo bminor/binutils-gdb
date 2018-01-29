@@ -1,3 +1,8 @@
+2018-01-30  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (bfd_elf_define_start_stop): Make __start and __stop
+	symbols dynamic.
+
 2018-01-29  Alan Modra  <amodra@gmail.com>
 
 	PR 22741
