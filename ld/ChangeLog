@@ -1,5 +1,10 @@
 2018-01-29  Eric Botcazou  <ebotcazou@adacore.com>
 
+	* testsuite/ld-elf/shared.exp (AFLAGS_PIC): Define on SPARC.
+	(pr22269-1): Pass AFLAGS_PIC to the assembler.
+
+2018-01-29  Eric Botcazou  <ebotcazou@adacore.com>
+
 	* testsuite/ld-elf/pr22450.d: Remove reference to SPARC64.
 
 2018-01-29  Maciej W. Rozycki  <macro@mips.com>

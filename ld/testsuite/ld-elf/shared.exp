@@ -42,6 +42,10 @@ set AFLAGS_PIC ""
 if [istarget "tic6x-*-*"] {
     append AFLAGS_PIC " -mpic -mpid=near"
 }
+if [istarget "sparc*-*-*"] {
+    append AFLAGS_PIC " -K PIC"
+}
+
 # This target requires a non-default emulation for successful shared
 # library/executable builds.
 set LFLAGS ""
@@ -577,7 +581,7 @@ run_ld_link_tests [list \
 	"Build pr22269-1" \
 	"-pie -e _start --no-dynamic-linker -z text" \
 	"" \
-	"" \
+	"$AFLAGS_PIC" \
 	{ pr22269-1.c } \
 	{{readelf -rW pr22269-1.rd}} \
 	"pr22269-1" \
