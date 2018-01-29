@@ -5206,7 +5206,6 @@ remote_follow_fork (struct target_ops *ops, int follow_child,
 	  child_pid = ptid_get_pid (child_ptid);
 
 	  remote_detach_pid (child_pid);
-	  detach_inferior (child_pid);
 	}
     }
   return 0;

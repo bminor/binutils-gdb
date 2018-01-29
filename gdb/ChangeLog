@@ -1,3 +1,7 @@
+2018-01-29  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* remote.c (remote_follow_fork): Don't call "detach_inferior".
+
 2018-01-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2read.c (free_dwo_files): Add forward-declaration.
