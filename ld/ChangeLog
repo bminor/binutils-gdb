@@ -1,3 +1,10 @@
+2018-01-29  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-mips-elf/comm-data.exp: Correct support for
+	targets using non-traditional MIPS emulation or having a limited
+	selection of ABIs available.  Don't force big endianness, use
+	defaults.
+
 2018-01-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22732
