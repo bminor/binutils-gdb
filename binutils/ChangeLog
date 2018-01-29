@@ -1,3 +1,8 @@
+2018-01-30  Alan Modra  <amodra@gmail.com>
+
+	* objcopy.c (merge_gnu_build_notes): Use (bfd_vma) -1 as
+	"artificially large" end address.
+
 2018-01-28  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Add note about checking gpg key
