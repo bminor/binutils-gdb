@@ -1,3 +1,14 @@
+2018-02-09  Eric Botcazou  <ebotcazou@adacore.com>
+
+	Backport from mainline
+	2018-01-29  Eric Botcazou  <ebotcazou@adacore.com>
+
+	PR gas/22738
+	* config/tc-sparc.h (sparc_mach): Declare.
+	(TARGET_MACH): Define to above.
+	* config/tc-sparc.c (sparc_mach): New function.
+	(sparc_md_end): Minor tweak.
+
 2018-02-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.

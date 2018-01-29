@@ -1,3 +1,7 @@
+2018-02-09  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* testsuite/ld-elf/pr22450.d: Remove reference to SPARC64.
+
 2018-02-07  Alan Modra  <amodra@gmail.com>
 
 	Revert 2018-01-17  Alan Modra  <amodra@gmail.com>
