@@ -1,3 +1,13 @@
+2018-01-30  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (wait_for_signal): New function.
+	(wait_lwp, linux_nat_wait_1): Use it instead of calling sigsuspend
+	directly.
+	(async_terminal_is_ours)
+	(linux_nat_terminal_inferior, linux_nat_terminal_ours): Delete.
+	(linux_nat_add_target): Don't override
+	to_terminal_inferior/to_terminal_ours.
+
 2018-01-29  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* remote.c (remote_follow_fork): Don't call "detach_inferior".

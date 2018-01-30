@@ -2152,6 +2152,30 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 		  _("unknown ptrace event %d"), event);
 }
 
+/* Suspend waiting for a signal.  We're mostly interested in
+   SIGCHLD/SIGINT.  */
+
+static void
+wait_for_signal ()
+{
+  if (debug_linux_nat)
+    fprintf_unfiltered (gdb_stdlog, "linux-nat: about to sigsuspend\n");
+  sigsuspend (&suspend_mask);
+
+  /* If the quit flag is set, it means that the user pressed Ctrl-C
+     and we're debugging a process that is running on a separate
+     terminal, so we must forward the Ctrl-C to the inferior.  (If the
+     inferior is sharing GDB's terminal, then the Ctrl-C reaches the
+     inferior directly.)  We must do this here because functions that
+     need to block waiting for a signal loop forever until there's an
+     event to report before returning back to the event loop.  */
+  if (!target_terminal::is_ours ())
+    {
+      if (check_quit_flag ())
+	target_pass_ctrlc ();
+    }
+}
+
 /* Wait for LP to stop.  Returns the wait status, or 0 if the LWP has
    exited.  */
 
@@ -2217,10 +2241,7 @@ wait_lwp (struct lwp_info *lp)
 	 linux_nat_wait_1 and there if we get called my_waitpid gets called
 	 again before it gets to sigsuspend so we can safely let the handlers
 	 get executed here.  */
-
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog, "WL: about to sigsuspend\n");
-      sigsuspend (&suspend_mask);
+      wait_for_signal ();
     }
 
   restore_child_signals_mask (&prev_mask);
@@ -3404,9 +3425,7 @@ linux_nat_wait_1 (struct target_ops *ops,
       gdb_assert (lp == NULL);
 
       /* Block until we get an event reported with SIGCHLD.  */
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog, "LNW: about to sigsuspend\n");
-      sigsuspend (&suspend_mask);
+      wait_for_signal ();
     }
 
   gdb_assert (lp);
@@ -4429,49 +4448,6 @@ linux_nat_supports_disable_randomization (struct target_ops *self)
 #endif
 }
 
-static int async_terminal_is_ours = 1;
-
-/* target_terminal_inferior implementation.
-
-   This is a wrapper around child_terminal_inferior to add async support.  */
-
-static void
-linux_nat_terminal_inferior (struct target_ops *self)
-{
-  child_terminal_inferior (self);
-
-  /* Calls to target_terminal_*() are meant to be idempotent.  */
-  if (!async_terminal_is_ours)
-    return;
-
-  async_terminal_is_ours = 0;
-  set_sigint_trap ();
-}
-
-/* target_terminal::ours implementation.
-
-   This is a wrapper around child_terminal_ours to add async support (and
-   implement the target_terminal::ours vs target_terminal::ours_for_output
-   distinction).  child_terminal_ours is currently no different than
-   child_terminal_ours_for_output.
-   We leave target_terminal::ours_for_output alone, leaving it to
-   child_terminal_ours_for_output.  */
-
-static void
-linux_nat_terminal_ours (struct target_ops *self)
-{
-  /* GDB should never give the terminal to the inferior if the
-     inferior is running in the background (run&, continue&, etc.),
-     but claiming it sure should.  */
-  child_terminal_ours (self);
-
-  if (async_terminal_is_ours)
-    return;
-
-  clear_sigint_trap ();
-  async_terminal_is_ours = 1;
-}
-
 /* SIGCHLD handler that serves two purposes: In non-stop/async mode,
    so we notice when any child changes state, and notify the
    event-loop; it allows us to use sigsuspend in linux_nat_wait_1
@@ -4820,8 +4796,6 @@ linux_nat_add_target (struct target_ops *t)
   t->to_supports_non_stop = linux_nat_supports_non_stop;
   t->to_always_non_stop_p = linux_nat_always_non_stop_p;
   t->to_async = linux_nat_async;
-  t->to_terminal_inferior = linux_nat_terminal_inferior;
-  t->to_terminal_ours = linux_nat_terminal_ours;
 
   super_close = t->to_close;
   t->to_close = linux_nat_close;
