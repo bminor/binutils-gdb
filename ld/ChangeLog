@@ -1,5 +1,13 @@
 2018-01-30  Maciej W. Rozycki  <macro@mips.com>
 
+	PR ld/22649
+	* testsuite/ld-elf/pr22649-2ab-mips.msg: New stderr output.
+	* testsuite/ld-elf/pr22649-2cd-mips.msg: New stderr output.
+	* testsuite/ld-elf/shared.exp: Use the new outputs with
+	`mips*-*-*' targets.
+
+2018-01-30  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/ld-elf/comm-data1.sd: Alternatively accept
 	`PRC[0xff02]' in place of a regular section index.
 	* testsuite/ld-elf/pr21703-shared.sd: Likewise `PRC[0xff01]'.

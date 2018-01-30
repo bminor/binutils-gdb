@@ -97,6 +97,11 @@ run_ld_link_tests [list \
 ]
 
 if { [check_gc_sections_available] } {
+    if [istarget mips*-*-*] {
+	set actions {{ld pr22649-2ab-mips.msg}}
+    } else {
+	set actions {{ld pr22649.msg}}
+    }
     run_ld_link_tests [list \
 	[list \
 	    "Build pr22649-2a.so" \
@@ -104,7 +109,7 @@ if { [check_gc_sections_available] } {
 	    "" \
 	    "$AFLAGS_PIC" \
 	    {pr22649-2a.s} \
-	    {{ld pr22649.msg}} \
+	    $actions \
 	    "pr22649-2a.so" \
 	] \
 	[list \
@@ -113,16 +118,23 @@ if { [check_gc_sections_available] } {
 	    "tmpdir/pr22649-1.so" \
 	    "$AFLAGS_PIC" \
 	    {pr22649-2a.s} \
-	    {{ld pr22649.msg}} \
+	    $actions \
 	    "pr22649-2b.so" \
 	] \
+    ]
+    if { [istarget mips*-*-*] && ![istarget *-*-elf*] } {
+	set actions {{ld pr22649-2cd-mips.msg}}
+    } else {
+	set actions {}
+    }
+    run_ld_link_tests [list \
 	[list \
 	    "Build pr22649-2c.so" \
 	    "$LFLAGS -shared -gc-sections -print-gc-sections" \
 	    "" \
 	    "$AFLAGS_PIC" \
 	    {pr22649-2b.s} \
-	    {} \
+	    $actions \
 	    "pr22649-2b.so" \
 	] \
 	[list \
@@ -131,7 +143,7 @@ if { [check_gc_sections_available] } {
 	    "tmpdir/pr22649-1.so" \
 	    "$AFLAGS_PIC" \
 	    {pr22649-2b.s} \
-	    {} \
+	    $actions \
 	    "pr22649-2b.so" \
 	] \
     ]
