@@ -1,3 +1,10 @@
+2018-01-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/break.exp: Save the location where the breakpoint
+	on break.c:47 was actually inserted when debugging the version
+	compiled at -O2 and use it in the expected output of the "info
+	break" test performed soon after.
+
 2018-01-22  Pedro Alves  <palves@redhat.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 
