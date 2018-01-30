@@ -1176,11 +1176,12 @@ spu_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static CORE_ADDR
-spu_read_pc (struct regcache *regcache)
+spu_read_pc (readable_regcache *regcache)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   ULONGEST pc;
-  regcache_cooked_read_unsigned (regcache, SPU_PC_REGNUM, &pc);
+
+  regcache->cooked_read (SPU_PC_REGNUM, &pc);
   /* Mask off interrupt enable bit.  */
   return SPUADDR (tdep->id, pc & -4);
 }

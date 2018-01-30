@@ -1362,12 +1362,12 @@ mips_in_frame_stub (CORE_ADDR pc)
    all registers should be sign extended for simplicity?  */
 
 static CORE_ADDR
-mips_read_pc (struct regcache *regcache)
+mips_read_pc (readable_regcache *regcache)
 {
   int regnum = gdbarch_pc_regnum (regcache->arch ());
   LONGEST pc;
 
-  regcache_cooked_read_signed (regcache, regnum, &pc);
+  regcache->cooked_read (regnum, &pc);
   return pc;
 }
 

@@ -245,8 +245,8 @@ extern void set_gdbarch_char_signed (struct gdbarch *gdbarch, int char_signed);
 
 extern int gdbarch_read_pc_p (struct gdbarch *gdbarch);
 
-typedef CORE_ADDR (gdbarch_read_pc_ftype) (struct regcache *regcache);
-extern CORE_ADDR gdbarch_read_pc (struct gdbarch *gdbarch, struct regcache *regcache);
+typedef CORE_ADDR (gdbarch_read_pc_ftype) (readable_regcache *regcache);
+extern CORE_ADDR gdbarch_read_pc (struct gdbarch *gdbarch, readable_regcache *regcache);
 extern void set_gdbarch_read_pc (struct gdbarch *gdbarch, gdbarch_read_pc_ftype *read_pc);
 
 extern int gdbarch_write_pc_p (struct gdbarch *gdbarch);

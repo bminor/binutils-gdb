@@ -422,7 +422,7 @@ v;int;dwarf2_addr_size;;;sizeof (void*);0;gdbarch_ptr_bit (gdbarch) / TARGET_CHA
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
 v;int;char_signed;;;1;-1;1
 #
-F;CORE_ADDR;read_pc;struct regcache *regcache;regcache
+F;CORE_ADDR;read_pc;readable_regcache *regcache;regcache
 F;void;write_pc;struct regcache *regcache, CORE_ADDR val;regcache, val
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
 # whole scheme for dealing with "frames" and "frame pointers" needs a

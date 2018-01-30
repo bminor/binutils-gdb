@@ -1906,7 +1906,7 @@ gdbarch_read_pc_p (struct gdbarch *gdbarch)
 }
 
 CORE_ADDR
-gdbarch_read_pc (struct gdbarch *gdbarch, struct regcache *regcache)
+gdbarch_read_pc (struct gdbarch *gdbarch, readable_regcache *regcache)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->read_pc != NULL);
