@@ -1,3 +1,10 @@
+2018-01-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 22734
+	* doc/binutils.texi (nm): Update description to point out that
+	zero-initialized values can also be shown as type B, b, S or s
+	since they can be stored in the BSS section.
+
 2018-01-30  Alan Modra  <amodra@gmail.com>
 
 	* objcopy.c (merge_gnu_build_notes): Use (bfd_vma) -1 as

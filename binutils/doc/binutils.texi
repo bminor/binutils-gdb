@@ -802,7 +802,9 @@ linking.
 
 @item B
 @itemx b
-The symbol is in the uninitialized data section (known as BSS).
+The symbol is in the BSS data section.  This section typically
+contains zero-initialized or uninitialized data, although the exact
+behavior is system dependent.
 
 @item C
 The symbol is common.  Common symbols are uninitialized data.  When
@@ -848,7 +850,8 @@ The symbol is in a read only data section.
 
 @item S
 @itemx s
-The symbol is in an uninitialized data section for small objects.
+The symbol is in an uninitialized or zero-initialized data section
+for small objects.
 
 @item T
 @itemx t
