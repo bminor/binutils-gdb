@@ -4913,7 +4913,7 @@ remote_serial_quit_handler (void)
       /* All-stop protocol, and blocked waiting for stop reply.  Send
 	 an interrupt request.  */
       else if (!target_terminal::is_ours () && rs->waiting_for_stop_reply)
-	target_interrupt (inferior_ptid);
+	target_interrupt ();
       else
 	rs->got_ctrlc_during_io = 1;
     }
@@ -6164,7 +6164,7 @@ remote_stop (struct target_ops *self, ptid_t ptid)
 /* Implement the to_interrupt function for the remote targets.  */
 
 static void
-remote_interrupt (struct target_ops *self, ptid_t ptid)
+remote_interrupt (struct target_ops *self)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
@@ -6193,7 +6193,7 @@ remote_pass_ctrlc (struct target_ops *self)
   else if (rs->ctrlc_pending_p)
     interrupt_query ();
   else
-    target_interrupt (inferior_ptid);
+    target_interrupt ();
 }
 
 /* Ask the user what to do when an interrupt is received.  */

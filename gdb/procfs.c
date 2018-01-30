@@ -89,7 +89,6 @@ static void procfs_attach (struct target_ops *, const char *, int);
 static void procfs_detach (struct target_ops *, const char *, int);
 static void procfs_resume (struct target_ops *,
 			   ptid_t, int, enum gdb_signal);
-static void procfs_interrupt (struct target_ops *self, ptid_t);
 static void procfs_files_info (struct target_ops *);
 static void procfs_fetch_registers (struct target_ops *,
 				    struct regcache *, int);
@@ -172,7 +171,6 @@ procfs_target (void)
   t->to_xfer_partial = procfs_xfer_partial;
   t->to_pass_signals = procfs_pass_signals;
   t->to_files_info = procfs_files_info;
-  t->to_interrupt = procfs_interrupt;
 
   t->to_update_thread_list = procfs_update_thread_list;
   t->to_thread_alive = procfs_thread_alive;
@@ -2834,16 +2832,6 @@ procfs_files_info (struct target_ops *ignore)
   printf_filtered (_("\tUsing the running image of %s %s via /proc.\n"),
 		   inf->attach_flag? "attached": "child",
 		   target_pid_to_str (inferior_ptid));
-}
-
-/* Stop the child process asynchronously, as when the gdb user types
-   control-c or presses a "stop" button.  Works by sending
-   kill(SIGINT) to the child's process group.  */
-
-static void
-procfs_interrupt (struct target_ops *self, ptid_t ptid)
-{
-  kill (-inferior_process_group (), SIGINT);
 }
 
 /* Make it die.  Wait for it to die.  Clean up after it.  Note: this

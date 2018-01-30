@@ -22,9 +22,4 @@
 
 #include <unistd.h>
 
-/* Process group of the current inferior.  */
-#ifdef HAVE_TERMIOS_H
-extern pid_t inferior_process_group (void);
-#endif
-
 #endif /* inflow.h */

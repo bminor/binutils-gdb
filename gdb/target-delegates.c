@@ -922,6 +922,28 @@ debug_terminal_inferior (struct target_ops *self)
 }
 
 static void
+delegate_terminal_save_inferior (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_terminal_save_inferior (self);
+}
+
+static void
+tdefault_terminal_save_inferior (struct target_ops *self)
+{
+}
+
+static void
+debug_terminal_save_inferior (struct target_ops *self)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_terminal_save_inferior (...)\n", debug_target.to_shortname);
+  debug_target.to_terminal_save_inferior (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_terminal_save_inferior (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (")\n", gdb_stdlog);
+}
+
+static void
 delegate_terminal_ours_for_output (struct target_ops *self)
 {
   self = self->beneath;
@@ -1639,26 +1661,24 @@ debug_stop (struct target_ops *self, ptid_t arg1)
 }
 
 static void
-delegate_interrupt (struct target_ops *self, ptid_t arg1)
+delegate_interrupt (struct target_ops *self)
 {
   self = self->beneath;
-  self->to_interrupt (self, arg1);
+  self->to_interrupt (self);
 }
 
 static void
-tdefault_interrupt (struct target_ops *self, ptid_t arg1)
+tdefault_interrupt (struct target_ops *self)
 {
 }
 
 static void
-debug_interrupt (struct target_ops *self, ptid_t arg1)
+debug_interrupt (struct target_ops *self)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_interrupt (...)\n", debug_target.to_shortname);
-  debug_target.to_interrupt (&debug_target, arg1);
+  debug_target.to_interrupt (&debug_target);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_interrupt (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_ptid_t (arg1);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
@@ -4248,6 +4268,8 @@ install_delegators (struct target_ops *ops)
     ops->to_terminal_init = delegate_terminal_init;
   if (ops->to_terminal_inferior == NULL)
     ops->to_terminal_inferior = delegate_terminal_inferior;
+  if (ops->to_terminal_save_inferior == NULL)
+    ops->to_terminal_save_inferior = delegate_terminal_save_inferior;
   if (ops->to_terminal_ours_for_output == NULL)
     ops->to_terminal_ours_for_output = delegate_terminal_ours_for_output;
   if (ops->to_terminal_ours == NULL)
@@ -4530,6 +4552,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_can_do_single_step = tdefault_can_do_single_step;
   ops->to_terminal_init = tdefault_terminal_init;
   ops->to_terminal_inferior = tdefault_terminal_inferior;
+  ops->to_terminal_save_inferior = tdefault_terminal_save_inferior;
   ops->to_terminal_ours_for_output = tdefault_terminal_ours_for_output;
   ops->to_terminal_ours = tdefault_terminal_ours;
   ops->to_terminal_info = default_terminal_info;
@@ -4690,6 +4713,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_can_do_single_step = debug_can_do_single_step;
   ops->to_terminal_init = debug_terminal_init;
   ops->to_terminal_inferior = debug_terminal_inferior;
+  ops->to_terminal_save_inferior = debug_terminal_save_inferior;
   ops->to_terminal_ours_for_output = debug_terminal_ours_for_output;
   ops->to_terminal_ours = debug_terminal_ours;
   ops->to_terminal_info = debug_terminal_info;

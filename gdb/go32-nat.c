@@ -937,6 +937,11 @@ go32_terminal_ours (struct target_ops *self)
   }
 }
 
+static void
+go32_pass_ctrlc (struct target_ops *self)
+{
+}
+
 static int
 go32_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
@@ -968,6 +973,7 @@ go32_target (void)
   t->to_terminal_ours_for_output = go32_terminal_ours;
   t->to_terminal_ours = go32_terminal_ours;
   t->to_terminal_info = go32_terminal_info;
+  t->to_pass_ctrlc = go32_pass_ctrlc;
   t->to_kill = go32_kill_inferior;
   t->to_create_inferior = go32_create_inferior;
   t->to_mourn_inferior = go32_mourn_inferior;

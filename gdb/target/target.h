@@ -95,6 +95,21 @@ extern void target_mourn_inferior (ptid_t ptid);
 
 extern int target_supports_multi_process (void);
 
+/* Possible terminal states.  */
+
+enum class target_terminal_state
+  {
+    /* The inferior's terminal settings are in effect.  */
+    is_inferior = 0,
+
+    /* Some of our terminal settings are in effect, enough to get
+       proper output.  */
+    is_ours_for_output = 1,
+
+    /* Our terminal settings are in effect, for output and input.  */
+    is_ours = 2
+  };
+
 /* Represents the state of the target terminal.  */
 class target_terminal
 {
@@ -108,9 +123,9 @@ public:
      before we actually run the inferior.  */
   static void init ();
 
-  /* Put the inferior's terminal settings into effect.  This is
-     preparation for starting or resuming the inferior.  This is a no-op
-     unless called with the main UI as current UI.  */
+  /* Put the current inferior's terminal settings into effect.  This
+     is preparation for starting or resuming the inferior.  This is a
+     no-op unless called with the main UI as current UI.  */
   static void inferior ();
 
   /* Put our terminal settings into effect.  First record the inferior's
@@ -125,39 +140,33 @@ public:
      UI as current UI.  */
   static void ours_for_output ();
 
+  /* Restore terminal settings of inferiors that are in
+     is_ours_for_output state back to "inferior".  Used when we need
+     to temporarily switch to is_ours_for_output state.  */
+  static void restore_inferior ();
+
   /* Returns true if the terminal settings of the inferior are in
      effect.  */
   static bool is_inferior ()
   {
-    return terminal_state == terminal_is_inferior;
+    return m_terminal_state == target_terminal_state::is_inferior;
   }
 
   /* Returns true if our terminal settings are in effect.  */
   static bool is_ours ()
   {
-    return terminal_state == terminal_is_ours;
+    return m_terminal_state == target_terminal_state::is_ours;
+  }
+
+  /* Returns true if our terminal settings are in effect.  */
+  static bool is_ours_for_output ()
+  {
+    return m_terminal_state == target_terminal_state::is_ours_for_output;
   }
 
   /* Print useful information about our terminal status, if such a thing
      exists.  */
   static void info (const char *arg, int from_tty);
-
-private:
-
-  /* Possible terminal states.  */
-
-  enum terminal_state
-    {
-     /* The inferior's terminal settings are in effect.  */
-     terminal_is_inferior = 0,
-
-     /* Some of our terminal settings are in effect, enough to get
-	proper output.  */
-     terminal_is_ours_for_output = 1,
-
-     /* Our terminal settings are in effect, for output and input.  */
-     terminal_is_ours = 2
-    };
 
 public:
 
@@ -168,7 +177,7 @@ public:
   public:
 
     scoped_restore_terminal_state ()
-      : m_state (terminal_state)
+      : m_state (m_terminal_state)
     {
     }
 
@@ -176,14 +185,14 @@ public:
     {
       switch (m_state)
 	{
-	case terminal_is_ours:
+	case target_terminal_state::is_ours:
 	  ours ();
 	  break;
-	case terminal_is_ours_for_output:
+	case target_terminal_state::is_ours_for_output:
 	  ours_for_output ();
 	  break;
-	case terminal_is_inferior:
-	  inferior ();
+	case target_terminal_state::is_inferior:
+	  restore_inferior ();
 	  break;
 	}
     }
@@ -192,12 +201,12 @@ public:
 
   private:
 
-    target_terminal::terminal_state m_state;
+    target_terminal_state m_state;
   };
 
 private:
 
-  static terminal_state terminal_state;
+  static target_terminal_state m_terminal_state;
 };
 
 #endif /* TARGET_COMMON_H */

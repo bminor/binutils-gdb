@@ -294,19 +294,6 @@ inf_ptrace_kill (struct target_ops *ops)
   target_mourn_inferior (inferior_ptid);
 }
 
-/* Interrupt the inferior.  */
-
-static void
-inf_ptrace_interrupt (struct target_ops *self, ptid_t ptid)
-{
-  /* Send a SIGINT to the process group.  This acts just like the user
-     typed a ^C on the controlling terminal.  Note that using a
-     negative process number in kill() is a System V-ism.  The proper
-     BSD interface is killpg().  However, all modern BSDs support the
-     System V interface too.  */
-  kill (-inferior_process_group (), SIGINT);
-}
-
 /* Return which PID to pass to ptrace in order to observe/control the
    tracee identified by PTID.  */
 
@@ -688,7 +675,6 @@ inf_ptrace_target (void)
   t->to_mourn_inferior = inf_ptrace_mourn_inferior;
   t->to_thread_alive = inf_ptrace_thread_alive;
   t->to_pid_to_str = inf_ptrace_pid_to_str;
-  t->to_interrupt = inf_ptrace_interrupt;
   t->to_xfer_partial = inf_ptrace_xfer_partial;
 #if defined (PT_IO) && defined (PIOD_READ_AUXV)
   t->to_auxv_parse = inf_ptrace_auxv_parse;

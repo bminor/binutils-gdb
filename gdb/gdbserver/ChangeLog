@@ -1,3 +1,9 @@
+2018-01-30  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13211
+	* target.c (target_terminal::terminal_state): Rename to ...
+	(target_terminal::m_terminal_state): ... this.
+
 2018-01-19  James Clarke  <jrtc27@jrtc27.com>
 
 	* linux-low.c (handle_extended_wait): Surround call to

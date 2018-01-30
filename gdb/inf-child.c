@@ -408,9 +408,12 @@ inf_child_target (void)
   t->to_remove_breakpoint = memory_remove_breakpoint;
   t->to_terminal_init = child_terminal_init;
   t->to_terminal_inferior = child_terminal_inferior;
+  t->to_terminal_save_inferior = child_terminal_save_inferior;
   t->to_terminal_ours_for_output = child_terminal_ours_for_output;
   t->to_terminal_ours = child_terminal_ours;
   t->to_terminal_info = child_terminal_info;
+  t->to_pass_ctrlc = child_pass_ctrlc;
+  t->to_interrupt = child_interrupt;
   t->to_post_startup_inferior = inf_child_post_startup_inferior;
   t->to_follow_fork = inf_child_follow_fork;
   t->to_can_run = inf_child_can_run;

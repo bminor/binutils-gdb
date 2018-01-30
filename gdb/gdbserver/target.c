@@ -360,8 +360,8 @@ default_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 
 /* Define it.  */
 
-enum target_terminal::terminal_state target_terminal::terminal_state
-  = target_terminal::terminal_is_ours;
+target_terminal_state target_terminal::m_terminal_state
+  = target_terminal_state::is_ours;
 
 /* See target/target.h.  */
 

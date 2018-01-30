@@ -732,7 +732,7 @@ nto_handle_sigint (int signo)
   /* If this doesn't work, try more severe steps.  */
   signal (signo, nto_handle_sigint_twice);
 
-  target_interrupt (inferior_ptid);
+  target_interrupt ();
 }
 
 static ptid_t
@@ -1275,7 +1275,7 @@ procfs_create_inferior (struct target_ops *ops, const char *exec_file,
 }
 
 static void
-procfs_interrupt (struct target_ops *self, ptid_t ptid)
+procfs_interrupt (struct target_ops *self)
 {
   devctl (ctl_fd, DCMD_PROC_STOP, NULL, 0, 0);
 }

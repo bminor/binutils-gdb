@@ -1,5 +1,78 @@
 2018-01-30  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/13211
+	* config.in, configure: Regenerate.
+	* configure.ac: Check for getpgid.
+	* go32-nat.c (go32_pass_ctrlc): New.
+	(go32_target): Install it.
+	* inf-child.c (inf_child_target): Install
+	child_terminal_save_inferior, child_pass_ctrlc and
+	child_interrupt.
+	* inf-ptrace.c (inf_ptrace_interrupt): Delete.
+	(inf_ptrace_target): No longer install it.
+	* infcmd.c (interrupt_target_1): Adjust.
+	* inferior.h (child_terminal_save_inferior, child_pass_ctrlc)
+	(child_interrupt): Declare.
+	(inferior::terminal_state): New.
+	* inflow.c (struct terminal_info): Update comments.
+	(inferior_process_group): Delete.
+	(terminal_is_ours): Delete.
+	(gdb_tty_state): New.
+	(child_terminal_init): Adjust.
+	(is_gdb_terminal, sharing_input_terminal_1)
+	(sharing_input_terminal): New functions.
+	(child_terminal_inferior): Adjust.  Use sharing_input_terminal.
+	Set the process's actual process group in the foreground if
+	possible.  Handle is_ours_for_output/is_ours distinction.  Don't
+	mark terminal as the inferior's if not sharing GDB's terminal.
+	Don't check attach_flag.
+	(child_terminal_ours_for_output, child_terminal_ours): Adjust to
+	pass down a target_terminal_state.
+	(child_terminal_save_inferior): New, factored out from ...
+	(child_terminal_ours_1): ... this.  Handle
+	target_terminal_state::is_ours_for_output.
+	(child_interrupt, child_pass_ctrlc): New.
+	(inflow_inferior_exit): Clear the inferior's terminal_state.
+	(copy_terminal_info): Copy the inferior's terminal state.
+	(_initialize_inflow): Remove reference to terminal_is_ours.
+	* inflow.h (inferior_process_group): Delete.
+	* nto-procfs.c (nto_handle_sigint, procfs_interrupt): Adjust.
+	* procfs.c (procfs_target): Don't install procfs_interrupt.
+	(procfs_interrupt): Delete.
+	* remote.c (remote_serial_quit_handler): Adjust.
+	(remote_interrupt): Remove ptid parameter.  Adjust.
+	* target-delegates.c: Regenerate.
+	* target.c: Include "terminal.h".
+	(target_terminal::terminal_state): Rename to ...
+	(target_terminal::m_terminal_state): ... this.
+	(target_terminal::init): Adjust.
+	(target_terminal::inferior): Adjust to per-inferior
+	terminal_state.
+	(target_terminal::restore_inferior, target_terminal_is_ours_kind): New.
+	(target_terminal::ours, target_terminal::ours_for_output): Use
+	target_terminal_is_ours_kind.
+	(target_interrupt): Remove ptid parameter.  Adjust.
+	(default_target_pass_ctrlc): Adjust.
+	* target.h (target_ops::to_terminal_save_inferior): New field.
+	(target_ops::to_interrupt): Remove ptid_t parameter.
+	(target_interrupt): Remove ptid_t parameter.  Update comment.
+	(target_pass_ctrlc): Update comment.
+	* target/target.h (target_terminal_state): New scoped enum,
+	factored out of ...
+	(target_terminal::terminal_state): ... here.
+	(target_terminal::inferior): Update comments.
+	(target_terminal::restore_inferior): New.
+	(target_terminal::is_inferior, target_terminal::is_ours)
+	(target_terminal::is_ours_for_output): Adjust.
+	(target_terminal::scoped_restore_terminal_state): Adjust to
+	rename, and call restore_inferior() instead of inferior().
+	(target_terminal::scoped_restore_terminal_state::m_state): Change
+	type.
+	(target_terminal::terminal_state): Rename to ...
+	(target_terminal::m_terminal_state): ... this and change type.
+
+2018-01-30  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c (wait_for_signal): New function.
 	(wait_lwp, linux_nat_wait_1): Use it instead of calling sigsuspend
 	directly.

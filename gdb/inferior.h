@@ -129,9 +129,15 @@ extern void child_terminal_ours_for_output (struct target_ops *self);
 
 extern void child_terminal_inferior (struct target_ops *self);
 
+extern void child_terminal_save_inferior (struct target_ops *self);
+
 extern void child_terminal_init (struct target_ops *self);
 
 extern void child_terminal_init_with_pgrp (int pgrp);
+
+extern void child_pass_ctrlc (struct target_ops *self);
+
+extern void child_interrupt (struct target_ops *self);
 
 /* From fork-child.c */
 
@@ -366,6 +372,10 @@ public:
 
   /* The name of terminal device to use for I/O.  */
   char *terminal = NULL;
+
+  /* The terminal state as set by the last target_terminal::terminal_*
+     call.  */
+  target_terminal_state terminal_state = target_terminal_state::is_ours;
 
   /* Environment to use for running inferior,
      in format described in environ.h.  */

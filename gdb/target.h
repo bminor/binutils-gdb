@@ -561,6 +561,8 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_terminal_inferior) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
+    void (*to_terminal_save_inferior) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_terminal_ours_for_output) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
     void (*to_terminal_ours) (struct target_ops *)
@@ -640,7 +642,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (NULL);
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_interrupt) (struct target_ops *, ptid_t)
+    void (*to_interrupt) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
     void (*to_pass_ctrlc) (struct target_ops *)
       TARGET_DEFAULT_FUNC (default_target_pass_ctrlc);
@@ -1690,16 +1692,18 @@ extern void target_update_thread_list (void);
 
 extern void target_stop (ptid_t ptid);
 
-/* Interrupt the target just like the user typed a ^C on the
-   inferior's controlling terminal.  (For instance, under Unix, this
-   should act like SIGINT).  This function is asynchronous.  */
+/* Interrupt the target.  Unlike target_stop, this does not specify
+   which thread/process reports the stop.  For most target this acts
+   like raising a SIGINT, though that's not absolutely required.  This
+   function is asynchronous.  */
 
-extern void target_interrupt (ptid_t ptid);
+extern void target_interrupt ();
 
 /* Pass a ^C, as determined to have been pressed by checking the quit
-   flag, to the target.  Normally calls target_interrupt, but remote
-   targets may take the opportunity to detect the remote side is not
-   responding and offer to disconnect.  */
+   flag, to the target, as if the user had typed the ^C on the
+   inferior's controlling terminal while the inferior was in the
+   foreground.  Remote targets may take the opportunity to detect the
+   remote side is not responding and offer to disconnect.  */
 
 extern void target_pass_ctrlc (void);
 
