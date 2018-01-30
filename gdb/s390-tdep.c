@@ -40,6 +40,9 @@
 #include "trad-frame.h"
 #include "value.h"
 
+#include "features/s390-linux32.c"
+#include "features/s390x-linux64.c"
+
 /* Holds the current set of options to be passed to the disassembler.  */
 static char *s390_disassembler_options;
 
@@ -6789,6 +6792,9 @@ s390_tdesc_valid (struct gdbarch_tdep *tdep,
   const struct target_desc *tdesc = tdep->tdesc;
   const struct tdesc_feature *feature;
 
+  if (!tdesc_has_registers (tdesc))
+    return false;
+
   /* Core registers, i.e. general purpose and PSW.  */
   feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.core");
   if (feature == NULL)
@@ -6929,7 +6935,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   static const char *const stap_register_indirection_suffixes[] = { ")",
 								    NULL };
 
-  /* Otherwise create a new gdbarch for the specified machine type.  */
   struct gdbarch_tdep *tdep = s390_gdbarch_tdep_alloc ();
   struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
   struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
@@ -7044,8 +7049,19 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Initialize the OSABI.  */
   gdbarch_init_osabi (info, gdbarch);
 
+  /* Always create a default tdesc.  Otherwise commands like 'set osabi'
+     cause GDB to crash with an internal error when the user tries to set
+     an unsupported OSABI.  */
+  if (!tdesc_has_registers (tdesc))
+  {
+    if (info.bfd_arch_info->mach == bfd_mach_s390_31)
+      tdesc = tdesc_s390_linux32;
+    else
+      tdesc = tdesc_s390x_linux64;
+  }
+  tdep->tdesc = tdesc;
+
   /* Check any target description for validity.  */
-  gdb_assert (tdesc_has_registers (tdep->tdesc));
   if (!s390_tdesc_valid (tdep, tdesc_data))
     {
       tdesc_data_cleanup (tdesc_data);
@@ -7120,4 +7136,7 @@ _initialize_s390_tdep (void)
 {
   /* Hook us into the gdbarch mechanism.  */
   register_gdbarch_init (bfd_arch_s390, s390_gdbarch_init);
+
+  initialize_tdesc_s390_linux32 ();
+  initialize_tdesc_s390x_linux64 ();
 }

@@ -1,3 +1,21 @@
+2018-01-30  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c: Remove includes "features/s390-linux32.c" and
+	"features/s390x-linux64.c".
+	(_initialize_s390_linux_tdep): Remove initialization of tdescs
+	s390_linux32 and s390x_linux64.
+	(s390_linux_init_abi_31, s390_linux_init_abi_64): Don't set
+	default tdesc.
+	* s390-tdep.c: Include "features/s390-linux32.c" and
+	"features/s390x-linux64.c".
+	(s390_tdesc_valid): Add check for tdesc_has_registers.
+	(s390_gdbarch_init): Make sure there is always a valid tdesc.
+	(_initialize_s390_tdep): Initialize tdesc_s390_linux32 and
+	tdesc_s390x_linux64.
+	* s390-linux-tdep.h: Move export of tdesc_s390_linux32 and
+	tdesc_s390x_linux64 to...
+	* s390-tdep.h: ...here.
+
 2018-01-30  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/13211

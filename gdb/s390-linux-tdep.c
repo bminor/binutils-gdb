@@ -42,7 +42,6 @@
 #include "trad-frame.h"
 #include "xml-syscall.h"
 
-#include "features/s390-linux32.c"
 #include "features/s390-linux32v1.c"
 #include "features/s390-linux32v2.c"
 #include "features/s390-linux64.c"
@@ -52,7 +51,6 @@
 #include "features/s390-vx-linux64.c"
 #include "features/s390-tevx-linux64.c"
 #include "features/s390-gs-linux64.c"
-#include "features/s390x-linux64.c"
 #include "features/s390x-linux64v1.c"
 #include "features/s390x-linux64v2.c"
 #include "features/s390x-te-linux64.c"
@@ -1158,9 +1156,6 @@ s390_linux_init_abi_31 (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   tdep->abi = ABI_LINUX_S390;
-  if (!tdesc_has_registers (tdesc))
-    tdesc = tdesc_s390_linux32;
-  tdep->tdesc = tdesc;
 
   s390_linux_init_abi_any (info, gdbarch);
 
@@ -1178,9 +1173,6 @@ s390_linux_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   tdep->abi = ABI_LINUX_ZSERIES;
-  if (!tdesc_has_registers (tdesc))
-    tdesc = tdesc_s390x_linux64;
-  tdep->tdesc = tdesc;
 
   s390_linux_init_abi_any (info, gdbarch);
 
@@ -1199,7 +1191,6 @@ _initialize_s390_linux_tdep (void)
 			  s390_linux_init_abi_64);
 
   /* Initialize the GNU/Linux target descriptions.  */
-  initialize_tdesc_s390_linux32 ();
   initialize_tdesc_s390_linux32v1 ();
   initialize_tdesc_s390_linux32v2 ();
   initialize_tdesc_s390_linux64 ();
@@ -1209,7 +1200,6 @@ _initialize_s390_linux_tdep (void)
   initialize_tdesc_s390_vx_linux64 ();
   initialize_tdesc_s390_tevx_linux64 ();
   initialize_tdesc_s390_gs_linux64 ();
-  initialize_tdesc_s390x_linux64 ();
   initialize_tdesc_s390x_linux64v1 ();
   initialize_tdesc_s390x_linux64v2 ();
   initialize_tdesc_s390x_te_linux64 ();
