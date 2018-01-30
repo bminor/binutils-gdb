@@ -79,8 +79,7 @@ do_proto_toplev()
     support_files=$4
 
     echo "==> Cleaning sources."
-    find -name "*.orig" -exec rm {} \;
-    find -name "*.rej" -exec rm {} \;
+    find \( -name "*.orig" -o  -name "*.rej" -o -name "*~" -o -name ".#*" -o -name "*~$bkpat" \) -exec rm {} \;
     
     echo "==> Making $package-$ver/"
     # Take out texinfo from a few places.
