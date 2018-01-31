@@ -1,3 +1,8 @@
+2018-01-31  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-elf/elf.exp: Move shared library tests over to...
+	* testsuite/ld-elf/shared.exp: ... here.
+
 2018-01-31  Michael Matz  <matz@suse.de>
 
 	* testsuite/ld-elf/pr21964-5.c: New test.
