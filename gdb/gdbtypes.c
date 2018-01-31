@@ -1231,10 +1231,15 @@ struct type *
 lookup_array_range_type (struct type *element_type,
 			 LONGEST low_bound, LONGEST high_bound)
 {
-  struct gdbarch *gdbarch = get_type_arch (element_type);
-  struct type *index_type = builtin_type (gdbarch)->builtin_int;
-  struct type *range_type
-    = create_static_range_type (NULL, index_type, low_bound, high_bound);
+  struct type *index_type;
+  struct type *range_type;
+
+  if (TYPE_OBJFILE_OWNED (element_type))
+    index_type = objfile_type (TYPE_OWNER (element_type).objfile)->builtin_int;
+  else
+    index_type = builtin_type (get_type_arch (element_type))->builtin_int;
+  range_type = create_static_range_type (NULL, index_type,
+					 low_bound, high_bound);
 
   return create_array_type (NULL, element_type, range_type);
 }
