@@ -220,6 +220,10 @@ extern enum stop_stack_kind stop_stack_dummy;
 
 extern int stopped_by_random_signal;
 
+/* Print notices on inferior events (attach, detach, etc.), set with
+   `set print inferior-events'.  */
+extern int print_inferior_events;
+
 /* STEP_OVER_ALL means step over all subroutine calls.
    STEP_OVER_UNDEBUGGABLE means step over calls to undebuggable functions.
    STEP_OVER_NONE means don't step over any subroutine calls.  */

@@ -2595,7 +2595,15 @@ kill_command (const char *arg, int from_tty)
     error (_("The program is not being run."));
   if (!query (_("Kill the program being debugged? ")))
     error (_("Not confirmed."));
+
+  std::string pid_str = target_pid_to_str (inferior_ptid);
+  int infnum = current_inferior ()->num;
+
   target_kill ();
+
+  if (print_inferior_events)
+    printf_unfiltered (_("[Inferior %d (%s) has been killed]\n"),
+		       infnum, pid_str.c_str ());
 
   /* If we still have other inferiors to debug, then don't mess with
      with their threads.  */

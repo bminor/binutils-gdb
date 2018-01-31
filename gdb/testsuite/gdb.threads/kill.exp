@@ -21,7 +21,7 @@ standard_testfile
 # program and spawn several threads before trying to kill the program.
 
 proc test {threaded} {
-    global testfile srcfile
+    global testfile srcfile decimal
 
     with_test_prefix [expr ($threaded)?"threaded":"non-threaded"] {
 
@@ -68,7 +68,11 @@ proc test {threaded} {
 	#
 	# the above would mean that the remote end crashed.
 
-	gdb_test "kill" "^y" "kill program" "Kill the program being debugged\\? \\(y or n\\) $" "y"
+	gdb_test_multiple "kill" "kill" {
+	    -re "Kill the program being debugged\\? \\(y or n\\) $" {
+		gdb_test "y" "\\\[Inferior $decimal \\(.*\\) has been killed\\\]" "kill"
+	    }
+	}
     }
 }
 

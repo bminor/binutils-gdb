@@ -45,9 +45,8 @@ DEFINE_REGISTRY (inferior, REGISTRY_ACCESS_FIELD)
 struct inferior *inferior_list = NULL;
 static int highest_inferior_num;
 
-/* Print notices on inferior events (attach, detach, etc.), set with
-   `set print inferior-events'.  */
-static int print_inferior_events = 0;
+/* See inferior.h.  */
+int print_inferior_events = 1;
 
 /* The Current Inferior.  This is a strong reference.  I.e., whenever
    an inferior is the current inferior, its refcount is
@@ -123,7 +122,9 @@ add_inferior (int pid)
   struct inferior *inf = add_inferior_silent (pid);
 
   if (print_inferior_events)
-    printf_unfiltered (_("[New inferior %d]\n"), pid);
+    printf_unfiltered (_("[New inferior %d (%s)]\n"),
+		       inf->num,
+		       target_pid_to_str (pid_to_ptid (pid)));
 
   return inf;
 }
@@ -234,9 +235,6 @@ exit_inferior (int pid)
   struct inferior *inf = find_inferior_pid (pid);
 
   exit_inferior_1 (inf, 0);
-
-  if (print_inferior_events)
-    printf_unfiltered (_("[Inferior %d exited]\n"), pid);
 }
 
 void
@@ -266,7 +264,9 @@ detach_inferior (inferior *inf)
   exit_inferior_1 (inf, 0);
 
   if (print_inferior_events)
-    printf_unfiltered (_("[Inferior %d detached]\n"), pid);
+    printf_unfiltered (_("[Inferior %d (%s) detached]\n"),
+		       inf->num,
+		       target_pid_to_str (pid_to_ptid (pid)));
 }
 
 /* See inferior.h.  */
@@ -989,7 +989,7 @@ initialize_inferiors (void)
      can only allocate an inferior when all those modules have done
      that.  Do this after initialize_progspace, due to the
      current_program_space reference.  */
-  current_inferior_ = add_inferior (0);
+  current_inferior_ = add_inferior_silent (0);
   current_inferior_->incref ();
   current_inferior_->pspace = current_program_space;
   current_inferior_->aspace = current_program_space->aspace;

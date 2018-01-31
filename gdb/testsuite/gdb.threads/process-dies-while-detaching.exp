@@ -169,7 +169,7 @@ proc do_detach {multi_process cmd child_exit} {
 			 && [target_info gdb_protocol] == "remote"}]
 
     if {$multi_process} {
-	gdb_test "detach" "Detaching from .*, process $decimal" \
+	gdb_test "detach" "Detaching from .*, process $decimal\r\n\\\[Inferior $decimal \\(.*\\) detached\\\]" \
 	    "detach child"
 
 	gdb_test "inferior 1" "\[Switching to inferior $decimal\].*" \
@@ -193,7 +193,7 @@ proc do_detach {multi_process cmd child_exit} {
 	    set extra ""
 	}
 	if {$cmd == "detach"} {
-	    gdb_test "detach" "Detaching from .*, process $decimal$extra"
+	    gdb_test "detach" "Detaching from .*, process ${decimal}\r\n\\\[Inferior $decimal \\(.*\\) detached\\\]$extra"
 	} elseif {$cmd == "continue"} {
 	    gdb_test "continue" $continue_re
 	} else {

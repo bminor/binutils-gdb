@@ -5137,7 +5137,14 @@ remote_detach_1 (int from_tty, inferior *inf)
   /* If doing detach-on-fork, we don't mourn, because that will delete
      breakpoints that should be available for the followed inferior.  */
   if (!is_fork_parent)
-    target_mourn_inferior (inferior_ptid);
+    {
+      std::string infpid = target_pid_to_str (inferior_ptid);
+
+      target_mourn_inferior (inferior_ptid);
+      if (print_inferior_events)
+	printf_unfiltered (_("[Inferior %d (%s) detached]\n"),
+			   inf->num, infpid.c_str ());
+    }
   else
     {
       inferior_ptid = null_ptid;

@@ -461,14 +461,14 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      remove_breakpoints_pid (ptid_get_pid (inferior_ptid));
 	    }
 
-	  if (info_verbose || debug_infrun)
+	  if (print_inferior_events)
 	    {
 	      /* Ensure that we have a process ptid.  */
 	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
 
 	      target_terminal::ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
-				_("Detaching after %s from child %s.\n"),
+				_("[Detaching after %s from child %s]\n"),
 				has_vforked ? "vfork" : "fork",
 				target_pid_to_str (process_ptid));
 	    }
@@ -489,7 +489,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
 	  inferior_ptid = child_ptid;
-	  add_thread (inferior_ptid);
+	  add_thread_silent (inferior_ptid);
 	  set_current_inferior (child_inf);
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
 
@@ -549,14 +549,17 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       struct inferior *parent_inf, *child_inf;
       struct program_space *parent_pspace;
 
-      if (info_verbose || debug_infrun)
+      if (print_inferior_events)
 	{
+	  std::string parent_pid = target_pid_to_str (parent_ptid);
+	  std::string child_pid = target_pid_to_str (child_ptid);
+
 	  target_terminal::ours_for_output ();
 	  fprintf_filtered (gdb_stdlog,
-			    _("Attaching after %s %s to child %s.\n"),
-			    target_pid_to_str (parent_ptid),
+			    _("[Attaching after %s %s to child %s]\n"),
+			    parent_pid.c_str (),
 			    has_vforked ? "vfork" : "fork",
-			    target_pid_to_str (child_ptid));
+			    child_pid.c_str ());
 	}
 
       /* Add the new inferior first, so that the target_detach below
@@ -594,15 +597,15 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	}
       else if (detach_fork)
 	{
-	  if (info_verbose || debug_infrun)
+	  if (print_inferior_events)
 	    {
 	      /* Ensure that we have a process ptid.  */
-	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
+	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (parent_ptid));
 
 	      target_terminal::ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
-				_("Detaching after fork from "
-				  "child %s.\n"),
+				_("[Detaching after fork from "
+				  "parent %s]\n"),
 				target_pid_to_str (process_ptid));
 	    }
 
@@ -616,7 +619,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	 informing the solib layer about this new process.  */
 
       inferior_ptid = child_ptid;
-      add_thread (inferior_ptid);
+      add_thread_silent (inferior_ptid);
       set_current_inferior (child_inf);
 
       /* If this is a vfork child, then the address-space is shared
@@ -956,23 +959,24 @@ handle_vfork_child_exec_or_exit (int exec)
 	  inf->aspace = NULL;
 	  inf->pspace = NULL;
 
-	  if (debug_infrun || info_verbose)
+	  if (print_inferior_events)
 	    {
+	      const char *pidstr
+		= target_pid_to_str (pid_to_ptid (inf->vfork_parent->pid));
+
 	      target_terminal::ours_for_output ();
 
 	      if (exec)
 		{
 		  fprintf_filtered (gdb_stdlog,
-				    _("Detaching vfork parent process "
-				      "%d after child exec.\n"),
-				    inf->vfork_parent->pid);
+				    _("[Detaching vfork parent %s "
+				      "after child exec]\n"), pidstr);
 		}
 	      else
 		{
 		  fprintf_filtered (gdb_stdlog,
-				    _("Detaching vfork parent process "
-				      "%d after child exit.\n"),
-				    inf->vfork_parent->pid);
+				    _("[Detaching vfork parent %s "
+				      "after child exit]\n"), pidstr);
 		}
 	    }
 

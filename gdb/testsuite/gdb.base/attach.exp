@@ -53,6 +53,7 @@ proc do_attach_tests {} {
     global testfile
     global subdir
     global timeout
+    global decimal
     
     # Figure out a regular expression that will match the sysroot,
     # noting that the default sysroot is "target:", and also noting
@@ -191,7 +192,7 @@ proc do_attach_tests {} {
     # Detach the process.
    
     gdb_test "detach" \
-	"Detaching from program: .*$escapedbinfile, process $testpid" \
+	"Detaching from program: .*$escapedbinfile, process $testpid\r\n\\\[Inferior $decimal \\(.*\\) detached\\\]" \
 	"attach1 detach"
 
     # Wait a bit for gdb to finish detaching

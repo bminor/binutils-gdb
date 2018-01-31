@@ -1,3 +1,29 @@
+2018-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/attach-non-pgrp-leader.exp: Adjust 'Detaching...'
+	regexps to expect for '[Inferior ... detached]' as well.
+	* gdb.base/attach.exp: Likewise.
+	* gdb.base/catch-syscall.exp (check_for_program_end): Adjust
+	"gdb_continue_to_end".
+	(test_catch_syscall_with_wrong_args): Likewise.
+	* gdb.base/foll-fork.exp: Adjust regexps to match '[' and
+	']'.  Don't set 'verbose' on.
+	* gdb.base/foll-vfork.exp: Likewise.
+	* gdb.base/fork-print-inferior-events.c: New file.
+	* gdb.base/fork-print-inferior-events.exp: New file.
+	* gdb.base/hook-stop.exp: Adjust regexps to expect for new
+	'[Inferior ... has been killed]' message.
+	* gdb.base/kill-after-signal.exp: Likewise.
+	* gdb.base/solib-overlap.exp: Adjust regexps to expect for new
+	detach message.
+	* gdb.threads/kill.exp: Adjust regexps to expect for new kill
+	message.
+	* gdb.threads/clone-attach-detach.exp: Adjust 'Detaching...'
+	regexps to expect for '[Inferior ... detached]' as well.
+	* gdb.threads/process-dies-while-detaching.exp: Likewise.
+
 2018-04-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/23104

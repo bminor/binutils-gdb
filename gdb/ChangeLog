@@ -1,3 +1,33 @@
+2018-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (kill_command): Print message when inferior has
+	been killed.
+	* inferior.c (print_inferior_events): Remove 'static'.  Set as
+	'1'.
+	(add_inferior): Improve message printed when
+	'print_inferior_events' is on.
+	(exit_inferior): Remove message printed when
+	'print_inferior_events' is on.
+	(detach_inferior): Improve message printed when
+	'print_inferior_events' is on.
+	(initialize_inferiors): Use 'add_inferior_silent' to set
+	'current_inferior_'.
+	* inferior.h (print_inferior_events): Declare here as
+	'extern'.
+	* infrun.c (follow_fork_inferior): Print '[Attaching...]' or
+	'[Detaching...]' messages when 'print_inferior_events' is on.
+	Use 'add_thread_silent' instead of 'add_thread'.  Add '[' and ']'
+	as prefix/suffix for messages.  Remove periods.  Fix erroneous
+	'Detaching after fork from child...', replace it by '... from
+	parent...'.
+	(handle_vfork_child_exec_or_exit): Add '[' and ']' as
+	prefix/suffix when printing 'Detaching...' messages.  Print
+	them when 'print_inferior_events' is on.
+	* remote.c (remote_detach_1): Print message when detaching
+	from inferior and '!is_fork_parent'.
+
 2018-04-24  Tom Tromey  <tom@tromey.com>
 
 	* cli-out.h: Reindent.

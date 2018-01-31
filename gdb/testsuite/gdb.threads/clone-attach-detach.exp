@@ -56,7 +56,7 @@ for {set attempt 1} {$attempt <= $attempts} {incr attempt} {
 	    "1.*${thread_re}.*\r\n.*2.*${thread_re}.*" \
 	    "info threads shows two LWPs"
 
-	gdb_test "detach" "Detaching from .*, process $testpid"
+	gdb_test "detach" "Detaching from .*, process $testpid\r\n\\\[Inferior $decimal \\(.*\\) detached\\\]"
     }
 }
 
@@ -91,7 +91,7 @@ for {set attempt 1} {$attempt <= $attempts} {incr attempt} {
 	    "1.*${thread_re}.*\\(running\\)\r\n.*2.*${thread_re}.*\\(running\\)" \
 	    "info threads shows two LWPs"
 
-	gdb_test "detach" "Detaching from .*, process $testpid"
+	gdb_test "detach" "Detaching from .*, process $testpid\r\n\\\[Inferior $decimal \\(.*\\) detached\\\]"
     }
 }
 
