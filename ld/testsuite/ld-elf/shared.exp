@@ -57,6 +57,12 @@ set hpux ""
 if [istarget "*-*-hpux*"] {
     set hpux "--defsym HPUX=1"
 }
+# These targets do not default to linking with shared libraries.
+if { [istarget "mips*vr4100*-*-elf*"] \
+     || [istarget "mips*vr4300*-*-elf*"] \
+     || [istarget "mips*vr5000*-*-elf*"] } {
+    append LFLAGS " -call_shared"
+}
 
 if [is_underscore_target] {
     set ASFLAGS "$ASFLAGS --defsym UNDERSCORE=1"
@@ -332,7 +338,8 @@ run_ld_link_tests {
 # bfin does not currently support copy relocs.
 run_ld_link_tests [list \
     [list "PR ld/14170" \
-	"--no-dynamic-linker tmpdir/pr14170a.o tmpdir/pr14170.so" "" $hpux \
+	"$LFLAGS --no-dynamic-linker tmpdir/pr14170a.o tmpdir/pr14170.so" "" \
+	$hpux \
 	 {pr14170c.s} { } "pr14170" ] \
 ] "bfin-*-*"
 
@@ -361,7 +368,7 @@ run_ld_link_tests {
     {"Build shared library for broken linker scrip test"
 	"-shared --hash-style=sysv" "" "" "note-3.s" {} "note-3.so" }
     {"Link using broken linker script"
-	"--script note-3.t tmpdir/note-3.so" "" "" ""
+	"$LFLAGS --script note-3.t tmpdir/note-3.so" "" "" ""
 	{ { ld "note-3.l" } }
 	"a.out" }
 }
@@ -382,7 +389,9 @@ run_ld_link_tests {
 # bfin does not currently support copy relocs.
 run_ld_link_tests {
     {"pr17068 link --as-needed lib in group"
-	"--as-needed --no-dynamic-linker" "--start-group tmpdir/pr17068a.a tmpdir/pr17068.so tmpdir/pr17068b.a --end-group" ""
+	"$LFLAGS --as-needed --no-dynamic-linker"
+	"--start-group tmpdir/pr17068a.a tmpdir/pr17068.so tmpdir/pr17068b.a\
+	 --end-group" ""
 	{start.s pr17068.s} {} "pr17068"}
 } "bfin-*-*"
 
@@ -419,7 +428,7 @@ setup_xfail "hppa*64*-*-hpux*"
 run_ld_link_tests [list \
     [list \
 	"pr20995" \
-	"" "tmpdir/pr20995.so" "$AFLAGS_NONPIC" \
+	"$LFLAGS" "tmpdir/pr20995.so" "$AFLAGS_NONPIC" \
 	{pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995"]]
 
 # xfail on arm*-*-eabi* is particularly because of no support of GNU_RELRO.
@@ -429,7 +438,7 @@ setup_xfail "hppa*64*-*-hpux*"
 run_ld_link_tests [list \
     [list \
 	"pr20995-2" \
-	"" "tmpdir/pr20995-2.so" "$AFLAGS_NONPIC" \
+	"$LFLAGS" "tmpdir/pr20995-2.so" "$AFLAGS_NONPIC" \
 	{pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995-2"]]
 
 setup_xfail "tic6x-*-*"

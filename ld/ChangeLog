@@ -1,5 +1,15 @@
 2018-01-31  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/ld-elf/comm-data.exp: Pass `-call_shared' to links
+	involving a shared library for `mips*vr4100*-*-elf*',
+	`mips*vr4300*-*-elf*' and `mips*vr5000*-*-elf*' targets.
+	* testsuite/ld-elf/provide-hidden.exp: Likewise.
+	* testsuite/ld-elf/shared.exp: Likewise.
+	* testsuite/ld-gc/gc.exp: Likewise.
+	* testsuite/ld-mips-elf/comm-data.exp: Likewise.
+
+2018-01-31  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/ld-elf/elf.exp: Move shared library tests over to...
 	* testsuite/ld-elf/shared.exp: ... here.
 

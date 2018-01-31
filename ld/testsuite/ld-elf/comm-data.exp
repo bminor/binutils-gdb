@@ -41,6 +41,12 @@ set LFLAGS ""
 if [istarget "tic6x-*-*"] {
     append LFLAGS " -melf32_tic6x_le"
 }
+# These targets do not default to linking with shared libraries.
+if { [istarget "mips*vr4100*-*-elf*"] \
+     || [istarget "mips*vr4300*-*-elf*"] \
+     || [istarget "mips*vr5000*-*-elf*"] } {
+    append LFLAGS " -call_shared"
+}
 
 set testname "Common symbol override test"
 

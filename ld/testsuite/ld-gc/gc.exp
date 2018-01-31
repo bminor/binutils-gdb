@@ -116,11 +116,18 @@ if { [is_elf_format] && [check_shared_lib_support] } then {
     if { [istarget tic6x-*] } then {
 	set gasopt "-mpic -mpid=near"
     }
+    # These targets do not default to linking with shared libraries.
+    set old_ldflags $LDFLAGS
+    if { [istarget "mips*vr4100*-*-elf*"] \
+	 || [istarget "mips*vr4300*-*-elf*"] \
+	 || [istarget "mips*vr5000*-*-elf*"] } {
+	append LDFLAGS " -call_shared"
+    }
     if {![ld_assemble_flags $as $gasopt $srcdir/$subdir/libpersonality.s tmpdir/libpersonality.o]
 	|| ![ld_link $ld tmpdir/libpersonality.so "-shared tmpdir/libpersonality.o"] } then {
 	fail libpersonality
     } else {
-	run_dump_test "personality"
+	run_dump_test "personality" [list [list ld $LFLAGS]]
     }
     run_dump_test "pr18223"
     if {![ld_assemble_flags $as $gasopt $srcdir/$subdir/pr20022a.s tmpdir/pr20022a.o]
@@ -129,6 +136,7 @@ if { [is_elf_format] && [check_shared_lib_support] } then {
     } else {
 	run_dump_test "pr20022"
     }
+    set LDFLAGS $old_ldflags
 }
 
 if { [is_remote host] || [which $CC] != 0 } {

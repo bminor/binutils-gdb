@@ -136,7 +136,8 @@ proc mips_comm_data_test { abi flag emul reloc } {
     run_ld_link_tests [list \
 	[list \
 	    "$testname" \
-	    "$LDFLAGS $ZFLAG -T ../ld-elf/comm-data2.ld -Ltmpdir -lmips-$abi-$reloc-comm-data" "" \
+	    "$LDFLAGS -call_shared $ZFLAG -T ../ld-elf/comm-data2.ld -Ltmpdir\
+	     -lmips-$abi-$reloc-comm-data" "" \
 	    "$AFLAGS -call_nonpic" \
 	    { ../ld-elf/comm-data2.s } \
 	    { \
