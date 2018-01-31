@@ -1,5 +1,9 @@
 2018-01-31  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/ld-elf/shared.exp: Fix a typo s/scrip/script/.
+
+2018-01-31  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/ld-elf/comm-data.exp: Pass `-call_shared' to links
 	involving a shared library for `mips*vr4100*-*-elf*',
 	`mips*vr4300*-*-elf*' and `mips*vr5000*-*-elf*' targets.

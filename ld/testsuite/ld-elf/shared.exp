@@ -365,7 +365,7 @@ if [istarget "mips*-*-*"] {
 # Note: setup_xfail before run_ld_link_tests xfails only the first test.
 setup_xfail "tic6x-*-*"
 run_ld_link_tests {
-    {"Build shared library for broken linker scrip test"
+    {"Build shared library for broken linker script test"
 	"-shared --hash-style=sysv" "" "" "note-3.s" {} "note-3.so" }
     {"Link using broken linker script"
 	"$LFLAGS --script note-3.t tmpdir/note-3.so" "" "" ""
