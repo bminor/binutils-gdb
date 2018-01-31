@@ -9,7 +9,7 @@ extern int __start___verbose[];
 extern int __stop___verbose[];
 int bar (void)
 {
-  static int my_var __attribute__((section("__verbose"))) = 6;
+  static int my_var __attribute__((section("__verbose"), used)) = 6;
   int *ptr;
   ptr = (int*) dlsym(RTLD_DEFAULT, "__start___verbose");
   if (!ptr || *ptr != 6)
