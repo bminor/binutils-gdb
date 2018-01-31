@@ -1,5 +1,10 @@
 2018-01-31  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 8.1.0.DATE-git.
+	* PROBLEMS: Likewise.
+
+2018-01-31  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 8.1 released.
 
 2018-01-31  Joel Brobecker  <brobecker@adacore.com>
