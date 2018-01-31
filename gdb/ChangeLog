@@ -1,3 +1,8 @@
+2018-01-31  Nikola Prica  <nikola.prica@rt-rk.com>
+
+	* rs6000-tdep.c (skip_prologue): Remove shifting for lr_reg and
+	assign shifted lr_reg to fdata->lr_register when lr_reg is set.
+
 2018-01-31  Pedro Alves  <palves@redhat.com>
 
 	* darwin-nat.c (darwin_interrupt): Remove ptid_t parameter.

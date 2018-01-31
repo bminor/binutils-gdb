@@ -1654,7 +1654,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	     remember just the first one, but skip over additional
 	     ones.  */
 	  if (lr_reg == -1)
-	    lr_reg = (op & 0x03e00000) >> 21;
+	    lr_reg = (op & 0x03e00000);
           if (lr_reg == 0)
             r0_contains_arg = 0;
 	  continue;
@@ -2180,7 +2180,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 #endif /* 0 */
 
   if (pc == lim_pc && lr_reg >= 0)
-    fdata->lr_register = lr_reg;
+    fdata->lr_register = lr_reg >> 21;
 
   fdata->offset = -fdata->offset;
   return last_prologue_pc;
