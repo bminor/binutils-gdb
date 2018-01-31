@@ -1,3 +1,11 @@
+2018-01-31  Alan Modra  <amodra@gmail.com>
+
+	PR 22714
+	* app.c (last_char): New static var.
+	(struct app_save): Add last_char field.
+	(app_push, app_pop): Handle it.
+	(do_scrub_chars): Use last_char in test for "\@".  Set last_char.
+
 2018-01-29  Eric Botcazou  <ebotcazou@adacore.com>
 
 	PR gas/22738
