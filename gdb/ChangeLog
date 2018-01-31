@@ -1,3 +1,15 @@
+2018-01-31  Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.c (darwin_interrupt): Remove ptid_t parameter.
+	* inflow.c (child_terminal_save_inferior): Wrap reference to
+	tcgetpgrp in HAVE_TERMIOS_H.
+	(child_interrupt, child_pass_ctrlc): Wrap references to signal in
+	_WIN32.
+	* remote-sim.c (gdbsim_interrupt): Remove ptid_t parameter and
+	always iterate over all inferiors.
+	(gdbsim_cntrl_c): Adjust.
+	* windows-nat.c (windows_interrupt): Remove 'ptid_t' parameter.
+
 2018-01-31  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.c (lookup_array_range_type): Make sure the array's
