@@ -1,3 +1,9 @@
+2018-01-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21964
+	* elflink.c (bfd_elf_define_start_stop): Check if __start and
+	__stop symbols are referenced by shared objects.
+
 2018-01-30  Alan Modra  <amodra@gmail.com>
 
 	PR 22758

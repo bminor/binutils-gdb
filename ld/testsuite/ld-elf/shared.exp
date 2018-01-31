@@ -1099,6 +1099,18 @@ if { [istarget *-*-linux*]
 	    "pr22393-2-static" \
 	    "pass.out" \
 	] \
+	[list \
+	    "Run pr21964-4" \
+	    "" \
+	    "" \
+	    {pr21964-4.c} \
+	    "pr21964-4" \
+	    "pass.out" \
+	    "" \
+	    "" \
+	    "" \
+	    "-ldl" \
+	] \
     ]
 }
 
