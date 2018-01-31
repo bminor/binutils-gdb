@@ -14338,8 +14338,9 @@ bfd_elf_define_start_stop (struct bfd_link_info *info,
   if (h != NULL
       && (h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak
-	  || ((h->ref_regular || h->ref_dynamic) && !h->def_regular)))
+	  || ((h->ref_regular || h->def_dynamic) && !h->def_regular)))
     {
+      bfd_boolean was_dynamic = h->ref_dynamic || h->def_dynamic;
       h->root.type = bfd_link_hash_defined;
       h->root.u.def.section = sec;
       h->root.u.def.value = 0;
@@ -14358,7 +14359,7 @@ bfd_elf_define_start_stop (struct bfd_link_info *info,
 	{
 	  if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_PROTECTED;
-	  if (h->ref_dynamic)
+	  if (was_dynamic)
 	    bfd_elf_link_record_dynamic_symbol (info, h);
 	}
       return &h->root;

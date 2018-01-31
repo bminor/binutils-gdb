@@ -772,6 +772,9 @@ set dlopen_run_tests [list \
     [list "Run pr21964-2" \
      "-Wl,--no-as-needed,-rpath,tmpdir tmpdir/pr21964-2a.so $extralibs" "" \
      {pr21964-2c.c} "pr21964-2" "pass.out" ] \
+    [list "Run pr21964-5" \
+     "-Wl,--no-as-needed,-rpath,tmpdir tmpdir/pr21964-1a.so $extralibs" "" \
+     {pr21964-5.c} "pr21964-5" "pass.out" ] \
 ]
 
 # Only run them when libdl is available.
