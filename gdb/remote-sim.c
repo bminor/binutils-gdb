@@ -86,7 +86,7 @@ static void gdbsim_files_info (struct target_ops *target);
 
 static void gdbsim_mourn_inferior (struct target_ops *target);
 
-static void gdbsim_interrupt (struct target_ops *self, ptid_t ptid);
+static void gdbsim_interrupt (struct target_ops *self);
 
 void simulator_command (char *args, int from_tty);
 
@@ -920,24 +920,9 @@ gdbsim_interrupt_inferior (struct inferior *inf, void *arg)
 }
 
 static void
-gdbsim_interrupt (struct target_ops *self, ptid_t ptid)
+gdbsim_interrupt (struct target_ops *self)
 {
-  struct sim_inferior_data *sim_data;
-
-  if (ptid_equal (ptid, minus_one_ptid))
-    {
-      iterate_over_inferiors (gdbsim_interrupt_inferior, NULL);
-    }
-  else
-    {
-      struct inferior *inf = find_inferior_ptid (ptid);
-
-      if (inf == NULL)
-	error (_("Can't stop pid %d.  No inferior found."),
-	       ptid_get_pid (ptid));
-
-      gdbsim_interrupt_inferior (inf, NULL);
-    }
+  iterate_over_inferiors (gdbsim_interrupt_inferior, NULL);
 }
 
 /* GDB version of os_poll_quit callback.
@@ -961,7 +946,7 @@ gdb_os_poll_quit (host_callback *p)
 static void
 gdbsim_cntrl_c (int signo)
 {
-  gdbsim_interrupt (NULL, minus_one_ptid);
+  gdbsim_interrupt (NULL);
 }
 
 static ptid_t

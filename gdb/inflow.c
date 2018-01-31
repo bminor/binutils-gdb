@@ -469,7 +469,9 @@ child_terminal_save_inferior (struct target_ops *self)
   xfree (tinfo->ttystate);
   tinfo->ttystate = serial_get_tty_state (stdin_serial);
 
+#ifdef HAVE_TERMIOS_H
   tinfo->process_group = tcgetpgrp (0);
+#endif
 
 #ifdef F_GETFL
   tinfo->tflags = fcntl (0, F_GETFL, 0);
@@ -563,7 +565,9 @@ child_interrupt (struct target_ops *self)
 	 either Ctrl-C or with kill(3) with negative PID) sends a
 	 SIGINT to each process in the process group, and we may not
 	 be debugging all processes in the process group.  */
+#ifndef _WIN32
       kill (resumed->inf->pid, SIGINT);
+#endif
     }
 }
 
@@ -606,7 +610,9 @@ child_pass_ctrlc (struct target_ops *self)
 	{
 	  gdb_assert (inf->pid != 0);
 
+#ifndef _WIN32
 	  kill (inf->pid, SIGINT);
+#endif
 	  return;
 	}
     }

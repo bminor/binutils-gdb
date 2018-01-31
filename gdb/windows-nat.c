@@ -201,7 +201,7 @@ typedef enum
 #define DEBUG_MEM(x)	if (debug_memory)	printf_unfiltered x
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
 
-static void windows_interrupt (struct target_ops *self, ptid_t);
+static void windows_interrupt (struct target_ops *self);
 static int windows_thread_alive (struct target_ops *, ptid_t);
 static void windows_kill_inferior (struct target_ops *);
 
@@ -2777,7 +2777,7 @@ windows_mourn_inferior (struct target_ops *ops)
    ^C on the controlling terminal.  */
 
 static void
-windows_interrupt (struct target_ops *self, ptid_t ptid)
+windows_interrupt (struct target_ops *self)
 {
   DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT, current_event.dwProcessId));
