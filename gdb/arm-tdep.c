@@ -10238,75 +10238,101 @@ arm_record_data_proc_misc_ld_str (insn_decode_record *arm_insn_r)
   arm_insn_r->decode = bits (arm_insn_r->arm_insn, 4, 7);
   opcode1 = bits (arm_insn_r->arm_insn, 20, 24);
 
-  /* Data processing insn /multiply insn.  */
-  if (9 == arm_insn_r->decode
-      && ((4 <= arm_insn_r->opcode && 7 >= arm_insn_r->opcode)
-      ||  (0 == arm_insn_r->opcode || 1 == arm_insn_r->opcode)))
+  if (!((opcode1 & 0x19) == 0x10))
     {
+      /* Data-processing (register) and Data-processing (register-shifted
+	 register */
+      /* Out of 11 shifter operands mode, all the insn modifies destination
+	 register, which is specified by 13-16 decode.  */
+      record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+      record_buf[1] = ARM_PS_REGNUM;
+      arm_insn_r->reg_rec_count = 2;
+    }
+  else if ((arm_insn_r->decode < 8) && ((opcode1 & 0x19) == 0x10))
+    {
+      /* Miscellaneous instructions */
+
+      if (3 == arm_insn_r->decode && 0x12 == opcode1
+	  && sbo_sbz (arm_insn_r->arm_insn, 9, 12, 1))
+	{
+	  /* Handle BLX, branch and link/exchange.  */
+	  if (9 == arm_insn_r->opcode)
+	    {
+	      /* Branch is chosen by setting T bit of CSPR, bitp[0] of Rm,
+		 and R14 stores the return address.  */
+	      record_buf[0] = ARM_PS_REGNUM;
+	      record_buf[1] = ARM_LR_REGNUM;
+	      arm_insn_r->reg_rec_count = 2;
+	    }
+	}
+      else if (7 == arm_insn_r->decode && 0x12 == opcode1)
+	{
+	  /* Handle enhanced software breakpoint insn, BKPT.  */
+	  /* CPSR is changed to be executed in ARM state,  disabling normal
+	     interrupts, entering abort mode.  */
+	  /* According to high vector configuration PC is set.  */
+	  /* user hit breakpoint and type reverse, in
+	     that case, we need to go back with previous CPSR and
+	     Program Counter.  */
+	  record_buf[0] = ARM_PS_REGNUM;
+	  record_buf[1] = ARM_LR_REGNUM;
+	  arm_insn_r->reg_rec_count = 2;
+
+	  /* Save SPSR also; how?  */
+	  return -1;
+	}
+      else if (1 == arm_insn_r->decode && 0x12 == opcode1
+	       && sbo_sbz (arm_insn_r->arm_insn, 9, 12, 1))
+	{
+	  /* Handle BX, branch and link/exchange.  */
+	  /* Branch is chosen by setting T bit of CSPR, bitp[0] of Rm.  */
+	  record_buf[0] = ARM_PS_REGNUM;
+	  arm_insn_r->reg_rec_count = 1;
+	}
+      else if (1 == arm_insn_r->decode && 0x16 == opcode1
+	       && sbo_sbz (arm_insn_r->arm_insn, 9, 4, 1)
+	       && sbo_sbz (arm_insn_r->arm_insn, 17, 4, 1))
+	{
+	  /* Count leading zeros: CLZ.  */
+	  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+	  arm_insn_r->reg_rec_count = 1;
+	}
+      else if (!bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM)
+	       && (8 == arm_insn_r->opcode || 10 == arm_insn_r->opcode)
+	       && sbo_sbz (arm_insn_r->arm_insn, 17, 4, 1)
+	       && sbo_sbz (arm_insn_r->arm_insn, 1, 12, 0))
+	{
+	  /* Handle MRS insn.  */
+	  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+	  arm_insn_r->reg_rec_count = 1;
+	}
+    }
+  else if (9 == arm_insn_r->decode && opcode1 < 0x10)
+    {
+      /* Multiply and multiply-accumulate */
+
       /* Handle multiply instructions.  */
       /* MLA, MUL, SMLAL, SMULL, UMLAL, UMULL.  */
-        if (0 == arm_insn_r->opcode || 1 == arm_insn_r->opcode)
-          {
-            /* Handle MLA and MUL.  */
-            record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
-            record_buf[1] = ARM_PS_REGNUM;
-            arm_insn_r->reg_rec_count = 2;
-          }
-        else if (4 <= arm_insn_r->opcode && 7 >= arm_insn_r->opcode)
-          {
-            /* Handle SMLAL, SMULL, UMLAL, UMULL.  */
-            record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
-            record_buf[1] = bits (arm_insn_r->arm_insn, 12, 15);
-            record_buf[2] = ARM_PS_REGNUM;
-            arm_insn_r->reg_rec_count = 3;
-          }
+      if (0 == arm_insn_r->opcode || 1 == arm_insn_r->opcode)
+	  {
+	    /* Handle MLA and MUL.  */
+	    record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
+	    record_buf[1] = ARM_PS_REGNUM;
+	    arm_insn_r->reg_rec_count = 2;
+	  }
+	else if (4 <= arm_insn_r->opcode && 7 >= arm_insn_r->opcode)
+	  {
+	    /* Handle SMLAL, SMULL, UMLAL, UMULL.  */
+	    record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
+	    record_buf[1] = bits (arm_insn_r->arm_insn, 12, 15);
+	    record_buf[2] = ARM_PS_REGNUM;
+	    arm_insn_r->reg_rec_count = 3;
+	  }
     }
-  else if (bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM)
-           && (11 == arm_insn_r->decode || 13 == arm_insn_r->decode))
+  else if (9 == arm_insn_r->decode  && opcode1 > 0x10)
     {
-      /* Handle misc load insns, as 20th bit  (L = 1).  */
-      /* LDR insn has a capability to do branching, if
-         MOV LR, PC is precceded by LDR insn having Rn as R15
-         in that case, it emulates branch and link insn, and hence we 
-         need to save CSPR and PC as well. I am not sure this is right
-         place; as opcode = 010 LDR insn make this happen, if R15 was
-         used.  */
-      reg_dest = bits (arm_insn_r->arm_insn, 12, 15);
-      if (15 != reg_dest)
-        {
-          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
-          arm_insn_r->reg_rec_count = 1;
-        }
-      else
-        {
-          record_buf[0] = reg_dest;
-          record_buf[1] = ARM_PS_REGNUM;
-          arm_insn_r->reg_rec_count = 2;
-        }
-    }
-  else if ((9 == arm_insn_r->opcode || 11 == arm_insn_r->opcode)
-           && sbo_sbz (arm_insn_r->arm_insn, 5, 12, 0)
-           && sbo_sbz (arm_insn_r->arm_insn, 13, 4, 1)
-           && 2 == bits (arm_insn_r->arm_insn, 20, 21))
-    {
-      /* Handle MSR insn.  */
-      if (9 == arm_insn_r->opcode)
-        {
-          /* CSPR is going to be changed.  */
-          record_buf[0] = ARM_PS_REGNUM;
-          arm_insn_r->reg_rec_count = 1;
-        }
-      else
-        {
-          /* SPSR is going to be changed.  */
-          /* How to read SPSR value?  */
-          return -1;
-        }
-    }
-  else if (9 == arm_insn_r->decode
-           && (8 == arm_insn_r->opcode || 10 == arm_insn_r->opcode)
-           && !bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM))
-    {
+      /* Synchronization primitives */
+
       /* Handling SWP, SWPB.  */
       /* These insn, changes register and memory as well.  */
       /* SWP or SWPB insn.  */
@@ -10315,91 +10341,169 @@ arm_record_data_proc_misc_ld_str (insn_decode_record *arm_insn_r)
       regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval[0]);
       /* SWP insn ?, swaps word.  */
       if (8 == arm_insn_r->opcode)
-        {
-          record_buf_mem[0] = 4;
-        }
-        else
-        {
-          /* SWPB insn, swaps only byte.  */
-          record_buf_mem[0] = 1;
-        }
+	{
+	  record_buf_mem[0] = 4;
+	}
+      else
+	{
+	  /* SWPB insn, swaps only byte.  */
+	  record_buf_mem[0] = 1;
+	}
       record_buf_mem[1] = u_regval[0];
       arm_insn_r->mem_rec_count = 1;
       record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
       arm_insn_r->reg_rec_count = 1;
     }
-  else if (3 == arm_insn_r->decode && 0x12 == opcode1
-           && sbo_sbz (arm_insn_r->arm_insn, 9, 12, 1))
+  else if (11 == arm_insn_r->decode || 13 == arm_insn_r->decode
+	   || 15 == arm_insn_r->decode)
     {
-      /* Handle BLX, branch and link/exchange.  */
-      if (9 == arm_insn_r->opcode)
-      {
-        /* Branch is chosen by setting T bit of CSPR, bitp[0] of Rm,
-           and R14 stores the return address.  */
-        record_buf[0] = ARM_PS_REGNUM;
-        record_buf[1] = ARM_LR_REGNUM;
-        arm_insn_r->reg_rec_count = 2;
-      }
-    }
-  else if (7 == arm_insn_r->decode && 0x12 == opcode1)
-    {
-      /* Handle enhanced software breakpoint insn, BKPT.  */
-      /* CPSR is changed to be executed in ARM state,  disabling normal
-         interrupts, entering abort mode.  */
-      /* According to high vector configuration PC is set.  */
-      /* user hit breakpoint and type reverse, in
-         that case, we need to go back with previous CPSR and
-         Program Counter.  */
-      record_buf[0] = ARM_PS_REGNUM;
-      record_buf[1] = ARM_LR_REGNUM;
-      arm_insn_r->reg_rec_count = 2;
+      if ((opcode1 & 0x12) == 2)
+	{
+	  /* Extra load/store (unprivileged) */
+	  return -1;
+	}
+      else
+	{
+	  /* Extra load/store */
+	  switch (bits (arm_insn_r->arm_insn, 5, 6))
+	    {
+	    case 1:
+	      if ((opcode1 & 0x05) == 0x0 || (opcode1 & 0x05) == 0x4)
+		{
+		  /* STRH (register), STRH (immediate) */
+		  arm_record_strx (arm_insn_r, &record_buf[0],
+				   &record_buf_mem[0], ARM_RECORD_STRH);
+		}
+	      else if ((opcode1 & 0x05) == 0x1)
+		{
+		  /* LDRH (register) */
+		  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+		  arm_insn_r->reg_rec_count = 1;
 
-      /* Save SPSR also; how?  */
-      return -1;
-    }
-  else if (11 == arm_insn_r->decode
-           && !bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM))
-  {
-    /* Handle enhanced store insns and DSP insns (e.g. LDRD).  */
+		  if (bit (arm_insn_r->arm_insn, 21))
+		    {
+		      /* Write back to Rn.  */
+		      record_buf[arm_insn_r->reg_rec_count++]
+			= bits (arm_insn_r->arm_insn, 16, 19);
+		    }
+		}
+	      else if ((opcode1 & 0x05) == 0x5)
+		{
+		  /* LDRH (immediate), LDRH (literal) */
+		  int rn = bits (arm_insn_r->arm_insn, 16, 19);
 
-    /* Handle str(x) insn */
-    arm_record_strx(arm_insn_r, &record_buf[0], &record_buf_mem[0],
-                    ARM_RECORD_STRH);
-  }
-  else if (1 == arm_insn_r->decode && 0x12 == opcode1
-           && sbo_sbz (arm_insn_r->arm_insn, 9, 12, 1))
-    {
-      /* Handle BX, branch and link/exchange.  */
-      /* Branch is chosen by setting T bit of CSPR, bitp[0] of Rm.  */
-      record_buf[0] = ARM_PS_REGNUM;
-      arm_insn_r->reg_rec_count = 1;
-    }
-  else if (1 == arm_insn_r->decode && 0x16 == opcode1
-           && sbo_sbz (arm_insn_r->arm_insn, 9, 4, 1)
-           && sbo_sbz (arm_insn_r->arm_insn, 17, 4, 1))
-    {
-      /* Count leading zeros: CLZ.  */
-      record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
-      arm_insn_r->reg_rec_count = 1;
-    }
-  else if (!bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM)
-           && (8 == arm_insn_r->opcode || 10 == arm_insn_r->opcode)
-           && sbo_sbz (arm_insn_r->arm_insn, 17, 4, 1)
-           && sbo_sbz (arm_insn_r->arm_insn, 1, 12, 0)
-          )
-    {
-      /* Handle MRS insn.  */
-      record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
-      arm_insn_r->reg_rec_count = 1;
-    }
-  else if (arm_insn_r->opcode <= 15)
-    {
-      /* Normal data processing insns.  */
-      /* Out of 11 shifter operands mode, all the insn modifies destination
-         register, which is specified by 13-16 decode.  */
-      record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
-      record_buf[1] = ARM_PS_REGNUM;
-      arm_insn_r->reg_rec_count = 2;
+		  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+		  arm_insn_r->reg_rec_count = 1;
+
+		  if (rn != 15)
+		    {
+		      /*LDRH (immediate) */
+		      if (bit (arm_insn_r->arm_insn, 21))
+			{
+			  /* Write back to Rn.  */
+			  record_buf[arm_insn_r->reg_rec_count++] = rn;
+			}
+		    }
+		}
+	      else
+		return -1;
+	      break;
+	    case 2:
+	      if ((opcode1 & 0x05) == 0x0)
+		{
+		  /* LDRD (register) */
+		  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+		  record_buf[1] = record_buf[0] + 1;
+		  arm_insn_r->reg_rec_count = 2;
+
+		  if (bit (arm_insn_r->arm_insn, 21))
+		    {
+		      /* Write back to Rn.  */
+		      record_buf[arm_insn_r->reg_rec_count++]
+			= bits (arm_insn_r->arm_insn, 16, 19);
+		    }
+		}
+	      else if ((opcode1 & 0x05) == 0x1)
+		{
+		  /* LDRSB (register) */
+		  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+		  arm_insn_r->reg_rec_count = 1;
+
+		  if (bit (arm_insn_r->arm_insn, 21))
+		    {
+		      /* Write back to Rn.  */
+		      record_buf[arm_insn_r->reg_rec_count++]
+			= bits (arm_insn_r->arm_insn, 16, 19);
+		    }
+		}
+	      else if ((opcode1 & 0x05) == 0x4 || (opcode1 & 0x05) == 0x5)
+		{
+		  /* LDRD (immediate), LDRD (literal), LDRSB (immediate),
+		     LDRSB (literal) */
+		  int rn = bits (arm_insn_r->arm_insn, 16, 19);
+
+		  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+		  arm_insn_r->reg_rec_count = 1;
+
+		  if (rn != 15)
+		    {
+		      /*LDRD (immediate), LDRSB (immediate) */
+		      if (bit (arm_insn_r->arm_insn, 21))
+			{
+			  /* Write back to Rn.  */
+			  record_buf[arm_insn_r->reg_rec_count++] = rn;
+			}
+		    }
+		}
+	      else
+		return -1;
+	      break;
+	    case 3:
+	      if ((opcode1 & 0x05) == 0x0)
+		{
+		  /* STRD (register) */
+		  arm_record_strx (arm_insn_r, &record_buf[0],
+				   &record_buf_mem[0], ARM_RECORD_STRD);
+		}
+	      else if ((opcode1 & 0x05) == 0x1)
+		{
+		  /* LDRSH (register) */
+		  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+		  arm_insn_r->reg_rec_count = 1;
+
+		  if (bit (arm_insn_r->arm_insn, 21))
+		    {
+		      /* Write back to Rn.  */
+		      record_buf[arm_insn_r->reg_rec_count++]
+			= bits (arm_insn_r->arm_insn, 16, 19);
+		    }
+		}
+	      else if ((opcode1 & 0x05) == 0x4)
+		{
+		  /* STRD (immediate) */
+		  arm_record_strx (arm_insn_r, &record_buf[0],
+				   &record_buf_mem[0], ARM_RECORD_STRD);
+		}
+	      else if ((opcode1 & 0x05) == 0x5)
+		{
+		  /* LDRSH (immediate), LDRSH (literal) */
+		  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+		  arm_insn_r->reg_rec_count = 1;
+
+		  if (bit (arm_insn_r->arm_insn, 21))
+		    {
+		      /* Write back to Rn.  */
+		      record_buf[arm_insn_r->reg_rec_count++]
+			= bits (arm_insn_r->arm_insn, 16, 19);
+		    }
+		}
+	      else
+		return -1;
+	      break;
+	    default:
+	      return -1;
+	    }
+	}
     }
   else
     {
@@ -11579,18 +11683,18 @@ arm_record_asimd_vfp_coproc (insn_decode_record *arm_insn_r)
 static int
 arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
 {
-  uint32_t op, op1_sbit, op1_ebit, coproc;
+  uint32_t op, op1_ebit, coproc, bits_24_25;
   struct gdbarch_tdep *tdep = gdbarch_tdep (arm_insn_r->gdbarch);
   struct regcache *reg_cache = arm_insn_r->regcache;
 
   arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 24, 27);
   coproc = bits (arm_insn_r->arm_insn, 8, 11);
-  op1_sbit = bit (arm_insn_r->arm_insn, 24);
   op1_ebit = bit (arm_insn_r->arm_insn, 20);
   op = bit (arm_insn_r->arm_insn, 4);
+  bits_24_25 = bits (arm_insn_r->arm_insn, 24, 25);
 
   /* Handle arm SWI/SVC system call instructions.  */
-  if (op1_sbit)
+  if (bits_24_25 == 0x3)
     {
       if (tdep->arm_syscall_record != NULL)
         {
@@ -11611,44 +11715,97 @@ arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
           return -1;
         }
     }
-
-  if ((coproc & 0x0e) == 0x0a)
+  else if (bits_24_25 == 0x02)
     {
-      /* VFP data-processing instructions.  */
-      if (!op1_sbit && !op)
-        return arm_record_vfp_data_proc_insn (arm_insn_r);
+      if (op)
+	{
+	  if ((coproc & 0x0e) == 0x0a)
+	    {
+	      /* 8, 16, and 32-bit transfer */
+	      return arm_record_vdata_transfer_insn (arm_insn_r);
+	    }
+	  else
+	    {
+	      if (op1_ebit)
+		{
+		  /* MRC, MRC2 */
+		  uint32_t record_buf[1];
 
-      /* Advanced SIMD, VFP instructions.  */
-      if (!op1_sbit && op)
-        return arm_record_vdata_transfer_insn (arm_insn_r);
+		  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+		  if (record_buf[0] == 15)
+		    record_buf[0] = ARM_PS_REGNUM;
+
+		  arm_insn_r->reg_rec_count = 1;
+		  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count,
+			     record_buf);
+		  return 0;
+		}
+	      else
+		{
+		  /* MCR, MCR2 */
+		  return -1;
+		}
+	    }
+	}
+      else
+	{
+	  if ((coproc & 0x0e) == 0x0a)
+	    {
+	      /* VFP data-processing instructions.  */
+	      return arm_record_vfp_data_proc_insn (arm_insn_r);
+	    }
+	  else
+	    {
+	      /* CDP, CDP2 */
+	      return -1;
+	    }
+	}
     }
   else
     {
-      /* Coprocessor data operations.  */
-      if (!op1_sbit && !op)
-        return arm_record_unsupported_insn (arm_insn_r);
+      unsigned int op1 = bits (arm_insn_r->arm_insn, 20, 25);
 
-      /* Move to Coprocessor from ARM core register.  */
-      if (!op1_sbit && !op1_ebit && op)
-        return arm_record_unsupported_insn (arm_insn_r);
-
-      /* Move to arm core register from coprocessor.  */
-      if (!op1_sbit && op1_ebit && op)
-        {
-          uint32_t record_buf[1];
-
-          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
-          if (record_buf[0] == 15)
-            record_buf[0] = ARM_PS_REGNUM;
-
-          arm_insn_r->reg_rec_count = 1;
-          REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count,
-                     record_buf);
-          return 0;
-        }
+      if (op1 == 5)
+	{
+	  if ((coproc & 0x0e) != 0x0a)
+	    {
+	      /* MRRC, MRRC2 */
+	      return -1;
+	    }
+	}
+      else if (op1 == 4 || op1 == 5)
+	{
+	  if ((coproc & 0x0e) == 0x0a)
+	    {
+	      /* 64-bit transfers between ARM core and extension */
+	      return -1;
+	    }
+	  else if (op1 == 4)
+	    {
+	      /* MCRR, MCRR2 */
+	      return -1;
+	    }
+	}
+      else if (op1 == 0 || op1 == 1)
+	{
+	  /* UNDEFINED */
+	  return -1;
+	}
+      else
+	{
+	  if ((coproc & 0x0e) == 0x0a)
+	    {
+	      /* Extension register load/store */
+	    }
+	  else
+	    {
+	      /* STC, STC2, LDC, LDC2 */
+	    }
+	  return -1;
+	}
     }
 
-  return arm_record_unsupported_insn (arm_insn_r);
+  return -1;
 }
 
 /* Handling opcode 000 insns.  */
