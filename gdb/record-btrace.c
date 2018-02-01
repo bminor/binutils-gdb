@@ -2958,7 +2958,10 @@ cmd_record_btrace_start (const char *args, int from_tty)
 static void
 cmd_set_record_btrace (const char *args, int from_tty)
 {
-  cmd_show_list (set_record_btrace_cmdlist, from_tty, "");
+  printf_unfiltered (_("\"set record btrace\" must be followed "
+		       "by an appropriate subcommand.\n"));
+  help_list (set_record_btrace_cmdlist, "set record btrace ",
+	     all_commands, gdb_stdout);
 }
 
 /* The "show record btrace" command.  */
