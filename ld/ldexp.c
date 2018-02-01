@@ -782,7 +782,7 @@ fold_name (etree_type *tree)
 	  if (expld.assign_src == NULL)
 	    expld.assign_src = h;
 	  else
-	    expld.assign_src = (struct bfd_link_hash_entry *) 0 - 1;
+	    expld.assign_src = (struct bfd_link_hash_entry *) - 1;
 	}
       break;
 
@@ -1207,7 +1207,7 @@ exp_fold_tree_1 (etree_type *tree)
 		     false branches.)  */
 		  if (expld.assign_src != NULL
 		      && (expld.assign_src
-			  != (struct bfd_link_hash_entry *) 0 - 1))
+			  != (struct bfd_link_hash_entry *) -1))
 		    bfd_copy_link_hash_symbol_type (link_info.output_bfd, h,
 						    expld.assign_src);
 		}

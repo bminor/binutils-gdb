@@ -1,3 +1,10 @@
+2018-02-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* elf64-ppc.c (ppc64_elf_archive_symbol_lookup): Avoid pointer
+	arithmetic on NULL pointer.
+	* elflink.c (_bfd_elf_archive_symbol_lookup,
+	elf_link_add_archive_symbols): Likewise.
+
 2018-01-31  Michael Matz  <matz@suse.de>
 
 	* elflink.c (bfd_elf_define_start_stop): Fix check of

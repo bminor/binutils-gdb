@@ -1,3 +1,8 @@
+2018-02-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ldexp.c (fold_name, exp_fold_tree_1): Avoid pointer arithmetic
+	on NULL pointer.
+
 2018-01-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr21964-5.c (my_var): Mark as used.
