@@ -1,3 +1,8 @@
+2018-02-01  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/attach.exp (do_attach_tests): Set sysroot to
+	"\[^\r\n\]*".
+
 2018-01-31  Nikola Prica  <nikola.prica@rt-rk.com>
 
 	* gdb.arch/powerpc-prologue-frame.s: New file.

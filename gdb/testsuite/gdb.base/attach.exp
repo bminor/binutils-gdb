@@ -57,15 +57,12 @@ proc do_attach_tests {} {
     # Figure out a regular expression that will match the sysroot,
     # noting that the default sysroot is "target:", and also noting
     # that GDB will strip "target:" from the start of filenames when
-    # operating on the local filesystem
-    set sysroot ""
-    set test "show sysroot"
-    gdb_test_multiple $test $test {
-	-re "The current system root is \"(.*)\"\..*${gdb_prompt} $" {
-	    set sysroot $expect_out(1,string)
-	}
-    }
-    regsub "^target:" "$sysroot" "(target:)?" sysroot
+    # operating on the local filesystem.  However the default sysroot
+    # can be set via configure option --with-sysroot, which can be "/".
+    # If $binfile is a absolute path, so pattern
+    # "$sysroot$escapedbinfile" below is wrong.  Use [^\r\n]* to make
+    # $sysroot simple.
+    set sysroot "\[^\r\n\]*"
 
     # Start the program running and then wait for a bit, to be sure
     # that it can be attached to.
