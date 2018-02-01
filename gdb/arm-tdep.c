@@ -9964,7 +9964,7 @@ arm_record_strx (insn_decode_record *arm_insn_r, uint32_t *record_buf,
 static int
 arm_record_extension_space (insn_decode_record *arm_insn_r)
 {
-  uint32_t ret = 0;  /* Return value: -1:record failure ;  0:success  */
+  int ret = 0;  /* Return value: -1:record failure ;  0:success  */
   uint32_t opcode1 = 0, opcode2 = 0, insn_op1 = 0;
   uint32_t record_buf[8], record_buf_mem[8];
   uint32_t reg_src1 = 0;
