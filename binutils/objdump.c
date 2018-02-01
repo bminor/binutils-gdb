@@ -2466,6 +2466,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   struct dwarf_section *section = &debug_displays [debug].section;
   bfd *abfd = (bfd *) file;
   bfd_byte *contents;
+  bfd_size_type amt;
 
   if (section->start != NULL)
     {
@@ -2480,9 +2481,11 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->num_relocs = 0;
   section->address = bfd_get_section_vma (abfd, sec);
   section->size = bfd_get_section_size (sec);
-  section->start = contents = malloc (section->size + 1);
+  amt = section->size + 1;
+  section->start = contents = malloc (amt);
   section->user_data = sec;
-  if (section->start == NULL
+  if (amt == 0
+      || section->start == NULL
       || !bfd_get_full_section_contents (abfd, sec, &contents))
     {
       free_debug_section (debug);
