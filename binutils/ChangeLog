@@ -1,3 +1,13 @@
+2018-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf.c (dwarf_regnames_riscv): New register name table.
+	(init_dwarf_regnames_riscv): New function.
+	(init_dwarf_regnames): Add call to initialise RiscV register
+	names.
+	* dwarf.h (init_dwarf_regnames_riscv): Declare.
+	* objdump.c (dump_dwarf): Add call to initialise RiscV register
+	names.
+
 2018-02-01  Alan Modra  <amodra@gmail.com>
 
 	PR 22769
