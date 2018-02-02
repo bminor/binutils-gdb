@@ -2604,7 +2604,8 @@ fail:
 /* Delete some bytes from a section while relaxing.  */
 
 static bfd_boolean
-riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count)
+riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count,
+			  struct bfd_link_info *link_info)
 {
   unsigned int i, symcount;
   bfd_vma toaddr = sec->size;
@@ -2653,6 +2654,31 @@ riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count)
   for (i = 0; i < symcount; i++)
     {
       struct elf_link_hash_entry *sym_hash = sym_hashes[i];
+
+      /* The '--wrap SYMBOL' option is causing a pain when the object file,
+	 containing the definition of __wrap_SYMBOL, includes a direct
+	 call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference
+	 the same symbol (which is __wrap_SYMBOL), but still exist as two
+	 different symbols in 'sym_hashes', we don't want to adjust
+	 the global symbol __wrap_SYMBOL twice.
+	 This check is only relevant when symbols are being wrapped.  */
+      if (link_info->wrap_hash != NULL)
+	{
+	  struct elf_link_hash_entry **cur_sym_hashes;
+
+	  /* Loop only over the symbols which have already been checked.  */
+	  for (cur_sym_hashes = sym_hashes; cur_sym_hashes < &sym_hashes[i];
+	       cur_sym_hashes++)
+	    {
+	      /* If the current symbol is identical to 'sym_hash', that means
+		 the symbol was already adjusted (or at least checked).  */
+	      if (*cur_sym_hashes == sym_hash)
+		break;
+	    }
+	  /* Don't adjust the symbol again.  */
+	  if (cur_sym_hashes < &sym_hashes[i])
+	    continue;
+	}
 
       if ((sym_hash->root.type == bfd_link_hash_defined
 	   || sym_hash->root.type == bfd_link_hash_defweak)
@@ -2886,7 +2912,8 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 
   /* Delete unnecessary JALR.  */
   *again = TRUE;
-  return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + len, 8 - len);
+  return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + len, 8 - len,
+				   link_info);
 }
 
 /* Traverse all output sections and return the max alignment.  */
@@ -2964,7 +2991,8 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	  /* We can delete the unnecessary LUI and reloc.  */
 	  rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
 	  *again = TRUE;
-	  return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4);
+	  return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4,
+					   link_info);
 
 	default:
 	  abort ();
@@ -2991,7 +3019,8 @@ _bfd_riscv_relax_lui (bfd *abfd,
       rel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel->r_info), R_RISCV_RVC_LUI);
 
       *again = TRUE;
-      return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + 2, 2);
+      return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + 2, 2,
+				       link_info);
     }
 
   return TRUE;
@@ -3031,7 +3060,7 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
       /* We can delete the unnecessary instruction and reloc.  */
       rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
       *again = TRUE;
-      return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4);
+      return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info);
 
     default:
       abort ();
@@ -3043,7 +3072,7 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
 static bfd_boolean
 _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 			asection *sym_sec,
-			struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+			struct bfd_link_info *link_info,
 			Elf_Internal_Rela *rel,
 			bfd_vma symval,
 			bfd_vma max_alignment ATTRIBUTE_UNUSED,
@@ -3091,7 +3120,7 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 
   /* Delete the excess bytes.  */
   return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + nop_bytes,
-				   rel->r_addend - nop_bytes);
+				   rel->r_addend - nop_bytes, link_info);
 }
 
 /* Relax PC-relative references to GP-relative references.  */
@@ -3212,7 +3241,7 @@ static bfd_boolean
 _bfd_riscv_relax_delete (bfd *abfd,
 			 asection *sec,
 			 asection *sym_sec ATTRIBUTE_UNUSED,
-			 struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+			 struct bfd_link_info *link_info,
 			 Elf_Internal_Rela *rel,
 			 bfd_vma symval ATTRIBUTE_UNUSED,
 			 bfd_vma max_alignment ATTRIBUTE_UNUSED,
@@ -3220,7 +3249,8 @@ _bfd_riscv_relax_delete (bfd *abfd,
 			 bfd_boolean *again ATTRIBUTE_UNUSED,
 			 riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED)
 {
-  if (!riscv_relax_delete_bytes(abfd, sec, rel->r_offset, rel->r_addend))
+  if (!riscv_relax_delete_bytes(abfd, sec, rel->r_offset, rel->r_addend,
+				link_info))
     return FALSE;
   rel->r_info = ELFNN_R_INFO(0, R_RISCV_NONE);
   return TRUE;

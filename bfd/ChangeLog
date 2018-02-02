@@ -1,3 +1,13 @@
+2018-02-02  Jim Wilson  <jimw@sifive.com>
+
+	PR ld/22756
+	* elfnn-riscv.c (riscv_relax_delete_bytes): New parameter link_info.
+	If link_info->wrap_hash, check for a duplicate symbol and ignore.
+	(_bfd_riscv_relax_call, bfd_riscv_relax_lui, _bfd_riscv_relax_tls_le):
+	Pass new argument to riscv_relax_delete_bytes.
+	(_bfd_riscv_relax_align, _bfd_riscv_relax_delete): Likewise.  Remove
+	ATTRIBUTE_UNUSED from link_info parameter.
+
 2018-02-02  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Don't relocate nops
