@@ -15067,7 +15067,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       /* Multi-instruction sequences that access the TOC can be
 	 optimized, eg. addis ra,r2,0; addi rb,ra,x;
 	 to		nop;	       addi rb,r2,x;  */
-      howto = ppc64_elf_howto_table[(int) r_type];
       switch (r_type)
 	{
 	default:
@@ -15099,6 +15098,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      bfd_byte *p = contents + (rel->r_offset & ~3);
 	      bfd_put_32 (input_bfd, NOP, p);
+	      goto copy_reloc;
 	    }
 	  break;
 
@@ -15140,9 +15140,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		/* xgettext:c-format */
 		info->callbacks->minfo
 		  (_("%H: warning: %s unexpected insn %#x.\n"),
-		   input_bfd, input_section, rel->r_offset, howto->name, insn);
+		   input_bfd, input_section, rel->r_offset,
+		   ppc64_elf_howto_table[r_type]->name, insn);
 	      else
-		bfd_put_32 (input_bfd, NOP, p);
+		{
+		  bfd_put_32 (input_bfd, NOP, p);
+		  goto copy_reloc;
+		}
 	    }
 	  break;
 
@@ -15240,7 +15244,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		/* xgettext:c-format */
 		(_("%H: error: %s not a multiple of %u\n"),
 		 input_bfd, input_section, rel->r_offset,
-		 howto->name,
+		 ppc64_elf_howto_table[r_type]->name,
 		 mask + 1);
 	      bfd_set_error (bfd_error_bad_value);
 	      ret = FALSE;
@@ -15252,6 +15256,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
 	 because such sections are not SEC_ALLOC and thus ld.so will
 	 not process them.  */
+      howto = ppc64_elf_howto_table[(int) r_type];
       if (unresolved_reloc
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && h->elf.def_dynamic)

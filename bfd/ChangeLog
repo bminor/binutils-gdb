@@ -1,3 +1,8 @@
+2018-02-02  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Don't relocate nops
+	emitted for toc sequence optimization.  Set and use "howto" later.
+
 2018-02-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* elf64-ppc.c (ppc64_elf_archive_symbol_lookup): Avoid pointer
