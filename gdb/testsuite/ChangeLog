@@ -1,3 +1,17 @@
+2018-02-01  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Leszek Swirski  <leszeks@google.com>
+
+	* gdb.python/py-prettyprint.c
+	(struct to_string_returns_value_inner,
+	struct to_string_returns_value_wrapper): New.
+	(main): Add tsrvw variable.
+	* gdb.python/py-prettyprint.py (ToStringReturnsValueInner,
+	ToStringReturnsValueWrapper): New classes.
+	(register_pretty_printers): Register new pretty-printers.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Test printing
+	recursive pretty printer.
+	* gdb.python/py-mi.exp: Likewise.
+
 2018-02-01  Leszek Swirski  <leszeks@google.com>
 
 	* gdb.cp/filename.cc, gdb.cp/filename.exp: Test that member

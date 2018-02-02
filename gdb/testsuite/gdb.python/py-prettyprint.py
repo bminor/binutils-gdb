@@ -84,6 +84,25 @@ class NoStringContainerPrinter (object):
     def children(self):
         return _iterator_except (self.val['elements'], self.val['len'])
 
+# See ToStringReturnsValueWrapper.
+class ToStringReturnsValueInner:
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return 'Inner to_string {}'.format(int(self.val['val']))
+
+# Test a printer that returns a gdb.Value in its to_string.  That gdb.Value
+# also has its own pretty-printer.
+class ToStringReturnsValueWrapper:
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return self.val['inner']
+
 class pp_s (object):
     def __init__(self, val):
         self.val = val
@@ -316,7 +335,12 @@ def register_pretty_printers ():
     pretty_printers_dict[re.compile ('^string_repr$')] = string_print
     pretty_printers_dict[re.compile ('^container$')] = ContainerPrinter
     pretty_printers_dict[re.compile ('^justchildren$')] = NoStringContainerPrinter
-    
+
+    pretty_printers_dict[re.compile ('^struct to_string_returns_value_inner$')] = ToStringReturnsValueInner
+    pretty_printers_dict[re.compile ('^to_string_returns_value_inner$')] = ToStringReturnsValueInner
+    pretty_printers_dict[re.compile ('^struct to_string_returns_value_wrapper$')] = ToStringReturnsValueWrapper
+    pretty_printers_dict[re.compile ('^to_string_returns_value_wrapper$')] = ToStringReturnsValueWrapper
+
     pretty_printers_dict[re.compile ('^struct ns$')]  = pp_ns
     pretty_printers_dict[re.compile ('^ns$')]  = pp_ns
 

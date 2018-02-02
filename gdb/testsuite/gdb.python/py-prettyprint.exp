@@ -64,6 +64,10 @@ proc run_lang_tests {exefile lang} {
     
     gdb_test "print arraystruct" " = {$nl *y = 7, *$nl *x = { a=<23> b=<$hex>,  a=<24> b=<$hex>} *$nl *}"
 
+    # Test that when a pretty-printer returns a gdb.Value in its to_string, we
+    # call the pretty-printer of that value too.
+    gdb_test "print tsrvw" " = Inner to_string 1989"
+
     if {$lang == "c++"} {
 	gdb_test "print cps" "=  a=<8> b=<$hex>"
 	gdb_test "print cpss" " = {$nl *zss = 9, *$nl *s =  a=<10> b=<$hex>$nl}"

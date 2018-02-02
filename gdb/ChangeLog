@@ -1,5 +1,10 @@
 2018-02-01  Leszek Swirski  <leszeks@google.com>
 
+	* varobj.c (varobj_formatted_print_options): Allow recursive
+	pretty printing if pretty printing is enabled.
+
+2018-02-01  Leszek Swirski  <leszeks@google.com>
+
 	* c-exp.y (lex_one_token, classify_name, yylex): Don't classify
 	names after a structop as a filename.
 

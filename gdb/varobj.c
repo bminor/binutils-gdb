@@ -2274,7 +2274,7 @@ varobj_formatted_print_options (struct value_print_options *opts,
 {
   get_formatted_print_options (opts, format_code[(int) format]);
   opts->deref_ref = 0;
-  opts->raw = 1;
+  opts->raw = !pretty_printing;
 }
 
 std::string

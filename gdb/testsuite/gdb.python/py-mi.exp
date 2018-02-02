@@ -295,6 +295,16 @@ mi_gdb_test "-var-evaluate-expression me" \
 mi_create_dynamic_varobj children_as_list children_as_list 1 \
     "printer whose children are returned as a list"
 
+# Test that when a pretty-printer returns a gdb.Value in its to_string, we call
+# the pretty-printer of that value too.
+mi_create_varobj_checked tsrvw tsrvw  \
+    "struct to_string_returns_value_wrapper" \
+    "create tsrvw varobj"
+mi_check_varobj_value tsrvw "Inner to_string 1989" "check tsrvw varobj value"
+mi_gdb_test "-data-evaluate-expression tsrvw" \
+    "\\^done,value=\"Inner to_string 1989\"" \
+    "check tsrvw expression value"
+
 # Regression test for bug 14741.
 mi_continue_to_line \
     [gdb_get_line_number {breakpoint bug 14741} ${srcfile}] \
