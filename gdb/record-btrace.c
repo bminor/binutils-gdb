@@ -61,6 +61,20 @@ static const char *const replay_memory_access_types[] =
 /* The currently allowed replay memory access type.  */
 static const char *replay_memory_access = replay_memory_access_read_only;
 
+/* The cpu state kinds.  */
+enum record_btrace_cpu_state_kind
+{
+  CS_AUTO,
+  CS_NONE,
+  CS_CPU
+};
+
+/* The current cpu state.  */
+static enum record_btrace_cpu_state_kind record_btrace_cpu_state = CS_AUTO;
+
+/* The current cpu for trace decode.  */
+static struct btrace_cpu record_btrace_cpu;
+
 /* Command lists for "set/show record btrace".  */
 static struct cmd_list_element *set_record_btrace_cmdlist;
 static struct cmd_list_element *show_record_btrace_cmdlist;
@@ -88,6 +102,9 @@ static struct cmd_list_element *show_record_btrace_bts_cmdlist;
 static struct cmd_list_element *set_record_btrace_pt_cmdlist;
 static struct cmd_list_element *show_record_btrace_pt_cmdlist;
 
+/* Command list for "set record btrace cpu".  */
+static struct cmd_list_element *set_record_btrace_cpu_cmdlist;
+
 /* Print a record-btrace debug message.  Use do ... while (0) to avoid
    ambiguities when used in if statements.  */
 
@@ -100,6 +117,26 @@ static struct cmd_list_element *show_record_btrace_pt_cmdlist;
     }									\
   while (0)
 
+
+/* Return the cpu configured by the user.  Returns NULL if the cpu was
+   configured as auto.  */
+const struct btrace_cpu *
+record_btrace_get_cpu (void)
+{
+  switch (record_btrace_cpu_state)
+    {
+    case CS_AUTO:
+      return nullptr;
+
+    case CS_NONE:
+      record_btrace_cpu.vendor = CV_UNKNOWN;
+      /* Fall through.  */
+    case CS_CPU:
+      return &record_btrace_cpu;
+    }
+
+  error (_("Internal error: bad record btrace cpu state."));
+}
 
 /* Update the branch trace for the current thread and return a pointer to its
    thread_info.
@@ -120,7 +157,7 @@ require_btrace_thread (void)
 
   validate_registers_access ();
 
-  btrace_fetch (tp);
+  btrace_fetch (tp, record_btrace_get_cpu ());
 
   if (btrace_is_empty (tp))
     error (_("No trace."));
@@ -440,7 +477,7 @@ record_btrace_info (struct target_ops *self)
   if (conf != NULL)
     record_btrace_print_conf (conf);
 
-  btrace_fetch (tp);
+  btrace_fetch (tp, record_btrace_get_cpu ());
 
   insns = 0;
   calls = 0;
@@ -1848,7 +1885,7 @@ record_btrace_resume_thread (struct thread_info *tp,
   btinfo = &tp->btrace;
 
   /* Fetch the latest branch trace.  */
-  btrace_fetch (tp);
+  btrace_fetch (tp, record_btrace_get_cpu ());
 
   /* A resume request overwrites a preceding resume or stop request.  */
   btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
@@ -2982,7 +3019,113 @@ cmd_show_replay_memory_access (struct ui_file *file, int from_tty,
 		    replay_memory_access);
 }
 
-/* The "set record btrace bts" command.  */
+/* The "set record btrace cpu none" command.  */
+
+static void
+cmd_set_record_btrace_cpu_none (const char *args, int from_tty)
+{
+  if (args != nullptr && *args != 0)
+    error (_("Trailing junk: '%s'."), args);
+
+  record_btrace_cpu_state = CS_NONE;
+}
+
+/* The "set record btrace cpu auto" command.  */
+
+static void
+cmd_set_record_btrace_cpu_auto (const char *args, int from_tty)
+{
+  if (args != nullptr && *args != 0)
+    error (_("Trailing junk: '%s'."), args);
+
+  record_btrace_cpu_state = CS_AUTO;
+}
+
+/* The "set record btrace cpu" command.  */
+
+static void
+cmd_set_record_btrace_cpu (const char *args, int from_tty)
+{
+  if (args == nullptr)
+    args = "";
+
+  /* We use a hard-coded vendor string for now.  */
+  unsigned int family, model, stepping;
+  int l1, l2, matches = sscanf (args, "intel: %u/%u%n/%u%n", &family,
+				&model, &l1, &stepping, &l2);
+  if (matches == 3)
+    {
+      if (strlen (args) != l2)
+	error (_("Trailing junk: '%s'."), args + l2);
+    }
+  else if (matches == 2)
+    {
+      if (strlen (args) != l1)
+	error (_("Trailing junk: '%s'."), args + l1);
+
+      stepping = 0;
+    }
+  else
+    error (_("Bad format.  See \"help set record btrace cpu\"."));
+
+  if (USHRT_MAX < family)
+    error (_("Cpu family too big."));
+
+  if (UCHAR_MAX < model)
+    error (_("Cpu model too big."));
+
+  if (UCHAR_MAX < stepping)
+    error (_("Cpu stepping too big."));
+
+  record_btrace_cpu.vendor = CV_INTEL;
+  record_btrace_cpu.family = family;
+  record_btrace_cpu.model = model;
+  record_btrace_cpu.stepping = stepping;
+
+  record_btrace_cpu_state = CS_CPU;
+}
+
+/* The "show record btrace cpu" command.  */
+
+static void
+cmd_show_record_btrace_cpu (const char *args, int from_tty)
+{
+  const char *cpu;
+
+  if (args != nullptr && *args != 0)
+    error (_("Trailing junk: '%s'."), args);
+
+  switch (record_btrace_cpu_state)
+    {
+    case CS_AUTO:
+      printf_unfiltered (_("btrace cpu is 'auto'.\n"));
+      return;
+
+    case CS_NONE:
+      printf_unfiltered (_("btrace cpu is 'none'.\n"));
+      return;
+
+    case CS_CPU:
+      switch (record_btrace_cpu.vendor)
+	{
+	case CV_INTEL:
+	  if (record_btrace_cpu.stepping == 0)
+	    printf_unfiltered (_("btrace cpu is 'intel: %u/%u'.\n"),
+			       record_btrace_cpu.family,
+			       record_btrace_cpu.model);
+	  else
+	    printf_unfiltered (_("btrace cpu is 'intel: %u/%u/%u'.\n"),
+			       record_btrace_cpu.family,
+			       record_btrace_cpu.model,
+			       record_btrace_cpu.stepping);
+	  return;
+	}
+    }
+
+  error (_("Internal error: bad cpu state."));
+}
+
+/* The "s record btrace bts" command.  */
 
 static void
 cmd_set_record_btrace_bts (const char *args, int from_tty)
@@ -3089,6 +3232,32 @@ replay."),
 			   NULL, cmd_show_replay_memory_access,
 			   &set_record_btrace_cmdlist,
 			   &show_record_btrace_cmdlist);
+
+  add_prefix_cmd ("cpu", class_support, cmd_set_record_btrace_cpu,
+		  _("\
+Set the cpu to be used for trace decode.\n\n\
+The format is \"<vendor>:<identifier>\" or \"none\" or \"auto\" (default).\n\
+For vendor \"intel\" the format is \"<family>/<model>[/<stepping>]\".\n\n\
+When decoding branch trace, enable errata workarounds for the specified cpu.\n\
+The default is \"auto\", which uses the cpu on which the trace was recorded.\n\
+When GDB does not support that cpu, this option can be used to enable\n\
+workarounds for a similar cpu that GDB supports.\n\n\
+When set to \"none\", errata workarounds are disabled."),
+		  &set_record_btrace_cpu_cmdlist,
+		  _("set record btrace cpu "), 1,
+		  &set_record_btrace_cmdlist);
+
+  add_cmd ("auto", class_support, cmd_set_record_btrace_cpu_auto, _("\
+Automatically determine the cpu to be used for trace decode."),
+	   &set_record_btrace_cpu_cmdlist);
+
+  add_cmd ("none", class_support, cmd_set_record_btrace_cpu_none, _("\
+Do not enable errata workarounds for trace decode."),
+	   &set_record_btrace_cpu_cmdlist);
+
+  add_cmd ("cpu", class_support, cmd_show_record_btrace_cpu, _("\
+Show the cpu to be used for trace decode."),
+	   &show_record_btrace_cmdlist);
 
   add_prefix_cmd ("bts", class_support, cmd_set_record_btrace_bts,
 		  _("Set record btrace bts options"),

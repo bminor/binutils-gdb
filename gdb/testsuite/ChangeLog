@@ -1,5 +1,9 @@
 2018-04-13  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/cpu.exp: New.
+
+2018-04-13  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.base/step-indirect-call-thunk.exp: New.
 	* gdb.base/step-indirect-call-thunk.c: New.
 	* gdb.reverse/step-indirect-call-thunk.exp: New.

@@ -6952,9 +6952,72 @@ and to read-write memory.  Beware that the accessed memory corresponds
 to the live target and not necessarily to the current replay
 position.
 
+@item set record btrace cpu @var{identifier}
+Set the processor to be used for enabling workarounds for processor
+errata when decoding the trace.
+
+Processor errata are defects in processor operation, caused by its
+design or manufacture.  They can cause a trace not to match the
+specification.  This, in turn, may cause trace decode to fail.
+@value{GDBN} can detect erroneous trace packets and correct them, thus
+avoiding the decoding failures.  These corrections are known as
+@dfn{errata workarounds}, and are enabled based on the processor on
+which the trace was recorded.
+
+By default, @value{GDBN} attempts to detect the processor
+automatically, and apply the necessary workarounds for it.  However,
+you may need to specify the processor if @value{GDBN} does not yet
+support it.  This command allows you to do that, and also allows to
+disable the workarounds.
+
+The argument @var{identifier} identifies the @sc{cpu} and is of the
+form: @code{@var{vendor}:@var{procesor identifier}}.  In addition,
+there are two special identifiers, @code{none} and @code{auto}
+(default).
+
+The following vendor identifiers and corresponding processor
+identifiers are currently supported:
+
+@multitable @columnfractions .1 .9
+
+@item @code{intel}
+@tab @var{family}/@var{model}[/@var{stepping}]
+
+@end multitable
+
+On GNU/Linux systems, the processor @var{family}, @var{model}, and
+@var{stepping} can be obtained from @code{/proc/cpuinfo}.
+
+If @var{identifier} is @code{auto}, enable errata workarounds for the
+processor on which the trace was recorded.  If @var{identifier} is
+@code{none}, errata workarounds are disabled.
+
+For example, when using an old @value{GDBN} on a new system, decode
+may fail because @value{GDBN} does not support the new processor.  It
+often suffices to specify an older processor that @value{GDBN}
+supports.
+
+@smallexample
+(gdb) info record
+Active record target: record-btrace
+Recording format: Intel Processor Trace.
+Buffer size: 16kB.
+Failed to configure the Intel Processor Trace decoder: unknown cpu.
+(gdb) set record btrace cpu intel:6/158
+(gdb) info record
+Active record target: record-btrace
+Recording format: Intel Processor Trace.
+Buffer size: 16kB.
+Recorded 84872 instructions in 3189 functions (0 gaps) for thread 1 (...).
+@end smallexample
+
 @kindex show record btrace
 @item show record btrace replay-memory-access
 Show the current setting of @code{replay-memory-access}.
+
+@item show record btrace cpu
+Show the processor to be used for enabling trace decode errata
+workarounds.
 
 @kindex set record btrace bts
 @item set record btrace bts buffer-size @var{size}

@@ -1,5 +1,35 @@
 2018-04-13  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* NEWS (New options): announce set/show record btrace cpu.
+	* btrace.c: Include record-btrace.h.
+	(btrace_compute_ftrace_pt): Skip enabling errata workarounds if
+	the vendor is unknown.
+	(btrace_compute_ftrace_1): Add cpu parameter.  Update callers.
+	Maybe overwrite the btrace configuration's cpu.
+	(btrace_compute_ftrace): Add cpu parameter.  Update callers.
+	(btrace_fetch): Add cpu parameter.  Update callers.
+	(btrace_maint_update_pt_packets): Call record_btrace_get_cpu.
+	Maybe overwrite the btrace configuration's cpu.  Skip enabling
+	errata workarounds if the vendor is unknown.
+	* python/py-record-btrace.c: Include record-btrace.h.
+	(recpy_bt_begin, recpy_bt_end, recpy_bt_instruction_history)
+	(recpy_bt_function_call_history): Call record_btrace_get_cpu.
+	* record-btrace.c (record_btrace_cpu_state_kind): New.
+	(record_btrace_cpu): New.
+	(set_record_btrace_cpu_cmdlist): New.
+	(record_btrace_get_cpu): New.
+	(require_btrace_thread, record_btrace_info)
+	(record_btrace_resume_thread): Call record_btrace_get_cpu.
+	(cmd_set_record_btrace_cpu_none): New.
+	(cmd_set_record_btrace_cpu_auto): New.
+	(cmd_set_record_btrace_cpu): New.
+	(cmd_show_record_btrace_cpu): New.
+	(_initialize_record_btrace): Initialize set/show record btrace cpu
+	commands.
+	* record-btrace.h (record_btrace_get_cpu): New.
+
+2018-04-13  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record.c (set_record_command): Fix typo in message.
 
 2018-04-13  Markus Metzger  <markus.t.metzger@intel.com>

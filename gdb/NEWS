@@ -17,6 +17,10 @@ set|show varsize-limit
   objects being printed when those objects have a variable type,
   instead of that maximum size being hardcoded to 65536 bytes.
 
+set|show record btrace cpu
+  Controls the processor to be used for enabling errata workarounds for
+  branch trace decode.
+
 * New targets
 
 RiscV ELF			riscv*-*-elf

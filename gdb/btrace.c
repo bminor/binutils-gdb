@@ -35,6 +35,9 @@
 #include "gdbcmd.h"
 #include "cli/cli-utils.h"
 
+/* For maintenance commands.  */
+#include "record-btrace.h"
+
 #include <inttypes.h>
 #include <ctype.h>
 #include <algorithm>
@@ -1428,15 +1431,20 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
   config.begin = btrace->data;
   config.end = btrace->data + btrace->size;
 
-  config.cpu.vendor = pt_translate_cpu_vendor (btrace->config.cpu.vendor);
-  config.cpu.family = btrace->config.cpu.family;
-  config.cpu.model = btrace->config.cpu.model;
-  config.cpu.stepping = btrace->config.cpu.stepping;
+  /* We treat an unknown vendor as 'no errata'.  */
+  if (btrace->config.cpu.vendor != CV_UNKNOWN)
+    {
+      config.cpu.vendor
+	= pt_translate_cpu_vendor (btrace->config.cpu.vendor);
+      config.cpu.family = btrace->config.cpu.family;
+      config.cpu.model = btrace->config.cpu.model;
+      config.cpu.stepping = btrace->config.cpu.stepping;
 
-  errcode = pt_cpu_errata (&config.errata, &config.cpu);
-  if (errcode < 0)
-    error (_("Failed to configure the Intel Processor Trace decoder: %s."),
-	   pt_errstr (pt_errcode (errcode)));
+      errcode = pt_cpu_errata (&config.errata, &config.cpu);
+      if (errcode < 0)
+	error (_("Failed to configure the Intel Processor Trace "
+		 "decoder: %s."), pt_errstr (pt_errcode (errcode)));
+    }
 
   decoder = pt_insn_alloc_decoder (&config);
   if (decoder == NULL)
@@ -1485,10 +1493,14 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 #endif /* defined (HAVE_LIBIPT)  */
 
 /* Compute the function branch trace from a block branch trace BTRACE for
-   a thread given by BTINFO.  */
+   a thread given by BTINFO.  If CPU is not NULL, overwrite the cpu in the
+   branch trace configuration.  This is currently only used for the PT
+   format.  */
 
 static void
-btrace_compute_ftrace_1 (struct thread_info *tp, struct btrace_data *btrace,
+btrace_compute_ftrace_1 (struct thread_info *tp,
+			 struct btrace_data *btrace,
+			 const struct btrace_cpu *cpu,
 			 std::vector<unsigned int> &gaps)
 {
   DEBUG ("compute ftrace");
@@ -1503,6 +1515,10 @@ btrace_compute_ftrace_1 (struct thread_info *tp, struct btrace_data *btrace,
       return;
 
     case BTRACE_FORMAT_PT:
+      /* Overwrite the cpu we use for enabling errata workarounds.  */
+      if (cpu != nullptr)
+	btrace->variant.pt.config.cpu = *cpu;
+
       btrace_compute_ftrace_pt (tp, &btrace->variant.pt, gaps);
       return;
     }
@@ -1521,13 +1537,14 @@ btrace_finalize_ftrace (struct thread_info *tp, std::vector<unsigned int> &gaps)
 }
 
 static void
-btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace)
+btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace,
+		       const struct btrace_cpu *cpu)
 {
   std::vector<unsigned int> gaps;
 
   TRY
     {
-      btrace_compute_ftrace_1 (tp, btrace, gaps);
+      btrace_compute_ftrace_1 (tp, btrace, cpu, gaps);
     }
   CATCH (error, RETURN_MASK_ALL)
     {
@@ -1564,7 +1581,7 @@ btrace_add_pc (struct thread_info *tp)
   block->begin = pc;
   block->end = pc;
 
-  btrace_compute_ftrace (tp, &btrace);
+  btrace_compute_ftrace (tp, &btrace, NULL);
 
   do_cleanups (cleanup);
 }
@@ -1872,7 +1889,7 @@ btrace_decode_error (enum btrace_format format, int errcode)
 /* See btrace.h.  */
 
 void
-btrace_fetch (struct thread_info *tp)
+btrace_fetch (struct thread_info *tp, const struct btrace_cpu *cpu)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_target_info *tinfo;
@@ -1948,7 +1965,7 @@ btrace_fetch (struct thread_info *tp)
       btrace_maint_clear (btinfo);
 
       btrace_clear_history (btinfo);
-      btrace_compute_ftrace (tp, &btrace);
+      btrace_compute_ftrace (tp, &btrace, cpu);
     }
 
   do_cleanups (cleanup);
@@ -3028,6 +3045,7 @@ static void
 btrace_maint_update_pt_packets (struct btrace_thread_info *btinfo)
 {
   struct pt_packet_decoder *decoder;
+  const struct btrace_cpu *cpu;
   struct btrace_data_pt *pt;
   struct pt_config config;
   int errcode;
@@ -3044,15 +3062,23 @@ btrace_maint_update_pt_packets (struct btrace_thread_info *btinfo)
   config.begin = pt->data;
   config.end = pt->data + pt->size;
 
-  config.cpu.vendor = pt_translate_cpu_vendor (pt->config.cpu.vendor);
-  config.cpu.family = pt->config.cpu.family;
-  config.cpu.model = pt->config.cpu.model;
-  config.cpu.stepping = pt->config.cpu.stepping;
+  cpu = record_btrace_get_cpu ();
+  if (cpu == nullptr)
+    cpu = &pt->config.cpu;
 
-  errcode = pt_cpu_errata (&config.errata, &config.cpu);
-  if (errcode < 0)
-    error (_("Failed to configure the Intel Processor Trace decoder: %s."),
-	   pt_errstr (pt_errcode (errcode)));
+  /* We treat an unknown vendor as 'no errata'.  */
+  if (cpu->vendor != CV_UNKNOWN)
+    {
+      config.cpu.vendor = pt_translate_cpu_vendor (cpu->vendor);
+      config.cpu.family = cpu->family;
+      config.cpu.model = cpu->model;
+      config.cpu.stepping = cpu->stepping;
+
+      errcode = pt_cpu_errata (&config.errata, &config.cpu);
+      if (errcode < 0)
+	error (_("Failed to configure the Intel Processor Trace "
+		 "decoder: %s."), pt_errstr (pt_errcode (errcode)));
+    }
 
   decoder = pt_pkt_alloc_decoder (&config);
   if (decoder == NULL)

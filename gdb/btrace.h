@@ -385,8 +385,10 @@ extern void btrace_teardown (struct thread_info *);
 
 extern const char *btrace_decode_error (enum btrace_format format, int errcode);
 
-/* Fetch the branch trace for a single thread.  */
-extern void btrace_fetch (struct thread_info *);
+/* Fetch the branch trace for a single thread.  If CPU is not NULL, assume
+   CPU for trace decode.  */
+extern void btrace_fetch (struct thread_info *,
+			  const struct btrace_cpu *cpu);
 
 /* Clear the branch trace for a single thread.  */
 extern void btrace_clear (struct thread_info *);

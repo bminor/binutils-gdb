@@ -24,6 +24,7 @@
 #include "btrace.h"
 #include "py-record.h"
 #include "py-record-btrace.h"
+#include "record-btrace.h"
 #include "disasm.h"
 
 #if defined (IS_PY3K)
@@ -678,7 +679,7 @@ recpy_bt_begin (PyObject *self, void *closure)
   if (tinfo == NULL)
     Py_RETURN_NONE;
 
-  btrace_fetch (tinfo);
+  btrace_fetch (tinfo, record_btrace_get_cpu ());
 
   if (btrace_is_empty (tinfo))
     Py_RETURN_NONE;
@@ -700,7 +701,7 @@ recpy_bt_end (PyObject *self, void *closure)
   if (tinfo == NULL)
     Py_RETURN_NONE;
 
-  btrace_fetch (tinfo);
+  btrace_fetch (tinfo, record_btrace_get_cpu ());
 
   if (btrace_is_empty (tinfo))
     Py_RETURN_NONE;
@@ -724,7 +725,7 @@ recpy_bt_instruction_history (PyObject *self, void *closure)
    if (tinfo == NULL)
      Py_RETURN_NONE;
 
-   btrace_fetch (tinfo);
+   btrace_fetch (tinfo, record_btrace_get_cpu ());
 
    if (btrace_is_empty (tinfo))
      Py_RETURN_NONE;
@@ -753,7 +754,7 @@ recpy_bt_function_call_history (PyObject *self, void *closure)
   if (tinfo == NULL)
     Py_RETURN_NONE;
 
-  btrace_fetch (tinfo);
+  btrace_fetch (tinfo, record_btrace_get_cpu ());
 
   if (btrace_is_empty (tinfo))
     Py_RETURN_NONE;
