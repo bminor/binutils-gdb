@@ -1,3 +1,9 @@
+2018-02-02  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-elf/shared.exp: Add $AFLAGS_PIC throughout to PIC
+	assembly builds where missing and remove `tic6x-*-*' XFAIL
+	markings accordingly.
+
 2018-02-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* ldexp.c (fold_name, exp_fold_tree_1): Avoid pointer arithmetic

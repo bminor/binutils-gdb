@@ -330,10 +330,10 @@ set ASFLAGS $old_ASFLAGS
 run_ld_link_tests {
     {"Build pr14170a.o" "" "" "" {pr14170a.s} {} "pr14170.a" }
 }
-run_ld_link_tests {
-    {"Build shared library for pr14170"
-	"-shared" "" "" "pr14170b.s" {} "pr14170.so" }
-} "tic6x-*-*"
+run_ld_link_tests [list \
+    [list "Build shared library for pr14170" \
+	"-shared" "" "$AFLAGS_PIC" "pr14170b.s" {} "pr14170.so" ] \
+]
 
 # bfin does not currently support copy relocs.
 run_ld_link_tests [list \
@@ -344,12 +344,14 @@ run_ld_link_tests [list \
 ] "bfin-*-*"
 
 # Targets that use _bfd_generic_link_add_symbols won't pass pr21703 tests
-# Not will tic6x with PIC/PID warning, or hppa64 with dot-symbols
-run_ld_link_tests {
-    {"PR ld/21703 shared"
-     "-shared --allow-multiple-definition --version-script pr21703.ver tmpdir/pr21703-3.o tmpdir/pr21703-4.o" "" "" \
-     {pr21703-3.s pr21703-4.s} {{readelf {--dyn-syms} pr21703-shared.sd}} "pr21703.so" }
-} "d30v-*-*" "dlx-*-*" "pj-*-*" "tic6x-*-*" "hppa64-*-*"
+# Not will hppa64 with dot-symbols.
+run_ld_link_tests [list \
+    [list "PR ld/21703 shared" \
+	"-shared --allow-multiple-definition --version-script pr21703.ver\
+	 tmpdir/pr21703-3.o tmpdir/pr21703-4.o" "" "$AFLAGS_PIC" \
+	{pr21703-3.s pr21703-4.s} {{readelf {--dyn-syms} pr21703-shared.sd}} \
+	"pr21703.so" ] \
+] "d30v-*-*" "dlx-*-*" "pj-*-*" "hppa64-*-*"
 
 # This target requires extra GAS options when building non-PIC code
 # for linking with shared libraries.
@@ -362,29 +364,28 @@ if [istarget "mips*-*-*"] {
 # script that accidentally marks dynamic sections as notes.  The
 # resulting executable is not expected to work, but the linker
 # should not seg-fault whilst creating the binary.
-# Note: setup_xfail before run_ld_link_tests xfails only the first test.
-setup_xfail "tic6x-*-*"
-run_ld_link_tests {
-    {"Build shared library for broken linker script test"
-	"-shared --hash-style=sysv" "" "" "note-3.s" {} "note-3.so" }
-    {"Link using broken linker script"
-	"$LFLAGS --script note-3.t tmpdir/note-3.so" "" "" ""
-	{ { ld "note-3.l" } }
-	"a.out" }
-}
+run_ld_link_tests [list \
+    [list "Build shared library for broken linker script test" \
+	"-shared --hash-style=sysv" "" "$AFLAGS_PIC" "note-3.s" \
+	{} \
+	"note-3.so" ] \
+    [list "Link using broken linker script" \
+	"$LFLAGS --script note-3.t tmpdir/note-3.so" "" "" "" \
+	{ { ld "note-3.l" } } \
+	"a.out" ] \
+]
 
-setup_xfail "tic6x-*-*"
-run_ld_link_tests {
-    {"Build pr17068.so"
-	"-shared" "" ""
-	{pr17068d.s} {} "pr17068.so"}
-    {"Build pr17068a.a"
-	"" "" ""
-	{pr17068a.s pr17068c.s pr17068ez.s} {} "pr17068a.a"}
-    {"Build pr17068b.a"
-	"" "" ""
-	{pr17068b.s pr17068e.s} {} "pr17068b.a"}
-}
+run_ld_link_tests [list \
+    [list "Build pr17068.so" \
+	"-shared" "" "$AFLAGS_PIC" \
+	{pr17068d.s} {} "pr17068.so"] \
+    [list "Build pr17068a.a" \
+	"" "" "" \
+	{pr17068a.s pr17068c.s pr17068ez.s} {} "pr17068a.a"] \
+    [list "Build pr17068b.a" \
+	"" "" "" \
+	{pr17068b.s pr17068e.s} {} "pr17068b.a"] \
+]
 
 # bfin does not currently support copy relocs.
 run_ld_link_tests {
@@ -395,31 +396,29 @@ run_ld_link_tests {
 	{start.s pr17068.s} {} "pr17068"}
 } "bfin-*-*"
 
-# xfail on tic6x due to non-PIC/non-PID warnings
 # Fails on MIPS because ABI trickery means that a NULL reloc is emitted.
 # Fails on bfin because relocations are not created.
-run_ld_link_tests {
-    {"-Bsymbolic-functions"
-	"-shared -Bsymbolic-functions" "" ""
-	{symbolic-func.s} {{readelf {-r --wide} symbolic-func.r}}
-	"symbolic-func.so"}
-} "tic6x-*-*" "mips*-*-*" "bfin-*-*"
+run_ld_link_tests [list \
+    [list "-Bsymbolic-functions" \
+	"-shared -Bsymbolic-functions" "" "$AFLAGS_PIC" \
+	{symbolic-func.s} {{readelf {-r --wide} symbolic-func.r}} \
+	"symbolic-func.so"] \
+] "mips*-*-*" "bfin-*-*"
 
-# xfail on tic6x due to non-PIC/non-PID warnings
-run_ld_link_tests {
-    {"Build pr20995.so"
-	"-shared" "" ""
-	{pr20995b.s} {} "pr20995.so"}
-} "tic6x-*-*"
+run_ld_link_tests [list \
+    [list "Build pr20995.so" \
+	"-shared" "" "$AFLAGS_PIC" \
+	{pr20995b.s} {} "pr20995.so"] \
+]
 
 # xfail on arm*-*-eabi*.  The list can be enlarged to those targets that
 # don't support GNU_RELRO.  For more details, please see discussions at:
 #   https://sourceware.org/ml/binutils/2017-01/msg00441.html
-run_ld_link_tests {
-    {"Build pr20995-2.so"
-	"-shared -z relro" "" ""
-	{pr20995c.s} {{readelf {-l --wide} pr20995-2so.r}} "pr20995-2.so"}
-} "tic6x-*-*" "arm*-*-eabi*" "hppa*64*-*-hpux*"
+run_ld_link_tests [list \
+    [list "Build pr20995-2.so" \
+	"-shared -z relro" "" "$AFLAGS_PIC" \
+	{pr20995c.s} {{readelf {-l --wide} pr20995-2so.r}} "pr20995-2.so"] \
+] "tic6x-*-*" "arm*-*-eabi*" "hppa*64*-*-hpux*"
 
 # These targets don't copy dynamic variables into .bss.
 setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
@@ -441,11 +440,10 @@ run_ld_link_tests [list \
 	"$LFLAGS" "tmpdir/pr20995-2.so" "$AFLAGS_NONPIC" \
 	{pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995-2"]]
 
-setup_xfail "tic6x-*-*"
-run_ld_link_tests {
-    {"Build pr22374 shared library"
-	"-shared" "" "" "pr22374b.s" {} "pr22374.so" }
-}
+run_ld_link_tests [list \
+    [list "Build pr22374 shared library" \
+	"-shared" "" "$AFLAGS_PIC" "pr22374b.s" {} "pr22374.so" ] \
+]
 if { ![istarget "alpha-*-*"]
      && ![istarget "frv-*-*"]
      && ![istarget "hppa*-*-*"]
