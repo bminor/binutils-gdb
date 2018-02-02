@@ -1,3 +1,8 @@
+2018-02-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/sid.exp (gdb_target_sid): Remove use of cleanup.
+	* config/sim.exp (gdb_target_sim): Remove use of cleanup.
+
 2018-02-01  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Leszek Swirski  <leszeks@google.com>
 

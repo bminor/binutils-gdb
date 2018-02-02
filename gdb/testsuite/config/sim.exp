@@ -34,7 +34,6 @@ proc gdb_target_sim { } {
 	}
 	timeout { 
 	    perror "Couldn't set target for simulator."
-	    cleanup
 	    return -1
 	}
     }

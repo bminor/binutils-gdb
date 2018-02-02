@@ -146,7 +146,6 @@ proc gdb_target_sid { } {
     gdb_expect {
 	-re ".*\[Ee\]rror.*$gdb_prompt $" {
 	    perror "Couldn't set target for remote simulator."
-	    cleanup
 	    gdb_exit
 	}
 	-re "Remote debugging using.*$gdb_prompt"	{
@@ -154,7 +153,6 @@ proc gdb_target_sid { } {
 	}
 	timeout { 
 	    perror "Couldn't set target for remote simulator."
-	    cleanup
 	    gdb_exit
 	}
     }
