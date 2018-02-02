@@ -1,3 +1,9 @@
+2018-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/examine-backward.exp: Still run tests around address
+	0x0, even if address 0x0 is not readable.  Update the pattern for
+	matching address 0x0 in expected output.
+
 2018-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/share-env-with-gdbserver.c (main): Add call to
