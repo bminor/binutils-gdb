@@ -7074,10 +7074,19 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 #if ARCH_SIZE == 64
 	case BFD_RELOC_AARCH64_32:
 #endif
-	  if (bfd_link_pic (info)
-	      && (sec->flags & SEC_ALLOC) != 0
-	      && (sec->flags & SEC_READONLY) != 0)
+	  if (bfd_link_pic (info) && (sec->flags & SEC_ALLOC) != 0)
 	    {
+	      if (h != NULL
+		  /* This is an absolute symbol.  It represents a value instead
+		     of an address.  */
+		  && ((h->root.type == bfd_link_hash_defined
+		       && bfd_is_abs_section (h->root.u.def.section))
+		      /* This is an undefined symbol.  */
+		      || h->root.type == bfd_link_hash_undefined))
+		break;
+
+	      /* For local symbols, defined global symbols in a non-ABS section,
+		 it is assumed that the value is an address.  */
 	      int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 	      _bfd_error_handler
 		/* xgettext:c-format */

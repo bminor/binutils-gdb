@@ -1,3 +1,10 @@
+2018-02-05  Renlin Li  <renlin.li@arm.com>
+
+	PR ld/22764
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Relax the
+	R_AARCH64_ABS32 and R_AARCH64_ABS16 for absolute symbol. Apply the
+	check for writeable section as well.
+
 2018-01-27  Nick Clifton  <nickc@redhat.com>
 
 	Back to development.

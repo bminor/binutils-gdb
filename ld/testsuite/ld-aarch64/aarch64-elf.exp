@@ -275,6 +275,7 @@ run_dump_test "pr17415"
 run_dump_test_lp64 "tprel_g2_overflow"
 run_dump_test "tprel_add_lo12_overflow"
 run_dump_test "protected-data"
+run_dump_test_lp64 "pr22764"
 
 # ifunc tests
 run_dump_test "ifunc-1"
