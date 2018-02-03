@@ -4001,6 +4001,12 @@ underscore), the linker will silently use the definition in the program.
 If the program references @samp{etext} but does not define it, the
 linker will use the definition in the linker script.
 
+Note - the @code{PROVIDE} directive considers a common symbol to be
+defined, even though such a symbol could be combined with the symbol
+that the @code{PROVIDE} would create.  This is particularly important
+when considering constructor and destructor list symbols such as
+@samp{__CTOR_LIST__} as these are often defined as common symbols.
+
 @node PROVIDE_HIDDEN
 @subsection PROVIDE_HIDDEN
 @cindex PROVIDE_HIDDEN

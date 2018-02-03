@@ -1,3 +1,13 @@
+2018-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 22762
+	* scripttempl/pe.sc: Remove PROVIDE()s from __CTOR_LIST__ and
+	__DTOR_LIST__ symbols.  Add a comment explaining why this is
+	necessary.
+	* scripttemp/pep.sc: Likewise.
+	* ld.texinfo (PROVIDE): Add a note about the effect of common
+	symbols.
+
 2018-02-03  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* emulparams/nios2elf.sh (GENERATE_SHLIB_SCRIPT): Don't set.
