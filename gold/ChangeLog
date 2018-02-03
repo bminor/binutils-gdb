@@ -1,3 +1,10 @@
+2018-02-02  Cary Coutant  <ccoutant@gmail.com>
+
+	* PR gold/22776
+	* dwarf_reader.cc (Sized_dwarf_line_info::read_header_prolog): Add
+	support for DWARF-4 line number tables.
+	* dwarf_reader.h (Sized_dwarf_line_info::max_ops_per_insn): New field.
+
 2018-01-27  Nick Clifton  <nickc@redhat.com>
 
 	This is the 2.30 release:
