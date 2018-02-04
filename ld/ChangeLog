@@ -1,3 +1,15 @@
+2018-02-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/lea1d.d: Replace -Sw with -SW.
+	* testsuite/ld-i386/lea1e.d: Likewise.
+	* testsuite/ld-i386/lea1f.d: Likewise.
+	* testsuite/ld-x86-64/lea1g.d: Likewise.
+	* testsuite/ld-x86-64/lea1h.d: Likewise.
+	* testsuite/ld-x86-64/lea1i.d: Likewise.
+	* testsuite/ld-x86-64/lea1j.d: Likewise.
+	* testsuite/ld-x86-64/lea1k.d: Likewise.
+	* testsuite/ld-x86-64/lea1l.d: Likewise.
+
 2018-02-03  Nick Clifton  <nickc@redhat.com>
 
 	PR 22762
