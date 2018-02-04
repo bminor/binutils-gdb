@@ -9211,7 +9211,7 @@ partial_die_full_name (struct partial_die_info *pdi,
     {
       fixup_partial_die (pdi, cu);
 
-      if (pdi->name != NULL && strchr (pdi->name, '<') == NULL)
+      if (pdi->name != NULL)
 	{
 	  struct die_info *die;
 	  struct attribute attr;
@@ -10875,6 +10875,22 @@ dwarf2_compute_name (const char *name,
   if (name == NULL)
     name = dwarf2_name (die, cu);
 
+  /* If there is a template in the name, strip it and let the code below
+     re-compute it.  */
+  gdb::unique_xmalloc_ptr<char> holder;
+  if (name != NULL)
+    {
+      const char *opening = strchr (name, '<');
+      if (opening != NULL)
+	{
+	  /* In this case, name will get copied/modified and re-assigned,
+	     so we can free this copy.  */
+	  holder.reset (xstrdup (name));
+	  holder.get ()[opening - name] = '\0';
+	  name = holder.get ();
+	}
+    }
+
   /* For Fortran GDB prefers DW_AT_*linkage_name for the physname if present
      but otherwise compute it by typename_concat inside GDB.
      FIXME: Actually this is not really true, or at least not always true.
@@ -10942,7 +10958,7 @@ dwarf2_compute_name (const char *name,
 	     templates; two instantiated function templates are allowed to
 	     differ only by their return types, which we do not add here.  */
 
-	  if (cu->language == language_cplus && strchr (name, '<') == NULL)
+	  if (cu->language == language_cplus)
 	    {
 	      struct attribute *attr;
 	      struct die_info *child;
@@ -11026,6 +11042,7 @@ dwarf2_compute_name (const char *name,
 			 the radix.  */
 		      get_formatted_print_options (&opts, 'd');
 		      opts.raw = 1;
+		      opts.print_suffix = true;
 		      value_print (v, &buf, &opts);
 		      release_value (v);
 		      value_free (v);

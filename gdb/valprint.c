@@ -109,7 +109,8 @@ struct value_print_options user_print_options =
   1,				/* pascal_static_field_print */
   0,				/* raw */
   0,				/* summary */
-  1				/* symbol_print */
+  1,				/* symbol_print */
+  false,			/* print_suffix */
 };
 
 /* Initialize *OPTS to be a copy of the user print options.  */

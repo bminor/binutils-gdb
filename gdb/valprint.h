@@ -92,6 +92,10 @@ struct value_print_options
   /* If nonzero, when printing a pointer, print the symbol to which it
      points, if any.  */
   int symbol_print;
+
+  /* If true, print the integer suffixes (u for unsigned, l for long, ll for
+     long long).  */
+  bool print_suffix;
 };
 
 /* The global print options set by the user.  In general this should

@@ -454,6 +454,21 @@ c_val_print_int (struct type *type, struct type *unresolved_type,
 		     : options->output_format);
       val_print_scalar_formatted (type, embedded_offset,
 				  original_value, &opts, 0, stream);
+
+      if (opts.print_suffix)
+	{
+	  struct type *t = check_typedef (type);
+
+	  if (TYPE_UNSIGNED (t))
+	    fputc_filtered ('u', stream);
+
+	  /* Is there a better way to do this?  Just looking at the size doesn't
+	     work.  */
+	  if (strstr (TYPE_NAME (t), "long long") != NULL)
+	    fputs_filtered ("ll", stream);
+	  else if (strstr (TYPE_NAME (t), "long") != NULL)
+	    fputc_filtered ('l', stream);
+	}
     }
   else
     {
