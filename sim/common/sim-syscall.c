@@ -97,11 +97,6 @@ sim_syscall_multi (SIM_CPU *cpu, int func, long arg1, long arg2, long arg3,
 
   if (cb_target_to_host_syscall (cb, func) == CB_SYS_exit)
     sim_engine_halt (sd, cpu, NULL, sim_pc_get (cpu), sim_exited, arg1);
-  else if (sc.result == -1)
-    {
-      cb->last_errno = errno;
-      sc.errcode = cb->get_errno (cb);
-    }
 
   *result = sc.result;
   *result2 = sc.result2;

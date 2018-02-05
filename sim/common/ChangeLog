@@ -1,3 +1,8 @@
+2018-12-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* sim-syscall.c (sim_syscall_multi): Don't update sc->errcode at
+	this point, it should have already been set in cb_syscall.
+
 2018-10-05  Stafford Horne  <shorne@gmail.com>
 
 	* cgen-ops.h (ADDCFDI): New function, add carry flag DI variant.
