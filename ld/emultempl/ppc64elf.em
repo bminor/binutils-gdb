@@ -38,7 +38,7 @@ static struct ppc64_elf_params params = { NULL,
 					  &ppc_layout_sections_again,
 					  1, -1, 0,
 					  ${DEFAULT_PLT_STATIC_CHAIN-0}, -1, 5,
-					  -1, 1, 0, -1, -1, 0};
+					  -1, 0, -1, -1, 0};
 
 /* Fake input file for stubs.  */
 static lang_input_statement_type *stub_file;
@@ -692,8 +692,6 @@ enum ppc64_opt
   OPTION_NO_PLT_STATIC_CHAIN,
   OPTION_PLT_THREAD_SAFE,
   OPTION_NO_PLT_THREAD_SAFE,
-  OPTION_SPECULATE_INDIRECT_JUMPS,
-  OPTION_NO_SPECULATE_INDIRECT_JUMPS,
   OPTION_PLT_ALIGN,
   OPTION_NO_PLT_ALIGN,
   OPTION_PLT_LOCALENTRY,
@@ -721,8 +719,6 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "no-plt-static-chain", no_argument, NULL, OPTION_NO_PLT_STATIC_CHAIN },
   { "plt-thread-safe", no_argument, NULL, OPTION_PLT_THREAD_SAFE },
   { "no-plt-thread-safe", no_argument, NULL, OPTION_NO_PLT_THREAD_SAFE },
-  { "speculate-indirect-jumps", no_argument, NULL, OPTION_SPECULATE_INDIRECT_JUMPS },
-  { "no-speculate-indirect-jumps", no_argument, NULL, OPTION_NO_SPECULATE_INDIRECT_JUMPS },
   { "plt-align", optional_argument, NULL, OPTION_PLT_ALIGN },
   { "no-plt-align", no_argument, NULL, OPTION_NO_PLT_ALIGN },
   { "plt-localentry", optional_argument, NULL, OPTION_PLT_LOCALENTRY },
@@ -764,13 +760,7 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   --plt-thread-safe           PLT call stubs with load-load barrier.\n"
 		   ));
   fprintf (file, _("\
-  --no-plt-thread-safe        PLT call stubs without load-load barrier.\n"
-		   ));
-  fprintf (file, _("\
-  --speculate-indirect-jumps  PLT call stubs without speculation barrier.\n"
-		   ));
-  fprintf (file, _("\
-  --no-speculate-indirect-jumps PLT call stubs with speculation barrier.\n"
+  --no-plt-thread-safe        PLT call stubs without barrier.\n"
 		   ));
   fprintf (file, _("\
   --plt-align [=<align>]      Align PLT call stubs to fit cache lines.\n"
@@ -858,14 +848,6 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_NO_PLT_THREAD_SAFE:
       params.plt_thread_safe = 0;
-      break;
-
-    case OPTION_SPECULATE_INDIRECT_JUMPS:
-      params.speculate_indirect_jumps = 1;
-      break;
-
-    case OPTION_NO_SPECULATE_INDIRECT_JUMPS:
-      params.speculate_indirect_jumps = 0;
       break;
 
     case OPTION_PLT_ALIGN:

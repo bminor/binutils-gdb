@@ -1,6 +1,6 @@
 #source: elfv2.s
 #as: -a64
-#ld: -melf64ppc -shared --speculate-indirect-jumps
+#ld: -melf64ppc -shared
 #objdump: -dr
 
 .*

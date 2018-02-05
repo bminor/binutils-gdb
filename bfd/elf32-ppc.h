@@ -35,9 +35,6 @@ struct ppc_elf_params
   /* Set if individual PLT call stubs should be aligned.  */
   int plt_stub_align;
 
-  /* Clear if PLT call stubs should use a speculative execution barrier.  */
-  int speculate_indirect_jumps;
-
   /* Whether to emit symbols for stubs.  */
   int emit_stub_syms;
 

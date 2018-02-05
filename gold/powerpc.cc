@@ -3781,8 +3781,6 @@ static const uint32_t b			= 0x48000000;
 static const uint32_t bcl_20_31		= 0x429f0005;
 static const uint32_t bctr		= 0x4e800420;
 static const uint32_t bctrl		= 0x4e800421;
-static const uint32_t beqctrm		= 0x4dc20420;
-static const uint32_t beqctrlm		= 0x4dc20421;
 static const uint32_t beqlr		= 0x4d820020;
 static const uint32_t blr		= 0x4e800020;
 static const uint32_t bnectr_p4		= 0x4ce20420;
@@ -3792,7 +3790,6 @@ static const uint32_t cmpdi_11_0	= 0x2c2b0000;
 static const uint32_t cmpwi_11_0	= 0x2c0b0000;
 static const uint32_t cror_15_15_15	= 0x4def7b82;
 static const uint32_t cror_31_31_31	= 0x4ffffb82;
-static const uint32_t crseteq		= 0x4c421242;
 static const uint32_t ld_0_1		= 0xe8010000;
 static const uint32_t ld_0_12		= 0xe80c0000;
 static const uint32_t ld_2_1		= 0xe8410000;
@@ -4168,24 +4165,6 @@ write_insn(unsigned char* p, uint32_t v)
   elfcpp::Swap<32, big_endian>::writeval(p, v);
 }
 
-template<bool big_endian>
-static unsigned char*
-output_bctr(unsigned char* p)
-{
-  if (!parameters->options().speculate_indirect_jumps())
-    {
-      write_insn<big_endian>(p, crseteq);
-      p += 4;
-      write_insn<big_endian>(p, beqctrm);
-      p += 4;
-      write_insn<big_endian>(p, b);
-    }
-  else
-    write_insn<big_endian>(p, bctr);
-  p += 4;
-  return p;
-}
-
 template<int size>
 static inline unsigned int
 param_plt_align()
@@ -4454,7 +4433,6 @@ class Stub_table : public Output_relaxed_input_section
       {
 	const Symbol* gsym = p->first.sym_;
 	return (4 * 4
-		+ (!parameters->options().speculate_indirect_jumps() ? 2 * 4 : 0)
 		+ (this->targ_->is_tls_get_addr_opt(gsym) ? 8 * 4 : 0));
       }
 
@@ -4470,8 +4448,6 @@ class Stub_table : public Output_relaxed_input_section
     got_addr += ppcobj->toc_base_offset();
     Address off = plt_addr - got_addr;
     unsigned int bytes = 4 * 4 + 4 * (ha(off) != 0);
-    if (!parameters->options().speculate_indirect_jumps())
-      bytes += 2 * 4;
     const Symbol* gsym = p->first.sym_;
     if (this->targ_->is_tls_get_addr_opt(gsym))
       bytes += 13 * 4;
@@ -4502,8 +4478,6 @@ class Stub_table : public Output_relaxed_input_section
     if (p->first.dest_ - loc + (1 << 25) < 2 << 25)
       return 4;
     unsigned int bytes = 16;
-    if (!parameters->options().speculate_indirect_jumps())
-      bytes += 8;
     if (size == 32 && parameters->options().output_is_position_independent())
       bytes += 16;
     return bytes;
@@ -4955,8 +4929,7 @@ class Output_data_glink : public Output_section_data
   {
     if (size == 64)
       return (8
-	      + (this->targ_->abiversion() < 2 ? 11 * 4 : 14 * 4)
-	      + (!parameters->options().speculate_indirect_jumps() ? 2 * 4 : 0));
+	      + (this->targ_->abiversion() < 2 ? 11 * 4 : 14 * 4));
     return 16 * 4;
   }
 
@@ -5033,8 +5006,7 @@ Output_data_glink<size, big_endian>::add_global_entry(const Symbol* gsym)
   std::pair<typename Global_entry_stub_entries::iterator, bool> p
     = this->global_entry_stubs_.insert(std::make_pair(gsym, off));
   if (p.second)
-    this->ge_size_
-      = off + 16 + (!parameters->options().speculate_indirect_jumps() ? 8 : 0);
+    this->ge_size_ = off + 16;
 }
 
 template<int size, bool big_endian>
@@ -5223,10 +5195,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		= plt_load_toc && this->targ_->plt_thread_safe();
 	      bool use_fake_dep = false;
 	      Address cmp_branch_off = 0;
-	      if (thread_safe
-		  && !parameters->options().speculate_indirect_jumps())
-		use_fake_dep = true;
-	      else if (thread_safe)
+	      if (thread_safe)
 		{
 		  unsigned int pltindex
 		    = ((pltoff - this->targ_->first_plt_entry_offset())
@@ -5274,7 +5243,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 						 + this->targ_->stk_linker()));
 		      p += 4;
 		    }
-		  use_fake_dep |= thread_safe;
+		  use_fake_dep = thread_safe;
 		}
 	      if (ha(off) != 0)
 		{
@@ -5365,14 +5334,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	      if (!cs->second.localentry0_
 		  && this->targ_->is_tls_get_addr_opt(gsym))
 		{
-		  if (!parameters->options().speculate_indirect_jumps())
-		    {
-		      write_insn<big_endian>(p, crseteq);
-		      p += 4;
-		      write_insn<big_endian>(p, beqctrlm);
-		    }
-		  else
-		    write_insn<big_endian>(p, bctrl);
+		  write_insn<big_endian>(p, bctrl);
 		  p += 4;
 		  write_insn<big_endian>(p, ld_2_1 + this->targ_->stk_toc());
 		  p += 4;
@@ -5391,7 +5353,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		  write_insn<big_endian>(p, b | (cmp_branch_off & 0x3fffffc));
 		}
 	      else
-		output_bctr<big_endian>(p);
+		write_insn<big_endian>(p, bctr);
 	    }
 	}
 
@@ -5426,7 +5388,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		  write_insn<big_endian>(p, ld_12_12 + l(brltoff)),	p += 4;
 		}
 	      write_insn<big_endian>(p, mtctr_12),			p += 4;
-	      output_bctr<big_endian>(p);
+	      write_insn<big_endian>(p, bctr);
 	    }
 	}
     }
@@ -5522,7 +5484,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	      p += 4;
 	      write_insn<big_endian>(p, mtctr_11);
 	      p += 4;
-	      output_bctr<big_endian>(p);
+	      write_insn<big_endian>(p, bctr);
 	    }
 	}
 
@@ -5563,7 +5525,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	  p += 4;
 	  write_insn<big_endian>(p, mtctr_12);
 	  p += 4;
-	  output_bctr<big_endian>(p);
+	  write_insn<big_endian>(p, bctr);
 	}
     }
   if (this->need_save_res_)
@@ -5630,7 +5592,7 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 	      write_insn<big_endian>(p, mtctr_12),		p += 4;
 	      write_insn<big_endian>(p, ld_11_11 + 8),		p += 4;
 	    }
-	  p = output_bctr<big_endian>(p);
+	  write_insn<big_endian>(p, bctr),			p += 4;
 	  gold_assert(p == oview + this->pltresolve_size());
 
 	  // Write lazy link call stubs.
@@ -5686,7 +5648,7 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 	  write_insn<big_endian>(p, addis_12_12 + ha(off)),	p += 4;
 	  write_insn<big_endian>(p, ld_12_12 + l(off)),		p += 4;
 	  write_insn<big_endian>(p, mtctr_12),			p += 4;
-	  output_bctr<big_endian>(p);
+	  write_insn<big_endian>(p, bctr);
 	}
     }
   else
@@ -5778,7 +5740,8 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 	  write_insn<big_endian>(p, add_11_0_11);
 	}
       p += 4;
-      p = output_bctr<big_endian>(p);
+      write_insn<big_endian>(p, bctr);
+      p += 4;
       while (p < end_p)
 	{
 	  write_insn<big_endian>(p, nop);
