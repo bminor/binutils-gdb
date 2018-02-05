@@ -1857,7 +1857,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  offset = fdata->offset;
 	  continue;
 	}
-      else if ((op & 0xfc1f016a) == 0x7c01016e)
+      else if ((op & 0xfc1f016e) == 0x7c01016e)
 	{			/* stwux rX,r1,rY */
 	  /* No way to figure out what r1 is going to be.  */
 	  fdata->frameless = 0;
