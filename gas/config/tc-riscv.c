@@ -1191,14 +1191,14 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
    an implicit offset was detected.  */
 
 static bfd_boolean
-riscv_handle_implicit_zero_offset (expressionS *expr, const char *s)
+riscv_handle_implicit_zero_offset (expressionS *ep, const char *s)
 {
   /* Check whether there is only a single bracketed expression left.
      If so, it must be the base register and the constant must be zero.  */
   if (*s == '(' && strchr (s + 1, '(') == 0)
     {
-      expr->X_op = O_constant;
-      expr->X_add_number = 0;
+      ep->X_op = O_constant;
+      ep->X_add_number = 0;
       return TRUE;
     }
 
