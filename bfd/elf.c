@@ -6354,7 +6354,8 @@ _bfd_elf_write_object_contents (bfd *abfd)
 	= _bfd_elf_strtab_offset (elf_shstrtab (abfd),
 				  i_shdrp[count]->sh_name);
       if (bed->elf_backend_section_processing)
-	(*bed->elf_backend_section_processing) (abfd, i_shdrp[count]);
+	if (!(*bed->elf_backend_section_processing) (abfd, i_shdrp[count]))
+	  return FALSE;
       if (i_shdrp[count]->contents)
 	{
 	  bfd_size_type amt = i_shdrp[count]->sh_size;

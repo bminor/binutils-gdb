@@ -1,3 +1,8 @@
+2018-02-05  Maciej W. Rozycki  <macro@mips.com>
+
+	* elf.c (_bfd_elf_write_object_contents): Propagate a failure
+	status from `->elf_backend_section_processing'.
+
 2018-02-02  Jim Wilson  <jimw@sifive.com>
 
 	PR ld/22756
