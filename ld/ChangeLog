@@ -1,3 +1,17 @@
+2018-02-05  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+
+	2018-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 22762
+	* scripttempl/pe.sc: Remove PROVIDE()s from __CTOR_LIST__ and
+	__DTOR_LIST__ symbols.  Add a comment explaining why this is
+	necessary.
+	* scripttemp/pep.sc: Likewise.
+	* ld.texinfo (PROVIDE): Add a note about the effect of common
+	symbols.
+
 2018-01-27  Nick Clifton  <nickc@redhat.com>
 
 	Back to development.
