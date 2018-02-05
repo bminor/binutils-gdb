@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: gas 2.30.0\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-01-13 13:44+0000\n"
-"PO-Revision-Date: 2018-01-28 10:06+0300\n"
+"PO-Revision-Date: 2018-02-03 10:05+0300\n"
 "Last-Translator: Yuri Kozlov <yuray@komyakino.ru>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
 "Language: ru\n"
@@ -1513,354 +1513,340 @@ msgstr "список векторных регистров пуст"
 #: config/tc-aarch64.c:1264 config/tc-arm.c:2223
 #, c-format
 msgid "ignoring attempt to redefine built-in register '%s'"
-msgstr ""
+msgstr "игнорируется попытка переопределить встроенный регистр «%s»"
 
 #: config/tc-aarch64.c:1270 config/tc-arm.c:2228
 #, c-format
 msgid "ignoring redefinition of register alias '%s'"
-msgstr ""
+msgstr "игнорируется переопределение псевдонима регистра «%s»"
 
 #: config/tc-aarch64.c:1316 config/tc-arm.c:2294
 #, c-format
 msgid "unknown register '%s' -- .req ignored"
-msgstr ""
+msgstr "неизвестный регистр «%s» — .req игнорируется"
 
 #: config/tc-aarch64.c:1374 config/tc-arm.c:2502
 msgid "invalid syntax for .req directive"
-msgstr ""
+msgstr "некорректный синтаксис директивы .req"
 
 #: config/tc-aarch64.c:1399 config/tc-arm.c:2540
 msgid "invalid syntax for .unreq directive"
-msgstr ""
+msgstr "некорректный синтаксис директивы .unreq"
 
 #: config/tc-aarch64.c:1405 config/tc-arm.c:2547
 #, c-format
 msgid "unknown register alias '%s'"
-msgstr ""
+msgstr "неизвестный псевдоним регистра «%s»"
 
 #: config/tc-aarch64.c:1407
 #, c-format
 msgid "ignoring attempt to undefine built-in register '%s'"
-msgstr ""
+msgstr "игнорируется попытка удалить определение встроенного регистра «%s»"
 
 #: config/tc-aarch64.c:1731 config/tc-arm.c:3293 config/tc-arm.c:3320
 #: config/tc-arm.c:3333
 msgid "literal pool overflow"
-msgstr ""
+msgstr "переполнение пула литералов"
 
 #: config/tc-aarch64.c:1913 config/tc-aarch64.c:5916 config/tc-arm.c:3554
 #: config/tc-arm.c:6996
 msgid "unrecognized relocation suffix"
-msgstr ""
+msgstr "нераспознанный суффикс перемещения"
 
 #: config/tc-aarch64.c:1915
 msgid "unimplemented relocation suffix"
-msgstr ""
+msgstr "нереализованный суффикс перемещения"
 
 #: config/tc-aarch64.c:2123 config/tc-aarch64.c:2316 config/tc-aarch64.c:2374
 msgid "immediate operand required"
-msgstr ""
+msgstr "требуется непосредственный операнд"
 
 #: config/tc-aarch64.c:2131
 msgid "missing immediate expression"
-msgstr ""
+msgstr "отсутствует непосредственное выражение"
 
 #: config/tc-aarch64.c:2354 config/tc-aarch64.c:5740 config/tc-aarch64.c:5760
-#, fuzzy
-#| msgid "Unrecognized or unsupported floating point constant"
 msgid "invalid floating-point constant"
-msgstr "Нераспознанная или неподдерживаемая константа с плавающей точкой"
+msgstr "некорректная константа с плавающей точкой"
 
 #: config/tc-aarch64.c:2984 config/tc-arm.c:5137 config/tc-arm.c:5146
 msgid "shift expression expected"
-msgstr ""
+msgstr "ожидается выражение сдвига"
 
 #: config/tc-aarch64.c:2992
 msgid "shift operator expected"
-msgstr ""
+msgstr "ожидается оператор сдвига"
 
 #: config/tc-aarch64.c:3000
 msgid "invalid use of 'MSL'"
-msgstr ""
+msgstr "некорректное употребление «MSL»"
 
 #: config/tc-aarch64.c:3008
 msgid "invalid use of 'MUL'"
-msgstr ""
+msgstr "некорректное употребление «MUL»"
 
 #: config/tc-aarch64.c:3017
 msgid "extending shift is not permitted"
-msgstr ""
+msgstr "расширяющий сдвиг не допускается"
 
 #: config/tc-aarch64.c:3025
 msgid "'ROR' shift is not permitted"
-msgstr ""
+msgstr "сдвиг «ROR» не допускается"
 
 #: config/tc-aarch64.c:3033
 msgid "only 'LSL' shift is permitted"
-msgstr ""
+msgstr "допускается только сдвиг «LSL»"
 
 #: config/tc-aarch64.c:3041
 msgid "only 'MUL' is permitted"
-msgstr ""
+msgstr "допускается только «MUL»"
 
 #: config/tc-aarch64.c:3059
 msgid "only 'MUL VL' is permitted"
-msgstr ""
+msgstr "допускается только «MUL VL»"
 
 #: config/tc-aarch64.c:3067
 msgid "invalid shift for the register offset addressing mode"
-msgstr ""
+msgstr "некорректный сдвиг регистра режима адресации смещения"
 
 #: config/tc-aarch64.c:3075
-#, fuzzy
-#| msgid "invalid listing option `%c'"
 msgid "invalid shift operator"
-msgstr "неверный параметр %c для листинга"
+msgstr "некорректный оператор сдвига"
 
 #: config/tc-aarch64.c:3108
-#, fuzzy
-#| msgid "missing name"
 msgid "missing shift amount"
-msgstr "пропущено имя"
+msgstr "не указан размер сдвига"
 
 #: config/tc-aarch64.c:3115
 msgid "constant shift amount required"
-msgstr ""
+msgstr "требуется константный размер сдвига"
 
 #: config/tc-aarch64.c:3124
 msgid "shift amount out of range 0 to 63"
-msgstr ""
+msgstr "размер сдвига вне диапазона  от 0 до 63"
 
 #: config/tc-aarch64.c:3173
-#, fuzzy
-#| msgid "unexpected storage class %d"
 msgid "unexpected shift operator"
-msgstr "неожиданный класс хранения %d"
+msgstr "неожиданный оператор сдвига"
 
 #: config/tc-aarch64.c:3209
 msgid "unexpected register in the immediate operand"
-msgstr ""
+msgstr "неожиданный регистр в непосредственном операнде"
 
 #: config/tc-aarch64.c:3234
 msgid "integer register expected in the extended/shifted operand register"
-msgstr ""
+msgstr "ожидается целочисленный регистр в расширенном/сдвигающем регистре-операнде"
 
 #: config/tc-aarch64.c:3269 config/tc-aarch64.c:3403 config/tc-aarch64.c:3532
 #: config/tc-aarch64.c:3687 config/tc-aarch64.c:3728
 msgid "unknown relocation modifier"
-msgstr ""
+msgstr "неизвестный модификатор перемещения"
 
 #: config/tc-aarch64.c:3276 config/tc-aarch64.c:3422 config/tc-aarch64.c:3539
 #: config/tc-aarch64.c:3694 config/tc-aarch64.c:3735
-#, fuzzy
-#| msgid "emulations not handled in this configuration"
 msgid "this relocation modifier is not allowed on this instruction"
-msgstr "эмуляции не обрабатываются при таких настройках"
+msgstr "данный модификатор перемещения недопустим для этой инструкции"
 
 #: config/tc-aarch64.c:3430 config/tc-aarch64.c:3550
-#, fuzzy
-#| msgid "invalid listing option `%c'"
 msgid "invalid relocation expression"
-msgstr "неверный параметр %c для листинга"
+msgstr "некорректное выражение перемещения"
 
 #: config/tc-aarch64.c:3448
 msgid "invalid address"
-msgstr ""
+msgstr "неправильный адрес"
 
 #: config/tc-aarch64.c:3504
 msgid "invalid use of 32-bit register offset"
-msgstr ""
+msgstr "некорректное использование 32-битного регистра смещения"
 
 #: config/tc-aarch64.c:3510
 msgid "offset has different size from base"
-msgstr ""
+msgstr "смещение имеет размер отличный от базы"
 
 #: config/tc-aarch64.c:3516
 msgid "invalid use of 64-bit register offset"
-msgstr ""
+msgstr "некорректное использование 64-битного регистра смещения"
 
 #. [Xn],#expr
 #: config/tc-aarch64.c:3563 config/tc-aarch64.c:3620
-#, fuzzy
-#| msgid "missing expression in .size directive"
 msgid "invalid expression in the address"
-msgstr "пропущено выражение в директиве .size"
+msgstr "некорректное выражение в адресе"
 
 #: config/tc-aarch64.c:3577 config/tc-arm.c:5673 config/tc-arm.c:6251
 msgid "']' expected"
-msgstr ""
+msgstr "ожидается «]»"
 
 #: config/tc-aarch64.c:3585
 msgid "register offset not allowed in pre-indexed addressing mode"
-msgstr ""
+msgstr "регистр смещения не допускается в режиме адресации с предваряющим индексом"
 
 #: config/tc-aarch64.c:3600 config/tc-arm.c:5709
 msgid "cannot combine pre- and post-indexing"
-msgstr ""
+msgstr "не удалось объединить пре и пост индексацию"
 
 #. Reject [Rn]!
 #: config/tc-aarch64.c:3632
 msgid "missing offset in the pre-indexed address"
-msgstr ""
+msgstr "отсутствует смещение в адресе с предваряющим индексом"
 
 #: config/tc-aarch64.c:3861
 msgid "unknown or missing option to PSB"
-msgstr ""
+msgstr "неизвестный или отсутствующий параметр у PSB"
 
 #: config/tc-aarch64.c:3869
 msgid "the specified option is not accepted for PSB"
-msgstr ""
+msgstr "указанный параметр неприемлем для PSB"
 
 #: config/tc-aarch64.c:3926
 #, c-format
 msgid "selected processor does not support PSTATE field name '%s'"
-msgstr ""
+msgstr "выбранный процессор не поддерживает имя поля PSTATE «%s»"
 
 #: config/tc-aarch64.c:3929 config/tc-aarch64.c:3962
 #, c-format
 msgid "selected processor does not support system register name '%s'"
-msgstr ""
+msgstr "выбранный процессор не поддерживает имя системного регистра «%s»"
 
 #: config/tc-aarch64.c:3932
 #, c-format
 msgid "system register name '%s' is deprecated and may be removed in a future release"
-msgstr ""
+msgstr "имя системного регистра «%s» устарело и может быть удалено в будущих выпусках"
 
 #: config/tc-aarch64.c:4004
 msgid "immediate value out of range "
-msgstr ""
+msgstr "непосредственное значение за пределами диапазона"
 
 #: config/tc-aarch64.c:4512
 #, c-format
 msgid "Info: "
-msgstr ""
+msgstr "Информация:"
 
 #: config/tc-aarch64.c:4545 config/tc-score.c:2750 config/tc-score.c:6503
 #, c-format
 msgid "%s -- `%s'"
-msgstr ""
+msgstr "%s — «%s»"
 
 #: config/tc-aarch64.c:4547
 #, c-format
 msgid "%s at operand %d -- `%s'"
-msgstr ""
+msgstr "%s в операнде %d — «%s»"
 
 #: config/tc-aarch64.c:4553
 #, c-format
 msgid "operand %d must be %s -- `%s'"
-msgstr ""
+msgstr "операнд %d должен быть %s — «%s»"
 
 #: config/tc-aarch64.c:4559
 #, c-format
 msgid "operand mismatch -- `%s'"
-msgstr ""
+msgstr "несоответствие операнда — «%s»"
 
 #. Print the hint.
 #: config/tc-aarch64.c:4619
 msgid "   did you mean this?"
-msgstr ""
+msgstr "   вы имели в виду это?"
 
 #: config/tc-aarch64.c:4622 config/tc-aarch64.c:4649
 #, c-format
 msgid "   %s"
-msgstr ""
+msgstr "   %s"
 
 #: config/tc-aarch64.c:4627
 msgid "   other valid variant(s):"
-msgstr ""
+msgstr "   другой корректный вариант(ы):"
 
 #: config/tc-aarch64.c:4656
 #, c-format
 msgid "operand %d must be the same register as operand 1 -- `%s'"
-msgstr ""
+msgstr "операнд %d должен быть тем же регистром как у 1 операнда — «%s»"
 
 #: config/tc-aarch64.c:4662
 #, c-format
 msgid "%s out of range %d to %d at operand %d -- `%s'"
-msgstr ""
+msgstr "%s за пределами диапазона %d - %d в операнде %d — «%s»"
 
 #: config/tc-aarch64.c:4663 config/tc-aarch64.c:4667 config/tc-aarch64.c:6447
 msgid "immediate value"
-msgstr ""
+msgstr "непосредственное значение"
 
 #: config/tc-aarch64.c:4666
 #, c-format
 msgid "%s must be %d at operand %d -- `%s'"
-msgstr ""
+msgstr "%s должно быть %d в операнде %d — «%s»"
 
 #: config/tc-aarch64.c:4673
 #, c-format
 msgid "invalid number of registers in the list; only 1 register is expected at operand %d -- `%s'"
-msgstr ""
+msgstr "некорректное количество регистров в списке; только 1 регистр ожидается в операнде %d — «%s»"
 
 #: config/tc-aarch64.c:4677
 #, c-format
 msgid "invalid number of registers in the list; %d registers are expected at operand %d -- `%s'"
-msgstr ""
+msgstr "некорректное количество регистров в списке; %d регистров ожидается в операнде %d — «%s»"
 
 #: config/tc-aarch64.c:4683
 #, c-format
 msgid "immediate value must be a multiple of %d at operand %d -- `%s'"
-msgstr ""
+msgstr "непосредственное значение должно быть кратно %d в операнде %d — «%s»"
 
 #: config/tc-aarch64.c:4970
 msgid "bad vector arrangement type"
-msgstr ""
+msgstr "плохой тип векторного расположения"
 
 #: config/tc-aarch64.c:5087
 msgid "the specified relocation type is not allowed for MOVK"
-msgstr ""
+msgstr "указанный тип перемещения недопустим для MOVK"
 
 #: config/tc-aarch64.c:5129 config/tc-aarch64.c:5139
 msgid "the specified relocation type is not allowed for 32-bit register"
-msgstr ""
+msgstr "указанный тип перемещения недопустим для 32-битного регистра"
 
 #: config/tc-aarch64.c:5310
 msgid "comma expected between operands"
-msgstr ""
+msgstr "между операндами ожидается запятая"
 
 #: config/tc-aarch64.c:5444
 msgid "the top half of a 128-bit FP/SIMD register is expected"
-msgstr ""
+msgstr "ожидается верхняя половина 128-битного регистра FP/SIMD"
 
 #: config/tc-aarch64.c:5515 config/tc-arm.c:1906 config/tc-arm.c:1951
 #: config/tc-h8300.c:1048
 msgid "invalid register list"
-msgstr ""
+msgstr "некорректный список регистров"
 
 #: config/tc-aarch64.c:5535
 msgid "missing type suffix"
-msgstr ""
+msgstr "отсутствует суффикс типа"
 
 #: config/tc-aarch64.c:5554
 msgid "C0 - C15 expected"
-msgstr ""
+msgstr "ожидается C0 - C15"
 
 #: config/tc-aarch64.c:5655 config/tc-aarch64.c:5679
 msgid "immediate zero expected"
-msgstr ""
+msgstr "ожидается непосредственный ноль"
 
 #: config/tc-aarch64.c:5775
 msgid "shift not allowed for bitmask immediate"
-msgstr ""
+msgstr "сдвиг недопустим для непосредственной маски битов"
 
 #: config/tc-aarch64.c:5829
 msgid "can't mix relocation modifier with explicit shift"
-msgstr ""
+msgstr "нельзя смешивать модификатор перемещения и явный сдвиг"
 
 #: config/tc-aarch64.c:5877
 msgid "invalid condition"
-msgstr ""
+msgstr "некорректное условие"
 
 #: config/tc-aarch64.c:5903
 msgid "invalid pc-relative address"
-msgstr ""
+msgstr "некорректный адрес, относительный pc"
 
 #. Only permit "=value" in the literal load instructions.
 #. The literal will be generated by programmer_friendly_fixup.
 #: config/tc-aarch64.c:5911
 msgid "invalid use of \"=immediate\""
-msgstr ""
+msgstr "некорректное употребление «=immediate»"
 
 #: config/tc-aarch64.c:5976 config/tc-aarch64.c:6008 config/tc-aarch64.c:6026
 #: config/tc-aarch64.c:6048 config/tc-aarch64.c:6068 config/tc-aarch64.c:6087
@@ -1868,103 +1854,96 @@ msgstr ""
 #: config/tc-aarch64.c:6177 config/tc-aarch64.c:6202 config/tc-aarch64.c:6218
 #: config/tc-aarch64.c:6242
 msgid "invalid addressing mode"
-msgstr ""
+msgstr "некорректный режим адресации"
 
 #: config/tc-aarch64.c:5992
 msgid "the optional immediate offset can only be 0"
-msgstr ""
+msgstr "необязательным непоредственным смещением может быть только 0"
 
 #: config/tc-aarch64.c:6031 config/tc-aarch64.c:6053 config/tc-aarch64.c:6073
-#, fuzzy
-#| msgid "relocation is not supported"
 msgid "relocation not allowed"
-msgstr "перемещение не поддерживается"
+msgstr "перемещение не допускается"
 
 #: config/tc-aarch64.c:6116
 msgid "writeback value must be an immediate constant"
-msgstr ""
+msgstr "значение обратной записи должно быть непосредственное константой"
 
 #. Make sure this has priority over
 #. "invalid addressing mode".
 #: config/tc-aarch64.c:6156
 msgid "constant offset required"
-msgstr ""
+msgstr "требуется константное смещение"
 
 #: config/tc-aarch64.c:6252
 msgid "unknown or missing system register name"
-msgstr ""
+msgstr "неизвестное или отсутствующее имя системного регистра"
 
 #: config/tc-aarch64.c:6262
 msgid "unknown or missing PSTATE field name"
-msgstr ""
+msgstr "неизвестное или отсутствующее имя поля PSTATE"
 
 #: config/tc-aarch64.c:6286
-#, fuzzy
-#| msgid "missing emulation mode name"
 msgid "unknown or missing operation name"
-msgstr "пропущено имя режима эмуляции"
+msgstr "неизвестное или отсутствующее имя операции"
 
 #: config/tc-aarch64.c:6299
 msgid "the specified option is not accepted in ISB"
-msgstr ""
+msgstr "указанный параметр неприемлем для ISB"
 
 #: config/tc-aarch64.c:6325 config/tc-aarch64.c:7458 config/tc-arm.c:7211
 #, c-format
 msgid "unhandled operand code %d"
-msgstr ""
+msgstr "необработанный код операнда %d"
 
 #: config/tc-aarch64.c:6367
-#, fuzzy
-#| msgid "expected comma after name in .symver"
 msgid "unexpected comma before the omitted optional operand"
-msgstr "ожидается запятая после имени в .symver"
+msgstr "ожидается запятая перед пропущенным необязательным операндом"
 
 #: config/tc-aarch64.c:6395
 msgid "unexpected characters following instruction"
-msgstr ""
+msgstr "неожиданные символы после инструкции"
 
 #: config/tc-aarch64.c:6473 config/tc-arm.c:5248 config/tc-arm.c:5809
 #: config/tc-arm.c:7973
 msgid "constant expression expected"
-msgstr ""
+msgstr "ожидается константное выражение"
 
 #: config/tc-aarch64.c:6480
 msgid "literal pool insertion failed"
-msgstr ""
+msgstr "невозможно вставить в пул литералов"
 
 #: config/tc-aarch64.c:6549 config/tc-aarch64.c:6561
 #, c-format
 msgid "unpredictable transfer with writeback -- `%s'"
-msgstr ""
+msgstr "непредсказуемая передача с отложенной записью — «%s»"
 
 #: config/tc-aarch64.c:6565
 #, c-format
 msgid "unpredictable load of register pair -- `%s'"
-msgstr ""
+msgstr "непредсказумая загрузка пары регистров — «%s»"
 
 #: config/tc-aarch64.c:6642
 #, c-format
 msgid "unknown mnemonic `%s' -- `%s'"
-msgstr ""
+msgstr "неизвестная мнемоника «%s» — «%s»"
 
 #: config/tc-aarch64.c:6650
-#, fuzzy, c-format
-#| msgid "expected comma after name `%s' in .size directive"
+#, c-format
 msgid "unexpected comma after the mnemonic name `%s' -- `%s'"
-msgstr "ожидается запятая после имени %s в директиве .size"
+msgstr "неожиданная запятая после мнемонического имени «%s» — «%s»"
 
 #: config/tc-aarch64.c:6708
 #, c-format
 msgid "selected processor does not support `%s'"
-msgstr ""
+msgstr "выбранный процессор не поддерживает «%s»"
 
 #: config/tc-aarch64.c:7121 config/tc-arm.c:22852
 msgid "GOT already in the symbol table"
-msgstr ""
+msgstr "GOT уже в таблице символов"
 
 #: config/tc-aarch64.c:7283
 msgid "immediate cannot be moved by a single instruction"
-msgstr ""
+msgstr "непосредственный элемент невозможно передвинуть одной инструкцией"
 
 #: config/tc-aarch64.c:7326 config/tc-aarch64.c:7371 config/tc-aarch64.c:7397
 #: config/tc-arm.c:15411 config/tc-arm.c:15438 config/tc-arm.c:16080
@@ -1972,589 +1951,586 @@ msgstr ""
 #: config/tc-metag.c:2444 config/tc-metag.c:2453 config/tc-metag.c:2492
 #: config/tc-metag.c:2501 config/tc-metag.c:3021 config/tc-metag.c:3030
 msgid "immediate out of range"
-msgstr ""
+msgstr "непосредственный элемент за пределами диапазона"
 
 #: config/tc-aarch64.c:7390 config/tc-metag.c:4656 config/tc-xtensa.c:4183
 msgid "invalid immediate"
-msgstr ""
+msgstr "некорректный непосредственный элемент"
 
 #: config/tc-aarch64.c:7453 config/tc-tic6x.c:3861 config/tc-tic6x.c:3926
 #: config/tc-tic6x.c:3953 config/tc-tic6x.c:3981
 msgid "immediate offset out of range"
-msgstr ""
+msgstr "непосредственное смещение за пределами диапазона"
 
 #: config/tc-aarch64.c:7527 config/tc-arm.c:23190 config/tc-arm.c:23258
 #: config/tc-arm.c:23540
 #, c-format
 msgid "undefined symbol %s used as an immediate value"
-msgstr ""
+msgstr "неопределенный символ %s используется как непосредственное значение"
 
 #: config/tc-aarch64.c:7539
 msgid "pc-relative load offset not word aligned"
-msgstr ""
+msgstr "загрузочное смещение, относительное pc, не выровнено по границе слова"
 
 #: config/tc-aarch64.c:7542
 msgid "pc-relative load offset out of range"
-msgstr ""
+msgstr "загрузочное смещение, относительное pc, за пределами диапазона"
 
 #: config/tc-aarch64.c:7554
 msgid "pc-relative address offset out of range"
-msgstr ""
+msgstr "адресное смещение, относительное pc, за пределами диапазона"
 
 #: config/tc-aarch64.c:7566 config/tc-aarch64.c:7581
 msgid "conditional branch target not word aligned"
-msgstr ""
+msgstr "цель условного ветвления не выровнена по границе слова"
 
 #: config/tc-aarch64.c:7569 config/tc-aarch64.c:7584 config/tc-arm.c:23831
 msgid "conditional branch out of range"
-msgstr ""
+msgstr "цель условного ветвления за пределами диапазона"
 
 #: config/tc-aarch64.c:7597
 msgid "branch target not word aligned"
-msgstr ""
+msgstr "цель ветвления не выровнена по границе слова"
 
 #: config/tc-aarch64.c:7600 config/tc-arm.c:822 config/tc-mips.c:15683
 #: config/tc-mips.c:15699 config/tc-mips.c:15789
 msgid "branch out of range"
-msgstr ""
+msgstr "ветвление за пределами диапазона"
 
 #: config/tc-aarch64.c:7652 config/tc-arm.c:23431 config/tc-arm.c:23446
 #: config/tc-arm.c:23461 config/tc-arm.c:23472 config/tc-arm.c:23495
 #: config/tc-arm.c:24293 config/tc-moxie.c:716 config/tc-pj.c:452
 #: config/tc-sh.c:4293
 msgid "offset out of range"
-msgstr ""
+msgstr "смещение вне диапазона"
 
 #: config/tc-aarch64.c:7667
 msgid "unsigned value out of range"
-msgstr ""
+msgstr "беззнаковое значение за пределами диапазона"
 
 #: config/tc-aarch64.c:7675
 msgid "signed value out of range"
-msgstr ""
+msgstr "знаковое значение за пределами диапазона"
 
 #: config/tc-aarch64.c:7817
 #, c-format
 msgid "unexpected %s fixup"
-msgstr ""
+msgstr "неожиданное местоположение %s"
 
 #: config/tc-aarch64.c:7883 config/tc-arm.c:24802 config/tc-arm.c:24823
 #: config/tc-mips.c:18038 config/tc-or1k.c:348 config/tc-score.c:7480
 #, c-format
 msgid "cannot represent %s relocation in this object file format"
-msgstr ""
+msgstr "невозможно представить перемещение %s в данном формате объектного файла"
 
 #: config/tc-aarch64.c:7916
 #, c-format
 msgid "cannot do %u-byte relocation"
-msgstr ""
+msgstr "невозможно выполнить %u-байтовое перемещение"
 
 #: config/tc-aarch64.c:8227 config/tc-arm.c:25283 config/tc-score.c:6297
 #: config/tc-score.c:6527 config/tc-score.c:6532
 msgid "virtual memory exhausted"
-msgstr ""
+msgstr "закончилась виртуальная память"
 
 #: config/tc-aarch64.c:8385 config/tc-arm.c:25622
 msgid "assemble for big-endian"
-msgstr ""
+msgstr "ассемблирование в порядке от старшего к младшему"
 
 #: config/tc-aarch64.c:8386 config/tc-arm.c:25623
 msgid "assemble for little-endian"
-msgstr ""
+msgstr "ассемблирование в порядке от младшего к старшему"
 
 #: config/tc-aarch64.c:8389
 msgid "temporary switch for dumping"
-msgstr ""
+msgstr "временное переключение для дампа"
 
 #: config/tc-aarch64.c:8391
 msgid "output verbose error messages"
-msgstr ""
+msgstr "выводить подробные сообщения об ошибках"
 
 #: config/tc-aarch64.c:8393
 msgid "do not output verbose error messages"
-msgstr ""
+msgstr "не выводить подробные сообщения об ошибках"
 
 #: config/tc-aarch64.c:8601 config/tc-arm.c:26444
 msgid "invalid architectural extension"
-msgstr ""
+msgstr "недопустимое расширение архитектуры"
 
 #: config/tc-aarch64.c:8626 config/tc-arm.c:26476
 msgid "must specify extensions to add before specifying those to remove"
-msgstr ""
+msgstr "добавляемые расширения должны быть указаны до указания их удаления"
 
 #: config/tc-aarch64.c:8634 config/tc-arm.c:26484
 msgid "missing architectural extension"
-msgstr ""
+msgstr "отсутствует расширение архитектуры"
 
 #: config/tc-aarch64.c:8661 config/tc-arm.c:26536
 #, c-format
 msgid "unknown architectural extension `%s'"
-msgstr ""
+msgstr "неизвестное расширение архитектуры «%s»"
 
 #: config/tc-aarch64.c:8685 config/tc-arm.c:26570 config/tc-metag.c:5834
 #, c-format
 msgid "missing cpu name `%s'"
-msgstr ""
+msgstr "отсутствует имя ЦП «%s»"
 
 #: config/tc-aarch64.c:8699 config/tc-aarch64.c:8916 config/tc-arm.c:26605
 #: config/tc-arm.c:27369 config/tc-metag.c:5845
 #, c-format
 msgid "unknown cpu `%s'"
-msgstr ""
+msgstr "неизвестный ЦП «%s»"
 
 #: config/tc-aarch64.c:8717 config/tc-arm.c:26623
 #, c-format
 msgid "missing architecture name `%s'"
-msgstr ""
+msgstr "отсутствует название архитектуры «%s»"
 
 #: config/tc-aarch64.c:8731 config/tc-aarch64.c:8963 config/tc-arm.c:26640
 #: config/tc-arm.c:27404 config/tc-arm.c:27434 config/tc-score.c:7715
 #, c-format
 msgid "unknown architecture `%s'\n"
-msgstr ""
+msgstr "неизвестная архитектура «%s»\n"
 
 #: config/tc-aarch64.c:8754
-#, fuzzy, c-format
-#| msgid "missing name"
+#, c-format
 msgid "missing abi name `%s'"
-msgstr "пропущено имя"
+msgstr "отсутствует имя abi «%s»"
 
 #: config/tc-aarch64.c:8765
 #, c-format
 msgid "unknown abi `%s'\n"
-msgstr ""
+msgstr "неизвестный abi «%s»\n"
 
 #: config/tc-aarch64.c:8771
 msgid "<abi name>\t  specify for ABI <abi name>"
-msgstr ""
+msgstr "<имя abi>\t  указать для ABI <имя abi>"
 
 #: config/tc-aarch64.c:8774 config/tc-arm.c:26727 config/tc-metag.c:5911
 msgid "<cpu name>\t  assemble for CPU <cpu name>"
-msgstr ""
+msgstr "<имя ЦП>\t  ассемблировать для ЦП <имя ЦП>"
 
 #: config/tc-aarch64.c:8776 config/tc-arm.c:26729
 msgid "<arch name>\t  assemble for architecture <arch name>"
-msgstr ""
+msgstr "<имя арх>\t  ассемблировать для архитектуры <имя арх>"
 
 #: config/tc-aarch64.c:8815 config/tc-aarch64.c:8835 config/tc-arm.c:26785
 #: config/tc-arm.c:26803 config/tc-arm.c:26823 config/tc-metag.c:5936
 #, c-format
 msgid "option `-%c%s' is deprecated: %s"
-msgstr ""
+msgstr "параметр «-%c%s» устарел: %s"
 
 #: config/tc-aarch64.c:8855
 #, c-format
 msgid " AArch64-specific assembler options:\n"
-msgstr ""
+msgstr "Специализированные параметры ассемблера для AArch64:\n"
 
 #: config/tc-aarch64.c:8866 config/tc-arc.c:3536 config/tc-arm.c:26854
 #, c-format
 msgid "  -EB                     assemble code for a big-endian cpu\n"
-msgstr ""
+msgstr "  -EB                     ассемблерный код для ЦП с прямым порядком байт\n"
 
 #: config/tc-aarch64.c:8871 config/tc-arc.c:3538 config/tc-arm.c:26859
 #, c-format
 msgid "  -EL                     assemble code for a little-endian cpu\n"
-msgstr ""
+msgstr "  -EL                     ассемблерный код для ЦП с обратным порядком байт\n"
 
 #: config/tc-alpha.c:653
 #, c-format
 msgid "No !literal!%ld was found"
-msgstr ""
+msgstr "Не найден !literal!%ld"
 
 #: config/tc-alpha.c:660
 #, c-format
 msgid "No !tlsgd!%ld was found"
-msgstr ""
+msgstr "Не найден !tlsgd!%ld"
 
 #: config/tc-alpha.c:667
 #, c-format
 msgid "No !tlsldm!%ld was found"
-msgstr ""
+msgstr "Не найден !tlsldm!%ld"
 
 #: config/tc-alpha.c:676
 #, c-format
 msgid "No ldah !gpdisp!%ld was found"
-msgstr ""
+msgstr "Не найден ldah !gpdisp!%ld"
 
 #: config/tc-alpha.c:726
 #, c-format
 msgid "too many !literal!%ld for %s"
-msgstr ""
+msgstr "слишком много !literal!%ld для %s"
 
 #: config/tc-alpha.c:756
 #, c-format
 msgid "No lda !gpdisp!%ld was found"
-msgstr ""
+msgstr "Не найден lda !gpdisp!%ld"
 
 #. Only support one relocation op per insn.
 #: config/tc-alpha.c:915
 msgid "More than one relocation op per insn"
-msgstr ""
+msgstr "Более одного операции перемещения на инструкцию"
 
 #: config/tc-alpha.c:930 config/tc-arc.c:1197
 msgid "No relocation operand"
-msgstr ""
+msgstr "Не операнд перемещения"
 
 #: config/tc-alpha.c:940
 #, c-format
 msgid "Unknown relocation operand: !%s"
-msgstr ""
+msgstr "Неизвестный операнд перемещения: !%s"
 
 #: config/tc-alpha.c:950
 #, c-format
 msgid "no sequence number after !%s"
-msgstr ""
+msgstr "отсутствует номер последовательности после !%s"
 
 #: config/tc-alpha.c:960
 #, c-format
 msgid "!%s does not use a sequence number"
-msgstr ""
+msgstr "!%s не использует номер последовательности"
 
 #: config/tc-alpha.c:970
 #, c-format
 msgid "Bad sequence number: !%s!%s"
-msgstr ""
+msgstr "Плохой номер последовательности: !%s!%s"
 
 #: config/tc-alpha.c:1186 config/tc-alpha.c:3360
 #, c-format
 msgid "inappropriate arguments for opcode `%s'"
-msgstr ""
+msgstr "неподходящие аргументы для кода операции «%s»"
 
 #: config/tc-alpha.c:1188 config/tc-alpha.c:3362
 #, c-format
 msgid "opcode `%s' not supported for target %s"
-msgstr ""
+msgstr "код операции «%s» не поддерживается для цели %s"
 
 #: config/tc-alpha.c:1192 config/tc-alpha.c:3366 config/tc-avr.c:1904
 #: config/tc-msp430.c:3988 config/tc-wasm32.c:753
 #, c-format
 msgid "unknown opcode `%s'"
-msgstr ""
+msgstr "неизвестный код операции «%s»"
 
 #: config/tc-alpha.c:1273 config/tc-alpha.c:1532
 msgid "overflow in literal (.lita) table"
-msgstr ""
+msgstr "переполнение в таблице литералов (.lita)"
 
 #: config/tc-alpha.c:1280 config/tc-alpha.c:1304 config/tc-alpha.c:1545
 #: config/tc-alpha.c:2232 config/tc-alpha.c:2277 config/tc-alpha.c:2346
 #: config/tc-alpha.c:2429 config/tc-alpha.c:2654 config/tc-alpha.c:2752
 msgid "macro requires $at register while noat in effect"
-msgstr ""
+msgstr "для макроса требуется регистр $at, но в действительности его нет"
 
 #: config/tc-alpha.c:1282 config/tc-alpha.c:1306 config/tc-alpha.c:1547
 msgid "macro requires $at while $at in use"
-msgstr ""
+msgstr "для макроса требуется регистр $at, но $at уже используется"
 
 #: config/tc-alpha.c:1491
 msgid "bignum invalid; zero assumed"
-msgstr ""
+msgstr "некорректный bignum; предполагается ноль"
 
 #: config/tc-alpha.c:1493
 msgid "floating point number invalid; zero assumed"
-msgstr ""
+msgstr "некорректное число с плавающей точкой; предполагается ноль"
 
 #: config/tc-alpha.c:1498
 msgid "can't handle expression"
-msgstr ""
+msgstr "невозможно обработать выражение"
 
 #: config/tc-alpha.c:1538
 msgid "overflow in literal (.lit8) table"
-msgstr ""
+msgstr "переполнение в таблице литералов (.lit8)"
 
 #: config/tc-alpha.c:1835
 #, c-format
 msgid "too many ldah insns for !gpdisp!%ld"
-msgstr ""
+msgstr "слишком много инструкций ldah для !gpdisp!%ld"
 
 #: config/tc-alpha.c:1837 config/tc-alpha.c:1849
 #, c-format
 msgid "both insns for !gpdisp!%ld must be in the same section"
-msgstr ""
+msgstr "обе инструкции для !gpdisp!%ld должны быть в одном разделе"
 
 #: config/tc-alpha.c:1847
 #, c-format
 msgid "too many lda insns for !gpdisp!%ld"
-msgstr ""
+msgstr "слишком много инструкций lda для !gpdisp!%ld"
 
 #: config/tc-alpha.c:1903
 #, c-format
 msgid "too many lituse insns for !lituse_tlsgd!%ld"
-msgstr ""
+msgstr "слишком много инструкций lituse для !lituse_tlsgd!%ld"
 
 #: config/tc-alpha.c:1906
 #, c-format
 msgid "too many lituse insns for !lituse_tlsldm!%ld"
-msgstr ""
+msgstr "слишком много инструкций lituse для !lituse_tlsldm!%ld"
 
 #: config/tc-alpha.c:1923
 #, c-format
 msgid "duplicate !tlsgd!%ld"
-msgstr ""
+msgstr "повторный !tlsgd!%ld"
 
 #: config/tc-alpha.c:1925
 #, c-format
 msgid "sequence number in use for !tlsldm!%ld"
-msgstr ""
+msgstr "номер последовательности задействован для !tlsldm!%ld"
 
 #: config/tc-alpha.c:1939
 #, c-format
 msgid "duplicate !tlsldm!%ld"
-msgstr ""
+msgstr "повторный !tlsldm!%ld"
 
 #: config/tc-alpha.c:1941
 #, c-format
 msgid "sequence number in use for !tlsgd!%ld"
-msgstr ""
+msgstr "номер последовательности задействован для !tlsgd!%ld"
 
 #: config/tc-alpha.c:1996 config/tc-arc.c:2806 config/tc-mn10200.c:854
 #: config/tc-mn10300.c:1150 config/tc-ppc.c:1953 config/tc-s390.c:675
 #: config/tc-tilegx.c:427 config/tc-tilegx.c:477 config/tc-tilepro.c:383
 msgid "operand"
-msgstr ""
+msgstr "операнд"
 
 #: config/tc-alpha.c:2135
 msgid "invalid relocation for instruction"
-msgstr ""
+msgstr "некорректное перемещение для инструкции"
 
 #: config/tc-alpha.c:2149
 msgid "invalid relocation for field"
-msgstr ""
+msgstr "некорректное перемещение для поля"
 
 #: config/tc-alpha.c:2981
 msgid "can not resolve expression"
-msgstr ""
+msgstr "невозможно разобрать выражение"
 
 #: config/tc-alpha.c:3514 config/tc-i370.c:1056 config/tc-microblaze.c:200
 #: config/tc-ppc.c:2275 config/tc-ppc.c:5394
 #, c-format
 msgid ".COMMon length (%ld.) <0! Ignored."
-msgstr ""
+msgstr "Длина .COMMon (%ld.) <0! Игнорируется."
 
 #: config/tc-alpha.c:3525 config/tc-ia64.c:1094 config/tc-sparc.c:4435
 #: config/tc-v850.c:306
 msgid "Ignoring attempt to re-define symbol"
-msgstr ""
+msgstr "Игнорируется попытка переопределения символа"
 
 #: config/tc-alpha.c:3617 config/tc-sparc.c:4443
 #, c-format
 msgid "Length of .comm \"%s\" is already %ld. Not changed to %ld."
-msgstr ""
+msgstr "Длина .comm «%s» уже равна %ld. Не изменяется на %ld."
 
 #: config/tc-alpha.c:3724
 msgid ".ent directive has no name"
-msgstr ""
+msgstr "директива .ent не имеет имени"
 
 #: config/tc-alpha.c:3732
 msgid "nested .ent directives"
-msgstr ""
+msgstr "вложенные директивы .ent"
 
 #: config/tc-alpha.c:3776 ecoff.c:3008
 msgid ".end directive has no name"
-msgstr ""
+msgstr "директива .end не имеет имени"
 
 #: config/tc-alpha.c:3784
 msgid ".end directive without matching .ent"
-msgstr ""
+msgstr "директива .end без надлежащего .ent"
 
 #: config/tc-alpha.c:3786
 msgid ".end directive names different symbol than .ent"
-msgstr ""
+msgstr "имя директивы .end указывает на другой символ, отличный от .ent"
 
 #: config/tc-alpha.c:3829 ecoff.c:3145
 msgid ".fmask outside of .ent"
-msgstr ""
+msgstr ".fmask вне .ent"
 
 #: config/tc-alpha.c:3831 config/tc-score.c:5598 ecoff.c:3209
 msgid ".mask outside of .ent"
-msgstr ""
+msgstr ".mask вне .ent"
 
 #: config/tc-alpha.c:3839 ecoff.c:3152
 msgid "bad .fmask directive"
-msgstr ""
+msgstr "неверная директива .fmask"
 
 #: config/tc-alpha.c:3841 ecoff.c:3216
 msgid "bad .mask directive"
-msgstr ""
+msgstr "неверная директива .mask"
 
 #: config/tc-alpha.c:3874 config/tc-mips.c:19507 config/tc-score.c:5739
 #: ecoff.c:3173
 msgid ".frame outside of .ent"
-msgstr ""
+msgstr ".frame вне .ent"
 
 #: config/tc-alpha.c:3885 config/tc-mips.c:19518 ecoff.c:3184
 msgid "bad .frame directive"
-msgstr ""
+msgstr "неверная директива .frame"
 
 #: config/tc-alpha.c:3919
 msgid ".prologue directive without a preceding .ent directive"
-msgstr ""
+msgstr "директива .prologue без предшествующей директивы .ent"
 
 #: config/tc-alpha.c:3937
 #, c-format
 msgid "Invalid argument %d to .prologue."
-msgstr ""
+msgstr "Неверный аргумент %d в .prologue."
 
 #: config/tc-alpha.c:4026
 msgid "ECOFF debugging is disabled."
-msgstr ""
+msgstr "Отладка ECOFF выключена."
 
 #: config/tc-alpha.c:4040
 msgid ".ent directive without matching .end"
-msgstr ""
+msgstr "директива .ent без надлежащего .end"
 
 #: config/tc-alpha.c:4133
 msgid ".usepv directive has no name"
-msgstr ""
+msgstr "директива .usepv не имеет имени"
 
 #: config/tc-alpha.c:4146
 msgid ".usepv directive has no type"
-msgstr ""
+msgstr "директива .usepv не имеет типа"
 
 #: config/tc-alpha.c:4161
 msgid "unknown argument for .usepv"
-msgstr ""
+msgstr "неизвестный аргумент .usepv"
 
 #: config/tc-alpha.c:4274
 #, c-format
 msgid "unknown section attribute %s"
-msgstr ""
+msgstr "неизвестный атрибут раздела %s"
 
 #: config/tc-alpha.c:4369
 msgid "previous .ent not closed by a .end"
-msgstr ""
+msgstr "предыдущая .ent не закрыта .end"
 
 #: config/tc-alpha.c:4390
 msgid ".ent directive has no symbol"
-msgstr ""
+msgstr "директива .ent не имеет символа"
 
 #: config/tc-alpha.c:4415
 msgid ".handler directive has no name"
-msgstr ""
+msgstr "директива .handler не имеет имени"
 
 #: config/tc-alpha.c:4446
 msgid "Bad .frame directive 1./2. param"
-msgstr ""
+msgstr "Неверный параметр 1./2. директивы .frame"
 
 #: config/tc-alpha.c:4456
 #, c-format
 msgid "Bad RA (%d) register for .frame"
-msgstr ""
+msgstr "Неверный регистр RA (%d) у .frame"
 
 #: config/tc-alpha.c:4461
 msgid "Bad .frame directive 3./4. param"
-msgstr ""
+msgstr "Неверный параметр 3./4. директивы .frame"
 
 #: config/tc-alpha.c:4497
 msgid ".pdesc directive not in link (.link) section"
-msgstr ""
+msgstr "директива .pdesc не в разделе связей (.link)"
 
 #: config/tc-alpha.c:4504
 msgid ".pdesc directive has no entry symbol"
-msgstr ""
+msgstr "директива .pdesc не имеет входного символа"
 
 #: config/tc-alpha.c:4515
 msgid ".pdesc has a bad entry symbol"
-msgstr ""
+msgstr "у директивы .pdesc указан неверный входной символ"
 
 #: config/tc-alpha.c:4526
 msgid ".pdesc doesn't match with last .ent"
-msgstr ""
+msgstr ".pdesc не совпадает с последней .ent"
 
 #: config/tc-alpha.c:4541
 msgid "No comma after .pdesc <entryname>"
-msgstr ""
+msgstr "Отсутствует запятая после .pdesc <входное_имя>"
 
 #: config/tc-alpha.c:4561
 msgid "unknown procedure kind"
-msgstr ""
+msgstr "неизвестный вид процедуры"
 
 #: config/tc-alpha.c:4656
 msgid ".name directive not in link (.link) section"
-msgstr ""
+msgstr "директива .name не в разделе связей (.link)"
 
 #: config/tc-alpha.c:4664
 msgid ".name directive has no symbol"
-msgstr ""
+msgstr "директива .name не имеет символа"
 
 #: config/tc-alpha.c:4698
 msgid "No symbol after .linkage"
-msgstr ""
+msgstr "Отсутствует символ после .linkage"
 
 #: config/tc-alpha.c:4745
 msgid "No symbol after .code_address"
-msgstr ""
+msgstr "Отсутствует символ после .code_address"
 
 #: config/tc-alpha.c:4771 config/tc-score.c:5604
 msgid "Bad .mask directive"
-msgstr ""
+msgstr "Неверная директива .mask"
 
 #: config/tc-alpha.c:4789
 msgid "Bad .fmask directive"
-msgstr ""
+msgstr "Неверная директива .fmask"
 
 #: config/tc-alpha.c:4946
 #, c-format
 msgid "Expected comma after name \"%s\""
-msgstr ""
+msgstr "Ожидается запятая после имени «\"%s»"
 
 #: config/tc-alpha.c:4958
 #, c-format
 msgid "unhandled: .proc %s,%d"
-msgstr ""
+msgstr "не обработано: .proc %s,%d"
 
 #: config/tc-alpha.c:4991
 #, c-format
 msgid "Tried to .set unrecognized mode `%s'"
-msgstr ""
+msgstr "Попытка задать .set нераспознанный режим «%s»"
 
 #: config/tc-alpha.c:5017
 #, c-format
 msgid "Bad base register, using $%d."
-msgstr ""
+msgstr "Неверный базовый регистр, используется $%d."
 
 #: config/tc-alpha.c:5038 config/tc-nios2.c:351 config/tc-nios2.c:476
 #, c-format
 msgid "Alignment too large: %d. assumed"
-msgstr ""
+msgstr "Слишком большое выравнивание: предполагается %d"
 
 #: config/tc-alpha.c:5042 config/tc-d30v.c:2057 config/tc-nios2.c:355
 #: config/tc-nios2.c:480 config/tc-pru.c:220 config/tc-pru.c:336
 msgid "Alignment negative: 0 assumed"
-msgstr ""
+msgstr "Отрицательное выравнивание: предполагается 0"
 
 #: config/tc-alpha.c:5137 config/tc-alpha.c:5630
 #, c-format
 msgid "Unknown CPU identifier `%s'"
-msgstr ""
+msgstr "Неизвестный идентификатор ЦП «%s»"
 
 #: config/tc-alpha.c:5328
 #, c-format
 msgid "Chose GP value of %lx\n"
-msgstr ""
+msgstr "Выбираем значение %lx для GP\n"
 
 #: config/tc-alpha.c:5342
-#, fuzzy
-#| msgid "unrecognized .section attribute: want a,w,x,M,S,G,T"
 msgid "bad .section directive: want a,s,w,x,M,S,G,T in string"
-msgstr "нераспознанный атрибут .section: должно быть a,w,x,M,S,G,T"
+msgstr "неправильная директива .section: в строке требуется a,s,w,x,M,S,G,T"
 
 #: config/tc-alpha.c:5431
 #, c-format
 msgid "internal error: can't hash opcode `%s': %s"
-msgstr ""
+msgstr "внутренняя ошибка: невозможно получить хеш кода операции «%s»: %s"
 
 #: config/tc-alpha.c:5467
 #, c-format
 msgid "internal error: can't hash macro `%s': %s"
-msgstr ""
+msgstr "внутренняя ошибка: невозможно получить хеш макроса «%s»: %s"
 
 #: config/tc-alpha.c:5551 config/tc-arc.c:2459 config/tc-arc.c:2473
 #: config/tc-arm.c:7288 config/tc-arm.c:7300 config/tc-i960.c:706
 #: config/tc-xtensa.c:5432 config/tc-xtensa.c:5508 config/tc-xtensa.c:5625
 #: config/tc-z80.c:1935
 msgid "syntax error"
-msgstr ""
+msgstr "синтаксическая ошибка"
 
 #: config/tc-alpha.c:5681
 msgid ""
@@ -2566,6 +2542,13 @@ msgid ""
 "-m21064 | -m21066 | -m21164 | -m21164a | -m21164pc | -m21264 | -m21264a | -m21264b\n"
 "\t\t\tthese variants include PALcode opcodes\n"
 msgstr ""
+"Параметры Alpha:\n"
+"-32addr\t\t\tсчитать адреса 32-битными значениями\n"
+"-F\t\t\tубрать поддержку инструкций с плавающей запятой\n"
+"-mev4 | -mev45 | -mev5 | -mev56 | -mpca56 | -mev6 | -mev67 | -mev68 | -mall\n"
+"\t\t\tзадать вариант архитектуры Alpha\n"
+"-m21064 | -m21066 | -m21164 | -m21164a | -m21164pc | -m21264 | -m21264a | -m21264b\n"
+"\t\t\tэти варианты содержат коды операций PALcode\n"
 
 #: config/tc-alpha.c:5691
 msgid ""
@@ -2574,50 +2557,54 @@ msgid ""
 "-H\t\t\tshow new symbol after hash truncation\n"
 "-replace/-noreplace\tenable or disable the optimization of procedure calls\n"
 msgstr ""
+"Параметры VMS:\n"
+"-+\t\t\tкодировать (не обрезать) имена длиннее 64 символов\n"
+"-H\t\t\tпоказывать новый символа после хеш-обрезания\n"
+"-replace/-noreplace\tвключить/выключить оптимизацию вызовов процедур\n"
 
 #: config/tc-alpha.c:5942 config/tc-arc.c:3086
 #, c-format
 msgid "unhandled relocation type %s"
-msgstr ""
+msgstr "необработанный тип перемещения %s"
 
 #: config/tc-alpha.c:5955 config/tc-arc.c:3094
 msgid "non-absolute expression in constant field"
-msgstr ""
+msgstr "не абсолютное выражение в поле-константе"
 
 #: config/tc-alpha.c:5969
 #, c-format
 msgid "type %d reloc done?\n"
-msgstr ""
+msgstr "выполнено перемещение типа %d?\n"
 
 #: config/tc-alpha.c:6016 config/tc-alpha.c:6023
 msgid "Used $at without \".set noat\""
-msgstr ""
+msgstr "Используется $at без «.set noat»"
 
 #: config/tc-alpha.c:6192
 #, c-format
 msgid "!samegp reloc against symbol without .prologue: %s"
-msgstr ""
+msgstr "перемещение !samegp для символа без .prologue: %s"
 
 #: config/tc-alpha.c:6236 config/tc-arc.c:3217 config/tc-tilegx.c:1751
 #: config/tc-tilepro.c:1531 config/tc-wasm32.c:813 config/tc-xtensa.c:6118
 #, c-format
 msgid "cannot represent `%s' relocation in object file"
-msgstr ""
+msgstr "невозможно представить перемещение «%s» в объектном файле"
 
 #: config/tc-alpha.c:6242 config/tc-arc.c:3223
 #, c-format
 msgid "internal error? cannot generate `%s' relocation"
-msgstr ""
+msgstr "внутренняя ошибка? невозможно сгенерировать перемещение «%s»"
 
 #: config/tc-alpha.c:6338
 #, c-format
 msgid "frame reg expected, using $%d."
-msgstr ""
+msgstr "ожидается регистр кадра, используется $%d."
 
 #: config/tc-arc.c:771
 #, c-format
 msgid "internal error: can't hash opcode '%s': %s"
-msgstr ""
+msgstr "внутренняя ошибка: невозможно получить хеш кода операции «%s»: %s"
 
 #: config/tc-arc.c:779 config/tc-arc.c:2556 config/tc-arc.c:2574
 #: config/tc-arc.c:2627 config/tc-arc.c:2651 config/tc-arc.c:4850
@@ -2625,49 +2612,48 @@ msgstr ""
 #: config/tc-cris.c:1195 config/tc-crx.c:535 config/tc-crx.c:562
 #: config/tc-crx.c:580 config/tc-pdp11.c:193
 msgid "Virtual memory exhausted"
-msgstr ""
+msgstr "Закончилась виртуальная память"
 
 #: config/tc-arc.c:829
-#, fuzzy, c-format
-#| msgid "invalid listing option `%c'"
+#, c-format
 msgid "invalid %s option for %s cpu"
-msgstr "неверный параметр %c для листинга"
+msgstr "неверный параметр %s для ЦП %s"
 
 #: config/tc-arc.c:834
 msgid "conflicting ISA extension attributes."
-msgstr ""
+msgstr "не согласующиеся атрибуты расширения ISA."
 
 #: config/tc-arc.c:853
 msgid "Multiple .cpu directives found"
-msgstr ""
+msgstr "Найдено несколько директив .cpu"
 
 #: config/tc-arc.c:871
 msgid "Command-line value overrides \".cpu\" directive"
-msgstr ""
+msgstr "Значение командной строки заменяет директиву «.cpu»"
 
 #: config/tc-arc.c:888
 #, c-format
 msgid "unknown architecture: %s\n"
-msgstr ""
+msgstr "неизвестная архитектура: %s\n"
 
 #: config/tc-arc.c:1187
 msgid "No valid label relocation operand"
-msgstr ""
+msgstr "Некорректный операнд метки перемещения"
 
 #: config/tc-arc.c:1209
 #, c-format
 msgid "Unknown relocation operand: @%s"
-msgstr ""
+msgstr "Неизвестный операнд перемещения: @%s"
 
 #: config/tc-arc.c:1222
 #, c-format
 msgid "Unable to parse TLS base: %s"
-msgstr ""
+msgstr "Невозможно разобрать базу TLS: %s"
 
 #: config/tc-arc.c:1246
 #, c-format
 msgid "@%s is not a complex relocation."
-msgstr ""
+msgstr "Значение @%s не являтся сложным перемещением."
 
 #: config/tc-arc.c:1252
 #, c-format
