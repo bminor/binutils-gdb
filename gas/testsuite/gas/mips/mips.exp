@@ -1494,6 +1494,10 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "pr12915"
     run_dump_test "reginfo-1a"
     run_dump_test "reginfo-1b"
+    run_dump_test "reginfo-2"
+    if $has_newabi {
+	run_dump_test "reginfo-2-n32"
+    }
 
     run_dump_test "micromips"
     run_dump_test "micromips-trap"

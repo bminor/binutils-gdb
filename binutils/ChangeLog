@@ -1,5 +1,12 @@
 2018-02-05  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/binutils-all/mips/mips-reginfo.d: New test.
+	* testsuite/binutils-all/mips/mips-reginfo-n32.d: New test.
+	* testsuite/binutils-all/mips/mips-reginfo.s: New test source.
+	* testsuite/binutils-all/mips/mips.exp: Run the new tests.
+
+2018-02-05  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/config/default.exp (binutils_run): Document
 	`binutils_run_status'.
 	* testsuite/lib/utils-lib.exp (default_binutils_run): Likewise,

@@ -7102,8 +7102,17 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
     {
       bfd_byte buf[4];
 
-      BFD_ASSERT (hdr->sh_size == sizeof (Elf32_External_RegInfo));
       BFD_ASSERT (hdr->contents == NULL);
+
+      if (hdr->sh_size != sizeof (Elf32_External_RegInfo))
+	{
+	  _bfd_error_handler
+	    (_("%B: Incorrect `.reginfo' section size; expected %Lu, got %Lu"),
+	     abfd, (bfd_size_type) sizeof (Elf32_External_RegInfo),
+	     hdr->sh_size);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       if (bfd_seek (abfd,
 		    hdr->sh_offset + sizeof (Elf32_External_RegInfo) - 4,

@@ -60,3 +60,8 @@ if $has_newabi {
     run_dump_test "mips-note-2r-n32"
     run_dump_test "mips-note-2r-n64"
 }
+
+run_dump_test "mips-reginfo"
+if $has_newabi {
+    run_dump_test "mips-reginfo-n32"
+}

@@ -1,5 +1,11 @@
 2018-02-05  Maciej W. Rozycki  <macro@mips.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_section_processing): For
+	SHT_MIPS_REGINFO sections don't assert the correct size and
+	report an error instead.
+
+2018-02-05  Maciej W. Rozycki  <macro@mips.com>
+
 	* elf.c (_bfd_elf_write_object_contents): Propagate a failure
 	status from `->elf_backend_section_processing'.
 
