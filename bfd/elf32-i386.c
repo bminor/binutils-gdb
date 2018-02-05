@@ -1578,6 +1578,10 @@ elf_i386_check_relocs (bfd *abfd,
 				     rel, rel_end, h, r_symndx, FALSE))
 	goto error_return;
 
+      /* Check if _GLOBAL_OFFSET_TABLE_ is referenced.  */
+      if (h == htab->elf.hgot)
+	htab->got_referenced = TRUE;
+
       switch (r_type)
 	{
 	case R_386_TLS_LDM:
@@ -1720,11 +1724,19 @@ elf_i386_check_relocs (bfd *abfd,
 
 	case R_386_GOTOFF:
 	case R_386_GOTPC:
-	create_got:
+create_got:
 	  if (r_type != R_386_TLS_IE)
 	    {
 	      if (eh != NULL)
-		eh->zero_undefweak &= 0x2;
+		{
+		  eh->zero_undefweak &= 0x2;
+
+		  /* Need GOT to resolve undefined weak symbol to 0.  */
+		  if (r_type == R_386_GOTOFF
+		      && h->root.type == bfd_link_hash_undefweak
+		      && bfd_link_executable (info))
+		    htab->got_referenced = TRUE;
+		}
 	      break;
 	    }
 	  /* Fall through */
