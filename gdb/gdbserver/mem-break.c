@@ -431,7 +431,6 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
 {
   struct process_info *proc = current_process ();
   struct raw_breakpoint *bp;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   if (type == raw_bkpt_type_sw || type == raw_bkpt_type_hw)
     {
@@ -450,13 +449,14 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
   else
     bp = find_raw_breakpoint_at (where, type, kind);
 
+  gdb::unique_xmalloc_ptr<struct raw_breakpoint> bp_holder;
   if (bp == NULL)
     {
-      bp = XCNEW (struct raw_breakpoint);
+      bp_holder.reset (XCNEW (struct raw_breakpoint));
+      bp = bp_holder.get ();
       bp->pc = where;
       bp->kind = kind;
       bp->raw_type = type;
-      make_cleanup (xfree, bp);
     }
 
   if (!bp->inserted)
@@ -468,14 +468,15 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
 	    debug_printf ("Failed to insert breakpoint at 0x%s (%d).\n",
 			  paddress (where), *err);
 
-	  do_cleanups (old_chain);
 	  return NULL;
 	}
 
       bp->inserted = 1;
     }
 
-  discard_cleanups (old_chain);
+  /* If the breakpoint was allocated above, we know we want to keep it
+     now.  */
+  bp_holder.release ();
 
   /* Link the breakpoint in, if this is the first reference.  */
   if (++bp->refcount == 1)

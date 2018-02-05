@@ -1,3 +1,8 @@
+2018-02-08  Tom Tromey  <tom@tromey.com>
+
+	* mem-break.c (set_raw_breakpoint_at): Use
+	gdb::unique_xmalloc_ptr.
+
 2018-01-30  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/13211
