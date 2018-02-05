@@ -11141,14 +11141,6 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
   gdb::unique_xmalloc_ptr<char> demangled;
   if (mangled != NULL)
     {
-      /* Use DMGL_RET_DROP for C++ template functions to suppress their return
-	 type.  It is easier for GDB users to search for such functions as
-	 `name(params)' than `long name(params)'.  In such case the minimal
-	 symbol names do not match the full symbol names but for template
-	 functions there is never a need to look up their definition from their
-	 declaration so the only disadvantage remains the minimal symbol
-	 variant `long name(params)' does not have the proper inferior type.
-	 */
 
       if (cu->language == language_go)
 	{
@@ -11158,6 +11150,14 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 	}
       else
 	{
+	  /* Use DMGL_RET_DROP for C++ template functions to suppress
+	     their return type.  It is easier for GDB users to search
+	     for such functions as `name(params)' than `long name(params)'.
+	     In such case the minimal symbol names do not match the full
+	     symbol names but for template functions there is never a need
+	     to look up their definition from their declaration so
+	     the only disadvantage remains the minimal symbol variant
+	     `long name(params)' does not have the proper inferior type.  */
 	  demangled.reset (gdb_demangle (mangled,
 					 (DMGL_PARAMS | DMGL_ANSI
 					  | DMGL_RET_DROP)));
