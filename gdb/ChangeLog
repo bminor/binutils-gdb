@@ -1,3 +1,17 @@
+2018-01-30  Alan Hayward  <alan.hayward@arm.com>
+
+	* target-descriptions.c (tdesc_element_visitor) Add empty implementations.
+	(tdesc_type): Move make_gdb_type from here.
+	(tdesc_type_builtin): Likewise.
+	(tdesc_type_vector): Likewise.
+	(tdesc_type_with_fields): Move make_gdb_type_ functions from here.
+	(make_gdb_type_struct): Move from tdesc_type_with_fields.
+	(make_gdb_type_union): Likewise.
+	(make_gdb_type_flags): Likewise.
+	(make_gdb_type_enum): Likewise.
+	(make_gdb_type): New function.
+	(tdesc_register_type): Use static make_gdb_type.
+
 2018-02-05  Ruslan Kabatsayev <b7.10110111@gmail.com>
 
 	* infcmd.c (default_print_one_register_info): Align natural-format
