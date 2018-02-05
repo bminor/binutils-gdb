@@ -50,6 +50,7 @@
 #include "common-inferior.h"
 #include "nat/fork-inferior.h"
 #include "environ.h"
+#include "common/scoped_restore.h"
 #ifndef ELFMAG0
 /* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
    then ELFMAG0 will have been defined.  If it didn't get included by
@@ -4207,15 +4208,14 @@ install_software_single_step_breakpoints (struct lwp_info *lwp)
 {
   struct thread_info *thread = get_lwp_thread (lwp);
   struct regcache *regcache = get_thread_regcache (thread, 1);
-  struct cleanup *old_chain = make_cleanup_restore_current_thread ();
+
+  scoped_restore save_current_thread = make_scoped_restore (&current_thread);
 
   current_thread = thread;
   std::vector<CORE_ADDR> next_pcs = the_low_target.get_next_pcs (regcache);
 
   for (CORE_ADDR pc : next_pcs)
     set_single_step_breakpoint (pc, current_ptid);
-
-  do_cleanups (old_chain);
 }
 
 /* Single step via hardware or software single step.

@@ -1,5 +1,14 @@
 2018-02-08  Tom Tromey  <tom@tromey.com>
 
+	* linux-low.c (install_software_single_step_breakpoints): Use
+	make_scoped_restore.
+	* inferiors.c (make_cleanup_restore_current_thread): Remove.
+	(do_restore_current_thread_cleanup): Remove.
+	* gdbthread.h (make_cleanup_restore_current_thread): Don't
+	declare.
+
+2018-02-08  Tom Tromey  <tom@tromey.com>
+
 	* mem-break.c (set_raw_breakpoint_at): Use
 	gdb::unique_xmalloc_ptr.
 

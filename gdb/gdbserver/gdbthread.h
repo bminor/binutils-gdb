@@ -224,7 +224,4 @@ lwpid_of (const thread_info *thread)
   return thread->id.lwp ();
 }
 
-/* Create a cleanup to restore current_thread.  */
-struct cleanup *make_cleanup_restore_current_thread (void);
-
 #endif /* GDB_THREAD_H */
