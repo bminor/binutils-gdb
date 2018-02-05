@@ -1,6 +1,6 @@
 #source: elfv2.s
 #as: -a64
-#ld: -melf64ppc --speculate-indirect-jumps --defsym f2=0x1234 --defsym f3=0x10008888 --defsym f4=0x1200000 --defsym _start=f1
+#ld: -melf64ppc --defsym f2=0x1234 --defsym f3=0x10008888 --defsym f4=0x1200000 --defsym _start=f1
 #objdump: -dr
 
 .*

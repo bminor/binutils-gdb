@@ -7652,15 +7652,6 @@ looks for calls to commonly used functions that create threads, and if
 seen, adds the necessary barriers.  Use these options to change the
 default behaviour.
 
-@cindex PowerPC64 PLT call stub speculative execution barrier
-@kindex --speculate-indirect-jumps
-@kindex --no-speculate-indirect-jumps
-@item --speculate-indirect-jumps
-@itemx --no-speculate-indirect-jumps
-Use these options to control whether all indirect branch instructions
-emitted by @code{ld}, such as those in the PLT, have a speculative
-execution barrier to mitigate Spectre variant 2 attacks.
-
 @cindex PowerPC64 ELFv2 PLT localentry optimization
 @kindex --plt-localentry
 @kindex --no-plt-localentry

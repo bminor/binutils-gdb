@@ -1,3 +1,11 @@
+2018-02-07  Alan Modra  <amodra@gmail.com>
+
+	Revert 2018-01-17  Alan Modra  <amodra@gmail.com>
+	* elf32-ppc.c: Remove speculation barrier support.
+	* elf32-ppc.h: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-ppc.h: Likewise.
+
 2018-02-05  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/22764

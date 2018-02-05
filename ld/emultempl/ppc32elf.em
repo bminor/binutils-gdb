@@ -38,7 +38,7 @@ static int notlsopt = 0;
 /* Choose the correct place for .got.  */
 static int old_got = 0;
 
-static struct ppc_elf_params params = { PLT_UNSET, 0, 1, -1,
+static struct ppc_elf_params params = { PLT_UNSET, 0, -1,
 					0, 0, 0, 0, 0, 0, 0 };
 
 static void
@@ -246,8 +246,6 @@ enum ppc32_opt
   OPTION_NO_TLS_GET_ADDR_OPT,
   OPTION_NEW_PLT,
   OPTION_OLD_PLT,
-  OPTION_SPECULATE_INDIRECT_JUMPS,
-  OPTION_NO_SPECULATE_INDIRECT_JUMPS,
   OPTION_PLT_ALIGN,
   OPTION_NO_PLT_ALIGN,
   OPTION_OLD_GOT,
@@ -269,8 +267,6 @@ if test -z "$VXWORKS_BASE_EM_FILE" ; then
   PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "secure-plt", no_argument, NULL, OPTION_NEW_PLT },
   { "bss-plt", no_argument, NULL, OPTION_OLD_PLT },
-  { "speculate-indirect-jumps", no_argument, NULL, OPTION_SPECULATE_INDIRECT_JUMPS },
-  { "no-speculate-indirect-jumps", no_argument, NULL, OPTION_NO_SPECULATE_INDIRECT_JUMPS },
   { "plt-align", optional_argument, NULL, OPTION_PLT_ALIGN },
   { "no-plt-align", no_argument, NULL, OPTION_NO_PLT_ALIGN },
   { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },'
@@ -302,12 +298,6 @@ if test -z "$VXWORKS_BASE_EM_FILE" ; then
 		   ));
   fprintf (file, _("\
   --bss-plt                   Force old-style BSS PLT.\n"
-		   ));
-  fprintf (file, _("\
-  --speculate-indirect-jumps  PLT call stubs without speculation barrier.\n"
-		   ));
-  fprintf (file, _("\
-  --no-speculate-indirect-jumps PLT call stubs with speculation barrier.\n"
 		   ));
   fprintf (file, _("\
   --plt-align                 Align PLT call stubs to fit cache lines.\n"
@@ -358,14 +348,6 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_OLD_PLT:
       params.plt_style = PLT_OLD;
-      break;
-
-    case OPTION_SPECULATE_INDIRECT_JUMPS:
-      params.speculate_indirect_jumps = 1;
-      break;
-
-    case OPTION_NO_SPECULATE_INDIRECT_JUMPS:
-      params.speculate_indirect_jumps = 0;
       break;
 
     case OPTION_PLT_ALIGN:

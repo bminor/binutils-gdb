@@ -1,3 +1,14 @@
+2018-02-07  Alan Modra  <amodra@gmail.com>
+
+	Revert 2018-01-17  Alan Modra  <amodra@gmail.com>
+	* emultempl/ppc32elf.em: Remove --speculate-indirect-jumps support.
+	* emultempl/ppc64elf.em: Likesize
+	* ld.texinfo: Likewise
+	* testsuite/ld-powerpc/elfv2exe.d,
+	* testsuite/ld-powerpc/elfv2so.d,
+	* testsuite/ld-powerpc/relbrlt.d,
+	* testsuite/ld-powerpc/powerpc.exp: Likewise.
+
 2018-02-05  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/22764

@@ -1108,10 +1108,6 @@ class General_options
 	      N_("(PowerPC64 only) Optimize calls to ELFv2 localentry:0 functions"),
 	      N_("(PowerPC64 only) Don't optimize ELFv2 calls"));
 
-  DEFINE_bool(speculate_indirect_jumps, options::TWO_DASHES, '\0', true,
-	      N_("(PowerPC only) PLT call stubs without speculation barrier"),
-	      N_("(PowerPC only) PLT call stubs with speculation barrier"));
-
   DEFINE_bool(plt_static_chain, options::TWO_DASHES, '\0', false,
 	      N_("(PowerPC64 only) PLT call stubs should load r11"),
 	      N_("(PowerPC64 only) PLT call stubs should not load r11"));
