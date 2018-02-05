@@ -1,5 +1,9 @@
 2018-02-05  Nick Clifton  <nickc@redhat.com>
 
+	* po/pt_BR.po: Updated Brazilian Portuguese translation.
+
+2018-02-05  Nick Clifton  <nickc@redhat.com>
+
 	Import from mainline:
 
 	2018-02-03  Nick Clifton  <nickc@redhat.com>
@@ -128,7 +132,7 @@
 
 2018-01-16  Nick Clifton  <nickc@redhat.com>
 
-	* po/pt_BR.po: Updated Brazilian Portugese translation.
+	* po/pt_BR.po: Updated Brazilian Portuguese translation.
 
 2018-01-15  Nick Clifton  <nickc@redhat.com>
 

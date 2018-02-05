@@ -2,14 +2,14 @@
 # Traduções em português brasileiro para o ld (pacote binutils).
 # Copyright (C) 2018 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Rafael Fontenelle <rffontenelle@gmail.com>, 2017, 2018.
+# Rafael Fontenelle <rafaelff@gnome.org>, 2017, 2018.
 msgid ""
 msgstr ""
 "Project-Id-Version: ld 2.30.0\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-01-13 13:43+0000\n"
 "PO-Revision-Date: 2018-01-15 13:02-0200\n"
-"Last-Translator: Rafael Fontenelle <rffontenelle@gmail.com>\n"
+"Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <ldpbr-translation@lists.sourceforge.net>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
