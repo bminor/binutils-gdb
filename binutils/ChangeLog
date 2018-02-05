@@ -1,3 +1,12 @@
+2018-02-05  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/config/default.exp (binutils_run): Document
+	`binutils_run_status'.
+	* testsuite/lib/utils-lib.exp (default_binutils_run): Likewise,
+	and set it.
+	(run_dump_test): Add `error', `error_output', `warning' and
+	`warning_output' options.  Update documentation accordingly.
+
 2018-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf.c (dwarf_regnames_riscv): New register name table.
