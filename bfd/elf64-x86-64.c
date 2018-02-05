@@ -1927,6 +1927,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 				       rel, rel_end, h, r_symndx, FALSE))
 	goto error_return;
 
+      /* Check if _GLOBAL_OFFSET_TABLE_ is referenced.  */
+      if (h == htab->elf.hgot)
+	htab->got_referenced = TRUE;
+
       eh = (struct elf_x86_link_hash_entry *) h;
       switch (r_type)
 	{

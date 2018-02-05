@@ -1,3 +1,16 @@
+2018-02-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22782
+	* elf32-i386.c (elf_i386_check_relocs): Set got_referenced if
+	_GLOBAL_OFFSET_TABLE_ is referenced or GOT is needed to resolve
+	undefined weak symbol to 0.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Set got_referenced
+	if _GLOBAL_OFFSET_TABLE_ is referenced.
+	* elfxx-x86.c (_bfd_x86_elf_size_dynamic_sections): Check
+	got_referenced instead of ref_regular_nonweak.  Remove the
+	unused _GLOBAL_OFFSET_TABLE_ from symbol table.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add got_referenced.
+
 2018-02-05  Maciej W. Rozycki  <macro@mips.com>
 
 	* elfnn-riscv.c (_bfd_riscv_relax_pc): Use `memset' to

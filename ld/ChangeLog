@@ -1,3 +1,23 @@
+2018-02-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22782
+	* testsuite/ld-i386/discarded1.s: Replace mov with div.
+	* testsuite/ld-x86-64/discarded1.s: Likewise.
+	* testsuite/ld-i386/i386.exp: Run pr22782.
+	* testsuite/ld-i386/load1-nacl.d: Updated for removing
+	_GLOBAL_OFFSET_TABLE_ from output.
+	* testsuite/ld-i386/load1.d: Likewise.
+	* testsuite/ld-x86-64/load1a-nacl.d: Likewise.
+	* testsuite/ld-x86-64/load1a.d: Likewise.
+	* testsuite/ld-x86-64/load1b-nacl.d: Likewise.
+	* testsuite/ld-x86-64/load1b.d: Likewise.
+	* testsuite/ld-i386/pr22782.d: New file.
+	* testsuite/ld-i386/pr22782.s: Likewise.
+	* testsuite/ld-x86-64/pr22782.s: Likewise.
+	* testsuite/ld-x86-64/pr22782a.d: Likewise.
+	* testsuite/ld-x86-64/pr22782b.d: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr22782a and pr22782b.
+
 2018-02-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt_BR.po: Updated Brazilian Portuguese translation.

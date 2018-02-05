@@ -1086,7 +1086,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
       /* Don't allocate .got.plt section if there are no GOT nor PLT
 	 entries and there is no reference to _GLOBAL_OFFSET_TABLE_.  */
       if ((htab->elf.hgot == NULL
-	   || !htab->elf.hgot->ref_regular_nonweak)
+	   || !htab->got_referenced)
 	  && (htab->elf.sgotplt->size == bed->got_header_size)
 	  && (htab->elf.splt == NULL
 	      || htab->elf.splt->size == 0)
@@ -1096,7 +1096,20 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 	      || htab->elf.iplt->size == 0)
 	  && (htab->elf.igotplt == NULL
 	      || htab->elf.igotplt->size == 0))
-	htab->elf.sgotplt->size = 0;
+	{
+	  htab->elf.sgotplt->size = 0;
+	  if (htab->elf.hgot != NULL)
+	    {
+	      /* Remove the unused _GLOBAL_OFFSET_TABLE_ from symbol
+		 table. */
+	      htab->elf.hgot->root.type = bfd_link_hash_undefined;
+	      htab->elf.hgot->root.u.undef.abfd
+		= htab->elf.hgot->root.u.def.section->owner;
+	      htab->elf.hgot->root.linker_def = 0;
+	      htab->elf.hgot->ref_regular = 0;
+	      htab->elf.hgot->def_regular = 0;
+	    }
+	}
     }
 
   if (_bfd_elf_eh_frame_present (info))

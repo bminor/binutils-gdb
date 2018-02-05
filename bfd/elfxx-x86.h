@@ -478,6 +478,9 @@ struct elf_x86_link_hash_table
       is only used for i386.  */
   bfd_byte plt0_pad_byte;
 
+  /* TRUE if GOT is referenced.  */
+  unsigned int got_referenced : 1;
+
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
   bfd_boolean (*is_reloc_section) (const char *);
