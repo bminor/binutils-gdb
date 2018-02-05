@@ -2185,12 +2185,47 @@ static struct type *get_die_type_at_offset (sect_offset,
 
 static struct type *get_die_type (struct die_info *die, struct dwarf2_cu *cu);
 
-static void dwarf2_release_queue (void *dummy);
-
 static void queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
 			     enum language pretend_language);
 
 static void process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile);
+
+/* Class, the destructor of which frees all allocated queue entries.  This
+   will only have work to do if an error was thrown while processing the
+   dwarf.  If no error was thrown then the queue entries should have all
+   been processed, and freed, as we went along.  */
+
+class dwarf2_queue_guard
+{
+public:
+  dwarf2_queue_guard () = default;
+
+  /* Free any entries remaining on the queue.  There should only be
+     entries left if we hit an error while processing the dwarf.  */
+  ~dwarf2_queue_guard ()
+  {
+    struct dwarf2_queue_item *item, *last;
+
+    item = dwarf2_queue;
+    while (item)
+      {
+	/* Anything still marked queued is likely to be in an
+	   inconsistent state, so discard it.  */
+	if (item->per_cu->queued)
+	  {
+	    if (item->per_cu->cu != NULL)
+	      free_one_cached_comp_unit (item->per_cu);
+	    item->per_cu->queued = 0;
+	  }
+
+	last = item;
+	item = item->next;
+	xfree (last);
+      }
+
+    dwarf2_queue = dwarf2_queue_tail = NULL;
+  }
+};
 
 /* The return type of find_file_and_directory.  Note, the enclosed
    string pointers are only valid while this object is valid.  */
@@ -3130,7 +3165,6 @@ load_cu (struct dwarf2_per_cu_data *per_cu)
 static void
 dw2_do_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
 {
-  struct cleanup *back_to;
   struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
 
   /* Skip type_unit_groups, reading the type units they contain
@@ -3138,7 +3172,10 @@ dw2_do_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
   if (IS_TYPE_UNIT_GROUP (per_cu))
     return;
 
-  back_to = make_cleanup (dwarf2_release_queue, NULL);
+  /* The destructor of dwarf2_queue_guard frees any entries left on
+     the queue.  After this point we're guaranteed to leave this function
+     with the dwarf queue empty.  */
+  dwarf2_queue_guard q_guard;
 
   if (dwarf2_per_objfile->using_index
       ? per_cu->v.quick->compunit_symtab == NULL
@@ -3165,8 +3202,6 @@ dw2_do_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
   /* Age the cache, releasing compilation units that have not
      been used recently.  */
   age_cached_comp_units (dwarf2_per_objfile);
-
-  do_cleanups (back_to);
 }
 
 /* Ensure that the symbols for PER_CU have been read in.  OBJFILE is
@@ -9960,35 +9995,6 @@ process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile)
       fprintf_unfiltered (gdb_stdlog, "Done expanding symtabs of %s.\n",
 			  objfile_name (dwarf2_per_objfile->objfile));
     }
-}
-
-/* Free all allocated queue entries.  This function only releases anything if
-   an error was thrown; if the queue was processed then it would have been
-   freed as we went along.  */
-
-static void
-dwarf2_release_queue (void *dummy)
-{
-  struct dwarf2_queue_item *item, *last;
-
-  item = dwarf2_queue;
-  while (item)
-    {
-      /* Anything still marked queued is likely to be in an
-	 inconsistent state, so discard it.  */
-      if (item->per_cu->queued)
-	{
-	  if (item->per_cu->cu != NULL)
-	    free_one_cached_comp_unit (item->per_cu);
-	  item->per_cu->queued = 0;
-	}
-
-      last = item;
-      item = item->next;
-      xfree (last);
-    }
-
-  dwarf2_queue = dwarf2_queue_tail = NULL;
 }
 
 /* Read in full symbols for PST, and anything it depends on.  */

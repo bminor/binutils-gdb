@@ -1,3 +1,11 @@
+2018-02-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2read.c (dwarf2_release_queue): Delete function, move body
+	into...
+	(class dwarf2_queue_guard): ...the destructor of this new class.
+	(dw2_do_instantiate_symtab): Create instance of the new class
+	dwarf2_queue_guard, remove cleanup.
+
 2018-02-09  Tom Tromey  <tom@tromey.com>
 
 	* source.c (find_source_lines): Don't reference past the end of
