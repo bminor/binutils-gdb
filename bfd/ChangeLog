@@ -1,3 +1,34 @@
+2018-02-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	PR ld/22263
+	* elfxx-sparc.c (sparc_elf_tls_transition): Turn call to bfd_link_pic
+	into call to !bfd_link_executable and tidy up.
+	(_bfd_sparc_elf_check_relocs): Fix formatting and tidy up.
+	<R_SPARC_TLS_LE_HIX22>: Turn call to bfd_link_pic into call to
+	!bfd_link_executable.
+	<R_SPARC_TLS_IE_HI22>: Likewise.
+	<GOT relocations>: Remove useless code, tidy and merge related blocks.
+	<R_SPARC_TLS_GD_CALL>: Turn call to bfd_link_pic into call to
+	!bfd_link_executable.
+	<R_SPARC_WPLT30>: Tidy up.
+	(_bfd_sparc_elf_gc_mark_hook): Turn call to bfd_link_pic into call to
+	!bfd_link_executable.
+	(allocate_dynrelocs): Likewise.
+	(_bfd_sparc_elf_relocate_section): Fix formatting and tidy up.
+	<R_SPARC_TLS_GD_HI22>: Merge into...
+	<R_SPARC_TLS_GD_LO10>: ...this.  Adjust 4th argument in call to
+	sparc_elf_tls_transition and remove redundant code.
+	<R_SPARC_TLS_LDM_HI22>: Turn call to bfd_link_pic into call to
+	!bfd_link_executable.
+	<R_SPARC_TLS_LDO_HIX22>: Likewise.
+	<R_SPARC_TLS_LE_HIX22>: Likewise.  Tidy up.
+	<R_SPARC_TLS_LDM_CALL>: Likewise.
+	<R_SPARC_TLS_GD_CALL>: Likewise.  Tidy up.
+	<R_SPARC_TLS_GD_ADD>: Likewise.
+	<R_SPARC_TLS_LDM_ADD>: Likewise.
+	<R_SPARC_TLS_LDO_ADD>: Likewise.
+	<R_SPARC_TLS_IE_LD>: Likewise.
+
 2018-02-06  Miloš Stojanović  <milos.stojanovic@rt-rk.com>
 
 	PR 22789

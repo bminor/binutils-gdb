@@ -1,3 +1,12 @@
+2018-02-06  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* testsuite/ld-elf/tls.exp (AFLAGS_PIC): Define on SPARC.
+	(pr22263-1): Pass AFLAGS_PIC to the assembler.
+	* testsuite/ld-sparc/tlspie32.s: Add test for other 3 transitions.
+	* testsuite/ld-sparc/tlspie32.dd: Adjust to above.
+	* testsuite/ld-sparc/tlspie64.s: Add test for other 3 transitions.
+	* testsuite/ld-sparc/tlspie64.dd: Adjust to above.
+
 2018-02-05  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/22764
