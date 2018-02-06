@@ -186,6 +186,7 @@ print_subexp_standard (struct expression *exp, int *pos,
       return;
 
     case OP_FUNCALL:
+    case OP_F77_UNDETERMINED_ARGLIST:
       (*pos) += 2;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
@@ -923,6 +924,7 @@ dump_subexp_body_standard (struct expression *exp,
       elt += 2;
       break;
     case OP_FUNCALL:
+    case OP_F77_UNDETERMINED_ARGLIST:
       {
 	int i, nargs;
 
@@ -1123,7 +1125,6 @@ dump_subexp_body_standard (struct expression *exp,
     default:
     case OP_NULL:
     case MULTI_SUBSCRIPT:
-    case OP_F77_UNDETERMINED_ARGLIST:
     case OP_COMPLEX:
     case OP_BOOL:
     case OP_M2_STRING:

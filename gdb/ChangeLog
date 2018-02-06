@@ -1,3 +1,9 @@
+2018-02-06  Yao Qi  <yao.qi@linaro.org>
+
+	* expprint.c (print_subexp_standard): Handle
+	OP_F77_UNDETERMINED_ARGLIST.
+	(dump_subexp_body_standard): Likewise.
+
 2018-02-05  Alan Hayward  <alan.hayward@arm.com>
 
 	* target-descriptions.c (tdesc_element_visitor) Add empty
