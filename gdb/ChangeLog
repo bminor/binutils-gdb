@@ -1,5 +1,10 @@
 2018-02-08  Tom Tromey  <tom@tromey.com>
 
+	* solib.c (solib_find_1): Use std::string.
+	(solib_bfd_fopen): Use unique_xmalloc_ptr.
+
+2018-02-08  Tom Tromey  <tom@tromey.com>
+
 	* build-id.c (build_id_to_debug_bfd): Use unique_xmalloc_ptr.
 
 2018-02-08  Tom Tromey  <tom@tromey.com>

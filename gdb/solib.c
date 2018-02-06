@@ -155,8 +155,7 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
   int found_file = -1;
   char *temp_pathname = NULL;
   const char *fskind = effective_target_file_system_kind ();
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  char *sysroot = gdb_sysroot;
+  const char *sysroot = gdb_sysroot;
   int prefix_len, orig_prefix_len;
 
   /* If the absolute prefix starts with "target:" but the filesystem
@@ -174,12 +173,13 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
   while (prefix_len > 0 && IS_DIR_SEPARATOR (sysroot[prefix_len - 1]))
     prefix_len--;
 
+  std::string sysroot_holder;
   if (prefix_len == 0)
     sysroot = NULL;
   else if (prefix_len != orig_prefix_len)
     {
-      sysroot = savestring (sysroot, prefix_len);
-      make_cleanup (xfree, sysroot);
+      sysroot_holder = std::string (sysroot, prefix_len);
+      sysroot = sysroot_holder.c_str ();
     }
 
   /* If we're on a non-DOS-based system, backslashes won't be
@@ -251,7 +251,6 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
     {
       if (fd != NULL)
 	*fd = -1;
-      do_cleanups (old_chain);
       return temp_pathname;
     }
 
@@ -299,8 +298,6 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
 	    xfree (temp_pathname);
 	}
     }
-
-  do_cleanups (old_chain);
 
   /* We try to find the library in various ways.  After each attempt,
      either found_file >= 0 and temp_pathname is a malloc'd string, or
@@ -480,7 +477,8 @@ solib_bfd_fopen (char *pathname, int fd)
 
   if (abfd == NULL)
     {
-      make_cleanup (xfree, pathname);
+      /* Arrange to free PATHNAME when the error is thrown.  */
+      gdb::unique_xmalloc_ptr<char> free_pathname (pathname);
       error (_("Could not open `%s' as an executable file: %s"),
 	     pathname, bfd_errmsg (bfd_get_error ()));
     }
