@@ -1,3 +1,10 @@
+2018-02-06  Miloš Stojanović  <milos.stojanovic@rt-rk.com>
+
+	PR 22789
+	* elfxx-mips.c (_bfd_mips_elf_find_nearest_line): If the dwarf
+	functions failed to find the function name, try the generic elf
+	find function instead.
+
 2018-02-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* coff-rs6000.c (xcoff_write_archive_contents_old): Use
