@@ -1,3 +1,8 @@
+2018-02-06  Paul Carroll  <pcarroll@codesourcery.com>
+
+	* bfd/dwarf2.c (find_abstract_name): Modified to return file and
+	line information in addition to name, if they can be found.
+
 2018-02-05  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/22764

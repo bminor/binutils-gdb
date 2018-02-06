@@ -2788,11 +2788,13 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
 }
 
 static bfd_boolean
-find_abstract_instance_name (struct comp_unit *unit,
-			     bfd_byte *orig_info_ptr,
-			     struct attribute *attr_ptr,
-			     const char **pname,
-			     bfd_boolean *is_linkage)
+find_abstract_instance (struct comp_unit *   unit,
+			bfd_byte *           orig_info_ptr,
+			struct attribute *   attr_ptr,
+			const char **        pname,
+			bfd_boolean *        is_linkage,
+			char **              filename_ptr,
+			int *                linenumber_ptr)
 {
   bfd *abfd = unit->abfd;
   bfd_byte *info_ptr;
@@ -2942,8 +2944,9 @@ find_abstract_instance_name (struct comp_unit *unit,
 		    }
 		  break;
 		case DW_AT_specification:
-		  if (!find_abstract_instance_name (unit, info_ptr, &attr,
-						    pname, is_linkage))
+		  if (!find_abstract_instance (unit, info_ptr, &attr,
+					       pname, is_linkage,
+					       filename_ptr, linenumber_ptr))
 		    return FALSE;
 		  break;
 		case DW_AT_linkage_name:
@@ -2955,6 +2958,13 @@ find_abstract_instance_name (struct comp_unit *unit,
 		      name = attr.u.str;
 		      *is_linkage = TRUE;
 		    }
+		  break;
+		case DW_AT_decl_file:
+		  *filename_ptr = concat_filename (unit->line_table,
+						   attr.u.val);
+		  break;
+		case DW_AT_decl_line:
+		  *linenumber_ptr = attr.u.val;
 		  break;
 		default:
 		  break;
@@ -3148,9 +3158,11 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 		case DW_AT_abstract_origin:
 		case DW_AT_specification:
-		  if (!find_abstract_instance_name (unit, info_ptr, &attr,
-						    &func->name,
-						    &func->is_linkage))
+		  if (!find_abstract_instance (unit, info_ptr, &attr,
+					       &func->name,
+					       &func->is_linkage,
+					       &func->file,
+					       &func->line))
 		    goto fail;
 		  break;
 
