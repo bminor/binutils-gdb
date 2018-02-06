@@ -1,3 +1,10 @@
+2018-02-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 22794
+	* opncls.c (bfd_get_debug_link_info_1): Check the size of the
+	section before attempting to read it in.
+	(bfd_get_alt_debug_link_info): Likewise.
+
 2018-02-06  Paul Carroll  <pcarroll@codesourcery.com>
 
 	* bfd/dwarf2.c (find_abstract_name): Modified to return file and
