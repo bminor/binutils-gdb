@@ -1,3 +1,8 @@
+2018-02-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* coff-rs6000.c (xcoff_write_archive_contents_old): Use
+	'memcpy' instead of 'strncpy' when writing the magic number.
+
 2018-02-06  Nick Clifton  <nickc@redhat.com>
 
 	PR 22794

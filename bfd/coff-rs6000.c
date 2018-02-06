@@ -2090,7 +2090,7 @@ xcoff_write_archive_contents_old (bfd *abfd)
   char decbuf[XCOFFARMAG_ELEMENT_SIZE + 1];
 
   memset (&fhdr, 0, sizeof fhdr);
-  (void) strncpy (fhdr.magic, XCOFFARMAG, SXCOFFARMAG);
+  (void) memcpy (fhdr.magic, XCOFFARMAG, SXCOFFARMAG);
   sprintf (fhdr.firstmemoff, "%d", SIZEOF_AR_FILE_HDR);
   sprintf (fhdr.freeoff, "%d", 0);
 
