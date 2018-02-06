@@ -1,6 +1,7 @@
-2018-01-30  Alan Hayward  <alan.hayward@arm.com>
+2018-02-05  Alan Hayward  <alan.hayward@arm.com>
 
-	* target-descriptions.c (tdesc_element_visitor) Add empty implementations.
+	* target-descriptions.c (tdesc_element_visitor) Add empty
+	implementations.
 	(tdesc_type): Move make_gdb_type from here.
 	(tdesc_type_builtin): Likewise.
 	(tdesc_type_vector): Likewise.
