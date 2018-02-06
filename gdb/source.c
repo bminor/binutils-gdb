@@ -1186,7 +1186,7 @@ void
 find_source_lines (struct symtab *s, int desc)
 {
   struct stat st;
-  char *data, *p, *end;
+  char *p, *end;
   int nlines = 0;
   int lines_allocated = 1000;
   int *line_charpos;
@@ -1207,23 +1207,20 @@ find_source_lines (struct symtab *s, int desc)
     warning (_("Source file is more recent than executable."));
 
   {
-    struct cleanup *old_cleanups;
-
     /* st_size might be a large type, but we only support source files whose 
        size fits in an int.  */
     size = (int) st.st_size;
 
-    /* Use malloc, not alloca, because this may be pretty large, and we may
-       run into various kinds of limits on stack size.  */
-    data = (char *) xmalloc (size);
-    old_cleanups = make_cleanup (xfree, data);
+    /* Use the heap, not the stack, because this may be pretty large,
+       and we may run into various kinds of limits on stack size.  */
+    gdb::def_vector<char> data (size);
 
     /* Reassign `size' to result of read for systems where \r\n -> \n.  */
-    size = myread (desc, data, size);
+    size = myread (desc, data.data (), size);
     if (size < 0)
       perror_with_name (symtab_to_filename_for_display (s));
-    end = data + size;
-    p = data;
+    end = &data[size];
+    p = &data[0];
     line_charpos[0] = 0;
     nlines = 1;
     while (p != end)
@@ -1239,10 +1236,9 @@ find_source_lines (struct symtab *s, int desc)
 		  (int *) xrealloc ((char *) line_charpos,
 				    sizeof (int) * lines_allocated);
 	      }
-	    line_charpos[nlines++] = p - data;
+	    line_charpos[nlines++] = p - data.data ();
 	  }
       }
-    do_cleanups (old_cleanups);
   }
 
   s->nlines = nlines;
