@@ -324,34 +324,36 @@ extract_identifier (const char **expp, int is_parameter)
   return result;
 }
 
-/* Helper function to clean up a temporarily-constructed macro object.
-   This assumes that the contents were all allocated with xmalloc.  */
-static void
-free_macro_definition_ptr (void *ptr)
+struct temporary_macro_definition : public macro_definition
 {
-  int i;
-  struct macro_definition *loc = (struct macro_definition *) ptr;
+  temporary_macro_definition ()
+  {
+    table = nullptr;
+    kind = macro_object_like;
+    argc = 0;
+    argv = nullptr;
+    replacement = nullptr;
+  }
 
-  for (i = 0; i < loc->argc; ++i)
-    xfree ((char *) loc->argv[i]);
-  xfree ((char *) loc->argv);
-  /* Note that the 'replacement' field is not allocated.  */
-}
+  ~temporary_macro_definition ()
+  {
+    int i;
+
+    for (i = 0; i < argc; ++i)
+      xfree ((char *) argv[i]);
+    xfree ((char *) argv);
+    /* Note that the 'replacement' field is not allocated.  */
+  }
+};
 
 static void
 macro_define_command (const char *exp, int from_tty)
 {
-  struct macro_definition new_macro;
+  temporary_macro_definition new_macro;
   char *name = NULL;
-  struct cleanup *cleanup_chain;
 
   if (!exp)
     error (_("usage: macro define NAME[(ARGUMENT-LIST)] [REPLACEMENT-LIST]"));
-
-  cleanup_chain = make_cleanup (free_macro_definition_ptr, &new_macro);
-  make_cleanup (free_current_contents, &name);
-
-  memset (&new_macro, 0, sizeof (struct macro_definition));
 
   skip_ws (&exp);
   name = extract_identifier (&exp, 0);
@@ -415,8 +417,6 @@ macro_define_command (const char *exp, int from_tty)
       skip_ws (&exp);
       macro_define_object (macro_main (macro_user_macros), -1, name, exp);
     }
-
-  do_cleanups (cleanup_chain);
 }
 
 

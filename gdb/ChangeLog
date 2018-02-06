@@ -1,5 +1,12 @@
 2018-02-08  Tom Tromey  <tom@tromey.com>
 
+	* macrocmd.c (struct temporary_macro_definition): New.
+	(macro_define_command): Use temporary_macro_definition.  Remove
+	cleanups.
+	(free_macro_definition_ptr): Remove.
+
+2018-02-08  Tom Tromey  <tom@tromey.com>
+
 	* macroexp.c (maybe_expand): Use std::string.
 
 2018-02-08  Tom Tromey  <tom@tromey.com>
