@@ -1,5 +1,9 @@
 2018-02-08  Tom Tromey  <tom@tromey.com>
 
+	* macroexp.c (maybe_expand): Use std::string.
+
+2018-02-08  Tom Tromey  <tom@tromey.com>
+
 	* macroexp.c (struct macro_buffer): Add initializers for some
 	members.
 	(init_buffer, init_shared_buffer, free_buffer)

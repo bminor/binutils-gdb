@@ -1347,28 +1347,20 @@ maybe_expand (struct macro_buffer *dest,
     {
       /* Make a null-terminated copy of it, since that's what our
          lookup function expects.  */
-      char *id = (char *) xmalloc (src_first->len + 1);
-      struct cleanup *back_to = make_cleanup (xfree, id);
+      std::string id (src_first->text, src_first->len);
 
-      memcpy (id, src_first->text, src_first->len);
-      id[src_first->len] = 0;
-          
       /* If we're currently re-scanning the result of expanding
          this macro, don't expand it again.  */
-      if (! currently_rescanning (no_loop, id))
+      if (! currently_rescanning (no_loop, id.c_str ()))
         {
           /* Does this identifier have a macro definition in scope?  */
-          struct macro_definition *def = lookup_func (id, lookup_baton);
+          struct macro_definition *def = lookup_func (id.c_str (),
+						      lookup_baton);
 
-          if (def && expand (id, def, dest, src_rest, no_loop,
+          if (def && expand (id.c_str (), def, dest, src_rest, no_loop,
                              lookup_func, lookup_baton))
-            {
-              do_cleanups (back_to);
-              return 1;
-            }
+	    return 1;
         }
-
-      do_cleanups (back_to);
     }
 
   return 0;
