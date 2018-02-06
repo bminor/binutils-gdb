@@ -1,5 +1,9 @@
 2018-02-08  Tom Tromey  <tom@tromey.com>
 
+	* build-id.c (build_id_to_debug_bfd): Use unique_xmalloc_ptr.
+
+2018-02-08  Tom Tromey  <tom@tromey.com>
+
 	* source.c (find_source_lines): Use gdb::def_vector.
 
 2018-02-08  Tom Tromey  <tom@tromey.com>

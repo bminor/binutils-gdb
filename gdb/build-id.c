@@ -95,8 +95,6 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
       const gdb_byte *data = build_id;
       size_t size = build_id_len;
       char *s;
-      char *filename = NULL;
-      struct cleanup *inner;
 
       memcpy (link, debugdir, debugdir_len);
       s = &link[debugdir_len];
@@ -116,16 +114,15 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
 	printf_unfiltered (_("  Trying %s\n"), link);
 
       /* lrealpath() is expensive even for the usually non-existent files.  */
+      gdb::unique_xmalloc_ptr<char> filename;
       if (access (link, F_OK) == 0)
-	filename = lrealpath (link);
+	filename.reset (lrealpath (link));
 
       if (filename == NULL)
 	continue;
 
       /* We expect to be silent on the non-existing files.  */
-      inner = make_cleanup (xfree, filename);
-      abfd = gdb_bfd_open (filename, gnutarget, -1);
-      do_cleanups (inner);
+      abfd = gdb_bfd_open (filename.get (), gnutarget, -1);
 
       if (abfd == NULL)
 	continue;
