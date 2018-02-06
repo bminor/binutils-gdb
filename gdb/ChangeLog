@@ -1,5 +1,24 @@
 2018-02-08  Tom Tromey  <tom@tromey.com>
 
+	* macroexp.c (struct macro_buffer): Add initializers for some
+	members.
+	(init_buffer, init_shared_buffer, free_buffer)
+	(free_buffer_return_text): Remove.
+	(macro_buffer): New constructors.
+	(~macro_buffer): New destructor.
+	(macro_buffer::set_shared): New method.
+	(macro_buffer::resize_buffer, macro_buffer::appendc)
+	(macro_buffer::appendmem): Now methods, not free functions.
+	(set_token, append_tokens_without_splicing, stringify)
+	(macro_stringify): Update.
+	(gather_arguments): Change return type.  Remove argc_p argument,
+	add args_ptr argument.  Use std::vector.
+	(substitute_args): Remove argc argument.  Accept std::vector.
+	(expand): Update.  Use std::vector.
+	(scan, macro_expand, macro_expand_next): Update.
+
+2018-02-08  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (default_collect_symbol_completion_matches_break_on):
 	Use unique_xmalloc_ptr.
 	* macroscope.h: (sal_macro_scope, user_macro_scope)
