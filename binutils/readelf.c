@@ -655,7 +655,8 @@ find_section (Filedata * filedata, const char * name)
 {
   unsigned int i;
 
-  assert (filedata->section_headers != NULL);
+  if (filedata->section_headers == NULL)
+    return NULL;
 
   for (i = 0; i < filedata->file_header.e_shnum; i++)
     if (streq (SECTION_NAME (filedata->section_headers + i), name))
@@ -672,6 +673,9 @@ find_section_by_address (Filedata * filedata, bfd_vma addr)
 {
   unsigned int i;
 
+  if (filedata->section_headers == NULL)
+    return NULL;
+
   for (i = 0; i < filedata->file_header.e_shnum; i++)
     {
       Elf_Internal_Shdr *sec = filedata->section_headers + i;
@@ -687,6 +691,9 @@ static Elf_Internal_Shdr *
 find_section_by_type (Filedata * filedata, unsigned int type)
 {
   unsigned int i;
+
+  if (filedata->section_headers == NULL)
+    return NULL;
 
   for (i = 0; i < filedata->file_header.e_shnum; i++)
     {
@@ -706,6 +713,9 @@ static Elf_Internal_Shdr *
 find_section_in_set (Filedata * filedata, const char * name, unsigned int * set)
 {
   unsigned int i;
+
+  if (filedata->section_headers == NULL)
+    return NULL;
 
   if (set != NULL)
     {
