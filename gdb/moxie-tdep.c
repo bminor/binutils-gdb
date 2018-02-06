@@ -448,25 +448,6 @@ moxie_software_single_step (struct regcache *regcache)
   return next_pcs;
 }
 
-/* Implement the "read_pc" gdbarch method.  */
-
-static CORE_ADDR
-moxie_read_pc (struct regcache *regcache)
-{
-  ULONGEST pc;
-
-  regcache_cooked_read_unsigned (regcache, MOXIE_PC_REGNUM, &pc);
-  return pc;
-}
-
-/* Implement the "write_pc" gdbarch method.  */
-
-static void
-moxie_write_pc (struct regcache *regcache, CORE_ADDR val)
-{
-  regcache_cooked_write_unsigned (regcache, MOXIE_PC_REGNUM, val);
-}
-
 /* Implement the "unwind_sp" gdbarch method.  */
 
 static CORE_ADDR
@@ -1109,8 +1090,6 @@ moxie_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_wchar_bit (gdbarch, 32);
   set_gdbarch_wchar_signed (gdbarch, 0);
 
-  set_gdbarch_read_pc (gdbarch, moxie_read_pc);
-  set_gdbarch_write_pc (gdbarch, moxie_write_pc);
   set_gdbarch_unwind_sp (gdbarch, moxie_unwind_sp);
 
   set_gdbarch_num_regs (gdbarch, MOXIE_NUM_REGS);

@@ -383,26 +383,6 @@ ft32_address_class_name_to_type_flags (struct gdbarch *gdbarch,
     return 0;
 }
 
-
-/* Implement the "read_pc" gdbarch method.  */
-
-static CORE_ADDR
-ft32_read_pc (struct regcache *regcache)
-{
-  ULONGEST pc;
-
-  regcache_cooked_read_unsigned (regcache, FT32_PC_REGNUM, &pc);
-  return pc;
-}
-
-/* Implement the "write_pc" gdbarch method.  */
-
-static void
-ft32_write_pc (struct regcache *regcache, CORE_ADDR val)
-{
-  regcache_cooked_write_unsigned (regcache, FT32_PC_REGNUM, val);
-}
-
 /* Implement the "unwind_sp" gdbarch method.  */
 
 static CORE_ADDR
@@ -622,8 +602,6 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				     func_void_type);
   TYPE_INSTANCE_FLAGS (tdep->pc_type) |= TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
 
-  set_gdbarch_read_pc (gdbarch, ft32_read_pc);
-  set_gdbarch_write_pc (gdbarch, ft32_write_pc);
   set_gdbarch_unwind_sp (gdbarch, ft32_unwind_sp);
 
   set_gdbarch_num_regs (gdbarch, FT32_NUM_REGS);

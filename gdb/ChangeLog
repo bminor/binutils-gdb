@@ -1,5 +1,23 @@
 2018-02-06  Yao Qi  <yao.qi@linaro.org>
 
+	* ft32-tdep.c (ft32_read_pc): Remove.
+	(ft32_write_pc): Remove.
+	(ft32_gdbarch_init): Update.
+	* m32r-tdep.c (m32r_read_pc): Remove.
+	(m32r_gdbarch_init): Update.
+	* mep-tdep.c (mep_read_pc): Remove.
+	(mep_gdbarch_init): Update.
+	* microblaze-tdep.c (microblaze_write_pc): Remove.
+	(microblaze_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_read_pc): Remove.
+	(mn10300_write_pc): Remove.
+	(mn10300_gdbarch_init): Update.
+	* moxie-tdep.c (moxie_read_pc): Remove.
+	(moxie_write_pc): Remove.
+	(moxie_gdbarch_init): Update.
+
+2018-02-06  Yao Qi  <yao.qi@linaro.org>
+
 	* expprint.c (print_subexp_standard): Handle
 	OP_F77_UNDETERMINED_ARGLIST.
 	(dump_subexp_body_standard): Likewise.

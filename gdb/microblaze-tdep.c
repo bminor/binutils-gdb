@@ -601,11 +601,6 @@ microblaze_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
   return (TYPE_LENGTH (type) == 16);
 }
 
-static void
-microblaze_write_pc (struct regcache *regcache, CORE_ADDR pc)
-{
-  regcache_cooked_write_unsigned (regcache, MICROBLAZE_PC_REGNUM, pc);
-}
 
 static int dwarf2_to_reg_map[78] =
 { 0  /* r0  */,   1  /* r1  */,   2  /* r2  */,   3  /* r3  */,  /*  0- 3 */
@@ -737,8 +732,6 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				       microblaze_breakpoint::bp_from_kind);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
-
-  set_gdbarch_write_pc (gdbarch, microblaze_write_pc);
 
   set_gdbarch_unwind_pc (gdbarch, microblaze_unwind_pc);
 

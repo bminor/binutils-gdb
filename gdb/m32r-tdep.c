@@ -650,14 +650,6 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
 }
 
 static CORE_ADDR
-m32r_read_pc (struct regcache *regcache)
-{
-  ULONGEST pc;
-  regcache_cooked_read_unsigned (regcache, M32R_PC_REGNUM, &pc);
-  return pc;
-}
-
-static CORE_ADDR
 m32r_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   return frame_unwind_register_unsigned (next_frame, M32R_SP_REGNUM);
@@ -912,7 +904,6 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_wchar_bit (gdbarch, 16);
   set_gdbarch_wchar_signed (gdbarch, 0);
 
-  set_gdbarch_read_pc (gdbarch, m32r_read_pc);
   set_gdbarch_unwind_sp (gdbarch, m32r_unwind_sp);
 
   set_gdbarch_num_regs (gdbarch, M32R_NUM_REGS);

@@ -307,20 +307,6 @@ mn10300_register_type (struct gdbarch *gdbarch, int reg)
   return builtin_type (gdbarch)->builtin_int;
 }
 
-static CORE_ADDR
-mn10300_read_pc (struct regcache *regcache)
-{
-  ULONGEST val;
-  regcache_cooked_read_unsigned (regcache, E_PC_REGNUM, &val);
-  return val;
-}
-
-static void
-mn10300_write_pc (struct regcache *regcache, CORE_ADDR val)
-{
-  regcache_cooked_write_unsigned (regcache, E_PC_REGNUM, val);
-}
-
 /* The breakpoint instruction must be the same size as the smallest
    instruction in the instruction set.
 
@@ -1423,8 +1409,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_num_regs (gdbarch, num_regs);
   set_gdbarch_register_type (gdbarch, mn10300_register_type);
   set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);
-  set_gdbarch_read_pc (gdbarch, mn10300_read_pc);
-  set_gdbarch_write_pc (gdbarch, mn10300_write_pc);
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mn10300_dwarf2_reg_to_regnum);

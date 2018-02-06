@@ -1112,15 +1112,6 @@ mep_register_type (struct gdbarch *gdbarch, int reg_nr)
     return builtin_type (gdbarch)->builtin_uint32;
 }
 
-
-static CORE_ADDR
-mep_read_pc (struct regcache *regcache)
-{
-  ULONGEST pc;
-  regcache_cooked_read_unsigned (regcache, MEP_PC_REGNUM, &pc);
-  return pc;
-}
-
 static enum register_status
 mep_pseudo_cr32_read (struct gdbarch *gdbarch,
                       struct regcache *regcache,
@@ -2446,7 +2437,6 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->me_module = me_module;
 
   /* Register set.  */
-  set_gdbarch_read_pc (gdbarch, mep_read_pc);
   set_gdbarch_num_regs (gdbarch, MEP_NUM_RAW_REGS);
   set_gdbarch_pc_regnum (gdbarch, MEP_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, MEP_SP_REGNUM);
