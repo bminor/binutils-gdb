@@ -35,11 +35,10 @@
 struct macro_table *macro_user_macros;
 
 
-struct macro_scope *
+gdb::unique_xmalloc_ptr<struct macro_scope>
 sal_macro_scope (struct symtab_and_line sal)
 {
   struct macro_source_file *main_file, *inclusion;
-  struct macro_scope *ms;
   struct compunit_symtab *cust;
 
   if (sal.symtab == NULL)
@@ -48,7 +47,7 @@ sal_macro_scope (struct symtab_and_line sal)
   if (COMPUNIT_MACRO_TABLE (cust) == NULL)
     return NULL;
 
-  ms = XNEW (struct macro_scope);
+  gdb::unique_xmalloc_ptr<struct macro_scope> ms (XNEW (struct macro_scope));
 
   main_file = macro_main (COMPUNIT_MACRO_TABLE (cust));
   inclusion = macro_lookup_inclusion (main_file, sal.symtab->filename);
@@ -87,22 +86,20 @@ sal_macro_scope (struct symtab_and_line sal)
 }
 
 
-struct macro_scope *
+gdb::unique_xmalloc_ptr<struct macro_scope>
 user_macro_scope (void)
 {
-  struct macro_scope *ms;
-
-  ms = XNEW (struct macro_scope);
+  gdb::unique_xmalloc_ptr<struct macro_scope> ms (XNEW (struct macro_scope));
   ms->file = macro_main (macro_user_macros);
   ms->line = -1;
   return ms;
 }
 
-struct macro_scope *
+gdb::unique_xmalloc_ptr<struct macro_scope>
 default_macro_scope (void)
 {
   struct symtab_and_line sal;
-  struct macro_scope *ms;
+  gdb::unique_xmalloc_ptr<struct macro_scope> ms;
   struct frame_info *frame;
   CORE_ADDR pc;
 

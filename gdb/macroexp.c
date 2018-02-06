@@ -1485,7 +1485,7 @@ scan (struct macro_buffer *dest,
 }
 
 
-char *
+gdb::unique_xmalloc_ptr<char>
 macro_expand (const char *source,
               macro_lookup_ftype *lookup_func,
               void *lookup_func_baton)
@@ -1504,11 +1504,11 @@ macro_expand (const char *source,
   appendc (&dest, '\0');
 
   discard_cleanups (back_to);
-  return dest.text;
+  return gdb::unique_xmalloc_ptr<char> (dest.text);
 }
 
 
-char *
+gdb::unique_xmalloc_ptr<char>
 macro_expand_once (const char *source,
                    macro_lookup_ftype *lookup_func,
                    void *lookup_func_baton)

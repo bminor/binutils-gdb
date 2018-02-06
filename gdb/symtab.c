@@ -5154,7 +5154,7 @@ default_collect_symbol_completion_matches_break_on
   if (current_language->la_macro_expansion == macro_expansion_c
       && code == TYPE_CODE_UNDEF)
     {
-      struct macro_scope *scope;
+      gdb::unique_xmalloc_ptr<struct macro_scope> scope;
 
       /* This adds a macro's name to the current completion list.  */
       auto add_macro_name = [&] (const char *macro_name,
@@ -5175,11 +5175,8 @@ default_collect_symbol_completion_matches_break_on
 	 completion time.  */
       scope = default_macro_scope ();
       if (scope)
-	{
-	  macro_for_each_in_scope (scope->file, scope->line,
-				   add_macro_name);
-	  xfree (scope);
-	}
+	macro_for_each_in_scope (scope->file, scope->line,
+				 add_macro_name);
 
       /* User-defined macros are always visible.  */
       macro_for_each (macro_user_macros, add_macro_name);

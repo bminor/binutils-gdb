@@ -3220,26 +3220,24 @@ c_parse (struct parser_state *par_state)
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
-  /* Note that parsing (within yyparse) freely installs cleanups
-     assuming they'll be run here (below).  */
-
-  back_to = make_cleanup (free_current_contents, &expression_macro_scope);
-
-  /* Set up the scope for macro expansion.  */
-  expression_macro_scope = NULL;
+  gdb::unique_xmalloc_ptr<struct macro_scope> macro_scope;
 
   if (expression_context_block)
-    expression_macro_scope
-      = sal_macro_scope (find_pc_line (expression_context_pc, 0));
+    macro_scope = sal_macro_scope (find_pc_line (expression_context_pc, 0));
   else
-    expression_macro_scope = default_macro_scope ();
-  if (! expression_macro_scope)
-    expression_macro_scope = user_macro_scope ();
+    macro_scope = default_macro_scope ();
+  if (! macro_scope)
+    macro_scope = user_macro_scope ();
+
+  scoped_restore restore_macro_scope
+    = make_scoped_restore (&expression_macro_scope, macro_scope.get ());
 
   /* Initialize macro expansion code.  */
   obstack_init (&expansion_obstack);
   gdb_assert (! macro_original_text);
-  make_cleanup (scan_macro_cleanup, 0);
+  /* Note that parsing (within yyparse) freely installs cleanups
+     assuming they'll be run here (below).  */
+  back_to = make_cleanup (scan_macro_cleanup, 0);
 
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
 							parser_debug);

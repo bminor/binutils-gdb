@@ -37,9 +37,9 @@ typedef struct macro_definition *(macro_lookup_ftype) (const char *name,
    preprocessor definitions.  SOURCE is a null-terminated string.  The
    result is a null-terminated string, allocated using xmalloc; it is
    the caller's responsibility to free it.  */
-char *macro_expand (const char *source,
-                    macro_lookup_ftype *lookup_func,
-                    void *lookup_func_baton);
+gdb::unique_xmalloc_ptr<char> macro_expand (const char *source,
+					    macro_lookup_ftype *lookup_func,
+					    void *lookup_func_baton);
 
 
 /* Expand all preprocessor macro references that appear explicitly in
@@ -49,9 +49,9 @@ char *macro_expand (const char *source,
    SOURCE is a null-terminated string.  The result is a
    null-terminated string, allocated using xmalloc; it is the caller's
    responsibility to free it.  */
-char *macro_expand_once (const char *source,
-                         macro_lookup_ftype *lookup_func,
-                         void *lookup_func_baton);
+gdb::unique_xmalloc_ptr<char> macro_expand_once (const char *source,
+						 macro_lookup_ftype *lookup_func,
+						 void *lookup_func_baton);
 
 
 /* If the null-terminated string pointed to by *LEXPTR begins with a

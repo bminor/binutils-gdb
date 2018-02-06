@@ -55,11 +55,8 @@ macro_inform_no_debuginfo (void)
 static void
 macro_expand_command (const char *exp, int from_tty)
 {
-  struct macro_scope *ms = NULL;
-  char *expanded = NULL;
-  struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &ms);
-
-  make_cleanup (free_current_contents, &expanded);
+  gdb::unique_xmalloc_ptr<struct macro_scope> ms;
+  gdb::unique_xmalloc_ptr<char> expanded;
 
   /* You know, when the user doesn't specify any expression, it would be
      really cool if this defaulted to the last expression evaluated.
@@ -74,26 +71,21 @@ macro_expand_command (const char *exp, int from_tty)
   ms = default_macro_scope ();
   if (ms)
     {
-      expanded = macro_expand (exp, standard_macro_lookup, ms);
+      expanded = macro_expand (exp, standard_macro_lookup, ms.get ());
       fputs_filtered ("expands to: ", gdb_stdout);
-      fputs_filtered (expanded, gdb_stdout);
+      fputs_filtered (expanded.get (), gdb_stdout);
       fputs_filtered ("\n", gdb_stdout);
     }
   else
     macro_inform_no_debuginfo ();
-
-  do_cleanups (cleanup_chain);
-  return;
 }
 
 
 static void
 macro_expand_once_command (const char *exp, int from_tty)
 {
-  struct macro_scope *ms = NULL;
-  char *expanded = NULL;
-  struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &ms);
-  make_cleanup (free_current_contents, &expanded);
+  gdb::unique_xmalloc_ptr<struct macro_scope> ms;
+  gdb::unique_xmalloc_ptr<char> expanded;
 
   /* You know, when the user doesn't specify any expression, it would be
      really cool if this defaulted to the last expression evaluated.
@@ -108,16 +100,13 @@ macro_expand_once_command (const char *exp, int from_tty)
   ms = default_macro_scope ();
   if (ms)
     {
-      expanded = macro_expand_once (exp, standard_macro_lookup, ms);
+      expanded = macro_expand_once (exp, standard_macro_lookup, ms.get ());
       fputs_filtered ("expands to: ", gdb_stdout);
-      fputs_filtered (expanded, gdb_stdout);
+      fputs_filtered (expanded.get (), gdb_stdout);
       fputs_filtered ("\n", gdb_stdout);
     }
   else
     macro_inform_no_debuginfo ();
-
-  do_cleanups (cleanup_chain);
-  return;
 }
 
 /*  Outputs the include path of a macro starting at FILE and LINE to STREAM.
@@ -190,8 +179,7 @@ print_macro_definition (const char *name,
 static void
 info_macro_command (const char *args, int from_tty)
 {
-  struct macro_scope *ms = NULL;
-  struct cleanup *cleanup_chain;
+  gdb::unique_xmalloc_ptr<struct macro_scope> ms;
   const char *name;
   int show_all_macros_named = 0;
   const char *arg_start = args;
@@ -228,7 +216,6 @@ info_macro_command (const char *args, int from_tty)
 	     "whose definition you want to see."));
 
   ms = default_macro_scope ();
-  cleanup_chain = make_cleanup (free_current_contents, &ms);
 
   if (! ms)
     macro_inform_no_debuginfo ();
@@ -263,16 +250,13 @@ info_macro_command (const char *args, int from_tty)
           show_pp_source_pos (gdb_stdout, ms->file, ms->line);
 	}
     }
-
-  do_cleanups (cleanup_chain);
 }
 
 /* Implementation of the "info macros" command. */
 static void
 info_macros_command (const char *args, int from_tty)
 {
-  struct macro_scope *ms = NULL;
-  struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &ms);
+  gdb::unique_xmalloc_ptr<struct macro_scope> ms;
 
   if (args == NULL)
     ms = default_macro_scope ();
@@ -289,8 +273,6 @@ info_macros_command (const char *args, int from_tty)
     macro_inform_no_debuginfo ();
   else
     macro_for_each_in_scope (ms->file, ms->line, print_macro_definition);
-
-  do_cleanups (cleanup_chain);
 }
 
 

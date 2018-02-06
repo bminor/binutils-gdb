@@ -1,3 +1,22 @@
+2018-02-08  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (default_collect_symbol_completion_matches_break_on):
+	Use unique_xmalloc_ptr.
+	* macroscope.h: (sal_macro_scope, user_macro_scope)
+	(default_macro_scope): Return unique_xmalloc_ptr.
+	* macroscope.c (sal_macro_scope, user_macro_scope)
+	(default_macro_scope): Return unique_xmalloc_ptr.
+	* macroexp.h (macro_expand, macro_expand_once): Return
+	unique_xmalloc_ptr.
+	* macroexp.c (macro_expand, macro_expand_once): Return
+	unique_xmalloc_ptr.
+	* macrocmd.c (macro_expand_command, macro_expand_once_command)
+	(info_macro_command, info_macros_command): Use
+	unique_xmalloc_ptr.
+	* compile/compile-c-support.c (write_macro_definitions): Use
+	unique_xmalloc_ptr.
+	* c-exp.y (c_parse): Use unique_xmalloc_ptr.
+
 2018-02-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* value.c (value_static_field): Assign field type instead of
