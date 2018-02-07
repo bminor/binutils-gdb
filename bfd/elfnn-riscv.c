@@ -2253,6 +2253,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       if (msg)
 	info->callbacks->warning
 	  (info, msg, name, input_bfd, input_section, rel->r_offset);
+      ret = TRUE;
       goto out;
     }
 

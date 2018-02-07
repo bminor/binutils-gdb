@@ -1,3 +1,8 @@
+2018-02-06  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (riscv_elf_relocate_section): Return TRUE if used
+	callback to report an error.
+
 2018-02-06  Eric Botcazou  <ebotcazou@adacore.com>
 
 	PR ld/22263
