@@ -1,3 +1,15 @@
+2018-02-08  Alan Modra  <amodra@gmail.com>
+
+	PR 22819
+	* config/tc-ppc.c (md_assemble): Rewrite insn alignment checking.
+	(ppc_frag_check): Likewise.
+	* testsuite/gas/ppc/misalign.d,
+	* testsuite/gas/ppc/misalign.l,
+	* testsuite/gas/ppc/misalign.s: New test.
+	* testsuite/gas/ppc/misalign2.d,
+	* testsuite/gas/ppc/misalign2.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run them.
+
 2018-02-05  Maciej W. Rozycki  <macro@mips.com>
 
 	* config/tc-riscv.c (riscv_handle_implicit_zero_offset): Rename

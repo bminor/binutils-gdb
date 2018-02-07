@@ -45,6 +45,8 @@ if { [istarget powerpc64*-*-*] || [istarget *-*-elf64*]} then {
 
 if { [istarget powerpc*-*-*] } then {
     run_dump_test "regnames"
+    run_dump_test "misalign"
+    run_dump_test "misalign2"
     if { [is_elf_format] } then {
 	run_dump_test "machine"
 	run_dump_test "common"

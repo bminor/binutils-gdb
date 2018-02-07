@@ -2747,7 +2747,7 @@ md_assemble (char *str)
   struct ppc_fixup fixups[MAX_INSN_FIXUPS];
   int fc;
   char *f;
-  int addr_mod;
+  int addr_mask;
   int i;
   unsigned int insn_length;
 
@@ -3520,31 +3520,34 @@ md_assemble (char *str)
 #endif
 
   /* Write out the instruction.  */
-  /* Differentiate between two and four byte insns.  */
+
+  addr_mask = 3;
   if ((ppc_cpu & PPC_OPCODE_VLE) != 0)
+    /* All instructions can start on a 2 byte boundary for VLE.  */
+    addr_mask = 1;
+
+  if (frag_now->insn_addr != addr_mask)
     {
-      if (PPC_OP_SE_VLE (insn))
-        insn_length = 2;
-      else
-        insn_length = 4;
-      addr_mod = frag_now_fix () & 1;
+      /* Don't emit instructions to a frag started for data, or for a
+	 CPU differing in VLE mode.  Data is allowed to be misaligned,
+	 and it's possible to start a new frag in the middle of
+	 misaligned data.  */
+      frag_wane (frag_now);
+      frag_new (0);
     }
-  else
-    {
-      insn_length = 4;
-      addr_mod = frag_now_fix () & 3;
-    }
-  /* All instructions can start on a 2 byte boundary for VLE.  */
+
+  /* Check that insns within the frag are aligned.  ppc_frag_check
+     will ensure that the frag start address is aligned.  */
+  if ((frag_now_fix () & addr_mask) != 0)
+    as_bad (_("instruction address is not a multiple of %d"), addr_mask + 1);
+
+  /* Differentiate between two and four byte insns.  */
+  insn_length = 4;
+  if ((ppc_cpu & PPC_OPCODE_VLE) != 0 && PPC_OP_SE_VLE (insn))
+    insn_length = 2;
+
   f = frag_more (insn_length);
-  if (frag_now->has_code && frag_now->insn_addr != addr_mod)
-    {
-      if ((ppc_cpu & PPC_OPCODE_VLE) != 0)
-        as_bad (_("instruction address is not a multiple of 2"));
-      else
-        as_bad (_("instruction address is not a multiple of 4"));
-    }
-  frag_now->insn_addr = addr_mod;
-  frag_now->has_code = 1;
+  frag_now->insn_addr = addr_mask;
   md_number_to_chars (f, insn, insn_length);
   last_insn = insn;
   last_seg = now_seg;
@@ -6491,19 +6494,10 @@ ppc_fix_adjustable (fixS *fix)
 void
 ppc_frag_check (struct frag *fragP)
 {
-  if (!fragP->has_code)
-    return;
-
-  if ((ppc_cpu & PPC_OPCODE_VLE) != 0)
-    {
-      if (((fragP->fr_address + fragP->insn_addr) & 1) != 0)
-        as_bad (_("instruction address is not a multiple of 2"));
-    }
-  else
-    {
-      if (((fragP->fr_address + fragP->insn_addr) & 3) != 0)
-        as_bad (_("instruction address is not a multiple of 4"));
-    }
+  if ((fragP->fr_address & fragP->insn_addr) != 0)
+    as_bad_where (fragP->fr_file, fragP->fr_line,
+		  _("instruction address is not a multiple of %d"),
+		  fragP->insn_addr + 1);
 }
 
 /* Implement HANDLE_ALIGN.  This writes the NOP pattern into an
