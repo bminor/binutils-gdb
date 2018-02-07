@@ -2976,14 +2976,12 @@ value_static_field (struct type *type, int fieldno)
 	     reported as non-debuggable symbols.  */
 	  struct bound_minimal_symbol msym
 	    = lookup_minimal_symbol (phys_name, NULL, NULL);
+	  struct type *field_type = TYPE_FIELD_TYPE (type, fieldno);
 
 	  if (!msym.minsym)
-	    return allocate_optimized_out_value (type);
+	    retval = allocate_optimized_out_value (field_type);
 	  else
-	    {
-	      retval = value_at_lazy (TYPE_FIELD_TYPE (type, fieldno),
-				      BMSYMBOL_VALUE_ADDRESS (msym));
-	    }
+	    retval = value_at_lazy (field_type, BMSYMBOL_VALUE_ADDRESS (msym));
 	}
       else
 	retval = value_of_variable (sym.symbol, sym.block);

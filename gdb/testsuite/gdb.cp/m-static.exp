@@ -165,6 +165,8 @@ if {[test_compiler_info {gcc-[0-3]-*}]
     setup_xfail *-*-*
 }
 gdb_test "print test4.nowhere" "<optimized out>" "static const int initialized nowhere (print field)"
+gdb_test "ptype test4.nowhere" "type = const int"
+gdb_test "print test4.nowhere.nowhere" "Attempt to extract a component of a value that is not a structure."
 
 # Same, but print the whole struct.
 gdb_test "print test4" "static nowhere = <optimized out>.*" "static const int initialized nowhere (whole struct)"
