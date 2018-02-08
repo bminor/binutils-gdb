@@ -481,6 +481,9 @@ struct elf_x86_link_hash_table
   /* TRUE if GOT is referenced.  */
   unsigned int got_referenced : 1;
 
+  /* TRUE if _GLOBAL_OFFSET_TABLE_ is needed.  */
+  unsigned int need_global_offset_table : 1;
+
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
   bfd_boolean (*is_reloc_section) (const char *);
@@ -524,6 +527,9 @@ struct elf_x86_init_table
   const struct elf_x86_non_lazy_plt_layout *non_lazy_ibt_plt;
 
   bfd_byte plt0_pad_byte;
+
+  /* TRUE if _GLOBAL_OFFSET_TABLE_ is needed.  */
+  unsigned int need_global_offset_table : 1;
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);

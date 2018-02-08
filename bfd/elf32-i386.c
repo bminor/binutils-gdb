@@ -29,6 +29,9 @@
 
 #include "elf/i386.h"
 
+static bfd_boolean elf32_i386_copy_solaris_special_section_fields
+  (const bfd *, bfd *, const Elf_Internal_Shdr *, Elf_Internal_Shdr *);
+
 static reloc_howto_type elf_howto_table[]=
 {
   HOWTO(R_386_NONE, 0, 3, 0, FALSE, 0, complain_overflow_dont,
@@ -4345,6 +4348,7 @@ static bfd *
 elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 {
   struct elf_x86_init_table init_table;
+  const struct elf_backend_data *bed;
 
   switch (get_elf_x86_backend_data (info->output_bfd)->target_os)
     {
@@ -4373,6 +4377,11 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 
   init_table.r_info = elf32_r_info;
   init_table.r_sym = elf32_r_sym;
+
+  bed = get_elf_backend_data (info->output_bfd);
+  init_table.need_global_offset_table
+    = (bed->elf_backend_copy_special_section_fields
+       == elf32_i386_copy_solaris_special_section_fields);
 
   return _bfd_x86_elf_link_setup_gnu_properties (info, &init_table);
 }
