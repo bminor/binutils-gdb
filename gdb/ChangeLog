@@ -1,5 +1,12 @@
 2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* remote.c (remote_btrace_maybe_reopen): Change error message.
+	* btrace.c (btrace_enable): Likewise.
+	(parse_xml_btrace): Likewise.
+	(parse_xml_btrace_conf): Likewise.
+
+2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* nat/linux-btrace.c (diagnose_perf_event_open_fail): New.
 	(linux_enable_pt, linux_enable_bts): Call
 	diagnose_perf_event_open_fail.

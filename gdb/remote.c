@@ -13193,8 +13193,8 @@ remote_btrace_maybe_reopen (void)
 	  if (!warned)
 	    {
 	      warned = 1;
-	      warning (_("GDB does not support Intel Processor Trace. "
-			 "\"record\" will not work in this session."));
+	      warning (_("Target is recording using Intel Processor Trace "
+			 "but support was disabled at compile time."));
 	    }
 
 	  continue;

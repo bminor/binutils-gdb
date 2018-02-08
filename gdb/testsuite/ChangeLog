@@ -1,3 +1,8 @@
+2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* lib/gdb.exp (skip_btrace_pt_tests): Update expected error message.
+	Fix test name.
+
 2018-02-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.cp/m-static.exp: Check type of optimized out static

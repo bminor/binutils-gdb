@@ -2955,7 +2955,7 @@ gdb_caching_proc skip_btrace_pt_tests {
     file delete $src
     # In case of an unexpected output, we return 2 as a fail value.
     set skip_btrace_tests 2
-    gdb_test_multiple "record btrace pt" "check btrace support" {
+    gdb_test_multiple "record btrace pt" "check btrace pt support" {
         -re "You can't do that when your target is.*\r\n$gdb_prompt $" {
             set skip_btrace_tests 1
         }
@@ -2965,7 +2965,7 @@ gdb_caching_proc skip_btrace_pt_tests {
         -re "Could not enable branch tracing.*\r\n$gdb_prompt $" {
             set skip_btrace_tests 1
         }
-        -re "GDB does not support.*\r\n$gdb_prompt $" {
+        -re "support was disabled at compile time.*\r\n$gdb_prompt $" {
             set skip_btrace_tests 1
         }
         -re "^record btrace pt\r\n$gdb_prompt $" {
