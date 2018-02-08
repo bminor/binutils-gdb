@@ -1098,7 +1098,8 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 	      || htab->elf.igotplt->size == 0))
 	{
 	  htab->elf.sgotplt->size = 0;
-	  if (htab->elf.hgot != NULL)
+	  if (htab->elf.hgot != NULL
+	      && !htab->need_global_offset_table)
 	    {
 	      /* Remove the unused _GLOBAL_OFFSET_TABLE_ from symbol
 		 table. */
@@ -2463,6 +2464,7 @@ error_alignment:
     return pbfd;
 
   htab->plt0_pad_byte = init_table->plt0_pad_byte;
+  htab->need_global_offset_table = init_table->need_global_offset_table;
 
   use_ibt_plt = info->ibtplt || info->ibt;
   if (!use_ibt_plt && pbfd != NULL)

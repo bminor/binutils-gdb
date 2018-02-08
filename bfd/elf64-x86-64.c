@@ -27,6 +27,9 @@
 #include "opcode/i386.h"
 #include "elf/x86-64.h"
 
+static bfd_boolean elf64_x86_64_copy_solaris_special_section_fields
+  (const bfd *, bfd *, const Elf_Internal_Shdr *, Elf_Internal_Shdr *);
+
 #ifdef CORE_HEADER
 #include <stdarg.h>
 #include CORE_HEADER
@@ -4858,6 +4861,7 @@ static bfd *
 elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 {
   struct elf_x86_init_table init_table;
+  const struct elf_backend_data *bed;
 
   if ((int) R_X86_64_standard >= (int) R_X86_64_converted_reloc_bit
       || (int) R_X86_64_max <= (int) R_X86_64_converted_reloc_bit
@@ -4913,6 +4917,11 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
       init_table.r_info = elf32_r_info;
       init_table.r_sym = elf32_r_sym;
     }
+
+  bed = get_elf_backend_data (info->output_bfd);
+  init_table.need_global_offset_table
+    = (bed->elf_backend_copy_special_section_fields
+       == elf64_x86_64_copy_solaris_special_section_fields);
 
   return _bfd_x86_elf_link_setup_gnu_properties (info, &init_table);
 }

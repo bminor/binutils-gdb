@@ -1,3 +1,21 @@
+2018-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf32_i386_copy_solaris_special_section_fields):
+	New prototype.
+	(elf_i386_link_setup_gnu_properties): Set need_global_offset_table
+	for Solaris.
+	* elf64-x86-64.c (elf64_x86_64_copy_solaris_special_section_fields):
+	New prototype.
+	(elf_x86_64_link_setup_gnu_properties): Set
+	need_global_offset_table for Solaris.
+	* elfxx-x86.c (_bfd_x86_elf_size_dynamic_sections): Keep the
+	unused _GLOBAL_OFFSET_TABLE_ for Solaris.
+	(_bfd_x86_elf_link_setup_gnu_properties): Copy
+	need_global_offset_table.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add
+	need_global_offset_table.
+	(elf_x86_init_table): Likewise.
+
 2018-02-08  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_relocate_section): Add comment for previous
