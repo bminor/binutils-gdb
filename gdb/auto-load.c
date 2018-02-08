@@ -1153,13 +1153,11 @@ auto_load_section_scripts (struct objfile *objfile, const char *section_name)
 	     section_name, bfd_get_filename (abfd));
   else
     {
-      struct cleanup *cleanups;
-      char *p = (char *) data;
+      gdb::unique_xmalloc_ptr<bfd_byte> data_holder (data);
 
-      cleanups = make_cleanup (xfree, p);
+      char *p = (char *) data;
       source_section_scripts (objfile, section_name, p,
 			      p + bfd_get_section_size (scripts_sect));
-      do_cleanups (cleanups);
     }
 }
 
