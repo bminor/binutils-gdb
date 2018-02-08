@@ -2253,6 +2253,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
       if (msg)
 	info->callbacks->warning
 	  (info, msg, name, input_bfd, input_section, rel->r_offset);
+      /* We already reported the error via a callback, so don't try to report
+	 it again by returning false.  That leads to spurious errors.  */
       ret = TRUE;
       goto out;
     }
