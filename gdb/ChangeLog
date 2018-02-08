@@ -1,3 +1,7 @@
+2018-02-09  Tom Tromey  <tom@tromey.com>
+
+	* auto-load.c (execute_script_contents): Use std::string.
+
 2018-02-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS <Changes in GDB 8.1>: Clarify that "rbreak" is a new

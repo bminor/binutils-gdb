@@ -989,23 +989,21 @@ execute_script_contents (struct auto_load_pspace_info *pspace_info,
 {
   objfile_script_executor_func *executor;
   const char *newline, *script_text;
-  char *name;
+  const char *name;
   int is_safe, in_hash_table;
-  struct cleanup *cleanups;
-
-  cleanups = make_cleanup (null_cleanup, NULL);
 
   /* The first line of the script is the name of the script.
      It must not contain any kind of space character.  */
   name = NULL;
   newline = strchr (script, '\n');
+  std::string name_holder;
   if (newline != NULL)
     {
-      char *buf, *p;
+      const char *buf, *p;
 
       /* Put the name in a buffer and validate it.  */
-      buf = xstrndup (script, newline - script);
-      make_cleanup (xfree, buf);
+      name_holder = std::string (script, newline - script);
+      buf = name_holder.c_str ();
       for (p = buf; *p != '\0'; ++p)
 	{
 	  if (isspace (*p))
@@ -1022,7 +1020,6 @@ execute_script_contents (struct auto_load_pspace_info *pspace_info,
 Missing/bad script name in entry at offset %u in section %s\n\
 of file %s."),
 	       offset, section_name, objfile_name (objfile));
-      do_cleanups (cleanups);
       return;
     }
   script_text = newline + 1;
@@ -1035,7 +1032,6 @@ of file %s."),
       maybe_print_unsupported_script_warning (pspace_info, objfile, language,
 					      section_name, offset);
       maybe_add_script_text (pspace_info, 0, name, language);
-      do_cleanups (cleanups);
       return;
     }
 
@@ -1043,7 +1039,6 @@ of file %s."),
   if (!ext_lang_auto_load_enabled (language))
     {
       /* No message is printed, just skip it.  */
-      do_cleanups (cleanups);
       return;
     }
 
@@ -1059,8 +1054,6 @@ of file %s."),
   /* If this file is not currently loaded, load it.  */
   if (is_safe && !in_hash_table)
     executor (language, objfile, name, script_text);
-
-  do_cleanups (cleanups);
 }
 
 /* Load scripts specified in OBJFILE.
