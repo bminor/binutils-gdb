@@ -1,3 +1,26 @@
+2018-02-20  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (struct litpool_frag): Add new field
+	literal_count.
+	(MAX_AUTO_POOL_LITERALS, MAX_EXPLICIT_POOL_LITERALS)
+	(MAX_POOL_LITERALS): New macro definitions.
+	(auto_litpool_limit): Initialize to 0.
+	(md_parse_option): Set auto_litpool_limit in the presence of
+	--auto-litpools option.
+	(xtensa_maybe_create_literal_pool_frag): Zero-initialize
+	literal_count field.
+	(xg_find_litpool): New function. Make sure that found literal
+	pool size is within the limit.
+	(xtensa_move_literals): Extract literal pool search code into
+	the new function.
+	* testsuite/gas/xtensa/all.exp: Add auto-litpools-2 test.
+	* testsuite/gas/xtensa/auto-litpools-2.d: New file.
+	* testsuite/gas/xtensa/auto-litpools-2.s: New file.
+	* testsuite/gas/xtensa/auto-litpools.d: Fix up changed
+	addresses.
+	* testsuite/gas/xtensa/auto-litpools.s: Change literal value so
+	that objdump doesn't get out of sync.
+
 2018-02-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* doc/c-arm.texi (.arch_extension): Mention extensions it accepts are

@@ -438,6 +438,7 @@ struct litpool_frag
   addressT addr;
   short priority; /* 1, 2, or 3 -- 1 is highest  */
   short original_priority;
+  int literal_count;
 };
 
 /* Map a segment to its litpool_frag list.  */
@@ -451,6 +452,14 @@ struct litpool_seg
 
 static struct litpool_seg litpool_seg_list;
 
+/* Limit maximal size of auto litpool by half of the j range.  */
+#define MAX_AUTO_POOL_LITERALS 16384
+
+/* Limit maximal size of explicit literal pool by l32r range.  */
+#define MAX_EXPLICIT_POOL_LITERALS 65536
+
+#define MAX_POOL_LITERALS \
+  (auto_litpools ? MAX_AUTO_POOL_LITERALS : MAX_EXPLICIT_POOL_LITERALS)
 
 /* Directive functions.  */
 
@@ -488,7 +497,7 @@ static int init_trampoline_frag (fragS *);
 static fixS *xg_append_jump (fragS *fragP, symbolS *sym, offsetT offset);
 static void xtensa_maybe_create_literal_pool_frag (bfd_boolean, bfd_boolean);
 static bfd_boolean auto_litpools = FALSE;
-static int auto_litpool_limit = 10000;
+static int auto_litpool_limit = 0;
 
 /* Alignment Functions.  */
 
@@ -984,6 +993,8 @@ md_parse_option (int c, const char *arg)
     case option_auto_litpools:
       auto_litpools = TRUE;
       use_literal_section = FALSE;
+      if (auto_litpool_limit <= 0)
+	auto_litpool_limit = MAX_AUTO_POOL_LITERALS / 2;
       return 1;
 
     case option_no_auto_litpools:
@@ -7912,6 +7923,7 @@ xtensa_maybe_create_literal_pool_frag (bfd_boolean create,
   lpf->fragP = fragP;
   lpf->priority = (needed) ? (only_if_needed) ? 3 : 2 : 1;
   lpf->original_priority = lpf->priority;
+  lpf->literal_count = 0;
 
   lps->frag_count = 0;
 }
@@ -11188,6 +11200,66 @@ xg_promote_candidate_litpool (struct litpool_seg *lps,
   /* Rest is done in xtensa_relax_frag.  */
 }
 
+static struct litpool_frag *xg_find_litpool (struct litpool_seg *lps,
+					     struct litpool_frag *lpf,
+					     addressT addr)
+{
+  struct litpool_frag *lp = lpf->prev;
+
+  gas_assert (lp->fragP);
+
+  while (lp->fragP->fr_subtype == RELAX_LITERAL_POOL_CANDIDATE_BEGIN)
+    {
+      lp = lp->prev;
+      if (lp->fragP == NULL)
+	{
+	  /* End of list; have to bite the bullet.
+	     Take the nearest.  */
+	  lp = lpf->prev;
+	  break;
+	}
+      /* Does it (conservatively) reach?  */
+      if (addr - lp->addr <= 128 * 1024)
+	{
+	  if (lp->fragP->fr_subtype == RELAX_LITERAL_POOL_BEGIN &&
+	      lp->literal_count < MAX_POOL_LITERALS)
+	    {
+	      /* Found a good one.  */
+	      break;
+	    }
+	  else if (lp->prev->fragP &&
+		   addr - lp->prev->addr > 128 * 1024 &&
+		   lp->prev->literal_count < MAX_POOL_LITERALS)
+	    {
+	      /* This is still a "candidate" but the next one
+		 will be too far away, so revert to the nearest
+		 one, convert it and add the jump around.  */
+	      lp = lpf->prev;
+	      break;
+	    }
+	}
+    }
+
+  if (lp->literal_count >= MAX_POOL_LITERALS)
+    {
+      lp = lpf->prev;
+      while (lp && lp->fragP && lp->literal_count >= MAX_POOL_LITERALS)
+	{
+	  lp = lp->prev;
+	}
+      gas_assert (lp);
+    }
+
+  gas_assert (lp && lp->fragP && lp->literal_count < MAX_POOL_LITERALS);
+  ++lp->literal_count;
+
+  /* Convert candidate and add the jump around.  */
+  if (lp->fragP->fr_subtype == RELAX_LITERAL_POOL_CANDIDATE_BEGIN)
+    xg_promote_candidate_litpool (lps, lp);
+
+  return lp;
+}
+
 static void
 xtensa_move_literals (void)
 {
@@ -11245,49 +11317,12 @@ xtensa_move_literals (void)
 			     preferring non-"candidate" positions to avoid
 			     the jump-around.  */
 			  fragS *litfrag = fragP->tc_frag_data.literal_frags[slot];
-			  struct litpool_frag *lp = lpf->prev;
-			  if (!lp->fragP)
-			    {
-			      break;
-			    }
-			  while (lp->fragP->fr_subtype ==
-				 RELAX_LITERAL_POOL_CANDIDATE_BEGIN)
-			    {
-			      lp = lp->prev;
-			      if (lp->fragP == NULL)
-				{
-				  /* End of list; have to bite the bullet.
-				     Take the nearest.  */
-				  lp = lpf->prev;
-				  break;
-				}
-			      /* Does it (conservatively) reach?  */
-			      if (addr - lp->addr <= 128 * 1024)
-				{
-				  if (lp->fragP->fr_subtype == RELAX_LITERAL_POOL_BEGIN)
-				    {
-				      /* Found a good one.  */
-				      break;
-				    }
-				  else if (lp->prev->fragP &&
-					   addr - lp->prev->addr > 128 * 1024)
-				    {
-				      /* This is still a "candidate" but the next one
-				         will be too far away, so revert to the nearest
-					 one, convert it and add the jump around.  */
-				      lp = lpf->prev;
-				      break;
-				    }
-				}
-			    }
 
-			  /* Convert candidate and add the jump around.  */
-			  if (lp->fragP->fr_subtype ==
-			      RELAX_LITERAL_POOL_CANDIDATE_BEGIN)
-			    xg_promote_candidate_litpool (lps, lp);
-
-			  if (! litfrag->tc_frag_data.literal_frag)
+			  if (!litfrag->tc_frag_data.literal_frag)
 			    {
+			      struct litpool_frag *lp;
+
+			      lp = xg_find_litpool (lps, lpf, addr);
 			      /* Take earliest use of this literal to avoid
 				 forward refs.  */
 			      litfrag->tc_frag_data.literal_frag = lp->fragP;
