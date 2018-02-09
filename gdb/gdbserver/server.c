@@ -39,6 +39,8 @@
 #include "common-inferior.h"
 #include "job-control.h"
 #include "environ.h"
+#include "filenames.h"
+#include "pathstuff.h"
 
 #include "common/selftest.h"
 
@@ -112,7 +114,35 @@ static int vCont_supported;
    space randomization feature before starting an inferior.  */
 int disable_randomization = 1;
 
-static char *program_name = NULL;
+static struct {
+  /* Set the PROGRAM_PATH.  Here we adjust the path of the provided
+     binary if needed.  */
+  void set (gdb::unique_xmalloc_ptr<char> &&path)
+  {
+    m_path = std::move (path);
+
+    /* Make sure we're using the absolute path of the inferior when
+       creating it.  */
+    if (!contains_dir_separator (m_path.get ()))
+      {
+	int reg_file_errno;
+
+	/* Check if the file is in our CWD.  If it is, then we prefix
+	   its name with CURRENT_DIRECTORY.  Otherwise, we leave the
+	   name as-is because we'll try searching for it in $PATH.  */
+	if (is_regular_file (m_path.get (), &reg_file_errno))
+	  m_path = gdb_abspath (m_path.get ());
+      }
+  }
+
+  /* Return the PROGRAM_PATH.  */
+  char *get ()
+  { return m_path.get (); }
+
+private:
+  /* The program name, adjusted if needed.  */
+  gdb::unique_xmalloc_ptr<char> m_path;
+} program_path;
 static std::vector<char *> program_args;
 static std::string wrapper_argv;
 
@@ -269,10 +299,10 @@ get_exec_wrapper ()
 char *
 get_exec_file (int err)
 {
-  if (err && program_name == NULL)
+  if (err && program_path.get () == NULL)
     error (_("No executable file specified."));
 
-  return program_name;
+  return program_path.get ();
 }
 
 /* See server.h.  */
@@ -3003,7 +3033,7 @@ handle_v_run (char *own_buf)
     {
       /* GDB didn't specify a program to run.  Use the program from the
 	 last run with the new argument list.  */
-      if (program_name == NULL)
+      if (program_path.get () == NULL)
 	{
 	  write_enn (own_buf);
 	  free_vector_argv (new_argv);
@@ -3011,16 +3041,13 @@ handle_v_run (char *own_buf)
 	}
     }
   else
-    {
-      xfree (program_name);
-      program_name = new_program_name;
-    }
+    program_path.set (gdb::unique_xmalloc_ptr<char> (new_program_name));
 
   /* Free the old argv and install the new one.  */
   free_vector_argv (program_args);
   program_args = new_argv;
 
-  create_inferior (program_name, program_args);
+  create_inferior (program_path.get (), program_args);
 
   if (last_status.kind == TARGET_WAITKIND_STOPPED)
     {
@@ -3765,13 +3792,13 @@ captured_main (int argc, char *argv[])
       int i, n;
 
       n = argc - (next_arg - argv);
-      program_name = xstrdup (next_arg[0]);
+      program_path.set (gdb::unique_xmalloc_ptr<char> (xstrdup (next_arg[0])));
       for (i = 1; i < n; i++)
 	program_args.push_back (xstrdup (next_arg[i]));
       program_args.push_back (NULL);
 
       /* Wait till we are at first instruction in program.  */
-      create_inferior (program_name, program_args);
+      create_inferior (program_path.get (), program_args);
 
       /* We are now (hopefully) stopped at the first instruction of
 	 the target process.  This assumes that the target process was
@@ -4288,9 +4315,9 @@ process_serial_event (void)
 	  fprintf (stderr, "GDBserver restarting\n");
 
 	  /* Wait till we are at 1st instruction in prog.  */
-	  if (program_name != NULL)
+	  if (program_path.get () != NULL)
 	    {
-	      create_inferior (program_name, program_args);
+	      create_inferior (program_path.get (), program_args);
 
 	      if (last_status.kind == TARGET_WAITKIND_STOPPED)
 		{

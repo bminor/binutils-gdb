@@ -140,3 +140,17 @@ gdb_abspath (const char *path)
 	     ? "" : SLASH_STRING,
 	     path, (char *) NULL));
 }
+
+/* See common/pathstuff.h.  */
+
+bool
+contains_dir_separator (const char *path)
+{
+  for (; *path != '\0'; path++)
+    {
+      if (IS_DIR_SEPARATOR (*path))
+	return true;
+    }
+
+  return false;
+}

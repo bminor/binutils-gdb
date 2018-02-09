@@ -146,4 +146,9 @@ in_inclusive_range (T value, T low, T high)
   return value >= low && value <= high;
 }
 
+/* Return true if the file NAME exists and is a regular file.
+   If the result is false then *ERRNO_PTR is set to a useful value assuming
+   we're expecting a regular file.  */
+extern bool is_regular_file (const char *name, int *errno_ptr);
+
 #endif

@@ -2054,6 +2054,30 @@ proc save_vars { vars body } {
     }
 }
 
+# Run tests in BODY with the current working directory (CWD) set to
+# DIR.  When BODY is finished, restore the original CWD.  Return the
+# result of BODY.
+#
+# This procedure doesn't check if DIR is a valid directory, so you
+# have to make sure of that.
+
+proc with_cwd { dir body } {
+    set saved_dir [pwd]
+    verbose -log "Switching to directory $dir (saved CWD: $saved_dir)."
+    cd $dir
+
+    set code [catch {uplevel 1 $body} result]
+
+    verbose -log "Switching back to $saved_dir."
+    cd $saved_dir
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
 
 # Run tests in BODY with GDB prompt and variable $gdb_prompt set to
 # PROMPT.  When BODY is finished, restore GDB prompt and variable

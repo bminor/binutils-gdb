@@ -1,4 +1,16 @@
 2018-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/common-utils.c: Include "sys/stat.h".
+	(is_regular_file): Move here from "source.c"; change return
+	type to "bool".
+	* common/common-utils.h (is_regular_file): New prototype.
+	* common/pathstuff.c (contains_dir_separator): New function.
+	* common/pathstuff.h (contains_dir_separator): New prototype.
+	* source.c: Don't include "sys/stat.h".
+	(is_regular_file): Move to "common/common-utils.c".
+
+2018-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile.in (COMMON_SFILES): Add "common/pathstuff.c".
 	(HFILES_NO_SRCDIR): Add "common/pathstuff.h".
