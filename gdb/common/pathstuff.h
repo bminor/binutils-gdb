@@ -46,4 +46,8 @@ extern gdb::unique_xmalloc_ptr<char>
 
 extern gdb::unique_xmalloc_ptr<char> gdb_abspath (const char *path);
 
+/* Return whether PATH contains a directory separator character.  */
+
+extern bool contains_dir_separator (const char *path);
+
 #endif /* PATHSTUFF_H */

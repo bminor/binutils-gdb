@@ -1,3 +1,8 @@
+2018-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.server/abspath.exp: New file.
+	* lib/gdb.exp (with_cwd): New procedure.
+
 2018-01-22  Pedro Alves  <palves@redhat.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 

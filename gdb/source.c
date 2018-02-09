@@ -29,7 +29,6 @@
 #include "filestuff.h"
 
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include "gdbcore.h"
 #include "gdb_regex.h"
@@ -669,39 +668,6 @@ info_source_command (const char *ignore, int from_tty)
 		   ? "Includes" : "Does not include");
 }
 
-
-/* Return True if the file NAME exists and is a regular file.
-   If the result is false then *ERRNO_PTR is set to a useful value assuming
-   we're expecting a regular file.  */
-
-static int
-is_regular_file (const char *name, int *errno_ptr)
-{
-  struct stat st;
-  const int status = stat (name, &st);
-
-  /* Stat should never fail except when the file does not exist.
-     If stat fails, analyze the source of error and return True
-     unless the file does not exist, to avoid returning false results
-     on obscure systems where stat does not work as expected.  */
-
-  if (status != 0)
-    {
-      if (errno != ENOENT)
-	return 1;
-      *errno_ptr = ENOENT;
-      return 0;
-    }
-
-  if (S_ISREG (st.st_mode))
-    return 1;
-
-  if (S_ISDIR (st.st_mode))
-    *errno_ptr = EISDIR;
-  else
-    *errno_ptr = EINVAL;
-  return 0;
-}
 
 /* Open a file named STRING, searching path PATH (dir names sep by some char)
    using mode MODE in the calls to open.  You cannot use this function to
