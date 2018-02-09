@@ -1,3 +1,9 @@
+2018-02-09  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/22824:
+	* NEWS <Changes in GDB 8.1>: Clarify that "rbreak" is a new
+	Python function, rather than a new command.
+
 2018-01-31  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 8.1.0.DATE-git.
