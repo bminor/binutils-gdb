@@ -1,5 +1,15 @@
 2018-02-26  Tom Tromey  <tom@tromey.com>
 
+	* value.h (value_union_variant): Declare.
+	* valops.c (value_union_variant): New function.
+	* gdbtypes.h (TYPE_FLAG_DISCRIMINATED_UNION): New macro.
+	(struct discriminant_info): New.
+	(enum dynamic_prop_node_kind) <DYN_PROP_DISCRIMINATED>: New
+	enumerator.
+	(struct main_type) <flag_discriminated_union>: New field.
+
+2018-02-26  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	unittests/unpack-selftests.c.
 	* unittests/unpack-selftests.c: New file.

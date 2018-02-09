@@ -1169,4 +1169,12 @@ extern struct type *result_type_of_xmethod (struct value *method,
 extern struct value *call_xmethod (struct value *method,
 				   int argc, struct value **argv);
 
+/* Given a discriminated union type and some corresponding value
+   contents, this will return the field index of the currently active
+   variant.  This will throw an exception if no active variant can be
+   found.  */
+
+extern int value_union_variant (struct type *union_type,
+				const gdb_byte *contents);
+
 #endif /* !defined (VALUE_H) */
