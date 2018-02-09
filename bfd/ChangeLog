@@ -1,6 +1,19 @@
 2018-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf32_i386_copy_solaris_special_section_fields):
+	Remove prototype.
+	(i386_elf32_sol2_vec): Declared.
+	(elf_i386_link_setup_gnu_properties): Set
+	need_global_offset_table with info->output_bfd->xvec.
+	* elf64-x86-64.c (elf64_x86_64_copy_solaris_special_section_fields):
+	Remove prototype.
+	(x86_64_elf64_sol2_vec): Declared.
+	(elf_x86_64_link_setup_gnu_properties): Set
+	need_global_offset_table with info->output_bfd->xvec.
+
+2018-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf32_i386_copy_solaris_special_section_fields):
 	New prototype.
 	(elf_i386_link_setup_gnu_properties): Set need_global_offset_table
 	for Solaris.
