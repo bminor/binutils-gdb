@@ -125,9 +125,9 @@
      gdb.new_thread are emitted.  See the manual for further
      description of these.
 
-  ** A new command, "rbreak" has been added to the Python API.  This
-     command allows the setting of a large number of breakpoints via a
-     regex pattern in Python.  See the manual for further details.
+  ** A new function, "gdb.rbreak" has been added to the Python API.
+     This function allows the setting of a large number of breakpoints
+     via a regex pattern in Python.  See the manual for further details.
 
   ** Python breakpoints can now accept explicit locations.  See the
      manual for a further description of this feature.
