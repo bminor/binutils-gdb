@@ -46,6 +46,7 @@
 #include "infrun.h"
 #include "signals-state-save-restore.h"
 #include <vector>
+#include "common/pathstuff.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since

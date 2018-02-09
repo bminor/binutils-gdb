@@ -66,6 +66,7 @@
 #include "filename-seen-cache.h"
 #include "arch-utils.h"
 #include <algorithm>
+#include "common/pathstuff.h"
 
 /* Forward declarations for local functions.  */
 

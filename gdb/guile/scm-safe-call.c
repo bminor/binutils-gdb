@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "filenames.h"
 #include "guile-internal.h"
+#include "common/pathstuff.h"
 
 /* Struct to marshall args to scscm_safe_call_body.  */
 

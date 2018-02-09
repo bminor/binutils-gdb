@@ -46,6 +46,7 @@
 #include <ctype.h>
 #include "nat/linux-namespaces.h"
 #include <algorithm>
+#include "common/pathstuff.h"
 
 /* GNU/Linux libthread_db support.
 

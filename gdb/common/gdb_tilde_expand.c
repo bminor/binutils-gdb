@@ -80,3 +80,16 @@ gdb_tilde_expand (const char *dir)
 
   return expanded_dir;
 }
+
+/* See common/gdb_tilde_expand.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+gdb_tilde_expand_up (const char *dir)
+{
+  gdb_glob glob (dir, GLOB_TILDE_CHECK, NULL);
+
+  gdb_assert (glob.pathc () > 0);
+  /* "glob" may return more than one match to the path provided by the
+     user, but we are only interested in the first match.  */
+  return gdb::unique_xmalloc_ptr<char> (xstrdup (glob.pathv ()[0]));
+}

@@ -87,6 +87,7 @@
 #include <set>
 #include <forward_list>
 #include "rust-lang.h"
+#include "common/pathstuff.h"
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.

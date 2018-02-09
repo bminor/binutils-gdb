@@ -1,3 +1,34 @@
+2018-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (COMMON_SFILES): Add "common/pathstuff.c".
+	(HFILES_NO_SRCDIR): Add "common/pathstuff.h".
+	* auto-load.c: Include "common/pathstuff.h".
+	* common/common-def.h (current_directory): Move here.
+	* common/gdb_tilde_expand.c (gdb_tilde_expand_up): New
+	function.
+	* common/gdb_tilde_expand.h (gdb_tilde_expand_up): New
+	prototype.
+	* common/pathstuff.c: New file.
+	* common/pathstuff.h: New file.
+	* compile/compile.c: Include "common/pathstuff.h".
+	* defs.h (current_directory): Move to "common/common-defs.h".
+	* dwarf2read.c: Include "common/pathstuff.h".
+	* exec.c: Likewise.
+	* guile/scm-safe-call.c: Likewise.
+	* linux-thread-db.c: Likewise.
+	* main.c: Likewise.
+	* nto-tdep.c: Likewise.
+	* objfiles.c: Likewise.
+	* source.c: Likewise.
+	* symtab.c: Likewise.
+	* utils.c: Include "common/pathstuff.h".
+	(gdb_realpath): Move to "common/pathstuff.c".
+	(gdb_realpath_keepfile): Likewise.
+	(gdb_abspath): Likewise.
+	* utils.h (gdb_realpath): Move to "common/pathstuff.h".
+	(gdb_realpath_keepfile): Likewise.
+	(gdb_abspath): Likewise.
+
 2018-02-28  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_resume): Use PT_SETSTEP for stepping and a
