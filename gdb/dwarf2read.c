@@ -86,6 +86,7 @@
 #include <cmath>
 #include <set>
 #include <forward_list>
+#include "common/pathstuff.h"
 
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);

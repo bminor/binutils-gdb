@@ -423,10 +423,6 @@ enum info_proc_what
     IP_ALL
   };
 
-/* * String containing the current directory (what getwd would return).  */
-
-extern char *current_directory;
-
 /* * Default radixes for input and output.  Only some values supported.  */
 extern unsigned input_radix;
 extern unsigned output_radix;

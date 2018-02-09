@@ -70,6 +70,7 @@
 #include "common/gdb_optional.h"
 #include "cp-support.h"
 #include <algorithm>
+#include "common/pathstuff.h"
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -2838,57 +2839,6 @@ string_to_core_addr (const char *my_string)
   return addr;
 }
 
-gdb::unique_xmalloc_ptr<char>
-gdb_realpath (const char *filename)
-{
-/* On most hosts, we rely on canonicalize_file_name to compute
-   the FILENAME's realpath.
-
-   But the situation is slightly more complex on Windows, due to some
-   versions of GCC which were reported to generate paths where
-   backlashes (the directory separator) were doubled.  For instance:
-      c:\\some\\double\\slashes\\dir
-   ... instead of ...
-      c:\some\double\slashes\dir
-   Those double-slashes were getting in the way when comparing paths,
-   for instance when trying to insert a breakpoint as follow:
-      (gdb) b c:/some/double/slashes/dir/foo.c:4
-      No source file named c:/some/double/slashes/dir/foo.c:4.
-      (gdb) b c:\some\double\slashes\dir\foo.c:4
-      No source file named c:\some\double\slashes\dir\foo.c:4.
-   To prevent this from happening, we need this function to always
-   strip those extra backslashes.  While canonicalize_file_name does
-   perform this simplification, it only works when the path is valid.
-   Since the simplification would be useful even if the path is not
-   valid (one can always set a breakpoint on a file, even if the file
-   does not exist locally), we rely instead on GetFullPathName to
-   perform the canonicalization.  */
-
-#if defined (_WIN32)
-  {
-    char buf[MAX_PATH];
-    DWORD len = GetFullPathName (filename, MAX_PATH, buf, NULL);
-
-    /* The file system is case-insensitive but case-preserving.
-       So it is important we do not lowercase the path.  Otherwise,
-       we might not be able to display the original casing in a given
-       path.  */
-    if (len > 0 && len < MAX_PATH)
-      return gdb::unique_xmalloc_ptr<char> (xstrdup (buf));
-  }
-#else
-  {
-    char *rp = canonicalize_file_name (filename);
-
-    if (rp != NULL)
-      return gdb::unique_xmalloc_ptr<char> (rp);
-  }
-#endif
-
-  /* This system is a lost cause, just dup the buffer.  */
-  return gdb::unique_xmalloc_ptr<char> (xstrdup (filename));
-}
-
 #if GDB_SELF_TEST
 
 static void
@@ -2924,74 +2874,6 @@ gdb_realpath_tests ()
 }
 
 #endif /* GDB_SELF_TEST */
-
-/* Return a copy of FILENAME, with its directory prefix canonicalized
-   by gdb_realpath.  */
-
-gdb::unique_xmalloc_ptr<char>
-gdb_realpath_keepfile (const char *filename)
-{
-  const char *base_name = lbasename (filename);
-  char *dir_name;
-  char *result;
-
-  /* Extract the basename of filename, and return immediately 
-     a copy of filename if it does not contain any directory prefix.  */
-  if (base_name == filename)
-    return gdb::unique_xmalloc_ptr<char> (xstrdup (filename));
-
-  dir_name = (char *) alloca ((size_t) (base_name - filename + 2));
-  /* Allocate enough space to store the dir_name + plus one extra
-     character sometimes needed under Windows (see below), and
-     then the closing \000 character.  */
-  strncpy (dir_name, filename, base_name - filename);
-  dir_name[base_name - filename] = '\000';
-
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-  /* We need to be careful when filename is of the form 'd:foo', which
-     is equivalent of d:./foo, which is totally different from d:/foo.  */
-  if (strlen (dir_name) == 2 && isalpha (dir_name[0]) && dir_name[1] == ':')
-    {
-      dir_name[2] = '.';
-      dir_name[3] = '\000';
-    }
-#endif
-
-  /* Canonicalize the directory prefix, and build the resulting
-     filename.  If the dirname realpath already contains an ending
-     directory separator, avoid doubling it.  */
-  gdb::unique_xmalloc_ptr<char> path_storage = gdb_realpath (dir_name);
-  const char *real_path = path_storage.get ();
-  if (IS_DIR_SEPARATOR (real_path[strlen (real_path) - 1]))
-    result = concat (real_path, base_name, (char *) NULL);
-  else
-    result = concat (real_path, SLASH_STRING, base_name, (char *) NULL);
-
-  return gdb::unique_xmalloc_ptr<char> (result);
-}
-
-/* Return PATH in absolute form, performing tilde-expansion if necessary.
-   PATH cannot be NULL or the empty string.
-   This does not resolve symlinks however, use gdb_realpath for that.  */
-
-gdb::unique_xmalloc_ptr<char>
-gdb_abspath (const char *path)
-{
-  gdb_assert (path != NULL && path[0] != '\0');
-
-  if (path[0] == '~')
-    return gdb::unique_xmalloc_ptr<char> (tilde_expand (path));
-
-  if (IS_ABSOLUTE_PATH (path))
-    return gdb::unique_xmalloc_ptr<char> (xstrdup (path));
-
-  /* Beware the // my son, the Emacs barfs, the botch that catch...  */
-  return gdb::unique_xmalloc_ptr<char>
-    (concat (current_directory,
-	     IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
-	     ? "" : SLASH_STRING,
-	     path, (char *) NULL));
-}
 
 ULONGEST
 align_up (ULONGEST v, int n)

@@ -1,3 +1,10 @@
+2018-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Add "$(srcdir)/common/pathstuff.c".
+	(OBJS): Add "pathstuff.o".
+	* server.c (current_directory): New global variable.
+	(captured_main): Initialize "current_directory".
+
 2018-01-17  Eldar Abusalimov  <eldar.abusalimov@jetbrains.com>
 
 	PR gdb/21559

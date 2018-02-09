@@ -56,6 +56,10 @@
       break;					\
     }
 
+/* String containing the current directory (what getwd would return).  */
+
+char *current_directory;
+
 /* The environment to pass to the inferior when creating it.  */
 
 static gdb_environ our_environ;
@@ -3563,6 +3567,13 @@ captured_main (int argc, char *argv[])
 #if GDB_SELF_TEST
   const char *selftest_filter = NULL;
 #endif
+
+  current_directory = getcwd (NULL, 0);
+  if (current_directory == NULL)
+    {
+      error (_("%s: error finding working directory"),
+	     safe_strerror (errno));
+    }
 
   while (*next_arg != NULL && **next_arg == '-')
     {

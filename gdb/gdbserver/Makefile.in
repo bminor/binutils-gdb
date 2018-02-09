@@ -209,6 +209,7 @@ SFILES = \
 	$(srcdir)/common/gdb_tilde_expand.c \
 	$(srcdir)/common/gdb_vecs.c \
 	$(srcdir)/common/new-op.c \
+	$(srcdir)/common/pathstuff.c \
 	$(srcdir)/common/print-utils.c \
 	$(srcdir)/common/ptid.c \
 	$(srcdir)/common/rsp-low.c \
@@ -256,6 +257,7 @@ OBS = \
 	mem-break.o \
 	new-op.o \
 	notif.o \
+	pathstuff.o \
 	print-utils.o \
 	ptid.o \
 	regcache.o \

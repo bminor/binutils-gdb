@@ -1134,6 +1134,7 @@ SFILES = \
 	common/gdb_tilde_expand.c \
 	common/gdb_vecs.c \
 	common/new-op.c \
+	common/pathstuff.c \
 	common/print-utils.c \
 	common/ptid.c \
 	common/rsp-low.c \
@@ -1424,6 +1425,7 @@ HFILES_NO_SRCDIR = \
 	common/gdb_wait.h \
 	common/common-inferior.h \
 	common/host-defs.h \
+	common/pathstuff.h \
 	common/print-utils.h \
 	common/ptid.h \
 	common/queue.h \
@@ -1549,6 +1551,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	gdb_vecs.o \
 	mi/mi-common.o \
 	new-op.o \
+	pathstuff.o \
 	print-utils.o \
 	ptid.o \
 	rsp-low.o \

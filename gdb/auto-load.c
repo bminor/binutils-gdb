@@ -40,6 +40,7 @@
 #include "extension.h"
 #include "gdb/section-scripts.h"
 #include <algorithm>
+#include "common/pathstuff.h"
 
 /* The section to look in for auto-loaded scripts (in file formats that
    support sections).

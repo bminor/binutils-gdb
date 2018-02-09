@@ -41,6 +41,7 @@
 #include "valprint.h"
 #include "common/gdb_optional.h"
 #include "common/gdb_unlinker.h"
+#include "common/pathstuff.h"
 
 
 

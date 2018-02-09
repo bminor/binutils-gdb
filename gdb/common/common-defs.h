@@ -91,4 +91,7 @@
 /* Pull in gdb::unique_xmalloc_ptr.  */
 #include "common/gdb_unique_ptr.h"
 
+/* String containing the current directory (what getwd would return).  */
+extern char *current_directory;
+
 #endif /* COMMON_DEFS_H */
