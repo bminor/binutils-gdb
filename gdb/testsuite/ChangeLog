@@ -1,3 +1,7 @@
+2018-02-26  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Accept more possible results in enum test.
+
 2018-02-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* lib/cp-support.exp (cp_test_ptype_class): Move space inside

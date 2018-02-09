@@ -1,5 +1,33 @@
 2018-02-26  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.h (rust_last_path_segment): Declare.
+	* rust-lang.c (rust_last_path_segment): Now public.  Change
+	contract.
+	(struct disr_info): Remove.
+	(RUST_ENUM_PREFIX, RUST_ENCODED_ENUM_REAL)
+	(RUST_ENCODED_ENUM_HIDDEN, rust_union_is_untagged)
+	(rust_get_disr_info, rust_tuple_variant_type_p): Remove.
+	(rust_enum_p, rust_enum_variant): New function.
+	(rust_underscore_fields): Remove "offset" parameter.
+	(rust_print_enum): New function.
+	(rust_val_print) <TYPE_CODE_UNION>: Remove enum code.
+	<TYPE_CODE_STRUCT>: Call rust_print_enum when appropriate.
+	(rust_print_struct_def): Add "for_rust_enum" parameter.  Handle
+	enums.
+	(rust_internal_print_type): New function, from rust_print_type.
+	Remove enum code.
+	(rust_print_type): Call rust_internal_print_type.
+	(rust_evaluate_subexp) <STRUCTOP_ANONYMOUS, STRUCTOP_STRUCT>:
+	Update enum handling.
+	* dwarf2read.c (struct dwarf2_cu) <rust_unions>: New field.
+	(rust_fully_qualify, alloc_discriminant_info, quirk_rust_enum)
+	(rust_union_quirks): New functions.
+	(process_full_comp_unit, process_full_type_unit): Call
+	rust_union_quirks.
+	(process_structure_scope): Update rust_unions if necessary.
+
+2018-02-26  Tom Tromey  <tom@tromey.com>
+
 	* value.h (value_union_variant): Declare.
 	* valops.c (value_union_variant): New function.
 	* gdbtypes.h (TYPE_FLAG_DISCRIMINATED_UNION): New macro.

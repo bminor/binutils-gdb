@@ -220,8 +220,8 @@ gdb_test "print .." " = .*::ops::RangeFull"
 gdb_test "print str_some" \
     " = core::option::Option<\[a-z\]+::string::String>::Some\\(\[a-z\]+::string::String .*"
 gdb_test "print str_none" " = core::option::Option<\[a-z\]+::string::String>::None"
-gdb_test "print int_some" " = core::option::Option::Some\\(1\\)"
-gdb_test "print int_none" " = core::option::Option::None"
+gdb_test "print int_some" " = core::option::Option<u8>::Some\\(1\\)"
+gdb_test "print int_none" " = core::option::Option<u8>::None"
 gdb_test "print box_some" " = core::option::Option<\[a-z:\]*Box<u8>>::Some\\(.*\\)"
 gdb_test "print box_none" " = core::option::Option<\[a-z:\]*Box<u8>>::None"
 gdb_test "print custom_some" \

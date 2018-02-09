@@ -39,6 +39,11 @@ extern bool rust_tuple_struct_type_p (struct type *type);
    stringif no crate name can be found.  */
 extern std::string rust_crate_for_block (const struct block *block);
 
+/* Returns the last segment of a Rust path like foo::bar::baz.  Will
+   not handle cases where the last segment contains generics.  */
+
+extern const char *rust_last_path_segment (const char *path);
+
 /* Create a new slice type.  NAME is the name of the type.  ELT_TYPE
    is the type of the elements of the slice.  USIZE_TYPE is the Rust
    "usize" type to use.  The new type is allocated whereever ELT_TYPE
