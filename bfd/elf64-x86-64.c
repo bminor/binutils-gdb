@@ -4528,7 +4528,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
   if (relsize <= 0)
     return -1;
 
-  if (get_elf_x86_backend_data (abfd)->target_os == is_normal)
+  if (get_elf_x86_backend_data (abfd)->target_os != is_nacl)
     {
       lazy_plt = &elf_x86_64_lazy_plt;
       non_lazy_plt = &elf_x86_64_non_lazy_plt;
@@ -4867,7 +4867,6 @@ static bfd *
 elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 {
   struct elf_x86_init_table init_table;
-  const struct elf_backend_data *bed;
 
   if ((int) R_X86_64_standard >= (int) R_X86_64_converted_reloc_bit
       || (int) R_X86_64_max <= (int) R_X86_64_converted_reloc_bit
@@ -4880,8 +4879,7 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
   /* This is unused for x86-64.  */
   init_table.plt0_pad_byte = 0x90;
 
-  if (get_elf_x86_backend_data (info->output_bfd)->target_os
-      == is_normal)
+  if (get_elf_x86_backend_data (info->output_bfd)->target_os != is_nacl)
     {
       if (info->bndplt)
 	{
@@ -4923,11 +4921,6 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
       init_table.r_info = elf32_r_info;
       init_table.r_sym = elf32_r_sym;
     }
-
-  bed = get_elf_backend_data (info->output_bfd);
-  init_table.need_global_offset_table
-    = (bed->elf_backend_copy_special_section_fields
-       == elf64_x86_64_copy_solaris_special_section_fields);
 
   return _bfd_x86_elf_link_setup_gnu_properties (info, &init_table);
 }
@@ -5053,6 +5046,14 @@ elf_x86_64_special_sections[]=
 #define TARGET_LITTLE_SYM		    x86_64_elf64_sol2_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf64-x86-64-sol2"
+
+static const struct elf_x86_backend_data elf_x86_64_solaris_arch_bed =
+  {
+    is_solaris				    /* os */
+  };
+
+#undef	elf_backend_arch_data
+#define	elf_backend_arch_data		    &elf_x86_64_solaris_arch_bed
 
 /* Restore default: we cannot use ELFOSABI_SOLARIS, otherwise ELFOSABI_NONE
    objects won't be recognized.  */

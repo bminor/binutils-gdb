@@ -1,3 +1,30 @@
+2018-02-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_get_synthetic_symtab): Also handle
+	is_solaris.
+	(i386_elf32_sol2_vec): Don't declare.
+	(elf_i386_link_setup_gnu_properties): Also handle is_solaris.
+	Don't set need_global_offset_table.
+	(elf_i386_solaris_arch_bed): New.
+	(elf_backend_arch_data): Set to elf_i386_solaris_arch_bed for
+	Solaris.
+	* elf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Check
+	target_os != is_nacl instead of target_os == is_normal.
+	(x86_64_elf64_sol2_vec): Don't declare.
+	(elf_x86_64_link_setup_gnu_properties): Check target_os !=
+	is_nacl instead of target_os == is_normal.  Don't set
+	need_global_offset_table.
+	(elf_x86_64_solaris_arch_bed): New.
+	(elf_backend_arch_data): Set to elf_x86_64_solaris_arch_bed for
+	Solaris.
+	* elfxx-x86.c (_bfd_x86_elf_size_dynamic_sections): Keep
+	_GLOBAL_OFFSET_TABLE_ for Solaris.
+	(_bfd_x86_elf_link_setup_gnu_properties): Don't copy
+	need_global_offset_table.
+	* elfxx-x86.h (elf_x86_target_os): Add is_solaris.
+	(elf_x86_link_hash_table): Remove need_global_offset_table.
+	(elf_x86_init_table): Likewise.
+
 2018-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf32_i386_copy_solaris_special_section_fields):
