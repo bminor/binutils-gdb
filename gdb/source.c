@@ -1219,7 +1219,7 @@ find_source_lines (struct symtab *s, int desc)
     size = myread (desc, data.data (), size);
     if (size < 0)
       perror_with_name (symtab_to_filename_for_display (s));
-    end = &data[size];
+    end = data.data () + size;
     p = &data[0];
     line_charpos[0] = 0;
     nlines = 1;
