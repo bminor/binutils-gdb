@@ -1,4 +1,4 @@
-2018-02-08  Eric Botcazou  <ebotcazou@adacore.com>
+2018-02-09  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* elfxx-sparc.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Reorder conditions.
 	(sparc_elf_append_rela): Assert that there is enough room in section.
