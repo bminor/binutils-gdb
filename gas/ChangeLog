@@ -1,3 +1,8 @@
+2018-02-13  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xg_find_best_trampoline): Skip trampoline
+	frag that contains source address.
+
 2018-02-13  Nick Clifton  <nickc@redhat.com>
 
 	PR 22773
