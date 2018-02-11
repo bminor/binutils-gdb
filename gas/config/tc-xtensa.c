@@ -9339,6 +9339,12 @@ static size_t xg_find_best_trampoline (struct trampoline_index *idx,
 		 trampoline_frag->fr_address > target))
 	      continue;
 
+	    /* Don't choose trampoline that contains the source.  */
+	    if (source >= trampoline_frag->fr_address
+		&& source <= trampoline_frag->fr_address +
+		trampoline_frag->fr_fix)
+	      continue;
+
 	    off = trampoline_frag->fr_address - fulcrum;
 	    /* Stop if some trampoline is found and the search is more than
 	       J_RANGE / 4 from the projected fulcrum.  A trampoline w/o jump
