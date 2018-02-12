@@ -1,3 +1,8 @@
+2018-02-12  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/gas/mips/reginfo-2-n32.d: Add `--no-pad-sections' to
+	`as' flags.
+
 2018-02-12  Henry Wong <henry@stuffedcow.net>
 
 	* testsuite/gas/mips/r6.d: Update for "sigrie" encoding fix.
