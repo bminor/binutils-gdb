@@ -5861,50 +5861,74 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
     {
       if (p->p_type == PT_GNU_RELRO)
 	{
-	  const Elf_Internal_Phdr *lp;
-	  struct elf_segment_map *lm;
+	  bfd_vma start, end;
 
 	  if (link_info != NULL)
 	    {
 	      /* During linking the range of the RELRO segment is passed
-		 in link_info.  */
+		 in link_info.  Note that there may be padding between
+		 relro_start and the first RELRO section.  */
+	      start = link_info->relro_start;
+	      end = link_info->relro_end;
+	    }
+	  else if (m->count != 0)
+	    {
+	      if (!m->p_size_valid)
+		abort ();
+	      start = m->sections[0]->vma;
+	      end = start + m->p_size;
+	    }
+	  else
+	    {
+	      start = 0;
+	      end = 0;
+	    }
+
+	  if (start < end)
+	    {
+	      struct elf_segment_map *lm;
+	      const Elf_Internal_Phdr *lp;
+	      unsigned int i;
+
+	      /* Find a LOAD segment containing a section in the RELRO
+		 segment.  */
 	      for (lm = elf_seg_map (abfd), lp = phdrs;
 		   lm != NULL;
 		   lm = lm->next, lp++)
 		{
 		  if (lp->p_type == PT_LOAD
-		      && lp->p_vaddr < link_info->relro_end
 		      && lm->count != 0
-		      && lm->sections[0]->vma >= link_info->relro_start)
+		      && lm->sections[lm->count - 1]->vma >= start
+		      && lm->sections[0]->vma < end)
 		    break;
 		}
-
 	      BFD_ASSERT (lm != NULL);
-	    }
-	  else
-	    {
-	      /* Otherwise we are copying an executable or shared
-		 library, but we need to use the same linker logic.  */
-	      for (lp = phdrs; lp < phdrs + count; ++lp)
+
+	      /* Find the section starting the RELRO segment.  */
+	      for (i = 0; i < lm->count; i++)
 		{
-		  if (lp->p_type == PT_LOAD
-		      && lp->p_paddr == p->p_paddr)
+		  asection *s = lm->sections[i];
+		  if (s->vma >= start
+		      && s->vma < end
+		      && s->size != 0)
 		    break;
 		}
-	    }
+	      BFD_ASSERT (i < lm->count);
 
-	  if (lp < phdrs + count)
-	    {
-	      p->p_vaddr = lp->p_vaddr;
-	      p->p_paddr = lp->p_paddr;
-	      p->p_offset = lp->p_offset;
-	      if (link_info != NULL)
-		p->p_filesz = link_info->relro_end - lp->p_vaddr;
-	      else if (m->p_size_valid)
-		p->p_filesz = m->p_size;
-	      else
-		abort ();
-	      p->p_memsz = p->p_filesz;
+	      p->p_vaddr = lm->sections[i]->vma;
+	      p->p_paddr = lm->sections[i]->lma;
+	      p->p_offset = lm->sections[i]->filepos;
+	      p->p_memsz = end - p->p_vaddr;
+	      p->p_filesz = p->p_memsz;
+
+	      /* The RELRO segment typically ends a few bytes into
+		 .got.plt but other layouts are possible.  In cases
+		 where the end does not match any loaded section (for
+		 instance is in file padding), trim p_filesz back to
+		 correspond to the end of loaded section contents.  */
+	      if (p->p_filesz > lp->p_vaddr + lp->p_filesz - p->p_vaddr)
+		p->p_filesz = lp->p_vaddr + lp->p_filesz - p->p_vaddr;
+
 	      /* Preserve the alignment and flags if they are valid. The
 		 gold linker generates RW/4 for the PT_GNU_RELRO section.
 		 It is better for objcopy/strip to honor these attributes

@@ -1,3 +1,9 @@
+2018-02-13  Alan Modra  <amodra@gmail.com>
+
+	PR 22829
+	* elf.c (assign_file_positions_for_non_load_sections): Rewrite
+	PT_GNU_RELRO setup.
+
 2018-02-12  Zebediah Figura  <z.figura12@gmail.com>
 
 	* i386msdos.c (msdos_mkobject); New function.

@@ -1,3 +1,7 @@
+2018-02-13  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-x86-64/pr14207.d: Adjust relro p_filesz.
+
 2018-02-07  Alan Modra  <amodra@gmail.com>
 
 	Revert 2018-01-17  Alan Modra  <amodra@gmail.com>
