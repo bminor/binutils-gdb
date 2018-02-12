@@ -1,3 +1,7 @@
+2018-02-12  Henry Wong <henry@stuffedcow.net>
+
+	* mips-opc.c (mips_builtin_opcodes): Correct "sigrie" encoding.
+
 2018-02-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt_BR.po: Updated Brazilian Portuguese translation.

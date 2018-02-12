@@ -1,3 +1,9 @@
+2018-02-12  Henry Wong <henry@stuffedcow.net>
+
+	* testsuite/gas/mips/r6.d: Update for "sigrie" encoding fix.
+	* testsuite/gas/mips/r6-n32.d: Likewise.
+	* testsuite/gas/mips/r6-n64.d: Likewise.
+
 2018-02-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.
