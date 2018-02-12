@@ -1,3 +1,15 @@
+2018-02-12  Zebediah Figura  <z.figura12@gmail.com>
+
+	* i386msdos.c (msdos_mkobject); New function.
+	(msdos_object_p): New function.
+	(i386_msdos_vec): Use msdos_object_p as the check_format
+	function.
+	* peicode.h: Rename external_PEI_DOS_hdr, DOSMAGIC, and
+	NT_SIGNATURE to external_DOS_hdr, IMAGE_DOS_SIGNATURE, and
+	IMAGE_NT_SIGNATURE.
+	* peXXigen.c: Likewise.
+	* coff-ia64.c: Likewise.
+
 2018-02-12  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-nds32.c (nds32_elf_relax_longjump3): Remove redundant

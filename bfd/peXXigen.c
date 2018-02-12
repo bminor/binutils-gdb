@@ -828,7 +828,7 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
   if (pe_data (abfd)->dll)
     filehdr_in->f_flags |= F_DLL;
 
-  filehdr_in->pe.e_magic    = DOSMAGIC;
+  filehdr_in->pe.e_magic    = IMAGE_DOS_SIGNATURE;
   filehdr_in->pe.e_cblp     = 0x90;
   filehdr_in->pe.e_cp       = 0x3;
   filehdr_in->pe.e_crlc     = 0x0;
@@ -872,7 +872,7 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
   filehdr_in->pe.dos_message[13] = 0x0a0d0d2e;
   filehdr_in->pe.dos_message[14] = 0x24;
   filehdr_in->pe.dos_message[15] = 0x0;
-  filehdr_in->pe.nt_signature = NT_SIGNATURE;
+  filehdr_in->pe.nt_signature = IMAGE_NT_SIGNATURE;
 
   H_PUT_16 (abfd, filehdr_in->f_magic, filehdr_out->f_magic);
   H_PUT_16 (abfd, filehdr_in->f_nscns, filehdr_out->f_nscns);

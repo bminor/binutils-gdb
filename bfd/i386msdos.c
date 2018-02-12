@@ -27,11 +27,93 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "libaout.h"
+#include "coff/msdos.h"
 
-#define EXE_MAGIC	0x5a4d
 #define EXE_LOAD_HIGH	0x0000
 #define EXE_LOAD_LOW	0xffff
 #define EXE_PAGE_SIZE	512
+
+static bfd_boolean
+msdos_mkobject (bfd *abfd)
+{
+  bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_i386_i8086);
+
+  return aout_32_mkobject (abfd);
+}
+
+static const bfd_target *
+msdos_object_p (bfd *abfd)
+{
+  struct external_DOS_hdr hdr;
+  bfd_byte buffer[2];
+  asection *section;
+  unsigned int size;
+
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
+      || bfd_bread (&hdr, (bfd_size_type) sizeof (hdr), abfd) < DOS_HDR_SIZE)
+    {
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
+      return NULL;
+    }
+
+  if (H_GET_16 (abfd, hdr.e_magic) != IMAGE_DOS_SIGNATURE)
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return NULL;
+    }
+
+  /* Check that this isn't actually a PE, NE, or LE file. If it is, the
+     e_lfanew field will be valid and point to a header beginning with one of
+     the relevant signatures.  If not, e_lfanew might point to anything, so
+     don't bail if we can't read there.  */
+  if (H_GET_16 (abfd, hdr.e_cparhdr) < 4
+      || bfd_seek (abfd, (file_ptr) H_GET_32 (abfd, hdr.e_lfanew), SEEK_SET) != 0
+      || bfd_bread (buffer, (bfd_size_type) 2, abfd) != 2)
+    {
+      if (bfd_get_error () == bfd_error_system_call)
+	return NULL;
+    }
+  else
+    {
+      if (H_GET_16 (abfd, buffer) == IMAGE_NT_SIGNATURE
+	  || H_GET_16 (abfd, buffer) == IMAGE_OS2_SIGNATURE
+	  || H_GET_16 (abfd, buffer) == IMAGE_OS2_SIGNATURE_LE
+	  || H_GET_16 (abfd, buffer) == IMAGE_OS2_SIGNATURE_LX)
+	{
+	  bfd_set_error (bfd_error_wrong_format);
+	  return NULL;
+	}
+    }
+
+  if (!msdos_mkobject (abfd))
+    return NULL;
+
+  abfd->flags = EXEC_P;
+  abfd->start_address = H_GET_16 (abfd, hdr.e_ip);
+
+  section = bfd_make_section (abfd, ".text");
+  if (section == NULL)
+    return NULL;
+
+  section->flags = (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS);
+  section->filepos = H_GET_16 (abfd, hdr.e_cparhdr) * 16;
+  size = (H_GET_16 (abfd, hdr.e_cp) - 1) * EXE_PAGE_SIZE - section->filepos;
+  size += H_GET_16 (abfd, hdr.e_cblp);
+
+  /* Check that the size is valid.  */
+  if (bfd_seek (abfd, (file_ptr) (section->filepos + size), SEEK_SET) != 0)
+    {
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
+      return NULL;
+    }
+
+  bfd_set_section_size (abfd, section, size);
+  section->alignment_power = 4;
+
+  return abfd->xvec;
+}
 
 static int
 msdos_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
@@ -77,7 +159,7 @@ msdos_write_object_contents (bfd *abfd)
     }
 
   /* Constants.  */
-  H_PUT_16 (abfd, EXE_MAGIC, &hdr[0]);
+  H_PUT_16 (abfd, IMAGE_DOS_SIGNATURE, &hdr[0]);
   H_PUT_16 (abfd, EXE_PAGE_SIZE / 16, &hdr[8]);
   H_PUT_16 (abfd, EXE_LOAD_LOW, &hdr[12]);
   H_PUT_16 (abfd, 0x3e, &hdr[24]);
@@ -127,7 +209,6 @@ msdos_set_section_contents (bfd *abfd,
 
 
 
-#define msdos_mkobject aout_32_mkobject
 #define msdos_make_empty_symbol aout_32_make_empty_symbol
 #define msdos_bfd_reloc_type_lookup aout_32_reloc_type_lookup
 #define msdos_bfd_reloc_name_lookup aout_32_reloc_name_lookup
@@ -203,7 +284,7 @@ const bfd_target i386_msdos_vec =
 
     {
       _bfd_dummy_target,
-      _bfd_dummy_target,		/* bfd_check_format */
+      msdos_object_p,		/* bfd_check_format */
       _bfd_dummy_target,
       _bfd_dummy_target,
     },

@@ -72,7 +72,7 @@ ia64coff_object_p (bfd *abfd)
 {
 #ifdef COFF_IMAGE_WITH_PE
   {
-    struct external_PEI_DOS_hdr dos_hdr;
+    struct external_DOS_hdr dos_hdr;
     struct external_PEI_IMAGE_hdr image_hdr;
     file_ptr offset;
 
@@ -87,7 +87,7 @@ ia64coff_object_p (bfd *abfd)
 
     /* There are really two magic numbers involved; the magic number
        that says this is a NT executable (PEI) and the magic number
-       that determines the architecture.  The former is DOSMAGIC,
+       that determines the architecture.  The former is IMAGE_DOS_SIGNATURE,
        stored in the e_magic field.  The latter is stored in the
        f_magic field.  If the NT magic number isn't valid, the
        architecture magic number could be mimicked by some other
@@ -95,7 +95,7 @@ ia64coff_object_p (bfd *abfd)
        this routine can only be called correctly for a PEI file, check
        the e_magic number here, and, if it doesn't match, clobber the
        f_magic number so that we don't get a false match.  */
-    if (H_GET_16 (abfd, dos_hdr.e_magic) != DOSMAGIC)
+    if (H_GET_16 (abfd, dos_hdr.e_magic) != IMAGE_DOS_SIGNATURE)
       {
 	bfd_set_error (bfd_error_wrong_format);
 	return NULL;

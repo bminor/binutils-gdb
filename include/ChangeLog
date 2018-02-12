@@ -1,3 +1,9 @@
+2018-02-12  Zebediah Figura  <z.figura12@gmail.com>
+
+	* coff/msdos.h: New header.
+	* coff/pe.h: Move common defines to msdos.h.
+	* coff/powerpc.h: Likewise.
+
 2018-01-13  Nick Clifton  <nickc@redhat.com>
 
 	2.30 branch created.
