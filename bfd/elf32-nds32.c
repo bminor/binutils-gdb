@@ -9690,7 +9690,6 @@ nds32_elf_relax_longjump3 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
     else
       {
 	irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info), reloc);
-	irel->r_addend = irel->r_addend;
 	hi_irelfn->r_info = ELF32_R_INFO (ELF32_R_SYM (hi_irelfn->r_info),
 					  cond_reloc);
       }
