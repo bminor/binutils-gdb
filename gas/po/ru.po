@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: gas 2.30.0\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-01-13 13:44+0000\n"
-"PO-Revision-Date: 2018-02-03 10:05+0300\n"
+"PO-Revision-Date: 2018-02-10 09:58+0300\n"
 "Last-Translator: Yuri Kozlov <yuray@komyakino.ru>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
 "Language: ru\n"
@@ -1915,7 +1915,7 @@ msgstr "невозможно вставить в пул литералов"
 #: config/tc-aarch64.c:6549 config/tc-aarch64.c:6561
 #, c-format
 msgid "unpredictable transfer with writeback -- `%s'"
-msgstr "непредсказуемая передача с отложенной записью — «%s»"
+msgstr "непредсказуемая передача с обратной записью — «%s»"
 
 #: config/tc-aarch64.c:6565
 #, c-format
@@ -2653,82 +2653,75 @@ msgstr "Невозможно разобрать базу TLS: %s"
 #: config/tc-arc.c:1246
 #, c-format
 msgid "@%s is not a complex relocation."
-msgstr "Значение @%s не являтся сложным перемещением."
+msgstr "Значение @%s не является сложным перемещением."
 
 #: config/tc-arc.c:1252
 #, c-format
 msgid "Bad expression: @%s + %s."
-msgstr ""
+msgstr "Ошибка в выражении: @%s + %s."
 
 #: config/tc-arc.c:1313
 msgid "Brackets in operand field incorrect"
-msgstr ""
+msgstr "Неверные скобки в поле операнда"
 
 #: config/tc-arc.c:1315 config/tc-xtensa.c:2038
 msgid "extra comma"
-msgstr ""
+msgstr "лишняя запятая"
 
 #: config/tc-arc.c:1317 config/tc-pru.c:1443 config/tc-pru.c:1710
 #: config/tc-xtensa.c:2042
 msgid "missing argument"
-msgstr ""
+msgstr "пропущен аргумент"
 
 #: config/tc-arc.c:1319 config/tc-xtensa.c:2044
 msgid "missing comma or colon"
-msgstr ""
+msgstr "отсутствует запятая или двоеточие"
 
 #: config/tc-arc.c:1388
 msgid "extra dot"
-msgstr ""
+msgstr "лишняя точка"
 
 #: config/tc-arc.c:1390
-#, fuzzy
-#| msgid "unrecognized option -%c%s"
 msgid "unrecognized flag"
-msgstr "нераспознанный параметр -%c%s"
+msgstr "нераспознанный флаг"
 
 #: config/tc-arc.c:1392
 msgid "failed to parse flags"
-msgstr ""
+msgstr "ошибка при разборе флагов"
 
 #: config/tc-arc.c:1418
 msgid "Unhandled reloc type"
-msgstr ""
+msgstr "необработанный тип перемещения"
 
 #: config/tc-arc.c:2427
-#, fuzzy, c-format
-#| msgid "failed to read instruction table %s\n"
+#, c-format
 msgid "%s for instruction '%s'"
-msgstr "не удалось прочитать таблицу инструкций %s\n"
+msgstr "%s в инструкции «%s»"
 
 #: config/tc-arc.c:2429
 #, c-format
 msgid "inappropriate arguments for opcode '%s'"
-msgstr ""
+msgstr "неподходящие аргументы для кода операции «%s»"
 
 #: config/tc-arc.c:2431
-#, fuzzy, c-format
-#| msgid "symbol type \"%s\" is supported only by GNU targets"
+#, c-format
 msgid "opcode '%s' not supported for target %s"
-msgstr "тип символа %s поддерживается только целями GNU"
+msgstr "код операции «%s» не поддерживается для цели %s"
 
 #: config/tc-arc.c:2435 config/tc-tic6x.c:3195
-#, fuzzy, c-format
-#| msgid "unknown section attribute '%c'"
+#, c-format
 msgid "unknown opcode '%s'"
-msgstr "неизвестный атрибут раздела %c"
+msgstr "неизвестный код операции «%s»"
 
 #: config/tc-arc.c:2493
-#, fuzzy, c-format
-#| msgid "Inserting \"%s\" into structure table failed: %s"
+#, c-format
 msgid "Inserting \"%s\" into register table failed: %s"
-msgstr "Не удалось вставить \"%s\" в таблицу структур: %s"
+msgstr "Не удалось вставить «%s» в таблицу регистров: %s"
 
 #: config/tc-arc.c:2529
-#, fuzzy, c-format
-#| msgid "Inserting \"%s\" into structure table failed: %s"
+#, c-format
 msgid "Inserting \"%s\" into address type table failed: %s"
-msgstr "Не удалось вставить \"%s\" в таблицу структур: %s"
+msgstr "Не удалось вставить «%s» в таблицу типов адресов: %s"
 
 #: config/tc-arc.c:2548 config/tc-arc.c:5015 config/tc-h8300.c:81
 #: config/tc-h8300.c:90 config/tc-h8300.c:100 config/tc-h8300.c:110
@@ -2739,73 +2732,68 @@ msgstr "Не удалось вставить \"%s\" в таблицу струк
 #: config/tc-mn10300.c:940 config/tc-mn10300.c:2440 config/tc-xc16x.c:79
 #: config/tc-xc16x.c:86 config/tc-xc16x.c:93
 msgid "could not set architecture and machine"
-msgstr ""
+msgstr "не задана архитектура и машина"
 
 #: config/tc-arc.c:2644 config/tc-arc.c:4837
 #, c-format
 msgid "internal error: can't hash aux register '%s': %s"
-msgstr ""
+msgstr "внутренняя ошибка: невозможно получить хеш регистра aux «%s»: %s"
 
 #: config/tc-arc.c:2751
 #, c-format
 msgid "unhandled reloc %s in md_pcrel_from_section"
-msgstr ""
+msgstr "необработанное перемещение %s в md_pcrel_from_section"
 
 #: config/tc-arc.c:2816
 msgid "Unaligned operand. Needs to be 32bit aligned"
-msgstr ""
+msgstr "Невыровненный операнд. Требует 32-битного выравнивания."
 
 #: config/tc-arc.c:2821
 msgid "Unaligned operand. Needs to be 16bit aligned"
-msgstr ""
+msgstr "Невыровненный операнд. Требует 16-битного выравнивания."
 
 #: config/tc-arc.c:2898 config/tc-cr16.c:573 config/tc-crx.c:345
 #: config/tc-mn10200.c:766 write.c:1024
 #, c-format
 msgid "can't resolve `%s' {%s section} - `%s' {%s section}"
-msgstr ""
+msgstr "невозможно определить «%s» {раздел %s} — «%s» {раздел %s}"
 
 #: config/tc-arc.c:2957
 #, c-format
 msgid "PC relative relocation not allowed for (internal) type %d"
-msgstr ""
+msgstr "PC-относительное перемещение запрещено для (внутреннего) типа %d"
 
 #. FIXME! Check for the conditionality of
 #. the insn.
 #. FIXME! Check for the conditionality of
 #. the insn.
 #: config/tc-arc.c:3002 config/tc-arc.c:3980
-#, fuzzy
-#| msgid "relocation is not supported"
 msgid "TLS_*_S9 relocs are not supported yet"
-msgstr "перемещение не поддерживается"
+msgstr "Перемещения TLS_*_S9 пока не поддерживаются"
 
 #. I cannot fix an GOTPC relocation because I need to relax it
 #. from ld rx,[pcl,@sym@gotpc] to add rx,pcl,@sym@gotpc.
 #: config/tc-arc.c:3038
-#, fuzzy
-#| msgid "unsupported section attribute '%c'"
 msgid "Unsupported operation on reloc"
-msgstr "неподдерживаемый атрибут раздела %c"
+msgstr "неподдерживаемая операция с перемещением"
 
 #: config/tc-arc.c:3114 config/tc-arc.c:3130
 msgid "unknown fixup size"
-msgstr ""
+msgstr "неизвестный размер местоположения"
 
 #: config/tc-arc.c:3264
 msgid "no relaxation found for this instruction."
-msgstr ""
+msgstr "отсутствует ослабление для этой инструкции."
 
 #: config/tc-arc.c:3514
 #, c-format
 msgid "ARC-specific assembler options:\n"
-msgstr ""
+msgstr "Специализированные параметры ассемблера для ARC:\n"
 
 #: config/tc-arc.c:3540
-#, fuzzy, c-format
-#| msgid "  --help                  show this message and exit\n"
+#, c-format
 msgid "  -mrelax                 enable relaxation\n"
-msgstr "  --help                  показать это сообщение и закончить работу\n"
+msgstr "  -mrelax                 включить ослабление\n"
 
 #: config/tc-arc.c:3543
 #, c-format
@@ -2813,6 +2801,8 @@ msgid ""
 "The following ARC-specific assembler options are deprecated and are accepted\n"
 "for compatibility only:\n"
 msgstr ""
+"Следующие специализированные параметры ассемблера для ARC устарели и\n"
+"рассматриваются только для совместимости:\n"
 
 #: config/tc-arc.c:3546
 #, c-format
@@ -2843,944 +2833,956 @@ msgid ""
 "  -muser-mode-only\n"
 "  -mxy\n"
 msgstr ""
+"  -mEA\n"
+"  -mbarrel-shifter\n"
+"  -mbarrel_shifter\n"
+"  -mcrc\n"
+"  -mdsp-packa\n"
+"  -mdsp_packa\n"
+"  -mdvbf\n"
+"  -mld-extension-reg-mask\n"
+"  -mlock\n"
+"  -mmac-24\n"
+"  -mmac-d16\n"
+"  -mmac_24\n"
+"  -mmac_d16\n"
+"  -mmin-max\n"
+"  -mmin_max\n"
+"  -mmul64\n"
+"  -mno-mpy\n"
+"  -mnorm\n"
+"  -mrtsc\n"
+"  -msimd\n"
+"  -mswap\n"
+"  -mswape\n"
+"  -mtelephony\n"
+"  -muser-mode-only\n"
+"  -mxy\n"
 
 #: config/tc-arc.c:3636
-#, fuzzy, c-format
-#| msgid "failed to read instruction table %s\n"
+#, c-format
 msgid "Unable to find %s relocation for instruction %s"
-msgstr "не удалось прочитать таблицу инструкций %s\n"
+msgstr "Не удалось найти перемещение %s для инструкции %s"
 
 #: config/tc-arc.c:3931
 #, c-format
 msgid "Unable to use @plt relocation for insn %s"
-msgstr ""
+msgstr "Невозможно использовать перемещение @plt для инструкции %s"
 
 #: config/tc-arc.c:3950
 #, c-format
 msgid "Unable to use @pcl relocation for insn %s"
-msgstr ""
+msgstr "Невозможно использовать перемещение @pcl для инструкции %s"
 
 #: config/tc-arc.c:4006
 #, c-format
 msgid "invalid relocation %s for field"
-msgstr ""
+msgstr "некорректное перемещение %s для поля"
 
 #: config/tc-arc.c:4117
 #, c-format
 msgid "Insn %s has a jump/branch instruction %s in its delay slot."
-msgstr ""
+msgstr "Инструкция %s содержит инструкцию прыжка/ветвления %s в своём слоте задержки."
 
 #: config/tc-arc.c:4122
 #, c-format
 msgid "Insn %s has an instruction %s with limm in its delay slot."
-msgstr ""
+msgstr "Инструкция %s содержит инструкцию %s с limm в своём слоте задержки."
 
 #: config/tc-arc.c:4232 config/tc-microblaze.c:2531 config/tc-mn10300.c:1069
 #: config/tc-sh.c:801 config/tc-z80.c:700 read.c:4600
 #, c-format
 msgid "unsupported BFD relocation size %u"
-msgstr ""
+msgstr "неподдерживаемое перемещение BFD размером %u"
 
 #: config/tc-arc.c:4252
 #, c-format
 msgid "Jump/Branch instruction detected at the end of the ZOL label @%s"
-msgstr ""
+msgstr "Обнаружена инструкция прыжка/ветвления в конце метки ZOL @%s"
 
 #: config/tc-arc.c:4259
 #, c-format
 msgid "Kernel instruction detected at the end of the ZOL label @%s"
-msgstr ""
+msgstr "Обнаружена инструкция ядра в конце метки ZOL @%s"
 
 #: config/tc-arc.c:4264
 #, c-format
 msgid "A jump instruction with long immediate detected at the end of the ZOL label @%s"
-msgstr ""
+msgstr "Обнаружена инструкция прыжка с явным длинным в конце метки ZOL @%s"
 
 #: config/tc-arc.c:4270
 #, c-format
 msgid "An illegal use of delay slot detected at the end of the ZOL label @%s"
-msgstr ""
+msgstr "Обнаружено некорректное использование слота задержки ядра в конце метки ZOL @%s"
 
 #: config/tc-arc.c:4375
-#, fuzzy
-#| msgid "expected comma after name in .symver"
 msgid "expected comma after instruction name"
-msgstr "ожидается запятая после имени в .symver"
+msgstr "ожидается запятая после имени инструкции"
 
 #: config/tc-arc.c:4387
-#, fuzzy
-#| msgid "expected comma after name in .symver"
 msgid "expected comma after major opcode"
-msgstr "ожидается запятая после имени в .symver"
+msgstr "ожидается запятая после основного кода операции"
 
 #: config/tc-arc.c:4573
 #, c-format
 msgid "Pseudocode already used %s"
-msgstr ""
+msgstr "Псевдокод уже используется %s"
 
 #: config/tc-arc.c:4581
 #, c-format
 msgid "major opcode not in range [0x%02x - 0x%02x]"
-msgstr ""
+msgstr "основной код операции не в диапазоне [0x%02x - 0x%02x]"
 
 #: config/tc-arc.c:4585
 msgid "minor opcode not in range [0x00 - 0x3f]"
-msgstr ""
+msgstr "вспомогательный код операции не в диапазоне [0x00 - 0x3f]"
 
 #: config/tc-arc.c:4591
 msgid "Improper use of OP1_IMM_IMPLIED"
-msgstr ""
+msgstr "Некорректное использование OP1_IMM_IMPLIED"
 
 #: config/tc-arc.c:4597
 msgid "Improper use of OP1_MUST_BE_IMM"
-msgstr ""
+msgstr "Некорректное использование OP1_MUST_BE_IMM"
 
 #: config/tc-arc.c:4609
 msgid "Couldn't generate extension instruction opcodes"
-msgstr ""
+msgstr "Не удалось сгенерировать коды операций расширенной инструкции"
 
 #: config/tc-arc.c:4645
-#, fuzzy
-#| msgid "expected comma after name in .symver"
 msgid "expected comma after name"
-msgstr "ожидается запятая после имени в .symver"
+msgstr "ожидается запятая после имени"
 
 #: config/tc-arc.c:4656
 #, c-format
 msgid "%s second argument cannot be a negative number %d"
-msgstr ""
+msgstr "второй аргумент %s не может быть отрицательным числом %d"
 
 #: config/tc-arc.c:4671
-#, fuzzy
-#| msgid "expected comma after name in .symver"
 msgid "expected comma after register number"
-msgstr "ожидается запятая после имени в .symver"
+msgstr "ожидается запятая после номера регистра"
 
 #: config/tc-arc.c:4692
 msgid "invalid mode"
-msgstr ""
+msgstr "неверный режим"
 
 #: config/tc-arc.c:4710
-#, fuzzy
-#| msgid "expected comma after name in .symver"
 msgid "expected comma after register mode"
-msgstr "ожидается запятая после имени в .symver"
+msgstr "ожидается запятая после режима регистра"
 
 #: config/tc-arc.c:4725
 msgid "shortcut designator invalid"
-msgstr ""
+msgstr "неверное обозначение сокращения"
 
 #: config/tc-arc.c:4824
 #, c-format
 msgid "core register %s value (%d) too large"
-msgstr ""
+msgstr "значение ключевого регистра %s (%d) слишком большое"
 
 #: config/tc-arc.c:4843
 #, c-format
 msgid "condition code %s value (%d) too large"
-msgstr ""
+msgstr "значение кода условия %s (%d) слишком большое"
 
 #: config/tc-arc.c:4862
 msgid "Unknown extension"
-msgstr ""
+msgstr "Неизвестное расширение"
 
 #: config/tc-arc.c:4967
 msgid "Overwrite explicitly set Tag_ARC_CPU_base"
-msgstr ""
+msgstr "Перезаписать явное указание Tag_ARC_CPU_base"
 
 #: config/tc-arm.c:619
 msgid "ARM register expected"
-msgstr ""
+msgstr "ожидается регистр ARM"
 
 #: config/tc-arm.c:620
 msgid "bad or missing co-processor number"
-msgstr ""
+msgstr "плохой или отсутствующий номер сопроцессора"
 
 #: config/tc-arm.c:621
 msgid "co-processor register expected"
-msgstr ""
+msgstr "ожидается регистр сопроцессора"
 
 #: config/tc-arm.c:622
 msgid "FPA register expected"
-msgstr ""
+msgstr "ожидается регистр FPA"
 
 #: config/tc-arm.c:623
 msgid "VFP single precision register expected"
-msgstr ""
+msgstr "ожидается регистр одинарной точности VFP"
 
 #: config/tc-arm.c:624
 msgid "VFP/Neon double precision register expected"
-msgstr ""
+msgstr "ожидается регистр двойной точности VFP/Neon"
 
 #: config/tc-arm.c:625
 msgid "Neon quad precision register expected"
-msgstr ""
+msgstr "ожидается регистр четверной точности Neon"
 
 #: config/tc-arm.c:626
 msgid "VFP single or double precision register expected"
-msgstr ""
+msgstr "ожидается регистр одинарной или двойной точности VFP"
 
 #: config/tc-arm.c:627
 msgid "Neon double or quad precision register expected"
-msgstr ""
+msgstr "ожидается регистр двойной или четверной точности Neon"
 
 #: config/tc-arm.c:628
 msgid "Neon single or double precision register expected"
-msgstr ""
+msgstr "ожидается регистр одинарной или двойной точности Neon"
 
 #: config/tc-arm.c:629
 msgid "VFP single, double or Neon quad precision register expected"
-msgstr ""
+msgstr "ожидается регистр одинарной двойной точности VFP или четверной точности Neon"
 
 #: config/tc-arm.c:631
 msgid "VFP system register expected"
-msgstr ""
+msgstr "ожидается регистр системный регистр VFP"
 
 #: config/tc-arm.c:632
 msgid "Maverick MVF register expected"
-msgstr ""
+msgstr "ожидается регистр Maverick MVF"
 
 #: config/tc-arm.c:633
 msgid "Maverick MVD register expected"
-msgstr ""
+msgstr "ожидается регистр Maverick MVD"
 
 #: config/tc-arm.c:634
 msgid "Maverick MVFX register expected"
-msgstr ""
+msgstr "ожидается регистр Maverick MVFX"
 
 #: config/tc-arm.c:635
 msgid "Maverick MVDX register expected"
-msgstr ""
+msgstr "ожидается регистр Maverick MVDX"
 
 #: config/tc-arm.c:636
 msgid "Maverick MVAX register expected"
-msgstr ""
+msgstr "ожидается регистр Maverick MVAX"
 
 #: config/tc-arm.c:637
 msgid "Maverick DSPSC register expected"
-msgstr ""
+msgstr "ожидается регистр Maverick DSPSC"
 
 #: config/tc-arm.c:638
 msgid "iWMMXt data register expected"
-msgstr ""
+msgstr "ожидается регистр данных iWMMXt"
 
 #: config/tc-arm.c:639 config/tc-arm.c:7061
 msgid "iWMMXt control register expected"
-msgstr ""
+msgstr "ожидается управляющий регистр iWMMXt"
 
 #: config/tc-arm.c:640
 msgid "iWMMXt scalar register expected"
-msgstr ""
+msgstr "ожидается скалярный регистр iWMMXt"
 
 #: config/tc-arm.c:641
 msgid "XScale accumulator register expected"
-msgstr ""
+msgstr "ожидается аккумуляторный регистр XScale"
 
 #. For score5u : div/mul will pop warning message, mmu/alw/asw will pop error message.
 #: config/tc-arm.c:803 config/tc-score.c:259
 msgid "bad arguments to instruction"
-msgstr ""
+msgstr "Неправильные аргументы для инструкции"
 
 #: config/tc-arm.c:804
 msgid "r13 not allowed here"
-msgstr ""
+msgstr "r13 здесь запрещён"
 
 #: config/tc-arm.c:805
 msgid "r15 not allowed here"
-msgstr ""
+msgstr "r15 здесь запрещён"
 
 #: config/tc-arm.c:806
 msgid "instruction cannot be conditional"
-msgstr ""
+msgstr "инструкция не может быть условной"
 
 #: config/tc-arm.c:807
 msgid "registers may not be the same"
-msgstr ""
+msgstr "регистры не могут быть одинаковыми"
 
 #: config/tc-arm.c:808
 msgid "lo register required"
-msgstr ""
+msgstr "требуется другой регистр"
 
 #: config/tc-arm.c:809
 msgid "instruction not supported in Thumb16 mode"
-msgstr ""
+msgstr "инструкция не поддерживается в режиме Thumb16"
 
 #: config/tc-arm.c:810
 msgid "instruction does not accept this addressing mode"
-msgstr ""
+msgstr "инструкция не принимает данный режим адресации"
 
 #: config/tc-arm.c:811
 msgid "branch must be last instruction in IT block"
-msgstr ""
+msgstr "ветвление должно быть последней инструкцией в блоке IT"
 
 #: config/tc-arm.c:812
 msgid "instruction not allowed in IT block"
-msgstr ""
+msgstr "инструкция не допускается в блоке IT"
 
 #: config/tc-arm.c:813
 msgid "selected FPU does not support instruction"
-msgstr ""
+msgstr "выбранный FPU не поддерживает инструкцию"
 
 #: config/tc-arm.c:814
 msgid "thumb conditional instruction should be in IT block"
-msgstr ""
+msgstr "thumb-инструкция условия должна быть в блоке IT"
 
 #: config/tc-arm.c:815
 msgid "incorrect condition in IT block"
-msgstr ""
+msgstr "некорректное условие в блоке IT"
 
 #: config/tc-arm.c:816
 msgid "IT falling in the range of a previous IT block"
-msgstr ""
+msgstr "IT попадает в диапазон предыдущего блока IT"
 
 #: config/tc-arm.c:817
 msgid "missing .fnstart before unwinding directive"
-msgstr ""
+msgstr "отсутствует .fnstart до раскручивающей директивы"
 
 #: config/tc-arm.c:819
 msgid "cannot use register index with PC-relative addressing"
-msgstr ""
+msgstr "невозможно использовать индексный регистр с относительной PC адресацией"
 
 #: config/tc-arm.c:821
 msgid "cannot use writeback with PC-relative addressing"
-msgstr ""
+msgstr "невозможно использовать обратную запись с относительной PC адресацией"
 
 #: config/tc-arm.c:823
 msgid "selected processor does not support fp16 instruction"
-msgstr ""
+msgstr "выбранный процессор не поддерживает инструкцию fp16"
 
 #: config/tc-arm.c:824
 msgid "using "
-msgstr ""
+msgstr "использует "
 
 #: config/tc-arm.c:825
 msgid "relocation valid in thumb1 code only"
-msgstr ""
+msgstr "перемещение корректно только в коде thumb1"
 
 #: config/tc-arm.c:1032
 msgid "immediate expression requires a # prefix"
-msgstr ""
+msgstr "для непосредственного выражения требуется префикс #"
 
 #: config/tc-arm.c:1061 read.c:3816
 msgid "missing expression"
-msgstr ""
+msgstr "отсутствующее выражение"
 
 #: config/tc-arm.c:1091 config/tc-arm.c:5260 config/tc-i960.c:1298
 #: config/tc-score.c:1210
 msgid "invalid constant"
-msgstr ""
+msgstr "некорректная константа"
 
 #: config/tc-arm.c:1223
 msgid "expected #constant"
-msgstr ""
+msgstr "ожидается #константа"
 
 #: config/tc-arm.c:1387
 #, c-format
 msgid "unexpected character `%c' in type specifier"
-msgstr ""
+msgstr "неожиданный символ «%c» в определителе типа"
 
 #: config/tc-arm.c:1404
 #, c-format
 msgid "bad size %d in type specifier"
-msgstr ""
+msgstr "неправильный размер %d в определителе типа"
 
 #: config/tc-arm.c:1454
 msgid "only one type should be specified for operand"
-msgstr ""
+msgstr "для операнда должен быть задан только один тип"
 
 #: config/tc-arm.c:1460
 msgid "vector type expected"
-msgstr ""
+msgstr "ожидается векторный тип"
 
 #: config/tc-arm.c:1534
 msgid "can't redefine type for operand"
-msgstr ""
+msgstr "для операнда невозможно переопределить тип"
 
 #: config/tc-arm.c:1547
 msgid "only D registers may be indexed"
-msgstr ""
+msgstr "только регистры D могут быть проиндексированы"
 
 #: config/tc-arm.c:1553
 msgid "can't change index for operand"
-msgstr ""
+msgstr "для операнда невозможно изменить индекс"
 
 #: config/tc-arm.c:1616
 msgid "register operand expected, but got scalar"
-msgstr ""
+msgstr "ожидается регистровый операнд, но получен скаляр"
 
 #: config/tc-arm.c:1653
 msgid "scalar must have an index"
-msgstr ""
+msgstr "у скаляра должен быть индекс"
 
 #: config/tc-arm.c:1658 config/tc-arm.c:16583 config/tc-arm.c:16643
 #: config/tc-arm.c:17097
 msgid "scalar index out of range"
-msgstr ""
+msgstr "индекс скаляра вне диапазона"
 
 #: config/tc-arm.c:1708
 msgid "bad range in register list"
-msgstr ""
+msgstr "некорректный диапазон в списке регистров"
 
 #: config/tc-arm.c:1716 config/tc-arm.c:1725 config/tc-arm.c:1766
 #, c-format
 msgid "Warning: duplicated register (r%d) in register list"
-msgstr ""
+msgstr "Предупреждение: повторяющийся регистр (r%d) в списке регистров"
 
 #: config/tc-arm.c:1728
 msgid "Warning: register range not in ascending order"
-msgstr ""
+msgstr "Предупреждение: регистровый диапазон не упорядочен по возрастанию"
 
 #: config/tc-arm.c:1739
 msgid "missing `}'"
-msgstr ""
+msgstr "отсутствует «}»"
 
 #: config/tc-arm.c:1755
 msgid "invalid register mask"
-msgstr ""
+msgstr "некорректная маска регистров"
 
 #: config/tc-arm.c:1890 config/tc-arm.c:1934
 msgid "register out of range in list"
-msgstr ""
+msgstr "регистр вне диапазона списка"
 
 #: config/tc-arm.c:1912 config/tc-arm.c:4197 config/tc-arm.c:4331
 msgid "register list not in ascending order"
-msgstr ""
+msgstr "список регистров не упорядочен по возрастанию"
 
 #: config/tc-arm.c:1943
 msgid "register range not in ascending order"
-msgstr ""
+msgstr "регистровый диапазон не упорядочен по возрастанию"
 
 #: config/tc-arm.c:1976
 msgid "non-contiguous register range"
-msgstr ""
+msgstr "не соблюдается непрерывность диапазона регистров"
 
 #: config/tc-arm.c:2035
 msgid "register stride must be 1 or 2"
-msgstr ""
+msgstr "регистровый шаг должен быть 1 или 2"
 
 #: config/tc-arm.c:2036
 msgid "mismatched element/structure types in list"
-msgstr ""
+msgstr "несовпадение типов элементов/структур в списке"
 
 #: config/tc-arm.c:2104
 msgid "don't use Rn-Rm syntax with non-unit stride"
-msgstr ""
+msgstr "не используйте синтаксис Rn-Rm с не элементным шагом"
 
 #: config/tc-arm.c:2159
 msgid "error parsing element/structure list"
-msgstr ""
+msgstr "ошибка при разборе списка элементов/структур"
 
 #: config/tc-arm.c:2165
 msgid "expected }"
-msgstr ""
+msgstr "ожидается }"
 
 #: config/tc-arm.c:2256
 msgid "attempt to redefine typed alias"
-msgstr ""
+msgstr "попытка переопределить типизированный псевдоним"
 
 #: config/tc-arm.c:2391
 msgid "bad type for register"
-msgstr ""
+msgstr "некорректный тип для регистра"
 
 #: config/tc-arm.c:2402 config/tc-nios2.c:1804
 msgid "expression must be constant"
-msgstr ""
+msgstr "выражение должно быть константой"
 
 #: config/tc-arm.c:2419
 msgid "can't redefine the type of a register alias"
-msgstr ""
+msgstr "невозможно переопределить тип псевдонима регистра"
 
 #: config/tc-arm.c:2426
 msgid "you must specify a single type only"
-msgstr ""
+msgstr "необходимо указать только один тип"
 
 #: config/tc-arm.c:2439
 msgid "can't redefine the index of a scalar alias"
-msgstr ""
+msgstr "невозможно переопределить индекс псевдонима скаляра"
 
 #: config/tc-arm.c:2447
 msgid "scalar index must be constant"
-msgstr ""
+msgstr "скалярный индекс должен быть константой"
 
 #: config/tc-arm.c:2456
 msgid "expecting ]"
-msgstr ""
+msgstr "ожидается ]"
 
 #: config/tc-arm.c:2508
 msgid "invalid syntax for .dn directive"
-msgstr ""
+msgstr "некорректный синтаксис директивы .dn"
 
 #: config/tc-arm.c:2514
 msgid "invalid syntax for .qn directive"
-msgstr ""
+msgstr "некорректный синтаксис директивы .qn"
 
 #: config/tc-arm.c:2549
 #, c-format
 msgid "ignoring attempt to use .unreq on fixed register name: '%s'"
-msgstr ""
+msgstr "игнорируется попытка использовать .unreq для постоянного имени регистра: «%s»"
 
 #: config/tc-arm.c:2814
 #, c-format
 msgid "Failed to find real start of function: %s\n"
-msgstr ""
+msgstr "Не удалось найти реальное начало функции: %s\n"
 
 #: config/tc-arm.c:2831
 msgid "selected processor does not support THUMB opcodes"
-msgstr ""
+msgstr "выбранный процессор не поддерживает коды операций THUMB"
 
 #: config/tc-arm.c:2844
 msgid "selected processor does not support ARM opcodes"
-msgstr ""
+msgstr "выбранный процессор не поддерживает коды операций ARM"
 
 #: config/tc-arm.c:2856
 #, c-format
 msgid "invalid instruction size selected (%d)"
-msgstr ""
+msgstr "выбран некорректный размер инструкции (%d)"
 
 #: config/tc-arm.c:2888
 #, c-format
 msgid "invalid operand to .code directive (%d) (expecting 16 or 32)"
-msgstr ""
+msgstr "некорректный операнд в директиве .code (%d) (ожидается 16 или 32)"
 
 #: config/tc-arm.c:2943
 #, c-format
 msgid "expected comma after name \"%s\""
-msgstr ""
+msgstr "ожидается запятая после имени «%s»"
 
 #: config/tc-arm.c:2993 config/tc-m32r.c:584
 #, c-format
 msgid "symbol `%s' already defined"
-msgstr ""
+msgstr "символ «%s» уже определён"
 
 #: config/tc-arm.c:3026
 #, c-format
 msgid "unrecognized syntax mode \"%s\""
-msgstr ""
+msgstr "нераспознанный синтаксис режима «%s»"
 
 #: config/tc-arm.c:3069
 msgid ".ref pseudo-op only available with -mccs flag."
-msgstr ""
+msgstr "Псевдооперация .ref доступна только с флагом -mccs."
 
 #: config/tc-arm.c:3110
 msgid ".asmfunc repeated."
-msgstr ""
+msgstr "повтор .asmfunc."
 
 #: config/tc-arm.c:3114
 msgid ".asmfunc without function."
-msgstr ""
+msgstr ".asmfunc без функции."
 
 #: config/tc-arm.c:3120
 msgid ".asmfunc pseudo-op only available with -mccs flag."
-msgstr ""
+msgstr "Псевдооперация .asmfunc доступна только с флагом -mccs."
 
 #: config/tc-arm.c:3131
-#, fuzzy
-#| msgid "\".endif\" without \".if\""
 msgid ".endasmfunc without a .asmfunc."
-msgstr "\".endif\" без \".if\""
+msgstr ".endasmfunc без .asmfunc."
 
 #: config/tc-arm.c:3135
 msgid ".endasmfunc without function."
-msgstr ""
+msgstr ".endasmfunc без function."
 
 #: config/tc-arm.c:3146
 msgid ".endasmfunc pseudo-op only available with -mccs flag."
-msgstr ""
+msgstr "Псевдооперация .endasmfunc доступна только с флагом -mccs."
 
 #: config/tc-arm.c:3155
 msgid ".def pseudo-op only available with -mccs flag."
-msgstr ""
+msgstr "Псевдооперация .def доступна только с флагом -mccs."
 
 #: config/tc-arm.c:3313
 msgid "invalid type for literal pool"
-msgstr ""
+msgstr "неправильный тип пула литералов"
 
 #: config/tc-arm.c:3393 config/tc-tic54x.c:5354
 #, c-format
 msgid "Invalid label '%s'"
-msgstr ""
+msgstr "Некорректная метка «%s»"
 
 #: config/tc-arm.c:3569
 msgid "(plt) is only valid on branch targets"
-msgstr ""
+msgstr "(plt) допустима только в целях ветвления"
 
 #: config/tc-arm.c:3575 config/tc-s390.c:1209 config/tc-s390.c:1865
 #: config/tc-xtensa.c:1664
 #, c-format
 msgid "%s relocations do not fit in %d byte"
 msgid_plural "%s relocations do not fit in %d bytes"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "перемещения %s не помещаются в %d байт"
+msgstr[1] "перемещения %s не помещаются в %d байта"
+msgstr[2] "перемещения %s не помещаются в %d байт"
 
 #: config/tc-arm.c:3657
 msgid ".inst.n operand too big. Use .inst.w instead"
-msgstr ""
+msgstr "Операнд .inst.n слишком большой. Вместо него используйте .inst.w."
 
 #: config/tc-arm.c:3677
 msgid "cannot determine Thumb instruction size. Use .inst.n/.inst.w instead"
-msgstr ""
+msgstr "Невозможно определить размер инструкции Thumb. Вместо этого используйте .inst.n/.inst.w."
 
 #: config/tc-arm.c:3707
 msgid "width suffixes are invalid in ARM mode"
-msgstr ""
+msgstr "некорректная ширина суффиксов в режиме ARM"
 
 #: config/tc-arm.c:3749 dwarf2dbg.c:990
 msgid "expected 0 or 1"
-msgstr ""
+msgstr "ожидался 0 или 1"
 
 #: config/tc-arm.c:3753
 msgid "missing comma"
-msgstr ""
+msgstr "отсутствует запятая"
 
 #: config/tc-arm.c:3786
 msgid "duplicate .fnstart directive"
-msgstr ""
+msgstr "повторное употребление .fnstart"
 
 #: config/tc-arm.c:3817 config/tc-tic6x.c:412
 msgid "duplicate .handlerdata directive"
-msgstr ""
+msgstr "повторное употребление .handlerdata"
 
 #: config/tc-arm.c:3836
 msgid ".fnend directive without .fnstart"
-msgstr ""
+msgstr "директива .fnend без .fnstart"
 
 #: config/tc-arm.c:3903 config/tc-tic6x.c:393
 msgid "personality routine specified for cantunwind frame"
-msgstr ""
+msgstr "персонализационная процедура указана для кадра cantunwind"
 
 #: config/tc-arm.c:3920 config/tc-tic6x.c:454
 msgid "duplicate .personalityindex directive"
-msgstr ""
+msgstr "повторное употребление .personalityindex"
 
 #: config/tc-arm.c:3927 config/tc-tic6x.c:461
 msgid "bad personality routine number"
-msgstr ""
+msgstr "Плохой номер персонализационной процедуры"
 
 #: config/tc-arm.c:3949 config/tc-tic6x.c:478
 msgid "duplicate .personality directive"
-msgstr ""
+msgstr "повторное употребление .personality"
 
 #: config/tc-arm.c:3973 config/tc-arm.c:4101 config/tc-arm.c:4149
 msgid "expected register list"
-msgstr ""
+msgstr "ожидается список регистров"
 
 #: config/tc-arm.c:4055
 msgid "expected , <constant>"
-msgstr ""
+msgstr "ожидается , <константа>"
 
 #: config/tc-arm.c:4064
 msgid "number of registers must be in the range [1:4]"
-msgstr ""
+msgstr "количество регистров должно быть в диапазоне [1:4]"
 
 #: config/tc-arm.c:4211 config/tc-arm.c:4345
 msgid "bad register range"
-msgstr ""
+msgstr "неверный диапазон регистров"
 
 #: config/tc-arm.c:4411
 msgid "FPA .unwind_save does not take a register list"
-msgstr ""
+msgstr "FPA .unwind_save не работает со списком регистров"
 
 #: config/tc-arm.c:4439
 msgid ".unwind_save does not support this kind of register"
-msgstr ""
+msgstr ".unwind_save не поддерживает такой вид регистров"
 
 #: config/tc-arm.c:4478
 msgid "SP and PC not permitted in .unwind_movsp directive"
-msgstr ""
+msgstr "SP и PC не допускаются в директиве .unwind_movsp"
 
 #: config/tc-arm.c:4483
 msgid "unexpected .unwind_movsp directive"
-msgstr ""
+msgstr "неожиданная директива .unwind_movsp"
 
 #: config/tc-arm.c:4510
 msgid "stack increment must be multiple of 4"
-msgstr ""
+msgstr "увеличение стека должно быть кратно 4"
 
 #: config/tc-arm.c:4542
 msgid "expected <reg>, <reg>"
-msgstr ""
+msgstr "ожидается <регистр>, <регистр>"
 
 #: config/tc-arm.c:4560
 msgid "register must be either sp or set by a previousunwind_movsp directive"
-msgstr ""
+msgstr "регистр должен быть sp или задаваться директивой previousunwind_movsp"
 
 #: config/tc-arm.c:4599
 msgid "expected <offset>, <opcode>"
-msgstr ""
+msgstr "ожидается <смещение>, <код операции>"
 
 #: config/tc-arm.c:4611
 msgid "unwind opcode too long"
-msgstr ""
+msgstr "раскрученный код операции слишком длинен"
 
 #: config/tc-arm.c:4616
 msgid "invalid unwind opcode"
-msgstr ""
+msgstr "неверный раскрученный код операции"
 
 #: config/tc-arm.c:4804 config/tc-arm.c:5815 config/tc-arm.c:10659
 #: config/tc-arm.c:11192 config/tc-arm.c:13219 config/tc-arm.c:14801
 #: config/tc-arm.c:24170 config/tc-arm.c:24234 config/tc-arm.c:24242
 #: config/tc-metag.c:5176 config/tc-z8k.c:1151 config/tc-z8k.c:1161
 msgid "immediate value out of range"
-msgstr ""
+msgstr "непосредственное значение за пределами диапазона"
 
 #: config/tc-arm.c:4974
 msgid "invalid FPA immediate expression"
-msgstr ""
+msgstr "неверное непосредственное выражение FPA"
 
 #: config/tc-arm.c:5160
 msgid "'LSL' or 'ASR' required"
-msgstr ""
+msgstr "требуется «LSL» или «ASR»"
 
 #: config/tc-arm.c:5168
 msgid "'LSL' required"
-msgstr ""
+msgstr "требуется «LSL»"
 
 #: config/tc-arm.c:5176
 msgid "'ASR' required"
-msgstr ""
+msgstr "требуется «ASR»"
 
 #: config/tc-arm.c:5255
 msgid "invalid rotation"
-msgstr ""
+msgstr "неверное вращение"
 
 #: config/tc-arm.c:5435 config/tc-arm.c:5604
 msgid "unknown group relocation"
-msgstr ""
+msgstr "неизвестная группа перемещения"
 
 #: config/tc-arm.c:5471
 msgid "alignment must be constant"
-msgstr ""
+msgstr "выравнивание должно быть константой"
 
 #: config/tc-arm.c:5635
 msgid "this group relocation is not allowed on this instruction"
-msgstr ""
+msgstr "данная группа перемещения недопустима для этой инструкции"
 
 #: config/tc-arm.c:5691
 msgid "'}' expected at end of 'option' field"
-msgstr ""
+msgstr "ожидается «}» в конце поля «option»"
 
 #: config/tc-arm.c:5696
 msgid "cannot combine index with option"
-msgstr ""
+msgstr "нельзя объединять индекс с параметром"
 
 #: config/tc-arm.c:5953
 msgid "unexpected bit specified after APSR"
-msgstr ""
+msgstr "указан неожиданный бит после APSR"
 
 #: config/tc-arm.c:5965
 msgid "selected processor does not support DSP extension"
-msgstr ""
+msgstr "выбранный процессор не поддерживает расширение DSP"
 
 #: config/tc-arm.c:5977
 msgid "bad bitmask specified after APSR"
-msgstr ""
+msgstr "указана плохая битовая маска после APSR"
 
 #: config/tc-arm.c:6001
 msgid "writing to APSR without specifying a bitmask is deprecated"
-msgstr ""
+msgstr "запись в APSR без указания битовой маски устарела"
 
 #: config/tc-arm.c:6013 config/tc-arm.c:12353 config/tc-arm.c:12398
 #: config/tc-arm.c:12402
 msgid "selected processor does not support requested special purpose register"
-msgstr ""
+msgstr "выбранный процессор не поддерживает запрошенный регистр специальных возможностей"
 
 #: config/tc-arm.c:6018
 msgid "flag for {c}psr instruction expected"
-msgstr ""
+msgstr "ожидается флаг для инструкции {c}ps"
 
 #: config/tc-arm.c:6043
 msgid "unrecognized CPS flag"
-msgstr ""
+msgstr "нераспознанный флаг CPS"
 
 #: config/tc-arm.c:6050
 msgid "missing CPS flags"
-msgstr ""
+msgstr "отсутствуют флаги CPS"
 
 #: config/tc-arm.c:6073 config/tc-arm.c:6079
 msgid "valid endian specifiers are be or le"
-msgstr ""
+msgstr "определителем порядка байт могут быть be или le"
 
 #: config/tc-arm.c:6101
 msgid "missing rotation field after comma"
-msgstr ""
+msgstr "отсутствует поле вращения после запятой"
 
 #: config/tc-arm.c:6116
 msgid "rotation can only be 0, 8, 16, or 24"
-msgstr ""
+msgstr "значением вращения могут быть только 0, 8, 16 или 24"
 
 #: config/tc-arm.c:6145
 msgid "condition required"
-msgstr ""
+msgstr "требуется условие"
 
 #: config/tc-arm.c:6213 config/tc-arm.c:8943
 msgid "'[' expected"
-msgstr ""
+msgstr "ожидается «[»"
 
 #: config/tc-arm.c:6226
 msgid "',' expected"
-msgstr ""
+msgstr "ожидается «,»"
 
 #: config/tc-arm.c:6243
 msgid "invalid shift"
-msgstr ""
+msgstr "некорректный сдвиг"
 
 #: config/tc-arm.c:6316
 msgid "can't use Neon quad register here"
-msgstr ""
+msgstr "здесь нельзя использовать четверной регистр Neon"
 
 #: config/tc-arm.c:6383
 msgid "expected <Rm> or <Dm> or <Qm> operand"
-msgstr ""
+msgstr "ожидается операнд <Rm>, <Dm> или <Qm>"
 
 #: config/tc-arm.c:6463
 msgid "parse error"
-msgstr ""
+msgstr "ошибка разбора"
 
 #. ISB can only take SY as an option.
 #: config/tc-arm.c:6732
 msgid "invalid barrier type"
-msgstr ""
+msgstr "неверный тип барьера"
 
 #: config/tc-arm.c:6829
 msgid "only floating point zero is allowed as immediate value"
-msgstr ""
+msgstr "непосредственным значением в качестве числа с плавающей точкой разрешён только ноль"
 
 #: config/tc-arm.c:6899
 msgid "immediate value is out of range"
-msgstr ""
+msgstr "непосредственное значение за пределами диапазона"
 
 #: config/tc-arm.c:7046
 msgid "iWMMXt data or control register expected"
-msgstr ""
+msgstr "ожидается управляющий регистр или регистр данных iWMMXt"
 
 #: config/tc-arm.c:7086
 msgid "Banked registers are not available with this architecture."
-msgstr ""
+msgstr "Банкование регистров недоступно на этой архитектуре."
 
 #: config/tc-arm.c:7314 config/tc-score.c:264
 msgid "garbage following instruction"
-msgstr ""
+msgstr "мусор после инструкции"
 
 #. If REG is R13 (the stack pointer), warn that its use is
 #. deprecated.
 #: config/tc-arm.c:7364
 msgid "use of r13 is deprecated"
-msgstr ""
+msgstr "использование r13 устарело"
 
 #: config/tc-arm.c:7382
 msgid "ARMv8.2 scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE"
-msgstr ""
+msgstr "скалярная инструкция ARMv8.2 fp16 не может быть условной, поведение НЕПРЕДСКАЗУЕМО"
 
 #: config/tc-arm.c:7457
 msgid "D register out of range for selected VFP version"
-msgstr ""
+msgstr "регистр D вне диапазона выбранной версии VFP"
 
 #: config/tc-arm.c:7554 config/tc-arm.c:10378
 msgid "Instruction does not support =N addresses"
-msgstr ""
+msgstr "инструкция не поддерживает адреса =N"
 
 #: config/tc-arm.c:7562
 msgid "instruction does not accept preindexed addressing"
-msgstr ""
+msgstr "инструкция не принимает прединдексированную адресацию"
 
 #. unindexed - only for coprocessor
 #: config/tc-arm.c:7578 config/tc-arm.c:10441
 msgid "instruction does not accept unindexed addressing"
-msgstr ""
+msgstr "инструкция не принимает неиндексированную адресацию"
 
 #: config/tc-arm.c:7586
 msgid "destination register same as write-back base"
-msgstr ""
+msgstr "регистр назначения совпадает с базовым обратной записи"
 
 #: config/tc-arm.c:7587
 msgid "source register same as write-back base"
-msgstr ""
+msgstr "регистр-источник совпадает с базовым обратной записи"
 
 #: config/tc-arm.c:7637
 msgid "use of PC in this instruction is deprecated"
-msgstr ""
+msgstr "использование PC в этой инструкции устарело"
 
 #: config/tc-arm.c:7660
 msgid "instruction does not accept scaled register index"
-msgstr ""
+msgstr "инструкция не принимает масштабированный регистровый индекс"
 
 #: config/tc-arm.c:7965
 msgid "invalid pseudo operation"
-msgstr ""
+msgstr "неверная псевдооперация"
 
 #: config/tc-arm.c:8203
 msgid "invalid co-processor operand"
-msgstr ""
+msgstr "некорректный операнд сопроцессора"
 
 #: config/tc-arm.c:8219
 msgid "instruction does not support unindexed addressing"
-msgstr ""
+msgstr "инструкция не поддерживает неиндексированную адресацию"
 
 #: config/tc-arm.c:8234
 msgid "pc may not be used with write-back"
-msgstr ""
+msgstr "pc нельзя использовать с обратной записью"
 
 #: config/tc-arm.c:8239
 msgid "instruction does not support writeback"
-msgstr ""
+msgstr "инструкция не поддерживает обратную запись"
 
 #: config/tc-arm.c:8345
 msgid "Rn must not overlap other operands"
-msgstr ""
+msgstr "Rn не должен пересекаться с другими операндами"
 
 #: config/tc-arm.c:8350
 msgid "swp{b} use is obsoleted for ARMv8 and later"
-msgstr ""
+msgstr "использование swp{b} устарело в ARMv8 и более новых"
 
 #: config/tc-arm.c:8353
 msgid "swp{b} use is deprecated for ARMv6 and ARMv7"
-msgstr ""
+msgstr "использование swp{b} устарело в ARMv6 и ARMv7"
 
 #: config/tc-arm.c:8470 config/tc-arm.c:8489 config/tc-arm.c:8502
 #: config/tc-arm.c:11029 config/tc-arm.c:11060 config/tc-arm.c:11082
 msgid "bit-field extends past end of register"
-msgstr ""
+msgstr "битовое поле выходит за границы регистра"
 
 #: config/tc-arm.c:8532
 msgid "the only valid suffixes here are '(plt)' and '(tlscall)'"
-msgstr ""
+msgstr "допустимыми суффиксами здесь могут быть только «(plt)» и «(tlscall)»"
 
 #: config/tc-arm.c:8585
 msgid "use of r15 in blx in ARM mode is not really useful"
-msgstr ""
+msgstr "использование r15 в blx в режиме ARM не особенно полезно"
 
 #: config/tc-arm.c:8607
 msgid "use of r15 in bx in ARM mode is not really useful"
-msgstr ""
+msgstr "использование r15 в bx в режиме ARM не особенно полезно"
 
 #: config/tc-arm.c:8632
 msgid "use of r15 in bxj is not really useful"
-msgstr ""
+msgstr "использование r15 в bxj не особенно полезно"
 
 #: config/tc-arm.c:8680
 msgid "This coprocessor register access is deprecated in ARMv8"
-msgstr ""
+msgstr "Такой доступ к регистру сопроцессора устарел в ARMv8"
 
 #: config/tc-arm.c:8888 config/tc-arm.c:8897
 msgid "writeback of base register is UNPREDICTABLE"
-msgstr ""
+msgstr "обратная запись в базовый регистр вызывает НЕПРЕДСКАЗУЕМОСТЬ"
 
 #: config/tc-arm.c:8891
 msgid "writeback of base register when in register list is UNPREDICTABLE"
-msgstr ""
+msgstr "обратная запись в базовый регистр при его нахождении в списке регистров вызывает НЕПРЕДСКАЗУЕМОСТЬ"
 
 #: config/tc-arm.c:8901
 msgid "if writeback register is in list, it must be the lowest reg in the list"
-msgstr ""
+msgstr "если регистр обратной записи в списке, то он должен быть самым нижним регистром в списке"
 
 #: config/tc-arm.c:8938
 msgid "first transfer register must be even"
-msgstr ""
+msgstr "первый регистр передачи должен быть чётным"
 
 #: config/tc-arm.c:8941
 msgid "can only transfer two consecutive registers"
-msgstr ""
+msgstr "передача допустима только для двух последовательных регистра"
 
 #. If op 1 were present and equal to PC, this function wouldn't
 #. have been called in the first place.
@@ -3789,1220 +3791,1218 @@ msgstr ""
 #: config/tc-arm.c:8942 config/tc-arm.c:9012 config/tc-arm.c:9676
 #: config/tc-arm.c:11844
 msgid "r14 not allowed here"
-msgstr ""
+msgstr "r14 здесь запрещён"
 
 #: config/tc-arm.c:8954
 msgid "base register written back, and overlaps second transfer register"
-msgstr ""
+msgstr "в базовый регистр выполняется обратная запись и он пересекается со вторым регистром передачи"
 
 #: config/tc-arm.c:8964
 msgid "index register overlaps transfer register"
-msgstr ""
+msgstr "индексный регистр пересекается с регистром передачи"
 
 #: config/tc-arm.c:8993 config/tc-arm.c:9643
 msgid "offset must be zero in ARM encoding"
-msgstr ""
+msgstr "смещение должно быть нулевым при кодировании ARM"
 
 #: config/tc-arm.c:9006 config/tc-arm.c:9670
 msgid "even register required"
-msgstr ""
+msgstr "требуется чётный регистр"
 
 #: config/tc-arm.c:9009
 msgid "can only load two consecutive registers"
-msgstr ""
+msgstr "загрузка допустима только в два последовательных регистра"
 
 #: config/tc-arm.c:9027
 msgid "ldr to register 15 must be 4-byte aligned"
-msgstr ""
+msgstr "ldr в регистр 15 должна быть выровнена по 4-байтовой границе"
 
 #: config/tc-arm.c:9050 config/tc-arm.c:9082
 msgid "this instruction requires a post-indexed address"
-msgstr ""
+msgstr "для данной инструкции требуется пост-индексируемый адрес"
 
 #: config/tc-arm.c:9109
 msgid "Rd and Rm should be different in mla"
-msgstr ""
+msgstr "Rd и Rm должны различаться в mla"
 
 #: config/tc-arm.c:9136 config/tc-arm.c:12217
-#, fuzzy
-#| msgid "emulations not handled in this configuration"
 msgid ":lower16: not allowed in this instruction"
-msgstr "эмуляции не обрабатываются при таких настройках"
+msgstr ":lower16: запрещён в этой инструкции"
 
 #: config/tc-arm.c:9138 config/tc-arm.c:12222
 msgid ":upper16: not allowed in this instruction"
-msgstr ""
+msgstr ":upper16: запрещён в этой инструкции"
 
 #: config/tc-arm.c:9155
 msgid "operand 1 must be FPSCR"
-msgstr ""
+msgstr "операнд 1 должен быть FPSCR"
 
 #: config/tc-arm.c:9247 config/tc-arm.c:12336
 msgid "bad register for mrs"
-msgstr ""
+msgstr "неверный регистр для mrs"
 
 #: config/tc-arm.c:9254 config/tc-arm.c:12360
 msgid "'APSR', 'CPSR' or 'SPSR' expected"
-msgstr ""
+msgstr "ожидается «APSR», «CPSR» или «SPSR»"
 
 #: config/tc-arm.c:9295
 msgid "Rd and Rm should be different in mul"
-msgstr ""
+msgstr "Rd и Rm должны различаться в mul"
 
 #: config/tc-arm.c:9314 config/tc-arm.c:9588 config/tc-arm.c:12499
 msgid "rdhi and rdlo must be different"
-msgstr ""
+msgstr "rdhi и rdlo должны различаться"
 
 #: config/tc-arm.c:9320
 msgid "rdhi, rdlo and rm must all be different"
-msgstr ""
+msgstr "rdhi, rdlo и rm должны различаться"
 
 #: config/tc-arm.c:9386
 msgid "'[' expected after PLD mnemonic"
-msgstr ""
+msgstr "после мнемоники PLD ожидается «[»"
 
 #: config/tc-arm.c:9388 config/tc-arm.c:9403
 msgid "post-indexed expression used in preload instruction"
-msgstr ""
+msgstr "в инструкции предварительной загрузки используется пост-индексируемое выражение"
 
 #: config/tc-arm.c:9390 config/tc-arm.c:9405
 msgid "writeback used in preload instruction"
-msgstr ""
+msgstr "в инструкции предварительной загрузки используется обратная запись"
 
 #: config/tc-arm.c:9392 config/tc-arm.c:9407
 msgid "unindexed addressing used in preload instruction"
-msgstr ""
+msgstr "в инструкции предварительной загрузки используется неиндексированная адресация"
 
 #: config/tc-arm.c:9401
 msgid "'[' expected after PLI mnemonic"
-msgstr ""
+msgstr "после мнемоники PLI ожидается «[»"
 
 #: config/tc-arm.c:9416 config/tc-arm.c:12668
 msgid "push/pop do not support {reglist}^"
-msgstr ""
+msgstr "push/pop не поддерживают {reglist}^"
 
 #: config/tc-arm.c:9494 config/tc-arm.c:12815
 msgid "setend use is deprecated for ARMv8"
-msgstr ""
+msgstr "использование setend устарело в ARMv8"
 
 #: config/tc-arm.c:9515 config/tc-arm.c:12876 config/tc-arm.c:12908
 #: config/tc-arm.c:12951
 msgid "extraneous shift as part of operand to shift insn"
-msgstr ""
+msgstr "в инструкции сдвига излишний сдвиг как часть операнда"
 
 #: config/tc-arm.c:9546 config/tc-arm.c:9555
 msgid "selected processor does not support SETPAN instruction"
-msgstr ""
+msgstr "выбранный процессор не поддерживает инструкцию SETPAN"
 
 #: config/tc-arm.c:9614
 msgid "SRS base register must be r13"
-msgstr ""
+msgstr "базовый регистр SRS должен быть r13"
 
 #: config/tc-arm.c:9673
 msgid "can only store two consecutive registers"
-msgstr ""
+msgstr "сохранение допустимо только в два последовательных регистра"
 
 #: config/tc-arm.c:9787 config/tc-arm.c:9804
 msgid "only two consecutive VFP SP registers allowed here"
-msgstr ""
+msgstr "здесь разрешены только два последовательных регистра VFP SP"
 
 #: config/tc-arm.c:9832 config/tc-arm.c:9847
 msgid "this addressing mode requires base-register writeback"
-msgstr ""
+msgstr "для данного режима адресации требуется базовый регистр обратной записи"
 
 #. If srcsize is 16, inst.operands[1].imm must be in the range 0-16.
 #. i.e. immbits must be in range 0 - 16.
 #: config/tc-arm.c:9964
 msgid "immediate value out of range, expected range [0, 16]"
-msgstr ""
+msgstr "непосредственное значение за пределами диапазона, ожидаемый диапазон [0, 16]"
 
 #. If srcsize is 32, inst.operands[1].imm must be in the range 1-32.
 #. i.e. immbits must be in range 0 - 31.
 #: config/tc-arm.c:9971
 msgid "immediate value out of range, expected range [1, 32]"
-msgstr ""
+msgstr "непосредственное значение за пределами диапазона, ожидаемый диапазон [1, 32]"
 
 #: config/tc-arm.c:10037
 msgid "this instruction does not support indexing"
-msgstr ""
+msgstr "данная инструкция не поддерживает индексацию"
 
 #: config/tc-arm.c:10060
 msgid "only r15 allowed here"
-msgstr ""
+msgstr "здесь разрешён только r15"
 
 #: config/tc-arm.c:10195
 msgid "immediate operand requires iWMMXt2"
-msgstr ""
+msgstr "требуется непосредственный операнд iWMMXt2"
 
 #: config/tc-arm.c:10339
 msgid "shift by register not allowed in thumb mode"
-msgstr ""
+msgstr "сдвиг регистром запрещён в режиме thumb"
 
 #: config/tc-arm.c:10351 config/tc-arm.c:13059 config/tc-arm.c:23513
 msgid "shift expression is too large"
-msgstr ""
+msgstr "выражение сдвига слишком большое"
 
 #: config/tc-arm.c:10384
 msgid "cannot use register index with this instruction"
-msgstr ""
+msgstr "невозможно использовать индексный регистр с этой инструкцией"
 
 #: config/tc-arm.c:10386
 msgid "Thumb does not support negative register indexing"
-msgstr ""
+msgstr "Thumb не поддерживает отрицательные индексный регистры"
 
 #: config/tc-arm.c:10388
 msgid "Thumb does not support register post-indexing"
-msgstr ""
+msgstr "Thumb не поддерживает регистровую пост-индексацию"
 
 #: config/tc-arm.c:10390
 msgid "Thumb does not support register indexing with writeback"
-msgstr ""
+msgstr "Thumb не поддерживает регистровую индексацию с обратной записью"
 
 #: config/tc-arm.c:10392
 msgid "Thumb supports only LSL in shifted register indexing"
-msgstr ""
+msgstr "Thumb поддерживает только LSL в регистровой индексации сдвигом"
 
 #: config/tc-arm.c:10401 config/tc-arm.c:16374
 msgid "shift out of range"
-msgstr ""
+msgstr "сдвиг вне диапазона"
 
 #: config/tc-arm.c:10410
 msgid "cannot use writeback with this instruction"
-msgstr ""
+msgstr "невозможно использовать обратную запись с этой инструкцией"
 
 #: config/tc-arm.c:10431
 msgid "cannot use post-indexing with PC-relative addressing"
-msgstr ""
+msgstr "невозможно использовать пост-индексацию с относительной PC адресацией"
 
 #: config/tc-arm.c:10432
 msgid "cannot use post-indexing with this instruction"
-msgstr ""
+msgstr "невозможно использовать пост-индексацию с этой инструкцией"
 
 #: config/tc-arm.c:10654
 msgid "only SUBS PC, LR, #const allowed"
-msgstr ""
+msgstr "разрешены только SUBS PC, LR, #const"
 
 #: config/tc-arm.c:10737 config/tc-arm.c:10897 config/tc-arm.c:10994
 #: config/tc-arm.c:12297 config/tc-arm.c:12605
 msgid "shift must be constant"
-msgstr ""
+msgstr "сдвиг должен быть константой"
 
 #: config/tc-arm.c:10742
 msgid "shift value over 3 not allowed in thumb mode"
-msgstr ""
+msgstr "значения сдвига больше 3 запрещено в режиме thumb"
 
 #: config/tc-arm.c:10744
 msgid "only LSL shift allowed in thumb mode"
-msgstr ""
+msgstr "в режиме thumb допускается только сдвиг LSL"
 
 #: config/tc-arm.c:10768 config/tc-arm.c:10912 config/tc-arm.c:11009
 #: config/tc-arm.c:12310
 msgid "unshifted register required"
-msgstr ""
+msgstr "требуется не сдвиговый регистр"
 
 #: config/tc-arm.c:10783 config/tc-arm.c:11020 config/tc-arm.c:12460
 msgid "dest must overlap one source register"
-msgstr ""
+msgstr "назначение должно пересекаться с одним из регистров источника"
 
 #: config/tc-arm.c:10915
 msgid "dest and source1 must be the same register"
-msgstr ""
+msgstr "назначение и источник1 должны быть одним и тем же регистром"
 
 #: config/tc-arm.c:11155
 msgid "selected architecture does not support wide conditional branch instruction"
-msgstr ""
+msgstr "выбранная архитектура не поддерживает инструкцию широкого условного ветвления"
 
 #: config/tc-arm.c:11188
 msgid "instruction is always unconditional"
-msgstr ""
+msgstr "инструкция всегда безусловная"
 
 #: config/tc-arm.c:11309
 msgid "selected processor does not support 'A' form of this instruction"
-msgstr ""
+msgstr "выбранный процессор не поддерживает форму «A» этой инструкции"
 
 #: config/tc-arm.c:11312
 msgid "Thumb does not support the 2-argument form of this instruction"
-msgstr ""
+msgstr "Thumb не поддерживает 2-аргументную форму этой инструкции"
 
 #: config/tc-arm.c:11433
 msgid "SP not allowed in register list"
-msgstr ""
+msgstr "SP не допускается указывать в списке регистров"
 
 #: config/tc-arm.c:11437 config/tc-arm.c:11543
 msgid "having the base register in the register list when using write back is UNPREDICTABLE"
-msgstr ""
+msgstr "наличие в списке регистров базового регистра при использовании обратной записи создаёт НЕПРЕДСКАЗУЕМОСТЬ"
 
 #: config/tc-arm.c:11445
 msgid "LR and PC should not both be in register list"
-msgstr ""
+msgstr "LR и PC не должны быть в списке регистров одновременно"
 
 #: config/tc-arm.c:11453
 msgid "PC not allowed in register list"
-msgstr ""
+msgstr "PC не допускается указывать в списке регистров"
 
 #: config/tc-arm.c:11495
 msgid "Thumb load/store multiple does not support {reglist}^"
-msgstr ""
+msgstr "множественная загрузка/сохранение в Thumb не поддерживает {reglist}^"
 
 #: config/tc-arm.c:11520 config/tc-arm.c:11597
 #, c-format
 msgid "value stored for r%d is UNKNOWN"
-msgstr ""
+msgstr "значение, сохранённое для r%d, НЕИЗВЕСТНО"
 
 #: config/tc-arm.c:11590
 msgid "Thumb-2 instruction only valid in unified syntax"
-msgstr ""
+msgstr "инструкцию Thumb-2 допускается указывать только в объединённом синтаксисе"
 
 #: config/tc-arm.c:11594 config/tc-arm.c:11604
 msgid "this instruction will write back the base register"
-msgstr ""
+msgstr "эта инструкция выполнит обратную запись в базовый регистр"
 
 #: config/tc-arm.c:11607
 msgid "this instruction will not write back the base register"
-msgstr ""
+msgstr "эта инструкция не выполнит обратную запись в базовый регистр"
 
 #: config/tc-arm.c:11638
 msgid "r14 not allowed as first register when second register is omitted"
-msgstr ""
+msgstr "r14 не допускается указывать первым регистром, если отсутствует второй регистр"
 
 #: config/tc-arm.c:11738
 msgid "This instruction may be unpredictable if executed on M-profile cores with interrupts enabled."
-msgstr ""
+msgstr "Эта инструкция может приводить к непредсказумому поведению, если выполняется в ядрах M-профиля с включёнными прерываниями."
 
 #: config/tc-arm.c:11767 config/tc-arm.c:11780 config/tc-arm.c:11816
 msgid "Thumb does not support this addressing mode"
-msgstr ""
+msgstr "Thumb не поддерживает данный режим адресации"
 
 #: config/tc-arm.c:11784
 msgid "byte or halfword not valid for base register"
-msgstr ""
+msgstr "байт или полуслово недопустимо для базового регистра"
 
 #: config/tc-arm.c:11787
 msgid "r15 based store not allowed"
-msgstr ""
+msgstr "хранилище на основе r15 не допускается"
 
 #: config/tc-arm.c:11789
 msgid "invalid base register for register offset"
-msgstr ""
+msgstr "некорректный базовый регистр для регистрового смещения"
 
 #: config/tc-arm.c:11846
 msgid "r12 not allowed here"
-msgstr ""
+msgstr "r12 здесь запрещён"
 
 #: config/tc-arm.c:11852
 msgid "base register written back, and overlaps one of transfer registers"
-msgstr ""
+msgstr "в базовый регистр выполняется обратная запись и он пересекается с одним из регистром передачи"
 
 #: config/tc-arm.c:11980
 #, c-format
 msgid "Use of r%u as a source register is deprecated when r%u is the destination register."
-msgstr ""
+msgstr "Использование r%u в качестве регистра источника устарело, если r%u является регистром назначения."
 
 #: config/tc-arm.c:12173
 msgid "shifts in CMP/MOV instructions are only supported in unified syntax"
-msgstr ""
+msgstr "сдвиги в инструкциях CMP/MOV поддерживаются только при указании в объединённом синтаксисе"
 
 #: config/tc-arm.c:12201
 msgid "only lo regs allowed with immediate"
-msgstr ""
+msgstr "только нижние регистры допускаются с непосредственными значениями"
 
 #: config/tc-arm.c:12378
 msgid "Thumb encoding does not support an immediate here"
-msgstr ""
+msgstr "кодирование Thumb не поддерживает здесь непосредственное значение"
 
 #: config/tc-arm.c:12465
 msgid "Thumb-2 MUL must not set flags"
-msgstr ""
+msgstr "Thumb-2 MUL не должна устанавливать флаги"
 
 #: config/tc-arm.c:12530
 msgid "Thumb does not support NOP with hints"
-msgstr ""
+msgstr "Thumb не поддерживает NOP с подсказками"
 
 #: config/tc-arm.c:12690
 msgid "invalid register list to push/pop instruction"
-msgstr ""
+msgstr "некорректный список регистров в инструкции push/pop"
 
 #: config/tc-arm.c:12935
 msgid "source1 and dest must be same register"
-msgstr ""
+msgstr "источник1 и назначение должны быть одним и тем же регистром"
 
 #: config/tc-arm.c:12960
 msgid "ror #imm not supported"
-msgstr ""
+msgstr "ror #imm не поддерживается"
 
 #: config/tc-arm.c:13011
 msgid "SMC is not permitted on this architecture"
-msgstr ""
+msgstr "SMC запрещена на этой архитектуре"
 
 #: config/tc-arm.c:13176
 msgid "Thumb encoding does not support rotation"
-msgstr ""
+msgstr "кодирование Thumb не поддерживает вращение"
 
 #: config/tc-arm.c:13196
 msgid "instruction requires register index"
-msgstr ""
+msgstr "для инструкции требуется регистровый индекс"
 
 #: config/tc-arm.c:13206
 msgid "instruction does not allow shifted index"
-msgstr ""
+msgstr "инструкция запрещает сдвиговый индекс"
 
 #: config/tc-arm.c:13392
 msgid "invalid neon suffix for non neon instruction"
-msgstr ""
+msgstr "неверный суффикс neon для инструкции не neon"
 
 #: config/tc-arm.c:13754 config/tc-arm.c:14100 config/tc-arm.c:15717
 #: config/tc-arm.c:17342
 msgid "invalid instruction shape"
-msgstr ""
+msgstr "неверная форма инструкции"
 
 #: config/tc-arm.c:13999
 msgid "types specified in both the mnemonic and operands"
-msgstr ""
+msgstr "типы указаны как в мнемонике так и в операндах"
 
 #: config/tc-arm.c:14036
 msgid "operand types can't be inferred"
-msgstr ""
+msgstr "невозможно догадаться о типах операндов"
 
 #: config/tc-arm.c:14042
 msgid "type specifier has the wrong number of parts"
-msgstr ""
+msgstr "определитель типа содержит ошибочное количество частей"
 
 #: config/tc-arm.c:14128 config/tc-arm.c:15905 config/tc-arm.c:15912
 msgid "operand size must match register width"
-msgstr ""
+msgstr "размер операнда должен совпадать с шириной регистра"
 
 #: config/tc-arm.c:14139
 msgid "bad type in Neon instruction"
-msgstr ""
+msgstr "неверный тип в инструкции Neon"
 
 #: config/tc-arm.c:14150
 msgid "inconsistent types in Neon instruction"
-msgstr ""
+msgstr "несоответствие типов в инструкции Neon"
 
 #: config/tc-arm.c:14521 config/tc-arm.c:14536 config/tc-arm.c:16921
 msgid "register list must contain at least 1 and at most 16 registers"
-msgstr ""
+msgstr "список регистров должен содержать не менее 1 и не более 16 регистров"
 
 #: config/tc-arm.c:14679 config/tc-arm.c:14715 config/tc-arm.c:15354
 #: config/tc-arm.c:16761
 msgid "immediate out of range for shift"
-msgstr ""
+msgstr "непосредственное значение за пределами диапазона сдвига"
 
 #: config/tc-arm.c:14835
 msgid "first and second operands shall be the same register"
-msgstr ""
+msgstr "первый и второй операнды должны быть одним и тем же регистром"
 
 #: config/tc-arm.c:15120 config/tc-arm.c:16210
 msgid "scalar out of range for multiply instruction"
-msgstr ""
+msgstr "скаляр вне диапазона инструкции умножения"
 
 #: config/tc-arm.c:15244
 msgid "instruction form not available on this architecture."
-msgstr ""
+msgstr "форма инструкции недоступна на этой архитектуре"
 
 #: config/tc-arm.c:15247
 msgid "this instruction implies use of ARMv8.1 AdvSIMD."
-msgstr ""
+msgstr "данная инструкция подразумевает использование ARMv8.1 AdvSIMD."
 
 #: config/tc-arm.c:15330 config/tc-arm.c:15342
 msgid "immediate out of range for insert"
-msgstr ""
+msgstr "непосредственное значение за пределами диапазона вставки"
 
 #: config/tc-arm.c:15475
 msgid "immediate out of range for narrowing operation"
-msgstr ""
+msgstr "непосредственное значение за пределами диапазона операции сужения"
 
 #: config/tc-arm.c:15621
 msgid "operands 0 and 1 must be the same register"
-msgstr ""
+msgstr "операнды 0 и 1 должны быть одним и тем же регистром"
 
 #: config/tc-arm.c:15727 config/tc-arm.c:17440
 msgid "invalid rounding mode"
-msgstr ""
+msgstr "неверный режим округления"
 
 #: config/tc-arm.c:16054
 msgid "operand size must be specified for immediate VMOV"
-msgstr ""
+msgstr "для непосредственного значения в VMOV должен быть указан размер операнда"
 
 #: config/tc-arm.c:16064
 msgid "immediate has bits set outside the operand size"
-msgstr ""
+msgstr "непосредственное значение содержит установленные биты вне диапазона размера операнда"
 
 #: config/tc-arm.c:16226
 msgid "vfmal/vfmsl with FP16 type cannot be conditional, the behaviour is UNPREDICTABLE"
-msgstr ""
+msgstr "vfmal/vfmsl с типом FP16 не могут быть условными, поведение НЕПРЕДСКАЗУЕМО"
 
 #: config/tc-arm.c:16356
 msgid "Instruction form not available on this architecture."
-msgstr ""
+msgstr "Форма инструкции недоступна на этой архитектуре."
 
 #: config/tc-arm.c:16400
 msgid "elements must be smaller than reversal region"
-msgstr ""
+msgstr "элементы должны быть меньше области возврата"
 
 #: config/tc-arm.c:16582 config/tc-arm.c:16642
 msgid "bad type for scalar"
-msgstr ""
+msgstr "некорректный тип для скаляра"
 
 #: config/tc-arm.c:16719 config/tc-arm.c:16727
 msgid "VFP registers must be adjacent"
-msgstr ""
+msgstr "регистры VFP должны быть расположенным рядом"
 
 #: config/tc-arm.c:16770
 msgid "invalid suffix"
-msgstr ""
+msgstr "неверный суффикс"
 
 #: config/tc-arm.c:16888
 msgid "bad list length for table lookup"
-msgstr ""
+msgstr "неверная длина списка для таблицы поиска"
 
 #: config/tc-arm.c:16918
 msgid "writeback (!) must be used for VLDMDB and VSTMDB"
-msgstr ""
+msgstr "для VLDMDB и VSTMDB должна использоваться обратная запись"
 
 #: config/tc-arm.c:16946
 msgid "Use of PC here is UNPREDICTABLE"
-msgstr ""
+msgstr "Использование PC в этом месте вызывает НЕПРЕДСКАЗУЕМОСТЬ"
 
 #: config/tc-arm.c:16948
 msgid "Use of PC here is deprecated"
-msgstr ""
+msgstr "Использование PC в этом месте устарело"
 
 #: config/tc-arm.c:17015
 msgid "bad alignment"
-msgstr ""
+msgstr "неверное выравнивание"
 
 #: config/tc-arm.c:17032
 msgid "bad list type for instruction"
-msgstr ""
+msgstr "неверный тип списка для инструкции"
 
 #: config/tc-arm.c:17034
 msgid "bad element type for instruction"
-msgstr ""
+msgstr "неверный тип элемента для инструкции"
 
 #: config/tc-arm.c:17076
 msgid "unsupported alignment for instruction"
-msgstr ""
+msgstr "неподдерживаемое выравнивание для инструкции"
 
 #: config/tc-arm.c:17095 config/tc-arm.c:17189 config/tc-arm.c:17201
 #: config/tc-arm.c:17211 config/tc-arm.c:17225
 msgid "bad list length"
-msgstr ""
+msgstr "неверная длина списка"
 
 #: config/tc-arm.c:17100
 msgid "stride of 2 unavailable when element size is 8"
-msgstr ""
+msgstr "шаг 2 недоступен, если размер элемента равен 8"
 
 #: config/tc-arm.c:17133 config/tc-arm.c:17209
 msgid "can't use alignment with this instruction"
-msgstr ""
+msgstr "невозможно использовать выравнивание с этой инструкцией"
 
 #: config/tc-arm.c:17281
 msgid "post-index must be a register"
-msgstr ""
+msgstr "пост-индекс должен задаваться регистром"
 
 #: config/tc-arm.c:17283
 msgid "bad register for post-index"
-msgstr ""
+msgstr "неверный регистр для пост-индекса"
 
 #: config/tc-arm.c:17504
 msgid "scalar out of range"
-msgstr ""
+msgstr "скаляр вне диапазона"
 
 #: config/tc-arm.c:17577
 msgid "Dot Product instructions cannot be conditional,  the behaviour is UNPREDICTABLE"
-msgstr ""
+msgstr "Инструкции скалярного произведения не могут быть условными, поведение НЕПРЕДСКАЗУЕМО."
 
 #: config/tc-arm.c:18150 config/tc-arm.c:18236
 msgid "conditional infixes are deprecated in unified syntax"
-msgstr ""
+msgstr "условные инфиксы устарели в объединённом синтаксисе"
 
 #: config/tc-arm.c:18387
 msgid "Warning: conditional outside an IT block for Thumb."
-msgstr ""
+msgstr "Предупреждение: условие вне блока IT для Thumb."
 
 #: config/tc-arm.c:18539
 msgid "Short branches, Undefined, SVC, LDM/STM"
-msgstr ""
+msgstr "Короткие ветвления, Не определено, SVC, LDM/STM"
 
 #: config/tc-arm.c:18540
 msgid "Miscellaneous 16-bit instructions"
-msgstr ""
+msgstr "Различные 16-битные инструкции"
 
 #: config/tc-arm.c:18541
 msgid "ADR"
-msgstr ""
+msgstr "ADR"
 
 #: config/tc-arm.c:18542
 msgid "Literal loads"
-msgstr ""
+msgstr "Загрузка литерала"
 
 #: config/tc-arm.c:18543
 msgid "Hi-register ADD, MOV, CMP, BX, BLX using pc"
-msgstr ""
+msgstr "Верхний регистр ADD, MOV, CMP, BX, BLX задаётся pc"
 
 #: config/tc-arm.c:18544
 msgid "Hi-register ADD, MOV, CMP using pc"
-msgstr ""
+msgstr "Верхний регистр ADD, MOV, CMP задаётся pc"
 
 #. NOTE: 0x00dd is not the real encoding, instead, it is the 'tvalue'
 #. field in asm_opcode. 'tvalue' is used at the stage this check happen.
 #: config/tc-arm.c:18547
 msgid "ADD/SUB sp, sp #imm"
-msgstr ""
+msgstr "ADD/SUB sp, sp #imm"
 
 #: config/tc-arm.c:18566
 msgid "IT blocks containing 32-bit Thumb instructions are deprecated in ARMv8"
-msgstr ""
+msgstr "Блоки IT с 32-битными инструкциями Thumb устарели в ARMv8"
 
 #: config/tc-arm.c:18578
 #, c-format
 msgid "IT blocks containing 16-bit Thumb instructions of the following class are deprecated in ARMv8: %s"
-msgstr ""
+msgstr "Блоки IT с 16-битными инструкциями Thumb следующих классов устарели в ARMv8: %s"
 
 #: config/tc-arm.c:18591
 msgid "IT blocks containing more than one conditional instruction are deprecated in ARMv8"
-msgstr ""
+msgstr "Блоки IT с более чем одной условной инструкцией устарели в ARMv8"
 
 #: config/tc-arm.c:18706
 #, c-format
 msgid "bad instruction `%s'"
-msgstr ""
+msgstr "плохая инструкция «%s»"
 
 #: config/tc-arm.c:18712
 msgid "s suffix on comparison instruction is deprecated"
-msgstr ""
+msgstr "суффикс s в инструкциях сравнения устарел"
 
 #: config/tc-arm.c:18732
 msgid "SVC is not permitted on this architecture"
-msgstr ""
+msgstr "SVC запрещена на этой архитектуре"
 
 #: config/tc-arm.c:18734
 #, c-format
 msgid "selected processor does not support `%s' in Thumb mode"
-msgstr ""
+msgstr "выбранный процессор не поддерживает «%s» в режиме Thumb"
 
 #: config/tc-arm.c:18740
 msgid "Thumb does not support conditional execution"
-msgstr ""
+msgstr "Thumb не поддерживает условное выполнение"
 
 #: config/tc-arm.c:18760
 #, c-format
 msgid "selected processor does not support 32bit wide variant of instruction `%s'"
-msgstr ""
+msgstr "выбранный процессор не поддерживает 32-битный вариант инструкции «%s»"
 
 #: config/tc-arm.c:18763
 #, c-format
 msgid "selected processor does not support `%s' in Thumb-2 mode"
-msgstr ""
+msgstr "выбранный процессор не поддерживает «%s» в режиме Thumb-2"
 
 #: config/tc-arm.c:18788
 #, c-format
 msgid "cannot honor width suffix -- `%s'"
-msgstr ""
+msgstr "не удалось учесть суффикс ширины «%s»"
 
 #: config/tc-arm.c:18830
 #, c-format
 msgid "selected processor does not support `%s' in ARM mode"
-msgstr ""
+msgstr "выбранный процессор не поддерживает «%s» в режиме ARM"
 
 #: config/tc-arm.c:18835
 #, c-format
 msgid "width suffixes are invalid in ARM mode -- `%s'"
-msgstr ""
+msgstr "некорректная ширина суффиксов в режиме ARM — «%s»"
 
 #: config/tc-arm.c:18868
 #, c-format
 msgid "attempt to use an ARM instruction on a Thumb-only processor -- `%s'"
-msgstr ""
+msgstr "попытка использования инструкции ARM на процессоре, поддерживающем только Thumb — «%s»"
 
 #: config/tc-arm.c:18885
 #, c-format
 msgid "section '%s' finished with an open IT block."
-msgstr ""
+msgstr "раздел «%s» завершён с открытым блоком IT"
 
 #: config/tc-arm.c:18890
 msgid "file finished with an open IT block."
-msgstr ""
+msgstr "файл завершён с открытым блоком IT"
 
 #: config/tc-arm.c:22166
 #, c-format
 msgid "alignments greater than %d bytes not supported in .text sections."
-msgstr ""
+msgstr "выравнивание больше чем %d байт не поддерживается в разделах .text"
 
 #: config/tc-arm.c:22433 config/tc-ia64.c:3594
 #, c-format
 msgid "Group section `%s' has no group signature"
-msgstr ""
+msgstr "Раздел групп «%s» не имеет подписи группы"
 
 #: config/tc-arm.c:22479
 msgid "handlerdata in cantunwind frame"
-msgstr ""
+msgstr "handlerdata в кадре cantunwind"
 
 #: config/tc-arm.c:22496
 msgid "too many unwind opcodes for personality routine 0"
-msgstr ""
+msgstr "слишком много раскрываемых кодов операций для персонализационной процедуры 0"
 
 #: config/tc-arm.c:22527
 msgid "attempt to recreate an unwind entry"
-msgstr ""
+msgstr "попытаться пересоздать элемент раскрытия"
 
 #: config/tc-arm.c:22537
 msgid "too many unwind opcodes"
-msgstr ""
+msgstr "слишком много раскрываемых кодов операций"
 
 #: config/tc-arm.c:22830
 #, c-format
 msgid "[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"
-msgstr ""
+msgstr "[-mwarn-syms]: Назначение делает символ, совпадающий с инструкцией ARM: %s"
 
 #: config/tc-arm.c:23192 config/tc-arm.c:23260
 #, c-format
 msgid "symbol %s is in a different section"
-msgstr ""
+msgstr "символ %s в другом разделе"
 
 #: config/tc-arm.c:23194 config/tc-arm.c:23262
 #, c-format
 msgid "symbol %s is weak and may be overridden later"
-msgstr ""
+msgstr "символ %s слаб и позднее может быть замещён"
 
 #: config/tc-arm.c:23239 config/tc-arm.c:23609
 #, c-format
 msgid "invalid constant (%lx) after fixup"
-msgstr ""
+msgstr "некорректная константа (%lx) после местоположения"
 
 #: config/tc-arm.c:23295
 #, c-format
 msgid "unable to compute ADRL instructions for PC offset of 0x%lx"
-msgstr ""
+msgstr "невозможно выслить инструкции ADRL для смещения относительно PC по адресу 0x%lx"
 
 #: config/tc-arm.c:23331 config/tc-arm.c:23361
 msgid "invalid literal constant: pool needs to be closer"
-msgstr ""
+msgstr "некорректная литеральная константа: пул должен быт ближе"
 
 #: config/tc-arm.c:23334 config/tc-arm.c:23383
 #, c-format
 msgid "bad immediate value for offset (%ld)"
-msgstr ""
+msgstr "некорректное непосредственное значение для смещения (%ld)"
 
 #: config/tc-arm.c:23364
 #, c-format
 msgid "bad immediate value for 8-bit offset (%ld)"
-msgstr ""
+msgstr "некорректное непосредственное значение для 8-битного смещения (%ld)"
 
 #: config/tc-arm.c:23424
 msgid "offset not a multiple of 4"
-msgstr ""
+msgstr "смещение не кратно 4"
 
 #: config/tc-arm.c:23625
 msgid "invalid smc expression"
-msgstr ""
+msgstr "неверное выражение smc"
 
 #: config/tc-arm.c:23634
 msgid "invalid hvc expression"
-msgstr ""
+msgstr "неверное выражение hvc"
 
 #: config/tc-arm.c:23645 config/tc-arm.c:23654
 msgid "invalid swi expression"
-msgstr ""
+msgstr "неверное выражение swi"
 
 #: config/tc-arm.c:23664
 msgid "invalid expression in load/store multiple"
-msgstr ""
+msgstr "неправильное выражение в многозначной загрузке/сохранении"
 
 #: config/tc-arm.c:23726
 #, c-format
 msgid "blx to '%s' an ARM ISA state function changed to bl"
-msgstr ""
+msgstr "blx в «%s» — функция состояния ARM ISA, изменяется на bl"
 
 #: config/tc-arm.c:23745
 msgid "misaligned branch destination"
-msgstr ""
+msgstr "невыравненное назначение ветвления"
 
 #: config/tc-arm.c:23865
 #, c-format
 msgid "blx to Thumb func '%s' from Thumb ISA state changed to bl"
-msgstr ""
+msgstr "blx в функции Thumb«%s» из состояния Thumb ISA изменяется на bl"
 
 #: config/tc-arm.c:23915
 msgid "Thumb2 branch out of range"
-msgstr ""
+msgstr "ветвление Thumb2 за пределами диапазона"
 
 #: config/tc-arm.c:23999
 msgid "rel31 relocation overflow"
-msgstr ""
+msgstr "переполнение перемещения rel31"
 
 #: config/tc-arm.c:24020 config/tc-arm.c:24024 config/tc-arm.c:24063
 msgid "co-processor offset out of range"
-msgstr ""
+msgstr "смещение сопроцессора вне диапазона"
 
 #: config/tc-arm.c:24080
 #, c-format
 msgid "invalid offset, target not word aligned (0x%08lX)"
-msgstr ""
+msgstr "неверное смещение, цель не выровнена по границе слова (0x%08lX)"
 
 #: config/tc-arm.c:24087 config/tc-arm.c:24096 config/tc-arm.c:24104
 #: config/tc-arm.c:24112 config/tc-arm.c:24120
 #, c-format
 msgid "invalid offset, value too big (0x%08lX)"
-msgstr ""
+msgstr "неверное смещение, слишком большое значение (0x%08lX)"
 
 #: config/tc-arm.c:24161
 msgid "invalid Hi register with immediate"
-msgstr ""
+msgstr "неверный старший регистр с непосредственным значением"
 
 #: config/tc-arm.c:24177
 msgid "invalid immediate for stack address calculation"
-msgstr ""
+msgstr "некорректный непосредственный элемент при вычислении адреса стека"
 
 #: config/tc-arm.c:24196
 msgid "address calculation needs a strongly defined nearby symbol"
-msgstr ""
+msgstr "для вычисления адреса необходимо стойкий близко определённый символ"
 
 #: config/tc-arm.c:24212
 msgid "symbol too far away"
-msgstr ""
+msgstr "символ слишком далеко"
 
 #: config/tc-arm.c:24224
 #, c-format
 msgid "invalid immediate for address calculation (value = 0x%08lX)"
-msgstr ""
+msgstr "некорректный непосредственный элемент при вычислении адреса (значение = 0x%08lX)"
 
 #: config/tc-arm.c:24254
 #, c-format
 msgid "invalid immediate: %ld is out of range"
-msgstr ""
+msgstr "неверное непосредственное значение: %ld за пределами диапазона"
 
 #: config/tc-arm.c:24266
 #, c-format
 msgid "invalid shift value: %ld"
-msgstr ""
+msgstr "некорректное значение сдвига: %ld"
 
 #: config/tc-arm.c:24336 config/tc-arm.c:24407
 #, c-format
 msgid "the offset 0x%08lX is not representable"
-msgstr ""
+msgstr "смещение 0x%08lX невозможно представить"
 
 #: config/tc-arm.c:24368
 #, c-format
 msgid "Unable to process relocation for thumb opcode: %lx"
-msgstr ""
+msgstr "Невозможно обработать перемещение для кода операции thumb: %lx"
 
 #: config/tc-arm.c:24447
 #, c-format
 msgid "bad offset 0x%08lX (only 12 bits available for the magnitude)"
-msgstr ""
+msgstr "неправильное смещение 0x%08lX (для представления доступно только 12 бит)"
 
 #: config/tc-arm.c:24486
 #, c-format
 msgid "bad offset 0x%08lX (only 8 bits available for the magnitude)"
-msgstr ""
+msgstr "неправильное смещение 0x%08lX (для представления доступно только 8 бит)"
 
 #: config/tc-arm.c:24526
 #, c-format
 msgid "bad offset 0x%08lX (must be word-aligned)"
-msgstr ""
+msgstr "неправильное смещение 0x%08lX (должно быть выровнено по границе слова)"
 
 #: config/tc-arm.c:24531
 #, c-format
 msgid "bad offset 0x%08lX (must be an 8-bit number of words)"
-msgstr ""
+msgstr "неправильное смещение 0x%08lX (должно быть 8-битный номер слова)"
 
 #: config/tc-arm.c:24562 config/tc-score.c:7391
 #, c-format
 msgid "bad relocation fixup type (%d)"
-msgstr ""
+msgstr "недопустимый тип перемещаемого местоположения (%d)"
 
 #: config/tc-arm.c:24680
 msgid "literal referenced across section boundary"
-msgstr ""
+msgstr "литерал указывает за границу раздела"
 
 #: config/tc-arm.c:24751
 msgid "internal relocation (type: IMMEDIATE) not fixed up"
-msgstr ""
+msgstr "внутреннее перемещение (тип: IMMEDIATE) не исправляется"
 
 #: config/tc-arm.c:24756
 msgid "ADRL used for a symbol not defined in the same file"
-msgstr ""
+msgstr "ADRL, используемая для символа, не определена в том же файле"
 
 #: config/tc-arm.c:24771
 #, c-format
 msgid "undefined local label `%s'"
-msgstr ""
+msgstr "неопределенная локальная метка «%s»"
 
 #: config/tc-arm.c:24777
 msgid "internal_relocation (type: OFFSET_IMM) not fixed up"
-msgstr ""
+msgstr "internal_relocation (тип: OFFSET_IMM) не исправляется"
 
 #: config/tc-arm.c:24799 config/tc-cris.c:4006 config/tc-ft32.c:709
 #: config/tc-mcore.c:1928 config/tc-microblaze.c:1978 config/tc-mmix.c:2895
 #: config/tc-moxie.c:825 config/tc-ns32k.c:2248 config/tc-score.c:7478
 msgid "<unknown>"
-msgstr ""
+msgstr "<неизвестно>"
 
 #: config/tc-arm.c:25188
 #, c-format
 msgid "%s: unexpected function type: %d"
-msgstr ""
+msgstr "%s: неожиданный тип функции: %d"
 
 #: config/tc-arm.c:25325
 msgid "use of old and new-style options to set CPU type"
-msgstr ""
+msgstr "использование параметров в старом и новом стиле для задания типа ЦП"
 
 #: config/tc-arm.c:25340
 msgid "use of old and new-style options to set FPU type"
-msgstr ""
+msgstr "использование параметров в старом и новом стиле для задания типа FPU"
 
 #: config/tc-arm.c:25424
 msgid "hard-float conflicts with specified fpu"
-msgstr ""
+msgstr "hard-float конфликтует с заданным fpu"
 
 #: config/tc-arm.c:25612
 msgid "generate PIC code"
-msgstr ""
+msgstr "генерировать код PIC"
 
 #: config/tc-arm.c:25613
 msgid "assemble Thumb code"
-msgstr ""
+msgstr "ассемблировать код Thumb"
 
 #: config/tc-arm.c:25614
 msgid "support ARM/Thumb interworking"
-msgstr ""
+msgstr "поддержка совместной работы ARM/Thumb"
 
 #: config/tc-arm.c:25616
 msgid "code uses 32-bit program counter"
-msgstr ""
+msgstr "в коде используется 32-битный программный счётчик"
 
 #: config/tc-arm.c:25617
 msgid "code uses 26-bit program counter"
-msgstr ""
+msgstr "в коде используется 26-битный программный счётчик"
 
 #: config/tc-arm.c:25618
 msgid "floating point args are in fp regs"
-msgstr ""
+msgstr "аргументы значений с плавающей точкой не в регистрах fp"
 
 #: config/tc-arm.c:25620
 msgid "re-entrant code"
-msgstr ""
+msgstr "реентерабельный код"
 
 #: config/tc-arm.c:25621
 msgid "code is ATPCS conformant"
-msgstr ""
+msgstr "код совместимый с ATPCS"
 
 #. These are recognized by the assembler, but have no affect on code.
 #: config/tc-arm.c:25627
 msgid "use frame pointer"
-msgstr ""
+msgstr "использовать указатель кадра"
 
 #: config/tc-arm.c:25628
 msgid "use stack size checking"
-msgstr ""
+msgstr "выполнять проверку размера стека"
 
 #: config/tc-arm.c:25631
 msgid "do not warn on use of deprecated feature"
-msgstr ""
+msgstr "не предупреждать об использовании устаревших возможностей"
 
 #: config/tc-arm.c:25633
 msgid "warn about symbols that match instruction names [default]"
-msgstr ""
+msgstr "предупреждать о символах, которые совпадают с именами инструкций [по умолчанию]"
 
 #: config/tc-arm.c:25634
 msgid "disable warnings about symobls that match instructions"
-msgstr ""
+msgstr "выключить предупреждения о символах, совпадающих с инструкциями"
 
 #. DON'T add any new processors to this list -- we want the whole list
 #. to go away...  Add them to the processors table instead.
 #: config/tc-arm.c:25650 config/tc-arm.c:25651
 msgid "use -mcpu=arm1"
-msgstr ""
+msgstr "использовать -mcpu=arm1"
 
 #: config/tc-arm.c:25652 config/tc-arm.c:25653
 msgid "use -mcpu=arm2"
-msgstr ""
+msgstr "использовать -mcpu=arm2"
 
 #: config/tc-arm.c:25654 config/tc-arm.c:25655
 msgid "use -mcpu=arm250"
-msgstr ""
+msgstr "использовать -mcpu=arm250"
 
 #: config/tc-arm.c:25656 config/tc-arm.c:25657
 msgid "use -mcpu=arm3"
-msgstr ""
+msgstr "использовать -mcpu=arm3"
 
 #: config/tc-arm.c:25658 config/tc-arm.c:25659
 msgid "use -mcpu=arm6"
-msgstr ""
+msgstr "использовать -mcpu=arm6"
 
 #: config/tc-arm.c:25660 config/tc-arm.c:25661
 msgid "use -mcpu=arm600"
-msgstr ""
+msgstr "использовать -mcpu=arm600"
 
 #: config/tc-arm.c:25662 config/tc-arm.c:25663
 msgid "use -mcpu=arm610"
-msgstr ""
+msgstr "использовать -mcpu=arm610"
 
 #: config/tc-arm.c:25664 config/tc-arm.c:25665
 msgid "use -mcpu=arm620"
-msgstr ""
+msgstr "использовать -mcpu=arm620"
 
 #: config/tc-arm.c:25666 config/tc-arm.c:25667
 msgid "use -mcpu=arm7"
-msgstr ""
+msgstr "использовать -mcpu=arm7"
 
 #: config/tc-arm.c:25668 config/tc-arm.c:25669
 msgid "use -mcpu=arm70"
-msgstr ""
+msgstr "использовать -mcpu=arm70"
 
 #: config/tc-arm.c:25670 config/tc-arm.c:25671
 msgid "use -mcpu=arm700"
-msgstr ""
+msgstr "использовать -mcpu=arm700"
 
 #: config/tc-arm.c:25672 config/tc-arm.c:25673
 msgid "use -mcpu=arm700i"
-msgstr ""
+msgstr "использовать -mcpu=arm700i"
 
 #: config/tc-arm.c:25674 config/tc-arm.c:25675
 msgid "use -mcpu=arm710"
-msgstr ""
+msgstr "использовать -mcpu=arm710"
 
 #: config/tc-arm.c:25676 config/tc-arm.c:25677
 msgid "use -mcpu=arm710c"
-msgstr ""
+msgstr "использовать -mcpu=arm710c"
 
 #: config/tc-arm.c:25678 config/tc-arm.c:25679
 msgid "use -mcpu=arm720"
-msgstr ""
+msgstr "использовать -mcpu=arm720"
 
 #: config/tc-arm.c:25680 config/tc-arm.c:25681
 msgid "use -mcpu=arm7d"
-msgstr ""
+msgstr "использовать -mcpu=arm7d"
 
 #: config/tc-arm.c:25682 config/tc-arm.c:25683
 msgid "use -mcpu=arm7di"
-msgstr ""
+msgstr "использовать -mcpu=arm7di"
 
 #: config/tc-arm.c:25684 config/tc-arm.c:25685
 msgid "use -mcpu=arm7m"
-msgstr ""
+msgstr "использовать -mcpu=arm7m"
 
 #: config/tc-arm.c:25686 config/tc-arm.c:25687
 msgid "use -mcpu=arm7dm"
-msgstr ""
+msgstr "использовать -mcpu=arm7dm"
 
 #: config/tc-arm.c:25688 config/tc-arm.c:25689
 msgid "use -mcpu=arm7dmi"
-msgstr ""
+msgstr "использовать -mcpu=arm7dmi"
 
 #: config/tc-arm.c:25690 config/tc-arm.c:25691
 msgid "use -mcpu=arm7100"
-msgstr ""
+msgstr "использовать -mcpu=arm7100"
 
 #: config/tc-arm.c:25692 config/tc-arm.c:25693
 msgid "use -mcpu=arm7500"
-msgstr ""
+msgstr "использовать -mcpu=arm7500"
 
 #: config/tc-arm.c:25694 config/tc-arm.c:25695
 msgid "use -mcpu=arm7500fe"
-msgstr ""
+msgstr "использовать -mcpu=arm7500fe"
 
 #: config/tc-arm.c:25696 config/tc-arm.c:25697 config/tc-arm.c:25698
 #: config/tc-arm.c:25699
 msgid "use -mcpu=arm7tdmi"
-msgstr ""
+msgstr "использовать -mcpu=arm7tdmi"
 
 #: config/tc-arm.c:25700 config/tc-arm.c:25701
 msgid "use -mcpu=arm710t"
-msgstr ""
+msgstr "использовать -mcpu=arm710t"
 
 #: config/tc-arm.c:25702 config/tc-arm.c:25703
 msgid "use -mcpu=arm720t"
-msgstr ""
+msgstr "использовать -mcpu=arm720t"
 
 #: config/tc-arm.c:25704 config/tc-arm.c:25705
 msgid "use -mcpu=arm740t"
-msgstr ""
+msgstr "использовать -mcpu=arm740t"
 
 #: config/tc-arm.c:25706 config/tc-arm.c:25707
 msgid "use -mcpu=arm8"
-msgstr ""
+msgstr "использовать -mcpu=arm8"
 
 #: config/tc-arm.c:25708 config/tc-arm.c:25709
 msgid "use -mcpu=arm810"
-msgstr ""
+msgstr "использовать -mcpu=arm810"
 
 #: config/tc-arm.c:25710 config/tc-arm.c:25711
 msgid "use -mcpu=arm9"
-msgstr ""
+msgstr "использовать -mcpu=arm9"
 
 #: config/tc-arm.c:25712 config/tc-arm.c:25713
 msgid "use -mcpu=arm9tdmi"
-msgstr ""
+msgstr "использовать -mcpu=arm9tdmi"
 
 #: config/tc-arm.c:25714 config/tc-arm.c:25715
 msgid "use -mcpu=arm920"
-msgstr ""
+msgstr "использовать -mcpu=arm920"
 
 #: config/tc-arm.c:25716 config/tc-arm.c:25717
 msgid "use -mcpu=arm940"
-msgstr ""
+msgstr "использовать -mcpu=arm940"
 
 #: config/tc-arm.c:25718
 msgid "use -mcpu=strongarm"
-msgstr ""
+msgstr "использовать -mcpu=strongarm"
 
 #: config/tc-arm.c:25720
 msgid "use -mcpu=strongarm110"
-msgstr ""
+msgstr "использовать -mcpu=strongarm110"
 
 #: config/tc-arm.c:25722
 msgid "use -mcpu=strongarm1100"
-msgstr ""
+msgstr "использовать -mcpu=strongarm1100"
 
 #: config/tc-arm.c:25724
 msgid "use -mcpu=strongarm1110"
-msgstr ""
+msgstr "использовать -mcpu=strongarm1110"
 
 #: config/tc-arm.c:25725
 msgid "use -mcpu=xscale"
-msgstr ""
+msgstr "использовать -mcpu=xscale"
 
 #: config/tc-arm.c:25726
 msgid "use -mcpu=iwmmxt"
-msgstr ""
+msgstr "использовать -mcpu=iwmmxt"
 
 #: config/tc-arm.c:25727
 msgid "use -mcpu=all"
-msgstr ""
+msgstr "использовать -mcpu=all"
 
 #. Architecture variants -- don't add any more to this list either.
 #: config/tc-arm.c:25730 config/tc-arm.c:25731
 msgid "use -march=armv2"
-msgstr ""
+msgstr "использовать -march=armv2"
 
 #: config/tc-arm.c:25732 config/tc-arm.c:25733
 msgid "use -march=armv2a"
-msgstr ""
+msgstr "использовать -march=armv2"
 
 #: config/tc-arm.c:25734 config/tc-arm.c:25735
 msgid "use -march=armv3"
-msgstr ""
+msgstr "использовать -march=armv3"
 
 #: config/tc-arm.c:25736 config/tc-arm.c:25737
 msgid "use -march=armv3m"
-msgstr ""
+msgstr "использовать -march=armv3m"
 
 #: config/tc-arm.c:25738 config/tc-arm.c:25739
 msgid "use -march=armv4"
-msgstr ""
+msgstr "использовать -march=armv4"
 
 #: config/tc-arm.c:25740 config/tc-arm.c:25741
 msgid "use -march=armv4t"
-msgstr ""
+msgstr "использовать -march=armv4t"
 
 #: config/tc-arm.c:25742 config/tc-arm.c:25743
 msgid "use -march=armv5"
-msgstr ""
+msgstr "использовать -march=armv5"
 
 #: config/tc-arm.c:25744 config/tc-arm.c:25745
 msgid "use -march=armv5t"
-msgstr ""
+msgstr "использовать -march=armv5t"
 
 #: config/tc-arm.c:25746 config/tc-arm.c:25747
 msgid "use -march=armv5te"
-msgstr ""
+msgstr "использовать -march=armv5te"
 
 #. Floating point variants -- don't add any more to this list either.
 #: config/tc-arm.c:25750
 msgid "use -mfpu=fpe"
-msgstr ""
+msgstr "использовать -mfpu=fpe"
 
 #: config/tc-arm.c:25751
 msgid "use -mfpu=fpa10"
-msgstr ""
+msgstr "использовать -mfpu=fpa10"
 
 #: config/tc-arm.c:25752
 msgid "use -mfpu=fpa11"
-msgstr ""
+msgstr "использовать -mfpu=fpa11"
 
 #: config/tc-arm.c:25754
 msgid "use either -mfpu=softfpa or -mfpu=softvfp"
-msgstr ""
+msgstr "использовать -mfpu=softfpa или -mfpu=softvfp"
 
 #: config/tc-arm.c:26508
 msgid "extension does not apply to the base architecture"
-msgstr ""
+msgstr "расширение не применяется к базовой архитектуре"
 
 #: config/tc-arm.c:26538
 msgid "architectural extensions must be specified in alphabetical order"
-msgstr ""
+msgstr "архитектурные расширения должны указываться в алфавитном порядке"
 
 #: config/tc-arm.c:26656 config/tc-arm.c:27541
 #, c-format
 msgid "unknown floating point format `%s'\n"
-msgstr ""
+msgstr "неизвестный формат плавающей точки «%s»\n"
 
 #: config/tc-arm.c:26672
 #, c-format
 msgid "unknown floating point abi `%s'\n"
-msgstr ""
+msgstr "неизвестный abi плавающей точки «%s»\n"
 
 #: config/tc-arm.c:26688
 #, c-format
 msgid "unknown EABI `%s'\n"
-msgstr ""
+msgstr "неизвестный EABI «%s»\n"
 
 #: config/tc-arm.c:26708
 #, c-format
 msgid "unknown implicit IT mode `%s', should be arm, thumb, always, or never."
-msgstr ""
+msgstr "неизвестный неявный режим IT «%s», должно быть arm, thumb, always или never."
 
 #: config/tc-arm.c:26731 config/tc-metag.c:5913
 msgid "<fpu name>\t  assemble for FPU architecture <fpu name>"
-msgstr ""
+msgstr "<имя fpu>\t  ассемблировать для архитектуры FPU <имя fpu>"
 
 #: config/tc-arm.c:26733
 msgid "<abi>\t  assemble for floating point ABI <abi>"
-msgstr ""
+msgstr "<abi>\t  ассемблировать для ABI плавающей точки <abi>"
 
 #: config/tc-arm.c:26736
 msgid "<ver>\t\t  assemble for eabi version <ver>"
-msgstr ""
+msgstr "<ver>\t\t  ассемблировать для версии eabi <ver>"
 
 #: config/tc-arm.c:26739
 msgid "<mode>\t  controls implicit insertion of IT instructions"
-msgstr ""
+msgstr "<mode>\t  управлять неявной вставкой инструкций IT"
 
 #: config/tc-arm.c:26741
 msgid "\t\t\t  TI CodeComposer Studio syntax compatibility mode"
-msgstr ""
+msgstr "\t\t\t  режим совместимости с синтаксисом TI CodeComposer Studio"
 
 #: config/tc-arm.c:26843
 #, c-format
 msgid " ARM-specific assembler options:\n"
-msgstr ""
+msgstr " Специализированные параметры ассемблера для ARM:\n"
 
 #: config/tc-arm.c:26863
 #, c-format
 msgid "  --fix-v4bx              Allow BX in ARMv4 code\n"
-msgstr ""
+msgstr "  --fix-v4bx              допускать BX в коде ARMv4\n"
 
 #: config/tc-arm.c:27160
 msgid "no architecture contains all the instructions used\n"
-msgstr ""
+msgstr "не существует архитектуры со всеми используемыми инструкциями\n"
 
 #: config/tc-arm.c:27479
 #, c-format
 msgid "architectural extension `%s' is not allowed for the current base architecture"
-msgstr ""
+msgstr "расширение архитектуры «%s» недопустимо для текущей базовой архитектуры"
 
 #: config/tc-arm.c:27508
 #, c-format
 msgid "unknown architecture extension `%s'\n"
-msgstr ""
+msgstr "неизвестное расширение архитектуры «%s»\n"
 
 #: config/tc-avr.c:594
 #, c-format
 msgid "Known MCU names:"
-msgstr ""
+msgstr "Известные  имена MCU:"
 
 #: config/tc-avr.c:659
 #, c-format
@@ -5030,6 +5030,28 @@ msgid ""
 "                   avrxmega7 - XMEGA, > 128K, <= 256K FLASH, > 64K RAM\n"
 "                   avrtiny   - AVR Tiny core with 16 gp registers\n"
 msgstr ""
+"Параметры ассемблера AVR:\n"
+"  -mmcu=[имя-avr] выберите вариант микроконтроллера\n"
+"                   [имя-avr] может быть:\n"
+"                   avr1  - классическое ядро AVR без RAM данных\n"
+"                   avr2  - классическое ядро AVR с до 8K памяти программы\n"
+"                   avr25 - классическое ядро AVR с до 8K памяти программы\n"
+"                           плюс инструкция MOVW\n"
+"                   avr3  - классическое ядро AVR с до 64K памяти программы\n"
+"                   avr31 - классическое ядро AVR с до 128K памяти программы\n"
+"                   avr35 - классическое ядро AVR с до 64K памяти программы\n"
+"                           плюс инструкция MOVW\n"
+"                   avr4  - улучшенное ядро AVR с до 8K памяти программы\n"
+"                   avr5  - улучшенное ядро AVR с до 64K памяти программы\n"
+"                   avr51 - улучшенное ядро AVR с до 128K памяти программы\n"
+"                   avr6  - улучшенное ядро AVR с до 256K памяти программы\n"
+"                   avrxmega2 - XMEGA, > 8K, < 64K FLASH, < 64K RAM\n"
+"                   avrxmega3 - XMEGA, RAM + FLASH < 64K, Flash видима в RAM\n"
+"                   avrxmega4 - XMEGA, > 64K, <= 128K FLASH, <= 64K RAM\n"
+"                   avrxmega5 - XMEGA, > 64K, <= 128K FLASH, > 64K RAM\n"
+"                   avrxmega6 - XMEGA, > 128K, <= 256K FLASH, <= 64K RAM\n"
+"                   avrxmega7 - XMEGA, > 128K, <= 256K FLASH, > 64K RAM\n"
+"                   avrtiny   - ядро AVR Tiny с 16 регистрами общего назначения\n"
 
 #: config/tc-avr.c:682
 #, c-format
