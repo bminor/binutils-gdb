@@ -1,3 +1,8 @@
+2018-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-nds32.c (nds32_elf_relax_longjump3): Remove redundant
+	assignment.
+
 2018-02-09  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* elfxx-sparc.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Reorder conditions.
