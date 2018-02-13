@@ -1,3 +1,11 @@
+2018-02-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/22791
+	* elf64-x86-64.c (is_32bit_relative_branch): Removed.
+	(elf_x86_64_relocate_section): Check PIC relocations in PIE.
+	Remove is_32bit_relative_branch usage.  Disallow PC32 reloc
+	against protected function in shared object.
+
 2018-02-13  Sergei Trofimovich  <slyfox@inbox.ru>
 
 	PR 22828

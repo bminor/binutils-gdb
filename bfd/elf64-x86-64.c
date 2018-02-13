@@ -2307,24 +2307,6 @@ elf_x86_64_tpoff (struct bfd_link_info *info, bfd_vma address)
   return address - static_tls_size - htab->tls_sec->vma;
 }
 
-/* Is the instruction before OFFSET in CONTENTS a 32bit relative
-   branch?  */
-
-static bfd_boolean
-is_32bit_relative_branch (bfd_byte *contents, bfd_vma offset)
-{
-  /* Opcode		Instruction
-     0xe8		call
-     0xe9		jump
-     0x0f 0x8x		conditional jump */
-  return ((offset > 0
-	   && (contents [offset - 1] == 0xe8
-	       || contents [offset - 1] == 0xe9))
-	  || (offset > 1
-	      && contents [offset - 2] == 0x0f
-	      && (contents [offset - 1] & 0xf0) == 0x80));
-}
-
 /* Relocate an x86_64 ELF section.  */
 
 static bfd_boolean
@@ -3023,14 +3005,18 @@ do_ifunc_pointer:
 	case R_X86_64_PC32:
 	case R_X86_64_PC32_BND:
 	  /* Don't complain about -fPIC if the symbol is undefined when
-	     building executable unless it is unresolved weak symbol or
-	     -z nocopyreloc is used.  */
+	     building executable unless it is unresolved weak symbol,
+	     references a dynamic definition in PIE or -z nocopyreloc
+	     is used.  */
 	  if ((input_section->flags & SEC_ALLOC) != 0
 	      && (input_section->flags & SEC_READONLY) != 0
 	      && h != NULL
 	      && ((bfd_link_executable (info)
 		   && ((h->root.type == bfd_link_hash_undefweak
 			&& !resolved_to_zero)
+		       || (bfd_link_pie (info)
+			   && !h->def_regular
+			   && h->def_dynamic)
 		       || ((info->nocopyreloc
 			    || (eh->def_protected
 				&& elf_has_no_copy_on_protected (h->root.u.def.section->owner)))
@@ -3039,26 +3025,21 @@ do_ifunc_pointer:
 		  || bfd_link_dll (info)))
 	    {
 	      bfd_boolean fail = FALSE;
-	      bfd_boolean branch
-		= ((r_type == R_X86_64_PC32
-		    || r_type == R_X86_64_PC32_BND)
-		   && is_32bit_relative_branch (contents, rel->r_offset));
-
 	      if (SYMBOL_REFERENCES_LOCAL_P (info, h))
 		{
 		  /* Symbol is referenced locally.  Make sure it is
-		     defined locally or for a branch.  */
-		  fail = (!(h->def_regular || ELF_COMMON_DEF_P (h))
-			  && !branch);
+		     defined locally.  */
+		  fail = !(h->def_regular || ELF_COMMON_DEF_P (h));
 		}
 	      else if (!(bfd_link_pie (info)
 			 && (h->needs_copy || eh->needs_copy)))
 		{
 		  /* Symbol doesn't need copy reloc and isn't referenced
-		     locally.  We only allow branch to symbol with
-		     non-default visibility. */
-		  fail = (!branch
-			  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT);
+		     locally.  Address of protected function may not be
+		     reachable at run-time.  */
+		  fail = (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			  || (ELF_ST_VISIBILITY (h->other) == STV_PROTECTED
+			      && h->type == STT_FUNC));
 		}
 
 	      if (fail)

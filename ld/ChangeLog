@@ -1,3 +1,16 @@
+2018-02-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/22791
+	* testsuite/ld-x86-64/mpx1c.rd: Updated.
+	* testsuite/ld-x86-64/pr22791-1.err: New file.
+	* testsuite/ld-x86-64/pr22791-1a.c: Likewise.
+	* testsuite/ld-x86-64/pr22791-1b.s: Likewise.
+	* testsuite/ld-x86-64/pr22791-2.rd: Likewise.
+	* testsuite/ld-x86-64/pr22791-2a.s: Likewise.
+	* testsuite/ld-x86-64/pr22791-2b.c: Likewise.
+	* testsuite/ld-x86-64/pr22791-2c.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/22791 tests.
+
 2018-02-13  Alan Modra  <amodra@gmail.com>
 
 	PR 22836
