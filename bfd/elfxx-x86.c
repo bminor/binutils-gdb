@@ -200,7 +200,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	     location in the .plt.  This is required to make function
 	     pointers compare as equal between the normal executable and
 	     the shared library.  */
-	  if (! bfd_link_pic (info)
+	  if (! bfd_link_dll (info)
 	      && !h->def_regular)
 	    {
 	      if (use_plt_got)

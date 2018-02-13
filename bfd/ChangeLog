@@ -1,5 +1,10 @@
 2018-02-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Check bfd_link_dll,
+	instead of bfd_link_pic, for building shared library.
+
+2018-02-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/22791
 	* elf64-x86-64.c (is_32bit_relative_branch): Removed.
 	(elf_x86_64_relocate_section): Check PIC relocations in PIE.
