@@ -1051,6 +1051,9 @@ if [is_elf_format] {
     objcopy_test_readelf "GNU_MBIND section" mbind1.s
     run_dump_test "group-5"
     run_dump_test "group-6"
+    run_dump_test "group-7a"
+    run_dump_test "group-7b"
+    run_dump_test "group-7c"
     run_dump_test "copy-1"
     run_dump_test "note-1"
     if [is_elf64 tmpdir/bintest.o] {

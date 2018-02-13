@@ -1,5 +1,11 @@
 2018-02-13  Alan Modra  <amodra@gmail.com>
 
+	PR 22836
+	* testsuite/ld-elf/pr22836-2.d,
+	* testsuite/ld-elf/pr22836-2.s: New test.
+
+2018-02-13  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-x86-64/pr14207.d: Adjust relro p_filesz.
 
 2018-02-07  Alan Modra  <amodra@gmail.com>

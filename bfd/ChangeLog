@@ -1,5 +1,13 @@
 2018-02-13  Alan Modra  <amodra@gmail.com>
 
+	PR 22836
+	* elf.c (_bfd_elf_fixup_group_sections): Account for removed
+	relocation sections.  If size reduces to just the flag word,
+	remove that too and mark with SEC_EXCLUDE.
+	* elflink.c (bfd_elf_final_link): Strip empty group sections.
+
+2018-02-13  Alan Modra  <amodra@gmail.com>
+
 	PR 22829
 	* elf.c (assign_file_positions_for_non_load_sections): Rewrite
 	PT_GNU_RELRO setup.
