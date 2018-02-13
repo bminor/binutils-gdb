@@ -911,7 +911,7 @@ msgstr "%P: из-за кодировки FDE в %B(%A) таблица .eh_frame_
 
 #: elf-eh-frame.c:1544
 msgid "%P: Further warnings about FDE encoding preventing .eh_frame_hdr generation dropped.\n"
-msgstr "%P: в дальнейшем предупреждения о не создании таблицы .eh_frame_hdr из-за кодировки FDE в %B(%A) будут отбрасываться.\n"
+msgstr "%P: в дальнейшем предупреждения о не создании таблицы .eh_frame_hdr из-за кодировки FDE будут отбрасываться.\n"
 
 #: elf-eh-frame.c:1866
 #, c-format
