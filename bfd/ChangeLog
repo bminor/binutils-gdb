@@ -1,3 +1,8 @@
+2018-02-13  Maciej W. Rozycki  <macro@mips.com>
+
+	* wasm-module.c (wasm_scan_name_function_section): Rename
+	`index' local variable to `idx'.
+
 2018-02-13  Alan Modra  <amodra@gmail.com>
 
 	PR 22836

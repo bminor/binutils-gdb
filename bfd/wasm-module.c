@@ -309,12 +309,12 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
 
   for (symcount = 0; p < end && symcount < tdata->symcount; symcount++)
     {
-      bfd_vma index;
+      bfd_vma idx;
       bfd_vma len;
       char *name;
       asymbol *sym;
 
-      READ_LEB128 (index, p, end);
+      READ_LEB128 (idx, p, end);
       READ_LEB128 (len, p, end);
 
       if (p + len < p || p + len > end)
@@ -330,7 +330,7 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
       sym = &symbols[symcount];
       sym->the_bfd = abfd;
       sym->name = name;
-      sym->value = index;
+      sym->value = idx;
       sym->flags = BSF_GLOBAL | BSF_FUNCTION;
       sym->section = space_function_index;
       sym->udata.p = NULL;
@@ -491,12 +491,12 @@ wasm_register_section (bfd *abfd ATTRIBUTE_UNUSED,
 		       void *fsarg)
 {
   sec_ptr *numbered_sections = fsarg;
-  int index = wasm_section_name_to_code (asect->name);
+  int idx = wasm_section_name_to_code (asect->name);
 
-  if (index == 0)
+  if (idx == 0)
     return;
 
-  numbered_sections[index] = asect;
+  numbered_sections[idx] = asect;
 }
 
 struct compute_section_arg
@@ -520,14 +520,14 @@ wasm_compute_custom_section_file_position (bfd *abfd,
 					   void *fsarg)
 {
   struct compute_section_arg *fs = fsarg;
-  int index;
+  int idx;
 
   if (fs->failed)
     return;
 
-  index = wasm_section_name_to_code (asect->name);
+  idx = wasm_section_name_to_code (asect->name);
 
-  if (index != 0)
+  if (idx != 0)
     return;
 
   if (CONST_STRNEQ (asect->name, WASM_SECTION_PREFIX))

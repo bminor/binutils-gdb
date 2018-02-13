@@ -1,3 +1,8 @@
+2018-02-13  Maciej W. Rozycki  <macro@mips.com>
+
+	* wasm32-dis.c (print_insn_wasm32): Rename `index' local
+	variable to `function_index'.
+
 2018-02-12  Henry Wong <henry@stuffedcow.net>
 
 	* mips-opc.c (mips_builtin_opcodes): Correct "sigrie" encoding.
