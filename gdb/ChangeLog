@@ -1,5 +1,16 @@
 2018-02-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* defs.h (enum openp_flags): New enum.
+	(OPF_TRY_CWD_FIRST, OPF_SEARCH_IN_PATH, OPF_RETURN_REALPATH):
+	Move to enum openp_flags.
+	(openp_flags): New enum flags.
+	(openp): Change parameter type to openp_flags.
+	* source.c (openp): Change parameter type to openp_flags.
+	* cli/cli-cmds.c (find_and_open_script): Use openp_flags.
+	* dwarf2read.c (try_open_dwop_file): Use openp_flags.
+
+2018-02-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* maint.c (_initialize_maint_cmds): Fix prefix of maint set/show
 	per-command.
 

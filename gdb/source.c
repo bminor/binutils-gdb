@@ -736,7 +736,7 @@ is_regular_file (const char *name, int *errno_ptr)
 /*  >>>> This should only allow files of certain types,
     >>>>  eg executable, non-directory.  */
 int
-openp (const char *path, int opts, const char *string,
+openp (const char *path, openp_flags opts, const char *string,
        int mode, char **filename_opened)
 {
   int fd;

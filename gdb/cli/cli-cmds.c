@@ -496,7 +496,7 @@ gdb::optional<open_script>
 find_and_open_script (const char *script_file, int search_path)
 {
   int fd;
-  int search_flags = OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH;
+  openp_flags search_flags = OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH;
   gdb::optional<open_script> opened;
 
   gdb::unique_xmalloc_ptr<char> file (tilde_expand (script_file));

@@ -12880,7 +12880,7 @@ static gdb_bfd_ref_ptr
 try_open_dwop_file (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		    const char *file_name, int is_dwp, int search_cwd)
 {
-  int desc, flags;
+  int desc;
   char *absolute_name;
   /* Blech.  OPF_TRY_CWD_FIRST also disables searching the path list if
      FILE_NAME contains a '/'.  So we can't use it.  Instead prepend "."
@@ -12899,7 +12899,7 @@ try_open_dwop_file (struct dwarf2_per_objfile *dwarf2_per_objfile,
   else
     search_path = xstrdup (debug_file_directory);
 
-  flags = OPF_RETURN_REALPATH;
+  openp_flags flags = OPF_RETURN_REALPATH;
   if (is_dwp)
     flags |= OPF_SEARCH_IN_PATH;
   desc = openp (search_path, flags, file_name,

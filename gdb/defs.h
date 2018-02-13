@@ -342,11 +342,17 @@ extern const char *pc_prefix (CORE_ADDR);
 /* From source.c */
 
 /* See openp function definition for their description.  */
-#define OPF_TRY_CWD_FIRST     0x01
-#define OPF_SEARCH_IN_PATH    0x02
-#define OPF_RETURN_REALPATH   0x04
 
-extern int openp (const char *, int, const char *, int, char **);
+enum openp_flag
+{
+  OPF_TRY_CWD_FIRST = 0x01,
+  OPF_SEARCH_IN_PATH = 0x02,
+  OPF_RETURN_REALPATH = 0x04,
+};
+
+DEF_ENUM_FLAGS_TYPE(openp_flag, openp_flags);
+
+extern int openp (const char *, openp_flags, const char *, int, char **);
 
 extern int source_full_path_of (const char *, char **);
 
