@@ -1,3 +1,8 @@
+2018-02-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* maint.c (_initialize_maint_cmds): Fix prefix of maint set/show
+	per-command.
+
 2018-02-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2read.c (dwarf2_release_queue): Delete function, move body
