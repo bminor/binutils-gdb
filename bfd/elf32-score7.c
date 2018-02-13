@@ -3872,4 +3872,4 @@ s7_elf32_score_new_section_hook (bfd *abfd, asection *sec)
 }
 
 #define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true_any)

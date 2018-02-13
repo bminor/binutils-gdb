@@ -751,10 +751,10 @@ get_filenum (const char *filename, unsigned int num)
    - Pass .file "source.c" to s_app_file
    - Handle .file 1 "source.c" by adding an entry to the DWARF-2 file table
 
-   If an entry is added to the file table, return a pointer to the filename. */
+   If an entry is added to the file table, return a pointer to the filename.  */
 
 char *
-dwarf2_directive_file (int dummy ATTRIBUTE_UNUSED)
+dwarf2_directive_filename (void)
 {
   offsetT num;
   char *filename;
@@ -793,6 +793,15 @@ dwarf2_directive_file (int dummy ATTRIBUTE_UNUSED)
   get_filenum (filename, num);
 
   return filename;
+}
+
+/* Calls dwarf2_directive_filename, but discards its result.
+   Used in pseudo-op tables where the function result is ignored.  */
+
+void
+dwarf2_directive_file (int dummy ATTRIBUTE_UNUSED)
+{
+  (void) dwarf2_directive_filename ();
 }
 
 void

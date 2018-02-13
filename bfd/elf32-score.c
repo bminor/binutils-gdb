@@ -4467,7 +4467,7 @@ _bfd_score_elf_common_definition (Elf_Internal_Sym *sym)
 #define elf_backend_size_dynamic_sections \
   _bfd_score_elf_size_dynamic_sections
 #define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true_any)
 #define elf_backend_create_dynamic_sections \
   _bfd_score_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_symbol \

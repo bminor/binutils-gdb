@@ -962,7 +962,7 @@ tekhex_print_symbol (bfd *abfd,
 #define	tekhex_close_and_cleanup		    _bfd_generic_close_and_cleanup
 #define tekhex_bfd_free_cached_info		    _bfd_generic_bfd_free_cached_info
 #define tekhex_new_section_hook			    _bfd_generic_new_section_hook
-#define tekhex_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+#define tekhex_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
 #define tekhex_bfd_is_local_label_name		     bfd_generic_is_local_label_name
 #define tekhex_get_lineno			    _bfd_nosymbols_get_lineno
 #define tekhex_find_nearest_line		    _bfd_nosymbols_find_nearest_line

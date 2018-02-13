@@ -98,6 +98,7 @@ reloc_type_to_name (unsigned int type)
 	break;
     }
 }
+
 #undef ARC_RELOC_HOWTO
 
 /* Try to minimize the amount of space occupied by relocation tables
@@ -160,7 +161,7 @@ struct arc_relocation_data
 };
 
 /* Should be included at this location due to static declarations
- * defined before this point.  */
+   defined before this point.  */
 #include "arc-got.h"
 
 #define arc_bfd_get_8(A,B,C) bfd_get_8(A,B)
@@ -199,11 +200,13 @@ arc_elf_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 
 #define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
   TYPE = VALUE,
+
 enum howto_list
 {
 #include "elf/arc-reloc.def"
   HOWTO_LIST_LAST
 };
+
 #undef ARC_RELOC_HOWTO
 
 #define ARC_RELOC_HOWTO(TYPE, VALUE, RSIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
@@ -233,16 +236,17 @@ static struct reloc_howto_struct elf_arc_howto_table[] =
 };
 #undef ARC_RELOC_HOWTO
 
-static void arc_elf_howto_init (void)
+static void
+arc_elf_howto_init (void)
 {
 #define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
-  elf_arc_howto_table[TYPE].pc_relative = \
+  elf_arc_howto_table[TYPE].pc_relative =				\
     (strstr (#FORMULA, " P ") != NULL || strstr (#FORMULA, " PDATA ") != NULL); \
-  elf_arc_howto_table[TYPE].dst_mask = RELOC_FUNCTION(0, ~0); \
-  /* Only 32 bit data relocations should be marked as ME.  */ \
-  if (strstr (#FORMULA, " ME ") != NULL) \
-    { \
-      BFD_ASSERT (SIZE == 2); \
+  elf_arc_howto_table[TYPE].dst_mask = RELOC_FUNCTION(0, ~0);		\
+  /* Only 32 bit data relocations should be marked as ME.  */		\
+  if (strstr (#FORMULA, " ME ") != NULL)				\
+    {									\
+      BFD_ASSERT (SIZE == 2);						\
     }
 
 #include "elf/arc-reloc.def"
@@ -253,10 +257,12 @@ static void arc_elf_howto_init (void)
 
 #define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
   [TYPE] = VALUE,
+
 const int howto_table_lookup[] =
 {
 #include "elf/arc-reloc.def"
 };
+
 #undef ARC_RELOC_HOWTO
 
 static reloc_howto_type *
@@ -358,6 +364,7 @@ arc_elf_link_hash_table_create (bfd *abfd)
 
 #define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
   { BFD_RELOC_##TYPE, R_##TYPE },
+
 static const struct arc_reloc_map arc_reloc_map[] =
 {
 #include "elf/arc-reloc.def"
@@ -368,6 +375,7 @@ static const struct arc_reloc_map arc_reloc_map[] =
   {BFD_RELOC_24, R_ARC_24},
   {BFD_RELOC_32, R_ARC_32},
 };
+
 #undef ARC_RELOC_HOWTO
 
 typedef ATTRIBUTE_UNUSED bfd_vma (*replace_func) (unsigned, int ATTRIBUTE_UNUSED);
@@ -376,6 +384,7 @@ typedef ATTRIBUTE_UNUSED bfd_vma (*replace_func) (unsigned, int ATTRIBUTE_UNUSED
   case TYPE: \
     func = (void *) RELOC_FUNCTION; \
     break;
+
 static replace_func
 get_replace_function (bfd *abfd, unsigned int r_type)
 {
@@ -387,7 +396,7 @@ get_replace_function (bfd *abfd, unsigned int r_type)
     }
 
   if (func == replace_bits24 && bfd_big_endian (abfd))
-    return (replace_func) replace_bits24_be;
+    func = replace_bits24_be;
 
   return (replace_func) func;
 }

@@ -4141,7 +4141,7 @@ elf_metag_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_finish_dynamic_sections	elf_metag_finish_dynamic_sections
 #define elf_backend_size_dynamic_sections	elf_metag_size_dynamic_sections
 #define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true_any)
 #define elf_backend_post_process_headers	elf_metag_post_process_headers
 #define elf_backend_reloc_type_class		elf_metag_reloc_type_class
 #define elf_backend_copy_indirect_symbol	elf_metag_copy_indirect_symbol

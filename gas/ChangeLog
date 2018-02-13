@@ -2,6 +2,34 @@
 
 	* testsuite/gas/mips/loongson-3a-2.d: Rename test.
 
+2018-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 22823
+	* config/obj-elf.c (elf_pseudo_table): Remove now redundant
+	casts.
+	(obj_elf_vtable_inherit): Rename to obj_elf_get_vtable_inherit.
+	(obj_elf_vtable_inherit): New stub function that calls
+	obj_elf_get_vtable_inherit.
+	(obj_elf_vtable_entry): Rename to obj_elf_get_vtable_entry.
+	(obj_elf_vtable_entry): New stub function that calls
+	obj_elf_get_vtable_entry.
+	* config/obj-elf.h (obj_elf_vtable_inherit): Update prototype.
+	(obj_elf_vtable_entry) Likewise.
+	(obj_elf_get_vtable_inherit) Likewise.
+	(obj_elf_get_vtable_entry) Likewise.
+	* config/tc-arm.c (md_pseudo_table): Remove now redundant cast.
+	* config/tc-i386c (md_pseudo_table): Likewise.
+	* config/tc-hppa.c (pa_vtable_entry): Call
+	obj_elf_get_vtable_entry.
+	(pa_vtable_inherit): Call obj_elf_get_vtable_inherit.
+	* config/tc-mips.c (s_mips_file): Replace call to dwarf2_get_file
+	with call to dwarf2_get_filename.
+	* dwarf2dbg.c (dwarf2_directive_file): Rename to
+	dwarf2_directive_filename.
+	(dwarf2_directive_file): New stub function that calls
+	dwarf2_directive_filename.
+	* dwarf2dbg.h: Prototype dwarf2_directive_filename.
+
 2018-02-12  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/gas/mips/reginfo-2-n32.d: Add `--no-pad-sections' to

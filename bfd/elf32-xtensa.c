@@ -11244,7 +11244,7 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define elf_backend_size_dynamic_sections    elf_xtensa_size_dynamic_sections
 #define elf_backend_always_size_sections     elf_xtensa_always_size_sections
 #define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true_any)
 #define elf_backend_special_sections	     elf_xtensa_special_sections
 #define elf_backend_action_discarded	     elf_xtensa_action_discarded
 #define elf_backend_copy_indirect_symbol     elf_xtensa_copy_indirect_symbol

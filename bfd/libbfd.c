@@ -50,11 +50,28 @@ bfd_false (bfd *ignore ATTRIBUTE_UNUSED)
   return FALSE;
 }
 
+/* Like bfd_false, but accepts an arbitrary number of arguments.  */
+
+bfd_boolean
+bfd_false_any (bfd *ignore ATTRIBUTE_UNUSED, ...)
+{
+  bfd_set_error (bfd_error_invalid_operation);
+  return FALSE;
+}
+
 /* A routine which is used in target vectors for supported operations
    which do not actually do anything.  */
 
 bfd_boolean
 bfd_true (bfd *ignore ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}
+
+/* Like bfd_true, but accepts an arbitrary number of arguments.  */
+
+bfd_boolean
+bfd_true_any (bfd *ignore ATTRIBUTE_UNUSED, ...)
 {
   return TRUE;
 }
@@ -69,8 +86,25 @@ bfd_nullvoidptr (bfd *ignore ATTRIBUTE_UNUSED)
   return NULL;
 }
 
+/* Like bfd_nullvoidptr, but accepts an arbitrary number of arguments.  */
+
+void *
+bfd_nullvoidptr_any (bfd *ignore ATTRIBUTE_UNUSED, ...)
+{
+  bfd_set_error (bfd_error_invalid_operation);
+  return NULL;
+}
+
 int
 bfd_0 (bfd *ignore ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
+/* Like bfd_0, but accepts an arbitrary number of arguments.  */
+
+int
+bfd_0_any (bfd *ignore ATTRIBUTE_UNUSED, ...)
 {
   return 0;
 }
@@ -81,8 +115,24 @@ bfd_0u (bfd *ignore ATTRIBUTE_UNUSED)
    return 0;
 }
 
+/* Like bfd_0u, but accepts an arbitrary number of arguments.  */
+
+unsigned int
+bfd_0u_any (bfd *ignore ATTRIBUTE_UNUSED, ...)
+{
+   return 0;
+}
+
 long
 bfd_0l (bfd *ignore ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
+/* Like bfd_0l, but accepts an arbitrary number of arguments.  */
+
+long
+bfd_0l_any (bfd *ignore ATTRIBUTE_UNUSED, ...)
 {
   return 0;
 }
@@ -97,8 +147,24 @@ _bfd_n1 (bfd *ignore_abfd ATTRIBUTE_UNUSED)
   return -1;
 }
 
+/* Like bfd_n1, but accepts an arbitrary number of arguments.  */
+
+long
+_bfd_n1_any (bfd *ignore_abfd ATTRIBUTE_UNUSED, ...)
+{
+  bfd_set_error (bfd_error_invalid_operation);
+  return -1;
+}
+
 void
 bfd_void (bfd *ignore ATTRIBUTE_UNUSED)
+{
+}
+
+/* Like bfd_void, but accepts an arbitrary number of arguments.  */
+
+void
+bfd_void_any (bfd *ignore ATTRIBUTE_UNUSED, ...)
 {
 }
 

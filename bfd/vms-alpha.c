@@ -9489,7 +9489,8 @@ bfd_vms_get_data (bfd *abfd)
   return (struct vms_private_data_struct *)abfd->tdata.any;
 }
 
-#define vms_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+#define vms_bfd_is_target_special_symbol \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
 #define vms_bfd_link_just_syms		  _bfd_generic_link_just_syms
 #define vms_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type
@@ -9497,7 +9498,7 @@ bfd_vms_get_data (bfd *abfd)
 #define vms_bfd_discard_group		  bfd_generic_discard_group
 #define vms_section_already_linked	  _bfd_generic_section_already_linked
 #define vms_bfd_define_common_symbol	  bfd_generic_define_common_symbol
-#define vms_bfd_define_start_stop      bfd_generic_define_start_stop
+#define vms_bfd_define_start_stop         bfd_generic_define_start_stop
 #define vms_bfd_copy_private_header_data  _bfd_generic_bfd_copy_private_header_data
 
 #define vms_bfd_copy_private_bfd_data	  _bfd_generic_bfd_copy_private_bfd_data
@@ -9510,7 +9511,7 @@ bfd_vms_get_data (bfd *abfd)
 /* Symbols table.  */
 #define alpha_vms_make_empty_symbol	   _bfd_generic_make_empty_symbol
 #define alpha_vms_bfd_is_target_special_symbol \
-   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
 #define alpha_vms_print_symbol		   vms_print_symbol
 #define alpha_vms_get_symbol_info	   vms_get_symbol_info
 #define alpha_vms_get_symbol_version_string \

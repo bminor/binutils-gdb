@@ -4758,7 +4758,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"4byte", cons, 4},
   {"8byte", cons, 8},
   /* These are used for dwarf2.  */
-  { "file", (void (*) (int)) dwarf2_directive_file, 0 },
+  { "file", dwarf2_directive_file, 0 },
   { "loc",  dwarf2_directive_loc,  0 },
   { "loc_mark_labels", dwarf2_directive_loc_mark_labels, 0 },
 #endif

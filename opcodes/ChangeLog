@@ -3,6 +3,12 @@
 	* wasm32-dis.c (print_insn_wasm32): Rename `index' local
 	variable to `function_index'.
 
+2018-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 22823
+	* metag-dis.c (print_fmmov): Double buffer size to avoid warning
+	about truncation of printing.
+
 2018-02-12  Henry Wong <henry@stuffedcow.net>
 
 	* mips-opc.c (mips_builtin_opcodes): Correct "sigrie" encoding.

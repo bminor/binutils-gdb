@@ -19324,7 +19324,7 @@ s_mips_file (int x ATTRIBUTE_UNUSED)
     {
       char *filename;
 
-      filename = dwarf2_directive_file (0);
+      filename = dwarf2_directive_filename ();
 
       /* Versions of GCC up to 3.1 start files with a ".file"
 	 directive even for stabs output.  Make sure that this

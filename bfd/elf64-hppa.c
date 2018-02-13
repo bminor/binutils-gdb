@@ -4053,7 +4053,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_post_process_headers	elf64_hppa_post_process_headers
 
 #define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true_any)
 #define elf_backend_adjust_dynamic_symbol \
 					elf64_hppa_adjust_dynamic_symbol
 

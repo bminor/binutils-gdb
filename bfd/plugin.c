@@ -80,7 +80,7 @@ dlerror (void)
 #define bfd_plugin_bfd_set_private_flags	      _bfd_generic_bfd_set_private_flags
 #define bfd_plugin_core_file_matches_executable_p     generic_core_file_matches_executable_p
 #define bfd_plugin_bfd_is_local_label_name	      _bfd_nosymbols_bfd_is_local_label_name
-#define bfd_plugin_bfd_is_target_special_symbol	      ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+#define bfd_plugin_bfd_is_target_special_symbol	      ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
 #define bfd_plugin_get_lineno			      _bfd_nosymbols_get_lineno
 #define bfd_plugin_find_nearest_line		      _bfd_nosymbols_find_nearest_line
 #define bfd_plugin_find_line			      _bfd_nosymbols_find_line

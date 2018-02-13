@@ -848,7 +848,8 @@ versados_canonicalize_reloc (bfd *abfd,
 #define	versados_close_and_cleanup		      _bfd_generic_close_and_cleanup
 #define versados_bfd_free_cached_info		      _bfd_generic_bfd_free_cached_info
 #define versados_new_section_hook		      _bfd_generic_new_section_hook
-#define versados_bfd_is_target_special_symbol	((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+#define versados_bfd_is_target_special_symbol	      \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
 #define versados_bfd_is_local_label_name	      bfd_generic_is_local_label_name
 #define versados_get_lineno			      _bfd_nosymbols_get_lineno
 #define versados_find_nearest_line		      _bfd_nosymbols_find_nearest_line
@@ -860,7 +861,7 @@ versados_canonicalize_reloc (bfd *abfd,
 #define versados_read_minisymbols		      _bfd_generic_read_minisymbols
 #define versados_minisymbol_to_symbol		      _bfd_generic_minisymbol_to_symbol
 #define versados_bfd_reloc_type_lookup		      _bfd_norelocs_bfd_reloc_type_lookup
-#define versados_bfd_reloc_name_lookup		_bfd_norelocs_bfd_reloc_name_lookup
+#define versados_bfd_reloc_name_lookup		      _bfd_norelocs_bfd_reloc_name_lookup
 #define versados_set_arch_mach			      bfd_default_set_arch_mach
 #define versados_bfd_get_relocated_section_contents   bfd_generic_get_relocated_section_contents
 #define versados_bfd_relax_section		      bfd_generic_relax_section

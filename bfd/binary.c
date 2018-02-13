@@ -211,7 +211,7 @@ binary_get_symbol_info (bfd *ignore_abfd ATTRIBUTE_UNUSED,
 #define binary_bfd_make_debug_symbol	   _bfd_nosymbols_bfd_make_debug_symbol
 #define binary_read_minisymbols		   _bfd_generic_read_minisymbols
 #define binary_minisymbol_to_symbol	   _bfd_generic_minisymbol_to_symbol
-#define binary_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+#define binary_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
 
 /* Set the architecture of a binary file.  */
 #define binary_set_arch_mach _bfd_generic_set_arch_mach

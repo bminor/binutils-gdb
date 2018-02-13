@@ -1405,10 +1405,10 @@ i370_elf_relocate_section (bfd *output_bfd,
 #define elf_backend_adjust_dynamic_symbol	i370_elf_adjust_dynamic_symbol
 #define elf_backend_check_relocs		i370_elf_check_relocs
 
-static int
-i370_noop (void)
+static bfd_boolean
+i370_noop (bfd * abfd ATTRIBUTE_UNUSED, ...)
 {
-  return 1;
+  return TRUE;
 }
 
 #define elf_backend_finish_dynamic_symbol \
