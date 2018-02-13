@@ -11618,6 +11618,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  else
 	    o->flags |= SEC_EXCLUDE;
 	}
+      else if ((o->flags & SEC_GROUP) != 0 && o->size == 0)
+	{
+	  /* Remove empty group section from linker output.  */
+	  o->flags |= SEC_EXCLUDE;
+	  bfd_section_list_remove (abfd, o);
+	  abfd->section_count--;
+	}
     }
 
   /* Count up the number of relocations we will output for each output

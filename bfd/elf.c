@@ -7579,7 +7579,16 @@ _bfd_elf_fixup_group_sections (bfd *ibfd, asection *discarded)
 	       but the SHT_GROUP section is, then adjust its size.  */
 	    else if (s->output_section == discarded
 		     && isec->output_section != discarded)
-	      removed += 4;
+	      {
+		struct bfd_elf_section_data *elf_sec = elf_section_data (s);
+		removed += 4;
+		if (elf_sec->rel.hdr != NULL
+		    && (elf_sec->rel.hdr->sh_flags & SHF_GROUP) != 0)
+		  removed += 4;
+		if (elf_sec->rela.hdr != NULL
+		    && (elf_sec->rela.hdr->sh_flags & SHF_GROUP) != 0)
+		  removed += 4;
+	      }
 	    s = elf_next_in_group (s);
 	    if (s == first)
 	      break;
@@ -7589,18 +7598,26 @@ _bfd_elf_fixup_group_sections (bfd *ibfd, asection *discarded)
 	    if (discarded != NULL)
 	      {
 		/* If we've been called for ld -r, then we need to
-		   adjust the input section size.  This function may
-		   be called multiple times, so save the original
-		   size.  */
+		   adjust the input section size.  */
 		if (isec->rawsize == 0)
 		  isec->rawsize = isec->size;
 		isec->size = isec->rawsize - removed;
+		if (isec->size <= 4)
+		  {
+		    isec->size = 0;
+		    isec->flags |= SEC_EXCLUDE;
+		  }
 	      }
 	    else
 	      {
 		/* Adjust the output section size when called from
 		   objcopy. */
 		isec->output_section->size -= removed;
+		if (isec->output_section->size <= 4)
+		  {
+		    isec->output_section->size = 0;
+		    isec->output_section->flags |= SEC_EXCLUDE;
+		  }
 	      }
 	  }
       }

@@ -1,3 +1,12 @@
+2018-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master branch
+	2018-02-13  Alan Modra  <amodra@gmail.com>
+
+	PR 22836
+	* testsuite/ld-elf/pr22836-2.d,
+	* testsuite/ld-elf/pr22836-2.s: New test.
+
 2018-03-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20882

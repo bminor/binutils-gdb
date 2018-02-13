@@ -1,3 +1,15 @@
+2018-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master branch
+	2018-02-13  Alan Modra  <amodra@gmail.com>
+
+	PR 22836
+	* testsuite/binutils-all/group-7.s,
+	* testsuite/binutils-all/group-7a.d,
+	* testsuite/binutils-all/group-7b.d,
+	* testsuite/binutils-all/group-7c.d: New tests.
+	* testsuite/binutils-all/objcopy.exp: Run them.
+
 2018-02-27  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt.po: New Portuguese translation.

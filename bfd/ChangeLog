@@ -1,3 +1,14 @@
+2018-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master branch
+	2018-02-13  Alan Modra  <amodra@gmail.com>
+
+	PR 22836
+	* elf.c (_bfd_elf_fixup_group_sections): Account for removed
+	relocation sections.  If size reduces to just the flag word,
+	remove that too and mark with SEC_EXCLUDE.
+	* elflink.c (bfd_elf_final_link): Strip empty group sections.
+
 2018-03-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20882
