@@ -1,5 +1,16 @@
 2018-02-14  Tom Tromey  <tom@tromey.com>
 
+	* solist.h (struct target_so_ops) <bfd_open>: Make pathname
+	const.
+	(solib_bfd_open): Make pathname const.
+	* solib.c (solib_bfd_open): Make pathname const.
+	* solib-spu.c (spu_bfd_fopen): Make name const.
+	(spu_bfd_open): Make pathname const.
+	* solib-darwin.c (darwin_bfd_open): Make pathname const.
+	* solib-aix.c (solib_aix_bfd_open): Make pathname const.
+
+2018-02-14  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (symfile_bfd_open): Update.
 	* source.h (openp, source_full_path_of, find_and_open_source):
 	Change argument type to unique_xmalloc_ptr.

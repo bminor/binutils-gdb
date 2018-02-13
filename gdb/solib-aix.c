@@ -602,7 +602,7 @@ solib_aix_in_dynsym_resolve_code (CORE_ADDR pc)
 /* Implement the "bfd_open" target_so_ops method.  */
 
 static gdb_bfd_ref_ptr
-solib_aix_bfd_open (char *pathname)
+solib_aix_bfd_open (const char *pathname)
 {
   /* The pathname is actually a synthetic filename with the following
      form: "/path/to/sharedlib(member.o)" (double-quotes excluded).
@@ -611,7 +611,7 @@ solib_aix_bfd_open (char *pathname)
      FIXME: This is a little hacky.  Perhaps we should provide access
      to the solib's lm_info here?  */
   const int path_len = strlen (pathname);
-  char *sep;
+  const char *sep;
   int filename_len;
   int found_file;
 

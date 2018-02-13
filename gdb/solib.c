@@ -478,7 +478,7 @@ solib_bfd_fopen (const char *pathname, int fd)
 /* Find shared library PATHNAME and open a BFD for it.  */
 
 gdb_bfd_ref_ptr
-solib_bfd_open (char *pathname)
+solib_bfd_open (const char *pathname)
 {
   int found_file;
   const struct bfd_arch_info *b;

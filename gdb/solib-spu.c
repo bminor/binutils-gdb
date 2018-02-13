@@ -320,7 +320,7 @@ spu_bfd_iovec_stat (bfd *abfd, void *stream, struct stat *sb)
 }
 
 static gdb_bfd_ref_ptr
-spu_bfd_fopen (char *name, CORE_ADDR addr)
+spu_bfd_fopen (const char *name, CORE_ADDR addr)
 {
   CORE_ADDR *open_closure = XNEW (CORE_ADDR);
 
@@ -342,9 +342,9 @@ spu_bfd_fopen (char *name, CORE_ADDR addr)
 
 /* Open shared library BFD.  */
 static gdb_bfd_ref_ptr
-spu_bfd_open (char *pathname)
+spu_bfd_open (const char *pathname)
 {
-  char *original_name = strrchr (pathname, '@');
+  const char *original_name = strrchr (pathname, '@');
   asection *spu_name;
   unsigned long long addr;
   int fd;

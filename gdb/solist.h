@@ -129,7 +129,7 @@ struct target_so_ops
     int (*in_dynsym_resolve_code) (CORE_ADDR pc);
 
     /* Find and open shared library binary file.  */
-    gdb_bfd_ref_ptr (*bfd_open) (char *pathname);
+    gdb_bfd_ref_ptr (*bfd_open) (const char *pathname);
 
     /* Optional extra hook for finding and opening a solib.
        If TEMP_PATHNAME is non-NULL: If the file is successfully opened a
@@ -204,7 +204,7 @@ extern gdb::unique_xmalloc_ptr<char> solib_find (const char *in_pathname,
 extern gdb_bfd_ref_ptr solib_bfd_fopen (const char *pathname, int fd);
 
 /* Find solib binary file and open it.  */
-extern gdb_bfd_ref_ptr solib_bfd_open (char *in_pathname);
+extern gdb_bfd_ref_ptr solib_bfd_open (const char *in_pathname);
 
 /* FIXME: gdbarch needs to control this variable.  */
 extern struct target_so_ops *current_target_so_ops;

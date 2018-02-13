@@ -617,7 +617,7 @@ darwin_lookup_lib_symbol (struct objfile *objfile,
 }
 
 static gdb_bfd_ref_ptr
-darwin_bfd_open (char *pathname)
+darwin_bfd_open (const char *pathname)
 {
   int found_file;
 
