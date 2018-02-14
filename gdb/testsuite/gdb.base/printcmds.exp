@@ -776,6 +776,10 @@ proc test_printf {} {
 	"" \
 	"create hibob command"
     gdb_test "hibob" "hi bob zzz.*y" "run hibob command"
+
+    # PR cli/19918.
+    gdb_test "printf \"%-16dq\\n\", 0" "0               q"
+    gdb_test "printf \"%-16pq\\n\", 0" "\\(nil\\)           q"
 }
 
 #Test printing DFP values with printf

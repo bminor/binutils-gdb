@@ -2399,8 +2399,9 @@ printf_pointer (struct ui_file *stream, const char *format,
   if (val != 0)
     *fmt_p++ = '#';
 
-  /* Copy any width.  */
-  while (*p >= '0' && *p < '9')
+  /* Copy any width or flags.  Only the "-" flag is valid for pointers
+     -- see the format_pieces constructor.  */
+  while (*p == '-' || (*p >= '0' && *p < '9'))
     *fmt_p++ = *p++;
 
   gdb_assert (*p == 'p' && *(p + 1) == '\0');

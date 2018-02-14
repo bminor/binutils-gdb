@@ -1,5 +1,10 @@
 2018-03-14  Tom Tromey  <tom@tromey.com>
 
+	PR cli/19918:
+	* printcmd.c (printf_pointer): Allow "-" in format.
+
+2018-03-14  Tom Tromey  <tom@tromey.com>
+
 	* printcmd.c (_initialize_printcmd): Add usage to printf.
 
 2018-03-14  Yao Qi  <qiyao@sourceware.org>
