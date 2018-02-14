@@ -1,3 +1,7 @@
+2018-03-14  Tom Tromey  <tom@tromey.com>
+
+	* printcmd.c (_initialize_printcmd): Add usage to printf.
+
 2018-03-14  Yao Qi  <qiyao@sourceware.org>
 
 	* MAINTAINERS: Update my email address.

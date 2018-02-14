@@ -2680,8 +2680,9 @@ No argument means cancel all automatic-display expressions.\n\
 Do \"info display\" to see current list of code numbers."), &deletelist);
 
   add_com ("printf", class_vars, printf_command, _("\
-printf \"printf format string\", arg1, arg2, arg3, ..., argn\n\
-This is useful for formatted output in user-defined commands."));
+Formatted printing, like the C \"printf\" function.\n\
+Usage: printf \"format string\", arg1, arg2, arg3, ..., argn\n\
+This supports most C printf format specifications, like %s, %d, etc."));
 
   add_com ("output", class_vars, output_command, _("\
 Like \"print\" but don't put in value history and don't print newline.\n\
