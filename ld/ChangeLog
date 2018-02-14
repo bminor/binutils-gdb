@@ -1,3 +1,8 @@
+2018-02-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/x86-64.exp: Replace pr22393-2a.so and
+	pr22393-2a-now.so with pr22393-3a.so and pr22393-3a-now.so.
+
 2018-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 22836
