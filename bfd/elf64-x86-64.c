@@ -2135,7 +2135,17 @@ pointer:
 		     as pointer, make sure that PLT is used if foo is
 		     a function defined in a shared library.  */
 		  if ((sec->flags & SEC_CODE) == 0)
-		    h->pointer_equality_needed = 1;
+		    {
+		      h->pointer_equality_needed = 1;
+		      if (bfd_link_pie (info)
+			  && h->type == STT_FUNC
+			  && !h->def_regular
+			  && h->def_dynamic)
+			{
+			  h->needs_plt = 1;
+			  h->plt.refcount = 1;
+			}
+		    }
 		}
 	      else if (r_type != R_X86_64_PC32_BND
 		       && r_type != R_X86_64_PC64)
@@ -2173,7 +2183,7 @@ pointer:
 
 	  size_reloc = FALSE;
 do_size:
-	  if (NEED_DYNAMIC_RELOCATION_P (info, h, sec, r_type,
+	  if (NEED_DYNAMIC_RELOCATION_P (info, TRUE, h, sec, r_type,
 					 htab->pointer_r_type))
 	    {
 	      struct elf_dyn_relocs *p;
@@ -2968,6 +2978,7 @@ do_ifunc_pointer:
 	      break;
 	    }
 
+use_plt:
 	  if (h->plt.offset != (bfd_vma) -1)
 	    {
 	      if (htab->plt_second != NULL)
@@ -3046,6 +3057,15 @@ do_ifunc_pointer:
 		return elf_x86_64_need_pic (info, input_bfd, input_section,
 					    h, NULL, NULL, howto);
 	    }
+	  /* Since x86-64 has PC-relative PLT, we can use PLT in PIE
+	     as function address.  */
+	  else if (h != NULL
+		   && (input_section->flags & SEC_CODE) == 0
+		   && bfd_link_pie (info)
+		   && h->type == STT_FUNC
+		   && !h->def_regular
+		   && h->def_dynamic)
+	    goto use_plt;
 	  /* Fall through.  */
 
 	case R_X86_64_8:

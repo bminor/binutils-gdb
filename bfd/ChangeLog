@@ -1,3 +1,22 @@
+2018-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22842
+	* elf32-i386.c (elf_i386_check_relocs): Pass FALSE for non
+	PC-relative PLT to NEED_DYNAMIC_RELOCATION_P.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Create PLT for
+	R_X86_64_PC32 reloc against dynamic function in data section.
+	Pass TRUE for PC-relative PLT to NEED_DYNAMIC_RELOCATION_P.
+	(elf_x86_64_relocate_section): Use PLT for R_X86_64_PC32 reloc
+	against dynamic function in data section.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Use PLT in PIE as
+	function address only if pcrel_plt is true.
+	(_bfd_x86_elf_link_hash_table_create): Set pcrel_plt.
+	* elfxx-x86.h (NEED_DYNAMIC_RELOCATION_P): Add PCREL_PLT for
+	PC-relative PLT.  If PLT is PC-relative, don't generate dynamic
+	PC-relative relocation against a function definition in data
+	secton in PIE.  Remove the obsolete comments.
+	(elf_x86_link_hash_table): Add pcrel_plt.
+
 2018-02-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Check bfd_link_dll,

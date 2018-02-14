@@ -1,3 +1,15 @@
+2018-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22842
+	* testsuite/ld-i386/i386.exp: Run PR ld/22842 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr22842a.c: New file.
+	* testsuite/ld-i386/pr22842b.S: Likewise.
+	* testsuite/ld-x86-64/pr22842a.c: Likewise.
+	* testsuite/ld-x86-64/pr22842a.rd: Likewise.
+	* testsuite/ld-x86-64/pr22842b.S: Likewise.
+	* testsuite/ld-x86-64/pr22842b.rd: Likewise.
+
 2018-02-14  Maciej W. Rozycki  <macro@mips.com>
 
 	* ldlex.h (ldlex_command): Remove prototype.

@@ -1812,7 +1812,7 @@ do_relocation:
 
 	  size_reloc = FALSE;
 do_size:
-	  if (NEED_DYNAMIC_RELOCATION_P (info, h, sec, r_type,
+	  if (NEED_DYNAMIC_RELOCATION_P (info, FALSE, h, sec, r_type,
 					 R_386_32))
 	    {
 	      struct elf_dyn_relocs *p;

@@ -1190,6 +1190,23 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{readelf -drW pr22791-2.rd}} \
 	    "pr22791-2" \
 	] \
+	[list \
+	    "Build pr22842.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr22842a.c } \
+	    {} \
+	    "pr22842.so" \
+	] \
+	[list \
+	    "Build pr22842" \
+	    "-pie -Wl,--no-as-needed tmpdir/pr22842.so" \
+	    "" \
+	    { pr22842b.S } \
+	    {{readelf -rW pr22842a.rd} \
+	     {readelf -rW pr22842b.rd}} \
+	    "pr22842" \
+	] \
     ]
 
     if  {[istarget "x86_64-*-linux*-gnux32"]} {
@@ -1523,6 +1540,14 @@ if { [isnative] && [which $CC] != 0 } {
 	    "pr22791-2" \
 	    "pass.out" \
 	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Build pr22842" \
+	    "-pie -Wl,--no-as-needed tmpdir/pr22842.so" \
+	    "" \
+	    { pr22842b.S } \
+	    "pr22842" \
+	    "pass.out" \
 	] \
     ]
 

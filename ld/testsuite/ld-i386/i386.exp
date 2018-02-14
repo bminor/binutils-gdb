@@ -1273,6 +1273,14 @@ if { [isnative]
 	    {} \
 	    "pr21997-1.so" \
 	] \
+	[list \
+	    "Build pr22842.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr22842a.c } \
+	    {} \
+	    "pr22842.so" \
+	] \
     ]
 
     run_ld_link_exec_tests [list \
@@ -1369,6 +1377,14 @@ if { [isnative]
 	    "" \
 	    { pr21997-1c.S } \
 	    "pr21997-1-pie-2" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Build pr22842" \
+	    "-pie -Wl,--no-as-needed tmpdir/pr22842.so" \
+	    "" \
+	    { pr22842b.S } \
+	    "pr22842" \
 	    "pass.out" \
 	] \
     ]

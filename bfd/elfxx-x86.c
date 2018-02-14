@@ -179,6 +179,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  asection *s = htab->elf.splt;
 	  asection *second_s = htab->plt_second;
 	  asection *got_s = htab->plt_got;
+	  bfd_boolean use_plt;
 
 	  /* If this is the first .plt entry, make room for the special
 	     first entry.  The .plt section is used by prelink to undo
@@ -196,12 +197,19 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 
 	  /* If this symbol is not defined in a regular file, and we are
-	     not generating a shared library, then set the symbol to this
-	     location in the .plt.  This is required to make function
-	     pointers compare as equal between the normal executable and
-	     the shared library.  */
-	  if (! bfd_link_dll (info)
-	      && !h->def_regular)
+	     generating PDE, then set the symbol to this location in the
+	     .plt.  This is required to make function pointers compare
+	     as equal between PDE and the shared library.
+
+	     NB: If PLT is PC-relative, we can use the .plt in PIE for
+	     function address. */
+	  if (h->def_regular)
+	    use_plt = FALSE;
+	  else if (htab->pcrel_plt)
+	    use_plt = ! bfd_link_dll (info);
+	  else
+	    use_plt = bfd_link_pde (info);
+	  if (use_plt)
 	    {
 	      if (use_plt_got)
 		{
@@ -771,6 +779,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       ret->dt_reloc_sz = DT_RELASZ;
       ret->dt_reloc_ent = DT_RELAENT;
       ret->got_entry_size = 8;
+      ret->pcrel_plt = TRUE;
       ret->tls_get_addr = "__tls_get_addr";
     }
   if (ABI_64_P (abfd))
@@ -798,6 +807,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 	  ret->dt_reloc_ent = DT_RELENT;
 	  ret->sizeof_reloc = sizeof (Elf32_External_Rel);
 	  ret->got_entry_size = 4;
+	  ret->pcrel_plt = FALSE;
 	  ret->pointer_r_type = R_386_32;
 	  ret->dynamic_interpreter = ELF32_DYNAMIC_INTERPRETER;
 	  ret->dynamic_interpreter_size

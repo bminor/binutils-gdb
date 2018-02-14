@@ -76,14 +76,11 @@
    into the shared library.  However, if we are linking with -Bsymbolic,
    we do not need to copy a reloc against a global symbol which is
    defined in an object we are including in the link (i.e., DEF_REGULAR
-   is set).  At this point we have not seen all the input files, so it
-   is possible that DEF_REGULAR is not set now but will be set later (it
-   is never cleared).  In case of a weak definition, DEF_REGULAR may be
-   cleared later by a strong definition in a shared library.  We account
-   for that possibility below by storing information in the relocs_copied
-   field of the hash table entry.  A similar situation occurs when
-   creating shared libraries and symbol visibility changes render the
-   symbol local.
+   is set).
+
+   If PCREL_PLT is true, don't generate dynamic relocation in PIE for
+   PC-relative relocation against a dynamic function definition in data
+   section when PLT address can be used.
 
    If on the other hand, we are creating an executable, we may need to
    keep relocations for symbols satisfied by a dynamic library if we
@@ -91,23 +88,30 @@
 
    We also need to generate dynamic pointer relocation against
    STT_GNU_IFUNC symbol in the non-code section.  */
-#define NEED_DYNAMIC_RELOCATION_P(INFO, H, SEC, R_TYPE, POINTER_TYPE) \
+#define NEED_DYNAMIC_RELOCATION_P(INFO, PCREL_PLT, H, SEC, R_TYPE, \
+				  POINTER_TYPE) \
   ((bfd_link_pic (INFO) \
     && (! X86_PCREL_TYPE_P (R_TYPE) \
 	|| ((H) != NULL \
 	    && (! (bfd_link_pie (INFO) \
 		   || SYMBOLIC_BIND ((INFO), (H))) \
 		|| (H)->root.type == bfd_link_hash_defweak \
-		|| !(H)->def_regular)))) \
-		|| ((H) != NULL \
-		    && (H)->type == STT_GNU_IFUNC \
-		    && (R_TYPE) == POINTER_TYPE \
-		    && ((SEC)->flags & SEC_CODE) == 0) \
-		    || (ELIMINATE_COPY_RELOCS \
-			&& !bfd_link_pic (INFO) \
-			&& (H) != NULL \
-			&& ((H)->root.type == bfd_link_hash_defweak \
-			    || !(H)->def_regular)))
+		|| (!(bfd_link_pie (INFO) \
+		      && (PCREL_PLT) \
+		      && (H)->plt.refcount > 0 \
+		      && ((SEC)->flags & SEC_CODE) == 0 \
+		      && (H)->type == STT_FUNC \
+		      && (H)->def_dynamic) \
+		    && !(H)->def_regular))))) \
+   || ((H) != NULL \
+       && (H)->type == STT_GNU_IFUNC \
+       && (R_TYPE) == POINTER_TYPE \
+       && ((SEC)->flags & SEC_CODE) == 0) \
+   || (ELIMINATE_COPY_RELOCS \
+       && !bfd_link_pic (INFO) \
+       && (H) != NULL \
+       && ((H)->root.type == bfd_link_hash_defweak \
+	   || !(H)->def_regular)))
 
 /* TRUE if dynamic relocation should be generated.  Don't copy a
    pc-relative relocation into the output file if the symbol needs
@@ -481,6 +485,14 @@ struct elf_x86_link_hash_table
 
   /* TRUE if GOT is referenced.  */
   unsigned int got_referenced : 1;
+
+  /* TRUE if PLT is PC-relative.  PLT in PDE and PC-relative PLT in PIE
+     can be used as function address.
+
+     NB: i386 has non-PIC PLT and PIC PLT.  Only non-PIC PLT in PDE can
+     be used as function address.  PIC PLT in PIE can't be used as
+     function address.  */
+  unsigned int pcrel_plt : 1;
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
