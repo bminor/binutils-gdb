@@ -1,3 +1,7 @@
+2018-02-14  Maciej W. Rozycki  <macro@mips.com>
+
+	* ldlex.h (ldlex_command): Remove prototype.
+
 2018-02-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/x86-64.exp: Replace pr22393-2a.so and
