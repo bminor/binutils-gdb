@@ -375,8 +375,6 @@ extern char *ada_breakpoint_rewrite (char *, int *);
 
 extern char *ada_main_name (void);
 
-extern std::string ada_name_for_lookup (const char *name);
-
 extern void create_ada_exception_catchpoint
   (struct gdbarch *gdbarch, enum ada_exception_catchpoint_kind ex_kind,
    char *excep_string, const std::string &cond_string, int tempflag,

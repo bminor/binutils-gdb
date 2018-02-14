@@ -1,3 +1,9 @@
+2018-02-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (name_match_type_from_name): Remove reference to
+	ada_name_for_lookup in function's documentation.
+	* ada-lang.h (ada_name_for_lookup): Delete declaration.
+
 2018-02-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* defs.h (enum openp_flags): New enum.

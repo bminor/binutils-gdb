@@ -4766,7 +4766,7 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
    searching for all symbols matching LOOKUP_NAME.
 
    LOOKUP_NAME is expected to be a symbol name after transformation
-   for Ada lookups (see ada_name_for_lookup).  */
+   for Ada lookups.  */
 
 static symbol_name_match_type
 name_match_type_from_name (const char *lookup_name)
