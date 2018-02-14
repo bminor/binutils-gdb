@@ -1,3 +1,25 @@
+2018-04-13  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* infrun.c (process_event_stop_test): Call
+	gdbarch_in_indirect_branch_thunk.
+	* gdbarch.sh (in_indirect_branch_thunk): New.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Regenerated.
+	* x86-tdep.h: New.
+	* x86-tdep.c: New.
+	* Makefile.in (ALL_TARGET_OBS): Add x86-tdep.o.
+	(HFILES_NO_SRCDIR): Add x86-tdep.h.
+	(ALLDEPFILES): Add x86-tdep.c.
+	* arch-utils.h (default_in_indirect_branch_thunk): New.
+	* arch-utils.c (default_in_indirect_branch_thunk): New.
+	* i386-tdep: Include x86-tdep.h.
+	(i386_in_indirect_branch_thunk): New.
+	(i386_elf_init_abi): Set in_indirect_branch_thunk gdbarch
+	function.
+	* amd64-tdep: Include x86-tdep.h.
+	(amd64_in_indirect_branch_thunk): New.
+	(amd64_init_abi): Set in_indirect_branch_thunk gdbarch function.
+
 2018-04-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/23053

@@ -1,3 +1,10 @@
+2018-04-13  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.base/step-indirect-call-thunk.exp: New.
+	* gdb.base/step-indirect-call-thunk.c: New.
+	* gdb.reverse/step-indirect-call-thunk.exp: New.
+	* gdb.reverse/step-indirect-call-thunk.c: New.
+
 2018-04-11  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/pie-fork.c: New file.

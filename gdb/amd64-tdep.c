@@ -48,6 +48,7 @@
 #include "ax-gdb.h"
 #include "common/byte-vector.h"
 #include "osabi.h"
+#include "x86-tdep.h"
 
 /* Note that the AMD64 architecture was previously known as x86-64.
    The latter is (forever) engraved into the canonical system name as
@@ -3034,6 +3035,16 @@ static const int amd64_record_regmap[] =
   AMD64_DS_REGNUM, AMD64_ES_REGNUM, AMD64_FS_REGNUM, AMD64_GS_REGNUM
 };
 
+/* Implement the "in_indirect_branch_thunk" gdbarch function.  */
+
+static bool
+amd64_in_indirect_branch_thunk (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  return x86_in_indirect_branch_thunk (pc, amd64_register_names,
+				       AMD64_RAX_REGNUM,
+				       AMD64_RIP_REGNUM);
+}
+
 void
 amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 		const target_desc *default_tdesc)
@@ -3206,6 +3217,9 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
   set_gdbarch_insn_is_call (gdbarch, amd64_insn_is_call);
   set_gdbarch_insn_is_ret (gdbarch, amd64_insn_is_ret);
   set_gdbarch_insn_is_jump (gdbarch, amd64_insn_is_jump);
+
+  set_gdbarch_in_indirect_branch_thunk (gdbarch,
+					amd64_in_indirect_branch_thunk);
 }
 
 /* Initialize ARCH for x86-64, no osabi.  */

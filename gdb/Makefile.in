@@ -793,6 +793,7 @@ ALL_TARGET_OBS = \
 	vax-nbsd-tdep.o \
 	vax-tdep.o \
 	windows-tdep.o \
+	x86-tdep.o \
 	xcoffread.o \
 	xstormy16-tdep.o \
 	xtensa-config.o \
@@ -1521,7 +1522,8 @@ HFILES_NO_SRCDIR = \
 	tui/tui-win.h \
 	tui/tui-windata.h \
 	tui/tui-wingeneral.h \
-	tui/tui-winsource.h
+	tui/tui-winsource.h \
+	x86-tdep.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -2363,6 +2365,7 @@ ALLDEPFILES = \
 	windows-nat.c \
 	windows-tdep.c \
 	x86-nat.c \
+	x86-tdep.c \
 	xcoffread.c \
 	xstormy16-tdep.c \
 	xtensa-config.c \

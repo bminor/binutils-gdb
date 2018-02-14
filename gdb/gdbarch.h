@@ -741,6 +741,12 @@ typedef int (gdbarch_in_solib_return_trampoline_ftype) (struct gdbarch *gdbarch,
 extern int gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, const char *name);
 extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline);
 
+/* Return true if PC lies inside an indirect branch thunk. */
+
+typedef bool (gdbarch_in_indirect_branch_thunk_ftype) (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern bool gdbarch_in_indirect_branch_thunk (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_in_indirect_branch_thunk (struct gdbarch *gdbarch, gdbarch_in_indirect_branch_thunk_ftype *in_indirect_branch_thunk);
+
 /* A target might have problems with watchpoints as soon as the stack
    frame of the current function has been destroyed.  This mostly happens
    as the first action in a function's epilogue.  stack_frame_destroyed_p()

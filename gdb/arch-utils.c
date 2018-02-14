@@ -979,6 +979,14 @@ gdbarch_skip_prologue_noexcept (gdbarch *gdbarch, CORE_ADDR pc) noexcept
   return new_pc;
 }
 
+/* See arch-utils.h.  */
+
+bool
+default_in_indirect_branch_thunk (gdbarch *gdbarch, CORE_ADDR pc)
+{
+  return false;
+}
+
 void
 _initialize_gdbarch_utils (void)
 {

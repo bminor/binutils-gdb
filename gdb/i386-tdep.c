@@ -47,6 +47,7 @@
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 #include "x86-xstate.h"
+#include "x86-tdep.h"
 
 #include "record.h"
 #include "record-full.h"
@@ -4421,6 +4422,15 @@ i386_gnu_triplet_regexp (struct gdbarch *gdbarch)
 
 
 
+/* Implement the "in_indirect_branch_thunk" gdbarch function.  */
+
+static bool
+i386_in_indirect_branch_thunk (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  return x86_in_indirect_branch_thunk (pc, i386_register_names,
+				       I386_EAX_REGNUM, I386_EIP_REGNUM);
+}
+
 /* Generic ELF.  */
 
 void
@@ -4447,6 +4457,9 @@ i386_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				      i386_stap_is_single_operand);
   set_gdbarch_stap_parse_special_token (gdbarch,
 					i386_stap_parse_special_token);
+
+  set_gdbarch_in_indirect_branch_thunk (gdbarch,
+					i386_in_indirect_branch_thunk);
 }
 
 /* System V Release 4 (SVR4).  */

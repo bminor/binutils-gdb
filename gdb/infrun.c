@@ -6565,6 +6565,17 @@ process_event_stop_test (struct execution_control_state *ecs)
       return;
     }
 
+  /* Step through an indirect branch thunk.  */
+  if (ecs->event_thread->control.step_over_calls != STEP_OVER_NONE
+      && gdbarch_in_indirect_branch_thunk (gdbarch, stop_pc))
+    {
+      if (debug_infrun)
+	 fprintf_unfiltered (gdb_stdlog,
+			     "infrun: stepped into indirect branch thunk\n");
+      keep_going (ecs);
+      return;
+    }
+
   if (ecs->event_thread->control.step_range_end != 1
       && (ecs->event_thread->control.step_over_calls == STEP_OVER_UNDEBUGGABLE
 	  || ecs->event_thread->control.step_over_calls == STEP_OVER_ALL)

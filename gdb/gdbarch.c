@@ -266,6 +266,7 @@ struct gdbarch
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
   gdbarch_skip_solib_resolver_ftype *skip_solib_resolver;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline;
+  gdbarch_in_indirect_branch_thunk_ftype *in_indirect_branch_thunk;
   gdbarch_stack_frame_destroyed_p_ftype *stack_frame_destroyed_p;
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
@@ -433,6 +434,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   gdbarch->skip_solib_resolver = generic_skip_solib_resolver;
   gdbarch->in_solib_return_trampoline = generic_in_solib_return_trampoline;
+  gdbarch->in_indirect_branch_thunk = default_in_indirect_branch_thunk;
   gdbarch->stack_frame_destroyed_p = generic_stack_frame_destroyed_p;
   gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
   gdbarch->make_symbol_special = default_make_symbol_special;
@@ -627,6 +629,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
+  /* Skip verify of in_indirect_branch_thunk, invalid_p == 0 */
   /* Skip verify of stack_frame_destroyed_p, invalid_p == 0 */
   /* Skip verify of elf_make_msymbol_special, has predicate.  */
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
@@ -1102,6 +1105,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
                       plongest (gdbarch->have_nonsteppable_watchpoint));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: in_indirect_branch_thunk = <%s>\n",
+                      host_address_to_string (gdbarch->in_indirect_branch_thunk));
   fprintf_unfiltered (file,
                       "gdbarch_dump: in_solib_return_trampoline = <%s>\n",
                       host_address_to_string (gdbarch->in_solib_return_trampoline));
@@ -3351,6 +3357,23 @@ set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch,
                                         gdbarch_in_solib_return_trampoline_ftype in_solib_return_trampoline)
 {
   gdbarch->in_solib_return_trampoline = in_solib_return_trampoline;
+}
+
+bool
+gdbarch_in_indirect_branch_thunk (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->in_indirect_branch_thunk != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_in_indirect_branch_thunk called\n");
+  return gdbarch->in_indirect_branch_thunk (gdbarch, pc);
+}
+
+void
+set_gdbarch_in_indirect_branch_thunk (struct gdbarch *gdbarch,
+                                      gdbarch_in_indirect_branch_thunk_ftype in_indirect_branch_thunk)
+{
+  gdbarch->in_indirect_branch_thunk = in_indirect_branch_thunk;
 }
 
 int

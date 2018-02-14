@@ -660,6 +660,9 @@ m;CORE_ADDR;skip_solib_resolver;CORE_ADDR pc;pc;;generic_skip_solib_resolver;;0
 # Some systems also have trampoline code for returning from shared libs.
 m;int;in_solib_return_trampoline;CORE_ADDR pc, const char *name;pc, name;;generic_in_solib_return_trampoline;;0
 
+# Return true if PC lies inside an indirect branch thunk.
+m;bool;in_indirect_branch_thunk;CORE_ADDR pc;pc;;default_in_indirect_branch_thunk;;0
+
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
 # as the first action in a function's epilogue.  stack_frame_destroyed_p()
