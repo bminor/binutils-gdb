@@ -2226,13 +2226,13 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
 {
   /* COFF backend structure.  */
   {
-    (void (*) (bfd *, void *, int, int, int, int, void *)) bfd_void_any, /* aux_in */
-    (void (*) (bfd *, void *, void *)) bfd_void_any, /* sym_in */
-    (void (*) (bfd *, void *, void *)) bfd_void_any, /* lineno_in */
-    (unsigned (*) (bfd *, void *, int, int, int, int, void *)) bfd_0u_any,/*aux_out*/
-    (unsigned (*) (bfd *, void *, void *)) bfd_0u_any, /* sym_out */
-    (unsigned (*) (bfd *, void *, void *)) bfd_0u_any, /* lineno_out */
-    (unsigned (*) (bfd *, void *, void *)) bfd_0u_any, /* reloc_out */
+    (void (*) (bfd *, void *, int, int, int, int, void *)) (void (*)) bfd_void, /* aux_in */
+    (void (*) (bfd *, void *, void *)) (void (*)) bfd_void, /* sym_in */
+    (void (*) (bfd *, void *, void *)) (void (*)) bfd_void, /* lineno_in */
+    (unsigned (*) (bfd *, void *, int, int, int, int, void *)) (unsigned (*)) bfd_0u,/*aux_out*/
+    (unsigned (*) (bfd *, void *, void *)) (unsigned (*)) bfd_0u, /* sym_out */
+    (unsigned (*) (bfd *, void *, void *)) (unsigned (*)) bfd_0u, /* lineno_out */
+    (unsigned (*) (bfd *, void *, void *)) (unsigned (*)) bfd_0u, /* reloc_out */
     alpha_ecoff_swap_filehdr_out, alpha_ecoff_swap_aouthdr_out,
     alpha_ecoff_swap_scnhdr_out,
     FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, 0, FILNMLEN, TRUE,

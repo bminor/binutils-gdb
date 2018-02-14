@@ -618,7 +618,7 @@ extern bfd_boolean NAME (aout, bfd_free_cached_info)
 
 #ifndef aout_32_bfd_is_target_special_symbol
 #define aout_32_bfd_is_target_special_symbol \
-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
+  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
 #endif
 
 #ifndef WRITE_HEADERS

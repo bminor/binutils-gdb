@@ -1986,7 +1986,7 @@ coff_set_alignment_hook (bfd *abfd, asection *section, void * scnhdr)
 #else /* ! RS6000COFF_C */
 
 #define coff_set_alignment_hook \
-  ((void (*) (bfd *, asection *, void *)) bfd_void_any)
+  ((void (*) (bfd *, asection *, void *)) (void (*)) bfd_void)
 
 #endif /* ! RS6000COFF_C */
 #endif /* ! COFF_WITH_PE */
@@ -2508,7 +2508,7 @@ symname_in_debug_hook (bfd * abfd ATTRIBUTE_UNUSED, struct internal_syment *sym)
 #else
 
 #define symname_in_debug_hook \
-  (bfd_boolean (*) (bfd *, struct internal_syment *)) bfd_false_any
+  (bfd_boolean (*) (bfd *, struct internal_syment *)) (bfd_boolean (*)) bfd_false
 
 #endif
 
@@ -6024,7 +6024,7 @@ static bfd_coff_backend_data bigobj_swap_table =
 #endif
 
 #ifndef coff_bfd_is_target_special_symbol
-#define coff_bfd_is_target_special_symbol   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
+#define coff_bfd_is_target_special_symbol   ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
 #endif
 
 #ifndef coff_read_minisymbols

@@ -1160,18 +1160,18 @@ oasys_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define oasys_slurp_armap			   bfd_true
 #define oasys_slurp_extended_name_table		   bfd_true
 #define oasys_construct_extended_name_table	   \
-  ((bfd_boolean (*) (bfd *, char **, bfd_size_type *, const char **)) bfd_true_any)
+  ((bfd_boolean (*) (bfd *, char **, bfd_size_type *, const char **)) (bfd_boolean (*)) bfd_true)
 #define oasys_truncate_arname			   bfd_dont_truncate_arname
 #define oasys_write_armap			   \
-  ((bfd_boolean (*) (bfd *, unsigned int, struct orl *, unsigned int, int)) bfd_true_any)
+  ((bfd_boolean (*) (bfd *, unsigned int, struct orl *, unsigned int, int)) (bfd_boolean (*)) bfd_true)
 #define oasys_read_ar_hdr			   bfd_nullvoidptr
 #define oasys_write_ar_hdr                         \
-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_false_any)
+  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_false)
 #define oasys_get_elt_at_index			   _bfd_generic_get_elt_at_index
 #define oasys_update_armap_timestamp		   bfd_true
 #define oasys_bfd_is_local_label_name		   bfd_generic_is_local_label_name
 #define oasys_bfd_is_target_special_symbol	   \
-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
+  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
 #define oasys_get_lineno			   _bfd_nosymbols_get_lineno
 #define oasys_get_symbol_version_string		   _bfd_nosymbols_get_symbol_version_string
 #define oasys_bfd_make_debug_symbol		   _bfd_nosymbols_bfd_make_debug_symbol

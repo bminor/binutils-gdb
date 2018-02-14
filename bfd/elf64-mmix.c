@@ -2902,7 +2902,7 @@ mmix_elf_relax_section (bfd *abfd,
 #define elf_backend_check_relocs	mmix_elf_check_relocs
 #define elf_backend_symbol_processing	mmix_elf_symbol_processing
 #define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true_any)
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
 
 #define bfd_elf64_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type

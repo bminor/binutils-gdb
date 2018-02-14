@@ -27,7 +27,7 @@
 #define bfd_mach_o_bfd_free_cached_info		      _bfd_generic_bfd_free_cached_info
 #define bfd_mach_o_get_section_contents_in_window     _bfd_generic_get_section_contents_in_window
 #define bfd_mach_o_bfd_print_private_bfd_data	      _bfd_generic_bfd_print_private_bfd_data
-#define bfd_mach_o_bfd_is_target_special_symbol	      ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
+#define bfd_mach_o_bfd_is_target_special_symbol	      ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
 #define bfd_mach_o_bfd_is_local_label_name	      bfd_generic_is_local_label_name
 #define bfd_mach_o_get_lineno			      _bfd_nosymbols_get_lineno
 #define bfd_mach_o_find_inliner_info		      _bfd_nosymbols_find_inliner_info

@@ -2922,7 +2922,7 @@ _bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 #define elf_backend_size_dynamic_sections \
 				  _bfd_cr16_elf_size_dynamic_sections
 #define elf_backend_omit_section_dynsym \
-      ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true_any)
+      ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
 #define elf_backend_finish_dynamic_symbol \
 				   _bfd_cr16_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \

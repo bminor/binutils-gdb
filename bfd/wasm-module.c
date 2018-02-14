@@ -773,7 +773,7 @@ wasm_object_p (bfd *abfd)
 /* BFD_JUMP_TABLE_SYMBOLS */
 #define wasm_get_symbol_version_string	  _bfd_nosymbols_get_symbol_version_string
 #define wasm_bfd_is_local_label_name	   bfd_generic_is_local_label_name
-#define wasm_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
+#define wasm_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
 #define wasm_get_lineno			  _bfd_nosymbols_get_lineno
 #define wasm_find_nearest_line		  _bfd_nosymbols_find_nearest_line
 #define wasm_find_line			  _bfd_nosymbols_find_line

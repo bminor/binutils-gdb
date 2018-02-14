@@ -9490,7 +9490,7 @@ bfd_vms_get_data (bfd *abfd)
 }
 
 #define vms_bfd_is_target_special_symbol \
-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
+  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
 #define vms_bfd_link_just_syms		  _bfd_generic_link_just_syms
 #define vms_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type
@@ -9511,7 +9511,7 @@ bfd_vms_get_data (bfd *abfd)
 /* Symbols table.  */
 #define alpha_vms_make_empty_symbol	   _bfd_generic_make_empty_symbol
 #define alpha_vms_bfd_is_target_special_symbol \
-   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
+   ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
 #define alpha_vms_print_symbol		   vms_print_symbol
 #define alpha_vms_get_symbol_info	   vms_get_symbol_info
 #define alpha_vms_get_symbol_version_string \

@@ -6739,7 +6739,7 @@ som_bfd_link_split_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 #define som_construct_extended_name_table	_bfd_archive_coff_construct_extended_name_table
 #define som_update_armap_timestamp		bfd_true
 #define som_bfd_is_target_special_symbol        \
-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
+  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
 #define som_get_lineno				_bfd_nosymbols_get_lineno
 #define som_bfd_make_debug_symbol		_bfd_nosymbols_bfd_make_debug_symbol
 #define som_read_minisymbols			_bfd_generic_read_minisymbols

@@ -919,12 +919,12 @@ ihex_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define ihex_new_section_hook			  _bfd_generic_new_section_hook
 #define ihex_get_section_contents_in_window	  _bfd_generic_get_section_contents_in_window
 #define ihex_get_symtab_upper_bound		  bfd_0l
-#define ihex_canonicalize_symtab		  ((long (*) (bfd *, asymbol **)) bfd_0l_any)
+#define ihex_canonicalize_symtab		  ((long (*) (bfd *, asymbol **)) (long (*)) bfd_0l)
 #define ihex_make_empty_symbol			  _bfd_generic_make_empty_symbol
 #define ihex_print_symbol			  _bfd_nosymbols_print_symbol
 #define ihex_get_symbol_info			  _bfd_nosymbols_get_symbol_info
 #define ihex_get_symbol_version_string		  _bfd_nosymbols_get_symbol_version_string
-#define ihex_bfd_is_target_special_symbol	  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false_any)
+#define ihex_bfd_is_target_special_symbol	  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
 #define ihex_bfd_is_local_label_name		  _bfd_nosymbols_bfd_is_local_label_name
 #define ihex_get_lineno				  _bfd_nosymbols_get_lineno
 #define ihex_find_nearest_line			  _bfd_nosymbols_find_nearest_line
