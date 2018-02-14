@@ -110,13 +110,14 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
       /* Catch all exceptions, caused by either interrupt or error.
 	 Reset *THIS_CACHE.  */
       *this_cache = NULL;
+      frame_cleanup_after_sniffer (this_frame);
+
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
 	  /* This usually means that not even the PC is available,
 	     thus most unwinders aren't able to determine if they're
 	     the best fit.  Keep trying.  Fallback prologue unwinders
 	     should always accept the frame.  */
-	  frame_cleanup_after_sniffer (this_frame);
 	  return 0;
 	}
       throw_exception (ex);

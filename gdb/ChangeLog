@@ -1,3 +1,8 @@
+2018-02-14  Pedro Alves  <palves@redhat.com>
+
+	* frame-unwind.c (frame_unwind_try_unwinder): Always call
+	frame_cleanup_after_sniffer on exception.
+
 2018-02-14  Tom Tromey  <tom@tromey.com>
 
 	* solist.h (struct target_so_ops) <bfd_open>: Make pathname

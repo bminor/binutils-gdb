@@ -1,3 +1,8 @@
+2018-02-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/bp-cmds-continue-ctrl-c.exp (do_test): Test "bt" after
+	getting a "Quit".
+
 2018-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* lib/gdb.exp (skip_btrace_pt_tests): Update expected error message.
