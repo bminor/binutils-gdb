@@ -780,6 +780,9 @@ proc test_printf {} {
     # PR cli/19918.
     gdb_test "printf \"%-16dq\\n\", 0" "0               q"
     gdb_test "printf \"%-16pq\\n\", 0" "\\(nil\\)           q"
+
+    # PR cli/14977.
+    gdb_test "printf \"%s\\n\", 0" "\\(null\\)"
 }
 
 #Test printing DFP values with printf

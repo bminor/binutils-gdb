@@ -1,5 +1,12 @@
 2018-03-14  Tom Tromey  <tom@tromey.com>
 
+	PR cli/14977:
+	* gdb.base/printcmds.exp (test_printf): Add printf test of %s with
+	a null pointer.
+	* gdb.base/wchar.exp: Likewise.
+
+2018-03-14  Tom Tromey  <tom@tromey.com>
+
 	PR cli/19918:
 	* gdb.base/printcmds.exp (test_printf): Add printf test using '-'
 	flag.

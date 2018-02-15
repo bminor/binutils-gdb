@@ -847,6 +847,11 @@ ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
 	    int j;
 
 	    tem = args[i];
+	    if (tem == 0)
+	      {
+		printf (current_substring, "(null)");
+		break;
+	      }
 
 	    /* This is a %s argument.  Find the length of the string.  */
 	    for (j = 0;; j++)

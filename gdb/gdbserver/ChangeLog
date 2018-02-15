@@ -1,3 +1,8 @@
+2018-03-14  Tom Tromey  <tom@tromey.com>
+
+	PR cli/14977:
+	* ax.c (ax_printf): Special case for NULL.
+
 2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* linux-low.c (linux_qxfer_libraries_svr4): Use

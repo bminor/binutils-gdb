@@ -1,5 +1,11 @@
 2018-03-14  Tom Tromey  <tom@tromey.com>
 
+	PR cli/14977:
+	* printcmd.c (printf_c_string, printf_wide_c_string): Special case
+	for NULL.
+
+2018-03-14  Tom Tromey  <tom@tromey.com>
+
 	PR cli/19918:
 	* printcmd.c (printf_pointer): Allow "-" in format.
 

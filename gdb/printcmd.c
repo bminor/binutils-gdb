@@ -2220,6 +2220,11 @@ printf_c_string (struct ui_file *stream, const char *format,
   int j;
 
   tem = value_as_address (value);
+  if (tem == 0)
+    {
+      fprintf_filtered (stream, format, "(null)");
+      return;
+    }
 
   /* This is a %s argument.  Find the length of the string.  */
   for (j = 0;; j++)
@@ -2260,6 +2265,11 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   gdb_byte *buf = (gdb_byte *) alloca (wcwidth);
 
   tem = value_as_address (value);
+  if (tem == 0)
+    {
+      fprintf_filtered (stream, format, "(null)");
+      return;
+    }
 
   /* This is a %s argument.  Find the length of the string.  */
   for (j = 0;; j += wcwidth)
