@@ -1,5 +1,8 @@
 2018-02-15  Jim Wilson  <jimw@sifive.com>
 
+	* elfnn-riscv.c (_bfd_riscv_relax_section): Ifdef out check to ignore
+	symbols whose section address is zero.
+
 	* elfnn-riscv.c (riscv_elf_relocate_section): Use bfd_reloc_dangerous
 	when pcrel_lo reloc has an addend.  Use reloc_dangerous callback for
 	bfd_reloc_dangerous.  Use einfo instead of warning callback for errors.

@@ -3399,8 +3399,14 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	    {
 	      BFD_ASSERT (isym->st_shndx < elf_numsections (abfd));
 	      sym_sec = elf_elfsections (abfd)[isym->st_shndx]->bfd_section;
+#if 0
+	      /* The purpose of this code is unknown.  It breaks linker scripts
+		 for embedded development that place sections at address zero.
+		 This code is believed to be unnecessary.  Disabling it but not
+		 yet removing it, in case something breaks.  */
 	      if (sec_addr (sym_sec) == 0)
 		continue;
+#endif
 	      symval = sec_addr (sym_sec) + isym->st_value;
 	    }
 	}
