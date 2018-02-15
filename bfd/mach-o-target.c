@@ -27,7 +27,7 @@
 #define bfd_mach_o_bfd_free_cached_info		      _bfd_generic_bfd_free_cached_info
 #define bfd_mach_o_get_section_contents_in_window     _bfd_generic_get_section_contents_in_window
 #define bfd_mach_o_bfd_print_private_bfd_data	      _bfd_generic_bfd_print_private_bfd_data
-#define bfd_mach_o_bfd_is_target_special_symbol	      ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+#define bfd_mach_o_bfd_is_target_special_symbol	      _bfd_bool_bfd_asymbol_false
 #define bfd_mach_o_bfd_is_local_label_name	      bfd_generic_is_local_label_name
 #define bfd_mach_o_get_lineno			      _bfd_nosymbols_get_lineno
 #define bfd_mach_o_find_inliner_info		      _bfd_nosymbols_find_inliner_info
@@ -165,13 +165,13 @@ const bfd_target TARGET_NAME =
 #endif
   },
   {				/* bfd_set_format.  */
-    bfd_false,
+    _bfd_bool_bfd_false_error,
     bfd_mach_o_mkobject,
     _bfd_generic_mkarchive,
     bfd_mach_o_mkobject,
   },
   {				/* bfd_write_contents.  */
-    bfd_false,
+    _bfd_bool_bfd_false_error,
     bfd_mach_o_write_contents,
     _bfd_write_archive_contents,
     bfd_mach_o_write_contents,

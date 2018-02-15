@@ -3370,3 +3370,104 @@ _bfd_generic_verify_endian_match (bfd *ibfd, struct bfd_link_info *info)
 
   return TRUE;
 }
+
+int
+_bfd_nolink_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
+			    struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
+bfd_boolean
+_bfd_nolink_bfd_relax_section (bfd *abfd,
+			       asection *section ATTRIBUTE_UNUSED,
+			       struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+			       bfd_boolean *again ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}
+
+bfd_byte *
+_bfd_nolink_bfd_get_relocated_section_contents
+    (bfd *abfd,
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+     struct bfd_link_order *link_order ATTRIBUTE_UNUSED,
+     bfd_byte *data ATTRIBUTE_UNUSED,
+     bfd_boolean relocatable ATTRIBUTE_UNUSED,
+     asymbol **symbols ATTRIBUTE_UNUSED)
+{
+  return (bfd_byte *) _bfd_ptr_bfd_null_error (abfd);
+}
+
+bfd_boolean
+_bfd_nolink_bfd_lookup_section_flags
+    (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+     struct flag_info *flaginfo ATTRIBUTE_UNUSED,
+     asection *section)
+{
+  return _bfd_bool_bfd_false_error (section->owner);
+}
+
+bfd_boolean
+_bfd_nolink_bfd_is_group_section (bfd *abfd,
+				  const asection *sec ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}
+
+bfd_boolean
+_bfd_nolink_bfd_discard_group (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}
+
+struct bfd_link_hash_table *
+_bfd_nolink_bfd_link_hash_table_create (bfd *abfd)
+{
+  return (struct bfd_link_hash_table *) _bfd_ptr_bfd_null_error (abfd);
+}
+
+void
+_bfd_nolink_bfd_link_just_syms (asection *sec ATTRIBUTE_UNUSED,
+				struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+}
+
+void
+_bfd_nolink_bfd_copy_link_hash_symbol_type
+    (bfd *abfd ATTRIBUTE_UNUSED,
+     struct bfd_link_hash_entry *from ATTRIBUTE_UNUSED,
+     struct bfd_link_hash_entry *to ATTRIBUTE_UNUSED)
+{
+}
+
+bfd_boolean
+_bfd_nolink_bfd_link_split_section (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}
+
+bfd_boolean
+_bfd_nolink_section_already_linked (bfd *abfd,
+				    asection *sec ATTRIBUTE_UNUSED,
+				    struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}
+
+bfd_boolean
+_bfd_nolink_bfd_define_common_symbol
+    (bfd *abfd,
+     struct bfd_link_info *info ATTRIBUTE_UNUSED,
+     struct bfd_link_hash_entry *h ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}
+
+struct bfd_link_hash_entry *
+_bfd_nolink_bfd_define_start_stop (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+				   const char *name ATTRIBUTE_UNUSED,
+				   asection *sec)
+{
+  return (struct bfd_link_hash_entry *) _bfd_ptr_bfd_null_error (sec->owner);
+}

@@ -9489,8 +9489,7 @@ bfd_vms_get_data (bfd *abfd)
   return (struct vms_private_data_struct *)abfd->tdata.any;
 }
 
-#define vms_bfd_is_target_special_symbol \
-  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+#define vms_bfd_is_target_special_symbol  _bfd_bool_bfd_asymbol_false
 #define vms_bfd_link_just_syms		  _bfd_generic_link_just_syms
 #define vms_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type
@@ -9510,8 +9509,7 @@ bfd_vms_get_data (bfd *abfd)
 
 /* Symbols table.  */
 #define alpha_vms_make_empty_symbol	   _bfd_generic_make_empty_symbol
-#define alpha_vms_bfd_is_target_special_symbol \
-   ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+#define alpha_vms_bfd_is_target_special_symbol _bfd_bool_bfd_asymbol_false
 #define alpha_vms_print_symbol		   vms_print_symbol
 #define alpha_vms_get_symbol_info	   vms_get_symbol_info
 #define alpha_vms_get_symbol_version_string \
@@ -9586,12 +9584,24 @@ const bfd_target alpha_vms_vec =
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,
   bfd_getl16, bfd_getl_signed_16, bfd_putl16,
 
-  {_bfd_dummy_target, alpha_vms_object_p,	/* bfd_check_format.  */
-   _bfd_vms_lib_alpha_archive_p, _bfd_dummy_target},
-  {bfd_false, alpha_vms_mkobject,		/* bfd_set_format.  */
-   _bfd_vms_lib_alpha_mkarchive, bfd_false},
-  {bfd_false, alpha_vms_write_object_contents,	/* bfd_write_contents.  */
-   _bfd_vms_lib_write_archive_contents, bfd_false},
+  {				/* bfd_check_format.  */
+    _bfd_dummy_target,
+    alpha_vms_object_p,
+    _bfd_vms_lib_alpha_archive_p,
+    _bfd_dummy_target
+  },
+  {				/* bfd_set_format.  */
+    _bfd_bool_bfd_false_error,
+    alpha_vms_mkobject,
+    _bfd_vms_lib_alpha_mkarchive,
+    _bfd_bool_bfd_false_error
+  },
+  {				/* bfd_write_contents.  */
+    _bfd_bool_bfd_false_error,
+    alpha_vms_write_object_contents,
+    _bfd_vms_lib_write_archive_contents,
+    _bfd_bool_bfd_false_error
+  },
 
   BFD_JUMP_TABLE_GENERIC (alpha_vms),
   BFD_JUMP_TABLE_COPY (vms),

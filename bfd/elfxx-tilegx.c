@@ -2499,7 +2499,7 @@ tilegx_elf_omit_section_dynsym (bfd *output_bfd,
   if (strcmp (p->name, ".got") == 0)
     return FALSE;
 
-  return _bfd_elf_link_omit_section_dynsym (output_bfd, info, p);
+  return _bfd_elf_omit_section_dynsym_default (output_bfd, info, p);
 }
 
 bfd_boolean

@@ -8398,3 +8398,26 @@ _bfd_unrecognized_reloc (bfd * abfd, sec_ptr section, unsigned int r_type)
   bfd_set_error (bfd_error_bad_value);
   return FALSE;
 }
+
+reloc_howto_type *
+_bfd_norelocs_bfd_reloc_type_lookup
+    (bfd *abfd,
+     bfd_reloc_code_real_type code ATTRIBUTE_UNUSED)
+{
+  return (reloc_howto_type *) _bfd_ptr_bfd_null_error (abfd);
+}
+
+reloc_howto_type *
+_bfd_norelocs_bfd_reloc_name_lookup (bfd *abfd,
+				     const char *reloc_name ATTRIBUTE_UNUSED)
+{
+  return (reloc_howto_type *) _bfd_ptr_bfd_null_error (abfd);
+}
+
+long
+_bfd_nodynamic_canonicalize_dynamic_reloc (bfd *abfd,
+					   arelent **relp ATTRIBUTE_UNUSED,
+					   asymbol **symp ATTRIBUTE_UNUSED)
+{
+  return _bfd_long_bfd_n1_error (abfd);
+}

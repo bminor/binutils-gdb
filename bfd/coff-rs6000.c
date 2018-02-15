@@ -3970,7 +3970,7 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
 
 /* For generic entry points.  */
 #define _bfd_xcoff_close_and_cleanup _bfd_archive_close_and_cleanup
-#define _bfd_xcoff_bfd_free_cached_info bfd_true
+#define _bfd_xcoff_bfd_free_cached_info _bfd_bool_bfd_true
 #define _bfd_xcoff_new_section_hook coff_new_section_hook
 #define _bfd_xcoff_get_section_contents _bfd_generic_get_section_contents
 #define _bfd_xcoff_get_section_contents_in_window \
@@ -4001,7 +4001,7 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
 #define _bfd_xcoff_write_ar_hdr _bfd_generic_write_ar_hdr
 #define _bfd_xcoff_get_elt_at_index _bfd_generic_get_elt_at_index
 #define _bfd_xcoff_generic_stat_arch_elt _bfd_xcoff_stat_arch_elt
-#define _bfd_xcoff_update_armap_timestamp bfd_true
+#define _bfd_xcoff_update_armap_timestamp _bfd_bool_bfd_true
 
 /* For symbols entry points.  */
 #define _bfd_xcoff_get_symtab_upper_bound coff_get_symtab_upper_bound
@@ -4195,17 +4195,17 @@ const bfd_target rs6000_xcoff_vec =
     },
 
     { /* bfd_set_format */
-      bfd_false,
+      _bfd_bool_bfd_false_error,
       coff_mkobject,
       _bfd_generic_mkarchive,
-      bfd_false
+      _bfd_bool_bfd_false_error
     },
 
     {/* bfd_write_contents */
-      bfd_false,
+      _bfd_bool_bfd_false_error,
       coff_write_object_contents,
       _bfd_xcoff_write_archive_contents,
-      bfd_false
+      _bfd_bool_bfd_false_error
     },
 
     BFD_JUMP_TABLE_GENERIC (_bfd_xcoff),
@@ -4376,17 +4376,17 @@ const bfd_target powerpc_xcoff_vec =
     },
 
     { /* bfd_set_format */
-      bfd_false,
+      _bfd_bool_bfd_false_error,
       coff_mkobject,
       _bfd_generic_mkarchive,
-      bfd_false
+      _bfd_bool_bfd_false_error
     },
 
     {/* bfd_write_contents */
-      bfd_false,
+      _bfd_bool_bfd_false_error,
       coff_write_object_contents,
       _bfd_xcoff_write_archive_contents,
-      bfd_false
+      _bfd_bool_bfd_false_error
     },
 
     BFD_JUMP_TABLE_GENERIC (_bfd_xcoff),

@@ -146,7 +146,7 @@
    routines in this file, we can not use the default aout
    free_cached_info routine which assumes that the relocs and symtabs
    were allocated using malloc.  */
-#define MY_bfd_free_cached_info bfd_true
+#define MY_bfd_free_cached_info _bfd_bool_bfd_true
 
 #define m68k_aout_hp300hpux_write_syms aout_32_write_syms
 

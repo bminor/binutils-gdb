@@ -5901,7 +5901,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 /* Not yet handled: creating an archive.  */
 #define bfd_mach_o_mkarchive			  _bfd_noarchive_mkarchive
 
-#define bfd_mach_o_close_and_cleanup		  bfd_true
+#define bfd_mach_o_close_and_cleanup		  _bfd_bool_bfd_true
 
 /* Not used.  */
 #define bfd_mach_o_generic_stat_arch_elt	  bfd_mach_o_fat_stat_arch_elt

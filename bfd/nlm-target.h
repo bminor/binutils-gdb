@@ -27,7 +27,7 @@
 #define nlm_get_symbol_info			nlmNAME (get_symbol_info)
 #define nlm_get_symbol_version_string		_bfd_nosymbols_get_symbol_version_string
 #define nlm_bfd_is_local_label_name		bfd_generic_is_local_label_name
-#define nlm_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+#define nlm_bfd_is_target_special_symbol	_bfd_bool_bfd_asymbol_false
 #define nlm_get_lineno				_bfd_nosymbols_get_lineno
 #define nlm_find_nearest_line			_bfd_nosymbols_find_nearest_line
 #define nlm_find_line				_bfd_nosymbols_find_line
@@ -133,17 +133,17 @@ const bfd_target TARGET_BIG_SYM =
   },
 
   /* bfd_set_format: set the format of a file being written.  */
-  { bfd_false,
+  { _bfd_bool_bfd_false_error,
     nlm_mkobject,
     _bfd_generic_mkarchive,
-    bfd_false
+    _bfd_bool_bfd_false_error
   },
 
   /* bfd_write_contents: write cached information into a file being written.  */
-  { bfd_false,
+  { _bfd_bool_bfd_false_error,
     nlmNAME (write_object_contents),
     _bfd_write_archive_contents,
-    bfd_false
+    _bfd_bool_bfd_false_error
   },
 
   /* Initialize a jump table with the standard macro.
@@ -227,17 +227,17 @@ const bfd_target TARGET_LITTLE_SYM =
   },
 
   /* bfd_set_format: set the format of a file being written.  */
-  { bfd_false,
+  { _bfd_bool_bfd_false_error,
     nlm_mkobject,
     _bfd_generic_mkarchive,
-    bfd_false
+    _bfd_bool_bfd_false_error
   },
 
   /* bfd_write_contents: write cached information into a file being written.  */
-  { bfd_false,
+  { _bfd_bool_bfd_false_error,
     nlmNAME(write_object_contents),
     _bfd_write_archive_contents,
-    bfd_false
+    _bfd_bool_bfd_false_error
   },
 
   /* Initialize a jump table with the standard macro.

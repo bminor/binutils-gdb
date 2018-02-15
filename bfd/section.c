@@ -1698,3 +1698,13 @@ bfd_generic_discard_group (bfd *abfd ATTRIBUTE_UNUSED,
 {
   return TRUE;
 }
+
+bfd_boolean
+_bfd_nowrite_set_section_contents (bfd *abfd,
+				   sec_ptr section ATTRIBUTE_UNUSED,
+				   const void *location ATTRIBUTE_UNUSED,
+				   file_ptr offset ATTRIBUTE_UNUSED,
+				   bfd_size_type count ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}

@@ -773,7 +773,7 @@ wasm_object_p (bfd *abfd)
 /* BFD_JUMP_TABLE_SYMBOLS */
 #define wasm_get_symbol_version_string	  _bfd_nosymbols_get_symbol_version_string
 #define wasm_bfd_is_local_label_name	   bfd_generic_is_local_label_name
-#define wasm_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+#define wasm_bfd_is_target_special_symbol _bfd_bool_bfd_asymbol_false
 #define wasm_get_lineno			  _bfd_nosymbols_get_lineno
 #define wasm_find_nearest_line		  _bfd_nosymbols_find_nearest_line
 #define wasm_find_line			  _bfd_nosymbols_find_line
@@ -811,16 +811,16 @@ const bfd_target wasm_vec =
     _bfd_dummy_target,
   },
   {
-    bfd_false,
+    _bfd_bool_bfd_false_error,
     wasm_mkobject,
     _bfd_generic_mkarchive,
-    bfd_false,
+    _bfd_bool_bfd_false_error,
   },
   {				/* bfd_write_contents.  */
-    bfd_false,
+    _bfd_bool_bfd_false_error,
     wasm_write_object_contents,
     _bfd_write_archive_contents,
-    bfd_false,
+    _bfd_bool_bfd_false_error,
   },
 
   BFD_JUMP_TABLE_GENERIC (_bfd_generic),

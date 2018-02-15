@@ -3853,27 +3853,20 @@ ieee_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define	ieee_close_and_cleanup _bfd_generic_close_and_cleanup
 #define ieee_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
 
-#define ieee_slurp_armap bfd_true
-#define ieee_slurp_extended_name_table bfd_true
+#define ieee_slurp_armap _bfd_bool_bfd_true
+#define ieee_slurp_extended_name_table _bfd_bool_bfd_true
 #define ieee_construct_extended_name_table \
-  ((bfd_boolean (*) \
-    (bfd *, char **, bfd_size_type *, const char **)) \
-   (bfd_boolean (*)) bfd_true)
+  _bfd_noarchive_construct_extended_name_table
 #define ieee_truncate_arname bfd_dont_truncate_arname
-#define ieee_write_armap \
-  ((bfd_boolean (*) \
-    (bfd *, unsigned int, struct orl *, unsigned int, int)) \
-   (bfd_boolean (*)) bfd_true)
-#define ieee_read_ar_hdr bfd_nullvoidptr
-#define ieee_write_ar_hdr \
-  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_false)
-#define ieee_update_armap_timestamp bfd_true
+#define ieee_write_armap _bfd_noarchive_write_armap
+#define ieee_read_ar_hdr _bfd_ptr_bfd_null_error
+#define ieee_write_ar_hdr _bfd_noarchive_write_ar_hdr
+#define ieee_update_armap_timestamp _bfd_bool_bfd_true
 #define ieee_get_elt_at_index _bfd_generic_get_elt_at_index
 
 #define ieee_get_symbol_version_string \
   _bfd_nosymbols_get_symbol_version_string
-#define ieee_bfd_is_target_special_symbol  \
-  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+#define ieee_bfd_is_target_special_symbol _bfd_bool_bfd_asymbol_false
 #define ieee_bfd_is_local_label_name bfd_generic_is_local_label_name
 #define ieee_get_lineno _bfd_nosymbols_get_lineno
 #define ieee_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
@@ -3937,16 +3930,16 @@ const bfd_target ieee_vec =
    _bfd_dummy_target,
   },
   {
-    bfd_false,
+    _bfd_bool_bfd_false_error,
     ieee_mkobject,
     _bfd_generic_mkarchive,
-    bfd_false
+    _bfd_bool_bfd_false_error
   },
   {
-    bfd_false,
+    _bfd_bool_bfd_false_error,
     ieee_write_object_contents,
     _bfd_write_archive_contents,
-    bfd_false,
+    _bfd_bool_bfd_false_error,
   },
 
   /* ieee_close_and_cleanup, ieee_bfd_free_cached_info, ieee_new_section_hook,

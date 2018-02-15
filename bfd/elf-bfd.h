@@ -2270,7 +2270,9 @@ extern bfd_boolean _bfd_elf_validate_reloc
 
 extern bfd_boolean _bfd_elf_link_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf_link_omit_section_dynsym
+extern bfd_boolean _bfd_elf_omit_section_dynsym_default
+  (bfd *, struct bfd_link_info *, asection *);
+extern bfd_boolean _bfd_elf_omit_section_dynsym_all
   (bfd *, struct bfd_link_info *, asection *);
 extern bfd_boolean _bfd_elf_create_dynamic_sections
   (bfd *, struct bfd_link_info *);

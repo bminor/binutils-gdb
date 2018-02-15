@@ -483,12 +483,25 @@ const bfd_target arm_aout_le_vec =
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,
   bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* Headers.  */
-  {_bfd_dummy_target, MY_object_p,		/* bfd_check_format.  */
-   bfd_generic_archive_p, MY_core_file_p},
-  {bfd_false, MY_mkobject,			/* bfd_set_format.  */
-   _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, MY_write_object_contents,		/* bfd_write_contents.  */
-   _bfd_write_archive_contents, bfd_false},
+
+  {				/* bfd_check_format.  */
+    _bfd_dummy_target,
+    MY_object_p,
+    bfd_generic_archive_p,
+    MY_core_file_p
+  },
+  {				/* bfd_set_format.  */
+    _bfd_bool_bfd_false_error,
+    MY_mkobject,
+    _bfd_generic_mkarchive,
+    _bfd_bool_bfd_false_error
+  },
+  {				/* bfd_write_contents.  */
+    _bfd_bool_bfd_false_error,
+    MY_write_object_contents,
+    _bfd_write_archive_contents,
+    _bfd_bool_bfd_false_error
+  },
 
   BFD_JUMP_TABLE_GENERIC (MY),
   BFD_JUMP_TABLE_COPY (MY),
@@ -525,12 +538,25 @@ const bfd_target arm_aout_be_vec =
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* Headers.  */
-  {_bfd_dummy_target, MY_object_p,		/* bfd_check_format.  */
-   bfd_generic_archive_p, MY_core_file_p},
-  {bfd_false, MY_mkobject,			/* bfd_set_format.  */
-   _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, MY_write_object_contents,		/* bfd_write_contents.  */
-   _bfd_write_archive_contents, bfd_false},
+
+  {				/* bfd_check_format.  */
+    _bfd_dummy_target,
+    MY_object_p,
+    bfd_generic_archive_p,
+    MY_core_file_p
+  },
+  {				/* bfd_set_format.  */
+    _bfd_bool_bfd_false_error,
+    MY_mkobject,
+    _bfd_generic_mkarchive,
+    _bfd_bool_bfd_false_error
+  },
+  {				/* bfd_write_contents.  */
+    _bfd_bool_bfd_false_error,
+    MY_write_object_contents,
+    _bfd_write_archive_contents,
+    _bfd_bool_bfd_false_error
+  },
 
   BFD_JUMP_TABLE_GENERIC (MY),
   BFD_JUMP_TABLE_COPY (MY),

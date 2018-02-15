@@ -2218,6 +2218,67 @@ alpha_ecoff_get_elt_at_index (bfd *abfd, symindex sym_index)
   entry = bfd_ardata (abfd)->symdefs + sym_index;
   return alpha_ecoff_get_elt_at_filepos (abfd, entry->file_offset);
 }
+
+static void
+alpha_ecoff_swap_coff_aux_in (bfd *abfd ATTRIBUTE_UNUSED,
+			      void *ext1 ATTRIBUTE_UNUSED,
+			      int type ATTRIBUTE_UNUSED,
+			      int in_class ATTRIBUTE_UNUSED,
+			      int indx ATTRIBUTE_UNUSED,
+			      int numaux ATTRIBUTE_UNUSED,
+			      void *in1 ATTRIBUTE_UNUSED)
+{
+}
+
+static void
+alpha_ecoff_swap_coff_sym_in (bfd *abfd ATTRIBUTE_UNUSED,
+			      void *ext1 ATTRIBUTE_UNUSED,
+			      void *in1 ATTRIBUTE_UNUSED)
+{
+}
+
+static void
+alpha_ecoff_swap_coff_lineno_in (bfd *abfd ATTRIBUTE_UNUSED,
+				 void *ext1 ATTRIBUTE_UNUSED,
+				 void *in1 ATTRIBUTE_UNUSED)
+{
+}
+
+static unsigned int
+alpha_ecoff_swap_coff_aux_out (bfd *abfd ATTRIBUTE_UNUSED,
+			       void *inp ATTRIBUTE_UNUSED,
+			       int type ATTRIBUTE_UNUSED,
+			       int in_class ATTRIBUTE_UNUSED,
+			       int indx ATTRIBUTE_UNUSED,
+			       int numaux ATTRIBUTE_UNUSED,
+			       void *extp ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
+static unsigned int
+alpha_ecoff_swap_coff_sym_out (bfd *abfd ATTRIBUTE_UNUSED,
+			       void *inp ATTRIBUTE_UNUSED,
+			       void *extp ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
+static unsigned int
+alpha_ecoff_swap_coff_lineno_out (bfd *abfd ATTRIBUTE_UNUSED,
+				  void *inp ATTRIBUTE_UNUSED,
+				  void *extp ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
+static unsigned int
+alpha_ecoff_swap_coff_reloc_out (bfd *abfd ATTRIBUTE_UNUSED,
+				 void *inp ATTRIBUTE_UNUSED,
+				 void *extp ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
 
 /* This is the ECOFF backend structure.  The backend field of the
    target vector points to this.  */
@@ -2226,13 +2287,10 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
 {
   /* COFF backend structure.  */
   {
-    (void (*) (bfd *, void *, int, int, int, int, void *)) (void (*)) bfd_void, /* aux_in */
-    (void (*) (bfd *, void *, void *)) (void (*)) bfd_void, /* sym_in */
-    (void (*) (bfd *, void *, void *)) (void (*)) bfd_void, /* lineno_in */
-    (unsigned (*) (bfd *, void *, int, int, int, int, void *)) (unsigned (*)) bfd_0u,/*aux_out*/
-    (unsigned (*) (bfd *, void *, void *)) (unsigned (*)) bfd_0u, /* sym_out */
-    (unsigned (*) (bfd *, void *, void *)) (unsigned (*)) bfd_0u, /* lineno_out */
-    (unsigned (*) (bfd *, void *, void *)) (unsigned (*)) bfd_0u, /* reloc_out */
+    alpha_ecoff_swap_coff_aux_in, alpha_ecoff_swap_coff_sym_in,
+    alpha_ecoff_swap_coff_lineno_in, alpha_ecoff_swap_coff_aux_out,
+    alpha_ecoff_swap_coff_sym_out, alpha_ecoff_swap_coff_lineno_out,
+    alpha_ecoff_swap_coff_reloc_out,
     alpha_ecoff_swap_filehdr_out, alpha_ecoff_swap_aouthdr_out,
     alpha_ecoff_swap_scnhdr_out,
     FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, 0, FILNMLEN, TRUE,
@@ -2353,9 +2411,9 @@ const bfd_target alpha_ecoff_le_vec =
   BFD_ENDIAN_LITTLE,		/* data byte order is little */
   BFD_ENDIAN_LITTLE,		/* header byte order is little */
 
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+  (HAS_RELOC | EXEC_P		/* object flags */
+   | HAS_LINENO | HAS_DEBUG
+   | HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA),
   0,				/* leading underscore */
@@ -2369,24 +2427,36 @@ const bfd_target alpha_ecoff_le_vec =
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
-  {_bfd_dummy_target, alpha_ecoff_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, _bfd_ecoff_mkobject,  /* bfd_set_format */
-     _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, _bfd_ecoff_write_object_contents, /* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
+  {				/* bfd_check_format */
+    _bfd_dummy_target,
+    alpha_ecoff_object_p,
+    bfd_generic_archive_p,
+    _bfd_dummy_target
+  },
+  {				/* bfd_set_format */
+    _bfd_bool_bfd_false_error,
+    _bfd_ecoff_mkobject,
+    _bfd_generic_mkarchive,
+    _bfd_bool_bfd_false_error
+  },
+  {				/* bfd_write_contents */
+    _bfd_bool_bfd_false_error,
+    _bfd_ecoff_write_object_contents,
+    _bfd_write_archive_contents,
+    _bfd_bool_bfd_false_error
+  },
 
-     BFD_JUMP_TABLE_GENERIC (_bfd_ecoff),
-     BFD_JUMP_TABLE_COPY (_bfd_ecoff),
-     BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (alpha_ecoff),
-     BFD_JUMP_TABLE_SYMBOLS (_bfd_ecoff),
-     BFD_JUMP_TABLE_RELOCS (_bfd_ecoff),
-     BFD_JUMP_TABLE_WRITE (_bfd_ecoff),
-     BFD_JUMP_TABLE_LINK (_bfd_ecoff),
-     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+  BFD_JUMP_TABLE_GENERIC (_bfd_ecoff),
+  BFD_JUMP_TABLE_COPY (_bfd_ecoff),
+  BFD_JUMP_TABLE_CORE (_bfd_nocore),
+  BFD_JUMP_TABLE_ARCHIVE (alpha_ecoff),
+  BFD_JUMP_TABLE_SYMBOLS (_bfd_ecoff),
+  BFD_JUMP_TABLE_RELOCS (_bfd_ecoff),
+  BFD_JUMP_TABLE_WRITE (_bfd_ecoff),
+  BFD_JUMP_TABLE_LINK (_bfd_ecoff),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   NULL,
 
-  & alpha_ecoff_backend_data
+  &alpha_ecoff_backend_data
 };

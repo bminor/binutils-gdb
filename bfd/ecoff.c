@@ -182,6 +182,13 @@ _bfd_ecoff_new_section_hook (bfd *abfd, asection *section)
   return _bfd_generic_new_section_hook (abfd, section);
 }
 
+void
+_bfd_ecoff_set_alignment_hook (bfd *abfd ATTRIBUTE_UNUSED,
+			       asection *section ATTRIBUTE_UNUSED,
+			       void *scnhdr ATTRIBUTE_UNUSED)
+{
+}
+
 /* Determine the machine architecture and type.  This is called from
    the generic COFF routines.  It is the inverse of ecoff_get_magic,
    below.  This could be an ECOFF backend routine, with one version

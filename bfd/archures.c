@@ -1452,3 +1452,11 @@ bfd_arch_default_fill (bfd_size_type count,
     memset (fill, 0, count);
   return fill;
 }
+
+bfd_boolean
+_bfd_nowrite_set_arch_mach (bfd *abfd,
+			    enum bfd_architecture arch ATTRIBUTE_UNUSED,
+			    unsigned long mach ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}

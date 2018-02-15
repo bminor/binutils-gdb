@@ -211,7 +211,7 @@ binary_get_symbol_info (bfd *ignore_abfd ATTRIBUTE_UNUSED,
 #define binary_bfd_make_debug_symbol	   _bfd_nosymbols_bfd_make_debug_symbol
 #define binary_read_minisymbols		   _bfd_generic_read_minisymbols
 #define binary_minisymbol_to_symbol	   _bfd_generic_minisymbol_to_symbol
-#define binary_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+#define binary_bfd_is_target_special_symbol _bfd_bool_bfd_asymbol_false
 
 /* Set the architecture of a binary file.  */
 #define binary_set_arch_mach _bfd_generic_set_arch_mach
@@ -346,16 +346,16 @@ const bfd_target binary_vec =
     _bfd_dummy_target,
   },
   {				/* bfd_set_format */
-    bfd_false,
+    _bfd_bool_bfd_false_error,
     binary_mkobject,
-    bfd_false,
-    bfd_false,
+    _bfd_bool_bfd_false_error,
+    _bfd_bool_bfd_false_error,
   },
   {				/* bfd_write_contents */
-    bfd_false,
-    bfd_true,
-    bfd_false,
-    bfd_false,
+    _bfd_bool_bfd_false_error,
+    _bfd_bool_bfd_true,
+    _bfd_bool_bfd_false_error,
+    _bfd_bool_bfd_false_error,
   },
 
   BFD_JUMP_TABLE_GENERIC (binary),

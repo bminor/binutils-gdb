@@ -2480,9 +2480,9 @@ const bfd_target TARGET_LITTLE_SYM =
   BFD_ENDIAN_LITTLE,		/* data byte order is little */
   BFD_ENDIAN_LITTLE,		/* header byte order is little */
 
-  (HAS_RELOC | EXEC_P |		/* FIXME: object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+  (HAS_RELOC | EXEC_P		/* FIXME: object flags */
+   | HAS_LINENO | HAS_DEBUG
+   | HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
 #ifndef COFF_WITH_PE
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
@@ -2505,12 +2505,24 @@ const bfd_target TARGET_LITTLE_SYM =
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,
   bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
-  {_bfd_dummy_target, coff_object_p,	/* bfd_check_format */
-     bfd_generic_archive_p, /* _bfd_dummy_target */ coff_object_p },
-  {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-     bfd_false},
-  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
+  {				/* bfd_check_format */
+    _bfd_dummy_target,
+    coff_object_p,
+    bfd_generic_archive_p,
+    coff_object_p
+  },
+  {				/* bfd_set_format */
+    _bfd_bool_bfd_false_error,
+    coff_mkobject,
+    _bfd_generic_mkarchive,
+    _bfd_bool_bfd_false_error
+  },
+  {				/* bfd_write_contents */
+    _bfd_bool_bfd_false_error,
+    coff_write_object_contents,
+    _bfd_write_archive_contents,
+    _bfd_bool_bfd_false_error
+  },
 
   BFD_JUMP_TABLE_GENERIC (coff),
   BFD_JUMP_TABLE_COPY (coff),
@@ -2524,7 +2536,7 @@ const bfd_target TARGET_LITTLE_SYM =
 
   /* Alternative_target.  */
 #ifdef TARGET_BIG_SYM
-  & TARGET_BIG_SYM,
+  &TARGET_BIG_SYM,
 #else
   NULL,
 #endif
@@ -2541,9 +2553,9 @@ const bfd_target TARGET_BIG_SYM =
   BFD_ENDIAN_BIG,		/* data byte order is big */
   BFD_ENDIAN_BIG,		/* header byte order is big */
 
-  (HAS_RELOC | EXEC_P |		/* FIXME: object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+  (HAS_RELOC | EXEC_P		/* FIXME: object flags */
+   | HAS_LINENO | HAS_DEBUG
+   | HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
 #ifndef COFF_WITH_PE
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
@@ -2566,12 +2578,24 @@ const bfd_target TARGET_BIG_SYM =
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
-  {_bfd_dummy_target, coff_object_p,	/* bfd_check_format */
-     bfd_generic_archive_p, /* _bfd_dummy_target */ coff_object_p },
-  {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-     bfd_false},
-  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
+  {				/* bfd_check_format */
+    _bfd_dummy_target,
+    coff_object_p,
+    bfd_generic_archive_p,
+    coff_object_p
+  },
+  {				/* bfd_set_format */
+    _bfd_bool_bfd_false_error,
+    coff_mkobject,
+    _bfd_generic_mkarchive,
+    _bfd_bool_bfd_false_error
+  },
+  {				/* bfd_write_contents */
+    _bfd_bool_bfd_false_error,
+    coff_write_object_contents,
+    _bfd_write_archive_contents,
+    _bfd_bool_bfd_false_error
+  },
 
   BFD_JUMP_TABLE_GENERIC (coff),
   BFD_JUMP_TABLE_COPY (coff),
@@ -2585,7 +2609,7 @@ const bfd_target TARGET_BIG_SYM =
 
   /* Alternative_target.  */
 #ifdef TARGET_LITTLE_SYM
-  & TARGET_LITTLE_SYM,
+  &TARGET_LITTLE_SYM,
 #else
   NULL,
 #endif

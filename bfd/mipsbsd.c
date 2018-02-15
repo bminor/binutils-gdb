@@ -401,17 +401,17 @@ static const struct aout_backend_data MY(backend_data) =
 extern const bfd_target mips_aout_be_vec;
 
 const bfd_target mips_aout_le_vec =
-{
-    "a.out-mips-little",		/* name */
+  {
+    "a.out-mips-little",	/* name */
     bfd_target_aout_flavour,
     BFD_ENDIAN_LITTLE,		/* target byte order (little) */
     BFD_ENDIAN_LITTLE,		/* target headers byte order (little) */
-    (HAS_RELOC | EXEC_P |		/* object flags */
-     HAS_LINENO | HAS_DEBUG |
-     HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+    (HAS_RELOC | EXEC_P		/* object flags */
+     | HAS_LINENO | HAS_DEBUG
+     | HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
     (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA),
     MY_symbol_leading_char,
-    ' ',				/* ar_pad_char */
+    ' ',			/* ar_pad_char */
     15,				/* ar_max_namelen */
     0,				/* match priority.  */
     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
@@ -420,12 +420,25 @@ const bfd_target mips_aout_le_vec =
     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
-    {_bfd_dummy_target, MY_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, MY_core_file_p},
-    {bfd_false, MY_mkobject,	/* bfd_set_format */
-     _bfd_generic_mkarchive, bfd_false},
-    {bfd_false, MY_write_object_contents, /* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
+
+    {				/* bfd_check_format */
+      _bfd_dummy_target,
+      MY_object_p,
+      bfd_generic_archive_p,
+      MY_core_file_p
+    },
+    {				/* bfd_set_format */
+      _bfd_bool_bfd_false_error,
+      MY_mkobject,
+      _bfd_generic_mkarchive,
+      _bfd_bool_bfd_false_error
+    },
+    {				/* bfd_write_contents */
+      _bfd_bool_bfd_false_error,
+      MY_write_object_contents,
+      _bfd_write_archive_contents,
+      _bfd_bool_bfd_false_error
+    },
 
     BFD_JUMP_TABLE_GENERIC (MY),
     BFD_JUMP_TABLE_COPY (MY),
@@ -437,7 +450,7 @@ const bfd_target mips_aout_le_vec =
     BFD_JUMP_TABLE_LINK (MY),
     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-    & mips_aout_be_vec,
+    &mips_aout_be_vec,
 
     MY_backend_data
   };
@@ -448,12 +461,12 @@ const bfd_target mips_aout_be_vec =
     bfd_target_aout_flavour,
     BFD_ENDIAN_BIG,		/* target byte order (big) */
     BFD_ENDIAN_BIG,		/* target headers byte order (big) */
-    (HAS_RELOC | EXEC_P |		/* object flags */
-     HAS_LINENO | HAS_DEBUG |
-     HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+    (HAS_RELOC | EXEC_P		/* object flags */
+     | HAS_LINENO | HAS_DEBUG
+     | HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
     (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA),
     MY_symbol_leading_char,
-    ' ',				/* ar_pad_char */
+    ' ',			/* ar_pad_char */
     15,				/* ar_max_namelen */
     0,				/* match priority.  */
     bfd_getb64, bfd_getb_signed_64, bfd_putb64,
@@ -462,12 +475,25 @@ const bfd_target mips_aout_be_vec =
     bfd_getb64, bfd_getb_signed_64, bfd_putb64,
     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
-    {_bfd_dummy_target, MY_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, MY_core_file_p},
-    {bfd_false, MY_mkobject,	/* bfd_set_format */
-     _bfd_generic_mkarchive, bfd_false},
-    {bfd_false, MY_write_object_contents, /* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
+
+    {				/* bfd_check_format */
+      _bfd_dummy_target,
+      MY_object_p,
+      bfd_generic_archive_p,
+      MY_core_file_p
+    },
+    {				/* bfd_set_format */
+      _bfd_bool_bfd_false_error,
+      MY_mkobject,
+      _bfd_generic_mkarchive,
+      _bfd_bool_bfd_false_error
+    },
+    {				/* bfd_write_contents */
+      _bfd_bool_bfd_false_error,
+      MY_write_object_contents,
+      _bfd_write_archive_contents,
+      _bfd_bool_bfd_false_error
+    },
 
     BFD_JUMP_TABLE_GENERIC (MY),
     BFD_JUMP_TABLE_COPY (MY),
@@ -479,7 +505,7 @@ const bfd_target mips_aout_be_vec =
     BFD_JUMP_TABLE_LINK (MY),
     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-    & mips_aout_le_vec,
+    &mips_aout_le_vec,
 
     MY_backend_data
   };

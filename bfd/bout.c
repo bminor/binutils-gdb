@@ -1417,24 +1417,37 @@ const bfd_target bout_be_vec =
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,
      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* Headers.  */
- {_bfd_dummy_target, b_out_object_p, /* bfd_check_format.  */
-   bfd_generic_archive_p, _bfd_dummy_target},
- {bfd_false, b_out_mkobject,	/* bfd_set_format.  */
-   _bfd_generic_mkarchive, bfd_false},
- {bfd_false, b_out_write_object_contents, /* bfd_write_contents.  */
-   _bfd_write_archive_contents, bfd_false},
 
-     BFD_JUMP_TABLE_GENERIC (aout_32),
-     BFD_JUMP_TABLE_COPY (_bfd_generic),
-     BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
-     BFD_JUMP_TABLE_SYMBOLS (aout_32),
-     BFD_JUMP_TABLE_RELOCS (b_out),
-     BFD_JUMP_TABLE_WRITE (b_out),
-     BFD_JUMP_TABLE_LINK (b_out),
-     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+  {				/* bfd_check_format.  */
+    _bfd_dummy_target,
+    b_out_object_p,
+    bfd_generic_archive_p,
+    _bfd_dummy_target
+  },
+  {				/* bfd_set_format.  */
+    _bfd_bool_bfd_false_error,
+    b_out_mkobject,
+    _bfd_generic_mkarchive,
+    _bfd_bool_bfd_false_error
+  },
+  {				/* bfd_write_contents.  */
+    _bfd_bool_bfd_false_error,
+    b_out_write_object_contents,
+    _bfd_write_archive_contents,
+    _bfd_bool_bfd_false_error
+  },
 
-  & bout_le_vec,
+  BFD_JUMP_TABLE_GENERIC (aout_32),
+  BFD_JUMP_TABLE_COPY (_bfd_generic),
+  BFD_JUMP_TABLE_CORE (_bfd_nocore),
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
+  BFD_JUMP_TABLE_SYMBOLS (aout_32),
+  BFD_JUMP_TABLE_RELOCS (b_out),
+  BFD_JUMP_TABLE_WRITE (b_out),
+  BFD_JUMP_TABLE_LINK (b_out),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+
+  &bout_le_vec,
 
   NULL
 };
@@ -1460,24 +1473,36 @@ const bfd_target bout_le_vec =
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* Headers.  */
 
-  {_bfd_dummy_target, b_out_object_p, /* bfd_check_format.  */
-     bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, b_out_mkobject,	/* bfd_set_format.  */
-     _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, b_out_write_object_contents, /* bfd_write_contents.  */
-     _bfd_write_archive_contents, bfd_false},
+  {				/* bfd_check_format.  */
+    _bfd_dummy_target,
+    b_out_object_p,
+    bfd_generic_archive_p,
+    _bfd_dummy_target
+  },
+  {				/* bfd_set_format.  */
+    _bfd_bool_bfd_false_error,
+    b_out_mkobject,
+    _bfd_generic_mkarchive,
+    _bfd_bool_bfd_false_error
+  },
+  {				/* bfd_write_contents.  */
+    _bfd_bool_bfd_false_error,
+    b_out_write_object_contents,
+    _bfd_write_archive_contents,
+    _bfd_bool_bfd_false_error
+  },
 
-     BFD_JUMP_TABLE_GENERIC (aout_32),
-     BFD_JUMP_TABLE_COPY (_bfd_generic),
-     BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
-     BFD_JUMP_TABLE_SYMBOLS (aout_32),
-     BFD_JUMP_TABLE_RELOCS (b_out),
-     BFD_JUMP_TABLE_WRITE (b_out),
-     BFD_JUMP_TABLE_LINK (b_out),
-     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+  BFD_JUMP_TABLE_GENERIC (aout_32),
+  BFD_JUMP_TABLE_COPY (_bfd_generic),
+  BFD_JUMP_TABLE_CORE (_bfd_nocore),
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
+  BFD_JUMP_TABLE_SYMBOLS (aout_32),
+  BFD_JUMP_TABLE_RELOCS (b_out),
+  BFD_JUMP_TABLE_WRITE (b_out),
+  BFD_JUMP_TABLE_LINK (b_out),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  & bout_be_vec,
+  &bout_be_vec,
 
   NULL
 };

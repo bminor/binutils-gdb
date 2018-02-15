@@ -251,7 +251,7 @@ msdos_set_section_contents (bfd *abfd,
 #define msdos_find_line _bfd_nosymbols_find_line
 #define msdos_find_inliner_info _bfd_nosymbols_find_inliner_info
 #define msdos_get_lineno _bfd_nosymbols_get_lineno
-#define msdos_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+#define msdos_bfd_is_target_special_symbol _bfd_bool_bfd_asymbol_false
 #define msdos_bfd_is_local_label_name _bfd_nosymbols_bfd_is_local_label_name
 #define msdos_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
 #define msdos_read_minisymbols _bfd_nosymbols_read_minisymbols
@@ -289,16 +289,16 @@ const bfd_target i386_msdos_vec =
       _bfd_dummy_target,
     },
     {
-      bfd_false,
+      _bfd_bool_bfd_false_error,
       msdos_mkobject,
       _bfd_generic_mkarchive,
-      bfd_false,
+      _bfd_bool_bfd_false_error,
     },
     {				/* bfd_write_contents */
-      bfd_false,
+      _bfd_bool_bfd_false_error,
       msdos_write_object_contents,
       _bfd_write_archive_contents,
-      bfd_false,
+      _bfd_bool_bfd_false_error,
     },
 
     BFD_JUMP_TABLE_GENERIC (msdos),

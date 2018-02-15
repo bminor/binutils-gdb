@@ -2694,22 +2694,22 @@ const bfd_target rs6000_xcoff64_vec =
     },
 
     { /* bfd_set_format */
-      bfd_false,
+      _bfd_bool_bfd_false_error,
       coff_mkobject,
       _bfd_generic_mkarchive,
-      bfd_false
+      _bfd_bool_bfd_false_error
     },
 
     {/* bfd_write_contents */
-      bfd_false,
+      _bfd_bool_bfd_false_error,
       xcoff64_write_object_contents,
       _bfd_xcoff_write_archive_contents,
-      bfd_false
+      _bfd_bool_bfd_false_error
     },
 
     /* Generic */
     _bfd_archive_close_and_cleanup,
-    bfd_true,
+    _bfd_bool_bfd_true,
     coff_new_section_hook,
     _bfd_generic_get_section_contents,
     _bfd_generic_get_section_contents_in_window,
@@ -2738,7 +2738,7 @@ const bfd_target rs6000_xcoff64_vec =
     xcoff64_openr_next_archived_file,
     _bfd_generic_get_elt_at_index,
     _bfd_xcoff_stat_arch_elt,
-    bfd_true,
+    _bfd_bool_bfd_true,
 
     /* Symbols */
     coff_get_symtab_upper_bound,
@@ -2955,22 +2955,22 @@ const bfd_target rs6000_xcoff64_aix_vec =
     },
 
     { /* bfd_set_format */
-      bfd_false,
+      _bfd_bool_bfd_false_error,
       coff_mkobject,
       _bfd_generic_mkarchive,
-      bfd_false
+      _bfd_bool_bfd_false_error
     },
 
     {/* bfd_write_contents */
-      bfd_false,
+      _bfd_bool_bfd_false_error,
       xcoff64_write_object_contents,
       _bfd_xcoff_write_archive_contents,
-      bfd_false
+      _bfd_bool_bfd_false_error
     },
 
     /* Generic */
     _bfd_archive_close_and_cleanup,
-    bfd_true,
+    _bfd_bool_bfd_true,
     coff_new_section_hook,
     _bfd_generic_get_section_contents,
     _bfd_generic_get_section_contents_in_window,
@@ -2999,7 +2999,7 @@ const bfd_target rs6000_xcoff64_aix_vec =
     xcoff64_openr_next_archived_file,
     _bfd_generic_get_elt_at_index,
     _bfd_xcoff_stat_arch_elt,
-    bfd_true,
+    _bfd_bool_bfd_true,
 
     /* Symbols */
     coff_get_symtab_upper_bound,

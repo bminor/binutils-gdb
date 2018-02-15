@@ -6138,7 +6138,9 @@ assign_file_positions_except_relocs (bfd *abfd,
 	 changed or the programs updated.  */
       if (alloc > 1
 	  && tdata->phdr[0].p_type == PT_PHDR
-	  && ! bed->elf_backend_allow_non_load_phdr (abfd, tdata->phdr, alloc)
+	  && (bed->elf_backend_allow_non_load_phdr == NULL
+	      || !bed->elf_backend_allow_non_load_phdr (abfd, tdata->phdr,
+							alloc))
 	  && tdata->phdr[1].p_type == PT_LOAD
 	  && (tdata->phdr[1].p_vaddr > tdata->phdr[0].p_vaddr
 	      || (tdata->phdr[1].p_vaddr + tdata->phdr[1].p_memsz)

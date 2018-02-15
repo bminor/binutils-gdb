@@ -5574,8 +5574,7 @@ mn10300_elf_mkobject (bfd *abfd)
   _bfd_mn10300_elf_adjust_dynamic_symbol
 #define elf_backend_size_dynamic_sections \
   _bfd_mn10300_elf_size_dynamic_sections
-#define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+#define elf_backend_omit_section_dynsym _bfd_elf_omit_section_dynsym_all
 #define elf_backend_finish_dynamic_symbol \
   _bfd_mn10300_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \

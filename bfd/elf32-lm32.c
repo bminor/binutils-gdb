@@ -2580,8 +2580,7 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define elf_backend_reloc_type_class		lm32_elf_reloc_type_class
 #define elf_backend_copy_indirect_symbol	lm32_elf_copy_indirect_symbol
 #define elf_backend_size_dynamic_sections	lm32_elf_size_dynamic_sections
-#define elf_backend_omit_section_dynsym		\
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+#define elf_backend_omit_section_dynsym		_bfd_elf_omit_section_dynsym_all
 #define elf_backend_create_dynamic_sections	lm32_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections	lm32_elf_finish_dynamic_sections
 #define elf_backend_adjust_dynamic_symbol	lm32_elf_adjust_dynamic_symbol

@@ -754,6 +754,13 @@ _bfd_generic_get_elt_at_index (bfd *abfd, symindex sym_index)
   return _bfd_get_elt_at_filepos (abfd, entry->file_offset);
 }
 
+bfd *
+_bfd_noarchive_get_elt_at_index (bfd *abfd,
+				 symindex sym_index ATTRIBUTE_UNUSED)
+{
+  return (bfd *) _bfd_ptr_bfd_null_error (abfd);
+}
+
 /*
 FUNCTION
 	bfd_openr_next_archived_file
@@ -814,6 +821,13 @@ bfd_generic_openr_next_archived_file (bfd *archive, bfd *last_file)
     }
 
   return _bfd_get_elt_at_filepos (archive, filestart);
+}
+
+bfd *
+_bfd_noarchive_openr_next_archived_file (bfd *archive,
+					 bfd *last_file ATTRIBUTE_UNUSED)
+{
+  return (bfd *) _bfd_ptr_bfd_null_error (archive);
 }
 
 const bfd_target *
@@ -1586,6 +1600,15 @@ _bfd_archive_coff_construct_extended_name_table (bfd *abfd,
   return _bfd_construct_extended_name_table (abfd, TRUE, tabloc, tablen);
 }
 
+bfd_boolean
+_bfd_noarchive_construct_extended_name_table (bfd *abfd ATTRIBUTE_UNUSED,
+					      char **tabloc ATTRIBUTE_UNUSED,
+					      bfd_size_type *len ATTRIBUTE_UNUSED,
+					      const char **name ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}
+
 /* Follows archive_head and produces an extended name table if
    necessary.  Returns (in tabloc) a pointer to an extended name
    table, and in tablen the length of the table.  If it makes an entry
@@ -1884,6 +1907,12 @@ _bfd_bsd44_write_ar_hdr (bfd *archive, bfd *abfd)
     }
   return TRUE;
 }
+
+bfd_boolean
+_bfd_noarchive_write_ar_hdr (bfd *archive, bfd *abfd ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (archive);
+}
 
 /* A couple of functions for creating ar_hdrs.  */
 
@@ -2153,6 +2182,13 @@ bfd_gnu_truncate_arname (bfd *abfd, const char *pathname, char *arhdr)
 
   if (length < 16)
     (hdr->ar_name)[length] = ar_padchar (abfd);
+}
+
+void
+_bfd_noarchive_truncate_arname (bfd *abfd ATTRIBUTE_UNUSED,
+				const char *pathname ATTRIBUTE_UNUSED,
+				char *arhdr ATTRIBUTE_UNUSED)
+{
 }
 
 /* The BFD is open for write and has its format set to bfd_archive.  */
@@ -2831,6 +2867,17 @@ _bfd_coff_write_armap (bfd *arch,
 	return FALSE;
     }
 
+  return TRUE;
+}
+
+bfd_boolean
+_bfd_noarchive_write_armap
+    (bfd *arch ATTRIBUTE_UNUSED,
+     unsigned int elength ATTRIBUTE_UNUSED,
+     struct orl *map ATTRIBUTE_UNUSED,
+     unsigned int orl_count ATTRIBUTE_UNUSED,
+     int stridx ATTRIBUTE_UNUSED)
+{
   return TRUE;
 }
 

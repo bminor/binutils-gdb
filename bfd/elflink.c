@@ -881,9 +881,9 @@ elf_link_renumber_local_hash_table_dynsyms (struct elf_link_hash_entry *h,
 /* Return true if the dynamic symbol for a given section should be
    omitted when creating a shared library.  */
 bfd_boolean
-_bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
-				   struct bfd_link_info *info,
-				   asection *p)
+_bfd_elf_omit_section_dynsym_default (bfd *output_bfd ATTRIBUTE_UNUSED,
+				      struct bfd_link_info *info,
+				      asection *p)
 {
   struct elf_link_hash_table *htab;
   asection *ip;
@@ -911,6 +911,15 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
     default:
       return TRUE;
     }
+}
+
+bfd_boolean
+_bfd_elf_omit_section_dynsym_all
+    (bfd *output_bfd ATTRIBUTE_UNUSED,
+     struct bfd_link_info *info ATTRIBUTE_UNUSED,
+     asection *p ATTRIBUTE_UNUSED)
+{
+  return TRUE;
 }
 
 /* Assign dynsym indices.  In a shared library we generate a section
@@ -6901,7 +6910,7 @@ _bfd_elf_init_1_index_section (bfd *output_bfd, struct bfd_link_info *info)
 
   for (s = output_bfd->sections; s != NULL; s = s->next)
     if ((s->flags & (SEC_EXCLUDE | SEC_ALLOC)) == SEC_ALLOC
-	&& !_bfd_elf_link_omit_section_dynsym (output_bfd, info, s))
+	&& !_bfd_elf_omit_section_dynsym_default (output_bfd, info, s))
       {
 	elf_hash_table (info)->text_index_section = s;
 	break;
@@ -6919,7 +6928,7 @@ _bfd_elf_init_2_index_sections (bfd *output_bfd, struct bfd_link_info *info)
      _bfd_elf_link_omit_section_dynsym.  */
   for (s = output_bfd->sections; s != NULL; s = s->next)
     if (((s->flags & (SEC_EXCLUDE | SEC_ALLOC | SEC_READONLY)) == SEC_ALLOC)
-	&& !_bfd_elf_link_omit_section_dynsym (output_bfd, info, s))
+	&& !_bfd_elf_omit_section_dynsym_default (output_bfd, info, s))
       {
 	elf_hash_table (info)->data_index_section = s;
 	break;
@@ -6928,7 +6937,7 @@ _bfd_elf_init_2_index_sections (bfd *output_bfd, struct bfd_link_info *info)
   for (s = output_bfd->sections; s != NULL; s = s->next)
     if (((s->flags & (SEC_EXCLUDE | SEC_ALLOC | SEC_READONLY))
 	 == (SEC_ALLOC | SEC_READONLY))
-	&& !_bfd_elf_link_omit_section_dynsym (output_bfd, info, s))
+	&& !_bfd_elf_omit_section_dynsym_default (output_bfd, info, s))
       {
 	elf_hash_table (info)->text_index_section = s;
 	break;

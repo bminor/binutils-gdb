@@ -704,7 +704,7 @@ extern bfd * _bfd_x86_elf_link_setup_gnu_properties
 #define elf_backend_gc_mark_hook \
   _bfd_x86_elf_gc_mark_hook
 #define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+  _bfd_elf_omit_section_dynsym_all
 #define elf_backend_parse_gnu_properties \
   _bfd_x86_elf_parse_gnu_properties
 #define elf_backend_merge_gnu_properties \

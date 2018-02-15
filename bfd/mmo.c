@@ -3275,8 +3275,7 @@ mmo_write_object_contents (bfd *abfd)
 /* Perhaps we need to adjust this one; mmo labels (originally) without a
    leading ':' might more appropriately be called local.  */
 #define mmo_bfd_is_local_label_name bfd_generic_is_local_label_name
-#define mmo_bfd_is_target_special_symbol  \
-  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+#define mmo_bfd_is_target_special_symbol _bfd_bool_bfd_asymbol_false
 
 #define mmo_get_symbol_version_string \
   _bfd_nosymbols_get_symbol_version_string
@@ -3364,16 +3363,16 @@ const bfd_target mmix_mmo_vec =
     _bfd_dummy_target,
   },
   {
-    bfd_false,
+    _bfd_bool_bfd_false_error,
     mmo_mkobject,
-    bfd_false,
-    bfd_false,
+    _bfd_bool_bfd_false_error,
+    _bfd_bool_bfd_false_error,
   },
   {				/* bfd_write_contents */
-    bfd_false,
+    _bfd_bool_bfd_false_error,
     mmo_write_object_contents,
-    bfd_false,
-    bfd_false,
+    _bfd_bool_bfd_false_error,
+    _bfd_bool_bfd_false_error,
   },
 
   BFD_JUMP_TABLE_GENERIC (mmo),

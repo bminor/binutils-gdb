@@ -1985,8 +1985,12 @@ coff_set_alignment_hook (bfd *abfd, asection *section, void * scnhdr)
 
 #else /* ! RS6000COFF_C */
 
-#define coff_set_alignment_hook \
-  ((void (*) (bfd *, asection *, void *)) (void (*)) bfd_void)
+static void
+coff_set_alignment_hook (bfd *abfd ATTRIBUTE_UNUSED,
+			 asection *section ATTRIBUTE_UNUSED,
+			 void *scnhdr ATTRIBUTE_UNUSED)
+{
+}
 
 #endif /* ! RS6000COFF_C */
 #endif /* ! COFF_WITH_PE */
@@ -2497,20 +2501,16 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
   return TRUE;
 }
 
-#ifdef SYMNAME_IN_DEBUG
-
 static bfd_boolean
-symname_in_debug_hook (bfd * abfd ATTRIBUTE_UNUSED, struct internal_syment *sym)
+symname_in_debug_hook (bfd *abfd ATTRIBUTE_UNUSED,
+		       struct internal_syment *sym ATTRIBUTE_UNUSED)
 {
+#ifdef SYMNAME_IN_DEBUG
   return SYMNAME_IN_DEBUG (sym) != 0;
-}
-
 #else
-
-#define symname_in_debug_hook \
-  (bfd_boolean (*) (bfd *, struct internal_syment *)) (bfd_boolean (*)) bfd_false
-
+  return FALSE;
 #endif
+}
 
 #ifdef RS6000COFF_C
 
@@ -6024,7 +6024,7 @@ static bfd_coff_backend_data bigobj_swap_table =
 #endif
 
 #ifndef coff_bfd_is_target_special_symbol
-#define coff_bfd_is_target_special_symbol   ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+#define coff_bfd_is_target_special_symbol   _bfd_bool_bfd_asymbol_false
 #endif
 
 #ifndef coff_read_minisymbols
@@ -6113,14 +6113,24 @@ const bfd_target VAR =							\
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,				\
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,				\
 									\
-	/* bfd_check_format.  */					\
-  { _bfd_dummy_target, coff_object_p, bfd_generic_archive_p,		\
-    _bfd_dummy_target },						\
-	/* bfd_set_format.  */						\
-  { bfd_false, coff_mkobject, _bfd_generic_mkarchive, bfd_false },	\
-	/* bfd_write_contents.  */					\
-  { bfd_false, coff_write_object_contents, _bfd_write_archive_contents,	\
-    bfd_false },							\
+  {				/* bfd_check_format.  */		\
+    _bfd_dummy_target,							\
+    coff_object_p,							\
+    bfd_generic_archive_p,						\
+    _bfd_dummy_target							\
+  },									\
+  {				/* bfd_set_format.  */			\
+    _bfd_bool_bfd_false_error,						\
+    coff_mkobject,							\
+    _bfd_generic_mkarchive,						\
+    _bfd_bool_bfd_false_error						\
+  },									\
+  {				/* bfd_write_contents.  */		\
+    _bfd_bool_bfd_false_error,						\
+    coff_write_object_contents,						\
+    _bfd_write_archive_contents,					\
+    _bfd_bool_bfd_false_error						\
+  },									\
 									\
   BFD_JUMP_TABLE_GENERIC (coff),					\
   BFD_JUMP_TABLE_COPY (coff),						\
@@ -6164,14 +6174,24 @@ const bfd_target VAR =							\
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,				\
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,				\
 									\
-	/* bfd_check_format.  */					\
-  { _bfd_dummy_target, coff_object_p, bfd_generic_archive_p,		\
-    _bfd_dummy_target },						\
-	/* bfd_set_format.  */						\
-  { bfd_false, coff_mkobject, _bfd_generic_mkarchive, bfd_false },	\
-	/* bfd_write_contents.  */					\
-  { bfd_false, coff_write_object_contents, _bfd_write_archive_contents,	\
-    bfd_false },							\
+  {				/* bfd_check_format.  */		\
+    _bfd_dummy_target,							\
+    coff_object_p,							\
+    bfd_generic_archive_p,						\
+    _bfd_dummy_target							\
+  },									\
+  {				/* bfd_set_format.  */			\
+    _bfd_bool_bfd_false_error,						\
+    coff_mkobject,							\
+    _bfd_generic_mkarchive,						\
+    _bfd_bool_bfd_false_error						\
+  },									\
+  {				/* bfd_write_contents.  */		\
+    _bfd_bool_bfd_false_error,						\
+    coff_write_object_contents,						\
+    _bfd_write_archive_contents,					\
+    _bfd_bool_bfd_false_error						\
+  },									\
 									\
   BFD_JUMP_TABLE_GENERIC (coff),					\
   BFD_JUMP_TABLE_COPY (coff),						\
@@ -6213,14 +6233,25 @@ const bfd_target VAR =							\
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,				\
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,				\
   bfd_getl16, bfd_getl_signed_16, bfd_putl16,				\
-	/* bfd_check_format.  */					\
-  { _bfd_dummy_target, coff_object_p, bfd_generic_archive_p,		\
-    _bfd_dummy_target },						\
-       /* bfd_set_format.  */						\
-  { bfd_false, coff_mkobject, _bfd_generic_mkarchive, bfd_false },	\
-	/* bfd_write_contents.  */					\
-  { bfd_false, coff_write_object_contents, _bfd_write_archive_contents,	\
-    bfd_false },							\
+									\
+  {				/* bfd_check_format.  */		\
+    _bfd_dummy_target,							\
+    coff_object_p,							\
+    bfd_generic_archive_p,						\
+    _bfd_dummy_target							\
+  },									\
+  {				/* bfd_set_format.  */			\
+    _bfd_bool_bfd_false_error,						\
+    coff_mkobject,							\
+    _bfd_generic_mkarchive,						\
+    _bfd_bool_bfd_false_error						\
+  },									\
+  {				/* bfd_write_contents.  */		\
+    _bfd_bool_bfd_false_error,						\
+    coff_write_object_contents,						\
+    _bfd_write_archive_contents,					\
+    _bfd_bool_bfd_false_error						\
+  },									\
 									\
   BFD_JUMP_TABLE_GENERIC (coff),					\
   BFD_JUMP_TABLE_COPY (coff),						\
