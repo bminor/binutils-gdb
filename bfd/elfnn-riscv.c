@@ -1993,6 +1993,16 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	case R_RISCV_PCREL_LO12_I:
 	case R_RISCV_PCREL_LO12_S:
+	  /* Addends are not allowed, because then riscv_relax_delete_bytes
+	     would have to search through all relocs to update the addends.
+	     Also, riscv_resolve_pcrel_lo_relocs does not support addends
+	     when searching for a matching hi reloc.  */
+	  if (rel->r_addend)
+	    {
+	      r = bfd_reloc_dangerous;
+	      break;
+	    }
+
 	  if (riscv_record_pcrel_lo_reloc (&pcrel_relocs, input_section, info,
 					   howto, rel, relocation, name,
 					   contents))
@@ -2234,25 +2244,27 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case bfd_reloc_outofrange:
-	  msg = _("internal error: out of range error");
+	  msg = _("%X%P: internal error: out of range error\n");
 	  break;
 
 	case bfd_reloc_notsupported:
-	  msg = _("internal error: unsupported relocation error");
+	  msg = _("%X%P: internal error: unsupported relocation error\n");
 	  break;
 
 	case bfd_reloc_dangerous:
-	  msg = _("internal error: dangerous relocation");
+	  info->callbacks->reloc_dangerous
+	    (info, "%pcrel_lo with addend", input_bfd, input_section,
+	     rel->r_offset);
 	  break;
 
 	default:
-	  msg = _("internal error: unknown error");
+	  msg = _("%X%P: internal error: unknown error\n");
 	  break;
 	}
 
       if (msg)
-	info->callbacks->warning
-	  (info, msg, name, input_bfd, input_section, rel->r_offset);
+	info->callbacks->einfo (msg);
+
       /* We already reported the error via a callback, so don't try to report
 	 it again by returning false.  That leads to spurious errors.  */
       ret = TRUE;

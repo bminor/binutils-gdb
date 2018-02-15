@@ -22,6 +22,7 @@
 if [istarget "riscv*-*-*"] {
     run_dump_test "c-lui"
     run_dump_test "disas-jalr"
+    run_dump_test "pcrel-lo-addend"
 
     # The following tests require shared library support.
     if ![check_shared_lib_support] {
