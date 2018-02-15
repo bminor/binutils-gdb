@@ -1630,8 +1630,9 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* These are basically R_SPARC_TLS_WPLT30 relocs against
 		 __tls_get_addr.  */
 	      h = (struct elf_link_hash_entry *)
-		  bfd_link_hash_lookup (info->hash, "__tls_get_addr", TRUE,
+		  bfd_link_hash_lookup (info->hash, "__tls_get_addr", FALSE,
 					FALSE, TRUE);
+	      BFD_ASSERT (h != NULL);
 	    }
 	  else
 	    break;

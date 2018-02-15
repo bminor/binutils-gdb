@@ -1,3 +1,10 @@
+2018-02-15  Eric Botcazou  <ebotcazou@adacore.com>
+
+	PR ld/22832
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs) <R_SPARC_TLS_GD_CALL>:
+	Pass FALSE instead of TRUE as 'create' argument to bfd_link_hash_lookup
+	and assert that the result of the call is not NULL.
+
 2018-02-09  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* elfxx-sparc.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Reorder conditions.
