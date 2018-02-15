@@ -26930,7 +26930,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {16, ARM_ARCH_V8M_BASE},
     {17, ARM_ARCH_V8M_MAIN},
     {15, ARM_ARCH_V8R},
-    {16, ARM_ARCH_V8_4A},
+    {14, ARM_ARCH_V8_4A},
     {-1, ARM_ARCH_NONE}
 };
 

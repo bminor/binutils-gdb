@@ -1,3 +1,8 @@
+2018-02-16  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-arm.c (cpu_arch_ver): Renumber ARM_ARCH_V8_4A.
+	* testsuite/gas/arm/attr-march-armv8_4-a.d: New.
+
 2018-02-14  Max Filippov  <jcmvbkbc@gmail.com>
 
 	Backport from mainline
