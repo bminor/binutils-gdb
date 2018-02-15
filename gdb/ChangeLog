@@ -1,3 +1,8 @@
+2018-02-15  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/22849
+	* inferior.c (exit_inferior_1): Reset inf->control.
+
 2018-02-09  Joel Brobecker  <brobecker@adacore.com>
 
 	PR gdb/22824:
