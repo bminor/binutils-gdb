@@ -1,3 +1,8 @@
+2018-02-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_to_fixed_value_create): Delete advance
+	declaration.
+
 2018-02-14  Pedro Alves  <palves@redhat.com>
 
 	* frame-unwind.c (frame_unwind_try_unwinder): Always call

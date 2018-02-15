@@ -225,9 +225,6 @@ static struct value *ada_value_primitive_field (struct value *, int, int,
 static int find_struct_field (const char *, struct type *, int,
                               struct type **, int *, int *, int *, int *);
 
-static struct value *ada_to_fixed_value_create (struct type *, CORE_ADDR,
-                                                struct value *);
-
 static int ada_resolve_function (struct block_symbol *, int,
                                  struct value **, int, const char *,
                                  struct type *);
