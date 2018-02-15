@@ -4727,33 +4727,35 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		 the previous section, then we need a new segment.  */
 	      new_segment = TRUE;
 	    }
+	  else if ((abfd->flags & D_PAGED) != 0
+		   && (((last_hdr->lma + last_size - 1) & -maxpagesize)
+		       == (hdr->lma & -maxpagesize)))
+	    {
+	      /* If we are demand paged then we can't map two disk
+		 pages onto the same memory page.  */
+	      new_segment = FALSE;
+	    }
 	  /* In the next test we have to be careful when last_hdr->lma is close
 	     to the end of the address space.  If the aligned address wraps
 	     around to the start of the address space, then there are no more
 	     pages left in memory and it is OK to assume that the current
 	     section can be included in the current segment.  */
-	  else if ((BFD_ALIGN (last_hdr->lma + last_size, maxpagesize) + maxpagesize
-		    > last_hdr->lma)
-		   && (BFD_ALIGN (last_hdr->lma + last_size, maxpagesize) + maxpagesize
-		       <= hdr->lma))
+	  else if ((BFD_ALIGN (last_hdr->lma + last_size, maxpagesize)
+		    + maxpagesize > last_hdr->lma)
+		   && (BFD_ALIGN (last_hdr->lma + last_size, maxpagesize)
+		       + maxpagesize <= hdr->lma))
 	    {
 	      /* If putting this section in this segment would force us to
 		 skip a page in the segment, then we need a new segment.  */
 	      new_segment = TRUE;
 	    }
 	  else if ((last_hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0
-		   && (hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) != 0
-		   && ((abfd->flags & D_PAGED) == 0
-		       || (((last_hdr->lma + last_size - 1) & -maxpagesize)
-			   != (hdr->lma & -maxpagesize))))
+		   && (hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) != 0)
 	    {
 	      /* We don't want to put a loaded section after a
 		 nonloaded (ie. bss style) section in the same segment
 		 as that will force the non-loaded section to be loaded.
-		 Consider .tbss sections as loaded for this purpose.
-		 However, like the writable/non-writable case below,
-		 if they are on the same page then they must be put
-		 in the same segment.  */
+		 Consider .tbss sections as loaded for this purpose.  */
 	      new_segment = TRUE;
 	    }
 	  else if ((abfd->flags & D_PAGED) == 0)
@@ -4769,21 +4771,11 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      new_segment = TRUE;
 	    }
-	  else if (! writable
-		   && (hdr->flags & SEC_READONLY) == 0
-		   && ((info != NULL
-			&& info->relro_end > info->relro_start)
-		       || (((last_hdr->lma + last_size - 1) & -maxpagesize)
-			   != (hdr->lma & -maxpagesize))))
+          else if (! writable
+		   && (hdr->flags & SEC_READONLY) == 0)
 	    {
 	      /* We don't want to put a writable section in a read only
-		 segment, unless they are on the same page in memory
-		 anyhow and there is no RELRO segment.  We already
-		 know that the last section does not bring us past the
-		 current section on the page, so the only case in which
-		 the new section is not on the same page as the previous
-		 section is when the previous section ends precisely on
-		 a page boundary.  */
+		 segment.  */
 	      new_segment = TRUE;
 	    }
 	  else

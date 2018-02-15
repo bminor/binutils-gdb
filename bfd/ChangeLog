@@ -1,3 +1,16 @@
+2018-02-15  Nick Clifton  <nickc@redhat.com>
+
+	Import patch from mainline:
+	2018-01-30  Alan Modra  <amodra@gmail.com>
+
+	PR 22758
+	* elf.c (_bfd_elf_map_sections_to_segments): Don't start a new
+	segment when demand paged with lma on the same page.  Test this
+	before load/non-load, executable/non-executable,
+	writable/non-writable tests and simplify.  Delete bogus relro
+	condition in writable/non-writable test.  Delete outdated
+	comment.  Formatting.
+
 2018-02-15  Eric Botcazou  <ebotcazou@adacore.com>
 
 	PR ld/22832
