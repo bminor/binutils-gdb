@@ -17,4 +17,4 @@ Hex dump of section '.got':
   0x[0-9a-f]+ [0 ]+\.+
 
 Hex dump of section '.got.plt':
-  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .\.+
+  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .*
