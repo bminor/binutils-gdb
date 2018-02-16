@@ -5897,6 +5897,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		   lm = lm->next, lp++)
 		{
 		  if (lp->p_type == PT_LOAD
+		      && lp->p_memsz != 0
 		      && lm->count != 0
 		      && lm->sections[lm->count - 1]->vma >= start
 		      && lm->sections[0]->vma < end)

@@ -1,3 +1,10 @@
+2018-02-17  Alan Modra  <amodra@gmail.com>
+
+	PR 22845
+	* elf.c (assign_file_positions_for_non_load_sections): Ignore
+	degenerate zero size PT_LOAD segments when finding one overlapping
+	the PT_GNU_RELRO segment.
+
 2018-02-16  Alan Modra  <amodra@gmail.com>
 
 	* libbfd.c (_bfd_bool_bfd_false_error): Rename from bfd_false.
