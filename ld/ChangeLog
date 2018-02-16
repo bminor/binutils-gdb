@@ -1,5 +1,10 @@
 2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/mpx.exp: Add -z max-page-size=0x200000
+	-z noseparate-code.
+
+2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/x86-64.exp: Add -z noseparate-code
 	-z max-page-size=0x200000, excluding NaCl target.
 
