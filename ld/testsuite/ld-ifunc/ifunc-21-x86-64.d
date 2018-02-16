@@ -1,5 +1,5 @@
 #as: --64 -mrelax-relocations=yes
-#ld: -melf_x86_64
+#ld: -melf_x86_64 -z max-page-size=0x200000 -z noseparate-code
 #objdump: -dw
 #target: x86_64-*-*
 
