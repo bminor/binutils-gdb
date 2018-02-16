@@ -1,5 +1,9 @@
 2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-i386/i386.exp: Add -z noseparate-code.
+
+2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/pr19162.d: Add -z noseparate-code.
 	* testsuite/ld-elf/textaddr1.d: Likewise.
 	* testsuite/ld-elf/textaddr2.d: Likewise.
