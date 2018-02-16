@@ -1,5 +1,27 @@
 2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-i386/ibt-plt-1.d: Add -z noseparate-code.
+	* testsuite/ld-i386/ibt-plt-2a.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2b.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2c.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2d.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3a.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3b.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3c.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3d.d: Likewise.
+	* testsuite/ld-i386/load1.d: Likewise.
+	* testsuite/ld-i386/pie1.d: Likewise.
+	* testsuite/ld-i386/pr20244-1a.d: Likewise.
+	* testsuite/ld-i386/pr20244-1b.d: Likewise.
+	* testsuite/ld-i386/pr20244-2a.d: Likewise.
+	* testsuite/ld-i386/pr20244-2b.d: Likewise.
+	* testsuite/ld-i386/pr20244-2c.d: Likewise.
+	* testsuite/ld-i386/pr20244-4a.d: Likewise.
+	* testsuite/ld-i386/pr20244-4b.d: Likewise.
+	* testsuite/ld-i386/pr20830.d: Likewise.
+
+2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-i386/pr19636-1a.d: Updated.
 	* testsuite/ld-i386/pr19636-1b.d: Likewise.
 	* testsuite/ld-i386/pr19636-1j.d: Likewise.

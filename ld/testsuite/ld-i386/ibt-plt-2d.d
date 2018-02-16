@@ -1,6 +1,6 @@
 #source: ibt-plt-2.s
 #as: --32
-#ld: -shared -m elf_i386 -z ibt --hash-style=sysv
+#ld: -shared -m elf_i386 -z ibt --hash-style=sysv -z noseparate-code
 #readelf: -n -wf
 
 Contents of the .eh_frame section:

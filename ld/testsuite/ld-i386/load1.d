@@ -1,5 +1,5 @@
 #as: --32 -mrelax-relocations=yes
-#ld: -melf_i386
+#ld: -melf_i386 -z noseparate-code
 #objdump: -dw --sym
 #notarget: i?86-*-nacl* x86_64-*-nacl*
 
