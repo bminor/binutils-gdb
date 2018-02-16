@@ -1,3 +1,13 @@
+2018-02-16  Yao Qi  <yao.qi@linaro.org>
+
+	* block.c (block_namespace_info): Inherit allocate_on_obstack.
+	(block_initialize_namespace): Use new.
+	* dwarf2read.c (dwarf2_per_objfile): Inherit allocate_on_obstack.
+	(dwarf2_free_objfile): Use delete.
+	* gdbtypes.c (type_pair): Inherit allocate_on_obstack.
+	(copy_type_recursive): Use new.
+	* gdb_obstack.h (allocate_on_obstack): New.
+
 2018-02-15  Yao Qi  <yao.qi@linaro.org>
 
 	PR gdb/22849

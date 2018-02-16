@@ -31,10 +31,10 @@
    C++ files, namely using declarations and the current namespace in
    scope.  */
 
-struct block_namespace_info
+struct block_namespace_info : public allocate_on_obstack
 {
-  const char *scope;
-  struct using_direct *using_decl;
+  const char *scope = nullptr;
+  struct using_direct *using_decl = nullptr;
 };
 
 static void block_initialize_namespace (struct block *block,
@@ -350,11 +350,7 @@ static void
 block_initialize_namespace (struct block *block, struct obstack *obstack)
 {
   if (BLOCK_NAMESPACE (block) == NULL)
-    {
-      BLOCK_NAMESPACE (block) = XOBNEW (obstack, struct block_namespace_info);
-      BLOCK_NAMESPACE (block)->scope = NULL;
-      BLOCK_NAMESPACE (block)->using_decl = NULL;
-    }
+    BLOCK_NAMESPACE (block) = new (obstack) struct block_namespace_info ();
 }
 
 /* Return the static block associated to BLOCK.  Return NULL if block

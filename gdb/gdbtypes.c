@@ -4699,9 +4699,13 @@ recursive_dump_type (struct type *type, int spaces)
 /* Trivial helpers for the libiberty hash table, for mapping one
    type to another.  */
 
-struct type_pair
+struct type_pair : public allocate_on_obstack
 {
-  struct type *old, *newobj;
+  type_pair (struct type *old_, struct type *newobj_)
+    : old (old_), newobj (newobj_)
+  {}
+
+  struct type * const old, * const newobj;
 };
 
 static hashval_t
@@ -4769,7 +4773,6 @@ copy_type_recursive (struct objfile *objfile,
 		     struct type *type,
 		     htab_t copied_types)
 {
-  struct type_pair *stored, pair;
   void **slot;
   struct type *new_type;
 
@@ -4780,7 +4783,8 @@ copy_type_recursive (struct objfile *objfile,
      if it did, the type might disappear unexpectedly.  */
   gdb_assert (TYPE_OBJFILE (type) == objfile);
 
-  pair.old = type;
+  struct type_pair pair (type, nullptr);
+
   slot = htab_find_slot (copied_types, &pair, INSERT);
   if (*slot != NULL)
     return ((struct type_pair *) *slot)->newobj;
@@ -4789,9 +4793,9 @@ copy_type_recursive (struct objfile *objfile,
 
   /* We must add the new type to the hash table immediately, in case
      we encounter this type again during a recursive call below.  */
-  stored = XOBNEW (&objfile->objfile_obstack, struct type_pair);
-  stored->old = type;
-  stored->newobj = new_type;
+  struct type_pair *stored
+    = new (&objfile->objfile_obstack) struct type_pair (type, new_type);
+
   *slot = stored;
 
   /* Copy the common fields of types.  For the main type, we simply

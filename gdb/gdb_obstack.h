@@ -78,4 +78,24 @@ struct auto_obstack : obstack
   { obstack_free (this, obstack_base (this)); }
 };
 
+/* Objects are allocated on obstack instead of heap.  */
+
+struct allocate_on_obstack
+{
+  allocate_on_obstack () = default;
+
+  void* operator new (size_t size, struct obstack *obstack)
+  {
+    return obstack_alloc (obstack, size);
+  }
+
+  void* operator new[] (size_t size, struct obstack *obstack)
+  {
+    return obstack_alloc (obstack, size);
+  }
+
+  void operator delete (void *memory) {}
+  void operator delete[] (void *memory) {}
+};
+
 #endif

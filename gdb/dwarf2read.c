@@ -380,7 +380,7 @@ struct tu_stats
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.  */
 
-struct dwarf2_per_objfile
+struct dwarf2_per_objfile : public allocate_on_obstack
 {
   /* Construct a dwarf2_per_objfile for OBJFILE.  NAMES points to the
      dwarf2 section names, or is NULL if the standard ELF names are
@@ -2525,10 +2525,9 @@ dwarf2_has_info (struct objfile *objfile,
   if (dwarf2_per_objfile == NULL)
     {
       /* Initialize per-objfile state.  */
-      struct dwarf2_per_objfile *data
-	= XOBNEW (&objfile->objfile_obstack, struct dwarf2_per_objfile);
-
-      dwarf2_per_objfile = new (data) struct dwarf2_per_objfile (objfile, names);
+      dwarf2_per_objfile
+	= new (&objfile->objfile_obstack) struct dwarf2_per_objfile (objfile,
+								     names);
       set_dwarf2_per_objfile (objfile, dwarf2_per_objfile);
     }
   return (!dwarf2_per_objfile->info.is_virtual
@@ -25202,10 +25201,7 @@ dwarf2_free_objfile (struct objfile *objfile)
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = get_dwarf2_per_objfile (objfile);
 
-  if (dwarf2_per_objfile == NULL)
-    return;
-
-  dwarf2_per_objfile->~dwarf2_per_objfile ();
+  delete dwarf2_per_objfile;
 }
 
 /* A set of CU "per_cu" pointer, DIE offset, and GDB type pointer.
