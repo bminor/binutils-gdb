@@ -1,3 +1,29 @@
+2018-02-07  Sriraman Tallam  <tmsriram@google.com>
+
+	* expression.cc (Symbol_expression::set_expr_sym_in_real_elf):
+	New method.
+	(Unary_expression::set_expr_sym_in_real_elf): New method.
+	(Binary_expression::set_expr_sym_in_real_elf): New method.
+	(Trinary_expression::set_expr_sym_in_real_elf): New method.
+	* plugin.cc (get_symbol_resolution_info): Fix symbol resolution if
+	defined or used in defsyms.
+	* plugin.h (Plugin_manager::is_defsym_def): New method.
+	(Plugin_manager::Plugin_manager): Initialize defsym_defines_set_.
+	(Plugin_manager::defsym_defines_set_): New member.
+	(Plugin_manager::Defsym_defines_set): New typedef.
+	* script.cc (Script_options::set_defsym_uses_in_real_elf): New method.
+	(Script_options::find_defsym_defs): New method.
+	* script.h (Expression::set_expr_sym_in_real_elf): New method.
+	(Symbol_assignment::is_defsym): New method.
+	(Symbol_assignment::value): New method.
+	(Script_options::find_defsym_defs): New method.
+	(Script_options::set_defsym_uses_in_real_elf): New method.
+	* testsuite/Makefile.am (plugin_test_defsym): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/plugin_test.c: Check for new symbol resolution.
+	* testsuite/plugin_test_defsym.sh: New script.
+	* testsuite/plugin_test_defsym.c: New test source.
+
 2018-02-07  Alan Modra  <amodra@gmail.com>
 
 	Revert 2018-01-17  Alan Modra  <amodra@gmail.com>
