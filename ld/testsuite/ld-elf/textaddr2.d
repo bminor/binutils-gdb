@@ -1,5 +1,5 @@
 #source: maxpage1.s
-#ld: -shared -Ttext-segment 0x7000000 -z max-page-size=0x200000
+#ld: -shared -Ttext-segment 0x7000000 -z max-page-size=0x200000 -z noseparate-code
 #readelf: -l --wide
 #target: *-*-linux-gnu *-*-gnu*
 

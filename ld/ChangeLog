@@ -1,3 +1,11 @@
+2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr19162.d: Add -z noseparate-code.
+	* testsuite/ld-elf/textaddr1.d: Likewise.
+	* testsuite/ld-elf/textaddr2.d: Likewise.
+	* testsuite/ld-elf/textaddr4.d: Likewise.
+	* testsuite/ld-elf/textaddr6.d: Likewise.
+
 2018-02-15  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Run pcrel-lo-addend test.

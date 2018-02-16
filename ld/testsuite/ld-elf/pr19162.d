@@ -1,6 +1,6 @@
 #source: pr19162a.s
 #source: pr19162b.s
-#ld: -shared -z max-page-size=0x200000
+#ld: -shared -z max-page-size=0x200000 -z noseparate-code
 #readelf: -l --wide
 #target: *-*-linux* *-*-gnu* *-*-nacl*
 #notarget: arc*-*-* hppa*-*-*
