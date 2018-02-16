@@ -1,5 +1,10 @@
 2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/x86-64.exp: Add -z noseparate-code
+	-z max-page-size=0x200000, excluding NaCl target.
+
+2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-ifunc/ifunc-2-i386-now.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-2-local-i386-now.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-2-local-x86-64.d: Likewise.
