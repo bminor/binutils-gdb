@@ -1,5 +1,11 @@
 2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-ifunc/ifunc-1-local-x86.d: Updated for i386.
+	* testsuite/ld-ifunc/ifunc-1-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-3a-x86.d: Likewise.
+
+2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-ifunc/ifunc-1-local-x86.d: Updated.
 	* testsuite/ld-ifunc/ifunc-1-x86.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-3a-x86.d: Likewise.
