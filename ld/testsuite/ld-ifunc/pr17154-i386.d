@@ -1,5 +1,5 @@
 #source: pr17154-x86.s
-#ld: -m elf_i386 -shared --hash-style=sysv
+#ld: -m elf_i386 -shared --hash-style=sysv -z noseparate-code
 #as: --32
 #objdump: -dw
 #target: x86_64-*-* i?86-*-*

@@ -1,5 +1,5 @@
 #as: --64
-#ld: -shared -melf_x86_64 --hash-style=sysv
+#ld: -shared -melf_x86_64 --hash-style=sysv -z noseparate-code
 #objdump: -dw
 #target: x86_64-*-*
 
