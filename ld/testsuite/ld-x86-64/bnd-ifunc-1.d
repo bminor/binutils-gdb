@@ -3,5 +3,5 @@
 #objdump: -dw
 
 #...
-[ 	]*[a-f0-9]+:	f2 e8 f0 ff ff ff    	bnd callq 210 <\*ABS\*\+0x218@plt>
+[ 	]*[a-f0-9]+:	f2 e8 f0 ff ff ff    	bnd callq [a-f0-9]+ <\*ABS\*\+0x[a-f0-9]+@plt>
 #pass

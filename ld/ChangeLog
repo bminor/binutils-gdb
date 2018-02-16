@@ -1,5 +1,10 @@
 2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/bnd-ifunc-1.d: Updated.
+	* testsuite/ld-x86-64/ilp32-4.d: Likewise.
+
+2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/mpx.exp: Add -z max-page-size=0x200000
 	-z noseparate-code.
 
