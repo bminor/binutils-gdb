@@ -39,6 +39,7 @@
 #include "top.h"
 #include "interps.h"
 #include "thread-fsm.h"
+#include <algorithm>
 
 /* If we can't find a function's name from its address,
    we print this instead.  */
@@ -732,7 +733,6 @@ call_function_by_hand_dummy (struct value *function,
   struct type *ftype = check_typedef (value_type (function));
   CORE_ADDR bp_addr;
   struct frame_id dummy_id;
-  struct cleanup *args_cleanup;
   struct frame_info *frame;
   struct gdbarch *gdbarch;
   struct cleanup *terminate_bp_cleanup;
@@ -1054,21 +1054,16 @@ call_function_by_hand_dummy (struct value *function,
 	}
     }
 
+  std::vector<struct value *> new_args;
   if (hidden_first_param_p)
     {
-      struct value **new_args;
-
       /* Add the new argument to the front of the argument list.  */
-      new_args = XNEWVEC (struct value *, nargs + 1);
-      new_args[0] = value_from_pointer (lookup_pointer_type (values_type),
-					struct_addr);
-      memcpy (&new_args[1], &args[0], sizeof (struct value *) * nargs);
-      args = new_args;
+      new_args.push_back
+	(value_from_pointer (lookup_pointer_type (values_type), struct_addr));
+      std::copy (&args[0], &args[nargs], std::back_inserter (new_args));
+      args = new_args.data ();
       nargs++;
-      args_cleanup = make_cleanup (xfree, args);
     }
-  else
-    args_cleanup = make_cleanup (null_cleanup, NULL);
 
   /* Create the dummy stack frame.  Pass in the call dummy address as,
      presumably, the ABI code knows where, in the call dummy, the
@@ -1076,8 +1071,6 @@ call_function_by_hand_dummy (struct value *function,
   sp = gdbarch_push_dummy_call (gdbarch, function, get_current_regcache (),
 				bp_addr, nargs, args,
 				sp, struct_return, struct_addr);
-
-  do_cleanups (args_cleanup);
 
   /* Set up a frame ID for the dummy frame so we can pass it to
      set_momentary_breakpoint.  We need to give the breakpoint a frame
