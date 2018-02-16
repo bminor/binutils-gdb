@@ -1,5 +1,11 @@
 2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-ifunc/ifunc-1-local-x86.d: Updated.
+	* testsuite/ld-ifunc/ifunc-1-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-3a-x86.d: Likewise.
+
+2018-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-i386/ibt-plt-1.d: Add -z noseparate-code.
 	* testsuite/ld-i386/ibt-plt-2a.d: Likewise.
 	* testsuite/ld-i386/ibt-plt-2b.d: Likewise.

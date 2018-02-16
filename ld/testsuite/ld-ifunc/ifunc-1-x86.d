@@ -4,5 +4,5 @@
 #map: ifunc-1-x86.map
 
 #...
-[ \t0-9a-f]+:[ \t0-9a-f]+call[ \t0-9a-fq]+<\*ABS\*(\+0x170|\+0x190|\+0x210|)@plt>
+[ \t0-9a-f]+:[ \t0-9a-f]+call[ \t0-9a-fq]+<\*ABS\*\+0x[0-9a-f]+@plt>
 #pass
