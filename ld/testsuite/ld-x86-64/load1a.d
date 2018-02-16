@@ -1,6 +1,6 @@
 #source: load1.s
 #as: --64 -mrelax-relocations=yes
-#ld: -melf_x86_64
+#ld: -melf_x86_64 -z max-page-size=0x200000 -z noseparate-code
 #objdump: -dw --sym
 #notarget: x86_64-*-nacl*
 

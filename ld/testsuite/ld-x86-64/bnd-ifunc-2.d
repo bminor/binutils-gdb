@@ -1,5 +1,5 @@
 #as: --64 -madd-bnd-prefix
-#ld: -shared -melf_x86_64 -z bndplt --hash-style=sysv
+#ld: -shared -melf_x86_64 -z bndplt --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
 #objdump: -dw
 
 #...

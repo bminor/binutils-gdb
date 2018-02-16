@@ -1,6 +1,6 @@
 #source: ibt-plt-3.s
 #as: --64 -defsym __64_bit__=1
-#ld: -shared -m elf_x86_64 -z ibtplt --hash-style=sysv
+#ld: -shared -m elf_x86_64 -z ibtplt --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
 #objdump: -dw
 
 .*: +file format .*

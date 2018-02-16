@@ -1,7 +1,7 @@
 #name: PR ld/20830 (.plt.got, -z now)
 #source: pr20830.s
 #as: --x32
-#ld: -z now -melf32_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv
+#ld: -z now -melf32_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
 #objdump: -dw -Wf
 
 .*: +file format .*
