@@ -2318,10 +2318,21 @@ plugin_test_start_lib: unused.o plugin_start_lib_test.o plugin_start_lib_test_2.
 plugin_test_start_lib.err: plugin_test_start_lib
 	@touch plugin_test_start_lib.err
 
+check_PROGRAMS += plugin_test_defsym
+check_SCRIPTS += plugin_test_defsym.sh
+check_DATA += plugin_test_defsym.err
+MOSTLYCLEANFILES += plugin_test_defsym.err
+plugin_test_defsym.syms: plugin_test_defsym.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+plugin_test_defsym.o: plugin_test_defsym.c
+	$(COMPILE) -c -o $@ $<
+plugin_test_defsym: plugin_test_defsym.o plugin_test_defsym.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" -Wl,--defsym,bar=foo plugin_test_defsym.syms 2>plugin_test_defsym.err
+plugin_test_defsym.err: plugin_test_defsym
+	@touch plugin_test_defsym.err
 
 plugin_start_lib_test_2.syms: plugin_start_lib_test_2.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
-
 
 plugin_test.so: plugin_test.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
