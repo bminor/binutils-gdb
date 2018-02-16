@@ -8432,21 +8432,22 @@ well as hex.
 
 @table @code
 @kindex info line
-@item info line @var{location}
+@item info line
+@itemx info line @var{location}
 Print the starting and ending addresses of the compiled code for
 source line @var{location}.  You can specify source lines in any of
-the ways documented in @ref{Specify Location}.
+the ways documented in @ref{Specify Location}.  With no @var{location}
+information about the current source line is printed.
 @end table
 
 For example, we can use @code{info line} to discover the location of
 the object code for the first line of function
 @code{m4_changequote}:
 
-@c FIXME: I think this example should also show the addresses in
-@c symbolic form, as they usually would be displayed.
 @smallexample
 (@value{GDBP}) info line m4_changequote
-Line 895 of "builtin.c" starts at pc 0x634c and ends at 0x6350.
+Line 895 of "builtin.c" starts at pc 0x634c <m4_changequote> and \
+        ends at 0x6350 <m4_changequote+4>.
 @end smallexample
 
 @noindent
@@ -8455,7 +8456,8 @@ We can also inquire (using @code{*@var{addr}} as the form for
 @var{location}) what source line covers a particular address:
 @smallexample
 (@value{GDBP}) info line *0x63ff
-Line 926 of "builtin.c" starts at pc 0x63e4 and ends at 0x6404.
+Line 926 of "builtin.c" starts at pc 0x63e4 <m4_changequote+152> and \
+        ends at 0x6404 <m4_changequote+184>.
 @end smallexample
 
 @cindex @code{$_} and @code{info line}
@@ -8467,6 +8469,11 @@ sufficient to begin examining the machine code (@pxref{Memory,
 ,Examining Memory}).  Also, this address is saved as the value of the
 convenience variable @code{$_} (@pxref{Convenience Vars, ,Convenience
 Variables}).
+
+@cindex info line, repeated calls
+After @code{info line}, using @code{info line} again without
+specifying a location will display information about the next source
+line.
 
 @table @code
 @kindex disassemble
