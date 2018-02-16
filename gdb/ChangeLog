@@ -1,5 +1,17 @@
 2018-02-21  Tom Tromey  <tom@tromey.com>
 
+	* value.h: (extract_field_op): Update.
+	* eval.c (extract_field_op): Return a const char *.
+	* expression.h (parse_expression_for_completion): Update.
+	* completer.c (complete_expression): Update.
+	(add_struct_fields): Make fieldname const.
+	* parse.c (expout_completion_name): Now a unique_xmalloc_ptr.
+	(mark_completion_tag, parse_exp_in_context_1): Update.
+	(parse_expression_for_completion): Change "name" to
+	unique_xmalloc_ptr*.
+
+2018-02-21  Tom Tromey  <tom@tromey.com>
+
 	* infcall.c (call_function_by_hand_dummy): Use std::vector.
 
 2018-02-21  Yao Qi  <yao.qi@linaro.org>

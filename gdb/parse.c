@@ -88,7 +88,7 @@ static int expout_last_struct = -1;
 static enum type_code expout_tag_completion_type = TYPE_CODE_UNDEF;
 
 /* The token for tagged type name completion.  */
-static char *expout_completion_name;
+static gdb::unique_xmalloc_ptr<char> expout_completion_name;
 
 
 static unsigned int expressiondebug = 0;
@@ -575,9 +575,7 @@ mark_completion_tag (enum type_code tag, const char *ptr, int length)
 	      || tag == TYPE_CODE_STRUCT
 	      || tag == TYPE_CODE_ENUM);
   expout_tag_completion_type = tag;
-  expout_completion_name = (char *) xmalloc (length + 1);
-  memcpy (expout_completion_name, ptr, length);
-  expout_completion_name[length] = '\0';
+  expout_completion_name.reset (xstrndup (ptr, length));
 }
 
 
@@ -1137,8 +1135,7 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
   type_stack.depth = 0;
   expout_last_struct = -1;
   expout_tag_completion_type = TYPE_CODE_UNDEF;
-  xfree (expout_completion_name);
-  expout_completion_name = NULL;
+  expout_completion_name.reset ();
 
   comma_terminates = comma;
 
@@ -1277,11 +1274,11 @@ parse_expression_with_language (const char *string, enum language lang)
    reference; furthermore, if the parsing ends in the field name,
    return the field name in *NAME.  If the parsing ends in the middle
    of a field reference, but the reference is somehow invalid, throw
-   an exception.  In all other cases, return NULL.  Returned non-NULL
-   *NAME must be freed by the caller.  */
+   an exception.  In all other cases, return NULL.  */
 
 struct type *
-parse_expression_for_completion (const char *string, char **name,
+parse_expression_for_completion (const char *string,
+				 gdb::unique_xmalloc_ptr<char> *name,
 				 enum type_code *code)
 {
   expression_up exp;
@@ -1306,23 +1303,24 @@ parse_expression_for_completion (const char *string, char **name,
   if (expout_tag_completion_type != TYPE_CODE_UNDEF)
     {
       *code = expout_tag_completion_type;
-      *name = expout_completion_name;
-      expout_completion_name = NULL;
+      *name = std::move (expout_completion_name);
       return NULL;
     }
 
   if (expout_last_struct == -1)
     return NULL;
 
-  *name = extract_field_op (exp.get (), &subexp);
-  if (!*name)
-    return NULL;
+  const char *fieldname = extract_field_op (exp.get (), &subexp);
+  if (fieldname == NULL)
+    {
+      name->reset ();
+      return NULL;
+    }
 
+  name->reset (xstrdup (fieldname));
   /* This might throw an exception.  If so, we want to let it
      propagate.  */
   val = evaluate_subexpression_type (exp.get (), subexp);
-  /* (*NAME) is a part of the EXP memory block freed below.  */
-  *name = xstrdup (*name);
 
   return value_type (val);
 }

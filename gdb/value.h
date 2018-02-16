@@ -889,7 +889,7 @@ extern void fetch_subexp_value (struct expression *exp, int *pc,
 				struct value **val_chain,
 				int preserve_errors);
 
-extern char *extract_field_op (struct expression *exp, int *subexp);
+extern const char *extract_field_op (struct expression *exp, int *subexp);
 
 extern struct value *evaluate_subexp_with_coercion (struct expression *,
 						    int *, enum noside);

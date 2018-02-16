@@ -272,7 +272,7 @@ fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
    subexpression of the left-hand-side of the dereference.  This is
    used when completing field names.  */
 
-char *
+const char *
 extract_field_op (struct expression *exp, int *subexp)
 {
   int tem;

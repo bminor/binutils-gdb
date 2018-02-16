@@ -101,8 +101,8 @@ extern expression_up parse_expression (const char *);
 extern expression_up parse_expression_with_language (const char *string,
 						     enum language lang);
 
-extern struct type *parse_expression_for_completion (const char *, char **,
-						     enum type_code *);
+extern struct type *parse_expression_for_completion
+    (const char *, gdb::unique_xmalloc_ptr<char> *, enum type_code *);
 
 extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
 				  const struct block *, int);
