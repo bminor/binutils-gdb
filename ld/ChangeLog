@@ -1,6 +1,11 @@
 2018-02-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22845
+	* testsuite/ld-elf/ehdr_start.d: Pass --build-id to ld.
+
+2018-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22845
 	* testsuite/ld-elf/binutils.exp (tls_opts): Add tests for
 	"-z noseparate-code" and "-z separate-code".
 
