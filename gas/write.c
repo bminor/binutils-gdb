@@ -435,6 +435,8 @@ cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
 {
   switch (fragP->fr_type)
     {
+    case rs_space_nop:
+      goto skip_align;
     case rs_align:
     case rs_align_code:
     case rs_align_test:
@@ -443,6 +445,7 @@ cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
 #ifdef HANDLE_ALIGN
       HANDLE_ALIGN (fragP);
 #endif
+skip_align:
       know (fragP->fr_next != NULL);
       fragP->fr_offset = (fragP->fr_next->fr_address
 			  - fragP->fr_address
@@ -450,14 +453,18 @@ cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
       if (fragP->fr_offset < 0)
 	{
 	  as_bad_where (fragP->fr_file, fragP->fr_line,
-			_("attempt to .org/.space backwards? (%ld)"),
+			_("attempt to .org/.space/.nop backwards? (%ld)"),
 			(long) fragP->fr_offset);
 	  fragP->fr_offset = 0;
 	}
-      fragP->fr_type = rs_fill;
+      if (fragP->fr_type == rs_space_nop)
+	fragP->fr_type = rs_fill_nop;
+      else
+	fragP->fr_type = rs_fill;
       break;
 
     case rs_fill:
+    case rs_fill_nop:
       break;
 
     case rs_leb128:
@@ -1570,6 +1577,20 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     }
 }
 
+#ifndef md_generate_nops
+/* Genenerate COUNT bytes of no-op instructions to WHERE.  A target
+   backend must override this with proper no-op instructions.   */
+
+static void
+md_generate_nops (fragS *f ATTRIBUTE_UNUSED,
+		  char *where ATTRIBUTE_UNUSED,
+		  offsetT count ATTRIBUTE_UNUSED,
+		  int control ATTRIBUTE_UNUSED)
+{
+  as_bad (_("unimplemented .nop directive"));
+}
+#endif
+
 static void
 write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 		asection *sec,
@@ -1593,7 +1614,7 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
       char *fill_literal;
       offsetT count;
 
-      gas_assert (f->fr_type == rs_fill);
+      gas_assert (f->fr_type == rs_fill || f->fr_type == rs_fill_nop);
       if (f->fr_fix)
 	{
 	  x = bfd_set_section_contents (stdoutput, sec,
@@ -1610,9 +1631,35 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 		      bfd_errmsg (bfd_get_error ()));
 	  offset += f->fr_fix;
 	}
-      fill_literal = f->fr_literal + f->fr_fix;
+
       fill_size = f->fr_var;
       count = f->fr_offset;
+      fill_literal = f->fr_literal + f->fr_fix;
+
+      if (f->fr_type == rs_fill_nop)
+	{
+	  gas_assert (count >= 0 && fill_size == 1);
+	  if (count > 0)
+	    {
+	      char *buf = xmalloc (count);
+	      md_generate_nops (f, buf, count, *fill_literal);
+	      x = bfd_set_section_contents
+		(stdoutput, sec, buf, (file_ptr) offset,
+		 (bfd_size_type) count);
+	      if (!x)
+		as_fatal (ngettext ("can't fill %ld byte "
+				    "in section %s of %s: '%s'",
+				    "can't fill %ld bytes "
+				    "in section %s of %s: '%s'",
+				    (long) count), (long) count,
+				    sec->name, stdoutput->filename,
+				    bfd_errmsg (bfd_get_error ()));
+	      offset += count;
+	      free (buf);
+	    }
+	  continue;
+	}
+
       gas_assert (count >= 0);
       if (fill_size && count)
 	{
@@ -2461,6 +2508,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 	  break;
 
 	case rs_space:
+	case rs_space_nop:
 	  break;
 
 	case rs_machine_dependent:
@@ -2765,6 +2813,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 		break;
 
 	      case rs_space:
+	      case rs_space_nop:
 		growth = 0;
 		if (symbolP)
 		  {
@@ -2791,7 +2840,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 			  }
 
 			as_warn_where (fragP->fr_file, fragP->fr_line,
-				       _(".space or .fill with negative value, ignored"));
+				       _(".space, .nop or .fill with negative value, ignored"));
 			fragP->fr_symbol = 0;
 		      }
 		    else

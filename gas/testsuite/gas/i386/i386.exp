@@ -431,6 +431,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "align-1a"
     run_dump_test "align-1b"
     run_list_test "inval-pseudo" "-al"
+    run_dump_test "nop-1"
+    run_dump_test "nop-2"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
@@ -494,6 +496,10 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "got-no-relax"
 
 	run_dump_test "addend"
+	run_dump_test "nop-3"
+	run_dump_test "nop-4"
+	run_dump_test "nop-5"
+	run_dump_test "nop-6"
 
 	if { [gas_64_check] } then {
 	    run_dump_test "att-regs"
@@ -538,6 +544,7 @@ if [expr [istarget "i*86-*-*"] || [istarget "x86_64-*-*"]] then {
     run_list_test "space1" "-al"
     run_dump_test rept
     run_dump_test pr19498
+    run_list_test "nop-bad-1" ""
     if [is_elf_format] then {
 	run_list_test_stdin "list-1" "-al"
 	run_list_test_stdin "list-2" "-al"
@@ -904,6 +911,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_list_test "x86-64-notrackbad" "-al"
     run_dump_test "x86-64-movd"
     run_dump_test "x86-64-movd-intel"
+    run_dump_test "x86-64-nop-1"
+    run_dump_test "x86-64-nop-2"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]
@@ -961,6 +970,10 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "x86-64-gotpcrel-no-relax"
 
 	run_dump_test "x86-64-addend"
+	run_dump_test "x86-64-nop-3"
+	run_dump_test "x86-64-nop-4"
+	run_dump_test "x86-64-nop-5"
+	run_dump_test "x86-64-nop-6"
     }
 
     set ASFLAGS "$old_ASFLAGS"

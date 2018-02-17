@@ -1146,105 +1146,174 @@ static struct hash_control *op_hash;
 /* Hash table for register lookup.  */
 static struct hash_control *reg_hash;
 
-void
-i386_align_code (fragS *fragP, int count)
-{
   /* Various efficient no-op patterns for aligning code labels.
      Note: Don't try to assemble the instructions in the comments.
      0L and 0w are not legal.  */
-  static const unsigned char f32_1[] =
-    {0x90};					/* nop			*/
-  static const unsigned char f32_2[] =
-    {0x66,0x90};				/* xchg %ax,%ax */
-  static const unsigned char f32_3[] =
-    {0x8d,0x76,0x00};				/* leal 0(%esi),%esi	*/
-  static const unsigned char f32_4[] =
-    {0x8d,0x74,0x26,0x00};			/* leal 0(%esi,1),%esi	*/
-  static const unsigned char f32_5[] =
-    {0x90,					/* nop			*/
-     0x8d,0x74,0x26,0x00};			/* leal 0(%esi,1),%esi	*/
-  static const unsigned char f32_6[] =
-    {0x8d,0xb6,0x00,0x00,0x00,0x00};		/* leal 0L(%esi),%esi	*/
-  static const unsigned char f32_7[] =
-    {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};	/* leal 0L(%esi,1),%esi */
-  static const unsigned char f32_8[] =
-    {0x90,					/* nop			*/
-     0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};	/* leal 0L(%esi,1),%esi */
-  static const unsigned char f32_9[] =
-    {0x89,0xf6,					/* movl %esi,%esi	*/
-     0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const unsigned char f32_10[] =
-    {0x8d,0x76,0x00,				/* leal 0(%esi),%esi	*/
-     0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const unsigned char f32_11[] =
-    {0x8d,0x74,0x26,0x00,			/* leal 0(%esi,1),%esi	*/
-     0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const unsigned char f32_12[] =
-    {0x8d,0xb6,0x00,0x00,0x00,0x00,		/* leal 0L(%esi),%esi	*/
-     0x8d,0xbf,0x00,0x00,0x00,0x00};		/* leal 0L(%edi),%edi	*/
-  static const unsigned char f32_13[] =
-    {0x8d,0xb6,0x00,0x00,0x00,0x00,		/* leal 0L(%esi),%esi	*/
-     0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const unsigned char f32_14[] =
-    {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00,	/* leal 0L(%esi,1),%esi */
-     0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const unsigned char f16_3[] =
-    {0x8d,0x74,0x00};				/* lea 0(%esi),%esi	*/
-  static const unsigned char f16_4[] =
-    {0x8d,0xb4,0x00,0x00};			/* lea 0w(%si),%si	*/
-  static const unsigned char f16_5[] =
-    {0x90,					/* nop			*/
-     0x8d,0xb4,0x00,0x00};			/* lea 0w(%si),%si	*/
-  static const unsigned char f16_6[] =
-    {0x89,0xf6,					/* mov %si,%si		*/
-     0x8d,0xbd,0x00,0x00};			/* lea 0w(%di),%di	*/
-  static const unsigned char f16_7[] =
-    {0x8d,0x74,0x00,				/* lea 0(%si),%si	*/
-     0x8d,0xbd,0x00,0x00};			/* lea 0w(%di),%di	*/
-  static const unsigned char f16_8[] =
-    {0x8d,0xb4,0x00,0x00,			/* lea 0w(%si),%si	*/
-     0x8d,0xbd,0x00,0x00};			/* lea 0w(%di),%di	*/
-  static const unsigned char jump_31[] =
-    {0xeb,0x1d,0x90,0x90,0x90,0x90,0x90,	/* jmp .+31; lotsa nops	*/
-     0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,
-     0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,
-     0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
-  static const unsigned char *const f32_patt[] = {
-    f32_1, f32_2, f32_3, f32_4, f32_5, f32_6, f32_7, f32_8,
-    f32_9, f32_10, f32_11, f32_12, f32_13, f32_14
-  };
-  static const unsigned char *const f16_patt[] = {
-    f32_1, f32_2, f16_3, f16_4, f16_5, f16_6, f16_7, f16_8
-  };
-  /* nopl (%[re]ax) */
-  static const unsigned char alt_3[] =
-    {0x0f,0x1f,0x00};
-  /* nopl 0(%[re]ax) */
-  static const unsigned char alt_4[] =
-    {0x0f,0x1f,0x40,0x00};
-  /* nopl 0(%[re]ax,%[re]ax,1) */
-  static const unsigned char alt_5[] =
-    {0x0f,0x1f,0x44,0x00,0x00};
-  /* nopw 0(%[re]ax,%[re]ax,1) */
-  static const unsigned char alt_6[] =
-    {0x66,0x0f,0x1f,0x44,0x00,0x00};
-  /* nopl 0L(%[re]ax) */
-  static const unsigned char alt_7[] =
-    {0x0f,0x1f,0x80,0x00,0x00,0x00,0x00};
-  /* nopl 0L(%[re]ax,%[re]ax,1) */
-  static const unsigned char alt_8[] =
-    {0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
-  /* nopw 0L(%[re]ax,%[re]ax,1) */
-  static const unsigned char alt_9[] =
-    {0x66,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
-  /* nopw %cs:0L(%[re]ax,%[re]ax,1) */
-  static const unsigned char alt_10[] =
-    {0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
-  static const unsigned char *const alt_patt[] = {
-    f32_1, f32_2, alt_3, alt_4, alt_5, alt_6, alt_7, alt_8,
-    alt_9, alt_10
-  };
+static const unsigned char f32_1[] =
+  {0x90};				/* nop			*/
+static const unsigned char f32_2[] =
+  {0x66,0x90};				/* xchg %ax,%ax		*/
+static const unsigned char f32_3[] =
+  {0x8d,0x76,0x00};			/* leal 0(%esi),%esi	*/
+static const unsigned char f32_4[] =
+  {0x8d,0x74,0x26,0x00};		/* leal 0(%esi,1),%esi	*/
+static const unsigned char f32_5[] =
+  {0x90,				/* nop			*/
+   0x8d,0x74,0x26,0x00};		/* leal 0(%esi,1),%esi	*/
+static const unsigned char f32_6[] =
+  {0x8d,0xb6,0x00,0x00,0x00,0x00};	/* leal 0L(%esi),%esi	*/
+static const unsigned char f32_7[] =
+  {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};	/* leal 0L(%esi,1),%esi */
+static const unsigned char f32_8[] =
+  {0x90,				/* nop			*/
+   0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};	/* leal 0L(%esi,1),%esi */
+static const unsigned char f32_9[] =
+  {0x89,0xf6,				/* movl %esi,%esi	*/
+   0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
+static const unsigned char f32_10[] =
+  {0x8d,0x76,0x00,			/* leal 0(%esi),%esi	*/
+   0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
+static const unsigned char f32_11[] =
+  {0x8d,0x74,0x26,0x00,			/* leal 0(%esi,1),%esi	*/
+   0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
+static const unsigned char f32_12[] =
+  {0x8d,0xb6,0x00,0x00,0x00,0x00,	/* leal 0L(%esi),%esi	*/
+   0x8d,0xbf,0x00,0x00,0x00,0x00};	/* leal 0L(%edi),%edi	*/
+static const unsigned char f32_13[] =
+  {0x8d,0xb6,0x00,0x00,0x00,0x00,	/* leal 0L(%esi),%esi	*/
+   0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
+static const unsigned char f32_14[] =
+  {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00,	/* leal 0L(%esi,1),%esi */
+   0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
+static const unsigned char f16_3[] =
+  {0x8d,0x74,0x00};			/* lea 0(%esi),%esi	*/
+static const unsigned char f16_4[] =
+  {0x8d,0xb4,0x00,0x00};		/* lea 0w(%si),%si	*/
+static const unsigned char f16_5[] =
+  {0x90,				/* nop			*/
+   0x8d,0xb4,0x00,0x00};		/* lea 0w(%si),%si	*/
+static const unsigned char f16_6[] =
+  {0x89,0xf6,				/* mov %si,%si		*/
+   0x8d,0xbd,0x00,0x00};		/* lea 0w(%di),%di	*/
+static const unsigned char f16_7[] =
+  {0x8d,0x74,0x00,			/* lea 0(%si),%si	*/
+   0x8d,0xbd,0x00,0x00};		/* lea 0w(%di),%di	*/
+static const unsigned char f16_8[] =
+  {0x8d,0xb4,0x00,0x00,			/* lea 0w(%si),%si	*/
+   0x8d,0xbd,0x00,0x00};		/* lea 0w(%di),%di	*/
+static const unsigned char jump_31[] =
+  {0xeb,0x1d,0x90,0x90,0x90,0x90,0x90,	/* jmp .+31; lotsa nops	*/
+   0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,
+   0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,
+   0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
+/* 32-bit NOPs patterns.  */
+static const unsigned char *const f32_patt[] = {
+  f32_1, f32_2, f32_3, f32_4, f32_5, f32_6, f32_7, f32_8,
+  f32_9, f32_10, f32_11, f32_12, f32_13, f32_14
+};
+/* 16-bit NOPs patterns.  */
+static const unsigned char *const f16_patt[] = {
+  f32_1, f32_2, f16_3, f16_4, f16_5, f16_6, f16_7, f16_8
+};
+/* nopl (%[re]ax) */
+static const unsigned char alt_3[] =
+  {0x0f,0x1f,0x00};
+/* nopl 0(%[re]ax) */
+static const unsigned char alt_4[] =
+  {0x0f,0x1f,0x40,0x00};
+/* nopl 0(%[re]ax,%[re]ax,1) */
+static const unsigned char alt_5[] =
+  {0x0f,0x1f,0x44,0x00,0x00};
+/* nopw 0(%[re]ax,%[re]ax,1) */
+static const unsigned char alt_6[] =
+  {0x66,0x0f,0x1f,0x44,0x00,0x00};
+/* nopl 0L(%[re]ax) */
+static const unsigned char alt_7[] =
+  {0x0f,0x1f,0x80,0x00,0x00,0x00,0x00};
+/* nopl 0L(%[re]ax,%[re]ax,1) */
+static const unsigned char alt_8[] =
+  {0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+/* nopw 0L(%[re]ax,%[re]ax,1) */
+static const unsigned char alt_9[] =
+  {0x66,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+/* nopw %cs:0L(%[re]ax,%[re]ax,1) */
+static const unsigned char alt_10[] =
+  {0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+/* 32-bit and 64-bit NOPs patterns.  */
+static const unsigned char *const alt_patt[] = {
+  f32_1, f32_2, alt_3, alt_4, alt_5, alt_6, alt_7, alt_8,
+  alt_9, alt_10
+};
+/* 64-bit only: nopw %cs:0L(%eax,%eax,1) */
+static const unsigned char alt64_11[] =
+  {0x67,0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+/* 64-bit NOPs patterns.  */
+static const unsigned char *const alt64_patt[] = {
+  f32_1, f32_2, alt_3, alt_4, alt_5, alt_6, alt_7, alt_8,
+  alt_9, alt_10, alt64_11
+};
 
+/* Genenerate COUNT bytes of NOPs to WHERE from PATT with the maximum
+   size of a single NOP instruction MAX_SINGLE_NOP_SIZE.  */
+
+static void
+i386_output_nops (char *where, const unsigned char *const *patt,
+		  int count, int max_single_nop_size)
+
+{
+  while (count > max_single_nop_size)
+    {
+      count -= max_single_nop_size;
+      memcpy (where + count, patt[max_single_nop_size - 1],
+	      max_single_nop_size);
+    }
+
+  if (count)
+    memcpy (where, patt[count - 1], count);
+}
+
+
+/* Genenerate COUNT bytes of NOPs to WHERE with the maximum size of a
+   single NOP instruction LIMIT.  */
+
+void
+i386_generate_nops (fragS *f, char *where, offsetT count, int limit)
+{
+  /* Output NOPs for .nop directive.  */
+  int max_single_nop_size;
+  const unsigned char *const *patt;
+
+  if (flag_code == CODE_16BIT)
+    {
+      patt = f16_patt;
+      max_single_nop_size = sizeof (f16_patt) / sizeof (f16_patt[0]);
+    }
+  else if (flag_code == CODE_64BIT)
+    {
+      patt = alt64_patt;
+      max_single_nop_size = sizeof (alt64_patt) / sizeof (alt64_patt[0]);
+    }
+  else
+    {
+      patt = alt_patt;
+      max_single_nop_size = sizeof (alt_patt) / sizeof (alt_patt[0]);
+    }
+  if (limit == 0)
+    limit = max_single_nop_size;
+  else if (limit > max_single_nop_size)
+    {
+      as_bad_where (f->fr_file, f->fr_line,
+		    _("invalide single nop size: %d (expect within [0, %d])"),
+		    limit, max_single_nop_size);
+      return;
+    }
+
+  i386_output_nops (where, patt, count, limit);
+}
+
+void
+i386_align_code (fragS *fragP, int count)
+{
   /* Only align for at least a positive non-zero boundary. */
   if (count <= 0 || count > MAX_MEM_FOR_RS_ALIGN_CODE)
     return;
@@ -1397,17 +1466,8 @@ i386_align_code (fragS *fragP, int count)
 	  /* Maximum length of an instruction is 10 byte.  If the
 	     padding is greater than 10 bytes and we don't use jump,
 	     we have to break it into smaller pieces.  */
-	  int padding = count;
-	  while (padding > 10)
-	    {
-	      padding -= 10;
-	      memcpy (fragP->fr_literal + fragP->fr_fix + padding,
-		      patt [9], 10);
-	    }
-
-	  if (padding)
-	    memcpy (fragP->fr_literal + fragP->fr_fix,
-		    patt [padding - 1], padding);
+	  i386_output_nops (fragP->fr_literal + fragP->fr_fix,
+			    patt, count, 10);
 	}
     }
   fragP->fr_var = count;

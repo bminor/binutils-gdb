@@ -281,6 +281,11 @@ extern void sco_id (void);
 
 #define WORKING_DOT_WORD 1
 
+/* How to generate NOPs for .nop direct directive.  */
+extern void i386_generate_nops (fragS *, char *, offsetT, int);
+#define md_generate_nops(frag, where, amount, control) \
+  i386_generate_nops ((frag), (where), (amount), (control))
+
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
 #define TARGET_USE_CFIPOP 1
 

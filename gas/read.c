@@ -442,6 +442,7 @@ static const pseudo_typeS potable[] = {
 /* size  */
   {"space", s_space, 0},
   {"skip", s_space, 0},
+  {"nop", s_nop, 0},
   {"sleb128", s_leb128, 1},
   {"spc", s_ignore, 0},
   {"stabd", s_stab, 'd'},
@@ -3506,6 +3507,58 @@ s_space (int mult)
 
   if (flag_mri)
     mri_comment_end (stop, stopc);
+}
+
+void
+s_nop (int ignore ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+  expressionS val;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+#ifdef md_cons_align
+  md_cons_align (1);
+#endif
+
+  expression (&exp);
+
+  if (*input_line_pointer == ',')
+    {
+      ++input_line_pointer;
+      expression (&val);
+    }
+  else
+    {
+      val.X_op = O_constant;
+      val.X_add_number = 0;
+    }
+
+  if (val.X_op == O_constant)
+    {
+      if (val.X_add_number < 0)
+	{
+	  as_warn (_("negative nop control byte, ignored"));
+	  val.X_add_number = 0;
+	}
+
+      if (!need_pass_2)
+	{
+	  /* Store the no-op instruction control byte in the first byte
+	     of frag.  */
+	  char *p;
+	  symbolS *sym = make_expr_symbol (&exp);
+	  p = frag_var (rs_space_nop, 1, 1, (relax_substateT) 0,
+			sym, (offsetT) 0, (char *) 0);
+	  *p = val.X_add_number;
+	}
+    }
+  else
+    as_bad (_("unsupported variable nop control in .nop directive"));
+
+  demand_empty_rest_of_line ();
 }
 
 /* This is like s_space, but the value is a floating point number with

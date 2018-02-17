@@ -279,6 +279,16 @@ enum _relax_state
      1 variable char: fill character  */
   rs_space,
 
+  /* .nop directive with expression operand that needs to be computed
+     later.  Similar to rs_space, but different.  It fills with no-op
+     instructions.
+     fr_symbol: operand
+     1 constant byte: no-op fill control byte.  */
+  rs_space_nop,
+
+  /* Similar to rs_fill.  It is used to implement .nop directive .  */
+  rs_fill_nop,
+
   /* A DWARF leb128 value; only ELF uses this.  The subtype is 0 for
      unsigned, 1 for signed.  */
   rs_leb128,

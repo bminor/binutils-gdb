@@ -1,3 +1,46 @@
+2018-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention .nop directive.
+	* as.h (_relax_state): Add rs_space_nop and rs_fill_nop.
+	* read.c (potable): Add .nop.
+	(s_nop): New function.
+	* read.h (s_nop): New prototype.
+	* write.c (cvt_frag_to_fill): Handle rs_space_nop and
+	rs_fill_nop.
+	(md_generate_nops): New function.
+	(relax_segment): Likewise.
+	(write_contents): Use md_generate_nops for rs_fill_nop.
+	* config/tc-i386.c (alt64_11): New.
+	(alt64_patt): Likewise.
+	(md_convert_frag): Handle rs_space_nop.
+	(i386_output_nops): New function.
+	(i386_generate_nops): Likewise.
+	(i386_align_code): Call i386_output_nops.
+	* config/tc-i386.h (i386_generate_nops): New.
+	(md_generate_nops): Likewise.
+	* doc/as.texinfo: Document .nop directive.
+	* testsuite/gas/i386/i386.exp: Run .nop directive tests.
+	* testsuite/gas/i386/nop-1.d: New file.
+	* testsuite/gas/i386/nop-1.s: Likewise.
+	* testsuite/gas/i386/nop-2.d: Likewise.
+	* testsuite/gas/i386/nop-2.s: Likewise.
+	* testsuite/gas/i386/nop-3.d: Likewise.
+	* testsuite/gas/i386/nop-3.s: Likewise.
+	* testsuite/gas/i386/nop-4.d: Likewise.
+	* testsuite/gas/i386/nop-4.s: Likewise.
+	* testsuite/gas/i386/nop-5.d: Likewise.
+	* testsuite/gas/i386/nop-5.s: Likewise.
+	* testsuite/gas/i386/nop-6.d: Likewise.
+	* testsuite/gas/i386/nop-6.s: Likewise.
+	* testsuite/gas/i386/nop-bad-1.l: Likewise.
+	* testsuite/gas/i386/nop-bad-1.s: Likewise.
+	* testsuite/gas/i386/x86-64-nop-1.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-2.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-3.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-4.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-5.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-6.d: Likewise.
+
 2018-02-15  Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-arm.c (cpu_arch_ver): Renumber ARM_ARCH_V8_4A.
