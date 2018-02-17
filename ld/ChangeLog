@@ -1,6 +1,12 @@
 2018-02-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22845
+	* testsuite/ld-elf/binutils.exp (tls_opts): Add tests for
+	"-z noseparate-code" and "-z separate-code".
+
+2018-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22845
 	* ld-elf/eh4.d: Pass -z max-page-size=0x200000 -z noseparate-code
 	to ld.
 

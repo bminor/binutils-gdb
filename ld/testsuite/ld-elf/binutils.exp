@@ -186,9 +186,11 @@ if { ![istarget "hppa64-*-*"] } {
     lappend tls_tests "tdata3" "tbss1" "tbss2" "tbss3"
 }
 set tls_opts {
-    ""
+    "-z noseparate-code"
+    "-z separate-code"
     "-z relro"
-    "-shared"
+    "-shared -z noseparate-code"
+    "-shared -z separate-code"
     "-shared -z relro"
     "-z max-page-size=0x100000"
     "-z max-page-size=0x100000 -z common-page-size=0x1000"
