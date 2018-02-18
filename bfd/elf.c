@@ -4542,6 +4542,9 @@ elf_modify_segment_map (bfd *abfd,
   return TRUE;
 }
 
+#define IS_TBSS(s) \
+  ((s->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) == SEC_THREAD_LOCAL)
+
 /* Set up a mapping from BFD sections to program segments.  */
 
 bfd_boolean
@@ -4801,11 +4804,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		executable = TRUE;
 	      last_hdr = hdr;
 	      /* .tbss sections effectively have zero size.  */
-	      if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD))
-		  != SEC_THREAD_LOCAL)
-		last_size = hdr->size;
-	      else
-		last_size = 0;
+	      last_size = !IS_TBSS (hdr) ? hdr->size : 0;
 	      continue;
 	    }
 
@@ -4831,10 +4830,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 
 	  last_hdr = hdr;
 	  /* .tbss sections effectively have zero size.  */
-	  if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
-	    last_size = hdr->size;
-	  else
-	    last_size = 0;
+	  last_size = !IS_TBSS (hdr) ? hdr->size : 0;
 	  phdr_index = i;
 	  phdr_in_segment = FALSE;
 	}
@@ -4843,8 +4839,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	 for .tbss.  */
       if (last_hdr != NULL
 	  && (i - phdr_index != 1
-	      || ((last_hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD))
-		  != SEC_THREAD_LOCAL)))
+	      || !IS_TBSS (last_hdr)))
 	{
 	  m = make_mapping (abfd, sections, phdr_index, i, phdr_in_segment);
 	  if (m == NULL)
@@ -5897,9 +5892,11 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		   lm = lm->next, lp++)
 		{
 		  if (lp->p_type == PT_LOAD
-		      && lp->p_memsz != 0
 		      && lm->count != 0
-		      && lm->sections[lm->count - 1]->vma >= start
+		      && (lm->sections[lm->count - 1]->vma
+			  + (!IS_TBSS (lm->sections[lm->count - 1])
+			     ? lm->sections[lm->count - 1]->size
+			     : 0)) > start
 		      && lm->sections[0]->vma < end)
 		    break;
 		}

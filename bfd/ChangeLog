@@ -1,3 +1,11 @@
+2018-02-19  Alan Modra  <amodra@gmail.com>
+
+	PR 22845
+	* elf.c (IS_TBSS): Define.
+	(_bfd_elf_map_sections_to_segments): Use IS_TBSS.
+	(assign_file_positions_for_non_load_sections): Revert last change.
+	Properly calculate load segment limits to compare against relro limits.
+
 2018-02-17  Alan Modra  <amodra@gmail.com>
 
 	PR 22845
