@@ -9294,12 +9294,19 @@ _bfd_mips_elf_always_size_sections (bfd *output_bfd,
   /* The .reginfo section has a fixed size.  */
   sect = bfd_get_section_by_name (output_bfd, ".reginfo");
   if (sect != NULL)
-    bfd_set_section_size (output_bfd, sect, sizeof (Elf32_External_RegInfo));
+    {
+      bfd_set_section_size (output_bfd, sect, sizeof (Elf32_External_RegInfo));
+      sect->flags |= SEC_FIXED_SIZE | SEC_HAS_CONTENTS;
+    }
 
   /* The .MIPS.abiflags section has a fixed size.  */
   sect = bfd_get_section_by_name (output_bfd, ".MIPS.abiflags");
   if (sect != NULL)
-    bfd_set_section_size (output_bfd, sect, sizeof (Elf_External_ABIFlags_v0));
+    {
+      bfd_set_section_size (output_bfd, sect,
+			    sizeof (Elf_External_ABIFlags_v0));
+      sect->flags |= SEC_FIXED_SIZE | SEC_HAS_CONTENTS;
+    }
 
   hti.info = info;
   hti.output_bfd = output_bfd;
@@ -14368,6 +14375,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      bfd *input_bfd;
 	      Elf32_External_RegInfo ext;
 	      Elf32_RegInfo sub;
+	      bfd_size_type sz;
 
 	      if (p->type != bfd_indirect_link_order)
 		{
@@ -14379,8 +14387,11 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      input_section = p->u.indirect.section;
 	      input_bfd = input_section->owner;
 
+	      sz = (input_section->size < sizeof (ext)
+		    ? input_section->size : sizeof (ext));
+	      memset (&ext, 0, sizeof (ext));
 	      if (! bfd_get_section_contents (input_bfd, input_section,
-					      &ext, 0, sizeof ext))
+					      &ext, 0, sz))
 		return FALSE;
 
 	      bfd_mips_elf32_swap_reginfo_in (input_bfd, &ext, &sub);

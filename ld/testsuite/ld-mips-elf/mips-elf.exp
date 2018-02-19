@@ -57,6 +57,7 @@ set has_newabi [expr [istarget *-*-irix6*] \
 		     || [istarget mips*-sde-elf*] \
 		     || [istarget mips*-mti-elf*] \
 		     || [istarget mips*-img-elf*]]
+set has_elf32 [expr ![istarget *-*-openbsd*]]
 set linux_gnu [expr [istarget mips*-*-linux*]]
 set embedded_elf [expr [istarget mips*-*-elf]]
 
@@ -1237,3 +1238,19 @@ rename mips_old_prune_warnings prune_warnings
 
 # Verify that we can link ELF input into the `binary' output format.
 run_dump_test "binary"
+
+# Verify special section processing.
+if $has_elf32 {
+    run_dump_test "reginfo-0"
+    run_dump_test "reginfo-0r"
+    run_dump_test "reginfo-1"
+    run_dump_test "reginfo-1r"
+    run_dump_test "reginfo-2"
+    run_dump_test "reginfo-2r"
+}
+run_dump_test "mips-abiflags-0"
+run_dump_test "mips-abiflags-0r"
+run_dump_test "mips-abiflags-1"
+run_dump_test "mips-abiflags-1r"
+run_dump_test "mips-abiflags-2"
+run_dump_test "mips-abiflags-2r"
