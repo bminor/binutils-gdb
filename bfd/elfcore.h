@@ -298,8 +298,8 @@ elf_core_file_p (bfd *abfd)
 	    _bfd_error_handler
 	      /* xgettext:c-format */
 	      (_("warning: %pB is truncated: expected core file "
-		 "size >= %" PRIu64 ", found: %llu"),
-	       abfd, (uint64_t) high, (unsigned long long) statbuf.st_size);
+		 "size >= %" PRIu64 ", found: %" PRIu64),
+	       abfd, (uint64_t) high, (uint64_t) statbuf.st_size);
 	  }
       }
   }

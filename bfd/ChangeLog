@@ -1,5 +1,11 @@
 2018-02-19  Alan Modra  <amodra@gmail.com>
 
+	* dwarf2.c (read_section): Don't use 'll' format modifier.
+	(find_abstract_instance): Likewise.
+	* elfcore.h (elf_core_file_p): Likewise.
+
+2018-02-19  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Include inttypes.h or if not available define
 	PRId64, PRIu64 and PRIx64.
 	* bfd.c (_bfd_doprnt, _bfd_doprnt_scan): Remove support for L

@@ -569,9 +569,9 @@ read_section (bfd *	      abfd,
   if (offset != 0 && offset >= *section_size)
     {
       /* xgettext: c-format */
-      _bfd_error_handler (_("Dwarf Error: Offset (%llu)"
+      _bfd_error_handler (_("Dwarf Error: Offset (%" PRIu64 ")"
 			    " greater than or equal to %s size (%" PRIu64 ")."),
-			  (long long) offset, section_name,
+			  (uint64_t) offset, section_name,
 			  (uint64_t) *section_size);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -2871,8 +2871,8 @@ find_abstract_instance (struct comp_unit *   unit,
       if (info_ptr == NULL)
 	{
 	  _bfd_error_handler
-	    (_("Dwarf Error: Unable to read alt ref %llu."),
-	     (long long) die_ref);
+	    (_("Dwarf Error: Unable to read alt ref %" PRIu64 "."),
+	     (uint64_t) die_ref);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
