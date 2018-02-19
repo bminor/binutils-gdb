@@ -653,7 +653,7 @@ microblaze_elf_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
   if (r_type >= R_MICROBLAZE_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: unrecognised MicroBlaze reloc number: %d"),
+      _bfd_error_handler (_("%pB: unrecognised MicroBlaze reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_MICROBLAZE_NONE;
@@ -929,7 +929,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
       if (r_type < 0 || r_type >= (int) R_MICROBLAZE_max)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: unknown relocation type %d"),
+	  _bfd_error_handler (_("%pB: unknown relocation type %d"),
 			      input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
@@ -1061,8 +1061,8 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		      {
 			_bfd_error_handler
 			  /* xgettext:c-format */
-			  (_("%B: The target (%s) of an %s relocation"
-			     " is in the wrong section (%A)"),
+			  (_("%pB: The target (%s) of an %s relocation"
+			     " is in the wrong section (%pA)"),
 			   input_bfd,
 			   sym_name,
 			   microblaze_elf_howto_table[(int) r_type]->name,
@@ -1109,8 +1109,8 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		      {
 			_bfd_error_handler
 			  /* xgettext:c-format */
-			  (_("%B: The target (%s) of an %s relocation"
-			     " is in the wrong section (%A)"),
+			  (_("%pB: The target (%s) of an %s relocation"
+			     " is in the wrong section (%pA)"),
 			   input_bfd,
 			   sym_name,
 			   microblaze_elf_howto_table[(int) r_type]->name,
@@ -1479,7 +1479,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 			  {
 			    BFD_FAIL ();
 			    _bfd_error_handler
-			      (_("%B: probably compiled without -fPIC?"),
+			      (_("%pB: probably compiled without -fPIC?"),
 			       input_bfd);
 			    bfd_set_error (bfd_error_bad_value);
 			    return FALSE;

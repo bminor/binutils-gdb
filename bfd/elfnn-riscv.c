@@ -424,7 +424,7 @@ riscv_elf_record_tls_type (bfd *abfd, struct elf_link_hash_entry *h,
   if ((*new_tls_type & GOT_NORMAL) && (*new_tls_type & ~GOT_NORMAL))
     {
       (*_bfd_error_handler)
-	(_("%B: `%s' accessed both as normal and thread local symbol"),
+	(_("%pB: `%s' accessed both as normal and thread local symbol"),
 	 abfd, h ? h->root.root.string : "<local>");
       return FALSE;
     }
@@ -468,7 +468,7 @@ static bfd_boolean
 bad_static_reloc (bfd *abfd, unsigned r_type, struct elf_link_hash_entry *h)
 {
   (*_bfd_error_handler)
-    (_("%B: relocation %s against `%s' can not be used when making a shared "
+    (_("%pB: relocation %s against `%s' can not be used when making a shared "
        "object; recompile with -fPIC"),
       abfd, riscv_elf_rtype_to_howto (r_type)->name,
       h != NULL ? h->root.root.string : "a local symbol");
@@ -510,7 +510,7 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
+	  (*_bfd_error_handler) (_("%pB: bad symbol index: %d"),
 				 abfd, r_symndx);
 	  return FALSE;
 	}
@@ -1109,7 +1109,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
@@ -2213,7 +2213,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
 	  (*_bfd_error_handler)
-	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
 	     rel->r_offset,
@@ -2504,7 +2504,7 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
       if (bfd_is_abs_section (output_section))
 	{
 	  (*_bfd_error_handler)
-	    (_("discarded output section: `%A'"), htab->elf.sgotplt);
+	    (_("discarded output section: `%pA'"), htab->elf.sgotplt);
 	  return FALSE;
 	}
 
@@ -2582,7 +2582,7 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)
     {
       (*_bfd_error_handler)
-	(_("%B: ABI is incompatible with that of the selected emulation:\n"
+	(_("%pB: ABI is incompatible with that of the selected emulation:\n"
 	   "  target emulation `%s' does not match `%s'"),
 	 ibfd, bfd_get_target (ibfd), bfd_get_target (obfd));
       return FALSE;
@@ -2602,7 +2602,7 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if ((old_flags ^ new_flags) & EF_RISCV_FLOAT_ABI)
     {
       (*_bfd_error_handler)
-	(_("%B: can't link hard-float modules with soft-float modules"), ibfd);
+	(_("%pB: can't link hard-float modules with soft-float modules"), ibfd);
       goto fail;
     }
 
@@ -3111,7 +3111,7 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
   if (rel->r_addend < nop_bytes)
     {
       (*_bfd_error_handler)
-	(_("%B(%A+0x%lx): %d bytes required for alignment "
+	(_("%pB(%pA+0x%lx): %d bytes required for alignment "
 	   "to %d-byte boundary, but only %d present"),
 	   abfd, sym_sec, rel->r_offset, nop_bytes, alignment, rel->r_addend);
       bfd_set_error (bfd_error_bad_value);
@@ -3178,7 +3178,7 @@ _bfd_riscv_relax_pc  (bfd *abfd,
 	sym_sec = hi_reloc.sym_sec;
 	if (!riscv_use_pcgp_hi_reloc(pcgp_relocs, hi->hi_sec_off))
 	  (*_bfd_error_handler)
-	   (_("%B(%A+0x%lx): Unable to clear RISCV_PCREL_HI20 reloc"
+	   (_("%pB(%pA+0x%lx): Unable to clear RISCV_PCREL_HI20 reloc"
 	      "for cooresponding RISCV_PCREL_LO12 reloc"),
 	    abfd, sec, rel->r_offset);
       }

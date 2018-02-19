@@ -337,7 +337,7 @@ hpux_core_core_file_p (bfd *abfd)
      */
   if ((unknown_sections > 0) && (good_sections > 0))
     _bfd_error_handler
-      ("%B appears to be a core file,\nbut contains unknown sections."
+      ("%pB appears to be a core file,\nbut contains unknown sections."
        "  It may have been created on an incompatible\nversion of HP-UX."
        "  As a result, some information may be unavailable.\n",
        abfd);

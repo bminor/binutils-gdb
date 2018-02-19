@@ -452,7 +452,7 @@ output_one_cref (FILE *fp, struct cref_hash_entry *h)
 	      putc (' ', fp);
 	      ++len;
 	    }
-	  lfinfo (fp, "%B\n", r->abfd);
+	  lfinfo (fp, "%pB\n", r->abfd);
 	  len = 0;
 	}
     }
@@ -466,7 +466,7 @@ output_one_cref (FILE *fp, struct cref_hash_entry *h)
 	      putc (' ', fp);
 	      ++len;
 	    }
-	  lfinfo (fp, "%B\n", r->abfd);
+	  lfinfo (fp, "%pB\n", r->abfd);
 	  len = 0;
 	}
     }
@@ -480,7 +480,7 @@ output_one_cref (FILE *fp, struct cref_hash_entry *h)
 	      putc (' ', fp);
 	      ++len;
 	    }
-	  lfinfo (fp, "%B\n", r->abfd);
+	  lfinfo (fp, "%pB\n", r->abfd);
 	  len = 0;
 	}
     }
@@ -514,7 +514,7 @@ check_local_sym_xref (lang_input_statement_type *statement)
     return;
 
   if (!bfd_generic_link_read_symbols (abfd))
-    einfo (_("%B%F: could not read symbols: %E\n"), abfd);
+    einfo (_("%pB%F: could not read symbols: %E\n"), abfd);
 
   for (syms = bfd_get_outsymbols (abfd); *syms; ++syms)
     {
@@ -625,7 +625,7 @@ check_refs (const char *name,
      BFD might contain a prohibited cross reference.  */
 
   if (!bfd_generic_link_read_symbols (abfd))
-    einfo (_("%B%F: could not read symbols: %E\n"), abfd);
+    einfo (_("%pB%F: could not read symbols: %E\n"), abfd);
 
   info.sym_name = name;
   info.global = global;
@@ -687,14 +687,14 @@ check_reloc_refs (bfd *abfd, asection *sec, void *iarg)
 
   relsize = bfd_get_reloc_upper_bound (abfd, sec);
   if (relsize < 0)
-    einfo (_("%B%F: could not read relocs: %E\n"), abfd);
+    einfo (_("%pB%F: could not read relocs: %E\n"), abfd);
   if (relsize == 0)
     return;
 
   relpp = (arelent **) xmalloc (relsize);
   relcount = bfd_canonicalize_reloc (abfd, sec, relpp, info->asymbols);
   if (relcount < 0)
-    einfo (_("%B%F: could not read relocs: %E\n"), abfd);
+    einfo (_("%pB%F: could not read relocs: %E\n"), abfd);
 
   p = relpp;
   pend = p + relcount;

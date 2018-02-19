@@ -452,7 +452,7 @@ coff_link_add_symbols (bfd *abfd,
 			_bfd_error_handler
 			  /* xgettext: c-format */
 			  (_("Warning: type of symbol `%s' changed"
-			     " from %d to %d in %B"),
+			     " from %d to %d in %pB"),
 			   name, (*sym_hash)->type, sym.n_type, abfd);
 
 		      /* We don't want to change from a meaningful
@@ -2370,7 +2370,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 	    {
 	      _bfd_error_handler
 		/* xgettext: c-format */
-		(_("%B: relocs in section `%A', but it has no contents"),
+		(_("%pB: relocs in section `%pA', but it has no contents"),
 		 input_bfd, o);
 	      bfd_set_error (bfd_error_no_contents);
 	      return FALSE;
@@ -2433,8 +2433,8 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 	      if (ps->flags & SEC_EXCLUDE)
 		(*flaginfo->info->callbacks->einfo)
 		  /* xgettext: c-format */
-		  (_("%X`%s' referenced in section `%A' of %B: "
-		     "defined in discarded section `%A' of %B\n"),
+		  (_("%X`%s' referenced in section `%pA' of %pB: "
+		     "defined in discarded section `%pA' of %pB\n"),
 		   h->root.root.string, o, input_bfd, ps, ps->owner);
 	    }
 
@@ -2731,7 +2731,7 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
 		      || bfd_link_relocatable (flaginfo->info)))
 		_bfd_error_handler
 		  /* xgettext: c-format */
-		  (_("%B: %A: reloc overflow: %#x > 0xffff"),
+		  (_("%pB: %pA: reloc overflow: %#x > 0xffff"),
 		   output_bfd, sec, sec->reloc_count);
 
 	      if (sec->lineno_count > 0xffff
@@ -2739,7 +2739,7 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
 		      || bfd_link_relocatable (flaginfo->info)))
 		_bfd_error_handler
 		  /* xgettext: c-format */
-		  (_("%B: warning: %A: line number overflow: %#x > 0xffff"),
+		  (_("%pB: warning: %pA: line number overflow: %#x > 0xffff"),
 		   output_bfd, sec, sec->lineno_count);
 
 	      auxp->x_scn.x_nreloc = sec->reloc_count;
@@ -2962,7 +2962,7 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext: c-format */
-	    (_("%B: illegal symbol index %ld in relocs"), input_bfd, symndx);
+	    (_("%pB: illegal symbol index %ld in relocs"), input_bfd, symndx);
 	  return FALSE;
 	}
       else
@@ -3124,7 +3124,7 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	case bfd_reloc_outofrange:
 	  _bfd_error_handler
 	    /* xgettext: c-format */
-	    (_("%B: bad reloc address %#Lx in section `%A'"),
+	    (_("%pB: bad reloc address %#Lx in section `%pA'"),
 	     input_bfd, rel->r_vaddr, input_section);
 	  return FALSE;
 	case bfd_reloc_overflow:

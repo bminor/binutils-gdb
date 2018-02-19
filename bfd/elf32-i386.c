@@ -381,7 +381,7 @@ elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
 	  >= R_386_vt - R_386_ext2))
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid relocation type %d"),
+      _bfd_error_handler (_("%pB: invalid relocation type %d"),
 			  abfd, (int) r_type);
       indx = R_386_NONE;
     }
@@ -1156,8 +1156,8 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: TLS transition from %s to %s against `%s' at %#Lx "
-	   "in section `%A' failed"),
+	(_("%pB: TLS transition from %s to %s against `%s' at %#Lx "
+	   "in section `%pA' failed"),
 	 abfd, from->name, to->name, name,
 	 rel->r_offset, sec);
       bfd_set_error (bfd_error_bad_value);
@@ -1247,7 +1247,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: direct GOT relocation R_386_GOT32X against `%s' without base"
+	(_("%pB: direct GOT relocation R_386_GOT32X against `%s' without base"
 	   " register can not be used when making a shared object"),
 	 abfd, name);
       return FALSE;
@@ -1507,7 +1507,7 @@ elf_i386_check_relocs (bfd *abfd,
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+	  _bfd_error_handler (_("%pB: bad symbol index: %d"),
 			      abfd, r_symndx);
 	  goto error_return;
 	}
@@ -1704,7 +1704,7 @@ elf_i386_check_relocs (bfd *abfd,
 					     NULL);
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: `%s' accessed both as normal and "
+		      (_("%pB: `%s' accessed both as normal and "
 			 "thread local symbol"),
 		       abfd, name);
 		    bfd_set_error (bfd_error_bad_value);
@@ -1776,7 +1776,7 @@ do_relocation:
 		    {
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%B: unsupported non-PIC call to IFUNC `%s'"),
+			(_("%pB: unsupported non-PIC call to IFUNC `%s'"),
 			 abfd, h->root.root.string);
 		      bfd_set_error (bfd_error_bad_value);
 		      goto error_return;
@@ -2354,7 +2354,7 @@ bad_ifunc_reloc:
 					 NULL);
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: relocation %s against STT_GNU_IFUNC "
+		(_("%pB: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't supported"), input_bfd,
 		 howto->name, name);
 	      bfd_set_error (bfd_error_bad_value);
@@ -2387,7 +2387,7 @@ do_ifunc_pointer:
 
 		  if (POINTER_LOCAL_IFUNC_P (info, h))
 		    {
-		      info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+		      info->callbacks->minfo (_("Local IFUNC function `%s' in %pB\n"),
 					      h->root.root.string,
 					      h->root.u.def.section->owner);
 
@@ -2602,7 +2602,7 @@ disallow_got32:
 
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: direct GOT relocation %s against `%s'"
+		    (_("%pB: direct GOT relocation %s against `%s'"
 		       " without base register can not be used"
 		       " when making a shared object"),
 		     input_bfd, howto->name, name);
@@ -2652,7 +2652,7 @@ disallow_got32:
 
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: relocation R_386_GOTOFF against undefined %s"
+		    (_("%pB: relocation R_386_GOTOFF against undefined %s"
 		       " `%s' can not be used when making a shared object"),
 		     input_bfd, v, h->root.root.string);
 		  bfd_set_error (bfd_error_bad_value);
@@ -2665,7 +2665,7 @@ disallow_got32:
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: relocation R_386_GOTOFF against protected %s"
+		    (_("%pB: relocation R_386_GOTOFF against protected %s"
 		       " `%s' can not be used when making a shared object"),
 		     input_bfd,
 		     h->type == STT_FUNC ? "function" : "data",
@@ -3442,7 +3442,7 @@ disallow_got32:
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
 	     rel->r_offset,
@@ -3482,7 +3482,7 @@ check_relocation_error:
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+%#Lx): reloc against `%s': error %d"),
+		(_("%pB(%pA+%#Lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
 		 rel->r_offset, name, (int) r);
 	      return FALSE;
@@ -3693,7 +3693,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 			  + got_offset);
 	  if (PLT_LOCAL_IFUNC_P (info, h))
 	    {
-	      info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+	      info->callbacks->minfo (_("Local IFUNC function `%s' in %pB\n"),
 				      h->root.root.string,
 				      h->root.u.def.section->owner);
 
@@ -3832,7 +3832,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		}
 	      if (SYMBOL_REFERENCES_LOCAL_P (info, h))
 		{
-		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+		  info->callbacks->minfo (_("Local IFUNC function `%s' in %pB\n"),
 					  h->root.root.string,
 					  h->root.u.def.section->owner);
 

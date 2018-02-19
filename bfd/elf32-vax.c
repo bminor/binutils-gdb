@@ -287,7 +287,7 @@ rtype_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
   if (r_type >= R_VAX_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: unrecognised VAX reloc number: %d"),
+      _bfd_error_handler (_("%pB: unrecognised VAX reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_VAX_NONE;
@@ -628,7 +628,7 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		  if (eh->got_addend != (bfd_vma) rel->r_addend)
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: warning: GOT addend of %Ld to `%s' does"
+		      (_("%pB: warning: GOT addend of %Ld to `%s' does"
 			 " not match previous GOT addend of %Ld"),
 			 abfd, rel->r_addend, h->root.root.string,
 			 eh->got_addend);
@@ -1442,8 +1442,8 @@ elf_vax_relocate_section (bfd *output_bfd,
 	  else if (rel->r_addend != 0)
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B: warning: PLT addend of %Ld to `%s'"
-		 " from %A section ignored"),
+	      (_("%pB: warning: PLT addend of %Ld to `%s'"
+		 " from %pA section ignored"),
 	       input_bfd, rel->r_addend, h->root.root.string, input_section);
 	  rel->r_addend = 0;
 
@@ -1567,14 +1567,14 @@ elf_vax_relocate_section (bfd *output_bfd,
 		  if (h != NULL)
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: warning: %s relocation against symbol `%s'"
-			 " from %A section"),
+		      (_("%pB: warning: %s relocation against symbol `%s'"
+			 " from %pA section"),
 		      input_bfd, howto->name, h->root.root.string,
 		      input_section);
 		  else
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: warning: %s relocation to %#Lx from %A section"),
+		      (_("%pB: warning: %s relocation to %#Lx from %pA section"),
 		      input_bfd, howto->name, outrel.r_addend,
 		      input_section);
 		}

@@ -1109,7 +1109,7 @@ elf64_alpha_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   if (r_type >= R_ALPHA_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: unrecognised Alpha reloc number: %d"),
+      _bfd_error_handler (_("%pB: unrecognised Alpha reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_ALPHA_NONE;
@@ -2459,7 +2459,7 @@ elf64_alpha_size_got_sections (struct bfd_link_info *info,
 	      /* Yikes! A single object file has too many entries.  */
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: .got subsegment exceeds 64K (size %d)"),
+		(_("%pB: .got subsegment exceeds 64K (size %d)"),
 		 i, alpha_elf_tdata (this_got)->total_got_size);
 	      return FALSE;
 	    }
@@ -3014,7 +3014,7 @@ elf64_alpha_relax_got_load (struct alpha_relax_info *info, bfd_vma symval,
       reloc_howto_type *howto = elf64_alpha_howto_table + r_type;
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: %A+%#Lx: warning: %s relocation against unexpected insn"),
+	(_("%pB: %pA+%#Lx: warning: %s relocation against unexpected insn"),
 	 info->abfd, info->sec, irel->r_offset, howto->name);
       return TRUE;
     }
@@ -3209,7 +3209,7 @@ elf64_alpha_relax_with_lituse (struct alpha_relax_info *info,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: %A+%#Lx: warning: LITERAL relocation against unexpected insn"),
+	(_("%pB: %pA+%#Lx: warning: LITERAL relocation against unexpected insn"),
 	 abfd, info->sec, irel->r_offset);
       return TRUE;
     }
@@ -4095,7 +4095,7 @@ elf64_alpha_relocate_section_r (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: unknown relocation type %d"),
+	    (_("%pB: unknown relocation type %d"),
 	     input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret_val = FALSE;
@@ -4243,7 +4243,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: unknown relocation type %d"),
+	    (_("%pB: unknown relocation type %d"),
 	     input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret_val = FALSE;
@@ -4409,7 +4409,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: gp-relative relocation against dynamic symbol %s"),
+		(_("%pB: gp-relative relocation against dynamic symbol %s"),
 		 input_bfd, h->root.root.root.string);
 	      ret_val = FALSE;
 	    }
@@ -4422,7 +4422,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: gp-relative relocation against dynamic symbol %s"),
+		(_("%pB: gp-relative relocation against dynamic symbol %s"),
 		 input_bfd, h->root.root.root.string);
 	      ret_val = FALSE;
 	    }
@@ -4449,7 +4449,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: pc-relative relocation against dynamic symbol %s"),
+		(_("%pB: pc-relative relocation against dynamic symbol %s"),
 		 input_bfd, h->root.root.root.string);
 	      ret_val = FALSE;
 	    }
@@ -4478,7 +4478,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      {
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B: change in gp: BRSGP %s"),
+		  (_("%pB: change in gp: BRSGP %s"),
 		   input_bfd, h->root.root.root.string);
 		ret_val = FALSE;
 	      }
@@ -4509,7 +4509,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  }
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B: !samegp reloc against symbol without .prologue: %s"),
+		  (_("%pB: !samegp reloc against symbol without .prologue: %s"),
 		   input_bfd, name);
 		ret_val = FALSE;
 		break;
@@ -4567,7 +4567,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: unhandled dynamic relocation against %s"),
+		      (_("%pB: unhandled dynamic relocation against %s"),
 		       input_bfd,
 		       h->root.root.root.string);
 		    ret_val = FALSE;
@@ -4593,7 +4593,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: pc-relative relocation against dynamic symbol %s"),
+		(_("%pB: pc-relative relocation against dynamic symbol %s"),
 		 input_bfd, h->root.root.root.string);
 	      ret_val = FALSE;
 	    }
@@ -4602,7 +4602,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: pc-relative relocation against undefined weak symbol %s"),
+		(_("%pB: pc-relative relocation against undefined weak symbol %s"),
 		 input_bfd, h->root.root.root.string);
 	      ret_val = FALSE;
 	    }
@@ -4668,7 +4668,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: dtp-relative relocation against dynamic symbol %s"),
+		(_("%pB: dtp-relative relocation against dynamic symbol %s"),
 		 input_bfd, h->root.root.root.string);
 	      ret_val = FALSE;
 	    }
@@ -4685,7 +4685,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: TLS local exec code cannot be linked into shared objects"),
+		(_("%pB: TLS local exec code cannot be linked into shared objects"),
 		input_bfd);
 	      ret_val = FALSE;
 	    }
@@ -4693,7 +4693,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: tp-relative relocation against dynamic symbol %s"),
+		(_("%pB: tp-relative relocation against dynamic symbol %s"),
 		 input_bfd, h->root.root.root.string);
 	      ret_val = FALSE;
 	    }

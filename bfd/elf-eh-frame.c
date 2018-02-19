@@ -939,7 +939,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      (*info->callbacks->minfo)
 		/* xgettext:c-format */
-		(_("discarding zero address range FDE in %B(%A).\n"),
+		(_("discarding zero address range FDE in %pB(%pA).\n"),
 		 abfd, sec);
 	      this_inf->u.fde.cie_inf = NULL;
 	    }
@@ -1044,7 +1044,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
  free_no_table:
   (*info->callbacks->einfo)
     /* xgettext:c-format */
-    (_("%P: error in %B(%A); no .eh_frame_hdr table will be created.\n"),
+    (_("%P: error in %pB(%pA); no .eh_frame_hdr table will be created.\n"),
      abfd, sec);
   hdr_info->u.dwarf.table = FALSE;
   if (sec_info)
@@ -1534,7 +1534,7 @@ _bfd_elf_discard_section_eh_frame
 		  {
 		    (*info->callbacks->einfo)
 		      /* xgettext:c-format */
-		      (_("%P: FDE encoding in %B(%A) prevents .eh_frame_hdr"
+		      (_("%P: FDE encoding in %pB(%pA) prevents .eh_frame_hdr"
 			 " table being created.\n"), abfd, sec);
 		    num_warnings_issued ++;
 		  }
@@ -1863,7 +1863,7 @@ _bfd_elf_write_section_eh_frame_entry (bfd *abfd, struct bfd_link_info *info,
       if (addr <= last_addr)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: %A not in order"), sec->owner, sec);
+	  _bfd_error_handler (_("%pB: %pA not in order"), sec->owner, sec);
 	  return FALSE;
 	}
 
@@ -1877,7 +1877,7 @@ _bfd_elf_write_section_eh_frame_entry (bfd *abfd, struct bfd_link_info *info,
   if (addr & 1)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: %A invalid input section size"),
+      _bfd_error_handler (_("%pB: %pA invalid input section size"),
 			  sec->owner, sec);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -1885,7 +1885,7 @@ _bfd_elf_write_section_eh_frame_entry (bfd *abfd, struct bfd_link_info *info,
   if (last_addr >= addr + sec->rawsize)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: %A points past end of text section"),
+      _bfd_error_handler (_("%pB: %pA points past end of text section"),
 			  sec->owner, sec);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -2304,7 +2304,7 @@ _bfd_elf_fixup_eh_frame_hdr (struct bfd_link_info *info)
       if (sec->output_section != osec)
 	{
 	  _bfd_error_handler
-	    (_("Invalid output section for .eh_frame_entry: %A"),
+	    (_("Invalid output section for .eh_frame_entry: %pA"),
 	     sec->output_section);
 	  return FALSE;
 	}
@@ -2327,7 +2327,7 @@ _bfd_elf_fixup_eh_frame_hdr (struct bfd_link_info *info)
   if (i != 0)
     {
       _bfd_error_handler
-	(_("Invalid contents in %A section"), osec);
+	(_("Invalid contents in %pA section"), osec);
       return FALSE;
     }
 

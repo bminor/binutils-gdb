@@ -303,7 +303,7 @@ m32c_info_to_howto_rela
   if (r_type >= (unsigned int) R_M32C_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid M32C reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid M32C reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & m32c_elf_howto_table [r_type];
@@ -871,7 +871,7 @@ m32c_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  error = TRUE;
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: compiled with %s and linked with modules compiled with %s"),
+	    (_("%pB: compiled with %s and linked with modules compiled with %s"),
 	     ibfd, new_opt, old_opt);
 	}
 
@@ -884,7 +884,7 @@ m32c_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  error = TRUE;
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: uses different e_flags (%#x) fields"
+	    (_("%pB: uses different e_flags (%#x) fields"
 	       " than previous modules (%#x)"),
 	     ibfd, new_flags, old_flags);
 	}

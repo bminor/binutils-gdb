@@ -1281,7 +1281,7 @@ NAME (aout, set_section_contents) (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	   (_("%B: can not represent section `%A' in a.out object file format"),
+	   (_("%pB: can not represent section `%pA' in a.out object file format"),
 	     abfd, section);
 	  bfd_set_error (bfd_error_nonrepresentable_section);
 	  return FALSE;
@@ -1597,7 +1597,7 @@ translate_to_native_sym_flags (bfd *abfd,
 	 file.  */
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: can not represent section for symbol `%s' in a.out "
+	(_("%pB: can not represent section for symbol `%s' in a.out "
 	   "object file format"),
 	 abfd,
 	 cache_ptr->name != NULL ? cache_ptr->name : _("*unknown*"));
@@ -1633,7 +1633,7 @@ translate_to_native_sym_flags (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	   (_("%B: can not represent section `%A' in a.out object file format"),
+	   (_("%pB: can not represent section `%pA' in a.out object file format"),
 	     abfd, sec);
 	  bfd_set_error (bfd_error_nonrepresentable_section);
 	  return FALSE;
@@ -2420,7 +2420,7 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
 	    {
 	      bfd_set_error (bfd_error_invalid_operation);
 	      _bfd_error_handler (_("\
-%B: attempt to write out unknown reloc type"), abfd);
+%pB: attempt to write out unknown reloc type"), abfd);
 	      return FALSE;
 	    }
 	  MY_swap_ext_reloc_out (abfd, *generic,
@@ -2438,7 +2438,7 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
 	    {
 	      bfd_set_error (bfd_error_invalid_operation);
 	      _bfd_error_handler (_("\
-%B: attempt to write out unknown reloc type"), abfd);
+%pB: attempt to write out unknown reloc type"), abfd);
 	      return FALSE;
 	    }
 	  MY_swap_std_reloc_out (abfd, *generic,
@@ -4090,7 +4090,7 @@ aout_link_input_section_std (struct aout_final_link_info *flaginfo,
       if (howto == NULL)
 	{
 	  (*flaginfo->info->callbacks->einfo)
-	    (_("%P: %B: unexpected relocation type\n"), input_bfd);
+	    (_("%P: %pB: unexpected relocation type\n"), input_bfd);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -4411,7 +4411,7 @@ aout_link_input_section_ext (struct aout_final_link_info *flaginfo,
       if (r_type >= TABLE_SIZE (howto_table_ext))
 	{
 	  (*flaginfo->info->callbacks->einfo)
-	    (_("%P: %B: unexpected relocation type\n"), input_bfd);
+	    (_("%P: %pB: unexpected relocation type\n"), input_bfd);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -5437,7 +5437,7 @@ NAME (aout, final_link) (bfd *abfd,
 		 by the reloc size.  */
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: relocatable link from %s to %s not supported"),
+		(_("%pB: relocatable link from %s to %s not supported"),
 		 abfd, sub->xvec->name, abfd->xvec->name);
 	      bfd_set_error (bfd_error_invalid_operation);
 	      goto error_return;

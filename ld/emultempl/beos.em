@@ -433,14 +433,14 @@ sort_by_file_name (const void *a, const void *b)
 				     (*ra)->input_section.section, &a_sec,
 				     (file_ptr) 0,
 				     (bfd_size_type) sizeof(a_sec)))
-	einfo (_("%F%B: Can't read contents of section .idata: %E\n"),
+	einfo (_("%F%pB: Can't read contents of section .idata: %E\n"),
 	       (*ra)->input_section.section->owner);
 
       if (!bfd_get_section_contents ((*rb)->input_section.section->owner,
 				     (*rb)->input_section.section, &b_sec,
 				     (file_ptr) 0,
 				     (bfd_size_type) sizeof(b_sec)))
-	einfo (_("%F%B: Can't read contents of section .idata: %E\n"),
+	einfo (_("%F%pB: Can't read contents of section .idata: %E\n"),
 	       (*rb)->input_section.section->owner);
 
       i = a_sec < b_sec ? -1 : 0;

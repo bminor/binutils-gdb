@@ -74,7 +74,7 @@ gld${EMULATION_NAME}_after_open (void)
       /* As first-order business, make sure that each input BFD is COFF. It
 	 better be, as we are directly calling a COFF backend function.  */
       if (bfd_get_flavour (abfd) != bfd_target_coff_flavour)
-	einfo (_("%F%B: all input objects must be COFF "
+	einfo (_("%F%pB: all input objects must be COFF "
 		 "for --embedded-relocs\n"));
 
       datasec = bfd_get_section_by_name (abfd, ".data");
@@ -99,7 +99,7 @@ gld${EMULATION_NAME}_after_open (void)
 	      || ! bfd_set_section_alignment (abfd, relsec, 2)
 	      || ! bfd_set_section_size (abfd, relsec,
 					 datasec->reloc_count * 12))
-	    einfo (_("%F%B: can not create .emreloc section: %E\n"));
+	    einfo (_("%F%pB: can not create .emreloc section: %E\n"));
 	}
 
       /* Double check that all other data sections are empty, as is
@@ -117,7 +117,7 @@ check_sections (bfd *abfd, asection *sec, void *datasec)
   if ((bfd_get_section_flags (abfd, sec) & SEC_DATA)
       && sec != datasec
       && sec->reloc_count != 0)
-    einfo (_("%B%X: section %s has relocs; can not use --embedded-relocs\n"),
+    einfo (_("%pB%X: section %s has relocs; can not use --embedded-relocs\n"),
 	   abfd, bfd_get_section_name (abfd, sec));
 }
 
@@ -152,10 +152,10 @@ gld${EMULATION_NAME}_after_allocation (void)
 						   &errmsg))
 	{
 	  if (errmsg == NULL)
-	    einfo (_("%B%X: can not create runtime reloc information: %E\n"),
+	    einfo (_("%pB%X: can not create runtime reloc information: %E\n"),
 		   abfd);
 	  else
-	    einfo (_("%X%B: can not create runtime reloc information: %s\n"),
+	    einfo (_("%X%pB: can not create runtime reloc information: %s\n"),
 		   abfd, errmsg);
 	}
     }

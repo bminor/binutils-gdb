@@ -875,7 +875,7 @@ metag_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_METAG_MAX)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid METAG reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid METAG reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & elf_metag_howto_table [r_type];
@@ -1180,7 +1180,7 @@ metag_add_stub (const char *stub_name,
   if (hsh == NULL)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: cannot create stub entry %s"),
+      _bfd_error_handler (_("%pB: cannot create stub entry %s"),
 			  section->owner, stub_name);
       return NULL;
     }
@@ -1857,10 +1857,10 @@ elf_metag_relocate_section (bfd *output_bfd,
 			/* We don't support changing the TLS model.  */
 			/* PR 20675 */
 			if (bfd_link_pic (info))
-			  _bfd_error_handler (_("%B(%A): multiple TLS models are not supported"),
+			  _bfd_error_handler (_("%pB(%pA): multiple TLS models are not supported"),
 					      input_bfd, input_section);
 			else
-			  _bfd_error_handler (_("%B(%A): shared library symbol %s encountered whilst performing a static link"),
+			  _bfd_error_handler (_("%pB(%pA): shared library symbol %s encountered whilst performing a static link"),
 					      input_bfd, input_section, name);
 			return FALSE;
 		      }
@@ -1913,7 +1913,7 @@ elf_metag_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+%#Lx): %s relocation not permitted in shared object"),
+		(_("%pB(%pA+%#Lx): %s relocation not permitted in shared object"),
 		 input_bfd, input_section, rel->r_offset, howto->name);
 	      return FALSE;
 	    }
@@ -2249,7 +2249,7 @@ elf_metag_check_relocs (bfd *abfd,
 		name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
+		(_("%pB: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
 		 abfd, elf_metag_howto_table[r_type].name, name);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -2789,7 +2789,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */

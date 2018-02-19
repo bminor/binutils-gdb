@@ -426,7 +426,7 @@ elf_crx_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   if (r_type >= R_CRX_MAX)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: unrecognised CRX reloc number: %d"),
+      _bfd_error_handler (_("%pB: unrecognised CRX reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_CRX_NONE;

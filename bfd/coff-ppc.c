@@ -1040,7 +1040,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 	default:
 	  _bfd_error_handler
 	    /* xgettext: c-format */
-	    (_("%B: unsupported relocation type 0x%02x"), input_bfd, r_type);
+	    (_("%pB: unsupported relocation type 0x%02x"), input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	case IMAGE_REL_PPC_TOCREL16:
@@ -1131,7 +1131,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 		      {
 			_bfd_error_handler
 			  /* xgettext: c-format */
-			  (_("%B: Relocation for %s of %#Lx exceeds "
+			  (_("%pB: Relocation for %s of %#Lx exceeds "
 			     "Toc size limit"),
 			   input_bfd, name, our_toc_offset);
 			bfd_set_error (bfd_error_bad_value);
@@ -1185,7 +1185,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 	      {
 		_bfd_error_handler
 		  /* xgettext: c-format */
-		  (_("%B: Relocation exceeds allocated TOC (%#Lx)"),
+		  (_("%pB: Relocation exceeds allocated TOC (%#Lx)"),
 		   input_bfd, toc_section->size);
 		bfd_set_error (bfd_error_bad_value);
 		return FALSE;
@@ -1240,7 +1240,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 
 	    _bfd_error_handler
 	      /* xgettext: c-format */
-	      (_("Warning: unsupported reloc %s <file %B, section %A>\n"
+	      (_("Warning: unsupported reloc %s <file %pB, section %pA>\n"
 		 "sym %ld (%s), r_vaddr %Ld (%#Lx)"),
 	       howto->name, input_bfd, input_section,
 	       rel->r_symndx, my_name, rel->r_vaddr, rel->r_vaddr);
@@ -1258,7 +1258,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 
 	    _bfd_error_handler
 	      /* xgettext: c-format */
-	      (_("%B: Out of order IMGLUE reloc for %s"), input_bfd, my_name);
+	      (_("%pB: Out of order IMGLUE reloc for %s"), input_bfd, my_name);
 	    bfd_set_error (bfd_error_bad_value);
 	    return FALSE;
 	  }

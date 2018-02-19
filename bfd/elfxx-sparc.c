@@ -1409,7 +1409,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: bad symbol index: %d"), abfd, r_symndx);
+	  _bfd_error_handler (_("%pB: bad symbol index: %d"), abfd, r_symndx);
 	  return FALSE;
 	}
 
@@ -1577,7 +1577,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: `%s' accessed both as normal and thread local symbol"),
+		      (_("%pB: `%s' accessed both as normal and thread local symbol"),
 		       abfd, h ? h->root.root.string : "<local>");
 		    return FALSE;
 		  }
@@ -2415,7 +2415,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
@@ -2514,7 +2514,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
 		    {
 		      info->flags |= DF_TEXTREL;
-		      info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+		      info->callbacks->minfo (_("%pB: dynamic relocation in read-only section `%pA'\n"),
 					      p->sec->owner, p->sec);
 		    }
 		}
@@ -3087,7 +3087,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 					 NULL);
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: relocation %s against STT_GNU_IFUNC "
+		(_("%pB: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't handled by %s"), input_bfd,
 		 _bfd_sparc_elf_howto_table[r_type].name,
 		 name, __FUNCTION__);
@@ -3509,7 +3509,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 			    {
 			      BFD_FAIL ();
 			      _bfd_error_handler
-				(_("%B: probably compiled without -fPIC?"),
+				(_("%pB: probably compiled without -fPIC?"),
 				 input_bfd);
 			      bfd_set_error (bfd_error_bad_value);
 			      return FALSE;
@@ -3877,7 +3877,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 				      rel->r_offset) != (bfd_vma) -1)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	  (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
 	   rel->r_offset,

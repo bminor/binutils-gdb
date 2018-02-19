@@ -1283,7 +1283,7 @@ m32r_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type > (unsigned int) R_M32R_GNU_VTENTRY)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid M32R reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid M32R reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &m32r_elf_howto_table[r_type];
@@ -2094,7 +2094,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
@@ -2401,7 +2401,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (r_type < 0 || r_type >= (int) R_M32R_max)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: unknown relocation type %d"),
+	  _bfd_error_handler (_("%pB: unknown relocation type %d"),
 			      input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
@@ -2523,7 +2523,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B(%A+%#Lx): unresolvable %s relocation "
+		    (_("%pB(%pA+%#Lx): unresolvable %s relocation "
 		       "against symbol `%s'"),
 		     input_bfd,
 		     input_section,
@@ -2968,7 +2968,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: The target (%s) of an %s relocation is in the wrong section (%A)"),
+		      (_("%pB: The target (%s) of an %s relocation is in the wrong section (%pA)"),
 		       input_bfd,
 		       sym_name,
 		       m32r_elf_howto_table[(int) r_type].name,
@@ -3470,7 +3470,7 @@ m32r_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  || ((in_flags  & EF_M32R_ARCH) == E_M32R2_ARCH))
 	{
 	  _bfd_error_handler
-	    (_("%B: Instruction set mismatch with previous modules"), ibfd);
+	    (_("%pB: Instruction set mismatch with previous modules"), ibfd);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;

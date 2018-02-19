@@ -447,7 +447,7 @@ alpha_ecoff_bad_format_hook (bfd *abfd ATTRIBUTE_UNUSED,
 
   if (ALPHA_ECOFF_COMPRESSEDMAG (*internal_f))
     _bfd_error_handler
-      (_("%B: Cannot handle compressed Alpha binaries.\n"
+      (_("%pB: Cannot handle compressed Alpha binaries.\n"
 	 "   Use compiler flags, or objZ, to generate uncompressed binaries."),
        abfd);
 
@@ -599,7 +599,7 @@ alpha_adjust_reloc_in (bfd *abfd,
     {
       /* xgettext:c-format */
       _bfd_error_handler
-	(_("%B: unknown/unsupported relocation type %d"),
+	(_("%pB: unknown/unsupported relocation type %d"),
 	 abfd, intern->r_type);
       bfd_set_error (bfd_error_bad_value);
       rptr->addend = 0;
@@ -1500,14 +1500,14 @@ alpha_relocate_section (bfd *output_bfd,
 	{
 	case ALPHA_R_GPRELHIGH:
 	  _bfd_error_handler
-	    (_("%B: unsupported relocation: ALPHA_R_GPRELHIGH"),
+	    (_("%pB: unsupported relocation: ALPHA_R_GPRELHIGH"),
 	     input_bfd);
 	  bfd_set_error (bfd_error_bad_value);
 	  continue;
 
 	case ALPHA_R_GPRELLOW:
 	  _bfd_error_handler
-	    (_("%B: unsupported relocation: ALPHA_R_GPRELLOW"),
+	    (_("%pB: unsupported relocation: ALPHA_R_GPRELLOW"),
 	     input_bfd);
 	  bfd_set_error (bfd_error_bad_value);
 	  continue;
@@ -1515,7 +1515,7 @@ alpha_relocate_section (bfd *output_bfd,
 	default:
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: unknown relocation type %d"),
+	    (_("%pB: unknown relocation type %d"),
 	     input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  continue;

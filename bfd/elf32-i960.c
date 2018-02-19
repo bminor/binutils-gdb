@@ -137,7 +137,7 @@ elf32_i960_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   if (type >= R_960_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid i960 reloc number: %d"), abfd, type);
+      _bfd_error_handler (_("%pB: invalid i960 reloc number: %d"), abfd, type);
       type = 0;
     }
 

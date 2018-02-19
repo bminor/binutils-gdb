@@ -282,7 +282,7 @@ elf_x86_64_rtype_to_howto (bfd *abfd, unsigned r_type)
       if (r_type >= (unsigned int) R_X86_64_standard)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: invalid relocation type %d"),
+	  _bfd_error_handler (_("%pB: invalid relocation type %d"),
 			      abfd, (int) r_type);
 	  r_type = R_X86_64_NONE;
 	}
@@ -1332,8 +1332,8 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: TLS transition from %s to %s against `%s' at %#Lx "
-	   "in section `%A' failed"),
+	(_("%pB: TLS transition from %s to %s against `%s' at %#Lx "
+	   "in section `%pA' failed"),
 	 abfd, from->name, to->name, name, rel->r_offset, sec);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -1401,7 +1401,7 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
     object = _("a PDE object");
 
   /* xgettext:c-format */
-  _bfd_error_handler (_("%B: relocation %s against %s%s`%s' can "
+  _bfd_error_handler (_("%pB: relocation %s against %s%s`%s' can "
 			"not be used when making %s%s"),
 		      input_bfd, howto->name, und, v, name,
 		      object, pic);
@@ -1820,7 +1820,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+	  _bfd_error_handler (_("%pB: bad symbol index: %d"),
 			      abfd, r_symndx);
 	  goto error_return;
 	}
@@ -1886,7 +1886,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 					   NULL);
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B: relocation %s against symbol `%s' isn't "
+		  (_("%pB: relocation %s against symbol `%s' isn't "
 		     "supported in x32 mode"), abfd,
 		   x86_64_elf_howto_table[r_type].name, name);
 		bfd_set_error (bfd_error_bad_value);
@@ -2028,7 +2028,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 					       isym, NULL);
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: '%s' accessed both as normal and"
+		      (_("%pB: '%s' accessed both as normal and"
 			 " thread local symbol"),
 		       abfd, name);
 		    bfd_set_error (bfd_error_bad_value);
@@ -2618,7 +2618,7 @@ bad_ifunc_reloc:
 					 NULL);
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: relocation %s against STT_GNU_IFUNC "
+		(_("%pB: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't supported"), input_bfd,
 		 howto->name, name);
 	      bfd_set_error (bfd_error_bad_value);
@@ -2644,7 +2644,7 @@ do_ifunc_pointer:
 					     sym, NULL);
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: relocation %s against STT_GNU_IFUNC "
+		    (_("%pB: relocation %s against STT_GNU_IFUNC "
 		       "symbol `%s' has non-zero addend: %Ld"),
 		     input_bfd, howto->name, name, rel->r_addend);
 		  bfd_set_error (bfd_error_bad_value);
@@ -2675,7 +2675,7 @@ do_ifunc_pointer:
 
 		  if (POINTER_LOCAL_IFUNC_P (info, h))
 		    {
-		      info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+		      info->callbacks->minfo (_("Local IFUNC function `%s' in %pB\n"),
 					      h->root.root.string,
 					      h->root.u.def.section->owner);
 
@@ -2881,7 +2881,7 @@ do_ifunc_pointer:
 
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: relocation R_X86_64_GOTOFF64 against undefined %s"
+		    (_("%pB: relocation R_X86_64_GOTOFF64 against undefined %s"
 		       " `%s' can not be used when making a shared object"),
 		     input_bfd, v, h->root.root.string);
 		  bfd_set_error (bfd_error_bad_value);
@@ -2895,7 +2895,7 @@ do_ifunc_pointer:
 		{
 		  _bfd_error_handler
 	      /* xgettext:c-format */
-		    (_("%B: relocation R_X86_64_GOTOFF64 against protected %s"
+		    (_("%pB: relocation R_X86_64_GOTOFF64 against protected %s"
 		       " `%s' can not be used when making a shared object"),
 		     input_bfd,
 		     h->type == STT_FUNC ? "function" : "data",
@@ -3155,8 +3155,8 @@ direct:
 						     sym, NULL);
 			  _bfd_error_handler
 			    /* xgettext:c-format */
-			    (_("%B: addend %s%#x in relocation %s against "
-			       "symbol `%s' at %#Lx in section `%A' is "
+			    (_("%pB: addend %s%#x in relocation %s against "
+			       "symbol `%s' at %#Lx in section `%pA' is "
 			       "out of range"),
 			     input_bfd, addend < 0 ? "-" : "", addend,
 			     howto->name, name, rel->r_offset, input_section);
@@ -3792,7 +3792,7 @@ direct:
 	    default:
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+		(_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
 		 input_bfd,
 		 input_section,
 		 rel->r_offset,
@@ -3841,7 +3841,7 @@ check_relocation_error:
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+%#Lx): reloc against `%s': error %d"),
+		(_("%pB(%pA+%#Lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
 		 rel->r_offset, name, (int) r);
 	      return FALSE;
@@ -3988,7 +3988,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       /* Check PC-relative offset overflow in PLT entry.  */
       if ((plt_got_pcrel_offset + 0x80000000) > 0xffffffff)
 	/* xgettext:c-format */
-	info->callbacks->einfo (_("%F%B: PC-relative offset overflow in PLT entry for `%s'\n"),
+	info->callbacks->einfo (_("%F%pB: PC-relative offset overflow in PLT entry for `%s'\n"),
 				output_bfd, h->root.root.string);
 
       bfd_put_32 (output_bfd, plt_got_pcrel_offset,
@@ -4014,7 +4014,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 			   + got_offset);
 	  if (PLT_LOCAL_IFUNC_P (info, h))
 	    {
-	      info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+	      info->callbacks->minfo (_("Local IFUNC function `%s' in %pB\n"),
 				      h->root.root.string,
 				      h->root.u.def.section->owner);
 
@@ -4051,7 +4051,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 		 will overflow first.  */
 	      if (plt0_offset > 0x80000000)
 		/* xgettext:c-format */
-		info->callbacks->einfo (_("%F%B: branch displacement overflow in PLT entry for `%s'\n"),
+		info->callbacks->einfo (_("%F%pB: branch displacement overflow in PLT entry for `%s'\n"),
 					output_bfd, h->root.root.string);
 	      bfd_put_32 (output_bfd, - plt0_offset,
 			  (plt->contents + h->plt.offset
@@ -4104,7 +4104,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       if ((got_after_plt && got_pcrel_offset < 0)
 	  || (!got_after_plt && got_pcrel_offset > 0))
 	/* xgettext:c-format */
-	info->callbacks->einfo (_("%F%B: PC-relative offset overflow in GOT PLT entry for `%s'\n"),
+	info->callbacks->einfo (_("%F%pB: PC-relative offset overflow in GOT PLT entry for `%s'\n"),
 				output_bfd, h->root.root.string);
 
       bfd_put_32 (output_bfd, got_pcrel_offset,
@@ -4168,7 +4168,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 		}
 	      if (SYMBOL_REFERENCES_LOCAL_P (info, h))
 		{
-		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+		  info->callbacks->minfo (_("Local IFUNC function `%s' in %pB\n"),
 					  h->root.root.string,
 					  h->root.u.def.section->owner);
 

@@ -1415,7 +1415,7 @@ exp_print_tree (etree_type *tree)
       return;
     case etree_rel:
       if (tree->rel.section->owner != NULL)
-	minfo ("%B:", tree->rel.section->owner);
+	minfo ("%pB:", tree->rel.section->owner);
       minfo ("%s+0x%v", tree->rel.section->name, tree->rel.value);
       return;
     case etree_assign:

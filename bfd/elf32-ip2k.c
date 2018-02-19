@@ -1242,7 +1242,7 @@ ip2k_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_IP2K_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid IP2K reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid IP2K reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & ip2k_elf_howto_table [r_type];

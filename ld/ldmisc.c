@@ -40,8 +40,6 @@
 
 /*
  %% literal %
- %A section name from a section
- %B filename from a bfd
  %C clever filename:linenumber with function
  %D like %C, but no function name
  %E current bfd error or errno
@@ -60,6 +58,8 @@
  %ld long, like printf
  %lu unsigned long, like printf
  %p native (host) void* pointer, like printf
+ %pA section name from a section
+ %pB filename from a bfd
  %s arbitrary string, like printf
  %u integer, like printf
  %v hex bfd_vma, no leading zeros
@@ -130,13 +130,16 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 	      break;
 
 	    case 'T':
-	    case 'A':
-	    case 'B':
 	    case 'I':
 	    case 'S':
 	    case 'R':
-	    case 'p':
 	    case 's':
+	      arg_type = Ptr;
+	      break;
+
+	    case 'p':
+	      if (*scan == 'A' || *scan == 'B')
+		scan++;
 	      arg_type = Ptr;
 	      break;
 
@@ -316,49 +319,6 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 	      }
 	      break;
 
-	    case 'A':
-	      /* section name from a section */
-	      {
-		asection *sec;
-		bfd *abfd;
-		const char *group = NULL;
-		struct coff_comdat_info *ci;
-
-		sec = (asection *) args[arg_no].p;
-		++arg_count;
-		abfd = sec->owner;
-		fprintf (fp, "%s", sec->name);
-		if (abfd != NULL
-		    && bfd_get_flavour (abfd) == bfd_target_elf_flavour
-		    && elf_next_in_group (sec) != NULL
-		    && (sec->flags & SEC_GROUP) == 0)
-		  group = elf_group_name (sec);
-		else if (abfd != NULL
-			 && bfd_get_flavour (abfd) == bfd_target_coff_flavour
-			 && (ci = bfd_coff_get_comdat_section (sec->owner,
-							       sec)) != NULL)
-		  group = ci->name;
-		if (group != NULL)
-		  fprintf (fp, "[%s]", group);
-	      }
-	      break;
-
-	    case 'B':
-	      /* filename from a bfd */
-	      {
-		bfd *abfd = (bfd *) args[arg_no].p;
-		++arg_count;
-		if (abfd == NULL)
-		  fprintf (fp, "%s generated", program_name);
-		else if (abfd->my_archive != NULL
-			 && !bfd_is_thin_archive (abfd->my_archive))
-		  fprintf (fp, "%s(%s)", abfd->my_archive->filename,
-			   abfd->filename);
-		else
-		  fprintf (fp, "%s", abfd->filename);
-	      }
-	      break;
-
 	    case 'F':
 	      /* Error is fatal.  */
 	      fatal = TRUE;
@@ -450,7 +410,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		if (abfd != NULL)
 		  {
 		    if (!bfd_generic_link_read_symbols (abfd))
-		      einfo (_("%B%F: could not read symbols: %E\n"), abfd);
+		      einfo (_("%pB%F: could not read symbols: %E\n"), abfd);
 
 		    asymbols = bfd_get_outsymbols (abfd);
 		  }
@@ -489,7 +449,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 				&& filename_cmp (last_file, filename) != 0)
 			    || strcmp (last_function, functionname) != 0)
 			  {
-			    lfinfo (fp, _("%B: In function `%T':\n"),
+			    lfinfo (fp, _("%pB: In function `%T':\n"),
 				    abfd, functionname);
 
 			    last_bfd = abfd;
@@ -505,7 +465,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 			discard_last = FALSE;
 		      }
 		    else
-		      lfinfo (fp, "%B:", abfd);
+		      lfinfo (fp, "%pB:", abfd);
 
 		    if (filename != NULL)
 		      fprintf (fp, "%s:", filename);
@@ -520,11 +480,11 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		  }
 		else
 		  {
-		    lfinfo (fp, "%B:", abfd);
+		    lfinfo (fp, "%pB:", abfd);
 		    done = FALSE;
 		  }
 		if (!done)
-		  lfinfo (fp, "(%A+0x%v)", section, offset);
+		  lfinfo (fp, "(%pA+0x%v)", section, offset);
 
 		if (discard_last)
 		  {
@@ -544,9 +504,54 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 	      break;
 
 	    case 'p':
-	      /* native (host) void* pointer, like printf */
-	      fprintf (fp, "%p", args[arg_no].p);
-	      ++arg_count;
+	      if (*fmt == 'A')
+		{
+		  /* section name from a section */
+		  asection *sec;
+		  bfd *abfd;
+		  const char *group = NULL;
+		  struct coff_comdat_info *ci;
+
+		  fmt++;
+		  sec = (asection *) args[arg_no].p;
+		  ++arg_count;
+		  abfd = sec->owner;
+		  fprintf (fp, "%s", sec->name);
+		  if (abfd != NULL
+		      && bfd_get_flavour (abfd) == bfd_target_elf_flavour
+		      && elf_next_in_group (sec) != NULL
+		      && (sec->flags & SEC_GROUP) == 0)
+		    group = elf_group_name (sec);
+		  else if (abfd != NULL
+			   && bfd_get_flavour (abfd) == bfd_target_coff_flavour
+			   && (ci = bfd_coff_get_comdat_section (sec->owner,
+								 sec)) != NULL)
+		    group = ci->name;
+		  if (group != NULL)
+		    fprintf (fp, "[%s]", group);
+		}
+	      else if (*fmt == 'B')
+		{
+		  /* filename from a bfd */
+		  bfd *abfd = (bfd *) args[arg_no].p;
+
+		  fmt++;
+		  ++arg_count;
+		  if (abfd == NULL)
+		    fprintf (fp, "%s generated", program_name);
+		  else if (abfd->my_archive != NULL
+			   && !bfd_is_thin_archive (abfd->my_archive))
+		    fprintf (fp, "%s(%s)", abfd->my_archive->filename,
+			     abfd->filename);
+		  else
+		    fprintf (fp, "%s", abfd->filename);
+		}
+	      else
+		{
+		  /* native (host) void* pointer, like printf */
+		  fprintf (fp, "%p", args[arg_no].p);
+		  ++arg_count;
+		}
 	      break;
 
 	    case 's':

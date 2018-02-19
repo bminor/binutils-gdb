@@ -86,7 +86,7 @@ elf32_sparc_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     {
       error = TRUE;
       _bfd_error_handler
-	(_("%B: compiled for a 64 bit system and target is 32 bit"), ibfd);
+	(_("%pB: compiled for a 64 bit system and target is 32 bit"), ibfd);
     }
   else if ((ibfd->flags & DYNAMIC) == 0)
     {
@@ -99,7 +99,7 @@ elf32_sparc_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       && previous_ibfd_e_flags != (unsigned long) -1)
     {
       _bfd_error_handler
-	(_("%B: linking little endian files with big endian files"), ibfd);
+	(_("%pB: linking little endian files with big endian files"), ibfd);
       error = TRUE;
     }
   previous_ibfd_e_flags = elf_elfheader (ibfd)->e_flags & EF_SPARC_LEDATA;

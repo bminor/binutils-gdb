@@ -772,13 +772,13 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
     case IMPORT_CONST:
       /* XXX code yet to be written.  */
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: Unhandled import type; %x"),
+      _bfd_error_handler (_("%pB: Unhandled import type; %x"),
 			  abfd, import_type);
       return FALSE;
 
     default:
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: Unrecognised import type; %x"),
+      _bfd_error_handler (_("%pB: Unrecognised import type; %x"),
 			  abfd, import_type);
       return FALSE;
     }
@@ -793,7 +793,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 
     default:
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: Unrecognised import name type; %x"),
+      _bfd_error_handler (_("%pB: Unrecognised import name type; %x"),
 			  abfd, import_name_type);
       return FALSE;
     }
@@ -1214,7 +1214,7 @@ pe_ILF_object_p (bfd * abfd)
     default:
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: Unrecognised machine type (0x%x)"
+	(_("%pB: Unrecognised machine type (0x%x)"
 	   " in Import Library Format archive"),
 	 abfd, machine);
       bfd_set_error (bfd_error_malformed_archive);
@@ -1227,7 +1227,7 @@ pe_ILF_object_p (bfd * abfd)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: Recognised but unhandled machine type (0x%x)"
+	(_("%pB: Recognised but unhandled machine type (0x%x)"
 	   " in Import Library Format archive"),
 	 abfd, machine);
       bfd_set_error (bfd_error_wrong_format);
@@ -1245,7 +1245,7 @@ pe_ILF_object_p (bfd * abfd)
   if (size == 0)
     {
       _bfd_error_handler
-	(_("%B: size field is zero in Import Library Format header"), abfd);
+	(_("%pB: size field is zero in Import Library Format header"), abfd);
       bfd_set_error (bfd_error_malformed_archive);
 
       return NULL;
@@ -1277,7 +1277,7 @@ pe_ILF_object_p (bfd * abfd)
       || (bfd_size_type) ((bfd_byte *) source_dll - ptr) >= size)
     {
       _bfd_error_handler
-	(_("%B: string not null terminated in ILF object file."), abfd);
+	(_("%pB: string not null terminated in ILF object file."), abfd);
       bfd_set_error (bfd_error_malformed_archive);
       bfd_release (abfd, ptr);
       return NULL;
@@ -1332,7 +1332,7 @@ pe_bfd_read_buildid (bfd *abfd)
   if (dataoff >= section->size
       || size > section->size - dataoff)
     {
-      _bfd_error_handler (_("%B: Error: Debug Data ends beyond end of debug directory."),
+      _bfd_error_handler (_("%pB: Error: Debug Data ends beyond end of debug directory."),
 			  abfd);
       return;
     }

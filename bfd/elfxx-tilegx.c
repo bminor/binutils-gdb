@@ -1685,7 +1685,7 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+	  _bfd_error_handler (_("%pB: bad symbol index: %d"),
 			      abfd, r_symndx);
 	  return FALSE;
 	}
@@ -1790,7 +1790,7 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: `%s' accessed both as normal and thread local symbol"),
+		      (_("%pB: `%s' accessed both as normal and thread local symbol"),
 		       abfd, h ? h->root.root.string : "<local>");
 		    return FALSE;
 		  }
@@ -2476,7 +2476,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
@@ -2564,7 +2564,7 @@ tilegx_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		    {
 		      info->flags |= DF_TEXTREL;
 
-		      info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+		      info->callbacks->minfo (_("%pB: dynamic relocation in read-only section `%pA'\n"),
 					      p->sec->owner, p->sec);
 		    }
 		}
@@ -3528,7 +3528,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			    {
 			      BFD_FAIL ();
 			      _bfd_error_handler
-				(_("%B: probably compiled without -fPIC?"),
+				(_("%pB: probably compiled without -fPIC?"),
 				 input_bfd);
 			      bfd_set_error (bfd_error_bad_value);
 			      return FALSE;
@@ -3778,7 +3778,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 				      rel->r_offset) != (bfd_vma) -1)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	  (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
 	   rel->r_offset,
@@ -4129,7 +4129,7 @@ tilegx_elf_finish_dynamic_sections (bfd *output_bfd,
       if (bfd_is_abs_section (htab->elf.sgotplt->output_section))
 	{
 	  _bfd_error_handler
-	    (_("discarded output section: `%A'"), htab->elf.sgotplt);
+	    (_("discarded output section: `%pA'"), htab->elf.sgotplt);
 	  return FALSE;
 	}
 
@@ -4238,7 +4238,7 @@ _bfd_tilegx_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: Cannot link together %s and %s objects."),
+	(_("%pB: Cannot link together %s and %s objects."),
 	 ibfd, targ1, targ2);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;

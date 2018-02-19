@@ -222,14 +222,14 @@ sh64_elf_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
       if (bfd_get_arch_size (ibfd) == 32
 	  && bfd_get_arch_size (obfd) == 64)
 	/* xgettext:c-format */
-	msg = _("%B: compiled as 32-bit object and %B is 64-bit");
+	msg = _("%pB: compiled as 32-bit object and %pB is 64-bit");
       else if (bfd_get_arch_size (ibfd) == 64
 	       && bfd_get_arch_size (obfd) == 32)
 	/* xgettext:c-format */
-	msg = _("%B: compiled as 64-bit object and %B is 32-bit");
+	msg = _("%pB: compiled as 64-bit object and %pB is 32-bit");
       else
 	/* xgettext:c-format */
-	msg = _("%B: object size does not match that of target %B");
+	msg = _("%pB: object size does not match that of target %pB");
 
       _bfd_error_handler (msg, ibfd, obfd);
       bfd_set_error (bfd_error_wrong_format);
@@ -248,7 +248,7 @@ sh64_elf_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
   else if ((new_flags & EF_SH_MACH_MASK) != EF_SH5)
     {
       _bfd_error_handler
-	("%B: uses non-SH64 instructions while previous modules"
+	("%pB: uses non-SH64 instructions while previous modules"
 	 " use SH64 instructions",
 	 ibfd);
       bfd_set_error (bfd_error_bad_value);
@@ -452,7 +452,7 @@ sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	{
 	  /* Make sure we don't get confused on invalid input.  */
 	  _bfd_error_handler
-	    (_("%B: encountered datalabel symbol in input"), abfd);
+	    (_("%pB: encountered datalabel symbol in input"), abfd);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -547,7 +547,7 @@ shmedia_prepare_reloc (struct bfd_link_info *info, bfd *abfd,
 	    if ((insn & SHMEDIA_PTB_BIT) != 0)
 	      {
 		_bfd_error_handler
-		  (_("%B: GAS error: unexpected PTB insn with R_SH_PT_16"),
+		  (_("%pB: GAS error: unexpected PTB insn with R_SH_PT_16"),
 		   input_section->owner);
 		return FALSE;
 	      }
@@ -597,7 +597,7 @@ shmedia_prepare_reloc (struct bfd_link_info *info, bfd *abfd,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: error: unaligned relocation type %d at %#Lx reloc %#Lx"),
+	(_("%pB: error: unaligned relocation type %d at %#Lx reloc %#Lx"),
 	 input_section->owner, (int) ELF32_R_TYPE (rel->r_info),
 	 rel->r_offset, *relocation);
       return FALSE;
@@ -673,7 +673,7 @@ sh64_elf_final_write_processing (bfd *abfd,
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  _bfd_error_handler
-	    (_("%B: could not write out added .cranges entries"), abfd);
+	    (_("%pB: could not write out added .cranges entries"), abfd);
 	}
     }
 
@@ -732,7 +732,7 @@ sh64_elf_final_write_processing (bfd *abfd,
 	    {
 	      bfd_set_error (bfd_error_file_truncated);
 	      _bfd_error_handler
-		(_("%B: could not write out sorted .cranges entries"), abfd);
+		(_("%pB: could not write out sorted .cranges entries"), abfd);
 	    }
 	}
     }

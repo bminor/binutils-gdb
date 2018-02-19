@@ -97,7 +97,7 @@ mcore_elf_unsupported_reloc (bfd * abfd,
   BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
 
   /* xgettext:c-format */
-  _bfd_error_handler (_("%B: Relocation %s (%d) is not currently supported.\n"),
+  _bfd_error_handler (_("%pB: Relocation %s (%d) is not currently supported.\n"),
 		      abfd,
 		      reloc_entry->howto->name,
 		      reloc_entry->howto->type);
@@ -352,7 +352,7 @@ mcore_elf_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
   if (r_type >= R_MCORE_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: unrecognised MCore reloc number: %d"),
+      _bfd_error_handler (_("%pB: unrecognised MCore reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_MCORE_NONE;
@@ -408,7 +408,7 @@ mcore_elf_relocate_section (bfd * output_bfd,
 
 #ifdef DEBUG
   _bfd_error_handler
-    ("mcore_elf_relocate_section called for %B section %A, %u relocations%s",
+    ("mcore_elf_relocate_section called for %pB section %pA, %u relocations%s",
      input_bfd,
      input_section,
      input_section->reloc_count,
@@ -437,7 +437,7 @@ mcore_elf_relocate_section (bfd * output_bfd,
 	  || ! mcore_elf_howto_table [(int)r_type])
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: Unknown relocation type %d\n"),
+	  _bfd_error_handler (_("%pB: Unknown relocation type %d\n"),
 			      input_bfd, (int) r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
@@ -452,7 +452,7 @@ mcore_elf_relocate_section (bfd * output_bfd,
       if (howto->special_function == mcore_elf_unsupported_reloc)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: Relocation %s (%d) is not currently supported.\n"),
+	  _bfd_error_handler (_("%pB: Relocation %s (%d) is not currently supported.\n"),
 			      input_bfd,
 			      howto->name,
 			      (int)r_type);

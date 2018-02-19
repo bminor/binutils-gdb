@@ -1407,7 +1407,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  && name[1] == '_'
 	  && strcmp (name + (name[2] == '_'), "__gnu_lto_slim") == 0)
 	_bfd_error_handler
-	  (_("%B: plugin needed to handle lto object"), abfd);
+	  (_("%pB: plugin needed to handle lto object"), abfd);
     }
   else
     row = DEF_ROW;
@@ -1675,7 +1675,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: indirect symbol `%s' to `%s' is a loop"),
+		(_("%pB: indirect symbol `%s' to `%s' is a loop"),
 		 abfd, name, string);
 	      bfd_set_error (bfd_error_invalid_operation);
 	      return FALSE;
@@ -2831,7 +2831,7 @@ _bfd_handle_already_linked (asection *sec,
     case SEC_LINK_DUPLICATES_ONE_ONLY:
       info->callbacks->einfo
 	/* xgettext:c-format */
-	(_("%B: ignoring duplicate section `%A'\n"),
+	(_("%pB: ignoring duplicate section `%pA'\n"),
 	 sec->owner, sec);
       break;
 
@@ -2841,7 +2841,7 @@ _bfd_handle_already_linked (asection *sec,
       else if (sec->size != l->sec->size)
 	info->callbacks->einfo
 	  /* xgettext:c-format */
-	  (_("%B: duplicate section `%A' has different size\n"),
+	  (_("%pB: duplicate section `%pA' has different size\n"),
 	   sec->owner, sec);
       break;
 
@@ -2851,7 +2851,7 @@ _bfd_handle_already_linked (asection *sec,
       else if (sec->size != l->sec->size)
 	info->callbacks->einfo
 	  /* xgettext:c-format */
-	  (_("%B: duplicate section `%A' has different size\n"),
+	  (_("%pB: duplicate section `%pA' has different size\n"),
 	   sec->owner, sec);
       else if (sec->size != 0)
 	{
@@ -2860,18 +2860,18 @@ _bfd_handle_already_linked (asection *sec,
 	  if (!bfd_malloc_and_get_section (sec->owner, sec, &sec_contents))
 	    info->callbacks->einfo
 	      /* xgettext:c-format */
-	      (_("%B: could not read contents of section `%A'\n"),
+	      (_("%pB: could not read contents of section `%pA'\n"),
 	       sec->owner, sec);
 	  else if (!bfd_malloc_and_get_section (l->sec->owner, l->sec,
 						&l_sec_contents))
 	    info->callbacks->einfo
 	      /* xgettext:c-format */
-	      (_("%B: could not read contents of section `%A'\n"),
+	      (_("%pB: could not read contents of section `%pA'\n"),
 	       l->sec->owner, l->sec);
 	  else if (memcmp (sec_contents, l_sec_contents, sec->size) != 0)
 	    info->callbacks->einfo
 	      /* xgettext:c-format */
-	      (_("%B: duplicate section `%A' has different contents\n"),
+	      (_("%pB: duplicate section `%pA' has different contents\n"),
 	       sec->owner, sec);
 
 	  if (sec_contents)
@@ -3359,10 +3359,10 @@ _bfd_generic_verify_endian_match (bfd *ibfd, struct bfd_link_info *info)
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
     {
       if (bfd_big_endian (ibfd))
-	_bfd_error_handler (_("%B: compiled for a big endian system "
+	_bfd_error_handler (_("%pB: compiled for a big endian system "
 			      "and target is little endian"), ibfd);
       else
-	_bfd_error_handler (_("%B: compiled for a little endian system "
+	_bfd_error_handler (_("%pB: compiled for a little endian system "
 			      "and target is big endian"), ibfd);
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;

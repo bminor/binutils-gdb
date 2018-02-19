@@ -343,7 +343,7 @@ elf_s390_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       if (r_type >= sizeof (elf_howto_table) / sizeof (elf_howto_table[0]))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: invalid relocation type %d"),
+	  _bfd_error_handler (_("%pB: invalid relocation type %d"),
 			      abfd, (int) r_type);
 	  r_type = R_390_NONE;
 	}
@@ -953,7 +953,7 @@ elf_s390_check_relocs (bfd *abfd,
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+	  _bfd_error_handler (_("%pB: bad symbol index: %d"),
 			      abfd, r_symndx);
 	  return FALSE;
 	}
@@ -1181,7 +1181,7 @@ elf_s390_check_relocs (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: `%s' accessed both as normal and thread local symbol"),
+		    (_("%pB: `%s' accessed both as normal and thread local symbol"),
 		     abfd, h->root.root.string);
 		  return FALSE;
 		}
@@ -1848,7 +1848,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
@@ -2134,7 +2134,7 @@ invalid_tls_insn (bfd *input_bfd,
   howto = elf_howto_table + ELF32_R_TYPE (rel->r_info);
   _bfd_error_handler
     /* xgettext:c-format */
-    (_("%B(%A+%#Lx): invalid instruction for TLS relocation %s"),
+    (_("%pB(%pA+%#Lx): invalid instruction for TLS relocation %s"),
      input_bfd,
      input_section,
      rel->r_offset,
@@ -3201,7 +3201,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 				      rel->r_offset) != (bfd_vma) -1)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	  (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
 	   rel->r_offset,
@@ -3258,7 +3258,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+%#Lx): reloc against `%s': error %d"),
+		(_("%pB(%pA+%#Lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
 		 rel->r_offset, name, (int) r);
 	      return FALSE;

@@ -783,7 +783,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
     report_symbol:
       syms[n].resolution = res;
       if (report_plugin_symbols)
-	einfo (_("%P: %B: symbol `%s' "
+	einfo (_("%P: %pB: symbol `%s' "
 		 "definition: %d, visibility: %d, resolution: %d\n"),
 	       abfd, syms[n].name,
 	       syms[n].def, syms[n].visibility, res);

@@ -154,7 +154,7 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	  name = _bfd_coff_internal_syment_name (abfd, in, namebuf);
 	  if (name == NULL)
 	    {
-	      _bfd_error_handler (_("%B: unable to find name for empty section"),
+	      _bfd_error_handler (_("%pB: unable to find name for empty section"),
 				  abfd);
 	      bfd_set_error (bfd_error_invalid_target);
 	      return;
@@ -180,7 +180,7 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	      name = (const char *) bfd_alloc (abfd, strlen (namebuf) + 1);
 	      if (name == NULL)
 		{
-		  _bfd_error_handler (_("%B: out of memory creating name for empty section"),
+		  _bfd_error_handler (_("%pB: out of memory creating name for empty section"),
 				      abfd);
 		  return;
 		}
@@ -191,7 +191,7 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	  sec = bfd_make_section_anyway_with_flags (abfd, name, flags);
 	  if (sec == NULL)
 	    {
-	      _bfd_error_handler (_("%B: unable to create fake empty section"),
+	      _bfd_error_handler (_("%pB: unable to create fake empty section"),
 				  abfd);
 	      return;
 	    }
@@ -529,7 +529,7 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
       {
 	/* xgettext:c-format */
 	_bfd_error_handler
-	  (_("%B: aout header specifies an invalid number of data-directory entries: %ld"),
+	  (_("%pB: aout header specifies an invalid number of data-directory entries: %ld"),
 	   abfd, a->NumberOfRvaAndSizes);
 	bfd_set_error (bfd_error_bad_value);
 
@@ -1086,7 +1086,7 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
       else
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: line number overflow: 0x%lx > 0xffff"),
+	  _bfd_error_handler (_("%pB: line number overflow: 0x%lx > 0xffff"),
 			      abfd, scnhdr_int->s_nlnno);
 	  bfd_set_error (bfd_error_file_truncated);
 	  H_PUT_16 (abfd, 0xffff, scnhdr_ext->s_nlnno);
@@ -2986,7 +2986,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	      > bfd_get_section_size (section))
 	    {
 	      /* xgettext:c-format */
-	      _bfd_error_handler (_("%B: Data Directory size (%lx) exceeds space left in section (%Lx)"),
+	      _bfd_error_handler (_("%pB: Data Directory size (%lx) exceeds space left in section (%Lx)"),
 				  obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
 				  bfd_get_section_size (section) - (addr - section->vma));
 	      return FALSE;
@@ -3022,7 +3022,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	}
       else if (section)
 	{
-	  _bfd_error_handler (_("%B: Failed to read debug data section"), obfd);
+	  _bfd_error_handler (_("%pB: Failed to read debug data section"), obfd);
 	  return FALSE;
 	}
     }
@@ -4225,7 +4225,7 @@ rsrc_process_section (bfd * abfd,
       if (data > dataend)
 	{
 	  /* Corrupted .rsrc section - cannot merge.  */
-	  _bfd_error_handler (_("%B: .rsrc merge failure: corrupt .rsrc section"),
+	  _bfd_error_handler (_("%pB: .rsrc merge failure: corrupt .rsrc section"),
 			      abfd);
 	  bfd_set_error (bfd_error_file_truncated);
 	  goto end;
@@ -4233,7 +4233,7 @@ rsrc_process_section (bfd * abfd,
 
       if ((data - p) > rsrc_sizes [num_resource_sets])
 	{
-	  _bfd_error_handler (_("%B: .rsrc merge failure: unexpected .rsrc size"),
+	  _bfd_error_handler (_("%pB: .rsrc merge failure: unexpected .rsrc size"),
 			      abfd);
 	  bfd_set_error (bfd_error_file_truncated);
 	  goto end;
@@ -4372,7 +4372,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       else
 	{
 	  _bfd_error_handler
-	    (_("%B: unable to fill in DataDictionary[1] because .idata$2 is missing"),
+	    (_("%pB: unable to fill in DataDictionary[1] because .idata$2 is missing"),
 	     abfd);
 	  result = FALSE;
 	}
@@ -4392,7 +4392,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       else
 	{
 	  _bfd_error_handler
-	    (_("%B: unable to fill in DataDictionary[1] because .idata$4 is missing"),
+	    (_("%pB: unable to fill in DataDictionary[1] because .idata$4 is missing"),
 	     abfd);
 	  result = FALSE;
 	}
@@ -4413,7 +4413,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       else
 	{
 	  _bfd_error_handler
-	    (_("%B: unable to fill in DataDictionary[12] because .idata$5 is missing"),
+	    (_("%pB: unable to fill in DataDictionary[12] because .idata$5 is missing"),
 	     abfd);
 	  result = FALSE;
 	}
@@ -4433,7 +4433,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       else
 	{
 	  _bfd_error_handler
-	    (_("%B: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)] because .idata$6 is missing"),
+	    (_("%pB: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)] because .idata$6 is missing"),
 	     abfd);
 	  result = FALSE;
 	}
@@ -4475,7 +4475,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	  else
 	    {
 	      _bfd_error_handler
-		(_("%B: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE(12)]"
+		(_("%pB: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE(12)]"
 		   " because .idata$6 is missing"), abfd);
 	      result = FALSE;
 	    }
@@ -4500,7 +4500,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       else
 	{
 	  _bfd_error_handler
-	    (_("%B: unable to fill in DataDictionary[9] because __tls_used is missing"),
+	    (_("%pB: unable to fill in DataDictionary[9] because __tls_used is missing"),
 	     abfd);
 	  result = FALSE;
 	}

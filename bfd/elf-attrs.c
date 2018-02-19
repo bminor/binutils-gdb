@@ -472,7 +472,7 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	  len -= section_len;
 	  if (section_len <= 4)
 	    {
-	      _bfd_error_handler (_("%B: error: attribute section length too small: %ld"),
+	      _bfd_error_handler (_("%pB: error: attribute section length too small: %ld"),
 				  abfd, section_len);
 	      break;
 	    }
@@ -600,7 +600,7 @@ _bfd_elf_merge_object_attributes (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-		(_("error: %B: Object has vendor-specific contents that "
+		(_("error: %pB: Object has vendor-specific contents that "
 		   "must be processed by the '%s' toolchain"),
 		 ibfd, in_attr->s);
 	  return FALSE;
@@ -610,7 +610,7 @@ _bfd_elf_merge_object_attributes (bfd *ibfd, struct bfd_link_info *info)
 	  || (in_attr->i != 0 && strcmp (in_attr->s, out_attr->s) != 0))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("error: %B: Object tag '%d, %s' is "
+	  _bfd_error_handler (_("error: %pB: Object tag '%d, %s' is "
 				"incompatible with tag '%d, %s'"),
 			      ibfd,
 			      in_attr->i, in_attr->s ? in_attr->s : "",

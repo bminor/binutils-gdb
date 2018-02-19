@@ -2894,7 +2894,7 @@ nds32_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   if (r_type > R_NDS32_GNU_VTENTRY)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid NDS32 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid NDS32 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = bfd_elf32_bfd_reloc_type_table_lookup (r_type);
@@ -3841,7 +3841,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
@@ -4407,7 +4407,7 @@ nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
       /* Set the _ITB_BASE_.  */
       if (!nds32_elf_ex9_itb_base (info))
 	{
-	  _bfd_error_handler (_("%B: error: Cannot set _ITB_BASE_"),
+	  _bfd_error_handler (_("%pB: error: Cannot set _ITB_BASE_"),
 			      output_bfd);
 	  bfd_set_error (bfd_error_bad_value);
 	}
@@ -4449,7 +4449,7 @@ nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
       if (r_type >= R_NDS32_max)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: error: unknown relocation type %d."),
+	  _bfd_error_handler (_("%pB: error: unknown relocation type %d."),
 			      input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
@@ -4895,7 +4895,7 @@ nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
 	  if (bfd_link_pic (info))
 	    {
 	      _bfd_error_handler
-		(_("%B: warning: cannot deal R_NDS32_25_ABS_RELA in shared "
+		(_("%pB: warning: cannot deal R_NDS32_25_ABS_RELA in shared "
 		   "mode."), input_bfd);
 	      return FALSE;
 	    }
@@ -5029,7 +5029,7 @@ nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
 	    {
 	      /* Incorrect alignment.  */
 	      _bfd_error_handler
-		(_("%B: warning: unaligned access to GOT entry."), input_bfd);
+		(_("%pB: warning: unaligned access to GOT entry."), input_bfd);
 	      ret = FALSE;
 	      r = bfd_reloc_dangerous;
 	      goto check_reloc;
@@ -5071,7 +5071,7 @@ handle_sda:
 	      if (r != bfd_reloc_ok)
 		{
 		  _bfd_error_handler
-		    (_("%B: warning: relocate SDA_BASE failed."), input_bfd);
+		    (_("%pB: warning: relocate SDA_BASE failed."), input_bfd);
 		  ret = FALSE;
 		  goto check_reloc;
 		}
@@ -5093,7 +5093,7 @@ handle_sda:
 		  /* Incorrect alignment.  */
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B(%A): warning: unaligned small data access of type %d."),
+		    (_("%pB(%pA): warning: unaligned small data access of type %d."),
 		     input_bfd, input_section, r_type);
 		  ret = FALSE;
 		  goto check_reloc;
@@ -5841,7 +5841,7 @@ nds32_check_vec_size (bfd *ibfd)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: ISR vector size mismatch"
+	    (_("%pB: ISR vector size mismatch"
 	       " with previous modules, previous %u-byte, current %u-byte"),
 	     ibfd,
 	     nds32_vec_size == 1 ? 4 : nds32_vec_size == 2 ? 16 : 0xffffffff,
@@ -5885,7 +5885,7 @@ nds32_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if (bfd_little_endian (ibfd) != bfd_little_endian (obfd))
     {
       _bfd_error_handler
-	(_("%B: warning: Endian mismatch with previous modules."), ibfd);
+	(_("%pB: warning: Endian mismatch with previous modules."), ibfd);
 
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -5895,7 +5895,7 @@ nds32_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if (in_version == E_NDS32_ELF_VER_1_2)
     {
       _bfd_error_handler
-	(_("%B: warning: Older version of object file encountered, "
+	(_("%pB: warning: Older version of object file encountered, "
 	   "Please recompile with current tool chain."), ibfd);
     }
 
@@ -5973,7 +5973,7 @@ nds32_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if ((in_flags & EF_NDS_ABI) != (out_flags & EF_NDS_ABI))
     {
       _bfd_error_handler
-	(_("%B: error: ABI mismatch with previous modules."), ibfd);
+	(_("%pB: error: ABI mismatch with previous modules."), ibfd);
 
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -5984,7 +5984,7 @@ nds32_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       if (((in_flags & EF_NDS_ARCH) != E_N1_ARCH))
 	{
 	  _bfd_error_handler
-	    (_("%B: error: Instruction set mismatch with previous modules."), ibfd);
+	    (_("%pB: error: Instruction set mismatch with previous modules."), ibfd);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -6010,7 +6010,7 @@ nds32_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       if (in_version != out_version)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%B: warning: Incompatible elf-versions %s and  %s."),
+	  (_("%pB: warning: Incompatible elf-versions %s and  %s."),
 	   ibfd, nds32_elfver_strtab[out_version],
 	   nds32_elfver_strtab[in_version]);
 
@@ -8532,7 +8532,7 @@ done_adjust_diff:
 		  && (blank_t2->offset > raddr
 		      || blank_t2->next->offset <= raddr))
 		_bfd_error_handler
-		  (_("%B: Error: search_nds32_elf_blank reports wrong node\n"), abfd);
+		  (_("%pB: Error: search_nds32_elf_blank reports wrong node\n"), abfd);
 
 	      /* Mark reloc in deleted portion as NONE.
 		 For some relocs like R_NDS32_LABEL that doesn't modify the
@@ -8791,7 +8791,7 @@ relax_range_measurement (bfd *abfd)
 
 static const char * unrecognized_reloc_msg =
   /* xgettext:c-format */
-  N_("%B: warning: %s points to unrecognized reloc at %#Lx");
+  N_("%pB: warning: %s points to unrecognized reloc at %#Lx");
 
 /* Relax LONGCALL1 relocation for nds32_elf_relax_section.  */
 
@@ -11779,7 +11779,7 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
       /* Set the _ITB_BASE_.  */
       if (!nds32_elf_ex9_itb_base (link_info))
 	{
-	  _bfd_error_handler (_("%B: error: Cannot set _ITB_BASE_"), abfd);
+	  _bfd_error_handler (_("%pB: error: Cannot set _ITB_BASE_"), abfd);
 	  bfd_set_error (bfd_error_bad_value);
 	}
     }
@@ -12525,7 +12525,7 @@ nds32_relax_fp_as_gp (struct bfd_link_info *link_info,
 	  /* Begin of the region.  */
 	  if (begin_rel)
 	    /* xgettext:c-format */
-	    _bfd_error_handler (_("%B: Nested OMIT_FP in %A."), abfd, sec);
+	    _bfd_error_handler (_("%pB: Nested OMIT_FP in %pA."), abfd, sec);
 
 	  begin_rel = irel;
 	  nds32_fag_init (&fag_head);
@@ -12544,7 +12544,7 @@ nds32_relax_fp_as_gp (struct bfd_link_info *link_info,
 	  if (begin_rel == NULL)
 	    {
 	      /* xgettext:c-format */
-	      _bfd_error_handler (_("%B: Unmatched OMIT_FP in %A."), abfd, sec);
+	      _bfd_error_handler (_("%pB: Unmatched OMIT_FP in %pA."), abfd, sec);
 	      continue;
 	    }
 
@@ -12827,7 +12827,7 @@ nds32_elf_get_relocated_section_contents (bfd *abfd,
 		     message instead.  */
 		  link_info->callbacks->einfo
 		    /* xgettext:c-format */
-		    (_("%X%P: %B(%A): relocation \"%R\" goes out of range\n"),
+		    (_("%X%P: %pB(%pA): relocation \"%R\" goes out of range\n"),
 		     abfd, input_section, * parent);
 		  goto error_return;
 
@@ -15237,7 +15237,7 @@ nds32_elf_ex9_build_hash_table (bfd *abfd, asection *sec,
 			  /* Incorrect alignment.  */
 			  _bfd_error_handler
 			    /* xgettext:c-format */
-			    (_("%B: warning: unaligned small data access "
+			    (_("%pB: warning: unaligned small data access "
 			       "for entry: {%Ld, %Ld, %Ld}, addr = %#Lx, align = %#x"),
 			     abfd, irel->r_offset,
 			     irel->r_info, irel->r_addend, relocation, align);

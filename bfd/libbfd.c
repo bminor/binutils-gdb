@@ -874,7 +874,7 @@ _bfd_generic_get_section_contents (bfd *abfd,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: unable to get decompressed section %A"),
+	(_("%pB: unable to get decompressed section %pA"),
 	 abfd, section);
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;

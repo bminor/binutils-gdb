@@ -4759,7 +4759,7 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
       break;
     default:
       command->len = 0;
-      _bfd_error_handler (_("%B: unknown load command %#x"),
+      _bfd_error_handler (_("%pB: unknown load command %#x"),
 			  abfd, command->type);
       return FALSE;
     }

@@ -134,7 +134,7 @@ moxie_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_MOXIE_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid Moxie reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid Moxie reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & moxie_elf_howto_table [r_type];

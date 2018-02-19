@@ -568,15 +568,15 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *inf)
 
       info->flags |= DF_TEXTREL;
       /* xgettext:c-format */
-      info->callbacks->minfo (_("%B: dynamic relocation against `%T' "
-				"in read-only section `%A'\n"),
+      info->callbacks->minfo (_("%pB: dynamic relocation against `%T' "
+				"in read-only section `%pA'\n"),
 			      sec->owner, h->root.root.string, sec);
 
       if ((info->warn_shared_textrel && bfd_link_pic (info))
 	  || info->error_textrel)
 	/* xgettext:c-format */
-	info->callbacks->einfo (_("%P: %B: warning: relocation against `%s' "
-				  "in read-only section `%A'\n"),
+	info->callbacks->einfo (_("%P: %pB: warning: relocation against `%s' "
+				  "in read-only section `%pA'\n"),
 				sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
@@ -970,8 +970,8 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 			  || info->error_textrel)
 			/* xgettext:c-format */
 			info->callbacks->einfo
-			  (_("%P: %B: warning: relocation "
-			     "in read-only section `%A'\n"),
+			  (_("%P: %pB: warning: relocation "
+			     "in read-only section `%pA'\n"),
 			   p->sec->owner, p->sec);
 		    }
 		}
@@ -1367,7 +1367,7 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
       if (bfd_is_abs_section (htab->elf.sgotplt->output_section))
 	{
 	  _bfd_error_handler
-	    (_("discarded output section: `%A'"), htab->elf.sgotplt);
+	    (_("discarded output section: `%pA'"), htab->elf.sgotplt);
 	  return NULL;
 	}
 
@@ -2272,10 +2272,10 @@ _bfd_x86_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
 	{
 	  _bfd_error_handler
 	    ((type == GNU_PROPERTY_X86_ISA_1_USED
-	      ? _("error: %B: <corrupt x86 ISA used size: 0x%x>")
+	      ? _("error: %pB: <corrupt x86 ISA used size: 0x%x>")
 	      : (type == GNU_PROPERTY_X86_ISA_1_NEEDED
-		 ? _("error: %B: <corrupt x86 ISA needed size: 0x%x>")
-		 : _("error: %B: <corrupt x86 feature size: 0x%x>"))),
+		 ? _("error: %pB: <corrupt x86 ISA needed size: 0x%x>")
+		 : _("error: %pB: <corrupt x86 feature size: 0x%x>"))),
 	     abfd, datasz);
 	  return property_corrupt;
 	}
@@ -2452,7 +2452,7 @@ _bfd_x86_elf_link_setup_gnu_properties
 	  if (!bfd_set_section_alignment (ebfd, sec, class_align))
 	    {
 error_alignment:
-	      info->callbacks->einfo (_("%F%A: failed to align section\n"),
+	      info->callbacks->einfo (_("%F%pA: failed to align section\n"),
 				      sec);
 	    }
 

@@ -536,7 +536,7 @@ lm32_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_LM32_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid LM32 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid LM32 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &lm32_elf_howto_table[r_type];
@@ -1986,7 +1986,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */

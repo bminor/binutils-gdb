@@ -679,7 +679,7 @@ elf_cr16_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   if (r_type >= R_CR16_MAX)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: unrecognised CR16 reloc number: %d"),
+      _bfd_error_handler (_("%pB: unrecognised CR16 reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_CR16_NONE;

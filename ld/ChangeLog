@@ -1,3 +1,26 @@
+2018-02-19  Alan Modra  <amodra@gmail.com>
+
+	* ldmisc.c (vfinfo): Handle %pA and %pB in place of %A and %B.
+	* ldcref.c: Update all messages using %A and %B.
+	* ldexp.c: Likewise.
+	* ldlang.c: Likewise.
+	* ldmain.c: Likewise.
+	* ldmisc.c: Likewise.
+	* pe-dll.c: Likewise.
+	* plugin.c: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/cr16elf.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/m68kelf.em: Likewise.
+	* emultempl/mmo.em: Likewise.
+	* emultempl/nds32elf.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
+
 2018-02-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22845

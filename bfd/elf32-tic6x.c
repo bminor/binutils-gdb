@@ -2457,7 +2457,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	    }
 	  else
 	    {
-	      _bfd_error_handler (_("%B: SB-relative relocation but "
+	      _bfd_error_handler (_("%pB: SB-relative relocation but "
 				    "__c6xabi_DSBT_BASE not defined"),
 				  input_bfd);
 	      ok = FALSE;
@@ -2567,7 +2567,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	      if (h == NULL)
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B, section %A: relocation %s with non-zero addend %Ld"
+		  (_("%pB, section %pA: relocation %s with non-zero addend %Ld"
 		     " against local symbol"),
 		   input_bfd,
 		   input_section,
@@ -2576,7 +2576,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	      else
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B, section %A: relocation %s with non-zero addend %Ld"
+		  (_("%pB, section %pA: relocation %s with non-zero addend %Ld"
 		     " against symbol `%s'"),
 		   input_bfd,
 		   input_section,
@@ -2606,7 +2606,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	default:
 	  /* Unknown relocation.  */
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: invalid relocation type %d"),
+	  _bfd_error_handler (_("%pB: invalid relocation type %d"),
 			      input_bfd, r_type);
 	  ok = FALSE;
 	  continue;
@@ -2746,7 +2746,7 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+	  _bfd_error_handler (_("%pB: bad symbol index: %d"),
 			      abfd, r_symndx);
 	  return FALSE;
 	}
@@ -3202,7 +3202,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
@@ -3579,7 +3579,7 @@ elf32_tic6x_obj_attrs_handle_unknown (bfd *abfd, int tag)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: error: unknown mandatory EABI object attribute %d"),
+	(_("%pB: error: unknown mandatory EABI object attribute %d"),
 	 abfd, tag);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -3588,7 +3588,7 @@ elf32_tic6x_obj_attrs_handle_unknown (bfd *abfd, int tag)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: warning: unknown EABI object attribute %d"),
+	(_("%pB: warning: unknown EABI object attribute %d"),
 	 abfd, tag);
       return TRUE;
     }
@@ -3702,7 +3702,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B requires more stack alignment than %B preserves"),
+	(_("error: %pB requires more stack alignment than %pB preserves"),
 	 ibfd, obfd);
       result = FALSE;
     }
@@ -3711,7 +3711,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B requires more stack alignment than %B preserves"),
+	(_("error: %pB requires more stack alignment than %pB preserves"),
 	 obfd, ibfd);
       result = FALSE;
     }
@@ -3721,7 +3721,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   if (array_align_in == -1)
     {
       _bfd_error_handler
-	(_("error: unknown Tag_ABI_array_object_alignment value in %B"),
+	(_("error: unknown Tag_ABI_array_object_alignment value in %pB"),
 	 ibfd);
       result = FALSE;
     }
@@ -3730,7 +3730,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   if (array_align_out == -1)
     {
       _bfd_error_handler
-	(_("error: unknown Tag_ABI_array_object_alignment value in %B"),
+	(_("error: unknown Tag_ABI_array_object_alignment value in %pB"),
 	 obfd);
       result = FALSE;
     }
@@ -3739,7 +3739,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   if (array_expect_in == -1)
     {
       _bfd_error_handler
-	(_("error: unknown Tag_ABI_array_object_align_expected value in %B"),
+	(_("error: unknown Tag_ABI_array_object_align_expected value in %pB"),
 	 ibfd);
       result = FALSE;
     }
@@ -3748,7 +3748,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   if (array_expect_out == -1)
     {
       _bfd_error_handler
-	(_("error: unknown Tag_ABI_array_object_align_expected value in %B"),
+	(_("error: unknown Tag_ABI_array_object_align_expected value in %pB"),
 	 obfd);
       result = FALSE;
     }
@@ -3757,7 +3757,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B requires more array alignment than %B preserves"),
+	(_("error: %pB requires more array alignment than %pB preserves"),
 	 ibfd, obfd);
       result = FALSE;
     }
@@ -3765,7 +3765,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B requires more array alignment than %B preserves"),
+	(_("error: %pB requires more array alignment than %pB preserves"),
 	 obfd, ibfd);
       result = FALSE;
     }
@@ -3788,7 +3788,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("warning: %B and %B differ in wchar_t size"), obfd, ibfd);
+		(_("warning: %pB and %pB differ in wchar_t size"), obfd, ibfd);
 	    }
 	  break;
 
@@ -3807,7 +3807,7 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("warning: %B and %B differ in whether code is "
+		(_("warning: %pB and %pB differ in whether code is "
 		   "compiled for DSBT"),
 		 obfd, ibfd);
 	    }

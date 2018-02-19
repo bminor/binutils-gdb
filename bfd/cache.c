@@ -270,7 +270,7 @@ bfd_cache_lookup_worker (bfd *abfd, enum cache_flag flag)
     return (FILE *) abfd->iostream;
 
   /* xgettext:c-format */
-  _bfd_error_handler (_("reopening %B: %s\n"),
+  _bfd_error_handler (_("reopening %pB: %s\n"),
 		      orig_bfd, bfd_errmsg (bfd_get_error ()));
   return NULL;
 }

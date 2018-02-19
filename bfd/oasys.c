@@ -878,7 +878,7 @@ oasys_write_sections (bfd *abfd)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: can not represent section `%A' in oasys"), abfd, s);
+	    (_("%pB: can not represent section `%pA' in oasys"), abfd, s);
 	  bfd_set_error (bfd_error_nonrepresentable_section);
 	  return FALSE;
 	}

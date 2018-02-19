@@ -103,7 +103,7 @@ elf32_wasm32_rtype_to_howto (bfd *abfd, unsigned r_type)
   if (i >= ARRAY_SIZE (elf32_wasm32_howto_table))
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid relocation type %d"),
+      _bfd_error_handler (_("%pB: invalid relocation type %d"),
 			  abfd, (int) r_type);
       i = R_WASM32_NONE;
     }

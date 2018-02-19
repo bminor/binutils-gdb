@@ -669,7 +669,7 @@ coff_tic80_relocate_section (bfd *output_bfd,
 	case bfd_reloc_outofrange:
 	  _bfd_error_handler
 	    /* xgettext: c-format */
-	    (_("%B: bad reloc address %#Lx in section `%A'"),
+	    (_("%pB: bad reloc address %#Lx in section `%pA'"),
 	     input_bfd, rel->r_vaddr, input_section);
 	  return FALSE;
 	case bfd_reloc_overflow:

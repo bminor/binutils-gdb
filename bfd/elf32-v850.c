@@ -61,7 +61,7 @@ v850_elf_check_relocs (bfd *abfd,
     return TRUE;
 
 #ifdef DEBUG
-  _bfd_error_handler ("v850_elf_check_relocs called for section %A in %B",
+  _bfd_error_handler ("v850_elf_check_relocs called for section %pA in %pB",
 		      sec, abfd);
 #endif
 
@@ -490,7 +490,7 @@ v850_elf_perform_relocation (bfd *abfd,
     {
     default:
 #ifdef DEBUG
-      fprintf (stderr, "%B: reloc number %d not recognised\n", abfd, r_type);
+      fprintf (stderr, "%pB: reloc number %d not recognised\n", abfd, r_type);
 #endif
       return bfd_reloc_notsupported;
 
@@ -1895,7 +1895,7 @@ v850_elf_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_V850_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid V850 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid V850 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &v850_elf_howto_table[r_type];
@@ -1914,7 +1914,7 @@ v850_elf_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_V850_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid V850 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid V850 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &v850_elf_howto_table[r_type];
@@ -2145,7 +2145,7 @@ v850_elf_final_link_relocate (reloc_howto_type *howto,
 
     default:
 #ifdef DEBUG
-      fprintf (stderr, "%B: reloc number %d not recognised\n", input_bfd, r_type);
+      fprintf (stderr, "%pB: reloc number %d not recognised\n", input_bfd, r_type);
 #endif
       return bfd_reloc_notsupported;
     }
@@ -2521,7 +2521,7 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("error: %B needs 8-byte alignment but %B is set for 4-byte alignment"),
+		    (_("error: %pB needs 8-byte alignment but %pB is set for 4-byte alignment"),
 				      ibfd, obfd);
 		  result = FALSE;
 		}
@@ -2537,8 +2537,8 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("error: %B uses 64-bit doubles but "
-		       "%B uses 32-bit doubles"), ibfd, obfd);
+		    (_("error: %pB uses 64-bit doubles but "
+		       "%pB uses 32-bit doubles"), ibfd, obfd);
 		  result = FALSE;
 		}
 	      else
@@ -2552,7 +2552,7 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("error: %B uses FPU-3.0 but %B only supports FPU-2.0"),
+		    (_("error: %pB uses FPU-3.0 but %pB only supports FPU-2.0"),
 		     ibfd, obfd);
 		  result = FALSE;
 		}
@@ -2809,7 +2809,7 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       if ((in_flags & EF_V800_850E3) != (out_flags & EF_V800_850E3))
 	{
 	  _bfd_error_handler
-	    (_("%B: Architecture mismatch with previous modules"), ibfd);
+	    (_("%pB: Architecture mismatch with previous modules"), ibfd);
 	  elf_elfheader (obfd)->e_flags |= EF_V800_850E3;
 	}
 
@@ -2865,7 +2865,7 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	}
 
       _bfd_error_handler
-	(_("%B: Architecture mismatch with previous modules"), ibfd);
+	(_("%pB: Architecture mismatch with previous modules"), ibfd);
     }
 
   return result;
@@ -3598,7 +3598,7 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: %#Lx: warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#Lx: warning: R_V850_LONGCALL points to "
 		       "unrecognized insns"),
 		     abfd, irel->r_offset);
 		  continue;
@@ -3608,7 +3608,7 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: %#Lx: warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#Lx: warning: R_V850_LONGCALL points to "
 		       "unrecognized insn %#x"),
 		     abfd,
 		     irel->r_offset + no_match,
@@ -3653,7 +3653,7 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: %#Lx: warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#Lx: warning: R_V850_LONGCALL points to "
 		       "unrecognized reloc"),
 		     abfd, irel->r_offset);
 
@@ -3693,7 +3693,7 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: %#Lx: warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#Lx: warning: R_V850_LONGCALL points to "
 		       "unrecognized reloc %#Lx"),
 		     abfd, irel->r_offset,
 		     irelcall->r_offset);
@@ -3836,7 +3836,7 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: %#Lx: warning: R_V850_LONGJUMP points to "
+		    (_("%pB: %#Lx: warning: R_V850_LONGJUMP points to "
 		       "unrecognized insns"),
 		     abfd, irel->r_offset);
 		  continue;
@@ -3846,7 +3846,7 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: %#Lx: warning: R_V850_LONGJUMP points to "
+		    (_("%pB: %#Lx: warning: R_V850_LONGJUMP points to "
 		       "unrecognized insn %#x"),
 		     abfd,
 		     irel->r_offset + no_match,
@@ -3880,7 +3880,7 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: %#Lx: warning: R_V850_LONGJUMP points to "
+		    (_("%pB: %#Lx: warning: R_V850_LONGJUMP points to "
 		       "unrecognized reloc"),
 		     abfd, irel->r_offset);
 		  continue;

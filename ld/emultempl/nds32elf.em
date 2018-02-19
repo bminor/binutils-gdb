@@ -121,7 +121,7 @@ nds32_elf_after_open (void)
 	       && abi_ver != (elf_elfheader (abfd)->e_flags & EF_NDS_ABI))
 	{
 	  /* Incompatible objects.  */
-	  einfo (_("%F%B: ABI version of object files mismatched\n"), abfd);
+	  einfo (_("%F%pB: ABI version of object files mismatched\n"), abfd);
 	}
 
 #if defined NDS32_EX9_EXT
@@ -166,7 +166,7 @@ nds32_elf_after_open (void)
 	      if (bfd_link_pic (&link_info))
 		{
 		  /* For PIE or shared object, all input must be PIC.  */
-		  einfo (_("%B: must use -fpic to compile this file "
+		  einfo (_("%pB: must use -fpic to compile this file "
 			   "for shared object or PIE\n"), abfd);
 		}
 	      else

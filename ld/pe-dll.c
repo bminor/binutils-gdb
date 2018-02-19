@@ -722,7 +722,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
 	  if (!bfd_generic_link_read_symbols (b))
 	    {
-	      einfo (_("%B%F: could not read symbols: %E\n"), b);
+	      einfo (_("%pB%F: could not read symbols: %E\n"), b);
 	      return;
 	    }
 
@@ -1301,7 +1301,7 @@ pe_walk_relocs_of_symbol (struct bfd_link_info *info,
 
       if (!bfd_generic_link_read_symbols (b))
 	{
-	  einfo (_("%B%F: could not read symbols: %E\n"), b);
+	  einfo (_("%pB%F: could not read symbols: %E\n"), b);
 	  return;
 	}
 
@@ -1396,7 +1396,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
 	  if (!bfd_generic_link_read_symbols (b))
 	    {
-	      einfo (_("%B%F: could not read symbols: %E\n"), b);
+	      einfo (_("%pB%F: could not read symbols: %E\n"), b);
 	      return;
 	    }
 

@@ -2554,7 +2554,7 @@ frv_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
       if (r_type >= (unsigned int) R_FRV_max)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: invalid FRV reloc number: %d"), abfd, r_type);
+	  _bfd_error_handler (_("%pB: invalid FRV reloc number: %d"), abfd, r_type);
 	  r_type = 0;
 	}
       cache_ptr->howto = & elf32_frv_howto_table [r_type];
@@ -6252,7 +6252,7 @@ elf32_frv_check_relocs (bfd *abfd,
 	bad_reloc:
 	  info->callbacks->einfo
 	    /* xgettext:c-format */
-	    (_("%B: unsupported relocation type %i\n"),
+	    (_("%pB: unsupported relocation type %i\n"),
 	     abfd, ELF32_R_TYPE (rel->r_info));
 	  return FALSE;
 	}
@@ -6504,7 +6504,7 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	      error = TRUE;
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: compiled with %s and linked with modules"
+		(_("%pB: compiled with %s and linked with modules"
 		   " that use non-pic relocations"),
 		 ibfd, (new_flags & EF_FRV_BIGPIC) ? "-fPIC" : "-fpic");
 #endif
@@ -6558,7 +6558,7 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  error = TRUE;
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: compiled with %s and linked with modules compiled with %s"),
+	    (_("%pB: compiled with %s and linked with modules compiled with %s"),
 	     ibfd, new_opt, old_opt);
 	}
 
@@ -6571,7 +6571,7 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  error = TRUE;
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: uses different unknown e_flags (%#x) fields"
+	    (_("%pB: uses different unknown e_flags (%#x) fields"
 	       " than previous modules (%#x)"),
 	     ibfd, new_partial, old_partial);
 	}
@@ -6593,11 +6593,11 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       error = TRUE;
       if (IS_FDPIC (obfd))
 	_bfd_error_handler
-	  (_("%B: cannot link non-fdpic object file into fdpic executable"),
+	  (_("%pB: cannot link non-fdpic object file into fdpic executable"),
 	   ibfd);
       else
 	_bfd_error_handler
-	  (_("%B: cannot link fdpic object file into non-fdpic executable"),
+	  (_("%pB: cannot link fdpic object file into non-fdpic executable"),
 	   ibfd);
     }
 

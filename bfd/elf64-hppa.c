@@ -3283,7 +3283,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+%#Lx): cannot reach %s"),
+	      (_("%pB(%pA+%#Lx): cannot reach %s"),
 	      input_bfd,
 	      input_section,
 	      offset,

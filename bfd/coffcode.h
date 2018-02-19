@@ -965,7 +965,7 @@ handle_COMDAT (bfd * abfd,
 	  /* PR 17512 file: 078-11867-0.004  */
 	  if (symname == NULL)
 	    {
-	      _bfd_error_handler (_("%B: unable to load COMDAT section name"),
+	      _bfd_error_handler (_("%pB: unable to load COMDAT section name"),
 				  abfd);
 	      break;
 	    }
@@ -1000,7 +1000,7 @@ handle_COMDAT (bfd * abfd,
 		  {
 		    /* Malformed input files can trigger this test.
 		       cf PR 21781.  */
-		    _bfd_error_handler (_("%B: error: unexpected symbol '%s' in COMDAT section"),
+		    _bfd_error_handler (_("%pB: error: unexpected symbol '%s' in COMDAT section"),
 					abfd, symname);
 		    goto breakloop;
 		  }
@@ -1012,7 +1012,7 @@ handle_COMDAT (bfd * abfd,
 
 		if (isym.n_sclass == C_STAT && strcmp (name, symname) != 0)
 		  /* xgettext:c-format */
-		  _bfd_error_handler (_("%B: warning: COMDAT symbol '%s'"
+		  _bfd_error_handler (_("%pB: warning: COMDAT symbol '%s'"
 					" does not match section name '%s'"),
 				      abfd, symname, name);
 
@@ -1022,7 +1022,7 @@ handle_COMDAT (bfd * abfd,
 		if (esym + bfd_coff_symesz (abfd) >= esymend)
 		  {
 		    /* xgettext:c-format */
-		    _bfd_error_handler (_("%B: warning: No symbol for"
+		    _bfd_error_handler (_("%pB: warning: No symbol for"
 					  " section '%s' found"),
 					abfd, symname);
 		    break;
@@ -1248,7 +1248,7 @@ styp_to_sec_flags (bfd *abfd,
 	     variable as this will allow some .sys files generate by
 	     other toolchains to be processed.  See bugzilla issue 196.  */
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: Warning: Ignoring section flag"
+	  _bfd_error_handler (_("%pB: Warning: Ignoring section flag"
 				" IMAGE_SCN_MEM_NOT_PAGED in section %s"),
 			      abfd, name);
 	  break;
@@ -1317,7 +1317,7 @@ styp_to_sec_flags (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B (%s): Section flag %s (%#lx) ignored"),
+	    (_("%pB (%s): Section flag %s (%#lx) ignored"),
 	     abfd, name, unhandled, flag);
 	  result = FALSE;
 	}
@@ -1947,7 +1947,7 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
     }
   else if (hdr->s_nreloc == 0xffff)
     _bfd_error_handler
-      (_("%B: warning: claims to have 0xffff relocs, without overflow"),
+      (_("%pB: warning: claims to have 0xffff relocs, without overflow"),
        abfd);
 }
 #undef ALIGN_SET
@@ -2781,7 +2781,7 @@ coff_write_relocs (bfd * abfd, int first_undef)
 		      {
 			bfd_set_error (bfd_error_bad_value);
 			/* xgettext:c-format */
-			_bfd_error_handler (_("%B: reloc against a non-existent"
+			_bfd_error_handler (_("%pB: reloc against a non-existent"
 					      " symbol index: %ld"),
 					    abfd, n.r_symndx);
 			return FALSE;
@@ -3184,7 +3184,7 @@ coff_compute_section_file_positions (bfd * abfd)
 	  bfd_set_error (bfd_error_file_too_big);
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: page size is too large (0x%x)"), abfd, page_size);
+	    (_("%pB: page size is too large (0x%x)"), abfd, page_size);
 	  return FALSE;
 	}
     }
@@ -3344,7 +3344,7 @@ coff_compute_section_file_positions (bfd * abfd)
       bfd_set_error (bfd_error_file_too_big);
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: too many sections (%d)"), abfd, target_index);
+	(_("%pB: too many sections (%d)"), abfd, target_index);
       return FALSE;
     }
 
@@ -3765,7 +3765,7 @@ coff_write_object_contents (bfd * abfd)
 		  bfd_set_error (bfd_error_file_too_big);
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: section %A: string table overflow at offset %ld"),
+		    (_("%pB: section %pA: string table overflow at offset %ld"),
 		    abfd, current, (unsigned long) string_size);
 		  return FALSE;
 		}
@@ -3870,7 +3870,7 @@ coff_write_object_contents (bfd * abfd)
 
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B:%s section %s: alignment 2**%u not representable"),
+	    (_("%pB:%s section %s: alignment 2**%u not representable"),
 	    abfd, warn ? " warning:" : "", current->name,
 	    current->alignment_power);
 	  if (!warn)
@@ -4589,7 +4589,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   if (asect->lineno_count > asect->size)
     {
       _bfd_error_handler
-	(_("%B: warning: line number count (%#lx) exceeds section size (%#lx)"),
+	(_("%pB: warning: line number count (%#lx) exceeds section size (%#lx)"),
 	 abfd, (unsigned long) asect->lineno_count, (unsigned long) asect->size);
       return FALSE;
     }
@@ -4604,7 +4604,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   if (native_lineno == NULL)
     {
       _bfd_error_handler
-	(_("%B: warning: line number table read failed"), abfd);
+	(_("%pB: warning: line number table read failed"), abfd);
       bfd_release (abfd, lineno_cache);
       return FALSE;
     }
@@ -4638,7 +4638,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
+		(_("%pB: warning: illegal symbol index 0x%lx in line number entry %d"),
 		 abfd, symndx, counter);
 	      cache_ptr->line_number = -1;
 	      ret = FALSE;
@@ -4652,7 +4652,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
+		(_("%pB: warning: illegal symbol index 0x%lx in line number entry %d"),
 		 abfd, symndx, counter);
 	      cache_ptr->line_number = -1;
 	      ret = FALSE;
@@ -4666,7 +4666,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: warning: illegal symbol in line number entry %d"),
+		(_("%pB: warning: illegal symbol in line number entry %d"),
 		 abfd, counter);
 	      cache_ptr->line_number = -1;
 	      ret = FALSE;
@@ -4679,7 +4679,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  if (sym->lineno != NULL)
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B: warning: duplicate line number information for `%s'"),
+	      (_("%pB: warning: duplicate line number information for `%s'"),
 	       abfd, bfd_asymbol_name (&sym->symbol));
 
 	  sym->lineno = cache_ptr;
@@ -5100,7 +5100,7 @@ coff_slurp_symbol_table (bfd * abfd)
 	    default:
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: Unrecognized storage class %d for %s symbol `%s'"),
+		(_("%pB: Unrecognized storage class %d for %s symbol `%s'"),
 		 abfd, src->u.syment.n_sclass,
 		 dst->symbol.section->name, dst->symbol.name);
 	      ret = FALSE;
@@ -5233,7 +5233,7 @@ coff_classify_symbol (bfd *abfd,
 
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("warning: %B: local symbol `%s' has no section"),
+	(_("warning: %pB: local symbol `%s' has no section"),
 	 abfd, _bfd_coff_internal_syment_name (abfd, syment, buf));
     }
 
@@ -5340,7 +5340,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: warning: illegal symbol index %ld in relocs"),
+		(_("%pB: warning: illegal symbol index %ld in relocs"),
 		 abfd, dst.r_symndx);
 	      cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      ptr = NULL;
@@ -5380,7 +5380,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: illegal relocation type %d at address %#Lx"),
+	    (_("%pB: illegal relocation type %d at address %#Lx"),
 	     abfd, dst.r_type, dst.r_vaddr);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;

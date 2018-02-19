@@ -482,7 +482,7 @@ elf_xtensa_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_XTENSA_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid XTENSA reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid XTENSA reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &elf_howto_table[r_type];
@@ -923,7 +923,7 @@ xtensa_read_table_entries (bfd *abfd,
 	      blocks[blk - 1].size != 0)
 	    {
 	      /* xgettext:c-format */
-	      _bfd_error_handler (_("%B(%A): invalid property table"),
+	      _bfd_error_handler (_("%pB(%pA): invalid property table"),
 				  abfd, section);
 	      bfd_set_error (bfd_error_bad_value);
 	      free (blocks);
@@ -1015,7 +1015,7 @@ elf_xtensa_check_relocs (bfd *abfd,
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+	  _bfd_error_handler (_("%pB: bad symbol index: %d"),
 			      abfd, r_symndx);
 	  return FALSE;
 	}
@@ -1189,7 +1189,7 @@ elf_xtensa_check_relocs (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: `%s' accessed both as normal and thread local symbol"),
+		(_("%pB: `%s' accessed both as normal and thread local symbol"),
 		 abfd,
 		 h ? h->root.root.string : "<local>");
 	      return FALSE;
@@ -2652,7 +2652,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+%#Lx): relocation offset out of range (size=%#Lx)"),
+	    (_("%pB(%pA+%#Lx): relocation offset out of range (size=%#Lx)"),
 	     input_bfd, input_section, rel->r_offset, input_size);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -2678,9 +2678,9 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	  _bfd_error_handler
 	    ((sym_type == STT_TLS
 	      /* xgettext:c-format */
-	      ? _("%B(%A+%#Lx): %s used with TLS symbol %s")
+	      ? _("%pB(%pA+%#Lx): %s used with TLS symbol %s")
 	      /* xgettext:c-format */
-	      : _("%B(%A+%#Lx): %s used with non-TLS symbol %s")),
+	      : _("%pB(%pA+%#Lx): %s used with non-TLS symbol %s")),
 	     input_bfd,
 	     input_section,
 	     rel->r_offset,
@@ -2936,7 +2936,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
 	     rel->r_offset,
@@ -3347,7 +3347,7 @@ elf_xtensa_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: incompatible machine type. Output is 0x%x. Input is 0x%x"),
+	(_("%pB: incompatible machine type. Output is 0x%x. Input is 0x%x"),
 	 ibfd, out_mach, in_mach);
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;
@@ -6414,7 +6414,7 @@ extend_ebb_bounds_forward (ebb_t *ebb)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+%#Lx): could not decode instruction; "
+	    (_("%pB(%pA+%#Lx): could not decode instruction; "
 	       "possible configuration mismatch"),
 	     ebb->sec->owner, ebb->sec, ebb->end_offset + insn_block_len);
 	  return FALSE;
@@ -6492,7 +6492,7 @@ extend_ebb_bounds_backward (ebb_t *ebb)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+%#Lx): could not decode instruction; "
+	    (_("%pB(%pA+%#Lx): could not decode instruction; "
 	       "possible configuration mismatch"),
 	     ebb->sec->owner, ebb->sec, ebb->end_offset + insn_block_len);
 	  return FALSE;
@@ -7607,7 +7607,7 @@ compute_text_actions (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+%#Lx): could not decode instruction for "
+	    (_("%pB(%pA+%#Lx): could not decode instruction for "
 	       "XTENSA_ASM_SIMPLIFY relocation; "
 	       "possible configuration mismatch"),
 	     sec->owner, sec, r_offset);
@@ -7868,7 +7868,7 @@ compute_ebb_proposed_actions (ebb_constraint *ebb_table)
  decode_error:
   _bfd_error_handler
     /* xgettext:c-format */
-    (_("%B(%A+%#Lx): could not decode instruction; "
+    (_("%pB(%pA+%#Lx): could not decode instruction; "
        "possible configuration mismatch"),
      ebb->sec->owner, ebb->sec, offset);
   return FALSE;
@@ -10646,7 +10646,7 @@ do_fix_for_relocatable_link (Elf_Internal_Rela *rel,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+%#Lx): unexpected fix for %s relocation"),
+	    (_("%pB(%pA+%#Lx): unexpected fix for %s relocation"),
 	     input_bfd, input_section, rel->r_offset,
 	     elf_howto_table[r_type].name);
 	  return FALSE;

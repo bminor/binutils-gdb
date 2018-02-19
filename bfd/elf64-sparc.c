@@ -457,7 +457,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	case 6: reg -= 4; break;
 	default:
 	  _bfd_error_handler
-	    (_("%B: Only registers %%g[2367] can be declared using STT_REGISTER"),
+	    (_("%pB: Only registers %%g[2367] can be declared using STT_REGISTER"),
 	     abfd);
 	  return FALSE;
 	}
@@ -478,8 +478,8 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("Register %%g%d used incompatibly: %s in %B,"
-	       " previously %s in %B"),
+	    (_("Register %%g%d used incompatibly: %s in %pB,"
+	       " previously %s in %pB"),
 	     (int) sym->st_value, **namep ? *namep : "#scratch", abfd,
 	     *p->name ? p->name : "#scratch", p->abfd);
 	  return FALSE;
@@ -502,8 +502,8 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 		    type = 0;
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("Symbol `%s' has differing types: REGISTER in %B,"
-		       " previously %s in %B"),
+		    (_("Symbol `%s' has differing types: REGISTER in %pB,"
+		       " previously %s in %pB"),
 		     *namep, abfd, stt_types[type], p->abfd);
 		  return FALSE;
 		}
@@ -549,8 +549,8 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	      type = 0;
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("Symbol `%s' has differing types: %s in %B,"
-		 " previously REGISTER in %B"),
+	      (_("Symbol `%s' has differing types: %s in %pB,"
+		 " previously REGISTER in %pB"),
 	       *namep, stt_types[type], abfd, p->abfd);
 	    return FALSE;
 	  }
@@ -704,7 +704,7 @@ elf64_sparc_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	    {
 	      error = TRUE;
 	      _bfd_error_handler
-		(_("%B: linking UltraSPARC specific with HAL specific code"),
+		(_("%pB: linking UltraSPARC specific with HAL specific code"),
 		 ibfd);
 	    }
 	  /* Choose the most restrictive memory ordering.  */
@@ -724,7 +724,7 @@ elf64_sparc_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  error = TRUE;
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: uses different e_flags (%#x) fields than previous modules (%#x)"),
+	    (_("%pB: uses different e_flags (%#x) fields than previous modules (%#x)"),
 	     ibfd, new_flags, old_flags);
 	}
 

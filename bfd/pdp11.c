@@ -1149,7 +1149,7 @@ NAME (aout, set_section_contents) (bfd *abfd,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: can not represent section `%A' in a.out object file format"),
+	(_("%pB: can not represent section `%pA' in a.out object file format"),
 	 abfd, section);
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
@@ -1382,7 +1382,7 @@ translate_to_native_sym_flags (bfd *abfd,
 	 file.  */
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: can not represent section for symbol `%s' in a.out object file format"),
+	(_("%pB: can not represent section for symbol `%s' in a.out object file format"),
 	 abfd, cache_ptr->name != NULL ? cache_ptr->name : "*unknown*");
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
@@ -1410,7 +1410,7 @@ translate_to_native_sym_flags (bfd *abfd,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: can not represent section `%A' in a.out object file format"),
+	(_("%pB: can not represent section `%pA' in a.out object file format"),
 	 abfd, sec);
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
@@ -3705,7 +3705,7 @@ NAME (aout, final_link) (bfd *abfd,
 		 by the reloc size.  */
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: relocatable link from %s to %s not supported"),
+		(_("%pB: relocatable link from %s to %s not supported"),
 		 abfd, sub->xvec->name, abfd->xvec->name);
 	      bfd_set_error (bfd_error_invalid_operation);
 	      goto error_return;

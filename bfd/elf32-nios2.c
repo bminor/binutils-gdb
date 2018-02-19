@@ -2204,7 +2204,7 @@ nios2_add_stub (const char *stub_name,
   if (hsh == NULL)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: cannot create stub entry %s"),
+      _bfd_error_handler (_("%pB: cannot create stub entry %s"),
 			  section->owner,
 			  stub_name);
       return NULL;
@@ -2926,7 +2926,7 @@ nios2_elf32_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  if (bfd_big_endian (ibfd))
 	    {
 	      _bfd_error_handler
-		(_("error: %B: Big-endian R2 is not supported."), ibfd);
+		(_("error: %pB: Big-endian R2 is not supported."), ibfd);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -2942,7 +2942,7 @@ nios2_elf32_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	 architectures.  */
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B: Conflicting CPU architectures %d/%d"),
+	(_("error: %pB: Conflicting CPU architectures %d/%d"),
 	 ibfd, new_flags, old_flags);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -4355,7 +4355,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B(%A+%#Lx): %s relocation not "
+		    (_("%pB(%pA+%#Lx): %s relocation not "
 		       "permitted in shared object"),
 		     input_bfd, input_section,
 		     rel->r_offset, howto->name);

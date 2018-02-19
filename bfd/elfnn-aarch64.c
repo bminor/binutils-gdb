@@ -2959,7 +2959,7 @@ _bfd_aarch64_add_stub_entry_in_group (const char *stub_name,
   if (stub_entry == NULL)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: cannot create stub entry %s"),
+      _bfd_error_handler (_("%pB: cannot create stub entry %s"),
 			  section->owner, stub_name);
       return NULL;
     }
@@ -4884,7 +4884,7 @@ make_branch_to_erratum_835769_stub (struct bfd_hash_entry *gen_entry,
   abfd = stub_entry->target_section->owner;
   if (!aarch64_valid_branch_p (veneer_entry_loc, veneered_insn_loc))
     _bfd_error_handler
-      (_("%B: error: Erratum 835769 stub out "
+      (_("%pB: error: Erratum 835769 stub out "
 	 "of range (input file too large)"), abfd);
 
   target = stub_entry->target_value;
@@ -4965,7 +4965,7 @@ _bfd_aarch64_erratum_843419_branch_to_stub (struct bfd_hash_entry *gen_entry,
       abfd = stub_entry->target_section->owner;
       if (!aarch64_valid_branch_p (veneer_entry_loc, veneered_insn_loc))
 	_bfd_error_handler
-	  (_("%B: error: Erratum 843419 stub out "
+	  (_("%pB: error: Erratum 843419 stub out "
 	     "of range (input file too large)"), abfd);
 
       branch_insn = 0x14000000;
@@ -5106,7 +5106,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, NULL);
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd, input_section, rel->r_offset, howto->name, name);
 	  bfd_set_error (bfd_error_bad_value);
 	  return bfd_reloc_notsupported;
@@ -5129,7 +5129,7 @@ bad_ifunc_reloc:
 				     NULL);
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: relocation %s against STT_GNU_IFUNC "
+	    (_("%pB: relocation %s against STT_GNU_IFUNC "
 	       "symbol `%s' isn't handled by %s"), input_bfd,
 	     howto->name, name, __FUNCTION__);
 	  bfd_set_error (bfd_error_bad_value);
@@ -5145,7 +5145,7 @@ bad_ifunc_reloc:
 					 sym, NULL);
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: relocation %s against STT_GNU_IFUNC "
+		(_("%pB: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' has non-zero addend: %Ld"),
 		 input_bfd, howto->name, name, rel->r_addend);
 	      bfd_set_error (bfd_error_bad_value);
@@ -5478,7 +5478,7 @@ bad_ifunc_reloc:
 
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: relocation %s against symbol `%s' which may bind "
+	    (_("%pB: relocation %s against symbol `%s' which may bind "
 	       "externally can not be used when making a shared object; "
 	       "recompile with -fPIC"),
 	     input_bfd, elfNN_aarch64_howto_table[howto_index].name,
@@ -5569,7 +5569,7 @@ bad_ifunc_reloc:
 	    int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B: Local symbol descriptor table be NULL when applying "
+	      (_("%pB: Local symbol descriptor table be NULL when applying "
 		 "relocation %s against local symbol"),
 	       input_bfd, elfNN_aarch64_howto_table[howto_index].name);
 	    abort ();
@@ -6297,9 +6297,9 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  _bfd_error_handler
 	    ((sym_type == STT_TLS
 	      /* xgettext:c-format */
-	      ? _("%B(%A+%#Lx): %s used with TLS symbol %s")
+	      ? _("%pB(%pA+%#Lx): %s used with TLS symbol %s")
 	      /* xgettext:c-format */
-	      : _("%B(%A+%#Lx): %s used with non-TLS symbol %s")),
+	      : _("%pB(%pA+%#Lx): %s used with non-TLS symbol %s")),
 	     input_bfd,
 	     input_section, rel->r_offset, howto->name, name);
 	}
@@ -6569,7 +6569,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd, input_section, rel->r_offset, howto->name,
 	     h->root.root.string);
 	  return FALSE;
@@ -7090,7 +7090,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: bad symbol index: %d"), abfd, r_symndx);
+	  _bfd_error_handler (_("%pB: bad symbol index: %d"), abfd, r_symndx);
 	  return FALSE;
 	}
 
@@ -7205,7 +7205,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: relocation %s against `%s' can not be used when making "
+		(_("%pB: relocation %s against `%s' can not be used when making "
 		   "a shared object"),
 		 abfd, elfNN_aarch64_howto_table[howto_index].name,
 		 (h) ? h->root.root.string : "a local symbol");
@@ -7224,7 +7224,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: relocation %s against `%s' can not be used when making "
+		(_("%pB: relocation %s against `%s' can not be used when making "
 		   "a shared object; recompile with -fPIC"),
 		 abfd, elfNN_aarch64_howto_table[howto_index].name,
 		 (h) ? h->root.root.string : "a local symbol");
@@ -7656,7 +7656,7 @@ elfNN_aarch64_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 				       0, &sym))
 	    {
 	      /* xgettext:c-format */
-	      _bfd_error_handler (_("%B symbol number %lu references"
+	      _bfd_error_handler (_("%pB symbol number %lu references"
 				    " nonexistent SHT_SYMTAB_SHNDX section"),
 				    abfd, r_symndx);
 	      /* Ideally an error class should be returned here.  */
@@ -8440,7 +8440,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%B: dynamic relocation against `%T' in read-only section `%A'\n"),
+	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
@@ -9293,7 +9293,7 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
       if (bfd_is_abs_section (htab->root.sgotplt->output_section))
 	{
 	  _bfd_error_handler
-	    (_("discarded output section: `%A'"), htab->root.sgotplt);
+	    (_("discarded output section: `%pA'"), htab->root.sgotplt);
 	  return FALSE;
 	}
 

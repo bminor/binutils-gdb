@@ -239,7 +239,7 @@ mt_info_to_howto_rela
   if (r_type >= (unsigned int) R_MT_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid MT reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid MT reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & mt_elf_howto_table [r_type];
@@ -520,7 +520,7 @@ mt_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   old_flags = elf_elfheader (obfd)->e_flags;
 
 #ifdef DEBUG
-  _bfd_error_handler ("%B: old_flags = 0x%.8x, new_flags = 0x%.8x, init = %s",
+  _bfd_error_handler ("%pB: old_flags = 0x%.8x, new_flags = 0x%.8x, init = %s",
 		      ibfd, old_flags, new_flags, elf_flags_init (obfd) ? "yes" : "no");
 #endif
 

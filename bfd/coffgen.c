@@ -175,7 +175,7 @@ make_a_section_from_file (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext: c-format */
-		(_("%B: unable to initialize compress status for section %s"),
+		(_("%pB: unable to initialize compress status for section %s"),
 		 abfd, name);
 	      return FALSE;
 	    }
@@ -199,7 +199,7 @@ make_a_section_from_file (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext: c-format */
-		(_("%B: unable to initialize decompress status for section %s"),
+		(_("%pB: unable to initialize decompress status for section %s"),
 		 abfd, name);
 	      return FALSE;
 	    }
@@ -1647,7 +1647,7 @@ _bfd_coff_get_external_symbols (bfd *abfd)
 	  && size > bfd_get_file_size (abfd)))
 
     {
-      _bfd_error_handler (_("%B: corrupt symbol count: %#Lx"),
+      _bfd_error_handler (_("%pB: corrupt symbol count: %#Lx"),
 			  abfd, obj_raw_syment_count (abfd));
       return FALSE;
     }
@@ -1656,7 +1656,7 @@ _bfd_coff_get_external_symbols (bfd *abfd)
   if (syms == NULL)
     {
       /* PR 21013: Provide an error message when the alloc fails.  */
-      _bfd_error_handler (_("%B: not enough memory to allocate space for %#Lx symbols of size %#Lx"),
+      _bfd_error_handler (_("%pB: not enough memory to allocate space for %#Lx symbols of size %#Lx"),
 			  abfd, obj_raw_syment_count (abfd), symesz);
       return FALSE;
     }
@@ -1723,7 +1723,7 @@ _bfd_coff_read_string_table (bfd *abfd)
     {
       _bfd_error_handler
 	/* xgettext: c-format */
-	(_("%B: bad string table size %Lu"), abfd, strsize);
+	(_("%pB: bad string table size %Lu"), abfd, strsize);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
@@ -3022,7 +3022,7 @@ coff_gc_sweep (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 
 	  if (info->print_gc_sections && o->size != 0)
 	    /* xgettext: c-format */
-	    _bfd_error_handler (_("Removing unused section '%A' in file '%B'"),
+	    _bfd_error_handler (_("Removing unused section '%pA' in file '%pB'"),
 				o, sub);
 
 #if 0

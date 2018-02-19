@@ -156,7 +156,7 @@ gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *entry)
 
   if (entry->flags.just_syms
       && (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) != 0)
-    einfo (_("%P%F: --just-symbols may not be used on DSO: %B\n"),
+    einfo (_("%P%F: --just-symbols may not be used on DSO: %pB\n"),
 	   entry->the_bfd);
 
   if (link_class == 0
@@ -279,7 +279,7 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
 
   if (bfd_stat (s->the_bfd, &st) != 0)
     {
-      einfo (_("%P:%B: bfd_stat failed: %E\n"), s->the_bfd);
+      einfo (_("%P:%pB: bfd_stat failed: %E\n"), s->the_bfd);
       return;
     }
 
@@ -319,7 +319,7 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
     soname = lbasename (s->filename);
 
   if (filename_ncmp (soname, global_needed->name, suffix - global_needed->name) == 0)
-    einfo (_("%P: warning: %s, needed by %B, may conflict with %s\n"),
+    einfo (_("%P: warning: %s, needed by %pB, may conflict with %s\n"),
 	   global_needed->name, global_needed->by, soname);
 }
 
@@ -381,7 +381,7 @@ gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
       struct bfd_link_needed_list *needs;
 
       if (! bfd_elf_get_bfd_needed_list (abfd, &needs))
-	einfo (_("%F%P:%B: bfd_elf_get_bfd_needed_list failed: %E\n"), abfd);
+	einfo (_("%F%P:%pB: bfd_elf_get_bfd_needed_list failed: %E\n"), abfd);
 
       if (needs != NULL)
 	{
@@ -438,7 +438,7 @@ fragment <<EOF
      can only check that using stat.  */
 
   if (bfd_stat (abfd, &global_stat) != 0)
-    einfo (_("%F%P:%B: bfd_stat failed: %E\n"), abfd);
+    einfo (_("%F%P:%pB: bfd_stat failed: %E\n"), abfd);
 
   /* First strip off everything before the last '/'.  */
   soname = lbasename (abfd->filename);
@@ -474,7 +474,7 @@ fragment <<EOF
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
-    einfo (_("%F%B: error adding symbols: %E\n"), abfd);
+    einfo (_("%F%pB: error adding symbols: %E\n"), abfd);
 
   return TRUE;
 }
@@ -1318,7 +1318,7 @@ gld${EMULATION_NAME}_after_open (void)
 	      else if (seen_type != type)
 		{
 		  einfo (_("%P%F: compact frame descriptions incompatible with"
-			   " DWARF2 .eh_frame from %B\n"),
+			   " DWARF2 .eh_frame from %pB\n"),
 			 type == DWARF2_EH_HDR ? abfd : elfbfd);
 		  break;
 		}
@@ -1407,7 +1407,7 @@ gld${EMULATION_NAME}_after_open (void)
       n.name = l->name;
       nn.by = l->by;
       if (verbose)
-	info_msg (_("%s needed by %B\n"), l->name, l->by);
+	info_msg (_("%s needed by %pB\n"), l->name, l->by);
 
       /* As-needed libs specified on the command line (or linker script)
 	 take priority over libs found in search dirs.  */
@@ -1541,7 +1541,7 @@ fragment <<EOF
       if (force < 2)
 	continue;
 
-      einfo (_("%P: warning: %s, needed by %B, not found "
+      einfo (_("%P: warning: %s, needed by %pB, not found "
 	       "(try using -rpath or -rpath-link)\n"),
 	     l->name, l->by);
     }
@@ -1820,7 +1820,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	msg = (char *) xmalloc ((size_t) (sz + 1));
 	if (! bfd_get_section_contents (is->the_bfd, s,	msg,
 					(file_ptr) 0, sz))
-	  einfo (_("%F%B: Can't read contents of section .gnu.warning: %E\n"),
+	  einfo (_("%F%pB: Can't read contents of section .gnu.warning: %E\n"),
 		 is->the_bfd);
 	msg[sz] = '\0';
 	(*link_info.callbacks->warning) (&link_info, msg,

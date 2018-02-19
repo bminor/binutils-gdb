@@ -1186,7 +1186,7 @@ pep_find_data_imports (void)
 
 	      if (!bfd_generic_link_read_symbols (b))
 		{
-		  einfo (_("%B%F: could not read symbols: %E\n"), b);
+		  einfo (_("%pB%F: could not read symbols: %E\n"), b);
 		  return;
 		}
 
@@ -1452,7 +1452,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
   if (coff_data (link_info.output_bfd) == NULL
       || coff_data (link_info.output_bfd)->pe == 0)
-    einfo (_("%F%P: cannot perform PE operations on non PE output file '%B'.\n"),
+    einfo (_("%F%P: cannot perform PE operations on non PE output file '%pB'.\n"),
 	   link_info.output_bfd);
 
   pe_data (link_info.output_bfd)->pe_opthdr = pep;
@@ -1562,7 +1562,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
 		    if (!bfd_generic_link_read_symbols (is->the_bfd))
 		      {
-			einfo (_("%B%F: could not read symbols: %E\n"),
+			einfo (_("%pB%F: could not read symbols: %E\n"),
 			       is->the_bfd);
 			return;
 		      }

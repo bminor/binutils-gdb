@@ -426,7 +426,7 @@ gld${EMULATION_NAME}_finish (void)
 
 	  s = spu_elf_check_vma (&link_info);
 	  if (s != NULL && !params.auto_overlay)
-	    einfo (_("%X%P: %A exceeds local store range\n"), s);
+	    einfo (_("%X%P: %pA exceeds local store range\n"), s);
 	}
       else if (params.auto_overlay)
 	einfo (_("%P: --auto-overlay ignored with zero local store range\n"));

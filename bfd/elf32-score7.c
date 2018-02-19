@@ -2627,7 +2627,7 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: Malformed reloc detected for section %A"), abfd, sec);
+	    (_("%pB: Malformed reloc detected for section %pA"), abfd, sec);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -2681,7 +2681,7 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: CALL15 reloc at %#Lx not against global symbol"),
+		(_("%pB: CALL15 reloc at %#Lx not against global symbol"),
 		 abfd, rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -3850,7 +3850,7 @@ s7_elf32_score_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   if (((in_flags & EF_SCORE_PIC) != 0) != ((out_flags & EF_SCORE_PIC) != 0))
     {
-      _bfd_error_handler (_("%B: warning: linking PIC files with non-PIC files"), ibfd);
+      _bfd_error_handler (_("%pB: warning: linking PIC files with non-PIC files"), ibfd);
     }
 
   /* Maybe dependency fix compatibility should be checked here.  */

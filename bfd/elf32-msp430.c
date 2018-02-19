@@ -645,7 +645,7 @@ msp430_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
       if (r_type >= (unsigned int) R_MSP430x_max)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: invalid MSP430X reloc number: %d"), abfd, r_type);
+	  _bfd_error_handler (_("%pB: invalid MSP430X reloc number: %d"), abfd, r_type);
 	  r_type = 0;
 	}
       cache_ptr->howto = elf_msp430x_howto_table + r_type;
@@ -655,7 +655,7 @@ msp430_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_MSP430_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid MSP430 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid MSP430 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &elf_msp430_howto_table[r_type];
@@ -2349,7 +2349,7 @@ elf32_msp430_obj_attrs_handle_unknown (bfd *abfd, int tag)
 {
   _bfd_error_handler
     /* xgettext:c-format */
-    (_("Warning: %B: Unknown MSPABI object attribute %d"),
+    (_("Warning: %pB: Unknown MSPABI object attribute %d"),
      abfd, tag);
   return TRUE;
 }
@@ -2442,7 +2442,7 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B uses %s instructions but %B uses %s"),
+	(_("error: %pB uses %s instructions but %pB uses %s"),
 	 ibfd, isa_type (in_attr[OFBA_MSPABI_Tag_ISA].i),
 	 first_input_bfd, isa_type (out_attr[OFBA_MSPABI_Tag_ISA].i));
       result = FALSE;
@@ -2454,7 +2454,7 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B uses the %s code model whereas %B uses the %s code model"),
+	(_("error: %pB uses the %s code model whereas %pB uses the %s code model"),
 	 ibfd, code_model (in_attr[OFBA_MSPABI_Tag_Code_Model].i),
 	 first_input_bfd, code_model (out_attr[OFBA_MSPABI_Tag_Code_Model].i));
       result = FALSE;
@@ -2466,7 +2466,7 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B uses the large code model but %B uses MSP430 instructions"),
+	(_("error: %pB uses the large code model but %pB uses MSP430 instructions"),
 	 ibfd, first_input_bfd);
       result = FALSE;
     }
@@ -2477,7 +2477,7 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B uses the %s data model whereas %B uses the %s data model"),
+	(_("error: %pB uses the %s data model whereas %pB uses the %s data model"),
 	 ibfd, data_model (in_attr[OFBA_MSPABI_Tag_Data_Model].i),
 	 first_input_bfd, data_model (out_attr[OFBA_MSPABI_Tag_Data_Model].i));
       result = FALSE;
@@ -2489,7 +2489,7 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B uses the small code model but %B uses the %s data model"),
+	(_("error: %pB uses the small code model but %pB uses the %s data model"),
 	 ibfd, first_input_bfd,
 	 data_model (out_attr[OFBA_MSPABI_Tag_Data_Model].i));
       result = FALSE;
@@ -2501,7 +2501,7 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %B uses the %s data model but %B only uses MSP430 instructions"),
+	(_("error: %pB uses the %s data model but %pB only uses MSP430 instructions"),
 	 ibfd, data_model (in_attr[OFBA_MSPABI_Tag_Data_Model].i),
 	 first_input_bfd);
       result = FALSE;

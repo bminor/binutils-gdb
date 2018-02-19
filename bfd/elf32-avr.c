@@ -956,7 +956,7 @@ avr_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_AVR_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: invalid AVR reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: invalid AVR reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &elf_avr_howto_table[r_type];

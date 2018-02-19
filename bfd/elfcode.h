@@ -757,7 +757,7 @@ elf_object_p (bfd *abfd)
 	     so that at least some processing can be done.  */
 	  i_ehdrp->e_shstrndx = SHN_UNDEF;
 	  _bfd_error_handler
-	    (_("warning: %B has a corrupt string table index - ignoring"),
+	    (_("warning: %pB has a corrupt string table index - ignoring"),
 	     abfd);
 	}
     }
@@ -1196,7 +1196,7 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: version count (%Ld) does not match symbol count (%ld)"),
+	    (_("%pB: version count (%Ld) does not match symbol count (%ld)"),
 	     abfd,
 	     verhdr->sh_size / sizeof (Elf_External_Versym),
 	     symcount);
@@ -1453,7 +1453,7 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A): relocation %d has invalid symbol index %ld"),
+	    (_("%pB(%pA): relocation %d has invalid symbol index %ld"),
 	     abfd, asect, i, (long) ELF_R_SYM (rela.r_info));
 	  relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	}

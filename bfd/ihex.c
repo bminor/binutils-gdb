@@ -227,7 +227,7 @@ ihex_bad_byte (bfd *abfd, unsigned int lineno, int c, bfd_boolean error)
 	}
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B:%d: unexpected character `%s' in Intel Hex file"),
+	(_("%pB:%d: unexpected character `%s' in Intel Hex file"),
 	 abfd, lineno, buf);
       bfd_set_error (bfd_error_bad_value);
     }
@@ -335,7 +335,7 @@ ihex_scan (bfd *abfd)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B:%u: bad checksum in Intel Hex file (expected %u, found %u)"),
+		(_("%pB:%u: bad checksum in Intel Hex file (expected %u, found %u)"),
 		 abfd, lineno,
 		 (- chksum) & 0xff, (unsigned int) HEX2 (buf + 2 * i));
 	      bfd_set_error (bfd_error_bad_value);
@@ -391,7 +391,7 @@ ihex_scan (bfd *abfd)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B:%u: bad extended address record length in Intel Hex file"),
+		    (_("%pB:%u: bad extended address record length in Intel Hex file"),
 		     abfd, lineno);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
@@ -409,7 +409,7 @@ ihex_scan (bfd *abfd)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B:%u: bad extended start address length in Intel Hex file"),
+		    (_("%pB:%u: bad extended start address length in Intel Hex file"),
 		     abfd, lineno);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
@@ -427,7 +427,7 @@ ihex_scan (bfd *abfd)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B:%u: bad extended linear address record length in Intel Hex file"),
+		    (_("%pB:%u: bad extended linear address record length in Intel Hex file"),
 		     abfd, lineno);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
@@ -445,7 +445,7 @@ ihex_scan (bfd *abfd)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B:%u: bad extended linear start address length in Intel Hex file"),
+		    (_("%pB:%u: bad extended linear start address length in Intel Hex file"),
 		     abfd, lineno);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
@@ -463,7 +463,7 @@ ihex_scan (bfd *abfd)
 	    default:
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B:%u: unrecognized ihex type %u in Intel Hex file"),
+		(_("%pB:%u: unrecognized ihex type %u in Intel Hex file"),
 		 abfd, lineno, type);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
@@ -582,7 +582,7 @@ ihex_read_section (bfd *abfd, asection *section, bfd_byte *contents)
       if (type != 0)
 	{
 	  _bfd_error_handler
-	    (_("%B: internal error in ihex_read_section"), abfd);
+	    (_("%pB: internal error in ihex_read_section"), abfd);
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
 	}
@@ -616,7 +616,7 @@ ihex_read_section (bfd *abfd, asection *section, bfd_byte *contents)
   if ((bfd_size_type) (p - contents) < section->size)
     {
       _bfd_error_handler
-	(_("%B: bad section length in ihex_read_section"), abfd);
+	(_("%pB: bad section length in ihex_read_section"), abfd);
       bfd_set_error (bfd_error_bad_value);
       goto error_return;
     }
@@ -827,7 +827,7 @@ ihex_write_object_contents (bfd *abfd)
 		    {
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%B: address %#Lx out of range for Intel Hex file"),
+			(_("%pB: address %#Lx out of range for Intel Hex file"),
 			 abfd, where);
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;

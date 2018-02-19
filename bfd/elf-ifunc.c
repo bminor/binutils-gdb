@@ -140,7 +140,7 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
       info->callbacks->einfo
 	/* xgettext:c-format */
 	(_("%F%P: dynamic STT_GNU_IFUNC symbol `%s' with pointer "
-	   "equality in `%B' can not be used when making an "
+	   "equality in `%pB' can not be used when making an "
 	   "executable; recompile with -fPIE and relink with -pie\n"),
 	 h->root.root.string,
 	 h->root.u.def.section->owner);

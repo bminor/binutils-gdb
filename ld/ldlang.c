@@ -2016,7 +2016,7 @@ lang_print_asneeded (void)
 	}
 
       if (m->ref != NULL)
-	minfo ("%B ", m->ref);
+	minfo ("%pB ", m->ref);
       minfo ("(%T)\n", m->name);
     }
 }
@@ -2770,15 +2770,15 @@ load_symbols (lang_input_statement_type *entry,
 	{
 	  char **p;
 
-	  einfo (_("%B: file not recognized: %E\n"), entry->the_bfd);
-	  einfo (_("%B: matching formats:"), entry->the_bfd);
+	  einfo (_("%pB: file not recognized: %E\n"), entry->the_bfd);
+	  einfo (_("%pB: matching formats:"), entry->the_bfd);
 	  for (p = matching; *p != NULL; p++)
 	    einfo (" %s", *p);
 	  einfo ("%F\n");
 	}
       else if (err != bfd_error_file_not_recognized
 	       || place == NULL)
-	einfo (_("%F%B: file not recognized: %E\n"), entry->the_bfd);
+	einfo (_("%F%pB: file not recognized: %E\n"), entry->the_bfd);
 
       bfd_close (entry->the_bfd);
       entry->the_bfd = NULL;
@@ -2851,7 +2851,7 @@ load_symbols (lang_input_statement_type *entry,
 
 	      if (!bfd_check_format (member, bfd_object))
 		{
-		  einfo (_("%F%B: member %B in archive is not an object\n"),
+		  einfo (_("%F%pB: member %pB in archive is not an object\n"),
 			 entry->the_bfd, member);
 		  loaded = FALSE;
 		}
@@ -2866,7 +2866,7 @@ load_symbols (lang_input_statement_type *entry,
 		 substitute BFD for us.  */
 	      if (!bfd_link_add_symbols (subsbfd, &link_info))
 		{
-		  einfo (_("%F%B: error adding symbols: %E\n"), member);
+		  einfo (_("%F%pB: error adding symbols: %E\n"), member);
 		  loaded = FALSE;
 		}
 	    }
@@ -2880,7 +2880,7 @@ load_symbols (lang_input_statement_type *entry,
   if (bfd_link_add_symbols (entry->the_bfd, &link_info))
     entry->flags.loaded = TRUE;
   else
-    einfo (_("%F%B: error adding symbols: %E\n"), entry->the_bfd);
+    einfo (_("%F%pB: error adding symbols: %E\n"), entry->the_bfd);
 
   return entry->flags.loaded;
 }
@@ -4230,7 +4230,7 @@ print_input_section (asection *i, bfd_boolean is_discarded)
 	size = 0;
     }
 
-  minfo ("0x%V %W %B\n", addr, size, i->owner);
+  minfo ("0x%V %W %pB\n", addr, size, i->owner);
 
   if (size != i->rawsize && i->rawsize != 0)
     {
@@ -4955,7 +4955,7 @@ os_region_check (lang_output_section_statement_type *os,
     {
       if (tree != NULL)
 	{
-	  einfo (_("%X%P: address 0x%v of %B section `%s'"
+	  einfo (_("%X%P: address 0x%v of %pB section `%s'"
 		   " is not within region `%s'\n"),
 		 region->current,
 		 os->bfd_section->owner,
@@ -4966,7 +4966,7 @@ os_region_check (lang_output_section_statement_type *os,
 	{
 	  region->had_full_message = TRUE;
 
-	  einfo (_("%X%P: %B section `%s' will not fit in region `%s'\n"),
+	  einfo (_("%X%P: %pB section `%s' will not fit in region `%s'\n"),
 		 os->bfd_section->owner,
 		 os->bfd_section->name,
 		 region->name_list.name);
@@ -6291,7 +6291,7 @@ lang_check (void)
 	  && (bfd_get_file_flags (input_bfd) & HAS_RELOC) != 0)
 	{
 	  einfo (_("%P%F: Relocatable linking with relocations from"
-		   " format %s (%B) to format %s (%B) is not supported\n"),
+		   " format %s (%pB) to format %s (%pB) is not supported\n"),
 		 bfd_get_target (input_bfd), input_bfd,
 		 bfd_get_target (link_info.output_bfd), link_info.output_bfd);
 	  /* einfo with %F exits.  */
@@ -6300,7 +6300,7 @@ lang_check (void)
       if (compatible == NULL)
 	{
 	  if (command_line.warn_mismatch)
-	    einfo (_("%P%X: %s architecture of input file `%B'"
+	    einfo (_("%P%X: %s architecture of input file `%pB'"
 		     " is incompatible with %s output\n"),
 		   bfd_printable_name (input_bfd), input_bfd,
 		   bfd_printable_name (link_info.output_bfd));
@@ -6323,7 +6323,7 @@ lang_check (void)
 	    {
 	      if (command_line.warn_mismatch)
 		einfo (_("%P%X: failed to merge target specific data"
-			 " of file %B\n"), input_bfd);
+			 " of file %pB\n"), input_bfd);
 	    }
 	  if (!command_line.warn_mismatch)
 	    bfd_set_error_handler (pfn);
@@ -6449,7 +6449,7 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
 	  ++len;
 	}
 
-      minfo ("%B\n", section->owner);
+      minfo ("%pB\n", section->owner);
     }
 
   return TRUE;
@@ -6480,7 +6480,7 @@ ldlang_place_orphan (asection *s)
       int constraint = 0;
 
       if (config.orphan_handling == orphan_handling_error)
-	einfo (_("%X%P: error: unplaced orphan section `%A' from `%B'.\n"),
+	einfo (_("%X%P: error: unplaced orphan section `%pA' from `%pB'.\n"),
 	       s, s->owner);
 
       if (config.unique_orphan_sections || unique_section_p (s, NULL))
@@ -6498,7 +6498,7 @@ ldlang_place_orphan (asection *s)
 	}
 
       if (config.orphan_handling == orphan_handling_warn)
-	einfo (_("%P: warning: orphan section `%A' from `%B' being "
+	einfo (_("%P: warning: orphan section `%pA' from `%pB' being "
 		 "placed in section `%s'.\n"),
 	       s, s->owner, os->name);
     }

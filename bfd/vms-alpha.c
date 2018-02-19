@@ -3827,7 +3827,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 
 	  if (section->reloc_count == 0)
 	    _bfd_error_handler
-	      (_("SEC_RELOC with no relocs in section %A"), section);
+	      (_("SEC_RELOC with no relocs in section %pA"), section);
 
 #if VMS_DEBUG
 	  else
@@ -3879,7 +3879,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 
 		  /* Regular relocs are intertwined with binary data.  */
 		  if (curr_addr > addr)
-		    _bfd_error_handler (_("Size error in section %A"),
+		    _bfd_error_handler (_("Size error in section %pA"),
 					section);
 		  size = addr - curr_addr;
 		  sto_imm (abfd, section, size, curr_data, curr_addr);
@@ -4092,7 +4092,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 	    {
 	      /* Output rest of section.  */
 	      if (curr_addr > section->size)
-		_bfd_error_handler (_("Size error in section %A"), section);
+		_bfd_error_handler (_("Size error in section %pA"), section);
 	      size = section->size - curr_addr;
 	      sto_imm (abfd, section, size, curr_data, curr_addr);
 	      curr_data += size;
@@ -8969,7 +8969,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      (*info->callbacks->einfo)
 		/* xgettext:c-format */
-		(_("%P: multiple entry points: in modules %B and %B\n"),
+		(_("%P: multiple entry points: in modules %pB and %pB\n"),
 		 startbfd, sub);
 	      continue;
 	    }

@@ -617,7 +617,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      /* It's sometimes ok to mix different configs, so this is only
 		 a warning.  */
 	      _bfd_error_handler
-		(_("Warning: %B: Conflicting platform configuration "
+		(_("Warning: %pB: Conflicting platform configuration "
 		   "%s with %s.\n"), ibfd,
 		 tagval[in_attr[i].i],
 		 tagval[out_attr[i].i]);
@@ -636,7 +636,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      BFD_ASSERT (out_attr[i].i < 5);
 	      /* We cannot mix code for different CPUs.  */
 	      _bfd_error_handler
-		(_("error: %B: unable to merge CPU base attributes "
+		(_("error: %pB: unable to merge CPU base attributes "
 		   "%s with %s.\n"),
 		 obfd,
 		 tagval[in_attr[i].i],
@@ -673,7 +673,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		    && (!(cpu_out & bfd_feature_list[j].cpus)))
 		  {
 		    _bfd_error_handler
-		      (_("error: %B: unable to merge ISA extension attributes "
+		      (_("error: %pB: unable to merge ISA extension attributes "
 			 "%s.\n"),
 		       obfd, bfd_feature_list[j].name);
 		    result = FALSE;
@@ -697,7 +697,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 			  p2 = (char *) bfd_feature_list[k].name;
 		      }
 		    _bfd_error_handler
-		      (_("error: %B: conflicting ISA extension attributes "
+		      (_("error: %pB: conflicting ISA extension attributes "
 			 "%s with %s.\n"),
 		       obfd, p1, p2);
 		    result = FALSE;
@@ -732,7 +732,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    {
 	      /* We cannot mix code with rf16 and without.  */
 	      _bfd_error_handler
-		(_("error: %B: cannot mix rf16 with full register set %B.\n"),
+		(_("error: %pB: cannot mix rf16 with full register set %pB.\n"),
 		 obfd, ibfd);
 	      result = FALSE;
 	    }
@@ -758,7 +758,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		&& out_attr[i].i != in_attr[i].i)
 	      {
 		_bfd_error_handler
-		  (_("error: %B: conflicting attributes %s: %s with %s.\n"),
+		  (_("error: %pB: conflicting attributes %s: %s with %s.\n"),
 		   obfd, tagname,
 		   tagval[in_attr[i].i],
 		   tagval[out_attr[i].i]);
@@ -783,7 +783,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      && out_attr[i].i != in_attr[i].i)
 	    {
 	      _bfd_error_handler
-		(_("error: %B: conflicting attributes %s.\n"),
+		(_("error: %pB: conflicting attributes %s.\n"),
 		 obfd, tagname);
 	      result = FALSE;
 	    }
@@ -883,8 +883,8 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       if (mach_ibfd != mach_obfd)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("ERROR: Attempting to link %B "
-				"with a binary %B of different architecture"),
+	  _bfd_error_handler (_("ERROR: Attempting to link %pB "
+				"with a binary %pB of different architecture"),
 			      ibfd, obfd);
 	  return FALSE;
 	}
@@ -897,7 +897,7 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  /* Warn if different flags.  */
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: uses different e_flags (%#x) fields than "
+	    (_("%pB: uses different e_flags (%#x) fields than "
 	       "previous modules (%#x)"),
 	     ibfd, in_flags, out_flags);
 	  if (in_flags && out_flags)
@@ -1125,7 +1125,7 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	  if (reloc_data.reloc_addend == 0)
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+%#Lx): CMEM relocation to `%s' is invalid, "
+	      (_("%pB(%pA+%#Lx): CMEM relocation to `%s' is invalid, "
 		 "16 MSB should be %#x (value is %#Lx)"),
 	       reloc_data.input_section->owner,
 	       reloc_data.input_section,
@@ -1136,7 +1136,7 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	  else
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+%#Lx): CMEM relocation to `%s+%#Lx' is invalid, "
+	      (_("%pB(%pA+%#Lx): CMEM relocation to `%s+%#Lx' is invalid, "
 		 "16 MSB should be %#x (value is %#Lx)"),
 	       reloc_data.input_section->owner,
 	       reloc_data.input_section,
@@ -1865,27 +1865,27 @@ elf_arc_relocate_section (bfd *			  output_bfd,
 
 	case bfd_reloc_other:
 	  /* xgettext:c-format */
-	  msg = _("%B(%A): warning: unaligned access to symbol '%s' in the small data area");
+	  msg = _("%pB(%pA): warning: unaligned access to symbol '%s' in the small data area");
 	  break;
 
 	case bfd_reloc_outofrange:
 	  /* xgettext:c-format */
-	  msg = _("%B(%A): internal error: out of range error");
+	  msg = _("%pB(%pA): internal error: out of range error");
 	  break;
 
 	case bfd_reloc_notsupported:
 	  /* xgettext:c-format */
-	  msg = _("%B(%A): internal error: unsupported relocation error");
+	  msg = _("%pB(%pA): internal error: unsupported relocation error");
 	  break;
 
 	case bfd_reloc_dangerous:
 	  /* xgettext:c-format */
-	  msg = _("%B(%A): internal error: dangerous relocation");
+	  msg = _("%pB(%pA): internal error: dangerous relocation");
 	  break;
 
 	default:
 	  /* xgettext:c-format */
-	  msg = _("%B(%A): internal error: unknown error");
+	  msg = _("%pB(%pA): internal error: unknown error");
 	  break;
 	}
 
@@ -1974,7 +1974,7 @@ elf_arc_check_relocs (bfd *			 abfd,
 		_bfd_error_handler
 		  /* xgettext:c-format */
 		  (_("\
-%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
+%pB: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
 		    abfd,
 		    arc_elf_howto (r_type)->name,
 		    name);
@@ -2865,7 +2865,7 @@ elf32_arc_obj_attrs_handle_unknown (bfd *abfd, int tag)
   if ((tag & 127) < (Tag_ARC_ISA_mpy_option + 1))
     {
       _bfd_error_handler
-	(_("%B: Unknown mandatory ARC object attribute %d."),
+	(_("%pB: Unknown mandatory ARC object attribute %d."),
 	 abfd, tag);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -2873,7 +2873,7 @@ elf32_arc_obj_attrs_handle_unknown (bfd *abfd, int tag)
   else
     {
       _bfd_error_handler
-	(_("Warning: %B: Unknown ARC object attribute %d."),
+	(_("Warning: %pB: Unknown ARC object attribute %d."),
 	 abfd, tag);
       return TRUE;
     }

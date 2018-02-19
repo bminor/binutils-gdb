@@ -427,11 +427,11 @@ gld${EMULATION_NAME}_after_open (void)
 	    {
 	      /* We've found the needed dynamic object.  */
 	      if (! bfd_link_add_symbols (abfd, &link_info))
-		einfo (_("%F%B: error adding symbols: %E\n"), abfd);
+		einfo (_("%F%pB: error adding symbols: %E\n"), abfd);
 	    }
 	  else
 	    {
-	      einfo (_("%P: warning: %s, needed by %B, not found\n"),
+	      einfo (_("%P: warning: %s, needed by %pB, not found\n"),
 		     lname, l->by);
 	    }
 
@@ -491,7 +491,7 @@ fragment <<EOF
 	    continue;
 	}
 
-      einfo (_("%P: warning: %s, needed by %B, not found\n"),
+      einfo (_("%P: warning: %s, needed by %pB, not found\n"),
 	     l->name, l->by);
     }
 }
@@ -574,7 +574,7 @@ gld${EMULATION_NAME}_try_needed (const char *dir, const char *name)
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
-    einfo (_("%F%B: error adding symbols: %E\n"), abfd);
+    einfo (_("%F%pB: error adding symbols: %E\n"), abfd);
 
   return TRUE;
 }

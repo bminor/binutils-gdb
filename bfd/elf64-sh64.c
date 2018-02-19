@@ -1536,7 +1536,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B(%A+%#Lx): %s relocation against SEC_MERGE section"),
+		    (_("%pB(%pA+%#Lx): %s relocation against SEC_MERGE section"),
 		     input_bfd, input_section,
 		     rel->r_offset, howto->name);
 		  return FALSE;
@@ -1633,7 +1633,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+		    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
 		     input_bfd,
 		     input_section,
 		     rel->r_offset,
@@ -1677,7 +1677,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: error: unaligned relocation type %d at %08Lx reloc %08Lx"),
+	    (_("%pB: error: unaligned relocation type %d at %08Lx reloc %08Lx"),
 	     input_bfd, (int) r_type, rel->r_offset,
 	     relocation);
 	  bfd_set_error (bfd_error_bad_value);
@@ -2274,14 +2274,14 @@ sh_elf64_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
       if (bfd_get_arch_size (ibfd) == 32
 	  && bfd_get_arch_size (obfd) == 64)
 	/* xgettext:c-format */
-	msg = _("%B: compiled as 32-bit object and %B is 64-bit");
+	msg = _("%pB: compiled as 32-bit object and %pB is 64-bit");
       else if (bfd_get_arch_size (ibfd) == 64
 	       && bfd_get_arch_size (obfd) == 32)
 	/* xgettext:c-format */
-	msg = _("%B: compiled as 64-bit object and %B is 32-bit");
+	msg = _("%pB: compiled as 64-bit object and %pB is 32-bit");
       else
 	/* xgettext:c-format */
-	msg = _("%B: object size does not match that of target %B");
+	msg = _("%pB: object size does not match that of target %pB");
 
       _bfd_error_handler (msg, ibfd, obfd);
       bfd_set_error (bfd_error_wrong_format);
@@ -2302,7 +2302,7 @@ sh_elf64_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
   else if ((new_flags & EF_SH_MACH_MASK) != EF_SH5)
     {
       _bfd_error_handler
-	("%B: does not use the SH64 64-bit ABI as previous modules do", ibfd);
+	("%pB: does not use the SH64 64-bit ABI as previous modules do", ibfd);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -2769,7 +2769,7 @@ sh64_elf64_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	{
 	  /* Make sure we don't get confused on invalid input.  */
 	  _bfd_error_handler
-	    (_("%B: encountered datalabel symbol in input"), abfd);
+	    (_("%pB: encountered datalabel symbol in input"), abfd);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

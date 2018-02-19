@@ -8241,7 +8241,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	    {
 	      link_info->callbacks->einfo
 		/* xgettext:c-format */
-		(_("%X%P: %B(%A): error: relocation for offset %V has no value\n"),
+		(_("%X%P: %pB(%pA): error: relocation for offset %V has no value\n"),
 		 abfd, input_section, (* parent)->address);
 	      goto error_return;
 	    }
@@ -8307,7 +8307,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		     message instead.  */
 		  link_info->callbacks->einfo
 		    /* xgettext:c-format */
-		    (_("%X%P: %B(%A): relocation \"%R\" goes out of range\n"),
+		    (_("%X%P: %pB(%pA): relocation \"%R\" goes out of range\n"),
 		     abfd, input_section, * parent);
 		  goto error_return;
 
@@ -8317,7 +8317,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		     Do not abort.  Issue an error message instead.  */
 		  link_info->callbacks->einfo
 		    /* xgettext:c-format */
-		    (_("%X%P: %B(%A): relocation \"%R\" is not supported\n"),
+		    (_("%X%P: %pB(%pA): relocation \"%R\" is not supported\n"),
 		     abfd, input_section, * parent);
 		  goto error_return;
 
@@ -8326,7 +8326,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		     Report unexpected results, without aborting.  */
 		  link_info->callbacks->einfo
 		    /* xgettext:c-format */
-		    (_("%X%P: %B(%A): relocation \"%R\" returns an unrecognized value %x\n"),
+		    (_("%X%P: %pB(%pA): relocation \"%R\" returns an unrecognized value %x\n"),
 		     abfd, input_section, * parent, r);
 		  break;
 		}
@@ -8388,7 +8388,7 @@ bfd_boolean
 _bfd_unrecognized_reloc (bfd * abfd, sec_ptr section, unsigned int r_type)
 {
    /* xgettext:c-format */
-  _bfd_error_handler (_("%B: unrecognized relocation (%#x) in section `%A'"),
+  _bfd_error_handler (_("%pB: unrecognized relocation (%#x) in section `%pA'"),
 		      abfd, r_type, section);
 
   /* PR 21803: Suggest the most likely cause of this error.  */
