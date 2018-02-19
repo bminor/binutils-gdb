@@ -57,7 +57,7 @@ fi
 GDB_AC_LIBMCHECK(${libmcheck_default})
 
 if $development; then
-  srv_selftest_objs="selftest.o"
+  srv_selftest_objs="common/selftest.o"
   AC_DEFINE(GDB_SELF_TEST, 1,
             [Define if self-testing features should be enabled])
 fi
@@ -69,7 +69,7 @@ ACX_NONCANONICAL_HOST
 ZW_CREATE_DEPDIR
 
 # Create sub-directories for objects and dependencies.
-CONFIG_SRC_SUBDIR="arch"
+CONFIG_SRC_SUBDIR="arch common"
 AC_SUBST(CONFIG_SRC_SUBDIR)
 
 AC_CONFIG_COMMANDS([gdbdepdir],[

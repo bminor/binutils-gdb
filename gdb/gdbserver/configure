@@ -5815,7 +5815,7 @@ fi
 
 
 if $development; then
-  srv_selftest_objs="selftest.o"
+  srv_selftest_objs="common/selftest.o"
 
 $as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
 
@@ -5858,7 +5858,7 @@ ac_config_commands="$ac_config_commands depdir"
 
 
 # Create sub-directories for objects and dependencies.
-CONFIG_SRC_SUBDIR="arch"
+CONFIG_SRC_SUBDIR="arch common"
 
 
 ac_config_commands="$ac_config_commands gdbdepdir"

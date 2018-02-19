@@ -1,3 +1,12 @@
+2018-02-19  Alan Hayward  <alan.hayward@arm.com>
+
+	* Makefile.in: (COMMON_SFILES): Add common/*.c files.
+	(SFILES): Remove common/*.c files.
+	(COMMON_OBS): Remove some *.o files built from common/*.c files.
+	* common/common.host: Add common reference.
+	* configure.ac: Likewise.
+	* configure: Regenerate.
+
 2018-02-16  Yao Qi  <yao.qi@linaro.org>
 
 	* block.c (block_namespace_info): Inherit allocate_on_obstack.

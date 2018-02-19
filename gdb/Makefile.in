@@ -524,7 +524,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch cli mi compile tui unittests guile python target
+CONFIG_SRC_SUBDIR = arch cli mi common compile tui unittests guile python target
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
 # -I. for config files.
@@ -937,6 +937,31 @@ COMMON_SFILES = \
 	cli-out.c \
 	coff-pe-read.c \
 	coffread.c \
+	common/agent.c \
+	common/btrace-common.c \
+	common/buffer.c \
+	common/cleanups.c \
+	common/common-debug.c \
+	common/common-exceptions.c \
+	common/common-regcache.c \
+	common/common-utils.c \
+	common/errors.c \
+	common/environ.c \
+	common/fileio.c \
+	common/filestuff.c \
+	common/format.c \
+	common/job-control.c \
+	common/gdb_tilde_expand.c \
+	common/gdb_vecs.c \
+	common/new-op.c \
+	common/print-utils.c \
+	common/ptid.c \
+	common/rsp-low.c \
+	common/run-time-clock.c \
+	common/signals.c \
+	common/signals-state-save-restore.c \
+	common/vec.c \
+	common/xml-utils.c \
 	complaints.c \
 	completer.c \
 	continuations.c \
@@ -1119,31 +1144,6 @@ SFILES = \
 	stub-termcap.c \
 	symfile-mem.c \
 	ui-file.h \
-	common/agent.c \
-	common/btrace-common.c \
-	common/buffer.c \
-	common/cleanups.c \
-	common/common-debug.c \
-	common/common-exceptions.c \
-	common/common-regcache.c \
-	common/common-utils.c \
-	common/errors.c \
-	common/environ.c \
-	common/fileio.c \
-	common/filestuff.c \
-	common/format.c \
-	common/job-control.c \
-	common/gdb_tilde_expand.c \
-	common/gdb_vecs.c \
-	common/new-op.c \
-	common/print-utils.c \
-	common/ptid.c \
-	common/rsp-low.c \
-	common/run-time-clock.c \
-	common/signals.c \
-	common/signals-state-save-restore.c \
-	common/vec.c \
-	common/xml-utils.c \
 	mi/mi-common.c \
 	$(SUBDIR_TARGET_SRCS) \
 	$(COMMON_SFILES) \
@@ -1533,35 +1533,10 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
-	btrace-common.o \
-	buffer.o \
-	cleanups.o \
-	common-agent.o \
-	common-debug.o \
-	common-exceptions.o \
-	job-control.o \
-	common-regcache.o \
-	common-utils.o \
-	environ.o \
-	errors.o \
 	exec.o \
-	fileio.o \
-	filestuff.o \
-	format.o \
-	gdb_tilde_expand.o \
-	gdb_vecs.o \
 	mi/mi-common.o \
-	new-op.o \
-	print-utils.o \
-	ptid.o \
-	rsp-low.o \
-	run-time-clock.o \
-	signals.o \
-	signals-state-save-restore.o \
-	vec.o \
 	version.o \
 	xml-builtin.o \
-	xml-utils.o \
 	$(patsubst %.c,%.o,$(COMMON_SFILES)) \
 	$(SUBDIR_TARGET_OBS) \
 	$(SUBDIR_GCC_COMPILE_OBS)
@@ -1629,22 +1604,12 @@ $(CONFIG_DEP_SUBDIR):
 python/%.o: INTERNAL_CFLAGS += $(PYTHON_CFLAGS)
 
 # Rules for compiling .c files in the various source subdirectories.
-%.o: ${srcdir}/common/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 %.o: $(srcdir)/gdbtk/generic/%.c
 	$(COMPILE) $(all_gdbtk_cflags) $<
 	$(POSTCOMPILE)
 
 %.o: ${srcdir}/nat/%.c
 	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-# Specify an explicit rule for gdb/common/agent.c, to avoid a clash with the
-# object file generate by gdb/agent.c.
-common-agent.o: $(srcdir)/common/agent.c
-	$(COMPILE) $(srcdir)/common/agent.c
 	$(POSTCOMPILE)
 
 installcheck:
