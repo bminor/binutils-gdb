@@ -1305,21 +1305,21 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		if (h == NULL)
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB, section %pA: relocation %s with non-zero addend %Ld"
-		       " against local symbol"),
+		    (_("%pB, section %pA: relocation %s with non-zero addend"
+		       " %" PRId64 " against local symbol"),
 		     input_bfd,
 		     input_section,
 		     cris_elf_howto_table[r_type].name,
-		     rel->r_addend);
+		     (int64_t) rel->r_addend);
 		else
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB, section %pA: relocation %s with non-zero addend %Ld"
-		       " against symbol `%s'"),
+		    (_("%pB, section %pA: relocation %s with non-zero addend"
+		       " %" PRId64 " against symbol `%s'"),
 		     input_bfd,
 		     input_section,
 		     cris_elf_howto_table[r_type].name,
-		     rel->r_addend,
+		     (int64_t) rel->r_addend,
 		     symname[0] != '\0' ? symname : _("[whose name is lost]"));
 
 		bfd_set_error (bfd_error_bad_value);
@@ -1662,12 +1662,12 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 to pass us these kinds of things.  */
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB, section %pA: relocation %s with non-zero addend %Ld"
-		   " against symbol `%s'"),
+		(_("%pB, section %pA: relocation %s with non-zero addend"
+		   " %" PRId64 " against symbol `%s'"),
 		 input_bfd,
 		 input_section,
 		 cris_elf_howto_table[r_type].name,
-		 rel->r_addend,
+		 (int64_t) rel->r_addend,
 		 symname[0] != '\0' ? symname : _("[whose name is lost]"));
 
 	      bfd_set_error (bfd_error_bad_value);
@@ -1815,12 +1815,12 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 things.  */
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB, section %pA: relocation %s with non-zero addend %Ld"
-		   " against symbol `%s'"),
+		(_("%pB, section %pA: relocation %s with non-zero addend"
+		   " %" PRId64 " against symbol `%s'"),
 		 input_bfd,
 		 input_section,
 		 cris_elf_howto_table[r_type].name,
-		 rel->r_addend,
+		 (int64_t) rel->r_addend,
 		 symname[0] != '\0' ? symname : _("[whose name is lost]"));
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;

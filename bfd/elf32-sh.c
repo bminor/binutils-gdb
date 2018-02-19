@@ -577,8 +577,9 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       if (laddr >= sec->size)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: %#Lx: warning: bad R_SH_USES offset"),
-			      abfd, irel->r_offset);
+	  _bfd_error_handler
+	    (_("%pB: %#" PRIx64 ": warning: bad R_SH_USES offset"),
+	     abfd, (uint64_t) irel->r_offset);
 	  continue;
 	}
       insn = bfd_get_16 (abfd, contents + laddr);
@@ -589,8 +590,9 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: %#Lx: warning: R_SH_USES points to unrecognized insn 0x%x"),
-	     abfd, irel->r_offset, insn);
+	    (_("%pB: %#" PRIx64 ": warning: "
+	       "R_SH_USES points to unrecognized insn 0x%x"),
+	     abfd, (uint64_t) irel->r_offset, insn);
 	  continue;
 	}
 
@@ -607,8 +609,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: %#Lx: warning: bad R_SH_USES load offset"),
-	     abfd, irel->r_offset);
+	    (_("%pB: %#" PRIx64 ": warning: bad R_SH_USES load offset"),
+	     abfd, (uint64_t) irel->r_offset);
 	  continue;
 	}
 
@@ -623,8 +625,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: %#Lx: warning: could not find expected reloc"),
-	     abfd, paddr);
+	    (_("%pB: %#" PRIx64 ": warning: could not find expected reloc"),
+	     abfd, (uint64_t) paddr);
 	  continue;
 	}
 
@@ -652,8 +654,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: %#Lx: warning: symbol in unexpected section"),
-		 abfd, paddr);
+		(_("%pB: %#" PRIx64 ": warning: symbol in unexpected section"),
+		 abfd, (uint64_t) paddr);
 	      continue;
 	    }
 
@@ -782,8 +784,9 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: %#Lx: warning: could not find expected COUNT reloc"),
-	     abfd, paddr);
+	    (_("%pB: %#" PRIx64 ": warning: "
+	       "could not find expected COUNT reloc"),
+	     abfd, (uint64_t) paddr);
 	  continue;
 	}
 
@@ -792,8 +795,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       if (irelcount->r_addend == 0)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: %#Lx: warning: bad count"),
-			      abfd, paddr);
+	  _bfd_error_handler (_("%pB: %#" PRIx64 ": warning: bad count"),
+			      abfd, (uint64_t) paddr);
 	  continue;
 	}
 
@@ -1196,8 +1199,8 @@ sh_elf_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: %#Lx: fatal: reloc overflow while relaxing"),
-		 abfd, irel->r_offset);
+		(_("%pB: %#" PRIx64 ": fatal: reloc overflow while relaxing"),
+		 abfd, (uint64_t) irel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -1567,8 +1570,8 @@ sh_elf_swap_insns (bfd *abfd, asection *sec, void *relocs,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: %#Lx: fatal: reloc overflow while relaxing"),
-		 abfd, irel->r_offset);
+		(_("%pB: %#" PRIx64 ": fatal: reloc overflow while relaxing"),
+		 abfd, (uint64_t) irel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4000,9 +4003,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB(%pA+%#Lx): %s relocation against SEC_MERGE section"),
+		    (_("%pB(%pA+%#" PRIx64 "): "
+		       "%s relocation against SEC_MERGE section"),
 		     input_bfd, input_section,
-		     rel->r_offset, howto->name);
+		     (uint64_t) rel->r_offset, howto->name);
 		  return FALSE;
 		}
 
@@ -4118,10 +4122,11 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
+		    (_("%pB(%pA+%#" PRIx64 "): "
+		       "unresolvable %s relocation against symbol `%s'"),
 		     input_bfd,
 		     input_section,
-		     rel->r_offset,
+		     (uint64_t) rel->r_offset,
 		     howto->name,
 		     h->root.root.string);
 		  return FALSE;
@@ -4197,9 +4202,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#Lx: fatal: unaligned branch target for relax-support relocation"),
+		    (_("%pB: %#" PRIx64 ": fatal: "
+		       "unaligned branch target for relax-support relocation"),
 		     input_section->owner,
-		     rel->r_offset);
+		     (uint64_t) rel->r_offset);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -4231,10 +4237,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: %#Lx: fatal: unaligned %s relocation %#Lx"),
-		 input_section->owner,
-		 rel->r_offset, howto->name,
-		 relocation);
+		(_("%pB: %#" PRIx64 ": fatal: "
+		   "unaligned %s relocation %#" PRIx64),
+		 input_section->owner, (uint64_t) rel->r_offset,
+		 howto->name, (uint64_t) relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4247,10 +4253,11 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: %#Lx: fatal: unaligned %s relocation %#Lx"),
+		(_("%pB: %#" PRIx64 ": fatal: "
+		   "unaligned %s relocation %#" PRIx64 ""),
 		 input_section->owner,
-		 rel->r_offset, howto->name,
-		 relocation);
+		 (uint64_t) rel->r_offset, howto->name,
+		 (uint64_t) relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4262,10 +4269,11 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: %#Lx: fatal: R_SH_PSHA relocation %Ld not in range -32..32"),
+		(_("%pB: %#" PRIx64 ": fatal: R_SH_PSHA relocation %" PRId64
+		   " not in range -32..32"),
 		 input_section->owner,
-		 rel->r_offset,
-		 relocation);
+		 (uint64_t) rel->r_offset,
+		 (int64_t) relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4277,10 +4285,11 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: %#Lx: fatal: R_SH_PSHL relocation %Ld not in range -32..32"),
+		(_("%pB: %#" PRIx64 ": fatal: R_SH_PSHL relocation %" PRId64
+		   " not in range -32..32"),
 		 input_section->owner,
-		 rel->r_offset,
-		 relocation);
+		 (uint64_t) rel->r_offset,
+		 (int64_t) relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4423,10 +4432,11 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%pB(%pA+%#Lx): cannot emit fixup to `%s' in read-only section"),
+		      (_("%pB(%pA+%#" PRIx64 "): "
+			 "cannot emit fixup to `%s' in read-only section"),
 		       input_bfd,
 		       input_section,
-		       rel->r_offset,
+		       (uint64_t) rel->r_offset,
 		       symname);
 		    return FALSE;
 		  }
@@ -4896,10 +4906,11 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%pB(%pA+%#Lx): cannot emit fixup to `%s' in read-only section"),
+		      (_("%pB(%pA+%#" PRIx64 "): "
+			 "cannot emit fixup to `%s' in read-only section"),
 		       input_bfd,
 		       input_section,
-		       rel->r_offset,
+		       (uint64_t) rel->r_offset,
 		       symname);
 		    return FALSE;
 		  }
@@ -4998,9 +5009,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB(%pA+%#Lx): %s relocation against external symbol \"%s\""),
-		 input_bfd, input_section, rel->r_offset, howto->name,
-		 h->root.root.string);
+		(_("%pB(%pA+%#" PRIx64 "): "
+		   "%s relocation against external symbol \"%s\""),
+		 input_bfd, input_section, (uint64_t) rel->r_offset,
+		 howto->name, h->root.root.string);
 	      return FALSE;
 	    }
 	  else

@@ -3398,10 +3398,11 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 				      rel->r_offset) != (bfd_vma) -1)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	  (_("%pB(%pA+%#" PRIx64 "): "
+	     "unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
-	   rel->r_offset,
+	   (uint64_t) rel->r_offset,
 	   howto->name,
 	   h->root.root.string);
 

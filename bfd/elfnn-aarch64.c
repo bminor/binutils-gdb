@@ -5106,8 +5106,10 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, NULL);
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
-	     input_bfd, input_section, rel->r_offset, howto->name, name);
+	    (_("%pB(%pA+%#" PRIx64 "): "
+	       "unresolvable %s relocation against symbol `%s'"),
+	     input_bfd, input_section, (uint64_t) rel->r_offset,
+	     howto->name, name);
 	  bfd_set_error (bfd_error_bad_value);
 	  return bfd_reloc_notsupported;
 	}
@@ -5146,8 +5148,8 @@ bad_ifunc_reloc:
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("%pB: relocation %s against STT_GNU_IFUNC "
-		   "symbol `%s' has non-zero addend: %Ld"),
-		 input_bfd, howto->name, name, rel->r_addend);
+		   "symbol `%s' has non-zero addend: %" PRId64),
+		 input_bfd, howto->name, name, (int64_t) rel->r_addend);
 	      bfd_set_error (bfd_error_bad_value);
 	      return bfd_reloc_notsupported;
 	    }
@@ -6297,11 +6299,11 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  _bfd_error_handler
 	    ((sym_type == STT_TLS
 	      /* xgettext:c-format */
-	      ? _("%pB(%pA+%#Lx): %s used with TLS symbol %s")
+	      ? _("%pB(%pA+%#" PRIx64 "): %s used with TLS symbol %s")
 	      /* xgettext:c-format */
-	      : _("%pB(%pA+%#Lx): %s used with non-TLS symbol %s")),
+	      : _("%pB(%pA+%#" PRIx64 "): %s used with non-TLS symbol %s")),
 	     input_bfd,
-	     input_section, rel->r_offset, howto->name, name);
+	     input_section, (uint64_t) rel->r_offset, howto->name, name);
 	}
 
       /* We relax only if we can see that there can be a valid transition
@@ -6569,8 +6571,9 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
-	     input_bfd, input_section, rel->r_offset, howto->name,
+	    (_("%pB(%pA+%#" PRIx64 "): "
+	       "unresolvable %s relocation against symbol `%s'"),
+	     input_bfd, input_section, (uint64_t) rel->r_offset, howto->name,
 	     h->root.root.string);
 	  return FALSE;
 	}

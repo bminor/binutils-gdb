@@ -9720,8 +9720,9 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
 	      | bfd_get_16 (input_bfd, contents + rel->r_offset + 2);
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB(%pA+%#Lx): unexpected Thumb instruction '%#lx' in TLS trampoline"),
-	     input_bfd, input_sec, rel->r_offset, insn);
+	    (_("%pB(%pA+%#" PRIx64 "): "
+	       "unexpected Thumb instruction '%#lx' in TLS trampoline"),
+	     input_bfd, input_sec, (uint64_t) rel->r_offset, insn);
 	  return bfd_reloc_notsupported;
 	}
       break;
@@ -9760,8 +9761,9 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB(%pA+%#Lx): unexpected ARM instruction '%#lx' in TLS trampoline"),
-	     input_bfd, input_sec, rel->r_offset, insn);
+	    (_("%pB(%pA+%#" PRIx64 "): "
+	       "unexpected ARM instruction '%#lx' in TLS trampoline"),
+	     input_bfd, input_sec, (uint64_t) rel->r_offset, insn);
 	  return bfd_reloc_notsupported;
 	}
       break;
@@ -11531,8 +11533,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%pB(%pA+%#Lx): unexpected Thumb instruction '%#lx' referenced by TLS_GOTDESC"),
-		       input_bfd, input_section, rel->r_offset, insn);
+		      (_("%pB(%pA+%#" PRIx64 "): "
+			 "unexpected Thumb instruction '%#lx' "
+			 "referenced by TLS_GOTDESC"),
+		       input_bfd, input_section, (uint64_t) rel->r_offset,
+		       insn);
 		    return bfd_reloc_notsupported;
 		  }
 	      }
@@ -11554,8 +11559,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 		  default:
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%pB(%pA+%#Lx): unexpected ARM instruction '%#lx' referenced by TLS_GOTDESC"),
-		       input_bfd, input_section, rel->r_offset, insn);
+		      (_("%pB(%pA+%#" PRIx64 "): "
+			 "unexpected ARM instruction '%#lx' "
+			 "referenced by TLS_GOTDESC"),
+		       input_bfd, input_section, (uint64_t) rel->r_offset,
+		       insn);
 		    return bfd_reloc_notsupported;
 		  }
 	      }
@@ -11583,8 +11591,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB(%pA+%#Lx): %s relocation not permitted in shared object"),
-	     input_bfd, input_section, rel->r_offset, howto->name);
+	    (_("%pB(%pA+%#" PRIx64 "): %s relocation not permitted "
+	       "in shared object"),
+	     input_bfd, input_section, (uint64_t) rel->r_offset, howto->name);
 	  return bfd_reloc_notsupported;
 	}
       else
@@ -11796,8 +11805,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	      {
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%pB(%pA+%#Lx): Only ADD or SUB instructions are allowed for ALU group relocations"),
-		  input_bfd, input_section, rel->r_offset);
+		  (_("%pB(%pA+%#" PRIx64 "): Only ADD or SUB instructions "
+		     "are allowed for ALU group relocations"),
+		  input_bfd, input_section, (uint64_t) rel->r_offset);
 		return bfd_reloc_overflow;
 	      }
 
@@ -11836,9 +11846,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#Lx): Overflow whilst splitting %#Lx for group relocation %s"),
-	       input_bfd, input_section, rel->r_offset,
-	       signed_value < 0 ? -signed_value : signed_value, howto->name);
+	      (_("%pB(%pA+%#" PRIx64 "): Overflow whilst "
+		 "splitting %#" PRIx64 " for group relocation %s"),
+	       input_bfd, input_section, (uint64_t) rel->r_offset,
+	       (uint64_t) (signed_value < 0 ? -signed_value : signed_value),
+	       howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -11926,9 +11938,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#Lx): Overflow whilst splitting %#Lx for group relocation %s"),
-	       input_bfd, input_section, rel->r_offset,
-	       signed_value < 0 ? -signed_value : signed_value, howto->name);
+	      (_("%pB(%pA+%#" PRIx64 "): Overflow whilst "
+		 "splitting %#" PRIx64 " for group relocation %s"),
+	       input_bfd, input_section, (uint64_t) rel->r_offset,
+	       (uint64_t) (signed_value < 0 ? -signed_value : signed_value),
+	       howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -12012,9 +12026,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#Lx): Overflow whilst splitting %#Lx for group relocation %s"),
-	       input_bfd, input_section, rel->r_offset,
-	       signed_value < 0 ? -signed_value : signed_value, howto->name);
+	      (_("%pB(%pA+%#" PRIx64 "): Overflow whilst "
+		 "splitting %#" PRIx64 " for group relocation %s"),
+	       input_bfd, input_section, (uint64_t) rel->r_offset,
+	       (uint64_t) (signed_value < 0 ? -signed_value : signed_value),
+	       howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -12100,9 +12116,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#Lx): Overflow whilst splitting %#Lx for group relocation %s"),
-	       input_bfd, input_section, rel->r_offset,
-	       signed_value < 0 ? -signed_value : signed_value, howto->name);
+	      (_("%pB(%pA+%#" PRIx64 "): Overflow whilst "
+		 "splitting %#" PRIx64 " for group relocation %s"),
+	       input_bfd, input_section, (uint64_t) rel->r_offset,
+	       (uint64_t) (signed_value < 0 ? -signed_value : signed_value),
+	       howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -12366,9 +12384,10 @@ elf32_arm_relocate_section (bfd *		   output_bfd,
 			{
 			  _bfd_error_handler
 			    /* xgettext:c-format */
-			    (_("%pB(%pA+%#Lx): %s relocation against SEC_MERGE section"),
+			    (_("%pB(%pA+%#" PRIx64 "): "
+			       "%s relocation against SEC_MERGE section"),
 			     input_bfd, input_section,
-			     rel->r_offset, howto->name);
+			     (uint64_t) rel->r_offset, howto->name);
 			  return FALSE;
 			}
 
@@ -12478,12 +12497,12 @@ elf32_arm_relocate_section (bfd *		   output_bfd,
 	  _bfd_error_handler
 	    ((sym_type == STT_TLS
 	      /* xgettext:c-format */
-	      ? _("%pB(%pA+%#Lx): %s used with TLS symbol %s")
+	      ? _("%pB(%pA+%#" PRIx64 "): %s used with TLS symbol %s")
 	      /* xgettext:c-format */
-	      : _("%pB(%pA+%#Lx): %s used with non-TLS symbol %s")),
+	      : _("%pB(%pA+%#" PRIx64 "): %s used with non-TLS symbol %s")),
 	     input_bfd,
 	     input_section,
-	     rel->r_offset,
+	     (uint64_t) rel->r_offset,
 	     howto->name,
 	     name);
 	}
@@ -12533,10 +12552,11 @@ elf32_arm_relocate_section (bfd *		   output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%pB(%pA+%#" PRIx64 "): "
+	       "unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
-	     rel->r_offset,
+	     (uint64_t) rel->r_offset,
 	     howto->name,
 	     h->root.root.string);
 	  return FALSE;
@@ -18418,12 +18438,13 @@ elf32_arm_write_section (bfd *output_bfd,
 		      branch_to_veneer - (1 << 24) : 0;
 
 		    _bfd_error_handler
-		      (_("%pB(%#Lx): error: Cannot create STM32L4XX veneer. "
-			 "Jump out of range by %Ld bytes. "
+		      (_("%pB(%#" PRIx64 "): error: "
+			 "Cannot create STM32L4XX veneer. "
+			 "Jump out of range by %" PRId64 " bytes. "
 			 "Cannot encode branch instruction. "),
 		       output_bfd,
-		       stm32l4xx_errnode->vma - 4,
-		       out_of_range);
+		       (uint64_t) (stm32l4xx_errnode->vma - 4),
+		       (int64_t) out_of_range);
 		    continue;
 		  }
 

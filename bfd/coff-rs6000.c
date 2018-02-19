@@ -2856,8 +2856,8 @@ xcoff_reloc_type_toc (bfd *input_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext: c-format */
-	    (_("%pB: TOC reloc at %#Lx to symbol `%s' with no TOC entry"),
-	     input_bfd, rel->r_vaddr, h->root.root.string);
+	    (_("%pB: TOC reloc at %#" PRIx64 " to symbol `%s' with no TOC entry"),
+	     input_bfd, (uint64_t) rel->r_vaddr, h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

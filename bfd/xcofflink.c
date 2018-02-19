@@ -1499,9 +1499,10 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: bad XTY_ER symbol `%s': class %d scnum %d scnlen %Ld"),
+		(_("%pB: bad XTY_ER symbol `%s': class %d scnum %d "
+		   "scnlen %" PRId64),
 		 abfd, name, sym.n_sclass, sym.n_scnum,
-		 aux.x_csect.x_scnlen.l);
+		 (int64_t) aux.x_csect.x_scnlen.l);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
 	    }
@@ -1529,8 +1530,8 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: XMC_TC0 symbol `%s' is class %d scnlen %Ld"),
-		     abfd, name, sym.n_sclass, aux.x_csect.x_scnlen.l);
+		    (_("%pB: XMC_TC0 symbol `%s' is class %d scnlen %" PRId64),
+		     abfd, name, sym.n_sclass, (int64_t) aux.x_csect.x_scnlen.l);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -2105,8 +2106,8 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: reloc %s:%Ld not in csect"),
-		     abfd, o->name, i);
+		    (_("%pB: reloc %s:%" PRId64 " not in csect"),
+		     abfd, o->name, (int64_t) i);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -5112,9 +5113,9 @@ xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *flinfo)
       if (best_address > toc_start + 0x8000)
 	{
 	  _bfd_error_handler
-	    (_("TOC overflow: %#Lx > 0x10000; try -mminimal-toc "
+	    (_("TOC overflow: %#" PRIx64 " > 0x10000; try -mminimal-toc "
 	       "when compiling"),
-	     toc_end - toc_start);
+	     (uint64_t) (toc_end - toc_start));
 	  bfd_set_error (bfd_error_file_too_big);
 	  return FALSE;
 	}

@@ -355,8 +355,8 @@ bfd_elf_string_from_elf_section (bfd *abfd,
       unsigned int shstrndx = elf_elfheader(abfd)->e_shstrndx;
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: invalid string offset %u >= %Lu for section `%s'"),
-	 abfd, strindex, hdr->sh_size,
+	(_("%pB: invalid string offset %u >= %" PRIu64 " for section `%s'"),
+	 abfd, strindex, (uint64_t) hdr->sh_size,
 	 (shindex == shstrndx && strindex == hdr->sh_name
 	  ? ".shstrtab"
 	  : bfd_elf_string_from_elf_section (abfd, shstrndx, hdr->sh_name)));
@@ -659,7 +659,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		      _bfd_error_handler
 			/* xgettext:c-format */
 			(_("%pB: corrupt size field in group section"
-			   " header: %#Lx"), abfd, shdr->sh_size);
+			   " header: %#" PRIx64),
+			 abfd, (uint64_t) shdr->sh_size);
 		      bfd_set_error (bfd_error_bad_value);
 		      -- num_group;
 		      continue;
@@ -674,7 +675,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		      _bfd_error_handler
 			/* xgettext:c-format */
 			(_("%pB: invalid size field in group section"
-			   " header: %#Lx"), abfd, shdr->sh_size);
+			   " header: %#" PRIx64 ""),
+			 abfd, (uint64_t) shdr->sh_size);
 		      bfd_set_error (bfd_error_bad_value);
 		      -- num_group;
 		      /* PR 17510: If the group contents are even
@@ -5558,8 +5560,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: section %pA lma %#Lx adjusted to %#Lx"),
-		     abfd, sec, s_start, p_end);
+		    (_("%pB: section %pA lma %#" PRIx64 " adjusted to %#" PRIx64),
+		     abfd, sec, (uint64_t) s_start, (uint64_t) p_end);
 		  adjust = 0;
 		  sec->lma = p_end;
 		}
@@ -6836,8 +6838,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	      && (segment->p_filesz > 0 || segment->p_memsz == 0))
 	    /* xgettext:c-format */
 	    _bfd_error_handler (_("%pB: warning: Empty loadable segment detected"
-				  " at vaddr=%#Lx, is this intentional?"),
-				ibfd, segment->p_vaddr);
+				  " at vaddr=%#" PRIx64 ", is this intentional?"),
+				ibfd, (uint64_t) segment->p_vaddr);
 
 	  map->count = 0;
 	  *pointer_to_map = map;
@@ -7449,9 +7451,9 @@ rewrite:
 	    /* PR 17512: file: f17299af.  */
 	    if (segment->p_align > (bfd_vma) 1 << ((sizeof (bfd_vma) * 8) - 2))
 	      /* xgettext:c-format */
-	      _bfd_error_handler (_("%pB: warning: segment alignment of %#Lx"
-				    " is too large"),
-				  ibfd, segment->p_align);
+	      _bfd_error_handler (_("%pB: warning: segment alignment of %#"
+				    PRIx64 " is too large"),
+				  ibfd, (uint64_t) segment->p_align);
 	    else
 	      maxpagesize = segment->p_align;
 	  }

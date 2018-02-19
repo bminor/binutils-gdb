@@ -1647,8 +1647,8 @@ _bfd_coff_get_external_symbols (bfd *abfd)
 	  && size > bfd_get_file_size (abfd)))
 
     {
-      _bfd_error_handler (_("%pB: corrupt symbol count: %#Lx"),
-			  abfd, obj_raw_syment_count (abfd));
+      _bfd_error_handler (_("%pB: corrupt symbol count: %#" PRIx64 ""),
+			  abfd, (uint64_t) obj_raw_syment_count (abfd));
       return FALSE;
     }
 
@@ -1656,8 +1656,10 @@ _bfd_coff_get_external_symbols (bfd *abfd)
   if (syms == NULL)
     {
       /* PR 21013: Provide an error message when the alloc fails.  */
-      _bfd_error_handler (_("%pB: not enough memory to allocate space for %#Lx symbols of size %#Lx"),
-			  abfd, obj_raw_syment_count (abfd), symesz);
+      _bfd_error_handler (_("%pB: not enough memory to allocate space "
+			    "for %#" PRIx64 " symbols of size %#" PRIx64),
+			  abfd, (uint64_t) obj_raw_syment_count (abfd),
+			  (uint64_t) symesz);
       return FALSE;
     }
 
@@ -1723,7 +1725,7 @@ _bfd_coff_read_string_table (bfd *abfd)
     {
       _bfd_error_handler
 	/* xgettext: c-format */
-	(_("%pB: bad string table size %Lu"), abfd, strsize);
+	(_("%pB: bad string table size %" PRIu64), abfd, (uint64_t) strsize);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }

@@ -4355,10 +4355,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB(%pA+%#Lx): %s relocation not "
+		    (_("%pB(%pA+%#" PRIx64 "): %s relocation not "
 		       "permitted in shared object"),
 		     input_bfd, input_section,
-		     rel->r_offset, howto->name);
+		     (uint64_t) rel->r_offset, howto->name);
 		  return FALSE;
 		}
 	      else

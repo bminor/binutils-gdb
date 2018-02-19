@@ -8161,8 +8161,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      else
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%pB(%pA+%#Lx): error: %s with unexpected instruction %#x"),
-		   input_bfd, input_section, rel->r_offset,
+		  (_("%pB(%pA+%#" PRIx64 "): error: "
+		     "%s with unexpected instruction %#x"),
+		   input_bfd, input_section, (uint64_t) rel->r_offset,
 		   "R_PPC_ADDR16_HA", insn);
 	    }
 	  else if (r_type == R_PPC_ADDR16_LO)
@@ -8196,8 +8197,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      else
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%pB(%pA+%#Lx): error: %s with unexpected instruction %#x"),
-		   input_bfd, input_section, rel->r_offset,
+		  (_("%pB(%pA+%#" PRIx64 "): error: "
+		     "%s with unexpected instruction %#x"),
+		   input_bfd, input_section, (uint64_t) rel->r_offset,
 		   "R_PPC_ADDR16_LO", insn);
 	    }
 	}

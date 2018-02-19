@@ -859,8 +859,8 @@ ieee_slurp_external_symbols (bfd *abfd)
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%pB: unexpected ATN type %Ld in external part"),
-			 abfd, value);
+		      (_("%pB: unexpected ATN type %" PRId64 " in external part"),
+			 abfd, (int64_t) value);
 		    bfd_set_error (bfd_error_bad_value);
 		    return FALSE;
 		  }

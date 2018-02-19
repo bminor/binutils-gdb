@@ -1913,8 +1913,10 @@ elf_metag_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB(%pA+%#Lx): %s relocation not permitted in shared object"),
-		 input_bfd, input_section, rel->r_offset, howto->name);
+		(_("%pB(%pA+%#" PRIx64 "): "
+		   "%s relocation not permitted in shared object"),
+		 input_bfd, input_section, (uint64_t) rel->r_offset,
+		 howto->name);
 	      return FALSE;
 	    }
 	  else

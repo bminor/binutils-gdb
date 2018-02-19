@@ -1125,26 +1125,26 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	  if (reloc_data.reloc_addend == 0)
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#Lx): CMEM relocation to `%s' is invalid, "
-		 "16 MSB should be %#x (value is %#Lx)"),
+	      (_("%pB(%pA+%#" PRIx64 "): CMEM relocation to `%s' is invalid, "
+		 "16 MSB should be %#x (value is %#" PRIx64 ")"),
 	       reloc_data.input_section->owner,
 	       reloc_data.input_section,
-	       reloc_data.reloc_offset,
+	       (uint64_t) reloc_data.reloc_offset,
 	       reloc_data.symbol_name,
 	       NPS_CMEM_HIGH_VALUE,
-	       relocation);
+	       (uint64_t) relocation);
 	  else
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#Lx): CMEM relocation to `%s+%#Lx' is invalid, "
-		 "16 MSB should be %#x (value is %#Lx)"),
+	      (_("%pB(%pA+%#" PRIx64 "): CMEM relocation to `%s+%#" PRIx64
+		 "' is invalid, 16 MSB should be %#x (value is %#" PRIx64 ")"),
 	       reloc_data.input_section->owner,
 	       reloc_data.input_section,
-	       reloc_data.reloc_offset,
+	       (uint64_t) reloc_data.reloc_offset,
 	       reloc_data.symbol_name,
-	       reloc_data.reloc_addend,
+	       (uint64_t) reloc_data.reloc_addend,
 	       NPS_CMEM_HIGH_VALUE,
-	       relocation);
+	       (uint64_t) relocation);
 	  return bfd_reloc_overflow;
 	}
       break;

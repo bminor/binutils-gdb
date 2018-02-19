@@ -1193,10 +1193,10 @@ mmix_elf_perform_relocation (asection *isec, reloc_howto_type *howto,
 	    _bfd_error_handler
 	      /* xgettext:c-format */
 	      (_("%pB: Internal inconsistency error for value for\n\
- linker-allocated global register: linked: %#Lx != relaxed: %#Lx"),
+ linker-allocated global register: linked: %#" PRIx64 " != relaxed: %#" PRIx64 ""),
 	       isec->owner,
-	       value,
-	       gregdata->reloc_request[bpo_index].value);
+	       (uint64_t) value,
+	       (uint64_t) gregdata->reloc_request[bpo_index].value);
 	    bfd_set_error (bfd_error_bad_value);
 	    return bfd_reloc_overflow;
 	  }
@@ -1738,9 +1738,10 @@ mmix_final_link_relocate (reloc_howto_type *howto, asection *input_section,
 	    /* FIXME: Better error message.  */
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB: LOCAL directive: Register $%Ld is not a local register."
-		 "  First global register is $%Ld."),
-	       input_section->owner, srel, first_global);
+	      (_("%pB: LOCAL directive: "
+		 "Register $%" PRId64 " is not a local register."
+		 "  First global register is $%" PRId64 "."),
+	       input_section->owner, (int64_t) srel, (int64_t) first_global);
 
 	    return bfd_reloc_overflow;
 	  }

@@ -649,10 +649,7 @@ union _bfd_doprnt_args
 };
 
 /* This macro and _bfd_doprnt taken from libiberty _doprnt.c, tidied a
-   little and extended to handle '%pA', '%pB' and positional parameters.
-   'L' as a modifer for integer formats is used for bfd_vma and
-   bfd_size_type args, which vary in size depending on BFD
-   configuration.  */
+   little and extended to handle '%pA', '%pB' and positional parameters.  */
 
 #define PRINT_TYPE(TYPE, FIELD) \
   do								\
@@ -800,21 +797,6 @@ _bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
 		  PRINT_TYPE (int, i);
 		else
 		  {
-		    /* L modifier for bfd_vma or bfd_size_type may be
-		       either long long or long.  */
-		    if (ptr[-2] == 'L')
-		      {
-			sptr[-2] = 'l';
-			if (BFD_ARCH_SIZE < 64 || BFD_HOST_64BIT_LONG)
-			  wide_width = 1;
-			else
-			  {
-			    sptr[-1] = 'l';
-			    *sptr++ = ptr[-1];
-			    *sptr = '\0';
-			  }
-		      }
-
 		    switch (wide_width)
 		      {
 		      case 0:
@@ -1051,12 +1033,6 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 		  arg_type = Int;
 		else
 		  {
-		    if (ptr[-2] == 'L')
-		      {
-			if (BFD_ARCH_SIZE < 64 || BFD_HOST_64BIT_LONG)
-			  wide_width = 1;
-		      }
-
 		    switch (wide_width)
 		      {
 		      case 0:

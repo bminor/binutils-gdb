@@ -2567,21 +2567,21 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	      if (h == NULL)
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%pB, section %pA: relocation %s with non-zero addend %Ld"
-		     " against local symbol"),
+		  (_("%pB, section %pA: relocation %s with non-zero addend %"
+		     PRId64 " against local symbol"),
 		   input_bfd,
 		   input_section,
 		   elf32_tic6x_howto_table[r_type].name,
-		   rel->r_addend);
+		   (int64_t) rel->r_addend);
 	      else
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%pB, section %pA: relocation %s with non-zero addend %Ld"
-		     " against symbol `%s'"),
+		  (_("%pB, section %pA: relocation %s with non-zero addend %"
+		     PRId64 " against symbol `%s'"),
 		   input_bfd,
 		   input_section,
 		   elf32_tic6x_howto_table[r_type].name,
-		   rel->r_addend,
+		   (int64_t) rel->r_addend,
 		   h->root.root.string[0] != '\0' ? h->root.root.string
 		   : _("[whose name is lost]"));
 

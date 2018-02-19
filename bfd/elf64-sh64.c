@@ -1536,9 +1536,10 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB(%pA+%#Lx): %s relocation against SEC_MERGE section"),
+		    (_("%pB(%pA+%#" PRIx64 "): "
+		       "%s relocation against SEC_MERGE section"),
 		     input_bfd, input_section,
-		     rel->r_offset, howto->name);
+		     (uint64_t) rel->r_offset, howto->name);
 		  return FALSE;
 		}
 
@@ -1633,10 +1634,11 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
+		    (_("%pB(%pA+%#" PRIx64 "): "
+		       "unresolvable %s relocation against symbol `%s'"),
 		     input_bfd,
 		     input_section,
-		     rel->r_offset,
+		     (uint64_t) rel->r_offset,
 		     howto->name,
 		     h->root.root.string);
 		}
@@ -1677,9 +1679,10 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: error: unaligned relocation type %d at %08Lx reloc %08Lx"),
-	     input_bfd, (int) r_type, rel->r_offset,
-	     relocation);
+	    (_("%pB: error: unaligned relocation type %d at "
+	       "%08" PRIx64 " reloc %08" PRIx64 ""),
+	     input_bfd, (int) r_type,
+	     (uint64_t) rel->r_offset, (uint64_t) relocation);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

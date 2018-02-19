@@ -1,5 +1,29 @@
 2018-02-19  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h: Include inttypes.h or if not available define
+	PRId64, PRIu64 and PRIx64.
+	* bfd.c (_bfd_doprnt, _bfd_doprnt_scan): Remove support for L
+	modifier to print bfd_vma.
+	* coff-arm.c, * coff-mcore.c, * coff-ppc.c, * coff-rs6000.c,
+	* coff-sh.c, * coff-tic80.c, * coffcode.h, * coffgen.c, * cofflink.c,
+	* compress.c, * dwarf2.c, * elf-m10300.c, * elf.c, * elf32-arc.c,
+	* elf32-arm.c, * elf32-bfin.c, * elf32-cris.c, * elf32-hppa.c,
+	* elf32-i386.c, * elf32-ip2k.c, * elf32-lm32.c, * elf32-m32r.c,
+	* elf32-m68k.c, * elf32-metag.c, * elf32-nds32.c, * elf32-nios2.c,
+	* elf32-ppc.c, * elf32-rx.c, * elf32-s390.c, * elf32-score.c,
+	* elf32-score7.c, * elf32-sh.c, * elf32-sh64.c, * elf32-spu.c,
+	* elf32-tic6x.c, * elf32-tilepro.c, * elf32-v850.c, * elf32-vax.c,
+	* elf32-xtensa.c, * elf64-alpha.c, * elf64-hppa.c, * elf64-ia64-vms.c,
+	* elf64-mmix.c, * elf64-s390.c, * elf64-sh64.c, * elf64-x86-64.c,
+	* elfcode.h, * elfcore.h, * elflink.c, * elfnn-aarch64.c,
+	* elfnn-ia64.c, * elfnn-riscv.c, * elfxx-mips.c, * elfxx-sparc.c,
+	* elfxx-tilegx.c, * ieee.c, * ihex.c, * mach-o.c, * merge.c, * mmo.c,
+	* peXXigen.c, * xcofflink.c: Replace use of Lx modifier with PRIx64,
+	and cast input to uint64_t, and similarly for Ld and Lu.
+	* bfd-in2.h: Regenerate.
+
+2018-02-19  Alan Modra  <amodra@gmail.com>
+
 	* elf32-arm.c, * elf32-hppa.c, * elf32-lm32.c, * elf32-m32r.c,
 	* elf32-metag.c, * elf32-nds32.c, * elf32-or1k.c, * elf32-ppc.c,
 	* elf32-s390.c, * elf32-sh.c, * elf32-tic6x.c, * elf32-tilepro.c,

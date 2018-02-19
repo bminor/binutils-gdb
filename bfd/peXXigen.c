@@ -2986,9 +2986,11 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	      > bfd_get_section_size (section))
 	    {
 	      /* xgettext:c-format */
-	      _bfd_error_handler (_("%pB: Data Directory size (%lx) exceeds space left in section (%Lx)"),
-				  obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
-				  bfd_get_section_size (section) - (addr - section->vma));
+	      _bfd_error_handler
+		(_("%pB: Data Directory size (%lx) "
+		   "exceeds space left in section (%" PRIx64 ")"),
+		 obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
+		 (uint64_t) (section->size - (addr - section->vma)));
 	      return FALSE;
 	    }
 

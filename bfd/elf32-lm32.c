@@ -1427,8 +1427,9 @@ lm32_elf_finish_dynamic_sections (bfd *output_bfd,
 	      != (lm32fdpic_fixup32_section (info)->reloc_count * 4))
 	{
 	  _bfd_error_handler
-	    ("LINKER BUG: .rofixup section size mismatch: size/4 %Ld != relocs %d",
-	    lm32fdpic_fixup32_section (info)->size/4,
+	    ("LINKER BUG: .rofixup section size mismatch: size/4 %" PRId64
+	     " != relocs %d",
+	    (int64_t) (lm32fdpic_fixup32_section (info)->size / 4),
 	    lm32fdpic_fixup32_section (info)->reloc_count);
 	  return FALSE;
 	}
@@ -1449,7 +1450,9 @@ lm32_elf_finish_dynamic_sections (bfd *output_bfd,
 	  if (hend->u.def.value != value)
 	    {
 	      _bfd_error_handler
-		("LINKER BUG: .rofixup section hend->u.def.value != value: %Ld != %Ld", hend->u.def.value, value);
+		("LINKER BUG: .rofixup section hend->u.def.value != value: %"
+		 PRId64 " != %" PRId64,
+		 (int64_t) hend->u.def.value, (int64_t) value);
 	      return FALSE;
 	    }
 	}

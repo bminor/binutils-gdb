@@ -570,8 +570,9 @@ read_section (bfd *	      abfd,
     {
       /* xgettext: c-format */
       _bfd_error_handler (_("Dwarf Error: Offset (%llu)"
-			    " greater than or equal to %s size (%Lu)."),
-			  (long long) offset, section_name, *section_size);
+			    " greater than or equal to %s size (%" PRIu64 ")."),
+			  (long long) offset, section_name,
+			  (uint64_t) *section_size);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -1918,8 +1919,9 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
      if we know that we are going to run out of buffer.  */
   if (data_count > (bfd_vma) (buf_end - buf))
     {
-      _bfd_error_handler (_("Dwarf Error: data count (%Lx) larger than buffer size."),
-			  data_count);
+      _bfd_error_handler
+	(_("Dwarf Error: data count (%" PRIx64 ") larger than buffer size."),
+	 (uint64_t) data_count);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -1959,8 +1961,8 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
 	      break;
 	    default:
 	      _bfd_error_handler
-		(_("Dwarf Error: Unknown format content type %Lu."),
-		 content_type);
+		(_("Dwarf Error: Unknown format content type %" PRIu64 "."),
+		 (uint64_t) content_type);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -2039,8 +2041,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
   if (stash->dwarf_line_size < 16)
     {
       _bfd_error_handler
-	(_("Dwarf Error: Line info section is too small (%Ld)"),
-	 stash->dwarf_line_size);
+	(_("Dwarf Error: Line info section is too small (%" PRId64 ")"),
+	 (int64_t) stash->dwarf_line_size);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
@@ -2069,9 +2071,9 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
     {
       _bfd_error_handler
 	/* xgettext: c-format */
-	(_("Dwarf Error: Line info data is bigger (%#Lx)"
+	(_("Dwarf Error: Line info data is bigger (%#" PRIx64 ")"
 	   " than the space remaining in the section (%#lx)"),
-	 lh.total_length, (unsigned long) (line_end - line_ptr));
+	 (uint64_t) lh.total_length, (unsigned long) (line_end - line_ptr));
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }

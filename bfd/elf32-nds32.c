@@ -8791,7 +8791,7 @@ relax_range_measurement (bfd *abfd)
 
 static const char * unrecognized_reloc_msg =
   /* xgettext:c-format */
-  N_("%pB: warning: %s points to unrecognized reloc at %#Lx");
+  N_("%pB: warning: %s points to unrecognized reloc at %#" PRIx64);
 
 /* Relax LONGCALL1 relocation for nds32_elf_relax_section.  */
 
@@ -8844,7 +8844,7 @@ nds32_elf_relax_longcall1 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (hi_irelfn == irelend || lo_irelfn == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGCALL1",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -8925,7 +8925,7 @@ nds32_elf_relax_longcall2 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (i1_irelfn == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGCALL2",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -9031,7 +9031,7 @@ nds32_elf_relax_longcall3 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (hi_irelfn == irelend || lo_irelfn == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGCALL3",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -9165,7 +9165,7 @@ nds32_elf_relax_longjump1 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (hi_irelfn == irelend || lo_irelfn == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGJUMP1",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -9371,7 +9371,7 @@ nds32_elf_relax_longjump2 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (i2_irelfn == irelend || cond_irelfn == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGJUMP2",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -9563,7 +9563,7 @@ nds32_elf_relax_longjump3 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (hi_irelfn == irelend || lo_irelfn == irelend || cond_irelfn == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGJUMP3",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -9742,7 +9742,7 @@ nds32_elf_relax_longcall4 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (hi_irel == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGCALL4",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -9772,7 +9772,7 @@ nds32_elf_relax_longcall4 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (ptr_irel == irelend || em_irel == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGCALL4",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
   /* Check these is enough space to insert jal in R_NDS32_EMPTY.  */
@@ -9843,7 +9843,7 @@ nds32_elf_relax_longcall5 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (cond_irel == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGCALL5",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -9921,7 +9921,7 @@ nds32_elf_relax_longcall6 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (em_irel == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGCALL6",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -9959,7 +9959,7 @@ nds32_elf_relax_longcall6 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
       if (cond_irel == irelend)
 	{
 	  _bfd_error_handler (unrecognized_reloc_msg, abfd,
-			      "R_NDS32_LONGCALL6", irel->r_offset);
+			      "R_NDS32_LONGCALL6", (uint64_t) irel->r_offset);
 	  return FALSE;
 	}
       cond_irel->r_addend = 1;
@@ -10008,7 +10008,7 @@ nds32_elf_relax_longcall6 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
       if (cond_irel == irelend)
 	{
 	  _bfd_error_handler (unrecognized_reloc_msg, abfd,
-			      "R_NDS32_LONGCALL6", irel->r_offset);
+			      "R_NDS32_LONGCALL6", (uint64_t) irel->r_offset);
 	  return FALSE;
 	}
       cond_irel->r_addend = 1;
@@ -10058,7 +10058,7 @@ nds32_elf_relax_longjump4 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (hi_irel == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGJUMP4",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -10080,7 +10080,7 @@ nds32_elf_relax_longjump4 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (ptr_irel == irelend || em_irel == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGJUMP4",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -10154,7 +10154,7 @@ nds32_elf_relax_longjump5 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (cond_irel == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGJUMP5",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -10283,7 +10283,7 @@ nds32_elf_relax_longjump6 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (em_irel == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGJUMP6",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -10453,7 +10453,7 @@ nds32_elf_relax_longjump7 (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (cond_irel == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LONGJUMP7",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -10558,7 +10558,7 @@ nds32_elf_relax_loadstore (struct bfd_link_info *link_info, bfd *abfd,
   if (hi_irelfn == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_LOADSTORE",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
 	return FALSE;
     }
 
@@ -11032,7 +11032,7 @@ nds32_elf_relax_ptr (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
   if (re_irel == irelend)
     {
       _bfd_error_handler (unrecognized_reloc_msg, abfd, "R_NDS32_PTR",
-			  irel->r_offset);
+			  (uint64_t) irel->r_offset);
       return FALSE;
     }
 
@@ -15238,9 +15238,11 @@ nds32_elf_ex9_build_hash_table (bfd *abfd, asection *sec,
 			  _bfd_error_handler
 			    /* xgettext:c-format */
 			    (_("%pB: warning: unaligned small data access "
-			       "for entry: {%Ld, %Ld, %Ld}, addr = %#Lx, align = %#x"),
-			     abfd, irel->r_offset,
-			     irel->r_info, irel->r_addend, relocation, align);
+			       "for entry: {%" PRId64 ", %" PRId64 ", %" PRId64
+			       "}, addr = %#" PRIx64 ", align = %#x"),
+			     abfd, (int64_t) irel->r_offset,
+			     (int64_t) irel->r_info, (int64_t) irel->r_addend,
+			     (uint64_t) relocation, align);
 			  off += 4;
 			  continue;
 			}

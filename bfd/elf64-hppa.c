@@ -2078,8 +2078,8 @@ elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("stub entry for %s cannot load .plt, dp offset = %Ld"),
-	     hh->eh.root.root.string, value);
+	    (_("stub entry for %s cannot load .plt, dp offset = %" PRId64),
+	     hh->eh.root.root.string, (int64_t) value);
 	  return FALSE;
 	}
 
@@ -3283,10 +3283,10 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#Lx): cannot reach %s"),
+	      (_("%pB(%pA+%#" PRIx64 "): cannot reach %s"),
 	      input_bfd,
 	      input_section,
-	      offset,
+	      (uint64_t) offset,
 	      eh ? eh->root.root.string : "unknown");
 	    bfd_set_error (bfd_error_bad_value);
 	    return bfd_reloc_overflow;

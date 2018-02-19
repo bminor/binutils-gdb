@@ -7107,9 +7107,10 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
       if (hdr->sh_size != sizeof (Elf32_External_RegInfo))
 	{
 	  _bfd_error_handler
-	    (_("%pB: Incorrect `.reginfo' section size; expected %Lu, got %Lu"),
-	     abfd, (bfd_size_type) sizeof (Elf32_External_RegInfo),
-	     hdr->sh_size);
+	    (_("%pB: Incorrect `.reginfo' section size; "
+	       "expected %" PRIu64 ", got %" PRIu64),
+	     abfd, (uint64_t) sizeof (Elf32_External_RegInfo),
+	     (uint64_t) hdr->sh_size);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -8471,8 +8472,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: GOT reloc at %#Lx not expected in executables"),
-		 abfd, rel->r_offset);
+		(_("%pB: GOT reloc at %#" PRIx64 " not expected in executables"),
+		 abfd, (uint64_t) rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -8609,8 +8610,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: CALL16 reloc at %#Lx not against global symbol"),
-		 abfd, rel->r_offset);
+		(_("%pB: CALL16 reloc at %#" PRIx64 " not against global symbol"),
+		 abfd, (uint64_t) rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -10153,9 +10154,9 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      _bfd_error_handler
 			/* xgettext:c-format */
 			(_("%pB: Can't find matching LO16 reloc against `%s'"
-			   " for %s at %#Lx in section `%pA'"),
+			   " for %s at %#" PRIx64 " in section `%pA'"),
 			 input_bfd, name,
-			 howto->name, rel->r_offset, input_section);
+			 howto->name, (uint64_t) rel->r_offset, input_section);
 		    }
 		}
 	      else
@@ -10696,11 +10697,11 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: `%pA' offset of %Ld from `%pA' "
+		    (_("%pB: `%pA' offset of %" PRId64 " from `%pA' "
 		       "beyond the range of ADDIUPC"),
 		     output_bfd,
 		     htab->root.sgotplt->output_section,
-		     gotpc_offset,
+		     (int64_t) gotpc_offset,
 		     htab->root.splt->output_section);
 		  bfd_set_error (bfd_error_no_error);
 		  return FALSE;
@@ -11264,10 +11265,11 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: `%pA' offset of %Ld from `%pA' beyond the range of ADDIUPC"),
+	    (_("%pB: `%pA' offset of %" PRId64 " from `%pA' "
+	       "beyond the range of ADDIUPC"),
 	     output_bfd,
 	     htab->root.sgotplt->output_section,
-	     gotpc_offset,
+	     (int64_t) gotpc_offset,
 	     htab->root.splt->output_section);
 	  bfd_set_error (bfd_error_no_error);
 	  return FALSE;

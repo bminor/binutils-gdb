@@ -1332,9 +1332,9 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: TLS transition from %s to %s against `%s' at %#Lx "
-	   "in section `%pA' failed"),
-	 abfd, from->name, to->name, name, rel->r_offset, sec);
+	(_("%pB: TLS transition from %s to %s against `%s' at %#" PRIx64
+	   " in section `%pA' failed"),
+	 abfd, from->name, to->name, name, (uint64_t) rel->r_offset, sec);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -2645,8 +2645,8 @@ do_ifunc_pointer:
 		  _bfd_error_handler
 		    /* xgettext:c-format */
 		    (_("%pB: relocation %s against STT_GNU_IFUNC "
-		       "symbol `%s' has non-zero addend: %Ld"),
-		     input_bfd, howto->name, name, rel->r_addend);
+		       "symbol `%s' has non-zero addend: %" PRId64),
+		     input_bfd, howto->name, name, (int64_t) rel->r_addend);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -3156,10 +3156,11 @@ direct:
 			  _bfd_error_handler
 			    /* xgettext:c-format */
 			    (_("%pB: addend %s%#x in relocation %s against "
-			       "symbol `%s' at %#Lx in section `%pA' is "
-			       "out of range"),
+			       "symbol `%s' at %#" PRIx64
+			       " in section `%pA' is out of range"),
 			     input_bfd, addend < 0 ? "-" : "", addend,
-			     howto->name, name, rel->r_offset, input_section);
+			     howto->name, name, (uint64_t) rel->r_offset,
+			     input_section);
 			  bfd_set_error (bfd_error_bad_value);
 			  return FALSE;
 			}
@@ -3792,10 +3793,11 @@ direct:
 	    default:
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
+		(_("%pB(%pA+%#" PRIx64 "): "
+		   "unresolvable %s relocation against symbol `%s'"),
 		 input_bfd,
 		 input_section,
-		 rel->r_offset,
+		 (uint64_t) rel->r_offset,
 		 howto->name,
 		 h->root.root.string);
 	      return FALSE;
@@ -3841,9 +3843,9 @@ check_relocation_error:
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB(%pA+%#Lx): reloc against `%s': error %d"),
+		(_("%pB(%pA+%#" PRIx64 "): reloc against `%s': error %d"),
 		 input_bfd, input_section,
-		 rel->r_offset, name, (int) r);
+		 (uint64_t) rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }
 	}

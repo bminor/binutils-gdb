@@ -1574,9 +1574,10 @@ bfin_relocate_section (bfd * output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB(%pA+%#Lx): unresolvable relocation against symbol `%s'"),
-	     input_bfd,
-	     input_section, rel->r_offset, h->root.root.string);
+	    (_("%pB(%pA+%#" PRIx64 "): "
+	       "unresolvable relocation against symbol `%s'"),
+	     input_bfd, input_section, (uint64_t) rel->r_offset,
+	     h->root.root.string);
 	  return FALSE;
 	}
 
@@ -1605,8 +1606,9 @@ bfin_relocate_section (bfd * output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB(%pA+%#Lx): reloc against `%s': error %d"),
-		 input_bfd, input_section, rel->r_offset, name, (int) r);
+		(_("%pB(%pA+%#" PRIx64 "): reloc against `%s': error %d"),
+		 input_bfd, input_section, (uint64_t) rel->r_offset,
+		 name, (int) r);
 	      return FALSE;
 	    }
 	}
@@ -2625,8 +2627,9 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: relocation at `%pA+%#Lx' references symbol `%s' with nonzero addend"),
-		 input_bfd, input_section, rel->r_offset, name);
+		(_("%pB: relocation at `%pA+%#" PRIx64 "' "
+		   "references symbol `%s' with nonzero addend"),
+		 input_bfd, input_section, (uint64_t) rel->r_offset, name);
 	      return FALSE;
 
 	    }

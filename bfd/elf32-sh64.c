@@ -597,9 +597,10 @@ shmedia_prepare_reloc (struct bfd_link_info *info, bfd *abfd,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: error: unaligned relocation type %d at %#Lx reloc %#Lx"),
+	(_("%pB: error: unaligned relocation type %d "
+	   "at %#" PRIx64 " reloc %#" PRIx64),
 	 input_section->owner, (int) ELF32_R_TYPE (rel->r_info),
-	 rel->r_offset, *relocation);
+	 (uint64_t) rel->r_offset, (uint64_t) *relocation);
       return FALSE;
     }
 

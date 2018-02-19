@@ -2134,10 +2134,10 @@ invalid_tls_insn (bfd *input_bfd,
   howto = elf_howto_table + ELF32_R_TYPE (rel->r_info);
   _bfd_error_handler
     /* xgettext:c-format */
-    (_("%pB(%pA+%#Lx): invalid instruction for TLS relocation %s"),
+    (_("%pB(%pA+%#" PRIx64 "): invalid instruction for TLS relocation %s"),
      input_bfd,
      input_section,
-     rel->r_offset,
+     (uint64_t) rel->r_offset,
      howto->name);
   bfd_set_error (bfd_error_bad_value);
 }
@@ -3201,10 +3201,11 @@ elf_s390_relocate_section (bfd *output_bfd,
 				      rel->r_offset) != (bfd_vma) -1)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	  (_("%pB(%pA+%#" PRIx64 "): "
+	     "unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
-	   rel->r_offset,
+	   (uint64_t) rel->r_offset,
 	   howto->name,
 	   h->root.root.string);
 
@@ -3258,9 +3259,9 @@ elf_s390_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB(%pA+%#Lx): reloc against `%s': error %d"),
+		(_("%pB(%pA+%#" PRIx64 "): reloc against `%s': error %d"),
 		 input_bfd, input_section,
-		 rel->r_offset, name, (int) r);
+		 (uint64_t) rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }
 	}

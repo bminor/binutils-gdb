@@ -956,8 +956,8 @@ mmo_write_loc_chunk (bfd *abfd, bfd_vma vma, const bfd_byte *loc,
 	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%pB: attempt to emit contents at non-multiple-of-4"
-	       " address %#Lx"),
-	     abfd, vma);
+	       " address %#" PRIx64 ""),
+	     abfd, (uint64_t) vma);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -3239,14 +3239,14 @@ mmo_write_object_contents (bfd *abfd)
 	       global registers.  */
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB: too many initialized registers; section length %Ld"),
-	       abfd, sec->size);
+	      (_("%pB: too many initialized registers; section length %" PRId64),
+	       abfd, (int64_t) sec->size);
 	  else
 	    _bfd_error_handler
 	      /* xgettext:c-format */
 	      (_("%pB: invalid start address for initialized registers of"
-		 " length %Ld: %#Lx"),
-	       abfd, sec->size, sec->vma);
+		 " length %" PRId64 ": %#" PRIx64),
+	       abfd, (int64_t) sec->size, (uint64_t) sec->vma);
 
 	  return FALSE;
 	}

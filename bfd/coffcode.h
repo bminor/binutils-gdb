@@ -5380,8 +5380,8 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: illegal relocation type %d at address %#Lx"),
-	     abfd, dst.r_type, dst.r_vaddr);
+	    (_("%pB: illegal relocation type %d at address %#" PRIx64),
+	     abfd, dst.r_type, (uint64_t) dst.r_vaddr);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

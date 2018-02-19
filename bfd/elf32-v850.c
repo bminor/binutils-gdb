@@ -3598,9 +3598,9 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#Lx: warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGCALL points to "
 		       "unrecognized insns"),
-		     abfd, irel->r_offset);
+		     abfd, (uint64_t) irel->r_offset);
 		  continue;
 		}
 
@@ -3608,10 +3608,10 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#Lx: warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGCALL points to "
 		       "unrecognized insn %#x"),
 		     abfd,
-		     irel->r_offset + no_match,
+		     (uint64_t) (irel->r_offset + no_match),
 		     insn[no_match]);
 		  continue;
 		}
@@ -3653,9 +3653,9 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#Lx: warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGCALL points to "
 		       "unrecognized reloc"),
-		     abfd, irel->r_offset);
+		     abfd, (uint64_t) irel->r_offset);
 
 		  continue;
 		}
@@ -3693,10 +3693,10 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#Lx: warning: R_V850_LONGCALL points to "
-		       "unrecognized reloc %#Lx"),
-		     abfd, irel->r_offset,
-		     irelcall->r_offset);
+		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGCALL points to "
+		       "unrecognized reloc %#" PRIx64),
+		     abfd, (uint64_t) irel->r_offset,
+		     (uint64_t) irelcall->r_offset);
 		  continue;
 		}
 
@@ -3836,9 +3836,9 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#Lx: warning: R_V850_LONGJUMP points to "
+		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGJUMP points to "
 		       "unrecognized insns"),
-		     abfd, irel->r_offset);
+		     abfd, (uint64_t) irel->r_offset);
 		  continue;
 		}
 
@@ -3846,10 +3846,10 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#Lx: warning: R_V850_LONGJUMP points to "
+		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGJUMP points to "
 		       "unrecognized insn %#x"),
 		     abfd,
-		     irel->r_offset + no_match,
+		     (uint64_t) (irel->r_offset + no_match),
 		     insn[no_match]);
 		  continue;
 		}
@@ -3880,9 +3880,9 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#Lx: warning: R_V850_LONGJUMP points to "
+		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGJUMP points to "
 		       "unrecognized reloc"),
-		     abfd, irel->r_offset);
+		     abfd, (uint64_t) irel->r_offset);
 		  continue;
 		}
 

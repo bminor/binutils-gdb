@@ -1131,9 +1131,9 @@ coff_ppc_relocate_section (bfd *output_bfd,
 		      {
 			_bfd_error_handler
 			  /* xgettext: c-format */
-			  (_("%pB: Relocation for %s of %#Lx exceeds "
+			  (_("%pB: Relocation for %s of %#" PRIx64 " exceeds "
 			     "Toc size limit"),
-			   input_bfd, name, our_toc_offset);
+			   input_bfd, name, (uint64_t) our_toc_offset);
 			bfd_set_error (bfd_error_bad_value);
 			return FALSE;
 		      }
@@ -1185,8 +1185,8 @@ coff_ppc_relocate_section (bfd *output_bfd,
 	      {
 		_bfd_error_handler
 		  /* xgettext: c-format */
-		  (_("%pB: Relocation exceeds allocated TOC (%#Lx)"),
-		   input_bfd, toc_section->size);
+		  (_("%pB: Relocation exceeds allocated TOC (%#" PRIx64 ")"),
+		   input_bfd, (uint64_t) toc_section->size);
 		bfd_set_error (bfd_error_bad_value);
 		return FALSE;
 	      }
@@ -1241,9 +1241,10 @@ coff_ppc_relocate_section (bfd *output_bfd,
 	    _bfd_error_handler
 	      /* xgettext: c-format */
 	      (_("Warning: unsupported reloc %s <file %pB, section %pA>\n"
-		 "sym %ld (%s), r_vaddr %Ld (%#Lx)"),
+		 "sym %ld (%s), r_vaddr %" PRId64 " (%#" PRIx64 ")"),
 	       howto->name, input_bfd, input_section,
-	       rel->r_symndx, my_name, rel->r_vaddr, rel->r_vaddr);
+	       rel->r_symndx, my_name,
+	       (int64_t) rel->r_vaddr, (uint64_t) rel->r_vaddr);
 	  }
 	  break;
 	case IMAGE_REL_PPC_IMGLUE:

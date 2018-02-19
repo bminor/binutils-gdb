@@ -2681,8 +2681,8 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: CALL15 reloc at %#Lx not against global symbol"),
-		 abfd, rel->r_offset);
+		(_("%pB: CALL15 reloc at %#" PRIx64 " not against global symbol"),
+		 abfd, (uint64_t) rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }

@@ -1295,9 +1295,11 @@ ip2k_final_link_relocate (reloc_howto_type *  howto,
 	      ip2k_nominal_page_bits (input_bfd, input_section,
 				      rel->r_offset, contents))
 	    /* xgettext:c-format */
-	    _bfd_error_handler (_("ip2k linker: missing page instruction at %#Lx (dest = %#Lx)"),
-				BASEADDR (input_section) + rel->r_offset,
-				relocation + rel->r_addend);
+	    _bfd_error_handler
+	      (_("ip2k linker: missing page instruction "
+		 "at %#" PRIx64 " (dest = %#" PRIx64 ")"),
+	       (uint64_t) (BASEADDR (input_section) + rel->r_offset),
+	       (uint64_t) (relocation + rel->r_addend));
 	}
       else if (ip2k_relaxed)
 	{
@@ -1312,9 +1314,11 @@ ip2k_final_link_relocate (reloc_howto_type *  howto,
 		  ip2k_nominal_page_bits (input_bfd, input_section,
 					  rel->r_offset - 2, contents)))
 	    /* xgettext:c-format */
-	    _bfd_error_handler (_("ip2k linker: redundant page instruction at %#Lx (dest = %#Lx)"),
-				page_addr,
-				relocation + rel->r_addend);
+	    _bfd_error_handler
+	      (_("ip2k linker: redundant page instruction "
+		 "at %#" PRIx64 " (dest = %#" PRIx64 ")"),
+	       (uint64_t) page_addr,
+	       (uint64_t) (relocation + rel->r_addend));
 	}
       if ((relocation & IP2K_INSN_MASK) == IP2K_INSN_VALUE)
 	relocation &= ~IP2K_INSN_MASK;

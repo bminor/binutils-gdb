@@ -827,8 +827,9 @@ ihex_write_object_contents (bfd *abfd)
 		    {
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%pB: address %#Lx out of range for Intel Hex file"),
-			 abfd, where);
+			(_("%pB: address %#" PRIx64
+			   " out of range for Intel Hex file"),
+			 abfd, (uint64_t) where);
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
 		    }

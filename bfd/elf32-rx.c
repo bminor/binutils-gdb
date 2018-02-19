@@ -684,9 +684,12 @@ rx_elf_relocate_section
 	  && strcmp (name, "__romdatastart") != 0			\
 	  && !saw_subtract)						\
 	/* xgettext:c-format */						\
-	_bfd_error_handler (_("%pB(%pA): unsafe PID relocation %s at %#Lx (against %s in %s)"), \
+	_bfd_error_handler (_("%pB(%pA): unsafe PID relocation %s "	\
+			      "at %#" PRIx64 " (against %s in %s)"),	\
 			    input_bfd, input_section, howto->name,	\
-			    input_section->output_section->vma + input_section->output_offset + rel->r_offset, \
+			    (uint64_t) (input_section->output_section->vma \
+					+ input_section->output_offset	\
+					+ rel->r_offset),		\
 			    name, sec->name);				\
     }									\
   while (0)

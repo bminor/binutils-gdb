@@ -584,9 +584,9 @@ elf64_ia64_relax_section (bfd *abfd, asection *sec,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: Can't relax br at %#Lx in section `%pA'."
+		(_("%pB: Can't relax br at %#" PRIx64 " in section `%pA'."
 		   " Please use brl or indirect branch."),
-		 sec->owner, roff, sec);
+		 sec->owner, (uint64_t) roff, sec);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
 	    }
@@ -3278,8 +3278,8 @@ elf64_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info, bfd_boolean final)
 overflow:
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: short data segment overflowed (%#Lx >= 0x400000)"),
-	     abfd, max_short_vma - min_short_vma);
+	    (_("%pB: short data segment overflowed (%#" PRIx64 " >= 0x400000)"),
+	     abfd, (uint64_t) (max_short_vma - min_short_vma));
 	  return FALSE;
 	}
       else if ((gp_val > min_short_vma
@@ -3947,9 +3947,9 @@ elf64_ia64_relocate_section (bfd *output_bfd,
 		_bfd_error_handler
 		  /* xgettext:c-format */
 		  (_("%pB: missing TLS section for relocation %s against `%s'"
-		     " at %#Lx in section `%pA'."),
+		     " at %#" PRIx64 " in section `%pA'."),
 		   input_bfd, howto->name, name,
-		   rel->r_offset, input_section);
+		   (uint64_t) rel->r_offset, input_section);
 		break;
 
 	      case R_IA64_PCREL21B:
@@ -3963,10 +3963,11 @@ elf64_ia64_relocate_section (bfd *output_bfd,
 		       that the section is too big to relax.  */
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%pB: Can't relax br (%s) to `%s' at %#Lx in section"
-			 " `%pA' with size %#Lx (> 0x1000000)."),
-		       input_bfd, howto->name, name, rel->r_offset,
-		       input_section, input_section->size);
+		      (_("%pB: Can't relax br (%s) to `%s' "
+			 "at %#" PRIx64 " in section `%pA' "
+			 "with size %#" PRIx64 " (> 0x1000000)."),
+		       input_bfd, howto->name, name, (uint64_t) rel->r_offset,
+		       input_section, (uint64_t) input_section->size);
 		    break;
 		  }
 		/* Fall through.  */
@@ -5158,8 +5159,9 @@ error_free_dyn:
 		_bfd_error_handler
 		  /* xgettext:c-format */
 		  (_("Warning: size of symbol `%s' changed"
-		     " from %Lu in %pB to %Lu in %pB"),
-		   name, h->size, old_bfd, isym->st_size, abfd);
+		     " from %" PRIu64 " in %pB to %" PRIu64 " in %pB"),
+		   name, (uint64_t) h->size, old_bfd,
+		   (uint64_t) isym->st_size, abfd);
 
 	      h->size = isym->st_size;
 	    }

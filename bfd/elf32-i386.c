@@ -1156,10 +1156,10 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: TLS transition from %s to %s against `%s' at %#Lx "
-	   "in section `%pA' failed"),
+	(_("%pB: TLS transition from %s to %s against `%s'"
+	   " at %#" PRIx64 " in section `%pA' failed"),
 	 abfd, from->name, to->name, name,
-	 rel->r_offset, sec);
+	 (uint64_t) rel->r_offset, sec);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -3442,10 +3442,10 @@ disallow_got32:
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB(%pA+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%pB(%pA+%#" PRIx64 "): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
-	     rel->r_offset,
+	     (uint64_t) rel->r_offset,
 	     howto->name,
 	     h->root.root.string);
 	  return FALSE;
@@ -3482,9 +3482,9 @@ check_relocation_error:
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB(%pA+%#Lx): reloc against `%s': error %d"),
+		(_("%pB(%pA+%#" PRIx64 "): reloc against `%s': error %d"),
 		 input_bfd, input_section,
-		 rel->r_offset, name, (int) r);
+		 (uint64_t) rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }
 	}

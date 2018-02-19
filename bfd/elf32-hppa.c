@@ -826,10 +826,11 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB(%pA+%#Lx): cannot reach %s, recompile with -ffunction-sections"),
+	    (_("%pB(%pA+%#" PRIx64 "): "
+	       "cannot reach %s, recompile with -ffunction-sections"),
 	     hsh->target_section->owner,
 	     stub_sec,
-	     hsh->stub_offset,
+	     (uint64_t) hsh->stub_offset,
 	     hsh->bh_root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -3330,10 +3331,11 @@ final_link_relocate (asection *input_section,
 		   error.  */
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%pB(%pA+%#Lx): %s fixup for insn %#x is not supported in a non-shared link"),
+		  (_("%pB(%pA+%#" PRIx64 "): %s fixup for insn %#x "
+		     "is not supported in a non-shared link"),
 		   input_bfd,
 		   input_section,
-		   offset,
+		   (uint64_t) offset,
 		   howto->name,
 		   insn);
 	    }
@@ -3496,10 +3498,11 @@ final_link_relocate (asection *input_section,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB(%pA+%#Lx): cannot reach %s, recompile with -ffunction-sections"),
+	(_("%pB(%pA+%#" PRIx64 "): cannot reach %s, "
+	   "recompile with -ffunction-sections"),
 	 input_bfd,
 	 input_section,
-	 offset,
+	 (uint64_t) offset,
 	 hsh->bh_root.string);
       bfd_set_error (bfd_error_bad_value);
       return bfd_reloc_notsupported;
@@ -4198,10 +4201,10 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB(%pA+%#Lx): cannot handle %s for %s"),
+		(_("%pB(%pA+%#" PRIx64 "): cannot handle %s for %s"),
 		 input_bfd,
 		 input_section,
-		 rela->r_offset,
+		 (uint64_t) rela->r_offset,
 		 howto->name,
 		 sym_name);
 	      bfd_set_error (bfd_error_bad_value);

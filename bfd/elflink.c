@@ -2440,10 +2440,10 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: bad reloc symbol index (%#Lx >= %#lx)"
-		   " for offset %#Lx in section `%pA'"),
-		 abfd, r_symndx, (unsigned long) nsyms,
-		 irela->r_offset, sec);
+		(_("%pB: bad reloc symbol index (%#" PRIx64 " >= %#lx)"
+		   " for offset %#" PRIx64 " in section `%pA'"),
+		 abfd, (uint64_t) r_symndx, (unsigned long) nsyms,
+		 (uint64_t) irela->r_offset, sec);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -2452,11 +2452,11 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: non-zero symbol index (%#Lx)"
-	       " for offset %#Lx in section `%pA'"
+	    (_("%pB: non-zero symbol index (%#" PRIx64 ")"
+	       " for offset %#" PRIx64 " in section `%pA'"
 	       " when the object file has no symbol table"),
-	     abfd, r_symndx,
-	     irela->r_offset, sec);
+	     abfd, (uint64_t) r_symndx,
+	     (uint64_t) irela->r_offset, sec);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -4804,8 +4804,9 @@ error_free_dyn:
 		_bfd_error_handler
 		  /* xgettext:c-format */
 		  (_("Warning: size of symbol `%s' changed"
-		     " from %Lu in %pB to %Lu in %pB"),
-		   name, h->size, old_bfd, isym->st_size, abfd);
+		     " from %" PRIu64 " in %pB to %" PRIu64 " in %pB"),
+		   name, (uint64_t) h->size, old_bfd,
+		   (uint64_t) isym->st_size, abfd);
 
 	      h->size = isym->st_size;
 	    }
@@ -10584,9 +10585,9 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		    {
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("error: %pB contains a reloc (%#Lx) for section %pA "
+			(_("error: %pB contains a reloc (%#" PRIx64 ") for section %pA "
 			   "that references a non-existent global symbol"),
-			 input_bfd, rel->r_info, o);
+			 input_bfd, (uint64_t) rel->r_info, o);
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
 		    }
@@ -13508,8 +13509,8 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
     }
 
   /* xgettext:c-format */
-  _bfd_error_handler (_("%pB: %pA+%#Lx: No symbol found for INHERIT"),
-		      abfd, sec, offset);
+  _bfd_error_handler (_("%pB: %pA+%#" PRIx64 ": No symbol found for INHERIT"),
+		      abfd, sec, (uint64_t) offset);
   bfd_set_error (bfd_error_invalid_operation);
   return FALSE;
 
