@@ -472,8 +472,9 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	  len -= section_len;
 	  if (section_len <= 4)
 	    {
-	      _bfd_error_handler (_("%pB: error: attribute section length too small: %ld"),
-				  abfd, section_len);
+	      _bfd_error_handler
+		(_("%pB: error: attribute section length too small: %" PRId64),
+		 abfd, (int64_t) section_len);
 	      break;
 	    }
 	  section_len -= 4;

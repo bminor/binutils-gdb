@@ -14404,9 +14404,10 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  if (o->size != sizeof (Elf32_External_RegInfo))
 	    {
 	      _bfd_error_handler
-		(_("%pB: .reginfo section size should be %d bytes, "
-		   "actual size is %d"),
-		 abfd, sizeof (Elf32_External_RegInfo), o->size);
+		(_("%pB: .reginfo section size should be %ld bytes, "
+		   "actual size is %" PRId64),
+		 abfd, (unsigned long) sizeof (Elf32_External_RegInfo),
+		 (int64_t) o->size);
 
 	      return FALSE;
 	    }

@@ -109,7 +109,7 @@ extern void *bfd_realloc2
 extern void *bfd_zmalloc2
   (bfd_size_type, bfd_size_type);
 
-extern void _bfd_error_handler (const char *s, ...);
+extern void _bfd_error_handler (const char *s, ...) ATTRIBUTE_PRINTF_1;
 
 /* These routines allocate and free things on the BFD's objalloc.  */
 

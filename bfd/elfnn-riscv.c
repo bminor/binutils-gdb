@@ -3111,10 +3111,11 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
   /* Make sure there are enough NOPs to actually achieve the alignment.  */
   if (rel->r_addend < nop_bytes)
     {
-      (*_bfd_error_handler)
-	(_("%pB(%pA+0x%lx): %d bytes required for alignment "
-	   "to %d-byte boundary, but only %d present"),
-	   abfd, sym_sec, rel->r_offset, nop_bytes, alignment, rel->r_addend);
+      _bfd_error_handler
+	(_("%pB(%pA+%#" PRIx64 "): %" PRId64 " bytes required for alignment "
+	   "to %" PRId64 "-byte boundary, but only %" PRId64 " present"),
+	 abfd, sym_sec, (uint64_t) rel->r_offset,
+	 (int64_t) nop_bytes, (int64_t) alignment, (int64_t) rel->r_addend);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -3178,10 +3179,10 @@ _bfd_riscv_relax_pc  (bfd *abfd,
 	symval = hi_reloc.hi_addr;
 	sym_sec = hi_reloc.sym_sec;
 	if (!riscv_use_pcgp_hi_reloc(pcgp_relocs, hi->hi_sec_off))
-	  (*_bfd_error_handler)
-	   (_("%pB(%pA+0x%lx): Unable to clear RISCV_PCREL_HI20 reloc"
-	      "for cooresponding RISCV_PCREL_LO12 reloc"),
-	    abfd, sec, rel->r_offset);
+	  _bfd_error_handler
+	    (_("%pB(%pA+%#" PRIx64 "): Unable to clear RISCV_PCREL_HI20 reloc "
+	       "for corresponding RISCV_PCREL_LO12 reloc"),
+	     abfd, sec, (uint64_t) rel->r_offset);
       }
       break;
 

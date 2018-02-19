@@ -1,5 +1,15 @@
 2018-02-19  Alan Modra  <amodra@gmail.com>
 
+	* elf-attrs.c (_bfd_elf_parse_attributes): Correct _bfd_error_handler
+	arguments.
+	* elfxx-mips.c (_bfd_mips_elf_final_link): Likewise.
+	* elfnn-riscv.c (_bfd_riscv_relax_align): Likewise.
+	(_bfd_riscv_relax_pc): Likewise and fix typos.
+	* libbfd-in.h (_bfd_error_handler): Add attribute printf.
+	* libbfd.h: Regenerate.
+
+2018-02-19  Alan Modra  <amodra@gmail.com>
+
 	* dwarf2.c (read_section): Don't use 'll' format modifier.
 	(find_abstract_instance): Likewise.
 	* elfcore.h (elf_core_file_p): Likewise.
