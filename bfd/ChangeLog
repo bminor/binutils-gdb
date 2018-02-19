@@ -1,3 +1,8 @@
+2018-02-19  Maciej W. Rozycki  <macro@mips.com>
+
+	* section.c (SEC_HAS_GOT_REF): Remove macro.
+	* bfd-in2.h: Regenerate.
+
 2018-02-19  Alan Modra  <amodra@gmail.com>
 
 	* elf-attrs.c (_bfd_elf_parse_attributes): Correct _bfd_error_handler

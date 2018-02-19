@@ -1342,14 +1342,6 @@ typedef struct bfd_section
   /* The section contains thread local data.  */
 #define SEC_THREAD_LOCAL                0x400
 
-  /* The section has GOT references.  This flag is only for the
-     linker, and is currently only used by the elf32-hppa back end.
-     It will be set if global offset table references were detected
-     in this section, which indicate to the linker that the section
-     contains PIC code, and must be handled specially when doing a
-     static link.  */
-#define SEC_HAS_GOT_REF                 0x800
-
   /* The section contains common symbols (symbols may be defined
      multiple times, the value of a symbol is the amount of
      space it requires, and the largest symbol value is the one
