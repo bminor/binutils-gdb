@@ -7262,7 +7262,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	 sections.  Allow them to proceed, but warn that this might
 	 break at runtime.  */
       info->callbacks->einfo
-	(_("%P: copy reloc against `%T' requires lazy plt linking; "
+	(_("%P: copy reloc against `%pT' requires lazy plt linking; "
 	   "avoid setting LD_BIND_NOW=1 or upgrade gcc\n"),
 	 h->root.root.string);
     }
@@ -9933,7 +9933,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *inf)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
+	(_("%pB: dynamic relocation against `%pT' in read-only section `%pA'\n"),
 	 sec->owner, h->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */
@@ -10780,7 +10780,7 @@ get_r2off (struct bfd_link_info *info,
       if (strcmp (opd->name, ".opd") != 0
 	  || opd->reloc_count != 0)
 	{
-	  info->callbacks->einfo (_("%P: cannot find opd entry toc for `%T'\n"),
+	  info->callbacks->einfo (_("%P: cannot find opd entry toc for `%pT'\n"),
 				  stub_entry->h->elf.root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  return (bfd_vma) -1;
@@ -10991,7 +10991,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
 	{
 	  info->callbacks->einfo
-	    (_("%P: linkage table error against `%T'\n"),
+	    (_("%P: linkage table error against `%pT'\n"),
 	     stub_entry->root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  htab->stub_error = TRUE;
@@ -11137,7 +11137,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	{
 	  info->callbacks->einfo
 	    /* xgettext:c-format */
-	    (_("%P: linkage table error against `%T'\n"),
+	    (_("%P: linkage table error against `%pT'\n"),
 	     stub_entry->h != NULL
 	     ? stub_entry->h->elf.root.root.string
 	     : "<local sym>");
@@ -13006,7 +13006,7 @@ build_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 	if (off + 0x80008000 > 0xffffffff || (off & 3) != 0)
 	  {
 	    info->callbacks->einfo
-	      (_("%P: linkage table error against `%T'\n"),
+	      (_("%P: linkage table error against `%pT'\n"),
 	       h->root.root.string);
 	    bfd_set_error (bfd_error_bad_value);
 	    htab->stub_error = TRUE;
@@ -13608,9 +13608,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    info->callbacks->einfo
 	      (!IS_PPC64_TLS_RELOC (r_type)
 	       /* xgettext:c-format */
-	       ? _("%H: %s used with TLS symbol `%T'\n")
+	       ? _("%H: %s used with TLS symbol `%pT'\n")
 	       /* xgettext:c-format */
-	       : _("%H: %s used with non-TLS symbol `%T'\n"),
+	       : _("%H: %s used with non-TLS symbol `%pT'\n"),
 	       input_bfd, input_section, rel->r_offset,
 	       ppc64_elf_howto_table[r_type]->name,
 	       sym_name);
@@ -14220,13 +14220,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      || stub_entry->stub_type == ppc_stub_plt_call_r2save)
 		    info->callbacks->einfo
 		      /* xgettext:c-format */
-		      (_("%H: call to `%T' lacks nop, can't restore toc; "
+		      (_("%H: call to `%pT' lacks nop, can't restore toc; "
 			 "recompile with -fPIC\n"),
 		       input_bfd, input_section, rel->r_offset, sym_name);
 		  else
 		    info->callbacks->einfo
 		      /* xgettext:c-format */
-		      (_("%H: call to `%T' lacks nop, can't restore toc; "
+		      (_("%H: call to `%pT' lacks nop, can't restore toc; "
 			 "(-mcmodel=small toc adjust stub)\n"),
 		       input_bfd, input_section, rel->r_offset, sym_name);
 
@@ -14354,7 +14354,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	default:
 	  info->callbacks->einfo
 	    /* xgettext:c-format */
-	    (_("%P: %pB: unknown relocation type %d for `%T'\n"),
+	    (_("%P: %pB: unknown relocation type %d for `%pT'\n"),
 	     input_bfd, (int) r_type, sym_name);
 
 	  bfd_set_error (bfd_error_bad_value);
@@ -14904,7 +14904,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			  info->callbacks->einfo
 			    /* xgettext:c-format */
 			    (_("%H: %s for indirect "
-			       "function `%T' unsupported\n"),
+			       "function `%pT' unsupported\n"),
 			     input_bfd, input_section, rel->r_offset,
 			     ppc64_elf_howto_table[r_type]->name,
 			     sym_name);
@@ -15015,7 +15015,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	  info->callbacks->einfo
 	    /* xgettext:c-format */
-	    (_("%P: %pB: %s is not supported for `%T'\n"),
+	    (_("%P: %pB: %s is not supported for `%pT'\n"),
 	     input_bfd,
 	     ppc64_elf_howto_table[r_type]->name, sym_name);
 
@@ -15225,7 +15225,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	{
 	  info->callbacks->einfo
 	    /* xgettext:c-format */
-	    (_("%H: unresolvable %s against `%T'\n"),
+	    (_("%H: unresolvable %s against `%pT'\n"),
 	     input_bfd, input_section, rel->r_offset,
 	     howto->name,
 	     h->elf.root.root.string);
@@ -15322,7 +15322,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      info->callbacks->einfo
 		/* xgettext:c-format */
-		(_("%H: %s against `%T': error %d\n"),
+		(_("%H: %s against `%pT': error %d\n"),
 		 input_bfd, input_section, rel->r_offset,
 		 reloc_name, sym_name, (int) r);
 	      ret = FALSE;

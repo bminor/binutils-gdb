@@ -3023,7 +3023,7 @@ _bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
 	  || (info->extern_protected_data < 0
 	      && !get_elf_backend_data (dynbss->owner)->extern_protected_data)))
     info->callbacks->einfo
-      (_("%P: copy reloc against protected `%T' is dangerous\n"),
+      (_("%P: copy reloc against protected `%pT' is dangerous\n"),
        h->root.root.string);
 
   return TRUE;

@@ -8307,7 +8307,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		     message instead.  */
 		  link_info->callbacks->einfo
 		    /* xgettext:c-format */
-		    (_("%X%P: %pB(%pA): relocation \"%R\" goes out of range\n"),
+		    (_("%X%P: %pB(%pA): relocation \"%pR\" goes out of range\n"),
 		     abfd, input_section, * parent);
 		  goto error_return;
 
@@ -8317,7 +8317,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		     Do not abort.  Issue an error message instead.  */
 		  link_info->callbacks->einfo
 		    /* xgettext:c-format */
-		    (_("%X%P: %pB(%pA): relocation \"%R\" is not supported\n"),
+		    (_("%X%P: %pB(%pA): relocation \"%pR\" is not supported\n"),
 		     abfd, input_section, * parent);
 		  goto error_return;
 
@@ -8326,7 +8326,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		     Report unexpected results, without aborting.  */
 		  link_info->callbacks->einfo
 		    /* xgettext:c-format */
-		    (_("%X%P: %pB(%pA): relocation \"%R\" returns an unrecognized value %x\n"),
+		    (_("%X%P: %pB(%pA): relocation \"%pR\" returns an unrecognized value %x\n"),
 		     abfd, input_section, * parent, r);
 		  break;
 		}

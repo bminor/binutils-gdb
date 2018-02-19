@@ -1,5 +1,14 @@
 2018-02-19  Alan Modra  <amodra@gmail.com>
 
+	* ldmisc.c (vfinfo) Handle %pI, %pR, %pS and %pT in place of
+	%I, %R, %S and %T.
+	* ldcref.c, * ldctor.c, * ldemul.c, * ldexp.c, * ldgram.y,
+	* ldlang.c, * ldlex.l, * ldmain.c, * ldmisc.c, * pe-dll.c,
+	* emultempl/sh64elf.em: Replace use of of %I, %R, %S and %T in
+	format strings passed to einfo and friends by %pI, %pR, %pS and %pT.
+
+2018-02-19  Alan Modra  <amodra@gmail.com>
+
 	* ldmisc.c (vfinfo): Handle %pA and %pB in place of %A and %B.
 	* ldcref.c: Update all messages using %A and %B.
 	* ldexp.c: Likewise.

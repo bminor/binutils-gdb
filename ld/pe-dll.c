@@ -2701,7 +2701,7 @@ pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend, char *name)
       runtime_pseudo_relocs_created++;
     }
   else if (addend != 0)
-    einfo (_("%P%X%C: variable '%T' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"),
+    einfo (_("%P%X%C: variable '%pT' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"),
 	   s->owner, s, rel->address, sym->name);
 }
 

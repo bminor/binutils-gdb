@@ -271,13 +271,13 @@ set_output_arch_default (void)
 void
 syslib_default (char *ignore ATTRIBUTE_UNUSED)
 {
-  info_msg (_("%S SYSLIB ignored\n"), NULL);
+  info_msg (_("%pS SYSLIB ignored\n"), NULL);
 }
 
 void
 hll_default (char *ignore ATTRIBUTE_UNUSED)
 {
-  info_msg (_("%S HLL ignored\n"), NULL);
+  info_msg (_("%pS HLL ignored\n"), NULL);
 }
 
 ld_emulation_xfer_type *ld_emulations[] = { EMULATION_LIST };

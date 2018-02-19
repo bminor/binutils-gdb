@@ -823,7 +823,7 @@ add_archive_element (struct bfd_link_info *info,
 	      /* Don't claim new IR symbols after all IR symbols have
 		 been claimed.  */
 	      if (trace_files || verbose)
-		info_msg ("%I: no new IR symbols to claimi\n",
+		info_msg ("%pI: no new IR symbols to claimi\n",
 			  &orig_input);
 	      input->flags.claimed = 0;
 	      return FALSE;
@@ -906,13 +906,13 @@ add_archive_element (struct bfd_link_info *info,
       if (from != NULL)
 	minfo ("%pB ", from);
       if (h != NULL)
-	minfo ("(%T)\n", h->root.string);
+	minfo ("(%pT)\n", h->root.string);
       else
 	minfo ("(%s)\n", name);
     }
 
   if (trace_files || verbose)
-    info_msg ("%I\n", &orig_input);
+    info_msg ("%pI\n", &orig_input);
   return TRUE;
 }
 
@@ -979,7 +979,7 @@ multiple_definition (struct bfd_link_info *info,
       nval = oval;
       obfd = NULL;
     }
-  einfo (_("%X%C: multiple definition of `%T'\n"),
+  einfo (_("%X%C: multiple definition of `%pT'\n"),
 	 nbfd, nsec, nval, name);
   if (obfd != NULL)
     einfo (_("%D: first defined here\n"), obfd, osec, oval);
@@ -1038,7 +1038,7 @@ multiple_common (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       || ntype == bfd_link_hash_indirect)
     {
       ASSERT (otype == bfd_link_hash_common);
-      einfo (_("%pB: warning: definition of `%T' overriding common\n"),
+      einfo (_("%pB: warning: definition of `%pT' overriding common\n"),
 	     nbfd, name);
       if (obfd != NULL)
 	einfo (_("%pB: warning: common is here\n"), obfd);
@@ -1048,7 +1048,7 @@ multiple_common (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 	   || otype == bfd_link_hash_indirect)
     {
       ASSERT (ntype == bfd_link_hash_common);
-      einfo (_("%pB: warning: common of `%T' overridden by definition\n"),
+      einfo (_("%pB: warning: common of `%pT' overridden by definition\n"),
 	     nbfd, name);
       if (obfd != NULL)
 	einfo (_("%pB: warning: defined here\n"), obfd);
@@ -1058,21 +1058,21 @@ multiple_common (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       ASSERT (otype == bfd_link_hash_common && ntype == bfd_link_hash_common);
       if (osize > nsize)
 	{
-	  einfo (_("%pB: warning: common of `%T' overridden by larger common\n"),
+	  einfo (_("%pB: warning: common of `%pT' overridden by larger common\n"),
 		 nbfd, name);
 	  if (obfd != NULL)
 	    einfo (_("%pB: warning: larger common is here\n"), obfd);
 	}
       else if (nsize > osize)
 	{
-	  einfo (_("%pB: warning: common of `%T' overriding smaller common\n"),
+	  einfo (_("%pB: warning: common of `%pT' overriding smaller common\n"),
 		 nbfd, name);
 	  if (obfd != NULL)
 	    einfo (_("%pB: warning: smaller common is here\n"), obfd);
 	}
       else
 	{
-	  einfo (_("%pB: warning: multiple common of `%T'\n"), nbfd, name);
+	  einfo (_("%pB: warning: multiple common of `%pT'\n"), nbfd, name);
 	  if (obfd != NULL)
 	    einfo (_("%pB: warning: previous common is here\n"), obfd);
 	}
@@ -1318,19 +1318,19 @@ undefined_symbol (struct bfd_link_info *info,
       if (error_count < MAX_ERRORS_IN_A_ROW)
 	{
 	  if (error)
-	    einfo (_("%X%C: undefined reference to `%T'\n"),
+	    einfo (_("%X%C: undefined reference to `%pT'\n"),
 		   abfd, section, address, name);
 	  else
-	    einfo (_("%C: warning: undefined reference to `%T'\n"),
+	    einfo (_("%C: warning: undefined reference to `%pT'\n"),
 		   abfd, section, address, name);
 	}
       else if (error_count == MAX_ERRORS_IN_A_ROW)
 	{
 	  if (error)
-	    einfo (_("%X%D: more undefined references to `%T' follow\n"),
+	    einfo (_("%X%D: more undefined references to `%pT' follow\n"),
 		   abfd, section, address, name);
 	  else
-	    einfo (_("%D: warning: more undefined references to `%T' follow\n"),
+	    einfo (_("%D: warning: more undefined references to `%pT' follow\n"),
 		   abfd, section, address, name);
 	}
       else if (error)
@@ -1341,19 +1341,19 @@ undefined_symbol (struct bfd_link_info *info,
       if (error_count < MAX_ERRORS_IN_A_ROW)
 	{
 	  if (error)
-	    einfo (_("%X%pB: undefined reference to `%T'\n"),
+	    einfo (_("%X%pB: undefined reference to `%pT'\n"),
 		   abfd, name);
 	  else
-	    einfo (_("%pB: warning: undefined reference to `%T'\n"),
+	    einfo (_("%pB: warning: undefined reference to `%pT'\n"),
 		   abfd, name);
 	}
       else if (error_count == MAX_ERRORS_IN_A_ROW)
 	{
 	  if (error)
-	    einfo (_("%X%pB: more undefined references to `%T' follow\n"),
+	    einfo (_("%X%pB: more undefined references to `%pT' follow\n"),
 		   abfd, name);
 	  else
-	    einfo (_("%pB: warning: more undefined references to `%T' follow\n"),
+	    einfo (_("%pB: warning: more undefined references to `%pT' follow\n"),
 		   abfd, name);
 	}
       else if (error)
@@ -1404,13 +1404,13 @@ reloc_overflow (struct bfd_link_info *info,
 	case bfd_link_hash_undefined:
 	case bfd_link_hash_undefweak:
 	  einfo (_(" relocation truncated to fit: "
-		   "%s against undefined symbol `%T'"),
+		   "%s against undefined symbol `%pT'"),
 		 reloc_name, entry->root.string);
 	  break;
 	case bfd_link_hash_defined:
 	case bfd_link_hash_defweak:
 	  einfo (_(" relocation truncated to fit: "
-		   "%s against symbol `%T' defined in %pA section in %pB"),
+		   "%s against symbol `%pT' defined in %pA section in %pB"),
 		 reloc_name, entry->root.string,
 		 entry->u.def.section,
 		 entry->u.def.section == bfd_abs_section_ptr
@@ -1422,7 +1422,7 @@ reloc_overflow (struct bfd_link_info *info,
 	}
     }
   else
-    einfo (_(" relocation truncated to fit: %s against `%T'"),
+    einfo (_(" relocation truncated to fit: %s against `%pT'"),
 	   reloc_name, name);
   if (addend != 0)
     einfo ("+%v", addend);
@@ -1452,7 +1452,7 @@ unattached_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		  asection *section,
 		  bfd_vma address)
 {
-  einfo (_("%X%H: reloc refers to symbol `%T' which is not being output\n"),
+  einfo (_("%X%H: reloc refers to symbol `%pT' which is not being output\n"),
 	 abfd, section, address, name);
 }
 

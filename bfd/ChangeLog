@@ -1,5 +1,15 @@
 2018-02-19  Alan Modra  <amodra@gmail.com>
 
+	* elf32-arm.c, * elf32-hppa.c, * elf32-lm32.c, * elf32-m32r.c,
+	* elf32-metag.c, * elf32-nds32.c, * elf32-or1k.c, * elf32-ppc.c,
+	* elf32-s390.c, * elf32-sh.c, * elf32-tic6x.c, * elf32-tilepro.c,
+	* elf64-ppc.c, * elf64-s390.c, * elflink.c, * elfnn-aarch64.c,
+	* elfnn-riscv.c, * elfxx-sparc.c, * elfxx-tilegx.c, * elfxx-x86.c,
+	* reloc.c: Replace use of %R and %T in format strings passed to
+	einfo and friends by %pR and %pT.
+
+2018-02-19  Alan Modra  <amodra@gmail.com>
+
 	* bfd.c (_bfd_doprnt, _bfd_doprnt_scan): Handle %pA and %pB in place
 	of %A and %B.
 	* aout-adobe.c: Update all messages using %A and %B.

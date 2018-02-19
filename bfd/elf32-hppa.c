@@ -2079,7 +2079,7 @@ maybe_set_textrel (struct elf_link_hash_entry *eh, void *inf)
 
       info->flags |= DF_TEXTREL;
       info->callbacks->minfo
-	(_("%pB: dynamic relocation against `%T' in read-only section `%pA'\n"),
+	(_("%pB: dynamic relocation against `%pT' in read-only section `%pA'\n"),
 	 sec->owner, eh->root.root.string, sec);
 
       /* Not an error, just cut short the traversal.  */

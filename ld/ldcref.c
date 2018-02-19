@@ -410,7 +410,7 @@ output_one_cref (FILE *fp, struct cref_hash_entry *h)
   hl = bfd_link_hash_lookup (link_info.hash, h->root.string, FALSE,
 			     FALSE, TRUE);
   if (hl == NULL)
-    einfo (_("%P: symbol `%T' missing from main hash table\n"),
+    einfo (_("%P: symbol `%pT' missing from main hash table\n"),
 	   h->root.string);
   else
     {
@@ -562,7 +562,7 @@ check_nocrossref (struct cref_hash_entry *h, void *ignore ATTRIBUTE_UNUSED)
 			     FALSE, TRUE);
   if (hl == NULL)
     {
-      einfo (_("%P: symbol `%T' missing from main hash table\n"),
+      einfo (_("%P: symbol `%pT' missing from main hash table\n"),
 	     h->root.string);
       return TRUE;
     }
@@ -721,7 +721,7 @@ check_reloc_refs (bfd *abfd, asection *sec, void *iarg)
 	     in OUTSECNAME.  This reloc is from a section which is
 	     mapped into a section from which references to OUTSECNAME
 	     are prohibited.  We must report an error.  */
-	  einfo (_("%X%C: prohibited cross reference from %s to `%T' in %s\n"),
+	  einfo (_("%X%C: prohibited cross reference from %s to `%pT' in %s\n"),
 		 abfd, sec, q->address, outsecname,
 		 bfd_asymbol_name (*q->sym_ptr_ptr), outdefsecname);
 	}

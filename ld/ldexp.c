@@ -624,7 +624,7 @@ fold_binary (etree_type *tree)
 	    expld.result.value = ((bfd_signed_vma) lhs.value
 				  % (bfd_signed_vma) expld.result.value);
 	  else if (expld.phase != lang_mark_phase_enum)
-	    einfo (_("%F%S %% by zero\n"), tree->binary.rhs);
+	    einfo (_("%F%pS %% by zero\n"), tree->binary.rhs);
 	  arith_result_section (&lhs);
 	  break;
 
@@ -633,7 +633,7 @@ fold_binary (etree_type *tree)
 	    expld.result.value = ((bfd_signed_vma) lhs.value
 				  / (bfd_signed_vma) expld.result.value);
 	  else if (expld.phase != lang_mark_phase_enum)
-	    einfo (_("%F%S / by zero\n"), tree->binary.rhs);
+	    einfo (_("%F%pS / by zero\n"), tree->binary.rhs);
 	  arith_result_section (&lhs);
 	  break;
 
@@ -754,7 +754,7 @@ fold_name (etree_type *tree)
 		  if (expld.phase <= lang_mark_phase_enum)
 		    new_rel (h->u.def.value, h->u.def.section);
 		  else
-		    einfo (_("%X%S: unresolvable symbol `%s'"
+		    einfo (_("%X%pS: unresolvable symbol `%s'"
 			     " referenced in expression\n"),
 			   tree, tree->name.name);
 		}
@@ -769,7 +769,7 @@ fold_name (etree_type *tree)
 	  else if (expld.phase == lang_final_phase_enum
 		   || (expld.phase != lang_mark_phase_enum
 		       && expld.assigning_to_dot))
-	    einfo (_("%F%S: undefined symbol `%s'"
+	    einfo (_("%F%pS: undefined symbol `%s'"
 		     " referenced in expression\n"),
 		   tree, tree->name.name);
 	  else if (h->type == bfd_link_hash_new)
@@ -795,7 +795,7 @@ fold_name (etree_type *tree)
 	  if (os == NULL)
 	    {
 	      if (expld.phase == lang_final_phase_enum)
-		einfo (_("%F%S: undefined section `%s'"
+		einfo (_("%F%pS: undefined section `%s'"
 			 " referenced in expression\n"),
 		       tree, tree->name.name);
 	    }
@@ -813,7 +813,7 @@ fold_name (etree_type *tree)
 	  if (os == NULL)
 	    {
 	      if (expld.phase == lang_final_phase_enum)
-		einfo (_("%F%S: undefined section `%s'"
+		einfo (_("%F%pS: undefined section `%s'"
 			 " referenced in expression\n"),
 		       tree, tree->name.name);
 	    }
@@ -841,7 +841,7 @@ fold_name (etree_type *tree)
 	  if (os == NULL)
 	    {
 	      if (expld.phase == lang_final_phase_enum)
-		einfo (_("%F%S: undefined section `%s'"
+		einfo (_("%F%pS: undefined section `%s'"
 			 " referenced in expression\n"),
 		       tree, tree->name.name);
 	      new_number (0);
@@ -873,7 +873,7 @@ fold_name (etree_type *tree)
 	  if (mem != NULL)
 	    new_number (mem->length);
 	  else
-	    einfo (_("%F%S: undefined MEMORY region `%s'"
+	    einfo (_("%F%pS: undefined MEMORY region `%s'"
 		     " referenced in expression\n"),
 		   tree, tree->name.name);
 	}
@@ -889,7 +889,7 @@ fold_name (etree_type *tree)
 	  if (mem != NULL)
 	    new_rel_from_abs (mem->origin);
 	  else
-	    einfo (_("%F%S: undefined MEMORY region `%s'"
+	    einfo (_("%F%pS: undefined MEMORY region `%s'"
 		     " referenced in expression\n"),
 		   tree, tree->name.name);
 	}
@@ -901,7 +901,7 @@ fold_name (etree_type *tree)
       else if (strcmp (tree->name.name, "COMMONPAGESIZE") == 0)
 	new_number (config.commonpagesize);
       else
-	einfo (_("%F%S: unknown constant `%s' referenced in expression\n"),
+	einfo (_("%F%pS: unknown constant `%s' referenced in expression\n"),
 	       tree, tree->name.name);
       break;
 
@@ -1049,7 +1049,7 @@ exp_fold_tree_1 (etree_type *tree)
       if (tree->assign.dst[0] == '.' && tree->assign.dst[1] == 0)
 	{
 	  if (tree->type.node_class != etree_assign)
-	    einfo (_("%F%S can not PROVIDE assignment to"
+	    einfo (_("%F%pS can not PROVIDE assignment to"
 		     " location counter\n"), tree);
 	  if (expld.phase != lang_first_phase_enum)
 	    {
@@ -1082,11 +1082,11 @@ exp_fold_tree_1 (etree_type *tree)
 		  || expld.section == bfd_und_section_ptr)
 		{
 		  if (expld.phase != lang_mark_phase_enum)
-		    einfo (_("%F%S invalid assignment to"
+		    einfo (_("%F%pS invalid assignment to"
 			     " location counter\n"), tree);
 		}
 	      else if (expld.dotp == NULL)
-		einfo (_("%F%S assignment to location counter"
+		einfo (_("%F%pS assignment to location counter"
 			 " invalid outside of SECTIONS\n"), tree);
 
 	      /* After allocation, assignment to dot should not be
@@ -1105,7 +1105,7 @@ exp_fold_tree_1 (etree_type *tree)
 		    nextdot += expld.section->vma;
 		  if (nextdot < expld.dot
 		      && expld.section != bfd_abs_section_ptr)
-		    einfo (_("%F%S cannot move location counter backwards"
+		    einfo (_("%F%pS cannot move location counter backwards"
 			     " (from %V to %V)\n"),
 			   tree, expld.dot, nextdot);
 		  else
@@ -1513,7 +1513,7 @@ exp_get_vma (etree_type *tree, bfd_vma def, char *name)
       if (expld.result.valid_p)
 	return expld.result.value;
       else if (name != NULL && expld.phase != lang_mark_phase_enum)
-	einfo (_("%F%S: nonconstant expression for %s\n"),
+	einfo (_("%F%pS: nonconstant expression for %s\n"),
 	       tree, name);
     }
   return def;
@@ -1539,7 +1539,7 @@ exp_get_fill (etree_type *tree, fill_type *def, char *name)
   if (!expld.result.valid_p)
     {
       if (name != NULL && expld.phase != lang_mark_phase_enum)
-	einfo (_("%F%S: nonconstant expression for %s\n"),
+	einfo (_("%F%pS: nonconstant expression for %s\n"),
 	       tree, name);
       return def;
     }
@@ -1599,7 +1599,7 @@ exp_get_abs_int (etree_type *tree, int def, char *name)
 	}
       else if (name != NULL && expld.phase != lang_mark_phase_enum)
 	{
-	  einfo (_("%F%S: nonconstant expression for %s\n"),
+	  einfo (_("%F%pS: nonconstant expression for %s\n"),
 		 tree, name);
 	}
     }

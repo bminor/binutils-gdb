@@ -76,7 +76,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
 		  = bfd_get_section_by_name (f->the_bfd,
 					     SH64_CRANGES_SECTION_NAME);
 		if (input_cranges != NULL)
-		  einfo (" %I\n", f);
+		  einfo (" %pI\n", f);
 	      }
 	  }
 
@@ -105,7 +105,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
 		      & (SHF_SH5_ISA32 | SHF_SH5_ISA32_MIXED))
 		    {
 		      einfo (_("%P: Sorry, turning off relaxing: SHmedia sections present.\n"));
-		      einfo ("  %I\n", f);
+		      einfo ("  %pI\n", f);
 		      DISABLE_RELAXATION;
 		      goto done_scanning_shmedia_sections;
 		    }

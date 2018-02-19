@@ -360,7 +360,7 @@ ldctor_build_sets (void)
 		}
 
 	      if (e->name != NULL)
-		minfo ("%T\n", e->name);
+		minfo ("%pT\n", e->name);
 	      else
 		minfo ("%G\n", e->section->owner, e->section, e->value);
 	    }

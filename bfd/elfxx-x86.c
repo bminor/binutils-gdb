@@ -568,7 +568,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *inf)
 
       info->flags |= DF_TEXTREL;
       /* xgettext:c-format */
-      info->callbacks->minfo (_("%pB: dynamic relocation against `%T' "
+      info->callbacks->minfo (_("%pB: dynamic relocation against `%pT' "
 				"in read-only section `%pA'\n"),
 			      sec->owner, h->root.root.string, sec);
 

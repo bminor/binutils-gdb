@@ -1315,13 +1315,13 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
       if (strcmp (n->name, name) == 0)
 	{
 	  if (create)
-	    einfo (_("%P:%S: warning: redeclaration of memory region `%s'\n"),
+	    einfo (_("%P:%pS: warning: redeclaration of memory region `%s'\n"),
 		   NULL, name);
 	  return r;
 	}
 
   if (!create && strcmp (name, DEFAULT_MEMORY_REGION))
-    einfo (_("%P:%S: warning: memory region `%s' not declared\n"),
+    einfo (_("%P:%pS: warning: memory region `%s' not declared\n"),
 	   NULL, name);
 
   new_region = (lang_memory_region_type *)
@@ -1358,7 +1358,7 @@ lang_memory_region_alias (const char *alias, const char *region_name)
      the default memory region.  */
   if (strcmp (region_name, DEFAULT_MEMORY_REGION) == 0
       || strcmp (alias, DEFAULT_MEMORY_REGION) == 0)
-    einfo (_("%F%P:%S: error: alias for default memory region\n"), NULL);
+    einfo (_("%F%P:%pS: error: alias for default memory region\n"), NULL);
 
   /* Look for the target region and check if the alias is not already
      in use.  */
@@ -1369,14 +1369,14 @@ lang_memory_region_alias (const char *alias, const char *region_name)
 	if (region == NULL && strcmp (n->name, region_name) == 0)
 	  region = r;
 	if (strcmp (n->name, alias) == 0)
-	  einfo (_("%F%P:%S: error: redefinition of memory region "
+	  einfo (_("%F%P:%pS: error: redefinition of memory region "
 		   "alias `%s'\n"),
 		 NULL, alias);
       }
 
   /* Check if the target region exists.  */
   if (region == NULL)
-    einfo (_("%F%P:%S: error: memory region `%s' "
+    einfo (_("%F%P:%pS: error: memory region `%s' "
 	     "for alias `%s' does not exist\n"),
 	   NULL, region_name, alias);
 
@@ -2017,7 +2017,7 @@ lang_print_asneeded (void)
 
       if (m->ref != NULL)
 	minfo ("%pB ", m->ref);
-      minfo ("(%T)\n", m->name);
+      minfo ("(%pT)\n", m->name);
     }
 }
 
@@ -2829,7 +2829,7 @@ load_symbols (lang_input_statement_type *entry,
       if (!entry->flags.reload)
 	ldlang_add_file (entry);
       if (trace_files || verbose)
-	info_msg ("%I\n", entry);
+	info_msg ("%pI\n", entry);
       break;
 
     case bfd_archive:
@@ -4142,7 +4142,7 @@ print_one_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr)
 	      + hash_entry->u.def.section->output_offset
 	      + hash_entry->u.def.section->output_section->vma));
 
-      minfo ("             %T\n", hash_entry->root.string);
+      minfo ("             %pT\n", hash_entry->root.string);
     }
 
   return TRUE;
@@ -5047,7 +5047,7 @@ lang_size_sections_1
 		      dot += expld.result.section->vma;
 		  }
 		else if (expld.phase != lang_mark_phase_enum)
-		  einfo (_("%F%S: non constant or forward reference"
+		  einfo (_("%F%pS: non constant or forward reference"
 			   " address expression for section %s\n"),
 			 os->addr_tree, os->name);
 	      }
@@ -6393,7 +6393,7 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
 
   section = h->u.c.p->section;
   if (!bfd_define_common_symbol (link_info.output_bfd, &link_info, h))
-    einfo (_("%P%F: Could not define common symbol `%T': %E\n"),
+    einfo (_("%P%F: Could not define common symbol `%pT': %E\n"),
 	   h->root.string);
 
   if (config.map_file != NULL)
@@ -6716,7 +6716,7 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
 
   os->align_lma_with_input = align_with_input == ALIGN_WITH_INPUT;
   if (os->align_lma_with_input && align != NULL)
-    einfo (_("%F%P:%S: error: align with input and explicit align specified\n"),
+    einfo (_("%F%P:%pS: error: align with input and explicit align specified\n"),
 	   NULL);
 
   os->subsection_alignment =
@@ -7637,7 +7637,7 @@ lang_get_regions (lang_memory_region_type **region,
     *region = lang_memory_region_lookup (memspec, FALSE);
 
   if (have_lma && lma_memspec != 0)
-    einfo (_("%X%P:%S: section has both a load address and a load region\n"),
+    einfo (_("%X%P:%pS: section has both a load address and a load region\n"),
 	   NULL);
 }
 
@@ -7752,7 +7752,7 @@ lang_new_phdr (const char *name,
 	&& (*pp)->type == 1
 	&& !((*pp)->filehdr || (*pp)->phdrs))
       {
-	einfo (_("%X%P:%S: PHDRS and FILEHDR are not supported"
+	einfo (_("%X%P:%pS: PHDRS and FILEHDR are not supported"
 		 " when prior PT_LOAD headers lack them\n"), NULL);
 	hdrs = FALSE;
       }
