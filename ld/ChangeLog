@@ -1,3 +1,10 @@
+2018-02-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22845
+	* testsuite/ld-elf/frame.exp: Skip if -shared isn't supported.
+	Add tests for "-z noseparate-code" and "-z separate-code".
+	Remove unsupported -shared check.
+
 2018-02-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22845
