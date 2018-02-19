@@ -1,5 +1,13 @@
 2018-02-19  Maciej W. Rozycki  <macro@mips.com>
 
+	Revert
+	2018-01-12  Vlad Ivanov  <vlad@ivanov.email>
+
+	* elfxx-mips.c (_bfd_mips_elf_final_link): Notify user when
+	.reginfo section has wrong size.
+
+2018-02-19  Maciej W. Rozycki  <macro@mips.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_always_size_sections): Set
 	SEC_FIXED_SIZE and SEC_HAS_CONTENTS flags for `.reginfo' and
 	`.MIPS.abiflags' sections.

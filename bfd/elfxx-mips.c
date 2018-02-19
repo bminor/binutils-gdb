@@ -14412,16 +14412,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    }
 
 	  /* Size has been set in _bfd_mips_elf_always_size_sections.  */
-	  if (o->size != sizeof (Elf32_External_RegInfo))
-	    {
-	      _bfd_error_handler
-		(_("%pB: .reginfo section size should be %ld bytes, "
-		   "actual size is %" PRId64),
-		 abfd, (unsigned long) sizeof (Elf32_External_RegInfo),
-		 (int64_t) o->size);
-
-	      return FALSE;
-	    }
+	  BFD_ASSERT(o->size == sizeof (Elf32_External_RegInfo));
 
 	  /* Skip this section later on (I don't think this currently
 	     matters, but someday it might).  */
