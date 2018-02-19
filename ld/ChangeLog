@@ -1,3 +1,11 @@
+2018-02-19  Maciej W. Rozycki  <macro@mips.com>
+
+	* ldlang.c (insert_pad): Do not change output section's size if
+	SEC_FIXED_SIZE is set in the flags.
+	(size_input_section): Likewise.
+	(lang_size_sections_1): Likewise.
+	(lang_reset_memory_regions): Likewise.
+
 2018-02-19  Alan Modra  <amodra@gmail.com>
 
 	* ldmisc.c (vfinfo) Handle %pI, %pR, %pS and %pT in place of

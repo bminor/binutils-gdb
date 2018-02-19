@@ -4675,8 +4675,9 @@ insert_pad (lang_statement_union_type **ptr,
     }
   pad->padding_statement.output_offset = dot - output_section->vma;
   pad->padding_statement.size = alignment_needed;
-  output_section->size = TO_SIZE (dot + TO_ADDR (alignment_needed)
-				  - output_section->vma);
+  if (!(output_section->flags & SEC_FIXED_SIZE))
+    output_section->size = TO_SIZE (dot + TO_ADDR (alignment_needed)
+				    - output_section->vma);
 }
 
 /* Work out how much this section will move the dot point.  */
@@ -4725,7 +4726,8 @@ size_input_section
 
       /* Mark how big the output section must be to contain this now.  */
       dot += TO_ADDR (i->size);
-      o->size = TO_SIZE (dot - o->vma);
+      if (!(o->flags & SEC_FIXED_SIZE))
+	o->size = TO_SIZE (dot - o->vma);
     }
 
   return dot;
@@ -5079,7 +5081,8 @@ lang_size_sections_1
 		bfd_set_section_vma (os->bfd_section->owner,
 				     os->bfd_section,
 				     bfd_section_vma (input->owner, input));
-		os->bfd_section->size = input->size;
+		if (!(os->bfd_section->flags & SEC_FIXED_SIZE))
+		  os->bfd_section->size = input->size;
 		break;
 	      }
 
@@ -5194,7 +5197,9 @@ lang_size_sections_1
 			  + os->block_value - 1)
 			 & - (bfd_vma) os->block_value);
 
-		os->bfd_section->size = TO_SIZE (after - os->bfd_section->vma);
+		if (!(os->bfd_section->flags & SEC_FIXED_SIZE))
+		  os->bfd_section->size = TO_SIZE (after
+						   - os->bfd_section->vma);
 	      }
 
 	    /* Set section lma.  */
@@ -5379,8 +5384,10 @@ lang_size_sections_1
 	    if (size < TO_SIZE ((unsigned) 1))
 	      size = TO_SIZE ((unsigned) 1);
 	    dot += TO_ADDR (size);
-	    output_section_statement->bfd_section->size
-	      = TO_SIZE (dot - output_section_statement->bfd_section->vma);
+	    if (!(output_section_statement->bfd_section->flags
+		  & SEC_FIXED_SIZE))
+	      output_section_statement->bfd_section->size
+		= TO_SIZE (dot - output_section_statement->bfd_section->vma);
 
 	  }
 	  break;
@@ -5395,8 +5402,10 @@ lang_size_sections_1
 	      output_section_statement->bfd_section;
 	    size = bfd_get_reloc_size (s->reloc_statement.howto);
 	    dot += TO_ADDR (size);
-	    output_section_statement->bfd_section->size
-	      = TO_SIZE (dot - output_section_statement->bfd_section->vma);
+	    if (!(output_section_statement->bfd_section->flags
+		  & SEC_FIXED_SIZE))
+	      output_section_statement->bfd_section->size
+		= TO_SIZE (dot - output_section_statement->bfd_section->vma);
 	  }
 	  break;
 
@@ -6764,7 +6773,8 @@ lang_reset_memory_regions (void)
     {
       /* Save the last size for possible use by bfd_relax_section.  */
       o->rawsize = o->size;
-      o->size = 0;
+      if (!(o->flags & SEC_FIXED_SIZE))
+	o->size = 0;
     }
 }
 

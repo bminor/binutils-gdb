@@ -1342,6 +1342,11 @@ typedef struct bfd_section
   /* The section contains thread local data.  */
 #define SEC_THREAD_LOCAL                0x400
 
+  /* The section's size is fixed.  Generic linker code will not
+     recalculate it and it is up to whoever has set this flag to
+     get the size right.  */
+#define SEC_FIXED_SIZE                  0x800
+
   /* The section contains common symbols (symbols may be defined
      multiple times, the value of a symbol is the amount of
      space it requires, and the largest symbol value is the one
