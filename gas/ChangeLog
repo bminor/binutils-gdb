@@ -1,3 +1,8 @@
+2018-02-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* doc/c-arm.texi (.arch_extension): Mention extensions it accepts are
+	also the same as -march.
+
 2018-02-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention .nop directive.
