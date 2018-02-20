@@ -537,11 +537,15 @@ ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
 
-arch/%.o: ../arch/%.c
-	$(COMPILE) $<
+# Rules for objects that go in the in-process agent.
+
+arch/%-ipa.o: ../arch/%.c
+	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
-# Rules for objects that go in the in-process agent.
+common/%-ipa.o: ../common/%.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
 
 %-ipa.o: %-generated.c
 	$(IPAGENT_COMPILE) $<
@@ -562,25 +566,21 @@ arch/%.o: ../arch/%.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
-common/%-ipa.o: ../common/%.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-
-arch/%-ipa.o: ../arch/%.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-
 # Rules for objects that go in the gdbserver binary.
+
+arch/%.o: ../arch/%.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+common/%.o: ../common/%.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 
 %.o: %-generated.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
 %.o: %.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-common/%.o: ../common/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

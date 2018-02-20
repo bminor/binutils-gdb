@@ -1,3 +1,8 @@
+2018-02-20  Alan Hayward  <alan.hayward@arm.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in: Switch order of make rules.
+
 2018-02-19  Alan Hayward  <alan.hayward@arm.com>
 
 	* Makefile.in: Add common directory in build.
