@@ -1,5 +1,19 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/indirect.exp,
+	* testsuite/ld-elf/pr22649-2ab-mips.msg,
+	* testsuite/ld-elf/pr22649-2cd-mips.msg,
+	* testsuite/ld-elf/pr22649.msg,
+	* testsuite/ld-elf/tls_common.exp,
+	* testsuite/ld-elfcomm/elfcomm.exp,
+	* testsuite/ld-arm/attr-merge-incompatible.d,
+	* testsuite/ld-tic6x/attr-compatibility-gnu-other.d,
+	* testsuite/ld-tic6x/attr-compatibility-other-gnu.d,
+	* testsuite/ld-tic6x/attr-compatibility-other-other.d,
+	* testsuite/ld-i386/warn1.d: Update expected error/warning messages.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/attr-gnu-12-21.d,
 	* testsuite/ld-powerpc/attr-gnu-4-12.d,
 	* testsuite/ld-powerpc/attr-gnu-4-13.d,

@@ -124,7 +124,7 @@ set cmd "$ld -e start -o tmpdir/indirect1 tmpdir/indirect1a.o tmpdir/libindirect
 check_link_message "$cmd" [list $string1 $string] "$testname"
 
 set string ": final link failed: Nonrepresentable section on output"
-set string2 ": No symbol version section for versioned symbol \`foo@FOO\'"
+set string2 ": no symbol version section for versioned symbol \`foo@FOO\'"
 set testname "Indirect symbol 2"
 set cmd "$ld -shared  -o tmpdir/indirect2.so tmpdir/indirect2.o"
 check_link_message "$cmd" [list $string2 $string] "$testname"

@@ -66,7 +66,7 @@ check_for_relocs (bfd * abfd, asection * o, void * failed)
 
       ehdrp = elf_elfheader (abfd);
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: Relocations in generic ELF (EM: %d)"),
+      _bfd_error_handler (_("%pB: relocations in generic ELF (EM: %d)"),
 			  abfd, ehdrp->e_machine);
 
       bfd_set_error (bfd_error_wrong_format);

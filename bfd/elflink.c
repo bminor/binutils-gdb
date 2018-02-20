@@ -3822,9 +3822,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	   && ehdr->e_machine == bed->elf_machine_alt1)
 	  || (bed->elf_machine_alt2 != 0
 	      && ehdr->e_machine == bed->elf_machine_alt2)))
-    info->callbacks->einfo
+    _bfd_error_handler
       /* xgettext:c-format */
-      (_("%P: alternate ELF machine code found (%d) in %pB, expecting %d\n"),
+      (_("alternate ELF machine code found (%d) in %pB, expecting %d"),
        ehdr->e_machine, abfd, bed->elf_machine_code);
 
   /* As a GNU extension, any input sections which are named
@@ -4779,14 +4779,14 @@ error_free_dyn:
 		  if (normal_bfd == NULL)
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("Warning: alignment %u of common symbol `%s' in %pB is"
+		      (_("warning: alignment %u of common symbol `%s' in %pB is"
 			 " greater than the alignment (%u) of its section %pA"),
 		       1 << common_align, name, common_bfd,
 		       1 << normal_align, h->root.u.def.section);
 		  else
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("Warning: alignment %u of symbol `%s' in %pB"
+		      (_("warning: alignment %u of symbol `%s' in %pB"
 			 " is smaller than %u in %pB"),
 		       1 << normal_align, name, normal_bfd,
 		       1 << common_align, common_bfd);
@@ -4803,7 +4803,7 @@ error_free_dyn:
 		  && ! size_change_ok)
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("Warning: size of symbol `%s' changed"
+		  (_("warning: size of symbol `%s' changed"
 		     " from %" PRIu64 " in %pB to %" PRIu64 " in %pB"),
 		   name, (uint64_t) h->size, old_bfd,
 		   (uint64_t) isym->st_size, abfd);
@@ -4838,7 +4838,7 @@ error_free_dyn:
 		  if (h->type != STT_NOTYPE && ! type_change_ok)
 		    /* xgettext:c-format */
 		    _bfd_error_handler
-		      (_("Warning: type of symbol `%s' changed"
+		      (_("warning: type of symbol `%s' changed"
 			 " from %d to %d in %pB"),
 		       name, h->type, type, abfd);
 
@@ -8717,10 +8717,10 @@ elf_link_adjust_relocs (bfd *abfd,
 	  && ! info->gc_keep_exported)
 	{
 	  /* PR 21524: Let the user know if a symbol was removed by garbage collection.  */
-	  _bfd_error_handler (_("%pB:%pA: error: relocation references symbol %s which was removed by garbage collection."),
+	  _bfd_error_handler (_("%pB:%pA: error: relocation references symbol %s which was removed by garbage collection"),
 			      abfd, sec,
 			      (*rel_hash)->root.root.string);
-	  _bfd_error_handler (_("%pB:%pA: error: try relinking with --gc-keep-exported enabled."),
+	  _bfd_error_handler (_("%pB:%pA: error: try relinking with --gc-keep-exported enabled"),
 			      abfd, sec);
 	  bfd_set_error (bfd_error_invalid_operation);
 	  return FALSE;
@@ -8956,7 +8956,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		    /* Section size is only divisible by rela.  */
 		    if (use_rela_initialised && !use_rela)
 		      {
-			_bfd_error_handler (_("%pB: Unable to sort relocs - "
+			_bfd_error_handler (_("%pB: unable to sort relocs - "
 					      "they are in more than one size"),
 					    abfd);
 			bfd_set_error (bfd_error_invalid_operation);
@@ -8974,7 +8974,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		/* Section size is only divisible by rel.  */
 		if (use_rela_initialised && use_rela)
 		  {
-		    _bfd_error_handler (_("%pB: Unable to sort relocs - "
+		    _bfd_error_handler (_("%pB: unable to sort relocs - "
 					  "they are in more than one size"),
 					abfd);
 		    bfd_set_error (bfd_error_invalid_operation);
@@ -8990,7 +8990,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	      {
 		/* The section size is not divisible by either -
 		   something is wrong.  */
-		_bfd_error_handler (_("%pB: Unable to sort relocs - "
+		_bfd_error_handler (_("%pB: unable to sort relocs - "
 				      "they are of an unknown size"), abfd);
 		bfd_set_error (bfd_error_invalid_operation);
 		return 0;
@@ -9013,7 +9013,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		    /* Section size is only divisible by rela.  */
 		    if (use_rela_initialised && !use_rela)
 		      {
-			_bfd_error_handler (_("%pB: Unable to sort relocs - "
+			_bfd_error_handler (_("%pB: unable to sort relocs - "
 					      "they are in more than one size"),
 					    abfd);
 			bfd_set_error (bfd_error_invalid_operation);
@@ -9031,7 +9031,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		/* Section size is only divisible by rel.  */
 		if (use_rela_initialised && use_rela)
 		  {
-		    _bfd_error_handler (_("%pB: Unable to sort relocs - "
+		    _bfd_error_handler (_("%pB: unable to sort relocs - "
 					  "they are in more than one size"),
 					abfd);
 		    bfd_set_error (bfd_error_invalid_operation);
@@ -9047,7 +9047,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	      {
 		/* The section size is not divisible by either -
 		   something is wrong.  */
-		_bfd_error_handler (_("%pB: Unable to sort relocs - "
+		_bfd_error_handler (_("%pB: unable to sort relocs - "
 				      "they are of an unknown size"), abfd);
 		bfd_set_error (bfd_error_invalid_operation);
 		return 0;
@@ -9099,7 +9099,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
   if (sort == NULL)
     {
       (*info->callbacks->warning)
-	(info, _("Not enough memory to sort relocations"), 0, abfd, 0, 0);
+	(info, _("not enough memory to sort relocations"), 0, abfd, 0, 0);
       return 0;
     }
 
@@ -9367,7 +9367,7 @@ check_dynsym (bfd *abfd, Elf_Internal_Sym *sym)
 	 beyond 64k.  */
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: Too many sections: %d (>= %d)"),
+	(_("%pB: too many sections: %d (>= %d)"),
 	 abfd, bfd_count_sections (abfd), SHN_LORESERVE & 0xffff);
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
@@ -9930,7 +9930,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: No symbol version section for versioned symbol `%s'"),
+		(_("%pB: no symbol version section for versioned symbol `%s'"),
 		 flinfo->output_bfd, h->root.root.string);
 	      eoinfo->failed = TRUE;
 	      return FALSE;
@@ -12553,10 +12553,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		{
 		  if (info->error_textrel)
 		    info->callbacks->einfo
-		      (_("%P%X: read-only segment has dynamic relocations.\n"));
+		      (_("%P%X: read-only segment has dynamic relocations\n"));
 		  else
 		    info->callbacks->einfo
-		      (_("%P: warning: creating a DT_TEXTREL in a shared object.\n"));
+		      (_("%P: warning: creating a DT_TEXTREL in a shared object\n"));
 		  break;
 		}
 	    }
@@ -13165,7 +13165,7 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 
 	  if (info->print_gc_sections && o->size != 0)
 	    /* xgettext:c-format */
-	    _bfd_error_handler (_("Removing unused section '%pA' in file '%pB'"),
+	    _bfd_error_handler (_("removing unused section '%pA' in file '%pB'"),
 				o, sub);
 	}
     }
@@ -13383,7 +13383,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   if (!bed->can_gc_sections
       || !is_elf_hash_table (info->hash))
     {
-      _bfd_error_handler(_("Warning: gc-sections option ignored"));
+      _bfd_error_handler(_("warning: gc-sections option ignored"));
       return TRUE;
     }
 
@@ -13509,7 +13509,7 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
     }
 
   /* xgettext:c-format */
-  _bfd_error_handler (_("%pB: %pA+%#" PRIx64 ": No symbol found for INHERIT"),
+  _bfd_error_handler (_("%pB: %pA+%#" PRIx64 ": no symbol found for INHERIT"),
 		      abfd, sec, (uint64_t) offset);
   bfd_set_error (bfd_error_invalid_operation);
   return FALSE;
@@ -13685,7 +13685,7 @@ bfd_elf_lookup_section_flags (struct bfd_link_info *info,
 	  if (!tf->valid)
 	    {
 	      info->callbacks->einfo
-		(_("Unrecognized INPUT_SECTION_FLAG %s\n"), tf->name);
+		(_("unrecognized INPUT_SECTION_FLAG %s\n"), tf->name);
 	      return FALSE;
 	    }
 	}

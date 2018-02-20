@@ -1389,7 +1389,7 @@ copy_special_section_fields (const bfd *ibfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: Invalid sh_link field (%d) in section number %d"),
+	    (_("%pB: invalid sh_link field (%d) in section number %d"),
 	     ibfd, iheader->sh_link, secnum);
 	  return FALSE;
 	}
@@ -1405,7 +1405,7 @@ copy_special_section_fields (const bfd *ibfd,
 	   if we could not find a match ?  */
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%pB: Failed to find link section for section %d"), obfd, secnum);
+	  (_("%pB: failed to find link section for section %d"), obfd, secnum);
     }
 
   if (iheader->sh_info)
@@ -1432,7 +1432,7 @@ copy_special_section_fields (const bfd *ibfd,
       else
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%pB: Failed to find info section for section %d"), obfd, secnum);
+	  (_("%pB: failed to find info section for section %d"), obfd, secnum);
     }
 
   return changed;
@@ -3223,7 +3223,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: error: Alignment power %d of section `%pA' is too big"),
+	(_("%pB: error: alignment power %d of section `%pA' is too big"),
 	 abfd, asect->alignment_power, asect);
       arg->failed = TRUE;
       return;
@@ -5472,7 +5472,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		      && p->p_paddr < (bfd_vma) off))
 		{
 		  _bfd_error_handler
-		    (_("%pB: Not enough room for program headers,"
+		    (_("%pB: not enough room for program headers,"
 		       " try linking with -N"),
 		     abfd);
 		  bfd_set_error (bfd_error_bad_value);
@@ -6845,9 +6845,10 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	  if (segment->p_type == PT_LOAD
 	      && (segment->p_filesz > 0 || segment->p_memsz == 0))
 	    /* xgettext:c-format */
-	    _bfd_error_handler (_("%pB: warning: Empty loadable segment detected"
-				  " at vaddr=%#" PRIx64 ", is this intentional?"),
-				ibfd, (uint64_t) segment->p_vaddr);
+	    _bfd_error_handler
+	      (_("%pB: warning: empty loadable segment detected"
+		 " at vaddr=%#" PRIx64 ", is this intentional?"),
+	       ibfd, (uint64_t) segment->p_vaddr);
 
 	  map->count = 0;
 	  *pointer_to_map = map;
@@ -7957,10 +7958,11 @@ error_return:
 		  if (shndx == SHN_BAD)
 		    {
 		      /* xgettext:c-format */
-		      _bfd_error_handler (_("\
-Unable to find equivalent output section for symbol '%s' from section '%s'"),
-					  syms[idx]->name ? syms[idx]->name : "<Local sym>",
-					  sec->name);
+		      _bfd_error_handler
+			(_("unable to find equivalent output section"
+			   " for symbol '%s' from section '%s'"),
+			 syms[idx]->name ? syms[idx]->name : "<Local sym>",
+			 sec->name);
 		      bfd_set_error (bfd_error_invalid_operation);
 		      goto error_return;
 		    }

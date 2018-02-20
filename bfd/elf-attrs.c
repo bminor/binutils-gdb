@@ -601,7 +601,7 @@ _bfd_elf_merge_object_attributes (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-		(_("error: %pB: Object has vendor-specific contents that "
+		(_("error: %pB: object has vendor-specific contents that "
 		   "must be processed by the '%s' toolchain"),
 		 ibfd, in_attr->s);
 	  return FALSE;
@@ -611,7 +611,7 @@ _bfd_elf_merge_object_attributes (bfd *ibfd, struct bfd_link_info *info)
 	  || (in_attr->i != 0 && strcmp (in_attr->s, out_attr->s) != 0))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("error: %pB: Object tag '%d, %s' is "
+	  _bfd_error_handler (_("error: %pB: object tag '%d, %s' is "
 				"incompatible with tag '%d, %s'"),
 			      ibfd,
 			      in_attr->i, in_attr->s ? in_attr->s : "",

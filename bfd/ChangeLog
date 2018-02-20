@@ -1,5 +1,11 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* dwarf2.c, * elf-attrs.c, * elf-eh-frame.c, * elf.c, * elf32-gen.c,
+	* elflink.c: Standardize error/warning messages.  Replace use of
+	linker callback einfo with _bfd_error_handler when possible.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* aoutx.h, * coff-alpha.c, * coff-i860.c, * coff-m68k.c,
 	* coff-mcore.c, * coff-ppc.c, * coff-rs6000.c, * coff-sh.c,
 	* coff-tic4x.c, * coff-tic54x.c, * coff-tic80.c, * coff-w65.c,
