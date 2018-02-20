@@ -4,4 +4,4 @@
 #as: -EB -32
 #ld: -EB -Ttext 0x1c000000 -e 0x1c000000
 #error: \A[^\n]*: In function `foo':\n
-#error:   \(\.text\+0x0\): Cannot convert a branch to JALX for a non-word-aligned address\Z
+#error:   \(\.text\+0x0\): cannot convert a branch to JALX for a non-word-aligned address\Z

@@ -1,5 +1,9 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* elfxx-mips.c: Standardize error/warning messages.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* dwarf2.c, * elf-attrs.c, * elf-eh-frame.c, * elf.c, * elf32-gen.c,
 	* elflink.c: Standardize error/warning messages.  Replace use of
 	linker callback einfo with _bfd_error_handler when possible.
