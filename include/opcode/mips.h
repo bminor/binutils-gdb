@@ -1889,13 +1889,12 @@ extern int bfd_mips_num_opcodes;
    "A" 8 bit PC relative address * 4 (MIPS16OP_*_IMM8)
    "B" 5 bit PC relative address * 8 (MIPS16OP_*_IMM5)
    "E" 5 bit PC relative address * 4 (MIPS16OP_*_IMM5)
-   "m" 7 bit register list for save instruction (18 bit extended)
-   "M" 7 bit register list for restore instruction (18 bit extended)
+   "m" 7 bit register list for SAVE/RESTORE instruction (18 bit extended)
 
    Characters used so far, for quick reference when adding more:
    "0123456 89"
    ".[]<>"
-   "ABCDEFGHI KLMNOPQRSTUVWXYZ"
+   "ABCDEFGHI KL NOPQRSTUVWXYZ"
    "abcde   ijklmnopqrs uvwxyz"
   */
 

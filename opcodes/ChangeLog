@@ -1,3 +1,8 @@
+2018-02-20  Maciej W. Rozycki  <macro@mips.com>
+
+	* mips16-opc.c (decode_mips16_operand) <'M'>: Remove case.
+	(mips16_opcodes): Replace `M' with `m' for "restore".
+
 2018-02-19  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-dis.c (thumb_opcodes): Fix BXNS mask.
