@@ -1,3 +1,8 @@
+2018-02-20  Ronald Hoogenboom  <hoogenboom30@zonnet.nl>
+
+	* doc/binutils.texi (objcopy): Add missing closing square
+	parenthesis to listing of objcopy's command line options.
+
 2018-02-19  Matthias Klose  <doko@debian.org>
 
 	* strings.c (long_options): Include-all-whitespace does not take
