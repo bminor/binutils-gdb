@@ -1,3 +1,11 @@
+2018-02-20  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/gas/mips/mips16-branch-reloc-4.d: New test.
+	* testsuite/gas/mips/mips16-branch-reloc-5.d: New test.
+	* testsuite/gas/mips/mips16-branch-reloc-4.s: New test source.
+	* testsuite/gas/mips/mips16-branch-reloc-5.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2018-02-20  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (struct litpool_frag): Add new field
