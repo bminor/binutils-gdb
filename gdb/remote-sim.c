@@ -376,8 +376,8 @@ gdb_os_flush_stderr (host_callback *p)
 
 /* GDB version of printf_filtered callback.  */
 
-static void
-gdb_os_printf_filtered (host_callback * p, const char *format,...)
+static void ATTRIBUTE_PRINTF (2, 3)
+gdb_os_printf_filtered (host_callback * p, const char *format, ...)
 {
   va_list args;
 
@@ -388,7 +388,7 @@ gdb_os_printf_filtered (host_callback * p, const char *format,...)
 
 /* GDB version of error vprintf_filtered.  */
 
-static void
+static void ATTRIBUTE_PRINTF (2, 0)
 gdb_os_vprintf_filtered (host_callback * p, const char *format, va_list ap)
 {
   vfprintf_filtered (gdb_stdout, format, ap);
@@ -396,7 +396,7 @@ gdb_os_vprintf_filtered (host_callback * p, const char *format, va_list ap)
 
 /* GDB version of error evprintf_filtered.  */
 
-static void
+static void ATTRIBUTE_PRINTF (2, 0)
 gdb_os_evprintf_filtered (host_callback * p, const char *format, va_list ap)
 {
   vfprintf_filtered (gdb_stderr, format, ap);
@@ -404,7 +404,7 @@ gdb_os_evprintf_filtered (host_callback * p, const char *format, va_list ap)
 
 /* GDB version of error callback.  */
 
-static void
+static void ATTRIBUTE_PRINTF (2, 3)
 gdb_os_error (host_callback * p, const char *format, ...)
 {
   va_list args;
