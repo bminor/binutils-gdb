@@ -118,6 +118,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module memmem-simple:
   # Code from module mempcpy:
   # Code from module memrchr:
+  # Code from module mkstemp:
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
   # Code from module multiarch:
@@ -137,6 +138,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module rmdir:
   # Code from module same-inode:
   # Code from module save-cwd:
+  # Code from module secure_getenv:
   # Code from module setenv:
   # Code from module signal-h:
   # Code from module snippet/_Noreturn:
@@ -163,6 +165,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module sys_stat:
   # Code from module sys_time:
   # Code from module sys_types:
+  # Code from module tempname:
   # Code from module time:
   # Code from module unistd:
   # Code from module unistd-safer:
@@ -421,6 +424,12 @@ AC_DEFUN([gl_INIT],
     gl_PREREQ_MEMRCHR
   fi
   gl_STRING_MODULE_INDICATOR([memrchr])
+  gl_FUNC_MKSTEMP
+  if test $HAVE_MKSTEMP = 0 || test $REPLACE_MKSTEMP = 1; then
+    AC_LIBOBJ([mkstemp])
+    gl_PREREQ_MKSTEMP
+  fi
+  gl_STDLIB_MODULE_INDICATOR([mkstemp])
   AC_REQUIRE([gl_MSVC_INVAL])
   if test $HAVE_MSVC_INVALID_PARAMETER_HANDLER = 1; then
     AC_LIBOBJ([msvc-inval])
@@ -487,6 +496,12 @@ AC_DEFUN([gl_INIT],
   fi
   gl_UNISTD_MODULE_INDICATOR([rmdir])
   gl_SAVE_CWD
+  gl_FUNC_SECURE_GETENV
+  if test $HAVE_SECURE_GETENV = 0; then
+    AC_LIBOBJ([secure_getenv])
+    gl_PREREQ_SECURE_GETENV
+  fi
+  gl_STDLIB_MODULE_INDICATOR([secure_getenv])
   gl_FUNC_SETENV
   if test $HAVE_SETENV = 0 || test $REPLACE_SETENV = 1; then
     AC_LIBOBJ([setenv])
@@ -551,6 +566,7 @@ AC_DEFUN([gl_INIT],
   AC_PROG_MKDIR_P
   gl_SYS_TYPES_H
   AC_PROG_MKDIR_P
+  gl_FUNC_GEN_TEMPNAME
   gl_HEADER_TIME_H
   gl_UNISTD_H
   gl_UNISTD_SAFER
@@ -797,6 +813,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/memmem.c
   lib/mempcpy.c
   lib/memrchr.c
+  lib/mkstemp.c
   lib/msvc-inval.c
   lib/msvc-inval.h
   lib/msvc-nothrow.c
@@ -823,6 +840,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/same-inode.h
   lib/save-cwd.c
   lib/save-cwd.h
+  lib/secure_getenv.c
   lib/setenv.c
   lib/signal.in.h
   lib/stat.c
@@ -848,6 +866,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/sys_stat.in.h
   lib/sys_time.in.h
   lib/sys_types.in.h
+  lib/tempname.c
+  lib/tempname.h
   lib/time.in.h
   lib/unistd--.h
   lib/unistd-safer.h
@@ -932,6 +952,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/memmem.m4
   m4/mempcpy.m4
   m4/memrchr.m4
+  m4/mkstemp.m4
   m4/mmap-anon.m4
   m4/mode_t.m4
   m4/msvc-inval.m4
@@ -951,6 +972,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/rewinddir.m4
   m4/rmdir.m4
   m4/save-cwd.m4
+  m4/secure_getenv.m4
   m4/setenv.m4
   m4/signal_h.m4
   m4/ssize_t.m4
@@ -970,6 +992,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/sys_stat_h.m4
   m4/sys_time_h.m4
   m4/sys_types_h.m4
+  m4/tempname.m4
   m4/time_h.m4
   m4/unistd-safer.m4
   m4/unistd_h.m4

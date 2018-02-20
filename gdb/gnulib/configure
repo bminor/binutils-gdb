@@ -3362,8 +3362,14 @@ as_fn_append ac_func_list " mbsinit"
 as_fn_append ac_func_list " mbrtowc"
 as_fn_append ac_header_list " sys/mman.h"
 as_fn_append ac_func_list " mprotect"
+as_fn_append ac_func_list " mkstemp"
 as_fn_append ac_func_list " openat"
 as_fn_append ac_func_list " link"
+as_fn_append ac_func_list " secure_getenv"
+as_fn_append ac_func_list " getuid"
+as_fn_append ac_func_list " geteuid"
+as_fn_append ac_func_list " getgid"
+as_fn_append ac_func_list " getegid"
 as_fn_append ac_func_list " setenv"
 as_fn_append ac_func_list " strdup"
 as_fn_append ac_func_list " pipe"
@@ -5409,6 +5415,7 @@ fi
   # Code from module memmem-simple:
   # Code from module mempcpy:
   # Code from module memrchr:
+  # Code from module mkstemp:
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
   # Code from module multiarch:
@@ -5428,6 +5435,7 @@ fi
   # Code from module rmdir:
   # Code from module same-inode:
   # Code from module save-cwd:
+  # Code from module secure_getenv:
   # Code from module setenv:
   # Code from module signal-h:
   # Code from module snippet/_Noreturn:
@@ -5454,6 +5462,7 @@ fi
   # Code from module sys_stat:
   # Code from module sys_time:
   # Code from module sys_types:
+  # Code from module tempname:
   # Code from module time:
   # Code from module unistd:
   # Code from module unistd-safer:
@@ -11972,6 +11981,8 @@ _ACEOF
 
 
 
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for promoted mode_t type" >&5
 $as_echo_n "checking for promoted mode_t type... " >&6; }
 if test "${gl_cv_promoted_mode_t+set}" = set; then :
@@ -12109,6 +12120,16 @@ _ACEOF
   REPLACE_VPRINTF=0;
   REPLACE_VSNPRINTF=0;
   REPLACE_VSPRINTF=0;
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -19676,6 +19697,117 @@ $as_echo "#define GNULIB_TEST_MEMRCHR 1" >>confdefs.h
 
 
 
+
+
+
+  if test $ac_cv_func_mkstemp = yes; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working mkstemp" >&5
+$as_echo_n "checking for working mkstemp... " >&6; }
+if test "${gl_cv_func_working_mkstemp+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+
+        mkdir conftest.mkstemp
+        if test "$cross_compiling" = yes; then :
+  case "$host_os" in
+                     # Guess yes on glibc systems.
+             *-gnu*) gl_cv_func_working_mkstemp="guessing yes" ;;
+                     # If we don't know, assume the worst.
+             *)      gl_cv_func_working_mkstemp="guessing no" ;;
+           esac
+
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+int result = 0;
+              int i;
+              off_t large = (off_t) 4294967295u;
+              if (large < 0)
+                large = 2147483647;
+              umask (0);
+              for (i = 0; i < 70; i++)
+                {
+                  char templ[] = "conftest.mkstemp/coXXXXXX";
+                  int (*mkstemp_function) (char *) = mkstemp;
+                  int fd = mkstemp_function (templ);
+                  if (fd < 0)
+                    result |= 1;
+                  else
+                    {
+                      struct stat st;
+                      if (lseek (fd, large, SEEK_SET) != large)
+                        result |= 2;
+                      if (fstat (fd, &st) < 0)
+                        result |= 4;
+                      else if (st.st_mode & 0077)
+                        result |= 8;
+                      if (close (fd))
+                        result |= 16;
+                    }
+                }
+              return result;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  gl_cv_func_working_mkstemp=yes
+else
+  gl_cv_func_working_mkstemp=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+        rm -rf conftest.mkstemp
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_working_mkstemp" >&5
+$as_echo "$gl_cv_func_working_mkstemp" >&6; }
+    case "$gl_cv_func_working_mkstemp" in
+      *yes) ;;
+      *)
+        REPLACE_MKSTEMP=1
+        ;;
+    esac
+  else
+    HAVE_MKSTEMP=0
+  fi
+
+  if test $HAVE_MKSTEMP = 0 || test $REPLACE_MKSTEMP = 1; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS mkstemp.$ac_objext"
+
+
+
+  fi
+
+
+
+
+
+          GNULIB_MKSTEMP=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_MKSTEMP 1" >>confdefs.h
+
+
+
+
   if test $HAVE_MSVC_INVALID_PARAMETER_HANDLER = 1; then
 
 
@@ -20634,6 +20766,69 @@ $as_echo "#define GNULIB_TEST_RMDIR 1" >>confdefs.h
 
 
 
+
+
+
+
+
+
+
+
+  if test $ac_cv_func_secure_getenv = no; then
+    HAVE_SECURE_GETENV=0
+  fi
+
+  if test $HAVE_SECURE_GETENV = 0; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS secure_getenv.$ac_objext"
+
+
+  for ac_func in __secure_getenv
+do :
+  ac_fn_c_check_func "$LINENO" "__secure_getenv" "ac_cv_func___secure_getenv"
+if test "x$ac_cv_func___secure_getenv" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE___SECURE_GETENV 1
+_ACEOF
+
+fi
+done
+
+  if test $ac_cv_func___secure_getenv = no; then
+    for ac_func in issetugid
+do :
+  ac_fn_c_check_func "$LINENO" "issetugid" "ac_cv_func_issetugid"
+if test "x$ac_cv_func_issetugid" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ISSETUGID 1
+_ACEOF
+
+fi
+done
+
+  fi
+
+
+  fi
+
+
+
+
+
+          GNULIB_SECURE_GETENV=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_SECURE_GETENV 1" >>confdefs.h
 
 
 
@@ -22297,6 +22492,11 @@ fi
 
 
 
+
+
+
+
+  :
 
 
 

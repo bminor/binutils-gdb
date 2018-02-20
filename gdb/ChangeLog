@@ -1,3 +1,7 @@
+2018-02-20  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add mkstemp.
+
 2018-02-19  Alan Hayward  <alan.hayward@arm.com>
 
 	* Makefile.in: (COMMON_SFILES): Add common/*.c files.
