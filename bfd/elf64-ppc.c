@@ -2514,8 +2514,8 @@ ppc64_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
   if (type >= ARRAY_SIZE (ppc64_elf_howto_table))
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid relocation type %d"),
-			  abfd, (int) type);
+      _bfd_error_handler (_("%pB: unsupported reloc type %#x"),
+			  abfd, type);
       type = R_PPC64_NONE;
     }
   cache_ptr->howto = ppc64_elf_howto_table[type];
@@ -4647,8 +4647,8 @@ ppc_add_stub (const char *stub_name,
   if (stub_entry == NULL)
     {
       /* xgettext:c-format */
-      info->callbacks->einfo (_("%P: %pB: cannot create stub entry %s\n"),
-			      section->owner, stub_name);
+      _bfd_error_handler (_("%pB: cannot create stub entry %s"),
+			  section->owner, stub_name);
       return NULL;
     }
 
@@ -4978,8 +4978,8 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
 	set_abiversion (ibfd, 2);
       else if (abiversion (ibfd) == 1)
 	{
-	  info->callbacks->einfo (_("%P: symbol '%s' has invalid st_other"
-				    " for ABI version 1\n"), name);
+	  _bfd_error_handler (_("symbol '%s' has invalid st_other"
+				" for ABI version 1"), *name);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -5153,9 +5153,8 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
       else if (abiversion (ibfd) >= 2)
 	{
 	  /* xgettext:c-format */
-	  info->callbacks->einfo (_("%P: %pB .opd not allowed in ABI"
-				    " version %d\n"),
-				  ibfd, abiversion (ibfd));
+	  _bfd_error_handler (_("%pB .opd not allowed in ABI version %d"),
+			      ibfd, abiversion (ibfd));
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -5653,7 +5652,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		ppc_howto_init ();
 	      /* xgettext:c-format */
 	      info->callbacks->einfo (_("%H: %s reloc unsupported "
-					"in shared libraries and PIEs.\n"),
+					"in shared libraries and PIEs\n"),
 				      abfd, sec, rel->r_offset,
 				      ppc64_elf_howto_table[r_type]->name);
 	      bfd_set_error (bfd_error_bad_value);
@@ -7756,8 +7755,8 @@ dec_dynrel_count (bfd_vma r_info,
     }
 
   /* xgettext:c-format */
-  info->callbacks->einfo (_("%P: dynreloc miscount for %pB, section %pA\n"),
-			  sec->owner, sec);
+  _bfd_error_handler (_("dynreloc miscount for %pB, section %pA"),
+		      sec->owner, sec);
   bfd_set_error (bfd_error_bad_value);
   return FALSE;
 }
@@ -8213,9 +8212,9 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
   if (htab->params->plt_localentry0
       && elf_link_hash_lookup (&htab->elf, "GLIBC_2.26",
 			       FALSE, FALSE, FALSE) == NULL)
-    info->callbacks->einfo
-      (_("%P: warning: --plt-localentry is especially dangerous without "
-	 "ld.so support to detect ABI violations.\n"));
+    _bfd_error_handler
+      (_("warning: --plt-localentry is especially dangerous without "
+	 "ld.so support to detect ABI violations"));
 
   htab->tls_get_addr = ((struct ppc_link_hash_entry *)
 			elf_link_hash_lookup (&htab->elf, ".__tls_get_addr",
@@ -9173,7 +9172,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			  info->callbacks->einfo
 			    /* xgettext:c-format */
 			    (_("%H: toc optimization is not supported for"
-			       " %s instruction.\n"),
+			       " %s instruction\n"),
 			     ibfd, sec, rel->r_offset & ~3, str);
 			}
 		    }
@@ -10867,8 +10866,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       if (off + (1 << 25) >= (bfd_vma) (1 << 26))
 	{
-	  info->callbacks->einfo
-	    (_("%P: long branch stub `%s' offset overflow\n"),
+	  _bfd_error_handler
+	    (_("long branch stub `%s' offset overflow"),
 	     stub_entry->root.string);
 	  htab->stub_error = TRUE;
 	  return FALSE;
@@ -10927,8 +10926,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 					 FALSE, FALSE);
       if (br_entry == NULL)
 	{
-	  info->callbacks->einfo (_("%P: can't find branch stub `%s'\n"),
-				  stub_entry->root.string);
+	  _bfd_error_handler (_("can't find branch stub `%s'"),
+			      stub_entry->root.string);
 	  htab->stub_error = TRUE;
 	  return FALSE;
 	}
@@ -11355,8 +11354,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 					     TRUE, FALSE);
 	  if (br_entry == NULL)
 	    {
-	      info->callbacks->einfo (_("%P: can't build branch stub `%s'\n"),
-				      stub_entry->root.string);
+	      _bfd_error_handler (_("can't build branch stub `%s'"),
+				  stub_entry->root.string);
 	      htab->stub_error = TRUE;
 	      return FALSE;
 	    }
@@ -13271,7 +13270,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
   if (group != NULL)
     {
       htab->stub_error = TRUE;
-      info->callbacks->einfo (_("%P: stubs don't match calculated size\n"));
+      _bfd_error_handler (_("stubs don't match calculated size"));
     }
 
   if (htab->stub_error)
@@ -14352,10 +14351,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       switch (r_type)
 	{
 	default:
-	  info->callbacks->einfo
-	    /* xgettext:c-format */
-	    (_("%P: %pB: unknown relocation type %d for `%pT'\n"),
-	     input_bfd, (int) r_type, sym_name);
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB: %s unsupported"),
+			      input_bfd, ppc64_elf_howto_table[r_type]->name);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
@@ -15711,8 +15709,8 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 		    + (p + 8 - htab->glink_eh_frame->contents));
 	    if (val + 0x80000000 > 0xffffffff)
 	      {
-		info->callbacks->einfo
-		  (_("%P: %s offset too large for .eh_frame sdata4 encoding"),
+		_bfd_error_handler
+		  (_("%s offset too large for .eh_frame sdata4 encoding"),
 		   group->stub_sec->name);
 		return FALSE;
 	      }
@@ -15730,8 +15728,8 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 		  + (p + 8 - htab->glink_eh_frame->contents));
 	  if (val + 0x80000000 > 0xffffffff)
 	    {
-	      info->callbacks->einfo
-		(_("%P: %s offset too large for .eh_frame sdata4 encoding"),
+	      _bfd_error_handler
+		(_("%s offset too large for .eh_frame sdata4 encoding"),
 		 htab->glink->name);
 	      return FALSE;
 	    }

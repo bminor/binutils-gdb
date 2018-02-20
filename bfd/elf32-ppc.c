@@ -2029,7 +2029,7 @@ ppc_elf_info_to_howto (bfd *abfd,
   if (r_type >= R_PPC_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unrecognised PPC reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported reloc type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_PPC_NONE;
@@ -2041,7 +2041,7 @@ ppc_elf_info_to_howto (bfd *abfd,
   if (!cache_ptr->howto)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid relocation type %d"),
+      _bfd_error_handler (_("%pB: unsupported reloc type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
 
@@ -2846,7 +2846,7 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
   if (buffer == NULL)
     {
       _bfd_error_handler
-	(_("failed to allocate space for new APUinfo section."));
+	(_("failed to allocate space for new APUinfo section"));
       return;
     }
 
@@ -2865,10 +2865,10 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
     }
 
   if (length != asec->size)
-    _bfd_error_handler (_("failed to compute new APUinfo section."));
+    _bfd_error_handler (_("failed to compute new APUinfo section"));
 
   if (! bfd_set_section_contents (abfd, asec, buffer, (file_ptr) 0, length))
-    _bfd_error_handler (_("failed to install new APUinfo section."));
+    _bfd_error_handler (_("failed to install new APUinfo section"));
 
   free (buffer);
 
@@ -4638,20 +4638,20 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
       else if (out_fp != 2 && in_fp == 2)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses hard float, %pB uses soft float"), obfd, ibfd);
+	  (_("warning: %pB uses hard float, %pB uses soft float"), obfd, ibfd);
       else if (out_fp == 2 && in_fp != 2)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses hard float, %pB uses soft float"), ibfd, obfd);
+	  (_("warning: %pB uses hard float, %pB uses soft float"), ibfd, obfd);
       else if (out_fp == 1 && in_fp == 3)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses double-precision hard float, "
+	  (_("warning: %pB uses double-precision hard float, "
 	     "%pB uses single-precision hard float"), obfd, ibfd);
       else if (out_fp == 3 && in_fp == 1)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses double-precision hard float, "
+	  (_("warning: %pB uses double-precision hard float, "
 	     "%pB uses single-precision hard float"), ibfd, obfd);
 
       in_fp = in_attr->i & 0xc;
@@ -4666,22 +4666,22 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
       else if (out_fp != 2 * 4 && in_fp == 2 * 4)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses 64-bit long double, "
+	  (_("warning: %pB uses 64-bit long double, "
 	     "%pB uses 128-bit long double"), ibfd, obfd);
       else if (in_fp != 2 * 4 && out_fp == 2 * 4)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses 64-bit long double, "
+	  (_("warning: %pB uses 64-bit long double, "
 	     "%pB uses 128-bit long double"), obfd, ibfd);
       else if (out_fp == 1 * 4 && in_fp == 3 * 4)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses IBM long double, "
+	  (_("warning: %pB uses IBM long double, "
 	     "%pB uses IEEE long double"), ibfd, obfd);
       else if (out_fp == 3 * 4 && in_fp == 1 * 4)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses IBM long double, "
+	  (_("warning: %pB uses IBM long double, "
 	     "%pB uses IEEE long double"), obfd, ibfd);
     }
 }
@@ -4732,12 +4732,12 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
       else if (out_vec < in_vec)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
+	  (_("warning: %pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
 	   obfd, ibfd);
       else if (out_vec > in_vec)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
+	  (_("warning: %pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
 	   ibfd, obfd);
     }
 
@@ -4760,12 +4760,12 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
       else if (out_struct < in_struct)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses r3/r4 for small structure returns, "
+	  (_("warning: %pB uses r3/r4 for small structure returns, "
 	     "%pB uses memory"), obfd, ibfd);
       else if (out_struct > in_struct)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("Warning: %pB uses r3/r4 for small structure returns, "
+	  (_("warning: %pB uses r3/r4 for small structure returns, "
 	     "%pB uses memory"), ibfd, obfd);
     }
 
@@ -5007,10 +5007,9 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (htab->plt_type == PLT_OLD && htab->params->plt_style == PLT_NEW)
     {
       if (htab->old_bfd != NULL)
-	info->callbacks->einfo (_("%P: bss-plt forced due to %pB\n"),
-				htab->old_bfd);
+	_bfd_error_handler (_("bss-plt forced due to %pB"), htab->old_bfd);
       else
-	info->callbacks->einfo (_("%P: bss-plt forced by profiling\n"));
+	_bfd_error_handler (_("bss-plt forced by profiling"));
     }
 
   BFD_ASSERT (htab->plt_type != PLT_VXWORKS);
@@ -8341,10 +8340,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
       switch (r_type)
 	{
 	default:
-	  info->callbacks->einfo
-	    /* xgettext:c-format */
-	    (_("%P: %pB: unknown relocation type %d for symbol %s\n"),
-	     input_bfd, (int) r_type, sym_name);
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB: %s unsupported"),
+			      input_bfd, howto->name);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
@@ -9099,10 +9097,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    if (!(strcmp (name, ".sdata") == 0
 		  || strcmp (name, ".sbss") == 0))
 	      {
-		info->callbacks->einfo
+		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%P: %pB: the target (%s) of a %s relocation is "
-		     "in the wrong output section (%s)\n"),
+		  (_("%pB: the target (%s) of a %s relocation is "
+		     "in the wrong output section (%s)"),
 		   input_bfd,
 		   sym_name,
 		   howto->name,
@@ -9130,10 +9128,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    if (!(strcmp (name, ".sdata2") == 0
 		  || strcmp (name, ".sbss2") == 0))
 	      {
-		info->callbacks->einfo
+		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%P: %pB: the target (%s) of a %s relocation is "
-		     "in the wrong output section (%s)\n"),
+		  (_("%pB: the target (%s) of a %s relocation is "
+		     "in the wrong output section (%s)"),
 		   input_bfd,
 		   sym_name,
 		   howto->name,
@@ -9221,10 +9219,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      }
 	    else
 	      {
-		info->callbacks->einfo
+		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%P: %pB: the target (%s) of a %s relocation is "
-		     "in the wrong output section (%s)\n"),
+		  (_("%pB: the target (%s) of a %s relocation is "
+		     "in the wrong output section (%s)"),
 		   input_bfd,
 		   sym_name,
 		   howto->name,
@@ -9417,12 +9415,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_EMB_RELST_HI:
 	case R_PPC_EMB_RELST_HA:
 	case R_PPC_EMB_BIT_FLD:
-	  info->callbacks->einfo
-	    /* xgettext:c-format */
-	    (_("%P: %pB: relocation %s is not yet supported for symbol %s\n"),
-	     input_bfd,
-	     howto->name,
-	     sym_name);
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB: %s unsupported"),
+			      input_bfd, howto->name);
 
 	  bfd_set_error (bfd_error_invalid_operation);
 	  ret = FALSE;
@@ -10407,11 +10402,10 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
       else
 	{
 	  /* xgettext:c-format */
-	  info->callbacks->einfo (_("%P: %s not defined in linker created %s\n"),
-				  htab->elf.hgot->root.root.string,
-				  (htab->elf.sgotplt != NULL
-				   ? htab->elf.sgotplt->name
-				   : htab->elf.sgot->name));
+	  _bfd_error_handler (_("%s not defined in linker created %pA"),
+			      htab->elf.hgot->root.root.string,
+			      (htab->elf.sgotplt != NULL
+			       ? htab->elf.sgotplt : htab->elf.sgot));
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
 	}

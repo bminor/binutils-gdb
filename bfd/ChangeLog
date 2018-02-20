@@ -1,3 +1,9 @@
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c: Standardize error/warning messages.  Use
+	_bfd_error_handler rather than einfo when einfo features not used.
+	* elf64-ppc.c: Likewise.
+
 2018-02-23  Alan Modra  <amodra@gmail.com>
 
 	PR 22881
