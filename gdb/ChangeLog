@@ -1,3 +1,16 @@
+2018-02-24  Tom Tromey  <tom@tromey.com>
+
+	* i386-tdep.c (i386_fast_tracepoint_valid_at): "msg" now a
+	std::string.
+	* gdbarch.sh (fast_tracepoint_valid_at): Change "msg" to a
+	std::string*.
+	* gdbarch.c: Rebuild.
+	* gdbarch.h: Rebuild.
+	* breakpoint.c (check_fast_tracepoint_sals): Use std::string.
+	* arch-utils.h (default_fast_tracepoint_valid_at): Update.
+	* arch-utils.c (default_fast_tracepoint_valid_at): "msg" now a
+	std::string*.
+
 2018-02-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbtypes.h (sect_offset): Change type to uint64_t.

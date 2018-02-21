@@ -1045,7 +1045,7 @@ v;int;has_global_breakpoints;;;0;0;;0
 m;int;has_shared_address_space;void;;;default_has_shared_address_space;;0
 
 # True if a fast tracepoint can be set at an address.
-m;int;fast_tracepoint_valid_at;CORE_ADDR addr, char **msg;addr, msg;;default_fast_tracepoint_valid_at;;0
+m;int;fast_tracepoint_valid_at;CORE_ADDR addr, std::string *msg;addr, msg;;default_fast_tracepoint_valid_at;;0
 
 # Guess register state based on tracepoint location.  Used for tracepoints
 # where no registers have been collected, but there's only one location,

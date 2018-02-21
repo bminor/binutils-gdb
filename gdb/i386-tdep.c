@@ -8111,7 +8111,7 @@ static const int i386_record_regmap[] =
 
 static int
 i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
-			       char **msg)
+			       std::string *msg)
 {
   int len, jumplen;
 
@@ -8144,15 +8144,15 @@ i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
       /* Return a bit of target-specific detail to add to the caller's
 	 generic failure message.  */
       if (msg)
-	*msg = xstrprintf (_("; instruction is only %d bytes long, "
-			     "need at least %d bytes for the jump"),
-			   len, jumplen);
+	*msg = string_printf (_("; instruction is only %d bytes long, "
+				"need at least %d bytes for the jump"),
+			      len, jumplen);
       return 0;
     }
   else
     {
       if (msg)
-	*msg = NULL;
+	msg->clear ();
       return 1;
     }
 }

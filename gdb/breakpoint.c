@@ -9177,10 +9177,6 @@ static void
 check_fast_tracepoint_sals (struct gdbarch *gdbarch,
 			    gdb::array_view<const symtab_and_line> sals)
 {
-  int rslt;
-  char *msg;
-  struct cleanup *old_chain;
-
   for (const auto &sal : sals)
     {
       struct gdbarch *sarch;
@@ -9190,14 +9186,10 @@ check_fast_tracepoint_sals (struct gdbarch *gdbarch,
 	 associated with SAL.  */
       if (sarch == NULL)
 	sarch = gdbarch;
-      rslt = gdbarch_fast_tracepoint_valid_at (sarch, sal.pc, &msg);
-      old_chain = make_cleanup (xfree, msg);
-
-      if (!rslt)
+      std::string msg;
+      if (!gdbarch_fast_tracepoint_valid_at (sarch, sal.pc, &msg))
 	error (_("May not have a fast tracepoint at %s%s"),
-	       paddress (sarch, sal.pc), (msg ? msg : ""));
-
-      do_cleanups (old_chain);
+	       paddress (sarch, sal.pc), msg.c_str ());
     }
 }
 

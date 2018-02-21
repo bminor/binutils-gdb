@@ -813,12 +813,12 @@ default_has_shared_address_space (struct gdbarch *gdbarch)
 
 int
 default_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
-				  char **msg)
+				  std::string *msg)
 {
   /* We don't know if maybe the target has some way to do fast
      tracepoints that doesn't need gdbarch, so always say yes.  */
   if (msg)
-    *msg = NULL;
+    msg->clear ();
   return 1;
 }
 
