@@ -1,3 +1,13 @@
+2018-02-21  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache::regcache): Call reg_buffer ctor.
+	(regcache::arch): Move it to reg_buffer::arch.
+	(regcache::register_buffer): Likewise.
+	(regcache::assert_regnum): Likewise.
+	(regcache::num_raw_registers): Likewise.
+	* regcache.h (reg_buffer): New class.
+	(regcache): Inherit reg_buffer.
+
 2018-02-20  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* remote-sim.c (gdb_os_printf_filtered, gdb_os_vprintf_filtered,

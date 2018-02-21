@@ -181,14 +181,13 @@ regcache_register_size (const struct regcache *regcache, int n)
   return register_size (regcache->arch (), n);
 }
 
-regcache::regcache (gdbarch *gdbarch, const address_space *aspace_,
-		    bool readonly_p_)
-  : m_aspace (aspace_), m_readonly_p (readonly_p_)
+reg_buffer::reg_buffer (gdbarch *gdbarch, bool has_pseudo)
+  : m_has_pseudo (has_pseudo)
 {
   gdb_assert (gdbarch != NULL);
   m_descr = regcache_descr (gdbarch);
 
-  if (m_readonly_p)
+  if (has_pseudo)
     {
       m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_cooked_registers);
       m_register_status = XCNEWVEC (signed char,
@@ -199,6 +198,16 @@ regcache::regcache (gdbarch *gdbarch, const address_space *aspace_,
       m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_raw_registers);
       m_register_status = XCNEWVEC (signed char, gdbarch_num_regs (gdbarch));
     }
+}
+
+regcache::regcache (gdbarch *gdbarch, const address_space *aspace_,
+		    bool readonly_p_)
+/* The register buffers.  A read-only register cache can hold the
+   full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a
+   read/write register cache can only hold [0 .. gdbarch_num_regs).  */
+  : reg_buffer (gdbarch, readonly_p_),
+    m_aspace (aspace_), m_readonly_p (readonly_p_)
+{
   m_ptid = minus_one_ptid;
 }
 
@@ -218,7 +227,7 @@ regcache::regcache (readonly_t, const regcache &src)
 }
 
 gdbarch *
-regcache::arch () const
+reg_buffer::arch () const
 {
   return m_descr->gdbarch;
 }
@@ -267,7 +276,7 @@ private:
 /* Return  a pointer to register REGNUM's buffer cache.  */
 
 gdb_byte *
-regcache::register_buffer (int regnum) const
+reg_buffer::register_buffer (int regnum) const
 {
   return m_registers + m_descr->register_offset[regnum];
 }
@@ -390,9 +399,13 @@ regcache::invalidate (int regnum)
 }
 
 void
-regcache::assert_regnum (int regnum) const
+reg_buffer::assert_regnum (int regnum) const
 {
-  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (arch ()));
+  gdb_assert (regnum >= 0);
+  if (m_has_pseudo)
+    gdb_assert (regnum < m_descr->nr_cooked_registers);
+  else
+    gdb_assert (regnum < gdbarch_num_regs (arch ()));
 }
 
 /* Global structure containing the current regcache.  */
@@ -1272,7 +1285,7 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 }
 
 int
-regcache::num_raw_registers () const
+reg_buffer::num_raw_registers () const
 {
   return gdbarch_num_regs (arch ());
 }
