@@ -3211,8 +3211,8 @@ elf64_alpha_relax_with_lituse (struct alpha_relax_info *info,
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("%pB: %pA+%#" PRIx64 ": warning: "
-	   "LITERAL relocation against unexpected insn"),
-	 abfd, info->sec, (uint64_t) irel->r_offset);
+	   "%s relocation against unexpected insn"),
+	 abfd, info->sec, (uint64_t) irel->r_offset, "LITERAL");
       return TRUE;
     }
 

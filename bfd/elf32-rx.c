@@ -661,13 +661,20 @@ rx_elf_relocate_section
 
       r = bfd_reloc_ok;
 
-#define RANGE(a,b) if (a > (long) relocation || (long) relocation > b) r = bfd_reloc_overflow
-#define ALIGN(m)   if (relocation & m) r = bfd_reloc_other;
-#define OP(i)      (contents[rel->r_offset + (i)])
+#define RANGE(a,b) \
+  if (a > (long) relocation || (long) relocation > b)		\
+    r = bfd_reloc_overflow
+#define ALIGN(m) \
+  if (relocation & m)						\
+    r = bfd_reloc_other
+#define OP(i) \
+  (contents[rel->r_offset + (i)])
 #define WARN_REDHAT(type) \
-      /* xgettext:c-format */ \
-      _bfd_error_handler (_("%pB:%pA: Warning: deprecated Red Hat reloc " type " detected against: %s."), \
-      input_bfd, input_section, name)
+  /* xgettext:c-format */					\
+  _bfd_error_handler						\
+    (_("%pB:%pA: warning: deprecated Red Hat reloc "		\
+       "%s detected against: %s"),				\
+     input_bfd, input_section, #type, name)
 
       /* Check for unsafe relocs in PID mode.  These are any relocs where
 	 an absolute address is being computed.  There are special cases
@@ -1268,7 +1275,8 @@ rx_elf_relocate_section
 			       + sec->output_offset
 			       + rel->r_addend);
 	      else
-		_bfd_error_handler (_("Warning: RX_SYM reloc with an unknown symbol"));
+		_bfd_error_handler
+		  (_("warning: RX_SYM reloc with an unknown symbol"));
 	    }
 	  break;
 
@@ -3147,7 +3155,7 @@ rx_elf_merge_private_bfd_data (bfd * ibfd, struct bfd_link_info *info)
 	    }
 	  else
 	    {
-	      _bfd_error_handler (_("There is a conflict merging the"
+	      _bfd_error_handler (_("there is a conflict merging the"
 				    " ELF header flags from %pB"),
 				  ibfd);
 	      _bfd_error_handler (_("  the input  file's flags: %s"),

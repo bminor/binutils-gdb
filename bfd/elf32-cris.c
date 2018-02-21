@@ -1179,10 +1179,10 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      _bfd_error_handler
 		((h->got.offset == (bfd_vma) -1)
 		 /* xgettext:c-format */
-		 ? _("%pB, section %pA: No PLT nor GOT for relocation %s"
+		 ? _("%pB, section %pA: no PLT nor GOT for relocation %s"
 		     " against symbol `%s'")
 		 /* xgettext:c-format */
-		 : _("%pB, section %pA: No PLT for relocation %s"
+		 : _("%pB, section %pA: no PLT for relocation %s"
 		     " against symbol `%s'"),
 		 input_bfd,
 		 input_section,
@@ -3045,7 +3045,7 @@ cris_elf_check_relocs (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB, section %pA:\n  v10/v32 compatible object"
+		    (_("%pB, section %pA: v10/v32 compatible object"
 		       " must not contain a PIC relocation"),
 		     abfd, sec);
 		  return FALSE;
@@ -3317,7 +3317,7 @@ cris_elf_check_relocs (bfd *abfd,
 	      /* FIXME: How do we make this optionally a warning only?  */
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB, section %pA:\n  relocation %s should not"
+		(_("%pB, section %pA: relocation %s should not"
 		   " be used in a shared object; recompile with -fPIC"),
 		 abfd,
 		 sec,
@@ -3742,8 +3742,8 @@ elf_cris_discard_excess_dso_dynamics (struct elf_cris_link_hash_entry *h,
 	/* FIXME: How do we make this optionally a warning only?  */
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%pB, section `%pA', to symbol `%s':\n"
-	     "  relocation %s should not be used"
+	  (_("%pB, section `%pA', to symbol `%s':"
+	     " relocation %s should not be used"
 	     " in a shared object; recompile with -fPIC"),
 	   s->section->owner,
 	   s->section,
@@ -3855,7 +3855,7 @@ cris_elf_final_write_processing (bfd *abfd,
 
     default:
       _bfd_abort (__FILE__, __LINE__,
-		  _("Unexpected machine number"));
+		  _("unexpected machine number"));
     }
 
   elf_elfheader (abfd)->e_flags = e_flags;

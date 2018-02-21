@@ -1025,7 +1025,7 @@ mn10300_do_tls_transition (bfd *	 input_bfd,
     default:
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: Unsupported transition from %s to %s"),
+	(_("%pB: unsupported transition from %s to %s"),
 	 input_bfd,
 	 elf_mn10300_howto_table[r_type].name,
 	 elf_mn10300_howto_table[tls_r_type].name);

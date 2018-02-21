@@ -150,19 +150,19 @@ v850_elf_check_relocs (bfd *abfd,
 		  switch (h->other & V850_OTHER_MASK)
 		    {
 		    default:
-		      msg = _("Variable `%s' cannot occupy in multiple small data regions");
+		      msg = _("variable `%s' cannot occupy in multiple small data regions");
 		      break;
 		    case V850_OTHER_SDA | V850_OTHER_ZDA | V850_OTHER_TDA:
-		      msg = _("Variable `%s' can only be in one of the small, zero, and tiny data regions");
+		      msg = _("variable `%s' can only be in one of the small, zero, and tiny data regions");
 		      break;
 		    case V850_OTHER_SDA | V850_OTHER_ZDA:
-		      msg = _("Variable `%s' cannot be in both small and zero data regions simultaneously");
+		      msg = _("variable `%s' cannot be in both small and zero data regions simultaneously");
 		      break;
 		    case V850_OTHER_SDA | V850_OTHER_TDA:
-		      msg = _("Variable `%s' cannot be in both small and tiny data regions simultaneously");
+		      msg = _("variable `%s' cannot be in both small and tiny data regions simultaneously");
 		      break;
 		    case V850_OTHER_ZDA | V850_OTHER_TDA:
-		      msg = _("Variable `%s' cannot be in both zero and tiny data regions simultaneously");
+		      msg = _("variable `%s' cannot be in both zero and tiny data regions simultaneously");
 		      break;
 		    }
 
@@ -460,7 +460,7 @@ v850_elf_perform_lo16_relocation (bfd *abfd, unsigned long *insn,
 	}
       else
 	{
-	  _bfd_error_handler (_("FAILED to find previous HI16 reloc"));
+	  _bfd_error_handler (_("failed to find previous HI16 reloc"));
 	  return FALSE;
 	}
     }
@@ -2813,7 +2813,7 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       if ((in_flags & EF_V800_850E3) != (out_flags & EF_V800_850E3))
 	{
 	  _bfd_error_handler
-	    (_("%pB: Architecture mismatch with previous modules"), ibfd);
+	    (_("%pB: architecture mismatch with previous modules"), ibfd);
 	  elf_elfheader (obfd)->e_flags |= EF_V800_850E3;
 	}
 
@@ -2869,7 +2869,7 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	}
 
       _bfd_error_handler
-	(_("%pB: Architecture mismatch with previous modules"), ibfd);
+	(_("%pB: architecture mismatch with previous modules"), ibfd);
     }
 
   return result;
@@ -3602,9 +3602,9 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#" PRIx64 ": warning: %s points to "
 		       "unrecognized insns"),
-		     abfd, (uint64_t) irel->r_offset);
+		     abfd, (uint64_t) irel->r_offset, "R_V850_LONGCALL");
 		  continue;
 		}
 
@@ -3612,10 +3612,11 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#" PRIx64 ": warning: %s points to "
 		       "unrecognized insn %#x"),
 		     abfd,
 		     (uint64_t) (irel->r_offset + no_match),
+		     "R_V850_LONGCALL",
 		     insn[no_match]);
 		  continue;
 		}
@@ -3657,9 +3658,9 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#" PRIx64 ": warning: %s points to "
 		       "unrecognized reloc"),
-		     abfd, (uint64_t) irel->r_offset);
+		     abfd, (uint64_t) irel->r_offset, "R_V850_LONGCALL");
 
 		  continue;
 		}
@@ -3697,9 +3698,9 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGCALL points to "
+		    (_("%pB: %#" PRIx64 ": warning: %s points to "
 		       "unrecognized reloc %#" PRIx64),
-		     abfd, (uint64_t) irel->r_offset,
+		     abfd, (uint64_t) irel->r_offset, "R_V850_LONGCALL",
 		     (uint64_t) irelcall->r_offset);
 		  continue;
 		}
@@ -3840,9 +3841,9 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGJUMP points to "
+		    (_("%pB: %#" PRIx64 ": warning: %s points to "
 		       "unrecognized insns"),
-		     abfd, (uint64_t) irel->r_offset);
+		     abfd, (uint64_t) irel->r_offset, "R_V850_LONGJUMP");
 		  continue;
 		}
 
@@ -3850,10 +3851,11 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGJUMP points to "
+		    (_("%pB: %#" PRIx64 ": warning: %s points to "
 		       "unrecognized insn %#x"),
 		     abfd,
 		     (uint64_t) (irel->r_offset + no_match),
+		     "R_V850_LONGJUMP",
 		     insn[no_match]);
 		  continue;
 		}
@@ -3884,9 +3886,9 @@ v850_elf_relax_section (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: %#" PRIx64 ": warning: R_V850_LONGJUMP points to "
+		    (_("%pB: %#" PRIx64 ": warning: %s points to "
 		       "unrecognized reloc"),
-		     abfd, (uint64_t) irel->r_offset);
+		     abfd, (uint64_t) irel->r_offset, "R_V850_LONGJUMP");
 		  continue;
 		}
 

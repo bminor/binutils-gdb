@@ -465,7 +465,7 @@ mmo_make_section (bfd *abfd, const char *secname)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: No core to allocate section name %s\n"),
+	    (_("%pB: no core to allocate section name %s"),
 	     abfd, secname);
 	  bfd_set_error (bfd_error_system_call);
 	  return NULL;
@@ -541,7 +541,7 @@ mmo_object_p (bfd *abfd)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: No core to allocate a symbol %d bytes long\n"),
+	(_("%pB: no core to allocate a symbol %d bytes long"),
 	 abfd, abfd->tdata.mmo_data->max_symbol_length);
       goto bad_final;
     }
@@ -2983,7 +2983,7 @@ mmo_write_symbols_and_terminator (bfd *abfd)
 
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB: Bad symbol definition: `Main' set to %s rather"
+	      (_("%pB: bad symbol definition: `Main' set to %s rather"
 		 " than the start address %s\n"),
 	       abfd, vmas_main, vmas_start);
 	    bfd_set_error (bfd_error_bad_value);

@@ -982,10 +982,10 @@ mmix_elf_perform_relocation (asection *isec, reloc_howto_type *howto,
 		     a verbose message.  */
 		  *error_message
 		    = _("invalid input relocation when producing"
-			" non-ELF, non-mmo format output."
-			"\n Please use the objcopy program to convert from"
+			" non-ELF, non-mmo format output;"
+			" please use the objcopy program to convert from"
 			" ELF or mmo,"
-			"\n or assemble using"
+			" or assemble using"
 			" \"-no-expand\" (for gcc, \"-Wa,-no-expand\"");
 		  mmix_elf_section_data (isec)->has_warned_pushj = TRUE;
 		  return bfd_reloc_dangerous;
@@ -1166,10 +1166,10 @@ mmix_elf_perform_relocation (asection *isec, reloc_howto_type *howto,
 		   a verbose message.  */
 		*error_message
 		  = _("invalid input relocation when producing"
-		      " non-ELF, non-mmo format output."
-		      "\n Please use the objcopy program to convert from"
+		      " non-ELF, non-mmo format output;"
+		      " please use the objcopy program to convert from"
 		      " ELF or mmo,"
-		      "\n or compile using the gcc-option"
+		      " or compile using the gcc-option"
 		      " \"-mno-base-addresses\".");
 		mmix_elf_section_data (isec)->has_warned_bpo = TRUE;
 		return bfd_reloc_dangerous;
@@ -1740,8 +1740,8 @@ mmix_final_link_relocate (reloc_howto_type *howto, asection *input_section,
 	    _bfd_error_handler
 	      /* xgettext:c-format */
 	      (_("%pB: LOCAL directive: "
-		 "Register $%" PRId64 " is not a local register."
-		 "  First global register is $%" PRId64 "."),
+		 "register $%" PRId64 " is not a local register;"
+		 " first global register is $%" PRId64),
 	       input_section->owner, (int64_t) srel, (int64_t) first_global);
 
 	    return bfd_reloc_overflow;
@@ -2168,8 +2168,8 @@ mmix_elf_add_symbol_hook (bfd *abfd,
 	     h->u.def.section->owner is NULL.  */
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: Error: multiple definition of `%s'; start of %s "
-	       "is set in a earlier linked file\n"),
+	    (_("%pB: error: multiple definition of `%s'; start of %s "
+	       "is set in a earlier linked file"),
 	     abfd, *namep,
 	     *namep + strlen (MMIX_LOC_SECTION_START_SYMBOL_PREFIX));
 	   bfd_set_error (bfd_error_bad_value);
@@ -2223,7 +2223,7 @@ mmix_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       /* FIXME: Pass error state gracefully.  */
       if (bfd_get_section_flags (abfd, reg_section) & SEC_HAS_CONTENTS)
-	_bfd_abort (__FILE__, __LINE__, _("Register section has contents\n"));
+	_bfd_abort (__FILE__, __LINE__, _("register section has contents\n"));
 
       /* Really remove the section, if it hasn't already been done.  */
       if (!bfd_section_removed_from_list (abfd, reg_section))
@@ -2413,8 +2413,8 @@ _bfd_mmix_after_linker_allocation (bfd *abfd ATTRIBUTE_UNUSED,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("Internal inconsistency: remaining %lu != max %lu.\n\
-  Please report this bug."),
+	(_("internal inconsistency: remaining %lu != max %lu;"
+	   " please report this bug"),
 	 (unsigned long) gregdata->n_remaining_bpo_relocs_this_relaxation_round,
 	 (unsigned long) gregdata->n_bpo_relocs);
       return FALSE;

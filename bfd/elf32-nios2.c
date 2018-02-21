@@ -2926,7 +2926,7 @@ nios2_elf32_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  if (bfd_big_endian (ibfd))
 	    {
 	      _bfd_error_handler
-		(_("error: %pB: Big-endian R2 is not supported."), ibfd);
+		(_("error: %pB: big-endian R2 is not supported"), ibfd);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -2942,7 +2942,7 @@ nios2_elf32_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	 architectures.  */
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("error: %pB: Conflicting CPU architectures %d/%d"),
+	(_("error: %pB: conflicting CPU architectures %d/%d"),
 	 ibfd, new_flags, old_flags);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -3831,10 +3831,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		      if (h)
 			name = h->root.root.string;
 		      /* xgettext:c-format */
-		      format = _("Unable to reach %s (at 0x%08x) from the "
+		      format = _("unable to reach %s (at 0x%08x) from the "
 				 "global pointer (at 0x%08x) because the "
 				 "offset (%d) is out of the allowed range, "
-				 "-32678 to 32767.\n" );
+				 "-32678 to 32767\n" );
 		      sprintf (msgbuf, format, name, symbol_address, gp,
 			       (signed)relocation);
 		      msg = msgbuf;

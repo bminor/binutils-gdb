@@ -381,7 +381,7 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
 
 	  bfd_set_error (bfd_error_invalid_operation);
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: Unrecognised .directive command: %s"),
+	  _bfd_error_handler (_("%pB: unrecognized .directive command: %s"),
 			      abfd, directive);
 	  break;
 	}
@@ -499,7 +499,7 @@ sh_symbian_relocate_section (bfd *		    output_bfd,
 	  if (new_hash == NULL)
 	    {
 	      /* xgettext:c-format */
-	      _bfd_error_handler (_("%pB: Failed to add renamed symbol %s"),
+	      _bfd_error_handler (_("%pB: failed to add renamed symbol %s"),
 				  input_bfd, ptr->new_name);
 	      continue;
 	    }

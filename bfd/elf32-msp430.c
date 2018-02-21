@@ -831,7 +831,7 @@ msp430_final_link_relocate (reloc_howto_type *	   howto,
 		  {
 		    info->callbacks->warning
 		      (info,
-		       _("Try enabling relaxation to avoid relocation truncations"),
+		       _("try enabling relaxation to avoid relocation truncations"),
 		       NULL, input_bfd, input_section, relocation);
 		    warned = TRUE;
 		  }
@@ -1145,7 +1145,7 @@ msp430_final_link_relocate (reloc_howto_type *	   howto,
 		{
 		  info->callbacks->warning
 		    (info,
-		     _("Try enabling relaxation to avoid relocation truncations"),
+		     _("try enabling relaxation to avoid relocation truncations"),
 		     NULL, input_bfd, input_section, relocation);
 		  warned = TRUE;
 		}
@@ -2351,7 +2351,7 @@ elf32_msp430_obj_attrs_handle_unknown (bfd *abfd, int tag)
 {
   _bfd_error_handler
     /* xgettext:c-format */
-    (_("Warning: %pB: Unknown MSPABI object attribute %d"),
+    (_("warning: %pB: unknown MSPABI object attribute %d"),
      abfd, tag);
   return TRUE;
 }

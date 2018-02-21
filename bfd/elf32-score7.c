@@ -2627,7 +2627,7 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: Malformed reloc detected for section %pA"), abfd, sec);
+	    (_("%pB: malformed reloc detected for section %pA"), abfd, sec);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

@@ -2969,7 +2969,8 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%pB: The target (%s) of an %s relocation is in the wrong section (%pA)"),
+		      (_("%pB: the target (%s) of an %s relocation"
+			 " is in the wrong section (%pA)"),
 		       input_bfd,
 		       sym_name,
 		       m32r_elf_howto_table[(int) r_type].name,
@@ -3471,7 +3472,7 @@ m32r_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  || ((in_flags  & EF_M32R_ARCH) == E_M32R2_ARCH))
 	{
 	  _bfd_error_handler
-	    (_("%pB: Instruction set mismatch with previous modules"), ibfd);
+	    (_("%pB: instruction set mismatch with previous modules"), ibfd);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;

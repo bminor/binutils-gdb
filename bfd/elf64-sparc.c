@@ -457,7 +457,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	case 6: reg -= 4; break;
 	default:
 	  _bfd_error_handler
-	    (_("%pB: Only registers %%g[2367] can be declared using STT_REGISTER"),
+	    (_("%pB: only registers %%g[2367] can be declared using STT_REGISTER"),
 	     abfd);
 	  return FALSE;
 	}
@@ -478,7 +478,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("Register %%g%d used incompatibly: %s in %pB,"
+	    (_("register %%g%d used incompatibly: %s in %pB,"
 	       " previously %s in %pB"),
 	     (int) sym->st_value, **namep ? *namep : "#scratch", abfd,
 	     *p->name ? p->name : "#scratch", p->abfd);
@@ -502,7 +502,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 		    type = 0;
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("Symbol `%s' has differing types: REGISTER in %pB,"
+		    (_("symbol `%s' has differing types: REGISTER in %pB,"
 		       " previously %s in %pB"),
 		     *namep, abfd, stt_types[type], p->abfd);
 		  return FALSE;

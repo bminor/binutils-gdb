@@ -4239,7 +4239,7 @@ _bfd_tilegx_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: Cannot link together %s and %s objects."),
+	(_("%pB: cannot link together %s and %s objects"),
 	 ibfd, targ1, targ2);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;

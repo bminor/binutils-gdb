@@ -3351,7 +3351,7 @@ elf_xtensa_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: incompatible machine type. Output is 0x%x. Input is 0x%x"),
+	(_("%pB: incompatible machine type; output is 0x%x; input is 0x%x"),
 	 ibfd, out_mach, in_mach);
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;
@@ -4582,7 +4582,7 @@ elf_xtensa_do_asm_simplify (bfd_byte *contents,
 
   if (content_length < address)
     {
-      *error_message = _("Attempt to convert L32R/CALLX to CALL failed");
+      *error_message = _("attempt to convert L32R/CALLX to CALL failed");
       return bfd_reloc_other;
     }
 
@@ -4590,7 +4590,7 @@ elf_xtensa_do_asm_simplify (bfd_byte *contents,
   direct_call_opcode = swap_callx_for_call_opcode (opcode);
   if (direct_call_opcode == XTENSA_UNDEFINED)
     {
-      *error_message = _("Attempt to convert L32R/CALLX to CALL failed");
+      *error_message = _("attempt to convert L32R/CALLX to CALL failed");
       return bfd_reloc_other;
     }
 

@@ -1068,7 +1068,6 @@ i370_elf_relocate_section (bfd *output_bfd,
       Elf_Internal_Sym *sym	     = NULL;
       asection *sec		     = NULL;
       struct elf_link_hash_entry * h = NULL;
-      const char *sym_name	     = NULL;
       reloc_howto_type *howto;
       unsigned long r_symndx;
       bfd_vma relocation;
@@ -1094,7 +1093,6 @@ i370_elf_relocate_section (bfd *output_bfd,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  sym_name = "<local symbol>";
 
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, & sec, rel);
 	  addend = rel->r_addend;
@@ -1111,7 +1109,6 @@ i370_elf_relocate_section (bfd *output_bfd,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  sym_name = h->root.root.string;
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
@@ -1301,27 +1298,14 @@ i370_elf_relocate_section (bfd *output_bfd,
 
 	case (int) R_I370_COPY:
 	case (int) R_I370_RELATIVE:
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%pB: Relocation %s is not yet supported for symbol %s."),
-	     input_bfd,
-	     i370_elf_howto_table[(int) r_type]->name,
-	     sym_name);
-
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB: %s unsupported"),
+			      input_bfd,
+			      i370_elf_howto_table[(int) r_type]->name);
 	  bfd_set_error (bfd_error_invalid_operation);
 	  ret = FALSE;
 	  continue;
 	}
-
-#ifdef DEBUG
-      fprintf (stderr, "\ttype = %s (%d), name = %s, symbol index = %ld, offset = %ld, addend = %ld\n",
-	       howto->name,
-	       (int)r_type,
-	       sym_name,
-	       r_symndx,
-	       (long) offset,
-	       (long) addend);
-#endif
 
       r = _bfd_final_link_relocate (howto, input_bfd, input_section, contents,
 				    offset, relocation, addend);

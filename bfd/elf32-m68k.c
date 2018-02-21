@@ -1656,14 +1656,14 @@ elf_m68k_add_entry_to_got (struct elf_m68k_got *got,
       if (got->n_slots[R_8] > ELF_M68K_R_8_MAX_N_SLOTS_IN_GOT (info))
 	/* xgettext:c-format */
 	_bfd_error_handler (_("%pB: GOT overflow: "
-			      "Number of relocations with 8-bit "
+			      "number of relocations with 8-bit "
 			      "offset > %d"),
 			    abfd,
 			    ELF_M68K_R_8_MAX_N_SLOTS_IN_GOT (info));
       else
 	/* xgettext:c-format */
 	_bfd_error_handler (_("%pB: GOT overflow: "
-			      "Number of relocations with 8- or 16-bit "
+			      "number of relocations with 8- or 16-bit "
 			      "offset > %d"),
 			    abfd,
 			    ELF_M68K_R_8_16_MAX_N_SLOTS_IN_GOT (info));

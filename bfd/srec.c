@@ -257,7 +257,7 @@ srec_bad_byte (bfd *abfd,
 	}
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB:%d: Unexpected character `%s' in S-record file\n"),
+	(_("%pB:%d: unexpected character `%s' in S-record file"),
 	 abfd, lineno, buf);
       bfd_set_error (bfd_error_bad_value);
     }
@@ -485,7 +485,7 @@ srec_scan (bfd *abfd)
 	    if (bytes < min_bytes)
 	      {
 		/* xgettext:c-format */
-		_bfd_error_handler (_("%pB:%d: byte count %d too small\n"),
+		_bfd_error_handler (_("%pB:%d: byte count %d too small"),
 				    abfd, lineno, bytes);
 		bfd_set_error (bfd_error_bad_value);
 		goto error_return;
@@ -578,7 +578,7 @@ srec_scan (bfd *abfd)
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%pB:%d: Bad checksum in S-record file\n"),
+		      (_("%pB:%d: bad checksum in S-record file"),
 		       abfd, lineno);
 		    bfd_set_error (bfd_error_bad_value);
 		    goto error_return;
@@ -612,7 +612,7 @@ srec_scan (bfd *abfd)
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%pB:%d: Bad checksum in S-record file\n"),
+		      (_("%pB:%d: bad checksum in S-record file"),
 		       abfd, lineno);
 		    bfd_set_error (bfd_error_bad_value);
 		    goto error_return;

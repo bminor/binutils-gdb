@@ -1,5 +1,10 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-cris/pcrelcp-1.d,
+	* testsuite/ld-mmix/start-2.d: Update.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-arm/cmse-implib-errors.out,
 	* testsuite/ld-arm/cmse-new-earlier-later-implib.out,
 	* testsuite/ld-arm/cmse-new-implib-not-sg-in-implib.out,

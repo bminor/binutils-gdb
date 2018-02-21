@@ -996,7 +996,9 @@ lm32_elf_relocate_section (bfd *output_bfd,
 
 	      /* Addend should be zero.  */
 	      if (rel->r_addend != 0)
-		_bfd_error_handler (_("internal error: addend should be zero for R_LM32_16_GOT"));
+		_bfd_error_handler
+		  (_("internal error: addend should be zero for %s"),
+		   "R_LM32_16_GOT");
 
 	      r = _bfd_final_link_relocate (howto,
 					    input_bfd,

@@ -3530,9 +3530,10 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		    if (addend)
 		      {
 			info->callbacks->einfo
-			  (_("%H: R_FRV_FUNCDESC references dynamic symbol"
+			  (_("%H: %s references dynamic symbol"
 			     " with nonzero addend\n"),
-			   input_bfd, input_section, rel->r_offset);
+			   input_bfd, input_section, rel->r_offset,
+			   "R_FRV_FUNCDESC");
 			return FALSE;
 		      }
 		    dynindx = h->dynindx;
@@ -3651,9 +3652,10 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		if (addend && r_type == R_FRV_FUNCDESC_VALUE)
 		  {
 		    info->callbacks->einfo
-		      (_("%H: R_FRV_FUNCDESC_VALUE"
-			 " references dynamic symbol with nonzero addend\n"),
-		       input_bfd, input_section, rel->r_offset);
+		      (_("%H: %s references dynamic symbol"
+			 " with nonzero addend\n"),
+		       input_bfd, input_section, rel->r_offset,
+		       "R_FRV_FUNCDESC_VALUE");
 		    return FALSE;
 		  }
 		dynindx = h->dynindx;

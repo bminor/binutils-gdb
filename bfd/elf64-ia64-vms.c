@@ -584,8 +584,8 @@ elf64_ia64_relax_section (bfd *abfd, asection *sec,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: Can't relax br at %#" PRIx64 " in section `%pA'."
-		   " Please use brl or indirect branch."),
+		(_("%pB: can't relax br at %#" PRIx64 " in section `%pA';"
+		   " please use brl or indirect branch"),
 		 sec->owner, (uint64_t) roff, sec);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
@@ -5134,14 +5134,14 @@ error_free_dyn:
 		  if (normal_bfd == NULL)
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("Warning: alignment %u of common symbol `%s' in %pB"
+		      (_("warning: alignment %u of common symbol `%s' in %pB"
 			 " is greater than the alignment (%u) of its section %pA"),
 		       1 << common_align, name, common_bfd,
 		       1 << normal_align, h->root.u.def.section);
 		  else
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("Warning: alignment %u of symbol `%s' in %pB"
+		      (_("warning: alignment %u of symbol `%s' in %pB"
 			 " is smaller than %u in %pB"),
 		       1 << normal_align, name, normal_bfd,
 		       1 << common_align, common_bfd);
@@ -5157,7 +5157,7 @@ error_free_dyn:
 		  && ! size_change_ok)
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("Warning: size of symbol `%s' changed"
+		  (_("warning: size of symbol `%s' changed"
 		     " from %" PRIu64 " in %pB to %" PRIu64 " in %pB"),
 		   name, (uint64_t) h->size, old_bfd,
 		   (uint64_t) isym->st_size, abfd);
@@ -5184,7 +5184,7 @@ error_free_dyn:
 		  if (h->type != STT_NOTYPE && ! type_change_ok)
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("Warning: type of symbol `%s' changed"
+		      (_("warning: type of symbol `%s' changed"
 			 " from %d to %d in %pB"),
 		       name, h->type, type, abfd);
 

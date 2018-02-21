@@ -963,7 +963,8 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	  /* Addend should be zero.  */
 	  if (rel->r_addend != 0)
 	    _bfd_error_handler
-	      (_("internal error: addend should be zero for R_OR1K_GOT16"));
+	      (_("internal error: addend should be zero for %s"),
+	       "R_OR1K_GOT16");
 
 	  break;
 
@@ -2639,7 +2640,8 @@ elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if ((in_flags & EF_OR1K_NODELAY) != (out_flags & EF_OR1K_NODELAY))
     {
       _bfd_error_handler
-	(_("%pB: EF_OR1K_NODELAY flag mismatch with previous modules"), ibfd);
+	(_("%pB: %s flag mismatch with previous modules"),
+	 ibfd, "EF_OR1K_NODELAY");
 
       bfd_set_error (bfd_error_bad_value);
       return FALSE;

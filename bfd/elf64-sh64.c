@@ -1505,7 +1505,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if ((sym->st_other & STO_SH5_ISA32) != 0)
 	    (*info->callbacks->reloc_dangerous)
 	      (info,
-	       _("Unexpected STO_SH5_ISA32 on local symbol is not handled"),
+	       _("unexpected STO_SH5_ISA32 on local symbol is not handled"),
 	       input_bfd, input_section, rel->r_offset);
 
 	  if (sec != NULL && discarded_section (sec))

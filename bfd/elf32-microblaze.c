@@ -1061,7 +1061,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		      {
 			_bfd_error_handler
 			  /* xgettext:c-format */
-			  (_("%pB: The target (%s) of an %s relocation"
+			  (_("%pB: the target (%s) of an %s relocation"
 			     " is in the wrong section (%pA)"),
 			   input_bfd,
 			   sym_name,
@@ -1109,7 +1109,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		      {
 			_bfd_error_handler
 			  /* xgettext:c-format */
-			  (_("%pB: The target (%s) of an %s relocation"
+			  (_("%pB: the target (%s) of an %s relocation"
 			     " is in the wrong section (%pA)"),
 			   input_bfd,
 			   sym_name,

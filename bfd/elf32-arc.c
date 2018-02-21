@@ -617,8 +617,8 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      /* It's sometimes ok to mix different configs, so this is only
 		 a warning.  */
 	      _bfd_error_handler
-		(_("Warning: %pB: Conflicting platform configuration "
-		   "%s with %s.\n"), ibfd,
+		(_("warning: %pB: conflicting platform configuration "
+		   "%s with %s"), ibfd,
 		 tagval[in_attr[i].i],
 		 tagval[out_attr[i].i]);
 	    }
@@ -637,7 +637,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      /* We cannot mix code for different CPUs.  */
 	      _bfd_error_handler
 		(_("error: %pB: unable to merge CPU base attributes "
-		   "%s with %s.\n"),
+		   "%s with %s"),
 		 obfd,
 		 tagval[in_attr[i].i],
 		 tagval[out_attr[i].i]);
@@ -674,7 +674,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		  {
 		    _bfd_error_handler
 		      (_("error: %pB: unable to merge ISA extension attributes "
-			 "%s.\n"),
+			 "%s"),
 		       obfd, bfd_feature_list[j].name);
 		    result = FALSE;
 		    break;
@@ -698,7 +698,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		      }
 		    _bfd_error_handler
 		      (_("error: %pB: conflicting ISA extension attributes "
-			 "%s with %s.\n"),
+			 "%s with %s"),
 		       obfd, p1, p2);
 		    result = FALSE;
 		    break;
@@ -732,7 +732,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    {
 	      /* We cannot mix code with rf16 and without.  */
 	      _bfd_error_handler
-		(_("error: %pB: cannot mix rf16 with full register set %pB.\n"),
+		(_("error: %pB: cannot mix rf16 with full register set %pB"),
 		 obfd, ibfd);
 	      result = FALSE;
 	    }
@@ -758,7 +758,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		&& out_attr[i].i != in_attr[i].i)
 	      {
 		_bfd_error_handler
-		  (_("error: %pB: conflicting attributes %s: %s with %s.\n"),
+		  (_("error: %pB: conflicting attributes %s: %s with %s"),
 		   obfd, tagname,
 		   tagval[in_attr[i].i],
 		   tagval[out_attr[i].i]);
@@ -783,7 +783,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      && out_attr[i].i != in_attr[i].i)
 	    {
 	      _bfd_error_handler
-		(_("error: %pB: conflicting attributes %s.\n"),
+		(_("error: %pB: conflicting attributes %s"),
 		 obfd, tagname);
 	      result = FALSE;
 	    }
@@ -883,7 +883,7 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       if (mach_ibfd != mach_obfd)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("ERROR: Attempting to link %pB "
+	  _bfd_error_handler (_("error: attempting to link %pB "
 				"with a binary %pB of different architecture"),
 			      ibfd, obfd);
 	  return FALSE;
@@ -986,14 +986,14 @@ arc_elf_object_p (bfd * abfd)
       if (e_machine == EM_ARC)
 	{
 	  _bfd_error_handler
-	    (_("Error: The ARC4 architecture is no longer supported.\n"));
+	    (_("error: the ARC4 architecture is no longer supported"));
 	  return FALSE;
 	}
       else
 	{
 	  _bfd_error_handler
-	    (_("Warning: unset or old architecture flags. \n"
-	       "	       Use default machine.\n"));
+	    (_("warning: unset or old architecture flags; "
+	       "use default machine"));
 	}
     }
 
@@ -1828,7 +1828,7 @@ elf_arc_relocate_section (bfd *			  output_bfd,
 	  && !reloc_data.sdata_begin_symbol_vma_set)
 	{
 	  _bfd_error_handler
-	    ("Error: Linker symbol __SDATA_BEGIN__ not found");
+	    ("error: linker symbol __SDATA_BEGIN__ not found");
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -1841,7 +1841,7 @@ elf_arc_relocate_section (bfd *			  output_bfd,
 	  && reloc_data.sym_section == NULL)
 	{
 	  _bfd_error_handler
-	    (_("GOT and PLT relocations cannot be fixed with a non dynamic linker."));
+	    (_("GOT and PLT relocations cannot be fixed with a non dynamic linker"));
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -1973,11 +1973,11 @@ elf_arc_check_relocs (bfd *			 abfd,
 		  name = "UNKNOWN";
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("\
-%pB: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
-		    abfd,
-		    arc_elf_howto (r_type)->name,
-		    name);
+		  (_("%pB: relocation %s against `%s' can not be used"
+		     " when making a shared object; recompile with -fPIC"),
+		   abfd,
+		   arc_elf_howto (r_type)->name,
+		   name);
 		bfd_set_error (bfd_error_bad_value);
 		return FALSE;
 	      }
@@ -2865,7 +2865,7 @@ elf32_arc_obj_attrs_handle_unknown (bfd *abfd, int tag)
   if ((tag & 127) < (Tag_ARC_ISA_mpy_option + 1))
     {
       _bfd_error_handler
-	(_("%pB: Unknown mandatory ARC object attribute %d."),
+	(_("%pB: unknown mandatory ARC object attribute %d"),
 	 abfd, tag);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -2873,7 +2873,7 @@ elf32_arc_obj_attrs_handle_unknown (bfd *abfd, int tag)
   else
     {
       _bfd_error_handler
-	(_("Warning: %pB: Unknown ARC object attribute %d."),
+	(_("warning: %pB: unknown ARC object attribute %d"),
 	 abfd, tag);
       return TRUE;
     }

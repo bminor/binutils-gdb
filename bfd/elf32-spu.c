@@ -724,7 +724,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 	      if ((s->vma - vma_start) & (htab->params->line_size - 1))
 		{
 		  info->callbacks->einfo (_("%X%P: overlay section %pA "
-					    "does not start on a cache line.\n"),
+					    "does not start on a cache line\n"),
 					  s);
 		  bfd_set_error (bfd_error_bad_value);
 		  return 0;
@@ -732,7 +732,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 	      else if (s->size > htab->params->line_size)
 		{
 		  info->callbacks->einfo (_("%X%P: overlay section %pA "
-					    "is larger than a cache line.\n"),
+					    "is larger than a cache line\n"),
 					  s);
 		  bfd_set_error (bfd_error_bad_value);
 		  return 0;
@@ -752,7 +752,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 	  if (s->vma < ovl_end)
 	    {
 	      info->callbacks->einfo (_("%X%P: overlay section %pA "
-					"is not in cache area.\n"),
+					"is not in cache area\n"),
 				      alloc_sec[i-1]);
 	      bfd_set_error (bfd_error_bad_value);
 	      return 0;
@@ -794,7 +794,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 		      /* xgettext:c-format */
 		      info->callbacks->einfo (_("%X%P: overlay sections %pA "
 						"and %pA do not start at the "
-						"same address.\n"),
+						"same address\n"),
 					      s0, s);
 		      bfd_set_error (bfd_error_bad_value);
 		      return 0;
@@ -3321,7 +3321,7 @@ remove_cycles (struct function_info *fun,
 	      const char *f2 = func_name (call->fun);
 
 	      /* xgettext:c-format */
-	      info->callbacks->info (_("Stack analysis will ignore the call "
+	      info->callbacks->info (_("stack analysis will ignore the call "
 				       "from %s to %s\n"),
 				     f1, f2);
 	    }

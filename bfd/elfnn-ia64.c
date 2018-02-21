@@ -617,8 +617,8 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: Can't relax br at %#" PRIx64 " in section `%pA'."
-		   " Please use brl or indirect branch."),
+		(_("%pB: can't relax br at %#" PRIx64 " in section `%pA';"
+		   " please use brl or indirect branch"),
 		 sec->owner, (uint64_t) roff, sec);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;

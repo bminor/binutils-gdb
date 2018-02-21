@@ -1112,7 +1112,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Get virtual address of instruction having the relocation.  */
 	  if (is_far)
 	    {
-	      msg = _("Reference to the far symbol `%s' using a wrong "
+	      msg = _("reference to the far symbol `%s' using a wrong "
 		      "relocation may result in incorrect execution");
 	      buf = xmalloc (strlen (msg) + strlen (name) + 10);
 	      sprintf (buf, msg, name);

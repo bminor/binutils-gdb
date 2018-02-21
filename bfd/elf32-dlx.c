@@ -138,7 +138,7 @@ elf32_dlx_relocate16 (bfd *abfd,
   if (strcmp (input_section->name, symbol->section->output_section->name) != 0)
     {
       _bfd_error_handler
-	(_("BFD Link Error: branch (PC rel16) to section (%s) not supported"),
+	(_("branch (PC rel16) to section (%s) not supported"),
 	 symbol->section->output_section->name);
       return bfd_reloc_undefined;
     }
@@ -201,7 +201,7 @@ elf32_dlx_relocate26 (bfd *abfd,
   if (strcmp (input_section->name, symbol->section->output_section->name) != 0)
     {
       _bfd_error_handler
-	(_("BFD Link Error: jump (PC rel26) to section (%s) not supported"),
+	(_("jump (PC rel26) to section (%s) not supported"),
 	 symbol->section->output_section->name);
       return bfd_reloc_undefined;
     }

@@ -1,5 +1,19 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* elf-m10300.c, * elf-s390-common.c, * elf32-arc.c, * elf32-cris.c,
+	* elf32-dlx.c, * elf32-frv.c, * elf32-i370.c, * elf32-lm32.c,
+	* elf32-m32r.c, * elf32-m68hc1x.c, * elf32-m68k.c,
+	* elf32-microblaze.c, * elf32-msp430.c, * elf32-nds32.c,
+	* elf32-nios2.c, * elf32-or1k.c, * elf32-rl78.c, * elf32-rx.c,
+	* elf32-score.c, * elf32-score7.c, * elf32-sh-symbian.c,
+	* elf32-sh.c, * elf32-spu.c, * elf32-v850.c, * elf32-xtensa.c,
+	* elf64-alpha.c, * elf64-ia64-vms.c, * elf64-mmix.c,
+	* elf64-sh64.c, * elf64-sparc.c, * elfnn-ia64.c, * elfxx-tilegx.c,
+	* mmo.c, * osf-core.c, * srec.c, * vms-alpha.c: Standardize
+	error/warning messages.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* archive.c, * bfd.c, * linker.c, * reloc.c, * stabs.c,
 	* syms.c: Standardize error/warning messages.
 

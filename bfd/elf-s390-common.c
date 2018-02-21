@@ -286,12 +286,12 @@ elf_s390_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
   if (in_attr->i > 2)
     _bfd_error_handler
       /* xgettext:c-format */
-      (_("Warning: %pB uses unknown vector ABI %d"), ibfd,
+      (_("warning: %pB uses unknown vector ABI %d"), ibfd,
        in_attr->i);
   else if (out_attr->i > 2)
     _bfd_error_handler
       /* xgettext:c-format */
-      (_("Warning: %pB uses unknown vector ABI %d"), obfd,
+      (_("warning: %pB uses unknown vector ABI %d"), obfd,
        out_attr->i);
   else if (in_attr->i != out_attr->i)
     {
@@ -303,7 +303,7 @@ elf_s390_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("Warning: %pB uses vector %s ABI, %pB uses %s ABI"),
+	    (_("warning: %pB uses vector %s ABI, %pB uses %s ABI"),
 	     ibfd, abi_str[in_attr->i], obfd, abi_str[out_attr->i]);
 	}
       if (in_attr->i > out_attr->i)
