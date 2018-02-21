@@ -1,5 +1,32 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-arm/cmse-implib-errors.out,
+	* testsuite/ld-arm/cmse-new-earlier-later-implib.out,
+	* testsuite/ld-arm/cmse-new-implib-not-sg-in-implib.out,
+	* testsuite/ld-arm/cmse-new-wrong-implib.out,
+	* testsuite/ld-arm/cmse-veneers-no-gnu_sgstubs.out,
+	* testsuite/ld-arm/cmse-veneers-wrong-entryfct.out,
+	* testsuite/ld-cris/badgotr1.d,
+	* testsuite/ld-cris/tls-err-24.d,
+	* testsuite/ld-cris/tls-err-25.d,
+	* testsuite/ld-cris/tls-err-26.d,
+	* testsuite/ld-cris/tls-err-27.d,
+	* testsuite/ld-cris/tls-err-28.d,
+	* testsuite/ld-cris/tls-err-40.d,
+	* testsuite/ld-cris/tls-err-44.d,
+	* testsuite/ld-cris/tls-err-48.d,
+	* testsuite/ld-cris/tls-err-52.d,
+	* testsuite/ld-cris/tls-err-53.d,
+	* testsuite/ld-cris/tls-err-55.d,
+	* testsuite/ld-cris/tls-err-56.d,
+	* testsuite/ld-cris/tls-err-62.d,
+	* testsuite/ld-cris/tls-err-65.d,
+	* testsuite/ld-cris/tls-err-77.d,
+	* testsuite/ld-elf/empty-implib.out,
+	* testsuite/ld-elf/indirect.exp: Update.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-aarch64/reloc-overflow-bad.d,
 	* testsuite/ld-arm/attr-merge-9.out,
 	* testsuite/ld-arm/attr-merge-arch-2.d,

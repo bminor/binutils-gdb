@@ -8140,7 +8140,7 @@ bfd_generic_lookup_section_flags (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 {
   if (flaginfo != NULL)
     {
-      _bfd_error_handler (_("INPUT_SECTION_FLAGS are not supported.\n"));
+      _bfd_error_handler (_("INPUT_SECTION_FLAGS are not supported"));
       return FALSE;
     }
   return TRUE;
@@ -8392,7 +8392,7 @@ _bfd_unrecognized_reloc (bfd * abfd, sec_ptr section, unsigned int r_type)
 		      abfd, r_type, section);
 
   /* PR 21803: Suggest the most likely cause of this error.  */
-  _bfd_error_handler (_("Is this version of the linker - %s - out of date ?"),
+  _bfd_error_handler (_("is this version of the linker - %s - out of date ?"),
 		      BFD_VERSION_STRING);
 
   bfd_set_error (bfd_error_bad_value);

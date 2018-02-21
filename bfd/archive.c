@@ -2338,7 +2338,7 @@ _bfd_write_archive_contents (bfd *arch)
 	  if (bfd_update_armap_timestamp (arch))
 	    break;
 	  _bfd_error_handler
-	    (_("Warning: writing archive was slow: rewriting timestamp\n"));
+	    (_("warning: writing archive was slow: rewriting timestamp"));
 	}
       while (++tries < 6);
     }

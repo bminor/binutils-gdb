@@ -3,6 +3,11 @@
 	* testsuite/binutils-all/mips/mips-reginfo-n32.d,
 	* testsuite/binutils-all/mips/mips-reginfo.d: Update.
 
+2018-02-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/mips/mips-reginfo-n32.d,
+	* testsuite/binutils-all/mips/mips-reginfo.d: Update.
+
 2018-02-20  Ronald Hoogenboom  <hoogenboom30@zonnet.nl>
 
 	* doc/binutils.texi (objcopy): Add missing closing square

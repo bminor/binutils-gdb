@@ -2545,7 +2545,7 @@ default_indirect_link_order (bfd *output_bfd,
 	 difficult, and sometimes impossible.  */
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("Attempt to do relocatable link with %s input and %s output"),
+	(_("attempt to do relocatable link with %s input and %s output"),
 	 bfd_get_target (input_bfd), bfd_get_target (output_bfd));
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;

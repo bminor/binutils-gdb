@@ -1,5 +1,10 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* archive.c, * bfd.c, * linker.c, * reloc.c, * stabs.c,
+	* syms.c: Standardize error/warning messages.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* aout-adobe.c, * aout-cris.c, * i386linux.c, * m68klinux.c,
 	* sparclinux.c, * coff-alpha.c, * coff-arm.c, * coff-mcore.c,
 	* coffcode.h, * coffgen.c, * cofflink.c, * ecoff.c, * pe-mips.c,

@@ -112,7 +112,7 @@ run_cc_link_tests $build_tests
 
 global ld
 
-set string ": final link failed: Bad value"
+set string ": final link failed: bad value"
 set string1 ": local symbol \`foo\' in tmpdir/indirect1b.o is referenced by DSO"
 
 set testname "Indirect symbol 1a"
@@ -123,7 +123,7 @@ set testname "Indirect symbol 1b"
 set cmd "$ld -e start -o tmpdir/indirect1 tmpdir/indirect1a.o tmpdir/libindirect1c.so tmpdir/indirect1b.o"
 check_link_message "$cmd" [list $string1 $string] "$testname"
 
-set string ": final link failed: Nonrepresentable section on output"
+set string ": final link failed: nonrepresentable section on output"
 set string2 ": no symbol version section for versioned symbol \`foo@FOO\'"
 set testname "Indirect symbol 2"
 set cmd "$ld -shared  -o tmpdir/indirect2.so tmpdir/indirect2.o"
