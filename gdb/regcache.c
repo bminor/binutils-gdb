@@ -219,13 +219,6 @@ do_cooked_read (void *src, int regnum, gdb_byte *buf)
   return regcache_cooked_read (regcache, regnum, buf);
 }
 
-regcache::regcache (readonly_t, const regcache &src)
-  : regcache (src.arch (), nullptr, true)
-{
-  gdb_assert (!src.m_readonly_p);
-  save (do_cooked_read, (void *) &src);
-}
-
 readonly_detached_regcache::readonly_detached_regcache (const regcache &src)
   : readonly_detached_regcache (src.arch (), do_cooked_read, (void *) &src)
 {
@@ -1512,6 +1505,55 @@ private:
   const bool m_dump_pseudo;
 };
 
+/* Dump from reg_buffer, used when there is no thread or
+   registers.  */
+
+class register_dump_reg_buffer : public register_dump, reg_buffer
+{
+public:
+  register_dump_reg_buffer (gdbarch *gdbarch, bool dump_pseudo)
+    : register_dump (gdbarch), reg_buffer (gdbarch, dump_pseudo)
+  {
+  }
+
+protected:
+  void dump_reg (ui_file *file, int regnum) override
+  {
+    if (regnum < 0)
+      {
+	if (m_has_pseudo)
+	  fprintf_unfiltered (file, "Cooked value");
+	else
+	  fprintf_unfiltered (file, "Raw value");
+      }
+    else
+      {
+	if (regnum < gdbarch_num_regs (m_gdbarch) || m_has_pseudo)
+	  {
+	    auto size = register_size (m_gdbarch, regnum);
+
+	    if (size == 0)
+	      return;
+
+	    auto status = get_register_status (regnum);
+
+	    gdb_assert (status != REG_VALID);
+
+	    if (status == REG_UNKNOWN)
+	      fprintf_unfiltered (file, "<invalid>");
+	    else
+	      fprintf_unfiltered (file, "<unavailable>");
+	  }
+	else
+	  {
+	    /* Just print "<cooked>" for pseudo register when
+	       regcache_dump_raw.  */
+	    fprintf_unfiltered (file, "<cooked>");
+	  }
+      }
+  }
+};
+
 /* For "maint print registers".  */
 
 class register_dump_none : public register_dump
@@ -1633,22 +1675,19 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
     case regcache_dump_raw:
     case regcache_dump_cooked:
       {
-	regcache *reg;
+	auto dump_pseudo = (what_to_dump == regcache_dump_cooked);
 
 	if (target_has_registers)
-	  reg = get_current_regcache ();
+	  dump.reset (new register_dump_regcache (get_current_regcache (),
+						  dump_pseudo));
 	else
 	  {
 	    /* For the benefit of "maint print registers" & co when
 	       debugging an executable, allow dumping a regcache even when
 	       there is no thread selected / no registers.  */
-	    reg = new regcache (target_gdbarch ());
-	    regs.reset (reg);
+	    dump.reset (new register_dump_reg_buffer (target_gdbarch (),
+						      dump_pseudo));
 	  }
-
-	auto dump_pseudo = (what_to_dump == regcache_dump_cooked);
-
-	dump.reset (new register_dump_regcache (reg, dump_pseudo));
       }
       break;
     }
@@ -1937,7 +1976,7 @@ cooked_read_test (struct gdbarch *gdbarch)
       mock_target.reset ();
     }
 
-  regcache readonly (regcache::readonly, readwrite);
+  readonly_detached_regcache readonly (readwrite);
 
   /* GDB may go to target layer to fetch all registers and memory for
      readonly regcache.  */

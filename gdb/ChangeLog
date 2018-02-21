@@ -1,5 +1,14 @@
 2018-02-21  Yao Qi  <yao.qi@linaro.org>
 
+	* infcmd.c (get_return_value): Let stop_regs point to
+	get_current_regcache.
+	* regcache.c (regcache::regcache): Remove.
+	(register_dump_reg_buffer): New class.
+	(regcache_print): Adjust.
+	* regcache.h (regcache): Remove constructors.
+
+2018-02-21  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (class register_dump): New class.
 	(register_dump_regcache, register_dump_none): New class.
 	(register_dump_remote, register_dump_groups): New class.

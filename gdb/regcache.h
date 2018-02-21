@@ -307,16 +307,6 @@ class readonly_detached_regcache;
 class regcache : public detached_regcache
 {
 public:
-  regcache (gdbarch *gdbarch)
-    : regcache (gdbarch, nullptr, true)
-  {}
-
-  struct readonly_t {};
-  static constexpr readonly_t readonly {};
-
-  /* Create a readonly regcache from a non-readonly regcache.  */
-  regcache (readonly_t, const regcache &src);
-
   DISABLE_COPY_AND_ASSIGN (regcache);
 
   /* Return REGCACHE's address space.  */
