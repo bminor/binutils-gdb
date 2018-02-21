@@ -349,7 +349,7 @@ coff_link_add_symbols (bfd *abfd,
 		      && (*sym_hash)->root.type != bfd_link_hash_undefined
 		      && (*sym_hash)->root.type != bfd_link_hash_undefweak)
 		    _bfd_error_handler
-		      (_("Warning: symbol `%s' is both section and non-section"),
+		      (_("warning: symbol `%s' is both section and non-section"),
 		       name);
 
 		  addit = FALSE;
@@ -451,7 +451,7 @@ coff_link_add_symbols (bfd *abfd,
 				   || BTYPE (sym.n_type) == T_NULL)))
 			_bfd_error_handler
 			  /* xgettext: c-format */
-			  (_("Warning: type of symbol `%s' changed"
+			  (_("warning: type of symbol `%s' changed"
 			     " from %d to %d in %pB"),
 			   name, (*sym_hash)->type, sym.n_type, abfd);
 

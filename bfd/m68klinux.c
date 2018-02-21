@@ -416,7 +416,7 @@ linux_tally_symbols (struct linux_link_hash_entry *h,
 	alloc = (char *) bfd_malloc ((bfd_size_type) strlen (name) + 1);
 
       if (p == NULL || alloc == NULL)
-	_bfd_error_handler (_("Output file requires shared library `%s'\n"),
+	_bfd_error_handler (_("output file requires shared library `%s'"),
 			    name);
       else
 	{
@@ -425,7 +425,7 @@ linux_tally_symbols (struct linux_link_hash_entry *h,
 	  *p++ = '\0';
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("Output file requires shared library `%s.so.%s'\n"),
+	    (_("output file requires shared library `%s.so.%s'"),
 	     alloc, p);
 	  free (alloc);
 	}
@@ -614,7 +614,7 @@ linux_finish_dynamic_link (bfd *output_bfd, struct bfd_link_info *info)
 	  && f->h->root.root.type != bfd_link_hash_defweak)
 	{
 	  _bfd_error_handler
-	    (_("Symbol %s not defined for fixups\n"),
+	    (_("symbol %s not defined for fixups"),
 	     f->h->root.root.root.string);
 	  continue;
 	}
@@ -662,7 +662,7 @@ linux_finish_dynamic_link (bfd *output_bfd, struct bfd_link_info *info)
 	      && f->h->root.root.type != bfd_link_hash_defweak)
 	    {
 	      _bfd_error_handler
-		(_("Symbol %s not defined for fixups\n"),
+		(_("symbol %s not defined for fixups"),
 		 f->h->root.root.root.string);
 	      continue;
 	    }
@@ -686,7 +686,7 @@ linux_finish_dynamic_link (bfd *output_bfd, struct bfd_link_info *info)
 
   if (linux_hash_table (info)->fixup_count != fixups_written)
     {
-      _bfd_error_handler (_("Warning: fixup count mismatch\n"));
+      _bfd_error_handler (_("warning: fixup count mismatch"));
       while (linux_hash_table (info)->fixup_count > fixups_written)
 	{
 	  bfd_put_32 (output_bfd, (bfd_vma) 0, fixup_table);

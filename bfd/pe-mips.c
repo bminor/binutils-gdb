@@ -606,7 +606,7 @@ coff_pe_mips_relocate_section (bfd *output_bfd,
   if (bfd_link_relocatable (info))
     {
       _bfd_error_handler
-	(_("%pB: `ld -r' not supported with PE MIPS objects\n"), input_bfd);
+	(_("%pB: `ld -r' not supported with PE MIPS objects"), input_bfd);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -717,7 +717,7 @@ coff_pe_mips_relocate_section (bfd *output_bfd,
 
 #define UI(x)						       \
       /* xgettext:c-format */				       \
-	_bfd_error_handler (_("%pB: unimplemented %s\n"),       \
+	_bfd_error_handler (_("%pB: unimplemented %s"),	       \
 			    input_bfd, x);		       \
 	bfd_set_error (bfd_error_bad_value);
 
@@ -743,7 +743,7 @@ coff_pe_mips_relocate_section (bfd *output_bfd,
 	  targ = val + (tmp & 0x03ffffff) * 4;
 	  if ((src & 0xf0000000) != (targ & 0xf0000000))
 	    {
-	      _bfd_error_handler (_("%pB: jump too far away\n"), input_bfd);
+	      _bfd_error_handler (_("%pB: jump too far away"), input_bfd);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -769,7 +769,7 @@ coff_pe_mips_relocate_section (bfd *output_bfd,
 	      targ = val + low + ((tmp & 0xffff) << 16);
 	      break;
 	    default:
-	      _bfd_error_handler (_("%pB: bad pair/reflo after refhi\n"),
+	      _bfd_error_handler (_("%pB: bad pair/reflo after refhi"),
 				  input_bfd);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;

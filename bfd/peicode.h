@@ -772,13 +772,13 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
     case IMPORT_CONST:
       /* XXX code yet to be written.  */
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: Unhandled import type; %x"),
+      _bfd_error_handler (_("%pB: unhandled import type; %x"),
 			  abfd, import_type);
       return FALSE;
 
     default:
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: Unrecognised import type; %x"),
+      _bfd_error_handler (_("%pB: unrecognized import type; %x"),
 			  abfd, import_type);
       return FALSE;
     }
@@ -793,7 +793,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 
     default:
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: Unrecognised import name type; %x"),
+      _bfd_error_handler (_("%pB: unrecognized import name type; %x"),
 			  abfd, import_name_type);
       return FALSE;
     }
@@ -1214,7 +1214,7 @@ pe_ILF_object_p (bfd * abfd)
     default:
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: Unrecognised machine type (0x%x)"
+	(_("%pB: unrecognised machine type (0x%x)"
 	   " in Import Library Format archive"),
 	 abfd, machine);
       bfd_set_error (bfd_error_malformed_archive);
@@ -1227,7 +1227,7 @@ pe_ILF_object_p (bfd * abfd)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%pB: Recognised but unhandled machine type (0x%x)"
+	(_("%pB: recognised but unhandled machine type (0x%x)"
 	   " in Import Library Format archive"),
 	 abfd, machine);
       bfd_set_error (bfd_error_wrong_format);
@@ -1277,7 +1277,7 @@ pe_ILF_object_p (bfd * abfd)
       || (bfd_size_type) ((bfd_byte *) source_dll - ptr) >= size)
     {
       _bfd_error_handler
-	(_("%pB: string not null terminated in ILF object file."), abfd);
+	(_("%pB: string not null terminated in ILF object file"), abfd);
       bfd_set_error (bfd_error_malformed_archive);
       bfd_release (abfd, ptr);
       return NULL;
@@ -1332,8 +1332,9 @@ pe_bfd_read_buildid (bfd *abfd)
   if (dataoff >= section->size
       || size > section->size - dataoff)
     {
-      _bfd_error_handler (_("%pB: Error: Debug Data ends beyond end of debug directory."),
-			  abfd);
+      _bfd_error_handler
+	(_("%pB: error: debug data ends beyond end of debug directory"),
+	 abfd);
       return;
     }
 

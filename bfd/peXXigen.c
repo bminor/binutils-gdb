@@ -1903,7 +1903,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
   if ((stop % onaline) != 0)
     fprintf (file,
 	     /* xgettext:c-format */
-	     _("Warning, .pdata section size (%ld) is not a multiple of %d\n"),
+	     _("warning, .pdata section size (%ld) is not a multiple of %d\n"),
 	     (long) stop, onaline);
 
   fprintf (file,
@@ -2100,7 +2100,7 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
   if ((stop % onaline) != 0)
     fprintf (file,
 	     /* xgettext:c-format */
-	     _("Warning, .pdata section size (%ld) is not a multiple of %d\n"),
+	     _("warning, .pdata section size (%ld) is not a multiple of %d\n"),
 	     (long) stop, onaline);
 
   fprintf (file,
@@ -3018,13 +3018,13 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 
 	  if (!bfd_set_section_contents (obfd, section, data, 0, section->size))
 	    {
-	      _bfd_error_handler (_("Failed to update file offsets in debug directory"));
+	      _bfd_error_handler (_("failed to update file offsets in debug directory"));
 	      return FALSE;
 	    }
 	}
       else if (section)
 	{
-	  _bfd_error_handler (_("%pB: Failed to read debug data section"), obfd);
+	  _bfd_error_handler (_("%pB: failed to read debug data section"), obfd);
 	  return FALSE;
 	}
     }
@@ -4103,14 +4103,14 @@ rsrc_merge (struct rsrc_entry * a, struct rsrc_entry * b)
 
   if (adir->characteristics != bdir->characteristics)
     {
-      _bfd_error_handler (_(".rsrc merge failure: dirs with differing characteristics\n"));
+      _bfd_error_handler (_(".rsrc merge failure: dirs with differing characteristics"));
       bfd_set_error (bfd_error_file_truncated);
       return;
     }
 
   if (adir->major != bdir->major || adir->minor != bdir->minor)
     {
-      _bfd_error_handler (_(".rsrc merge failure: differing directory versions\n"));
+      _bfd_error_handler (_(".rsrc merge failure: differing directory versions"));
       bfd_set_error (bfd_error_file_truncated);
       return;
     }

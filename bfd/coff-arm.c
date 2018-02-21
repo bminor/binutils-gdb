@@ -1365,8 +1365,8 @@ coff_arm_relocate_section (bfd *output_bfd,
 			      && ! INTERWORK_FLAG (h_sec->owner))
 			    _bfd_error_handler
 			      /* xgettext:c-format */
-			      (_("%pB(%s): warning: interworking not enabled.\n"
-				 "  first occurrence: %pB: arm call to thumb"),
+			      (_("%pB(%s): warning: interworking not enabled; "
+				 "first occurrence: %pB: arm call to thumb"),
 			       h_sec->owner, name, input_bfd);
 
 			  --my_offset;
@@ -1455,9 +1455,10 @@ coff_arm_relocate_section (bfd *output_bfd,
 			      && ! globals->support_old_code)
 			    _bfd_error_handler
 			      /* xgettext:c-format */
-			      (_("%pB(%s): warning: interworking not enabled.\n"
-				 "  first occurrence: %pB: thumb call to arm\n"
-				 "  consider relinking with --support-old-code enabled"),
+			      (_("%pB(%s): warning: interworking not enabled; "
+				 "first occurrence: %pB: thumb call to arm; "
+				 "consider relinking with --support-old-code "
+				 "enabled"),
 			       h_sec->owner, name, input_bfd);
 
 			  -- my_offset;
@@ -2268,12 +2269,12 @@ error: %pB is compiled as absolute position code, whereas target %pB is position
 	      if (INTERWORK_FLAG (ibfd))
 		/* xgettext: c-format */
 		_bfd_error_handler (_("\
-Warning: %pB supports interworking, whereas %pB does not"),
+warning: %pB supports interworking, whereas %pB does not"),
 				    ibfd, obfd);
 	      else
 		/* xgettext: c-format */
 		_bfd_error_handler (_("\
-Warning: %pB does not support interworking, whereas %pB does"),
+warning: %pB does not support interworking, whereas %pB does"),
 				    ibfd, obfd);
 	    }
 	}
@@ -2363,10 +2364,10 @@ _bfd_coff_arm_set_private_flags (bfd * abfd, flagword flags)
   if (INTERWORK_SET (abfd) && (INTERWORK_FLAG (abfd) != flag))
     {
       if (flag)
-	_bfd_error_handler (_("Warning: Not setting interworking flag of %pB since it has already been specified as non-interworking"),
+	_bfd_error_handler (_("warning: not setting interworking flag of %pB since it has already been specified as non-interworking"),
 			    abfd);
       else
-	_bfd_error_handler (_("Warning: Clearing the interworking flag of %pB due to outside request"),
+	_bfd_error_handler (_("warning: clearing the interworking flag of %pB due to outside request"),
 			    abfd);
       flag = 0;
     }
@@ -2424,7 +2425,7 @@ coff_arm_copy_private_bfd_data (bfd * src, bfd * dest)
 		{
 		  /* xgettext:c-format */
 		  _bfd_error_handler (_("\
-Warning: Clearing the interworking flag of %pB because non-interworking code in %pB has been linked with it"),
+warning: clearing the interworking flag of %pB because non-interworking code in %pB has been linked with it"),
 				      dest, src);
 		}
 

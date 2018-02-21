@@ -447,8 +447,8 @@ alpha_ecoff_bad_format_hook (bfd *abfd ATTRIBUTE_UNUSED,
 
   if (ALPHA_ECOFF_COMPRESSEDMAG (*internal_f))
     _bfd_error_handler
-      (_("%pB: Cannot handle compressed Alpha binaries.\n"
-	 "   Use compiler flags, or objZ, to generate uncompressed binaries."),
+      (_("%pB: cannot handle compressed Alpha binaries; "
+	 "use compiler flags, or objZ, to generate uncompressed binaries"),
        abfd);
 
   return FALSE;

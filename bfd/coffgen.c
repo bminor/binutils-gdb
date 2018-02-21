@@ -3024,7 +3024,7 @@ coff_gc_sweep (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 
 	  if (info->print_gc_sections && o->size != 0)
 	    /* xgettext: c-format */
-	    _bfd_error_handler (_("Removing unused section '%pA' in file '%pB'"),
+	    _bfd_error_handler (_("removing unused section '%pA' in file '%pB'"),
 				o, sub);
 
 #if 0
@@ -3101,7 +3101,7 @@ bfd_coff_gc_sections (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
   if (!bed->can_gc_sections
       || !is_coff_hash_table (info->hash))
     {
-      _bfd_error_handler(_("Warning: gc-sections option ignored"));
+      _bfd_error_handler(_("warning: gc-sections option ignored"));
       return TRUE;
     }
 #endif

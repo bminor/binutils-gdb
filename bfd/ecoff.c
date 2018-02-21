@@ -1265,7 +1265,7 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
       break;
 
     default:
-      sprintf (p1, _("Unknown basic type %d"), (int) basic_type);
+      sprintf (p1, _("unknown basic type %d"), (int) basic_type);
       break;
     }
 

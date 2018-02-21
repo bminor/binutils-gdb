@@ -1022,7 +1022,7 @@ handle_COMDAT (bfd * abfd,
 		if (esym + bfd_coff_symesz (abfd) >= esymend)
 		  {
 		    /* xgettext:c-format */
-		    _bfd_error_handler (_("%pB: warning: No symbol for"
+		    _bfd_error_handler (_("%pB: warning: no symbol for"
 					  " section '%s' found"),
 					abfd, symname);
 		    break;
@@ -1248,9 +1248,9 @@ styp_to_sec_flags (bfd *abfd,
 	     variable as this will allow some .sys files generate by
 	     other toolchains to be processed.  See bugzilla issue 196.  */
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: Warning: Ignoring section flag"
-				" IMAGE_SCN_MEM_NOT_PAGED in section %s"),
-			      abfd, name);
+	  _bfd_error_handler (_("%pB: warning: ignoring section flag"
+				" %s in section %s"),
+			      abfd, "IMAGE_SCN_MEM_NOT_PAGED", name);
 	  break;
 	case IMAGE_SCN_MEM_EXECUTE:
 	  sec_flags |= SEC_CODE;
@@ -1317,7 +1317,7 @@ styp_to_sec_flags (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB (%s): Section flag %s (%#lx) ignored"),
+	    (_("%pB (%s): section flag %s (%#lx) ignored"),
 	     abfd, name, unhandled, flag);
 	  result = FALSE;
 	}
@@ -2467,7 +2467,7 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
 	default:
 	  arch = bfd_arch_obscure;
 	  _bfd_error_handler
-	    (_("Unrecognized TI COFF target id '0x%x'"),
+	    (_("unrecognized TI COFF target id '0x%x'"),
 	     internal_f->f_target_id);
 	  break;
 	}
@@ -5100,7 +5100,7 @@ coff_slurp_symbol_table (bfd * abfd)
 	    default:
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: Unrecognized storage class %d for %s symbol `%s'"),
+		(_("%pB: unrecognized storage class %d for %s symbol `%s'"),
 		 abfd, src->u.syment.n_sclass,
 		 dst->symbol.section->name, dst->symbol.name);
 	      ret = FALSE;
