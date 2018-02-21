@@ -1,5 +1,14 @@
 2018-02-21  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.c (class register_dump): New class.
+	(register_dump_regcache, register_dump_none): New class.
+	(register_dump_remote, register_dump_groups): New class.
+	(regcache_print): Update.
+	* regcache.h (regcache_dump_what): Move it to regcache.c.
+	(regcache) <dump>: Remove.
+
+2018-02-21  Yao Qi  <yao.qi@linaro.org>
+
 	* jit.c (struct jit_unwind_private) <regcache>: Change its type to
 	 reg_buffer_rw *.
 	(jit_unwind_reg_set_impl): Call raw_supply.
