@@ -876,13 +876,13 @@ ia64_breakpoint_from_pc (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-ia64_read_pc (struct regcache *regcache)
+ia64_read_pc (readable_regcache *regcache)
 {
   ULONGEST psr_value, pc_value;
   int slot_num;
 
-  regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr_value);
-  regcache_cooked_read_unsigned (regcache, IA64_IP_REGNUM, &pc_value);
+  regcache->cooked_read (IA64_PSR_REGNUM, &psr_value);
+  regcache->cooked_read (IA64_IP_REGNUM, &pc_value);
   slot_num = (psr_value >> 41) & 3;
 
   return pc_value | (slot_num * SLOT_MULTIPLIER);

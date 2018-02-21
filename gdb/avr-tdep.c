@@ -367,10 +367,11 @@ avr_integer_to_address (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-avr_read_pc (struct regcache *regcache)
+avr_read_pc (readable_regcache *regcache)
 {
   ULONGEST pc;
-  regcache_cooked_read_unsigned (regcache, AVR_PC_REGNUM, &pc);
+
+  regcache->cooked_read (AVR_PC_REGNUM, &pc);
   return avr_make_iaddr (pc);
 }
 

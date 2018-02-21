@@ -1304,13 +1304,13 @@ hppa64_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 }
 
 CORE_ADDR
-hppa_read_pc (struct regcache *regcache)
+hppa_read_pc (readable_regcache *regcache)
 {
   ULONGEST ipsw;
   ULONGEST pc;
 
-  regcache_cooked_read_unsigned (regcache, HPPA_IPSW_REGNUM, &ipsw);
-  regcache_cooked_read_unsigned (regcache, HPPA_PCOQ_HEAD_REGNUM, &pc);
+  regcache->cooked_read (HPPA_IPSW_REGNUM, &ipsw);
+  regcache->cooked_read (HPPA_PCOQ_HEAD_REGNUM, &pc);
 
   /* If the current instruction is nullified, then we are effectively
      still executing the previous instruction.  Pretend we are still

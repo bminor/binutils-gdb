@@ -1,5 +1,18 @@
 2018-02-21  Yao Qi  <yao.qi@linaro.org>
 
+	* avr-tdep.c (avr_read_pc): Change parameter type to
+	readable_regcache.
+	* gdbarch.sh (read_pc): Likewise.
+	* gdbarch.c: Re-generated.
+	* gdbarch.h: Re-generated.
+	* hppa-tdep.c (hppa_read_pc): Change parameter type to
+	readable_regcache.
+	* ia64-tdep.c (ia64_read_pc): Likewise.
+	* mips-tdep.c (mips_read_pc): Likewise.
+	* spu-tdep.c (spu_read_pc): Likewise.
+
+2018-02-21  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (COMMON_SFILES): Add regcache-dump.c
 	* regcache-dump.c: New file.
 	* regcache.c: Move register_dump to regcache-dump.c.
