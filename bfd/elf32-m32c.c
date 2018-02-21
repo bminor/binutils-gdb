@@ -292,10 +292,9 @@ m32c_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 /* Set the howto pointer for an M32C ELF reloc.  */
 
 static void
-m32c_info_to_howto_rela
-    (bfd *		 abfd ATTRIBUTE_UNUSED,
-     arelent *		 cache_ptr,
-     Elf_Internal_Rela * dst)
+m32c_info_to_howto_rela (bfd *abfd,
+			 arelent *cache_ptr,
+			 Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
@@ -303,7 +302,8 @@ m32c_info_to_howto_rela
   if (r_type >= (unsigned int) R_M32C_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid M32C reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & m32c_elf_howto_table [r_type];

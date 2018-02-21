@@ -122,15 +122,15 @@ elf64_sparc_slurp_one_reloc_table (bfd *abfd, asection *asect,
       r_type = ELF64_R_TYPE_ID (rela.r_info);
       if (r_type == R_SPARC_OLO10)
 	{
-	  relent->howto = _bfd_sparc_elf_info_to_howto_ptr (R_SPARC_LO10);
+	  relent->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, R_SPARC_LO10);
 	  relent[1].address = relent->address;
 	  relent++;
 	  relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	  relent->addend = ELF64_R_TYPE_DATA (rela.r_info);
-	  relent->howto = _bfd_sparc_elf_info_to_howto_ptr (R_SPARC_13);
+	  relent->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, R_SPARC_13);
 	}
       else
-	relent->howto = _bfd_sparc_elf_info_to_howto_ptr (r_type);
+	relent->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, r_type);
     }
 
   canon_reloc_count (asect) += relent - relents;

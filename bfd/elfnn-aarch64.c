@@ -1972,7 +1972,7 @@ elfNN_aarch64_bfd_reloc_from_howto (reloc_howto_type *howto)
 /* Given R_TYPE, return the bfd internal relocation enumerator.  */
 
 static bfd_reloc_code_real_type
-elfNN_aarch64_bfd_reloc_from_type (unsigned int r_type)
+elfNN_aarch64_bfd_reloc_from_type (bfd *abfd, unsigned int r_type)
 {
   static bfd_boolean initialized_p = FALSE;
   /* Indexed by R_TYPE, values are offsets in the howto_table.  */
@@ -1995,7 +1995,8 @@ elfNN_aarch64_bfd_reloc_from_type (unsigned int r_type)
   /* PR 17512: file: b371e70a.  */
   if (r_type >= R_AARCH64_end)
     {
-      _bfd_error_handler (_("Invalid AArch64 reloc number: %d"), r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       return BFD_RELOC_AARCH64_NONE;
     }
@@ -2054,7 +2055,7 @@ elfNN_aarch64_howto_from_bfd_reloc (bfd_reloc_code_real_type code)
 }
 
 static reloc_howto_type *
-elfNN_aarch64_howto_from_type (unsigned int r_type)
+elfNN_aarch64_howto_from_type (bfd *abfd, unsigned int r_type)
 {
   bfd_reloc_code_real_type val;
   reloc_howto_type *howto;
@@ -2070,7 +2071,7 @@ elfNN_aarch64_howto_from_type (unsigned int r_type)
   if (r_type == R_AARCH64_NONE)
     return &elfNN_aarch64_howto_none;
 
-  val = elfNN_aarch64_bfd_reloc_from_type (r_type);
+  val = elfNN_aarch64_bfd_reloc_from_type (abfd, r_type);
   howto = elfNN_aarch64_howto_from_bfd_reloc (val);
 
   if (howto != NULL)
@@ -2081,13 +2082,13 @@ elfNN_aarch64_howto_from_type (unsigned int r_type)
 }
 
 static void
-elfNN_aarch64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *bfd_reloc,
+elfNN_aarch64_info_to_howto (bfd *abfd, arelent *bfd_reloc,
 			     Elf_Internal_Rela *elf_reloc)
 {
   unsigned int r_type;
 
   r_type = ELFNN_R_TYPE (elf_reloc->r_info);
-  bfd_reloc->howto = elfNN_aarch64_howto_from_type (r_type);
+  bfd_reloc->howto = elfNN_aarch64_howto_from_type (abfd, r_type);
 }
 
 static reloc_howto_type *
@@ -2727,11 +2728,11 @@ aarch64_relocate (unsigned int r_type, bfd *input_bfd, asection *input_section,
   reloc_howto_type *howto;
   bfd_vma place;
 
-  howto = elfNN_aarch64_howto_from_type (r_type);
+  howto = elfNN_aarch64_howto_from_type (input_bfd, r_type);
   place = (input_section->output_section->vma + input_section->output_offset
 	   + offset);
 
-  r_type = elfNN_aarch64_bfd_reloc_from_type (r_type);
+  r_type = elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type);
   value = _bfd_aarch64_elf_resolve_relocation (r_type, place, value, 0, FALSE);
   return _bfd_aarch64_elf_put_addend (input_bfd,
 				      input_section->contents + offset, r_type,
@@ -4708,7 +4709,7 @@ aarch64_tls_transition (bfd *input_bfd,
 			unsigned long r_symndx)
 {
   bfd_reloc_code_real_type bfd_r_type
-    = elfNN_aarch64_bfd_reloc_from_type (r_type);
+    = elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type);
 
   if (! aarch64_can_relax_tls (input_bfd, info, bfd_r_type, h, r_symndx))
     return bfd_r_type;
@@ -5793,7 +5794,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 
   BFD_ASSERT (globals && input_bfd && contents && rel);
 
-  switch (elfNN_aarch64_bfd_reloc_from_type (r_type))
+  switch (elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type))
     {
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
@@ -6215,7 +6216,8 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
       r_symndx = ELFNN_R_SYM (rel->r_info);
       r_type = ELFNN_R_TYPE (rel->r_info);
 
-      howto = bfd_reloc.howto = elfNN_aarch64_howto_from_type (r_type);
+      bfd_reloc.howto = elfNN_aarch64_howto_from_type (input_bfd, r_type);
+      howto = bfd_reloc.howto;
 
       if (howto == NULL)
 	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
@@ -6343,7 +6345,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 					       h, &unresolved_reloc,
 					       save_addend, &addend, sym);
 
-      switch (elfNN_aarch64_bfd_reloc_from_type (r_type))
+      switch (elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type))
 	{
 	case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
@@ -6386,7 +6388,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		  bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 
 		  bfd_reloc_code_real_type real_type =
-		    elfNN_aarch64_bfd_reloc_from_type (r_type);
+		    elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type);
 
 		  if (real_type == BFD_RELOC_AARCH64_TLSLD_ADR_PREL21
 		      || real_type == BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21
@@ -6581,7 +6583,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
       if (r != bfd_reloc_ok && r != bfd_reloc_continue)
 	{
 	  bfd_reloc_code_real_type real_r_type
-	    = elfNN_aarch64_bfd_reloc_from_type (r_type);
+	    = elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type);
 
 	  switch (r)
 	    {

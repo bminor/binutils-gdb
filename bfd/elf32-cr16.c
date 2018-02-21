@@ -641,7 +641,7 @@ _bfd_cr16_elf_create_got_section (bfd * abfd, struct bfd_link_info * info)
 /* Retrieve a howto ptr using a BFD reloc_code.  */
 
 static reloc_howto_type *
-elf_cr16_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+elf_cr16_reloc_type_lookup (bfd *abfd,
 			    bfd_reloc_code_real_type code)
 {
   unsigned int i;
@@ -650,7 +650,8 @@ elf_cr16_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     if (code == cr16_reloc_map[i].bfd_reloc_enum)
       return &cr16_elf_howto_table[cr16_reloc_map[i].cr16_reloc_type];
 
-  _bfd_error_handler (_("Unsupported CR16 relocation type: 0x%x\n"), code);
+  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+		      abfd, code);
   return NULL;
 }
 
@@ -671,7 +672,7 @@ elf_cr16_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Retrieve a howto ptr using an internal relocation entry.  */
 
 static void
-elf_cr16_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+elf_cr16_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
 {
   unsigned int r_type = ELF32_R_TYPE (dst->r_info);
@@ -679,7 +680,7 @@ elf_cr16_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   if (r_type >= R_CR16_MAX)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unrecognised CR16 reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_CR16_NONE;
@@ -2798,7 +2799,7 @@ bfd_cr16_elf32_create_embedded_relocs (bfd *abfd,
       if (!((ELF32_R_TYPE (irel->r_info) == (int) R_CR16_NUM32a)
 	  || (ELF32_R_TYPE (irel->r_info) == (int) R_CR16_NUM32)))
 	{
-	  *errmsg = _("unsupported reloc type");
+	  *errmsg = _("unsupported relocation type");
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
 	}

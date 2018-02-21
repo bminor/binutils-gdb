@@ -289,7 +289,8 @@ rl78_info_to_howto_rela (bfd *		     abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_RL78_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid RL78 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = rl78_elf_howto_table + r_type;

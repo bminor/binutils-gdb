@@ -614,7 +614,7 @@ _bfd_sparc_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 reloc_howto_type *
-_bfd_sparc_elf_info_to_howto_ptr (unsigned int r_type)
+_bfd_sparc_elf_info_to_howto_ptr (bfd *abfd, unsigned int r_type)
 {
   switch (r_type)
     {
@@ -636,7 +636,8 @@ _bfd_sparc_elf_info_to_howto_ptr (unsigned int r_type)
     default:
       if (r_type >= (unsigned int) R_SPARC_max_std)
 	{
-	  _bfd_error_handler (_("invalid relocation type %d"), (int) r_type);
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      abfd, r_type);
 	  r_type = R_SPARC_NONE;
 	}
       return &_bfd_sparc_elf_howto_table[r_type];
@@ -649,12 +650,12 @@ _bfd_sparc_elf_info_to_howto_ptr (unsigned int r_type)
 	((r_info) & 0xff)
 
 void
-_bfd_sparc_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+_bfd_sparc_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			      Elf_Internal_Rela *dst)
 {
   unsigned int r_type = SPARC_ELF_R_TYPE (dst->r_info);
 
-  cache_ptr->howto = _bfd_sparc_elf_info_to_howto_ptr (r_type);
+  cache_ptr->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, r_type);
 }
 
 

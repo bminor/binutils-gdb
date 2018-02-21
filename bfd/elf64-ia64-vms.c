@@ -3425,10 +3425,9 @@ elf64_ia64_relocate_section (bfd *output_bfd,
       r_type = ELF64_R_TYPE (rel->r_info);
       if (r_type > R_IA64_MAX_RELOC_CODE)
 	{
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%pB: unknown relocation type %d"),
-	     input_bfd, (int) r_type);
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret_val = FALSE;
 	  continue;

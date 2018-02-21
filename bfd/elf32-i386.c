@@ -381,8 +381,8 @@ elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
 	  >= R_386_vt - R_386_ext2))
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid relocation type %d"),
-			  abfd, (int) r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       indx = R_386_NONE;
     }
   /* PR 17512: file: 0f67f69d.  */

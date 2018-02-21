@@ -80,8 +80,6 @@ static void mips_elf64_be_swap_reloca_out
   (bfd *, const Elf_Internal_Rela *, bfd_byte *);
 static reloc_howto_type *bfd_elf64_bfd_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
-static reloc_howto_type *mips_elf64_rtype_to_howto
-  (unsigned int, bfd_boolean);
 static void mips_elf64_info_to_howto_rel
   (bfd *, arelent *, Elf_Internal_Rela *);
 static void mips_elf64_info_to_howto_rela
@@ -3574,7 +3572,7 @@ bfd_elf64_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
 static reloc_howto_type *
-mips_elf64_rtype_to_howto (unsigned int r_type, bfd_boolean rela_p)
+mips_elf64_rtype_to_howto (bfd *abfd, unsigned int r_type, bfd_boolean rela_p)
 {
   switch (r_type)
     {
@@ -3612,7 +3610,8 @@ mips_elf64_rtype_to_howto (unsigned int r_type, bfd_boolean rela_p)
 	}
       if (r_type >= R_MIPS_max)
 	{
-	  _bfd_error_handler (_("unrecognised MIPS reloc number: %d"), r_type);
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      abfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  r_type = R_MIPS_NONE;
 	}
@@ -3805,7 +3804,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 
 	  relent->addend = rela.r_addend;
 
-	  relent->howto = mips_elf64_rtype_to_howto (type, rela_p);
+	  relent->howto = mips_elf64_rtype_to_howto (abfd, type, rela_p);
 
 	  ++relent;
 	}

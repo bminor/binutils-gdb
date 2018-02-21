@@ -287,7 +287,7 @@ rtype_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
   if (r_type >= R_VAX_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unrecognised VAX reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_VAX_NONE;

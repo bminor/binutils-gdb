@@ -2894,7 +2894,8 @@ nds32_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   if (r_type > R_NDS32_GNU_VTENTRY)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid NDS32 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = bfd_elf32_bfd_reloc_type_table_lookup (r_type);
@@ -4449,7 +4450,7 @@ nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
       if (r_type >= R_NDS32_max)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: error: unknown relocation type %d."),
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;

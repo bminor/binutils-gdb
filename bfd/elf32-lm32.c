@@ -526,7 +526,7 @@ lm32_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Set the howto pointer for an Lattice Mico32 ELF reloc.  */
 
 static void
-lm32_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+lm32_info_to_howto_rela (bfd *abfd,
 			 arelent *cache_ptr,
 			 Elf_Internal_Rela *dst)
 {
@@ -536,7 +536,8 @@ lm32_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_LM32_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid LM32 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &lm32_elf_howto_table[r_type];

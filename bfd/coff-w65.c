@@ -349,7 +349,7 @@ w65_reloc16_extra_cases (bfd *abfd,
       }
       break;
     default:
-      printf (_("ignoring reloc %s\n"), reloc->howto->name);
+      _bfd_error_handler (_("%pB: %s unsupported"), abfd, reloc->howto->name);
       break;
 
     }

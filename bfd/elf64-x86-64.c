@@ -282,8 +282,8 @@ elf_x86_64_rtype_to_howto (bfd *abfd, unsigned r_type)
       if (r_type >= (unsigned int) R_X86_64_standard)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: invalid relocation type %d"),
-			      abfd, (int) r_type);
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      abfd, r_type);
 	  r_type = R_X86_64_NONE;
 	}
       i = r_type;

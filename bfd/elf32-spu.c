@@ -146,7 +146,7 @@ spu_elf_bfd_to_reloc_type (bfd_reloc_code_real_type code)
 }
 
 static void
-spu_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+spu_elf_info_to_howto (bfd *abfd,
 		       arelent *cache_ptr,
 		       Elf_Internal_Rela *dst)
 {
@@ -157,7 +157,7 @@ spu_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= R_SPU_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unrecognised SPU reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_SPU_NONE;

@@ -8388,7 +8388,7 @@ bfd_boolean
 _bfd_unrecognized_reloc (bfd * abfd, sec_ptr section, unsigned int r_type)
 {
    /* xgettext:c-format */
-  _bfd_error_handler (_("%pB: unrecognized relocation (%#x) in section `%pA'"),
+  _bfd_error_handler (_("%pB: unrecognized relocation type %#x in section `%pA'"),
 		      abfd, r_type, section);
 
   /* PR 21803: Suggest the most likely cause of this error.  */

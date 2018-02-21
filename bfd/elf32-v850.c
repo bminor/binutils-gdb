@@ -490,7 +490,8 @@ v850_elf_perform_relocation (bfd *abfd,
     {
     default:
 #ifdef DEBUG
-      fprintf (stderr, "%pB: reloc number %d not recognised\n", abfd, r_type);
+      _bfd_error_handler ("%pB: unsupported relocation type %#x",
+			  abfd, r_type);
 #endif
       return bfd_reloc_notsupported;
 
@@ -1885,7 +1886,7 @@ v850_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Set the howto pointer for an V850 ELF reloc.  */
 
 static void
-v850_elf_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
+v850_elf_info_to_howto_rel (bfd *abfd,
 			    arelent *cache_ptr,
 			    Elf_Internal_Rela *dst)
 {
@@ -1895,7 +1896,8 @@ v850_elf_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_V850_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid V850 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &v850_elf_howto_table[r_type];
@@ -1904,8 +1906,8 @@ v850_elf_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 /* Set the howto pointer for a V850 ELF reloc (type RELA).  */
 
 static void
-v850_elf_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
-			     arelent * cache_ptr,
+v850_elf_info_to_howto_rela (bfd *abfd,
+			     arelent *cache_ptr,
 			     Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
@@ -1914,7 +1916,8 @@ v850_elf_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_V850_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid V850 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &v850_elf_howto_table[r_type];
@@ -2145,7 +2148,8 @@ v850_elf_final_link_relocate (reloc_howto_type *howto,
 
     default:
 #ifdef DEBUG
-      fprintf (stderr, "%pB: reloc number %d not recognised\n", input_bfd, r_type);
+      _bfd_error_handler ("%pB: unsupported relocation type %#x",
+	       input_bfd, r_type);
 #endif
       return bfd_reloc_notsupported;
     }

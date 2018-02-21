@@ -66,8 +66,6 @@ static bfd_reloc_status_type mips16_gprel_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
-static reloc_howto_type *mips_elf_n32_rtype_to_howto
-  (unsigned int, bfd_boolean);
 static void mips_info_to_howto_rel
   (bfd *, arelent *, Elf_Internal_Rela *);
 static void mips_info_to_howto_rela
@@ -3402,7 +3400,7 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
 static reloc_howto_type *
-mips_elf_n32_rtype_to_howto (unsigned int r_type, bfd_boolean rela_p)
+mips_elf_n32_rtype_to_howto (bfd *abfd, unsigned int r_type, bfd_boolean rela_p)
 {
   switch (r_type)
     {
@@ -3440,7 +3438,8 @@ mips_elf_n32_rtype_to_howto (unsigned int r_type, bfd_boolean rela_p)
 	}
       if (r_type >= R_MIPS_max)
 	{
-	  _bfd_error_handler (_("unrecognised MIPS reloc number: %d"), r_type);
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      abfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  r_type = R_MIPS_NONE;
 	}
@@ -3460,7 +3459,7 @@ mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  cache_ptr->howto = mips_elf_n32_rtype_to_howto (r_type, FALSE);
+  cache_ptr->howto = mips_elf_n32_rtype_to_howto (abfd, r_type, FALSE);
 
   /* The addend for a GPREL16 or LITERAL relocation comes from the GP
      value for the object file.  We get the addend now, rather than
@@ -3474,13 +3473,13 @@ mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 /* Given a MIPS Elf_Internal_Rela, fill in an arelent structure.  */
 
 static void
-mips_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+mips_info_to_howto_rela (bfd *abfd,
 			 arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  cache_ptr->howto = mips_elf_n32_rtype_to_howto (r_type, TRUE);
+  cache_ptr->howto = mips_elf_n32_rtype_to_howto (abfd, r_type, TRUE);
   cache_ptr->addend = dst->r_addend;
 }
 

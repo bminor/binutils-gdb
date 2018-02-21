@@ -8967,10 +8967,9 @@ _bfd_elf_validate_reloc (bfd *abfd, arelent *areloc)
   return TRUE;
 
  fail:
-  _bfd_error_handler
-    /* xgettext:c-format */
-    (_("%pB: unsupported relocation type %s"),
-     abfd, areloc->howto->name);
+  /* xgettext:c-format */
+  _bfd_error_handler (_("%pB: %s unsupported"),
+		      abfd, areloc->howto->name);
   bfd_set_error (bfd_error_bad_value);
   return FALSE;
 }

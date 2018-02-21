@@ -139,7 +139,7 @@ coff_i860_reloc (bfd *abfd,
    these relocations.  */
 
 static bfd_reloc_status_type
-coff_i860_reloc_nyi (bfd *abfd ATTRIBUTE_UNUSED,
+coff_i860_reloc_nyi (bfd *abfd,
 		     arelent *reloc_entry,
 		     asymbol *symbol ATTRIBUTE_UNUSED,
 		     void *data ATTRIBUTE_UNUSED,
@@ -148,7 +148,7 @@ coff_i860_reloc_nyi (bfd *abfd ATTRIBUTE_UNUSED,
 		     char **error_message ATTRIBUTE_UNUSED)
 {
   reloc_howto_type *howto = reloc_entry->howto;
-  _bfd_error_handler (_("relocation `%s' not yet implemented"), howto->name);
+  _bfd_error_handler (_("%pB: %s unsupported"), abfd, howto->name);
   return bfd_reloc_notsupported;
 }
 

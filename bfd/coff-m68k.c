@@ -485,7 +485,7 @@ bfd_m68k_coff_create_embedded_relocs (bfd *abfd,
       /* We can only relocate absolute longword relocs at run time.  */
       if (irel->r_type != R_RELLONG)
 	{
-	  *errmsg = _("unsupported reloc type");
+	  *errmsg = _("unsupported relocation type");
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

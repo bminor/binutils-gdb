@@ -415,7 +415,7 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 /* Set the howto pointer for an XGATE ELF reloc.  */
 
 static void
-xgate_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
+xgate_info_to_howto_rel (bfd *abfd,
 			 arelent *cache_ptr,
 			 Elf_Internal_Rela *dst)
 {
@@ -425,7 +425,8 @@ xgate_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_XGATE_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid XGate reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &elf_xgate_howto_table[r_type];

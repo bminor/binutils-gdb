@@ -470,7 +470,7 @@ coff_mcore_relocate_section (bfd * output_bfd,
 	{
 	default:
 	  /* xgettext: c-format */
-	  _bfd_error_handler (_("%pB: unsupported relocation type 0x%02x"),
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;

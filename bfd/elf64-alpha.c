@@ -1101,7 +1101,7 @@ elf64_alpha_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Given an Alpha ELF reloc type, fill in an arelent structure.  */
 
 static void
-elf64_alpha_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+elf64_alpha_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			   Elf_Internal_Rela *dst)
 {
   unsigned r_type = ELF64_R_TYPE(dst->r_info);
@@ -1109,7 +1109,7 @@ elf64_alpha_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   if (r_type >= R_ALPHA_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unrecognised Alpha reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_ALPHA_NONE;
@@ -4097,7 +4097,7 @@ elf64_alpha_relocate_section_r (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: unknown relocation type %d"),
+	    (_("%pB: unsupported relocation type %#x"),
 	     input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret_val = FALSE;
@@ -4245,7 +4245,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: unknown relocation type %d"),
+	    (_("%pB: unsupported relocation type %#x"),
 	     input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret_val = FALSE;

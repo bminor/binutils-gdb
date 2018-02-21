@@ -702,7 +702,7 @@ or1k_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Set the howto pointer for an Or1k ELF reloc.  */
 
 static void
-or1k_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
+or1k_info_to_howto_rela (bfd * abfd,
 			 arelent * cache_ptr,
 			 Elf_Internal_Rela * dst)
 {
@@ -712,7 +712,8 @@ or1k_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_OR1K_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid OR1K reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & or1k_elf_howto_table[r_type];

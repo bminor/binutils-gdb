@@ -799,7 +799,7 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Set the howto pointer for an MN10300 ELF reloc.  */
 
 static void
-mn10300_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+mn10300_info_to_howto (bfd *abfd,
 		       arelent *cache_ptr,
 		       Elf_Internal_Rela *dst)
 {
@@ -809,7 +809,7 @@ mn10300_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= R_MN10300_MAX)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unrecognised MN10300 reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_MN10300_NONE;

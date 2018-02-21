@@ -2029,7 +2029,7 @@ ppc_elf_info_to_howto (bfd *abfd,
   if (r_type >= R_PPC_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unsupported reloc type %#x"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_PPC_NONE;
@@ -2041,7 +2041,7 @@ ppc_elf_info_to_howto (bfd *abfd,
   if (!cache_ptr->howto)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unsupported reloc type %#x"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
 

@@ -438,7 +438,7 @@ rtype2howto (arelent *cache_ptr, struct internal_reloc *dst)
 	}
     }
 
-  _bfd_error_handler (_("Unrecognized reloc type 0x%x"),
+  _bfd_error_handler (_("unsupported relocation type %#x"),
 		      (unsigned int) dst->r_type);
   cache_ptr->howto = tic80_howto_table + 0;
 }

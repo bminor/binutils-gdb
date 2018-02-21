@@ -122,11 +122,11 @@ struct riscv_elf_link_hash_table
   == RISCV_ELF_DATA ? ((struct riscv_elf_link_hash_table *) ((p)->hash)) : NULL)
 
 static void
-riscv_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+riscv_info_to_howto_rela (bfd *abfd,
 			  arelent *cache_ptr,
 			  Elf_Internal_Rela *dst)
 {
-  cache_ptr->howto = riscv_elf_rtype_to_howto (ELFNN_R_TYPE (dst->r_info));
+  cache_ptr->howto = riscv_elf_rtype_to_howto (abfd, ELFNN_R_TYPE (dst->r_info));
 }
 
 static void
@@ -470,7 +470,7 @@ bad_static_reloc (bfd *abfd, unsigned r_type, struct elf_link_hash_entry *h)
   (*_bfd_error_handler)
     (_("%pB: relocation %s against `%s' can not be used when making a shared "
        "object; recompile with -fPIC"),
-      abfd, riscv_elf_rtype_to_howto (r_type)->name,
+      abfd, riscv_elf_rtype_to_howto (abfd, r_type)->name,
       h != NULL ? h->root.root.string : "a local symbol");
   bfd_set_error (bfd_error_bad_value);
   return FALSE;
@@ -626,7 +626,7 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     symbol.  */
 	  if ((bfd_link_pic (info)
 	       && (sec->flags & SEC_ALLOC) != 0
-	       && (! riscv_elf_rtype_to_howto (r_type)->pc_relative
+	       && (! riscv_elf_rtype_to_howto (abfd, r_type)->pc_relative
 		   || (h != NULL
 		       && (! info->symbolic
 			   || h->root.type == bfd_link_hash_defweak
@@ -696,7 +696,7 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		}
 
 	      p->count += 1;
-	      p->pc_count += riscv_elf_rtype_to_howto (r_type)->pc_relative;
+	      p->pc_count += riscv_elf_rtype_to_howto (abfd, r_type)->pc_relative;
 	    }
 
 	  break;
@@ -1724,7 +1724,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       bfd_boolean unresolved_reloc, is_ie = FALSE;
       bfd_vma pc = sec_addr (input_section) + rel->r_offset;
       int r_type = ELFNN_R_TYPE (rel->r_info), tls_type;
-      reloc_howto_type *howto = riscv_elf_rtype_to_howto (r_type);
+      reloc_howto_type *howto = riscv_elf_rtype_to_howto (input_bfd, r_type);
       const char *msg = NULL;
 
       if (r_type == R_RISCV_GNU_VTINHERIT || r_type == R_RISCV_GNU_VTENTRY)
@@ -1888,7 +1888,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 						howto,
 						input_bfd);
 	  r_type = ELFNN_R_TYPE (rel->r_info);
-	  howto = riscv_elf_rtype_to_howto (r_type);
+	  howto = riscv_elf_rtype_to_howto (input_bfd, r_type);
 	  if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
 					    relocation, absolute))
 	    r = bfd_reloc_overflow;
@@ -1984,7 +1984,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 						howto,
 						input_bfd);
 	  r_type = ELFNN_R_TYPE (rel->r_info);
-	  howto = riscv_elf_rtype_to_howto (r_type);
+	  howto = riscv_elf_rtype_to_howto (input_bfd, r_type);
 	  if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
 					    relocation + rel->r_addend,
 					    absolute))

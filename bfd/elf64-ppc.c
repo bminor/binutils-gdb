@@ -2514,7 +2514,7 @@ ppc64_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
   if (type >= ARRAY_SIZE (ppc64_elf_howto_table))
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unsupported reloc type %#x"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, type);
       type = R_PPC64_NONE;
     }

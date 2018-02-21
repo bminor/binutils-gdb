@@ -260,7 +260,8 @@ tic54x_coff_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
    Called after some initial checking by the tic54x_rtype_to_howto fn below.  */
 
 static void
-tic54x_lookup_howto (arelent *internal,
+tic54x_lookup_howto (bfd *abfd,
+		     arelent *internal,
 		     struct internal_reloc *dst)
 {
   unsigned i;
@@ -275,8 +276,8 @@ tic54x_lookup_howto (arelent *internal,
 	}
     }
 
-  _bfd_error_handler (_("Unrecognized reloc type 0x%x"),
-		      (unsigned int) dst->r_type);
+  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+		      abfd, (unsigned int) dst->r_type);
   abort ();
 }
 
@@ -286,7 +287,7 @@ tic54x_lookup_howto (arelent *internal,
 #define coff_rtype_to_howto coff_tic54x_rtype_to_howto
 
 static reloc_howto_type *
-coff_tic54x_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+coff_tic54x_rtype_to_howto (bfd *abfd,
 			    asection *sec,
 			    struct internal_reloc *rel,
 			    struct coff_link_hash_entry *h ATTRIBUTE_UNUSED,
@@ -303,7 +304,7 @@ coff_tic54x_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       *addendp = (sec->output_section->vma + sec->output_offset) - sec->vma;
     }
 
-  tic54x_lookup_howto (&genrel, rel);
+  tic54x_lookup_howto (abfd, &genrel, rel);
 
   return genrel.howto;
 }
@@ -394,7 +395,7 @@ tic54x_reloc_processing (arelent *relent,
   /* !!     relent->section = (asection *) NULL;*/
 
   /* Fill in the relent->howto field from reloc->r_type.  */
-  tic54x_lookup_howto (relent, reloc);
+  tic54x_lookup_howto (abfd, relent, reloc);
 }
 
 /* TI COFF v0, DOS tools (little-endian headers).  */

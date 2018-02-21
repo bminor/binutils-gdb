@@ -1352,7 +1352,7 @@ struct elf_backend_data
     (bfd *);
 
   reloc_howto_type *(*elf_backend_mips_rtype_to_howto)
-    (unsigned int, bfd_boolean);
+    (bfd *, unsigned int, bfd_boolean);
 
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */

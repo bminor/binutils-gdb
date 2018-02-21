@@ -4089,8 +4089,8 @@ aout_link_input_section_std (struct aout_final_link_info *flaginfo,
 
       if (howto == NULL)
 	{
-	  (*flaginfo->info->callbacks->einfo)
-	    (_("%P: %pB: unexpected relocation type\n"), input_bfd);
+	  _bfd_error_handler (_("%pB: unsupported relocation type"),
+			      input_bfd);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -4410,8 +4410,8 @@ aout_link_input_section_ext (struct aout_final_link_info *flaginfo,
 
       if (r_type >= TABLE_SIZE (howto_table_ext))
 	{
-	  (*flaginfo->info->callbacks->einfo)
-	    (_("%P: %pB: unexpected relocation type\n"), input_bfd);
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

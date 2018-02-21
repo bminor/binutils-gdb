@@ -57,8 +57,6 @@ static bfd_reloc_status_type mips32_64bit_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
-static reloc_howto_type *mips_elf32_rtype_to_howto
-  (unsigned int, bfd_boolean);
 static void mips_info_to_howto_rel
   (bfd *, arelent *, Elf_Internal_Rela *);
 static void mips_info_to_howto_rela
@@ -2196,7 +2194,8 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
 static reloc_howto_type *
-mips_elf32_rtype_to_howto (unsigned int r_type,
+mips_elf32_rtype_to_howto (bfd *abfd,
+			   unsigned int r_type,
 			   bfd_boolean rela_p ATTRIBUTE_UNUSED)
 {
   switch (r_type)
@@ -2222,7 +2221,8 @@ mips_elf32_rtype_to_howto (unsigned int r_type,
 	return &elf_mips16_howto_table_rel[r_type - R_MIPS16_min];
       if (r_type >= (unsigned int) R_MIPS_max)
 	{
-	  _bfd_error_handler (_("Unrecognised MIPS reloc number: %d"), r_type);
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      abfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  r_type = R_MIPS_NONE;
 	}
@@ -2240,7 +2240,7 @@ mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 
   r_type = ELF32_R_TYPE (dst->r_info);
   bed = get_elf_backend_data (abfd);
-  cache_ptr->howto = bed->elf_backend_mips_rtype_to_howto (r_type, FALSE);
+  cache_ptr->howto = bed->elf_backend_mips_rtype_to_howto (abfd, r_type, FALSE);
 
   /* The addend for a GPREL16 or LITERAL relocation comes from the GP
      value for the object file.  We get the addend now, rather than

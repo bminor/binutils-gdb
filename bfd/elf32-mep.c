@@ -376,10 +376,9 @@ mep_final_link_relocate
 /* Set the howto pointer for a MEP ELF reloc.  */
 
 static void
-mep_info_to_howto_rela
-    (bfd *		 abfd ATTRIBUTE_UNUSED,
-     arelent *		 cache_ptr,
-     Elf_Internal_Rela * dst)
+mep_info_to_howto_rela (bfd *abfd,
+			arelent *cache_ptr,
+			Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
@@ -387,7 +386,8 @@ mep_info_to_howto_rela
   if (r_type >= R_MEP_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid MEP reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & mep_elf_howto_table [r_type];

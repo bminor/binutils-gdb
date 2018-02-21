@@ -492,7 +492,7 @@ static const struct shcoff_reloc_map sh_reloc_map[] =
 #define coff_bfd_reloc_name_lookup sh_coff_reloc_name_lookup
 
 static reloc_howto_type *
-sh_coff_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
+sh_coff_reloc_type_lookup (bfd *abfd,
 			   bfd_reloc_code_real_type code)
 {
   unsigned int i;
@@ -501,7 +501,8 @@ sh_coff_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
     if (sh_reloc_map[i].bfd_reloc_val == code)
       return &sh_coff_howtos[(int) sh_reloc_map[i].shcoff_reloc_val];
 
-  _bfd_error_handler (_("SH Error: unknown reloc type %d"), code);
+  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+		      abfd, (unsigned int) code);
   return NULL;
 }
 

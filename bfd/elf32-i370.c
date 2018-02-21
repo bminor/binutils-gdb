@@ -290,7 +290,7 @@ i370_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Set the howto pointer for an i370 ELF reloc.  */
 
 static void
-i370_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+i370_elf_info_to_howto (bfd *abfd,
 			arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
 {
@@ -304,7 +304,7 @@ i370_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= R_I370_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unrecognised I370 reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_I370_NONE;
@@ -1078,7 +1078,7 @@ i370_elf_relocate_section (bfd *output_bfd,
 	  || !i370_elf_howto_table[(int)r_type])
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: unknown relocation type %d"),
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      input_bfd, (int) r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
@@ -1161,8 +1161,8 @@ i370_elf_relocate_section (bfd *output_bfd,
 	{
 	default:
 	  _bfd_error_handler
-	    (_("%pB: unknown relocation type %d for symbol %s"),
-	     input_bfd, (int) r_type, sym_name);
+	    (_("%pB: unsupported relocation type %#x"),
+	     input_bfd, (int) r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;

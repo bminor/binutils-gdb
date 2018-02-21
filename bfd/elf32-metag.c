@@ -865,7 +865,7 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
 }
 
 static void
-metag_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+metag_info_to_howto_rela (bfd *abfd,
 			  arelent *cache_ptr,
 			  Elf_Internal_Rela *dst)
 {
@@ -875,7 +875,8 @@ metag_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_METAG_MAX)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid METAG reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = & elf_metag_howto_table [r_type];

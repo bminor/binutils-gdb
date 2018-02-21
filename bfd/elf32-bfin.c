@@ -4687,7 +4687,7 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	bad_reloc:
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB: unsupported relocation type %d"),
+	    (_("%pB: unsupported relocation type %#x"),
 	     abfd, (int) ELF32_R_TYPE (rel->r_info));
 	  return FALSE;
 	}
@@ -5340,7 +5340,7 @@ bfd_bfin_elf32_create_embedded_relocs (bfd *abfd,
       /* We can only relocate absolute longword relocs at run time.  */
       if (ELF32_R_TYPE (irel->r_info) != (int) R_BFIN_BYTE4_DATA)
 	{
-	  *errmsg = _("unsupported reloc type");
+	  *errmsg = _("unsupported relocation type");
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
 	}

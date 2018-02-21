@@ -2606,7 +2606,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	default:
 	  /* Unknown relocation.  */
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: invalid relocation type %d"),
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      input_bfd, r_type);
 	  ok = FALSE;
 	  continue;

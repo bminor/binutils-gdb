@@ -530,7 +530,7 @@ elf32_dlx_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static reloc_howto_type *
-dlx_rtype_to_howto (unsigned int r_type)
+dlx_rtype_to_howto (bfd *abfd, unsigned int r_type)
 {
   switch (r_type)
     {
@@ -545,7 +545,8 @@ dlx_rtype_to_howto (unsigned int r_type)
     default:
       if (r_type >= (unsigned int) R_DLX_max)
 	{
-	  _bfd_error_handler (_("Invalid DLX reloc number: %d"), r_type);
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      abfd, r_type);
 	  r_type = 0;
 	}
       return & dlx_elf_howto_table[r_type];
@@ -561,14 +562,14 @@ elf32_dlx_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
 }
 
 static void
-elf32_dlx_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
+elf32_dlx_info_to_howto_rel (bfd *abfd,
 			     arelent *cache_ptr,
 			     Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  cache_ptr->howto = dlx_rtype_to_howto (r_type);
+  cache_ptr->howto = dlx_rtype_to_howto (abfd, r_type);
   return;
 }
 

@@ -881,7 +881,7 @@ static bfd *reldyn_sorting_bfd;
   _bfd_elf_add_dynamic_entry (info, tag, val)
 
 #define MIPS_ELF_RTYPE_TO_HOWTO(abfd, rtype, rela)			\
-  (get_elf_backend_data (abfd)->elf_backend_mips_rtype_to_howto (rtype, rela))
+  (get_elf_backend_data (abfd)->elf_backend_mips_rtype_to_howto (abfd, rtype, rela))
 
 /* The name of the dynamic relocation section.  */
 #define MIPS_ELF_REL_DYN_NAME(INFO) \

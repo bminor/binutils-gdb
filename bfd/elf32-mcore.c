@@ -97,10 +97,9 @@ mcore_elf_unsupported_reloc (bfd * abfd,
   BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
 
   /* xgettext:c-format */
-  _bfd_error_handler (_("%pB: Relocation %s (%d) is not currently supported.\n"),
+  _bfd_error_handler (_("%pB: %s unsupported"),
 		      abfd,
-		      reloc_entry->howto->name,
-		      reloc_entry->howto->type);
+		      reloc_entry->howto->name);
 
   return bfd_reloc_notsupported;
 }
@@ -338,7 +337,7 @@ mcore_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Set the howto pointer for a RCE ELF reloc.  */
 
 static void
-mcore_elf_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
+mcore_elf_info_to_howto (bfd * abfd,
 			 arelent * cache_ptr,
 			 Elf_Internal_Rela * dst)
 {
@@ -352,7 +351,7 @@ mcore_elf_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
   if (r_type >= R_MCORE_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unrecognised MCore reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_MCORE_NONE;
@@ -437,7 +436,7 @@ mcore_elf_relocate_section (bfd * output_bfd,
 	  || ! mcore_elf_howto_table [(int)r_type])
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: Unknown relocation type %d\n"),
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      input_bfd, (int) r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
@@ -452,10 +451,9 @@ mcore_elf_relocate_section (bfd * output_bfd,
       if (howto->special_function == mcore_elf_unsupported_reloc)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: Relocation %s (%d) is not currently supported.\n"),
+	  _bfd_error_handler (_("%pB: %s unsupported"),
 			      input_bfd,
-			      howto->name,
-			      (int)r_type);
+			      howto->name);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;

@@ -419,14 +419,14 @@ elf_crx_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Retrieve a howto ptr using an internal relocation entry.  */
 
 static void
-elf_crx_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+elf_crx_info_to_howto (bfd *abfd, arelent *cache_ptr,
 		       Elf_Internal_Rela *dst)
 {
   unsigned int r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_CRX_MAX)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unrecognised CRX reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_CRX_NONE;

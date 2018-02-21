@@ -378,7 +378,7 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Set the howto pointer for an M68HC11 ELF reloc.  */
 
 static void
-m68hc11_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
+m68hc11_info_to_howto_rel (bfd *abfd,
 			   arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
@@ -387,7 +387,8 @@ m68hc11_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_M68HC11_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid M68HC11 reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &elf_m68hc11_howto_table[r_type];

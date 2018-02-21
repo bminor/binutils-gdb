@@ -1038,9 +1038,9 @@ coff_ppc_relocate_section (bfd *output_bfd,
       switch (r_type)
 	{
 	default:
-	  _bfd_error_handler
-	    /* xgettext: c-format */
-	    (_("%pB: unsupported relocation type 0x%02x"), input_bfd, r_type);
+	  /* xgettext: c-format */
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	case IMAGE_REL_PPC_TOCREL16:
@@ -1240,7 +1240,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 
 	    _bfd_error_handler
 	      /* xgettext: c-format */
-	      (_("Warning: unsupported reloc %s <file %pB, section %pA>\n"
+	      (_("warning: unsupported reloc %s <file %pB, section %pA>\n"
 		 "sym %ld (%s), r_vaddr %" PRId64 " (%#" PRIx64 ")"),
 	       howto->name, input_bfd, input_section,
 	       rel->r_symndx, my_name,

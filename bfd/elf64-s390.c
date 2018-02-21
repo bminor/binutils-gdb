@@ -370,8 +370,8 @@ elf_s390_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       if (r_type >= sizeof (elf_howto_table) / sizeof (elf_howto_table[0]))
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: invalid relocation type %d"),
-			      abfd, (int) r_type);
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      abfd, r_type);
 	  r_type = R_390_NONE;
 	}
       cache_ptr->howto = &elf_howto_table[r_type];

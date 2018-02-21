@@ -1251,7 +1251,7 @@ mmix_elf_perform_relocation (asection *isec, reloc_howto_type *howto,
 /* Set the howto pointer for an MMIX ELF reloc (type RELA).  */
 
 static void
-mmix_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+mmix_info_to_howto_rela (bfd *abfd,
 			 arelent *cache_ptr,
 			 Elf_Internal_Rela *dst)
 {
@@ -1261,7 +1261,8 @@ mmix_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type >= (unsigned int) R_MMIX_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid MMIX reloc number: %d"), abfd, r_type);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
       r_type = 0;
     }
   cache_ptr->howto = &elf_mmix_howto_table[r_type];

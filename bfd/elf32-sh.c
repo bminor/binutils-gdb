@@ -488,7 +488,7 @@ sh_elf_info_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
       || (r >= R_SH_FIRST_INVALID_RELOC_6 && r <= R_SH_LAST_INVALID_RELOC_6))
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unrecognised SH reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r);
       bfd_set_error (bfd_error_bad_value);
       r = R_SH_NONE;

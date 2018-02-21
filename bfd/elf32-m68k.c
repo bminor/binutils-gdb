@@ -349,8 +349,8 @@ rtype_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
   if (indx >= (unsigned int) R_68K_max)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid relocation type %d"),
-			  abfd, (int) indx);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, indx);
       indx = R_68K_NONE;
     }
   cache_ptr->howto = &howto_table[indx];
@@ -4385,7 +4385,7 @@ bfd_m68k_elf32_create_embedded_relocs (bfd *abfd, struct bfd_link_info *info,
       /* We can only relocate absolute longword relocs at run time.  */
       if (ELF32_R_TYPE (irel->r_info) != (int) R_68K_32)
 	{
-	  *errmsg = _("unsupported reloc type");
+	  *errmsg = _("unsupported relocation type");
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
 	}

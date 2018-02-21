@@ -2770,7 +2770,7 @@ xcoff_reloc_type_fail (bfd *input_bfd,
 {
   _bfd_error_handler
     /* xgettext: c-format */
-    (_("%pB: unsupported relocation type 0x%02x"),
+    (_("%pB: unsupported relocation type %#x"),
      input_bfd, (unsigned int) rel->r_type);
   bfd_set_error (bfd_error_bad_value);
   return FALSE;

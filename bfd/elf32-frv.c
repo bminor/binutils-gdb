@@ -2554,7 +2554,8 @@ frv_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
       if (r_type >= (unsigned int) R_FRV_max)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: invalid FRV reloc number: %d"), abfd, r_type);
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      abfd, r_type);
 	  r_type = 0;
 	}
       cache_ptr->howto = & elf32_frv_howto_table [r_type];
@@ -6250,10 +6251,9 @@ elf32_frv_check_relocs (bfd *abfd,
 
 	default:
 	bad_reloc:
-	  info->callbacks->einfo
-	    /* xgettext:c-format */
-	    (_("%pB: unsupported relocation type %i\n"),
-	     abfd, ELF32_R_TYPE (rel->r_info));
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      abfd, (unsigned int) ELF32_R_TYPE (rel->r_info));
 	  return FALSE;
 	}
     }
