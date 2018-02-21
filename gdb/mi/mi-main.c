@@ -96,8 +96,8 @@ static void mi_execute_cli_command (const char *cmd, int args_p,
 				    const char *args);
 static void mi_execute_async_cli_command (const char *cli_command,
 					  char **argv, int argc);
-static bool register_changed_p (int regnum, regcache *,
-				regcache *);
+static bool register_changed_p (int regnum, readonly_detached_regcache *,
+			       readonly_detached_regcache *);
 static void output_register (struct frame_info *, int regnum, int format,
 			     int skip_unavailable);
 
@@ -931,9 +931,9 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
 void
 mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
 {
-  static std::unique_ptr<struct regcache> this_regs;
+  static std::unique_ptr<readonly_detached_regcache> this_regs;
   struct ui_out *uiout = current_uiout;
-  std::unique_ptr<struct regcache> prev_regs;
+  std::unique_ptr<readonly_detached_regcache> prev_regs;
   struct gdbarch *gdbarch;
   int regnum, numregs;
   int i;
@@ -995,8 +995,8 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
 }
 
 static bool
-register_changed_p (int regnum, struct regcache *prev_regs,
-		    struct regcache *this_regs)
+register_changed_p (int regnum, readonly_detached_regcache *prev_regs,
+		    readonly_detached_regcache *this_regs)
 {
   struct gdbarch *gdbarch = this_regs->arch ();
   struct value *prev_value, *this_value;

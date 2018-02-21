@@ -8805,7 +8805,7 @@ struct infcall_suspend_state
 
   /* Other fields:  */
   CORE_ADDR stop_pc;
-  struct regcache *registers;
+  readonly_detached_regcache *registers;
 
   /* Format of SIGINFO_DATA or NULL if it is not present.  */
   struct gdbarch *siginfo_gdbarch;
@@ -8861,7 +8861,7 @@ save_infcall_suspend_state (void)
 
   inf_state->stop_pc = stop_pc;
 
-  inf_state->registers = regcache_dup (regcache);
+  inf_state->registers = new readonly_detached_regcache (*regcache);
 
   return inf_state;
 }
@@ -8918,7 +8918,7 @@ discard_infcall_suspend_state (struct infcall_suspend_state *inf_state)
   xfree (inf_state);
 }
 
-struct regcache *
+readonly_detached_regcache *
 get_infcall_suspend_state_regcache (struct infcall_suspend_state *inf_state)
 {
   return inf_state->registers;

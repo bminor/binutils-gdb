@@ -1017,13 +1017,13 @@ do_frame_register_read (void *src, int regnum, gdb_byte *buf)
     return REG_VALID;
 }
 
-std::unique_ptr<struct regcache>
+std::unique_ptr<readonly_detached_regcache>
 frame_save_as_regcache (struct frame_info *this_frame)
 {
-  std::unique_ptr<struct regcache> regcache
-    (new struct regcache (get_frame_arch (this_frame)));
+  std::unique_ptr<readonly_detached_regcache> regcache
+    (new readonly_detached_regcache (get_frame_arch (this_frame),
+				     do_frame_register_read, this_frame));
 
-  regcache->save (do_frame_register_read, this_frame);
   return regcache;
 }
 
@@ -1057,7 +1057,7 @@ frame_pop (struct frame_info *this_frame)
      Save them in a scratch buffer so that there isn't a race between
      trying to extract the old values from the current regcache while
      at the same time writing new values into that same cache.  */
-  std::unique_ptr<struct regcache> scratch
+  std::unique_ptr<readonly_detached_regcache> scratch
     = frame_save_as_regcache (prev_frame);
 
   /* FIXME: cagney/2003-03-16: It should be possible to tell the

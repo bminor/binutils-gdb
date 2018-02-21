@@ -45,8 +45,9 @@ struct fork_info
   ptid_t ptid;
   ptid_t parent_ptid;
   int num;			/* Convenient handle (GDB fork id).  */
-  struct regcache *savedregs;	/* Convenient for info fork, saves
+  readonly_detached_regcache *savedregs;	/* Convenient for info fork, saves
 				   having to actually switch contexts.  */
+  CORE_ADDR pc;
   int clobber_regs;		/* True if we should restore saved regs.  */
   off_t *filepos;		/* Set of open file descriptors' offsets.  */
   int maxfd;
@@ -294,7 +295,8 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
   if (fp->savedregs)
     delete fp->savedregs;
 
-  fp->savedregs = regcache_dup (get_current_regcache ());
+  fp->savedregs = new readonly_detached_regcache (*get_current_regcache ());
+  fp->pc = regcache_read_pc (get_current_regcache ());
   fp->clobber_regs = clobber_regs;
 
   if (clobber_regs)
@@ -590,15 +592,11 @@ info_checkpoints_command (const char *arg, int from_tty)
 
       printed = fp;
       if (ptid_equal (fp->ptid, inferior_ptid))
-	{
-	  printf_filtered ("* ");
-	  pc = regcache_read_pc (get_current_regcache ());
-	}
+	printf_filtered ("* ");
       else
-	{
-	  printf_filtered ("  ");
-	  pc = regcache_read_pc (fp->savedregs);
-	}
+	printf_filtered ("  ");
+
+      pc = fp->pc;
       printf_filtered ("%d %s", fp->num, target_pid_to_str (fp->ptid));
       if (fp->num == 0)
 	printf_filtered (_(" (main process)"));

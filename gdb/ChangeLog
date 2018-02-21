@@ -1,5 +1,43 @@
 2018-02-21  Yao Qi  <yao.qi@linaro.org>
 
+	* dummy-frame.c (dummy_frame_cache) <prev_regcache>: Use
+	readonly_detached_regcache.
+	(dummy_frame_prev_register): Use regcache->cooked_read.
+	* frame.c (frame_save_as_regcache): Change return type.
+	(frame_pop): Update.
+	* frame.h (frame_save_as_regcache): Update declaration.
+	* inferior.h (get_infcall_suspend_state_regcache): Update
+	declaration.
+	* infrun.c (infcall_suspend_state) <registers>: use
+	readonly_detached_regcache.
+	(save_infcall_suspend_state): Don't use regcache_dup.
+	(get_infcall_suspend_state_regcache): Change return type.
+	* linux-fork.c (struct fork_info) <savedregs>: Change to
+	readonly_detached_regcache.
+	<pc>: New field.
+	(fork_save_infrun_state): Don't use regcache_dup.
+	(info_checkpoints_command): Adjust.
+	* mi/mi-main.c (register_changed_p): Update declaration.
+	(mi_cmd_data_list_changed_registers): Use
+	readonly_detached_regcache.
+	(register_changed_p): Change parameter type to
+	readonly_detached_regcache.
+	* ppc-linux-tdep.c (ppu2spu_cache) <regcache>: Use
+	readonly_detached_regcache.
+	(ppu2spu_sniffer): Construct a new readonly_detached_regcache.
+	* regcache.c (readonly_detached_regcache::readonly_detached_regcache):
+	New.
+	(regcache::save): Move it to reg_buffer.
+	(regcache::restore): Change parameter type.
+	(regcache_dup): Remove.
+	* regcache.h (reg_buffer) <save>: New method.
+	(readonly_detached_regcache): New class.
+	* spu-tdep.c (spu2ppu_cache) <regcache>: Use
+	readonly_detached_regcache.
+	(spu2ppu_sniffer): Construct a new readonly_detached_regcache.
+
+2018-02-21  Yao Qi  <yao.qi@linaro.org>
+
 	* frame.c (frame_save_as_regcache): Use regcache method save.
 	(frame_pop): Use regcache method restore.
 	* infrun.c (restore_infcall_suspend_state): Likewise.

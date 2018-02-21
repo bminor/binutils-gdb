@@ -226,6 +226,11 @@ regcache::regcache (readonly_t, const regcache &src)
   save (do_cooked_read, (void *) &src);
 }
 
+readonly_detached_regcache::readonly_detached_regcache (const regcache &src)
+  : readonly_detached_regcache (src.arch (), do_cooked_read, (void *) &src)
+{
+}
+
 gdbarch *
 reg_buffer::arch () const
 {
@@ -282,16 +287,14 @@ reg_buffer::register_buffer (int regnum) const
 }
 
 void
-regcache::save (regcache_cooked_read_ftype *cooked_read,
-		void *src)
+reg_buffer::save (regcache_cooked_read_ftype *cooked_read,
+		  void *src)
 {
   struct gdbarch *gdbarch = m_descr->gdbarch;
   int regnum;
 
-  /* The DST should be `read-only', if it wasn't then the save would
-     end up trying to write the register values back out to the
-     target.  */
-  gdb_assert (m_readonly_p);
+  /* It should have pseudo registers.  */
+  gdb_assert (m_has_pseudo);
   /* Clear the dest.  */
   memset (m_registers, 0, m_descr->sizeof_cooked_registers);
   memset (m_register_status, 0, m_descr->nr_cooked_registers);
@@ -317,16 +320,14 @@ regcache::save (regcache_cooked_read_ftype *cooked_read,
 }
 
 void
-regcache::restore (struct regcache *src)
+regcache::restore (readonly_detached_regcache *src)
 {
   struct gdbarch *gdbarch = m_descr->gdbarch;
   int regnum;
 
   gdb_assert (src != NULL);
-  /* The dst had better not be read-only.  If it is, the `restore'
-     doesn't make much sense.  */
   gdb_assert (!m_readonly_p);
-  gdb_assert (src->m_readonly_p);
+  gdb_assert (src->m_has_pseudo);
 
   gdb_assert (gdbarch == src->arch ());
 
@@ -342,12 +343,6 @@ regcache::restore (struct regcache *src)
 	    cooked_write (regnum, src->register_buffer (regnum));
 	}
     }
-}
-
-struct regcache *
-regcache_dup (struct regcache *src)
-{
-  return new regcache (regcache::readonly, *src);
 }
 
 enum register_status
