@@ -1,5 +1,18 @@
 2018-02-21  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (COMMON_SFILES): Add regcache-dump.c
+	* regcache-dump.c: New file.
+	* regcache.c: Move register_dump to regcache-dump.c.
+	(maintenance_print_registers): Likewise.
+	(maintenance_print_raw_registers): Likewise.
+	(maintenance_print_cooked_registers): Likewise.
+	(maintenance_print_register_groups): Likewise.
+	(maintenance_print_remote_registers): Likewise.
+	(_initialize_regcache): Likewise.
+	* regcache.h (register_dump): Moved from regcache.c.
+
+2018-02-21  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (regcache::regcache): Update.
 	(regcache::invalidate): Move it to detached_regcache::invalidate.
 	(get_thread_arch_aspace_regcache): Update.

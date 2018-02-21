@@ -1070,6 +1070,7 @@ COMMON_SFILES = \
 	record-btrace.c \
 	record-full.c \
 	regcache.c \
+	regcache-dump.c \
 	reggroups.c \
 	registry.c \
 	remote.c \
