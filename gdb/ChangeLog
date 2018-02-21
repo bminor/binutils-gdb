@@ -1,5 +1,24 @@
 2018-02-21  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.c (regcache::regcache): Update.
+	(regcache::invalidate): Move it to detached_regcache::invalidate.
+	(get_thread_arch_aspace_regcache): Update.
+	(regcache::raw_update): Update.
+	(regcache::cooked_read): Remove some code.
+	(regcache::cooked_read_value): Likewise.
+	(regcache::raw_write): Remove assert on m_readonly_p.
+	(regcache::raw_supply_integer): Move it to
+	detached_regcache::raw_supply_integer.
+	(regcache::raw_supply_zeroed): Likewise.
+	* regcache.h (detached_regcache) <raw_supply_integer>: New
+	declaration.
+	<raw_supply_zeroed, invalidate>: Likewise.
+	(regcache) <raw_supply_integer, raw_supply_zeroed>: Removed.
+	<invalidate>: Likewise.
+	<m_readonly_p>: Removed.
+
+2018-02-21  Yao Qi  <yao.qi@linaro.org>
+
 	* infcmd.c (get_return_value): Let stop_regs point to
 	get_current_regcache.
 	* regcache.c (regcache::regcache): Remove.
