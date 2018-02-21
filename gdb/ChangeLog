@@ -1,3 +1,9 @@
+2018-02-21  John Baldwin  <jhb@FreeBSD.org>
+
+	* arch/aarch64.c: Include "common-defs.h".
+	* arch/amd64.c: Likewise.
+	* arch/i386.c: Likewise.
+
 2018-02-21  Tom Tromey  <tom@tromey.com>
 
 	* value.h: (extract_field_op): Update.
