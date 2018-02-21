@@ -1097,7 +1097,7 @@ struct jit_unwind_private
 {
   /* Cached register values.  See jit_frame_sniffer to see how this
      works.  */
-  struct regcache *regcache;
+  detached_regcache *regcache;
 
   /* The frame being unwound.  */
   struct frame_info *this_frame;
@@ -1126,7 +1126,7 @@ jit_unwind_reg_set_impl (struct gdb_unwind_callbacks *cb, int dwarf_regnum,
       return;
     }
 
-  regcache_raw_set_cached_value (priv->regcache, gdb_reg, value->value);
+  priv->regcache->raw_supply (gdb_reg, value->value);
   value->free (value);
 }
 
@@ -1188,7 +1188,6 @@ jit_frame_sniffer (const struct frame_unwind *self,
   struct jit_unwind_private *priv_data;
   struct gdb_unwind_callbacks callbacks;
   struct gdb_reader_funcs *funcs;
-  struct gdbarch *gdbarch;
 
   callbacks.reg_get = jit_unwind_reg_get_impl;
   callbacks.reg_set = jit_unwind_reg_set_impl;
@@ -1201,11 +1200,11 @@ jit_frame_sniffer (const struct frame_unwind *self,
 
   gdb_assert (!*cache);
 
-  gdbarch = get_frame_arch (this_frame);
-
   *cache = XCNEW (struct jit_unwind_private);
   priv_data = (struct jit_unwind_private *) *cache;
-  priv_data->regcache = new regcache (gdbarch);
+  /* Take a snapshot of current regcache.  */
+  priv_data->regcache = new detached_regcache (get_frame_arch (this_frame),
+					       true);
   priv_data->this_frame = this_frame;
 
   callbacks.priv_data = priv_data;

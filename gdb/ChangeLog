@@ -1,5 +1,25 @@
 2018-02-21  Yao Qi  <yao.qi@linaro.org>
 
+	* jit.c (struct jit_unwind_private) <regcache>: Change its type to
+	 reg_buffer_rw *.
+	(jit_unwind_reg_set_impl): Call raw_supply.
+	(jit_frame_sniffer): Use reg_buffer_rw.
+	* record-full.c (record_full_core_regbuf): Change its type.
+	(record_full_core_open_1): Use reg_buffer_rw.
+	(record_full_close): Likewise.
+	(record_full_core_fetch_registers): Use regcache->raw_supply.
+	(record_full_core_store_registers): Likewise.
+	* regcache.c (regcache::get_register_status): Move it to
+	reg_buffer.
+	(regcache_raw_set_cached_value): Remove.
+	(regcache::raw_set_cached_value): Remove.
+	(regcache::raw_write): Call raw_supply.
+	(regcache::raw_supply): Move it to reg_buffer_rw.
+	* regcache.h (regcache_raw_set_cached_value): Remove.
+	(reg_buffer_rw): New class.
+
+2018-02-21  Yao Qi  <yao.qi@linaro.org>
+
 	* dummy-frame.c (dummy_frame_cache) <prev_regcache>: Use
 	readonly_detached_regcache.
 	(dummy_frame_prev_register): Use regcache->cooked_read.
