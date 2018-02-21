@@ -16772,6 +16772,20 @@ do_neon_movhf (void)
   constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
 	      _(BAD_FPU));
 
+  if (inst.cond != COND_ALWAYS)
+    {
+      if (thumb_mode)
+	{
+	  as_warn (_("ARMv8.2 scalar fp16 instruction cannot be conditional,"
+		     " the behaviour is UNPREDICTABLE"));
+	}
+      else
+	{
+	  inst.error = BAD_COND;
+	  return;
+	}
+    }
+
   do_vfp_sp_monadic ();
 
   inst.is_neon = 1;
