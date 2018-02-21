@@ -1,5 +1,21 @@
 2018-02-21  Yao Qi  <yao.qi@linaro.org>
 
+	* frame.c (frame_save_as_regcache): Use regcache method save.
+	(frame_pop): Use regcache method restore.
+	* infrun.c (restore_infcall_suspend_state): Likewise.
+	* linux-fork.c (fork_load_infrun_state): Likewise.
+	* ppc-linux-tdep.c (ppu2spu_sniffer): User regcache method
+	save.
+	* regcache.c (regcache_save): Remove.
+	(regcache::restore): More asserts.
+	(regcache_cpy): Remove.
+	* regcache.h (regcache_save): Remove the declaration.
+	(regcache::restore): Move from private to public.
+	Remove the friend declaration of regcache_cpy.
+	(regcache_cpy): Remove declaration.
+
+2018-02-21  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (aarch64_pseudo_register_read_value): Change
 	parameter type to 'readable_regcache *'.
 	* amd64-tdep.c (amd64_pseudo_register_read_value): Likewise.

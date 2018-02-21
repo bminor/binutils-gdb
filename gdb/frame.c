@@ -1023,7 +1023,7 @@ frame_save_as_regcache (struct frame_info *this_frame)
   std::unique_ptr<struct regcache> regcache
     (new struct regcache (get_frame_arch (this_frame)));
 
-  regcache_save (regcache.get (), do_frame_register_read, this_frame);
+  regcache->save (do_frame_register_read, this_frame);
   return regcache;
 }
 
@@ -1068,9 +1068,8 @@ frame_pop (struct frame_info *this_frame)
      Unfortunately, they don't implement it.  Their lack of a formal
      definition can lead to targets writing back bogus values
      (arguably a bug in the target code mind).  */
-  /* Now copy those saved registers into the current regcache.
-     Here, regcache_cpy() calls regcache_restore().  */
-  regcache_cpy (get_current_regcache (), scratch.get ());
+  /* Now copy those saved registers into the current regcache.  */
+  get_current_regcache ()->restore (scratch.get ());
 
   /* We've made right mess of GDB's local state, just discard
      everything.  */
