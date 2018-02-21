@@ -20,7 +20,7 @@
 
 if { (![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_lp64_target]
      || [istarget "*-*-openbsd*"] } then {
-    verbose "Skipping amd64->i386 adress test."
+    verbose "Skipping amd64->i386 address test."
     return
 }
 

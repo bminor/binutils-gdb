@@ -1,3 +1,7 @@
+2018-02-21  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.arch/amd64-i386-address.exp: Fix a typo.
+
 2018-02-20  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/buffer-size.exp: Do not force BTS.
