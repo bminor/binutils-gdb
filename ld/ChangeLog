@@ -1,3 +1,27 @@
+2018-02-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/group8b.d: Run test on ia64.  Use xfail rather
+	than notarget.
+	* testsuite/ld-elf/pr12851.d: Likewise.
+	* testsuite/ld-elf/pr12975.d: Likewise.
+	* testsuite/ld-elf/pr13177.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elf/pr17615.d: Likewise.
+	* testsuite/ld-elf/pr21562a.d: Likewise.
+	* testsuite/ld-elf/pr21562b.d: Likewise.
+	* testsuite/ld-elf/pr21562c.d: Likewise.
+	* testsuite/ld-elf/pr21562d.d: Likewise.
+	* testsuite/ld-elf/pr21562i.d: Likewise.
+	* testsuite/ld-elf/pr21562j.d: Likewise.
+	* testsuite/ld-elf/pr21562k.d: Likewise.
+	* testsuite/ld-elf/pr21562l.d: Likewise.
+	* testsuite/ld-elf/pr21562m.d: Likewise.
+	* testsuite/ld-elf/pr21562n.d: Likewise.
+	* testsuite/ld-elf/group9a.d: Run test on ia64 and alpha.  Use xfail
+	rather than notarget.
+	* testsuite/ld-elf/group9b.d: Likewise.
+	* testsuite/ld-elf/pr22677.d: Likewise.
+
 2018-02-19  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/ld-mips-elf/reginfo-0.d: New test.

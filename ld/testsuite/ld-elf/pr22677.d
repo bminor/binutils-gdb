@@ -1,7 +1,7 @@
 #ld: -r  --gc-sections -u foo
 #readelf: -S --wide
-#notarget: d30v-*-* dlx-*-* i960-*-* pj*-*-* pru-*-*
-#notarget: alpha-*-* hppa64-*-* i370-*-* i860-*-* ia64-*-* mep-*-* mn10200-*-*
+#xfail: d30v-*-* dlx-*-* i960-*-* pj*-*-* pru-*-*
+#xfail: hppa64-*-* i370-*-* i860-*-* mep-*-* mn10200-*-*
 #xfail: cr16-*-* crx-*-* msp430-*-*
 # msp430 puts the init_array and fini_array inside the .rodata section.
 # generic linker targets don't support --gc-sections, nor do a bunch of
