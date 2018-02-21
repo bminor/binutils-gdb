@@ -4885,7 +4885,7 @@ make_branch_to_erratum_835769_stub (struct bfd_hash_entry *gen_entry,
   abfd = stub_entry->target_section->owner;
   if (!aarch64_valid_branch_p (veneer_entry_loc, veneered_insn_loc))
     _bfd_error_handler
-      (_("%pB: error: Erratum 835769 stub out "
+      (_("%pB: error: erratum 835769 stub out "
 	 "of range (input file too large)"), abfd);
 
   target = stub_entry->target_value;
@@ -4966,7 +4966,7 @@ _bfd_aarch64_erratum_843419_branch_to_stub (struct bfd_hash_entry *gen_entry,
       abfd = stub_entry->target_section->owner;
       if (!aarch64_valid_branch_p (veneer_entry_loc, veneered_insn_loc))
 	_bfd_error_handler
-	  (_("%pB: error: Erratum 843419 stub out "
+	  (_("%pB: error: erratum 843419 stub out "
 	     "of range (input file too large)"), abfd);
 
       branch_insn = 0x14000000;
@@ -5572,7 +5572,7 @@ bad_ifunc_reloc:
 	    int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB: Local symbol descriptor table be NULL when applying "
+	      (_("%pB: local symbol descriptor table be NULL when applying "
 		 "relocation %s against local symbol"),
 	       input_bfd, elfNN_aarch64_howto_table[howto_index].name);
 	    abort ();
@@ -6596,7 +6596,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		{
 		  (*info->callbacks->warning)
 		    (info,
-		     _("Too many GOT entries for -fpic, "
+		     _("too many GOT entries for -fpic, "
 		       "please recompile with -fPIC"),
 		     name, input_bfd, input_section, rel->r_offset);
 		  return FALSE;
@@ -6624,9 +6624,9 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		      || real_r_type == BFD_RELOC_AARCH64_LDST128_LO12))
 		{
 		  info->callbacks->warning
-		    (info, _("One possible cause of this error is that the \
+		    (info, _("one possible cause of this error is that the \
 symbol is being referenced in the indicated code as if it had a larger \
-alignment than was declared where it was defined."),
+alignment than was declared where it was defined"),
 		     name, input_bfd, input_section, rel->r_offset);
 		}
 	      break;

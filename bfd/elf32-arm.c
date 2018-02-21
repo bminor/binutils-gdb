@@ -4022,7 +4022,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 		      (_("%pB(%pA): warning: long branch veneers used in"
 			 " section with SHF_ARM_PURECODE section"
 			 " attribute is only supported for M-profile"
-			 " targets that implement the movw instruction."),
+			 " targets that implement the movw instruction"),
 		       input_bfd, input_sec);
 
 		  stub_type = (bfd_link_pic (info) | globals->pic_veneer)
@@ -4056,7 +4056,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 			  (_("%pB(%pA): warning: long branch veneers used in"
 			     " section with SHF_ARM_PURECODE section"
 			     " attribute is only supported for M-profile"
-			     " targets that implement the movw instruction."),
+			     " targets that implement the movw instruction"),
 			   input_bfd, input_sec);
 
 		      stub_type = (bfd_link_pic (info) | globals->pic_veneer)
@@ -4075,7 +4075,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 		  (_("%pB(%pA): warning: long branch veneers used in"
 		     " section with SHF_ARM_PURECODE section"
 		     " attribute is only supported" " for M-profile"
-		     " targets that implement the movw instruction."),
+		     " targets that implement the movw instruction"),
 		   input_bfd, input_sec);
 
 	      /* Thumb to arm.  */
@@ -4084,9 +4084,9 @@ arm_type_of_stub (struct bfd_link_info *info,
 		  && !INTERWORK_FLAG (sym_sec->owner))
 		{
 		  _bfd_error_handler
-		    (_("%pB(%s): warning: interworking not enabled.\n"
-		       "  first occurrence: %pB: Thumb call to ARM"),
-		     sym_sec->owner, name, input_bfd);
+		    (_("%pB(%s): warning: interworking not enabled;"
+		       " first occurrence: %pB: %s call to %s"),
+		     sym_sec->owner, name, input_bfd, "Thumb", "ARM");
 		}
 
 	      stub_type =
@@ -4127,7 +4127,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 	  (_("%pB(%pA): warning: long branch veneers used in"
 	     " section with SHF_ARM_PURECODE section"
 	     " attribute is only supported for M-profile"
-	     " targets that implement the movw instruction."),
+	     " targets that implement the movw instruction"),
 	   input_bfd, input_sec);
       if (branch_type == ST_BRANCH_TO_THUMB)
 	{
@@ -4138,9 +4138,9 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      && !INTERWORK_FLAG (sym_sec->owner))
 	    {
 	      _bfd_error_handler
-		(_("%pB(%s): warning: interworking not enabled.\n"
-		   "  first occurrence: %pB: ARM call to Thumb"),
-		 sym_sec->owner, name, input_bfd);
+		(_("%pB(%s): warning: interworking not enabled;"
+		   " first occurrence: %pB: %s call to %s"),
+		 sym_sec->owner, name, input_bfd, "ARM", "Thumb");
 	    }
 
 	  /* We have an extra 2-bytes reach because of
@@ -4412,7 +4412,7 @@ elf32_arm_create_or_find_stub_sec (asection **link_sec_p, asection *section,
       out_sec = bfd_get_section_by_name (output_bfd, out_sec_name);
       if (out_sec == NULL)
 	{
-	  _bfd_error_handler (_("No address assigned to the veneers output "
+	  _bfd_error_handler (_("no address assigned to the veneers output "
 				"section %s"), out_sec_name);
 	  return NULL;
 	}
@@ -5672,8 +5672,8 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
 
       if (!is_v8m)
 	{
-	  _bfd_error_handler (_("%pB: Special symbol `%s' only allowed for "
-				"ARMv8-M architecture or later."),
+	  _bfd_error_handler (_("%pB: special symbol `%s' only allowed for "
+				"ARMv8-M architecture or later"),
 			      input_bfd, sym_name);
 	  is_v8m = TRUE; /* Avoid multiple warning.  */
 	  ret = FALSE;
@@ -5681,10 +5681,9 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
 
       if (cmse_invalid)
 	{
-	  _bfd_error_handler (_("%pB: invalid special symbol `%s'."),
+	  _bfd_error_handler (_("%pB: invalid special symbol `%s'; it must be"
+				" a global or weak function symbol"),
 			      input_bfd, sym_name);
-	  _bfd_error_handler (_("It must be a global or weak function "
-				"symbol."));
 	  ret = FALSE;
 	  if (i < ext_start)
 	    continue;
@@ -5721,13 +5720,13 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
 	  if (hash || j < ext_start)
 	    {
 	      _bfd_error_handler
-		(_("%pB: invalid standard symbol `%s'."), input_bfd, sym_name);
-	      _bfd_error_handler
-		(_("It must be a global or weak function symbol."));
+		(_("%pB: invalid standard symbol `%s'; it must be "
+		   "a global or weak function symbol"),
+		 input_bfd, sym_name);
 	    }
 	  else
 	    _bfd_error_handler
-	      (_("%pB: absent standard symbol `%s'."), input_bfd, sym_name);
+	      (_("%pB: absent standard symbol `%s'"), input_bfd, sym_name);
 	  ret = FALSE;
 	  if (!hash)
 	    continue;
@@ -5739,7 +5738,7 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
       if (cmse_hash->root.root.u.def.section != section)
 	{
 	  _bfd_error_handler
-	    (_("%pB: `%s' and its special symbol are in different sections."),
+	    (_("%pB: `%s' and its special symbol are in different sections"),
 	     input_bfd, sym_name);
 	  ret = FALSE;
 	}
@@ -5751,14 +5750,14 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
       if (section->output_section == NULL)
 	{
 	  _bfd_error_handler
-	    (_("%pB: entry function `%s' not output."), input_bfd, sym_name);
+	    (_("%pB: entry function `%s' not output"), input_bfd, sym_name);
 	  continue;
 	}
 
       if (hash->root.size == 0)
 	{
 	  _bfd_error_handler
-	    (_("%pB: entry function `%s' is empty."), input_bfd, sym_name);
+	    (_("%pB: entry function `%s' is empty"), input_bfd, sym_name);
 	  ret = FALSE;
 	}
 
@@ -5888,7 +5887,7 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
   if (!htab->cmse_implib)
     {
       _bfd_error_handler (_("%pB: --in-implib only supported for Secure "
-			    "Gateway import libraries."), in_implib_bfd);
+			    "Gateway import libraries"), in_implib_bfd);
       return FALSE;
     }
 
@@ -5933,10 +5932,10 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
 	  || (ARM_GET_SYM_BRANCH_TYPE (intsym->st_target_internal)
 	      != ST_BRANCH_TO_THUMB))
 	{
-	  _bfd_error_handler (_("%pB: invalid import library entry: `%s'."),
+	  _bfd_error_handler (_("%pB: invalid import library entry: `%s'; "
+				"symbol should be absolute, global and "
+				"refer to Thumb functions"),
 			      in_implib_bfd, sym_name);
-	  _bfd_error_handler (_("Symbol should be absolute, global and "
-				"refer to Thumb functions."));
 	  ret = FALSE;
 	  continue;
 	}
@@ -5955,7 +5954,7 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
 	  bfd_boolean new_stub;
 
 	  _bfd_error_handler
-	    (_("Entry function `%s' disappeared from secure code."), sym_name);
+	    (_("entry function `%s' disappeared from secure code"), sym_name);
 	  hash = (struct elf32_arm_link_hash_entry *)
 	    elf_link_hash_lookup (&(htab)->root, sym_name, TRUE, TRUE, TRUE);
 	  stub_entry
@@ -5979,7 +5978,7 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
 	{
 	  if (!cmse_entry_fct_p (hash))
 	    {
-	      _bfd_error_handler (_("`%s' refers to a non entry function."),
+	      _bfd_error_handler (_("`%s' refers to a non entry function"),
 				  sym_name);
 	      ret = FALSE;
 	    }
@@ -5994,7 +5993,7 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
 	  if (!!(flags & BSF_GLOBAL)
 	      != (hash->root.root.type == bfd_link_hash_defined))
 	    _bfd_error_handler
-	      (_("%pB: visibility of symbol `%s' has changed."), in_implib_bfd,
+	      (_("%pB: visibility of symbol `%s' has changed"), in_implib_bfd,
 	       sym_name);
 
 	  stub_entry->stub_offset = stub_offset;
@@ -6003,7 +6002,7 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
       /* Size should match that of a SG veneer.  */
       if (intsym->st_size != cmse_stub_size)
 	{
-	  _bfd_error_handler (_("%pB: incorrect size for symbol `%s'."),
+	  _bfd_error_handler (_("%pB: incorrect size for symbol `%s'"),
 			      in_implib_bfd, sym_name);
 	  ret = FALSE;
 	}
@@ -6022,8 +6021,8 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
       if (stub_offset % cmse_stub_size)
 	{
 	  _bfd_error_handler
-	    (_("Offset of veneer for entry function `%s' not a multiple of "
-	       "its size."), sym_name);
+	    (_("offset of veneer for entry function `%s' not a multiple of "
+	       "its size"), sym_name);
 	  ret = FALSE;
 	}
 
@@ -6050,7 +6049,7 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
   if (cmse_stub_array_start != cmse_stub_sec_vma)
     {
       _bfd_error_handler
-	(_("Start address of `%s' is different from previous link."),
+	(_("start address of `%s' is different from previous link"),
 	 out_sec_name);
       ret = FALSE;
     }
@@ -6757,8 +6756,8 @@ find_thumb_glue (struct bfd_link_info *link_info,
     (&(hash_table)->root, tmp_name, FALSE, FALSE, TRUE);
 
   if (hash == NULL
-      && asprintf (error_message, _("unable to find THUMB glue '%s' for '%s'"),
-		   tmp_name, name) == -1)
+      && asprintf (error_message, _("unable to find %s glue '%s' for '%s'"),
+		   "Thumb", tmp_name, name) == -1)
     *error_message = (char *) bfd_errmsg (bfd_error_system_call);
 
   free (tmp_name);
@@ -6793,8 +6792,8 @@ find_arm_glue (struct bfd_link_info *link_info,
     (&(hash_table)->root, tmp_name, FALSE, FALSE, TRUE);
 
   if (myh == NULL
-      && asprintf (error_message, _("unable to find ARM glue '%s' for '%s'"),
-		   tmp_name, name) == -1)
+      && asprintf (error_message, _("unable to find %s glue '%s' for '%s'"),
+		   "ARM", tmp_name, name) == -1)
     *error_message = (char *) bfd_errmsg (bfd_error_system_call);
 
   free (tmp_name);
@@ -7508,7 +7507,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 
   if (globals->byteswap_code && !bfd_big_endian (abfd))
     {
-      _bfd_error_handler (_("%pB: BE8 images only valid in big-endian mode."),
+      _bfd_error_handler (_("%pB: BE8 images only valid in big-endian mode"),
 			  abfd);
       return FALSE;
     }
@@ -8303,8 +8302,8 @@ bfd_elf32_arm_vfp11_fix_veneer_locations (bfd *abfd,
 		(&(globals)->root, tmp_name, FALSE, FALSE, TRUE);
 
 	      if (myh == NULL)
-		_bfd_error_handler (_("%pB: unable to find VFP11 veneer "
-				      "`%s'"), abfd, tmp_name);
+		_bfd_error_handler (_("%pB: unable to find %s veneer `%s'"),
+				    abfd, "VFP11", tmp_name);
 
 	      vma = myh->root.u.def.section->output_section->vma
 		    + myh->root.u.def.section->output_offset
@@ -8323,8 +8322,8 @@ bfd_elf32_arm_vfp11_fix_veneer_locations (bfd *abfd,
 		(&(globals)->root, tmp_name, FALSE, FALSE, TRUE);
 
 	      if (myh == NULL)
-		_bfd_error_handler (_("%pB: unable to find VFP11 veneer "
-				      "`%s'"), abfd, tmp_name);
+		_bfd_error_handler (_("%pB: unable to find %s veneer `%s'"),
+				    abfd, "VFP11", tmp_name);
 
 	      vma = myh->root.u.def.section->output_section->vma
 		    + myh->root.u.def.section->output_offset
@@ -8389,8 +8388,8 @@ bfd_elf32_arm_stm32l4xx_fix_veneer_locations (bfd *abfd,
 		(&(globals)->root, tmp_name, FALSE, FALSE, TRUE);
 
 	      if (myh == NULL)
-		_bfd_error_handler (_("%pB: unable to find STM32L4XX veneer "
-				      "`%s'"), abfd, tmp_name);
+		_bfd_error_handler (_("%pB: unable to find %s veneer `%s'"),
+				    abfd, "STM32L4XX", tmp_name);
 
 	      vma = myh->root.u.def.section->output_section->vma
 		+ myh->root.u.def.section->output_offset
@@ -8408,8 +8407,8 @@ bfd_elf32_arm_stm32l4xx_fix_veneer_locations (bfd *abfd,
 		(&(globals)->root, tmp_name, FALSE, FALSE, TRUE);
 
 	      if (myh == NULL)
-		_bfd_error_handler (_("%pB: unable to find STM32L4XX veneer "
-				      "`%s'"), abfd, tmp_name);
+		_bfd_error_handler (_("%pB: unable to find %s veneer `%s'"),
+				    abfd, "STM32L4XX", tmp_name);
 
 	      vma = myh->root.u.def.section->output_section->vma
 		+ myh->root.u.def.section->output_offset
@@ -8616,10 +8615,10 @@ bfd_elf32_arm_stm32l4xx_erratum_scan (bfd *abfd,
 			    _bfd_error_handler
 			      /* xgettext:c-format */
 			      (_("%pB(%pA+%#x): error: multiple load detected"
-				 " in non-last IT block instruction :"
-				 " STM32L4XX veneer cannot be generated.\n"
-				 "Use gcc option -mrestrict-it to generate"
-				 " only one instruction per IT block.\n"),
+				 " in non-last IT block instruction:"
+				 " STM32L4XX veneer cannot be generated; "
+				 "use gcc option -mrestrict-it to generate"
+				 " only one instruction per IT block"),
 			       abfd, sec, i);
 			  }
 			else
@@ -8713,7 +8712,7 @@ bfd_elf32_arm_set_target_params (struct bfd *output_bfd,
     globals->target2_reloc = R_ARM_GOT_PREL;
   else
     {
-      _bfd_error_handler (_("Invalid TARGET2 relocation type '%s'."),
+      _bfd_error_handler (_("invalid TARGET2 relocation type '%s'"),
 			  params->target2_type);
     }
   globals->fix_v4bx = params->fix_v4bx;
@@ -8803,9 +8802,9 @@ elf32_thumb_to_arm_stub (struct bfd_link_info * info,
 	  && !INTERWORK_FLAG (sym_sec->owner))
 	{
 	  _bfd_error_handler
-	    (_("%pB(%s): warning: interworking not enabled.\n"
-	       "  first occurrence: %pB: Thumb call to ARM"),
-	     sym_sec->owner, name, input_bfd);
+	    (_("%pB(%s): warning: interworking not enabled;"
+	       " first occurrence: %pB: %s call to %s"),
+	     sym_sec->owner, name, input_bfd, "Thumb", "ARM");
 
 	  return FALSE;
 	}
@@ -8893,9 +8892,9 @@ elf32_arm_create_thumb_stub (struct bfd_link_info * info,
 	  && !INTERWORK_FLAG (sym_sec->owner))
 	{
 	  _bfd_error_handler
-	    (_("%pB(%s): warning: interworking not enabled.\n"
-	       "  first occurrence: %pB: arm call to thumb"),
-	     sym_sec->owner, name, input_bfd);
+	    (_("%pB(%s): warning: interworking not enabled;"
+	       " first occurrence: %pB: %s call to %s"),
+	     sym_sec->owner, name, input_bfd, "ARM", "Thumb");
 	}
 
       --my_offset;
@@ -9455,7 +9454,7 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      /* FIXME: We ought to be able to generate thumb-1 PLT
 		 instructions...  */
-	      _bfd_error_handler (_("%pB: Warning: thumb-1 mode PLT generation not currently supported"),
+	      _bfd_error_handler (_("%pB: warning: thumb-1 mode PLT generation not currently supported"),
 				  output_bfd);
 	      return FALSE;
 	    }
@@ -9721,8 +9720,9 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
 	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%pB(%pA+%#" PRIx64 "): "
-	       "unexpected Thumb instruction '%#lx' in TLS trampoline"),
-	     input_bfd, input_sec, (uint64_t) rel->r_offset, insn);
+	       "unexpected %s instruction '%#lx' in TLS trampoline"),
+	     input_bfd, input_sec, (uint64_t) rel->r_offset,
+	     "Thumb", insn);
 	  return bfd_reloc_notsupported;
 	}
       break;
@@ -9762,8 +9762,9 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
 	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%pB(%pA+%#" PRIx64 "): "
-	       "unexpected ARM instruction '%#lx' in TLS trampoline"),
-	     input_bfd, input_sec, (uint64_t) rel->r_offset, insn);
+	       "unexpected %s instruction '%#lx' in TLS trampoline"),
+	     input_bfd, input_sec, (uint64_t) rel->r_offset,
+	     "ARM", insn);
 	  return bfd_reloc_notsupported;
 	}
       break;
@@ -10239,9 +10240,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 		 instruction instead ?  */
 	      if (branch_type != ST_BRANCH_TO_THUMB)
 		_bfd_error_handler
-		  (_("\%pB: Warning: Arm BLX instruction targets Arm function '%s'."),
-		   input_bfd,
-		   h ? h->root.root.string : "(local)");
+		  (_("\%pB: warning: %s BLX instruction targets"
+		     " %s function '%s'"),
+		   input_bfd, "ARM",
+		   "ARM", h ? h->root.root.string : "(local)");
 	    }
 	  else if (r_type == R_ARM_PC24)
 	    {
@@ -10665,9 +10667,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	       instruction instead ?  */
 	    if (branch_type == ST_BRANCH_TO_THUMB)
 	      _bfd_error_handler
-		(_("%pB: Warning: Thumb BLX instruction targets thumb function '%s'."),
-		 input_bfd,
-		 h ? h->root.root.string : "(local)");
+		(_("%pB: warning: %s BLX instruction targets"
+		   " %s function '%s'"),
+		 input_bfd, "Thumb",
+		 "Thumb", h ? h->root.root.string : "(local)");
 	  }
 	else
 	  {
@@ -11534,10 +11537,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 		    _bfd_error_handler
 		      /* xgettext:c-format */
 		      (_("%pB(%pA+%#" PRIx64 "): "
-			 "unexpected Thumb instruction '%#lx' "
+			 "unexpected %s instruction '%#lx' "
 			 "referenced by TLS_GOTDESC"),
 		       input_bfd, input_section, (uint64_t) rel->r_offset,
-		       insn);
+		       "Thumb", insn);
 		    return bfd_reloc_notsupported;
 		  }
 	      }
@@ -11560,10 +11563,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 		    _bfd_error_handler
 		      /* xgettext:c-format */
 		      (_("%pB(%pA+%#" PRIx64 "): "
-			 "unexpected ARM instruction '%#lx' "
+			 "unexpected %s instruction '%#lx' "
 			 "referenced by TLS_GOTDESC"),
 		       input_bfd, input_section, (uint64_t) rel->r_offset,
-		       insn);
+		       "ARM", insn);
 		    return bfd_reloc_notsupported;
 		  }
 	      }
@@ -11805,7 +11808,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	      {
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%pB(%pA+%#" PRIx64 "): Only ADD or SUB instructions "
+		  (_("%pB(%pA+%#" PRIx64 "): only ADD or SUB instructions "
 		     "are allowed for ALU group relocations"),
 		  input_bfd, input_section, (uint64_t) rel->r_offset);
 		return bfd_reloc_overflow;
@@ -11846,7 +11849,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#" PRIx64 "): Overflow whilst "
+	      (_("%pB(%pA+%#" PRIx64 "): overflow whilst "
 		 "splitting %#" PRIx64 " for group relocation %s"),
 	       input_bfd, input_section, (uint64_t) rel->r_offset,
 	       (uint64_t) (signed_value < 0 ? -signed_value : signed_value),
@@ -11938,7 +11941,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#" PRIx64 "): Overflow whilst "
+	      (_("%pB(%pA+%#" PRIx64 "): overflow whilst "
 		 "splitting %#" PRIx64 " for group relocation %s"),
 	       input_bfd, input_section, (uint64_t) rel->r_offset,
 	       (uint64_t) (signed_value < 0 ? -signed_value : signed_value),
@@ -12026,7 +12029,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#" PRIx64 "): Overflow whilst "
+	      (_("%pB(%pA+%#" PRIx64 "): overflow whilst "
 		 "splitting %#" PRIx64 " for group relocation %s"),
 	       input_bfd, input_section, (uint64_t) rel->r_offset,
 	       (uint64_t) (signed_value < 0 ? -signed_value : signed_value),
@@ -12116,7 +12119,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB(%pA+%#" PRIx64 "): Overflow whilst "
+	      (_("%pB(%pA+%#" PRIx64 "): overflow whilst "
 		 "splitting %#" PRIx64 " for group relocation %s"),
 	       input_bfd, input_section, (uint64_t) rel->r_offset,
 	       (uint64_t) (signed_value < 0 ? -signed_value : signed_value),
@@ -13038,11 +13041,11 @@ elf32_arm_set_private_flags (bfd *abfd, flagword flags)
 	{
 	  if (flags & EF_ARM_INTERWORK)
 	    _bfd_error_handler
-	      (_("Warning: Not setting interworking flag of %pB since it has already been specified as non-interworking"),
+	      (_("warning: not setting interworking flag of %pB since it has already been specified as non-interworking"),
 	       abfd);
 	  else
 	    _bfd_error_handler
-	      (_("Warning: Clearing the interworking flag of %pB due to outside request"),
+	      (_("warning: clearing the interworking flag of %pB due to outside request"),
 	       abfd);
 	}
     }
@@ -13087,7 +13090,7 @@ elf32_arm_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  if (out_flags & EF_ARM_INTERWORK)
 	    _bfd_error_handler
-	      (_("Warning: Clearing the interworking flag of %pB because non-interworking code in %pB has been linked with it"),
+	      (_("warning: clearing the interworking flag of %pB because non-interworking code in %pB has been linked with it"),
 	       obfd, ibfd);
 
 	  in_flags &= ~EF_ARM_INTERWORK;
@@ -13174,7 +13177,7 @@ elf32_arm_obj_attrs_handle_unknown (bfd *abfd, int tag)
   if ((tag & 127) < 64)
     {
       _bfd_error_handler
-	(_("%pB: Unknown mandatory EABI object attribute %d"),
+	(_("%pB: unknown mandatory EABI object attribute %d"),
 	 abfd, tag);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -13182,7 +13185,7 @@ elf32_arm_obj_attrs_handle_unknown (bfd *abfd, int tag)
   else
     {
       _bfd_error_handler
-	(_("Warning: %pB: Unknown EABI object attribute %d"),
+	(_("warning: %pB: unknown EABI object attribute %d"),
 	 abfd, tag);
       return TRUE;
     }
@@ -13449,7 +13452,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
 
   if (oldtag > MAX_TAG_CPU_ARCH || newtag > MAX_TAG_CPU_ARCH)
     {
-      _bfd_error_handler (_("error: %pB: Unknown CPU architecture"), ibfd);
+      _bfd_error_handler (_("error: %pB: unknown CPU architecture"), ibfd);
       return -1;
     }
 
@@ -13487,7 +13490,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
 
   if (result == -1)
     {
-      _bfd_error_handler (_("error: %pB: Conflicting CPU architectures %d/%d"),
+      _bfd_error_handler (_("error: %pB: conflicting CPU architectures %d/%d"),
 			  ibfd, oldtag, newtag);
       return -1;
     }
@@ -13797,7 +13800,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      else
 		{
 		  _bfd_error_handler
-		    (_("error: %pB: Conflicting architecture profiles %c/%c"),
+		    (_("error: %pB: conflicting architecture profiles %c/%c"),
 		     ibfd,
 		     in_attr[i].i ? in_attr[i].i : '0',
 		     out_attr[i].i ? out_attr[i].i : '0');
@@ -13936,7 +13939,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      /* It's sometimes ok to mix different configs, so this is only
 		 a warning.  */
 	      _bfd_error_handler
-		(_("Warning: %pB: Conflicting platform configuration"), ibfd);
+		(_("warning: %pB: conflicting platform configuration"), ibfd);
 	    }
 	  break;
 	case Tag_ABI_PCS_R9_use:
@@ -13945,7 +13948,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      && in_attr[i].i != AEABI_R9_unused)
 	    {
 	      _bfd_error_handler
-		(_("error: %pB: Conflicting use of R9"), ibfd);
+		(_("error: %pB: conflicting use of R9"), ibfd);
 	      result = FALSE;
 	    }
 	  if (out_attr[i].i == AEABI_R9_unused)
@@ -15898,7 +15901,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
       if (!bfd_elf32_arm_process_before_allocation (ibfd, info)
 	  || !bfd_elf32_arm_vfp11_erratum_scan (ibfd, info)
 	  || !bfd_elf32_arm_stm32l4xx_erratum_scan (ibfd, info))
-	_bfd_error_handler (_("Errors encountered processing file %pB"), ibfd);
+	_bfd_error_handler (_("errors encountered processing file %pB"), ibfd);
     }
 
   /* Allocate space for the glue sections now that we've sized them.  */
@@ -18439,9 +18442,9 @@ elf32_arm_write_section (bfd *output_bfd,
 
 		    _bfd_error_handler
 		      (_("%pB(%#" PRIx64 "): error: "
-			 "Cannot create STM32L4XX veneer. "
-			 "Jump out of range by %" PRId64 " bytes. "
-			 "Cannot encode branch instruction. "),
+			 "cannot create STM32L4XX veneer; "
+			 "jump out of range by %" PRId64 " bytes; "
+			 "cannot encode branch instruction"),
 		       output_bfd,
 		       (uint64_t) (stm32l4xx_errnode->vma - 4),
 		       (int64_t) out_of_range);
@@ -18477,8 +18480,8 @@ elf32_arm_write_section (bfd *output_bfd,
 			      STM32L4XX_ERRATUM_LDM_VENEER_SIZE) < -(1 << 24)
 		    || (signed) (veneer_r - veneer) >= (1 << 24))
 		  {
-		    _bfd_error_handler (_("%pB: error: Cannot create STM32L4XX "
-					  "veneer."), output_bfd);
+		    _bfd_error_handler (_("%pB: error: cannot create STM32L4XX "
+					  "veneer"), output_bfd);
 		     continue;
 		  }
 
@@ -19575,7 +19578,7 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 				      EF_ARM_EABI_VERSION (out_flags)))
     {
       _bfd_error_handler
-	(_("error: Source object %pB has EABI version %d, but target %pB has EABI version %d"),
+	(_("error: source object %pB has EABI version %d, but target %pB has EABI version %d"),
 	 ibfd, (in_flags & EF_ARM_EABIMASK) >> 24,
 	 obfd, (out_flags & EF_ARM_EABIMASK) >> 24);
       return FALSE;
@@ -19614,12 +19617,12 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  if (in_flags & EF_ARM_VFP_FLOAT)
 	    _bfd_error_handler
-	      (_("error: %pB uses VFP instructions, whereas %pB does not"),
-	       ibfd, obfd);
+	      (_("error: %pB uses %s instructions, whereas %pB does not"),
+	       ibfd, "VFP", obfd);
 	  else
 	    _bfd_error_handler
-	      (_("error: %pB uses FPA instructions, whereas %pB does not"),
-	       ibfd, obfd);
+	      (_("error: %pB uses %s instructions, whereas %pB does not"),
+	       ibfd, "FPA", obfd);
 
 	  flags_compatible = FALSE;
 	}
@@ -19628,12 +19631,12 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  if (in_flags & EF_ARM_MAVERICK_FLOAT)
 	    _bfd_error_handler
-	      (_("error: %pB uses Maverick instructions, whereas %pB does not"),
-	       ibfd, obfd);
+	      (_("error: %pB uses %s instructions, whereas %pB does not"),
+	       ibfd, "Maverick", obfd);
 	  else
 	    _bfd_error_handler
-	      (_("error: %pB does not use Maverick instructions, whereas %pB does"),
-	       ibfd, obfd);
+	      (_("error: %pB does not use %s instructions, whereas %pB does"),
+	       ibfd, "Maverick", obfd);
 
 	  flags_compatible = FALSE;
 	}
@@ -19669,13 +19672,13 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  if (in_flags & EF_ARM_INTERWORK)
 	    {
 	      _bfd_error_handler
-		(_("Warning: %pB supports interworking, whereas %pB does not"),
+		(_("warning: %pB supports interworking, whereas %pB does not"),
 		 ibfd, obfd);
 	    }
 	  else
 	    {
 	      _bfd_error_handler
-		(_("Warning: %pB does not support interworking, whereas %pB does"),
+		(_("warning: %pB does not support interworking, whereas %pB does"),
 		 ibfd, obfd);
 	    }
 	}

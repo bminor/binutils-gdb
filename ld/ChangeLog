@@ -1,5 +1,32 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-aarch64/reloc-overflow-bad.d,
+	* testsuite/ld-arm/attr-merge-9.out,
+	* testsuite/ld-arm/attr-merge-arch-2.d,
+	* testsuite/ld-arm/attr-merge-unknown-1.d,
+	* testsuite/ld-arm/attr-merge-unknown-2.d,
+	* testsuite/ld-arm/attr-merge-unknown-2r.d,
+	* testsuite/ld-arm/attr-merge-unknown-3.d,
+	* testsuite/ld-arm/cmse-implib-errors.out,
+	* testsuite/ld-arm/cmse-new-earlier-later-implib.out,
+	* testsuite/ld-arm/cmse-new-implib-no-output.out,
+	* testsuite/ld-arm/cmse-new-implib-not-sg-in-implib.out,
+	* testsuite/ld-arm/cmse-new-implib.out,
+	* testsuite/ld-arm/cmse-new-wrong-implib.out,
+	* testsuite/ld-arm/cmse-veneers-no-gnu_sgstubs.out,
+	* testsuite/ld-arm/cmse-veneers-wrong-entryfct.out,
+	* testsuite/ld-arm/group-relocs-alu-bad-2.d,
+	* testsuite/ld-arm/group-relocs-alu-bad.d,
+	* testsuite/ld-arm/group-relocs-ldc-bad-2.d,
+	* testsuite/ld-arm/group-relocs-ldc-bad.d,
+	* testsuite/ld-arm/group-relocs-ldr-bad-2.d,
+	* testsuite/ld-arm/group-relocs-ldr-bad.d,
+	* testsuite/ld-arm/group-relocs-ldrs-bad-2.d,
+	* testsuite/ld-arm/group-relocs-ldrs-bad.d,
+	* testsuite/ld-arm/stm32l4xx-cannot-fix-far-ldm.d: Update.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-mips-elf/attr-gnu-4-12.d,
 	* testsuite/ld-mips-elf/attr-gnu-4-13.d,
 	* testsuite/ld-mips-elf/attr-gnu-4-14.d,

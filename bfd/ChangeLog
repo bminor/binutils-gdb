@@ -1,5 +1,9 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* elf32-arm.c, * elfnn-aarch64.c: Standardize error/warning messages.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* elfxx-mips.c: Standardize error/warning messages.
 
 2018-02-26  Alan Modra  <amodra@gmail.com>
