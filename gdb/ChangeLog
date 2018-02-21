@@ -1,5 +1,15 @@
 2018-02-24  Tom Tromey  <tom@tromey.com>
 
+	* linux-thread-db.c (try_thread_db_load_from_pdir_1)
+	(try_thread_db_load_from_dir, thread_db_load_search): Use
+	std::string.
+	(info_auto_load_libthread_db_compare): Return bool.  Change
+	argument types.
+	(info_auto_load_libthread_db): Use std::vector, std::string.
+	Remove cleanups.
+
+2018-02-24  Tom Tromey  <tom@tromey.com>
+
 	* i386-tdep.c (i386_fast_tracepoint_valid_at): "msg" now a
 	std::string.
 	* gdbarch.sh (fast_tracepoint_valid_at): Change "msg" to a
