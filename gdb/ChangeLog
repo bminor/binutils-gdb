@@ -1,5 +1,72 @@
 2018-02-21  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_pseudo_register_read_value): Change
+	parameter type to 'readable_regcache *'.
+	* amd64-tdep.c (amd64_pseudo_register_read_value): Likewise.
+	* arm-tdep.c (arm_neon_quad_read): Likewise.
+	(arm_pseudo_read): Likewise.
+	* avr-tdep.c (avr_pseudo_register_read): Likewise.
+	* bfin-tdep.c (bfin_pseudo_register_read): Likewise.
+	* frv-tdep.c (frv_pseudo_register_read): Likewise.
+	* gdbarch.c: Re-generated.
+	* gdbarch.h: Re-generated.
+	* gdbarch.sh (pseudo_register_read): Change parameter type to
+	'readable_regcache *'.
+	(pseudo_register_read_value): Likewise.
+	* h8300-tdep.c (pseudo_from_raw_register): Likewise.
+	(h8300_pseudo_register_read): Likewise.
+	* hppa-tdep.c (hppa_pseudo_register_read): Likewise.
+	* i386-tdep.c (i386_mmx_regnum_to_fp_regnum): Likewise.
+	(i386_pseudo_register_read_into_value): Likewise.
+	(i386_pseudo_register_read_value): Likewise.
+	* i386-tdep.h (i386_pseudo_register_read_into_value): Update
+	declaration.
+	* ia64-tdep.c (ia64_pseudo_register_read): Likewise.
+	* m32c-tdep.c (m32c_raw_read): Likewise.
+	(m32c_read_flg): Likewise.
+	(m32c_banked_register): Likewise.
+	(m32c_banked_read): Likewise.
+	(m32c_sb_read): Likewise.
+	(m32c_part_read): Likewise.
+	(m32c_cat_read): Likewise.
+	(m32c_r3r2r1r0_read): Likewise.
+	(m32c_pseudo_register_read): Likewise.
+	* m68hc11-tdep.c (m68hc11_pseudo_register_read): Likewise.
+	* mep-tdep.c (mep_pseudo_cr32_read): Likewise.
+	(mep_pseudo_cr64_read): Likewise.
+	(mep_pseudo_register_read): Likewise.
+	* mips-tdep.c (mips_pseudo_register_read): Likewise.
+	* msp430-tdep.c (msp430_pseudo_register_read): Likewise.
+	* nds32-tdep.c (nds32_pseudo_register_read): Likewise.
+	* regcache.c (regcache::raw_read): Move it to readable_regcache.
+	(regcache::cooked_read): Likewise.
+	(regcache::cooked_read_value): Likewise.
+	(regcache_cooked_read_signed):
+	(regcache::cooked_read): Likewise.
+	* regcache.h (readable_regcache): New class.
+	(regcache): Inherit readable_regcache.  Move some methods to
+	readable_regcache.
+	* rl78-tdep.c (rl78_pseudo_register_read): Change
+	parameter type to 'readable_regcache *'.
+	* rs6000-tdep.c (do_regcache_raw_read): Remove.
+	(e500_pseudo_register_read): Change parameter type to
+	'readable_regcache *'.
+	(dfp_pseudo_register_read): Likewise.
+	(vsx_pseudo_register_read): Likewise.
+	(efpr_pseudo_register_read): Likewise.
+	* s390-tdep.c (s390_pseudo_register_read): Likewise.
+	* sh-tdep.c (sh_pseudo_register_read): Likewise.
+	* sh64-tdep.c (pseudo_register_read_portions): Likewise.
+	(sh64_pseudo_register_read): Likewise.
+	* sparc-tdep.c (sparc32_pseudo_register_read): Likewise.
+	* sparc64-tdep.c (sparc64_pseudo_register_read): Likewise.
+	* spu-tdep.c (spu_pseudo_register_read_spu): Likewise.
+	(spu_pseudo_register_read): Likewise.
+	* xtensa-tdep.c	(xtensa_register_read_masked): Likewise.
+	(xtensa_pseudo_register_read): Likewise.
+
+2018-02-21  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (regcache::regcache): Call reg_buffer ctor.
 	(regcache::arch): Move it to reg_buffer::arch.
 	(regcache::register_buffer): Likewise.

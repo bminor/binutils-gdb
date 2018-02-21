@@ -453,7 +453,7 @@ xtensa_register_write_masked (struct regcache *regcache,
    of the registers and assemble them into a single value.  */
 
 static enum register_status
-xtensa_register_read_masked (struct regcache *regcache,
+xtensa_register_read_masked (readable_regcache *regcache,
 			     xtensa_register_t *reg, gdb_byte *buffer)
 {
   unsigned int value[(XTENSA_MAX_REGISTER_SIZE + 3) / 4];
@@ -547,7 +547,7 @@ xtensa_register_read_masked (struct regcache *regcache,
 
 static enum register_status
 xtensa_pseudo_register_read (struct gdbarch *gdbarch,
-			     struct regcache *regcache,
+			     readable_regcache *regcache,
 			     int regnum,
 			     gdb_byte *buffer)
 {
