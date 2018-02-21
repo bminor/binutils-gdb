@@ -427,6 +427,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/scoped_fd-selftests.c \
 	unittests/scoped_mmap-selftests.c \
 	unittests/scoped_restore-selftests.c \
+	unittests/unpack-selftests.c \
 	unittests/xml-utils-selftests.c
 
 SUBDIR_UNITTESTS_OBS = $(patsubst %.c,%.o,$(SUBDIR_UNITTESTS_SRCS))

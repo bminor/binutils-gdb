@@ -3214,7 +3214,8 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 
 /* Unpack a bitfield of the specified FIELD_TYPE, from the object at
    VALADDR, and store the result in *RESULT.
-   The bitfield starts at BITPOS bits and contains BITSIZE bits.
+   The bitfield starts at BITPOS bits and contains BITSIZE bits; if
+   BITSIZE is zero, then the length is taken from FIELD_TYPE.
 
    Extracting bits depends on endianness of the machine.  Compute the
    number of least significant bits to discard.  For big endian machines,
@@ -3244,7 +3245,10 @@ unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
   if (bitsize)
     bytes_read = ((bitpos % 8) + bitsize + 7) / 8;
   else
-    bytes_read = TYPE_LENGTH (field_type);
+    {
+      bytes_read = TYPE_LENGTH (field_type);
+      bitsize = 8 * bytes_read;
+    }
 
   read_offset = bitpos / 8;
 
@@ -3262,7 +3266,7 @@ unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
   /* If the field does not entirely fill a LONGEST, then zero the sign bits.
      If the field is signed, and is negative, then sign extend.  */
 
-  if ((bitsize > 0) && (bitsize < 8 * (int) sizeof (val)))
+  if (bitsize < 8 * (int) sizeof (val))
     {
       valmask = (((ULONGEST) 1) << bitsize) - 1;
       val &= valmask;
