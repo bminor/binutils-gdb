@@ -1789,8 +1789,6 @@ find_sym_fns (bfd *abfd)
 static void
 load_command (const char *arg, int from_tty)
 {
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
-
   dont_repeat ();
 
   /* The user might be reloading because the binary has changed.  Take
@@ -1798,40 +1796,28 @@ load_command (const char *arg, int from_tty)
   reopen_exec_file ();
   reread_symbols ();
 
+  std::string temp;
   if (arg == NULL)
     {
-      const char *parg;
-      int count = 0;
+      const char *parg, *prev;
 
-      parg = arg = get_exec_file (1);
+      arg = get_exec_file (1);
 
-      /* Count how many \ " ' tab space there are in the name.  */
+      /* We may need to quote this string so buildargv can pull it
+	 apart.  */
+      prev = parg = arg;
       while ((parg = strpbrk (parg, "\\\"'\t ")))
 	{
-	  parg++;
-	  count++;
+	  temp.append (prev, parg - prev);
+	  prev = parg++;
+	  temp.push_back ('\\');
 	}
-
-      if (count)
+      /* If we have not copied anything yet, then we didn't see a
+	 character to quote, and we can just leave ARG unchanged.  */
+      if (!temp.empty ())
 	{
-	  /* We need to quote this string so buildargv can pull it apart.  */
-	  char *temp = (char *) xmalloc (strlen (arg) + count + 1 );
-	  char *ptemp = temp;
-	  const char *prev;
-
-	  make_cleanup (xfree, temp);
-
-	  prev = parg = arg;
-	  while ((parg = strpbrk (parg, "\\\"'\t ")))
-	    {
-	      strncpy (ptemp, prev, parg - prev);
-	      ptemp += parg - prev;
-	      prev = parg++;
-	      *ptemp++ = '\\';
-	    }
-	  strcpy (ptemp, prev);
-
-	  arg = temp;
+	  temp.append (prev);
+	  arg = temp.c_str ();
 	}
     }
 
@@ -1840,8 +1826,6 @@ load_command (const char *arg, int from_tty)
   /* After re-loading the executable, we don't really know which
      overlays are mapped any more.  */
   overlay_cache_invalid = 1;
-
-  do_cleanups (cleanup);
 }
 
 /* This version of "load" should be usable for any target.  Currently

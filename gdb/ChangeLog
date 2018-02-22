@@ -1,3 +1,10 @@
+2018-03-13  Tom Tromey  <tom@tromey.com>
+
+	* machoread.c (macho_check_dsym): Change filenamep to a
+	std::string*.
+	(macho_symfile_read): Update.
+	* symfile.c (load_command): Use std::string.
+
 2018-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_sw_breakpoint_from_kind): Add localization
