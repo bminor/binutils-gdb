@@ -43,6 +43,7 @@
 #include "solib.h"
 #include "inf-child.h"
 #include "common/filestuff.h"
+#include "common/scoped_fd.h"
 
 #define NULL_PID		0
 #define _DEBUG_FLAG_TRACE	(_DEBUG_FLAG_TRACE_EXEC|_DEBUG_FLAG_TRACE_RD|\
@@ -113,9 +114,8 @@ procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
 {
   char *endstr;
   char buffer[50];
-  int fd, total_size;
+  int total_size;
   procfs_sysinfo *sysinfo;
-  struct cleanup *cleanups;
   char nto_procfs_path[PATH_MAX];
 
   /* Offer to kill previous inferiors before opening this target.  */
@@ -158,17 +158,16 @@ procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
   snprintf (nto_procfs_path, PATH_MAX - 1, "%s%s",
 	    (nodestr != NULL) ? nodestr : "", "/proc");
 
-  fd = open (nto_procfs_path, O_RDONLY);
-  if (fd == -1)
+  scoped_fd fd (open (nto_procfs_path, O_RDONLY));
+  if (fd.get () == -1)
     {
       printf_filtered ("Error opening %s : %d (%s)\n", nto_procfs_path, errno,
 		       safe_strerror (errno));
       error (_("Invalid procfs arg"));
     }
-  cleanups = make_cleanup_close (fd);
 
   sysinfo = (void *) buffer;
-  if (devctl (fd, DCMD_PROC_SYSINFO, sysinfo, sizeof buffer, 0) != EOK)
+  if (devctl (fd.get (), DCMD_PROC_SYSINFO, sysinfo, sizeof buffer, 0) != EOK)
     {
       printf_filtered ("Error getting size: %d (%s)\n", errno,
 		       safe_strerror (errno));
@@ -186,7 +185,8 @@ procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
 	}
       else
 	{
-	  if (devctl (fd, DCMD_PROC_SYSINFO, sysinfo, total_size, 0) != EOK)
+	  if (devctl (fd.get (), DCMD_PROC_SYSINFO, sysinfo, total_size, 0)
+	      != EOK)
 	    {
 	      printf_filtered ("Error getting sysinfo: %d (%s)\n", errno,
 			       safe_strerror (errno));
@@ -201,7 +201,6 @@ procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
 	    }
 	}
     }
-  do_cleanups (cleanups);
 
   inf_child_open_target (ops, arg, from_tty);
   printf_filtered ("Debugging using %s\n", nto_procfs_path);
@@ -377,9 +376,6 @@ procfs_pidlist (const char *args, int from_tty)
 
   do
     {
-      int fd;
-      struct cleanup *inner_cleanup;
-
       /* Get the right pid and procfs path for the pid.  */
       do
 	{
@@ -397,17 +393,16 @@ procfs_pidlist (const char *args, int from_tty)
       while (pid == 0);
 
       /* Open the procfs path.  */
-      fd = open (buf, O_RDONLY);
-      if (fd == -1)
+      scoped_fd fd (open (buf, O_RDONLY));
+      if (fd.get () == -1)
 	{
 	  fprintf_unfiltered (gdb_stderr, "failed to open %s - %d (%s)\n",
 			      buf, errno, safe_strerror (errno));
 	  continue;
 	}
-      inner_cleanup = make_cleanup_close (fd);
 
       pidinfo = (procfs_info *) buf;
-      if (devctl (fd, DCMD_PROC_INFO, pidinfo, sizeof (buf), 0) != EOK)
+      if (devctl (fd.get (), DCMD_PROC_INFO, pidinfo, sizeof (buf), 0) != EOK)
 	{
 	  fprintf_unfiltered (gdb_stderr,
 			      "devctl DCMD_PROC_INFO failed - %d (%s)\n",
@@ -417,7 +412,8 @@ procfs_pidlist (const char *args, int from_tty)
       num_threads = pidinfo->num_threads;
 
       info = (procfs_debuginfo *) buf;
-      if (devctl (fd, DCMD_PROC_MAPDEBUG_BASE, info, sizeof (buf), 0) != EOK)
+      if (devctl (fd.get (), DCMD_PROC_MAPDEBUG_BASE, info, sizeof (buf), 0)
+	  != EOK)
 	strcpy (name, "unavailable");
       else
 	strcpy (name, info->path);
@@ -427,7 +423,7 @@ procfs_pidlist (const char *args, int from_tty)
       for (status->tid = 1; status->tid <= num_threads; status->tid++)
 	{
 	  const int err
-	    = devctl (fd, DCMD_PROC_TIDSTATUS, status, sizeof (buf), 0);
+	    = devctl (fd.get (), DCMD_PROC_TIDSTATUS, status, sizeof (buf), 0);
 	  printf_filtered ("%s - %d", name, pid);
 	  if (err == EOK && status->tid != 0)
 	    printf_filtered ("/%d\n", status->tid);
@@ -437,8 +433,6 @@ procfs_pidlist (const char *args, int from_tty)
 	      break;
 	    }
 	}
-
-      do_cleanups (inner_cleanup);
     }
   while (dirp != NULL);
 

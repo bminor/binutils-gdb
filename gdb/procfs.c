@@ -46,6 +46,7 @@
 #include "auxv.h"
 #include "procfs.h"
 #include "observer.h"
+#include "common/scoped_fd.h"
 
 /* This module provides the interface between GDB and the
    /proc file system, which is used on many versions of Unix
@@ -1593,8 +1594,6 @@ proc_get_LDT_entry (procinfo *pi, int key)
 {
   static struct ssd *ldt_entry = NULL;
   char pathname[MAX_PROC_NAME_SIZE];
-  struct cleanup *old_chain = NULL;
-  int  fd;
 
   /* Allocate space for one LDT entry.
      This alloc must persist, because we return a pointer to it.  */
@@ -1603,16 +1602,16 @@ proc_get_LDT_entry (procinfo *pi, int key)
 
   /* Open the file descriptor for the LDT table.  */
   sprintf (pathname, "/proc/%d/ldt", pi->pid);
-  if ((fd = open_with_retry (pathname, O_RDONLY)) < 0)
+  scoped_fd fd (open_with_retry (pathname, O_RDONLY));
+  if (fd.get () < 0)
     {
       proc_warn (pi, "proc_get_LDT_entry (open)", __LINE__);
       return NULL;
     }
-  /* Make sure it gets closed again!  */
-  old_chain = make_cleanup_close (fd);
 
   /* Now 'read' thru the table, find a match and return it.  */
-  while (read (fd, ldt_entry, sizeof (struct ssd)) == sizeof (struct ssd))
+  while (read (fd.get (), ldt_entry, sizeof (struct ssd))
+	 == sizeof (struct ssd))
     {
       if (ldt_entry->sel == 0 &&
 	  ldt_entry->bo  == 0 &&
@@ -1627,7 +1626,6 @@ proc_get_LDT_entry (procinfo *pi, int key)
 	}
     }
   /* Loop ended, match not found.  */
-  do_cleanups (old_chain);
   return NULL;
 }
 
@@ -3426,40 +3424,33 @@ iterate_over_mappings (procinfo *pi, find_memory_region_ftype child_func,
   struct prmap *prmaps;
   struct prmap *prmap;
   int funcstat;
-  int map_fd;
   int nmap;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   struct stat sbuf;
 
   /* Get the number of mappings, allocate space,
      and read the mappings into prmaps.  */
   /* Open map fd.  */
   sprintf (pathname, "/proc/%d/map", pi->pid);
-  if ((map_fd = open (pathname, O_RDONLY)) < 0)
-    proc_error (pi, "iterate_over_mappings (open)", __LINE__);
 
-  /* Make sure it gets closed again.  */
-  make_cleanup_close (map_fd);
+  scoped_fd map_fd (open (pathname, O_RDONLY));
+  if (map_fd.get () < 0)
+    proc_error (pi, "iterate_over_mappings (open)", __LINE__);
 
   /* Use stat to determine the file size, and compute
      the number of prmap_t objects it contains.  */
-  if (fstat (map_fd, &sbuf) != 0)
+  if (fstat (map_fd.get (), &sbuf) != 0)
     proc_error (pi, "iterate_over_mappings (fstat)", __LINE__);
 
   nmap = sbuf.st_size / sizeof (prmap_t);
   prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
-  if (read (map_fd, (char *) prmaps, nmap * sizeof (*prmaps))
+  if (read (map_fd.get (), (char *) prmaps, nmap * sizeof (*prmaps))
       != (nmap * sizeof (*prmaps)))
     proc_error (pi, "iterate_over_mappings (read)", __LINE__);
 
   for (prmap = prmaps; nmap > 0; prmap++, nmap--)
     if ((funcstat = (*func) (prmap, child_func, data)) != 0)
-      {
-	do_cleanups (cleanups);
-        return funcstat;
-      }
+      return funcstat;
 
-  do_cleanups (cleanups);
   return 0;
 }
 

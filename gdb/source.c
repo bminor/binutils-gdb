@@ -42,6 +42,7 @@
 #include "ui-out.h"
 #include "readline/readline.h"
 #include "common/enum-flags.h"
+#include "common/scoped_fd.h"
 #include <algorithm>
 #include "common/pathstuff.h"
 
@@ -1215,24 +1216,21 @@ find_source_lines (struct symtab *s, int desc)
 static int
 get_filename_and_charpos (struct symtab *s, char **fullname)
 {
-  int desc, linenums_changed = 0;
-  struct cleanup *cleanups;
+  int linenums_changed = 0;
 
-  desc = open_source_file (s);
-  if (desc < 0)
+  scoped_fd desc (open_source_file (s));
+  if (desc.get () < 0)
     {
       if (fullname)
 	*fullname = NULL;
       return 0;
     }
-  cleanups = make_cleanup_close (desc);
   if (fullname)
     *fullname = s->fullname;
   if (s->line_charpos == 0)
     linenums_changed = 1;
   if (linenums_changed)
-    find_source_lines (s, desc);
-  do_cleanups (cleanups);
+    find_source_lines (s, desc.get ());
   return linenums_changed;
 }
 

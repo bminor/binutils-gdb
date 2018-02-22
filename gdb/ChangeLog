@@ -1,5 +1,13 @@
 2018-03-08  Tom Tromey  <tom@tromey.com>
 
+	* source.c (get_filename_and_charpos): Use scoped_fd.
+	* nto-procfs.c (procfs_open_1): Use scoped_fd.
+	(procfs_pidlist): Likewise.
+	* procfs.c (proc_get_LDT_entry): Use scoped_fd.
+	(iterate_over_mappings): Likewise.
+
+2018-03-08  Tom Tromey  <tom@tromey.com>
+
 	* infcall.c (struct call_return_meta_info)
 	<stack_temporaries_enabled>: Remove.
 	(get_call_return_value, call_function_by_hand_dummy): Update.
