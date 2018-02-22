@@ -76,6 +76,7 @@
 #define ARCH_pj
 #define ARCH_powerpc
 #define ARCH_pru
+#define ARCH_riscv
 #define ARCH_rs6000
 #define ARCH_rl78
 #define ARCH_rx

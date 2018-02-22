@@ -1,3 +1,7 @@
+2018-02-22  Shea Levy <shea@shealevy.com>
+
+	* disassemble.c (ARCH_riscv): Define if ARCH_all.
+
 2018-02-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Add {rex},
