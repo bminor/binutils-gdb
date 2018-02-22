@@ -471,7 +471,11 @@ struct Struct_special : public Struct_var
 									  \
   options::String_set::const_iterator					  \
   varname__##_end() const						  \
-  { return this->varname__##_.value.end(); }
+  { return this->varname__##_.value.end(); }                              \
+                                                                          \
+  options::String_set::size_type                                          \
+  varname__##_size() const                                                \
+  { return this->varname__##_.value.size(); }                             \
 
 // When you have a list of possible values (expressed as string)
 // After helparg__ should come an initializer list, like

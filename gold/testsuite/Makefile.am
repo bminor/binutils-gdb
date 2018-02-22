@@ -2322,6 +2322,19 @@ plugin_test_12: export_dynamic_plugin.o gcctestdir/ld plugin_test.so export_dyna
 plugin_test_12.err: plugin_test_12
 	@touch plugin_test_12.err
 
+check_PROGRAMS += plugin_test_wrap_symbols
+check_SCRIPTS += plugin_test_wrap_symbols.sh
+check_DATA += plugin_test_wrap_symbols.err
+MOSTLYCLEANFILES += plugin_test_wrap_symbols.err
+plugin_test_wrap_symbols_1.o: plugin_test_wrap_symbols_1.cc
+	$(COMPILE) -c -o $@ $<
+plugin_test_wrap_symbols_2.o: plugin_test_wrap_symbols_2.cc
+	$(COMPILE) -c -o $@ $<
+plugin_test_wrap_symbols: plugin_test_wrap_symbols_1.o plugin_test_wrap_symbols_2.o gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_test.so" -Wl,--wrap=hello,--wrap=jello plugin_test_wrap_symbols_1.o plugin_test_wrap_symbols_2.o 2>plugin_test_wrap_symbols.err
+plugin_test_wrap_symbols.err: plugin_test_wrap_symbols
+	@touch plugin_test_wrap_symbols.err
+
 check_PROGRAMS += plugin_test_start_lib
 check_SCRIPTS += plugin_test_start_lib.sh
 check_DATA += plugin_test_start_lib.err

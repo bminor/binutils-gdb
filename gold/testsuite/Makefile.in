@@ -535,6 +535,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_12 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_wrap_symbols \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_defsym
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_45 =  \
@@ -547,6 +548,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_12.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_wrap_symbols.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_defsym.sh
 
@@ -568,6 +570,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10.sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_12.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_wrap_symbols.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_defsym.err
 # Make a copy of two_file_test_1.o, which does not define the symbol _Z4t16av.
@@ -586,6 +589,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_thin.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_12.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_wrap_symbols.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_defsym.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__append_48 = plugin_test_tls
@@ -1215,6 +1219,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_10$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_11$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_12$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_wrap_symbols$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_start_lib$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_defsym$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@@TLS_TRUE@am__EXEEXT_25 = plugin_test_tls$(EXEEXT)
@@ -1958,6 +1963,13 @@ plugin_test_tls_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+plugin_test_wrap_symbols_SOURCES = plugin_test_wrap_symbols.c
+plugin_test_wrap_symbols_OBJECTS = plugin_test_wrap_symbols.$(OBJEXT)
+plugin_test_wrap_symbols_LDADD = $(LDADD)
+plugin_test_wrap_symbols_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 pr17704a_test_SOURCES = pr17704a_test.c
 pr17704a_test_OBJECTS = pr17704a_test.$(OBJEXT)
 pr17704a_test_LDADD = $(LDADD)
@@ -2488,13 +2500,13 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
 	plugin_test_5.c plugin_test_6.c plugin_test_7.c \
 	plugin_test_8.c plugin_test_defsym.c plugin_test_start_lib.c \
-	plugin_test_tls.c pr17704a_test.c $(pr20216a_test_SOURCES) \
-	$(pr20216b_test_SOURCES) $(pr20216c_test_SOURCES) \
-	$(pr20216d_test_SOURCES) $(pr20216e_test_SOURCES) \
-	$(pr20308a_test_SOURCES) $(pr20308b_test_SOURCES) \
-	$(pr20308c_test_SOURCES) $(pr20308d_test_SOURCES) \
-	$(pr20308e_test_SOURCES) pr20976.c pr22266.c \
-	$(protected_1_SOURCES) $(protected_2_SOURCES) \
+	plugin_test_tls.c plugin_test_wrap_symbols.c pr17704a_test.c \
+	$(pr20216a_test_SOURCES) $(pr20216b_test_SOURCES) \
+	$(pr20216c_test_SOURCES) $(pr20216d_test_SOURCES) \
+	$(pr20216e_test_SOURCES) $(pr20308a_test_SOURCES) \
+	$(pr20308b_test_SOURCES) $(pr20308c_test_SOURCES) \
+	$(pr20308d_test_SOURCES) $(pr20308e_test_SOURCES) pr20976.c \
+	pr22266.c $(protected_1_SOURCES) $(protected_2_SOURCES) \
 	$(relro_now_test_SOURCES) $(relro_script_test_SOURCES) \
 	$(relro_strip_test_SOURCES) $(relro_test_SOURCES) \
 	$(script_test_1_SOURCES) script_test_11.c script_test_12.c \
@@ -4150,6 +4162,15 @@ pie_copyrelocs_test$(EXEEXT): $(pie_copyrelocs_test_OBJECTS) $(pie_copyrelocs_te
 @TLS_FALSE@plugin_test_tls$(EXEEXT): $(plugin_test_tls_OBJECTS) $(plugin_test_tls_DEPENDENCIES) $(EXTRA_plugin_test_tls_DEPENDENCIES) 
 @TLS_FALSE@	@rm -f plugin_test_tls$(EXEEXT)
 @TLS_FALSE@	$(LINK) $(plugin_test_tls_OBJECTS) $(plugin_test_tls_LDADD) $(LIBS)
+@GCC_FALSE@plugin_test_wrap_symbols$(EXEEXT): $(plugin_test_wrap_symbols_OBJECTS) $(plugin_test_wrap_symbols_DEPENDENCIES) $(EXTRA_plugin_test_wrap_symbols_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f plugin_test_wrap_symbols$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(plugin_test_wrap_symbols_OBJECTS) $(plugin_test_wrap_symbols_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@plugin_test_wrap_symbols$(EXEEXT): $(plugin_test_wrap_symbols_OBJECTS) $(plugin_test_wrap_symbols_DEPENDENCIES) $(EXTRA_plugin_test_wrap_symbols_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f plugin_test_wrap_symbols$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(plugin_test_wrap_symbols_OBJECTS) $(plugin_test_wrap_symbols_LDADD) $(LIBS)
+@PLUGINS_FALSE@plugin_test_wrap_symbols$(EXEEXT): $(plugin_test_wrap_symbols_OBJECTS) $(plugin_test_wrap_symbols_DEPENDENCIES) $(EXTRA_plugin_test_wrap_symbols_DEPENDENCIES) 
+@PLUGINS_FALSE@	@rm -f plugin_test_wrap_symbols$(EXEEXT)
+@PLUGINS_FALSE@	$(LINK) $(plugin_test_wrap_symbols_OBJECTS) $(plugin_test_wrap_symbols_LDADD) $(LIBS)
 @DEFAULT_TARGET_X86_64_FALSE@pr17704a_test$(EXEEXT): $(pr17704a_test_OBJECTS) $(pr17704a_test_DEPENDENCIES) $(EXTRA_pr17704a_test_DEPENDENCIES) 
 @DEFAULT_TARGET_X86_64_FALSE@	@rm -f pr17704a_test$(EXEEXT)
 @DEFAULT_TARGET_X86_64_FALSE@	$(LINK) $(pr17704a_test_OBJECTS) $(pr17704a_test_LDADD) $(LIBS)
@@ -4544,6 +4565,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_defsym.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_start_lib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_tls.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_wrap_symbols.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pr17704a_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pr20216a_test-pr20216_def.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pr20216a_test-pr20216_main.Po@am__quote@
@@ -5313,6 +5335,8 @@ plugin_test_11.sh.log: plugin_test_11.sh
 	@p='plugin_test_11.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_12.sh.log: plugin_test_12.sh
 	@p='plugin_test_12.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_wrap_symbols.sh.log: plugin_test_wrap_symbols.sh
+	@p='plugin_test_wrap_symbols.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_start_lib.sh.log: plugin_test_start_lib.sh
 	@p='plugin_test_start_lib.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_defsym.sh.log: plugin_test_defsym.sh
@@ -5683,6 +5707,8 @@ plugin_test_11.log: plugin_test_11$(EXEEXT)
 	@p='plugin_test_11$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_12.log: plugin_test_12$(EXEEXT)
 	@p='plugin_test_12$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_wrap_symbols.log: plugin_test_wrap_symbols$(EXEEXT)
+	@p='plugin_test_wrap_symbols$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_start_lib.log: plugin_test_start_lib$(EXEEXT)
 	@p='plugin_test_start_lib$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_test_defsym.log: plugin_test_defsym$(EXEEXT)
@@ -7031,6 +7057,14 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z3foov" -Wl,--export-dynamic-symbol,"_Z3foov" export_dynamic_plugin.o.syms 2>plugin_test_12.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_12.err: plugin_test_12
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_12.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_wrap_symbols_1.o: plugin_test_wrap_symbols_1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_wrap_symbols_2.o: plugin_test_wrap_symbols_2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_wrap_symbols: plugin_test_wrap_symbols_1.o plugin_test_wrap_symbols_2.o gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_test.so" -Wl,--wrap=hello,--wrap=jello plugin_test_wrap_symbols_1.o plugin_test_wrap_symbols_2.o 2>plugin_test_wrap_symbols.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_wrap_symbols.err: plugin_test_wrap_symbols
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_wrap_symbols.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_start_lib: unused.o plugin_start_lib_test.o plugin_start_lib_test_2.syms gcctestdir/ld plugin_test.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_start_lib_test.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@		-Wl,--start-lib plugin_start_lib_test_2.syms -Wl,--end-lib 2>plugin_test_start_lib.err
