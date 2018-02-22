@@ -1,3 +1,9 @@
+2018-02-22  A. Wilcox  <awilfox@adelielinux.org>
+
+	PR 22014
+	* config/tc-mips.c (mips_lookup_insn): Use memmove to strip the
+	instruction size suffix.
+
 2017-12-12  Alan Modra  <amodra@gmail.com>
 
 	PR 21118

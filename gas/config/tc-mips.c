@@ -13956,7 +13956,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
 	suffix = 0;
       if (suffix)
 	{
-	  memcpy (name + opend - 2, name + opend, length - opend + 1);
+	  memmove (name + opend - 2, name + opend, length - opend + 1);
 	  insn = (struct mips_opcode *) hash_find (hash, name);
 	  if (insn)
 	    {
