@@ -642,6 +642,11 @@ Different encoding options can be specified via pseudo prefixes:
 
 @item
 @samp{@{evex@}} --  encode with EVEX prefix.
+
+@item
+@samp{@{rex@}} -- prefer REX prefix for integer and legacy vector
+instructions (x86-64 only).  Note that this differs from the @samp{rex}
+prefix which generates REX prefix unconditionally.
 @end itemize
 
 @cindex conversion instructions, i386

@@ -369,6 +369,9 @@ struct _i386_insn
 	disp_encoding_32bit
       } disp_encoding;
 
+    /* Prefer the REX byte in encoding.  */
+    bfd_boolean rex_encoding;
+
     /* How to encode vector instructions.  */
     enum
       {
@@ -3992,6 +3995,26 @@ md_assemble (char *line)
 	}
     }
 
+  if (i.rex == 0 && i.rex_encoding)
+    {
+      /* Check if we can add a REX_OPCODE byte.  Look for 8 bit operand
+         that uses legacy register.  If it is "hi" register, don't add
+	 the REX_OPCODE byte.  */
+      int x;
+      for (x = 0; x < 2; x++)
+	if (i.types[x].bitfield.reg
+	    && i.types[x].bitfield.byte
+	    && (i.op[x].regs->reg_flags & RegRex64) == 0
+	    && i.op[x].regs->reg_num > 3)
+	  {
+	    i.rex_encoding = FALSE;
+	    break;
+	  }
+
+      if (i.rex_encoding)
+	i.rex = REX_OPCODE;
+    }
+
   if (i.rex != 0)
     add_prefix (REX_OPCODE | i.rex);
 
@@ -4103,6 +4126,10 @@ parse_insn (char *line, char *mnemonic)
 		case 0x6:
 		  /* {evex} */
 		  i.vec_encoding = vex_encoding_evex;
+		  break;
+		case 0x7:
+		  /* {rex} */
+		  i.rex_encoding = TRUE;
 		  break;
 		default:
 		  abort ();
