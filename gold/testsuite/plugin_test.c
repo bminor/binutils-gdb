@@ -68,6 +68,7 @@ static ld_plugin_get_input_section_name get_input_section_name = NULL;
 static ld_plugin_get_input_section_contents get_input_section_contents = NULL;
 static ld_plugin_update_section_order update_section_order = NULL;
 static ld_plugin_allow_section_ordering allow_section_ordering = NULL;
+static ld_plugin_get_wrap_symbols get_wrap_symbols = NULL;
 
 #define MAXOPTS 10
 
@@ -158,6 +159,9 @@ onload(struct ld_plugin_tv *tv)
 	case LDPT_ALLOW_SECTION_ORDERING:
 	  allow_section_ordering = *entry->tv_u.tv_allow_section_ordering;
 	  break;
+	case LDPT_GET_WRAP_SYMBOLS:
+	  get_wrap_symbols = *entry->tv_u.tv_get_wrap_symbols;
+	  break;
         default:
           break;
         }
@@ -245,6 +249,28 @@ onload(struct ld_plugin_tv *tv)
     {
       fprintf(stderr, "tv_allow_section_ordering interface missing\n");
       return LDPS_ERR;
+    }
+
+  if (get_wrap_symbols == NULL)
+    {
+      fprintf(stderr, "tv_get_wrap_symbols interface missing\n");
+      return LDPS_ERR;
+    }
+  else
+    {
+      const char **wrap_symbols;
+      uint64_t count = 0;
+      if (get_wrap_symbols(&count, &wrap_symbols) == LDPS_OK)
+	{
+	  (*message)(LDPL_INFO, "Number of wrap symbols = %lu", count);
+	  for (; count > 0; --count)
+            (*message)(LDPL_INFO, "Wrap symbol %s", wrap_symbols[count - 1]);
+	}
+      else
+	{
+          fprintf(stderr, "tv_get_wrap_symbols interface call failed\n");
+          return LDPS_ERR;
+	}
     }
 
   return LDPS_OK;

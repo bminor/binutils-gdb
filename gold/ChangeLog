@@ -1,4 +1,21 @@
 2018-04-27  Sriraman Tallam  <tmsriram@google.com>
+
+	Apply from master:
+	2018-02-22  Sriraman Tallam  <tmsriram@google.com>
+
+	* plugin.cc (get_wrap_symbols): New plugin interface.
+	(load): Add get_wrap_symbols to transfer vector.
+	* plugin-api.h (ld_plugin_get_wrap_symbols): New plugin interface.
+	* testsuite/plugin_test.c (onload): Call and check get_wrap_symbols
+	interface.
+	* testsuite/plugin_test_wrap_symbols.sh: New test script.
+	* testsuite/plugin_test_wrap_symbols_1.cc: New file.
+	* testsuite/plugin_test_wrap_symbols_2.cc: New file.
+	* testsuite/Makefile.am (plugin_test_wrap_symbols): New test.
+	* testsuite/Makefile.in: Regenerate.
+
+2018-04-27  Sriraman Tallam  <tmsriram@google.com>
+
 	Apply from master:
 	2018-02-07  Sriraman Tallam  <tmsriram@google.com>
 

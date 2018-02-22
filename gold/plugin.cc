@@ -167,6 +167,9 @@ static enum ld_plugin_status
 get_input_section_size(const struct ld_plugin_section section,
                        uint64_t* secsize);
 
+static enum ld_plugin_status
+get_wrap_symbols(uint64_t *num_symbols, const char ***wrap_symbol_list);
+
 };
 
 #endif // ENABLE_PLUGINS
@@ -211,7 +214,7 @@ Plugin::load()
   sscanf(ver, "%d.%d", &major, &minor);
 
   // Allocate and populate a transfer vector.
-  const int tv_fixed_size = 29;
+  const int tv_fixed_size = 30;
 
   int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv* tv = new ld_plugin_tv[tv_size];
@@ -344,6 +347,10 @@ Plugin::load()
   ++i;
   tv[i].tv_tag = LDPT_GET_INPUT_SECTION_SIZE;
   tv[i].tv_u.tv_get_input_section_size = get_input_section_size;
+
+  ++i;
+  tv[i].tv_tag = LDPT_GET_WRAP_SYMBOLS;
+  tv[i].tv_u.tv_get_wrap_symbols = get_wrap_symbols;
 
   ++i;
   tv[i].tv_tag = LDPT_NULL;
@@ -1805,6 +1812,25 @@ get_input_section_size(const struct ld_plugin_section section,
     return LDPS_BAD_HANDLE;
 
   *secsize = obj->section_size(section.shndx);
+  return LDPS_OK;
+}
+
+static enum ld_plugin_status
+get_wrap_symbols(uint64_t *count, const char ***wrap_symbols)
+{
+  gold_assert(parameters->options().has_plugins());
+  *count = parameters->options().wrap_size();
+
+  if (*count == 0)
+    return LDPS_OK;
+
+  *wrap_symbols = new const char *[*count];
+  int i = 0;
+  for (options::String_set::const_iterator
+       it = parameters->options().wrap_begin();
+       it != parameters->options().wrap_end(); ++it, ++i) {
+    (*wrap_symbols)[i] = it->c_str();
+  }
   return LDPS_OK;
 }
 
