@@ -1,3 +1,21 @@
+2018-02-09  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* elfxx-sparc.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Reorder conditions.
+	(sparc_elf_append_rela): Assert that there is enough room in section.
+	(_bfd_sparc_elf_copy_indirect_symbol): Fix formatting.
+	(_bfd_sparc_elf_adjust_dynamic_symbol): Minor tweak.
+	(allocate_dynrelocs): Remove outdated comments and reorder conditions.
+	For a symbol subject to a GOT relocation, reserve a slot in the
+	relocation section if the symbol isn't dynamic and we are in PIC mode.
+	(_bfd_sparc_elf_relocate_section) <R_SPARC_GOTDATA_OP>: If relocation
+	is relaxed and a slot was reserved, generate a R_SPARC_NONE relocation.
+	<R_SPARC_GOTDATA_OP_HIX22>: Adjust comments.
+	<R_SPARC_PC10>: Reorder conditions.  Remove always-false assertion.
+	(_bfd_sparc_elf_finish_dynamic_symbol): Rename local_undefweak into
+	resolved_to_zero.  Do not generate a dynamic GOT relocation for an
+	undefined weak symbol with non-default visibility.  Remove superfluous
+	'else' and fix formatting.
+
 2017-12-19  Alan Modra  <amodra@gmail.com>
 
 	PR 22626
