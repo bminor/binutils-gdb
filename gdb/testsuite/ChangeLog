@@ -1,3 +1,8 @@
+2018-02-23  Maciej W. Rozycki  <macro@mips.com>
+
+	* lib/cp-support.exp (cp_test_ptype_class): Fix a typo in the
+	name of a variable: $actual_linejj -> $actual_line.
+
 2018-02-21  John Baldwin  <jhb@FreeBSD.org>
 
 	* gdb.arch/amd64-i386-address.exp: Fix a typo.

@@ -575,7 +575,7 @@ proc cp_test_ptype_class { in_exp in_testname in_key in_tag in_class_table
 			"Expecting enum result: $expected_result"
 		    if {![regexp -- $expected_result $actual_line]} {
 			set txt "$in_testname // wrong nested type enum"
-			append txt " definition: $actual_linejj"
+			append txt " definition: $actual_line"
 			fail $txt
 			queue delete $line_queue
 			return false
