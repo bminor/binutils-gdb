@@ -1,3 +1,10 @@
+2018-02-23  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* config/tc-nds32.c (ict_model): New function. Hook new
+	directive .ict_model.
+	(nds32_insert_relax_entry): Tag the bits of entry relocation
+	for .ict_model.
+
 2018-02-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (_i386_insn): Add rex_encoding.

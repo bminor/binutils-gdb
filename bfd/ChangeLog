@@ -1,3 +1,7 @@
+2018-02-23  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf32-nds32.h: Define mask for ict_model.
+
 2018-02-20  Jason Duerstock  <jason.duerstock@gmail.com>
 
 	* elfnn-ia64.c (elf_backend_can_gc_sections): Enable.
