@@ -559,4 +559,11 @@ extern void dump_core (void);
 
 extern char *make_hex_string (const gdb_byte *data, size_t length);
 
+/* Find an instance of the character C in the string S that is outside
+   of all parenthesis pairs, single-quoted strings, and double-quoted
+   strings.  Also, ignore the char within a template name, like a ','
+   within foo<int, int>.  */
+
+extern const char *find_toplevel_char (const char *s, char c);
+
 #endif /* UTILS_H */
