@@ -1,3 +1,13 @@
+2018-02-23  Nick Clifton  <nickc@redhat.com>
+
+	* Import from mainline:
+
+	2018-02-22  A. Wilcox  <awilfox@adelielinux.org>
+
+	PR 22014
+	* config/tc-mips.c (mips_lookup_insn): Use memmove to strip the
+	instruction size suffix.
+
 2018-02-16  Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-arm.c (cpu_arch_ver): Renumber ARM_ARCH_V8_4A.
