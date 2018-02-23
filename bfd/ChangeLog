@@ -1187,7 +1187,7 @@
 	* elflink.c (bfd_elf_gc_sections): Keep all PREINIT_ARRAY,
 	INIT_ARRAY as well as FINI_ARRAY sections for ld -r --gc-section.
 
-2017-09-27  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+2018-01-09  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	PR 22662
 	* elf32-nds32.c (nds32_elf_relax_loadstore): Fix a typographical error.
