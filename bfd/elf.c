@@ -5859,6 +5859,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
       if (p->p_type == PT_GNU_RELRO)
 	{
 	  bfd_vma start, end;
+	  bfd_boolean ok;
 
 	  if (link_info != NULL)
 	    {
@@ -5881,6 +5882,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      end = 0;
 	    }
 
+	  ok = FALSE;
 	  if (start < end)
 	    {
 	      struct elf_segment_map *lm;
@@ -5902,48 +5904,54 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		      && lm->sections[0]->vma < end)
 		    break;
 		}
-	      BFD_ASSERT (lm != NULL);
 
-	      /* Find the section starting the RELRO segment.  */
-	      for (i = 0; i < lm->count; i++)
+	      if (lm != NULL)
 		{
-		  asection *s = lm->sections[i];
-		  if (s->vma >= start
-		      && s->vma < end
-		      && s->size != 0)
-		    break;
+		  /* Find the section starting the RELRO segment.  */
+		  for (i = 0; i < lm->count; i++)
+		    {
+		      asection *s = lm->sections[i];
+		      if (s->vma >= start
+			  && s->vma < end
+			  && s->size != 0)
+			break;
+		    }
+
+		  if (i < lm->count)
+		    {
+		      p->p_vaddr = lm->sections[i]->vma;
+		      p->p_paddr = lm->sections[i]->lma;
+		      p->p_offset = lm->sections[i]->filepos;
+		      p->p_memsz = end - p->p_vaddr;
+		      p->p_filesz = p->p_memsz;
+
+		      /* The RELRO segment typically ends a few bytes
+			 into .got.plt but other layouts are possible.
+			 In cases where the end does not match any
+			 loaded section (for instance is in file
+			 padding), trim p_filesz back to correspond to
+			 the end of loaded section contents.  */
+		      if (p->p_filesz > lp->p_vaddr + lp->p_filesz - p->p_vaddr)
+			p->p_filesz = lp->p_vaddr + lp->p_filesz - p->p_vaddr;
+
+		      /* Preserve the alignment and flags if they are
+			 valid.  The gold linker generates RW/4 for
+			 the PT_GNU_RELRO section.  It is better for
+			 objcopy/strip to honor these attributes
+			 otherwise gdb will choke when using separate
+			 debug files.  */
+		      if (!m->p_align_valid)
+			p->p_align = 1;
+		      if (!m->p_flags_valid)
+			p->p_flags = PF_R;
+		      ok = TRUE;
+		    }
 		}
-	      BFD_ASSERT (i < lm->count);
-
-	      p->p_vaddr = lm->sections[i]->vma;
-	      p->p_paddr = lm->sections[i]->lma;
-	      p->p_offset = lm->sections[i]->filepos;
-	      p->p_memsz = end - p->p_vaddr;
-	      p->p_filesz = p->p_memsz;
-
-	      /* The RELRO segment typically ends a few bytes into
-		 .got.plt but other layouts are possible.  In cases
-		 where the end does not match any loaded section (for
-		 instance is in file padding), trim p_filesz back to
-		 correspond to the end of loaded section contents.  */
-	      if (p->p_filesz > lp->p_vaddr + lp->p_filesz - p->p_vaddr)
-		p->p_filesz = lp->p_vaddr + lp->p_filesz - p->p_vaddr;
-
-	      /* Preserve the alignment and flags if they are valid. The
-		 gold linker generates RW/4 for the PT_GNU_RELRO section.
-		 It is better for objcopy/strip to honor these attributes
-		 otherwise gdb will choke when using separate debug files.
-	       */
-	      if (!m->p_align_valid)
-		p->p_align = 1;
-	      if (!m->p_flags_valid)
-		p->p_flags = PF_R;
 	    }
-	  else
-	    {
-	      memset (p, 0, sizeof *p);
-	      p->p_type = PT_NULL;
-	    }
+	  if (link_info != NULL)
+	    BFD_ASSERT (ok);
+	  if (!ok)
+	    memset (p, 0, sizeof *p);
 	}
       else if (p->p_type == PT_GNU_STACK)
 	{
