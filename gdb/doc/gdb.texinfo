@@ -15188,6 +15188,52 @@ also use the @value{GDBN} command-line word completion facilities to list the
 available choices, or to finish the type list for you.
 @xref{Completion,, Command Completion}, for details on how to do this.
 
+@item @r{Breakpoints in template functions}
+
+Similar to overloaded symbols, @value{GDBN} will set breakpoints in all
+template instantiations with the user-specified name.  To set a breakpoint in
+a specific template instantiation, include the template parameter list.
+
+@smallexample
+(gdb) b mytemplate
+Breakpoint 1 at 0x40085b: mytemplate. (2 locations)
+(gdb) info breakpoints
+Num     Type           Disp Enb Address    What
+1       breakpoint     keep y   <MULTIPLE>
+1.1                         y     0x40085b in mytemplate<int>(int)
+                                           at mytemplate.cc:8
+1.2                         y     0x40087a in mytemplate<double>(double)
+                                           at mytemplate.cc:8
+@end smallexample
+
+@noindent
+In the above example, @value{GDBN} searches all namespaces and types for
+functions named @code{mytemplate}, ignoring template parameter lists and
+function arguments.
+
+In the below example, a template parameter list is specified, and @value{GDBN}
+searches all namespaces and types for the specific instantiation:
+
+@smallexample
+(gdb) b mytemplate<int>
+Breakpoint 2 at 0x40085b: file mytemplate.cc, line 8.
+(gdb) info breakpoints
+Num     Type           Disp Enb Address    What
+2       breakpoint     keep y   0x40085b   in mytemplate<int>(int)
+                                           at mytemplate.cc:8
+@end smallexample
+
+Just as with function overloads, the @kbd{-qualified} flag may be used to
+override this behavior, causing @value{GDBN} to search for a specific
+function without ignoring template parameter lists.
+
+@smallexample
+(gdb) b mytemplate
+Breakpoint 3 at 0x40085b: mytemplate. (2 locations)
+(gdb) b -qualified mytemplate
+Function "mytemplate" not defined.
+@end smallexample
+
 @item @r{Breakpoints in functions with ABI tags}
 
 The GNU C@t{++} compiler introduced the notion of ABI ``tags'', which

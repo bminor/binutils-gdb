@@ -6,6 +6,10 @@
 * 'info proc' now works on running processes on FreeBSD systems and core
   files created on FreeBSD systems.
 
+* C++ developers may now ignore template parameter lists when specifying
+  locations, e.g., while setting breakpoints.  This is analogous to how
+  completion and symbol lookup handles overloaded functions or ABI tags.
+
 *** Changes in GDB 8.1
 
 * GDB now supports dynamically creating arbitrary register groups specified
