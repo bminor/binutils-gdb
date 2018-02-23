@@ -47,6 +47,8 @@
 #include "hashtab.h"
 #include "common/offset-type.h"
 #include "common/enum-flags.h"
+#include "common/underlying.h"
+#include "common/print-utils.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -63,7 +65,13 @@ DEFINE_OFFSET_TYPE (cu_offset, unsigned int);
 
 /* * Offset relative to the start of its .debug_info or .debug_types
    section.  */
-DEFINE_OFFSET_TYPE (sect_offset, unsigned int);
+DEFINE_OFFSET_TYPE (sect_offset, uint64_t);
+
+static inline char *
+sect_offset_str (sect_offset offset)
+{
+  return hex_string (to_underlying (offset));
+}
 
 /* Some macros for char-based bitfields.  */
 

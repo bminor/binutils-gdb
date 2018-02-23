@@ -1,3 +1,49 @@
+2018-02-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (sect_offset): Change type to uint64_t.
+	(sect_offset_str): New function.
+	* dwarf2read.c (create_addrmap_from_aranges): Use
+	sect_offset_str.
+	(error_check_comp_unit_head): Likewise.
+	(create_debug_type_hash_table): Likewise.
+	(read_cutu_die_from_dwo): Likewise.
+	(init_cutu_and_read_dies): Likewise.
+	(init_cutu_and_read_dies_no_follow): Likewise.
+	(process_psymtab_comp_unit_reader): Likewise.
+	(partial_die_parent_scope): Likewise.
+	(peek_die_abbrev): Likewise.
+	(process_queue): Likewise.
+	(dwarf2_physname): Likewise.
+	(read_namespace_alias): Likewise.
+	(read_import_statement): Likewise.
+	(create_dwo_cu_reader): Likewise.
+	(create_cus_hash_table): Likewise.
+	(lookup_dwo_cutu): Likewise.
+	(inherit_abstract_dies): Likewise.
+	(read_func_scope): Likewise.
+	(read_call_site_scope): Likewise.
+	(dwarf2_add_member_fn): Likewise.
+	(read_common_block): Likewise.
+	(read_module_type): Likewise.
+	(read_typedef): Likewise.
+	(read_subrange_type): Likewise.
+	(load_partial_dies): Likewise.
+	(read_partial_die): Likewise.
+	(find_partial_die): Likewise.
+	(read_str_index): Likewise.
+	(dwarf2_string_attr): Likewise.
+	(build_error_marker_type): Likewise.
+	(lookup_die_type): Likewise.
+	(dump_die_shallow): Likewise.
+	(follow_die_ref): Likewise.
+	(dwarf2_fetch_die_loc_sect_off): Likewise.
+	(dwarf2_fetch_constant_bytes): Likewise.
+	(follow_die_sig): Likewise.
+	(get_signatured_type): Likewise.
+	(get_DW_AT_signature_type): Likewise.
+	(dwarf2_find_containing_comp_unit): Likewise.
+	(set_die_type): Likewise.
+
 2018-02-21  John Baldwin  <jhb@FreeBSD.org>
 
 	* arch/aarch64.c: Include "common-defs.h".
