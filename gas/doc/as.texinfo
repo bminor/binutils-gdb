@@ -4404,6 +4404,9 @@ Some machine configurations provide additional directives.
 * CFI directives::		@code{.cfi_startproc [simple]}, @code{.cfi_endproc}, etc.
 * Comm::                        @code{.comm @var{symbol} , @var{length} }
 * Data::                        @code{.data @var{subsection}}
+* Dc::                          @code{.dc[@var{size}] @var{expressions}}
+* Dcb::                         @code{.dcb[@var{size}] @var{number} [,@var{fill}]}
+* Ds::                          @code{.ds[@var{size}] @var{number} [,@var{fill}]}
 @ifset COFF
 * Def::                         @code{.def @var{name}}
 @end ifset
@@ -4518,12 +4521,12 @@ Some machine configurations provide additional directives.
 * Size::                        @code{.size [@var{name} , @var{expression}]}
 @end ifset
 @ifclear no-space-dir
-* Skip::                        @code{.skip @var{size} , @var{fill}}
+* Skip::                        @code{.skip @var{size} [,@var{fill}]}
 @end ifclear
 
 * Sleb128::			@code{.sleb128 @var{expressions}}
 @ifclear no-space-dir
-* Space::                       @code{.space @var{size} , @var{fill}}
+* Space::                       @code{.space @var{size} [,@var{fill}]}
 @end ifclear
 @ifset have-stabs
 * Stab::                        @code{.stabd, .stabn, .stabs}
@@ -5050,12 +5053,107 @@ The syntax for @code{.comm} differs slightly on the HPPA.  The syntax is
 
 @node Data
 @section @code{.data @var{subsection}}
-
 @cindex @code{data} directive
+
 @code{.data} tells @command{@value{AS}} to assemble the following statements onto the
 end of the data subsection numbered @var{subsection} (which is an
 absolute expression).  If @var{subsection} is omitted, it defaults
 to zero.
+
+@node Dc
+@section @code{.dc[@var{size}] @var{expressions}}
+@cindex @code{dc} directive
+
+The @code{.dc} directive expects zero of more @var{expressions} separated by
+commas.  These expressions are evaluated and their values inserted into the
+current section.  The size of the emitted value depends upon the suffix to the
+@code{.dc} directive:
+
+@table @code
+@item @samp{.a}
+Emits N-bit values, where N is the size of an address on the target system.
+@item @samp{.b}
+Emits 8-bit values.
+@item @samp{.d}
+Emits double precision floating-point values.
+@item @samp{.l}
+Emits 32-bit values.
+@item @samp{.s}
+Emits single precision floating-point values.
+@item @samp{.w}
+Emits 16-bit values.
+Note - this is true even on targets where the @code{.word} directive would emit
+32-bit values.
+@item @samp{.x}
+Emits long double precision floating-point values.
+@end table
+
+If no suffix is used then @samp{.w} is assumed.
+
+The byte ordering is still target dependent, as is the size and format of
+floating point values.
+
+@node Dcb
+@section @code{.dcb[@var{size}] @var{number} [,@var{fill}]}
+@cindex @code{dcb} directive
+This directive emits @var{number} copies of @var{fill}, each of @var{size}
+bytes.  Both @var{number} and @var{fill} are absolute expressions.  If the
+comma and @var{fill} are omitted, @var{fill} is assumed to be zero.  The
+@var{size} suffix, if present, must be one of:
+
+@table @code
+@item @samp{.b}
+Emits single byte values.
+@item @samp{.d}
+Emits double-precision floating point values.
+@item @samp{.l}
+Emits 4-byte values.
+@item @samp{.s}
+Emits single-precision floating point values.
+@item @samp{.w}
+Emits 2-byte values.
+@item @samp{.x}
+Emits long double-precision floating point values.
+@end table
+
+If the @var{size} suffix is omitted then @samp{.w} is assumed.
+
+The byte ordering is target dependent, as is the size and format of floating
+point values.
+
+@node Ds
+@section @code{.ds[@var{size}] @var{number} [,@var{fill}]}
+@cindex @code{ds} directive
+This directive emits @var{number} copies of @var{fill}, each of @var{size}
+bytes.  Both @var{number} and @var{fill} are absolute expressions.  If the
+comma and @var{fill} are omitted, @var{fill} is assumed to be zero.  The
+@var{size} suffix, if present, must be one of:
+
+@table @code
+@item @samp{.b}
+Emits single byte values.
+@item @samp{.d}
+Emits 8-byte values.
+@item @samp{.l}
+Emits 4-byte values.
+@item @samp{.p}
+Emits 12-byte values.
+@item @samp{.s}
+Emits 4-byte values.
+@item @samp{.w}
+Emits 2-byte values.
+@item @samp{.x}
+Emits 12-byte values.
+@end table
+
+Note - unlike the @code{.dcb} directive the @samp{.d}, @samp{.s} and @samp{.x}
+suffixes do not indicate that floating-point values are to inserted.
+
+If the @var{size} suffix is omitted then @samp{.w} is assumed.
+
+The byte ordering is target dependent, as is the size and format of floating
+point values.
+
 
 @ifset COFF
 @node Def
@@ -6831,7 +6929,7 @@ symbols.
 
 @ifclear no-space-dir
 @node Skip
-@section @code{.skip @var{size} , @var{fill}}
+@section @code{.skip @var{size} [,@var{fill}]}
 
 @cindex @code{skip} directive
 @cindex filling memory
@@ -6851,7 +6949,7 @@ symbolic debugging format.  @xref{Uleb128, ,@code{.uleb128}}.
 
 @ifclear no-space-dir
 @node Space
-@section @code{.space @var{size} , @var{fill}}
+@section @code{.space @var{size} [,@var{fill}]}
 
 @cindex @code{space} directive
 @cindex filling memory

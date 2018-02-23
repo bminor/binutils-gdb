@@ -1,3 +1,7 @@
+2018-02-23  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Pseudo Ops): Add nodes for .dc, .dcb and .ds.
+
 2018-02-23  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* config/tc-nds32.c (ict_model): New function. Hook new
