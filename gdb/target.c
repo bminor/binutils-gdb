@@ -3087,14 +3087,36 @@ target_fileio_readlink (struct inferior *inf, const char *filename,
   return {};
 }
 
-static void
-target_fileio_close_cleanup (void *opaque)
-{
-  int fd = *(int *) opaque;
-  int target_errno;
+/* Like scoped_fd, but specific to target fileio.  */
 
-  target_fileio_close (fd, &target_errno);
-}
+class scoped_target_fd
+{
+public:
+  explicit scoped_target_fd (int fd) noexcept
+    : m_fd (fd)
+  {
+  }
+
+  ~scoped_target_fd ()
+  {
+    if (m_fd >= 0)
+      {
+	int target_errno;
+
+	target_fileio_close (m_fd, &target_errno);
+      }
+  }
+
+  DISABLE_COPY_AND_ASSIGN (scoped_target_fd);
+
+  int get () const noexcept
+  {
+    return m_fd;
+  }
+
+private:
+  int m_fd;
+};
 
 /* Read target file FILENAME, in the filesystem as seen by INF.  If
    INF is NULL, use the filesystem seen by the debugger (GDB or, for
@@ -3108,19 +3130,15 @@ static LONGEST
 target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
 			    gdb_byte **buf_p, int padding)
 {
-  struct cleanup *close_cleanup;
   size_t buf_alloc, buf_pos;
   gdb_byte *buf;
   LONGEST n;
-  int fd;
   int target_errno;
 
-  fd = target_fileio_open (inf, filename, FILEIO_O_RDONLY, 0700,
-			   &target_errno);
-  if (fd == -1)
+  scoped_target_fd fd (target_fileio_open (inf, filename, FILEIO_O_RDONLY,
+					   0700, &target_errno));
+  if (fd.get () == -1)
     return -1;
-
-  close_cleanup = make_cleanup (target_fileio_close_cleanup, &fd);
 
   /* Start by reading up to 4K at a time.  The target will throttle
      this number down if necessary.  */
@@ -3129,20 +3147,18 @@ target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
   buf_pos = 0;
   while (1)
     {
-      n = target_fileio_pread (fd, &buf[buf_pos],
+      n = target_fileio_pread (fd.get (), &buf[buf_pos],
 			       buf_alloc - buf_pos - padding, buf_pos,
 			       &target_errno);
       if (n < 0)
 	{
 	  /* An error occurred.  */
-	  do_cleanups (close_cleanup);
 	  xfree (buf);
 	  return -1;
 	}
       else if (n == 0)
 	{
 	  /* Read all there was.  */
-	  do_cleanups (close_cleanup);
 	  if (buf_pos == 0)
 	    xfree (buf);
 	  else
