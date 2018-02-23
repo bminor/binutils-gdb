@@ -332,7 +332,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		if (abfd != NULL)
 		  {
 		    if (!bfd_generic_link_read_symbols (abfd))
-		      einfo (_("%pB%F: could not read symbols: %E\n"), abfd);
+		      einfo (_("%F%P: %pB: could not read symbols: %E\n"), abfd);
 
 		    asymbols = bfd_get_outsymbols (abfd);
 		  }
@@ -371,7 +371,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 				&& filename_cmp (last_file, filename) != 0)
 			    || strcmp (last_function, functionname) != 0)
 			  {
-			    lfinfo (fp, _("%pB: In function `%pT':\n"),
+			    lfinfo (fp, _("%pB: in function `%pT':\n"),
 				    abfd, functionname);
 
 			    last_bfd = abfd;
@@ -700,6 +700,6 @@ ld_abort (const char *file, int line, const char *fn)
   else
     einfo (_("%P: internal error: aborting at %s:%d\n"),
 	   file, line);
-  einfo (_("%P%F: please report this bug\n"));
+  einfo (_("%F%P: please report this bug\n"));
   xexit (1);
 }

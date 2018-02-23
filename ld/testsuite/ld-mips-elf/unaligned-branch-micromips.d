@@ -2,7 +2,7 @@
 #as: -EB -n32 -march=from-abi
 #ld: -EB -Ttext 0x1c000000 -e 0x1c000000
 #source: ../../../gas/testsuite/gas/mips/unaligned-branch-micromips-2.s
-#error: \A[^\n]*: In function `foo':\n
+#error: \A[^\n]*: in function `foo':\n
 #error:   \(\.text\+0x100a\): cannot convert a branch to JALX for a non-word-aligned address\n
 #error:   \(\.text\+0x1012\): cannot convert a branch to JALX for a non-word-aligned address\n
 #error:   \(\.text\+0x101a\): cannot convert a branch to JALX for a non-word-aligned address\n

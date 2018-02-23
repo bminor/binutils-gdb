@@ -2,7 +2,7 @@
 #source: symbol1ref.s
 #source: symbol1w.s
 #ld: -T group.ld
-#warning: ^[^\\n]*\): warning: witty one-liner$
+#warning: ^[^\n]*\): warning: witty one-liner$
 #readelf: -s
 #notarget: "sparc64-*-solaris2*" "sparcv9-*-solaris2*"
 #xfail: "d30v-*-*" "dlx-*-*" "i960-*-*" "pj-*-*"

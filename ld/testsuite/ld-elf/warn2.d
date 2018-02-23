@@ -2,7 +2,7 @@
 #source: symbol2ref.s
 #source: symbol2w.s
 #ld: -T group.ld
-#warning: ^[^\\n]*\.[obj]+: warning: function 'Foo' used$
+#warning: ^[^\n]*\.[obj]+: warning: function 'Foo' used$
 #readelf: -s
 #notarget: "sparc64-*-solaris2*" "sparcv9-*-solaris2*"
 #xfail: d30v-*-* dlx-*-* fr30-*-* frv-*-elf ft32-*-* i860-*-* i960-*-*

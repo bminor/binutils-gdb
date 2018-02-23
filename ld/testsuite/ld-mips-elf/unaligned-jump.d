@@ -2,7 +2,7 @@
 #as: -EB -n32 -march=from-abi
 #ld: -EB -Ttext 0x1c000000 -e 0x1c000000
 #source: ../../../gas/testsuite/gas/mips/unaligned-jump-2.s
-#error: \A[^\n]*: In function `foo':\n
+#error: \A[^\n]*: in function `foo':\n
 #error:   \(\.text\+0x1004\): unsupported JALX to the same ISA mode\n
 #error:   \(\.text\+0x101c\): jump to a non-instruction-aligned address\n
 #error:   \(\.text\+0x101c\): unsupported JALX to the same ISA mode\n

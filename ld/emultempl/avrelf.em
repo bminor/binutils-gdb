@@ -116,8 +116,8 @@ avr_elf_create_output_section_statements (void)
 
   if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
     {
-      einfo (_("%X%P: changing output format whilst linking "
-	       "is not supported\n"));
+      einfo (_("%F%P: error: cannot change output format "
+	       "whilst linking %s binaries\n"), "AVR");
       return;
     }
 
@@ -131,7 +131,7 @@ avr_elf_create_output_section_statements (void)
 			     bfd_get_arch (link_info.output_bfd),
 			     bfd_get_mach (link_info.output_bfd)))
     {
-      einfo (_("%X%P: can not create stub BFD %E\n"));
+      einfo (_("%X%P: can not create stub BFD: %E\n"));
       return;
     }
 

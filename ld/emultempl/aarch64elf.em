@@ -264,7 +264,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 					  & elf${ELFSIZE}_aarch64_add_stub_section,
 					  & gldaarch64_layout_sections_again))
 	    {
-	      einfo (_("%X%P: cannot size stub section: %E\n"));
+	      einfo (_("%X%P: can not size stub section: %E\n"));
 	      return;
 	    }
 	}
@@ -301,8 +301,8 @@ aarch64_elf_create_output_section_statements (void)
 	 These will only be created if the output format is an arm format,
 	 hence we do not support linking and changing output formats at the
 	 same time.  Use a link followed by objcopy to change output formats.  */
-      einfo (_("%F%X%P: error: Cannot change output format "
-	       "whilst linking AArch64 binaries.\n"));
+      einfo (_("%F%P: error: cannot change output format "
+	       "whilst linking %s binaries\n"), "AArch64");
       return;
     }
 
@@ -322,7 +322,7 @@ aarch64_elf_create_output_section_statements (void)
 			      bfd_get_arch (link_info.output_bfd),
 			      bfd_get_mach (link_info.output_bfd)))
     {
-      einfo (_("%X%P: can not create BFD %E\n"));
+      einfo (_("%F%P: can not create BFD: %E\n"));
       return;
     }
 
@@ -385,17 +385,17 @@ PARSE_AND_LIST_OPTIONS='
 		   "                                wchar_t sizes\n"));
   fprintf (file, _("  --pic-veneer                Always generate PIC interworking veneers\n"));
   fprintf (file, _("\
-   --stub-group-size=N   Maximum size of a group of input sections that can be\n\
-                           handled by one stub section.  A negative value\n\
-                           locates all stubs after their branches (with a\n\
-                           group size of -N), while a positive value allows\n\
-                           two groups of input sections, one before, and one\n\
-                           after each stub section.  Values of +/-1 indicate\n\
-                           the linker should choose suitable defaults.\n"
-		   ));
+  --stub-group-size=N         Maximum size of a group of input sections that\n\
+                                can be handled by one stub section.  A negative\n\
+                                value locates all stubs after their branches\n\
+                                (with a group size of -N), while a positive\n\
+                                value allows two groups of input sections, one\n\
+                                before, and one after each stub section.\n\
+                                Values of +/-1 indicate the linker should\n\
+                                choose suitable defaults.\n"));
   fprintf (file, _("  --fix-cortex-a53-835769      Fix erratum 835769\n"));
   fprintf (file, _("  --fix-cortex-a53-843419      Fix erratum 843419\n"));
-  fprintf (file, _("  --no-apply-dynamic-relocs	   Do not apply link-time values for dynamic relocations\n"));
+  fprintf (file, _("  --no-apply-dynamic-relocs    Do not apply link-time values for dynamic relocations\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -433,7 +433,7 @@ PARSE_AND_LIST_ARGS_CASES='
 
 	group_size = bfd_scan_vma (optarg, &end, 0);
 	if (*end)
-	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
+	  einfo (_("%F%P: invalid number `%s'\''\n"), optarg);
       }
       break;
 '

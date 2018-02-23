@@ -427,7 +427,7 @@ gld${EMULATION_NAME}_after_open (void)
 	    {
 	      /* We've found the needed dynamic object.  */
 	      if (! bfd_link_add_symbols (abfd, &link_info))
-		einfo (_("%F%pB: error adding symbols: %E\n"), abfd);
+		einfo (_("%F%P: %pB: error adding symbols: %E\n"), abfd);
 	    }
 	  else
 	    {
@@ -574,7 +574,7 @@ gld${EMULATION_NAME}_try_needed (const char *dir, const char *name)
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
-    einfo (_("%F%pB: error adding symbols: %E\n"), abfd);
+    einfo (_("%F%P: %pB: error adding symbols: %E\n"), abfd);
 
   return TRUE;
 }
@@ -717,10 +717,10 @@ gld${EMULATION_NAME}_before_allocation (void)
       hdyn = bfd_link_hash_lookup (link_info.hash, "__DYNAMIC", TRUE, FALSE,
 				   FALSE);
       if (hdyn == NULL)
-	einfo (_("%P%F: bfd_link_hash_lookup: %E\n"));
+	einfo (_("%F%P: bfd_link_hash_lookup: %E\n"));
       if (! bfd_sunos_record_link_assignment (link_info.output_bfd, &link_info,
 					      "__DYNAMIC"))
-	einfo (_("%P%F: failed to record assignment to __DYNAMIC: %E\n"));
+	einfo (_("%F%P: failed to record assignment to __DYNAMIC: %E\n"));
     }
 
   /* If we are going to make any variable assignments, we need to let
@@ -732,7 +732,7 @@ gld${EMULATION_NAME}_before_allocation (void)
      required by dynamic linking.  */
   if (! bfd_sunos_size_dynamic_sections (link_info.output_bfd, &link_info,
 					 &sdyn, &sneed, &srules))
-    einfo (_("%P%F: failed to set dynamic section sizes: %E\n"));
+    einfo (_("%F%P: failed to set dynamic section sizes: %E\n"));
 
   if (sneed != NULL)
     {
@@ -853,7 +853,7 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 	  if (! bfd_sunos_record_link_assignment (link_info.output_bfd,
 						  &link_info,
 						  exp->assign.dst))
-	    einfo (_("%P%F: failed to record assignment to %s: %E\n"),
+	    einfo (_("%F%P: failed to record assignment to %s: %E\n"),
 		   exp->assign.dst);
 	}
       gld${EMULATION_NAME}_find_exp_assignment (exp->assign.src);

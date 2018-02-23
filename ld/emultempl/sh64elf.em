@@ -66,7 +66,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
 	     also look through incoming relocs and kill the ones marking
 	     relaxation areas, but that wouldn't be TRT.  */
 	  einfo
-	    (_("%P: Sorry, turning off relaxing: .cranges section in input.\n"));
+	    (_("%P: sorry, turning off relaxing: .cranges section in input\n"));
 	  einfo (_(" A .cranges section is present in:\n"));
 
 	  {
@@ -104,7 +104,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
 		  if (elf_section_data (isec)->this_hdr.sh_flags
 		      & (SHF_SH5_ISA32 | SHF_SH5_ISA32_MIXED))
 		    {
-		      einfo (_("%P: Sorry, turning off relaxing: SHmedia sections present.\n"));
+		      einfo (_("%P: sorry, turning off relaxing: SHmedia sections present\n"));
 		      einfo ("  %pI\n", f);
 		      DISABLE_RELAXATION;
 		      goto done_scanning_shmedia_sections;
@@ -127,7 +127,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
       bfd_vma iflags_isa = 0;
 
       if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
-	einfo (_("%FError: non-ELF output formats are not supported by this target's linker.\n"));
+	einfo (_("%F%P: error: non-ELF output formats are not supported by this target's linker\n"));
 
       sh64_sec_data = sh64_elf_section_data (osec)->sh64_info;
 
@@ -210,7 +210,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
 							     | SEC_DEBUGGING);
 			    if (cranges == NULL)
 			      einfo
-				(_("%P%E%F: Can't make .cranges section\n"));
+				(_("%F%P: can't make .cranges section: %E\n"));
 			  }
 
 			/* We don't need to look at more input sections,
@@ -496,7 +496,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
 
 			if (cr_addr_order == NULL)
 			  {
-			    einfo (_("%P%F: bfd_new_link_order failed\n"));
+			    einfo (_("%F%P: bfd_new_link_order failed\n"));
 			    return;
 			  }
 

@@ -488,15 +488,15 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
                                        executable image files\n"));
   fprintf (file, _("  --disable-long-section-names       Never use long COFF section names, even\n\
                                        in object files\n"));
-  fprintf (file, _("  --dynamicbase			 Image base address may be relocated using\n\
-				       address space layout randomization (ASLR)\n"));
-  fprintf (file, _("  --forceinteg		 Code integrity checks are enforced\n"));
-  fprintf (file, _("  --nxcompat		 Image is compatible with data execution prevention\n"));
-  fprintf (file, _("  --no-isolation		 Image understands isolation but do not isolate the image\n"));
-  fprintf (file, _("  --no-seh			 Image does not use SEH. No SE handler may\n\
-				       be called in this image\n"));
-  fprintf (file, _("  --no-bind			 Do not bind this image\n"));
-  fprintf (file, _("  --wdmdriver		 Driver uses the WDM model\n"));
+  fprintf (file, _("  --dynamicbase                      Image base address may be relocated using\n\
+                                       address space layout randomization (ASLR)\n"));
+  fprintf (file, _("  --forceinteg               Code integrity checks are enforced\n"));
+  fprintf (file, _("  --nxcompat                 Image is compatible with data execution prevention\n"));
+  fprintf (file, _("  --no-isolation             Image understands isolation but do not isolate the image\n"));
+  fprintf (file, _("  --no-seh                   Image does not use SEH. No SE handler may\n\
+                                       be called in this image\n"));
+  fprintf (file, _("  --no-bind                  Do not bind this image\n"));
+  fprintf (file, _("  --wdmdriver                Driver uses the WDM model\n"));
   fprintf (file, _("  --tsaware                  Image is Terminal Server aware\n"));
   fprintf (file, _("  --build-id[=STYLE]         Generate build ID\n"));
 }
@@ -651,7 +651,7 @@ set_pe_subsystem (void)
 
       if (v[i].name == NULL)
 	{
-	  einfo (_("%P%F: invalid subsystem type %s\n"), optarg);
+	  einfo (_("%F%P: invalid subsystem type %s\n"), optarg);
 	  return;
 	}
 
@@ -672,7 +672,7 @@ set_pe_value (char *name)
   set_pe_name (name,  strtoul (optarg, &end, 0));
 
   if (end == optarg)
-    einfo (_("%P%F: invalid hex number for PE parameter '%s'\n"), optarg);
+    einfo (_("%F%P: invalid hex number for PE parameter '%s'\n"), optarg);
 
   optarg = end;
 }
@@ -689,7 +689,7 @@ set_pe_stack_heap (char *resname, char *comname)
       set_pe_value (comname);
     }
   else if (*optarg)
-    einfo (_("%P%F: strange hex info for PE parameter '%s'\n"), optarg);
+    einfo (_("%F%P: strange hex info for PE parameter '%s'\n"), optarg);
 }
 
 #define DEFAULT_BUILD_ID_STYLE	"md5"
@@ -1001,7 +1001,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
 
   if (pe.FileAlignment > pe.SectionAlignment)
     {
-      einfo (_("%P: warning, file alignment > section alignment.\n"));
+      einfo (_("%P: warning, file alignment > section alignment\n"));
     }
 }
 
@@ -1066,7 +1066,7 @@ change_undef (struct bfd_link_hash_entry * undef,
 
   if (pe_enable_stdcall_fixup == -1)
     {
-      einfo (_("Warning: resolving %s by linking to %s\n"),
+      einfo (_("%P: warning: resolving %s by linking to %s\n"),
 	     undef->root.string, sym->root.string);
 
       if (! gave_warning_message)
@@ -1140,7 +1140,7 @@ make_import_fixup (arelent *rel, asection *s, char *name)
 	    (unsigned long) rel->address, (long) rel->addend);
 
   if (! bfd_get_section_contents (s->owner, s, addend, rel->address, sizeof (addend)))
-    einfo (_("%C: Cannot get section contents - auto-import exception\n"),
+    einfo (_("%P: %C: cannot get section contents - auto-import exception\n"),
 	   s->owner, s, rel->address);
 
   pe_create_import_fixup (rel, s, bfd_get_32 (s->owner, addend), name);
@@ -1212,15 +1212,15 @@ pe_find_data_imports (void)
 		      warned = TRUE;
 		      einfo (_("%P: warning: auto-importing has been activated "
 			       "without --enable-auto-import specified on the "
-			       "command line.\nThis should work unless it "
+			       "command line; this should work unless it "
 			       "involves constant data structures referencing "
-			       "symbols from auto-imported DLLs.\n"));
+			       "symbols from auto-imported DLLs\n"));
 		    }
 		}
 
 	      if (!bfd_generic_link_read_symbols (b))
 		{
-		  einfo (_("%pB%F: could not read symbols: %E\n"), b);
+		  einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
 		  return;
 		}
 
@@ -1335,7 +1335,7 @@ write_build_id (bfd *abfd)
   if (!link_order)
     {
       einfo (_("%P: warning: .buildid section discarded,"
-	       " --build-id ignored.\n"));
+	       " --build-id ignored\n"));
       return TRUE;
     }
 
@@ -1407,7 +1407,7 @@ setup_build_id (bfd *ibfd)
 
   if (!validate_build_id_style (emit_build_id))
     {
-      einfo (_("%P: warning: unrecognized --build-id style ignored.\n"));
+      einfo (_("%P: warning: unrecognized --build-id style ignored\n"));
       return FALSE;
     }
 
@@ -1431,8 +1431,8 @@ setup_build_id (bfd *ibfd)
       return TRUE;
     }
 
-  einfo (_("%P: warning: Cannot create .buildid section,"
-	   " --build-id ignored.\n"));
+  einfo (_("%P: warning: cannot create .buildid section,"
+	   " --build-id ignored\n"));
   return FALSE;
 }
 
@@ -1484,7 +1484,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
   if (coff_data (link_info.output_bfd) == NULL
       || coff_data (link_info.output_bfd)->pe == 0)
-    einfo (_("%F%P: cannot perform PE operations on non PE output file '%pB'.\n"),
+    einfo (_("%F%P: cannot perform PE operations on non PE output file '%pB'\n"),
 	   link_info.output_bfd);
 
   pe_data (link_info.output_bfd)->pe_opthdr = pe;
@@ -1556,8 +1556,8 @@ gld_${EMULATION_NAME}_after_open (void)
 	 These will only be created if the output format is an arm format,
 	 hence we do not support linking and changing output formats at the
 	 same time.  Use a link followed by objcopy to change output formats.  */
-      einfo (_("%F%X%P: error: cannot change output format "
-	       "whilst linking ARM binaries\n"));
+      einfo (_("%F%P: error: cannot change output format "
+	       "whilst linking %s binaries\n"), "ARM");
       return;
     }
   {
@@ -1616,7 +1616,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
 		    if (!bfd_generic_link_read_symbols (is->the_bfd))
 		      {
-			einfo (_("%pB%F: could not read symbols: %E\n"),
+			einfo (_("%F%P: %pB: could not read symbols: %E\n"),
 			       is->the_bfd);
 			return;
 		      }
@@ -1823,7 +1823,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
 		if (!bfd_generic_link_read_symbols (is->the_bfd))
 		  {
-		    einfo (_("%pB%F: could not read symbols: %E\n"),
+		    einfo (_("%F%P: %pB: could not read symbols: %E\n"),
 			   is->the_bfd);
 		    return;
 		  }
@@ -1866,7 +1866,7 @@ gld_${EMULATION_NAME}_before_allocation (void)
 	if (!ppc_process_before_allocation (is->the_bfd, &link_info))
 	  {
 	    /* xgettext:c-format */
-	    einfo (_("Errors encountered processing file %s\n"), is->filename);
+	    einfo (_("%P: errors encountered processing file %s\n"), is->filename);
 	  }
       }
   }
@@ -1889,7 +1889,7 @@ gld_${EMULATION_NAME}_before_allocation (void)
 	    (is->the_bfd, & link_info, support_old_code))
 	  {
 	    /* xgettext:c-format */
-	    einfo (_("Errors encountered processing file %s for interworking\n"),
+	    einfo (_("%P: errors encountered processing file %s for interworking\n"),
 		   is->filename);
 	  }
       }
@@ -1951,7 +1951,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 
 	      h = bfd_link_hash_lookup (link_info.hash, buf, TRUE, TRUE, TRUE);
 	      if (h == (struct bfd_link_hash_entry *) NULL)
-		einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
+		einfo (_("%F%P: bfd_link_hash_lookup failed: %E\n"));
 	      if (h->type == bfd_link_hash_new)
 		{
 		  h->type = bfd_link_hash_undefined;

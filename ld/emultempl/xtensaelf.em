@@ -384,7 +384,7 @@ check_xtensa_info (bfd *abfd, asection *info_sec)
 
   data = xmalloc (info_sec->size);
   if (! bfd_get_section_contents (abfd, info_sec, data, 0, info_sec->size))
-    einfo (_("%F%P:%pB: cannot read contents of section %pA\n"), abfd, info_sec);
+    einfo (_("%F%P: %pB: cannot read contents of section %pA\n"), abfd, info_sec);
 
   if (info_sec->size > 24
       && info_sec->size >= 24 + bfd_get_32 (abfd, data + 4)
@@ -395,11 +395,11 @@ check_xtensa_info (bfd *abfd, asection *info_sec)
 					  &mismatch, &errmsg))
     {
       if (mismatch)
-	einfo (_("%P:%pB: warning: incompatible Xtensa configuration (%s)\n"),
+	einfo (_("%P: %pB: warning: incompatible Xtensa configuration (%s)\n"),
 	       abfd, errmsg);
     }
   else
-    einfo (_("%P:%pB: warning: cannot parse .xtensa.info section\n"), abfd);
+    einfo (_("%P: %pB: warning: cannot parse .xtensa.info section\n"), abfd);
 
   free (data);
 }

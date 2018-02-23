@@ -2,7 +2,7 @@
 #as: -EB -n32 -march=from-abi
 #ld: -EB -Ttext 0x1c000000 -e 0x1c000000
 #source: ../../../gas/testsuite/gas/mips/unaligned-jump-micromips-2.s
-#error: \A[^\n]*: In function `foo':\n
+#error: \A[^\n]*: in function `foo':\n
 #error:   \(\.text\+0x1012\): unsupported jump between ISA modes; consider recompiling with interlinking enabled\n
 #error:   \(\.text\+0x1018\): unsupported jump between ISA modes; consider recompiling with interlinking enabled\n
 #error:   \(\.text\+0x101e\): cannot convert a jump to JALX for a non-word-aligned address\n

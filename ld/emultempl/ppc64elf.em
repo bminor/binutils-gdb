@@ -751,34 +751,34 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
                                 choose suitable defaults.\n"
 		   ));
   fprintf (file, _("\
-  --plt-static-chain          PLT call stubs should load r11.'${DEFAULT_PLT_STATIC_CHAIN- (default)}'\n"
+  --plt-static-chain          PLT call stubs should load r11'${DEFAULT_PLT_STATIC_CHAIN- (default)}'\n"
 		   ));
   fprintf (file, _("\
-  --no-plt-static-chain       PLT call stubs should not load r11.'${DEFAULT_PLT_STATIC_CHAIN+ (default)}'\n"
+  --no-plt-static-chain       PLT call stubs should not load r11'${DEFAULT_PLT_STATIC_CHAIN+ (default)}'\n"
 		   ));
   fprintf (file, _("\
-  --plt-thread-safe           PLT call stubs with load-load barrier.\n"
+  --plt-thread-safe           PLT call stubs with load-load barrier\n"
 		   ));
   fprintf (file, _("\
-  --no-plt-thread-safe        PLT call stubs without barrier.\n"
+  --no-plt-thread-safe        PLT call stubs without barrier\n"
 		   ));
   fprintf (file, _("\
-  --plt-align [=<align>]      Align PLT call stubs to fit cache lines.\n"
+  --plt-align [=<align>]      Align PLT call stubs to fit cache lines\n"
 		   ));
   fprintf (file, _("\
-  --no-plt-align              Dont'\''t align individual PLT call stubs.\n"
+  --no-plt-align              Dont'\''t align individual PLT call stubs\n"
 		   ));
   fprintf (file, _("\
-  --plt-localentry            Optimize calls to ELFv2 localentry:0 functions.\n"
+  --plt-localentry            Optimize calls to ELFv2 localentry:0 functions\n"
 		   ));
   fprintf (file, _("\
-  --no-plt-localentry         Don'\''t optimize ELFv2 calls.\n"
+  --no-plt-localentry         Don'\''t optimize ELFv2 calls\n"
 		   ));
   fprintf (file, _("\
-  --emit-stub-syms            Label linker stubs with a symbol.\n"
+  --emit-stub-syms            Label linker stubs with a symbol\n"
 		   ));
   fprintf (file, _("\
-  --no-emit-stub-syms         Don'\''t label linker stubs with a symbol.\n"
+  --no-emit-stub-syms         Don'\''t label linker stubs with a symbol\n"
 		   ));
   fprintf (file, _("\
   --dotsyms                   For every version pattern \"foo\" in a version\n\
@@ -787,7 +787,7 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
                                 descriptor symbols.  Defaults to on.\n"
 		   ));
   fprintf (file, _("\
-  --no-dotsyms                Don'\''t do anything special in version scripts.\n"
+  --no-dotsyms                Don'\''t do anything special in version scripts\n"
 		   ));
   fprintf (file, _("\
   --save-restore-funcs        Provide register save and restore routines used\n\
@@ -795,32 +795,32 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
                                 final link, off for ld -r.\n"
 		   ));
   fprintf (file, _("\
-  --no-save-restore-funcs     Don'\''t provide these routines.\n"
+  --no-save-restore-funcs     Don'\''t provide these routines\n"
 		   ));
   fprintf (file, _("\
-  --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n"
+  --no-tls-optimize           Don'\''t try to optimize TLS accesses\n"
 		   ));
   fprintf (file, _("\
-  --tls-get-addr-optimize     Force use of special __tls_get_addr call.\n"
+  --tls-get-addr-optimize     Force use of special __tls_get_addr call\n"
 		   ));
   fprintf (file, _("\
-  --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n"
+  --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call\n"
 		   ));
   fprintf (file, _("\
-  --no-opd-optimize           Don'\''t optimize the OPD section.\n"
+  --no-opd-optimize           Don'\''t optimize the OPD section\n"
 		   ));
   fprintf (file, _("\
-  --no-toc-optimize           Don'\''t optimize the TOC section.\n"
+  --no-toc-optimize           Don'\''t optimize the TOC section\n"
 		   ));
   fprintf (file, _("\
-  --no-multi-toc              Disallow automatic multiple toc sections.\n"
+  --no-multi-toc              Disallow automatic multiple toc sections\n"
 		   ));
   fprintf (file, _("\
-  --no-toc-sort               Don'\''t sort TOC and GOT sections.\n"
+  --no-toc-sort               Don'\''t sort TOC and GOT sections\n"
 		   ));
   fprintf (file, _("\
   --non-overlapping-opd       Canonicalize .opd, so that there are no\n\
-                                overlapping .opd entries.\n"
+                                overlapping .opd entries\n"
 		   ));
 '
 
@@ -830,7 +830,7 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 	const char *end;
 	params.group_size = bfd_scan_vma (optarg, &end, 0);
 	if (*end)
-	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
+	  einfo (_("%F%P: invalid number `%s'\''\n"), optarg);
       }
       break;
 
@@ -856,7 +856,7 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 	  char *end;
 	  long val = strtol (optarg, &end, 0);
 	  if (*end || (unsigned long) val + 8 > 16)
-	    einfo (_("%P%F: invalid --plt-align `%s'\''\n"), optarg);
+	    einfo (_("%F%P: invalid --plt-align `%s'\''\n"), optarg);
 	  params.plt_stub_align = val;
 	}
       else

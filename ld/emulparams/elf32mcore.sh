@@ -40,8 +40,7 @@ PARSE_AND_LIST_LONGOPTS='
 '
 
 PARSE_AND_LIST_OPTIONS='
-  fprintf (file, _("  --base_file <basefile>\n"));
-  fprintf (file, _("\t\t\tGenerate a base file for relocatable DLLs\n"));
+  fprintf (file, _("  --base_file <basefile>      Generate a base file for relocatable DLLs\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='

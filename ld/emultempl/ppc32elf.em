@@ -280,48 +280,48 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
 
 PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("\
-  --emit-stub-syms            Label linker stubs with a symbol.\n"
+  --emit-stub-syms            Label linker stubs with a symbol\n"
 		   ));
   fprintf (file, _("\
-  --no-emit-stub-syms         Don'\''t label linker stubs with a symbol.\n"
+  --no-emit-stub-syms         Don'\''t label linker stubs with a symbol\n"
 		   ));
   fprintf (file, _("\
-  --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n"
+  --no-tls-optimize           Don'\''t try to optimize TLS accesses\n"
 		   ));
   fprintf (file, _("\
-  --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n"
+  --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call\n"
 		   ));'
 if test -z "$VXWORKS_BASE_EM_FILE" ; then
   PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'\
   fprintf (file, _("\
-  --secure-plt                Use new-style PLT if possible.\n"
+  --secure-plt                Use new-style PLT if possible\n"
 		   ));
   fprintf (file, _("\
-  --bss-plt                   Force old-style BSS PLT.\n"
+  --bss-plt                   Force old-style BSS PLT\n"
 		   ));
   fprintf (file, _("\
-  --plt-align                 Align PLT call stubs to fit cache lines.\n"
+  --plt-align                 Align PLT call stubs to fit cache lines\n"
 		   ));
   fprintf (file, _("\
-  --no-plt-align              Dont'\''t align individual PLT call stubs.\n"
+  --no-plt-align              Dont'\''t align individual PLT call stubs\n"
 		   ));
   fprintf (file, _("\
-  --sdata-got                 Force GOT location just before .sdata.\n"
+  --sdata-got                 Force GOT location just before .sdata\n"
 		   ));'
 fi
 PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'\
   fprintf (file, _("\
   --ppc476-workaround [=pagesize]\n\
-                              Avoid a cache bug on ppc476.\n"
+                              Avoid a cache bug on ppc476\n"
 		   ));
   fprintf (file, _("\
-  --no-ppc476-workaround      Disable workaround.\n"
+  --no-ppc476-workaround      Disable workaround\n"
 		   ));
   fprintf (file, _("\
-  --no-pic-fixup              Don'\''t edit non-pic to pic.\n"
+  --no-pic-fixup              Don'\''t edit non-pic to pic\n"
 		   ));
   fprintf (file, _("\
-  --vle-reloc-fixup           Correct old object file 16A/16D relocation.\n"
+  --vle-reloc-fixup           Correct old object file 16A/16D relocation\n"
 		   ));
 '
 
@@ -356,7 +356,7 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 	  char *end;
 	  unsigned long val = strtoul (optarg, &end, 0);
 	  if (*end || val > 5)
-	    einfo (_("%P%F: invalid --plt-align `%s'\''\n"), optarg);
+	    einfo (_("%F%P: invalid --plt-align `%s'\''\n"), optarg);
 	  params.plt_stub_align = val;
 	}
       else
@@ -385,7 +385,7 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 	  if (*end
 	      || (params.pagesize < 4096 && params.pagesize != 0)
 	      || params.pagesize != (params.pagesize & -params.pagesize))
-	    einfo (_("%P%F: invalid pagesize `%s'\''\n"), optarg);
+	    einfo (_("%F%P: invalid pagesize `%s'\''\n"), optarg);
 	}
       break;
 

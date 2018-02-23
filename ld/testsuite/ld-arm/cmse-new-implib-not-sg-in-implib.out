@@ -1,2 +1,2 @@
 .*: --in-implib only supported for Secure Gateway import libraries
-.*: cannot size stub section: invalid operation
+.*: can not size stub section: invalid operation

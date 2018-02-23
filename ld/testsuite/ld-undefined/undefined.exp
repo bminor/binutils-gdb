@@ -70,7 +70,7 @@ if { ![is_remote host] && [which $CC] == 0 } {
     # "undefined function" and "undefined line" tests fail.
     setup_xfail xtensa*-*-linux*
 
-    set mf "tmpdir/undefined.o* In function `function':"
+    set mf "tmpdir/undefined.o* in function `function':"
     checkund $mf $testfn
 
     if ![is_elf_format] {

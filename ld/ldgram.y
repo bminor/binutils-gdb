@@ -206,7 +206,7 @@ mri_script_command:
 		CHIP  exp
 	|	CHIP  exp ',' exp
 	|	NAME	{
-			einfo(_("%P%F: unrecognised keyword in MRI style script '%s'\n"),$1);
+			einfo(_("%F%P: unrecognised keyword in MRI style script '%s'\n"),$1);
 			}
 	|	LIST	{
 			config.map_filename = "-";
@@ -1477,7 +1477,7 @@ yyerror(arg)
     einfo (_("%P:%s: file format not recognized; treating as linker script\n"),
 	   ldlex_filename ());
   if (error_index > 0 && error_index < ERROR_NAME_MAX)
-    einfo ("%P%F:%pS: %s in %s\n", NULL, arg, error_names[error_index - 1]);
+    einfo ("%F%P:%pS: %s in %s\n", NULL, arg, error_names[error_index - 1]);
   else
-    einfo ("%P%F:%pS: %s\n", NULL, arg);
+    einfo ("%F%P:%pS: %s\n", NULL, arg);
 }

@@ -1231,7 +1231,7 @@ output_section_statement_table_init (void)
 			      output_section_statement_newfunc,
 			      sizeof (struct out_section_hash_entry),
 			      61))
-    einfo (_("%P%F: can not create hash table: %E\n"));
+    einfo (_("%F%P: can not create hash table: %E\n"));
 }
 
 static void
@@ -1435,7 +1435,7 @@ lang_output_section_statement_lookup (const char *name,
   if (entry == NULL)
     {
       if (create)
-	einfo (_("%P%F: failed creating section `%s': %E\n"), name);
+	einfo (_("%F%P: failed creating section `%s': %E\n"), name);
       return NULL;
     }
 
@@ -1474,7 +1474,7 @@ lang_output_section_statement_lookup (const char *name,
 					     name));
       if (entry == NULL)
 	{
-	  einfo (_("%P%F: failed creating section `%s': %E\n"), name);
+	  einfo (_("%F%P: failed creating section `%s': %E\n"), name);
 	  return NULL;
 	}
       entry->root = last_ent->root;
@@ -2164,7 +2164,7 @@ static void
 init_os (lang_output_section_statement_type *s, flagword flags)
 {
   if (strcmp (s->name, DISCARD_SECTION_NAME) == 0)
-    einfo (_("%P%F: Illegal use of `%s' section\n"), DISCARD_SECTION_NAME);
+    einfo (_("%F%P: illegal use of `%s' section\n"), DISCARD_SECTION_NAME);
 
   if (s->constraint != SPECIAL)
     s->bfd_section = bfd_get_section_by_name (link_info.output_bfd, s->name);
@@ -2173,7 +2173,7 @@ init_os (lang_output_section_statement_type *s, flagword flags)
 							 s->name, flags);
   if (s->bfd_section == NULL)
     {
-      einfo (_("%P%F: output format %s cannot represent section"
+      einfo (_("%F%P: output format %s cannot represent section"
 	       " called %s: %E\n"),
 	     link_info.output_bfd->xvec->name, s->name);
     }
@@ -2770,15 +2770,15 @@ load_symbols (lang_input_statement_type *entry,
 	{
 	  char **p;
 
-	  einfo (_("%pB: file not recognized: %E\n"), entry->the_bfd);
-	  einfo (_("%pB: matching formats:"), entry->the_bfd);
+	  einfo (_("%P: %pB: file not recognized: %E;"
+		   " matching formats:"), entry->the_bfd);
 	  for (p = matching; *p != NULL; p++)
 	    einfo (" %s", *p);
 	  einfo ("%F\n");
 	}
       else if (err != bfd_error_file_not_recognized
 	       || place == NULL)
-	einfo (_("%F%pB: file not recognized: %E\n"), entry->the_bfd);
+	einfo (_("%F%P: %pB: file not recognized: %E\n"), entry->the_bfd);
 
       bfd_close (entry->the_bfd);
       entry->the_bfd = NULL;
@@ -2851,7 +2851,7 @@ load_symbols (lang_input_statement_type *entry,
 
 	      if (!bfd_check_format (member, bfd_object))
 		{
-		  einfo (_("%F%pB: member %pB in archive is not an object\n"),
+		  einfo (_("%F%P: %pB: member %pB in archive is not an object\n"),
 			 entry->the_bfd, member);
 		  loaded = FALSE;
 		}
@@ -2866,7 +2866,7 @@ load_symbols (lang_input_statement_type *entry,
 		 substitute BFD for us.  */
 	      if (!bfd_link_add_symbols (subsbfd, &link_info))
 		{
-		  einfo (_("%F%pB: error adding symbols: %E\n"), member);
+		  einfo (_("%F%P: %pB: error adding symbols: %E\n"), member);
 		  loaded = FALSE;
 		}
 	    }
@@ -2880,7 +2880,7 @@ load_symbols (lang_input_statement_type *entry,
   if (bfd_link_add_symbols (entry->the_bfd, &link_info))
     entry->flags.loaded = TRUE;
   else
-    einfo (_("%F%pB: error adding symbols: %E\n"), entry->the_bfd);
+    einfo (_("%F%P: %pB: error adding symbols: %E\n"), entry->the_bfd);
 
   return entry->flags.loaded;
 }
@@ -3168,23 +3168,23 @@ open_output (const char *name)
   if (link_info.output_bfd == NULL)
     {
       if (bfd_get_error () == bfd_error_invalid_target)
-	einfo (_("%P%F: target %s not found\n"), output_target);
+	einfo (_("%F%P: target %s not found\n"), output_target);
 
-      einfo (_("%P%F: cannot open output file %s: %E\n"), name);
+      einfo (_("%F%P: cannot open output file %s: %E\n"), name);
     }
 
   delete_output_file_on_failure = TRUE;
 
   if (!bfd_set_format (link_info.output_bfd, bfd_object))
-    einfo (_("%P%F:%s: can not make object file: %E\n"), name);
+    einfo (_("%F%P: %s: can not make object file: %E\n"), name);
   if (!bfd_set_arch_mach (link_info.output_bfd,
 			   ldfile_output_architecture,
 			   ldfile_output_machine))
-    einfo (_("%P%F:%s: can not set architecture: %E\n"), name);
+    einfo (_("%F%P: %s: can not set architecture: %E\n"), name);
 
   link_info.hash = bfd_link_hash_table_create (link_info.output_bfd);
   if (link_info.hash == NULL)
-    einfo (_("%P%F: can not create hash table: %E\n"));
+    einfo (_("%F%P: can not create hash table: %E\n"));
 
   bfd_set_gp_size (link_info.output_bfd, g_switch_value);
 }
@@ -3408,7 +3408,7 @@ insert_undefined (const char *name)
 
   h = bfd_link_hash_lookup (link_info.hash, name, TRUE, FALSE, TRUE);
   if (h == NULL)
-    einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
+    einfo (_("%F%P: bfd_link_hash_lookup failed: %E\n"));
   if (h->type == bfd_link_hash_new)
     {
       h->type = bfd_link_hash_undefined;
@@ -3477,7 +3477,7 @@ ldlang_check_require_defined_symbols (void)
       if (h == NULL
 	  || (h->type != bfd_link_hash_defined
 	      && h->type != bfd_link_hash_defweak))
-	einfo(_("%P%X: required symbol `%s' not defined\n"), ptr->name);
+	einfo(_("%X%P: required symbol `%s' not defined\n"), ptr->name);
     }
 }
 
@@ -5049,7 +5049,7 @@ lang_size_sections_1
 		      dot += expld.result.section->vma;
 		  }
 		else if (expld.phase != lang_mark_phase_enum)
-		  einfo (_("%F%pS: non constant or forward reference"
+		  einfo (_("%F%P:%pS: non constant or forward reference"
 			   " address expression for section %s\n"),
 			 os->addr_tree, os->name);
 	      }
@@ -5074,7 +5074,7 @@ lang_size_sections_1
 		    || os->children.head->header.next != NULL
 		    || (os->children.head->header.type
 			!= lang_input_section_enum))
-		  einfo (_("%P%X: Internal error on COFF shared library"
+		  einfo (_("%X%P: internal error on COFF shared library"
 			   " section %s\n"), os->name);
 
 		input = os->children.head->input_section.section;
@@ -5133,7 +5133,7 @@ lang_size_sections_1
 			   overridden by the using the --no-check-sections
 			   switch.  */
 			if (command_line.check_section_addresses)
-			  einfo (_("%P%F: error: no memory region specified"
+			  einfo (_("%F%P: error: no memory region specified"
 				   " for loadable section `%s'\n"),
 				 bfd_get_section_name (link_info.output_bfd,
 						       os->bfd_section));
@@ -5434,7 +5434,7 @@ lang_size_sections_1
 		bfd_boolean again;
 
 		if (!bfd_relax_section (i->owner, i, &link_info, &again))
-		  einfo (_("%P%F: can't relax section: %E\n"));
+		  einfo (_("%F%P: can't relax section: %E\n"));
 		if (again)
 		  *relax = TRUE;
 	      }
@@ -6183,7 +6183,7 @@ lang_end (void)
      --gc-sections.  */
   if (link_info.gc_sections && bfd_link_relocatable (&link_info)
       && !(entry_from_cmdline || undef_from_cmdline))
-    einfo (_("%P%F: gc-sections requires either an entry or "
+    einfo (_("%F%P: gc-sections requires either an entry or "
 	     "an undefined symbol\n"));
 
   if (entry_symbol.name == NULL)
@@ -6208,7 +6208,7 @@ lang_end (void)
 				    h->u.def.section->output_section)
 	     + h->u.def.section->output_offset);
       if (!bfd_set_start_address (link_info.output_bfd, val))
-	einfo (_("%P%F:%s: can't set start address\n"), entry_symbol.name);
+	einfo (_("%F%P: %s: can't set start address\n"), entry_symbol.name);
     }
   else
     {
@@ -6221,7 +6221,7 @@ lang_end (void)
       if (*send == '\0')
 	{
 	  if (!bfd_set_start_address (link_info.output_bfd, val))
-	    einfo (_("%P%F: can't set start address\n"));
+	    einfo (_("%F%P: can't set start address\n"));
 	}
       else
 	{
@@ -6240,7 +6240,7 @@ lang_end (void)
 	      if (!(bfd_set_start_address
 		    (link_info.output_bfd,
 		     bfd_get_section_vma (link_info.output_bfd, ts))))
-		einfo (_("%P%F: can't set start address\n"));
+		einfo (_("%F%P: can't set start address\n"));
 	    }
 	  else
 	    {
@@ -6299,7 +6299,7 @@ lang_check (void)
 		  != bfd_get_flavour (link_info.output_bfd)))
 	  && (bfd_get_file_flags (input_bfd) & HAS_RELOC) != 0)
 	{
-	  einfo (_("%P%F: Relocatable linking with relocations from"
+	  einfo (_("%F%P: relocatable linking with relocations from"
 		   " format %s (%pB) to format %s (%pB) is not supported\n"),
 		 bfd_get_target (input_bfd), input_bfd,
 		 bfd_get_target (link_info.output_bfd), link_info.output_bfd);
@@ -6309,7 +6309,7 @@ lang_check (void)
       if (compatible == NULL)
 	{
 	  if (command_line.warn_mismatch)
-	    einfo (_("%P%X: %s architecture of input file `%pB'"
+	    einfo (_("%X%P: %s architecture of input file `%pB'"
 		     " is incompatible with %s output\n"),
 		   bfd_printable_name (input_bfd), input_bfd,
 		   bfd_printable_name (link_info.output_bfd));
@@ -6331,7 +6331,7 @@ lang_check (void)
 	  if (!bfd_merge_private_bfd_data (input_bfd, &link_info))
 	    {
 	      if (command_line.warn_mismatch)
-		einfo (_("%P%X: failed to merge target specific data"
+		einfo (_("%X%P: failed to merge target specific data"
 			 " of file %pB\n"), input_bfd);
 	    }
 	  if (!command_line.warn_mismatch)
@@ -6402,7 +6402,7 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
 
   section = h->u.c.p->section;
   if (!bfd_define_common_symbol (link_info.output_bfd, &link_info, h))
-    einfo (_("%P%F: Could not define common symbol `%pT': %E\n"),
+    einfo (_("%F%P: could not define common symbol `%pT': %E\n"),
 	   h->root.string);
 
   if (config.map_file != NULL)
@@ -6489,7 +6489,7 @@ ldlang_place_orphan (asection *s)
       int constraint = 0;
 
       if (config.orphan_handling == orphan_handling_error)
-	einfo (_("%X%P: error: unplaced orphan section `%pA' from `%pB'.\n"),
+	einfo (_("%X%P: error: unplaced orphan section `%pA' from `%pB'\n"),
 	       s, s->owner);
 
       if (config.unique_orphan_sections || unique_section_p (s, NULL))
@@ -6508,7 +6508,7 @@ ldlang_place_orphan (asection *s)
 
       if (config.orphan_handling == orphan_handling_warn)
 	einfo (_("%P: warning: orphan section `%pA' from `%pB' being "
-		 "placed in section `%s'.\n"),
+		 "placed in section `%s'\n"),
 	       s, s->owner, os->name);
     }
 }
@@ -6598,7 +6598,7 @@ lang_set_flags (lang_memory_region_type *ptr, const char *flags, int invert)
 	  break;
 
 	default:
-	  einfo (_("%P%F: invalid character %c (%d) in flags\n"),
+	  einfo (_("%F%P: invalid character %c (%d) in flags\n"),
 		 *flags, *flags);
 	  break;
 	}
@@ -7173,7 +7173,7 @@ lang_process (void)
   lang_place_undefineds ();
 
   if (!bfd_section_already_linked_table_init ())
-    einfo (_("%P%F: Failed to create hash table\n"));
+    einfo (_("%F%P: can not create hash table: %E\n"));
 
   /* Create a bfd for each input file.  */
   current_target = default_target;
@@ -7197,7 +7197,7 @@ lang_process (void)
       files = file_chain;
       inputfiles = input_file_chain;
       if (plugin_call_all_symbols_read ())
-	einfo (_("%P%F: %s: plugin reported error after all symbols read\n"),
+	einfo (_("%F%P: %s: plugin reported error after all symbols read\n"),
 	       plugin_error_plugin ());
       /* Open any newly added files, updating the file chains.  */
       open_input_bfds (*added.tail, OPEN_BFD_NORMAL);
@@ -7601,7 +7601,7 @@ lang_startup (const char *name)
 {
   if (first_file->filename != NULL)
     {
-      einfo (_("%P%F: multiple STARTUP files\n"));
+      einfo (_("%F%P: multiple STARTUP files\n"));
     }
   first_file->filename = name;
   first_file->local_sym_name = name;

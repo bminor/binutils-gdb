@@ -410,7 +410,7 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"));
   fprintf (file, _("  --support-old-code                 Support interworking with old code\n"));
   fprintf (file, _("  --[no-]leading-underscore          Set explicit symbol underscore prefix mode\n"));
-  fprintf (file, _("  --[no-]insert-timestamp            Use a real timestamp rather than zero. (default)\n"));
+  fprintf (file, _("  --[no-]insert-timestamp            Use a real timestamp rather than zero (default)\n"));
   fprintf (file, _("                                     This makes binaries non-deterministic\n"));
 #ifdef DLL_SUPPORT
   fprintf (file, _("  --add-stdcall-alias                Export symbols with and without @nn\n"));
@@ -421,16 +421,16 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --exclude-libs lib,lib,...         Exclude libraries from automatic export\n"));
   fprintf (file, _("  --exclude-modules-for-implib mod,mod,...\n"));
   fprintf (file, _("                                     Exclude objects, archive members from auto\n"));
-  fprintf (file, _("                                     export, place into import library instead.\n"));
+  fprintf (file, _("                                     export, place into import library instead\n"));
   fprintf (file, _("  --export-all-symbols               Automatically export all globals to DLL\n"));
   fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
   fprintf (file, _("  --output-def <file>                Generate a .DEF file for the built DLL\n"));
-  fprintf (file, _("  --warn-duplicate-exports           Warn about duplicate exports.\n"));
+  fprintf (file, _("  --warn-duplicate-exports           Warn about duplicate exports\n"));
   fprintf (file, _("  --compat-implib                    Create backward compatible import libs;\n\
-                                       create __imp_<SYMBOL> as well.\n"));
+                                       create __imp_<SYMBOL> as well\n"));
   fprintf (file, _("  --enable-auto-image-base           Automatically choose image base for DLLs\n\
                                        unless user specifies one\n"));
-  fprintf (file, _("  --disable-auto-image-base          Do not auto-choose image base. (default)\n"));
+  fprintf (file, _("  --disable-auto-image-base          Do not auto-choose image base (default)\n"));
   fprintf (file, _("  --dll-search-prefix=<string>       When linking dynamically to a dll without\n\
                                        an importlib, use <string><basename>.dll\n\
                                        in preference to lib<basename>.dll \n"));
@@ -439,9 +439,9 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --disable-auto-import              Do not auto-import DATA items from DLLs\n"));
   fprintf (file, _("  --enable-runtime-pseudo-reloc      Work around auto-import limitations by\n\
                                        adding pseudo-relocations resolved at\n\
-                                       runtime.\n"));
+                                       runtime\n"));
   fprintf (file, _("  --disable-runtime-pseudo-reloc     Do not add runtime pseudo-relocations for\n\
-                                       auto-imported DATA.\n"));
+                                       auto-imported DATA\n"));
   fprintf (file, _("  --enable-extra-pep-debug            Enable verbose debug output when building\n\
                                        or linking to DLLs (esp. auto-import)\n"));
   fprintf (file, _("  --enable-long-section-names        Use long COFF section names even in\n\
@@ -450,15 +450,15 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
                                        in object files\n"));
   fprintf (file, _("  --high-entropy-va                  Image is compatible with 64-bit address space\n\
                                        layout randomization (ASLR)\n"));
-  fprintf (file, _("  --dynamicbase			 Image base address may be relocated using\n\
-				       address space layout randomization (ASLR)\n"));
-  fprintf (file, _("  --forceinteg		 Code integrity checks are enforced\n"));
-  fprintf (file, _("  --nxcompat		 Image is compatible with data execution prevention\n"));
-  fprintf (file, _("  --no-isolation		 Image understands isolation but do not isolate the image\n"));
-  fprintf (file, _("  --no-seh			 Image does not use SEH. No SE handler may\n\
-				       be called in this image\n"));
-  fprintf (file, _("  --no-bind			 Do not bind this image\n"));
-  fprintf (file, _("  --wdmdriver		 Driver uses the WDM model\n"));
+  fprintf (file, _("  --dynamicbase                      Image base address may be relocated using\n\
+                                       address space layout randomization (ASLR)\n"));
+  fprintf (file, _("  --forceinteg               Code integrity checks are enforced\n"));
+  fprintf (file, _("  --nxcompat                 Image is compatible with data execution prevention\n"));
+  fprintf (file, _("  --no-isolation             Image understands isolation but do not isolate the image\n"));
+  fprintf (file, _("  --no-seh                   Image does not use SEH; no SE handler may\n\
+                                       be called in this image\n"));
+  fprintf (file, _("  --no-bind                  Do not bind this image\n"));
+  fprintf (file, _("  --wdmdriver                Driver uses the WDM model\n"));
   fprintf (file, _("  --tsaware                  Image is Terminal Server aware\n"));
   fprintf (file, _("  --build-id[=STYLE]         Generate build ID\n"));
 #endif
@@ -610,7 +610,7 @@ set_pep_subsystem (void)
 
       if (v[i].name == NULL)
 	{
-	  einfo (_("%P%F: invalid subsystem type %s\n"), optarg);
+	  einfo (_("%F%P: invalid subsystem type %s\n"), optarg);
 	  return;
 	}
 
@@ -631,7 +631,7 @@ set_pep_value (char *name)
   set_pep_name (name,  (bfd_vma) strtoull (optarg, &end, 0));
 
   if (end == optarg)
-    einfo (_("%P%F: invalid hex number for PE parameter '%s'\n"), optarg);
+    einfo (_("%F%P: invalid hex number for PE parameter '%s'\n"), optarg);
 
   optarg = end;
 }
@@ -648,7 +648,7 @@ set_pep_stack_heap (char *resname, char *comname)
       set_pep_value (comname);
     }
   else if (*optarg)
-    einfo (_("%P%F: strange hex info for PE parameter '%s'\n"), optarg);
+    einfo (_("%F%P: strange hex info for PE parameter '%s'\n"), optarg);
 }
 
 #define DEFAULT_BUILD_ID_STYLE	"md5"
@@ -945,7 +945,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
 
   if (pep.FileAlignment > pep.SectionAlignment)
     {
-      einfo (_("%P: warning, file alignment > section alignment.\n"));
+      einfo (_("%P: warning, file alignment > section alignment\n"));
     }
 }
 
@@ -1033,7 +1033,7 @@ pep_fixup_stdcalls (void)
 
 		if (pep_enable_stdcall_fixup == -1)
 		  {
-		    einfo (_("Warning: resolving %s by linking to %s\n"),
+		    einfo (_("warning: resolving %s by linking to %s\n"),
 			   undef->root.string, cname);
 		    if (! gave_warning_message)
 		      {
@@ -1060,7 +1060,7 @@ pep_fixup_stdcalls (void)
 
 		if (pep_enable_stdcall_fixup == -1)
 		  {
-		    einfo (_("Warning: resolving %s by linking to %s\n"),
+		    einfo (_("warning: resolving %s by linking to %s\n"),
 			   undef->root.string, sym->root.string);
 		    if (! gave_warning_message)
 		      {
@@ -1117,7 +1117,7 @@ make_import_fixup (arelent *rel, asection *s, char *name)
       break;
     }
   if (! suc)
-    einfo (_("%C: Cannot get section contents - auto-import exception\n"),
+    einfo (_("%P: %C: cannot get section contents - auto-import exception\n"),
 	   s->owner, s, rel->address);
 
   if (pep_dll_extra_pe_debug)
@@ -1186,7 +1186,7 @@ pep_find_data_imports (void)
 
 	      if (!bfd_generic_link_read_symbols (b))
 		{
-		  einfo (_("%pB%F: could not read symbols: %E\n"), b);
+		  einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
 		  return;
 		}
 
@@ -1302,7 +1302,7 @@ write_build_id (bfd *abfd)
   if (!link_order)
     {
       einfo (_("%P: warning: .buildid section discarded,"
-	       " --build-id ignored.\n"));
+	       " --build-id ignored\n"));
       return TRUE;
     }
 
@@ -1374,7 +1374,7 @@ setup_build_id (bfd *ibfd)
 
   if (!validate_build_id_style (emit_build_id))
     {
-      einfo (_("%P: warning: unrecognized --build-id style ignored.\n"));
+      einfo (_("%P: warning: unrecognized --build-id style ignored\n"));
       return FALSE;
     }
 
@@ -1398,8 +1398,8 @@ setup_build_id (bfd *ibfd)
       return TRUE;
     }
 
-  einfo (_("%P: warning: Cannot create .buildid section,"
-	   " --build-id ignored.\n"));
+  einfo (_("%P: warning: cannot create .buildid section,"
+	   " --build-id ignored\n"));
   return FALSE;
 }
 
@@ -1452,7 +1452,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
   if (coff_data (link_info.output_bfd) == NULL
       || coff_data (link_info.output_bfd)->pe == 0)
-    einfo (_("%F%P: cannot perform PE operations on non PE output file '%pB'.\n"),
+    einfo (_("%F%P: cannot perform PE operations on non PE output file '%pB'\n"),
 	   link_info.output_bfd);
 
   pe_data (link_info.output_bfd)->pe_opthdr = pep;
@@ -1562,7 +1562,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
 		    if (!bfd_generic_link_read_symbols (is->the_bfd))
 		      {
-			einfo (_("%pB%F: could not read symbols: %E\n"),
+			einfo (_("%F%P: %pB: could not read symbols: %E\n"),
 			       is->the_bfd);
 			return;
 		      }
@@ -1786,7 +1786,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 
 	      h = bfd_link_hash_lookup (link_info.hash, buf, TRUE, TRUE, TRUE);
 	      if (h == (struct bfd_link_hash_entry *) NULL)
-		einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
+		einfo (_("%F%P: bfd_link_hash_lookup failed: %E\n"));
 	      if (h->type == bfd_link_hash_new)
 		{
 		  h->type = bfd_link_hash_undefined;

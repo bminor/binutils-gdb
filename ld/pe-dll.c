@@ -442,7 +442,7 @@ pe_dll_id_target (const char *target)
 	pe_leading_underscore = (u != 0 ? 1 : 0);
 	return;
       }
-  einfo (_("%P%X: Unsupported PEI architecture: %s\n"), target);
+  einfo (_("%X%P: unsupported PEI architecture: %s\n"), target);
   exit (1);
 }
 
@@ -722,7 +722,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
 	  if (!bfd_generic_link_read_symbols (b))
 	    {
-	      einfo (_("%pB%F: could not read symbols: %E\n"), b);
+	      einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
 	      return;
 	    }
 
@@ -811,7 +811,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	      if (tmp_at)
 		*tmp_at = 0;
 	      else
-		einfo (_("%P%X: Cannot export %s: invalid export name\n"),
+		einfo (_("%X%P: cannot export %s: invalid export name\n"),
 		       pe_def_file->exports[i].name);
 	      pe_def_file->exports[i].name = tmp;
 	      resort_needed = TRUE;
@@ -863,14 +863,14 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	    {
 	      if (pe_dll_warn_dup_exports)
 		/* xgettext:c-format */
-		einfo (_("%P%X: Error, duplicate EXPORT with ordinals: %s (%d vs %d)\n"),
+		einfo (_("%X%P: error, duplicate EXPORT with ordinals: %s (%d vs %d)\n"),
 		       e[j - 1].name, e[j - 1].ordinal, e[i].ordinal);
 	    }
 	  else
 	    {
 	      if (pe_dll_warn_dup_exports)
 		/* xgettext:c-format */
-		einfo (_("%P: Warning, duplicate EXPORT: %s\n"),
+		einfo (_("%P: warning, duplicate EXPORT: %s\n"),
 		       e[j - 1].name);
 	    }
 
@@ -980,20 +980,20 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
       else if (blhe && blhe->type == bfd_link_hash_undefined)
 	{
 	  /* xgettext:c-format */
-	  einfo (_("%P%X: Cannot export %s: symbol not defined\n"),
+	  einfo (_("%X%P: cannot export %s: symbol not defined\n"),
 		 int_name);
 	}
       else if (blhe)
 	{
 	  /* xgettext:c-format */
-	  einfo (_("%P%X: Cannot export %s: symbol wrong type (%d vs %d)\n"),
+	  einfo (_("%X%P: cannot export %s: symbol wrong type (%d vs %d)\n"),
 		 int_name,
 		 blhe->type, bfd_link_hash_defined);
 	}
       else
 	{
 	  /* xgettext:c-format */
-	  einfo (_("%P%X: Cannot export %s: symbol not found\n"),
+	  einfo (_("%X%P: cannot export %s: symbol not found\n"),
 		 int_name);
 	}
       free (name);
@@ -1016,7 +1016,7 @@ build_filler_bfd (int include_edata)
 			     bfd_get_arch (link_info.output_bfd),
 			     bfd_get_mach (link_info.output_bfd)))
     {
-      einfo (_("%X%P: can not create BFD: %E\n"));
+      einfo (_("%F%P: can not create BFD: %E\n"));
       return;
     }
 
@@ -1107,7 +1107,7 @@ generate_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 	      if (pi != -1)
 		{
 		  /* xgettext:c-format */
-		  einfo (_("%P%X: Error: ordinal used twice: %d (%s vs %s)\n"),
+		  einfo (_("%X%P: error: ordinal used twice: %d (%s vs %s)\n"),
 			 pe_def_file->exports[i].ordinal,
 			 pe_def_file->exports[i].name,
 			 pe_def_file->exports[pi].name);
@@ -1143,7 +1143,7 @@ generate_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
   /* PR 12969: Check for more than 1^16 ordinals.  */
   if (max_ordinal > 65535 || next_ordinal > 65535)
     /* xgettext:c-format */
-    einfo(_("%P%X: Error: export ordinal too large: %d\n"),
+    einfo(_("%X%P: error: export ordinal too large: %d\n"),
 	  max_ordinal > next_ordinal ? max_ordinal : next_ordinal);
 
   /* OK, now we can allocate some memory.  */
@@ -1301,7 +1301,7 @@ pe_walk_relocs_of_symbol (struct bfd_link_info *info,
 
       if (!bfd_generic_link_read_symbols (b))
 	{
-	  einfo (_("%pB%F: could not read symbols: %E\n"), b);
+	  einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
 	  return;
 	}
 
@@ -1388,7 +1388,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  if (s->output_section->vma == 0)
 	    {
 	      /* Huh?  Shouldn't happen, but punt if it does.  */
-	      einfo (_("zero vma section reloc detected: `%s' #%d f=%d\n"),
+	      einfo (_("%P: zero vma section reloc detected: `%s' #%d f=%d\n"),
 		     s->output_section->name, s->output_section->index,
 		     s->output_section->flags);
 	      continue;
@@ -1396,7 +1396,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
 	  if (!bfd_generic_link_read_symbols (b))
 	    {
-	      einfo (_("%pB%F: could not read symbols: %E\n"), b);
+	      einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
 	      return;
 	    }
 
@@ -1503,7 +1503,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		      /* Fall through.  */
 		    default:
 		      /* xgettext:c-format */
-		      einfo (_("%P%X: Error: %d-bit reloc in dll\n"),
+		      einfo (_("%X%P: error: %d-bit reloc in dll\n"),
 			     relocs[i]->howto->bitsize);
 		      break;
 		    }
@@ -1631,7 +1631,7 @@ pe_dll_generate_def_file (const char *pe_out_def_filename)
 
   if (out == NULL)
     /* xgettext:c-format */
-    einfo (_("%P: Can't open output def file %s\n"),
+    einfo (_("%P: can't open output def file %s\n"),
 	   pe_out_def_filename);
 
   if (pe_def_file)
@@ -1786,7 +1786,7 @@ pe_dll_generate_def_file (const char *pe_out_def_filename)
 
   if (fclose (out) == EOF)
     /* xgettext:c-format */
-    einfo (_("%P: Error closing file `%s'\n"), pe_out_def_filename);
+    einfo (_("%P: error closing file `%s'\n"), pe_out_def_filename);
 }
 
 /* Generate the import library.  */
@@ -2701,7 +2701,7 @@ pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend, char *name)
       runtime_pseudo_relocs_created++;
     }
   else if (addend != 0)
-    einfo (_("%P%X%C: variable '%pT' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"),
+    einfo (_("%X%P: %C: variable '%pT' can't be auto-imported; please read the documentation for ld's --enable-auto-import for details\n"),
 	   s->owner, s, rel->address, sym->name);
 }
 
@@ -2729,7 +2729,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
   if (!outarch)
     {
       /* xgettext:c-format */
-      einfo (_("%P%X: Can't open .lib file: %s\n"), impfilename);
+      einfo (_("%X%P: can't open .lib file: %s\n"), impfilename);
       return;
     }
 
@@ -2764,7 +2764,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 		? ibfd->my_archive->filename : ibfd->filename, NULL);
 	  if (!newbfd)
 	    {
-	      einfo (_("%P%X: bfd_openr %s: %E\n"), ibfd->filename);
+	      einfo (_("%X%P: bfd_openr %s: %E\n"), ibfd->filename);
 	      return;
 	    }
 	  if (ibfd->my_archive)
@@ -2776,7 +2776,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 	      bfd *arbfd = newbfd;
 	      if (!bfd_check_format_matches (arbfd, bfd_archive, NULL))
 		{
-		  einfo (_("%P%X: %s(%s): can't find member in non-archive file"),
+		  einfo (_("%X%P: %s(%s): can't find member in non-archive file"),
 		    ibfd->my_archive->filename, ibfd->filename);
 		  return;
 		}
@@ -2788,7 +2788,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 		}
 	      if (!newbfd)
 		{
-		  einfo (_("%P%X: %s(%s): can't find member in archive"),
+		  einfo (_("%X%P: %s(%s): can't find member in archive"),
 		    ibfd->my_archive->filename, ibfd->filename);
 		  return;
 		}
@@ -2863,10 +2863,10 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
   head = ar_tail;
 
   if (! bfd_set_archive_head (outarch, head))
-    einfo ("%P%X: bfd_set_archive_head: %E\n");
+    einfo ("%X%P: bfd_set_archive_head: %E\n");
 
   if (! bfd_close (outarch))
-    einfo ("%P%X: bfd_close %s: %E\n", impfilename);
+    einfo ("%X%P: bfd_close %s: %E\n", impfilename);
 
   while (head != NULL)
     {
@@ -3050,7 +3050,7 @@ add_bfd_to_link (bfd *abfd, const char *name, struct bfd_link_info *linfo)
   ldlang_add_file (fake_file);
 
   if (!bfd_link_add_symbols (abfd, linfo))
-    einfo (_("%P%X: add symbols %s: %E\n"), name);
+    einfo (_("%X%P: add symbols %s: %E\n"), name);
 }
 
 void
@@ -3236,14 +3236,14 @@ pe_implied_import_dll (const char *filename)
   dll = bfd_openr (filename, pe_details->target_name);
   if (!dll)
     {
-      einfo (_("%P%X: open %s: %E\n"), filename);
+      einfo (_("%X%P: open %s: %E\n"), filename);
       return FALSE;
     }
 
   /* PEI dlls seem to be bfd_objects.  */
   if (!bfd_check_format (dll, bfd_object))
     {
-      einfo (_("%P%X: %s: this doesn't appear to be a DLL\n"), filename);
+      einfo (_("%X%P: %s: this doesn't appear to be a DLL\n"), filename);
       return FALSE;
     }
 
@@ -3414,7 +3414,7 @@ pe_output_file_set_long_section_names (bfd *abfd)
   if (pe_use_coff_long_section_names < 0)
     return;
   if (!bfd_coff_set_long_section_names (abfd, pe_use_coff_long_section_names))
-    einfo (_("%P%X: Error: can't use long section names on this arch\n"));
+    einfo (_("%X%P: error: can't use long section names on this arch\n"));
 }
 
 /* These are the main functions, called from the emulation.  The first
