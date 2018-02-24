@@ -1,5 +1,27 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (EMULATION_FILES, POTFILES): Delete.
+	(SRC_POTFILES, BLD_POTFILES): Define.
+	(po/POTFILES.in): Delete rule.
+	(po/SRC-POTFILES.in, po/BLD-POTFILES.in): New rules.
+	* configure.ac: Add AC_CONFIG_COMMANDS to create po/Makefile.
+	* po/Make-in (DISTFILES): Remove POTFILES.in, add SRC-POTFILES.in
+	and BLD-POTFILES.in.
+	(POTFILES): Delete.
+	(SRC-POTFILES, BLD-POTFILES): Define place marker.
+	(ld.pot): Build from SRC-POTFILES plus BLD-POTFILES.
+	(distclean, maintainer-clean): Tidy up new files.
+	(POTFILES, POTFILES.in): Delete rules.
+	(SRC-POTFILES, BLD-POTFILES, SRC-POTFILES.in, BLD-POTFILES.in):
+	New rules.
+	(Makefile): Depend on SRC-POTFILES and BLD-POTFILES.
+	* po/SRC-POTFILES.in: Rename from po/POTFILES.in.
+	* po/BLD-POTFILES.in: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-cris/pcrelcp-1.d,
 	* testsuite/ld-mmix/start-2.d: Update.
 

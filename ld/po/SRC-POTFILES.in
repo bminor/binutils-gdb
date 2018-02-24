@@ -1,7 +1,5 @@
 deffile.h
 elf-hints-local.h
-emultempl/armcoff.em
-emultempl/pe.em
 ld.h
 ldbuildid.c
 ldbuildid.h

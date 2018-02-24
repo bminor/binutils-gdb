@@ -590,15 +590,16 @@ endif
 	$(COMPILE) -c `test -f deffilep.c || echo $(srcdir)/`deffilep.c $(NO_WERROR)
 endif
 
-# At the moment this is just a list of those emulation template files
-# that contain internationalised strings.
-EMULATION_FILES = emultempl/pe.em emultempl/armcoff.em
+SRC_POTFILES = $(CFILES) $(HFILES)
+BLD_POTFILES = $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES)
 
-POTFILES = $(CFILES) $(HFILES) $(EMULATION_FILES)
+po/SRC-POTFILES.in: @MAINT@ Makefile
+	for f in $(SRC_POTFILES); do echo $$f; done | LC_ALL=C sort > $@-tmp \
+	  && mv $@-tmp $(srcdir)/po/SRC-POTFILES.in
 
-po/POTFILES.in: @MAINT@ Makefile
-	for f in $(POTFILES); do echo $$f; done | LC_ALL=C sort > tmp \
-	  && mv tmp $(srcdir)/po/POTFILES.in
+po/BLD-POTFILES.in: @MAINT@ Makefile $(BLD_POTFILES)
+	for f in $(BLD_POTFILES); do echo $$f; done | LC_ALL=C sort > $@-tmp \
+	  && mv $@-tmp $(srcdir)/po/BLD-POTFILES.in
 
 ldmain.@OBJEXT@: ldmain.c config.status
 if am__fastdepCC

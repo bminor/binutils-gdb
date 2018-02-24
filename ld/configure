@@ -17322,6 +17322,9 @@ _ACEOF
 
 fi
 
+ac_config_commands="$ac_config_commands default"
+
+
 
 
 
@@ -18414,6 +18417,7 @@ fi
     LINGUAS="${LINGUAS-%UNSET%}"
 
 
+
 _ACEOF
 
 cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
@@ -18426,6 +18430,7 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
     "default-1") CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
+    "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "po/Makefile.in") CONFIG_FILES="$CONFIG_FILES po/Makefile.in:po/Make-in" ;;
 
@@ -20057,6 +20062,24 @@ _LT_EOF
         ;;
       esac
     done ;;
+    "default":C)
+case "$srcdir" in
+  .) srcdirpre= ;;
+  *) srcdirpre='$(srcdir)/' ;;
+esac
+POFILES=
+GMOFILES=
+for lang in dummy $OBSOLETE_ALL_LINGUAS; do
+  if test $lang != dummy; then
+    POFILES="$POFILES $srcdirpre$lang.po"
+    GMOFILES="$GMOFILES $srcdirpre$lang.gmo"
+  fi
+done
+sed -e '/^SRC-POTFILES =/r po/SRC-POTFILES' \
+    -e '/^BLD-POTFILES =/r po/BLD-POTFILES' \
+    -e "s,@POFILES@,$POFILES," \
+    -e "s,@GMOFILES@,$GMOFILES," \
+    po/Makefile.in > po/Makefile ;;
 
   esac
 done # for ac_tag

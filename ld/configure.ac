@@ -491,6 +491,26 @@ if test x${EXTRA_SHLIB_EXTENSION} != x ; then
    [Additional extension a shared object might have.])
 fi
 
+AC_CONFIG_COMMANDS([default],
+[[
+case "$srcdir" in
+  .) srcdirpre= ;;
+  *) srcdirpre='$(srcdir)/' ;;
+esac
+POFILES=
+GMOFILES=
+for lang in dummy $OBSOLETE_ALL_LINGUAS; do
+  if test $lang != dummy; then
+    POFILES="$POFILES $srcdirpre$lang.po"
+    GMOFILES="$GMOFILES $srcdirpre$lang.gmo"
+  fi
+done
+sed -e '/^SRC-POTFILES =/r po/SRC-POTFILES' \
+    -e '/^BLD-POTFILES =/r po/BLD-POTFILES' \
+    -e "s,@POFILES@,$POFILES," \
+    -e "s,@GMOFILES@,$GMOFILES," \
+    po/Makefile.in > po/Makefile]],[[]])
+
 dnl Required by html, pdf, install-pdf and install-html
 AC_SUBST(datarootdir)
 AC_SUBST(docdir)
