@@ -1,3 +1,8 @@
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
+	* crx-dis.c (getregliststring): Allocate a large enough buffer
+	to silence false positive gcc8 warning.
+
 2018-02-22  Shea Levy <shea@shealevy.com>
 
 	* disassemble.c (ARCH_riscv): Define if ARCH_all.
