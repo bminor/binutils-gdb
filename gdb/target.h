@@ -1463,18 +1463,21 @@ void target_flash_done (void);
 
 /* Describes a request for a memory write operation.  */
 struct memory_write_request
-  {
-    /* Begining address that must be written.  */
-    ULONGEST begin;
-    /* Past-the-end address.  */
-    ULONGEST end;
-    /* The data to write.  */
-    gdb_byte *data;
-    /* A callback baton for progress reporting for this request.  */
-    void *baton;
-  };
-typedef struct memory_write_request memory_write_request_s;
-DEF_VEC_O(memory_write_request_s);
+{
+  memory_write_request (ULONGEST begin_, ULONGEST end_,
+			gdb_byte *data_ = nullptr, void *baton_ = nullptr)
+    : begin (begin_), end (end_), data (data_), baton (baton_)
+  {}
+
+  /* Begining address that must be written.  */
+  ULONGEST begin;
+  /* Past-the-end address.  */
+  ULONGEST end;
+  /* The data to write.  */
+  gdb_byte *data;
+  /* A callback baton for progress reporting for this request.  */
+  void *baton;
+};
 
 /* Enumeration specifying different flash preservation behaviour.  */
 enum flash_preserve_mode
@@ -1500,9 +1503,10 @@ enum flash_preserve_mode
      with a NULL baton, when preserved flash sectors are being rewritten.
 
    The function returns 0 on success, and error otherwise.  */
-int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
-				enum flash_preserve_mode preserve_flash_p,
-				void (*progress_cb) (ULONGEST, void *));
+int target_write_memory_blocks
+    (const std::vector<memory_write_request> &requests,
+     enum flash_preserve_mode preserve_flash_p,
+     void (*progress_cb) (ULONGEST, void *));
 
 /* Print a line about the current target.  */
 

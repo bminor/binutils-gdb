@@ -1,3 +1,24 @@
+2018-02-27  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tom Tromey  <tom@tromey.com>
+
+	* target.h (memory_write_request_s): Remove typedef.  Don't define
+	VEC.
+	(target_write_memory_blocks): Change argument to std::vector.
+	(struct memory_write_request): Add constructor.
+	* target-memory.c (compare_block_starting_address): Return bool.
+	Change argument types.
+	(claim_memory): Change arguments to use std::vector.
+	(split_regular_and_flash_blocks, blocks_to_erase)
+	(compute_garbled_blocks): Likewise.
+	(cleanup_request_data, cleanup_write_requests_vector): Remove.
+	(target_write_memory_blocks): Change argument to std::vector.
+	* symfile.c (struct load_section_data): Add constructor and
+	destructor.  Use std::vector for "requests".
+	(struct load_progress_data): Add initializers.
+	(load_section_callback): Update.  Use "new".
+	(clear_memory_write_data): Remove.
+	(generic_load): Update.
+
 2018-02-27  Alan Hayward  <alan.hayward@arm.com>
 
 	* arch/aarch64.h: Use common/tdesc.h.

@@ -1892,31 +1892,54 @@ add_section_size_callback (bfd *abfd, asection *asec, void *data)
   *sum += bfd_get_section_size (asec);
 }
 
-/* Opaque data for load_section_callback.  */
-struct load_section_data {
-  CORE_ADDR load_offset;
-  struct load_progress_data *progress_data;
-  VEC(memory_write_request_s) *requests;
-};
-
 /* Opaque data for load_progress.  */
-struct load_progress_data {
+struct load_progress_data
+{
   /* Cumulative data.  */
-  unsigned long write_count;
-  unsigned long data_count;
-  bfd_size_type total_size;
+  unsigned long write_count = 0;
+  unsigned long data_count = 0;
+  bfd_size_type total_size = 0;
 };
 
 /* Opaque data for load_progress for a single section.  */
-struct load_progress_section_data {
+struct load_progress_section_data
+{
+  load_progress_section_data (load_progress_data *cumulative_,
+			      const char *section_name_, ULONGEST section_size_,
+			      CORE_ADDR lma_, gdb_byte *buffer_)
+    : cumulative (cumulative_), section_name (section_name_),
+      section_size (section_size_), lma (lma_), buffer (buffer_)
+  {}
+
   struct load_progress_data *cumulative;
 
   /* Per-section data.  */
   const char *section_name;
-  ULONGEST section_sent;
+  ULONGEST section_sent = 0;
   ULONGEST section_size;
   CORE_ADDR lma;
   gdb_byte *buffer;
+};
+
+/* Opaque data for load_section_callback.  */
+struct load_section_data
+{
+  load_section_data (load_progress_data *progress_data_)
+    : progress_data (progress_data_)
+  {}
+
+  ~load_section_data ()
+  {
+    for (auto &&request : requests)
+      {
+	xfree (request.data);
+	delete ((load_progress_section_data *) request.baton);
+      }
+  }
+
+  CORE_ADDR load_offset = 0;
+  struct load_progress_data *progress_data;
+  std::vector<struct memory_write_request> requests;
 };
 
 /* Target write callback routine for progress reporting.  */
@@ -1988,11 +2011,8 @@ load_progress (ULONGEST bytes, void *untyped_arg)
 static void
 load_section_callback (bfd *abfd, asection *asec, void *data)
 {
-  struct memory_write_request *new_request;
   struct load_section_data *args = (struct load_section_data *) data;
-  struct load_progress_section_data *section_data;
   bfd_size_type size = bfd_get_section_size (asec);
-  gdb_byte *buffer;
   const char *sect_name = bfd_get_section_name (abfd, asec);
 
   if ((bfd_get_section_flags (abfd, asec) & SEC_LOAD) == 0)
@@ -2001,44 +2021,16 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
   if (size == 0)
     return;
 
-  new_request = VEC_safe_push (memory_write_request_s,
-			       args->requests, NULL);
-  memset (new_request, 0, sizeof (struct memory_write_request));
-  section_data = XCNEW (struct load_progress_section_data);
-  new_request->begin = bfd_section_lma (abfd, asec) + args->load_offset;
-  new_request->end = new_request->begin + size; /* FIXME Should size
-						   be in instead?  */
-  new_request->data = (gdb_byte *) xmalloc (size);
-  new_request->baton = section_data;
-
-  buffer = new_request->data;
-
-  section_data->cumulative = args->progress_data;
-  section_data->section_name = sect_name;
-  section_data->section_size = size;
-  section_data->lma = new_request->begin;
-  section_data->buffer = buffer;
-
+  ULONGEST begin = bfd_section_lma (abfd, asec) + args->load_offset;
+  ULONGEST end = begin + size;
+  gdb_byte *buffer = (gdb_byte *) xmalloc (size);
   bfd_get_section_contents (abfd, asec, buffer, 0, size);
-}
 
-/* Clean up an entire memory request vector, including load
-   data and progress records.  */
+  load_progress_section_data *section_data
+    = new load_progress_section_data (args->progress_data, sect_name, size,
+				      begin, buffer);
 
-static void
-clear_memory_write_data (void *arg)
-{
-  VEC(memory_write_request_s) **vec_p = (VEC(memory_write_request_s) **) arg;
-  VEC(memory_write_request_s) *vec = *vec_p;
-  int i;
-  struct memory_write_request *mr;
-
-  for (i = 0; VEC_iterate (memory_write_request_s, vec, i, mr); ++i)
-    {
-      xfree (mr->data);
-      xfree (mr->baton);
-    }
-  VEC_free (memory_write_request_s, vec);
+  args->requests.emplace_back (begin, end, buffer, section_data);
 }
 
 static void print_transfer_performance (struct ui_file *stream,
@@ -2049,18 +2041,9 @@ static void print_transfer_performance (struct ui_file *stream,
 void
 generic_load (const char *args, int from_tty)
 {
-  struct cleanup *old_cleanups;
-  struct load_section_data cbdata;
   struct load_progress_data total_progress;
+  struct load_section_data cbdata (&total_progress);
   struct ui_out *uiout = current_uiout;
-
-  CORE_ADDR entry;
-
-  memset (&cbdata, 0, sizeof (cbdata));
-  memset (&total_progress, 0, sizeof (total_progress));
-  cbdata.progress_data = &total_progress;
-
-  old_cleanups = make_cleanup (clear_memory_write_data, &cbdata.requests);
 
   if (args == NULL)
     error_no_arg (_("file to load"));
@@ -2110,7 +2093,7 @@ generic_load (const char *args, int from_tty)
 
   steady_clock::time_point end_time = steady_clock::now ();
 
-  entry = bfd_get_start_address (loadfile_bfd.get ());
+  CORE_ADDR entry = bfd_get_start_address (loadfile_bfd.get ());
   entry = gdbarch_addr_bits_remove (target_gdbarch (), entry);
   uiout->text ("Start address ");
   uiout->field_fmt ("address", "%s", paddress (target_gdbarch (), entry));
@@ -2132,8 +2115,6 @@ generic_load (const char *args, int from_tty)
   print_transfer_performance (gdb_stdout, total_progress.data_count,
 			      total_progress.write_count,
 			      end_time - start_time);
-
-  do_cleanups (old_cleanups);
 }
 
 /* Report on STREAM the performance of a memory transfer operation,
