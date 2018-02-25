@@ -1,3 +1,9 @@
+2018-03-11  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (sort_tu_by_abbrev_offset): Change to be suitable
+	for use by std::sort.
+	(build_type_psymtabs_1): Use std::vector.
+
 2018-03-09  Eli Zaretskii  <eliz@gnu.org>
 
 	* top.c (print_gdb_configuration): Reflect LIBIPT, LIBMEMCHECK,

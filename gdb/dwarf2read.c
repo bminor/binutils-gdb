@@ -8610,19 +8610,13 @@ struct tu_abbrev_offset
   sect_offset abbrev_offset;
 };
 
-/* Helper routine for build_type_psymtabs_1, passed to qsort.  */
+/* Helper routine for build_type_psymtabs_1, passed to std::sort.  */
 
-static int
-sort_tu_by_abbrev_offset (const void *ap, const void *bp)
+static bool
+sort_tu_by_abbrev_offset (const struct tu_abbrev_offset &a,
+			  const struct tu_abbrev_offset &b)
 {
-  const struct tu_abbrev_offset * const *a
-    = (const struct tu_abbrev_offset * const*) ap;
-  const struct tu_abbrev_offset * const *b
-    = (const struct tu_abbrev_offset * const*) bp;
-  sect_offset aoff = (*a)->abbrev_offset;
-  sect_offset boff = (*b)->abbrev_offset;
-
-  return (aoff > boff) - (aoff < boff);
+  return a.abbrev_offset < b.abbrev_offset;
 }
 
 /* Efficiently read all the type units.
@@ -8647,10 +8641,8 @@ static void
 build_type_psymtabs_1 (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
   struct tu_stats *tu_stats = &dwarf2_per_objfile->tu_stats;
-  struct cleanup *cleanups;
   abbrev_table_up abbrev_table;
   sect_offset abbrev_offset;
-  struct tu_abbrev_offset *sorted_by_abbrev;
   int i;
 
   /* It's up to the caller to not call us multiple times.  */
@@ -8683,8 +8675,8 @@ build_type_psymtabs_1 (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
   /* Sort in a separate table to maintain the order of all_type_units
      for .gdb_index: TU indices directly index all_type_units.  */
-  sorted_by_abbrev = XNEWVEC (struct tu_abbrev_offset,
-			      dwarf2_per_objfile->n_type_units);
+  std::vector<struct tu_abbrev_offset> sorted_by_abbrev
+    (dwarf2_per_objfile->n_type_units);
   for (i = 0; i < dwarf2_per_objfile->n_type_units; ++i)
     {
       struct signatured_type *sig_type = dwarf2_per_objfile->all_type_units[i];
@@ -8695,9 +8687,8 @@ build_type_psymtabs_1 (struct dwarf2_per_objfile *dwarf2_per_objfile)
 			    sig_type->per_cu.section,
 			    sig_type->per_cu.sect_off);
     }
-  cleanups = make_cleanup (xfree, sorted_by_abbrev);
-  qsort (sorted_by_abbrev, dwarf2_per_objfile->n_type_units,
-	 sizeof (struct tu_abbrev_offset), sort_tu_by_abbrev_offset);
+  std::sort (sorted_by_abbrev.begin (), sorted_by_abbrev.end (),
+	     sort_tu_by_abbrev_offset);
 
   abbrev_offset = (sect_offset) ~(unsigned) 0;
 
@@ -8720,8 +8711,6 @@ build_type_psymtabs_1 (struct dwarf2_per_objfile *dwarf2_per_objfile)
       init_cutu_and_read_dies (&tu->sig_type->per_cu, abbrev_table.get (),
 			       0, 0, build_type_psymtabs_reader, NULL);
     }
-
-  do_cleanups (cleanups);
 }
 
 /* Print collected type unit statistics.  */
