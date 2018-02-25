@@ -6127,9 +6127,7 @@ assign_file_positions_except_relocs (bfd *abfd,
 	}
 
       /* Write out the program headers.  */
-      alloc = elf_program_header_size (abfd) / bed->s->sizeof_phdr;
-
-      /* Sort the program headers into the ordering required by the ELF standard.  */
+      alloc = elf_elfheader (abfd)->e_phnum;
       if (alloc == 0)
 	return TRUE;
 
@@ -6151,14 +6149,14 @@ assign_file_positions_except_relocs (bfd *abfd,
 							alloc))
 	  && tdata->phdr[1].p_type == PT_LOAD
 	  && (tdata->phdr[1].p_vaddr > tdata->phdr[0].p_vaddr
-	      || (tdata->phdr[1].p_vaddr + tdata->phdr[1].p_memsz)
-	      <  (tdata->phdr[0].p_vaddr + tdata->phdr[0].p_memsz)))
+	      || (tdata->phdr[1].p_vaddr + tdata->phdr[1].p_memsz
+		  < tdata->phdr[0].p_vaddr + tdata->phdr[0].p_memsz)))
 	{
 	  /* The fix for this error is usually to edit the linker script being
 	     used and set up the program headers manually.  Either that or
 	     leave room for the headers at the start of the SECTIONS.  */
-	  _bfd_error_handler (_("\
-%pB: error: PHDR segment not covered by LOAD segment"),
+	  _bfd_error_handler (_("%pB: error: PHDR segment not covered"
+				" by LOAD segment"),
 			      abfd);
 	  return FALSE;
 	}

@@ -1,5 +1,11 @@
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
+	* elf.c (assign_file_positions_except_relocs): Don't segfault
+	when actual number of phdrs is less than allocated.  Delete
+	outdated comment.  Formatting.
+
+2018-02-26  Alan Modra  <amodra@gmail.com>
+
 	* elf-m10300.c, * elf-s390-common.c, * elf32-arc.c, * elf32-cris.c,
 	* elf32-dlx.c, * elf32-frv.c, * elf32-i370.c, * elf32-lm32.c,
 	* elf32-m32r.c, * elf32-m68hc1x.c, * elf32-m68k.c,
