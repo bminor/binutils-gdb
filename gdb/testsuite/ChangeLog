@@ -1,3 +1,8 @@
+2018-02-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lib/cp-support.exp (cp_test_ptype_class): Move space inside
+	parentheses.
+
 2018-02-23  Maciej W. Rozycki  <macro@mips.com>
 
 	* lib/cp-support.exp (cp_test_ptype_class): Fix a typo in the

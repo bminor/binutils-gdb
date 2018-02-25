@@ -564,7 +564,7 @@ proc cp_test_ptype_class { in_exp in_testname in_key in_tag in_class_table
 	    switch $nested_key {
 		enum {
 		    set expected_result \
-			"enum $nested_name (: (unsigned )?int)? \{"
+			"enum $nested_name (: (unsigned )?int )?\{"
 		    foreach c $nested_children {
 			append expected_result "$c, "
 		    }
