@@ -5090,8 +5090,8 @@ Emits long double precision floating-point values.
 
 If no suffix is used then @samp{.w} is assumed.
 
-The byte ordering is still target dependent, as is the size and format of
-floating point values.
+The byte ordering is target dependent, as is the size and format of floating
+point values.
 
 @node Dcb
 @section @code{.dcb[@var{size}] @var{number} [,@var{fill}]}
@@ -5147,12 +5147,11 @@ Emits 12-byte values.
 @end table
 
 Note - unlike the @code{.dcb} directive the @samp{.d}, @samp{.s} and @samp{.x}
-suffixes do not indicate that floating-point values are to inserted.
+suffixes do not indicate that floating-point values are to be inserted.
 
 If the @var{size} suffix is omitted then @samp{.w} is assumed.
 
-The byte ordering is target dependent, as is the size and format of floating
-point values.
+The byte ordering is target dependent.
 
 
 @ifset COFF
