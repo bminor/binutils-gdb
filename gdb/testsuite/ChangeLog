@@ -1,3 +1,13 @@
+2018-02-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/load-command.c: New file.
+	* gdb.base/load-command.exp: New file.
+	* lib/gdb.exp (gdb_is_target_remote_prompt): Rename to...
+	(gdb_is_target_1): ...this, and generalize for other targets
+	than just remote.
+	(gdb_is_target_remote): Use gdb_is_target_1.
+	(gdb_is_target_native): use gdb_is_target_1.
+
 2018-02-26  Tom Tromey  <tom@tromey.com>
 
 	PR python/16497:

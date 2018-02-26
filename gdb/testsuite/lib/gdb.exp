@@ -3154,14 +3154,19 @@ proc skip_compile_feature_tests {} {
     return $result
 }
 
-# Helper for gdb_is_target_remote.  PROMPT_REGEXP is the expected
-# prompt.
+# Helper for gdb_is_target_* procs.  TARGET_NAME is the name of the target
+# we're looking for (used to build the test name).  TARGET_STACK_REGEXP
+# is a regexp that will match the output of "maint print target-stack" if
+# the target in question is currently pushed.
 
-proc gdb_is_target_remote_prompt { prompt_regexp } {
+proc gdb_is_target_1 { target_name target_stack_regexp } {
+    global gdb_prompt
 
-    set test "probe for target remote"
+    set prompt_regexp "$gdb_prompt $"
+
+    set test "probe for target ${target_name}"
     gdb_test_multiple "maint print target-stack" $test {
-	-re ".*emote serial target in gdb-specific protocol.*$prompt_regexp" {
+	-re "${target_stack_regexp}${prompt_regexp}" {
 	    pass $test
 	    return 1
 	}
@@ -3175,10 +3180,14 @@ proc gdb_is_target_remote_prompt { prompt_regexp } {
 # Check whether we're testing with the remote or extended-remote
 # targets.
 
-proc gdb_is_target_remote {} {
-    global gdb_prompt
+proc gdb_is_target_remote { } {
+    return [gdb_is_target_1 "remote" ".*emote serial target in gdb-specific protocol.*"]
+}
 
-    return [gdb_is_target_remote_prompt "$gdb_prompt $"]
+# Check whether we're testing with the native target.
+
+proc gdb_is_target_native { } {
+    return [gdb_is_target_1 "native" ".*native \\(Native process\\).*"]
 }
 
 # Return the effective value of use_gdb_stub.
