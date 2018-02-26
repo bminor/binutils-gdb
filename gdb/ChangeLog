@@ -1,5 +1,13 @@
 2018-02-26  Yao Qi  <yao.qi@linaro.org>
 
+	* dwarf2read.c (struct partial_die_info) <read>: New method.
+	(read_partial_die): Remove the declaration.
+	(load_partial_dies): Update.
+	(partial_die_info::partial_die_info):
+	(read_partial_die): Change it to partial_die_info::read.
+
+2018-02-26  Yao Qi  <yao.qi@linaro.org>
+
 	* dwarf2read.c (struct partial_die_info) <fixup>: New method.
 	(fixup_partial_die): Remove declaration.
 	(scan_partial_symbols): Update.

@@ -1415,6 +1415,12 @@ struct partial_die_info : public allocate_on_obstack
        name.  */
     void fixup (struct dwarf2_cu *cu);
 
+    /* Read a minimal amount of information into the minimal die
+       structure.  */
+    const gdb_byte *read (const struct die_reader_specs *reader,
+			  const struct abbrev_info &abbrev,
+			  const gdb_byte *info_ptr);
+
     /* Offset of this DIE.  */
     const sect_offset sect_off;
 
@@ -1484,8 +1490,8 @@ struct partial_die_info : public allocate_on_obstack
 
     /* Pointer into the info_buffer (or types_buffer) pointing at the target of
        DW_AT_sibling, if any.  */
-    /* NOTE: This member isn't strictly necessary, read_partial_die could
-       return DW_AT_sibling values to its caller load_partial_dies.  */
+    /* NOTE: This member isn't strictly necessary, partial_die_info::read
+       could return DW_AT_sibling values to its caller load_partial_dies.  */
     const gdb_byte *sibling = nullptr;
 
     /* If HAS_SPECIFICATION, the offset of the DIE referred to by
@@ -1835,11 +1841,6 @@ static unsigned int peek_abbrev_code (bfd *, const gdb_byte *);
 
 static struct partial_die_info *load_partial_dies
   (const struct die_reader_specs *, const gdb_byte *, int);
-
-static const gdb_byte *read_partial_die (const struct die_reader_specs *,
-					 struct partial_die_info *,
-					 const struct abbrev_info &,
-					 const gdb_byte *);
 
 static struct partial_die_info *find_partial_die (sect_offset, int,
 						  struct dwarf2_cu *);
@@ -14840,7 +14841,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 	return PC_BOUNDS_NOT_PRESENT;
     }
 
-  /* read_partial_die has also the strict LOW < HIGH requirement.  */
+  /* partial_die_info::read has also the strict LOW < HIGH requirement.  */
   if (high <= low)
     return PC_BOUNDS_INVALID;
 
@@ -18352,8 +18353,7 @@ load_partial_dies (const struct die_reader_specs *reader,
       struct partial_die_info pdi ((sect_offset) (info_ptr - reader->buffer),
 				   abbrev);
 
-      info_ptr = read_partial_die (reader, &pdi, *abbrev,
-				   (const gdb_byte *) info_ptr + bytes_read);
+      info_ptr = pdi.read (reader, *abbrev, info_ptr + bytes_read);
 
       /* This two-pass algorithm for processing partial symbols has a
 	 high cost in cache pressure.  Thus, handle some simple cases
@@ -18531,25 +18531,22 @@ partial_die_info::partial_die_info (sect_offset sect_off_,
 /* Read a minimal amount of information into the minimal die structure.
    INFO_PTR should point just after the initial uleb128 of a DIE.  */
 
-static const gdb_byte *
-read_partial_die (const struct die_reader_specs *reader,
-		  struct partial_die_info *part_die,
-		  struct abbrev_info *abbrev, unsigned int abbrev_len,
-		  const gdb_byte *info_ptr)
+const gdb_byte *
+partial_die_info::read (const struct die_reader_specs *reader,
+			const struct abbrev_info &abbrev, const gdb_byte *info_ptr)
 {
   struct dwarf2_cu *cu = reader->cu;
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = cu->per_cu->dwarf2_per_objfile;
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
-  const gdb_byte *buffer = reader->buffer;
   unsigned int i;
-  struct attribute attr;
   int has_low_pc_attr = 0;
   int has_high_pc_attr = 0;
   int high_pc_relative = 0;
 
   for (i = 0; i < abbrev.num_attrs; ++i)
     {
+      struct attribute attr;
+
       info_ptr = read_attribute (reader, &attr, &abbrev.attrs[i], info_ptr);
 
       /* Store the data if it is of an attribute we want to keep in a
@@ -18557,7 +18554,7 @@ read_partial_die (const struct die_reader_specs *reader,
       switch (attr.name)
 	{
 	case DW_AT_name:
-	  switch (part_die->tag)
+	  switch (tag)
 	    {
 	    case DW_TAG_compile_unit:
 	    case DW_TAG_partial_unit:
@@ -18568,12 +18565,16 @@ read_partial_die (const struct die_reader_specs *reader,
 	    case DW_TAG_enumerator:
 	      /* These tags always have simple identifiers already; no need
 		 to canonicalize them.  */
-	      part_die->name = DW_STRING (&attr);
+	      name = DW_STRING (&attr);
 	      break;
 	    default:
-	      part_die->name
-		= dwarf2_canonicalize_name (DW_STRING (&attr), cu,
-					    &objfile->per_bfd->storage_obstack);
+	      {
+		struct objfile *objfile = dwarf2_per_objfile->objfile;
+
+		name
+		  = dwarf2_canonicalize_name (DW_STRING (&attr), cu,
+					      &objfile->per_bfd->storage_obstack);
+	      }
 	      break;
 	    }
 	  break;
@@ -18583,16 +18584,16 @@ read_partial_die (const struct die_reader_specs *reader,
 	     assume they will be the same, and we only store the last
 	     one we see.  */
 	  if (cu->language == language_ada)
-	    part_die->name = DW_STRING (&attr);
-	  part_die->linkage_name = DW_STRING (&attr);
+	    name = DW_STRING (&attr);
+	  linkage_name = DW_STRING (&attr);
 	  break;
 	case DW_AT_low_pc:
 	  has_low_pc_attr = 1;
-	  part_die->lowpc = attr_value_as_address (&attr);
+	  lowpc = attr_value_as_address (&attr);
 	  break;
 	case DW_AT_high_pc:
 	  has_high_pc_attr = 1;
-	  part_die->highpc = attr_value_as_address (&attr);
+	  highpc = attr_value_as_address (&attr);
 	  if (cu->header.version >= 4 && attr_form_is_constant (&attr))
 		high_pc_relative = 1;
 	  break;
@@ -18600,7 +18601,7 @@ read_partial_die (const struct die_reader_specs *reader,
           /* Support the .debug_loc offsets.  */
           if (attr_form_is_block (&attr))
             {
-	       part_die->d.locdesc = DW_BLOCK (&attr);
+	       d.locdesc = DW_BLOCK (&attr);
             }
           else if (attr_form_is_section_offset (&attr))
             {
@@ -18613,20 +18614,20 @@ read_partial_die (const struct die_reader_specs *reader,
             }
 	  break;
 	case DW_AT_external:
-	  part_die->is_external = DW_UNSND (&attr);
+	  is_external = DW_UNSND (&attr);
 	  break;
 	case DW_AT_declaration:
-	  part_die->is_declaration = DW_UNSND (&attr);
+	  is_declaration = DW_UNSND (&attr);
 	  break;
 	case DW_AT_type:
-	  part_die->has_type = 1;
+	  has_type = 1;
 	  break;
 	case DW_AT_abstract_origin:
 	case DW_AT_specification:
 	case DW_AT_extension:
-	  part_die->has_specification = 1;
-	  part_die->spec_offset = dwarf2_get_ref_die_offset (&attr);
-	  part_die->spec_is_dwz = (attr.form == DW_FORM_GNU_ref_alt
+	  has_specification = 1;
+	  spec_offset = dwarf2_get_ref_die_offset (&attr);
+	  spec_is_dwz = (attr.form == DW_FORM_GNU_ref_alt
 				   || cu->per_cu->is_dwz);
 	  break;
 	case DW_AT_sibling:
@@ -18637,6 +18638,7 @@ read_partial_die (const struct die_reader_specs *reader,
 		       _("ignoring absolute DW_AT_sibling"));
 	  else
 	    {
+	      const gdb_byte *buffer = reader->buffer;
 	      sect_offset off = dwarf2_get_ref_die_offset (&attr);
 	      const gdb_byte *sibling_ptr = buffer + to_underlying (off);
 
@@ -18646,14 +18648,14 @@ read_partial_die (const struct die_reader_specs *reader,
 	      else if (sibling_ptr > reader->buffer_end)
 		dwarf2_section_buffer_overflow_complaint (reader->die_section);
 	      else
-		part_die->sibling = sibling_ptr;
+		sibling = sibling_ptr;
 	    }
 	  break;
         case DW_AT_byte_size:
-          part_die->has_byte_size = 1;
+          has_byte_size = 1;
           break;
         case DW_AT_const_value:
-          part_die->has_const_value = 1;
+          has_const_value = 1;
           break;
 	case DW_AT_calling_convention:
 	  /* DWARF doesn't provide a way to identify a program's source-level
@@ -18672,25 +18674,25 @@ read_partial_die (const struct die_reader_specs *reader,
 	     compatibility.  */
 	  if (DW_UNSND (&attr) == DW_CC_program
 	      && cu->language == language_fortran)
-	    part_die->main_subprogram = 1;
+	    main_subprogram = 1;
 	  break;
 	case DW_AT_inline:
 	  if (DW_UNSND (&attr) == DW_INL_inlined
 	      || DW_UNSND (&attr) == DW_INL_declared_inlined)
-	    part_die->may_be_inlined = 1;
+	    may_be_inlined = 1;
 	  break;
 
 	case DW_AT_import:
-	  if (part_die->tag == DW_TAG_imported_unit)
+	  if (tag == DW_TAG_imported_unit)
 	    {
-	      part_die->d.sect_off = dwarf2_get_ref_die_offset (&attr);
-	      part_die->is_dwz = (attr.form == DW_FORM_GNU_ref_alt
+	      d.sect_off = dwarf2_get_ref_die_offset (&attr);
+	      is_dwz = (attr.form == DW_FORM_GNU_ref_alt
 				  || cu->per_cu->is_dwz);
 	    }
 	  break;
 
 	case DW_AT_main_subprogram:
-	  part_die->main_subprogram = DW_UNSND (&attr);
+	  main_subprogram = DW_UNSND (&attr);
 	  break;
 
 	default:
@@ -18699,7 +18701,7 @@ read_partial_die (const struct die_reader_specs *reader,
     }
 
   if (high_pc_relative)
-    part_die->highpc += part_die->lowpc;
+    highpc += lowpc;
 
   if (has_low_pc_attr && has_high_pc_attr)
     {
@@ -18711,32 +18713,34 @@ read_partial_die (const struct die_reader_specs *reader,
 	 labels are not in the output, so the relocs get a value of 0.
 	 If this is a discarded function, mark the pc bounds as invalid,
 	 so that GDB will ignore it.  */
-      if (part_die->lowpc == 0 && !dwarf2_per_objfile->has_section_at_zero)
+      if (lowpc == 0 && !dwarf2_per_objfile->has_section_at_zero)
 	{
+	  struct objfile *objfile = dwarf2_per_objfile->objfile;
 	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
 	  complaint (&symfile_complaints,
 		     _("DW_AT_low_pc %s is zero "
 		       "for DIE at %s [in module %s]"),
-		     paddress (gdbarch, part_die->lowpc),
-		     sect_offset_str (part_die->sect_off),
+		     paddress (gdbarch, lowpc),
+		     sect_offset_str (sect_off),
 		     objfile_name (objfile));
 	}
       /* dwarf2_get_pc_bounds has also the strict low < high requirement.  */
-      else if (part_die->lowpc >= part_die->highpc)
+      else if (lowpc >= highpc)
 	{
+	  struct objfile *objfile = dwarf2_per_objfile->objfile;
 	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
 	  complaint (&symfile_complaints,
 		     _("DW_AT_low_pc %s is not < DW_AT_high_pc %s "
 		       "for DIE at %s [in module %s]"),
-		     paddress (gdbarch, part_die->lowpc),
-		     paddress (gdbarch, part_die->highpc),
-		     sect_offset_str (part_die->sect_off),
+		     paddress (gdbarch, lowpc),
+		     paddress (gdbarch, highpc),
+		     sect_offset_str (sect_off),
 		     objfile_name (objfile));
 	}
       else
-	part_die->has_pc_info = 1;
+	has_pc_info = 1;
     }
 
   return info_ptr;
