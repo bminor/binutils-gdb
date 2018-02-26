@@ -752,3 +752,12 @@ target_fetch_description_xml (struct target_ops *ops)
   return output;
 #endif
 }
+
+/* Take an xml string, parse it, and return the parsed description.  Does not
+   handle a string containing includes.  */
+
+const struct target_desc *
+target_read_description_xml_string (const char *xml_str)
+{
+  return tdesc_parse_xml (xml_str, nullptr, nullptr);
+}

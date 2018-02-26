@@ -27,7 +27,7 @@
 /* A target description.  Inherit from tdesc_feature so that target_desc
    can be used as tdesc_feature.  */
 
-struct target_desc
+struct target_desc : tdesc_element
 {
   /* A vector of elements of register definitions that
      describe the inferior's register set.  */
@@ -73,6 +73,8 @@ public:
     return !(*this == other);
   }
 #endif
+
+  void accept (tdesc_element_visitor &v) const;
 };
 
 /* Copy target description SRC to DEST.  */

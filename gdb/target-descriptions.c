@@ -333,6 +333,8 @@ struct target_desc : tdesc_element
   /* The features associated with this target.  */
   std::vector<tdesc_feature_up> features;
 
+  char *xmltarget = nullptr;
+
   void accept (tdesc_element_visitor &v) const override
   {
     v.visit_pre (this);
@@ -1667,6 +1669,21 @@ private:
   int m_next_regnum = 0;
 };
 
+/* See common/tdesc.h.  */
+
+const char *
+tdesc_get_features_xml (target_desc *tdesc)
+{
+  if (tdesc->xmltarget == nullptr)
+    {
+      std::string buffer ("@");
+      print_xml_feature v (buffer);
+      tdesc->accept (v);
+      tdesc->xmltarget = xstrdup (buffer.c_str ());
+    }
+  return tdesc->xmltarget;
+}
+
 static void
 maint_print_c_tdesc_cmd (const char *args, int from_tty)
 {
@@ -1760,7 +1777,36 @@ maintenance_check_xml_descriptions (const char *dir, int from_tty)
 	= file_read_description_xml (tdesc_xml.data ());
 
       if (tdesc == NULL || *tdesc != *e.second)
-	failed++;
+	{
+	  printf_filtered ( _("Descriptions for %s do not match\n"), e.first);
+	  failed++;
+	  continue;
+	}
+
+      /* Convert both descriptions to xml, and then back again.  Confirm all
+	 descriptions are identical.  */
+
+      const char *xml = tdesc_get_features_xml ((target_desc *) tdesc);
+      const char *xml2 = tdesc_get_features_xml ((target_desc *) e.second);
+      gdb_assert (*xml == '@');
+      gdb_assert (*xml2 == '@');
+      const target_desc *t_trans = target_read_description_xml_string (xml+1);
+      const target_desc *t_trans2 = target_read_description_xml_string (xml2+1);
+
+      if (t_trans == NULL || t_trans2 == NULL)
+	{
+	  printf_filtered (
+	    _("Could not convert descriptions for %s back to xml (%p %p)\n"),
+	    e.first, t_trans, t_trans2);
+	  failed++;
+	}
+      else if (*tdesc != *t_trans || *tdesc != *t_trans2)
+	{
+	  printf_filtered
+	    (_("Translated descriptions for %s do not match (%d %d)\n"),
+	    e.first, *tdesc == *t_trans, *tdesc == *t_trans2);
+	  failed++;
+	}
     }
   printf_filtered (_("Tested %lu XML files, %d failed\n"),
 		   (long) selftests::xml_tdesc.size (), failed);

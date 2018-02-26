@@ -163,7 +163,9 @@ done
 
 echo
 echo "static const char *expedite_regs_${name}[] = { \"`echo ${expedite} | sed 's/,/", "/g'`\", 0 };"
-if test "${xmltarget}" = x; then
+if test "${feature}" != x; then
+  echo "static const char *xmltarget_${name} = 0;"
+elif test "${xmltarget}" = x; then
   if test "${xmlarch}" = x && test "${xmlosabi}" = x; then
     echo "static const char *xmltarget_${name} = 0;"
   else
