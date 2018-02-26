@@ -8185,6 +8185,14 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     fprintf_unfiltered (gdb_stdlog, "mips_gdbarch_init: mips_abi = %d\n",
 			mips_abi);
 
+  /* Make sure we don't use a 32-bit architecture with a 64-bit ABI.  */
+  if (mips_abi != MIPS_ABI_EABI32
+      && mips_abi != MIPS_ABI_O32
+      && info.bfd_arch_info != NULL
+      && info.bfd_arch_info->arch == bfd_arch_mips
+      && info.bfd_arch_info->bits_per_word < 64)
+    info.bfd_arch_info = bfd_lookup_arch (bfd_arch_mips, bfd_mach_mips4000);
+
   /* Determine the default compressed ISA.  */
   if ((elf_flags & EF_MIPS_ARCH_ASE_MICROMIPS) != 0
       && (elf_flags & EF_MIPS_ARCH_ASE_M16) == 0)
