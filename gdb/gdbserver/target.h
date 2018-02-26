@@ -620,17 +620,44 @@ int kill_inferior (int);
   (the_target->supports_agent ? \
    (*the_target->supports_agent) () : 0)
 
-#define target_enable_btrace(ptid, conf) \
-  (*the_target->enable_btrace) (ptid, conf)
+static inline struct btrace_target_info *
+target_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
+{
+  if (the_target->enable_btrace == nullptr)
+    error (_("Target does not support branch tracing."));
 
-#define target_disable_btrace(tinfo) \
-  (*the_target->disable_btrace) (tinfo)
+  return (*the_target->enable_btrace) (ptid, conf);
+}
 
-#define target_read_btrace(tinfo, buffer, type)	\
-  (*the_target->read_btrace) (tinfo, buffer, type)
+static inline int
+target_disable_btrace (struct btrace_target_info *tinfo)
+{
+  if (the_target->disable_btrace == nullptr)
+    error (_("Target does not support branch tracing."));
 
-#define target_read_btrace_conf(tinfo, buffer)	\
-  (*the_target->read_btrace_conf) (tinfo, buffer)
+  return (*the_target->disable_btrace) (tinfo);
+}
+
+static inline int
+target_read_btrace (struct btrace_target_info *tinfo,
+		    struct buffer *buffer,
+		    enum btrace_read_type type)
+{
+  if (the_target->read_btrace == nullptr)
+    error (_("Target does not support branch tracing."));
+
+  return (*the_target->read_btrace) (tinfo, buffer, type);
+}
+
+static inline int
+target_read_btrace_conf (struct btrace_target_info *tinfo,
+			 struct buffer *buffer)
+{
+  if (the_target->read_btrace_conf == nullptr)
+    error (_("Target does not support branch tracing."));
+
+  return (*the_target->read_btrace_conf) (tinfo, buffer);
+}
 
 #define target_supports_range_stepping() \
   (the_target->supports_range_stepping ? \

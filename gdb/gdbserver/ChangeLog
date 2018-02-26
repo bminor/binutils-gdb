@@ -1,3 +1,12 @@
+2018-03-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* target.h (target_enable_btrace, target_disable_btrace)
+	(target_read_btrace, target_read_btrace_conf): Turn macro into
+	inline function.  Throw error if target method is not defined.
+	* server.c (handle_qxfer_btrace handle_qxfer_btrace_conf): Remove
+	check for btrace target method.  Be prepared to handle exceptions
+	from btrace target methods.
+
 2018-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* server.c (captured_main): Change order of error message printed

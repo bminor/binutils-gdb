@@ -1852,7 +1852,7 @@ handle_qxfer_btrace (const char *annex,
   enum btrace_read_type type;
   int result;
 
-  if (the_target->read_btrace == NULL || writebuf != NULL)
+  if (writebuf != NULL)
     return -2;
 
   if (ptid_equal (general_thread, null_ptid)
@@ -1891,12 +1891,21 @@ handle_qxfer_btrace (const char *annex,
     {
       buffer_free (&cache);
 
-      result = target_read_btrace (thread->btrace, &cache, type);
-      if (result != 0)
+      TRY
 	{
-	  memcpy (own_buf, cache.buffer, cache.used_size);
-	  return -3;
+	  result = target_read_btrace (thread->btrace, &cache, type);
+	  if (result != 0)
+	    memcpy (own_buf, cache.buffer, cache.used_size);
 	}
+      CATCH (exception, RETURN_MASK_ERROR)
+	{
+	  sprintf (own_buf, "E.%s", exception.message);
+	  result = -1;
+	}
+      END_CATCH
+
+      if (result != 0)
+	return -3;
     }
   else if (offset > cache.used_size)
     {
@@ -1923,7 +1932,7 @@ handle_qxfer_btrace_conf (const char *annex,
   struct thread_info *thread;
   int result;
 
-  if (the_target->read_btrace_conf == NULL || writebuf != NULL)
+  if (writebuf != NULL)
     return -2;
 
   if (annex[0] != '\0')
@@ -1953,12 +1962,21 @@ handle_qxfer_btrace_conf (const char *annex,
     {
       buffer_free (&cache);
 
-      result = target_read_btrace_conf (thread->btrace, &cache);
-      if (result != 0)
+      TRY
 	{
-	  memcpy (own_buf, cache.buffer, cache.used_size);
-	  return -3;
+	  result = target_read_btrace_conf (thread->btrace, &cache);
+	  if (result != 0)
+	    memcpy (own_buf, cache.buffer, cache.used_size);
 	}
+      CATCH (exception, RETURN_MASK_ERROR)
+	{
+	  sprintf (own_buf, "E.%s", exception.message);
+	  result = -1;
+	}
+      END_CATCH
+
+      if (result != 0)
+	return -3;
     }
   else if (offset > cache.used_size)
     {
