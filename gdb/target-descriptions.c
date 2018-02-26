@@ -1025,7 +1025,7 @@ tdesc_predefined_type (enum tdesc_type_kind kind)
   gdb_assert_not_reached ("bad predefined tdesc type");
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 struct tdesc_type *
 tdesc_named_type (const struct tdesc_feature *feature, const char *id)
@@ -1476,7 +1476,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 }
 
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 tdesc_create_reg (struct tdesc_feature *feature, const char *name,
@@ -1489,7 +1489,7 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
   feature->registers.emplace_back (reg);
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 struct tdesc_type *
 tdesc_create_vector (struct tdesc_feature *feature, const char *name,
@@ -1501,7 +1501,7 @@ tdesc_create_vector (struct tdesc_feature *feature, const char *name,
   return type;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 tdesc_type_with_fields *
 tdesc_create_struct (struct tdesc_feature *feature, const char *name)
@@ -1513,7 +1513,7 @@ tdesc_create_struct (struct tdesc_feature *feature, const char *name)
   return type;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 tdesc_set_struct_size (tdesc_type_with_fields *type, int size)
@@ -1523,7 +1523,7 @@ tdesc_set_struct_size (tdesc_type_with_fields *type, int size)
   type->size = size;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 tdesc_type_with_fields *
 tdesc_create_union (struct tdesc_feature *feature, const char *name)
@@ -1535,7 +1535,7 @@ tdesc_create_union (struct tdesc_feature *feature, const char *name)
   return type;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 tdesc_type_with_fields *
 tdesc_create_flags (struct tdesc_feature *feature, const char *name,
@@ -1563,7 +1563,7 @@ tdesc_create_enum (struct tdesc_feature *feature, const char *name,
   return type;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 tdesc_add_field (tdesc_type_with_fields *type, const char *field_name,
@@ -1588,7 +1588,7 @@ tdesc_add_typed_bitfield (tdesc_type_with_fields *type, const char *field_name,
   type->fields.emplace_back (field_name, field_type, start, end);
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
@@ -1606,7 +1606,7 @@ tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
   tdesc_add_typed_bitfield (type, field_name, start, end, field_type);
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 tdesc_add_flag (tdesc_type_with_fields *type, int start,
@@ -1630,7 +1630,7 @@ tdesc_add_enum_value (tdesc_type_with_fields *type, int value,
 			     value, -1);
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 struct tdesc_feature *
 tdesc_create_feature (struct target_desc *tdesc, const char *name,
@@ -1696,7 +1696,7 @@ set_tdesc_property (struct target_desc *target_desc,
   target_desc->properties.emplace_back (key, value);
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 set_tdesc_architecture (struct target_desc *target_desc,
@@ -1712,7 +1712,7 @@ set_tdesc_architecture (struct target_desc *target_desc,
   target_desc->arch = arch;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 set_tdesc_osabi (struct target_desc *target_desc, const char *name)
@@ -2077,7 +2077,7 @@ public:
     printf_unfiltered ("  Original: %s */\n\n",
 		       lbasename (m_filename_after_features.c_str ()));
 
-    printf_unfiltered ("#include \"arch/tdesc.h\"\n");
+    printf_unfiltered ("#include \"common/tdesc.h\"\n");
     printf_unfiltered ("\n");
   }
 

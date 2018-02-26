@@ -17,7 +17,7 @@
 
 #include "common-defs.h"
 #include "i386.h"
-#include "tdesc.h"
+#include "common/tdesc.h"
 #include "x86-xstate.h"
 #include <stdlib.h>
 

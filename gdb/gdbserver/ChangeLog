@@ -1,3 +1,8 @@
+2018-02-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* tdesc.c: Use common/tdesc.h.
+	* tdesc.h: Likewise.
+
 2018-02-20  Alan Hayward  <alan.hayward@arm.com>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 

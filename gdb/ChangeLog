@@ -1,3 +1,35 @@
+2018-02-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* arch/amd64.h: Use common/tdesc.h.
+	* arch/i386.c: Likewise.
+	* arch/i386.h: Likewise.
+	* arch/tic6x.c: Likewise.
+	* arch/tdesc.h: Move file from here...
+	* common/tdesc.h: ...to here.
+	* features/aarch64-core.c: Regenerate.
+	* features/aarch64-fpu.c: Regenerate.
+	* features/i386/32bit-avx.c: Regenerate.
+	* features/i386/32bit-avx512.c: Regenerate.
+	* features/i386/32bit-core.c: Regenerate.
+	* features/i386/32bit-linux.c: Regenerate.
+	* features/i386/32bit-mpx.c: Regenerate.
+	* features/i386/32bit-pkeys.c: Regenerate.
+	* features/i386/32bit-sse.c: Regenerate.
+	* features/i386/64bit-avx.c: Regenerate.
+	* features/i386/64bit-avx512.c: Regenerate.
+	* features/i386/64bit-core.c: Regenerate.
+	* features/i386/64bit-linux.c: Regenerate.
+	* features/i386/64bit-mpx.c: Regenerate.
+	* features/i386/64bit-pkeys.c: Regenerate.
+	* features/i386/64bit-segments.c: Regenerate.
+	* features/i386/64bit-sse.c: Regenerate.
+	* features/i386/x32-core.c: Regenerate.
+	* features/tic6x-c6xp.c: Regenerate.
+	* features/tic6x-core.c: Regenerate.
+	* features/tic6x-gp.c: Regenerate.
+	* target-descriptions.c: Use common/tdesc.h.
+	* target-descriptions.h: Likewise.
+
 2018-02-24  Tom Tromey  <tom@tromey.com>
 
 	* linux-thread-db.c (try_thread_db_load_from_pdir_1)

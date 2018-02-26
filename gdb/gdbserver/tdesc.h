@@ -19,7 +19,7 @@
 #ifndef TDESC_H
 #define TDESC_H
 
-#include "arch/tdesc.h"
+#include "common/tdesc.h"
 
 #include "regdef.h"
 #include <vector>

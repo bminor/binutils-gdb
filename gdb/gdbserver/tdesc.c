@@ -66,7 +66,7 @@ current_target_desc (void)
   return current_process ()->tdesc;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 set_tdesc_architecture (struct target_desc *target_desc,
@@ -75,7 +75,7 @@ set_tdesc_architecture (struct target_desc *target_desc,
   target_desc->arch = xstrdup (name);
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 set_tdesc_osabi (struct target_desc *target_desc, const char *name)
@@ -132,7 +132,7 @@ tdesc_get_features_xml (target_desc *tdesc)
 struct tdesc_type
 {};
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 struct tdesc_feature *
 tdesc_create_feature (struct target_desc *tdesc, const char *name,
@@ -144,7 +144,7 @@ tdesc_create_feature (struct target_desc *tdesc, const char *name,
   return tdesc;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 tdesc_type_with_fields *
 tdesc_create_flags (struct tdesc_feature *feature, const char *name,
@@ -153,14 +153,14 @@ tdesc_create_flags (struct tdesc_feature *feature, const char *name,
   return NULL;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 tdesc_add_flag (tdesc_type_with_fields *type, int start,
 		const char *flag_name)
 {}
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 struct tdesc_type *
 tdesc_named_type (const struct tdesc_feature *feature, const char *id)
@@ -168,7 +168,7 @@ tdesc_named_type (const struct tdesc_feature *feature, const char *id)
   return NULL;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 tdesc_type_with_fields *
 tdesc_create_union (struct tdesc_feature *feature, const char *id)
@@ -176,7 +176,7 @@ tdesc_create_union (struct tdesc_feature *feature, const char *id)
   return NULL;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 tdesc_type_with_fields *
 tdesc_create_struct (struct tdesc_feature *feature, const char *id)
@@ -184,7 +184,7 @@ tdesc_create_struct (struct tdesc_feature *feature, const char *id)
   return NULL;
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 tdesc_create_reg (struct tdesc_feature *feature, const char *name,
@@ -212,7 +212,7 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
   tdesc->reg_defs.push_back (reg);
 }
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 struct tdesc_type *
 tdesc_create_vector (struct tdesc_feature *feature, const char *name,
@@ -226,14 +226,14 @@ tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
 		    int start, int end)
 {}
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 tdesc_add_field (tdesc_type_with_fields *type, const char *field_name,
 		 struct tdesc_type *field_type)
 {}
 
-/* See arch/tdesc.h.  */
+/* See common/tdesc.h.  */
 
 void
 tdesc_set_struct_size (tdesc_type_with_fields *type, int size)
