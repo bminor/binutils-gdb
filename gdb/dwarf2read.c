@@ -785,6 +785,8 @@ struct dwarf2_cu
      this information, but later versions do.  */
 
   unsigned int processing_has_namespace_info : 1;
+
+  struct partial_die_info *find_partial_die (sect_offset sect_off);
 };
 
 /* Persistent data held for a compilation unit, even when not
@@ -18705,15 +18707,15 @@ read_partial_die (const struct die_reader_specs *reader,
 
 /* Find a cached partial DIE at OFFSET in CU.  */
 
-static struct partial_die_info *
-find_partial_die_in_comp_unit (sect_offset sect_off, struct dwarf2_cu *cu)
+struct partial_die_info *
+dwarf2_cu::find_partial_die (sect_offset sect_off)
 {
   struct partial_die_info *lookup_die = NULL;
   struct partial_die_info part_die;
 
   part_die.sect_off = sect_off;
   lookup_die = ((struct partial_die_info *)
-		htab_find_with_hash (cu->partial_dies, &part_die,
+		htab_find_with_hash (partial_dies, &part_die,
 				     to_underlying (sect_off)));
 
   return lookup_die;
@@ -18736,7 +18738,7 @@ find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
   if (offset_in_dwz == cu->per_cu->is_dwz
       && offset_in_cu_p (&cu->header, sect_off))
     {
-      pd = find_partial_die_in_comp_unit (sect_off, cu);
+      pd = cu->find_partial_die (sect_off);
       if (pd != NULL)
 	return pd;
       /* We missed recording what we needed.
@@ -18760,7 +18762,7 @@ find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
 	load_partial_comp_unit (per_cu);
 
       per_cu->cu->last_used = 0;
-      pd = find_partial_die_in_comp_unit (sect_off, per_cu->cu);
+      pd = per_cu->cu->find_partial_die (sect_off);
     }
 
   /* If we didn't find it, and not all dies have been loaded,
@@ -18778,7 +18780,7 @@ find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
 	 set.  */
       load_partial_comp_unit (per_cu);
 
-      pd = find_partial_die_in_comp_unit (sect_off, per_cu->cu);
+      pd = per_cu->cu->find_partial_die (sect_off);
     }
 
   if (pd == NULL)

@@ -1,5 +1,12 @@
 2018-02-26  Yao Qi  <yao.qi@linaro.org>
 
+	* dwarf2read.c (struct dwarf2_cu) <find_partial_die>: New method.
+	(find_partial_die_in_comp_unit): Change it to
+	dwarf2_cu::find_partial_die.
+	(find_partial_die): Update.
+
+2018-02-26  Yao Qi  <yao.qi@linaro.org>
+
 	* dwarf2read.c (read_partial_die): Remove the code checking abbrev
 	is NULL.
 
