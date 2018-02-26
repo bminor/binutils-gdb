@@ -1410,6 +1410,11 @@ struct partial_die_info : public allocate_on_obstack
        load_partial_dies.   */
     partial_die_info& operator=(const partial_die_info& rhs) = delete;
 
+    /* Adjust the partial die before generating a symbol for it.  This
+       function may set the is_external flag or change the DIE's
+       name.  */
+    void fixup (struct dwarf2_cu *cu);
+
     /* Offset of this DIE.  */
     const sect_offset sect_off;
 
@@ -1442,7 +1447,7 @@ struct partial_die_info : public allocate_on_obstack
     /* Flag set if any of the DIE's children are template arguments.  */
     unsigned int has_template_arguments : 1;
 
-    /* Flag set if fixup_partial_die has been called on this die.  */
+    /* Flag set if fixup has been called on this die.  */
     unsigned int fixup_called : 1;
 
     /* Flag set if DW_TAG_imported_unit uses DW_FORM_GNU_ref_alt.  */
@@ -1838,9 +1843,6 @@ static const gdb_byte *read_partial_die (const struct die_reader_specs *,
 
 static struct partial_die_info *find_partial_die (sect_offset, int,
 						  struct dwarf2_cu *);
-
-static void fixup_partial_die (struct partial_die_info *,
-			       struct dwarf2_cu *);
 
 static const gdb_byte *read_attribute (const struct die_reader_specs *,
 				       struct attribute *, struct attr_abbrev *,
@@ -9083,7 +9085,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 
   while (pdi != NULL)
     {
-      fixup_partial_die (pdi, cu);
+      pdi->fixup (cu);
 
       /* Anonymous namespaces or modules have no name but have interesting
 	 children, so we need to look at them.  Ditto for anonymous
@@ -9219,7 +9221,7 @@ partial_die_parent_scope (struct partial_die_info *pdi,
   if (parent->scope_set)
     return parent->scope;
 
-  fixup_partial_die (parent, cu);
+  parent->fixup (cu);
 
   grandparent_scope = partial_die_parent_scope (parent, cu);
 
@@ -9284,7 +9286,7 @@ partial_die_full_name (struct partial_die_info *pdi,
      types here will be reused if full symbols are loaded later.  */
   if (pdi->has_template_arguments)
     {
-      fixup_partial_die (pdi, cu);
+      pdi->fixup (cu);
 
       if (pdi->name != NULL && strchr (pdi->name, '<') == NULL)
 	{
@@ -9593,7 +9595,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
       pdi = pdi->die_child;
       while (pdi != NULL)
 	{
-	  fixup_partial_die (pdi, cu);
+	  pdi->fixup (cu);
 	  if (pdi->tag == DW_TAG_subprogram
 	      || pdi->tag == DW_TAG_inlined_subroutine
 	      || pdi->tag == DW_TAG_lexical_block)
@@ -18879,45 +18881,40 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
     }
 }
 
-/* Adjust PART_DIE before generating a symbol for it.  This function
-   may set the is_external flag or change the DIE's name.  */
-
-static void
-fixup_partial_die (struct partial_die_info *part_die,
-		   struct dwarf2_cu *cu)
+void
+partial_die_info::fixup (struct dwarf2_cu *cu)
 {
   /* Once we've fixed up a die, there's no point in doing so again.
      This also avoids a memory leak if we were to call
      guess_partial_die_structure_name multiple times.  */
-  if (part_die->fixup_called)
+  if (fixup_called)
     return;
 
   /* If we found a reference attribute and the DIE has no name, try
      to find a name in the referred to DIE.  */
 
-  if (part_die->name == NULL && part_die->has_specification)
+  if (name == NULL && has_specification)
     {
       struct partial_die_info *spec_die;
 
-      spec_die = find_partial_die (part_die->spec_offset,
-				   part_die->spec_is_dwz, cu);
+      spec_die = find_partial_die (spec_offset, spec_is_dwz, cu);
 
-      fixup_partial_die (spec_die, cu);
+      spec_die->fixup (cu);
 
       if (spec_die->name)
 	{
-	  part_die->name = spec_die->name;
+	  name = spec_die->name;
 
 	  /* Copy DW_AT_external attribute if it is set.  */
 	  if (spec_die->is_external)
-	    part_die->is_external = spec_die->is_external;
+	    is_external = spec_die->is_external;
 	}
     }
 
   /* Set default names for some unnamed DIEs.  */
 
-  if (part_die->name == NULL && part_die->tag == DW_TAG_namespace)
-    part_die->name = CP_ANONYMOUS_NAMESPACE_STR;
+  if (name == NULL && tag == DW_TAG_namespace)
+    name = CP_ANONYMOUS_NAMESPACE_STR;
 
   /* If there is no parent die to provide a namespace, and there are
      children, see if we can determine the namespace from their linkage
@@ -18925,25 +18922,25 @@ fixup_partial_die (struct partial_die_info *part_die,
   if (cu->language == language_cplus
       && !VEC_empty (dwarf2_section_info_def,
 		     cu->per_cu->dwarf2_per_objfile->types)
-      && part_die->die_parent == NULL
-      && part_die->has_children
-      && (part_die->tag == DW_TAG_class_type
-	  || part_die->tag == DW_TAG_structure_type
-	  || part_die->tag == DW_TAG_union_type))
-    guess_partial_die_structure_name (part_die, cu);
+      && die_parent == NULL
+      && has_children
+      && (tag == DW_TAG_class_type
+	  || tag == DW_TAG_structure_type
+	  || tag == DW_TAG_union_type))
+    guess_partial_die_structure_name (this, cu);
 
   /* GCC might emit a nameless struct or union that has a linkage
      name.  See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47510.  */
-  if (part_die->name == NULL
-      && (part_die->tag == DW_TAG_class_type
-	  || part_die->tag == DW_TAG_interface_type
-	  || part_die->tag == DW_TAG_structure_type
-	  || part_die->tag == DW_TAG_union_type)
-      && part_die->linkage_name != NULL)
+  if (name == NULL
+      && (tag == DW_TAG_class_type
+	  || tag == DW_TAG_interface_type
+	  || tag == DW_TAG_structure_type
+	  || tag == DW_TAG_union_type)
+      && linkage_name != NULL)
     {
       char *demangled;
 
-      demangled = gdb_demangle (part_die->linkage_name, DMGL_TYPES);
+      demangled = gdb_demangle (linkage_name, DMGL_TYPES);
       if (demangled)
 	{
 	  const char *base;
@@ -18957,7 +18954,7 @@ fixup_partial_die (struct partial_die_info *part_die,
 	    base = demangled;
 
 	  struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
-	  part_die->name
+	  name
 	    = ((const char *)
 	       obstack_copy0 (&objfile->per_bfd->storage_obstack,
 			      base, strlen (base)));
@@ -18965,7 +18962,7 @@ fixup_partial_die (struct partial_die_info *part_die,
 	}
     }
 
-  part_die->fixup_called = 1;
+  fixup_called = 1;
 }
 
 /* Read an attribute value described by an attribute form.  */
