@@ -1834,7 +1834,6 @@ static struct partial_die_info *load_partial_dies
 static const gdb_byte *read_partial_die (const struct die_reader_specs *,
 					 struct partial_die_info *,
 					 const struct abbrev_info &,
-					 unsigned int,
 					 const gdb_byte *);
 
 static struct partial_die_info *find_partial_die (sect_offset, int,
@@ -18351,8 +18350,8 @@ load_partial_dies (const struct die_reader_specs *reader,
       struct partial_die_info pdi ((sect_offset) (info_ptr - reader->buffer),
 				   abbrev);
 
-      info_ptr = read_partial_die (reader, &pdi, *abbrev, bytes_read,
-				   info_ptr);
+      info_ptr = read_partial_die (reader, &pdi, *abbrev,
+				   (const gdb_byte *) info_ptr + bytes_read);
 
       /* This two-pass algorithm for processing partial symbols has a
 	 high cost in cache pressure.  Thus, handle some simple cases
@@ -18527,12 +18526,13 @@ partial_die_info::partial_die_info (sect_offset sect_off_,
 {
 }
 
-/* Read a minimal amount of information into the minimal die structure.  */
+/* Read a minimal amount of information into the minimal die structure.
+   INFO_PTR should point just after the initial uleb128 of a DIE.  */
 
 static const gdb_byte *
 read_partial_die (const struct die_reader_specs *reader,
 		  struct partial_die_info *part_die,
-		  const struct abbrev_info &abbrev, unsigned int abbrev_len,
+		  struct abbrev_info *abbrev, unsigned int abbrev_len,
 		  const gdb_byte *info_ptr)
 {
   struct dwarf2_cu *cu = reader->cu;
@@ -18545,8 +18545,6 @@ read_partial_die (const struct die_reader_specs *reader,
   int has_low_pc_attr = 0;
   int has_high_pc_attr = 0;
   int high_pc_relative = 0;
-
-  info_ptr += abbrev_len;
 
   for (i = 0; i < abbrev.num_attrs; ++i)
     {

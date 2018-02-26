@@ -1,5 +1,11 @@
 2018-02-26  Yao Qi  <yao.qi@linaro.org>
 
+	* dwarf2read.c (read_partial_die): Update the declaration.
+	(load_partial_dies): Caller update.
+	(read_partial_die): Remove one argument abbrev_len.
+
+2018-02-26  Yao Qi  <yao.qi@linaro.org>
+
 	* dwarf2read.c (struct partial_die_info): Add ctor, delete
 	assignment operator.
 	(load_partial_dies): Use ctor and copy ctor.
