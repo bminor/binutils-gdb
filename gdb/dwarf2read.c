@@ -1792,7 +1792,7 @@ static struct partial_die_info *load_partial_dies
 
 static const gdb_byte *read_partial_die (const struct die_reader_specs *,
 					 struct partial_die_info *,
-					 struct abbrev_info *,
+					 const struct abbrev_info &,
 					 unsigned int,
 					 const gdb_byte *);
 
@@ -18310,7 +18310,7 @@ load_partial_dies (const struct die_reader_specs *reader,
       struct partial_die_info pdi;
 
       memset (&pdi, 0, sizeof (pdi));
-      info_ptr = read_partial_die (reader, &pdi, abbrev, bytes_read,
+      info_ptr = read_partial_die (reader, &pdi, *abbrev, bytes_read,
 				   info_ptr);
 
       /* This two-pass algorithm for processing partial symbols has a
@@ -18486,7 +18486,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 static const gdb_byte *
 read_partial_die (const struct die_reader_specs *reader,
 		  struct partial_die_info *part_die,
-		  struct abbrev_info *abbrev, unsigned int abbrev_len,
+		  const struct abbrev_info &abbrev, unsigned int abbrev_len,
 		  const gdb_byte *info_ptr)
 {
   struct dwarf2_cu *cu = reader->cu;
@@ -18506,15 +18506,12 @@ read_partial_die (const struct die_reader_specs *reader,
 
   info_ptr += abbrev_len;
 
-  if (abbrev == NULL)
-    return info_ptr;
+  part_die->tag = abbrev.tag;
+  part_die->has_children = abbrev.has_children;
 
-  part_die->tag = abbrev->tag;
-  part_die->has_children = abbrev->has_children;
-
-  for (i = 0; i < abbrev->num_attrs; ++i)
+  for (i = 0; i < abbrev.num_attrs; ++i)
     {
-      info_ptr = read_attribute (reader, &attr, &abbrev->attrs[i], info_ptr);
+      info_ptr = read_attribute (reader, &attr, &abbrev.attrs[i], info_ptr);
 
       /* Store the data if it is of an attribute we want to keep in a
          partial symbol table.  */
