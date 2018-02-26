@@ -1,3 +1,7 @@
+2018-02-26  Yao Qi  <yao.qi@linaro.org>
+
+	* dwarf2read.c (load_partial_dies): Move the location of XOBNEW.
+
 2018-02-26  Alan Hayward  <alan.hayward@arm.com>
 
 	* arch/amd64.h: Use common/tdesc.h.

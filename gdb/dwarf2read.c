@@ -18219,7 +18219,6 @@ load_partial_dies (const struct die_reader_specs *reader,
 {
   struct dwarf2_cu *cu = reader->cu;
   struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
-  struct partial_die_info *part_die;
   struct partial_die_info *parent_die, *last_die, *first_die = NULL;
   unsigned int bytes_read;
   unsigned int load_all = 0;
@@ -18241,8 +18240,6 @@ load_partial_dies (const struct die_reader_specs *reader,
 			    hashtab_obstack_allocate,
 			    dummy_obstack_deallocate);
 
-  part_die = XOBNEW (&cu->comp_unit_obstack, struct partial_die_info);
-
   while (1)
     {
       abbrev_info *abbrev = peek_die_abbrev (*reader, info_ptr, &bytes_read);
@@ -18251,15 +18248,8 @@ load_partial_dies (const struct die_reader_specs *reader,
       if (abbrev == NULL)
 	{
 	  if (--nesting_level == 0)
-	    {
-	      /* PART_DIE was probably the last thing allocated on the
-		 comp_unit_obstack, so we could call obstack_free
-		 here.  We don't do that because the waste is small,
-		 and will be cleaned up when we're done with this
-		 compilation unit.  This way, we're also more robust
-		 against other users of the comp_unit_obstack.  */
-	      return first_die;
-	    }
+	    return first_die;
+
 	  info_ptr += bytes_read;
 	  last_die = parent_die;
 	  parent_die = parent_die->die_parent;
@@ -18317,7 +18307,10 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  continue;
 	}
 
-      info_ptr = read_partial_die (reader, part_die, abbrev, bytes_read,
+      struct partial_die_info pdi;
+
+      memset (&pdi, 0, sizeof (pdi));
+      info_ptr = read_partial_die (reader, &pdi, abbrev, bytes_read,
 				   info_ptr);
 
       /* This two-pass algorithm for processing partial symbols has a
@@ -18337,18 +18330,18 @@ load_partial_dies (const struct die_reader_specs *reader,
 	 of them, for a language without namespaces), can be processed
 	 directly.  */
       if (parent_die == NULL
-	  && part_die->has_specification == 0
-	  && part_die->is_declaration == 0
-	  && ((part_die->tag == DW_TAG_typedef && !part_die->has_children)
-	      || part_die->tag == DW_TAG_base_type
-	      || part_die->tag == DW_TAG_subrange_type))
+	  && pdi.has_specification == 0
+	  && pdi.is_declaration == 0
+	  && ((pdi.tag == DW_TAG_typedef && !pdi.has_children)
+	      || pdi.tag == DW_TAG_base_type
+	      || pdi.tag == DW_TAG_subrange_type))
 	{
-	  if (building_psymtab && part_die->name != NULL)
-	    add_psymbol_to_list (part_die->name, strlen (part_die->name), 0,
+	  if (building_psymtab && pdi.name != NULL)
+	    add_psymbol_to_list (pdi.name, strlen (pdi.name), 0,
 				 VAR_DOMAIN, LOC_TYPEDEF,
 				 &objfile->static_psymbols,
 				 0, cu->language, objfile);
-	  info_ptr = locate_pdi_sibling (reader, part_die, info_ptr);
+	  info_ptr = locate_pdi_sibling (reader, &pdi, info_ptr);
 	  continue;
 	}
 
@@ -18360,37 +18353,41 @@ load_partial_dies (const struct die_reader_specs *reader,
 	 it could not find the child DIEs referenced later, this is checked
 	 above.  In correct DWARF DW_TAG_typedef should have no children.  */
 
-      if (part_die->tag == DW_TAG_typedef && part_die->has_children)
+      if (pdi.tag == DW_TAG_typedef && pdi.has_children)
 	complaint (&symfile_complaints,
 		   _("DW_TAG_typedef has childen - GCC PR debug/47510 bug "
 		     "- DIE at %s [in module %s]"),
-		   sect_offset_str (part_die->sect_off), objfile_name (objfile));
+		   sect_offset_str (pdi.sect_off), objfile_name (objfile));
 
       /* If we're at the second level, and we're an enumerator, and
 	 our parent has no specification (meaning possibly lives in a
 	 namespace elsewhere), then we can add the partial symbol now
 	 instead of queueing it.  */
-      if (part_die->tag == DW_TAG_enumerator
+      if (pdi.tag == DW_TAG_enumerator
 	  && parent_die != NULL
 	  && parent_die->die_parent == NULL
 	  && parent_die->tag == DW_TAG_enumeration_type
 	  && parent_die->has_specification == 0)
 	{
-	  if (part_die->name == NULL)
+	  if (pdi.name == NULL)
 	    complaint (&symfile_complaints,
 		       _("malformed enumerator DIE ignored"));
 	  else if (building_psymtab)
-	    add_psymbol_to_list (part_die->name, strlen (part_die->name), 0,
+	    add_psymbol_to_list (pdi.name, strlen (pdi.name), 0,
 				 VAR_DOMAIN, LOC_CONST,
 				 cu->language == language_cplus
 				 ? &objfile->global_psymbols
 				 : &objfile->static_psymbols,
 				 0, cu->language, objfile);
 
-	  info_ptr = locate_pdi_sibling (reader, part_die, info_ptr);
+	  info_ptr = locate_pdi_sibling (reader, &pdi, info_ptr);
 	  continue;
 	}
 
+      struct partial_die_info *part_die
+	  = XOBNEW (&cu->comp_unit_obstack, struct partial_die_info);
+
+      memcpy (part_die, &pdi, sizeof (pdi));
       /* We'll save this DIE so link it in.  */
       part_die->die_parent = parent_die;
       part_die->die_sibling = NULL;
@@ -18441,8 +18438,6 @@ load_partial_dies (const struct die_reader_specs *reader,
 					   INSERT);
 	  *slot = part_die;
 	}
-
-      part_die = XOBNEW (&cu->comp_unit_obstack, struct partial_die_info);
 
       /* For some DIEs we want to follow their children (if any).  For C
 	 we have no reason to follow the children of structures; for other
