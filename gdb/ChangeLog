@@ -1,5 +1,13 @@
 2018-02-26  Yao Qi  <yao.qi@linaro.org>
 
+	* dwarf2read.c (struct partial_die_info): Add ctor, delete
+	assignment operator.
+	(load_partial_dies): Use ctor and copy ctor.
+	(read_partial_die): Update.
+	(dwarf2_cu::find_partial_die): Use ctor.
+
+2018-02-26  Yao Qi  <yao.qi@linaro.org>
+
 	* dwarf2read.c (struct dwarf2_cu) <find_partial_die>: New method.
 	(find_partial_die_in_comp_unit): Change it to
 	dwarf2_cu::find_partial_die.

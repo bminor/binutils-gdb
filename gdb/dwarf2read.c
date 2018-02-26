@@ -1402,16 +1402,23 @@ file_entry::include_dir (const line_header *lh) const
 
 /* When we construct a partial symbol table entry we only
    need this much information.  */
-struct partial_die_info
+struct partial_die_info : public allocate_on_obstack
   {
+    partial_die_info (sect_offset sect_off, struct abbrev_info *abbrev);
+
+    /* Disable assign but still keep copy ctor, which is needed
+       load_partial_dies.   */
+    partial_die_info& operator=(const partial_die_info& rhs) = delete;
+
     /* Offset of this DIE.  */
-    sect_offset sect_off;
+    const sect_offset sect_off;
 
     /* DWARF-2 tag for this DIE.  */
-    ENUM_BITFIELD(dwarf_tag) tag : 16;
+    const ENUM_BITFIELD(dwarf_tag) tag : 16;
 
     /* Assorted flags describing the data found in this DIE.  */
-    unsigned int has_children : 1;
+    const unsigned int has_children : 1;
+
     unsigned int is_external : 1;
     unsigned int is_declaration : 1;
     unsigned int has_type : 1;
@@ -1446,15 +1453,15 @@ struct partial_die_info
 
     /* The name of this DIE.  Normally the value of DW_AT_name, but
        sometimes a default name for unnamed DIEs.  */
-    const char *name;
+    const char *name = nullptr;
 
     /* The linkage name, if present.  */
-    const char *linkage_name;
+    const char *linkage_name = nullptr;
 
     /* The scope to prepend to our children.  This is generally
        allocated on the comp_unit_obstack, so will disappear
        when this compilation unit leaves the cache.  */
-    const char *scope;
+    const char *scope = nullptr;
 
     /* Some data associated with the partial DIE.  The tag determines
        which field is live.  */
@@ -1464,26 +1471,58 @@ struct partial_die_info
       struct dwarf_block *locdesc;
       /* The offset of an import, for DW_TAG_imported_unit.  */
       sect_offset sect_off;
-    } d;
+    } d {};
 
     /* If HAS_PC_INFO, the PC range associated with this DIE.  */
-    CORE_ADDR lowpc;
-    CORE_ADDR highpc;
+    CORE_ADDR lowpc = 0;
+    CORE_ADDR highpc = 0;
 
     /* Pointer into the info_buffer (or types_buffer) pointing at the target of
        DW_AT_sibling, if any.  */
     /* NOTE: This member isn't strictly necessary, read_partial_die could
        return DW_AT_sibling values to its caller load_partial_dies.  */
-    const gdb_byte *sibling;
+    const gdb_byte *sibling = nullptr;
 
     /* If HAS_SPECIFICATION, the offset of the DIE referred to by
        DW_AT_specification (or DW_AT_abstract_origin or
        DW_AT_extension).  */
-    sect_offset spec_offset;
+    sect_offset spec_offset {};
 
     /* Pointers to this DIE's parent, first child, and next sibling,
        if any.  */
-    struct partial_die_info *die_parent, *die_child, *die_sibling;
+    struct partial_die_info *die_parent = nullptr;
+    struct partial_die_info *die_child = nullptr;
+    struct partial_die_info *die_sibling = nullptr;
+
+    friend struct partial_die_info *
+    dwarf2_cu::find_partial_die (sect_offset sect_off);
+
+  private:
+    /* Only need to do look up in dwarf2_cu::find_partial_die.  */
+    partial_die_info (sect_offset sect_off)
+      : partial_die_info (sect_off, DW_TAG_padding, 0)
+    {
+    }
+
+    partial_die_info (sect_offset sect_off_, enum dwarf_tag tag_,
+		      int has_children_)
+      : sect_off (sect_off_), tag (tag_), has_children (has_children_)
+    {
+      is_external = 0;
+      is_declaration = 0;
+      has_type = 0;
+      has_specification = 0;
+      has_pc_info = 0;
+      may_be_inlined = 0;
+      main_subprogram = 0;
+      scope_set = 0;
+      has_byte_size = 0;
+      has_const_value = 0;
+      has_template_arguments = 0;
+      fixup_called = 0;
+      is_dwz = 0;
+      spec_is_dwz = 0;
+    }
   };
 
 /* This data structure holds the information of an abbrev.  */
@@ -18309,9 +18348,9 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  continue;
 	}
 
-      struct partial_die_info pdi;
+      struct partial_die_info pdi ((sect_offset) (info_ptr - reader->buffer),
+				   abbrev);
 
-      memset (&pdi, 0, sizeof (pdi));
       info_ptr = read_partial_die (reader, &pdi, *abbrev, bytes_read,
 				   info_ptr);
 
@@ -18387,9 +18426,8 @@ load_partial_dies (const struct die_reader_specs *reader,
 	}
 
       struct partial_die_info *part_die
-	  = XOBNEW (&cu->comp_unit_obstack, struct partial_die_info);
+	= new (&cu->comp_unit_obstack) partial_die_info (pdi);
 
-      memcpy (part_die, &pdi, sizeof (pdi));
       /* We'll save this DIE so link it in.  */
       part_die->die_parent = parent_die;
       part_die->die_sibling = NULL;
@@ -18483,6 +18521,12 @@ load_partial_dies (const struct die_reader_specs *reader,
     }
 }
 
+partial_die_info::partial_die_info (sect_offset sect_off_,
+				    struct abbrev_info *abbrev)
+  : partial_die_info (sect_off_, abbrev->tag, abbrev->has_children)
+{
+}
+
 /* Read a minimal amount of information into the minimal die structure.  */
 
 static const gdb_byte *
@@ -18502,14 +18546,7 @@ read_partial_die (const struct die_reader_specs *reader,
   int has_high_pc_attr = 0;
   int high_pc_relative = 0;
 
-  memset (part_die, 0, sizeof (struct partial_die_info));
-
-  part_die->sect_off = (sect_offset) (info_ptr - buffer);
-
   info_ptr += abbrev_len;
-
-  part_die->tag = abbrev.tag;
-  part_die->has_children = abbrev.has_children;
 
   for (i = 0; i < abbrev.num_attrs; ++i)
     {
@@ -18711,9 +18748,8 @@ struct partial_die_info *
 dwarf2_cu::find_partial_die (sect_offset sect_off)
 {
   struct partial_die_info *lookup_die = NULL;
-  struct partial_die_info part_die;
+  struct partial_die_info part_die (sect_off);
 
-  part_die.sect_off = sect_off;
   lookup_die = ((struct partial_die_info *)
 		htab_find_with_hash (partial_dies, &part_die,
 				     to_underlying (sect_off)));
