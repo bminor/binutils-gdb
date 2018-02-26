@@ -628,6 +628,14 @@ tdesc_architecture (const struct target_desc *target_desc)
   return target_desc->arch;
 }
 
+/* See common/tdesc.h.  */
+
+const char *
+tdesc_architecture_name (const struct target_desc *target_desc)
+{
+  return target_desc->arch->printable_name;
+}
+
 /* Return the OSABI associated with this target description, or
    GDB_OSABI_UNKNOWN if no osabi was specified.  */
 
@@ -637,7 +645,16 @@ tdesc_osabi (const struct target_desc *target_desc)
   return target_desc->osabi;
 }
 
-
+/* See common/tdesc.h.  */
+
+const char *
+tdesc_osabi_name (const struct target_desc *target_desc)
+{
+  enum gdb_osabi osabi = tdesc_osabi (target_desc);
+  if (osabi > GDB_OSABI_UNKNOWN && osabi < GDB_OSABI_INVALID)
+    return gdbarch_osabi_name (osabi);
+  return nullptr;
+}
 
 /* Return 1 if this target description includes any registers.  */
 
