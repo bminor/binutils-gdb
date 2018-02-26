@@ -5064,7 +5064,7 @@ to zero.
 @section @code{.dc[@var{size}] @var{expressions}}
 @cindex @code{dc} directive
 
-The @code{.dc} directive expects zero of more @var{expressions} separated by
+The @code{.dc} directive expects zero or more @var{expressions} separated by
 commas.  These expressions are evaluated and their values inserted into the
 current section.  The size of the emitted value depends upon the suffix to the
 @code{.dc} directive:
