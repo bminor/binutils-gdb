@@ -1,3 +1,8 @@
+2018-02-26  Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb/mips-tdep.c (mips_gdbarch_init): Reorder ABI determination
+	ahead of target description loading.
+
 2018-02-26  Tom Tromey  <tom@tromey.com>
 
 	* stack.c (backtrace_command_1): Update.

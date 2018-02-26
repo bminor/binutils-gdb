@@ -8084,185 +8084,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int dspacc;
   int dspctl;
 
-  /* Fill in the OS dependent register numbers and names.  */
-  if (info.osabi == GDB_OSABI_LINUX)
-    {
-      mips_regnum.fp0 = 38;
-      mips_regnum.pc = 37;
-      mips_regnum.cause = 36;
-      mips_regnum.badvaddr = 35;
-      mips_regnum.hi = 34;
-      mips_regnum.lo = 33;
-      mips_regnum.fp_control_status = 70;
-      mips_regnum.fp_implementation_revision = 71;
-      mips_regnum.dspacc = -1;
-      mips_regnum.dspctl = -1;
-      dspacc = 72;
-      dspctl = 78;
-      num_regs = 90;
-      reg_names = mips_linux_reg_names;
-    }
-  else
-    {
-      mips_regnum.lo = MIPS_EMBED_LO_REGNUM;
-      mips_regnum.hi = MIPS_EMBED_HI_REGNUM;
-      mips_regnum.badvaddr = MIPS_EMBED_BADVADDR_REGNUM;
-      mips_regnum.cause = MIPS_EMBED_CAUSE_REGNUM;
-      mips_regnum.pc = MIPS_EMBED_PC_REGNUM;
-      mips_regnum.fp0 = MIPS_EMBED_FP0_REGNUM;
-      mips_regnum.fp_control_status = 70;
-      mips_regnum.fp_implementation_revision = 71;
-      mips_regnum.dspacc = dspacc = -1;
-      mips_regnum.dspctl = dspctl = -1;
-      num_regs = MIPS_LAST_EMBED_REGNUM + 1;
-      if (info.bfd_arch_info != NULL
-          && info.bfd_arch_info->mach == bfd_mach_mips3900)
-        reg_names = mips_tx39_reg_names;
-      else
-        reg_names = mips_generic_reg_names;
-    }
-
-  /* Check any target description for validity.  */
-  if (tdesc_has_registers (info.target_desc))
-    {
-      static const char *const mips_gprs[] = {
-	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-	"r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-	"r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
-	"r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31"
-      };
-      static const char *const mips_fprs[] = {
-	"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
-	"f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
-	"f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-	"f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-      };
-
-      const struct tdesc_feature *feature;
-      int valid_p;
-
-      feature = tdesc_find_feature (info.target_desc,
-				    "org.gnu.gdb.mips.cpu");
-      if (feature == NULL)
-	return NULL;
-
-      tdesc_data = tdesc_data_alloc ();
-
-      valid_p = 1;
-      for (i = MIPS_ZERO_REGNUM; i <= MIPS_RA_REGNUM; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
-					    mips_gprs[i]);
-
-
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  mips_regnum.lo, "lo");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  mips_regnum.hi, "hi");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  mips_regnum.pc, "pc");
-
-      if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
-
-      feature = tdesc_find_feature (info.target_desc,
-				    "org.gnu.gdb.mips.cp0");
-      if (feature == NULL)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
-
-      valid_p = 1;
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  mips_regnum.badvaddr, "badvaddr");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  MIPS_PS_REGNUM, "status");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  mips_regnum.cause, "cause");
-
-      if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
-
-      /* FIXME drow/2007-05-17: The FPU should be optional.  The MIPS
-	 backend is not prepared for that, though.  */
-      feature = tdesc_find_feature (info.target_desc,
-				    "org.gnu.gdb.mips.fpu");
-      if (feature == NULL)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
-
-      valid_p = 1;
-      for (i = 0; i < 32; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					    i + mips_regnum.fp0, mips_fprs[i]);
-
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  mips_regnum.fp_control_status,
-					  "fcsr");
-      valid_p
-	&= tdesc_numbered_register (feature, tdesc_data,
-				    mips_regnum.fp_implementation_revision,
-				    "fir");
-
-      if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
-
-      num_regs = mips_regnum.fp_implementation_revision + 1;
-
-      if (dspacc >= 0)
-	{
-	  feature = tdesc_find_feature (info.target_desc,
-					"org.gnu.gdb.mips.dsp");
-	  /* The DSP registers are optional; it's OK if they are absent.  */
-	  if (feature != NULL)
-	    {
-	      i = 0;
-	      valid_p = 1;
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						  dspacc + i++, "hi1");
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						  dspacc + i++, "lo1");
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						  dspacc + i++, "hi2");
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						  dspacc + i++, "lo2");
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						  dspacc + i++, "hi3");
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						  dspacc + i++, "lo3");
-
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						  dspctl, "dspctl");
-
-	      if (!valid_p)
-		{
-		  tdesc_data_cleanup (tdesc_data);
-		  return NULL;
-		}
-
-	      mips_regnum.dspacc = dspacc;
-	      mips_regnum.dspctl = dspctl;
-
-	      num_regs = mips_regnum.dspctl + 1;
-	    }
-	}
-
-      /* It would be nice to detect an attempt to use a 64-bit ABI
-	 when only 32-bit registers are provided.  */
-      reg_names = NULL;
-    }
-
   /* First of all, extract the elf_flags, if available.  */
   if (info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
     elf_flags = elf_elfheader (info.abfd)->e_flags;
@@ -8442,10 +8263,185 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       && tdesc_property (info.target_desc, PROPERTY_GP32) != NULL
       && mips_abi != MIPS_ABI_EABI32
       && mips_abi != MIPS_ABI_O32)
+    return NULL;
+
+  /* Fill in the OS dependent register numbers and names.  */
+  if (info.osabi == GDB_OSABI_LINUX)
     {
-      if (tdesc_data != NULL)
-	tdesc_data_cleanup (tdesc_data);
-      return NULL;
+      mips_regnum.fp0 = 38;
+      mips_regnum.pc = 37;
+      mips_regnum.cause = 36;
+      mips_regnum.badvaddr = 35;
+      mips_regnum.hi = 34;
+      mips_regnum.lo = 33;
+      mips_regnum.fp_control_status = 70;
+      mips_regnum.fp_implementation_revision = 71;
+      mips_regnum.dspacc = -1;
+      mips_regnum.dspctl = -1;
+      dspacc = 72;
+      dspctl = 78;
+      num_regs = 90;
+      reg_names = mips_linux_reg_names;
+    }
+  else
+    {
+      mips_regnum.lo = MIPS_EMBED_LO_REGNUM;
+      mips_regnum.hi = MIPS_EMBED_HI_REGNUM;
+      mips_regnum.badvaddr = MIPS_EMBED_BADVADDR_REGNUM;
+      mips_regnum.cause = MIPS_EMBED_CAUSE_REGNUM;
+      mips_regnum.pc = MIPS_EMBED_PC_REGNUM;
+      mips_regnum.fp0 = MIPS_EMBED_FP0_REGNUM;
+      mips_regnum.fp_control_status = 70;
+      mips_regnum.fp_implementation_revision = 71;
+      mips_regnum.dspacc = dspacc = -1;
+      mips_regnum.dspctl = dspctl = -1;
+      num_regs = MIPS_LAST_EMBED_REGNUM + 1;
+      if (info.bfd_arch_info != NULL
+          && info.bfd_arch_info->mach == bfd_mach_mips3900)
+        reg_names = mips_tx39_reg_names;
+      else
+        reg_names = mips_generic_reg_names;
+    }
+
+  /* Check any target description for validity.  */
+  if (tdesc_has_registers (info.target_desc))
+    {
+      static const char *const mips_gprs[] = {
+	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+	"r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+	"r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
+	"r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31"
+      };
+      static const char *const mips_fprs[] = {
+	"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
+	"f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
+	"f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
+	"f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
+      };
+
+      const struct tdesc_feature *feature;
+      int valid_p;
+
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.mips.cpu");
+      if (feature == NULL)
+	return NULL;
+
+      tdesc_data = tdesc_data_alloc ();
+
+      valid_p = 1;
+      for (i = MIPS_ZERO_REGNUM; i <= MIPS_RA_REGNUM; i++)
+	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+					    mips_gprs[i]);
+
+
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  mips_regnum.lo, "lo");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  mips_regnum.hi, "hi");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  mips_regnum.pc, "pc");
+
+      if (!valid_p)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.mips.cp0");
+      if (feature == NULL)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      valid_p = 1;
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  mips_regnum.badvaddr, "badvaddr");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  MIPS_PS_REGNUM, "status");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  mips_regnum.cause, "cause");
+
+      if (!valid_p)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      /* FIXME drow/2007-05-17: The FPU should be optional.  The MIPS
+	 backend is not prepared for that, though.  */
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.mips.fpu");
+      if (feature == NULL)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      valid_p = 1;
+      for (i = 0; i < 32; i++)
+	valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					    i + mips_regnum.fp0, mips_fprs[i]);
+
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  mips_regnum.fp_control_status,
+					  "fcsr");
+      valid_p
+	&= tdesc_numbered_register (feature, tdesc_data,
+				    mips_regnum.fp_implementation_revision,
+				    "fir");
+
+      if (!valid_p)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      num_regs = mips_regnum.fp_implementation_revision + 1;
+
+      if (dspacc >= 0)
+	{
+	  feature = tdesc_find_feature (info.target_desc,
+					"org.gnu.gdb.mips.dsp");
+	  /* The DSP registers are optional; it's OK if they are absent.  */
+	  if (feature != NULL)
+	    {
+	      i = 0;
+	      valid_p = 1;
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						  dspacc + i++, "hi1");
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						  dspacc + i++, "lo1");
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						  dspacc + i++, "hi2");
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						  dspacc + i++, "lo2");
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						  dspacc + i++, "hi3");
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						  dspacc + i++, "lo3");
+
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						  dspctl, "dspctl");
+
+	      if (!valid_p)
+		{
+		  tdesc_data_cleanup (tdesc_data);
+		  return NULL;
+		}
+
+	      mips_regnum.dspacc = dspacc;
+	      mips_regnum.dspctl = dspctl;
+
+	      num_regs = mips_regnum.dspctl + 1;
+	    }
+	}
+
+      /* It would be nice to detect an attempt to use a 64-bit ABI
+	 when only 32-bit registers are provided.  */
+      reg_names = NULL;
     }
 
   /* Try to find a pre-existing architecture.  */
