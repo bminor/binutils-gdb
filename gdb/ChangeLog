@@ -1,3 +1,8 @@
+2018-02-27  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* compile/compile.c (get_args): Add additional comments
+	explaining function.
+
 2018-02-27  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Tom Tromey  <tom@tromey.com>
 
