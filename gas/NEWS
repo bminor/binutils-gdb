@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add -O[2|s] command-line options to x86 assembler to enable alternate
+  shorter instruction encoding.
+
 * Add support for .nop directive.  It is currently supported only for
   x86 targets.
 

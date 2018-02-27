@@ -1,3 +1,17 @@
+2018-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/22871
+	* i386-gen.c (opcode_modifiers): Add Optimize.
+	* i386-opc.h (Optimize): New enum.
+	(i386_opcode_modifier): Add optimize.
+	* i386-opc.tbl: Add "Optimize" to "mov $imm, reg",
+	"sub reg, reg/mem", "test $imm, acc", "test $imm, reg/mem",
+	"and $imm, acc", "and $imm, reg/mem", "xor reg, reg/mem",
+	"movq $imm, reg" and AVX256 and AVX512 versions of vandnps,
+	vandnpd, vpandn, vpandnd, vpandnq, vxorps, vxorpd, vpxor,
+	vpxord and vpxorq.
+	* i386-tbl.h: Regenerated.
+
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
 	* crx-dis.c (getregliststring): Allocate a large enough buffer

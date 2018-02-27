@@ -1,3 +1,39 @@
+2018-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/22871
+	* NEWS: Mention -O[2|s].
+	* config/tc-i386.c (_i386_insn): Add no_optimize.
+	(optimize): New.
+	(optimize_for_space): Likewise.
+	(fits_in_imm7): New function.
+	(fits_in_imm31): Likewise.
+	(optimize_encoding): Likewise.
+	(md_assemble): Call optimize_encoding to optimize encoding.
+	(parse_insn): Handle {nooptimize}.
+	(md_shortopts): Append "O::".
+	(md_parse_option): Handle -On.
+	* doc/c-i386.texi: Document -O0, -O, -O1, -O2 and -Os as well
+	as {nooptimize}.
+	* testsuite/gas/cfi/cfi-x86_64.d: Pass -O0 to assembler.
+	* testsuite/gas/i386/ilp32/cfi/cfi-x86_64.d: Likewise.
+	* testsuite/gas/i386/i386.exp: Run optimize-1, optimize-2,
+	optimize-3, x86-64-optimize-1, x86-64-optimize-2,
+	x86-64-optimize-3 and x86-64-optimize-4.
+	* testsuite/gas/i386/optimize-1.d: New file.
+	* testsuite/gas/i386/optimize-1.s: Likewise.
+	* testsuite/gas/i386/optimize-2.d: Likewise.
+	* testsuite/gas/i386/optimize-2.s: Likewise.
+	* testsuite/gas/i386/optimize-3.d: Likewise.
+	* testsuite/gas/i386/optimize-3.s: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-1.s: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-1.d: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-2.d: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-2.s: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-3.d: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-3.s: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-4.d: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-4.s: Likewise.
+
 2018-02-27  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.

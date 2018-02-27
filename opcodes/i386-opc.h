@@ -601,6 +601,9 @@ enum
    */
   ImplicitQuadGroup,
 
+  /* Support encoding optimization.  */
+  Optimize,
+
   /* Compatible with old (<= 2.8.1) versions of gcc  */
   OldGcc,
   /* AT&T mnemonic.  */
@@ -678,6 +681,7 @@ typedef struct i386_opcode_modifier
   unsigned int disp8memshift:3;
   unsigned int nodefmask:1;
   unsigned int implicitquadgroup:1;
+  unsigned int optimize:1;
   unsigned int oldgcc:1;
   unsigned int attmnemonic:1;
   unsigned int attsyntax:1;

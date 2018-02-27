@@ -372,6 +372,9 @@ struct _i386_insn
     /* Prefer the REX byte in encoding.  */
     bfd_boolean rex_encoding;
 
+    /* Disable instruction size optimization.  */
+    bfd_boolean no_optimize;
+
     /* How to encode vector instructions.  */
     enum
       {
@@ -599,6 +602,22 @@ static enum check_kind
     check_error
   }
 sse_check, operand_check = check_warning;
+
+/* Optimization:
+   1. Clear the REX_W bit with register operand if possible.
+   2. Above plus use 128bit vector instruction to clear the full vector
+      register.
+ */
+static int optimize = 0;
+
+/* Optimization:
+   1. Clear the REX_W bit with register operand if possible.
+   2. Above plus use 128bit vector instruction to clear the full vector
+      register.
+   3. Above plus optimize "test{q,l,w} $imm8,%r{64,32,16}" to
+      "testb $imm7,%r8".
+ */
+static int optimize_for_space = 0;
 
 /* Register prefix used for error message.  */
 static const char *register_prefix = "%";
@@ -2185,6 +2204,18 @@ fits_in_imm4 (offsetT num)
   return (num & 0xf) == num;
 }
 
+static INLINE int
+fits_in_imm7 (offsetT num)
+{
+  return (num & 0x7f) == num;
+}
+
+static INLINE int
+fits_in_imm31 (offsetT num)
+{
+  return (num & 0x7fffffff) == num;
+}
+
 static i386_operand_type
 smallest_imm_type (offsetT num)
 {
@@ -3712,6 +3743,179 @@ check_hle (void)
     }
 }
 
+/* Try the shortest encoding by shortening operand size.  */
+
+static void
+optimize_encoding (void)
+{
+  int j;
+
+  if (optimize_for_space
+      && i.reg_operands == 1
+      && i.imm_operands == 1
+      && !i.types[1].bitfield.byte
+      && i.op[0].imms->X_op == O_constant
+      && fits_in_imm7 (i.op[0].imms->X_add_number)
+      && ((i.tm.base_opcode == 0xa8
+	   && i.tm.extension_opcode == None)
+	  || (i.tm.base_opcode == 0xf6
+	      && i.tm.extension_opcode == 0x0)))
+    {
+      /* Optimize: -Os:
+	   test $imm7, %r64/%r32/%r16  -> test $imm7, %r8
+       */
+      unsigned int base_regnum = i.op[1].regs->reg_num;
+      if (flag_code == CODE_64BIT || base_regnum < 4)
+	{
+	  i.types[1].bitfield.byte = 1;
+	  /* Ignore the suffix.  */
+	  i.suffix = 0;
+	  if (base_regnum >= 4
+	      && !(i.op[1].regs->reg_flags & RegRex))
+	    {
+	      /* Handle SP, BP, SI and DI registers.  */
+	      if (i.types[1].bitfield.word)
+		j = 16;
+	      else if (i.types[1].bitfield.dword)
+		j = 32;
+	      else
+		j = 48;
+	      i.op[1].regs -= j;
+	    }
+	}
+    }
+  else if (flag_code == CODE_64BIT
+	   && ((i.reg_operands == 1
+		&& i.imm_operands == 1
+		&& i.op[0].imms->X_op == O_constant
+		&& ((i.tm.base_opcode == 0xb0
+		     && i.tm.extension_opcode == None
+		     && fits_in_unsigned_long (i.op[0].imms->X_add_number))
+		    || (fits_in_imm31 (i.op[0].imms->X_add_number)
+			&& (((i.tm.base_opcode == 0x24
+			      || i.tm.base_opcode == 0xa8)
+			     && i.tm.extension_opcode == None)
+			    || (i.tm.base_opcode == 0x80
+				&& i.tm.extension_opcode == 0x4)
+			    || ((i.tm.base_opcode == 0xf6
+				 || i.tm.base_opcode == 0xc6)
+				&& i.tm.extension_opcode == 0x0)))))
+	       || (i.reg_operands == 2
+		   && i.op[0].regs == i.op[1].regs
+		   && ((i.tm.base_opcode == 0x30
+			|| i.tm.base_opcode == 0x28)
+		       && i.tm.extension_opcode == None)))
+	   && i.types[1].bitfield.qword)
+    {
+      /* Optimize: -O:
+	   andq $imm31, %r64   -> andl $imm31, %r32
+	   testq $imm31, %r64  -> testl $imm31, %r32
+	   xorq %r64, %r64     -> xorl %r32, %r32
+	   subq %r64, %r64     -> subl %r32, %r32
+	   movq $imm31, %r64   -> movl $imm31, %r32
+	   movq $imm32, %r64   -> movl $imm32, %r32
+        */
+      i.tm.opcode_modifier.norex64 = 1;
+      if (i.tm.base_opcode == 0xb0 || i.tm.base_opcode == 0xc6)
+	{
+	  /* Handle
+	       movq $imm31, %r64   -> movl $imm31, %r32
+	       movq $imm32, %r64   -> movl $imm32, %r32
+	   */
+	  i.tm.operand_types[0].bitfield.imm32 = 1;
+	  i.tm.operand_types[0].bitfield.imm32s = 0;
+	  i.tm.operand_types[0].bitfield.imm64 = 0;
+	  i.types[0].bitfield.imm32 = 1;
+	  i.types[0].bitfield.imm32s = 0;
+	  i.types[0].bitfield.imm64 = 0;
+	  i.types[1].bitfield.dword = 1;
+	  i.types[1].bitfield.qword = 0;
+	  if (i.tm.base_opcode == 0xc6)
+	    {
+	      /* Handle
+		   movq $imm31, %r64   -> movl $imm31, %r32
+	       */
+	      i.tm.base_opcode = 0xb0;
+	      i.tm.extension_opcode = None;
+	      i.tm.opcode_modifier.shortform = 1;
+	      i.tm.opcode_modifier.modrm = 0;
+	    }
+	}
+    }
+  else if (optimize > 1
+	   && i.reg_operands == 3
+	   && i.op[0].regs == i.op[1].regs
+	   && !i.types[2].bitfield.xmmword
+	   && (i.tm.opcode_modifier.vex
+	       || (!i.mask
+		   && !i.rounding
+		   && i.tm.opcode_modifier.evex
+		   && cpu_arch_flags.bitfield.cpuavx512vl))
+	   && ((i.tm.base_opcode == 0x55
+		|| i.tm.base_opcode == 0x6655
+		|| i.tm.base_opcode == 0x66df
+		|| i.tm.base_opcode == 0x57
+		|| i.tm.base_opcode == 0x6657
+		|| i.tm.base_opcode == 0x66ef)
+	       && i.tm.extension_opcode == None))
+    {
+      /* Optimize: -O2:
+	   VOP, one of vandnps, vandnpd, vxorps and vxorpd:
+	     EVEX VOP %zmmM, %zmmM, %zmmN
+	       -> VEX VOP %xmmM, %xmmM, %xmmN (M and N < 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	     EVEX VOP %ymmM, %ymmM, %ymmN
+	       -> VEX VOP %xmmM, %xmmM, %xmmN (M and N < 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	     VEX VOP %ymmM, %ymmM, %ymmN
+	       -> VEX VOP %xmmM, %xmmM, %xmmN
+	   VOP, one of vpandn and vpxor:
+	     VEX VOP %ymmM, %ymmM, %ymmN
+	       -> VEX VOP %xmmM, %xmmM, %xmmN
+	   VOP, one of vpandnd and vpandnq:
+	     EVEX VOP %zmmM, %zmmM, %zmmN
+	       -> VEX vpandn %xmmM, %xmmM, %xmmN (M and N < 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	     EVEX VOP %ymmM, %ymmM, %ymmN
+	       -> VEX vpandn %xmmM, %xmmM, %xmmN (M and N < 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	   VOP, one of vpxord and vpxorq:
+	     EVEX VOP %zmmM, %zmmM, %zmmN
+	       -> VEX vpxor %xmmM, %xmmM, %xmmN (M and N < 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	     EVEX VOP %ymmM, %ymmM, %ymmN
+	       -> VEX vpxor %xmmM, %xmmM, %xmmN (M and N < 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+       */
+      if (i.tm.opcode_modifier.evex)
+	{
+	  /* If only lower 16 vector registers are used, we can use
+	     VEX encoding.  */
+	  for (j = 0; j < 3; j++)
+	    if (register_number (i.op[j].regs) > 15)
+	      break;
+
+	  if (j < 3)
+	    i.tm.opcode_modifier.evex = EVEX128;
+	  else
+	    {
+	      i.tm.opcode_modifier.vex = VEX128;
+	      i.tm.opcode_modifier.vexw = VEXW0;
+	      i.tm.opcode_modifier.evex = 0;
+	    }
+	}
+      else
+	i.tm.opcode_modifier.vex = VEX128;
+
+      if (i.tm.opcode_modifier.vex)
+	for (j = 0; j < 3; j++)
+	  {
+	    i.types[j].bitfield.xmmword = 1;
+	    i.types[j].bitfield.ymmword = 0;
+	  }
+    }
+}
+
 /* This is the guts of the machine-dependent assembler.  LINE points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
@@ -3876,6 +4080,9 @@ md_assemble (char *line)
 	return;
       i.disp_operands = 0;
     }
+
+  if (optimize && !i.no_optimize && i.tm.opcode_modifier.optimize)
+    optimize_encoding ();
 
   if (!process_suffix ())
     return;
@@ -4130,6 +4337,10 @@ parse_insn (char *line, char *mnemonic)
 		case 0x7:
 		  /* {rex} */
 		  i.rex_encoding = TRUE;
+		  break;
+		case 0x8:
+		  /* {nooptimize} */
+		  i.no_optimize = TRUE;
 		  break;
 		default:
 		  abort ();
@@ -10074,9 +10285,9 @@ md_operand (expressionS *e)
 
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-const char *md_shortopts = "kVQ:sqn";
+const char *md_shortopts = "kVQ:sqnO::";
 #else
-const char *md_shortopts = "qn";
+const char *md_shortopts = "qnO::";
 #endif
 
 #define OPTION_32 (OPTION_MD_BASE + 0)
@@ -10511,6 +10722,27 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_MINTEL64:
       intel64 = 1;
+      break;
+
+    case 'O':
+      if (arg == NULL)
+	{
+	  optimize = 1;
+	  /* Turn off -Os.  */
+	  optimize_for_space = 0;
+	}
+      else if (*arg == 's')
+	{
+	  optimize_for_space = 1;
+	  /* Turn on all encoding optimizations.  */
+	  optimize = -1;
+	}
+      else
+	{
+	  optimize = atoi (arg);
+	  /* Turn off -Os.  */
+	  optimize_for_space = 0;
+	}
       break;
 
     default:
