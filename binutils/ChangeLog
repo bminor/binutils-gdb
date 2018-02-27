@@ -1,5 +1,11 @@
 2018-02-27  Nick Clifton  <nickc@redhat.com>
 
+	* po/pt.po: New Portuguese translation.
+	* configure.ac (ALL_LINGUAS): Add pt.
+	* configure: Regenerate.
+
+2018-02-27  Nick Clifton  <nickc@redhat.com>
+
 	PR 22875
 	* objcopy.c (copy_object): Check the error status after marking
 	symbols used in relocations.
