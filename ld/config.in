@@ -19,6 +19,10 @@
 /* Define to 1 if you want to enable -z relro in ELF linker by default. */
 #undef DEFAULT_LD_Z_RELRO
 
+/* Define to 1 if you want to enable -z separate-code in ELF linker by
+   default. */
+#undef DEFAULT_LD_Z_SEPARATE_CODE
+
 /* Define to 1 if you want to set DT_RUNPATH instead of DT_RPATH by default.
    */
 #undef DEFAULT_NEW_DTAGS

@@ -1,3 +1,13 @@
+2018-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* configure.ac: Add --enable-separate-code.
+	(DEFAULT_LD_Z_SEPARATE_CODE): New AC_DEFINE_UNQUOTED.  Default
+	to 1 for Linux/x86 targets,
+	* elf64-x86-64.c (ELF_MAXPAGESIZE): Set to 0x1000 if
+	DEFAULT_LD_Z_SEPARATE_CODE is 1.
+
 2018-02-27  Nick Clifton  <nickc@redhat.com>
 
 	* aout-cris.c (swap_ext_reloc_out): Standadize error/warning

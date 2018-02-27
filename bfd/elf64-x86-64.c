@@ -4942,7 +4942,11 @@ elf_x86_64_special_sections[]=
 #define ELF_ARCH			    bfd_arch_i386
 #define ELF_TARGET_ID			    X86_64_ELF_DATA
 #define ELF_MACHINE_CODE		    EM_X86_64
-#define ELF_MAXPAGESIZE			    0x200000
+#if DEFAULT_LD_Z_SEPARATE_CODE
+# define ELF_MAXPAGESIZE		    0x1000
+#else
+# define ELF_MAXPAGESIZE		    0x200000
+#endif
 #define ELF_MINPAGESIZE			    0x1000
 #define ELF_COMMONPAGESIZE		    0x1000
 
@@ -5335,7 +5339,11 @@ elf64_l1om_elf_object_p (bfd *abfd)
 #undef	ELF_MAXPAGESIZE
 #undef	ELF_MINPAGESIZE
 #undef	ELF_COMMONPAGESIZE
-#define ELF_MAXPAGESIZE			0x200000
+#if DEFAULT_LD_Z_SEPARATE_CODE
+# define ELF_MAXPAGESIZE		0x1000
+#else
+# define ELF_MAXPAGESIZE		0x200000
+#endif
 #define ELF_MINPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
 #undef	elf_backend_plt_alignment

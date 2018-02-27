@@ -177,6 +177,16 @@ AC_ARG_ENABLE(relro,
   no)  ac_default_ld_z_relro=0 ;;
 esac])dnl
 
+# Decide if -z separate-code should be enabled in ELF linker by default.
+ac_default_ld_z_separate_code=unset
+AC_ARG_ENABLE(separate-code,
+	      AS_HELP_STRING([--enable-separate-code],
+	      [enable -z separate-code in ELF linker by default]),
+[case "${enableval}" in
+  yes) ac_default_ld_z_separate_code=1 ;;
+  no) ac_default_ld_z_separate_code=0 ;;
+esac])
+
 # Decide which "--hash-style" to use by default
 # Provide a configure time option to override our default.
 AC_ARG_ENABLE([default-hash-style],
@@ -433,6 +443,13 @@ fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_RELRO,
   $ac_default_ld_z_relro,
   [Define to 1 if you want to enable -z relro in ELF linker by default.])
+
+if test "${ac_default_ld_z_separate_code}" = unset; then
+  ac_default_ld_z_separate_code=0
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_SEPARATE_CODE,
+  $ac_default_ld_z_separate_code,
+  [Define to 1 if you want to enable -z separate-code in ELF linker by default.])
 
 AC_DEFINE_UNQUOTED([DEFAULT_EMIT_SYSV_HASH],
   [$ac_default_emit_sysv_hash],

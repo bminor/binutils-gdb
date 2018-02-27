@@ -106,6 +106,7 @@ gld${EMULATION_NAME}_before_parse (void)
   `if test -n "$CALL_NOP_BYTE" ; then echo link_info.call_nop_byte = $CALL_NOP_BYTE; fi`;
   link_info.check_relocs_after_open_input = TRUE;
   link_info.relro = DEFAULT_LD_Z_RELRO;
+  link_info.separate_code = DEFAULT_LD_Z_SEPARATE_CODE;
 }
 
 EOF

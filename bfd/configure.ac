@@ -97,6 +97,30 @@ if test $use_secureplt = true; then
     [Define if we should default to creating read-only plt entries])
 fi
 
+# Decide if -z separate-code should be enabled in ELF linker by default.
+ac_default_ld_z_separate_code=unset
+AC_ARG_ENABLE(separate-code,
+	      AS_HELP_STRING([--enable-separate-code],
+	      [enable -z separate-code in ELF linker by default]),
+[case "${enableval}" in
+  yes) ac_default_ld_z_separate_code=1 ;;
+  no) ac_default_ld_z_separate_code=0 ;;
+esac])
+# Enable -z separate-code by default for Linux/x86.
+case "${target}" in
+i[3-7]86-*-linux-* | x86_64-*-linux-*)
+  if test ${ac_default_ld_z_separate_code} = unset; then
+    ac_default_ld_z_separate_code=1
+  fi
+  ;;
+esac
+if test "${ac_default_ld_z_separate_code}" = unset; then
+  ac_default_ld_z_separate_code=0
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_SEPARATE_CODE,
+  $ac_default_ld_z_separate_code,
+  [Define to 1 if you want to enable -z separate-code in ELF linker by default.])
+
 AC_ARG_ENABLE(leading-mingw64-underscores,
   AS_HELP_STRING([--enable-leading-mingw64-underscores],
                  [Enable leading underscores on 64 bit mingw targets]),

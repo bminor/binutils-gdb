@@ -1,3 +1,15 @@
+2018-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention --enable-separate-code.
+	* configure.ac: Add --enable-separate-code.
+	(DEFAULT_LD_Z_SEPARATE_CODE): New AC_DEFINE_UNQUOTED.
+	* configure.tgt: Default ac_default_ld_z_separate_code to 1 for
+	Linux/x86 targets.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set
+	link_info.separate_code DEFAULT_LD_Z_SEPARATE_CODE.
+
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
 	* emulparams/call_nop.sh, * emulparams/cet.sh,

@@ -968,3 +968,12 @@ frv-*-* | hppa*-*-* | ia64-*-* | mips*-*-*)
   fi
   ;;
 esac
+
+# Enable -z separate-code by default for Linux/x86.
+case "${target}" in
+i[3-7]86-*-linux-* | x86_64-*-linux-*)
+  if test ${ac_default_ld_z_separate_code} = unset; then
+    ac_default_ld_z_separate_code=1
+  fi
+  ;;
+esac
