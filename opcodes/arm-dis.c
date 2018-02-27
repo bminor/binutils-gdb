@@ -3393,7 +3393,7 @@ print_insn_coprocessor (bfd_vma pc,
   struct arm_private_data *private_data = info->private_data;
   arm_feature_set allowed_arches = ARM_ARCH_NONE;
 
-  ARM_FEATURE_COPY (allowed_arches, private_data->features);
+  allowed_arches = private_data->features;
 
   for (insn = coprocessor_opcodes; insn->assembler; insn++)
     {
@@ -3419,7 +3419,7 @@ print_insn_coprocessor (bfd_vma pc,
 	    continue;
 
 	  case SENTINEL_GENERIC_START:
-	    ARM_FEATURE_COPY (allowed_arches, private_data->features);
+	    allowed_arches = private_data->features;
 	    continue;
 
 	  default:

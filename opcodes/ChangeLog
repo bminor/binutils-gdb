@@ -1,3 +1,8 @@
+2018-02-27  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (print_insn_coprocessor): Replace uses of ARM_FEATURE_COPY
+	macro by assignements.
+
 2018-02-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/22871
