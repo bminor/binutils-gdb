@@ -2532,7 +2532,7 @@ frv_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 
 /* Set the howto pointer for an FRV ELF reloc.  */
 
-static void
+static bfd_boolean
 frv_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
 			arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
@@ -2556,15 +2556,18 @@ frv_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
-	  r_type = 0;
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
 	}
       cache_ptr->howto = & elf32_frv_howto_table [r_type];
       break;
     }
+  return TRUE;
 }
 
 /* Set the howto pointer for an FRV ELF REL reloc.  */
-static void
+
+static bfd_boolean
 frvfdpic_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 			    arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
@@ -2595,8 +2598,9 @@ frvfdpic_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 
     default:
       cache_ptr->howto = NULL;
-      break;
+      return FALSE;
     }
+  return TRUE;
 }
 
 /* Perform a single relocation.  By default we use the standard BFD

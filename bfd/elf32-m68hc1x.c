@@ -963,7 +963,8 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  || r_type == R_M68HC11_GNU_VTINHERIT)
 	continue;
 
-      (*ebd->elf_info_to_howto_rel) (input_bfd, &arel, rel);
+      if (! (*ebd->elf_info_to_howto_rel) (input_bfd, &arel, rel))
+	continue;
       howto = arel.howto;
 
       h = NULL;

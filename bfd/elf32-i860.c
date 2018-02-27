@@ -761,10 +761,11 @@ lookup_howto (unsigned int rtype)
 	elf_code_to_howto_index[elf32_i860_howto_table[i].type] = i;
     }
 
-  BFD_ASSERT (rtype <= R_860_max);
+  if (rtype > R_860_max)
+    return NULL;
   i = elf_code_to_howto_index[rtype];
   if (i >= howto_tbl_size)
-    return 0;
+    return NULL;
   return elf32_i860_howto_table + i;
 }
 
@@ -880,8 +881,7 @@ elf32_i860_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       rtype = R_860_HIGOTOFF;
       break;
     default:
-      rtype = 0;
-      break;
+      return NULL;
     }
   return lookup_howto (rtype);
 }
@@ -904,13 +904,15 @@ elf32_i860_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 /* Given a ELF reloc, return the matching HOWTO structure.  */
-static void
+
+static bfd_boolean
 elf32_i860_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
 			       arelent *bfd_reloc,
 			       Elf_Internal_Rela *elf_reloc)
 {
   bfd_reloc->howto
     = lookup_howto ((unsigned) ELF32_R_TYPE (elf_reloc->r_info));
+  return bfd_reloc->howto != NULL;
 }
 
 /* Specialized relocation handler for R_860_SPLITn.  These relocations

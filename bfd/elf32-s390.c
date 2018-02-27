@@ -323,12 +323,13 @@ elf_s390_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* We need to use ELF32_R_TYPE so we have our own copy of this function,
    and elf32-s390.c has its own copy.  */
 
-static void
-elf_s390_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+static bfd_boolean
+elf_s390_info_to_howto (bfd *abfd,
 			arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
 {
   unsigned int r_type = ELF32_R_TYPE(dst->r_info);
+
   switch (r_type)
     {
     case R_390_GNU_VTINHERIT:
@@ -345,10 +346,13 @@ elf_s390_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
-	  r_type = R_390_NONE;
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
 	}
       cache_ptr->howto = &elf_howto_table[r_type];
     }
+
+  return TRUE;
 }
 
 /* A relocation function which doesn't do anything.  */

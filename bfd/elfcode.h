@@ -1430,6 +1430,7 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
        i < reloc_count;
        i++, relent++, native_relocs += entsize)
     {
+      bfd_boolean res;
       Elf_Internal_Rela rela;
 
       if (entsize == sizeof (Elf_External_Rela))
@@ -1456,6 +1457,7 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
 	    /* xgettext:c-format */
 	    (_("%pB(%pA): relocation %d has invalid symbol index %ld"),
 	     abfd, asect, i, (long) ELF_R_SYM (rela.r_info));
+	  bfd_set_error (bfd_error_bad_value);
 	  relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	}
       else
@@ -1472,14 +1474,16 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
       if ((entsize == sizeof (Elf_External_Rela)
 	   && ebd->elf_info_to_howto != NULL)
 	  || ebd->elf_info_to_howto_rel == NULL)
-	(*ebd->elf_info_to_howto) (abfd, relent, &rela);
+	res = ebd->elf_info_to_howto (abfd, relent, &rela);
       else
-	(*ebd->elf_info_to_howto_rel) (abfd, relent, &rela);
+	res = ebd->elf_info_to_howto_rel (abfd, relent, &rela);
+
+      if (! res || relent->howto == NULL)
+	goto error_return;
     }
 
   if (allocated != NULL)
     free (allocated);
-
   return TRUE;
 
  error_return:

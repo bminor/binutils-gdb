@@ -3023,9 +3023,18 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	 ignore input sections which have no corresponding output
 	 section.  */
       if (strip_symbols != STRIP_ALL)
-	bfd_map_over_sections (ibfd,
-			       mark_symbols_used_in_relocations,
-			       isympp);
+	{
+	  bfd_set_error (bfd_error_no_error);
+	  bfd_map_over_sections (ibfd,
+				 mark_symbols_used_in_relocations,
+				 isympp);
+	  if (bfd_get_error () != bfd_error_no_error)
+	    {
+	      status = 1;
+	      return FALSE;
+	    }
+	}
+
       osympp = (asymbol **) xmalloc ((symcount + add_symbols + 1) * sizeof (asymbol *));
       symcount = filter_symbols (ibfd, obfd, osympp, isympp, symcount);
     }

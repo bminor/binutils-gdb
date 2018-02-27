@@ -311,7 +311,7 @@ static reloc_howto_type sparc_rev32_howto =
   HOWTO(R_SPARC_REV32, 0,2,32,FALSE,0,complain_overflow_bitfield,bfd_elf_generic_reloc, "R_SPARC_REV32", FALSE,0,0xffffffff,TRUE);
 
 reloc_howto_type *
-_bfd_sparc_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+_bfd_sparc_elf_reloc_type_lookup (bfd *abfd,
 				  bfd_reloc_code_real_type code)
 {
   /* We explicitly handle each relocation type in the switch
@@ -585,8 +585,10 @@ _bfd_sparc_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     default:
       break;
     }
-    bfd_set_error (bfd_error_bad_value);
-    return NULL;
+  /* xgettext:c-format */
+  _bfd_error_handler (_("%pB: invalid BFD relocation type %d"), abfd, (int) code);
+  bfd_set_error (bfd_error_bad_value);
+  return NULL;
 }
 
 reloc_howto_type *
@@ -595,10 +597,7 @@ _bfd_sparc_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   unsigned int i;
 
-  for (i = 0;
-       i < (sizeof (_bfd_sparc_elf_howto_table)
-	    / sizeof (_bfd_sparc_elf_howto_table[0]));
-       i++)
+  for (i = 0; i < ARRAY_SIZE (_bfd_sparc_elf_howto_table); i++)
     if (_bfd_sparc_elf_howto_table[i].name != NULL
 	&& strcasecmp (_bfd_sparc_elf_howto_table[i].name, r_name) == 0)
       return &_bfd_sparc_elf_howto_table[i];
@@ -614,7 +613,8 @@ _bfd_sparc_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 reloc_howto_type *
-_bfd_sparc_elf_info_to_howto_ptr (bfd *abfd, unsigned int r_type)
+_bfd_sparc_elf_info_to_howto_ptr (bfd *abfd ATTRIBUTE_UNUSED,
+				  unsigned int r_type)
 {
   switch (r_type)
     {
@@ -638,7 +638,8 @@ _bfd_sparc_elf_info_to_howto_ptr (bfd *abfd, unsigned int r_type)
 	{
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
-	  r_type = R_SPARC_NONE;
+	  bfd_set_error (bfd_error_bad_value);
+	  return NULL;
 	}
       return &_bfd_sparc_elf_howto_table[r_type];
     }
@@ -649,13 +650,20 @@ _bfd_sparc_elf_info_to_howto_ptr (bfd *abfd, unsigned int r_type)
 #define SPARC_ELF_R_TYPE(r_info)	\
 	((r_info) & 0xff)
 
-void
+bfd_boolean
 _bfd_sparc_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			      Elf_Internal_Rela *dst)
 {
   unsigned int r_type = SPARC_ELF_R_TYPE (dst->r_info);
 
-  cache_ptr->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, r_type);
+  if ((cache_ptr->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, r_type)) == NULL)
+    {
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+  return TRUE;
 }
 
 

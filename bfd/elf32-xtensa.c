@@ -450,6 +450,9 @@ elf_xtensa_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       break;
     }
 
+  /* xgettext:c-format */
+  _bfd_error_handler (_("%pB: invalid relocation type %d"), abfd, (int) code);
+  bfd_set_error (bfd_error_bad_value);
   TRACE ("Unknown");
   return NULL;
 }
@@ -472,7 +475,7 @@ elf_xtensa_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Given an ELF "rela" relocation, find the corresponding howto and record
    it in the BFD internal arelent representation of the relocation.  */
 
-static void
+static bfd_boolean
 elf_xtensa_info_to_howto_rela (bfd *abfd,
 			       arelent *cache_ptr,
 			       Elf_Internal_Rela *dst)
@@ -484,9 +487,11 @@ elf_xtensa_info_to_howto_rela (bfd *abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = &elf_howto_table[r_type];
+  return TRUE;
 }
 
 

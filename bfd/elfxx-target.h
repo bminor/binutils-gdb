@@ -339,11 +339,11 @@
 #endif
 
 #ifndef elf_info_to_howto
-#define elf_info_to_howto 0
+#define elf_info_to_howto NULL
 #endif
 
 #ifndef elf_info_to_howto_rel
-#define elf_info_to_howto_rel 0
+#define elf_info_to_howto_rel NULL
 #endif
 
 #ifndef elf_backend_arch_data

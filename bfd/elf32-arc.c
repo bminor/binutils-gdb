@@ -505,16 +505,25 @@ bfd_elf32_bfd_reloc_name_lookup (bfd * abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for an ARC ELF reloc.  */
 
-static void
-arc_info_to_howto_rel (bfd * abfd ATTRIBUTE_UNUSED,
+static bfd_boolean
+arc_info_to_howto_rel (bfd * abfd,
 		       arelent * cache_ptr,
 		       Elf_Internal_Rela * dst)
 {
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_ARC_max);
+  if (r_type >= (unsigned int) R_ARC_max)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
   cache_ptr->howto = arc_elf_howto (r_type);
+  return TRUE;
 }
 
 /* Extract CPU features from an NTBS.  */

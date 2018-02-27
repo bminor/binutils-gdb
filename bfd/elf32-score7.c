@@ -2214,7 +2214,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 
 /* Score backend functions.  */
 
-void
+bfd_boolean
 s7_bfd_score_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 			    arelent *bfd_reloc,
 			    Elf_Internal_Rela *elf_reloc)
@@ -2223,9 +2223,10 @@ s7_bfd_score_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 
   r_type = ELF32_R_TYPE (elf_reloc->r_info);
   if (r_type >= ARRAY_SIZE (elf32_score_howto_table))
-    bfd_reloc->howto = NULL;
-  else
-    bfd_reloc->howto = &elf32_score_howto_table[r_type];
+    return FALSE;
+
+  bfd_reloc->howto = &elf32_score_howto_table[r_type];
+  return TRUE;
 }
 
 /* Relocate an score ELF section.  */
@@ -2288,7 +2289,8 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
 
-      s7_bfd_score_info_to_howto (input_bfd, &bfd_reloc, (Elf_Internal_Rela *) rel);
+      if (! s7_bfd_score_info_to_howto (input_bfd, &bfd_reloc, (Elf_Internal_Rela *) rel))
+	continue;
       howto = bfd_reloc.howto;
 
       h = NULL;

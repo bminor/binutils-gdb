@@ -1495,7 +1495,7 @@ elf32_tic6x_reloc_name_lookup (bfd *abfd, const char *r_name)
   return NULL;
 }
 
-static void
+static bfd_boolean
 elf32_tic6x_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *bfd_reloc,
 			   Elf_Internal_Rela *elf_reloc)
 {
@@ -1503,12 +1503,28 @@ elf32_tic6x_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *bfd_reloc,
 
   r_type = ELF32_R_TYPE (elf_reloc->r_info);
   if (r_type >= ARRAY_SIZE (elf32_tic6x_howto_table))
-    bfd_reloc->howto = NULL;
-  else
-    bfd_reloc->howto = &elf32_tic6x_howto_table[r_type];
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  bfd_reloc->howto = &elf32_tic6x_howto_table[r_type];
+  if (bfd_reloc->howto == NULL || bfd_reloc->howto->name == NULL)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  return TRUE;
 }
 
-static void
+static bfd_boolean
 elf32_tic6x_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED, arelent *bfd_reloc,
 			       Elf_Internal_Rela *elf_reloc)
 {
@@ -1516,9 +1532,25 @@ elf32_tic6x_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED, arelent *bfd_reloc,
 
   r_type = ELF32_R_TYPE (elf_reloc->r_info);
   if (r_type >= ARRAY_SIZE (elf32_tic6x_howto_table_rel))
-    bfd_reloc->howto = NULL;
-  else
-    bfd_reloc->howto = &elf32_tic6x_howto_table_rel[r_type];
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  bfd_reloc->howto = &elf32_tic6x_howto_table_rel[r_type];
+  if (bfd_reloc->howto == NULL || bfd_reloc->howto->name == NULL)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  return TRUE;
 }
 
 void
@@ -2213,6 +2245,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
       bfd_reloc_status_type r;
       struct bfd_link_hash_entry *sbh;
       bfd_boolean is_rel;
+      bfd_boolean res;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       r_symndx = ELF32_R_SYM (rel->r_info);
@@ -2221,11 +2254,11 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 					     relocs, rel);
 
       if (is_rel)
-	elf32_tic6x_info_to_howto_rel (input_bfd, &bfd_reloc, rel);
+	res = elf32_tic6x_info_to_howto_rel (input_bfd, &bfd_reloc, rel);
       else
-	elf32_tic6x_info_to_howto (input_bfd, &bfd_reloc, rel);
-      howto = bfd_reloc.howto;
-      if (howto == NULL)
+	res = elf32_tic6x_info_to_howto (input_bfd, &bfd_reloc, rel);
+
+      if (!res || (howto = bfd_reloc.howto) == NULL)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -2608,6 +2641,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      input_bfd, r_type);
+	  bfd_set_error (bfd_error_bad_value);
 	  ok = FALSE;
 	  continue;
 	}

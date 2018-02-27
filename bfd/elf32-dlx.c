@@ -547,21 +547,22 @@ dlx_rtype_to_howto (bfd *abfd, unsigned int r_type)
 	{
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
-	  r_type = 0;
+	  bfd_set_error (bfd_error_bad_value);
+	  return NULL;
 	}
       return & dlx_elf_howto_table[r_type];
     }
 }
 
-static void
+static bfd_boolean
 elf32_dlx_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED,
 			 arelent * cache_ptr ATTRIBUTE_UNUSED,
 			 Elf_Internal_Rela * dst ATTRIBUTE_UNUSED)
 {
-  abort ();
+  return FALSE;
 }
 
-static void
+static bfd_boolean
 elf32_dlx_info_to_howto_rel (bfd *abfd,
 			     arelent *cache_ptr,
 			     Elf_Internal_Rela *dst)
@@ -570,7 +571,7 @@ elf32_dlx_info_to_howto_rel (bfd *abfd,
 
   r_type = ELF32_R_TYPE (dst->r_info);
   cache_ptr->howto = dlx_rtype_to_howto (abfd, r_type);
-  return;
+  return cache_ptr->howto != NULL;
 }
 
 #define TARGET_BIG_SYM		dlx_elf32_be_vec

@@ -324,6 +324,8 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
     unresolved "readelf -S bintest (failed to assemble)"
     unresolved "readelf -s bintest (failed to assemble)"
     unresolved "readelf -r bintest (failed to assemble)"
+    global readelf_size
+    set readelf_size ""
 } else {
 
     if ![is_remote host] {

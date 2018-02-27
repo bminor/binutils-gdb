@@ -66,9 +66,9 @@ static bfd_reloc_status_type mips16_gprel_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
-static void mips_info_to_howto_rel
+static bfd_boolean mips_info_to_howto_rel
   (bfd *, arelent *, Elf_Internal_Rela *);
-static void mips_info_to_howto_rela
+static bfd_boolean mips_info_to_howto_rela
   (bfd *, arelent *, Elf_Internal_Rela *);
 static bfd_boolean mips_elf_sym_is_global
   (bfd *, asymbol *);
@@ -3441,7 +3441,7 @@ mips_elf_n32_rtype_to_howto (bfd *abfd, unsigned int r_type, bfd_boolean rela_p)
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
-	  r_type = R_MIPS_NONE;
+	  return NULL;
 	}
       if (rela_p)
 	return &elf_mips_howto_table_rela[r_type];
@@ -3453,13 +3453,16 @@ mips_elf_n32_rtype_to_howto (bfd *abfd, unsigned int r_type, bfd_boolean rela_p)
 
 /* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
-static void
+static bfd_boolean
 mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
   cache_ptr->howto = mips_elf_n32_rtype_to_howto (abfd, r_type, FALSE);
+
+  if (cache_ptr->howto == NULL)
+    return FALSE;
 
   /* The addend for a GPREL16 or LITERAL relocation comes from the GP
      value for the object file.  We get the addend now, rather than
@@ -3468,11 +3471,13 @@ mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
   if (((*cache_ptr->sym_ptr_ptr)->flags & BSF_SECTION_SYM) != 0
       && (gprel16_reloc_p (r_type) || r_type == (unsigned int) R_MIPS_LITERAL))
     cache_ptr->addend = elf_gp (abfd);
+
+  return TRUE;
 }
 
 /* Given a MIPS Elf_Internal_Rela, fill in an arelent structure.  */
 
-static void
+static bfd_boolean
 mips_info_to_howto_rela (bfd *abfd,
 			 arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
@@ -3481,6 +3486,7 @@ mips_info_to_howto_rela (bfd *abfd,
   r_type = ELF32_R_TYPE (dst->r_info);
   cache_ptr->howto = mips_elf_n32_rtype_to_howto (abfd, r_type, TRUE);
   cache_ptr->addend = dst->r_addend;
+  return cache_ptr->howto != NULL;
 }
 
 /* Determine whether a symbol is global for the purposes of splitting

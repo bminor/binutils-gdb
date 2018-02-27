@@ -1100,7 +1100,7 @@ elf64_alpha_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Given an Alpha ELF reloc type, fill in an arelent structure.  */
 
-static void
+static bfd_boolean
 elf64_alpha_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			   Elf_Internal_Rela *dst)
 {
@@ -1112,9 +1112,10 @@ elf64_alpha_info_to_howto (bfd *abfd, arelent *cache_ptr,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      r_type = R_ALPHA_NONE;
+      return FALSE;
     }
   cache_ptr->howto = &elf64_alpha_howto_table[r_type];
+  return TRUE;
 }
 
 /* These two relocations create a two-word entry in the got.  */

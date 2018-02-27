@@ -278,8 +278,8 @@ rl78_reloc_name_lookup (bfd * abfd ATTRIBUTE_UNUSED, const char * r_name)
 
 /* Set the howto pointer for an RL78 ELF reloc.  */
 
-static void
-rl78_info_to_howto_rela (bfd *		     abfd ATTRIBUTE_UNUSED,
+static bfd_boolean
+rl78_info_to_howto_rela (bfd *		     abfd,
 			 arelent *	     cache_ptr,
 			 Elf_Internal_Rela * dst)
 {
@@ -291,9 +291,11 @@ rl78_info_to_howto_rela (bfd *		     abfd ATTRIBUTE_UNUSED,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = rl78_elf_howto_table + r_type;
+  return TRUE;
 }
 
 static bfd_vma

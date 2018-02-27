@@ -1040,8 +1040,8 @@ static const struct bfin_reloc_map bfin_reloc_map [] =
 };
 
 
-static void
-bfin_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+static bfd_boolean
+bfin_info_to_howto (bfd *abfd,
 		    arelent *cache_ptr,
 		    Elf_Internal_Rela *dst)
 {
@@ -1056,7 +1056,15 @@ bfin_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
     cache_ptr->howto = &bfin_gnuext_howto_table [r_type - BFIN_GNUEXT_RELOC_MIN];
 
   else
-    cache_ptr->howto = (reloc_howto_type *) NULL;
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  return TRUE;
 }
 
 /* Given a BFD reloc type, return the howto.  */
@@ -5424,7 +5432,7 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 #define bfd_elf32_bfd_reloc_name_lookup \
 					bfin_bfd_reloc_name_lookup
 #define elf_info_to_howto		bfin_info_to_howto
-#define elf_info_to_howto_rel		0
+#define elf_info_to_howto_rel		NULL
 #define elf_backend_object_p		elf32_bfin_object_p
 
 #define bfd_elf32_bfd_is_local_label_name \

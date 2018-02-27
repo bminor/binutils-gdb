@@ -28,7 +28,7 @@
 /* Forward declarations.  */
 static reloc_howto_type * m32c_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
-static void m32c_info_to_howto_rela
+static bfd_boolean m32c_info_to_howto_rela
   (bfd *, arelent *, Elf_Internal_Rela *);
 static bfd_boolean m32c_elf_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
@@ -291,10 +291,10 @@ m32c_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 
 /* Set the howto pointer for an M32C ELF reloc.  */
 
-static void
-m32c_info_to_howto_rela (bfd *abfd,
-			 arelent *cache_ptr,
-			 Elf_Internal_Rela *dst)
+static bfd_boolean
+m32c_info_to_howto_rela (bfd *               abfd,
+			 arelent *           cache_ptr,
+			 Elf_Internal_Rela * dst)
 {
   unsigned int r_type;
 
@@ -304,9 +304,11 @@ m32c_info_to_howto_rela (bfd *abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = & m32c_elf_howto_table [r_type];
+  return TRUE;
 }
 
 

@@ -458,7 +458,7 @@ visium_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 
 /* Set the howto pointer for a VISIUM ELF reloc.  */
 
-static void
+static bfd_boolean
 visium_info_to_howto_rela (bfd *abfd, arelent *cache_ptr,
 			   Elf_Internal_Rela *dst)
 {
@@ -480,11 +480,13 @@ visium_info_to_howto_rela (bfd *abfd, arelent *cache_ptr,
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
-	  r_type = 0;
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
 	}
       cache_ptr->howto = &visium_elf_howto_table[r_type];
       break;
     }
+  return TRUE;
 }
 
 /* Look through the relocs for a section during the first phase.

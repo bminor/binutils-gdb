@@ -872,13 +872,13 @@ struct elf_backend_data
   const void *arch_data;
 
   /* A function to translate an ELF RELA relocation to a BFD arelent
-     structure.  */
-  void (*elf_info_to_howto)
+     structure.  Returns TRUE upon success, FALSE otherwise.  */
+  bfd_boolean (*elf_info_to_howto)
     (bfd *, arelent *, Elf_Internal_Rela *);
 
   /* A function to translate an ELF REL relocation to a BFD arelent
-     structure.  */
-  void (*elf_info_to_howto_rel)
+     structure.  Returns TRUE upon success, FALSE otherwise.  */
+  bfd_boolean (*elf_info_to_howto_rel)
     (bfd *, arelent *, Elf_Internal_Rela *);
 
   /* A function to determine whether a symbol is global when
@@ -2181,7 +2181,7 @@ extern const struct bfd_elf_special_section *_bfd_elf_get_sec_type_attr
   (bfd *, asection *);
 
 /* If the target doesn't have reloc handling written yet:  */
-extern void _bfd_elf_no_info_to_howto
+extern bfd_boolean _bfd_elf_no_info_to_howto
   (bfd *, arelent *, Elf_Internal_Rela *);
 
 extern bfd_boolean bfd_section_from_shdr

@@ -2014,7 +2014,7 @@ ppc_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for a PowerPC ELF reloc.  */
 
-static void
+static bfd_boolean
 ppc_elf_info_to_howto (bfd *abfd,
 		       arelent *cache_ptr,
 		       Elf_Internal_Rela *dst)
@@ -2032,21 +2032,24 @@ ppc_elf_info_to_howto (bfd *abfd,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      r_type = R_PPC_NONE;
+      return FALSE;
     }
+
   cache_ptr->howto = ppc_elf_howto_table[r_type];
 
   /* Just because the above assert didn't trigger doesn't mean that
      ELF32_R_TYPE (dst->r_info) is necessarily a valid relocation.  */
-  if (!cache_ptr->howto)
+  if (cache_ptr->howto == NULL)
     {
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
 
-      cache_ptr->howto = ppc_elf_howto_table[R_PPC_NONE];
+      return FALSE;
     }
+
+  return TRUE;
 }
 
 /* Handle the R_PPC_ADDR16_HA and R_PPC_REL16_HA relocs.  */

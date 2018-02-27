@@ -29,7 +29,7 @@
 #define bfd_elf32_bfd_reloc_type_lookup	elf32_i960_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup \
   elf32_i960_reloc_name_lookup
-#define elf_info_to_howto		elf32_i960_info_to_howto
+#define elf_info_to_howto		NULL
 #define elf_info_to_howto_rel		elf32_i960_info_to_howto_rel
 
 /* ELF relocs are against symbols.  If we are producing relocatable
@@ -116,15 +116,7 @@ elf32_i960_bfd_to_reloc_type (bfd_reloc_code_real_type code)
     }
 }
 
-static void
-elf32_i960_info_to_howto (bfd *		      abfd ATTRIBUTE_UNUSED,
-			  arelent *	      cache_ptr ATTRIBUTE_UNUSED,
-			  Elf_Internal_Rela * dst ATTRIBUTE_UNUSED)
-{
-  abort ();
-}
-
-static void
+static bfd_boolean
 elf32_i960_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 			      arelent *cache_ptr,
 			      Elf_Internal_Rela *dst)
@@ -139,10 +131,12 @@ elf32_i960_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, type);
-      type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
 
   cache_ptr->howto = &elf_howto_table[(int) type];
+  return TRUE;
 }
 
 static reloc_howto_type *

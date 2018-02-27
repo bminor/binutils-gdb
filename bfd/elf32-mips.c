@@ -57,9 +57,9 @@ static bfd_reloc_status_type mips32_64bit_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
-static void mips_info_to_howto_rel
+static bfd_boolean mips_info_to_howto_rel
   (bfd *, arelent *, Elf_Internal_Rela *);
-static void mips_info_to_howto_rela
+static bfd_boolean mips_info_to_howto_rela
   (bfd *, arelent *, Elf_Internal_Rela *);
 static bfd_boolean mips_elf_sym_is_global
   (bfd *, asymbol *);
@@ -2224,7 +2224,7 @@ mips_elf32_rtype_to_howto (bfd *abfd,
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
-	  r_type = R_MIPS_NONE;
+	  return NULL;
 	}
       return &elf_mips_howto_table_rel[r_type];
     }
@@ -2232,7 +2232,7 @@ mips_elf32_rtype_to_howto (bfd *abfd,
 
 /* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
-static void
+static bfd_boolean
 mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
   const struct elf_backend_data *bed;
@@ -2241,6 +2241,13 @@ mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
   r_type = ELF32_R_TYPE (dst->r_info);
   bed = get_elf_backend_data (abfd);
   cache_ptr->howto = bed->elf_backend_mips_rtype_to_howto (abfd, r_type, FALSE);
+  if (cache_ptr->howto == NULL)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   /* The addend for a GPREL16 or LITERAL relocation comes from the GP
      value for the object file.  We get the addend now, rather than
@@ -2249,14 +2256,16 @@ mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
   if (((*cache_ptr->sym_ptr_ptr)->flags & BSF_SECTION_SYM) != 0
       && (gprel16_reloc_p (r_type) || literal_reloc_p (r_type)))
     cache_ptr->addend = elf_gp (abfd);
+
+  return TRUE;
 }
 
 /* Given a MIPS Elf_Internal_Rela, fill in an arelent structure.  */
 
-static void
+static bfd_boolean
 mips_info_to_howto_rela (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
-  mips_info_to_howto_rel (abfd, cache_ptr, dst);
+  return mips_info_to_howto_rel (abfd, cache_ptr, dst);
 
   /* If we ever need to do any extra processing with dst->r_addend
      (the field omitted in an Elf_Internal_Rel) we can do it here.  */

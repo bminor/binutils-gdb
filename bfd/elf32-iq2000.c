@@ -416,7 +416,7 @@ iq2000_final_link_relocate (reloc_howto_type *	howto,
 
 /* Set the howto pointer for a IQ2000 ELF reloc.  */
 
-static void
+static bfd_boolean
 iq2000_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
 			   arelent * cache_ptr,
 			   Elf_Internal_Rela * dst)
@@ -440,11 +440,13 @@ iq2000_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
-	  r_type = 0;
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
 	}
       cache_ptr->howto = & iq2000_elf_howto_table [r_type];
       break;
     }
+  return TRUE;
 }
 
 /* Look through the relocs for a section during the first phase.

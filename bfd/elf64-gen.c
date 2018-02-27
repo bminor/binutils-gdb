@@ -41,20 +41,22 @@ static reloc_howto_type dummy =
 	 0,			/* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
-static void
+static bfd_boolean
 elf_generic_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 			   arelent *bfd_reloc,
 			   Elf_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED)
 {
   bfd_reloc->howto = &dummy;
+  return TRUE;
 }
 
-static void
+static bfd_boolean
 elf_generic_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 			       arelent *bfd_reloc,
 			       Elf_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED)
 {
   bfd_reloc->howto = &dummy;
+  return TRUE;
 }
 
 static void

@@ -864,7 +864,7 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
 			 elf_hash_table (info)->tls_sec->alignment_power));
 }
 
-static void
+static bfd_boolean
 metag_info_to_howto_rela (bfd *abfd,
 			  arelent *cache_ptr,
 			  Elf_Internal_Rela *dst)
@@ -877,9 +877,11 @@ metag_info_to_howto_rela (bfd *abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = & elf_metag_howto_table [r_type];
+  return TRUE;
 }
 
 static reloc_howto_type *

@@ -472,7 +472,7 @@ sh_elf_reloc_name_lookup (bfd *abfd, const char *r_name)
 
 /* Given an ELF reloc, fill in the howto field of a relent.  */
 
-static void
+static bfd_boolean
 sh_elf_info_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
   unsigned int r;
@@ -491,10 +491,11 @@ sh_elf_info_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r);
       bfd_set_error (bfd_error_bad_value);
-      r = R_SH_NONE;
+      return FALSE;
     }
 
   cache_ptr->howto = get_howto_table (abfd) + r;
+  return TRUE;
 }
 
 /* This function handles relaxing for SH ELF.  See the corresponding

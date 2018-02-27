@@ -783,7 +783,7 @@ tilepro_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for an TILEPro ELF reloc.  */
 
-static void
+static bfd_boolean
 tilepro_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
 			    arelent * cache_ptr,
 			    Elf_Internal_Rela * dst)
@@ -793,11 +793,19 @@ tilepro_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   if (r_type <= (unsigned int) R_TILEPRO_IMM16_X1_TLS_LE_HA)
     cache_ptr->howto = &tilepro_elf_howto_table [r_type];
   else if (r_type - R_TILEPRO_GNU_VTINHERIT
-	   <= (unsigned int) R_TILEPRO_GNU_VTENTRY)
+	   <= ((unsigned int) R_TILEPRO_GNU_VTENTRY
+	       - (unsigned int) R_TILEPRO_GNU_VTINHERIT))
     cache_ptr->howto
       = &tilepro_elf_howto_table2 [r_type - R_TILEPRO_GNU_VTINHERIT];
   else
-    abort ();
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+  return TRUE;
 }
 
 typedef tilepro_bundle_bits (*tilepro_create_func)(int);

@@ -671,7 +671,7 @@ elf_cr16_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Retrieve a howto ptr using an internal relocation entry.  */
 
-static void
+static bfd_boolean
 elf_cr16_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
 {
@@ -683,9 +683,10 @@ elf_cr16_info_to_howto (bfd *abfd, arelent *cache_ptr,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      r_type = R_CR16_NONE;
+      return FALSE;
     }
   cache_ptr->howto = cr16_elf_howto_table + r_type;
+  return TRUE;
 }
 
 /* Look through the relocs for a section during the first phase.
@@ -2895,7 +2896,7 @@ _bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 #define bfd_elf32_bfd_reloc_type_lookup	  elf_cr16_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	  elf_cr16_reloc_name_lookup
 #define elf_info_to_howto		  elf_cr16_info_to_howto
-#define elf_info_to_howto_rel		  0
+#define elf_info_to_howto_rel		  NULL
 #define elf_backend_relocate_section	  elf32_cr16_relocate_section
 #define bfd_elf32_bfd_relax_section	  elf32_cr16_relax_section
 #define bfd_elf32_bfd_get_relocated_section_contents \

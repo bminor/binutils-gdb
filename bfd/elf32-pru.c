@@ -30,6 +30,7 @@
 #include "elf-bfd.h"
 #include "elf/pru.h"
 #include "opcode/pru.h"
+#include "libiberty.h"
 
 #define SWAP_VALS(A,B)		      \
   do {				      \
@@ -291,38 +292,42 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 static unsigned char elf_code_to_howto_index[R_PRU_ILLEGAL + 1];
 
 /* Return the howto for relocation RTYPE.  */
+
 static reloc_howto_type *
 lookup_howto (unsigned int rtype)
 {
-  static int initialized = 0;
+  static bfd_boolean initialized = FALSE;
   int i;
   int howto_tbl_size = (int) (sizeof (elf_pru_howto_table_rel)
 			      / sizeof (elf_pru_howto_table_rel[0]));
 
-  if (!initialized)
+  if (! initialized)
     {
-      initialized = 1;
+      initialized = TRUE;
       memset (elf_code_to_howto_index, 0xff,
 	      sizeof (elf_code_to_howto_index));
       for (i = 0; i < howto_tbl_size; i++)
 	elf_code_to_howto_index[elf_pru_howto_table_rel[i].type] = i;
     }
 
-  BFD_ASSERT (rtype <= R_PRU_ILLEGAL);
+  if (rtype > R_PRU_ILLEGAL)
+    return NULL;
   i = elf_code_to_howto_index[rtype];
   if (i >= howto_tbl_size)
-    return 0;
+    return NULL;
   return elf_pru_howto_table_rel + i;
 }
 
 /* Map for converting BFD reloc types to PRU reloc types.  */
+
 struct elf_reloc_map
 {
   bfd_reloc_code_real_type bfd_val;
   enum elf_pru_reloc_type elf_val;
 };
 
-static const struct elf_reloc_map pru_reloc_map[] = {
+static const struct elf_reloc_map pru_reloc_map[] =
+{
   {BFD_RELOC_NONE, R_PRU_NONE},
   {BFD_RELOC_PRU_16_PMEM, R_PRU_16_PMEM},
   {BFD_RELOC_PRU_U16_PMEMIMM, R_PRU_U16_PMEMIMM},
@@ -346,6 +351,7 @@ static const struct elf_reloc_map pru_reloc_map[] = {
 /* Assorted hash table functions.  */
 
 /* Create an entry in a PRU ELF linker hash table.  */
+
 static struct bfd_hash_entry *
 link_hash_newfunc (struct bfd_hash_entry *entry,
 		   struct bfd_hash_table *table, const char *string)
@@ -368,14 +374,14 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
 
 /* Implement bfd_elf32_bfd_reloc_type_lookup:
    Given a BFD reloc type, return a howto structure.  */
+
 static reloc_howto_type *
 pru_elf32_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 				   bfd_reloc_code_real_type code)
 {
-  int i;
-  for (i = 0;
-       i < (int) (sizeof (pru_reloc_map) / sizeof (struct elf_reloc_map));
-       ++i)
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (pru_reloc_map); ++i)
     if (pru_reloc_map[i].bfd_val == code)
       return lookup_howto ((unsigned int) pru_reloc_map[i].elf_val);
   return NULL;
@@ -383,15 +389,14 @@ pru_elf32_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Implement bfd_elf32_bfd_reloc_name_lookup:
    Given a reloc name, return a howto structure.  */
+
 static reloc_howto_type *
 pru_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 				   const char *r_name)
 {
   unsigned int i;
-  for (i = 0;
-       i < (sizeof (elf_pru_howto_table_rel)
-	    / sizeof (elf_pru_howto_table_rel[0]));
-       i++)
+
+  for (i = 0; i < ARRAY_SIZE (elf_pru_howto_table_rel); i++)
     if (elf_pru_howto_table_rel[i].name
 	&& strcasecmp (elf_pru_howto_table_rel[i].name, r_name) == 0)
       return &elf_pru_howto_table_rel[i];
@@ -401,15 +406,24 @@ pru_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Implement elf_info_to_howto:
    Given a ELF32 relocation, fill in a arelent structure.  */
-static void
-pru_elf32_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+
+static bfd_boolean
+pru_elf32_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			 Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < R_PRU_ILLEGAL);
+  if (r_type >= R_PRU_ILLEGAL)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+    
   cache_ptr->howto = lookup_howto (r_type);
+  return cache_ptr->howto != NULL;
 }
 
 /* Do the relocations that require special handling.  */

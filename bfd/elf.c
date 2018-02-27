@@ -8870,12 +8870,13 @@ _bfd_elf_set_section_contents (bfd *abfd,
   return TRUE;
 }
 
-void
+bfd_boolean
 _bfd_elf_no_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 			   arelent *cache_ptr ATTRIBUTE_UNUSED,
 			   Elf_Internal_Rela *dst ATTRIBUTE_UNUSED)
 {
   abort ();
+  return FALSE;
 }
 
 /* Try to convert a non-ELF reloc into an ELF one.  */

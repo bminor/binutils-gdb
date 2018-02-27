@@ -270,7 +270,8 @@ set_abiversion (bfd *abfd, int ver)
 /* Relocation HOWTO's.  */
 static reloc_howto_type *ppc64_elf_howto_table[(int) R_PPC64_max];
 
-static reloc_howto_type ppc64_elf_howto_raw[] = {
+static reloc_howto_type ppc64_elf_howto_raw[] =
+{
   /* This reloc does nothing.  */
   HOWTO (R_PPC64_NONE,		/* type */
 	 0,			/* rightshift */
@@ -2231,7 +2232,7 @@ ppc_howto_init (void)
 }
 
 static reloc_howto_type *
-ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+ppc64_elf_reloc_type_lookup (bfd *abfd,
 			     bfd_reloc_code_real_type code)
 {
   enum elf_ppc64_reloc_type r = R_PPC64_NONE;
@@ -2243,6 +2244,9 @@ ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   switch (code)
     {
     default:
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: invalid relocation type %d"), abfd, (int) code);
+      bfd_set_error (bfd_error_bad_value);
       return NULL;
 
     case BFD_RELOC_NONE:			r = R_PPC64_NONE;
@@ -2495,12 +2499,13 @@ ppc64_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 	&& strcasecmp (ppc64_elf_howto_raw[i].name, r_name) == 0)
       return &ppc64_elf_howto_raw[i];
 
+  
   return NULL;
 }
 
 /* Set the howto pointer for a PowerPC ELF reloc.  */
 
-static void
+static bfd_boolean
 ppc64_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			 Elf_Internal_Rela *dst)
 {
@@ -2516,9 +2521,20 @@ ppc64_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, type);
-      type = R_PPC64_NONE;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = ppc64_elf_howto_table[type];
+  if (cache_ptr->howto == NULL || cache_ptr->howto->name == NULL)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+  
+  return TRUE;
 }
 
 /* Handle the R_PPC64_ADDR16_HA and similar relocs.  */

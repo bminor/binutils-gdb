@@ -123,7 +123,7 @@ moxie_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 
 /* Set the howto pointer for an MOXIE ELF reloc.  */
 
-static void
+static bfd_boolean
 moxie_info_to_howto_rela (bfd *abfd,
 			  arelent *cache_ptr,
 			  Elf_Internal_Rela *dst)
@@ -136,9 +136,11 @@ moxie_info_to_howto_rela (bfd *abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = & moxie_elf_howto_table [r_type];
+  return TRUE;
 }
 
 /* Perform a single relocation.  By default we use the standard BFD

@@ -130,7 +130,11 @@ elf64_sparc_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	  relent->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, R_SPARC_13);
 	}
       else
-	relent->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, r_type);
+	{
+	  relent->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, r_type);
+	  if (relent->howto == NULL)
+	    goto error_return;
+	}
     }
 
   canon_reloc_count (asect) += relent - relents;

@@ -1,3 +1,12 @@
+2018-02-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22875
+	* objcopy.c (copy_object): Check the error status after marking
+	symbols used in relocations.
+	* testsuite/binutils-all/strip-13.s: New test source file.
+	* testsuite/binutils-all/strip-13.s: New test driver file.
+	* testsuite/binutils-all/objcopy.exp: Run the new test.
+
 2018-02-26  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/mips/mips-reginfo-n32.d,

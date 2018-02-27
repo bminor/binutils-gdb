@@ -289,7 +289,7 @@ i370_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for an i370 ELF reloc.  */
 
-static void
+static bfd_boolean
 i370_elf_info_to_howto (bfd *abfd,
 			arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
@@ -307,9 +307,10 @@ i370_elf_info_to_howto (bfd *abfd,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      r_type = R_I370_NONE;
+      return FALSE;
     }
   cache_ptr->howto = i370_elf_howto_table[r_type];
+  return TRUE;
 }
 
 /* Hack alert --  the following several routines look generic to me ...

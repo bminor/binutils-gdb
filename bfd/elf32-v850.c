@@ -1885,7 +1885,7 @@ v850_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for an V850 ELF reloc.  */
 
-static void
+static bfd_boolean
 v850_elf_info_to_howto_rel (bfd *abfd,
 			    arelent *cache_ptr,
 			    Elf_Internal_Rela *dst)
@@ -1898,16 +1898,18 @@ v850_elf_info_to_howto_rel (bfd *abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = &v850_elf_howto_table[r_type];
+  return TRUE;
 }
 
 /* Set the howto pointer for a V850 ELF reloc (type RELA).  */
 
-static void
+static bfd_boolean
 v850_elf_info_to_howto_rela (bfd *abfd,
-			     arelent *cache_ptr,
+			     arelent * cache_ptr,
 			     Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
@@ -1918,9 +1920,11 @@ v850_elf_info_to_howto_rela (bfd *abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = &v850_elf_howto_table[r_type];
+  return TRUE;
 }
 
 static bfd_boolean
@@ -4247,25 +4251,30 @@ v800_elf_reloc_name_lookup (bfd * abfd, const char * r_name)
 
 /* Set the howto pointer in CACHE_PTR for a V800 ELF reloc.  */
 
-static void
+static bfd_boolean
 v800_elf_info_to_howto (bfd *		    abfd,
 			arelent *	    cache_ptr,
 			Elf_Internal_Rela * dst)
 {
   unsigned int r_type = ELF32_R_TYPE (dst->r_info);
 
-  BFD_ASSERT (bfd_get_arch (abfd) == bfd_arch_v850_rh850);
-
-  BFD_ASSERT (r_type < (unsigned int) R_V800_max);
-
   if (r_type == R_V800_NONE)
     r_type = R_V810_NONE;
 
-  BFD_ASSERT (r_type >= (unsigned int) R_V810_NONE);
-  r_type -= R_V810_NONE;
-  BFD_ASSERT (r_type < ARRAY_SIZE (v800_elf_howto_table));
+  if (bfd_get_arch (abfd) != bfd_arch_v850_rh850
+      || r_type >= (unsigned int) R_V800_max
+      || r_type < (unsigned int) R_V810_NONE
+      || (r_type - R_V810_NONE) >= ARRAY_SIZE (v800_elf_howto_table))
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
-  cache_ptr->howto = v800_elf_howto_table + r_type;
+  cache_ptr->howto = v800_elf_howto_table + (r_type - R_V810_NONE);
+  return TRUE;
 }
 
 #undef  TARGET_LITTLE_SYM

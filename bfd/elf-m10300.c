@@ -798,7 +798,7 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for an MN10300 ELF reloc.  */
 
-static void
+static bfd_boolean
 mn10300_info_to_howto (bfd *abfd,
 		       arelent *cache_ptr,
 		       Elf_Internal_Rela *dst)
@@ -812,9 +812,10 @@ mn10300_info_to_howto (bfd *abfd,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      r_type = R_MN10300_NONE;
+      return FALSE;
     }
   cache_ptr->howto = elf_mn10300_howto_table + r_type;
+  return TRUE;
 }
 
 static int
@@ -5544,7 +5545,7 @@ mn10300_elf_mkobject (bfd *abfd)
 #endif
 
 #define elf_info_to_howto		mn10300_info_to_howto
-#define elf_info_to_howto_rel		0
+#define elf_info_to_howto_rel		NULL
 #define elf_backend_can_gc_sections	1
 #define elf_backend_rela_normal		1
 #define elf_backend_check_relocs	mn10300_elf_check_relocs

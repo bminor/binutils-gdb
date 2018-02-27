@@ -1231,7 +1231,7 @@ ip2k_elf_relax_section (bfd *abfd,
 
 /* Set the howto pointer for a IP2K ELF reloc.  */
 
-static void
+static bfd_boolean
 ip2k_info_to_howto_rela (bfd * abfd,
 			 arelent * cache_ptr,
 			 Elf_Internal_Rela * dst)
@@ -1244,9 +1244,11 @@ ip2k_info_to_howto_rela (bfd * abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = & ip2k_elf_howto_table [r_type];
+  return TRUE;
 }
 
 /* Perform a single relocation.

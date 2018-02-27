@@ -1272,7 +1272,7 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for an M32R ELF reloc.  */
 
-static void
+static bfd_boolean
 m32r_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 			arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
@@ -1285,20 +1285,32 @@ m32r_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = &m32r_elf_howto_table[r_type];
+  return TRUE;
 }
 
-static void
+static bfd_boolean
 m32r_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 		    arelent *cache_ptr,
 		    Elf_Internal_Rela *dst)
 {
-  BFD_ASSERT ((ELF32_R_TYPE(dst->r_info) == (unsigned int) R_M32R_NONE)
-	      || ((ELF32_R_TYPE(dst->r_info) > (unsigned int) R_M32R_GNU_VTENTRY)
-		  && (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_M32R_max)));
-  cache_ptr->howto = &m32r_elf_howto_table[ELF32_R_TYPE(dst->r_info)];
+  unsigned int r_type = ELF32_R_TYPE (dst->r_info);
+
+  if (r_type == (unsigned int) R_M32R_NONE
+      || ((r_type > (unsigned int) R_M32R_GNU_VTENTRY)
+	  && (r_type < (unsigned int) R_M32R_max)))
+    {
+      cache_ptr->howto = &m32r_elf_howto_table[r_type];
+      return TRUE;
+    }
+
+  /* xgettext:c-format */
+  _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, r_type);
+  bfd_set_error (bfd_error_bad_value);
+  return FALSE;  
 }
 
 

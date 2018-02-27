@@ -2375,7 +2375,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 }
 
 /* Score backend functions.  */
-static void
+static bfd_boolean
 s3_bfd_score_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 			    arelent *bfd_reloc,
 			    Elf_Internal_Rela *elf_reloc)
@@ -2384,9 +2384,10 @@ s3_bfd_score_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 
   r_type = ELF32_R_TYPE (elf_reloc->r_info);
   if (r_type >= ARRAY_SIZE (elf32_score_howto_table))
-    bfd_reloc->howto = NULL;
-  else
-    bfd_reloc->howto = &elf32_score_howto_table[r_type];
+    return FALSE;
+
+  bfd_reloc->howto = &elf32_score_howto_table[r_type];
+  return TRUE;
 }
 
 /* Relocate an score ELF section.  */
@@ -2448,7 +2449,8 @@ s3_bfd_score_elf_relocate_section (bfd *output_bfd,
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
 
-      s3_bfd_score_info_to_howto (input_bfd, &bfd_reloc, (Elf_Internal_Rela *) rel);
+      if (! s3_bfd_score_info_to_howto (input_bfd, &bfd_reloc, (Elf_Internal_Rela *) rel))
+	continue;
       howto = bfd_reloc.howto;
 
       h = NULL;
@@ -4069,7 +4071,7 @@ s3_elf32_score_new_section_hook (bfd *abfd, asection *sec)
 /*****************************************************************************/
 
 /* s3_s7: backend hooks.  */
-static void
+static bfd_boolean
 _bfd_score_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 			  arelent *bfd_reloc,
 			  Elf_Internal_Rela *elf_reloc)
@@ -4450,7 +4452,7 @@ _bfd_score_elf_common_definition (Elf_Internal_Sym *sym)
 #define ELF_MACHINE_ALT1		EM_SCORE_OLD
 #define ELF_MAXPAGESIZE			0x8000
 
-#define elf_info_to_howto		0
+#define elf_info_to_howto		NULL
 #define elf_info_to_howto_rel		_bfd_score_info_to_howto
 #define elf_backend_relocate_section	_bfd_score_elf_relocate_section
 #define elf_backend_check_relocs	_bfd_score_elf_check_relocs

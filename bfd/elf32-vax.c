@@ -27,7 +27,7 @@
 #include "elf/vax.h"
 
 static reloc_howto_type *reloc_type_lookup (bfd *, bfd_reloc_code_real_type);
-static void rtype_to_howto (bfd *, arelent *, Elf_Internal_Rela *);
+static bfd_boolean rtype_to_howto (bfd *, arelent *, Elf_Internal_Rela *);
 static struct bfd_hash_entry *elf_vax_link_hash_newfunc (struct bfd_hash_entry *,
 							 struct bfd_hash_table *,
 							 const char *);
@@ -278,7 +278,7 @@ static reloc_howto_type howto_table[] = {
 	 FALSE),		/* pcrel_offset */
 };
 
-static void
+static bfd_boolean
 rtype_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
@@ -290,9 +290,10 @@ rtype_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      r_type = R_VAX_NONE;
+      return FALSE;
     }
   cache_ptr->howto = &howto_table[r_type];
+  return TRUE;
 }
 
 #define elf_info_to_howto rtype_to_howto

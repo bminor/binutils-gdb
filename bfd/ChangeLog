@@ -1,3 +1,133 @@
+2018-02-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22875
+	* elf-bfd.h (struct elf_backend_data): Change the return type of
+	the elf_info_to_howto and elf_info_to_howto_rel function pointers
+	to bfd_boolean.
+	* elfcode.h (elf_slurp_reloc_table_from_section): Check the return
+	value from the info_to_howto function and fail if that function
+	failed.
+	* elf32-h8300.c (elf32_h8_relocate_section): Check return value
+	from the info_to_howto function.
+	(elf32_h8_relax_section): Likewise.
+	* elf32-lm32.c (lm32_elf_relocate_section): Likewise.
+	* elf32-m68hc1x.c (elf32_m68hc11_relocate_section): Likewise.
+	* elf32-score.c (s3_bfd_score_elf_relocate_section): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_relocate_section): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_relocate_section): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_relocate_section): Likewise.
+	* elf64-sparc.c (elf64_sparc_slurp_one_reloc_table): Likewise.
+	* elf64-x86-64.c (elf_x86_64_tls_transition): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_relocate_section): Likewise.
+	* elfnn-riscv.c (riscv_elf_check_relocs): Likewise.
+	(riscv_elf_relocate_section): Likewise.
+	* elf-hppa.h (elf_hppa_info_to_howto): Change return type to
+	bfd_boolean.  Issue an error message, set an error value and
+	return FALSE if the reloc is not recognized.
+	(elf_hppa_info_to_howto_rel): Likewise.
+	* elf-m10200.c (mn10200_info_to_howto): Likewise.
+	* elf-m10300.c (mn10300_info_to_howto): Likewise.
+	* elf.c (_bfd_elf_no_info_to_howto): Likewise.
+	* elf32-arc.c (arc_info_to_howto_rel): Likewise.
+	* elf32-arm.c (elf32_arm_info_to_howto): Likewise.
+	* elf32-avr.c (avr_info_to_howto_rela): Likewise.
+	* elf32-bfin.c (bfin_info_to_howto): Likewise.
+	* elf32-cr16.c (elf_cr16_info_to_howto): Likewise.
+	* elf32-cr16c.c (elf_cr16c_info_to_howto): Likewise.
+	* elf32-cris.c (elf_cr16c_info_to_howto_rel)
+	(cris_info_to_howto_rela): Likewise.
+	* elf32-crx.c (elf_crx_info_to_howto): Likewise.
+	* elf32-d10v.c (d10v_info_to_howto_rel): Likewise.
+	* elf32-d30v.c (d30v_info_to_howto_rel, d30v_info_to_howto_rela):
+	Likewise.
+	* elf32-dlx.c (dlx_rtype_to_howto, elf32_dlx_info_to_howto)
+	(elf32_dlx_info_to_howto_rel): Likewise.
+	* elf32-epiphany.c (epiphany_info_to_howto_rela): Likewise.
+	* elf32-fr30.c (fr30_info_to_howto_rela): Likewise.
+	* elf32-frv.c (frv_info_to_howto_rela)
+	(frvfdpic_info_to_howto_rel): Likewise.
+	* elf32-ft32.c (ft32_info_to_howto_rela): Likewise.
+	* elf32-gen.c (elf_generic_info_to_howto)
+	(elf_generic_info_to_howto_rel): Likewise.
+	* elf32-h8300.c (elf32_h8_info_to_howto)
+	(elf32_h8_info_to_howto_rel): Likewise.
+	* elf32-i370.c (i370_elf_info_to_howto): Likewise.
+	* elf32-i386.c (elf_i386_reloc_type_lookup)
+	(elf_i386_rtype_to_howto, elf_i386_info_to_howto_rel): Likewise.
+	* elf32-i860.c (lookup_howto, elf32_i860_info_to_howto_rela):
+	Likewise.
+	* elf32-i960.c (elf32_i960_info_to_howto_rel): Likewise.
+	* elf32-ip2k.c (ip2k_info_to_howto_rela): Likewise.
+	* elf32-iq2000.c (iq2000_info_to_howto_rela): Likewise.
+	* elf32-lm32.c (lm32_info_to_howto_rela): Likewise.
+	* elf32-m32c.c (m32c_info_to_howto_rela): Likewise.
+	* elf32-m32r.c (m32r_info_to_howto_rel, m32r_info_to_howto):
+	Likewise.
+	* elf32-m68hc11.c (m68hc11_info_to_howto_rel): Likewise.
+	* elf32-m68hc12.c (m68hc11_info_to_howto_rel): Likewise.
+	* elf32-m68k.c (rtype_to_howto): Likewise.
+	* elf32-mcore.c (mcore_elf_info_to_howto): Likewise.
+	* elf32-mep.c (mep_info_to_howto_rela): Likewise.
+	* elf32-metag.c (metag_info_to_howto_rela): Likewise.
+	* elf32-microblaze.c (microblaze_elf_info_to_howto): Likewise.
+	* elf32-mips.c (mips_info_to_howto_rel, mips_info_to_howto_rela):
+	Likewise.
+	* elf32-moxie.c (moxie_info_to_howto_rela): Likewise.
+	* elf32-msp430.c (msp430_info_to_howto_rela): Likewise.
+	* elf32-mt.c (mt_info_to_howto_rela): Likewise.
+	* elf32-nds32.c (nds32_info_to_howto_rel, nds32_info_to_howto):
+	Likewise.
+	* elf32-nios2.c (nios2_elf32_info_to_howto): Likewise.
+	* elf32-or1k.c (or1k_info_to_howto_rela): Likewise.
+	* elf32-pj.c (pj_elf_info_to_howto): Likewise.
+	* elf32-ppc.c (ppc_elf_info_to_howto): Likewise.
+	* elf32-pru.c (pru_elf32_info_to_howto): Likewise.
+	* elf32-rl78.c (rl78_info_to_howto_rela): Likewise.
+	* elf32-rx.c (rx_info_to_howto_rela): Likewise.
+	* elf32-s390.c (elf_s390_info_to_howto): Likewise.
+	* elf32-score.c (s3_bfd_score_info_to_howto)
+	(_bfd_score_info_to_howto): Likewise.
+	* elf32-score7.c (s7_bfd_score_info_to_howto): Likewise.
+	* elf32-sh.c (sh_elf_info_to_howto): Likewise.
+	* elf32-spu.c (spu_elf_info_to_howto): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_info_to_howto)
+	(elf32_tic6x_info_to_howto_rel): Likewise.
+	* elf32-tilepro.c (tilepro_info_to_howto_rela): Likewise.
+	* elf32-v850.c (v850_elf_info_to_howto_rel)
+	(v850_elf_info_to_howto_rela, v800_elf_info_to_howto): Likewise.
+	* elf32-vax.c (rtype_to_howto): Likewise.
+	* elf32-visium.c (visium_info_to_howto_rela): Likewise.
+	* elf32-wasm32.c (elf32_wasm32_rtype_to_howto)
+	(elf32_wasm32_info_to_howto_rela): Likewise.
+	* elf32-xc16x.c (elf32_xc16x_info_to_howto): Likewise.
+	* elf32-xgate.c (xgate_info_to_howto_rel): Likewise.
+	* elf32-xstormy16.c (xstormy16_info_to_howto_rela): Likewise.
+	* elf32-xtensa.c (elf_xtensa_info_to_howto_rela): Likewise.
+	* elf64-alpha.c (elf64_alpha_info_to_howto): Likewise.
+	* elf64-gen.c (elf_generic_info_to_howto)
+	(elf_generic_info_to_howto_rel): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_info_to_howto): Likewise.
+	* elf64-mips.c (mips_elf64_info_to_howto_rela): Likewise.
+	* elf64-mmix.c (mmix_info_to_howto_rela): Likewise.
+	* elf64-ppc.c (ppc64_elf_info_to_howto): Likewise.
+	* elf64-s390.c (elf_s390_reloc_type_lookup): Likewise.
+	* elf64-sh64.c (elf_s390_info_to_howto, sh_elf64_info_to_howto):
+	Likewise.
+	* elf64-x86-64.c (elf_x86_64_info_to_howto): Likewise.
+	* elfn32-mips.c (mips_info_to_howto_rel, mips_info_to_howto_rela):
+	Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_info_to_howto): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_info_to_howto): Likewise.
+	* elfnn-riscv.c (riscv_info_to_howto_rela): Likewise.
+	* elfxx-ia64.c (ia64_elf_reloc_type_lookup): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_info_to_howto): Likewise.
+	* elfxx-tilegx.c (tilegx_info_to_howto_rela): Likewise.
+	* elf32-score.h (s7_bfd_score_info_to_howto): Update prototype.
+	* elfxx-sparc.h (_bfd_sparc_elf_info_to_howto): Update prototype.
+	* elfxx-tilegx.h (tilegx_info_to_howto_rela): Update prototype.
+	* elfxx-target.h (elf_info_to_howto, elf_info_to_howto_rel):
+	Default to NULL.
+
 2018-02-26  Jim Wilson  <jimw@sifive.com>
 	    Stephan Schreiber <info@fs-driver.org>
 

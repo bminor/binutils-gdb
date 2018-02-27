@@ -145,7 +145,7 @@ spu_elf_bfd_to_reloc_type (bfd_reloc_code_real_type code)
     }
 }
 
-static void
+static bfd_boolean
 spu_elf_info_to_howto (bfd *abfd,
 		       arelent *cache_ptr,
 		       Elf_Internal_Rela *dst)
@@ -160,9 +160,10 @@ spu_elf_info_to_howto (bfd *abfd,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      r_type = R_SPU_NONE;
+      return FALSE;
     }
   cache_ptr->howto = &elf_howto_table[(int) r_type];
+  return TRUE;
 }
 
 static reloc_howto_type *

@@ -2884,8 +2884,8 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for an NDS32 ELF reloc.  */
 
-static void
-nds32_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+static bfd_boolean
+nds32_info_to_howto_rel (bfd *abfd, arelent *cache_ptr,
 			 Elf_Internal_Rela *dst)
 {
   enum elf_nds32_reloc_type r_type;
@@ -2896,19 +2896,31 @@ nds32_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = bfd_elf32_bfd_reloc_type_table_lookup (r_type);
+  return TRUE;
 }
 
-static void
+static bfd_boolean
 nds32_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
 		     Elf_Internal_Rela *dst)
 {
-  BFD_ASSERT ((ELF32_R_TYPE (dst->r_info) == R_NDS32_NONE)
-	      || ((ELF32_R_TYPE (dst->r_info) > R_NDS32_GNU_VTENTRY)
-		  && (ELF32_R_TYPE (dst->r_info) < R_NDS32_max)));
-  cache_ptr->howto = bfd_elf32_bfd_reloc_type_table_lookup (ELF32_R_TYPE (dst->r_info));
+  unsigned int r_type = ELF32_R_TYPE (dst->r_info);
+
+  if ((r_type == R_NDS32_NONE)
+      || ((r_type > R_NDS32_GNU_VTENTRY)
+	  && (r_type < R_NDS32_max)))
+    {
+      cache_ptr->howto = bfd_elf32_bfd_reloc_type_table_lookup (r_type);
+      return TRUE;
+    }
+
+  /* xgettext:c-format */
+  _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, r_type);
+  bfd_set_error (bfd_error_bad_value);
+  return FALSE;  
 }
 
 /* Support for core dump NOTE sections.

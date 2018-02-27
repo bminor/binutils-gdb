@@ -341,7 +341,7 @@ static reloc_howto_type howto_table[] =
 	 FALSE),		/* pcrel_offset */
 };
 
-static void
+static bfd_boolean
 rtype_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
   unsigned int indx = ELF32_R_TYPE (dst->r_info);
@@ -351,9 +351,11 @@ rtype_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, indx);
-      indx = R_68K_NONE;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = &howto_table[indx];
+  return TRUE;
 }
 
 #define elf_info_to_howto rtype_to_howto

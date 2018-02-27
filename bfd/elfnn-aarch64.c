@@ -2081,7 +2081,7 @@ elfNN_aarch64_howto_from_type (bfd *abfd, unsigned int r_type)
   return NULL;
 }
 
-static void
+static bfd_boolean
 elfNN_aarch64_info_to_howto (bfd *abfd, arelent *bfd_reloc,
 			     Elf_Internal_Rela *elf_reloc)
 {
@@ -2089,6 +2089,14 @@ elfNN_aarch64_info_to_howto (bfd *abfd, arelent *bfd_reloc,
 
   r_type = ELFNN_R_TYPE (elf_reloc->r_info);
   bfd_reloc->howto = elfNN_aarch64_howto_from_type (abfd, r_type);
+
+  if (bfd_reloc->howto == NULL)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, r_type);
+      return FALSE;
+    }
+  return TRUE;
 }
 
 static reloc_howto_type *

@@ -284,7 +284,8 @@ elf_x86_64_rtype_to_howto (bfd *abfd, unsigned r_type)
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
-	  r_type = R_X86_64_NONE;
+	  bfd_set_error (bfd_error_bad_value);
+	  return NULL;
 	}
       i = r_type;
     }
@@ -336,8 +337,8 @@ elf_x86_64_reloc_name_lookup (bfd *abfd,
 
 /* Given an x86_64 ELF reloc type, fill in an arelent structure.  */
 
-static void
-elf_x86_64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+static bfd_boolean
+elf_x86_64_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			  Elf_Internal_Rela *dst)
 {
   unsigned r_type;
@@ -347,8 +348,10 @@ elf_x86_64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
       && r_type != (unsigned int) R_X86_64_GNU_VTENTRY)
     r_type &= ~R_X86_64_converted_reloc_bit;
   cache_ptr->howto = elf_x86_64_rtype_to_howto (abfd, r_type);
-
+  if (cache_ptr->howto == NULL)
+    return FALSE;
   BFD_ASSERT (r_type == cache_ptr->howto->type || cache_ptr->howto->type == R_X86_64_NONE);
+  return TRUE;
 }
 
 /* Support for core dump NOTE sections.  */
@@ -1310,6 +1313,9 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
       from = elf_x86_64_rtype_to_howto (abfd, from_type);
       to = elf_x86_64_rtype_to_howto (abfd, to_type);
+
+      if (from == NULL || to == NULL)
+	return FALSE;
 
       if (h)
 	name = h->root.root.string;

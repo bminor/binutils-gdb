@@ -28,7 +28,7 @@
 static reloc_howto_type * mt_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
 
-static void mt_info_to_howto_rela
+static bfd_boolean mt_info_to_howto_rela
   (bfd *, arelent *, Elf_Internal_Rela *);
 
 static bfd_reloc_status_type mt_elf_relocate_hi16
@@ -227,10 +227,10 @@ mt_elf_relocate_hi16
 
 /* Set the howto pointer for a MT ELF reloc.  */
 
-static void
-mt_info_to_howto_rela (bfd *abfd,
-		       arelent *cache_ptr,
-		       Elf_Internal_Rela *dst)
+static bfd_boolean
+mt_info_to_howto_rela (bfd *		    abfd,
+		       arelent *	    cache_ptr,
+		       Elf_Internal_Rela *  dst)
 {
   unsigned int r_type;
 
@@ -240,9 +240,11 @@ mt_info_to_howto_rela (bfd *abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = & mt_elf_howto_table [r_type];
+  return TRUE;
 }
 
 /* Perform a single relocation.  By default we use the standard BFD

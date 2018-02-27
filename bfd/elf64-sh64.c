@@ -1400,7 +1400,7 @@ sh_elf64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
    See sh_elf_info_to_howto in elf32-sh.c for the original.  */
 
-static void
+static bfd_boolean
 sh_elf64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
 {
@@ -1408,13 +1408,21 @@ sh_elf64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
 
   r = ELF64_R_TYPE (dst->r_info);
 
-  BFD_ASSERT (r <= (unsigned int) R_SH_64_PCREL);
+  if (r > (unsigned int) R_SH_64_PCREL)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: invalid relocation type %d"), abfd, r);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+    
   BFD_ASSERT (r < R_SH_FIRST_INVALID_RELOC || r > R_SH_LAST_INVALID_RELOC);
   BFD_ASSERT (r < R_SH_DIR8WPN || r > R_SH_LAST_INVALID_RELOC_2);
   BFD_ASSERT (r < R_SH_FIRST_INVALID_RELOC_3 || r > R_SH_GOTPLT32);
   BFD_ASSERT (r < R_SH_FIRST_INVALID_RELOC_4 || r > R_SH_LAST_INVALID_RELOC_4);
 
   cache_ptr->howto = &sh_elf64_howto_table[r];
+  return cache_ptr->howto != NULL;
 }
 
 /* Relocate an SH ELF section.

@@ -638,7 +638,7 @@ microblaze_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for a RCE ELF reloc.  */
 
-static void
+static bfd_boolean
 microblaze_elf_info_to_howto (bfd * abfd,
 			      arelent * cache_ptr,
 			      Elf_Internal_Rela * dst)
@@ -656,10 +656,11 @@ microblaze_elf_info_to_howto (bfd * abfd,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      r_type = R_MICROBLAZE_NONE;
+      return FALSE;
     }
 
   cache_ptr->howto = microblaze_elf_howto_table [r_type];
+  return TRUE;
 }
 
 /* Microblaze ELF local labels start with 'L.' or '$L', not '.L'.  */

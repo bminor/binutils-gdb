@@ -525,7 +525,7 @@ lm32_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for an Lattice Mico32 ELF reloc.  */
 
-static void
+static bfd_boolean
 lm32_info_to_howto_rela (bfd *abfd,
 			 arelent *cache_ptr,
 			 Elf_Internal_Rela *dst)
@@ -538,9 +538,11 @@ lm32_info_to_howto_rela (bfd *abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = &lm32_elf_howto_table[r_type];
+  return TRUE;
 }
 
 /* Set the right machine number for an Lattice Mico32 ELF file. */
@@ -1076,7 +1078,8 @@ lm32_elf_relocate_section (bfd *output_bfd,
 	  const char *msg = NULL;
 	  arelent bfd_reloc;
 
-	  lm32_info_to_howto_rela (input_bfd, &bfd_reloc, rel);
+	  if (! lm32_info_to_howto_rela (input_bfd, &bfd_reloc, rel))
+	    continue;
 	  howto = bfd_reloc.howto;
 
 	  if (h != NULL)
@@ -2568,7 +2571,7 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define bfd_elf32_bfd_reloc_type_lookup		lm32_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup		lm32_reloc_name_lookup
 #define elf_info_to_howto			lm32_info_to_howto_rela
-#define elf_info_to_howto_rel			0
+#define elf_info_to_howto_rel			NULL
 #define elf_backend_rela_normal			1
 #define elf_backend_object_p			lm32_elf_object_p
 #define elf_backend_final_write_processing	lm32_elf_final_write_processing

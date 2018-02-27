@@ -56,7 +56,7 @@
    ? bfd_elf32_swap_reloc_out \
    : bfd_elf32_swap_reloca_out)
 
-#define elf_info_to_howto		0
+#define elf_info_to_howto		NULL
 #define elf_info_to_howto_rel		elf32_arm_info_to_howto
 
 #define ARM_ELF_ABI_VERSION		0
@@ -1839,14 +1839,22 @@ elf32_arm_howto_from_type (unsigned int r_type)
   return NULL;
 }
 
-static void
-elf32_arm_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED, arelent * bfd_reloc,
+static bfd_boolean
+elf32_arm_info_to_howto (bfd * abfd, arelent * bfd_reloc,
 			 Elf_Internal_Rela * elf_reloc)
 {
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (elf_reloc->r_info);
-  bfd_reloc->howto = elf32_arm_howto_from_type (r_type);
+  if ((bfd_reloc->howto = elf32_arm_howto_from_type (r_type)) == NULL)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+  return TRUE;
 }
 
 struct elf32_arm_reloc_map
@@ -3142,7 +3150,7 @@ struct elf32_arm_link_hash_table
   int nacl_p;
 
   /* True if the target uses REL relocations.  */
-  int use_rel;
+  bfd_boolean use_rel;
 
   /* Nonzero if import library must be a secure gateway import library
      as per ARMv8-M Security Extensions.  */
@@ -3796,7 +3804,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->plt_header_size = 20;
   ret->plt_entry_size = elf32_arm_use_long_plt_entry ? 16 : 12;
 #endif
-  ret->use_rel = 1;
+  ret->use_rel = TRUE;
   ret->obfd = abfd;
 
   if (!bfd_hash_table_init (&ret->stub_hash_table, stub_hash_newfunc,

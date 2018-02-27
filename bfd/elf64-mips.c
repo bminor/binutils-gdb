@@ -80,9 +80,7 @@ static void mips_elf64_be_swap_reloca_out
   (bfd *, const Elf_Internal_Rela *, bfd_byte *);
 static reloc_howto_type *bfd_elf64_bfd_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
-static void mips_elf64_info_to_howto_rel
-  (bfd *, arelent *, Elf_Internal_Rela *);
-static void mips_elf64_info_to_howto_rela
+static bfd_boolean mips_elf64_info_to_howto_rela
   (bfd *, arelent *, Elf_Internal_Rela *);
 static long mips_elf64_get_dynamic_reloc_upper_bound
   (bfd *);
@@ -3625,20 +3623,17 @@ mips_elf64_rtype_to_howto (bfd *abfd, unsigned int r_type, bfd_boolean rela_p)
 
 /* Prevent relocation handling by bfd for MIPS ELF64.  */
 
-static void
-mips_elf64_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
-			      arelent *cache_ptr ATTRIBUTE_UNUSED,
-			      Elf_Internal_Rela *dst ATTRIBUTE_UNUSED)
-{
-  BFD_ASSERT (0);
-}
-
-static void
-mips_elf64_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+static bfd_boolean
+mips_elf64_info_to_howto_rela (bfd *abfd,
 			       arelent *cache_ptr ATTRIBUTE_UNUSED,
-			       Elf_Internal_Rela *dst ATTRIBUTE_UNUSED)
+			       Elf_Internal_Rela *dst)
 {
-  BFD_ASSERT (0);
+  unsigned int r_type = ELF32_R_TYPE (dst->r_info);
+  /* xgettext:c-format */
+  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+		      abfd, r_type);
+  bfd_set_error (bfd_error_bad_value);
+  return FALSE;
 }
 
 /* Since each entry in an SHT_REL or SHT_RELA section can represent up
@@ -4378,7 +4373,7 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_gc_mark_extra_sections \
 					_bfd_mips_elf_gc_mark_extra_sections
 #define elf_info_to_howto		mips_elf64_info_to_howto_rela
-#define elf_info_to_howto_rel		mips_elf64_info_to_howto_rel
+#define elf_info_to_howto_rel		mips_elf64_info_to_howto_rela
 #define elf_backend_object_p		mips_elf64_object_p
 #define elf_backend_symbol_processing	_bfd_mips_elf_symbol_processing
 #define elf_backend_section_processing	_bfd_mips_elf_section_processing

@@ -300,10 +300,10 @@ rx_reloc_name_lookup (bfd * abfd ATTRIBUTE_UNUSED, const char * r_name)
 
 /* Set the howto pointer for an RX ELF reloc.  */
 
-static void
-rx_info_to_howto_rela (bfd *abfd,
-		       arelent *cache_ptr,
-		       Elf_Internal_Rela *dst)
+static bfd_boolean
+rx_info_to_howto_rela (bfd *		   abfd,
+		       arelent *	   cache_ptr,
+		       Elf_Internal_Rela * dst)
 {
   unsigned int r_type;
 
@@ -313,9 +313,19 @@ rx_info_to_howto_rela (bfd *abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
-      r_type = 0;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
   cache_ptr->howto = rx_elf_howto_table + r_type;
+  if (cache_ptr->howto->name == NULL)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+  return TRUE;
 }
 
 static bfd_vma

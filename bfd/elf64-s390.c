@@ -189,7 +189,7 @@ static reloc_howto_type elf64_s390_vtentry_howto =
   HOWTO (R_390_GNU_VTENTRY, 0,4,0,FALSE,0,complain_overflow_dont, _bfd_elf_rel_vtable_reloc_fn,"R_390_GNU_VTENTRY", FALSE,0,0, FALSE);
 
 static reloc_howto_type *
-elf_s390_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+elf_s390_reloc_type_lookup (bfd *abfd,
 			    bfd_reloc_code_real_type code)
 {
   switch (code)
@@ -323,7 +323,11 @@ elf_s390_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     default:
       break;
     }
-  return 0;
+
+  /* xgettext:c-format */
+  _bfd_error_handler (_("%pB: invalid relocation type %d"), abfd, (int) code);
+  bfd_set_error (bfd_error_bad_value);
+  return NULL;
 }
 
 static reloc_howto_type *
@@ -350,12 +354,13 @@ elf_s390_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* We need to use ELF64_R_TYPE so we have our own copy of this function,
    and elf64-s390.c has its own copy.  */
 
-static void
+static bfd_boolean
 elf_s390_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 			arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
 {
   unsigned int r_type = ELF64_R_TYPE(dst->r_info);
+
   switch (r_type)
     {
     case R_390_GNU_VTINHERIT:
@@ -372,10 +377,12 @@ elf_s390_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
-	  r_type = R_390_NONE;
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
 	}
       cache_ptr->howto = &elf_howto_table[r_type];
     }
+  return TRUE;
 }
 
 /* A relocation function which doesn't do anything.  */

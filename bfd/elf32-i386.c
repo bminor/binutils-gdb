@@ -194,7 +194,7 @@ static reloc_howto_type elf_howto_table[]=
 #endif
 
 static reloc_howto_type *
-elf_i386_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+elf_i386_reloc_type_lookup (bfd *abfd,
 			    bfd_reloc_code_real_type code)
 {
   switch (code)
@@ -346,11 +346,13 @@ elf_i386_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       return &elf_howto_table[R_386_GNU_VTENTRY - R_386_vt_offset];
 
     default:
-      break;
+      TRACE ("Unknown");
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: invalid Alpha reloc number: %d"),
+			  abfd, (int) code);
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
     }
-
-  TRACE ("Unknown");
-  return 0;
 }
 
 static reloc_howto_type *
@@ -368,7 +370,7 @@ elf_i386_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static reloc_howto_type *
-elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
+elf_i386_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED, unsigned r_type)
 {
   unsigned int indx;
 
@@ -379,25 +381,30 @@ elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
 	  >= R_386_ext2 - R_386_ext)
       && ((indx = r_type - R_386_vt_offset) - R_386_ext2
 	  >= R_386_vt - R_386_ext2))
-    {
-      /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
-			  abfd, r_type);
-      indx = R_386_NONE;
-    }
+      return NULL;
   /* PR 17512: file: 0f67f69d.  */
   if (elf_howto_table [indx].type != r_type)
     return NULL;
   return &elf_howto_table[indx];
 }
 
-static void
-elf_i386_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
+static bfd_boolean
+elf_i386_info_to_howto_rel (bfd *abfd,
 			    arelent *cache_ptr,
 			    Elf_Internal_Rela *dst)
 {
   unsigned int r_type = ELF32_R_TYPE (dst->r_info);
-  cache_ptr->howto = elf_i386_rtype_to_howto (abfd, r_type);
+
+  if ((cache_ptr->howto = elf_i386_rtype_to_howto (abfd, r_type)) == NULL)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  return TRUE;
 }
 
 /* Return whether a symbol name implies a local label.  The UnixWare

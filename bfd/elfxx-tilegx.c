@@ -892,7 +892,7 @@ tilegx_put_word_32 (bfd *abfd, bfd_vma val, void *ptr)
 }
 
 reloc_howto_type *
-tilegx_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
+tilegx_reloc_type_lookup (bfd * abfd,
 			  bfd_reloc_code_real_type code)
 {
   unsigned int i;
@@ -908,6 +908,10 @@ tilegx_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
 			       - entry->table[0].type);
     }
 
+  /* xgettext:c-format */
+  _bfd_error_handler (_("%pB: invalid BFD relocation type %d"),
+		      abfd, (int) code);
+  bfd_set_error (bfd_error_bad_value);
   return NULL;
 }
 
@@ -928,7 +932,7 @@ tilegx_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
-void
+bfd_boolean
 tilegx_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
 			   arelent *cache_ptr,
 			   Elf_Internal_Rela *dst)
@@ -938,11 +942,19 @@ tilegx_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   if (r_type <= (unsigned int) R_TILEGX_IMM8_Y1_TLS_ADD)
     cache_ptr->howto = &tilegx_elf_howto_table [r_type];
   else if (r_type - R_TILEGX_GNU_VTINHERIT
-	   <= (unsigned int) R_TILEGX_GNU_VTENTRY)
+	   <= ((unsigned int) R_TILEGX_GNU_VTENTRY
+	       - (unsigned int) R_TILEGX_GNU_VTINHERIT))
     cache_ptr->howto
       = &tilegx_elf_howto_table2 [r_type - R_TILEGX_GNU_VTINHERIT];
   else
-    abort ();
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+  return TRUE;
 }
 
 typedef tilegx_bundle_bits (*tilegx_create_func)(int);
