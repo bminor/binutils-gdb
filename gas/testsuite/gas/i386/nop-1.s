@@ -1,21 +1,21 @@
        .text
 single:
-	.nop 0
+	.nops 0
 	nop
 
 pseudo_1:
-	.nop 1
+	.nops 1
 
 pseudo_8:
-	.nop 8
+	.nops 8
 
 pseudo_8_4:
-	.nop 8, 4
+	.nops 8, 4
 
 pseudo_20:
-	.nop 20
+	.nops 20
 
 pseudo_30:
-	.nop 30
+	.nops 30
 
 	xor %eax, %eax

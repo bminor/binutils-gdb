@@ -1,6 +1,6 @@
 #source: nop-4.s
 #objdump: -drw
-#name: x86-64 .nop 4
+#name: x86-64 .nops 4
 
 .*: +file format .*
 

@@ -4482,7 +4482,7 @@ Some machine configurations provide additional directives.
 * MRI::				@code{.mri @var{val}}
 * Noaltmacro::                  @code{.noaltmacro}
 * Nolist::                      @code{.nolist}
-* Nop::                         @code{.nop @var{size}[, @var{control}]}
+* Nops::                        @code{.nops @var{size}[, @var{control}]}
 * Octa::                        @code{.octa @var{bignums}}
 * Offset::			@code{.offset @var{loc}}
 * Org::                         @code{.org @var{new-lc}, @var{fill}}
@@ -6199,10 +6199,10 @@ internal counter (which is zero initially).   @code{.list} increments the
 counter, and @code{.nolist} decrements it.  Assembly listings are
 generated whenever the counter is greater than zero.
 
-@node Nop
-@section @code{.nop @var{size}[, @var{control}]}
+@node Nops
+@section @code{.nops @var{size}[, @var{control}]}
 
-@cindex @code{nop} directive
+@cindex @code{nops} directive
 @cindex filling memory with no-op instructions
 This directive emits @var{size} bytes filled with no-op instructions.
 @var{size} is absolute expression, which must be a positve value.

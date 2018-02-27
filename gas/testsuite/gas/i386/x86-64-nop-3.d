@@ -1,6 +1,6 @@
 #source: nop-3.s
 #objdump: -drw
-#name: x86-64 .nop 3
+#name: x86-64 .nops 3
 
 .*: +file format .*
 

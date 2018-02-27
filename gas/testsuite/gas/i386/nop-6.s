@@ -1,5 +1,5 @@
 .macro mknops nr_bytes
-    .nop \nr_bytes, 9
+    .nops \nr_bytes, 9
 .endm
 
 .macro ALTERNATIVE

@@ -1,5 +1,38 @@
 2018-02-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* NEWS: Rename .nop to .nops.
+	* doc/as.texinfo: Likewise.
+	* read.c (potable): Add "nops".  Remove "nop".
+	(s_nop): Renamed to ...
+	(s_nops): This.
+	* read.h (s_nop): Renamed to ...
+	(s_nops): This.
+	* write.c (cvt_frag_to_fill): Rename .nop to .nops.
+	(md_generate_nops): Likewise.
+	(relax_segment): Likewise.
+	* testsuite/gas/i386/nop-1.d: Updated.
+	* testsuite/gas/i386/nop-1.s: Likewise.
+	* testsuite/gas/i386/nop-2.d: Likewise.
+	* testsuite/gas/i386/nop-2.s: Likewise.
+	* testsuite/gas/i386/nop-3.d: Likewise.
+	* testsuite/gas/i386/nop-3.s: Likewise.
+	* testsuite/gas/i386/nop-4.d: Likewise.
+	* testsuite/gas/i386/nop-4.s: Likewise.
+	* testsuite/gas/i386/nop-5.d: Likewise.
+	* testsuite/gas/i386/nop-5.s: Likewise.
+	* testsuite/gas/i386/nop-6.d: Likewise.
+	* testsuite/gas/i386/nop-6.s: Likewise.
+	* testsuite/gas/i386/nop-bad-1.l: Likewise.
+	* testsuite/gas/i386/nop-bad-1.s: Likewise.
+	* testsuite/gas/i386/x86-64-nop-1.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-2.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-3.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-4.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-5.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-6.d: Likewise.
+
+2018-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/22871
 	* NEWS: Mention -O[2|s].
 	* config/tc-i386.c (_i386_insn): Add no_optimize.

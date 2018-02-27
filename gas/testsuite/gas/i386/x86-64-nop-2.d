@@ -1,6 +1,6 @@
 #source: nop-2.s
 #objdump: -drw -Mi8086
-#name: x86-64 .nop 2
+#name: x86-64 .nops 2
 
 .*: +file format .*
 

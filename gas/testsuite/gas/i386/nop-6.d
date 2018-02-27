@@ -1,5 +1,5 @@
 #objdump: -drw
-#name: i386 .nop 6
+#name: i386 .nops 6
 
 .*: +file format .*
 

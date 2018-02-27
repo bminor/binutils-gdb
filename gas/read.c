@@ -417,6 +417,7 @@ static const pseudo_typeS potable[] = {
   {"noformat", s_ignore, 0},
   {"nolist", listing_list, 0},	/* Turn listing off.  */
   {"nopage", listing_nopage, 0},
+  {"nops", s_nops, 0},
   {"octa", cons, 16},
   {"offset", s_struct, 0},
   {"org", s_org, 0},
@@ -442,7 +443,6 @@ static const pseudo_typeS potable[] = {
 /* size  */
   {"space", s_space, 0},
   {"skip", s_space, 0},
-  {"nop", s_nop, 0},
   {"sleb128", s_leb128, 1},
   {"spc", s_ignore, 0},
   {"stabd", s_stab, 'd'},
@@ -3510,7 +3510,7 @@ s_space (int mult)
 }
 
 void
-s_nop (int ignore ATTRIBUTE_UNUSED)
+s_nops (int ignore ATTRIBUTE_UNUSED)
 {
   expressionS exp;
   expressionS val;
@@ -3556,7 +3556,7 @@ s_nop (int ignore ATTRIBUTE_UNUSED)
 	}
     }
   else
-    as_bad (_("unsupported variable nop control in .nop directive"));
+    as_bad (_("unsupported variable nop control in .nops directive"));
 
   demand_empty_rest_of_line ();
 }

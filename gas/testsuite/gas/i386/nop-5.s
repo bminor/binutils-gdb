@@ -4,7 +4,7 @@ _start:
 140:
 	testl %eax, %eax
 141:
-	.nop -(((144f-143f)-(141b-140b)) > 0)*((144f-143f)-(141b-140b)),6
+	.nops -(((144f-143f)-(141b-140b)) > 0)*((144f-143f)-(141b-140b)),6
 142:
 	xor %eax, %eax
 	.pushsection .altinstr_replacement,"ax"

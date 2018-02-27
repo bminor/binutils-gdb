@@ -1,5 +1,5 @@
 #objdump: -drw -Mi8086
-#name: i386 .nop 2
+#name: i386 .nops 2
 
 .*: +file format .*
 

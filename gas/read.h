@@ -206,7 +206,7 @@ extern void s_purgem (int);
 extern void s_rept (int);
 extern void s_set (int);
 extern void s_space (int mult);
-extern void s_nop (int);
+extern void s_nops (int);
 extern void s_stab (int what);
 extern void s_struct (int);
 extern void s_text (int);

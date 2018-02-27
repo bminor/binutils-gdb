@@ -453,7 +453,7 @@ skip_align:
       if (fragP->fr_offset < 0)
 	{
 	  as_bad_where (fragP->fr_file, fragP->fr_line,
-			_("attempt to .org/.space/.nop backwards? (%ld)"),
+			_("attempt to .org/.space/.nops backwards? (%ld)"),
 			(long) fragP->fr_offset);
 	  fragP->fr_offset = 0;
 	}
@@ -1587,7 +1587,7 @@ md_generate_nops (fragS *f ATTRIBUTE_UNUSED,
 		  offsetT count ATTRIBUTE_UNUSED,
 		  int control ATTRIBUTE_UNUSED)
 {
-  as_bad (_("unimplemented .nop directive"));
+  as_bad (_("unimplemented .nops directive"));
 }
 #endif
 
@@ -2840,7 +2840,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 			  }
 
 			as_warn_where (fragP->fr_file, fragP->fr_line,
-				       _(".space, .nop or .fill with negative value, ignored"));
+				       _(".space, .nops or .fill with negative value, ignored"));
 			fragP->fr_symbol = 0;
 		      }
 		    else
