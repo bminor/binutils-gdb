@@ -348,7 +348,7 @@ elf_i386_reloc_type_lookup (bfd *abfd,
     default:
       TRACE ("Unknown");
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid Alpha reloc number: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type: %#x"),
 			  abfd, (int) code);
       bfd_set_error (bfd_error_bad_value);
       return NULL;

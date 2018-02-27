@@ -586,7 +586,7 @@ _bfd_sparc_elf_reloc_type_lookup (bfd *abfd,
       break;
     }
   /* xgettext:c-format */
-  _bfd_error_handler (_("%pB: invalid BFD relocation type %d"), abfd, (int) code);
+  _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, (int) code);
   bfd_set_error (bfd_error_bad_value);
   return NULL;
 }

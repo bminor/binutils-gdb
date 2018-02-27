@@ -197,7 +197,7 @@ MY (swap_ext_reloc_out) (bfd *abfd,
   if (r_type > 2)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid relocation type exported: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type exported: %#x"),
 			  abfd, r_type);
 
       bfd_set_error (bfd_error_wrong_format);
@@ -241,7 +241,7 @@ MY (swap_ext_reloc_in) (bfd *abfd,
   if (r_type > 2)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid relocation type imported: %d"),
+      _bfd_error_handler (_("%pB: unsupported relocation type imported: %#x"),
 			  abfd, r_type);
 
       bfd_set_error (bfd_error_wrong_format);

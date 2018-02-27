@@ -1,5 +1,17 @@
 2018-02-27  Nick Clifton  <nickc@redhat.com>
 
+	* aout-cris.c (swap_ext_reloc_out): Standadize error/warning
+	message.
+	* elf-hppa.h (elf_hppa_info_to_howto_rel): Likewise.
+	* elf32-i386.c (elf_i386_reloc_type_lookup): Likewise.
+	* elf32-xtensa.c (elf_xtensa_reloc_type_lookup): Likewise.
+	* elf64-ppc.c (ppc64_elf_reloc_type_lookup): Likewise.
+	* elf64-s390.c (elf_s390_reloc_type_lookup): Likewise.
+	* elf64-sh64.c (sh_elf64_info_to_howto): Likewise.
+	* elfxx-ia64.c (ia64_elf_reloc_type_lookup): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_reloc_type_lookup): Likewise.
+	* elfxx-tilegx.c (tilegx_reloc_type_lookup): Likewise.
+
 	PR 22875
 	* elf-bfd.h (struct elf_backend_data): Change the return type of
 	the elf_info_to_howto and elf_info_to_howto_rel function pointers

@@ -1411,7 +1411,7 @@ sh_elf64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   if (r > (unsigned int) R_SH_64_PCREL)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: invalid relocation type %d"), abfd, r);
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, r);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }

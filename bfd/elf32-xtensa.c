@@ -451,7 +451,7 @@ elf_xtensa_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     }
 
   /* xgettext:c-format */
-  _bfd_error_handler (_("%pB: invalid relocation type %d"), abfd, (int) code);
+  _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, (int) code);
   bfd_set_error (bfd_error_bad_value);
   TRACE ("Unknown");
   return NULL;
