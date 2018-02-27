@@ -55,7 +55,8 @@ if [check_plugin_api_available] {
 # really test -r.  Use ld1 to link a fresh ld, ld2.  Use ld2 to link a
 # new ld, ld3.  ld2 and ld3 should be identical.
 set test_flags {"" "strip" "--static" "-Wl,--traditional-format"
-		"-Wl,--no-keep-memory" "-Wl,--relax"}
+		"-Wl,--no-keep-memory" "-Wl,--relax"
+		"-Wl,--max-cache-size=-1"}
 if { [istarget "powerpc-*-*"] } {
     lappend test_flags "-Wl,--ppc476-workaround"
 }

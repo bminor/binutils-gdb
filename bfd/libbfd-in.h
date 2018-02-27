@@ -894,6 +894,9 @@ extern bfd_byte * _bfd_write_unsigned_leb128
 
 extern struct bfd_link_info *_bfd_get_link_info (bfd *);
 
+extern bool _bfd_link_keep_memory (struct bfd_link_info *)
+  ATTRIBUTE_HIDDEN;
+
 #if GCC_VERSION >= 7000
 #define _bfd_mul_overflow(a, b, res) __builtin_mul_overflow (a, b, res)
 #else

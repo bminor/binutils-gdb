@@ -2365,13 +2365,14 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   if (elf_section_data (sec)->this_hdr.contents != contents)
     {
-      if (!converted && !info->keep_memory)
+      if (!converted && !_bfd_link_keep_memory (info))
 	free (contents);
       else
 	{
 	  /* Cache the section contents for elf_link_input_bfd if any
 	     load is converted or --no-keep-memory isn't used.  */
 	  elf_section_data (sec)->this_hdr.contents = contents;
+	  info->cache_size += sec->size;
 	}
     }
 

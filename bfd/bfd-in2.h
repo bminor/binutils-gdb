@@ -6717,6 +6717,9 @@ struct bfd
      be used only for archive elements.  */
   int archive_pass;
 
+  /* The total size of memory from bfd_alloc.  */
+  bfd_size_type alloc_size;
+
   /* Stuff only useful for object files:
      The start address.  */
   bfd_vma start_address;

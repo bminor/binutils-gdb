@@ -2839,6 +2839,12 @@ has been used.
 The @option{--reduce-memory-overheads} switch may be also be used to
 enable other tradeoffs in future versions of the linker.
 
+@kindex --max-cache-size=@var{size}
+@item --max-cache-size=@var{size}
+@command{ld} normally caches the relocation information and symbol tables
+of input files in memory with the unlimited size.  This option sets the
+maximum cache size to @var{size}.
+
 @kindex --build-id
 @kindex --build-id=@var{style}
 @item --build-id

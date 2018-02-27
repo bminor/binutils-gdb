@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add --max-cache-size=SIZE to set the the maximum cache size to SIZE
+  bytes.
+
 Changes in 2.37:
 
 * arm-symbianelf support removed.
