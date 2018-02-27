@@ -1,3 +1,7 @@
+2018-02-27  Alan Hayward  <alan.hayward@arm.com>
+
+	* arch/aarch64.h: Use common/tdesc.h.
+
 2018-02-26  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Don't use a 32-bit BFD

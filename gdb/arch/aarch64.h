@@ -20,7 +20,7 @@
 #ifndef ARCH_AARCH64_H
 #define ARCH_AARCH64_H
 
-#include "tdesc.h"
+#include "common/tdesc.h"
 
 target_desc *aarch64_create_target_description ();
 
