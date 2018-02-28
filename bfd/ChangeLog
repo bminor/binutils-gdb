@@ -1,3 +1,7 @@
+2018-03-01  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ft32.c (ft32_info_to_howto_rela): Correct range test.
+
 2018-02-28  Alan Modra  <amodra@gmail.com>
 
 	PR 22887

@@ -300,7 +300,7 @@ ft32_info_to_howto_rela (bfd *abfd,
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  if (r_type < (unsigned int) R_FT32_max)
+  if (r_type >= (unsigned int) R_FT32_max)
     {
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
