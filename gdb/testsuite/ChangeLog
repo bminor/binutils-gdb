@@ -1,3 +1,12 @@
+2018-02-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (gdb_is_target_1): Add prompt_regexp parameter and
+	use it.
+	(gdb_is_target_remote_prompt): New proc.
+	(gdb_is_target_remote): Use gdb_is_target_remote_prompt.
+	(gdb_is_target_native): Pass prompt parameter to
+	gdb_is_target_1.
+
 2018-02-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/load-command.c: New file.
