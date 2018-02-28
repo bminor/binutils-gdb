@@ -1,3 +1,8 @@
+2018-03-01  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac (ALL_LINGUAS): Sort.
+	* configure: Regenerate.
+
 2018-02-27  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-dis.c (print_insn_coprocessor): Replace uses of ARM_FEATURE_COPY

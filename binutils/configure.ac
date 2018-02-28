@@ -89,7 +89,7 @@ fi
 AC_PROG_YACC
 AM_PROG_LEX
 
-ALL_LINGUAS="bg da es fi fr id it ja ro ru rw sk sv tr uk vi zh_CN zh_TW hr ca pt"
+ALL_LINGUAS="bg ca da es fi fr hr id it ja pt ro ru rw sk sr sv tr uk vi zh_CN zh_TW"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 

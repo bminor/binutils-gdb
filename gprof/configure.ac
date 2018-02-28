@@ -42,7 +42,7 @@ ACX_LARGEFILE
 
 AC_CHECK_FUNCS(setmode)
 
-ALL_LINGUAS="fr tr sv es id da pt_BR de vi rw ga ms fi nl bg eo ja sr hu"
+ALL_LINGUAS="bg da de eo es fi fr ga hu id it ja ms nl pt_BR ro ru rw sr sv tr uk vi"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 
