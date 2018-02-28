@@ -3573,7 +3573,7 @@ captured_main (int argc, char *argv[])
   current_directory = getcwd (NULL, 0);
   if (current_directory == NULL)
     {
-      error (_("%s: error finding working directory"),
+      error (_("Could not find current working directory: %s"),
 	     safe_strerror (errno));
     }
 
