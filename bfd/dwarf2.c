@@ -623,14 +623,24 @@ read_8_bytes (bfd *abfd, bfd_byte *buf, bfd_byte *end)
 }
 
 static bfd_byte *
-read_n_bytes (bfd *abfd ATTRIBUTE_UNUSED,
-	      bfd_byte *buf,
-	      bfd_byte *end,
-	      unsigned int size ATTRIBUTE_UNUSED)
+read_n_bytes (bfd_byte *           buf,
+	      bfd_byte *           end,
+	      struct dwarf_block * block)
 {
-  if (buf + size > end)
-    return NULL;
-  return buf;
+  unsigned int  size = block->size;
+  bfd_byte *    block_end = buf + size;
+
+  if (block_end > end || block_end < buf)
+    {
+      block->data = NULL;
+      block->size = 0;
+      return end;
+    }
+  else
+    {
+      block->data = buf;
+      return block_end;
+    }
 }
 
 /* Scans a NUL terminated string starting at BUF, returning a pointer to it.
@@ -1128,8 +1138,7 @@ read_attribute_value (struct attribute *  attr,
 	return NULL;
       blk->size = read_2_bytes (abfd, info_ptr, info_ptr_end);
       info_ptr += 2;
-      blk->data = read_n_bytes (abfd, info_ptr, info_ptr_end, blk->size);
-      info_ptr += blk->size;
+      info_ptr = read_n_bytes (info_ptr, info_ptr_end, blk);
       attr->u.blk = blk;
       break;
     case DW_FORM_block4:
@@ -1139,8 +1148,7 @@ read_attribute_value (struct attribute *  attr,
 	return NULL;
       blk->size = read_4_bytes (abfd, info_ptr, info_ptr_end);
       info_ptr += 4;
-      blk->data = read_n_bytes (abfd, info_ptr, info_ptr_end, blk->size);
-      info_ptr += blk->size;
+      info_ptr = read_n_bytes (info_ptr, info_ptr_end, blk);
       attr->u.blk = blk;
       break;
     case DW_FORM_data2:
@@ -1180,8 +1188,7 @@ read_attribute_value (struct attribute *  attr,
       blk->size = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
 					 FALSE, info_ptr_end);
       info_ptr += bytes_read;
-      blk->data = read_n_bytes (abfd, info_ptr, info_ptr_end, blk->size);
-      info_ptr += blk->size;
+      info_ptr = read_n_bytes (info_ptr, info_ptr_end, blk);
       attr->u.blk = blk;
       break;
     case DW_FORM_block1:
@@ -1191,8 +1198,7 @@ read_attribute_value (struct attribute *  attr,
 	return NULL;
       blk->size = read_1_byte (abfd, info_ptr, info_ptr_end);
       info_ptr += 1;
-      blk->data = read_n_bytes (abfd, info_ptr, info_ptr_end, blk->size);
-      info_ptr += blk->size;
+      info_ptr = read_n_bytes (info_ptr, info_ptr_end, blk);
       attr->u.blk = blk;
       break;
     case DW_FORM_data1:
