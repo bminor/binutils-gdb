@@ -5064,6 +5064,7 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 	elfNN_ia64_print_private_bfd_data
 
 #define elf_backend_plt_readonly	1
+#define elf_backend_can_gc_sections	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_plt_alignment	5
 #define elf_backend_got_header_size	0

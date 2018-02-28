@@ -1,3 +1,10 @@
+2018-02-28  Nick Clifton  <nickc@redhat.com>
+
+	Import patch from the mainline:
+	2018-02-20  Jason Duerstock  <jason.duerstock@gmail.com>
+
+	* elfnn-ia64.c (elf_backend_can_gc_sections): Enable.
+
 2018-02-15  Nick Clifton  <nickc@redhat.com>
 
 	Import patch from mainline:
