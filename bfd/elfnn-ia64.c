@@ -593,6 +593,9 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 		     1, change it to slot 2.  */
 		  if ((irel->r_offset & 3) == 1)
 		    irel->r_offset += 1;
+
+		  changed_contents = TRUE;
+		  changed_relocs = TRUE;
 		}
 
 	      continue;
@@ -607,6 +610,9 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 
 	      /* Make the relocation offset point to slot 1.  */
 	      irel->r_offset = (irel->r_offset & ~((bfd_vma) 0x3)) + 1;
+
+	      changed_contents = TRUE;
+	      changed_relocs = TRUE;
 	      continue;
 	    }
 
