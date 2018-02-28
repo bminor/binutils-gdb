@@ -228,7 +228,14 @@ main (int argc, char **argv)
   if (*ld_sysroot)
     ld_canon_sysroot = lrealpath (ld_sysroot);
   if (ld_canon_sysroot)
-    ld_canon_sysroot_len = strlen (ld_canon_sysroot);
+    {
+      ld_canon_sysroot_len = strlen (ld_canon_sysroot);
+
+      /* is_sysrooted_pathname() relies on no trailing dirsep.  */
+      if (ld_canon_sysroot_len > 0
+	  && IS_DIR_SEPARATOR (ld_canon_sysroot [ld_canon_sysroot_len - 1]))
+        ld_canon_sysroot [--ld_canon_sysroot_len] = '\0';
+    }
   else
     ld_canon_sysroot_len = -1;
 
