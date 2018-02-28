@@ -1734,7 +1734,13 @@ NAME (aout, translate_symbol_table) (bfd *abfd,
       else if (x < strsize)
 	in->symbol.name = str + x;
       else
-	return FALSE;
+	{
+	  _bfd_error_handler
+	    (_("%pB: invalid string offset %" PRIu64 " >= %" PRIu64),
+	     abfd, (uint64_t) x, (uint64_t) strsize);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       in->symbol.value = GET_SWORD (abfd,  ext->e_value);
       in->desc = H_GET_16 (abfd, ext->e_desc);
