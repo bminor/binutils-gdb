@@ -1,3 +1,9 @@
+2018-03-01  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (alloc_discriminant_info): Fix default_index
+	assertion.  Add assertion for discriminant_index.
+	(quirk_rust_enum): Use correct base type name in univariant case.
+
 2018-03-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* record.c (get_call_history_modifiers): Return a

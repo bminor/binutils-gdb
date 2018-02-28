@@ -10364,8 +10364,11 @@ alloc_discriminant_info (struct type *type, int discriminant_index,
 			 int default_index)
 {
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
+  gdb_assert (discriminant_index == -1
+	      || (discriminant_index >= 0
+		  && discriminant_index < TYPE_NFIELDS (type)));
   gdb_assert (default_index == -1
-	      || (default_index > 0 && default_index < TYPE_NFIELDS (type)));
+	      || (default_index >= 0 && default_index < TYPE_NFIELDS (type)));
 
   TYPE_FLAG_DISCRIMINATED_UNION (type) = 1;
 
@@ -10518,7 +10521,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       TYPE_FIELD_NAME (union_type, 0) = variant_name;
       TYPE_NAME (field_type)
 	= rust_fully_qualify (&objfile->objfile_obstack,
-			      TYPE_NAME (field_type), variant_name);
+			      TYPE_NAME (type), variant_name);
 
       /* Install the union in the outer struct type.  */
       TYPE_NFIELDS (type) = 1;
