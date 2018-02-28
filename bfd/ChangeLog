@@ -1,3 +1,9 @@
+2018-02-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 22894
+	* dwarf1.c (parse_die): Check the length of form blocks before
+	advancing the data pointer.
+
 2018-02-28  Alan Modra  <amodra@gmail.com>
 
 	PR 22887
