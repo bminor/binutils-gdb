@@ -722,7 +722,7 @@ fail (const char *message, ...)
   va_list args;
 
   va_start (args, message);
-  fprintf (stderr, _("%s: Error: "), program_name);
+  fprintf (stderr, _("%s: error: "), program_name);
   vfprintf (stderr, message, args);
   va_end (args);
   xexit (1);
@@ -901,9 +901,9 @@ set_bitfield (char *f, bitfield *array, int value,
     return;
 
   if (lineno != -1)
-    fail (_("%s: %d: Unknown bitfield: %s\n"), filename, lineno, f);
+    fail (_("%s: %d: unknown bitfield: %s\n"), filename, lineno, f);
   else
-    fail (_("Unknown bitfield: %s\n"), f);
+    fail (_("unknown bitfield: %s\n"), f);
 }
 
 static void
@@ -966,7 +966,7 @@ process_i386_cpu_flag (FILE *table, char *flag, int macro,
 	  last -= 1;
 	  next = flag + 2;
 	  if (*last != ')')
-	    fail (_("%s: %d: Missing `)' in bitfield: %s\n"), filename,
+	    fail (_("%s: %d: missing `)' in bitfield: %s\n"), filename,
 		  lineno, flag);
 	  *last = '\0';
 	}

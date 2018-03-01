@@ -1,3 +1,34 @@
+2018-03-03  Alan Modra  <amodra@gmail.com>
+
+	* sysdep.h (opcodes_error_handler): Define.
+	(_bfd_error_handler): Declare.
+	* Makefile.am: Remove stray #.
+	* opc2c.c (main): Remove bogus -l arg handling.  Print "DO NOT
+	EDIT" comment.
+	* aarch64-dis.c, * arc-dis.c, * arm-dis.c, * avr-dis.c,
+	* d30v-dis.c, * h8300-dis.c, * mmix-dis.c, * ppc-dis.c,
+	* riscv-dis.c, * s390-dis.c, * sparc-dis.c, * v850-dis.c: Use
+	opcodes_error_handler to print errors.  Standardize error messages.
+	* msp430-decode.opc, * nios2-dis.c, * rl78-decode.opc: Likewise,
+	and include opintl.h.
+	* nds32-asm.c: Likewise, and include sysdep.h and opintl.h.
+	* i386-gen.c: Standardize error messages.
+	* msp430-decode.c, * rl78-decode.c, rx-decode.c: Regenerate.
+	* Makefile.in: Regenerate.
+	* epiphany-asm.c, * epiphany-desc.c, * epiphany-dis.c,
+	* epiphany-ibld.c, * fr30-asm.c, * fr30-desc.c, * fr30-dis.c,
+	* fr30-ibld.c, * frv-asm.c, * frv-desc.c, * frv-dis.c, * frv-ibld.c,
+	* frv-opc.c, * ip2k-asm.c, * ip2k-desc.c, * ip2k-dis.c, * ip2k-ibld.c,
+	* iq2000-asm.c, * iq2000-desc.c, * iq2000-dis.c, * iq2000-ibld.c,
+	* lm32-asm.c, * lm32-desc.c, * lm32-dis.c, * lm32-ibld.c,
+	* m32c-asm.c, * m32c-desc.c, * m32c-dis.c, * m32c-ibld.c,
+	* m32r-asm.c, * m32r-desc.c, * m32r-dis.c, * m32r-ibld.c,
+	* mep-asm.c, * mep-desc.c, * mep-dis.c, * mep-ibld.c, * mt-asm.c,
+	* mt-desc.c, * mt-dis.c, * mt-ibld.c, * or1k-asm.c, * or1k-desc.c,
+	* or1k-dis.c, * or1k-ibld.c, * xc16x-asm.c, * xc16x-desc.c,
+	* xc16x-dis.c, * xc16x-ibld.c, * xstormy16-asm.c, * xstormy16-desc.c,
+	* xstormy16-dis.c, * xstormy16-ibld.c: Regenerate.
+
 2018-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* * i386-opc.tbl: Add "Optimize" to AVX256 and AVX512

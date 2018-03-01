@@ -6145,14 +6145,17 @@ parse_arm_disassembler_options (const char *options)
 	      }
 
 	  if (i >= NUM_ARM_OPTIONS)
-	    fprintf (stderr, _("Unrecognised register name set: %s\n"), opt);
+	    /* xgettext: c-format */
+	    opcodes_error_handler (_("unrecognised register name set: %s"),
+				   opt);
 	}
       else if (CONST_STRNEQ (opt, "force-thumb"))
 	force_thumb = 1;
       else if (CONST_STRNEQ (opt, "no-force-thumb"))
 	force_thumb = 0;
       else
-	fprintf (stderr, _("Unrecognised disassembler option: %s\n"), opt);
+	/* xgettext: c-format */
+	opcodes_error_handler (_("unrecognised disassembler option: %s"), opt);
     }
 
   return;

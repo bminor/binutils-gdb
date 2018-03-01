@@ -78,7 +78,7 @@ parse_aarch64_dis_option (const char *option, unsigned int len ATTRIBUTE_UNUSED)
 #endif /* DEBUG_AARCH64 */
 
   /* Invalid option.  */
-  fprintf (stderr, _("Unrecognised disassembler option: %s\n"), option);
+  opcodes_error_handler (_("unrecognised disassembler option: %s"), option);
 }
 
 static void

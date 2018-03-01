@@ -356,7 +356,8 @@ powerpc_init_dialect (struct disassemble_info *info)
       else if ((new_cpu = ppc_parse_cpu (dialect, &sticky, opt)) != 0)
 	dialect = new_cpu;
       else
-	fprintf (stderr, _("warning: ignoring unknown -M%s option\n"), opt);
+	/* xgettext: c-format */
+	opcodes_error_handler (_("warning: ignoring unknown -M%s option"), opt);
     }
 
   info->private_data = priv;
