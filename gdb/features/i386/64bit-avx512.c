@@ -8,7 +8,7 @@ create_feature_i386_64bit_avx512 (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.avx512", "64bit-avx512.xml");
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.avx512");
   tdesc_type *element_type;
   element_type = tdesc_named_type (feature, "ieee_single");
   tdesc_create_vector (feature, "v4f", element_type, 4);

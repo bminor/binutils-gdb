@@ -8,7 +8,7 @@ create_feature_aarch64_fpu (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.aarch64.fpu", "aarch64-fpu.xml");
+  feature = tdesc_create_feature (result, "org.gnu.gdb.aarch64.fpu");
   tdesc_type *element_type;
   element_type = tdesc_named_type (feature, "ieee_double");
   tdesc_create_vector (feature, "v2d", element_type, 2);

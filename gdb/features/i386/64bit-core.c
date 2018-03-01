@@ -8,7 +8,7 @@ create_feature_i386_64bit_core (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.core", "64bit-core.xml");
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.core");
   tdesc_type_with_fields *type_with_fields;
   type_with_fields = tdesc_create_flags (feature, "i386_eflags", 4);
   tdesc_add_flag (type_with_fields, 0, "CF");
