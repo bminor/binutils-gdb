@@ -962,6 +962,7 @@ COMMON_SFILES = \
 	common/run-time-clock.c \
 	common/signals.c \
 	common/signals-state-save-restore.c \
+	common/tdesc.c \
 	common/vec.c \
 	common/xml-utils.c \
 	complaints.c \
@@ -1438,6 +1439,7 @@ HFILES_NO_SRCDIR = \
 	common/run-time-clock.h \
 	common/signals-state-save-restore.h \
 	common/symbol.h \
+	common/tdesc.h \
 	common/vec.h \
 	common/version.h \
 	common/x86-xstate.h \

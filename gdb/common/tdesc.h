@@ -18,6 +18,12 @@
 #ifndef ARCH_TDESC_H
 #define ARCH_TDESC_H 1
 
+#ifdef GDBSERVER
+#include "server.h"
+#else
+#include "defs.h"
+#endif
+
 struct tdesc_feature;
 struct tdesc_type;
 struct tdesc_type_builtin;
@@ -25,6 +31,111 @@ struct tdesc_type_vector;
 struct tdesc_type_with_fields;
 struct tdesc_reg;
 struct target_desc;
+
+/* The interface to visit different elements of target description.  */
+
+class tdesc_element_visitor
+{
+public:
+  virtual void visit_pre (const target_desc *e)
+  {}
+
+  virtual void visit_post (const target_desc *e)
+  {}
+
+  virtual void visit_pre (const tdesc_feature *e)
+  {}
+
+  virtual void visit_post (const tdesc_feature *e)
+  {}
+
+  virtual void visit (const tdesc_type_builtin *e)
+  {}
+
+  virtual void visit (const tdesc_type_vector *e)
+  {}
+
+  virtual void visit (const tdesc_type_with_fields *e)
+  {}
+
+  virtual void visit (const tdesc_reg *e)
+  {}
+};
+
+class tdesc_element
+{
+public:
+  virtual void accept (tdesc_element_visitor &v) const = 0;
+};
+
+/* An individual register from a target description.  */
+
+struct tdesc_reg : tdesc_element
+{
+  tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
+	     int regnum, int save_restore_, const char *group_,
+	     int bitsize_, const char *type_);
+
+  virtual ~tdesc_reg () = default;
+
+  DISABLE_COPY_AND_ASSIGN (tdesc_reg);
+
+  /* The name of this register.  In standard features, it may be
+     recognized by the architecture support code, or it may be purely
+     for the user.  */
+  std::string name;
+
+  /* The register number used by this target to refer to this
+     register.  This is used for remote p/P packets and to determine
+     the ordering of registers in the remote g/G packets.  */
+  long target_regnum;
+
+  /* If this flag is set, GDB should save and restore this register
+     around calls to an inferior function.  */
+  int save_restore;
+
+  /* The name of the register group containing this register, or empty
+     if the group should be automatically determined from the
+     register's type.  If this is "general", "float", or "vector", the
+     corresponding "info" command should display this register's
+     value.  It can be an arbitrary string, but should be limited to
+     alphanumeric characters and internal hyphens.  Currently other
+     strings are ignored (treated as empty).  */
+  std::string group;
+
+  /* The size of the register, in bits.  */
+  int bitsize;
+
+  /* The type of the register.  This string corresponds to either
+     a named type from the target description or a predefined
+     type from GDB.  */
+  std::string type;
+
+  /* The target-described type corresponding to TYPE, if found.  */
+  struct tdesc_type *tdesc_type;
+
+  void accept (tdesc_element_visitor &v) const override
+  {
+    v.visit (this);
+  }
+
+  bool operator== (const tdesc_reg &other) const
+  {
+    return (name == other.name
+       && target_regnum == other.target_regnum
+       && save_restore == other.save_restore
+       && bitsize == other.bitsize
+       && group == other.group
+       && type == other.type);
+  }
+
+  bool operator!= (const tdesc_reg &other) const
+  {
+    return !(*this == other);
+  }
+};
+
+typedef std::unique_ptr<tdesc_reg> tdesc_reg_up;
 
 /* Allocate a new target_desc.  */
 target_desc *allocate_target_description (void);
