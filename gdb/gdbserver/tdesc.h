@@ -67,49 +67,9 @@ public:
     : registers_size (0)
   {}
 
-  ~target_desc ()
-  {
-    int i;
+  ~target_desc ();
 
-    for (reg *reg : reg_defs)
-      xfree (reg);
-
-    xfree ((char *) arch);
-    xfree ((char *) osabi);
-
-    char *f;
-
-    for (i = 0; VEC_iterate (char_ptr, features, i, f); i++)
-      xfree (f);
-    VEC_free (char_ptr, features);
-  }
-
-  bool operator== (const target_desc &other) const
-  {
-    if (reg_defs.size () != other.reg_defs.size ())
-      return false;
-
-    for (int i = 0; i < reg_defs.size (); ++i)
-      {
-	struct reg *reg = reg_defs[i];
-	struct reg *reg2 = other.reg_defs[i];
-
-	if (reg != reg2 && *reg != *reg2)
-	  return false;
-      }
-
-    /* Compare expedite_regs.  */
-    int i = 0;
-    for (; expedite_regs[i] != NULL; i++)
-      {
-	if (strcmp (expedite_regs[i], other.expedite_regs[i]) != 0)
-	  return false;
-      }
-    if (other.expedite_regs[i] != NULL)
-      return false;
-
-    return true;
-  }
+  bool operator== (const target_desc &other) const;
 
   bool operator!= (const target_desc &other) const
   {
