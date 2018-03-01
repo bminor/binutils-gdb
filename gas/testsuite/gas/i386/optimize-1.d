@@ -42,4 +42,20 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 f1 f5 af ef e9    	vpxorq %ymm1,%ymm1,%ymm5\{%k7\}\{z\}
  +[a-f0-9]+:	c5 f1 ef e9          	vpxor  %xmm1,%xmm1,%xmm5
  +[a-f0-9]+:	c5 f1 ef e9          	vpxor  %xmm1,%xmm1,%xmm5
+ +[a-f0-9]+:	62 f1 75 4f f8 e9    	vpsubb %zmm1,%zmm1,%zmm5\{%k7\}
+ +[a-f0-9]+:	62 f1 75 af f8 e9    	vpsubb %ymm1,%ymm1,%ymm5\{%k7\}\{z\}
+ +[a-f0-9]+:	c5 f1 f8 e9          	vpsubb %xmm1,%xmm1,%xmm5
+ +[a-f0-9]+:	c5 f1 f8 e9          	vpsubb %xmm1,%xmm1,%xmm5
+ +[a-f0-9]+:	62 f1 75 4f f9 e9    	vpsubw %zmm1,%zmm1,%zmm5\{%k7\}
+ +[a-f0-9]+:	62 f1 75 af f9 e9    	vpsubw %ymm1,%ymm1,%ymm5\{%k7\}\{z\}
+ +[a-f0-9]+:	c5 f1 f9 e9          	vpsubw %xmm1,%xmm1,%xmm5
+ +[a-f0-9]+:	c5 f1 f9 e9          	vpsubw %xmm1,%xmm1,%xmm5
+ +[a-f0-9]+:	62 f1 75 4f fa e9    	vpsubd %zmm1,%zmm1,%zmm5\{%k7\}
+ +[a-f0-9]+:	62 f1 75 af fa e9    	vpsubd %ymm1,%ymm1,%ymm5\{%k7\}\{z\}
+ +[a-f0-9]+:	c5 f1 fa e9          	vpsubd %xmm1,%xmm1,%xmm5
+ +[a-f0-9]+:	c5 f1 fa e9          	vpsubd %xmm1,%xmm1,%xmm5
+ +[a-f0-9]+:	62 f1 f5 4f fb e9    	vpsubq %zmm1,%zmm1,%zmm5\{%k7\}
+ +[a-f0-9]+:	62 f1 f5 af fb e9    	vpsubq %ymm1,%ymm1,%ymm5\{%k7\}\{z\}
+ +[a-f0-9]+:	c5 f1 fb e9          	vpsubq %xmm1,%xmm1,%xmm5
+ +[a-f0-9]+:	c5 f1 fb e9          	vpsubq %xmm1,%xmm1,%xmm5
 #pass

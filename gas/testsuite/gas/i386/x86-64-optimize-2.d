@@ -74,4 +74,36 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 e1 f5 08 ef c1    	vpxorq %xmm1,%xmm1,%xmm16
  +[a-f0-9]+:	62 b1 f5 00 ef c9    	vpxorq %xmm17,%xmm17,%xmm1
  +[a-f0-9]+:	62 b1 f5 00 ef c9    	vpxorq %xmm17,%xmm17,%xmm1
+ +[a-f0-9]+:	62 71 75 4f f8 f9    	vpsubb %zmm1,%zmm1,%zmm15\{%k7\}
+ +[a-f0-9]+:	62 71 75 af f8 f9    	vpsubb %ymm1,%ymm1,%ymm15\{%k7\}\{z\}
+ +[a-f0-9]+:	c5 71 f8 f9          	vpsubb %xmm1,%xmm1,%xmm15
+ +[a-f0-9]+:	c5 71 f8 f9          	vpsubb %xmm1,%xmm1,%xmm15
+ +[a-f0-9]+:	62 e1 75 08 f8 c1    	vpsubb %xmm1,%xmm1,%xmm16
+ +[a-f0-9]+:	62 e1 75 08 f8 c1    	vpsubb %xmm1,%xmm1,%xmm16
+ +[a-f0-9]+:	62 b1 75 00 f8 c9    	vpsubb %xmm17,%xmm17,%xmm1
+ +[a-f0-9]+:	62 b1 75 00 f8 c9    	vpsubb %xmm17,%xmm17,%xmm1
+ +[a-f0-9]+:	62 71 75 4f f9 f9    	vpsubw %zmm1,%zmm1,%zmm15\{%k7\}
+ +[a-f0-9]+:	62 71 75 af f9 f9    	vpsubw %ymm1,%ymm1,%ymm15\{%k7\}\{z\}
+ +[a-f0-9]+:	c5 71 f9 f9          	vpsubw %xmm1,%xmm1,%xmm15
+ +[a-f0-9]+:	c5 71 f9 f9          	vpsubw %xmm1,%xmm1,%xmm15
+ +[a-f0-9]+:	62 e1 75 08 f9 c1    	vpsubw %xmm1,%xmm1,%xmm16
+ +[a-f0-9]+:	62 e1 75 08 f9 c1    	vpsubw %xmm1,%xmm1,%xmm16
+ +[a-f0-9]+:	62 b1 75 00 f9 c9    	vpsubw %xmm17,%xmm17,%xmm1
+ +[a-f0-9]+:	62 b1 75 00 f9 c9    	vpsubw %xmm17,%xmm17,%xmm1
+ +[a-f0-9]+:	62 71 75 4f fa f9    	vpsubd %zmm1,%zmm1,%zmm15\{%k7\}
+ +[a-f0-9]+:	62 71 75 af fa f9    	vpsubd %ymm1,%ymm1,%ymm15\{%k7\}\{z\}
+ +[a-f0-9]+:	c5 71 fa f9          	vpsubd %xmm1,%xmm1,%xmm15
+ +[a-f0-9]+:	c5 71 fa f9          	vpsubd %xmm1,%xmm1,%xmm15
+ +[a-f0-9]+:	62 e1 75 08 fa c1    	vpsubd %xmm1,%xmm1,%xmm16
+ +[a-f0-9]+:	62 e1 75 08 fa c1    	vpsubd %xmm1,%xmm1,%xmm16
+ +[a-f0-9]+:	62 b1 75 00 fa c9    	vpsubd %xmm17,%xmm17,%xmm1
+ +[a-f0-9]+:	62 b1 75 00 fa c9    	vpsubd %xmm17,%xmm17,%xmm1
+ +[a-f0-9]+:	62 71 f5 4f fb f9    	vpsubq %zmm1,%zmm1,%zmm15\{%k7\}
+ +[a-f0-9]+:	62 71 f5 af fb f9    	vpsubq %ymm1,%ymm1,%ymm15\{%k7\}\{z\}
+ +[a-f0-9]+:	c5 71 fb f9          	vpsubq %xmm1,%xmm1,%xmm15
+ +[a-f0-9]+:	c5 71 fb f9          	vpsubq %xmm1,%xmm1,%xmm15
+ +[a-f0-9]+:	62 e1 f5 08 fb c1    	vpsubq %xmm1,%xmm1,%xmm16
+ +[a-f0-9]+:	62 e1 f5 08 fb c1    	vpsubq %xmm1,%xmm1,%xmm16
+ +[a-f0-9]+:	62 b1 f5 00 fb c9    	vpsubq %xmm17,%xmm17,%xmm1
+ +[a-f0-9]+:	62 b1 f5 00 fb c9    	vpsubq %xmm17,%xmm17,%xmm1
 #pass

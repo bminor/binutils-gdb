@@ -3856,11 +3856,16 @@ optimize_encoding (void)
 		|| i.tm.base_opcode == 0x66df
 		|| i.tm.base_opcode == 0x57
 		|| i.tm.base_opcode == 0x6657
-		|| i.tm.base_opcode == 0x66ef)
+		|| i.tm.base_opcode == 0x66ef
+		|| i.tm.base_opcode == 0x66f8
+		|| i.tm.base_opcode == 0x66f9
+		|| i.tm.base_opcode == 0x66fa
+		|| i.tm.base_opcode == 0x66fb)
 	       && i.tm.extension_opcode == None))
     {
       /* Optimize: -O2:
-	   VOP, one of vandnps, vandnpd, vxorps and vxorpd:
+	   VOP, one of vandnps, vandnpd, vxorps, vxorpd, vpsubb, vpsubd,
+	   vpsubq and vpsubw:
 	     EVEX VOP %zmmM, %zmmM, %zmmN
 	       -> VEX VOP %xmmM, %xmmM, %xmmN (M and N < 16)
 	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)

@@ -1,3 +1,9 @@
+2018-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* * i386-opc.tbl: Add "Optimize" to AVX256 and AVX512
+	vpsub[bwdq] instructions.
+	* i386-tbl.h: Regenerated.
+
 2018-03-01  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac (ALL_LINGUAS): Sort.

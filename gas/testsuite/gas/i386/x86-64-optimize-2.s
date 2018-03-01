@@ -78,3 +78,39 @@ _start:
 	vpxorq %ymm1, %ymm1, %ymm16
 	vpxorq %zmm17, %zmm17, %zmm1
 	vpxorq %ymm17, %ymm17, %ymm1
+
+	vpsubb %zmm1, %zmm1, %zmm15{%k7}
+	vpsubb %ymm1, %ymm1, %ymm15{z}{%k7}
+	vpsubb %zmm1, %zmm1, %zmm15
+	vpsubb %ymm1, %ymm1, %ymm15
+	vpsubb %zmm1, %zmm1, %zmm16
+	vpsubb %ymm1, %ymm1, %ymm16
+	vpsubb %zmm17, %zmm17, %zmm1
+	vpsubb %ymm17, %ymm17, %ymm1
+
+	vpsubw %zmm1, %zmm1, %zmm15{%k7}
+	vpsubw %ymm1, %ymm1, %ymm15{z}{%k7}
+	vpsubw %zmm1, %zmm1, %zmm15
+	vpsubw %ymm1, %ymm1, %ymm15
+	vpsubw %zmm1, %zmm1, %zmm16
+	vpsubw %ymm1, %ymm1, %ymm16
+	vpsubw %zmm17, %zmm17, %zmm1
+	vpsubw %ymm17, %ymm17, %ymm1
+
+	vpsubd %zmm1, %zmm1, %zmm15{%k7}
+	vpsubd %ymm1, %ymm1, %ymm15{z}{%k7}
+	vpsubd %zmm1, %zmm1, %zmm15
+	vpsubd %ymm1, %ymm1, %ymm15
+	vpsubd %zmm1, %zmm1, %zmm16
+	vpsubd %ymm1, %ymm1, %ymm16
+	vpsubd %zmm17, %zmm17, %zmm1
+	vpsubd %ymm17, %ymm17, %ymm1
+
+	vpsubq %zmm1, %zmm1, %zmm15{%k7}
+	vpsubq %ymm1, %ymm1, %ymm15{z}{%k7}
+	vpsubq %zmm1, %zmm1, %zmm15
+	vpsubq %ymm1, %ymm1, %ymm15
+	vpsubq %zmm1, %zmm1, %zmm16
+	vpsubq %ymm1, %ymm1, %ymm16
+	vpsubq %zmm17, %zmm17, %zmm1
+	vpsubq %ymm17, %ymm17, %ymm1
