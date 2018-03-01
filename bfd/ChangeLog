@@ -1,3 +1,9 @@
+2018-03-01  Jim Wilson  <jimw@sifive.com>
+
+	PR 22756
+	* elfnn-riscv.c (riscv_relax_delete_bytes): When adjust st_size, use
+	else if instead of if.
+
 2018-03-01  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ft32.c (ft32_info_to_howto_rela): Correct range test.

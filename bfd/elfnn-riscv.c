@@ -2665,10 +2665,16 @@ riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count,
 
 	  /* If the symbol *spans* the bytes we just deleted (i.e. its
 	     *end* is in the moved bytes but its *start* isn't), then we
-	     must adjust its size.  */
-	  if (sym->st_value <= addr
-	      && sym->st_value + sym->st_size > addr
-	      && sym->st_value + sym->st_size <= toaddr)
+	     must adjust its size.
+
+	     This test needs to use the original value of st_value, otherwise
+	     we might accidentally decrease size when deleting bytes right
+	     before the symbol.  But since deleted relocs can't span across
+	     symbols, we can't have both a st_value and a st_size decrease,
+	     so it is simpler to just use an else.  */
+	  else if (sym->st_value <= addr
+		   && sym->st_value + sym->st_size > addr
+		   && sym->st_value + sym->st_size <= toaddr)
 	    sym->st_size -= count;
 	}
     }
@@ -2716,9 +2722,9 @@ riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count,
 	    sym_hash->root.u.def.value -= count;
 
 	  /* As above, adjust the size if needed.  */
-	  if (sym_hash->root.u.def.value <= addr
-	      && sym_hash->root.u.def.value + sym_hash->size > addr
-	      && sym_hash->root.u.def.value + sym_hash->size <= toaddr)
+	  else if (sym_hash->root.u.def.value <= addr
+		   && sym_hash->root.u.def.value + sym_hash->size > addr
+		   && sym_hash->root.u.def.value + sym_hash->size <= toaddr)
 	    sym_hash->size -= count;
 	}
     }
