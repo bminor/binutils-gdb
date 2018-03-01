@@ -1,3 +1,9 @@
+2018-03-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 22905
+	* dwarf.c (display_debug_ranges): Check that the offset loaded
+	from the range_entry structure is valid.
+
 2018-03-01  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac (ALL_LINGUAS): Add sr.  Sort.

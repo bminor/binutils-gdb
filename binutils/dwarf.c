@@ -387,6 +387,9 @@ read_uleb128 (unsigned char * data,
     }								\
   while (0)
 
+/* Read AMOUNT bytes from PTR and store them in VAL as an unsigned value.
+   Checks to make sure that the read will not reach or pass END
+   and that VAL is big enough to hold AMOUNT bytes.  */
 #define SAFE_BYTE_GET(VAL, PTR, AMOUNT, END)	\
   do						\
     {						\
@@ -415,6 +418,7 @@ read_uleb128 (unsigned char * data,
     }						\
   while (0)
 
+/* Like SAFE_BYTE_GET, but also increments PTR by AMOUNT.  */
 #define SAFE_BYTE_GET_AND_INC(VAL, PTR, AMOUNT, END)	\
   do							\
     {							\
@@ -423,6 +427,7 @@ read_uleb128 (unsigned char * data,
     }							\
   while (0)
 
+/* Like SAFE_BYTE_GET, but reads a signed value.  */
 #define SAFE_SIGNED_BYTE_GET(VAL, PTR, AMOUNT, END)	\
   do							\
     {							\
@@ -441,6 +446,7 @@ read_uleb128 (unsigned char * data,
     }							\
   while (0)
 
+/* Like SAFE_SIGNED_BYTE_GET, but also increments PTR by AMOUNT.  */
 #define SAFE_SIGNED_BYTE_GET_AND_INC(VAL, PTR, AMOUNT, END)	\
   do								\
     {								\
@@ -6543,6 +6549,7 @@ display_debug_ranges_list (unsigned char *start, unsigned char *finish,
 	break;
       SAFE_SIGNED_BYTE_GET_AND_INC (end, start, pointer_size, finish);
 
+      
       printf ("    %8.8lx ", offset);
 
       if (begin == 0 && end == 0)
@@ -6810,6 +6817,13 @@ display_debug_ranges (struct dwarf_section *section,
 	  continue;
 	}
 
+      if (next < section_begin || next >= finish)
+	{
+	  warn (_("Corrupt offset (%#8.8lx) in range entry %u\n"),
+		(unsigned long) offset, i);
+	  continue;
+	}
+
       if (dwarf_check != 0 && i > 0)
 	{
 	  if (start < next)
@@ -6825,6 +6839,7 @@ display_debug_ranges (struct dwarf_section *section,
 		    (unsigned long) (next - section_begin), section->name);
 	    }
 	}
+
       start = next;
       last_start = next;
 
