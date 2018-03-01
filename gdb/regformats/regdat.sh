@@ -131,7 +131,7 @@ do
     echo "{"
     echo "  static struct target_desc tdesc_${name}_s;"
     echo "  struct target_desc *result = &tdesc_${name}_s;"
-
+    echo "  struct tdesc_feature *feature = tdesc_create_feature (result, \"${name}\");"
     continue
   elif test "${type}" = "xmltarget"; then
     xmltarget="${entry}"
@@ -149,7 +149,7 @@ do
     echo "$0: $1 does not specify \`\`name''." 1>&2
     exit 1
   else
-    echo "  tdesc_create_reg ((struct tdesc_feature *) result, \"${entry}\","
+    echo "  tdesc_create_reg (feature, \"${entry}\","
     echo "  0, 0, NULL, ${type}, NULL);"
 
     offset=`expr ${offset} + ${type}`

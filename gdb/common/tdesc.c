@@ -38,3 +38,61 @@ tdesc_reg::tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
      have easy access to the containing feature when we want it later.  */
   tdesc_type = tdesc_named_type (feature, type.c_str ());
 }
+
+void tdesc_feature::accept (tdesc_element_visitor &v) const
+{
+  v.visit_pre (this);
+
+  for (const tdesc_type_up &type : types)
+    type->accept (v);
+
+  for (const tdesc_reg_up &reg : registers)
+    reg->accept (v);
+
+  v.visit_post (this);
+}
+
+bool tdesc_feature::operator== (const tdesc_feature &other) const
+{
+  if (name != other.name)
+    return false;
+
+  if (registers.size () != other.registers.size ())
+    return false;
+
+  for (int ix = 0; ix < registers.size (); ix++)
+    {
+      const tdesc_reg_up &reg1 = registers[ix];
+      const tdesc_reg_up &reg2 = other.registers[ix];
+
+      if (reg1 != reg2 && *reg1 != *reg2)
+	return false;
+      }
+
+  if (types.size () != other.types.size ())
+    return false;
+
+  for (int ix = 0; ix < types.size (); ix++)
+    {
+      const tdesc_type_up &type1 = types[ix];
+      const tdesc_type_up &type2 = other.types[ix];
+
+      if (type1 != type2 && *type1 != *type2)
+	return false;
+    }
+
+  return true;
+}
+
+/* See common/tdesc.h.  */
+
+void
+tdesc_create_reg (struct tdesc_feature *feature, const char *name,
+		  int regnum, int save_restore, const char *group,
+		  int bitsize, const char *type)
+{
+  tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
+				  group, bitsize, type);
+
+  feature->registers.emplace_back (reg);
+}
