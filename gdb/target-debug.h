@@ -172,6 +172,8 @@
   target_debug_do_print (host_address_to_string (X.data ()))
 #define target_debug_print_inferior_p(inf) \
   target_debug_do_print (host_address_to_string (inf))
+#define target_debug_print_record_print_flags(X) \
+  target_debug_do_print (plongest (X))
 
 static void
 target_debug_print_struct_target_waitstatus_p (struct target_waitstatus *status)

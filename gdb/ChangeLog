@@ -1,3 +1,20 @@
+2018-03-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* record.c (get_call_history_modifiers): Return a
+	record_print_flags.
+	(cmd_record_call_history): Adjust.
+	* record-btrace.c (record_btrace_call_history): Adjust.
+	(record_btrace_call_history_range): Adjust.
+	(record_btrace_call_history_from): Adjust.
+	* target-debug.h (target_debug_print_record_print_flags): New.
+	* target-delegates.c: Re-generate.
+	* target.c (target_call_history): Change flags type.
+	(target_call_history_from): Likewise.
+	(target_call_history_range): Likewise.
+	* target.h (struct target_ops) <target_call_history>: Likewise.
+	(target_call_history_from): Likewise.
+	(target_call_history_range): Likewise.
+
 2018-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Simon Marchi  <simon.marchi@polymtl.ca>
 

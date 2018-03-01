@@ -615,14 +615,11 @@ cmd_record_insn_history (const char *arg, int from_tty)
 
 /* Read function-call-history modifiers from an argument string.  */
 
-static int
+static record_print_flags
 get_call_history_modifiers (const char **arg)
 {
-  int modifiers;
-  const char *args;
-
-  modifiers = 0;
-  args = *arg;
+  record_print_flags modifiers = 0;
+  const char *args = *arg;
 
   if (args == NULL)
     return modifiers;
@@ -672,13 +669,11 @@ get_call_history_modifiers (const char **arg)
 static void
 cmd_record_call_history (const char *arg, int from_tty)
 {
-  int flags, size;
-
   require_record_target ();
 
-  flags = get_call_history_modifiers (&arg);
+  record_print_flags flags = get_call_history_modifiers (&arg);
 
-  size = command_size_to_target_size (record_call_history_size);
+  int size = command_size_to_target_size (record_call_history_size);
 
   if (arg == NULL || *arg == 0 || strcmp (arg, "+") == 0)
     target_call_history (size, flags);

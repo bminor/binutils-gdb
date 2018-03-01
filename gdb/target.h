@@ -1217,7 +1217,7 @@ struct target_ops
     /* Print a function trace of the recorded execution trace.
        If SIZE < 0, print abs (SIZE) preceding functions; otherwise, print SIZE
        succeeding functions.  */
-    void (*to_call_history) (struct target_ops *, int size, int flags)
+    void (*to_call_history) (struct target_ops *, int size, record_print_flags flags)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Print a function trace of the recorded execution trace starting
@@ -1225,13 +1225,13 @@ struct target_ops
        If SIZE < 0, print abs (SIZE) functions before FROM; otherwise, print
        SIZE functions after FROM.  */
     void (*to_call_history_from) (struct target_ops *,
-				  ULONGEST begin, int size, int flags)
+				  ULONGEST begin, int size, record_print_flags flags)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Print a function trace of an execution trace section from function BEGIN
        (inclusive) to function END (inclusive).  */
     void (*to_call_history_range) (struct target_ops *,
-				   ULONGEST begin, ULONGEST end, int flags)
+				   ULONGEST begin, ULONGEST end, record_print_flags flags)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Nonzero if TARGET_OBJECT_LIBRARIES_SVR4 may be read with a
@@ -2492,13 +2492,15 @@ extern void target_insn_history_range (ULONGEST begin, ULONGEST end,
 				       gdb_disassembly_flags flags);
 
 /* See to_call_history.  */
-extern void target_call_history (int size, int flags);
+extern void target_call_history (int size, record_print_flags flags);
 
 /* See to_call_history_from.  */
-extern void target_call_history_from (ULONGEST begin, int size, int flags);
+extern void target_call_history_from (ULONGEST begin, int size,
+				      record_print_flags flags);
 
 /* See to_call_history_range.  */
-extern void target_call_history_range (ULONGEST begin, ULONGEST end, int flags);
+extern void target_call_history_range (ULONGEST begin, ULONGEST end,
+				       record_print_flags flags);
 
 /* See to_prepare_to_generate_core.  */
 extern void target_prepare_to_generate_core (void);

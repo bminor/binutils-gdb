@@ -3809,7 +3809,7 @@ target_insn_history_range (ULONGEST begin, ULONGEST end,
 /* See target.h.  */
 
 void
-target_call_history (int size, int flags)
+target_call_history (int size, record_print_flags flags)
 {
   current_target.to_call_history (&current_target, size, flags);
 }
@@ -3817,7 +3817,7 @@ target_call_history (int size, int flags)
 /* See target.h.  */
 
 void
-target_call_history_from (ULONGEST begin, int size, int flags)
+target_call_history_from (ULONGEST begin, int size, record_print_flags flags)
 {
   current_target.to_call_history_from (&current_target, begin, size, flags);
 }
@@ -3825,7 +3825,7 @@ target_call_history_from (ULONGEST begin, int size, int flags)
 /* See target.h.  */
 
 void
-target_call_history_range (ULONGEST begin, ULONGEST end, int flags)
+target_call_history_range (ULONGEST begin, ULONGEST end, record_print_flags flags)
 {
   current_target.to_call_history_range (&current_target, begin, end, flags);
 }
