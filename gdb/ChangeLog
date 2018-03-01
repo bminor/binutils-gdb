@@ -1,3 +1,8 @@
+2018-03-01  Georg Sauthoff  <mail@georg.so>
+
+	PR gdb/22888
+	* gcore.in: Quote variables and switch interpreter to bash.
+
 2018-03-01  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (alloc_discriminant_info): Fix default_index

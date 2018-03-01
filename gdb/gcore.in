@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 #   Copyright (C) 2003-2018 Free Software Foundation, Inc.
 
@@ -28,9 +28,9 @@ name=core
 dump_all_cmds=()
 
 while getopts :ao: opt; do
-    case $opt in
+    case "$opt" in
         a)
-            case $OSTYPE in
+            case "$OSTYPE" in
                 linux*)
                     dump_all_cmds=("-ex" "set use-coredump-filter off")
                     dump_all_cmds+=("-ex" "set dump-excluded-mappings on")
@@ -84,7 +84,7 @@ fi
 
 # Check if the GDB binary is in the expected path.  If not, just
 # quit with a message.
-if [ ! -f "$binary_path"/@GDB_TRANSFORM_NAME@ ]; then
+if [ ! -f "$binary_path/@GDB_TRANSFORM_NAME@" ]; then
   echo "gcore: GDB binary (${binary_path}/@GDB_TRANSFORM_NAME@) not found"
   exit 1
 fi
@@ -93,16 +93,16 @@ fi
 rc=0
 
 # Loop through pids
-for pid in $*
+for pid in "$@"
 do
 	# `</dev/null' to avoid touching interactive terminal if it is
 	# available but not accessible as GDB would get stopped on SIGTTIN.
-	$binary_path/@GDB_TRANSFORM_NAME@ </dev/null --nx --batch \
+	"$binary_path/@GDB_TRANSFORM_NAME@" </dev/null --nx --batch \
 	    -ex "set pagination off" -ex "set height 0" -ex "set width 0" \
 	    "${dump_all_cmds[@]}" \
 	    -ex "attach $pid" -ex "gcore $name.$pid" -ex detach -ex quit
 
-	if [ -r $name.$pid ] ; then 
+	if [ -r "$name.$pid" ] ; then
 	    rc=0
 	else
 	    echo "@GCORE_TRANSFORM_NAME@: failed to create $name.$pid"
