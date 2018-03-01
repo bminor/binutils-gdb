@@ -23,6 +23,10 @@
 #include "filenames.h"
 #include "gdb_tilde_expand.h"
 
+#ifdef USE_WIN32API
+#include <windows.h>
+#endif
+
 /* See common/pathstuff.h.  */
 
 gdb::unique_xmalloc_ptr<char>
