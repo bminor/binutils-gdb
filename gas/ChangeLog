@@ -1,3 +1,47 @@
+2018-03-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (cpu_variant, arm_arch_used, thumb_arch_used,
+	legacy_cpu, legacy_fpu, mcpu_cpu_opt, dyn_mcpu_ext_opt,
+	mcpu_fpu_opt, march_cpu_opt, dyn_march_ext_opt, march_fpu_opt,
+	mfpu_opt, object_arch, selected_cpu): Comment meaning of variables.
+	(dyn_mcpu_ext_opt): Also rename into ...
+	(mcpu_ext_opt): This.
+	(dyn_march_ext_opt): Also rename into ...
+	(march_ext_opt): This.
+	(object_arch): Also rename into ...
+	(selected_object_arch): This and make it a plain arm_feature_set
+	structure.
+	(selected_arch, selected_ext, selected_fpu): New static variables.
+	(mark_feature_used): Fix comments, feature is marked as used iff it is
+	currently allowed.
+	(do_bx): Adapt to change in name and type of object_arch.
+	(md_begin): Set selected_arch rather than mcpu_cpu_opt, selected_ext
+	rather than dyn_mcpu_ext_opt and selected_fpu rather than mfpu_opt.
+	Remove dead code to set default FPU if architecture version is greater
+	than 5.  Set all CPU bits of cpu_variant directly in autodection
+	leaving mcpu_cpu_opt, selected_arch and selected_cpu unset.
+	(arm_parse_extension): Take extension feature set pointer parameter by
+	value rather than by pointer.  Remove allocation code.  Adapt code
+	accordingly.
+	(arm_parse_cpu): Adapt to variable renaming and changes in
+	arm_parse_extension () signature.
+	(arm_parse_arch): Likewise.
+	(aeabi_set_public_attributes): Also set selected_arch and selected_ext
+	in addition to selected_cpu.  Set flags_arch and flags_ext from them
+	instead of selected_cpu.  Adapt to variables renaming and type change.
+	(arm_md_post_relax): Adapt to variable renaming.
+	(s_arm_cpu): Set selcted_cpu_cpu and selected_ext instead of
+	mcpu_cpu_opt and dyn_mcpu_ext_opt.  Set selected_cpu from them and
+	cpu_variant from selected_cpu and selected_fpu.
+	(s_arm_arch): Likewise.
+	(s_arm_object_arch): Adapt to variable renaming.
+	(s_arm_arch_extension): Use ARM_CPU_IS_ANY instead of checking feature
+	set against arm_any.  Check selected_arch rather than *mcpu_cpu_opt.
+	Set selected_ext rather than *dyn_mcpu_ext_opt and remove allocation
+	code.
+	(s_arm_fpu): Set selected_fpu instead of mfpu_opt.  Set all CPU feature
+	bits if in autodetection mode.
+
 2018-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (optimize_encoding): Optimize AVX256 and

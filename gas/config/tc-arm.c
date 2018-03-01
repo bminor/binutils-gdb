@@ -123,7 +123,12 @@ enum arm_float_abi
 
 #define streq(a, b)	      (strcmp (a, b) == 0)
 
+/* Current set of feature bits available (CPU+FPU).  Different from
+   selected_cpu + selected_fpu in case of autodetection since the CPU
+   feature bits are then all set.  */
 static arm_feature_set cpu_variant;
+/* Feature bits used in each execution state.  Used to set build attribute
+   (in particular Tag_*_ISA_use) in CPU autodetection mode.  */
 static arm_feature_set arm_arch_used;
 static arm_feature_set thumb_arch_used;
 
@@ -143,17 +148,24 @@ bfd_boolean codecomposer_syntax = FALSE;
 /* Variables that we set while parsing command-line options.  Once all
    options have been read we re-process these values to set the real
    assembly flags.  */
-static const arm_feature_set *  legacy_cpu = NULL;
-static const arm_feature_set *  legacy_fpu = NULL;
 
-static const arm_feature_set *  mcpu_cpu_opt = NULL;
-static arm_feature_set *        dyn_mcpu_ext_opt = NULL;
-static const arm_feature_set *  mcpu_fpu_opt = NULL;
-static const arm_feature_set *  march_cpu_opt = NULL;
-static arm_feature_set *        dyn_march_ext_opt = NULL;
-static const arm_feature_set *  march_fpu_opt = NULL;
-static const arm_feature_set *  mfpu_opt = NULL;
-static const arm_feature_set *  object_arch = NULL;
+/* CPU and FPU feature bits set for legacy CPU and FPU options (eg. -marm1
+   instead of -mcpu=arm1).  */
+static const arm_feature_set *legacy_cpu = NULL;
+static const arm_feature_set *legacy_fpu = NULL;
+
+/* CPU, extension and FPU feature bits selected by -mcpu.  */
+static const arm_feature_set *mcpu_cpu_opt = NULL;
+static arm_feature_set *mcpu_ext_opt = NULL;
+static const arm_feature_set *mcpu_fpu_opt = NULL;
+
+/* CPU, extension and FPU feature bits selected by -march.  */
+static const arm_feature_set *march_cpu_opt = NULL;
+static arm_feature_set *march_ext_opt = NULL;
+static const arm_feature_set *march_fpu_opt = NULL;
+
+/* Feature bits selected by -mfpu.  */
+static const arm_feature_set *mfpu_opt = NULL;
 
 /* Constants for known architecture features.  */
 static const arm_feature_set fpu_default = FPU_DEFAULT;
@@ -302,8 +314,20 @@ static const arm_feature_set fpu_neon_ext_dotprod =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD);
 
 static int mfloat_abi_opt = -1;
-/* Record user cpu selection for object attributes.  */
+/* Architecture feature bits selected by the last -mcpu/-march or .cpu/.arch
+   directive.  */
+static arm_feature_set selected_arch = ARM_ARCH_NONE;
+/* Extension feature bits selected by the last -mcpu/-march or .arch_extension
+   directive.  */
+static arm_feature_set selected_ext = ARM_ARCH_NONE;
+/* Feature bits selected by the last -mcpu/-march or by the combination of the
+   last .cpu/.arch directive .arch_extension directives since that
+   directive.  */
 static arm_feature_set selected_cpu = ARM_ARCH_NONE;
+/* FPU feature bits selected by the last -mfpu or .fpu directive.  */
+static arm_feature_set selected_fpu = FPU_NONE;
+/* Feature bits selected by the last .object_arch directive.  */
+static arm_feature_set selected_object_arch = ARM_ARCH_NONE;
 /* Must be long enough to hold any of the names in arm_cpus.  */
 static char selected_cpu_name[20];
 
@@ -6160,17 +6184,16 @@ record_feature_use (const arm_feature_set *feature)
     ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used, *feature);
 }
 
-/* If the given feature available in the selected CPU, mark it as used.
-   Returns TRUE iff feature is available.  */
+/* If the given feature is currently allowed, mark it as used and return TRUE.
+   Return FALSE otherwise.  */
 static bfd_boolean
 mark_feature_used (const arm_feature_set *feature)
 {
-  /* Ensure the option is valid on the current architecture.  */
+  /* Ensure the option is currently allowed.  */
   if (!ARM_CPU_HAS_FEATURE (cpu_variant, *feature))
     return FALSE;
 
-  /* Add the appropriate architecture feature for the barrier option used.
-     */
+  /* Add the appropriate architecture feature for the barrier option used.  */
   record_feature_use (feature);
 
   return TRUE;
@@ -8610,7 +8633,8 @@ do_bx (void)
   /* Output R_ARM_V4BX relocations if is an EABI object that looks like
      it is for ARMv4t or earlier.  */
   want_reloc = !ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5);
-  if (object_arch && !ARM_CPU_HAS_FEATURE (*object_arch, arm_ext_v5))
+  if (!ARM_FEATURE_ZERO (selected_object_arch)
+      && !ARM_CPU_HAS_FEATURE (selected_object_arch, arm_ext_v5))
       want_reloc = TRUE;
 
 #ifdef OBJ_ELF
@@ -25352,70 +25376,69 @@ md_begin (void)
       if (mcpu_cpu_opt || march_cpu_opt)
 	as_bad (_("use of old and new-style options to set CPU type"));
 
-      mcpu_cpu_opt = legacy_cpu;
+      selected_arch = *legacy_cpu;
     }
-  else if (!mcpu_cpu_opt)
+  else if (mcpu_cpu_opt)
     {
-      mcpu_cpu_opt = march_cpu_opt;
-      dyn_mcpu_ext_opt = dyn_march_ext_opt;
-      /* Avoid double free in arm_md_end.  */
-      dyn_march_ext_opt = NULL;
+      selected_arch = *mcpu_cpu_opt;
+      selected_ext = *mcpu_ext_opt;
     }
+  else if (march_cpu_opt)
+    {
+      selected_arch = *march_cpu_opt;
+      selected_ext = *march_ext_opt;
+    }
+  ARM_MERGE_FEATURE_SETS (selected_cpu, selected_arch, selected_ext);
 
   if (legacy_fpu)
     {
       if (mfpu_opt)
 	as_bad (_("use of old and new-style options to set FPU type"));
 
-      mfpu_opt = legacy_fpu;
+      selected_fpu = *legacy_fpu;
     }
-  else if (!mfpu_opt)
+  else if (mfpu_opt)
+    selected_fpu = *mfpu_opt;
+  else
     {
 #if !(defined (EABI_DEFAULT) || defined (TE_LINUX) \
 	|| defined (TE_NetBSD) || defined (TE_VXWORKS))
       /* Some environments specify a default FPU.  If they don't, infer it
 	 from the processor.  */
       if (mcpu_fpu_opt)
-	mfpu_opt = mcpu_fpu_opt;
+	selected_fpu = *mcpu_fpu_opt;
       else
-	mfpu_opt = march_fpu_opt;
+	selected_fpu = *march_fpu_opt;
 #else
-      mfpu_opt = &fpu_default;
+      selected_fpu = fpu_default;
 #endif
     }
 
-  if (!mfpu_opt)
+  if (ARM_FEATURE_ZERO (selected_fpu))
     {
-      if (mcpu_cpu_opt != NULL)
-	mfpu_opt = &fpu_default;
-      else if (mcpu_fpu_opt != NULL && ARM_CPU_HAS_FEATURE (*mcpu_fpu_opt, arm_ext_v5))
-	mfpu_opt = &fpu_arch_vfp_v2;
+      if (!no_cpu_selected ())
+	selected_fpu = fpu_default;
       else
-	mfpu_opt = &fpu_arch_fpa;
+	selected_fpu = fpu_arch_fpa;
     }
 
 #ifdef CPU_DEFAULT
-  if (!mcpu_cpu_opt)
+  if (ARM_FEATURE_ZERO (selected_arch))
     {
-      mcpu_cpu_opt = &cpu_default;
-      selected_cpu = cpu_default;
+      selected_arch = cpu_default;
+      selected_cpu = selected_arch;
     }
-  else if (dyn_mcpu_ext_opt)
-    ARM_MERGE_FEATURE_SETS (selected_cpu, *mcpu_cpu_opt, *dyn_mcpu_ext_opt);
-  else
-    selected_cpu = *mcpu_cpu_opt;
+  ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, selected_fpu);
 #else
-  if (mcpu_cpu_opt && dyn_mcpu_ext_opt)
-    ARM_MERGE_FEATURE_SETS (selected_cpu, *mcpu_cpu_opt, *dyn_mcpu_ext_opt);
-  else if (mcpu_cpu_opt)
-    selected_cpu = *mcpu_cpu_opt;
+  /*  Autodection of feature mode: allow all features in cpu_variant but leave
+      selected_cpu unset.  It will be set in aeabi_set_public_attributes ()
+      after all instruction have been processed and we can decide what CPU
+      should be selected.  */
+  if (ARM_FEATURE_ZERO (selected_arch))
+    ARM_MERGE_FEATURE_SETS (cpu_variant, arm_arch_any, selected_fpu);
   else
-    mcpu_cpu_opt = &arm_arch_any;
+    ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, selected_fpu);
 #endif
-
-  ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
-  if (dyn_mcpu_ext_opt)
-    ARM_MERGE_FEATURE_SETS (cpu_variant, cpu_variant, *dyn_mcpu_ext_opt);
 
   autoselect_thumb_from_cpu_variant ();
 
@@ -26444,7 +26467,7 @@ struct arm_long_option_table
 
 static bfd_boolean
 arm_parse_extension (const char *str, const arm_feature_set *opt_set,
-		     arm_feature_set **ext_set_p)
+		     arm_feature_set *ext_set)
 {
   /* We insist on extensions being specified in alphabetical order, and with
      extensions being added before being removed.  We achieve this by having
@@ -26455,12 +26478,6 @@ arm_parse_extension (const char *str, const arm_feature_set *opt_set,
   const struct arm_option_extension_value_table * opt = NULL;
   const arm_feature_set arm_any = ARM_ANY;
   int adding_value = -1;
-
-  if (!*ext_set_p)
-    {
-      *ext_set_p = XNEW (arm_feature_set);
-      **ext_set_p = arm_arch_none;
-    }
 
   while (str != NULL && *str != 0)
     {
@@ -26539,10 +26556,9 @@ arm_parse_extension (const char *str, const arm_feature_set *opt_set,
 
 	    /* Add or remove the extension.  */
 	    if (adding_value)
-	      ARM_MERGE_FEATURE_SETS (**ext_set_p, **ext_set_p,
-				      opt->merge_value);
+	      ARM_MERGE_FEATURE_SETS (*ext_set, *ext_set, opt->merge_value);
 	    else
-	      ARM_CLEAR_FEATURE (**ext_set_p, **ext_set_p, opt->clear_value);
+	      ARM_CLEAR_FEATURE (*ext_set, *ext_set, opt->clear_value);
 
 	    /* Allowing Thumb division instructions for ARMv7 in autodetection
 	       rely on this break so that duplicate extensions (extensions
@@ -26603,9 +26619,9 @@ arm_parse_cpu (const char *str)
     if (opt->name_len == len && strncmp (opt->name, str, len) == 0)
       {
 	mcpu_cpu_opt = &opt->value;
-	if (!dyn_mcpu_ext_opt)
-	  dyn_mcpu_ext_opt = XNEW (arm_feature_set);
-	*dyn_mcpu_ext_opt = opt->ext;
+	if (mcpu_ext_opt == NULL)
+	  mcpu_ext_opt = XNEW (arm_feature_set);
+	*mcpu_ext_opt = opt->ext;
 	mcpu_fpu_opt = &opt->default_fpu;
 	if (opt->canonical_name)
 	  {
@@ -26625,7 +26641,7 @@ arm_parse_cpu (const char *str)
 	  }
 
 	if (ext != NULL)
-	  return arm_parse_extension (ext, mcpu_cpu_opt, &dyn_mcpu_ext_opt);
+	  return arm_parse_extension (ext, mcpu_cpu_opt, mcpu_ext_opt);
 
 	return TRUE;
       }
@@ -26656,11 +26672,14 @@ arm_parse_arch (const char *str)
     if (opt->name_len == len && strncmp (opt->name, str, len) == 0)
       {
 	march_cpu_opt = &opt->value;
+	if (march_ext_opt == NULL)
+	  march_ext_opt = XNEW (arm_feature_set);
+	*march_ext_opt = arm_arch_none;
 	march_fpu_opt = &opt->default_fpu;
 	strcpy (selected_cpu_name, opt->name);
 
 	if (ext != NULL)
-	  return arm_parse_extension (ext, march_cpu_opt, &dyn_march_ext_opt);
+	  return arm_parse_extension (ext, march_cpu_opt, march_ext_opt);
 
 	return TRUE;
       }
@@ -27152,26 +27171,31 @@ aeabi_set_public_attributes (void)
 	ARM_MERGE_FEATURE_SETS (flags, flags, arm_ext_v4t);
 
       /* Code run during relaxation relies on selected_cpu being set.  */
+      ARM_CLEAR_FEATURE (flags_arch, flags, fpu_any);
+      flags_ext = arm_arch_none;
+      ARM_CLEAR_FEATURE (selected_arch, flags_arch, flags_ext);
+      selected_ext = flags_ext;
       selected_cpu = flags;
     }
   /* Otherwise, choose the architecture based on the capabilities of the
      requested cpu.  */
   else
-    flags = selected_cpu;
-  ARM_MERGE_FEATURE_SETS (flags, flags, *mfpu_opt);
+    {
+      ARM_MERGE_FEATURE_SETS (flags_arch, selected_arch, selected_ext);
+      ARM_CLEAR_FEATURE (flags_arch, flags_arch, fpu_any);
+      flags_ext = selected_ext;
+      flags = selected_cpu;
+    }
+  ARM_MERGE_FEATURE_SETS (flags, flags, selected_fpu);
 
   /* Allow the user to override the reported architecture.  */
-  if (object_arch)
+  if (!ARM_FEATURE_ZERO (selected_object_arch))
     {
-      ARM_CLEAR_FEATURE (flags_arch, *object_arch, fpu_any);
+      ARM_CLEAR_FEATURE (flags_arch, selected_object_arch, fpu_any);
       flags_ext = arm_arch_none;
     }
   else
-    {
-      ARM_CLEAR_FEATURE (flags_arch, flags, fpu_any);
-      flags_ext = dyn_mcpu_ext_opt ? *dyn_mcpu_ext_opt : arm_arch_none;
-      skip_exact_match = ARM_FEATURE_EQUAL (selected_cpu, arm_arch_any);
-    }
+    skip_exact_match = ARM_FEATURE_EQUAL (selected_cpu, arm_arch_any);
 
   /* When this function is run again after relaxation has happened there is no
      way to determine whether an architecture or CPU was specified by the user:
@@ -27212,7 +27236,7 @@ aeabi_set_public_attributes (void)
     aeabi_set_attribute_int (Tag_CPU_arch_profile, profile);
 
   /* Tag_DSP_extension.  */
-  if (dyn_mcpu_ext_opt && ARM_CPU_HAS_FEATURE (*dyn_mcpu_ext_opt, arm_ext_dsp))
+  if (ARM_CPU_HAS_FEATURE (selected_ext, arm_ext_dsp))
     aeabi_set_attribute_int (Tag_DSP_extension, 1);
 
   ARM_CLEAR_FEATURE (flags_arch, flags, fpu_any);
@@ -27335,10 +27359,10 @@ void
 arm_md_post_relax (void)
 {
   aeabi_set_public_attributes ();
-  XDELETE (dyn_mcpu_ext_opt);
-  dyn_mcpu_ext_opt = NULL;
-  XDELETE (dyn_march_ext_opt);
-  dyn_march_ext_opt = NULL;
+  XDELETE (mcpu_ext_opt);
+  mcpu_ext_opt = NULL;
+  XDELETE (march_ext_opt);
+  march_ext_opt = NULL;
 }
 
 /* Add the default contents for the .ARM.attributes section.  */
@@ -27372,11 +27396,9 @@ s_arm_cpu (int ignored ATTRIBUTE_UNUSED)
   for (opt = arm_cpus + 1; opt->name != NULL; opt++)
     if (streq (opt->name, name))
       {
-	mcpu_cpu_opt = &opt->value;
-	if (!dyn_mcpu_ext_opt)
-	  dyn_mcpu_ext_opt = XNEW (arm_feature_set);
-	*dyn_mcpu_ext_opt = opt->ext;
-	ARM_MERGE_FEATURE_SETS (selected_cpu, *mcpu_cpu_opt, *dyn_mcpu_ext_opt);
+	selected_arch = opt->value;
+	selected_ext = opt->ext;
+	ARM_MERGE_FEATURE_SETS (selected_cpu, selected_arch, selected_ext);
 	if (opt->canonical_name)
 	  strcpy (selected_cpu_name, opt->canonical_name);
 	else
@@ -27387,9 +27409,8 @@ s_arm_cpu (int ignored ATTRIBUTE_UNUSED)
 
 	    selected_cpu_name[i] = 0;
 	  }
-	ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
-	if (dyn_mcpu_ext_opt)
-	  ARM_MERGE_FEATURE_SETS (cpu_variant, cpu_variant, *dyn_mcpu_ext_opt);
+	ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, selected_fpu);
+
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
 	return;
@@ -27418,12 +27439,11 @@ s_arm_arch (int ignored ATTRIBUTE_UNUSED)
   for (opt = arm_archs + 1; opt->name != NULL; opt++)
     if (streq (opt->name, name))
       {
-	mcpu_cpu_opt = &opt->value;
-	XDELETE (dyn_mcpu_ext_opt);
-	dyn_mcpu_ext_opt = NULL;
-	selected_cpu = *mcpu_cpu_opt;
+	selected_arch = opt->value;
+	selected_ext = arm_arch_none;
+	selected_cpu = selected_arch;
 	strcpy (selected_cpu_name, opt->name);
-	ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, *mfpu_opt);
+	ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, selected_fpu);
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
 	return;
@@ -27453,7 +27473,7 @@ s_arm_object_arch (int ignored ATTRIBUTE_UNUSED)
   for (opt = arm_archs + 1; opt->name != NULL; opt++)
     if (streq (opt->name, name))
       {
-	object_arch = &opt->value;
+	selected_object_arch = opt->value;
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
 	return;
@@ -27470,7 +27490,6 @@ static void
 s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
 {
   const struct arm_option_extension_value_table *opt;
-  const arm_feature_set arm_any = ARM_ANY;
   char saved_char;
   char *name;
   int adding_value = 1;
@@ -27496,9 +27515,9 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
 	for (i = 0; i < nb_allowed_archs; i++)
 	  {
 	    /* Empty entry.  */
-	    if (ARM_FEATURE_EQUAL (opt->allowed_archs[i], arm_any))
+	    if (ARM_CPU_IS_ANY (opt->allowed_archs[i]))
 	      continue;
-	    if (ARM_FSET_CPU_SUBSET (opt->allowed_archs[i], *mcpu_cpu_opt))
+	    if (ARM_FSET_CPU_SUBSET (opt->allowed_archs[i], selected_arch))
 	      break;
 	  }
 
@@ -27509,20 +27528,14 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
 	    break;
 	  }
 
-	if (!dyn_mcpu_ext_opt)
-	  {
-	    dyn_mcpu_ext_opt = XNEW (arm_feature_set);
-	    *dyn_mcpu_ext_opt = arm_arch_none;
-	  }
 	if (adding_value)
-	  ARM_MERGE_FEATURE_SETS (*dyn_mcpu_ext_opt, *dyn_mcpu_ext_opt,
+	  ARM_MERGE_FEATURE_SETS (selected_ext, selected_ext,
 				  opt->merge_value);
 	else
-	  ARM_CLEAR_FEATURE (*dyn_mcpu_ext_opt, *dyn_mcpu_ext_opt,
-			     opt->clear_value);
+	  ARM_CLEAR_FEATURE (selected_ext, selected_ext, opt->clear_value);
 
-	ARM_MERGE_FEATURE_SETS (selected_cpu, *mcpu_cpu_opt, *dyn_mcpu_ext_opt);
-	ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, *mfpu_opt);
+	ARM_MERGE_FEATURE_SETS (selected_cpu, selected_arch, selected_ext);
+	ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, selected_fpu);
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
 	/* Allowing Thumb division instructions for ARMv7 in autodetection rely
@@ -27557,10 +27570,13 @@ s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
   for (opt = arm_fpus; opt->name != NULL; opt++)
     if (streq (opt->name, name))
       {
-	mfpu_opt = &opt->value;
-	ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
-	if (dyn_mcpu_ext_opt)
-	  ARM_MERGE_FEATURE_SETS (cpu_variant, cpu_variant, *dyn_mcpu_ext_opt);
+	selected_fpu = opt->value;
+#ifndef CPU_DEFAULT
+	if (no_cpu_selected ())
+	  ARM_MERGE_FEATURE_SETS (cpu_variant, arm_arch_any, selected_fpu);
+	else
+#endif
+	  ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, selected_fpu);
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
 	return;
