@@ -25407,7 +25407,7 @@ md_begin (void)
 	 from the processor.  */
       if (mcpu_fpu_opt)
 	selected_fpu = *mcpu_fpu_opt;
-      else
+      else if (march_fpu_opt)
 	selected_fpu = *march_fpu_opt;
 #else
       selected_fpu = fpu_default;
