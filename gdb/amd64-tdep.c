@@ -601,8 +601,9 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
 	    bitsize = TYPE_LENGTH (subtype) * 8;
 	  endpos = (TYPE_FIELD_BITPOS (type, i) + bitsize - 1) / 64;
 
-	  /* Ignore static fields.  */
-	  if (field_is_static (&TYPE_FIELD (type, i)))
+	  /* Ignore static fields, or empty fields, for example nested
+	     empty structures.*/
+	  if (field_is_static (&TYPE_FIELD (type, i)) || bitsize == 0)
 	    continue;
 
 	  gdb_assert (pos == 0 || pos == 1);

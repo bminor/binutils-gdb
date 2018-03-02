@@ -1,3 +1,8 @@
+2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* amd64-tdep.c (amd64_classify_aggregate): Ignore zero sized
+	fields within aggregates.
+
 2018-03-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* record-btrace.c (btrace_print_lines): Change type of flags to
