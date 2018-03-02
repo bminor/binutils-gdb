@@ -1,3 +1,13 @@
+2018-11-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	Backport from mainline
+	2018-03-02  Cupertino Miranda  <cmiranda@synopsys.com>a
+	* arc-got.h (get_got_entry_list_for_symbol): Changed.
+	* ef32-arc.c (struct elf_arc_link_hash_entry): Moved and changed.
+	(elf_arc_link_hash_newfunc): Changed.
+	(arc_elf_link_hash_table_create): Removed old initializations.
+	(elf_arc_relocate_section, elf_arc_finish_dynamic_symbol): Changed.
+
 2018-11-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23818

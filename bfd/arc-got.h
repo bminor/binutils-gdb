@@ -156,9 +156,11 @@ get_got_entry_list_for_symbol (bfd *abfd,
 			       unsigned long r_symndx,
 			       struct elf_link_hash_entry *h)
 {
-  if (h != NULL)
+  struct elf_arc_link_hash_entry *h1 =
+    ((struct elf_arc_link_hash_entry *) h);
+  if (h1 != NULL)
     {
-      return &h->got.glist;
+      return &h1->got_ents;
     }
   else
     {
