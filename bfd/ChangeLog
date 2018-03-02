@@ -1,3 +1,11 @@
+2018-03-02  Jim Wilson  <jimw@sifive.com>
+
+	PR 22903
+	* elfnn-aarch64.c (_bfd_aarch64_resize_stubs): Add 8 bytes for branch
+	and nop instead of 4.
+	(elfNN_arch64_build_stubs): Add nop after branch.  Increase size by
+	8 instead of 4.
+
 2018-03-01  Jim Wilson  <jimw@sifive.com>
 
 	PR 22756

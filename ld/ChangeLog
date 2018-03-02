@@ -1,3 +1,28 @@
+2018-03-02  Jim Wilson  <jimw@sifive.com>
+
+	PR 22903
+	* emultempl/aarch64elf.em (elf${ELFSIZE}_aarch64_add_stub_section):
+	Give stub_sec 8 byte alignment.
+	* emulparams/aarch64cloudabi.sh (NOP): Set to 0x1f2003d5.
+	* emulparams/aarch64elf.sh (NOP): Likewise.
+	* emulparams/aarch64elf32.sh (NOP): Likewise.
+	* emulparams/aarch64fbsd.sh (NOP): Likewise.
+	* emulparams/aarch64linux.sh (NOP): Likewise.
+	* emulparams/aarch64linux32.sh (NOP): Likewise.
+	* testsuite/ld-aarch64/erratum835769.d: Adjust for added nop.
+	* testsuite/ld-aarch64/erratum843419.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b-defsym.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b-none-function.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b-plt.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b-section.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b.d: Likewise.
+	* testsuite/ld-aarch64/farcall-back.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl-defsym.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl-none-function.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl-plt.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl-section.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl.d: Likewise.
+
 2018-03-01  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac (ALL_LINGUAS): Add ja.  Sort.

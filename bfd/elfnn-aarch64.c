@@ -3813,8 +3813,10 @@ _bfd_aarch64_resize_stubs (struct elf_aarch64_link_hash_table *htab)
       if (!strstr (section->name, STUB_SUFFIX))
 	continue;
 
+      /* Add space for a branch.  Add 8 bytes to keep section 8 byte aligned,
+	 as long branch stubs contain a 64-bit address.  */
       if (section->size)
-	section->size += 4;
+	section->size += 8;
 
       /* Ensure all stub sections have a size which is a multiple of
 	 4096.  This is important in order to ensure that the insertion
@@ -3826,9 +3828,7 @@ _bfd_aarch64_resize_stubs (struct elf_aarch64_link_hash_table *htab)
     }
 }
 
-
-/* Construct an erratum 843419 workaround stub name.
- */
+/* Construct an erratum 843419 workaround stub name.  */
 
 static char *
 _bfd_aarch64_erratum_843419_stub_name (asection *input_section,
@@ -4370,8 +4370,11 @@ elfNN_aarch64_build_stubs (struct bfd_link_info *info)
 	return FALSE;
       stub_sec->size = 0;
 
+      /* Add a branch around the stub section, and a nop, to keep it 8 byte
+	 aligned, as long branch stubs contain a 64-bit address.  */
       bfd_putl32 (0x14000000 | (size >> 2), stub_sec->contents);
-      stub_sec->size += 4;
+      bfd_putl32 (INSN_NOP, stub_sec->contents + 4);
+      stub_sec->size += 8;
     }
 
   /* Build the stubs as directed by the stub hash table.  */
