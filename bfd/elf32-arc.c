@@ -2420,6 +2420,9 @@ elf_arc_finish_dynamic_symbol (bfd * output_bfd,
     {
       struct elf_arc_link_hash_table *arc_htab = elf_arc_hash_table (info);
 
+      if (arc_htab == NULL)
+	return FALSE;
+
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
