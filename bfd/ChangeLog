@@ -1,7 +1,14 @@
 2018-11-15  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	Backport from mainline
-	2018-03-01  Cupertino Miranda <cmiranda@synopsys.com>
+	2018-03-02  Cupertino Miranda <cmiranda@synopsys.com>
+	* elf32-arc.c (elf_arc_check_relocs): Changed.
+
+
+2018-11-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	Backport from mainline
+	2018-03-02  Cupertino Miranda <cmiranda@synopsys.com>
 	* elf32-arc.c (elf_arc_finish_dynamic_symbol) Return FALSE in case
 	arc_htab is NULL.
 
