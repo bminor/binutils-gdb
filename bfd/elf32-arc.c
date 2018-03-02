@@ -2041,7 +2041,8 @@ elf_arc_check_relocs (bfd *			 abfd,
 	  if (h == NULL)
 	    continue;
 	  else
-	    h->needs_plt = 1;
+	    if (h->forced_local == 0)
+	      h->needs_plt = 1;
 	}
 
       /* Add info to the symbol got_entry_list.  */
