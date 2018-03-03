@@ -29,8 +29,6 @@ DEF_VEC_P (char_ptr);
 
 DEF_VEC_P (const_char_ptr);
 
-extern void free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec);
-
 /* Split STR, a list of DELIMITER-separated fields, into a char pointer vector.
 
    You may modify the returned strings.  */

@@ -21,24 +21,6 @@
 #include "gdb_vecs.h"
 #include "host-defs.h"
 
-/* Call xfree for each element of CHAR_PTR_VEC and final VEC_free for
-   CHAR_PTR_VEC itself.
-
-   You must not modify CHAR_PTR_VEC after it got registered with this function
-   by make_cleanup as the CHAR_PTR_VEC base address may change on its updates.
-   Contrary to VEC_free this function does not (cannot) clear the pointer.  */
-
-void
-free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec)
-{
-  int ix;
-  char *name;
-
-  for (ix = 0; VEC_iterate (char_ptr, char_ptr_vec, ix, name); ++ix)
-    xfree (name);
-  VEC_free (char_ptr, char_ptr_vec);
-}
-
 /* Worker function to split character delimiter separated string of fields
    STR into a char pointer vector.  */
 

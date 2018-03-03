@@ -1,5 +1,10 @@
 2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* common/gdb_vecs.c (free_char_ptr_vec): Remove.
+	* common/gdb_vecs.h (free_char_ptr_vec): Remove.
+
+2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* charset.c (struct charset_vector): New.
 	(charsets): Change type to charset_vector.
 	(find_charset_names): Adjust.
