@@ -40,11 +40,12 @@ free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec)
 }
 
 /* Worker function to split character delimiter separated string of fields
-   STR into a CHAR_PTR_VEC.  */
+   STR into a char pointer vector.  */
 
 static void
-delim_string_to_char_ptr_vec_append (VEC (char_ptr) **vecp,
-				     const char *str, char delimiter)
+delim_string_to_char_ptr_vec_append
+  (std::vector<gdb::unique_xmalloc_ptr<char>> *vecp, const char *str,
+   char delimiter)
 {
   do
     {
@@ -64,49 +65,40 @@ delim_string_to_char_ptr_vec_append (VEC (char_ptr) **vecp,
       this_field = (char *) xmalloc (this_len + 1);
       memcpy (this_field, str, this_len);
       this_field[this_len] = '\0';
-      VEC_safe_push (char_ptr, *vecp, this_field);
+      vecp->emplace_back (this_field);
 
       str = next_field;
     }
   while (str != NULL);
 }
 
-/* Split STR, a list of DELIMITER-separated fields, into a CHAR_PTR_VEC.
+/* See gdb_vecs.h.  */
 
-   You may modify the returned strings.
-   Read free_char_ptr_vec for its cleanup.  */
-
-VEC (char_ptr) *
+std::vector<gdb::unique_xmalloc_ptr<char>>
 delim_string_to_char_ptr_vec (const char *str, char delimiter)
 {
-  VEC (char_ptr) *retval = NULL;
+  std::vector<gdb::unique_xmalloc_ptr<char>> retval;
   
   delim_string_to_char_ptr_vec_append (&retval, str, delimiter);
 
   return retval;
 }
 
-/* Extended version of dirnames_to_char_ptr_vec - additionally if *VECP is
-   non-NULL the new list elements from DIRNAMES are appended to the existing
-   *VECP list of entries.  *VECP address will be updated by this call.  */
+/* See gdb_vecs.h.  */
 
 void
-dirnames_to_char_ptr_vec_append (VEC (char_ptr) **vecp, const char *dirnames)
+dirnames_to_char_ptr_vec_append
+  (std::vector<gdb::unique_xmalloc_ptr<char>> *vecp, const char *dirnames)
 {
   delim_string_to_char_ptr_vec_append (vecp, dirnames, DIRNAME_SEPARATOR);
 }
 
-/* Split DIRNAMES by DIRNAME_SEPARATOR delimiter and return a list of all the
-   elements in their original order.  For empty string ("") DIRNAMES return
-   list of one empty string ("") element.
-   
-   You may modify the returned strings.
-   Read free_char_ptr_vec for its cleanup.  */
+/* See gdb_vecs.h.  */
 
-VEC (char_ptr) *
+std::vector<gdb::unique_xmalloc_ptr<char>>
 dirnames_to_char_ptr_vec (const char *dirnames)
 {
-  VEC (char_ptr) *retval = NULL;
+  std::vector<gdb::unique_xmalloc_ptr<char>> retval;
   
   dirnames_to_char_ptr_vec_append (&retval, dirnames);
 

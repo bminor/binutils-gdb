@@ -71,8 +71,6 @@ gdb_bfd_ref_ptr
 build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
 {
   char *link, *debugdir;
-  VEC (char_ptr) *debugdir_vec;
-  struct cleanup *back_to;
   int ix;
   gdb_bfd_ref_ptr abfd;
   int alloc_len;
@@ -86,17 +84,17 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
   /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
      cause "/.build-id/..." lookups.  */
 
-  debugdir_vec = dirnames_to_char_ptr_vec (debug_file_directory);
-  back_to = make_cleanup_free_char_ptr_vec (debugdir_vec);
+  std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
+    = dirnames_to_char_ptr_vec (debug_file_directory);
 
-  for (ix = 0; VEC_iterate (char_ptr, debugdir_vec, ix, debugdir); ++ix)
+  for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {
-      size_t debugdir_len = strlen (debugdir);
+      size_t debugdir_len = strlen (debugdir.get ());
       const gdb_byte *data = build_id;
       size_t size = build_id_len;
       char *s;
 
-      memcpy (link, debugdir, debugdir_len);
+      memcpy (link, debugdir.get (), debugdir_len);
       s = &link[debugdir_len];
       s += sprintf (s, "/.build-id/");
       if (size > 0)
@@ -133,7 +131,6 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
       abfd.release ();
     }
 
-  do_cleanups (back_to);
   return abfd;
 }
 

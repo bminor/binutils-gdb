@@ -1,3 +1,35 @@
+2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/gdb_vecs.h (make_cleanup_free_char_ptr_vec): Remove.
+	(delim_string_to_char_ptr_vec): Return std::vector of
+	gdb::unique_xmalloc_ptr.
+	(dirnames_to_char_ptr_vec_append): Take std::vector of
+	gdb::unique_xmalloc_ptr.
+	(dirnames_to_char_ptr_vec): Return std::vector of
+	gdb::unique_xmalloc_ptr.
+	* common/gdb_vecs.c (delim_string_to_char_ptr_vec_append):
+	Take std::vector of gdb::unique_xmalloc_ptr, adjust the code.
+	(delim_string_to_char_ptr_vec): Return an std::vector of
+	gdb::unique_xmalloc_ptr, adjust the code.
+	(dirnames_to_char_ptr_vec_append): Take an std::vector of
+	gdb::unique_xmalloc_ptr, adjust the code.
+	(dirnames_to_char_ptr_vec): Return an std::vector of
+	gdb::unique_xmalloc_ptr, adjust the code.
+	* auto-load.c (auto_load_safe_path_vec): Change type to
+	std::vector of gdb::unique_xmalloc_ptr.
+	(auto_load_expand_dir_vars): Return an std::vector of
+	gdb::unique_xmalloc_ptr, adjust the code.
+	(auto_load_safe_path_vec_update): Adjust.
+	(filename_is_in_auto_load_safe_path_vec): Adjust.
+	(auto_load_objfile_script_1): Adjust.
+	* build-id.c (build_id_to_debug_bfd): Adjust.
+	* linux-thread-db.c (thread_db_load_search): Adjust.
+	* source.c (add_path): Adjust.
+	(openp): Adjust.
+	* symfile.c (find_separate_debug_file): Adjust.
+	* utils.c (do_free_char_ptr_vec): Remove.
+	(make_cleanup_free_char_ptr_vec): Remove.
+
 2018-03-01  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/22907

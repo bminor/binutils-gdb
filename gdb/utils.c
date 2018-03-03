@@ -3052,30 +3052,6 @@ make_bpstat_clear_actions_cleanup (void)
   return make_cleanup (do_bpstat_clear_actions_cleanup, NULL);
 }
 
-
-/* Helper for make_cleanup_free_char_ptr_vec.  */
-
-static void
-do_free_char_ptr_vec (void *arg)
-{
-  VEC (char_ptr) *char_ptr_vec = (VEC (char_ptr) *) arg;
-
-  free_char_ptr_vec (char_ptr_vec);
-}
-
-/* Make cleanup handler calling xfree for each element of CHAR_PTR_VEC and
-   final VEC_free for CHAR_PTR_VEC itself.
-
-   You must not modify CHAR_PTR_VEC after this cleanup registration as the
-   CHAR_PTR_VEC base address may change on its updates.  Contrary to VEC_free
-   this function does not (cannot) clear the pointer.  */
-
-struct cleanup *
-make_cleanup_free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec)
-{
-  return make_cleanup (do_free_char_ptr_vec, char_ptr_vec);
-}
-
 /* Substitute all occurences of string FROM by string TO in *STRINGP.  *STRINGP
    must come from xrealloc-compatible allocator and it may be updated.  FROM
    needs to be delimited by IS_DIR_SEPARATOR or DIRNAME_SEPARATOR (or be

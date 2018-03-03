@@ -1309,8 +1309,8 @@ handle_detach (char *own_buf)
    ARG is the text after "--debug-format=" or "monitor set debug-format".
    IS_MONITOR is non-zero if we're invoked via "monitor set debug-format".
    This triggers calls to monitor_output.
-   The result is NULL if all options were parsed ok, otherwise an error
-   message which the caller must free.
+   The result is an empty string if all options were parsed ok, otherwise an
+   error message which the caller must free.
 
    N.B. These commands affect all debug format settings, they are not
    cumulative.  If a format is not specified, it is turned off.
@@ -1325,10 +1325,6 @@ handle_detach (char *own_buf)
 static std::string
 parse_debug_format_options (const char *arg, int is_monitor)
 {
-  VEC (char_ptr) *options;
-  int ix;
-  char *option;
-
   /* First turn all debug format options off.  */
   debug_timestamp = 0;
 
@@ -1336,23 +1332,24 @@ parse_debug_format_options (const char *arg, int is_monitor)
   while (isspace (*arg))
     ++arg;
 
-  options = delim_string_to_char_ptr_vec (arg, ',');
+  std::vector<gdb::unique_xmalloc_ptr<char>> options
+    = delim_string_to_char_ptr_vec (arg, ',');
 
-  for (ix = 0; VEC_iterate (char_ptr, options, ix, option); ++ix)
+  for (const gdb::unique_xmalloc_ptr<char> &option : options)
     {
-      if (strcmp (option, "all") == 0)
+      if (strcmp (option.get (), "all") == 0)
 	{
 	  debug_timestamp = 1;
 	  if (is_monitor)
 	    monitor_output ("All extra debug format options enabled.\n");
 	}
-      else if (strcmp (option, "none") == 0)
+      else if (strcmp (option.get (), "none") == 0)
 	{
 	  debug_timestamp = 0;
 	  if (is_monitor)
 	    monitor_output ("All extra debug format options disabled.\n");
 	}
-      else if (strcmp (option, "timestamp") == 0)
+      else if (strcmp (option.get (), "timestamp") == 0)
 	{
 	  debug_timestamp = 1;
 	  if (is_monitor)
@@ -1364,16 +1361,10 @@ parse_debug_format_options (const char *arg, int is_monitor)
 	  continue;
 	}
       else
-	{
-	  std::string msg
-	    = string_printf ("Unknown debug-format argument: \"%s\"\n", option);
-
-	  free_char_ptr_vec (options);
-	  return msg;
-	}
+	return string_printf ("Unknown debug-format argument: \"%s\"\n",
+			      option.get ());
     }
 
-  free_char_ptr_vec (options);
   return std::string ();
 }
 

@@ -1439,12 +1439,8 @@ find_separate_debug_file (const char *dir,
 			  const char *debuglink,
 			  unsigned long crc32, struct objfile *objfile)
 {
-  char *debugdir;
   char *debugfile;
   int i;
-  VEC (char_ptr) *debugdir_vec;
-  struct cleanup *back_to;
-  int ix;
 
   if (separate_debug_file_debug)
     printf_unfiltered (_("\nLooking for separate debug info (debug link) for "
@@ -1484,21 +1480,18 @@ find_separate_debug_file (const char *dir,
      Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
      cause "/..." lookups.  */
 
-  debugdir_vec = dirnames_to_char_ptr_vec (debug_file_directory);
-  back_to = make_cleanup_free_char_ptr_vec (debugdir_vec);
+  std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
+    = dirnames_to_char_ptr_vec (debug_file_directory);
 
-  for (ix = 0; VEC_iterate (char_ptr, debugdir_vec, ix, debugdir); ++ix)
+  for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {
-      strcpy (debugfile, debugdir);
+      strcpy (debugfile, debugdir.get ());
       strcat (debugfile, "/");
       strcat (debugfile, dir);
       strcat (debugfile, debuglink);
 
       if (separate_debug_file_exists (debugfile, crc32, objfile))
-	{
-	  do_cleanups (back_to);
-	  return debugfile;
-	}
+	return debugfile;
 
       /* If the file is in the sysroot, try using its base path in the
 	 global debugfile directory.  */
@@ -1507,20 +1500,16 @@ find_separate_debug_file (const char *dir,
 			    strlen (gdb_sysroot)) == 0
 	  && IS_DIR_SEPARATOR (canon_dir[strlen (gdb_sysroot)]))
 	{
-	  strcpy (debugfile, debugdir);
+	  strcpy (debugfile, debugdir.get ());
 	  strcat (debugfile, canon_dir + strlen (gdb_sysroot));
 	  strcat (debugfile, "/");
 	  strcat (debugfile, debuglink);
 
 	  if (separate_debug_file_exists (debugfile, crc32, objfile))
-	    {
-	      do_cleanups (back_to);
-	      return debugfile;
-	    }
+	    return debugfile;
 	}
     }
 
-  do_cleanups (back_to);
   xfree (debugfile);
   return NULL;
 }

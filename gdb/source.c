@@ -461,10 +461,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 {
   char *old = *which_path;
   int prefix = 0;
-  VEC (char_ptr) *dir_vec = NULL;
-  struct cleanup *back_to;
-  int ix;
-  char *name;
+  std::vector<gdb::unique_xmalloc_ptr<char>> dir_vec;
 
   if (dirname == 0)
     return;
@@ -479,11 +476,13 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	dirnames_to_char_ptr_vec_append (&dir_vec, arg);
     }
   else
-    VEC_safe_push (char_ptr, dir_vec, xstrdup (dirname));
-  back_to = make_cleanup_free_char_ptr_vec (dir_vec);
+    dir_vec.emplace_back (xstrdup (dirname));
 
-  for (ix = 0; VEC_iterate (char_ptr, dir_vec, ix, name); ++ix)
+  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
+
+  for (const gdb::unique_xmalloc_ptr<char> &name_up : dir_vec)
     {
+      char *name = name_up.get ();
       char *p;
       struct stat st;
 
@@ -709,13 +708,10 @@ openp (const char *path, openp_flags opts, const char *string,
   int fd;
   char *filename;
   int alloclen;
-  VEC (char_ptr) *dir_vec;
-  struct cleanup *back_to;
-  int ix;
-  char *dir;
   /* The errno set for the last name we tried to open (and
      failed).  */
   int last_errno = 0;
+  std::vector<gdb::unique_xmalloc_ptr<char>> dir_vec;
 
   /* The open syscall MODE parameter is not specified.  */
   gdb_assert ((mode & O_CREAT) == 0);
@@ -783,10 +779,10 @@ openp (const char *path, openp_flags opts, const char *string,
   last_errno = ENOENT;
 
   dir_vec = dirnames_to_char_ptr_vec (path);
-  back_to = make_cleanup_free_char_ptr_vec (dir_vec);
 
-  for (ix = 0; VEC_iterate (char_ptr, dir_vec, ix, dir); ++ix)
+  for (const gdb::unique_xmalloc_ptr<char> &dir_up : dir_vec)
     {
+      char *dir = dir_up.get ();
       size_t len = strlen (dir);
       int reg_file_errno;
 
@@ -855,8 +851,6 @@ openp (const char *path, openp_flags opts, const char *string,
       else
 	last_errno = reg_file_errno;
     }
-
-  do_cleanups (back_to);
 
 done:
   if (filename_opened)

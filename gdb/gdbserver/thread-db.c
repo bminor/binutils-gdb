@@ -683,17 +683,17 @@ try_thread_db_load_from_dir (const char *dir, size_t dir_len)
 static int
 thread_db_load_search (void)
 {
-  VEC (char_ptr) *dir_vec;
-  char *this_dir;
-  int i, rc = 0;
+  int rc = 0;
 
   if (libthread_db_search_path == NULL)
     libthread_db_search_path = xstrdup (LIBTHREAD_DB_SEARCH_PATH);
 
-  dir_vec = dirnames_to_char_ptr_vec (libthread_db_search_path);
+  std::vector<gdb::unique_xmalloc_ptr<char>> dir_vec
+    = dirnames_to_char_ptr_vec (libthread_db_search_path);
 
-  for (i = 0; VEC_iterate (char_ptr, dir_vec, i, this_dir); ++i)
+  for (const gdb::unique_xmalloc_ptr<char> &this_dir_up : dir_vec)
     {
+      char *this_dir = this_dir_up.get ();
       const int pdir_len = sizeof ("$pdir") - 1;
       size_t this_dir_len;
 
@@ -725,7 +725,6 @@ thread_db_load_search (void)
 	}
     }
 
-  free_char_ptr_vec (dir_vec);
   if (debug_threads)
     debug_printf ("thread_db_load_search returning %d\n", rc);
   return rc;

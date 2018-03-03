@@ -169,19 +169,15 @@ static char *auto_load_safe_path;
 /* Vector of directory elements of AUTO_LOAD_SAFE_PATH with each one normalized
    by tilde_expand and possibly each entries has added its gdb_realpath
    counterpart.  */
-static VEC (char_ptr) *auto_load_safe_path_vec;
+std::vector<gdb::unique_xmalloc_ptr<char>> auto_load_safe_path_vec;
 
 /* Expand $datadir and $debugdir in STRING according to the rules of
-   substitute_path_component.  Return vector from dirnames_to_char_ptr_vec,
-   this vector must be freed by free_char_ptr_vec by the caller.  */
+   substitute_path_component.  */
 
-static VEC (char_ptr) *
+static std::vector<gdb::unique_xmalloc_ptr<char>>
 auto_load_expand_dir_vars (const char *string)
 {
-  VEC (char_ptr) *dir_vec;
-  char *s;
-
-  s = xstrdup (string);
+  char *s = xstrdup (string);
   substitute_path_component (&s, "$datadir", gdb_datadir);
   substitute_path_component (&s, "$debugdir", debug_file_directory);
 
@@ -189,7 +185,8 @@ auto_load_expand_dir_vars (const char *string)
     fprintf_unfiltered (gdb_stdlog,
 			_("auto-load: Expanded $-variables to \"%s\".\n"), s);
 
-  dir_vec = dirnames_to_char_ptr_vec (s);
+  std::vector<gdb::unique_xmalloc_ptr<char>> dir_vec
+    = dirnames_to_char_ptr_vec (s);
   xfree(s);
 
   return dir_vec;
@@ -208,46 +205,42 @@ auto_load_safe_path_vec_update (void)
 			_("auto-load: Updating directories of \"%s\".\n"),
 			auto_load_safe_path);
 
-  free_char_ptr_vec (auto_load_safe_path_vec);
-
   auto_load_safe_path_vec = auto_load_expand_dir_vars (auto_load_safe_path);
-  len = VEC_length (char_ptr, auto_load_safe_path_vec);
 
   /* Apply tilde_expand and gdb_realpath to each AUTO_LOAD_SAFE_PATH_VEC
      element.  */
-  for (ix = 0; ix < len; ix++)
+  for (gdb::unique_xmalloc_ptr<char> &in_vec : auto_load_safe_path_vec)
     {
-      char *dir = VEC_index (char_ptr, auto_load_safe_path_vec, ix);
-      char *expanded = tilde_expand (dir);
-      gdb::unique_xmalloc_ptr<char> real_path = gdb_realpath (expanded);
+      gdb::unique_xmalloc_ptr<char> expanded (tilde_expand (in_vec.get ()));
+      gdb::unique_xmalloc_ptr<char> real_path = gdb_realpath (expanded.get ());
 
-      /* Ensure the current entry is at least tilde_expand-ed.  */
-      VEC_replace (char_ptr, auto_load_safe_path_vec, ix, expanded);
+      /* Ensure the current entry is at least tilde_expand-ed.  ORIGINAL makes
+	 sure we free the original string.  */
+      gdb::unique_xmalloc_ptr<char> original = std::move (in_vec);
+      in_vec = std::move (expanded);
 
       if (debug_auto_load)
 	{
-	  if (strcmp (expanded, dir) == 0)
+	  if (strcmp (in_vec.get (), original.get ()) == 0)
 	    fprintf_unfiltered (gdb_stdlog,
 				_("auto-load: Using directory \"%s\".\n"),
-				expanded);
+				in_vec.get ());
 	  else
 	    fprintf_unfiltered (gdb_stdlog,
 				_("auto-load: Resolved directory \"%s\" "
 				  "as \"%s\".\n"),
-				dir, expanded);
+				original.get (), in_vec.get ());
 	}
-      xfree (dir);
 
       /* If gdb_realpath returns a different content, append it.  */
-      if (strcmp (real_path.get (), expanded) != 0)
+      if (strcmp (real_path.get (), in_vec.get ()) != 0)
 	{
 	  if (debug_auto_load)
 	    fprintf_unfiltered (gdb_stdlog,
 				_("auto-load: And canonicalized as \"%s\".\n"),
 				real_path.get ());
 
-	  VEC_safe_push (char_ptr, auto_load_safe_path_vec,
-			 real_path.release ());
+	  auto_load_safe_path_vec.push_back (std::move (real_path));
 	}
     }
 }
@@ -426,13 +419,14 @@ static int
 filename_is_in_auto_load_safe_path_vec (const char *filename,
 					gdb::unique_xmalloc_ptr<char> *filename_realp)
 {
-  char *pattern;
-  int ix;
+  const char *pattern = NULL;
 
-  for (ix = 0; VEC_iterate (char_ptr, auto_load_safe_path_vec, ix, pattern);
-       ++ix)
-    if (*filename_realp == NULL && filename_is_in_pattern (filename, pattern))
-      break;
+  for (const gdb::unique_xmalloc_ptr<char> &p : auto_load_safe_path_vec)
+    if (*filename_realp == NULL && filename_is_in_pattern (filename, p.get ()))
+      {
+	pattern = p.get ();
+	break;
+      }
   
   if (pattern == NULL)
     {
@@ -447,10 +441,12 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
 	}
 
       if (strcmp (filename_realp->get (), filename) != 0)
-	for (ix = 0;
-	     VEC_iterate (char_ptr, auto_load_safe_path_vec, ix, pattern); ++ix)
-	  if (filename_is_in_pattern (filename_realp->get (), pattern))
-	    break;
+	for (const gdb::unique_xmalloc_ptr<char> &p : auto_load_safe_path_vec)
+	  if (filename_is_in_pattern (filename_realp->get (), p.get ()))
+	    {
+	      pattern = p.get ();
+	      break;
+	    }
     }
 
   if (pattern != NULL)
@@ -793,25 +789,22 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
   if (!input)
     {
-      VEC (char_ptr) *vec;
-      int ix;
-      char *dir;
-
       /* Also try the same file in a subdirectory of gdb's data
 	 directory.  */
 
-      vec = auto_load_expand_dir_vars (auto_load_dir);
-      make_cleanup_free_char_ptr_vec (vec);
+      std::vector<gdb::unique_xmalloc_ptr<char>> vec
+	= auto_load_expand_dir_vars (auto_load_dir);
 
       if (debug_auto_load)
 	fprintf_unfiltered (gdb_stdlog, _("auto-load: Searching 'set auto-load "
 					  "scripts-directory' path \"%s\".\n"),
 			    auto_load_dir);
 
-      for (ix = 0; VEC_iterate (char_ptr, vec, ix, dir); ++ix)
+      for (const gdb::unique_xmalloc_ptr<char> &dir : vec)
 	{
-	  debugfile = (char *) xmalloc (strlen (dir) + strlen (filename) + 1);
-	  strcpy (debugfile, dir);
+	  debugfile = (char *) xmalloc (strlen (dir.get ())
+					+ strlen (filename) + 1);
+	  strcpy (debugfile, dir.get ());
 
 	  /* FILENAME is absolute, so we don't need a "/" here.  */
 	  strcat (debugfile, filename);
