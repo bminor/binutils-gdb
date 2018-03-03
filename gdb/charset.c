@@ -705,21 +705,33 @@ wchar_iterator::iterate (enum wchar_iterate_result *out_result,
   return -1;
 }
 
-/* The charset.c module initialization function.  */
+struct charset_vector
+{
+  ~charset_vector ()
+  {
+    clear ();
+  }
 
-static VEC (char_ptr) *charsets;
+  void clear ()
+  {
+    for (char *c : charsets)
+      xfree (c);
+
+    charsets.clear ();
+  }
+
+  std::vector<char *> charsets;
+};
+
+static charset_vector charsets;
 
 #ifdef PHONY_ICONV
 
 static void
 find_charset_names (void)
 {
-  /* Cast is fine here, because CHARSETS is never released.  Note that
-     the vec does not hold "const char *" pointers instead of "char *"
-     because the non-phony version stores heap-allocated strings in
-     it.  */
-  VEC_safe_push (char_ptr, charsets, (char *) GDB_DEFAULT_HOST_CHARSET);
-  VEC_safe_push (char_ptr, charsets, NULL);
+  charsets.charsets.push_back (xstrdup (GDB_DEFAULT_HOST_CHARSET));
+  charsets.charsets.push_back (NULL);
 }
 
 #else /* PHONY_ICONV */
@@ -740,7 +752,7 @@ add_one (unsigned int count, const char *const *names, void *data)
   unsigned int i;
 
   for (i = 0; i < count; ++i)
-    VEC_safe_push (char_ptr, charsets, xstrdup (names[i]));
+    charsets.charsets.push_back (xstrdup (names[i]));
 
   return 0;
 }
@@ -749,7 +761,8 @@ static void
 find_charset_names (void)
 {
   iconvlist (add_one, NULL);
-  VEC_safe_push (char_ptr, charsets, NULL);
+
+  charsets.charsets.push_back (NULL);
 }
 
 #else
@@ -879,7 +892,7 @@ find_charset_names (void)
 		break;
 	      keep_going = *p;
 	      *p = '\0';
-	      VEC_safe_push (char_ptr, charsets, xstrdup (start));
+	      charsets.charsets.push_back (xstrdup (start));
 	      if (!keep_going)
 		break;
 	      /* Skip any extra spaces.  */
@@ -900,11 +913,10 @@ find_charset_names (void)
   if (fail)
     {
       /* Some error occurred, so drop the vector.  */
-      free_char_ptr_vec (charsets);
-      charsets = NULL;
+      charsets.clear ();
     }
   else
-    VEC_safe_push (char_ptr, charsets, NULL);
+    charsets.charsets.push_back (NULL);
 }
 
 #endif /* HAVE_ICONVLIST || HAVE_LIBICONVLIST */
@@ -994,11 +1006,11 @@ void
 _initialize_charset (void)
 {
   /* The first element is always "auto".  */
-  VEC_safe_push (char_ptr, charsets, xstrdup ("auto"));
+  charsets.charsets.push_back (xstrdup ("auto"));
   find_charset_names ();
 
-  if (VEC_length (char_ptr, charsets) > 1)
-    charset_enum = (const char **) VEC_address (char_ptr, charsets);
+  if (charsets.charsets.size () > 1)
+    charset_enum = (const char **) charsets.charsets.data ();
   else
     charset_enum = default_charset_names;
 
