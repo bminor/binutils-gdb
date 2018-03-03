@@ -109,30 +109,21 @@ init_address_spaces (void)
 /* Adds a new empty program space to the program space list, and binds
    it to ASPACE.  Returns the pointer to the new object.  */
 
-struct program_space *
-add_program_space (struct address_space *aspace)
+program_space::program_space (address_space *aspace_)
+: num (++last_program_space_num), aspace (aspace_)
 {
-  struct program_space *pspace;
-
-  pspace = XCNEW (struct program_space);
-
-  pspace->num = ++last_program_space_num;
-  pspace->aspace = aspace;
-
-  program_space_alloc_data (pspace);
+  program_space_alloc_data (this);
 
   if (program_spaces == NULL)
-    program_spaces = pspace;
+    program_spaces = this;
   else
     {
       struct program_space *last;
 
       for (last = program_spaces; last->next != NULL; last = last->next)
 	;
-      last->next = pspace;
+      last->next = this;
     }
-
-  return pspace;
 }
 
 /* Releases program space PSPACE, and all its contents (shared
@@ -141,26 +132,24 @@ add_program_space (struct address_space *aspace)
    is the current program space, since there should always be a
    program space.  */
 
-static void
-release_program_space (struct program_space *pspace)
+program_space::~program_space ()
 {
-  gdb_assert (pspace != current_program_space);
+  gdb_assert (this != current_program_space);
 
   scoped_restore_current_program_space restore_pspace;
 
-  set_current_program_space (pspace);
+  set_current_program_space (this);
 
-  breakpoint_program_space_exit (pspace);
+  breakpoint_program_space_exit (this);
   no_shared_libraries (NULL, 0);
   exec_close ();
   free_all_objfiles ();
   if (!gdbarch_has_shared_address_space (target_gdbarch ()))
-    free_address_space (pspace->aspace);
-  clear_section_table (&pspace->target_sections);
-  clear_program_space_solib_cache (pspace);
+    free_address_space (this->aspace);
+  clear_section_table (&this->target_sections);
+  clear_program_space_solib_cache (this);
     /* Discard any data modules have associated with the PSPACE.  */
-  program_space_free_data (pspace);
-  xfree (pspace);
+  program_space_free_data (this);
 }
 
 /* Copies program space SRC to DEST.  Copies the main executable file,
@@ -235,7 +224,7 @@ delete_program_space (struct program_space *pspace)
       ss = *ss_link;
     }
 
-  release_program_space (pspace);
+  delete pspace;
 }
 
 /* Prints the list of program spaces and their details on UIOUT.  If
@@ -433,5 +422,5 @@ initialize_progspace (void)
      modules have done that.  Do this before
      initialize_current_architecture, because that accesses exec_bfd,
      which in turn dereferences current_program_space.  */
-  current_program_space = add_program_space (new_address_space ());
+  current_program_space = new program_space (new_address_space ());
 }

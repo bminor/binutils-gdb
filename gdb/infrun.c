@@ -511,7 +511,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  else
 	    {
 	      child_inf->aspace = new_address_space ();
-	      child_inf->pspace = add_program_space (child_inf->aspace);
+	      child_inf->pspace = new program_space (child_inf->aspace);
 	      child_inf->removable = 1;
 	      set_current_program_space (child_inf->pspace);
 	      clone_program_space (child_inf->pspace, parent_inf->pspace);
@@ -630,7 +630,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       else
 	{
 	  child_inf->aspace = new_address_space ();
-	  child_inf->pspace = add_program_space (child_inf->aspace);
+	  child_inf->pspace = new program_space (child_inf->aspace);
 	  child_inf->removable = 1;
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
 	  set_current_program_space (child_inf->pspace);
@@ -986,7 +986,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	{
 	  /* We're staying attached to the parent, so, really give the
 	     child a new address space.  */
-	  inf->pspace = add_program_space (maybe_new_address_space ());
+	  inf->pspace = new program_space (maybe_new_address_space ());
 	  inf->aspace = inf->pspace->aspace;
 	  inf->removable = 1;
 	  set_current_program_space (inf->pspace);
@@ -1020,7 +1020,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	     program space resets breakpoints).  */
 	  inf->aspace = NULL;
 	  inf->pspace = NULL;
-	  pspace = add_program_space (maybe_new_address_space ());
+	  pspace = new program_space (maybe_new_address_space ());
 	  set_current_program_space (pspace);
 	  inf->removable = 1;
 	  inf->symfile_flags = SYMFILE_NO_READ;

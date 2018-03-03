@@ -1,5 +1,21 @@
 2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* progspace.h (struct program_space): Add constructor and
+	destructor, initialize fields.
+	(add_program_space): Remove.
+	* progspace.c (add_program_space): Rename to...
+	(program_space::program_space): ... this.
+	(release_program_space): Rename to...
+	(program_space::~program_space): ... this.
+	(delete_program_space): Use delete to delete program_space.
+	(initialize_progspace): Use new to allocate program_space.
+	* inferior.c (add_inferior_with_spaces): Likewise.
+	(clone_inferior_command): Likewise.
+	* infrun.c (follow_fork_inferior): Likewise.
+	(handle_vfork_child_exec_or_exit): Likewise.
+
+2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* common/gdb_vecs.h (make_cleanup_free_char_ptr_vec): Remove.
 	(delim_string_to_char_ptr_vec): Return std::vector of
 	gdb::unique_xmalloc_ptr.

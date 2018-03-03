@@ -784,7 +784,7 @@ add_inferior_with_spaces (void)
      doesn't really return a new address space; otherwise, it
      really does.  */
   aspace = maybe_new_address_space ();
-  pspace = add_program_space (aspace);
+  pspace = new program_space (aspace);
   inf = add_inferior (0);
   inf->pspace = pspace;
   inf->aspace = pspace->aspace;
@@ -928,7 +928,7 @@ clone_inferior_command (const char *args, int from_tty)
 	 doesn't really return a new address space; otherwise, it
 	 really does.  */
       aspace = maybe_new_address_space ();
-      pspace = add_program_space (aspace);
+      pspace = new program_space (aspace);
       inf = add_inferior (0);
       inf->pspace = pspace;
       inf->aspace = pspace->aspace;
