@@ -1,5 +1,9 @@
 2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* server.c (handle_general_set): Remove unnecessary xstrdup.
+
+2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* server.c (parse_debug_format_options): Adjust to
 	delim_string_to_char_ptr_vec changes.
 	* thread-db.c (thread_db_load_search): Adjust to

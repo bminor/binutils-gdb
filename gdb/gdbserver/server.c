@@ -847,12 +847,9 @@ handle_general_set (char *own_buf)
 	req = TRIBOOL_TRUE;
       else
 	{
-	  char *mode_copy = xstrdup (mode);
-
 	  /* We don't know what this mode is, so complain to GDB.  */
 	  sprintf (own_buf, "E.Unknown thread-events mode requested: %s\n",
-		   mode_copy);
-	  xfree (mode_copy);
+		   mode);
 	  return;
 	}
 
