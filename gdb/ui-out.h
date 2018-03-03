@@ -104,6 +104,7 @@ class ui_out
   void field_core_addr (const char *fldname, struct gdbarch *gdbarch,
 			CORE_ADDR address);
   void field_string (const char *fldname, const char *string);
+  void field_string (const char *fldname, const std::string &string);
   void field_stream (const char *fldname, string_file &stream);
   void field_skip (const char *fldname);
   void field_fmt (const char *fldname, const char *format, ...)

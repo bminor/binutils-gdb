@@ -401,8 +401,7 @@ clear_program_space_solib_cache (struct program_space *pspace)
 {
   VEC_free (so_list_ptr, pspace->added_solibs);
 
-  free_char_ptr_vec (pspace->deleted_solibs);
-  pspace->deleted_solibs = NULL;
+  pspace->deleted_solibs.clear ();
 }
 
 

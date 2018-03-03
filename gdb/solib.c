@@ -828,8 +828,7 @@ update_solib_list (int from_tty)
 	     unloaded before we remove it from GDB's tables.  */
 	  observer_notify_solib_unloaded (gdb);
 
-	  VEC_safe_push (char_ptr, current_program_space->deleted_solibs,
-			 xstrdup (gdb->so_name));
+	  current_program_space->deleted_solibs.push_back (gdb->so_name);
 
 	  *gdb_link = gdb->next;
 

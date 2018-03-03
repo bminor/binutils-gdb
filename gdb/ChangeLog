@@ -1,5 +1,16 @@
 2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* progspace.h (struct program_space) <deleted_solibs>: Change
+	type to std::vector<std::string>.
+	* progspace.c (clear_program_space_solib_cache): Adjust.
+	* breakpoint.c (print_solib_event): Adjust.
+	(check_status_catch_solib): Adjust.
+	* solib.c (update_solib_list): Adjust.
+	* ui-out.h (class ui_out) <field_string>: New overload.
+	* ui-out.c (ui_out::field_string): New overload.
+
+2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* progspace.h (struct program_space): Add constructor and
 	destructor, initialize fields.
 	(add_program_space): Remove.

@@ -4604,8 +4604,7 @@ print_bp_stop_message (bpstat bs)
 static void
 print_solib_event (int is_catchpoint)
 {
-  int any_deleted
-    = !VEC_empty (char_ptr, current_program_space->deleted_solibs);
+  bool any_deleted = !current_program_space->deleted_solibs.empty ();
   int any_added
     = !VEC_empty (so_list_ptr, current_program_space->added_solibs);
 
@@ -4624,16 +4623,12 @@ print_solib_event (int is_catchpoint)
 
   if (any_deleted)
     {
-      char *name;
-      int ix;
-
       current_uiout->text (_("  Inferior unloaded "));
       ui_out_emit_list list_emitter (current_uiout, "removed");
-      for (ix = 0;
-	   VEC_iterate (char_ptr, current_program_space->deleted_solibs,
-			ix, name);
-	   ++ix)
+      for (int ix = 0; ix < current_program_space->deleted_solibs.size (); ix++)
 	{
+	  const std::string &name = current_program_space->deleted_solibs[ix];
+
 	  if (ix > 0)
 	    current_uiout->text ("    ");
 	  current_uiout->field_string ("library", name);
@@ -8050,13 +8045,12 @@ check_status_catch_solib (struct bpstats *bs)
 {
   struct solib_catchpoint *self
     = (struct solib_catchpoint *) bs->breakpoint_at;
-  int ix;
 
   if (self->is_load)
     {
       struct so_list *iter;
 
-      for (ix = 0;
+      for (int ix = 0;
 	   VEC_iterate (so_list_ptr, current_program_space->added_solibs,
 			ix, iter);
 	   ++ix)
@@ -8068,15 +8062,10 @@ check_status_catch_solib (struct bpstats *bs)
     }
   else
     {
-      char *iter;
-
-      for (ix = 0;
-	   VEC_iterate (char_ptr, current_program_space->deleted_solibs,
-			ix, iter);
-	   ++ix)
+      for (const std::string &iter : current_program_space->deleted_solibs)
 	{
 	  if (!self->regex
-	      || self->compiled->exec (iter, 0, NULL, 0) == 0)
+	      || self->compiled->exec (iter.c_str (), 0, NULL, 0) == 0)
 	    return;
 	}
     }

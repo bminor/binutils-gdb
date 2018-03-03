@@ -207,7 +207,7 @@ struct program_space
 
   /* When an solib is removed, its name is added to this vector.
      This is so we can properly report solib changes to the user.  */
-  VEC (char_ptr) *deleted_solibs = NULL;
+  std::vector<std::string> deleted_solibs;
 
   /* Per pspace data-pointers required by other GDB modules.  */
   REGISTRY_FIELDS {};
