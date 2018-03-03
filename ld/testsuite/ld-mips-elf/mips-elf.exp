@@ -995,6 +995,7 @@ if { $linux_gnu } {
 }
 
 run_dump_test "undefined"
+run_dump_test "undefined-warn"
 
 # Test the conversion from jr to b
 if { $linux_gnu } {

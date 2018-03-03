@@ -1,3 +1,12 @@
+2018-03-03  James Cowgill  <james.cowgill@mips.com>
+	    Maciej W. Rozycki  <macro@mips.com>
+
+	PR ld/21900
+	* elfxx-mips.c (mips_elf_calculate_relocation): Only return
+	after calling `undefined_symbol' hook if this is an error
+	condition.  Assume the value of 0 for the symbol requested
+	otherwise.
+
 2018-03-02  Jim Wilson  <jimw@sifive.com>
 
 	PR 22903

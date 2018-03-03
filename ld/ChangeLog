@@ -1,3 +1,11 @@
+2018-03-03  James Cowgill  <james.cowgill@mips.com>
+	    Maciej W. Rozycki  <macro@mips.com>
+
+	PR ld/21900
+	* testsuite/ld-mips-elf/undefined-warn.d: New test.
+	* testsuite/ld-mips-elf/undefined.s: Add padding at the end.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
 2018-03-02  Jim Wilson  <jimw@sifive.com>
 
 	PR 22903

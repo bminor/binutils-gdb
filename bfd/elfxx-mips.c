@@ -5478,12 +5478,18 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	}
       else
 	{
+	  bfd_boolean reject_undefined
+	    = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
+	       || ELF_ST_VISIBILITY (h->root.other) != STV_DEFAULT);
+
 	  (*info->callbacks->undefined_symbol)
 	    (info, h->root.root.root.string, input_bfd,
-	     input_section, relocation->r_offset,
-	     (info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
-	     || ELF_ST_VISIBILITY (h->root.other));
-	  return bfd_reloc_undefined;
+	     input_section, relocation->r_offset, reject_undefined);
+
+	  if (reject_undefined)
+	    return bfd_reloc_undefined;
+
+	  symbol = 0;
 	}
 
       target_is_16_bit_code_p = ELF_ST_IS_MIPS16 (h->root.other);
