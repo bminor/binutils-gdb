@@ -765,6 +765,7 @@ fbsd_xfer_partial (struct target_ops *ops, enum target_object object,
 
 #ifdef PT_LWPINFO
 static int debug_fbsd_lwp;
+static int debug_fbsd_nat;
 
 static void (*super_resume) (struct target_ops *,
 			     ptid_t,
@@ -780,6 +781,14 @@ show_fbsd_lwp_debug (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("Debugging of FreeBSD lwp module is %s.\n"), value);
+}
+
+static void
+show_fbsd_nat_debug (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Debugging of FreeBSD native target is %s.\n"),
+		    value);
 }
 
 /*
@@ -1212,6 +1221,18 @@ fbsd_wait (struct target_ops *ops,
 
 	  wptid = ptid_build (pid, pl.pl_lwpid, 0);
 
+	  if (debug_fbsd_nat)
+	    {
+	      fprintf_unfiltered (gdb_stdlog,
+				  "FNAT: stop for LWP %u event %d flags %#x\n",
+				  pl.pl_lwpid, pl.pl_event, pl.pl_flags);
+	      if (pl.pl_flags & PL_FLAG_SI)
+		fprintf_unfiltered (gdb_stdlog,
+				    "FNAT: si_signo %u si_code %u\n",
+				    pl.pl_siginfo.si_signo,
+				    pl.pl_siginfo.si_code);
+	    }
+
 #ifdef PT_LWP_EVENTS
 	  if (pl.pl_flags & PL_FLAG_EXITED)
 	    {
@@ -1568,6 +1589,14 @@ Show debugging of FreeBSD lwp module."), _("\
 Enables printf debugging output."),
 			   NULL,
 			   &show_fbsd_lwp_debug,
+			   &setdebuglist, &showdebuglist);
+  add_setshow_boolean_cmd ("fbsd-nat", class_maintenance,
+			   &debug_fbsd_nat, _("\
+Set debugging of FreeBSD native target."), _("\
+Show debugging of FreeBSD native target."), _("\
+Enables printf debugging output."),
+			   NULL,
+			   &show_fbsd_nat_debug,
 			   &setdebuglist, &showdebuglist);
 #endif
 }

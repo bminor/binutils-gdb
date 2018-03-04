@@ -6,6 +6,12 @@
 * 'info proc' now works on running processes on FreeBSD systems and core
   files created on FreeBSD systems.
 
+* New commands
+
+set debug fbsd-nat
+show debug fbsd-nat
+  Control display of debugging info regarding the FreeBSD native target.
+
 *** Changes in GDB 8.1
 
 * GDB now supports dynamically creating arbitrary register groups specified

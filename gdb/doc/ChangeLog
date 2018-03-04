@@ -1,3 +1,8 @@
+2018-03-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Debugging Output): Document "set/show debug
+	fbsd-nat".
+
 2018-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Machine Code): Additional information about "info

@@ -1,5 +1,13 @@
 2018-03-04  John Baldwin  <jhb@FreeBSD.org>
 
+	* NEWS (Changes since GDB 8.1): Add "set/show debug fbsd-nat".
+	* fbsd-nat.c (debug_fbsd_nat): New variable.
+	(show_fbsd_nat_debug): New function.
+	(fbsd_wait): Log LWP info if "debug_fbsd_nat" is enabled.
+	(_initialize_fbsd_nat): Add "fbsd-nat" debug boolean command.
+
+2018-03-04  John Baldwin  <jhb@FreeBSD.org>
+
 	* nat/x86-dregs.c (x86_dr_stopped_by_hw_breakpoint): New function.
 	* nat/x86-dregs.h (x86_dr_stopped_by_hw_breakpoint): New
 	prototype.
