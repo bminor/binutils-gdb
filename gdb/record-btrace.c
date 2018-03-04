@@ -2428,13 +2428,12 @@ DEF_VEC_P (tp_t);
 /* Announce further events if necessary.  */
 
 static void
-record_btrace_maybe_mark_async_event (const VEC (tp_t) *moving,
-				      const VEC (tp_t) *no_history)
+record_btrace_maybe_mark_async_event
+  (const std::vector<thread_info *> &moving,
+   const std::vector<thread_info *> &no_history)
 {
-  int more_moving, more_no_history;
-
-  more_moving = !VEC_empty (tp_t, moving);
-  more_no_history = !VEC_empty (tp_t, no_history);
+  bool more_moving = !moving.empty ();
+  bool more_no_history = !no_history.empty ();;
 
   if (!more_moving && !more_no_history)
     return;
@@ -2454,9 +2453,8 @@ static ptid_t
 record_btrace_wait (struct target_ops *ops, ptid_t ptid,
 		    struct target_waitstatus *status, int options)
 {
-  VEC (tp_t) *moving, *no_history;
-  struct thread_info *tp, *eventing;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  std::vector<thread_info *> moving;
+  std::vector<thread_info *> no_history;
 
   DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid), options);
 
@@ -2468,26 +2466,25 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
       return ops->to_wait (ops, ptid, status, options);
     }
 
-  moving = NULL;
-  no_history = NULL;
-
-  make_cleanup (VEC_cleanup (tp_t), &moving);
-  make_cleanup (VEC_cleanup (tp_t), &no_history);
-
   /* Keep a work list of moving threads.  */
-  ALL_NON_EXITED_THREADS (tp)
-    if (ptid_match (tp->ptid, ptid)
-	&& ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0))
-      VEC_safe_push (tp_t, moving, tp);
+  {
+    thread_info *tp;
 
-  if (VEC_empty (tp_t, moving))
+    ALL_NON_EXITED_THREADS (tp)
+      {
+	if (ptid_match (tp->ptid, ptid)
+	    && ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0))
+	  moving.push_back (tp);
+      }
+  }
+
+  if (moving.empty ())
     {
       *status = btrace_step_no_resumed ();
 
       DEBUG ("wait ended by %s: %s", target_pid_to_str (null_ptid),
 	     target_waitstatus_to_string (status).c_str ());
 
-      do_cleanups (cleanups);
       return null_ptid;
     }
 
@@ -2508,14 +2505,13 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
      nothing else to report.  By this time, all threads should have moved to
      either the beginning or the end of their execution history.  There will
      be a single user-visible stop.  */
-  eventing = NULL;
-  while ((eventing == NULL) && !VEC_empty (tp_t, moving))
+  struct thread_info *eventing = NULL;
+  while ((eventing == NULL) && !moving.empty ())
     {
-      unsigned int ix;
-
-      ix = 0;
-      while ((eventing == NULL) && VEC_iterate (tp_t, moving, ix, tp))
+      for (unsigned int ix = 0; eventing == NULL && ix < moving.size ();)
 	{
+	  thread_info *tp = moving[ix];
+
 	  *status = record_btrace_step_thread (tp);
 
 	  switch (status->kind)
@@ -2525,12 +2521,11 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
 	      break;
 
 	    case TARGET_WAITKIND_NO_HISTORY:
-	      VEC_safe_push (tp_t, no_history,
-			     VEC_ordered_remove (tp_t, moving, ix));
+	      no_history.push_back (ordered_remove (moving, ix));
 	      break;
 
 	    default:
-	      eventing = VEC_unordered_remove (tp_t, moving, ix);
+	      eventing = unordered_remove (moving, ix);
 	      break;
 	    }
 	}
@@ -2543,11 +2538,11 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
 
 	 In the former case, EVENTING must not be NULL.
 	 In the latter case, NO_HISTORY must not be empty.  */
-      gdb_assert (!VEC_empty (tp_t, no_history));
+      gdb_assert (!no_history.empty ());
 
       /* We kept threads moving at the end of their execution history.  Stop
 	 EVENTING now that we are going to report its stop.  */
-      eventing = VEC_unordered_remove (tp_t, no_history, 0);
+      eventing = unordered_remove (no_history, 0);
       eventing->btrace.flags &= ~BTHR_MOVE;
 
       *status = btrace_step_no_history ();
@@ -2561,8 +2556,12 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
 
   /* Stop all other threads. */
   if (!target_is_non_stop_p ())
-    ALL_NON_EXITED_THREADS (tp)
-      record_btrace_cancel_resume (tp);
+    {
+      thread_info *tp;
+
+      ALL_NON_EXITED_THREADS (tp)
+	record_btrace_cancel_resume (tp);
+    }
 
   /* In async mode, we need to announce further events.  */
   if (target_is_async_p ())
@@ -2579,7 +2578,6 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
 	 target_pid_to_str (eventing->ptid),
 	 target_waitstatus_to_string (status).c_str ());
 
-  do_cleanups (cleanups);
   return eventing->ptid;
 }
 
