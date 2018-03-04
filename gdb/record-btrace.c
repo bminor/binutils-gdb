@@ -159,16 +159,6 @@ record_btrace_enable_warn (struct thread_info *tp)
   END_CATCH
 }
 
-/* Callback function to disable branch tracing for one thread.  */
-
-static void
-record_btrace_disable_callback (void *arg)
-{
-  struct thread_info *tp = (struct thread_info *) arg;
-
-  btrace_disable (tp);
-}
-
 /* Enable automatic tracing of new threads.  */
 
 static void
@@ -223,12 +213,42 @@ record_btrace_push_target (void)
   observer_notify_record_changed (current_inferior (), 1, "btrace", format);
 }
 
+/* Disable btrace on a set of threads on scope exit.  */
+
+struct scoped_btrace_disable
+{
+  scoped_btrace_disable () = default;
+
+  DISABLE_COPY_AND_ASSIGN (scoped_btrace_disable);
+
+  ~scoped_btrace_disable ()
+  {
+    for (thread_info *tp : m_threads)
+      btrace_disable (tp);
+  }
+
+  void add_thread (thread_info *thread)
+  {
+    m_threads.push_front (thread);
+  }
+
+  void discard ()
+  {
+    m_threads.clear ();
+  }
+
+private:
+  std::forward_list<thread_info *> m_threads;
+};
+
 /* The to_open method of target record-btrace.  */
 
 static void
 record_btrace_open (const char *args, int from_tty)
 {
-  struct cleanup *disable_chain;
+  /* If we fail to enable btrace for one thread, disable it for the threads for
+     which it was successfully enabled.  */
+  scoped_btrace_disable btrace_disable;
   struct thread_info *tp;
 
   DEBUG ("open");
@@ -240,18 +260,17 @@ record_btrace_open (const char *args, int from_tty)
 
   gdb_assert (record_btrace_thread_observer == NULL);
 
-  disable_chain = make_cleanup (null_cleanup, NULL);
   ALL_NON_EXITED_THREADS (tp)
     if (args == NULL || *args == 0 || number_is_in_list (args, tp->global_num))
       {
 	btrace_enable (tp, &record_btrace_conf);
 
-	make_cleanup (record_btrace_disable_callback, tp);
+	btrace_disable.add_thread (tp);
       }
 
   record_btrace_push_target ();
 
-  discard_cleanups (disable_chain);
+  btrace_disable.discard ();
 }
 
 /* The to_stop_recording method of target record-btrace.  */
