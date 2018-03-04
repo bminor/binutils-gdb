@@ -620,26 +620,24 @@ btrace_find_line_range (CORE_ADDR pc)
 
 static void
 btrace_print_lines (struct btrace_line_range lines, struct ui_out *uiout,
-		    struct cleanup **ui_item_chain, gdb_disassembly_flags flags)
+		    gdb::optional<ui_out_emit_tuple> &src_and_asm_tuple,
+		    gdb::optional<ui_out_emit_list> &asm_list,
+		    gdb_disassembly_flags flags)
 {
   print_source_lines_flags psl_flags;
-  int line;
 
-  psl_flags = 0;
   if (flags & DISASSEMBLY_FILENAME)
     psl_flags |= PRINT_SOURCE_LINES_FILENAME;
 
-  for (line = lines.begin; line < lines.end; ++line)
+  for (int line = lines.begin; line < lines.end; ++line)
     {
-      if (*ui_item_chain != NULL)
-	do_cleanups (*ui_item_chain);
+      asm_list.reset ();
 
-      *ui_item_chain
-	= make_cleanup_ui_out_tuple_begin_end (uiout, "src_and_asm_line");
+      src_and_asm_tuple.emplace (uiout, "src_and_asm_line");
 
       print_source_lines (lines.symtab, line, line + 1, psl_flags);
 
-      make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
+      asm_list.emplace (uiout, "line_asm_insn");
     }
 }
 
@@ -652,28 +650,23 @@ btrace_insn_history (struct ui_out *uiout,
 		     const struct btrace_insn_iterator *end,
 		     gdb_disassembly_flags flags)
 {
-  struct cleanup *cleanups, *ui_item_chain;
-  struct gdbarch *gdbarch;
-  struct btrace_insn_iterator it;
-  struct btrace_line_range last_lines;
-
   DEBUG ("itrace (0x%x): [%u; %u)", (unsigned) flags,
 	 btrace_insn_number (begin), btrace_insn_number (end));
 
   flags |= DISASSEMBLY_SPECULATIVE;
 
-  gdbarch = target_gdbarch ();
-  last_lines = btrace_mk_line_range (NULL, 0, 0);
+  struct gdbarch *gdbarch = target_gdbarch ();
+  btrace_line_range last_lines = btrace_mk_line_range (NULL, 0, 0);
 
-  cleanups = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
+  ui_out_emit_list list_emitter (uiout, "asm_insns");
 
-  /* UI_ITEM_CHAIN is a cleanup chain for the last source line and the
-     instructions corresponding to that line.  */
-  ui_item_chain = NULL;
+  gdb::optional<ui_out_emit_tuple> src_and_asm_tuple;
+  gdb::optional<ui_out_emit_list> asm_list;
 
   gdb_pretty_print_disassembler disasm (gdbarch);
 
-  for (it = *begin; btrace_insn_cmp (&it, end) != 0; btrace_insn_next (&it, 1))
+  for (btrace_insn_iterator it = *begin; btrace_insn_cmp (&it, end) != 0;
+         btrace_insn_next (&it, 1))
     {
       const struct btrace_insn *insn;
 
@@ -708,19 +701,22 @@ btrace_insn_history (struct ui_out *uiout,
 	      if (!btrace_line_range_is_empty (lines)
 		  && !btrace_line_range_contains_range (last_lines, lines))
 		{
-		  btrace_print_lines (lines, uiout, &ui_item_chain, flags);
+		  btrace_print_lines (lines, uiout, src_and_asm_tuple, asm_list,
+				      flags);
 		  last_lines = lines;
 		}
-	      else if (ui_item_chain == NULL)
+	      else if (!src_and_asm_tuple.has_value ())
 		{
-		  ui_item_chain
-		    = make_cleanup_ui_out_tuple_begin_end (uiout,
-							   "src_and_asm_line");
+		  gdb_assert (!asm_list.has_value ());
+
+		  src_and_asm_tuple.emplace (uiout, "src_and_asm_line");
+
 		  /* No source information.  */
-		  make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
+		  asm_list.emplace (uiout, "line_asm_insn");
 		}
 
-	      gdb_assert (ui_item_chain != NULL);
+	      gdb_assert (src_and_asm_tuple.has_value ());
+	      gdb_assert (asm_list.has_value ());
 	    }
 
 	  memset (&dinsn, 0, sizeof (dinsn));
@@ -733,8 +729,6 @@ btrace_insn_history (struct ui_out *uiout,
 	  disasm.pretty_print_insn (uiout, &dinsn, flags);
 	}
     }
-
-  do_cleanups (cleanups);
 }
 
 /* The to_insn_history method of target record-btrace.  */

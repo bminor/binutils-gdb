@@ -66,14 +66,6 @@ enum ui_out_type
     ui_out_type_list
   };
 
-/* Compatibility wrappers.  */
-
-extern struct cleanup *make_cleanup_ui_out_list_begin_end (struct ui_out *uiout,
-							   const char *id);
-
-extern struct cleanup *make_cleanup_ui_out_tuple_begin_end (struct ui_out *uiout,
-							    const char *id);
-
 class ui_out
 {
  public:
