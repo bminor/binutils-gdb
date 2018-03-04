@@ -1,3 +1,12 @@
+2018-03-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* nat/x86-dregs.c (x86_dr_stopped_by_hw_breakpoint): New function.
+	* nat/x86-dregs.h (x86_dr_stopped_by_hw_breakpoint): New
+	prototype.
+	* x86-nat.c (x86_stopped_by_hw_breakpoint): New function.
+	(x86_use_watchpoints): Set "stopped_by_hw_breakpoint" target
+	method.
+
 2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common/gdb_vecs.c (free_char_ptr_vec): Remove.

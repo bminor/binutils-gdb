@@ -128,4 +128,8 @@ extern int x86_dr_stopped_data_address (struct x86_debug_reg_state *state,
    Otherwise return false.  */
 extern int x86_dr_stopped_by_watchpoint (struct x86_debug_reg_state *state);
 
+/* Return true if the inferior has some hardware breakpoint that
+   triggered.  Otherwise return false.  */
+extern int x86_dr_stopped_by_hw_breakpoint (struct x86_debug_reg_state *state);
+
 #endif /* X86_DREGS_H */

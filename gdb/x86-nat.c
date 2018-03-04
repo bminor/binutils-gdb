@@ -260,6 +260,18 @@ x86_can_use_hw_breakpoint (struct target_ops *self,
   return 1;
 }
 
+/* Return non-zero if the inferior has some breakpoint that triggered.
+   Otherwise return zero.  */
+
+static int
+x86_stopped_by_hw_breakpoint (struct target_ops *ops)
+{
+  struct x86_debug_reg_state *state
+    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+  return x86_dr_stopped_by_hw_breakpoint (state);
+}
+
 static void
 add_show_debug_regs_command (void)
 {
@@ -297,6 +309,11 @@ x86_use_watchpoints (struct target_ops *t)
   t->to_remove_watchpoint = x86_remove_watchpoint;
   t->to_insert_hw_breakpoint = x86_insert_hw_breakpoint;
   t->to_remove_hw_breakpoint = x86_remove_hw_breakpoint;
+
+  /* A target must provide an implementation of the
+     "to_supports_stopped_by_hw_breakpoint" target method before this
+     callback will be used.  */
+  t->to_stopped_by_hw_breakpoint = x86_stopped_by_hw_breakpoint;
 }
 
 void
