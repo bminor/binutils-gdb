@@ -1,3 +1,11 @@
+2018-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22911
+	* objdump.c (is_significant_symbol_name): Return TRUE for all
+	.plt* sections.
+	(find_symbol_for_address): Replace linear search with binary
+	search on dynamic relocations.
+
 2018-03-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 22905

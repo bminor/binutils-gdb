@@ -664,9 +664,7 @@ slurp_dynamic_symtab (bfd *abfd)
 static bfd_boolean
 is_significant_symbol_name (const char * name)
 {
-  return strcmp (name, ".plt") == 0
-    ||   strcmp (name, ".got") == 0
-    ||   strcmp (name, ".plt.got") == 0;
+  return strncmp (name, ".plt", 4) == 0 || strcmp (name, ".got") == 0;
 }
 
 /* Filter out (in place) symbols that are useless for disassembly.
@@ -937,6 +935,7 @@ find_symbol_for_address (bfd_vma vma,
   asection *sec;
   unsigned int opb;
   bfd_boolean want_section;
+  long rel_count;
 
   if (sorted_symcount < 1)
     return NULL;
@@ -1065,33 +1064,57 @@ find_symbol_for_address (bfd_vma vma,
      and we have dynamic relocations available, then we can produce
      a better result by matching a relocation to the address and
      using the symbol associated with that relocation.  */
+  rel_count = aux->dynrelcount;
   if (!want_section
-      && aux->dynrelbuf != NULL
       && sorted_syms[thisplace]->value != vma
+      && rel_count > 0
+      && aux->dynrelbuf != NULL
+      && aux->dynrelbuf[0]->address <= vma
+      && aux->dynrelbuf[rel_count - 1]->address >= vma
       /* If we have matched a synthetic symbol, then stick with that.  */
       && (sorted_syms[thisplace]->flags & BSF_SYNTHETIC) == 0)
     {
-      long        rel_count;
-      arelent **  rel_pp;
+      arelent **  rel_low;
+      arelent **  rel_high;
 
-      for (rel_count = aux->dynrelcount, rel_pp = aux->dynrelbuf;
-	   rel_count--;)
+      rel_low = aux->dynrelbuf;
+      rel_high = rel_low + rel_count - 1;
+      while (rel_low <= rel_high)
 	{
-	  arelent * rel = rel_pp[rel_count];
+	  arelent **rel_mid = &rel_low[(rel_high - rel_low) / 2];
+	  arelent * rel = *rel_mid;
 
-	  if (rel->address == vma
-	      && rel->sym_ptr_ptr != NULL
-	      /* Absolute relocations do not provide a more helpful symbolic address.  */
-	      && ! bfd_is_abs_section ((* rel->sym_ptr_ptr)->section))
+	  if (rel->address == vma)
 	    {
-	      if (place != NULL)
-		* place = thisplace;
-	      return * rel->sym_ptr_ptr;
+	      /* Absolute relocations do not provide a more helpful
+	         symbolic address.  Find a non-absolute relocation
+		 with the same address.  */
+	      arelent **rel_vma = rel_mid;
+	      for (rel_mid--;
+		   rel_mid >= rel_low && rel_mid[0]->address == vma;
+		   rel_mid--)
+		rel_vma = rel_mid;
+
+	      for (; rel_vma <= rel_high && rel_vma[0]->address == vma;
+		   rel_vma++)
+		{
+		  rel = *rel_vma;
+		  if (rel->sym_ptr_ptr != NULL
+		      && ! bfd_is_abs_section ((* rel->sym_ptr_ptr)->section))
+		    {
+		      if (place != NULL)
+			* place = thisplace;
+		      return * rel->sym_ptr_ptr;
+		    }
+		}
+	      break;
 	    }
 
-	  /* We are scanning backwards, so if we go below the target address
-	     we have failed.  */
-	  if (rel_pp[rel_count]->address < vma)
+	  if (vma < rel->address)
+	    rel_high = rel_mid;
+	  else if (vma >= rel_mid[1]->address)
+	    rel_low = rel_mid + 1;
+	  else
 	    break;
 	}
     }
