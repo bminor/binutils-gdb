@@ -601,7 +601,7 @@ btrace_find_line_range (CORE_ADDR pc)
 
 static void
 btrace_print_lines (struct btrace_line_range lines, struct ui_out *uiout,
-		    struct cleanup **ui_item_chain, int flags)
+		    struct cleanup **ui_item_chain, gdb_disassembly_flags flags)
 {
   print_source_lines_flags psl_flags;
   int line;
