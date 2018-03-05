@@ -1,3 +1,8 @@
+2018-03-07  Alan Modra  <amodra@gmail.com>
+
+	* elf64-mips.c (mips_elf64_rtype_to_howto): Return NULL on error.
+	(mips_elf64_slurp_one_reloc_table): Pass on error.
+
 2018-03-03  James Cowgill  <james.cowgill@mips.com>
 	    Maciej W. Rozycki  <macro@mips.com>
 

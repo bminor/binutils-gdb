@@ -3611,7 +3611,7 @@ mips_elf64_rtype_to_howto (bfd *abfd, unsigned int r_type, bfd_boolean rela_p)
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			      abfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
-	  r_type = R_MIPS_NONE;
+	  return NULL;
 	}
       if (rela_p)
 	return &mips_elf64_howto_table_rela[r_type];
@@ -3800,6 +3800,8 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	  relent->addend = rela.r_addend;
 
 	  relent->howto = mips_elf64_rtype_to_howto (abfd, type, rela_p);
+	  if (relent->howto == NULL)
+	    goto error_return;
 
 	  ++relent;
 	}
