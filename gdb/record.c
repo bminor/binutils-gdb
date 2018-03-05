@@ -320,7 +320,7 @@ static void
 set_record_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"set record\" must be followed "
-		       "by an apporpriate subcommand.\n"));
+		       "by an appropriate subcommand.\n"));
   help_list (set_record_cmdlist, "set record ", all_commands, gdb_stdout);
 }
 
