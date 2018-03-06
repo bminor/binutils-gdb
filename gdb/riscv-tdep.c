@@ -1959,8 +1959,13 @@ riscv_arg_location (struct gdbarch *gdbarch,
     }
 }
 
+/* Used for printing debug information about the call argument location in
+   INFO to STREAM.  The addresses in SP_REFS and SP_ARGS are the base
+   addresses for the location of pass-by-reference and
+   arguments-on-the-stack memory areas.  */
+
 static void
-riscv_print_arg_location (FILE *stream, struct gdbarch *gdbarch,
+riscv_print_arg_location (ui_file *stream, struct gdbarch *gdbarch,
 			  struct riscv_arg_info *info,
 			  CORE_ADDR sp_refs, CORE_ADDR sp_args)
 {
@@ -1968,26 +1973,28 @@ riscv_print_arg_location (FILE *stream, struct gdbarch *gdbarch,
   if (type_name == nullptr)
     type_name = "???";
 
-  fprintf (stream, "type: '%s', length: 0x%x, alignment: 0x%x",
-	   type_name, info->length, info->align);
+  fprintf_unfiltered (stream, "type: '%s', length: 0x%x, alignment: 0x%x",
+		      type_name, info->length, info->align);
   switch (info->argloc[0].loc_type)
     {
     case riscv_arg_info::location::in_reg:
-      fprintf (stream, ", register %s",
-	       gdbarch_register_name (gdbarch, info->argloc[0].loc_data.regno));
+      fprintf_unfiltered
+	(stream, ", register %s",
+	 gdbarch_register_name (gdbarch, info->argloc[0].loc_data.regno));
       if (info->argloc[0].c_length < info->length)
 	{
 	  switch (info->argloc[1].loc_type)
 	    {
 	    case riscv_arg_info::location::in_reg:
-	      fprintf (stream, ", register %s",
-		       gdbarch_register_name (gdbarch,
-					      info->argloc[1].loc_data.regno));
+	      fprintf_unfiltered
+		(stream, ", register %s",
+		 gdbarch_register_name (gdbarch,
+					info->argloc[1].loc_data.regno));
 	      break;
 
 	    case riscv_arg_info::location::on_stack:
-	      fprintf (stream, ", on stack at offset 0x%x",
-		       info->argloc[1].loc_data.offset);
+	      fprintf_unfiltered (stream, ", on stack at offset 0x%x",
+				  info->argloc[1].loc_data.offset);
 	      break;
 
 	    case riscv_arg_info::location::by_ref:
@@ -2000,31 +2007,34 @@ riscv_print_arg_location (FILE *stream, struct gdbarch *gdbarch,
 	    }
 
 	  if (info->argloc[1].c_offset > info->argloc[0].c_length)
-	    fprintf (stream, " (offset 0x%x)", info->argloc[1].c_offset);
+	    fprintf_unfiltered (stream, " (offset 0x%x)",
+				info->argloc[1].c_offset);
 	}
       break;
 
     case riscv_arg_info::location::on_stack:
-      fprintf (stream, ", on stack at offset 0x%x",
-	       info->argloc[0].loc_data.offset);
+      fprintf_unfiltered (stream, ", on stack at offset 0x%x",
+			  info->argloc[0].loc_data.offset);
       break;
 
     case riscv_arg_info::location::by_ref:
-      fprintf (stream, ", by reference, data at offset 0x%x (0x%lx)",
-	       info->argloc[0].loc_data.offset,
-	       (sp_refs + info->argloc[0].loc_data.offset));
+      fprintf_unfiltered
+	(stream, ", by reference, data at offset 0x%x (%s)",
+	 info->argloc[0].loc_data.offset,
+	 core_addr_to_string (sp_refs + info->argloc[0].loc_data.offset));
       if (info->argloc[1].loc_type
 	  == riscv_arg_info::location::in_reg)
-	fprintf (stream, ", address in register %s",
-		 gdbarch_register_name (gdbarch,
-					info->argloc[1].loc_data.regno));
+	fprintf_unfiltered
+	  (stream, ", address in register %s",
+	   gdbarch_register_name (gdbarch, info->argloc[1].loc_data.regno));
       else
 	{
 	  gdb_assert (info->argloc[1].loc_type
 		      == riscv_arg_info::location::on_stack);
-	  fprintf (stream, ", address on stack at offset 0x%x (0x%lx)",
-		   info->argloc[1].loc_data.offset,
-		   (sp_args + info->argloc[1].loc_data.offset));
+	  fprintf_unfiltered
+	    (stream, ", address on stack at offset 0x%x (%s)",
+	     info->argloc[1].loc_data.offset,
+	     core_addr_to_string (sp_args + info->argloc[1].loc_data.offset));
 	}
       break;
 
@@ -2099,20 +2109,20 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	  struct riscv_arg_info *info = &arg_info [i];
 
 	  fprintf_unfiltered (gdb_stdlog, "[%2d] ", i);
-	  riscv_print_arg_location (stderr, gdbarch, info, sp_refs, sp_args);
+	  riscv_print_arg_location (gdb_stdlog, gdbarch, info, sp_refs, sp_args);
 	  fprintf_unfiltered (gdb_stdlog, "\n");
 	}
       if (call_info.memory.arg_offset > 0
 	  || call_info.memory.ref_offset > 0)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "              Original sp: 0x%lx\n",
-			      osp);
+	  fprintf_unfiltered (gdb_stdlog, "              Original sp: %s\n",
+			      core_addr_to_string (osp));
 	  fprintf_unfiltered (gdb_stdlog, "Stack required (for args): 0x%x\n",
-		   call_info.memory.arg_offset);
+			      call_info.memory.arg_offset);
 	  fprintf_unfiltered (gdb_stdlog, "Stack required (for refs): 0x%x\n",
-		   call_info.memory.ref_offset);
+			      call_info.memory.ref_offset);
 	  fprintf_unfiltered (gdb_stdlog, "          Stack allocated: 0x%lx\n",
-		   (osp - sp));
+			      (osp - sp));
 	}
     }
 
@@ -2213,13 +2223,15 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
      A dummy breakpoint will be setup to execute the call.  */
 
   if (riscv_debug_infcall > 0)
-    fprintf_unfiltered (gdb_stdlog, ": writing $ra = 0x%lx\n", bp_addr);
+    fprintf_unfiltered (gdb_stdlog, ": writing $ra = %s\n",
+			core_addr_to_string (bp_addr));
   regcache_cooked_write_unsigned (regcache, RISCV_RA_REGNUM, bp_addr);
 
   /* Finally, update the stack pointer.  */
 
   if (riscv_debug_infcall > 0)
-    fprintf_unfiltered (gdb_stdlog, ": writing $sp = 0x%lx\n", sp);
+    fprintf_unfiltered (gdb_stdlog, ": writing $sp = %s\n",
+			core_addr_to_string (sp));
   regcache_cooked_write_unsigned (regcache, RISCV_SP_REGNUM, sp);
 
   return sp;
@@ -2250,7 +2262,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
     {
       fprintf_unfiltered (gdb_stdlog, "riscv return value:\n");
       fprintf_unfiltered (gdb_stdlog, "[R] ");
-      riscv_print_arg_location (stderr, gdbarch, &info, 0, 0);
+      riscv_print_arg_location (gdb_stdlog, gdbarch, &info, 0, 0);
       fprintf_unfiltered (gdb_stdlog, "\n");
     }
 

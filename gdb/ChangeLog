@@ -1,4 +1,14 @@
 2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_print_arg_location): Add header comment,
+	change parameter type.  Use GDB's print functions, and use
+	core_addr_to_string where appropriate.
+	(riscv_push_dummy_call): Use core_addr_to_string where
+	appropriate, update call to riscv_print_arg_location, and reindent
+	a few lines.
+	(riscv_return_value): Update call to riscv_print_arg_location.
+
+2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Tim Newsome <tim@sifive.com>
 	    Albert Ou <a0u@eecs.berkeley.edu>
 	    Darius Rad <darius@bluespec.com>
