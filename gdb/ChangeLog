@@ -1,5 +1,11 @@
 2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c: Remove 'Contributed by ...' lines from header
+	comment.
+	* riscv-tdep.h: Likewise.
+
+2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_pseudo_register_read): Delete.
 	(riscv_pseudo_register_write): Delete.
 	(riscv_gdbarch_init): Remove all use of pseudo registers.

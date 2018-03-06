@@ -2,11 +2,6 @@
 
    Copyright (C) 2018 Free Software Foundation, Inc.
 
-   Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
-   and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin
-   and by Todd Snyder <todd@bluespec.com>
-   and by Mike Frysinger <vapier@gentoo.org>.
-
    This file is part of GDB.
 
    This program is free software; you can redistribute it and/or modify
