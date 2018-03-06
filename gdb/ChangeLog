@@ -1,3 +1,7 @@
+2018-03-06  Tom Tromey  <tom@tromey.com>
+
+	* rust-exp.y: Formatting fixes.
+
 2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_register_name): Remove target description

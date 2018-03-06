@@ -425,7 +425,8 @@ expr:
 |	array_expr
 |	idx_expr
 |	range_expr
-|	unop_expr /* Must precede call_expr because of ambiguity with sizeof.  */
+|	unop_expr /* Must precede call_expr because of ambiguity with
+		     sizeof.  */
 |	binop_expr
 |	paren_expr
 |	call_expr
@@ -445,9 +446,9 @@ unit_expr:
 		  struct typed_val_int val;
 
 		  val.type
-		    = language_lookup_primitive_type (current_parser->language (),
-						      current_parser->arch (),
-						      "()");
+		    = (language_lookup_primitive_type
+		       (current_parser->language (), current_parser->arch (),
+			"()"));
 		  val.val = 0;
 		  $$ = ast_literal (val);
 		}
@@ -623,8 +624,8 @@ unop_expr:
 
 |	'&' KW_MUT expr	%prec UNARY
 		{ $$ = ast_unary (UNOP_ADDR, $3); }
-|   KW_SIZEOF '(' expr ')' %prec UNARY
-        { $$ = ast_unary (UNOP_SIZEOF, $3); }
+|	KW_SIZEOF '(' expr ')' %prec UNARY
+		{ $$ = ast_unary (UNOP_SIZEOF, $3); }
 ;
 
 binop_expr:
@@ -738,9 +739,7 @@ maybe_expr_list:
 ;
 
 paren_expr_list:
-	'('
-	maybe_expr_list
-	')'
+	'(' maybe_expr_list ')'
 		{ $$ = $2; }
 ;
 
@@ -828,7 +827,7 @@ path_for_type:
 
 just_identifiers_for_type:
 	IDENT
-	  	{ $$ = ast_path ($1, NULL); }
+		{ $$ = ast_path ($1, NULL); }
 |	just_identifiers_for_type COLONCOLON IDENT
 		{
 		  $$ = ast_path (rust_concat3 ($1->left.sval.ptr, "::",
