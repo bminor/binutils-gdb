@@ -1,3 +1,9 @@
+2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_pseudo_register_read): Delete.
+	(riscv_pseudo_register_write): Delete.
+	(riscv_gdbarch_init): Remove all use of pseudo registers.
+
 2018-03-06  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* record-btrace.c (btrace_print_lines): Replace cleanup
