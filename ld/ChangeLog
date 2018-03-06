@@ -1,3 +1,7 @@
+2018-03-07  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* emulparams/elf32xtensa.sh (COMMONPAGESIZE): Define.
+
 2018-03-07  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/20402
