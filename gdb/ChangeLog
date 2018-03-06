@@ -1,5 +1,10 @@
 2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (riscv_return_value): Change type to ULONGEST for
+	reading values from registers.
+
+2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_push_dummy_call): Use core_addr_to_string_nz
 	where appropriate.
 

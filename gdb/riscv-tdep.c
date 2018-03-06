@@ -2318,7 +2318,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	    /* Return value by reference will have its address in A0.  */
 	  case riscv_arg_info::location::by_ref:
 	    {
-	      CORE_ADDR addr;
+	      ULONGEST addr;
 
 	      regcache_cooked_read_unsigned (regcache, RISCV_A0_REGNUM,
 					     &addr);
