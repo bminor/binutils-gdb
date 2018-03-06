@@ -1,5 +1,11 @@
 2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (riscv_register_name): Remove target description
+	support.
+	(riscv_gdbarch_init): Remove target description check.
+
+2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c: Remove 'Contributed by ...' lines from header
 	comment.
 	* riscv-tdep.h: Likewise.

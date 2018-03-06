@@ -464,9 +464,6 @@ value_of_riscv_user_reg (struct frame_info *frame, const void *baton)
 static const char *
 riscv_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
-    return tdesc_register_name (gdbarch, regnum);
-
   /* Prefer to use the alias. */
   if (regnum >= RISCV_ZERO_REGNUM && regnum <= RISCV_LAST_REGNUM)
     {
@@ -2564,40 +2561,6 @@ riscv_gdbarch_init (struct gdbarch_info info,
      unwinder.  */
   dwarf2_append_unwinders (gdbarch);
   frame_unwind_append_unwinder (gdbarch, &riscv_frame_unwind);
-
-  /* Check any target description for validity.  */
-  if (tdesc_has_registers (info.target_desc))
-    {
-      const struct tdesc_feature *feature;
-      struct tdesc_arch_data *tdesc_data;
-      int valid_p;
-
-      feature = tdesc_find_feature (info.target_desc, "org.gnu.gdb.riscv.cpu");
-      if (feature == NULL)
-	goto no_tdata;
-
-      tdesc_data = tdesc_data_alloc ();
-
-      valid_p = 1;
-      for (i = RISCV_ZERO_REGNUM; i <= RISCV_LAST_FP_REGNUM; ++i)
-        valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
-                                            riscv_gdb_reg_names[i]);
-      for (i = RISCV_FIRST_CSR_REGNUM; i <= RISCV_LAST_CSR_REGNUM; ++i)
-        {
-          char buf[20];
-
-          sprintf (buf, "csr%d", i - RISCV_FIRST_CSR_REGNUM);
-          valid_p &= tdesc_numbered_register (feature, tdesc_data, i, buf);
-        }
-
-      valid_p &= tdesc_numbered_register (feature, tdesc_data, i++, "priv");
-
-      if (!valid_p)
-	tdesc_data_cleanup (tdesc_data);
-      else
-	tdesc_use_registers (gdbarch, info.target_desc, tdesc_data);
-    }
- no_tdata:
 
   for (i = 0; i < ARRAY_SIZE (riscv_register_aliases); ++i)
     user_reg_add (gdbarch, riscv_register_aliases[i].name,
