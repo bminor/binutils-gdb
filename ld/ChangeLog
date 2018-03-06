@@ -1,3 +1,13 @@
+2018-03-06  Jim Wilson  <jimw@sifive.com>
+
+	PR 22920
+	* emultempl/riscvelf.em (riscv_create_output_section_statements): New.
+	(LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS): New.
+	* testsuite/ld-elf/pr21884.d (#notarget): Add riscv*-*-*.
+	* testsuite/ld-unique/pr21529.d (#notarget): Likewise.
+	* testsuite/ld-srec/srec.exp (run_srec_test): For riscv*-*-* target,
+	call setup_xfail.
+
 2018-03-03  James Cowgill  <james.cowgill@mips.com>
 	    Maciej W. Rozycki  <macro@mips.com>
 

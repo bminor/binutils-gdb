@@ -282,6 +282,12 @@ proc run_srec_test { test objs } {
 	setup_xfail "msp430*-*-*"
     }
 
+    # The RISC-V target does not correctly process
+    # relocs when output format is not ELF.
+    if [istarget riscv*-*-*] {
+	setup_xfail "riscv*-*-*"
+    }
+
     # SH64 targets cannot convert format in the linker 
     # using the -oformat command line switch.
     if [istarget sh64*-*-elf] {
