@@ -1,5 +1,13 @@
 2018-03-06  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* record-btrace.c (record_btrace_maybe_mark_async_event): Change
+	parameter types to std::vector.  Use bool.
+	(record_btrace_wait): Replace VEC(tp_t) with
+	std::vector<thread_info *>.
+	* common/gdb_vecs.h (unordered_remove, ordered_remove): New.
+
+2018-03-06  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* record-btrace.c (record_btrace_disable_callback): Remove.
 	(struct scoped_btrace_disable): New.
 	(record_btrace_open): Use scoped_btrace_disable.
