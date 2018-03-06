@@ -1,3 +1,9 @@
+2018-03-06  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* record-btrace.c (record_btrace_disable_callback): Remove.
+	(struct scoped_btrace_disable): New.
+	(record_btrace_open): Use scoped_btrace_disable.
+
 2018-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_return_value): Change type to ULONGEST for
