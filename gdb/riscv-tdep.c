@@ -2121,8 +2121,8 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 			      call_info.memory.arg_offset);
 	  fprintf_unfiltered (gdb_stdlog, "Stack required (for refs): 0x%x\n",
 			      call_info.memory.ref_offset);
-	  fprintf_unfiltered (gdb_stdlog, "          Stack allocated: 0x%lx\n",
-			      (osp - sp));
+	  fprintf_unfiltered (gdb_stdlog, "          Stack allocated: %s\n",
+			      core_addr_to_string_nz (osp - sp));
 	}
     }
 
