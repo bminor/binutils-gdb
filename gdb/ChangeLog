@@ -1,5 +1,16 @@
 2018-03-06  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* record-btrace.c (btrace_print_lines): Replace cleanup
+	parameter with RAII equivalents.
+	(btrace_insn_history): Replace cleanup with RAII equivalents.
+	* ui-out.h (make_cleanup_ui_out_list_begin_end,
+	make_cleanup_ui_out_tuple_begin_end): Remove.
+	* ui-out.c (struct ui_out_end_cleanup_data, do_cleanup_end,
+	make_cleanup_ui_out_end, make_cleanup_ui_out_tuple_begin_end,
+	make_cleanup_ui_out_list_begin_end): Remove.
+
+2018-03-06  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* record-btrace.c (record_btrace_maybe_mark_async_event): Change
 	parameter types to std::vector.  Use bool.
 	(record_btrace_wait): Replace VEC(tp_t) with
