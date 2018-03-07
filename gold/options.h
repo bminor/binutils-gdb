@@ -1485,6 +1485,11 @@ class General_options
   DEFINE_bool_alias(textoff, text, options::DASH_Z, '\0',
 		    N_("Permit relocations in read-only segments"),
 		    NULL, true);
+  DEFINE_bool(keep_text_section_prefix, options::DASH_Z, '\0', false,
+	      N_("Keep .text.hot, .text.startup, .text.exit and .text.unlikely "
+		 "as separate sections in the final binary."),
+	      N_("Merge all .text.* prefix sections."));
+
 
  public:
   typedef options::Dir_list Dir_list;

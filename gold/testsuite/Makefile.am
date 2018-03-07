@@ -340,6 +340,18 @@ section_sorting_name: section_sorting_name.o gcctestdir/ld
 section_sorting_name.stdout: section_sorting_name
 	$(TEST_NM) -n --synthetic section_sorting_name > section_sorting_name.stdout
 
+check_SCRIPTS += keep_text_section_prefix.sh
+check_DATA += keep_text_section_prefix_readelf.stdout keep_text_section_prefix_nm.stdout
+MOSTLYCLEANFILES += keep_text_section_prefix
+keep_text_section_prefix.o: keep_text_section_prefix.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+keep_text_section_prefix: keep_text_section_prefix.o gcctestdir/ld
+	$(CXXLINK)  -Bgcctestdir/ -Wl,-z,keep-text-section-prefix keep_text_section_prefix.o
+keep_text_section_prefix_readelf.stdout: keep_text_section_prefix
+	$(TEST_READELF) -Wl $< >$@
+keep_text_section_prefix_nm.stdout: keep_text_section_prefix
+	$(TEST_NM) -n $< >$@
+
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test icf_virtual_function_folding_test.map
 icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc

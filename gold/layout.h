@@ -422,8 +422,20 @@ enum Output_section_order
   // The PLT.
   ORDER_PLT,
 
+  // The hot text sections, prefixed by .text.hot.
+  ORDER_TEXT_HOT,
+
   // The regular text sections.
   ORDER_TEXT,
+
+  // The startup text sections, prefixed by .text.startup.
+  ORDER_TEXT_STARTUP,
+
+  // The startup text sections, prefixed by .text.startup.
+  ORDER_TEXT_EXIT,
+
+  // The unlikely text sections, prefixed by .text.unlikely.
+  ORDER_TEXT_UNLIKELY,
 
   // The .fini section.
   ORDER_FINI,
@@ -1008,6 +1020,14 @@ class Layout
   };
   static const Section_name_mapping section_name_mapping[];
   static const int section_name_mapping_count;
+  static const Section_name_mapping text_section_name_mapping[];
+  static const int text_section_name_mapping_count;
+
+  // Find section name NAME in map and return the mapped name if found
+  // with the length set in PLEN.
+  static const char* match_section_name(const Section_name_mapping* map,
+					const int count, const char* name,
+					size_t* plen);
 
   // During a relocatable link, a list of group sections and
   // signatures.

@@ -1864,6 +1864,19 @@ Layout::default_section_order(Output_section* os, bool is_relro_local)
 	    return ORDER_INIT;
 	  else if (strcmp(os->name(), ".fini") == 0)
 	    return ORDER_FINI;
+	  else if (parameters->options().keep_text_section_prefix())
+	    {
+	      // -z,keep-text-section-prefix introduces additional
+	      // output sections.
+	      if (strcmp(os->name(), ".text.hot") == 0)
+		return ORDER_TEXT_HOT;
+	      else if (strcmp(os->name(), ".text.startup") == 0)
+		return ORDER_TEXT_STARTUP;
+	      else if (strcmp(os->name(), ".text.exit") == 0)
+		return ORDER_TEXT_EXIT;
+	      else if (strcmp(os->name(), ".text.unlikely") == 0)
+		return ORDER_TEXT_UNLIKELY;
+	    }
 	}
       return is_execinstr ? ORDER_TEXT : ORDER_READONLY;
     }
@@ -5092,12 +5105,59 @@ const Layout::Section_name_mapping Layout::section_name_mapping[] =
   MAPPING_INIT(".ARM.exidx", ".ARM.exidx"),
   MAPPING_INIT(".gnu.linkonce.armexidx.", ".ARM.exidx"),
 };
+
+// Mapping for ".text" section prefixes with -z,keep-text-section-prefix.
+const Layout::Section_name_mapping Layout::text_section_name_mapping[] =
+{
+  MAPPING_INIT(".text.hot.", ".text.hot"),
+  MAPPING_INIT_EXACT(".text.hot", ".text.hot"),
+  MAPPING_INIT(".text.unlikely.", ".text.unlikely"),
+  MAPPING_INIT_EXACT(".text.unlikely", ".text.unlikely"),
+  MAPPING_INIT(".text.startup.", ".text.startup"),
+  MAPPING_INIT_EXACT(".text.startup", ".text.startup"),
+  MAPPING_INIT(".text.exit.", ".text.exit"),
+  MAPPING_INIT_EXACT(".text.exit", ".text.exit"),
+  MAPPING_INIT(".text.", ".text"),
+};
 #undef MAPPING_INIT
 #undef MAPPING_INIT_EXACT
 
 const int Layout::section_name_mapping_count =
   (sizeof(Layout::section_name_mapping)
    / sizeof(Layout::section_name_mapping[0]));
+
+const int Layout::text_section_name_mapping_count =
+  (sizeof(Layout::text_section_name_mapping)
+   / sizeof(Layout::text_section_name_mapping[0]));
+
+// Find section name NAME in PSNM and return the mapped name if found
+// with the length set in PLEN.
+const char *
+Layout::match_section_name(const Layout::Section_name_mapping* psnm,
+			   const int count,
+			   const char* name, size_t* plen)
+{
+  for (int i = 0; i < count; ++i, ++psnm)
+    {
+      if (psnm->fromlen > 0)
+	{
+	  if (strncmp(name, psnm->from, psnm->fromlen) == 0)
+	    {
+	      *plen = psnm->tolen;
+	      return psnm->to;
+	    }
+	}
+      else
+	{
+	  if (strcmp(name, psnm->from) == 0)
+	    {
+	      *plen = psnm->tolen;
+	      return psnm->to;
+	    }
+	}
+    }
+  return NULL;
+}
 
 // Choose the output section name to use given an input section name.
 // Set *PLEN to the length of the name.  *PLEN is initialized to the
@@ -5142,26 +5202,20 @@ Layout::output_section_name(const Relobj* relobj, const char* name,
   // not found in the table, we simply use it as the output section
   // name.
 
-  const Section_name_mapping* psnm = section_name_mapping;
-  for (int i = 0; i < section_name_mapping_count; ++i, ++psnm)
+  if (parameters->options().keep_text_section_prefix()
+      && is_prefix_of(".text", name))
     {
-      if (psnm->fromlen > 0)
-	{
-	  if (strncmp(name, psnm->from, psnm->fromlen) == 0)
-	    {
-	      *plen = psnm->tolen;
-	      return psnm->to;
-	    }
-	}
-      else
-	{
-	  if (strcmp(name, psnm->from) == 0)
-	    {
-	      *plen = psnm->tolen;
-	      return psnm->to;
-	    }
-	}
+      const char* match = match_section_name(text_section_name_mapping,
+					     text_section_name_mapping_count,
+					     name, plen);
+      if (match != NULL)
+	return match;
     }
+
+  const char* match = match_section_name(section_name_mapping,
+					 section_name_mapping_count, name, plen);
+  if (match != NULL)
+    return match;
 
   // As an additional complication, .ctors sections are output in
   // either .ctors or .init_array sections, and .dtors sections are
