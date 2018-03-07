@@ -5074,6 +5074,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
   asection *base_got;
   bfd_vma orig_value = value;
   bfd_boolean resolved_to_zero;
+  bfd_boolean abs_symbol_p;
 
   globals = elf_aarch64_hash_table (info);
 
@@ -5093,6 +5094,9 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
   weak_undef_p = (h ? h->root.type == bfd_link_hash_undefweak
 		  : bfd_is_und_section (sym_sec));
+  abs_symbol_p = (h !=NULL && h->root.type == bfd_link_hash_defined
+		  && bfd_is_abs_section (h->root.u.def.section));
+
 
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
      it here if it is defined in a non-shared object.  */
@@ -5360,6 +5364,12 @@ bad_ifunc_reloc:
 	      skip = TRUE;
 	      relocate = TRUE;
 	    }
+	  else if (abs_symbol_p)
+	    {
+	      /* Local absolute symbol.  */
+	      skip = (h->forced_local || (h->dynindx == -1));
+	      relocate = skip;
+	    }
 
 	  outrel.r_offset += (input_section->output_section->vma
 			      + input_section->output_offset);
@@ -5369,8 +5379,7 @@ bad_ifunc_reloc:
 	  else if (h != NULL
 		   && h->dynindx != -1
 		   && (!bfd_link_pic (info)
-		       || !(bfd_link_pie (info)
-			    || SYMBOLIC_BIND (info, h))
+		       || !(bfd_link_pie (info) || SYMBOLIC_BIND (info, h))
 		       || !h->def_regular))
 	    outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
 	  else

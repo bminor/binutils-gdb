@@ -1,3 +1,10 @@
+2018-03-07  Renlin Li  <renlin.li@arm.com>
+
+	PR ld/20402
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new test.
+	* testsuite/ld-aarch64/pr20402.s: New.
+	* testsuite/ld-aarch64/pr20402.d: New.
+
 2018-03-06  Jim Wilson  <jimw@sifive.com>
 
 	PR 22920
