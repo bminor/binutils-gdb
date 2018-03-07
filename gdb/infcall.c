@@ -409,9 +409,6 @@ struct call_return_meta_info
 
   /* If using a structure return, this is the structure's address.  */
   CORE_ADDR struct_addr;
-
-  /* Whether stack temporaries are enabled.  */
-  int stack_temporaries_enabled;
 };
 
 /* Extract the called function's return value.  */
@@ -420,7 +417,7 @@ static struct value *
 get_call_return_value (struct call_return_meta_info *ri)
 {
   struct value *retval = NULL;
-  int stack_temporaries = thread_stack_temporaries_enabled_p (inferior_ptid);
+  bool stack_temporaries = thread_stack_temporaries_enabled_p (inferior_ptid);
 
   if (TYPE_CODE (ri->value_type) == TYPE_CODE_VOID)
     retval = allocate_value (ri->value_type);
@@ -739,7 +736,7 @@ call_function_by_hand_dummy (struct value *function,
   ptid_t call_thread_ptid;
   struct gdb_exception e;
   char name_buf[RAW_FUNCTION_ADDRESS_SIZE];
-  int stack_temporaries = thread_stack_temporaries_enabled_p (inferior_ptid);
+  bool stack_temporaries = thread_stack_temporaries_enabled_p (inferior_ptid);
 
   if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
     ftype = check_typedef (TYPE_TARGET_TYPE (ftype));

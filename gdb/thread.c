@@ -749,55 +749,16 @@ delete_exited_threads (void)
     }
 }
 
-/* Disable storing stack temporaries for the thread whose id is
-   stored in DATA.  */
-
-static void
-disable_thread_stack_temporaries (void *data)
-{
-  ptid_t *pd = (ptid_t *) data;
-  struct thread_info *tp = find_thread_ptid (*pd);
-
-  if (tp != NULL)
-    {
-      tp->stack_temporaries_enabled = 0;
-      VEC_free (value_ptr, tp->stack_temporaries);
-    }
-
-  xfree (pd);
-}
-
-/* Enable storing stack temporaries for thread with id PTID and return a
-   cleanup which can disable and clear the stack temporaries.  */
-
-struct cleanup *
-enable_thread_stack_temporaries (ptid_t ptid)
-{
-  struct thread_info *tp = find_thread_ptid (ptid);
-  ptid_t  *data;
-  struct cleanup *c;
-
-  gdb_assert (tp != NULL);
-
-  tp->stack_temporaries_enabled = 1;
-  tp->stack_temporaries = NULL;
-  data = XNEW (ptid_t);
-  *data = ptid;
-  c = make_cleanup (disable_thread_stack_temporaries, data);
-
-  return c;
-}
-
-/* Return non-zero value if stack temporaies are enabled for the thread
+/* Return true value if stack temporaies are enabled for the thread
    with id PTID.  */
 
-int
+bool
 thread_stack_temporaries_enabled_p (ptid_t ptid)
 {
   struct thread_info *tp = find_thread_ptid (ptid);
 
   if (tp == NULL)
-    return 0;
+    return false;
   else
     return tp->stack_temporaries_enabled;
 }
@@ -810,29 +771,23 @@ push_thread_stack_temporary (ptid_t ptid, struct value *v)
   struct thread_info *tp = find_thread_ptid (ptid);
 
   gdb_assert (tp != NULL && tp->stack_temporaries_enabled);
-  VEC_safe_push (value_ptr, tp->stack_temporaries, v);
+  tp->stack_temporaries.push_back (v);
 }
 
-/* Return 1 if VAL is among the stack temporaries of the thread
-   with id PTID.  Return 0 otherwise.  */
+/* Return true if VAL is among the stack temporaries of the thread
+   with id PTID.  Return false otherwise.  */
 
-int
+bool
 value_in_thread_stack_temporaries (struct value *val, ptid_t ptid)
 {
   struct thread_info *tp = find_thread_ptid (ptid);
 
   gdb_assert (tp != NULL && tp->stack_temporaries_enabled);
-  if (!VEC_empty (value_ptr, tp->stack_temporaries))
-    {
-      struct value *v;
-      int i;
+  for (struct value *v : tp->stack_temporaries)
+    if (v == val)
+      return true;
 
-      for (i = 0; VEC_iterate (value_ptr, tp->stack_temporaries, i, v); i++)
-	if (v == val)
-	  return 1;
-    }
-
-  return 0;
+  return false;
 }
 
 /* Return the last of the stack temporaries for thread with id PTID.
@@ -845,8 +800,8 @@ get_last_thread_stack_temporary (ptid_t ptid)
   struct thread_info *tp = find_thread_ptid (ptid);
 
   gdb_assert (tp != NULL);
-  if (!VEC_empty (value_ptr, tp->stack_temporaries))
-    lastval = VEC_last (value_ptr, tp->stack_temporaries);
+  if (!tp->stack_temporaries.empty ())
+    lastval = tp->stack_temporaries.back ();
 
   return lastval;
 }

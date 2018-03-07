@@ -69,27 +69,20 @@ struct value *
 evaluate_subexp (struct type *expect_type, struct expression *exp,
 		 int *pos, enum noside noside)
 {
-  struct cleanup *cleanups;
   struct value *retval;
-  int cleanup_temps = 0;
 
+  gdb::optional<enable_thread_stack_temporaries> stack_temporaries;
   if (*pos == 0 && target_has_execution
       && exp->language_defn->la_language == language_cplus
       && !thread_stack_temporaries_enabled_p (inferior_ptid))
-    {
-      cleanups = enable_thread_stack_temporaries (inferior_ptid);
-      cleanup_temps = 1;
-    }
+    stack_temporaries.emplace (inferior_ptid);
 
   retval = (*exp->language_defn->la_exp_desc->evaluate_exp)
     (expect_type, exp, pos, noside);
 
-  if (cleanup_temps)
-    {
-      if (value_in_thread_stack_temporaries (retval, inferior_ptid))
-	retval = value_non_lval (retval);
-      do_cleanups (cleanups);
-    }
+  if (stack_temporaries.has_value ()
+      && value_in_thread_stack_temporaries (retval, inferior_ptid))
+    retval = value_non_lval (retval);
 
   return retval;
 }

@@ -1,3 +1,22 @@
+2018-03-08  Tom Tromey  <tom@tromey.com>
+
+	* infcall.c (struct call_return_meta_info)
+	<stack_temporaries_enabled>: Remove.
+	(get_call_return_value, call_function_by_hand_dummy): Update.
+	* thread.c (disable_thread_stack_temporaries): Remove.
+	(enable_thread_stack_temporaries): Remove.
+	(thread_stack_temporaries_enabled_p): Return bool.
+	(push_thread_stack_temporary, value_in_thread_stack_temporaries)
+	(get_last_thread_stack_temporary): Update.
+	* eval.c (evaluate_subexp): Update.
+	* gdbthread.h (class enable_thread_stack_temporaries): Now a
+	class, not a function.
+	(value_ptr, value_vec): Remove typedefs.
+	(class thread_info) <stack_temporaries_enabled>: Now bool.
+	<stack_temporaries>: Now a std::vector.
+	(thread_stack_temporaries_enabled_p)
+	(value_in_thread_stack_temporaries): Return bool.
+
 2018-03-08  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* remote.c (putpkt_binary): Fix omitted bytes reporting.

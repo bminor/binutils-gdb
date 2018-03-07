@@ -175,10 +175,6 @@ struct thread_suspend_state
   CORE_ADDR stop_pc;
 };
 
-typedef struct value *value_ptr;
-DEF_VEC_P (value_ptr);
-typedef VEC (value_ptr) value_vec;
-
 /* Base class for target-specific thread data.  */
 struct private_thread_info
 {
@@ -358,11 +354,11 @@ public:
 
   /* Flag which indicates that the stack temporaries should be stored while
      evaluating expressions.  */
-  int stack_temporaries_enabled = 0;
+  bool stack_temporaries_enabled = false;
 
   /* Values that are stored as temporaries on stack while evaluating
      expressions.  */
-  value_vec *stack_temporaries = NULL;
+  std::vector<struct value *> stack_temporaries;
 
   /* Step-over chain.  A thread is in the step-over queue if these are
      non-NULL.  If only a single thread is in the chain, then these
@@ -634,15 +630,48 @@ extern void delete_exited_threads (void);
 
 int pc_in_thread_step_range (CORE_ADDR pc, struct thread_info *thread);
 
-extern struct cleanup *enable_thread_stack_temporaries (ptid_t ptid);
+/* Enable storing stack temporaries for thread with id PTID and
+   disable and clear the stack temporaries on destruction.  */
 
-extern int thread_stack_temporaries_enabled_p (ptid_t ptid);
+class enable_thread_stack_temporaries
+{
+public:
+
+  explicit enable_thread_stack_temporaries (ptid_t ptid)
+    : m_ptid (ptid)
+  {
+    struct thread_info *tp = find_thread_ptid (ptid);
+
+    gdb_assert (tp != NULL);
+    tp->stack_temporaries_enabled = true;
+    tp->stack_temporaries.clear ();
+  }
+
+  ~enable_thread_stack_temporaries ()
+  {
+    struct thread_info *tp = find_thread_ptid (m_ptid);
+
+    if (tp != NULL)
+      {
+	tp->stack_temporaries_enabled = false;
+	tp->stack_temporaries.clear ();
+      }
+  }
+
+  DISABLE_COPY_AND_ASSIGN (enable_thread_stack_temporaries);
+
+private:
+
+  ptid_t m_ptid;
+};
+
+extern bool thread_stack_temporaries_enabled_p (ptid_t ptid);
 
 extern void push_thread_stack_temporary (ptid_t ptid, struct value *v);
 
 extern struct value *get_last_thread_stack_temporary (ptid_t);
 
-extern int value_in_thread_stack_temporaries (struct value *, ptid_t);
+extern bool value_in_thread_stack_temporaries (struct value *, ptid_t);
 
 /* Add TP to the end of its inferior's pending step-over chain.  */
 
