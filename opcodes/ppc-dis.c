@@ -340,7 +340,10 @@ powerpc_init_dialect (struct disassemble_info *info)
       dialect = ppc_parse_cpu (dialect, &sticky, "vle");
       break;
     default:
-      dialect = ppc_parse_cpu (dialect, &sticky, "power9") | PPC_OPCODE_ANY;
+      if (info->arch == bfd_arch_powerpc)
+	dialect = ppc_parse_cpu (dialect, &sticky, "power9") | PPC_OPCODE_ANY;
+      else
+	dialect = ppc_parse_cpu (dialect, &sticky, "pwr");
       break;
     }
 
@@ -431,8 +434,7 @@ disassemble_init_powerpc (struct disassemble_info *info)
       last = spe2_opcd_indices[i];
     }
 
-  if (info->arch == bfd_arch_powerpc)
-    powerpc_init_dialect (info);
+  powerpc_init_dialect (info);
 }
 
 /* Print a big endian PowerPC instruction.  */
@@ -449,14 +451,6 @@ int
 print_insn_little_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 {
   return print_insn_powerpc (memaddr, info, 0, get_powerpc_dialect (info));
-}
-
-/* Print a POWER (RS/6000) instruction.  */
-
-int
-print_insn_rs6000 (bfd_vma memaddr, struct disassemble_info *info)
-{
-  return print_insn_powerpc (memaddr, info, 1, PPC_OPCODE_POWER);
 }
 
 /* Extract the operand value from the PowerPC or POWER instruction.  */

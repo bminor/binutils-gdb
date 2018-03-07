@@ -375,6 +375,11 @@ disassembler (enum bfd_architecture a,
 #endif
 #ifdef ARCH_powerpc
     case bfd_arch_powerpc:
+#endif
+#ifdef ARCH_rs6000
+    case bfd_arch_rs6000:
+#endif
+#if defined ARCH_powerpc || defined ARCH_rs6000
       if (big)
 	disassemble = print_insn_big_powerpc;
       else
@@ -389,14 +394,6 @@ disassembler (enum bfd_architecture a,
 #ifdef ARCH_riscv
     case bfd_arch_riscv:
       disassemble = print_insn_riscv;
-      break;
-#endif
-#ifdef ARCH_rs6000
-    case bfd_arch_rs6000:
-      if (mach == bfd_mach_ppc_620)
-	disassemble = print_insn_big_powerpc;
-      else
-	disassemble = print_insn_rs6000;
       break;
 #endif
 #ifdef ARCH_rl78

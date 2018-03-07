@@ -56,7 +56,7 @@ proc do_align_test {} {
 }
 
 
-if [istarget powerpc-ibm-aix*] then {
+if { [istarget "powerpc*-*-aix*"] || [istarget "rs6000-*-aix*"] } then {
 
     # Make sure that symbols are correctly aligned 
     do_align_test

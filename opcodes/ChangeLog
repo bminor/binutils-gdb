@@ -1,3 +1,12 @@
+2018-03-07  Alan Modra  <amodra@gmail.com>
+
+	* disassemble.c (disassembler): Use bfd_arch_powerpc entry for
+	bfd_arch_rs6000.
+	* disassemble.h (print_insn_rs6000): Delete.
+	* ppc-dis.c (powerpc_init_dialect): Handle rs6000.
+	(disassemble_init_powerpc): Call powerpc_init_dialect for rs6000.
+	(print_insn_rs6000): Delete.
+
 2018-03-03  Alan Modra  <amodra@gmail.com>
 
 	* sysdep.h (opcodes_error_handler): Define.

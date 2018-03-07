@@ -417,7 +417,7 @@ changequote([,])dnl
 	avr-*-*)
 	  od_vectors="$od_vectors objdump_private_desc_elf32_avr"
 	  ;;
-	powerpc-*-aix*)
+	powerpc*-*-aix* | rs6000-*-aix*)
 	  od_vectors="$od_vectors objdump_private_desc_xcoff"
 	  ;;
         *-*-darwin*)

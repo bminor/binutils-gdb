@@ -1,3 +1,8 @@
+2018-03-07  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Add objdump_private_desc_xcoff for rs6000.
+	* configure: Regenerate.
+
 2018-03-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/22911
