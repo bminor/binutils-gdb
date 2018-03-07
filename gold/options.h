@@ -1500,6 +1500,10 @@ class General_options
 	      N_("Move .text.unlikely sections to a separate segment."),
 	      N_("Do not move .text.unlikely sections to a separate "
 		 "segment."));
+  DEFINE_bool(keep_text_section_prefix, options::DASH_Z, '\0', false,
+	      N_("Keep .text.hot, .text.startup, .text.exit and .text.unlikely "
+		 "as separate sections in the final binary."),
+	      N_("Merge all .text.* prefix sections."));
 
 
  public:

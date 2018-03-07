@@ -1,3 +1,24 @@
+2018-03-07  Sriraman Tallam  <tmsriram@google.com>
+
+	* layout.cc (Layout::default_section_order): Check for text section
+	prefixes.
+	(Layout::text_section_name_mapping): New static member.
+	(Layout::text_section_name_mapping_count): New static member.
+	(Layout::match_section_name): New static function.
+	(Layout::output_section_name): Check for text section prefixes.
+	* layout.h (Output_section_order::ORDER_TEXT_HOT): New enum value.
+	(Output_section_order::ORDER_TEXT_STARTUP): New enum value.
+	(Output_section_order::ORDER_TEXT_EXIT): New enum value.
+	(Output_section_order::ORDER_TEXT_UNLIKELY): New enum value.
+	(Layout::text_section_name_mapping): New static member.
+	(Layout::text_section_name_mapping_count): New static member.
+	(Layout::match_section_name): New static function.
+	* options.h (keep_text_section_prefix): New -z option.
+	* testsuite/Makefile.am (keep_text_section_prefix): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/keep_text_section_prefix.cc: New test source.
+	* testsuite/keep_text_section_prefix.sh: New test script.
+
 2018-02-22  Sriraman Tallam  <tmsriram@google.com>
 
 	* plugin.cc (get_wrap_symbols): New plugin interface.

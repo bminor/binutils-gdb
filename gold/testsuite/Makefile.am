@@ -354,6 +354,18 @@ text_unlikely_segment: text_unlikely_segment.o gcctestdir/ld
 text_unlikely_segment_readelf.stdout: text_unlikely_segment
 	$(TEST_READELF) -Wl $< >$@
 
+check_SCRIPTS += keep_text_section_prefix.sh
+check_DATA += keep_text_section_prefix_readelf.stdout keep_text_section_prefix_nm.stdout
+MOSTLYCLEANFILES += keep_text_section_prefix
+keep_text_section_prefix.o: keep_text_section_prefix.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+keep_text_section_prefix: keep_text_section_prefix.o gcctestdir/ld
+	$(CXXLINK)  -Bgcctestdir/ -Wl,-z,keep-text-section-prefix keep_text_section_prefix.o
+keep_text_section_prefix_readelf.stdout: keep_text_section_prefix
+	$(TEST_READELF) -Wl $< >$@
+keep_text_section_prefix_nm.stdout: keep_text_section_prefix
+	$(TEST_NM) -n $< >$@
+
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test icf_virtual_function_folding_test.map
 icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc
