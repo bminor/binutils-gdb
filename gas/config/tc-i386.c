@@ -1179,63 +1179,27 @@ static const unsigned char f32_3[] =
   {0x8d,0x76,0x00};			/* leal 0(%esi),%esi	*/
 static const unsigned char f32_4[] =
   {0x8d,0x74,0x26,0x00};		/* leal 0(%esi,1),%esi	*/
-static const unsigned char f32_5[] =
-  {0x90,				/* nop			*/
-   0x8d,0x74,0x26,0x00};		/* leal 0(%esi,1),%esi	*/
 static const unsigned char f32_6[] =
   {0x8d,0xb6,0x00,0x00,0x00,0x00};	/* leal 0L(%esi),%esi	*/
 static const unsigned char f32_7[] =
   {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};	/* leal 0L(%esi,1),%esi */
-static const unsigned char f32_8[] =
-  {0x90,				/* nop			*/
-   0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};	/* leal 0L(%esi,1),%esi */
-static const unsigned char f32_9[] =
-  {0x89,0xf6,				/* movl %esi,%esi	*/
-   0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-static const unsigned char f32_10[] =
-  {0x8d,0x76,0x00,			/* leal 0(%esi),%esi	*/
-   0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-static const unsigned char f32_11[] =
-  {0x8d,0x74,0x26,0x00,			/* leal 0(%esi,1),%esi	*/
-   0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-static const unsigned char f32_12[] =
-  {0x8d,0xb6,0x00,0x00,0x00,0x00,	/* leal 0L(%esi),%esi	*/
-   0x8d,0xbf,0x00,0x00,0x00,0x00};	/* leal 0L(%edi),%edi	*/
-static const unsigned char f32_13[] =
-  {0x8d,0xb6,0x00,0x00,0x00,0x00,	/* leal 0L(%esi),%esi	*/
-   0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-static const unsigned char f32_14[] =
-  {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00,	/* leal 0L(%esi,1),%esi */
-   0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
 static const unsigned char f16_3[] =
-  {0x8d,0x74,0x00};			/* lea 0(%esi),%esi	*/
+  {0x8d,0x74,0x00};			/* lea 0(%si),%si	*/
 static const unsigned char f16_4[] =
-  {0x8d,0xb4,0x00,0x00};		/* lea 0w(%si),%si	*/
-static const unsigned char f16_5[] =
-  {0x90,				/* nop			*/
-   0x8d,0xb4,0x00,0x00};		/* lea 0w(%si),%si	*/
-static const unsigned char f16_6[] =
-  {0x89,0xf6,				/* mov %si,%si		*/
-   0x8d,0xbd,0x00,0x00};		/* lea 0w(%di),%di	*/
-static const unsigned char f16_7[] =
-  {0x8d,0x74,0x00,			/* lea 0(%si),%si	*/
-   0x8d,0xbd,0x00,0x00};		/* lea 0w(%di),%di	*/
-static const unsigned char f16_8[] =
-  {0x8d,0xb4,0x00,0x00,			/* lea 0w(%si),%si	*/
-   0x8d,0xbd,0x00,0x00};		/* lea 0w(%di),%di	*/
-static const unsigned char jump_31[] =
-  {0xeb,0x1d,0x90,0x90,0x90,0x90,0x90,	/* jmp .+31; lotsa nops	*/
-   0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,
-   0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,
-   0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
+  {0x8d,0xb4,0x00,0x00};		/* lea 0W(%si),%si	*/
+static const unsigned char jump_disp8[] =
+  {0xeb};				/* jmp disp8	       */
+static const unsigned char jump32_disp32[] =
+  {0xe9};				/* jmp disp32	       */
+static const unsigned char jump16_disp32[] =
+  {0x66,0xe9};				/* jmp disp32	       */
 /* 32-bit NOPs patterns.  */
 static const unsigned char *const f32_patt[] = {
-  f32_1, f32_2, f32_3, f32_4, f32_5, f32_6, f32_7, f32_8,
-  f32_9, f32_10, f32_11, f32_12, f32_13, f32_14
+  f32_1, f32_2, f32_3, f32_4, NULL, f32_6, f32_7
 };
 /* 16-bit NOPs patterns.  */
 static const unsigned char *const f16_patt[] = {
-  f32_1, f32_2, f16_3, f16_4, f16_5, f16_6, f16_7, f16_8
+  f32_1, f32_2, f16_3, f16_4
 };
 /* nopl (%[re]ax) */
 static const unsigned char alt_3[] =
@@ -1261,18 +1225,13 @@ static const unsigned char alt_9[] =
 /* nopw %cs:0L(%[re]ax,%[re]ax,1) */
 static const unsigned char alt_10[] =
   {0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+/* data16 nopw %cs:0L(%eax,%eax,1) */
+static const unsigned char alt_11[] =
+  {0x66,0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
 /* 32-bit and 64-bit NOPs patterns.  */
 static const unsigned char *const alt_patt[] = {
   f32_1, f32_2, alt_3, alt_4, alt_5, alt_6, alt_7, alt_8,
-  alt_9, alt_10
-};
-/* 64-bit only: nopw %cs:0L(%eax,%eax,1) */
-static const unsigned char alt64_11[] =
-  {0x67,0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
-/* 64-bit NOPs patterns.  */
-static const unsigned char *const alt64_patt[] = {
-  f32_1, f32_2, alt_3, alt_4, alt_5, alt_6, alt_7, alt_8,
-  alt_9, alt_10, alt64_11
+  alt_9, alt_10, alt_11
 };
 
 /* Genenerate COUNT bytes of NOPs to WHERE from PATT with the maximum
@@ -1283,62 +1242,72 @@ i386_output_nops (char *where, const unsigned char *const *patt,
 		  int count, int max_single_nop_size)
 
 {
-  while (count > max_single_nop_size)
+  /* Place the longer NOP first.  */
+  int last;
+  int offset;
+  const unsigned char *nops =  patt[max_single_nop_size - 1];
+
+  /* Use the smaller one if the requsted one isn't available.  */
+  if (nops == NULL)
     {
-      count -= max_single_nop_size;
-      memcpy (where + count, patt[max_single_nop_size - 1],
-	      max_single_nop_size);
+      max_single_nop_size--;
+      nops = patt[max_single_nop_size - 1];
     }
 
-  if (count)
-    memcpy (where, patt[count - 1], count);
+  last = count % max_single_nop_size;
+
+  count -= last;
+  for (offset = 0; offset < count; offset += max_single_nop_size)
+    memcpy (where + offset, nops, max_single_nop_size);
+
+  if (last)
+    {
+      nops = patt[last - 1];
+      if (nops == NULL)
+	{
+	  /* Use the smaller one plus one-byte NOP if the needed one
+	     isn't available.  */
+	  last--;
+	  nops = patt[last - 1];
+	  memcpy (where + offset, nops, last);
+	  where[offset + last] = *patt[0];
+	}
+      else
+	memcpy (where + offset, nops, last);
+    }
 }
 
+static INLINE int
+fits_in_imm7 (offsetT num)
+{
+  return (num & 0x7f) == num;
+}
+
+static INLINE int
+fits_in_imm31 (offsetT num)
+{
+  return (num & 0x7fffffff) == num;
+}
 
 /* Genenerate COUNT bytes of NOPs to WHERE with the maximum size of a
    single NOP instruction LIMIT.  */
 
 void
-i386_generate_nops (fragS *f, char *where, offsetT count, int limit)
+i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 {
-  /* Output NOPs for .nop directive.  */
+  const unsigned char *const *patt = NULL;
   int max_single_nop_size;
-  const unsigned char *const *patt;
+  /* Maximum number of NOPs before switching to jump over NOPs.  */
+  int max_number_of_nops;
 
-  if (flag_code == CODE_16BIT)
+  switch (fragP->fr_type)
     {
-      patt = f16_patt;
-      max_single_nop_size = sizeof (f16_patt) / sizeof (f16_patt[0]);
-    }
-  else if (flag_code == CODE_64BIT)
-    {
-      patt = alt64_patt;
-      max_single_nop_size = sizeof (alt64_patt) / sizeof (alt64_patt[0]);
-    }
-  else
-    {
-      patt = alt_patt;
-      max_single_nop_size = sizeof (alt_patt) / sizeof (alt_patt[0]);
-    }
-  if (limit == 0)
-    limit = max_single_nop_size;
-  else if (limit > max_single_nop_size)
-    {
-      as_bad_where (f->fr_file, f->fr_line,
-		    _("invalide single nop size: %d (expect within [0, %d])"),
-		    limit, max_single_nop_size);
+    case rs_fill_nop:
+    case rs_align_code:
+      break;
+    default:
       return;
     }
-
-  i386_output_nops (where, patt, count, limit);
-}
-
-void
-i386_align_code (fragS *fragP, int count)
-{
-  /* Only align for at least a positive non-zero boundary. */
-  if (count <= 0 || count > MAX_MEM_FOR_RS_ALIGN_CODE)
-    return;
 
   /* We need to decide which NOP sequence to use for 32bit and
      64bit. When -mtune= is used:
@@ -1356,21 +1325,13 @@ i386_align_code (fragS *fragP, int count)
 
   if (flag_code == CODE_16BIT)
     {
-      if (count > 8)
-	{
-	  memcpy (fragP->fr_literal + fragP->fr_fix,
-		  jump_31, count);
-	  /* Adjust jump offset.  */
-	  fragP->fr_literal[fragP->fr_fix + 1] = count - 2;
-	}
-      else
-	memcpy (fragP->fr_literal + fragP->fr_fix,
-		f16_patt[count - 1], count);
+      patt = f16_patt;
+      max_single_nop_size = sizeof (f16_patt) / sizeof (f16_patt[0]);
+      /* Limit number of NOPs to 2 in 16-bit mode.  */
+      max_number_of_nops = 2;
     }
   else
     {
-      const unsigned char *const *patt = NULL;
-
       if (fragP->tc_frag_data.isa == PROCESSOR_UNKNOWN)
 	{
 	  /* PROCESSOR_UNKNOWN means that all ISAs may be used.  */
@@ -1461,38 +1422,79 @@ i386_align_code (fragS *fragP, int count)
 
       if (patt == f32_patt)
 	{
-	  /* If the padding is less than 15 bytes, we use the normal
-	     ones.  Otherwise, we use a jump instruction and adjust
-	     its offset.   */
-	  int limit;
-
-	  /* For 64bit, the limit is 3 bytes.  */
-	  if (flag_code == CODE_64BIT
-	      && fragP->tc_frag_data.isa_flags.bitfield.cpulm)
-	    limit = 3;
-	  else
-	    limit = 15;
-	  if (count < limit)
-	    memcpy (fragP->fr_literal + fragP->fr_fix,
-		    patt[count - 1], count);
-	  else
-	    {
-	      memcpy (fragP->fr_literal + fragP->fr_fix,
-		      jump_31, count);
-	      /* Adjust jump offset.  */
-	      fragP->fr_literal[fragP->fr_fix + 1] = count - 2;
-	    }
+	  max_single_nop_size = sizeof (f32_patt) / sizeof (f32_patt[0]);
+	  /* Limit number of NOPs to 2 for older processors.  */
+	  max_number_of_nops = 2;
 	}
       else
 	{
-	  /* Maximum length of an instruction is 10 byte.  If the
-	     padding is greater than 10 bytes and we don't use jump,
-	     we have to break it into smaller pieces.  */
-	  i386_output_nops (fragP->fr_literal + fragP->fr_fix,
-			    patt, count, 10);
+	  max_single_nop_size = sizeof (alt_patt) / sizeof (alt_patt[0]);
+	  /* Limit number of NOPs to 7 for newer processors.  */
+	  max_number_of_nops = 7;
 	}
     }
-  fragP->fr_var = count;
+
+  if (limit == 0)
+    limit = max_single_nop_size;
+
+  if (fragP->fr_type == rs_fill_nop)
+    {
+      /* Output NOPs for .nop directive.  */
+      if (limit > max_single_nop_size)
+	{
+	  as_bad_where (fragP->fr_file, fragP->fr_line,
+			_("invalid single nop size: %d "
+			  "(expect within [0, %d])"),
+			limit, max_single_nop_size);
+	  return;
+	}
+    }
+  else
+    fragP->fr_var = count;
+
+  if ((count / max_single_nop_size) > max_number_of_nops)
+    {
+      /* Generate jump over NOPs.  */
+      offsetT disp = count - 2;
+      if (fits_in_imm7 (disp))
+	{
+	  /* Use "jmp disp8" if possible.  */
+	  count = disp;
+	  where[0] = jump_disp8[0];
+	  where[1] = count;
+	  where += 2;
+	}
+      else
+	{
+	  unsigned int size_of_jump;
+
+	  if (flag_code == CODE_16BIT)
+	    {
+	      where[0] = jump16_disp32[0];
+	      where[1] = jump16_disp32[1];
+	      size_of_jump = 2;
+	    }
+	  else
+	    {
+	      where[0] = jump32_disp32[0];
+	      size_of_jump = 1;
+	    }
+
+	  count -= size_of_jump + 4;
+	  if (!fits_in_imm31 (count))
+	    {
+	      as_bad_where (fragP->fr_file, fragP->fr_line,
+			    _("jump over nop padding out of range"));
+	      return;
+	    }
+
+	  md_number_to_chars (where + size_of_jump, count, 4);
+	  where += size_of_jump + 4;
+	}
+    }
+
+  /* Generate multiple NOPs.  */
+  i386_output_nops (where, patt, count, limit);
 }
 
 static INLINE int
@@ -2202,18 +2204,6 @@ static INLINE int
 fits_in_imm4 (offsetT num)
 {
   return (num & 0xf) == num;
-}
-
-static INLINE int
-fits_in_imm7 (offsetT num)
-{
-  return (num & 0x7f) == num;
-}
-
-static INLINE int
-fits_in_imm31 (offsetT num)
-{
-  return (num & 0x7fffffff) == num;
 }
 
 static i386_operand_type

@@ -6212,9 +6212,10 @@ zero.
 
 Note: For Intel 80386 and AMD x86-64 targets, @var{control} specifies
 the size limit of a no-op instruction.  The valid values of @var{control}
-are between 0 and 8 for 16-bit mode, between 0 and 10 for 32-bit mode,
-between 0 and 11 for 64-bit mode.  When 0 is used, the no-op instruction
-size limit is set to the maximum supported size.
+are between 0 and 4 in 16-bit mode, between 0 and 7 when tuning for
+older processors in 32-bit mode, between 0 and 11 in 64-bit mode or when
+tuning for newer processors in 32-bit mode.  When 0 is used, the no-op
+instruction size limit is set to the maximum supported size.
 
 @node Octa
 @section @code{.octa @var{bignums}}

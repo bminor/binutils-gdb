@@ -9,7 +9,8 @@ Disassembly of section .text:
 0+ <_start>:
  +[a-f0-9]+:	31 c0                	xor    %eax,%eax
  +[a-f0-9]+:	85 c0                	test   %eax,%eax
- +[a-f0-9]+:	66 0f 1f 84 00 00 00 00 00 	nopw   0x0\(%eax,%eax,1\)
+ +[a-f0-9]+:	8d b4 26 00 00 00 00 	lea    0x0\(%esi,%eiz,1\),%esi
+ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
  +[a-f0-9]+:	31 c0                	xor    %eax,%eax
  +[a-f0-9]+:	31 c0                	xor    %eax,%eax
 
