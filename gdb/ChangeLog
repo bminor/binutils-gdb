@@ -1,3 +1,8 @@
+2018-03-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gnu-v3-abi.c (gnuv3_rtti_type): Add early exit if the given
+	value is not a dynamic class object.
+
 2018-03-06  Tom Tromey  <tom@tromey.com>
 
 	* rust-exp.y: Formatting fixes.
