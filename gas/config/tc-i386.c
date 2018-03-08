@@ -5492,15 +5492,17 @@ check_reverse:
 		  /* Fall through.  */
 		case 3:
 		  /* Here we make use of the fact that there are no
-		     reverse match 3 operand instructions, and all 3
-		     operand instructions only need to be checked for
-		     register consistency between operands 2 and 3.  */
+		     reverse match 3 operand instructions.  */
 		  if (!operand_type_match (overlap2, i.types[2])
 		      || (check_register
-			  && !operand_type_register_match (i.types[1],
-							   operand_types[1],
-							   i.types[2],
-							   operand_types[2])))
+			  && (!operand_type_register_match (i.types[0],
+							    operand_types[0],
+							    i.types[2],
+							    operand_types[2])
+			      || !operand_type_register_match (i.types[1],
+							       operand_types[1],
+							       i.types[2],
+							       operand_types[2]))))
 		    continue;
 		  break;
 		}
