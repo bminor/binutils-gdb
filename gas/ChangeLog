@@ -1,5 +1,11 @@
 2018-03-08  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-ppc.c (ppc_handle_align): Correct last patch.  Really
+	don't emit a group terminating nop for power9.  Simplify cpu
+	tests.
+
+2018-03-08  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (ppc_handle_align): Don't emit a group
 	terminating nop for power9.
 
