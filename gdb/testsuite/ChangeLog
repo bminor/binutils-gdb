@@ -1,3 +1,9 @@
+2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/22841
+	* boards/gdbserver-base.exp (${board}_file, ${board}_download,
+	${board}_upload): Remove.
+
 2018-03-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.cp/watch-cp.cc: New test.
