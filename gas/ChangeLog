@@ -1,5 +1,9 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (cpu_flags_match): Move AVX512VL check ahead.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (CPU_FLAGS_32BIT_MATCH): Delete.
 	(cpu_flags_match): Use CPU_FLAGS_ARCH_MATCH instead of
 	CPU_FLAGS_32BIT_MATCH.

@@ -1712,6 +1712,11 @@ cpu_flags_match (const insn_template *t)
       /* This instruction is available only on some archs.  */
       i386_cpu_flags cpu = cpu_arch_flags;
 
+      /* AVX512VL is no standalone feature - match it and then strip it.  */
+      if (x.bitfield.cpuavx512vl && !cpu.bitfield.cpuavx512vl)
+	return match;
+      x.bitfield.cpuavx512vl = 0;
+
       cpu = cpu_flags_and (x, cpu);
       if (!cpu_flags_all_zero (&cpu))
 	{
@@ -1723,17 +1728,6 @@ cpu_flags_match (const insn_template *t)
 		  && (!x.bitfield.cpuaes || cpu.bitfield.cpuaes)
 		  && (!x.bitfield.cpupclmul || cpu.bitfield.cpupclmul))
 		match |= CPU_FLAGS_ARCH_MATCH;
-	    }
-	  else if (x.bitfield.cpuavx512vl)
-	    {
-	      /* Match AVX512VL.  */
-	      if (cpu.bitfield.cpuavx512vl)
-		{
-		  /* Need another match.  */
-		  cpu.bitfield.cpuavx512vl = 0;
-		  if (!cpu_flags_all_zero (&cpu))
-		    match |= CPU_FLAGS_ARCH_MATCH;
-		}
 	    }
 	  else
 	    match |= CPU_FLAGS_ARCH_MATCH;
