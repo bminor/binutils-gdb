@@ -1,5 +1,10 @@
 2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-low.c (linux_qxfer_libraries_svr4): Use
+	xml_escape_text_append.
+
+2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.c (linux_qxfer_libraries_svr4): Use std::string.
 
 2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>

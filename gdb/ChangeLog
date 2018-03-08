@@ -1,3 +1,13 @@
+2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/xml-utils.c (xml_escape_text): Move code to...
+	(xml_escape_text_append): ... this new function.
+	* common/xml-utils.h (xml_escape_text_append): New declaration.
+	* unittests/xml-utils-selftests.c (test_xml_escape_text_append):
+	New function.
+	(_initialize_xml_utils): register test_xml_escape_text_append as
+	a selftest.
+
 2018-03-07  Alan Hayward  <alan.hayward@arm.com>
 
 	* defs.h: Remove MAX_REGISTER_SIZE.

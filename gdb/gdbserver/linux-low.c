@@ -7136,12 +7136,12 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 		  header_done = 1;
 		}
 
-	      std::string name = xml_escape_text ((char *) libname);
-	      string_appendf (document,
-			      "<library name=\"%s\" lm=\"0x%lx\" "
+	      string_appendf (document, "<library name=\"");
+	      xml_escape_text_append (&document, (char *) libname);
+	      string_appendf (document, "\" lm=\"0x%lx\" "
 			      "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
-			      name.c_str (), (unsigned long) lm_addr,
-			      (unsigned long) l_addr, (unsigned long) l_ld);
+			      (unsigned long) lm_addr, (unsigned long) l_addr,
+			      (unsigned long) l_ld);
 	    }
 	}
 

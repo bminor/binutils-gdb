@@ -20,37 +20,44 @@
 #include "common-defs.h"
 #include "xml-utils.h"
 
-/* Return a string with special characters from TEXT replaced by entity
-   references.  */
+/* See xml-utils.h.  */
 
 std::string
 xml_escape_text (const char *text)
 {
   std::string result;
 
+  xml_escape_text_append (&result, text);
+
+  return result;
+}
+
+/* See xml-utils.h.  */
+
+void
+xml_escape_text_append (std::string *result, const char *text)
+{
   /* Expand the result.  */
   for (int i = 0; text[i] != '\0'; i++)
     switch (text[i])
       {
       case '\'':
-	result += "&apos;";
+	*result += "&apos;";
 	break;
       case '\"':
-	result += "&quot;";
+	*result += "&quot;";
 	break;
       case '&':
-	result += "&amp;";
+	*result += "&amp;";
 	break;
       case '<':
-	result += "&lt;";
+	*result += "&lt;";
 	break;
       case '>':
-	result += "&gt;";
+	*result += "&gt;";
 	break;
       default:
-	result += text[i];
+	*result += text[i];
 	break;
       }
-
-  return result;
 }
