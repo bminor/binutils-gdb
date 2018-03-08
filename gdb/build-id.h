@@ -41,10 +41,10 @@ extern gdb_bfd_ref_ptr build_id_to_debug_bfd (size_t build_id_len,
 					      const bfd_byte *build_id);
 
 /* Find the separate debug file for OBJFILE, by using the build-id
-   associated with OBJFILE's BFD.  If successful, returns a malloc'd
-   file name for the separate debug file.  The caller must free this.
-   Otherwise, returns NULL.  */
+   associated with OBJFILE's BFD.  If successful, returns the file name for the
+   separate debug file, otherwise, return an empty string.  */
 
-extern char *find_separate_debug_file_by_buildid (struct objfile *objfile);
+extern std::string find_separate_debug_file_by_buildid
+  (struct objfile *objfile);
 
 #endif /* BUILD_ID_H */

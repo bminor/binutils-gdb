@@ -136,7 +136,7 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
 
 /* See build-id.h.  */
 
-char *
+std::string
 find_separate_debug_file_by_buildid (struct objfile *objfile)
 {
   const struct bfd_build_id *build_id;
@@ -157,7 +157,8 @@ find_separate_debug_file_by_buildid (struct objfile *objfile)
 	warning (_("\"%s\": separate debug info file has no debug info"),
 		 bfd_get_filename (abfd.get ()));
       else if (abfd != NULL)
-	return xstrdup (bfd_get_filename (abfd.get ()));
+	return std::string (bfd_get_filename (abfd.get ()));
     }
-  return NULL;
+
+  return std::string ();
 }

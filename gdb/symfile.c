@@ -1333,7 +1333,7 @@ symbol_file_clear (int from_tty)
 int separate_debug_file_debug = 0;
 
 static int
-separate_debug_file_exists (const char *name, unsigned long crc,
+separate_debug_file_exists (const std::string &name, unsigned long crc,
 			    struct objfile *parent_objfile)
 {
   unsigned long file_crc;
@@ -1347,13 +1347,13 @@ separate_debug_file_exists (const char *name, unsigned long crc,
      ".debug" suffix as "/usr/lib/debug/path/to/file" is a separate tree where
      the separate debug infos with the same basename can exist.  */
 
-  if (filename_cmp (name, objfile_name (parent_objfile)) == 0)
+  if (filename_cmp (name.c_str (), objfile_name (parent_objfile)) == 0)
     return 0;
 
   if (separate_debug_file_debug)
-    printf_unfiltered (_("  Trying %s\n"), name);
+    printf_unfiltered (_("  Trying %s\n"), name.c_str ());
 
-  gdb_bfd_ref_ptr abfd (gdb_bfd_open (name, gnutarget, -1));
+  gdb_bfd_ref_ptr abfd (gdb_bfd_open (name.c_str (), gnutarget, -1));
 
   if (abfd == NULL)
     return 0;
@@ -1403,7 +1403,7 @@ separate_debug_file_exists (const char *name, unsigned long crc,
       if (verified_as_different || parent_crc != file_crc)
 	warning (_("the debug information found in \"%s\""
 		   " does not match \"%s\" (CRC mismatch).\n"),
-		 name, objfile_name (parent_objfile));
+		 name.c_str (), objfile_name (parent_objfile));
 
       return 0;
     }
@@ -1431,46 +1431,31 @@ show_debug_file_directory (struct ui_file *file, int from_tty,
    dirname(objfile->name) due to symlinks), and DEBUGLINK as the file we are
    looking for.  CANON_DIR is the "realpath" form of DIR.
    DIR must contain a trailing '/'.
-   Returns the path of the file with separate debug info, of NULL.  */
+   Returns the path of the file with separate debug info, or an empty
+   string.  */
 
-static char *
+static std::string
 find_separate_debug_file (const char *dir,
 			  const char *canon_dir,
 			  const char *debuglink,
 			  unsigned long crc32, struct objfile *objfile)
 {
-  char *debugfile;
-  int i;
-
   if (separate_debug_file_debug)
     printf_unfiltered (_("\nLooking for separate debug info (debug link) for "
 		         "%s\n"), objfile_name (objfile));
 
-  /* Set I to std::max (strlen (canon_dir), strlen (dir)).  */
-  i = strlen (dir);
-  if (canon_dir != NULL && strlen (canon_dir) > i)
-    i = strlen (canon_dir);
-
-  debugfile
-    = (char *) xmalloc (strlen (debug_file_directory) + 1
-			+ i
-			+ strlen (DEBUG_SUBDIRECTORY)
-			+ strlen ("/")
-			+ strlen (debuglink)
-			+ 1);
-
   /* First try in the same directory as the original file.  */
-  strcpy (debugfile, dir);
-  strcat (debugfile, debuglink);
+  std::string debugfile = dir;
+  debugfile += debuglink;
 
   if (separate_debug_file_exists (debugfile, crc32, objfile))
     return debugfile;
 
   /* Then try in the subdirectory named DEBUG_SUBDIRECTORY.  */
-  strcpy (debugfile, dir);
-  strcat (debugfile, DEBUG_SUBDIRECTORY);
-  strcat (debugfile, "/");
-  strcat (debugfile, debuglink);
+  debugfile = dir;
+  debugfile += DEBUG_SUBDIRECTORY;
+  debugfile += "/";
+  debugfile += debuglink;
 
   if (separate_debug_file_exists (debugfile, crc32, objfile))
     return debugfile;
@@ -1485,10 +1470,10 @@ find_separate_debug_file (const char *dir,
 
   for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {
-      strcpy (debugfile, debugdir.get ());
-      strcat (debugfile, "/");
-      strcat (debugfile, dir);
-      strcat (debugfile, debuglink);
+      debugfile = debugdir.get ();
+      debugfile += "/";
+      debugfile += dir;
+      debugfile += debuglink;
 
       if (separate_debug_file_exists (debugfile, crc32, objfile))
 	return debugfile;
@@ -1500,18 +1485,17 @@ find_separate_debug_file (const char *dir,
 			    strlen (gdb_sysroot)) == 0
 	  && IS_DIR_SEPARATOR (canon_dir[strlen (gdb_sysroot)]))
 	{
-	  strcpy (debugfile, debugdir.get ());
-	  strcat (debugfile, canon_dir + strlen (gdb_sysroot));
-	  strcat (debugfile, "/");
-	  strcat (debugfile, debuglink);
+	  debugfile = debugdir.get ();
+	  debugfile += (canon_dir + strlen (gdb_sysroot));
+	  debugfile += "/";
+	  debugfile += debuglink;
 
 	  if (separate_debug_file_exists (debugfile, crc32, objfile))
 	    return debugfile;
 	}
     }
 
-  xfree (debugfile);
-  return NULL;
+  return std::string ();
 }
 
 /* Modify PATH to contain only "[/]directory/" part of PATH.
@@ -1534,12 +1518,11 @@ terminate_after_last_dir_separator (char *path)
 }
 
 /* Find separate debuginfo for OBJFILE (using .gnu_debuglink section).
-   Returns pathname, or NULL.  */
+   Returns pathname, or an empty string.  */
 
-char *
+std::string
 find_separate_debug_file_by_debuglink (struct objfile *objfile)
 {
-  char *debugfile;
   unsigned long crc32;
 
   gdb::unique_xmalloc_ptr<char> debuglink
@@ -1549,17 +1532,18 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
     {
       /* There's no separate debug info, hence there's no way we could
 	 load it => no warning.  */
-      return NULL;
+      return std::string ();
     }
 
   std::string dir = objfile_name (objfile);
   terminate_after_last_dir_separator (&dir[0]);
   gdb::unique_xmalloc_ptr<char> canon_dir (lrealpath (dir.c_str ()));
 
-  debugfile = find_separate_debug_file (dir.c_str (), canon_dir.get (),
-					debuglink.get (), crc32, objfile);
+  std::string debugfile
+    = find_separate_debug_file (dir.c_str (), canon_dir.get (),
+				debuglink.get (), crc32, objfile);
 
-  if (debugfile == NULL)
+  if (debugfile.empty ())
     {
       /* For PR gdb/9538, try again with realpath (if different from the
 	 original).  */

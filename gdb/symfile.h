@@ -426,7 +426,7 @@ extern struct objfile *symbol_file_add_from_bfd (bfd *, const char *, symfile_ad
 extern void symbol_file_add_separate (bfd *, const char *, symfile_add_flags,
 				      struct objfile *);
 
-extern char *find_separate_debug_file_by_debuglink (struct objfile *);
+extern std::string find_separate_debug_file_by_debuglink (struct objfile *);
 
 /* Create a new section_addr_info, with room for NUM_SECTIONS.  */
 

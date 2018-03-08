@@ -1,5 +1,20 @@
 2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* build-id.c (find_separate_debug_file_by_buildid): Return
+	std::string.
+	* build-id.h (find_separate_debug_file_by_buildid): Return
+	std::string.
+	* coffread.c (coff_symfile_read): Adjust to std::string.
+	* elfread.c (elf_symfile_read): Adjust to std::string.
+	* symfile.c (separate_debug_file_exists): Change parameter to
+	std::string.
+	(find_separate_debug_file): Return std::string.
+	(find_separate_debug_file_by_debuglink): Return std::string.
+	* symfile.h (find_separate_debug_file_by_debuglink): Return
+	std::string.
+
+2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* common/xml-utils.c (xml_escape_text): Move code to...
 	(xml_escape_text_append): ... this new function.
 	* common/xml-utils.h (xml_escape_text_append): New declaration.

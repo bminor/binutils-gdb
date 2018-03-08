@@ -1259,17 +1259,16 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	   && objfile->separate_debug_objfile == NULL
 	   && objfile->separate_debug_objfile_backlink == NULL)
     {
-      gdb::unique_xmalloc_ptr<char> debugfile
-	(find_separate_debug_file_by_buildid (objfile));
+      std::string debugfile = find_separate_debug_file_by_buildid (objfile);
 
-      if (debugfile == NULL)
-	debugfile.reset (find_separate_debug_file_by_debuglink (objfile));
+      if (debugfile.empty ())
+	debugfile = find_separate_debug_file_by_debuglink (objfile);
 
-      if (debugfile != NULL)
+      if (!debugfile.empty ())
 	{
-	  gdb_bfd_ref_ptr abfd (symfile_bfd_open (debugfile.get ()));
+	  gdb_bfd_ref_ptr abfd (symfile_bfd_open (debugfile.c_str ()));
 
-	  symbol_file_add_separate (abfd.get (), debugfile.get (),
+	  symbol_file_add_separate (abfd.get (), debugfile.c_str (),
 				    symfile_flags, objfile);
 	}
     }
