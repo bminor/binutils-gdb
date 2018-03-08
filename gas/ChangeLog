@@ -1,5 +1,13 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (process_operands): Access operands only
+	after operand count assertion. Sanitize warning text. Fix
+	indentation.
+	* testsuite/gas/i386/avx512_4fmaps-warn.l,
+	gas/i386/x86-64-avx512_4fmaps-warn.l: Adjust expectations.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/x86-64-movd.s: Drop bogus vmovd memory forms.
 	* testsuite/gas/i386/x86-64-movd.d,
 	testsuite/gas/i386/x86-64-movd-intel.d: Adjust expectations.
