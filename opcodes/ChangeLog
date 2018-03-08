@@ -1,5 +1,12 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vexpandpd, vexpandps, vmovapd, vmovaps,
+	vmovdqa32, vmovdqa64, vmovdqu32, vmovdqu64, vmovupd, vmovups,
+	vpexpandd, vpexpandq): Fold AVX512F templates.
+	* i386-tlb.h: Re-generate.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (llwpcb, slwpcb, lwpval, lwpins): Fold 32- and
 	64-bit templates. Drop Disp<N>.
 	* i386-tlb.h: Re-generate.
