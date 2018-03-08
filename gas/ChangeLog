@@ -1,5 +1,10 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (parse_insn): Move success return up. Combine
+	failure returns.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (cpu_flags_match): Add GFNI check to AVX
 	logic. Add respective logic for AVX512F.
 	* testsuite/gas/i386/arch-avx-1.s: Add GFNI test.

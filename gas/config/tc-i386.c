@@ -4487,34 +4487,26 @@ check_suffix:
     {
       supported |= cpu_flags_match (t);
       if (supported == CPU_FLAGS_PERFECT_MATCH)
-	goto skip;
+	{
+	  if (!cpu_arch_flags.bitfield.cpui386 && (flag_code != CODE_16BIT))
+	    as_warn (_("use .code16 to ensure correct addressing mode"));
+
+	  return l;
+	}
     }
 
   if (!(supported & CPU_FLAGS_64BIT_MATCH))
-    {
-      as_bad (flag_code == CODE_64BIT
-	      ? _("`%s' is not supported in 64-bit mode")
-	      : _("`%s' is only supported in 64-bit mode"),
-	      current_templates->start->name);
-      return NULL;
-    }
-  if (supported != CPU_FLAGS_PERFECT_MATCH)
-    {
-      as_bad (_("`%s' is not supported on `%s%s'"),
-	      current_templates->start->name,
-	      cpu_arch_name ? cpu_arch_name : default_arch,
-	      cpu_sub_arch_name ? cpu_sub_arch_name : "");
-      return NULL;
-    }
+    as_bad (flag_code == CODE_64BIT
+	    ? _("`%s' is not supported in 64-bit mode")
+	    : _("`%s' is only supported in 64-bit mode"),
+	    current_templates->start->name);
+  else
+    as_bad (_("`%s' is not supported on `%s%s'"),
+	    current_templates->start->name,
+	    cpu_arch_name ? cpu_arch_name : default_arch,
+	    cpu_sub_arch_name ? cpu_sub_arch_name : "");
 
-skip:
-  if (!cpu_arch_flags.bitfield.cpui386
-	   && (flag_code != CODE_16BIT))
-    {
-      as_warn (_("use .code16 to ensure correct addressing mode"));
-    }
-
-  return l;
+  return NULL;
 }
 
 static char *
