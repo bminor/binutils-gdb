@@ -459,6 +459,7 @@ run_dump_test "pr22115-1c"
 run_dump_test "pr22115-1d"
 run_dump_test "pr22135"
 run_dump_test "pr22782"
+run_dump_test "pr22929"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]

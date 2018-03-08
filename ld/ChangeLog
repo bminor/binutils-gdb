@@ -1,3 +1,13 @@
+2018-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22929
+	* testsuite/ld-i386/i386.exp: Run PR ld/22929 test.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr22929.d: New file.
+	* testsuite/ld-i386/pr22929.s: Likewise.
+	* testsuite/ld-x86-64/pr22929.d: Likewise.
+	* testsuite/ld-x86-64/pr22929.s: Likewise.
+
 2018-03-07  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* emulparams/elf32xtensa.sh (COMMONPAGESIZE): Define.

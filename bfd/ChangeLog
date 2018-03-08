@@ -1,3 +1,11 @@
+2018-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22929
+	* elf32-i386.c (elf_i386_relocate_section): Treat relocation
+	against IFUNC symbol in SHT_NOTE section without SHF_ALLOC as
+	relocation against FUNC symbol.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
 2018-03-07  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/20402

@@ -2221,6 +2221,10 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    {
+	      /* If this is a SHT_NOTE section without SHF_ALLOC, treat
+	         STT_GNU_IFUNC symbol as STT_FUNC.  */
+	      if (elf_section_type (input_section) == SHT_NOTE)
+		goto skip_ifunc;
 	      /* Dynamic relocs are not propagated for SEC_DEBUGGING
 		 sections because such sections are not SEC_ALLOC and
 		 thus ld.so will not process them.  */
@@ -2440,6 +2444,7 @@ do_ifunc_pointer:
 	    }
 	}
 
+skip_ifunc:
       resolved_to_zero = (eh != NULL
 			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh));
 
