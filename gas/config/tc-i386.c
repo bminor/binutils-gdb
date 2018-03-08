@@ -4008,12 +4008,16 @@ md_assemble (char *line)
 
   if (sse_check != check_none
       && !i.tm.opcode_modifier.noavx
+      && !i.tm.cpu_flags.bitfield.cpuavx
       && (i.tm.cpu_flags.bitfield.cpusse
 	  || i.tm.cpu_flags.bitfield.cpusse2
 	  || i.tm.cpu_flags.bitfield.cpusse3
 	  || i.tm.cpu_flags.bitfield.cpussse3
 	  || i.tm.cpu_flags.bitfield.cpusse4_1
-	  || i.tm.cpu_flags.bitfield.cpusse4_2))
+	  || i.tm.cpu_flags.bitfield.cpusse4_2
+	  || i.tm.cpu_flags.bitfield.cpupclmul
+	  || i.tm.cpu_flags.bitfield.cpuaes
+	  || i.tm.cpu_flags.bitfield.cpugfni))
     {
       (sse_check == check_warning
        ? as_warn
