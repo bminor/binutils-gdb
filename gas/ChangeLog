@@ -1,5 +1,11 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (CPU_FLAGS_32BIT_MATCH): Delete.
+	(cpu_flags_match): Use CPU_FLAGS_ARCH_MATCH instead of
+	CPU_FLAGS_32BIT_MATCH.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (CPU_FLAGS_AES_MATCH, CPU_FLAGS_AVX_MATCH,
 	CPU_FLAGS_PCLMUL_MATCH): Delete.
 	(CPU_FLAGS_32BIT_MATCH): Drop uses of deleted CPU_FLAGS_*_MATCH.

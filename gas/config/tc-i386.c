@@ -1688,9 +1688,8 @@ cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
 #define CPU_FLAGS_ARCH_MATCH		0x1
 #define CPU_FLAGS_64BIT_MATCH		0x2
 
-#define CPU_FLAGS_32BIT_MATCH CPU_FLAGS_ARCH_MATCH
 #define CPU_FLAGS_PERFECT_MATCH \
-  (CPU_FLAGS_32BIT_MATCH | CPU_FLAGS_64BIT_MATCH)
+  (CPU_FLAGS_ARCH_MATCH | CPU_FLAGS_64BIT_MATCH)
 
 /* Return CPU flags match bits. */
 
@@ -1706,7 +1705,7 @@ cpu_flags_match (const insn_template *t)
   if (cpu_flags_all_zero (&x))
     {
       /* This instruction is available on all archs.  */
-      match |= CPU_FLAGS_32BIT_MATCH;
+      match |= CPU_FLAGS_ARCH_MATCH;
     }
   else
     {
@@ -1733,11 +1732,11 @@ cpu_flags_match (const insn_template *t)
 		  /* Need another match.  */
 		  cpu.bitfield.cpuavx512vl = 0;
 		  if (!cpu_flags_all_zero (&cpu))
-		    match |= CPU_FLAGS_32BIT_MATCH;
+		    match |= CPU_FLAGS_ARCH_MATCH;
 		}
 	    }
 	  else
-	    match |= CPU_FLAGS_32BIT_MATCH;
+	    match |= CPU_FLAGS_ARCH_MATCH;
 	}
     }
   return match;
