@@ -1687,13 +1687,8 @@ cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
 
 #define CPU_FLAGS_ARCH_MATCH		0x1
 #define CPU_FLAGS_64BIT_MATCH		0x2
-#define CPU_FLAGS_AES_MATCH		0x4
-#define CPU_FLAGS_PCLMUL_MATCH		0x8
-#define CPU_FLAGS_AVX_MATCH	       0x10
 
-#define CPU_FLAGS_32BIT_MATCH \
-  (CPU_FLAGS_ARCH_MATCH | CPU_FLAGS_AES_MATCH \
-   | CPU_FLAGS_PCLMUL_MATCH | CPU_FLAGS_AVX_MATCH)
+#define CPU_FLAGS_32BIT_MATCH CPU_FLAGS_ARCH_MATCH
 #define CPU_FLAGS_PERFECT_MATCH \
   (CPU_FLAGS_32BIT_MATCH | CPU_FLAGS_64BIT_MATCH)
 
@@ -1724,22 +1719,11 @@ cpu_flags_match (const insn_template *t)
 	  if (x.bitfield.cpuavx)
 	    {
 	      /* We only need to check AES/PCLMUL/SSE2AVX with AVX.  */
-	      if (cpu.bitfield.cpuavx)
-		{
-		  /* Check SSE2AVX.  */
-		  if (!t->opcode_modifier.sse2avx|| sse2avx)
-		    {
-		      match |= (CPU_FLAGS_ARCH_MATCH
-				| CPU_FLAGS_AVX_MATCH);
-		      /* Check AES.  */
-		      if (!x.bitfield.cpuaes || cpu.bitfield.cpuaes)
-			match |= CPU_FLAGS_AES_MATCH;
-		      /* Check PCLMUL.  */
-		      if (!x.bitfield.cpupclmul
-			  || cpu.bitfield.cpupclmul)
-			match |= CPU_FLAGS_PCLMUL_MATCH;
-		    }
-		}
+	      if (cpu.bitfield.cpuavx
+		  && (!t->opcode_modifier.sse2avx || sse2avx)
+		  && (!x.bitfield.cpuaes || cpu.bitfield.cpuaes)
+		  && (!x.bitfield.cpupclmul || cpu.bitfield.cpupclmul))
+		match |= CPU_FLAGS_ARCH_MATCH;
 	    }
 	  else if (x.bitfield.cpuavx512vl)
 	    {
