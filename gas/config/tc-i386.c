@@ -1722,11 +1722,21 @@ cpu_flags_match (const insn_template *t)
 	{
 	  if (x.bitfield.cpuavx)
 	    {
-	      /* We only need to check AES/PCLMUL/SSE2AVX with AVX.  */
+	      /* We need to check a few extra flags with AVX.  */
 	      if (cpu.bitfield.cpuavx
 		  && (!t->opcode_modifier.sse2avx || sse2avx)
 		  && (!x.bitfield.cpuaes || cpu.bitfield.cpuaes)
+		  && (!x.bitfield.cpugfni || cpu.bitfield.cpugfni)
 		  && (!x.bitfield.cpupclmul || cpu.bitfield.cpupclmul))
+		match |= CPU_FLAGS_ARCH_MATCH;
+	    }
+	  else if (x.bitfield.cpuavx512f)
+	    {
+	      /* We need to check a few extra flags with AVX512F.  */
+	      if (cpu.bitfield.cpuavx512f
+		  && (!x.bitfield.cpugfni || cpu.bitfield.cpugfni)
+		  && (!x.bitfield.cpuvaes || cpu.bitfield.cpuvaes)
+		  && (!x.bitfield.cpuvpclmulqdq || cpu.bitfield.cpuvpclmulqdq))
 		match |= CPU_FLAGS_ARCH_MATCH;
 	    }
 	  else

@@ -1,5 +1,27 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (cpu_flags_match): Add GFNI check to AVX
+	logic. Add respective logic for AVX512F.
+	* testsuite/gas/i386/arch-avx-1.s: Add GFNI test.
+	testsuite/gas/i386/arch-avx-1.d,
+	testsuite/gas/i386/arch-avx-1-1.l,
+	testsuite/gas/i386/arch-avx-1-2.l,
+	testsuite/gas/i386/arch-avx-1-3.l,
+	testsuite/gas/i386/arch-avx-1-4.l,
+	testsuite/gas/i386/arch-avx-1-5.l,
+	testsuite/gas/i386/arch-avx-1-6.l: Adjust expectations.
+	* testsuite/gas/i386/arch-avx-1-7.l,
+	testsuite/gas/i386/arch-avx-1-7.s,
+	testsuite/gas/i386/arch-avx-1-8.l,
+	testsuite/gas/i386/arch-avx-1-8.s,
+	testsuite/gas/i386/avx512f-plain.l,
+	testsuite/gas/i386/avx512f-plain.s,
+	testsuite/gas/i386/avx512vl-plain.l,
+	testsuite/gas/i386/avx512vl-plain.s: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (cpu_flags_match): Move AVX512VL check ahead.
 
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
