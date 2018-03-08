@@ -1,5 +1,10 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (cpu_flags_match): Drop "else" branches
+	setting CPU_FLAGS_ARCH_MATCH.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (md_assemble): Extend SSE check conditional.
 	* testsuite/gas/i386/ilp32/x86-64-sse-check-none.d,
 	testsuite/gas/i386/ilp32/x86-64-sse-check-warn.d,
