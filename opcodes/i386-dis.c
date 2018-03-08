@@ -13737,10 +13737,10 @@ static const struct dis386 float_reg[][8] = {
     { "fmul",	{ STi, ST }, 0 },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "fsub!M",	{ STi, ST }, 0 },
-    { "fsubM",	{ STi, ST }, 0 },
-    { "fdiv!M",	{ STi, ST }, 0 },
-    { "fdivM",	{ STi, ST }, 0 },
+    { "fsub{!M|r}",	{ STi, ST }, 0 },
+    { "fsub{M|}",	{ STi, ST }, 0 },
+    { "fdiv{!M|r}",	{ STi, ST }, 0 },
+    { "fdiv{M|}",	{ STi, ST }, 0 },
   },
   /* dd */
   {
@@ -13759,10 +13759,10 @@ static const struct dis386 float_reg[][8] = {
     { "fmulp",	{ STi, ST }, 0 },
     { Bad_Opcode },
     { FGRPde_3 },
-    { "fsub!Mp", { STi, ST }, 0 },
-    { "fsubMp",	{ STi, ST }, 0 },
-    { "fdiv!Mp", { STi, ST }, 0 },
-    { "fdivMp",	{ STi, ST }, 0 },
+    { "fsub{!M|r}p",	{ STi, ST }, 0 },
+    { "fsub{M|}p",	{ STi, ST }, 0 },
+    { "fdiv{!M|r}p",	{ STi, ST }, 0 },
+    { "fdiv{M|}p",	{ STi, ST }, 0 },
   },
   /* df */
   {

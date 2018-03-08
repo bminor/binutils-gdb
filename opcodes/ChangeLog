@@ -1,5 +1,9 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (float_reg): Adjust DC and DE fsub*/fdiv* patterns.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (vmovd): Disallow Qword memory operands.
 	* i386-tlb.h: Re-generate.
 
