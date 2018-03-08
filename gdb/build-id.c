@@ -70,16 +70,7 @@ build_id_verify (bfd *abfd, size_t check_len, const bfd_byte *check)
 gdb_bfd_ref_ptr
 build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
 {
-  char *link, *debugdir;
-  int ix;
   gdb_bfd_ref_ptr abfd;
-  int alloc_len;
-
-  /* DEBUG_FILE_DIRECTORY/.build-id/ab/cdef */
-  alloc_len = (strlen (debug_file_directory)
-	       + (sizeof "/.build-id/" - 1) + 1
-	       + 2 * build_id_len + (sizeof ".debug" - 1) + 1);
-  link = (char *) alloca (alloc_len);
 
   /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
      cause "/.build-id/..." lookups.  */
@@ -89,32 +80,30 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
 
   for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {
-      size_t debugdir_len = strlen (debugdir.get ());
       const gdb_byte *data = build_id;
       size_t size = build_id_len;
-      char *s;
 
-      memcpy (link, debugdir.get (), debugdir_len);
-      s = &link[debugdir_len];
-      s += sprintf (s, "/.build-id/");
+      std::string link = debugdir.get ();
+      link += "/.build-id/";
+
       if (size > 0)
 	{
 	  size--;
-	  s += sprintf (s, "%02x", (unsigned) *data++);
+	  string_appendf (link, "%02x/", (unsigned) *data++);
 	}
-      if (size > 0)
-	*s++ = '/';
+
       while (size-- > 0)
-	s += sprintf (s, "%02x", (unsigned) *data++);
-      strcpy (s, ".debug");
+	string_appendf (link, "%02x", (unsigned) *data++);
+
+      link += ".debug";
 
       if (separate_debug_file_debug)
-	printf_unfiltered (_("  Trying %s\n"), link);
+	printf_unfiltered (_("  Trying %s\n"), link.c_str ());
 
       /* lrealpath() is expensive even for the usually non-existent files.  */
       gdb::unique_xmalloc_ptr<char> filename;
-      if (access (link, F_OK) == 0)
-	filename.reset (lrealpath (link));
+      if (access (link.c_str (), F_OK) == 0)
+	filename.reset (lrealpath (link.c_str ()));
 
       if (filename == NULL)
 	continue;

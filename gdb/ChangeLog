@@ -1,5 +1,9 @@
 2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* build-id.c (build_id_to_debug_bfd): Use std::string.
+
+2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* build-id.c (find_separate_debug_file_by_buildid): Return
 	std::string.
 	* build-id.h (find_separate_debug_file_by_buildid): Return
