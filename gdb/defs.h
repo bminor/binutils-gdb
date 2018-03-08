@@ -531,11 +531,6 @@ enum symbol_needs_kind
 /* Dynamic target-system-dependent parameters for GDB.  */
 #include "gdbarch.h"
 
-/* * Maximum size of a register.  Something small, but large enough for
-   all known ISAs.  If it turns out to be too small, make it bigger.  */
-
-enum { MAX_REGISTER_SIZE = 64 };
-
 /* In findvar.c.  */
 
 template<typename T, typename = RequireLongest<T>>

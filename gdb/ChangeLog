@@ -1,3 +1,10 @@
+2018-03-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* defs.h: Remove MAX_REGISTER_SIZE.
+	* regcache.c (init_regcache_descr): Remove MAX_REGISTER_SIZE
+	asserts.
+	* python/py-unwind.c (pyuw_sniffer): Likewise.
+
 2018-03-07  Tom Tromey  <tom@tromey.com>
 
 	* linux-tdep.c (linux_info_proc): Update.

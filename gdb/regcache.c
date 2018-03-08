@@ -117,7 +117,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
 	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
 	descr->register_offset[i] = offset;
 	offset += descr->sizeof_register[i];
-	gdb_assert (MAX_REGISTER_SIZE >= descr->sizeof_register[i]);
       }
     /* Set the real size of the raw register cache buffer.  */
     descr->sizeof_raw_registers = offset;
@@ -127,7 +126,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
 	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
 	descr->register_offset[i] = offset;
 	offset += descr->sizeof_register[i];
-	gdb_assert (MAX_REGISTER_SIZE >= descr->sizeof_register[i]);
       }
     /* Set the real size of the readonly register cache buffer.  */
     descr->sizeof_cooked_registers = offset;

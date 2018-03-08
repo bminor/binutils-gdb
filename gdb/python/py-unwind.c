@@ -583,7 +583,6 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
         /* `value' validation was done before, just assert.  */
         gdb_assert (value != NULL);
         gdb_assert (data_size == TYPE_LENGTH (value_type (value)));
-        gdb_assert (data_size <= MAX_REGISTER_SIZE);
 
 	cached_frame->reg[i].data = (gdb_byte *) xmalloc (data_size);
         memcpy (cached_frame->reg[i].data, value_contents (value), data_size);
