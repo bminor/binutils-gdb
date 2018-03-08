@@ -1,5 +1,12 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vexpandpd, vexpandps, vmovapd, vmovaps,
+	vmovdqa32, vmovdqa64, vmovdqu32, vmovdqu64, vmovupd, vmovups,
+	vpexpandd, vpexpandq): Fold AFX512VF templates.
+	* i386-tlb.h: Re-generate.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (vgf2p8affineinvqb, vgf2p8affineqb, vgf2p8mulb):
 	Fold 128- and 256-bit VEX-encoded templates.
 	* i386-tlb.h: Re-generate.

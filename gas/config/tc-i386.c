@@ -7157,9 +7157,10 @@ build_modrm_byte (void)
 		}
 	      else
 		{
-		  /* There are only 2 operands.  */
-		  gas_assert (op < 2 && i.operands == 2);
-		  vex_reg = 1;
+		  /* There are only 2 non-immediate operands.  */
+		  gas_assert (op < i.imm_operands + 2
+			      && i.operands == i.imm_operands + 2);
+		  vex_reg = i.imm_operands + 1;
 		}
 	    }
 	  else

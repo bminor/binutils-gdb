@@ -1,5 +1,10 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (build_modrm_byte): Make VexNDD handling cope
+	with 3rd (immediate) operand.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (XMMWORD_MNEM_SUFFIX, YMMWORD_MNEM_SUFFIX,
 	ZMMWORD_MNEM_SUFFIX): Delete.
 	(process_suffix): Drop their uses. Re-arrange final part of
