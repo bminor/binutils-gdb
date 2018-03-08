@@ -35,7 +35,5 @@ _start:
 	{evex} vmovd dword ptr [rax + 128], xmm1
 	{evex} vmovd [rax + 128], xmm1
 	{evex} vmovd eax, xmm1
-	vmovd xmm1, qword ptr [rax + 128]
 	vmovd xmm1, rax
-	vmovd qword ptr [rax + 128], xmm1
 	vmovd rax, xmm1

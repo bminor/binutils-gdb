@@ -1,5 +1,10 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vmovd): Disallow Qword memory operands.
+	* i386-tlb.h: Re-generate.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (vcvtpd2ps): Fold AVX 128- and 256-bit memory
 	forms.
 	* i386-tlb.h: Re-generate.
