@@ -1,3 +1,9 @@
+2018-03-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/22841
+	* boards/remote-stdio-gdbserver.exp (${board}_file): Pass
+	"target" to remote_exec.
+
 2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/22841

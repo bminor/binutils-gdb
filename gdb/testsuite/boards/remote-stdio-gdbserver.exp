@@ -75,7 +75,7 @@ proc get_target_remote_pipe_cmd { } {
 
 proc ${board}_file { dest op args } {
     if { $op == "delete" } {
-	return [remote_exec [get_remote_login] "rm -f $args"]
+	return [remote_exec target "rm -f $args"]
     }
     return [eval [list standard_file $dest $op] $args]
 }
