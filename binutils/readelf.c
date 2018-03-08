@@ -10212,7 +10212,7 @@ process_dynamic_section (Filedata * filedata)
 static char *
 get_ver_flags (unsigned int flags)
 {
-  static char buff[32];
+  static char buff[128];
 
   buff[0] = 0;
 
