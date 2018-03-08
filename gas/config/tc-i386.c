@@ -81,9 +81,6 @@
 #define SHORT_MNEM_SUFFIX 's'
 #define LONG_MNEM_SUFFIX  'l'
 #define QWORD_MNEM_SUFFIX  'q'
-#define XMMWORD_MNEM_SUFFIX  'x'
-#define YMMWORD_MNEM_SUFFIX 'y'
-#define ZMMWORD_MNEM_SUFFIX 'z'
 /* Intel Syntax.  Use a non-ascii letter since since it never appears
    in instructions.  */
 #define LONG_DOUBLE_MNEM_SUFFIX '\1'
@@ -5790,13 +5787,6 @@ process_suffix (void)
 	  else if (!check_word_reg ())
 	    return 0;
 	}
-      else if (i.suffix == XMMWORD_MNEM_SUFFIX
-	       || i.suffix == YMMWORD_MNEM_SUFFIX
-	       || i.suffix == ZMMWORD_MNEM_SUFFIX)
-	{
-	  /* Skip if the instruction has x/y/z suffix.  match_template
-	     should check if it is a valid suffix.  */
-	}
       else if (intel_syntax && i.tm.opcode_modifier.ignoresize)
 	/* Do nothing if the instruction is going to ignore the prefix.  */
 	;
@@ -5877,15 +5867,19 @@ process_suffix (void)
 	}
     }
 
-  /* Change the opcode based on the operand size given by i.suffix;
-     We don't need to change things for byte insns.  */
-
-  if (i.suffix
-      && i.suffix != BYTE_MNEM_SUFFIX
-      && i.suffix != XMMWORD_MNEM_SUFFIX
-      && i.suffix != YMMWORD_MNEM_SUFFIX
-      && i.suffix != ZMMWORD_MNEM_SUFFIX)
+  /* Change the opcode based on the operand size given by i.suffix.  */
+  switch (i.suffix)
     {
+    /* Size floating point instruction.  */
+    case LONG_MNEM_SUFFIX:
+      if (i.tm.opcode_modifier.floatmf)
+	{
+	  i.tm.base_opcode ^= 4;
+	  break;
+	}
+    /* fall through */
+    case WORD_MNEM_SUFFIX:
+    case QWORD_MNEM_SUFFIX:
       /* It's not a byte, select word/dword operation.  */
       if (i.tm.opcode_modifier.w)
 	{
@@ -5894,7 +5888,8 @@ process_suffix (void)
 	  else
 	    i.tm.base_opcode |= 1;
 	}
-
+    /* fall through */
+    case SHORT_MNEM_SUFFIX:
       /* Now select between word & dword operations via the operand
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
@@ -5910,7 +5905,6 @@ process_suffix (void)
 	      return 0;
 	}
       else if (i.suffix != QWORD_MNEM_SUFFIX
-	       && i.suffix != LONG_DOUBLE_MNEM_SUFFIX
 	       && !i.tm.opcode_modifier.ignoresize
 	       && !i.tm.opcode_modifier.floatmf
 	       && ((i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)
@@ -5929,27 +5923,17 @@ process_suffix (void)
       /* Set mode64 for an operand.  */
       if (i.suffix == QWORD_MNEM_SUFFIX
 	  && flag_code == CODE_64BIT
-	  && !i.tm.opcode_modifier.norex64)
-	{
+	  && !i.tm.opcode_modifier.norex64
 	  /* Special case for xchg %rax,%rax.  It is NOP and doesn't
-	     need rex64.  cmpxchg8b is also a special case. */
-	  if (! (i.operands == 2
-		 && i.tm.base_opcode == 0x90
-		 && i.tm.extension_opcode == None
-		 && operand_type_equal (&i.types [0], &acc64)
-		 && operand_type_equal (&i.types [1], &acc64))
-	      && ! (i.operands == 1
-		    && i.tm.base_opcode == 0xfc7
-		    && i.tm.extension_opcode == 1
-		    && !operand_type_check (i.types [0], reg)
-		    && operand_type_check (i.types [0], anymem)))
-	    i.rex |= REX_W;
-	}
+	     need rex64. */
+	  && ! (i.operands == 2
+		&& i.tm.base_opcode == 0x90
+		&& i.tm.extension_opcode == None
+		&& operand_type_equal (&i.types [0], &acc64)
+		&& operand_type_equal (&i.types [1], &acc64)))
+	i.rex |= REX_W;
 
-      /* Size floating point instruction.  */
-      if (i.suffix == LONG_MNEM_SUFFIX)
-	if (i.tm.opcode_modifier.floatmf)
-	  i.tm.base_opcode ^= 4;
+      break;
     }
 
   return 1;

@@ -1,5 +1,10 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (cmpxchg8b): Add NoRex64.
+	* i386-tlb.h: Re-generate.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (cmpxchg16b, fisttp, fisttpll, bndmov, mwaitx):
 	Drop NoAVX.
 	* i386-tlb.h: Re-generate.

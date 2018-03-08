@@ -848,7 +848,7 @@ cpuid, 0, 0xfa2, None, 2, Cpu486, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldS
 wrmsr, 0, 0xf30, None, 2, Cpu586, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 rdtsc, 0, 0xf31, None, 2, Cpu586, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 rdmsr, 0, 0xf32, None, 2, Cpu586, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-cmpxchg8b, 1, 0xfc7, 0x1, 2, Cpu586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|IsLockable|HLEPrefixOk, { Qword|Unspecified|BaseIndex }
+cmpxchg8b, 1, 0xfc7, 0x1, 2, Cpu586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|IsLockable|NoRex64|HLEPrefixOk, { Qword|Unspecified|BaseIndex }
 
 // Pentium II/Pentium Pro extensions.
 sysenter, 0, 0xf34, None, 2, Cpu686, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }

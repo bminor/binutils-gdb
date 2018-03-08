@@ -1,5 +1,13 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (XMMWORD_MNEM_SUFFIX, YMMWORD_MNEM_SUFFIX,
+	ZMMWORD_MNEM_SUFFIX): Delete.
+	(process_suffix): Drop their uses. Re-arrange final part of
+	logic into a switch() statement. Drop special casing of
+	cmpxchg8b.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (match_template): Also match register
 	operands 0 and 2 for 3-operand forms.
 	* testsuite/gas/i386/unspec64.l, testsuite/gas/i386/unspec64.s:
