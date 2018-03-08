@@ -3451,6 +3451,14 @@ build_vex_prefix (const insn_template *t)
     }
 }
 
+static INLINE bfd_boolean
+is_evex_encoding (const insn_template *t)
+{
+  return t->opcode_modifier.evex
+	 || t->opcode_modifier.broadcast || t->opcode_modifier.masking
+	 || t->opcode_modifier.staticrounding || t->opcode_modifier.sae;
+}
+
 /* Build the EVEX prefix.  */
 
 static void
@@ -3585,6 +3593,29 @@ build_evex_prefix (void)
       /* Encode the vector length.  */
       unsigned int vec_length;
 
+      if (!i.tm.opcode_modifier.evex
+	  || i.tm.opcode_modifier.evex == EVEXDYN)
+	{
+	  unsigned int op;
+
+	  vec_length = 0;
+	  for (op = 0; op < i.tm.operands; ++op)
+	    if (i.tm.operand_types[op].bitfield.xmmword
+		+ i.tm.operand_types[op].bitfield.ymmword
+		+ i.tm.operand_types[op].bitfield.zmmword > 1)
+	      {
+		if (i.types[op].bitfield.zmmword)
+		  i.tm.opcode_modifier.evex = EVEX512;
+		else if (i.types[op].bitfield.ymmword)
+		  i.tm.opcode_modifier.evex = EVEX256;
+		else if (i.types[op].bitfield.xmmword)
+		  i.tm.opcode_modifier.evex = EVEX128;
+		else
+		  continue;
+		break;
+	      }
+	}
+
       switch (i.tm.opcode_modifier.evex)
 	{
 	case EVEXLIG: /* LL' is ignored */
@@ -3682,7 +3713,8 @@ bad_register_operand:
   gas_assert (i.imm_operands <= 1
 	      && (i.operands <= 2
 		  || ((i.tm.opcode_modifier.vex
-		       || i.tm.opcode_modifier.evex)
+		       || i.tm.opcode_modifier.vexopcode
+		       || is_evex_encoding (&i.tm))
 		      && i.operands <= 4)));
 
   exp = &im_expressions[i.imm_operands++];
@@ -3837,7 +3869,7 @@ optimize_encoding (void)
 	   && (i.tm.opcode_modifier.vex
 	       || (!i.mask
 		   && !i.rounding
-		   && i.tm.opcode_modifier.evex
+		   && is_evex_encoding (&i.tm)
 		   && cpu_arch_flags.bitfield.cpuavx512vl))
 	   && ((i.tm.base_opcode == 0x55
 		|| i.tm.base_opcode == 0x6655
@@ -3880,7 +3912,7 @@ optimize_encoding (void)
 	       -> VEX vpxor %xmmM, %xmmM, %xmmN (M and N < 16)
 	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
        */
-      if (i.tm.opcode_modifier.evex)
+      if (is_evex_encoding (&i.tm))
 	{
 	  /* If only lower 16 vector registers are used, we can use
 	     VEX encoding.  */
@@ -4122,7 +4154,8 @@ md_assemble (char *line)
       as_warn (_("translating to `%sp'"), i.tm.name);
     }
 
-  if (i.tm.opcode_modifier.vex || i.tm.opcode_modifier.evex)
+  if (i.tm.opcode_modifier.vex || i.tm.opcode_modifier.vexopcode
+      || is_evex_encoding (&i.tm))
     {
       if (flag_code == CODE_16BIT)
 	{
@@ -5144,7 +5177,7 @@ VEX_check_operands (const insn_template *t)
   if (i.vec_encoding == vex_encoding_evex)
     {
       /* This instruction must be encoded with EVEX prefix.  */
-      if (!t->opcode_modifier.evex)
+      if (!is_evex_encoding (t))
 	{
 	  i.error = unsupported;
 	  return 1;
@@ -6679,7 +6712,7 @@ build_modrm_byte (void)
 	    }
 	  break;
 	case 5:
-	  if (i.tm.opcode_modifier.evex)
+	  if (is_evex_encoding (&i.tm))
 	    {
 	      /* For EVEX instructions, when there are 5 operands, the
 		 first one must be immediate operand.  If the second one

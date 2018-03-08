@@ -547,11 +547,13 @@ enum
 	2: 128bit EVEX prefix.
 	3: 256bit EVEX prefix.
 	4: Length-ignored (LIG) EVEX prefix.
+	5: Length determined from actual operands.
    */
 #define EVEX512                1
 #define EVEX128                2
 #define EVEX256                3
 #define EVEXLIG                4
+#define EVEXDYN                5
   EVex,
 
   /* AVX512 masking support:

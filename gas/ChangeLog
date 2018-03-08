@@ -1,5 +1,13 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (is_evex_encoding): New.
+	(optimize_encoding, md_assemble, md_assemble,
+	VEX_check_operands, build_modrm_byte): Use is_evex_encoding.
+	(build_evex_prefix): Derive EVEX length field from actual
+	operands if the template allows multiple ones.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (build_modrm_byte): Make VexNDD handling cope
 	with 3rd (immediate) operand.
 
