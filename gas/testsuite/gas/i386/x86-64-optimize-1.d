@@ -50,4 +50,6 @@ Disassembly of section .text:
  +[a-f0-9]+:	b8 ff 03 00 00       	mov    \$0x3ff,%eax
  +[a-f0-9]+:	48 b8 00 00 00 00 01 00 00 00 	movabs \$0x100000000,%rax
  +[a-f0-9]+:	48 b8 00 00 00 00 01 00 00 00 	movabs \$0x100000000,%rax
+ +[a-f0-9]+:	31 c0                	xor    %eax,%eax
+ +[a-f0-9]+:	45 31 f6             	xor    %r14d,%r14d
 #pass

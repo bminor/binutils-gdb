@@ -1,5 +1,10 @@
 2018-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.tbl: Add Optimize to clr.
+	* i386-tbl.h: Regenerated.
+
+2018-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (opcode_modifiers): Remove OldGcc.
 	* i386-opc.h (OldGcc): Removed.
 	(i386_opcode_modifier): Remove oldgcc.

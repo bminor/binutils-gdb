@@ -45,3 +45,5 @@ _start:
 	movq	$1023,%rax
 	mov	$0x100000000,%rax
 	movq	$0x100000000,%rax
+	clrq	%rax
+	clrq	%r14

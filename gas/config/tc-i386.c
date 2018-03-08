@@ -3801,7 +3801,8 @@ optimize_encoding (void)
 	}
     }
   else if (flag_code == CODE_64BIT
-	   && ((i.reg_operands == 1
+	   && ((i.types[1].bitfield.qword
+		&& i.reg_operands == 1
 		&& i.imm_operands == 1
 		&& i.op[0].imms->X_op == O_constant
 		&& ((i.tm.base_opcode == 0xb0
@@ -3816,12 +3817,16 @@ optimize_encoding (void)
 			    || ((i.tm.base_opcode == 0xf6
 				 || i.tm.base_opcode == 0xc6)
 				&& i.tm.extension_opcode == 0x0)))))
-	       || (i.reg_operands == 2
-		   && i.op[0].regs == i.op[1].regs
-		   && ((i.tm.base_opcode == 0x30
-			|| i.tm.base_opcode == 0x28)
-		       && i.tm.extension_opcode == None)))
-	   && i.types[1].bitfield.qword)
+	       || (i.types[0].bitfield.qword
+		   && ((i.reg_operands == 2
+			&& i.op[0].regs == i.op[1].regs
+			&& ((i.tm.base_opcode == 0x30
+			     || i.tm.base_opcode == 0x28)
+			    && i.tm.extension_opcode == None))
+		       || (i.reg_operands == 1
+			   && i.operands == 1
+			   && i.tm.base_opcode == 0x30
+			   && i.tm.extension_opcode == None)))))
     {
       /* Optimize: -O:
 	   andq $imm31, %r64   -> andl $imm31, %r32
