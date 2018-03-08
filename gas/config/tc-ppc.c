@@ -6555,8 +6555,7 @@ ppc_handle_align (struct frag *fragP)
       md_number_to_chars (dest, 0x60000000, 4);
 
       if ((ppc_cpu & PPC_OPCODE_POWER6) != 0
-	  || (ppc_cpu & PPC_OPCODE_POWER7) != 0
-	  || (ppc_cpu & PPC_OPCODE_POWER8) != 0)
+	  && (ppc_cpu & PPC_OPCODE_POWER9) == 0)
 	{
 	  /* For power6, power7, and power8, we want the last nop to
 	     be a group terminating one.  Do this by inserting an
@@ -6576,8 +6575,7 @@ ppc_handle_align (struct frag *fragP)
 	      dest = group_nop->fr_literal;
 	    }
 
-	  if ((ppc_cpu & PPC_OPCODE_POWER7) != 0
-	      || (ppc_cpu & PPC_OPCODE_POWER8) != 0)
+	  if ((ppc_cpu & PPC_OPCODE_POWER7) != 0)
 	    {
 	      if (ppc_cpu & PPC_OPCODE_E500MC)
 		/* e500mc group terminating nop: "ori 0,0,0".  */
