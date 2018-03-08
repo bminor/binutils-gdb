@@ -1,5 +1,10 @@
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (ldmxcsr, stmxcsr): Add NoAVX.
+	* i386-tlb.h: Re-generate.
+
+2018-03-08  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (opcode_modifiers): Delete FloatD.
 	* i386-opc.h (FloatD): Delete.
 	(struct i386_opcode_modifier): Delete floatd.
