@@ -1,3 +1,7 @@
+2018-03-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.c (linux_qxfer_libraries_svr4): Use std::string.
+
 2018-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* server.c (handle_general_set): Remove unnecessary xstrdup.

@@ -6988,8 +6988,6 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 			    unsigned const char *writebuf,
 			    CORE_ADDR offset, int len)
 {
-  char *document;
-  unsigned document_len;
   struct process_info_private *const priv = current_process ()->priv;
   char filename[PATH_MAX];
   int pid, is_elf64;
@@ -7019,8 +7017,6 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
   unsigned int machine;
   int ptr_size;
   CORE_ADDR lm_addr = 0, lm_prev = 0;
-  int allocated = 1024;
-  char *p;
   CORE_ADDR l_name, l_addr, l_ld, l_next, l_prev;
   int header_done = 0;
 
@@ -7093,9 +7089,7 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 	}
     }
 
-  document = (char *) xmalloc (allocated);
-  strcpy (document, "<library-list-svr4 version=\"1.0\"");
-  p = document + strlen (document);
+  std::string document = "<library-list-svr4 version=\"1.0\"";
 
   while (lm_addr
 	 && read_one_ptr (lm_addr + lmo->l_name_offset,
@@ -7125,10 +7119,7 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 	 executable does not have PT_DYNAMIC present and this function already
 	 exited above due to failed get_r_debug.  */
       if (lm_prev == 0)
-	{
-	  sprintf (p, " main-lm=\"0x%lx\"", (unsigned long) lm_addr);
-	  p = p + strlen (p);
-	}
+	string_appendf (document, " main-lm=\"0x%lx\"", (unsigned long) lm_addr);
       else
 	{
 	  /* Not checking for error because reading may stop before
@@ -7138,31 +7129,19 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 	  libname[sizeof (libname) - 1] = '\0';
 	  if (libname[0] != '\0')
 	    {
-	      /* 6x the size for xml_escape_text below.  */
-	      size_t len = 6 * strlen ((char *) libname);
-
 	      if (!header_done)
 		{
 		  /* Terminate `<library-list-svr4'.  */
-		  *p++ = '>';
+		  document += '>';
 		  header_done = 1;
 		}
 
-	      while (allocated < p - document + len + 200)
-		{
-		  /* Expand to guarantee sufficient storage.  */
-		  uintptr_t document_len = p - document;
-
-		  document = (char *) xrealloc (document, 2 * allocated);
-		  allocated *= 2;
-		  p = document + document_len;
-		}
-
 	      std::string name = xml_escape_text ((char *) libname);
-	      p += sprintf (p, "<library name=\"%s\" lm=\"0x%lx\" "
-			    "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
-			    name.c_str (), (unsigned long) lm_addr,
-			    (unsigned long) l_addr, (unsigned long) l_ld);
+	      string_appendf (document,
+			      "<library name=\"%s\" lm=\"0x%lx\" "
+			      "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
+			      name.c_str (), (unsigned long) lm_addr,
+			      (unsigned long) l_addr, (unsigned long) l_ld);
 	    }
 	}
 
@@ -7173,12 +7152,12 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
   if (!header_done)
     {
       /* Empty list; terminate `<library-list-svr4'.  */
-      strcpy (p, "/>");
+      document += "/>";
     }
   else
-    strcpy (p, "</library-list-svr4>");
+    document += "</library-list-svr4>";
 
-  document_len = strlen (document);
+  int document_len = document.length ();
   if (offset < document_len)
     document_len -= offset;
   else
@@ -7186,8 +7165,7 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
   if (len > document_len)
     len = document_len;
 
-  memcpy (readbuf, document + offset, len);
-  xfree (document);
+  memcpy (readbuf, document.data () + offset, len);
 
   return len;
 }
