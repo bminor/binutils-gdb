@@ -5736,26 +5736,19 @@ process_suffix (void)
 		if (!i.tm.operand_types[op].bitfield.inoutportreg
 		    && !i.tm.operand_types[op].bitfield.shiftcount)
 		  {
-		    if (i.types[op].bitfield.reg && i.types[op].bitfield.byte)
-		      {
-			i.suffix = BYTE_MNEM_SUFFIX;
-			break;
-		      }
-		    if (i.types[op].bitfield.reg && i.types[op].bitfield.word)
-		      {
-			i.suffix = WORD_MNEM_SUFFIX;
-			break;
-		      }
-		    if (i.types[op].bitfield.reg && i.types[op].bitfield.dword)
-		      {
-			i.suffix = LONG_MNEM_SUFFIX;
-			break;
-		      }
-		    if (i.types[op].bitfield.reg && i.types[op].bitfield.qword)
-		      {
-			i.suffix = QWORD_MNEM_SUFFIX;
-			break;
-		      }
+		    if (!i.types[op].bitfield.reg)
+		      continue;
+		    if (i.types[op].bitfield.byte)
+		      i.suffix = BYTE_MNEM_SUFFIX;
+		    else if (i.types[op].bitfield.word)
+		      i.suffix = WORD_MNEM_SUFFIX;
+		    else if (i.types[op].bitfield.dword)
+		      i.suffix = LONG_MNEM_SUFFIX;
+		    else if (i.types[op].bitfield.qword)
+		      i.suffix = QWORD_MNEM_SUFFIX;
+		    else
+		      continue;
+		    break;
 		  }
 	    }
 	}
