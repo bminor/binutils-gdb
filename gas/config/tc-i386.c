@@ -262,7 +262,6 @@ enum i386_error
     number_of_operands_mismatch,
     invalid_instruction_suffix,
     bad_imm4,
-    old_gcc_only,
     unsupported_with_intel_mnemonic,
     unsupported_syntax,
     unsupported,
@@ -561,9 +560,6 @@ static int intel64;
 /* 1 for intel mnemonic,
    0 if att mnemonic.  */
 static int intel_mnemonic = !SYSV386_COMPAT;
-
-/* 1 if support old (<= 2.8.1) versions of gcc.  */
-static int old_gcc = OLDGCC_COMPAT;
 
 /* 1 if pseudo registers are permitted.  */
 static int allow_pseudo_reg = 0;
@@ -5280,11 +5276,6 @@ match_template (char mnem_suffix)
       if (!found_cpu_match)
 	continue;
 
-      /* Check old gcc support. */
-      i.error = old_gcc_only;
-      if (!old_gcc && t->opcode_modifier.oldgcc)
-	continue;
-
       /* Check AT&T mnemonic.   */
       i.error = unsupported_with_intel_mnemonic;
       if (intel_mnemonic && t->opcode_modifier.attmnemonic)
@@ -5582,9 +5573,6 @@ check_reverse:
 	  break;
 	case bad_imm4:
 	  err_msg = _("constant doesn't fit in 4 bits");
-	  break;
-	case old_gcc_only:
-	  err_msg = _("only supported with old gcc");
 	  break;
 	case unsupported_with_intel_mnemonic:
 	  err_msg = _("unsupported with Intel mnemonic");
@@ -10312,7 +10300,7 @@ const char *md_shortopts = "qnO::";
 #define OPTION_MSYNTAX (OPTION_MD_BASE + 6)
 #define OPTION_MINDEX_REG (OPTION_MD_BASE + 7)
 #define OPTION_MNAKED_REG (OPTION_MD_BASE + 8)
-#define OPTION_MOLD_GCC (OPTION_MD_BASE + 9)
+#define OPTION_MRELAX_RELOCATIONS (OPTION_MD_BASE + 9)
 #define OPTION_MSSE2AVX (OPTION_MD_BASE + 10)
 #define OPTION_MSSE_CHECK (OPTION_MD_BASE + 11)
 #define OPTION_MOPERAND_CHECK (OPTION_MD_BASE + 12)
@@ -10328,7 +10316,6 @@ const char *md_shortopts = "qnO::";
 #define OPTION_MAMD64 (OPTION_MD_BASE + 22)
 #define OPTION_MINTEL64 (OPTION_MD_BASE + 23)
 #define OPTION_MFENCE_AS_LOCK_ADD (OPTION_MD_BASE + 24)
-#define OPTION_MRELAX_RELOCATIONS (OPTION_MD_BASE + 25)
 
 struct option md_longopts[] =
 {
@@ -10348,7 +10335,6 @@ struct option md_longopts[] =
   {"msyntax", required_argument, NULL, OPTION_MSYNTAX},
   {"mindex-reg", no_argument, NULL, OPTION_MINDEX_REG},
   {"mnaked-reg", no_argument, NULL, OPTION_MNAKED_REG},
-  {"mold-gcc", no_argument, NULL, OPTION_MOLD_GCC},
   {"msse2avx", no_argument, NULL, OPTION_MSSE2AVX},
   {"msse-check", required_argument, NULL, OPTION_MSSE_CHECK},
   {"moperand-check", required_argument, NULL, OPTION_MOPERAND_CHECK},
@@ -10618,10 +10604,6 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_MNAKED_REG:
       allow_naked_reg = 1;
-      break;
-
-    case OPTION_MOLD_GCC:
-      old_gcc = 1;
       break;
 
     case OPTION_MSSE2AVX:
@@ -10933,8 +10915,6 @@ md_show_usage (FILE *stream)
   -mindex-reg             support pseudo index registers\n"));
   fprintf (stream, _("\
   -mnaked-reg             don't require `%%' prefix for registers\n"));
-  fprintf (stream, _("\
-  -mold-gcc               support old (<= 2.8.1) versions of gcc\n"));
   fprintf (stream, _("\
   -madd-bnd-prefix        add BND prefix for all valid branches\n"));
   fprintf (stream, _("\

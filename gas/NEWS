@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Remove -mold-gcc command-line option for x86 targets.
+
 * Add -O[2|s] command-line options to x86 assembler to enable alternate
   shorter instruction encoding.
 

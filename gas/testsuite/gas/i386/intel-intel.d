@@ -653,7 +653,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	de f9 +	fdivp  st\(1\),st
 [ 	]*[a-f0-9]+:	de fb +	fdivp  st\(3\),st
 [ 	]*[a-f0-9]+:	de fb +	fdivp  st\(3\),st
-[ 	]*[a-f0-9]+:	de fb +	fdivp  st\(3\),st
+[ 	]*[a-f0-9]+:	d8 f3 +	fdiv   st,st\(3\)
 [ 	]*[a-f0-9]+:	de f1 +	fdivrp st\(1\),st
 [ 	]*[a-f0-9]+:	d8 fb +	fdivr  st,st\(3\)
 [ 	]*[a-f0-9]+:	d8 fb +	fdivr  st,st\(3\)
@@ -663,7 +663,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	de f1 +	fdivrp st\(1\),st
 [ 	]*[a-f0-9]+:	de f3 +	fdivrp st\(3\),st
 [ 	]*[a-f0-9]+:	de f3 +	fdivrp st\(3\),st
-[ 	]*[a-f0-9]+:	de f3 +	fdivrp st\(3\),st
+[ 	]*[a-f0-9]+:	d8 fb +	fdivr  st,st\(3\)
 [ 	]*[a-f0-9]+:	de c9 +	fmulp  st\(1\),st
 [ 	]*[a-f0-9]+:	d8 cb +	fmul   st,st\(3\)
 [ 	]*[a-f0-9]+:	d8 cb +	fmul   st,st\(3\)
@@ -682,7 +682,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	dc 23 +	fsub   QWORD PTR \[ebx\]
 [ 	]*[a-f0-9]+:	de e9 +	fsubp  st\(1\),st
 [ 	]*[a-f0-9]+:	de eb +	fsubp  st\(3\),st
-[ 	]*[a-f0-9]+:	de eb +	fsubp  st\(3\),st
+[ 	]*[a-f0-9]+:	d8 e3 +	fsub   st,st\(3\)
 [ 	]*[a-f0-9]+:	de eb +	fsubp  st\(3\),st
 [ 	]*[a-f0-9]+:	d8 eb +	fsubr  st,st\(3\)
 [ 	]*[a-f0-9]+:	d8 eb +	fsubr  st,st\(3\)
@@ -692,7 +692,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	de e1 +	fsubrp st\(1\),st
 [ 	]*[a-f0-9]+:	de e3 +	fsubrp st\(3\),st
 [ 	]*[a-f0-9]+:	de e3 +	fsubrp st\(3\),st
-[ 	]*[a-f0-9]+:	de e3 +	fsubrp st\(3\),st
+[ 	]*[a-f0-9]+:	d8 eb +	fsubr  st,st\(3\)
 [ 	]*[a-f0-9]+:	de 3b +	fidivr WORD PTR \[ebx\]
 [ 	]*[a-f0-9]+:	da 3b +	fidivr DWORD PTR \[ebx\]
 [ 	]*[a-f0-9]+:	0f 4a 90 90 90 90 90 	cmovp  edx,DWORD PTR \[eax-0x6f6f6f70\]

@@ -631,8 +631,6 @@ fisub, 1, 0xde, 0x4, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, {
 fsubp, 2, 0xdee0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
 fsubp, 1, 0xdee0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg }
 fsubp, 0, 0xdee1, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { 0 }
-fsubp, 2, 0xdee0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|ATTSyntax|OldGcc, { FloatReg, FloatAcc }
-fsubp, 2, 0xdee9, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|OldGcc, { FloatReg, FloatAcc }
 fsubp, 2, 0xdee8, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm, { FloatAcc, FloatReg }
 fsubp, 1, 0xdee8, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm, { FloatReg }
 fsubp, 0, 0xdee9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
@@ -650,8 +648,6 @@ fisubr, 1, 0xde, 0x5, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, 
 fsubrp, 2, 0xdee8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
 fsubrp, 1, 0xdee8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg }
 fsubrp, 0, 0xdee9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { 0 }
-fsubrp, 2, 0xdee8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|ATTSyntax|OldGcc, { FloatReg, FloatAcc }
-fsubrp, 2, 0xdee0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|OldGcc, { FloatReg, FloatAcc }
 fsubrp, 2, 0xdee0, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm, { FloatAcc, FloatReg }
 fsubrp, 1, 0xdee0, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm, { FloatReg }
 fsubrp, 0, 0xdee1, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { 0 }
@@ -682,8 +678,6 @@ fidiv, 1, 0xde, 0x6, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, {
 fdivp, 2, 0xdef0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
 fdivp, 1, 0xdef0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg }
 fdivp, 0, 0xdef1, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { 0 }
-fdivp, 2, 0xdef0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|ATTSyntax|OldGcc, { FloatReg, FloatAcc }
-fdivp, 2, 0xdef8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|OldGcc, { FloatReg, FloatAcc }
 fdivp, 2, 0xdef8, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm, { FloatAcc, FloatReg }
 fdivp, 1, 0xdef8, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm, { FloatReg }
 fdivp, 0, 0xdef9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { 0 }
@@ -701,8 +695,6 @@ fidivr, 1, 0xde, 0x7, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, 
 fdivrp, 2, 0xdef8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
 fdivrp, 1, 0xdef8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg }
 fdivrp, 0, 0xdef9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { 0 }
-fdivrp, 2, 0xdef8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|ATTSyntax|OldGcc, { FloatReg, FloatAcc }
-fdivrp, 2, 0xdef0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|OldGcc, { FloatReg, FloatAcc }
 fdivrp, 2, 0xdef0, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm, { FloatAcc, FloatReg }
 fdivrp, 1, 0xdef0, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm, { FloatReg }
 fdivrp, 0, 0xdef1, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf,	{ 0 }

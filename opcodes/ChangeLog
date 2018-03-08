@@ -1,3 +1,12 @@
+2018-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Remove OldGcc.
+	* i386-opc.h (OldGcc): Removed.
+	(i386_opcode_modifier): Remove oldgcc.
+	* i386-opc.tbl: Remove fsubp, fsubrp, fdivp and fdivrp
+	instructions for old (<= 2.8.1) versions of gcc.
+	* i386-tbl.h: Regenerated.
+
 2018-03-08  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.h (EVEXDYN): New.

@@ -646,7 +646,6 @@ static bitfield opcode_modifiers[] =
   BITFIELD (NoDefMask),
   BITFIELD (ImplicitQuadGroup),
   BITFIELD (Optimize),
-  BITFIELD (OldGcc),
   BITFIELD (ATTMnemonic),
   BITFIELD (ATTSyntax),
   BITFIELD (IntelSyntax),

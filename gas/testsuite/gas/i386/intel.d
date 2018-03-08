@@ -652,7 +652,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	de f9                	fdivrp %st,%st\(1\)
 [ 	]*[a-f0-9]+:	de fb                	fdivrp %st,%st\(3\)
 [ 	]*[a-f0-9]+:	de fb                	fdivrp %st,%st\(3\)
-[ 	]*[a-f0-9]+:	de fb                	fdivrp %st,%st\(3\)
+[ 	]*[a-f0-9]+:	d8 f3                	fdiv   %st\(3\),%st
 [ 	]*[a-f0-9]+:	de f1                	fdivp  %st,%st\(1\)
 [ 	]*[a-f0-9]+:	d8 fb                	fdivr  %st\(3\),%st
 [ 	]*[a-f0-9]+:	d8 fb                	fdivr  %st\(3\),%st
@@ -662,7 +662,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	de f1                	fdivp  %st,%st\(1\)
 [ 	]*[a-f0-9]+:	de f3                	fdivp  %st,%st\(3\)
 [ 	]*[a-f0-9]+:	de f3                	fdivp  %st,%st\(3\)
-[ 	]*[a-f0-9]+:	de f3                	fdivp  %st,%st\(3\)
+[ 	]*[a-f0-9]+:	d8 fb                	fdivr  %st\(3\),%st
 [ 	]*[a-f0-9]+:	de c9                	fmulp  %st,%st\(1\)
 [ 	]*[a-f0-9]+:	d8 cb                	fmul   %st\(3\),%st
 [ 	]*[a-f0-9]+:	d8 cb                	fmul   %st\(3\),%st
@@ -681,7 +681,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	dc 23                	fsubl  \(%ebx\)
 [ 	]*[a-f0-9]+:	de e9                	fsubrp %st,%st\(1\)
 [ 	]*[a-f0-9]+:	de eb                	fsubrp %st,%st\(3\)
-[ 	]*[a-f0-9]+:	de eb                	fsubrp %st,%st\(3\)
+[ 	]*[a-f0-9]+:	d8 e3                	fsub   %st\(3\),%st
 [ 	]*[a-f0-9]+:	de eb                	fsubrp %st,%st\(3\)
 [ 	]*[a-f0-9]+:	d8 eb                	fsubr  %st\(3\),%st
 [ 	]*[a-f0-9]+:	d8 eb                	fsubr  %st\(3\),%st
@@ -691,7 +691,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	de e1                	fsubp  %st,%st\(1\)
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
-[ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
+[ 	]*[a-f0-9]+:	d8 eb                	fsubr  %st\(3\),%st
 [ 	]*[a-f0-9]+:	de 3b                	fidivrs \(%ebx\)
 [ 	]*[a-f0-9]+:	da 3b                	fidivrl \(%ebx\)
 [ 	]*[a-f0-9]+:	0f 4a 90 90 90 90 90 	cmovp  -0x6f6f6f70\(%eax\),%edx
