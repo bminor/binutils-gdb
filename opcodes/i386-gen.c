@@ -598,7 +598,6 @@ static bitfield opcode_modifiers[] =
   BITFIELD (JumpInterSegment),
   BITFIELD (FloatMF),
   BITFIELD (FloatR),
-  BITFIELD (FloatD),
   BITFIELD (Size16),
   BITFIELD (Size32),
   BITFIELD (Size64),

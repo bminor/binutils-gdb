@@ -604,7 +604,7 @@ fldz, 0, 0xd9ee, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSu
 // Arithmetic.
 
 // add
-fadd, 2, 0xd8c0, None, 2, CpuFP, ShortForm|FloatD|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
+fadd, 2, 0xd8c0, None, 2, CpuFP, ShortForm|D|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
 // alias for fadd %st(i), %st
 fadd, 1, 0xd8c0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
 // alias for faddp
@@ -620,11 +620,11 @@ faddp, 2, 0xdec0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_q
 
 // subtract
 fsub, 1, 0xd8e0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
-fsub, 2, 0xd8e0, None, 2, CpuFP, ShortForm|FloatD|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
+fsub, 2, 0xd8e0, None, 2, CpuFP, ShortForm|D|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
 // alias for fsubp
 fsub, 0, 0xdee1, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|ATTSyntax, { 0 }
 fsub, 0, 0xdee9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic, { 0 }
-fsub, 2, 0xd8e0, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm|FloatD|FloatR, { FloatReg, FloatAcc }
+fsub, 2, 0xd8e0, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm|D|FloatR, { FloatReg, FloatAcc }
 fsub, 1, 0xd8, 0x4, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex }
 fisub, 1, 0xde, 0x4, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 
@@ -639,11 +639,11 @@ fsubp, 0, 0xdee9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldS
 
 // subtract reverse
 fsubr, 1, 0xd8e8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
-fsubr, 2, 0xd8e8, None, 2, CpuFP, ShortForm|FloatD|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
+fsubr, 2, 0xd8e8, None, 2, CpuFP, ShortForm|D|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
 // alias for fsubrp
 fsubr, 0, 0xdee9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|ATTSyntax, { 0 }
 fsubr, 0, 0xdee1, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic, { 0 }
-fsubr, 2, 0xd8e8, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm|FloatD|FloatR, { FloatReg, FloatAcc }
+fsubr, 2, 0xd8e8, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm|D|FloatR, { FloatReg, FloatAcc }
 fsubr, 1, 0xd8, 0x5, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex }
 fisubr, 1, 0xde, 0x5, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 
@@ -657,7 +657,7 @@ fsubrp, 1, 0xdee0, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_q
 fsubrp, 0, 0xdee1, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { 0 }
 
 // multiply
-fmul, 2, 0xd8c8, None, 2, CpuFP, ShortForm|FloatD|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
+fmul, 2, 0xd8c8, None, 2, CpuFP, ShortForm|D|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
 fmul, 1, 0xd8c8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
 // alias for fmulp
 fmul, 0, 0xdec9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic, { 0 }
@@ -671,11 +671,11 @@ fmulp, 2, 0xdec8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_q
 
 // divide
 fdiv, 1, 0xd8f0, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
-fdiv, 2, 0xd8f0, None, 2, CpuFP, ShortForm|FloatD|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
+fdiv, 2, 0xd8f0, None, 2, CpuFP, ShortForm|D|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
 // alias for fdivp
 fdiv, 0, 0xdef1, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|ATTSyntax, { 0 }
 fdiv, 0, 0xdef9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic, { 0 }
-fdiv, 2, 0xd8f0, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm|FloatD|FloatR, { FloatReg, FloatAcc }
+fdiv, 2, 0xd8f0, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm|D|FloatR, { FloatReg, FloatAcc }
 fdiv, 1, 0xd8, 0x6, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex }
 fidiv, 1, 0xde, 0x6, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 
@@ -690,11 +690,11 @@ fdivp, 0, 0xdef9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qS
 
 // divide reverse
 fdivr, 1, 0xd8f8, None, 2, CpuFP, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
-fdivr, 2, 0xd8f8, None, 2, CpuFP, ShortForm|FloatD|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
+fdivr, 2, 0xd8f8, None, 2, CpuFP, ShortForm|D|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
 // alias for fdivrp
 fdivr, 0, 0xdef9, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic|ATTSyntax, { 0 }
 fdivr, 0, 0xdef1, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic, { 0 }
-fdivr, 2, 0xd8f8, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm|FloatD|FloatR, { FloatReg, FloatAcc }
+fdivr, 2, 0xd8f8, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm|D|FloatR, { FloatReg, FloatAcc }
 fdivr, 1, 0xd8, 0x7, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex }
 fidivr, 1, 0xde, 0x7, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 

@@ -2027,7 +2027,7 @@ operand_size_match (const insn_template *t)
 
   if (match)
     return match;
-  else if (!t->opcode_modifier.d && !t->opcode_modifier.floatd)
+  else if (!t->opcode_modifier.d)
     {
 mismatch:
       i.error = operand_size_mismatch;
@@ -5446,7 +5446,7 @@ match_template (char mnem_suffix)
 						   operand_types[1])))
 	    {
 	      /* Check if other direction is valid ...  */
-	      if (!t->opcode_modifier.d && !t->opcode_modifier.floatd)
+	      if (!t->opcode_modifier.d)
 		continue;
 
 check_reverse:
@@ -5464,14 +5464,14 @@ check_reverse:
 		  /* Does not match either direction.  */
 		  continue;
 		}
-	      /* found_reverse_match holds which of D or FloatDR
+	      /* found_reverse_match holds which of D or FloatR
 		 we've found.  */
-	      if (t->opcode_modifier.d)
-		found_reverse_match = Opcode_D;
-	      else if (t->opcode_modifier.floatd)
+	      if (!t->opcode_modifier.d)
+		found_reverse_match = 0;
+	      else if (operand_types[0].bitfield.tbyte)
 		found_reverse_match = Opcode_FloatD;
 	      else
-		found_reverse_match = 0;
+		found_reverse_match = Opcode_D;
 	      if (t->opcode_modifier.floatr)
 		found_reverse_match |= Opcode_FloatR;
 	    }

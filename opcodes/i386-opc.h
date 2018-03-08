@@ -398,8 +398,6 @@ enum
   FloatMF,
   /* src/dest swap for floats. */
   FloatR,
-  /* has float insn direction bit. */
-  FloatD,
   /* needs size prefix if in 32-bit mode */
   Size16,
   /* needs size prefix if in 16-bit mode */
@@ -633,7 +631,6 @@ typedef struct i386_opcode_modifier
   unsigned int jumpintersegment:1;
   unsigned int floatmf:1;
   unsigned int floatr:1;
-  unsigned int floatd:1;
   unsigned int size16:1;
   unsigned int size32:1;
   unsigned int size64:1;
