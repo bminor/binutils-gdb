@@ -8720,11 +8720,9 @@ putpkt_binary (const char *buf, int cnt)
 
 	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s", str.c_str ());
 
-	  if (str.length () > REMOTE_DEBUG_MAX_CHAR)
-	    {
-	      fprintf_unfiltered (gdb_stdlog, "[%zu bytes omitted]",
-				  str.length () - REMOTE_DEBUG_MAX_CHAR);
-	    }
+	  if (len > REMOTE_DEBUG_MAX_CHAR)
+	    fprintf_unfiltered (gdb_stdlog, "[%d bytes omitted]",
+				len - REMOTE_DEBUG_MAX_CHAR);
 
 	  fprintf_unfiltered (gdb_stdlog, "...");
 
@@ -9157,11 +9155,9 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 	      fprintf_unfiltered (gdb_stdlog, "Packet received: %s",
 				  str.c_str ());
 
-	      if (str.length () >  REMOTE_DEBUG_MAX_CHAR)
-		{
-		  fprintf_unfiltered (gdb_stdlog, "[%zu bytes omitted]",
-				      str.length () - REMOTE_DEBUG_MAX_CHAR);
-		}
+	      if (val > REMOTE_DEBUG_MAX_CHAR)
+		fprintf_unfiltered (gdb_stdlog, "[%d bytes omitted]",
+				    val - REMOTE_DEBUG_MAX_CHAR);
 
 	      fprintf_unfiltered (gdb_stdlog, "\n");
 	    }
