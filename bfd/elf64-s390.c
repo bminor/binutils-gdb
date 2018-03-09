@@ -2565,6 +2565,9 @@ elf_s390_relocate_section (bfd *output_bfd,
 	case R_390_32:
 	case R_390_64:
 
+	  if ((input_section->flags & SEC_ALLOC) == 0)
+	    break;
+
 	  if (h != NULL
 	      && s390_is_ifunc_symbol_p (h)
 	      && h->def_regular)
@@ -2626,9 +2629,6 @@ elf_s390_relocate_section (bfd *output_bfd,
 		  continue;
 		}
 	    }
-
-	  if ((input_section->flags & SEC_ALLOC) == 0)
-	    break;
 
 	  if ((bfd_link_pic (info)
 	       && (h == NULL

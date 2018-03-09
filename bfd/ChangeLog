@@ -1,3 +1,14 @@
+2018-03-09  Nick Clifton  <nickc@redhat.com>
+
+	* elf64-s390.c (elf_s390_relocate_section): Move check for
+	relocations against non-allocated sections to before the code that
+	handles ifunc relocations.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Treat
+	relocs against IFUNC symbols in non-allocated sections as relocs
+	against FUNC symbols.
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Likewise.
+
 2018-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22929

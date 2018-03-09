@@ -1,3 +1,12 @@
+2018-03-09  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-ifunc/ifuncmod5.s: New test.  Checks that targets
+	that support IFUNC symbols can handle relocations against those
+	symbols in NOTE sections.
+	* testsuite/ld-ifunc/ifuncmod5.d: New file:  Driver for the new
+	test.
+	* testsuite/ld-ifunc/ifunc.exp: Run the new test.
+
 2018-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22929

@@ -3001,7 +3001,13 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
 	  if ((input_section->flags & SEC_ALLOC) == 0
 	      || h->plt.offset == (bfd_vma) -1)
-	    abort ();
+	    {
+	      /* If this is a SHT_NOTE section without SHF_ALLOC, treat
+	         STT_GNU_IFUNC symbol as STT_FUNC.  */
+	      if (elf_section_type (input_section) == SHT_NOTE)
+		goto skip_ifunc;
+	      abort ();
+	    }
 
 	  plt_sec = htab->elf.splt;
 	  if (! plt_sec)
@@ -3105,6 +3111,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	    }
 	}
 
+    skip_ifunc:
       eh = (struct _bfd_sparc_elf_link_hash_entry *) h;
       resolved_to_zero = eh && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
 

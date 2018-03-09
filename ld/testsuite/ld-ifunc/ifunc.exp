@@ -47,6 +47,9 @@ if ![check_shared_lib_support] {
     return
 }
 
+# This test does not need a compiler...
+run_dump_test "ifuncmod5"
+
 # We need a working compiler.  (Strictly speaking this is
 # not true, we could use target specific assembler files).
 if { [which $CC] == 0 } {

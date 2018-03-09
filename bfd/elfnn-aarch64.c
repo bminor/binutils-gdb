@@ -5110,6 +5110,11 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
       if ((input_section->flags & SEC_ALLOC) == 0)
 	{
+	  /* If this is a SHT_NOTE section without SHF_ALLOC, treat
+	     STT_GNU_IFUNC symbol as STT_FUNC.  */
+	  if (elf_section_type (input_section) == SHT_NOTE)
+	    goto skip_ifunc;
+
 	  /* Dynamic relocs are not propagated for SEC_DEBUGGING
 	     sections because such sections are not SEC_ALLOC and
 	     thus ld.so will not process them.  */
@@ -5305,6 +5310,7 @@ bad_ifunc_reloc:
 	}
     }
 
+ skip_ifunc:
   resolved_to_zero = (h != NULL
 		      && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
 
