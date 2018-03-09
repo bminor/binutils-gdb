@@ -1007,9 +1007,6 @@ rs6000_aix_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 {
   struct bfd_section *ldinfo_sec;
   int ldinfo_size;
-  gdb_byte *ldinfo_buf;
-  struct cleanup *cleanup;
-  LONGEST result;
 
   ldinfo_sec = bfd_get_section_by_name (core_bfd, ".ldinfo");
   if (ldinfo_sec == NULL)
@@ -1017,19 +1014,15 @@ rs6000_aix_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 	   bfd_errmsg (bfd_get_error ()));
   ldinfo_size = bfd_get_section_size (ldinfo_sec);
 
-  ldinfo_buf = (gdb_byte *) xmalloc (ldinfo_size);
-  cleanup = make_cleanup (xfree, ldinfo_buf);
+  gdb::byte_vector ldinfo_buf (ldinfo_size);
 
   if (! bfd_get_section_contents (core_bfd, ldinfo_sec,
-				  ldinfo_buf, 0, ldinfo_size))
+				  ldinfo_buf.data (), 0, ldinfo_size))
     error (_("unable to read .ldinfo section from core file: %s"),
 	  bfd_errmsg (bfd_get_error ()));
 
-  result = rs6000_aix_ld_info_to_xml (gdbarch, ldinfo_buf, readbuf,
-				      offset, len, 0);
-
-  do_cleanups (cleanup);
-  return result;
+  return rs6000_aix_ld_info_to_xml (gdbarch, ldinfo_buf.data (), readbuf,
+				    offset, len, 0);
 }
 
 static void

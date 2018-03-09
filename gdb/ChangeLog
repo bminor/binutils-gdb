@@ -1,3 +1,9 @@
+2018-03-12  Tom Tromey  <tom@tromey.com>
+
+	* rs6000-aix-tdep.c (rs6000_aix_core_xfer_shared_libraries_aix):
+	Use gdb::byte_vector.
+	* arm-tdep.c (arm_exidx_new_objfile): Use gdb::byte_vector.
+
 2018-03-12  Yao Qi  <yao.qi@linaro.org>
 
 	* ia64-libunwind-tdep.c (libunwind_get_reg_special): Change
