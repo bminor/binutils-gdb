@@ -1,5 +1,12 @@
 2018-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (optimize_encoding): Encode EVEX instructions
+	with VEX128 if EVEX encoding isn't required.
+	* testsuite/gas/i386/optimize-1.d: Updated.
+	* testsuite/gas/i386/x86-64-optimize-2.d: Likewise.
+
+2018-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (check_VecOperations): Strip whitespace.
 	* testsuite/gas/i386/optimize-1.s: Add whitespaces before
 	{%k7} and {z},

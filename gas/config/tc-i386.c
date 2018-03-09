@@ -3875,7 +3875,8 @@ optimize_encoding (void)
 	       || (!i.mask
 		   && !i.rounding
 		   && is_evex_encoding (&i.tm)
-		   && (i.tm.cpu_flags.bitfield.cpuavx512vl
+		   && (i.vec_encoding != vex_encoding_evex
+		       || i.tm.cpu_flags.bitfield.cpuavx512vl
 		       || cpu_arch_isa_flags.bitfield.cpuavx512vl)))
 	   && ((i.tm.base_opcode == 0x55
 		|| i.tm.base_opcode == 0x6655
