@@ -8524,6 +8524,12 @@ check_VecOperations (char *op_string, char *op_end)
 	      return NULL;
 	    }
 	  op_string++;
+
+	  /* Strip whitespace since the addition of pseudo prefixes
+	     changed how the scrubber treats '{'.  */
+	  if (is_space_char (*op_string))
+	    ++op_string;
+
 	  continue;
 	}
     unknown_vec_op:

@@ -4,7 +4,7 @@
 	.text
 _start:
 	vandnpd %zmm1, %zmm1, %zmm5{%k7}
-	vandnpd %ymm1, %ymm1, %ymm5{z}{%k7}
+	vandnpd %ymm1, %ymm1, %ymm5	 {%k7}		{z}
 	vandnpd %zmm1, %zmm1, %zmm5
 	vandnpd %ymm1, %ymm1, %ymm5
 
