@@ -1386,6 +1386,42 @@ This GDB was configured as follows:\n\
              --without-lzma\n\
 "));
 #endif
+#if HAVE_LIBBABELTRACE
+    fprintf_filtered (stream, _("\
+             --with-babeltrace\n\
+"));
+#else
+    fprintf_filtered (stream, _("\
+             --without-babeltrace\n\
+"));
+#endif
+#if HAVE_LIBIPT
+    fprintf_filtered (stream, _("\
+             --with-intel-pt\n\
+"));
+#else
+    fprintf_filtered (stream, _("\
+             --without-intel-pt\n\
+"));
+#endif
+#if HAVE_LIBMCHECK
+    fprintf_filtered (stream, _("\
+             --enable-libmcheck\n\
+"));
+#else
+    fprintf_filtered (stream, _("\
+             --disable-libmcheck\n\
+"));
+#endif
+#if HAVE_LIBMPFR
+    fprintf_filtered (stream, _("\
+             --with-mpfr\n\
+"));
+#else
+    fprintf_filtered (stream, _("\
+             --without-mpfr\n\
+"));
+#endif
 #ifdef WITH_PYTHON_PATH
   fprintf_filtered (stream, _("\
              --with-python=%s%s\n\
@@ -1417,15 +1453,6 @@ This GDB was configured as follows:\n\
     fprintf_filtered (stream, _("\
              --with-system-gdbinit=%s%s\n\
 "), SYSTEM_GDBINIT, SYSTEM_GDBINIT_RELOCATABLE ? " (relocatable)" : "");
-#if HAVE_LIBBABELTRACE
-    fprintf_filtered (stream, _("\
-             --with-babeltrace\n\
-"));
-#else
-    fprintf_filtered (stream, _("\
-             --without-babeltrace\n\
-"));
-#endif
     /* We assume "relocatable" will be printed at least once, thus we always
        print this text.  It's a reasonably safe assumption for now.  */
     fprintf_filtered (stream, _("\n\

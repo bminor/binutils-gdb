@@ -1,3 +1,8 @@
+2018-03-09  Eli Zaretskii  <eliz@gnu.org>
+
+	* top.c (print_gdb_configuration): Reflect LIBIPT, LIBMEMCHECK,
+	and LIBMPFR in the printed configuration.
+
 2018-03-08  Tom Tromey  <tom@tromey.com>
 
 	* source.c (get_filename_and_charpos): Use scoped_fd.
