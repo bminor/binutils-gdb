@@ -1,3 +1,9 @@
+2018-03-15  Andreas Schwab  <schwab@suse.de>
+
+	PR ld/22949
+	* emultempl/riscvelf.em (riscv_elf_before_allocation): Don't
+	enable relaxation in relocatable link.
+
 2018-03-15  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* emultempl/nds32elf.em (nds32_elf_after_allocation): Remove

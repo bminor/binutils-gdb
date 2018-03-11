@@ -33,11 +33,14 @@ riscv_elf_before_allocation (void)
   if (link_info.discard == discard_sec_merge)
     link_info.discard = discard_l;
 
-  /* We always need at least some relaxation to handle code alignment.  */
-  if (RELAXATION_DISABLED_BY_USER)
-    TARGET_ENABLE_RELAXATION;
-  else
-    ENABLE_RELAXATION;
+  if (!bfd_link_relocatable (&link_info))
+    {
+      /* We always need at least some relaxation to handle code alignment.  */
+      if (RELAXATION_DISABLED_BY_USER)
+	TARGET_ENABLE_RELAXATION;
+      else
+	ENABLE_RELAXATION;
+    }
 
   link_info.relax_pass = 3;
 }
