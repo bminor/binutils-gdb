@@ -1,5 +1,21 @@
 2018-03-11  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (struct nextfield): Add initializers.
+	(struct nextfnfield): Remove.
+	(struct fnfieldlist): Add initializers.  Remove "length" and
+	"head", use std::vector.
+	(struct decl_field_list): Remove.
+	(struct field_info): Add initializers.
+	<fields, baseclasses>: Now std::vector.
+	<nbaseclasses, nfnfields, typedef_field_list_count,
+	nested_types_list_count>: Remove.
+	(dwarf2_add_field, dwarf2_add_type_defn)
+	(dwarf2_attach_fields_to_type, dwarf2_add_member_fn)
+	(dwarf2_attach_fn_fields_to_type, handle_struct_member_die)
+	(process_structure_scope): Update.
+
+2018-03-11  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (sort_tu_by_abbrev_offset): Change to be suitable
 	for use by std::sort.
 	(build_type_psymtabs_1): Use std::vector.

@@ -1725,31 +1725,17 @@ struct variant_field
 
 struct nextfield
 {
-  struct nextfield *next;
-  int accessibility;
-  int virtuality;
+  int accessibility = 0;
+  int virtuality = 0;
   /* Extra information to describe a variant or variant part.  */
-  struct variant_field variant;
-  struct field field;
-};
-
-struct nextfnfield
-{
-  struct nextfnfield *next;
-  struct fn_field fnfield;
+  struct variant_field variant {};
+  struct field field {};
 };
 
 struct fnfieldlist
 {
-  const char *name;
-  int length;
-  struct nextfnfield *head;
-};
-
-struct decl_field_list
-{
-  struct decl_field field;
-  struct decl_field_list *next;
+  const char *name = nullptr;
+  std::vector<struct fn_field> fnfields;
 };
 
 /* The routines that read and process dies for a C struct or C++ class
@@ -1758,34 +1744,27 @@ struct decl_field_list
 struct field_info
   {
     /* List of data member and baseclasses fields.  */
-    struct nextfield *fields, *baseclasses;
+    std::vector<struct nextfield> fields;
+    std::vector<struct nextfield> baseclasses;
 
     /* Number of fields (including baseclasses).  */
-    int nfields;
-
-    /* Number of baseclasses.  */
-    int nbaseclasses;
+    int nfields = 0;
 
     /* Set if the accesibility of one of the fields is not public.  */
-    int non_public_fields;
+    int non_public_fields = 0;
 
     /* Member function fieldlist array, contains name of possibly overloaded
        member function, number of overloaded member functions and a pointer
        to the head of the member function field chain.  */
-    struct fnfieldlist *fnfieldlists;
-
-    /* Number of entries in the fnfieldlists array.  */
-    int nfnfields;
+    std::vector<struct fnfieldlist> fnfieldlists;
 
     /* typedefs defined inside this class.  TYPEDEF_FIELD_LIST contains head of
        a NULL terminated list of TYPEDEF_FIELD_LIST_COUNT elements.  */
-    struct decl_field_list *typedef_field_list;
-    unsigned typedef_field_list_count;
+    std::vector<struct decl_field> typedef_field_list;
 
     /* Nested types defined by this class and the number of elements in this
        list.  */
-    struct decl_field_list *nested_types_list;
-    unsigned nested_types_list_count;
+    std::vector<struct decl_field> nested_types_list;
   };
 
 /* One item on the queue of compilation units to read in full symbols
@@ -15480,21 +15459,17 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
   struct field *fp;
   const char *fieldname = "";
 
-  /* Allocate a new field list entry and link it in.  */
-  new_field = XNEW (struct nextfield);
-  make_cleanup (xfree, new_field);
-  memset (new_field, 0, sizeof (struct nextfield));
-
   if (die->tag == DW_TAG_inheritance)
     {
-      new_field->next = fip->baseclasses;
-      fip->baseclasses = new_field;
+      fip->baseclasses.emplace_back ();
+      new_field = &fip->baseclasses.back ();
     }
   else
     {
-      new_field->next = fip->fields;
-      fip->fields = new_field;
+      fip->fields.emplace_back ();
+      new_field = &fip->fields.back ();
     }
+
   fip->nfields++;
 
   attr = dwarf2_attr (die, DW_AT_accessibility, cu);
@@ -15654,7 +15629,6 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       FIELD_BITSIZE (*fp) = 0;
       FIELD_TYPE (*fp) = die_type (die, cu);
       FIELD_NAME (*fp) = type_name_no_tag (fp->type);
-      fip->nbaseclasses++;
     }
   else if (die->tag == DW_TAG_variant_part)
     {
@@ -15697,20 +15671,14 @@ static void
 dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
 		      struct dwarf2_cu *cu)
 {
-  struct decl_field_list *new_field;
-  struct decl_field *fp;
-
-  /* Allocate a new field list entry and link it in.  */
-  new_field = XCNEW (struct decl_field_list);
-  make_cleanup (xfree, new_field);
+  struct decl_field fp;
+  memset (&fp, 0, sizeof (fp));
 
   gdb_assert (type_can_define_types (die));
 
-  fp = &new_field->field;
-
   /* Get name of field.  NULL is okay here, meaning an anonymous type.  */
-  fp->name = dwarf2_name (die, cu);
-  fp->type = read_type_die (die, cu);
+  fp.name = dwarf2_name (die, cu);
+  fp.type = read_type_die (die, cu);
 
   /* Save accessibility.  */
   enum dwarf_access_attribute accessibility;
@@ -15725,10 +15693,10 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
       /* The assumed value if neither private nor protected.  */
       break;
     case DW_ACCESS_private:
-      fp->is_private = 1;
+      fp.is_private = 1;
       break;
     case DW_ACCESS_protected:
-      fp->is_protected = 1;
+      fp.is_protected = 1;
       break;
     default:
       complaint (&symfile_complaints,
@@ -15736,17 +15704,9 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
     }
 
   if (die->tag == DW_TAG_typedef)
-    {
-      new_field->next = fip->typedef_field_list;
-      fip->typedef_field_list = new_field;
-      fip->typedef_field_list_count++;
-    }
+    fip->typedef_field_list.push_back (fp);
   else
-    {
-      new_field->next = fip->nested_types_list;
-      fip->nested_types_list = new_field;
-      fip->nested_types_list_count++;
-    }
+    fip->nested_types_list.push_back (fp);
 }
 
 /* Create the vector of fields, and attach it to the type.  */
@@ -15761,8 +15721,7 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
      and create blank accessibility bitfields if necessary.  */
   TYPE_NFIELDS (type) = nfields;
   TYPE_FIELDS (type) = (struct field *)
-    TYPE_ALLOC (type, sizeof (struct field) * nfields);
-  memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nfields);
+    TYPE_ZALLOC (type, sizeof (struct field) * nfields);
 
   if (fip->non_public_fields && cu->language != language_ada)
     {
@@ -15783,68 +15742,53 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 
   /* If the type has baseclasses, allocate and clear a bit vector for
      TYPE_FIELD_VIRTUAL_BITS.  */
-  if (fip->nbaseclasses && cu->language != language_ada)
+  if (!fip->baseclasses.empty () && cu->language != language_ada)
     {
-      int num_bytes = B_BYTES (fip->nbaseclasses);
+      int num_bytes = B_BYTES (fip->baseclasses.size ());
       unsigned char *pointer;
 
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
       pointer = (unsigned char *) TYPE_ALLOC (type, num_bytes);
       TYPE_FIELD_VIRTUAL_BITS (type) = pointer;
-      B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), fip->nbaseclasses);
-      TYPE_N_BASECLASSES (type) = fip->nbaseclasses;
+      B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), fip->baseclasses.size ());
+      TYPE_N_BASECLASSES (type) = fip->baseclasses.size ();
     }
 
   if (TYPE_FLAG_DISCRIMINATED_UNION (type))
     {
       struct discriminant_info *di = alloc_discriminant_info (type, -1, -1);
 
-      int index = nfields - 1;
-      struct nextfield *field = fip->fields;
-
-      while (index >= 0)
+      for (int index = 0; index < nfields; ++index)
 	{
-	  if (field->variant.is_discriminant)
+	  struct nextfield &field = fip->fields[index];
+
+	  if (field.variant.is_discriminant)
 	    di->discriminant_index = index;
-	  else if (field->variant.default_branch)
+	  else if (field.variant.default_branch)
 	    di->default_index = index;
 	  else
-	    di->discriminants[index] = field->variant.discriminant_value;
-
-	  --index;
-	  field = field->next;
+	    di->discriminants[index] = field.variant.discriminant_value;
 	}
     }
 
-  /* Copy the saved-up fields into the field vector.  Start from the head of
-     the list, adding to the tail of the field array, so that they end up in
-     the same order in the array in which they were added to the list.  */
-  while (nfields-- > 0)
+  /* Copy the saved-up fields into the field vector.  */
+  for (int i = 0; i < nfields; ++i)
     {
-      struct nextfield *fieldp;
+      struct nextfield &field
+	= ((i < fip->baseclasses.size ()) ? fip->baseclasses[i]
+	   : fip->fields[i - fip->baseclasses.size ()]);
 
-      if (fip->fields)
-	{
-	  fieldp = fip->fields;
-	  fip->fields = fieldp->next;
-	}
-      else
-	{
-	  fieldp = fip->baseclasses;
-	  fip->baseclasses = fieldp->next;
-	}
-
-      TYPE_FIELD (type, nfields) = fieldp->field;
-      switch (fieldp->accessibility)
+      TYPE_FIELD (type, i) = field.field;
+      switch (field.accessibility)
 	{
 	case DW_ACCESS_private:
 	  if (cu->language != language_ada)
-	    SET_TYPE_FIELD_PRIVATE (type, nfields);
+	    SET_TYPE_FIELD_PRIVATE (type, i);
 	  break;
 
 	case DW_ACCESS_protected:
 	  if (cu->language != language_ada)
-	    SET_TYPE_FIELD_PROTECTED (type, nfields);
+	    SET_TYPE_FIELD_PROTECTED (type, i);
 	  break;
 
 	case DW_ACCESS_public:
@@ -15854,19 +15798,19 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	  /* Unknown accessibility.  Complain and treat it as public.  */
 	  {
 	    complaint (&symfile_complaints, _("unsupported accessibility %d"),
-		       fieldp->accessibility);
+		       field.accessibility);
 	  }
 	  break;
 	}
-      if (nfields < fip->nbaseclasses)
+      if (i < fip->baseclasses.size ())
 	{
-	  switch (fieldp->virtuality)
+	  switch (field.virtuality)
 	    {
 	    case DW_VIRTUALITY_virtual:
 	    case DW_VIRTUALITY_pure_virtual:
 	      if (cu->language == language_ada)
 		error (_("unexpected virtuality in component of Ada type"));
-	      SET_TYPE_FIELD_VIRTUAL (type, nfields);
+	      SET_TYPE_FIELD_VIRTUAL (type, i);
 	      break;
 	    }
 	}
@@ -15909,11 +15853,10 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 {
   struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
   struct attribute *attr;
-  struct fnfieldlist *flp;
   int i;
+  struct fnfieldlist *flp = nullptr;
   struct fn_field *fnp;
   const char *fieldname;
-  struct nextfnfield *new_fnfield;
   struct type *this_type;
   enum dwarf_access_attribute accessibility;
 
@@ -15926,51 +15869,33 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
     return;
 
   /* Look up member function name in fieldlist.  */
-  for (i = 0; i < fip->nfnfields; i++)
+  for (i = 0; i < fip->fnfieldlists.size (); i++)
     {
       if (strcmp (fip->fnfieldlists[i].name, fieldname) == 0)
-	break;
-    }
-
-  /* Create new list element if necessary.  */
-  if (i < fip->nfnfields)
-    flp = &fip->fnfieldlists[i];
-  else
-    {
-      if ((fip->nfnfields % DW_FIELD_ALLOC_CHUNK) == 0)
 	{
-	  fip->fnfieldlists = (struct fnfieldlist *)
-	    xrealloc (fip->fnfieldlists,
-		      (fip->nfnfields + DW_FIELD_ALLOC_CHUNK)
-		      * sizeof (struct fnfieldlist));
-	  if (fip->nfnfields == 0)
-	    make_cleanup (free_current_contents, &fip->fnfieldlists);
+	  flp = &fip->fnfieldlists[i];
+	  break;
 	}
-      flp = &fip->fnfieldlists[fip->nfnfields];
-      flp->name = fieldname;
-      flp->length = 0;
-      flp->head = NULL;
-      i = fip->nfnfields++;
     }
 
-  /* Create a new member function field and chain it to the field list
-     entry.  */
-  new_fnfield = XNEW (struct nextfnfield);
-  make_cleanup (xfree, new_fnfield);
-  memset (new_fnfield, 0, sizeof (struct nextfnfield));
-  new_fnfield->next = flp->head;
-  flp->head = new_fnfield;
-  flp->length++;
+  /* Create a new fnfieldlist if necessary.  */
+  if (flp == nullptr)
+    {
+      fip->fnfieldlists.emplace_back ();
+      flp = &fip->fnfieldlists.back ();
+      flp->name = fieldname;
+      i = fip->fnfieldlists.size () - 1;
+    }
 
-  /* Fill in the member function field info.  */
-  fnp = &new_fnfield->fnfield;
+  /* Create a new member function field and add it to the vector of
+     fnfieldlists.  */
+  flp->fnfields.emplace_back ();
+  fnp = &flp->fnfields.back ();
 
   /* Delay processing of the physname until later.  */
   if (cu->language == language_cplus)
-    {
-      add_to_method_list (type, i, flp->length - 1, fieldname,
-			  die, cu);
-    }
+    add_to_method_list (type, i, flp->fnfields.size () - 1, fieldname,
+			die, cu);
   else
     {
       const char *physname = dwarf2_physname (fieldname, die, cu);
@@ -16117,31 +16042,29 @@ static void
 dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
 				 struct dwarf2_cu *cu)
 {
-  struct fnfieldlist *flp;
-  int i;
-
   if (cu->language == language_ada)
     error (_("unexpected member functions in Ada type"));
 
   ALLOCATE_CPLUS_STRUCT_TYPE (type);
   TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
-    TYPE_ALLOC (type, sizeof (struct fn_fieldlist) * fip->nfnfields);
+    TYPE_ALLOC (type,
+		sizeof (struct fn_fieldlist) * fip->fnfieldlists.size ());
 
-  for (i = 0, flp = fip->fnfieldlists; i < fip->nfnfields; i++, flp++)
+  for (int i = 0; i < fip->fnfieldlists.size (); i++)
     {
-      struct nextfnfield *nfp = flp->head;
+      struct fnfieldlist &nf = fip->fnfieldlists[i];
       struct fn_fieldlist *fn_flp = &TYPE_FN_FIELDLIST (type, i);
-      int k;
 
-      TYPE_FN_FIELDLIST_NAME (type, i) = flp->name;
-      TYPE_FN_FIELDLIST_LENGTH (type, i) = flp->length;
+      TYPE_FN_FIELDLIST_NAME (type, i) = nf.name;
+      TYPE_FN_FIELDLIST_LENGTH (type, i) = nf.fnfields.size ();
       fn_flp->fn_fields = (struct fn_field *)
-	TYPE_ALLOC (type, sizeof (struct fn_field) * flp->length);
-      for (k = flp->length; (k--, nfp); nfp = nfp->next)
-	fn_flp->fn_fields[k] = nfp->fnfield;
+	TYPE_ALLOC (type, sizeof (struct fn_field) * nf.fnfields.size ());
+
+      for (int k = 0; k < nf.fnfields.size (); ++k)
+	fn_flp->fn_fields[k] = nf.fnfields[k];
     }
 
-  TYPE_NFN_FIELDS (type) = fip->nfnfields;
+  TYPE_NFN_FIELDS (type) = fip->fnfieldlists.size ();
 }
 
 /* Returns non-zero if NAME is the name of a vtable member in CU's
@@ -16419,11 +16342,11 @@ handle_struct_member_die (struct die_info *child_die, struct type *type,
 
       /* The first field was just added, so we can stash the
 	 discriminant there.  */
-      gdb_assert (fi->fields != NULL);
+      gdb_assert (!fi->fields.empty ());
       if (discr == NULL)
-	fi->fields->variant.default_branch = true;
+	fi->fields.back ().variant.default_branch = true;
       else
-	fi->fields->variant.discriminant_value = DW_UNSND (discr);
+	fi->fields.back ().variant.discriminant_value = DW_UNSND (discr);
     }
 }
 
@@ -16478,9 +16401,6 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct field_info fi;
       std::vector<struct symbol *> template_args;
-      struct cleanup *back_to = make_cleanup (null_cleanup, 0);
-
-      memset (&fi, 0, sizeof (struct field_info));
 
       child_die = die->child;
 
@@ -16489,7 +16409,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  handle_struct_member_die (child_die, type, &fi, &template_args, cu);
 
 	  if (is_variant_part && discr_offset == child_die->sect_off)
-	    fi.fields->variant.is_discriminant = true;
+	    fi.fields.back ().variant.is_discriminant = true;
 
 	  child_die = sibling_die (child_die);
 	}
@@ -16512,7 +16432,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
       /* Attach fields and member functions to the type.  */
       if (fi.nfields)
 	dwarf2_attach_fields_to_type (&fi, type, cu);
-      if (fi.nfnfields)
+      if (!fi.fnfieldlists.empty ())
 	{
 	  dwarf2_attach_fn_fields_to_type (&fi, type, cu);
 
@@ -16582,53 +16502,36 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       /* Copy fi.typedef_field_list linked list elements content into the
 	 allocated array TYPE_TYPEDEF_FIELD_ARRAY (type).  */
-      if (fi.typedef_field_list)
+      if (!fi.typedef_field_list.empty ())
 	{
-	  int i = fi.typedef_field_list_count;
+	  int count = fi.typedef_field_list.size ();
 
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
 	  TYPE_TYPEDEF_FIELD_ARRAY (type)
 	    = ((struct decl_field *)
-	       TYPE_ALLOC (type, sizeof (TYPE_TYPEDEF_FIELD (type, 0)) * i));
-	  TYPE_TYPEDEF_FIELD_COUNT (type) = i;
+	       TYPE_ALLOC (type,
+			   sizeof (TYPE_TYPEDEF_FIELD (type, 0)) * count));
+	  TYPE_TYPEDEF_FIELD_COUNT (type) = count;
 
-	  /* Reverse the list order to keep the debug info elements order.  */
-	  while (--i >= 0)
-	    {
-	      struct decl_field *dest, *src;
-
-	      dest = &TYPE_TYPEDEF_FIELD (type, i);
-	      src = &fi.typedef_field_list->field;
-	      fi.typedef_field_list = fi.typedef_field_list->next;
-	      *dest = *src;
-	    }
+	  for (int i = 0; i < fi.typedef_field_list.size (); ++i)
+	    TYPE_TYPEDEF_FIELD (type, i) = fi.typedef_field_list[i];
 	}
 
       /* Copy fi.nested_types_list linked list elements content into the
 	 allocated array TYPE_NESTED_TYPES_ARRAY (type).  */
-      if (fi.nested_types_list != NULL && cu->language != language_ada)
+      if (!fi.nested_types_list.empty () && cu->language != language_ada)
 	{
-	  int i = fi.nested_types_list_count;
+	  int count = fi.nested_types_list.size ();
 
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
 	  TYPE_NESTED_TYPES_ARRAY (type)
 	    = ((struct decl_field *)
-	       TYPE_ALLOC (type, sizeof (struct decl_field) * i));
-	  TYPE_NESTED_TYPES_COUNT (type) = i;
+	       TYPE_ALLOC (type, sizeof (struct decl_field) * count));
+	  TYPE_NESTED_TYPES_COUNT (type) = count;
 
-	  /* Reverse the list order to keep the debug info elements order.  */
-	  while (--i >= 0)
-	    {
-	      struct decl_field *dest, *src;
-
-	      dest = &TYPE_NESTED_TYPES_FIELD (type, i);
-	      src = &fi.nested_types_list->field;
-	      fi.nested_types_list = fi.nested_types_list->next;
-	      *dest = *src;
-	    }
+	  for (int i = 0; i < fi.nested_types_list.size (); ++i)
+	    TYPE_NESTED_TYPES_FIELD (type, i) = fi.nested_types_list[i];
 	}
-
-      do_cleanups (back_to);
     }
 
   quirk_gcc_member_function_pointer (type, objfile);
