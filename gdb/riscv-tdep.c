@@ -446,7 +446,7 @@ riscv_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     case 4:
       return ebreak;
     default:
-      gdb_assert_not_reached ("unhandled breakpoint kind");
+      gdb_assert_not_reached (_("unhandled breakpoint kind"));
     }
 }
 
@@ -481,7 +481,8 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
     {
       static char buf[20];
 
-      sprintf (buf, "csr%d", regnum - RISCV_FIRST_CSR_REGNUM);
+      xsnprintf (buf, sizeof (buf), "csr%d",
+		 regnum - RISCV_FIRST_CSR_REGNUM);
       return buf;
     }
 
@@ -1049,12 +1050,10 @@ riscv_insn::fetch_instruction (struct gdbarch *gdbarch,
 
   /* If we need more, grab it now.  */
   instlen = riscv_insn_length (buf[0]);
+  gdb_assert (instlen <= sizeof (buf));
   *len = instlen;
-  if (instlen > sizeof (buf))
-    internal_error (__FILE__, __LINE__,
-		    _("%s: riscv_insn_length returned %i"),
-		    __func__, instlen);
-  else if (instlen > 2)
+
+  if (instlen > 2)
     {
       status = target_read_memory (addr + 2, buf + 2, instlen - 2);
       if (status)
@@ -2009,7 +2008,7 @@ riscv_print_arg_location (ui_file *stream, struct gdbarch *gdbarch,
       break;
 
     default:
-      error ("unknown argument location type");
+      gdb_assert_not_reached (_("unknown argument location type"));
     }
 }
 
@@ -2149,7 +2148,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	  break;
 
 	default:
-	  error ("unknown argument location type");
+	  gdb_assert_not_reached (_("unknown argument location type"));
 	}
 
       if (second_arg_length > 0)

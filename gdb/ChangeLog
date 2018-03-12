@@ -1,3 +1,14 @@
+2018-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_sw_breakpoint_from_kind): Add localization
+	to error message string.
+	(riscv_register_name): Use xsnprintf instead of sprintf.
+	(riscv_insn::fetch_instruction): Use gdb_assert instead of
+	internal_error.
+	(riscv_print_arg_location): Use gdb_assert_not_reached instead of
+	error.
+	(riscv_push_dummy_call): Likewise.
+
 2018-03-12  Tom Tromey  <tom@tromey.com>
 
 	* rs6000-aix-tdep.c (rs6000_aix_core_xfer_shared_libraries_aix):
