@@ -1,3 +1,10 @@
+2018-03-12  Yao Qi  <yao.qi@linaro.org>
+
+	* ia64-libunwind-tdep.c (libunwind_get_reg_special): Change
+	parameter type to readable_regcache.
+	* ia64-libunwind-tdep.h (libunwind_get_reg_special): Update
+	the declaration.
+
 2018-03-11  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (struct nextfield): Add initializers.
