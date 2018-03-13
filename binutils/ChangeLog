@@ -1,5 +1,11 @@
 2018-03-13  Nick Clifton  <nickc@redhat.com>
 
+	PR 22957
+	* stabs.c (pop_binincl): Fail if the file index is off the end of
+	the stack.
+
+2018-03-13  Nick Clifton  <nickc@redhat.com>
+
 	PR 22955
 	* stabs.c (parse_number): Add p_end parameter and use it to check
 	the validity of the pp parameter.  Add checks to prevent walking
@@ -19,6 +25,7 @@
 	(parse_stab_members): Likewise.
 	(parse_stab_tilde_field): Likewise.
 	(parse_stab_array_type): Likewise.
+
 	* parse_stab: Compute the end of the string and then pass it on to
 	individual parser functions.
 

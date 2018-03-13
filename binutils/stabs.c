@@ -449,7 +449,6 @@ parse_stab (void *dhandle, void *handle, int type, int desc, bfd_vma value,
       info->file_types = ((struct stab_types **)
 			  xmalloc (sizeof *info->file_types));
       info->file_types[0] = NULL;
-
       info->so_string = NULL;
 
       /* Now process whatever type we just got.  */
@@ -3325,6 +3324,9 @@ pop_bincl (struct stab_handle *info)
   if (o == NULL)
     return info->main_filename;
   info->bincl_stack = o->next_stack;
+
+  if (o->file >= info->files)
+    return info->main_filename;
 
   o->file_types = info->file_types[o->file];
 
