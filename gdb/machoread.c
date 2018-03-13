@@ -927,7 +927,7 @@ macho_symfile_finish (struct objfile *objfile)
 
 static void
 macho_symfile_offsets (struct objfile *objfile,
-                       const struct section_addr_info *addrs)
+                       const section_addr_info &addrs)
 {
   unsigned int i;
   struct obj_section *osect;
@@ -949,15 +949,15 @@ macho_symfile_offsets (struct objfile *objfile,
      N.B. if an objfile slides after we've already created it, then it
      goes through objfile_relocate.  */
 
-  for (i = 0; i < addrs->num_sections; i++)
+  for (i = 0; i < addrs.size (); i++)
     {
       ALL_OBJFILE_OSECTIONS (objfile, osect)
 	{
 	  const char *bfd_sect_name = osect->the_bfd_section->name;
 
-	  if (strcmp (bfd_sect_name, addrs->other[i].name) == 0)
+	  if (bfd_sect_name == addrs[i].name)
 	    {
-	      obj_section_offset (osect) = addrs->other[i].addr;
+	      obj_section_offset (osect) = addrs[i].addr;
 	      break;
 	    }
 	}

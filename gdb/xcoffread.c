@@ -3054,7 +3054,7 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
 
 static void
 xcoff_symfile_offsets (struct objfile *objfile,
-		       const struct section_addr_info *addrs)
+		       const section_addr_info &addrs)
 {
   const char *first_section_name;
 

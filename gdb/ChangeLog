@@ -1,3 +1,42 @@
+2018-03-16  Tom Tromey  <tom@tromey.com>
+
+	* xcoffread.c (xcoff_symfile_offsets): Change type of "addrs".
+	* utils.h (make_cleanup_free_section_addr_info): Don't declare.
+	* utils.c (do_free_section_addr_info)
+	(make_cleanup_free_section_addr_info): Remove.
+	* symfile.h (struct other_sections): Add constructor.
+	(struct section_addr_info): Remove.
+	(section_addr_info): New typedef.
+	(struct sym_fns) <sym_offsets>: Change type of parameter.
+	(build_section_addr_info_from_objfile)
+	(relative_addr_info_to_section_offsets, addr_info_make_relative)
+	(default_symfile_offsets, symbol_file_add)
+	(symbol_file_add_from_bfd)
+	(build_section_addr_info_from_section_table): Update.
+	(alloc_section_addr_info, free_section_addr_info): Don't declare.
+	* symfile.c (alloc_section_addr_info): Remove.
+	(build_section_addr_info_from_section_table): Change return type.
+	Update.
+	(build_section_addr_info_from_bfd)
+	(build_section_addr_info_from_objfile): Likewise.
+	(free_section_addr_info): Remove.
+	(relative_addr_info_to_section_offsets): Change type of "addrs".
+	(addrs_section_compar): Now a std::sort comparator.
+	(addrs_section_sort): Change return type.
+	(addr_info_make_relative): Change type of "addrs".  Update.
+	(default_symfile_offsets, syms_from_objfile_1)
+	(syms_from_objfile, symbol_file_add_with_addrs): Likewise.
+	(symbol_file_add_separate): Update.
+	(symbol_file_add): Change type of "addrs".  Update.
+	(add_symbol_file_command): Update.  Remove cleanups.
+	* symfile-mem.c (symbol_file_add_from_memory): Update.  Remove
+	cleanups.
+	* symfile-debug.c (debug_sym_offsets): Change type of "info".
+	* solib.c (solib_read_symbols): Update.
+	* objfiles.c (objfile_relocate): Update.  Remove cleanups.
+	* machoread.c (macho_symfile_offsets): Update.
+	* jit.c (jit_bfd_try_read_symtab): Update.
+
 2018-03-15  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add

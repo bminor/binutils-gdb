@@ -506,7 +506,7 @@ debug_sym_finish (struct objfile *objfile)
 
 static void
 debug_sym_offsets (struct objfile *objfile,
-		   const struct section_addr_info *info)
+		   const section_addr_info &info)
 {
   const struct debug_sym_fns_data *debug_data
     = ((const struct debug_sym_fns_data *)
@@ -514,7 +514,7 @@ debug_sym_offsets (struct objfile *objfile,
 
   fprintf_filtered (gdb_stdlog, "sf->sym_offsets (%s, %s)\n",
 		    objfile_debug_name (objfile),
-		    host_address_to_string (info));
+		    host_address_to_string (&info));
 
   debug_data->real_sf->sym_offsets (objfile, info);
 }

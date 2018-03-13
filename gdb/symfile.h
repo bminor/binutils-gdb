@@ -47,8 +47,19 @@ typedef int (symbol_compare_ftype) (const char *string1,
 
 struct other_sections
 {
+  other_sections (CORE_ADDR addr_, std::string &&name_, int sectindex_)
+    : addr (addr_),
+      name (std::move (name_)),
+      sectindex (sectindex_)
+  {
+  }
+
+  other_sections (other_sections &&other) = default;
+
+  DISABLE_COPY_AND_ASSIGN (other_sections);
+
   CORE_ADDR addr;
-  char *name;
+  std::string name;
 
   /* SECTINDEX must be valid for associated BFD or set to -1.  */
   int sectindex;
@@ -61,15 +72,7 @@ struct other_sections
    to communicate the section addresses in shared objects to
    symbol_file_add ().  */
 
-struct section_addr_info
-{
-  /* The number of sections for which address information is
-     available.  */
-  size_t num_sections;
-  /* Sections whose names are file format dependent.  */
-  struct other_sections other[1];
-};
-
+typedef std::vector<other_sections> section_addr_info;
 
 /* A table listing the load segments in a symfile, and which segment
    each BFD section belongs to.  */
@@ -340,7 +343,7 @@ struct sym_fns
      The section_addr_info structure contains the offset of loadable and
      allocated sections, relative to the absolute offsets found in the BFD.  */
 
-  void (*sym_offsets) (struct objfile *, const struct section_addr_info *);
+  void (*sym_offsets) (struct objfile *, const section_addr_info &);
 
   /* This function produces a format-independent description of
      the segments of ABFD.  Each segment is a unit of the file
@@ -369,21 +372,21 @@ struct sym_fns
   const struct quick_symbol_functions *qf;
 };
 
-extern struct section_addr_info *
+extern section_addr_info
   build_section_addr_info_from_objfile (const struct objfile *objfile);
 
 extern void relative_addr_info_to_section_offsets
   (struct section_offsets *section_offsets, int num_sections,
-   const struct section_addr_info *addrs);
+   const section_addr_info &addrs);
 
-extern void addr_info_make_relative (struct section_addr_info *addrs,
+extern void addr_info_make_relative (section_addr_info *addrs,
 				     bfd *abfd);
 
 /* The default version of sym_fns.sym_offsets for readers that don't
    do anything special.  */
 
 extern void default_symfile_offsets (struct objfile *objfile,
-				     const struct section_addr_info *);
+				     const section_addr_info &);
 
 /* The default version of sym_fns.sym_segments for readers that don't
    do anything special.  */
@@ -417,10 +420,10 @@ extern enum language deduce_language_from_filename (const char *);
 extern void add_filename_language (const char *ext, enum language lang);
 
 extern struct objfile *symbol_file_add (const char *, symfile_add_flags,
-					struct section_addr_info *, objfile_flags);
+					section_addr_info *, objfile_flags);
 
 extern struct objfile *symbol_file_add_from_bfd (bfd *, const char *, symfile_add_flags,
-                                                 struct section_addr_info *,
+						 section_addr_info *,
                                                  objfile_flags, struct objfile *parent);
 
 extern void symbol_file_add_separate (bfd *, const char *, symfile_add_flags,
@@ -428,25 +431,14 @@ extern void symbol_file_add_separate (bfd *, const char *, symfile_add_flags,
 
 extern std::string find_separate_debug_file_by_debuglink (struct objfile *);
 
-/* Create a new section_addr_info, with room for NUM_SECTIONS.  */
-
-extern struct section_addr_info *alloc_section_addr_info (size_t
-							  num_sections);
-
 /* Build (allocate and populate) a section_addr_info struct from an
    existing section table.  */
 
-extern struct section_addr_info
-  *build_section_addr_info_from_section_table (const struct target_section
+extern section_addr_info
+   build_section_addr_info_from_section_table (const struct target_section
 					       *start,
 					       const struct target_section
 					       *end);
-
-/* Free all memory allocated by
-   build_section_addr_info_from_section_table.  */
-
-extern void free_section_addr_info (struct section_addr_info *);
-
 
 			/*   Variables   */
 

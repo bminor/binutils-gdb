@@ -242,10 +242,6 @@ private:
 
 /* Cleanup utilities.  */
 
-struct section_addr_info;
-extern struct cleanup *make_cleanup_free_section_addr_info
-                       (struct section_addr_info *);
-
 /* For make_cleanup_close see common/filestuff.h.  */
 
 struct target_ops;

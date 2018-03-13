@@ -676,8 +676,6 @@ solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 
       TRY
 	{
-	  struct section_addr_info *sap;
-
 	  /* Have we already loaded this shared object?  */
 	  ALL_OBJFILES (so->objfile)
 	    {
@@ -687,13 +685,13 @@ solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 	    }
 	  if (so->objfile == NULL)
 	    {
-	      sap = build_section_addr_info_from_section_table (so->sections,
-								so->sections_end);
+	      section_addr_info sap
+		= build_section_addr_info_from_section_table (so->sections,
+							      so->sections_end);
 	      so->objfile = symbol_file_add_from_bfd (so->abfd, so->so_name,
-						      flags, sap, OBJF_SHARED,
-						      NULL);
+						      flags, &sap,
+						      OBJF_SHARED, NULL);
 	      so->objfile->addr_low = so->addr_low;
-	      free_section_addr_info (sap);
 	    }
 
 	  so->symbols_loaded = 1;

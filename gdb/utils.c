@@ -141,18 +141,6 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
    because while they use the "cleanup API" they are not part of the
    "cleanup API".  */
 
-static void
-do_free_section_addr_info (void *arg)
-{
-  free_section_addr_info ((struct section_addr_info *) arg);
-}
-
-struct cleanup *
-make_cleanup_free_section_addr_info (struct section_addr_info *addrs)
-{
-  return make_cleanup (do_free_section_addr_info, addrs);
-}
-
 /* Helper for make_cleanup_unpush_target.  */
 
 static void
