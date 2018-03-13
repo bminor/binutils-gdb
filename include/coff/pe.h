@@ -497,6 +497,7 @@ struct pex64_unwind_info
   bfd_vma FrameOffset;
   bfd_vma sizeofUnwindCodes;
   bfd_byte *rawUnwindCodes;
+  bfd_byte *rawUnwindCodesEnd;
   bfd_vma rva_ExceptionHandler; /* UNW_EHANDLER or UNW_FLAG_UHANDLER.  */
   bfd_vma rva_BeginAddress;	/* UNW_FLAG_CHAININFO.  */
   bfd_vma rva_EndAddress;	/* UNW_FLAG_CHAININFO.  */

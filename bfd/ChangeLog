@@ -1,3 +1,16 @@
+2018-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 22113
+	* pei-x86_64.c (pex64_get_unwind_info): Change to a boolean
+	function.  Add an end address parameter.  Check access of the data
+	pointer to make sure that they do not extend beyond the end
+	address.  Return FALSE if any check fails.  Add the end address
+	pointer to the ui structure.
+	(pex64_xdata_print_uwd_codes): Check accesses of the raw unwind
+	codes to make sure that they do not extend beyond the end address
+	pointer.  Print an error message and return immediately if any
+	check fails.
+
 2018-03-09  Nick Clifton  <nickc@redhat.com>
 
 	* elf64-s390.c (elf_s390_relocate_section): Move check for

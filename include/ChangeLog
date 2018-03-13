@@ -1,3 +1,9 @@
+2018-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 22113
+	* coff/pe.h (struct pex64_unwind_info): Add a rawUnwindCodesEnd
+	field.
+
 2018-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* opcode/i386 (OLDGCC_COMPAT): Removed.
