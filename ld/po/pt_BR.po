@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ld 2.30.0\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-01-13 13:43+0000\n"
-"PO-Revision-Date: 2018-01-15 13:02-0200\n"
+"PO-Revision-Date: 2018-03-11 11:01-0300\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <ldpbr-translation@lists.sourceforge.net>\n"
 "Language: pt_BR\n"
@@ -55,7 +55,7 @@ msgstr "%P: aviso: não foi possível localizar símbolo inicial %s Thumb\n"
 #: emultempl/pe.em:430
 #, c-format
 msgid "  --base_file <basefile>             Generate a base file for relocatable DLLs\n"
-msgstr "  --base_file <arquivobase>          Gera um arquivo base para DDLs relocáveis\n"
+msgstr "  --base_file <arquivobase>          Gera arquivo base para DDLs realocáveis\n"
 
 #: emultempl/pe.em:431
 #, c-format
@@ -300,7 +300,7 @@ msgid ""
 "                                       runtime.\n"
 msgstr ""
 "  --enable-runtime-pseudo-reloc      Contorna limitações de importação\n"
-"                                     automática adicionando pseudo-relocações\n"
+"                                     automática adicionando pseudorrealocações\n"
 "                                     resolvidas em tempo de execução.\n"
 
 #: emultempl/pe.em:478
@@ -309,7 +309,7 @@ msgid ""
 "  --disable-runtime-pseudo-reloc     Do not add runtime pseudo-relocations for\n"
 "                                       auto-imported DATA.\n"
 msgstr ""
-"  --disable-runtime-pseudo-reloc     Não adiciona pseudo-relocações em tempo\n"
+"  --disable-runtime-pseudo-reloc     Não adiciona pseudorrealocações em tempo\n"
 "                                       de execução para DATA autoimportados.\n"
 
 #: emultempl/pe.em:480
@@ -365,7 +365,7 @@ msgid ""
 "\t\t\t\t       address space layout randomization (ASLR)\n"
 msgstr ""
 "  --dynamicbase                      Endereço de base de imagem pode ser\n"
-"                                       relocado usando personalização de\n"
+"                                       realocado usando personalização de\n"
 "                                       layout de espaço de endereço (ASLR)\n"
 
 #: emultempl/pe.em:493
@@ -501,7 +501,7 @@ msgstr "%F%P: não foi possível realizar operações de PO no arquivo de saída
 
 #: emultempl/pe.em:1631
 msgid "%X%P: unable to process relocs: %E\n"
-msgstr "%X%P: não foi possível processar as relocações: %E\n"
+msgstr "%X%P: não foi possível processar as realocações: %E\n"
 
 #: emultempl/pe.em:1869
 #, c-format
@@ -560,7 +560,7 @@ msgstr "%P: símbolo \"%T\" faltando da tabela hash principal\n"
 
 #: ldcref.c:690 ldcref.c:697 ldmain.c:1248 ldmain.c:1255
 msgid "%B%F: could not read relocs: %E\n"
-msgstr "%B%F: não foi possível ler as relocações: %E\n"
+msgstr "%B%F: não foi possível ler as realocações: %E\n"
 
 #. We found a reloc for the symbol.  The symbol is defined
 #. in OUTSECNAME.  This reloc is from a section which is
@@ -572,7 +572,7 @@ msgstr "%X%C: referência cruzada proibida de %s para \"%T\" em %s\n"
 
 #: ldctor.c:83
 msgid "%P%X: Different relocs used in set %s\n"
-msgstr "%P%X: Relocações diferentes usadas no conjunto %s\n"
+msgstr "%P%X: realocações diferentes usadas no conjunto %s\n"
 
 #: ldctor.c:101
 msgid "%P%X: Different object file formats composing set %s\n"
@@ -580,11 +580,11 @@ msgstr "%P%X: Formatos de arquivo objeto diferentes compondo conjunto %s\n"
 
 #: ldctor.c:279 ldctor.c:300
 msgid "%P%X: %s does not support reloc %s for set %s\n"
-msgstr "%P%X: %s não oferece suporte a relocações %s para o conjunto %s\n"
+msgstr "%P%X: %s não oferece suporte a realocações %s para o conjunto %s\n"
 
 #: ldctor.c:295
 msgid "%P%X: Special section %s does not support reloc %s for set %s\n"
-msgstr "%P%X: Seção especial %s não oferece suporte a relocações %s para o conjunto %s\n"
+msgstr "%P%X: Seção especial %s não oferece suporte a realocações %s para o conjunto %s\n"
 
 #: ldctor.c:321
 msgid "%P%X: Unsupported size %d for set %s\n"
@@ -985,7 +985,7 @@ msgstr "%F%P: instrução de dados inválida\n"
 
 #: ldlang.c:5843
 msgid "%F%P: invalid reloc statement\n"
-msgstr "%F%P: instrução de relocação inválida\n"
+msgstr "%F%P: instrução de realocação inválida\n"
 
 #: ldlang.c:6177
 msgid "%P%F: gc-sections requires either an entry or an undefined symbol\n"
@@ -1009,7 +1009,7 @@ msgstr "%P: aviso: não foi possível localizar símbolo de entrada %s; não def
 
 #: ldlang.c:6293
 msgid "%P%F: Relocatable linking with relocations from format %s (%B) to format %s (%B) is not supported\n"
-msgstr "%P%F: Sem suporte a vinculação relocável com relocações do formato %s (%B) para o formato %s (%B)\n"
+msgstr "%P%F: Sem suporte a vinculação realocável com realocações do formato %s (%B) para o formato %s (%B)\n"
 
 #: ldlang.c:6303
 msgid "%P%X: %s architecture of input file `%B' is incompatible with %s output\n"
@@ -1316,27 +1316,27 @@ msgstr "%B: aviso: mais referências não definidas para \"%T\" seguir\n"
 
 #: ldmain.c:1393
 msgid " additional relocation overflows omitted from the output\n"
-msgstr " estouro de relocação adiciona omitido da saída\n"
+msgstr " estouro de realocação adiciona omitido da saída\n"
 
 #: ldmain.c:1406
 msgid " relocation truncated to fit: %s against undefined symbol `%T'"
-msgstr " relocação truncada para caber: %s contra símbolo não definido \"%T\""
+msgstr " realocação truncada para caber: %s contra símbolo não definido \"%T\""
 
 #: ldmain.c:1412
 msgid " relocation truncated to fit: %s against symbol `%T' defined in %A section in %B"
-msgstr " relocação truncada para caber: %s contra símbolo não definido \"%T\" na seção %A em %B"
+msgstr " realocação truncada para caber: %s contra símbolo não definido \"%T\" na seção %A em %B"
 
 #: ldmain.c:1425
 msgid " relocation truncated to fit: %s against `%T'"
-msgstr " relocação truncada para caber: %s contra \"%T\""
+msgstr " realocação truncada para caber: %s contra \"%T\""
 
 #: ldmain.c:1441
 msgid "%X%H: dangerous relocation: %s\n"
-msgstr "%X%H: relocação perigosa: %s\n"
+msgstr "%X%H: realocação perigosa: %s\n"
 
 #: ldmain.c:1455
 msgid "%X%H: reloc refers to symbol `%T' which is not being output\n"
-msgstr "%X%H: a relocação faz referência a símbolo \"%T\" que não está sendo emitido\n"
+msgstr "%X%H: a realocação faz referência a símbolo \"%T\" que não está sendo emitido\n"
 
 #: ldmain.c:1489
 msgid "%B: reference to %s\n"
@@ -1659,7 +1659,7 @@ msgstr "Ignorada para manter compatibilidade com SVR4"
 
 #: lexsup.c:198
 msgid "Generate relocatable output"
-msgstr "Gera uma saída relocável"
+msgstr "Gera uma saída realocável"
 
 # Dividi linhas para promover alinhamento em 80 caracteres
 #: lexsup.c:202
@@ -1864,7 +1864,7 @@ msgstr ""
 
 #: lexsup.c:318
 msgid "Generate embedded relocs"
-msgstr "Gera relocações incorporadas"
+msgstr "Gera realocações incorporadas"
 
 #: lexsup.c:320
 msgid "Treat warnings as errors"
@@ -2111,7 +2111,7 @@ msgstr "[=CONTAGEM]"
 msgid "Split output sections every COUNT relocs"
 msgstr ""
 "Divide a saída em seções a cada CONTAGEM\n"
-"                                relocações"
+"                                realocações"
 
 #: lexsup.c:449
 msgid "Print memory usage statistics"
@@ -2492,12 +2492,12 @@ msgstr ""
 #: lexsup.c:1749
 #, c-format
 msgid "  -z combreloc                Merge dynamic relocs into one section and sort\n"
-msgstr "  -z combreloc                Mescla relocações dinâmicas numa seção e ordena\n"
+msgstr "  -z combreloc                Mescla realocações dinâmicas numa seção e ordena\n"
 
 #: lexsup.c:1751
 #, c-format
 msgid "  -z nocombreloc              Don't merge dynamic relocs into one section\n"
-msgstr "  -z nocombreloc              Não mescla relocações dinâmicas em uma seção\n"
+msgstr "  -z nocombreloc              Não mescla realocações dinâmicas em uma seção\n"
 
 #: lexsup.c:1753
 #, c-format
@@ -2831,12 +2831,12 @@ msgstr "%P%X: Erro: ordinal exportação grande demais: %d\n"
 #: pe-dll.c:1391
 #, c-format
 msgid "zero vma section reloc detected: `%s' #%d f=%d\n"
-msgstr "relocação de seção de vma zero detectada: \"%s\" #%d f=%d\n"
+msgstr "realocação de seção de vma zero detectada: \"%s\" #%d f=%d\n"
 
 #: pe-dll.c:1506
 #, c-format
 msgid "%P%X: Error: %d-bit reloc in dll\n"
-msgstr "%P%X: Erro: relocação de %d bits na dll\n"
+msgstr "%P%X: Erro: realocação de %d bits na dll\n"
 
 #: pe-dll.c:1634
 #, c-format
@@ -3020,7 +3020,7 @@ msgstr "%P: %s: erro na limpeza do plug-in: %d (ignorado)\n"
 #~ msgstr "%XErro, ordinal usado duas vezes: %d (%s vs %s)\n"
 
 #~ msgid "%XError: %d-bit reloc in dll\n"
-#~ msgstr "%XErro: relocação de %d bit na dll\n"
+#~ msgstr "%XErro: realocação de %d bit na dll\n"
 
 #~ msgid "%s: Can't open output def file %s\n"
 #~ msgstr "%s: Não foi possível abrir arquivo def de saída %s\n"

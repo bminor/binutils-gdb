@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: opcodes 2.30.0\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-01-13 13:44+0000\n"
-"PO-Revision-Date: 2018-01-15 15:17-0200\n"
+"PO-Revision-Date: 2018-03-11 11:12-0300\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <ldpbr-translation@lists.sourceforge.net>\n"
 "Language: pt_BR\n"
@@ -621,7 +621,7 @@ msgstr "origem de registrador no movimento de imediato"
 
 #: epiphany-asm.c:187
 msgid "byte relocation unsupported"
-msgstr "sem suporte a relocação de byte"
+msgstr "sem suporte a realocação de byte"
 
 #. -- assembler routines inserted here.
 #. -- asm.c
@@ -1890,7 +1890,7 @@ msgstr "Expressão errada de imediato"
 
 #: xstormy16-asm.c:109
 msgid "No relocation for small immediate"
-msgstr "Nenhuma relocação para imediato pequeno"
+msgstr "Nenhuma realocação para imediato pequeno"
 
 #: xstormy16-asm.c:119
 msgid "Small operand was not an immediate number"
