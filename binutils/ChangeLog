@@ -1,3 +1,27 @@
+2018-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 22955
+	* stabs.c (parse_number): Add p_end parameter and use it to check
+	the validity of the pp parameter.  Add checks to prevent walking
+	off the end of the string buffer.
+	(parse_stab_string): Likewise.
+	(parse_stab_type): Likewise.
+	(parse_stab_type_number): Likewise.
+	(parse_stab_range_type): Likewise.
+	(parse_stab_sun_builtin_type): Likewise.
+	(parse_stab_sun_floating_type): Likewise.
+	(parse_stab_enum_type): Likewise.
+	(parse_stab_struct_type): Likewise.
+	(parse_stab_baseclasses): Likewise.
+	(parse_stab_struct_fields): Likewise.
+	(parse_stab_cpp_abbrev): Likewise.
+	(parse_stab_one_struct_field): Likewise.
+	(parse_stab_members): Likewise.
+	(parse_stab_tilde_field): Likewise.
+	(parse_stab_array_type): Likewise.
+	* parse_stab: Compute the end of the string and then pass it on to
+	individual parser functions.
+
 2018-03-07  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR binutils/22923
