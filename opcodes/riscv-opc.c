@@ -741,3 +741,77 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Terminate the list.  */
 {0, 0, 0, 0, 0, 0, 0}
 };
+
+/* Instruction format for .insn directive.  */
+const struct riscv_opcode riscv_insn_types[] =
+{
+/* name,  isa,          operands, match, mask,    match_func, pinfo.  */
+{"r",     "I",  "O4,F3,F7,d,s,t",     0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F7,D,s,t",     0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F7,d,S,t",     0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F7,D,S,t",     0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F7,d,s,T",     0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F7,D,s,T",     0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F7,d,S,T",     0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F7,D,S,T",     0,    0,  match_opcode, 0 },
+
+{"r",     "I",  "O4,F3,F2,d,s,t,r",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,D,s,t,r",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,d,S,t,r",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,D,S,t,r",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,d,s,T,r",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,D,s,T,r",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,d,S,T,r",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,D,S,T,r",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,d,s,t,R",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,D,s,t,R",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,d,S,t,R",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,D,S,t,R",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,d,s,T,R",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,D,s,T,R",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,d,S,T,R",   0,    0,  match_opcode, 0 },
+{"r",     "I",  "O4,F3,F2,D,S,T,R",   0,    0,  match_opcode, 0 },
+
+{"i",     "I",  "O4,F3,d,s,j",        0,    0,  match_opcode, 0 },
+{"i",     "I",  "O4,F3,D,s,j",        0,    0,  match_opcode, 0 },
+{"i",     "I",  "O4,F3,d,S,j",        0,    0,  match_opcode, 0 },
+{"i",     "I",  "O4,F3,D,S,j",        0,    0,  match_opcode, 0 },
+
+{"i",     "I",  "O4,F3,d,o(s)",       0,    0,  match_opcode, 0 },
+{"i",     "I",  "O4,F3,D,o(s)",       0,    0,  match_opcode, 0 },
+
+{"s",     "I",  "O4,F3,d,o(s)",       0,    0,  match_opcode, 0 },
+{"s",     "I",  "O4,F3,D,o(s)",       0,    0,  match_opcode, 0 },
+
+{"sb",    "I",  "O4,F3,s,t,p",        0,    0,  match_opcode, 0 },
+{"sb",    "I",  "O4,F3,S,t,p",        0,    0,  match_opcode, 0 },
+{"sb",    "I",  "O4,F3,s,T,p",        0,    0,  match_opcode, 0 },
+{"sb",    "I",  "O4,F3,S,T,p",        0,    0,  match_opcode, 0 },
+
+{"sb",    "I",  "O4,F3,t,q(s)",       0,    0,  match_opcode, 0 },
+{"sb",    "I",  "O4,F3,T,q(s)",       0,    0,  match_opcode, 0 },
+
+{"u",     "I",  "O4,d,u",             0,    0,  match_opcode, 0 },
+{"u",     "I",  "O4,D,u",             0,    0,  match_opcode, 0 },
+
+{"uj",    "I",  "O4,d,a",             0,    0,  match_opcode, 0 },
+{"uj",    "I",  "O4,D,a",             0,    0,  match_opcode, 0 },
+
+{"cr",    "C",  "O2,CF4,d,CV",        0,    0,  match_opcode, 0 },
+{"cr",    "C",  "O2,CF4,D,CV",        0,    0,  match_opcode, 0 },
+{"cr",    "C",  "O2,CF4,d,CT",        0,    0,  match_opcode, 0 },
+{"cr",    "C",  "O2,CF4,D,CT",        0,    0,  match_opcode, 0 },
+
+{"ci",    "C",  "O2,CF3,d,Co",        0,    0,  match_opcode, 0 },
+{"ci",    "C",  "O2,CF3,D,Co",        0,    0,  match_opcode, 0 },
+
+{"ciw",   "C",  "O2,CF3,Ct,C8",        0,    0,  match_opcode, 0 },
+{"ciw",   "C",  "O2,CF3,CD,C8",        0,    0,  match_opcode, 0 },
+
+{"cb",    "C",  "O2,CF3,Cs,Cp",       0,    0,  match_opcode, 0 },
+{"cb",    "C",  "O2,CF3,CS,Cp",       0,    0,  match_opcode, 0 },
+
+{"cj",    "C",  "O2,CF3,Ca",          0,    0,  match_opcode, 0 },
+/* Terminate the list.  */
+{0, 0, 0, 0, 0, 0, 0}
+};

@@ -1,3 +1,17 @@
+2018-03-14  Kito Cheng  <kito.cheng@gmail.com>
+
+	* opcode/riscv.h (OP_MASK_FUNCT3): New.
+	(OP_SH_FUNCT3): Likewise.
+	(OP_MASK_FUNCT7): Likewise.
+	(OP_SH_FUNCT7): Likewise.
+	(OP_MASK_OP2): Likewise.
+	(OP_SH_OP2): Likewise.
+	(OP_MASK_CFUNCT4): Likewise.
+	(OP_SH_CFUNCT4): Likewise.
+	(OP_MASK_CFUNCT3): Likewise.
+	(OP_SH_CFUNCT3): Likewise.
+	(riscv_insn_types): Likewise.
+
 2018-03-13  Nick Clifton  <nickc@redhat.com>
 
 	PR 22113

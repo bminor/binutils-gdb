@@ -1,3 +1,22 @@
+2018-03-14  Kito Cheng  <kito.cheng@gmail.com>
+
+	* config/tc-riscv.c (opcode_name_list): New.
+	(opcode_names_hash): Likewise.
+	(init_opcode_names_hash): Likewise.
+	(opcode_name_lookup): Likewise.
+	(validate_riscv_insn): New argument length, and add new format
+	which used in .insn directive.
+	(md_begin): Refine hash table initialization logic into
+	init_opcode_hash.
+	(init_opcode_hash): New.
+	(my_getOpcodeExpression): Parse opcode name for .insn.
+	(riscv_ip): New argument hash, able to handle .insn directive.
+	(s_riscv_insn): Handler for .insn directive.
+	(riscv_pseudo_table): New entry for .insn.
+	* doc/c-riscv.texi: Add documentation for .insn directive.
+	* testsuite/gas/riscv/insn.d: Add testcase for .insn directive.
+	* testsuite/gas/riscv/insn.s: Likewise.
+
 2018-03-13  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.
