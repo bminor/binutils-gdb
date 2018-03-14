@@ -1,5 +1,12 @@
 2018-03-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/20882
+	* testsuite/ld-gc/pr20882.d: Also dump and check .debug_abbrev
+	section.
+	* testsuite/ld-gc/pr20882b.s: Add .debug_abbrev section.
+
+2018-03-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-gc/gc.exp: Fix a typo: $LFLAGS -> $LDFLAGS.
 
 2018-03-13  Nick Clifton  <nickc@redhat.com>
