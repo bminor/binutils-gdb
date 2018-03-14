@@ -1,3 +1,10 @@
+2018-03-14  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (sfpr_define): Adjust for stub_sec size having
+	sfpr size added before defining alias symbols.
+	(ppc64_elf_build_stubs): Add stub section padding before
+	copying sfpr contents and defining save/restore alias symbols.
+
 2018-03-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20882
