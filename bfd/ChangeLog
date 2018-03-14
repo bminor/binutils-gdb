@@ -1,3 +1,9 @@
+2018-03-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20882
+	* elflink.c (elf_gc_mark_debug_section): Also check the local
+	debug definition section.
+
 2018-02-28  Jim Wilson  <jimw@sifive.com>
 
 	Import patch from mainline:

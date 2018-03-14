@@ -1,3 +1,10 @@
+2018-03-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20882
+	* testsuite/ld-gc/pr20882.d: Also dump and check .debug_abbrev
+	section.
+	* testsuite/ld-gc/pr20882b.s: Add .debug_abbrev section.
+
 2018-02-09  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* testsuite/ld-elf/pr22450.d: Remove reference to SPARC64.
