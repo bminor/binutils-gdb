@@ -6645,7 +6645,7 @@ sfpr_define (struct bfd_link_info *info,
 		{
 		  s->root.type = bfd_link_hash_defined;
 		  s->root.u.def.section = stub_sec;
-		  s->root.u.def.value = (stub_sec->size
+		  s->root.u.def.value = (stub_sec->size - htab->sfpr->size
 					 + h->elf.root.u.def.value);
 		  s->ref_regular = 1;
 		  s->def_regular = 1;
@@ -13232,20 +13232,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 
   for (group = htab->group; group != NULL; group = group->next)
     if (group->needs_save_res)
-      {
-	stub_sec = group->stub_sec;
-	memcpy (stub_sec->contents + stub_sec->size, htab->sfpr->contents,
-		htab->sfpr->size);
-	if (htab->params->emit_stub_syms)
-	  {
-	    unsigned int i;
-
-	    for (i = 0; i < ARRAY_SIZE (save_res_funcs); i++)
-	      if (!sfpr_define (info, &save_res_funcs[i], stub_sec))
-		return FALSE;
-	  }
-	stub_sec->size += htab->sfpr->size;
-      }
+      group->stub_sec->size += htab->sfpr->size;
 
   if (htab->relbrlt != NULL)
     htab->relbrlt->reloc_count = 0;
@@ -13257,6 +13244,22 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	  int align = abs (htab->params->plt_stub_align);
 	  stub_sec->size = (stub_sec->size + (1 << align) - 1) & -(1 << align);
 	}
+
+  for (group = htab->group; group != NULL; group = group->next)
+    if (group->needs_save_res)
+      {
+	stub_sec = group->stub_sec;
+	memcpy (stub_sec->contents + stub_sec->size - htab->sfpr->size,
+		htab->sfpr->contents, htab->sfpr->size);
+	if (htab->params->emit_stub_syms)
+	  {
+	    unsigned int i;
+
+	    for (i = 0; i < ARRAY_SIZE (save_res_funcs); i++)
+	      if (!sfpr_define (info, &save_res_funcs[i], stub_sec))
+		return FALSE;
+	  }
+      }
 
   for (group = htab->group; group != NULL; group = group->next)
     if ((stub_sec = group->stub_sec) != NULL)
