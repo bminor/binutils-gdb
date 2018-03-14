@@ -153,7 +153,7 @@ Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
 Doug Evans			dje@google.com
 Simon Marchi			simon.marchi@ericsson.com
-Yao Qi				yao.qi@arm.com
+Yao Qi				qiyao@sourceware.org
 Ulrich Weigand			Ulrich.Weigand@de.ibm.com
 Eli Zaretskii			eliz@gnu.org
 
@@ -286,7 +286,7 @@ the native maintainer when resolving ABI issues.
 
 	nios2		--target=nios2-elf ,-Werror
 			--target=nios2-linux-gnu ,-Werror
-			Yao Qi			yao.qi@arm.com
+			Yao Qi			qiyao@sourceware.org
 
 	ns32k		Deleted
 
@@ -317,7 +317,7 @@ the native maintainer when resolving ABI issues.
 			Ulrich Weigand		uweigand@de.ibm.com
 
 	tic6x		--target=tic6x-elf ,-Werror
-			Yao Qi			yao.qi@arm.com
+			Yao Qi			qiyao@sourceware.org
 
 	v850		--target=v850-elf ,-Werror
 
@@ -595,7 +595,7 @@ Paul Pluzhnikov					ppluzhnikov@google.com
 Marek Polacek					mpolacek@redhat.com
 Siddhesh Poyarekar				siddhesh@redhat.com
 Vladimir Prus                                   vladimir@codesourcery.com
-Yao Qi						yao.qi@arm.com
+Yao Qi						qiyao@sourceware.org
 Qinwei						qinwei@sunnorth.com.cn
 Ramana Radhakrishnan				ramana.radhakrishnan@arm.com
 Siva Chandra Reddy				sivachandra@google.com
