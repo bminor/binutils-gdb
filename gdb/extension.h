@@ -146,6 +146,11 @@ enum ext_lang_bp_stop
 
 struct ext_lang_type_printers
 {
+  ext_lang_type_printers ();
+  ~ext_lang_type_printers ();
+
+  DISABLE_COPY_AND_ASSIGN (ext_lang_type_printers);
+
   /* Type-printers from Python.  */
   void *py_type_printers;
 };
@@ -273,12 +278,8 @@ extern void eval_ext_lang_from_control_command (struct command_line *cmd);
 
 extern void auto_load_ext_lang_scripts_for_objfile (struct objfile *);
 
-extern struct ext_lang_type_printers *start_ext_lang_type_printers (void);
-
 extern char *apply_ext_lang_type_printers (struct ext_lang_type_printers *,
 					   struct type *);
-
-extern void free_ext_lang_type_printers (struct ext_lang_type_printers *);
 
 extern int apply_ext_lang_val_pretty_printer
   (struct type *type,

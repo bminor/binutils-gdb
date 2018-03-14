@@ -405,21 +405,16 @@ auto_load_ext_lang_scripts_for_objfile (struct objfile *objfile)
    We don't know in advance which extension language will provide a
    pretty-printer for the type, so all are initialized.  */
 
-struct ext_lang_type_printers *
-start_ext_lang_type_printers (void)
+ext_lang_type_printers::ext_lang_type_printers ()
 {
-  struct ext_lang_type_printers *printers
-    = XCNEW (struct ext_lang_type_printers);
   int i;
   const struct extension_language_defn *extlang;
 
   ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
     {
       if (extlang->ops->start_type_printers != NULL)
-	extlang->ops->start_type_printers (extlang, printers);
+	extlang->ops->start_type_printers (extlang, this);
     }
-
-  return printers;
 }
 
 /* Iteratively try the type pretty-printers specified by PRINTERS
@@ -460,11 +455,7 @@ apply_ext_lang_type_printers (struct ext_lang_type_printers *printers,
   return NULL;
 }
 
-/* Call this after pretty-printing a type to release all memory held
-   by PRINTERS.  */
-
-void
-free_ext_lang_type_printers (struct ext_lang_type_printers *printers)
+ext_lang_type_printers::~ext_lang_type_printers ()
 {
   int i;
   const struct extension_language_defn *extlang;
@@ -472,10 +463,8 @@ free_ext_lang_type_printers (struct ext_lang_type_printers *printers)
   ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
     {
       if (extlang->ops->free_type_printers != NULL)
-	extlang->ops->free_type_printers (extlang, printers);
+	extlang->ops->free_type_printers (extlang, this);
     }
-
-  xfree (printers);
 }
 
 /* Try to pretty-print a value of type TYPE located at VAL's contents

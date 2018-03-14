@@ -1,5 +1,44 @@
 2018-03-27  Tom Tromey  <tom@tromey.com>
 
+	* typeprint.h (struct type_print_options) <local_typedefs,
+	global_typedefs>: Remove "struct" keyword.
+	(class typedef_hash_table): New class.
+	(recursively_update_typedef_hash, add_template_parameters)
+	(create_typedef_hash, free_typedef_hash, copy_typedef_hash)
+	(find_typedef_in_hash): Don't declare.
+	* typeprint.c (struct typedef_hash_table): Move to typeprint.h.
+	(typedef_hash_table::recursively_update): Rename from
+	recursively_update_typedef_hash.  Now a member.
+	(typedef_hash_table::add_template_parameters): Rename from
+	add_template_parameters.  Now a member.
+	(typedef_hash_table::typedef_hash_table): Now a constructor;
+	rename from create_typedef_hash.
+	(typedef_hash_table::~typedef_hash_table): Now a destructor;
+	rename from free_typedef_hash.
+	(do_free_typedef_hash, make_cleanup_free_typedef_hash)
+	(do_free_global_table): Remove.
+	(typedef_hash_table::typedef_hash_table): New constructor; renamed
+	from copy_type_recursive.
+	(create_global_typedef_table): Remove.
+	(typedef_hash_table::find_global_typedef): Now a member of
+	typedef_hash_table.
+	(typedef_hash_table::find_typedef): Rename from
+	find_typedef_in_hash; now a member.
+	(whatis_exp): Update.
+	* extension.h (struct ext_lang_type_printers): Add constructor and
+	destructor.
+	(start_ext_lang_type_printers, free_ext_lang_type_printers): Don't
+	declare.
+	* extension.c (ext_lang_type_printers::ext_lang_type_printers):
+	Now a constructor; rename from start_ext_lang_type_printers.
+	(ext_lang_type_printers): Now a destructor; rename from
+	free_ext_lang_type_printers.
+	* c-typeprint.c (find_typedef_for_canonicalize, c_print_type_1):
+	Update.
+	(c_type_print_base_struct_union): Update.  Remove cleanups.
+
+2018-03-27  Tom Tromey  <tom@tromey.com>
+
 	* dwarf-index-write.c: Include <cmath>.
 
 2018-03-27  Joel Brobecker  <brobecker@adacore.com>

@@ -19,6 +19,8 @@
 #ifndef TYPEPRINT_H
 #define TYPEPRINT_H
 
+#include "gdb_obstack.h"
+
 enum language;
 struct ui_file;
 struct typedef_hash_table;
@@ -57,11 +59,11 @@ struct type_print_options
 
   /* If not NULL, a local typedef hash table used when printing a
      type.  */
-  struct typedef_hash_table *local_typedefs;
+  typedef_hash_table *local_typedefs;
 
   /* If not NULL, a global typedef hash table used when printing a
      type.  */
-  struct typedef_hash_table *global_typedefs;
+  typedef_hash_table *global_typedefs;
 
   /* The list of type printers associated with the global typedef
      table.  This is intentionally opaque.  */
@@ -70,21 +72,51 @@ struct type_print_options
 
 extern const struct type_print_options type_print_raw_options;
 
-void recursively_update_typedef_hash (struct typedef_hash_table *,
-				      struct type *);
+/* A hash table holding typedef_field objects.  This is more
+   complicated than an ordinary hash because it must also track the
+   lifetime of some -- but not all -- of the contained objects.  */
 
-void add_template_parameters (struct typedef_hash_table *, struct type *);
+class typedef_hash_table
+{
+public:
 
-struct typedef_hash_table *create_typedef_hash (void);
+  /* Create a new typedef-lookup hash table.  */
+  typedef_hash_table ();
 
-void free_typedef_hash (struct typedef_hash_table *);
+  ~typedef_hash_table ();
 
-struct cleanup *make_cleanup_free_typedef_hash (struct typedef_hash_table *);
+  /* Copy a typedef hash.  */
+  typedef_hash_table (const typedef_hash_table &);
 
-struct typedef_hash_table *copy_typedef_hash (struct typedef_hash_table *);
+  typedef_hash_table &operator= (const typedef_hash_table &) = delete;
 
-const char *find_typedef_in_hash (const struct type_print_options *,
-				  struct type *);
+  /* Add typedefs from T to the hash table TABLE.  */
+  void recursively_update (struct type *);
+
+  /* Add template parameters from T to the typedef hash TABLE.  */
+  void add_template_parameters (struct type *t);
+
+  /* Look up the type T in the typedef hash tables contained in FLAGS.
+     The local table is searched first, then the global table (either
+     table can be NULL, in which case it is skipped).  If T is in a
+     table, return its short (class-relative) typedef name.  Otherwise
+     return NULL.  */
+  static const char *find_typedef (const struct type_print_options *flags,
+				   struct type *t);
+
+private:
+
+  static const char *find_global_typedef (const struct type_print_options *flags,
+					  struct type *t);
+
+
+  /* The actual hash table.  */
+  htab_t m_table;
+
+  /* Storage for typedef_field objects that must be synthesized.  */
+  auto_obstack m_storage;
+};
+
 
 void print_type_scalar (struct type * type, LONGEST, struct ui_file *);
 

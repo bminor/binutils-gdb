@@ -68,12 +68,13 @@ static void c_type_print_base_1 (struct type *type, struct ui_file *stream,
 
 
 /* A callback function for cp_canonicalize_string_full that uses
-   find_typedef_in_hash.  */
+   typedef_hash_table::find_typedef.  */
 
 static const char *
 find_typedef_for_canonicalize (struct type *t, void *data)
 {
-  return find_typedef_in_hash ((const struct type_print_options *) data, t);
+  return typedef_hash_table::find_typedef
+    ((const struct type_print_options *) data, t);
 }
 
 /* Print NAME on STREAM.  If the 'raw' field of FLAGS is not set,
@@ -114,7 +115,7 @@ c_print_type_1 (struct type *type,
   if (show > 0)
     type = check_typedef (type);
 
-  local_name = find_typedef_in_hash (flags, type);
+  local_name = typedef_hash_table::find_typedef (flags, type);
   if (local_name != NULL)
     {
       fputs_filtered (local_name, stream);
@@ -1109,21 +1110,18 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 				struct print_offset_data *podata)
 {
   struct type_print_options local_flags = *flags;
-  struct type_print_options semi_local_flags = *flags;
-  struct cleanup *local_cleanups = make_cleanup (null_cleanup, NULL);
-
   local_flags.local_typedefs = NULL;
-  semi_local_flags.local_typedefs = NULL;
 
+  std::unique_ptr<typedef_hash_table> hash_holder;
   if (!flags->raw)
     {
       if (flags->local_typedefs)
 	local_flags.local_typedefs
-	  = copy_typedef_hash (flags->local_typedefs);
+	  = new typedef_hash_table (*flags->local_typedefs);
       else
-	local_flags.local_typedefs = create_typedef_hash ();
+	local_flags.local_typedefs = new typedef_hash_table ();
 
-      make_cleanup_free_typedef_hash (local_flags.local_typedefs);
+      hash_holder.reset (local_flags.local_typedefs);
     }
 
   c_type_print_modifier (type, stream, 0, 1);
@@ -1164,18 +1162,25 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
       c_type_print_template_args (&local_flags, type, stream);
 
       /* Add in template parameters when printing derivation info.  */
-      add_template_parameters (local_flags.local_typedefs, type);
+      if (local_flags.local_typedefs != NULL)
+	local_flags.local_typedefs->add_template_parameters (type);
       cp_type_print_derivation_info (stream, type, &local_flags);
 
       /* This holds just the global typedefs and the template
 	 parameters.  */
-      semi_local_flags.local_typedefs
-	= copy_typedef_hash (local_flags.local_typedefs);
-      if (semi_local_flags.local_typedefs)
-	make_cleanup_free_typedef_hash (semi_local_flags.local_typedefs);
+      struct type_print_options semi_local_flags = *flags;
+      semi_local_flags.local_typedefs = NULL;
 
-      /* Now add in the local typedefs.  */
-      recursively_update_typedef_hash (local_flags.local_typedefs, type);
+      std::unique_ptr<typedef_hash_table> semi_holder;
+      if (local_flags.local_typedefs != nullptr)
+	{
+	  semi_local_flags.local_typedefs
+	    = new typedef_hash_table (*local_flags.local_typedefs);
+	  semi_holder.reset (semi_local_flags.local_typedefs);
+
+	  /* Now add in the local typedefs.  */
+	  local_flags.local_typedefs->recursively_update (type);
+	}
 
       fprintf_filtered (stream, "{\n");
 
@@ -1518,8 +1523,6 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 
       fprintfi_filtered (level, stream, "}");
     }
-
-  do_cleanups (local_cleanups);
 }
 
 /* Print the name of the type (or the ultimate pointer target,
