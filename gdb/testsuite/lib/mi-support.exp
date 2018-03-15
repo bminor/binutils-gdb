@@ -979,7 +979,11 @@ proc mi_run_cmd_full {use_mi_command args} {
 	send_gdb  "jump *$start\n"
 	warning "Using CLI jump command, expect run-to-main FAIL"
 	gdb_expect {
-	    -re "${run_match}&\"jump \\*${start}\\n\"\[\r\n\]+~\"Continuing at 0x\[0-9A-Fa-f\]+\\n.\"\[\r\n\]+\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n${mi_gdb_prompt}" {}
+	    -re "&\"jump \\*${start}\\\\n\"\[\r\n\]+~\"Continuing at 0x\[0-9A-Fa-f\]+\.\\\\n\"\[\r\n\]+\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\[\r\n\]+${mi_gdb_prompt}" {}
+	    timeout {
+		perror "Unable to start target"
+		return -1
+	    }
 	}
 	return 0
     }

@@ -1,3 +1,8 @@
+2018-05-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/mi-support.exp (mi_run_cmd_full): Fix regexp and add a
+	timeout.
+
 2018-05-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/callfuncs.exp (fetch_all_registers): Add riscv register
