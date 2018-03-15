@@ -8150,8 +8150,8 @@ typedef struct xlate_map xlate_map_t;
 
 struct xlate_map_entry
 {
-  unsigned orig_address;
-  unsigned new_address;
+  bfd_vma orig_address;
+  bfd_vma new_address;
   unsigned size;
 };
 
@@ -8182,6 +8182,7 @@ xlate_offset_with_removed_text (const xlate_map_t *map,
 {
   void *r;
   xlate_map_entry_t *e;
+  struct xlate_map_entry se;
 
   if (map == NULL)
     return offset_with_removed_text (action_list, offset);
@@ -8189,10 +8190,19 @@ xlate_offset_with_removed_text (const xlate_map_t *map,
   if (map->entry_count == 0)
     return offset;
 
-  r = bsearch (&offset, map->entry, map->entry_count,
+  se.orig_address = offset;
+  r = bsearch (&se, map->entry, map->entry_count,
 	       sizeof (xlate_map_entry_t), &xlate_compare);
   e = (xlate_map_entry_t *) r;
 
+  /* There could be a jump past the end of the section,
+     allow it using the last xlate map entry to translate its address.  */
+  if (e == NULL)
+    {
+      e = map->entry + map->entry_count - 1;
+      if (xlate_compare (&se, e) <= 0)
+	e = NULL;
+    }
   BFD_ASSERT (e != NULL);
   if (e == NULL)
     return offset;

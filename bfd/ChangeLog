@@ -1,3 +1,11 @@
+2018-03-15  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (xlate_map_entry): Change types of address
+	fields from 'unsigned' to 'bfd_vma'.
+	(xlate_offset_with_removed_text): Use struct xlate_map_entry as
+	the key argument to bsearch. Allow offsets past the end of a
+	section, use the last map entry for translation of such offsets.
+
 2018-03-15  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* elf32-nds32.c (nds32_elf_ex9_build_hash_table): Removed.
