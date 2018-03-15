@@ -1,3 +1,8 @@
+2018-03-15  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* emultempl/nds32elf.em (nds32_elf_after_allocation): Remove
+	unsupported target feature.
+
 2018-03-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20882

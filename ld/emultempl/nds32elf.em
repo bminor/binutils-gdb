@@ -191,14 +191,6 @@ nds32_elf_after_open (void)
 static void
 nds32_elf_after_allocation (void)
 {
-  if (target_optimize & NDS32_RELAX_EX9_ON
-      || (ex9_import_file != NULL && update_ex9_table == 1))
-    {
-      /* Initialize ex9 hash table.  */
-      if (!nds32_elf_ex9_init ())
-	return;
-    }
-
   /* Call default after allocation callback.
      1. This is where relaxation is done.
      2. It calls gld${EMULATION_NAME}_map_segments to build ELF segment table.

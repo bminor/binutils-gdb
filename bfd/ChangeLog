@@ -1,3 +1,19 @@
+2018-03-15  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf32-nds32.c (nds32_elf_ex9_build_hash_table): Removed.
+	Not support the target feature.
+	(nds32_elf_ex9_itb_base): Likewise.
+	(nds32_elf_ex9_import_table): Likewise.
+	(nds32_elf_ex9_finish): Likewise.
+	(nds32_elf_ex9_reloc_jmp): Likewise.
+	(nds32_elf_get_insn_with_reg): Likewise.
+	(nds32_get_local_syms): Likewise.
+	(nds32_elf_ex9_replace_instruction): Likewise.
+	(nds32_elf_ifc_calc): Likewise.
+	(nds32_elf_ifc_finish): Likewise.
+	(nds32_elf_ifc_replace): Likewise.
+	(nds32_elf_ifc_reloc): Likewise.
+
 2018-03-14  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (sfpr_define): Adjust for stub_sec size having
