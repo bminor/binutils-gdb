@@ -1,3 +1,9 @@
+2018-03-15  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/utils-selftests.c.
+	* unittests/utils-selftests.c: New file.
+
 2018-03-14  Tom Tromey  <tom@tromey.com>
 
 	PR cli/14977:
