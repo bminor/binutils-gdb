@@ -1,5 +1,9 @@
 2018-03-17  Tom Tromey  <tom@tromey.com>
 
+	* auto-load.c (auto_load_objfile_script_1): Use std::string.
+
+2018-03-17  Tom Tromey  <tom@tromey.com>
+
 	* target.c (class scoped_target_fd): New.
 	(target_fileio_close_cleanup): Remove.
 	(target_fileio_read_alloc_1): Use scoped_target_fd.

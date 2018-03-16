@@ -769,24 +769,19 @@ static int
 auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 			    const struct extension_language_defn *language)
 {
-  char *filename, *debugfile;
-  int len, retval;
-  struct cleanup *cleanups;
+  const char *debugfile;
+  int retval;
   const char *suffix = ext_lang_auto_load_suffix (language);
 
-  len = strlen (realname);
-  filename = (char *) xmalloc (len + strlen (suffix) + 1);
-  memcpy (filename, realname, len);
-  strcpy (filename + len, suffix);
+  std::string filename = std::string (realname) + suffix;
 
-  cleanups = make_cleanup (xfree, filename);
-
-  gdb_file_up input = gdb_fopen_cloexec (filename, "r");
-  debugfile = filename;
+  gdb_file_up input = gdb_fopen_cloexec (filename.c_str (), "r");
+  debugfile = filename.c_str ();
   if (debug_auto_load)
     fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file \"%s\" %s.\n"),
 			debugfile, input ? _("exists") : _("does not exist"));
 
+  std::string debugfile_holder;
   if (!input)
     {
       /* Also try the same file in a subdirectory of gdb's data
@@ -802,14 +797,10 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
       for (const gdb::unique_xmalloc_ptr<char> &dir : vec)
 	{
-	  debugfile = (char *) xmalloc (strlen (dir.get ())
-					+ strlen (filename) + 1);
-	  strcpy (debugfile, dir.get ());
-
 	  /* FILENAME is absolute, so we don't need a "/" here.  */
-	  strcat (debugfile, filename);
+	  debugfile_holder = dir.get () + filename;
+	  debugfile = debugfile_holder.c_str ();
 
-	  make_cleanup (xfree, debugfile);
 	  input = gdb_fopen_cloexec (debugfile, "r");
 	  if (debug_auto_load)
 	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file "
@@ -862,7 +853,6 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
   else
     retval = 0;
 
-  do_cleanups (cleanups);
   return retval;
 }
 
