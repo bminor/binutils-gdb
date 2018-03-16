@@ -37,6 +37,8 @@ gl_INIT
 # its Makefile.in.
 AM_INIT_AUTOMAKE(libgnu, UNUSED-VERSION, [no-define])
 
+AM_SILENT_RULES([yes])
+
 # --------------------- #
 # Checks for programs.  #
 # --------------------- #

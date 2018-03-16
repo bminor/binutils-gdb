@@ -1,3 +1,23 @@
+2018-03-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* silent-rules.mk: New.
+	* Makefile.in: Include silent-rules.mk
+	(srcdir, VPATH, top_srcdir): Move up.
+	(COMPILE): Add ECHO_CXX.
+	(test-cp-name-parser$(EXEEXT)): Add ECHO_CXXLD.
+	(init.c): Add ECHO_INIT_C.
+	(gdb$(EXEEXT)): Add SILENCE and ECHO_CXXLD.
+	(version.c): Add ECHO_GEN.
+	(printcmd.o): Add ECHO_CXX.
+	(target-float.o): Add ECHO_CXX.
+	(ada-exp.o): Add ECHO_CXX.
+	(stamp-xml): Add SILENCE and ECHO_GEN_XML_BUILTIN.
+	(insight$(EXEEXT)): Add ECHO_CXXLD.
+	* gnulib/configure.ac: Add AM_SILENT_RULES.
+	* gnulib/aclocal.m4: Re-generate.
+	* gnulib/configure: Re-generate.
+	* gnulib/import/Makefile.in: Re-generate.
+
 2018-03-16  Tom Tromey  <tom@tromey.com>
 
 	* xcoffread.c (xcoff_symfile_offsets): Change type of "addrs".

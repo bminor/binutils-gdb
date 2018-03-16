@@ -112,17 +112,19 @@ DEPMODE = @CCDEPMODE@
 DEPDIR = @DEPDIR@
 depcomp = $(SHELL) $(srcdir)/../depcomp
 
-# Note that these are overridden by GNU make-specific code below if
-# GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(CXX) -x c++ $(CXX_DIALECT)
-COMPILE.post = -c -o $@
-COMPILE = $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
-POSTCOMPILE = @true
-
 # Directory containing source files.
 srcdir = @srcdir@
 VPATH = @srcdir@
 top_srcdir = @top_srcdir@
+
+include $(srcdir)/silent-rules.mk
+
+# Note that these are overridden by GNU make-specific code below if
+# GNU make is used.  The overrides implement dependency tracking.
+COMPILE.pre = $(CXX) -x c++ $(CXX_DIALECT)
+COMPILE.post = -c -o $@
+COMPILE = $(ECHO_CXX) $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
+POSTCOMPILE = @true
 
 YACC = @YACC@
 
@@ -1797,8 +1799,9 @@ test-cp-name-parser.o: cp-name-parser.c
 	$(POSTCOMPILE)
 
 test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
-	$(CC_LD) $(INTERNAL_LDFLAGS) -o test-cp-name-parser$(EXEEXT) \
-		test-cp-name-parser.o $(LIBIBERTY)
+	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) \
+		-o test-cp-name-parser$(EXEEXT) test-cp-name-parser.o \
+		$(LIBIBERTY)
 
 # We do this by grepping through sources.  If that turns out to be too slow,
 # maybe we could just require every .o file to have an initialization routine
@@ -1839,7 +1842,7 @@ test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
 
 INIT_FILES = $(COMMON_OBS) $(TSOBS) $(CONFIG_SRCS) $(SUBDIR_GCC_COMPILE_SRCS)
 init.c: $(INIT_FILES)
-	@echo Making init.c
+	@$(ECHO_INIT_C) echo "Making init.c"
 	@rm -f init.c-tmp init.l-tmp
 	@touch init.c-tmp
 	@echo gdbtypes > init.l-tmp
@@ -1899,8 +1902,8 @@ libgdb.a: $(LIBGDB_OBS)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
 gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
-	rm -f gdb$(EXEEXT)
-	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
+	$(SILENCE) rm -f gdb$(EXEEXT)
+	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
 		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
@@ -2131,7 +2134,7 @@ $(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ $(srcdir)/../COPYING3 $(srcdir)/copy
 	mv $(srcdir)/copying.tmp $(srcdir)/copying.c
 
 version.c: Makefile version.in $(srcdir)/../bfd/version.h $(srcdir)/common/create-version.sh
-	$(SHELL) $(srcdir)/common/create-version.sh $(srcdir) \
+	$(ECHO_GEN) $(SHELL) $(srcdir)/common/create-version.sh $(srcdir) \
 	    $(host_alias) $(target_alias) version.c
 
 observer.h: observer.sh doc/observer.texi
@@ -2377,14 +2380,16 @@ ALLDEPFILES = \
 # Do not try to build "printcmd.c" with -Wformat-nonliteral.  It manually
 # checks format strings.
 printcmd.o: $(srcdir)/printcmd.c
-	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
-		$(COMPILE.post) $(srcdir)/printcmd.c
+	$(ECHO_CXX) $(COMPILE.pre) $(INTERNAL_CFLAGS) \
+		$(GDB_WARN_CFLAGS_NO_FORMAT) $(COMPILE.post) \
+		$(srcdir)/printcmd.c
 	$(POSTCOMPILE)
 
 # Same for "target-float.c".
 target-float.o: $(srcdir)/target-float.c
-	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
-		$(COMPILE.post) $(srcdir)/target-float.c
+	$(ECHO_CXX) $(COMPILE.pre) $(INTERNAL_CFLAGS) \
+		$(GDB_WARN_CFLAGS_NO_FORMAT) $(COMPILE.post) \
+		$(srcdir)/target-float.c
 
 # ada-exp.c can appear in srcdir, for releases; or in ., for
 # development builds.
@@ -2393,8 +2398,8 @@ ADA_EXP_C = `if test -f ada-exp.c; then echo ada-exp.c; else echo $(srcdir)/ada-
 # Some versions of flex give output that triggers
 # -Wold-style-definition.
 ada-exp.o: ada-exp.c
-	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_DEFS) \
-		$(COMPILE.post) $(ADA_EXP_C)
+	$(ECHO_CXX) $(COMPILE.pre) $(INTERNAL_CFLAGS) \
+		$(GDB_WARN_CFLAGS_NO_DEFS) $(COMPILE.post) $(ADA_EXP_C)
 	$(POSTCOMPILE)
 
 # Message files.  Based on code in gcc/Makefile.in.
@@ -2525,12 +2530,12 @@ po/$(PACKAGE).pot: force
 
 xml-builtin.c: stamp-xml; @true
 stamp-xml: $(srcdir)/features/feature_to_c.sh Makefile $(XMLFILES)
-	rm -f xml-builtin.tmp
-	AWK="$(AWK)" \
+	$(SILENCE) rm -f xml-builtin.tmp
+	$(ECHO_GEN_XML_BUILTIN) AWK="$(AWK)" \
 	  $(SHELL) $(srcdir)/features/feature_to_c.sh \
 	  xml-builtin.tmp $(XMLFILES)
-	$(SHELL) $(srcdir)/../move-if-change xml-builtin.tmp xml-builtin.c
-	echo stamp > stamp-xml
+	$(SILENCE) $(SHELL) $(srcdir)/../move-if-change xml-builtin.tmp xml-builtin.c
+	$(SILENCE) echo stamp > stamp-xml
 
 .PRECIOUS: xml-builtin.c
 
@@ -2588,7 +2593,7 @@ clean-gdbtk:
 insight$(EXEEXT): gdbtk-main.o libgdb.a $(ADD_DEPS) \
 		$(CDEPS) $(TDEPLIBS)
 	rm -f insight$(EXEEXT)
-	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
+	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
 		-o insight$(EXEEXT) gdbtk-main.o libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 

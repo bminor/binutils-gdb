@@ -1,3 +1,16 @@
+2018-03-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Include silent-rules.mk.
+	(srcdir, abs_top_srcdir, abs_srcdir, VPATH): Move up.
+	(COMPILE): Add ECHO_CXX.
+	(gdbserver$(EXEEXT)): Add SILENCE and ECHO_CXXLD.
+	(gdbreplay$(EXEEXT)): Add SILENCE and ECHO_CXXLD.
+	($(IPA_LIB)): Add SILENCE and ECHO_CXXLD.
+	(version-generated.c): Add ECHO_GEN.
+	(stamp-xml): Add SILENCE and ECHO_GEN_XML_BUILTIN_GENERATED.
+	(IPAGENT_COMPILE): Add ECHO_CXX.
+	(%-generated.c): Add ECHO_REGDAT.
+
 2018-03-14  Tom Tromey  <tom@tromey.com>
 
 	PR cli/14977:

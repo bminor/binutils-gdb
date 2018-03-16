@@ -600,6 +600,8 @@ gl_LIBOBJS
 LTLIBOBJS
 LIBOBJS
 LN_S
+AM_BACKSLASH
+AM_DEFAULT_VERBOSITY
 am__fastdepCC_FALSE
 am__fastdepCC_TRUE
 CCDEPMODE
@@ -1694,6 +1696,7 @@ enable_option_checking
 enable_maintainer_mode
 enable_largefile
 enable_dependency_tracking
+enable_silent_rules
 '
       ac_precious_vars='build_alias
 host_alias
@@ -2327,6 +2330,8 @@ Optional Features:
   --disable-largefile     omit support for large files
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
+  --enable-silent-rules          less verbose build output (undo: `make V=1')
+  --disable-silent-rules         verbose build output (undo: `make V=0')
 
 Some influential environment variables:
   CC          C compiler command
@@ -23978,6 +23983,19 @@ else
 fi
 
 
+
+
+# Check whether --enable-silent-rules was given.
+if test "${enable_silent_rules+set}" = set; then :
+  enableval=$enable_silent_rules;
+fi
+
+case $enable_silent_rules in
+yes) AM_DEFAULT_VERBOSITY=0;;
+no)  AM_DEFAULT_VERBOSITY=1;;
+*)   AM_DEFAULT_VERBOSITY=0;;
+esac
+AM_BACKSLASH='\'
 
 
 # --------------------- #

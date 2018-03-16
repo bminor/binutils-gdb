@@ -64,19 +64,21 @@ DEPMODE = @CCDEPMODE@
 DEPDIR = @DEPDIR@
 depcomp = $(SHELL) $(srcdir)/../depcomp
 
-# Note that these are overridden by GNU make-specific code below if
-# GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(CXX) -x c++ $(CXX_DIALECT)
-COMPILE.post = -c -o $@
-COMPILE = $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
-POSTCOMPILE = @true
-
 # Directory containing source files.  Don't clean up the spacing,
 # this exact string is matched for by the "configure" script.
 srcdir = @srcdir@
 abs_top_srcdir = @abs_top_srcdir@
 abs_srcdir = @abs_srcdir@
 VPATH = @srcdir@
+
+include $(srcdir)/../silent-rules.mk
+
+# Note that these are overridden by GNU make-specific code below if
+# GNU make is used.  The overrides implement dependency tracking.
+COMPILE.pre = $(CXX) -x c++ $(CXX_DIALECT)
+COMPILE.post = -c -o $@
+COMPILE = $(ECHO_CXX) $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
+POSTCOMPILE = @true
 
 # It is also possible that you will need to add -I/usr/include/sys to the
 # CFLAGS section if your system doesn't have fcntl.h in /usr/include (which
@@ -378,9 +380,10 @@ clean-info: force
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(LIBGNU) $(LIBIBERTY)
-	rm -f gdbserver$(EXEEXT)
-	$(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver$(EXEEXT) $(OBS) \
-	$(LIBGNU) $(LIBIBERTY) $(GDBSERVER_LIBS) $(XM_CLIBS)
+	$(SILENCE) rm -f gdbserver$(EXEEXT)
+	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
+		-o gdbserver$(EXEEXT) $(OBS) $(LIBGNU) $(LIBIBERTY) \
+		$(GDBSERVER_LIBS) $(XM_CLIBS)
 
 $(LIBGNU) $(LIBIBERTY) $(GNULIB_H): all-lib
 all-lib: $(GNULIB_BUILDDIR)/Makefile $(LIBIBERTY_BUILDDIR)/Makefile
@@ -388,9 +391,10 @@ all-lib: $(GNULIB_BUILDDIR)/Makefile $(LIBIBERTY_BUILDDIR)/Makefile
 .PHONY: all-lib
 
 gdbreplay$(EXEEXT): $(GDBREPLAY_OBS) $(LIBGNU) $(LIBIBERTY)
-	rm -f gdbreplay$(EXEEXT)
-	$(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
-	  $(XM_CLIBS) $(LIBGNU) $(LIBIBERTY)
+	$(SILENCE) rm -f gdbreplay$(EXEEXT)
+	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
+		-o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) $(XM_CLIBS) $(LIBGNU) \
+		$(LIBIBERTY)
 
 IPA_OBJS = \
 	ax-ipa.o \
@@ -410,9 +414,10 @@ IPA_OBJS = \
 IPA_LIB = libinproctrace.so
 
 $(IPA_LIB): $(IPA_OBJS) ${ADD_DEPS} ${CDEPS}
-	rm -f $(IPA_LIB)
-	$(CC_LD) -shared -fPIC -Wl,--soname=$(IPA_LIB) -Wl,--no-undefined $(INTERNAL_CFLAGS) \
-	$(INTERNAL_LDFLAGS) -o $(IPA_LIB) ${IPA_OBJS} -ldl -pthread
+	$(SILENCE) rm -f $(IPA_LIB)
+	$(ECHO_CXXLD) $(CC_LD) -shared -fPIC -Wl,--soname=$(IPA_LIB) \
+		-Wl,--no-undefined $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
+		-o $(IPA_LIB) ${IPA_OBJS} -ldl -pthread
 
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.
@@ -494,15 +499,16 @@ am--refresh:
 force:
 
 version-generated.c: Makefile $(srcdir)/../version.in $(srcdir)/../../bfd/version.h $(srcdir)/../common/create-version.sh
-	$(SHELL) $(srcdir)/../common/create-version.sh $(srcdir)/.. \
-	    $(host_alias) $(target_alias) $@
+	$(ECHO_GEN) $(SHELL) $(srcdir)/../common/create-version.sh $(srcdir)/.. \
+		$(host_alias) $(target_alias) $@
 
 xml-builtin-generated.c: stamp-xml; @true
 stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)
-	rm -f xml-builtin.tmp
-	$(SHELL) $(XML_DIR)/feature_to_c.sh xml-builtin.tmp $(XML_FILES)
-	$(SHELL) $(srcdir)/../../move-if-change xml-builtin.tmp xml-builtin-generated.c
-	echo stamp > stamp-xml
+	$(SILENCE) rm -f xml-builtin.tmp
+	$(ECHO_GEN_XML_BUILTIN_GENERATED) $(SHELL) $(XML_DIR)/feature_to_c.sh \
+		xml-builtin.tmp $(XML_FILES)
+	$(SILENCE) $(SHELL) $(srcdir)/../../move-if-change xml-builtin.tmp xml-builtin-generated.c
+	$(SILENCE) echo stamp > stamp-xml
 
 .PRECIOUS: xml-builtin.c
 
@@ -527,7 +533,7 @@ IPAGENT_CFLAGS = $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
 	-fPIC -DIN_PROCESS_AGENT \
 	-fvisibility=hidden
 
-IPAGENT_COMPILE = $(COMPILE.pre) $(IPAGENT_CFLAGS) $(COMPILE.post)
+IPAGENT_COMPILE = $(ECHO_CXX) $(COMPILE.pre) $(IPAGENT_CFLAGS) $(COMPILE.post)
 
 # Rules for special cases.
 
@@ -598,16 +604,16 @@ common/%.o: ../common/%.c
 # -generated to identify and clean them easily.
 
 %-generated.c: ../regformats/%.dat | $(regdat_sh)
-	$(SHELL) $(regdat_sh) $< $@
+	$(ECHO_REGDAT) $(SHELL) $(regdat_sh) $< $@
 
 %-generated.c: ../regformats/arm/%.dat | $(regdat_sh)
-	$(SHELL) $(regdat_sh) $< $@
+	$(ECHO_REGDAT) $(SHELL) $(regdat_sh) $< $@
 
 %-generated.c: ../regformats/i386/%.dat | $(regdat_sh)
-	$(SHELL) $(regdat_sh) $< $@
+	$(ECHO_REGDAT) $(SHELL) $(regdat_sh) $< $@
 
 %-generated.c: ../regformats/rs6000/%.dat | $(regdat_sh)
-	$(SHELL) $(regdat_sh) $< $@
+	$(ECHO_REGDAT) $(SHELL) $(regdat_sh) $< $@
 
 #
 # Dependency tracking.
