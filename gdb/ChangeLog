@@ -1,3 +1,13 @@
+2018-03-23  Tom Tromey  <tom@tromey.com>
+
+	* machoread.c (struct oso_el): Add a constructor.  Don't define as
+	a typedef.
+	(macho_register_oso): Remove.
+	(macho_symtab_read): Take a std::vector.
+	(oso_el_compare_name): Now a std::sort comparator.
+	(macho_symfile_read_all_oso): Take a std::vector.
+	(macho_symfile_read): Use std::vector.  Remove cleanups.
+
 2018-03-22  Tom Tromey  <tom@tromey.com>
 
 	* record-full.c (record_full_exec_insn): Use gdb::byte_vector.
