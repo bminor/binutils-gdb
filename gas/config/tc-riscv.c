@@ -993,13 +993,18 @@ normalize_constant_expr (expressionS *ex)
 			- 0x80000000);
 }
 
-/* Fail if an expression is not a constant.  */
+/* Fail if an expression EX is not a constant.  IP is the instruction using EX.
+   MAYBE_CSR is true if the symbol may be an unrecognized CSR name.  */
 
 static void
-check_absolute_expr (struct riscv_cl_insn *ip, expressionS *ex)
+check_absolute_expr (struct riscv_cl_insn *ip, expressionS *ex,
+		     bfd_boolean maybe_csr)
 {
   if (ex->X_op == O_big)
     as_bad (_("unsupported large constant"));
+  else if (maybe_csr && ex->X_op == O_symbol)
+    as_bad (_("unknown CSR `%s'"),
+	    S_GET_NAME (ex->X_add_symbol));
   else if (ex->X_op != O_constant)
     as_bad (_("Instruction %s requires absolute expression"),
 	    ip->insn_mo->name);
@@ -1744,7 +1749,7 @@ rvc_lui:
 
 	    case '<':		/* Shift amount, 0 - 31.  */
 	      my_getExpression (imm_expr, s);
-	      check_absolute_expr (ip, imm_expr);
+	      check_absolute_expr (ip, imm_expr, FALSE);
 	      if ((unsigned long) imm_expr->X_add_number > 31)
 		as_bad (_("Improper shift amount (%lu)"),
 			(unsigned long) imm_expr->X_add_number);
@@ -1755,7 +1760,7 @@ rvc_lui:
 
 	    case '>':		/* Shift amount, 0 - (XLEN-1).  */
 	      my_getExpression (imm_expr, s);
-	      check_absolute_expr (ip, imm_expr);
+	      check_absolute_expr (ip, imm_expr, FALSE);
 	      if ((unsigned long) imm_expr->X_add_number >= xlen)
 		as_bad (_("Improper shift amount (%lu)"),
 			(unsigned long) imm_expr->X_add_number);
@@ -1766,7 +1771,7 @@ rvc_lui:
 
 	    case 'Z':		/* CSRRxI immediate.  */
 	      my_getExpression (imm_expr, s);
-	      check_absolute_expr (ip, imm_expr);
+	      check_absolute_expr (ip, imm_expr, FALSE);
 	      if ((unsigned long) imm_expr->X_add_number > 31)
 		as_bad (_("Improper CSRxI immediate (%lu)"),
 			(unsigned long) imm_expr->X_add_number);
@@ -1781,7 +1786,7 @@ rvc_lui:
 	      else
 		{
 		  my_getExpression (imm_expr, s);
-		  check_absolute_expr (ip, imm_expr);
+		  check_absolute_expr (ip, imm_expr, TRUE);
 		  if ((unsigned long) imm_expr->X_add_number > 0xfff)
 		    as_bad (_("Improper CSR address (%lu)"),
 			    (unsigned long) imm_expr->X_add_number);

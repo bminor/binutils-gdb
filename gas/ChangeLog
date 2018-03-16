@@ -1,3 +1,12 @@
+2018-03-16  Jim Wilson  <jimw@sifive.com>
+
+	* config/tc-riscv.c (check_absolute_expr): Expand comment.  New
+	parameter maybe_csr.  If maybe_csr and O_symbol, print CSR name.
+	(riscv_ip): Add new argument to check_absolute_expr calls.
+	* testsuite/gas/riscv/bad-csr.d: New.
+	* testsuite/gas/riscv/bad-csr.l: New.
+	* testsuite/gas/riscv/bad-csr.s: New.
+
 2018-03-14  Kito Cheng  <kito.cheng@gmail.com>
 
 	* config/tc-riscv.c (opcode_name_list): New.
