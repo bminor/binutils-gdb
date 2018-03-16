@@ -1,3 +1,8 @@
+2018-03-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.trace/tspeed.exp: Add invocation of gdb_load_shlib to ensure
+	that libinproctrace is copied to the target.
+
 2018-03-14  Tom Tromey  <tom@tromey.com>
 
 	PR cli/14977:

@@ -19,6 +19,7 @@ standard_testfile
 set executable $testfile
 
 set ipalib [get_in_proc_agent]
+gdb_load_shlib $ipalib
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable [concat {debug nowarnings c} shlib=$ipalib]] != "" } {
