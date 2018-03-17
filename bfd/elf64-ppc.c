@@ -11356,7 +11356,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       local_off = PPC64_LOCAL_ENTRY_OFFSET (stub_entry->other);
 
-      /* If the branch offset if too big, use a ppc_stub_plt_branch.
+      /* If the branch offset is too big, use a ppc_stub_plt_branch.
 	 Do the same for -R objects without function descriptors.  */
       if (off + (1 << 25) >= (bfd_vma) (1 << 26) - local_off
 	  || (stub_entry->stub_type == ppc_stub_long_branch_r2off
@@ -11700,7 +11700,9 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 		  htab->elf.irelplt->size += rel_size;
 		  htab->got_reli_size += rel_size;
 		}
-	      else if (bfd_link_pic (info))
+	      else if (bfd_link_pic (info)
+		       && !((ent->tls_type & TLS_TPREL) != 0
+			    && bfd_link_executable (info)))
 		{
 		  asection *srel = ppc64_elf_tdata (ibfd)->relgot;
 		  srel->size += rel_size;
