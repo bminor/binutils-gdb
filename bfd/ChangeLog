@@ -1,3 +1,9 @@
+2018-03-21  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Don't access rel[1]
+	without first checking array bounds.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+
 2018-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22983
