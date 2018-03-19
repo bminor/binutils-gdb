@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: gas 2.30.0\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-01-13 13:44+0000\n"
-"PO-Revision-Date: 2018-01-14 14:15+0200\n"
+"PO-Revision-Date: 2018-03-18 14:26+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
 "Language: uk\n"
@@ -19615,7 +19615,7 @@ msgstr "-- незавершений рядок"
 
 #: config/tc-z80.c:392
 msgid "floating point numbers are not implemented"
-msgstr "обробки чисел з рухомою кнопкою не передбачено"
+msgstr "обробки чисел з рухомою крапкою не передбачено"
 
 #: config/tc-z80.c:517 config/tc-z80.c:523
 msgid "mismatched parentheses"

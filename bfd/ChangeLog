@@ -1,3 +1,7 @@
+2018-03-19  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2018-03-15  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (xlate_map_entry): Change types of address

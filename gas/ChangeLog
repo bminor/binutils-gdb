@@ -1,3 +1,7 @@
+2018-03-19  Nick Clifton  <nickc@redhat.com>
+
+	* po/uk.po: Updated Ukranian translation.
+
 2018-03-16  Jim Wilson  <jimw@sifive.com>
 
 	* config/tc-riscv.c (check_absolute_expr): Expand comment.  New
