@@ -1,5 +1,9 @@
 2018-03-21  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_tls_optimize): Delete locsyms.
+
+2018-03-21  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (struct ppc_elf_link_hash_entry): Make tls_mask
 	field unsigned.
 	(update_local_sym_info): Likewise for local_got_tls_masks.

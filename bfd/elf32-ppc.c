@@ -5190,7 +5190,6 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
   for (pass = 0; pass < 2; ++pass)
     for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
       {
-	Elf_Internal_Sym *locsyms = NULL;
 	Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (ibfd);
 	asection *got2 = bfd_get_section_by_name (ibfd, ".got2");
 
@@ -5370,20 +5369,6 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		      struct plt_entry **local_plt;
 		      unsigned char *lgot_masks;
 
-		      if (locsyms == NULL)
-			{
-			  locsyms = (Elf_Internal_Sym *) symtab_hdr->contents;
-			  if (locsyms == NULL)
-			    locsyms = bfd_elf_get_elf_syms (ibfd, symtab_hdr,
-							    symtab_hdr->sh_info,
-							    0, NULL, NULL, NULL);
-			  if (locsyms == NULL)
-			    {
-			      if (elf_section_data (sec)->relocs != relstart)
-				free (relstart);
-			      return FALSE;
-			    }
-			}
 		      lgot_refs = elf_local_got_refcounts (ibfd);
 		      if (lgot_refs == NULL)
 			abort ();
@@ -5409,15 +5394,6 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 	      if (elf_section_data (sec)->relocs != relstart)
 		free (relstart);
 	    }
-
-	if (locsyms != NULL
-	    && (symtab_hdr->contents != (unsigned char *) locsyms))
-	  {
-	    if (!info->keep_memory)
-	      free (locsyms);
-	    else
-	      symtab_hdr->contents = (unsigned char *) locsyms;
-	  }
       }
   htab->do_tls_opt = 1;
   return TRUE;
