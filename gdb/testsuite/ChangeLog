@@ -1,3 +1,14 @@
+2018-03-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/amd64-disp-step-avx.exp: Remove unneeded assembler flag
+	option, syntax was wrong anyway.
+	* gdb.arch/arm-disp-step.exp: Likewise.
+	* gdb.arch/sparc64-regs.exp: Likewise.
+	* gdb.arch/amd64-disp-step.exp: Remove unneeded assembler flag
+	option, syntax was wrong anyway, switch to use
+	prepare_for_testing.
+	* gdb.arch/i386-disp-step.exp: Likewise.
+
 2018-03-23  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.ada/exec_changed.exp: Replace "target_info exists
