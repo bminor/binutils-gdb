@@ -66,7 +66,7 @@ if ![runto_main] {
     return -1
 }
 
-gdb_test "break kill" "Breakpoint $decimal at .*"
+gdb_breakpoint "kill" qualified
 gdb_test "handle SIGABRT nostop noprint pass" ".*" "pass SIGABRT"
 
 # Hit the breakpoint on $syscall for the first time.  In this time,
@@ -119,7 +119,7 @@ gdb_test_multiple $test $test {
 }
 
 delete_breakpoints
-gdb_test "break start" "Breakpoint $decimal at .*"
+gdb_breakpoint "start" qualified
 gdb_continue_to_breakpoint "continue to start"
 
 gdb_assert { 0 == [get_integer_valueof "counter" "1"] } "counter is zero"
@@ -135,7 +135,7 @@ set tpnum [get_integer_valueof "\$bpnum" 0]
 gdb_test "trace *$syscall_insn_next" "Tracepoint $decimal at .*" \
     "tracepoint on instruction following syscall instruction"
 
-gdb_test "break end" "Breakpoint $decimal at .*"
+gdb_breakpoint "end" qualified
 
 gdb_test_no_output "tstart"
 gdb_test "continue" ".*Breakpoint.* end .*at.*$srcfile.*" \

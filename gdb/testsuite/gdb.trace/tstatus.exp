@@ -119,9 +119,9 @@ proc run_trace_experiment {} {
 proc test_tracepoints {} {
     global gdb_prompt
 
-    gdb_test "break begin" ".*" ""
+    gdb_breakpoint "begin" qualified
 
-    gdb_test "break end" ".*" ""
+    gdb_breakpoint "end" qualified
 
     gdb_test "trace gdb_c_test" "Tracepoint .*" \
 	"tracepoint at gdb_c_test"

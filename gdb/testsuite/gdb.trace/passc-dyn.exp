@@ -86,7 +86,7 @@ gdb_test "passcount 3 $tdp4" "Setting tracepoint $tdp4's passcount to 3" \
 
 gdb_test "tstart" ".*" ""
 
-gdb_test "break end" ".*" ""
+gdb_breakpoint "end" qualified
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
     "run trace experiment"

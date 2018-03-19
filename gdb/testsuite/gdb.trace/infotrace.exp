@@ -111,7 +111,7 @@ if { ![gdb_target_supports_trace] } then {
     return 1
 }
 
-gdb_test "break end" "Breakpoint \[0-9\] at .*"
+gdb_breakpoint "end" qualified
 gdb_test_no_output "tstart"
 gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" \
     "continue to end"

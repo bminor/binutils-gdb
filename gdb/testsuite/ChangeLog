@@ -1,3 +1,32 @@
+2018-03-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.trace/actions-changed.exp: Call gdb_breakpoint with the
+	"qualified" option when setting breakpoints.
+	* gdb.trace/backtrace.exp: Likewise.
+	* gdb.trace/circ.exp: Likewise.
+	* gdb.trace/collection.exp: Likewise.
+	* gdb.trace/disconnected-tracing.exp: Likewise.
+	* gdb.trace/ftrace-lock.exp: Likewise.
+	* gdb.trace/ftrace.exp: Likewise.
+	* gdb.trace/infotrace.exp: Likewise.
+	* gdb.trace/packetlen.exp: Likewise.
+	* gdb.trace/passc-dyn.exp: Likewise.
+	* gdb.trace/qtro.exp: Likewise.
+	* gdb.trace/read-memory.exp: Likewise.
+	* gdb.trace/report.exp: Likewise.
+	* gdb.trace/signal.exp: Likewise.
+	* gdb.trace/status-stop.exp: Likewise.
+	* gdb.trace/strace.exp: Likewise.
+	* gdb.trace/tfind.exp: Likewise.
+	* gdb.trace/trace-break.exp: Likewise.
+	* gdb.trace/trace-condition.exp: Likewise.
+	* gdb.trace/trace-mt.exp: Likewise.
+	* gdb.trace/tstatus.exp: Likewise.
+	* gdb.trace/tsv.exp: Likewise.
+	* gdb.trace/unavailable-dwarf-piece.exp: Likewise.
+	* gdb.trace/unavailable.exp: Likewise.
+	* gdb.trace/while-dyn.exp: Likewise.
+
 2018-03-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.trace/tspeed.exp: Add invocation of gdb_load_shlib to ensure

@@ -303,7 +303,7 @@ if ![gdb_target_supports_trace] {
     return -1
 }
 
-gdb_breakpoint "end"
+gdb_breakpoint "end" qualified
 
 with_test_prefix "tracing foo" {
     gdb_test "trace *foo_start_lbl" ".*"

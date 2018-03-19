@@ -48,7 +48,7 @@ if ![gdb_target_supports_trace] {
 # frame (IOW, returns while tfind mode is active).
 proc prepare_for_trace_disassembly { } {
     global gdb_prompt
-    gdb_breakpoint "end"
+    gdb_breakpoint "end" qualified
 
     gdb_test "trace subr" "Tracepoint .*" \
 	"tracepoint at subr"

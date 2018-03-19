@@ -22,7 +22,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 }
 
 proc test_actions_changed { } {
-    gdb_breakpoint "end"
+    gdb_breakpoint "end" qualified
 
     gdb_test "trace subr" "Tracepoint .*" \
 	"tracepoint at subr"

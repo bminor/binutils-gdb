@@ -72,7 +72,7 @@ proc test_while_stepping { while_stepping } {
 
     gdb_test "tstart" ".*" ""
 
-    gdb_test "break end" ".*" ""
+    gdb_breakpoint "end" qualified
     gdb_test "continue" \
 	"Continuing.*Breakpoint $decimal, end.*" \
 	"$while_stepping: run trace experiment"

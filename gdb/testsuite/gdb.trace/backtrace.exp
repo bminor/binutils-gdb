@@ -145,7 +145,7 @@ gdb_trace_setactions "8.6: setup TP to collect stack mem cast expr" \
 
 gdb_test_no_output "tstart" ""
 
-gdb_test "break end" ".*" ""
+gdb_breakpoint "end" qualified
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
     "run trace experiment"

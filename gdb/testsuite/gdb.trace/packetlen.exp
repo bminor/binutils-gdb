@@ -61,7 +61,7 @@ gdb_trace_setactions "setup collect actions" \
 	"end" ""
 
 gdb_test_no_output "tstart" "survive the long packet send"
-gdb_test "break end" ".*" ""
+gdb_breakpoint "end" qualified
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
     "run trace experiment"

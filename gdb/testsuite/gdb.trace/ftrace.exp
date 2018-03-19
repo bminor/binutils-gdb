@@ -104,9 +104,9 @@ proc test_fast_tracepoints {} {
 
     set fourgood 0
 
-    gdb_test "break begin" ".*" ""
+    gdb_breakpoint "begin" qualified
 
-    gdb_test "break end" ".*" ""
+    gdb_breakpoint "end" qualified
 
     gdb_test "print gdb_agent_gdb_trampoline_buffer_error" ".*" ""
 

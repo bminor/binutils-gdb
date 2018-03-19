@@ -160,7 +160,7 @@ gdb_trace_setactions "9.x: setup TP to collect expressions" \
 
 gdb_test "tstart" ".*" ""
 
-gdb_test "break end" ".*" ""
+gdb_breakpoint "end" qualified
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
     "run trace experiment"

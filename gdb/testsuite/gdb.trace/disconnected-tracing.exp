@@ -62,7 +62,7 @@ proc disconnected_tracing {  } {
 	gdb_test "trace start" ".*"
 	gdb_trace_setactions "collect on tracepoint 2" "2" \
 	    "collect foo" "^$"
-	gdb_test "break end" "Breakpoint ${decimal} at .*"
+	gdb_breakpoint "end" qualified
 
 	gdb_test_no_output "tstart"
 
@@ -125,7 +125,7 @@ proc disconnected_tfind {  } {
 	gdb_test "trace start" ".*"
 	gdb_test_no_output "tstart"
 
-	gdb_test "break end" "Breakpoint ${decimal} at .*"
+	gdb_breakpoint "end" qualified
 	gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*"
 	gdb_test_no_output "tstop"
 

@@ -136,7 +136,7 @@ gdb_test "print \$tvar5" " = 15" \
     "Print a trace state variable at start of run"
 
 # Be sure not to fall off the end of the program.
-gdb_test "break end" ".*" ""
+gdb_breakpoint "end" qualified
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
     "run trace experiment"

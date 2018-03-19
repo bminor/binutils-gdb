@@ -61,8 +61,8 @@ proc prepare_for_trace_test {} {
 
     runto_main
 
-    gdb_test "break begin" ".*" ""
-    gdb_test "break end" ".*" ""
+    gdb_breakpoint "begin" qualified
+    gdb_breakpoint "end" qualified
 }
 
 proc run_trace_experiment { test_func } {

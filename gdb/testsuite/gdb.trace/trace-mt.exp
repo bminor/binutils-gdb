@@ -81,7 +81,7 @@ proc break_trace_same_addr { trace_type option } \
 
     gdb_test_no_output "set breakpoint always-inserted ${option}"
 
-    gdb_test "break end" "Breakpoint \[0-9\] at $hex: file.*"
+    gdb_breakpoint "end" qualified
 
     gdb_test "break set_point1" "Breakpoint \[0-9\] at $hex: file.*"
     gdb_test "${trace_type} set_point1" "\(Fast t|T\)racepoint \[0-9\] at $hex: file.*"
