@@ -3238,7 +3238,7 @@ struct ppc_elf_link_hash_entry
 #define TLS_TLS		16	/* Any TLS reloc.  */
 #define TLS_TPRELGD	32	/* TPREL reloc resulting from GD->IE. */
 #define PLT_IFUNC	64	/* STT_GNU_IFUNC.  */
-  char tls_mask;
+  unsigned char tls_mask;
 
   /* Nonzero if we have seen a small data relocation referring to this
      symbol.  */
@@ -3844,7 +3844,7 @@ update_local_sym_info (bfd *abfd,
 {
   bfd_signed_vma *local_got_refcounts = elf_local_got_refcounts (abfd);
   struct plt_entry **local_plt;
-  char *local_got_tls_masks;
+  unsigned char *local_got_tls_masks;
 
   if (local_got_refcounts == NULL)
     {
@@ -3860,7 +3860,7 @@ update_local_sym_info (bfd *abfd,
     }
 
   local_plt = (struct plt_entry **) (local_got_refcounts + symtab_hdr->sh_info);
-  local_got_tls_masks = (char *) (local_plt + symtab_hdr->sh_info);
+  local_got_tls_masks = (unsigned char *) (local_plt + symtab_hdr->sh_info);
   local_got_tls_masks[r_symndx] |= tls_type;
   if (tls_type != PLT_IFUNC)
     local_got_refcounts[r_symndx] += 1;
@@ -5212,7 +5212,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		  enum elf_ppc_reloc_type r_type;
 		  unsigned long r_symndx;
 		  struct elf_link_hash_entry *h = NULL;
-		  char *tls_mask;
+		  unsigned char *tls_mask;
 		  char tls_set, tls_clear;
 		  bfd_boolean is_local;
 		  bfd_signed_vma *got_count;
@@ -5368,7 +5368,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		    {
 		      bfd_signed_vma *lgot_refs;
 		      struct plt_entry **local_plt;
-		      char *lgot_masks;
+		      unsigned char *lgot_masks;
 
 		      if (locsyms == NULL)
 			{
@@ -5389,7 +5389,8 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 			abort ();
 		      local_plt = (struct plt_entry **)
 			(lgot_refs + symtab_hdr->sh_info);
-		      lgot_masks = (char *) (local_plt + symtab_hdr->sh_info);
+		      lgot_masks = (unsigned char *)
+			(local_plt + symtab_hdr->sh_info);
 		      tls_mask = &lgot_masks[r_symndx];
 		      got_count = &lgot_refs[r_symndx];
 		    }
