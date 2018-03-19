@@ -20,9 +20,11 @@
 
 	.text
 
-	.global main
-main:
+	.global _start,main
+_start:
 	nop
+main:
+        nop
 
 /***********************************************/
 
@@ -59,7 +61,7 @@ ro_var:
 
 done:
 	mov $0,%rdi
-	call exit
+	call _exit
 	hlt
 
 /* RIP-relative data for VEX3 test above.  */

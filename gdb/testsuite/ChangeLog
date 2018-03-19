@@ -1,5 +1,13 @@
 2018-03-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.arch/amd64-disp-step-avx.S: Add '_start' label.
+	(done): Call '_exit' not 'exit' to avoid atexit handlers.
+	* gdb.arch/amd64-disp-step-avx.exp: Pass -static, and
+	-nostartfiles when compiling the test.  Confirm that all registers
+	xmm0 to xmm15 are initially 0, and that xmm1 to xmm15 are 0 after.
+
+2018-03-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.arch/amd64-disp-step-avx.exp: Remove unneeded assembler flag
 	option, syntax was wrong anyway.
 	* gdb.arch/arm-disp-step.exp: Likewise.

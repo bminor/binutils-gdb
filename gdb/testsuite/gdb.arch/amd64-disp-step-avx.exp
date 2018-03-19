@@ -25,7 +25,10 @@ if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
 
 standard_testfile .S
 
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
+set options [list debug \
+		 additional_flags=-static \
+		 additional_flags=-nostartfiles]
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $options] } {
     return -1
 }
 
@@ -100,10 +103,15 @@ proc disp_step_func { func } {
 
 # Test a VEX2-encoded RIP-relative instruction.
 with_test_prefix "vex2" {
-    # This case writes to the 'xmm0' register.  Confirm the register's
-    # value is what we believe it is before the AVX instruction runs.
-    gdb_test "p /x \$xmm0.uint128" " = 0x0" \
-	"xmm0 has expected value before"
+    # This test writes to the 'xmm0' register.  As the test is
+    # statically linked, we know that the XMM registers should all
+    # have the default value of 0 at this point in time.  We're about
+    # to run an AVX instruction that will modify $xmm0, but lets first
+    # confirm that all XMM registers are 0.
+    for {set i 0 } { $i < 16 } { incr i } {
+	gdb_test "p /x \$xmm${i}.uint128" " = 0x0" \
+	    "xmm${i} has expected value before"
+    }
 
     disp_step_func "test_rip_vex2"
 
@@ -111,6 +119,12 @@ with_test_prefix "vex2" {
     # modified xmm0.
     gdb_test "p /x \$xmm0.uint128" " = 0x1122334455667788" \
 	"xmm0 has expected value after"
+
+    # And all of the other XMM register should still be 0.
+    for {set i 1 } { $i < 16 } { incr i } {
+	gdb_test "p /x \$xmm${i}.uint128" " = 0x0" \
+	    "xmm${i} has expected value after"
+    }
 }
 
 # Test a VEX3-encoded RIP-relative instruction.
