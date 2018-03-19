@@ -118,6 +118,7 @@ xmltarget=x
 xmlarch=x
 xmlosabi=x
 expedite=x
+feature=x
 exec < $1
 while do_read
 do
@@ -144,6 +145,9 @@ do
     continue
   elif test "${type}" = "expedite"; then
     expedite="${entry}"
+    continue
+  elif test "${type}" = "feature"; then
+    feature="${entry}"
     continue
   elif test "${name}" = x; then
     echo "$0: $1 does not specify \`\`name''." 1>&2
