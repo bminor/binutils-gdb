@@ -1,3 +1,8 @@
+2018-03-19  Tom Tromey  <tom@tromey.com>
+
+	* rust-exp.y (struct_expr_tail, struct_expr_list): Add plain
+	"IDENT" production.
+
 2018-03-19  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
 

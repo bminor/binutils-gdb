@@ -166,6 +166,9 @@ gdb_test "print simple::HiBob + 5" \
 gdb_test "print nosuchsymbol" \
     "No symbol 'nosuchsymbol' in current context"
 
+gdb_test "print simple::HiBob{field1, field2}" \
+    " = simple::HiBob \\{field1: 77, field2: 88\\}"
+
 gdb_test "print e" " = simple::MoreComplicated::Two\\(73\\)"
 gdb_test "print e2" \
     " = simple::MoreComplicated::Four\\{this: true, is: 8, a: 109 'm', struct_: 100, variant: 10\\}"

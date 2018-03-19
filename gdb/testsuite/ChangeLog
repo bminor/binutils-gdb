@@ -1,5 +1,12 @@
 2018-03-19  Tom Tromey  <tom@tromey.com>
 
+	* gdb.rust/simple.rs (main): Add local variables field1, field2,
+	y0.
+	* gdb.rust/simple.exp: Test bare identifier form of struct
+	initializer.
+
+2018-03-19  Tom Tromey  <tom@tromey.com>
+
 	* gdb.gdb/observer.exp: Remove.
 
 2018-03-19  Andreas Arnez  <arnez@linux.vnet.ibm.com>

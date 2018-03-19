@@ -481,6 +481,14 @@ struct_expr_tail:
 		  sf.init = $3;
 		  $$ = sf;
 		}
+|	IDENT
+		{
+		  struct set_field sf;
+
+		  sf.name = $1;
+		  sf.init = ast_path ($1, NULL);
+		  $$ = sf;
+		}
 ;
 
 struct_expr_list:
@@ -502,6 +510,15 @@ struct_expr_list:
 		  sf.init = $3;
 		  $5->push_back (sf);
 		  $$ = $5;
+		}
+|	IDENT ',' struct_expr_list
+		{
+		  struct set_field sf;
+
+		  sf.name = $1;
+		  sf.init = ast_path ($1, NULL);
+		  $3->push_back (sf);
+		  $$ = $3;
 		}
 ;
 
