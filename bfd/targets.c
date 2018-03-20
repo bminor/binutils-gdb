@@ -612,6 +612,8 @@ extern const bfd_target arm_coff_be_vec;
 extern const bfd_target arm_coff_le_vec;
 extern const bfd_target arm_elf32_be_vec;
 extern const bfd_target arm_elf32_le_vec;
+extern const bfd_target arm_elf32_fdpic_be_vec;
+extern const bfd_target arm_elf32_fdpic_le_vec;
 extern const bfd_target arm_elf32_nacl_be_vec;
 extern const bfd_target arm_elf32_nacl_le_vec;
 extern const bfd_target arm_elf32_symbian_be_vec;
@@ -1021,6 +1023,8 @@ static const bfd_target * const _bfd_target_vector[] =
 	&arm_coff_le_vec,
 	&arm_elf32_be_vec,
 	&arm_elf32_le_vec,
+	&arm_elf32_fdpic_be_vec,
+	&arm_elf32_fdpic_le_vec,
 	&arm_elf32_symbian_be_vec,
 	&arm_elf32_symbian_le_vec,
 	&arm_elf32_vxworks_be_vec,

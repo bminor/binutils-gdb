@@ -436,7 +436,7 @@ case "${targ}" in
     ;;
   armeb-*-elf | arm*b-*-freebsd* | arm*b-*-linux-* | armeb-*-eabi*)
     targ_defvec=arm_elf32_be_vec
-    targ_selvecs=arm_elf32_le_vec
+    targ_selvecs="arm_elf32_fdpic_be_vec arm_elf32_le_vec arm_elf32_fdpic_le_vec"
     ;;
   arm-*-kaos*)
     targ_defvec=arm_elf32_le_vec
@@ -446,7 +446,7 @@ case "${targ}" in
   arm*-*-uclinux* | arm-*-kfreebsd*-gnu | \
   arm*-*-eabi* | arm-*-rtems*)
     targ_defvec=arm_elf32_le_vec
-    targ_selvecs=arm_elf32_be_vec
+    targ_selvecs="arm_elf32_fdpic_le_vec arm_elf32_be_vec arm_elf32_fdpic_be_vec"
     ;;
   arm*-*-vxworks | arm*-*-windiss)
     targ_defvec=arm_elf32_vxworks_le_vec
