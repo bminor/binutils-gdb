@@ -17086,10 +17086,10 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  On VxWorks,
-     the _GLOBAL_OFFSET_TABLE_ symbol is not absolute: it is relative
-     to the ".got" section.  */
+     and for FDPIC, the _GLOBAL_OFFSET_TABLE_ symbol is not absolute:
+     it is relative to the ".got" section.  */
   if (h == htab->root.hdynamic
-      || (!htab->vxworks_p && h == htab->root.hgot))
+      || (!htab->fdpic_p && !htab->vxworks_p && h == htab->root.hgot))
     sym->st_shndx = SHN_ABS;
 
   return TRUE;
