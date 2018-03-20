@@ -1,6 +1,30 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* elf32-arm.c (struct fdpic_local): New.
+	(elf_arm_obj_tdata): Add local_fdpic_cnts field.
+	(elf32_arm_local_fdpic_cnts): New.
+	(struct fdpic_global): New.
+	(elf32_arm_link_hash_entry): Add fdpic_cnts field.
+	(elf32_arm_link_hash_table): Add srofixup field.
+	(arm_elf_add_rofixup): New.
+	(arm_elf_fill_funcdesc): New.
+	(elf32_arm_link_hash_newfunc): Handle fdpic_cnts.
+	(elf32_arm_allocate_local_sym_info): Likewise.
+	(create_got_section): Create .rofixup section.
+	(elf32_arm_copy_indirect_symbol): Handle fdpic_cnts.
+	(bfd_elf32_arm_set_target_params): Handle FDPIC.
+	(elf32_arm_final_link_relocate): Likewise.
+	(elf32_arm_check_relocs): Likewise.
+	(allocate_dynrelocs_for_symbol): Likewise.
+	(elf32_arm_size_dynamic_sections): Likewise.
+	(elf32_arm_finish_dynamic_sections): Likewise.
+	(elf32_arm_output_arch_local_syms): Likewise.
+	(elf32_arm_fdpic_omit_section_dynsym): New.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* bfd-in2.c (BFD_RELOC_ARM_GOTFUNCDESC)
 	(BFD_RELOC_ARM_GOTOFFFUNCDESC, BFD_RELOC_ARM_FUNCDESC)
 	(BFD_RELOC_ARM_FUNCDESC_VALUE): New.

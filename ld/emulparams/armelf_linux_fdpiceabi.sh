@@ -9,5 +9,9 @@ OTHER_READONLY_SECTIONS="
   .ARM.extab ${RELOCATING-0} : { *(.ARM.extab${RELOCATING+* .gnu.linkonce.armextab.*}) }
   ${RELOCATING+ PROVIDE_HIDDEN (__exidx_start = .); }
   .ARM.exidx ${RELOCATING-0} : { *(.ARM.exidx${RELOCATING+* .gnu.linkonce.armexidx.*}) }
-  ${RELOCATING+ PROVIDE_HIDDEN (__exidx_end = .); }"
-
+  ${RELOCATING+ PROVIDE_HIDDEN (__exidx_end = .); }
+  .rofixup : {
+	${RELOCATING+__ROFIXUP_LIST__ = .;}
+	*(.rofixup)
+	${RELOCATING+__ROFIXUP_END__ = .;}
+}"
