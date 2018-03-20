@@ -2229,6 +2229,22 @@ static const unsigned long dl_tlsdesc_lazy_trampoline [] =
   0x00000018, /* 4:   .word  _GLOBAL_OFFSET_TABLE_ - 2b - 8 */
 };
 
+/* ARM FDPIC PLT entry.  */
+/* The last 5 words contain PLT lazy fragment code and data.  */
+static const bfd_vma elf32_arm_fdpic_plt_entry [] =
+  {
+    0xe59fc008,    /* ldr     r12, .L1 */
+    0xe08cc009,    /* add     r12, r12, r9 */
+    0xe59c9004,    /* ldr     r9, [r12, #4] */
+    0xe59cf000,    /* ldr     pc, [r12] */
+    0x00000000,    /* L1.     .word   foo(GOTOFFFUNCDESC) */
+    0x00000000,    /* L1.     .word   foo(funcdesc_value_reloc_offset) */
+    0xe51fc00c,    /* ldr     r12, [pc, #-12] */
+    0xe92d1000,    /* push    {r12} */
+    0xe599c004,    /* ldr     r12, [r9, #4] */
+    0xe599f000,    /* ldr     pc, [r9] */
+  };
+
 #ifdef FOUR_WORD_PLT
 
 /* The first entry in a procedure linkage table looks like
@@ -3855,6 +3871,14 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 	}
       htab->obfd = saved_obfd;
     }
+
+  if (htab->fdpic_p) {
+    htab->plt_header_size = 0;
+    if (info->flags & DF_BIND_NOW)
+      htab->plt_entry_size = 4 * (ARRAY_SIZE(elf32_arm_fdpic_plt_entry) - 5);
+    else
+      htab->plt_entry_size = 4 * ARRAY_SIZE(elf32_arm_fdpic_plt_entry);
+  }
 
   if (!htab->root.splt
       || !htab->root.srelplt
@@ -9392,8 +9416,22 @@ elf32_arm_allocate_plt_entry (struct bfd_link_info *info,
       splt = htab->root.splt;
       sgotplt = htab->root.sgotplt;
 
-      /* Allocate room for an R_JUMP_SLOT relocation in .rel.plt.  */
-      elf32_arm_allocate_dynrelocs (info, htab->root.srelplt, 1);
+    if (htab->fdpic_p)
+      {
+	/* Allocate room for R_ARM_FUNCDESC_VALUE.  */
+	/* For lazy binding, relocations will be put into .rel.plt, in
+	   .rel.got otherwise.  */
+	/* FIXME: today we don't support lazy binding so put it in .rel.got */
+	if (info->flags & DF_BIND_NOW)
+	  elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
+	else
+	  elf32_arm_allocate_dynrelocs (info, htab->root.srelplt, 1);
+      }
+    else
+      {
+	/* Allocate room for an R_JUMP_SLOT relocation in .rel.plt.  */
+	elf32_arm_allocate_dynrelocs (info, htab->root.srelplt, 1);
+      }
 
       /* If this is the first .plt entry, make room for the special
 	 first entry.  */
@@ -9417,7 +9455,11 @@ elf32_arm_allocate_plt_entry (struct bfd_link_info *info,
 	arm_plt->got_offset = sgotplt->size;
       else
 	arm_plt->got_offset = sgotplt->size - 8 * htab->num_tls_desc;
-      sgotplt->size += 4;
+      if (htab->fdpic_p)
+	/* Function descriptor takes 64 bits in GOT.  */
+        sgotplt->size += 8;
+      else
+	sgotplt->size += 4;
     }
 }
 
@@ -9526,7 +9568,11 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	 in all the symbols for which we are making plt entries.
 	 After the reserved .got.plt entries, all symbols appear in
 	 the same order as in .plt.  */
-      plt_index = (got_offset - got_header_size) / 4;
+      if (htab->fdpic_p)
+        /* Function descriptor takes 8 bytes.  */
+        plt_index = (got_offset - got_header_size) / 8;
+      else
+        plt_index = (got_offset - got_header_size) / 4;
 
       /* Calculate the address of the GOT entry.  */
       got_address = (sgot->output_section->vma
@@ -9633,6 +9679,42 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 			elf32_arm_nacl_plt_entry[3]
 			| (tail_displacement & 0x00ffffff),
 			ptr + 12);
+	}
+      else if (htab->fdpic_p)
+	{
+	  /* Fill-up Thumb stub if needed.  */
+	  if (elf32_arm_plt_needs_thumb_stub_p (info, arm_plt))
+	    {
+	      put_thumb_insn (htab, output_bfd,
+			      elf32_arm_plt_thumb_stub[0], ptr - 4);
+	      put_thumb_insn (htab, output_bfd,
+			      elf32_arm_plt_thumb_stub[1], ptr - 2);
+	    }
+	  put_arm_insn(htab, output_bfd,
+		       elf32_arm_fdpic_plt_entry[0], ptr + 0);
+	  put_arm_insn(htab, output_bfd,
+		       elf32_arm_fdpic_plt_entry[1], ptr + 4);
+	  put_arm_insn(htab, output_bfd,
+		       elf32_arm_fdpic_plt_entry[2], ptr + 8);
+	  put_arm_insn(htab, output_bfd,
+		       elf32_arm_fdpic_plt_entry[3], ptr + 12);
+	  bfd_put_32 (output_bfd, got_offset, ptr + 16);
+
+	  if (!(info->flags & DF_BIND_NOW))
+	    {
+	      /* funcdesc_value_reloc_offset.  */
+	      bfd_put_32 (output_bfd,
+			  htab->root.srelplt->reloc_count * RELOC_SIZE (htab),
+			  ptr + 20);
+	      put_arm_insn(htab, output_bfd,
+			   elf32_arm_fdpic_plt_entry[6], ptr + 24);
+	      put_arm_insn(htab, output_bfd,
+			   elf32_arm_fdpic_plt_entry[7], ptr + 28);
+	      put_arm_insn(htab, output_bfd,
+			   elf32_arm_fdpic_plt_entry[8], ptr + 32);
+	      put_arm_insn(htab, output_bfd,
+			   elf32_arm_fdpic_plt_entry[9], ptr + 36);
+	    }
 	}
       else if (using_thumb_only (htab))
 	{
@@ -9744,22 +9826,61 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else
 	{
-	  rel.r_info = ELF32_R_INFO (dynindx, R_ARM_JUMP_SLOT);
-	  initial_got_entry = (splt->output_section->vma
-			       + splt->output_offset);
+	  /* For FDPIC we will have to resolve a R_ARM_FUNCDESC_VALUE
+	     used by PLT entry.  */
+	  if (htab->fdpic_p)
+	    {
+	      rel.r_info = ELF32_R_INFO (dynindx, R_ARM_FUNCDESC_VALUE);
+	      initial_got_entry = 0;
+	    }
+	  else
+	    {
+	      rel.r_info = ELF32_R_INFO (dynindx, R_ARM_JUMP_SLOT);
+	      initial_got_entry = (splt->output_section->vma
+				   + splt->output_offset);
+	    }
 	}
 
       /* Fill in the entry in the global offset table.  */
       bfd_put_32 (output_bfd, initial_got_entry,
 		  sgot->contents + got_offset);
+
+      if (htab->fdpic_p && !(info->flags & DF_BIND_NOW))
+	{
+	  /* Setup initial funcdesc value.  */
+	  /* FIXME: we don't support lazy binding because there is a
+	     race condition between both words getting written and
+	     some other thread attempting to read them. The ARM
+	     architecture does not have an atomic 64 bit load/store
+	     instruction that could be used to prevent it; it is
+	     recommended that threaded FDPIC applications run with the
+	     LD_BIND_NOW environment variable set.  */
+	  bfd_put_32(output_bfd, plt_address + 0x18,
+		     sgot->contents + got_offset);
+	  bfd_put_32(output_bfd, -1 /*TODO*/,
+		     sgot->contents + got_offset + 4);
+	}
     }
 
   if (dynindx == -1)
     elf32_arm_add_dynreloc (output_bfd, info, srel, &rel);
   else
     {
-      loc = srel->contents + plt_index * RELOC_SIZE (htab);
-      SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
+      if (htab->fdpic_p)
+	{
+	  /* For FDPIC we put PLT relocationss into .rel.got when not
+	     lazy binding otherwise we put them in .rel.plt.  For now,
+	     we don't support lazy binding so put it in .rel.got.  */
+	  if (info->flags & DF_BIND_NOW)
+	    elf32_arm_add_dynreloc(output_bfd, info, htab->root.srelgot, &rel);
+	  else
+	    elf32_arm_add_dynreloc(output_bfd, info, htab->root.srelplt, &rel);
+	}
+      else
+	{
+	  loc = srel->contents + plt_index * RELOC_SIZE (htab);
+	  SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
+	}
     }
 
   return TRUE;
@@ -17573,6 +17694,19 @@ elf32_arm_output_plt_map_1 (output_arch_syminfo *osi,
     {
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
 	return FALSE;
+    }
+  else if (htab->fdpic_p)
+    {
+      if (elf32_arm_plt_needs_thumb_stub_p (osi->info, arm_plt))
+        if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr - 4))
+          return FALSE;
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
+        return FALSE;
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 16))
+        return FALSE;
+      if (htab->plt_entry_size == 4 * ARRAY_SIZE(elf32_arm_fdpic_plt_entry))
+        if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 24))
+          return FALSE;
     }
   else if (using_thumb_only (htab))
     {
