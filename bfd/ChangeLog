@@ -1,6 +1,12 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* elf32-arm.c (bfd_elf32_arm_set_target_params): Handle FDPIC case
+	for R_ARM_TARGET2.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* elf32-arm.c (DEFAULT_STACK_SIZE): New.
 	(elf32_arm_always_size_sections): Create stack segment.
 
