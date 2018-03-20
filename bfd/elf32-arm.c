@@ -2251,6 +2251,9 @@ typedef unsigned short int insn16;
    section.  */
 #define ELF_DYNAMIC_INTERPRETER     "/usr/lib/ld.so.1"
 
+/* FDPIC default stack size.  */
+#define DEFAULT_STACK_SIZE 0x8000
+
 static const unsigned long tls_trampoline [] =
 {
   0xe08e0000,		/* add r0, lr, r0 */
@@ -16485,6 +16488,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
       /* Not an error, just cut short the traversal.  */
       return FALSE;
     }
+
   return TRUE;
 }
 
@@ -16955,6 +16959,9 @@ elf32_arm_always_size_sections (bfd *output_bfd,
 				struct bfd_link_info *info)
 {
   asection *tls_sec;
+  struct elf32_arm_link_hash_table *htab;
+
+  htab = elf32_arm_hash_table (info);
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -16987,6 +16994,12 @@ elf32_arm_always_size_sections (bfd *output_bfd,
 	  (*bed->elf_backend_hide_symbol) (info, tlsbase, TRUE);
 	}
     }
+
+  if (htab->fdpic_p && !bfd_link_relocatable (info)
+      && !bfd_elf_stack_segment_size (output_bfd, info,
+				      "__stacksize", DEFAULT_STACK_SIZE))
+    return FALSE;
+
   return TRUE;
 }
 
