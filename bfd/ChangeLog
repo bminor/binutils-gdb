@@ -1,6 +1,23 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* bfd-in2.c (BFD_RELOC_ARM_GOTFUNCDESC)
+	(BFD_RELOC_ARM_GOTOFFFUNCDESC, BFD_RELOC_ARM_FUNCDESC)
+	(BFD_RELOC_ARM_FUNCDESC_VALUE): New.
+	* elf32-arm.c (elf32_arm_howto_table_2): Add R_ARM_GOTFUNCDESC,
+	R_ARM_GOTOFFFUNCDESC, R_ARM_FUNCDESC, R_ARM_FUNCDESC_VALUE.
+	(elf32_arm_howto_from_type): Take new members of
+	elf32_arm_howto_table_2 into account.
+	(elf32_arm_reloc_map): Add BFD_RELOC_ARM_GOTFUNCDESC,
+	BFD_RELOC_ARM_GOTOFFFUNCDESC, BFD_RELOC_ARM_FUNCDESC,
+	BFD_RELOC_ARM_FUNCDESC_VALUE.
+	* reloc.c: Add BFD_RELOC_ARM_GOTFUNCDESC,
+	BFD_RELOC_ARM_GOTOFFFUNCDESC, BFD_RELOC_ARM_FUNCDESC,
+	BFD_RELOC_ARM_FUNCDESC_VALUE.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* elf32-arm.c (elf32_arm_print_private_bfd_data): Support
 	EF_ARM_PIC and ELFOSABI_ARM_FDPIC.
 	(elf32_arm_post_process_headers): Support ELFOSABI_ARM_FDPIC.

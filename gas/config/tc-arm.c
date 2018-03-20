@@ -19303,7 +19303,13 @@ static struct reloc_entry reloc_names[] =
   { "tlscall", BFD_RELOC_ARM_TLS_CALL},
 	{ "TLSCALL", BFD_RELOC_ARM_TLS_CALL},
   { "tlsdescseq", BFD_RELOC_ARM_TLS_DESCSEQ},
-	{ "TLSDESCSEQ", BFD_RELOC_ARM_TLS_DESCSEQ}
+	{ "TLSDESCSEQ", BFD_RELOC_ARM_TLS_DESCSEQ},
+  { "gotfuncdesc", BFD_RELOC_ARM_GOTFUNCDESC },
+	{ "GOTFUNCDESC", BFD_RELOC_ARM_GOTFUNCDESC },
+  { "gotofffuncdesc", BFD_RELOC_ARM_GOTOFFFUNCDESC },
+	{ "GOTOFFFUNCDESC", BFD_RELOC_ARM_GOTOFFFUNCDESC },
+  { "funcdesc", BFD_RELOC_ARM_FUNCDESC },
+	{ "FUNCDESC", BFD_RELOC_ARM_FUNCDESC }
 };
 #endif
 
@@ -23992,6 +23998,22 @@ md_apply_fix (fixS *	fixP,
       if (fixP->fx_done || !seg->use_rela_p)
 	md_number_to_chars (buf, fixP->fx_offset, 4);
       break;
+
+      /* Relocations for FDPIC.  */
+    case BFD_RELOC_ARM_GOTFUNCDESC:
+    case BFD_RELOC_ARM_GOTOFFFUNCDESC:
+    case BFD_RELOC_ARM_FUNCDESC:
+      if (arm_fdpic)
+	{
+	  if (fixP->fx_done || !seg->use_rela_p)
+	    md_number_to_chars (buf, 0, 4);
+	}
+      else
+	{
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("Relocation supported only in FDPIC mode"));
+      }
+      break;
 #endif
 
     case BFD_RELOC_RVA:
@@ -24753,6 +24775,9 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC:
     case BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC:
     case BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC:
+    case BFD_RELOC_ARM_GOTFUNCDESC:
+    case BFD_RELOC_ARM_GOTOFFFUNCDESC:
+    case BFD_RELOC_ARM_FUNCDESC:
       code = fixp->fx_r_type;
       break;
 

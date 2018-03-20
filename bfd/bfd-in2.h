@@ -3526,6 +3526,12 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARM_THUMB_MOVW_PCREL,
   BFD_RELOC_ARM_THUMB_MOVT_PCREL,
 
+/* ARM FDPIC specific relocations. */
+  BFD_RELOC_ARM_GOTFUNCDESC,
+  BFD_RELOC_ARM_GOTOFFFUNCDESC,
+  BFD_RELOC_ARM_FUNCDESC,
+  BFD_RELOC_ARM_FUNCDESC_VALUE,
+
 /* Relocations for setting up GOTs and PLTs for shared libraries.  */
   BFD_RELOC_ARM_JUMP_SLOT,
   BFD_RELOC_ARM_GLOB_DAT,

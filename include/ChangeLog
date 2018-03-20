@@ -1,6 +1,13 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* elf/arm.h (R_ARM_GOTFUNCDESC, R_ARM_GOTOFFFUNCDESC)
+	(R_ARM_FUNCDESC)
+	(R_ARM_FUNCDESC_VALUE): Define new relocations.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* elf/arm.h (EF_ARM_FDPIC): New.
 
 2018-04-18  Alan Modra  <amodra@gmail.com>
