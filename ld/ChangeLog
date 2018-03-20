@@ -1,6 +1,21 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* testsuite/ld-arm/arm-elf.exp: Execute the new FDPIC tests.
+	* testsuite/ld-arm/fdpic-main.d: New test.
+	* testsuite/ld-arm/fdpic-main.ld: New.
+	* testsuite/ld-arm/fdpic-main.r: New.
+	* testsuite/ld-arm/fdpic-main.s: New.
+	* testsuite/ld-arm/fdpic-main.sym: New.
+	* testsuite/ld-arm/fdpic-shared.d: New test.
+	* testsuite/ld-arm/fdpic-shared.ld: New.
+	* testsuite/ld-arm/fdpic-shared.r: New.
+	* testsuite/ld-arm/fdpic-shared.s: New.
+	* testsuite/ld-arm/fdpic-shared.sym: New.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* testsuite/ld-elf/pr2404b.c (main): Rename time variable into
 	time1.
 
