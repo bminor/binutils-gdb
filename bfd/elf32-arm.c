@@ -8957,7 +8957,9 @@ bfd_elf32_arm_set_target_params (struct bfd *output_bfd,
     return;
 
   globals->target1_is_rel = params->target1_is_rel;
-  if (strcmp (params->target2_type, "rel") == 0)
+  if (globals->fdpic_p)
+    globals->target2_reloc = R_ARM_GOT32;
+  else if (strcmp (params->target2_type, "rel") == 0)
     globals->target2_reloc = R_ARM_REL32;
   else if (strcmp (params->target2_type, "abs") == 0)
     globals->target2_reloc = R_ARM_ABS32;
