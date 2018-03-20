@@ -1,3 +1,9 @@
+2018-03-20  Stephen Roberts  <stephen.roberts@arm.com>
+
+	* gdb.perf/template-breakpoints.cc: New file.
+	* gdb.perf/template-breakpoints.exp: New file.
+	* gdb.perf/template-breakpoints.py: New file.
+
 2018-03-19  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/simple.rs (main): Add local variables field1, field2,

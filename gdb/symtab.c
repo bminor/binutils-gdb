@@ -3046,8 +3046,6 @@ find_symbol_at_address (CORE_ADDR address)
    find the one whose first PC is closer than that of the next line in this
    symtab.  */
 
-/* If it's worth the effort, we could be using a binary search.  */
-
 struct symtab_and_line
 find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 {
@@ -3214,15 +3212,17 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       if (item->pc > pc && (!alt || item->pc < alt->pc))
 	alt = item;
 
-      for (i = 0; i < len; i++, item++)
-	{
-	  /* Leave prev pointing to the linetable entry for the last line
-	     that started at or before PC.  */
-	  if (item->pc > pc)
-	    break;
+    auto pc_compare = [](const CORE_ADDR & pc,
+			const struct linetable_entry & lhs)->bool
+    {
+      return pc < lhs.pc;
+    };
 
-	  prev = item;
-	}
+    struct linetable_entry *first = item;
+    struct linetable_entry *last = item + len;
+    item = std::upper_bound (first, last, pc, pc_compare);
+    if (item != first)
+      prev = item - 1;		/* Found a matching item.  */
 
       /* At this point, prev points at the line whose start addr is <= pc, and
          item points at the next line.  If we ran off the end of the linetable
@@ -3247,7 +3247,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       /* If another line (denoted by ITEM) is in the linetable and its
          PC is after BEST's PC, but before the current BEST_END, then
 	 use ITEM's PC as the new best_end.  */
-      if (best && i < len && item->pc > best->pc
+      if (best && item < last && item->pc > best->pc
           && (best_end == 0 || best_end > item->pc))
 	best_end = item->pc;
     }
