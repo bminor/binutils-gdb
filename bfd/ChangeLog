@@ -1,6 +1,15 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* elf32-arm.c (elf32_arm_fdpic_plt_entry): New.
+	(elf32_arm_create_dynamic_sections): Handle FDPIC.
+	(elf32_arm_allocate_plt_entry): Likewise.
+	(elf32_arm_populate_plt_entry): Likewise.
+	(elf32_arm_output_plt_map_1): Likewise.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* elf32-arm.c (struct fdpic_local): New.
 	(elf_arm_obj_tdata): Add local_fdpic_cnts field.
 	(elf32_arm_local_fdpic_cnts): New.
