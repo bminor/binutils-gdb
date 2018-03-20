@@ -172,6 +172,7 @@ ALL_EMULATION_SOURCES = \
 	earmelf_fuchsia.c \
 	earmelf_linux.c \
 	earmelf_linux_eabi.c \
+	earmelf_linux_fdpiceabi.c \
 	earmelf_nacl.c \
 	earmelf_nbsd.c \
 	earmelf_phoenix.c \
@@ -181,6 +182,7 @@ ALL_EMULATION_SOURCES = \
 	earmelfb_fuchsia.c \
 	earmelfb_linux.c \
 	earmelfb_linux_eabi.c \
+	earmelfb_linux_fdpiceabi.c \
 	earmelfb_nacl.c \
 	earmelfb_nbsd.c \
 	earmnto.c \
@@ -703,6 +705,11 @@ earmelf_linux_eabi.c: $(srcdir)/emulparams/armelf_linux_eabi.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
+earmelf_linux_fdpiceabi.c: $(srcdir)/emulparams/armelf_linux_fdpiceabi.sh \
+  $(srcdir)/emulparams/armelf_linux.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
 earmelf_nacl.c: $(srcdir)/emulparams/armelf_nacl.sh \
   $(srcdir)/emulparams/armelf_linux_eabi.sh \
   $(srcdir)/emulparams/armelf_linux.sh \
@@ -745,6 +752,12 @@ earmelfb_linux.c: $(srcdir)/emulparams/armelfb_linux.sh \
 
 earmelfb_linux_eabi.c: $(srcdir)/emulparams/armelfb_linux_eabi.sh \
   $(srcdir)/emulparams/armelf_linux_eabi.sh \
+  $(srcdir)/emulparams/armelf_linux.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+earmelfb_linux_fdpiceabi.c: $(srcdir)/emulparams/armelfb_linux_fdpiceabi.sh \
+  $(srcdir)/emulparams/armelfb_linux_fdpiceabi.sh \
   $(srcdir)/emulparams/armelf_linux.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

@@ -3228,6 +3228,9 @@ struct elf32_arm_link_hash_table
   unsigned int bfd_count;
   unsigned int top_index;
   asection **input_list;
+
+  /* True if the target system uses FDPIC. */
+  int fdpic_p;
 };
 
 static inline int
@@ -3806,6 +3809,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
 #endif
   ret->use_rel = TRUE;
   ret->obfd = abfd;
+  ret->fdpic_p = 0;
 
   if (!bfd_hash_table_init (&ret->stub_hash_table, stub_hash_newfunc,
 			    sizeof (struct elf32_arm_stub_hash_entry)))
@@ -19410,6 +19414,46 @@ elf32_arm_nacl_plt_sym_val (bfd_vma i, const asection *plt,
 #undef	ELF_COMMONPAGESIZE
 #define ELF_COMMONPAGESIZE		0x1000
 
+
+/* FDPIC Targets.  */
+
+#undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		arm_elf32_fdpic_le_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		"elf32-littlearm-fdpic"
+#undef  TARGET_BIG_SYM
+#define TARGET_BIG_SYM			arm_elf32_fdpic_be_vec
+#undef  TARGET_BIG_NAME
+#define TARGET_BIG_NAME			"elf32-bigarm-fdpic"
+#undef elf_match_priority
+#define elf_match_priority		128
+
+/* Like elf32_arm_link_hash_table_create -- but overrides
+   appropriately for FDPIC.  */
+
+static struct bfd_link_hash_table *
+elf32_arm_fdpic_link_hash_table_create (bfd *abfd)
+{
+  struct bfd_link_hash_table *ret;
+
+  ret = elf32_arm_link_hash_table_create (abfd);
+  if (ret)
+    {
+      struct elf32_arm_link_hash_table *htab = (struct elf32_arm_link_hash_table *) ret;
+
+      htab->fdpic_p = 1;
+    }
+  return ret;
+}
+
+#undef  elf32_bed
+#define elf32_bed				elf32_arm_fdpic_bed
+
+#undef  bfd_elf32_bfd_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_create 	elf32_arm_fdpic_link_hash_table_create
+
+#include "elf32-target.h"
+#undef elf_match_priority
 
 /* VxWorks Targets.  */
 

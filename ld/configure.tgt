@@ -129,7 +129,12 @@ arm*b-*-linux-*)	targ_emul=armelfb_linux
 			targ_extra_libpath="armelf_linux"
 			;;
 arm*-*-linux-*eabi*)	targ_emul=armelf_linux_eabi
-			targ_extra_emuls=armelfb_linux_eabi
+			targ_extra_emuls="armelfb_linux_eabi"
+			targ_extra_libpath=$targ_extra_emuls
+			;;
+arm*-*-uclinuxfdpiceabi)
+			targ_emul=armelf_linux_eabi
+			targ_extra_emuls="armelfb_linux_eabi armelf_linux_fdpiceabi armelfb_linux_fdpiceabi"
 			targ_extra_libpath=$targ_extra_emuls
 			;;
 arm*-*-linux-*)		targ_emul=armelf_linux

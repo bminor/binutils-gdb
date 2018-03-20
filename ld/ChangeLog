@@ -1,3 +1,14 @@
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add
+	earmelf_linux_fdpiceabi.c and earmelfb_linux_fdpiceabi.c.
+	(earmelf_linux_fdpiceabi.c, earmelfb_linux_fdpiceabi.c): New rules.
+	* Makefile.in: Regenerate.
+	* configure.tgt (arm*-*-uclinuxfdpiceabi): Handle new target.
+	* emulparams/armelf_linux_fdpiceabi.sh: New.
+	* emulparams/armelfb_linux_fdpiceabi.sh: New.
+
 2018-04-25  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am: Remove arm-aout and arm-coff support.

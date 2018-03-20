@@ -386,9 +386,9 @@ case "${targ}" in
     ;;
   arm-*-elf | arm*-*-freebsd* | arm*-*-linux-* | arm*-*-conix* | \
   arm*-*-uclinux* | arm-*-kfreebsd*-gnu | \
-  arm*-*-eabi* | arm-*-rtems*)
+  arm*-*-eabi* | arm-*-rtems* | arm*-*-uclinuxfdpiceabi)
     targ_defvec=arm_elf32_le_vec
-    targ_selvecs=arm_elf32_be_vec
+    targ_selvecs="arm_elf32_fdpic_le_vec arm_elf32_be_vec arm_elf32_fdpic_be_vec"
     ;;
   arm*-*-vxworks | arm*-*-windiss)
     targ_defvec=arm_elf32_vxworks_le_vec

@@ -1,3 +1,20 @@
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
+	* config.bfd (arm*-*-linux-*): Add arm_elf32_fdpic_be_vec and
+	arm_elf32_fdpic_le_vec to targ_selvecs. Accept
+	arm*-*-uclinuxfdpiceabi.
+	* configure.ac: Add support for arm_elf32_fdpic_be_vec and
+	arm_elf32_fdpic_le_vec.
+	* configure: Regenerate.
+	* elf32-arm.c (struct elf32_arm_link_hash_table): Add fdpic_p.
+	(elf32_arm_link_hash_table_create): Initialize fdpic_p.
+	(TARGET_LITTLE_SYM, TARGET_LITTLE_NAME, TARGET_BIG_SYM)
+	(TARGET_BIG_NAME, elf_match_priority): Define for FDPIC targets.
+	(elf32_arm_fdpic_link_hash_table_create): New.
+	* targets.c (_bfd_target_vector): Add arm_elf32_fdpic_be_vec and
+	arm_elf32_fdpic_le_vec.
+
 2018-04-25  Alan Modra  <amodra@gmail.com>
 
 	* elf-linux-core.h: Disable gcc-8 string truncation warning.
