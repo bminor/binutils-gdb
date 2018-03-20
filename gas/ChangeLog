@@ -1,6 +1,15 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* config/tc-arm.c (reloc_names): Add TLSGD_FDPIC, TLSLDM_FDPIC,
+	GOTTPOFF_FDIC relocations.
+	(md_apply_fix): Handle the new TLS FDPIC relocations.
+	(tc_gen_reloc): Likewise.
+	(arm_fix_adjustable): Likewise.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* config/tc-arm.c (reloc_names): Add gotfuncdesc, gotofffuncdesc,
 	funcdesc.
 	(md_apply_fix): Support the new relocations.
