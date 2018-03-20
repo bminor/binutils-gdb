@@ -1018,6 +1018,33 @@ set armeabitests_nonacl {
      "preempt-app"}
 }
 
+set armfdpiceabitests {
+    {"FDPIC ARM shared library little endian"
+     "-shared -T fdpic-shared.ld --hash-style=sysv -EL -m armelf_linux_fdpiceabi" ""
+     "-EL -fdpic" {fdpic-shared.s}
+     {{objdump -fdw fdpic-shared.d} {objdump -Rw fdpic-shared.r}
+      {readelf -Ds fdpic-shared.sym}}
+     "fdpic-shared.so"}
+    {"FDPIC ARM dynamic executable little endian"
+     "tmpdir/fdpic-shared.so -T fdpic-main.ld --hash-style=sysv -EL -m armelf_linux_fdpiceabi" ""
+     "-EL -fdpic" {fdpic-main.s}
+     {{objdump -fdw fdpic-main.d} {objdump -Rw fdpic-main.r}
+      {readelf -Ds fdpic-main.sym}}
+     "fdpic-main"}
+    {"FDPIC ARM shared library big endian"
+     "-shared -T fdpic-shared.ld --hash-style=sysv -EB -m armelfb_linux_fdpiceabi" ""
+     "-EB -fdpic" {fdpic-shared.s}
+     {{objdump -fdw fdpic-shared.d} {objdump -Rw fdpic-shared.r}
+      {readelf -Ds fdpic-shared.sym}}
+     "fdpic-shared.so"}
+    {"FDPIC ARM dynamic executable big endian"
+     "tmpdir/fdpic-shared.so -T fdpic-main.ld --hash-style=sysv -EB -m armelfb_linux_fdpiceabi" ""
+     "-EB -fdpic" {fdpic-main.s}
+     {{objdump -fdw fdpic-main.d} {objdump -Rw fdpic-main.r}
+      {readelf -Ds fdpic-main.sym}}
+     "fdpic-main"}
+}
+
 # Massage the $armeabitests_common list into run_ld_link_tests standard form.
 # See the comment before 'set armeabitests_common', above.
 set elide_action_elt 3
@@ -1042,6 +1069,10 @@ for {set i 0} {$i < $neabi_common} {incr i} {
 run_ld_link_tests $armeabitests_common
 if { !$is_nacl } {
     run_ld_link_tests $armeabitests_nonacl
+}
+
+if { [istarget "arm*-linux-uclibceabi"] } {
+    run_ld_link_tests $armfdpiceabitests
 }
 
 run_dump_test "attr-merge-div-00"
