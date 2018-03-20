@@ -127,7 +127,7 @@ if { [is_elf_format] && [check_shared_lib_support] } then {
 	|| ![ld_link $ld tmpdir/libpersonality.so "-shared tmpdir/libpersonality.o"] } then {
 	fail libpersonality
     } else {
-	run_dump_test "personality" [list [list ld $LDFLAGS]]
+	run_dump_test "personality"
     }
     run_dump_test "pr18223"
     if {![ld_assemble_flags $as $gasopt $srcdir/$subdir/pr20022a.s tmpdir/pr20022a.o]
