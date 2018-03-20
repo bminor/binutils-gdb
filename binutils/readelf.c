@@ -2578,6 +2578,12 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
       e_flags &= ~ EF_ARM_RELEXEC;
     }
 
+  if (e_flags & EF_ARM_PIC)
+    {
+      strcat (buf, ", position independent");
+      e_flags &= ~ EF_ARM_PIC;
+    }
+
   /* Now handle EABI specific flags.  */
   switch (eabi)
     {
@@ -3718,6 +3724,7 @@ get_osabi_name (Filedata * filedata, unsigned int osabi)
 	    switch (osabi)
 	      {
 	      case ELFOSABI_ARM:	return "ARM";
+	      case ELFOSABI_ARM_FDPIC:	return "ARM FDPIC";
 	      default:
 		break;
 	      }

@@ -1,6 +1,14 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* elf32-arm.c (elf32_arm_print_private_bfd_data): Support
+	EF_ARM_PIC and ELFOSABI_ARM_FDPIC.
+	(elf32_arm_post_process_headers): Support ELFOSABI_ARM_FDPIC.
+	(ELF_OSABI): Define to ELFOSABI_ARM_FDPIC.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* config.bfd (arm*-*-linux-*): Add arm_elf32_fdpic_be_vec and
 	arm_elf32_fdpic_le_vec to targ_selvecs. Accept
 	arm*-*-uclinuxfdpiceabi.

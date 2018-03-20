@@ -14280,7 +14280,13 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
   if (flags & EF_ARM_RELEXEC)
     fprintf (file, _(" [relocatable executable]"));
 
-  flags &= ~EF_ARM_RELEXEC;
+  if (flags & EF_ARM_PIC)
+    fprintf (file, _(" [position independent]"));
+
+  if (elf_elfheader (abfd)->e_ident[EI_OSABI] == ELFOSABI_ARM_FDPIC)
+    fprintf (file, _(" [FDPIC ABI supplement]"));
+
+  flags &= ~ (EF_ARM_RELEXEC | EF_ARM_PIC);
 
   if (flags)
     fprintf (file, _("<Unrecognised flag bits set>"));
@@ -16642,6 +16648,9 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
       globals = elf32_arm_hash_table (link_info);
       if (globals != NULL && globals->byteswap_code)
 	i_ehdrp->e_flags |= EF_ARM_BE8;
+
+      if (globals->fdpic_p)
+	i_ehdrp->e_ident[EI_OSABI] |= ELFOSABI_ARM_FDPIC;
     }
 
   if (EF_ARM_EABI_VERSION (i_ehdrp->e_flags) == EF_ARM_EABI_VER5
@@ -19427,6 +19436,8 @@ elf32_arm_nacl_plt_sym_val (bfd_vma i, const asection *plt,
 #define TARGET_BIG_NAME			"elf32-bigarm-fdpic"
 #undef elf_match_priority
 #define elf_match_priority		128
+#undef ELF_OSABI
+#define ELF_OSABI		ELFOSABI_ARM_FDPIC
 
 /* Like elf32_arm_link_hash_table_create -- but overrides
    appropriately for FDPIC.  */
@@ -19454,6 +19465,7 @@ elf32_arm_fdpic_link_hash_table_create (bfd *abfd)
 
 #include "elf32-target.h"
 #undef elf_match_priority
+#undef ELF_OSABI
 
 /* VxWorks Targets.  */
 

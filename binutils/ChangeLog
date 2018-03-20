@@ -1,3 +1,9 @@
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
+	* readelf.c (decode_ARM_machine_flags): Support EF_ARM_PIC.
+	(get_osabi_name): Support ELFOSABI_ARM_FDPIC.
+
 2018-04-25  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/arm/objdump.exp: Remove arm-aout and

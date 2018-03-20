@@ -1,3 +1,13 @@
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
+	* config/tc-arm.c (arm_fdpic): New.
+	(elf32_arm_target_format): Support FDPIC.
+	(OPTION_FDPIC): New.
+	(md_longopts): Support FDPIC.
+	(md_parse_option): Likewise.
+	(md_show_usage): Likewise.
+
 2018-04-25  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/gas/aarch64/rdma.s: Test for larger register numbers.
