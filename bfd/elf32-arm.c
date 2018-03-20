@@ -2290,6 +2290,22 @@ static const bfd_vma elf32_arm_fdpic_plt_entry [] =
     0xe599f000,    /* ldr     pc, [r9] */
   };
 
+/* Thumb FDPIC PLT entry.  */
+/* The last 5 words contain PLT lazy fragment code and data.  */
+static const bfd_vma elf32_arm_fdpic_thumb_plt_entry [] =
+  {
+    0xc00cf8df,    /* ldr.w   r12, .L1 */
+    0x0c09eb0c,    /* add.w   r12, r12, r9 */
+    0x9004f8dc,    /* ldr.w   r9, [r12, #4] */
+    0xf000f8dc,    /* ldr.w   pc, [r12] */
+    0x00000000,    /* .L1     .word   foo(GOTOFFFUNCDESC) */
+    0x00000000,    /* .L2     .word   foo(funcdesc_value_reloc_offset) */
+    0xc008f85f,    /* ldr.w   r12, .L2 */
+    0xcd04f84d,    /* push    {r12} */
+    0xc004f8d9,    /* ldr.w   r12, [r9, #4] */
+    0xf000f8d9,    /* ldr.w   pc, [r9] */
+  };
+
 #ifdef FOUR_WORD_PLT
 
 /* The first entry in a procedure linkage table looks like
@@ -3620,6 +3636,8 @@ elf32_arm_get_plt_info (bfd *abfd, struct elf32_arm_link_hash_table *globals,
   return TRUE;
 }
 
+static bfd_boolean using_thumb_only (struct elf32_arm_link_hash_table *globals);
+
 /* Return true if the PLT described by ARM_PLT requires a Thumb stub
    before it.  */
 
@@ -3630,8 +3648,9 @@ elf32_arm_plt_needs_thumb_stub_p (struct bfd_link_info *info,
   struct elf32_arm_link_hash_table *htab;
 
   htab = elf32_arm_hash_table (info);
-  return (arm_plt->thumb_refcount != 0
-	  || (!htab->use_blx && arm_plt->maybe_thumb_refcount != 0));
+
+  return (!using_thumb_only(htab) && (arm_plt->thumb_refcount != 0
+	  || (!htab->use_blx && arm_plt->maybe_thumb_refcount != 0)));
 }
 
 /* Return a pointer to the head of the dynamic reloc list that should
@@ -9729,6 +9748,10 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else if (htab->fdpic_p)
 	{
+	  const bfd_vma *plt_entry = using_thumb_only(htab)
+	    ? elf32_arm_fdpic_thumb_plt_entry
+	    : elf32_arm_fdpic_plt_entry;
+
 	  /* Fill-up Thumb stub if needed.  */
 	  if (elf32_arm_plt_needs_thumb_stub_p (info, arm_plt))
 	    {
@@ -9737,14 +9760,13 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	      put_thumb_insn (htab, output_bfd,
 			      elf32_arm_plt_thumb_stub[1], ptr - 2);
 	    }
-	  put_arm_insn(htab, output_bfd,
-		       elf32_arm_fdpic_plt_entry[0], ptr + 0);
-	  put_arm_insn(htab, output_bfd,
-		       elf32_arm_fdpic_plt_entry[1], ptr + 4);
-	  put_arm_insn(htab, output_bfd,
-		       elf32_arm_fdpic_plt_entry[2], ptr + 8);
-	  put_arm_insn(htab, output_bfd,
-		       elf32_arm_fdpic_plt_entry[3], ptr + 12);
+	  /* As we are using 32 bit instructions even for the Thumb
+	     version, we have to use 'put_arm_insn' instead of
+	     'put_thumb_insn'.  */
+	  put_arm_insn(htab, output_bfd, plt_entry[0], ptr + 0);
+	  put_arm_insn(htab, output_bfd, plt_entry[1], ptr + 4);
+	  put_arm_insn(htab, output_bfd, plt_entry[2], ptr + 8);
+	  put_arm_insn(htab, output_bfd, plt_entry[3], ptr + 12);
 	  bfd_put_32 (output_bfd, got_offset, ptr + 16);
 
 	  if (!(info->flags & DF_BIND_NOW))
@@ -9753,14 +9775,10 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	      bfd_put_32 (output_bfd,
 			  htab->root.srelplt->reloc_count * RELOC_SIZE (htab),
 			  ptr + 20);
-	      put_arm_insn(htab, output_bfd,
-			   elf32_arm_fdpic_plt_entry[6], ptr + 24);
-	      put_arm_insn(htab, output_bfd,
-			   elf32_arm_fdpic_plt_entry[7], ptr + 28);
-	      put_arm_insn(htab, output_bfd,
-			   elf32_arm_fdpic_plt_entry[8], ptr + 32);
-	      put_arm_insn(htab, output_bfd,
-			   elf32_arm_fdpic_plt_entry[9], ptr + 36);
+	      put_arm_insn(htab, output_bfd, plt_entry[6], ptr + 24);
+	      put_arm_insn(htab, output_bfd, plt_entry[7], ptr + 28);
+	      put_arm_insn(htab, output_bfd, plt_entry[8], ptr + 32);
+	      put_arm_insn(htab, output_bfd, plt_entry[9], ptr + 36);
 	    }
 	}
       else if (using_thumb_only (htab))
@@ -17767,15 +17785,19 @@ elf32_arm_output_plt_map_1 (output_arch_syminfo *osi,
     }
   else if (htab->fdpic_p)
     {
+      enum map_symbol_type type = using_thumb_only(htab)
+	? ARM_MAP_THUMB
+	: ARM_MAP_ARM;
+
       if (elf32_arm_plt_needs_thumb_stub_p (osi->info, arm_plt))
         if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr - 4))
           return FALSE;
-      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
+      if (!elf32_arm_output_map_sym (osi, type, addr))
         return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 16))
         return FALSE;
       if (htab->plt_entry_size == 4 * ARRAY_SIZE(elf32_arm_fdpic_plt_entry))
-        if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 24))
+        if (!elf32_arm_output_map_sym (osi, type, addr + 24))
           return FALSE;
     }
   else if (using_thumb_only (htab))
@@ -18134,7 +18156,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, 0))
 	    return FALSE;
 	}
-      else if (using_thumb_only (htab))
+      else if (using_thumb_only (htab) && !htab->fdpic_p)
 	{
 	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_THUMB, 0))
 	    return FALSE;

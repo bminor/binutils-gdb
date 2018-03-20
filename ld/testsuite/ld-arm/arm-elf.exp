@@ -1043,6 +1043,18 @@ set armfdpiceabitests {
      {{objdump -fdw fdpic-main.d} {objdump -Rw fdpic-main.r}
       {readelf -Ds fdpic-main.sym}}
      "fdpic-main"}
+    {"FDPIC ARM shared library little endian M profile"
+     "-shared -T fdpic-shared.ld --hash-style=sysv -EL -m armelf_linux_fdpiceabi" ""
+     "-EL -fdpic" {fdpic-shared-m.s}
+     {{objdump -fdw fdpic-shared-m.d} {objdump -Rw fdpic-shared.r}
+      {readelf -Ds fdpic-shared-m.sym}}
+     "fdpic-shared.so"}
+    {"FDPIC ARM dynamic executable little endian M profile"
+     "tmpdir/fdpic-shared.so -T fdpic-main.ld --hash-style=sysv -EL -m armelf_linux_fdpiceabi" ""
+     "-EL -fdpic" {fdpic-main-m.s}
+     {{objdump -fdw fdpic-main-m.d} {objdump -Rw fdpic-main.r}
+      {readelf -Ds fdpic-main-m.sym}}
+     "fdpic-main"}
 }
 
 # Massage the $armeabitests_common list into run_ld_link_tests standard form.
