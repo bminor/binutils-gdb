@@ -1,6 +1,12 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* testsuite/ld-elf/pr2404b.c (main): Rename time variable into
+	time1.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* scripttempl/elf.sc: Define __tdata_start for .tdata section.
 
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
