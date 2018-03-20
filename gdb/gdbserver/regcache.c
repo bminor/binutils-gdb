@@ -196,6 +196,13 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
   dst->registers_valid = src->registers_valid;
 }
 
+/* Return a reference to the description of register ``n''.  */
+
+static const struct reg &
+find_register_by_number (const struct target_desc *tdesc, int n)
+{
+  return tdesc->reg_defs[n];
+}
 
 #ifndef IN_PROCESS_AGENT
 
@@ -243,25 +250,13 @@ int
 find_regno (const struct target_desc *tdesc, const char *name)
 {
   for (int i = 0; i < tdesc->reg_defs.size (); ++i)
-    {
-      struct reg *reg = tdesc->reg_defs[i];
+    if (strcmp (name, find_register_by_number (tdesc, i).name) == 0)
+      return i;
 
-      if (strcmp (name, reg->name) == 0)
-	return i;
-    }
   internal_error (__FILE__, __LINE__, "Unknown register %s requested",
 		  name);
 }
 
-#endif
-
-struct reg *
-find_register_by_number (const struct target_desc *tdesc, int n)
-{
-  return tdesc->reg_defs[n];
-}
-
-#ifndef IN_PROCESS_AGENT
 static void
 free_register_cache_thread (struct thread_info *thread)
 {
@@ -292,7 +287,7 @@ register_cache_size (const struct target_desc *tdesc)
 int
 register_size (const struct target_desc *tdesc, int n)
 {
-  return find_register_by_number (tdesc, n)->size / 8;
+  return find_register_by_number (tdesc, n).size / 8;
 }
 
 /* See common/common-regcache.h.  */
@@ -307,7 +302,7 @@ static unsigned char *
 register_data (struct regcache *regcache, int n, int fetch)
 {
   return (regcache->registers
-	  + find_register_by_number (regcache->tdesc, n)->offset / 8);
+	  + find_register_by_number (regcache->tdesc, n).offset / 8);
 }
 
 /* Supply register N, whose contents are stored in BUF, to REGCACHE.

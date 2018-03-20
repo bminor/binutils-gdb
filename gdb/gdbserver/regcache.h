@@ -94,10 +94,6 @@ void registers_from_string (struct regcache *regcache, char *buf);
 
 void regcache_write_pc (struct regcache *regcache, CORE_ADDR pc);
 
-/* Return a pointer to the description of register ``n''.  */
-
-struct reg *find_register_by_number (const struct target_desc *tdesc, int n);
-
 int register_cache_size (const struct target_desc *tdesc);
 
 int register_size (const struct target_desc *tdesc, int n);
