@@ -1,6 +1,15 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* elf32-arm.c (elf32_arm_fdpic_thumb_plt_entry): New.
+	(elf32_arm_plt_needs_thumb_stub_p): Handle thumb-only case.
+	(elf32_arm_populate_plt_entry): Likewise.
+	(elf32_arm_output_plt_map_1): Likewise.
+	(elf32_arm_output_arch_local_syms): Likewise.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* elf32-arm.c (elf32_arm_finish_dynamic_symbol): Handle
 	_GLOBAL_OFFSET_TABLE_ in FDPIC mode.
 

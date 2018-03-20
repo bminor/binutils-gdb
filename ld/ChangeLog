@@ -1,6 +1,17 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
+	* testsuite/ld-arm/arm-elf.exp: Execute the new FDPIC Thumb-only tests.
+	* testsuite/ld-arm/fdpic-main-m.d: New test.
+	* testsuite/ld-arm/fdpic-main-m.s: New.
+	* testsuite/ld-arm/fdpic-main-m.sym: New.
+	* testsuite/ld-arm/fdpic-shared-m.d: New test.
+	* testsuite/ld-arm/fdpic-shared-m.s: New.
+	* testsuite/ld-arm/fdpic-shared-m.sym: New.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+	Mickaël Guêné  <mickael.guene@st.com>
+
 	* testsuite/ld-arm/arm-elf.exp: Execute the new FDPIC tests.
 	* testsuite/ld-arm/fdpic-main.d: New test.
 	* testsuite/ld-arm/fdpic-main.ld: New.
