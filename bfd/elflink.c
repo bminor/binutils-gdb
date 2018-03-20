@@ -586,7 +586,12 @@ bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
       || (d != NULL
 	  && h->non_elf
 	  && (*d->match) (&d->head, NULL, h->root.root.string)))
-    h->dynamic = 1;
+    {
+      h->dynamic = 1;
+      /* NB: If a symbol is made dynamic by --dynamic-list, it has
+	 non-IR reference.  */
+      h->root.non_ir_ref_dynamic = 1;
+    }
 }
 
 /* Record an assignment to a symbol made by a linker script.  We need

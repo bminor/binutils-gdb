@@ -564,6 +564,16 @@ run_ld_link_exec_tests $lto_run_tests
 
 if { [is_elf_format] } {
     run_ld_link_exec_tests $lto_run_elf_tests
+    run_cc_link_tests [list \
+	[list \
+	    "Build pr22983" \
+	    "-Wl,--dynamic-list,pr22983.t" \
+	    "-flto" \
+	    {pr22983a.c pr22983b.c} \
+	    {{readelf {--dyn-syms --wide} pr22983.d}} \
+	    "pr22983" \
+	] \
+    ]
 }
 
 if { [is_elf_format] && [check_lto_shared_available] } {

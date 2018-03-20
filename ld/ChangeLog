@@ -1,3 +1,15 @@
+2018-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master branch
+	2018-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22983
+	* testsuite/ld-plugin/lto.exp: Run PR ld/22983 test.
+	* testsuite/ld-plugin/pr22983.d: New file.
+	* testsuite/ld-plugin/pr22983.t: Likewise.
+	* testsuite/ld-plugin/pr22983a.c: Likewise.
+	* testsuite/ld-plugin/pr22983b.c: Likewise.
+
 2018-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master branch
