@@ -3570,6 +3570,9 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARM_GOTOFFFUNCDESC,
   BFD_RELOC_ARM_FUNCDESC,
   BFD_RELOC_ARM_FUNCDESC_VALUE,
+  BFD_RELOC_ARM_TLS_GD32_FDPIC,
+  BFD_RELOC_ARM_TLS_LDM32_FDPIC,
+  BFD_RELOC_ARM_TLS_IE32_FDPIC,
 
 /* Relocations for setting up GOTs and PLTs for shared libraries.  */
   BFD_RELOC_ARM_JUMP_SLOT,
