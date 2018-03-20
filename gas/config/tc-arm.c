@@ -75,6 +75,9 @@ static struct
   unsigned	  sp_restored:1;
 } unwind;
 
+/* Whether --fdpic was given.  */
+static int arm_fdpic;
+
 #endif /* OBJ_ELF */
 
 /* Results from operand parsing worker functions.  */
@@ -25111,10 +25114,20 @@ elf32_arm_target_format (void)
 	  ? "elf32-bigarm-nacl"
 	  : "elf32-littlearm-nacl");
 #else
-  if (target_big_endian)
-    return "elf32-bigarm";
+  if (arm_fdpic)
+    {
+      if (target_big_endian)
+	return "elf32-bigarm-fdpic";
+      else
+	return "elf32-littlearm-fdpic";
+    }
   else
-    return "elf32-littlearm";
+    {
+      if (target_big_endian)
+	return "elf32-bigarm";
+      else
+	return "elf32-littlearm";
+    }
 #endif
 }
 
@@ -25634,6 +25647,7 @@ const char * md_shortopts = "m:k";
 #endif
 #endif
 #define OPTION_FIX_V4BX (OPTION_MD_BASE + 2)
+#define OPTION_FDPIC (OPTION_MD_BASE + 3)
 
 struct option md_longopts[] =
 {
@@ -25644,6 +25658,9 @@ struct option md_longopts[] =
   {"EL", no_argument, NULL, OPTION_EL},
 #endif
   {"fix-v4bx", no_argument, NULL, OPTION_FIX_V4BX},
+#ifdef OBJ_ELF
+  {"fdpic", no_argument, NULL, OPTION_FDPIC},
+#endif
   {NULL, no_argument, NULL, 0}
 };
 
@@ -26815,6 +26832,12 @@ md_parse_option (int c, const char * arg)
       fix_v4bx = TRUE;
       break;
 
+#ifdef OBJ_ELF
+    case OPTION_FDPIC:
+      arm_fdpic = TRUE;
+      break;
+#endif /* OBJ_ELF */
+
     case 'a':
       /* Listing option.  Just ignore these, we don't support additional
 	 ones.	*/
@@ -26909,6 +26932,11 @@ md_show_usage (FILE * fp)
 
   fprintf (fp, _("\
   --fix-v4bx              Allow BX in ARMv4 code\n"));
+
+#ifdef OBJ_ELF
+  fprintf (fp, _("\
+  --fdpic                 generate an FDPIC object file\n"));
+#endif /* OBJ_ELF */
 }
 
 #ifdef OBJ_ELF
