@@ -375,16 +375,6 @@ s390_store_vxrs_high (struct regcache *regcache, const void *buf)
 }
 
 static void
-s390_fill_gs (struct regcache *regcache, void *buf)
-{
-  int gsd = find_regno (regcache->tdesc, "gsd");
-  int i;
-
-  for (i = 0; i < 3; i++)
-    collect_register (regcache, gsd + i, (char *) buf + 8 * (i + 1));
-}
-
-static void
 s390_store_gs (struct regcache *regcache, const void *buf)
 {
   int gsd = find_regno (regcache->tdesc, "gsd");
@@ -392,16 +382,6 @@ s390_store_gs (struct regcache *regcache, const void *buf)
 
   for (i = 0; i < 3; i++)
     supply_register (regcache, gsd + i, (const char *) buf + 8 * (i + 1));
-}
-
-static void
-s390_fill_gsbc (struct regcache *regcache, void *buf)
-{
-  int bc_gsd = find_regno (regcache->tdesc, "bc_gsd");
-  int i;
-
-  for (i = 0; i < 3; i++)
-    collect_register (regcache, bc_gsd + i, (char *) buf + 8 * (i + 1));
 }
 
 static void
@@ -432,10 +412,11 @@ static struct regset_info s390_regsets[] = {
     EXTENDED_REGS, s390_fill_vxrs_low, s390_store_vxrs_low },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_S390_VXRS_HIGH, 0,
     EXTENDED_REGS, s390_fill_vxrs_high, s390_store_vxrs_high },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_S390_GS_CB, 0,
-    EXTENDED_REGS, s390_fill_gs, s390_store_gs },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_S390_GS_BC, 0,
-    EXTENDED_REGS, s390_fill_gsbc, s390_store_gsbc },
+  /* Guarded storage registers are read-only.  */
+  { PTRACE_GETREGSET, -1, NT_S390_GS_CB, 0, EXTENDED_REGS,
+    NULL, s390_store_gs },
+  { PTRACE_GETREGSET, -1, NT_S390_GS_BC, 0, EXTENDED_REGS,
+    NULL, s390_store_gsbc },
   NULL_REGSET
 };
 

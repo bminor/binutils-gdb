@@ -1,5 +1,12 @@
 2018-03-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* linux-s390-low.c (s390_fill_gs): Remove function.
+	(s390_fill_gsbc): Remove function.
+	(s390_regsets): Set fill functions for the guarded storage regsets
+	to NULL.
+
+2018-03-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* linux-s390-low.c (s390_get_hwcap): Replace tdesc parameter by
 	the word size.  Add comment.
 	(s390_get_wordsize): New function.
