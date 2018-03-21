@@ -1,3 +1,8 @@
+2018-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_dynamic_section): Also dump DF_1_KMOD,
+	DF_1_WEAKFILTER and DF_1_NOCOMMON.
+
 2018-03-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

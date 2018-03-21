@@ -10009,6 +10009,21 @@ process_dynamic_section (Filedata * filedata)
 		      printf (" PIE");
 		      val ^= DF_1_PIE;
 		    }
+		  if (val & DF_1_KMOD)
+		    {
+		      printf (" KMOD");
+		      val ^= DF_1_KMOD;
+		    }
+		  if (val & DF_1_WEAKFILTER)
+		    {
+		      printf (" WEAKFILTER");
+		      val ^= DF_1_WEAKFILTER;
+		    }
+		  if (val & DF_1_NOCOMMON)
+		    {
+		      printf (" NOCOMMON");
+		      val ^= DF_1_NOCOMMON;
+		    }
 		  if (val != 0)
 		    printf (" %lx", val);
 		  puts ("");
