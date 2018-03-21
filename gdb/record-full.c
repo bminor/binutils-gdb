@@ -702,8 +702,7 @@ record_full_exec_insn (struct regcache *regcache,
 	/* Nothing to do if the entry is flagged not_accessible.  */
         if (!entry->u.mem.mem_entry_not_accessible)
           {
-            gdb_byte *mem = (gdb_byte *) xmalloc (entry->u.mem.len);
-            struct cleanup *cleanup = make_cleanup (xfree, mem);
+	    gdb::byte_vector mem (entry->u.mem.len);
 
             if (record_debug > 1)
               fprintf_unfiltered (gdb_stdlog,
@@ -714,7 +713,8 @@ record_full_exec_insn (struct regcache *regcache,
                                   entry->u.mem.len);
 
             if (record_read_memory (gdbarch,
-				    entry->u.mem.addr, mem, entry->u.mem.len))
+				    entry->u.mem.addr, mem.data (),
+				    entry->u.mem.len))
 	      entry->u.mem.mem_entry_not_accessible = 1;
             else
               {
@@ -731,7 +731,7 @@ record_full_exec_insn (struct regcache *regcache,
                   }
                 else
 		  {
-		    memcpy (record_full_get_loc (entry), mem,
+		    memcpy (record_full_get_loc (entry), mem.data (),
 			    entry->u.mem.len);
 
 		    /* We've changed memory --- check if a hardware
@@ -748,8 +748,6 @@ record_full_exec_insn (struct regcache *regcache,
 		      record_full_stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
 		  }
               }
-
-	    do_cleanups (cleanup);
           }
       }
       break;
@@ -1750,28 +1748,22 @@ record_full_goto_bookmark (struct target_ops *self,
 			   const gdb_byte *raw_bookmark, int from_tty)
 {
   const char *bookmark = (const char *) raw_bookmark;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"record_full_goto_bookmark receives %s\n", bookmark);
 
+  std::string name_holder;
   if (bookmark[0] == '\'' || bookmark[0] == '\"')
     {
-      char *copy;
-
       if (bookmark[strlen (bookmark) - 1] != bookmark[0])
 	error (_("Unbalanced quotes: %s"), bookmark);
 
-
-      copy = savestring (bookmark + 1, strlen (bookmark) - 2);
-      make_cleanup (xfree, copy);
-      bookmark = copy;
+      name_holder = std::string (bookmark + 1, strlen (bookmark) - 2);
+      bookmark = name_holder.c_str ();
     }
 
   record_goto (bookmark);
-
-  do_cleanups (cleanup);
 }
 
 static enum exec_direction_kind

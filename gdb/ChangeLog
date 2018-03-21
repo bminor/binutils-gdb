@@ -1,3 +1,8 @@
+2018-03-22  Tom Tromey  <tom@tromey.com>
+
+	* record-full.c (record_full_exec_insn): Use gdb::byte_vector.
+	(record_full_goto_bookmark): Use std::string.
+
 2018-03-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
 	PR tdep/18295
