@@ -1,5 +1,13 @@
 2018-03-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* linux-s390-ipa.c (get_ipa_tdesc): Add handling for
+	S390_TDESC_GS.
+	* linux-s390-low.c (s390_get_ipa_tdesc_idx): Likewise.
+	(initialize_low_tracepoint): Call init_registers_s390x_gs_linux64
+	and init_registers_s390_gs_linux64.
+
+2018-03-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* linux-s390-low.c (s390_fill_gs): Remove function.
 	(s390_fill_gsbc): Remove function.
 	(s390_regsets): Set fill functions for the guarded storage regsets

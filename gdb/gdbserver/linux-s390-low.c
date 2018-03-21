@@ -1431,6 +1431,8 @@ s390_get_ipa_tdesc_idx (void)
     return S390_TDESC_VX;
   if (tdesc == tdesc_s390x_tevx_linux64)
     return S390_TDESC_TEVX;
+  if (tdesc == tdesc_s390x_gs_linux64)
+    return S390_TDESC_GS;
 #endif
 
   if (tdesc == tdesc_s390_linux32)
@@ -1451,6 +1453,8 @@ s390_get_ipa_tdesc_idx (void)
     return S390_TDESC_VX;
   if (tdesc == tdesc_s390_tevx_linux64)
     return S390_TDESC_TEVX;
+  if (tdesc == tdesc_s390_gs_linux64)
+    return S390_TDESC_GS;
 
   return 0;
 }
