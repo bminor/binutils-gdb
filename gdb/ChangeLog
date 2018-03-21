@@ -1,3 +1,8 @@
+2018-03-21  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
+	* MAINTAINERS (Write After Approval): Add Pedro Franco de
+	Carvalho.
+
 2018-03-20  Stephen Roberts  <stephen.roberts@arm.com>
 
 	* gdb/symtab.c (find_pc_sect_line): fixed indentation.
