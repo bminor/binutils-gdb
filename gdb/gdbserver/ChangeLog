@@ -1,3 +1,12 @@
+2018-03-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-s390-low.c (s390_get_hwcap): Replace tdesc parameter by
+	the word size.  Add comment.
+	(s390_get_wordsize): New function.
+	(s390_arch_setup): No longer select a temporary tdesc to fetch the
+	pswm with it.  Instead, use s390_get_wordsize to determine the
+	word size first and derive the correct tdesc from that directly.
+
 2018-03-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Include silent-rules.mk.

@@ -486,10 +486,12 @@ s390_set_pc (struct regcache *regcache, CORE_ADDR newpc)
     }
 }
 
+/* Get HWCAP from AUXV, using the given WORDSIZE.  Return the HWCAP, or
+   zero if not found.  */
+
 static unsigned long
-s390_get_hwcap (const struct target_desc *tdesc)
+s390_get_hwcap (int wordsize)
 {
-  int wordsize = register_size (tdesc, 0);
   gdb_byte *data = (gdb_byte *) alloca (2 * wordsize);
   int offset = 0;
 
@@ -513,6 +515,27 @@ s390_get_hwcap (const struct target_desc *tdesc)
 
   return 0;
 }
+
+/* Determine the word size for the given PID, in bytes.  */
+
+#ifdef __s390x__
+static int
+s390_get_wordsize (int pid)
+{
+  errno = 0;
+  PTRACE_XFER_TYPE pswm = ptrace (PTRACE_PEEKUSER, pid,
+				  (PTRACE_TYPE_ARG3) 0,
+				  (PTRACE_TYPE_ARG4) 0);
+  if (errno != 0) {
+    warning (_("Couldn't determine word size, assuming 64-bit.\n"));
+    return 8;
+  }
+  /* Derive word size from extended addressing mode (PSW bit 31).  */
+  return pswm & (1L << 32) ? 8 : 4;
+}
+#else
+#define s390_get_wordsize(pid) 4
+#endif
 
 static int
 s390_check_regset (int pid, int regset, int regsize)
@@ -540,49 +563,32 @@ s390_arch_setup (void)
   const struct target_desc *tdesc;
   struct regset_info *regset;
 
-  /* Check whether the kernel supports extra register sets.  */
+  /* Determine word size and HWCAP.  */
   int pid = pid_of (current_thread);
+  int wordsize = s390_get_wordsize (pid);
+  unsigned long hwcap = s390_get_hwcap (wordsize);
+
+  /* Check whether the kernel supports extra register sets.  */
   int have_regset_last_break
     = s390_check_regset (pid, NT_S390_LAST_BREAK, 8);
   int have_regset_system_call
     = s390_check_regset (pid, NT_S390_SYSTEM_CALL, 4);
-  int have_regset_tdb = s390_check_regset (pid, NT_S390_TDB, 256);
-  int have_regset_vxrs = s390_check_regset (pid, NT_S390_VXRS_LOW, 128)
-    && s390_check_regset (pid, NT_S390_VXRS_HIGH, 256);
-  int have_regset_gs = s390_check_regset (pid, NT_S390_GS_CB, 32)
-    && s390_check_regset (pid, NT_S390_GS_BC, 32);
+  int have_regset_tdb
+    = (s390_check_regset (pid, NT_S390_TDB, 256)
+       && (hwcap & HWCAP_S390_TE) != 0);
+  int have_regset_vxrs
+    = (s390_check_regset (pid, NT_S390_VXRS_LOW, 128)
+       && s390_check_regset (pid, NT_S390_VXRS_HIGH, 256)
+       && (hwcap & HWCAP_S390_VX) != 0);
+  int have_regset_gs
+    = (s390_check_regset (pid, NT_S390_GS_CB, 32)
+       && s390_check_regset (pid, NT_S390_GS_BC, 32)
+       && (hwcap & HWCAP_S390_GS) != 0);
 
-  /* Assume 31-bit inferior process.  */
-  if (have_regset_system_call)
-    tdesc = tdesc_s390_linux32v2;
-  else if (have_regset_last_break)
-    tdesc = tdesc_s390_linux32v1;
-  else
-    tdesc = tdesc_s390_linux32;
-
-  /* On a 64-bit host, check the low bit of the (31-bit) PSWM
-     -- if this is one, we actually have a 64-bit inferior.  */
   {
 #ifdef __s390x__
-    unsigned int pswm;
-    struct regcache *regcache = new_register_cache (tdesc);
-
-    fetch_inferior_registers (regcache, find_regno (tdesc, "pswm"));
-    collect_register_by_name (regcache, "pswm", &pswm);
-    free_register_cache (regcache);
-
-    if (pswm & 1)
+    if (wordsize == 8)
       {
-	if (have_regset_tdb)
-	  have_regset_tdb =
-	    (s390_get_hwcap (tdesc_s390x_linux64v2) & HWCAP_S390_TE) != 0;
-	if (have_regset_vxrs)
-	  have_regset_vxrs =
-	    (s390_get_hwcap (tdesc_s390x_linux64v2) & HWCAP_S390_VX) != 0;
-	if (have_regset_gs)
-	  have_regset_gs =
-	    (s390_get_hwcap (tdesc_s390x_linux64v2) & HWCAP_S390_GS) != 0;
-
 	if (have_regset_gs)
 	  tdesc = tdesc_s390x_gs_linux64;
 	else if (have_regset_vxrs)
@@ -602,16 +608,9 @@ s390_arch_setup (void)
        using the full 64-bit GPRs.  */
     else
 #endif
-    if (s390_get_hwcap (tdesc) & HWCAP_S390_HIGH_GPRS)
+    if (hwcap & HWCAP_S390_HIGH_GPRS)
       {
 	have_hwcap_s390_high_gprs = 1;
-	if (have_regset_tdb)
-	  have_regset_tdb = (s390_get_hwcap (tdesc) & HWCAP_S390_TE) != 0;
-	if (have_regset_vxrs)
-	  have_regset_vxrs = (s390_get_hwcap (tdesc) & HWCAP_S390_VX) != 0;
-	if (have_regset_gs)
-	  have_regset_gs = (s390_get_hwcap (tdesc) & HWCAP_S390_GS) != 0;
-
 	if (have_regset_gs)
 	  tdesc = tdesc_s390_gs_linux64;
 	else if (have_regset_vxrs)
@@ -625,6 +624,16 @@ s390_arch_setup (void)
 	  tdesc = tdesc_s390_linux64v1;
 	else
 	  tdesc = tdesc_s390_linux64;
+      }
+    else
+      {
+	/* Assume 31-bit inferior process.  */
+	if (have_regset_system_call)
+	  tdesc = tdesc_s390_linux32v2;
+	else if (have_regset_last_break)
+	  tdesc = tdesc_s390_linux32v1;
+	else
+	  tdesc = tdesc_s390_linux32;
       }
 
     have_hwcap_s390_vx = have_regset_vxrs;
