@@ -5053,14 +5053,15 @@ check_VecOperands (const insn_template *t)
       /* Check if specified broadcast is supported in this instruction,
 	 and it's applied to memory operand of DWORD or QWORD type,
 	 depending on VecESize.  */
+      op = i.broadcast->operand;
       if (i.broadcast->type != t->opcode_modifier.broadcast
-	  || !i.types[i.broadcast->operand].bitfield.mem
+	  || !i.types[op].bitfield.mem
 	  || (t->opcode_modifier.vecesize == 0
-	      && !i.types[i.broadcast->operand].bitfield.dword
-	      && !i.types[i.broadcast->operand].bitfield.unspecified)
+	      && !i.types[op].bitfield.dword
+	      && !i.types[op].bitfield.unspecified)
 	  || (t->opcode_modifier.vecesize == 1
-	      && !i.types[i.broadcast->operand].bitfield.qword
-	      && !i.types[i.broadcast->operand].bitfield.unspecified))
+	      && !i.types[op].bitfield.qword
+	      && !i.types[op].bitfield.unspecified))
 	goto bad_broadcast;
 
       broadcasted_opnd_size = t->opcode_modifier.vecesize ? 64 : 32;
@@ -5076,9 +5077,9 @@ check_VecOperands (const insn_template *t)
 	goto bad_broadcast;
 
       if ((broadcasted_opnd_size == 256
-	   && !t->operand_types[i.broadcast->operand].bitfield.ymmword)
+	   && !t->operand_types[op].bitfield.ymmword)
 	  || (broadcasted_opnd_size == 512
-	      && !t->operand_types[i.broadcast->operand].bitfield.zmmword))
+	      && !t->operand_types[op].bitfield.zmmword))
 	{
 	bad_broadcast:
 	  i.error = unsupported_broadcast;
