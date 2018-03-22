@@ -3315,23 +3315,23 @@ debug_set_permissions (struct target_ops *self)
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
-static int
-delegate_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR arg1, struct static_tracepoint_marker *arg2)
+static bool
+delegate_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR arg1, static_tracepoint_marker *arg2)
 {
   self = self->beneath;
   return self->to_static_tracepoint_marker_at (self, arg1, arg2);
 }
 
-static int
-tdefault_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR arg1, struct static_tracepoint_marker *arg2)
+static bool
+tdefault_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR arg1, static_tracepoint_marker *arg2)
 {
-  return 0;
+  return false;
 }
 
-static int
-debug_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR arg1, struct static_tracepoint_marker *arg2)
+static bool
+debug_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR arg1, static_tracepoint_marker *arg2)
 {
-  int result;
+  bool result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_static_tracepoint_marker_at (...)\n", debug_target.to_shortname);
   result = debug_target.to_static_tracepoint_marker_at (&debug_target, arg1, arg2);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_static_tracepoint_marker_at (", debug_target.to_shortname);
@@ -3339,30 +3339,30 @@ debug_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR arg1, stru
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_struct_static_tracepoint_marker_p (arg2);
+  target_debug_print_static_tracepoint_marker_p (arg2);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_int (result);
+  target_debug_print_bool (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }
 
-static VEC(static_tracepoint_marker_p) *
+static std::vector<static_tracepoint_marker>
 delegate_static_tracepoint_markers_by_strid (struct target_ops *self, const char *arg1)
 {
   self = self->beneath;
   return self->to_static_tracepoint_markers_by_strid (self, arg1);
 }
 
-static VEC(static_tracepoint_marker_p) *
+static std::vector<static_tracepoint_marker>
 tdefault_static_tracepoint_markers_by_strid (struct target_ops *self, const char *arg1)
 {
   tcomplain ();
 }
 
-static VEC(static_tracepoint_marker_p) *
+static std::vector<static_tracepoint_marker>
 debug_static_tracepoint_markers_by_strid (struct target_ops *self, const char *arg1)
 {
-  VEC(static_tracepoint_marker_p) * result;
+  std::vector<static_tracepoint_marker> result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_static_tracepoint_markers_by_strid (...)\n", debug_target.to_shortname);
   result = debug_target.to_static_tracepoint_markers_by_strid (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_static_tracepoint_markers_by_strid (", debug_target.to_shortname);
@@ -3370,7 +3370,7 @@ debug_static_tracepoint_markers_by_strid (struct target_ops *self, const char *a
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_const_char_p (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_VEC_static_tracepoint_marker_p_p (result);
+  target_debug_print_std_vector_static_tracepoint_marker (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }

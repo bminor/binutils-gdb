@@ -1,5 +1,56 @@
 2018-03-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* tracepoint.h (struct static_tracepoint_marker): Initialize
+	fields, define default constructor, move constructor and move
+	assignment, disable the rest.
+	<str_id, extra>: Make std::string.
+	(release_static_tracepoint_marker): Remove.
+	(free_current_marker): Remove.
+	* tracepoint.c (free_current_marker): Remove.
+	(parse_static_tracepoint_marker_definition): Adjust to
+	std::string, use new hex2str overload.
+	(release_static_tracepoint_marker): Remove.
+	(print_one_static_tracepoint_marker): Get marker by reference
+	and adjust to std::string.
+	(info_static_tracepoint_markers_command): Adjust to std::vector
+	changes
+	* target.h (static_tracepoint_marker_p): Remove typedef.
+	(DEF_VEC_P(static_tracepoint_marker_p)): Remove.
+	(struct target_ops) <to_static_tracepoint_marker_at>: Return
+	bool.
+	<to_static_tracepoint_markers_by_strid>: Return std::vector.
+	* target-debug.h
+	(target_debug_print_VEC_static_tracepoint_marker_p_p): Remove.
+	(target_debug_print_std_vector_static_tracepoint_marker): New.
+	(target_debug_print_struct_static_tracepoint_marker_p): Rename
+	to...
+	(target_debug_print_static_tracepoint_marker_p): ... this.
+	* target-delegates.c: Re-generate.
+	* breakpoint.h (struct tracepoint) <static_trace_marker_id>:
+	Make std::string.
+	* breakpoint.c (init_breakpoint_sal): Adjust to std::string.
+	(decode_static_tracepoint_spec): Adjust to std::vector.
+	(tracepoint_print_one_detail): Adjust to std::string.
+	(strace_marker_decode_location): Adjust to std::string.
+	(update_static_tracepoint): Adjust to std::string, remove call
+	to release_static_tracepoint_marker.
+	* linux-nat.c (linux_child_static_tracepoint_markers_by_strid):
+	Adjust to std::vector.
+	* remote.c (remote_static_tracepoint_marker_at): Return bool.
+	(remote_static_tracepoint_markers_by_strid): Adjust to
+	std::vector.
+	* common/rsp-low.h (hex2str): New overload with explicit count
+	of bytes.
+	* common/rsp-low.c (hex2str): New overload with explicit count
+	of bytes.
+	* unittests/rsp-low-selftests.c (test_hex2str): New function.
+	(_initialize_rsp_low_selftests): Add test_hex2str test.
+	* unittests/tracepoint-selftests.c
+	(test_parse_static_tracepoint_marker_definition): Adjust to
+	std::string.
+
+2018-03-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* tracepoint.c (parse_static_tracepoint_marker_definition):
 	Consider case where the definition is followed by more
 	definitions.

@@ -889,7 +889,7 @@ struct tracepoint : public breakpoint
   ULONGEST traceframe_usage;
 
   /* The static tracepoint marker id, if known.  */
-  char *static_trace_marker_id;
+  std::string static_trace_marker_id;
 
   /* LTTng/UST allow more than one marker with the same ID string,
      although it unadvised because it confuses tools.  When setting

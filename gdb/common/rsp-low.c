@@ -148,11 +148,18 @@ hex2bin (const char *hex)
 std::string
 hex2str (const char *hex)
 {
-  std::string ret;
-  size_t len = strlen (hex);
+  return hex2str (hex, strlen (hex));
+}
 
-  ret.reserve (len / 2);
-  for (size_t i = 0; i < len; ++i)
+/* See rsp-low.h.  */
+
+std::string
+hex2str (const char *hex, int count)
+{
+  std::string ret;
+
+  ret.reserve (count);
+  for (size_t i = 0; i < count; ++i)
     {
       if (hex[0] == '\0' || hex[1] == '\0')
 	{

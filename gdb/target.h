@@ -227,9 +227,6 @@ enum target_xfer_status
 extern const char *
   target_xfer_status_to_string (enum target_xfer_status status);
 
-typedef struct static_tracepoint_marker *static_tracepoint_marker_p;
-DEF_VEC_P(static_tracepoint_marker_p);
-
 typedef enum target_xfer_status
   target_xfer_partial_ftype (struct target_ops *ops,
 			     enum target_object object,
@@ -1084,14 +1081,16 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
 
     /* Look for a static tracepoint marker at ADDR, and fill in MARKER
-       with its details.  Return 1 on success, 0 on failure.  */
-    int (*to_static_tracepoint_marker_at) (struct target_ops *, CORE_ADDR,
-					   struct static_tracepoint_marker *marker)
-      TARGET_DEFAULT_RETURN (0);
+       with its details.  Return true on success, false on failure.  */
+    bool (*to_static_tracepoint_marker_at) (struct target_ops *, CORE_ADDR,
+					    static_tracepoint_marker *marker)
+      TARGET_DEFAULT_RETURN (false);
 
     /* Return a vector of all tracepoints markers string id ID, or all
        markers if ID is NULL.  */
-    VEC(static_tracepoint_marker_p) *(*to_static_tracepoint_markers_by_strid) (struct target_ops *, const char *id)
+    std::vector<static_tracepoint_marker>
+      (*to_static_tracepoint_markers_by_strid) (struct target_ops *,
+						const char *id)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Return a traceframe info object describing the current

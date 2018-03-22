@@ -4291,17 +4291,17 @@ cleanup_target_stop (void *arg)
   target_continue_no_signal (*ptid);
 }
 
-static VEC(static_tracepoint_marker_p) *
+static std::vector<static_tracepoint_marker>
 linux_child_static_tracepoint_markers_by_strid (struct target_ops *self,
 						const char *strid)
 {
   char s[IPA_CMD_BUF_SIZE];
   struct cleanup *old_chain;
   int pid = ptid_get_pid (inferior_ptid);
-  VEC(static_tracepoint_marker_p) *markers = NULL;
-  struct static_tracepoint_marker *marker = NULL;
+  std::vector<static_tracepoint_marker> markers;
   const char *p = s;
   ptid_t ptid = ptid_build (pid, 0, 0);
+  static_tracepoint_marker marker;
 
   /* Pause all */
   target_stop (ptid);
@@ -4311,29 +4311,16 @@ linux_child_static_tracepoint_markers_by_strid (struct target_ops *self,
 
   agent_run_command (pid, s, strlen (s) + 1);
 
-  old_chain = make_cleanup (free_current_marker, &marker);
-  make_cleanup (cleanup_target_stop, &ptid);
+  old_chain = make_cleanup (cleanup_target_stop, &ptid);
 
   while (*p++ == 'm')
     {
-      if (marker == NULL)
-	marker = XCNEW (struct static_tracepoint_marker);
-
       do
 	{
-	  parse_static_tracepoint_marker_definition (p, &p, marker);
+	  parse_static_tracepoint_marker_definition (p, &p, &marker);
 
-	  if (strid == NULL || strcmp (strid, marker->str_id) == 0)
-	    {
-	      VEC_safe_push (static_tracepoint_marker_p,
-			     markers, marker);
-	      marker = NULL;
-	    }
-	  else
-	    {
-	      release_static_tracepoint_marker (marker);
-	      memset (marker, 0, sizeof (*marker));
-	    }
+	  if (strid == NULL || marker.str_id == strid)
+	    markers.push_back (std::move (marker));
 	}
       while (*p++ == ',');	/* comma-separated list */
 

@@ -8912,27 +8912,24 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 		  const char *p
 		    = &event_location_to_string (b->location.get ())[3];
 		  const char *endp;
-		  char *marker_str;
 
 		  p = skip_spaces (p);
 
 		  endp = skip_to_space (p);
 
-		  marker_str = savestring (p, endp - p);
-		  t->static_trace_marker_id = marker_str;
+		  t->static_trace_marker_id.assign (p, endp - p);
 
 		  printf_filtered (_("Probed static tracepoint "
 				     "marker \"%s\"\n"),
-				   t->static_trace_marker_id);
+				   t->static_trace_marker_id.c_str ());
 		}
 	      else if (target_static_tracepoint_marker_at (sal.pc, &marker))
 		{
-		  t->static_trace_marker_id = xstrdup (marker.str_id);
-		  release_static_tracepoint_marker (&marker);
+		  t->static_trace_marker_id = std::move (marker.str_id);
 
 		  printf_filtered (_("Probed static tracepoint "
 				     "marker \"%s\"\n"),
-				   t->static_trace_marker_id);
+				   t->static_trace_marker_id.c_str ());
 		}
 	      else
 		warning (_("Couldn't determine the static "
@@ -9264,10 +9261,8 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
 static std::vector<symtab_and_line>
 decode_static_tracepoint_spec (const char **arg_p)
 {
-  VEC(static_tracepoint_marker_p) *markers = NULL;
   const char *p = &(*arg_p)[3];
   const char *endp;
-  int i;
 
   p = skip_spaces (p);
 
@@ -9275,26 +9270,21 @@ decode_static_tracepoint_spec (const char **arg_p)
 
   std::string marker_str (p, endp - p);
 
-  markers = target_static_tracepoint_markers_by_strid (marker_str.c_str ());
-  if (VEC_empty(static_tracepoint_marker_p, markers))
+  std::vector<static_tracepoint_marker> markers
+    = target_static_tracepoint_markers_by_strid (marker_str.c_str ());
+  if (markers.empty ())
     error (_("No known static tracepoint marker named %s"),
 	   marker_str.c_str ());
 
   std::vector<symtab_and_line> sals;
-  sals.reserve (VEC_length(static_tracepoint_marker_p, markers));
+  sals.reserve (markers.size ());
 
-  for (i = 0; i < VEC_length(static_tracepoint_marker_p, markers); i++)
+  for (const static_tracepoint_marker &marker : markers)
     {
-      struct static_tracepoint_marker *marker;
-
-      marker = VEC_index (static_tracepoint_marker_p, markers, i);
-
-      symtab_and_line sal = find_pc_line (marker->address, 0);
-      sal.pc = marker->address;
+      symtab_and_line sal = find_pc_line (marker.address, 0);
+      sal.pc = marker.address;
       sals.push_back (sal);
-
-      release_static_tracepoint_marker (marker);
-    }
+   }
 
   *arg_p = endp;
   return sals;
@@ -12905,7 +12895,7 @@ tracepoint_print_one_detail (const struct breakpoint *self,
 			     struct ui_out *uiout)
 {
   struct tracepoint *tp = (struct tracepoint *) self;
-  if (tp->static_trace_marker_id)
+  if (!tp->static_trace_marker_id.empty ())
     {
       gdb_assert (self->type == bp_static_tracepoint);
 
@@ -13189,7 +13179,7 @@ strace_marker_decode_location (struct breakpoint *b,
       return sals;
     }
   else
-    error (_("marker %s not found"), tp->static_trace_marker_id);
+    error (_("marker %s not found"), tp->static_trace_marker_id.c_str ());
 }
 
 static struct breakpoint_ops strace_marker_breakpoint_ops;
@@ -13470,14 +13460,12 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 
   if (target_static_tracepoint_marker_at (pc, &marker))
     {
-      if (strcmp (tp->static_trace_marker_id, marker.str_id) != 0)
+      if (tp->static_trace_marker_id != marker.str_id)
 	warning (_("static tracepoint %d changed probed marker from %s to %s"),
-		 b->number,
-		 tp->static_trace_marker_id, marker.str_id);
+		 b->number, tp->static_trace_marker_id.c_str (),
+		 marker.str_id.c_str ());
 
-      xfree (tp->static_trace_marker_id);
-      tp->static_trace_marker_id = xstrdup (marker.str_id);
-      release_static_tracepoint_marker (&marker);
+      tp->static_trace_marker_id = std::move (marker.str_id);
 
       return sal;
     }
@@ -13487,28 +13475,26 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
   if (!sal.explicit_pc
       && sal.line != 0
       && sal.symtab != NULL
-      && tp->static_trace_marker_id != NULL)
+      && !tp->static_trace_marker_id.empty ())
     {
-      VEC(static_tracepoint_marker_p) *markers;
+      std::vector<static_tracepoint_marker> markers
+	= target_static_tracepoint_markers_by_strid
+	    (tp->static_trace_marker_id.c_str ());
 
-      markers
-	= target_static_tracepoint_markers_by_strid (tp->static_trace_marker_id);
-
-      if (!VEC_empty(static_tracepoint_marker_p, markers))
+      if (!markers.empty ())
 	{
 	  struct symbol *sym;
 	  struct static_tracepoint_marker *tpmarker;
 	  struct ui_out *uiout = current_uiout;
 	  struct explicit_location explicit_loc;
 
-	  tpmarker = VEC_index (static_tracepoint_marker_p, markers, 0);
+	  tpmarker = &markers[0];
 
-	  xfree (tp->static_trace_marker_id);
-	  tp->static_trace_marker_id = xstrdup (tpmarker->str_id);
+	  tp->static_trace_marker_id = std::move (tpmarker->str_id);
 
 	  warning (_("marker for static tracepoint %d (%s) not "
 		     "found at previous line number"),
-		   b->number, tp->static_trace_marker_id);
+		   b->number, tp->static_trace_marker_id.c_str ());
 
 	  symtab_and_line sal2 = find_pc_line (tpmarker->address, 0);
 	  sym = find_pc_sect_function (tpmarker->address, NULL);
@@ -13545,8 +13531,6 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 
 	  /* Might be nice to check if function changed, and warn if
 	     so.  */
-
-	  release_static_tracepoint_marker (tpmarker);
 	}
     }
   return sal;

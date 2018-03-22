@@ -214,14 +214,20 @@ struct uploaded_tsv
 
 struct static_tracepoint_marker
 {
-  struct gdbarch *gdbarch;
-  CORE_ADDR address;
+  DISABLE_COPY_AND_ASSIGN (static_tracepoint_marker);
+
+  static_tracepoint_marker () = default;
+  static_tracepoint_marker (static_tracepoint_marker &&) = default;
+  static_tracepoint_marker &operator= (static_tracepoint_marker &&) = default;
+
+  struct gdbarch *gdbarch = NULL;
+  CORE_ADDR address = 0;
 
   /* The string ID of the marker.  */
-  char *str_id;
+  std::string str_id;
 
   /* Extra target reported info associated with the marker.  */
-  char *extra;
+  std::string extra;
 };
 
 struct memrange
@@ -295,11 +301,9 @@ private:
   std::vector<std::string> m_computed;
 };
 
-extern void parse_static_tracepoint_marker_definition
-  (const char *line, const char **pp,
-   struct static_tracepoint_marker *marker);
-extern void release_static_tracepoint_marker (struct static_tracepoint_marker *);
-extern void free_current_marker (void *arg);
+extern void
+  parse_static_tracepoint_marker_definition (const char *line, const char **pp,
+					     static_tracepoint_marker *marker);
 
 /* A hook used to notify the UI of tracepoint operations.  */
 

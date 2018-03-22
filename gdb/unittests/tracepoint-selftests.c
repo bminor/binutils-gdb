@@ -37,24 +37,24 @@ test_parse_static_tracepoint_marker_definition ()
   parse_static_tracepoint_marker_definition (start, &end, &marker);
 
   SELF_CHECK (marker.address == 0x1234);
-  SELF_CHECK (strcmp (marker.str_id, "marker1") == 0);
-  SELF_CHECK (strcmp (marker.extra, "extra stuff") == 0);
+  SELF_CHECK (marker.str_id == "marker1");
+  SELF_CHECK (marker.extra == "extra stuff");
   SELF_CHECK (end == strchr (start, ','));
 
   start = end + 1;
   parse_static_tracepoint_marker_definition (start, &end, &marker);
 
   SELF_CHECK (marker.address == 0xabba);
-  SELF_CHECK (strcmp (marker.str_id, "marker2") == 0);
-  SELF_CHECK (strcmp (marker.extra, "") == 0);
+  SELF_CHECK (marker.str_id == "marker2");
+  SELF_CHECK (marker.extra == "");
   SELF_CHECK (end == strchr (start, ','));
 
   start = end + 1;
   parse_static_tracepoint_marker_definition (start, &end, &marker);
 
   SELF_CHECK (marker.address == 0xcafe);
-  SELF_CHECK (strcmp (marker.str_id, "marker3") == 0);
-  SELF_CHECK (strcmp (marker.extra, "morestuff") == 0);
+  SELF_CHECK (marker.str_id == "marker3");
+  SELF_CHECK (marker.extra == "morestuff");
   SELF_CHECK (end == def + strlen (def));
 }
 

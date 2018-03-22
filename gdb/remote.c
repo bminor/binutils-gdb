@@ -3381,7 +3381,7 @@ remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
 }
 
 
-static int
+static bool
 remote_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR addr,
 				    struct static_tracepoint_marker *marker)
 {
@@ -3401,21 +3401,20 @@ remote_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR addr,
   if (*p++ == 'm')
     {
       parse_static_tracepoint_marker_definition (p, NULL, marker);
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
-static VEC(static_tracepoint_marker_p) *
+static std::vector<static_tracepoint_marker>
 remote_static_tracepoint_markers_by_strid (struct target_ops *self,
 					   const char *strid)
 {
   struct remote_state *rs = get_remote_state ();
-  VEC(static_tracepoint_marker_p) *markers = NULL;
-  struct static_tracepoint_marker *marker = NULL;
-  struct cleanup *old_chain;
+  std::vector<static_tracepoint_marker> markers;
   const char *p;
+  static_tracepoint_marker marker;
 
   /* Ask for a first packet of static tracepoint marker
      definition.  */
@@ -3425,28 +3424,14 @@ remote_static_tracepoint_markers_by_strid (struct target_ops *self,
   if (*p == 'E')
     error (_("Remote failure reply: %s"), p);
 
-  old_chain = make_cleanup (free_current_marker, &marker);
-
   while (*p++ == 'm')
     {
-      if (marker == NULL)
-	marker = XCNEW (struct static_tracepoint_marker);
-
       do
 	{
-	  parse_static_tracepoint_marker_definition (p, &p, marker);
+	  parse_static_tracepoint_marker_definition (p, &p, &marker);
 
-	  if (strid == NULL || strcmp (strid, marker->str_id) == 0)
-	    {
-	      VEC_safe_push (static_tracepoint_marker_p,
-			     markers, marker);
-	      marker = NULL;
-	    }
-	  else
-	    {
-	      release_static_tracepoint_marker (marker);
-	      memset (marker, 0, sizeof (*marker));
-	    }
+	  if (strid == NULL || marker.str_id == strid)
+	    markers.push_back (std::move (marker));
 	}
       while (*p++ == ',');	/* comma-separated list */
       /* Ask for another packet of static tracepoint definition.  */
@@ -3455,7 +3440,6 @@ remote_static_tracepoint_markers_by_strid (struct target_ops *self,
       p = rs->buf;
     }
 
-  do_cleanups (old_chain);
   return markers;
 }
 

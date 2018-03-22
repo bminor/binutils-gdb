@@ -48,6 +48,16 @@ static void test_hex2bin_byte_vector ()
   SELF_CHECK (bv[1] == 0x23);
 }
 
+static void test_hex2str ()
+{
+  SELF_CHECK (hex2str ("666f6f") == "foo");
+  SELF_CHECK (hex2str ("666f6fa") == "foo");
+  SELF_CHECK (hex2str ("666f6f", 2) == "fo");
+  SELF_CHECK (hex2str ("666", 2) == "f");
+  SELF_CHECK (hex2str ("666", 6) == "f");
+  SELF_CHECK (hex2str ("") == "");
+}
+
 } /* namespace rsp_low */
 } /* namespace selftests */
 
@@ -56,4 +66,6 @@ _initialize_rsp_low_selftests ()
 {
   selftests::register_test ("hex2bin_byte_vector",
 			    selftests::rsp_low::test_hex2bin_byte_vector);
+  selftests::register_test ("hex2str",
+			    selftests::rsp_low::test_hex2str);
 }

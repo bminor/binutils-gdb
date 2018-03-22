@@ -3674,21 +3674,6 @@ parse_tsv_definition (const char *line, struct uploaded_tsv **utsvp)
   utsv->name = xstrdup (buf);
 }
 
-void
-free_current_marker (void *arg)
-{
-  struct static_tracepoint_marker **marker_p
-    = (struct static_tracepoint_marker **) arg;
-
-  if (*marker_p != NULL)
-    {
-      release_static_tracepoint_marker (*marker_p);
-      xfree (*marker_p);
-    }
-  else
-    *marker_p = NULL;
-}
-
 /* Given a line of text defining a static tracepoint marker, parse it
    into a "static tracepoint marker" object.  Throws an error is
    parsing fails.  If PP is non-null, it points to one past the end of
@@ -3696,11 +3681,10 @@ free_current_marker (void *arg)
 
 void
 parse_static_tracepoint_marker_definition (const char *line, const char **pp,
-					   struct static_tracepoint_marker *marker)
+					   static_tracepoint_marker *marker)
 {
   const char *p, *endp;
   ULONGEST addr;
-  int end;
 
   p = line;
   p = unpack_varlen_hex (p, &addr);
@@ -3713,12 +3697,10 @@ parse_static_tracepoint_marker_definition (const char *line, const char **pp,
   if (endp == NULL)
     error (_("bad marker definition: %s"), line);
 
-  marker->str_id = (char *) xmalloc (endp - p + 1);
-  end = hex2bin (p, (gdb_byte *) marker->str_id, (endp - p + 1) / 2);
-  marker->str_id[end] = '\0';
+  marker->str_id = hex2str (p, (endp - p) / 2);
 
-  p += 2 * end;
-  p++;  /* skip a colon */
+  p = endp;
+  p++; /* skip a colon */
 
   /* This definition may be followed by another one, separated by a comma.  */
   int hex_len;
@@ -3728,30 +3710,17 @@ parse_static_tracepoint_marker_definition (const char *line, const char **pp,
   else
     hex_len = strlen (p);
 
-  marker->extra = (char *) xmalloc (hex_len / 2 + 1);
-  end = hex2bin (p, (gdb_byte *) marker->extra, hex_len / 2);
-  marker->extra[end] = '\0';
+  marker->extra = hex2str (p, hex_len / 2);
 
-  if (pp)
+  if (pp != nullptr)
     *pp = p + hex_len;
-}
-
-/* Release a static tracepoint marker's contents.  Note that the
-   object itself isn't released here.  There objects are usually on
-   the stack.  */
-
-void
-release_static_tracepoint_marker (struct static_tracepoint_marker *marker)
-{
-  xfree (marker->str_id);
-  marker->str_id = NULL;
 }
 
 /* Print MARKER to gdb_stdout.  */
 
 static void
 print_one_static_tracepoint_marker (int count,
-				    struct static_tracepoint_marker *marker)
+				    const static_tracepoint_marker &marker)
 {
   struct symbol *sym;
 
@@ -3761,9 +3730,9 @@ print_one_static_tracepoint_marker (int count,
   VEC(breakpoint_p) *tracepoints;
 
   symtab_and_line sal;
-  sal.pc = marker->address;
+  sal.pc = marker.address;
 
-  tracepoints = static_tracepoints_here (marker->address);
+  tracepoints = static_tracepoints_here (marker.address);
 
   ui_out_emit_tuple tuple_emitter (uiout, "marker");
 
@@ -3771,7 +3740,7 @@ print_one_static_tracepoint_marker (int count,
      identifier!  */
   uiout->field_int ("count", count);
 
-  uiout->field_string ("marker-id", marker->str_id);
+  uiout->field_string ("marker-id", marker.str_id.c_str ());
 
   uiout->field_fmt ("enabled", "%c",
 		    !VEC_empty (breakpoint_p, tracepoints) ? 'y' : 'n');
@@ -3779,17 +3748,17 @@ print_one_static_tracepoint_marker (int count,
 
   strcpy (wrap_indent, "                                   ");
 
-  if (gdbarch_addr_bit (marker->gdbarch) <= 32)
+  if (gdbarch_addr_bit (marker.gdbarch) <= 32)
     strcat (wrap_indent, "           ");
   else
     strcat (wrap_indent, "                   ");
 
   strcpy (extra_field_indent, "         ");
 
-  uiout->field_core_addr ("addr", marker->gdbarch, marker->address);
+  uiout->field_core_addr ("addr", marker.gdbarch, marker.address);
 
-  sal = find_pc_line (marker->address, 0);
-  sym = find_pc_sect_function (marker->address, NULL);
+  sal = find_pc_line (marker.address, 0);
+  sym = find_pc_sect_function (marker.address, NULL);
   if (sym)
     {
       uiout->text ("in ");
@@ -3827,7 +3796,7 @@ print_one_static_tracepoint_marker (int count,
   uiout->text ("\n");
   uiout->text (extra_field_indent);
   uiout->text (_("Data: \""));
-  uiout->field_string ("extra-data", marker->extra);
+  uiout->field_string ("extra-data", marker.extra.c_str ());
   uiout->text ("\"\n");
 
   if (!VEC_empty (breakpoint_p, tracepoints))
@@ -3861,11 +3830,9 @@ print_one_static_tracepoint_marker (int count,
 static void
 info_static_tracepoint_markers_command (const char *arg, int from_tty)
 {
-  VEC(static_tracepoint_marker_p) *markers;
-  struct cleanup *old_chain;
-  struct static_tracepoint_marker *marker;
   struct ui_out *uiout = current_uiout;
-  int i;
+  std::vector<static_tracepoint_marker> markers
+    = target_static_tracepoint_markers_by_strid (NULL);
 
   /* We don't have to check target_can_use_agent and agent's capability on
      static tracepoint here, in order to be compatible with older GDBserver.
@@ -3889,19 +3856,8 @@ info_static_tracepoint_markers_command (const char *arg, int from_tty)
 
   uiout->table_body ();
 
-  markers = target_static_tracepoint_markers_by_strid (NULL);
-  old_chain = make_cleanup (VEC_cleanup (static_tracepoint_marker_p), &markers);
-
-  for (i = 0;
-       VEC_iterate (static_tracepoint_marker_p,
-		    markers, i, marker);
-       i++)
-    {
-      print_one_static_tracepoint_marker (i + 1, marker);
-      release_static_tracepoint_marker (marker);
-    }
-
-  do_cleanups (old_chain);
+  for (int i = 0; i < markers.size (); i++)
+    print_one_static_tracepoint_marker (i + 1, markers[i]);
 }
 
 /* The $_sdata convenience variable is a bit special.  We don't know

@@ -118,8 +118,8 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_std_vector_mem_region(X) \
   target_debug_do_print (host_address_to_string (X.data ()))
-#define target_debug_print_VEC_static_tracepoint_marker_p_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
+#define target_debug_print_std_vector_static_tracepoint_marker(X)	\
+  target_debug_do_print (host_address_to_string (X.data ()))
 #define target_debug_print_const_struct_target_desc_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_bp_location_p(X)	\
@@ -136,7 +136,7 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_uploaded_tsv_pp(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_static_tracepoint_marker_p(X)	\
+#define target_debug_print_static_tracepoint_marker_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_traceframe_info_p(X)	\
   target_debug_do_print (host_address_to_string (X))

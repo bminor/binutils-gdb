@@ -62,6 +62,10 @@ gdb::byte_vector hex2bin (const char *hex);
 
 extern std::string hex2str (const char *hex);
 
+/* Like hex2bin, but return a std::string.  */
+
+extern std::string hex2str (const char *hex, int count);
+
 /* Convert some bytes to a hexadecimal representation.  BIN holds the
    bytes to convert.  COUNT says how many bytes to convert.  The
    resulting characters are stored in HEX, followed by a NUL
