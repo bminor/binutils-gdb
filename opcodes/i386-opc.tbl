@@ -1981,8 +1981,9 @@ vcmpunord_ssd, 3, 0xf2c2, 0x13, 1, CpuAVX, Modrm|Vex=3|VexOpcode=0|VexVVVV=1|Vex
 vcmpunord_sss, 3, 0xf3c2, 0x13, 1, CpuAVX, Modrm|Vex=3|VexOpcode=0|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 vcomisd, 2, 0x662f, None, 1, CpuAVX, Modrm|Vex=3|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
 vcomiss, 2, 0x2f, None, 1, CpuAVX, Modrm|Vex=3|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-vcvtdq2pd, 2, 0xf3e6, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-vcvtdq2pd, 2, 0xf3e6, None, 1, CpuAVX, Modrm|Vex=2|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegYMM }
+vcvtdq2pd, 2, 0xf3e6, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, RegXMM|RegYMM }
+vcvtdq2pd, 2, 0xf3e6, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex, RegXMM }
+vcvtdq2pd, 2, 0xf3e6, None, 1, CpuAVX, Modrm|Vex=2|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex, RegYMM }
 vcvtdq2ps, 2, 0x5b, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vcvtpd2dq, 2, 0xf2e6, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM, RegXMM }
 vcvtpd2dq, 2, 0xf2e6, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IntelSyntax, { Xmmword|Ymmword|BaseIndex, RegXMM }
@@ -1993,8 +1994,9 @@ vcvtpd2ps, 2, 0x665a, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|No_bSuf|No_w
 vcvtpd2psx, 2, 0x665a, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTSyntax, { Unspecified|BaseIndex|RegXMM, RegXMM }
 vcvtpd2psy, 2, 0x665a, None, 1, CpuAVX, Modrm|Vex=2|VexOpcode=0|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTSyntax, { Unspecified|BaseIndex|RegYMM, RegXMM }
 vcvtps2dq, 2, 0x665b, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
-vcvtps2pd, 2, 0x5a, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-vcvtps2pd, 2, 0x5a, None, 1, CpuAVX, Modrm|Vex=2|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegYMM }
+vcvtps2pd, 2, 0x5a, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, RegXMM|RegYMM }
+vcvtps2pd, 2, 0x5a, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex, RegXMM }
+vcvtps2pd, 2, 0x5a, None, 1, CpuAVX, Modrm|Vex=2|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex, RegYMM }
 vcvtsd2si, 2, 0xf22d, None, 1, CpuAVX, Modrm|Vex=3|VexOpcode=0|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|ToDword, { Qword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
 vcvtsd2ss, 3, 0xf25a, None, 1, CpuAVX, Modrm|Vex=3|VexOpcode=0|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 vcvtsi2sd, 3, 0xf22a, None, 1, CpuAVX|CpuNo64, Modrm|Vex=3|VexOpcode=0|VexVVVV=1|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Dword|Unspecified|BaseIndex, RegXMM, RegXMM }
@@ -4494,10 +4496,12 @@ vscatterdps, 2, 0x66A2, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=3|Masking=2|
 vscatterqps, 2, 0x66A3, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=2|NoDefMask|VexOpcode=1|VexW=1|Disp8MemShift=2|VecSIB=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, Qword|Unspecified|BaseIndex }
 vscatterqps, 2, 0x66A3, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=3|Masking=2|NoDefMask|VexOpcode=1|VexW=1|Disp8MemShift=2|VecSIB=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, XMMword|Unspecified|BaseIndex }
 
-vcvtdq2pd, 2, 0xF3E6, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=0|VexW=1|Broadcast=4|Disp8MemShift=3|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Dword|Qword|Unspecified|BaseIndex, RegXMM }
-vcvtdq2pd, 2, 0xF3E6, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=3|Masking=3|VexOpcode=0|VexW=1|Broadcast=3|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Dword|XMMword|Unspecified|BaseIndex, RegYMM }
-vcvtudq2pd, 2, 0xF37A, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=0|VexW=1|Broadcast=4|Disp8MemShift=3|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Dword|Qword|Unspecified|BaseIndex, RegXMM }
-vcvtudq2pd, 2, 0xF37A, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=3|Masking=3|VexOpcode=0|VexW=1|Broadcast=3|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Dword|XMMword|Unspecified|BaseIndex, RegYMM }
+vcvtdq2pd, 2, 0xF3E6, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|Masking=3|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, RegXMM|RegYMM }
+vcvtdq2pd, 2, 0xF3E6, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=0|VexW=1|Broadcast=4|Disp8MemShift=3|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex, RegXMM }
+vcvtdq2pd, 2, 0xF3E6, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=3|Masking=3|VexOpcode=0|VexW=1|Broadcast=3|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Dword|XMMword|Unspecified|BaseIndex, RegYMM }
+vcvtudq2pd, 2, 0xF37A, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|Masking=3|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, RegXMM|RegYMM }
+vcvtudq2pd, 2, 0xF37A, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=0|VexW=1|Broadcast=4|Disp8MemShift=3|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex, RegXMM }
+vcvtudq2pd, 2, 0xF37A, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=3|Masking=3|VexOpcode=0|VexW=1|Broadcast=3|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Dword|XMMword|Unspecified|BaseIndex, RegYMM }
 
 vcvtpd2dq, 2, 0xF2E6, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=0|VexW=2|VecESize=1|Broadcast=4|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Qword|XMMword|BaseIndex, RegXMM }
 vcvtpd2dqx, 2, 0xF2E6, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=0|VexW=2|VecESize=1|Broadcast=4|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Qword|XMMword|Unspecified|BaseIndex, RegXMM }
@@ -4518,8 +4522,9 @@ vcvtph2ps, 2, 0x6613, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=3|Masking=3|Ve
 vcvtps2dq, 2, 0x665B, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=0|VexW=1|Broadcast=3|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Dword|XMMword|Unspecified|BaseIndex, RegXMM }
 vcvtps2dq, 2, 0x665B, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=3|Masking=3|VexOpcode=0|VexW=1|Broadcast=2|Disp8MemShift=5|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegYMM|Dword|YMMword|Unspecified|BaseIndex, RegYMM }
 
-vcvtps2pd, 2, 0x5A, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=0|VexW=1|Broadcast=4|Disp8MemShift=3|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Dword|Qword|Unspecified|BaseIndex, RegXMM }
-vcvtps2pd, 2, 0x5A, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=3|Masking=3|VexOpcode=0|VexW=1|Broadcast=3|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Dword|XMMword|Unspecified|BaseIndex, RegYMM }
+vcvtps2pd, 2, 0x5A, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|Masking=3|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, RegXMM|RegYMM }
+vcvtps2pd, 2, 0x5A, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=0|VexW=1|Broadcast=4|Disp8MemShift=3|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex, RegXMM }
+vcvtps2pd, 2, 0x5A, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=3|Masking=3|VexOpcode=0|VexW=1|Broadcast=3|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Dword|XMMword|Unspecified|BaseIndex, RegYMM }
 
 vcvtps2ph, 3, 0x661D, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|Masking=3|VexOpcode=2|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM|RegYMM, RegXMM|RegMem }
 vcvtps2ph, 3, 0x661D, None, 1, CpuAVX512F|CpuAVX512VL, Modrm|EVex=2|Masking=2|VexOpcode=2|VexW=1|Disp8MemShift=3|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM, Qword|Unspecified|BaseIndex }

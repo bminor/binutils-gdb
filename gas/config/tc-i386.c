@@ -1937,10 +1937,13 @@ match_mem_size (const insn_template *t, unsigned int j)
 		   && !t->operand_types[j].bitfield.fword)
 	       /* For scalar opcode templates to allow register and memory
 		  operands at the same time, some special casing is needed
-		  here.  */
+		  here.  Also for v{,p}broadcast*, {,v}pmov{s,z}*, and
+		  down-conversion vpmov*.  */
 	       || ((t->operand_types[j].bitfield.regsimd
 		    && !t->opcode_modifier.broadcast
-		    && (t->operand_types[j].bitfield.dword
+		    && (t->operand_types[j].bitfield.byte
+			|| t->operand_types[j].bitfield.word
+			|| t->operand_types[j].bitfield.dword
 			|| t->operand_types[j].bitfield.qword))
 		   ? (i.types[j].bitfield.xmmword
 		      || i.types[j].bitfield.ymmword

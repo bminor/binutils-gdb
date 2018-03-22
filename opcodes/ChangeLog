@@ -1,5 +1,12 @@
 2018-03-22  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vcvtdq2pd, vcvtps2pd, vcvtudq2pd): Use separate
+	templates allowing memory operands and folded ones for register
+	only flavors.
+	* i386-tlb.h: Re-generate.
+
+2018-03-22  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (vfrczp*, vpcmov, vpermil2p*): Fold 128- and
 	256-bit templates. Drop redundant leftover Disp<N>.
 	* i386-tlb.h: Re-generate.
