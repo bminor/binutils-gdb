@@ -5427,6 +5427,14 @@ match_template (char mnem_suffix)
 	      && operand_type_equal (&i.types [0], &acc32)
 	      && operand_type_equal (&i.types [1], &acc32))
 	    continue;
+	  /* xrelease mov %eax, <disp> is another special case. It must not
+	     match the accumulator-only encoding of mov.  */
+	  if (flag_code != CODE_64BIT
+	      && i.hle_prefix
+	      && t->base_opcode == 0xa0
+	      && i.types[0].bitfield.acc
+	      && operand_type_check (i.types[1], anymem))
+	    continue;
 	  /* If we want store form, we reverse direction of operands.  */
 	  if (i.dir_encoding == dir_encoding_store
 	      && t->opcode_modifier.d)
