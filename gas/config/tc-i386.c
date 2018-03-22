@@ -5510,10 +5510,14 @@ check_reverse:
 		case 4:
 		  if (!operand_type_match (overlap3, i.types[3])
 		      || (check_register
-			  && !operand_type_register_match (i.types[2],
-							   operand_types[2],
-							   i.types[3],
-							   operand_types[3])))
+			  && (!operand_type_register_match (i.types[1],
+							    operand_types[1],
+							    i.types[3],
+							    operand_types[3])
+			      || !operand_type_register_match (i.types[2],
+							       operand_types[2],
+							       i.types[3],
+							       operand_types[3]))))
 		    continue;
 		  /* Fall through.  */
 		case 3:
