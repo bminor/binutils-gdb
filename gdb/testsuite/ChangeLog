@@ -1,3 +1,11 @@
+2018-03-23  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/22968
+	* gdb.cp/subtypes.exp: New file.
+	* gdb.cp/subtypes.h: New file.
+	* gdb.cp/subtypes.cc: New file.
+	* gdb.cp/subtypes-2.cc: New file.
+
 2018-03-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/amd64-disp-step-avx.S: Add '_start' label.

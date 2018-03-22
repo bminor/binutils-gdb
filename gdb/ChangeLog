@@ -1,3 +1,9 @@
+2018-03-23  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/22968
+	* dwarf2read.c (scan_partial_symbols): Scan structs/classes for
+	nested type definitions for C++, too.
+
 2018-03-23  Tom Tromey  <tom@tromey.com>
 
 	* machoread.c (struct oso_el): Add a constructor.  Don't define as
