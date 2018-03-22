@@ -1889,8 +1889,8 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  offset = fdata->offset;
 	  continue;
 	}
-      else if ((op & 0xfc1f016e) == 0x7c01016e)
-	{			/* stwux rX,r1,rY */
+      else if ((op & 0xfc1f07fa) == 0x7c01016a)
+	{		/* stwux rX,r1,rY  || stdux rX,r1,rY */
 	  /* No way to figure out what r1 is going to be.  */
 	  fdata->frameless = 0;
 	  offset = fdata->offset;
@@ -1900,13 +1900,6 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	{			/* stdu rX,NUM(r1) */
 	  fdata->frameless = 0;
 	  fdata->offset = SIGNED_SHORT (op & ~3UL);
-	  offset = fdata->offset;
-	  continue;
-	}
-      else if ((op & 0xfc1f016a) == 0x7c01016a)
-	{			/* stdux rX,r1,rY */
-	  /* No way to figure out what r1 is going to be.  */
-	  fdata->frameless = 0;
 	  offset = fdata->offset;
 	  continue;
 	}
