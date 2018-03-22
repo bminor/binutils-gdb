@@ -1,3 +1,7 @@
+2018-03-22  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/info-proc.exp: Add test for "info proc cmdline".
+
 2018-03-20  Stephen Roberts  <stephen.roberts@arm.com>
 
 	* gdb.perf/template-breakpoints.cc: New file.

@@ -1,3 +1,8 @@
+2018-03-22  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-tdep.c (linux_info_proc): For "info proc cmdline", print
+	command line args instead of emitting a warning.
+
 2018-03-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* tracepoint.h (struct static_tracepoint_marker): Initialize

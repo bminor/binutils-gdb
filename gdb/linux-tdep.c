@@ -754,10 +754,22 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (cmdline_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/cmdline", pid);
-      gdb::unique_xmalloc_ptr<char> cmdline
-	= target_fileio_read_stralloc (NULL, filename);
-      if (cmdline)
-	printf_filtered ("cmdline = '%s'\n", cmdline.get ());
+      gdb_byte *buffer;
+      ssize_t len = target_fileio_read_alloc (NULL, filename, &buffer);
+
+      if (len > 0)
+	{
+	  gdb::unique_xmalloc_ptr<char> cmdline ((char *) buffer);
+	  ssize_t pos;
+
+	  for (pos = 0; pos < len - 1; pos++)
+	    {
+	      if (buffer[pos] == '\0')
+		buffer[pos] = ' ';
+	    }
+	  buffer[len - 1] = '\0';
+	  printf_filtered ("cmdline = '%s'\n", buffer);
+	}
       else
 	warning (_("unable to open /proc file '%s'"), filename);
     }
