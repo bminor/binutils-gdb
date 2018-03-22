@@ -1357,6 +1357,39 @@ bl_to_blrl_insn_p (CORE_ADDR pc, int insn, enum bfd_endian byte_order)
   return 0;
 }
 
+/* Return true if OP is a stw or std instruction with
+   register operands RS and RA and any immediate offset.
+
+   If WITH_UPDATE is true, also return true if OP is
+   a stwu or stdu instruction with the same operands.
+
+   Return false otherwise.
+   */
+static bool
+store_insn_p (unsigned long op, unsigned long rs,
+	      unsigned long ra, bool with_update)
+{
+  rs = rs << 21;
+  ra = ra << 16;
+
+  if (/* std RS, SIMM(RA) */
+      ((op & 0xffff0003) == (rs | ra | 0xf8000000)) ||
+      /* stw RS, SIMM(RA) */
+      ((op & 0xffff0000) == (rs | ra | 0x90000000)))
+    return true;
+
+  if (with_update)
+    {
+      if (/* stdu RS, SIMM(RA) */
+	  ((op & 0xffff0003) == (rs | ra | 0xf8000001)) ||
+	  /* stwu RS, SIMM(RA) */
+	  ((op & 0xffff0000) == (rs | ra | 0x94000000)))
+	return true;
+    }
+
+  return false;
+}
+
 /* Masks for decoding a branch-and-link (bl) instruction.
 
    BL_MASK and BL_INSTRUCTION are used in combination with each other.
@@ -1583,6 +1616,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
   gdb_byte buf[4];
   unsigned long op;
   long offset = 0;
+  long alloca_reg_offset = 0;
   long vr_saved_offset = 0;
   int lr_reg = -1;
   int cr_reg = -1;
@@ -1654,14 +1688,14 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	     remember just the first one, but skip over additional
 	     ones.  */
 	  if (lr_reg == -1)
-	    lr_reg = (op & 0x03e00000);
+	    lr_reg = (op & 0x03e00000) >> 21;
           if (lr_reg == 0)
             r0_contains_arg = 0;
 	  continue;
 	}
       else if ((op & 0xfc1fffff) == 0x7c000026)
 	{			/* mfcr Rx */
-	  cr_reg = (op & 0x03e00000);
+	  cr_reg = (op & 0x03e00000) >> 21;
           if (cr_reg == 0)
             r0_contains_arg = 0;
 	  continue;
@@ -1738,14 +1772,17 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
 	}
       else if (lr_reg >= 0 &&
-	       /* std Rx, NUM(r1) || stdu Rx, NUM(r1) */
-	       (((op & 0xffff0000) == (lr_reg | 0xf8010000)) ||
-		/* stw Rx, NUM(r1) */
-		((op & 0xffff0000) == (lr_reg | 0x90010000)) ||
-		/* stwu Rx, NUM(r1) */
-		((op & 0xffff0000) == (lr_reg | 0x94010000))))
-	{	/* where Rx == lr */
-	  fdata->lr_offset = offset;
+	       ((store_insn_p (op, lr_reg, 1, true)) ||
+		(framep &&
+		 (store_insn_p (op, lr_reg,
+				fdata->alloca_reg - tdep->ppc_gp0_regnum,
+				false)))))
+	{
+	  if (store_insn_p (op, lr_reg, 1, true))
+	    fdata->lr_offset = offset;
+	  else /* LR save through frame pointer. */
+	    fdata->lr_offset = alloca_reg_offset;
+
 	  fdata->nosavedpc = 0;
 	  /* Invalidate lr_reg, but don't set it to -1.
 	     That would mean that it had never been set.  */
@@ -1760,13 +1797,8 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
 	}
       else if (cr_reg >= 0 &&
-	       /* std Rx, NUM(r1) || stdu Rx, NUM(r1) */
-	       (((op & 0xffff0000) == (cr_reg | 0xf8010000)) ||
-		/* stw Rx, NUM(r1) */
-		((op & 0xffff0000) == (cr_reg | 0x90010000)) ||
-		/* stwu Rx, NUM(r1) */
-		((op & 0xffff0000) == (cr_reg | 0x94010000))))
-	{	/* where Rx == cr */
+	       (store_insn_p (op, cr_reg, 1, true)))
+	{
 	  fdata->cr_offset = offset;
 	  /* Invalidate cr_reg, but don't set it to -1.
 	     That would mean that it had never been set.  */
@@ -1920,6 +1952,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  fdata->frameless = 0;
 	  framep = 1;
 	  fdata->alloca_reg = (tdep->ppc_gp0_regnum + 29);
+	  alloca_reg_offset = offset;
 	  continue;
 
 	  /* Another way to set up the frame pointer.  */
@@ -1930,6 +1963,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  fdata->frameless = 0;
 	  framep = 1;
 	  fdata->alloca_reg = (tdep->ppc_gp0_regnum + 31);
+	  alloca_reg_offset = offset;
 	  continue;
 
 	  /* Another way to set up the frame pointer.  */
@@ -1940,6 +1974,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  framep = 1;
 	  fdata->alloca_reg = (tdep->ppc_gp0_regnum
 			       + ((op & ~0x38010000) >> 21));
+	  alloca_reg_offset = offset;
 	  continue;
 	}
       /* AltiVec related instructions.  */
@@ -2180,7 +2215,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 #endif /* 0 */
 
   if (pc == lim_pc && lr_reg >= 0)
-    fdata->lr_register = lr_reg >> 21;
+    fdata->lr_register = lr_reg;
 
   fdata->offset = -fdata->offset;
   return last_prologue_pc;
