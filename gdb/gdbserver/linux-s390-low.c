@@ -507,10 +507,11 @@ s390_get_wordsize (int pid)
   PTRACE_XFER_TYPE pswm = ptrace (PTRACE_PEEKUSER, pid,
 				  (PTRACE_TYPE_ARG3) 0,
 				  (PTRACE_TYPE_ARG4) 0);
-  if (errno != 0) {
-    warning (_("Couldn't determine word size, assuming 64-bit.\n"));
-    return 8;
-  }
+  if (errno != 0)
+    {
+      warning (_("Couldn't determine word size, assuming 64-bit.\n"));
+      return 8;
+    }
   /* Derive word size from extended addressing mode (PSW bit 31).  */
   return pswm & (1L << 32) ? 8 : 4;
 }
