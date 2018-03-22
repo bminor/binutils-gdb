@@ -248,6 +248,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Eb { OP_E, b_mode }
 #define Ebnd { OP_E, bnd_mode }
 #define EbS { OP_E, b_swap_mode }
+#define EbndS { OP_E, bnd_swap_mode }
 #define Ev { OP_E, v_mode }
 #define Ev_bnd { OP_E, v_bnd_mode }
 #define EvS { OP_E, v_swap_mode }
@@ -560,7 +561,10 @@ enum
   dq_mode,
   /* registers like dq_mode, memory like w_mode.  */
   dqw_mode,
+  /* bounds operand */
   bnd_mode,
+  /* bounds operand with operand swapped */
+  bnd_swap_mode,
   /* 4- or 6-byte pointer operand */
   f_mode,
   const_1_mode,
@@ -3890,7 +3894,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { MOD_TABLE (MOD_0F1B_PREFIX_0) },
     { MOD_TABLE (MOD_0F1B_PREFIX_1) },
-    { "bndmov", { Ebnd, Gbnd }, 0 },
+    { "bndmov", { EbndS, Gbnd }, 0 },
     { "bndcn",  { Gbnd, Ev_bnd }, 0 },
   },
 
@@ -15047,6 +15051,7 @@ OP_E_register (int bytemode, int sizeflag)
 
   if ((sizeflag & SUFFIX_ALWAYS)
       && (bytemode == b_swap_mode
+	  || bytemode == bnd_swap_mode
 	  || bytemode == v_swap_mode))
     swap_operand ();
 
@@ -15076,6 +15081,7 @@ OP_E_register (int bytemode, int sizeflag)
       names = address_mode == mode_64bit ? names64 : names32;
       break;
     case bnd_mode:
+    case bnd_swap_mode:
       if (reg > 0x3)
 	{
 	  oappend ("(bad)");
@@ -15272,7 +15278,8 @@ OP_E_memory (int bytemode, int sizeflag)
       int scale = 0;
       int addr32flag = !((sizeflag & AFLAG)
 			 || bytemode == v_bnd_mode
-			 || bytemode == bnd_mode);
+			 || bytemode == bnd_mode
+			 || bytemode == bnd_swap_mode);
       const char **indexes64 = names64;
       const char **indexes32 = names32;
 
@@ -15389,7 +15396,8 @@ OP_E_memory (int bytemode, int sizeflag)
 
       if ((havebase || haveindex || riprel)
 	  && (bytemode != v_bnd_mode)
-	  && (bytemode != bnd_mode))
+	  && (bytemode != bnd_mode)
+	  && (bytemode != bnd_swap_mode))
 	used_prefixes |= PREFIX_ADDR;
 
       if (havedisp || (intel_syntax && riprel))
