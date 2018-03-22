@@ -1,5 +1,11 @@
 2018-03-22  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vfrczs*, vphadd*, vphsub*, vpmacs*, vpmadcs*,
+	vprot*, vpsha*, vpshl*, bextr, blc*, bls*, t1mskc, tzmsk, sha1*,
+	sha256*): Drop Disp<N>.
+
+2018-03-22  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (EbndS, bnd_swap_mode): New.
 	(prefix_table): Use EbndS.
 	(OP_E_register, OP_E_memory): Also handle bnd_swap_mode.
