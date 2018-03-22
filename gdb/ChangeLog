@@ -1,3 +1,11 @@
+2018-03-27  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* top.c (class gdb_readline_wrapper_cleanup): Add constructor,
+	destructor.  Now a class.
+	(gdb_readline_wrapper_cleanup): Remove function.
+	(gdb_readline_wrapper): Remove cleanups.
+
 2018-03-27  Tom Tromey  <tom@tromey.com>
 
 	* typeprint.h (struct type_print_options) <local_typedefs,
