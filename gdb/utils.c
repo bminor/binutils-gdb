@@ -1479,9 +1479,7 @@ set_screen_width_and_height (int width, int height)
 static void
 prompt_for_continue (void)
 {
-  char *ignore;
   char cont_prompt[120];
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   /* Used to add duration we waited for user to respond to
      prompt_for_continue_wait_time.  */
   using namespace std::chrono;
@@ -1504,8 +1502,7 @@ prompt_for_continue (void)
 
   /* Call gdb_readline_wrapper, not readline, in order to keep an
      event loop running.  */
-  ignore = gdb_readline_wrapper (cont_prompt);
-  make_cleanup (xfree, ignore);
+  gdb::unique_xmalloc_ptr<char> ignore (gdb_readline_wrapper (cont_prompt));
 
   /* Add time spend in this routine to prompt_for_continue_wait_time.  */
   prompt_for_continue_wait_time += steady_clock::now () - prompt_started;
@@ -1515,7 +1512,7 @@ prompt_for_continue (void)
 
   if (ignore != NULL)
     {
-      char *p = ignore;
+      char *p = ignore.get ();
 
       while (*p == ' ' || *p == '\t')
 	++p;
@@ -1529,8 +1526,6 @@ prompt_for_continue (void)
   reinitialize_more_filter ();
 
   dont_repeat ();		/* Forget prev cmd -- CR won't repeat it.  */
-
-  do_cleanups (old_chain);
 }
 
 /* Initialize timer to keep track of how long we waited for the user.  */

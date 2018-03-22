@@ -1,3 +1,7 @@
+2018-03-27  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (prompt_for_continue): Use unique_xmalloc_ptr.
+
 2018-03-27  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
 
