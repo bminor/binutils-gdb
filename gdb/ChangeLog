@@ -1,3 +1,12 @@
+2018-03-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* tracepoint.c (parse_static_tracepoint_marker_definition):
+	Consider case where the definition is followed by more
+	definitions.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	tracepoint-selftests.c.
+	* unittests/tracepoint-selftests.c: New.
+
 2018-03-21  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
 	* MAINTAINERS (Write After Approval): Add Pedro Franco de

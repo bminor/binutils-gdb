@@ -3720,12 +3720,20 @@ parse_static_tracepoint_marker_definition (const char *line, const char **pp,
   p += 2 * end;
   p++;  /* skip a colon */
 
-  marker->extra = (char *) xmalloc (strlen (p) + 1);
-  end = hex2bin (p, (gdb_byte *) marker->extra, strlen (p) / 2);
+  /* This definition may be followed by another one, separated by a comma.  */
+  int hex_len;
+  endp = strchr (p, ',');
+  if (endp != nullptr)
+    hex_len = endp - p;
+  else
+    hex_len = strlen (p);
+
+  marker->extra = (char *) xmalloc (hex_len / 2 + 1);
+  end = hex2bin (p, (gdb_byte *) marker->extra, hex_len / 2);
   marker->extra[end] = '\0';
 
   if (pp)
-    *pp = p;
+    *pp = p + hex_len;
 }
 
 /* Release a static tracepoint marker's contents.  Note that the
