@@ -1,5 +1,11 @@
 2018-03-23  Alan Hayward  <alan.hayward@arm.com>
 
+	* regcache.c (find_register_by_number): Make static.
+	(find_regno): Use find_register_by_number
+	* regcache.h (struct reg): Remove declaration.
+
+2018-03-23  Alan Hayward  <alan.hayward@arm.com>
+
 	* tdesc.c (target_desc::~target_desc): Move to here.
 	(target_desc::operator==): Likewise.
 	* tdesc.h (target_desc::~target_desc): Move from here.
