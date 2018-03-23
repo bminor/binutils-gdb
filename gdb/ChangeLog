@@ -1,5 +1,16 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	* python/py-framefilter.c (py_print_type): Don't catch
+	exceptions.  Return void.
+	(py_print_value): Likewise.
+	(py_print_single_arg): Likewise.
+	(enumerate_args): Don't catch exceptions.
+	(py_print_args): Likewise.
+	(py_print_frame): Likewise.
+	(gdbpy_apply_frame_filter): Catch exceptions here.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	* stack.c (_initialize_stack): Remove trailing newlines from help
 	text.  Add "Usage" line to "backtrace" help.
 
