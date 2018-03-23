@@ -1,3 +1,13 @@
+2018-03-23  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_symbol_for_build_attribute): Skip ARM mapping
+	symbols.
+	(print_gnu_build_attribute_description): If no file start symbol
+	could be found, look for one two bytes into the file.
+	* testsuite/binutils-all/note-4-64.s: Set the address of the file
+	start symbol to two bytes into the file.
+	* testsuite/binutils-all/note-4-32.s: Likewise.
+
 2018-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (process_dynamic_section): Also dump DF_1_KMOD,

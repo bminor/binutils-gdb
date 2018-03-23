@@ -1,6 +1,6 @@
 	.text
 	.org 0x100
-note_4.s:
+	.equiv note_4.s, . + 2
 	.dc.l 0
 	.dc.l 0
 	.dc.l 0
@@ -22,7 +22,7 @@ note_4.s_end:
 	.dc.l 16
 	.dc.l 0x100
 	.asciz "GA$3p3"
-	.8byte note_4.s
+	.8byte note_4.s - 2
 	.8byte note_4.s_end
 
 	.dc.l 23

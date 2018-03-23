@@ -17502,6 +17502,13 @@ get_symbol_for_build_attribute (Filedata *       filedata,
 	if (strtab[sym->st_name] == 0)
 	  continue;
 
+	/* The AArch64 and ARM architectures define mapping symbols
+	   (eg $d, $x, $t) which we want to ignore.  */
+	if (strtab[sym->st_name] == '$'
+	    && strtab[sym->st_name + 1] != 0
+	    && strtab[sym->st_name + 2] == 0)
+	  continue;
+
 	if (is_open_attr)
 	  {
 	    /* For OPEN attributes we prefer GLOBAL over LOCAL symbols
@@ -17630,6 +17637,12 @@ print_gnu_build_attribute_description (Elf_Internal_Note *  pnote,
 
   name = NULL;
   sym = get_symbol_for_build_attribute (filedata, start, is_open_attr, & name);
+  /* As of version 5 of the annobin plugin, filename symbols are biased by 2
+     in order to avoid them being confused with the start address of the
+     first function in the file...  */
+  if (sym == NULL && is_open_attr)
+    sym = get_symbol_for_build_attribute (filedata, start + 2, is_open_attr,
+					  & name);
 
   if (end == 0 && sym != NULL && sym->st_size > 0)
     end = start + sym->st_size;
