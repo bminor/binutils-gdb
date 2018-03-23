@@ -2554,22 +2554,23 @@ This is useful in command scripts."));
 Select and print a stack frame.\nWith no argument, \
 print the selected stack frame.  (See also \"info frame\").\n\
 An argument specifies the frame to select.\n\
-It can be a stack frame number or the address of the frame.\n"));
+It can be a stack frame number or the address of the frame."));
 
   add_com_alias ("f", "frame", class_stack, 1);
 
   add_com_suppress_notification ("select-frame", class_stack, select_frame_command, _("\
 Select a stack frame without printing anything.\n\
 An argument specifies the frame to select.\n\
-It can be a stack frame number or the address of the frame.\n"),
+It can be a stack frame number or the address of the frame."),
 		 &cli_suppress_notification.user_selected_context);
 
   add_com ("backtrace", class_stack, backtrace_command, _("\
 Print backtrace of all stack frames, or innermost COUNT frames.\n\
-With a negative argument, print outermost -COUNT frames.\nUse of the \
-'full' qualifier also prints the values of the local variables.\n\
+Usage: backtrace [QUALIFIERS]... [COUNT]\n\
+With a negative argument, print outermost -COUNT frames.\n\
+Use of the 'full' qualifier also prints the values of the local variables.\n\
 Use of the 'no-filters' qualifier prohibits frame filters from executing\n\
-on this backtrace.\n"));
+on this backtrace."));
   add_com_alias ("bt", "backtrace", class_stack, 0);
 
   add_com_alias ("where", "backtrace", class_alias, 0);
@@ -2587,7 +2588,7 @@ on this backtrace.\n"));
   if (dbx_commands)
     add_com ("func", class_stack, func_command, _("\
 Select the stack frame that contains <func>.\n\
-Usage: func <name>\n"));
+Usage: func <name>"));
 
   add_setshow_enum_cmd ("frame-arguments", class_stack,
 			print_frame_arguments_choices, &print_frame_arguments,

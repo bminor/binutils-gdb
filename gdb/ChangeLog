@@ -1,5 +1,10 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	* stack.c (_initialize_stack): Remove trailing newlines from help
+	text.  Add "Usage" line to "backtrace" help.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	PR python/16486:
 	* python/py-framefilter.c (py_print_args): Call wrap_hint.
 
