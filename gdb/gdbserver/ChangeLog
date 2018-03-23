@@ -1,3 +1,10 @@
+2018-03-23  Alan Hayward  <alan.hayward@arm.com>
+
+	* tdesc.c (target_desc::~target_desc): Move to here.
+	(target_desc::operator==): Likewise.
+	* tdesc.h (target_desc::~target_desc): Move from here.
+	(target_desc::operator==): Likewise.
+
 2018-03-22  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* linux-s390-low.c (s390_get_wordsize): Correct brace style.
