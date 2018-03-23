@@ -18,7 +18,7 @@
 # This file was updated by Jan Kratochvil <jan.kratochvil@redhat.com>.
 
 # This test only works on Linux
-if { ![isnative] || [is_remote host] || [target_info exists use_gdb_stub]
+if { ![isnative] || [is_remote host] || [use_gdb_stub]
      || ![istarget *-linux*] } {
     continue
 }

@@ -21,7 +21,7 @@
 load_lib gdbserver-support.exp
 
 # The test relies on "detach/attach".
-if { [target_info exists use_gdb_stub] } then {
+if { [use_gdb_stub] } then {
     return 0
 }
 

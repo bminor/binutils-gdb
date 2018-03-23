@@ -17,7 +17,7 @@ standard_testfile .c
 set executable ${testfile}
 
 # The plain remote target can't do multiple inferiors.
-if [target_info exists use_gdb_stub] {
+if [use_gdb_stub] {
     return
 }
 

@@ -105,7 +105,7 @@ proc kill_and_remove_inferior {thread_set} {
 
     # The test starts multiple inferiors, therefore non-extended
     # remote is not supported.
-    if [target_info exists use_gdb_stub] {
+    if [use_gdb_stub] {
 	unsupported "using gdb stub"
 	return
     }

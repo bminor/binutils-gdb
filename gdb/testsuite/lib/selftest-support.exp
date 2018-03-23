@@ -140,7 +140,7 @@ proc do_self_tests {function body} {
     # ... or with a stub-like server?  I.e., gdbserver + "target
     # remote"?  In that case we won't be able to pass command line
     # arguments to GDB, and selftest_setup wants to do exactly that.
-    if [target_info exists use_gdb_stub] {
+    if [use_gdb_stub] {
 	return
     }
 

@@ -20,7 +20,7 @@
 
 # Can't pass environment variables to the inferior if when we connect,
 # the inferior is already running.
-if [target_info exists use_gdb_stub] {
+if [use_gdb_stub] {
     return
 }
 

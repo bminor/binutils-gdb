@@ -1,3 +1,31 @@
+2018-03-23  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.ada/exec_changed.exp: Replace "target_info exists
+	use_gdb_stub" by "use_gdb_stub".
+	* gdb.ada/start.exp: Likewise.
+	* gdb.base/async-shell.exp: Likewise.
+	* gdb.base/attach-pie-misread.exp: Likewise.
+	* gdb.base/attach-wait-input.exp: Likewise.
+	* gdb.base/break-entry.exp: Likewise.
+	* gdb.base/break-interp.exp: Likewise.
+	* gdb.base/dprintf-detach.exp: Likewise.
+	* gdb.base/nostdlib.exp: Likewise.
+	* gdb.base/solib-nodir.exp: Likewise.
+	* gdb.base/statistics.exp: Likewise.
+	* gdb.base/testenv.exp: Likewise.
+	* gdb.mi/mi-exec-run.exp: Likewise.
+	* gdb.mi/mi-start.exp: Likewise.
+	* gdb.multi/dummy-frame-restore.exp: Likewise.
+	* gdb.multi/multi-arch-exec.exp: Likewise.
+	* gdb.multi/multi-arch.exp: Likewise.
+	* gdb.multi/tids.exp: Likewise.
+	* gdb.multi/watchpoint-multi.exp: Likewise.
+	* gdb.python/py-events.exp: Likewise.
+	* gdb.threads/attach-into-signal.exp: Likewise.
+	* gdb.threads/attach-stopped.exp: Likewise.
+	* gdb.threads/threadapply.exp: Likewise.
+	* lib/selftest-support.exp: Likewise.
+
 2018-03-22  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/info-proc.exp: Add test for "info proc cmdline".

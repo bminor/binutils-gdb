@@ -19,7 +19,7 @@ set MIFLAGS "-i=mi"
 # The purpose of this testcase is to test the --start option of
 # the -exec-run command. If we cannot use the -exec-run command,
 # then there is no point in running this testcase...
-if [target_info exists use_gdb_stub] {
+if [use_gdb_stub] {
      untested "cannot use -exec-run command"
      return -1
 }
