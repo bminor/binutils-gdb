@@ -8078,6 +8078,7 @@ libxxx.dll.a
 xxx.dll.a
 libxxx.a
 xxx.lib
+libxxx.lib
 cygxxx.dll (*)
 libxxx.dll
 xxx.dll

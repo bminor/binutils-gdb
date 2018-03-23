@@ -2120,6 +2120,8 @@ gld_${EMULATION_NAME}_open_dynamic_archive
       { "lib%s.a", FALSE },
       /* The 'native' spelling of an import lib name is "foo.lib".  */
       { "%s.lib", FALSE },
+      /* PR 22948 - Check for an import library.  */
+      { "lib%s.lib", FALSE },
 #ifdef DLL_SUPPORT
       /* Try "<prefix>foo.dll" (preferred dll name, if specified).  */
       {	"%s%s.dll", TRUE },

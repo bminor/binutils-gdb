@@ -1,3 +1,11 @@
+2018-03-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 22948
+	* emultempl/pe.em (open_dynamic_archive): Add libXXX.lib template
+	to library name list.
+	* emultempl/pep.em (open_dynamic_archive): Likewise.
+	* ld.texinfo (WIN32): Update documentation.
+
 2018-03-20  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/ld-elf/shared.exp (pr20995-2): XFAIL on aarch64*-*-elf*,
