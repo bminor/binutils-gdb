@@ -1,5 +1,9 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	* stack.c (backtrace_command_1): Remove verbose code.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	* python/py-framefilter.c (py_print_type): Don't catch
 	exceptions.  Return void.
 	(py_print_value): Likewise.

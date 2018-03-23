@@ -1780,24 +1780,6 @@ backtrace_command_1 (const char *count_exp, frame_filter_flags flags,
 	  count = -1;
 	}
 
-      if (info_verbose)
-	{
-	  /* Read in symbols for all of the frames.  Need to do this in a
-	     separate pass so that "Reading in symbols for xxx" messages
-	     don't screw up the appearance of the backtrace.  Also if
-	     people have strong opinions against reading symbols for
-	     backtrace this may have to be an option.  */
-	  i = count;
-	  for (fi = trailing; fi != NULL && i--; fi = get_prev_frame (fi))
-	    {
-	      CORE_ADDR pc;
-
-	      QUIT;
-	      pc = get_frame_address_in_block (fi);
-	      expand_symtab_containing_pc (pc, find_pc_mapped_section (pc));
-	    }
-	}
-
       for (i = 0, fi = trailing; fi && count--; i++, fi = get_prev_frame (fi))
 	{
 	  QUIT;
