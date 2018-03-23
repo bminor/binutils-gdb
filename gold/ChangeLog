@@ -1,3 +1,15 @@
+2018-03-26  Cary Coutant  <ccoutant@gmail.com>
+
+gold/
+	PR gold/22868
+	* plugin.cc (Sized_pluginobj::do_add_symbols): Use a real section
+	index instead of SHN_ABS for defined symbols.
+	* testsuite/Makefile.am (plugin_pr22868): New test case.
+	* testsuite/Makefile.in: Regenerate
+	* testsuite/plugin_pr22868.sh: New test script.
+	* testsuite/plugin_pr22868_a.c: New source file.
+	* testsuite/plugin_pr22868_b.c: New source file.
+
 2018-03-23  Cary Coutant  <ccoutant@gmail.com>
 
 	* plugin.cc (link_or_copy_file): Remove newlines from warning messages.

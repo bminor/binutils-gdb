@@ -1424,7 +1424,8 @@ Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
         {
         case LDPK_DEF:
         case LDPK_WEAKDEF:
-          shndx = elfcpp::SHN_ABS;
+          // We use an arbitrary section number for a defined symbol.
+          shndx = 1;
           break;
         case LDPK_COMMON:
           shndx = elfcpp::SHN_COMMON;
