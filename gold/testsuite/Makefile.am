@@ -2433,6 +2433,27 @@ plugin_section_alignment.so: plugin_section_alignment.o gcctestdir/ld
 plugin_section_alignment.o: plugin_section_alignment.cc
 	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
 
+check_SCRIPTS += plugin_pr22868.sh
+check_DATA += plugin_pr22868.stdout
+MOSTLYCLEANFILES += plugin_pr22868.stdout
+plugin_pr22868.stdout: plugin_pr22868.so
+	$(TEST_READELF) -W --dyn-syms $< >$@ 2>/dev/null
+plugin_pr22868.so: plugin_pr22868_a.o.syms plugin_pr22868_b.o.syms plugin_pr22868_b.o plugin_test.so gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared -Wl,--plugin,"./plugin_test.so" plugin_pr22868_a.o.syms plugin_pr22868_b.o.syms
+plugin_pr22868_a.o.syms: plugin_pr22868_a.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+# Generate the .syms file from an alternate version of the original source
+# file, with a "protected" visibility attribute. We'll link with a
+# "replacement" object that does not have that attribute.
+plugin_pr22868_b.o.syms: plugin_pr22868_b_ir.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+plugin_pr22868_a.o: plugin_pr22868_a.c
+	$(COMPILE) -c -fpic -o $@ $<
+plugin_pr22868_b_ir.o: plugin_pr22868_b.c
+	$(COMPILE) -c -DIR -fpic -o $@ $<
+plugin_pr22868_b.o: plugin_pr22868_b.c
+	$(COMPILE) -c -fpic -o $@ $<
+
 endif PLUGINS
 
 check_PROGRAMS += exclude_libs_test

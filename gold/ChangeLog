@@ -2,6 +2,17 @@
 
 	* testsuite/split_x86_64.sh: Fix bad regexp.
 
+2018-03-26  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/22868
+	* plugin.cc (Sized_pluginobj::do_add_symbols): Use a real section
+	index instead of SHN_ABS for defined symbols.
+	* testsuite/Makefile.am (plugin_pr22868): New test case.
+	* testsuite/Makefile.in: Regenerate
+	* testsuite/plugin_pr22868.sh: New test script.
+	* testsuite/plugin_pr22868_a.c: New source file.
+	* testsuite/plugin_pr22868_b.c: New source file.
+
 2018-02-07  Alan Modra  <amodra@gmail.com>
 
 	Revert 2018-01-17  Alan Modra  <amodra@gmail.com>
