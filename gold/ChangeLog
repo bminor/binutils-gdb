@@ -1,5 +1,10 @@
 2018-03-23  Cary Coutant  <ccoutant@gmail.com>
 
+	* plugin.cc (link_or_copy_file): Remove newlines from warning messages.
+	Add pedantic check for return value from ::write.
+
+2018-03-23  Cary Coutant  <ccoutant@gmail.com>
+
 	* debug.h (DEBUG_PLUGIN): New constant.
 	(DEBUG_ALL): Add DEBUG_PLUGIN.
 	(debug_string_to_enum): Likewise.

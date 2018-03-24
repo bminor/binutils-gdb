@@ -568,19 +568,26 @@ link_or_copy_file(const char* inname, const char* outname)
   int in = ::open(inname, O_RDONLY);
   if (in < 0)
     {
-      gold_warning(_("%s: can't open (%s)\n"), inname, strerror(errno));
+      gold_warning(_("%s: can't open (%s)"), inname, strerror(errno));
       return false;
     }
   int out = ::open(outname, O_CREAT | O_TRUNC | O_WRONLY, 0600);
   if (out < 0)
     {
-      gold_warning(_("%s: can't create (%s)\n"), outname, strerror(errno));
+      gold_warning(_("%s: can't create (%s)"), outname, strerror(errno));
       ::close(in);
       return false;
     }
   ssize_t len;
   while ((len = ::read(in, buf, sizeof(buf))) > 0)
-    static_cast<void>(::write(out, buf, len));
+    {
+      if (::write(out, buf, len) != len)
+	{
+	  gold_warning(_("%s: write error while making copy of file (%s)"),
+		       inname, strerror(errno));
+	  break;
+        }
+    }
   ::close(in);
   ::close(out);
   return true;
