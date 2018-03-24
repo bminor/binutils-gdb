@@ -1,3 +1,24 @@
+2018-03-23  Cary Coutant  <ccoutant@gmail.com>
+
+	* debug.h (DEBUG_PLUGIN): New constant.
+	(DEBUG_ALL): Add DEBUG_PLUGIN.
+	(debug_string_to_enum): Likewise.
+	* plugin.cc (make_sized_plugin_object): Add filename parameter.
+	(Plugin_recorder): New class.
+	(Plugin_manager::~Plugin_manager): Delete recorder_.
+	(Plugin_manager::load_plugins): Create and initialize recorder_.
+	(Plugin_manager::claim_file): Record claimed and unclaimed files.
+	(Plugin_manager::make_plugin_object): Use object name as name for
+	plugin object, if available.
+	(Plugin_manager::add_input_file): Record replacement files.
+	(Sized_pluginobj::do_add_symbols): Record plugin symbols.
+	(Plugin_finish::run): Call Plugin_recorder::finish().
+	(make_sized_plugin_object): Add filename parameter and pass to
+	Sized_pluginobj constructor.
+	* plugin.h (Plugin::filename): New method.
+	(Plugin::recorder): New method.
+	(Plugin::recorder_): New data member.
+
 2018-03-07  Sriraman Tallam  <tmsriram@google.com>
 
 	* layout.cc (Layout::default_section_order): Check for text section
