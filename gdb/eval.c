@@ -1039,13 +1039,13 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 	{
 	  if (op == OP_VAR_MSYM_VALUE)
 	    {
-	      symbol *sym = exp->elts[*pos + 2].symbol;
-	      var_func_name = SYMBOL_PRINT_NAME (sym);
+	      minimal_symbol *msym = exp->elts[*pos + 2].msymbol;
+	      var_func_name = MSYMBOL_PRINT_NAME (msym);
 	    }
 	  else if (op == OP_VAR_VALUE)
 	    {
-	      minimal_symbol *msym = exp->elts[*pos + 2].msymbol;
-	      var_func_name = MSYMBOL_PRINT_NAME (msym);
+	      symbol *sym = exp->elts[*pos + 2].symbol;
+	      var_func_name = SYMBOL_PRINT_NAME (sym);
 	    }
 
 	  argvec[0] = evaluate_subexp_with_coercion (exp, pos, noside);

@@ -1,3 +1,8 @@
+2018-03-25  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (evaluate_funcall): Swap OP_VAR_MSYM_VALUE/OP_VAR_VALUE
+	if then/else bodies in var_func_name extraction.
+
 2018-03-23  Weimin Pan  <weimin.pan@oracle.com>
 
 	* minsyms.c (lookup_minimal_symbol_and_objfile): Use
