@@ -162,8 +162,6 @@ DEF_VEC_O (dwarf2_section_info_def);
    architecture-independent.  */
 typedef uint32_t offset_type;
 
-DEF_VEC_I (offset_type);
-
 /* Ensure only legit values are used.  */
 #define DW2_GDB_INDEX_SYMBOL_STATIC_SET_VALUE(cu_index, value) \
   do { \

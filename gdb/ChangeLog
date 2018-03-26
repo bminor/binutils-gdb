@@ -1,5 +1,9 @@
 2018-03-26  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dwarf2read.c (DEF_VEC_I(offset_type)): Remove.
+
+2018-03-26  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* filename-seen-cache.h: Add include guard.
 
 2018-03-26  Keith Seitz  <keiths@redhat.com>
