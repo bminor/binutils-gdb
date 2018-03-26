@@ -1,3 +1,10 @@
+2018-03-26  Keith Seitz  <keiths@redhat.com>
+
+	* symfile.c (place_section): Remove "struct" from section_addr_info
+	in comment.
+	* windows-nat.c (struct safe_symbol_file_add_args) <addrs>: Remove
+	"struct" keyword from section_addr_info.
+
 2018-03-26  Alan Hayward  <alan.hayward@arm.com>
 
 	* regformats/regdef.h (reg): Add constructors.

@@ -579,7 +579,7 @@ struct safe_symbol_file_add_args
 {
   char *name;
   int from_tty;
-  struct section_addr_info *addrs;
+  section_addr_info *addrs;
   int mainline;
   int flags;
   struct ui_file *err, *out;

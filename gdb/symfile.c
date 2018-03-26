@@ -412,7 +412,7 @@ place_section (bfd *abfd, asection *sect, void *obj)
   arg->lowest = start_addr + bfd_get_section_size (sect);
 }
 
-/* Store struct section_addr_info as prepared (made relative and with SECTINDEX
+/* Store section_addr_info as prepared (made relative and with SECTINDEX
    filled-in) by addr_info_make_relative into SECTION_OFFSETS of NUM_SECTIONS
    entries.  */
 
