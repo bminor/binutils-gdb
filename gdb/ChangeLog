@@ -1,3 +1,7 @@
+2018-03-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* regformats/regdef.h (reg): Add constructors.
+
 2018-03-25  Pedro Alves  <palves@redhat.com>
 
 	* eval.c (evaluate_funcall): Swap OP_VAR_MSYM_VALUE/OP_VAR_VALUE

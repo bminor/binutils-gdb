@@ -25,9 +25,6 @@ target_desc::~target_desc ()
 {
   int i;
 
-  for (reg *reg : reg_defs)
-    xfree (reg);
-
   xfree ((char *) arch);
   xfree ((char *) osabi);
 
@@ -40,17 +37,8 @@ target_desc::~target_desc ()
 
 bool target_desc::operator== (const target_desc &other) const
 {
-  if (reg_defs.size () != other.reg_defs.size ())
+  if (reg_defs != other.reg_defs)
     return false;
-
-  for (int i = 0; i < reg_defs.size (); ++i)
-    {
-      struct reg *reg = reg_defs[i];
-      struct reg *reg2 = other.reg_defs[i];
-
-      if (reg != reg2 && *reg != *reg2)
-	return false;
-    }
 
   /* Compare expedite_regs.  */
   int i = 0;
@@ -72,10 +60,10 @@ init_target_desc (struct target_desc *tdesc)
 {
   int offset = 0;
 
-  for (reg *reg : tdesc->reg_defs)
+  for (reg &reg : tdesc->reg_defs)
     {
-      reg->offset = offset;
-      offset += reg->size;
+      reg.offset = offset;
+      offset += reg.size;
     }
 
   tdesc->registers_size = offset / 8;
@@ -241,23 +229,12 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 {
   struct target_desc *tdesc = (struct target_desc *) feature;
 
-  while (tdesc->reg_defs.size () < regnum)
-    {
-      struct reg *reg = XCNEW (struct reg);
+  gdb_assert (regnum == 0 || regnum >= tdesc->reg_defs.size ());
 
-      reg->name = "";
-      reg->size = 0;
-      tdesc->reg_defs.push_back (reg);
-    }
+  if (regnum != 0)
+    tdesc->reg_defs.resize (regnum);
 
-  gdb_assert (regnum == 0
-	      || regnum == tdesc->reg_defs.size ());
-
-  struct reg *reg = XCNEW (struct reg);
-
-  reg->name = name;
-  reg->size = bitsize;
-  tdesc->reg_defs.push_back (reg);
+  tdesc->reg_defs.emplace_back (name, bitsize);
 }
 
 /* See common/tdesc.h.  */

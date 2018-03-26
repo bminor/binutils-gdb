@@ -21,6 +21,18 @@
 
 struct reg
 {
+  reg ()
+    : name (""),
+      offset (0),
+      size (0)
+  {}
+
+  reg (const char *_name, int _size)
+    : name (_name),
+      offset (0),
+      size (_size)
+  {}
+
   /* The name of this register - NULL for pad entries.  */
   const char *name;
 

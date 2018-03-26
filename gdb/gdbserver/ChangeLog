@@ -1,3 +1,15 @@
+2018-03-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* regcache.c (find_register_by_number): Return a ref.
+	(find_regno): Use references.
+	(register_size): Likewise.
+	(register_data): Likewise.
+	* tdesc.c (target_desc::~target_desc): Remove free calls.
+	(target_desc::operator==): Use std::vector compare.
+	(init_target_desc): Use reference.
+	(tdesc_create_reg): Use reg constructors.
+	* tdesc.h (struct target_desc): Replace pointer with object.
+
 2018-03-23  Alan Hayward  <alan.hayward@arm.com>
 
 	* regcache.c (find_register_by_number): Make static.
