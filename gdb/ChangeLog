@@ -440,11 +440,11 @@
 
 2018-03-20  Stephen Roberts  <stephen.roberts@arm.com>
 
-	* gdb/symtab.c (find_pc_sect_line): fixed indentation.
+	* symtab.c (find_pc_sect_line): fixed indentation.
 
 2018-03-20  Stephen Roberts  <stephen.roberts@arm.com>
 
-	* gdb/symtab.c (find_pc_sect_line): now uses binary search.
+	* symtab.c (find_pc_sect_line): now uses binary search.
 
 2018-03-19  Tom Tromey  <tom@tromey.com>
 
