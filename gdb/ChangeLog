@@ -1,3 +1,7 @@
+2018-03-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* filename-seen-cache.h: Add include guard.
+
 2018-03-26  Keith Seitz  <keiths@redhat.com>
 
 	* symfile.c (place_section): Remove "struct" from section_addr_info
