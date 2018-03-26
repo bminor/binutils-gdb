@@ -1,3 +1,12 @@
+2018-03-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master branch
+	2018-03-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23000
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_sections): Add
+	ENDBR64 to the TLSDESC PLT entry.
+
 2018-03-21  Alan Modra  <amodra@gmail.com>
 
 	Apply from master

@@ -4393,15 +4393,23 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 
       if (htab->tlsdesc_plt)
 	{
+	  /* The TLSDESC entry in a lazy procedure linkage table.  */
+	  static const bfd_byte tlsdesc_plt_entry[LAZY_PLT_ENTRY_SIZE] =
+	    {
+	      0xf3, 0x0f, 0x1e, 0xfa,	/* endbr64		*/
+	      0xff, 0x35, 8, 0, 0, 0,	/* pushq GOT+8(%rip)	*/
+	      0xff, 0x25, 16, 0, 0, 0	/* jmpq *GOT+TDG(%rip)	*/
+	    };
+
 	  bfd_put_64 (output_bfd, (bfd_vma) 0,
 		      htab->elf.sgot->contents + htab->tlsdesc_got);
 
 	  memcpy (htab->elf.splt->contents + htab->tlsdesc_plt,
-		  htab->lazy_plt->plt0_entry,
-		  htab->lazy_plt->plt0_entry_size);
+		  tlsdesc_plt_entry, LAZY_PLT_ENTRY_SIZE);
 
-	  /* Add offset for pushq GOT+8(%rip), since the
-	     instruction uses 6 bytes subtract this value.  */
+	  /* Add offset for pushq GOT+8(%rip), since ENDBR64 uses 4
+	     bytes and the instruction uses 6 bytes, subtract these
+	     values.  */
 	  bfd_put_32 (output_bfd,
 		      (htab->elf.sgotplt->output_section->vma
 		       + htab->elf.sgotplt->output_offset
@@ -4409,14 +4417,13 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 		       - htab->elf.splt->output_section->vma
 		       - htab->elf.splt->output_offset
 		       - htab->tlsdesc_plt
-		       - 6),
+		       - 4 - 6),
 		      (htab->elf.splt->contents
 		       + htab->tlsdesc_plt
-		       + htab->lazy_plt->plt0_got1_offset));
-	  /* Add offset for the PC-relative instruction accessing
-	     GOT+TDG, where TDG stands for htab->tlsdesc_got,
-	     subtracting the offset to the end of that
-	     instruction.  */
+		       + 4 + 2));
+	  /* Add offset for indirect branch via GOT+TDG, where TDG
+	     stands for htab->tlsdesc_got, subtracting the offset
+	     to the end of that instruction.  */
 	  bfd_put_32 (output_bfd,
 		      (htab->elf.sgot->output_section->vma
 		       + htab->elf.sgot->output_offset
@@ -4424,10 +4431,9 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 		       - htab->elf.splt->output_section->vma
 		       - htab->elf.splt->output_offset
 		       - htab->tlsdesc_plt
-		       - htab->lazy_plt->plt0_got2_insn_end),
+		       - 4 - 6 - 6),
 		      (htab->elf.splt->contents
-		       + htab->tlsdesc_plt
-		       + htab->lazy_plt->plt0_got2_offset));
+		       + htab->tlsdesc_plt + 4 + 6 + 2));
 	}
     }
 

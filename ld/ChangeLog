@@ -1,3 +1,11 @@
+2018-03-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master branch
+	2018-03-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23000
+	* testsuite/ld-x86-64/tlsdesc.pd: Updated.
+
 2018-03-20  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/ld-elf/elf.exp (pr20995-2): XFAIL on aarch64*-*-elf*,
