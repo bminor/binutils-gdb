@@ -1,3 +1,70 @@
+2018-03-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (COMMON_SFILES): Add dwarf-index-common.c and
+	dwarf-index-write.c
+	(HFILES_NO_SRCDIR): Add dwarf-index-common.h and dwarf2read.h.
+	* dwarf-index-common.c: New file.
+	* dwarf-index-common.h: New file.
+	* dwarf-index-write.c: New file.
+	* dwarf2read.c: Include dwarf2read.h and dwarf-index-common.h.
+	(struct dwarf2_section_info): Move from here.
+	(dwarf2_section_info_def): Likewise.
+	(DEF_VEC_O (dwarf2_section_info_def)): Likewise.
+	(offset_type): Likewise.
+	(DW2_GDB_INDEX_SYMBOL_STATIC_SET_VALUE): Likewise.
+	(DW2_GDB_INDEX_SYMBOL_KIND_SET_VALUE): Likewise.
+	(DW2_GDB_INDEX_CU_SET_VALUE): Likewise.
+	(byte_swap): Likewise.
+	(MAYBE_SWAP): Likewise.
+	(dwarf2_per_cu_ptr): Likewise.
+	(DEF_VEC_P (dwarf2_per_cu_ptr)): Likewise.
+	(struct tu_stats): Likewise.
+	(struct dwarf2_per_objfile): Likewise.
+	(struct dwarf2_per_cu_data): Likewise.
+	(struct signatured_type): Likewise.
+	(sig_type_ptr): Likewise.
+	(DEF_VEC_P (sig_type_ptr)): Likewise.
+	(INDEX4_SUFFIX): Likewise.
+	(INDEX5_SUFFIX): Likewise.
+	(DEBUG_STR_SUFFIX): Likewise.
+	(dwarf2_read_section): Make non-static.
+	(mapped_index_string_hash): Move from here.
+	(dwarf5_djb_hash): Likewise.
+	(file_write): Likewise.
+	(class data_buf): Likewise.
+	(struct symtab_index_entry): Likewise.
+	(struct mapped_symtab): Likewise.
+	(find_slot): Likewise.
+	(hash_expand): Likewise.
+	(add_index_entry): Likewise.
+	(uniquify_cu_indices): Likewise.
+	(class c_str_view): Likewise.
+	(class c_str_view_hasher): Likewise.
+	(class vector_hasher): Likewise.
+	(write_hash_table): Likewise.
+	(psym_index_map): Likewise.
+	(struct addrmap_index_data): Likewise.
+	(add_address_entry): Likewise.
+	(add_address_entry_worker): Likewise.
+	(write_address_map): Likewise.
+	(symbol_kind): Likewise.
+	(write_psymbols): Likewise.
+	(struct signatured_type_index_data): Likewise.
+	(write_one_signatured_type): Likewise.
+	(recursively_count_psymbols): Likewise.
+	(recursively_write_psymbols): Likewise.
+	(class debug_names): Likewise.
+	(check_dwarf64_offsets): Likewise.
+	(psyms_seen_size): Likewise.
+	(write_gdbindex): Likewise.
+	(write_debug_names): Likewise.
+	(assert_file_size): Likewise.
+	(write_psymtabs_to_index): Likewise.
+	(save_gdb_index_command): Likewise.
+	(_initialize_dwarf2_read): Don't register the "save gdb-index"
+	command.
+	* dwarf2read.h: New file.
+
 2018-03-27  Joel Brobecker  <brobecker@adacore.com>
 
 	PR gdb/22670
