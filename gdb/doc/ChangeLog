@@ -1,3 +1,7 @@
+2018-03-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Ada Settings): New subsubsection.
+
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
 	PR backtrace/15582:

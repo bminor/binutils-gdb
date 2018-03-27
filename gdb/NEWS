@@ -12,6 +12,11 @@ set debug fbsd-nat
 show debug fbsd-nat
   Control display of debugging info regarding the FreeBSD native target.
 
+set|show varsize-limit
+  This new setting allows the user to control the maximum size of Ada
+  objects being printed when those objects have a variable type,
+  instead of that maximum size being hardcoded to 65536 bytes.
+
 * New targets
 
 RiscV ELF			riscv*-*-elf

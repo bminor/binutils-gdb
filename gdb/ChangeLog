@@ -1,3 +1,11 @@
+2018-03-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Add entry describing new "set|show varsize-limit" command.
+	* ada-lang.c (_initialize_ada_language): Add "set/show varsize-limit"
+	command.
+	* printcmd.c (_initialize_printcmd): Add "set var" alias of
+	"set variable".
+
 2018-03-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.in (COMMON_SFILES): Add dwarf-index-common.c and

@@ -14689,6 +14689,13 @@ With an argument, catch only exceptions with the given name."),
 		     CATCH_TEMPORARY);
 
   varsize_limit = 65536;
+  add_setshow_uinteger_cmd ("varsize-limit", class_support,
+			    &varsize_limit, _("\
+Set the maximum number of bytes allowed in a variable-size object."), _("\
+Show the maximum number of bytes allowed in a variable-size object."), _("\
+Attempts to access an object whose size is not a compile-time constant\n\
+and exceeds this limit will cause an error."),
+			    NULL, NULL, &setlist, &showlist);
 
   add_info ("exceptions", info_exceptions_command,
 	    _("\

@@ -2737,6 +2737,7 @@ with $), a register (a few standard names starting with $), or an actual\n\
 variable in the program being debugged.  EXP is any valid expression.\n\
 This may usually be abbreviated to simply \"set\"."),
 	   &setlist);
+  add_alias_cmd ("var", "variable", class_vars, 0, &setlist);
 
   c = add_com ("print", class_vars, print_command, _("\
 Print value of expression EXP.\n\
