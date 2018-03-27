@@ -1,3 +1,7 @@
+2018-03-27  Tom Tromey  <tom@tromey.com>
+
+	* dwarf-index-write.c: Include <cmath>.
+
 2018-03-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Add entry describing new "set|show varsize-limit" command.
