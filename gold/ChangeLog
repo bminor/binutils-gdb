@@ -1,3 +1,7 @@
+2018-03-27  Roland McGrath  <mcgrathr@google.com>
+
+	* testsuite/split_x86_64.sh: Fix bad regexp.
+
 2018-02-07  Alan Modra  <amodra@gmail.com>
 
 	Revert 2018-01-17  Alan Modra  <amodra@gmail.com>
