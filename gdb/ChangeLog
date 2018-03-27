@@ -1,3 +1,13 @@
+2018-03-27  Joel Brobecker  <brobecker@adacore.com>
+
+	PR gdb/22670
+	* dwarf2read.c (dwarf2_physname): Do not return the demangled
+	symbol name if the CU's language stores symbol names in linkage
+	format.
+	* language.h (struct language_defn)
+	<la_store_sym_names_in_linkage_form_p>: New field.  Adjust
+	all instances of this struct.
+
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
 	* stack.c (backtrace_command_1): Remove verbose code.

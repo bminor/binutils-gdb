@@ -11492,7 +11492,11 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
   if (mangled != NULL)
     {
 
-      if (cu->language == language_go)
+      if (language_def (cu->language)->la_store_sym_names_in_linkage_form_p)
+	{
+	  /* Do nothing (do not demangle the symbol name).  */
+	}
+      else if (cu->language == language_go)
 	{
 	  /* This is a lie, but we already lie to the caller new_symbol.
 	     new_symbol assumes we return the mangled name.

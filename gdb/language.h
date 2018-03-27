@@ -264,6 +264,26 @@ struct language_defn
 
     const char *la_name_of_this;
 
+    /* True if the symbols names should be stored in GDB's data structures
+       for minimal/partial/full symbols using their linkage (aka mangled)
+       form; false if the symbol names should be demangled first.
+
+       Most languages implement symbol lookup by comparing the demangled
+       names, in which case it is advantageous to store that information
+       already demangled, and so would set this field to false.
+
+       On the other hand, some languages have opted for doing symbol
+       lookups by comparing mangled names instead, for reasons usually
+       specific to the language.  Those languages should set this field
+       to true.
+
+       And finally, other languages such as C or Asm do not have
+       the concept of mangled vs demangled name, so those languages
+       should set this field to true as well, to prevent any accidental
+       demangling through an unrelated language's demangler.  */
+
+    const bool la_store_sym_names_in_linkage_form_p;
+
     /* This is a function that lookup_symbol will call when it gets to
        the part of symbol lookup where C looks up static and global
        variables.  */

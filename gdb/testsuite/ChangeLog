@@ -1,3 +1,12 @@
+2018-03-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/maint_with_ada.exp: Remove PR gdb/22670 setup_kfail.
+
+	* gdb.ada/notcplusplus: New testcase.
+
+	* gdb.base/c-linkage-name.c: New file.
+	* gdb.base/c-linkage-name.exp: New testcase.
+
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
 	* gdb.python/py-framefilter.exp: Add test for KeyboardInterrupt.

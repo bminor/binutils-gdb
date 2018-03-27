@@ -590,6 +590,7 @@ extern const struct language_defn go_language_defn =
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline.  */
   NULL,				/* name_of_this */
+  false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, 
   basic_lookup_transparent_type,
   go_demangle,			/* Language specific symbol demangler.  */
