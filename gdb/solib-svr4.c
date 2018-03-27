@@ -168,28 +168,22 @@ svr4_same (struct so_list *gdb, struct so_list *inferior)
   return (svr4_same_1 (gdb->so_original_name, inferior->so_original_name));
 }
 
-static lm_info_svr4 *
+static std::unique_ptr<lm_info_svr4>
 lm_info_read (CORE_ADDR lm_addr)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  gdb_byte *lm;
-  lm_info_svr4 *lm_info;
-  struct cleanup *back_to;
+  std::unique_ptr<lm_info_svr4> lm_info;
 
-  lm = (gdb_byte *) xmalloc (lmo->link_map_size);
-  back_to = make_cleanup (xfree, lm);
+  gdb::byte_vector lm (lmo->link_map_size);
 
-  if (target_read_memory (lm_addr, lm, lmo->link_map_size) != 0)
-    {
-      warning (_("Error reading shared library list entry at %s"),
-	       paddress (target_gdbarch (), lm_addr)),
-      lm_info = NULL;
-    }
+  if (target_read_memory (lm_addr, lm.data (), lmo->link_map_size) != 0)
+    warning (_("Error reading shared library list entry at %s"),
+	     paddress (target_gdbarch (), lm_addr));
   else
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
 
-      lm_info = new lm_info_svr4;
+      lm_info.reset (new lm_info_svr4);
       lm_info->lm_addr = lm_addr;
 
       lm_info->l_addr_inferior = extract_typed_address (&lm[lmo->l_addr_offset],
@@ -202,8 +196,6 @@ lm_info_read (CORE_ADDR lm_addr)
       lm_info->l_name = extract_typed_address (&lm[lmo->l_name_offset],
 					       ptr_type);
     }
-
-  do_cleanups (back_to);
 
   return lm_info;
 }
@@ -958,8 +950,6 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 {
   struct svr4_info *info;
   CORE_ADDR ldsomap;
-  struct so_list *newobj;
-  struct cleanup *old_chain;
   CORE_ADDR name_lm;
 
   info = get_svr4_info ();
@@ -973,13 +963,8 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
   if (!ldsomap)
     return 0;
 
-  newobj = XCNEW (struct so_list);
-  old_chain = make_cleanup (xfree, newobj);
-  lm_info_svr4 *li = lm_info_read (ldsomap);
-  newobj->lm_info = li;
-  make_cleanup (xfree, newobj->lm_info);
+  std::unique_ptr<lm_info_svr4> li = lm_info_read (ldsomap);
   name_lm = li != NULL ? li->l_name : 0;
-  do_cleanups (old_chain);
 
   return (name_lm >= vaddr && name_lm < vaddr + size);
 }
@@ -995,8 +980,7 @@ open_symbol_file_object (int from_tty)
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   int l_name_size = TYPE_LENGTH (ptr_type);
-  gdb_byte *l_name_buf = (gdb_byte *) xmalloc (l_name_size);
-  struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
+  gdb::byte_vector l_name_buf (l_name_size);
   struct svr4_info *info = get_svr4_info ();
   symfile_add_flags add_flags = 0;
 
@@ -1005,38 +989,26 @@ open_symbol_file_object (int from_tty)
 
   if (symfile_objfile)
     if (!query (_("Attempt to reload symbols from process? ")))
-      {
-	do_cleanups (cleanups);
-	return 0;
-      }
+      return 0;
 
   /* Always locate the debug struct, in case it has moved.  */
   info->debug_base = 0;
   if (locate_base (info) == 0)
-    {
-      do_cleanups (cleanups);
-      return 0;	/* failed somehow...  */
-    }
+    return 0;	/* failed somehow...  */
 
   /* First link map member should be the executable.  */
   lm = solib_svr4_r_map (info);
   if (lm == 0)
-    {
-      do_cleanups (cleanups);
-      return 0;	/* failed somehow...  */
-    }
+    return 0;	/* failed somehow...  */
 
   /* Read address of name from target memory to GDB.  */
-  read_memory (lm + lmo->l_name_offset, l_name_buf, l_name_size);
+  read_memory (lm + lmo->l_name_offset, l_name_buf.data (), l_name_size);
 
   /* Convert the address to host format.  */
-  l_name = extract_typed_address (l_name_buf, ptr_type);
+  l_name = extract_typed_address (l_name_buf.data (), ptr_type);
 
   if (l_name == 0)
-    {
-      do_cleanups (cleanups);
-      return 0;		/* No filename.  */
-    }
+    return 0;		/* No filename.  */
 
   /* Now fetch the filename from target memory.  */
   target_read_string (l_name, &filename, SO_NAME_MAX_PATH_SIZE - 1, &errcode);
@@ -1045,14 +1017,12 @@ open_symbol_file_object (int from_tty)
     {
       warning (_("failed to read exec filename from attached file: %s"),
 	       safe_strerror (errcode));
-      do_cleanups (cleanups);
       return 0;
     }
 
   /* Have a pathname: read the symbol file.  */
   symbol_file_add_main (filename.get (), add_flags);
 
-  do_cleanups (cleanups);
   return 1;
 }
 
@@ -1342,7 +1312,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 
       so_list_up newobj (XCNEW (struct so_list));
 
-      lm_info_svr4 *li = lm_info_read (lm);
+      lm_info_svr4 *li = lm_info_read (lm).release ();
       newobj->lm_info = li;
       if (li == NULL)
 	return 0;

@@ -1,5 +1,12 @@
 2018-03-30  Tom Tromey  <tom@tromey.com>
 
+	* solib-svr4.c (lm_info_read): Use gdb::byte_vector.  Return
+	std::unique_ptr.
+	(svr4_keep_data_in_core): Update.
+	(svr4_read_so_list): Update.
+
+2018-03-30  Tom Tromey  <tom@tromey.com>
+
 	* windows-nat.c (handle_output_debug_string, handle_exception):
 	Update.
 	* target.h (target_read_string): Update.
