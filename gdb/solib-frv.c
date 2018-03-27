@@ -377,7 +377,7 @@ frv_current_sos (void)
       if (got_addr != mgot)
 	{
 	  int errcode;
-	  char *name_buf;
+	  gdb::unique_xmalloc_ptr<char> name_buf;
 	  struct int_elf32_fdpic_loadmap *loadmap;
 	  struct so_list *sop;
 	  CORE_ADDR addr;
@@ -409,16 +409,16 @@ frv_current_sos (void)
 
 	  if (solib_frv_debug)
 	    fprintf_unfiltered (gdb_stdlog, "current_sos: name = %s\n",
-	                        name_buf);
+	                        name_buf.get ());
 	  
 	  if (errcode != 0)
 	    warning (_("Can't read pathname for link map entry: %s."),
 		     safe_strerror (errcode));
 	  else
 	    {
-	      strncpy (sop->so_name, name_buf, SO_NAME_MAX_PATH_SIZE - 1);
+	      strncpy (sop->so_name, name_buf.get (),
+		       SO_NAME_MAX_PATH_SIZE - 1);
 	      sop->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-	      xfree (name_buf);
 	      strcpy (sop->so_original_name, sop->so_name);
 	    }
 

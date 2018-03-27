@@ -240,7 +240,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 
     case OP_OBJC_MSGCALL:
       {			/* Objective C message (method) call.  */
-	char *selector;
+	gdb::unique_xmalloc_ptr<char> selector;
 
 	(*pos) += 3;
 	nargs = longest_to_int (exp->elts[pc + 2].longconst);
@@ -256,8 +256,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  {
 	    char *s, *nextS;
 
-	    s = (char *) alloca (strlen (selector) + 1);
-	    strcpy (s, selector);
+	    s = selector.get ();
 	    for (tem = 0; tem < nargs; tem++)
 	      {
 		nextS = strchr (s, ':');
@@ -270,11 +269,9 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  }
 	else
 	  {
-	    fprintf_unfiltered (stream, " %s", selector);
+	    fprintf_unfiltered (stream, " %s", selector.get ());
 	  }
 	fprintf_unfiltered (stream, "]");
-	/* "selector" was malloc'd by target_read_string.  Free it.  */
-	xfree (selector);
 	return;
       }
 

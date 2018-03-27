@@ -883,25 +883,25 @@ signal_event_command (const char *args, int from_tty)
 static int
 handle_output_debug_string (struct target_waitstatus *ourstatus)
 {
-  char *s = NULL;
+  gdb::unique_xmalloc_ptr<char> s;
   int retval = 0;
 
   if (!target_read_string
 	((CORE_ADDR) (uintptr_t) current_event.u.DebugString.lpDebugStringData,
-	&s, 1024, 0)
-      || !s || !*s)
+	 &s, 1024, 0)
+      || !s || !*(s.get ()))
     /* nothing to do */;
-  else if (!startswith (s, _CYGWIN_SIGNAL_STRING))
+  else if (!startswith (s.get (), _CYGWIN_SIGNAL_STRING))
     {
 #ifdef __CYGWIN__
-      if (!startswith (s, "cYg"))
+      if (!startswith (s.get (), "cYg"))
 #endif
 	{
-	  char *p = strchr (s, '\0');
+	  char *p = strchr (s.get (), '\0');
 
-	  if (p > s && *--p == '\n')
+	  if (p > s.get () && *--p == '\n')
 	    *p = '\0';
-	  warning (("%s"), s);
+	  warning (("%s"), s.get ());
 	}
     }
 #ifdef __CYGWIN__
@@ -915,7 +915,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	 to be stored at the given address in the inferior.  Tell gdb
 	 to treat this like a real signal.  */
       char *p;
-      int sig = strtol (s + sizeof (_CYGWIN_SIGNAL_STRING) - 1, &p, 0);
+      int sig = strtol (s.get () + sizeof (_CYGWIN_SIGNAL_STRING) - 1, &p, 0);
       gdb_signal gotasig = gdb_signal_from_host (sig);
 
       ourstatus->value.sig = gotasig;
@@ -938,8 +938,6 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
     }
 #endif
 
-  if (s)
-    xfree (s);
   return retval;
 }
 
@@ -1193,18 +1191,16 @@ handle_exception (struct target_waitstatus *ourstatus)
 	  if (named_thread != NULL)
 	    {
 	      int thread_name_len;
-	      char *thread_name;
+	      gdb::unique_xmalloc_ptr<char> thread_name;
 
 	      thread_name_len = target_read_string (thread_name_target,
 						    &thread_name, 1025, NULL);
 	      if (thread_name_len > 0)
 		{
-		  thread_name[thread_name_len - 1] = '\0';
+		  thread_name.get ()[thread_name_len - 1] = '\0';
 		  xfree (named_thread->name);
-		  named_thread->name = thread_name;
+		  named_thread->name = thread_name.release ();
 		}
-	      else
-		xfree (thread_name);
 	    }
 	  ourstatus->value.sig = GDB_SIGNAL_TRAP;
 	  result = HANDLE_EXCEPTION_IGNORED;

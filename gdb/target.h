@@ -1430,7 +1430,8 @@ int target_supports_disable_randomization (void);
 #define target_can_run_breakpoint_commands() \
   (*current_target.to_can_run_breakpoint_commands) (&current_target)
 
-extern int target_read_string (CORE_ADDR, char **, int, int *);
+extern int target_read_string (CORE_ADDR, gdb::unique_xmalloc_ptr<char> *,
+			       int, int *);
 
 /* For target_read_memory see target/target.h.  */
 

@@ -993,7 +993,8 @@ target_xfer_status_to_string (enum target_xfer_status status)
    read.  */
 
 int
-target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
+target_read_string (CORE_ADDR memaddr, gdb::unique_xmalloc_ptr<char> *string,
+		    int len, int *errnop)
 {
   int tlen, offset, i;
   gdb_byte buf[4];
@@ -1053,7 +1054,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
       nbytes_read += tlen;
     }
 done:
-  *string = buffer;
+  string->reset (buffer);
   if (errnop != NULL)
     *errnop = errcode;
   return nbytes_read;

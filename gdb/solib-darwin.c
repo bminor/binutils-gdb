@@ -261,7 +261,7 @@ darwin_current_sos (void)
       CORE_ADDR path_addr;
       struct mach_o_header_external hdr;
       unsigned long hdr_val;
-      char *file_path;
+      gdb::unique_xmalloc_ptr<char> file_path;
       int errcode;
       struct so_list *newobj;
       struct cleanup *old_chain;
@@ -299,10 +299,9 @@ darwin_current_sos (void)
       lm_info_darwin *li = new lm_info_darwin;
       newobj->lm_info = li;
 
-      strncpy (newobj->so_name, file_path, SO_NAME_MAX_PATH_SIZE - 1);
+      strncpy (newobj->so_name, file_path.get (), SO_NAME_MAX_PATH_SIZE - 1);
       newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
       strcpy (newobj->so_original_name, newobj->so_name);
-      xfree (file_path);
       li->lm_addr = load_addr;
 
       if (head == NULL)

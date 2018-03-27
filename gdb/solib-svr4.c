@@ -990,7 +990,7 @@ static int
 open_symbol_file_object (int from_tty)
 {
   CORE_ADDR lm, l_name;
-  char *filename;
+  gdb::unique_xmalloc_ptr<char> filename;
   int errcode;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
@@ -1040,7 +1040,6 @@ open_symbol_file_object (int from_tty)
 
   /* Now fetch the filename from target memory.  */
   target_read_string (l_name, &filename, SO_NAME_MAX_PATH_SIZE - 1, &errcode);
-  make_cleanup (xfree, filename);
 
   if (errcode)
     {
@@ -1051,7 +1050,7 @@ open_symbol_file_object (int from_tty)
     }
 
   /* Have a pathname: read the symbol file.  */
-  symbol_file_add_main (filename, add_flags);
+  symbol_file_add_main (filename.get (), add_flags);
 
   do_cleanups (cleanups);
   return 1;
@@ -1339,7 +1338,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
   for (; lm != 0; prev_lm = lm, lm = next_lm)
     {
       int errcode;
-      char *buffer;
+      gdb::unique_xmalloc_ptr<char> buffer;
 
       so_list_up newobj (XCNEW (struct so_list));
 
@@ -1387,10 +1386,9 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 	  continue;
 	}
 
-      strncpy (newobj->so_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
+      strncpy (newobj->so_name, buffer.get (), SO_NAME_MAX_PATH_SIZE - 1);
       newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
       strcpy (newobj->so_original_name, newobj->so_name);
-      xfree (buffer);
 
       /* If this entry has no name, or its name matches the name
 	 for the main executable, don't include it in the list.  */
