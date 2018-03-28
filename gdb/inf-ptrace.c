@@ -36,6 +36,22 @@
 
 
 
+/* A unique_ptr helper to unpush a target.  */
+
+struct target_unpusher
+{
+  void operator() (struct target_ops *ops) const
+  {
+    unpush_target (ops);
+  }
+};
+
+/* A unique_ptr that unpushes a target on destruction.  */
+
+typedef std::unique_ptr<struct target_ops, target_unpusher> target_unpush_up;
+
+
+
 #ifdef PT_GET_PROCESS_STATE
 
 /* Target hook for follow_fork.  On entry and at return inferior_ptid is
@@ -101,13 +117,13 @@ inf_ptrace_create_inferior (struct target_ops *ops,
   /* Do not change either targets above or the same target if already present.
      The reason is the target stack is shared across multiple inferiors.  */
   int ops_already_pushed = target_is_pushed (ops);
-  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
+  target_unpush_up unpusher;
   if (! ops_already_pushed)
     {
       /* Clear possible core file with its process_stratum.  */
       push_target (ops);
-      make_cleanup_unpush_target (ops);
+      unpusher.reset (ops);
     }
 
   pid = fork_inferior (exec_file, allargs, env, inf_ptrace_me, NULL,
@@ -119,7 +135,7 @@ inf_ptrace_create_inferior (struct target_ops *ops,
      pid shouldn't change.  */
   add_thread_silent (ptid);
 
-  discard_cleanups (back_to);
+  unpusher.release ();
 
   gdb_startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED);
 
@@ -174,19 +190,19 @@ inf_ptrace_attach (struct target_ops *ops, const char *args, int from_tty)
   /* Do not change either targets above or the same target if already present.
      The reason is the target stack is shared across multiple inferiors.  */
   int ops_already_pushed = target_is_pushed (ops);
-  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
   pid = parse_pid_to_attach (args);
 
   if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));
 
+  target_unpush_up unpusher;
   if (! ops_already_pushed)
     {
       /* target_pid_to_str already uses the target.  Also clear possible core
 	 file with its process_stratum.  */
       push_target (ops);
-      make_cleanup_unpush_target (ops);
+      unpusher.reset (ops);
     }
 
   if (from_tty)
@@ -221,7 +237,7 @@ inf_ptrace_attach (struct target_ops *ops, const char *args, int from_tty)
      target, it should decorate the ptid later with more info.  */
   add_thread_silent (inferior_ptid);
 
-  discard_cleanups (back_to);
+  unpusher.release ();
 }
 
 #ifdef PT_GET_PROCESS_STATE

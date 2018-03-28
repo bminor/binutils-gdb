@@ -141,24 +141,6 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
    because while they use the "cleanup API" they are not part of the
    "cleanup API".  */
 
-/* Helper for make_cleanup_unpush_target.  */
-
-static void
-do_unpush_target (void *arg)
-{
-  struct target_ops *ops = (struct target_ops *) arg;
-
-  unpush_target (ops);
-}
-
-/* Return a new cleanup that unpushes OPS.  */
-
-struct cleanup *
-make_cleanup_unpush_target (struct target_ops *ops)
-{
-  return make_cleanup (do_unpush_target, ops);
-}
-
 /* Helper for make_cleanup_value_free_to_mark.  */
 
 static void

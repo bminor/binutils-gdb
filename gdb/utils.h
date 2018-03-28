@@ -244,9 +244,6 @@ private:
 
 /* For make_cleanup_close see common/filestuff.h.  */
 
-struct target_ops;
-extern struct cleanup *make_cleanup_unpush_target (struct target_ops *ops);
-
 extern struct cleanup *make_cleanup_value_free_to_mark (struct value *);
 
 /* A deleter for a hash table.  */

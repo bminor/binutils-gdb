@@ -1,3 +1,12 @@
+2018-03-30  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (make_cleanup_unpush_target): Remove.
+	* inf-ptrace.c (struct target_unpusher): New.
+	(target_unpush_up) New typedef.
+	(inf_ptrace_create_inferior, inf_ptrace_attach): Use
+	target_unpush_up.
+	* utils.c (do_unpush_target, make_cleanup_unpush_target): Remove.
+
 2018-03-27  Tom Tromey  <tom@tromey.com>
 
 	* utils.c (prompt_for_continue): Use unique_xmalloc_ptr.
