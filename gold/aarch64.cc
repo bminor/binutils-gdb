@@ -5916,6 +5916,14 @@ Target_aarch64<size, big_endian>::optimize_tls_reloc(bool is_final,
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST8_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST16_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST32_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST64_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
       // When we already have Local-Exec, there is nothing further we
       // can do.
       return tls::TLSOPT_NONE;
@@ -6262,6 +6270,14 @@ Target_aarch64<size, big_endian>::Scan::local(
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST8_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST16_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST32_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST64_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
       {
 	layout->set_has_static_tls();
 	bool output_is_shared = parameters->options().shared();
@@ -6679,7 +6695,15 @@ Target_aarch64<size, big_endian>::Scan::global(
     case elfcpp::R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
-    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:  // Local executable
+    case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST8_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST16_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST32_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST64_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:  // Local executable
       layout->set_has_static_tls();
       if (parameters->options().shared())
 	gold_error(_("%s: unsupported TLSLE reloc type %u in shared objects."),
@@ -7276,6 +7300,14 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST8_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST16_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST32_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST64_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
     case elfcpp::R_AARCH64_TLSDESC_ADR_PAGE21:
     case elfcpp::R_AARCH64_TLSDESC_LD64_LO12:
     case elfcpp::R_AARCH64_TLSDESC_ADD_LO12:
@@ -7555,6 +7587,14 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_HI12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12:
     case elfcpp::R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST8_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST16_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST32_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
+    case elfcpp::R_AARCH64_TLSLE_LDST64_TPREL_LO12:
+    case elfcpp::R_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
       {
 	gold_assert(tls_segment != NULL);
 	AArch64_address value = psymval->value(object, 0);

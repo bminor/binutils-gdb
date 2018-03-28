@@ -1,10 +1,19 @@
+2018-03-28  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/22969
+	* aarch64-reloc.def: Add TLSLE_LDST* relocations.
+	* aarch64.cc (Target_aarch64::optimize_tls_reloc): Likewise.
+	(Target_aarch64::Scan::local): Likewise.
+	(Target_aarch64::Scan::global): Likewise.
+	(Target_aarch64::Relocate::relocate): Likewise.
+	(Target_aarch64::Relocate::relocate_tls): Likewise.
+
 2018-03-27  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/split_x86_64.sh: Fix bad regexp.
 
 2018-03-26  Cary Coutant  <ccoutant@gmail.com>
 
-gold/
 	PR gold/22868
 	* plugin.cc (Sized_pluginobj::do_add_symbols): Use a real section
 	index instead of SHN_ABS for defined symbols.
