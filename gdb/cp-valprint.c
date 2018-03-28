@@ -633,7 +633,8 @@ cp_print_static_field (struct type *type,
       return;
     }
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  struct type *real_type = check_typedef (type);
+  if (TYPE_CODE (real_type) == TYPE_CODE_STRUCT)
     {
       CORE_ADDR *first_dont_print;
       CORE_ADDR addr;
@@ -658,7 +659,6 @@ cp_print_static_field (struct type *type,
       addr = value_address (val);
       obstack_grow (&dont_print_statmem_obstack, (char *) &addr,
 		    sizeof (CORE_ADDR));
-      type = check_typedef (type);
       cp_print_value_fields (type, value_enclosing_type (val),
 			     value_embedded_offset (val), addr,
 			     stream, recurse, val,
@@ -666,7 +666,7 @@ cp_print_static_field (struct type *type,
       return;
     }
 
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  if (TYPE_CODE (real_type) == TYPE_CODE_ARRAY)
     {
       struct type **first_dont_print;
       int i;

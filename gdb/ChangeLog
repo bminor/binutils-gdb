@@ -1,3 +1,9 @@
+2018-03-30  Weimin Pan  <weimin.pan@oracle.com>
+
+	PR gdb/16959
+	* cp-valprint.c: (cp_print_static_field) Fix infinite recursion when 
+	printing static type.
+
 2018-04-01  Tom Tromey  <tom@tromey.com>
 
 	* rs6000-nat.c (rs6000_ptrace_ldinfo): Return a byte_vector.
@@ -7,6 +13,13 @@
 
 	* common/gdb_vecs.h (char_ptr): Remove.
 	* tracepoint.c (encode_actions_1): Remove usage of char_ptr.
+=======
+2018-03-30  Weimin Pan  <weimin.pan@oracle.com>
+
+	PR gdb/16959
+	* cp-valprint.c: (cp_print_static_field) Fix infinite recursion when 
+	printing static type.
+>>>>>>> Fix infinite recursion when printing static member with typedef
 
 2018-03-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
@@ -2079,6 +2092,13 @@
 	* rs6000-tdep.c (ppc_insns_match_pattern): Make pattern const.
 	Correct insns description.
 	* ppc-tdep.h (ppc_insns_match_pattern): Update prototype.
+=======
+2018-02-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	PR gdb/16959
+	* cp-valprint.c: (cp_print_static_field) Fix infinite recursion when
+	printing static type.
+>>>>>>> Fix infinite recursion when printing static member with typedef
 
 2018-01-24  Pedro Alves  <palves@redhat.com>
 
