@@ -2235,12 +2235,10 @@ mips_elf32_rtype_to_howto (bfd *abfd,
 static bfd_boolean
 mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
-  const struct elf_backend_data *bed;
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  bed = get_elf_backend_data (abfd);
-  cache_ptr->howto = bed->elf_backend_mips_rtype_to_howto (abfd, r_type, FALSE);
+  cache_ptr->howto = mips_elf32_rtype_to_howto (abfd, r_type, FALSE);
   if (cache_ptr->howto == NULL)
     {
       /* xgettext:c-format */
