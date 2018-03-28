@@ -1021,7 +1021,7 @@ _bfd_elf_hppa_gen_reloc_type (bfd *abfd,
 /* Translate from an elf into field into a howto relocation pointer.  */
 
 static bfd_boolean
-elf_hppa_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+elf_hppa_info_to_howto (bfd *abfd,
 			arelent *bfd_reloc,
 			Elf_Internal_Rela *elf_reloc)
 {
