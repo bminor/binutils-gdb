@@ -1,5 +1,14 @@
 2018-03-28  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (struct Broadcast_Operation): Adjust comment.
+	(check_VecOperands): Re-write broadcast validation code.
+	(check_VecOperations): Replace BROADCAST_1TO* uses.
+	* testsuite/gas/i386/inval-avx512f.s: Add various broadcast
+	cases.
+	* testsuite/gas/i386/inval-avx512f.l: Adjust expectations.
+
+2018-03-28  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (process_suffix): Check .todword/.toqword
 	before zapping suffix.
 

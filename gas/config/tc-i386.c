@@ -225,7 +225,7 @@ static struct Mask_Operation mask_op;
    broadcast factor.  */
 struct Broadcast_Operation
 {
-  /* Type of broadcast: no broadcast, {1to8}, or {1to16}.  */
+  /* Type of broadcast: {1to2}, {1to4}, {1to8}, or {1to16}.  */
   int type;
 
   /* Index of broadcasted operand.  */
@@ -5048,13 +5048,13 @@ check_VecOperands (const insn_template *t)
      to the memory operand.  */
   if (i.broadcast)
     {
-      int broadcasted_opnd_size;
+      i386_operand_type type, overlap;
 
       /* Check if specified broadcast is supported in this instruction,
 	 and it's applied to memory operand of DWORD or QWORD type,
 	 depending on VecESize.  */
       op = i.broadcast->operand;
-      if (i.broadcast->type != t->opcode_modifier.broadcast
+      if (!t->opcode_modifier.broadcast
 	  || !i.types[op].bitfield.mem
 	  || (t->opcode_modifier.vecesize == 0
 	      && !i.types[op].bitfield.dword
@@ -5062,28 +5062,48 @@ check_VecOperands (const insn_template *t)
 	  || (t->opcode_modifier.vecesize == 1
 	      && !i.types[op].bitfield.qword
 	      && !i.types[op].bitfield.unspecified))
-	goto bad_broadcast;
-
-      broadcasted_opnd_size = t->opcode_modifier.vecesize ? 64 : 32;
-      if (i.broadcast->type == BROADCAST_1TO16)
-	broadcasted_opnd_size <<= 4; /* Broadcast 1to16.  */
-      else if (i.broadcast->type == BROADCAST_1TO8)
-	broadcasted_opnd_size <<= 3; /* Broadcast 1to8.  */
-      else if (i.broadcast->type == BROADCAST_1TO4)
-	broadcasted_opnd_size <<= 2; /* Broadcast 1to4.  */
-      else if (i.broadcast->type == BROADCAST_1TO2)
-	broadcasted_opnd_size <<= 1; /* Broadcast 1to2.  */
-      else
-	goto bad_broadcast;
-
-      if ((broadcasted_opnd_size == 256
-	   && !t->operand_types[op].bitfield.ymmword)
-	  || (broadcasted_opnd_size == 512
-	      && !t->operand_types[op].bitfield.zmmword))
 	{
 	bad_broadcast:
 	  i.error = unsupported_broadcast;
 	  return 1;
+	}
+
+      operand_type_set (&type, 0);
+      switch ((t->opcode_modifier.vecesize ? 8 : 4) * i.broadcast->type)
+	{
+	case 8:
+	  type.bitfield.qword = 1;
+	  break;
+	case 16:
+	  type.bitfield.xmmword = 1;
+	  break;
+	case 32:
+	  type.bitfield.ymmword = 1;
+	  break;
+	case 64:
+	  type.bitfield.zmmword = 1;
+	  break;
+	default:
+	  goto bad_broadcast;
+	}
+
+      overlap = operand_type_and (type, t->operand_types[op]);
+      if (operand_type_all_zero (&overlap))
+	  goto bad_broadcast;
+
+      if (t->opcode_modifier.checkregsize)
+	{
+	  unsigned int j;
+
+	  for (j = 0; j < i.operands; ++j)
+	    {
+	      if (j != op
+		  && !operand_type_register_match(i.types[j],
+						  t->operand_types[j],
+						  type,
+						  t->operand_types[op]))
+		goto bad_broadcast;
+	    }
 	}
     }
   /* If broadcast is supported in this instruction, we need to check if
@@ -8445,15 +8465,15 @@ check_VecOperations (char *op_string, char *op_end)
 
 	      op_string += 3;
 	      if (*op_string == '8')
-		bcst_type = BROADCAST_1TO8;
+		bcst_type = 8;
 	      else if (*op_string == '4')
-		bcst_type = BROADCAST_1TO4;
+		bcst_type = 4;
 	      else if (*op_string == '2')
-		bcst_type = BROADCAST_1TO2;
+		bcst_type = 2;
 	      else if (*op_string == '1'
 		       && *(op_string+1) == '6')
 		{
-		  bcst_type = BROADCAST_1TO16;
+		  bcst_type = 16;
 		  op_string++;
 		}
 	      else
