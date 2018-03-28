@@ -1,3 +1,14 @@
+2018-03-28  Eric Botcazou  <ebotcazou@adacore.com>
+
+	PR ld/22972
+	* elfxx-sparc.c (struct _bfd_sparc_elf_link_hash_entry): Add new flag
+	has_old_style_got_reloc.
+	(_bfd_sparc_elf_check_relocs) <GOT relocations>: Set it for old-style
+	relocations.  Fix a couple of long lines.
+	(_bfd_sparc_elf_relocate_section) <R_SPARC_GOTDATA_OP>: Do not generate
+	a R_SPARC_NONE for the GOT slot if the symbol is also subject to old-style
+	GOT relocations.
+
 2018-02-09  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* elfxx-sparc.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Reorder conditions.
