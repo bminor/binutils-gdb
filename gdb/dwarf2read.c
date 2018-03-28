@@ -1821,8 +1821,6 @@ static void prepare_one_comp_unit (struct dwarf2_cu *cu,
 				   struct die_info *comp_unit_die,
 				   enum language pretend_language);
 
-static void free_cached_comp_units (void *);
-
 static void age_cached_comp_units (struct dwarf2_per_objfile *dwarf2_per_objfile);
 
 static void free_one_cached_comp_unit (struct dwarf2_per_cu_data *);
@@ -2171,6 +2169,30 @@ dwarf2_per_objfile::free_cached_comp_units ()
       per_cu = next_cu;
     }
 }
+
+/* A helper class that calls free_cached_comp_units on
+   destruction.  */
+
+class free_cached_comp_units
+{
+public:
+
+  explicit free_cached_comp_units (dwarf2_per_objfile *per_objfile)
+    : m_per_objfile (per_objfile)
+  {
+  }
+
+  ~free_cached_comp_units ()
+  {
+    m_per_objfile->free_cached_comp_units ();
+  }
+
+  DISABLE_COPY_AND_ASSIGN (free_cached_comp_units);
+
+private:
+
+  dwarf2_per_objfile *m_per_objfile;
+};
 
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.
@@ -2876,12 +2898,10 @@ dw2_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
   gdb_assert (dwarf2_per_objfile->using_index);
   if (!per_cu->v.quick->compunit_symtab)
     {
-      struct cleanup *back_to = make_cleanup (free_cached_comp_units,
-					      dwarf2_per_objfile);
+      free_cached_comp_units freer (dwarf2_per_objfile);
       scoped_restore decrementer = increment_reading_symtab ();
       dw2_do_instantiate_symtab (per_cu);
       process_cu_includes (dwarf2_per_objfile);
-      do_cleanups (back_to);
     }
 
   return per_cu->v.quick->compunit_symtab;
@@ -8434,7 +8454,6 @@ set_partial_user (struct dwarf2_per_objfile *dwarf2_per_objfile)
 static void
 dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
-  struct cleanup *back_to;
   int i;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
 
@@ -8450,7 +8469,7 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
   /* Any cached compilation units will be linked by the per-objfile
      read_in_chain.  Make sure to free them when we're done.  */
-  back_to = make_cleanup (free_cached_comp_units, dwarf2_per_objfile);
+  free_cached_comp_units freer (dwarf2_per_objfile);
 
   build_type_psymtabs (dwarf2_per_objfile);
 
@@ -8490,8 +8509,6 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
 						    &objfile->objfile_obstack);
   /* At this point we want to keep the address map.  */
   save_psymtabs_addrmap.release ();
-
-  do_cleanups (back_to);
 
   if (dwarf_read_debug)
     fprintf_unfiltered (gdb_stdlog, "Done building psymtabs of %s\n",
@@ -25070,17 +25087,6 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
     }
 
   cu->producer = dwarf2_string_attr (comp_unit_die, DW_AT_producer, cu);
-}
-
-/* Free all cached compilation units.  */
-
-static void
-free_cached_comp_units (void *data)
-{
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = (struct dwarf2_per_objfile *) data;
-
-  dwarf2_per_objfile->free_cached_comp_units ();
 }
 
 /* Increase the age counter on each cached compilation unit, and free

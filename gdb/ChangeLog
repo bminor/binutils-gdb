@@ -1,5 +1,11 @@
 2018-03-30  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (class free_cached_comp_units): New class.
+	(dw2_instantiate_symtab, dwarf2_build_psymtabs_hard): Use it.
+	(free_cached_comp_units): Remove function.
+
+2018-03-30  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (make_cleanup_unpush_target): Remove.
 	* inf-ptrace.c (struct target_unpusher): New.
 	(target_unpush_up) New typedef.
