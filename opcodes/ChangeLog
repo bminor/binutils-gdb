@@ -1,5 +1,13 @@
 2018-03-28  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (opcode_modifiers): Delete VecESize.
+	* i386-opc.h (VecESize): Delete.
+	(struct i386_opcode_modifier): Delete vecesize.
+	* i386-opc.tbl: Drop VecESize.
+	* i386-tlb.h: Re-generate.
+
+2018-03-28  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.h (NO_BROADCAST, BROADCAST_1TO16, BROADCAST_1TO8,
 	BROADCAST_1TO4, BROADCAST_1TO2): Delete.
 	(struct i386_opcode_modifier): Shrink broadcast field to 1 bit.

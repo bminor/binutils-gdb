@@ -638,7 +638,6 @@ static bitfield opcode_modifiers[] =
   BITFIELD (NoAVX),
   BITFIELD (EVex),
   BITFIELD (Masking),
-  BITFIELD (VecESize),
   BITFIELD (Broadcast),
   BITFIELD (StaticRounding),
   BITFIELD (SAE),

@@ -5051,17 +5051,14 @@ check_VecOperands (const insn_template *t)
       i386_operand_type type, overlap;
 
       /* Check if specified broadcast is supported in this instruction,
-	 and it's applied to memory operand of DWORD or QWORD type,
-	 depending on VecESize.  */
+	 and it's applied to memory operand of DWORD or QWORD type.  */
       op = i.broadcast->operand;
       if (!t->opcode_modifier.broadcast
 	  || !i.types[op].bitfield.mem
-	  || (t->opcode_modifier.vecesize == 0
-	      && !i.types[op].bitfield.dword
-	      && !i.types[op].bitfield.unspecified)
-	  || (t->opcode_modifier.vecesize == 1
-	      && !i.types[op].bitfield.qword
-	      && !i.types[op].bitfield.unspecified))
+	  || (!i.types[op].bitfield.unspecified
+	      && (t->operand_types[op].bitfield.dword
+		  ? !i.types[op].bitfield.dword
+		  : !i.types[op].bitfield.qword)))
 	{
 	bad_broadcast:
 	  i.error = unsupported_broadcast;
@@ -5069,7 +5066,7 @@ check_VecOperands (const insn_template *t)
 	}
 
       operand_type_set (&type, 0);
-      switch ((t->opcode_modifier.vecesize ? 8 : 4) * i.broadcast->type)
+      switch ((t->operand_types[op].bitfield.dword ? 4 : 8) * i.broadcast->type)
 	{
 	case 8:
 	  type.bitfield.qword = 1;
@@ -5116,15 +5113,16 @@ check_VecOperands (const insn_template *t)
 	  break;
       gas_assert (op < i.operands);
       /* Check size of the memory operand.  */
-      if ((t->opcode_modifier.vecesize == 0
-	   && i.types[op].bitfield.dword)
-	  || (t->opcode_modifier.vecesize == 1
-	      && i.types[op].bitfield.qword))
+      if (t->operand_types[op].bitfield.dword
+	  ? i.types[op].bitfield.dword
+	  : i.types[op].bitfield.qword)
 	{
 	  i.error = broadcast_needed;
 	  return 1;
 	}
     }
+  else
+    op = MAX_OPERANDS - 1; /* Avoid uninitialized variable warning.  */
 
   /* Check if requested masking is supported.  */
   if (i.mask
@@ -5171,7 +5169,7 @@ check_VecOperands (const insn_template *t)
       && i.disp_encoding != disp_encoding_32bit)
     {
       if (i.broadcast)
-	i.memshift = t->opcode_modifier.vecesize ? 3 : 2;
+	i.memshift = t->operand_types[op].bitfield.dword ? 2 : 3;
       else
 	i.memshift = t->opcode_modifier.disp8memshift;
 

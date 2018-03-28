@@ -1,5 +1,17 @@
 2018-03-28  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (check_VecOperands): Replace uses of
+	.vecesize. Always initialize op.
+	* testsuite/gas/i386/avx512_vpopcntdq.s,
+	testsuite/gas/i386/avx512bitalg_vl.s: Add Intel syntax vpopcnt
+	broadcast cases with explicit operand size.
+	* testsuite/gas/i386/avx512_vpopcntdq.d,
+	testsuite/gas/i386/avx512_vpopcntdq-intel.d,
+	testsuite/gas/i386/avx512bitalg_vl.d
+	testsuite/gas/i386/avx512bitalg_vl-intel.d: Adjust expectations.
+
+2018-03-28  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (struct Broadcast_Operation): Adjust comment.
 	(check_VecOperands): Re-write broadcast validation code.
 	(check_VecOperations): Replace BROADCAST_1TO* uses.
