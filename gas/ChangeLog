@@ -1,5 +1,10 @@
 2018-03-28  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (process_suffix): Check .todword/.toqword
+	before zapping suffix.
+
+2018-03-28  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/ilp32/x86-64-simd-suffix.d,
 	testsuite/gas/i386/x86-64-simd-suffix.d: Drop q suffix from
 	cvt*2si.

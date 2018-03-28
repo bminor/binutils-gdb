@@ -5806,7 +5806,9 @@ process_suffix (void)
 	{
 	  if (intel_syntax
 	      && i.tm.opcode_modifier.ignoresize
-	      && i.tm.opcode_modifier.no_lsuf)
+	      && i.tm.opcode_modifier.no_lsuf
+	      && !i.tm.opcode_modifier.todword
+	      && !i.tm.opcode_modifier.toqword)
 	    i.suffix = 0;
 	  else if (!check_long_reg ())
 	    return 0;
@@ -5815,7 +5817,9 @@ process_suffix (void)
 	{
 	  if (intel_syntax
 	      && i.tm.opcode_modifier.ignoresize
-	      && i.tm.opcode_modifier.no_qsuf)
+	      && i.tm.opcode_modifier.no_qsuf
+	      && !i.tm.opcode_modifier.todword
+	      && !i.tm.opcode_modifier.toqword)
 	    i.suffix = 0;
 	  else if (!check_qword_reg ())
 	    return 0;
