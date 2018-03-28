@@ -13513,13 +13513,11 @@ queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *per_cu)
 }
 
 /* Free all resources associated with DWO_FILE.
-   Close the DWO file and munmap the sections.
-   All memory should be on the objfile obstack.  */
+   Close the DWO file and munmap the sections.  */
 
 static void
-free_dwo_file (struct dwo_file *dwo_file, struct objfile *objfile)
+free_dwo_file (struct dwo_file *dwo_file)
 {
-
   /* Note: dbfd is NULL for virtual DWO files.  */
   gdb_bfd_unref (dwo_file->dbfd);
 
@@ -13533,9 +13531,8 @@ free_dwo_file_cleanup (void *arg)
 {
   struct free_dwo_file_cleanup_data *data
     = (struct free_dwo_file_cleanup_data *) arg;
-  struct objfile *objfile = data->dwarf2_per_objfile->objfile;
 
-  free_dwo_file (data->dwo_file, objfile);
+  free_dwo_file (data->dwo_file);
 
   xfree (data);
 }
@@ -13546,9 +13543,8 @@ static int
 free_dwo_file_from_slot (void **slot, void *info)
 {
   struct dwo_file *dwo_file = (struct dwo_file *) *slot;
-  struct objfile *objfile = (struct objfile *) info;
 
-  free_dwo_file (dwo_file, objfile);
+  free_dwo_file (dwo_file);
 
   return 1;
 }

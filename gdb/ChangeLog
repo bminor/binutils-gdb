@@ -1,5 +1,10 @@
 2018-03-30  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (free_dwo_file): Remove "objfile" parameter.
+	(free_dwo_file_cleanup, free_dwo_file_from_slot): Update.
+
+2018-03-30  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (class free_cached_comp_units): New class.
 	(dw2_instantiate_symtab, dwarf2_build_psymtabs_hard): Use it.
 	(free_cached_comp_units): Remove function.
