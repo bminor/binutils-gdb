@@ -2536,8 +2536,7 @@ struct dis386 {
 	  prefix and behave as 'S' otherwise
    'W' => print 'b', 'w' or 'l' ('d' in Intel mode)
    'X' => print 's', 'd' depending on data16 prefix (for XMM)
-   'Y' => 'q' if instruction has an REX 64bit overwrite prefix and
-	  suffix_always is true.
+   'Y' unused.
    'Z' => print 'q' in 64bit mode and behave as 'L' otherwise
    '!' => change condition from true to false or from false to true.
    '%' => add 1 upper case letter to the macro.
@@ -3925,17 +3924,17 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0F2C */
   {
     { "cvttps2pi", { MXC, EXq }, PREFIX_OPCODE },
-    { "cvttss2siY", { Gv, EXd }, PREFIX_OPCODE },
+    { "cvttss2si", { Gv, EXd }, PREFIX_OPCODE },
     { "cvttpd2pi", { MXC, EXx }, PREFIX_OPCODE },
-    { "cvttsd2siY", { Gv, EXq }, PREFIX_OPCODE },
+    { "cvttsd2si", { Gv, EXq }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F2D */
   {
     { "cvtps2pi", { MXC, EXq }, PREFIX_OPCODE },
-    { "cvtss2siY", { Gv, EXd }, PREFIX_OPCODE },
+    { "cvtss2si", { Gv, EXd }, PREFIX_OPCODE },
     { "cvtpd2pi", { MXC, EXx }, PREFIX_OPCODE },
-    { "cvtsd2siY", { Gv, EXq }, PREFIX_OPCODE },
+    { "cvtsd2si", { Gv, EXq }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F2E */
@@ -9547,26 +9546,26 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F2C_P_1 */
   {
-    { "vcvttss2siY",	{ Gv, EXdScalar }, 0 },
-    { "vcvttss2siY",	{ Gv, EXdScalar }, 0 },
+    { "vcvttss2si",	{ Gv, EXdScalar }, 0 },
+    { "vcvttss2si",	{ Gv, EXdScalar }, 0 },
   },
 
   /* VEX_LEN_0F2C_P_3 */
   {
-    { "vcvttsd2siY",	{ Gv, EXqScalar }, 0 },
-    { "vcvttsd2siY",	{ Gv, EXqScalar }, 0 },
+    { "vcvttsd2si",	{ Gv, EXqScalar }, 0 },
+    { "vcvttsd2si",	{ Gv, EXqScalar }, 0 },
   },
 
   /* VEX_LEN_0F2D_P_1 */
   {
-    { "vcvtss2siY",	{ Gv, EXdScalar }, 0 },
-    { "vcvtss2siY",	{ Gv, EXdScalar }, 0 },
+    { "vcvtss2si",	{ Gv, EXdScalar }, 0 },
+    { "vcvtss2si",	{ Gv, EXdScalar }, 0 },
   },
 
   /* VEX_LEN_0F2D_P_3 */
   {
-    { "vcvtsd2siY",	{ Gv, EXqScalar }, 0 },
-    { "vcvtsd2siY",	{ Gv, EXqScalar }, 0 },
+    { "vcvtsd2si",	{ Gv, EXqScalar }, 0 },
+    { "vcvtsd2si",	{ Gv, EXqScalar }, 0 },
   },
 
   /* VEX_LEN_0F2E_P_0 */
@@ -14414,16 +14413,7 @@ case_S:
 	  break;
 	case 'Y':
 	  if (l == 0 && len == 1)
-	    {
-	      if (intel_syntax || !(sizeflag & SUFFIX_ALWAYS))
-		break;
-	      if (rex & REX_W)
-		{
-		  USED_REX (REX_W);
-		  *obufp++ = 'q';
-		}
-	      break;
-	    }
+	    abort ();
 	  else
 	    {
 	      if (l != 1 || len != 2 || last[0] != 'X')
