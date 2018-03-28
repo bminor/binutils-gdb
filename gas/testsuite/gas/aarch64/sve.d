@@ -40562,3 +40562,18 @@ Disassembly of section .*:
 .*:	0e431441 	fadd	v1\.4h, v2\.4h, v3\.4h
 .*:	4e401400 	fadd	v0\.8h, v0\.8h, v0\.8h
 .*:	4e431441 	fadd	v1\.8h, v2\.8h, v3\.8h
+
+.*:	a41f6400 	ldff1b	\{z0\.b\}, p1/z, \[x0, xzr\]
+.*:	a43f6420 	ldff1b	\{z0\.h\}, p1/z, \[x1, xzr\]
+.*:	a45f6440 	ldff1b	\{z0\.s\}, p1/z, \[x2, xzr\]
+.*:	a47f6460 	ldff1b	\{z0\.d\}, p1/z, \[x3, xzr\]
+.*:	a5ff6000 	ldff1d	\{z0\.d\}, p0/z, \[x0, xzr, lsl #3\]
+.*:	a4bf6520 	ldff1h	\{z0\.h\}, p1/z, \[x9, xzr, lsl #1\]
+.*:	a4df6540 	ldff1h	\{z0\.s\}, p1/z, \[x10, xzr, lsl #1\]
+.*:	a4ff6560 	ldff1h	\{z0\.d\}, p1/z, \[x11, xzr, lsl #1\]
+.*:	a5bf65c0 	ldff1sb	\{z0\.s\}, p1/z, \[x14, xzr\]
+.*:	a59f65e0 	ldff1sb	\{z0\.d\}, p1/z, \[x15, xzr\]
+.*:	a53f6640 	ldff1sh	\{z0\.s\}, p1/z, \[x18, xzr, lsl #1\]
+.*:	a51f6660 	ldff1sh	\{z0\.d\}, p1/z, \[x19, xzr, lsl #1\]
+.*:	a49f66e0 	ldff1sw	\{z0\.d\}, p1/z, \[x23, xzr, lsl #2\]
+.*:	a57f6760 	ldff1w	\{z0\.d\}, p1/z, \[x27, xzr, lsl #2\]

@@ -134,6 +134,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RI_U6x2", 1 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an address with a 6-bit unsigned offset, multiplied by 2"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RI_U6x4", 2 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an address with a 6-bit unsigned offset, multiplied by 4"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RI_U6x8", 3 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an address with a 6-bit unsigned offset, multiplied by 8"},
+  {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_R", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_Rm}, "an address with an optional scalar register offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RR", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_Rm}, "an address with a scalar register offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RR_LSL1", 1 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_Rm}, "an address with a scalar register offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RR_LSL2", 2 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_Rm}, "an address with a scalar register offset"},

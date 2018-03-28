@@ -1,3 +1,15 @@
+2018-03-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 22988
+	* aarch64-tbl.h (aarch64_opcode_table): Add entries for LDFF1xx
+	instructions with only a base address register.
+	* aarch64-opc.c (operand_general_constraint_met_p): Add code to
+	handle AARHC64_OPND_SVE_ADDR_R.
+	(aarch64_print_operand): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64_dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
 2018-03-22  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl: Drop VecESize from register only insn forms and

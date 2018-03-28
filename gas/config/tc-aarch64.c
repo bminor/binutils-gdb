@@ -3695,6 +3695,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	  set_syntax_error (_("missing offset in the pre-indexed address"));
 	  return FALSE;
 	}
+
       operand->addr.preind = 1;
       inst.reloc.exp.X_op = O_constant;
       inst.reloc.exp.X_add_number = 0;
@@ -6233,6 +6234,25 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->addr.offset.imm = inst.reloc.exp.X_add_number;
 	  break;
 
+	case AARCH64_OPND_SVE_ADDR_R:
+	  /* [<Xn|SP>{, <R><m>}]
+	     but recognizing SVE registers.  */
+	  po_misc_or_fail (parse_sve_address (&str, info, &base_qualifier,
+					      &offset_qualifier));
+	  if (offset_qualifier == AARCH64_OPND_QLF_NIL)
+	    {
+	      offset_qualifier = AARCH64_OPND_QLF_X;
+	      info->addr.offset.is_reg = 1;
+	      info->addr.offset.regno = 31;
+	    }
+	  else if (base_qualifier != AARCH64_OPND_QLF_X
+	      || offset_qualifier != AARCH64_OPND_QLF_X)
+	    {
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	  goto regoff_addr;
+	  
 	case AARCH64_OPND_SVE_ADDR_RR:
 	case AARCH64_OPND_SVE_ADDR_RR_LSL1:
 	case AARCH64_OPND_SVE_ADDR_RR_LSL2:

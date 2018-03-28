@@ -1,3 +1,12 @@
+2018-03-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 22988
+	* config/tc-aarch64.c (parse_operands): Add code to handle
+	AARCH64_OPN_SVE_ADDR_R.
+	* testsuite/gas/aarch64/sve.s: Add tests for LDFF1xx instructions
+	with an assumed XZR offset address register.
+	* testsuite/gas/aarch64/sve.d: Update expected disassembly.
+
 2018-03-22  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (check_VecOperands): Latch
