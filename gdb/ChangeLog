@@ -1,5 +1,13 @@
 2018-03-30  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (struct free_dwo_file_cleanup_data): Remove.
+	(struct dwo_file_deleter): New.
+	(dwo_file_up): New typedef.
+	(open_and_init_dwo_file): Use dwo_file_up.
+	(free_dwo_file_cleanup): Remove.
+
+2018-03-30  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (free_dwo_file): Remove "objfile" parameter.
 	(free_dwo_file_cleanup, free_dwo_file_from_slot): Update.
 

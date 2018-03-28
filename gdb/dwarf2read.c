@@ -1959,13 +1959,21 @@ static struct dwo_unit *lookup_dwo_type_unit
 
 static void queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *);
 
-static void free_dwo_file_cleanup (void *);
+static void free_dwo_file (struct dwo_file *);
 
-struct free_dwo_file_cleanup_data
+/* A unique_ptr helper to free a dwo_file.  */
+
+struct dwo_file_deleter
 {
-  struct dwo_file *dwo_file;
-  struct dwarf2_per_objfile *dwarf2_per_objfile;
+  void operator() (struct dwo_file *df) const
+  {
+    free_dwo_file (df);
+  }
 };
+
+/* A unique pointer to a dwo_file.  */
+
+typedef std::unique_ptr<struct dwo_file, dwo_file_deleter> dwo_file_up;
 
 static void process_cu_includes (struct dwarf2_per_objfile *dwarf2_per_objfile);
 
@@ -12983,8 +12991,6 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  struct dwo_file *dwo_file;
-  struct cleanup *cleanups;
 
   gdb_bfd_ref_ptr dbfd (open_dwo_file (dwarf2_per_objfile, dwo_name, comp_dir));
   if (dbfd == NULL)
@@ -12993,16 +12999,14 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
 	fprintf_unfiltered (gdb_stdlog, "DWO file not found: %s\n", dwo_name);
       return NULL;
     }
-  dwo_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_file);
+
+  /* We use a unique pointer here, despite the obstack allocation,
+     because a dwo_file needs some cleanup if it is abandoned.  */
+  dwo_file_up dwo_file (OBSTACK_ZALLOC (&objfile->objfile_obstack,
+					struct dwo_file));
   dwo_file->dwo_name = dwo_name;
   dwo_file->comp_dir = comp_dir;
   dwo_file->dbfd = dbfd.release ();
-
-  free_dwo_file_cleanup_data *cleanup_data = XNEW (free_dwo_file_cleanup_data);
-  cleanup_data->dwo_file = dwo_file;
-  cleanup_data->dwarf2_per_objfile = dwarf2_per_objfile;
-
-  cleanups = make_cleanup (free_dwo_file_cleanup, cleanup_data);
 
   bfd_map_over_sections (dwo_file->dbfd, dwarf2_locate_dwo_sections,
 			 &dwo_file->sections);
@@ -13010,15 +13014,13 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
   create_cus_hash_table (dwarf2_per_objfile, *dwo_file, dwo_file->sections.info,
 			 dwo_file->cus);
 
-  create_debug_types_hash_table (dwarf2_per_objfile, dwo_file,
+  create_debug_types_hash_table (dwarf2_per_objfile, dwo_file.get (),
 				 dwo_file->sections.types, dwo_file->tus);
-
-  discard_cleanups (cleanups);
 
   if (dwarf_read_debug)
     fprintf_unfiltered (gdb_stdlog, "DWO file found: %s\n", dwo_name);
 
-  return dwo_file;
+  return dwo_file.release ();
 }
 
 /* This function is mapped across the sections and remembers the offset and
@@ -13522,19 +13524,6 @@ free_dwo_file (struct dwo_file *dwo_file)
   gdb_bfd_unref (dwo_file->dbfd);
 
   VEC_free (dwarf2_section_info_def, dwo_file->sections.types);
-}
-
-/* Wrapper for free_dwo_file for use in cleanups.  */
-
-static void
-free_dwo_file_cleanup (void *arg)
-{
-  struct free_dwo_file_cleanup_data *data
-    = (struct free_dwo_file_cleanup_data *) arg;
-
-  free_dwo_file (data->dwo_file);
-
-  xfree (data);
 }
 
 /* Traversal function for free_dwo_files.  */
