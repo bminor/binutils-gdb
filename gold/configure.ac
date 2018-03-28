@@ -28,6 +28,8 @@ AM_INIT_AUTOMAKE([no-dist parallel-tests])
 
 AM_CONFIG_HEADER(config.h:config.in)
 
+AC_USE_SYSTEM_EXTENSIONS
+
 # PR 14072
 AH_VERBATIM([00_CONFIG_H_CHECK],
 [/* Check that config.h is #included before system headers
@@ -100,14 +102,7 @@ if test "$threads" = "yes"; then
 fi
 AM_CONDITIONAL(THREADS, test "$threads" = "yes")
 
-AC_ARG_ENABLE([plugins],
-[  --enable-plugins        linker plugins],
-[case "${enableval}" in
-  yes | "") plugins=yes ;;
-  no) plugins=no ;;
-  *) plugins=yes ;;
- esac],
-[plugins=no])
+AC_PLUGINS
 if test "$plugins" = "yes"; then
   AC_DEFINE(ENABLE_PLUGINS, 1,
 	    [Define to enable linker plugins])

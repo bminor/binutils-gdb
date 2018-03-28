@@ -1125,6 +1125,12 @@ class General_options
 		 N_("Load a plugin library"), N_("PLUGIN"));
   DEFINE_special(plugin_opt, options::TWO_DASHES, '\0',
 		 N_("Pass an option to the plugin"), N_("OPTION"));
+#else
+  DEFINE_special(plugin, options::TWO_DASHES, '\0',
+		 N_("Load a plugin library (not supported)"), N_("PLUGIN"));
+  DEFINE_special(plugin_opt, options::TWO_DASHES, '\0',
+		 N_("Pass an option to the plugin (not supported)"),
+		 N_("OPTION"));
 #endif
 
   DEFINE_bool(posix_fallocate, options::TWO_DASHES, '\0', true,

@@ -1,5 +1,20 @@
 2018-03-28  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/21423
+	PR gold/22500
+	* configure.ac: Call AC_USE_SYSTEM_EXTENSIONS.
+	Replace check for --enable-plugins with AC_PLUGINS.
+	* options.cc (parse_plugin, parse_plugin_opt): Remove #ifdef.
+	(General_options::finalize): Check if plugins enabled.
+	* options.h (--plugin, --plugin-opt): Define even if plugins not
+	enabled.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* testsuite/Makefile.in: Regenerate.
+
+2018-03-28  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/22969
 	* aarch64-reloc.def: Add TLSLE_LDST* relocations.
 	* aarch64.cc (Target_aarch64::optimize_tls_reloc): Likewise.
