@@ -285,11 +285,18 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
     case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
       if (old_addend & ((1 << howto->rightshift) - 1))
 	return bfd_reloc_overflow;
       /* Used for ldr*|str* rt, [rn, #uimm12] to provide the low order
-	 12 bits of the page offset following BFD_RELOC_AARCH64_ADR_HI21_PCREL
-	 which computes the (pc-relative) page base.  */
+	 12 bits address offset.  */
       contents = reencode_ldst_pos_imm (contents, addend);
       break;
 
@@ -457,6 +464,14 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
+    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
       value = value + addend;
       break;
 
