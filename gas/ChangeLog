@@ -1,3 +1,38 @@
+2018-03-28  Renlin Li  <renlin.li@arm.com>
+
+	PR ld/22970
+	* config/tc-aarch64.c (reloc_table): Update entry for tprel_lo12 and
+	tprel_lo12_nc with pseudo relocations.
+	(ldst_lo12_determine_real_reloc_type): Add new relocations support.
+	(parse_operands): Handle BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12 and
+	BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12_NC pseudo relocations.
+	(md_apply_fix): Add handling for new relocation.
+	(aarch64_force_relocation): Likewise.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst16.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst16.s: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst32.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst32.s: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst64.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst64.s: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst8.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst8.s: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst16.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst16.s: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst32.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst32.s: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst64.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst64.s: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst8.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst8.s: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst16-ilp32.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst32-ilp32.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst64-ilp32.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12-ldst8-ilp32.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst16-ilp32.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst32-ilp32.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst64-ilp32.d: New.
+	* testsuite/gas/aarch64/reloc-tprel_lo12_nc-ldst8-ilp32.d: New.
+
 2018-03-28  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (check_VecOperands): Replace uses of

@@ -6229,6 +6229,34 @@ instructions.  */
 /* AArch64 TLS LOCAL EXEC relocation.  */
   BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC,
 
+/* bit[11:1] of byte offset to module TLS base address, encoded in ldst
+instructions.  */
+  BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12,
+
+/* Similar as BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12, but no overflow check.  */
+  BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12_NC,
+
+/* bit[11:2] of byte offset to module TLS base address, encoded in ldst
+instructions.  */
+  BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12,
+
+/* Similar as BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12, but no overflow check.  */
+  BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12_NC,
+
+/* bit[11:3] of byte offset to module TLS base address, encoded in ldst
+instructions.  */
+  BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12,
+
+/* Similar as BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12, but no overflow check.  */
+  BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12_NC,
+
+/* bit[11:0] of byte offset to module TLS base address, encoded in ldst
+instructions.  */
+  BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12,
+
+/* Similar as BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12, but no overflow check.  */
+  BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12_NC,
+
 /* AArch64 TLS DESC relocation.  */
   BFD_RELOC_AARCH64_TLSDESC_LD_PREL19,
 
@@ -6311,6 +6339,14 @@ any object files.  */
 
 /* Similar as BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12, but no overflow check.  */
   BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC,
+
+/* AArch64 pseudo relocation code for TLS local exec mode.  It's to be
+used internally by the AArch64 assembler and not (currently) written to
+any object files.  */
+  BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12,
+
+/* Similar as BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12, but no overflow check.  */
+  BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12_NC,
 
 /* AArch64 pseudo relocation code to be used internally by the AArch64
 assembler and not (currently) written to any object files.  */

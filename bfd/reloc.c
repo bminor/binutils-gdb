@@ -7396,6 +7396,42 @@ ENUM
 ENUMDOC
   AArch64 TLS LOCAL EXEC relocation.
 ENUM
+  BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12
+ENUMDOC
+  bit[11:1] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12
+ENUMDOC
+  bit[11:2] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12
+ENUMDOC
+  bit[11:3] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12
+ENUMDOC
+  bit[11:0] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12, but no overflow check.
+ENUM
   BFD_RELOC_AARCH64_TLSDESC_LD_PREL19
 ENUMDOC
   AArch64 TLS DESC relocation.
@@ -7503,6 +7539,16 @@ ENUM
   BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC
 ENUMDOC
   Similar as BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12
+ENUMDOC
+  AArch64 pseudo relocation code for TLS local exec mode.  It's to be
+  used internally by the AArch64 assembler and not (currently) written to
+  any object files.
+ENUM
+  BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12, but no overflow check.
 ENUM
   BFD_RELOC_AARCH64_LD_GOT_LO12_NC
 ENUMDOC
