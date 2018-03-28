@@ -1,4 +1,4 @@
-2018-02-28  Maciej W. Rozycki  <macro@mips.com>
+2018-03-28  Maciej W. Rozycki  <macro@mips.com>
 
 	* elf32-mips.c (mips_info_to_howto_rel): Call
 	`mips_elf32_rtype_to_howto' directly rather than via
