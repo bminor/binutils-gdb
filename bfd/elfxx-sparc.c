@@ -692,8 +692,11 @@ struct _bfd_sparc_elf_link_hash_entry
 #define GOT_TLS_IE      3
   unsigned char tls_type;
 
-    /* Symbol has GOT or PLT relocations.  */
+  /* Symbol has GOT or PLT relocations.  */
   unsigned int has_got_reloc : 1;
+
+  /* Symbol has old-style, non-relaxable GOT relocations.  */
+  unsigned int has_old_style_got_reloc : 1;
 
   /* Symbol has non-GOT/non-PLT relocations in text sections.  */
   unsigned int has_non_got_reloc : 1;
@@ -1583,7 +1586,8 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    local_got_refcounts[r_symndx] += 1;
 		    break;
 		  }
-		old_tls_type = _bfd_sparc_elf_local_got_tls_type (abfd) [r_symndx];
+		old_tls_type
+		  = _bfd_sparc_elf_local_got_tls_type (abfd) [r_symndx];
 	      }
 
 	    /* If a TLS symbol is accessed using IE at least once,
@@ -1620,7 +1624,13 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    }
 
 	  if (eh != NULL)
-	    eh->has_got_reloc = 1;
+	    {
+	      eh->has_got_reloc = 1;
+	      if (r_type == R_SPARC_GOT10
+		  || r_type == R_SPARC_GOT13
+		  || r_type == R_SPARC_GOT22)
+		eh->has_old_style_got_reloc = 1;
+	    }
 	  break;
 
 	case R_SPARC_TLS_GD_CALL:
@@ -3159,12 +3169,14 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	      bfd_put_32 (output_bfd, relocation, contents + rel->r_offset);
 
 	      /* If the symbol is global but not dynamic, an .rela.* slot has
-		 been allocated for it in the GOT so output R_SPARC_NONE here.
-		 See also the handling of other GOT relocations just below.  */
+		 been allocated for it in the GOT so output R_SPARC_NONE here,
+		 if it isn't also subject to another, old-style GOT relocation.
+		 See also the handling of these GOT relocations just below.  */
 	      if (h != NULL
 		  && h->dynindx == -1
 		  && !h->forced_local
 		  && h->root.type != bfd_link_hash_undefweak
+		  && !eh->has_old_style_got_reloc
 		  && (h->got.offset & 1) == 0
 		  && bfd_link_pic (info))
 		{
