@@ -631,7 +631,6 @@ rust_print_struct_def (struct type *type, const char *varstring,
   bool is_tuple_struct = rust_tuple_struct_type_p (type);
   bool is_tuple = rust_tuple_type_p (type);
   bool is_enum = rust_enum_p (type);
-  bool is_univariant = false;
 
   int enum_discriminant_index = -1;
 
@@ -652,12 +651,6 @@ rust_print_struct_def (struct type *type, const char *varstring,
 	  struct discriminant_info *info
 	    = (struct discriminant_info *) discriminant_prop->data.baton;
 	  enum_discriminant_index = info->discriminant_index;
-	}
-      else if (TYPE_CODE (type) == TYPE_CODE_UNION && TYPE_NFIELDS (type) == 1)
-	{
-	  /* Probably a univariant enum.  */
-	  fputs_filtered ("enum ", stream);
-	  is_univariant = true;
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	fputs_filtered ("struct ", stream);
@@ -695,19 +688,12 @@ rust_print_struct_def (struct type *type, const char *varstring,
 	    continue;
 	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
 	}
-      else if (is_univariant)
-	{
-	  const char *name
-	    = rust_last_path_segment (TYPE_NAME (TYPE_FIELD_TYPE (type, i)));
-	  fputs_filtered (name, stream);
-	}
       else if (!is_tuple_struct)
 	fprintf_filtered (stream, "%s: ", TYPE_FIELD_NAME (type, i));
 
       rust_internal_print_type (TYPE_FIELD_TYPE (type, i), NULL,
-				stream,
-				((is_enum || is_univariant) ? show : show - 1),
-				level + 2, flags, is_enum || is_univariant);
+				stream, (is_enum ? show : show - 1),
+				level + 2, flags, is_enum);
       if (!for_rust_enum)
 	fputs_filtered (",\n", stream);
       else if (i + 1 < TYPE_NFIELDS (type))
@@ -1591,13 +1577,6 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
         lhs = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
         type = value_type (lhs);
-
-	/* Treat a univariant union as if it were an enum.  */
-	if (TYPE_CODE (type) == TYPE_CODE_UNION && TYPE_NFIELDS (type) == 1)
-	  {
-	    lhs = value_primitive_field (lhs, 0, 0, type);
-	    type = value_type (lhs);
-	  }
 
 	if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	  {

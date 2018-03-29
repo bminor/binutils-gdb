@@ -1,3 +1,8 @@
+2018-04-12  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_print_struct_def): Remove univariant code.
+	(rust_evaluate_subexp): Likewise.
+
 2018-04-12  Pedro Alves  <palves@redhat.com>
 
 	* procfs.c (procfs_detach): Make forward declaration's prototype
