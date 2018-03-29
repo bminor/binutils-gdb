@@ -2239,13 +2239,9 @@ mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 
   r_type = ELF32_R_TYPE (dst->r_info);
   cache_ptr->howto = mips_elf32_rtype_to_howto (abfd, r_type, FALSE);
+
   if (cache_ptr->howto == NULL)
-    {
-      /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, r_type);
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
+    return FALSE;
 
   /* The addend for a GPREL16 or LITERAL relocation comes from the GP
      value for the object file.  We get the addend now, rather than

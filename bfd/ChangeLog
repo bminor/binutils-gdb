@@ -1,3 +1,8 @@
+2018-03-29  Maciej W. Rozycki  <macro@mips.com>
+
+	* elf32-mips.c (mips_info_to_howto_rel): Remove the calls to
+	`_bfd_error_handler' and to set the `bfd_error_bad_value' error.
+
 2018-03-28  Maciej W. Rozycki  <macro@mips.com>
 
 	* elf-hppa.h (elf_hppa_info_to_howto_rel): Remove
