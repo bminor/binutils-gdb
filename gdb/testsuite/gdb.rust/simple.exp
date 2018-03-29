@@ -277,6 +277,7 @@ gdb_test "print parametrized.next.val" \
 gdb_test "print parametrized" \
     " = simple::ParametrizedStruct<i32> \\{next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>>>::Val\\{val: $hex\\}, value: 0\\}"
 
+gdb_test "print u" " = simple::Union {f1: -1, f2: 255}"
 
 load_lib gdb-python.exp
 if {[skip_python_tests]} {

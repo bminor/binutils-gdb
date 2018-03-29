@@ -9989,9 +9989,15 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	{
 	  disr_type = TYPE_FIELD_TYPE (type, i);
 
-	  if (TYPE_NFIELDS (disr_type) == 0)
+	  if (TYPE_CODE (disr_type) != TYPE_CODE_STRUCT)
+	    {
+	      /* All fields of a true enum will be structs.  */
+	      return;
+	    }
+	  else if (TYPE_NFIELDS (disr_type) == 0)
 	    {
 	      /* Could be data-less variant, so keep going.  */
+	      disr_type = nullptr;
 	    }
 	  else if (strcmp (TYPE_FIELD_NAME (disr_type, 0),
 			   "RUST$ENUM$DISR") != 0)

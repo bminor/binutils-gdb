@@ -80,6 +80,11 @@ struct ParametrizedStruct<T> {
     value: T
 }
 
+union Union {
+    f1: i8,
+    f2: u8,
+}
+
 fn main () {
     let a = ();
     let b : [i32; 0] = [];
@@ -152,6 +157,8 @@ fn main () {
         },
         value: 0,
     };
+
+    let u = Union { f2: 255 };
 
     println!("{}, {}", x.0, x.1);        // set breakpoint here
     println!("{}", diff2(92, 45));
