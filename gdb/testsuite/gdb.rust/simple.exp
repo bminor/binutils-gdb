@@ -169,6 +169,9 @@ gdb_test "print nosuchsymbol" \
 gdb_test "print simple::HiBob{field1, field2}" \
     " = simple::HiBob \\{field1: 77, field2: 88\\}"
 
+gdb_test "print simple::HiBob{field1: 99, .. y}" \
+    " = simple::HiBob \\{field1: 99, field2: 8\\}"
+
 gdb_test "print e" " = simple::MoreComplicated::Two\\(73\\)"
 gdb_test "print e2" \
     " = simple::MoreComplicated::Four\\{this: true, is: 8, a: 109 'm', struct_: 100, variant: 10\\}"
