@@ -1,3 +1,8 @@
+2018-04-27  Tom Tromey  <tom@tromey.com>
+
+	PR rust/22545:
+	* gdb.rust/simple.exp: Add inclusive range tests.
+
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/gnu-ifunc.exp (set-break): Test that GDB resolves

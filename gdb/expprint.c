@@ -578,9 +578,13 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  longest_to_int (exp->elts[pc + 1].longconst);
 	*pos += 2;
 
+	if (range_type == NONE_BOUND_DEFAULT_EXCLUSIVE
+	    || range_type == LOW_BOUND_DEFAULT_EXCLUSIVE)
+	  fputs_filtered ("EXCLUSIVE_", stream);
 	fputs_filtered ("RANGE(", stream);
 	if (range_type == HIGH_BOUND_DEFAULT
-	    || range_type == NONE_BOUND_DEFAULT)
+	    || range_type == NONE_BOUND_DEFAULT
+	    || range_type == NONE_BOUND_DEFAULT_EXCLUSIVE)
 	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
 	fputs_filtered ("..", stream);
 	if (range_type == LOW_BOUND_DEFAULT
@@ -1099,11 +1103,17 @@ dump_subexp_body_standard (struct expression *exp,
 	  case LOW_BOUND_DEFAULT:
 	    fputs_filtered ("Range '..EXP'", stream);
 	    break;
+	  case LOW_BOUND_DEFAULT_EXCLUSIVE:
+	    fputs_filtered ("ExclusiveRange '..EXP'", stream);
+	    break;
 	  case HIGH_BOUND_DEFAULT:
 	    fputs_filtered ("Range 'EXP..'", stream);
 	    break;
 	  case NONE_BOUND_DEFAULT:
 	    fputs_filtered ("Range 'EXP..EXP'", stream);
+	    break;
+	  case NONE_BOUND_DEFAULT_EXCLUSIVE:
+	    fputs_filtered ("ExclusiveRange 'EXP..EXP'", stream);
 	    break;
 	  default:
 	    fputs_filtered ("Invalid Range!", stream);

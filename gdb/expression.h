@@ -150,15 +150,26 @@ extern void dump_prefix_expression (struct expression *, struct ui_file *);
 
 /* In an OP_RANGE expression, either bound could be empty, indicating
    that its value is by default that of the corresponding bound of the
-   array or string.  So we have four sorts of subrange.  This
-   enumeration type is to identify this.  */
-   
+   array or string.  Also, the upper end of the range can be exclusive
+   or inclusive.  So we have six sorts of subrange.  This enumeration
+   type is to identify this.  */
+
 enum range_type
-  {
-    BOTH_BOUND_DEFAULT,		/* "(:)"  */
-    LOW_BOUND_DEFAULT,		/* "(:high)"  */
-    HIGH_BOUND_DEFAULT,		/* "(low:)"  */
-    NONE_BOUND_DEFAULT		/* "(low:high)"  */
-  };
+{
+  /* Neither the low nor the high bound was given -- so this refers to
+     the entire available range.  */
+  BOTH_BOUND_DEFAULT,
+  /* The low bound was not given and the high bound is inclusive.  */
+  LOW_BOUND_DEFAULT,
+  /* The high bound was not given and the low bound in inclusive.  */
+  HIGH_BOUND_DEFAULT,
+  /* Both bounds were given and both are inclusive.  */
+  NONE_BOUND_DEFAULT,
+  /* The low bound was not given and the high bound is exclusive.  */
+  NONE_BOUND_DEFAULT_EXCLUSIVE,
+  /* Both bounds were given.  The low bound is inclusive and the high
+     bound is exclusive.  */
+  LOW_BOUND_DEFAULT_EXCLUSIVE,
+};
 
 #endif /* !defined (EXPRESSION_H) */

@@ -995,6 +995,7 @@ operator_length_standard (const struct expression *expr, int endpos,
       switch (range_type)
 	{
 	case LOW_BOUND_DEFAULT:
+	case LOW_BOUND_DEFAULT_EXCLUSIVE:
 	case HIGH_BOUND_DEFAULT:
 	  args = 1;
 	  break;
@@ -1002,6 +1003,7 @@ operator_length_standard (const struct expression *expr, int endpos,
 	  args = 0;
 	  break;
 	case NONE_BOUND_DEFAULT:
+	case NONE_BOUND_DEFAULT_EXCLUSIVE:
 	  args = 2;
 	  break;
 	}

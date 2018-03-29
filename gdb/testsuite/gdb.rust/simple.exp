@@ -219,7 +219,9 @@ gdb_test "print r###\"###hello\"##" "Unexpected EOF in string"
 gdb_test "print r###\"hello###" "Unexpected EOF in string"
 
 gdb_test "print 0..5" " = .*::ops::Range.* \\{start: 0, end: 5\\}"
+gdb_test "print 0..=5" " = .*::ops::RangeInclusive.* \\{start: 0, end: 5\\}"
 gdb_test "print ..5" " = .*::ops::RangeTo.* \\{end: 5\\}"
+gdb_test "print ..=5" " = .*::ops::RangeToInclusive.* \\{end: 5\\}"
 gdb_test "print 5.." " = .*::ops::RangeFrom.* \\{start: 5\\}"
 gdb_test "print .." " = .*::ops::RangeFull"
 
@@ -244,7 +246,9 @@ proc test_one_slice {svar length base range} {
 }
 
 test_one_slice slice 1 w 2..3
+test_one_slice slice 1 w 2..=2
 test_one_slice slice2 1 slice 0..1
+test_one_slice slice2 1 slice 0..=0
 
 test_one_slice all1 4 w ..
 test_one_slice all2 1 slice ..
@@ -253,7 +257,9 @@ test_one_slice from1 3 w 1..
 test_one_slice from2 0 slice 1..
 
 test_one_slice to1 3 w ..3
+test_one_slice to1 3 w ..=2
 test_one_slice to2 1 slice ..1
+test_one_slice to2 1 slice ..=0
 
 gdb_test "print w\[2..3\]" "Can't take slice of array without '&'"
 

@@ -1,5 +1,26 @@
 2018-04-27  Tom Tromey  <tom@tromey.com>
 
+	PR rust/22545:
+	* rust-lang.c (rust_inclusive_range_type_p): New function.
+	(rust_range): Handle inclusive ranges.
+	(rust_compute_range): Likewise.
+	* rust-exp.y (struct rust_op) <inclusive>: New field.
+	(DOTDOTEQ): New constant.
+	(range_expr): Add "..=" productions.
+	(operator_tokens): Add "..=" token.
+	(ast_range): Add "inclusive" parameter.
+	(convert_ast_to_expression) <case OP_RANGE>: Handle inclusive
+	ranges.
+	* parse.c (operator_length_standard) <case OP_RANGE>: Handle new
+	bounds values.
+	* expression.h (enum range_type) <NONE_BOUND_DEFAULT_EXCLUSIVE,
+	LOW_BOUND_DEFAULT_EXCLUSIVE>: New constants.
+	Update comments.
+	* expprint.c (print_subexp_standard): Handle new bounds values.
+	(dump_subexp_body_standard): Likewise.
+
+2018-04-27  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 	* warning.m4 (AM_GDB_WARNINGS): Add -Wsuggest-override.
 	* dwarf2loc.c (class dwarf_evaluate_loc_desc): Use "override", not

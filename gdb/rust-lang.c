@@ -180,6 +180,17 @@ rust_range_type_p (struct type *type)
   return strcmp (TYPE_FIELD_NAME (type, i), "end") == 0;
 }
 
+/* Return true if TYPE is an inclusive range type, otherwise false.
+   This is only valid for types which are already known to be range
+   types.  */
+
+static bool
+rust_inclusive_range_type_p (struct type *type)
+{
+  return (strstr (TYPE_TAG_NAME (type), "::RangeInclusive") != NULL
+	  || strstr (TYPE_TAG_NAME (type), "::RangeToInclusive") != NULL);
+}
+
 /* Return true if TYPE seems to be the type "u8", otherwise false.  */
 
 static bool
@@ -1136,10 +1147,13 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
   kind = (enum range_type) longest_to_int (exp->elts[*pos + 1].longconst);
   *pos += 3;
 
-  if (kind == HIGH_BOUND_DEFAULT || kind == NONE_BOUND_DEFAULT)
+  if (kind == HIGH_BOUND_DEFAULT || kind == NONE_BOUND_DEFAULT
+      || kind == NONE_BOUND_DEFAULT_EXCLUSIVE)
     low = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-  if (kind == LOW_BOUND_DEFAULT || kind == NONE_BOUND_DEFAULT)
+  if (kind == LOW_BOUND_DEFAULT || kind == LOW_BOUND_DEFAULT_EXCLUSIVE
+      || kind == NONE_BOUND_DEFAULT || kind == NONE_BOUND_DEFAULT_EXCLUSIVE)
     high = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+  bool inclusive = (kind == NONE_BOUND_DEFAULT || kind == LOW_BOUND_DEFAULT);
 
   if (noside == EVAL_SKIP)
     return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
@@ -1154,7 +1168,8 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
       else
 	{
 	  index_type = value_type (high);
-	  name = "std::ops::RangeTo";
+	  name = (inclusive
+		  ? "std::ops::RangeToInclusive" : "std::ops::RangeTo");
 	}
     }
   else
@@ -1169,7 +1184,7 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
 	  if (!types_equal (value_type (low), value_type (high)))
 	    error (_("Range expression with different types"));
 	  index_type = value_type (low);
-	  name = "std::ops::Range";
+	  name = inclusive ? "std::ops::RangeInclusive" : "std::ops::Range";
 	}
     }
 
@@ -1245,6 +1260,9 @@ rust_compute_range (struct type *type, struct value *range,
       *kind = (*kind == BOTH_BOUND_DEFAULT
 	       ? LOW_BOUND_DEFAULT : NONE_BOUND_DEFAULT);
       *high = value_as_long (value_field (range, i));
+
+      if (rust_inclusive_range_type_p (type))
+	++*high;
     }
 }
 
