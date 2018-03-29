@@ -1,3 +1,15 @@
+2018-03-29  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+	2018-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 22773
+	* config/tc-arm.c (md_apply_fix): Test Rn field of Thumb ORR
+	instruction before assuming that it is a MOV instruction.
+	* testsuite/gas/arm/pr22773.s: New test.
+	* testsuite/gas/arm/pr22773.d: New test driver.
+	* testsuite/gas/arm/pr22773.l: New expected output.
+
 2018-03-21  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
