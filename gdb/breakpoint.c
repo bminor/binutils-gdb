@@ -14738,11 +14738,13 @@ static int next_cmd;
 static char *
 read_uploaded_action (void)
 {
-  char *rslt;
+  char *rslt = nullptr;
 
-  VEC_iterate (char_ptr, this_utp->cmd_strings, next_cmd, rslt);
-
-  next_cmd++;
+  if (next_cmd < this_utp->cmd_strings.size ())
+    {
+      rslt = this_utp->cmd_strings[next_cmd];
+      next_cmd++;
+    }
 
   return rslt;
 }
@@ -14814,7 +14816,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
      special-purpose "reader" function and call the usual command line
      reader, then pass the result to the breakpoint command-setting
      function.  */
-  if (!VEC_empty (char_ptr, utp->cmd_strings))
+  if (!utp->cmd_strings.empty ())
     {
       command_line_up cmd_list;
 
@@ -14825,8 +14827,8 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 
       breakpoint_set_commands (tp, std::move (cmd_list));
     }
-  else if (!VEC_empty (char_ptr, utp->actions)
-	   || !VEC_empty (char_ptr, utp->step_actions))
+  else if (!utp->actions.empty ()
+	   || !utp->step_actions.empty ())
     warning (_("Uploaded tracepoint %d actions "
 	       "have no source form, ignoring them"),
 	     utp->number);

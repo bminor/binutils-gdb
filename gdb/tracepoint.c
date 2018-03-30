@@ -3062,12 +3062,9 @@ get_uploaded_tp (int num, ULONGEST addr, struct uploaded_tp **utpp)
     if (utp->number == num && utp->addr == addr)
       return utp;
 
-  utp = XCNEW (struct uploaded_tp);
+  utp = new uploaded_tp;
   utp->number = num;
   utp->addr = addr;
-  utp->actions = NULL;
-  utp->step_actions = NULL;
-  utp->cmd_strings = NULL;
   utp->next = *utpp;
   *utpp = utp;
 
@@ -3082,7 +3079,7 @@ free_uploaded_tps (struct uploaded_tp **utpp)
   while (*utpp)
     {
       next_one = (*utpp)->next;
-      xfree (*utpp);
+      delete *utpp;
       *utpp = next_one;
     }
 }
@@ -3599,12 +3596,12 @@ parse_tracepoint_definition (const char *line, struct uploaded_tp **utpp)
   else if (piece == 'A')
     {
       utp = get_uploaded_tp (num, addr, utpp);
-      VEC_safe_push (char_ptr, utp->actions, xstrdup (p));
+      utp->actions.push_back (xstrdup (p));
     }
   else if (piece == 'S')
     {
       utp = get_uploaded_tp (num, addr, utpp);
-      VEC_safe_push (char_ptr, utp->step_actions, xstrdup (p));
+      utp->step_actions.push_back (xstrdup (p));
     }
   else if (piece == 'Z')
     {
@@ -3628,7 +3625,7 @@ parse_tracepoint_definition (const char *line, struct uploaded_tp **utpp)
       else if (startswith (srctype, "cond:"))
 	utp->cond_string = xstrdup (buf);
       else if (startswith (srctype, "cmd:"))
-	VEC_safe_push (char_ptr, utp->cmd_strings, xstrdup (buf));
+	utp->cmd_strings.push_back (xstrdup (buf));
     }
   else if (piece == 'V')
     {

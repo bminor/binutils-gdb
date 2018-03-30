@@ -165,38 +165,38 @@ extern const char *stop_reason_names[];
 
 struct uploaded_tp
 {
-  int number;
-  enum bptype type;
-  ULONGEST addr;
-  int enabled;
-  int step;
-  int pass;
-  int orig_size;
+  int number = 0;
+  enum bptype type = bp_none;
+  ULONGEST addr = 0;
+  int enabled = 0;
+  int step = 0;
+  int pass = 0;
+  int orig_size = 0;
 
   /* String that is the encoded form of the tracepoint's condition.  */
-  char *cond;
+  char *cond = nullptr;
 
   /* Vectors of strings that are the encoded forms of a tracepoint's
      actions.  */
-  VEC(char_ptr) *actions;
-  VEC(char_ptr) *step_actions;
+  std::vector<char *> actions;
+  std::vector<char *> step_actions;
 
   /* The original string defining the location of the tracepoint.  */
-  char *at_string;
+  char *at_string = nullptr;
 
   /* The original string defining the tracepoint's condition.  */
-  char *cond_string;
+  char *cond_string = nullptr;
 
   /* List of original strings defining the tracepoint's actions.  */
-  VEC(char_ptr) *cmd_strings;
+  std::vector<char *> cmd_strings;
 
   /* The tracepoint's current hit count.  */
-  int hit_count;
+  int hit_count = 0;
 
   /* The tracepoint's current traceframe usage.  */
-  ULONGEST traceframe_usage;
+  ULONGEST traceframe_usage = 0;
 
-  struct uploaded_tp *next;
+  struct uploaded_tp *next = nullptr;
 };
 
 /* Struct recording info about trace state variables on the target.  */

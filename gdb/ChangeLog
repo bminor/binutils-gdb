@@ -1,3 +1,17 @@
+2018-03-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* tracepoint.h (struct uploaded_tp): Initialize fields.
+	<actions, step_actions, cmd_strings>: Change type to
+	std::vector<char *>.
+	* tracepoint.c (get_uploaded_tp): Allocate with new.
+	(free_uploaded_tps): Free with delete.
+	(parse_tracepoint_definition): Adjust to std::vector change.
+	* breakpoint.c (read_uploaded_action): Likewise.
+	(create_tracepoint_from_upload): Likewise.
+	* ctf.c (ctf_write_uploaded_tp): Likewise.
+	(SET_ARRAY_FIELD): Likewise.
+	* tracefile-tfile.c (tfile_write_uploaded_tp): Likewise.
+
 2018-03-30  Tom Tromey  <tom@tromey.com>
 
 	* solib-svr4.c (lm_info_read): Use gdb::byte_vector.  Return

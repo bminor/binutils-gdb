@@ -221,8 +221,6 @@ tfile_write_uploaded_tp (struct trace_file_writer *self,
 {
   struct tfile_trace_file_writer *writer
     = (struct tfile_trace_file_writer *) self;
-  int a;
-  char *act;
   char buf[MAX_TRACE_UPLOAD];
 
   fprintf (writer->fp, "tp T%x:%s:%c:%x:%x",
@@ -235,10 +233,10 @@ tfile_write_uploaded_tp (struct trace_file_writer *self,
 	     ":X%x,%s", (unsigned int) strlen (utp->cond) / 2,
 	     utp->cond);
   fprintf (writer->fp, "\n");
-  for (a = 0; VEC_iterate (char_ptr, utp->actions, a, act); ++a)
+  for (char *act : utp->actions)
     fprintf (writer->fp, "tp A%x:%s:%s\n",
 	     utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
-  for (a = 0; VEC_iterate (char_ptr, utp->step_actions, a, act); ++a)
+  for (char *act : utp->step_actions)
     fprintf (writer->fp, "tp S%x:%s:%s\n",
 	     utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
   if (utp->at_string)
@@ -254,7 +252,7 @@ tfile_write_uploaded_tp (struct trace_file_writer *self,
 			    buf, MAX_TRACE_UPLOAD);
       fprintf (writer->fp, "tp Z%s\n", buf);
     }
-  for (a = 0; VEC_iterate (char_ptr, utp->cmd_strings, a, act); ++a)
+  for (char *act : utp->cmd_strings)
     {
       encode_source_string (utp->number, utp->addr, "cmd", act,
 			    buf, MAX_TRACE_UPLOAD);

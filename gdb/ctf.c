@@ -530,8 +530,6 @@ ctf_write_uploaded_tp (struct trace_file_writer *self,
   int64_t int64;
   uint32_t u32;
   const gdb_byte zero = 0;
-  int a;
-  char *act;
 
   /* Event Id.  */
   int32 = CTF_EVENT_ID_TP_DEF;
@@ -569,15 +567,15 @@ ctf_write_uploaded_tp (struct trace_file_writer *self,
   ctf_save_write (&writer->tcs, &zero, 1);
 
   /* actions */
-  u32 = VEC_length (char_ptr, tp->actions);
+  u32 = tp->actions.size ();
   ctf_save_align_write (&writer->tcs, (gdb_byte *) &u32, 4, 4);
-  for (a = 0; VEC_iterate (char_ptr, tp->actions, a, act); ++a)
+  for (char *act : tp->actions)
     ctf_save_write (&writer->tcs, (gdb_byte *) act, strlen (act) + 1);
 
   /* step_actions */
-  u32 = VEC_length (char_ptr, tp->step_actions);
+  u32 = tp->step_actions.size ();
   ctf_save_align_write (&writer->tcs, (gdb_byte *) &u32, 4, 4);
-  for (a = 0; VEC_iterate (char_ptr, tp->step_actions, a, act); ++a)
+  for (char *act : tp->step_actions)
     ctf_save_write (&writer->tcs, (gdb_byte *) act, strlen (act) + 1);
 
   /* at_string */
@@ -593,9 +591,9 @@ ctf_write_uploaded_tp (struct trace_file_writer *self,
   ctf_save_write (&writer->tcs, &zero, 1);
 
   /* cmd_strings */
-  u32 = VEC_length (char_ptr, tp->cmd_strings);
+  u32 = tp->cmd_strings.size ();
   ctf_save_align_write (&writer->tcs, (gdb_byte *) &u32, 4, 4);
-  for (a = 0; VEC_iterate (char_ptr, tp->cmd_strings, a, act); ++a)
+  for (char *act : tp->cmd_strings)
     ctf_save_write (&writer->tcs, (gdb_byte *) act, strlen (act) + 1);
 
 }
@@ -992,8 +990,8 @@ ctf_read_tsv (struct uploaded_tsv **uploaded_tsvs)
 	  const struct bt_definition *element				\
 	    = bt_ctf_get_index ((EVENT), def, i);			\
 									\
-	  VEC_safe_push (char_ptr, (VAR)->ARRAY,			\
-			 xstrdup (bt_ctf_get_string (element)));	\
+	  (VAR)->ARRAY.push_back					\
+	    (xstrdup (bt_ctf_get_string (element)));			\
 	}								\
     }									\
   while (0)
