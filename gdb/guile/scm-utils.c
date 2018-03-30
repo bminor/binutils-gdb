@@ -386,7 +386,7 @@ gdbscm_parse_function_args (const char *func_name,
   SCM status;
   SCM rest = SCM_EOL;
   /* Keep track of malloc'd strings.  We need to free them upon error.  */
-  VEC (char_ptr) *allocated_strings = NULL;
+  std::vector<char *> allocated_strings;
   char *ptr;
 
   have_rest = validate_arg_format (format);
@@ -419,7 +419,7 @@ gdbscm_parse_function_args (const char *func_name,
 	  if (!gdbscm_is_false (status))
 	    goto fail;
 	  if (*p == 's')
-	    VEC_safe_push (char_ptr, allocated_strings, *(char **) arg_ptr);
+	    allocated_strings.push_back (*(char **) arg_ptr);
 	}
       ++p;
       ++position;
@@ -485,10 +485,7 @@ gdbscm_parse_function_args (const char *func_name,
 	      if (!gdbscm_is_false (status))
 		goto fail;
 	      if (p[i] == 's')
-		{
-		  VEC_safe_push (char_ptr, allocated_strings,
-				 *(char **) arg_ptr);
-		}
+		allocated_strings.push_back (*(char **) arg_ptr);
 	    }
 	}
     }
@@ -516,14 +513,12 @@ gdbscm_parse_function_args (const char *func_name,
     }
 
   va_end (args);
-  VEC_free (char_ptr, allocated_strings);
   return;
 
  fail:
   va_end (args);
-  for (i = 0; VEC_iterate (char_ptr, allocated_strings, i, ptr); ++i)
+  for (char *ptr : allocated_strings)
     xfree (ptr);
-  VEC_free (char_ptr, allocated_strings);
   gdbscm_throw (status);
 }
 

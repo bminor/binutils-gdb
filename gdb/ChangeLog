@@ -1,5 +1,11 @@
 2018-03-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* guile/scm-utils.c (gdbscm_parse_function_args): Replace VEC
+	with std::vector.
+	* common/gdb_vecs.h (DEF_VEC_P (char_ptr)): Remove.
+
+2018-03-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* tracepoint.h (struct uploaded_tp): Initialize fields.
 	<actions, step_actions, cmd_strings>: Change type to
 	std::vector<char *>.

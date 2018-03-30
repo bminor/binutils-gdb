@@ -25,8 +25,6 @@
 typedef char *char_ptr;
 typedef const char *const_char_ptr;
 
-DEF_VEC_P (char_ptr);
-
 DEF_VEC_P (const_char_ptr);
 
 /* Split STR, a list of DELIMITER-separated fields, into a char pointer vector.
