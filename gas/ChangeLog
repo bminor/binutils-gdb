@@ -1,3 +1,9 @@
+2018-03-30  Peter Bergner <bergner@vnet.ibm.com>
+
+	PR binutils/23013
+	* config/tc-ppc.c (ppc_set_cpu): Select appropriate cpu when ppc_obj64
+	and little endian.
+
 2018-03-28  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/22970

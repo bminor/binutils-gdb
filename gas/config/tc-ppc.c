@@ -1403,7 +1403,11 @@ ppc_set_cpu (void)
   if ((ppc_cpu & ~(ppc_cpu_t) PPC_OPCODE_ANY) == 0)
     {
       if (ppc_obj64)
-	ppc_cpu |= PPC_OPCODE_PPC | PPC_OPCODE_64;
+	if (target_big_endian)
+	  ppc_cpu |= PPC_OPCODE_PPC | PPC_OPCODE_64;
+	else
+	  /* The minimum supported cpu for 64-bit little-endian is power8.  */
+	  ppc_cpu |= ppc_parse_cpu (ppc_cpu, &sticky, "power8");
       else if (strncmp (default_os, "aix", 3) == 0
 	       && default_os[3] >= '4' && default_os[3] <= '9')
 	ppc_cpu |= PPC_OPCODE_COMMON;
