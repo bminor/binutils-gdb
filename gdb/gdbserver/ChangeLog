@@ -1,3 +1,12 @@
+2018-03-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* tdesc.h (struct target_desc) <features>: Change type to
+	std::vector<std::string>.
+	* tdesc.c (target_desc::~target_desc): Adjust to std::vector
+	changes.
+	(tdesc_get_features_xml): Likewise.
+	(tdesc_create_feature): Likewise.
+
 2018-03-26  Alan Hayward  <alan.hayward@arm.com>
 
 	* regcache.c (find_register_by_number): Return a ref.

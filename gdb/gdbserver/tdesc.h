@@ -54,7 +54,7 @@ struct target_desc : tdesc_feature
   const char *xmltarget = NULL;
 
   /* XML features in this target description.  */
-  VEC (char_ptr) *features = NULL;
+  std::vector<std::string> features;
 
   /* The value of <architecture> element in the XML, replying GDB.  */
   const char *arch = NULL;

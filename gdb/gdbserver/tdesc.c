@@ -27,12 +27,6 @@ target_desc::~target_desc ()
 
   xfree ((char *) arch);
   xfree ((char *) osabi);
-
-  char *f;
-
-  for (i = 0; VEC_iterate (char_ptr, features, i, f); i++)
-    xfree (f);
-  VEC_free (char_ptr, features);
 }
 
 bool target_desc::operator== (const target_desc &other) const
@@ -127,7 +121,7 @@ tdesc_get_features_xml (target_desc *tdesc)
 {
   /* Either .xmltarget or .features is not NULL.  */
   gdb_assert (tdesc->xmltarget != NULL
-	      || (tdesc->features != NULL
+	      || (!tdesc->features.empty ()
 		  && tdesc->arch != NULL));
 
   if (tdesc->xmltarget == NULL)
@@ -147,9 +141,8 @@ tdesc_get_features_xml (target_desc *tdesc)
 	  buffer += "</osabi>";
 	}
 
-      char *xml;
 
-      for (int i = 0; VEC_iterate (char_ptr, tdesc->features, i, xml); i++)
+      for (const std::string &xml : tdesc->features)
 	{
 	  buffer += "<xi:include href=\"";
 	  buffer += xml;
@@ -175,7 +168,7 @@ tdesc_create_feature (struct target_desc *tdesc, const char *name,
 		      const char *xml)
 {
 #ifndef IN_PROCESS_AGENT
-  VEC_safe_push (char_ptr, tdesc->features, xstrdup (xml));
+  tdesc->features.emplace_back (xml);
 #endif
   return tdesc;
 }
