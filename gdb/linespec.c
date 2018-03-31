@@ -46,6 +46,7 @@
 #include "location.h"
 #include "common/function-view.h"
 #include "common/def-vector.h"
+#include <algorithm>
 
 /* An enumeration of the various things a user might attempt to
    complete for a linespec location.  */
@@ -4370,27 +4371,6 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
     add_sal_to_sals (self, result, &sal, MSYMBOL_NATURAL_NAME (msymbol), 0);
 }
 
-/* A helper struct to pass some data through
-   iterate_over_minimal_symbols.  */
-
-struct collect_minsyms
-{
-  /* The objfile we're examining.  */
-  struct objfile *objfile;
-
-  /* Only search the given symtab, or NULL to search for all symbols.  */
-  struct symtab *symtab;
-
-  /* The funfirstline setting from the initial call.  */
-  int funfirstline;
-
-  /* The list_mode setting from the initial call.  */
-  int list_mode;
-
-  /* The resulting symbols.  */
-  VEC (bound_minimal_symbol_d) *msyms;
-};
-
 /* A helper function to classify a minimal_symbol_type according to
    priority.  */
 
@@ -4415,47 +4395,45 @@ classify_mtype (enum minimal_symbol_type t)
     }
 }
 
-/* Callback for qsort that sorts symbols by priority.  */
+/* Callback for std::sort that sorts symbols by priority.  */
 
-static int
-compare_msyms (const void *a, const void *b)
+static bool
+compare_msyms (const bound_minimal_symbol &a, const bound_minimal_symbol &b)
 {
-  const bound_minimal_symbol_d *moa = (const bound_minimal_symbol_d *) a;
-  const bound_minimal_symbol_d *mob = (const bound_minimal_symbol_d *) b;
-  enum minimal_symbol_type ta = MSYMBOL_TYPE (moa->minsym);
-  enum minimal_symbol_type tb = MSYMBOL_TYPE (mob->minsym);
+  enum minimal_symbol_type ta = MSYMBOL_TYPE (a.minsym);
+  enum minimal_symbol_type tb = MSYMBOL_TYPE (b.minsym);
 
-  return classify_mtype (ta) - classify_mtype (tb);
+  return classify_mtype (ta) < classify_mtype (tb);
 }
 
-/* Callback for iterate_over_minimal_symbols that adds the symbol to
-   the result.  */
+/* Helper for search_minsyms_for_name that adds the symbol to the
+   result.  */
 
 static void
-add_minsym (struct minimal_symbol *minsym, void *d)
+add_minsym (struct minimal_symbol *minsym, struct objfile *objfile,
+	    struct symtab *symtab, int list_mode,
+	    std::vector<struct bound_minimal_symbol> *msyms)
 {
-  struct collect_minsyms *info = (struct collect_minsyms *) d;
-
-  if (info->symtab != NULL)
+  if (symtab != NULL)
     {
       /* We're looking for a label for which we don't have debug
 	 info.  */
       CORE_ADDR func_addr;
-      if (msymbol_is_function (info->objfile, minsym, &func_addr))
+      if (msymbol_is_function (objfile, minsym, &func_addr))
 	{
 	  symtab_and_line sal = find_pc_sect_line (func_addr, NULL, 0);
 
-	  if (info->symtab != sal.symtab)
+	  if (symtab != sal.symtab)
 	    return;
 	}
     }
 
   /* Exclude data symbols when looking for breakpoint locations.  */
-  if (!info->list_mode && !msymbol_is_function (info->objfile, minsym))
+  if (!list_mode && !msymbol_is_function (objfile, minsym))
     return;
 
-  bound_minimal_symbol_d mo = {minsym, info->objfile};
-  VEC_safe_push (bound_minimal_symbol_d, info->msyms, &mo);
+  struct bound_minimal_symbol mo = {minsym, objfile};
+  msyms->push_back (mo);
 }
 
 /* Search for minimal symbols called NAME.  If SEARCH_PSPACE
@@ -4471,15 +4449,7 @@ search_minsyms_for_name (struct collect_info *info,
 			 struct program_space *search_pspace,
 			 struct symtab *symtab)
 {
-  struct collect_minsyms local;
-  struct cleanup *cleanup;
-
-  memset (&local, 0, sizeof (local));
-  local.funfirstline = info->state->funfirstline;
-  local.list_mode = info->state->list_mode;
-  local.symtab = symtab;
-
-  cleanup = make_cleanup (VEC_cleanup (bound_minimal_symbol_d), &local.msyms);
+  std::vector<struct bound_minimal_symbol> minsyms;
 
   if (symtab == NULL)
     {
@@ -4498,8 +4468,13 @@ search_minsyms_for_name (struct collect_info *info,
 
 	ALL_OBJFILES (objfile)
 	{
-	  local.objfile = objfile;
-	  iterate_over_minimal_symbols (objfile, name, add_minsym, &local);
+	  iterate_over_minimal_symbols (objfile, name,
+					[&] (struct minimal_symbol *msym)
+					  {
+					    add_minsym (msym, objfile, nullptr,
+							info->state->list_mode,
+							&minsyms);
+					  });
 	}
       }
     }
@@ -4508,41 +4483,36 @@ search_minsyms_for_name (struct collect_info *info,
       if (search_pspace == NULL || SYMTAB_PSPACE (symtab) == search_pspace)
 	{
 	  set_current_program_space (SYMTAB_PSPACE (symtab));
-	  local.objfile = SYMTAB_OBJFILE(symtab);
-	  iterate_over_minimal_symbols (local.objfile, name, add_minsym, &local);
+	  iterate_over_minimal_symbols
+	    (SYMTAB_OBJFILE (symtab), name,
+	     [&] (struct minimal_symbol *msym)
+	       {
+		 add_minsym (msym, SYMTAB_OBJFILE (symtab), symtab,
+			     info->state->list_mode, &minsyms);
+	       });
 	}
     }
 
-    if (!VEC_empty (bound_minimal_symbol_d, local.msyms))
-      {
-	int classification;
-	int ix;
-	bound_minimal_symbol_d *item;
+  if (!minsyms.empty ())
+    {
+      int classification;
 
-	qsort (VEC_address (bound_minimal_symbol_d, local.msyms),
-	       VEC_length (bound_minimal_symbol_d, local.msyms),
-	       sizeof (bound_minimal_symbol_d),
-	       compare_msyms);
+      std::sort (minsyms.begin (), minsyms.end (), compare_msyms);
 
-	/* Now the minsyms are in classification order.  So, we walk
-	   over them and process just the minsyms with the same
-	   classification as the very first minsym in the list.  */
-	item = VEC_index (bound_minimal_symbol_d, local.msyms, 0);
-	classification = classify_mtype (MSYMBOL_TYPE (item->minsym));
+      /* Now the minsyms are in classification order.  So, we walk
+	 over them and process just the minsyms with the same
+	 classification as the very first minsym in the list.  */
+      classification = classify_mtype (MSYMBOL_TYPE (minsyms[0].minsym));
 
-	for (ix = 0;
-	     VEC_iterate (bound_minimal_symbol_d, local.msyms, ix, item);
-	     ++ix)
-	  {
-	    if (classify_mtype (MSYMBOL_TYPE (item->minsym)) != classification)
-	      break;
+      for (const struct bound_minimal_symbol &item : minsyms)
+	{
+	  if (classify_mtype (MSYMBOL_TYPE (item.minsym)) != classification)
+	    break;
 
-	    VEC_safe_push (bound_minimal_symbol_d,
-			   info->result.minimal_symbols, item);
-	  }
-      }
-
-    do_cleanups (cleanup);
+	  VEC_safe_push (bound_minimal_symbol_d,
+			 info->result.minimal_symbols, &item);
+	}
+    }
 }
 
 /* A helper function to add all symbols matching NAME to INFO.  If

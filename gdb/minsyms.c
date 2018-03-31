@@ -469,13 +469,10 @@ linkage_name_str (const lookup_name_info &lookup_name)
 /* See minsyms.h.  */
 
 void
-iterate_over_minimal_symbols (struct objfile *objf,
-			      const lookup_name_info &lookup_name,
-			      void (*callback) (struct minimal_symbol *,
-						void *),
-			      void *user_data)
+iterate_over_minimal_symbols
+    (struct objfile *objf, const lookup_name_info &lookup_name,
+     gdb::function_view<void (struct minimal_symbol *)> callback)
 {
-
   /* The first pass is over the ordinary hash table.  */
     {
       const char *name = linkage_name_str (lookup_name);
@@ -490,7 +487,7 @@ iterate_over_minimal_symbols (struct objfile *objf,
 	   iter = iter->hash_next)
 	{
 	  if (mangled_cmp (MSYMBOL_LINKAGE_NAME (iter), name) == 0)
-	    (*callback) (iter, user_data);
+	    callback (iter);
 	}
     }
 
@@ -509,7 +506,7 @@ iterate_over_minimal_symbols (struct objfile *objf,
 	   iter != NULL;
 	   iter = iter->demangled_hash_next)
 	if (name_match (MSYMBOL_SEARCH_NAME (iter), lookup_name, NULL))
-	  (*callback) (iter, user_data);
+	  callback (iter);
     }
 }
 

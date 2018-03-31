@@ -1,3 +1,13 @@
+2018-04-05  Tom Tromey  <tom@tromey.com>
+
+	* minsyms.h (iterate_over_minimal_symbols): Update.
+	* minsyms.c (iterate_over_minimal_symbols): Take a
+	gdb::function_view.
+	* linespec.c (struct collect_minsyms): Remove.
+	(compare_msyms): Now a std::sort comparator.
+	(add_minsym): Add parameters.
+	(search_minsyms_for_name): Update.  Use std::vector.
+
 2018-04-03  Tom Tromey  <tom@tromey.com>
 
 	* mipsread.c (read_alphacoff_dynamic_symtab): Use
