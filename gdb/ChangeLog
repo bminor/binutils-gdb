@@ -1,5 +1,9 @@
 2018-04-05  Tom Tromey  <tom@tromey.com>
 
+	* linespec.c (linespec_parse_basic): Reindent.
+
+2018-04-05  Tom Tromey  <tom@tromey.com>
+
 	* minsyms.h (iterate_over_minimal_symbols): Update.
 	* minsyms.c (iterate_over_minimal_symbols): Take a
 	gdb::function_view.

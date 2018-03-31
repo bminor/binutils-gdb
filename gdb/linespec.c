@@ -1897,67 +1897,65 @@ linespec_parse_basic (linespec_parser *parser)
     }
   else
     {
-      /* XXX Reindent before pushing.  */
+      /* Try looking it up as a function/method.  */
+      find_linespec_symbols (PARSER_STATE (parser),
+			     PARSER_RESULT (parser)->file_symtabs, name,
+			     PARSER_EXPLICIT (parser)->func_name_match_type,
+			     &symbols, &minimal_symbols);
 
-  /* Try looking it up as a function/method.  */
-  find_linespec_symbols (PARSER_STATE (parser),
-			 PARSER_RESULT (parser)->file_symtabs, name,
-			 PARSER_EXPLICIT (parser)->func_name_match_type,
-			 &symbols, &minimal_symbols);
-
-  if (symbols != NULL || minimal_symbols != NULL)
-    {
-      PARSER_RESULT (parser)->function_symbols = symbols;
-      PARSER_RESULT (parser)->minimal_symbols = minimal_symbols;
-      PARSER_EXPLICIT (parser)->function_name = name;
-      symbols = NULL;
-      discard_cleanups (cleanup);
-    }
-  else
-    {
-      /* NAME was not a function or a method.  So it must be a label
-	 name or user specified variable like "break foo.c:$zippo".  */
-      labels = find_label_symbols (PARSER_STATE (parser), NULL,
-				   &symbols, name);
-      if (labels != NULL)
+      if (symbols != NULL || minimal_symbols != NULL)
 	{
-	  PARSER_RESULT (parser)->labels.label_symbols = labels;
-	  PARSER_RESULT (parser)->labels.function_symbols = symbols;
-	  PARSER_EXPLICIT (parser)->label_name = name;
+	  PARSER_RESULT (parser)->function_symbols = symbols;
+	  PARSER_RESULT (parser)->minimal_symbols = minimal_symbols;
+	  PARSER_EXPLICIT (parser)->function_name = name;
 	  symbols = NULL;
 	  discard_cleanups (cleanup);
 	}
-      else if (token.type == LSTOKEN_STRING
-	       && *LS_TOKEN_STOKEN (token).ptr == '$')
+      else
 	{
-	  /* User specified a convenience variable or history value.  */
-	  PARSER_EXPLICIT (parser)->line_offset
-	    = linespec_parse_variable (PARSER_STATE (parser), name);
-
-	  if (PARSER_EXPLICIT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN)
+	  /* NAME was not a function or a method.  So it must be a label
+	     name or user specified variable like "break foo.c:$zippo".  */
+	  labels = find_label_symbols (PARSER_STATE (parser), NULL,
+				       &symbols, name);
+	  if (labels != NULL)
 	    {
-	      /* The user-specified variable was not valid.  Do not
-		 throw an error here.  parse_linespec will do it for us.  */
+	      PARSER_RESULT (parser)->labels.label_symbols = labels;
+	      PARSER_RESULT (parser)->labels.function_symbols = symbols;
+	      PARSER_EXPLICIT (parser)->label_name = name;
+	      symbols = NULL;
+	      discard_cleanups (cleanup);
+	    }
+	  else if (token.type == LSTOKEN_STRING
+		   && *LS_TOKEN_STOKEN (token).ptr == '$')
+	    {
+	      /* User specified a convenience variable or history value.  */
+	      PARSER_EXPLICIT (parser)->line_offset
+		= linespec_parse_variable (PARSER_STATE (parser), name);
+
+	      if (PARSER_EXPLICIT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN)
+		{
+		  /* The user-specified variable was not valid.  Do not
+		     throw an error here.  parse_linespec will do it for us.  */
+		  PARSER_EXPLICIT (parser)->function_name = name;
+		  discard_cleanups (cleanup);
+		  return;
+		}
+
+	      /* The convenience variable/history value parsed correctly.
+		 NAME is no longer needed.  */
+	      do_cleanups (cleanup);
+	    }
+	  else
+	    {
+	      /* The name is also not a label.  Abort parsing.  Do not throw
+		 an error here.  parse_linespec will do it for us.  */
+
+	      /* Save a copy of the name we were trying to lookup.  */
 	      PARSER_EXPLICIT (parser)->function_name = name;
 	      discard_cleanups (cleanup);
 	      return;
 	    }
-
-	  /* The convenience variable/history value parsed correctly.
-	     NAME is no longer needed.  */
-	  do_cleanups (cleanup);
 	}
-      else
-	{
-	  /* The name is also not a label.  Abort parsing.  Do not throw
-	     an error here.  parse_linespec will do it for us.  */
-
-	  /* Save a copy of the name we were trying to lookup.  */
-	  PARSER_EXPLICIT (parser)->function_name = name;
-	  discard_cleanups (cleanup);
-	  return;
-	}
-    }
     }
 
   int previous_qc = parser->completion_quote_char;
@@ -2027,29 +2025,28 @@ linespec_parse_basic (linespec_parser *parser)
 	    }
 	  else
 	    {
-	      /* XXX Reindent before pushing.  */
+	      /* Grab a copy of the label's name and look it up.  */
+	      name = copy_token_string (token);
+	      cleanup = make_cleanup (xfree, name);
+	      labels
+		= find_label_symbols (PARSER_STATE (parser),
+				      PARSER_RESULT (parser)->function_symbols,
+				      &symbols, name);
 
-	  /* Grab a copy of the label's name and look it up.  */
-	  name = copy_token_string (token);
-	  cleanup = make_cleanup (xfree, name);
-	  labels = find_label_symbols (PARSER_STATE (parser),
-				       PARSER_RESULT (parser)->function_symbols,
-				       &symbols, name);
-
-	  if (labels != NULL)
-	    {
-	      PARSER_RESULT (parser)->labels.label_symbols = labels;
-	      PARSER_RESULT (parser)->labels.function_symbols = symbols;
-	      PARSER_EXPLICIT (parser)->label_name = name;
-	      symbols = NULL;
-	      discard_cleanups (cleanup);
-	    }
-	  else
-	    {
-	      /* We don't know what it was, but it isn't a label.  */
-	      undefined_label_error (PARSER_EXPLICIT (parser)->function_name,
-				     name);
-	    }
+	      if (labels != NULL)
+		{
+		  PARSER_RESULT (parser)->labels.label_symbols = labels;
+		  PARSER_RESULT (parser)->labels.function_symbols = symbols;
+		  PARSER_EXPLICIT (parser)->label_name = name;
+		  symbols = NULL;
+		  discard_cleanups (cleanup);
+		}
+	      else
+		{
+		  /* We don't know what it was, but it isn't a label.  */
+		  undefined_label_error
+		    (PARSER_EXPLICIT (parser)->function_name, name);
+		}
 
 	    }
 
