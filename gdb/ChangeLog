@@ -1,5 +1,18 @@
 2018-04-05  Tom Tromey  <tom@tromey.com>
 
+	* utils.c (compare_strings): Remove.
+	* utils.h (compare_strings): Remove.
+	* objc-lang.h (find_imps): Update.
+	* objc-lang.c (find_methods): Take a std::vector.
+	(uniquify_strings, find_imps): Likewise.
+	* linespec.c (find_methods): Take a std::vector.
+	(decode_objc): Use std::vector.
+	(add_all_symbol_names_from_pspace, find_superclass_methods): Take
+	a std::vector.
+	(find_method, find_function_symbols): Use std::vector.
+
+2018-04-05  Tom Tromey  <tom@tromey.com>
+
 	* completer.c (completion_tracker::completion_tracker): Remove
 	cast.
 	(completion_tracker::discard_completions): Likewise.

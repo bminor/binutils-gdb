@@ -377,10 +377,9 @@ static void add_matching_symbols_to_info (const char *name,
 					  struct collect_info *info,
 					  struct program_space *pspace);
 
-static void add_all_symbol_names_from_pspace (struct collect_info *info,
-					      struct program_space *pspace,
-					      VEC (const_char_ptr) *names,
-					      enum search_domain search_domain);
+static void add_all_symbol_names_from_pspace
+    (struct collect_info *info, struct program_space *pspace,
+     const std::vector<const char *> &names, enum search_domain search_domain);
 
 static VEC (symtab_ptr) *
   collect_symtabs_from_filename (const char *file,
@@ -1211,7 +1210,7 @@ iterate_over_file_blocks
 
 static void
 find_methods (struct type *t, enum language t_lang, const char *name,
-	      VEC (const_char_ptr) **result_names,
+	      std::vector<const char *> *result_names,
 	      VEC (typep) **superclasses)
 {
   int ibase;
@@ -1266,7 +1265,7 @@ find_methods (struct type *t, enum language t_lang, const char *name,
 		  if (TYPE_FN_FIELD_STUB (f, field_counter))
 		    continue;
 		  phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
-		  VEC_safe_push (const_char_ptr, *result_names, phys_name);
+		  result_names->push_back (phys_name);
 		}
 	    }
 	}
@@ -3398,20 +3397,19 @@ static std::vector<symtab_and_line>
 decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 {
   struct collect_info info;
-  VEC (const_char_ptr) *symbol_names = NULL;
+  std::vector<const char *> symbol_names;
   const char *new_argptr;
-  struct cleanup *cleanup = make_cleanup (VEC_cleanup (const_char_ptr),
-					  &symbol_names);
 
   info.state = self;
   info.file_symtabs = NULL;
   VEC_safe_push (symtab_ptr, info.file_symtabs, NULL);
-  make_cleanup (VEC_cleanup (symtab_ptr), &info.file_symtabs);
+  struct cleanup *cleanup = make_cleanup (VEC_cleanup (symtab_ptr),
+					  &info.file_symtabs);
   info.result.symbols = NULL;
   info.result.minimal_symbols = NULL;
 
   new_argptr = find_imps (arg, &symbol_names);
-  if (VEC_empty (const_char_ptr, symbol_names))
+  if (symbol_names.empty ())
     {
       do_cleanups (cleanup);
       return {};
@@ -3637,13 +3635,10 @@ compare_msymbols (const void *a, const void *b)
 static void
 add_all_symbol_names_from_pspace (struct collect_info *info,
 				  struct program_space *pspace,
-				  VEC (const_char_ptr) *names,
+				  const std::vector<const char *> &names,
 				  enum search_domain search_domain)
 {
-  int ix;
-  const char *iter;
-
-  for (ix = 0; VEC_iterate (const_char_ptr, names, ix, iter); ++ix)
+  for (const char *iter : names)
     add_matching_symbols_to_info (iter,
 				  symbol_name_match_type::FULL,
 				  search_domain, info, pspace);
@@ -3652,9 +3647,9 @@ add_all_symbol_names_from_pspace (struct collect_info *info,
 static void
 find_superclass_methods (VEC (typep) *superclasses,
 			 const char *name, enum language name_lang,
-			 VEC (const_char_ptr) **result_names)
+			 std::vector<const char *> *result_names)
 {
-  int old_len = VEC_length (const_char_ptr, *result_names);
+  size_t old_len = result_names->size ();
   VEC (typep) *iter_classes;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
@@ -3669,8 +3664,7 @@ find_superclass_methods (VEC (typep) *superclasses,
       for (ix = 0; VEC_iterate (typep, iter_classes, ix, t); ++ix)
 	find_methods (t, name_lang, name, result_names, &new_supers);
 
-      if (VEC_length (const_char_ptr, *result_names) != old_len
-	  || VEC_empty (typep, new_supers))
+      if (result_names->size () != old_len || VEC_empty (typep, new_supers))
 	break;
 
       iter_classes = new_supers;
@@ -3692,9 +3686,9 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
   struct symbol *sym;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   int ix;
-  int last_result_len;
+  size_t last_result_len;
   VEC (typep) *superclass_vec;
-  VEC (const_char_ptr) *result_names;
+  std::vector<const char *> result_names;
   struct collect_info info;
 
   /* Sort symbols so that symbols with the same program space are next
@@ -3720,8 +3714,6 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
      what to do.  */
   superclass_vec = NULL;
   make_cleanup (VEC_cleanup (typep), &superclass_vec);
-  result_names = NULL;
-  make_cleanup (VEC_cleanup (const_char_ptr), &result_names);
   last_result_len = 0;
   for (ix = 0; VEC_iterate (symbolp, sym_classes, ix, sym); ++ix)
     {
@@ -3746,7 +3738,7 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 	{
 	  /* If we did not find a direct implementation anywhere in
 	     this program space, consider superclasses.  */
-	  if (VEC_length (const_char_ptr, result_names) == last_result_len)
+	  if (result_names.size () == last_result_len)
 	    find_superclass_methods (superclass_vec, method_name,
 				     SYMBOL_LANGUAGE (sym), &result_names);
 
@@ -3757,7 +3749,7 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 					    FUNCTIONS_DOMAIN);
 
 	  VEC_truncate (typep, superclass_vec, 0);
-	  last_result_len = VEC_length (const_char_ptr, result_names);
+	  last_result_len = result_names.size ();
 	}
     }
 
@@ -3902,9 +3894,7 @@ find_function_symbols (struct linespec_state *state,
 		       VEC (bound_minimal_symbol_d) **minsyms)
 {
   struct collect_info info;
-  VEC (const_char_ptr) *symbol_names = NULL;
-  struct cleanup *cleanup = make_cleanup (VEC_cleanup (const_char_ptr),
-					  &symbol_names);
+  std::vector<const char *> symbol_names;
 
   info.state = state;
   info.result.symbols = NULL;
@@ -3913,14 +3903,12 @@ find_function_symbols (struct linespec_state *state,
 
   /* Try NAME as an Objective-C selector.  */
   find_imps (name, &symbol_names);
-  if (!VEC_empty (const_char_ptr, symbol_names))
+  if (!symbol_names.empty ())
     add_all_symbol_names_from_pspace (&info, state->search_pspace,
 				      symbol_names, FUNCTIONS_DOMAIN);
   else
     add_matching_symbols_to_info (name, name_match_type, FUNCTIONS_DOMAIN,
 				  &info, state->search_pspace);
-
-  do_cleanups (cleanup);
 
   if (VEC_empty (symbolp, info.result.symbols))
     {
