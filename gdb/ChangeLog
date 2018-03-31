@@ -1,5 +1,14 @@
 2018-04-05  Tom Tromey  <tom@tromey.com>
 
+	* linespec.c (canonical_to_fullform): Return std::string.
+	(filter_results): Update.
+	(struct decode_line_2_item): Add constructor.
+	<fullform, displayform>: Now std::string.
+	(decode_line_2_compare_items): Now a std::sort comparator.
+	(decode_line_2): Update.
+
+2018-04-05  Tom Tromey  <tom@tromey.com>
+
 	* linespec.c (copy_token_string): Return a unique_xmalloc_ptr.
 	(unexpected_linespec_error): Update.
 	(linespec_parse_basic, parse_linespec): Update.

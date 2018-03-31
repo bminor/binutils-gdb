@@ -1384,16 +1384,16 @@ find_toplevel_string (const char *haystack, const char *needle)
 }
 
 /* Convert CANONICAL to its string representation using
-   symtab_to_fullname for SYMTAB.  The caller must xfree the result.  */
+   symtab_to_fullname for SYMTAB.  */
 
-static char *
+static std::string
 canonical_to_fullform (const struct linespec_canonical_name *canonical)
 {
   if (canonical->symtab == NULL)
-    return xstrdup (canonical->suffix);
+    return canonical->suffix;
   else
-    return xstrprintf ("%s:%s", symtab_to_fullname (canonical->symtab),
-		       canonical->suffix);
+    return string_printf ("%s:%s", symtab_to_fullname (canonical->symtab),
+			  canonical->suffix);
 }
 
 /* Given FILTERS, a list of canonical names, filter the sals in RESULT
@@ -1414,17 +1414,12 @@ filter_results (struct linespec_state *self,
       for (size_t j = 0; j < result->size (); ++j)
 	{
 	  const struct linespec_canonical_name *canonical;
-	  char *fullform;
-	  struct cleanup *cleanup;
 
 	  canonical = &self->canonical_names[j];
-	  fullform = canonical_to_fullform (canonical);
-	  cleanup = make_cleanup (xfree, fullform);
+	  std::string fullform = canonical_to_fullform (canonical);
 
-	  if (strcmp (name, fullform) == 0)
+	  if (name == fullform)
 	    lsal.sals.push_back ((*result)[j]);
-
-	  do_cleanups (cleanup);
 	}
 
       if (!lsal.sals.empty ())
@@ -1458,34 +1453,35 @@ convert_results_to_lsals (struct linespec_state *self,
 
 struct decode_line_2_item
 {
-  /* The form using symtab_to_fullname.
-     It must be xfree'ed after use.  */
-  char *fullform;
+  decode_line_2_item (std::string &&fullform_, std::string &&displayform_,
+		      bool selected_)
+    : fullform (std::move (fullform_)),
+      displayform (std::move (displayform_)),
+      selected (selected_)
+  {
+  }
 
-  /* The form using symtab_to_filename_for_display.
-     It must be xfree'ed after use.  */
-  char *displayform;
+  /* The form using symtab_to_fullname.  */
+  std::string fullform;
+
+  /* The form using symtab_to_filename_for_display.  */
+  std::string displayform;
 
   /* Field is initialized to zero and it is set to one if the user
      requested breakpoint for this entry.  */
   unsigned int selected : 1;
 };
 
-/* Helper for qsort to sort decode_line_2_item entries by DISPLAYFORM and
-   secondarily by FULLFORM.  */
+/* Helper for std::sort to sort decode_line_2_item entries by
+   DISPLAYFORM and secondarily by FULLFORM.  */
 
-static int
-decode_line_2_compare_items (const void *ap, const void *bp)
+static bool
+decode_line_2_compare_items (const decode_line_2_item &a,
+			     const decode_line_2_item &b)
 {
-  const struct decode_line_2_item *a = (const struct decode_line_2_item *) ap;
-  const struct decode_line_2_item *b = (const struct decode_line_2_item *) bp;
-  int retval;
-
-  retval = strcmp (a->displayform, b->displayform);
-  if (retval != 0)
-    return retval;
-
-  return strcmp (a->fullform, b->fullform);
+  if (a.displayform != b.displayform)
+    return a.displayform < b.displayform;
+  return a.fullform < b.fullform;
 }
 
 /* Handle multiple results in RESULT depending on SELECT_MODE.  This
@@ -1503,8 +1499,7 @@ decode_line_2 (struct linespec_state *self,
   int i;
   struct cleanup *old_chain;
   VEC (const_char_ptr) *filters = NULL;
-  struct decode_line_2_item *items;
-  int items_count;
+  std::vector<struct decode_line_2_item> items;
 
   gdb_assert (select_mode != multiple_symbols_all);
   gdb_assert (self->canonical != NULL);
@@ -1513,56 +1508,50 @@ decode_line_2 (struct linespec_state *self,
   old_chain = make_cleanup (VEC_cleanup (const_char_ptr), &filters);
 
   /* Prepare ITEMS array.  */
-  items_count = result->size ();
-  items = XNEWVEC (struct decode_line_2_item, items_count);
-  make_cleanup (xfree, items);
-  for (i = 0; i < items_count; ++i)
+  for (i = 0; i < result->size (); ++i)
     {
       const struct linespec_canonical_name *canonical;
       struct decode_line_2_item *item;
 
+      std::string displayform;
+
       canonical = &self->canonical_names[i];
       gdb_assert (canonical->suffix != NULL);
-      item = &items[i];
 
-      item->fullform = canonical_to_fullform (canonical);
-      make_cleanup (xfree, item->fullform);
+      std::string fullform = canonical_to_fullform (canonical);
 
       if (canonical->symtab == NULL)
-	item->displayform = canonical->suffix;
+	displayform = canonical->suffix;
       else
 	{
 	  const char *fn_for_display;
 
 	  fn_for_display = symtab_to_filename_for_display (canonical->symtab);
-	  item->displayform = xstrprintf ("%s:%s", fn_for_display,
-					  canonical->suffix);
-	  make_cleanup (xfree, item->displayform);
+	  displayform = string_printf ("%s:%s", fn_for_display,
+				       canonical->suffix);
 	}
 
-      item->selected = 0;
+      items.emplace_back (std::move (fullform), std::move (displayform),
+			  false);
     }
 
   /* Sort the list of method names.  */
-  qsort (items, items_count, sizeof (*items), decode_line_2_compare_items);
+  std::sort (items.begin (), items.end (), decode_line_2_compare_items);
 
   /* Remove entries with the same FULLFORM.  */
-  if (items_count >= 2)
-    {
-      struct decode_line_2_item *dst, *src;
+  items.erase (std::unique (items.begin (), items.end (),
+			    [] (const struct decode_line_2_item &a,
+				const struct decode_line_2_item &b)
+			      {
+				return a.fullform == b.fullform;
+			      }),
+	       items.end ());
 
-      dst = items;
-      for (src = &items[1]; src < &items[items_count]; src++)
-	if (strcmp (src->fullform, dst->fullform) != 0)
-	  *++dst = *src;
-      items_count = dst + 1 - items;
-    }
-
-  if (select_mode == multiple_symbols_cancel && items_count > 1)
+  if (select_mode == multiple_symbols_cancel && items.size () > 1)
     error (_("canceled because the command is ambiguous\n"
 	     "See set/show multiple-symbol."));
   
-  if (select_mode == multiple_symbols_all || items_count == 1)
+  if (select_mode == multiple_symbols_all || items.size () == 1)
     {
       do_cleanups (old_chain);
       convert_results_to_lsals (self, result);
@@ -1570,8 +1559,8 @@ decode_line_2 (struct linespec_state *self,
     }
 
   printf_unfiltered (_("[0] cancel\n[1] all\n"));
-  for (i = 0; i < items_count; i++)
-    printf_unfiltered ("[%d] %s\n", i + 2, items[i].displayform);
+  for (i = 0; i < items.size (); i++)
+    printf_unfiltered ("[%d] %s\n", i + 2, items[i].displayform.c_str ());
 
   prompt = getenv ("PS2");
   if (prompt == NULL)
@@ -1604,7 +1593,7 @@ decode_line_2 (struct linespec_state *self,
 	}
 
       num -= 2;
-      if (num >= items_count)
+      if (num >= items.size ())
 	printf_unfiltered (_("No choice number %d.\n"), num);
       else
 	{
@@ -1612,7 +1601,7 @@ decode_line_2 (struct linespec_state *self,
 
 	  if (!item->selected)
 	    {
-	      VEC_safe_push (const_char_ptr, filters, item->fullform);
+	      VEC_safe_push (const_char_ptr, filters, item->fullform.c_str ());
 	      item->selected = 1;
 	    }
 	  else
