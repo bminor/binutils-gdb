@@ -3165,16 +3165,10 @@ event_location_to_sals (linespec_parser *parser,
 
 	if (addr_string != NULL)
 	  {
-	    char *expr = xstrdup (addr_string);
-	    const char *const_expr = expr;
-	    struct cleanup *cleanup = make_cleanup (xfree, expr);
-
-	    addr = linespec_expression_to_pc (&const_expr);
+	    addr = linespec_expression_to_pc (&addr_string);
 	    if (PARSER_STATE (parser)->canonical != NULL)
 	      PARSER_STATE (parser)->canonical->location
 		= copy_event_location (location);
-
-	    do_cleanups (cleanup);
 	  }
 
 	result = convert_address_location_to_sals (PARSER_STATE (parser),

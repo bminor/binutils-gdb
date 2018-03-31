@@ -1,5 +1,10 @@
 2018-04-05  Tom Tromey  <tom@tromey.com>
 
+	* linespec.c (event_location_to_sals) <case ADDRESS_LOCATION>:
+	Remove a string copy.
+
+2018-04-05  Tom Tromey  <tom@tromey.com>
+
 	* linespec.c (filter_results): Use std::vector.
 	(decode_line_2, decode_line_full): Update.
 
