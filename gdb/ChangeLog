@@ -1,5 +1,9 @@
 2018-04-05  Tom Tromey  <tom@tromey.com>
 
+	* linespec.h: Remove include of "vec.h".
+
+2018-04-05  Tom Tromey  <tom@tromey.com>
+
 	* linespec.c (typep): Remove typedef.
 	(find_methods, find_superclass_methods): Take a std::vector.
 	(find_method): Use std::vector.

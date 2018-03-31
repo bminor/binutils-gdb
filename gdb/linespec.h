@@ -20,7 +20,6 @@
 struct symtab;
 
 #include "location.h"
-#include "vec.h"
 
 /* Flags to pass to decode_line_1 and decode_line_full.  */
 
