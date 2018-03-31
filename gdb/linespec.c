@@ -1402,12 +1402,9 @@ canonical_to_fullform (const struct linespec_canonical_name *canonical)
 static void
 filter_results (struct linespec_state *self,
 		std::vector<symtab_and_line> *result,
-		VEC (const_char_ptr) *filters)
+		const std::vector<const char *> &filters)
 {
-  int i;
-  const char *name;
-
-  for (i = 0; VEC_iterate (const_char_ptr, filters, i, name); ++i)
+  for (const char *name : filters)
     {
       linespec_sals lsal;
 
@@ -1497,15 +1494,12 @@ decode_line_2 (struct linespec_state *self,
   char *args;
   const char *prompt;
   int i;
-  struct cleanup *old_chain;
-  VEC (const_char_ptr) *filters = NULL;
+  std::vector<const char *> filters;
   std::vector<struct decode_line_2_item> items;
 
   gdb_assert (select_mode != multiple_symbols_all);
   gdb_assert (self->canonical != NULL);
   gdb_assert (!result->empty ());
-
-  old_chain = make_cleanup (VEC_cleanup (const_char_ptr), &filters);
 
   /* Prepare ITEMS array.  */
   for (i = 0; i < result->size (); ++i)
@@ -1553,7 +1547,6 @@ decode_line_2 (struct linespec_state *self,
   
   if (select_mode == multiple_symbols_all || items.size () == 1)
     {
-      do_cleanups (old_chain);
       convert_results_to_lsals (self, result);
       return;
     }
@@ -1587,7 +1580,6 @@ decode_line_2 (struct linespec_state *self,
 	     multiple_symbols_all behavior even with the 'ask'
 	     setting; and he can get separate breakpoints by entering
 	     "2-57" at the query.  */
-	  do_cleanups (old_chain);
 	  convert_results_to_lsals (self, result);
 	  return;
 	}
@@ -1601,7 +1593,7 @@ decode_line_2 (struct linespec_state *self,
 
 	  if (!item->selected)
 	    {
-	      VEC_safe_push (const_char_ptr, filters, item->fullform.c_str ());
+	      filters.push_back (item->fullform.c_str ());
 	      item->selected = 1;
 	    }
 	  else
@@ -1613,7 +1605,6 @@ decode_line_2 (struct linespec_state *self,
     }
 
   filter_results (self, result, filters);
-  do_cleanups (old_chain);
 }
 
 
@@ -3225,7 +3216,7 @@ decode_line_full (const struct event_location *location, int flags,
 		  const char *filter)
 {
   struct cleanup *cleanups;
-  VEC (const_char_ptr) *filters = NULL;
+  std::vector<const char *> filters;
   linespec_parser parser;
   struct linespec_state *state;
 
@@ -3277,8 +3268,7 @@ decode_line_full (const struct event_location *location, int flags,
     {
       if (filter != NULL)
 	{
-	  make_cleanup (VEC_cleanup (const_char_ptr), &filters);
-	  VEC_safe_push (const_char_ptr, filters, filter);
+	  filters.push_back (filter);
 	  filter_results (state, &result, filters);
 	}
       else

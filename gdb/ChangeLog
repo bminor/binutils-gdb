@@ -1,5 +1,10 @@
 2018-04-05  Tom Tromey  <tom@tromey.com>
 
+	* linespec.c (filter_results): Use std::vector.
+	(decode_line_2, decode_line_full): Update.
+
+2018-04-05  Tom Tromey  <tom@tromey.com>
+
 	* linespec.c (canonical_to_fullform): Return std::string.
 	(filter_results): Update.
 	(struct decode_line_2_item): Add constructor.
