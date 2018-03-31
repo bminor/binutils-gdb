@@ -80,9 +80,6 @@ enum class linespec_complete_what
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
 
-typedef struct type *typep;
-DEF_VEC_P (typep);
-
 /* An address entry is used to ensure that any given location is only
    added to the result a single time.  It holds an address and the
    program space from which the address came.  */
@@ -1211,7 +1208,7 @@ iterate_over_file_blocks
 static void
 find_methods (struct type *t, enum language t_lang, const char *name,
 	      std::vector<const char *> *result_names,
-	      VEC (typep) **superclasses)
+	      std::vector<struct type *> *superclasses)
 {
   int ibase;
   const char *class_name = type_name_no_tag (t);
@@ -1272,7 +1269,7 @@ find_methods (struct type *t, enum language t_lang, const char *name,
     }
 
   for (ibase = 0; ibase < TYPE_N_BASECLASSES (t); ibase++)
-    VEC_safe_push (typep, *superclasses, TYPE_BASECLASS (t, ibase));
+    superclasses->push_back (TYPE_BASECLASS (t, ibase));
 }
 
 /* Find an instance of the character C in the string S that is outside
@@ -3645,32 +3642,24 @@ add_all_symbol_names_from_pspace (struct collect_info *info,
 }
 
 static void
-find_superclass_methods (VEC (typep) *superclasses,
+find_superclass_methods (std::vector<struct type *> &&superclasses,
 			 const char *name, enum language name_lang,
 			 std::vector<const char *> *result_names)
 {
   size_t old_len = result_names->size ();
-  VEC (typep) *iter_classes;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
-  iter_classes = superclasses;
   while (1)
     {
-      VEC (typep) *new_supers = NULL;
-      int ix;
-      struct type *t;
+      std::vector<struct type *> new_supers;
 
-      make_cleanup (VEC_cleanup (typep), &new_supers);
-      for (ix = 0; VEC_iterate (typep, iter_classes, ix, t); ++ix)
+      for (struct type *t : superclasses)
 	find_methods (t, name_lang, name, result_names, &new_supers);
 
-      if (result_names->size () != old_len || VEC_empty (typep, new_supers))
+      if (result_names->size () != old_len || new_supers.empty ())
 	break;
 
-      iter_classes = new_supers;
+      superclasses = std::move (new_supers);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* This finds the method METHOD_NAME in the class CLASS_NAME whose type is
@@ -3684,10 +3673,9 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 	     VEC (bound_minimal_symbol_d) **minsyms)
 {
   struct symbol *sym;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   int ix;
   size_t last_result_len;
-  VEC (typep) *superclass_vec;
+  std::vector<struct type *> superclass_vec;
   std::vector<const char *> result_names;
   struct collect_info info;
 
@@ -3712,8 +3700,6 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
      those names.  This loop is written in a somewhat funny way
      because we collect data across the program space before deciding
      what to do.  */
-  superclass_vec = NULL;
-  make_cleanup (VEC_cleanup (typep), &superclass_vec);
   last_result_len = 0;
   for (ix = 0; VEC_iterate (symbolp, sym_classes, ix, sym); ++ix)
     {
@@ -3739,7 +3725,7 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 	  /* If we did not find a direct implementation anywhere in
 	     this program space, consider superclasses.  */
 	  if (result_names.size () == last_result_len)
-	    find_superclass_methods (superclass_vec, method_name,
+	    find_superclass_methods (std::move (superclass_vec), method_name,
 				     SYMBOL_LANGUAGE (sym), &result_names);
 
 	  /* We have a list of candidate symbol names, so now we
@@ -3748,7 +3734,7 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 	  add_all_symbol_names_from_pspace (&info, pspace, result_names,
 					    FUNCTIONS_DOMAIN);
 
-	  VEC_truncate (typep, superclass_vec, 0);
+	  superclass_vec.clear ();
 	  last_result_len = result_names.size ();
 	}
     }
@@ -3758,7 +3744,6 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
     {
       *symbols = info.result.symbols;
       *minsyms = info.result.minimal_symbols;
-      do_cleanups (cleanup);
       return;
     }
 
