@@ -285,6 +285,16 @@ proc fetch_all_registers {test} {
 	    }
 	    exp_continue
 	}
+	-re "^\(?:cycle\|instret\)\[ \t\]+\[^\r\n\]+\r\n" {
+	    if [istarget "riscv*-*-*"] {
+		# Filter out the cycle counter and instructions
+		# retired counter CSRs which are read-only, giving
+		# spurious differences.
+	    } else {
+		lappend all_registers_lines $expect_out(0,string)
+	    }
+	    exp_continue
+	}
 	-re "^\[^ \t\]+\[ \t\]+\[^\r\n\]+\r\n" {
 	    lappend all_registers_lines $expect_out(0,string)
 	    exp_continue
