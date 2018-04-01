@@ -1469,7 +1469,7 @@ int max_completions = 200;
 completion_tracker::completion_tracker ()
 {
   m_entries_hash = htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-				      htab_hash_string, (htab_eq) streq,
+				      htab_hash_string, streq_hash,
 				      NULL, xcalloc, xfree);
 }
 
@@ -1487,7 +1487,7 @@ completion_tracker::discard_completions ()
 
   htab_delete (m_entries_hash);
   m_entries_hash = htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-				      htab_hash_string, (htab_eq) streq,
+				      htab_hash_string, streq_hash,
 				      NULL, xcalloc, xfree);
 }
 

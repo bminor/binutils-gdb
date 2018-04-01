@@ -2601,13 +2601,22 @@ strcmp_iw_ordered (const char *string1, const char *string2)
     }
 }
 
-/* A simple comparison function with opposite semantics to strcmp.  */
+/* See utils.h.  */
 
-int
+bool
 streq (const char *lhs, const char *rhs)
 {
   return !strcmp (lhs, rhs);
 }
+
+/* See utils.h.  */
+
+int
+streq_hash (const void *lhs, const void *rhs)
+{
+  return streq ((const char *) lhs, (const char *) rhs);
+}
+
 
 
 /*
