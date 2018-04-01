@@ -1382,7 +1382,7 @@ encode_actions_1 (struct command_line *action,
 		    case OP_VAR_VALUE:
 		      {
 			struct symbol *sym = exp->elts[2].symbol;
-			char_ptr name = (char_ptr) SYMBOL_NATURAL_NAME (sym);
+			const char *name = SYMBOL_NATURAL_NAME (sym);
 
 			collect->collect_symbol (exp->elts[2].symbol,
 						 target_gdbarch (),

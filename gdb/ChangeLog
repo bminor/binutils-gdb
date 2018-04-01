@@ -1,3 +1,8 @@
+2018-04-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/gdb_vecs.h (char_ptr): Remove.
+	* tracepoint.c (encode_actions_1): Remove usage of char_ptr.
+
 2018-03-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* guile/scm-utils.c (gdbscm_parse_function_args): Replace VEC
