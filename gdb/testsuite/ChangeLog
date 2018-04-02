@@ -1,4 +1,4 @@
-2018-03-30  Weimin Pan  <weimin.pan@oracle.com>
+2018-04-02  Weimin Pan  <weimin.pan@oracle.com>
 
 	* gdb.cp/static-typedef-print.exp: New file.
 	* gdb.cp/static-typedef-print.cc: New file.
@@ -303,12 +303,6 @@
 	on break.c:47 was actually inserted when debugging the version
 	compiled at -O2 and use it in the expected output of the "info
 	break" test performed soon after.
-=======
-2018-03-20  Weimin Pan  <weimin.pan@oracle.com>
-
-	* gdb.cp/static-typedef-print.exp: New file.
-	* gdb.cp/static-typedef-print.cc: New file.
->>>>>>> Fix infinite recursion when printing static member with typedef
 
 2018-01-22  Pedro Alves  <palves@redhat.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
