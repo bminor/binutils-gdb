@@ -1273,6 +1273,7 @@ const Target::Target_info Target_x86_64<64>::x86_64_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_X86_64_UNWIND,	// unwind_section_type
 };
 
 template<>
@@ -1301,6 +1302,7 @@ const Target::Target_info Target_x86_64<32>::x86_64_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_X86_64_UNWIND,	// unwind_section_type
 };
 
 // This is called when a new output section is created.  This is where
@@ -5578,6 +5580,7 @@ const Target::Target_info Target_x86_64_nacl<64>::x86_64_nacl_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_X86_64_UNWIND,	// unwind_section_type
 };
 
 template<>
@@ -5606,6 +5609,7 @@ const Target::Target_info Target_x86_64_nacl<32>::x86_64_nacl_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_X86_64_UNWIND,	// unwind_section_type
 };
 
 #define	NACLMASK	0xe0            // 32-byte alignment mask.

@@ -537,7 +537,8 @@ class Layout
   Output_section*
   layout(Sized_relobj_file<size, big_endian> *object, unsigned int shndx,
 	 const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
-	 unsigned int reloc_shndx, unsigned int reloc_type, off_t* offset);
+	 unsigned int sh_type, unsigned int reloc_shndx,
+	 unsigned int reloc_type, off_t* offset);
 
   std::map<Section_id, unsigned int>*
   get_section_order_map()

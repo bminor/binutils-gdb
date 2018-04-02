@@ -173,8 +173,8 @@ Incremental_binary::error(const char* format, ...) const
 
 // Return TRUE if a section of type SH_TYPE can be updated in place
 // during an incremental update.  We can update sections of type PROGBITS,
-// NOBITS, INIT_ARRAY, FINI_ARRAY, PREINIT_ARRAY, and NOTE.  All others
-// will be regenerated.
+// NOBITS, INIT_ARRAY, FINI_ARRAY, PREINIT_ARRAY, NOTE, and
+// (processor-specific) unwind sections.  All others will be regenerated.
 
 bool
 can_incremental_update(unsigned int sh_type)
@@ -184,7 +184,8 @@ can_incremental_update(unsigned int sh_type)
 	  || sh_type == elfcpp::SHT_INIT_ARRAY
 	  || sh_type == elfcpp::SHT_FINI_ARRAY
 	  || sh_type == elfcpp::SHT_PREINIT_ARRAY
-	  || sh_type == elfcpp::SHT_NOTE);
+	  || sh_type == elfcpp::SHT_NOTE
+	  || sh_type == parameters->target().unwind_section_type());
 }
 
 // Find the .gnu_incremental_inputs section and related sections.

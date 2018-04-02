@@ -3062,6 +3062,7 @@ const Target::Target_info Target_arm<big_endian>::arm_info =
   "aeabi",		// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 // Arm relocate functions class
@@ -13056,6 +13057,7 @@ const Target::Target_info Target_arm_nacl<big_endian>::arm_nacl_info =
   "aeabi",		// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 template<bool big_endian>

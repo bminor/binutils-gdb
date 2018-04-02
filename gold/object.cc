@@ -574,7 +574,7 @@ Sized_relobj_file<size, big_endian>::check_eh_frame_flags(
 {
   elfcpp::Elf_Word sh_type = shdr->get_sh_type();
   return ((sh_type == elfcpp::SHT_PROGBITS
-	   || sh_type == elfcpp::SHT_X86_64_UNWIND)
+	   || sh_type == parameters->target().unwind_section_type())
 	  && (shdr->get_sh_flags() & elfcpp::SHF_ALLOC) != 0);
 }
 
@@ -1252,12 +1252,13 @@ Sized_relobj_file<size, big_endian>::layout_section(
     unsigned int shndx,
     const char* name,
     const typename This::Shdr& shdr,
+    unsigned int sh_type,
     unsigned int reloc_shndx,
     unsigned int reloc_type)
 {
   off_t offset;
-  Output_section* os = layout->layout(this, shndx, name, shdr,
-					  reloc_shndx, reloc_type, &offset);
+  Output_section* os = layout->layout(this, shndx, name, shdr, sh_type,
+				      reloc_shndx, reloc_type, &offset);
 
   this->output_sections()[shndx] = os;
   if (offset == -1)
@@ -1337,6 +1338,8 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 					       Layout* layout,
 					       Read_symbols_data* sd)
 {
+  const unsigned int unwind_section_type =
+      parameters->target().unwind_section_type();
   const unsigned int shnum = this->shnum();
 
   /* Should this function be called twice?  */
@@ -1522,15 +1525,17 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
   for (unsigned int i = 1; i < shnum; ++i, pshdrs += This::shdr_size)
     {
       typename This::Shdr shdr(pshdrs);
+      const unsigned int sh_name = shdr.get_sh_name();
+      unsigned int sh_type = shdr.get_sh_type();
 
-      if (shdr.get_sh_name() >= section_names_size)
+      if (sh_name >= section_names_size)
 	{
 	  this->error(_("bad section name offset for section %u: %lu"),
-		      i, static_cast<unsigned long>(shdr.get_sh_name()));
+		      i, static_cast<unsigned long>(sh_name));
 	  return;
 	}
 
-      const char* name = pnames + shdr.get_sh_name();
+      const char* name = pnames + sh_name;
 
       if (!is_pass_two)
 	{
@@ -1568,7 +1573,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	  bool discard = omit[i];
 	  if (!discard)
 	    {
-	      if (shdr.get_sh_type() == elfcpp::SHT_GROUP)
+	      if (sh_type == elfcpp::SHT_GROUP)
 		{
 		  if (!this->include_section_group(symtab, layout, i, name,
 						   shdrs, pnames,
@@ -1588,7 +1593,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	  Incremental_inputs* incremental_inputs = layout->incremental_inputs();
 	  if (incremental_inputs != NULL
 	      && !discard
-	      && can_incremental_update(shdr.get_sh_type()))
+	      && can_incremental_update(sh_type))
 	    {
 	      off_t sh_size = shdr.get_sh_size();
 	      section_size_type uncompressed_size;
@@ -1610,8 +1615,8 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	{
 	  if (this->is_section_name_included(name)
 	      || layout->keep_input_section (this, name)
-	      || shdr.get_sh_type() == elfcpp::SHT_INIT_ARRAY
-	      || shdr.get_sh_type() == elfcpp::SHT_FINI_ARRAY)
+	      || sh_type == elfcpp::SHT_INIT_ARRAY
+	      || sh_type == elfcpp::SHT_FINI_ARRAY)
 	    {
 	      symtab->gc()->worklist().push_back(Section_id(this, i));
 	    }
@@ -1632,14 +1637,14 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
       // reloc sections and process them later. Garbage collection is
       // not triggered when relocatable code is desired.
       if (emit_relocs
-	  && (shdr.get_sh_type() == elfcpp::SHT_REL
-	      || shdr.get_sh_type() == elfcpp::SHT_RELA))
+	  && (sh_type == elfcpp::SHT_REL
+	      || sh_type == elfcpp::SHT_RELA))
 	{
 	  reloc_sections.push_back(i);
 	  continue;
 	}
 
-      if (relocatable && shdr.get_sh_type() == elfcpp::SHT_GROUP)
+      if (relocatable && sh_type == elfcpp::SHT_GROUP)
 	continue;
 
       // The .eh_frame section is special.  It holds exception frame
@@ -1648,26 +1653,30 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
       // sections so that the exception frame reader can reliably
       // determine which sections are being discarded, and discard the
       // corresponding information.
-      if (!relocatable
-	  && strcmp(name, ".eh_frame") == 0
-	  && this->check_eh_frame_flags(&shdr))
+      if (this->check_eh_frame_flags(&shdr)
+	  && strcmp(name, ".eh_frame") == 0)
 	{
-	  if (is_pass_one)
+	  // If the target has a special unwind section type, let's
+	  // canonicalize it here.
+	  sh_type = unwind_section_type;
+	  if (!relocatable)
 	    {
-	      if (this->is_deferred_layout())
-		out_sections[i] = reinterpret_cast<Output_section*>(2);
+	      if (is_pass_one)
+		{
+		  if (this->is_deferred_layout())
+		    out_sections[i] = reinterpret_cast<Output_section*>(2);
+		  else
+		    out_sections[i] = reinterpret_cast<Output_section*>(1);
+		  out_section_offsets[i] = invalid_address;
+		}
+	      else if (this->is_deferred_layout())
+		this->deferred_layout_.push_back(
+		    Deferred_layout(i, name, sh_type, pshdrs,
+				    reloc_shndx[i], reloc_type[i]));
 	      else
-		out_sections[i] = reinterpret_cast<Output_section*>(1);
-	      out_section_offsets[i] = invalid_address;
+		eh_frame_sections.push_back(i);
+	      continue;
 	    }
-	  else if (this->is_deferred_layout())
-	    this->deferred_layout_.push_back(Deferred_layout(i, name,
-							     pshdrs,
-							     reloc_shndx[i],
-							     reloc_type[i]));
-	  else
-	    eh_frame_sections.push_back(i);
-	  continue;
 	}
 
       if (is_pass_two && parameters->options().gc_sections())
@@ -1731,7 +1740,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
           && this->is_deferred_layout()
           && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC))
 	{
-	  this->deferred_layout_.push_back(Deferred_layout(i, name,
+	  this->deferred_layout_.push_back(Deferred_layout(i, name, sh_type,
 							   pshdrs,
 							   reloc_shndx[i],
 							   reloc_type[i]));
@@ -1760,7 +1769,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	{
 	  // When garbage collection is switched on the actual layout
 	  // only happens in the second call.
-	  this->layout_section(layout, i, name, shdr, reloc_shndx[i],
+	  this->layout_section(layout, i, name, shdr, sh_type, reloc_shndx[i],
 			       reloc_type[i]);
 
 	  // When generating a .gdb_index section, we do additional
@@ -1838,7 +1847,8 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	  // to defer the relocation section, too.
 	  const char* name = pnames + shdr.get_sh_name();
 	  this->deferred_layout_relocs_.push_back(
-	      Deferred_layout(i, name, pshdr, 0, elfcpp::SHT_NULL));
+	      Deferred_layout(i, name, shdr.get_sh_type(), pshdr, 0,
+			      elfcpp::SHT_NULL));
 	  out_sections[i] = reinterpret_cast<Output_section*>(2);
 	  out_section_offsets[i] = invalid_address;
 	  continue;
@@ -1949,7 +1959,7 @@ Sized_relobj_file<size, big_endian>::do_layout_deferred_sections(Layout* layout)
 	continue;
 
       this->layout_section(layout, deferred->shndx_, deferred->name_.c_str(),
-			   shdr, deferred->reloc_shndx_,
+			   shdr, shdr.get_sh_type(), deferred->reloc_shndx_,
 			   deferred->reloc_type_);
     }
 

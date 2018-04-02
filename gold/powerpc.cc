@@ -1625,6 +1625,7 @@ Target::Target_info Target_powerpc<32, true>::powerpc_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 template<>
@@ -1653,6 +1654,7 @@ Target::Target_info Target_powerpc<32, false>::powerpc_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 template<>
@@ -1681,6 +1683,7 @@ Target::Target_info Target_powerpc<64, true>::powerpc_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 template<>
@@ -1709,6 +1712,7 @@ Target::Target_info Target_powerpc<64, false>::powerpc_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 inline bool

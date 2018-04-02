@@ -1,3 +1,55 @@
+2018-04-02  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/23016
+	* incremental.cc (can_incremental_update): Check for unwind section
+	type.
+	* layout.h (Layout::layout): Add sh_type parameter.
+	* layout.cc (Layout::layout): Likewise.
+	(Layout::layout_reloc): Create new output reloc section if data
+	section does not already have one.
+	(Layout::layout_eh_frame): Check for unwind section type.
+	(Layout::make_eh_frame_section): Use unwind section type for .eh_frame
+	and .eh_frame_hdr.
+	* object.h (Sized_relobj_file::Shdr_write): New typedef.
+	(Sized_relobj_file::layout_section): Add sh_type parameter.
+	(Sized_relobj_file::Deferred_layout::Deferred_layout): Add sh_type
+	parameter.
+	* object.cc (Sized_relobj_file::check_eh_frame_flags): Check for
+	unwind section type.
+	(Sized_relobj_file::layout_section): Add sh_type parameter; pass it
+	to Layout::layout.
+	(Sized_relobj_file::do_layout): Make local copy of sh_type.
+	Force .eh_frame sections to unwind section type.
+	Pass sh_type to layout_section.
+	(Sized_relobj_file<size, big_endian>::do_layout_deferred_sections):
+	Pass sh_type to layout_section.
+	* output.cc (Output_section::Output_section): Initialize reloc_section_.
+	* output.h (Output_section::reloc_section): New method.
+	(Output_section::set_reloc_section): New method.
+	(Output_section::reloc_section_): New data member.
+	* target.h (Target::unwind_section_type): New method.
+	(Target::Target_info::unwind_section_type): New data member.
+
+	* aarch64.cc (aarch64_info): Add unwind_section_type.
+	* arm.cc (arm_info, arm_nacl_info): Likewise.
+	* i386.cc (i386_info, i386_nacl_info, iamcu_info): Likewise.
+	* mips.cc (mips_info, mips_nacl_info): Likewise.
+	* powerpc.cc (powerpc_info): Likewise.
+	* s390.cc (s390_info): Likewise.
+	* sparc.cc (sparc_info): Likewise.
+	* tilegx.cc (tilegx_info): Likewise.
+	* x86_64.cc (x86_64_info, x86_64_nacl_info): Likewise.
+
+	* testsuite/Makefile.am (pr23016_1, pr23016_2): New test cases.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/testfile.cc: Add unwind_section_type.
+	* testsuite/pr23016_1.sh: New test script.
+	* testsuite/pr23016_1a.s: New source file.
+	* testsuite/pr23016_1b.s: New source file.
+	* testsuite/pr23016_2.sh: New test script.
+	* testsuite/pr23016_2a.s: New source file.
+	* testsuite/pr23016_2b.s: New source file.
+
 2018-03-28  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/21423

@@ -1153,14 +1153,13 @@ template<int size, bool big_endian>
 Output_section*
 Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 	       const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
-	       unsigned int reloc_shndx, unsigned int, off_t* off)
+	       unsigned int sh_type, unsigned int reloc_shndx,
+	       unsigned int, off_t* off)
 {
   *off = 0;
 
   if (!this->include_section(object, name, shdr))
     return NULL;
-
-  elfcpp::Elf_Word sh_type = shdr.get_sh_type();
 
   // In a relocatable link a grouped section must not be combined with
   // any other sections.
@@ -1315,7 +1314,7 @@ Layout::insert_section_segment_map(Const_section_id secn,
 
 template<int size, bool big_endian>
 Output_section*
-Layout::layout_reloc(Sized_relobj_file<size, big_endian>* object,
+Layout::layout_reloc(Sized_relobj_file<size, big_endian>*,
 		     unsigned int,
 		     const elfcpp::Shdr<size, big_endian>& shdr,
 		     Output_section* data_section,
@@ -1335,23 +1334,18 @@ Layout::layout_reloc(Sized_relobj_file<size, big_endian>* object,
     gold_unreachable();
   name += data_section->name();
 
-  // In a relocatable link relocs for a grouped section must not be
-  // combined with other reloc sections.
-  Output_section* os;
-  if (!parameters->options().relocatable()
-      || (data_section->flags() & elfcpp::SHF_GROUP) == 0)
-    os = this->choose_output_section(object, name.c_str(), sh_type,
-				     shdr.get_sh_flags(), false,
-				     ORDER_INVALID, false, true, false);
-  else
+  // If the output data section already has a reloc section, use that;
+  // otherwise, make a new one.
+  Output_section* os = data_section->reloc_section();
+  if (os == NULL)
     {
       const char* n = this->namepool_.add(name.c_str(), true, NULL);
       os = this->make_output_section(n, sh_type, shdr.get_sh_flags(),
 				     ORDER_INVALID, false);
+      os->set_should_link_to_symtab();
+      os->set_info_section(data_section);
+      data_section->set_reloc_section(os);
     }
-
-  os->set_should_link_to_symtab();
-  os->set_info_section(data_section);
 
   Output_section_data* posd;
   if (sh_type == elfcpp::SHT_REL)
@@ -1442,8 +1436,11 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
 			unsigned int reloc_shndx, unsigned int reloc_type,
 			off_t* off)
 {
+  const unsigned int unwind_section_type =
+      parameters->target().unwind_section_type();
+
   gold_assert(shdr.get_sh_type() == elfcpp::SHT_PROGBITS
-	      || shdr.get_sh_type() == elfcpp::SHT_X86_64_UNWIND);
+	      || shdr.get_sh_type() == unwind_section_type);
   gold_assert((shdr.get_sh_flags() & elfcpp::SHF_ALLOC) != 0);
 
   Output_section* os = this->make_eh_frame_section(object);
@@ -1530,10 +1527,11 @@ Layout::finalize_eh_frame_section()
 Output_section*
 Layout::make_eh_frame_section(const Relobj* object)
 {
-  // FIXME: On x86_64, this could use SHT_X86_64_UNWIND rather than
-  // SHT_PROGBITS.
+  const unsigned int unwind_section_type =
+      parameters->target().unwind_section_type();
+
   Output_section* os = this->choose_output_section(object, ".eh_frame",
-						   elfcpp::SHT_PROGBITS,
+						   unwind_section_type,
 						   elfcpp::SHF_ALLOC, false,
 						   ORDER_EHFRAME, false, false,
 						   false);
@@ -1551,7 +1549,7 @@ Layout::make_eh_frame_section(const Relobj* object)
 	{
 	  Output_section* hdr_os =
 	    this->choose_output_section(NULL, ".eh_frame_hdr",
-					elfcpp::SHT_PROGBITS,
+					unwind_section_type,
 					elfcpp::SHF_ALLOC, false,
 					ORDER_EHFRAME, false, false,
 					false);
@@ -5915,7 +5913,7 @@ Layout::layout<32, false>(Sized_relobj_file<32, false>* object,
 			  unsigned int shndx,
 			  const char* name,
 			  const elfcpp::Shdr<32, false>& shdr,
-			  unsigned int, unsigned int, off_t*);
+			  unsigned int, unsigned int, unsigned int, off_t*);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -5925,7 +5923,7 @@ Layout::layout<32, true>(Sized_relobj_file<32, true>* object,
 			 unsigned int shndx,
 			 const char* name,
 			 const elfcpp::Shdr<32, true>& shdr,
-			 unsigned int, unsigned int, off_t*);
+			 unsigned int, unsigned int, unsigned int, off_t*);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -5935,7 +5933,7 @@ Layout::layout<64, false>(Sized_relobj_file<64, false>* object,
 			  unsigned int shndx,
 			  const char* name,
 			  const elfcpp::Shdr<64, false>& shdr,
-			  unsigned int, unsigned int, off_t*);
+			  unsigned int, unsigned int, unsigned int, off_t*);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -5945,7 +5943,7 @@ Layout::layout<64, true>(Sized_relobj_file<64, true>* object,
 			 unsigned int shndx,
 			 const char* name,
 			 const elfcpp::Shdr<64, true>& shdr,
-			 unsigned int, unsigned int, off_t*);
+			 unsigned int, unsigned int, unsigned int, off_t*);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

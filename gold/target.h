@@ -474,6 +474,11 @@ class Target
   hash_entry_size() const
   { return this->pti_->hash_entry_size; }
 
+  // Return the section type to use for unwind sections.
+  unsigned int
+  unwind_section_type() const
+  { return this->pti_->unwind_section_type; }
+
   // Whether the target has a custom set_dynsym_indexes method.
   bool
   has_custom_set_dynsym_indexes() const
@@ -562,6 +567,9 @@ class Target
     // Size (in bits) of SHT_HASH entry. Always equal to 32, except for
     // 64-bit S/390.
     const int hash_entry_size;
+    // Processor-specific section type for ".eh_frame" (unwind) sections.
+    // SHT_PROGBITS if there is no special section type.
+    const unsigned int unwind_section_type;
   };
 
   Target(const Target_info* pti)

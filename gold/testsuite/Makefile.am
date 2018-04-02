@@ -1211,6 +1211,32 @@ x32_overflow_pc32.err: x32_overflow_pc32.o gcctestdir/ld
 	  exit 1; \
 	fi
 
+check_SCRIPTS += pr23016_1.sh
+check_DATA += pr23016_1.stdout pr23016_1r.stdout
+pr23016_1.stdout: pr23016_1.o
+	$(TEST_READELF) -rSW $< >$@ 2>/dev/null
+pr23016_1.o: pr23016_1a.o pr23016_1b.o gcctestdir/ld
+	gcctestdir/ld -r -o $@ pr23016_1a.o pr23016_1b.o
+pr23016_1r.stdout: pr23016_1r.o
+	$(TEST_READELF) -rSW $< >$@ 2>/dev/null
+pr23016_1r.o: pr23016_1a.o pr23016_1b.o gcctestdir/ld
+	gcctestdir/ld -r -o $@ pr23016_1b.o pr23016_1a.o
+pr23016_1a.o: pr23016_1a.s
+	$(TEST_AS) -o $@ $<
+pr23016_1b.o: pr23016_1b.s
+	$(TEST_AS) -o $@ $<
+
+check_SCRIPTS += pr23016_2.sh
+check_DATA += pr23016_2.stdout
+pr23016_2.stdout: pr23016_2.o
+	$(TEST_READELF) -rW $< >$@ 2>/dev/null
+pr23016_2.o: pr23016_2a.o pr23016_2b.o gcctestdir/ld
+	gcctestdir/ld -r -o $@ pr23016_2a.o pr23016_2b.o
+pr23016_2a.o: pr23016_2a.s
+	$(TEST_AS) -o $@ $<
+pr23016_2b.o: pr23016_2b.s
+	$(TEST_AS) -o $@ $<
+
 endif DEFAULT_TARGET_X86_64
 
 if DEFAULT_TARGET_X86_64_OR_X32

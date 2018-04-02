@@ -12633,6 +12633,7 @@ const Target::Target_info Target_mips<size, big_endian>::mips_info =
   NULL,                 // attributes_vendor
   "__start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 template<int size, bool big_endian>
@@ -12673,6 +12674,7 @@ const Target::Target_info Target_mips_nacl<size, big_endian>::mips_nacl_info =
   NULL,                 // attributes_vendor
   "_start",             // entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 // Target selector for Mips.  Note this is never instantiated directly.

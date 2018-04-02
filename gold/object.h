@@ -2591,6 +2591,7 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   typedef elfcpp::Shdr<size, big_endian> Shdr;
+  typedef elfcpp::Shdr_write<size, big_endian> Shdr_write;
 
   // To keep track of discarded comdat sections, we need to map a member
   // section index to the object and section index of the corresponding
@@ -2635,8 +2636,8 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // Layout an input section.
   void
   layout_section(Layout* layout, unsigned int shndx, const char* name,
-                 const typename This::Shdr& shdr, unsigned int reloc_shndx,
-                 unsigned int reloc_type);
+                 const typename This::Shdr& shdr, unsigned int sh_type,
+                 unsigned int reloc_shndx, unsigned int reloc_type);
 
   // Layout an input .eh_frame section.
   void
@@ -2798,15 +2799,18 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   {
     static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
     Deferred_layout(unsigned int shndx, const char* name,
+                    unsigned int sh_type,
                     const unsigned char* pshdr,
                     unsigned int reloc_shndx, unsigned int reloc_type)
-      : shndx_(shndx), name_(name), reloc_shndx_(reloc_shndx),
+      : name_(name), shndx_(shndx), reloc_shndx_(reloc_shndx),
         reloc_type_(reloc_type)
     {
+      typename This::Shdr_write shdr(this->shdr_data_);
       memcpy(this->shdr_data_, pshdr, shdr_size);
+      shdr.put_sh_type(sh_type);
     }
-    unsigned int shndx_;
     std::string name_;
+    unsigned int shndx_;
     unsigned int reloc_shndx_;
     unsigned int reloc_type_;
     unsigned char shdr_data_[shdr_size];

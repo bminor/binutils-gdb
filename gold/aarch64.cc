@@ -3565,6 +3565,7 @@ const Target::Target_info Target_aarch64<64, false>::aarch64_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 template<>
@@ -3593,6 +3594,7 @@ const Target::Target_info Target_aarch64<32, false>::aarch64_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 template<>
@@ -3621,6 +3623,7 @@ const Target::Target_info Target_aarch64<64, true>::aarch64_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 template<>
@@ -3649,6 +3652,7 @@ const Target::Target_info Target_aarch64<32, true>::aarch64_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 // Get the GOT section, creating it if necessary.
