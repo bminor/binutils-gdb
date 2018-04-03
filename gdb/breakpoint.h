@@ -31,7 +31,6 @@
 #include "common/array-view.h"
 #include "cli/cli-script.h"
 
-struct value;
 struct block;
 struct gdbpy_breakpoint_object;
 struct gdbscm_breakpoint_object;
@@ -813,7 +812,7 @@ struct watchpoint : public breakpoint
   /* Value of the watchpoint the last time we checked it, or NULL when
      we do not know the value yet or the value was not readable.  VAL
      is never lazy.  */
-  struct value *val;
+  value_ref_ptr val;
   /* Nonzero if VAL is valid.  If VAL_VALID is set but VAL is NULL,
      then an error occurred reading the value.  */
   int val_valid;
@@ -1125,7 +1124,7 @@ struct bpstats
     counted_command_line commands;
 
     /* Old value associated with a watchpoint.  */
-    struct value *old_val;
+    value_ref_ptr old_val;
 
     /* Nonzero if this breakpoint tells us to print the frame.  */
     char print;

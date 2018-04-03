@@ -1740,7 +1740,6 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	 no longer relevant.  We don't want to report a watchpoint hit
 	 to the user when the old value and the new value may actually
 	 be completely different objects.  */
-      value_decref (b->val);
       b->val = NULL;
       b->val_valid = 0;
 
@@ -1792,12 +1791,8 @@ update_watchpoint (struct watchpoint *b, int reparse)
       if (!b->val_valid && !is_masked_watchpoint (b))
 	{
 	  if (b->val_bitsize != 0)
-	    {
-	      v = extract_bitfield_from_watchpoint_value (b, v);
-	      if (v != NULL)
-		release_value (v).release ();
-	    }
-	  b->val = v;
+	    v = extract_bitfield_from_watchpoint_value (b, v);
+	  b->val = release_value (v);
 	  b->val_valid = 1;
 	}
 
@@ -3951,9 +3946,7 @@ breakpoint_init_inferior (enum inf_context context)
 		{
 		  /* Reset val field to force reread of starting value in
 		     insert_breakpoints.  */
-		  if (w->val)
-		    value_decref (w->val);
-		  w->val = NULL;
+		  w->val.reset (nullptr);
 		  w->val_valid = 0;
 		}
 	    }
@@ -4199,8 +4192,6 @@ is_catchpoint (struct breakpoint *ep)
 
 bpstats::~bpstats ()
 {
-  if (old_val != NULL)
-    value_decref (old_val);
   if (bp_location_at != NULL)
     decref_bp_location (&bp_location_at);
 }
@@ -4231,13 +4222,12 @@ bpstats::bpstats (const bpstats &other)
     bp_location_at (other.bp_location_at),
     breakpoint_at (other.breakpoint_at),
     commands (other.commands),
-    old_val (other.old_val),
     print (other.print),
     stop (other.stop),
     print_it (other.print_it)
 {
-  if (old_val != NULL)
-    old_val = release_value (value_copy (old_val)).release ();
+  if (other.old_val != NULL)
+    old_val = release_value (value_copy (other.old_val.get ()));
   incref_bp_location (bp_location_at);
 }
 
@@ -4358,12 +4348,7 @@ bpstat_clear_actions (void)
   for (bs = tp->control.stop_bpstat; bs != NULL; bs = bs->next)
     {
       bs->commands = NULL;
-
-      if (bs->old_val != NULL)
-	{
-	  value_decref (bs->old_val);
-	  bs->old_val = NULL;
-	}
+      bs->old_val.reset (nullptr);
     }
 }
 
@@ -4725,7 +4710,6 @@ bpstats::bpstats (struct bp_location *bl, bpstat **bs_link_pointer)
     bp_location_at (bl),
     breakpoint_at (bl->owner),
     commands (NULL),
-    old_val (NULL),
     print (0),
     stop (0),
     print_it (print_it_normal)
@@ -4740,7 +4724,6 @@ bpstats::bpstats ()
     bp_location_at (NULL),
     breakpoint_at (NULL),
     commands (NULL),
-    old_val (NULL),
     print (0),
     stop (0),
     print_it (print_it_normal)
@@ -4935,16 +4918,14 @@ watchpoint_check (bpstat bs)
 	 the address of the array instead of its contents.  This is
 	 not what we want.  */
       if ((b->val != NULL) != (new_val != NULL)
-	  || (b->val != NULL && !value_equal_contents (b->val, new_val)))
+	  || (b->val != NULL && !value_equal_contents (b->val.get (),
+						       new_val)))
 	{
-	  if (new_val != NULL)
-	    {
-	      release_value (new_val).release ();
-	      value_free_to_mark (mark);
-	    }
 	  bs->old_val = b->val;
-	  b->val = new_val;
+	  b->val = release_value (new_val);
 	  b->val_valid = 1;
+	  if (new_val != NULL)
+	    value_free_to_mark (mark);
 	  return WP_VALUE_CHANGED;
 	}
       else
@@ -10099,7 +10080,6 @@ watchpoint::~watchpoint ()
 {
   xfree (this->exp_string);
   xfree (this->exp_string_reparse);
-  value_decref (this->val);
 }
 
 /* Implement the "re_set" breakpoint_ops method for watchpoints.  */
@@ -10241,10 +10221,10 @@ print_it_watchpoint (bpstat bs)
       mention (b);
       tuple_emitter.emplace (uiout, "value");
       uiout->text ("\nOld value = ");
-      watchpoint_value_print (bs->old_val, &stb);
+      watchpoint_value_print (bs->old_val.get (), &stb);
       uiout->field_stream ("old", stb);
       uiout->text ("\nNew value = ");
-      watchpoint_value_print (w->val, &stb);
+      watchpoint_value_print (w->val.get (), &stb);
       uiout->field_stream ("new", stb);
       uiout->text ("\n");
       /* More than one watchpoint may have been triggered.  */
@@ -10258,7 +10238,7 @@ print_it_watchpoint (bpstat bs)
       mention (b);
       tuple_emitter.emplace (uiout, "value");
       uiout->text ("\nValue = ");
-      watchpoint_value_print (w->val, &stb);
+      watchpoint_value_print (w->val.get (), &stb);
       uiout->field_stream ("value", stb);
       uiout->text ("\n");
       result = PRINT_UNKNOWN;
@@ -10274,7 +10254,7 @@ print_it_watchpoint (bpstat bs)
 	  mention (b);
 	  tuple_emitter.emplace (uiout, "value");
 	  uiout->text ("\nOld value = ");
-	  watchpoint_value_print (bs->old_val, &stb);
+	  watchpoint_value_print (bs->old_val.get (), &stb);
 	  uiout->field_stream ("old", stb);
 	  uiout->text ("\nNew value = ");
 	}
@@ -10288,7 +10268,7 @@ print_it_watchpoint (bpstat bs)
 	  tuple_emitter.emplace (uiout, "value");
 	  uiout->text ("\nValue = ");
 	}
-      watchpoint_value_print (w->val, &stb);
+      watchpoint_value_print (w->val.get (), &stb);
       uiout->field_stream ("new", stb);
       uiout->text ("\n");
       result = PRINT_UNKNOWN;
@@ -10583,7 +10563,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 {
   struct breakpoint *scope_breakpoint = NULL;
   const struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
-  struct value *val, *mark, *result;
+  struct value *mark, *result;
   int saved_bitpos = 0, saved_bitsize = 0;
   const char *exp_start = NULL;
   const char *exp_end = NULL;
@@ -10709,25 +10689,28 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 
   exp_valid_block = innermost_block.block ();
   mark = value_mark ();
-  fetch_subexp_value (exp.get (), &pc, &val, &result, NULL, just_location);
+  struct value *val_as_value = nullptr;
+  fetch_subexp_value (exp.get (), &pc, &val_as_value, &result, NULL,
+		      just_location);
 
-  if (val != NULL && just_location)
+  if (val_as_value != NULL && just_location)
     {
-      saved_bitpos = value_bitpos (val);
-      saved_bitsize = value_bitsize (val);
+      saved_bitpos = value_bitpos (val_as_value);
+      saved_bitsize = value_bitsize (val_as_value);
     }
 
+  value_ref_ptr val;
   if (just_location)
     {
       int ret;
 
       exp_valid_block = NULL;
-      val = release_value (value_addr (result)).release ();
+      val = release_value (value_addr (result));
       value_free_to_mark (mark);
 
       if (use_mask)
 	{
-	  ret = target_masked_watch_num_registers (value_as_address (val),
+	  ret = target_masked_watch_num_registers (value_as_address (val.get ()),
 						   mask);
 	  if (ret == -1)
 	    error (_("This target does not support masked watchpoints."));
@@ -10735,8 +10718,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	    error (_("Invalid mask or memory region."));
 	}
     }
-  else if (val != NULL)
-    release_value (val).release ();
+  else if (val_as_value != NULL)
+    val = release_value (val_as_value);
 
   tok = skip_spaces (arg);
   end_tok = skip_to_space (tok);
@@ -10830,8 +10813,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   w->cond_exp_valid_block = cond_exp_valid_block;
   if (just_location)
     {
-      struct type *t = value_type (val);
-      CORE_ADDR addr = value_as_address (val);
+      struct type *t = value_type (val.get ());
+      CORE_ADDR addr = value_as_address (val.get ());
 
       w->exp_string_reparse
 	= current_language->la_watch_location_expression (t, addr).release ();
@@ -14533,7 +14516,7 @@ invalidate_bp_value_on_memory_change (struct inferior *inferior,
       {
 	struct watchpoint *wp = (struct watchpoint *) bp;
 
-	if (wp->val_valid && wp->val)
+	if (wp->val_valid && wp->val != nullptr)
 	  {
 	    struct bp_location *loc;
 
@@ -14542,7 +14525,6 @@ invalidate_bp_value_on_memory_change (struct inferior *inferior,
 		  && loc->address + loc->length > addr
 		  && addr + len > loc->address)
 		{
-		  value_decref (wp->val);
 		  wp->val = NULL;
 		  wp->val_valid = 0;
 		}

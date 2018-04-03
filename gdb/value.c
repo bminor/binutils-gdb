@@ -1696,6 +1696,9 @@ release_value (struct value *val)
   struct value *v;
   bool released = false;
 
+  if (val == nullptr)
+    return value_ref_ptr ();
+
   if (all_values == val)
     {
       all_values = val->next;

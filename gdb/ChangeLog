@@ -1,5 +1,15 @@
 2018-04-06  Tom Tromey  <tom@tromey.com>
 
+	* value.c (release_value): Update.
+	* breakpoint.h (struct watchpoint) <val>: Now a value_ref_ptr.
+	(struct bpstats) <val>: Now a value_ref_ptr.
+	* breakpoint.c (update_watchpoint, breakpoint_init_inferior)
+	(~bpstats, bpstats, bpstat_clear_actions, watchpoint_check)
+	(~watchpoint, print_it_watchpoint, watch_command_1)
+	(invalidate_bp_value_on_memory_change): Update.
+
+2018-04-06  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (varobj_clear_saved_item)
 	(update_dynamic_varobj_children, install_new_value, ~varobj):
 	Update.
