@@ -39,9 +39,11 @@ set has_n32abi [expr [istarget *-img-elf*] \
 		     || [istarget *-sde-elf*] \
 		     || [istarget *-*-freebsd*] \
 		     || [istarget *-*-irix6*] \
+		     || [istarget *-*-kfreebsd*-gnu] \
 		     || [istarget *-*-linux*]]
 set has_n64abi [expr [istarget *-*-freebsd*] \
 		     || [istarget *-*-irix6*] \
+		     || [istarget *-*-kfreebsd*-gnu] \
 		     || [istarget *-*-linux*] \
 		     || [istarget *-*-netbsd*] \
 		     || [istarget *-*-openbsd*]]
@@ -62,7 +64,8 @@ if {[istarget *-img-elf*] \
 	set abi_ldemul(n32) elf32btsmipn32
 	set abi_ldemul(n64) elf64btsmip
     }
-} elseif { [istarget *-*-freebsd*] } {
+} elseif { [istarget *-*-freebsd*] \
+	   || [istarget *-*-kfreebsd*-gnu] } {
     if [istarget *el-*-*] {
 	set abi_ldemul(o32) elf32ltsmip_fbsd
 	set abi_ldemul(n32) elf32ltsmipn32_fbsd

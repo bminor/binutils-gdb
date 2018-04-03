@@ -1,3 +1,8 @@
+2018-04-03  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-mips-elf/comm-data.exp: Correct support for
+	`mips*-*-kfreebsd*-gnu' targets.
+
 2018-03-23  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/22970
