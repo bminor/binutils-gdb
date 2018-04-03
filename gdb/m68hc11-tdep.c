@@ -919,13 +919,11 @@ m68hc11_frame_prev_register (struct frame_info *this_frame,
           CORE_ADDR page;
 
 	  release_value (value);
-	  value_free (value);
 
 	  value = trad_frame_get_prev_register (this_frame, info->saved_regs,
 						HARD_PAGE_REGNUM);
 	  page = value_as_long (value);
 	  release_value (value);
-	  value_free (value);
 
           pc -= 0x08000;
           pc += ((page & 0x0ff) << 14);

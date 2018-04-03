@@ -726,7 +726,6 @@ m88k_frame_prev_register (struct frame_info *this_frame,
 					    M88K_SXIP_REGNUM);
       pc = value_as_long (value);
       release_value (value);
-      value_free (value);
 
       if (regnum == M88K_SFIP_REGNUM)
 	pc += 4;

@@ -131,7 +131,7 @@ vlscm_free_value_smob (SCM self)
   value_smob *v_smob = (value_smob *) SCM_SMOB_DATA (self);
 
   vlscm_forget_value_smob (v_smob);
-  value_free (v_smob->value);
+  value_decref (v_smob->value);
 
   return 0;
 }
@@ -253,8 +253,7 @@ vlscm_scm_from_value (struct value *value)
   SCM v_scm = vlscm_make_value_smob ();
   value_smob *v_smob = (value_smob *) SCM_SMOB_DATA (v_scm);
 
-  v_smob->value = value;
-  release_value_or_incref (value);
+  v_smob->value = release_value (value).release ();
   vlscm_remember_scheme_value (v_smob);
 
   return v_scm;

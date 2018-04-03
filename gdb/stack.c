@@ -1645,7 +1645,6 @@ info_frame_command (const char *addr_exp, int from_tty)
 	      }
 
 	    release_value (value);
-	    value_free (value);
 	    need_nl = 0;
 	  }
 	/* else keep quiet.  */

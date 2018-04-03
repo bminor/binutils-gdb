@@ -292,7 +292,7 @@ lval_func_free_closure (struct value *v)
 
   if (c->refc == 0)
     {
-      value_free (c->val); /* Decrement the reference counter of the value.  */
+      value_decref (c->val); /* Decrement the reference counter of the value.  */
       xfree (c->indices);
       xfree (c);
     }

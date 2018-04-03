@@ -1004,7 +1004,6 @@ address_from_register (int regnum, struct frame_info *frame)
 
   result = value_as_address (value);
   release_value (value);
-  value_free (value);
 
   return result;
 }

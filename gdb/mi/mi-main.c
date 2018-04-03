@@ -1017,8 +1017,6 @@ register_changed_p (int regnum, readonly_detached_regcache *prev_regs,
 
   release_value (prev_value);
   release_value (this_value);
-  value_free (prev_value);
-  value_free (this_value);
   return ret;
 }
 

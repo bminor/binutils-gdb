@@ -1376,7 +1376,7 @@ entry_data_value_free_closure (struct value *v)
 {
   struct value *target_val = (struct value *) value_computed_closure (v);
 
-  value_free (target_val);
+  value_decref (target_val);
 }
 
 /* Vector for methods for an entry value reference where the referenced value
@@ -1434,7 +1434,7 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
 					       target_type, caller_frame,
 					       caller_per_cu);
 
-  release_value (target_val);
+  release_value (target_val).release ();
   val = allocate_computed_value (type, &entry_data_value_funcs,
 				 target_val /* closure */);
 
@@ -2299,7 +2299,7 @@ free_pieced_value_closure (struct value *v)
     {
       for (dwarf_expr_piece &p : c->pieces)
 	if (p.location == DWARF_VALUE_STACK)
-	  value_free (p.v.value);
+	  value_decref (p.v.value);
 
       delete c;
     }
@@ -2482,9 +2482,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    /* Preserve VALUE because we are going to free values back
 	       to the mark, but we still need the value contents
 	       below.  */
-	    value_incref (value);
+	    value_ref_ptr value_holder (value_incref (value));
 	    free_values.free_to_mark ();
-	    gdb_value_up value_holder (value);
 
 	    retval = allocate_value (subobj_type);
 

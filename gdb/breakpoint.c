@@ -1740,7 +1740,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	 no longer relevant.  We don't want to report a watchpoint hit
 	 to the user when the old value and the new value may actually
 	 be completely different objects.  */
-      value_free (b->val);
+      value_decref (b->val);
       b->val = NULL;
       b->val_valid = 0;
 
@@ -1795,7 +1795,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	    {
 	      v = extract_bitfield_from_watchpoint_value (b, v);
 	      if (v != NULL)
-		release_value (v);
+		release_value (v).release ();
 	    }
 	  b->val = v;
 	  b->val_valid = 1;
@@ -1971,7 +1971,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	{
 	  next = value_next (v);
 	  if (v != b->val)
-	    value_free (v);
+	    value_decref (v);
 	}
 
       /* If a software watchpoint is not watching any memory, then the
@@ -3952,7 +3952,7 @@ breakpoint_init_inferior (enum inf_context context)
 		  /* Reset val field to force reread of starting value in
 		     insert_breakpoints.  */
 		  if (w->val)
-		    value_free (w->val);
+		    value_decref (w->val);
 		  w->val = NULL;
 		  w->val_valid = 0;
 		}
@@ -4200,7 +4200,7 @@ is_catchpoint (struct breakpoint *ep)
 bpstats::~bpstats ()
 {
   if (old_val != NULL)
-    value_free (old_val);
+    value_decref (old_val);
   if (bp_location_at != NULL)
     decref_bp_location (&bp_location_at);
 }
@@ -4237,10 +4237,7 @@ bpstats::bpstats (const bpstats &other)
     print_it (other.print_it)
 {
   if (old_val != NULL)
-    {
-      old_val = value_copy (old_val);
-      release_value (old_val);
-    }
+    old_val = release_value (value_copy (old_val)).release ();
   incref_bp_location (bp_location_at);
 }
 
@@ -4364,7 +4361,7 @@ bpstat_clear_actions (void)
 
       if (bs->old_val != NULL)
 	{
-	  value_free (bs->old_val);
+	  value_decref (bs->old_val);
 	  bs->old_val = NULL;
 	}
     }
@@ -4942,7 +4939,7 @@ watchpoint_check (bpstat bs)
 	{
 	  if (new_val != NULL)
 	    {
-	      release_value (new_val);
+	      release_value (new_val).release ();
 	      value_free_to_mark (mark);
 	    }
 	  bs->old_val = b->val;
@@ -10102,7 +10099,7 @@ watchpoint::~watchpoint ()
 {
   xfree (this->exp_string);
   xfree (this->exp_string_reparse);
-  value_free (this->val);
+  value_decref (this->val);
 }
 
 /* Implement the "re_set" breakpoint_ops method for watchpoints.  */
@@ -10725,8 +10722,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
       int ret;
 
       exp_valid_block = NULL;
-      val = value_addr (result);
-      release_value (val);
+      val = release_value (value_addr (result)).release ();
       value_free_to_mark (mark);
 
       if (use_mask)
@@ -10740,7 +10736,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	}
     }
   else if (val != NULL)
-    release_value (val);
+    release_value (val).release ();
 
   tok = skip_spaces (arg);
   end_tok = skip_to_space (tok);
@@ -14546,7 +14542,7 @@ invalidate_bp_value_on_memory_change (struct inferior *inferior,
 		  && loc->address + loc->length > addr
 		  && addr + len > loc->address)
 		{
-		  value_free (wp->val);
+		  value_decref (wp->val);
 		  wp->val = NULL;
 		  wp->val_valid = 0;
 		}

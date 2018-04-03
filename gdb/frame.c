@@ -1117,7 +1117,6 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   /* Dispose of the new value.  This prevents watchpoints from
      trying to watch the saved frame pointer.  */
   release_value (value);
-  value_free (value);
 }
 
 void
@@ -1264,7 +1263,6 @@ frame_unwind_register_signed (struct frame_info *frame, int regnum)
 				      byte_order);
 
   release_value (value);
-  value_free (value);
   return r;
 }
 
@@ -1299,7 +1297,6 @@ frame_unwind_register_unsigned (struct frame_info *frame, int regnum)
 					 byte_order);
 
   release_value (value);
-  value_free (value);
   return r;
 }
 
@@ -1446,12 +1443,10 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
 	  if (*optimizedp || *unavailablep)
 	    {
 	      release_value (value);
-	      value_free (value);
 	      return 0;
 	    }
 	  memcpy (myaddr, value_contents_all (value) + offset, curr_len);
 	  release_value (value);
-	  value_free (value);
 	}
 
       myaddr += curr_len;
@@ -1500,7 +1495,6 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
 		  curr_len);
 	  put_frame_register (frame, regnum, value_contents_raw (value));
 	  release_value (value);
-	  value_free (value);
 	}
 
       myaddr += curr_len;

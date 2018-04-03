@@ -707,7 +707,7 @@ varobj_clear_saved_item (struct varobj_dynamic *var)
 {
   if (var->saved_item != NULL)
     {
-      value_free (var->saved_item->value);
+      value_decref (var->saved_item->value);
       delete var->saved_item;
       var->saved_item = NULL;
     }
@@ -761,7 +761,7 @@ update_dynamic_varobj_children (struct varobj *var,
 	  /* Release vitem->value so its lifetime is not bound to the
 	     execution of a command.  */
 	  if (item != NULL && item->value != NULL)
-	    release_value_or_incref (item->value);
+	    release_value (item->value).release ();
 	}
 
       if (item == NULL)
@@ -1393,7 +1393,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 
   /* We must always keep the new value, since children depend on it.  */
   if (var->value != NULL && var->value != value)
-    value_free (var->value);
+    value_decref (var->value);
   var->value = value;
   if (value && value_lazy (value) && intentionally_not_fetched)
     var->not_fetched = true;
@@ -1990,7 +1990,7 @@ varobj::~varobj ()
 
   varobj_iter_delete (var->dynamic->child_iter);
   varobj_clear_saved_item (var->dynamic);
-  value_free (var->value);
+  value_decref (var->value);
 
   if (is_root_p (var))
     delete var->root;

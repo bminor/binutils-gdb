@@ -1,3 +1,50 @@
+2018-04-06  Tom Tromey  <tom@tromey.com>
+
+	* varobj.c (varobj_clear_saved_item)
+	(update_dynamic_varobj_children, install_new_value, ~varobj):
+	Update.
+	* value.h (value_incref): Move declaration earlier.
+	(value_decref): Rename from value_free.
+	(struct value_ref_policy): New.
+	(value_ref_ptr): New typedef.
+	(struct value_deleter): Remove.
+	(gdb_value_up): Remove typedef.
+	(release_value): Change return type.
+	(release_value_or_incref): Remove.
+	* value.c (set_value_parent): Update.
+	(value_incref): Change return type.
+	(value_decref): Rename from value_free.
+	(value_free_to_mark, free_all_values, free_value_chain): Update.
+	(release_value): Return value_ref_ptr.
+	(release_value_or_incref): Remove.
+	(record_latest_value, set_internalvar, clear_internalvar):
+	Update.
+	* stack.c (info_frame_command): Don't call value_free.
+	* python/py-value.c (valpy_dealloc, valpy_new)
+	(value_to_value_object): Update.
+	* printcmd.c (do_examine): Update.
+	* opencl-lang.c (lval_func_free_closure): Update.
+	* mi/mi-main.c (register_changed_p): Don't call value_free.
+	* mep-tdep.c (mep_frame_prev_register): Don't call value_free.
+	* m88k-tdep.c (m88k_frame_prev_register): Don't call value_free.
+	* m68hc11-tdep.c (m68hc11_frame_prev_register): Don't call
+	value_free.
+	* guile/scm-value.c (vlscm_free_value_smob)
+	(vlscm_scm_from_value): Update.
+	* frame.c (frame_register_unwind, frame_unwind_register_signed)
+	(frame_unwind_register_unsigned, get_frame_register_bytes)
+	(put_frame_register_bytes): Don't call value_free.
+	* findvar.c (address_from_register): Don't call value_free.
+	* dwarf2read.c (dwarf2_compute_name): Don't call value_free.
+	* dwarf2loc.c (entry_data_value_free_closure)
+	(value_of_dwarf_reg_entry, free_pieced_value_closure)
+	(dwarf2_evaluate_loc_desc_full): Update.
+	* breakpoint.c (update_watchpoint, breakpoint_init_inferior)
+	(~bpstats, bpstats, bpstat_clear_actions, watchpoint_check)
+	(~watchpoint, watch_command_1)
+	(invalidate_bp_value_on_memory_change): Update.
+	* alpha-tdep.c (alpha_register_to_value): Don't call value_free.
+
 2018-04-06  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/23022

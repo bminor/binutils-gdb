@@ -252,7 +252,6 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
   if (*optimizedp || *unavailablep)
     {
       release_value (value);
-      value_free (value);
       return 0;
     }
 
@@ -262,7 +261,6 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
   alpha_sts (gdbarch, out, value_contents_all (value));
 
   release_value (value);
-  value_free (value);
   return 1;
 }
 

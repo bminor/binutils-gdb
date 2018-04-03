@@ -1094,7 +1094,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	  last_examine_address = next_address;
 
 	  if (last_examine_value)
-	    value_free (last_examine_value);
+	    value_decref (last_examine_value);
 
 	  /* The value to be displayed is not fetched greedily.
 	     Instead, to avoid the possibility of a fetched value not
@@ -1108,7 +1108,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	  last_examine_value = value_at_lazy (val_type, next_address);
 
 	  if (last_examine_value)
-	    release_value (last_examine_value);
+	    release_value (last_examine_value).release ();
 
 	  print_formatted (last_examine_value, size, &opts, gdb_stdout);
 

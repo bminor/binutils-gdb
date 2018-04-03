@@ -2005,7 +2005,6 @@ mep_frame_prev_register (struct frame_info *this_frame,
 				       MEP_LP_REGNUM);
       lp = value_as_long (value);
       release_value (value);
-      value_free (value);
 
       return frame_unwind_got_constant (this_frame, regnum, lp & ~1);
     }
@@ -2036,13 +2035,11 @@ mep_frame_prev_register (struct frame_info *this_frame,
 
 	  psw = value_as_long (value);
 	  release_value (value);
-	  value_free (value);
 
           /* Get the LP's value, too.  */
 	  value = get_frame_register_value (this_frame, MEP_LP_REGNUM);
 	  lp = value_as_long (value);
 	  release_value (value);
-	  value_free (value);
 
           /* If LP.LTOM is set, then toggle PSW.OM.  */
 	  if (lp & 0x1)

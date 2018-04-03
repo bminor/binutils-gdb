@@ -10974,7 +10974,6 @@ dwarf2_compute_name (const char *name,
 		      opts.raw = 1;
 		      value_print (v, &buf, &opts);
 		      release_value (v);
-		      value_free (v);
 		    }
 		}
 

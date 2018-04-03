@@ -1151,7 +1151,7 @@ set_value_parent (struct value *value, struct value *parent)
   value->parent = parent;
   if (parent != NULL)
     value_incref (parent);
-  value_free (old);
+  value_decref (old);
 }
 
 gdb_byte *
@@ -1594,10 +1594,11 @@ value_mark (void)
 /* Take a reference to VAL.  VAL will not be deallocated until all
    references are released.  */
 
-void
+struct value *
 value_incref (struct value *val)
 {
   val->reference_count++;
+  return val;
 }
 
 /* Release a reference to VAL, which was acquired with value_incref.
@@ -1605,7 +1606,7 @@ value_incref (struct value *val)
    chain.  */
 
 void
-value_free (struct value *val)
+value_decref (struct value *val)
 {
   if (val)
     {
@@ -1617,7 +1618,7 @@ value_free (struct value *val)
       /* If there's an associated parent value, drop our reference to
 	 it.  */
       if (val->parent != NULL)
-	value_free (val->parent);
+	value_decref (val->parent);
 
       if (VALUE_LVAL (val) == lval_computed)
 	{
@@ -1647,7 +1648,7 @@ value_free_to_mark (const struct value *mark)
     {
       next = val->next;
       val->released = 1;
-      value_free (val);
+      value_decref (val);
     }
   all_values = val;
 }
@@ -1666,7 +1667,7 @@ free_all_values (void)
     {
       next = val->next;
       val->released = 1;
-      value_free (val);
+      value_decref (val);
     }
 
   all_values = 0;
@@ -1682,50 +1683,48 @@ free_value_chain (struct value *v)
   for (; v; v = next)
     {
       next = value_next (v);
-      value_free (v);
+      value_decref (v);
     }
 }
 
 /* Remove VAL from the chain all_values
    so it will not be freed automatically.  */
 
-void
+value_ref_ptr
 release_value (struct value *val)
 {
   struct value *v;
+  bool released = false;
 
   if (all_values == val)
     {
       all_values = val->next;
       val->next = NULL;
-      val->released = 1;
-      return;
+      released = true;
     }
-
-  for (v = all_values; v; v = v->next)
+  else
     {
-      if (v->next == val)
+      for (v = all_values; v; v = v->next)
 	{
-	  v->next = val->next;
-	  val->next = NULL;
-	  val->released = 1;
-	  break;
+	  if (v->next == val)
+	    {
+	      v->next = val->next;
+	      val->next = NULL;
+	      released = true;
+	      break;
+	    }
 	}
     }
-}
 
-/* If the value is not already released, release it.
-   If the value is already released, increment its reference count.
-   That is, this function ensures that the value is released from the
-   value chain and that the caller owns a reference to it.  */
+  if (!released)
+    {
+      /* We must always return an owned reference.  Normally this
+	 happens because we transfer the reference from the value
+	 chain, but in this case the value was not on the chain.  */
+      value_incref (val);
+    }
 
-void
-release_value_or_incref (struct value *val)
-{
-  if (val->released)
-    value_incref (val);
-  else
-    release_value (val);
+  return value_ref_ptr (val);
 }
 
 /* Release all values up to mark  */
@@ -1896,11 +1895,6 @@ record_latest_value (struct value *val)
      but the current contents of that location.  c'est la vie...  */
   val->modifiable = 0;
 
-  /* The value may have already been released, in which case we're adding a
-     new reference for its entry in the history.  That is why we call
-     release_value_or_incref here instead of release_value.  */
-  release_value_or_incref (val);
-
   /* Here we treat value_history_count as origin-zero
      and applying to the value being stored now.  */
 
@@ -1913,7 +1907,7 @@ record_latest_value (struct value *val)
       value_history_chain = newobj;
     }
 
-  value_history_chain->values[i] = val;
+  value_history_chain->values[i] = release_value (val).release ();
 
   /* Now we regard value_history_count as origin-one
      and applying to the value just stored.  */
@@ -2416,7 +2410,7 @@ set_internalvar (struct internalvar *var, struct value *val)
 	 deleted by free_all_values.  From here on this function should not
 	 call error () until new_data is installed into the var->u to avoid
 	 leaking memory.  */
-      release_value (new_data.value);
+      release_value (new_data.value).release ();
 
       /* Internal variables which are created from values with a dynamic
          location don't need the location property of the origin anymore.
@@ -2478,7 +2472,7 @@ clear_internalvar (struct internalvar *var)
   switch (var->kind)
     {
     case INTERNALVAR_VALUE:
-      value_free (var->u.value);
+      value_decref (var->u.value);
       break;
 
     case INTERNALVAR_STRING:

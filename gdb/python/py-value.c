@@ -88,7 +88,7 @@ valpy_dealloc (PyObject *obj)
   if (self->next)
     self->next->prev = self->prev;
 
-  value_free (self->value);
+  value_decref (self->value);
 
   if (self->address)
     /* Use braces to appease gcc warning.  *sigh*  */
@@ -147,8 +147,7 @@ valpy_new (PyTypeObject *subtype, PyObject *args, PyObject *keywords)
       return NULL;
     }
 
-  value_obj->value = value;
-  release_value_or_incref (value);
+  value_obj->value = release_value (value).release ();
   value_obj->address = NULL;
   value_obj->type = NULL;
   value_obj->dynamic_type = NULL;
@@ -1583,8 +1582,7 @@ value_to_value_object (struct value *val)
   val_obj = PyObject_New (value_object, &value_object_type);
   if (val_obj != NULL)
     {
-      val_obj->value = val;
-      release_value_or_incref (val);
+      val_obj->value = release_value (val).release ();
       val_obj->address = NULL;
       val_obj->type = NULL;
       val_obj->dynamic_type = NULL;
