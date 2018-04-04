@@ -3317,6 +3317,7 @@ pe_implied_import_dll (const char *filename)
   bfd_vma rdata_end = 0;
   bfd_vma bss_start = 1;
   bfd_vma bss_end = 0;
+  int from;
 
   /* No, I can't use bfd here.  kernel32.dll puts its export table in
      the middle of the .rdata section.  */
@@ -3454,6 +3455,40 @@ pe_implied_import_dll (const char *filename)
     {
       if (pe_dll_extra_pe_debug)
 	printf ("%s is already loaded\n", dllname);
+      return TRUE;
+    }
+
+  /* This is an optimized version of the insertion loop, which avoids lots of
+     calls to realloc and memmove from def_file_add_import.  */
+  if ((from = def_file_add_import_from (pe_def_file, nexp,
+					erva + pe_as32 (erva + name_rvas),
+					dllname, 0, NULL, NULL)) >= 0)
+    {
+      for (i = 0; i < nexp; i++)
+	{
+	  /* Pointer to the names vector.  */
+	  bfd_vma name_rva = pe_as32 (erva + name_rvas + i * 4);
+	  def_file_import *imp;
+	  /* Pointer to the function address vector.  */
+	  bfd_vma func_rva = pe_as32 (erva + exp_funcbase + i * 4);
+	  /* is_data is true if the address is in the data, rdata or bss
+	     segment.  */
+	  const int is_data =
+	    (func_rva >= data_start && func_rva < data_end)
+	    || (func_rva >= rdata_start && func_rva < rdata_end)
+	    || (func_rva >= bss_start && func_rva < bss_end);
+
+	  imp = def_file_add_import_at (pe_def_file, from + i, erva + name_rva,
+					dllname, i, NULL, NULL);
+	  /* Mark symbol type.  */
+	  imp->data = is_data;
+
+	  if (pe_dll_extra_pe_debug)
+	    printf ("%s dll-name: %s sym: %s addr: 0x%lx %s\n",
+		    __FUNCTION__, dllname, erva + name_rva,
+		    (unsigned long) func_rva, is_data ? "(data)" : "");
+	}
+
       return TRUE;
     }
 

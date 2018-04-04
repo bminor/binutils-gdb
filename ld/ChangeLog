@@ -1,5 +1,16 @@
 2018-04-04  Eric Botcazou  <ebotcazou@adacore.com>
 
+	* deffile.h (def_file_add_import_from): Declare.
+	(def_file_add_import_at): Likewise.
+	* deffilep.y (fill_in_import): New function extracted from...
+	(def_file_add_import): ...here.  Call it.
+	(def_file_add_import_from): New function.
+	(def_file_add_import_at): Likewise.
+	* pe-dll.c (pe_implied_import_dll): Use an optimized version of the
+	insertion loop for imported symbols if possible.
+
+2018-04-04  Eric Botcazou  <ebotcazou@adacore.com>
+
 	* emultempl/pe.em (U_SIZE): Delete.
 	(pe_data_import_dll): Likewise.
 	(make_import_fixup): Return void, take 4th parameter and pass it down
