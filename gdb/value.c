@@ -186,8 +186,6 @@ struct value
       }
     else if (VALUE_LVAL (this) == lval_xcallable)
       delete location.xm_worker;
-
-    xfree (contents);
   }
 
   DISABLE_COPY_AND_ASSIGN (value);
@@ -332,7 +330,7 @@ struct value
 
   /* Actual contents of the value.  Target byte-order.  NULL or not
      valid if lazy is nonzero.  */
-  gdb_byte *contents = nullptr;
+  gdb::unique_xmalloc_ptr<gdb_byte> contents;
 
   /* Unavailable ranges in CONTENTS.  We mark unavailable ranges,
      rather than available, since the common and default case is for a
@@ -875,8 +873,8 @@ value_contents_bits_eq (const struct value *val1, int offset1,
 	}
 
       /* Compare the available/valid contents.  */
-      if (memcmp_with_bit_offsets (val1->contents, offset1,
-				   val2->contents, offset2, l) != 0)
+      if (memcmp_with_bit_offsets (val1->contents.get (), offset1,
+				   val2->contents.get (), offset2, l) != 0)
 	return false;
 
       length -= h;
@@ -1012,8 +1010,8 @@ allocate_value_contents (struct value *val)
   if (!val->contents)
     {
       check_type_length_before_alloc (val->enclosing_type);
-      val->contents
-	= (gdb_byte *) xzalloc (TYPE_LENGTH (val->enclosing_type));
+      val->contents.reset
+	((gdb_byte *) xzalloc (TYPE_LENGTH (val->enclosing_type)));
     }
 }
 
@@ -1137,14 +1135,14 @@ value_contents_raw (struct value *value)
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
 
   allocate_value_contents (value);
-  return value->contents + value->embedded_offset * unit_size;
+  return value->contents.get () + value->embedded_offset * unit_size;
 }
 
 gdb_byte *
 value_contents_all_raw (struct value *value)
 {
   allocate_value_contents (value);
-  return value->contents;
+  return value->contents.get ();
 }
 
 struct type *
@@ -1227,14 +1225,14 @@ value_contents_for_printing (struct value *value)
 {
   if (value->lazy)
     value_fetch_lazy (value);
-  return value->contents;
+  return value->contents.get ();
 }
 
 const gdb_byte *
 value_contents_for_printing_const (const struct value *value)
 {
   gdb_assert (!value->lazy);
-  return value->contents;
+  return value->contents.get ();
 }
 
 const gdb_byte *
@@ -2877,7 +2875,8 @@ set_value_enclosing_type (struct value *val, struct type *new_encl_type)
     {
       check_type_length_before_alloc (new_encl_type);
       val->contents
-	= (gdb_byte *) xrealloc (val->contents, TYPE_LENGTH (new_encl_type));
+	.reset ((gdb_byte *) xrealloc (val->contents.release (),
+				       TYPE_LENGTH (new_encl_type)));
     }
 
   val->enclosing_type = new_encl_type;

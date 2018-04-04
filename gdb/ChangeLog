@@ -1,5 +1,14 @@
 2018-04-06  Tom Tromey  <tom@tromey.com>
 
+	* value.c (~value): Update.
+	(struct value) <contents>: Now unique_xmalloc_ptr.
+	(value_contents_bits_eq, allocate_value_contents)
+	(value_contents_raw, value_contents_all_raw)
+	(value_contents_for_printing, value_contents_for_printing_const)
+	(set_value_enclosing_type): Update.
+
+2018-04-06  Tom Tromey  <tom@tromey.com>
+
 	* value.c (range_s): Remove typedef, VEC.
 	(struct range): Add operator<.
 	(range_lessthan): Remove.
