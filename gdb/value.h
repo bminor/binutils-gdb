@@ -1053,8 +1053,6 @@ extern int unop_user_defined_p (enum exp_opcode op, struct value *arg1);
 
 extern int destructor_name_p (const char *name, struct type *type);
 
-extern void free_all_values (void);
-
 extern void free_value_chain (struct value *v);
 
 extern value_ref_ptr release_value (struct value *val);

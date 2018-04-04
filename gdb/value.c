@@ -1638,26 +1638,6 @@ value_free_to_mark (const struct value *mark)
   all_values = val;
 }
 
-/* Free all the values that have been allocated (except for those released).
-   Call after each command, successful or not.
-   In practice this is called before each command, which is sufficient.  */
-
-void
-free_all_values (void)
-{
-  struct value *val;
-  struct value *next;
-
-  for (val = all_values; val; val = next)
-    {
-      next = val->next;
-      val->released = 1;
-      value_decref (val);
-    }
-
-  all_values = 0;
-}
-
 /* Frees all the elements in a chain of values.  */
 
 void

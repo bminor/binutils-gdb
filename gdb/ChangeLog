@@ -1,5 +1,10 @@
 2018-04-06  Tom Tromey  <tom@tromey.com>
 
+	* value.h (free_all_values): Remove.
+	* value.c (free_all_values): Remove.
+
+2018-04-06  Tom Tromey  <tom@tromey.com>
+
 	* value.c (VALUE_HISTORY_CHUNK, struct value_history_chunk)
 	(value_history_chain, value_history_count): Remove.
 	(value_history): New global.
