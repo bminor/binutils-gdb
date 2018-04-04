@@ -1027,7 +1027,7 @@ elf_hppa_info_to_howto (bfd *abfd,
 {
   unsigned int r_type = ELF32_R_TYPE (elf_reloc->r_info);
   unsigned int type = r_type;
-  reloc_howto_type *howto;
+  reloc_howto_type *howto = NULL;
 
   if (r_type < (unsigned int) R_PARISC_UNIMPLEMENTED)
     {
@@ -1055,7 +1055,7 @@ elf_hppa_info_to_howto_rel (bfd *abfd,
 {
   unsigned int r_type = ELF_R_TYPE (elf_reloc->r_info);
   unsigned int type = r_type;
-  reloc_howto_type *howto;
+  reloc_howto_type *howto = NULL;
 
   if (r_type < (unsigned int) R_PARISC_UNIMPLEMENTED)
     {

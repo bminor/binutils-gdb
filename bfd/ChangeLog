@@ -1,3 +1,8 @@
+2018-04-05  Alan Modra  <amodra@gmail.com>
+
+	* elf-hppa.h (elf_hppa_info_to_howto): Init howto to NULL.
+	(elf_hppa_info_to_howto_rel): Likewise.
+
 2018-04-04  Maciej W. Rozycki  <macro@mips.com>
 
 	* elf-hppa.h (elf_hppa_info_to_howto): Also return
