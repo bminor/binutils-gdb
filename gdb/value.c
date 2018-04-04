@@ -881,25 +881,10 @@ value_contents_eq (const struct value *val1, LONGEST offset1,
 }
 
 
-/* The value-history records all the values printed
-   by print commands during this session.  Each chunk
-   records 60 consecutive values.  The first chunk on
-   the chain records the most recent values.
-   The total number of values is in value_history_count.  */
+/* The value-history records all the values printed by print commands
+   during this session.  */
 
-#define VALUE_HISTORY_CHUNK 60
-
-struct value_history_chunk
-  {
-    struct value_history_chunk *next;
-    struct value *values[VALUE_HISTORY_CHUNK];
-  };
-
-/* Chain of chunks now in use.  */
-
-static struct value_history_chunk *value_history_chain;
-
-static int value_history_count;	/* Abs number of last entry stored.  */
+static std::vector<value_ref_ptr> value_history;
 
 
 /* List of all value objects currently allocated
@@ -1898,24 +1883,9 @@ record_latest_value (struct value *val)
      but the current contents of that location.  c'est la vie...  */
   val->modifiable = 0;
 
-  /* Here we treat value_history_count as origin-zero
-     and applying to the value being stored now.  */
+  value_history.push_back (release_value (val));
 
-  i = value_history_count % VALUE_HISTORY_CHUNK;
-  if (i == 0)
-    {
-      struct value_history_chunk *newobj = XCNEW (struct value_history_chunk);
-
-      newobj->next = value_history_chain;
-      value_history_chain = newobj;
-    }
-
-  value_history_chain->values[i] = release_value (val).release ();
-
-  /* Now we regard value_history_count as origin-one
-     and applying to the value just stored.  */
-
-  return ++value_history_count;
+  return value_history.size ();
 }
 
 /* Return a copy of the value in the history with sequence number NUM.  */
@@ -1923,12 +1893,11 @@ record_latest_value (struct value *val)
 struct value *
 access_value_history (int num)
 {
-  struct value_history_chunk *chunk;
   int i;
   int absnum = num;
 
   if (absnum <= 0)
-    absnum += value_history_count;
+    absnum += value_history.size ();
 
   if (absnum <= 0)
     {
@@ -1939,20 +1908,12 @@ access_value_history (int num)
       else
 	error (_("History does not go back to $$%d."), -num);
     }
-  if (absnum > value_history_count)
+  if (absnum > value_history.size ())
     error (_("History has not yet reached $%d."), absnum);
 
   absnum--;
 
-  /* Now absnum is always absolute and origin zero.  */
-
-  chunk = value_history_chain;
-  for (i = (value_history_count - 1) / VALUE_HISTORY_CHUNK
-	 - absnum / VALUE_HISTORY_CHUNK;
-       i > 0; i--)
-    chunk = chunk->next;
-
-  return value_copy (chunk->values[absnum % VALUE_HISTORY_CHUNK]);
+  return value_copy (value_history[absnum].get ());
 }
 
 static void
@@ -1972,13 +1933,13 @@ show_values (const char *num_exp, int from_tty)
   else
     {
       /* "show values" means print the last 10 values.  */
-      num = value_history_count - 9;
+      num = value_history.size () - 9;
     }
 
   if (num <= 0)
     num = 1;
 
-  for (i = num; i < num + 10 && i <= value_history_count; i++)
+  for (i = num; i < num + 10 && i <= value_history.size (); i++)
     {
       struct value_print_options opts;
 
@@ -2626,7 +2587,6 @@ void
 preserve_values (struct objfile *objfile)
 {
   htab_t copied_types;
-  struct value_history_chunk *cur;
   struct internalvar *var;
   int i;
 
@@ -2634,10 +2594,8 @@ preserve_values (struct objfile *objfile)
      it is soon to be deleted.  */
   copied_types = create_copied_types_hash (objfile);
 
-  for (cur = value_history_chain; cur; cur = cur->next)
-    for (i = 0; i < VALUE_HISTORY_CHUNK; i++)
-      if (cur->values[i])
-	preserve_one_value (cur->values[i], objfile, copied_types);
+  for (const value_ref_ptr &item : value_history)
+    preserve_one_value (item.get (), objfile, copied_types);
 
   for (var = internalvars; var; var = var->next)
     preserve_one_internalvar (var, objfile, copied_types);
