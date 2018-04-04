@@ -745,12 +745,13 @@ static reloc_howto_type elf32_i860_howto_table [] =
 static unsigned char elf_code_to_howto_index[R_860_max + 1];
 
 static reloc_howto_type *
-lookup_howto (unsigned int rtype)
+lookup_howto (bfd *abfd, unsigned int rtype)
 {
   static int initialized = 0;
   int i;
   int howto_tbl_size = (int) (sizeof (elf32_i860_howto_table)
 			/ sizeof (elf32_i860_howto_table[0]));
+  reloc_howto_type *howto = NULL;
 
   if (! initialized)
     {
@@ -761,18 +762,24 @@ lookup_howto (unsigned int rtype)
 	elf_code_to_howto_index[elf32_i860_howto_table[i].type] = i;
     }
 
-  if (rtype > R_860_max)
-    return NULL;
-  i = elf_code_to_howto_index[rtype];
-  if (i >= howto_tbl_size)
-    return NULL;
-  return elf32_i860_howto_table + i;
+  if (rtype < R_860_max)
+    {
+      i = elf_code_to_howto_index[rtype];
+      if (i < howto_tbl_size)
+	howto = elf32_i860_howto_table + i;
+    }
+  if (howto == NULL)
+    {
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, rtype);
+      bfd_set_error (bfd_error_bad_value);
+    }
+  return howto;
 }
 
 /* Given a BFD reloc, return the matching HOWTO structure.  */
 static reloc_howto_type *
-elf32_i860_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
-			      bfd_reloc_code_real_type code)
+elf32_i860_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
 {
   unsigned int rtype;
 
@@ -883,7 +890,7 @@ elf32_i860_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     default:
       return NULL;
     }
-  return lookup_howto (rtype);
+  return lookup_howto (abfd, rtype);
 }
 
 static reloc_howto_type *
@@ -906,12 +913,12 @@ elf32_i860_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Given a ELF reloc, return the matching HOWTO structure.  */
 
 static bfd_boolean
-elf32_i860_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+elf32_i860_info_to_howto_rela (bfd *abfd,
 			       arelent *bfd_reloc,
 			       Elf_Internal_Rela *elf_reloc)
 {
   bfd_reloc->howto
-    = lookup_howto ((unsigned) ELF32_R_TYPE (elf_reloc->r_info));
+    = lookup_howto (abfd, (unsigned) ELF32_R_TYPE (elf_reloc->r_info));
   return bfd_reloc->howto != NULL;
 }
 
@@ -925,7 +932,7 @@ elf32_i860_relocate_splitn (bfd *input_bfd,
 {
   bfd_vma insn;
   reloc_howto_type *howto;
-  howto = lookup_howto ((unsigned) ELF32_R_TYPE (rello->r_info));
+  howto = lookup_howto (input_bfd, (unsigned) ELF32_R_TYPE (rello->r_info));
   insn = bfd_get_32 (input_bfd, contents + rello->r_offset);
 
   /* Relocate.  */
@@ -951,7 +958,7 @@ elf32_i860_relocate_pc16 (bfd *input_bfd,
 {
   bfd_vma insn;
   reloc_howto_type *howto;
-  howto = lookup_howto ((unsigned) ELF32_R_TYPE (rello->r_info));
+  howto = lookup_howto (input_bfd, (unsigned) ELF32_R_TYPE (rello->r_info));
   insn = bfd_get_32 (input_bfd, contents + rello->r_offset);
 
   /* Adjust for PC-relative relocation.  */
@@ -983,7 +990,7 @@ elf32_i860_relocate_pc26 (bfd *input_bfd,
 {
   bfd_vma insn;
   reloc_howto_type *howto;
-  howto = lookup_howto ((unsigned) ELF32_R_TYPE (rello->r_info));
+  howto = lookup_howto (input_bfd, (unsigned) ELF32_R_TYPE (rello->r_info));
   insn = bfd_get_32 (input_bfd, contents + rello->r_offset);
 
   /* Adjust for PC-relative relocation.  */
@@ -1104,7 +1111,7 @@ elf32_i860_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       r_type = ELF32_R_TYPE (rel->r_info);
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-      howto = lookup_howto ((unsigned) ELF32_R_TYPE (rel->r_info));
+      howto = lookup_howto (input_bfd, (unsigned) ELF32_R_TYPE (rel->r_info));
       h     = NULL;
       sym   = NULL;
       sec   = NULL;

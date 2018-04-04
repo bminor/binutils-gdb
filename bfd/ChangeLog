@@ -1,5 +1,18 @@
 2018-04-04  Maciej W. Rozycki  <macro@mips.com>
 
+	* elf32-i860.c (lookup_howto): Add `abfd' parameter.  Set the
+	`bfd_error_bad_value' error and call `_bfd_error_handler' on a
+	howto lookup failure.
+	(elf32_i860_reloc_type_lookup): Adjust `lookup_howto' call
+	accordingly.
+	(elf32_i860_info_to_howto_rela): Likewise.
+	(elf32_i860_relocate_splitn): Likewise.
+	(elf32_i860_relocate_pc16): Likewise.
+	(elf32_i860_relocate_pc26): Likewise.
+	(elf32_i860_relocate_section): Likewise.
+
+2018-04-04  Maciej W. Rozycki  <macro@mips.com>
+
 	* elf32-visium.c (visium_info_to_howto_rela): Correct the range
 	check for `visium_elf_howto_table' table access.
 
