@@ -66,11 +66,17 @@ struct range
 
   /* Length of the range.  */
   LONGEST length;
+
+  /* Returns true if THIS is strictly less than OTHER, useful for
+     searching.  We keep ranges sorted by offset and coalesce
+     overlapping and contiguous ranges, so this just compares the
+     starting offset.  */
+
+  bool operator< (const range &other) const
+  {
+    return offset < other.offset;
+  }
 };
-
-typedef struct range range_s;
-
-DEF_VEC_O(range_s);
 
 /* Returns true if the ranges defined by [offset1, offset1+len1) and
    [offset2, offset2+len2) overlap.  */
@@ -86,25 +92,14 @@ ranges_overlap (LONGEST offset1, LONGEST len1,
   return (l < h);
 }
 
-/* Returns true if the first argument is strictly less than the
-   second, useful for VEC_lower_bound.  We keep ranges sorted by
-   offset and coalesce overlapping and contiguous ranges, so this just
-   compares the starting offset.  */
-
-static int
-range_lessthan (const range_s *r1, const range_s *r2)
-{
-  return r1->offset < r2->offset;
-}
-
 /* Returns true if RANGES contains any range that overlaps [OFFSET,
    OFFSET+LENGTH).  */
 
 static int
-ranges_contain (VEC(range_s) *ranges, LONGEST offset, LONGEST length)
+ranges_contain (const std::vector<range> &ranges, LONGEST offset,
+		LONGEST length)
 {
-  range_s what;
-  LONGEST i;
+  range what;
 
   what.offset = offset;
   what.length = length;
@@ -140,21 +135,22 @@ ranges_contain (VEC(range_s) *ranges, LONGEST offset, LONGEST length)
        I=1
   */
 
-  i = VEC_lower_bound (range_s, ranges, &what, range_lessthan);
 
-  if (i > 0)
+  auto i = std::lower_bound (ranges.begin (), ranges.end (), what);
+
+  if (i > ranges.begin ())
     {
-      struct range *bef = VEC_index (range_s, ranges, i - 1);
+      const struct range &bef = *(i - 1);
 
-      if (ranges_overlap (bef->offset, bef->length, offset, length))
+      if (ranges_overlap (bef.offset, bef.length, offset, length))
 	return 1;
     }
 
-  if (i < VEC_length (range_s, ranges))
+  if (i < ranges.end ())
     {
-      struct range *r = VEC_index (range_s, ranges, i);
+      const struct range &r = *i;
 
-      if (ranges_overlap (r->offset, r->length, offset, length))
+      if (ranges_overlap (r.offset, r.length, offset, length))
 	return 1;
     }
 
@@ -192,8 +188,6 @@ struct value
       delete location.xm_worker;
 
     xfree (contents);
-    VEC_free (range_s, unavailable);
-    VEC_free (range_s, optimized_out);
   }
 
   DISABLE_COPY_AND_ASSIGN (value);
@@ -346,7 +340,7 @@ struct value
      The unavailable ranges are tracked in bits.  Note that a contents
      bit that has been optimized out doesn't really exist in the
      program, so it can't be marked unavailable either.  */
-  VEC(range_s) *unavailable = nullptr;
+  std::vector<range> unavailable;
 
   /* Likewise, but for optimized out contents (a chunk of the value of
      a variable that does not actually exist in the program).  If LVAL
@@ -355,7 +349,7 @@ struct value
      saved registers and optimized-out program variables values are
      treated pretty much the same, except not-saved registers have a
      different string representation and related error strings.  */
-  VEC(range_s) *optimized_out = nullptr;
+  std::vector<range> optimized_out;
 };
 
 /* See value.h.  */
@@ -399,7 +393,7 @@ value_entirely_available (struct value *value)
   if (value->lazy)
     value_fetch_lazy (value);
 
-  if (VEC_empty (range_s, value->unavailable))
+  if (value->unavailable.empty ())
     return 1;
   return 0;
 }
@@ -410,20 +404,20 @@ value_entirely_available (struct value *value)
 
 static int
 value_entirely_covered_by_range_vector (struct value *value,
-					VEC(range_s) **ranges)
+					const std::vector<range> &ranges)
 {
   /* We can only tell whether the whole value is optimized out /
      unavailable when we try to read it.  */
   if (value->lazy)
     value_fetch_lazy (value);
 
-  if (VEC_length (range_s, *ranges) == 1)
+  if (ranges.size () == 1)
     {
-      struct range *t = VEC_index (range_s, *ranges, 0);
+      const struct range &t = ranges[0];
 
-      if (t->offset == 0
-	  && t->length == (TARGET_CHAR_BIT
-			   * TYPE_LENGTH (value_enclosing_type (value))))
+      if (t.offset == 0
+	  && t.length == (TARGET_CHAR_BIT
+			  * TYPE_LENGTH (value_enclosing_type (value))))
 	return 1;
     }
 
@@ -433,24 +427,23 @@ value_entirely_covered_by_range_vector (struct value *value,
 int
 value_entirely_unavailable (struct value *value)
 {
-  return value_entirely_covered_by_range_vector (value, &value->unavailable);
+  return value_entirely_covered_by_range_vector (value, value->unavailable);
 }
 
 int
 value_entirely_optimized_out (struct value *value)
 {
-  return value_entirely_covered_by_range_vector (value, &value->optimized_out);
+  return value_entirely_covered_by_range_vector (value, value->optimized_out);
 }
 
 /* Insert into the vector pointed to by VECTORP the bit range starting of
    OFFSET bits, and extending for the next LENGTH bits.  */
 
 static void
-insert_into_bit_range_vector (VEC(range_s) **vectorp,
+insert_into_bit_range_vector (std::vector<range> *vectorp,
 			      LONGEST offset, LONGEST length)
 {
-  range_s newr;
-  int i;
+  range newr;
 
   /* Insert the range sorted.  If there's overlap or the new range
      would be contiguous with an existing range, merge.  */
@@ -538,76 +531,77 @@ insert_into_bit_range_vector (VEC(range_s) **vectorp,
 
   */
 
-  i = VEC_lower_bound (range_s, *vectorp, &newr, range_lessthan);
-  if (i > 0)
+  auto i = std::lower_bound (vectorp->begin (), vectorp->end (), newr);
+  if (i > vectorp->begin ())
     {
-      struct range *bef = VEC_index (range_s, *vectorp, i - 1);
+      struct range &bef = *(i - 1);
 
-      if (ranges_overlap (bef->offset, bef->length, offset, length))
+      if (ranges_overlap (bef.offset, bef.length, offset, length))
 	{
 	  /* #1 */
-	  ULONGEST l = std::min (bef->offset, offset);
-	  ULONGEST h = std::max (bef->offset + bef->length, offset + length);
+	  ULONGEST l = std::min (bef.offset, offset);
+	  ULONGEST h = std::max (bef.offset + bef.length, offset + length);
 
-	  bef->offset = l;
-	  bef->length = h - l;
+	  bef.offset = l;
+	  bef.length = h - l;
 	  i--;
 	}
-      else if (offset == bef->offset + bef->length)
+      else if (offset == bef.offset + bef.length)
 	{
 	  /* #2 */
-	  bef->length += length;
+	  bef.length += length;
 	  i--;
 	}
       else
 	{
 	  /* #3 */
-	  VEC_safe_insert (range_s, *vectorp, i, &newr);
+	  i = vectorp->insert (i, newr);
 	}
     }
   else
     {
       /* #4 */
-      VEC_safe_insert (range_s, *vectorp, i, &newr);
+      i = vectorp->insert (i, newr);
     }
 
   /* Check whether the ranges following the one we've just added or
      touched can be folded in (#5 above).  */
-  if (i + 1 < VEC_length (range_s, *vectorp))
+  if (i != vectorp->end () && i + 1 < vectorp->end ())
     {
-      struct range *t;
-      struct range *r;
       int removed = 0;
-      int next = i + 1;
+      auto next = i + 1;
 
       /* Get the range we just touched.  */
-      t = VEC_index (range_s, *vectorp, i);
+      struct range &t = *i;
       removed = 0;
 
       i = next;
-      for (; VEC_iterate (range_s, *vectorp, i, r); i++)
-	if (r->offset <= t->offset + t->length)
-	  {
-	    ULONGEST l, h;
+      for (; i < vectorp->end (); i++)
+	{
+	  struct range &r = *i;
+	  if (r.offset <= t.offset + t.length)
+	    {
+	      ULONGEST l, h;
 
-	    l = std::min (t->offset, r->offset);
-	    h = std::max (t->offset + t->length, r->offset + r->length);
+	      l = std::min (t.offset, r.offset);
+	      h = std::max (t.offset + t.length, r.offset + r.length);
 
-	    t->offset = l;
-	    t->length = h - l;
+	      t.offset = l;
+	      t.length = h - l;
 
-	    removed++;
-	  }
-	else
-	  {
-	    /* If we couldn't merge this one, we won't be able to
-	       merge following ones either, since the ranges are
-	       always sorted by OFFSET.  */
-	    break;
-	  }
+	      removed++;
+	    }
+	  else
+	    {
+	      /* If we couldn't merge this one, we won't be able to
+		 merge following ones either, since the ranges are
+		 always sorted by OFFSET.  */
+	      break;
+	    }
+	}
 
       if (removed != 0)
-	VEC_block_remove (range_s, *vectorp, next, removed);
+	vectorp->erase (next, next + removed);
     }
 }
 
@@ -633,15 +627,17 @@ mark_value_bytes_unavailable (struct value *value,
    found, or -1 if none was found.  */
 
 static int
-find_first_range_overlap (VEC(range_s) *ranges, int pos,
+find_first_range_overlap (const std::vector<range> *ranges, int pos,
 			  LONGEST offset, LONGEST length)
 {
-  range_s *r;
   int i;
 
-  for (i = pos; VEC_iterate (range_s, ranges, i, r); i++)
-    if (ranges_overlap (r->offset, r->length, offset, length))
-      return i;
+  for (i = pos; i < ranges->size (); i++)
+    {
+      const range &r = (*ranges)[i];
+      if (ranges_overlap (r.offset, r.length, offset, length))
+	return i;
+    }
 
   return -1;
 }
@@ -754,7 +750,7 @@ memcmp_with_bit_offsets (const gdb_byte *ptr1, size_t offset1_bits,
 struct ranges_and_idx
 {
   /* The ranges.  */
-  VEC(range_s) *ranges;
+  const std::vector<range> *ranges;
 
   /* The range we've last found in RANGES.  Given ranges are sorted,
      we can start the next lookup here.  */
@@ -788,12 +784,12 @@ find_first_range_overlap_and_match (struct ranges_and_idx *rp1,
     return 0;
   else
     {
-      range_s *r1, *r2;
+      const range *r1, *r2;
       ULONGEST l1, h1;
       ULONGEST l2, h2;
 
-      r1 = VEC_index (range_s, rp1->ranges, rp1->idx);
-      r2 = VEC_index (range_s, rp2->ranges, rp2->idx);
+      r1 = &(*rp1->ranges)[rp1->idx];
+      r2 = &(*rp2->ranges)[rp2->idx];
 
       /* Get the unavailable windows intersected by the incoming
 	 ranges.  The first and last ranges that overlap the argument
@@ -849,10 +845,10 @@ value_contents_bits_eq (const struct value *val1, int offset1,
 
   memset (&rp1, 0, sizeof (rp1));
   memset (&rp2, 0, sizeof (rp2));
-  rp1[0].ranges = val1->unavailable;
-  rp2[0].ranges = val2->unavailable;
-  rp1[1].ranges = val1->optimized_out;
-  rp2[1].ranges = val2->optimized_out;
+  rp1[0].ranges = &val1->unavailable;
+  rp2[0].ranges = &val2->unavailable;
+  rp1[1].ranges = &val1->optimized_out;
+  rp2[1].ranges = &val2->optimized_out;
 
   while (length > 0)
     {
@@ -1210,7 +1206,7 @@ error_value_optimized_out (void)
 static void
 require_not_optimized_out (const struct value *value)
 {
-  if (!VEC_empty (range_s, value->optimized_out))
+  if (!value->optimized_out.empty ())
     {
       if (value->lval == lval_register)
 	error (_("register has not been saved in frame"));
@@ -1222,7 +1218,7 @@ require_not_optimized_out (const struct value *value)
 static void
 require_available (const struct value *value)
 {
-  if (!VEC_empty (range_s, value->unavailable))
+  if (!value->unavailable.empty ())
     throw_error (NOT_AVAILABLE_ERROR, _("value is not available"));
 }
 
@@ -1254,19 +1250,16 @@ value_contents_all (struct value *value)
    SRC_BIT_OFFSET+BIT_LENGTH) ranges into *DST_RANGE, adjusted.  */
 
 static void
-ranges_copy_adjusted (VEC (range_s) **dst_range, int dst_bit_offset,
-		      VEC (range_s) *src_range, int src_bit_offset,
+ranges_copy_adjusted (std::vector<range> *dst_range, int dst_bit_offset,
+		      const std::vector<range> &src_range, int src_bit_offset,
 		      int bit_length)
 {
-  range_s *r;
-  int i;
-
-  for (i = 0; VEC_iterate (range_s, src_range, i, r); i++)
+  for (const range &r : src_range)
     {
       ULONGEST h, l;
 
-      l = std::max (r->offset, (LONGEST) src_bit_offset);
-      h = std::min (r->offset + r->length,
+      l = std::max (r.offset, (LONGEST) src_bit_offset);
+      h = std::min (r.offset + r.length,
 		    (LONGEST) src_bit_offset + bit_length);
 
       if (l < h)
@@ -1405,7 +1398,7 @@ value_optimized_out (struct value *value)
 {
   /* We can only know if a value is optimized out once we have tried to
      fetch it.  */
-  if (VEC_empty (range_s, value->optimized_out) && value->lazy)
+  if (value->optimized_out.empty () && value->lazy)
     {
       TRY
 	{
@@ -1418,7 +1411,7 @@ value_optimized_out (struct value *value)
       END_CATCH
     }
 
-  return !VEC_empty (range_s, value->optimized_out);
+  return !value->optimized_out.empty ();
 }
 
 /* Mark contents of VALUE as optimized out, starting at OFFSET bytes, and
@@ -1688,8 +1681,8 @@ value_copy (struct value *arg)
 	      TYPE_LENGTH (value_enclosing_type (arg)));
 
     }
-  val->unavailable = VEC_copy (range_s, arg->unavailable);
-  val->optimized_out = VEC_copy (range_s, arg->optimized_out);
+  val->unavailable = arg->unavailable;
+  val->optimized_out = arg->optimized_out;
   val->parent = arg->parent;
   if (VALUE_LVAL (val) == lval_computed)
     {
@@ -3739,8 +3732,8 @@ value_fetch_lazy (struct value *val)
   /* A value is either lazy, or fully fetched.  The
      availability/validity is only established as we try to fetch a
      value.  */
-  gdb_assert (VEC_empty (range_s, val->optimized_out));
-  gdb_assert (VEC_empty (range_s, val->unavailable));
+  gdb_assert (val->optimized_out.empty ());
+  gdb_assert (val->unavailable.empty ());
   if (value_bitsize (val))
     {
       /* To read a lazy bitfield, read the entire enclosing value.  This

@@ -1,5 +1,24 @@
 2018-04-06  Tom Tromey  <tom@tromey.com>
 
+	* value.c (range_s): Remove typedef, VEC.
+	(struct range): Add operator<.
+	(range_lessthan): Remove.
+	(ranges_contain): Change type.
+	(~value): Update.
+	(struct value) <unavailable, optimized_out>: Now std::vector.
+	(value_entirely_available)
+	(value_entirely_covered_by_range_vector)
+	(value_entirely_unavailable, value_entirely_optimized_out):
+	Update.
+	(insert_into_bit_range_vector): Change argument type.
+	(find_first_range_overlap): Likewise.
+	(struct ranges_and_idx, value_contents_bits_eq)
+	(require_not_optimized_out, require_available): Update.
+	(ranges_copy_adjusted): Change argument types.
+	(value_optimized_out, value_copy, value_fetch_lazy): Update.
+
+2018-04-06  Tom Tromey  <tom@tromey.com>
+
 	* value.c (~value): Update.
 	(struct value) <parent>: Now a value_ref_ptr.
 	(value_parent, set_value_parent, value_address, value_copy):
