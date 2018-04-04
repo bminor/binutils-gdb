@@ -872,7 +872,7 @@ ada_varobj_get_value_of_variable (struct value *value,
 static int
 ada_number_of_children (const struct varobj *var)
 {
-  return ada_varobj_get_number_of_children (var->value, var->type);
+  return ada_varobj_get_number_of_children (var->value.get (), var->type);
 }
 
 static std::string
@@ -884,7 +884,7 @@ ada_name_of_variable (const struct varobj *parent)
 static std::string
 ada_name_of_child (const struct varobj *parent, int index)
 {
-  return ada_varobj_get_name_of_child (parent->value, parent->type,
+  return ada_varobj_get_name_of_child (parent->value.get (), parent->type,
 				       parent->name.c_str (), index);
 }
 
@@ -894,7 +894,7 @@ ada_path_expr_of_child (const struct varobj *child)
   const struct varobj *parent = child->parent;
   const char *parent_path_expr = varobj_get_path_expr (parent);
 
-  return ada_varobj_get_path_expr_of_child (parent->value,
+  return ada_varobj_get_path_expr_of_child (parent->value.get (),
 					    parent->type,
 					    parent->name.c_str (),
 					    parent_path_expr,
@@ -904,14 +904,14 @@ ada_path_expr_of_child (const struct varobj *child)
 static struct value *
 ada_value_of_child (const struct varobj *parent, int index)
 {
-  return ada_varobj_get_value_of_child (parent->value, parent->type,
+  return ada_varobj_get_value_of_child (parent->value.get (), parent->type,
 					parent->name.c_str (), index);
 }
 
 static struct type *
 ada_type_of_child (const struct varobj *parent, int index)
 {
-  return ada_varobj_get_type_of_child (parent->value, parent->type,
+  return ada_varobj_get_type_of_child (parent->value.get (), parent->type,
 				       index);
 }
 
@@ -923,7 +923,8 @@ ada_value_of_variable (const struct varobj *var,
 
   varobj_formatted_print_options (&opts, format);
 
-  return ada_varobj_get_value_of_variable (var->value, var->type, &opts);
+  return ada_varobj_get_value_of_variable (var->value.get (), var->type,
+					   &opts);
 }
 
 /* Implement the "value_is_changeable_p" routine for Ada.  */
@@ -931,7 +932,8 @@ ada_value_of_variable (const struct varobj *var,
 static bool
 ada_value_is_changeable_p (const struct varobj *var)
 {
-  struct type *type = var->value ? value_type (var->value) : var->type;
+  struct type *type = (var->value != nullptr
+		       ? value_type (var->value.get ()) : var->type);
 
   if (ada_is_array_descriptor_type (type)
       && TYPE_CODE (type) == TYPE_CODE_TYPEDEF)

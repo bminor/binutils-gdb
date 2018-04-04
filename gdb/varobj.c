@@ -522,9 +522,9 @@ varobj_set_display_format (struct varobj *var,
     }
 
   if (varobj_value_is_changeable_p (var) 
-      && var->value && !value_lazy (var->value))
+      && var->value != nullptr && !value_lazy (var->value.get ()))
     {
-      var->print_value = varobj_value_get_print_value (var->value,
+      var->print_value = varobj_value_get_print_value (var->value.get (),
 						       var->format, var);
     }
 
@@ -1045,7 +1045,7 @@ varobj_set_value (struct varobj *var, const char *expression)
   gdb_assert (varobj_value_is_changeable_p (var));
 
   /* The value of a changeable variable object must not be lazy.  */
-  gdb_assert (!value_lazy (var->value));
+  gdb_assert (!value_lazy (var->value.get ()));
 
   /* Need to coerce the input.  We want to check if the
      value of the variable object will be different
@@ -1060,7 +1060,7 @@ varobj_set_value (struct varobj *var, const char *expression)
      rather value_contents, will take care of this.  */
   TRY
     {
-      val = value_assign (var->value, value);
+      val = value_assign (var->value.get (), value);
     }
 
   CATCH (except, RETURN_MASK_ERROR)
@@ -1112,9 +1112,9 @@ install_default_visualizer (struct varobj *var)
     {
       PyObject *pretty_printer = NULL;
 
-      if (var->value)
+      if (var->value != nullptr)
 	{
-	  pretty_printer = gdbpy_get_varobj_pretty_printer (var->value);
+	  pretty_printer = gdbpy_get_varobj_pretty_printer (var->value.get ());
 	  if (! pretty_printer)
 	    {
 	      gdbpy_print_stack ();
@@ -1149,7 +1149,8 @@ construct_visualizer (struct varobj *var, PyObject *constructor)
     pretty_printer = NULL;
   else
     {
-      pretty_printer = instantiate_pretty_printer (constructor, var->value);
+      pretty_printer = instantiate_pretty_printer (constructor,
+						   var->value.get ());
       if (! pretty_printer)
 	{
 	  gdbpy_print_stack ();
@@ -1326,8 +1327,9 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 
   /* Get a reference now, before possibly passing it to any Python
      code that might release it.  */
+  value_ref_ptr value_holder;
   if (value != NULL)
-    value_incref (value);
+    value_holder.reset (value_incref (value));
 
   /* Below, we'll be comparing string rendering of old and new
      values.  Don't get string rendering if the value is
@@ -1354,7 +1356,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 	{
 	  /* Try to compare the values.  That requires that both
 	     values are non-lazy.  */
-	  if (var->not_fetched && value_lazy (var->value))
+	  if (var->not_fetched && value_lazy (var->value.get ()))
 	    {
 	      /* This is a frozen varobj and the value was never read.
 		 Presumably, UI shows some "never read" indicator.
@@ -1372,7 +1374,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 	    }
 	  else
 	    {
-	      gdb_assert (!value_lazy (var->value));
+	      gdb_assert (!value_lazy (var->value.get ()));
 	      gdb_assert (!value_lazy (value));
 
 	      gdb_assert (!var->print_value.empty () && !print_value.empty ());
@@ -1392,9 +1394,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
     }
 
   /* We must always keep the new value, since children depend on it.  */
-  if (var->value != NULL && var->value != value)
-    value_decref (var->value);
-  var->value = value;
+  var->value = value_holder;
   if (value && value_lazy (value) && intentionally_not_fetched)
     var->not_fetched = true;
   else
@@ -1407,8 +1407,8 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
      to see if the variable changed.  */
   if (var->dynamic->pretty_printer != NULL)
     {
-      print_value = varobj_value_get_print_value (var->value, var->format,
-						  var);
+      print_value = varobj_value_get_print_value (var->value.get (),
+						  var->format, var);
       if ((var->print_value.empty () && !print_value.empty ())
 	  || (!var->print_value.empty () && print_value.empty ())
 	  || (!var->print_value.empty () && !print_value.empty ()
@@ -1417,7 +1417,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
     }
   var->print_value = print_value;
 
-  gdb_assert (!var->value || value_type (var->value));
+  gdb_assert (var->value == nullptr || value_type (var->value.get ()));
 
   return changed;
 }
@@ -1990,7 +1990,6 @@ varobj::~varobj ()
 
   varobj_iter_delete (var->dynamic->child_iter);
   varobj_clear_saved_item (var->dynamic);
-  value_decref (var->value);
 
   if (is_root_p (var))
     delete var->root;
@@ -2014,8 +2013,8 @@ varobj_get_value_type (const struct varobj *var)
 {
   struct type *type;
 
-  if (var->value)
-    type = value_type (var->value);
+  if (var->value != nullptr)
+    type = value_type (var->value.get ());
   else
     type = var->type;
 
@@ -2261,7 +2260,8 @@ my_value_of_variable (struct varobj *var, enum varobj_display_formats format)
   if (var->root->is_valid)
     {
       if (var->dynamic->pretty_printer != NULL)
-	return varobj_value_get_print_value (var->value, var->format, var);
+	return varobj_value_get_print_value (var->value.get (), var->format,
+					     var);
       return (*var->root->lang_ops->value_of_variable) (var, format);
     }
   else
@@ -2397,7 +2397,8 @@ varobj_editable_p (const struct varobj *var)
 {
   struct type *type;
 
-  if (!(var->root->is_valid && var->value && VALUE_LVAL (var->value)))
+  if (!(var->root->is_valid && var->value != nullptr
+	&& VALUE_LVAL (var->value.get ())))
     return false;
 
   type = varobj_get_value_type (var);
