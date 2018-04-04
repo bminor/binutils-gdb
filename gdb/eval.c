@@ -179,14 +179,14 @@ evaluate_subexpression_type (struct expression *exp, int subexp)
    set to any referenced values.  *VALP will never be a lazy value.
    This is the value which we store in struct breakpoint.
 
-   If VAL_CHAIN is non-NULL, *VAL_CHAIN will be released from the
-   value chain.  The caller must free the values individually.  If
-   VAL_CHAIN is NULL, all generated values will be left on the value
-   chain.  */
+   If VAL_CHAIN is non-NULL, the values put into *VAL_CHAIN will be
+   released from the value chain.  If VAL_CHAIN is NULL, all generated
+   values will be left on the value chain.  */
 
 void
 fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
-		    struct value **resultp, struct value **val_chain,
+		    struct value **resultp,
+		    std::vector<value_ref_ptr> *val_chain,
 		    int preserve_errors)
 {
   struct value *mark, *new_mark, *result;
@@ -195,7 +195,7 @@ fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
   if (resultp)
     *resultp = NULL;
   if (val_chain)
-    *val_chain = NULL;
+    val_chain->clear ();
 
   /* Evaluate the expression.  */
   mark = value_mark ();
@@ -253,8 +253,7 @@ fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
     {
       /* Return the chain of intermediate values.  We use this to
 	 decide which addresses to watch.  */
-      *val_chain = new_mark;
-      value_release_to_mark (mark);
+      *val_chain = value_release_to_mark (mark);
     }
 }
 

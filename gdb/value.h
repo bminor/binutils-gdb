@@ -915,7 +915,7 @@ extern value *eval_skip_value (expression *exp);
 
 extern void fetch_subexp_value (struct expression *exp, int *pc,
 				struct value **valp, struct value **resultp,
-				struct value **val_chain,
+				std::vector<value_ref_ptr> *val_chain,
 				int preserve_errors);
 
 extern const char *extract_field_op (struct expression *exp, int *subexp);
@@ -1053,8 +1053,6 @@ extern int unop_user_defined_p (enum exp_opcode op, struct value *arg1);
 
 extern int destructor_name_p (const char *name, struct type *type);
 
-extern void free_value_chain (struct value *v);
-
 extern value_ref_ptr release_value (struct value *val);
 
 extern int record_latest_value (struct value *val);
@@ -1084,7 +1082,14 @@ extern void value_print_array_elements (struct value *val,
 					struct ui_file *stream, int format,
 					enum val_prettyformat pretty);
 
-extern struct value *value_release_to_mark (const struct value *mark);
+/* Release values from the value chain and return them.  Values
+   created after MARK are released.  If MARK is nullptr, or if MARK is
+   not found on the value chain, then all values are released.  Values
+   are returned in reverse order of creation; that is, newest
+   first.  */
+
+extern std::vector<value_ref_ptr> value_release_to_mark
+    (const struct value *mark);
 
 extern void val_print (struct type *type,
 		       LONGEST embedded_offset, CORE_ADDR address,

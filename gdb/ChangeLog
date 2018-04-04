@@ -1,5 +1,19 @@
 2018-04-06  Tom Tromey  <tom@tromey.com>
 
+	* value.h (fetch_subexp_value, value_release_to_mark): Update.
+	(free_value_chain): Remove.
+	* value.c (free_value_chain): Remove.
+	(value_release_to_mark): Return a std::vector.
+	* ppc-linux-nat.c (num_memory_accesses): Change "chain" to a
+	std::vector.
+	(check_condition): Update.
+	* eval.c (fetch_subexp_value): Change "val_chain" to a
+	std::vector.
+	* breakpoint.c (update_watchpoint): Update.
+	(can_use_hardware_watchpoint): Change "vals" to a std::vector.
+
+2018-04-06  Tom Tromey  <tom@tromey.com>
+
 	* value.h (free_all_values): Remove.
 	* value.c (free_all_values): Remove.
 

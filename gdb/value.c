@@ -1638,20 +1638,6 @@ value_free_to_mark (const struct value *mark)
   all_values = val;
 }
 
-/* Frees all the elements in a chain of values.  */
-
-void
-free_value_chain (struct value *v)
-{
-  struct value *next;
-
-  for (; v; v = next)
-    {
-      next = value_next (v);
-      value_decref (v);
-    }
-}
-
 /* Remove VAL from the chain all_values
    so it will not be freed automatically.  */
 
@@ -1695,25 +1681,30 @@ release_value (struct value *val)
   return value_ref_ptr (val);
 }
 
-/* Release all values up to mark  */
-struct value *
+/* See value.h.  */
+
+std::vector<value_ref_ptr>
 value_release_to_mark (const struct value *mark)
 {
-  struct value *val;
+  std::vector<value_ref_ptr> result;
   struct value *next;
 
-  for (val = next = all_values; next; next = next->next)
+  for (next = all_values; next; next = next->next)
     {
+      next->released = 1;
+      result.emplace_back (next);
+
       if (next->next == mark)
 	{
-	  all_values = next->next;
+	  struct value *save = next->next;
 	  next->next = NULL;
-	  return val;
+	  next = save;
+	  break;
 	}
-      next->released = 1;
     }
-  all_values = 0;
-  return val;
+
+  all_values = next;
+  return result;
 }
 
 /* Return a copy of the value ARG.

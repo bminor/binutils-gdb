@@ -1840,10 +1840,9 @@ calculate_dvc (CORE_ADDR addr, int len, CORE_ADDR data_value,
    other kinds of values which are not acceptable in a condition
    expression (e.g., lval_computed or lval_internalvar).  */
 static int
-num_memory_accesses (struct value *v)
+num_memory_accesses (const std::vector<value_ref_ptr> &chain)
 {
   int found_memory_cnt = 0;
-  struct value *head = v;
 
   /* The idea here is that evaluating an expression generates a series
      of values, one holding the value of every subexpression.  (The
@@ -1860,8 +1859,10 @@ num_memory_accesses (struct value *v)
      notice that an expression contains an inferior function call.
      FIXME.  */
 
-  for (; v; v = value_next (v))
+  for (const value_ref_ptr &iter : chain)
     {
+      struct value *v = iter.get ();
+
       /* Constants and values from the history are fine.  */
       if (VALUE_LVAL (v) == not_lval || deprecated_value_modifiable (v) == 0)
 	continue;
@@ -1892,7 +1893,8 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
 		 CORE_ADDR *data_value, int *len)
 {
   int pc = 1, num_accesses_left, num_accesses_right;
-  struct value *left_val, *right_val, *left_chain, *right_chain;
+  struct value *left_val, *right_val;
+  std::vector<value_ref_ptr> left_chain, right_chain;
 
   if (cond->elts[0].opcode != BINOP_EQUAL)
     return 0;
@@ -1901,22 +1903,13 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
   num_accesses_left = num_memory_accesses (left_chain);
 
   if (left_val == NULL || num_accesses_left < 0)
-    {
-      free_value_chain (left_chain);
-
-      return 0;
-    }
+    return 0;
 
   fetch_subexp_value (cond, &pc, &right_val, NULL, &right_chain, 0);
   num_accesses_right = num_memory_accesses (right_chain);
 
   if (right_val == NULL || num_accesses_right < 0)
-    {
-      free_value_chain (left_chain);
-      free_value_chain (right_chain);
-
-      return 0;
-    }
+    return 0;
 
   if (num_accesses_left == 1 && num_accesses_right == 0
       && VALUE_LVAL (left_val) == lval_memory
@@ -1939,15 +1932,7 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
       *len = TYPE_LENGTH (check_typedef (value_type (right_val)));
     }
   else
-    {
-      free_value_chain (left_chain);
-      free_value_chain (right_chain);
-
-      return 0;
-    }
-
-  free_value_chain (left_chain);
-  free_value_chain (right_chain);
+    return 0;
 
   return 1;
 }

@@ -117,7 +117,8 @@ static std::vector<symtab_and_line> decode_location_default
   (struct breakpoint *b, const struct event_location *location,
    struct program_space *search_pspace);
 
-static int can_use_hardware_watchpoint (struct value *);
+static int can_use_hardware_watchpoint
+    (const std::vector<value_ref_ptr> &vals);
 
 static void mention (struct breakpoint *);
 
@@ -1777,7 +1778,8 @@ update_watchpoint (struct watchpoint *b, int reparse)
   else if (within_current_scope && b->exp)
     {
       int pc = 0;
-      struct value *val_chain, *v, *result, *next;
+      std::vector<value_ref_ptr> val_chain;
+      struct value *v, *result, *next;
       struct program_space *frame_pspace;
 
       fetch_subexp_value (b->exp.get (), &pc, &v, &result, &val_chain, 0);
@@ -1799,15 +1801,18 @@ update_watchpoint (struct watchpoint *b, int reparse)
       frame_pspace = get_frame_program_space (get_selected_frame (NULL));
 
       /* Look at each value on the value chain.  */
-      for (v = val_chain; v; v = value_next (v))
+      gdb_assert (!val_chain.empty ());
+      for (const value_ref_ptr &iter : val_chain)
 	{
+	  v = iter.get ();
+
 	  /* If it's a memory location, and GDB actually needed
 	     its contents to evaluate the expression, then we
 	     must watch it.  If the first value returned is
 	     still lazy, that means an error occurred reading it;
 	     watch it anyway in case it becomes readable.  */
 	  if (VALUE_LVAL (v) == lval_memory
-	      && (v == val_chain || ! value_lazy (v)))
+	      && (v == val_chain[0] || ! value_lazy (v)))
 	    {
 	      struct type *vtype = check_typedef (value_type (v));
 
@@ -1960,13 +1965,6 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		      : bp_loc_hardware_watchpoint);
 	  for (bl = b->loc; bl; bl = bl->next)
 	    bl->loc_type = loc_type;
-	}
-
-      for (v = val_chain; v; v = next)
-	{
-	  next = value_next (v);
-	  if (v != b->val)
-	    value_decref (v);
 	}
 
       /* If a software watchpoint is not watching any memory, then the
@@ -10875,14 +10873,16 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
    If the watchpoint cannot be handled in hardware return zero.  */
 
 static int
-can_use_hardware_watchpoint (struct value *v)
+can_use_hardware_watchpoint (const std::vector<value_ref_ptr> &vals)
 {
   int found_memory_cnt = 0;
-  struct value *head = v;
 
   /* Did the user specifically forbid us to use hardware watchpoints? */
   if (!can_use_hw_watchpoints)
     return 0;
+
+  gdb_assert (!vals.empty ());
+  struct value *head = vals[0].get ();
 
   /* Make sure that the value of the expression depends only upon
      memory contents, and values computed from them within GDB.  If we
@@ -10903,8 +10903,10 @@ can_use_hardware_watchpoint (struct value *v)
      function calls are special in any way.  So this function may not
      notice that an expression involving an inferior function call
      can't be watched with hardware watchpoints.  FIXME.  */
-  for (; v; v = value_next (v))
+  for (const value_ref_ptr &iter : vals)
     {
+      struct value *v = iter.get ();
+
       if (VALUE_LVAL (v) == lval_memory)
 	{
 	  if (v != head && value_lazy (v))
