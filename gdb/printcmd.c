@@ -78,7 +78,7 @@ static CORE_ADDR last_examine_address;
 /* Contents of last address examined.
    This is not valid past the end of the `x' command!  */
 
-static struct value *last_examine_value;
+static value_ref_ptr last_examine_value;
 
 /* Largest offset between a symbolic value and an address, that will be
    printed as `0x1234 <symbol+offset>'.  */
@@ -1093,9 +1093,6 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	     object.  */
 	  last_examine_address = next_address;
 
-	  if (last_examine_value)
-	    value_decref (last_examine_value);
-
 	  /* The value to be displayed is not fetched greedily.
 	     Instead, to avoid the possibility of a fetched value not
 	     being used, its retrieval is delayed until the print code
@@ -1105,12 +1102,10 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	     the disassembler be modified so that LAST_EXAMINE_VALUE
 	     is left with the byte sequence from the last complete
 	     instruction fetched from memory?  */
-	  last_examine_value = value_at_lazy (val_type, next_address);
+	  last_examine_value
+	    = release_value (value_at_lazy (val_type, next_address));
 
-	  if (last_examine_value)
-	    release_value (last_examine_value).release ();
-
-	  print_formatted (last_examine_value, size, &opts, gdb_stdout);
+	  print_formatted (last_examine_value.get (), size, &opts, gdb_stdout);
 
 	  /* Display any branch delay slots following the final insn.  */
 	  if (format == 'i' && count == 1)
@@ -1668,12 +1663,12 @@ x_command (const char *exp, int from_tty)
   last_format = fmt.format;
 
   /* Set a couple of internal variables if appropriate.  */
-  if (last_examine_value)
+  if (last_examine_value != nullptr)
     {
       /* Make last address examined available to the user as $_.  Use
          the correct pointer type.  */
       struct type *pointer_type
-	= lookup_pointer_type (value_type (last_examine_value));
+	= lookup_pointer_type (value_type (last_examine_value.get ()));
       set_internalvar (lookup_internalvar ("_"),
 		       value_from_pointer (pointer_type,
 					   last_examine_address));
@@ -1682,10 +1677,10 @@ x_command (const char *exp, int from_tty)
 	 as $__.  If the last value has not been fetched from memory
 	 then don't fetch it now; instead mark it by voiding the $__
 	 variable.  */
-      if (value_lazy (last_examine_value))
+      if (value_lazy (last_examine_value.get ()))
 	clear_internalvar (lookup_internalvar ("__"));
       else
-	set_internalvar (lookup_internalvar ("__"), last_examine_value);
+	set_internalvar (lookup_internalvar ("__"), last_examine_value.get ());
     }
 }
 
