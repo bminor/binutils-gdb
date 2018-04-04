@@ -12815,7 +12815,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       switch ((*codep & 0x3))
 	{
 	case 0:
-	  vex.prefix = 0;
 	  break;
 	case 1:
 	  vex.prefix = DATA_PREFIX_OPCODE;
@@ -12880,7 +12879,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       switch ((*codep & 0x3))
 	{
 	case 0:
-	  vex.prefix = 0;
 	  break;
 	case 1:
 	  vex.prefix = DATA_PREFIX_OPCODE;
@@ -12918,12 +12916,10 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       /* For the 2-byte VEX prefix in 32-bit mode, the highest bit in
 	 VEX.vvvv is 1.  */
       vex.register_specifier = (~(*codep >> 3)) & 0xf;
-      vex.w = 0;
       vex.length = (*codep & 0x4) ? 256 : 128;
       switch ((*codep & 0x3))
 	{
 	case 0:
-	  vex.prefix = 0;
 	  break;
 	case 1:
 	  vex.prefix = DATA_PREFIX_OPCODE;
@@ -12998,7 +12994,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       switch ((*codep & 0x3))
 	{
 	case 0:
-	  vex.prefix = 0;
 	  break;
 	case 1:
 	  vex.prefix = DATA_PREFIX_OPCODE;
@@ -13356,7 +13351,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
   need_vex = 0;
   need_vex_reg = 0;
   vex_w_done = 0;
-  vex.evex = 0;
+  memset (&vex, 0, sizeof (vex));
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
     {
