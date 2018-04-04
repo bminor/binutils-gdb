@@ -22,6 +22,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/iq2000.h"
+#include "libiberty.h"
 
 /* Forward declarations.  */
 
@@ -435,7 +436,7 @@ iq2000_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
       break;
 
     default:
-      if (r_type >= (unsigned int) R_IQ2000_max)
+      if (r_type >= ARRAY_SIZE (iq2000_elf_howto_table))
 	{
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
