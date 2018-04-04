@@ -25,6 +25,7 @@
 #include "elf/frv.h"
 #include "dwarf2.h"
 #include "hashtab.h"
+#include "libiberty.h"
 
 /* Forward declarations.  */
 
@@ -2551,7 +2552,7 @@ frv_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
       break;
 
     default:
-      if (r_type >= (unsigned int) R_FRV_max)
+      if (r_type >= ARRAY_SIZE (elf32_frv_howto_table))
 	{
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
