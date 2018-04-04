@@ -168,9 +168,44 @@ static struct cmd_list_element *functionlist;
 
 struct value
 {
+  explicit value (struct type *type_)
+    : modifiable (1),
+      lazy (1),
+      initialized (1),
+      stack (0),
+      type (type_),
+      enclosing_type (type_)
+  {
+    location.address = 0;
+  }
+
+  ~value ()
+  {
+    /* If there's an associated parent value, drop our reference to
+       it.  */
+    if (parent != NULL)
+      value_decref (parent);
+
+    if (VALUE_LVAL (this) == lval_computed)
+      {
+	const struct lval_funcs *funcs = location.computed.funcs;
+
+	if (funcs->free_closure)
+	  funcs->free_closure (this);
+      }
+    else if (VALUE_LVAL (this) == lval_xcallable)
+      delete location.xm_worker;
+
+    xfree (contents);
+    VEC_free (range_s, unavailable);
+    VEC_free (range_s, optimized_out);
+  }
+
+  DISABLE_COPY_AND_ASSIGN (value);
+
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
-  enum lval_type lval;
+  enum lval_type lval = not_lval;
 
   /* Is it modifiable?  Only relevant if lval != not_lval.  */
   unsigned int modifiable : 1;
@@ -237,27 +272,27 @@ struct value
   /* Describes offset of a value within lval of a structure in target
      addressable memory units.  Note also the member embedded_offset
      below.  */
-  LONGEST offset;
+  LONGEST offset = 0;
 
   /* Only used for bitfields; number of bits contained in them.  */
-  LONGEST bitsize;
+  LONGEST bitsize = 0;
 
   /* Only used for bitfields; position of start of field.  For
      gdbarch_bits_big_endian=0 targets, it is the position of the LSB.  For
      gdbarch_bits_big_endian=1 targets, it is the position of the MSB.  */
-  LONGEST bitpos;
+  LONGEST bitpos = 0;
 
   /* The number of references to this value.  When a value is created,
      the value chain holds a reference, so REFERENCE_COUNT is 1.  If
      release_value is called, this value is removed from the chain but
      the caller of release_value now has a reference to this value.
      The caller must arrange for a call to value_free later.  */
-  int reference_count;
+  int reference_count = 1;
 
   /* Only used for bitfields; the containing value.  This allows a
      single read from the target when displaying multiple
      bitfields.  */
-  struct value *parent;
+  struct value *parent = nullptr;
 
   /* Type of the value.  */
   struct type *type;
@@ -303,12 +338,12 @@ struct value
      `type', and `embedded_offset' is zero, so everything works
      normally.  */
   struct type *enclosing_type;
-  LONGEST embedded_offset;
-  LONGEST pointed_to_offset;
+  LONGEST embedded_offset = 0;
+  LONGEST pointed_to_offset = 0;
 
   /* Actual contents of the value.  Target byte-order.  NULL or not
      valid if lazy is nonzero.  */
-  gdb_byte *contents;
+  gdb_byte *contents = nullptr;
 
   /* Unavailable ranges in CONTENTS.  We mark unavailable ranges,
      rather than available, since the common and default case is for a
@@ -316,7 +351,7 @@ struct value
      The unavailable ranges are tracked in bits.  Note that a contents
      bit that has been optimized out doesn't really exist in the
      program, so it can't be marked unavailable either.  */
-  VEC(range_s) *unavailable;
+  VEC(range_s) *unavailable = nullptr;
 
   /* Likewise, but for optimized out contents (a chunk of the value of
      a variable that does not actually exist in the program).  If LVAL
@@ -325,7 +360,7 @@ struct value
      saved registers and optimized-out program variables values are
      treated pretty much the same, except not-saved registers have a
      different string representation and related error strings.  */
-  VEC(range_s) *optimized_out;
+  VEC(range_s) *optimized_out = nullptr;
 };
 
 /* See value.h.  */
@@ -901,23 +936,9 @@ allocate_value_lazy (struct type *type)
      description correctly.  */
   check_typedef (type);
 
-  val = XCNEW (struct value);
-  val->contents = NULL;
-  val->type = type;
-  val->enclosing_type = type;
-  VALUE_LVAL (val) = not_lval;
-  val->location.address = 0;
-  val->offset = 0;
-  val->bitpos = 0;
-  val->bitsize = 0;
-  val->lazy = 1;
-  val->embedded_offset = 0;
-  val->pointed_to_offset = 0;
-  val->modifiable = 1;
-  val->initialized = 1;  /* Default to initialized.  */
+  val = new struct value (type);
 
   /* Values start out on the all_values chain.  */
-  val->reference_count = 1;
   all_values.emplace_back (val);
 
   return val;
@@ -1579,32 +1600,13 @@ value_incref (struct value *val)
 void
 value_decref (struct value *val)
 {
-  if (val)
+  if (val != nullptr)
     {
       gdb_assert (val->reference_count > 0);
       val->reference_count--;
-      if (val->reference_count > 0)
-	return;
-
-      /* If there's an associated parent value, drop our reference to
-	 it.  */
-      if (val->parent != NULL)
-	value_decref (val->parent);
-
-      if (VALUE_LVAL (val) == lval_computed)
-	{
-	  const struct lval_funcs *funcs = val->location.computed.funcs;
-
-	  if (funcs->free_closure)
-	    funcs->free_closure (val);
-	}
-      else if (VALUE_LVAL (val) == lval_xcallable)
-	  delete val->location.xm_worker;
-
-      xfree (val->contents);
-      VEC_free (range_s, val->unavailable);
+      if (val->reference_count == 0)
+	delete val;
     }
-  xfree (val);
 }
 
 /* Free all values allocated since MARK was obtained by value_mark
