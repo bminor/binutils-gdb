@@ -198,9 +198,6 @@ struct value
      used instead of read_memory to enable extra caching.  */
   unsigned int stack : 1;
 
-  /* If the value has been released.  */
-  unsigned int released : 1;
-
   /* Location of value (if lval).  */
   union
   {
@@ -308,12 +305,6 @@ struct value
   struct type *enclosing_type;
   LONGEST embedded_offset;
   LONGEST pointed_to_offset;
-
-  /* Values are stored in a chain, so that they can be deleted easily
-     over calls to the inferior.  Values assigned to internal
-     variables, put into the value history or exposed to Python are
-     taken off this list.  */
-  struct value *next;
 
   /* Actual contents of the value.  Target byte-order.  NULL or not
      valid if lazy is nonzero.  */
@@ -891,7 +882,7 @@ static std::vector<value_ref_ptr> value_history;
    (except for those released by calls to release_value)
    This is so they can be freed after each command.  */
 
-static struct value *all_values;
+static std::vector<value_ref_ptr> all_values;
 
 /* Allocate a lazy value for type TYPE.  Its actual content is
    "lazily" allocated too: the content field of the return value is
@@ -912,8 +903,6 @@ allocate_value_lazy (struct type *type)
 
   val = XCNEW (struct value);
   val->contents = NULL;
-  val->next = all_values;
-  all_values = val;
   val->type = type;
   val->enclosing_type = type;
   VALUE_LVAL (val) = not_lval;
@@ -929,6 +918,7 @@ allocate_value_lazy (struct type *type)
 
   /* Values start out on the all_values chain.  */
   val->reference_count = 1;
+  all_values.emplace_back (val);
 
   return val;
 }
@@ -1069,12 +1059,6 @@ allocate_optimized_out_value (struct type *type)
 }
 
 /* Accessor methods.  */
-
-struct value *
-value_next (const struct value *value)
-{
-  return value->next;
-}
 
 struct type *
 value_type (const struct value *value)
@@ -1573,7 +1557,9 @@ deprecated_value_modifiable (const struct value *value)
 struct value *
 value_mark (void)
 {
-  return all_values;
+  if (all_values.empty ())
+    return nullptr;
+  return all_values.back ().get ();
 }
 
 /* Take a reference to VAL.  VAL will not be deallocated until all
@@ -1626,16 +1612,11 @@ value_decref (struct value *val)
 void
 value_free_to_mark (const struct value *mark)
 {
-  struct value *val;
-  struct value *next;
-
-  for (val = all_values; val && val != mark; val = next)
-    {
-      next = val->next;
-      val->released = 1;
-      value_decref (val);
-    }
-  all_values = val;
+  auto iter = std::find (all_values.begin (), all_values.end (), mark);
+  if (iter == all_values.end ())
+    all_values.clear ();
+  else
+    all_values.erase (iter + 1, all_values.end ());
 }
 
 /* Remove VAL from the chain all_values
@@ -1645,40 +1626,25 @@ value_ref_ptr
 release_value (struct value *val)
 {
   struct value *v;
-  bool released = false;
 
   if (val == nullptr)
     return value_ref_ptr ();
 
-  if (all_values == val)
+  std::vector<value_ref_ptr>::reverse_iterator iter;
+  for (iter = all_values.rbegin (); iter != all_values.rend (); ++iter)
     {
-      all_values = val->next;
-      val->next = NULL;
-      released = true;
-    }
-  else
-    {
-      for (v = all_values; v; v = v->next)
+      if (*iter == val)
 	{
-	  if (v->next == val)
-	    {
-	      v->next = val->next;
-	      val->next = NULL;
-	      released = true;
-	      break;
-	    }
+	  value_ref_ptr result = *iter;
+	  all_values.erase (iter.base () - 1);
+	  return result;
 	}
     }
 
-  if (!released)
-    {
-      /* We must always return an owned reference.  Normally this
-	 happens because we transfer the reference from the value
-	 chain, but in this case the value was not on the chain.  */
-      value_incref (val);
-    }
-
-  return value_ref_ptr (val);
+  /* We must always return an owned reference.  Normally this happens
+     because we transfer the reference from the value chain, but in
+     this case the value was not on the chain.  */
+  return value_ref_ptr (value_incref (val));
 }
 
 /* See value.h.  */
@@ -1687,23 +1653,16 @@ std::vector<value_ref_ptr>
 value_release_to_mark (const struct value *mark)
 {
   std::vector<value_ref_ptr> result;
-  struct value *next;
 
-  for (next = all_values; next; next = next->next)
+  auto iter = std::find (all_values.begin (), all_values.end (), mark);
+  if (iter == all_values.end ())
+    std::swap (result, all_values);
+  else
     {
-      next->released = 1;
-      result.emplace_back (next);
-
-      if (next->next == mark)
-	{
-	  struct value *save = next->next;
-	  next->next = NULL;
-	  next = save;
-	  break;
-	}
+      std::move (iter + 1, all_values.end (), std::back_inserter (result));
+      all_values.erase (iter + 1, all_values.end ());
     }
-
-  all_values = next;
+  std::reverse (result.begin (), result.end ());
   return result;
 }
 

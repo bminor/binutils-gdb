@@ -1,5 +1,14 @@
 2018-04-06  Tom Tromey  <tom@tromey.com>
 
+	* value.c (struct value) <released, next>: Remove.
+	(all_values): Now a std::vector.
+	(allocate_value_lazy): Update.
+	(value_next): Remove.
+	(value_mark, value_free_to_mark, release_value)
+	(value_release_to_mark): Update.
+
+2018-04-06  Tom Tromey  <tom@tromey.com>
+
 	* value.h (fetch_subexp_value, value_release_to_mark): Update.
 	(free_value_chain): Remove.
 	* value.c (free_value_chain): Remove.
