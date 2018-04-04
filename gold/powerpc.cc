@@ -4034,9 +4034,8 @@ Target_powerpc<size, big_endian>::make_brlt_section(Layout* layout)
       bool is_pic = parameters->options().output_is_position_independent();
       if (is_pic)
 	{
-	  // When PIC we can't fill in .branch_lt (like .plt it can be
-	  // a bss style section) but must initialise at runtime via
-	  // dynamic relocations.
+	  // When PIC we can't fill in .branch_lt but must initialise at
+	  // runtime via dynamic relocations.
 	  this->rela_dyn_section(layout);
 	  brlt_rel = new Reloc_section(false);
 	  if (this->rela_dyn_->output_section())
@@ -4050,13 +4049,11 @@ Target_powerpc<size, big_endian>::make_brlt_section(Layout* layout)
 	  ->add_output_section_data(this->brlt_section_);
       else
 	layout->add_output_section_data(".branch_lt",
-					(is_pic ? elfcpp::SHT_NOBITS
-					 : elfcpp::SHT_PROGBITS),
+					elfcpp::SHT_PROGBITS,
 					elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,
 					this->brlt_section_,
-					(is_pic ? ORDER_SMALL_BSS
-					 : ORDER_SMALL_DATA),
-					false);
+					ORDER_RELRO,
+					true);
     }
 }
 
