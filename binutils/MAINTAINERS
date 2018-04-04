@@ -83,7 +83,7 @@ responsibility among the other maintainers.
   GOLD		   Ian Lance Taylor <iant@google.com>
   GOLD		   Cary Coutant <ccoutant@gmail.com>
   H8300		   Prafulla Thakare <prafulla.thakare@kpitcummins.com>
-  HPPA		   Dave Anglin <dave.anglin@nrc.ca>
+  HPPA		   Dave Anglin <dave.anglin@bell.net>
   HPPA elf32	   Alan Modra <amodra@gmail.com>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
   IA-64		   Jim Wilson <wilson@tuliptree.org>
