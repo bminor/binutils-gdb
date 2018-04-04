@@ -3402,6 +3402,8 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 static reloc_howto_type *
 mips_elf_n32_rtype_to_howto (bfd *abfd, unsigned int r_type, bfd_boolean rela_p)
 {
+  reloc_howto_type *howto = NULL;
+
   switch (r_type)
     {
     case R_MIPS_GNU_VTINHERIT:
@@ -3425,29 +3427,31 @@ mips_elf_n32_rtype_to_howto (bfd *abfd, unsigned int r_type, bfd_boolean rela_p)
       if (r_type >= R_MICROMIPS_min && r_type < R_MICROMIPS_max)
 	{
 	  if (rela_p)
-	    return &elf_micromips_howto_table_rela[r_type - R_MICROMIPS_min];
+	    howto = &elf_micromips_howto_table_rela[r_type - R_MICROMIPS_min];
 	  else
-	    return &elf_micromips_howto_table_rel[r_type - R_MICROMIPS_min];
+	    howto = &elf_micromips_howto_table_rel[r_type - R_MICROMIPS_min];
 	}
       if (r_type >= R_MIPS16_min && r_type < R_MIPS16_max)
 	{
 	  if (rela_p)
-	    return &elf_mips16_howto_table_rela[r_type - R_MIPS16_min];
+	    howto = &elf_mips16_howto_table_rela[r_type - R_MIPS16_min];
 	  else
-	    return &elf_mips16_howto_table_rel[r_type - R_MIPS16_min];
+	    howto = &elf_mips16_howto_table_rel[r_type - R_MIPS16_min];
 	}
-      if (r_type >= R_MIPS_max)
+      if (r_type < R_MIPS_max)
 	{
-	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
-			      abfd, r_type);
-	  bfd_set_error (bfd_error_bad_value);
-	  return NULL;
+	  if (rela_p)
+	    howto = &elf_mips_howto_table_rela[r_type];
+	  else
+	    howto = &elf_mips_howto_table_rel[r_type];
 	}
-      if (rela_p)
-	return &elf_mips_howto_table_rela[r_type];
-      else
-	return &elf_mips_howto_table_rel[r_type];
-      break;
+      if (howto != NULL && howto->name != NULL)
+	return howto;
+
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
     }
 }
 

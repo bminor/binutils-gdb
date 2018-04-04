@@ -2198,6 +2198,8 @@ mips_elf32_rtype_to_howto (bfd *abfd,
 			   unsigned int r_type,
 			   bfd_boolean rela_p ATTRIBUTE_UNUSED)
 {
+  reloc_howto_type *howto = NULL;
+
   switch (r_type)
     {
     case R_MIPS_GNU_VTINHERIT:
@@ -2216,17 +2218,18 @@ mips_elf32_rtype_to_howto (bfd *abfd,
       return &elf_mips_eh_howto;
     default:
       if (r_type >= R_MICROMIPS_min && r_type < R_MICROMIPS_max)
-	return &elf_micromips_howto_table_rel[r_type - R_MICROMIPS_min];
+	howto = &elf_micromips_howto_table_rel[r_type - R_MICROMIPS_min];
       if (r_type >= R_MIPS16_min && r_type < R_MIPS16_max)
-	return &elf_mips16_howto_table_rel[r_type - R_MIPS16_min];
-      if (r_type >= (unsigned int) R_MIPS_max)
-	{
-	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
-			      abfd, r_type);
-	  bfd_set_error (bfd_error_bad_value);
-	  return NULL;
-	}
-      return &elf_mips_howto_table_rel[r_type];
+	howto = &elf_mips16_howto_table_rel[r_type - R_MIPS16_min];
+      if (r_type < R_MIPS_max)
+	howto = &elf_mips_howto_table_rel[r_type];
+      if (howto != NULL && howto->name != NULL)
+	return howto;
+
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
     }
 }
 
