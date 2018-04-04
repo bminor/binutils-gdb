@@ -1,3 +1,10 @@
+2018-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23025
+	* i386-dis.c (get_valid_dis386): Don't set vex.prefix nor vex.w
+	to 0.
+	(print_insn): Clear vex instead of vex.evex.
+
 2018-04-04  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
