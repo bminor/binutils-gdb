@@ -1026,8 +1026,15 @@ elf_hppa_info_to_howto (bfd *abfd,
 			Elf_Internal_Rela *elf_reloc)
 {
   unsigned int r_type = ELF32_R_TYPE (elf_reloc->r_info);
+  unsigned int type = r_type;
+  reloc_howto_type *howto;
 
-  if (r_type >= (unsigned int) R_PARISC_UNIMPLEMENTED)
+  if (r_type < (unsigned int) R_PARISC_UNIMPLEMENTED)
+    {
+      howto = &elf_hppa_howto_table[r_type];
+      type = howto->type;
+    }
+  if (type >= (unsigned int) R_PARISC_UNIMPLEMENTED)
     {
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
@@ -1035,7 +1042,7 @@ elf_hppa_info_to_howto (bfd *abfd,
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
-  bfd_reloc->howto = &elf_hppa_howto_table[r_type];
+  bfd_reloc->howto = howto;
   return TRUE;
 }
 
@@ -1047,8 +1054,15 @@ elf_hppa_info_to_howto_rel (bfd *abfd,
 			    Elf_Internal_Rela *elf_reloc)
 {
   unsigned int r_type = ELF_R_TYPE (elf_reloc->r_info);
+  unsigned int type = r_type;
+  reloc_howto_type *howto;
 
-  if (r_type >= (unsigned int) R_PARISC_UNIMPLEMENTED)
+  if (r_type < (unsigned int) R_PARISC_UNIMPLEMENTED)
+    {
+      howto = &elf_hppa_howto_table[r_type];
+      type = howto->type;
+    }
+  if (type >= (unsigned int) R_PARISC_UNIMPLEMENTED)
     {
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
@@ -1056,8 +1070,7 @@ elf_hppa_info_to_howto_rel (bfd *abfd,
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
-
-  bfd_reloc->howto = &elf_hppa_howto_table[r_type];
+  bfd_reloc->howto = howto;
   return TRUE;
 }
 
