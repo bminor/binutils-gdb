@@ -168,7 +168,7 @@ static struct bfd_section *edata_s, *reloc_s;
 static unsigned char *edata_d, *reloc_d;
 static size_t edata_sz, reloc_sz;
 static int runtime_pseudo_relocs_created = 0;
-static int runtime_pseudp_reloc_v2_init = 0;
+static bfd_boolean runtime_pseudp_reloc_v2_init = FALSE;
 
 typedef struct
 {
@@ -1287,10 +1287,12 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 
 static struct bfd_section *current_sec;
 
-void
-pe_walk_relocs_of_symbol (struct bfd_link_info *info,
-			  char *name,
-			  int (*cb) (arelent *, asection *, char *))
+static void
+pe_walk_relocs (struct bfd_link_info *info,
+		char *name,
+		const char *symname,
+		struct bfd_hash_table *import_hash,
+		void (*cb) (arelent *, asection *, char *, const char *))
 {
   bfd *b;
   asection *s;
@@ -1328,8 +1330,20 @@ pe_walk_relocs_of_symbol (struct bfd_link_info *info,
 	    {
 	      struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
 
-	      if (!strcmp (name, sym->name))
-		cb (relocs[i], s, name);
+	      /* Warning: the callback needs to be passed NAME directly.  */
+	      if (import_hash)
+		{
+		  if (bfd_hash_lookup (import_hash, sym->name, FALSE, FALSE))
+		    {
+		      strcpy (name, sym->name);
+		      cb (relocs[i], s, name, symname);
+		    }
+		}
+	      else
+		{
+		  if (strcmp (name, sym->name) == 0)
+		    cb (relocs[i], s, name, symname);
+		}
 	    }
 
 	  free (relocs);
@@ -1339,6 +1353,138 @@ pe_walk_relocs_of_symbol (struct bfd_link_info *info,
 	  /* free (symbols); */
 	}
     }
+}
+
+void
+pe_find_data_imports (const char *symhead,
+		      void (*cb) (arelent *, asection *, char *, const char *))
+{
+  struct bfd_link_hash_entry *undef;
+  const size_t headlen = strlen (symhead);
+  size_t namelen = 0;
+  char *buf, *name;
+  struct bfd_hash_table *import_hash;
+
+  for (undef = link_info.hash->undefs; undef; undef = undef->u.undef.next)
+    if (undef->type == bfd_link_hash_undefined)
+      {
+	size_t len = strlen (undef->root.string);
+	if (namelen < len)
+	  namelen = len;
+      }
+  if (namelen == 0)
+    return;
+
+  /* For the pseudo-relocation support version 2, we can collect the symbols
+     that are subject to auto-import and adjust the relocations en masse.  */
+  if (link_info.pei386_runtime_pseudo_reloc == 2)
+    {
+      import_hash
+	= (struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
+      if (!bfd_hash_table_init (import_hash,
+				bfd_hash_newfunc,
+				sizeof (struct bfd_hash_entry)))
+	einfo (_("%F%P: bfd_hash_table_init failed: %E\n"));
+    }
+  else
+    import_hash = NULL;
+
+  /* We are being a bit cunning here.  The buffer will have space for
+     prefixes at the beginning.  The prefix is modified here and in a
+     number of functions called from this function.  */
+#define PREFIX_LEN 32
+  buf = xmalloc (PREFIX_LEN + namelen + 1);
+  name = buf + PREFIX_LEN;
+
+  for (undef = link_info.hash->undefs; undef; undef = undef->u.undef.next)
+    if (undef->type == bfd_link_hash_undefined)
+      {
+	struct bfd_link_hash_entry *sym;
+	char *impname;
+
+	if (pe_dll_extra_pe_debug)
+	  printf ("%s:%s\n", __FUNCTION__, undef->root.string);
+
+	strcpy (name, undef->root.string);
+	impname = name - (sizeof "__imp_" - 1);
+	memcpy (impname, "__imp_", sizeof "__imp_" - 1);
+
+	sym = bfd_link_hash_lookup (link_info.hash, impname, 0, 0, 1);
+
+	if (sym && sym->type == bfd_link_hash_defined)
+	  {
+	    if (import_hash)
+	      bfd_hash_lookup (import_hash, undef->root.string, TRUE, FALSE);
+	    else
+	      {
+		bfd *b = sym->u.def.section->owner;
+		const char *symname = NULL;
+		asymbol **symbols;
+		int nsyms, i;
+
+		if (!bfd_generic_link_read_symbols (b))
+		  {
+		    einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
+		    return;
+		  }
+
+		symbols = bfd_get_outsymbols (b);
+		nsyms = bfd_get_symcount (b);
+
+		for (i = 0; i < nsyms; i++)
+		  if (strncmp (symbols[i]->name, symhead, headlen) == 0)
+		    {
+		      if (pe_dll_extra_pe_debug)
+			printf ("->%s\n", symbols[i]->name);
+
+		      symname = symbols[i]->name + headlen;
+		      break;
+		    }
+
+		/* If the symobl isn't part of an import table, there is no
+		   point in building a fixup, this would give rise to link
+		   errors for mangled symbols instead of the original one.  */
+		if (symname)
+		  pe_walk_relocs (&link_info, name, symname, NULL, cb);
+		else
+		  continue;
+	      }
+
+	    /* Let's differentiate it somehow from defined.  */
+	    undef->type = bfd_link_hash_defweak;
+	    undef->u.def.value = sym->u.def.value;
+	    undef->u.def.section = sym->u.def.section;
+
+	    if (link_info.pei386_auto_import == -1)
+	      {
+		static bfd_boolean warned = FALSE;
+
+		info_msg (_("Info: resolving %s by linking to %s "
+			    "(auto-import)\n"), name, impname);
+
+		/* PR linker/4844.  */
+		if (!warned)
+		  {
+		    einfo (_("%P: warning: auto-importing has been activated "
+			     "without --enable-auto-import specified on the "
+			     "command line; this should work unless it "
+			     "involves constant data structures referencing "
+			     "symbols from auto-imported DLLs\n"));
+		    warned = TRUE;
+		  }
+	      }
+	  }
+      }
+
+  /* If we have the import hash table, walk the relocations only once.  */
+  if (import_hash)
+    {
+      pe_walk_relocs (&link_info, name, NULL, import_hash, cb);
+      bfd_hash_table_free (import_hash);
+      free (import_hash);
+    }
+
+  free (buf);
 }
 
 /* Gather all the relocations and build the .reloc section.  */
@@ -1794,7 +1940,6 @@ pe_dll_generate_def_file (const char *pe_out_def_filename)
 static asymbol **symtab;
 static int symptr;
 static int tmp_seq;
-static int tmp_seq2;
 static const char *dll_filename;
 static char *dll_symname;
 
@@ -2327,47 +2472,6 @@ make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
 }
 
 static bfd *
-make_singleton_name_imp (const char *import, bfd *parent)
-{
-  /* Name thunks go to idata$4.  */
-  asection *id5;
-  unsigned char *d5;
-  char *oname;
-  bfd *abfd;
-
-  oname = xmalloc (20);
-  sprintf (oname, "nmimp%06d.o", tmp_seq2);
-  tmp_seq2++;
-
-  abfd = bfd_create (oname, parent);
-  bfd_find_target (pe_details->object_target, abfd);
-  bfd_make_writable (abfd);
-
-  bfd_set_format (abfd, bfd_object);
-  bfd_set_arch_mach (abfd, pe_details->bfd_arch, 0);
-
-  symptr = 0;
-  symtab = xmalloc (3 * sizeof (asymbol *));
-  id5 = quick_section (abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
-  quick_symbol (abfd, "__imp_", import, "", id5, BSF_GLOBAL, 0);
-
-  /* We need space for the real thunk and for the null terminator.  */
-  bfd_set_section_size (abfd, id5, PE_IDATA5_SIZE * 2);
-  d5 = xmalloc (PE_IDATA5_SIZE * 2);
-  id5->contents = d5;
-  memset (d5, 0, PE_IDATA5_SIZE * 2);
-  quick_reloc (abfd, 0, BFD_RELOC_RVA, 2);
-  save_relocs (id5);
-
-  bfd_set_symtab (abfd, symtab, symptr);
-
-  bfd_set_section_contents (abfd, id5, d5, 0, PE_IDATA4_SIZE * 2);
-
-  bfd_make_readable (abfd);
-  return abfd;
-}
-
-static bfd *
 make_singleton_name_thunk (const char *import, bfd *parent)
 {
   /* Name thunks go to idata$4.  */
@@ -2409,7 +2513,7 @@ make_singleton_name_thunk (const char *import, bfd *parent)
   return abfd;
 }
 
-static char *
+static const char *
 make_import_fixup_mark (arelent *rel, char *name)
 {
   /* We convert reloc to symbol, for later reference.  */
@@ -2431,7 +2535,7 @@ make_import_fixup_mark (arelent *rel, char *name)
 				current_sec, /* sym->section, */
 				rel->address, NULL, TRUE, FALSE, &bh);
 
-  return fixup_name;
+  return bh->root.string;
 }
 
 /*	.section	.idata$2
@@ -2469,12 +2573,7 @@ make_import_fixup_entry (const char *name,
 
   quick_symbol (abfd, "__nm_thnk_", name, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U (""), symname, "_iname", UNDSEC, BSF_GLOBAL, 0);
-  /* For relocator v2 we have to use the .idata$5 element and not
-     fixup_name.  */
-  if (link_info.pei386_runtime_pseudo_reloc == 2)
-    quick_symbol (abfd, "__imp_", name, "", UNDSEC, BSF_GLOBAL, 0);
-  else
-    quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
 
   bfd_set_section_size (abfd, id2, 20);
   d2 = xmalloc (20);
@@ -2509,6 +2608,8 @@ make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
   unsigned char *rt_rel_d;
   char *oname;
   bfd *abfd;
+  bfd_size_type size;
+
   oname = xmalloc (20);
   sprintf (oname, "rtr%06d.o", tmp_seq);
   tmp_seq++;
@@ -2520,47 +2621,52 @@ make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
   bfd_set_format (abfd, bfd_object);
   bfd_set_arch_mach (abfd, pe_details->bfd_arch, 0);
 
-  symptr = 0;
   if (link_info.pei386_runtime_pseudo_reloc == 2)
     {
-      symtab = xmalloc ((runtime_pseudp_reloc_v2_init ? 3 : 6) * sizeof (asymbol *));
+      if (runtime_pseudp_reloc_v2_init)
+	size = 3 * sizeof (asymbol *);
+      else
+	size = 6 * sizeof (asymbol *);
     }
   else
-    {
-      symtab = xmalloc (2 * sizeof (asymbol *));
-    }
-  rt_rel = quick_section (abfd, ".rdata_runtime_pseudo_reloc",
-			  SEC_HAS_CONTENTS, 2);
+    size = 2 * sizeof (asymbol *);
+
+  symptr = 0;
+  symtab = xmalloc (size);
+
+  rt_rel
+    = quick_section (abfd, ".rdata_runtime_pseudo_reloc", SEC_HAS_CONTENTS, 2);
 
   quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
 
   if (link_info.pei386_runtime_pseudo_reloc == 2)
     {
-	  size_t size = 12;
-	  if (! runtime_pseudp_reloc_v2_init)
-	    {
-		  size += 12;
-		  runtime_pseudp_reloc_v2_init = 1;
-	    }
+      size = 12;
+      if (!runtime_pseudp_reloc_v2_init)
+	{
+	  size += 12;
+	  runtime_pseudp_reloc_v2_init = TRUE;
+	}
+
       quick_symbol (abfd, "__imp_", name, "", UNDSEC, BSF_GLOBAL, 0);
 
       bfd_set_section_size (abfd, rt_rel, size);
       rt_rel_d = xmalloc (size);
       rt_rel->contents = rt_rel_d;
       memset (rt_rel_d, 0, size);
-	  quick_reloc (abfd, size - 8, BFD_RELOC_RVA, 1);
-	  quick_reloc (abfd, size - 12, BFD_RELOC_RVA, 2);
-	  bfd_put_32 (abfd, bitsize, rt_rel_d + (size - 4));
-	  if (size != 12)
-	    bfd_put_32 (abfd, 1, rt_rel_d + 8);
+      quick_reloc (abfd, size - 8, BFD_RELOC_RVA, 1);
+      quick_reloc (abfd, size - 12, BFD_RELOC_RVA, 2);
+      bfd_put_32 (abfd, bitsize, rt_rel_d + (size - 4));
+      if (size != 12)
+	bfd_put_32 (abfd, 1, rt_rel_d + 8);
       save_relocs (rt_rel);
 
       bfd_set_symtab (abfd, symtab, symptr);
 
       bfd_set_section_contents (abfd, rt_rel, rt_rel_d, 0, size);
-   }
+    }
   else
-   {
+    {
       bfd_set_section_size (abfd, rt_rel, 8);
       rt_rel_d = xmalloc (8);
       rt_rel->contents = rt_rel_d;
@@ -2575,6 +2681,7 @@ make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
 
       bfd_set_section_contents (abfd, rt_rel, rt_rel_d, 0, 8);
    }
+
   bfd_make_readable (abfd);
   return abfd;
 }
@@ -2624,65 +2731,46 @@ pe_create_runtime_relocator_reference (bfd *parent)
 }
 
 void
-pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend, char *name)
+pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend, char *name,
+			const char *symname)
 {
-  struct bfd_symbol *sym = *rel->sym_ptr_ptr;
-  struct bfd_link_hash_entry *name_thunk_sym;
-  struct bfd_link_hash_entry *name_imp_sym;
-  char *fixup_name, *impname;
+  const char *fixup_name = make_import_fixup_mark (rel, name);
   bfd *b;
-  int need_import_table = 1;
 
-  /* name buffer is allocated with space at beginning for prefixes.  */
-  impname = name - (sizeof "__imp_" - 1);
-  memcpy (impname, "__imp_", sizeof "__imp_" - 1);
-  name_imp_sym = bfd_link_hash_lookup (link_info.hash, impname, 0, 0, 1);
-
-  impname = name - (sizeof "__nm_thnk_" - 1);
-  memcpy (impname, "__nm_thnk_", sizeof "__nm_thnk_" - 1);
-  name_thunk_sym = bfd_link_hash_lookup (link_info.hash, impname, 0, 0, 1);
-
-  fixup_name = make_import_fixup_mark (rel, name);
-
-  /* For version 2 pseudo relocation we don't need to add an import
-     if the import symbol is already present.  */
-  if (link_info.pei386_runtime_pseudo_reloc == 2
-      && name_imp_sym
-      && name_imp_sym->type == bfd_link_hash_defined)
-    need_import_table = 0;
-
-  if (need_import_table == 1
-      && (!name_thunk_sym || name_thunk_sym->type != bfd_link_hash_defined))
+  /* This is the original implementation of the auto-import feature, which
+     primarily relied on the OS loader to patch things up with some help
+     from the pseudo-relocator to overcome the main limitation.  See the
+     comment at the beginning of the file for an overview of the feature.  */
+  if (link_info.pei386_runtime_pseudo_reloc != 2)
     {
-      b = make_singleton_name_thunk (name, link_info.output_bfd);
-      add_bfd_to_link (b, b->filename, &link_info);
+      struct bfd_link_hash_entry *name_thunk_sym;
+      /* name buffer is allocated with space at beginning for prefixes.  */
+      char *thname = name - (sizeof "__nm_thnk_" - 1);
+      memcpy (thname, "__nm_thnk_", sizeof "__nm_thnk_" - 1);
+      name_thunk_sym = bfd_link_hash_lookup (link_info.hash, thname, 0, 0, 1);
 
-      /* If we ever use autoimport, we have to cast text section writable.
-	 But not for version 2.  */
-      if (link_info.pei386_runtime_pseudo_reloc != 2)
+      if (!(name_thunk_sym && name_thunk_sym->type == bfd_link_hash_defined))
 	{
+	  b = make_singleton_name_thunk (name, link_info.output_bfd);
+	  add_bfd_to_link (b, b->filename, &link_info);
+
+	  /* If we ever use autoimport, we have to cast text section writable.  */
 	  config.text_read_only = FALSE;
 	  link_info.output_bfd->flags &= ~WP_TEXT;
 	}
-      if (link_info.pei386_runtime_pseudo_reloc == 2)
+
+      if (addend == 0 || link_info.pei386_runtime_pseudo_reloc == 1)
 	{
-	  b = make_singleton_name_imp (name, link_info.output_bfd);
+	  b = make_import_fixup_entry (name, fixup_name, symname,
+				       link_info.output_bfd);
 	  add_bfd_to_link (b, b->filename, &link_info);
 	}
     }
 
-  if ((addend == 0 || link_info.pei386_runtime_pseudo_reloc)
-      && need_import_table == 1)
-    {
-      extern char * pe_data_import_dll;
-      char * symname = pe_data_import_dll ? pe_data_import_dll : "unknown";
-
-      b = make_import_fixup_entry (name, fixup_name, symname,
-				   link_info.output_bfd);
-      add_bfd_to_link (b, b->filename, &link_info);
-    }
-
-  if ((link_info.pei386_runtime_pseudo_reloc != 0 && addend != 0)
+  /* In the original implementation, the pseudo-relocator was only used when
+     the addend was not null.  In the new implementation, the OS loader is
+     completely bypassed and the pseudo-relocator does the entire work.  */
+  if ((addend != 0 && link_info.pei386_runtime_pseudo_reloc == 1)
       || link_info.pei386_runtime_pseudo_reloc == 2)
     {
       if (pe_dll_extra_pe_debug)
@@ -2693,18 +2781,17 @@ pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend, char *name)
 				     link_info.output_bfd);
       add_bfd_to_link (b, b->filename, &link_info);
 
-      if (runtime_pseudo_relocs_created == 0)
+      if (runtime_pseudo_relocs_created++ == 0)
 	{
 	  b = pe_create_runtime_relocator_reference (link_info.output_bfd);
 	  add_bfd_to_link (b, b->filename, &link_info);
 	}
-      runtime_pseudo_relocs_created++;
     }
+
   else if (addend != 0)
     einfo (_("%X%P: %C: variable '%pT' can't be auto-imported; please read the documentation for ld's --enable-auto-import for details\n"),
-	   s->owner, s, rel->address, sym->name);
+	   s->owner, s, rel->address, (*rel->sym_ptr_ptr)->name);
 }
-
 
 void
 pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_info *info)

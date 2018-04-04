@@ -2752,11 +2752,16 @@ uwin, pw, etc.  For instance, cygwin DLLs typically use
 @kindex --enable-auto-import
 @item --enable-auto-import
 Do sophisticated linking of @code{_symbol} to @code{__imp__symbol} for
-DATA imports from DLLs, and create the necessary thunking symbols when
-building the import libraries with those DATA exports. Note: Use of the
-'auto-import' extension will cause the text section of the image file
-to be made writable. This does not conform to the PE-COFF format
-specification published by Microsoft.
+DATA imports from DLLs, thus making it possible to bypass the dllimport
+mechanism on the user side and to reference unmangled symbol names.
+[This option is specific to the i386 PE targeted port of the linker]
+
+The following remarks pertain to the original implementation of the
+feature and are obsolete nowadays for Cygwin and MinGW targets.
+
+Note: Use of the 'auto-import' extension will cause the text section
+of the image file to be made writable. This does not conform to the
+PE-COFF format specification published by Microsoft.
 
 Note - use of the 'auto-import' extension will also cause read only
 data which would normally be placed into the .rdata section to be
@@ -2878,7 +2883,6 @@ A fourth way to avoid this problem is to re-code your
 library to use a functional interface rather than a data interface
 for the offending variables (e.g. set_foo() and get_foo() accessor
 functions).
-[This option is specific to the i386 PE targeted port of the linker]
 
 @kindex --disable-auto-import
 @item --disable-auto-import
@@ -2896,8 +2900,7 @@ environment to adjust references to such data in your client code.
 
 @kindex --disable-runtime-pseudo-reloc
 @item --disable-runtime-pseudo-reloc
-Do not create pseudo relocations for non-zero offset DATA imports from
-DLLs.
+Do not create pseudo relocations for non-zero offset DATA imports from DLLs.
 [This option is specific to the i386 PE targeted port of the linker]
 
 @kindex --enable-extra-pe-debug

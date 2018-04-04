@@ -1,3 +1,49 @@
+2018-04-04  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* emultempl/pe.em (U_SIZE): Delete.
+	(pe_data_import_dll): Likewise.
+	(make_import_fixup): Return void, take 4th parameter and pass it down
+	in call to pe_create_import_fixup.
+	(pe_find_data_imports): Move to...
+	(gld_${EMULATION_NAME}_after_open): Run the stdcall fixup pass after
+	the auto-import pass and add a guard before running the latter.
+	* emultempl/pep.em (U_SIZE): Delete.
+	(pep_data_import_dll): Likewise.
+	(make_import_fixup): Return void, take 4th parameter and pass it down
+	in call to pe_create_import_fixup.
+	(pep_find_data_imports): Move to...
+	(gld_${EMULATION_NAME}_after_open): Run the stdcall fixup pass after
+	the auto-import pass and add a guard before running the latter.
+	* pe-dll.c (runtime_pseudp_reloc_v2_init): Change type to bfd_boolean.
+	(pe_walk_relocs_of_symbol): Rename into...
+	(pe_walk_relocs): ...this.  Add 2 more parameters,4th parameter to the
+	callback prototype and pass 4th parameter in calls to the callback.
+	If the import hash table is present, invoke the callback on the reloc
+	if the symbol name is in the table.
+	(pe_find_data_imports): ...here.  Take 2 parameters.  Build an import
+	hash table for the pseudo-relocation support version 2.  When it is
+	built, walk the relocations only once at the end; when it is not, do
+	not build a fixup when the symbol isn't part of an import table.
+	Issue the associated warning only after a first fixup is built.
+	(tmp_seq2): Delete.
+	(make_singleton_name_imp): Likewise.
+	(make_import_fixup_mark): Return const char * and a stable string.
+	(make_import_fixup_entry): Do not deal with the pseudo-relocation
+	support version 2.
+	(make_runtime_pseudo_reloc): Factor out code and fix formatting.
+	(pe_create_import_fixup): Add 5th parameter.  Clearly separate the
+	pseudo-relocation support version 2 from the rest.  Fix formatting.
+	* pe-dll.h (pe_walk_relocs_of_symbol): Delete.
+	(pe_find_data_imports): Declare.
+	(pe_create_import_fixup): Add 5th parameter.
+	* pep-dll.c (pe_data_import_dll): Delete.
+	(pe_find_data_imports): Define.
+	(pe_walk_relocs_of_symbol): Delete.
+	* pep-dll.h (pep_walk_relocs_of_symbol): Delete.
+	(pep_find_data_imports): Declare.
+	(pep_create_import_fixup): Add 5th parameter.
+	* ld.texinfo (--enable-auto-import): Adjust to new implementation.
+
 2018-04-04  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

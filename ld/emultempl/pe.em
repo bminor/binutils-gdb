@@ -385,11 +385,6 @@ typedef struct
 #define U(CSTR) \
   ((is_underscoring () == 0) ? CSTR : "_" CSTR)
 
-/* Get size of constant string for a possible underscore prefixed
-   C visible symbol.  */
-#define U_SIZE(CSTR) \
-  (sizeof (CSTR) + (is_underscoring () == 0 ? 0 : 1))
-
 #define D(field,symbol,def,usc)  {&pe.field, sizeof (pe.field), def, symbol, 0, usc}
 
 static definfo init[] =
@@ -1022,13 +1017,6 @@ gld_${EMULATION_NAME}_after_parse (void)
   after_parse_default ();
 }
 
-/* pe-dll.c directly accesses pe_data_import_dll,
-   so it must be defined outside of #ifdef DLL_SUPPORT.
-   Note - this variable is deliberately not initialised.
-   This allows it to be treated as a common varaible, and only
-   exist in one incarnation in a multiple target enabled linker.  */
-char * pe_data_import_dll;
-
 #ifdef DLL_SUPPORT
 static struct bfd_link_hash_entry *pe_undef_found_sym;
 
@@ -1129,11 +1117,12 @@ pe_fixup_stdcalls (void)
       }
 }
 
-static int
-make_import_fixup (arelent *rel, asection *s, char *name)
+static void
+make_import_fixup (arelent *rel, asection *s, char *name, const char *symname)
 {
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
   char addend[4];
+  bfd_vma _addend;
 
   if (pe_dll_extra_pe_debug)
     printf ("arelent: %s@%#lx: add=%li\n", sym->name,
@@ -1143,117 +1132,8 @@ make_import_fixup (arelent *rel, asection *s, char *name)
     einfo (_("%P: %C: cannot get section contents - auto-import exception\n"),
 	   s->owner, s, rel->address);
 
-  pe_create_import_fixup (rel, s, bfd_get_32 (s->owner, addend), name);
-
-  return 1;
-}
-
-static void
-pe_find_data_imports (void)
-{
-  struct bfd_link_hash_entry *undef, *sym;
-  size_t namelen;
-  char *buf, *name;
-
-  if (link_info.pei386_auto_import == 0)
-    return;
-
-  namelen = 0;
-  for (undef = link_info.hash->undefs; undef; undef = undef->u.undef.next)
-    {
-      if (undef->type == bfd_link_hash_undefined)
-	{
-	  size_t len = strlen (undef->root.string);
-	  if (namelen < len)
-	    namelen = len;
-	}
-    }
-  if (namelen == 0)
-    return;
-
-  /* We are being a bit cunning here.  The buffer will have space for
-     prefixes at the beginning.  The prefix is modified here and in a
-     number of functions called from this function.  */
-#define PREFIX_LEN 32
-  buf = xmalloc (PREFIX_LEN + namelen + 1);
-  name = buf + PREFIX_LEN;
-
-  for (undef = link_info.hash->undefs; undef; undef = undef->u.undef.next)
-    {
-      if (undef->type == bfd_link_hash_undefined)
-	{
-	  char *impname;
-
-	  if (pe_dll_extra_pe_debug)
-	    printf ("%s:%s\n", __FUNCTION__, undef->root.string);
-
-	  strcpy (name, undef->root.string);
-	  impname = name - (sizeof "__imp_" - 1);
-	  memcpy (impname, "__imp_", sizeof "__imp_" - 1);
-
-	  sym = bfd_link_hash_lookup (link_info.hash, impname, 0, 0, 1);
-
-	  if (sym && sym->type == bfd_link_hash_defined)
-	    {
-	      bfd *b = sym->u.def.section->owner;
-	      asymbol **symbols;
-	      int nsyms, i;
-
-	      if (link_info.pei386_auto_import == -1)
-		{
-		  static bfd_boolean warned = FALSE;
-
-		  info_msg (_("Info: resolving %s by linking to %s "
-			      "(auto-import)\n"), name, impname);
-
-		  /* PR linker/4844.  */
-		  if (! warned)
-		    {
-		      warned = TRUE;
-		      einfo (_("%P: warning: auto-importing has been activated "
-			       "without --enable-auto-import specified on the "
-			       "command line; this should work unless it "
-			       "involves constant data structures referencing "
-			       "symbols from auto-imported DLLs\n"));
-		    }
-		}
-
-	      if (!bfd_generic_link_read_symbols (b))
-		{
-		  einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
-		  return;
-		}
-
-	      symbols = bfd_get_outsymbols (b);
-	      nsyms = bfd_get_symcount (b);
-
-	      for (i = 0; i < nsyms; i++)
-		{
-		  if (! CONST_STRNEQ (symbols[i]->name, U ("_head_")))
-		    continue;
-
-		  if (pe_dll_extra_pe_debug)
-		    printf ("->%s\n", symbols[i]->name);
-
-		  pe_data_import_dll = (char *) (symbols[i]->name
-						 + U_SIZE ("_head_") - 1);
-		  break;
-		}
-
-	      pe_walk_relocs_of_symbol (&link_info, name, make_import_fixup);
-
-	      /* Let's differentiate it somehow from defined.  */
-	      undef->type = bfd_link_hash_defweak;
-	      /* We replace original name with __imp_ prefixed, this
-		 1) may trash memory 2) leads to duplicate symbol generation.
-		 Still, IMHO it's better than having name polluted.  */
-	      undef->root.string = sym->root.string;
-	      undef->u.def.value = sym->u.def.value;
-	      undef->u.def.section = sym->u.def.section;
-	    }
-	}
-    }
-  free (buf);
+  _addend = bfd_get_32 (s->owner, addend);
+  pe_create_import_fixup (rel, s, _addend, name, symname);
 }
 
 static bfd_boolean
@@ -1523,16 +1403,15 @@ gld_${EMULATION_NAME}_after_open (void)
   pe_output_file_set_long_section_names (link_info.output_bfd);
 
 #ifdef DLL_SUPPORT
-  if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */
-    pe_fixup_stdcalls ();
-
   pe_process_import_defs (link_info.output_bfd, &link_info);
 
-  pe_find_data_imports ();
+  if (link_info.pei386_auto_import) /* -1=warn or 1=enable */
+    pe_find_data_imports (U ("_head_"), make_import_fixup);
 
-  /* As possibly new symbols are added by imports, we rerun
-     stdcall/fastcall fixup here.  */
-  if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */
+  /* The implementation of the feature is rather dumb and would cause the
+     compilation time to go through the roof if there are many undefined
+     symbols in the link, so it needs to be run after auto-import.  */
+  if (pe_enable_stdcall_fixup) /* -1=warn or 1=enable */
     pe_fixup_stdcalls ();
 
 #if defined (TARGET_IS_i386pe) \
