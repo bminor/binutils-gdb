@@ -1,5 +1,10 @@
 2018-04-04  Maciej W. Rozycki  <macro@mips.com>
 
+	* elf32-visium.c (visium_info_to_howto_rela): Correct the range
+	check for `visium_elf_howto_table' table access.
+
+2018-04-04  Maciej W. Rozycki  <macro@mips.com>
+
 	* elf32-iq2000.c (iq2000_info_to_howto_rela): Correct the range
 	check for `iq2000_elf_howto_table' table access.
 

@@ -25,6 +25,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/visium.h"
+#include "libiberty.h"
 
 static bfd_reloc_status_type visium_elf_howto_parity_reloc
   (bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **);
@@ -475,7 +476,7 @@ visium_info_to_howto_rela (bfd *abfd, arelent *cache_ptr,
       break;
 
     default:
-      if (r_type >= (unsigned int) R_VISIUM_max)
+      if (r_type >= ARRAY_SIZE (visium_elf_howto_table))
 	{
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
