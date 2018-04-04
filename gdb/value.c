@@ -181,11 +181,6 @@ struct value
 
   ~value ()
   {
-    /* If there's an associated parent value, drop our reference to
-       it.  */
-    if (parent != NULL)
-      value_decref (parent);
-
     if (VALUE_LVAL (this) == lval_computed)
       {
 	const struct lval_funcs *funcs = location.computed.funcs;
@@ -292,7 +287,7 @@ struct value
   /* Only used for bitfields; the containing value.  This allows a
      single read from the target when displaying multiple
      bitfields.  */
-  struct value *parent = nullptr;
+  value_ref_ptr parent;
 
   /* Type of the value.  */
   struct type *type;
@@ -1128,7 +1123,7 @@ set_value_bitsize (struct value *value, LONGEST bit)
 struct value *
 value_parent (const struct value *value)
 {
-  return value->parent;
+  return value->parent.get ();
 }
 
 /* See value.h.  */
@@ -1136,12 +1131,7 @@ value_parent (const struct value *value)
 void
 set_value_parent (struct value *value, struct value *parent)
 {
-  struct value *old = value->parent;
-
-  value->parent = parent;
-  if (parent != NULL)
-    value_incref (parent);
-  value_decref (old);
+  value->parent = value_ref_ptr (value_incref (parent));
 }
 
 gdb_byte *
@@ -1521,7 +1511,7 @@ value_address (const struct value *value)
   if (value->lval != lval_memory)
     return 0;
   if (value->parent != NULL)
-    return value_address (value->parent) + value->offset;
+    return value_address (value->parent.get ()) + value->offset;
   if (NULL != TYPE_DATA_LOCATION (value_type (value)))
     {
       gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (value_type (value)));
@@ -1700,7 +1690,7 @@ value_copy (struct value *arg)
     }
   val->unavailable = VEC_copy (range_s, arg->unavailable);
   val->optimized_out = VEC_copy (range_s, arg->optimized_out);
-  set_value_parent (val, arg->parent);
+  val->parent = arg->parent;
   if (VALUE_LVAL (val) == lval_computed)
     {
       const struct lval_funcs *funcs = val->location.computed.funcs;

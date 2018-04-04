@@ -1,5 +1,12 @@
 2018-04-06  Tom Tromey  <tom@tromey.com>
 
+	* value.c (~value): Update.
+	(struct value) <parent>: Now a value_ref_ptr.
+	(value_parent, set_value_parent, value_address, value_copy):
+	Update.
+
+2018-04-06  Tom Tromey  <tom@tromey.com>
+
 	* value.c (struct value): Add constructor, destructor, and member
 	initializers.
 	(allocate_value_lazy, value_decref): Update.
