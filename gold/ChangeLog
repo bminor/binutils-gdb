@@ -1,3 +1,9 @@
+2018-04-05  James Cowgill  <james.cowgill@mips.com>
+
+	PR gold/22770
+	* mips.cc (Mips_got_info::record_got_page_entry): Fetch existing
+	page entries for the object's GOT.
+
 2018-04-05  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::make_brlt_section): Make .branch_lt relro.

@@ -5795,13 +5795,14 @@ Mips_got_info<size, big_endian>::record_got_page_entry(
     this->got_page_entries_.insert(entry);
 
   // Add the same entry to the OBJECT's GOT.
-  Got_page_entry* entry2 = NULL;
+  Got_page_entry* entry2 = new Got_page_entry(*entry);
   Mips_got_info<size, big_endian>* g2 = object->get_or_create_got_info();
-  if (g2->got_page_entries_.find(entry) == g2->got_page_entries_.end())
-    {
-      entry2 = new Got_page_entry(*entry);
-      g2->got_page_entries_.insert(entry2);
-    }
+  typename Got_page_entry_set::iterator it2 =
+    g2->got_page_entries_.find(entry);
+  if (it2 != g2->got_page_entries_.end())
+    entry2 = *it2;
+  else
+    g2->got_page_entries_.insert(entry2);
 
   // Skip over ranges whose maximum extent cannot share a page entry
   // with ADDEND.
@@ -5822,8 +5823,7 @@ Mips_got_info<size, big_endian>::record_got_page_entry(
 
       *range_ptr = range;
       ++entry->num_pages;
-      if (entry2 != NULL)
-        ++entry2->num_pages;
+      ++entry2->num_pages;
       ++this->page_gotno_;
       ++g2->page_gotno_;
       return;
@@ -5852,8 +5852,7 @@ Mips_got_info<size, big_endian>::record_got_page_entry(
   if (old_pages != new_pages)
     {
       entry->num_pages += new_pages - old_pages;
-      if (entry2 != NULL)
-        entry2->num_pages += new_pages - old_pages;
+      entry2->num_pages += new_pages - old_pages;
       this->page_gotno_ += new_pages - old_pages;
       g2->page_gotno_ += new_pages - old_pages;
     }
