@@ -7130,6 +7130,7 @@ Do you want to stop the program?"),
 	      else if (ir.rm == 1)
 		break;
 	    }
+	  /* Fall through.  */
 	case 3:  /* lidt */
 	  if (ir.mod == 3)
 	    {
