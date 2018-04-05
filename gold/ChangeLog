@@ -1,5 +1,16 @@
 2018-04-05  James Cowgill  <james.cowgill@mips.com>
 
+	Revert previous patch and apply revised patch.
+
+	PR gold/22770
+	* mips.cc (Mips_got_info::record_got_page_entry): Don't insert
+	Got_page_entry for object's GOT.
+	(Mips_got_info::add_got_page_entries): Add all pages from from's GOT.
+	Rename to add_got_page_count.
+	(Got_page_entry): Remove num_pages.
+
+2018-04-05  James Cowgill  <james.cowgill@mips.com>
+
 	PR gold/22770
 	* mips.cc (Mips_got_info::record_got_page_entry): Fetch existing
 	page entries for the object's GOT.
