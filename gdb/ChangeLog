@@ -1,5 +1,10 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* stabsread.c (define_symbol) <case 'p'>: Add fall-through
+	comment.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* riscv-tdep.c (riscv_isa_xlen): Add fall-through comment.
 	* utils.c (can_dump_core) <LIMIT_CUR>: Add fall-through comment.
 	* eval.c (fetch_subexp_value) <MEMORY_ERROR>: Add fall-through

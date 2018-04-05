@@ -1100,6 +1100,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    }
 	  break;
 	}
+      /* Fall through.  */
 
     case 'P':
       /* acc seems to use P to declare the prototypes of functions that
