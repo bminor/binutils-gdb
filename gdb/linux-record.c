@@ -881,6 +881,7 @@ Do you want to stop the program?"),
 	      if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
 		return -1;
 	    }
+	  break;
 	case RECORD_SYS_RECV:
 	  regcache_raw_read_unsigned (regcache, tdep->arg2,
 				      &tmpulongest);

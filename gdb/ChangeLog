@@ -1,5 +1,10 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* linux-record.c (record_linux_system_call) <case
+	RECORD_SYS_RECVFROM>: Add "break".
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (mi_cmd_trace_frame_collected) <REGISTERS_FORMAT>:
 	Add missing "break".
 	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals) <NO_FRAME_FILTERS>:
