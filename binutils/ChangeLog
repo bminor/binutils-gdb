@@ -1,5 +1,17 @@
 2018-04-05  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/binutils-all/strip-13.s: Rename to...
+	* testsuite/binutils-all/strip-13rela.s: ... this.
+	* testsuite/binutils-all/strip-13rel.s: New test source.
+	* testsuite/binutils-all/strip-13mips64.s: New test source.
+	* testsuite/binutils-all/strip-13.d: Remove `arm-*', `d10v-*',
+	`dlx-*' and `xgate-*' from `not-target' list.  Add `m6811-*' and
+	`m68hc11-*' to `not-target' list.
+	* testsuite/binutils-all/objcopy.exp: Switch between sources for
+	`strip-13'.
+
+2018-04-05  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/binutils-all/strip-13.s: Use 143 (0x8f) rather than
 	241 (0xf1) for the relocation number and RELA addend.
 	* testsuite/binutils-all/strip-13.d: Remove `hppa*-*' from the

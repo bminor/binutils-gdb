@@ -1084,7 +1084,29 @@ if [is_elf_format] {
     run_dump_test "strip-8"
     run_dump_test "strip-9"
     run_dump_test "strip-12"
-    run_dump_test "strip-13"
+
+    if { [istarget "mips64*-*-openbsd*"] } {
+	set reloc_format mips64
+    } elseif { [istarget "arm-*"] \
+	       || [istarget "d10v-*"] \
+	       || [istarget "dlx-*"] \
+	       || [istarget "i*86-*"] \
+	       || [istarget "i960-*"] \
+	       || [istarget "m681*-*"] \
+	       || [istarget "m68hc1*-*"] \
+	       || ([istarget "mips*-*"] \
+		   && ![istarget "mips64*-ps2-elf*"] \
+		   && ![istarget "*-*-irix6*"] \
+		   && ![istarget "mips64*-*-freebsd*"] \
+		   && ![istarget "mips64*-*-kfreebsd*-gnu"] \
+		   && ![istarget "mips64*-*-linux*"]) \
+	       || [istarget "score*-*"] \
+	       || [istarget "xgate-*"] } {
+	set reloc_format rel
+    } else {
+	set reloc_format rela
+    }
+    run_dump_test "strip-13" [list [list source strip-13${reloc_format}.s]]
 
     # This requires STB_GNU_UNIQUE support with OSABI set to GNU.
     if { [supports_gnu_unique] } {
