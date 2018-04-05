@@ -2352,12 +2352,22 @@ read_and_display_attr_value (unsigned long           attribute,
 	  /* DWARF 4 values.  */
 	case DW_LANG_Python:		printf ("(Python)"); break;
 	  /* DWARF 5 values.  */
+	case DW_LANG_OpenCL:		printf ("(OpenCL)"); break;
 	case DW_LANG_Go:		printf ("(Go)"); break;
+	case DW_LANG_Modula3:		printf ("(Modula 3)"); break;
+	case DW_LANG_Haskell:		printf ("(Haskell)"); break;
+	case DW_LANG_C_plus_plus_03:	printf ("(C++03)"); break;
 	case DW_LANG_C_plus_plus_11:	printf ("(C++11)"); break;
+	case DW_LANG_OCaml:		printf ("(OCaml)"); break;
+	case DW_LANG_Rust:		printf ("(Rust)"); break;
 	case DW_LANG_C11:		printf ("(C11)"); break;
+	case DW_LANG_Swift:		printf ("(Swift)"); break;
+	case DW_LANG_Julia:		printf ("(Julia)"); break;
+	case DW_LANG_Dylan:		printf ("(Dylan)"); break;
 	case DW_LANG_C_plus_plus_14:	printf ("(C++14)"); break;
 	case DW_LANG_Fortran03:		printf ("(Fortran 03)"); break;
 	case DW_LANG_Fortran08:		printf ("(Fortran 08)"); break;
+	case DW_LANG_RenderScript:	printf ("(RenderScript)"); break;
 	  /* MIPS extension.  */
 	case DW_LANG_Mips_Assembler:	printf ("(MIPS assembler)"); break;
 	  /* UPC extension.  */
