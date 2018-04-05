@@ -1,3 +1,9 @@
+2018-04-05  Cary Coutant  <ccoutant@gmail.com>
+
+	* target-reloc.h (relocate_section): Add local symbol index or global
+	symbol name to warning about relocation that refers to discarded
+	section.
+
 2018-04-05  James Cowgill  <james.cowgill@mips.com>
 
 	Revert previous patch and apply revised patch.

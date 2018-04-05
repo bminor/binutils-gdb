@@ -305,6 +305,7 @@ relocate_section(
       const Symbol_value<size> *psymval;
       bool is_defined_in_discarded_section;
       unsigned int shndx;
+      const Symbol* gsym = NULL;
       if (r_sym < local_count
 	  && (reloc_symbol_changes == NULL
 	      || (*reloc_symbol_changes)[i] == NULL))
@@ -327,7 +328,6 @@ relocate_section(
 	}
       else
 	{
-	  const Symbol* gsym;
 	  if (reloc_symbol_changes != NULL
 	      && (*reloc_symbol_changes)[i] != NULL)
 	    gsym = (*reloc_symbol_changes)[i];
@@ -383,9 +383,24 @@ relocate_section(
 	  else
 	    {
 	      if (comdat_behavior == CB_WARNING)
-		gold_warning_at_location(relinfo, i, offset,
-					 _("relocation refers to discarded "
-					   "section"));
+		{
+		  if (gsym == NULL)
+		    {
+		      gold_warning_at_location(
+			  relinfo, i, offset,
+			  _("relocation refers to local symbol %d "
+			    "defined in discarded section"),
+			  r_sym);
+		    }
+		  else
+		    {
+		      gold_warning_at_location(
+			  relinfo, i, offset,
+			  _("relocation refers to symbol \"%s\" "
+			    "defined in discarded section"),
+			  gsym->demangled_name().c_str());
+		    }
+		}
 	      symval2.set_output_value(0);
 	    }
 	  symval2.set_no_output_symtab_entry();
