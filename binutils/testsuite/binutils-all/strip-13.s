@@ -4,8 +4,8 @@ foo:
 
 	.section .rela.text
 	.dc.a	 0
-	.dc.a    0x000000f1
-	.dc.a	 0x000000f1
+	.dc.a    0x0000008f
+	.dc.a	 0x0000008f
 
 	.dc.a	 0
 	.dc.a    0

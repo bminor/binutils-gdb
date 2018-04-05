@@ -1,3 +1,10 @@
+2018-04-05  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/binutils-all/strip-13.s: Use 143 (0x8f) rather than
+	241 (0xf1) for the relocation number and RELA addend.
+	* testsuite/binutils-all/strip-13.d: Remove `hppa*-*' from the
+	`not-target' list.
+
 2018-04-04  John David Anglin  <danglin@gcc.gnu.org>
 
 	* MAINTAINERS: Update my e-mail address.
