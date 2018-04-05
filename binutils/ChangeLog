@@ -1,5 +1,10 @@
 2018-04-05  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/binutils-all/strip-13mips64.s: Use `.dc.l' rather
+	than `.dc.w' in second relocation.
+
+2018-04-05  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/binutils-all/strip-13.d: Also expect `unsupported
 	relocation type 0x8f' error message.
 

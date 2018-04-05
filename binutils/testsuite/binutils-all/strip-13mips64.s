@@ -9,6 +9,6 @@ foo:
 	.dc.a	 0x0000008f
 
 	.dc.a	 0
-	.dc.w    0
+	.dc.l    0
 	.dc.b    0, 0, 0, 0
 	.dc.a	 0
