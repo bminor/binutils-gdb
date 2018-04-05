@@ -1,5 +1,10 @@
 2018-04-05  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/binutils-all/strip-13.d: Also expect `unsupported
+	relocation type 0x8f' error message.
+
+2018-04-05  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/binutils-all/strip-13.s: Rename to...
 	* testsuite/binutils-all/strip-13rela.s: ... this.
 	* testsuite/binutils-all/strip-13rel.s: New test source.
