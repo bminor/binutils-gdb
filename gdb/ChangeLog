@@ -1,5 +1,10 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* rs6000-tdep.c (ppc_process_record_op4)
+	(ppc_process_record_op63): Add fall-through comment.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* i386-tdep.c (i386_process_record): Add fall-through comment.
 
 2018-05-04  Tom Tromey  <tom@tromey.com>
