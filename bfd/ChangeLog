@@ -1,3 +1,8 @@
+2018-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_info_to_howto): Don't mask out
+	R_X86_64_converted_reloc_bit.
+
 2018-04-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/22318

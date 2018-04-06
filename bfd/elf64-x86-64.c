@@ -344,9 +344,6 @@ elf_x86_64_info_to_howto (bfd *abfd, arelent *cache_ptr,
   unsigned r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  if (r_type != (unsigned int) R_X86_64_GNU_VTINHERIT
-      && r_type != (unsigned int) R_X86_64_GNU_VTENTRY)
-    r_type &= ~R_X86_64_converted_reloc_bit;
   cache_ptr->howto = elf_x86_64_rtype_to_howto (abfd, r_type);
   if (cache_ptr->howto == NULL)
     return FALSE;
