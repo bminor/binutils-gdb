@@ -1,3 +1,33 @@
+2018-04-06  Cary Coutant  <ccoutant@gmail.com>
+
+	* object.cc (Sized_relobj_file::include_section_group): Store
+	reference to Kept_section info for discarded comdat sections
+	regardless of size.  Move size checking to map_to_kept_section.
+	(Sized_relobj_file::include_linkonce_section): Likewise.
+	(Sized_relobj_file::map_to_kept_section): Add section name parameter.
+	Insert size checking logic from above functions.
+	(Sized_relobj_file::find_kept_section_object): New method.
+	(Sized_relobj_file::get_symbol_name): New method.
+	* object.h (Sized_relobj_file::map_to_kept_section): Add section_name
+	parameter.  Adjust all callers.
+	(Sized_relobj_file::find_kept_section_object): New method.
+	(Sized_relobj_file::get_symbol_name): New method.
+	(Sized_relobj_file::Kept_comdat_section): Replace object and shndx
+	fields with sh_size, kept_section, symndx, and is_comdat fields.
+	(Sized_relobj_file::set_kept_comdat_section): Replace kept_object
+	and kept_shndx parameters with is_comdat, symndx, sh_size, and
+	kept_section.
+	(Sized_relobj_file::get_kept_comdat_section): Likewise.
+	* target-reloc.h (enum Comdat_behavior): Change CB_WARNING to CB_ERROR.
+	Adjust all references.
+	(issue_undefined_symbol_error): New function template.
+	(relocate_section): Pass section name to map_to_kept_section.
+	Move discarded section code to new function above.
+	* aarch64.cc (Target_aarch64::scan_reloc_section_for_stubs): Move
+	declaration for gsym out one level.  Call issue_discarded_error.
+	* arm.cc (Target_arm::scan_reloc_section_for_stubs): Likewise.
+	* powerpc.cc (Relocate_comdat_behavior): Change CB_WARNING to CB_ERROR.
+
 2018-04-05  Cary Coutant  <ccoutant@gmail.com>
 
 	* target-reloc.h (relocate_section): Add local symbol index or global

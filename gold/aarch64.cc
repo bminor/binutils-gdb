@@ -3972,6 +3972,7 @@ Target_aarch64<size, big_endian>::scan_reloc_section_for_stubs(
       const Symbol_value<size> *psymval;
       bool is_defined_in_discarded_section;
       unsigned int shndx;
+      const Symbol* gsym = NULL;
       if (r_sym < local_count)
 	{
 	  sym = NULL;
@@ -4024,7 +4025,6 @@ Target_aarch64<size, big_endian>::scan_reloc_section_for_stubs(
 	}
       else
 	{
-	  const Symbol* gsym;
 	  gsym = object->global_symbol(r_sym);
 	  gold_assert(gsym != NULL);
 	  if (gsym->is_forwarder())
@@ -4065,16 +4065,16 @@ Target_aarch64<size, big_endian>::scan_reloc_section_for_stubs(
       Symbol_value<size> symval2;
       if (is_defined_in_discarded_section)
 	{
+	  std::string name = object->section_name(relinfo->data_shndx);
+
 	  if (comdat_behavior == CB_UNDETERMINED)
-	    {
-	      std::string name = object->section_name(relinfo->data_shndx);
 	      comdat_behavior = default_comdat_behavior.get(name.c_str());
-	    }
+
 	  if (comdat_behavior == CB_PRETEND)
 	    {
 	      bool found;
 	      typename elfcpp::Elf_types<size>::Elf_Addr value =
-		object->map_to_kept_section(shndx, &found);
+		object->map_to_kept_section(shndx, name, &found);
 	      if (found)
 		symval2.set_output_value(value + psymval->input_value());
 	      else
@@ -4082,10 +4082,8 @@ Target_aarch64<size, big_endian>::scan_reloc_section_for_stubs(
 	    }
 	  else
 	    {
-	      if (comdat_behavior == CB_WARNING)
-		gold_warning_at_location(relinfo, i, offset,
-					 _("relocation refers to discarded "
-					   "section"));
+	      if (comdat_behavior == CB_ERROR)
+	        issue_discarded_error(relinfo, i, offset, r_sym, gsym);
 	      symval2.set_output_value(0);
 	    }
 	  symval2.set_no_output_symtab_entry();

@@ -1351,7 +1351,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     {
       gold::Default_comdat_behavior default_behavior;
       Comdat_behavior ret = default_behavior.get(name);
-      if (ret == CB_WARNING)
+      if (ret == CB_ERROR)
 	{
 	  if (size == 32
 	      && (strcmp(name, ".fixup") == 0

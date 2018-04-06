@@ -39,6 +39,7 @@ class General_options;
 class Task;
 class Cref;
 class Layout;
+class Kept_section;
 class Output_data;
 class Output_section;
 class Output_section_data;
@@ -2304,7 +2305,17 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // and return its output address.  This is used only for relocations in
   // debugging sections.
   Address
-  map_to_kept_section(unsigned int shndx, bool* found) const;
+  map_to_kept_section(unsigned int shndx, std::string& section_name,
+		      bool* found) const;
+
+  // Look for a kept section corresponding to the given discarded section,
+  // and return its object file.
+  Relobj*
+  find_kept_section_object(unsigned int shndx, unsigned int* symndx_p) const;
+
+  // Return the name of symbol SYMNDX.
+  const char*
+  get_symbol_name(unsigned int symndx);
 
   // Compute final local symbol value.  R_SYM is the local symbol index.
   // LV_IN points to a local symbol value containing the input value.
@@ -2598,11 +2609,15 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // kept section.
   struct Kept_comdat_section
   {
-    Kept_comdat_section(Relobj* a_object, unsigned int a_shndx)
-      : object(a_object), shndx(a_shndx)
+    Kept_comdat_section(uint64_t a_sh_size, Kept_section* a_kept_section,
+			unsigned int a_symndx, bool a_is_comdat)
+      : sh_size(a_sh_size), kept_section(a_kept_section),
+	symndx (a_symndx), is_comdat(a_is_comdat)
     { }
-    Relobj* object;
-    unsigned int shndx;
+    uint64_t sh_size;		// Section size
+    Kept_section* kept_section;	// Kept section info
+    unsigned int symndx;	// Index of key symbol
+    bool is_comdat;		// True if comdat group, false if linkonce
   };
   typedef std::map<unsigned int, Kept_comdat_section>
       Kept_comdat_section_table;
@@ -2747,25 +2762,29 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // Record a mapping from discarded section SHNDX to the corresponding
   // kept section.
   void
-  set_kept_comdat_section(unsigned int shndx, Relobj* kept_object,
-			  unsigned int kept_shndx)
+  set_kept_comdat_section(unsigned int shndx, bool is_comdat,
+			  unsigned int symndx, uint64_t sh_size,
+			  Kept_section* kept_section)
   {
-    Kept_comdat_section kept(kept_object, kept_shndx);
+    Kept_comdat_section kept(sh_size, kept_section, symndx, is_comdat);
     this->kept_comdat_sections_.insert(std::make_pair(shndx, kept));
   }
 
   // Find the kept section corresponding to the discarded section
   // SHNDX.  Return true if found.
   bool
-  get_kept_comdat_section(unsigned int shndx, Relobj** kept_object,
-			  unsigned int* kept_shndx) const
+  get_kept_comdat_section(unsigned int shndx, bool* is_comdat,
+			  unsigned int *symndx, uint64_t* sh_size,
+			  Kept_section** kept_section) const
   {
     typename Kept_comdat_section_table::const_iterator p =
       this->kept_comdat_sections_.find(shndx);
     if (p == this->kept_comdat_sections_.end())
       return false;
-    *kept_object = p->second.object;
-    *kept_shndx = p->second.shndx;
+    *is_comdat = p->second.is_comdat;
+    *symndx = p->second.symndx;
+    *sh_size = p->second.sh_size;
+    *kept_section = p->second.kept_section;
     return true;
   }
 

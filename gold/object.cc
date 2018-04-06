@@ -1112,42 +1112,17 @@ Sized_relobj_file<size, big_endian>::include_section_group(
 	{
 	  (*omit)[shndx] = true;
 
-	  if (is_comdat)
-	    {
-	      Relobj* kept_object = kept_section->object();
-	      if (kept_section->is_comdat())
-		{
-		  // Find the corresponding kept section, and store
-		  // that info in the discarded section table.
-		  unsigned int kept_shndx;
-		  uint64_t kept_size;
-		  if (kept_section->find_comdat_section(mname, &kept_shndx,
-							&kept_size))
-		    {
-		      // We don't keep a mapping for this section if
-		      // it has a different size.  The mapping is only
-		      // used for relocation processing, and we don't
-		      // want to treat the sections as similar if the
-		      // sizes are different.  Checking the section
-		      // size is the approach used by the GNU linker.
-		      if (kept_size == member_shdr.get_sh_size())
-			this->set_kept_comdat_section(shndx, kept_object,
-						      kept_shndx);
-		    }
-		}
-	      else
-		{
-		  // The existing section is a linkonce section.  Add
-		  // a mapping if there is exactly one section in the
-		  // group (which is true when COUNT == 2) and if it
-		  // is the same size.
-		  if (count == 2
-		      && (kept_section->linkonce_size()
-			  == member_shdr.get_sh_size()))
-		    this->set_kept_comdat_section(shndx, kept_object,
-						  kept_section->shndx());
-		}
-	    }
+	  // Store a mapping from this section to the Kept_section
+	  // information for the group.  This mapping is used for
+	  // relocation processing and diagnostics.
+	  // If the kept section is a linkonce section, we don't
+	  // bother with it unless the comdat group contains just
+	  // a single section, making it easy to match up.
+	  if (is_comdat
+	      && (kept_section->is_comdat() || count == 2))
+	    this->set_kept_comdat_section(shndx, true, symndx,
+					  member_shdr.get_sh_size(),
+					  kept_section);
 	}
     }
 
@@ -1212,10 +1187,8 @@ Sized_relobj_file<size, big_endian>::include_linkonce_section(
       // that the kept section is another linkonce section.  If it is
       // the same size, record it as the section which corresponds to
       // this one.
-      if (kept2->object() != NULL
-	  && !kept2->is_comdat()
-	  && kept2->linkonce_size() == sh_size)
-	this->set_kept_comdat_section(index, kept2->object(), kept2->shndx());
+      if (kept2->object() != NULL && !kept2->is_comdat())
+	this->set_kept_comdat_section(index, false, 0, sh_size, kept2);
     }
   else if (!include1)
     {
@@ -1226,13 +1199,8 @@ Sized_relobj_file<size, big_endian>::include_linkonce_section(
       // this linkonce section.  We'll handle the simple case where
       // the group has only one member section.  Otherwise, it's not
       // worth the effort.
-      unsigned int kept_shndx;
-      uint64_t kept_size;
-      if (kept1->object() != NULL
-	  && kept1->is_comdat()
-	  && kept1->find_single_comdat_section(&kept_shndx, &kept_size)
-	  && kept_size == sh_size)
-	this->set_kept_comdat_section(index, kept1->object(), kept_shndx);
+      if (kept1->object() != NULL && kept1->is_comdat())
+	this->set_kept_comdat_section(index, false, 0, sh_size, kept1);
     }
   else
     {
@@ -2844,24 +2812,115 @@ template<int size, bool big_endian>
 typename Sized_relobj_file<size, big_endian>::Address
 Sized_relobj_file<size, big_endian>::map_to_kept_section(
     unsigned int shndx,
-    bool* found) const
+    std::string& section_name,
+    bool* pfound) const
 {
-  Relobj* kept_object;
-  unsigned int kept_shndx;
-  if (this->get_kept_comdat_section(shndx, &kept_object, &kept_shndx))
+  Kept_section* kept_section;
+  bool is_comdat;
+  uint64_t sh_size;
+  unsigned int symndx;
+  bool found = false;
+
+  if (this->get_kept_comdat_section(shndx, &is_comdat, &symndx, &sh_size,
+				    &kept_section))
     {
-      Sized_relobj_file<size, big_endian>* kept_relobj =
-	static_cast<Sized_relobj_file<size, big_endian>*>(kept_object);
-      Output_section* os = kept_relobj->output_section(kept_shndx);
-      Address offset = kept_relobj->get_output_section_offset(kept_shndx);
-      if (os != NULL && offset != invalid_address)
+      Relobj* kept_object = kept_section->object();
+      unsigned int kept_shndx = 0;
+      if (!kept_section->is_comdat())
+        {
+	  // The kept section is a linkonce section.
+	  if (sh_size == kept_section->linkonce_size())
+	    found = true;
+        }
+      else
 	{
-	  *found = true;
-	  return os->address() + offset;
+	  if (is_comdat)
+	    {
+	      // Find the corresponding kept section.
+	      // Since we're using this mapping for relocation processing,
+	      // we don't want to match sections unless they have the same
+	      // size.
+	      uint64_t kept_size;
+	      if (kept_section->find_comdat_section(section_name, &kept_shndx,
+						    &kept_size))
+		{
+		  if (sh_size == kept_size)
+		    found = true;
+		}
+	    }
+	  else
+	    {
+	      uint64_t kept_size;
+	      if (kept_section->find_single_comdat_section(&kept_shndx,
+							   &kept_size)
+		  && sh_size == kept_size)
+		found = true;
+	    }
+	}
+
+      if (found)
+	{
+	  Sized_relobj_file<size, big_endian>* kept_relobj =
+	    static_cast<Sized_relobj_file<size, big_endian>*>(kept_object);
+	  Output_section* os = kept_relobj->output_section(kept_shndx);
+	  Address offset = kept_relobj->get_output_section_offset(kept_shndx);
+	  if (os != NULL && offset != invalid_address)
+	    {
+	      *pfound = true;
+	      return os->address() + offset;
+	    }
 	}
     }
-  *found = false;
+  *pfound = false;
   return 0;
+}
+
+// Look for a kept section corresponding to the given discarded section,
+// and return its object file.
+
+template<int size, bool big_endian>
+Relobj*
+Sized_relobj_file<size, big_endian>::find_kept_section_object(
+    unsigned int shndx, unsigned int *symndx_p) const
+{
+  Kept_section* kept_section;
+  bool is_comdat;
+  uint64_t sh_size;
+  if (this->get_kept_comdat_section(shndx, &is_comdat, symndx_p, &sh_size,
+				    &kept_section))
+    return kept_section->object();
+  return NULL;
+}
+
+// Return the name of symbol SYMNDX.
+
+template<int size, bool big_endian>
+const char*
+Sized_relobj_file<size, big_endian>::get_symbol_name(unsigned int symndx)
+{
+  if (this->symtab_shndx_ == 0)
+    return NULL;
+
+  section_size_type symbols_size;
+  const unsigned char* symbols = this->section_contents(this->symtab_shndx_,
+							&symbols_size,
+							false);
+
+  unsigned int symbol_names_shndx =
+    this->adjust_shndx(this->section_link(this->symtab_shndx_));
+  section_size_type names_size;
+  const unsigned char* symbol_names_u =
+    this->section_contents(symbol_names_shndx, &names_size, false);
+  const char* symbol_names = reinterpret_cast<const char*>(symbol_names_u);
+
+  const unsigned char* p = symbols + symndx * This::sym_size;
+
+  if (p >= symbols + symbols_size)
+    return NULL;
+
+  elfcpp::Sym<size, big_endian> sym(p);
+
+  return symbol_names + sym.get_st_name();
 }
 
 // Get symbol counts.
