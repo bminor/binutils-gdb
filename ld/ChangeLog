@@ -1,3 +1,13 @@
+2018-04-06  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+	2018-04-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 23030
+	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Make sure
+	that the .IA_64.unwind_info and .IA_64.unwind sections are not
+	subject to garbage collection.
+
 2018-03-28  Eric Botcazou  <ebotcazou@adacore.com>
 
 	PR ld/22972
