@@ -482,9 +482,8 @@ extern int longest_to_int (LONGEST);
    table in osabi.c.  */
 enum gdb_osabi
 {
-  GDB_OSABI_UNINITIALIZED = -1, /* For struct gdbarch_info.  */
-
   GDB_OSABI_UNKNOWN = 0,	/* keep this zero */
+  GDB_OSABI_NONE,
 
   GDB_OSABI_SVR4,
   GDB_OSABI_HURD,

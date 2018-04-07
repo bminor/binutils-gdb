@@ -727,7 +727,6 @@ gdbarch_info_init (struct gdbarch_info *info)
   memset (info, 0, sizeof (struct gdbarch_info));
   info->byte_order = BFD_ENDIAN_UNKNOWN;
   info->byte_order_for_code = info->byte_order;
-  info->osabi = GDB_OSABI_UNINITIALIZED;
 }
 
 /* Similar to init, but this time fill in the blanks.  Information is
@@ -772,9 +771,10 @@ gdbarch_info_fill (struct gdbarch_info *info)
 
   /* "(gdb) set osabi ...".  Handled by gdbarch_lookup_osabi.  */
   /* From the manual override, or from file.  */
-  if (info->osabi == GDB_OSABI_UNINITIALIZED)
+  if (info->osabi == GDB_OSABI_UNKNOWN)
     info->osabi = gdbarch_lookup_osabi (info->abfd);
   /* From the target.  */
+
   if (info->osabi == GDB_OSABI_UNKNOWN && info->target_desc != NULL)
     info->osabi = tdesc_osabi (info->target_desc);
   /* From the configured default.  */
@@ -782,6 +782,9 @@ gdbarch_info_fill (struct gdbarch_info *info)
   if (info->osabi == GDB_OSABI_UNKNOWN)
     info->osabi = GDB_OSABI_DEFAULT;
 #endif
+  /* If we still don't know which osabi to pick, pick none.  */
+  if (info->osabi == GDB_OSABI_UNKNOWN)
+    info->osabi = GDB_OSABI_NONE;
 
   /* Must have at least filled in the architecture.  */
   gdb_assert (info->bfd_arch_info != NULL);

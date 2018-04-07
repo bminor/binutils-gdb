@@ -1,5 +1,13 @@
 2018-04-07  Simon Marchi  <simon.marchi@ericsson.com>
 
+	PR gdb/22980
+	* defs.h (enum gdb_osabi): Remove GDB_OSABI_UNINITIALIZED, add
+	GDB_OSABI_NONE.
+	* arch-utils.c (gdbarch_info_init): Don't set info->osabi.
+	* osabi.c (gdb_osabi_names): Add "unknown" entry.
+
+2018-04-07  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* common/byte-vector.h (char_vector): New type.
 	* target.h (target_read_alloc): Return
 	gdb::optional<byte_vector>.

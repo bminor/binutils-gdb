@@ -58,6 +58,7 @@ struct osabi_names
    them in sync.  */
 static const struct osabi_names gdb_osabi_names[] =
 {
+  { "unknown", NULL },
   { "none", NULL },
 
   { "SVR4", NULL },
@@ -335,9 +336,11 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdb_osabi_handler *handler;
 
-  if (info.osabi == GDB_OSABI_UNKNOWN)
+  gdb_assert (info.osabi != GDB_OSABI_UNKNOWN);
+
+  if (info.osabi == GDB_OSABI_NONE)
     {
-      /* Don't complain about an unknown OSABI.  Assume the user knows
+      /* Don't complain about no OSABI.  Assume the user knows
 	 what they are doing.  */
       return;
     }
@@ -601,11 +604,6 @@ set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
   else if (strcmp (set_osabi_string, "default") == 0)
     {
       user_selected_osabi = GDB_OSABI_DEFAULT;
-      user_osabi_state = osabi_user;
-    }
-  else if (strcmp (set_osabi_string, "none") == 0)
-    {
-      user_selected_osabi = GDB_OSABI_UNKNOWN;
       user_osabi_state = osabi_user;
     }
   else
