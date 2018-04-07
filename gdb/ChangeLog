@@ -1,5 +1,32 @@
 2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2read.h (struct dwarf2_per_objfile) <n_type_units>:
+	Remove.
+	<n_allocated_type_units>: Remove.
+	<all_type_units>: Change to std::vector.
+	* dwarf2read.c (dwarf2_per_objfile::~dwarf2_per_objfile): Adjust
+	to std::vector change.
+	(dwarf2_per_objfile::get_cutu): Likewise.
+	(dwarf2_per_objfile::get_tu): Likewise.
+	(create_signatured_type_table_from_index): Likewise.
+	(create_signatured_type_table_from_debug_names): Likewise.
+	(dw2_symtab_iter_next): Likewise.
+	(dw2_print_stats): Likewise.
+	(dw2_expand_all_symtabs): Likewise.
+	(dw2_expand_marked_cus): Likewise.
+	(dw2_debug_names_iterator::next): Likewise.
+	(dwarf2_initialize_objfile): Likewise.
+	(add_signatured_type_cu_to_table): Likewise.
+	(create_all_type_units): Likewise.
+	(add_type_unit): Likewise.
+	(struct tu_abbrev_offset): Add constructor.
+	(build_type_psymtabs_1): Adjust to std::vector change.
+	(print_tu_stats): Likewise.
+	* dwarf-index-write.c (check_dwarf64_offsets): Likewise.
+	(write_debug_names): Likewise.
+
+2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2read.h (struct dwarf2_per_objfile) <all_comp_units>: Likewise.
 	Make an std::vector.
 	<n_comp_units>: Remove.

@@ -167,16 +167,8 @@ public:
      the target compilation unit of a particular reference.  */
   std::vector<dwarf2_per_cu_data *> all_comp_units;
 
-  /* The number of .debug_types-related CUs.  */
-  int n_type_units = 0;
-
-  /* The number of elements allocated in all_type_units.
-     If there are skeleton-less TUs, we add them to all_type_units lazily.  */
-  int n_allocated_type_units = 0;
-
-  /* The .debug_types-related CUs (TUs).
-     This is stored in malloc space because we may realloc it.  */
-  struct signatured_type **all_type_units = NULL;
+  /* The .debug_types-related CUs (TUs).  */
+  std::vector<signatured_type *> all_type_units;
 
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */

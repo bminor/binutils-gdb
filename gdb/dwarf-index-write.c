@@ -1256,10 +1256,9 @@ check_dwarf64_offsets (struct dwarf2_per_objfile *dwarf2_per_objfile)
       if (to_underlying (per_cu->sect_off) >= (static_cast<uint64_t> (1) << 32))
 	return true;
     }
-  for (int i = 0; i < dwarf2_per_objfile->n_type_units; ++i)
+  for (const signatured_type *sigtype : dwarf2_per_objfile->all_type_units)
     {
-      const signatured_type &sigtype = *dwarf2_per_objfile->all_type_units[i];
-      const dwarf2_per_cu_data &per_cu = sigtype.per_cu;
+      const dwarf2_per_cu_data &per_cu = sigtype->per_cu;
 
       if (to_underlying (per_cu.sect_off) >= (static_cast<uint64_t> (1) << 32))
 	return true;
@@ -1497,7 +1496,8 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
   /* local_type_unit_count - The number of TUs in the local TU
      list.  */
-  header.append_uint (4, dwarf5_byte_order, dwarf2_per_objfile->n_type_units);
+  header.append_uint (4, dwarf5_byte_order,
+		      dwarf2_per_objfile->all_type_units.size ());
 
   /* foreign_type_unit_count - The number of TUs in the foreign TU
      list.  */
