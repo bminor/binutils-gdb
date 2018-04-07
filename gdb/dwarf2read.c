@@ -2978,17 +2978,13 @@ create_cu_from_index_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
    CUs.  */
 
 static void
-create_cus_from_index_list (struct objfile *objfile,
+create_cus_from_index_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			    const gdb_byte *cu_list, offset_type n_elements,
 			    struct dwarf2_section_info *section,
 			    int is_dwz,
 			    int base_offset)
 {
-  offset_type i;
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = get_dwarf2_per_objfile (objfile);
-
-  for (i = 0; i < n_elements; i += 2)
+  for (offset_type i = 0; i < n_elements; i += 2)
     {
       gdb_static_assert (sizeof (ULONGEST) >= 8);
 
@@ -3007,42 +3003,38 @@ create_cus_from_index_list (struct objfile *objfile,
    the CU objects for this objfile.  */
 
 static void
-create_cus_from_index (struct objfile *objfile,
+create_cus_from_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		       const gdb_byte *cu_list, offset_type cu_list_elements,
 		       const gdb_byte *dwz_list, offset_type dwz_elements)
 {
-  struct dwz_file *dwz;
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = get_dwarf2_per_objfile (objfile);
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   dwarf2_per_objfile->n_comp_units = (cu_list_elements + dwz_elements) / 2;
   dwarf2_per_objfile->all_comp_units =
     XOBNEWVEC (&objfile->objfile_obstack, struct dwarf2_per_cu_data *,
 	       dwarf2_per_objfile->n_comp_units);
 
-  create_cus_from_index_list (objfile, cu_list, cu_list_elements,
+  create_cus_from_index_list (dwarf2_per_objfile, cu_list, cu_list_elements,
 			      &dwarf2_per_objfile->info, 0, 0);
 
   if (dwz_elements == 0)
     return;
 
-  dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
-  create_cus_from_index_list (objfile, dwz_list, dwz_elements, &dwz->info, 1,
-			      cu_list_elements / 2);
+  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+  create_cus_from_index_list (dwarf2_per_objfile, dwz_list, dwz_elements,
+			      &dwz->info, 1, cu_list_elements / 2);
 }
 
 /* Create the signatured type hash table from the index.  */
 
 static void
-create_signatured_type_table_from_index (struct objfile *objfile,
-					 struct dwarf2_section_info *section,
-					 const gdb_byte *bytes,
-					 offset_type elements)
+create_signatured_type_table_from_index
+  (struct dwarf2_per_objfile *dwarf2_per_objfile,
+   struct dwarf2_section_info *section,
+   const gdb_byte *bytes,
+   offset_type elements)
 {
-  offset_type i;
-  htab_t sig_types_hash;
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = get_dwarf2_per_objfile (objfile);
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   dwarf2_per_objfile->n_type_units
     = dwarf2_per_objfile->n_allocated_type_units
@@ -3050,9 +3042,9 @@ create_signatured_type_table_from_index (struct objfile *objfile,
   dwarf2_per_objfile->all_type_units =
     XNEWVEC (struct signatured_type *, dwarf2_per_objfile->n_type_units);
 
-  sig_types_hash = allocate_signatured_type_table (objfile);
+  htab_t sig_types_hash = allocate_signatured_type_table (objfile);
 
-  for (i = 0; i < elements; i += 3)
+  for (offset_type i = 0; i < elements; i += 3)
     {
       struct signatured_type *sig_type;
       ULONGEST signature;
@@ -3559,14 +3551,13 @@ to use the section anyway."),
    elements of all the CUs and return 1.  Otherwise, return 0.  */
 
 static int
-dwarf2_read_index (struct objfile *objfile)
+dwarf2_read_index (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
   struct mapped_index local_map, *map;
   const gdb_byte *cu_list, *types_list, *dwz_list = NULL;
   offset_type cu_list_elements, types_list_elements, dwz_list_elements = 0;
   struct dwz_file *dwz;
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = get_dwarf2_per_objfile (objfile);
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   if (!read_index_from_section (objfile, objfile_name (objfile),
 				use_deprecated_index_sections,
@@ -3601,8 +3592,8 @@ dwarf2_read_index (struct objfile *objfile)
 	}
     }
 
-  create_cus_from_index (objfile, cu_list, cu_list_elements, dwz_list,
-			 dwz_list_elements);
+  create_cus_from_index (dwarf2_per_objfile, cu_list, cu_list_elements,
+			 dwz_list, dwz_list_elements);
 
   if (types_list_elements)
     {
@@ -3616,8 +3607,8 @@ dwarf2_read_index (struct objfile *objfile)
       section = VEC_index (dwarf2_section_info_def,
 			   dwarf2_per_objfile->types, 0);
 
-      create_signatured_type_table_from_index (objfile, section, types_list,
-					       types_list_elements);
+      create_signatured_type_table_from_index (dwarf2_per_objfile, section,
+					       types_list, types_list_elements);
     }
 
   create_addrmap_from_index (dwarf2_per_objfile, &local_map);
@@ -6259,7 +6250,7 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
       return true;
     }
 
-  if (dwarf2_read_index (objfile))
+  if (dwarf2_read_index (dwarf2_per_objfile))
     {
       *index_kind = dw_index_kind::GDB_INDEX;
       return true;
@@ -22926,9 +22917,8 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
   struct die_info *die;
   struct attribute *attr;
   struct dwarf2_locexpr_baton retval;
-  struct objfile *objfile = per_cu->dwarf2_per_objfile->objfile;
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = get_dwarf2_per_objfile (objfile);
+  struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   if (per_cu->cu == NULL)
     load_cu (per_cu);

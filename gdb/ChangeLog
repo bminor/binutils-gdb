@@ -1,5 +1,16 @@
 2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2read.c (create_cus_from_index_list): Replace objfile arg
+	with dwarf2_per_objfile.
+	(create_cus_from_index): Likewise.
+	(create_signatured_type_table_from_index): Likewise.
+	(dwarf2_read_index): Likewise.
+	(dwarf2_initialize_objfile): Likewise.
+	(dwarf2_fetch_die_loc_sect_off):  Get dwarf2_per_objfile from
+	per_cu rather than get_dwarf2_per_objfile.
+
+2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2read.h (struct signatured_type): Forward declare.
 	(struct dwarf2_per_objfile) <get_cutu, get_cu, get_tu>:
 	New methods.
