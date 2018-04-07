@@ -166,7 +166,8 @@ clone_program_space (struct program_space *dest, struct program_space *src)
     exec_file_attach (src->pspace_exec_filename, 0);
 
   if (src->symfile_object_file != NULL)
-    symbol_file_add_main (objfile_name (src->symfile_object_file), 0);
+    symbol_file_add_main (objfile_name (src->symfile_object_file),
+			  SYMFILE_DEFER_BP_RESET);
 
   return dest;
 }
