@@ -165,10 +165,7 @@ public:
 
   /* Table of all the compilation units.  This is used to locate
      the target compilation unit of a particular reference.  */
-  struct dwarf2_per_cu_data **all_comp_units = NULL;
-
-  /* The number of compilation units in ALL_COMP_UNITS.  */
-  int n_comp_units = 0;
+  std::vector<dwarf2_per_cu_data *> all_comp_units;
 
   /* The number of .debug_types-related CUs.  */
   int n_type_units = 0;

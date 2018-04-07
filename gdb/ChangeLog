@@ -1,5 +1,43 @@
 2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2read.h (struct dwarf2_per_objfile) <all_comp_units>: Likewise.
+	Make an std::vector.
+	<n_comp_units>: Remove.
+	* dwarf2read.c (dwarf2_per_objfile::~dwarf2_per_objfile): Adjust
+	to std::vector change.
+	(dwarf2_per_objfile::get_cutu): Likewise.
+	(dwarf2_per_objfile::get_cu): Likewise.
+	(create_cus_from_index): Likewise.
+	(create_addrmap_from_index): Likewise.
+	(create_addrmap_from_aranges): Likewise.
+	(dwarf2_read_index): Likewise.
+	(dw2_find_last_source_symtab): Likewise.
+	(dw2_map_symtabs_matching_filename): Likewise.
+	(dw2_symtab_iter_next): Likewise.
+	(dw2_print_stats): Likewise.
+	(dw2_expand_all_symtabs): Likewise.
+	(dw2_expand_symtabs_with_fullname): Likewise.
+	(dw2_expand_marked_cus): Likewise.
+	(dw2_map_symbol_filenames): Likewise.
+	(create_cus_from_debug_names): Likewise.
+	(dwarf2_read_debug_names): Likewise.
+	(dw2_debug_names_iterator::next): Likewise.
+	(dwarf2_initialize_objfile): Likewise.
+	(set_partial_user): Likewise.
+	(dwarf2_build_psymtabs_hard): Likewise.
+	(read_comp_units_from_section): Remove arguments, adjust to
+	std::vector change.
+	(create_all_comp_units): Adjust to std::vector and
+	read_comp_units_from_section changes.
+	(dwarf2_find_containing_comp_unit): Adjust to std::vector
+	change.
+	* dwarf-index-write.c (check_dwarf64_offsets): Likewise.
+	(psyms_seen_size): Likewise.
+	(write_gdbindex): Likewise.
+	(write_debug_names): Likewise.
+
+2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2read.c (create_cus_from_index_list): Replace objfile arg
 	with dwarf2_per_objfile.
 	(create_cus_from_index): Likewise.

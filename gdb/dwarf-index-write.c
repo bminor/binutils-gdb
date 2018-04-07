@@ -1251,11 +1251,9 @@ private:
 static bool
 check_dwarf64_offsets (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
-  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+  for (dwarf2_per_cu_data *per_cu : dwarf2_per_objfile->all_comp_units)
     {
-      const dwarf2_per_cu_data &per_cu = *dwarf2_per_objfile->all_comp_units[i];
-
-      if (to_underlying (per_cu.sect_off) >= (static_cast<uint64_t> (1) << 32))
+      if (to_underlying (per_cu->sect_off) >= (static_cast<uint64_t> (1) << 32))
 	return true;
     }
   for (int i = 0; i < dwarf2_per_objfile->n_type_units; ++i)
@@ -1279,10 +1277,8 @@ static size_t
 psyms_seen_size (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
   size_t psyms_count = 0;
-  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+  for (dwarf2_per_cu_data *per_cu : dwarf2_per_objfile->all_comp_units)
     {
-      struct dwarf2_per_cu_data *per_cu
-	= dwarf2_per_objfile->all_comp_units[i];
       struct partial_symtab *psymtab = per_cu->v.psymtab;
 
       if (psymtab != NULL && psymtab->user == NULL)
@@ -1308,7 +1304,7 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file)
      in the index file).  This will later be needed to write the address
      table.  */
   psym_index_map cu_index_htab;
-  cu_index_htab.reserve (dwarf2_per_objfile->n_comp_units);
+  cu_index_htab.reserve (dwarf2_per_objfile->all_comp_units.size ());
 
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
@@ -1316,7 +1312,7 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file)
 
   std::unordered_set<partial_symbol *> psyms_seen
     (psyms_seen_size (dwarf2_per_objfile));
-  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+  for (int i = 0; i < dwarf2_per_objfile->all_comp_units.size (); ++i)
     {
       struct dwarf2_per_cu_data *per_cu
 	= dwarf2_per_objfile->all_comp_units[i];
@@ -1353,7 +1349,7 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file)
 
       sig_data.objfile = objfile;
       sig_data.symtab = &symtab;
-      sig_data.cu_index = dwarf2_per_objfile->n_comp_units;
+      sig_data.cu_index = dwarf2_per_objfile->all_comp_units.size ();
       htab_traverse_noresize (dwarf2_per_objfile->signatured_types,
 			      write_one_signatured_type, &sig_data);
     }
@@ -1428,7 +1424,7 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			 dwarf5_byte_order);
   std::unordered_set<partial_symbol *>
     psyms_seen (psyms_seen_size (dwarf2_per_objfile));
-  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+  for (int i = 0; i < dwarf2_per_objfile->all_comp_units.size (); ++i)
     {
       const dwarf2_per_cu_data *per_cu = dwarf2_per_objfile->all_comp_units[i];
       partial_symtab *psymtab = per_cu->v.psymtab;
@@ -1496,7 +1492,8 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
   header.append_uint (2, dwarf5_byte_order, 0);
 
   /* comp_unit_count - The number of CUs in the CU list.  */
-  header.append_uint (4, dwarf5_byte_order, dwarf2_per_objfile->n_comp_units);
+  header.append_uint (4, dwarf5_byte_order,
+		      dwarf2_per_objfile->all_comp_units.size ());
 
   /* local_type_unit_count - The number of TUs in the local TU
      list.  */
