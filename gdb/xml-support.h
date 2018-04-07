@@ -24,6 +24,7 @@
 #include "gdb_obstack.h"
 #include "vec.h"
 #include "xml-utils.h"
+#include "common/byte-vector.h"
 
 struct gdb_xml_parser;
 struct gdb_xml_element;
@@ -52,8 +53,8 @@ extern const char *xml_builtin[][2];
 
 /* Callback to fetch a new XML file, based on the provided HREF.  */
 
-typedef gdb::unique_xmalloc_ptr<char> (*xml_fetch_another) (const char *href,
-							    void *baton);
+typedef gdb::optional<gdb::char_vector> (*xml_fetch_another) (const char *href,
+							      void *baton);
 
 /* Append the expansion of TEXT after processing <xi:include> tags in
    RESULT.  FETCHER will be called (with FETCHER_BATON) to retrieve
@@ -231,9 +232,10 @@ ULONGEST gdb_xml_parse_ulongest (struct gdb_xml_parser *parser,
 				 const char *value);
 
 /* Open FILENAME, read all its text into memory, close it, and return
-   the text.  If something goes wrong, return NULL and warn.  */
+   the text.  If something goes wrong, return an uninstantiated optional
+   and warn.  */
 
-extern gdb::unique_xmalloc_ptr<char> xml_fetch_content_from_file
+extern gdb::optional<gdb::char_vector> xml_fetch_content_from_file
     (const char *filename, void *baton);
 
 #endif

@@ -305,12 +305,12 @@ syscall_parse_xml (const char *document, xml_fetch_another fetcher,
 static struct syscalls_info *
 xml_init_syscalls_info (const char *filename)
 {
-  gdb::unique_xmalloc_ptr<char> full_file
+  gdb::optional<gdb::char_vector> full_file
     = xml_fetch_content_from_file (filename, gdb_datadir);
-  if (full_file == NULL)
+  if (!full_file)
     return NULL;
 
-  return syscall_parse_xml (full_file.get (),
+  return syscall_parse_xml (full_file->data (),
 			    xml_fetch_content_from_file,
 			    (void *) ldirname (filename).c_str ());
 }

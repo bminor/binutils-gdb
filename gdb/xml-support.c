@@ -793,13 +793,13 @@ xinclude_start_include (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Maximum XInclude depth (%d) exceeded"),
 		   MAX_XINCLUDE_DEPTH);
 
-  gdb::unique_xmalloc_ptr<char> text = data->fetcher (href,
-						      data->fetcher_baton);
-  if (text == NULL)
+  gdb::optional<gdb::char_vector> text
+    = data->fetcher (href, data->fetcher_baton);
+  if (!text)
     gdb_xml_error (parser, _("Could not load XML document \"%s\""), href);
 
   if (!xml_process_xincludes (data->output, parser->name (),
-			      text.get (), data->fetcher,
+			      text->data (), data->fetcher,
 			      data->fetcher_baton,
 			      data->include_depth + 1))
     gdb_xml_error (parser, _("Parsing \"%s\" failed"), href);
@@ -971,7 +971,7 @@ show_debug_xml (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("XML debugging is %s.\n"), value);
 }
 
-gdb::unique_xmalloc_ptr<char>
+gdb::optional<gdb::char_vector>
 xml_fetch_content_from_file (const char *filename, void *baton)
 {
   const char *dirname = (const char *) baton;
@@ -990,7 +990,7 @@ xml_fetch_content_from_file (const char *filename, void *baton)
     file = gdb_fopen_cloexec (filename, FOPEN_RT);
 
   if (file == NULL)
-    return NULL;
+    return {};
 
   /* Read in the whole file.  */
 
@@ -1001,16 +1001,16 @@ xml_fetch_content_from_file (const char *filename, void *baton)
   len = ftell (file.get ());
   rewind (file.get ());
 
-  gdb::unique_xmalloc_ptr<char> text ((char *) xmalloc (len + 1));
+  gdb::char_vector text (len + 1);
 
-  if (fread (text.get (), 1, len, file.get ()) != len
+  if (fread (text.data (), 1, len, file.get ()) != len
       || ferror (file.get ()))
     {
       warning (_("Read error from \"%s\""), filename);
-      return NULL;
+      return {};
     }
 
-  text.get ()[len] = '\0';
+  text.back () = '\0';
   return text;
 }
 

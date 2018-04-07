@@ -668,15 +668,15 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
 const struct target_desc *
 file_read_description_xml (const char *filename)
 {
-  gdb::unique_xmalloc_ptr<char> tdesc_str
+  gdb::optional<gdb::char_vector> tdesc_str
     = xml_fetch_content_from_file (filename, NULL);
-  if (tdesc_str == NULL)
+  if (!tdesc_str)
     {
       warning (_("Could not open \"%s\""), filename);
       return NULL;
     }
 
-  return tdesc_parse_xml (tdesc_str.get (), xml_fetch_content_from_file,
+  return tdesc_parse_xml (tdesc_str->data (), xml_fetch_content_from_file,
 			  (void *) ldirname (filename).c_str ());
 }
 
@@ -687,7 +687,7 @@ file_read_description_xml (const char *filename)
    is "target.xml".  Other calls may be performed for the DTD or
    for <xi:include>.  */
 
-static gdb::unique_xmalloc_ptr<char>
+static gdb::optional<gdb::char_vector>
 fetch_available_features_from_target (const char *name, void *baton_)
 {
   struct target_ops *ops = (struct target_ops *) baton_;
@@ -706,12 +706,12 @@ fetch_available_features_from_target (const char *name, void *baton_)
 const struct target_desc *
 target_read_description_xml (struct target_ops *ops)
 {
-  gdb::unique_xmalloc_ptr<char> tdesc_str
+  gdb::optional<gdb::char_vector> tdesc_str
     = fetch_available_features_from_target ("target.xml", ops);
-  if (tdesc_str == NULL)
+  if (!tdesc_str)
     return NULL;
 
-  return tdesc_parse_xml (tdesc_str.get (),
+  return tdesc_parse_xml (tdesc_str->data (),
 			  fetch_available_features_from_target,
 			  ops);
 }
@@ -735,15 +735,15 @@ target_fetch_description_xml (struct target_ops *ops)
 
   return {};
 #else
-  gdb::unique_xmalloc_ptr<char>
+  gdb::optional<gdb::char_vector>
     tdesc_str = fetch_available_features_from_target ("target.xml", ops);
-  if (tdesc_str == NULL)
+  if (!tdesc_str)
     return {};
 
   std::string output;
   if (!xml_process_xincludes (output,
 			      _("target description"),
-			      tdesc_str.get (),
+			      tdesc_str->data (),
 			      fetch_available_features_from_target, ops, 0))
     {
       warning (_("Could not load XML target description; ignoring"));

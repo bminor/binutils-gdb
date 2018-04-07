@@ -224,10 +224,10 @@ dsbt_print_loadmap (struct int_elf32_dsbt_loadmap *map)
 /* Decode int_elf32_dsbt_loadmap from BUF.  */
 
 static struct int_elf32_dsbt_loadmap *
-decode_loadmap (gdb_byte *buf)
+decode_loadmap (const gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  struct ext_elf32_dsbt_loadmap *ext_ldmbuf;
+  const struct ext_elf32_dsbt_loadmap *ext_ldmbuf;
   struct int_elf32_dsbt_loadmap *int_ldmbuf;
 
   int version, seg, nsegs;
@@ -278,7 +278,6 @@ decode_loadmap (gdb_byte *buf)
 				    byte_order);
     }
 
-  xfree (ext_ldmbuf);
   return int_ldmbuf;
 }
 
@@ -292,26 +291,26 @@ static struct dsbt_info *get_dsbt_info (void);
 static void
 dsbt_get_initial_loadmaps (void)
 {
-  gdb_byte *buf;
   struct dsbt_info *info = get_dsbt_info ();
+  gdb::optional<gdb::byte_vector> buf
+    = target_read_alloc (&current_target, TARGET_OBJECT_FDPIC, "exec");
 
-  if (0 >= target_read_alloc (&current_target, TARGET_OBJECT_FDPIC,
-			      "exec", &buf))
+  if (!buf || buf->empty ())
     {
       info->exec_loadmap = NULL;
       error (_("Error reading DSBT exec loadmap"));
     }
-  info->exec_loadmap = decode_loadmap (buf);
+  info->exec_loadmap = decode_loadmap (buf->data ());
   if (solib_dsbt_debug)
     dsbt_print_loadmap (info->exec_loadmap);
 
-  if (0 >= target_read_alloc (&current_target, TARGET_OBJECT_FDPIC,
-			      "interp", &buf))
+  buf = target_read_alloc (&current_target, TARGET_OBJECT_FDPIC, "exec");
+  if (!buf || buf->empty ())
     {
       info->interp_loadmap = NULL;
       error (_("Error reading DSBT interp loadmap"));
     }
-  info->interp_loadmap = decode_loadmap (buf);
+  info->interp_loadmap = decode_loadmap (buf->data ());
   if (solib_dsbt_debug)
     dsbt_print_loadmap (info->interp_loadmap);
 }

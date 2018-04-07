@@ -324,29 +324,26 @@ LONGEST target_write_with_progress (struct target_ops *ops,
 				    void (*progress) (ULONGEST, void *),
 				    void *baton);
 
-/* Wrapper to perform a full read of unknown size.  OBJECT/ANNEX will
-   be read using OPS.  The return value will be -1 if the transfer
-   fails or is not supported; 0 if the object is empty; or the length
-   of the object otherwise.  If a positive value is returned, a
-   sufficiently large buffer will be allocated using xmalloc and
-   returned in *BUF_P containing the contents of the object.
+/* Wrapper to perform a full read of unknown size.  OBJECT/ANNEX will be read
+   using OPS.  The return value will be uninstantiated if the transfer fails or
+   is not supported.
 
    This method should be used for objects sufficiently small to store
    in a single xmalloc'd buffer, when no fixed bound on the object's
    size is known in advance.  Don't try to read TARGET_OBJECT_MEMORY
    through this function.  */
 
-extern LONGEST target_read_alloc (struct target_ops *ops,
-				  enum target_object object,
-				  const char *annex, gdb_byte **buf_p);
+extern gdb::optional<gdb::byte_vector> target_read_alloc
+    (struct target_ops *ops, enum target_object object, const char *annex);
 
-/* Read OBJECT/ANNEX using OPS.  The result is NUL-terminated and
-   returned as a string.  If an error occurs or the transfer is
-   unsupported, NULL is returned.  Empty objects are returned as
-   allocated but empty strings.  A warning is issued if the result
-   contains any embedded NUL bytes.  */
+/* Read OBJECT/ANNEX using OPS.  The result is a NUL-terminated character vector
+   (therefore usable as a NUL-terminated string).  If an error occurs or the
+   transfer is unsupported, the return value will be uninstantiated.  Empty
+   objects are returned as allocated but empty strings.  Therefore, on success,
+   the returned vector is guaranteed to have at least one element.  A warning is
+   issued if the result contains any embedded NUL bytes.  */
 
-extern gdb::unique_xmalloc_ptr<char> target_read_stralloc
+extern gdb::optional<gdb::char_vector> target_read_stralloc
     (struct target_ops *ops, enum target_object object, const char *annex);
 
 /* See target_ops->to_xfer_partial.  */
@@ -2384,15 +2381,11 @@ extern struct target_ops *find_target_beneath (struct target_ops *);
 
 struct target_ops *find_target_at (enum strata stratum);
 
-/* Read OS data object of type TYPE from the target, and return it in
-   XML format.  The result is NUL-terminated and returned as a string.
-   If an error occurs or the transfer is unsupported, NULL is
-   returned.  Empty objects are returned as allocated but empty
-   strings.  */
+/* Read OS data object of type TYPE from the target, and return it in XML
+   format.  The return value follows the same rules as target_read_stralloc.  */
 
-extern gdb::unique_xmalloc_ptr<char> target_get_osdata (const char *type);
+extern gdb::optional<gdb::char_vector> target_get_osdata (const char *type);
 
-
 /* Stuff that should be shared among the various remote targets.  */
 
 /* Debugging level.  0 is off, and non-zero values mean to print some debug

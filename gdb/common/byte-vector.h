@@ -56,6 +56,7 @@ namespace gdb {
    and providing the whole std::vector API, if you end up needing it.
 */
 using byte_vector = gdb::def_vector<gdb_byte>;
+using char_vector = gdb::def_vector<char>;
 
 } /* namespace gdb */
 

@@ -1420,46 +1420,40 @@ linux_spu_make_corefile_notes (bfd *obfd, char *note_data, int *note_size)
    };
 
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  gdb_byte *spu_ids;
-  LONGEST i, j, size;
 
   /* Determine list of SPU ids.  */
-  size = target_read_alloc (&current_target, TARGET_OBJECT_SPU,
-			    NULL, &spu_ids);
+  gdb::optional<gdb::byte_vector>
+    spu_ids = target_read_alloc (&current_target, TARGET_OBJECT_SPU, NULL);
+
+  if (!spu_ids)
+    return nullptr;
 
   /* Generate corefile notes for each SPU file.  */
-  for (i = 0; i < size; i += 4)
+  for (size_t i = 0; i < spu_ids->size (); i += 4)
     {
-      int fd = extract_unsigned_integer (spu_ids + i, 4, byte_order);
+      int fd = extract_unsigned_integer (spu_ids->data () + i, 4, byte_order);
 
-      for (j = 0; j < sizeof (spu_files) / sizeof (spu_files[0]); j++)
+      for (size_t j = 0; j < sizeof (spu_files) / sizeof (spu_files[0]); j++)
 	{
 	  char annex[32], note_name[32];
-	  gdb_byte *spu_data;
-	  LONGEST spu_len;
 
 	  xsnprintf (annex, sizeof annex, "%d/%s", fd, spu_files[j]);
-	  spu_len = target_read_alloc (&current_target, TARGET_OBJECT_SPU,
-				       annex, &spu_data);
-	  if (spu_len > 0)
+	  gdb::optional<gdb::byte_vector> spu_data
+	    = target_read_alloc (&current_target, TARGET_OBJECT_SPU, annex);
+
+	  if (spu_data && !spu_data->empty ())
 	    {
 	      xsnprintf (note_name, sizeof note_name, "SPU/%s", annex);
 	      note_data = elfcore_write_note (obfd, note_data, note_size,
 					      note_name, NT_SPU,
-					      spu_data, spu_len);
-	      xfree (spu_data);
+					      spu_data->data (),
+					      spu_data->size ());
 
 	      if (!note_data)
-		{
-		  xfree (spu_ids);
-		  return NULL;
-		}
+		return nullptr;
 	    }
 	}
     }
-
-  if (size > 0)
-    xfree (spu_ids);
 
   return note_data;
 }
@@ -1911,8 +1905,6 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   struct linux_corefile_thread_data thread_args;
   struct elf_internal_linux_prpsinfo prpsinfo;
   char *note_data = NULL;
-  gdb_byte *auxv;
-  int auxv_len;
   struct thread_info *curr_thr, *signalled_thr, *thr;
 
   if (! gdbarch_iterate_over_regset_sections_p (gdbarch))
@@ -1977,13 +1969,13 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     return NULL;
 
   /* Auxillary vector.  */
-  auxv_len = target_read_alloc (&current_target, TARGET_OBJECT_AUXV,
-				NULL, &auxv);
-  if (auxv_len > 0)
+  gdb::optional<gdb::byte_vector> auxv =
+    target_read_alloc (&current_target, TARGET_OBJECT_AUXV, NULL);
+  if (auxv && !auxv->empty ())
     {
       note_data = elfcore_write_note (obfd, note_data, note_size,
-				      "CORE", NT_AUXV, auxv, auxv_len);
-      xfree (auxv);
+				      "CORE", NT_AUXV, auxv->data (),
+				      auxv->size ());
 
       if (!note_data)
 	return NULL;

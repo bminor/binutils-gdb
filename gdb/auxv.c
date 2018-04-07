@@ -304,8 +304,7 @@ static const struct inferior_data *auxv_inferior_data;
     overhead of transfering data from a remote target to the local host.  */
 struct auxv_info
 {
-  LONGEST length;
-  gdb_byte *data;
+  gdb::optional<gdb::byte_vector> data;
 };
 
 /* Handles the cleanup of the auxv cache for inferior INF.  ARG is ignored.
@@ -323,8 +322,7 @@ auxv_inferior_data_cleanup (struct inferior *inf, void *arg)
   info = (struct auxv_info *) inferior_data (inf, auxv_inferior_data);
   if (info != NULL)
     {
-      xfree (info->data);
-      xfree (info);
+      delete info;
       set_inferior_data (inf, auxv_inferior_data, NULL);
     }
 }
@@ -358,9 +356,8 @@ get_auxv_inferior_data (struct target_ops *ops)
   info = (struct auxv_info *) inferior_data (inf, auxv_inferior_data);
   if (info == NULL)
     {
-      info = XCNEW (struct auxv_info);
-      info->length = target_read_alloc (ops, TARGET_OBJECT_AUXV,
-					NULL, &info->data);
+      info = new auxv_info;
+      info->data = target_read_alloc (ops, TARGET_OBJECT_AUXV, NULL);
       set_inferior_data (inf, auxv_inferior_data, info);
     }
 
@@ -375,20 +372,17 @@ int
 target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
 {
   CORE_ADDR type, val;
-  gdb_byte *data;
-  gdb_byte *ptr;
-  struct auxv_info *info;
+  auxv_info *info = get_auxv_inferior_data (ops);
 
-  info = get_auxv_inferior_data (ops);
+  if (!info->data)
+    return -1;
 
-  data = info->data;
-  ptr = data;
-
-  if (info->length <= 0)
-    return info->length;
+  gdb_byte *data = info->data->data ();
+  gdb_byte *ptr = data;
+  size_t len = info->data->size ();
 
   while (1)
-    switch (target_auxv_parse (ops, &ptr, data + info->length, &type, &val))
+    switch (target_auxv_parse (ops, &ptr, data + len, &type, &val))
       {
       case 1:			/* Here's an entry, check it.  */
 	if (type == match)
@@ -528,19 +522,17 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 {
   struct gdbarch *gdbarch = target_gdbarch ();
   CORE_ADDR type, val;
-  gdb_byte *data;
-  gdb_byte *ptr;
-  struct auxv_info *info;
   int ents = 0;
+  auxv_info *info = get_auxv_inferior_data (ops);
 
-  info = get_auxv_inferior_data (ops);
+  if (!info->data)
+    return -1;
 
-  data = info->data;
-  ptr = data;
-  if (info->length <= 0)
-    return info->length;
+  gdb_byte *data = info->data->data ();
+  gdb_byte *ptr = data;
+  size_t len = info->data->size ();
 
-  while (target_auxv_parse (ops, &ptr, data + info->length, &type, &val) > 0)
+  while (target_auxv_parse (ops, &ptr, data + len, &type, &val) > 0)
     {
       gdbarch_print_auxv_entry (gdbarch, file, type, val);
       ++ents;

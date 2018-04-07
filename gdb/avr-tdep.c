@@ -1549,21 +1549,15 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 avr_io_reg_read_command (const char *args, int from_tty)
 {
-  LONGEST bufsiz = 0;
-  gdb_byte *buf;
-  const char *bufstr;
   char query[400];
-  const char *p;
   unsigned int nreg = 0;
   unsigned int val;
-  int i, j, k, step;
 
   /* Find out how many io registers the target has.  */
-  bufsiz = target_read_alloc (&current_target, TARGET_OBJECT_AVR,
-			      "avr.io_reg", &buf);
-  bufstr = (const char *) buf;
+  gdb::optional<gdb::byte_vector> buf
+    = target_read_alloc (&current_target, TARGET_OBJECT_AVR, "avr.io_reg");
 
-  if (bufsiz <= 0)
+  if (!buf)
     {
       fprintf_unfiltered (gdb_stderr,
 			  _("ERR: info io_registers NOT supported "
@@ -1571,36 +1565,42 @@ avr_io_reg_read_command (const char *args, int from_tty)
       return;
     }
 
+  const char *bufstr = (const char *) buf->data ();
+
   if (sscanf (bufstr, "%x", &nreg) != 1)
     {
       fprintf_unfiltered (gdb_stderr,
 			  _("Error fetching number of io registers\n"));
-      xfree (buf);
       return;
     }
-
-  xfree (buf);
 
   reinitialize_more_filter ();
 
   printf_unfiltered (_("Target has %u io registers:\n\n"), nreg);
 
   /* only fetch up to 8 registers at a time to keep the buffer small */
-  step = 8;
+  int step = 8;
 
-  for (i = 0; i < nreg; i += step)
+  for (int i = 0; i < nreg; i += step)
     {
       /* how many registers this round? */
-      j = step;
+      int j = step;
       if ((i+j) >= nreg)
         j = nreg - i;           /* last block is less than 8 registers */
 
       snprintf (query, sizeof (query) - 1, "avr.io_reg:%x,%x", i, j);
-      bufsiz = target_read_alloc (&current_target, TARGET_OBJECT_AVR,
-				  query, &buf);
+      buf = target_read_alloc (&current_target, TARGET_OBJECT_AVR, query);
 
-      p = (const char *) buf;
-      for (k = i; k < (i + j); k++)
+      if (!buf)
+        {
+          fprintf_unfiltered (gdb_stderr,
+			      _("ERR: error reading avr.io_reg:%x,%x\n"),
+			      i, j);
+          return;
+        }
+
+      const char *p = (const char *) buf->data ();
+      for (int k = i; k < (i + j); k++)
 	{
 	  if (sscanf (p, "%[^,],%x;", query, &val) == 2)
 	    {
@@ -1612,8 +1612,6 @@ avr_io_reg_read_command (const char *args, int from_tty)
 		break;
 	    }
 	}
-
-      xfree (buf);
     }
 }
 

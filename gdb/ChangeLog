@@ -1,3 +1,47 @@
+2018-04-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/byte-vector.h (char_vector): New type.
+	* target.h (target_read_alloc): Return
+	gdb::optional<byte_vector>.
+	(target_read_stralloc): Return gdb::optional<char_vector>.
+	(target_get_osdata): Return gdb::optional<char_vector>.
+	* target.c (target_read_alloc_1): Templatize.  Replacement
+	manual memory management with vector.
+	(target_read_alloc): Change return type, adjust.
+	(target_read_stralloc): Change return type, adjust.
+	(target_get_osdata): Change return type, adjust.
+	* auxv.c (struct auxv_info) <length>: Remove.
+	<data>: Change type to gdb::optional<byte_vector>.
+	(auxv_inferior_data_cleanup): Free auxv_info with delete.
+	(get_auxv_inferior_data): Allocate auxv_info with new, adjust.
+	(target_auxv_search): Adjust.
+	(fprint_target_auxv): Adjust.
+	* avr-tdep.c (avr_io_reg_read_command): Adjust.
+	* linux-tdep.c (linux_spu_make_corefile_notes): Adjust.
+	(linux_make_corefile_notes): Adjust.
+	* osdata.c (get_osdata): Adjust.
+	* remote.c (remote_get_threads_with_qxfer): Adjust.
+	(remote_memory_map): Adjust.
+	(remote_traceframe_info): Adjust.
+	(btrace_read_config): Adjust.
+	(remote_read_btrace): Adjust.
+	(remote_pid_to_exec_file): Adjust.
+	* solib-aix.c (solib_aix_get_library_list): Adjust.
+	* solib-dsbt.c (decode_loadmap): Don't free buf.
+	(dsbt_get_initial_loadmaps): Adjust.
+	* solib-svr4.c (svr4_current_sos_via_xfer_libraries): Adjust.
+	* solib-target.c (solib_target_current_sos): Adjust.
+	* tracepoint.c (sdata_make_value): Adjust.
+	* xml-support.c (xinclude_start_include): Adjust.
+	(xml_fetch_content_from_file): Adjust.
+	* xml-support.h (xml_fetch_another): Change return type.
+	(xml_fetch_content_from_file): Change return type.
+	* xml-syscall.c (xml_init_syscalls_info): Adjust.
+	* xml-tdesc.c (file_read_description_xml): Adjust.
+	(fetch_available_features_from_target): Change return type.
+	(target_fetch_description_xml): Adjust.
+	(target_read_description_xml): Adjust.
+
 2018-04-06  Tom Tromey  <tom@tromey.com>
 
 	* value.c (~value): Update.

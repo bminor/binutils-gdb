@@ -3871,23 +3871,19 @@ static struct value *
 sdata_make_value (struct gdbarch *gdbarch, struct internalvar *var,
 		  void *ignore)
 {
-  LONGEST size;
-  gdb_byte *buf;
-
   /* We need to read the whole object before we know its size.  */
-  size = target_read_alloc (&current_target,
-			    TARGET_OBJECT_STATIC_TRACE_DATA,
-			    NULL, &buf);
-  if (size >= 0)
+  gdb::optional<gdb::byte_vector> buf
+    = target_read_alloc (&current_target, TARGET_OBJECT_STATIC_TRACE_DATA,
+			 NULL);
+  if (buf)
     {
       struct value *v;
       struct type *type;
 
       type = init_vector_type (builtin_type (gdbarch)->builtin_true_char,
-			       size);
+			       buf->size ());
       v = allocate_value (type);
-      memcpy (value_contents_raw (v), buf, size);
-      xfree (buf);
+      memcpy (value_contents_raw (v), buf->data (), buf->size ());
       return v;
     }
   else

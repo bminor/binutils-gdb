@@ -257,13 +257,13 @@ solib_target_current_sos (void)
   int ix;
 
   /* Fetch the list of shared libraries.  */
-  gdb::unique_xmalloc_ptr<char> library_document
+  gdb::optional<gdb::char_vector> library_document
     = target_read_stralloc (&current_target, TARGET_OBJECT_LIBRARIES, NULL);
-  if (library_document == NULL)
+  if (!library_document)
     return NULL;
 
   /* Parse the list.  */
-  library_list = solib_target_parse_libraries (library_document.get ());
+  library_list = solib_target_parse_libraries (library_document->data ());
 
   if (library_list == NULL)
     return NULL;

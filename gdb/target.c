@@ -48,6 +48,7 @@
 #include <algorithm>
 #include "byte-vector.h"
 #include "terminal.h"
+#include <algorithm>
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
@@ -1937,18 +1938,17 @@ target_write (struct target_ops *ops,
 				     NULL, NULL);
 }
 
-/* Read OBJECT/ANNEX using OPS.  Store the result in *BUF_P and return
-   the size of the transferred data.  PADDING additional bytes are
-   available in *BUF_P.  This is a helper function for
-   target_read_alloc; see the declaration of that function for more
-   information.  */
+/* Help for target_read_alloc and target_read_stralloc.  See their comments
+   for details.  */
 
-static LONGEST
+template <typename T>
+gdb::optional<gdb::def_vector<T>>
 target_read_alloc_1 (struct target_ops *ops, enum target_object object,
-		     const char *annex, gdb_byte **buf_p, int padding)
+		     const char *annex)
 {
-  size_t buf_alloc, buf_pos;
-  gdb_byte *buf;
+  gdb::def_vector<T> buf;
+  size_t buf_pos = 0;
+  const int chunk = 4096;
 
   /* This function does not have a length parameter; it reads the
      entire OBJECT).  Also, it doesn't support objects fetched partly
@@ -1959,82 +1959,64 @@ target_read_alloc_1 (struct target_ops *ops, enum target_object object,
 
   /* Start by reading up to 4K at a time.  The target will throttle
      this number down if necessary.  */
-  buf_alloc = 4096;
-  buf = (gdb_byte *) xmalloc (buf_alloc);
-  buf_pos = 0;
   while (1)
     {
       ULONGEST xfered_len;
       enum target_xfer_status status;
 
-      status = target_read_partial (ops, object, annex, &buf[buf_pos],
-				    buf_pos, buf_alloc - buf_pos - padding,
+      buf.resize (buf_pos + chunk);
+
+      status = target_read_partial (ops, object, annex,
+				    (gdb_byte *) &buf[buf_pos],
+				    buf_pos, chunk,
 				    &xfered_len);
 
       if (status == TARGET_XFER_EOF)
 	{
 	  /* Read all there was.  */
-	  if (buf_pos == 0)
-	    xfree (buf);
-	  else
-	    *buf_p = buf;
-	  return buf_pos;
+	  buf.resize (buf_pos);
+	  return buf;
 	}
       else if (status != TARGET_XFER_OK)
 	{
 	  /* An error occurred.  */
-	  xfree (buf);
-	  return TARGET_XFER_E_IO;
+	  return {};
 	}
 
       buf_pos += xfered_len;
-
-      /* If the buffer is filling up, expand it.  */
-      if (buf_alloc < buf_pos * 2)
-	{
-	  buf_alloc *= 2;
-	  buf = (gdb_byte *) xrealloc (buf, buf_alloc);
-	}
 
       QUIT;
     }
 }
 
-/* Read OBJECT/ANNEX using OPS.  Store the result in *BUF_P and return
-   the size of the transferred data.  See the declaration in "target.h"
-   function for more information about the return value.  */
+/* See target.h  */
 
-LONGEST
+gdb::optional<gdb::byte_vector>
 target_read_alloc (struct target_ops *ops, enum target_object object,
-		   const char *annex, gdb_byte **buf_p)
+		   const char *annex)
 {
-  return target_read_alloc_1 (ops, object, annex, buf_p, 0);
+  return target_read_alloc_1<gdb_byte> (ops, object, annex);
 }
 
 /* See target.h.  */
 
-gdb::unique_xmalloc_ptr<char>
+gdb::optional<gdb::char_vector>
 target_read_stralloc (struct target_ops *ops, enum target_object object,
 		      const char *annex)
 {
-  gdb_byte *buffer;
-  char *bufstr;
-  LONGEST i, transferred;
+  gdb::optional<gdb::char_vector> buf
+    = target_read_alloc_1<char> (ops, object, annex);
 
-  transferred = target_read_alloc_1 (ops, object, annex, &buffer, 1);
-  bufstr = (char *) buffer;
+  if (!buf)
+    return {};
 
-  if (transferred < 0)
-    return NULL;
-
-  if (transferred == 0)
-    return gdb::unique_xmalloc_ptr<char> (xstrdup (""));
-
-  bufstr[transferred] = 0;
+  if (buf->back () != '\0')
+    buf->push_back ('\0');
 
   /* Check for embedded NUL bytes; but allow trailing NULs.  */
-  for (i = strlen (bufstr); i < transferred; i++)
-    if (bufstr[i] != 0)
+  for (auto it = std::find (buf->begin (), buf->end (), '\0');
+       it != buf->end (); it++)
+    if (*it != '\0')
       {
 	warning (_("target object %d, annex %s, "
 		   "contained unexpected null characters"),
@@ -2042,7 +2024,7 @@ target_read_stralloc (struct target_ops *ops, enum target_object object,
 	break;
       }
 
-  return gdb::unique_xmalloc_ptr<char> (bufstr);
+  return buf;
 }
 
 /* Memory transfer methods.  */
@@ -2744,7 +2726,7 @@ target_supports_multi_process (void)
 
 /* See target.h.  */
 
-gdb::unique_xmalloc_ptr<char>
+gdb::optional<gdb::char_vector>
 target_get_osdata (const char *type)
 {
   struct target_ops *t;
@@ -2758,7 +2740,7 @@ target_get_osdata (const char *type)
     t = find_default_run_target ("get OS data");
 
   if (!t)
-    return NULL;
+    return {};
 
   return target_read_stralloc (t, TARGET_OBJECT_OSDATA, type);
 }

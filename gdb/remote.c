@@ -3151,13 +3151,13 @@ remote_get_threads_with_qxfer (struct target_ops *ops,
 #if defined(HAVE_LIBEXPAT)
   if (packet_support (PACKET_qXfer_threads) == PACKET_ENABLE)
     {
-      gdb::unique_xmalloc_ptr<char> xml
+      gdb::optional<gdb::char_vector> xml
 	= target_read_stralloc (ops, TARGET_OBJECT_THREADS, NULL);
 
-      if (xml != NULL && *xml != '\0')
+      if (xml && (*xml)[0] != '\0')
 	{
 	  gdb_xml_parse_quick (_("threads"), "threads.dtd",
-			       threads_elements, xml.get (), context);
+			       threads_elements, xml->data (), context);
 	}
 
       return 1;
@@ -10790,11 +10790,11 @@ static std::vector<mem_region>
 remote_memory_map (struct target_ops *ops)
 {
   std::vector<mem_region> result;
-  gdb::unique_xmalloc_ptr<char> text
+  gdb::optional<gdb::char_vector> text
     = target_read_stralloc (&current_target, TARGET_OBJECT_MEMORY_MAP, NULL);
 
   if (text)
-    result = parse_memory_map (text.get ());
+    result = parse_memory_map (text->data ());
 
   return result;
 }
@@ -12905,11 +12905,11 @@ remote_set_circular_trace_buffer (struct target_ops *self, int val)
 static traceframe_info_up
 remote_traceframe_info (struct target_ops *self)
 {
-  gdb::unique_xmalloc_ptr<char> text
+  gdb::optional<gdb::char_vector> text
     = target_read_stralloc (&current_target, TARGET_OBJECT_TRACEFRAME_INFO,
 			    NULL);
-  if (text != NULL)
-    return parse_traceframe_info (text.get ());
+  if (text)
+    return parse_traceframe_info (text->data ());
 
   return NULL;
 }
@@ -13137,10 +13137,10 @@ btrace_sync_conf (const struct btrace_config *conf)
 static void
 btrace_read_config (struct btrace_config *conf)
 {
-  gdb::unique_xmalloc_ptr<char> xml
+  gdb::optional<gdb::char_vector> xml
     = target_read_stralloc (&current_target, TARGET_OBJECT_BTRACE_CONF, "");
-  if (xml != NULL)
-    parse_xml_btrace_conf (conf, xml.get ());
+  if (xml)
+    parse_xml_btrace_conf (conf, xml->data ());
 }
 
 /* Maybe reopen target btrace.  */
@@ -13337,12 +13337,12 @@ remote_read_btrace (struct target_ops *self,
 		      (unsigned int) type);
     }
 
-  gdb::unique_xmalloc_ptr<char> xml
+  gdb::optional<gdb::char_vector> xml
     = target_read_stralloc (&current_target, TARGET_OBJECT_BTRACE, annex);
-  if (xml == NULL)
+  if (!xml)
     return BTRACE_ERR_UNKNOWN;
 
-  parse_xml_btrace (btrace, xml.get ());
+  parse_xml_btrace (btrace, xml->data ());
 
   return BTRACE_ERR_NONE;
 }
@@ -13376,7 +13376,7 @@ remote_load (struct target_ops *self, const char *name, int from_tty)
 static char *
 remote_pid_to_exec_file (struct target_ops *self, int pid)
 {
-  static gdb::unique_xmalloc_ptr<char> filename;
+  static gdb::optional<gdb::char_vector> filename;
   struct inferior *inf;
   char *annex = NULL;
 
@@ -13399,7 +13399,7 @@ remote_pid_to_exec_file (struct target_ops *self, int pid)
   filename = target_read_stralloc (&current_target,
 				   TARGET_OBJECT_EXEC_FILE, annex);
 
-  return filename.get ();
+  return filename ? filename->data () : nullptr;
 }
 
 /* Implement the to_can_do_single_step target_ops method.  */

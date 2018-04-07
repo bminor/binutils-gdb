@@ -163,11 +163,11 @@ std::unique_ptr<osdata>
 get_osdata (const char *type)
 {
   std::unique_ptr<osdata> osdata;
-  gdb::unique_xmalloc_ptr<char> xml = target_get_osdata (type);
+  gdb::optional<gdb::char_vector> xml = target_get_osdata (type);
 
   if (xml)
     {
-      if (xml.get ()[0] == '\0')
+      if ((*xml)[0] == '\0')
 	{
 	  if (type)
 	    warning (_("Empty data returned by target.  Wrong osdata type?"));
@@ -175,7 +175,7 @@ get_osdata (const char *type)
 	    warning (_("Empty type list returned by target.  No type data?"));
 	}
       else
-	osdata = osdata_parse (xml.get ());
+	osdata = osdata_parse (xml->data ());
     }
 
   if (osdata == NULL)

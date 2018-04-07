@@ -1243,13 +1243,13 @@ svr4_current_sos_via_xfer_libraries (struct svr4_library_list *list,
   gdb_assert (annex == NULL || target_augmented_libraries_svr4_read ());
 
   /* Fetch the list of shared libraries.  */
-  gdb::unique_xmalloc_ptr<char> svr4_library_document
+  gdb::optional<gdb::char_vector> svr4_library_document
     = target_read_stralloc (&current_target, TARGET_OBJECT_LIBRARIES_SVR4,
 			    annex);
-  if (svr4_library_document == NULL)
+  if (!svr4_library_document)
     return 0;
 
-  return svr4_parse_libraries (svr4_library_document.get (), list);
+  return svr4_parse_libraries (svr4_library_document->data (), list);
 }
 
 #else
