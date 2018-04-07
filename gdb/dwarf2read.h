@@ -89,6 +89,7 @@ struct tu_stats
 struct dwarf2_debug_sections;
 struct mapped_index;
 struct mapped_debug_names;
+struct signatured_type;
 
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.  */
@@ -104,6 +105,30 @@ struct dwarf2_per_objfile : public allocate_on_obstack
   ~dwarf2_per_objfile ();
 
   DISABLE_COPY_AND_ASSIGN (dwarf2_per_objfile);
+
+  /* Return the CU/TU given its index.
+
+     This is intended for loops like:
+
+     for (i = 0; i < (dwarf2_per_objfile->n_comp_units
+		      + dwarf2_per_objfile->n_type_units); ++i)
+       {
+         dwarf2_per_cu_data *per_cu = dwarf2_per_objfile->get_cutu (i);
+
+         ...;
+       }
+  */
+  dwarf2_per_cu_data *get_cutu (int index);
+
+  /* Return the CU given its index.
+     This differs from get_cutu in that it's for when you know INDEX refers to a
+     CU.  */
+  dwarf2_per_cu_data *get_cu (int index);
+
+  /* Return the TU given its index.
+     This differs from get_cutu in that it's for when you know INDEX refers to a
+     TU.  */
+  signatured_type *get_tu (int index);
 
   /* Free all cached compilation units.  */
   void free_cached_comp_units ();

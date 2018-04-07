@@ -1,5 +1,31 @@
 2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2read.h (struct signatured_type): Forward declare.
+	(struct dwarf2_per_objfile) <get_cutu, get_cu, get_tu>:
+	New methods.
+	* dwarf2read.c (dwarf2_per_objfile::get_cutu): Rename from...
+	(dw2_get_cutu): ...this.
+	(dwarf2_per_objfile::get_cu): Rename from...
+	(dw2_get_cu): ...this.
+	(dwarf2_per_objfile::get_tu): New.
+	(create_addrmap_from_index): Adjust.
+	(create_addrmap_from_aranges): Adjust.
+	(dw2_find_last_source_symtab): Adjust.
+	(dw2_map_symtabs_matching_filename): Adjust.
+	(dw2_symtab_iter_next): Adjust.
+	(dw2_print_stats): Adjust.
+	(dw2_expand_all_symtabs): Adjust.
+	(dw2_expand_symtabs_with_fullname): Adjust.
+	(dw2_expand_marked_cus): Adjust.
+	(dw_expand_symtabs_matching_file_matcher): Adjust.
+	(dw2_map_symbol_filenames): Adjust.
+	(dw2_debug_names_iterator::next): Adjust.
+	(dwarf2_initialize_objfile): Adjust.
+	(set_partial_user): Adjust.
+	(dwarf2_build_psymtabs_hard): Adjust.
+
+2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2read.c (create_signatured_type_table_from_debug_names):
 	Remove unused variables.
 	(dw2_map_symtabs_matching_filename): Likewise.
