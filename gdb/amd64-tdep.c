@@ -47,6 +47,7 @@
 #include "ax.h"
 #include "ax-gdb.h"
 #include "common/byte-vector.h"
+#include "osabi.h"
 
 /* Note that the AMD64 architecture was previously known as x86-64.
    The latter is (forever) engraved into the canonical system name as
@@ -3206,7 +3207,14 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
   set_gdbarch_insn_is_ret (gdbarch, amd64_insn_is_ret);
   set_gdbarch_insn_is_jump (gdbarch, amd64_insn_is_jump);
 }
-
+
+/* Initialize ARCH for x86-64, no osabi.  */
+
+static void
+amd64_none_init_abi (gdbarch_info info, gdbarch *arch)
+{
+  amd64_init_abi (info, arch, amd64_target_description (X86_XSTATE_SSE_MASK));
+}
 
 static struct type *
 amd64_x32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
@@ -3240,6 +3248,15 @@ amd64_x32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
   set_gdbarch_ptr_bit (gdbarch, 32);
 }
 
+/* Initialize ARCH for x64-32, no osabi.  */
+
+static void
+amd64_x32_none_init_abi (gdbarch_info info, gdbarch *arch)
+{
+  amd64_x32_init_abi (info, arch,
+		      amd64_target_description (X86_XSTATE_SSE_MASK));
+}
+
 /* Return the target description for a specified XSAVE feature mask.  */
 
 const struct target_desc *
@@ -3263,6 +3280,11 @@ amd64_target_description (uint64_t xcr0)
 void
 _initialize_amd64_tdep (void)
 {
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_NONE,
+ 			  amd64_none_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x64_32, GDB_OSABI_NONE,
+ 			  amd64_x32_none_init_abi);
+
 #if GDB_SELF_TEST
   struct
   {

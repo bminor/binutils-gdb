@@ -338,13 +338,6 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   gdb_assert (info.osabi != GDB_OSABI_UNKNOWN);
 
-  if (info.osabi == GDB_OSABI_NONE)
-    {
-      /* Don't complain about no OSABI.  Assume the user knows
-	 what they are doing.  */
-      return;
-    }
-
   for (handler = gdb_osabi_handler_list; handler != NULL;
        handler = handler->next)
     {
@@ -376,6 +369,13 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	  (*handler->init_osabi) (info, gdbarch);
 	  return;
 	}
+    }
+
+  if (info.osabi == GDB_OSABI_NONE)
+    {
+      /* Don't complain about no OSABI.  Assume the user knows
+	 what they are doing.  */
+      return;
     }
 
   warning

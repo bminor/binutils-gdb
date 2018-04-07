@@ -1,5 +1,15 @@
 2018-04-07  Simon Marchi  <simon.marchi@ericsson.com>
 
+	PR gdb/22979
+	* amd64-tdep.c (amd64_none_init_abi): New function.
+	(amd64_x32_none_init_abi): New function.
+	(_initialize_amd64_tdep): Register handlers for x86-64 and
+	x64_32 with GDB_OSABI_NONE.
+	* osabi.c (gdbarch_init_osabi): Allow running handlers for the
+	GDB_OSABI_NONE osabi.
+
+2018-04-07  Simon Marchi  <simon.marchi@ericsson.com>
+
 	PR gdb/22980
 	* defs.h (enum gdb_osabi): Remove GDB_OSABI_UNINITIALIZED, add
 	GDB_OSABI_NONE.

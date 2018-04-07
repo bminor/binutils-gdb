@@ -1,5 +1,10 @@
 2018-04-07  Simon Marchi  <simon.marchi@ericsson.com>
 
+	PR gdb/22979
+	* gdb.arch/amd64-osabi.exp: New file.
+
+2018-04-07  Simon Marchi  <simon.marchi@ericsson.com>
+
 	PR gdb/22980
 	* gdb.base/osabi.exp: New file.
 
