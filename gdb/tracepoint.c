@@ -3012,43 +3012,9 @@ set_current_traceframe (int num)
   clear_traceframe_info ();
 }
 
-/* A cleanup used when switching away and back from tfind mode.  */
-
-struct current_traceframe_cleanup
-{
-  /* The traceframe we were inspecting.  */
-  int traceframe_number;
-};
-
-static void
-do_restore_current_traceframe_cleanup (void *arg)
-{
-  struct current_traceframe_cleanup *old
-    = (struct current_traceframe_cleanup *) arg;
-
-  set_current_traceframe (old->traceframe_number);
-}
-
-static void
-restore_current_traceframe_cleanup_dtor (void *arg)
-{
-  struct current_traceframe_cleanup *old
-    = (struct current_traceframe_cleanup *) arg;
-
-  xfree (old);
-}
-
-struct cleanup *
-make_cleanup_restore_current_traceframe (void)
-{
-  struct current_traceframe_cleanup *old =
-    XNEW (struct current_traceframe_cleanup);
-
-  old->traceframe_number = traceframe_number;
-
-  return make_cleanup_dtor (do_restore_current_traceframe_cleanup, old,
-			    restore_current_traceframe_cleanup_dtor);
-}
+scoped_restore_current_traceframe::scoped_restore_current_traceframe ()
+: m_traceframe_number (traceframe_number)
+{}
 
 /* Given a number and address, return an uploaded tracepoint with that
    number, creating if necessary.  */

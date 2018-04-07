@@ -1,5 +1,17 @@
 2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* tracepoint.c (struct current_traceframe_cleanup): Remove.
+	(do_restore_current_traceframe_cleanup): Remove.
+	(restore_current_traceframe_cleanup_dtor): Remove.
+	(make_cleanup_restore_current_traceframe): Remove.
+	(scoped_restore_current_traceframe::scoped_restore_current_traceframe):
+	New.
+	* tracepoint.h (struct scoped_restore_current_traceframe): New.
+	* infrun.c (fetch_inferior_event): Use
+	scoped_restore_current_traceframe.
+
+2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2read.h (struct dwarf2_per_objfile) <n_type_units>:
 	Remove.
 	<n_allocated_type_units>: Remove.

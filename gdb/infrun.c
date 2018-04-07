@@ -3877,9 +3877,10 @@ fetch_inferior_event (void *client_data)
      debugging.  If we're looking at traceframes while the target is
      running, we're going to need to get back to that mode after
      handling the event.  */
+  gdb::optional<scoped_restore_current_traceframe> maybe_restore_traceframe;
   if (non_stop)
     {
-      make_cleanup_restore_current_traceframe ();
+      maybe_restore_traceframe.emplace ();
       set_current_traceframe (-1);
     }
 

@@ -321,7 +321,22 @@ extern int get_tracepoint_number (void);
    etc.).  */
 extern void set_current_traceframe (int num);
 
-struct cleanup *make_cleanup_restore_current_traceframe (void);
+struct scoped_restore_current_traceframe
+{
+  scoped_restore_current_traceframe ();
+
+  ~scoped_restore_current_traceframe ()
+  {
+    set_current_traceframe (m_traceframe_number);
+  }
+
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_traceframe);
+
+private:
+
+  /* The traceframe we were inspecting.  */
+  int m_traceframe_number;
+};
 
 void free_actions (struct breakpoint *);
 
