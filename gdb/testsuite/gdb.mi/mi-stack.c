@@ -24,7 +24,7 @@
 
 int callee4 (void)
 {
-  int A=1;
+  int A=1; /* callee4 begin */
   int B=2;
   int C;
   int D[3] = {0, 1, 2};
