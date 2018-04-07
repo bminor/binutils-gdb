@@ -1170,9 +1170,7 @@ parse_escape (struct gdbarch *gdbarch, const char **string_ptr)
    character. */
 
 static void
-printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
-	   void (*do_fprintf) (struct ui_file *, const char *, ...)
-	   ATTRIBUTE_FPTR_PRINTF_2, struct ui_file *stream, int quoter)
+printchar (int c, do_fputc_ftype do_fputc, ui_file *stream, int quoter)
 {
   c &= 0xFF;			/* Avoid sign bit follies */
 
@@ -1180,39 +1178,45 @@ printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
       (c >= 0x7F && c < 0xA0) ||	/* DEL, High controls */
       (sevenbit_strings && c >= 0x80))
     {				/* high order bit set */
+      do_fputc ('\\', stream);
+
       switch (c)
 	{
 	case '\n':
-	  do_fputs ("\\n", stream);
+	  do_fputc ('n', stream);
 	  break;
 	case '\b':
-	  do_fputs ("\\b", stream);
+	  do_fputc ('b', stream);
 	  break;
 	case '\t':
-	  do_fputs ("\\t", stream);
+	  do_fputc ('t', stream);
 	  break;
 	case '\f':
-	  do_fputs ("\\f", stream);
+	  do_fputc ('f', stream);
 	  break;
 	case '\r':
-	  do_fputs ("\\r", stream);
+	  do_fputc ('r', stream);
 	  break;
 	case '\033':
-	  do_fputs ("\\e", stream);
+	  do_fputc ('e', stream);
 	  break;
 	case '\007':
-	  do_fputs ("\\a", stream);
+	  do_fputc ('a', stream);
 	  break;
 	default:
-	  do_fprintf (stream, "\\%.3o", (unsigned int) c);
-	  break;
+	  {
+	    do_fputc ('0' + ((c >> 6) & 0x7), stream);
+	    do_fputc ('0' + ((c >> 3) & 0x7), stream);
+	    do_fputc ('0' + ((c >> 0) & 0x7), stream);
+	    break;
+	  }
 	}
     }
   else
     {
       if (quoter != 0 && (c == '\\' || c == quoter))
-	do_fputs ("\\", stream);
-      do_fprintf (stream, "%c", c);
+	do_fputc ('\\', stream);
+      do_fputc (c, stream);
     }
 }
 
@@ -1225,34 +1229,30 @@ void
 fputstr_filtered (const char *str, int quoter, struct ui_file *stream)
 {
   while (*str)
-    printchar (*str++, fputs_filtered, fprintf_filtered, stream, quoter);
+    printchar (*str++, fputc_filtered, stream, quoter);
 }
 
 void
 fputstr_unfiltered (const char *str, int quoter, struct ui_file *stream)
 {
   while (*str)
-    printchar (*str++, fputs_unfiltered, fprintf_unfiltered, stream, quoter);
+    printchar (*str++, fputc_unfiltered, stream, quoter);
 }
 
 void
 fputstrn_filtered (const char *str, int n, int quoter,
 		   struct ui_file *stream)
 {
-  int i;
-
-  for (i = 0; i < n; i++)
-    printchar (str[i], fputs_filtered, fprintf_filtered, stream, quoter);
+  for (int i = 0; i < n; i++)
+    printchar (str[i], fputc_filtered, stream, quoter);
 }
 
 void
 fputstrn_unfiltered (const char *str, int n, int quoter,
-		     struct ui_file *stream)
+		     do_fputc_ftype do_fputc, struct ui_file *stream)
 {
-  int i;
-
-  for (i = 0; i < n; i++)
-    printchar (str[i], fputs_unfiltered, fprintf_unfiltered, stream, quoter);
+  for (int i = 0; i < n; i++)
+    printchar (str[i], do_fputc, stream, quoter);
 }
 
 

@@ -418,7 +418,10 @@ extern void fputstr_unfiltered (const char *str, int quotr,
 extern void fputstrn_filtered (const char *str, int n, int quotr,
 			       struct ui_file * stream);
 
+typedef int (*do_fputc_ftype) (int c, ui_file *stream);
+
 extern void fputstrn_unfiltered (const char *str, int n, int quotr,
+				 do_fputc_ftype do_fputc,
 				 struct ui_file * stream);
 
 /* Return nonzero if filtered printing is initialized.  */

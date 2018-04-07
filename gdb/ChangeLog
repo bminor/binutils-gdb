@@ -1,5 +1,25 @@
 2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	PR mi/22299
+	* mi/mi-console.c (do_fputc_async_safe): New.
+	(mi_console_file::write_async_safe): New.
+	(mi_console_file::flush): Adjust calls to fputstrn_unfiltered.
+	* mi/mi-console.h (class mi_console_file) <write_async_safe>:
+	New.
+	* ui-file.c (ui_file::putstrn): Adjust call to
+	fputstrn_unfiltered.
+	* utils.c (printchar): Replace do_fputs and do_fprintf
+	parameters by do_fputc.
+	(fputstr_filtered): Adjust call to printchar.
+	(fputstr_unfiltered): Likewise.
+	(fputstrn_filtered): Likewise.
+	(fputstrn_unfiltered): Add do_fputc parameter, pass to
+	printchar.
+	* utils.h (do_fputc_ftype): New typedef.
+	(fputstrn_unfiltered): Add do_fputc parameter.
+
+2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* regformats/i386/i386-avx.dat: Remove.
 
 2018-04-07  Simon Marchi  <simon.marchi@ericsson.com>

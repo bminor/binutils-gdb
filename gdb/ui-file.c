@@ -52,7 +52,7 @@ ui_file::putstr (const char *str, int quoter)
 void
 ui_file::putstrn (const char *str, int n, int quoter)
 {
-  fputstrn_unfiltered (str, n, quoter, this);
+  fputstrn_unfiltered (str, n, quoter, fputc_unfiltered, this);
 }
 
 int

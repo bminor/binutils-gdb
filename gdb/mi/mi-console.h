@@ -39,6 +39,8 @@ public:
 
   void write (const char *buf, long length_buf) override;
 
+  void write_async_safe (const char *buf, long length_buf) override;
+
 private:
   /* The wrapped raw output stream.  */
   ui_file *m_raw;
