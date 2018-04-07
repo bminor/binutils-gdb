@@ -3118,9 +3118,7 @@ create_signatured_type_table_from_debug_names
   for (uint32_t i = 0; i < map.tu_count; ++i)
     {
       struct signatured_type *sig_type;
-      ULONGEST signature;
       void **slot;
-      cu_offset type_offset_in_tu;
 
       sect_offset sect_off
 	= (sect_offset) (extract_unsigned_integer
@@ -3838,7 +3836,6 @@ dw2_map_symtabs_matching_filename
   (struct objfile *objfile, const char *name, const char *real_path,
    gdb::function_view<bool (symtab *)> callback)
 {
-  int i;
   const char *name_basename = lbasename (name);
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = get_dwarf2_per_objfile (objfile);
@@ -14878,24 +14875,6 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
          address range list in the .debug_ranges section.  */
       unsigned long offset = (DW_UNSND (attr)
 			      + (need_ranges_base ? cu->ranges_base : 0));
-      const gdb_byte *buffer;
-
-      /* For some target architectures, but not others, the
-         read_address function sign-extends the addresses it returns.
-         To recognize base address selection entries, we need a
-         mask.  */
-      unsigned int addr_size = cu->header.addr_size;
-      CORE_ADDR base_select_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
-
-      /* The base address, to which the next pair is relative.  Note
-         that this 'base' is a DWARF concept: most entries in a range
-         list are relative, to reduce the number of relocs against the
-         debugging information.  This is separate from this function's
-         'baseaddr' argument, which GDB uses to relocate debugging
-         information from a shared library based on the address at
-         which the library was loaded.  */
-      CORE_ADDR base = cu->base_address;
-      int base_known = cu->base_known;
 
       dwarf2_ranges_process (offset, cu,
 	[&] (CORE_ADDR start, CORE_ADDR end)
@@ -19659,7 +19638,6 @@ dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
 			unsigned int addr_index)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_cu *cu = per_cu->cu;
   ULONGEST addr_base;
   int addr_size;
@@ -22875,7 +22853,6 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
   struct dwarf2_cu *target_cu, *cu = *ref_cu;
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = cu->per_cu->dwarf2_per_objfile;
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   gdb_assert (cu->per_cu != NULL);
 

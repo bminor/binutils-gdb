@@ -1,5 +1,14 @@
 2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2read.c (create_signatured_type_table_from_debug_names):
+	Remove unused variables.
+	(dw2_map_symtabs_matching_filename): Likewise.
+	(dwarf2_record_block_ranges): Likewise.
+	(dwarf2_read_addr_index): Likewise.
+	(follow_die_offset): Likewise.
+
+2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* progspace.c (clone_program_space): Pass SYMFILE_DEFER_BP_RESET
 	to symbol_file_add_main.
 
