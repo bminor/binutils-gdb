@@ -1,3 +1,19 @@
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::plt_off): New functions.
+	(is_plt16_reloc): New function.
+	(Stub_table::plt_off): Use Target_powerpc::plt_off.
+	(Stub_table::plt_call_size): Use plt_off.
+	(Stub_table::do_write): Likewise.
+	(Target_powerpc::Scan::get_reference_flags): Return RELATIVE_REF
+	for PLT16 relocations.
+	(Target_powerpc::Scan::reloc_needs_plt_for_ifunc): Return true
+	for PLT16 relocations.
+	(Target_powerpc::Scan::global): Make a PLT entry for PLT16 relocations.
+	(Target_powerpc::Relocate::relocate): Support PLT16 relocations.
+	(Powerpc_scan_relocatable_reloc::global_strategy): Return RELOC_SPECIAL
+	for ppc32 plt16 relocs.
+
 2018-04-06  Cary Coutant  <ccoutant@gmail.com>
 
 	* object.cc (Sized_relobj_file::include_section_group): Store

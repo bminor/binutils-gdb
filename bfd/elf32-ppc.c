@@ -4056,15 +4056,20 @@ ppc_elf_check_relocs (bfd *abfd,
 		 In a non-pie executable even when there are
 		 no plt calls.  */
 	      if (!bfd_link_pic (info)
-		  || is_branch_reloc (r_type))
+		  || is_branch_reloc (r_type)
+		  || r_type == R_PPC_PLT16_LO
+		  || r_type == R_PPC_PLT16_HI
+		  || r_type == R_PPC_PLT16_HA)
 		{
 		  bfd_vma addend = 0;
 		  if (r_type == R_PPC_PLTREL24)
-		    {
-		      ppc_elf_tdata (abfd)->makes_plt_call = 1;
-		      if (bfd_link_pic (info))
-			addend = rel->r_addend;
-		    }
+		    ppc_elf_tdata (abfd)->makes_plt_call = 1;
+		  if (bfd_link_pic (info)
+		      && (r_type == R_PPC_PLTREL24
+			  || r_type == R_PPC_PLT16_LO
+			  || r_type == R_PPC_PLT16_HI
+			  || r_type == R_PPC_PLT16_HA))
+		    addend = rel->r_addend;
 		  if (!update_plt_info (abfd, ifunc, got2, addend))
 		    return FALSE;
 		}
@@ -4277,7 +4282,9 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_PLTREL24:
 	  if (h == NULL)
 	    break;
+	  ppc_elf_tdata (abfd)->makes_plt_call = 1;
 	  /* Fall through */
+
 	case R_PPC_PLT32:
 	case R_PPC_PLTREL32:
 	case R_PPC_PLT16_LO:
@@ -4306,12 +4313,12 @@ ppc_elf_check_relocs (bfd *abfd,
 	    {
 	      bfd_vma addend = 0;
 
-	      if (r_type == R_PPC_PLTREL24)
-		{
-		  ppc_elf_tdata (abfd)->makes_plt_call = 1;
-		  if (bfd_link_pic (info))
-		    addend = rel->r_addend;
-		}
+	      if (bfd_link_pic (info)
+		  && (r_type == R_PPC_PLTREL24
+		      || r_type == R_PPC_PLT16_LO
+		      || r_type == R_PPC_PLT16_HI
+		      || r_type == R_PPC_PLT16_HA))
+		addend = rel->r_addend;
 	      h->needs_plt = 1;
 	      if (!update_plt_info (abfd, &h->plt.plist, got2, addend))
 		return FALSE;
@@ -7747,7 +7754,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
       bfd_boolean unresolved_reloc;
       bfd_boolean warned;
       unsigned int tls_type, tls_mask, tls_gd;
-      struct plt_entry **ifunc;
+      struct plt_entry **ifunc, **plt_list;
       struct reloc_howto_struct alt_howto;
 
     again:
@@ -8099,8 +8106,33 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      insn ^= BRANCH_PREDICT_BIT;
 
 	    bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
-	    break;
 	  }
+	  break;
+
+	case R_PPC_PLT16_HA:
+	  {
+	    unsigned int insn;
+
+	    insn = bfd_get_32 (input_bfd,
+			       contents + rel->r_offset - d_offset);
+	    if ((insn & (0x3f << 26)) == 15u << 26
+		&& (insn & (0x1f << 16)) != 0)
+	      {
+		if (!bfd_link_pic (info))
+		  {
+		    /* Convert addis to lis.  */
+		    insn &= ~(0x1f << 16);
+		    bfd_put_32 (input_bfd, insn,
+				contents + rel->r_offset - d_offset);
+		  }
+	      }
+	    else if (bfd_link_pic (info))
+	      info->callbacks->einfo
+		(_("%P: %H: error: %s with unexpected instruction %x\n"),
+		 input_bfd, input_section, rel->r_offset,
+		 "R_PPC_PLT16_HA", insn);
+	  }
+	  break;
 	}
 
       if (ELIMINATE_COPY_RELOCS
@@ -8239,10 +8271,17 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  ent = NULL;
 	  if (ifunc != NULL
 	      && (!bfd_link_pic (info)
-		  || is_branch_reloc (r_type)))
+		  || is_branch_reloc (r_type)
+		  || r_type == R_PPC_PLT16_LO
+		  || r_type == R_PPC_PLT16_HI
+		  || r_type == R_PPC_PLT16_HA))
 	    {
 	      addend = 0;
-	      if (r_type == R_PPC_PLTREL24 && bfd_link_pic (info))
+	      if (bfd_link_pic (info)
+		  && (r_type == R_PPC_PLTREL24
+		      || r_type == R_PPC_PLT16_LO
+		      || r_type == R_PPC_PLT16_HI
+		      || r_type == R_PPC_PLT16_HA))
 		addend = rel->r_addend;
 	      ent = find_plt_ent (ifunc, got2, addend);
 	    }
@@ -9092,6 +9131,42 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  addend = 0;
 	  break;
 
+	case R_PPC_PLT16_LO:
+	case R_PPC_PLT16_HI:
+	case R_PPC_PLT16_HA:
+	  plt_list = ifunc;
+	  if (h != NULL)
+	    plt_list = &h->plt.plist;
+	  unresolved_reloc = TRUE;
+	  if (plt_list != NULL)
+	    {
+	      struct plt_entry *ent;
+
+	      ent = find_plt_ent (plt_list, got2,
+				  bfd_link_pic (info) ? addend : 0);
+	      if (ent != NULL)
+		{
+		  unresolved_reloc = FALSE;
+		  relocation = (htab->elf.splt->output_section->vma
+				+ htab->elf.splt->output_offset
+				+ ent->plt.offset);
+		  if (bfd_link_pic (info))
+		    {
+		      bfd_vma got = 0;
+
+		      if (ent->addend >= 32768)
+			got = (ent->addend
+			       + ent->sec->output_section->vma
+			       + ent->sec->output_offset);
+		      else
+			got = SYM_VAL (htab->elf.hgot);
+		      relocation -= got;
+		    }
+		}
+	    }
+	  addend = 0;
+	  break;
+
 	  /* Relocate against _SDA_BASE_.  */
 	case R_PPC_SDAREL16:
 	  {
@@ -9420,9 +9495,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_IRELATIVE:
 	case R_PPC_PLT32:
 	case R_PPC_PLTREL32:
-	case R_PPC_PLT16_LO:
-	case R_PPC_PLT16_HI:
-	case R_PPC_PLT16_HA:
 	case R_PPC_ADDR30:
 	case R_PPC_EMB_RELSEC16:
 	case R_PPC_EMB_RELST_LO:

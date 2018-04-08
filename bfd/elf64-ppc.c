@@ -5623,6 +5623,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_PLT16_HA:
 	case R_PPC64_PLT16_HI:
 	case R_PPC64_PLT16_LO:
+	case R_PPC64_PLT16_LO_DS:
 	case R_PPC64_PLT32:
 	case R_PPC64_PLT64:
 	  /* This symbol requires a procedure linkage table entry.  */
@@ -14664,6 +14665,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_PLT16_HA:
 	case R_PPC64_PLT16_HI:
 	case R_PPC64_PLT16_LO:
+	case R_PPC64_PLT16_LO_DS:
 	case R_PPC64_PLT32:
 	case R_PPC64_PLT64:
 	  /* Relocation is to the entry for this symbol in the
@@ -14690,12 +14692,22 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      && ent->addend == orig_rel.r_addend)
 		    {
 		      asection *plt;
+		      bfd_vma got;
 
 		      plt = htab->elf.splt;
 		      if (!htab->elf.dynamic_sections_created
 			  || h == NULL
 			  || h->elf.dynindx == -1)
 			plt = htab->elf.iplt;
+		      if (r_type == R_PPC64_PLT16_HA
+			  || r_type ==R_PPC64_PLT16_HI
+			  || r_type ==R_PPC64_PLT16_LO
+			  || r_type ==R_PPC64_PLT16_LO_DS)
+			{
+			  got = (elf_gp (output_bfd)
+				 + htab->sec_info[input_section->id].toc_off);
+			  relocation -= got;
+			}
 		      relocation = (plt->output_section->vma
 				    + plt->output_offset
 				    + ent->plt.offset);

@@ -1,5 +1,13 @@
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_check_relocs): Handle PLT16 relocs.
+	(ppc_elf_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_check_relocs): Handle PLT16_LO_DS.
+	(ppc64_elf_relocate_section): Likewise.  Correct PLT16
+	resolution to plt entry relative to toc pointer.
+
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (TLS_TLS, TLS_GD, TLS_LD, TLS_TPREL, TLS_DTPREL,
 	TLS_TPRELGD, TLS_EXPLICIT):  Renumber.  Test TLS_TLS throughout
 	file when other TLS flags are tested in a mask.
