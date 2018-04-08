@@ -11158,29 +11158,6 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       dest += plt->output_offset + plt->output_section->vma;
 
-      if (stub_entry->h == NULL
-	  && (stub_entry->plt_ent->plt.offset & 1) == 0)
-	{
-	  Elf_Internal_Rela rela;
-	  bfd_byte *rl;
-
-	  rela.r_offset = dest;
-	  if (htab->opd_abi)
-	    rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
-	  else
-	    rela.r_info = ELF64_R_INFO (0, R_PPC64_IRELATIVE);
-	  rela.r_addend = (stub_entry->target_value
-			   + stub_entry->target_section->output_offset
-			   + stub_entry->target_section->output_section->vma);
-
-	  rl = (htab->elf.irelplt->contents
-		+ (htab->elf.irelplt->reloc_count++
-		   * sizeof (Elf64_External_Rela)));
-	  bfd_elf64_swap_reloca_out (info->output_bfd, &rela, rl);
-	  stub_entry->plt_ent->plt.offset |= 1;
-	  htab->local_ifunc_resolver = 1;
-	}
-
       off = (dest
 	     - elf_gp (info->output_bfd)
 	     - htab->sec_info[stub_entry->group->link_sec->id].toc_off);
@@ -13016,23 +12993,17 @@ ppc64_elf_set_toc (struct bfd_link_info *info, bfd *obfd)
 }
 
 /* Called via elf_link_hash_traverse from ppc64_elf_build_stubs to
-   write out any global entry stubs.  */
+   write out any global entry stubs, and PLT relocations.  */
 
 static bfd_boolean
-build_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
+build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct ppc_link_hash_table *htab;
-  struct plt_entry *pent;
+  struct plt_entry *ent;
   asection *s;
 
   if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
-
-  if (!h->pointer_equality_needed)
-    return TRUE;
-
-  if (h->def_regular)
     return TRUE;
 
   info = inf;
@@ -13040,10 +13011,66 @@ build_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
   if (htab == NULL)
     return FALSE;
 
+  for (ent = h->plt.plist; ent != NULL; ent = ent->next)
+    if (ent->plt.offset != (bfd_vma) -1)
+      {
+	/* This symbol has an entry in the procedure linkage
+	   table.  Set it up.  */
+	Elf_Internal_Rela rela;
+	bfd_byte *loc;
+
+	if (!htab->elf.dynamic_sections_created
+	    || h->dynindx == -1)
+	  {
+	    if (!(h->def_regular
+		  && (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak)))
+	      continue;
+	    rela.r_offset = (htab->elf.iplt->output_section->vma
+			     + htab->elf.iplt->output_offset
+			     + ent->plt.offset);
+	    if (htab->opd_abi)
+	      rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
+	    else
+	      rela.r_info = ELF64_R_INFO (0, R_PPC64_IRELATIVE);
+	    rela.r_addend = (h->root.u.def.value
+			     + h->root.u.def.section->output_offset
+			     + h->root.u.def.section->output_section->vma
+			     + ent->addend);
+	    loc = (htab->elf.irelplt->contents
+		   + (htab->elf.irelplt->reloc_count++
+		      * sizeof (Elf64_External_Rela)));
+	    htab->local_ifunc_resolver = 1;
+	  }
+	else
+	  {
+	    rela.r_offset = (htab->elf.splt->output_section->vma
+			     + htab->elf.splt->output_offset
+			     + ent->plt.offset);
+	    rela.r_info = ELF64_R_INFO (h->dynindx, R_PPC64_JMP_SLOT);
+	    rela.r_addend = ent->addend;
+	    loc = (htab->elf.srelplt->contents
+		   + ((ent->plt.offset - PLT_INITIAL_ENTRY_SIZE (htab))
+		      / PLT_ENTRY_SIZE (htab) * sizeof (Elf64_External_Rela)));
+	    if (h->type == STT_GNU_IFUNC && is_static_defined (h))
+	      htab->maybe_local_ifunc_resolver = 1;
+	  }
+	bfd_elf64_swap_reloca_out (info->output_bfd, &rela, loc);
+      }
+
+  if (!h->pointer_equality_needed)
+    return TRUE;
+
+  if (h->def_regular)
+    return TRUE;
+
   s = htab->global_entry;
-  for (pent = h->plt.plist; pent != NULL; pent = pent->next)
-    if (pent->plt.offset != (bfd_vma) -1
-	&& pent->addend == 0)
+  if (s == NULL || s->size == 0)
+    return TRUE;
+
+  for (ent = h->plt.plist; ent != NULL; ent = ent->next)
+    if (ent->plt.offset != (bfd_vma) -1
+	&& ent->addend == 0)
       {
 	bfd_byte *p;
 	asection *plt;
@@ -13054,7 +13081,7 @@ build_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 	if (!htab->elf.dynamic_sections_created
 	    || h->dynindx == -1)
 	  plt = htab->elf.iplt;
-	off = pent->plt.offset + plt->output_offset + plt->output_section->vma;
+	off = ent->plt.offset + plt->output_offset + plt->output_section->vma;
 	off -= h->root.u.def.value + s->output_offset + s->output_section->vma;
 
 	if (off + 0x80008000 > 0xffffffff || (off & 3) != 0)
@@ -13105,6 +13132,91 @@ build_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 	bfd_put_32 (s->owner, BCTR, p);
 	break;
       }
+  return TRUE;
+}
+
+/* Write PLT relocs for locals.  */
+
+static bfd_boolean
+write_plt_relocs_for_local_syms (struct bfd_link_info *info)
+{
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  bfd *ibfd;
+
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
+    {
+      struct got_entry **lgot_ents, **end_lgot_ents;
+      struct plt_entry **local_plt, **lplt, **end_local_plt;
+      Elf_Internal_Shdr *symtab_hdr;
+      bfd_size_type locsymcount;
+      Elf_Internal_Sym *local_syms = NULL;
+      struct plt_entry *ent;
+
+      if (!is_ppc64_elf (ibfd))
+	continue;
+
+      lgot_ents = elf_local_got_ents (ibfd);
+      if (!lgot_ents)
+	continue;
+
+      symtab_hdr = &elf_symtab_hdr (ibfd);
+      locsymcount = symtab_hdr->sh_info;
+      end_lgot_ents = lgot_ents + locsymcount;
+      local_plt = (struct plt_entry **) end_lgot_ents;
+      end_local_plt = local_plt + locsymcount;
+      for (lplt = local_plt; lplt < end_local_plt; ++lplt)
+	for (ent = *lplt; ent != NULL; ent = ent->next)
+	  if (ent->plt.offset != (bfd_vma) -1)
+	    {
+	      Elf_Internal_Sym *sym;
+	      asection *sym_sec;
+	      asection *plt, *relplt;
+	      bfd_byte *loc;
+	      bfd_vma val;
+	      Elf_Internal_Rela rela;
+
+	      if (!get_sym_h (NULL, &sym, &sym_sec, NULL, &local_syms,
+			      lplt - local_plt, ibfd))
+		{
+		  if (local_syms != NULL
+		      && symtab_hdr->contents != (unsigned char *) local_syms)
+		    free (local_syms);
+		  return FALSE;
+		}
+
+	      val = sym->st_value + ent->addend;
+	      val += PPC64_LOCAL_ENTRY_OFFSET (sym->st_other);
+	      if (sym_sec != NULL && sym_sec->output_section != NULL)
+		val += sym_sec->output_offset + sym_sec->output_section->vma;
+
+	      BFD_ASSERT (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC);
+
+	      htab->local_ifunc_resolver = 1;
+	      plt = htab->elf.iplt;
+	      relplt = htab->elf.irelplt;
+
+	      rela.r_offset = (ent->plt.offset
+			       + plt->output_offset
+			       + plt->output_section->vma);
+	      if (htab->opd_abi)
+		rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
+	      else
+		rela.r_info = ELF64_R_INFO (0, R_PPC64_IRELATIVE);
+	      rela.r_addend = val;
+	      loc = relplt->contents + (relplt->reloc_count++
+					* sizeof (Elf64_External_Rela));
+	      bfd_elf64_swap_reloca_out (info->output_bfd, &rela, loc);
+	    }
+
+      if (local_syms != NULL
+	  && symtab_hdr->contents != (unsigned char *) local_syms)
+	{
+	  if (!info->keep_memory)
+	    free (local_syms);
+	  else
+	    symtab_hdr->contents = (unsigned char *) local_syms;
+	}
+    }
   return TRUE;
 }
 
@@ -13262,9 +13374,11 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	}
     }
 
-  /* Build .glink global entry stubs.  */
-  if (htab->global_entry != NULL && htab->global_entry->size != 0)
-    elf_link_hash_traverse (&htab->elf, build_global_entry_stubs, info);
+  /* Build .glink global entry stubs, and PLT relocs for globals.  */
+  elf_link_hash_traverse (&htab->elf, build_global_entry_stubs_and_plt, info);
+
+  if (!write_plt_relocs_for_local_syms (info))
+    return FALSE;
 
   if (htab->brlt != NULL && htab->brlt->size != 0)
     {
@@ -15488,85 +15602,41 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 {
   struct ppc_link_hash_table *htab;
   struct plt_entry *ent;
-  Elf_Internal_Rela rela;
-  bfd_byte *loc;
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
     return FALSE;
 
-  for (ent = h->plt.plist; ent != NULL; ent = ent->next)
-    if (ent->plt.offset != (bfd_vma) -1)
-      {
-	/* This symbol has an entry in the procedure linkage
-	   table.  Set it up.  */
-	if (!htab->elf.dynamic_sections_created
-	    || h->dynindx == -1)
-	  {
-	    BFD_ASSERT (h->type == STT_GNU_IFUNC
-			&& h->def_regular
-			&& (h->root.type == bfd_link_hash_defined
-			    || h->root.type == bfd_link_hash_defweak));
-	    rela.r_offset = (htab->elf.iplt->output_section->vma
-			     + htab->elf.iplt->output_offset
-			     + ent->plt.offset);
-	    if (htab->opd_abi)
-	      rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
-	    else
-	      rela.r_info = ELF64_R_INFO (0, R_PPC64_IRELATIVE);
-	    rela.r_addend = (h->root.u.def.value
-			     + h->root.u.def.section->output_offset
-			     + h->root.u.def.section->output_section->vma
-			     + ent->addend);
-	    loc = (htab->elf.irelplt->contents
-		   + (htab->elf.irelplt->reloc_count++
-		      * sizeof (Elf64_External_Rela)));
-	    htab->local_ifunc_resolver = 1;
-	  }
-	else
-	  {
-	    rela.r_offset = (htab->elf.splt->output_section->vma
-			     + htab->elf.splt->output_offset
-			     + ent->plt.offset);
-	    rela.r_info = ELF64_R_INFO (h->dynindx, R_PPC64_JMP_SLOT);
-	    rela.r_addend = ent->addend;
-	    loc = (htab->elf.srelplt->contents
-		   + ((ent->plt.offset - PLT_INITIAL_ENTRY_SIZE (htab))
-		      / PLT_ENTRY_SIZE (htab) * sizeof (Elf64_External_Rela)));
-	    if (h->type == STT_GNU_IFUNC && is_static_defined (h))
-	      htab->maybe_local_ifunc_resolver = 1;
-	  }
-	bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
-
-	if (!htab->opd_abi)
-	  {
-	    if (!h->def_regular)
-	      {
-		/* Mark the symbol as undefined, rather than as
-		   defined in glink.  Leave the value if there were
-		   any relocations where pointer equality matters
-		   (this is a clue for the dynamic linker, to make
-		   function pointer comparisons work between an
-		   application and shared library), otherwise set it
-		   to zero.  */
-		sym->st_shndx = SHN_UNDEF;
-		if (!h->pointer_equality_needed)
-		  sym->st_value = 0;
-		else if (!h->ref_regular_nonweak)
-		  {
-		    /* This breaks function pointer comparisons, but
-		       that is better than breaking tests for a NULL
-		       function pointer.  */
-		    sym->st_value = 0;
-		  }
-	      }
-	  }
-      }
+  if (!htab->opd_abi && !h->def_regular)
+    for (ent = h->plt.plist; ent != NULL; ent = ent->next)
+      if (ent->plt.offset != (bfd_vma) -1)
+	{
+	  /* Mark the symbol as undefined, rather than as
+	     defined in glink.  Leave the value if there were
+	     any relocations where pointer equality matters
+	     (this is a clue for the dynamic linker, to make
+	     function pointer comparisons work between an
+	     application and shared library), otherwise set it
+	     to zero.  */
+	  sym->st_shndx = SHN_UNDEF;
+	  if (!h->pointer_equality_needed)
+	    sym->st_value = 0;
+	  else if (!h->ref_regular_nonweak)
+	    {
+	      /* This breaks function pointer comparisons, but
+		 that is better than breaking tests for a NULL
+		 function pointer.  */
+	      sym->st_value = 0;
+	    }
+	  break;
+	}
 
   if (h->needs_copy)
     {
       /* This symbol needs a copy reloc.  Set it up.  */
+      Elf_Internal_Rela rela;
       asection *srel;
+      bfd_byte *loc;
 
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined

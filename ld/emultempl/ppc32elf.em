@@ -212,6 +212,8 @@ ppc_finish (void)
 {
   if (params.ppc476_workaround)
     lang_for_each_statement (no_zero_padding);
+  if (!ppc_finish_symbols (&link_info))
+    einfo (_("%X%P: ppc_finish_symbols problem %E\n"));
   finish_default ();
 }
 
