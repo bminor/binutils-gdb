@@ -413,6 +413,15 @@ riscv_has_fp_abi (struct gdbarch *gdbarch)
   return (gdbarch_tdep (gdbarch)->abi.fields.float_abi != 0);
 }
 
+/* Return true if REGNO is a floating pointer register.  */
+
+static bool
+riscv_is_fp_regno_p (int regno)
+{
+  return (regno >= RISCV_FIRST_FP_REGNUM
+	  && regno <= RISCV_LAST_FP_REGNUM);
+}
+
 /* Implement the breakpoint_kind_from_pc gdbarch method.  */
 
 static int
@@ -787,10 +796,10 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
       return 0;
     }
   else if (reggroup == float_reggroup)
-    return ((regnum >= RISCV_FIRST_FP_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
-	    || (regnum == RISCV_CSR_FCSR_REGNUM
-		|| regnum == RISCV_CSR_FFLAGS_REGNUM
-	        || regnum == RISCV_CSR_FRM_REGNUM));
+    return (riscv_is_fp_regno_p (regnum)
+	    || regnum == RISCV_CSR_FCSR_REGNUM
+	    || regnum == RISCV_CSR_FFLAGS_REGNUM
+	    || regnum == RISCV_CSR_FRM_REGNUM);
   else if (reggroup == general_reggroup)
     return regnum < RISCV_FIRST_FP_REGNUM;
   else if (reggroup == restore_reggroup || reggroup == save_reggroup)
@@ -2154,7 +2163,9 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	      {
 		gdb_byte tmp [sizeof (ULONGEST)];
 
-		gdb_assert (second_arg_length <= call_info.xlen);
+		gdb_assert ((riscv_is_fp_regno_p (info->argloc[1].loc_data.regno)
+			     && second_arg_length <= call_info.flen)
+			    || second_arg_length <= call_info.xlen);
 		memset (tmp, 0, sizeof (tmp));
 		memcpy (tmp, second_arg_data, second_arg_length);
 		regcache->cooked_write (info->argloc[1].loc_data.regno, tmp);

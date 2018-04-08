@@ -1,5 +1,13 @@
 2018-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (riscv_is_fp_regno_p): New function.
+	(riscv_register_reggroup_p): Use new function, remove unneeded
+	parenthesis.
+	(riscv_push_dummy_call): Extend assert to compare against xlen or
+	flen based on register type.
+
+2018-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_print_arg_location): Use TYPE_SAFE_NAME.
 
 2018-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
