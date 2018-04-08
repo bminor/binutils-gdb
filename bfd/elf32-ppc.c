@@ -818,6 +818,35 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  /* Marker relocs on inline plt call instructions.  */
+  HOWTO (R_PPC_PLTSEQ,
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC_PLTSEQ",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_PPC_PLTCALL,
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC_PLTCALL",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   /* Computes the load module index of the load module that contains the
      definition of its TLS sym.  */
   HOWTO (R_PPC_DTPMOD32,
@@ -3956,6 +3985,17 @@ is_branch_reloc (enum elf_ppc_reloc_type r_type)
 	  || r_type == R_PPC_VLE_REL24);
 }
 
+/* Relocs on inline plt call sequence insns prior to the call.  */
+
+static bfd_boolean
+is_plt_seq_reloc (enum elf_ppc_reloc_type r_type)
+{
+  return (r_type == R_PPC_PLT16_HA
+	  || r_type == R_PPC_PLT16_HI
+	  || r_type == R_PPC_PLT16_LO
+	  || r_type == R_PPC_PLTSEQ);
+}
+
 static void
 bad_shared_reloc (bfd *abfd, enum elf_ppc_reloc_type r_type)
 {
@@ -4129,6 +4169,9 @@ ppc_elf_check_relocs (bfd *abfd,
 	    if (!update_local_sym_info (abfd, symtab_hdr, r_symndx,
 					NON_GOT | TLS_TLS | TLS_MARK))
 	      return FALSE;
+	  break;
+
+	case R_PPC_PLTSEQ:
 	  break;
 
 	case R_PPC_GOT_TLSLD16:
@@ -4310,6 +4353,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	  ppc_elf_tdata (abfd)->makes_plt_call = 1;
 	  /* Fall through */
 
+	case R_PPC_PLTCALL:
 	case R_PPC_PLT32:
 	case R_PPC_PLTREL32:
 	case R_PPC_PLT16_LO:
@@ -5437,6 +5481,40 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 
 		    case R_PPC_TLSGD:
 		    case R_PPC_TLSLD:
+		      if (rel + 1 < relend
+			  && is_plt_seq_reloc (ELF32_R_TYPE (rel[1].r_info)))
+			{
+			  if (pass != 0
+			      && ELF32_R_TYPE (rel[1].r_info) != R_PPC_PLTSEQ)
+			    {
+			      r_type = ELF32_R_TYPE (rel[1].r_info);
+			      r_symndx = ELF32_R_SYM (rel[1].r_info);
+			      if (r_symndx >= symtab_hdr->sh_info)
+				{
+				  struct elf_link_hash_entry **sym_hashes;
+
+				  sym_hashes = elf_sym_hashes (ibfd);
+				  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+				  while (h->root.type == bfd_link_hash_indirect
+					 || h->root.type == bfd_link_hash_warning)
+				    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+				  if (h != NULL)
+				    {
+				      struct plt_entry *ent = NULL;
+				      bfd_vma addend = 0;
+
+				      if (bfd_link_pic (info))
+					addend = rel->r_addend;
+				      ent = find_plt_ent (&h->plt.plist,
+							  got2, addend);
+				      if (ent != NULL
+					  && ent->plt.refcount > 0)
+					ent->plt.refcount -= 1;
+				    }
+				}
+			    }
+			  continue;
+			}
 		      expecting_tls_get_addr = 2;
 		      tls_set = 0;
 		      tls_clear = 0;
@@ -5449,8 +5527,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		  if (pass == 0)
 		    {
 		      if (!expecting_tls_get_addr
-			  || (expecting_tls_get_addr == 1
-			      && !sec->has_tls_get_addr_call))
+			  || !sec->has_tls_get_addr_call)
 			continue;
 
 		      if (rel + 1 < relend
@@ -5511,7 +5588,8 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		      bfd_vma addend = 0;
 
 		      if (bfd_link_pic (info)
-			  && ELF32_R_TYPE (rel[1].r_info) == R_PPC_PLTREL24)
+			  && (ELF32_R_TYPE (rel[1].r_info) == R_PPC_PLTREL24
+			      || ELF32_R_TYPE (rel[1].r_info) == R_PPC_PLTCALL))
 			addend = rel[1].r_addend;
 		      ent = find_plt_ent (&htab->tls_get_addr->plt.plist,
 					  got2, addend);
@@ -7062,6 +7140,7 @@ ppc_elf_relax_section (bfd *abfd,
 	    case R_PPC_REL24:
 	    case R_PPC_LOCAL24PC:
 	    case R_PPC_PLTREL24:
+	    case R_PPC_PLTCALL:
 	      max_branch_offset = 1 << 25;
 	      break;
 
@@ -7890,7 +7969,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
       unsigned long r_symndx;
       bfd_vma relocation;
       bfd_vma branch_bit, from;
-      bfd_boolean unresolved_reloc;
+      bfd_boolean unresolved_reloc, save_unresolved_reloc;
       bfd_boolean warned;
       unsigned int tls_type, tls_mask, tls_gd;
       struct plt_entry **ifunc, **plt_list;
@@ -8160,6 +8239,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      unsigned int insn2;
 	      bfd_vma offset = rel->r_offset;
 
+	      if (is_plt_seq_reloc (ELF32_R_TYPE (rel[1].r_info)))
+		{
+		  bfd_put_32 (input_bfd, NOP, contents + offset);
+		  rel[1].r_info = ELF32_R_INFO (STN_UNDEF, R_PPC_NONE);
+		  break;
+		}
+
 	      if ((tls_mask & TLS_TPRELGD) != 0)
 		{
 		  /* IE */
@@ -8186,6 +8272,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      && rel + 1 < relend)
 	    {
 	      unsigned int insn2;
+
+	      if (is_plt_seq_reloc (ELF32_R_TYPE (rel[1].r_info)))
+		{
+		  bfd_put_32 (input_bfd, NOP, contents + rel->r_offset);
+		  rel[1].r_info = ELF32_R_INFO (STN_UNDEF, R_PPC_NONE);
+		  break;
+		}
 
 	      for (r_symndx = 0;
 		   r_symndx < symtab_hdr->sh_info;
@@ -8230,7 +8323,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_ADDR14_BRNTAKEN:
 	case R_PPC_REL14_BRNTAKEN:
 	  {
-	    bfd_vma insn;
+	    unsigned int insn;
 
 	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	    insn &= ~BRANCH_PREDICT_BIT;
@@ -8464,6 +8557,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	}
 
       addend = rel->r_addend;
+      save_unresolved_reloc = unresolved_reloc;
       howto = NULL;
       if (r_type < R_PPC_max)
 	howto = ppc_elf_howto_table[r_type];
@@ -9244,6 +9338,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  addend = 0;
 	  break;
 
+	case R_PPC_PLTSEQ:
+	case R_PPC_PLTCALL:
 	case R_PPC_PLT16_LO:
 	case R_PPC_PLT16_HI:
 	case R_PPC_PLT16_HA:
@@ -9642,6 +9738,48 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  bfd_set_error (bfd_error_invalid_operation);
 	  ret = FALSE;
 	  goto copy_reloc;
+	}
+
+      switch (r_type)
+	{
+	default:
+	  break;
+
+	case R_PPC_PLTCALL:
+	  if (unresolved_reloc)
+	    {
+	      bfd_byte *p = contents + rel->r_offset;
+	      unsigned int insn = bfd_get_32 (input_bfd, p);
+	      insn &= 1;
+	      bfd_put_32 (input_bfd, B | insn, p);
+	      unresolved_reloc = save_unresolved_reloc;
+	      r_type = R_PPC_REL24;
+	      howto = ppc_elf_howto_table[r_type];
+	    }
+	  else if (htab->plt_type != PLT_NEW)
+	    info->callbacks->einfo
+	      (_("%P: %H: %s relocation unsupported for bss-plt\n"),
+	       input_bfd, input_section, rel->r_offset,
+	       howto->name);
+	  break;
+
+	case R_PPC_PLTSEQ:
+	case R_PPC_PLT16_HA:
+	case R_PPC_PLT16_LO:
+	  if (unresolved_reloc)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      bfd_put_32 (input_bfd, NOP, p);
+	      unresolved_reloc = FALSE;
+	      r_type = R_PPC_NONE;
+	      howto = ppc_elf_howto_table[r_type];
+	    }
+	  else if (htab->plt_type != PLT_NEW)
+	    info->callbacks->einfo
+	      (_("%P: %H: %s relocation unsupported for bss-plt\n"),
+	       input_bfd, input_section, rel->r_offset,
+	       howto->name);
+	  break;
 	}
 
       /* Do any further special processing.  */

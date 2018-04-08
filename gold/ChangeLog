@@ -1,5 +1,13 @@
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::Track_tls::maybe_skip_tls_get_addr_call):
+	Handle inline plt sequence relocs.
+	(Stub_table::Plt_stub_key::Plt_stub_key): Likewise.
+	(Target_powerpc::Scan::reloc_needs_plt_for_ifunc): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.
+
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::lplt_): New variable.
 	(Target_powerpc::lplt_section): Associated accessor.
 	(Target_powerpc::plt_off): Handle local non-ifunc symbols.

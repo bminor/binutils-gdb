@@ -1,5 +1,29 @@
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_howto_raw): Add PLTSEQ and PLTCALL howtos.
+	(is_plt_seq_reloc): New function.
+	(ppc_elf_check_relocs): Handle PLTSEQ and PLTCALL relocs.
+	(ppc_elf_tls_optimize): Handle inline plt call sequence.
+	(ppc_elf_relax_section): Handle PLTCALL reloc.
+	(ppc_elf_relocate_section): Nop out inline plt call sequence when
+	resolving locally.
+	* elf64-ppc.c (ppc64_elf_howto_raw): Add R_PPC64_PLTSEQ and
+	R_PPC64_PLTCALL entries.  Comment R_PPC64_TOCSAVE.
+	(has_tls_get_addr_call): Correct comment.
+	(is_branch_reloc): Add PLTCALL.
+	(is_plt_seq_reloc): New function.
+	(ppc64_elf_check_relocs): Handle PLT16_LO_DS reloc.  Set
+	has_tls_reloc for R_PPC64_TLSGD and R_PPC64_TLSLD.  Create plt
+	entry for R_PPC64_PLTCALL.
+	(ppc64_elf_tls_optimize): Handle inline plt call sequence.
+	(ppc_type_of_stub): Handle PLTCALL reloc.
+	(toc_adjusting_stub_needed): Likewise.
+	(ppc64_elf_relocate_section): Set "can_plt_call" for PLTCALL
+	reloc insn.  Nop out inline plt call sequence when resolving
+	locally.  Handle __tls_get_addr inline plt call optimization.
+
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (LOCAL_PLT_ENTRY_SIZE): Define.
 	(struct ppc_stub_hash_entry): Add symtype field.
 	(PLT_KEEP): Define.

@@ -78,8 +78,10 @@ struct Stub_table_owner
   const Output_section::Input_section* owner;
 };
 
-inline bool
-is_branch_reloc(unsigned int r_type);
+inline bool is_branch_reloc(unsigned int);
+
+template<int size>
+inline bool is_plt16_reloc(unsigned int);
 
 // Counter incremented on every Powerpc_relobj constructed.
 static uint32_t object_id = 0;
@@ -1211,7 +1213,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
 				 unsigned int r_type, const Symbol* gsym)
     {
       bool is_tls_call = ((r_type == elfcpp::R_POWERPC_REL24
-			   || r_type == elfcpp::R_PPC_PLTREL24)
+			   || r_type == elfcpp::R_PPC_PLTREL24
+			   || is_plt16_reloc<size>(r_type)
+			   || r_type == elfcpp::R_POWERPC_PLTSEQ
+			   || r_type == elfcpp::R_POWERPC_PLTCALL)
 			  && gsym != NULL
 			  && (gsym == target->tls_get_addr()
 			      || gsym == target->tls_get_addr_opt()));
@@ -4651,7 +4656,8 @@ class Stub_table : public Output_relaxed_input_section
       if (size != 32)
 	this->addend_ = addend;
       else if (parameters->options().output_is_position_independent()
-	       && r_type == elfcpp::R_PPC_PLTREL24)
+	       && (r_type == elfcpp::R_PPC_PLTREL24
+		   || r_type == elfcpp::R_POWERPC_PLTCALL))
 	{
 	  this->addend_ = addend;
 	  if (this->addend_ >= 32768)
@@ -4668,7 +4674,8 @@ class Stub_table : public Output_relaxed_input_section
       if (size != 32)
 	this->addend_ = addend;
       else if (parameters->options().output_is_position_independent()
-	       && r_type == elfcpp::R_PPC_PLTREL24)
+	       && (r_type == elfcpp::R_PPC_PLTREL24
+		   || r_type == elfcpp::R_POWERPC_PLTCALL))
 	this->addend_ = addend;
     }
 
@@ -6569,6 +6576,8 @@ Target_powerpc<size, big_endian>::Scan::reloc_needs_plt_for_ifunc(
     case elfcpp::R_POWERPC_PLT16_HI:
     case elfcpp::R_POWERPC_PLT16_HA:
     case elfcpp::R_PPC64_PLT16_LO_DS:
+    case elfcpp::R_POWERPC_PLTSEQ:
+    case elfcpp::R_POWERPC_PLTCALL:
       return true;
       break;
 
@@ -6706,6 +6715,8 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_GNU_VTENTRY:
     case elfcpp::R_POWERPC_TLS:
     case elfcpp::R_PPC64_ENTRY:
+    case elfcpp::R_POWERPC_PLTSEQ:
+    case elfcpp::R_POWERPC_PLTCALL:
       break;
 
     case elfcpp::R_PPC64_TOC:
@@ -7266,6 +7277,8 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_PPC_LOCAL24PC:
     case elfcpp::R_POWERPC_TLS:
     case elfcpp::R_PPC64_ENTRY:
+    case elfcpp::R_POWERPC_PLTSEQ:
+    case elfcpp::R_POWERPC_PLTCALL:
       break;
 
     case elfcpp::R_PPC64_TOC:
@@ -8495,6 +8508,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     Address address,
     section_size_type view_size)
 {
+  typedef Powerpc_relocate_functions<size, big_endian> Reloc;
+  typedef typename elfcpp::Swap<32, big_endian>::Valtype Insn;
+  typedef typename elfcpp::Rela<size, big_endian> Reltype;
+
   if (view == NULL)
     return true;
 
@@ -8513,14 +8530,22 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       // We have already complained.
       break;
     case Track_tls::SKIP:
+      if (is_plt16_reloc<size>(r_type)
+	  || r_type == elfcpp::R_POWERPC_PLTSEQ)
+	{
+	  Insn* iview = reinterpret_cast<Insn*>(view);
+	  elfcpp::Swap<32, big_endian>::writeval(iview, nop);
+	}
+      else if (size == 64 && r_type == elfcpp::R_POWERPC_PLTCALL)
+	{
+	  Insn* iview = reinterpret_cast<Insn*>(view);
+	  elfcpp::Swap<32, big_endian>::writeval(iview + 1, nop);
+	}
       return true;
     case Track_tls::NORMAL:
       break;
     }
 
-  typedef Powerpc_relocate_functions<size, big_endian> Reloc;
-  typedef typename elfcpp::Swap<32, big_endian>::Valtype Insn;
-  typedef typename elfcpp::Rela<size, big_endian> Reltype;
   // Offset from start of insn to d-field reloc.
   const int d_offset = big_endian ? 2 : 0;
 
@@ -8536,6 +8561,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
        : object->local_has_plt_offset(r_sym));
   if (has_plt_offset
       && !is_plt16_reloc<size>(r_type)
+      && r_type != elfcpp::R_POWERPC_PLTSEQ
+      && r_type != elfcpp::R_POWERPC_PLTCALL
       && (!psymval->is_ifunc_symbol()
 	  || Scan::reloc_needs_plt_for_ifunc(target, object, r_type, false)))
     {
@@ -8632,6 +8659,14 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    value -= (target->got_section()->address()
 		      + target->got_section()->g_o_t());
 	}
+    }
+  else if (!has_plt_offset
+	   && (is_plt16_reloc<size>(r_type)
+	       || r_type == elfcpp::R_POWERPC_PLTSEQ))
+    {
+      Insn* iview = reinterpret_cast<Insn*>(view);
+      elfcpp::Swap<32, big_endian>::writeval(iview, nop);
+      r_type = elfcpp::R_POWERPC_NONE;
     }
   else if (r_type == elfcpp::R_POWERPC_GOT16
 	   || r_type == elfcpp::R_POWERPC_GOT16_LO
@@ -8969,6 +9004,18 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     }
   else if (!has_stub_value)
     {
+      if (!has_plt_offset && r_type == elfcpp::R_POWERPC_PLTCALL)
+	{
+	  // PLTCALL without plt entry => convert to direct call
+	  Insn* iview = reinterpret_cast<Insn*>(view);
+	  Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
+	  insn = (insn & 1) | b;
+	  elfcpp::Swap<32, big_endian>::writeval(iview, insn);
+	  if (size == 32)
+	    r_type = elfcpp::R_PPC_PLTREL24;
+	  else
+	    r_type = elfcpp::R_POWERPC_REL24;
+	}
       Address addend = 0;
       if (!(size == 32
 	    && (r_type == elfcpp::R_PPC_PLTREL24
@@ -9498,6 +9545,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_TLS:
     case elfcpp::R_POWERPC_GNU_VTINHERIT:
     case elfcpp::R_POWERPC_GNU_VTENTRY:
+    case elfcpp::R_POWERPC_PLTSEQ:
+    case elfcpp::R_POWERPC_PLTCALL:
       break;
 
     case elfcpp::R_PPC64_ADDR64:

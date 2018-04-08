@@ -1,3 +1,8 @@
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc.h (R_PPC_PLTSEQ, R_PPC_PLTCALL): Define.
+	* elf/ppc64.h (R_PPC64_PLTSEQ, R_PPC64_PLTCALL): Define.
+
 2018-03-28  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/22970
