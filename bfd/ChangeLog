@@ -1,3 +1,27 @@
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (TLS_TLS, TLS_GD, TLS_LD, TLS_TPREL, TLS_DTPREL,
+	TLS_TPRELGD, TLS_EXPLICIT):  Renumber.  Test TLS_TLS throughout
+	file when other TLS flags are tested in a mask.
+	(TLS_MARK, NON_GOT): Define.
+	(PLT_IFUNC): Redefine, and test TLS_TLS throughout file as well.
+	(update_local_sym_info): Don't create got entry when NON_GOT.
+	(ppc64_elf_check_relocs): Pass NON_GOT with PLT_IFUNC.
+	Set TLS_MARK.
+	(get_tls_mask): Do toc lookup if tls_mask is just TLS_MARK.
+	(ppc64_elf_relocate_section): Likewise.
+	(ppc64_elf_tls_optimize): Don't attempt to optimize indirect
+	__tls_get_addr calls lacking a marker reloc.
+	* elf32-ppc.c (TLS_TLS, TLS_GD, TLS_LD, TLS_TPREL, TLS_DTPREL,
+	TLS_TPRELGD): Renumber.  Update comment.
+	(TLS_MARK, NON_GOT): Define.
+	(PLT_IFUNC): Redefine, and test TLS_TLS throughout file as well.
+	(update_local_sym_info): Don't create got entry when NON_GOT.
+	(ppc_elf_check_relocs): Pass NON_GOT with PLT_IFUNC.
+	Set TLS_MARK.
+	(ppc_elf_tls_optimize): Don't attempt to optimize indirect
+	__tls_get_addr calls lacking a marker reloc.
+
 2018-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_info_to_howto): Don't mask out

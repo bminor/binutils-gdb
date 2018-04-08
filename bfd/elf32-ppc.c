@@ -3226,19 +3226,29 @@ struct ppc_elf_link_hash_entry
   /* Track dynamic relocs copied for this symbol.  */
   struct elf_dyn_relocs *dyn_relocs;
 
-  /* Contexts in which symbol is used in the GOT (or TOC).
-     TLS_GD .. TLS_TLS bits are or'd into the mask as the
-     corresponding relocs are encountered during check_relocs.
-     tls_optimize clears TLS_GD .. TLS_TPREL when optimizing to
-     indicate the corresponding GOT entry type is not needed.  */
-#define TLS_GD		 1	/* GD reloc. */
-#define TLS_LD		 2	/* LD reloc. */
-#define TLS_TPREL	 4	/* TPREL reloc, => IE. */
-#define TLS_DTPREL	 8	/* DTPREL reloc, => LD. */
-#define TLS_TLS		16	/* Any TLS reloc.  */
-#define TLS_TPRELGD	32	/* TPREL reloc resulting from GD->IE. */
-#define PLT_IFUNC	64	/* STT_GNU_IFUNC.  */
+  /* Contexts in which symbol is used in the GOT.
+     Bits are or'd into the mask as the corresponding relocs are
+     encountered during check_relocs, with TLS_TLS being set when any
+     of the other TLS bits are set.  tls_optimize clears bits when
+     optimizing to indicate the corresponding GOT entry type is not
+     needed.  If set, TLS_TLS is never cleared.  tls_optimize may also
+     set TLS_TPRELGD when a GD reloc turns into a TPREL one.  We use a
+     separate flag rather than setting TPREL just for convenience in
+     distinguishing the two cases.
+     These flags are also kept for local symbols.  */
+#define TLS_TLS		 1	/* Any TLS reloc.  */
+#define TLS_GD		 2	/* GD reloc. */
+#define TLS_LD		 4	/* LD reloc. */
+#define TLS_TPREL	 8	/* TPREL reloc, => IE. */
+#define TLS_DTPREL	16	/* DTPREL reloc, => LD. */
+#define TLS_MARK	32	/* __tls_get_addr call marked. */
+#define TLS_TPRELGD	64	/* TPREL reloc resulting from GD->IE. */
   unsigned char tls_mask;
+
+  /* The above field is also used to mark function symbols.  In which
+     case TLS_TLS will be 0.  */
+#define PLT_IFUNC	 2	/* STT_GNU_IFUNC.  */
+#define NON_GOT        256	/* local symbol plt, not stored.  */
 
   /* Nonzero if we have seen a small data relocation referring to this
      symbol.  */
@@ -3861,8 +3871,8 @@ update_local_sym_info (bfd *abfd,
 
   local_plt = (struct plt_entry **) (local_got_refcounts + symtab_hdr->sh_info);
   local_got_tls_masks = (unsigned char *) (local_plt + symtab_hdr->sh_info);
-  local_got_tls_masks[r_symndx] |= tls_type;
-  if (tls_type != PLT_IFUNC)
+  local_got_tls_masks[r_symndx] |= tls_type & 0xff;
+  if ((tls_type & NON_GOT) == 0)
     local_got_refcounts[r_symndx] += 1;
   return local_plt + r_symndx;
 }
@@ -4038,7 +4048,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	    {
 	      /* Set PLT_IFUNC flag for this sym, no GOT entry yet.  */
 	      ifunc = update_local_sym_info (abfd, symtab_hdr, r_symndx,
-					     PLT_IFUNC);
+					     NON_GOT | PLT_IFUNC);
 	      if (ifunc == NULL)
 		return FALSE;
 
@@ -4083,6 +4093,12 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_TLSLD:
 	  /* These special tls relocs tie a call to __tls_get_addr with
 	     its parameter symbol.  */
+	  if (h != NULL)
+	    ppc_elf_hash_entry (h)->tls_mask |= TLS_TLS | TLS_MARK;
+	  else
+	    if (!update_local_sym_info (abfd, symtab_hdr, r_symndx,
+					NON_GOT | TLS_TLS | TLS_MARK))
+	      return FALSE;
 	  break;
 
 	case R_PPC_GOT_TLSLD16:
@@ -5212,7 +5228,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		  unsigned long r_symndx;
 		  struct elf_link_hash_entry *h = NULL;
 		  unsigned char *tls_mask;
-		  char tls_set, tls_clear;
+		  unsigned char tls_set, tls_clear;
 		  bfd_boolean is_local;
 		  bfd_signed_vma *got_count;
 
@@ -5341,23 +5357,6 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		      return TRUE;
 		    }
 
-		  if (expecting_tls_get_addr)
-		    {
-		      struct plt_entry *ent;
-		      bfd_vma addend = 0;
-
-		      if (bfd_link_pic (info)
-			  && ELF32_R_TYPE (rel[1].r_info) == R_PPC_PLTREL24)
-			addend = rel[1].r_addend;
-		      ent = find_plt_ent (&htab->tls_get_addr->plt.plist,
-					  got2, addend);
-		      if (ent != NULL && ent->plt.refcount > 0)
-			ent->plt.refcount -= 1;
-
-		      if (expecting_tls_get_addr == 2)
-			continue;
-		    }
-
 		  if (h != NULL)
 		    {
 		      tls_mask = &ppc_elf_hash_entry (h)->tls_mask;
@@ -5378,6 +5377,36 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 			(local_plt + symtab_hdr->sh_info);
 		      tls_mask = &lgot_masks[r_symndx];
 		      got_count = &lgot_refs[r_symndx];
+		    }
+
+		  /* If we don't have old-style __tls_get_addr calls
+		     without TLSGD/TLSLD marker relocs, and we haven't
+		     found a new-style __tls_get_addr call with a
+		     marker for this symbol, then we either have a
+		     broken object file or an -mlongcall style
+		     indirect call to __tls_get_addr without a marker.
+		     Disable optimization in this case.  */
+		  if ((tls_clear & (TLS_GD | TLS_LD)) != 0
+		      && !sec->has_tls_get_addr_call
+		      && ((*tls_mask & (TLS_TLS | TLS_MARK))
+			  != (TLS_TLS | TLS_MARK)))
+		    continue;
+
+		  if (expecting_tls_get_addr)
+		    {
+		      struct plt_entry *ent;
+		      bfd_vma addend = 0;
+
+		      if (bfd_link_pic (info)
+			  && ELF32_R_TYPE (rel[1].r_info) == R_PPC_PLTREL24)
+			addend = rel[1].r_addend;
+		      ent = find_plt_ent (&htab->tls_get_addr->plt.plist,
+					  got2, addend);
+		      if (ent != NULL && ent->plt.refcount > 0)
+			ent->plt.refcount -= 1;
+
+		      if (expecting_tls_get_addr == 2)
+			continue;
 		    }
 
 		  if (tls_set == 0)
@@ -5783,7 +5812,8 @@ got_relocs_needed (int tls_mask, unsigned int need, bfd_boolean known)
      the DTPREL reloc on the second word of a GD entry under the same
      condition as that for IE, but ld.so needs to differentiate
      LD and GD entries.  */
-  if ((tls_mask & (TLS_TPREL | TLS_TPRELGD)) != 0 && known)
+  if (known && (tls_mask & TLS_TLS) != 0
+      && (tls_mask & (TLS_TPREL | TLS_TPRELGD)) != 0)
     need -= 4;
   return need * sizeof (Elf32_External_Rela) / 4;
 }
@@ -5838,7 +5868,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	return FALSE;
 
       need = 0;
-      if ((eh->tls_mask & TLS_LD) != 0)
+      if ((eh->tls_mask & (TLS_TLS | TLS_LD)) == (TLS_TLS | TLS_LD))
 	{
 	  if (!eh->elf.def_dynamic)
 	    /* We'll just use htab->tlsld_got.offset.  This should
@@ -5866,7 +5896,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 								     &eh->elf));
 
 	      need = got_relocs_needed (eh->tls_mask, need, tprel_known);
-	      if ((eh->tls_mask & TLS_LD) != 0 && eh->elf.def_dynamic)
+	      if ((eh->tls_mask & (TLS_TLS | TLS_LD)) == (TLS_TLS | TLS_LD)
+		  && eh->elf.def_dynamic)
 		need -= sizeof (Elf32_External_Rela);
 	      rsec = htab->elf.srelgot;
 	      if (eh->elf.type == STT_GNU_IFUNC)
@@ -6272,7 +6303,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	if (*local_got > 0)
 	  {
 	    unsigned int need;
-	    if ((*lgot_masks & TLS_LD) != 0)
+	    if ((*lgot_masks & (TLS_TLS | TLS_LD)) == (TLS_TLS | TLS_LD))
 	      htab->tlsld_got.refcount += 1;
 	    need = got_entries_needed (*lgot_masks);
 	    if (need == 0)
@@ -6287,7 +6318,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 
 		    need = got_relocs_needed (*lgot_masks, need, tprel_known);
 		    srel = htab->elf.srelgot;
-		    if ((*lgot_masks & PLT_IFUNC) != 0)
+		    if ((*lgot_masks & (TLS_TLS | PLT_IFUNC)) == PLT_IFUNC)
 		      srel = htab->elf.irelplt;
 		    srel->size += need;
 		  }
@@ -8425,9 +8456,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      off &= ~1;
 	    else
 	      {
-		unsigned int tls_m = (tls_mask
-				      & (TLS_LD | TLS_GD | TLS_DTPREL
-					 | TLS_TPREL | TLS_TPRELGD));
+		unsigned int tls_m = ((tls_mask & TLS_TLS) != 0
+				      ? tls_mask & (TLS_LD | TLS_GD | TLS_DTPREL
+						    | TLS_TPREL | TLS_TPRELGD)
+				      : 0);
 
 		if (offp == &htab->tlsld_got.offset)
 		  tls_m = TLS_LD;
