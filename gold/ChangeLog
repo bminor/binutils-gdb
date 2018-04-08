@@ -1,5 +1,20 @@
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::lplt_): New variable.
+	(Target_powerpc::lplt_section): Associated accessor.
+	(Target_powerpc::plt_off): Handle local non-ifunc symbols.
+	(Target_powerpc::make_lplt_section): New function.
+	(Target_powerpc::make_local_plt_entry): New function.
+	(Powerpc_relobj::do_relocate_sections): Write out lplt.
+	(Output_data_plt_powerpc::first_plt_entry_offset): Zero for lplt.
+	(Output_data_plt_powerpc::add_local_entry): New function.
+	(Output_data_plt_powerpc::do_write): Ignore lplt.
+	(Target_powerpc::make_iplt_section): Make lplt first.
+	(Target_powerpc::make_brlt_section): Make .branch_lt relro.
+	(Target_powerpc::Scan::local): Handle PLT16 relocs.
+
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::plt_off): New functions.
 	(is_plt16_reloc): New function.
 	(Stub_table::plt_off): Use Target_powerpc::plt_off.

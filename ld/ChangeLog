@@ -1,5 +1,15 @@
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/elf32ppc.sh (OTHER_RELRO_SECTIONS_2): Add .branch_lt.
+	(OTHER_GOT_RELOC_SECTIONS): Add .rela.branch_lt.
+	* testsuite/ld-powerpc/elfv2so.d: Update for symbol/stub reordering.
+	* testsuite/ld-powerpc/relbrlt.d: Likewise.
+	* testsuite/ld-powerpc/relbrlt.s: Likewise.
+	* testsuite/ld-powerpc/tlsso.r: Likewise.
+	* testsuite/ld-powerpc/tlstocso.r: Likewise.
+
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
 	* ppc32elf.em (ppc_finish): Call ppc_finish_symbols.
 
 2018-04-05  H.J. Lu  <hongjiu.lu@intel.com>

@@ -14,16 +14,16 @@ Disassembly of section \.text:
 .*:	(4e 80 04 20|20 04 80 4e) 	bctr
 	\.\.\.
 
-.* <.*\.plt_call\.f1>:
+.* <.*\.plt_call\.f3>:
 .*:	(f8 41 00 18|18 00 41 f8) 	std     r2,24\(r1\)
-.*:	(e9 82 80 40|40 80 82 e9) 	ld      r12,-32704\(r2\)
+.*:	(e9 82 80 28|28 80 82 e9) 	ld      r12,-32728\(r2\)
 .*:	(7d 89 03 a6|a6 03 89 7d) 	mtctr   r12
 .*:	(4e 80 04 20|20 04 80 4e) 	bctr
 	\.\.\.
 
-.* <.*\.plt_call\.f3>:
+.* <.*\.plt_call\.f1>:
 .*:	(f8 41 00 18|18 00 41 f8) 	std     r2,24\(r1\)
-.*:	(e9 82 80 28|28 80 82 e9) 	ld      r12,-32728\(r2\)
+.*:	(e9 82 80 40|40 80 82 e9) 	ld      r12,-32704\(r2\)
 .*:	(7d 89 03 a6|a6 03 89 7d) 	mtctr   r12
 .*:	(4e 80 04 20|20 04 80 4e) 	bctr
 	\.\.\.
@@ -41,12 +41,12 @@ Disassembly of section \.text:
 .*:	(7c 08 02 a6|a6 02 08 7c) 	mflr    r0
 .*:	(f8 21 ff e1|e1 ff 21 f8) 	stdu    r1,-32\(r1\)
 .*:	(f8 01 00 30|30 00 01 f8) 	std     r0,48\(r1\)
-.*:	(4b ff ff 8d|8d ff ff 4b) 	bl      .*\.plt_call\.f1>
+.*:	(4b ff ff ad|ad ff ff 4b) 	bl      .*\.plt_call\.f1>
 .*:	(e8 62 80 08|08 80 62 e8) 	ld      r3,-32760\(r2\)
 .*:	(4b ff ff c5|c5 ff ff 4b) 	bl      .*\.plt_call\.f2>
 .*:	(e8 41 00 18|18 00 41 e8) 	ld      r2,24\(r1\)
 .*:	(e8 62 80 10|10 80 62 e8) 	ld      r3,-32752\(r2\)
-.*:	(4b ff ff 99|99 ff ff 4b) 	bl      .*\.plt_call\.f3>
+.*:	(4b ff ff 79|79 ff ff 4b) 	bl      .*\.plt_call\.f3>
 .*:	(e8 41 00 18|18 00 41 e8) 	ld      r2,24\(r1\)
 .*:	(4b ff ff 51|51 ff ff 4b) 	bl      .*\.plt_call\.f4>
 .*:	(e8 41 00 18|18 00 41 e8) 	ld      r2,24\(r1\)
