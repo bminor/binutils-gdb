@@ -1,5 +1,10 @@
 2018-05-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/maint.exp: Process output from 'maint print registers'
+	line at a time.
+
+2018-05-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* lib/mi-support.exp (mi_run_cmd_full): Fix regexp and add a
 	timeout.
 

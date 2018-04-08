@@ -62,8 +62,28 @@ gdb_test_no_output "set height 0"
 gdb_file_cmd ${binfile}
 
 # Test for a regression where this command would internal-error if the
-# program wasn't running.
-gdb_test "maint print registers" "Name.*Nr.*Rel.*Offset.*Size.*Type.*"
+# program wasn't running.  If there's a lot of registers then this
+# might overflow expect's buffers, so process the output line at a
+# time.
+set saw_registers 0
+set saw_headers 0
+set test "maint print registers"
+gdb_test_multiple $test $test {
+    -re "\[^\r\n\]+Name\[^\r\n\]+Nr\[^\r\n\]+Rel\[^\r\n\]+Offset\[^\r\n\]+Size\[^\r\n\]+Type\[^\r\n\]+\[\r\n\]+" {
+	set saw_headers 1
+	exp_continue
+    }
+    -re "^\[^\r\n\]+\[0-9\]+\[^\r\n\]+\[0-9\]+\[^\r\n\]+\[0-9\]+\[^\r\n\]+\[0-9\]+\[^\r\n\]+\[\r\n\]+" {
+        set saw_registers 1
+        exp_continue
+    }
+    -re "^\\*\[0-9\]+\[^\r\n\]+\[\r\n\]+" {
+        exp_continue
+    }
+    -re "$gdb_prompt $" {
+        gdb_assert { $saw_registers && $saw_headers } $test
+    }
+}
 
 # Test "mt expand-symtabs" here as it's easier to verify before we
 # run the program.
