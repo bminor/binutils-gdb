@@ -47,29 +47,33 @@ typedef std::unique_ptr<traceframe_info> traceframe_info_up;
    tracepoints.  */
 
 struct trace_state_variable
-  {
-    /* The variable's name.  The user has to prefix with a dollar sign,
-       but we don't store that internally.  */
-    const char *name;
+{
+  trace_state_variable (std::string &&name_, int number_)
+  : name (name_), number (number_)
+  {}
 
-    /* An id number assigned by GDB, and transmitted to targets.  */
-    int number;
+  /* The variable's name.  The user has to prefix with a dollar sign,
+     but we don't store that internally.  */
+  std::string name;
 
-    /* The initial value of a variable is a 64-bit signed integer.  */
-    LONGEST initial_value;
+  /* An id number assigned by GDB, and transmitted to targets.  */
+  int number = 0;
 
-    /* 1 if the value is known, else 0.  The value is known during a
-       trace run, or in tfind mode if the variable was collected into
-       the current trace frame.  */
-    int value_known;
+  /* The initial value of a variable is a 64-bit signed integer.  */
+  LONGEST initial_value = 0;
 
-    /* The value of a variable is a 64-bit signed integer.  */
-    LONGEST value;
+  /* 1 if the value is known, else 0.  The value is known during a
+     trace run, or in tfind mode if the variable was collected into
+     the current trace frame.  */
+  int value_known = 0;
 
-    /* This is true for variables that are predefined and built into
-       the target.  */
-    int builtin;
-   };
+  /* The value of a variable is a 64-bit signed integer.  */
+  LONGEST value = 0;
+
+  /* This is true for variables that are predefined and built into
+     the target.  */
+  int builtin = 0;
+ };
 
 /* The trace status encompasses various info about the general state
    of the tracing run.  */

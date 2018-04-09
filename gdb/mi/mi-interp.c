@@ -760,7 +760,7 @@ mi_tsv_created (const struct trace_state_variable *tsv)
 
       fprintf_unfiltered (mi->event_channel, "tsv-created,"
 			  "name=\"%s\",initial=\"%s\"\n",
-			  tsv->name, plongest (tsv->initial_value));
+			  tsv->name.c_str (), plongest (tsv->initial_value));
 
       gdb_flush (mi->event_channel);
     }
@@ -783,7 +783,7 @@ mi_tsv_deleted (const struct trace_state_variable *tsv)
 
       if (tsv != NULL)
 	fprintf_unfiltered (mi->event_channel, "tsv-deleted,"
-			    "name=\"%s\"\n", tsv->name);
+			    "name=\"%s\"\n", tsv->name.c_str ());
       else
 	fprintf_unfiltered (mi->event_channel, "tsv-deleted\n");
 

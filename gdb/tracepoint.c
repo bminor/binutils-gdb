@@ -114,10 +114,7 @@ void (*deprecated_trace_start_stop_hook) (int start, int from_tty);
    any of these for any reason - API is by name or number only - so it
    works to have a vector of objects.  */
 
-typedef struct trace_state_variable tsv_s;
-DEF_VEC_O(tsv_s);
-
-static VEC(tsv_s) *tvariables;
+static std::vector<trace_state_variable> tvariables;
 
 /* The next integer to assign to a variable.  */
 
@@ -267,12 +264,8 @@ set_traceframe_context (struct frame_info *trace_frame)
 struct trace_state_variable *
 create_trace_state_variable (const char *name)
 {
-  struct trace_state_variable tsv;
-
-  memset (&tsv, 0, sizeof (tsv));
-  tsv.name = xstrdup (name);
-  tsv.number = next_tsv_number++;
-  return VEC_safe_push (tsv_s, tvariables, &tsv);
+  tvariables.emplace_back (name, next_tsv_number++);
+  return &tvariables.back ();
 }
 
 /* Look for a trace state variable of the given name.  */
@@ -280,12 +273,9 @@ create_trace_state_variable (const char *name)
 struct trace_state_variable *
 find_trace_state_variable (const char *name)
 {
-  struct trace_state_variable *tsv;
-  int ix;
-
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
-    if (strcmp (name, tsv->name) == 0)
-      return tsv;
+  for (trace_state_variable &tsv : tvariables)
+    if (tsv.name == name)
+      return &tsv;
 
   return NULL;
 }
@@ -296,12 +286,9 @@ find_trace_state_variable (const char *name)
 struct trace_state_variable *
 find_trace_state_variable_by_number (int number)
 {
-  struct trace_state_variable *tsv;
-  int ix;
-
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
-    if (tsv->number == number)
-      return tsv;
+  for (trace_state_variable &tsv : tvariables)
+    if (tsv.number == number)
+      return &tsv;
 
   return NULL;
 }
@@ -309,17 +296,11 @@ find_trace_state_variable_by_number (int number)
 static void
 delete_trace_state_variable (const char *name)
 {
-  struct trace_state_variable *tsv;
-  int ix;
-
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
-    if (strcmp (name, tsv->name) == 0)
+  for (auto it = tvariables.begin (); it != tvariables.end (); it++)
+    if (it->name == name)
       {
-	gdb::observers::tsv_deleted.notify (tsv);
-
-	xfree ((void *)tsv->name);
-	VEC_unordered_remove (tsv_s, tvariables, ix);
-
+	gdb::observers::tsv_deleted.notify (&*it);
+	tvariables.erase (it);
 	return;
       }
 
@@ -394,7 +375,7 @@ trace_variable_command (const char *args, int from_tty)
 	}
       printf_filtered (_("Trace state variable $%s "
 			 "now has initial value %s.\n"),
-		       tsv->name, plongest (tsv->initial_value));
+		       tsv->name.c_str (), plongest (tsv->initial_value));
       return;
     }
 
@@ -406,7 +387,7 @@ trace_variable_command (const char *args, int from_tty)
 
   printf_filtered (_("Trace state variable $%s "
 		     "created, with initial value %s.\n"),
-		   tsv->name, plongest (tsv->initial_value));
+		   tsv->name.c_str (), plongest (tsv->initial_value));
 }
 
 static void
@@ -415,7 +396,7 @@ delete_trace_variable_command (const char *args, int from_tty)
   if (args == NULL)
     {
       if (query (_("Delete all trace state variables? ")))
-	VEC_free (tsv_s, tvariables);
+	tvariables.clear ();
       dont_repeat ();
       gdb::observers::tsv_deleted.notify (NULL);
       return;
@@ -437,41 +418,38 @@ delete_trace_variable_command (const char *args, int from_tty)
 void
 tvariables_info_1 (void)
 {
-  struct trace_state_variable *tsv;
-  int ix;
-  int count = 0;
   struct ui_out *uiout = current_uiout;
 
-  if (VEC_length (tsv_s, tvariables) == 0 && !uiout->is_mi_like_p ())
+  if (tvariables.empty () && !uiout->is_mi_like_p ())
     {
       printf_filtered (_("No trace state variables.\n"));
       return;
     }
 
   /* Try to acquire values from the target.  */
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix, ++count)
-    tsv->value_known = target_get_trace_state_variable_value (tsv->number,
-							      &(tsv->value));
+  for (trace_state_variable &tsv : tvariables)
+    tsv.value_known
+      = target_get_trace_state_variable_value (tsv.number, &tsv.value);
 
-  ui_out_emit_table table_emitter (uiout, 3, count, "trace-variables");
+  ui_out_emit_table table_emitter (uiout, 3, tvariables.size (),
+				   "trace-variables");
   uiout->table_header (15, ui_left, "name", "Name");
   uiout->table_header (11, ui_left, "initial", "Initial");
   uiout->table_header (11, ui_left, "current", "Current");
 
   uiout->table_body ();
 
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
+  for (const trace_state_variable &tsv : tvariables)
     {
       const char *c;
 
       ui_out_emit_tuple tuple_emitter (uiout, "variable");
 
-      std::string name = std::string ("$") + tsv->name;
-      uiout->field_string ("name", name.c_str ());
-      uiout->field_string ("initial", plongest (tsv->initial_value));
+      uiout->field_string ("name", std::string ("$") + tsv.name);
+      uiout->field_string ("initial", plongest (tsv.initial_value));
 
-      if (tsv->value_known)
-        c = plongest (tsv->value);
+      if (tsv.value_known)
+        c = plongest (tsv.value);
       else if (uiout->is_mi_like_p ())
         /* For MI, we prefer not to use magic string constants, but rather
            omit the field completely.  The difference between unknown and
@@ -502,14 +480,11 @@ info_tvariables_command (const char *args, int from_tty)
 void
 save_trace_state_variables (struct ui_file *fp)
 {
-  struct trace_state_variable *tsv;
-  int ix;
-
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
+  for (const trace_state_variable &tsv : tvariables)
     {
-      fprintf_unfiltered (fp, "tvariable $%s", tsv->name);
-      if (tsv->initial_value)
-	fprintf_unfiltered (fp, " = %s", plongest (tsv->initial_value));
+      fprintf_unfiltered (fp, "tvariable $%s", tsv.name.c_str ());
+      if (tsv.initial_value)
+	fprintf_unfiltered (fp, " = %s", plongest (tsv.initial_value));
       fprintf_unfiltered (fp, "\n");
     }
 }
@@ -1664,10 +1639,8 @@ start_tracing (const char *notes)
   VEC_free (breakpoint_p, tp_vec);
 
   /* Send down all the trace state variables too.  */
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
-    {
-      target_download_trace_state_variable (tsv);
-    }
+  for (const trace_state_variable &tsv : tvariables)
+    target_download_trace_state_variable (tsv);
   
   /* Tell target to treat text-like sections as transparent.  */
   target_trace_set_readonly_regions ();
@@ -3268,8 +3241,8 @@ merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
 
   /* Most likely some numbers will have to be reassigned as part of
      the merge, so clear them all in anticipation.  */
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
-    tsv->number = 0;
+  for (trace_state_variable &tsv : tvariables)
+    tsv.number = 0;
 
   for (utsv = *uploaded_tsvs; utsv; utsv = utsv->next)
     {
@@ -3279,7 +3252,7 @@ merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
 	  if (info_verbose)
 	    printf_filtered (_("Assuming trace state variable $%s "
 			       "is same as target's variable %d.\n"),
-			     tsv->name, utsv->number);
+			     tsv->name.c_str (), utsv->number);
 	}
       else
 	{
@@ -3287,7 +3260,7 @@ merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
 	  if (info_verbose)
 	    printf_filtered (_("Created trace state variable "
 			       "$%s for target's variable %d.\n"),
-			     tsv->name, utsv->number);
+			     tsv->name.c_str (), utsv->number);
 	}
       /* Give precedence to numberings that come from the target.  */
       if (tsv)
@@ -3296,14 +3269,13 @@ merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
 
   /* Renumber everything that didn't get a target-assigned number.  */
   highest = 0;
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
-    if (tsv->number > highest)
-      highest = tsv->number;
+  for (const trace_state_variable &tsv : tvariables)
+    highest = std::max (tsv.number, highest);
 
   ++highest;
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
-    if (tsv->number == 0)
-      tsv->number = highest++;
+  for (trace_state_variable &tsv : tvariables)
+    if (tsv.number == 0)
+      tsv.number = highest++;
 
   free_uploaded_tsvs (uploaded_tsvs);
 }

@@ -12448,18 +12448,18 @@ remote_can_download_tracepoint (struct target_ops *self)
 
 static void
 remote_download_trace_state_variable (struct target_ops *self,
-				      struct trace_state_variable *tsv)
+				      const trace_state_variable &tsv)
 {
   struct remote_state *rs = get_remote_state ();
   char *p;
 
   xsnprintf (rs->buf, get_remote_packet_size (), "QTDV:%x:%s:%x:",
-	     tsv->number, phex ((ULONGEST) tsv->initial_value, 8),
-	     tsv->builtin);
+	     tsv.number, phex ((ULONGEST) tsv.initial_value, 8),
+	     tsv.builtin);
   p = rs->buf + strlen (rs->buf);
-  if ((p - rs->buf) + strlen (tsv->name) * 2 >= get_remote_packet_size ())
+  if ((p - rs->buf) + tsv.name.length () * 2 >= get_remote_packet_size ())
     error (_("Trace state variable name too long for tsv definition packet"));
-  p += 2 * bin2hex ((gdb_byte *) (tsv->name), p, strlen (tsv->name));
+  p += 2 * bin2hex ((gdb_byte *) (tsv.name.data ()), p, tsv.name.length ());
   *p++ = '\0';
   putpkt (rs->buf);
   remote_get_noisy_reply ();

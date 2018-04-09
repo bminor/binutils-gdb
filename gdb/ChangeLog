@@ -1,5 +1,37 @@
 2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* tracepoint.h (struct trace_state_variable): Add constructor.
+	<name>: Change type to std::string.
+	* tracepoint.c (tsv_s): Remove.
+	(DEF_VEC_O(tsv_s)): Remove.
+	(tvariables): Change to std::vector.
+	(create_trace_state_variable): Adjust to std::vector.
+	(find_trace_state_variable): Likewise.
+	(find_trace_state_variable_by_number): Likewise.
+	(delete_trace_state_variable): Likewise.
+	(trace_variable_command): Adjust to std::string.
+	(delete_trace_variable_command): Likewise.
+	(tvariables_info_1): Adjust to std::vector.
+	(save_trace_state_variables): Likewise.
+	(start_tracing): Likewise.
+	(merge_uploaded_trace_state_variables): Adjust to std::vector
+	and std::string.
+	* target.h (struct target_ops)
+	<to_download_trace_state_variable>: Pass reference to
+	trace_state_variable.
+	* target-debug.h (target_debug_print_const_trace_state_variable_r): New.
+	* target-delegates.c: Re-generate.
+	* mi/mi-interp.c (mi_tsv_created): Adjust to std::string.
+	(mi_tsv_deleted): Likewise.
+	* mi/mi-main.c (mi_cmd_trace_frame_collected): Likewise.
+	* remote.c (remote_download_trace_state_variable): Change
+	pointer to reference and adjust.
+	* make-target-delegates (parse_argtypes): Handle references.
+	(write_function_header): Likewise.
+	(munge_type): Likewise.
+
+2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	string_view-selftests.c.
 	* unittests/basic_string_view/capacity/1.cc: Adapt to GDB

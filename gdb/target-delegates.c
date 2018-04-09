@@ -2687,27 +2687,27 @@ debug_can_download_tracepoint (struct target_ops *self)
 }
 
 static void
-delegate_download_trace_state_variable (struct target_ops *self, struct trace_state_variable *arg1)
+delegate_download_trace_state_variable (struct target_ops *self, const trace_state_variable &arg1)
 {
   self = self->beneath;
   self->to_download_trace_state_variable (self, arg1);
 }
 
 static void
-tdefault_download_trace_state_variable (struct target_ops *self, struct trace_state_variable *arg1)
+tdefault_download_trace_state_variable (struct target_ops *self, const trace_state_variable &arg1)
 {
   tcomplain ();
 }
 
 static void
-debug_download_trace_state_variable (struct target_ops *self, struct trace_state_variable *arg1)
+debug_download_trace_state_variable (struct target_ops *self, const trace_state_variable &arg1)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_download_trace_state_variable (...)\n", debug_target.to_shortname);
   debug_target.to_download_trace_state_variable (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_download_trace_state_variable (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_struct_trace_state_variable_p (arg1);
+  target_debug_print_const_trace_state_variable_r (arg1);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 

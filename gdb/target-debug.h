@@ -126,6 +126,8 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_trace_state_variable_p(X)	\
   target_debug_do_print (host_address_to_string (X))
+#define target_debug_print_const_trace_state_variable_r(X)	\
+  target_debug_do_print (host_address_to_string (&X))
 #define target_debug_print_struct_trace_status_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_breakpoint_p(X)	\

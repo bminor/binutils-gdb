@@ -2665,7 +2665,7 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
 	if (tsv != NULL)
 	  {
-	    uiout->field_fmt ("name", "$%s", tsv->name);
+	    uiout->field_fmt ("name", "$%s", tsv->name.c_str ());
 
 	    tsv->value_known = target_get_trace_state_variable_value (tsv->number,
 								      &tsv->value);
