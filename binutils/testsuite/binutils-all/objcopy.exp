@@ -1113,8 +1113,11 @@ if [is_elf_format] {
 	set reloc 259
     } elseif { [istarget "ia64*-*"] \
 	       || [istarget "m32r*-*"] \
+	       || [istarget "nds32*-*"] \
 	       || [istarget "v850*-*"] } {
 	set reloc 50
+    } elseif { [istarget "pru-*"] } {
+	set reloc 11
     } else {
 	set reloc 1
     }

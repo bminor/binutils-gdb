@@ -1,3 +1,9 @@
+2018-04-10  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/objcopy.exp (strip-14, strip-15): Choose
+	reloc=11 for pru and reloc=50 for nds32.
+	* testsuite/binutils-all/strip-15.d: Accept 0xb reloc number.
+
 2018-04-09  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/binutils-all/strip-15.d: New test.
