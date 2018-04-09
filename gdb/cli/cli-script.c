@@ -32,6 +32,7 @@
 #include "extension.h"
 #include "interps.h"
 #include "compile/compile.h"
+#include "common/gdb_string_view.h"
 
 #include <vector>
 
@@ -53,18 +54,6 @@ static int command_nest_depth = 1;
 
 /* This is to prevent certain commands being printed twice.  */
 static int suppress_next_print_command_trace = 0;
-
-/* A non-owning slice of a string.  */
-
-struct string_view
-{
-  string_view (const char *str_, size_t len_)
-    : str (str_), len (len_)
-  {}
-
-  const char *str;
-  size_t len;
-};
 
 /* Structure for arguments to user defined functions.  */
 
@@ -91,7 +80,7 @@ private:
   std::string m_command_line;
 
   /* The arguments.  Each element points inside M_COMMAND_LINE.  */
-  std::vector<string_view> m_args;
+  std::vector<gdb::string_view> m_args;
 };
 
 /* The stack of arguments passed to user defined functions.  We need a
@@ -827,7 +816,7 @@ user_args::insert_args (const char *line) const
 	    error (_("Missing argument %ld in user function."), i);
 	  else
 	    {
-	      new_line.append (m_args[i].str, m_args[i].len);
+	      new_line.append (m_args[i].data (), m_args[i].length ());
 	      line = tmp;
 	    }
 	}

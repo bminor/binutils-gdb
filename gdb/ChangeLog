@@ -1,5 +1,14 @@
 2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* common/gdb_string_view.h: Remove libstdc++ implementation
+	details, adjust to gdb reality.
+	* common/gdb_string_view.tcc: Likewise.
+	* cli/cli-script.c (struct string_view): Remove.
+	(user_args) <m_args>: Change element type to gdb::string_view.
+	(user_args::insert_args): Adjust.
+
+2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* common/gdb_string_view.h: New file.
 	* common/gdb_string_view.tcc: New file.
 
