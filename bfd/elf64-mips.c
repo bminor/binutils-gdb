@@ -3669,6 +3669,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 {
   void *allocated;
   bfd_byte *native_relocs;
+  unsigned int symcount;
   arelent *relent;
   bfd_vma i;
   int entsize;
@@ -3693,6 +3694,11 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
     rela_p = FALSE;
   else
     rela_p = TRUE;
+
+  if (dynamic)
+    symcount = bfd_get_dynamic_symcount (abfd);
+  else
+    symcount = bfd_get_symcount (abfd);
 
   for (i = 0, relent = relents;
        i < reloc_count;
@@ -3750,6 +3756,17 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 		{
 		  if (rela.r_sym == STN_UNDEF)
 		    relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+		  else if (rela.r_sym > symcount)
+		    {
+		      _bfd_error_handler
+			/* xgettext:c-format */
+			(_("%pB(%pA): relocation %" PRIu64
+			   " has invalid symbol index %ld"),
+			 abfd, asect, (uint64_t) i, rela.r_sym);
+		      bfd_set_error (bfd_error_bad_value);
+		      relent->sym_ptr_ptr
+			= bfd_abs_section_ptr->symbol_ptr_ptr;
+		    }
 		  else
 		    {
 		      asymbol **ps, *s;

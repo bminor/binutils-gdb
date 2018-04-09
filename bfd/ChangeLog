@@ -1,3 +1,8 @@
+2018-04-09  Maciej W. Rozycki  <macro@mips.com>
+
+	* elf64-mips.c (mips_elf64_slurp_one_reloc_table): Issue an
+	error for out-of-range `r_sym' values.
+
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct _ppc64_elf_section_data): Add has_pltcall field.
