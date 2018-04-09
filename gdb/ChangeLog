@@ -1,3 +1,10 @@
+2018-04-09  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch.sh: Include "observable.h" instead of "observer.h".
+	(set_target_gdbarch): Call
+	gdb::observers::architecture_changed.notify instead of
+	observer_notify_architecture_changed.
+
 2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* tracepoint.c (struct current_traceframe_cleanup): Remove.

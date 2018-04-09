@@ -1644,7 +1644,7 @@ cat <<EOF
 #include "reggroups.h"
 #include "osabi.h"
 #include "gdb_obstack.h"
-#include "observer.h"
+#include "observable.h"
 #include "regcache.h"
 #include "objfiles.h"
 #include "auxv.h"
@@ -2506,7 +2506,7 @@ set_target_gdbarch (struct gdbarch *new_gdbarch)
   gdb_assert (new_gdbarch != NULL);
   gdb_assert (new_gdbarch->initialized_p);
   current_inferior ()->gdbarch = new_gdbarch;
-  observer_notify_architecture_changed (new_gdbarch);
+  gdb::observers::architecture_changed.notify (new_gdbarch);
   registers_changed ();
 }
 
