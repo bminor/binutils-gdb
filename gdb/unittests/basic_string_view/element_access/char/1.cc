@@ -19,21 +19,19 @@
 
 // basic_string element access
 
-#include <string_view>
-#include <stdexcept>
-#include <testsuite_hooks.h>
+namespace element_access_1 {
 
 void
 test01()
 {
-  typedef std::string_view::size_type csize_type;
-  typedef std::string_view::const_reference cref;
-  typedef std::string_view::reference ref;
+  typedef gdb::string_view::size_type csize_type;
+  typedef gdb::string_view::const_reference cref;
+  typedef gdb::string_view::reference ref;
   csize_type csz01, csz02;
 
-  const std::string_view str01("tamarindo, costa rica");
-  std::string_view str02("41st street beach, capitola, california");
-  std::string_view str03;
+  const gdb::string_view str01("tamarindo, costa rica");
+  gdb::string_view str02("41st street beach, capitola, california");
+  gdb::string_view str03;
 
   // const_reference operator[] (size_type pos) const;
   csz01 = str01.size();
@@ -52,7 +50,7 @@ test01()
     str01.at(csz01);
     VERIFY( false ); // Should not get here, as exception thrown.
   }
-  catch (std::out_of_range& fail)
+  catch (gdb_exception& fail)
   {
     VERIFY( true );
   }
@@ -68,3 +66,5 @@ main()
   test01();
   return 0;
 }
+
+} // namespace element_access_1

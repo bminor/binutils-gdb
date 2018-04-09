@@ -19,21 +19,19 @@
 
 // basic_string_view::substr
 
-#include <string_view>
-#include <stdexcept>
-#include <testsuite_hooks.h>
+namespace operations_substr_1 {
 
 void
 test01()
 {
-  typedef std::string_view::size_type csize_type;
-  typedef std::string_view::const_reference cref;
-  typedef std::string_view::reference ref;
+  typedef gdb::string_view::size_type csize_type;
+  typedef gdb::string_view::const_reference cref;
+  typedef gdb::string_view::reference ref;
   csize_type csz01;
 
   const char str_lit01[] = "rockaway, pacifica";
-  const std::string_view str01(str_lit01);
-  std::string_view str02;
+  const gdb::string_view str01(str_lit01);
+  gdb::string_view str02;
 
   // basic_string_view<charT, _Traits, _Alloc>
   //  substr(size_type pos = 0, size_type n = npos) const;
@@ -48,7 +46,7 @@ test01()
     str02 = str01.substr(csz01 + 1);
     VERIFY( false ); 
   }
-  catch(std::out_of_range& fail)
+  catch(gdb_exception& fail)
   {
     VERIFY( true );
   }
@@ -77,3 +75,5 @@ main()
 
   return 0;
 }
+
+} // namespace operations_substr_1

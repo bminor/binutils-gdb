@@ -19,15 +19,13 @@
 
 // basic_string_view constructors.
 
-#include <string_view>
-#include <vector>
-#include <testsuite_hooks.h>
+namespace cons_3 {
 
 void
 test05()
 {
   char const * s = 0;
-  std::string_view zero_length_built_with_NULL(s, 0);
+  gdb::string_view zero_length_built_with_NULL(s, 0);
 }
 
 int
@@ -37,3 +35,5 @@ main()
 
   return 0;
 }
+
+} // namespace cons_3

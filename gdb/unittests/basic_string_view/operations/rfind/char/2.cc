@@ -17,16 +17,15 @@
 // with this library; see the file COPYING3.  If not see
 // <http://www.gnu.org/licenses/>.
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace operations_rfind_2 {
 
 // basic_string_view::find_last_of
 
 void
 test02()
 {
-  std::string_view z("ab");
-  std::string_view::size_type pos;
+  gdb::string_view z("ab");
+  gdb::string_view::size_type pos;
   pos = z.find_last_of("ab");
   VERIFY( pos == 1 );
   pos = z.find_last_of("Xa");
@@ -34,13 +33,13 @@ test02()
   pos = z.find_last_of("Xb");
   VERIFY( pos == 1 );
   pos = z.find_last_of("XYZ");
-  VERIFY( pos == std::string_view::npos );
+  VERIFY( pos == gdb::string_view::npos );
   pos = z.find_last_of('a');
   VERIFY( pos == 0 );
   pos = z.find_last_of('b');
   VERIFY( pos == 1 );
   pos = z.find_last_of('X');
-  VERIFY( pos == std::string_view::npos );
+  VERIFY( pos == gdb::string_view::npos );
 }
 
 int
@@ -50,3 +49,5 @@ main()
 
   return 0;
 }
+
+} // namespace operations_rfind_2

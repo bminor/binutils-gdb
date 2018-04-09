@@ -18,18 +18,19 @@
 // { dg-options "-std=gnu++17" }
 // { dg-do compile { target c++17 } }
 
-#include <string_view>
+namespace modifiers_swap {
 
-constexpr bool
+void
 test01()
 {
-  using std::string_view;
+  using gdb::string_view;
 
   string_view s1{"last"};
   string_view s2{"first"};
 
   s1.swap(s2);
-  return s1 == "first" && s2 == "last";
+  VERIFY( s1 == "first" );
+  VERIFY( s2 == "last" );
 }
 
-static_assert( test01() );
+} // namespace modifiers_swap

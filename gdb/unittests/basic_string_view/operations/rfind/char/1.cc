@@ -17,25 +17,24 @@
 // with this library; see the file COPYING3.  If not see
 // <http://www.gnu.org/licenses/>.
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace operations_rfind_1 {
 
 // basic_string_view rfind
 
 void
 test01()
 {
-  typedef std::string_view::size_type csize_type;
-  typedef std::string_view::const_reference cref;
-  typedef std::string_view::reference ref;
-  csize_type npos = std::string_view::npos;
+  typedef gdb::string_view::size_type csize_type;
+  typedef gdb::string_view::const_reference cref;
+  typedef gdb::string_view::reference ref;
+  csize_type npos = gdb::string_view::npos;
   csize_type csz01, csz02;
 
   const char str_lit01[] = "mave";
-  const std::string_view str01("mavericks, santa cruz");
-  std::string_view str02(str_lit01);
-  std::string_view str03("s, s");
-  std::string_view str04;
+  const gdb::string_view str01("mavericks, santa cruz");
+  gdb::string_view str02(str_lit01);
+  gdb::string_view str03("s, s");
+  gdb::string_view str04;
 
   // size_type rfind(const string_view&, size_type pos = 0) const;
   csz01 = str01.rfind(str01);
@@ -92,3 +91,5 @@ main()
 
   return 0;
 }
+
+} // namespace operations_rfind_1

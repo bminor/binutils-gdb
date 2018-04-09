@@ -18,14 +18,13 @@
 // with this library; see the file COPYING3.  If not see
 // <http://www.gnu.org/licenses/>.
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace element_access_front_back {
 
 void
 test01()
 {
-  std::string_view str("ramifications");
-  const std::string_view cstr("melodien");
+  gdb::string_view str("ramifications");
+  const gdb::string_view cstr("melodien");
 
   VERIFY( str.front() == 'r' );
   VERIFY( str.back() == 's' );
@@ -40,3 +39,5 @@ main()
 
   return 0;
 }
+
+} // namespace element_access_front_back

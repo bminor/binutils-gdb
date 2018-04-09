@@ -19,14 +19,13 @@
 
 // basic_string_view::compare [lib.string_view::compare]
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace operations_compare_13650 {
 
 // libstdc++/13650
 void
 test01()
 {
-  using std::string_view;
+  using gdb::string_view;
 
   const char lit_01[]{ 'w', 'e', '\0', 'r', 'd' };
   const char lit_02[]{ 'w', 'e', 'i', '\0', 'd' };
@@ -47,3 +46,5 @@ main()
 
   return 0;
 }
+
+} // namespace operations_compare_13650

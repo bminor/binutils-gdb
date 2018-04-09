@@ -19,21 +19,20 @@
 
 // basic_string_view find_first_not_of
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace operations_find_3 {
 
 void
 test03()
 {
-  typedef std::string_view::size_type csize_type;
-  csize_type npos = std::string_view::npos;
+  typedef gdb::string_view::size_type csize_type;
+  csize_type npos = gdb::string_view::npos;
   csize_type csz01;
 
-  const std::string_view str01("Bob Rock, per me");
+  const gdb::string_view str01("Bob Rock, per me");
   const char str_lit01[] = "Bob Rock";
-  std::string_view str02("ovvero Trivi");
-  std::string_view str03(str_lit01);
-  std::string_view str04;
+  gdb::string_view str02("ovvero Trivi");
+  gdb::string_view str03(str_lit01);
+  gdb::string_view str04;
 
   // size_type find_first_not_of(const string_view&, size_type pos = 0) const;
   csz01 = str01.find_first_not_of(str01);
@@ -84,6 +83,7 @@ test03()
   VERIFY( csz01 == npos );
 }
 
+#ifndef GDB_STRING_VIEW
 constexpr bool
 test04()
 {
@@ -150,12 +150,17 @@ test04()
 
   return true;
 }
+#endif
 
 int
 main()
 {
   test03();
+#ifndef GDB_STRING_VIEW
   static_assert( test04() );
+#endif
 
   return 0;
 }
+
+} // namespace operations_find_3

@@ -19,24 +19,23 @@
 
 // basic_string_view find_first_of
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace operations_find_2 {
 
 void
 test02()
 {
-  typedef std::string_view::size_type csize_type;
-  csize_type npos = std::string_view::npos;
+  typedef gdb::string_view::size_type csize_type;
+  csize_type npos = gdb::string_view::npos;
   csize_type csz01, csz02;
 
   const char str_lit01[] = "mave";
-  const std::string_view str01("mavericks, santa cruz");
-  std::string_view str02(str_lit01);
-  std::string_view str03("s, s");
-  std::string_view str04;
+  const gdb::string_view str01("mavericks, santa cruz");
+  gdb::string_view str02(str_lit01);
+  gdb::string_view str03("s, s");
+  gdb::string_view str04;
 
   // size_type find_first_of(const string_view&, size_type pos = 0) const;
-  std::string_view str05("xena rulez");
+  gdb::string_view str05("xena rulez");
   csz01 = str01.find_first_of(str01);
   VERIFY( csz01 == 0 );
   csz01 = str01.find_first_of(str01, 4);
@@ -84,6 +83,7 @@ test02()
   VERIFY( csz01 == csz02 );
 }
 
+#ifndef GDB_STRING_VIEW
 constexpr bool
 test03()
 {
@@ -150,12 +150,17 @@ test03()
 
   return true;
 }
+#endif
 
 int
 main()
 {
   test02();
+#ifndef GDB_STRING_VIEW
   static_assert( test03() );
+#endif
 
   return 0;
 }
+
+} // namespace operations_find_2 {

@@ -19,9 +19,7 @@
 
 // string_view size, length
 
-#include <string_view>
-#include <cstring>
-#include <testsuite_hooks.h>
+namespace capacity_1 {
 
 template<typename T>
   struct A { };
@@ -36,13 +34,19 @@ template<typename T>
 
 struct B { };
 
+} // namespace capacity_1
+} // namespace string_view
+} // namespace selftests
+
 // char_traits specialization
 namespace std
 {
   template<>
-    struct char_traits<A<B> >
+    struct char_traits<selftests::string_view::capacity_1::A<
+	selftests::string_view::capacity_1::B> >
     {
-      typedef A<B> 		char_type;
+      typedef selftests::string_view::capacity_1::A<
+	  selftests::string_view::capacity_1::B> char_type;
       // Unsigned as wint_t in unsigned.
       typedef unsigned long  	int_type;
       typedef streampos 	pos_type;
@@ -123,11 +127,15 @@ namespace std
     };
 } // namespace std
 
+namespace selftests {
+namespace string_view {
+namespace capacity_1 {
+
 void
 test01()
 {
-  std::basic_string_view<A<B>> str02;
-  typedef std::basic_string_view< A<B> >::size_type size_type_o;
+  gdb::basic_string_view<A<B>> str02;
+  typedef gdb::basic_string_view< A<B> >::size_type size_type_o;
   size_type_o sz03;
   size_type_o sz04;
 
@@ -160,3 +168,5 @@ main()
 
   return 0;
 }
+
+} // namespace capacity_1

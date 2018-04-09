@@ -29,9 +29,7 @@
 // NB compare should be thought of as a lexographical compare, ie how
 // things would be sorted in a dictionary.
 
-#include <string_view>
-#include <cstring>
-#include <testsuite_hooks.h>
+namespace operations_compare_1 {
 
 enum want_value {lt=0, z=1, gt=2};
 
@@ -66,7 +64,7 @@ test_value(int result, want_value expected)
 int
 test01()
 {
-  using std::string_view;
+  using gdb::string_view;
 
   string_view 	str_0("costa rica");
   string_view 	str_1("costa marbella");
@@ -130,3 +128,5 @@ main()
 
   return 0;
 }
+
+} // namespace operations_compare_1

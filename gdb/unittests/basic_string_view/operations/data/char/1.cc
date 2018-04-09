@@ -19,16 +19,15 @@
 
 // string_view operations
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace operations_data_1 {
 
 int
 test01()
 {
-  std::string_view empty;
+  gdb::string_view empty;
 
   VERIFY( empty.size() == 0 );
-  const std::string_view::value_type* p = empty.data();
+  const gdb::string_view::value_type* p = empty.data();
   VERIFY( p == nullptr );
 
   return 0;
@@ -41,3 +40,5 @@ main()
 
   return 0;
 }
+
+} // namespace operations_data_1

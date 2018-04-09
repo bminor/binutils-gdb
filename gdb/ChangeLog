@@ -1,5 +1,54 @@
 2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	string_view-selftests.c.
+	* unittests/basic_string_view/capacity/1.cc: Adapt to GDB
+	testsuite.
+	* unittests/basic_string_view/cons/char/1.cc: Likewise.
+	* unittests/basic_string_view/cons/char/2.cc: Likewise.
+	* unittests/basic_string_view/cons/char/3.cc: Likewise.
+	* unittests/basic_string_view/element_access/char/1.cc:
+	Likewise.
+	* unittests/basic_string_view/element_access/char/empty.cc:
+	Likewise.
+	* unittests/basic_string_view/element_access/char/front_back.cc:
+	Likewise.
+	* unittests/basic_string_view/inserters/char/2.cc: Likewise.
+	* unittests/basic_string_view/modifiers/remove_prefix/char/1.cc:
+	Likewise.
+	* unittests/basic_string_view/modifiers/remove_suffix/char/1.cc:
+	Likewise.
+	* unittests/basic_string_view/modifiers/swap/char/1.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/compare/char/1.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/compare/char/13650.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/copy/char/1.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/data/char/1.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/find/char/1.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/find/char/2.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/find/char/3.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/find/char/4.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/rfind/char/1.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/rfind/char/2.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/rfind/char/3.cc:
+	Likewise.
+	* unittests/basic_string_view/operations/substr/char/1.cc:
+	Likewise.
+	* unittests/basic_string_view/operators/char/2.cc: Likewise.
+	* unittests/string_view-selftests.c: New file.
+
+2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* unittests/basic_string_view/capacity/1.cc: New file.
 	* unittests/basic_string_view/capacity/empty_neg.cc: New file.
 	* unittests/basic_string_view/cons/char/1.cc: New file.

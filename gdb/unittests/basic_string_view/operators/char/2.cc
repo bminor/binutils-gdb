@@ -109,17 +109,16 @@ template<class charT, class traits, class Allocator>
                   const basic_string<charT,traits,Allocator>& rhs);
 */
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace operators_2 {
 
 void
 test01()
 {
-  std::string_view 	str_0("costa rica");
-  std::string_view 	str_1("costa marbella");
-  std::string_view 	str_2("cost");
-  std::string_view	str_3("costa ricans");
-  std::string_view        str_4;
+  gdb::string_view 	str_0("costa rica");
+  gdb::string_view 	str_1("costa marbella");
+  gdb::string_view 	str_2("cost");
+  gdb::string_view	str_3("costa ricans");
+  gdb::string_view      str_4;
 
   str_4 = str_0;
   //comparisons between string objects
@@ -233,6 +232,7 @@ test01()
   VERIFY( str_0 <= "costa rica" );
 }
 
+#ifndef GDB_STRING_VIEW
 constexpr bool
 test02()
 {
@@ -358,10 +358,16 @@ test02()
 
   return true;
 }
+#endif
 
 int
 main()
 {
   test01();
+#ifndef GDB_STRING_VIEW
   static_assert( test02() );
+#endif
+  return 0;
 }
+
+} // namespace operators_2

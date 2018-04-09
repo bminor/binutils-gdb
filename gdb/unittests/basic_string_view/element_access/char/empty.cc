@@ -18,21 +18,22 @@
 // <http://www.gnu.org/licenses/>.
 //
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace element_access_empty {
 
 int
 main()
 {
   {
-    std::string_view empty;
+    gdb::string_view empty;
     VERIFY( empty.empty() );
   }
 
   {
-    const std::string_view empty;
+    const gdb::string_view empty;
     VERIFY( empty.empty() );
   }
 
   return 0;
 }
+
+} // namespace element_access_empty

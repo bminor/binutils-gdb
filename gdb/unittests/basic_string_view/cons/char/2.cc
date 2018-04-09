@@ -19,10 +19,7 @@
 
 // basic_string_view constructors.
 
-#include <new>
-#include <string_view>
-#include <stdexcept>
-#include <testsuite_hooks.h>
+namespace cons_2 {
 
 void
 test03()
@@ -32,9 +29,9 @@ test03()
   // These are tests to see how basic_string_view handles data with NUL
   // bytes.  Obviously basic_string_view(char*) will halt at the first one, but
   // nothing else should.
-  std::string_view s1(with_nulls, 28);
+  gdb::string_view s1(with_nulls, 28);
   VERIFY( s1.size() == 28 );
-  std::string_view s2(s1);
+  gdb::string_view s2(s1);
   VERIFY( s2.size() == 28 );
 }
 
@@ -45,3 +42,5 @@ main()
 
   return 0;
 }
+
+} // namespace cons_2

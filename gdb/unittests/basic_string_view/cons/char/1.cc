@@ -19,43 +19,40 @@
 
 // basic_string_view constructors.
 
-#include <string_view>
-#include <string>
-#include <cstring>
-#include <testsuite_hooks.h>
+namespace cons_1 {
 
 void
 test01()
 {
-  typedef std::string_view::size_type csize_type;
+  typedef gdb::string_view::size_type csize_type;
 
   // basic_string_view()
-  const std::string_view str00{};
+  const gdb::string_view str00{};
   VERIFY( str00.length() == 0 );
   VERIFY( str00.data() == nullptr );
 
   // basic_string_view(const char*)
   const char str_lit01[] = "rodeo beach, marin";
-  const std::string_view str01{str_lit01};
+  const gdb::string_view str01{str_lit01};
   VERIFY( str01.length() == 18 );
   VERIFY( str01.data() == str_lit01 );
-  const std::string_view str02{"baker beach, san francisco"};
+  const gdb::string_view str02{"baker beach, san francisco"};
   VERIFY( str02.length() == 26 );
 
   // basic_string_view(const string_view&)
-  std::string_view str04{str01};
+  gdb::string_view str04{str01};
   VERIFY( str04.length() == str01.length() );
   VERIFY( str04.data() == str01.data() );
 
   // basic_string_view(const char* s)
   csize_type len_lit01 = strlen(str_lit01);
-  std::string_view str05{str_lit01, len_lit01};
+  gdb::string_view str05{str_lit01, len_lit01};
   VERIFY( str05.length() == len_lit01 );
   VERIFY( str05.data() == str_lit01 );
 
   // basic_string_view(basic_string& s)
   std::string istr07(10, 'z');
-  std::string_view str07{istr07};
+  gdb::string_view str07{istr07};
   VERIFY( str07.length() == 10 );
 }
 
@@ -66,3 +63,5 @@ main()
 
   return 0;
 }
+
+} // namespace cons_1

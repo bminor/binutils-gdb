@@ -17,13 +17,12 @@
 // with this library; see the file COPYING3.  If not see
 // <http://www.gnu.org/licenses/>.
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace modifiers_remove_prefix {
 
 void
 test01()
 {
-  using std::string_view;
+  using gdb::string_view;
 
   string_view str0{"olympus mons"};
   string_view::pointer p = str0.data();
@@ -33,6 +32,7 @@ test01()
   VERIFY( str0 == string_view{"pus mons"} );
 }
 
+#ifndef GDB_STRING_VIEW
 constexpr bool
 test02()
 {
@@ -50,12 +50,17 @@ test02()
 
   return true;
 }
+#endif
 
 int
 main()
 { 
   test01();
+#ifndef GDB_STRING_VIEW
   static_assert( test02() );
+#endif
 
   return 0;
 }
+
+} // namespace modifiers_remove_prefix

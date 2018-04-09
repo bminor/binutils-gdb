@@ -17,25 +17,24 @@
 // with this library; see the file COPYING3.  If not see
 // <http://www.gnu.org/licenses/>.
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace operations_rfind_3 {
 
 // basic_string_view::find_last_not_of
 
 void
 test03()
 {
-  typedef std::string_view::size_type csize_type;
-  std::string_view::size_type pos;
-  csize_type npos = std::string_view::npos;
+  typedef gdb::string_view::size_type csize_type;
+  gdb::string_view::size_type pos;
+  csize_type npos = gdb::string_view::npos;
 
-  std::string_view x;
+  gdb::string_view x;
   pos = x.find_last_not_of('X');
   VERIFY( pos == npos );
   pos = x.find_last_not_of("XYZ");
   VERIFY( pos == npos );
 
-  std::string_view y("a");
+  gdb::string_view y("a");
   pos = y.find_last_not_of('X');
   VERIFY( pos == 0 );
   pos = y.find_last_not_of('a');
@@ -45,7 +44,7 @@ test03()
   pos = y.find_last_not_of("a");
   VERIFY( pos == npos );
 
-  std::string_view z("ab");
+  gdb::string_view z("ab");
   pos = z.find_last_not_of('X');
   VERIFY( pos == 1 );
   pos = z.find_last_not_of("XYZ");
@@ -64,3 +63,5 @@ main()
 
   return 0;
 }
+
+} // namespace operations_rfind_3

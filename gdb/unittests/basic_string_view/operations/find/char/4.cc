@@ -19,17 +19,16 @@
 
 // basic_string_view find
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace operations_find_4 {
 
 // libstdc++/31401
 void
 test01()
 {
-  typedef std::string_view::size_type csize_type;
-  csize_type npos = std::string_view::npos;
+  typedef gdb::string_view::size_type csize_type;
+  csize_type npos = gdb::string_view::npos;
 
-  std::string_view use = "anu";
+  gdb::string_view use = "anu";
   csize_type pos1 = use.find("a", npos);
 
   VERIFY( pos1 == npos );
@@ -42,3 +41,5 @@ main()
 
   return 0;
 }
+
+} // namespace operations_find_4

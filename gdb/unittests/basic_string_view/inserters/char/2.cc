@@ -25,11 +25,7 @@
 // { dg-options "-std=gnu++17" }
 // { dg-require-fileio "" }
 
-#include <string_view>
-#include <string>
-#include <fstream>
-#include <iostream>
-#include <testsuite_hooks.h>
+namespace inserters_2 {
 
 // testing basic_filebuf::xsputn via stress testing with large string_views
 // based on a bug report libstdc++ 9
@@ -37,13 +33,13 @@
 void
 test05(std::size_t size)
 {
-  bool test = true;
+  bool test ATTRIBUTE_UNUSED = true;
 
   const char filename[] = "inserters_extractors-2.txt";
   const char fillc = 'f';
   std::ofstream ofs(filename);
   std::string str(size, fillc);
-  std::string_view strv{str};
+  gdb::string_view strv{str};
 
   // sanity checks
   VERIFY( str.size() == size );
@@ -91,3 +87,5 @@ main()
 
   return 0;
 }
+
+} // namespace inserters_2

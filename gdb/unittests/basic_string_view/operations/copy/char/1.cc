@@ -19,16 +19,15 @@
 
 // basic_string_view::copy
 
-#include <string_view>
-#include <testsuite_hooks.h>
+namespace operations_copy_1 {
 
 void
 test01()
 {
-  typedef std::string_view::size_type csize_type;
+  typedef gdb::string_view::size_type csize_type;
 
   const char str_lit01[] = "123456789A";
-  const std::string_view str01(str_lit01);
+  const gdb::string_view str01(str_lit01);
   char buffer[4] = { 0 };
 
   csize_type len = str01.copy(buffer, sizeof(buffer), 8);
@@ -43,3 +42,5 @@ main()
 
   return 0;
 }
+
+} // namespace operations_copy_1
