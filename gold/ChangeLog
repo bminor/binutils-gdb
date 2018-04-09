@@ -1,5 +1,9 @@
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
+	* configure: Regenerate.
+
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::Track_tls::maybe_skip_tls_get_addr_call):
 	Handle inline plt sequence relocs.
 	(Stub_table::Plt_stub_key::Plt_stub_key): Likewise.

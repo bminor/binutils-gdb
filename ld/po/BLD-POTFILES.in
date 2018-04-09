@@ -124,7 +124,6 @@ eelf32lm32.c
 eelf32lm32fd.c
 eelf32lmip.c
 eelf32lppc.c
-eelf32lppc_fbsd.c
 eelf32lppclinux.c
 eelf32lppcnto.c
 eelf32lppcsim.c
@@ -184,7 +183,6 @@ eelf64btsmip.c
 eelf64btsmip_fbsd.c
 eelf64hppa.c
 eelf64lppc.c
-eelf64lppc_fbsd.c
 eelf64lriscv.c
 eelf64ltsmip.c
 eelf64ltsmip_fbsd.c

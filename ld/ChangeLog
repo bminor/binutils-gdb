@@ -1,5 +1,9 @@
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
+	* po/BLD-POTFILES.in: Regenerate.
+
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/ppc64elf.em (no_inline_plt): New var.
 	(ppc_before_allocation): Call ppc64_elf_inline_plt.
 	(enum ppc64_opt): Add OPTION_NO_INLINE_OPT.
