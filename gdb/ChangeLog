@@ -1,3 +1,13 @@
+2018-08-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (struct riscv_inferior_data): Delete.
+	(riscv_read_misa_reg): Don't cache value read into inferior data.
+	(riscv_new_inferior_data): Delete.
+	(riscv_inferior_data_cleanup): Delete.
+	(riscv_inferior_data): Delete.
+	(riscv_invalidate_inferior_data): Delete.
+	(_initialize_riscv_tdep): Remove initialisation of inferior data.
+
 2018-08-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* compile/compile-cplus-types.c
