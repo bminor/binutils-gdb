@@ -174,6 +174,33 @@ private:
   size_type m_size;
 };
 
+/* Compare LHS and RHS for (deep) equality.  That is, whether LHS and
+   RHS have the same sizes, and whether each pair of elements of LHS
+   and RHS at the same position compares equal.  */
+
+template <typename T>
+bool
+operator== (const gdb::array_view<T> &lhs, const gdb::array_view<T> &rhs)
+{
+  if (lhs.size () != rhs.size ())
+    return false;
+
+  for (size_t i = 0; i < lhs.size (); i++)
+    if (!(lhs[i] == rhs[i]))
+      return false;
+
+  return true;
+}
+
+/* Compare two array_views for inequality.  */
+
+template <typename T>
+bool
+operator!= (const gdb::array_view<T> &lhs, const gdb::array_view<T> &rhs)
+{
+  return !(lhs == rhs);
+}
+
 } /* namespace gdb */
 
 #endif

@@ -1,4 +1,15 @@
 2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Pedro Alves  <palves@redhat.com>
+
+	* value.c: Include "selftest.h" and "common/array-view.h".
+	(struct range) <operator ==>: New.
+	(test_ranges_contain): New.
+	(check_ranges_vector): New.
+	(test_insert_into_bit_range_vector): New.
+	(_initialize_values): Register selftests.
+	* common/array-view.h (operator==, operator!=): New.
+
+2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common/gdb_vecs.h (unordered_remove): Add overload that takes
 	an iterator.

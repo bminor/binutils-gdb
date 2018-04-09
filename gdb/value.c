@@ -41,6 +41,8 @@
 #include "user-regs.h"
 #include <algorithm>
 #include "completer.h"
+#include "selftest.h"
+#include "common/array-view.h"
 
 /* Definition of a user function.  */
 struct internal_function
@@ -75,6 +77,12 @@ struct range
   bool operator< (const range &other) const
   {
     return offset < other.offset;
+  }
+
+  /* Returns true if THIS is equal to OTHER.  */
+  bool operator== (const range &other) const
+  {
+    return offset == other.offset && length == other.length;
   }
 };
 
@@ -3903,6 +3911,148 @@ isvoid_internal_fn (struct gdbarch *gdbarch,
   return value_from_longest (builtin_type (gdbarch)->builtin_int, ret);
 }
 
+#if GDB_SELF_TEST
+namespace selftests
+{
+
+/* Test the ranges_contain function.  */
+
+static void
+test_ranges_contain ()
+{
+  std::vector<range> ranges;
+  range r;
+
+  /* [10, 14] */
+  r.offset = 10;
+  r.length = 5;
+  ranges.push_back (r);
+
+  /* [20, 24] */
+  r.offset = 20;
+  r.length = 5;
+  ranges.push_back (r);
+
+  /* [2, 6] */
+  SELF_CHECK (!ranges_contain (ranges, 2, 5));
+  /* [9, 13] */
+  SELF_CHECK (ranges_contain (ranges, 9, 5));
+  /* [10, 11] */
+  SELF_CHECK (ranges_contain (ranges, 10, 2));
+  /* [10, 14] */
+  SELF_CHECK (ranges_contain (ranges, 10, 5));
+  /* [13, 18] */
+  SELF_CHECK (ranges_contain (ranges, 13, 6));
+  /* [14, 18] */
+  SELF_CHECK (ranges_contain (ranges, 14, 5));
+  /* [15, 18] */
+  SELF_CHECK (!ranges_contain (ranges, 15, 4));
+  /* [16, 19] */
+  SELF_CHECK (!ranges_contain (ranges, 16, 4));
+  /* [16, 21] */
+  SELF_CHECK (ranges_contain (ranges, 16, 6));
+  /* [21, 21] */
+  SELF_CHECK (ranges_contain (ranges, 21, 1));
+  /* [21, 25] */
+  SELF_CHECK (ranges_contain (ranges, 21, 5));
+  /* [26, 28] */
+  SELF_CHECK (!ranges_contain (ranges, 26, 3));
+}
+
+/* Check that RANGES contains the same ranges as EXPECTED.  */
+
+static bool
+check_ranges_vector (gdb::array_view<const range> ranges,
+		     gdb::array_view<const range> expected)
+{
+  return ranges == expected;
+}
+
+/* Test the insert_into_bit_range_vector function.  */
+
+static void
+test_insert_into_bit_range_vector ()
+{
+  std::vector<range> ranges;
+
+  /* [10, 14] */
+  {
+    insert_into_bit_range_vector (&ranges, 10, 5);
+    static const range expected[] = {
+      {10, 5}
+    };
+    SELF_CHECK (check_ranges_vector (ranges, expected));
+  }
+
+  /* [10, 14] */
+  {
+    insert_into_bit_range_vector (&ranges, 11, 4);
+    static const range expected = {10, 5};
+    SELF_CHECK (check_ranges_vector (ranges, expected));
+  }
+
+  /* [10, 14] [20, 24] */
+  {
+    insert_into_bit_range_vector (&ranges, 20, 5);
+    static const range expected[] = {
+      {10, 5},
+      {20, 5},
+    };
+    SELF_CHECK (check_ranges_vector (ranges, expected));
+  }
+
+  /* [10, 14] [17, 24] */
+  {
+    insert_into_bit_range_vector (&ranges, 17, 5);
+    static const range expected[] = {
+      {10, 5},
+      {17, 8},
+    };
+    SELF_CHECK (check_ranges_vector (ranges, expected));
+  }
+
+  /* [2, 8] [10, 14] [17, 24] */
+  {
+    insert_into_bit_range_vector (&ranges, 2, 7);
+    static const range expected[] = {
+      {2, 7},
+      {10, 5},
+      {17, 8},
+    };
+    SELF_CHECK (check_ranges_vector (ranges, expected));
+  }
+
+  /* [2, 14] [17, 24] */
+  {
+    insert_into_bit_range_vector (&ranges, 9, 1);
+    static const range expected[] = {
+      {2, 13},
+      {17, 8},
+    };
+    SELF_CHECK (check_ranges_vector (ranges, expected));
+  }
+
+  /* [2, 14] [17, 24] */
+  {
+    insert_into_bit_range_vector (&ranges, 9, 1);
+    static const range expected[] = {
+      {2, 13},
+      {17, 8},
+    };
+    SELF_CHECK (check_ranges_vector (ranges, expected));
+  }
+
+  /* [2, 33] */
+  {
+    insert_into_bit_range_vector (&ranges, 4, 30);
+    static const range expected = {2, 32};
+    SELF_CHECK (check_ranges_vector (ranges, expected));
+  }
+}
+
+} /* namespace selftests */
+#endif /* GDB_SELF_TEST */
+
 void
 _initialize_values (void)
 {
@@ -3954,4 +4104,9 @@ prevents future values, larger than this size, from being allocated."),
 			    set_max_value_size,
 			    show_max_value_size,
 			    &setlist, &showlist);
+#if GDB_SELF_TEST
+  selftests::register_test ("ranges_contain", selftests::test_ranges_contain);
+  selftests::register_test ("insert_into_bit_range_vector",
+			    selftests::test_insert_into_bit_range_vector);
+#endif
 }
