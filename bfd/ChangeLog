@@ -1,5 +1,11 @@
 2018-04-09  Maciej W. Rozycki  <macro@mips.com>
 
+	* elf64-mips.c (mips_elf64_write_rel): Handle a NULL BFD pointer
+	in the BFD symbol referred by the relocation.
+	(mips_elf64_write_rela): Likewise.
+
+2018-04-09  Maciej W. Rozycki  <macro@mips.com>
+
 	* elf64-mips.c (mips_elf64_slurp_one_reloc_table): Issue an
 	error for out-of-range `r_sym' values.
 

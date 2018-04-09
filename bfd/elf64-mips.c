@@ -4038,7 +4038,8 @@ mips_elf64_write_rel (bfd *abfd, asection *sec,
       int_rel.r_sym = n;
       int_rel.r_ssym = RSS_UNDEF;
 
-      if ((*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
+      if ((*ptr->sym_ptr_ptr)->the_bfd != NULL
+	  && (*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
 	  && ! _bfd_elf_validate_reloc (abfd, ptr))
 	{
 	  *failedp = TRUE;
@@ -4137,7 +4138,8 @@ mips_elf64_write_rela (bfd *abfd, asection *sec,
       int_rela.r_addend = ptr->addend;
       int_rela.r_ssym = RSS_UNDEF;
 
-      if ((*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
+      if ((*ptr->sym_ptr_ptr)->the_bfd != NULL
+	  && (*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
 	  && ! _bfd_elf_validate_reloc (abfd, ptr))
 	{
 	  *failedp = TRUE;
