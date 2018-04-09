@@ -47,6 +47,22 @@ extern void dirnames_to_char_ptr_vec_append
 extern std::vector<gdb::unique_xmalloc_ptr<char>>
   dirnames_to_char_ptr_vec (const char *dirnames);
 
+/* Remove the element pointed by iterator IT from VEC, not preserving the order
+   of the remaining elements.  Return the removed element.  */
+
+template <typename T>
+T
+unordered_remove (std::vector<T> &vec, typename std::vector<T>::iterator it)
+{
+  gdb_assert (it >= vec.begin () && it < vec.end ());
+
+  T removed = std::move (*it);
+  *it = std::move (vec.back ());
+  vec.pop_back ();
+
+  return removed;
+}
+
 /* Remove the element at position IX from VEC, not preserving the order of the
    remaining elements.  Return the removed element.  */
 
@@ -56,11 +72,7 @@ unordered_remove (std::vector<T> &vec, typename std::vector<T>::size_type ix)
 {
   gdb_assert (ix < vec.size ());
 
-  T removed = std::move (vec[ix]);
-  vec[ix] = std::move (vec.back ());
-  vec.pop_back ();
-
-  return removed;
+  return unordered_remove (vec, vec.begin () + ix);
 }
 
 /* Remove the element at position IX from VEC, preserving the order the

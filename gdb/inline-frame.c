@@ -27,6 +27,7 @@
 #include "symtab.h"
 #include "vec.h"
 #include "frame.h"
+#include <algorithm>
 
 /* We need to save a few variables for every thread stopped at the
    virtual call site of an inlined function.  If there was always a
@@ -34,6 +35,12 @@
    keep our own list.  */
 struct inline_state
 {
+  inline_state (ptid_t ptid_, int skipped_frames_, CORE_ADDR saved_pc_,
+		symbol *skipped_symbol_)
+    : ptid (ptid_), skipped_frames (skipped_frames_), saved_pc (saved_pc_),
+      skipped_symbol (skipped_symbol_)
+  {}
+
   /* The thread this data relates to.  It should be a currently
      stopped thread; we assume thread IDs never change while the
      thread is stopped.  */
@@ -55,10 +62,7 @@ struct inline_state
   struct symbol *skipped_symbol;
 };
 
-typedef struct inline_state inline_state_s;
-DEF_VEC_O(inline_state_s);
-
-static VEC(inline_state_s) *inline_states;
+static std::vector<inline_state> inline_states;
 
 /* Locate saved inlined frame state for PTID, if it exists
    and is valid.  */
@@ -66,43 +70,29 @@ static VEC(inline_state_s) *inline_states;
 static struct inline_state *
 find_inline_frame_state (ptid_t ptid)
 {
-  struct inline_state *state;
-  int ix;
+  auto state_it = std::find_if (inline_states.begin (), inline_states.end (),
+				[&ptid] (const inline_state &state)
+				  {
+				    return ptid == state.ptid;
+				  });
 
-  for (ix = 0; VEC_iterate (inline_state_s, inline_states, ix, state); ix++)
+  if (state_it == inline_states.end ())
+    return nullptr;
+
+  inline_state &state = *state_it;
+  struct regcache *regcache = get_thread_regcache (ptid);
+  CORE_ADDR current_pc = regcache_read_pc (regcache);
+
+  if (current_pc != state.saved_pc)
     {
-      if (ptid_equal (state->ptid, ptid))
-	{
-	  struct regcache *regcache = get_thread_regcache (ptid);
-	  CORE_ADDR current_pc = regcache_read_pc (regcache);
+      /* PC has changed - this context is invalid.  Use the
+	 default behavior.  */
 
-	  if (current_pc != state->saved_pc)
-	    {
-	      /* PC has changed - this context is invalid.  Use the
-		 default behavior.  */
-	      VEC_unordered_remove (inline_state_s, inline_states, ix);
-	      return NULL;
-	    }
-	  else
-	    return state;
-	}
+      unordered_remove (inline_states, state_it);
+      return nullptr;
     }
 
-  return NULL;
-}
-
-/* Allocate saved inlined frame state for PTID.  */
-
-static struct inline_state *
-allocate_inline_frame_state (ptid_t ptid)
-{
-  struct inline_state *state;
-
-  state = VEC_safe_push (inline_state_s, inline_states, NULL);
-  memset (state, 0, sizeof (*state));
-  state->ptid = ptid;
-
-  return state;
+  return &state;
 }
 
 /* Forget about any hidden inlined functions in PTID, which is new or
@@ -112,36 +102,34 @@ allocate_inline_frame_state (ptid_t ptid)
 void
 clear_inline_frame_state (ptid_t ptid)
 {
-  struct inline_state *state;
-  int ix;
-
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid == minus_one_ptid)
     {
-      VEC_free (inline_state_s, inline_states);
+      inline_states.clear ();
       return;
     }
 
-  if (ptid_is_pid (ptid))
+  if (ptid.is_pid ())
     {
-      VEC (inline_state_s) *new_states = NULL;
-      int pid = ptid_get_pid (ptid);
+      int pid = ptid.pid ();
+      auto it = std::remove_if (inline_states.begin (), inline_states.end (),
+				[pid] (const inline_state &state)
+				  {
+				    return pid == state.ptid.pid ();
+				  });
 
-      for (ix = 0;
-	   VEC_iterate (inline_state_s, inline_states, ix, state);
-	   ix++)
-	if (pid != ptid_get_pid (state->ptid))
-	  VEC_safe_push (inline_state_s, new_states, state);
-      VEC_free (inline_state_s, inline_states);
-      inline_states = new_states;
+      inline_states.erase (it, inline_states.end ());
+
       return;
     }
 
-  for (ix = 0; VEC_iterate (inline_state_s, inline_states, ix, state); ix++)
-    if (ptid_equal (state->ptid, ptid))
-      {
-	VEC_unordered_remove (inline_state_s, inline_states, ix);
-	return;
-      }
+  auto it = std::find_if (inline_states.begin (), inline_states.end (),
+			  [&ptid] (const inline_state &state)
+			    {
+			      return ptid == state.ptid;
+			    });
+
+  if (it != inline_states.end ())
+    unordered_remove (inline_states, it);
 }
 
 static void
@@ -303,16 +291,14 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
 void
 skip_inline_frames (ptid_t ptid)
 {
-  CORE_ADDR this_pc;
   const struct block *frame_block, *cur_block;
   struct symbol *last_sym = NULL;
   int skip_count = 0;
-  struct inline_state *state;
 
   /* This function is called right after reinitializing the frame
      cache.  We try not to do more unwinding than absolutely
      necessary, for performance.  */
-  this_pc = get_frame_pc (get_current_frame ());
+  CORE_ADDR this_pc = get_frame_pc (get_current_frame ());
   frame_block = block_for_pc (this_pc);
 
   if (frame_block != NULL)
@@ -341,10 +327,7 @@ skip_inline_frames (ptid_t ptid)
     }
 
   gdb_assert (find_inline_frame_state (ptid) == NULL);
-  state = allocate_inline_frame_state (ptid);
-  state->skipped_frames = skip_count;
-  state->saved_pc = this_pc;
-  state->skipped_symbol = last_sym;
+  inline_states.emplace_back (ptid, skip_count, this_pc, last_sym);
 
   if (skip_count != 0)
     reinit_frame_cache ();

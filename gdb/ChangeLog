@@ -1,5 +1,19 @@
 2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* common/gdb_vecs.h (unordered_remove): Add overload that takes
+	an iterator.
+	* inline-frame.c: Include <algorithm>.
+	(struct inline_state): Add constructor.
+	(inline_state_s): Remove.
+	(DEF_VEC_O(inline_state_s)): Remove.
+	(inline_states): Change type to std::vector.
+	(find_inline_frame_state): Adjust to std::vector.
+	(allocate_inline_frame_state): Remove.
+	(clear_inline_frame_state): Adjust to std::vector.
+	(skip_inline_frames): Adjust to std::vector.
+
+2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* tracepoint.h (struct trace_state_variable): Add constructor.
 	<name>: Change type to std::string.
 	* tracepoint.c (tsv_s): Remove.
