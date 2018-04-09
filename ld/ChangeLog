@@ -1,5 +1,19 @@
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/ppc64elf.em (no_inline_plt): New var.
+	(ppc_before_allocation): Call ppc64_elf_inline_plt.
+	(enum ppc64_opt): Add OPTION_NO_INLINE_OPT.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS,
+	PARSE_AND_LIST_ARGS_CASES): Handle --no-inline-optimize.
+	* emultemps/ppc32elf.em (no_inline_opt): New var.
+	(prelim_size_sections): New function, extracted from..
+	(ppc_before_allocation): ..here.  Call ppc_elf_inline_plt.
+	(enum ppc32_opt): Add OPTION_NO_INLINE_OPT.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS,
+	PARSE_AND_LIST_ARGS_CASES): Handle --no-inline-optimize.
+
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
 	* emulparams/elf32ppc.sh (OTHER_RELRO_SECTIONS_2): Add .branch_lt.
 	(OTHER_GOT_RELOC_SECTIONS): Add .rela.branch_lt.
 	* testsuite/ld-powerpc/elfv2so.d: Update for symbol/stub reordering.

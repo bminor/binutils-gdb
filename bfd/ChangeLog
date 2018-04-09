@@ -1,5 +1,22 @@
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct _ppc64_elf_section_data): Add has_pltcall field.
+	(struct ppc_link_hash_table): Add can_convert_all_inline_plt.
+	(ppc64_elf_check_relocs): Set has_pltcall.
+	(ppc64_elf_adjust_dynamic_symbol): Discard some PLT entries.
+	(ppc64_elf_inline_plt): New function.
+	(ppc64_elf_size_dynamic_sections): Discard some PLT entries for locals.
+	* elf64-ppc.h (ppc64_elf_inline_plt): Declare.
+	* elf32-ppc.c (has_pltcall): Define.
+	(struct ppc_elf_link_hash_table): Add can_convert_all_inline_plt.
+	(ppc_elf_check_relocs): Set has_pltcall.
+	(ppc_elf_inline_plt): New function.
+	(ppc_elf_adjust_dynamic_symbol): Discard some PLT entries.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	* elf32-ppc.h (ppc_elf_inline_plt): Declare.
+
+2018-04-09  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (ppc_elf_howto_raw): Add PLTSEQ and PLTCALL howtos.
 	(is_plt_seq_reloc): New function.
 	(ppc_elf_check_relocs): Handle PLTSEQ and PLTCALL relocs.

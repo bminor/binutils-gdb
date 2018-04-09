@@ -3123,6 +3123,9 @@ struct _ppc64_elf_section_data
   /* Flag set when small branches are detected.  Used to
      select suitable defaults for the stub group size.  */
   unsigned int has_14bit_branch:1;
+
+  /* Flag set when PLTCALL relocs are detected.  */
+  unsigned int has_pltcall:1;
 };
 
 #define ppc64_elf_section_data(sec) \
@@ -4190,6 +4193,9 @@ struct ppc_link_hash_table
 
   /* Set if tls optimization is enabled.  */
   unsigned int do_tls_opt:1;
+
+  /* Set if inline plt calls should be converted to direct calls.  */
+  unsigned int can_convert_all_inline_plt:1;
 
   /* Set on error.  */
   unsigned int stub_error:1;
@@ -5818,10 +5824,14 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    if (dest != sec)
 	      ppc64_elf_section_data (sec)->has_14bit_branch = 1;
 	  }
+	  goto rel24;
+
+	case R_PPC64_PLTCALL:
+	  ppc64_elf_section_data (sec)->has_pltcall = 1;
 	  /* Fall through.  */
 
 	case R_PPC64_REL24:
-	case R_PPC64_PLTCALL:
+	rel24:
 	  plt_list = ifunc;
 	  if (h != NULL)
 	    {
@@ -7261,8 +7271,9 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       if (ent == NULL
 	  || (h->type != STT_GNU_IFUNC
 	      && local
-	      && (((struct ppc_link_hash_entry *) h)->tls_mask
-		  & (TLS_TLS | PLT_KEEP)) != PLT_KEEP))
+	      && (htab->can_convert_all_inline_plt
+		  || (((struct ppc_link_hash_entry *) h)->tls_mask
+		      & (TLS_TLS | PLT_KEEP)) != PLT_KEEP)))
 	{
 	  h->plt.plist = NULL;
 	  h->needs_plt = 0;
@@ -8271,6 +8282,153 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 
       memset (need_pad->contents + need_pad->size, 0, 8);
       need_pad->size += 8;
+    }
+
+  return TRUE;
+}
+
+/* Analyze inline PLT call relocations to see whether calls to locally
+   defined functions can be converted to direct calls.  */
+
+bfd_boolean
+ppc64_elf_inline_plt (struct bfd_link_info *info)
+{
+  struct ppc_link_hash_table *htab;
+  bfd *ibfd;
+  asection *sec;
+  bfd_vma low_vma, high_vma, limit;
+
+  htab = ppc_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
+  /* A bl insn can reach -0x2000000 to 0x1fffffc.  The limit is
+     reduced somewhat to cater for possible stubs that might be added
+     between the call and its destination.  */
+  if (htab->params->group_size < 0)
+    {
+      limit = -htab->params->group_size;
+      if (limit == 1)
+	limit = 0x1e00000;
+    }
+  else
+    {
+      limit = htab->params->group_size;
+      if (limit == 1)
+	limit = 0x1c00000;
+    }
+
+  low_vma = -1;
+  high_vma = 0;
+  for (sec = info->output_bfd->sections; sec != NULL; sec = sec->next)
+    if ((sec->flags & (SEC_ALLOC | SEC_CODE)) == (SEC_ALLOC | SEC_CODE))
+      {
+	if (low_vma > sec->vma)
+	  low_vma = sec->vma;
+	if (high_vma < sec->vma + sec->size)
+	  high_vma = sec->vma + sec->size;
+      }
+
+  /* If a "bl" can reach anywhere in local code sections, then we can
+     convert all inline PLT sequences to direct calls when the symbol
+     is local.  */
+  if (high_vma - low_vma < limit)
+    {
+      htab->can_convert_all_inline_plt = 1;
+      return TRUE;
+    }
+
+  /* Otherwise, go looking through relocs for cases where a direct
+     call won't reach.  Mark the symbol on any such reloc to disable
+     the optimization and keep the PLT entry as it seems likely that
+     this will be better than creating trampolines.  Note that this
+     will disable the optimization for all inline PLT calls to a
+     particular symbol, not just those that won't reach.  The
+     difficulty in doing a more precise optimization is that the
+     linker needs to make a decision depending on whether a
+     particular R_PPC64_PLTCALL insn can be turned into a direct
+     call, for each of the R_PPC64_PLTSEQ and R_PPC64_PLT16* insns in
+     the sequence, and there is nothing that ties those relocs
+     together except their symbol.  */
+
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
+    {
+      Elf_Internal_Shdr *symtab_hdr;
+      Elf_Internal_Sym *local_syms;
+
+      if (!is_ppc64_elf (ibfd))
+	continue;
+
+      local_syms = NULL;
+      symtab_hdr = &elf_symtab_hdr (ibfd);
+
+      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+	if (ppc64_elf_section_data (sec)->has_pltcall
+	    && !bfd_is_abs_section (sec->output_section))
+	  {
+	    Elf_Internal_Rela *relstart, *rel, *relend;
+
+	    /* Read the relocations.  */
+	    relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
+						  info->keep_memory);
+	    if (relstart == NULL)
+	      return FALSE;
+
+	    relend = relstart + sec->reloc_count;
+	    for (rel = relstart; rel < relend; )
+	      {
+		enum elf_ppc64_reloc_type r_type;
+		unsigned long r_symndx;
+		asection *sym_sec;
+		struct elf_link_hash_entry *h;
+		Elf_Internal_Sym *sym;
+		unsigned char *tls_maskp;
+
+		r_type = ELF64_R_TYPE (rel->r_info);
+		if (r_type != R_PPC64_PLTCALL)
+		  continue;
+
+		r_symndx = ELF64_R_SYM (rel->r_info);
+		if (!get_sym_h (&h, &sym, &sym_sec, &tls_maskp, &local_syms,
+				r_symndx, ibfd))
+		  {
+		    if (elf_section_data (sec)->relocs != relstart)
+		      free (relstart);
+		    if (local_syms != NULL
+			&& symtab_hdr->contents != (unsigned char *) local_syms)
+		      free (local_syms);
+		    return FALSE;
+		  }
+
+		if (sym_sec != NULL && sym_sec->output_section != NULL)
+		  {
+		    bfd_vma from, to;
+		    if (h != NULL)
+		      to = h->root.u.def.value;
+		    else
+		      to = sym->st_value;
+		    to += (rel->r_addend
+			   + sym_sec->output_offset
+			   + sym_sec->output_section->vma);
+		    from = (rel->r_offset
+			    + sec->output_offset
+			    + sec->output_section->vma);
+		    if (to - from + limit < 2 * limit)
+		      *tls_maskp &= ~PLT_KEEP;
+		  }
+	      }
+	    if (elf_section_data (sec)->relocs != relstart)
+	      free (relstart);
+	  }
+
+      if (local_syms != NULL
+	  && symtab_hdr->contents != (unsigned char *) local_syms)
+	{
+	  if (!info->keep_memory)
+	    free (local_syms);
+	  else
+	    symtab_hdr->contents = (unsigned char *) local_syms;
+	}
     }
 
   return TRUE;
@@ -9913,6 +10071,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       || (h->needs_plt
 	  && h->def_regular
 	  && !htab->elf.dynamic_sections_created
+	  && !htab->can_convert_all_inline_plt
 	  && (((struct ppc_link_hash_entry *) h)->tls_mask
 	      & (TLS_TLS | PLT_KEEP)) == PLT_KEEP))
     {
@@ -10241,7 +10400,8 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 		    s->size += PLT_ENTRY_SIZE (htab);
 		    htab->elf.irelplt->size += sizeof (Elf64_External_Rela);
 		  }
-		else if ((*lgot_masks & (TLS_TLS | PLT_KEEP)) != PLT_KEEP)
+		else if (htab->can_convert_all_inline_plt
+			 || (*lgot_masks & (TLS_TLS | PLT_KEEP)) != PLT_KEEP)
 		  ent->plt.offset = (bfd_vma) -1;
 		else
 		  {

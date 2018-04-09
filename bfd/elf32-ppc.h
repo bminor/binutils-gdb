@@ -60,6 +60,7 @@ struct ppc_elf_params
 
 void ppc_elf_link_params (struct bfd_link_info *, struct ppc_elf_params *);
 int ppc_elf_select_plt_layout (bfd *, struct bfd_link_info *);
+bfd_boolean ppc_elf_inline_plt (struct bfd_link_info *);
 asection *ppc_elf_tls_setup (bfd *, struct bfd_link_info *);
 bfd_boolean ppc_elf_tls_optimize (bfd *, struct bfd_link_info *);
 void ppc_elf_maybe_strip_sdata_syms (struct bfd_link_info *);

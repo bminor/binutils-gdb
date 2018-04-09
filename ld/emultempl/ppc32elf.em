@@ -35,6 +35,9 @@ fragment <<EOF
 /* Whether to run tls optimization.  */
 static int notlsopt = 0;
 
+/* Whether to convert inline PLT calls to direct.  */
+static int no_inline_opt = 0;
+
 /* Choose the correct place for .got.  */
 static int old_got = 0;
 
@@ -116,10 +119,32 @@ EOF
 fi
 fragment <<EOF
 static void
+prelim_size_sections (void)
+{
+  if (expld.phase != lang_mark_phase_enum)
+    {
+      expld.phase = lang_mark_phase_enum;
+      expld.dataseg.phase = exp_seg_none;
+      one_lang_size_sections_pass (NULL, FALSE);
+      /* We must not cache anything from the preliminary sizing.  */
+      lang_reset_memory_regions ();
+    }
+}
+
+static void
 ppc_before_allocation (void)
 {
   if (is_ppc_elf (link_info.output_bfd))
     {
+      if (!no_inline_opt
+	  && !bfd_link_relocatable (&link_info))
+	{
+	  prelim_size_sections ();
+
+	  if (!ppc_elf_inline_plt (&link_info))
+	    einfo (_("%X%P: inline PLT: %E\n"));
+	}
+
       if (ppc_elf_tls_setup (link_info.output_bfd, &link_info)
 	  && !notlsopt)
 	{
@@ -147,13 +172,7 @@ ppc_before_allocation (void)
       asection *o;
 
       /* Run lang_size_sections (if not already done).  */
-      if (expld.phase != lang_mark_phase_enum)
-	{
-	  expld.phase = lang_mark_phase_enum;
-	  expld.dataseg.phase = exp_seg_none;
-	  one_lang_size_sections_pass (NULL, FALSE);
-	  lang_reset_memory_regions ();
-	}
+      prelim_size_sections ();
 
       for (o = link_info.output_bfd->sections; o != NULL; o = o->next)
 	{
@@ -250,6 +269,7 @@ enum ppc32_opt
   OPTION_OLD_PLT,
   OPTION_PLT_ALIGN,
   OPTION_NO_PLT_ALIGN,
+  OPTION_NO_INLINE_OPT,
   OPTION_OLD_GOT,
   OPTION_STUBSYMS,
   OPTION_NO_STUBSYMS,
@@ -271,6 +291,7 @@ if test -z "$VXWORKS_BASE_EM_FILE" ; then
   { "bss-plt", no_argument, NULL, OPTION_OLD_PLT },
   { "plt-align", optional_argument, NULL, OPTION_PLT_ALIGN },
   { "no-plt-align", no_argument, NULL, OPTION_NO_PLT_ALIGN },
+  { "no-inline-optimize", no_argument, NULL, OPTION_NO_INLINE_OPT },
   { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },'
 fi
 PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
@@ -306,6 +327,9 @@ if test -z "$VXWORKS_BASE_EM_FILE" ; then
 		   ));
   fprintf (file, _("\
   --no-plt-align              Dont'\''t align individual PLT call stubs\n"
+		   ));
+  fprintf (file, _("\
+  --no-inline-optimize        Don'\''t convert inline PLT to direct calls\n"
 		   ));
   fprintf (file, _("\
   --sdata-got                 Force GOT location just before .sdata\n"
@@ -367,6 +391,10 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_NO_PLT_ALIGN:
       params.plt_stub_align = 0;
+      break;
+
+    case OPTION_NO_INLINE_OPT:
+      no_inline_opt = 1;
       break;
 
     case OPTION_OLD_GOT:

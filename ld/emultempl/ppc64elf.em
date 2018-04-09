@@ -55,6 +55,9 @@ static int no_tls_opt = 0;
 /* Whether to run opd optimization.  */
 static int no_opd_opt = 0;
 
+/* Whether to convert inline PLT calls to direct.  */
+static int no_inline_opt = 0;
+
 /* Whether to run toc optimization.  */
 static int no_toc_opt = 0;
 
@@ -281,6 +284,15 @@ ppc_before_allocation (void)
       if (!no_opd_opt
 	  && !ppc64_elf_edit_opd (&link_info))
 	einfo (_("%X%P: can not edit %s: %E\n"), "opd");
+
+      if (!no_inline_opt
+	  && !bfd_link_relocatable (&link_info))
+	{
+	  prelim_size_sections ();
+
+	  if (!ppc64_elf_inline_plt (&link_info))
+	    einfo (_("%X%P: inline PLT: %E\n"));
+	}
 
       if (ppc64_elf_tls_setup (&link_info)
 	  && !no_tls_opt)
@@ -706,6 +718,7 @@ enum ppc64_opt
   OPTION_TLS_GET_ADDR_OPT,
   OPTION_NO_TLS_GET_ADDR_OPT,
   OPTION_NO_OPD_OPT,
+  OPTION_NO_INLINE_OPT,
   OPTION_NO_TOC_OPT,
   OPTION_NO_MULTI_TOC,
   OPTION_NO_TOC_SORT,
@@ -733,6 +746,7 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "tls-get-addr-optimize", no_argument, NULL, OPTION_TLS_GET_ADDR_OPT },
   { "no-tls-get-addr-optimize", no_argument, NULL, OPTION_NO_TLS_GET_ADDR_OPT },
   { "no-opd-optimize", no_argument, NULL, OPTION_NO_OPD_OPT },
+  { "no-inline-optimize", no_argument, NULL, OPTION_NO_INLINE_OPT },
   { "no-toc-optimize", no_argument, NULL, OPTION_NO_TOC_OPT },
   { "no-multi-toc", no_argument, NULL, OPTION_NO_MULTI_TOC },
   { "no-toc-sort", no_argument, NULL, OPTION_NO_TOC_SORT },
@@ -808,6 +822,9 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
 		   ));
   fprintf (file, _("\
   --no-opd-optimize           Don'\''t optimize the OPD section\n"
+		   ));
+  fprintf (file, _("\
+  --no-inline-optimize        Don'\''t convert inline PLT to direct calls\n"
 		   ));
   fprintf (file, _("\
   --no-toc-optimize           Don'\''t optimize the TOC section\n"
@@ -913,6 +930,10 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_NO_OPD_OPT:
       no_opd_opt = 1;
+      break;
+
+    case OPTION_NO_INLINE_OPT:
+      no_inline_opt = 1;
       break;
 
     case OPTION_NO_TOC_OPT:
