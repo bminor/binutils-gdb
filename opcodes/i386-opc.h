@@ -227,6 +227,8 @@ enum
   CpuWBNOINVD,
   /* PCONFIG instructions required */
   CpuPCONFIG,
+  /* WAITPKG instructions required */
+  CpuWAITPKG,
   /* MMX register support required */
   CpuRegMMX,
   /* XMM register support required */
@@ -358,6 +360,7 @@ typedef union i386_cpu_flags
       unsigned int cpuvpclmulqdq:1;
       unsigned int cpuwbnoinvd:1;
       unsigned int cpupconfig:1;
+      unsigned int cpuwaitpkg:1;
       unsigned int cpuregmmx:1;
       unsigned int cpuregxmm:1;
       unsigned int cpuregymm:1;

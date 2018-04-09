@@ -250,6 +250,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EbS { OP_E, b_swap_mode }
 #define EbndS { OP_E, bnd_swap_mode }
 #define Ev { OP_E, v_mode }
+#define Eva { OP_E, va_mode }
 #define Ev_bnd { OP_E, v_bnd_mode }
 #define EvS { OP_E, v_swap_mode }
 #define Ed { OP_E, d_mode }
@@ -499,6 +500,8 @@ enum
   v_mode,
   /* operand size depends on prefixes with operand swapped */
   v_swap_mode,
+  /* operand size depends on address prefix */
+  va_mode,
   /* word operand */
   w_mode,
   /* double word operand  */
@@ -1008,7 +1011,8 @@ enum
   PREFIX_MOD_3_0FAE_REG_4,
   PREFIX_MOD_0_0FAE_REG_5,
   PREFIX_MOD_3_0FAE_REG_5,
-  PREFIX_0FAE_REG_6,
+  PREFIX_MOD_0_0FAE_REG_6,
+  PREFIX_MOD_1_0FAE_REG_6,
   PREFIX_0FAE_REG_7,
   PREFIX_0FB8,
   PREFIX_0FBC,
@@ -4191,11 +4195,19 @@ static const struct dis386 prefix_table[][4] = {
     { "incsspK",	{ Rdq }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_0FAE_REG_6 */
+  /* PREFIX_MOD_0_0FAE_REG_6 */
   {
     { "xsaveopt",	{ FXSAVE }, PREFIX_OPCODE },
     { "clrssbsy",	{ Mq }, PREFIX_OPCODE },
     { "clwb",	{ Mb }, PREFIX_OPCODE },
+  },
+
+  /* PREFIX_MOD_1_0FAE_REG_6 */
+  {
+    { RM_TABLE (RM_0FAE_REG_6) },
+    { "umonitor",	{ Eva }, PREFIX_OPCODE },
+    { "tpause",	{ Em }, PREFIX_OPCODE },
+    { "umwait",	{ Em }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0FAE_REG_7 */
@@ -11726,8 +11738,8 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FAE_REG_6 */
-    { PREFIX_TABLE (PREFIX_0FAE_REG_6) },
-    { RM_TABLE (RM_0FAE_REG_6) },
+    { PREFIX_TABLE (PREFIX_MOD_0_0FAE_REG_6) },
+    { PREFIX_TABLE (PREFIX_MOD_1_0FAE_REG_6) },
   },
   {
     /* MOD_0FAE_REG_7 */
@@ -15107,6 +15119,21 @@ OP_E_register (int bytemode, int sizeflag)
 	  else
 	    names = names16;
 	  used_prefixes |= (prefixes & PREFIX_DATA);
+	}
+      break;
+    case va_mode:
+      names = (address_mode == mode_64bit
+	       ? names64 : names32);
+      if (!(prefixes & PREFIX_ADDR))
+	names = (address_mode == mode_16bit
+		     ? names16 : names);
+      else
+	{
+	  /* Remove "addr16/addr32".  */
+	  all_prefixes[last_addr_prefix] = 0;
+	  names = (address_mode != mode_32bit
+		       ? names32 : names16);
+	  used_prefixes |= PREFIX_ADDR;
 	}
       break;
     case mask_bd_mode:
