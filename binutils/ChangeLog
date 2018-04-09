@@ -1,5 +1,13 @@
 2018-04-09  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/binutils-all/strip-15.d: New test.
+	* testsuite/binutils-all/strip-15rel.s: New test source.
+	* testsuite/binutils-all/strip-15rela.s: New test source.
+	* testsuite/binutils-all/strip-15mips64.s: New test source.
+	* testsuite/binutils-all/objcopy.exp: Run the new test.
+
+2018-04-09  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/binutils-all/strip-14.d: New test.
 	* testsuite/binutils-all/strip-14rel.s: New test source.
 	* testsuite/binutils-all/strip-14rela.s: New test source.

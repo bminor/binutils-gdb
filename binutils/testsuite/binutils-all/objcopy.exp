@@ -1123,6 +1123,11 @@ if [is_elf_format] {
 				[list as "--defsym RELOC=${reloc}"] \
 				[list as [expr {[is_elf64 tmpdir/bintest.o] \
 				    ? "--defsym ELF64=1" : ""}]]]
+    run_dump_test "strip-15" [list \
+				[list source strip-15${reloc_format}.s] \
+				[list as "--defsym RELOC=${reloc}"] \
+				[list as [expr {[is_elf64 tmpdir/bintest.o] \
+				    ? "--defsym ELF64=1" : ""}]]]
 
     # This requires STB_GNU_UNIQUE support with OSABI set to GNU.
     if { [supports_gnu_unique] } {
