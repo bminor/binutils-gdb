@@ -28,30 +28,18 @@ static int
 fork_child (void)
 {
   while (1)
-    {
-      sleep (1);
-
-      /* Exit if GDB kills the parent.  */
-      if (getppid () != save_parent)
-	break;
-      if (kill (getppid (), 0) != 0)
-	break;
-    }
+    pause ();
 
   return 0;
 }
 
-/* The fork parent.  Just runs forever waiting for the child to
-   exit.  */
+/* The fork parent.  Just runs forever.  */
 
 static int
 fork_parent (void)
 {
-  if (wait (NULL) == -1)
-    {
-      perror ("wait");
-      return 1;
-    }
+  while (1)
+    pause ();
 
   return 0;
 }

@@ -1,3 +1,9 @@
+2018-04-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/fork-running-state.c (fork_child): Don't exit if parent
+	exits.  Instead loop running forever.
+	(fork_parent): Run forever too.
+
 2018-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.mi/mi-stack.exp (test_stack_frame_listing): Use
