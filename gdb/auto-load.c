@@ -197,20 +197,19 @@ auto_load_expand_dir_vars (const char *string)
 static void
 auto_load_safe_path_vec_update (void)
 {
-  unsigned len;
-  int ix;
-
   if (debug_auto_load)
     fprintf_unfiltered (gdb_stdlog,
 			_("auto-load: Updating directories of \"%s\".\n"),
 			auto_load_safe_path);
 
   auto_load_safe_path_vec = auto_load_expand_dir_vars (auto_load_safe_path);
+  size_t len = auto_load_safe_path_vec.size ();
 
   /* Apply tilde_expand and gdb_realpath to each AUTO_LOAD_SAFE_PATH_VEC
      element.  */
-  for (gdb::unique_xmalloc_ptr<char> &in_vec : auto_load_safe_path_vec)
+  for (size_t i = 0; i < len; i++)
     {
+      gdb::unique_xmalloc_ptr<char> &in_vec = auto_load_safe_path_vec[i];
       gdb::unique_xmalloc_ptr<char> expanded (tilde_expand (in_vec.get ()));
       gdb::unique_xmalloc_ptr<char> real_path = gdb_realpath (expanded.get ());
 

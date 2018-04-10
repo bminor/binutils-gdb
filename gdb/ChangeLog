@@ -1,3 +1,8 @@
+2018-04-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* auto-load.c (auto_load_safe_path_vec_update): Iterate by
+	index.
+
 2018-04-10  Pedro Alves  <palves@redhat.com>
 
 	* gdbthread.h (finish_thread_state_cleanup): Delete declaration.
