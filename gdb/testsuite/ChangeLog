@@ -1,3 +1,8 @@
+2018-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/share-env-with-gdbserver.c (main): Add call to
+	malloc/free.
+
 2018-07-04  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/dw2-error.exp: Update expected error message.
