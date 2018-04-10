@@ -1,3 +1,8 @@
+2018-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/watchpoint-reuse-slot.exp: Test with hardware
+	watchpoints enabled and disabled.
+
 2018-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/examine-backward.exp: Still run tests around address
