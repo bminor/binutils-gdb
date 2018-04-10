@@ -1,3 +1,13 @@
+2018-04-10  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (finish_thread_state_cleanup): Delete declaration.
+	(scoped_finish_thread_state): New class.
+	* infcmd.c (run_command_1): Use it instead of finish_thread_state
+	cleanup.
+	* infrun.c (proceed, prepare_for_detach, wait_for_inferior)
+	(fetch_inferior_event, normal_stop): Likewise.
+	* thread.c (finish_thread_state_cleanup): Delete.
+
 2018-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Pedro Alves  <palves@redhat.com>
 

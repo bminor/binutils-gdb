@@ -1040,16 +1040,6 @@ finish_thread_state (ptid_t ptid)
     gdb::observers::target_resumed.notify (ptid);
 }
 
-void
-finish_thread_state_cleanup (void *arg)
-{
-  ptid_t *ptid_p = (ptid_t *) arg;
-
-  gdb_assert (arg);
-
-  finish_thread_state (*ptid_p);
-}
-
 /* See gdbthread.h.  */
 
 void

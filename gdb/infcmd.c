@@ -565,8 +565,6 @@ static void
 run_command_1 (const char *args, int from_tty, enum run_how run_how)
 {
   const char *exec_file;
-  struct cleanup *old_chain;
-  ptid_t ptid;
   struct ui_out *uiout = current_uiout;
   struct target_ops *run_target;
   int async_exec;
@@ -655,11 +653,10 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
      events --- the frontend shouldn't see them as stopped.  In
      all-stop, always finish the state of all threads, as we may be
      resuming more than just the new process.  */
-  if (non_stop)
-    ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-  else
-    ptid = minus_one_ptid;
-  old_chain = make_cleanup (finish_thread_state_cleanup, &ptid);
+  ptid_t finish_ptid = (non_stop
+			? ptid_t (current_inferior ()->pid)
+			: minus_one_ptid);
+  scoped_finish_thread_state finish_state (finish_ptid);
 
   /* Pass zero for FROM_TTY, because at this point the "run" command
      has done its thing; now we are setting up the running program.  */
@@ -680,7 +677,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   /* Since there was no error, there's no need to finish the thread
      states here.  */
-  discard_cleanups (old_chain);
+  finish_state.release ();
 }
 
 static void

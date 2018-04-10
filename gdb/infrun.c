@@ -2979,7 +2979,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   ptid_t resume_ptid;
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
-  struct cleanup *old_chain;
   int started;
 
   /* If we're stopped at a fork/vfork, follow the branch set by the
@@ -3043,7 +3042,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   /* If an exception is thrown from this point on, make sure to
      propagate GDB's knowledge of the executing state to the
      frontend/user running state.  */
-  old_chain = make_cleanup (finish_thread_state_cleanup, &resume_ptid);
+  scoped_finish_thread_state finish_state (resume_ptid);
 
   /* Even if RESUME_PTID is a wildcard, and we end up resuming fewer
      threads (e.g., we might need to set threads stepping over
@@ -3198,7 +3197,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   target_commit_resume ();
 
-  discard_cleanups (old_chain);
+  finish_state.release ();
 
   /* Tell the event loop to wait for it to stop.  If the target
      supports asynchronous execution, it'll do this from within
@@ -3641,7 +3640,6 @@ prepare_for_detach (void)
 
   while (!ptid_equal (displaced->step_ptid, null_ptid))
     {
-      struct cleanup *old_chain_2;
       struct execution_control_state ecss;
       struct execution_control_state *ecs;
 
@@ -3663,14 +3661,13 @@ prepare_for_detach (void)
       /* If an error happens while handling the event, propagate GDB's
 	 knowledge of the executing state to the frontend/user running
 	 state.  */
-      old_chain_2 = make_cleanup (finish_thread_state_cleanup,
-				  &minus_one_ptid);
+      scoped_finish_thread_state finish_state (minus_one_ptid);
 
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
 
       /* No error, don't finish the state yet.  */
-      discard_cleanups (old_chain_2);
+      finish_state.release ();
 
       /* Breakpoints and watchpoints are not installed on the target
 	 at this point, and signals are passed directly to the
@@ -3696,7 +3693,6 @@ void
 wait_for_inferior (void)
 {
   struct cleanup *old_cleanups;
-  struct cleanup *thread_state_chain;
 
   if (debug_infrun)
     fprintf_unfiltered
@@ -3709,7 +3705,7 @@ wait_for_inferior (void)
   /* If an error happens while handling the event, propagate GDB's
      knowledge of the executing state to the frontend/user running
      state.  */
-  thread_state_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+  scoped_finish_thread_state finish_state (minus_one_ptid);
 
   while (1)
     {
@@ -3740,7 +3736,7 @@ wait_for_inferior (void)
     }
 
   /* No error, don't finish the state yet.  */
-  discard_cleanups (thread_state_chain);
+  finish_state.release ();
 
   do_cleanups (old_cleanups);
 }
@@ -3859,7 +3855,6 @@ fetch_inferior_event (void *client_data)
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  struct cleanup *ts_old_chain;
   int cmd_done = 0;
   ptid_t waiton_ptid = minus_one_ptid;
 
@@ -3912,14 +3907,12 @@ fetch_inferior_event (void *client_data)
   /* If an error happens while handling the event, propagate GDB's
      knowledge of the executing state to the frontend/user running
      state.  */
-  if (!target_is_non_stop_p ())
-    ts_old_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
-  else
-    ts_old_chain = make_cleanup (finish_thread_state_cleanup, &ecs->ptid);
+  ptid_t finish_ptid = !target_is_non_stop_p () ? minus_one_ptid : ecs->ptid;
+  scoped_finish_thread_state finish_state (finish_ptid);
 
   /* Get executed before make_cleanup_restore_current_thread above to apply
      still for the thread which has thrown the exception.  */
-  make_bpstat_clear_actions_cleanup ();
+  struct cleanup *ts_old_chain = make_bpstat_clear_actions_cleanup ();
 
   make_cleanup (delete_just_stopped_threads_infrun_breakpoints_cleanup, NULL);
 
@@ -3974,8 +3967,10 @@ fetch_inferior_event (void *client_data)
 	}
     }
 
-  /* No error, don't finish the thread states yet.  */
   discard_cleanups (ts_old_chain);
+
+  /* No error, don't finish the thread states yet.  */
+  finish_state.release ();
 
   /* Revert thread and frame.  */
   do_cleanups (old_chain);
@@ -8165,8 +8160,6 @@ normal_stop (void)
 {
   struct target_waitstatus last;
   ptid_t last_ptid;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  ptid_t pid_ptid;
 
   get_last_target_status (&last_ptid, &last);
 
@@ -8176,8 +8169,11 @@ normal_stop (void)
      propagate GDB's knowledge of the executing state to the
      frontend/user running state.  A QUIT is an easy exception to see
      here, so do this before any filtered output.  */
+
+  gdb::optional<scoped_finish_thread_state> maybe_finish_thread_state;
+
   if (!non_stop)
-    make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+    maybe_finish_thread_state.emplace (minus_one_ptid);
   else if (last.kind == TARGET_WAITKIND_SIGNALLED
 	   || last.kind == TARGET_WAITKIND_EXITED)
     {
@@ -8186,14 +8182,11 @@ normal_stop (void)
 	 "checkpoint", when the current checkpoint/fork exits,
 	 linux-fork.c automatically switches to another fork from
 	 within target_mourn_inferior.  */
-      if (!ptid_equal (inferior_ptid, null_ptid))
-	{
-	  pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-	  make_cleanup (finish_thread_state_cleanup, &pid_ptid);
-	}
+      if (inferior_ptid != null_ptid)
+	maybe_finish_thread_state.emplace (ptid_t (inferior_ptid.pid ()));
     }
   else if (last.kind != TARGET_WAITKIND_NO_RESUMED)
-    make_cleanup (finish_thread_state_cleanup, &inferior_ptid);
+    maybe_finish_thread_state.emplace (inferior_ptid);
 
   /* As we're presenting a stop, and potentially removing breakpoints,
      update the thread list so we can tell whether there are threads
@@ -8225,7 +8218,7 @@ normal_stop (void)
      after this event is handled, so we're not really switching, only
      informing of a stop.  */
   if (!non_stop
-      && !ptid_equal (previous_inferior_ptid, inferior_ptid)
+      && previous_inferior_ptid != inferior_ptid
       && target_has_execution
       && last.kind != TARGET_WAITKIND_SIGNALLED
       && last.kind != TARGET_WAITKIND_EXITED
@@ -8266,7 +8259,7 @@ normal_stop (void)
     }
 
   /* Let the user/frontend see the threads as stopped.  */
-  do_cleanups (old_chain);
+  maybe_finish_thread_state.reset ();
 
   /* Select innermost stack frame - i.e., current frame is frame 0,
      and current location is based on that.  Handle the case where the

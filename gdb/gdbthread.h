@@ -567,10 +567,33 @@ extern int threads_are_executing (void);
    Notifications are only emitted if the thread state did change.  */
 extern void finish_thread_state (ptid_t ptid);
 
-/* Same as FINISH_THREAD_STATE, but with an interface suitable to be
-   registered as a cleanup.  PTID_P points to the ptid_t that is
-   passed to FINISH_THREAD_STATE.  */
-extern void finish_thread_state_cleanup (void *ptid_p);
+/* Calls finish_thread_state on scope exit, unless release() is called
+   to disengage.  */
+class scoped_finish_thread_state
+{
+public:
+  explicit scoped_finish_thread_state (ptid_t ptid)
+    : m_ptid (ptid)
+  {}
+
+  ~scoped_finish_thread_state ()
+  {
+    if (!m_released)
+      finish_thread_state (m_ptid);
+  }
+
+  /* Disengage.  */
+  void release ()
+  {
+    m_released = true;
+  }
+
+  DISABLE_COPY_AND_ASSIGN (scoped_finish_thread_state);
+
+private:
+  bool m_released = false;
+  ptid_t m_ptid;
+};
 
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;
