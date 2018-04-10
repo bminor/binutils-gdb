@@ -1,5 +1,9 @@
 2018-05-25  Tom Tromey  <tom@tromey.com>
 
+	* value.c (value::location): Initialize.
+
+2018-05-25  Tom Tromey  <tom@tromey.com>
+
 	* dbxread.c (init_bincl_list): Remove.
 	(bincl_list): Now a std::vector.
 	(bincls_allocated, next_bincl): Remove.

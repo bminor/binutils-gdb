@@ -180,7 +180,6 @@ struct value
       type (type_),
       enclosing_type (type_)
   {
-    location.address = 0;
   }
 
   ~value ()
@@ -262,7 +261,7 @@ struct value
       /* Closure for those functions to use.  */
       void *closure;
     } computed;
-  } location;
+  } location {};
 
   /* Describes offset of a value within lval of a structure in target
      addressable memory units.  Note also the member embedded_offset
