@@ -407,8 +407,7 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 		}
 	      else
 		{
-#if (!defined (OBJ_AOUT) && !defined (OBJ_MAYBE_AOUT) \
-     && !defined (OBJ_BOUT) && !defined (OBJ_MAYBE_BOUT))
+#if (!defined (OBJ_AOUT) && !defined (OBJ_MAYBE_AOUT))
 		  static const char *od_buf = "";
 #else
 		  char od_buf[100];

@@ -1,5 +1,76 @@
 2018-04-11  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/coff_i860.sh: Delete.
+	* emulparams/elf32_i860.sh: Delete.
+	* emulparams/elf32_i960.sh: Delete.
+	* emulparams/gld960.sh: Delete.
+	* emulparams/gld960coff.sh: Delete.
+	* emulparams/lnk960.sh: Delete.
+	* emultempl/gld960.em: Delete.
+	* emultempl/gld960c.em: Delete.
+	* emultempl/lnk960.em: Delete.
+	* scripttempl/i860coff.sc: Delete.
+	* scripttempl/i960.sc: Delete.
+	* ld.texinfo: Remove i960 support.
+	* Makefile.am: Remove i860 and i960 support.
+	* configure.tgt: Likewise.
+	* testsuite/ld-discard/extern.d: Likewise.
+	* testsuite/ld-discard/start.d: Likewise.
+	* testsuite/ld-discard/static.d: Likewise.
+	* testsuite/ld-elf/compressed1d.d: Likewise.
+	* testsuite/ld-elf/group1.d: Likewise.
+	* testsuite/ld-elf/group3b.d: Likewise.
+	* testsuite/ld-elf/group8a.d: Likewise.
+	* testsuite/ld-elf/group8b.d: Likewise.
+	* testsuite/ld-elf/group9a.d: Likewise.
+	* testsuite/ld-elf/group9b.d: Likewise.
+	* testsuite/ld-elf/linkonce2.d: Likewise.
+	* testsuite/ld-elf/merge.d: Likewise.
+	* testsuite/ld-elf/merge2.d: Likewise.
+	* testsuite/ld-elf/merge3.d: Likewise.
+	* testsuite/ld-elf/orphan-10.d: Likewise.
+	* testsuite/ld-elf/orphan-11.d: Likewise.
+	* testsuite/ld-elf/orphan-12.d: Likewise.
+	* testsuite/ld-elf/orphan-9.d: Likewise.
+	* testsuite/ld-elf/orphan-region.d: Likewise.
+	* testsuite/ld-elf/orphan.d: Likewise.
+	* testsuite/ld-elf/orphan3.d: Likewise.
+	* testsuite/ld-elf/pr12851.d: Likewise.
+	* testsuite/ld-elf/pr12975.d: Likewise.
+	* testsuite/ld-elf/pr13177.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elf/pr17550a.d: Likewise.
+	* testsuite/ld-elf/pr17550b.d: Likewise.
+	* testsuite/ld-elf/pr17550c.d: Likewise.
+	* testsuite/ld-elf/pr17550d.d: Likewise.
+	* testsuite/ld-elf/pr17615.d: Likewise.
+	* testsuite/ld-elf/pr20528a.d: Likewise.
+	* testsuite/ld-elf/pr20528b.d: Likewise.
+	* testsuite/ld-elf/pr21562a.d: Likewise.
+	* testsuite/ld-elf/pr21562b.d: Likewise.
+	* testsuite/ld-elf/pr21562c.d: Likewise.
+	* testsuite/ld-elf/pr21562d.d: Likewise.
+	* testsuite/ld-elf/pr21562i.d: Likewise.
+	* testsuite/ld-elf/pr21562j.d: Likewise.
+	* testsuite/ld-elf/pr21562k.d: Likewise.
+	* testsuite/ld-elf/pr21562l.d: Likewise.
+	* testsuite/ld-elf/pr21562m.d: Likewise.
+	* testsuite/ld-elf/pr21562n.d: Likewise.
+	* testsuite/ld-elf/pr22677.d: Likewise.
+	* testsuite/ld-elf/pr22836-1a.d: Likewise.
+	* testsuite/ld-elf/pr22836-1b.d: Likewise.
+	* testsuite/ld-elf/pr349.d: Likewise.
+	* testsuite/ld-elf/sec-to-seg.exp: Likewise.
+	* testsuite/ld-elf/sec64k.exp: Likewise.
+	* testsuite/ld-elf/warn1.d: Likewise.
+	* testsuite/ld-elf/warn2.d: Likewise.
+	* testsuite/ld-elf/warn3.d: Likewise.
+	* testsuite/lib/ld-lib.exp: Likewise.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
+2018-04-11  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/shared.exp (AFLAGS_PIC): Add -mpic for nds32.
 
 2018-04-09  Alan Modra  <amodra@gmail.com>

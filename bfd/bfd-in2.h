@@ -1979,23 +1979,6 @@ enum bfd_architecture
 #define bfd_mach_mcf_isa_c_nodiv_mac   30
 #define bfd_mach_mcf_isa_c_nodiv_emac  31
   bfd_arch_vax,       /* DEC Vax.  */
-  bfd_arch_i960,      /* Intel 960.  */
-    /* The order of the following is important.
-       lower number indicates a machine type that
-       only accepts a subset of the instructions
-       available to machines with higher numbers.
-       The exception is the "ca", which is
-       incompatible with all other machines except
-       "core".  */
-
-#define bfd_mach_i960_core     1
-#define bfd_mach_i960_ka_sa    2
-#define bfd_mach_i960_kb_sb    3
-#define bfd_mach_i960_mc       4
-#define bfd_mach_i960_xa       5
-#define bfd_mach_i960_ca       6
-#define bfd_mach_i960_jx       7
-#define bfd_mach_i960_hx       8
 
   bfd_arch_or1k,      /* OpenRISC 1000.  */
 #define bfd_mach_or1k          1
@@ -2113,7 +2096,6 @@ enum bfd_architecture
 #define bfd_mach_i386_iamcu_intel_syntax (bfd_mach_i386_iamcu | bfd_mach_i386_intel_syntax)
   bfd_arch_we32k,     /* AT&T WE32xxx.  */
   bfd_arch_tahoe,     /* CCI/Harris Tahoe.  */
-  bfd_arch_i860,      /* Intel 860.  */
   bfd_arch_i370,      /* IBM 360/370 Mainframes.  */
   bfd_arch_romp,      /* IBM ROMP PC/RT.  */
   bfd_arch_convex,    /* Convex.  */
@@ -2506,10 +2488,9 @@ typedef enum bfd_reloc_status
   /* The symbol to relocate against was undefined.  */
   bfd_reloc_undefined,
 
-  /* The relocation was performed, but may not be ok - presently
-     generated only when linking i960 coff files with i960 b.out
-     symbols.  If this type is returned, the error_message argument
-     to bfd_perform_relocation will be set.  */
+  /* The relocation was performed, but may not be ok.  If this type is
+     returned, the error_message argument to bfd_perform_relocation
+     will be set.  */
   bfd_reloc_dangerous
  }
  bfd_reloc_status_type;
@@ -2589,8 +2570,7 @@ struct reloc_howto_struct
 
   /* If this field is non null, then the supplied function is
      called rather than the normal function.  This allows really
-     strange relocation methods to be accommodated (e.g., i960 callj
-     instructions).  */
+     strange relocation methods to be accommodated.  */
   bfd_reloc_status_type (*special_function)
     (bfd *, arelent *, struct bfd_symbol *, void *, asection *,
      bfd *, char **);
@@ -2715,9 +2695,7 @@ enum bfd_reloc_code_real {
 
 /* PC-relative relocations.  Sometimes these are relative to the address
 of the relocation itself; sometimes they are relative to the start of
-the section containing the relocation.  It depends on the specific target.
-
-The 24-bit relocation is used in some Intel 960 configurations.  */
+the section containing the relocation.  It depends on the specific target.  */
   BFD_RELOC_64_PCREL,
   BFD_RELOC_32_PCREL,
   BFD_RELOC_24_PCREL,
@@ -2808,9 +2786,6 @@ handled specially, because the value the register will have is
 decided relatively late.  */
   BFD_RELOC_GPREL16,
   BFD_RELOC_GPREL32,
-
-/* Reloc types used for i960/b.out.  */
-  BFD_RELOC_I960_CALLJ,
 
 /* SPARC ELF relocations.  There is probably some overlap with other
 relocation types already defined.  */
@@ -5435,40 +5410,6 @@ a matching LO8XG part.  */
   BFD_RELOC_CRIS_DTPMOD,
   BFD_RELOC_CRIS_32_IE,
 
-/* Intel i860 Relocations.  */
-  BFD_RELOC_860_COPY,
-  BFD_RELOC_860_GLOB_DAT,
-  BFD_RELOC_860_JUMP_SLOT,
-  BFD_RELOC_860_RELATIVE,
-  BFD_RELOC_860_PC26,
-  BFD_RELOC_860_PLT26,
-  BFD_RELOC_860_PC16,
-  BFD_RELOC_860_LOW0,
-  BFD_RELOC_860_SPLIT0,
-  BFD_RELOC_860_LOW1,
-  BFD_RELOC_860_SPLIT1,
-  BFD_RELOC_860_LOW2,
-  BFD_RELOC_860_SPLIT2,
-  BFD_RELOC_860_LOW3,
-  BFD_RELOC_860_LOGOT0,
-  BFD_RELOC_860_SPGOT0,
-  BFD_RELOC_860_LOGOT1,
-  BFD_RELOC_860_SPGOT1,
-  BFD_RELOC_860_LOGOTOFF0,
-  BFD_RELOC_860_SPGOTOFF0,
-  BFD_RELOC_860_LOGOTOFF1,
-  BFD_RELOC_860_SPGOTOFF1,
-  BFD_RELOC_860_LOGOTOFF2,
-  BFD_RELOC_860_LOGOTOFF3,
-  BFD_RELOC_860_LOPC,
-  BFD_RELOC_860_HIGHADJ,
-  BFD_RELOC_860_HAGOT,
-  BFD_RELOC_860_HAGOTOFF,
-  BFD_RELOC_860_HAPC,
-  BFD_RELOC_860_HIGH,
-  BFD_RELOC_860_HIGOT,
-  BFD_RELOC_860_HIGOTOFF,
-
 /* OpenRISC 1000 Relocations.  */
   BFD_RELOC_OR1K_REL_26,
   BFD_RELOC_OR1K_GOTPC_HI16,
@@ -7076,7 +7017,6 @@ struct bfd
       struct tekhex_data_struct *tekhex_data;
       struct elf_obj_tdata *elf_obj_data;
       struct nlm_obj_tdata *nlm_obj_data;
-      struct bout_data_struct *bout_data;
       struct mmo_data_struct *mmo_data;
       struct sun_core_struct *sun_core_data;
       struct sco5_core_struct *sco5_core_data;

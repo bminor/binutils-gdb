@@ -847,7 +847,6 @@ bfd_generic_archive_p (bfd *abfd)
   bfd_is_thin_archive (abfd) = (strncmp (armag, ARMAGT, SARMAG) == 0);
 
   if (strncmp (armag, ARMAG, SARMAG) != 0
-      && strncmp (armag, ARMAGB, SARMAG) != 0
       && ! bfd_is_thin_archive (abfd))
     {
       bfd_set_error (bfd_error_wrong_format);
@@ -1041,21 +1040,6 @@ do_slurp_coff_armap (bfd *abfd)
   swap = bfd_getb32;
   nsymz = bfd_getb32 (int_buf);
   stringsize = parsed_size - (4 * nsymz) - 4;
-
-  /* ... except that some archive formats are broken, and it may be our
-     fault - the i960 little endian coff sometimes has big and sometimes
-     little, because our tools changed.  Here's a horrible hack to clean
-     up the crap.  */
-
-  if (stringsize > 0xfffff
-      && bfd_get_arch (abfd) == bfd_arch_i960
-      && bfd_get_flavour (abfd) == bfd_target_coff_flavour)
-    {
-      /* This looks dangerous, let's do it the other way around.  */
-      nsymz = bfd_getl32 (int_buf);
-      stringsize = parsed_size - (4 * nsymz) - 4;
-      swap = bfd_getl32;
-    }
 
   /* The coff armap must be read sequentially.  So we construct a
      bsd-style one in core all at once, for simplicity.  */

@@ -1775,13 +1775,11 @@ proc check_gc_sections_available { } {
 	# advertised by ld's options.
 	if {   [istarget d30v-*-*]
 	    || [istarget dlx-*-*]
-	    || [istarget i960-*-*]
 	    || [istarget pj*-*-*]
 	    || [istarget pru*-*-*]
 	    || [istarget alpha-*-*]
 	    || [istarget hppa*64-*-*]
 	    || [istarget i370-*-*]
-	    || [istarget i860-*-*]
 	    || [istarget ia64-*-*]
 	    || [istarget mep-*-*]
 	    || [istarget mn10200-*-*] } {
@@ -1834,8 +1832,6 @@ proc is_generic_elf { } {
 	 || [istarget "fr30-*-*"]
 	 || ([istarget "frv-*-*"] && ![istarget "frv-*-linux*"])
 	 || [istarget "ft32-*-*"]
-	 || [istarget "i860-*-*"]
-	 || [istarget "i960-*-*"]
 	 || [istarget "iq2000-*-*"]
 	 || [istarget "mn10200-*-*"]
 	 || [istarget "moxie-*-*"]

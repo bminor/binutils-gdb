@@ -14344,7 +14344,6 @@ do
     aout0_be_vec)		 tb="$tb aout0.lo aout32.lo" ;;
     aout64_vec)			 tb="$tb demo64.lo aout64.lo"; target_size=64 ;;
     aout_vec)			 tb="$tb host-aout.lo aout32.lo" ;;
-    aout_adobe_vec)		 tb="$tb aout-adobe.lo aout32.lo" ;;
     arc_elf32_be_vec)		 tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     arc_elf32_le_vec)		 tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     arm_aout_be_vec)		 tb="$tb aout-arm.lo aout32.lo" ;;
@@ -14377,8 +14376,6 @@ do
     avr_elf32_vec)		 tb="$tb elf32-avr.lo elf32.lo $elf" ;;
     bfin_elf32_vec)		 tb="$tb elf32-bfin.lo elf32.lo $elf" ;;
     bfin_elf32_fdpic_vec)	 tb="$tb elf32-bfin.lo elf32.lo $elf" ;;
-    bout_be_vec)		 tb="$tb bout.lo aout32.lo" ;;
-    bout_le_vec)		 tb="$tb bout.lo aout32.lo" ;;
     cr16_elf32_vec)		 tb="$tb elf32-cr16.lo elf32.lo $elf" ;;
     cr16c_elf32_vec)		 tb="$tb elf32-cr16c.lo elf32.lo $elf" ;;
     cris_aout_vec)		 tb="$tb aout-cris.lo" ;;
@@ -14431,10 +14428,6 @@ do
     i386_pe_vec)		 tb="$tb pe-i386.lo peigen.lo $coff" ;;
     i386_pei_vec)		 tb="$tb pei-i386.lo peigen.lo $coff" ;;
     iamcu_elf32_vec)		 tb="$tb elf32-i386.lo elfxx-x86.lo elf-ifunc.lo elf-nacl.lo elf-vxworks.lo elf32.lo $elf" ;;
-    i860_coff_vec)		 tb="$tb coff-i860.lo $coff" ;;
-    i860_elf32_vec)		 tb="$tb elf32-i860.lo elf32.lo $elf" ;;
-    i860_elf32_le_vec)		 tb="$tb elf32-i860.lo elf32.lo $elf" ;;
-    i960_elf32_vec)		 tb="$tb elf32-i960.lo elf32.lo $elf" ;;
     ia64_elf32_be_vec)		 tb="$tb elf32-ia64.lo elfxx-ia64.lo elf32.lo $elf" ;;
     ia64_elf32_hpux_be_vec)	 tb="$tb elf32-ia64.lo elfxx-ia64.lo elf32.lo $elf" ;;
     ia64_elf64_be_vec)		 tb="$tb elf64-ia64.lo elfxx-ia64.lo elf64.lo $elf"; target_size=64 ;;
@@ -14442,8 +14435,6 @@ do
     ia64_elf64_hpux_be_vec)	 tb="$tb elf64-ia64.lo elfxx-ia64.lo elf64.lo $elf"; target_size=64 ;;
     ia64_elf64_vms_vec)		 tb="$tb elf64-ia64-vms.lo elf64-ia64.lo elfxx-ia64.lo elf64.lo vms-lib.lo vms-misc.lo $elf"; target_size=64 ;;
     ia64_pei_vec)		 tb="$tb pei-ia64.lo pepigen.lo $coff"; target_size=64 ;;
-    icoff_be_vec)		 tb="$tb coff-i960.lo $coff" ;;
-    icoff_le_vec)		 tb="$tb coff-i960.lo $coff" ;;
     ieee_vec)			 tb="$tb ieee.lo" ;;
     ip2k_elf32_vec)		 tb="$tb elf32-ip2k.lo elf32.lo $elf" ;;
     iq2000_elf32_vec)		 tb="$tb elf32-iq2000.lo elf32.lo $elf" ;;
@@ -14890,10 +14881,6 @@ if test "${target}" = "${host}"; then
 	;;
   i[3-7]86-*-isc*)	COREFILE=trad-core.lo ;;
   i[3-7]86-*-aix*)	COREFILE=aix386-core.lo ;;
-  i860-*-mach3* | i860-*-osf1*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/i860mach3.h"'
-	;;
   mips-*-netbsd* | mips*-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;

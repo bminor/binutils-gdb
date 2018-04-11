@@ -1,6 +1,5 @@
 aix386-core.c
 aix5ppc-core.c
-aout-adobe.c
 aout-arm.c
 aout-cris.c
 aout-ns32k.c
@@ -20,7 +19,6 @@ bfd.c
 bfdio.c
 bfdwin.c
 binary.c
-bout.c
 cache.c
 cf-i386lynx.c
 cf-sparclynx.c
@@ -34,8 +32,6 @@ coff-go32.c
 coff-h8300.c
 coff-h8500.c
 coff-i386.c
-coff-i860.c
-coff-i960.c
 coff-m68k.c
 coff-m88k.c
 coff-mips.c
@@ -83,8 +79,6 @@ cpu-h8500.c
 cpu-hppa.c
 cpu-i370.c
 cpu-i386.c
-cpu-i860.c
-cpu-i960.c
 cpu-ia64.c
 cpu-iamcu.c
 cpu-ip2k.c
@@ -190,8 +184,6 @@ elf32-hppa.c
 elf32-hppa.h
 elf32-i370.c
 elf32-i386.c
-elf32-i860.c
-elf32-i960.c
 elf32-ip2k.c
 elf32-iq2000.c
 elf32-lm32.c

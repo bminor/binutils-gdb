@@ -48,8 +48,6 @@ extern int print_insn_i370		(bfd_vma, disassemble_info *);
 extern int print_insn_i386		(bfd_vma, disassemble_info *);
 extern int print_insn_i386_att		(bfd_vma, disassemble_info *);
 extern int print_insn_i386_intel	(bfd_vma, disassemble_info *);
-extern int print_insn_i860		(bfd_vma, disassemble_info *);
-extern int print_insn_i960		(bfd_vma, disassemble_info *);
 extern int print_insn_ia64		(bfd_vma, disassemble_info *);
 extern int print_insn_ip2k		(bfd_vma, disassemble_info *);
 extern int print_insn_iq2000		(bfd_vma, disassemble_info *);

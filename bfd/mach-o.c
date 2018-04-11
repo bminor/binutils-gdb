@@ -1047,9 +1047,6 @@ bfd_mach_o_convert_architecture (bfd_mach_o_cpu_type mtype,
       *type = bfd_arch_sparc;
       *subtype = bfd_mach_sparc;
       break;
-    case BFD_MACH_O_CPU_TYPE_I860:
-      *type = bfd_arch_i860;
-      break;
     case BFD_MACH_O_CPU_TYPE_ALPHA:
       *type = bfd_arch_alpha;
       break;
@@ -5446,8 +5443,6 @@ bfd_mach_o_stack_addr (enum bfd_mach_o_cpu_type type)
       return 0xc0000000;
     case BFD_MACH_O_CPU_TYPE_SPARC:
       return 0xf0000000;
-    case BFD_MACH_O_CPU_TYPE_I860:
-      return 0;
     case BFD_MACH_O_CPU_TYPE_HPPA:
       return 0xc0000000 - 0x04000000;
     default:

@@ -114,8 +114,6 @@ ALL_MACHINES = \
 	cpu-iamcu.lo \
 	cpu-l1om.lo \
 	cpu-k1om.lo \
-	cpu-i860.lo \
-	cpu-i960.lo \
 	cpu-ia64.lo \
 	cpu-ip2k.lo \
 	cpu-iq2000.lo \
@@ -204,8 +202,6 @@ ALL_MACHINES_CFILES = \
 	cpu-iamcu.c \
 	cpu-l1om.c \
 	cpu-k1om.c \
-	cpu-i860.c \
-	cpu-i960.c \
 	cpu-ia64.c \
 	cpu-ip2k.c \
 	cpu-iq2000.c \
@@ -271,7 +267,6 @@ ALL_MACHINES_CFILES = \
 # The .o files needed by all of the 32 bit vectors that are configured into
 # target_vector in targets.c if configured with --enable-targets=all.
 BFD32_BACKENDS = \
-	aout-adobe.lo \
 	aout-arm.lo \
 	aout-cris.lo \
 	aout-ns32k.lo \
@@ -280,7 +275,6 @@ BFD32_BACKENDS = \
 	aout0.lo \
 	aout32.lo \
 	armnetbsd.lo \
-	bout.lo \
 	cf-i386lynx.lo \
 	cf-sparclynx.lo \
 	coff-apollo.lo \
@@ -290,8 +284,6 @@ BFD32_BACKENDS = \
 	coff-h8300.lo \
 	coff-h8500.lo \
 	coff-i386.lo \
-	coff-i860.lo \
-	coff-i960.lo \
 	coff-m68k.lo \
 	coff-m88k.lo \
 	coff-mips.lo \
@@ -347,8 +339,6 @@ BFD32_BACKENDS = \
 	elf32-i370.lo \
 	elf32-i386.lo \
 	elfxx-x86.lo \
-	elf32-i860.lo \
-	elf32-i960.lo \
 	elf32-ip2k.lo \
 	elf32-iq2000.lo \
 	elf32-lm32.lo \
@@ -468,7 +458,6 @@ BFD32_BACKENDS = \
 	xtensa-modules.lo
 
 BFD32_BACKENDS_CFILES = \
-	aout-adobe.c \
 	aout-arm.c \
 	aout-cris.c \
 	aout-ns32k.c \
@@ -477,7 +466,6 @@ BFD32_BACKENDS_CFILES = \
 	aout0.c \
 	aout32.c \
 	armnetbsd.c \
-	bout.c \
 	cf-i386lynx.c \
 	cf-sparclynx.c \
 	coff-apollo.c \
@@ -487,8 +475,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-h8300.c \
 	coff-h8500.c \
 	coff-i386.c \
-	coff-i860.c \
-	coff-i960.c \
 	coff-m68k.c \
 	coff-m88k.c \
 	coff-mips.c \
@@ -544,8 +530,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-i370.c \
 	elf32-i386.c \
 	elfxx-x86.c \
-	elf32-i860.c \
-	elf32-i960.c \
 	elf32-ip2k.c \
 	elf32-iq2000.c \
 	elf32-lm32.c \

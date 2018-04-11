@@ -106,7 +106,7 @@ case $target_triplet in {
     default {
 	# Some targets don't manage to resolve BFD_RELOC_8 for constants.
 	setup_xfail "alpha*-*-*" "*c30*-*-*" "*c4x*-*-*" \
-	    "d\[13\]0v*-*-*" "i860-*-*" \
+	    "d\[13\]0v*-*-*" \
 	    "nds32*-*-*" "pdp11-*-*" "xtensa*-*-*"
 	run_dump_test forward
     }
@@ -335,8 +335,7 @@ if {   ([istarget *-*-coff*] && ![istarget arm*-*-coff] && ![istarget *c4x*-*-co
      || [istarget i*86-*-cygwin*] \
      || [istarget x86_64-*-mingw*] \
      || [istarget i*86-*-*nt] \
-     || [istarget i*86-*-interix*] \
-     || ([istarget i960-*-vxworks5.*] && ![istarget i960-*-vxworks5.0*]) } {
+     || [istarget i*86-*-interix*] } {
     run_dump_test cofftag
 }
 
@@ -413,10 +412,7 @@ if { ![istarget "powerpc*-*-*"] && ![istarget "rs6000*-*-*"] && ![istarget "s390
     run_dump_test byte
 }
 
-# .quad is 16 bytes on i960.
-if { ![istarget "i960-*-*"] } {
-    run_dump_test quad
-}
+run_dump_test quad
 
 # som doesn't use .data section.
 case $target_triplet in {
@@ -466,9 +462,6 @@ dg-finish
 case $target_triplet in {
     { "mmix-*-*" } {
 	set nop_type 5
-    }
-    { "i960-*-*" } {
-	set nop_type 4
     }
     { "i370-*-*" } {
 	set nop_type 3

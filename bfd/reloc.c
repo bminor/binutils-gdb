@@ -87,10 +87,9 @@ CODE_FRAGMENT
 .  {* The symbol to relocate against was undefined.  *}
 .  bfd_reloc_undefined,
 .
-.  {* The relocation was performed, but may not be ok - presently
-.     generated only when linking i960 coff files with i960 b.out
-.     symbols.  If this type is returned, the error_message argument
-.     to bfd_perform_relocation will be set.  *}
+.  {* The relocation was performed, but may not be ok.  If this type is
+.     returned, the error_message argument to bfd_perform_relocation
+.     will be set.  *}
 .  bfd_reloc_dangerous
 . }
 . bfd_reloc_status_type;
@@ -318,8 +317,7 @@ CODE_FRAGMENT
 .
 .  {* If this field is non null, then the supplied function is
 .     called rather than the normal function.  This allows really
-.     strange relocation methods to be accommodated (e.g., i960 callj
-.     instructions).  *}
+.     strange relocation methods to be accommodated.  *}
 .  bfd_reloc_status_type (*special_function)
 .    (bfd *, arelent *, struct bfd_symbol *, void *, asection *,
 .     bfd *, char **);
@@ -1739,8 +1737,6 @@ ENUMDOC
 of the relocation itself; sometimes they are relative to the start of
 the section containing the relocation.  It depends on the specific target.
 
-The 24-bit relocation is used in some Intel 960 configurations.
-
 ENUM
   BFD_RELOC_32_SECREL
 ENUMDOC
@@ -1890,11 +1886,6 @@ ENUMDOC
 displacements off that register.  These relocation types are
 handled specially, because the value the register will have is
 decided relatively late.
-
-ENUM
-  BFD_RELOC_I960_CALLJ
-ENUMDOC
-  Reloc types used for i960/b.out.
 
 ENUM
   BFD_RELOC_NONE
@@ -6223,73 +6214,6 @@ ENUMX
   BFD_RELOC_CRIS_32_IE
 ENUMDOC
   Relocs used in TLS code for CRIS.
-
-ENUM
-  BFD_RELOC_860_COPY
-ENUMX
-  BFD_RELOC_860_GLOB_DAT
-ENUMX
-  BFD_RELOC_860_JUMP_SLOT
-ENUMX
-  BFD_RELOC_860_RELATIVE
-ENUMX
-  BFD_RELOC_860_PC26
-ENUMX
-  BFD_RELOC_860_PLT26
-ENUMX
-  BFD_RELOC_860_PC16
-ENUMX
-  BFD_RELOC_860_LOW0
-ENUMX
-  BFD_RELOC_860_SPLIT0
-ENUMX
-  BFD_RELOC_860_LOW1
-ENUMX
-  BFD_RELOC_860_SPLIT1
-ENUMX
-  BFD_RELOC_860_LOW2
-ENUMX
-  BFD_RELOC_860_SPLIT2
-ENUMX
-  BFD_RELOC_860_LOW3
-ENUMX
-  BFD_RELOC_860_LOGOT0
-ENUMX
-  BFD_RELOC_860_SPGOT0
-ENUMX
-  BFD_RELOC_860_LOGOT1
-ENUMX
-  BFD_RELOC_860_SPGOT1
-ENUMX
-  BFD_RELOC_860_LOGOTOFF0
-ENUMX
-  BFD_RELOC_860_SPGOTOFF0
-ENUMX
-  BFD_RELOC_860_LOGOTOFF1
-ENUMX
-  BFD_RELOC_860_SPGOTOFF1
-ENUMX
-  BFD_RELOC_860_LOGOTOFF2
-ENUMX
-  BFD_RELOC_860_LOGOTOFF3
-ENUMX
-  BFD_RELOC_860_LOPC
-ENUMX
-  BFD_RELOC_860_HIGHADJ
-ENUMX
-  BFD_RELOC_860_HAGOT
-ENUMX
-  BFD_RELOC_860_HAGOTOFF
-ENUMX
-  BFD_RELOC_860_HAPC
-ENUMX
-  BFD_RELOC_860_HIGH
-ENUMX
-  BFD_RELOC_860_HIGOT
-ENUMX
-  BFD_RELOC_860_HIGOTOFF
-ENUMDOC
-  Intel i860 Relocations.
 
 ENUM
   BFD_RELOC_OR1K_REL_26

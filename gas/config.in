@@ -238,9 +238,6 @@
 /* a.out support? */
 #undef OBJ_MAYBE_AOUT
 
-/* b.out support? */
-#undef OBJ_MAYBE_BOUT
-
 /* COFF support? */
 #undef OBJ_MAYBE_COFF
 

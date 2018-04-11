@@ -11936,7 +11936,7 @@ case "${host}" in
 esac
 
 
-#We need this for the host.  BOUT header is in host order.
+#We need this for the host.
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether byte ordering is bigendian" >&5
 $as_echo_n "checking whether byte ordering is bigendian... " >&6; }
 if test "${ac_cv_c_bigendian+set}" = set; then :
@@ -12248,11 +12248,6 @@ $as_echo "#define STRICTCOFF 1" >>confdefs.h
 	   && test ${ac_default_x86_relax_relocations} = unset; then
 	  ac_default_x86_relax_relocations=0
 	fi
-	;;
-
-      i860-*-*)
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: GAS support for ${generic_target} is preliminary and a work in progress" >&5
-$as_echo "$as_me: WARNING: GAS support for ${generic_target} is preliminary and a work in progress" >&2;}
 	;;
 
       microblaze*)
@@ -12862,9 +12857,6 @@ if test `set . $formats ; shift ; echo $#` -gt 1 ; then
     case $fmt in
       aout)
 $as_echo "#define OBJ_MAYBE_AOUT 1" >>confdefs.h
-   ;;
-      bout)
-$as_echo "#define OBJ_MAYBE_BOUT 1" >>confdefs.h
    ;;
       coff)
 $as_echo "#define OBJ_MAYBE_COFF 1" >>confdefs.h

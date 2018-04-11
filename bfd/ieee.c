@@ -3567,34 +3567,6 @@ ieee_write_processor (bfd *abfd)
 	return FALSE;
       break;
 
-    case bfd_arch_i960:
-      switch (arch->mach)
-	{
-	default:
-	case bfd_mach_i960_core:
-	case bfd_mach_i960_ka_sa:
-	  if (! ieee_write_id (abfd, "80960KA"))
-	    return FALSE;
-	  break;
-
-	case bfd_mach_i960_kb_sb:
-	  if (! ieee_write_id (abfd, "80960KB"))
-	    return FALSE;
-	  break;
-
-	case bfd_mach_i960_ca:
-	  if (! ieee_write_id (abfd, "80960CA"))
-	    return FALSE;
-	  break;
-
-	case bfd_mach_i960_mc:
-	case bfd_mach_i960_xa:
-	  if (! ieee_write_id (abfd, "80960MC"))
-	    return FALSE;
-	  break;
-	}
-      break;
-
     case bfd_arch_m68k:
       {
 	const char *id;

@@ -141,7 +141,7 @@ case "${host}" in
 esac
 AC_SUBST(GDBINIT)
 
-#We need this for the host.  BOUT header is in host order.
+#We need this for the host.
 AC_C_BIGENDIAN
 
 te_file=generic
@@ -211,10 +211,6 @@ for this_target in $target $canon_targets ; do
 	   && test ${ac_default_x86_relax_relocations} = unset; then
 	  ac_default_x86_relax_relocations=0
 	fi
-	;;
-
-      i860-*-*)
-	AC_MSG_WARN(GAS support for ${generic_target} is preliminary and a work in progress)
 	;;
 
       microblaze*)
@@ -737,7 +733,6 @@ if test `set . $formats ; shift ; echo $#` -gt 1 ; then
   for fmt in $formats ; do
     case $fmt in
       aout)	AC_DEFINE(OBJ_MAYBE_AOUT, 1,    [a.out support?])   ;;
-      bout)	AC_DEFINE(OBJ_MAYBE_BOUT, 1,    [b.out support?])   ;;
       coff)	AC_DEFINE(OBJ_MAYBE_COFF, 1,    [COFF support?])    ;;
       ecoff)	AC_DEFINE(OBJ_MAYBE_ECOFF, 1,   [ECOFF support?])   ;;
       elf)	AC_DEFINE(OBJ_MAYBE_ELF, 1,     [ELF support?])     ;;

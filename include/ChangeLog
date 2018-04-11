@@ -1,3 +1,18 @@
+2018-04-11  Alan Modra  <amodra@gmail.com>
+
+	* aout/adobe.h: Delete.
+	* aout/reloc.h: Delete.
+	* coff/i860.h: Delete.
+	* coff/i960.h: Delete.
+	* elf/i860.h: Delete.
+	* elf/i960.h: Delete.
+	* opcode/i860.h: Delete.
+	* opcode/i960.h: Delete.
+	* aout/aout64.h (enum reloc_type): Trim off 29k and other unused values.
+	* aout/ar.h (ARMAGB): Remove.
+	* coff/internal.h (struct internal_aouthdr, struct internal_scnhdr,
+	union internal_auxent): Remove i960 support.
+
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
 	* elf/ppc.h (R_PPC_PLTSEQ, R_PPC_PLTCALL): Define.

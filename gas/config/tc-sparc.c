@@ -365,10 +365,6 @@ sparc_target_format (void)
 #endif
 #endif
 
-#ifdef OBJ_BOUT
-  return "b.out.big";
-#endif
-
 #ifdef OBJ_COFF
 #ifdef TE_LYNX
   return "coff-sparc-lynx";

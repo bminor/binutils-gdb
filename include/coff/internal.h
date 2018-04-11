@@ -257,9 +257,6 @@ struct internal_aouthdr
   bfd_vma text_start;		/* base of text used for this file */
   bfd_vma data_start;		/* base of data used for this file */
 
-  /* i960 stuff */
-  unsigned long tagentries;	/* number of tag entries to follow */
-
   /* RS/6000 stuff */
   bfd_vma o_toc;		/* address of TOC			*/
   short o_snentry;		/* section number for entry point */
@@ -416,7 +413,6 @@ struct internal_scnhdr
   unsigned long s_nreloc;	/* number of relocation entries	*/
   unsigned long s_nlnno;	/* number of line number entries*/
   long s_flags;			/* flags			*/
-  long s_align;			/* used on I960			*/
   unsigned char s_page;         /* TI COFF load page            */
 };
 
@@ -668,28 +664,6 @@ union internal_auxent
 /* 		14	??? */
 #define	XMC_TC0	15		/* Read-write TOC anchor */
 #define XMC_TD	16		/* Read-write data in TOC */
-
-  /******************************************
-   *  I960-specific *2nd* aux. entry formats
-   ******************************************/
-  struct
-  {
-    /* This is a very old typo that keeps getting propagated. */
-#define x_stdindx x_stindx
-    long x_stindx;		/* sys. table entry */
-  }      x_sc;			/* system call entry */
-
-  struct
-  {
-    unsigned long x_balntry;	/* BAL entry point */
-  }      x_bal;			/* BAL-callable function */
-
-  struct
-  {
-    unsigned long x_timestamp;	/* time stamp */
-    char x_idstring[20];	/* producer identity string */
-  }      x_ident;		/* Producer ident info */
-
 };
 
 /********************** RELOCATION DIRECTIVES **********************/

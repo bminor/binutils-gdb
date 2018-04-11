@@ -45,8 +45,6 @@
 #define ARCH_hppa
 #define ARCH_i370
 #define ARCH_i386
-#define ARCH_i860
-#define ARCH_i960
 #define ARCH_ia64
 #define ARCH_ip2k
 #define ARCH_iq2000
@@ -220,16 +218,6 @@ disassembler (enum bfd_architecture a,
     case bfd_arch_l1om:
     case bfd_arch_k1om:
       disassemble = print_insn_i386;
-      break;
-#endif
-#ifdef ARCH_i860
-    case bfd_arch_i860:
-      disassemble = print_insn_i860;
-      break;
-#endif
-#ifdef ARCH_i960
-    case bfd_arch_i960:
-      disassemble = print_insn_i960;
       break;
 #endif
 #ifdef ARCH_ia64

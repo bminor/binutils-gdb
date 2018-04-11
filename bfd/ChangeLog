@@ -1,3 +1,33 @@
+2018-04-11  Alan Modra  <amodra@gmail.com>
+
+	* aout-adobe.c: Delete.
+	* bout.c: Delete.
+	* coff-i860.c: Delete.
+	* coff-i960.c: Delete.
+	* cpu-i860.c: Delete.
+	* cpu-i960.c: Delete.
+	* elf32-i860.c: Delete.
+	* elf32-i960.c: Delete.
+	* hosts/i860mach3.h: Delete.
+	* Makefile.am: Remove i860, i960, bout, and adobe support.
+	* archures.c: Remove i860 and i960 support.
+	* coffcode.h: Likewise.
+	* reloc.c: Likewise.
+	* aoutx.h: Comment updates.
+	* archive.c: Remove BOUT and i960 support.
+	* bfd.c: Remove BOUT support.
+	* coffswap.h: Remove i960 support.
+	* config.bfd: Remove i860, i960 and adobe targets.
+	* configure.ac: Remove adode, bout, i860, i960, icoff targets.
+	* targets.c: Likewise.
+	* ieee.c: Remove i960 support.
+	* mach-o.c: Remove i860 support.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2018-04-09  Maciej W. Rozycki  <macro@mips.com>
 
 	* elf64-mips.c (mips_elf64_write_rel): Handle a NULL BFD pointer

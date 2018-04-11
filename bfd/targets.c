@@ -601,7 +601,6 @@ extern const bfd_target am33_elf32_linux_vec;
 extern const bfd_target aout0_be_vec;
 extern const bfd_target aout64_vec;
 extern const bfd_target aout_vec;
-extern const bfd_target aout_adobe_vec;
 extern const bfd_target arc_elf32_be_vec;
 extern const bfd_target arc_elf32_le_vec;
 extern const bfd_target arm_aout_be_vec;
@@ -634,8 +633,6 @@ extern const bfd_target arm_pei_wince_le_vec;
 extern const bfd_target avr_elf32_vec;
 extern const bfd_target bfin_elf32_vec;
 extern const bfd_target bfin_elf32_fdpic_vec;
-extern const bfd_target bout_be_vec;
-extern const bfd_target bout_le_vec;
 extern const bfd_target cr16_elf32_vec;
 extern const bfd_target cr16c_elf32_vec;
 extern const bfd_target cris_aout_vec;
@@ -688,10 +685,6 @@ extern const bfd_target i386_nlm32_vec;
 extern const bfd_target i386_pe_vec;
 extern const bfd_target i386_pei_vec;
 extern const bfd_target iamcu_elf32_vec;
-extern const bfd_target i860_coff_vec;
-extern const bfd_target i860_elf32_vec;
-extern const bfd_target i860_elf32_le_vec;
-extern const bfd_target i960_elf32_vec;
 extern const bfd_target ia64_elf32_be_vec;
 extern const bfd_target ia64_elf32_hpux_be_vec;
 extern const bfd_target ia64_elf64_be_vec;
@@ -699,8 +692,6 @@ extern const bfd_target ia64_elf64_le_vec;
 extern const bfd_target ia64_elf64_hpux_be_vec;
 extern const bfd_target ia64_elf64_vms_vec;
 extern const bfd_target ia64_pei_vec;
-extern const bfd_target icoff_be_vec;
-extern const bfd_target icoff_le_vec;
 extern const bfd_target ieee_vec;
 extern const bfd_target ip2k_elf32_vec;
 extern const bfd_target iq2000_elf32_vec;
@@ -1002,7 +993,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	   which kind of a.out file it is.  */
 	&aout_vec,
 #endif
-	&aout_adobe_vec,
 
 	&arc_elf32_be_vec,
 	&arc_elf32_le_vec,
@@ -1043,9 +1033,6 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&bfin_elf32_vec,
 	&bfin_elf32_fdpic_vec,
-
-	&bout_be_vec,
-	&bout_le_vec,
 
 	&cr16_elf32_vec,
 	&cr16c_elf32_vec,
@@ -1130,12 +1117,6 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&iamcu_elf32_vec,
 
-	&i860_coff_vec,
-	&i860_elf32_vec,
-	&i860_elf32_le_vec,
-
-	&i960_elf32_vec,
-
 #ifdef BFD64
 #if 0
 	&ia64_elf32_be_vec,
@@ -1147,9 +1128,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&ia64_elf64_vms_vec,
 	&ia64_pei_vec,
 #endif
-
-	&icoff_be_vec,
-	&icoff_le_vec,
 
 	&ieee_vec,
 

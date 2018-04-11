@@ -33,9 +33,9 @@ DESCRIPTION
 	The support is split into a basic support file @file{aoutx.h}
 	and other files which derive functions from the base. One
 	derivation file is @file{aoutf1.h} (for a.out flavour 1), and
-	adds to the basic a.out functions support for sun3, sun4, 386
-	and 29k a.out files, to create a target jump vector for a
-	specific target.
+	adds to the basic a.out functions support for sun3, sun4, and
+	386 a.out files, to create a target jump vector for a specific
+	target.
 
 	This information is further split out into more specific files
 	for each machine, including @file{sunos.c} for sun3 and sun4,
@@ -136,10 +136,9 @@ DESCRIPTION
 	The file @file{aoutx.h} provides for both the @emph{standard}
 	and @emph{extended} forms of a.out relocation records.
 
-	The standard records contain only an
-	address, a symbol index, and a type field. The extended records
-	(used on 29ks and sparcs) also have a full integer for an
-	addend.  */
+	The standard records contain only an address, a symbol index,
+	and a type field.  The extended records also have a full
+	integer for an addend.  */
 
 #ifndef CTOR_TABLE_RELOC_HOWTO
 #define CTOR_TABLE_RELOC_IDX 2

@@ -26,7 +26,6 @@ run_dump_test "lns-duplicate"
 # defined a macro...
 if {
         ![istarget i370-*-*]
-     && ![istarget i960-*-*]
      && ![istarget s390*-*-*]
 } {
     # Use alternate file for targets using DW_LNS_fixed_advance_pc opcodes.

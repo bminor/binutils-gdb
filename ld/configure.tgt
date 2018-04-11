@@ -404,17 +404,6 @@ x86_64-*-nacl*)		targ_emul=elf32_x86_64_nacl
 			targ_extra_libpath=$targ_extra_emuls
 			tdir_elf_i386_nacl=`echo ${targ_alias} | sed -e 's/x86_64/i386/'`
 			;;
-i860-*-coff)		targ_emul=coff_i860 ;;
-i860-stardent-sysv4* | i860-stardent-elf*)
-			targ_emul=elf32_i860
-			;;
-i960-wrs-vxworks5.0*)	targ_emul=gld960 ;;
-i960-wrs-vxworks5*)	targ_emul=gld960coff ;;
-i960-wrs-vxworks*)	targ_emul=gld960 ;;
-i960-*-coff)		targ_emul=gld960coff ;;
-i960-intel-nindy)	targ_emul=gld960 ;;
-i960-*-elf*)		targ_emul=elf32_i960
-			;;
 ia16-*-elf*)		targ_emul=elf_i386 targ_extra_emuls=i386msdos ;;
 ia64-*-elf*)		targ_emul=elf64_ia64 ;;
 ia64-*-freebsd* | ia64-*-kfreebsd*-gnu)

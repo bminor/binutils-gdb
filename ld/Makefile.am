@@ -209,7 +209,6 @@ ALL_EMULATION_SOURCES = \
 	eavrxmega6.c \
 	eavrxmega7.c \
 	eavrtiny.c   \
-	ecoff_i860.c \
 	ecoff_sparc.c \
 	ecrisaout.c \
 	ecriself.c \
@@ -220,8 +219,6 @@ ALL_EMULATION_SOURCES = \
 	ed30velf.c \
 	edelta68.c \
 	eelf32_dlx.c \
-	eelf32_i860.c \
-	eelf32_i960.c \
 	eelf32_sparc.c \
 	eelf32_sparc_sol2.c \
 	eelf32_sparc_vxworks.c \
@@ -297,8 +294,6 @@ ALL_EMULATION_SOURCES = \
 	eelf_i386_vxworks.c \
 	eelf_iamcu.c \
 	eelf_s390.c \
-	egld960.c \
-	egld960coff.c \
 	eh8300.c \
 	eh8300elf.c \
 	eh8300elf_linux.c \
@@ -343,7 +338,6 @@ ALL_EMULATION_SOURCES = \
 	ei386nw.c \
 	ei386pe.c \
 	ei386pe_posix.c \
-	elnk960.c \
 	em32relf.c \
 	em32relf_linux.c \
 	em32rlelf.c \
@@ -927,9 +921,6 @@ eavrtiny.c: $(srcdir)/emulparams/avrtiny.sh \
   $(srcdir)/emultempl/avrelf.em $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
 
-ecoff_i860.c: $(srcdir)/emulparams/coff_i860.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i860coff.sc ${GEN_DEPENDS}
-
 ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
 
@@ -959,12 +950,6 @@ edelta68.c: $(srcdir)/emulparams/delta68.sh \
 
 eelf32_dlx.c: $(srcdir)/emulparams/elf32_dlx.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/dlx.sc ${GEN_DEPENDS}
-
-eelf32_i860.c: $(srcdir)/emulparams/elf32_i860.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eelf32_i960.c: $(srcdir)/emulparams/elf32_i960.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -1378,12 +1363,6 @@ eelf_iamcu.c: $(srcdir)/emulparams/elf_iamcu.sh \
 eelf_s390.c: $(srcdir)/emulparams/elf_s390.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-egld960.c: $(srcdir)/emulparams/gld960.sh \
-  $(srcdir)/emultempl/gld960.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
-
-egld960coff.c: $(srcdir)/emulparams/gld960coff.sh \
-  $(srcdir)/emultempl/gld960c.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
-
 eh8300.c: $(srcdir)/emulparams/h8300.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300.sc ${GEN_DEPENDS}
 
@@ -1532,9 +1511,6 @@ ei386pe_posix.c: $(srcdir)/emulparams/i386pe_posix.sh \
 
 ei386pep.c: $(srcdir)/emulparams/i386pep.sh \
   $(srcdir)/emultempl/pep.em $(srcdir)/scripttempl/pep.sc ${GEN_DEPENDS}
-
-elnk960.c: $(srcdir)/emulparams/lnk960.sh \
-  $(srcdir)/emultempl/lnk960.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
 
 em32relf.c: $(srcdir)/emulparams/m32relf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

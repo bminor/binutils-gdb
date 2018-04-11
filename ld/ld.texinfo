@@ -23,7 +23,6 @@
 @set C6X
 @set H8300
 @set HPPA
-@set I960
 @set M68HC11
 @set M68K
 @set MIPS
@@ -134,9 +133,6 @@ in the section entitled ``GNU Free Documentation License''.
 @end ifset
 @ifset Renesas
 * Renesas::                     ld and other Renesas micros
-@end ifset
-@ifset I960
-* i960::                        ld and the Intel 960 family
 @end ifset
 @ifset ARM
 * ARM::				ld and the ARM family
@@ -380,23 +376,6 @@ finds an object with an audit entry while searching for shared libraries,
 it will add a corresponding @code{DT_DEPAUDIT} entry in the output file.
 This option is only meaningful on ELF platforms supporting the rtld-audit
 interface.
-
-@ifset I960
-@cindex architectures
-@kindex -A @var{arch}
-@item -A @var{architecture}
-@kindex --architecture=@var{arch}
-@itemx --architecture=@var{architecture}
-In the current release of @command{ld}, this option is useful only for the
-Intel 960 family of architectures.  In that @command{ld} configuration, the
-@var{architecture} argument identifies the particular architecture in
-the 960 family, enabling some safeguards and modifying the
-archive-library search path.  @xref{i960,,@command{ld} and the Intel 960
-family}, for details.
-
-Future releases of @command{ld} may support similar functionality for
-other architecture families.
-@end ifset
 
 @ifclear SingleFormat
 @cindex binary input format
@@ -1859,9 +1838,6 @@ This option is only supported on a few targets.
 @end ifset
 @ifset H8300
 @xref{H8/300,,@command{ld} and the H8/300}.
-@end ifset
-@ifset I960
-@xref{i960,, @command{ld} and the Intel 960 family}.
 @end ifset
 @ifset XTENSA
 @xref{Xtensa,, @command{ld} and Xtensa Processors}.
@@ -6562,9 +6538,6 @@ functionality are not listed.
 @ifset H8300
 * H8/300::                      @command{ld} and the H8/300
 @end ifset
-@ifset I960
-* i960::                        @command{ld} and the Intel 960 family
-@end ifset
 @ifset M68HC11
 * M68HC11/68HC12::		@code{ld} and the Motorola 68HC11 and 68HC12 families
 @end ifset
@@ -6689,63 +6662,6 @@ H8/500, and SH chips.  No special features, commands, or command-line
 options are required for these chips.
 @end ifset
 @end ifclear
-
-@ifset I960
-@ifclear GENERIC
-@raisesections
-@end ifclear
-
-@node i960
-@section @command{ld} and the Intel 960 Family
-
-@cindex i960 support
-
-You can use the @samp{-A@var{architecture}} command line option to
-specify one of the two-letter names identifying members of the 960
-family; the option specifies the desired output target, and warns of any
-incompatible instructions in the input files.  It also modifies the
-linker's search strategy for archive libraries, to support the use of
-libraries specific to each particular architecture, by including in the
-search loop names suffixed with the string identifying the architecture.
-
-For example, if your @command{ld} command line included @w{@samp{-ACA}} as
-well as @w{@samp{-ltry}}, the linker would look (in its built-in search
-paths, and in any paths you specify with @samp{-L}) for a library with
-the names
-
-@smallexample
-@group
-try
-libtry.a
-tryca
-libtryca.a
-@end group
-@end smallexample
-
-@noindent
-The first two possibilities would be considered in any event; the last
-two are due to the use of @w{@samp{-ACA}}.
-
-You can meaningfully use @samp{-A} more than once on a command line, since
-the 960 architecture family allows combination of target architectures; each
-use will add another pair of name variants to search for when @w{@samp{-l}}
-specifies a library.
-
-@cindex @option{--relax} on i960
-@cindex relaxing on i960
-@command{ld} supports the @samp{--relax} option for the i960 family.  If
-you specify @samp{--relax}, @command{ld} finds all @code{balx} and
-@code{calx} instructions whose targets are within 24 bits, and turns
-them into 24-bit program-counter relative @code{bal} and @code{cal}
-instructions, respectively.  @command{ld} also turns @code{cal}
-instructions into @code{bal} instructions when it determines that the
-target subroutine is a leaf routine (that is, the target subroutine does
-not itself call any subroutines).
-
-@ifclear GENERIC
-@lowersections
-@end ifclear
-@end ifset
 
 @ifset ARM
 @ifclear GENERIC

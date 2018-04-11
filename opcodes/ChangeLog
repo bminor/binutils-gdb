@@ -1,3 +1,15 @@
+2018-04-11  Alan Modra  <amodra@gmail.com>
+
+	* opcodes/i860-dis.c: Delete.
+	* opcodes/i960-dis.c: Delete.
+	* Makefile.am: Remove i860 and i960 support.
+	* configure.ac: Likewise.
+	* disassemble.c: Likewise.
+	* disassemble.h: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2018-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23025

@@ -60,8 +60,6 @@ CPU_DOCS = \
 	c-hppa.texi \
 	c-i370.texi \
 	c-i386.texi \
-	c-i860.texi \
-	c-i960.texi \
 	c-ip2k.texi \
 	c-lm32.texi \
 	c-m32c.texi \

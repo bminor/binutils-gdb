@@ -46,11 +46,6 @@ if { [is_elf_format] } then {
       return
     }
 
-    # not yet supported by i960
-    if {[istarget "i960-*-*"]} {
-      return
-    }
-
     run_dump_test "symver0" 
     run_dump_test "symver1" 
     run_error_test "symver2" ""

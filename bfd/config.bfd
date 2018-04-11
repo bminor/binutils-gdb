@@ -81,8 +81,6 @@ case $targ in
  i[3-7]86-*-os9k | \
  i[3-7]86-none-* | \
  i[3-7]86-*-aout* | i[3-7]86*-*-vsta* | \
- i860-*-* | \
- i960-*-* | \
  m68*-motorola-sysv* | m68*-hp-bsd* | m68*-*-aout* | \
  m68*-*-coff* | m68*-*-sysv* | \
  m68*-*-hpux* | \
@@ -115,7 +113,6 @@ case $targ in
  we32k-*-* | \
  w65-*-* | \
  *-*-ieee* | \
- *-adobe-* | \
  *-sony-* | \
  *-tandem-* | \
  i370-* | \
@@ -131,13 +128,15 @@ case $targ in
 esac
 
 case $targ in
+ *-adobe-* | \
  *-go32-rtems* | \
  *-*-rtemsaout* | \
  *-*-rtemscoff* | \
  a29k-* | \
  arm-*-oabi | \
  hppa*-*-rtems* | \
- i960-*-rtems* | \
+ i860-*-* | \
+ i960-*-* | \
  m68*-*-lynxos* | \
  m68*-apollo-* | \
  m68*-apple-aux* | \
@@ -880,37 +879,6 @@ case "${targ}" in
   i[3-7]86-*-chaos)
     targ_defvec=i386_elf32_vec
     targ_selfvecs="iamcu_elf32_vec i386chaos_vec"
-    ;;
-
-  i860-*-mach3* | i860-*-osf1* | i860-*-coff*)
-    targ_defvec=i860_coff_vec
-    ;;
-  i860-stardent-sysv4* | i860-stardent-elf*)
-    targ_defvec=i860_elf32_le_vec
-    targ_selvecs="i860_elf32_vec i860_elf32_le_vec"
-    ;;
-  i860-*-sysv4* | i860-*-elf*)
-    targ_defvec=i860_elf32_vec
-    ;;
-
-  i960-*-vxworks4* | i960-*-vxworks5.0)
-    targ_defvec=bout_le_vec
-    targ_selvecs="bout_be_vec icoff_le_vec icoff_be_vec ieee_vec"
-    targ_underscore=yes
-    ;;
-  i960-*-vxworks5.* | i960-*-coff* | i960-*-sysv*)
-    targ_defvec=icoff_le_vec
-    targ_selvecs="icoff_be_vec bout_le_vec bout_be_vec ieee_vec"
-    targ_underscore=yes
-    ;;
-  i960-*-vxworks* | i960-*-aout* | i960-*-bout* | i960-*-nindy*)
-    targ_defvec=bout_le_vec
-    targ_selvecs="bout_be_vec icoff_le_vec icoff_be_vec ieee_vec"
-    targ_underscore=yes
-    ;;
-  i960-*-elf*)
-    targ_defvec=i960_elf32_vec
-    targ_selvecs="icoff_le_vec icoff_be_vec"
     ;;
 
   ia16-*-elf)
@@ -1852,11 +1820,6 @@ case "${targ}" in
 
   *-*-ieee*)
     targ_defvec=ieee_vec
-    ;;
-
-  *-adobe-*)
-    targ_defvec=aout_adobe_vec
-    targ_underscore=yes
     ;;
 
   *-sony-*)

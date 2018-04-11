@@ -3561,12 +3561,6 @@ ieee_regno_to_genreg (bfd *abfd, int r)
 	r += 2;
       break;
 
-    case bfd_arch_i960:
-      /* Stabs uses 0 to 15 for r0 to r15, 16 to 31 for g0 to g15, and
-         32 to 35 for fp0 to fp3.  */
-      --r;
-      break;
-
     default:
       break;
     }
@@ -3586,12 +3580,6 @@ ieee_genreg_to_regno (bfd *abfd, int r)
          numbers.  */
       if (r >= 18)
 	r -= 2;
-      break;
-
-    case bfd_arch_i960:
-      /* Stabs uses 0 to 15 for r0 to r15, 16 to 31 for g0 to g15, and
-         32 to 35 for fp0 to fp3.  */
-      ++r;
       break;
 
     default:

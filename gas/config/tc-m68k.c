@@ -5405,7 +5405,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
   return md_relax_table[fragP->fr_subtype].rlx_length;
 }
 
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
+#if defined(OBJ_AOUT)
 /* the bit-field entries in the relocation_info struct plays hell
    with the byte-order problems of cross-assembly.  So as a hack,
    I added this mach. dependent ri twiddler.  Ugly, but it gets
@@ -5433,7 +5433,7 @@ md_ri_to_chars (char *the_bytes, struct reloc_info_generic *ri)
 
 #endif
 
-#endif /* OBJ_AOUT or OBJ_BOUT */
+#endif /* OBJ_AOUT */
 
 #ifndef WORKING_DOT_WORD
 int md_short_jump_size = 4;

@@ -144,8 +144,6 @@ TARGET_LIBOPCODES_CFILES = \
 	i370-opc.c \
 	i386-dis.c \
 	i386-opc.c \
-	i860-dis.c \
-	i960-dis.c \
 	ia64-dis.c \
 	ia64-opc.c \
 	ip2k-asm.c \

@@ -926,9 +926,7 @@ fixup_segment (fixS *fixP, segT this_segment)
   /* If the linker is doing the relaxing, we must not do any fixups.
 
      Well, strictly speaking that's not true -- we could do any that
-     are PC-relative and don't cross regions that could change size.
-     And for the i960 we might be able to turn callx/callj into bal
-     anyways in cases where we know the maximum displacement.  */
+     are PC-relative and don't cross regions that could change size.  */
   if (linkrelax && TC_LINKRELAX_FIXUP (this_segment))
     {
       for (; fixP; fixP = fixP->fx_next)

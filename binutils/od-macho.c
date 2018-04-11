@@ -106,7 +106,6 @@ static const bfd_mach_o_xlat_name bfd_mach_o_cpu_name[] =
   { "arm", BFD_MACH_O_CPU_TYPE_ARM },
   { "mc88000", BFD_MACH_O_CPU_TYPE_MC88000 },
   { "sparc", BFD_MACH_O_CPU_TYPE_SPARC },
-  { "i860", BFD_MACH_O_CPU_TYPE_I860 },
   { "alpha", BFD_MACH_O_CPU_TYPE_ALPHA },
   { "powerpc", BFD_MACH_O_CPU_TYPE_POWERPC },
   { "powerpc_64", BFD_MACH_O_CPU_TYPE_POWERPC_64 },

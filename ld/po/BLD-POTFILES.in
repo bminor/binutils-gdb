@@ -66,7 +66,6 @@ eavrxmega4.c
 eavrxmega5.c
 eavrxmega6.c
 eavrxmega7.c
-ecoff_i860.c
 ecoff_sparc.c
 ecrisaout.c
 ecriself.c
@@ -77,8 +76,6 @@ ed30v_o.c
 ed30velf.c
 edelta68.c
 eelf32_dlx.c
-eelf32_i860.c
-eelf32_i960.c
 eelf32_sparc.c
 eelf32_sparc_sol2.c
 eelf32_sparc_vxworks.c
@@ -211,8 +208,6 @@ eelf_x86_64_cloudabi.c
 eelf_x86_64_fbsd.c
 eelf_x86_64_nacl.c
 eelf_x86_64_sol2.c
-egld960.c
-egld960coff.c
 eh8300.c
 eh8300elf.c
 eh8300elf_linux.c
@@ -259,7 +254,6 @@ ei386nw.c
 ei386pe.c
 ei386pe_posix.c
 ei386pep.c
-elnk960.c
 em32relf.c
 em32relf_linux.c
 em32rlelf.c

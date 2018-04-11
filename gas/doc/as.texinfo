@@ -32,16 +32,13 @@
 @set COFF-ELF
 @end ifset
 @ifset AOUT
-@set aout-bout
+@set aout
 @end ifset
 @ifset ARM/Thumb
 @set ARM
 @end ifset
 @ifset Blackfin
 @set Blackfin
-@end ifset
-@ifset BOUT
-@set aout-bout
 @end ifset
 @ifset H8/300
 @set H8
@@ -336,14 +333,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @emph{Target i386 options:}
    [@b{--32}|@b{--x32}|@b{--64}] [@b{-n}]
    [@b{-march}=@var{CPU}[+@var{EXTENSION}@dots{}]] [@b{-mtune}=@var{CPU}]
-@end ifset
-@ifset I960
-
-@emph{Target i960 options:}
-@c see md_parse_option in tc-i960.c
-   [@b{-ACA}|@b{-ACA_A}|@b{-ACB}|@b{-ACC}|@b{-AKA}|@b{-AKB}|
-    @b{-AKC}|@b{-AMC}]
-   [@b{-b}] [@b{-no-relax}]
 @end ifset
 @ifset IA64
 
@@ -1069,24 +1058,6 @@ an i386 processor.
 @end ifset
 
 @c man begin OPTIONS
-@ifset I960
-The following options are available when @value{AS} is configured for the
-Intel 80960 processor.
-
-@table @gcctabopt
-@item -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC
-Specify which variant of the 960 architecture is the target.
-
-@item -b
-Add code to collect statistics about branches taken.
-
-@item -no-relax
-Do not alter compare-and-branch instructions for long displacements;
-error if necessary.
-
-@end table
-@end ifset
-
 @ifset IP2K
 The following options are available when @value{AS} is configured for the
 Ubicom IP2K series.
@@ -1995,10 +1966,6 @@ For the @value{TARGET} target, @command{@value{AS}} is configured to produce
 @value{OBJ-NAME} format object files.
 @end ifclear
 @c The following should exhaust all configs that set MULTI-OBJ, ideally
-@ifset I960
-On the @value{TARGET}, @command{@value{AS}} can be configured to produce either
-@code{b.out} or COFF format object files.
-@end ifset
 @ifset HPPA
 On the @value{TARGET}, @command{@value{AS}} can be configured to produce either
 SOM or ELF format object files.
@@ -2104,16 +2071,7 @@ is itself synthesized from other files.  @command{@value{AS}} understands the
 @kindex .o
 Every time you run @command{@value{AS}} it produces an output file, which is
 your assembly language program translated into numbers.  This file
-is the object file.  Its default name is
-@ifclear BOUT
-@code{a.out}.
-@end ifclear
-@ifset BOUT
-@ifset GENERIC
-@code{a.out}, or
-@end ifset
-@code{b.out} when @command{@value{AS}} is configured for the Intel 80960.
-@end ifset
+is the object file.  Its default name is @code{a.out}.
 You can give it another name by using the @option{-o} option.  Conventionally,
 object file names end with @file{.o}.  The default name is used for historical
 reasons: older assemblers were capable of assembling self-contained programs
@@ -2447,8 +2405,8 @@ displayed for a given single line of source input.  The default value is 4.
 @cindex MRI compatibility mode
 The @option{-M} or @option{--mri} option selects MRI compatibility mode.  This
 changes the syntax and pseudo-op handling of @command{@value{AS}} to make it
-compatible with the @code{ASM68K} or the @code{ASM960} (depending upon the
-configured target) assembler from Microtec Research.  The exact nature of the
+compatible with the @code{ASM68K} assembler from Microtec Research.
+The exact nature of the
 MRI syntax will not be documented here; see the MRI manuals for more
 information.  Note in particular that the handling of macros and macro
 arguments is somewhat different.  The purpose of this option is to permit
@@ -2545,30 +2503,6 @@ The m68k @code{OPT} @code{D} option is the default, unlike the MRI assembler.
 
 The m68k @code{XREF} pseudo-op is ignored.
 
-@item @code{.debug} pseudo-op
-
-The i960 @code{.debug} pseudo-op is not supported.
-
-@item @code{.extended} pseudo-op
-
-The i960 @code{.extended} pseudo-op is not supported.
-
-@item @code{.list} pseudo-op.
-
-The various options of the i960 @code{.list} pseudo-op are not supported.
-
-@item @code{.optimize} pseudo-op
-
-The i960 @code{.optimize} pseudo-op is not supported.
-
-@item @code{.output} pseudo-op
-
-The i960 @code{.output} pseudo-op is not supported.
-
-@item @code{.setreal} pseudo-op
-
-The i960 @code{.setreal} pseudo-op is not supported.
-
 @end itemize
 
 @node MD
@@ -2602,23 +2536,7 @@ disable this behaviour.
 @cindex naming object file
 @cindex object file name
 There is always one object file output when you run @command{@value{AS}}.  By
-default it has the name
-@ifset GENERIC
-@ifset I960
-@file{a.out} (or @file{b.out}, for Intel 960 targets only).
-@end ifset
-@ifclear I960
-@file{a.out}.
-@end ifclear
-@end ifset
-@ifclear GENERIC
-@ifset I960
-@file{b.out}.
-@end ifset
-@ifclear I960
-@file{a.out}.
-@end ifclear
-@end ifclear
+default it has the name @file{a.out}.
 You use this option (which takes exactly one filename) to give the
 object file a different name.
 
@@ -3153,9 +3071,6 @@ are floating point numbers, described below.
 * Bignums::                     Bignums
 * Flonums::                     Flonums
 @ifclear GENERIC
-@ifset I960
-* Bit Fields::                  Bit Fields
-@end ifset
 @end ifclear
 @end menu
 
@@ -3230,15 +3145,11 @@ A letter, to tell @command{@value{AS}} the rest of the number is a flonum.
 4.2 assembler seems to allow any of @samp{defghDEFGH}.)
 @end ignore
 
-On the H8/300, Renesas / SuperH SH,
-and AMD 29K architectures, the letter must be
+On the H8/300 and Renesas / SuperH SH architectures, the letter must be
 one of the letters @samp{DFPRSX} (in upper or lower case).
 
 On the ARC, the letter must be one of the letters @samp{DFRS}
 (in upper or lower case).
-
-On the Intel 960 architecture, the letter must be
-one of the letters @samp{DFT} (in upper or lower case).
 
 On the HPPA architecture, the letter must be @samp{E} (upper case only).
 @end ifset
@@ -3251,9 +3162,6 @@ One of the letters @samp{DFPRSX} (in upper or lower case).
 @end ifset
 @ifset HPPA
 The letter @samp{E} (upper case only).
-@end ifset
-@ifset I960
-One of the letters @samp{DFT} (in upper or lower case).
 @end ifset
 @end ifclear
 
@@ -3289,41 +3197,6 @@ present.  The floating point number has the usual base-10 value.
 @command{@value{AS}} does all processing using integers.  Flonums are computed
 independently of any floating point hardware in the computer running
 @command{@value{AS}}.
-
-@ifclear GENERIC
-@ifset I960
-@c Bit fields are written as a general facility but are also controlled
-@c by a conditional-compilation flag---which is as of now (21mar91)
-@c turned on only by the i960 config of GAS.
-@node Bit Fields
-@subsubsection Bit Fields
-
-@cindex bit fields
-@cindex constants, bit field
-You can also define numeric constants as @dfn{bit fields}.
-Specify two numbers separated by a colon---
-@example
-@var{mask}:@var{value}
-@end example
-@noindent
-@command{@value{AS}} applies a bitwise @sc{and} between @var{mask} and
-@var{value}.
-
-The resulting number is then packed
-@ifset GENERIC
-@c this conditional paren in case bit fields turned on elsewhere than 960
-(in host-dependent byte order)
-@end ifset
-into a field whose width depends on which assembler directive has the
-bit-field as its argument.  Overflow (a result from the bitwise and
-requiring more binary digits to represent) is not an error; instead,
-more constants are generated, of the specified width, beginning with the
-least significant digits.@refill
-
-The directives @code{.byte}, @code{.hword}, @code{.int}, @code{.long},
-@code{.short}, and @code{.word} accept bit-field arguments.
-@end ifset
-@end ifclear
 
 @node Sections
 @chapter Sections and Relocation
@@ -3486,7 +3359,7 @@ use of @command{@value{AS}} and have no meaning except during assembly.
 @cindex sections, named
 @item named sections
 @end ifset
-@ifset aout-bout
+@ifset aout
 @cindex text section
 @cindex data section
 @itemx text section
@@ -3495,7 +3368,7 @@ use of @command{@value{AS}} and have no meaning except during assembly.
 These sections hold your program.  @command{@value{AS}} and @code{@value{LD}} treat them as
 separate but equal sections.  Anything you can say of one section is
 true of another.
-@c @ifset aout-bout
+@c @ifset aout
 When the program is running, however, it is
 customary for the text section to be unalterable.  The
 text section is often shared among processes: it contains
@@ -3615,7 +3488,7 @@ it in the expr section.
 
 @cindex numbered subsections
 @cindex grouping data
-@ifset aout-bout
+@ifset aout
 Assembled bytes
 @ifset COFF-ELF
 conventionally
@@ -3627,10 +3500,10 @@ You may have separate groups of
 data in named sections
 @end ifset
 @ifclear GENERIC
-@ifclear aout-bout
+@ifclear aout
 data in named sections
 @end ifclear
-@ifset aout-bout
+@ifset aout
 text or data
 @end ifset
 @end ifclear
@@ -3658,14 +3531,6 @@ of @command{@value{AS}}.)
 On the H8/300 platform, each subsection is zero-padded to a word
 boundary (two bytes).
 The same is true on the Renesas SH.
-@end ifset
-@ifset I960
-@c FIXME section padding (alignment)?
-@c Rich Pixley says padding here depends on target obj code format; that
-@c doesn't seem particularly useful to say without further elaboration,
-@c so for now I say nothing about it.  If this is a generic BFD issue,
-@c these paragraphs might need to vanish from this manual, and be
-@c discussed in BFD chapter of binutils (or some such).
 @end ifset
 @end ifclear
 
@@ -3990,18 +3855,8 @@ would want.
 @menu
 * Symbol Value::                Value
 * Symbol Type::                 Type
-@ifset aout-bout
-@ifset GENERIC
+@ifset aout
 * a.out Symbols::               Symbol Attributes: @code{a.out}
-@end ifset
-@ifclear GENERIC
-@ifclear BOUT
-* a.out Symbols::               Symbol Attributes: @code{a.out}
-@end ifclear
-@ifset BOUT
-* a.out Symbols::               Symbol Attributes: @code{a.out}, @code{b.out}
-@end ifset
-@end ifclear
 @end ifset
 @ifset COFF
 * COFF Symbols::                Symbol Attributes for COFF
@@ -4043,39 +3898,13 @@ information, any flag settings indicating that a symbol is external, and
 (optionally), other information for linkers and debuggers.  The exact
 format depends on the object-code output format in use.
 
-@ifset aout-bout
-@ifclear GENERIC
-@ifset BOUT
-@c The following avoids a "widow" subsection title.  @group would be
-@c better if it were available outside examples.
-@need 1000
-@node a.out Symbols
-@subsection Symbol Attributes: @code{a.out}, @code{b.out}
-
-@cindex @code{b.out} symbol attributes
-@cindex symbol attributes, @code{b.out}
-These symbol attributes appear only when @command{@value{AS}} is configured for
-one of the Berkeley-descended object output formats---@code{a.out} or
-@code{b.out}.
-
-@end ifset
-@ifclear BOUT
+@ifset aout
 @node a.out Symbols
 @subsection Symbol Attributes: @code{a.out}
 
 @cindex @code{a.out} symbol attributes
 @cindex symbol attributes, @code{a.out}
 
-@end ifclear
-@end ifclear
-@ifset GENERIC
-@node a.out Symbols
-@subsection Symbol Attributes: @code{a.out}
-
-@cindex @code{a.out} symbol attributes
-@cindex symbol attributes, @code{a.out}
-
-@end ifset
 @menu
 * Symbol Desc::                 Descriptor
 * Symbol Other::                Other
@@ -4410,7 +4239,7 @@ Some machine configurations provide additional directives.
 @ifset COFF
 * Def::                         @code{.def @var{name}}
 @end ifset
-@ifset aout-bout
+@ifset aout
 * Desc::                        @code{.desc @var{symbol}, @var{abs-expression}}
 @end ifset
 @ifset COFF
@@ -4594,10 +4423,6 @@ quit also.  One day @code{.abort} will not be supported.
 When producing COFF output, @command{@value{AS}} accepts this directive as a
 synonym for @samp{.abort}.
 
-@ifset BOUT
-When producing @code{b.out} output, @command{@value{AS}} accepts this directive,
-but ignores it.
-@end ifset
 @end ifset
 
 @node Align
@@ -4624,7 +4449,7 @@ required alignment; this can be useful if you want the alignment to be filled
 with no-op instructions when appropriate.
 
 The way the required alignment is specified varies from system to system.
-For the arc, hppa, i386 using ELF, i860, iq2000, m68k, or1k,
+For the arc, hppa, i386 using ELF, iq2000, m68k, or1k,
 s390, sparc, tic4x, tic80 and xtensa, the first expression is the
 alignment request in bytes.  For example @samp{.align 8} advances
 the location counter until it is a multiple of 8.  If the location counter
@@ -5163,15 +4988,9 @@ The byte ordering is target dependent.
 @cindex debugging COFF symbols
 Begin defining debugging information for a symbol @var{name}; the
 definition extends until the @code{.endef} directive is encountered.
-@ifset BOUT
-
-This directive is only observed when @command{@value{AS}} is configured for COFF
-format output; when producing @code{b.out}, @samp{.def} is recognized,
-but ignored.
-@end ifset
 @end ifset
 
-@ifset aout-bout
+@ifset aout
 @node Desc
 @section @code{.desc @var{symbol}, @var{abs-expression}}
 
@@ -5199,12 +5018,6 @@ it, but produces no output, when configured for COFF.
 This directive is generated by compilers to include auxiliary debugging
 information in the symbol table.  It is only permitted inside
 @code{.def}/@code{.endef} pairs.
-@ifset BOUT
-
-@samp{.dim} is only meaningful when generating COFF format output; when
-@command{@value{AS}} is generating @code{b.out}, it accepts this directive but
-ignores it.
-@end ifset
 @end ifset
 
 @node Double
@@ -5265,12 +5078,6 @@ process anything in the file past the @code{.end} directive.
 @cindex @code{endef} directive
 This directive flags the end of a symbol definition begun with
 @code{.def}.
-@ifset BOUT
-
-@samp{.endef} is only meaningful when generating COFF format output; if
-@command{@value{AS}} is configured to generate @code{b.out}, it accepts this
-directive but ignores it.
-@end ifset
 @end ifset
 
 @node Endfunc
@@ -5801,7 +5608,7 @@ assemblers, but ignores it.
 
 @cindex @code{line} directive
 @cindex logical line number
-@ifset aout-bout
+@ifset aout
 Change the logical line number.  @var{line-number} must be an absolute
 expression.  The next line has that logical line number.  Therefore any other
 statements on the current line (after a statement separator character) are
@@ -5886,12 +5693,6 @@ must be an absolute expression.  The next line has that logical
 line number, so any other statements on the current line (after a
 statement separator character @code{;}) are reported as on logical
 line number @var{line-number} @minus{} 1.
-@ifset BOUT
-
-This directive is accepted, but ignored, when @command{@value{AS}} is
-configured for @code{b.out}; its effect is only associated with COFF
-output format.
-@end ifset
 @end ifset
 
 @node Loc
@@ -6220,7 +6021,7 @@ instruction size limit is set to the maximum supported size.
 @node Octa
 @section @code{.octa @var{bignums}}
 
-@c FIXME: double size emitted for "octa" on i960, others?  Or warn?
+@c FIXME: double size emitted for "octa" on some?  Or warn?
 @cindex @code{octa} directive
 @cindex integer, 16-byte
 @cindex sixteen byte integer
@@ -6535,12 +6336,6 @@ Set the storage-class value for a symbol.  This directive may only be
 used inside a @code{.def}/@code{.endef} pair.  Storage class may flag
 whether a symbol is static or external, or it may record further
 symbolic debugging information.
-@ifset BOUT
-
-The @samp{.scl} directive is primarily associated with COFF output; when
-configured to generate @code{b.out} output format, @command{@value{AS}}
-accepts this directive but ignores it.
-@end ifset
 @end ifset
 
 @ifset COFF-ELF
@@ -6900,11 +6695,6 @@ For COFF targets, the @code{.size} directive is only permitted inside
 .size @var{expression}
 @end smallexample
 
-@ifset BOUT
-@samp{.size} is only meaningful when generating COFF format output; when
-@command{@value{AS}} is generating @code{b.out}, it accepts this directive but
-ignores it.
-@end ifset
 @end ifset
 
 @ifset ELF
@@ -7172,12 +6962,6 @@ This directive is generated by compilers to include auxiliary debugging
 information in the symbol table.  It is only permitted inside
 @code{.def}/@code{.endef} pairs.  Tags are used to link structure
 definitions in the symbol table with instances of those structures.
-@ifset BOUT
-
-@samp{.tag} is only used when generating COFF format output; when
-@command{@value{AS}} is generating @code{b.out}, it accepts this directive but
-ignores it.
-@end ifset
 @end ifset
 
 @node Text
@@ -7225,11 +7009,6 @@ For COFF targets, this directive is permitted only within
 This records the integer @var{int} as the type attribute of a symbol table
 entry.
 
-@ifset BOUT
-@samp{.type} is associated only with COFF format output; when
-@command{@value{AS}} is configured for @code{b.out} output, it accepts this
-directive but ignores it.
-@end ifset
 @end ifset
 
 @ifset ELF
@@ -7328,11 +7107,6 @@ symbolic debugging format.  @xref{Sleb128, ,@code{.sleb128}}.
 This directive, permitted only within @code{.def}/@code{.endef} pairs,
 records the address @var{addr} as the value attribute of a symbol table
 entry.
-@ifset BOUT
-
-@samp{.val} is used only for COFF output; when @command{@value{AS}} is
-configured for @code{b.out}, it accepts this directive but ignores it.
-@end ifset
 @end ifset
 
 @ifset ELF
@@ -7422,7 +7196,7 @@ The size of the number emitted, and its byte order,
 depend on what target computer the assembly is for.
 @end ifset
 
-@c on amd29k, i960, sparc the "special treatment to support compilers" doesn't
+@c on sparc the "special treatment to support compilers" doesn't
 @c happen---32-bit addressability, period; no long/short jumps.
 @ifset DIFF-TBL-KLUGE
 @cindex difference tables altered
@@ -7764,12 +7538,6 @@ subject, see the hardware manufacturer's manual.
 @ifset I80386
 * i386-Dependent::              Intel 80386 and AMD x86-64 Dependent Features
 @end ifset
-@ifset I860
-* i860-Dependent::              Intel 80860 Dependent Features
-@end ifset
-@ifset I960
-* i960-Dependent::              Intel 80960 Dependent Features
-@end ifset
 @ifset IA64
 * IA-64-Dependent::             Intel IA-64 Dependent Features
 @end ifset
@@ -7977,14 +7745,6 @@ family.
 
 @ifset I80386
 @include c-i386.texi
-@end ifset
-
-@ifset I860
-@include c-i860.texi
-@end ifset
-
-@ifset I960
-@include c-i960.texi
 @end ifset
 
 @ifset IA64

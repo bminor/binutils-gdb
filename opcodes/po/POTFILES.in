@@ -70,8 +70,6 @@ i386-init.h
 i386-opc.c
 i386-opc.h
 i386-tbl.h
-i860-dis.c
-i960-dis.c
 ia64-asmtab.c
 ia64-asmtab.h
 ia64-dis.c
