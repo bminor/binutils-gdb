@@ -1,3 +1,8 @@
+2018-04-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/pie-fork.c: New file.
+	* gdb.base/pie-fork.exp: New file.
+
 2018-04-11  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/simple.exp: Add test for ".." struct initializer.
