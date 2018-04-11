@@ -1,3 +1,17 @@
+2018-04-11  Pedro Alves  <palves@redhat.com>
+
+	* target.c (fileio_fh_t): Make it a named struct instead of a
+	typedef.
+	(fileio_fh_t::is_closed): New method.
+	(DEF_VEC_O (fileio_fh_t)): Remove.
+	(fileio_fhandles): Now a std::vector.
+	(is_closed_fileio_fh): Delete.
+	(acquire_fileio_fd): Adjust.  Rename parameters.
+	(release_fileio_fd): Adjust.
+	(fileio_fd_to_fh): Reimplement as a function instead of a macro.
+	(target_fileio_pwrite, target_fileio_pread, target_fileio_fstat)
+	(target_fileio_close): Adjust.
+
 2018-04-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* auto-load.c (auto_load_safe_path_vec_update): Iterate by

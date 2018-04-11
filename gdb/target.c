@@ -2791,26 +2791,27 @@ default_fileio_target (void)
 
 /* File handle for target file operations.  */
 
-typedef struct
+struct fileio_fh_t
 {
   /* The target on which this file is open.  */
-  struct target_ops *t;
+  target_ops *target;
 
   /* The file descriptor on the target.  */
-  int fd;
-} fileio_fh_t;
+  int target_fd;
 
-DEF_VEC_O (fileio_fh_t);
+  /* Check whether this fileio_fh_t represents a closed file.  */
+  bool is_closed ()
+  {
+    return target_fd < 0;
+  }
+};
 
 /* Vector of currently open file handles.  The value returned by
    target_fileio_open and passed as the FD argument to other
    target_fileio_* functions is an index into this vector.  This
    vector's entries are never freed; instead, files are marked as
    closed, and the handle becomes available for reuse.  */
-static VEC (fileio_fh_t) *fileio_fhandles;
-
-/* Macro to check whether a fileio_fh_t represents a closed file.  */
-#define is_closed_fileio_fh(fd) ((fd) < 0)
+static std::vector<fileio_fh_t> fileio_fhandles;
 
 /* Index into fileio_fhandles of the lowest handle that might be
    closed.  This permits handle reuse without searching the whole
@@ -2820,27 +2821,25 @@ static int lowest_closed_fd;
 /* Acquire a target fileio file descriptor.  */
 
 static int
-acquire_fileio_fd (struct target_ops *t, int fd)
+acquire_fileio_fd (target_ops *target, int target_fd)
 {
-  fileio_fh_t *fh;
-
-  gdb_assert (!is_closed_fileio_fh (fd));
-
   /* Search for closed handles to reuse.  */
-  for (;
-       VEC_iterate (fileio_fh_t, fileio_fhandles,
-                    lowest_closed_fd, fh);
-       lowest_closed_fd++)
-    if (is_closed_fileio_fh (fh->fd))
-      break;
+  for (; lowest_closed_fd < fileio_fhandles.size (); lowest_closed_fd++)
+    {
+      fileio_fh_t &fh = fileio_fhandles[lowest_closed_fd];
+
+      if (fh.is_closed ())
+	break;
+    }
 
   /* Push a new handle if no closed handles were found.  */
-  if (lowest_closed_fd == VEC_length (fileio_fh_t, fileio_fhandles))
-    fh = VEC_safe_push (fileio_fh_t, fileio_fhandles, NULL);
+  if (lowest_closed_fd == fileio_fhandles.size ())
+    fileio_fhandles.push_back (fileio_fh_t {target, target_fd});
+  else
+    fileio_fhandles[lowest_closed_fd] = {target, target_fd};
 
-  /* Fill in the handle.  */
-  fh->t = t;
-  fh->fd = fd;
+  /* Should no longer be marked closed.  */
+  gdb_assert (!fileio_fhandles[lowest_closed_fd].is_closed ());
 
   /* Return its index, and start the next lookup at
      the next index.  */
@@ -2852,14 +2851,17 @@ acquire_fileio_fd (struct target_ops *t, int fd)
 static void
 release_fileio_fd (int fd, fileio_fh_t *fh)
 {
-  fh->fd = -1;
+  fh->target_fd = -1;
   lowest_closed_fd = std::min (lowest_closed_fd, fd);
 }
 
 /* Return a pointer to the fileio_fhandle_t corresponding to FD.  */
 
-#define fileio_fd_to_fh(fd) \
-  VEC_index (fileio_fh_t, fileio_fhandles, (fd))
+static fileio_fh_t *
+fileio_fd_to_fh (int fd)
+{
+  return &fileio_fhandles[fd];
+}
 
 /* Helper for target_fileio_open and
    target_fileio_open_warn_if_slow.  */
@@ -2929,11 +2931,11 @@ target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
   fileio_fh_t *fh = fileio_fd_to_fh (fd);
   int ret = -1;
 
-  if (is_closed_fileio_fh (fh->fd))
+  if (fh->is_closed ())
     *target_errno = EBADF;
   else
-    ret = fh->t->to_fileio_pwrite (fh->t, fh->fd, write_buf,
-				   len, offset, target_errno);
+    ret = fh->target->to_fileio_pwrite (fh->target, fh->target_fd, write_buf,
+					len, offset, target_errno);
 
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog,
@@ -2953,11 +2955,11 @@ target_fileio_pread (int fd, gdb_byte *read_buf, int len,
   fileio_fh_t *fh = fileio_fd_to_fh (fd);
   int ret = -1;
 
-  if (is_closed_fileio_fh (fh->fd))
+  if (fh->is_closed ())
     *target_errno = EBADF;
   else
-    ret = fh->t->to_fileio_pread (fh->t, fh->fd, read_buf,
-				  len, offset, target_errno);
+    ret = fh->target->to_fileio_pread (fh->target, fh->target_fd, read_buf,
+				       len, offset, target_errno);
 
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog,
@@ -2976,10 +2978,11 @@ target_fileio_fstat (int fd, struct stat *sb, int *target_errno)
   fileio_fh_t *fh = fileio_fd_to_fh (fd);
   int ret = -1;
 
-  if (is_closed_fileio_fh (fh->fd))
+  if (fh->is_closed ())
     *target_errno = EBADF;
   else
-    ret = fh->t->to_fileio_fstat (fh->t, fh->fd, sb, target_errno);
+    ret = fh->target->to_fileio_fstat (fh->target, fh->target_fd,
+				       sb, target_errno);
 
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog,
@@ -2996,11 +2999,12 @@ target_fileio_close (int fd, int *target_errno)
   fileio_fh_t *fh = fileio_fd_to_fh (fd);
   int ret = -1;
 
-  if (is_closed_fileio_fh (fh->fd))
+  if (fh->is_closed ())
     *target_errno = EBADF;
   else
     {
-      ret = fh->t->to_fileio_close (fh->t, fh->fd, target_errno);
+      ret = fh->target->to_fileio_close (fh->target, fh->target_fd,
+					 target_errno);
       release_fileio_fd (fd, fh);
     }
 
