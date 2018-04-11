@@ -11350,8 +11350,7 @@ remote_hostio_send_command (int command_bytes, int which_packet,
   int ret, bytes_read;
   char *attachment_tmp;
 
-  if (!rs->remote_desc
-      || packet_support (which_packet) == PACKET_DISABLE)
+  if (packet_support (which_packet) == PACKET_DISABLE)
     {
       *remote_errno = FILEIO_ENOSYS;
       return -1;

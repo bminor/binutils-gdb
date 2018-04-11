@@ -1,5 +1,15 @@
 2018-04-11  Pedro Alves  <palves@redhat.com>
 
+	* target.c (fileio_fh_t::t): Add comment.
+	(target_fileio_pwrite, target_fileio_pread, target_fileio_fstat)
+	(target_fileio_close): Handle a NULL target.
+	(invalidate_fileio_fh): New.
+	(target_close): Call it.
+	* remote.c (remote_hostio_send_command): No longer check whether
+	remote_desc is open.
+
+2018-04-11  Pedro Alves  <palves@redhat.com>
+
 	* target.c (fileio_fh_t): Make it a named struct instead of a
 	typedef.
 	(fileio_fh_t::is_closed): New method.

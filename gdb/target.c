@@ -2793,7 +2793,8 @@ default_fileio_target (void)
 
 struct fileio_fh_t
 {
-  /* The target on which this file is open.  */
+  /* The target on which this file is open.  NULL if the target is
+     meanwhile closed while the handle is open.  */
   target_ops *target;
 
   /* The file descriptor on the target.  */
@@ -2817,6 +2818,20 @@ static std::vector<fileio_fh_t> fileio_fhandles;
    closed.  This permits handle reuse without searching the whole
    list each time a new file is opened.  */
 static int lowest_closed_fd;
+
+/* Invalidate the target associated with open handles that were open
+   on target TARG, since we're about to close (and maybe destroy) the
+   target.  The handles remain open from the client's perspective, but
+   trying to do anything with them other than closing them will fail
+   with EIO.  */
+
+static void
+fileio_handles_invalidate_target (target_ops *targ)
+{
+  for (fileio_fh_t &fh : fileio_fhandles)
+    if (fh.target == targ)
+      fh.target = NULL;
+}
 
 /* Acquire a target fileio file descriptor.  */
 
@@ -2933,6 +2948,8 @@ target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
 
   if (fh->is_closed ())
     *target_errno = EBADF;
+  else if (fh->target == NULL)
+    *target_errno = EIO;
   else
     ret = fh->target->to_fileio_pwrite (fh->target, fh->target_fd, write_buf,
 					len, offset, target_errno);
@@ -2957,6 +2974,8 @@ target_fileio_pread (int fd, gdb_byte *read_buf, int len,
 
   if (fh->is_closed ())
     *target_errno = EBADF;
+  else if (fh->target == NULL)
+    *target_errno = EIO;
   else
     ret = fh->target->to_fileio_pread (fh->target, fh->target_fd, read_buf,
 				       len, offset, target_errno);
@@ -2980,6 +2999,8 @@ target_fileio_fstat (int fd, struct stat *sb, int *target_errno)
 
   if (fh->is_closed ())
     *target_errno = EBADF;
+  else if (fh->target == NULL)
+    *target_errno = EIO;
   else
     ret = fh->target->to_fileio_fstat (fh->target, fh->target_fd,
 				       sb, target_errno);
@@ -3003,8 +3024,11 @@ target_fileio_close (int fd, int *target_errno)
     *target_errno = EBADF;
   else
     {
-      ret = fh->target->to_fileio_close (fh->target, fh->target_fd,
-					 target_errno);
+      if (fh->target != NULL)
+	ret = fh->target->to_fileio_close (fh->target, fh->target_fd,
+					   target_errno);
+      else
+	ret = 0;
       release_fileio_fd (fd, fh);
     }
 
@@ -3389,6 +3413,8 @@ void
 target_close (struct target_ops *targ)
 {
   gdb_assert (!target_is_pushed (targ));
+
+  fileio_handles_invalidate_target (targ);
 
   if (targ->to_xclose != NULL)
     targ->to_xclose (targ);
