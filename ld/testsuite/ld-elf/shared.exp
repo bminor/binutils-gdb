@@ -39,6 +39,9 @@ set old_ASFLAGS $ASFLAGS
 # This target requires extra GAS options when building code for shared
 # libraries.
 set AFLAGS_PIC ""
+if [istarget "nds32*-*"] {
+    append AFLAGS_PIC " -mpic"
+}
 if [istarget "tic6x-*-*"] {
     append AFLAGS_PIC " -mpic -mpid=near"
 }
