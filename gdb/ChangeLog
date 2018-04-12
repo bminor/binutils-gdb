@@ -1,3 +1,11 @@
+2018-04-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/23053
+	* dwarf-index-write.c (data_buf::grow) (write_one_signatured_type)
+	(recursively_write_psymbols) (debug_names::recursively_write_psymbols)
+	(debug_names::write_one_signatured_type): Fix -D_GLIBCXX_DEBUG
+	regression.
+
 2018-04-12  Tom Tromey  <tom@tromey.com>
 
 	* rust-lang.c (rust_print_struct_def): Remove univariant code.
