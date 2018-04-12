@@ -1342,39 +1342,6 @@ debug_set_syscall_catchpoint (struct target_ops *self, int arg1, bool arg2, int 
   return result;
 }
 
-static int
-delegate_has_exited (struct target_ops *self, int arg1, int arg2, int *arg3)
-{
-  self = self->beneath;
-  return self->to_has_exited (self, arg1, arg2, arg3);
-}
-
-static int
-tdefault_has_exited (struct target_ops *self, int arg1, int arg2, int *arg3)
-{
-  return 0;
-}
-
-static int
-debug_has_exited (struct target_ops *self, int arg1, int arg2, int *arg3)
-{
-  int result;
-  fprintf_unfiltered (gdb_stdlog, "-> %s->to_has_exited (...)\n", debug_target.to_shortname);
-  result = debug_target.to_has_exited (&debug_target, arg1, arg2, arg3);
-  fprintf_unfiltered (gdb_stdlog, "<- %s->to_has_exited (", debug_target.to_shortname);
-  target_debug_print_struct_target_ops_p (&debug_target);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg2);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int_p (arg3);
-  fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_int (result);
-  fputs_unfiltered ("\n", gdb_stdlog);
-  return result;
-}
-
 static void
 delegate_mourn_inferior (struct target_ops *self)
 {
@@ -4271,8 +4238,6 @@ install_delegators (struct target_ops *ops)
     ops->to_follow_exec = delegate_follow_exec;
   if (ops->to_set_syscall_catchpoint == NULL)
     ops->to_set_syscall_catchpoint = delegate_set_syscall_catchpoint;
-  if (ops->to_has_exited == NULL)
-    ops->to_has_exited = delegate_has_exited;
   if (ops->to_mourn_inferior == NULL)
     ops->to_mourn_inferior = delegate_mourn_inferior;
   if (ops->to_can_run == NULL)
@@ -4537,7 +4502,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_remove_exec_catchpoint = tdefault_remove_exec_catchpoint;
   ops->to_follow_exec = tdefault_follow_exec;
   ops->to_set_syscall_catchpoint = tdefault_set_syscall_catchpoint;
-  ops->to_has_exited = tdefault_has_exited;
   ops->to_mourn_inferior = default_mourn_inferior;
   ops->to_can_run = tdefault_can_run;
   ops->to_pass_signals = tdefault_pass_signals;
@@ -4697,7 +4661,6 @@ init_debug_target (struct target_ops *ops)
   ops->to_remove_exec_catchpoint = debug_remove_exec_catchpoint;
   ops->to_follow_exec = debug_follow_exec;
   ops->to_set_syscall_catchpoint = debug_set_syscall_catchpoint;
-  ops->to_has_exited = debug_has_exited;
   ops->to_mourn_inferior = debug_mourn_inferior;
   ops->to_can_run = debug_can_run;
   ops->to_pass_signals = debug_pass_signals;

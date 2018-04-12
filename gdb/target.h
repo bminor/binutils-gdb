@@ -597,8 +597,6 @@ struct target_ops
 				      int, bool, int,
 				      gdb::array_view<const int>)
       TARGET_DEFAULT_RETURN (1);
-    int (*to_has_exited) (struct target_ops *, int, int, int *)
-      TARGET_DEFAULT_RETURN (0);
     void (*to_mourn_inferior) (struct target_ops *)
       TARGET_DEFAULT_FUNC (default_mourn_inferior);
     /* Note that to_can_run is special and can be invoked on an
@@ -1623,13 +1621,6 @@ void target_follow_exec (struct inferior *inf, char *execd_pathname);
      (*current_target.to_set_syscall_catchpoint) (&current_target,	\
 						  pid, needed, any_count, \
 						  syscall_counts)
-
-/* Returns TRUE if PID has exited.  And, also sets EXIT_STATUS to the
-   exit code of PID, if any.  */
-
-#define target_has_exited(pid,wait_status,exit_status) \
-     (*current_target.to_has_exited) (&current_target, \
-				      pid,wait_status,exit_status)
 
 /* The debugger has completed a blocking wait() call.  There is now
    some process event that must be processed.  This function should
