@@ -9639,7 +9639,7 @@ process_dynamic_section (Filedata * filedata)
 	  if (archive_file_offset != 0)
 	    str_tab_len = archive_file_size - offset;
 	  else
-	    str_tab_len = filedata->file_size;
+	    str_tab_len = filedata->file_size - offset;
 
 	  if (str_tab_len < 1)
 	    {

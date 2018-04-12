@@ -1,3 +1,9 @@
+2018-04-12  Nick Clifton  <nickc@redhat.com>
+
+	PR 23050
+	* readelf.c (process_dynamic_section): Correct dynamic string
+	table size calculation.
+
 2018-04-11  Alan Modra  <amodra@gmail.com>
 
 	* ieee.c: Remove i960 support.
