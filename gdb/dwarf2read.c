@@ -10079,10 +10079,13 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	  if (iter != discriminant_map.end ())
 	    disc->discriminants[i] = iter->second;
 
-	  /* Remove the discriminant field.  */
+	  /* Remove the discriminant field, if it exists.  */
 	  struct type *sub_type = TYPE_FIELD_TYPE (union_type, i);
-	  --TYPE_NFIELDS (sub_type);
-	  ++TYPE_FIELDS (sub_type);
+	  if (TYPE_NFIELDS (sub_type) > 0)
+	    {
+	      --TYPE_NFIELDS (sub_type);
+	      ++TYPE_FIELDS (sub_type);
+	    }
 	  TYPE_FIELD_NAME (union_type, i) = variant_name;
 	  TYPE_NAME (sub_type)
 	    = rust_fully_qualify (&objfile->objfile_obstack,
