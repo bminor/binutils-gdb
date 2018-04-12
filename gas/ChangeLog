@@ -1,3 +1,8 @@
+2018-04-12  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+	* po/ru.po: Updated Russian translation.
+
 2018-04-11  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add WAITPKG.
