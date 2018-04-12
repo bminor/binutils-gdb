@@ -1,3 +1,9 @@
+2018-04-12  John Darrington  <john@darrington.wattle.id.au>
+
+	* as.c (main): Fail if the output is the same as one of the input
+	files.
+	* testsuite/gas/all/gas.exp: Test the new feature.
+
 2018-04-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

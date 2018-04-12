@@ -1171,6 +1171,7 @@ int
 main (int argc, char ** argv)
 {
   char ** argv_orig = argv;
+  struct stat sob;
 
   int macro_strip_at;
 
@@ -1218,6 +1219,27 @@ main (int argc, char ** argv)
   /* Call parse_args before any of the init/begin functions
      so that switches like --hash-size can be honored.  */
   parse_args (&argc, &argv);
+
+  if (argc > 1 && stat (out_file_name, &sob) == 0)
+    {
+      int i;
+
+      for (i = 1; i < argc; ++i)
+	{
+	  struct stat sib;
+
+	  if (stat (argv[i], &sib) == 0)
+	    {
+	      if (sib.st_ino == sob.st_ino)
+		{
+		  /* Don't let as_fatal remove the output file!  */
+		  out_file_name = NULL;
+		  as_fatal (_("The input and output files must be distinct"));
+		}
+	    }
+	}
+    }
+
   symbol_begin ();
   frag_init ();
   subsegs_begin ();
