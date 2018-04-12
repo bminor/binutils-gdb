@@ -25539,7 +25539,7 @@ private:
   gdb_byte *grow (size_t size)
   {
     m_vec.resize (m_vec.size () + size);
-    return &*m_vec.end () - size;
+    return &*(m_vec.end () - size);
   }
 
   gdb::byte_vector m_vec;
@@ -25973,12 +25973,14 @@ write_one_signatured_type (void **slot, void *d)
 
   write_psymbols (info->symtab,
 		  info->psyms_seen,
-		  &info->objfile->global_psymbols[psymtab->globals_offset],
+		  (info->objfile->global_psymbols.data ()
+		   + psymtab->globals_offset),
 		  psymtab->n_global_syms, info->cu_index,
 		  0);
   write_psymbols (info->symtab,
 		  info->psyms_seen,
-		  &info->objfile->static_psymbols[psymtab->statics_offset],
+		  (info->objfile->static_psymbols.data ()
+		   + psymtab->statics_offset),
 		  psymtab->n_static_syms, info->cu_index,
 		  1);
 
@@ -26028,12 +26030,12 @@ recursively_write_psymbols (struct objfile *objfile,
 
   write_psymbols (symtab,
 		  psyms_seen,
-		  &objfile->global_psymbols[psymtab->globals_offset],
+		  objfile->global_psymbols.data () + psymtab->globals_offset,
 		  psymtab->n_global_syms, cu_index,
 		  0);
   write_psymbols (symtab,
 		  psyms_seen,
-		  &objfile->static_psymbols[psymtab->statics_offset],
+		  objfile->static_psymbols.data () + psymtab->statics_offset,
 		  psymtab->n_static_syms, cu_index,
 		  1);
 }
@@ -26222,10 +26224,10 @@ public:
 				    psyms_seen, cu_index);
 
     write_psymbols (psyms_seen,
-		    &objfile->global_psymbols[psymtab->globals_offset],
+		    objfile->global_psymbols.data () + psymtab->globals_offset,
 		    psymtab->n_global_syms, cu_index, false, unit_kind::cu);
     write_psymbols (psyms_seen,
-		    &objfile->static_psymbols[psymtab->statics_offset],
+		    objfile->static_psymbols.data () + psymtab->statics_offset,
 		    psymtab->n_static_syms, cu_index, true, unit_kind::cu);
   }
 
@@ -26581,11 +26583,13 @@ private:
     struct partial_symtab *psymtab = entry->per_cu.v.psymtab;
 
     write_psymbols (info->psyms_seen,
-		    &info->objfile->global_psymbols[psymtab->globals_offset],
+		    (info->objfile->global_psymbols.data ()
+		     + psymtab->globals_offset),
 		    psymtab->n_global_syms, info->cu_index, false,
 		    unit_kind::tu);
     write_psymbols (info->psyms_seen,
-		    &info->objfile->static_psymbols[psymtab->statics_offset],
+		    (info->objfile->static_psymbols.data ()
+		     + psymtab->statics_offset),
 		    psymtab->n_static_syms, info->cu_index, true,
 		    unit_kind::tu);
 
