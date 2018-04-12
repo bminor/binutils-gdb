@@ -87,7 +87,7 @@
 /* This module defines the GDB target vector and its methods.  */
 
 static void procfs_attach (struct target_ops *, const char *, int);
-static void procfs_detach (struct target_ops *, const char *, int);
+static void procfs_detach (struct target_ops *, inferior *, int);
 static void procfs_resume (struct target_ops *,
 			   ptid_t, int, enum gdb_signal);
 static void procfs_files_info (struct target_ops *);
@@ -1620,10 +1620,7 @@ proc_get_LDT_entry (procinfo *pi, int key)
 	break;	/* end of table */
       /* If key matches, return this entry.  */
       if (ldt_entry->sel == key)
-	{
-	  do_cleanups (old_chain);
-	  return ldt_entry;
-	}
+	return ldt_entry;
     }
   /* Loop ended, match not found.  */
   return NULL;
