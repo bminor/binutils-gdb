@@ -4517,6 +4517,11 @@ print_symbol_info (enum search_domain kind,
       fputs_filtered (":\n", gdb_stdout);
     }
 
+  if (SYMBOL_LINE (sym) != 0)
+    printf_filtered ("%d:\t", SYMBOL_LINE (sym));
+  else
+    puts_filtered ("\t");
+
   if (kind != TYPES_DOMAIN && block == STATIC_BLOCK)
     printf_filtered ("static ");
 

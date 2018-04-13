@@ -1,3 +1,14 @@
+2018-04-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.ada/info_types.exp: Adjust expected output to the line
+	numbers now printed by "info var/func/type".
+	* gdb.base/completion.exp: Likewise.
+	* gdb.base/included.exp: Likewise.
+	* gdb.cp/cp-relocate.exp: Likewise.
+	* gdb.cp/cplusfuncs.exp: Likewise.
+	* gdb.cp/namespace.exp: Likewise.
+	* gdb.dwarf2/dw2-case-insensitive.exp: Likewise.
+
 2018-04-13  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/cpu.exp: New.

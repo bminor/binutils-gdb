@@ -1,3 +1,8 @@
+2018-04-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo (Symbols): Mention the fact that "info
+	variables/functions/types" show source files and line numbers.
+
 2018-04-13  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo: Document set/show record btrace cpu.

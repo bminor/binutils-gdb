@@ -56,11 +56,11 @@ gdb_file_cmd ${binfile}
 set func1_name ""
 set func2_name ""
 gdb_test_multiple "info functions func<.>" "info functions" {
-    -re "\r\nint (\[^\r\]*func<1>\[^\r]*);" {
+    -re "\tint (\[^\r\]*func<1>\[^\r]*);" {
 	set func1_name $expect_out(1,string)
 	exp_continue
     }
-    -re "\r\nint (\[^\r\]*func<2>\[^\r]*);" {
+    -re "\tint (\[^\r\]*func<2>\[^\r]*);" {
 	set func2_name $expect_out(1,string)
 	exp_continue
     }

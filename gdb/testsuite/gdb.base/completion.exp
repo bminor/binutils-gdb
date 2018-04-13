@@ -749,7 +749,7 @@ gdb_test_multiple "" "$test" {
 	    -re "marker1.*$gdb_prompt " {
 		send_gdb "\n"
 		gdb_test_multiple "" "$test" {
-		    -re "All functions matching regular expression \"marker\":.*File.*break1.c:\r\nint marker1\\((void|)\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long( int)?\\);.*$gdb_prompt $" {
+		    -re "All functions matching regular expression \"marker\":.*File.*break1.c:.*\tint marker1\\((void|)\\);\r\n.*:\tint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long( int)?\\);.*$gdb_prompt $" {
 			pass "$test"
 		    }
 		}

@@ -33,4 +33,4 @@ gdb_test "ptype integer" "type = int"
 
 # We should report that integer comes from the header file.
 if { $non_dwarf } { setup_xfail *-*-* }
-gdb_test "info variables integer" "\r\nFile \[^\r\n\]*/${subdir}/${testfile}.h:\r\nint integer;"
+gdb_test "info variables integer" "\r\nFile \[^\r\n\]*/${subdir}/${testfile}.h:\r\n.*\tint integer;"

@@ -3,6 +3,9 @@
 
 *** Changes since GDB 8.1
 
+* The commands 'info variables/functions/types' now show the source line
+  numbers of symbol definitions when available.
+
 * 'info proc' now works on running processes on FreeBSD systems and core
   files created on FreeBSD systems.
 

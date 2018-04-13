@@ -17585,7 +17585,7 @@ name is @code{value}.
 
 This command differs from @code{ptype} in two ways: first, like
 @code{whatis}, it does not print a detailed description; second, it
-lists all source files where a type is defined.
+lists all source files and line numbers where a type is defined.
 
 @kindex info type-printers
 @item info type-printers
@@ -17663,24 +17663,29 @@ have already been read, and files whose symbols will be read when needed.
 @kindex info functions
 @item info functions
 Print the names and data types of all defined functions.
+Similarly to @samp{info types}, this command groups its output by source
+files and annotates each function definition with its source line
+number.
 
 @item info functions @var{regexp}
-Print the names and data types of all defined functions
-whose names contain a match for regular expression @var{regexp}.
-Thus, @samp{info fun step} finds all functions whose names
-include @code{step}; @samp{info fun ^step} finds those whose names
-start with @code{step}.  If a function name contains characters
-that conflict with the regular expression language (e.g.@:
+Like @samp{info functions}, but only print the names and data types of
+functions whose names contain a match for regular expression
+@var{regexp}.  Thus, @samp{info fun step} finds all functions whose
+names include @code{step}; @samp{info fun ^step} finds those whose names
+start with @code{step}.  If a function name contains characters that
+conflict with the regular expression language (e.g.@:
 @samp{operator*()}), they may be quoted with a backslash.
 
 @kindex info variables
 @item info variables
 Print the names and data types of all variables that are defined
 outside of functions (i.e.@: excluding local variables).
+The printed variables are grouped by source files and annotated with
+their respective source line numbers.
 
 @item info variables @var{regexp}
-Print the names and data types of all variables (except for local
-variables) whose names contain a match for regular expression
+Like @kbd{info variables}, but only print the names and data types of
+non-local variables whose names contain a match for regular expression
 @var{regexp}.
 
 @kindex info classes

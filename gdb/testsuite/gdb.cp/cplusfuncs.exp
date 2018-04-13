@@ -292,7 +292,7 @@ proc info_func_regexp { name demangled } {
     regsub {\\\(void\\\)} $demangled {\(\)} demangled
 
     gdb_test "info function $name" \
-	"File .*:\r\n(class|)${demangled}.*" \
+	"File .*:\t(class|)${demangled}.*" \
 	"info function for \"$name\""
 }
 
