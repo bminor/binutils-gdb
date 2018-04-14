@@ -2252,6 +2252,7 @@ get_machine_name (unsigned e_machine)
     case EM_68K:		return "MC68000";
     case EM_88K:		return "MC88000";
     case EM_IAMCU:		return "Intel MCU";
+    case EM_860:		return "Intel 80860";
     case EM_MIPS:		return "MIPS R3000";
     case EM_S370:		return "IBM System/370";
       /* 10 */
@@ -2260,6 +2261,7 @@ get_machine_name (unsigned e_machine)
     case EM_PARISC:		return "HPPA";
     case EM_VPP550:		return "Fujitsu VPP500";
     case EM_SPARC32PLUS:	return "Sparc v8+" ;
+    case EM_960:		return "Intel 90860";
     case EM_PPC:		return "PowerPC";
       /* 20 */
     case EM_PPC64:		return "PowerPC64";
