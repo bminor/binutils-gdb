@@ -98,6 +98,7 @@ case $targ in
  mips*-sgi-* | mips*-*-bsd* | \
  mips*-*-lnews* | \
  mips*-*-sysv* | mips*-*-riscos* | \
+ powerpc-*-lynxos* | powerpc-*-windiss* | \
  sh*-*-symbianelf* | \
  sparclet-*-aout* | \
  sparc86x-*-aout* | \
