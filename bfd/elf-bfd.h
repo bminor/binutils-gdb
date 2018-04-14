@@ -864,6 +864,9 @@ struct elf_backend_data
   /* The common page size for this backend.  */
   bfd_vma commonpagesize;
 
+  /* The value of commonpagesize to use when -z relro for this backend.  */
+  bfd_vma relropagesize;
+
   /* The BFD flags applied to sections created for dynamic linking.  */
   flagword dynamic_sec_flags;
 

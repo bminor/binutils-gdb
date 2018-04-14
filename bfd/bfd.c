@@ -2137,7 +2137,7 @@ FUNCTION
 	bfd_emul_get_commonpagesize
 
 SYNOPSIS
-	bfd_vma bfd_emul_get_commonpagesize (const char *);
+	bfd_vma bfd_emul_get_commonpagesize (const char *, bfd_boolean);
 
 DESCRIPTION
 	Returns the common page size, in bytes, as determined by
@@ -2148,15 +2148,22 @@ RETURNS
 */
 
 bfd_vma
-bfd_emul_get_commonpagesize (const char *emul)
+bfd_emul_get_commonpagesize (const char *emul, bfd_boolean relro)
 {
   const bfd_target *target;
 
   target = bfd_find_target (emul, NULL);
   if (target != NULL
       && target->flavour == bfd_target_elf_flavour)
-    return xvec_get_elf_backend_data (target)->commonpagesize;
+    {
+      const struct elf_backend_data *bed;
 
+      bed = xvec_get_elf_backend_data (target);
+      if (relro)
+	return bed->relropagesize;
+      else
+	return bed->commonpagesize;
+    }
   return 0;
 }
 

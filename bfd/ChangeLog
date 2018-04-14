@@ -1,5 +1,20 @@
 2018-04-14  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (struct elf_backend_data): Add relropagesize.
+	* elfxx-target.h (ELF_RELROPAGESIZE): Provide default and
+	sanity test.
+	(elfNN_bed): Init relropagesize.
+	* bfd.c (bfd_emul_get_commonpagesize): Add boolean param to
+	select relropagesize.
+	* elf32-ppc.c (ELF_COMMONPAGESIZE): Define as 0x1000.
+	(ELF_RELROPAGESIZE): Define as ELF_MAXPAGESIZE.
+	(ELF_MINPAGESIZE): Don't define.
+	* elf64-ppc.c (ELF_COMMONPAGESIZE): Define as 0x1000.
+	(ELF_RELROPAGESIZE): Define as ELF_MAXPAGESIZE.
+	* bfd-in2.h: Regenerate.
+
+2018-04-14  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (ELF_MAXPAGESIZE, ELF_COMMONPAGESIZE): Don't depend
 	on __QNXTARGET__ define.
 

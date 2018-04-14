@@ -225,6 +225,11 @@ after_parse_default (void)
       if (!is_vma)
 	ldlang_add_undef (entry_symbol.name, entry_from_cmdline);
     }
+  if (config.maxpagesize == 0)
+    config.maxpagesize = bfd_emul_get_maxpagesize (default_target);
+  if (config.commonpagesize == 0)
+    config.commonpagesize = bfd_emul_get_commonpagesize (default_target,
+							 link_info.relro);
 }
 
 void

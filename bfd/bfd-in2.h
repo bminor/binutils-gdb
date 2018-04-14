@@ -7251,7 +7251,7 @@ bfd_vma bfd_emul_get_maxpagesize (const char *);
 
 void bfd_emul_set_maxpagesize (const char *, bfd_vma);
 
-bfd_vma bfd_emul_get_commonpagesize (const char *);
+bfd_vma bfd_emul_get_commonpagesize (const char *, bfd_boolean);
 
 void bfd_emul_set_commonpagesize (const char *, bfd_vma);
 
