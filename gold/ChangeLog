@@ -1,3 +1,9 @@
+2018-04-14  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/23046
+	* gc.h (gc_process_relocs): Pass target to
+	scan.global_reloc_may_be_function_pointer.
+
 2018-04-09  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
