@@ -1,3 +1,8 @@
+2018-04-15  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.tgt (x86_tobjs): New variable.
+	(amd64_tobjs, i386_tobjs): Use it.
+
 2018-04-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* symtab.c (print_symbol_info): Precede the symbol definition by
