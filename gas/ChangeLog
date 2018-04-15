@@ -1,3 +1,10 @@
+2018-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/x86-64-waitpkg.s: Add 32-bit registers
+	tests for tpause and umwait.
+	* testsuite/gas/i386/x86-64-waitpkg-intel.d: Updated.
+	* testsuite/gas/i386/x86-64-waitpkg.d: Likewise.
+
 2018-04-12  John Darrington  <john@darrington.wattle.id.au>
 
 	* as.c (main): Fail if the output is the same as one of the input

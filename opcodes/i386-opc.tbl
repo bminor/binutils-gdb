@@ -5904,10 +5904,8 @@ pconfig, 0, 0x0f01c5, None, 3, CpuPCONFIG, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qS
 umonitor, 1, 0xf30fae, 0x6, 2, CpuWAITPKG|CpuNo64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|AddrPrefixOp0, { Reg16|Reg32 }
 umonitor, 1, 0xf30fae, 0x6, 2, CpuWAITPKG|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|AddrPrefixOp0|NoRex64, { Reg32|Reg64 }
 
-tpause, 1, 0x660fae, 0x6, 2, CpuWAITPKG|CpuNo64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32 }
-tpause, 1, 0x660fae, 0x6, 2, CpuWAITPKG|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64 }
+tpause, 1, 0x660fae, 0x6, 2, CpuWAITPKG, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg32|Reg64 }
 
-umwait, 1, 0xf20fae, 0x6, 2, CpuWAITPKG|CpuNo64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32 }
-umwait, 1, 0xf20fae, 0x6, 2, CpuWAITPKG|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64 }
+umwait, 1, 0xf20fae, 0x6, 2, CpuWAITPKG, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg32|Reg64 }
 
 // WAITPKG instructions end.

@@ -12,8 +12,12 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*f3 0f ae f0[ 	]*umonitor rax
 [ 	]*[a-f0-9]+:[ 	]*f3 41 0f ae f2[ 	]*umonitor r10
 [ 	]*[a-f0-9]+:[ 	]*67 f3 41 0f ae f2[ 	]*umonitor r10d
-[ 	]*[a-f0-9]+:[ 	]*f2 0f ae f1[ 	]*umwait rcx
-[ 	]*[a-f0-9]+:[ 	]*f2 41 0f ae f2[ 	]*umwait r10
-[ 	]*[a-f0-9]+:[ 	]*66 0f ae f1[ 	]*tpause rcx
-[ 	]*[a-f0-9]+:[ 	]*66 41 0f ae f2[ 	]*tpause r10
+[ 	]*[a-f0-9]+:[ 	]*f2 0f ae f1[ 	]*umwait ecx
+[ 	]*[a-f0-9]+:[ 	]*f2 0f ae f1[ 	]*umwait ecx
+[ 	]*[a-f0-9]+:[ 	]*f2 41 0f ae f2[ 	]*umwait r10d
+[ 	]*[a-f0-9]+:[ 	]*f2 41 0f ae f2[ 	]*umwait r10d
+[ 	]*[a-f0-9]+:[ 	]*66 0f ae f1[ 	]*tpause ecx
+[ 	]*[a-f0-9]+:[ 	]*66 0f ae f1[ 	]*tpause ecx
+[ 	]*[a-f0-9]+:[ 	]*66 41 0f ae f2[ 	]*tpause r10d
+[ 	]*[a-f0-9]+:[ 	]*66 41 0f ae f2[ 	]*tpause r10d
 #pass

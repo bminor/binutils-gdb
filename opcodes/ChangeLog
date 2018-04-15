@@ -1,3 +1,11 @@
+2018-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (prefix_table): Replace Em with Edq on tpause and
+	umwait.
+	* i386-opc.tbl: Allow 32-bit registers for tpause and umwait in
+	64-bit mode.
+	* i386-tbl.h: Regenerated.
+
 2018-04-11  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* i386-dis.c (enum): Add PREFIX_MOD_0_0FAE_REG_6,
