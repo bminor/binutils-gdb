@@ -406,7 +406,6 @@ ALL_EMULATION_SOURCES = \
 	esparcaout.c \
 	esparclinux.c \
 	esparcnbsd.c \
-	est2000.c \
 	esun3.c \
 	esun4.c \
 	etic30aout.c \
@@ -1809,9 +1808,6 @@ esparclinux.c: $(srcdir)/emulparams/sparclinux.sh \
 
 esparcnbsd.c:	$(srcdir)/emulparams/sparcnbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-est2000.c: $(srcdir)/emulparams/st2000.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/st2000.sc ${GEN_DEPENDS}
 
 esun3.c: $(srcdir)/emulparams/sun3.sh \
   $(srcdir)/emultempl/sunos.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}

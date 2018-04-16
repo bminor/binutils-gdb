@@ -110,7 +110,6 @@ case $targ in
  we32k-*-* | \
  w65-*-* | \
  *-*-ieee* | \
- *-tandem-* | \
  i370-* | \
  sh5*-*-* | sh64*-*-* | \
  null)
@@ -127,6 +126,7 @@ case $targ in
  *-adobe-* | \
  *-go32-rtems* | \
  *-sony-* | \
+ *-tandem-* | \
  *-*-netware* | \
  *-*-rtemsaout* | \
  *-*-rtemscoff* | \
@@ -1797,10 +1797,6 @@ case "${targ}" in
     targ_defvec=ieee_vec
     ;;
 
-  *-tandem-*)
-    targ_defvec=m68k_coff_vec
-    targ_selvecs=ieee_vec
-    ;;
 # END OF targmatch.h
   *)
     echo 1>&2 "*** BFD does not support target ${targ}."

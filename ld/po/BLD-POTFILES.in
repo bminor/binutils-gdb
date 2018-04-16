@@ -328,7 +328,6 @@ eshpe.c
 esparcaout.c
 esparclinux.c
 esparcnbsd.c
-est2000.c
 esun3.c
 esun4.c
 etic30aout.c

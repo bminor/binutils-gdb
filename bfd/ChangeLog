@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* config.bfd: Remove tandem support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove newsos3 support.
 	* aoutx.h: Likewise.
 	* config.bfd: Likewise.
