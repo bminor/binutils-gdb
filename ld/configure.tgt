@@ -218,8 +218,6 @@ moxie-*-moxiebox*)	targ_emul=moxiebox
 			;;
 moxie-*-*)		targ_emul=elf32moxie
 			;;
-h8300-*-hms* | h8300-*-coff*)
-			targ_emul=h8300; targ_extra_emuls="h8300h h8300s h8300hn h8300sn h8300sx h8300sxn" ;;
 h8300-*-elf* | h8300-*-rtems*)
 			targ_emul=h8300elf;
 			targ_extra_emuls="h8300helf h8300self h8300hnelf h8300snelf h8300sxelf h8300sxnelf" ;;

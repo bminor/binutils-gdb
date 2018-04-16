@@ -281,7 +281,6 @@ BFD32_BACKENDS = \
 	coff-arm.lo \
 	coff-aux.lo \
 	coff-go32.lo \
-	coff-h8300.lo \
 	coff-h8500.lo \
 	coff-i386.lo \
 	coff-m68k.lo \
@@ -465,7 +464,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-arm.c \
 	coff-aux.c \
 	coff-go32.c \
-	coff-h8300.c \
 	coff-h8500.c \
 	coff-i386.c \
 	coff-m68k.c \

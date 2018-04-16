@@ -469,7 +469,6 @@ do
     fr30_elf32_vec)		 tb="$tb elf32-fr30.lo elf32.lo $elf" ;;
     frv_elf32_vec)		 tb="$tb elf32-frv.lo elf32.lo $elf" ;;
     frv_elf32_fdpic_vec)	 tb="$tb elf32-frv.lo elf32.lo $elf" ;;
-    h8300_coff_vec)		 tb="$tb coff-h8300.lo reloc16.lo $coffgen" ;;
     h8300_elf32_vec)		 tb="$tb elf32-h8300.lo elf32.lo $elf" ;;
     h8300_elf32_linux_vec)	 tb="$tb elf32-h8300.lo elf32.lo $elf" ;;
     h8500_coff_vec)		 tb="$tb coff-h8500.lo reloc16.lo $coffgen" ;;

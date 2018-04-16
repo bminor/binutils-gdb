@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/binutils-all/objcopy.exp: Remove h8300-coff support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove IEEE 695 support.
 	* budbg.h: Likewise.
 	* doc/binutils.texi: Likewise.

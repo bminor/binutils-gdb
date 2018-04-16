@@ -85,11 +85,6 @@
 #define TARGET_FORMAT "coff-z8k"
 #endif
 
-#ifdef TC_H8300
-#include "coff/h8300.h"
-#define TARGET_FORMAT "coff-h8300"
-#endif
-
 #ifdef TC_H8500
 #include "coff/h8500.h"
 #define TARGET_FORMAT "coff-h8500"

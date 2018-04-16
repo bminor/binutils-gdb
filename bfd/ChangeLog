@@ -1,5 +1,18 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove h8300-coff support.
+	* coffcode.h: Likewise.
+	* config.bfd: Likewise.
+	* configure.ac: Likewise.
+	* reloc16.c: Likewise.
+	* targets.c: Likewise.
+	* coff-h8300.c: Delete.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove IEEE 695 support.
 	* archures.c: Likewise.
 	* bfd.c: Likewise.

@@ -2285,51 +2285,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
       break;
 #endif
 
-#ifdef H8300MAGIC
-    case H8300MAGIC:
-      arch = bfd_arch_h8300;
-      machine = bfd_mach_h8300;
-      /* !! FIXME this probably isn't the right place for this.  */
-      abfd->flags |= BFD_IS_RELAXABLE;
-      break;
-#endif
-
-#ifdef H8300HMAGIC
-    case H8300HMAGIC:
-      arch = bfd_arch_h8300;
-      machine = bfd_mach_h8300h;
-      /* !! FIXME this probably isn't the right place for this.  */
-      abfd->flags |= BFD_IS_RELAXABLE;
-      break;
-#endif
-
-#ifdef H8300SMAGIC
-    case H8300SMAGIC:
-      arch = bfd_arch_h8300;
-      machine = bfd_mach_h8300s;
-      /* !! FIXME this probably isn't the right place for this.  */
-      abfd->flags |= BFD_IS_RELAXABLE;
-      break;
-#endif
-
-#ifdef H8300HNMAGIC
-    case H8300HNMAGIC:
-      arch = bfd_arch_h8300;
-      machine = bfd_mach_h8300hn;
-      /* !! FIXME this probably isn't the right place for this.  */
-      abfd->flags |= BFD_IS_RELAXABLE;
-      break;
-#endif
-
-#ifdef H8300SNMAGIC
-    case H8300SNMAGIC:
-      arch = bfd_arch_h8300;
-      machine = bfd_mach_h8300sn;
-      /* !! FIXME this probably isn't the right place for this.  */
-      abfd->flags |= BFD_IS_RELAXABLE;
-      break;
-#endif
-
 #ifdef SH_ARCH_MAGIC_BIG
     case SH_ARCH_MAGIC_BIG:
     case SH_ARCH_MAGIC_LITTLE:
@@ -2886,20 +2841,6 @@ coff_set_flags (bfd * abfd,
     case bfd_arch_m88k:
       *magicp = MC88OMAGIC;
       return TRUE;
-#endif
-
-#ifdef H8300MAGIC
-    case bfd_arch_h8300:
-      switch (bfd_get_mach (abfd))
-	{
-	case bfd_mach_h8300:   *magicp = H8300MAGIC;   return TRUE;
-	case bfd_mach_h8300h:  *magicp = H8300HMAGIC;  return TRUE;
-	case bfd_mach_h8300s:  *magicp = H8300SMAGIC;  return TRUE;
-	case bfd_mach_h8300hn: *magicp = H8300HNMAGIC; return TRUE;
-	case bfd_mach_h8300sn: *magicp = H8300SNMAGIC; return TRUE;
-	default: break;
-	}
-      break;
 #endif
 
 #ifdef SH_ARCH_MAGIC_BIG

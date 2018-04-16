@@ -1,5 +1,18 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* config/obj-coff.h: Remove h8300-coff support.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-h8300.h: Likewise.
+	* testsuite/gas/h8300/h8300.exp: Likewise.
+	* testsuite/gas/h8300/branch-coff.s: Delete.
+	* testsuite/gas/h8300/branchh-coff.s: Delete.
+	* testsuite/gas/h8300/branchs-coff.s: Delete.
+	* testsuite/gas/h8300/ffxx1-coff.d: Delete.
+	* testsuite/gas/h8300/ffxx1-coff.s: Delete.
+	* testsuite/gas/h8300/h8300-coff.exp: Delete.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* app.c: Remove IEEE 695 support.
 	* symbols.c: Likewise.
 

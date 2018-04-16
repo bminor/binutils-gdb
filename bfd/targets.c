@@ -647,7 +647,6 @@ extern const bfd_target epiphany_elf32_vec;
 extern const bfd_target fr30_elf32_vec;
 extern const bfd_target frv_elf32_vec;
 extern const bfd_target frv_elf32_fdpic_vec;
-extern const bfd_target h8300_coff_vec;
 extern const bfd_target h8300_elf32_vec;
 extern const bfd_target h8300_elf32_linux_vec;
 extern const bfd_target h8500_coff_vec;
@@ -1057,7 +1056,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&frv_elf32_vec,
 	&frv_elf32_fdpic_vec,
 
-	&h8300_coff_vec,
 	&h8300_elf32_vec,
 	&h8300_elf32_linux_vec,
 	&h8500_coff_vec,
