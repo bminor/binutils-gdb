@@ -219,11 +219,6 @@ eh8300snelf.c
 eh8300sxelf.c
 eh8300sxelf_linux.c
 eh8300sxnelf.c
-eh8500.c
-eh8500b.c
-eh8500c.c
-eh8500m.c
-eh8500s.c
 ehp300bsd.c
 ehp3hpux.c
 ehppa64linux.c

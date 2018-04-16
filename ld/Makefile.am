@@ -305,11 +305,6 @@ ALL_EMULATION_SOURCES = \
 	eh8300sxelf.c \
 	eh8300sxelf_linux.c \
 	eh8300sxnelf.c \
-	eh8500.c \
-	eh8500b.c \
-	eh8500c.c \
-	eh8500m.c \
-	eh8500s.c \
 	ehp300bsd.c \
 	ehp3hpux.c \
 	ehppaelf.c \
@@ -1393,21 +1388,6 @@ eh8300sxelf_linux.c: $(srcdir)/emulparams/h8300sxelf_linux.sh \
 eh8300sxnelf.c: $(srcdir)/emulparams/h8300sxnelf.sh \
   $(srcdir)/emulparams/h8300elf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eh8500.c: $(srcdir)/emulparams/h8500.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500.sc ${GEN_DEPENDS}
-
-eh8500b.c: $(srcdir)/emulparams/h8500b.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500b.sc ${GEN_DEPENDS}
-
-eh8500c.c: $(srcdir)/emulparams/h8500c.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500c.sc ${GEN_DEPENDS}
-
-eh8500m.c: $(srcdir)/emulparams/h8500m.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500m.sc ${GEN_DEPENDS}
-
-eh8500s.c: $(srcdir)/emulparams/h8500s.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500s.sc ${GEN_DEPENDS}
 
 ehp300bsd.c: $(srcdir)/emulparams/hp300bsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}

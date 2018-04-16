@@ -107,7 +107,6 @@ ALL_MACHINES = \
 	cpu-frv.lo \
 	cpu-ft32.lo \
 	cpu-h8300.lo \
-	cpu-h8500.lo \
 	cpu-hppa.lo \
 	cpu-i370.lo \
 	cpu-i386.lo \
@@ -195,7 +194,6 @@ ALL_MACHINES_CFILES = \
 	cpu-frv.c \
 	cpu-ft32.c \
 	cpu-h8300.c \
-	cpu-h8500.c \
 	cpu-hppa.c \
 	cpu-i370.c \
 	cpu-i386.c \
@@ -281,7 +279,6 @@ BFD32_BACKENDS = \
 	coff-arm.lo \
 	coff-aux.lo \
 	coff-go32.lo \
-	coff-h8500.lo \
 	coff-i386.lo \
 	coff-m68k.lo \
 	coff-m88k.lo \
@@ -464,7 +461,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-arm.c \
 	coff-aux.c \
 	coff-go32.c \
-	coff-h8500.c \
 	coff-i386.c \
 	coff-m68k.c \
 	coff-m88k.c \

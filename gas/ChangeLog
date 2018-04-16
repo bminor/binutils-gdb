@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* config/obj-coff.h: Remove h8500 support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* config/obj-coff.h: Remove h8300-coff support.
 	* config/tc-h8300.c: Likewise.
 	* config/tc-h8300.h: Likewise.

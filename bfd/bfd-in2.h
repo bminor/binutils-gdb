@@ -2162,7 +2162,6 @@ enum bfd_architecture
   bfd_arch_z8k,       /* Zilog Z8000.  */
 #define bfd_mach_z8001         1
 #define bfd_mach_z8002         2
-  bfd_arch_h8500,     /* Renesas H8/500 (formerly Hitachi H8/500).  */
   bfd_arch_sh,        /* Renesas / SuperH SH (formerly Hitachi SH).  */
 #define bfd_mach_sh                            1
 #define bfd_mach_sh2                           0x20

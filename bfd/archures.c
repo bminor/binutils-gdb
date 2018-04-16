@@ -287,7 +287,6 @@ DESCRIPTION
 .  bfd_arch_z8k,       {* Zilog Z8000.  *}
 .#define bfd_mach_z8001		1
 .#define bfd_mach_z8002		2
-.  bfd_arch_h8500,     {* Renesas H8/500 (formerly Hitachi H8/500).  *}
 .  bfd_arch_sh,	       {* Renesas / SuperH SH (formerly Hitachi SH).  *}
 .#define bfd_mach_sh				1
 .#define bfd_mach_sh2				0x20
@@ -578,7 +577,6 @@ extern const bfd_arch_info_type bfd_epiphany_arch;
 extern const bfd_arch_info_type bfd_fr30_arch;
 extern const bfd_arch_info_type bfd_frv_arch;
 extern const bfd_arch_info_type bfd_h8300_arch;
-extern const bfd_arch_info_type bfd_h8500_arch;
 extern const bfd_arch_info_type bfd_hppa_arch;
 extern const bfd_arch_info_type bfd_i370_arch;
 extern const bfd_arch_info_type bfd_i386_arch;
@@ -671,7 +669,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_fr30_arch,
     &bfd_frv_arch,
     &bfd_h8300_arch,
-    &bfd_h8500_arch,
     &bfd_hppa_arch,
     &bfd_i370_arch,
     &bfd_i386_arch,

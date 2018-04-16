@@ -1,5 +1,10 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* coff/h8500.h: Delete.
+	* coff/internal.h: Remove h8500 support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* coff/h8300.h: Delete.
 
 2018-04-16  Alan Modra  <amodra@gmail.com>

@@ -63,7 +63,6 @@ HFILES = \
 	epiphany-desc.h epiphany-opc.h \
 	fr30-desc.h fr30-opc.h \
 	frv-desc.h frv-opc.h \
-	h8500-opc.h \
 	i386-init.h \
 	i386-opc.h \
 	i386-tbl.h \
@@ -138,7 +137,6 @@ TARGET_LIBOPCODES_CFILES = \
 	ft32-dis.c \
 	ft32-opc.c \
 	h8300-dis.c \
-	h8500-dis.c \
 	hppa-dis.c \
 	i370-dis.c \
 	i370-opc.c \

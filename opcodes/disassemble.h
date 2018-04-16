@@ -42,7 +42,6 @@ extern int print_insn_ft32		(bfd_vma, disassemble_info *);
 extern int print_insn_h8300		(bfd_vma, disassemble_info *);
 extern int print_insn_h8300h		(bfd_vma, disassemble_info *);
 extern int print_insn_h8300s		(bfd_vma, disassemble_info *);
-extern int print_insn_h8500		(bfd_vma, disassemble_info *);
 extern int print_insn_hppa		(bfd_vma, disassemble_info *);
 extern int print_insn_i370		(bfd_vma, disassemble_info *);
 extern int print_insn_i386		(bfd_vma, disassemble_info *);

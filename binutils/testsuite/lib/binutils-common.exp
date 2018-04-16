@@ -58,7 +58,6 @@ proc is_elf_format {} {
 	 || [istarget *-*-linux*ecoff*]
 	 || [istarget *-*-linux*oldld*]
 	 || [istarget *-*-rtemscoff*]
-	 || [istarget h8500-*-rtems*]
 	 || [istarget i?86-*-freebsd\[12\].*] } {
 	return 0
     }

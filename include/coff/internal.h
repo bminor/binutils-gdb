@@ -813,18 +813,6 @@ struct internal_reloc
 #define R_IMM24   0x33          /* 24 bit abs */
 /* R_JR, R_IMM8, R_IMM16, R_IMM32 - as for Z8k */
 
-/* H8500 modes */
-
-#define R_H8500_IMM8  	1		/*  8 bit immediate 	*/
-#define R_H8500_IMM16 	2		/* 16 bit immediate	*/
-#define R_H8500_PCREL8 	3		/*  8 bit pcrel 	*/
-#define R_H8500_PCREL16 4		/* 16 bit pcrel 	*/
-#define R_H8500_HIGH8  	5		/* high 8 bits of 24 bit address */
-#define R_H8500_LOW16 	7		/* low 16 bits of 24 bit immediate */
-#define R_H8500_IMM24	6		/* 24 bit immediate */
-#define R_H8500_IMM32   8               /* 32 bit immediate */
-#define R_H8500_HIGH16  9		/* high 16 bits of 32 bit immediate */
-
 /* W65 modes */
 
 #define R_W65_ABS8	1  /* addr & 0xff 		*/

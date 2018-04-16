@@ -2301,12 +2301,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
       break;
 #endif
 
-#ifdef H8500MAGIC
-    case H8500MAGIC:
-      arch = bfd_arch_h8500;
-      break;
-#endif
-
 #ifdef SPARCMAGIC
     case SPARCMAGIC:
 #ifdef LYNXCOFFMAGIC
@@ -2870,13 +2864,6 @@ coff_set_flags (bfd * abfd,
       *magicp = LYNXCOFFMAGIC;
 #endif
       return TRUE;
-#endif
-
-#ifdef H8500MAGIC
-    case bfd_arch_h8500:
-      *magicp = H8500MAGIC;
-      return TRUE;
-      break;
 #endif
 
 #ifdef WE32KMAGIC

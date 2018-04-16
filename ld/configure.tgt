@@ -224,10 +224,6 @@ h8300-*-elf* | h8300-*-rtems*)
 h8300-*-linux*)
 			targ_emul=h8300elf_linux;
 			targ_extra_emuls="h8300helf_linux h8300self_linux h8300sxelf_linux" ;;
-h8500-*-hms* | h8500-*-coff* | h8500-*-rtems*)
-			targ_emul=h8500
-			targ_extra_emuls="h8500s h8500b h8500m h8500c"
-			;;
 hppa*64*-*-linux-*)	targ_emul=hppa64linux ;;
 hppa*64*-hpux*)		targ_emul=elf64hppa ;;
 hppa*-*-linux-*)	targ_emul=hppalinux ;;
