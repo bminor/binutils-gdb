@@ -7532,9 +7532,6 @@ subject, see the hardware manufacturer's manual.
 @ifset HPPA
 * HPPA-Dependent::              HPPA Dependent Features
 @end ifset
-@ifset I370
-* ESA/390-Dependent::           IBM ESA/390 Dependent Features
-@end ifset
 @ifset I80386
 * i386-Dependent::              Intel 80386 and AMD x86-64 Dependent Features
 @end ifset
@@ -7737,10 +7734,6 @@ family.
 
 @ifset HPPA
 @include c-hppa.texi
-@end ifset
-
-@ifset I370
-@include c-i370.texi
 @end ifset
 
 @ifset I80386

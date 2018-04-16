@@ -1779,7 +1779,6 @@ proc check_gc_sections_available { } {
 	    || [istarget pru*-*-*]
 	    || [istarget alpha-*-*]
 	    || [istarget hppa*64-*-*]
-	    || [istarget i370-*-*]
 	    || [istarget ia64-*-*]
 	    || [istarget mep-*-*]
 	    || [istarget mn10200-*-*] } {

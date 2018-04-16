@@ -107,7 +107,6 @@ case $targ in
  vax-*-bsd* | vax-*-ultrix* | \
  we32k-*-* | \
  w65-*-* | \
- i370-* | \
  sh5*-*-* | sh64*-*-* | \
  null)
     if test "x$enable_obsolete" != xyes; then
@@ -133,6 +132,7 @@ case $targ in
  h8300*-*-coff | \
  h8500*-*-coff | \
  hppa*-*-rtems* | \
+ i370-* | \
  i860-*-* | \
  i960-*-* | \
  m68*-*-lynxos* | \
@@ -169,7 +169,6 @@ dlx*)		 targ_archs=bfd_dlx_arch ;;
 fido*)		 targ_archs=bfd_m68k_arch ;;
 hppa*)		 targ_archs=bfd_hppa_arch ;;
 i[3-7]86)	 targ_archs=bfd_i386_arch ;;
-i370)		 targ_archs=bfd_i370_arch ;;
 ia16)		 targ_archs=bfd_i386_arch ;;
 lm32)	         targ_archs=bfd_lm32_arch ;;
 m6811*|m68hc11*) targ_archs="bfd_m68hc11_arch bfd_m68hc12_arch bfd_m9s12x_arch bfd_m9s12xg_arch" ;;
@@ -602,11 +601,6 @@ case "${targ}" in
   hppa*-*-osf*)
     targ_defvec=hppa_som_vec
     targ_selvecs=hppa_elf32_vec
-    ;;
-
-  i370-*-*)
-    targ_defvec=i370_elf32_vec
-    targ_selvecs="i370_elf32_vec"
     ;;
 
   i[3-7]86-*-sco3.2v5*coff)

@@ -1,5 +1,17 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove i370 support.
+	* configure.ac: Likewise.
+	* disassemble.c: Likewise.
+	* disassemble.h: Likewise.
+	* i370-dis.c: Delete.
+	* i370-opc.c: Delete.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove h8500 support.
 	* configure.ac: Likewise.
 	* disassemble.c: Likewise.

@@ -48,10 +48,6 @@
 #include "elf/ppc.h"
 #endif
 
-#ifdef TC_I370
-#include "elf/i370.h"
-#endif
-
 #ifdef TC_I386
 #include "elf/x86-64.h"
 #endif
@@ -1019,7 +1015,6 @@ obj_elf_section (int push)
   subsegT new_subsection = -1;
   unsigned int info = 0;
 
-#ifndef TC_I370
   if (flag_mri)
     {
       char mri_type;
@@ -1039,7 +1034,6 @@ obj_elf_section (int push)
 
       return;
     }
-#endif /* ! defined (TC_I370) */
 
   name = obj_elf_section_name ();
   if (name == NULL)

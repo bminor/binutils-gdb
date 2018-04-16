@@ -72,8 +72,6 @@ config/tc-h8300.c
 config/tc-h8300.h
 config/tc-hppa.c
 config/tc-hppa.h
-config/tc-i370.c
-config/tc-i370.h
 config/tc-i386.c
 config/tc-i386.h
 config/tc-ia64.c

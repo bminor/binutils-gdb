@@ -333,7 +333,6 @@ CPU_DOCS = \
 	c-epiphany.texi \
 	c-h8300.texi \
 	c-hppa.texi \
-	c-i370.texi \
 	c-i386.texi \
 	c-ip2k.texi \
 	c-lm32.texi \

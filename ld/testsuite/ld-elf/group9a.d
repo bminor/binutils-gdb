@@ -2,7 +2,7 @@
 #ld: -r --gc-sections --entry foo
 #readelf: -g --wide
 #xfail: d30v-*-* dlx-*-* pj*-*-* pru-*-*
-#xfail: hppa64-*-* i370-*-* mep-*-* mn10200-*-*
+#xfail: hppa64-*-* mep-*-* mn10200-*-*
 #xfail: cr16-*-* crx-*-*
 # generic linker targets don't support --gc-sections, nor do a bunch of others
 # cr16 and crx use non-standard scripts with memory regions, which don't play

@@ -465,9 +465,6 @@ case $target_triplet in {
     { "mmix-*-*" } {
 	set nop_type 5
     }
-    { "i370-*-*" } {
-	set nop_type 3
-    }
     { "or1k*-*-*" } {
 	set nop_type 2
     }

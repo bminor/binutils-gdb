@@ -108,7 +108,6 @@
 #include "elf/h8.h"
 #include "elf/hppa.h"
 #include "elf/i386.h"
-#include "elf/i370.h"
 #include "elf/ia64.h"
 #include "elf/ip2k.h"
 #include "elf/lm32.h"
@@ -1424,10 +1423,6 @@ dump_relocations (Filedata *          filedata,
 	case EM_L1OM:
 	case EM_K1OM:
 	  rtype = elf_x86_64_reloc_type (type);
-	  break;
-
-	case EM_S370:
-	  rtype = i370_reloc_type (type);
 	  break;
 
 	case EM_S390_OLD:
@@ -12298,8 +12293,6 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
       return reloc_type == 1; /* R_RL78_DIR32.  */
     case EM_RX:
       return reloc_type == 1; /* R_RX_DIR32.  */
-    case EM_S370:
-      return reloc_type == 1; /* R_I370_ADDR31.  */
     case EM_S390_OLD:
     case EM_S390:
       return reloc_type == 4; /* R_S390_32.  */

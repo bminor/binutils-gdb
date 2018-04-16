@@ -241,7 +241,6 @@ ALL_EMULATION_SOURCES = \
 	eelf32frv.c \
 	eelf32frvfd.c \
 	eelf32ft32.c \
-	eelf32i370.c \
 	eelf32ip2k.c \
 	eelf32iq10.c \
 	eelf32iq2000.c \
@@ -1096,9 +1095,6 @@ eelf32frvfd.c: $(srcdir)/emulparams/elf32frvfd.sh \
 
 eelf32ft32.c: $(srcdir)/emulparams/elf32ft32.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eelf32i370.c: $(srcdir)/emulparams/elf32i370.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elfi370.sc ${GEN_DEPENDS}
 
 eelf32ip2k.c: $(srcdir)/emulparams/elf32ip2k.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

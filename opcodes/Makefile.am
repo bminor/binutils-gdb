@@ -138,8 +138,6 @@ TARGET_LIBOPCODES_CFILES = \
 	ft32-opc.c \
 	h8300-dis.c \
 	hppa-dis.c \
-	i370-dis.c \
-	i370-opc.c \
 	i386-dis.c \
 	i386-opc.c \
 	ia64-dis.c \

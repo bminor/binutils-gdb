@@ -120,8 +120,7 @@ do_scrub_begin (int m68k_mri ATTRIBUTE_UNUSED)
     {
       lex['"'] = LEX_IS_STRINGQUOTE;
 
-#if ! defined (TC_HPPA) && ! defined (TC_I370)
-      /* I370 uses single-quotes to delimit integer, float constants.  */
+#if ! defined (TC_HPPA)
       lex['\''] = LEX_IS_ONECHAR_QUOTE;
 #endif
 

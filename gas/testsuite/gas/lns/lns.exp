@@ -24,10 +24,7 @@ run_dump_test "lns-duplicate"
 # ??? Won't work on targets that don't have a bare "nop" insn.
 # Perhaps we could arrange for an include file or something that
 # defined a macro...
-if {
-        ![istarget i370-*-*]
-     && ![istarget s390*-*-*]
-} {
+if { ![istarget s390*-*-*] } {
     # Use alternate file for targets using DW_LNS_fixed_advance_pc opcodes.
     if {    [istarget am3*-*-*]
 	 || [istarget avr*-*-*]

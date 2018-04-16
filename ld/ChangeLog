@@ -1,5 +1,37 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove i370 support.
+	* configure.tgt: Likewise.
+	* testsuite/ld-elf/compressed1d.d: Likewise.
+	* testsuite/ld-elf/group8a.d: Likewise.
+	* testsuite/ld-elf/group8b.d: Likewise.
+	* testsuite/ld-elf/group9a.d: Likewise.
+	* testsuite/ld-elf/group9b.d: Likewise.
+	* testsuite/ld-elf/merge.d: Likewise.
+	* testsuite/ld-elf/pr12851.d: Likewise.
+	* testsuite/ld-elf/pr12975.d: Likewise.
+	* testsuite/ld-elf/pr13177.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elf/pr17615.d: Likewise.
+	* testsuite/ld-elf/pr21562a.d: Likewise.
+	* testsuite/ld-elf/pr21562b.d: Likewise.
+	* testsuite/ld-elf/pr21562c.d: Likewise.
+	* testsuite/ld-elf/pr21562d.d: Likewise.
+	* testsuite/ld-elf/pr21562i.d: Likewise.
+	* testsuite/ld-elf/pr21562j.d: Likewise.
+	* testsuite/ld-elf/pr21562k.d: Likewise.
+	* testsuite/ld-elf/pr21562l.d: Likewise.
+	* testsuite/ld-elf/pr21562m.d: Likewise.
+	* testsuite/ld-elf/pr21562n.d: Likewise.
+	* testsuite/ld-elf/pr22677.d: Likewise.
+	* testsuite/lib/ld-lib.exp: Likewise.
+	* emulparams/elf32i370.sh: Delete.
+	* scripttempl/elfi370.sc: Delete.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove h8500 support.
 	* configure.tgt: Likewise.
 	* emulparams/h8500.sh: Delete.

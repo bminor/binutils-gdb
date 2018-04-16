@@ -74,7 +74,6 @@ cpu-frv.c
 cpu-ft32.c
 cpu-h8300.c
 cpu-hppa.c
-cpu-i370.c
 cpu-i386.c
 cpu-ia64.c
 cpu-iamcu.c
@@ -179,7 +178,6 @@ elf32-gen.c
 elf32-h8300.c
 elf32-hppa.c
 elf32-hppa.h
-elf32-i370.c
 elf32-i386.c
 elf32-ip2k.c
 elf32-iq2000.c

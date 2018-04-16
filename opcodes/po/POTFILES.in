@@ -60,8 +60,6 @@ ft32-dis.c
 ft32-opc.c
 h8300-dis.c
 hppa-dis.c
-i370-dis.c
-i370-opc.c
 i386-dis.c
 i386-gen.c
 i386-init.h

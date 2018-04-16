@@ -477,7 +477,6 @@ do
     hppa_elf64_vec)		 tb="$tb elf64-hppa.lo elf64.lo $elf"; target_size=64 ;;
     hppa_elf64_linux_vec)	 tb="$tb elf64-hppa.lo elf64.lo $elf"; target_size=64 ;;
     hppa_som_vec)		 tb="$tb som.lo" ;;
-    i370_elf32_vec)		 tb="$tb elf32-i370.lo elf32.lo $elf" ;;
     i386_aout_vec)		 tb="$tb i386aout.lo aout32.lo" ;;
     i386_aout_bsd_vec)		 tb="$tb i386bsd.lo aout32.lo" ;;
     i386_aout_dynix_vec)	 tb="$tb i386dynix.lo aout32.lo" ;;
@@ -880,11 +879,6 @@ if test "${target}" = "${host}"; then
 			COREFLAG="-DHPUX_CORE -DHPPABSD_CORE" ;;
   hppa*-*-netbsd* | hppa*-*-openbsd*)
 	COREFILE=netbsd-core.lo
-	;;
-
-  i370-*-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/i370linux.h"'
 	;;
 
 changequote(,)dnl
