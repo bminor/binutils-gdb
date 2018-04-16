@@ -349,7 +349,7 @@ typedef struct aout_symbol
 
 enum aout_subformat {
   default_format = 0,
-  /* Used on HP 9000/300 running HP/UX.  See hp300hpux.c.  */
+  /* Used on HP 9000/300 running HP/UX.  */
   gnu_encap_format,
   /* Used on Linux, 386BSD, etc.  See include/aout/aout64.h.  */
   q_magic_format

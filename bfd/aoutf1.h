@@ -36,9 +36,7 @@
    probably no longer reject a NewsOS object.  <ian@cygnus.com>.  */
 #ifndef MACHTYPE_OK
 #define MACHTYPE_OK(mtype) \
-  (((mtype) == M_SPARC && bfd_lookup_arch (bfd_arch_sparc, 0) != NULL) \
-   || (((mtype) == M_UNKNOWN || (mtype) == M_68010 || (mtype) == M_68020) \
-       && bfd_lookup_arch (bfd_arch_m68k, 0) != NULL))
+  ((mtype) == M_SPARC && bfd_lookup_arch (bfd_arch_sparc, 0) != NULL)
 #endif
 
 /* The file @code{aoutf1.h} contains the code for BFD's
@@ -103,25 +101,6 @@ sunos_set_arch_mach (bfd *abfd, enum machine_type machtype)
 
   switch (machtype)
     {
-    case M_UNKNOWN:
-      /* Some Sun3s make magic numbers without cpu types in them, so
-	 we'll default to the 68000.  */
-      arch = bfd_arch_m68k;
-      machine = bfd_mach_m68000;
-      break;
-
-    case M_68010:
-    case M_HP200:
-      arch = bfd_arch_m68k;
-      machine = bfd_mach_m68010;
-      break;
-
-    case M_68020:
-    case M_HP300:
-      arch = bfd_arch_m68k;
-      machine = bfd_mach_m68020;
-      break;
-
     case M_SPARC:
       arch = bfd_arch_sparc;
       machine = 0;
@@ -140,11 +119,6 @@ sunos_set_arch_mach (bfd *abfd, enum machine_type machtype)
     case M_386:
     case M_386_DYNIX:
       arch = bfd_arch_i386;
-      machine = 0;
-      break;
-
-    case M_HPUX:
-      arch = bfd_arch_m68k;
       machine = 0;
       break;
 
@@ -191,21 +165,6 @@ sunos_write_object_contents (bfd *abfd)
   /* Magic number, maestro, please!  */
   switch (bfd_get_arch (abfd))
     {
-    case bfd_arch_m68k:
-      switch (bfd_get_mach (abfd))
-	{
-	case bfd_mach_m68000:
-	  N_SET_MACHTYPE (execp, M_UNKNOWN);
-	  break;
-	case bfd_mach_m68010:
-	  N_SET_MACHTYPE (execp, M_68010);
-	  break;
-	default:
-	case bfd_mach_m68020:
-	  N_SET_MACHTYPE (execp, M_68020);
-	  break;
-	}
-      break;
     case bfd_arch_sparc:
       switch (bfd_get_mach (abfd))
 	{
@@ -720,11 +679,6 @@ sunos4_set_sizes (bfd *abfd)
     case bfd_arch_sparc:
       adata (abfd).page_size = 0x2000;
       adata (abfd).segment_size = 0x2000;
-      adata (abfd).exec_bytes_size = EXEC_BYTES_SIZE;
-      return TRUE;
-    case bfd_arch_m68k:
-      adata (abfd).page_size = 0x2000;
-      adata (abfd).segment_size = 0x20000;
       adata (abfd).exec_bytes_size = EXEC_BYTES_SIZE;
       return TRUE;
     }

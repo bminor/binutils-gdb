@@ -68,7 +68,6 @@ proc is_elf_format {} {
 	     || [istarget arm*-*-netbsd*]
 	     || [istarget sparc-*-netbsd*]
 	     || [istarget i*86-*-netbsd*]
-	     || [istarget m68*-*-netbsd*]
 	     || [istarget vax-*-netbsd*]
 	     || [istarget ns32k-*-netbsd*]) } {
     	return 0
@@ -77,7 +76,6 @@ proc is_elf_format {} {
     if {    [istarget arm-*-openbsd*]
 	 || [istarget i386-*-openbsd\[0-2\].*]
 	 || [istarget i386-*-openbsd3.\[0-2\]]
-	 || [istarget m68*-*-openbsd*]
 	 || [istarget ns32k-*-openbsd*]
 	 || [istarget sparc-*-openbsd\[0-2\].*]
 	 || [istarget sparc-*-openbsd3.\[0-1\]]
@@ -109,8 +107,6 @@ proc is_aout_format {} {
 	 || [istarget i?86-*-openbsd3.\[0-2\]*]
 	 || [istarget i?86-*-vsta]
 	 || [istarget i?86-*-mach*]
-	 || [istarget m68*-*-netbsd*]
-	 || [istarget m68*-*-openbsd*]
 	 || [istarget ns32k-*-*]
 	 || [istarget pdp11-*-*]
 	 || [istarget sparc*-*-sunos4*]

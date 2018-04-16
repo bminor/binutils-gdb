@@ -80,12 +80,6 @@ MY (write_object_contents) (bfd *abfd)
   /* Magic number, maestro, please!  */
   switch (bfd_get_arch(abfd))
     {
-    case bfd_arch_m68k:
-      if (strcmp (abfd->xvec->name, "a.out-m68k4k-netbsd") == 0)
-	N_SET_MACHTYPE (execp, M_68K4K_NETBSD);
-      else
-	N_SET_MACHTYPE (execp, M_68K_NETBSD);
-      break;
     case bfd_arch_sparc:
       N_SET_MACHTYPE (execp, M_SPARC_NETBSD);
       break;

@@ -1,5 +1,37 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove m68k-aout and m68k-coff support.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-m68k.h: Likewise.
+	* configure.ac: Likewise.
+	* configure.tgt: Likewise.
+	* testsuite/gas/all/weakref1u.d: Likewise.
+	* testsuite/gas/m68k/all.exp: Likewise.
+	* testsuite/gas/m68k/br-isaa.d: Likewise.
+	* testsuite/gas/m68k/br-isab.d: Likewise.
+	* testsuite/gas/m68k/br-isac.d: Likewise.
+	* config/te-psos.h: Delete.
+	* config/te-sun3.h: Delete.
+	* testsuite/gas/m68k-coff/gas.exp: Delete.
+	* testsuite/gas/m68k-coff/p2389.s: Delete.
+	* testsuite/gas/m68k-coff/p2389a.s: Delete.
+	* testsuite/gas/m68k-coff/p2430.s: Delete.
+	* testsuite/gas/m68k-coff/p2430a.s: Delete.
+	* testsuite/gas/m68k-coff/t1.s: Delete.
+	* testsuite/gas/m68k/p3041.d: Delete.
+	* testsuite/gas/m68k/p3041.s: Delete.
+	* testsuite/gas/m68k/p3041data.d: Delete.
+	* testsuite/gas/m68k/p3041data.s: Delete.
+	* testsuite/gas/m68k/p3041pcrel.d: Delete.
+	* testsuite/gas/m68k/p3041pcrel.s: Delete.
+	* testsuite/gas/m68k/t2.d: Delete.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove sh5 and sh64 support.
 	* config/tc-sh.c: Likewise.
 	* configure.tgt: Likewise.

@@ -77,16 +77,6 @@ case $targ in
  i[3-7]86-*-os9k | \
  i[3-7]86-none-* | \
  i[3-7]86-*-aout* | i[3-7]86*-*-vsta* | \
- m68*-motorola-sysv* | m68*-hp-bsd* | m68*-*-aout* | \
- m68*-*-coff* | m68*-*-sysv* | \
- m68*-*-hpux* | \
- m68*-*-linux*aout* | \
- m68*-hp*-netbsd* | \
- m68*-*-netbsdaout* | \
- m68*-*-sunos* | m68*-*-os68k* | m68*-*-vxworks* | m68*-netx-* | \
- m68*-*-bsd* | m68*-*-vsta* | \
- m68*-ericsson-* | \
- m68*-*-psos* | \
  mips*-big-* | \
  mips*-dec-* | mips*el-*-ecoff* | \
  mips*-*-ecoff* | \
@@ -113,6 +103,9 @@ case $targ in
 esac
 
 case $targ in
+ m68*-*-netbsdelf*)
+    # Not obsolete
+    ;;
  *-adobe-* | \
  *-go32-rtems* | \
  *-sony-* | \
@@ -129,10 +122,24 @@ case $targ in
  i370-* | \
  i860-*-* | \
  i960-*-* | \
+ m68*-*-*bsd* | \
+ m68*-*-aout* | \
+ m68*-*-coff* | \
+ m68*-*-hpux* | \
+ m68*-*-linux*aout* | \
  m68*-*-lynxos* | \
+ m68*-*-os68k* | \
+ m68*-*-psos* | \
+ m68*-*-sunos* | \
+ m68*-*-sysv* | \
+ m68*-*-vsta* | \
+ m68*-*-vxworks* | \
  m68*-apollo-* | \
  m68*-apple-aux* | \
  m68*-bull-sysv* | \
+ m68*-ericsson-* | \
+ m68*-motorola-sysv* | \
+ m68*-netx-* | \
  m88*-*-* | \
  maxq-*-coff | \
  mips*el-*-rtems* | \
@@ -526,7 +533,6 @@ case "${targ}" in
 
   fido-*-elf* )
     targ_defvec=m68k_elf32_vec
-    targ_selvecs="m68k_coff_vec"
     ;;
 
   fr30-*-elf)
@@ -906,83 +912,8 @@ case "${targ}" in
     targ_selvecs="m68hc11_elf32_vec m68hc12_elf32_vec"
     ;;
 
-  m68*-motorola-sysv*)
-    targ_defvec=m68k_coff_sysv_vec
-    ;;
-  m68*-hp-bsd*)
-    targ_defvec=m68k_aout_hp300bsd_vec
-    targ_underscore=yes
-    ;;
-  m68*-*-aout*)
-    targ_defvec=aout0_be_vec
-    # We include core_cisco_be_vec here, rather than making a separate cisco
-    # configuration, so that cisco-core.c gets routinely tested at
-    # least for compilation.
-    targ_selvecs="core_cisco_be_vec"
-    targ_underscore=yes
-    ;;
-  m68*-*-elf* | m68*-*-sysv4* | m68*-*-rtems* | m68*-*-uclinux*)
+  m68*-*-*)
     targ_defvec=m68k_elf32_vec
-    targ_selvecs="m68k_coff_vec"
-    ;;
-  m68*-*-coff* | m68*-*-sysv*)
-    targ_defvec=m68k_coff_vec
-    targ_selvecs="m68k_coff_vec m68k_versados_vec"
-    ;;
-  m68*-*-hpux*)
-    targ_defvec=m68k_aout_hp300hpux_vec
-    targ_underscore=yes
-    ;;
-  m68*-*-linux*aout*)
-    targ_defvec=m68k_aout_linux_vec
-    targ_selvecs=m68k_elf32_vec
-    targ_underscore=yes
-    ;;
-  m68*-*-linux-*)
-    targ_defvec=m68k_elf32_vec
-    targ_selvecs=m68k_aout_linux_vec
-    ;;
-  m68*-*-gnu*)
-    targ_defvec=m68k_elf32_vec
-    # targ_selvecs=m68kmach3_vec
-    # targ_cflags=-DSTAT_FOR_EXEC
-    ;;
-  m68*-hp*-netbsd*)
-    targ_defvec=m68k_aout_4knbsd_vec
-    targ_selvecs="m68k_aout_nbsd_vec m68k_aout_hp300bsd_vec sparc_aout_sunos_be_vec"
-    targ_underscore=yes
-    ;;
-  m68*-*-netbsdelf*)
-    targ_defvec=m68k_elf32_vec
-    targ_selvecs="m68k_aout_nbsd_vec m68k_aout_4knbsd_vec m68k_aout_hp300bsd_vec sparc_aout_sunos_be_vec"
-    ;;
-  m68*-*-netbsdaout* | m68*-*-netbsd*)
-    targ_defvec=m68k_aout_nbsd_vec
-    targ_selvecs="m68k_aout_4knbsd_vec m68k_elf32_vec m68k_aout_hp300bsd_vec sparc_aout_sunos_be_vec"
-    targ_underscore=yes
-    ;;
-  m68*-*-openbsd*)
-    targ_defvec=m68k_aout_nbsd_vec
-    targ_selvecs="m68k_aout_4knbsd_vec m68k_aout_hp300bsd_vec sparc_aout_sunos_be_vec"
-    targ_underscore=yes
-    ;;
-  m68*-*-sunos* | m68*-*-os68k* | m68*-*-vxworks* | m68*-netx-* | \
-  m68*-*-bsd* | m68*-*-vsta*)
-    targ_defvec=sparc_aout_sunos_be_vec
-    targ_underscore=yes
-    ;;
-  m68*-ericsson-*)
-    targ_defvec=sparc_aout_sunos_be_vec
-    targ_selvecs="m68k_coff_vec m68k_versados_vec tekhex_vec"
-    targ_underscore=yes
-    ;;
-  m68*-cbm-*)
-    targ_defvec=m68k_elf32_vec
-    targ_selvecs=m68k_coff_vec
-    ;;
-  m68*-*-psos*)
-    targ_defvec=m68k_elf32_vec
-    targ_underscore=yes
     ;;
 
   mcore-*-elf)

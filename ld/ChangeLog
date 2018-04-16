@@ -1,5 +1,41 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove m68k-aout and m68k-coff support.
+	* configure.tgt: Likewise.
+	* emultempl/m68kelf.em: Likewise.
+	* ld.texinfo: Likewise.
+	* mri.c: Likewise.
+	* emulparams/delta68.sh: Delete.
+	* emulparams/hp300bsd.sh: Delete.
+	* emulparams/hp3hpux.sh: Delete.
+	* emulparams/m68k4knbsd.sh: Delete.
+	* emulparams/m68kaout.sh: Delete.
+	* emulparams/m68kaux.sh: Delete.
+	* emulparams/m68kcoff.sh: Delete.
+	* emulparams/m68klinux.sh: Delete.
+	* emulparams/m68knbsd.sh: Delete.
+	* emulparams/m68kpsos.sh: Delete.
+	* emulparams/sun3.sh: Delete.
+	* emultempl/m68kcoff.em: Delete.
+	* scripttempl/delta68.sc: Delete.
+	* scripttempl/m68kaux.sc: Delete.
+	* scripttempl/m68kcoff.sc: Delete.
+	* scripttempl/psos.sc: Delete.
+	* testsuite/ld-versados/t1-1.ro: Delete.
+	* testsuite/ld-versados/t1-2.ro: Delete.
+	* testsuite/ld-versados/t1.ld: Delete.
+	* testsuite/ld-versados/t1.ook: Delete.
+	* testsuite/ld-versados/t2-1.ro: Delete.
+	* testsuite/ld-versados/t2-2.ro: Delete.
+	* testsuite/ld-versados/t2-3.ro: Delete.
+	* testsuite/ld-versados/t2.ld: Delete.
+	* testsuite/ld-versados/t2.ook: Delete.
+	* testsuite/ld-versados/versados.exp: Delete.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove sh5 and sh64 support.
 	* configure.tgt: Likewise.
 	* ldlang.c: Likewise.

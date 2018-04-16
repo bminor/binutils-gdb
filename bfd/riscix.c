@@ -495,10 +495,7 @@ riscix_some_aout_object_p (bfd *abfd,
   oldrawptr = abfd->tdata.aout_data;
   abfd->tdata.aout_data = rawptr;
 
-  /* Copy the contents of the old tdata struct.
-     In particular, we want the subformat, since for hpux it was set in
-     hp300hpux.c:swap_exec_header_in and will be used in
-     hp300hpux.c:callback.  */
+  /* Copy the contents of the old tdata struct.  */
   if (oldrawptr != NULL)
     *abfd->tdata.aout_data = *oldrawptr;
 

@@ -74,7 +74,6 @@ ed10velf.c
 ed30v_e.c
 ed30v_o.c
 ed30velf.c
-edelta68.c
 eelf32_dlx.c
 eelf32_sparc.c
 eelf32_sparc_sol2.c
@@ -218,8 +217,6 @@ eh8300snelf.c
 eh8300sxelf.c
 eh8300sxelf_linux.c
 eh8300sxnelf.c
-ehp300bsd.c
-ehp3hpux.c
 ehppa64linux.c
 ehppaelf.c
 ehppalinux.c
@@ -248,15 +245,8 @@ em68hc11elf.c
 em68hc11elfb.c
 em68hc12elf.c
 em68hc12elfb.c
-em68k4knbsd.c
-em68kaout.c
-em68kaux.c
-em68kcoff.c
 em68kelf.c
 em68kelfnbsd.c
-em68klinux.c
-em68knbsd.c
-em68kpsos.c
 emcorepe.c
 emmo.c
 emn10200.c
@@ -303,7 +293,6 @@ eshpe.c
 esparcaout.c
 esparclinux.c
 esparcnbsd.c
-esun3.c
 esun4.c
 etic30aout.c
 etic30coff.c

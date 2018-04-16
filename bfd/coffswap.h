@@ -618,13 +618,6 @@ coff_swap_aouthdr_in (bfd * abfd, void * aouthdr_ext1, void * aouthdr_int1)
   aouthdr_int->data_start =
     GET_AOUTHDR_DATA_START (abfd, aouthdr_ext->data_start);
 
-#ifdef APOLLO_M68
-  H_PUT_32 (abfd, aouthdr_int->o_inlib, aouthdr_ext->o_inlib);
-  H_PUT_32 (abfd, aouthdr_int->o_sri, aouthdr_ext->o_sri);
-  H_PUT_32 (abfd, aouthdr_int->vid[0], aouthdr_ext->vid);
-  H_PUT_32 (abfd, aouthdr_int->vid[1], aouthdr_ext->vid + 4);
-#endif
-
 #ifdef RS6000COFF_C
 #ifdef XCOFF64
   aouthdr_int->o_toc = H_GET_64 (abfd, aouthdr_ext->o_toc);

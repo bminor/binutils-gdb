@@ -1167,12 +1167,6 @@ pe_ILF_object_p (bfd * abfd)
 #endif
       break;
 
-    case IMAGE_FILE_MACHINE_M68K:
-#ifdef MC68AGIC
-      magic = MC68MAGIC;
-#endif
-      break;
-
     case IMAGE_FILE_MACHINE_R3000:
     case IMAGE_FILE_MACHINE_R4000:
     case IMAGE_FILE_MACHINE_R10000:

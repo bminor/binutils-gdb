@@ -1,5 +1,13 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* aout/host.h: Remove m68k-aout and m68k-coff support.
+	* aout/hp300hpux.h: Delete.
+	* coff/apollo.h: Delete.
+	* coff/aux-coff.h: Delete.
+	* coff/m68k.h: Delete.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* dis-asm.h: Remove sh5 and sh64 support.
 
 2018-04-16  Alan Modra  <amodra@gmail.com>

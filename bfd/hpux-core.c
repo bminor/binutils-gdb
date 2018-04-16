@@ -28,7 +28,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 
-#if defined (HOST_HPPAHPUX) || defined (HOST_HP300HPUX) || defined (HOST_HPPAMPEIX)
+#if defined (HOST_HPPAHPUX) || defined (HOST_HPPAMPEIX)
 
 /* FIXME: sys/core.h doesn't exist for HPUX version 7.  HPUX version
    5, 6, and 7 core files seem to be standard trad-core.c type core

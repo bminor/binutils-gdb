@@ -1,5 +1,53 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove m68k-aout and m68k-coff support.
+	* aoutf1.h: Likewise.
+	* aoutx.h: Likewise.
+	* archive.c: Likewise.
+	* bfd-in.h: Likewise.
+	* bfd.c: Likewise.
+	* coffcode.h: Likewise.
+	* coffswap.h: Likewise.
+	* config.bfd: Likewise.
+	* configure.ac: Likewise.
+	* configure.host: Likewise.
+	* doc/bfd.texinfo: Likewise.
+	* doc/bfdint.texi: Likewise.
+	* freebsd.h: Likewise.
+	* gen-aout.c: Likewise.
+	* hpux-core.c: Likewise.
+	* libaout.h: Likewise.
+	* libbfd-in.h: Likewise.
+	* pdp11.c: Likewise.
+	* peicode.h: Likewise.
+	* riscix.c: Likewise.
+	* targets.c: Likewise.
+	* aout0.c: Delete.
+	* coff-apollo.c: Delete.
+	* coff-aux.c: Delete.
+	* coff-m68k.c: Delete.
+	* coff-svm68k.c: Delete.
+	* coff-u68k.c: Delete.
+	* hosts/delta68.h: Delete.
+	* hosts/hp300bsd.h: Delete.
+	* hosts/m68kaux.h: Delete.
+	* hosts/news.h: Delete.
+	* hp300bsd.c: Delete.
+	* hp300hpux.c: Delete.
+	* liboasys.h: Delete.
+	* m68k4knetbsd.c: Delete.
+	* m68klinux.c: Delete.
+	* m68knetbsd.c: Delete.
+	* oasys.c: Delete.
+	* versados.c: Delete.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove sh5 and sh64 support.
 	* archures.c: Likewise.
 	* config.bfd: Likewise.

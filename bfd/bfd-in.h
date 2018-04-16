@@ -776,8 +776,6 @@ extern bfd_boolean bfd_sunos_size_dynamic_sections
 
 extern bfd_boolean bfd_i386linux_size_dynamic_sections
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_m68klinux_size_dynamic_sections
-  (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_sparclinux_size_dynamic_sections
   (bfd *, struct bfd_link_info *);
 
@@ -845,9 +843,6 @@ union internal_auxent;
 
 extern bfd_boolean bfd_coff_set_symbol_class
   (bfd *, struct bfd_symbol *, unsigned int);
-
-extern bfd_boolean bfd_m68k_coff_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* ARM VFP11 erratum workaround support.  */
 typedef enum

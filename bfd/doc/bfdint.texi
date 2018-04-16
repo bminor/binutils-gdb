@@ -336,8 +336,6 @@ COFF.
 ECOFF.
 @item bfd_target_elf_flavour
 ELF.
-@item bfd_target_oasys_flavour
-OASYS.
 @item bfd_target_tekhex_flavour
 Tektronix hex format.
 @item bfd_target_srec_flavour

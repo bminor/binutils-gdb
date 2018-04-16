@@ -8602,16 +8602,7 @@ This command does nothing whatever; it's only accepted for compatibility.
 @cindex @code{FORMAT} (MRI)
 @item FORMAT @var{output-format}
 Similar to the @code{OUTPUT_FORMAT} command in the more general linker
-language, but restricted to one of these output formats:
-
-@enumerate
-@item
-S-records, if @var{output-format} is @samp{S}
-
-@item
-COFF (the @samp{coff-m68k} variant in BFD), if @var{output-format} is
-@samp{COFF}
-@end enumerate
+language, but restricted to S-records, if @var{output-format} is @samp{S}
 
 @cindex @code{LIST} (MRI)
 @item LIST @var{anything}@dots{}

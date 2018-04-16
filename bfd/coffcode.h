@@ -2103,7 +2103,7 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
     case I386MAGIC:
     case I386PTXMAGIC:
     case I386AIXMAGIC:		/* Danbury PS/2 AIX C Compiler.  */
-    case LYNXCOFFMAGIC:		/* Shadows the m68k Lynx number below, sigh.  */
+    case LYNXCOFFMAGIC:
       arch = bfd_arch_i386;
       break;
 #endif
@@ -2143,22 +2143,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
 	    case F_ARM_5:  machine = bfd_mach_arm_XScale;  break;
 	    }
 	}
-      break;
-#endif
-#ifdef MC68MAGIC
-    case MC68MAGIC:
-    case M68MAGIC:
-#ifdef MC68KBCSMAGIC
-    case MC68KBCSMAGIC:
-#endif
-#ifdef APOLLOM68KMAGIC
-    case APOLLOM68KMAGIC:
-#endif
-#ifdef LYNXCOFFMAGIC
-    case LYNXCOFFMAGIC:
-#endif
-      arch = bfd_arch_m68k;
-      machine = bfd_mach_m68020;
       break;
 #endif
 #ifdef Z80MAGIC
@@ -2789,25 +2773,6 @@ coff_set_flags (bfd * abfd,
 #ifdef IA64MAGIC
     case bfd_arch_ia64:
       *magicp = IA64MAGIC;
-      return TRUE;
-#endif
-
-#ifdef MC68MAGIC
-    case bfd_arch_m68k:
-#ifdef APOLLOM68KMAGIC
-      *magicp = APOLLO_COFF_VERSION_NUMBER;
-#else
-      /* NAMES_HAVE_UNDERSCORE may be defined by coff-u68k.c.  */
-#ifdef NAMES_HAVE_UNDERSCORE
-      *magicp = MC68KBCSMAGIC;
-#else
-      *magicp = MC68MAGIC;
-#endif
-#endif
-#ifdef LYNXOS
-      /* Just overwrite the usual value if we're doing Lynx.  */
-      *magicp = LYNXCOFFMAGIC;
-#endif
       return TRUE;
 #endif
 
@@ -3869,28 +3834,6 @@ coff_write_object_contents (bfd * abfd)
     internal_a.magic = TIC80_ARCH_MAGIC;
 #define __A_MAGIC_SET__
 #endif /* TIC80 */
-
-#if APOLLO_M68
-#define __A_MAGIC_SET__
-    internal_a.magic = APOLLO_COFF_VERSION_NUMBER;
-#endif
-
-#if defined(M68) || defined(M68K)
-#define __A_MAGIC_SET__
-#if defined(LYNXOS)
-    internal_a.magic = LYNXCOFFMAGIC;
-#else
-#if defined(TARG_AUX)
-    internal_a.magic = (abfd->flags & D_PAGED ? PAGEMAGICPEXECPAGED :
-			abfd->flags & WP_TEXT ? PAGEMAGICPEXECSWAPPED :
-			PAGEMAGICEXECSWAPPED);
-#else
-#if defined (PAGEMAGICPEXECPAGED)
-    internal_a.magic = PAGEMAGICPEXECPAGED;
-#endif
-#endif /* TARG_AUX */
-#endif /* LYNXOS */
-#endif /* M68 || M68K */
 
 #if defined(ARM)
 #define __A_MAGIC_SET__

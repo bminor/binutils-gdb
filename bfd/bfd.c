@@ -304,8 +304,6 @@ CODE_FRAGMENT
 .    {
 .      struct aout_data_struct *aout_data;
 .      struct artdata *aout_ar_data;
-.      struct _oasys_data *oasys_obj_data;
-.      struct _oasys_ar_data *oasys_ar_data;
 .      struct coff_tdata *coff_obj_data;
 .      struct pe_tdata *pe_obj_data;
 .      struct xcoff_tdata *xcoff_obj_data;

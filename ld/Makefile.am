@@ -217,7 +217,6 @@ ALL_EMULATION_SOURCES = \
 	ed30v_e.c \
 	ed30v_o.c \
 	ed30velf.c \
-	edelta68.c \
 	eelf32_dlx.c \
 	eelf32_sparc.c \
 	eelf32_sparc_sol2.c \
@@ -304,8 +303,6 @@ ALL_EMULATION_SOURCES = \
 	eh8300sxelf.c \
 	eh8300sxelf_linux.c \
 	eh8300sxnelf.c \
-	ehp300bsd.c \
-	ehp3hpux.c \
 	ehppaelf.c \
 	ehppalinux.c \
 	ehppanbsd.c \
@@ -332,15 +329,8 @@ ALL_EMULATION_SOURCES = \
 	em68hc11elfb.c \
 	em68hc12elf.c \
 	em68hc12elfb.c \
-	em68k4knbsd.c \
-	em68kaout.c \
-	em68kaux.c \
-	em68kcoff.c \
 	em68kelf.c \
 	em68kelfnbsd.c \
-	em68klinux.c \
-	em68knbsd.c \
-	em68kpsos.c \
 	emcorepe.c \
 	emn10200.c \
 	emn10300.c \
@@ -385,7 +375,6 @@ ALL_EMULATION_SOURCES = \
 	esparcaout.c \
 	esparclinux.c \
 	esparcnbsd.c \
-	esun3.c \
 	esun4.c \
 	etic30aout.c \
 	etic30coff.c \
@@ -914,9 +903,6 @@ ed30v_o.c: $(srcdir)/emulparams/d30v_o.sh \
 ed30velf.c: $(srcdir)/emulparams/d30velf.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
 
-edelta68.c: $(srcdir)/emulparams/delta68.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
-
 eelf32_dlx.c: $(srcdir)/emulparams/elf32_dlx.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/dlx.sc ${GEN_DEPENDS}
 
@@ -1371,12 +1357,6 @@ eh8300sxnelf.c: $(srcdir)/emulparams/h8300sxnelf.sh \
   $(srcdir)/emulparams/h8300elf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-ehp300bsd.c: $(srcdir)/emulparams/hp300bsd.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-ehp3hpux.c: $(srcdir)/emulparams/hp3hpux.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
 ehppaelf.c: $(srcdir)/emulparams/hppaelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/hppaelf.em \
   $(srcdir)/scripttempl/hppaelf.sc ${GEN_DEPENDS}
@@ -1467,18 +1447,6 @@ em68hc12elfb.c: $(srcdir)/emulparams/m68hc12elfb.sh \
   $(srcdir)/emultempl/m68hc1xelf.em $(ELF_DEPS) \
   $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
 
-em68k4knbsd.c:	$(srcdir)/emulparams/m68k4knbsd.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-em68kaout.c: $(srcdir)/emulparams/m68kaout.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-em68kaux.c: $(srcdir)/emulparams/m68kaux.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m68kaux.sc ${GEN_DEPENDS}
-
-em68kcoff.c: $(srcdir)/emulparams/m68kcoff.sh \
-  $(srcdir)/emultempl/m68kcoff.em $(srcdir)/scripttempl/m68kcoff.sc ${GEN_DEPENDS}
-
 em68kelf.c: $(srcdir)/emulparams/m68kelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/m68kelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -1487,15 +1455,6 @@ em68kelfnbsd.c: $(srcdir)/emulparams/m68kelfnbsd.sh \
   $(srcdir)/emulparams/m68kelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/m68kelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-em68klinux.c: $(srcdir)/emulparams/m68klinux.sh \
-  $(srcdir)/emultempl/linux.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-em68knbsd.c:	$(srcdir)/emulparams/m68knbsd.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-em68kpsos.c:	$(srcdir)/emulparams/m68kpsos.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/psos.sc ${GEN_DEPENDS}
 
 emcorepe.c: $(srcdir)/emulparams/mcorepe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
@@ -1701,9 +1660,6 @@ esparclinux.c: $(srcdir)/emulparams/sparclinux.sh \
 
 esparcnbsd.c:	$(srcdir)/emulparams/sparcnbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-esun3.c: $(srcdir)/emulparams/sun3.sh \
-  $(srcdir)/emultempl/sunos.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 
 esun4.c: $(srcdir)/emulparams/sun4.sh \
   $(srcdir)/emultempl/sunos.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}

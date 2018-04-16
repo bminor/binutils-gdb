@@ -181,9 +181,6 @@
    */
 #undef LT_OBJDIR
 
-/* Using m68k COFF? */
-#undef M68KCOFF
-
 /* Default CPU for MIPS targets. */
 #undef MIPS_CPU_STRING_DEFAULT
 

@@ -78,15 +78,12 @@ proc objcopy_test {testname srcfile} {
 	# differently. Those systems should use setup_xfail here.
 
 	setup_xfail "hppa*-*-*"
-	setup_xfail "m68*-*-*coff" "m68*-*-hpux*" "m68*-*-lynxos*"
-	setup_xfail "m68*-*-sysv*" "m68*-apple-aux*"
 	setup_xfail "m8*-*"
 	setup_xfail "sh-*-coff*"
 	setup_xfail "tic80-*-*"
 
 	clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
 	clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
-	clear_xfail "m68*-*-sysv4*"
 
 	if [string equal "" $exec_output] then {
 	    pass "objcopy ($testname)"

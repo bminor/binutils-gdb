@@ -262,28 +262,22 @@ BFD32_BACKENDS = \
 	aout-ns32k.lo \
 	aout-sparcle.lo \
 	aout-tic30.lo \
-	aout0.lo \
 	aout32.lo \
 	armnetbsd.lo \
 	cf-i386lynx.lo \
 	cf-sparclynx.lo \
-	coff-apollo.lo \
 	coff-arm.lo \
-	coff-aux.lo \
 	coff-go32.lo \
 	coff-i386.lo \
-	coff-m68k.lo \
 	coff-mips.lo \
 	coff-rs6000.lo \
 	coff-sh.lo \
 	coff-sparc.lo \
 	coff-stgo32.lo \
-	coff-svm68k.lo \
 	coff-tic30.lo \
 	coff-tic4x.lo \
 	coff-tic54x.lo \
 	coff-tic80.lo \
-	coff-u68k.lo \
 	coff-z80.lo \
 	coff-z8k.lo \
 	coffgen.lo \
@@ -368,8 +362,6 @@ BFD32_BACKENDS = \
 	elfxx-tilegx.lo \
 	epoc-pe-arm.lo \
 	epoc-pei-arm.lo \
-	hp300bsd.lo \
-	hp300hpux.lo \
 	i386aout.lo \
 	i386bsd.lo \
 	i386dynix.lo \
@@ -380,15 +372,11 @@ BFD32_BACKENDS = \
 	i386msdos.lo \
 	i386netbsd.lo \
 	i386os9k.lo \
-	m68k4knetbsd.lo \
-	m68klinux.lo \
-	m68knetbsd.lo \
 	mach-o.lo \
 	mach-o-i386.lo \
 	mach-o-arm.lo \
 	mipsbsd.lo \
 	ns32knetbsd.lo \
-	oasys.lo \
 	pc532-mach.lo \
 	pdp11.lo \
 	pe-arm-wince.lo \
@@ -418,7 +406,6 @@ BFD32_BACKENDS = \
 	sunos.lo \
 	vax1knetbsd.lo \
 	vaxnetbsd.lo \
-	versados.lo \
 	vms-lib.lo \
 	vms-misc.lo \
 	wasm-module.lo \
@@ -433,28 +420,22 @@ BFD32_BACKENDS_CFILES = \
 	aout-ns32k.c \
 	aout-sparcle.c \
 	aout-tic30.c \
-	aout0.c \
 	aout32.c \
 	armnetbsd.c \
 	cf-i386lynx.c \
 	cf-sparclynx.c \
-	coff-apollo.c \
 	coff-arm.c \
-	coff-aux.c \
 	coff-go32.c \
 	coff-i386.c \
-	coff-m68k.c \
 	coff-mips.c \
 	coff-rs6000.c \
 	coff-sh.c \
 	coff-sparc.c \
 	coff-stgo32.c \
-	coff-svm68k.c \
 	coff-tic30.c \
 	coff-tic4x.c \
 	coff-tic54x.c \
 	coff-tic80.c \
-	coff-u68k.c \
 	coff-z80.c \
 	coff-z8k.c \
 	coffgen.c \
@@ -539,8 +520,6 @@ BFD32_BACKENDS_CFILES = \
 	elfxx-tilegx.c \
 	epoc-pe-arm.c \
 	epoc-pei-arm.c \
-	hp300bsd.c \
-	hp300hpux.c \
 	i386aout.c \
 	i386bsd.c \
 	i386dynix.c \
@@ -551,15 +530,11 @@ BFD32_BACKENDS_CFILES = \
 	i386msdos.c \
 	i386netbsd.c \
 	i386os9k.c \
-	m68k4knetbsd.c \
-	m68klinux.c \
-	m68knetbsd.c \
 	mach-o.c \
 	mach-o-i386.c \
 	mach-o-arm.c \
 	mipsbsd.c \
 	ns32knetbsd.c \
-	oasys.c \
 	pc532-mach.c \
 	pdp11.c \
 	pe-arm-wince.c \
@@ -588,7 +563,6 @@ BFD32_BACKENDS_CFILES = \
 	sunos.c \
 	vax1knetbsd.c \
 	vaxnetbsd.c \
-	versados.c \
 	vms-lib.c \
 	vms-misc.c \
 	wasm-module.c \
@@ -748,7 +722,7 @@ SOURCE_HFILES = \
 	elf64-hppa.h elfcode.h elfcore.h \
 	freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
-	liboasys.h libpei.h libxcoff.h mach-o.h \
+	libpei.h libxcoff.h mach-o.h \
 	netbsd.h ns32k.h \
 	pef.h pef-traceback.h peicode.h som.h version.h \
 	vms.h xsym.h

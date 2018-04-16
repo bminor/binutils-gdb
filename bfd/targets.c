@@ -151,7 +151,6 @@ DESCRIPTION
 .  bfd_target_ecoff_flavour,
 .  bfd_target_xcoff_flavour,
 .  bfd_target_elf_flavour,
-.  bfd_target_oasys_flavour,
 .  bfd_target_tekhex_flavour,
 .  bfd_target_srec_flavour,
 .  bfd_target_verilog_flavour,
@@ -595,7 +594,6 @@ extern const bfd_target alpha_elf64_fbsd_vec;
 extern const bfd_target alpha_vms_vec;
 extern const bfd_target alpha_vms_lib_txt_vec;
 extern const bfd_target am33_elf32_linux_vec;
-extern const bfd_target aout0_be_vec;
 extern const bfd_target aout64_vec;
 extern const bfd_target aout_vec;
 extern const bfd_target arc_elf32_be_vec;
@@ -700,18 +698,7 @@ extern const bfd_target m32r_elf32_linux_vec;
 extern const bfd_target m32r_elf32_linux_le_vec;
 extern const bfd_target m68hc11_elf32_vec;
 extern const bfd_target m68hc12_elf32_vec;
-extern const bfd_target m68k_aout_4knbsd_vec;
-extern const bfd_target m68k_aout_hp300bsd_vec;
-extern const bfd_target m68k_aout_hp300hpux_vec;
-extern const bfd_target m68k_aout_linux_vec;
-extern const bfd_target m68k_aout_nbsd_vec;
-extern const bfd_target m68k_coff_vec;
-extern const bfd_target m68k_coff_apollo_vec;
-extern const bfd_target m68k_coff_aux_vec;
-extern const bfd_target m68k_coff_sysv_vec;
-extern const bfd_target m68k_coff_un_vec;
 extern const bfd_target m68k_elf32_vec;
-extern const bfd_target m68k_versados_vec;
 extern const bfd_target mach_o_be_vec;
 extern const bfd_target mach_o_le_vec;
 extern const bfd_target mach_o_fat_vec;
@@ -770,7 +757,6 @@ extern const bfd_target nios2_elf32_be_vec;
 extern const bfd_target nios2_elf32_le_vec;
 extern const bfd_target ns32k_aout_pc532mach_vec;
 extern const bfd_target ns32k_aout_pc532nbsd_vec;
-extern const bfd_target oasys_vec;
 extern const bfd_target or1k_elf32_vec;
 extern const bfd_target pdp11_aout_vec;
 extern const bfd_target pef_vec;
@@ -952,7 +938,6 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&am33_elf32_linux_vec,
 
-	&aout0_be_vec,
 #ifdef BFD64
 	&aout64_vec,	/* Only compiled if host has long-long support.  */
 #endif
@@ -1114,27 +1099,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&m68hc11_elf32_vec,
 	&m68hc12_elf32_vec,
 
-#if 0
-	&m68k_aout_4knbsd_vec,
-	/* Clashes with sparc_aout_sunos_be_vec magic no.  */
-	&m68k_aout_hp300bsd_vec,
-#endif
-	&m68k_aout_hp300hpux_vec,
-#if 0
-	/* Since a.out files lack decent magic numbers, no way to recognize
-	   which kind of a.out file it is.  */
-	&m68k_aout_linux_vec,
-#endif
-	&m68k_aout_nbsd_vec,
-	&m68k_coff_vec,
-#if 0
-	&m68k_coff_apollo_vec,
-	&m68k_coff_aux_vec,
-#endif
-	&m68k_coff_sysv_vec,
-	&m68k_coff_un_vec,
 	&m68k_elf32_vec,
-	&m68k_versados_vec,
 
 	&mach_o_be_vec,
 	&mach_o_le_vec,
@@ -1212,15 +1177,6 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&ns32k_aout_pc532mach_vec,
 	&ns32k_aout_pc532nbsd_vec,
-
-#if 0
-	/* We have no oasys tools anymore, so we can't test any of this
-	   anymore. If you want to test the stuff yourself, go ahead...
-	   steve@cygnus.com
-	   Worse, since there is no magic number for archives, there
-	   can be annoying target mis-matches.  */
-	&oasys_vec,
-#endif
 
 	&or1k_elf32_vec,
 
@@ -1804,7 +1760,6 @@ bfd_flavour_name (enum bfd_flavour flavour)
     case bfd_target_ecoff_flavour: return "ECOFF";
     case bfd_target_xcoff_flavour: return "XCOFF";
     case bfd_target_elf_flavour: return "ELF";
-    case bfd_target_oasys_flavour: return "Oasys";
     case bfd_target_tekhex_flavour: return "Tekhex";
     case bfd_target_srec_flavour: return "Srec";
     case bfd_target_verilog_flavour: return "Verilog";

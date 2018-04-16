@@ -139,8 +139,6 @@ const bfd_target *bfd_generic_archive_p
   (bfd *);
 bfd_boolean bfd_slurp_armap
   (bfd *);
-bfd_boolean bfd_slurp_bsd_armap_f2
-  (bfd *);
 #define bfd_slurp_bsd_armap bfd_slurp_armap
 #define bfd_slurp_coff_armap bfd_slurp_armap
 bfd_boolean _bfd_archive_64_bit_slurp_armap

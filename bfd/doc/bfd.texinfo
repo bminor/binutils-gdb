@@ -293,7 +293,6 @@ structures.
 * elf  ::	elf backends
 * mmo  ::	mmo backend
 @ignore
-* oasys ::	oasys backends
 * srecord ::	s-record backend
 @end ignore
 @end menu

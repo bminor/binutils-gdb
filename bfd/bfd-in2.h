@@ -783,8 +783,6 @@ extern bfd_boolean bfd_sunos_size_dynamic_sections
 
 extern bfd_boolean bfd_i386linux_size_dynamic_sections
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_m68klinux_size_dynamic_sections
-  (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_sparclinux_size_dynamic_sections
   (bfd *, struct bfd_link_info *);
 
@@ -852,9 +850,6 @@ union internal_auxent;
 
 extern bfd_boolean bfd_coff_set_symbol_class
   (bfd *, struct bfd_symbol *, unsigned int);
-
-extern bfd_boolean bfd_m68k_coff_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* ARM VFP11 erratum workaround support.  */
 typedef enum
@@ -6994,8 +6989,6 @@ struct bfd
     {
       struct aout_data_struct *aout_data;
       struct artdata *aout_ar_data;
-      struct _oasys_data *oasys_obj_data;
-      struct _oasys_ar_data *oasys_ar_data;
       struct coff_tdata *coff_obj_data;
       struct pe_tdata *pe_obj_data;
       struct xcoff_tdata *xcoff_obj_data;
@@ -7313,7 +7306,6 @@ enum bfd_flavour
   bfd_target_ecoff_flavour,
   bfd_target_xcoff_flavour,
   bfd_target_elf_flavour,
-  bfd_target_oasys_flavour,
   bfd_target_tekhex_flavour,
   bfd_target_srec_flavour,
   bfd_target_verilog_flavour,

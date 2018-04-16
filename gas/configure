@@ -12763,9 +12763,6 @@ case ${obj_format} in
       i386)
 $as_echo "#define I386COFF 1" >>confdefs.h
  ;;
-      m68k)
-$as_echo "#define M68KCOFF 1" >>confdefs.h
- ;;
       x86_64)
 $as_echo "#define I386COFF 1" >>confdefs.h
  ;;
