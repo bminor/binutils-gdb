@@ -46,21 +46,7 @@
 
 struct fix;
 
-#if defined OBJ_AOUT
-# if defined TE_RISCIX
-#  define TARGET_FORMAT "a.out-riscix"
-# elif defined TE_LINUX
-#  define ARM_BI_ENDIAN
-#  define TARGET_FORMAT "a.out-arm-linux"
-# elif defined TE_NetBSD
-#  define TARGET_FORMAT "a.out-arm-netbsd"
-# else
-#  define ARM_BI_ENDIAN
-#  define TARGET_FORMAT (target_big_endian ? "a.out-arm-big" : "a.out-arm-little")
-# endif
-#elif defined OBJ_AIF
-# define TARGET_FORMAT "aif"
-#elif defined OBJ_COFF
+#if defined OBJ_COFF
 # define ARM_BI_ENDIAN
 # if defined TE_PE
 #  if defined TE_WINCE

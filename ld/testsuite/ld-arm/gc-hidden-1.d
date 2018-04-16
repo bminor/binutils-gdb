@@ -4,7 +4,7 @@
 #ld: --gc-sections --shared --version-script hideall.ld
 #objdump: -dRT
 # This test is only valid on ELF based ports.
-# not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
+# not-target: *-*-pe *-*-wince
 
 # See PR ld/13990: a forced-local PLT reference to a
 # forced-local symbol is GC'ed, trigging a BFD_ASSERT.

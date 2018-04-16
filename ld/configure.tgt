@@ -102,22 +102,16 @@ arm*-*-cegcc*)		targ_emul=arm_wince_pe ; targ_extra_ofiles="deffilep.o pe-dll.o"
 arm-wince-pe | arm-*-wince | arm*-*-mingw32ce*)
 			targ_emul=arm_wince_pe ; targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 arm-*-pe)		targ_emul=armpe ; targ_extra_ofiles="deffilep.o pe-dll.o" ;;
-arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
-armeb-*-aout)		targ_emul=armaoutb ;;
-arm-*-coff)		targ_emul=armcoff ;;
 arm*b-*-freebsd*)	targ_emul=armelfb_fbsd
 			targ_extra_emuls="armelf_fbsd armelf" ;;
 arm*-*-freebsd* | arm-*-kfreebsd*-gnu)
 			targ_emul=armelf_fbsd
 			targ_extra_emuls="armelfb_fbsd armelf" ;;
 armeb-*-netbsdelf*)	targ_emul=armelfb_nbsd;
-			targ_extra_emuls="armelf_nbsd armelf armnbsd" ;;
+			targ_extra_emuls="armelf_nbsd armelf" ;;
 arm-*-netbsdelf*)	targ_emul=armelf_nbsd;
-			targ_extra_emuls="armelfb_nbsd armelf armnbsd" ;;
-arm-*-netbsd*)		targ_emul=armnbsd;
-			targ_extra_emuls="armelf armelf_nbsd armelfb_nbsd" ;;
+			targ_extra_emuls="armelfb_nbsd armelf" ;;
 arm-*-nto*)		targ_emul=armnto ;;
-arm-*-openbsd*)		targ_emul=armnbsd ;;
 arm-*-phoenix*)		targ_emul=armelf ;;
 armeb-*-elf | armeb-*-eabi*)
 			targ_emul=armelfb ;;

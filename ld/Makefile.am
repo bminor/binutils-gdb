@@ -167,9 +167,6 @@ ALL_EMULATION_SOURCES = \
 	earclinux_nps.c \
 	earclinux_prof.c \
 	earm_wince_pe.c \
-	earmaoutb.c \
-	earmaoutl.c \
-	earmcoff.c \
 	earmelf.c \
 	earmelf_fbsd.c \
 	earmelf_fuchsia.c \
@@ -186,7 +183,6 @@ ALL_EMULATION_SOURCES = \
 	earmelfb_linux_eabi.c \
 	earmelfb_nacl.c \
 	earmelfb_nbsd.c \
-	earmnbsd.c \
 	earmnto.c \
 	earmpe.c \
 	earmsymbian.c \
@@ -346,7 +342,6 @@ ALL_EMULATION_SOURCES = \
 	eppcmacos.c \
 	eppcpe.c \
 	epruelf.c \
-	eriscix.c \
 	escore3_elf.c \
 	escore7_elf.c \
 	esh.c \
@@ -686,15 +681,6 @@ earclinux_prof.c: $(srcdir)/emulparams/arclinux_prof.sh \
 earm_wince_pe.c: $(srcdir)/emulparams/arm_wince_pe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 
-earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
-
-earmaoutl.c:	$(srcdir)/emulparams/armaoutl.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
-
-earmcoff.c:	$(srcdir)/emulparams/armcoff.sh \
-  $(srcdir)/emultempl/armcoff.em $(srcdir)/scripttempl/armcoff.sc ${GEN_DEPENDS}
-
 earmelf.c: $(srcdir)/emulparams/armelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -776,9 +762,6 @@ earmelfb_nbsd.c: $(srcdir)/emulparams/armelfb_nbsd.sh \
   $(srcdir)/emulparams/armelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-earmnbsd.c:	$(srcdir)/emulparams/armnbsd.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 
 earmnto.c: $(srcdir)/emulparams/armnto.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
@@ -1549,9 +1532,6 @@ eppcpe.c: $(srcdir)/emulparams/ppcpe.sh \
 epruelf.c: $(srcdir)/emulparams/pruelf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/pru.sc \
   $(srcdir)/emultempl/pruelf.em ${GEN_DEPENDS}
-
-eriscix.c: $(srcdir)/emulparams/riscix.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 
 escore3_elf.c: $(srcdir)/emulparams/score3_elf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/scoreelf.em \

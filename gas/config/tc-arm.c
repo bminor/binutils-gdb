@@ -1040,7 +1040,6 @@ static int
 my_get_expression (expressionS * ep, char ** str, int prefix_mode)
 {
   char * save_in;
-  segT	 seg;
 
   /* In unified syntax, all prefixes are optional.  */
   if (unified_syntax)
@@ -1072,7 +1071,7 @@ my_get_expression (expressionS * ep, char ** str, int prefix_mode)
   save_in = input_line_pointer;
   input_line_pointer = *str;
   in_my_get_expression = TRUE;
-  seg = expression (ep);
+  expression (ep);
   in_my_get_expression = FALSE;
 
   if (ep->X_op == O_illegal || ep->X_op == O_absent)
@@ -1085,22 +1084,6 @@ my_get_expression (expressionS * ep, char ** str, int prefix_mode)
 		      ? _("missing expression") :_("bad expression"));
       return 1;
     }
-
-#ifdef OBJ_AOUT
-  if (seg != absolute_section
-      && seg != text_section
-      && seg != data_section
-      && seg != bss_section
-      && seg != undefined_section)
-    {
-      inst.error = _("bad segment");
-      *str = input_line_pointer;
-      input_line_pointer = save_in;
-      return 1;
-    }
-#else
-  (void) seg;
-#endif
 
   /* Get rid of any bignums now, so that we don't generate an error for which
      we can't establish a line number later on.	 Big numbers are never valid
@@ -22060,21 +22043,6 @@ valueT
 md_section_align (segT	 segment ATTRIBUTE_UNUSED,
 		  valueT size)
 {
-#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
-  if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
-    {
-      /* For a.out, force the section size to be aligned.  If we don't do
-	 this, BFD will align it for us, but it will not write out the
-	 final bytes of the section.  This may be a bug in BFD, but it is
-	 easier to fix it here since that is how the other a.out targets
-	 work.  */
-      int align;
-
-      align = bfd_get_section_alignment (stdoutput, segment);
-      size = ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
-    }
-#endif
-
   return size;
 }
 

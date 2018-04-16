@@ -80,8 +80,6 @@ proc is_aout_format {} {
     if { [istarget *-*-*aout*]
 	 || [istarget *-*-bsd*]
 	 || [istarget *-*-msdos*]
-	 || [istarget arm-*-netbsd*]
-	 || [istarget arm-*-openbsd*]
 	 || [istarget ns32k-*-*]
 	 || [istarget pdp11-*-*]
 	 || [istarget vax-*-netbsd] } {

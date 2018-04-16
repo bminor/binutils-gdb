@@ -651,7 +651,6 @@ proc copy_executable { prog flags test1 test2 } {
 	    setup_xfail "*-*-*"
 	}
 
-	setup_xfail "arm*-*-coff"
 	setup_xfail "arm*-*-pe"
 	setup_xfail "*-*-mingw*"
 	setup_xfail "*-*-cygwin*"

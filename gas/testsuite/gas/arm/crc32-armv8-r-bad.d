@@ -3,7 +3,7 @@
 #source: crc32-armv8-ar-bad.s
 #as: -march=armv8-r+crc
 #stderr: crc32-bad.l
-#not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
+#not-target: *-*-pe *-*-wince
 
 .*: +file format .*arm.*
 

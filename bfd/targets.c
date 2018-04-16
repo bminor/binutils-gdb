@@ -597,12 +597,6 @@ extern const bfd_target am33_elf32_linux_vec;
 extern const bfd_target aout_vec;
 extern const bfd_target arc_elf32_be_vec;
 extern const bfd_target arc_elf32_le_vec;
-extern const bfd_target arm_aout_be_vec;
-extern const bfd_target arm_aout_le_vec;
-extern const bfd_target arm_aout_nbsd_vec;
-extern const bfd_target arm_aout_riscix_vec;
-extern const bfd_target arm_coff_be_vec;
-extern const bfd_target arm_coff_le_vec;
 extern const bfd_target arm_elf32_be_vec;
 extern const bfd_target arm_elf32_le_vec;
 extern const bfd_target arm_elf32_nacl_be_vec;
@@ -925,18 +919,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&arc_elf32_be_vec,
 	&arc_elf32_le_vec,
 
-#if 0
-	/* We have no way of distinguishing these from other a.out variants.  */
-	&arm_aout_be_vec,
-	&arm_aout_le_vec,
-#endif
-	&arm_aout_nbsd_vec,
-#if 0
-	/* We have no way of distinguishing these from other a.out variants.  */
-	&arm_aout_riscix_vec,
-#endif
-	&arm_coff_be_vec,
-	&arm_coff_le_vec,
 	&arm_elf32_be_vec,
 	&arm_elf32_le_vec,
 	&arm_elf32_symbian_be_vec,

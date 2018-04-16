@@ -18,10 +18,6 @@ if {![istarget "arm*-*-*"]} then {
   return
 }
 
-if {[istarget "*-*-aout"]} then {
-  return
-}
-
 if {![is_remote host] && [which $OBJDUMP] == 0} then {
     perror "$OBJDUMP does not exist"
     return

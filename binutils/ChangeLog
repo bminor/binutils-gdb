@@ -1,3 +1,10 @@
+2018-04-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/arm/objdump.exp: Remove arm-aout and
+	arm-coff support.
+	* testsuite/binutils-all/objcopy.exp: Likewise.
+	* testsuite/lib/binutils-common.exp: Likewise.
+
 2018-04-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 23062

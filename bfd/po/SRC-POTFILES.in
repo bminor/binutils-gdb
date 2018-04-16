@@ -1,6 +1,5 @@
 aix386-core.c
 aix5ppc-core.c
-aout-arm.c
 aout-cris.c
 aout-ns32k.c
 aout-target.h
@@ -11,7 +10,6 @@ aoutx.h
 archive.c
 archive64.c
 archures.c
-armnetbsd.c
 bfd.c
 bfdio.c
 bfdwin.c
@@ -20,7 +18,6 @@ cache.c
 cf-i386lynx.c
 cisco-core.c
 coff-alpha.c
-coff-arm.c
 coff-bfd.c
 coff-go32.c
 coff-i386.c
@@ -291,7 +288,6 @@ plugin.c
 ppcboot.c
 reloc.c
 reloc16.c
-riscix.c
 rs6000-core.c
 sco5-core.c
 section.c

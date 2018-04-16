@@ -53,8 +53,6 @@ case $targ in
     echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
     exit 1
     ;;
- arm*-*-aout | \
- arm*-*-coff | \
  powerpc-*-lynxos* | powerpc-*-windiss* | \
  null)
     if test "x$enable_obsolete" != xyes; then
@@ -80,7 +78,12 @@ case $targ in
  *-*-rtemsaout* | \
  *-*-rtemscoff* | \
  a29k-* | \
+ arm*-*-aout | \
+ arm-*-coff | \
+ arm-*-netbsd* | \
+ arm-*-openbsd* | \
  arm-*-oabi | \
+ arm-*-riscix* | \
  arm-epoc-pe* | \
  h8300*-*-coff | \
  h8500*-*-coff | \
@@ -347,24 +350,16 @@ case "${targ}" in
     ;;
   armeb-*-netbsdelf*)
     targ_defvec=arm_elf32_be_vec
-    targ_selvecs="arm_elf32_le_vec arm_aout_nbsd_vec"
+    targ_selvecs="arm_elf32_le_vec"
     ;;
   arm-*-netbsdelf*)
     targ_defvec=arm_elf32_le_vec
-    targ_selvecs="arm_elf32_be_vec arm_aout_nbsd_vec"
-    ;;
-  arm-*-netbsd* | arm-*-openbsd*)
-    targ_defvec=arm_aout_nbsd_vec
-    targ_selvecs="arm_elf32_le_vec arm_elf32_be_vec"
-    targ_underscore=yes
+    targ_selvecs="arm_elf32_be_vec"
     ;;
   arm-*-nto* | nto*arm*)
     targ_defvec=arm_elf32_le_vec
     targ_selvecs=arm_elf32_be_vec
     targ_cflags=-D__QNXTARGET__
-    ;;
-  arm-*-riscix*)
-    targ_defvec=arm_aout_riscix_vec
     ;;
   arm-wince-pe | arm-*-wince | arm*-*-mingw32ce* | arm*-*-cegcc*)
     targ_defvec=arm_pe_wince_le_vec
@@ -375,19 +370,6 @@ case "${targ}" in
   arm-*-pe*)
     targ_defvec=arm_pe_le_vec
     targ_selvecs="arm_pe_le_vec arm_pe_be_vec arm_pei_le_vec arm_pei_be_vec"
-    targ_underscore=yes
-    ;;
-  arm-*-aout | armel-*-aout)
-    targ_defvec=arm_aout_le_vec
-    targ_selvecs=arm_aout_be_vec
-    ;;
-  armeb-*-aout)
-    targ_defvec=arm_aout_be_vec
-    targ_selvecs=arm_aout_le_vec
-    ;;
-  arm-*-coff)
-    targ_defvec=arm_coff_le_vec
-    targ_selvecs=arm_coff_be_vec
     targ_underscore=yes
     ;;
   arm-*-phoenix*)

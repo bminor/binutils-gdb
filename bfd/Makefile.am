@@ -257,14 +257,11 @@ ALL_MACHINES_CFILES = \
 # The .o files needed by all of the 32 bit vectors that are configured into
 # target_vector in targets.c if configured with --enable-targets=all.
 BFD32_BACKENDS = \
-	aout-arm.lo \
 	aout-cris.lo \
 	aout-ns32k.lo \
 	aout-tic30.lo \
 	aout32.lo \
-	armnetbsd.lo \
 	cf-i386lynx.lo \
-	coff-arm.lo \
 	coff-go32.lo \
 	coff-i386.lo \
 	coff-mips.lo \
@@ -384,7 +381,6 @@ BFD32_BACKENDS = \
 	plugin.lo \
 	ppcboot.lo \
 	reloc16.lo \
-	riscix.lo \
 	som.lo \
 	vax1knetbsd.lo \
 	vaxnetbsd.lo \
@@ -397,14 +393,11 @@ BFD32_BACKENDS = \
 	xtensa-modules.lo
 
 BFD32_BACKENDS_CFILES = \
-	aout-arm.c \
 	aout-cris.c \
 	aout-ns32k.c \
 	aout-tic30.c \
 	aout32.c \
-	armnetbsd.c \
 	cf-i386lynx.c \
-	coff-arm.c \
 	coff-go32.c \
 	coff-i386.c \
 	coff-mips.c \
@@ -523,7 +516,6 @@ BFD32_BACKENDS_CFILES = \
 	plugin.c \
 	ppcboot.c \
 	reloc16.c \
-	riscix.c \
 	som.c \
 	vax1knetbsd.c \
 	vaxnetbsd.c \

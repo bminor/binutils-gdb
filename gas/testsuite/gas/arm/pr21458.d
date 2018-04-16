@@ -1,6 +1,6 @@
 #objdump: -d --prefix-addresses --show-raw-insn
 #name: ADR(L) for Thumb functions
-#skip: *-*-pe *-wince-* *-*-coff *-*-vxworks
+#skip: *-*-pe *-wince-* *-*-vxworks
 
 # Test that using ADR(L) on thumb function symbols sets the T bit.
 

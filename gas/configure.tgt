@@ -136,8 +136,6 @@ case ${generic_target} in
   arc-*-elf*)				fmt=elf ;;
   arc*-*-linux*)			fmt=elf bfd_gas=yes ;;
 
-  arm-*-aout)				fmt=aout ;;
-  arm-*-coff)				fmt=coff ;;
   arm-*-phoenix*)			fmt=elf ;;
   arm-*-elf)				fmt=elf ;;
   arm-*-eabi* | arm-*-rtems*)		fmt=elf em=armeabi ;;
@@ -148,19 +146,16 @@ case ${generic_target} in
 					fmt=elf  em=freebsd ;;
   arm-*-freebsd* | armeb-*-freebsd*)	fmt=elf  em=armfbsdeabi ;;
   arm*-*-freebsd*)			fmt=elf  em=armfbsdvfp ;;
-  arm-*-linux*aout*)			fmt=aout em=linux ;;
   arm-*-linux-*eabi*)			fmt=elf  em=armlinuxeabi ;;
   arm-*-linux-*)			fmt=elf  em=linux ;;
   arm-*-uclinux*eabi*)			fmt=elf  em=armlinuxeabi ;;
   arm-*-uclinux*)			fmt=elf  em=linux ;;
   arm-*-nacl*)				fmt=elf  em=nacl ;;
   arm-*-netbsdelf*)			fmt=elf  em=nbsd ;;
-  arm-*-*n*bsd*)			fmt=aout em=nbsd ;;
   arm-*-nto*)				fmt=elf ;;
   arm-wince-pe | arm-*-wince | arm*-*-mingw32ce* | arm*-*-cegcc*)
 					fmt=coff em=wince-pe ;;
   arm-*-pe)				fmt=coff em=pe ;;
-  arm-*-riscix*)			fmt=aout em=riscix ;;
   arm-*-fuchsia*)			fmt=elf ;;
 
   avr-*-*)				fmt=elf bfd_gas=yes ;;
