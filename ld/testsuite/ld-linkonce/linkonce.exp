@@ -32,11 +32,6 @@ if { ![istarget *-*-linux*] \
     return
 }
 
-if { [istarget *-*-linux*aout*] \
-     || [istarget *-*-linux*oldld*] } {
-    return
-}
-
 load_lib ld-lib.exp
 
 set rd_test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]

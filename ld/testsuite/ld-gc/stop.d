@@ -2,7 +2,7 @@
 #ld: --gc-sections -e _start
 #nm: -n
 #target: *-*-linux* *-*-gnu*
-#notarget: *-*-*aout *-*-*oldld frv-*-linux* metag-*-linux*
+#notarget: frv-*-linux* metag-*-linux*
 
 #failif
 #...

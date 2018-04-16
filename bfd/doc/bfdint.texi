@@ -1098,17 +1098,9 @@ This file is the source for the generated files @file{elf32-target.h}
 and @file{elf64-target.h}, one of which is included by every ELF target.
 It defines the ELF target vector.
 
-@item freebsd.h
-@cindex @file{freebsd.h}
-Presumably intended to be included by all FreeBSD targets, but in fact
-there is only one such target, @samp{i386-freebsd}.  This defines a
-function used to set the right magic number for FreeBSD, as well as
-various macros, and includes @file{aout-target.h}.
-
 @item netbsd.h
 @cindex @file{netbsd.h}
-Like @file{freebsd.h}, except that there are several files which include
-it.
+Used by all netbsd aout targets.  Several other files include it.
 
 @item peicode.h
 @cindex @file{peicode.h}

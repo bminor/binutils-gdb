@@ -220,17 +220,12 @@ ehppaelf.c
 ehppalinux.c
 ehppanbsd.c
 ehppaobsd.c
-ei386aout.c
 ei386beos.c
 ei386bsd.c
-ei386coff.c
 ei386go32.c
-ei386linux.c
 ei386lynx.c
-ei386mach.c
 ei386moss.c
 ei386msdos.c
-ei386nbsd.c
 ei386nto.c
 ei386pe.c
 ei386pe_posix.c
@@ -299,7 +294,6 @@ ev850.c
 ev850_rh850.c
 evanilla.c
 evaxnbsd.c
-evsta.c
 exgateelf.c
 ez80.c
 ez8001.c

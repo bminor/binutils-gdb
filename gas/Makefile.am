@@ -306,7 +306,6 @@ TARG_ENV_HFILES = \
 	config/te-armfbsdeabi.h \
 	config/te-armfbsdvfp.h \
 	config/te-armlinuxeabi.h \
-	config/te-dynix.h \
 	config/te-freebsd.h \
 	config/te-generic.h \
 	config/te-gnu.h \
@@ -314,11 +313,9 @@ TARG_ENV_HFILES = \
 	config/te-hppa.h \
 	config/te-hppa64.h \
 	config/te-hppalinux64.h \
-	config/te-i386aix.h \
 	config/te-ia64aix.h \
 	config/te-interix.h \
 	config/te-lynx.h \
-	config/te-mach.h \
 	config/te-macos.h \
 	config/te-nbsd.h \
 	config/te-nbsd532.h \

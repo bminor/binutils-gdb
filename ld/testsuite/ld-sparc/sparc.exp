@@ -52,9 +52,7 @@ if {[istarget "sparc-*-vxworks"]} {
 
 if { !([istarget "sparc*-*-elf*"]
        || [istarget "sparc*-sun-solaris*"]
-       || ([istarget "sparc*-*-linux*"]
-	   && ![istarget "*-*-*aout*"]
-	   && ![istarget "*-*-*oldld*"])) } {
+       || [istarget "sparc*-*-linux*"]) } {
     return
 }
 

@@ -2,8 +2,7 @@
 #ld: --gc-sections -e _start tmpdir/pr20022.so
 #readelf: -SsW
 #target: *-*-linux* *-*-gnu*
-#notarget: *-*-*aout *-*-*oldld frv-*-linux* metag-*-linux*
-#notarget: mips*-*-*
+#notarget: frv-*-linux* metag-*-linux* mips*-*-*
 # Skip on targets without dynamic relocations in .text section.
 
 #...

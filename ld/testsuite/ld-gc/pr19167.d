@@ -3,7 +3,7 @@
 #ld: --gc-sections -e _start
 #objdump: -s -j _foo
 #target: *-*-linux* *-*-gnu*
-#notarget: *-*-*aout *-*-*oldld frv-*-linux* metag-*-linux*
+#notarget: frv-*-linux* metag-*-linux*
 
 #...
 Contents of section _foo:

@@ -266,11 +266,6 @@ struct i386_tc_frag_data
    }								\
  while (0)
 
-#ifdef SCO_ELF
-#define tc_init_after_args() sco_id ()
-extern void sco_id (void);
-#endif
-
 #define WORKING_DOT_WORD 1
 
 /* How to generate NOPs for .nop direct directive.  */

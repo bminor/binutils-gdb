@@ -650,13 +650,7 @@ extern const bfd_target hppa_elf64_linux_vec;
 extern const bfd_target hppa_som_vec;
 extern const bfd_target i386_aout_vec;
 extern const bfd_target i386_aout_bsd_vec;
-extern const bfd_target i386_aout_dynix_vec;
-extern const bfd_target i386_aout_fbsd_vec;
-extern const bfd_target i386_aout_linux_vec;
 extern const bfd_target i386_aout_lynx_vec;
-extern const bfd_target i386_aout_mach3_vec;
-extern const bfd_target i386_aout_nbsd_vec;
-extern const bfd_target i386_aout_os9k_vec;
 extern const bfd_target i386_coff_vec;
 extern const bfd_target i386_coff_go32_vec;
 extern const bfd_target i386_coff_go32stubbed_vec;
@@ -1014,22 +1008,7 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&i386_aout_vec,
 	&i386_aout_bsd_vec,
-#if 0
-	&i386_aout_dynix_vec,
-#endif
-	&i386_aout_fbsd_vec,
-#if 0
-	/* Since a.out files lack decent magic numbers, no way to recognize
-	   which kind of a.out file it is.  */
-	&i386_aout_linux_vec,
-#endif
 	&i386_aout_lynx_vec,
-#if 0
-	/* No distinguishing features for Mach 3 executables.  */
-	&i386_aout_mach3_vec,
-#endif
-	&i386_aout_nbsd_vec,
-	&i386_aout_os9k_vec,
 	&i386_coff_vec,
 	&i386_coff_go32_vec,
 	&i386_coff_go32stubbed_vec,

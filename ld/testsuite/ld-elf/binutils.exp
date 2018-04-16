@@ -29,11 +29,6 @@ if { ![istarget *-*-linux*]
     return
 }
 
-if { [istarget *-*-linux*aout*]
-     || [istarget *-*-linux*oldld*] } {
-    return
-}
-
 # The optional test_name argument provides a mechanism for the caller
 # to hardwire the test name. This is important if ld_options contains
 # absolute path names because the default test name is constructed
@@ -166,10 +161,8 @@ binutils_test strip "-z relro -shared" relro1
 binutils_test objcopy "-z relro" relro1
 binutils_test objcopy "-z relro -shared" relro1
 if { ([istarget "i?86-*-elf*"]
-      || (([istarget "i?86-*-linux*"]
-	   || [istarget "i?86-*-gnu*"])
-	  && ![istarget "*-*-*aout*"]
-	  && ![istarget "*-*-*oldld*"])
+      || [istarget "i?86-*-linux*"]
+      || [istarget "i?86-*-gnu*"]
       || [istarget "x86_64-*-linux*"]
       || [istarget "amd64-*-linux*"]
       || [istarget "i?86-*nacl*"]

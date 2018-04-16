@@ -32,11 +32,6 @@ if {    ![istarget *-*-sysv4*] \
     return
 }
 
-if { [istarget *-*-linux*aout*] \
-     || [istarget *-*-linux*oldld*] } {
-    return
-}
-
 # This is a very simplistic test.
 
 set testname "PHDRS2"

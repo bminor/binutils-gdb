@@ -54,27 +54,18 @@ proc is_elf_format {} {
 	return 0
     }
 
-    if {    [istarget *-*-linux*aout*]
-	 || [istarget *-*-linux*ecoff*]
-	 || [istarget *-*-linux*oldld*]
-	 || [istarget *-*-rtemscoff*]
-	 || [istarget i?86-*-freebsd\[12\].*] } {
+    if { [istarget *-*-linux*ecoff*]
+	 || [istarget *-*-rtemscoff*] } {
 	return 0
     }
 
     if { ![istarget *-*-netbsdelf*]
-	 && (   [istarget *-*-netbsd*aout*]
-	     || [istarget *-*-netbsdpe*]
-	     || [istarget arm*-*-netbsd*]
-	     || [istarget i*86-*-netbsd*]
-	     || [istarget vax-*-netbsd*]
+	 && (   [istarget vax-*-netbsd*]
 	     || [istarget ns32k-*-netbsd*]) } {
     	return 0
     }
 
     if {    [istarget arm-*-openbsd*]
-	 || [istarget i386-*-openbsd\[0-2\].*]
-	 || [istarget i386-*-openbsd3.\[0-2\]]
 	 || [istarget ns32k-*-openbsd*]
 	 || [istarget vax-*-openbsd*] } {
 	return 0
@@ -86,22 +77,13 @@ proc is_elf_format {} {
 # True if the object format is known to be a.out.
 #
 proc is_aout_format {} {
-    if { [istarget *-*-*\[ab\]out*]
-	 || [istarget *-*-linux*oldld*]
+    if { [istarget *-*-*aout*]
 	 || [istarget *-*-bsd*]
 	 || [istarget *-*-msdos*]
 	 || [istarget arm-*-netbsd*]
 	 || [istarget arm-*-openbsd*]
-	 || [istarget arm-*-riscix*]
-	 || [istarget i?86-*-freebsd\[12\].*]
-	 || [istarget i?86-*-netbsd*]
-	 || [istarget i?86-*-openbsd\[0-2\]*]
-	 || [istarget i?86-*-openbsd3.\[0-2\]*]
-	 || [istarget i?86-*-vsta]
-	 || [istarget i?86-*-mach*]
 	 || [istarget ns32k-*-*]
 	 || [istarget pdp11-*-*]
-	 || [istarget vax-dec-ultrix*]
 	 || [istarget vax-*-netbsd] } {
 	return 1
     }

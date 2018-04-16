@@ -1,3 +1,8 @@
+2018-04-18  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp: Remove support for assorted
+	aout targets.
+
 2018-04-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 23063

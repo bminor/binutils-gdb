@@ -59,11 +59,6 @@ if { ![istarget hppa*64*-*-hpux*]
     return
 }
 
-if { [istarget *-*-linux*aout*]
-     || [istarget *-*-linux*oldld*] } {
-    return
-}
-
 if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
     return
 }

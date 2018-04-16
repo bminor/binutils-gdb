@@ -55,12 +55,6 @@ if {    ![istarget alpha*-*-linux*]
      && ![istarget *-*-nacl*] } {
     return
 }
-
-if { [istarget *-*-linux*aout*]
-     || [istarget *-*-linux*oldld*] } {
-    return
-}
-
 if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
     return
 }

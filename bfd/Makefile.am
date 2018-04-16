@@ -359,14 +359,8 @@ BFD32_BACKENDS = \
 	elfxx-tilegx.lo \
 	i386aout.lo \
 	i386bsd.lo \
-	i386dynix.lo \
-	i386freebsd.lo \
-	i386linux.lo \
 	i386lynx.lo \
-	i386mach3.lo \
 	i386msdos.lo \
-	i386netbsd.lo \
-	i386os9k.lo \
 	mach-o.lo \
 	mach-o-i386.lo \
 	mach-o-arm.lo \
@@ -508,14 +502,8 @@ BFD32_BACKENDS_CFILES = \
 	elfxx-tilegx.c \
 	i386aout.c \
 	i386bsd.c \
-	i386dynix.c \
-	i386freebsd.c \
-	i386linux.c \
 	i386lynx.c \
-	i386mach3.c \
 	i386msdos.c \
-	i386netbsd.c \
-	i386os9k.c \
 	mach-o.c \
 	mach-o-i386.c \
 	mach-o-arm.c \
@@ -700,7 +688,7 @@ SOURCE_HFILES = \
 	aout-target.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
 	elf-bfd.h elf-hppa.h elf-linux-core.h elf32-hppa.h \
 	elf64-hppa.h elfcode.h elfcore.h \
-	freebsd.h genlink.h go32stub.h \
+	genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libpei.h libxcoff.h mach-o.h \
 	netbsd.h ns32k.h \

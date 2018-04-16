@@ -475,13 +475,7 @@ do
     hppa_som_vec)		 tb="$tb som.lo" ;;
     i386_aout_vec)		 tb="$tb i386aout.lo aout32.lo" ;;
     i386_aout_bsd_vec)		 tb="$tb i386bsd.lo aout32.lo" ;;
-    i386_aout_dynix_vec)	 tb="$tb i386dynix.lo aout32.lo" ;;
-    i386_aout_fbsd_vec)		 tb="$tb i386freebsd.lo aout32.lo" ;;
-    i386_aout_linux_vec)	 tb="$tb i386linux.lo aout32.lo" ;;
     i386_aout_lynx_vec)		 tb="$tb i386lynx.lo lynx-core.lo aout32.lo" ;;
-    i386_aout_mach3_vec)	 tb="$tb i386mach3.lo aout32.lo" ;;
-    i386_aout_nbsd_vec)		 tb="$tb i386netbsd.lo aout32.lo" ;;
-    i386_aout_os9k_vec)		 tb="$tb i386os9k.lo aout32.lo" ;;
     i386_coff_vec)		 tb="$tb coff-i386.lo $coff" ;;
     i386_coff_go32_vec)		 tb="$tb coff-go32.lo $coff" ;;
     i386_coff_go32stubbed_vec)	 tb="$tb coff-stgo32.lo $coff" ;;

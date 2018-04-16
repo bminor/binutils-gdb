@@ -1,5 +1,20 @@
 2018-04-18  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove support for assorted i386 aout and coff targets.
+	* config/obj-elf.c: Likewise.
+	* config/tc-i386.h: Likewise.
+	* configure.ac: Likewise.
+	* configure.tgt: Likewise.
+	* config/te-dynix.h: Delete.
+	* config/te-i386aix.h: Delete.
+	* config/te-mach.h: Delete.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2018-04-18  Alan Modra  <amodra@gmail.com>
+
 	* configure.tgt: Remove *-*-bsd* entry.
 
 2018-04-17 Andrew Sadek  <andrew.sadek.se@gmail.com>
