@@ -332,7 +332,6 @@ DESCRIPTION
 .#define bfd_mach_n1h_v3	4
 .#define bfd_mach_n1h_v3m	5
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000.  *}
-.  bfd_arch_w65,       {* WDC 65816.  *}
 .  bfd_arch_tic30,     {* Texas Instruments TMS320C30.  *}
 .  bfd_arch_tic4x,     {* Texas Instruments TMS320C3X/4X.  *}
 .#define bfd_mach_tic3x		30
@@ -633,7 +632,6 @@ extern const bfd_arch_info_type bfd_v850_rh850_arch;
 extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_visium_arch;
 extern const bfd_arch_info_type bfd_wasm32_arch;
-extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_xstormy16_arch;
 extern const bfd_arch_info_type bfd_xtensa_arch;
 extern const bfd_arch_info_type bfd_xc16x_arch;
@@ -718,7 +716,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_v850_rh850_arch,
     &bfd_vax_arch,
     &bfd_visium_arch,
-    &bfd_w65_arch,
     &bfd_wasm32_arch,
     &bfd_xstormy16_arch,
     &bfd_xtensa_arch,

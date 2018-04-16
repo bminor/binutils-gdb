@@ -2207,7 +2207,6 @@ enum bfd_architecture
 #define bfd_mach_n1h_v3        4
 #define bfd_mach_n1h_v3m       5
   bfd_arch_ns32k,     /* National Semiconductors ns32000.  */
-  bfd_arch_w65,       /* WDC 65816.  */
   bfd_arch_tic30,     /* Texas Instruments TMS320C30.  */
   bfd_arch_tic4x,     /* Texas Instruments TMS320C3X/4X.  */
 #define bfd_mach_tic3x         30

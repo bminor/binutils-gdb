@@ -90,7 +90,6 @@
 #define ARCH_v850
 #define ARCH_vax
 #define ARCH_visium
-#define ARCH_w65
 #define ARCH_wasm32
 #define ARCH_xstormy16
 #define ARCH_xc16x
@@ -438,11 +437,6 @@ disassembler (enum bfd_architecture a,
     case bfd_arch_v850:
     case bfd_arch_v850_rh850:
       disassemble = print_insn_v850;
-      break;
-#endif
-#ifdef ARCH_w65
-    case bfd_arch_w65:
-      disassemble = print_insn_w65;
       break;
 #endif
 #ifdef ARCH_wasm32

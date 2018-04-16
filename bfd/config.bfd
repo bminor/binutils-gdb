@@ -104,7 +104,6 @@ case $targ in
  sparc64-*-aout* | \
  sparc*-*-coff* | \
  vax-*-bsd* | vax-*-ultrix* | \
- w65-*-* | \
  sh5*-*-* | sh64*-*-* | \
  null)
     if test "x$enable_obsolete" != xyes; then
@@ -143,6 +142,7 @@ case $targ in
  sparc-*-lynxos* | \
  tahoe-*-* | \
  vax-*-vms* | \
+ w65-*-* | \
  we32k-*-* | \
  null)
     echo "*** Configuration $targ is obsolete." >&2
@@ -1721,10 +1721,6 @@ case "${targ}" in
   wasm32-*-*)
     targ_defvec=wasm32_elf32_vec
     targ_selvecs="wasm_vec"
-    ;;
-
-  w65-*-*)
-    targ_defvec=w65_coff_vec
     ;;
 
   xgate-*-*)

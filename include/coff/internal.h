@@ -809,21 +809,4 @@ struct internal_reloc
 #define R_IMM24   0x33          /* 24 bit abs */
 /* R_JR, R_IMM8, R_IMM16, R_IMM32 - as for Z8k */
 
-/* W65 modes */
-
-#define R_W65_ABS8	1  /* addr & 0xff 		*/
-#define R_W65_ABS16	2  /* addr & 0xffff 		*/
-#define R_W65_ABS24	3  /* addr & 0xffffff 		*/
-
-#define R_W65_ABS8S8    4  /* (addr >> 8) & 0xff 	*/
-#define R_W65_ABS8S16   5  /* (addr >> 16) & 0xff 	*/
-
-#define R_W65_ABS16S8   6  /* (addr >> 8) & 0ffff 	*/
-#define R_W65_ABS16S16  7  /* (addr >> 16) & 0ffff 	*/
-
-#define R_W65_PCR8	8
-#define R_W65_PCR16	9
-
-#define R_W65_DP       10  /* direct page 8 bits only   */
-
 #endif /* GNU_COFF_INTERNAL_H */

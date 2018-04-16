@@ -496,7 +496,6 @@ ALL_MACHINES = \
 	cpu-v850_rh850.lo \
 	cpu-vax.lo \
 	cpu-visium.lo \
-	cpu-w65.lo \
 	cpu-wasm32.lo \
 	cpu-xc16x.lo \
 	cpu-xgate.lo \
@@ -581,7 +580,6 @@ ALL_MACHINES_CFILES = \
 	cpu-vax.c \
 	cpu-visium.c \
 	cpu-wasm32.c \
-	cpu-w65.c \
 	cpu-xc16x.c \
 	cpu-xgate.c \
 	cpu-xstormy16.c \
@@ -620,7 +618,6 @@ BFD32_BACKENDS = \
 	coff-tic54x.lo \
 	coff-tic80.lo \
 	coff-u68k.lo \
-	coff-w65.lo \
 	coff-z80.lo \
 	coff-z8k.lo \
 	coffgen.lo \
@@ -796,7 +793,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-tic54x.c \
 	coff-tic80.c \
 	coff-u68k.c \
-	coff-w65.c \
 	coff-z80.c \
 	coff-z8k.c \
 	coffgen.c \
@@ -1303,7 +1299,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-tic54x.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-tic80.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-u68k.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-w65.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-x86_64.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-z80.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-z8k.Plo@am__quote@
@@ -1386,7 +1381,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-v850_rh850.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-vax.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-visium.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-w65.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-wasm32.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-xc16x.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-xgate.Plo@am__quote@

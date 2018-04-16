@@ -1,5 +1,17 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove w65 support.
+	* configure.ac: Likewise.
+	* disassemble.c: Likewise.
+	* disassemble.h: Likewise.
+	* w65-dis.c: Delete.
+	* w65-opc.h: Delete.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* configure.ac: Remove we32k support.
 	* configure: Regenerate.
 

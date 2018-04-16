@@ -1,5 +1,10 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* coff/internal.h: Remove w65 support.
+	* coff/w65.h: Delete.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* coff/we32k.h: Delete.
 
 2018-04-16  Alan Modra  <amodra@gmail.com>

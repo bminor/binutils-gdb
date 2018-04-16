@@ -82,7 +82,6 @@ HFILES = \
 	sh-opc.h \
 	sh64-opc.h \
 	sysdep.h \
-	w65-opc.h \
 	xc16x-desc.h xc16x-opc.h \
 	xstormy16-desc.h xstormy16-opc.h \
 	z8k-opc.h
@@ -251,7 +250,6 @@ TARGET_LIBOPCODES_CFILES = \
 	vax-dis.c \
 	visium-dis.c \
 	visium-opc.c \
-	w65-dis.c \
 	wasm32-dis.c \
 	xc16x-asm.c \
 	xc16x-desc.c \

@@ -329,7 +329,6 @@ evanilla.c
 evax.c
 evaxnbsd.c
 evsta.c
-ew65.c
 exgateelf.c
 ez80.c
 ez8001.c

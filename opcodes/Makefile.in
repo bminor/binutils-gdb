@@ -383,7 +383,6 @@ HFILES = \
 	sh-opc.h \
 	sh64-opc.h \
 	sysdep.h \
-	w65-opc.h \
 	xc16x-desc.h xc16x-opc.h \
 	xstormy16-desc.h xstormy16-opc.h \
 	z8k-opc.h
@@ -553,7 +552,6 @@ TARGET_LIBOPCODES_CFILES = \
 	vax-dis.c \
 	visium-dis.c \
 	visium-opc.c \
-	w65-dis.c \
 	wasm32-dis.c \
 	xc16x-asm.c \
 	xc16x-desc.c \
@@ -956,7 +954,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vax-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/visium-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/visium-opc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/w65-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wasm32-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xc16x-asm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xc16x-desc.Plo@am__quote@

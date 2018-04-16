@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/binutils-all/objcopy.exp: Remove w65 support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/objdump.exp: Remove we32k support.
 
 2018-04-16  Alan Modra  <amodra@gmail.com>

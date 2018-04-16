@@ -2347,12 +2347,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
       break;
 #endif
 
-#ifdef W65MAGIC
-    case W65MAGIC:
-      arch = bfd_arch_w65;
-      break;
-#endif
-
     default:			/* Unreadable input file type.  */
       arch = bfd_arch_obscure;
       break;
@@ -2859,12 +2853,6 @@ coff_set_flags (bfd * abfd,
 #ifdef MCOREMAGIC
     case bfd_arch_mcore:
       * magicp = MCOREMAGIC;
-      return TRUE;
-#endif
-
-#ifdef W65MAGIC
-    case bfd_arch_w65:
-      *magicp = W65MAGIC;
       return TRUE;
 #endif
 

@@ -407,7 +407,6 @@ ALL_EMULATION_SOURCES = \
 	evax.c \
 	evaxnbsd.c \
 	evsta.c \
-	ew65.c \
 	exgateelf.c \
 	ez80.c \
 	ez8001.c \
@@ -1797,9 +1796,6 @@ evaxnbsd.c: $(srcdir)/emulparams/vaxnbsd.sh \
 
 evsta.c: $(srcdir)/emulparams/vsta.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-ew65.c: $(srcdir)/emulparams/w65.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/w65.sc ${GEN_DEPENDS}
 
 exgateelf.c: $(srcdir)/emulparams/xgateelf.sh \
   $(srcdir)/emultempl/generic.em $(ELF_DEPS) \
