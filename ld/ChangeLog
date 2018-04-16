@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/sunos.em: Delete.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove arm-epoc-pe support.
 	* configure.tgt: Likewise.
 	* emultempl/pe.em: Likewise.
