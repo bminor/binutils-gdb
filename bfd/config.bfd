@@ -103,7 +103,6 @@ case $targ in
  sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1] | \
  sparc64-*-aout* | \
  sparc*-*-coff* | \
- vax-*-bsd* | vax-*-ultrix* | \
  sh5*-*-* | sh64*-*-* | \
  null)
     if test "x$enable_obsolete" != xyes; then
@@ -141,7 +140,7 @@ case $targ in
  mips*el-*-rtems* | \
  sparc-*-lynxos* | \
  tahoe-*-* | \
- vax-*-vms* | \
+ vax-*-bsd* | vax-*-ultrix* | vax-*-vms* | \
  w65-*-* | \
  we32k-*-* | \
  null)
@@ -1697,11 +1696,6 @@ case "${targ}" in
   vax-*-netbsdaout* | vax-*-netbsd*)
     targ_defvec=vax_aout_nbsd_vec
     targ_selvecs="vax_elf32_vec vax_aout_1knbsd_vec"
-    targ_underscore=yes
-    ;;
-
-  vax-*-bsd* | vax-*-ultrix*)
-    targ_defvec=vax_aout_bsd_vec
     targ_underscore=yes
     ;;
 

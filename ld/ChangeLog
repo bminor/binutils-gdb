@@ -1,5 +1,13 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove vax-bsd and vax-ultrix support.
+	* configure.tgt: Likewise.
+	* emulparams/vax.sh: Delete.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove w65 support.
 	* configure.tgt: Likewise.
 	* emulparams/w65.sh: Delete.

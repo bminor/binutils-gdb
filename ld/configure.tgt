@@ -827,7 +827,6 @@ ft32-*-*)		targ_emul=elf32ft32
 v850*-*-*)		targ_emul=v850_rh850
 			targ_extra_emuls=v850
 			;;
-vax-dec-ultrix* | vax-dec-bsd*) targ_emul=vax ;;
 vax-*-netbsdelf*)	targ_emul=elf32vax
 			targ_extra_emuls=vaxnbsd ;;
 vax-*-netbsdaout* | vax-*-netbsd*)

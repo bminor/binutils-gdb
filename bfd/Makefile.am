@@ -420,7 +420,6 @@ BFD32_BACKENDS = \
 	sparcnetbsd.lo \
 	sunos.lo \
 	vax1knetbsd.lo \
-	vaxbsd.lo \
 	vaxnetbsd.lo \
 	versados.lo \
 	vms-lib.lo \
@@ -594,7 +593,6 @@ BFD32_BACKENDS_CFILES = \
 	sparcnetbsd.c \
 	sunos.c \
 	vax1knetbsd.c \
-	vaxbsd.c \
 	vaxnetbsd.c \
 	versados.c \
 	vms-lib.c \

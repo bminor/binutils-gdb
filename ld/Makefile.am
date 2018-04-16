@@ -404,7 +404,6 @@ ALL_EMULATION_SOURCES = \
 	ev850.c \
 	ev850_rh850.c \
 	evanilla.c \
-	evax.c \
 	evaxnbsd.c \
 	evsta.c \
 	exgateelf.c \
@@ -1787,9 +1786,6 @@ ev850_rh850.c: $(srcdir)/emulparams/v850_rh850.sh $(srcdir)/emultempl/v850elf.em
 
 evanilla.c: $(srcdir)/emulparams/vanilla.sh \
   $(srcdir)/emultempl/vanilla.em $(srcdir)/scripttempl/vanilla.sc ${GEN_DEPENDS}
-
-evax.c: $(srcdir)/emulparams/vax.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 
 evaxnbsd.c: $(srcdir)/emulparams/vaxnbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}

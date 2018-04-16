@@ -697,7 +697,6 @@ do
     v800_elf32_vec)		 tb="$tb elf32-v850.lo elf32.lo $elf" ;;
     v850_elf32_vec)		 tb="$tb elf32-v850.lo elf32.lo $elf" ;;
     vax_aout_1knbsd_vec)	 tb="$tb vax1knetbsd.lo aout32.lo" ;;
-    vax_aout_bsd_vec)		 tb="$tb vaxbsd.lo aout32.lo" ;;
     vax_aout_nbsd_vec)		 tb="$tb vaxnetbsd.lo aout32.lo" ;;
     vax_elf32_vec)		 tb="$tb elf32-vax.lo elf32.lo $elf" ;;
     ft32_elf32_vec)		 tb="$tb elf32-ft32.lo elf32.lo $elf" ;;

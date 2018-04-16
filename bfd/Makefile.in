@@ -754,7 +754,6 @@ BFD32_BACKENDS = \
 	sparcnetbsd.lo \
 	sunos.lo \
 	vax1knetbsd.lo \
-	vaxbsd.lo \
 	vaxnetbsd.lo \
 	versados.lo \
 	vms-lib.lo \
@@ -928,7 +927,6 @@ BFD32_BACKENDS_CFILES = \
 	sparcnetbsd.c \
 	sunos.c \
 	vax1knetbsd.c \
-	vaxbsd.c \
 	vaxnetbsd.c \
 	versados.c \
 	vms-lib.c \
@@ -1581,7 +1579,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tekhex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trad-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vax1knetbsd.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vaxbsd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vaxnetbsd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/verilog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/versados.Plo@am__quote@

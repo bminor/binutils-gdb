@@ -326,7 +326,6 @@ etic80coff.c
 ev850.c
 ev850_rh850.c
 evanilla.c
-evax.c
 evaxnbsd.c
 evsta.c
 exgateelf.c
