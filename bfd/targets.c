@@ -712,10 +712,6 @@ extern const bfd_target m68k_coff_sysv_vec;
 extern const bfd_target m68k_coff_un_vec;
 extern const bfd_target m68k_elf32_vec;
 extern const bfd_target m68k_versados_vec;
-extern const bfd_target m88k_aout_mach3_vec;
-extern const bfd_target m88k_aout_obsd_vec;
-extern const bfd_target m88k_coff_bcs_vec;
-extern const bfd_target m88k_elf32_vec;
 extern const bfd_target mach_o_be_vec;
 extern const bfd_target mach_o_le_vec;
 extern const bfd_target mach_o_fat_vec;
@@ -1155,11 +1151,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&m68k_coff_un_vec,
 	&m68k_elf32_vec,
 	&m68k_versados_vec,
-
-	&m88k_aout_mach3_vec,
-	&m88k_aout_obsd_vec,
-	&m88k_coff_bcs_vec,
-	&m88k_elf32_vec,
 
 	&mach_o_be_vec,
 	&mach_o_le_vec,

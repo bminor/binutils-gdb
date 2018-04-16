@@ -2095,7 +2095,6 @@ enum bfd_architecture
   bfd_arch_we32k,     /* AT&T WE32xxx.  */
   bfd_arch_romp,      /* IBM ROMP PC/RT.  */
   bfd_arch_convex,    /* Convex.  */
-  bfd_arch_m88k,      /* Motorola 88xxx.  */
   bfd_arch_m98k,      /* Motorola 98xxx.  */
   bfd_arch_pyramid,   /* Pyramid Technology.  */
   bfd_arch_h8300,     /* Renesas H8/300 (formerly Hitachi H8/300).  */
@@ -2609,7 +2608,7 @@ struct reloc_howto_struct
      slot of the instruction, so that a PC relative relocation can
      be made just by adding in an ordinary offset (e.g., sun3 a.out).
      Some formats leave the displacement part of an instruction
-     empty (e.g., m88k bcs); this flag signals the fact.  */
+     empty (e.g., ELF); this flag signals the fact.  */
   bfd_boolean pcrel_offset;
 };
 

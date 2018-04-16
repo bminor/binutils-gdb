@@ -220,7 +220,6 @@ DESCRIPTION
 .  bfd_arch_we32k,     {* AT&T WE32xxx.  *}
 .  bfd_arch_romp,      {* IBM ROMP PC/RT.  *}
 .  bfd_arch_convex,    {* Convex.  *}
-.  bfd_arch_m88k,      {* Motorola 88xxx.  *}
 .  bfd_arch_m98k,      {* Motorola 98xxx.  *}
 .  bfd_arch_pyramid,   {* Pyramid Technology.  *}
 .  bfd_arch_h8300,     {* Renesas H8/300 (formerly Hitachi H8/300).  *}
@@ -592,7 +591,6 @@ extern const bfd_arch_info_type bfd_m68hc12_arch;
 extern const bfd_arch_info_type bfd_m9s12x_arch;
 extern const bfd_arch_info_type bfd_m9s12xg_arch;
 extern const bfd_arch_info_type bfd_m68k_arch;
-extern const bfd_arch_info_type bfd_m88k_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_mep_arch;
 extern const bfd_arch_info_type bfd_metag_arch;
@@ -683,7 +681,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_m9s12x_arch,
     &bfd_m9s12xg_arch,
     &bfd_m68k_arch,
-    &bfd_m88k_arch,
     &bfd_mcore_arch,
     &bfd_mep_arch,
     &bfd_metag_arch,

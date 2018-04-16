@@ -4234,12 +4234,7 @@ nds32_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
 
   /* If the relocation is PC relative, we want to set RELOCATION to
      the distance between the symbol (currently in RELOCATION) and the
-     location we are relocating.  Some targets (e.g., i386-aout)
-     arrange for the contents of the section to be the negative of the
-     offset of the location within the section; for such targets
-     pcrel_offset is FALSE.  Other targets (e.g., m88kbcs or ELF)
-     simply leave the contents of the section as zero; for such
-     targets pcrel_offset is TRUE.  If pcrel_offset is FALSE we do not
+     location we are relocating.  If pcrel_offset is FALSE we do not
      need to subtract out the offset of the location within the
      section (which is just ADDRESS).  */
   if (howto->pc_relative)

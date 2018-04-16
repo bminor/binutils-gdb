@@ -1040,9 +1040,6 @@ bfd_mach_o_convert_architecture (bfd_mach_o_cpu_type mtype,
 	  break;
 	}
       break;
-    case BFD_MACH_O_CPU_TYPE_MC88000:
-      *type = bfd_arch_m88k;
-      break;
     case BFD_MACH_O_CPU_TYPE_SPARC:
       *type = bfd_arch_sparc;
       *subtype = bfd_mach_sparc;
@@ -5435,8 +5432,6 @@ bfd_mach_o_stack_addr (enum bfd_mach_o_cpu_type type)
     {
     case BFD_MACH_O_CPU_TYPE_MC680x0:
       return 0x04000000;
-    case BFD_MACH_O_CPU_TYPE_MC88000:
-      return 0xffffe000;
     case BFD_MACH_O_CPU_TYPE_POWERPC:
       return 0xc0000000;
     case BFD_MACH_O_CPU_TYPE_I386:

@@ -689,7 +689,6 @@ case ${obj_format} in
     case ${target_cpu_type} in
       i386) AC_DEFINE(I386COFF, 1, [Using i386 COFF?]) ;;
       m68k) AC_DEFINE(M68KCOFF, 1, [Using m68k COFF?]) ;;
-      m88k) AC_DEFINE(M88KCOFF, 1, [Using m88k COFF?]) ;;
       x86_64) AC_DEFINE(I386COFF, 1, [Using i386 COFF?]) ;;
     esac
     ;;

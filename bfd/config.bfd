@@ -87,7 +87,6 @@ case $targ in
  m68*-*-bsd* | m68*-*-vsta* | \
  m68*-ericsson-* | \
  m68*-*-psos* | \
- m88*-*-* | \
  mips*-big-* | \
  mips*-dec-* | mips*el-*-ecoff* | \
  mips*-*-ecoff* | \
@@ -139,6 +138,7 @@ case $targ in
  m68*-apollo-* | \
  m68*-apple-aux* | \
  m68*-bull-sysv* | \
+ m88*-*-* | \
  maxq-*-coff | \
  mips*el-*-rtems* | \
  sparc-*-lynxos* | \
@@ -174,7 +174,6 @@ lm32)	         targ_archs=bfd_lm32_arch ;;
 m6811*|m68hc11*) targ_archs="bfd_m68hc11_arch bfd_m68hc12_arch bfd_m9s12x_arch bfd_m9s12xg_arch" ;;
 m6812*|m68hc12*) targ_archs="bfd_m68hc12_arch bfd_m68hc11_arch bfd_m9s12x_arch bfd_m9s12xg_arch" ;;
 m68*)		 targ_archs=bfd_m68k_arch ;;
-m88*)		 targ_archs=bfd_m88k_arch ;;
 microblaze*)	 targ_archs=bfd_microblaze_arch ;;
 mips*)		 targ_archs=bfd_mips_arch ;;
 nds32*)		 targ_archs=bfd_nds32_arch ;;
@@ -985,23 +984,6 @@ case "${targ}" in
     ;;
   m68*-*-psos*)
     targ_defvec=m68k_elf32_vec
-    targ_underscore=yes
-    ;;
-
-  m88*-harris-cxux* | m88*-*-dgux* | m88*-*-sysv4*)
-    targ_defvec=m88k_elf32_vec
-    targ_selvecs=m88k_coff_bcs_vec
-    ;;
-  m88*-*-mach3*)
-    targ_defvec=m88k_aout_mach3_vec
-    targ_cflags=-DSTAT_FOR_EXEC
-    ;;
-  m88*-*-openbsd*)
-   targ_defvec=m88k_aout_obsd_vec
-   targ_underscore=yes
-   ;;
-  m88*-*-*)
-    targ_defvec=m88k_coff_bcs_vec
     targ_underscore=yes
     ;;
 

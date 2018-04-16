@@ -52,7 +52,6 @@
 #define ARCH_m68hc11
 #define ARCH_m68hc12
 #define ARCH_m68k
-#define ARCH_m88k
 #define ARCH_mcore
 #define ARCH_mep
 #define ARCH_metag
@@ -256,11 +255,6 @@ disassembler (enum bfd_architecture a,
 #ifdef ARCH_m68k
     case bfd_arch_m68k:
       disassemble = print_insn_m68k;
-      break;
-#endif
-#ifdef ARCH_m88k
-    case bfd_arch_m88k:
-      disassemble = print_insn_m88k;
       break;
 #endif
 #ifdef ARCH_mt

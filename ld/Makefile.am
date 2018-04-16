@@ -341,7 +341,6 @@ ALL_EMULATION_SOURCES = \
 	em68klinux.c \
 	em68knbsd.c \
 	em68kpsos.c \
-	em88kbcs.c \
 	emcorepe.c \
 	emn10200.c \
 	emn10300.c \
@@ -1510,9 +1509,6 @@ em68knbsd.c:	$(srcdir)/emulparams/m68knbsd.sh \
 
 em68kpsos.c:	$(srcdir)/emulparams/m68kpsos.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/psos.sc ${GEN_DEPENDS}
-
-em88kbcs.c: $(srcdir)/emulparams/m88kbcs.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m88kbcs.sc ${GEN_DEPENDS}
 
 emcorepe.c: $(srcdir)/emulparams/mcorepe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}

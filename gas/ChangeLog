@@ -1,5 +1,11 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* configure.ac: Remove m88k support.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove i370 support.
 	* app.c: Likewise.
 	* config/obj-elf.c: Likewise.

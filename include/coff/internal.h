@@ -344,10 +344,6 @@ struct internal_aouthdr
 #define C_PRAGMA	111	/* Advice to compiler or linker	*/
 #define C_SEGMENT	112	/* 80960 segment name		*/
 
-  /* Storage classes for m88k */
-#define C_SHADOW        107     /* shadow symbol                */
-#define C_VERSION       108     /* coff version symbol          */
-
  /* New storage classes for RS/6000 */
 #define C_HIDEXT        107	/* Un-named external symbol */
 #define C_BINCL         108	/* Marks beginning of include file */

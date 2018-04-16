@@ -257,7 +257,6 @@ em68kelfnbsd.c
 em68klinux.c
 em68knbsd.c
 em68kpsos.c
-em88kbcs.c
 emcorepe.c
 emmo.c
 emn10200.c

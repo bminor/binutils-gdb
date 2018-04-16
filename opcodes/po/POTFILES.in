@@ -123,7 +123,6 @@ m68hc11-dis.c
 m68hc11-opc.c
 m68k-dis.c
 m68k-opc.c
-m88k-dis.c
 mcore-dis.c
 mcore-opc.h
 mep-asm.c

@@ -125,7 +125,6 @@ ALL_MACHINES = \
 	cpu-m9s12x.lo \
 	cpu-m9s12xg.lo \
 	cpu-m68k.lo \
-	cpu-m88k.lo \
 	cpu-mcore.lo \
 	cpu-mep.lo \
 	cpu-metag.lo \
@@ -211,7 +210,6 @@ ALL_MACHINES_CFILES = \
 	cpu-m9s12x.c \
 	cpu-m9s12xg.c \
 	cpu-m68k.c \
-	cpu-m88k.c \
 	cpu-mcore.c \
 	cpu-mep.c \
 	cpu-metag.c \
@@ -279,7 +277,6 @@ BFD32_BACKENDS = \
 	coff-go32.lo \
 	coff-i386.lo \
 	coff-m68k.lo \
-	coff-m88k.lo \
 	coff-mips.lo \
 	coff-rs6000.lo \
 	coff-sh.lo \
@@ -341,7 +338,6 @@ BFD32_BACKENDS = \
 	elf32-m68hc12.lo \
 	elf32-m68hc1x.lo \
 	elf32-m68k.lo \
-	elf32-m88k.lo \
 	elf32-mcore.lo \
 	elf32-mep.lo \
 	elf32-metag.lo \
@@ -396,8 +392,6 @@ BFD32_BACKENDS = \
 	m68k4knetbsd.lo \
 	m68klinux.lo \
 	m68knetbsd.lo \
-	m88kmach3.lo \
-	m88kopenbsd.lo \
 	mach-o.lo \
 	mach-o-i386.lo \
 	mach-o-arm.lo \
@@ -460,7 +454,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-go32.c \
 	coff-i386.c \
 	coff-m68k.c \
-	coff-m88k.c \
 	coff-mips.c \
 	coff-rs6000.c \
 	coff-sh.c \
@@ -522,7 +515,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-m68hc12.c \
 	elf32-m68hc1x.c \
 	elf32-m68k.c \
-	elf32-m88k.c \
 	elf32-mcore.c \
 	elf32-mep.c \
 	elf32-metag.c \
@@ -577,8 +569,6 @@ BFD32_BACKENDS_CFILES = \
 	m68k4knetbsd.c \
 	m68klinux.c \
 	m68knetbsd.c \
-	m88kmach3.c \
-	m88kopenbsd.c \
 	mach-o.c \
 	mach-o-i386.c \
 	mach-o-arm.c \

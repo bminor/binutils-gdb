@@ -361,7 +361,7 @@ CODE_FRAGMENT
 .     slot of the instruction, so that a PC relative relocation can
 .     be made just by adding in an ordinary offset (e.g., sun3 a.out).
 .     Some formats leave the displacement part of an instruction
-.     empty (e.g., m88k bcs); this flag signals the fact.  *}
+.     empty (e.g., ELF); this flag signals the fact.  *}
 .  bfd_boolean pcrel_offset;
 .};
 .
@@ -704,8 +704,8 @@ bfd_perform_relocation (bfd *abfd,
 	 the addend to be the negative of the position of the location
 	 within the section; for example, i386-aout does this.  For
 	 i386-aout, pcrel_offset is FALSE.  Some other targets do not
-	 include the position of the location; for example, m88kbcs,
-	 or ELF.  For those targets, pcrel_offset is TRUE.
+	 include the position of the location; for example, ELF.
+	 For those targets, pcrel_offset is TRUE.
 
 	 If we are producing relocatable output, then we must ensure
 	 that this reloc will be correctly computed when the final
@@ -1095,8 +1095,8 @@ bfd_install_relocation (bfd *abfd,
 	 the addend to be the negative of the position of the location
 	 within the section; for example, i386-aout does this.  For
 	 i386-aout, pcrel_offset is FALSE.  Some other targets do not
-	 include the position of the location; for example, m88kbcs,
-	 or ELF.  For those targets, pcrel_offset is TRUE.
+	 include the position of the location; for example, ELF.
+	 For those targets, pcrel_offset is TRUE.
 
 	 If we are producing relocatable output, then we must ensure
 	 that this reloc will be correctly computed when the final
@@ -1405,11 +1405,11 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
      location we are relocating.  Some targets (e.g., i386-aout)
      arrange for the contents of the section to be the negative of the
      offset of the location within the section; for such targets
-     pcrel_offset is FALSE.  Other targets (e.g., m88kbcs or ELF)
-     simply leave the contents of the section as zero; for such
-     targets pcrel_offset is TRUE.  If pcrel_offset is FALSE we do not
-     need to subtract out the offset of the location within the
-     section (which is just ADDRESS).  */
+     pcrel_offset is FALSE.  Other targets (e.g., ELF) simply leave
+     the contents of the section as zero; for such targets
+     pcrel_offset is TRUE.  If pcrel_offset is FALSE we do not need to
+     subtract out the offset of the location within the section (which
+     is just ADDRESS).  */
   if (howto->pc_relative)
     {
       relocation -= (input_section->output_section->vma

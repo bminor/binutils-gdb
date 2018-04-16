@@ -1,5 +1,10 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* MAINTAINERS (Mark Kettenis): Move to past maintainers.
+	* testsuite/binutils-all/objdump.exp: Remove m88k support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c: Remove i370 support.
 	* testsuite/binutils-all/objdump.exp: Likewise.
 

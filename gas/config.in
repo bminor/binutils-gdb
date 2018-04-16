@@ -184,9 +184,6 @@
 /* Using m68k COFF? */
 #undef M68KCOFF
 
-/* Using m88k COFF? */
-#undef M88KCOFF
-
 /* Default CPU for MIPS targets. */
 #undef MIPS_CPU_STRING_DEFAULT
 

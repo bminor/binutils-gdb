@@ -451,8 +451,6 @@ m68*-*-netbsdaout* | m68*-*-netbsd*)
 			targ_emul=m68knbsd
 			targ_extra_emuls="m68kelfnbsd m68k4knbsd" ;;
 m68*-*-psos*)		targ_emul=m68kpsos ;;
-m8*-*-*)		targ_emul=m88kbcs
-			;;
 mcore-*-pe)		targ_emul=mcorepe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 mcore-*-elf)		targ_emul=elf32mcore

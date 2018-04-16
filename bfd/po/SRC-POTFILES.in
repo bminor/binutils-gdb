@@ -31,7 +31,6 @@ coff-bfd.c
 coff-go32.c
 coff-i386.c
 coff-m68k.c
-coff-m88k.c
 coff-mips.c
 coff-rs6000.c
 coff-sh.c
@@ -89,7 +88,6 @@ cpu-m32r.c
 cpu-m68hc11.c
 cpu-m68hc12.c
 cpu-m68k.c
-cpu-m88k.c
 cpu-m9s12x.c
 cpu-m9s12xg.c
 cpu-mcore.c
@@ -188,7 +186,6 @@ elf32-m68hc11.c
 elf32-m68hc12.c
 elf32-m68hc1x.c
 elf32-m68k.c
-elf32-m88k.c
 elf32-mcore.c
 elf32-mep.c
 elf32-metag.c
@@ -289,8 +286,6 @@ lynx-core.c
 m68k4knetbsd.c
 m68klinux.c
 m68knetbsd.c
-m88kmach3.c
-m88kopenbsd.c
 mach-o-aarch64.c
 mach-o-arm.c
 mach-o-i386.c

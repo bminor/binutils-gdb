@@ -32,12 +32,12 @@ SECTION
 
 	Coff in all its varieties is implemented with a few common
 	files and a number of implementation specific files. For
-	example, The 88k bcs coff format is implemented in the file
-	@file{coff-m88k.c}. This file @code{#include}s
-	@file{coff/m88k.h} which defines the external structure of the
-	coff format for the 88k, and @file{coff/internal.h} which
-	defines the internal structure. @file{coff-m88k.c} also
-	defines the relocations used by the 88k format
+	example, the i386 coff format is implemented in the file
+	@file{coff-i386.c}.  This file @code{#include}s
+	@file{coff/i386.h} which defines the external structure of the
+	coff format for the i386, and @file{coff/internal.h} which
+	defines the internal structure. @file{coff-i386.c} also
+	defines the relocations used by the i386 coff format
 	@xref{Relocations}.
 
 SUBSECTION
@@ -2161,14 +2161,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
       machine = bfd_mach_m68020;
       break;
 #endif
-#ifdef MC88MAGIC
-    case MC88MAGIC:
-    case MC88DMAGIC:
-    case MC88OMAGIC:
-      arch = bfd_arch_m88k;
-      machine = 88100;
-      break;
-#endif
 #ifdef Z80MAGIC
     case Z80MAGIC:
       arch = bfd_arch_z80;
@@ -2828,12 +2820,6 @@ coff_set_flags (bfd * abfd,
       /* Just overwrite the usual value if we're doing Lynx.  */
       *magicp = LYNXCOFFMAGIC;
 #endif
-      return TRUE;
-#endif
-
-#ifdef MC88MAGIC
-    case bfd_arch_m88k:
-      *magicp = MC88OMAGIC;
       return TRUE;
 #endif
 
@@ -3907,10 +3893,6 @@ coff_write_object_contents (bfd * abfd)
     internal_a.magic = TIC80_ARCH_MAGIC;
 #define __A_MAGIC_SET__
 #endif /* TIC80 */
-#if M88
-#define __A_MAGIC_SET__
-    internal_a.magic = PAGEMAGICBCS;
-#endif /* M88 */
 
 #if APOLLO_M68
 #define __A_MAGIC_SET__
@@ -5027,8 +5009,7 @@ SUBSUBSECTION
 	o The reloc index is turned into a pointer to a howto
 	structure, in a back end specific way. For instance, the 386
 	uses the @code{r_type} to directly produce an index
-	into a howto table vector; the 88k subtracts a number from the
-	@code{r_type} field and creates an addend field.
+	into a howto table vector.
 */
 
 #ifndef CALC_ADDEND

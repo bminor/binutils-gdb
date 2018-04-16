@@ -14457,10 +14457,6 @@ do
     m68k_coff_un_vec)		 tb="$tb coff-u68k.lo coff-m68k.lo $coff" ;;
     m68k_elf32_vec)		 tb="$tb elf32-m68k.lo elf32.lo $elf" ;;
     m68k_versados_vec)		 tb="$tb versados.lo" ;;
-    m88k_aout_mach3_vec)	 tb="$tb m88kmach3.lo aout32.lo" ;;
-    m88k_aout_obsd_vec)		 tb="$tb m88kopenbsd.lo aout32.lo" ;;
-    m88k_coff_bcs_vec)		 tb="$tb coff-m88k.lo $coffgen" ;;
-    m88k_elf32_vec)		 tb="$tb elf32-m88k.lo elf32.lo $elf" ;;
     mach_o_be_vec)		 tb="$tb mach-o.lo dwarf2.lo" ;;
     mach_o_le_vec)		 tb="$tb mach-o.lo dwarf2.lo" ;;
     mach_o_fat_vec)		 tb="$tb mach-o.lo dwarf2.lo" ;;
@@ -14905,18 +14901,6 @@ if test "${target}" = "${host}"; then
   m68*-apple-aux*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/m68kaux.h"'
-	;;
-  m88*-*-sysv4*)
-	;;
-  m88*-motorola-sysv*)
-	COREFILE=ptrace-core.lo
-	;;
-  m88*-*-mach3*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/m88kmach3.h"'
-	;;
-  m88*-*-openbsd*)
-	COREFILE=netbsd-core.lo
 	;;
   ns32k-pc532-mach)
 	COREFILE=trad-core.lo
