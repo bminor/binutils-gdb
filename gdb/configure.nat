@@ -410,10 +410,6 @@ case ${gdb_host} in
 		NATDEPFILES="${NATDEPFILES} m68k-bsd-nat.o bsd-kvm.o"
 		LOADLIBES='-lkvm'
 		;;
-	    m88k)
-		# Host: OpenBSD/m88k
-		NATDEPFILES="${NATDEPFILES} m88k-bsd-nat.o"
-		;;
 	    pa)
 		# Host: OpenBSD/hppa
 		NATDEPFILES="${NATDEPFILES} obsd-nat.o hppa-obsd-nat.o"

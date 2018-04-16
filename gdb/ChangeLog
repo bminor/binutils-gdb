@@ -1,3 +1,15 @@
+2018-04-16  Pedro Alves  <palves@redhat.com>
+
+	* MAINTAINERS: Remove m88k.
+	* Makefile.in (ALL_TARGET_OBS): Remove m88k-tdep.o.
+	(HFILES_NO_SRCDIR): Remove m88k-tdep.h.
+	(ALLDEPFILES): Remove m88k-bsd-nat.c and m88k-tdep.c.
+	* NEWS: Mention that support for m88k was removed.
+	* configure.host (m88*-*-*): Remove support.
+	* configure.nat (m88k-*-*): Remove support.
+	* configure.tgt (m88*-*-openbsd*): Remove.
+	* m88k-bsd-nat.c, m88k-tdep.c, m88k-tdep.h: Delete.
+
 2018-04-15  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* configure.tgt (x86_tobjs): New variable.

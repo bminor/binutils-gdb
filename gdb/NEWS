@@ -28,6 +28,10 @@ set|show record btrace cpu
 
 RiscV ELF			riscv*-*-elf
 
+* Removed targets and native configurations
+
+m88k running OpenBSD  		m88*-*-openbsd*
+
 *** Changes in GDB 8.1
 
 * GDB now supports dynamically creating arbitrary register groups specified

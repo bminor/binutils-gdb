@@ -729,7 +729,6 @@ ALL_TARGET_OBS = \
 	m68k-bsd-tdep.o \
 	m68k-linux-tdep.o \
 	m68k-tdep.o \
-	m88k-tdep.o \
 	mep-tdep.o \
 	microblaze-linux-tdep.o \
 	microblaze-tdep.o \
@@ -1291,7 +1290,6 @@ HFILES_NO_SRCDIR = \
 	m2-lang.h \
 	m32r-tdep.h \
 	m68k-tdep.h \
-	m88k-tdep.h \
 	macroexp.h \
 	macroscope.h \
 	macrotab.h \
@@ -2271,8 +2269,6 @@ ALLDEPFILES = \
 	m68k-linux-nat.c \
 	m68k-linux-tdep.c \
 	m68k-tdep.c \
-	m88k-bsd-nat.c \
-	m88k-tdep.c \
 	microblaze-linux-tdep.c \
 	microblaze-tdep.c \
 	mingw-hdep.c \

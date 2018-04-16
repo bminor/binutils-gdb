@@ -261,8 +261,6 @@ the native maintainer when resolving ABI issues.
 	m68hc11		--target=m68hc11-elf ,-Werror ,
 	m68k		--target=m68k-elf ,-Werror
 
-	m88k		--target=m88k-openbsd ,-Werror
-
 	mcore		Deleted
 
 	mep		--target=mep-elf ,-Werror

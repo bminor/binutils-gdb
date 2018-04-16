@@ -373,11 +373,6 @@ m68*-*-openbsd*)
 	gdb_target_obs="m68k-tdep.o m68k-bsd-tdep.o"
 	;;
 
-m88*-*-openbsd*)
-	# Target: OpenBSD/m88k
-	gdb_target_obs="m88k-tdep.o"
-	;;
-
 mep-*-*)
 	# Target: Toshiba Media Processor (MEP)
 	gdb_target_obs="mep-tdep.o"
