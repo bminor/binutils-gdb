@@ -1,3 +1,15 @@
+2018-04-17  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c: Add REG_0F1C_MOD_0, MOD_0F1C_PREFIX_0,
+	PREFIX_0F1C.
+	* i386-gen.c (cpu_flag_init): Add CPU_CLDEMOTE_FLAGS,
+	(cpu_flags): Add CpuCLDEMOTE.
+	* i386-init.h: Regenerate.
+	* i386-opc.h (enum): Add CpuCLDEMOTE,
+	(i386_cpu_flags): Add cpucldemote.
+	* i386-opc.tbl: Add cldemote.
+	* i386-tbl.h: Regenerate.
+
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am: Remove sh5 and sh64 support.

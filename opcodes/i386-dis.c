@@ -738,6 +738,7 @@ enum
   REG_0F01,
   REG_0F0D,
   REG_0F18,
+  REG_0F1C_MOD_0,
   REG_0F1E_MOD_3,
   REG_0F71,
   REG_0F72,
@@ -792,6 +793,7 @@ enum
   MOD_0F1A_PREFIX_0,
   MOD_0F1B_PREFIX_0,
   MOD_0F1B_PREFIX_1,
+  MOD_0F1C_PREFIX_0,
   MOD_0F1E_PREFIX_1,
   MOD_0F24,
   MOD_0F26,
@@ -970,6 +972,7 @@ enum
   PREFIX_0F16,
   PREFIX_0F1A,
   PREFIX_0F1B,
+  PREFIX_0F1C,
   PREFIX_0F1E,
   PREFIX_0F2A,
   PREFIX_0F2B,
@@ -2898,7 +2901,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "nopQ",		{ Ev }, 0 },
   { PREFIX_TABLE (PREFIX_0F1A) },
   { PREFIX_TABLE (PREFIX_0F1B) },
-  { "nopQ",		{ Ev }, 0 },
+  { PREFIX_TABLE (PREFIX_0F1C) },
   { "nopQ",		{ Ev }, 0 },
   { PREFIX_TABLE (PREFIX_0F1E) },
   { "nopQ",		{ Ev }, 0 },
@@ -3650,6 +3653,17 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0F18_REG_6) },
     { MOD_TABLE (MOD_0F18_REG_7) },
   },
+  /* REG_0F1C_MOD_0 */
+  {
+    { "cldemote",	{ Mb }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+  },
   /* REG_0F1E_MOD_3 */
   {
     { "nopQ",		{ Ev }, 0 },
@@ -3899,6 +3913,14 @@ static const struct dis386 prefix_table[][4] = {
     { MOD_TABLE (MOD_0F1B_PREFIX_1) },
     { "bndmov", { EbndS, Gbnd }, 0 },
     { "bndcn",  { Gbnd, Ev_bnd }, 0 },
+  },
+
+  /* PREFIX_0F1C */
+  {
+    { MOD_TABLE (MOD_0F1C_PREFIX_0) },
+    { "nopQ",	{ Ev }, PREFIX_OPCODE },
+    { "nopQ",	{ Ev }, PREFIX_OPCODE },
+    { "nopQ",	{ Ev }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F1E */
@@ -11618,6 +11640,11 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F1B_PREFIX_1 */
     { "bndmk",		{ Gbnd, Ev_bnd }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+  },
+  {
+    /* MOD_0F1C_PREFIX_0 */
+    { REG_TABLE (REG_0F1C_MOD_0) },
     { "nopQ",		{ Ev }, 0 },
   },
   {
