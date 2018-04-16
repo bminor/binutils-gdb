@@ -1426,7 +1426,7 @@ linux_spu_make_corefile_notes (bfd *obfd, char *note_data, int *note_size)
     spu_ids = target_read_alloc (&current_target, TARGET_OBJECT_SPU, NULL);
 
   if (!spu_ids)
-    return nullptr;
+    return note_data;
 
   /* Generate corefile notes for each SPU file.  */
   for (size_t i = 0; i < spu_ids->size (); i += 4)

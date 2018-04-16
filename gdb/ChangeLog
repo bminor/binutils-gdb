@@ -1,3 +1,8 @@
+2018-04-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-tdep.c (linux_spu_make_corefile_notes): Return note_data
+	instead of nullptr.
+
 2018-04-16  Pedro Alves  <palves@redhat.com>
 
 	* MAINTAINERS (sh): Remove.
