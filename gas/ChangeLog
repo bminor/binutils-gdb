@@ -1,3 +1,14 @@
+2018-04-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 23054
+	* cond.c (s_ifsef): Replace use of obstack_copy with obstack_alloc
+	followed by memcpy.
+	(s_if, s_ifb, s_ifc, s_ifeqs): Likewise.
+	* obj-elf.c (elf_adjust_symtab): Check for local symbols before
+	attempting to dereference the sy_next field of a symbol.
+	* stabs.c (get_stab_string_offset): Fail if there is no string
+	following the stab directive.
+
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am: Remove arm-epoc-pe support.

@@ -202,6 +202,12 @@ s_stab_generic (int          what,
       int length;
 
       string = demand_copy_C_string (&length);
+      if (string == NULL)
+	{
+	  as_warn (_(".stab%c: missing string"), what);
+	  ignore_rest_of_line ();
+	  return;
+	}
       /* FIXME: We should probably find some other temporary storage
 	 for string, rather than leaking memory if someone else
 	 happens to use the notes obstack.  */

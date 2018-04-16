@@ -2471,7 +2471,8 @@ elf_adjust_symtab (void)
       sy = symbol_find_exact (group_name);
       if (!sy
 	  || (sy != symbol_lastP
-	      && (sy->sy_next == NULL
+	      && (sy->sy_flags.sy_local_symbol
+		  || sy->sy_next == NULL
 		  || sy->sy_next->sy_previous != sy)))
 	{
 	  /* Create the symbol now.  */
