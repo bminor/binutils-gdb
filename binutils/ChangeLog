@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (get_machine_name): Correct typo.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* configure.ac: Remove arm-epoc-pe support.
 	* dlltool.c: Likewise.
 	* configure: Regenerate.
