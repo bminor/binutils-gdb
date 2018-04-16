@@ -31,6 +31,9 @@ RiscV ELF			riscv*-*-elf
 * Removed targets and native configurations
 
 m88k running OpenBSD  		m88*-*-openbsd*
+SH-5/SH64 ELF			sh64-*-elf*, SH-5/SH64 support in sh*
+SH-5/SH64 running GNU/Linux	SH-5/SH64 support in sh*-*-linux*
+SH-5/SH64 running OpenBSD 	SH-5/SH64 support in sh*-*-openbsd*
 
 *** Changes in GDB 8.1
 

@@ -1,5 +1,22 @@
 2018-04-16  Pedro Alves  <palves@redhat.com>
 
+	* MAINTAINERS (sh): Remove.
+	* Makefile.in (ALL_TARGET_OBS): Remove sh64-tdep.o.
+	(HFILES_NO_SRCDIR): Remove sh64-tdep.h.
+	(ALLDEPFILES): Remove sh64-tdep.c.
+	* NEWS: Mentions that support for SH-5/SH64 is removed.
+	* configure.tgt (sh*-*-linux*): Remove reference to sh64-tdep.o.
+	(sh*-*-openbsd*): Ditto.
+	(sh64-*-elf*): Remove.
+	(sh*): Remove.
+	* regcache.c (cooked_write_test): Remove bfd_mach_sh5 case.
+	* sh-linux-tdep.c: Remove reference to bfd_mach_sh5.
+	* sh-tdep.c: No longer include "sh64-tdep.h".
+	(sh_gdbarch_init): Remove reference to bfd_mach_sh5.
+	* sh64-tdep.c, sh64-tdep.h: Remove files.
+
+2018-04-16  Pedro Alves  <palves@redhat.com>
+
 	* MAINTAINERS: Remove m88k.
 	* Makefile.in (ALL_TARGET_OBS): Remove m88k-tdep.o.
 	(HFILES_NO_SRCDIR): Remove m88k-tdep.h.

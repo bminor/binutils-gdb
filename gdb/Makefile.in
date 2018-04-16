@@ -767,7 +767,6 @@ ALL_TARGET_OBS = \
 	sh-linux-tdep.o \
 	sh-nbsd-tdep.o \
 	sh-tdep.o \
-	sh64-tdep.o \
 	sol2-tdep.o \
 	solib-aix.o \
 	solib-darwin.o \
@@ -1355,7 +1354,6 @@ HFILES_NO_SRCDIR = \
 	ser-unix.h \
 	serial.h \
 	sh-tdep.h \
-	sh64-tdep.h \
 	sim-regno.h \
 	skip.h \
 	sol2-tdep.h \
@@ -2322,7 +2320,6 @@ ALLDEPFILES = \
 	sh-nbsd-nat.c \
 	sh-nbsd-tdep.c \
 	sh-tdep.c \
-	sh64-tdep.c \
 	sol2-tdep.c \
 	solib-aix.c \
 	solib-spu.c \

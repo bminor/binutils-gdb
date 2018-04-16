@@ -1786,10 +1786,6 @@ cooked_write_test (struct gdbarch *gdbarch)
 	   && gdbarch_ptr_bit (gdbarch) == 64
 	   && (regnum >= gdbarch_num_regs (gdbarch)
 	       && regnum <= gdbarch_num_regs (gdbarch) + 4))
-	  || (bfd_arch == bfd_arch_sh
-	      /* FPSCR_C_REGNUM in sh64 is hard to test.  */
-	      && gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_sh5
-	      && regnum == 243)
 	  || (bfd_arch == bfd_arch_spu
 	      /* SPU pseudo registers except SPU_SP_REGNUM are got by
 		 TARGET_OBJECT_SPU.  */

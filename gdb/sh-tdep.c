@@ -41,7 +41,6 @@
 #include "objfiles.h"
 
 #include "sh-tdep.h"
-#include "sh64-tdep.h"
 
 #include "elf-bfd.h"
 #include "solib-svr4.h"
@@ -2256,10 +2255,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
-
-  /* SH5 is handled entirely in sh64-tdep.c.  */
-  if (info.bfd_arch_info->mach == bfd_mach_sh5)
-    return sh64_gdbarch_init (info, arches);
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
