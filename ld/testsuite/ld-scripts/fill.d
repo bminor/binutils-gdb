@@ -10,7 +10,6 @@
 #notarget: tilepro-*-*
 #notarget: x86_64-*-cygwin x86_64-*-mingw* x86_64-*-pe*
 #xfail: alpha*-*-*ecoff
-#xfail: arm-epoc-pe
 #xfail: m32c-*-*
 #xfail: sh-*-pe
 #xfail: sparc*-*-coff
@@ -23,7 +22,6 @@
 # configurations are listed above.
 #
 # alpha-linuxecoff pads out code to 16 bytes.
-# arm-epoc-pe always pads out code to 512 bytes.
 # ia64 aligns code to minimum 16 bytes.
 # m32c pads out code sections with 4 NOPs (see `m32c_md_end').
 # mips aligns to minimum 16 bytes (except for bare-metal ELF and VxWorks).

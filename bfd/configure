@@ -14361,14 +14361,10 @@ do
     arm_elf32_vxworks_le_vec)	 tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
     arm_pe_be_vec)		 tb="$tb pe-arm.lo peigen.lo $coff" ;;
     arm_pe_le_vec)		 tb="$tb pe-arm.lo peigen.lo $coff" ;;
-    arm_pe_epoc_be_vec)		 tb="$tb epoc-pe-arm.lo peigen.lo $coff" ;;
-    arm_pe_epoc_le_vec)		 tb="$tb epoc-pe-arm.lo peigen.lo $coff" ;;
     arm_pe_wince_be_vec)	 tb="$tb pe-arm-wince.lo pe-arm.lo peigen.lo $coff" ;;
     arm_pe_wince_le_vec)	 tb="$tb pe-arm-wince.lo pe-arm.lo peigen.lo $coff" ;;
     arm_pei_be_vec)		 tb="$tb pei-arm.lo peigen.lo $coff" ;;
     arm_pei_le_vec)		 tb="$tb pei-arm.lo peigen.lo $coff" ;;
-    arm_pei_epoc_be_vec)	 tb="$tb epoc-pei-arm.lo peigen.lo $coff" ;;
-    arm_pei_epoc_le_vec)	 tb="$tb epoc-pei-arm.lo peigen.lo $coff" ;;
     arm_pei_wince_be_vec)	 tb="$tb pei-arm-wince.lo pei-arm.lo peigen.lo $coff" ;;
     arm_pei_wince_le_vec)	 tb="$tb pei-arm-wince.lo pei-arm.lo peigen.lo $coff" ;;
     arm_mach_o_vec)		 tb="$tb mach-o-arm.lo" ;;

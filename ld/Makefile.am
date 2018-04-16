@@ -166,7 +166,6 @@ ALL_EMULATION_SOURCES = \
 	earclinux.c \
 	earclinux_nps.c \
 	earclinux_prof.c \
-	earm_epoc_pe.c \
 	earm_wince_pe.c \
 	earmaoutb.c \
 	earmaoutl.c \
@@ -689,9 +688,6 @@ earclinux_nps.c: $(srcdir)/emulparams/arclinux_nps.sh \
 earclinux_prof.c: $(srcdir)/emulparams/arclinux_prof.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em \
   $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
-
-earm_epoc_pe.c: $(srcdir)/emulparams/arm_epoc_pe.sh \
-  $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/epocpe.sc ${GEN_DEPENDS}
 
 earm_wince_pe.c: $(srcdir)/emulparams/arm_wince_pe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}

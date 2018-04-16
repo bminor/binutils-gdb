@@ -614,14 +614,10 @@ extern const bfd_target arm_elf32_vxworks_le_vec;
 extern const bfd_target arm_mach_o_vec;
 extern const bfd_target arm_pe_be_vec;
 extern const bfd_target arm_pe_le_vec;
-extern const bfd_target arm_pe_epoc_be_vec;
-extern const bfd_target arm_pe_epoc_le_vec;
 extern const bfd_target arm_pe_wince_be_vec;
 extern const bfd_target arm_pe_wince_le_vec;
 extern const bfd_target arm_pei_be_vec;
 extern const bfd_target arm_pei_le_vec;
-extern const bfd_target arm_pei_epoc_be_vec;
-extern const bfd_target arm_pei_epoc_le_vec;
 extern const bfd_target arm_pei_wince_be_vec;
 extern const bfd_target arm_pei_wince_le_vec;
 extern const bfd_target avr_elf32_vec;
@@ -960,14 +956,10 @@ static const bfd_target * const _bfd_target_vector[] =
 	&arm_mach_o_vec,
 	&arm_pe_be_vec,
 	&arm_pe_le_vec,
-	&arm_pe_epoc_be_vec,
-	&arm_pe_epoc_le_vec,
 	&arm_pe_wince_be_vec,
 	&arm_pe_wince_le_vec,
 	&arm_pei_be_vec,
 	&arm_pei_le_vec,
-	&arm_pei_epoc_be_vec,
-	&arm_pei_epoc_le_vec,
 	&arm_pei_wince_be_vec,
 	&arm_pei_wince_le_vec,
 

@@ -97,7 +97,6 @@ arc*-*-linux*)		case "${with_cpu}" in
 			esac
 			targ_extra_emuls="${targ_extra_emuls} arclinux_prof arcelf arcelf_prof arcv2elf arcv2elfx"
 			;;
-arm-epoc-pe)		targ_emul=arm_epoc_pe ;	targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 arm*-*-cegcc*)		targ_emul=arm_wince_pe ; targ_extra_ofiles="deffilep.o pe-dll.o"
 			LIB_PATH='${tooldir}/lib/w32api' ;;
 arm-wince-pe | arm-*-wince | arm*-*-mingw32ce*)

@@ -357,8 +357,6 @@ BFD32_BACKENDS = \
 	elflink.lo \
 	elfxx-sparc.lo \
 	elfxx-tilegx.lo \
-	epoc-pe-arm.lo \
-	epoc-pei-arm.lo \
 	i386aout.lo \
 	i386bsd.lo \
 	i386dynix.lo \
@@ -508,8 +506,6 @@ BFD32_BACKENDS_CFILES = \
 	elflink.c \
 	elfxx-sparc.c \
 	elfxx-tilegx.c \
-	epoc-pe-arm.c \
-	epoc-pei-arm.c \
 	i386aout.c \
 	i386bsd.c \
 	i386dynix.c \

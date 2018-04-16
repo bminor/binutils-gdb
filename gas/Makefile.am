@@ -307,7 +307,6 @@ TARG_ENV_HFILES = \
 	config/te-armfbsdvfp.h \
 	config/te-armlinuxeabi.h \
 	config/te-dynix.h \
-	config/te-epoc-pe.h \
 	config/te-freebsd.h \
 	config/te-generic.h \
 	config/te-gnu.h \

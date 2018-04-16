@@ -23,7 +23,6 @@ earclinux_nps.c
 earclinux_prof.c
 earcv2elf.c
 earcv2elfx.c
-earm_epoc_pe.c
 earm_wince_pe.c
 earmaoutb.c
 earmaoutl.c

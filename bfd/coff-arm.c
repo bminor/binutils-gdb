@@ -1274,9 +1274,8 @@ coff_arm_relocate_section (bfd *output_bfd,
 	    continue;
 	  /* FIXME - it is not clear which targets need this next test
 	     and which do not.  It is known that it is needed for the
-	     VxWorks and EPOC-PE targets, but it is also known that it
-	     was suppressed for other ARM targets.  This ought to be
-	     sorted out one day.  */
+	     VxWorks targets but it is also known that it was suppressed
+	     for other ARM targets.  This ought to be sorted out one day.  */
 #ifdef ARM_COFF_BUGFIX
 	  /* We must not ignore the symbol value.  If the symbol is
 	     within the same section, the relocation should have already

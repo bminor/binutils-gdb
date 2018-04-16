@@ -40,7 +40,6 @@ fragment <<EOF
 /* Do this before including bfd.h, so we prototype the right functions.  */
 
 #if defined(TARGET_IS_armpe) \
-    || defined(TARGET_IS_arm_epoc_pe) \
     || defined(TARGET_IS_arm_wince_pe)
 #define bfd_arm_allocate_interworking_sections \
 	bfd_${EMULATION_NAME}_allocate_interworking_sections
@@ -95,7 +94,6 @@ fragment <<EOF
 #if defined(TARGET_IS_i386pe) \
     || defined(TARGET_IS_shpe) \
     || defined(TARGET_IS_armpe) \
-    || defined(TARGET_IS_arm_epoc_pe) \
     || defined(TARGET_IS_arm_wince_pe)
 #define DLL_SUPPORT
 #endif
@@ -1416,7 +1414,6 @@ gld_${EMULATION_NAME}_after_open (void)
 
 #if defined (TARGET_IS_i386pe) \
     || defined (TARGET_IS_armpe) \
-    || defined (TARGET_IS_arm_epoc_pe) \
     || defined (TARGET_IS_arm_wince_pe)
   if (!bfd_link_relocatable (&link_info))
     pe_dll_build_sections (link_info.output_bfd, &link_info);
@@ -1428,7 +1425,7 @@ gld_${EMULATION_NAME}_after_open (void)
 #endif
 #endif /* DLL_SUPPORT */
 
-#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) || defined(TARGET_IS_arm_wince_pe)
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_wince_pe)
   if (strstr (bfd_get_target (link_info.output_bfd), "arm") == NULL)
     {
       /* The arm backend needs special fields in the output hash structure.
@@ -1754,7 +1751,7 @@ gld_${EMULATION_NAME}_before_allocation (void)
   ppc_allocate_toc_section (&link_info);
 #endif /* TARGET_IS_ppcpe */
 
-#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) || defined(TARGET_IS_arm_wince_pe)
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_wince_pe)
   /* FIXME: we should be able to set the size of the interworking stub
      section.
 
@@ -1776,7 +1773,7 @@ gld_${EMULATION_NAME}_before_allocation (void)
 
   /* We have seen it all. Allocate it, and carry on.  */
   bfd_arm_allocate_interworking_sections (& link_info);
-#endif /* TARGET_IS_armpe || TARGET_IS_arm_epoc_pe || TARGET_IS_arm_wince_pe */
+#endif /* TARGET_IS_armpe || TARGET_IS_arm_wince_pe */
 
   before_allocation_default ();
 }
@@ -1891,9 +1888,6 @@ gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUT
 #ifdef TARGET_IS_armpe
   pe_dll_id_target ("pei-arm-little");
 #endif
-#ifdef TARGET_IS_arm_epoc_pe
-  pe_dll_id_target ("epoc-pei-arm-little");
-#endif
 #ifdef TARGET_IS_arm_wince_pe
   pe_dll_id_target ("pei-arm-wince-little");
 #endif
@@ -1906,7 +1900,7 @@ gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUT
 static void
 gld_${EMULATION_NAME}_finish (void)
 {
-#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) || defined(TARGET_IS_arm_wince_pe)
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_wince_pe)
   struct bfd_link_hash_entry * h;
 
   if (thumb_entry_symbol != NULL)
@@ -1946,7 +1940,7 @@ gld_${EMULATION_NAME}_finish (void)
       else
 	einfo (_("%P: warning: cannot find thumb start symbol %s\n"), thumb_entry_symbol);
     }
-#endif /* defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) || defined(TARGET_IS_arm_wince_pe) */
+#endif /* defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_wince_pe) */
 
   finish_default ();
 

@@ -6,7 +6,6 @@
 #notarget: arm-*-coff
 #notarget: i[3-7]86-*-coff
 #xfail: alpha*-*-*ecoff
-#xfail: arm-epoc-pe
 #xfail: m32c-*-*
 #xfail: sh-*-pe
 #xfail: sparc*-*-coff
@@ -19,7 +18,6 @@
 # configurations are listed above.
 #
 # alpha-linuxecoff pads out code to 16 bytes.
-# arm-epoc-pe always pads out code to 512 bytes.
 # arm-coff always aligns code to 4 bytes.
 # i386-coff always aligns code to 4 bytes.
 # m32c pads out code sections with 4 NOPs (see `m32c_md_end').

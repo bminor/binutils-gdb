@@ -243,8 +243,7 @@ static const autofilter_entry_type autofilter_symbollist_i386[] =
 #define PE_ARCH_sh	 2
 #define PE_ARCH_mips	 3
 #define PE_ARCH_arm	 4
-#define PE_ARCH_arm_epoc 5
-#define PE_ARCH_arm_wince 6
+#define PE_ARCH_arm_wince 5
 
 /* Don't make it constant as underscore mode gets possibly overriden
    by target or -(no-)leading-underscore option.  */
@@ -305,15 +304,6 @@ static pe_details_type pe_detail_list[] =
     PE_ARCH_arm,
     bfd_arch_arm,
     TRUE,
-    autofilter_symbollist_generic
-  },
-  {
-    "epoc-pei-arm-little",
-    "epoc-pe-arm-little",
-    11 /* ARM_RVA32 */,
-    PE_ARCH_arm_epoc,
-    bfd_arch_arm,
-    FALSE,
     autofilter_symbollist_generic
   },
   {
@@ -2283,7 +2273,6 @@ make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
 	  jmp_byte_count = sizeof (jmp_mips_bytes);
 	  break;
 	case PE_ARCH_arm:
-	case PE_ARCH_arm_epoc:
 	case PE_ARCH_arm_wince:
 	  jmp_bytes = jmp_arm_bytes;
 	  jmp_byte_count = sizeof (jmp_arm_bytes);
@@ -2371,7 +2360,6 @@ make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
 	  quick_reloc (abfd, 4, BFD_RELOC_LO16, 2);
 	  break;
 	case PE_ARCH_arm:
-	case PE_ARCH_arm_epoc:
 	case PE_ARCH_arm_wince:
 	  quick_reloc (abfd, 8, BFD_RELOC_32, 2);
 	  break;

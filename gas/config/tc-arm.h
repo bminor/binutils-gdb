@@ -63,9 +63,7 @@ struct fix;
 #elif defined OBJ_COFF
 # define ARM_BI_ENDIAN
 # if defined TE_PE
-#  if defined TE_EPOC
-#   define TARGET_FORMAT (target_big_endian ? "epoc-pe-arm-big" : "epoc-pe-arm-little")
-#  elif defined TE_WINCE
+#  if defined TE_WINCE
 #   define TARGET_FORMAT (target_big_endian ? "pe-arm-wince-big" : "pe-arm-wince-little")
 #  else
 #   define TARGET_FORMAT (target_big_endian ? "pe-arm-big" : "pe-arm-little")

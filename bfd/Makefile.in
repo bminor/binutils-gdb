@@ -691,8 +691,6 @@ BFD32_BACKENDS = \
 	elflink.lo \
 	elfxx-sparc.lo \
 	elfxx-tilegx.lo \
-	epoc-pe-arm.lo \
-	epoc-pei-arm.lo \
 	i386aout.lo \
 	i386bsd.lo \
 	i386dynix.lo \
@@ -842,8 +840,6 @@ BFD32_BACKENDS_CFILES = \
 	elflink.c \
 	elfxx-sparc.c \
 	elfxx-tilegx.c \
-	epoc-pe-arm.c \
-	epoc-pei-arm.c \
 	i386aout.c \
 	i386bsd.c \
 	i386dynix.c \
@@ -1431,8 +1427,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-sparc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-tilegx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-x86.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/epoc-pe-arm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/epoc-pei-arm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/format.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hpux-core.Plo@am__quote@
