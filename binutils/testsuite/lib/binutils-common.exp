@@ -66,7 +66,6 @@ proc is_elf_format {} {
 	 && (   [istarget *-*-netbsd*aout*]
 	     || [istarget *-*-netbsdpe*]
 	     || [istarget arm*-*-netbsd*]
-	     || [istarget sparc-*-netbsd*]
 	     || [istarget i*86-*-netbsd*]
 	     || [istarget vax-*-netbsd*]
 	     || [istarget ns32k-*-netbsd*]) } {
@@ -77,8 +76,6 @@ proc is_elf_format {} {
 	 || [istarget i386-*-openbsd\[0-2\].*]
 	 || [istarget i386-*-openbsd3.\[0-2\]]
 	 || [istarget ns32k-*-openbsd*]
-	 || [istarget sparc-*-openbsd\[0-2\].*]
-	 || [istarget sparc-*-openbsd3.\[0-1\]]
 	 || [istarget vax-*-openbsd*] } {
 	return 0
     }
@@ -89,11 +86,6 @@ proc is_elf_format {} {
 # True if the object format is known to be a.out.
 #
 proc is_aout_format {} {
-    if { [istarget *-*-netbsdelf]
-	 || [istarget sparc64-*-netbsd*]
-	 || [istarget sparc64-*-openbsd*] } {
-	return 0
-    }
     if { [istarget *-*-*\[ab\]out*]
 	 || [istarget *-*-linux*oldld*]
 	 || [istarget *-*-bsd*]
@@ -109,11 +101,6 @@ proc is_aout_format {} {
 	 || [istarget i?86-*-mach*]
 	 || [istarget ns32k-*-*]
 	 || [istarget pdp11-*-*]
-	 || [istarget sparc*-*-sunos4*]
-	 || [istarget sparc*-*-netbsd*]
-	 || [istarget sparc*-*-openbsd\[0-2\]*]
-	 || [istarget sparc*-*-openbsd3.\[0-1\]*]
-	 || [istarget sparc*-fujitsu-none]
 	 || [istarget vax-dec-ultrix*]
 	 || [istarget vax-*-netbsd] } {
 	return 1

@@ -48,10 +48,6 @@
 #endif
 #endif
 
-#ifdef TC_SPARC
-#include "coff/sparc.h"
-#endif
-
 #ifdef TC_I386
 #ifdef TE_PEP
 #include "coff/x86_64.h"

@@ -1,5 +1,10 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/lib/binutils-common.exp: Remove sparc-aout and
+	sparc-coff support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/copy-2.d: Remove m68k-aout and m68k-coff
 	support.
 	* testsuite/binutils-all/copy-3.d: Likewise.

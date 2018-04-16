@@ -702,45 +702,27 @@ sh-*-nto*)		targ_emul=shelf_nto
 sh-*-pe)		targ_emul=shpe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 sh-*-*)			targ_emul=sh; targ_extra_emuls=shl ;;
-sparc64-*-aout*)	targ_emul=sparcaout ;;
-sparc64-*-elf* | sparc64-*-rtems*)
-			targ_emul=elf64_sparc ;;
-sparc-sun-sunos4*)	targ_emul=sun4 ;;
-sparclite*-*-elf)	targ_emul=elf32_sparc ;;
-sparclite*-*-coff)	targ_emul=coff_sparc ;;
-sparclite*-fujitsu-*)	targ_emul=sparcaout ;;
-sparc*-*-aout)		targ_emul=sparcaout ;;
-sparc*-*-coff)		targ_emul=coff_sparc ;;
-sparc*-*-elf | sparc-*-rtems*)
-			targ_emul=elf32_sparc ;;
-sparc*-*-sysv4*)	targ_emul=elf32_sparc ;;
-sparc*-*-vxworks*)	targ_emul=elf32_sparc_vxworks ;;
 sparc64-*-freebsd* | sparcv9-*-freebsd* | sparc64-*-kfreebsd*-gnu | sparcv9-*-kfreebsd*-gnu)
 			targ_emul=elf64_sparc_fbsd
 			targ_extra_emuls="elf64_sparc elf32_sparc"
 			targ_extra_libpath=$targ_extra_emuls
 			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/64//'`	;;
-sparc*-*-linux*aout*)	targ_emul=sparclinux
-			targ_extra_emuls="elf32_sparc sun4"
-			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/aout//'`
-			tdir_sun4=sparc-sun-sunos4 ;;
 sparc64-*-linux-*)	targ_emul=elf64_sparc
-			targ_extra_emuls="elf32_sparc sparclinux sun4"
+			targ_extra_emuls="elf32_sparc"
 			targ_extra_libpath=elf32_sparc
-			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/64//'`
-			tdir_sparclinux=${tdir_elf32_sparc}aout
-			tdir_sun4=sparc-sun-sunos4 ;;
-sparc*-*-linux-*)	targ_emul=elf32_sparc
-			targ_extra_emuls="sparclinux elf64_sparc sun4"
-			targ_extra_libpath=elf64_sparc
-			tdir_sparclinux=${targ_alias}aout
-			tdir_elf64_sparc=`echo ${targ_alias} | sed -e 's/32//'`
-			tdir_sun4=sparc-sun-sunos4 ;;
-sparc64-*-netbsd* | sparc64-*-openbsd*)
-			targ_emul=elf64_sparc
+			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/64//'` ;;
+sparc64-*-*bsd*)	targ_emul=elf64_sparc
 			targ_extra_emuls="elf32_sparc" ;;
-sparc*-*-netbsd*elf*)	targ_emul=elf32_sparc ;;
-sparc*-*-netbsd*)	targ_emul=sparcnbsd ;;
+sparc64-*-solaris2* | sparcv9-*-solaris2*)
+			targ_emul=elf64_sparc_sol2
+			targ_extra_emuls="elf64_sparc elf32_sparc_sol2 elf32_sparc"
+			targ_extra_libpath=$targ_extra_emuls
+			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/64//'` ;;
+sparc64-*-*)		targ_emul=elf64_sparc ;;
+sparc*-*-linux-*)	targ_emul=elf32_sparc
+			targ_extra_emuls="elf64_sparc"
+			targ_extra_libpath=elf64_sparc
+			tdir_elf64_sparc=`echo ${targ_alias} | sed -e 's/32//'` ;;
 sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
 			targ_emul=elf32_sparc_sol2
 			targ_extra_emuls=elf32_sparc ;;
@@ -748,13 +730,8 @@ sparc-*-solaris2*)	targ_emul=elf32_sparc_sol2
 			targ_extra_emuls="elf32_sparc elf64_sparc_sol2 elf64_sparc"
 			targ_extra_libpath=$targ_extra_emuls
 			tdir_elf64_sparc=`echo ${targ_alias} | sed -e 's/32//'`	;;
-sparcv9-*-solaris2* | sparc64-*-solaris2*)
-			targ_emul=elf64_sparc_sol2
-			targ_extra_emuls="elf64_sparc elf32_sparc_sol2 elf32_sparc"
-			targ_extra_libpath=$targ_extra_emuls
-			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/64//'` ;;
-sparc*-*-solaris2*)	targ_emul=elf32_sparc ;;
-sparc*-wrs-vxworks*)	targ_emul=sparcaout ;;
+sparc*-*-vxworks*)	targ_emul=elf32_sparc_vxworks ;;
+sparc*-*-*)		targ_emul=elf32_sparc ;;
 spu-*-elf*)		targ_emul=elf32_spu ;;
 tic30-*-*aout*)		targ_emul=tic30aout ;;
 tic30-*-*coff*)		targ_emul=tic30coff ;;

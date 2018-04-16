@@ -412,28 +412,9 @@ case ${generic_target} in
   sh-*-kaos*)				fmt=elf ;;
   shle*-*-kaos*)			fmt=elf ;;
 
-  sparc-*-sunos4*)			fmt=aout em=sun3 ;;
-  sparc-*-aout)				fmt=aout em=sparcaout ;;
-  sparc-*-coff)				fmt=coff ;;
-  sparc-*-linux*aout*)			fmt=aout em=linux ;;
   sparc-*-linux-*)			fmt=elf em=linux ;;
-  sparc-fujitsu-none)			fmt=aout ;;
-  sparc-*-elf)				fmt=elf ;;
-  sparc-*-sysv4*)			fmt=elf ;;
   sparc-*-solaris*)			fmt=elf em=solaris ;;
-  sparc-*-netbsdelf*)			fmt=elf em=nbsd ;;
-  sparc-*-netbsd*)
-    case ${cpu} in
-      sparc64)				fmt=elf em=nbsd ;;
-      *)				fmt=aout em=nbsd ;;
-    esac ;;
-  sparc-*-openbsd[0-2].* | \
-  sparc-*-openbsd3.[0-1])
-    case ${cpu} in
-      sparc64)				fmt=elf em=nbsd ;;
-      *)				fmt=aout em=nbsd ;;
-    esac ;;
-  sparc-*-openbsd*)			fmt=elf em=nbsd ;;
+  sparc-*-*bsd*)			fmt=elf em=nbsd ;;
 
   spu-*-elf)				fmt=elf ;;
 

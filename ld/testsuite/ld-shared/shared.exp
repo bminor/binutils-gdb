@@ -50,7 +50,6 @@ if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget powerpc*-*-sysv4*] \
      && ![istarget sparc*-*-elf] \
      && ![istarget sparc*-*-solaris2*] \
-     && ![istarget sparc*-*-sunos4*] \
      && ![istarget sparc*-*-linux*] \
      && ![istarget arm*-*-linux*] \
      && ![istarget alpha*-*-linux*] \
@@ -205,11 +204,7 @@ if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
 	 || [string match "*option ignored*" $exec_output] \
 	 || [string match "*unrecognized option*" $exec_output] \
 	 || [string match "*passed to ld*" $exec_output] } {
-	if [istarget *-*-sunos4*] {
-	    set picflag "-pic"
-	} else {
-	    set picflag "-KPIC"
-	}
+	set picflag "-KPIC"
     }
 }
 verbose "Using $picflag to compile PIC code"
@@ -234,7 +229,6 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
     } else {
 	# SunOS non PIC shared libraries don't permit some cases of
 	# overriding.
-	setup_xfail "*-*-sunos4*"
 	setup_xfail "ia64-*-linux*"
 	setup_xfail "alpha*-*-linux*"
 	setup_xfail "powerpc64*-*-*"
@@ -259,7 +253,6 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	# address for the library.  Near as I can tell, the R_*_RELATIVE
 	# relocations for various targets are broken in the case where
 	# the load address is not zero (which is the default).
-	setup_xfail "*-*-sunos4*"
 	setup_xfail "*-*-linux*libc1"
 	setup_xfail "powerpc*-*-linux*"
 	setup_xfail "ia64-*-linux*"
@@ -291,10 +284,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	 || ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
 	unresolved "shared"
     } else {
-	# SunOS can not compare function pointers correctly
-	if [istarget "*-*-sunos4*"] {
-	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o sun4
-	} else { if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
+	if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o xcoff
 	} else {
 	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o shared
@@ -303,7 +293,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	    shared_test shp "shared -Bsymbolic" mainnp.o sh1p.o sh2p.o symbolic "-Bsymbolic"
 	    ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
 	    ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
-	} }
+	}
     }
 }
 
@@ -318,7 +308,6 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/m
 	} else {
 	    # SunOS non PIC shared libraries don't permit some cases of
 	    # overriding.
-	    setup_xfail "*-*-sunos4*"
 	    setup_xfail "ia64-*-linux*"
 	    setup_xfail "alpha*-*-linux*"
 	    setup_xfail "powerpc64*-*-*"

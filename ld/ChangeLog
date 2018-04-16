@@ -1,5 +1,22 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove sparc-aout and sparc-coff support.
+	* configure.tgt: Likewise.
+	* testsuite/ld-elfvers/vers.exp: Likewise.
+	* testsuite/ld-elfvsb/elfvsb.exp: Likewise.
+	* testsuite/ld-elfweak/elfweak.exp: Likewise.
+	* testsuite/ld-shared/shared.exp: Likewise.
+	* emulparams/coff_sparc.sh: Delete.
+	* emulparams/sparcaout.sh: Delete.
+	* emulparams/sparclinux.sh: Delete.
+	* emulparams/sparcnbsd.sh: Delete.
+	* emulparams/sun4.sh: Delete.
+	* scripttempl/sparccoff.sc: Delete.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove m68k-aout and m68k-coff support.
 	* configure.tgt: Likewise.
 	* emultempl/m68kelf.em: Likewise.

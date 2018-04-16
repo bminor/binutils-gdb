@@ -629,13 +629,6 @@ do
     sh_elf32_vxworks_le_vec)	 tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo $coff" ;;
     sh_pe_le_vec)		 tb="$tb pe-sh.lo coff-sh.lo peigen.lo $coff" ;;
     sh_pei_le_vec)		 tb="$tb pei-sh.lo coff-sh.lo peigen.lo $coff" ;;
-    sparc_aout_le_vec)		 tb="$tb aout-sparcle.lo aout32.lo" ;;
-    sparc_aout_linux_vec)	 tb="$tb sparclinux.lo aout32.lo" ;;
-    sparc_aout_lynx_vec)	 tb="$tb sparclynx.lo lynx-core.lo aout32.lo" ;;
-    sparc_aout_nbsd_vec)	 tb="$tb sparcnetbsd.lo aout32.lo" ;;
-    sparc_aout_sunos_be_vec)	 tb="$tb sunos.lo aout32.lo" ;;
-    sparc_coff_vec)		 tb="$tb coff-sparc.lo $coffgen" ;;
-    sparc_coff_lynx_vec)	 tb="$tb cf-sparclynx.lo lynx-core.lo $coffgen" ;;
     sparc_elf32_vec)		 tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
     sparc_elf32_sol2_vec)	 tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
     sparc_elf32_vxworks_vec)	 tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;

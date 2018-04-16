@@ -84,14 +84,6 @@ case $targ in
  mips*-*-lnews* | \
  mips*-*-sysv* | mips*-*-riscos* | \
  powerpc-*-lynxos* | powerpc-*-windiss* | \
- sparclet-*-aout* | \
- sparc86x-*-aout* | \
- sparc*-*-chorus* | \
- sparc-*-linux*aout* | \
- sparc-*-netbsdaout* | \
- sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1] | \
- sparc64-*-aout* | \
- sparc*-*-coff* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -144,7 +136,11 @@ case $targ in
  maxq-*-coff | \
  mips*el-*-rtems* | \
  sh*-*-symbianelf* | sh5*-*-* | sh64*-*-* | \
+ sparc*-*-*aout* | \
+ sparc*-*-chorus* | \
+ sparc*-*-coff* | \
  sparc-*-lynxos* | \
+ sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1] | \
  tahoe-*-* | \
  vax-*-bsd* | vax-*-ultrix* | vax-*-vms* | \
  w65-*-* | \
@@ -327,15 +323,6 @@ case "${targ}" in
   ia64*-*-*vms*)
     targ_defvec=ia64_elf64_vms_vec
     targ_selvecs=alpha_vms_lib_txt_vec
-    want64=true
-    ;;
-  sparc64-*-freebsd* | sparc64-*-kfreebsd*-gnu)
-    targ_defvec=sparc_elf64_fbsd_vec
-    targ_selvecs="sparc_elf64_vec sparc_elf32_vec sparc_aout_sunos_be_vec"
-    ;;
-  sparc64-*-netbsd* | sparc64-*-openbsd*)
-    targ_defvec=sparc_elf64_vec
-    targ_selvecs="sparc_elf32_vec sparc_aout_sunos_be_vec"
     want64=true
     ;;
 #endif /* BFD64 */
@@ -1407,96 +1394,35 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  sparclet-*-aout*)
-    targ_defvec=sparc_aout_sunos_be_vec
-    targ_selvecs=sparc_aout_le_vec
-    targ_underscore=yes
-    ;;
-  sparc86x-*-aout*)
-    targ_defvec=sparc_aout_sunos_be_vec
-    targ_underscore=yes
-    ;;
-  sparclite-*-elf* | sparc86x-*-elf*)
-    targ_defvec=sparc_elf32_vec
-    ;;
-  sparc*-*-chorus*)
-    targ_defvec=sparc_elf32_vec
-    ;;
-  sparc-*-linux*aout*)
-    targ_defvec=sparc_aout_linux_vec
-    targ_selvecs="sparc_elf32_vec sparc_aout_sunos_be_vec"
-    targ_underscore=yes
-    ;;
-  sparc-*-linux-* | sparcv*-*-linux-*)
-    targ_defvec=sparc_elf32_vec
-    targ_selvecs="sparc_aout_linux_vec sparc_elf64_vec sparc_aout_sunos_be_vec"
-    ;;
-  sparc-*-netbsdelf*)
-    targ_defvec=sparc_elf32_vec
-    targ_selvecs=sparc_aout_nbsd_vec
-    ;;
-  sparc-*-netbsdaout* | sparc-*-netbsd*)
-    targ_defvec=sparc_aout_nbsd_vec
-    targ_selvecs=sparc_elf32_vec
-    targ_underscore=yes
-    ;;
-  sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1])
-    targ_defvec=sparc_aout_nbsd_vec
-    targ_underscore=yes
-    ;;
-  sparc-*-openbsd*)
-    targ_defvec=sparc_elf32_vec
-    targ_selvecs=sparc_aout_nbsd_vec
-    ;;
-  sparc-*-elf*)
-    targ_defvec=sparc_elf32_vec
-    targ_selvecs=sparc_aout_sunos_be_vec
-    ;;
   sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
     targ_defvec=sparc_elf32_sol2_vec
-    targ_selvecs=sparc_aout_sunos_be_vec
     ;;
 #ifdef BFD64
   sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
     targ_defvec=sparc_elf32_sol2_vec
-    targ_selvecs="sparc_elf64_sol2_vec sparc_aout_sunos_be_vec"
+    targ_selvecs="sparc_elf64_sol2_vec"
+    want64=true
+    ;;
+  sparc64-*-freebsd* | sparc64-*-kfreebsd*-gnu)
+    targ_defvec=sparc_elf64_fbsd_vec
+    targ_selvecs="sparc_elf64_vec sparc_elf32_vec"
+    ;;
+  sparc64*-*-*)
+    targ_defvec=sparc_elf64_vec
+    targ_selvecs="sparc_elf32_vec"
     want64=true
     ;;
 #endif
-  sparc-*-sysv4*)
+  sparc-*-linux-* | sparcv*-*-linux-*)
     targ_defvec=sparc_elf32_vec
+    targ_selvecs="sparc_elf64_vec"
     ;;
   sparc-*-vxworks*)
     targ_defvec=sparc_elf32_vxworks_vec
-    targ_selvecs="sparc_elf32_vec sparc_aout_sunos_be_vec"
-    ;;
-#ifdef BFD64
-  sparc64-*-aout*)
-    targ_defvec=sparc_aout_sunos_be_vec
-    targ_underscore=yes
-    want64=true
-    ;;
-  sparc64*-*-linux-*)
-    targ_defvec=sparc_elf64_vec
-    targ_selvecs="sparc_elf32_vec sparc_aout_linux_vec sparc_aout_sunos_be_vec"
-    want64=true
-    ;;
-  sparc64-*-elf* | sparc64-*-rtems* )
-    targ_defvec=sparc_elf64_vec
-    targ_selvecs=sparc_elf32_vec
-    want64=true
-    ;;
-#endif /* BFD64 */
-  sparc*-*-coff*)
-    targ_defvec=sparc_coff_vec
-    ;;
-  sparc-*-rtems*)
-    targ_defvec=sparc_elf32_vec
-    targ_selvecs="sparc_aout_sunos_be_vec sparc_coff_vec"
+    targ_selvecs="sparc_elf32_vec"
     ;;
   sparc*-*-*)
-    targ_defvec=sparc_aout_sunos_be_vec
-    targ_underscore=yes
+    targ_defvec=sparc_elf32_vec
     ;;
 
   spu-*-elf)

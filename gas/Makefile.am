@@ -327,7 +327,6 @@ TARG_ENV_HFILES = \
 	config/te-pe.h \
 	config/te-riscix.h \
 	config/te-solaris.h \
-	config/te-sparcaout.h \
 	config/te-svr4.h \
 	config/te-symbian.h \
 	config/te-tmips.h \

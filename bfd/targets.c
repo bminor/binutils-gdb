@@ -594,7 +594,6 @@ extern const bfd_target alpha_elf64_fbsd_vec;
 extern const bfd_target alpha_vms_vec;
 extern const bfd_target alpha_vms_lib_txt_vec;
 extern const bfd_target am33_elf32_linux_vec;
-extern const bfd_target aout64_vec;
 extern const bfd_target aout_vec;
 extern const bfd_target arc_elf32_be_vec;
 extern const bfd_target arc_elf32_le_vec;
@@ -807,13 +806,6 @@ extern const bfd_target sh_elf32_vxworks_vec;
 extern const bfd_target sh_elf32_vxworks_le_vec;
 extern const bfd_target sh_pe_le_vec;
 extern const bfd_target sh_pei_le_vec;
-extern const bfd_target sparc_aout_le_vec;
-extern const bfd_target sparc_aout_linux_vec;
-extern const bfd_target sparc_aout_lynx_vec;
-extern const bfd_target sparc_aout_nbsd_vec;
-extern const bfd_target sparc_aout_sunos_be_vec;
-extern const bfd_target sparc_coff_vec;
-extern const bfd_target sparc_coff_lynx_vec;
 extern const bfd_target sparc_elf32_vec;
 extern const bfd_target sparc_elf32_sol2_vec;
 extern const bfd_target sparc_elf32_vxworks_vec;
@@ -938,9 +930,6 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&am33_elf32_linux_vec,
 
-#ifdef BFD64
-	&aout64_vec,	/* Only compiled if host has long-long support.  */
-#endif
 #if 0
 	/* Since a.out files lack decent magic numbers, no way to recognize
 	   which kind of a.out file it is.  */
@@ -1256,13 +1245,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&sh_pe_le_vec,
 	&sh_pei_le_vec,
 
-	&sparc_aout_le_vec,
-	&sparc_aout_linux_vec,
-	&sparc_aout_lynx_vec,
-	&sparc_aout_nbsd_vec,
-	&sparc_aout_sunos_be_vec,
-	&sparc_coff_vec,
-	&sparc_coff_lynx_vec,
 	&sparc_elf32_vec,
 	&sparc_elf32_sol2_vec,
 	&sparc_elf32_vxworks_vec,

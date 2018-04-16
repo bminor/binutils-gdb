@@ -260,19 +260,16 @@ BFD32_BACKENDS = \
 	aout-arm.lo \
 	aout-cris.lo \
 	aout-ns32k.lo \
-	aout-sparcle.lo \
 	aout-tic30.lo \
 	aout32.lo \
 	armnetbsd.lo \
 	cf-i386lynx.lo \
-	cf-sparclynx.lo \
 	coff-arm.lo \
 	coff-go32.lo \
 	coff-i386.lo \
 	coff-mips.lo \
 	coff-rs6000.lo \
 	coff-sh.lo \
-	coff-sparc.lo \
 	coff-stgo32.lo \
 	coff-tic30.lo \
 	coff-tic4x.lo \
@@ -400,10 +397,6 @@ BFD32_BACKENDS = \
 	reloc16.lo \
 	riscix.lo \
 	som.lo \
-	sparclinux.lo \
-	sparclynx.lo \
-	sparcnetbsd.lo \
-	sunos.lo \
 	vax1knetbsd.lo \
 	vaxnetbsd.lo \
 	vms-lib.lo \
@@ -418,19 +411,16 @@ BFD32_BACKENDS_CFILES = \
 	aout-arm.c \
 	aout-cris.c \
 	aout-ns32k.c \
-	aout-sparcle.c \
 	aout-tic30.c \
 	aout32.c \
 	armnetbsd.c \
 	cf-i386lynx.c \
-	cf-sparclynx.c \
 	coff-arm.c \
 	coff-go32.c \
 	coff-i386.c \
 	coff-mips.c \
 	coff-rs6000.c \
 	coff-sh.c \
-	coff-sparc.c \
 	coff-stgo32.c \
 	coff-tic30.c \
 	coff-tic4x.c \
@@ -557,10 +547,6 @@ BFD32_BACKENDS_CFILES = \
 	reloc16.c \
 	riscix.c \
 	som.c \
-	sparclinux.c \
-	sparclynx.c \
-	sparcnetbsd.c \
-	sunos.c \
 	vax1knetbsd.c \
 	vaxnetbsd.c \
 	vms-lib.c \
@@ -585,7 +571,6 @@ BFD64_BACKENDS = \
 	coff-alpha.lo \
 	coff-x86_64.lo \
 	coff64-rs6000.lo \
-	demo64.lo \
 	elf32-ia64.lo \
 	elf32-mips.lo \
 	elf32-score.lo \
@@ -626,7 +611,6 @@ BFD64_BACKENDS_CFILES = \
 	coff-alpha.c \
 	coff-x86_64.c \
 	coff64-rs6000.c \
-	demo64.c \
 	elf32-mips.c \
 	elf32-score.c \
 	elf32-score7.c \
@@ -717,7 +701,7 @@ CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 
 ## This is a list of all .h files which are in the source tree.
 SOURCE_HFILES = \
-	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
+	aout-target.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
 	elf-bfd.h elf-hppa.h elf-linux-core.h elf32-hppa.h \
 	elf64-hppa.h elfcode.h elfcore.h \
 	freebsd.h genlink.h go32stub.h \

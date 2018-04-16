@@ -1,5 +1,19 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove sparc-aout and sparc-coff support.
+	* config/obj-coff.h: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-sparc.h: Likewise.
+	* configure.tgt: Likewise.
+	* config/te-sparcaout.h: Delete.
+	* testsuite/gas/sun4/addend.d: Delete.
+	* testsuite/gas/sun4/addend.exp: Delete.
+	* testsuite/gas/sun4/addend.s: Delete.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove m68k-aout and m68k-coff support.
 	* config/tc-m68k.c: Likewise.
 	* config/tc-m68k.h: Likewise.

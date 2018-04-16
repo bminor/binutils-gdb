@@ -594,19 +594,16 @@ BFD32_BACKENDS = \
 	aout-arm.lo \
 	aout-cris.lo \
 	aout-ns32k.lo \
-	aout-sparcle.lo \
 	aout-tic30.lo \
 	aout32.lo \
 	armnetbsd.lo \
 	cf-i386lynx.lo \
-	cf-sparclynx.lo \
 	coff-arm.lo \
 	coff-go32.lo \
 	coff-i386.lo \
 	coff-mips.lo \
 	coff-rs6000.lo \
 	coff-sh.lo \
-	coff-sparc.lo \
 	coff-stgo32.lo \
 	coff-tic30.lo \
 	coff-tic4x.lo \
@@ -734,10 +731,6 @@ BFD32_BACKENDS = \
 	reloc16.lo \
 	riscix.lo \
 	som.lo \
-	sparclinux.lo \
-	sparclynx.lo \
-	sparcnetbsd.lo \
-	sunos.lo \
 	vax1knetbsd.lo \
 	vaxnetbsd.lo \
 	vms-lib.lo \
@@ -752,19 +745,16 @@ BFD32_BACKENDS_CFILES = \
 	aout-arm.c \
 	aout-cris.c \
 	aout-ns32k.c \
-	aout-sparcle.c \
 	aout-tic30.c \
 	aout32.c \
 	armnetbsd.c \
 	cf-i386lynx.c \
-	cf-sparclynx.c \
 	coff-arm.c \
 	coff-go32.c \
 	coff-i386.c \
 	coff-mips.c \
 	coff-rs6000.c \
 	coff-sh.c \
-	coff-sparc.c \
 	coff-stgo32.c \
 	coff-tic30.c \
 	coff-tic4x.c \
@@ -891,10 +881,6 @@ BFD32_BACKENDS_CFILES = \
 	reloc16.c \
 	riscix.c \
 	som.c \
-	sparclinux.c \
-	sparclynx.c \
-	sparcnetbsd.c \
-	sunos.c \
 	vax1knetbsd.c \
 	vaxnetbsd.c \
 	vms-lib.c \
@@ -920,7 +906,6 @@ BFD64_BACKENDS = \
 	coff-alpha.lo \
 	coff-x86_64.lo \
 	coff64-rs6000.lo \
-	demo64.lo \
 	elf32-ia64.lo \
 	elf32-mips.lo \
 	elf32-score.lo \
@@ -961,7 +946,6 @@ BFD64_BACKENDS_CFILES = \
 	coff-alpha.c \
 	coff-x86_64.c \
 	coff64-rs6000.c \
-	demo64.c \
 	elf32-mips.c \
 	elf32-score.c \
 	elf32-score7.c \
@@ -1052,7 +1036,7 @@ BUILD_CFILES = \
 
 CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 SOURCE_HFILES = \
-	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
+	aout-target.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
 	elf-bfd.h elf-hppa.h elf-linux-core.h elf32-hppa.h \
 	elf64-hppa.h elfcode.h elfcore.h \
 	freebsd.h genlink.h go32stub.h \
@@ -1227,7 +1211,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-arm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-cris.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-ns32k.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-sparcle.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-tic30.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout32.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout64.Plo@am__quote@
@@ -1241,7 +1224,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cf-i386lynx.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cf-sparclynx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cisco-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-alpha.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-arm.Plo@am__quote@
@@ -1251,7 +1233,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-mips.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-rs6000.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-sh.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-sparc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-stgo32.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-tic30.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coff-tic4x.Plo@am__quote@
@@ -1346,7 +1327,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-xtensa.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-z80.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-z8k.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/demo64.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwarf1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwarf2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecoff.Plo@am__quote@
@@ -1517,13 +1497,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/section.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/som.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparclinux.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparclynx.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparcnetbsd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/srec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stab-syms.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stabs.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sunos.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/syms.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/targets.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tekhex.Plo@am__quote@

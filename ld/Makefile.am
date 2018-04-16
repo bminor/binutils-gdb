@@ -209,7 +209,6 @@ ALL_EMULATION_SOURCES = \
 	eavrxmega6.c \
 	eavrxmega7.c \
 	eavrtiny.c   \
-	ecoff_sparc.c \
 	ecrisaout.c \
 	ecriself.c \
 	ecrislinux.c \
@@ -372,10 +371,6 @@ ALL_EMULATION_SOURCES = \
 	eshlelf_nto.c \
 	eshlelf_vxworks.c \
 	eshpe.c \
-	esparcaout.c \
-	esparclinux.c \
-	esparcnbsd.c \
-	esun4.c \
 	etic30aout.c \
 	etic30coff.c \
 	etic3xcoff.c \
@@ -878,9 +873,6 @@ eavrxmega7.c: $(srcdir)/emulparams/avrxmega7.sh \
 eavrtiny.c: $(srcdir)/emulparams/avrtiny.sh \
   $(srcdir)/emultempl/avrelf.em $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
-
-ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
 
 ecrisaout.c: $(srcdir)/emulparams/crisaout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/crisaout.sc ${GEN_DEPENDS}
@@ -1651,18 +1643,6 @@ eshlelf_vxworks.c: $(srcdir)/emulparams/shlelf_vxworks.sh \
 
 eshpe.c: $(srcdir)/emulparams/shpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
-
-esparcaout.c: $(srcdir)/emulparams/sparcaout.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-esparclinux.c: $(srcdir)/emulparams/sparclinux.sh \
-  $(srcdir)/emultempl/linux.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-esparcnbsd.c:	$(srcdir)/emulparams/sparcnbsd.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-
-esun4.c: $(srcdir)/emulparams/sun4.sh \
-  $(srcdir)/emultempl/sunos.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 
 etic30aout.c: $(srcdir)/emulparams/tic30aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic30aout.sc ${GEN_DEPENDS}
