@@ -104,7 +104,6 @@ case $targ in
  sparc64-*-aout* | \
  sparc*-*-coff* | \
  vax-*-bsd* | vax-*-ultrix* | \
- we32k-*-* | \
  w65-*-* | \
  sh5*-*-* | sh64*-*-* | \
  null)
@@ -144,6 +143,7 @@ case $targ in
  sparc-*-lynxos* | \
  tahoe-*-* | \
  vax-*-vms* | \
+ we32k-*-* | \
  null)
     echo "*** Configuration $targ is obsolete." >&2
     echo "*** Support has been REMOVED." >&2
@@ -1721,10 +1721,6 @@ case "${targ}" in
   wasm32-*-*)
     targ_defvec=wasm32_elf32_vec
     targ_selvecs="wasm_vec"
-    ;;
-
-  we32k-*-*)
-    targ_defvec=we32k_coff_vec
     ;;
 
   w65-*-*)

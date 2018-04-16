@@ -217,7 +217,6 @@ DESCRIPTION
 .#define bfd_mach_iamcu			(1 << 8)
 .#define bfd_mach_i386_iamcu		(bfd_mach_i386_i386 | bfd_mach_iamcu)
 .#define bfd_mach_i386_iamcu_intel_syntax (bfd_mach_i386_iamcu | bfd_mach_i386_intel_syntax)
-.  bfd_arch_we32k,     {* AT&T WE32xxx.  *}
 .  bfd_arch_romp,      {* IBM ROMP PC/RT.  *}
 .  bfd_arch_convex,    {* Convex.  *}
 .  bfd_arch_m98k,      {* Motorola 98xxx.  *}
@@ -635,7 +634,6 @@ extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_visium_arch;
 extern const bfd_arch_info_type bfd_wasm32_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
-extern const bfd_arch_info_type bfd_we32k_arch;
 extern const bfd_arch_info_type bfd_xstormy16_arch;
 extern const bfd_arch_info_type bfd_xtensa_arch;
 extern const bfd_arch_info_type bfd_xc16x_arch;
@@ -722,7 +720,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_visium_arch,
     &bfd_w65_arch,
     &bfd_wasm32_arch,
-    &bfd_we32k_arch,
     &bfd_xstormy16_arch,
     &bfd_xtensa_arch,
     &bfd_xc16x_arch,
@@ -1206,10 +1203,6 @@ bfd_default_scan (const bfd_arch_info_type *info, const char *string)
     case 5282:
       arch = bfd_arch_m68k;
       number = bfd_mach_mcf_isa_aplus_emac;
-      break;
-
-    case 32000:
-      arch = bfd_arch_we32k;
       break;
 
     case 3000:

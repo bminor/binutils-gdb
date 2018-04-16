@@ -2271,12 +2271,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
       break;
 #endif
 
-#ifdef WE32KMAGIC
-    case WE32KMAGIC:
-      arch = bfd_arch_we32k;
-      break;
-#endif
-
 #ifdef SH_ARCH_MAGIC_BIG
     case SH_ARCH_MAGIC_BIG:
     case SH_ARCH_MAGIC_LITTLE:
@@ -2849,12 +2843,6 @@ coff_set_flags (bfd * abfd,
       /* Just overwrite the usual value if we're doing Lynx.  */
       *magicp = LYNXCOFFMAGIC;
 #endif
-      return TRUE;
-#endif
-
-#ifdef WE32KMAGIC
-    case bfd_arch_we32k:
-      *magicp = WE32KMAGIC;
       return TRUE;
 #endif
 
@@ -3899,7 +3887,7 @@ coff_write_object_contents (bfd * abfd)
     internal_a.magic = APOLLO_COFF_VERSION_NUMBER;
 #endif
 
-#if defined(M68) || defined(WE32K) || defined(M68K)
+#if defined(M68) || defined(M68K)
 #define __A_MAGIC_SET__
 #if defined(LYNXOS)
     internal_a.magic = LYNXCOFFMAGIC;
@@ -3914,7 +3902,7 @@ coff_write_object_contents (bfd * abfd)
 #endif
 #endif /* TARG_AUX */
 #endif /* LYNXOS */
-#endif /* M68 || WE32K || M68K */
+#endif /* M68 || M68K */
 
 #if defined(ARM)
 #define __A_MAGIC_SET__

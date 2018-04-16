@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/binutils-all/objdump.exp: Remove we32k support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* MAINTAINERS (Mark Kettenis): Move to past maintainers.
 	* testsuite/binutils-all/objdump.exp: Remove m88k support.
 

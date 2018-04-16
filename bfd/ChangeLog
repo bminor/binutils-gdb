@@ -1,5 +1,20 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove we32k support.
+	* archures.c: Likewise.
+	* coffcode.h: Likewise.
+	* config.bfd: Likewise.
+	* configure.ac: Likewise.
+	* targets.c: Likewise.
+	* coff-we32k.c: Delete.
+	* cpu-we32k.c: Delete.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove m88k support.
 	* aoutx.h: Likewise.
 	* archures.c: Likewise.

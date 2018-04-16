@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* coff/we32k.h: Delete.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* coff/internal.h: Remove m88k support.
 	* coff/m88k.h: Delete.
 	* opcode/m88k.h: Delete.

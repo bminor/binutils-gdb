@@ -165,7 +165,6 @@ ALL_MACHINES = \
 	cpu-visium.lo \
 	cpu-w65.lo \
 	cpu-wasm32.lo \
-	cpu-we32k.lo \
 	cpu-xc16x.lo \
 	cpu-xgate.lo \
 	cpu-xstormy16.lo \
@@ -250,7 +249,6 @@ ALL_MACHINES_CFILES = \
 	cpu-visium.c \
 	cpu-wasm32.c \
 	cpu-w65.c \
-	cpu-we32k.c \
 	cpu-xc16x.c \
 	cpu-xgate.c \
 	cpu-xstormy16.c \
@@ -289,7 +287,6 @@ BFD32_BACKENDS = \
 	coff-tic80.lo \
 	coff-u68k.lo \
 	coff-w65.lo \
-	coff-we32k.lo \
 	coff-z80.lo \
 	coff-z8k.lo \
 	coffgen.lo \
@@ -466,7 +463,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-tic80.c \
 	coff-u68k.c \
 	coff-w65.c \
-	coff-we32k.c \
 	coff-z80.c \
 	coff-z8k.c \
 	coffgen.c \

@@ -43,7 +43,6 @@ coff-tic54x.c
 coff-tic80.c
 coff-u68k.c
 coff-w65.c
-coff-we32k.c
 coff-x86_64.c
 coff-z80.c
 coff-z8k.c
@@ -130,7 +129,6 @@ cpu-vax.c
 cpu-visium.c
 cpu-w65.c
 cpu-wasm32.c
-cpu-we32k.c
 cpu-xc16x.c
 cpu-xgate.c
 cpu-xstormy16.c

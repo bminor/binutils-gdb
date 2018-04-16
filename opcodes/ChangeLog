@@ -1,5 +1,10 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* configure.ac: Remove we32k support.
+	* configure: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove m88k support.
 	* configure.ac: Likewise.
 	* disassemble.c: Likewise.
