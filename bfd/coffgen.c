@@ -835,7 +835,7 @@ coff_mangle_symbols (bfd *bfd_ptr)
 	  for (i = 0; i < s->u.syment.n_numaux; i++)
 	    {
 	      combined_entry_type *a = s + i + 1;
-
+	      
 	      BFD_ASSERT (! a->is_sym);
 	      if (a->fix_tag)
 		{
@@ -1547,7 +1547,9 @@ coff_pointerize_aux (bfd *abfd,
 
   if ((ISFCN (type) || ISTAG (n_sclass) || n_sclass == C_BLOCK
        || n_sclass == C_FCN)
-      && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l > 0)
+      && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l > 0
+      && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l
+      < (long) obj_raw_syment_count (abfd))
     {
       auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p =
 	table_base + auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l;
