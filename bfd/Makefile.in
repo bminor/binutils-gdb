@@ -744,7 +744,6 @@ BFD32_BACKENDS = \
 	mach-o-i386.lo \
 	mach-o-arm.lo \
 	mipsbsd.lo \
-	newsos3.lo \
 	ns32knetbsd.lo \
 	oasys.lo \
 	pc532-mach.lo \
@@ -930,7 +929,6 @@ BFD32_BACKENDS_CFILES = \
 	mach-o-i386.c \
 	mach-o-arm.c \
 	mipsbsd.c \
-	newsos3.c \
 	ns32knetbsd.c \
 	oasys.c \
 	pc532-mach.c \
@@ -1579,7 +1577,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mipsbsd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netbsd-core.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/newsos3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ns32knetbsd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/oasys.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/opncls.Plo@am__quote@

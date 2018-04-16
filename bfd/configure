@@ -14454,7 +14454,6 @@ do
     m68k_aout_hp300hpux_vec)	 tb="$tb hp300hpux.lo aout32.lo" ;;
     m68k_aout_linux_vec)	 tb="$tb m68klinux.lo aout32.lo" ;;
     m68k_aout_nbsd_vec)		 tb="$tb m68knetbsd.lo aout32.lo" ;;
-    m68k_aout_newsos3_vec)	 tb="$tb newsos3.lo aout32.lo" ;;
     m68k_coff_vec)		 tb="$tb coff-m68k.lo $coff" ;;
     m68k_coff_apollo_vec)	 tb="$tb coff-apollo.lo $coffgen" ;;
     m68k_coff_aux_vec)		 tb="$tb coff-aux.lo coff-m68k.lo $coff" ;;
@@ -14892,10 +14891,6 @@ if test "${target}" = "${host}"; then
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/riscos.h"'
 	;;
-  mips-sony-bsd*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/news-mips.h"'
-	;;
   m68*-bull*-sysv*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/dpx2.h"'
@@ -14912,10 +14907,6 @@ if test "${target}" = "${host}"; then
   m68*-motorola-sysv*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/delta68.h"'
-	;;
-  m68*-sony-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/news.h"'
 	;;
   m68*-*-netbsd* | m68*-*-openbsd*)
 	COREFILE=netbsd-core.lo

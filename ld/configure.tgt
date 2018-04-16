@@ -436,7 +436,6 @@ m68*-sun-sunos[34]*)	targ_emul=sun3 ;;
 m68*-wrs-vxworks*)	targ_emul=sun3 ;;
 m68*-ericsson-ose)	targ_emul=sun3 ;;
 m68*-apple-aux*)	targ_emul=m68kaux ;;
-m68k-sony-*)		targ_emul=news ;;
 m68k-hp-bsd*)		targ_emul=hp300bsd ;;
 m68*-motorola-sysv*)	targ_emul=delta68 ;;
 m68*-*-aout)		targ_emul=m68kaout ;;

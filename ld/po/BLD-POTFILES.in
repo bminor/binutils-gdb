@@ -284,7 +284,6 @@ ends32belf_linux.c
 ends32elf.c
 ends32elf16m.c
 ends32elf_linux.c
-enews.c
 enios2elf.c
 enios2linux.c
 ens32knbsd.c

@@ -39,8 +39,7 @@ DESCRIPTION
 
 	This information is further split out into more specific files
 	for each machine, including @file{sunos.c} for sun3 and sun4,
-	@file{newsos3.c} for the Sony NEWS, and @file{demo64.c} for a
-	demonstration of a 64 bit a.out format.
+	and @file{demo64.c} for a demonstration of a 64 bit a.out format.
 
 	The base file @file{aoutx.h} defines general mechanisms for
 	reading and writing records to and from disk and various

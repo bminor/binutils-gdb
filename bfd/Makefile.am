@@ -410,7 +410,6 @@ BFD32_BACKENDS = \
 	mach-o-i386.lo \
 	mach-o-arm.lo \
 	mipsbsd.lo \
-	newsos3.lo \
 	ns32knetbsd.lo \
 	oasys.lo \
 	pc532-mach.lo \
@@ -596,7 +595,6 @@ BFD32_BACKENDS_CFILES = \
 	mach-o-i386.c \
 	mach-o-arm.c \
 	mipsbsd.c \
-	newsos3.c \
 	ns32knetbsd.c \
 	oasys.c \
 	pc532-mach.c \

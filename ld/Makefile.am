@@ -366,7 +366,6 @@ ALL_EMULATION_SOURCES = \
 	ends32belf.c \
 	ends32belf16m.c \
 	ends32belf_linux.c \
-	enews.c \
 	ens32knbsd.c \
 	enios2elf.c \
 	enios2linux.c \
@@ -1609,9 +1608,6 @@ ends32elf_linux.c: $(srcdir)/emulparams/nds32elf_linux.sh \
 ends32belf_linux.c: $(srcdir)/emulparams/nds32belf_linux.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \
   $(srcdir)/scripttempl/nds32elf.sc ${GEN_DEPENDS}
-
-enews.c: $(srcdir)/emulparams/news.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 
 enios2elf.c: $(srcdir)/emulparams/nios2elf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/nios2elf.em \

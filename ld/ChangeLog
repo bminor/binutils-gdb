@@ -1,5 +1,13 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove newsos3 support.
+	* configure.tgt: Likewise.
+	* emulparams/news.sh: Delete.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove netware support.
 	* configure.tgt: Likewise.
 	* testsuite/ld-powerpc/powerpc.exp: Likewise.

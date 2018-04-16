@@ -110,7 +110,6 @@ case $targ in
  we32k-*-* | \
  w65-*-* | \
  *-*-ieee* | \
- *-sony-* | \
  *-tandem-* | \
  i370-* | \
  sh5*-*-* | sh64*-*-* | \
@@ -127,6 +126,7 @@ esac
 case $targ in
  *-adobe-* | \
  *-go32-rtems* | \
+ *-sony-* | \
  *-*-netware* | \
  *-*-rtemsaout* | \
  *-*-rtemscoff* | \
@@ -1795,11 +1795,6 @@ case "${targ}" in
 
   *-*-ieee*)
     targ_defvec=ieee_vec
-    ;;
-
-  *-sony-*)
-    targ_defvec=m68k_aout_newsos3_vec
-    targ_underscore=yes
     ;;
 
   *-tandem-*)

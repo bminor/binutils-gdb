@@ -309,7 +309,6 @@ mipsbsd.c
 mmo.c
 netbsd-core.c
 netbsd.h
-newsos3.c
 ns32k.h
 ns32knetbsd.c
 oasys.c

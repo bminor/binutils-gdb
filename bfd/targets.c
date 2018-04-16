@@ -710,7 +710,6 @@ extern const bfd_target m68k_aout_hp300bsd_vec;
 extern const bfd_target m68k_aout_hp300hpux_vec;
 extern const bfd_target m68k_aout_linux_vec;
 extern const bfd_target m68k_aout_nbsd_vec;
-extern const bfd_target m68k_aout_newsos3_vec;
 extern const bfd_target m68k_coff_vec;
 extern const bfd_target m68k_coff_apollo_vec;
 extern const bfd_target m68k_coff_aux_vec;
@@ -1158,7 +1157,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&m68k_aout_linux_vec,
 #endif
 	&m68k_aout_nbsd_vec,
-	&m68k_aout_newsos3_vec,
 	&m68k_coff_vec,
 #if 0
 	&m68k_coff_apollo_vec,

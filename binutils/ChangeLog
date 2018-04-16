@@ -1,5 +1,10 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/binutils-all/copy-2.d: Remove newsos3 support.
+	* testsuite/binutils-all/nm.exp: Likewise.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* .gitignore: Remove netware support.
 	* Makefile.am: Likewise.
 	* configure.ac: Likewise.

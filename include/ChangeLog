@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* aout/host.h: Remove newsos3 support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* nlm/ChangeLog-9315: Delete.
 	* nlm/alpha-ext.h: Delete.
 	* nlm/common.h: Delete.
