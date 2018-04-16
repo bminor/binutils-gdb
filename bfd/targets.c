@@ -805,18 +805,6 @@ extern const bfd_target s390_elf32_vec;
 extern const bfd_target s390_elf64_vec;
 extern const bfd_target score_elf32_be_vec;
 extern const bfd_target score_elf32_le_vec;
-extern const bfd_target sh64_elf32_vec;
-extern const bfd_target sh64_elf32_le_vec;
-extern const bfd_target sh64_elf32_linux_vec;
-extern const bfd_target sh64_elf32_linux_be_vec;
-extern const bfd_target sh64_elf32_nbsd_vec;
-extern const bfd_target sh64_elf32_nbsd_le_vec;
-extern const bfd_target sh64_elf64_vec;
-extern const bfd_target sh64_elf64_le_vec;
-extern const bfd_target sh64_elf64_linux_vec;
-extern const bfd_target sh64_elf64_linux_be_vec;
-extern const bfd_target sh64_elf64_nbsd_vec;
-extern const bfd_target sh64_elf64_nbsd_le_vec;
 extern const bfd_target sh_coff_vec;
 extern const bfd_target sh_coff_le_vec;
 extern const bfd_target sh_coff_small_vec;
@@ -1295,20 +1283,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&score_elf32_le_vec,
 #endif
 
-#ifdef BFD64
-	&sh64_elf32_vec,
-	&sh64_elf32_le_vec,
-	&sh64_elf32_linux_vec,
-	&sh64_elf32_linux_be_vec,
-	&sh64_elf32_nbsd_vec,
-	&sh64_elf32_nbsd_le_vec,
-	&sh64_elf64_vec,
-	&sh64_elf64_le_vec,
-	&sh64_elf64_linux_vec,
-	&sh64_elf64_linux_be_vec,
-	&sh64_elf64_nbsd_vec,
-	&sh64_elf64_nbsd_le_vec,
-#endif
 	&sh_coff_vec,
 	&sh_coff_le_vec,
 	&sh_coff_small_vec,

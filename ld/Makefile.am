@@ -368,9 +368,6 @@ ALL_EMULATION_SOURCES = \
 	escore7_elf.c \
 	esh.c \
 	eshelf.c \
-	eshelf32.c \
-	eshelf32_linux.c \
-	eshelf32_nbsd.c \
 	eshelf_fd.c \
 	eshelf_linux.c \
 	eshelf_nbsd.c \
@@ -379,9 +376,6 @@ ALL_EMULATION_SOURCES = \
 	eshelf_vxworks.c \
 	eshl.c \
 	eshlelf.c \
-	eshlelf32.c \
-	eshlelf32_linux.c \
-	eshlelf32_nbsd.c \
 	eshlelf_fd.c \
 	eshlelf_linux.c \
 	eshlelf_nbsd.c \
@@ -485,11 +479,7 @@ ALL_64_EMULATION_SOURCES = \
 	eelf_x86_64_sol2.c \
 	ehppa64linux.c \
 	ei386pep.c \
-	emmo.c \
-	eshelf64.c \
-	eshelf64_nbsd.c \
-	eshlelf64.c \
-	eshlelf64_nbsd.c
+	emmo.c
 
 ALL_64_EMULATIONS = $(ALL_64_EMULATION_SOURCES:.c=.@OBJEXT@)
 
@@ -1652,23 +1642,6 @@ esh.c: $(srcdir)/emulparams/sh.sh \
 eshelf.c: $(srcdir)/emulparams/shelf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-eshelf32.c: $(srcdir)/emulparams/shelf32.sh \
-  $(INCDIR)/libiberty.h \
-  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eshelf32_linux.c: $(srcdir)/emulparams/shelf32_linux.sh \
-  $(srcdir)/emulparams/shelf32.sh \
-  $(INCDIR)/libiberty.h \
-  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eshelf32_nbsd.c: $(srcdir)/emulparams/shelf32_nbsd.sh \
-  $(srcdir)/emulparams/shelf32.sh \
-  $(INCDIR)/libiberty.h \
-  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
 eshelf_fd.c: $(srcdir)/emulparams/shelf_fd.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
@@ -1696,23 +1669,6 @@ eshl.c: $(srcdir)/emulparams/shl.sh \
 
 eshlelf.c: $(srcdir)/emulparams/shlelf.sh \
   $(srcdir)/emulparams/shelf.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eshlelf32.c: $(srcdir)/emulparams/shlelf32.sh \
-  $(INCDIR)/libiberty.h $(srcdir)/emulparams/shelf32.sh \
-  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eshlelf32_linux.c: $(srcdir)/emulparams/shlelf32_linux.sh \
-  $(srcdir)/emulparams/shelf32_linux.sh $(srcdir)/emulparams/shelf32.sh \
-  $(INCDIR)/libiberty.h \
-  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eshlelf32_nbsd.c: $(srcdir)/emulparams/shlelf32_nbsd.sh \
-  $(srcdir)/emulparams/shelf32_nbsd.sh $(srcdir)/emulparams/shelf32.sh \
-  $(INCDIR)/libiberty.h \
-  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eshlelf_fd.c: $(srcdir)/emulparams/shlelf_fd.sh \
@@ -1969,22 +1925,6 @@ emmo.c: $(srcdir)/emulparams/mmo.sh $(srcdir)/emultempl/mmix-elfnmmo.em \
   $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/elf-generic.em \
   $(srcdir)/emultempl/mmo.em $(srcdir)/scripttempl/DWARF.sc \
   $(srcdir)/scripttempl/mmo.sc ${GEN_DEPENDS}
-
-eshelf64.c: $(srcdir)/emulparams/shelf64.sh $(srcdir)/emulparams/shelf32.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eshelf64_nbsd.c: $(srcdir)/emulparams/shelf64_nbsd.sh \
-  $(srcdir)/emulparams/shelf32_nbsd.sh $(srcdir)/emulparams/shelf32.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eshlelf64.c: $(srcdir)/emulparams/shlelf64.sh \
-  $(srcdir)/emulparams/shelf64.sh $(srcdir)/emulparams/shelf32.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-
-eshlelf64_nbsd.c: $(srcdir)/emulparams/shlelf64_nbsd.sh \
-  $(srcdir)/emulparams/shelf64_nbsd.sh \
-  $(srcdir)/emulparams/shelf32_nbsd.sh $(srcdir)/emulparams/shelf32.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 
 # We need this for automake to use YLWRAP.

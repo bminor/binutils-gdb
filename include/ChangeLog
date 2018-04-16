@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* dis-asm.h: Remove sh5 and sh64 support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* coff/internal.h: Remove w65 support.
 	* coff/w65.h: Delete.
 

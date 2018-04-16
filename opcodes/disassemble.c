@@ -97,7 +97,6 @@
 #define ARCH_xtensa
 #define ARCH_z80
 #define ARCH_z8k
-#define INCLUDE_SHMEDIA
 #endif
 
 #ifdef ARCH_m32c

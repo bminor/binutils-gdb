@@ -84,7 +84,6 @@ CPU_DOCS = \
 	c-s390.texi \
 	c-score.texi \
 	c-sh.texi \
-	c-sh64.texi \
 	c-sparc.texi \
         c-tic54x.texi \
         c-tic6x.texi \

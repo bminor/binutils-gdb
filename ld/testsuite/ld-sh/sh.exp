@@ -28,11 +28,6 @@ if ![istarget sh*-*-*] {
     return
 }
 
-if { ([istarget sh64*-*-*] || [istarget sh5*-*-*])} {
-    # relaxing not supported on sh64 yet.
-    return
-}
-
 set testsimple "SH simple relaxing"
 
 if ![ld_assemble $as "-relax $srcdir/$subdir/sh1.s" tmpdir/sh1.o] {

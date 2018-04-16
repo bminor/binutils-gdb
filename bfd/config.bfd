@@ -102,7 +102,6 @@ case $targ in
  sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1] | \
  sparc64-*-aout* | \
  sparc*-*-coff* | \
- sh5*-*-* | sh64*-*-* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -137,7 +136,7 @@ case $targ in
  m88*-*-* | \
  maxq-*-coff | \
  mips*el-*-rtems* | \
- sh*-*-symbianelf* | \
+ sh*-*-symbianelf* | sh5*-*-* | sh64*-*-* | \
  sparc-*-lynxos* | \
  tahoe-*-* | \
  vax-*-bsd* | vax-*-ultrix* | vax-*-vms* | \
@@ -1409,35 +1408,6 @@ case "${targ}" in
     targ_defvec=score_elf32_be_vec
     targ_selvecs=score_elf32_le_vec
     ;;
-
-  sh64l*-*-elf*)
-    targ_defvec=sh64_elf32_le_vec
-    targ_selvecs="sh64_elf32_vec sh64_elf64_le_vec sh64_elf64_vec sh_elf32_le_vec sh_elf32_vec"
-    targ_underscore=yes
-    want64=true
-    ;;
-  sh64-*-elf*)
-    targ_defvec=sh64_elf32_vec
-    targ_selvecs="sh64_elf32_le_vec sh64_elf64_vec sh64_elf64_le_vec sh_elf32_vec sh_elf32_le_vec"
-    targ_underscore=yes
-    want64=true
-    ;;
-  sh64eb-*-linux*)
-    targ_defvec=sh64_elf32_linux_be_vec
-    targ_selvecs="sh64_elf32_linux_vec sh64_elf64_linux_be_vec sh64_elf64_linux_vec sh_elf32_linux_be_vec sh_elf32_linux_vec"
-    want64=true
-    ;;
-  sh64-*-linux*)
-    targ_defvec=sh64_elf32_linux_vec
-    targ_selvecs="sh64_elf32_linux_be_vec sh64_elf64_linux_vec sh64_elf64_linux_be_vec sh_elf32_linux_vec sh_elf32_linux_be_vec"
-    want64=true
-    ;;
-  sh-*-linux*)
-    targ_defvec=sh_elf32_linux_be_vec
-    targ_selvecs="sh_elf32_linux_vec sh64_elf32_linux_vec sh64_elf32_linux_be_vec sh64_elf64_linux_vec sh64_elf64_linux_be_vec"
-    targ_selvecs="${targ_selvecs} sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
-    want64=true
-    ;;
 #endif /* BFD64 */
 
   sh*eb-*-linux*)
@@ -1454,68 +1424,28 @@ case "${targ}" in
   sh-*-uclinux* | sh[12]-*-uclinux*)
     targ_defvec=sh_elf32_vec
     targ_selvecs="sh_elf32_le_vec sh_elf32_linux_be_vec sh_elf32_linux_vec sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
-#ifdef BFD64
-    targ_selvecs="${targ_selvecs} sh64_elf32_linux_vec sh64_elf32_linux_be_vec sh64_elf64_linux_vec sh64_elf64_linux_be_vec"
-#endif
-    ;;
-
-#ifdef BFD64
-  sh5le-*-netbsd*)
-    targ_defvec=sh64_elf32_nbsd_le_vec
-    targ_selvecs="sh64_elf32_nbsd_vec sh64_elf64_nbsd_le_vec sh64_elf64_nbsd_vec sh_elf32_nbsd_vec sh_elf32_nbsd_le_vec"
-    want64=true
-    ;;
-  sh5-*-netbsd*)
-    targ_defvec=sh64_elf32_nbsd_vec
-    targ_selvecs="sh64_elf32_nbsd_le_vec sh64_elf64_nbsd_le_vec sh64_elf64_nbsd_vec sh_elf32_nbsd_vec sh_elf32_nbsd_le_vec"
-    want64=true
-    ;;
-
-  sh64le-*-netbsd*)
-    targ_defvec=sh64_elf64_nbsd_le_vec
-    targ_selvecs="sh64_elf64_nbsd_vec sh64_elf32_nbsd_le_vec sh64_elf32_nbsd_vec sh_elf32_nbsd_vec sh_elf32_nbsd_le_vec"
-    want64=true
-    ;;
-  sh64-*-netbsd*)
-    targ_defvec=sh64_elf64_nbsd_vec
-    targ_selvecs="sh64_elf64_nbsd_le_vec sh64_elf32_nbsd_le_vec sh64_elf32_nbsd_vec sh_elf32_nbsd_vec sh_elf32_nbsd_le_vec"
-    want64=true
     ;;
 
   sh*l*-*-netbsdelf*)
     targ_defvec=sh_elf32_nbsd_le_vec
-    targ_selvecs="sh_elf32_nbsd_vec sh_coff_vec sh_coff_le_vec sh64_elf32_nbsd_le_vec sh64_elf32_nbsd_vec sh64_elf64_nbsd_le_vec sh64_elf64_nbsd_vec"
-    want64=true
+    targ_selvecs="sh_elf32_nbsd_vec sh_coff_vec sh_coff_le_vec"
     ;;
-  sh-*-netbsdelf*)
-    targ_defvec=sh_elf32_nbsd_vec
-    targ_selvecs="sh_elf32_nbsd_le_vec sh_coff_vec sh_coff_le_vec sh64_elf32_nbsd_le_vec sh64_elf32_nbsd_vec sh64_elf64_nbsd_le_vec sh64_elf64_nbsd_vec"
-    want64=true
-    ;;
-#endif
-
   sh*-*-netbsdelf*)
     targ_defvec=sh_elf32_nbsd_vec
     targ_selvecs="sh_elf32_nbsd_le_vec sh_coff_vec sh_coff_le_vec"
     ;;
 
-#ifdef BFD64
   shl*-*-elf* | sh[1234]l*-*-elf* | sh3el*-*-elf* | shl*-*-kaos*)
     targ_defvec=sh_elf32_le_vec
-    targ_selvecs="sh_elf32_vec sh_coff_le_vec sh_coff_vec sh_coff_small_le_vec sh_coff_small_vec sh64_elf32_vec sh64_elf32_le_vec sh64_elf64_vec sh64_elf64_le_vec"
+    targ_selvecs="sh_elf32_vec sh_coff_le_vec sh_coff_vec sh_coff_small_le_vec sh_coff_small_vec"
     targ_underscore=yes
-    want64=true
     ;;
-#endif
 
-#ifdef BFD64
   sh-*-elf* | sh[1234]*-elf* | sh-*-rtems* | sh-*-kaos*)
     targ_defvec=sh_elf32_vec
-    targ_selvecs="sh_elf32_le_vec sh_coff_vec sh_coff_le_vec sh_coff_small_vec sh_coff_small_le_vec sh64_elf32_vec sh64_elf32_le_vec sh64_elf64_vec sh64_elf64_le_vec"
+    targ_selvecs="sh_elf32_le_vec sh_coff_vec sh_coff_le_vec sh_coff_small_vec sh_coff_small_le_vec"
     targ_underscore=yes
-    want64=true
     ;;
-#endif
 
   sh-*-nto*)
     targ_defvec=sh_elf32_vec

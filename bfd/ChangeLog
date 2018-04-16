@@ -1,5 +1,24 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove sh5 and sh64 support.
+	* archures.c: Likewise.
+	* config.bfd: Likewise.
+	* configure.ac: Likewise.
+	* cpu-sh.c: Likewise.
+	* elf32-sh-relocs.h: Likewise.
+	* elf32-sh.c: Likewise.
+	* targets.c: Likewise.
+	* elf32-sh64-com.c: Delete.
+	* elf32-sh64.c: Delete.
+	* elf32-sh64.h: Delete.
+	* elf64-sh64.c: Delete.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove sh-symbianelf support.
 	* config.bfd: Likewise.
 	* configure.ac: Likewise.

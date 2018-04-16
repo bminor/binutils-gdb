@@ -96,11 +96,7 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
     if { [istarget "*-pe" ] || [istarget "*-rtemscoff*"] } then {
 	return
     }
-
-    if { [istarget sh64*-*-*] || [istarget sh5*-*-*] } then {
-    } else {
-	run_dump_test "cfi-sh-1"
-    }
+    run_dump_test "cfi-sh-1"
 
 } elseif { [istarget sparc*-*-*] } then {
     global NM

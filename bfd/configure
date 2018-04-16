@@ -14547,18 +14547,6 @@ do
     s390_elf64_vec)		 tb="$tb elf64-s390.lo elf64.lo $elf"; target_size=64 ;;
     score_elf32_be_vec)		 tb="$tb elf32-score.lo elf32-score7.lo elf32.lo $elf"; want64=true; target_size=64 ;;
     score_elf32_le_vec)		 tb="$tb elf32-score.lo elf32-score7.lo elf32.lo $elf"; want64=true; target_size=64 ;;
-    sh64_elf32_vec)		 tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf" target_size=64 ;;
-    sh64_elf32_le_vec)		 tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf" target_size=64 ;;
-    sh64_elf32_linux_vec)	 tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf" target_size=64 ;;
-    sh64_elf32_linux_be_vec)	 tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf" target_size=64 ;;
-    sh64_elf32_nbsd_vec)	 tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf" ;;
-    sh64_elf32_nbsd_le_vec)	 tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf" ;;
-    sh64_elf64_vec)		 tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
-    sh64_elf64_le_vec)		 tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
-    sh64_elf64_linux_vec)	 tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
-    sh64_elf64_linux_be_vec)	 tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
-    sh64_elf64_nbsd_vec)	 tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
-    sh64_elf64_nbsd_le_vec)	 tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     sh_coff_vec)		 tb="$tb coff-sh.lo $coff" ;;
     sh_coff_le_vec)		 tb="$tb coff-sh.lo $coff" ;;
     sh_coff_small_vec)		 tb="$tb coff-sh.lo $coff" ;;

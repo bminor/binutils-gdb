@@ -80,7 +80,6 @@ HFILES = \
 	mt-desc.h mt-opc.h \
 	score-opc.h \
 	sh-opc.h \
-	sh64-opc.h \
 	sysdep.h \
 	xc16x-desc.h xc16x-opc.h \
 	xstormy16-desc.h xstormy16-opc.h \
@@ -228,8 +227,6 @@ TARGET_LIBOPCODES_CFILES = \
 	score-dis.c \
 	score7-dis.c \
 	sh-dis.c \
-	sh64-dis.c \
-	sh64-opc.c \
 	sparc-dis.c \
 	sparc-opc.c \
 	spu-dis.c \

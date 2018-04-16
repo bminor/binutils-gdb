@@ -286,11 +286,6 @@ escore3_elf.c
 escore7_elf.c
 esh.c
 eshelf.c
-eshelf32.c
-eshelf32_linux.c
-eshelf32_nbsd.c
-eshelf64.c
-eshelf64_nbsd.c
 eshelf_fd.c
 eshelf_linux.c
 eshelf_nbsd.c
@@ -299,11 +294,6 @@ eshelf_uclinux.c
 eshelf_vxworks.c
 eshl.c
 eshlelf.c
-eshlelf32.c
-eshlelf32_linux.c
-eshlelf32_nbsd.c
-eshlelf64.c
-eshlelf64_nbsd.c
 eshlelf_fd.c
 eshlelf_linux.c
 eshlelf_nbsd.c

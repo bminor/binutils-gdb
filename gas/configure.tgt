@@ -97,10 +97,6 @@ case ${cpu} in
   s390*)		cpu_type=s390 arch=s390 ;;
   score*l)		cpu_type=score endian=little ;;
   score*)		cpu_type=score endian=big ;;
-  sh5le*)		cpu_type=sh64 endian=little ;;
-  sh5*)			cpu_type=sh64 endian=big ;;
-  sh64le*)		cpu_type=sh64 endian=little ;;
-  sh64*)		cpu_type=sh64 endian=big ;;
   sh*le)		cpu_type=sh endian=little ;;
   sh*)			cpu_type=sh endian=big ;;
   sparc64* | sparcv9*)	cpu_type=sparc arch=v9-64 ;;
@@ -407,8 +403,6 @@ case ${generic_target} in
       sh*eb)	endian=big ;;
       *)	endian=little ;;
     esac ;;
-  sh5*-*-netbsd*)			fmt=elf em=nbsd ;;
-  sh64*-*-netbsd*)			fmt=elf em=nbsd ;;
   sh*-*-netbsdelf*)			fmt=elf em=nbsd
     case ${cpu} in
       sh*l*)	endian=little ;;
@@ -421,7 +415,6 @@ case ${generic_target} in
   sh-*-pe*)				fmt=coff em=pe bfd_gas=yes endian=little ;;
   sh-*-kaos*)				fmt=elf ;;
   shle*-*-kaos*)			fmt=elf ;;
-  sh64-*-elf*)				fmt=elf ;;
 
   sparc-*-sunos4*)			fmt=aout em=sun3 ;;
   sparc-*-aout)				fmt=aout em=sparcaout ;;

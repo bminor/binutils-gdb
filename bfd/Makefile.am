@@ -349,8 +349,6 @@ BFD32_BACKENDS = \
 	elf32-rx.lo \
 	elf32-s390.lo \
 	elf32-sh.lo \
-	elf32-sh64-com.lo \
-	elf32-sh64.lo \
 	elf32-sparc.lo \
 	elf32-spu.lo \
 	elf32-tic6x.lo \
@@ -522,8 +520,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-rx.c \
 	elf32-s390.c \
 	elf32-sh.c \
-	elf32-sh64-com.c \
-	elf32-sh64.c \
 	elf32-sparc.c \
 	elf32-spu.c \
 	elf32-tic6x.c \
@@ -635,7 +631,6 @@ BFD64_BACKENDS = \
 	elf64-riscv.lo \
 	elfxx-riscv.lo \
 	elf64-s390.lo \
-	elf64-sh64.lo \
 	elf64-sparc.lo \
 	elf64-tilegx.lo \
 	elf64-x86-64.lo \
@@ -669,7 +664,6 @@ BFD64_BACKENDS_CFILES = \
 	elf64-mmix.c \
 	elf64-ppc.c \
 	elf64-s390.c \
-	elf64-sh64.c \
 	elf64-sparc.c \
 	elf64-tilegx.c \
 	elf64-x86-64.c \

@@ -184,9 +184,6 @@ score-opc.h
 score7-dis.c
 sh-dis.c
 sh-opc.h
-sh64-dis.c
-sh64-opc.c
-sh64-opc.h
 sparc-dis.c
 sparc-opc.c
 spu-dis.c

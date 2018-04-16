@@ -124,7 +124,6 @@ if { ![is_remote host] && [which $CC] == 0 } {
     setup_xfail mcore-*-elf
     setup_xfail mep-*-*
     setup_xfail mips-sgi-irix6*
-    setup_xfail "sh64-*-*"
     # Fails for the MSP430 because it uses SYM_DIFF relocs but it does
     # not provide a special_function for handling them.  If
     # optimization is enabled then this test passes because

@@ -139,8 +139,6 @@ config/tc-score.c
 config/tc-score.h
 config/tc-sh.c
 config/tc-sh.h
-config/tc-sh64.c
-config/tc-sh64.h
 config/tc-sparc.c
 config/tc-sparc.h
 config/tc-spu.c

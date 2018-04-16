@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/binutils-all/objcopy.exp: Remove sh5 and sh64 support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/objcopy.exp: Remove w65 support.
 
 2018-04-16  Alan Modra  <amodra@gmail.com>

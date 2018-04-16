@@ -57,13 +57,6 @@ if [istarget mips*-*] {
     set ldflags "-e _start $ldflags"
 }
 
-if [istarget sh64*-*-elf] {
-    # This is what gcc passes to ld by default, plus switch to the
-    # "usual" ELF _start (shelf32 normally uses just `start' for COFF
-    # compatibility)
-    set ldflags "-e _start -mshelf32 $ldflags"
-}
-
 if [istarget avr-*-*] {
     # Make .text start at a non-zero address, as some tests expect
     # valid symbols to have non-zero values.

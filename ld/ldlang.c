@@ -3945,9 +3945,7 @@ strip_excluded_output_sections (void)
 }
 
 /* Called from ldwrite to clear out asection.map_head and
-   asection.map_tail for use as link_orders in ldwrite.
-   FIXME: Except for sh64elf.em which starts creating link_orders in
-   its after_allocation routine so needs to call it early.  */
+   asection.map_tail for use as link_orders in ldwrite.  */
 
 void
 lang_clear_os_map (void)
