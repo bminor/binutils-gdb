@@ -387,7 +387,6 @@ ALL_EMULATION_SOURCES = \
 	eshlelf_nbsd.c \
 	eshlelf_nto.c \
 	eshlelf_vxworks.c \
-	eshlsymbian.c \
 	eshpe.c \
 	esparcaout.c \
 	esparclinux.c \
@@ -1734,10 +1733,6 @@ eshlelf_vxworks.c: $(srcdir)/emulparams/shlelf_vxworks.sh \
   $(srcdir)/emulparams/shelf_vxworks.sh $(srcdir)/emulparams/vxworks.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc $(srcdir)/emultempl/vxworks.em \
   ${GEN_DEPENDS}
-
-eshlsymbian.c: $(srcdir)/emulparams/shlsymbian.sh \
-  $(srcdir)/emulparams/shelf.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf32sh-symbian.sc ${GEN_DEPENDS}
 
 eshpe.c: $(srcdir)/emulparams/shpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}

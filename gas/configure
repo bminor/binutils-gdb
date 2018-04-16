@@ -12268,12 +12268,6 @@ $as_echo "#define TARGET_SOLARIS_COMMENT 1" >>confdefs.h
 	  as_fn_error "Solaris must be configured little endian" "$LINENO" 5
 	fi
 	;;
-
-      sh*-*-symbianelf*)
-
-$as_echo "#define TARGET_SYMBIAN 1" >>confdefs.h
-
-	;;
     esac
 
     if test ${this_target} = $target ; then

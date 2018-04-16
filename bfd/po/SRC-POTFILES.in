@@ -201,7 +201,6 @@ elf32-rx.c
 elf32-s390.c
 elf32-score.c
 elf32-score7.c
-elf32-sh-symbian.c
 elf32-sh.c
 elf32-sh64-com.c
 elf32-sh64.c

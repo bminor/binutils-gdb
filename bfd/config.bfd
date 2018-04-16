@@ -94,7 +94,6 @@ case $targ in
  mips*-*-lnews* | \
  mips*-*-sysv* | mips*-*-riscos* | \
  powerpc-*-lynxos* | powerpc-*-windiss* | \
- sh*-*-symbianelf* | \
  sparclet-*-aout* | \
  sparc86x-*-aout* | \
  sparc*-*-chorus* | \
@@ -138,6 +137,7 @@ case $targ in
  m88*-*-* | \
  maxq-*-coff | \
  mips*el-*-rtems* | \
+ sh*-*-symbianelf* | \
  sparc-*-lynxos* | \
  tahoe-*-* | \
  vax-*-bsd* | vax-*-ultrix* | vax-*-vms* | \
@@ -1497,11 +1497,6 @@ case "${targ}" in
   sh*-*-netbsdelf*)
     targ_defvec=sh_elf32_nbsd_vec
     targ_selvecs="sh_elf32_nbsd_le_vec sh_coff_vec sh_coff_le_vec"
-    ;;
-  sh*-*-symbianelf*)
-    targ_defvec=sh_elf32_symbian_le_vec
-    targ_selvecs="sh_coff_le_vec sh_coff_small_le_vec"
-    targ_underscore=yes
     ;;
 
 #ifdef BFD64

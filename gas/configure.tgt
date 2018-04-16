@@ -414,7 +414,6 @@ case ${generic_target} in
       sh*l*)	endian=little ;;
       *)	endian=big ;;
     esac ;;
-  sh*-*-symbianelf*)			fmt=elf endian=little ;;
   sh-*-elf*)				fmt=elf ;;
   sh-*-uclinux* | sh[12]-*-uclinux*)	fmt=elf em=uclinux ;;
   sh-*-coff*)				fmt=coff ;;

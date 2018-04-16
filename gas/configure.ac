@@ -231,10 +231,6 @@ changequote([,])dnl
 	  AC_MSG_ERROR(Solaris must be configured little endian)
 	fi
 	;;
-
-      sh*-*-symbianelf*)
-	AC_DEFINE(TARGET_SYMBIAN, 1, [Define if target is Symbian OS.])
-	;;
     esac
 
     if test ${this_target} = $target ; then

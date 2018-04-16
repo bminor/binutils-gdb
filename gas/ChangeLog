@@ -1,5 +1,16 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-sh.c: Remove sh-symbianelf support.
+	* config/tc-sh.h: Likewise.
+	* configure.ac: Likewise.
+	* configure.tgt: Likewise.
+	* testsuite/gas/sh/reg-prefix.d: Likewise.
+	* testsuite/gas/sh/sh2a-pic.d: Likewise.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* configure.ac: Remove m88k support.
 	* config.in: Regenerate.
 	* configure: Regenerate.

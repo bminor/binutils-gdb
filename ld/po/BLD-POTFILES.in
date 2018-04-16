@@ -309,7 +309,6 @@ eshlelf_linux.c
 eshlelf_nbsd.c
 eshlelf_nto.c
 eshlelf_vxworks.c
-eshlsymbian.c
 eshpe.c
 esparcaout.c
 esparclinux.c

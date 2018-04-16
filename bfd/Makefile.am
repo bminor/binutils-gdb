@@ -348,7 +348,6 @@ BFD32_BACKENDS = \
 	elf32-rl78.lo \
 	elf32-rx.lo \
 	elf32-s390.lo \
-	elf32-sh-symbian.lo \
 	elf32-sh.lo \
 	elf32-sh64-com.lo \
 	elf32-sh64.lo \
@@ -522,7 +521,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-rl78.c \
 	elf32-rx.c \
 	elf32-s390.c \
-	elf32-sh-symbian.c \
 	elf32-sh.c \
 	elf32-sh64-com.c \
 	elf32-sh64.c \
