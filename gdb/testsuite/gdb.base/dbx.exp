@@ -267,7 +267,7 @@ proc test_assign { } {
 #test_whereis
 #
 proc test_whereis { } {
-    gdb_test "whereis my_list" "All variables matching regular expression \"my_list\":\r\n\r\nFile.*average\.c:\r\nstatic int my_list\\\[10\\\];"
+    gdb_test "whereis my_list" "All variables matching regular expression \"my_list\":\r\n\r\nFile.*average\.c:\r\n.*\tstatic int my_list\\\[10\\\];"
 }
 
 #
