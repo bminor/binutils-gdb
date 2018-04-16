@@ -1,3 +1,7 @@
+2018-04-17  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c: Revert 2018-04-16 and 2018-04-11 changes.
+
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_machine_name): Correct typo.
