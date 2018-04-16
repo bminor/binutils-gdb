@@ -2218,22 +2218,6 @@ _bfd_ecoff_set_section_contents (bfd *abfd,
   return TRUE;
 }
 
-/* Get the GP value for an ECOFF file.  This is a hook used by
-   nlmconv.  */
-
-bfd_vma
-bfd_ecoff_get_gp_value (bfd *abfd)
-{
-  if (bfd_get_flavour (abfd) != bfd_target_ecoff_flavour
-      || bfd_get_format (abfd) != bfd_object)
-    {
-      bfd_set_error (bfd_error_invalid_operation);
-      return 0;
-    }
-
-  return ecoff_data (abfd)->gp;
-}
-
 /* Set the GP value for an ECOFF file.  This is a hook used by the
    assembler.  */
 

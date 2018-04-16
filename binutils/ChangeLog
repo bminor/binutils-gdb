@@ -1,5 +1,21 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* .gitignore: Remove netware support.
+	* Makefile.am: Likewise.
+	* configure.ac: Likewise.
+	* doc/Makefile.am: Likewise.
+	* doc/binutils.texi: Likewise.
+	* testsuite/binutils-all/nm.exp: Likewise.
+	* nlmconv.c: Delete.
+	* nlmconv.h: Delete.
+	* nlmheader.y: Delete.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/objdump.exp: Remove tahoe support.
 
 2018-04-14  Alan Modra  <amodra@gmail.com>

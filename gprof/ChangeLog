@@ -1,5 +1,9 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* corefile.c: Remove netware support.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove tahoe support.
 	* corefile.c: Likewise.
 	* tahoe.c: Delete.

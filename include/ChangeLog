@@ -1,5 +1,16 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* nlm/ChangeLog-9315: Delete.
+	* nlm/alpha-ext.h: Delete.
+	* nlm/common.h: Delete.
+	* nlm/external.h: Delete.
+	* nlm/i386-ext.h: Delete.
+	* nlm/internal.h: Delete.
+	* nlm/ppc-ext.h: Delete.
+	* nlm/sparc32-ext.h: Delete.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* opcode/tahoe.h: Delete.
 
 2018-04-11  Alan Modra  <amodra@gmail.com>

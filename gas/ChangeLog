@@ -1,3 +1,12 @@
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am: Remove netware support.
+	* config/tc-i386.c: Likewise.
+	* configure.tgt: Likewise.
+	* config/te-netware.h: Delete.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2018-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/x86-64-waitpkg.s: Add 32-bit registers

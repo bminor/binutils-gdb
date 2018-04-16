@@ -80,7 +80,6 @@ alpha*-*-linux-*)	targ_emul=elf64alpha targ_extra_emuls=alpha
 			tdir_alpha=`echo ${targ_alias} | sed -e 's/linux\(-gnu\)*/linux\1ecoff/'` ;;
 alpha*-*-osf*)		targ_emul=alpha ;;
 alpha*-*-gnu*)		targ_emul=elf64alpha ;;
-alpha*-*-netware*)	targ_emul=alpha ;;
 alpha*-*-netbsd*)	targ_emul=elf64alpha_nbsd ;;
 alpha*-*-openbsd*)	targ_emul=elf64alpha ;;
 alpha*-*-*vms*)		targ_emul=alphavms
@@ -328,7 +327,6 @@ x86_64-*-netbsd*)	targ_emul=elf_x86_64
 			*)		tdir_elf_i386=`echo ${tdir_elf_i386} | \
 					sed -e 's/netbsd/netbsdelf/'`;;
 			esac ;;
-i[3-7]86-*-netware)	targ_emul=i386nw ;;
 i[3-7]86-*-elfiamcu)	targ_emul=elf_iamcu
 			targ_extra_emuls=elf_i386 ;;
 i[3-7]86-*-elf* | i[3-7]86-*-rtems*)
@@ -680,7 +678,6 @@ powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
 powerpc-*-nto*)		targ_emul=elf32ppcnto ;;
 powerpcle-*-nto*)	targ_emul=elf32lppcnto ;;
 powerpc-*-macos*)	targ_emul=ppcmacos ;;
-powerpc-*-netware*)	targ_emul=ppcnw ;;
 powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin*)
 			targ_emul=ppcpe
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;

@@ -615,8 +615,6 @@ extern bfd_boolean _bfd_handle_already_linked
 
 /* Externally visible ECOFF routines.  */
 
-extern bfd_vma bfd_ecoff_get_gp_value
-  (bfd * abfd);
 extern bfd_boolean bfd_ecoff_set_gp_value
   (bfd *abfd, bfd_vma gp_value);
 extern bfd_boolean bfd_ecoff_set_regmasks
@@ -7015,7 +7013,6 @@ struct bfd
       struct ihex_data_struct *ihex_data;
       struct tekhex_data_struct *tekhex_data;
       struct elf_obj_tdata *elf_obj_data;
-      struct nlm_obj_tdata *nlm_obj_data;
       struct mmo_data_struct *mmo_data;
       struct sun_core_struct *sun_core_data;
       struct sco5_core_struct *sco5_core_data;
@@ -7325,7 +7322,6 @@ enum bfd_flavour
   bfd_target_xcoff_flavour,
   bfd_target_elf_flavour,
   bfd_target_ieee_flavour,
-  bfd_target_nlm_flavour,
   bfd_target_oasys_flavour,
   bfd_target_tekhex_flavour,
   bfd_target_srec_flavour,

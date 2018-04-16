@@ -317,7 +317,6 @@ CODE_FRAGMENT
 .      struct ihex_data_struct *ihex_data;
 .      struct tekhex_data_struct *tekhex_data;
 .      struct elf_obj_tdata *elf_obj_data;
-.      struct nlm_obj_tdata *nlm_obj_data;
 .      struct mmo_data_struct *mmo_data;
 .      struct sun_core_struct *sun_core_data;
 .      struct sco5_core_struct *sco5_core_data;

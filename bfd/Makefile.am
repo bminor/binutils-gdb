@@ -411,11 +411,6 @@ BFD32_BACKENDS = \
 	mach-o-arm.lo \
 	mipsbsd.lo \
 	newsos3.lo \
-	nlm.lo \
-	nlm32-i386.lo \
-	nlm32-ppc.lo \
-	nlm32-sparc.lo \
-	nlm32.lo \
 	ns32knetbsd.lo \
 	oasys.lo \
 	pc532-mach.lo \
@@ -602,11 +597,6 @@ BFD32_BACKENDS_CFILES = \
 	mach-o-arm.c \
 	mipsbsd.c \
 	newsos3.c \
-	nlm.c \
-	nlm32-i386.c \
-	nlm32-ppc.c \
-	nlm32-sparc.c \
-	nlm32.c \
 	ns32knetbsd.c \
 	oasys.c \
 	pc532-mach.c \
@@ -690,8 +680,6 @@ BFD64_BACKENDS = \
 	mach-o-aarch64.lo \
 	mach-o-x86-64.lo \
 	mmo.lo \
-	nlm32-alpha.lo \
-	nlm64.lo \
 	pe-x86_64.lo \
 	pei-ia64.lo \
 	pei-x86_64.lo \
@@ -731,8 +719,6 @@ BFD64_BACKENDS_CFILES = \
 	mach-o-aarch64.c \
 	mach-o-x86-64.c \
 	mmo.c \
-	nlm32-alpha.c \
-	nlm64.c \
 	pe-x86_64.c \
 	pei-ia64.c \
 	pei-x86_64.c \
@@ -804,8 +790,8 @@ SOURCE_HFILES = \
 	elf64-hppa.h elfcode.h elfcore.h \
 	freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h libieee.h \
-	libnlm.h liboasys.h libpei.h libxcoff.h mach-o.h \
-	netbsd.h nlm-target.h nlmcode.h nlmswap.h ns32k.h \
+	liboasys.h libpei.h libxcoff.h mach-o.h \
+	netbsd.h ns32k.h \
 	pef.h pef-traceback.h peicode.h som.h version.h \
 	vms.h xsym.h
 

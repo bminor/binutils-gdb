@@ -57,7 +57,6 @@ case $targ in
  mips*-*-irix5* | mips*-*-irix6*)
     # Not obsolete
     ;;
- *-*-netware* | \
  arm-epoc-pe* | \
  arm*-*-aout | \
  arm*-*-coff | \
@@ -75,7 +74,6 @@ case $targ in
  i[3-7]86-*-freebsd[12] | \
  i[3-7]86-*-netbsdaout* | i[3-7]86-*-netbsd* | \
  i[3-7]86-*-openbsd[0-2].* | i[3-7]86-*-openbsd3.[0-3] | \
- i[3-7]86-*-netware* | \
  i[3-7]86-*-linux*aout* | \
  i[3-7]86-*-mach* | i[3-7]86-*-osf1mk* | \
  i[3-7]86-*-os9k | \
@@ -106,7 +104,6 @@ case $targ in
  sparc-*-linux*aout* | \
  sparc-*-netbsdaout* | \
  sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1] | \
- sparc-*-netware* | \
  sparc64-*-aout* | \
  sparc*-*-coff* | \
  vax-*-bsd* | vax-*-ultrix* | \
@@ -130,6 +127,7 @@ esac
 case $targ in
  *-adobe-* | \
  *-go32-rtems* | \
+ *-*-netware* | \
  *-*-rtemsaout* | \
  *-*-rtemscoff* | \
  a29k-* | \
@@ -292,11 +290,6 @@ case "${targ}" in
   alpha*-*-netbsd* | alpha*-*-openbsd*)
     targ_defvec=alpha_elf64_vec
     targ_selvecs=alpha_ecoff_le_vec
-    want64=true
-    ;;
-  alpha*-*-netware*)
-    targ_defvec=alpha_ecoff_le_vec
-    targ_selvecs=alpha_nlm32_vec
     want64=true
     ;;
   alpha*-*-linux*ecoff*)
@@ -731,10 +724,6 @@ case "${targ}" in
   i[3-7]86-*-openbsd*)
     targ_defvec=i386_elf32_vec
     targ_selvecs="iamcu_elf32_vec i386_aout_nbsd_vec"
-    ;;
-  i[3-7]86-*-netware*)
-    targ_defvec=i386_elf32_vec
-    targ_selvecs="iamcu_elf32_vec i386_nlm32_vec i386_coff_vec i386_aout_vec"
     ;;
   i[3-7]86-*-linux*aout*)
     targ_defvec=i386_aout_linux_vec
@@ -1384,10 +1373,6 @@ case "${targ}" in
     targ_selvecs="rs6000_xcoff_vec"
     targ_cflags=-DSMALL_ARCHIVE
     ;;
-  powerpc-*-netware*)
-    targ_defvec=powerpc_elf32_vec
-    targ_selvecs="powerpc_nlm32_vec rs6000_xcoff_vec"
-    ;;
   powerpc-*-nto*)
     targ_defvec=powerpc_elf32_vec
     targ_selvecs="rs6000_xcoff_vec powerpc_elf32_le_vec powerpc_boot_vec"
@@ -1664,10 +1649,6 @@ case "${targ}" in
   sparc-*-vxworks*)
     targ_defvec=sparc_elf32_vxworks_vec
     targ_selvecs="sparc_elf32_vec sparc_aout_sunos_be_vec"
-    ;;
-  sparc-*-netware*)
-    targ_defvec=sparc_elf32_vec
-    targ_selvecs="sparc_nlm32_vec sparc_aout_sunos_be_vec"
     ;;
 #ifdef BFD64
   sparc64-*-aout*)

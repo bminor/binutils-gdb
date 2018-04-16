@@ -44,7 +44,7 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
 
     # This test does not work correctly on ECOFF targets, because ECOFF
     # stores most symbols twice, which messes up the nm output.
-    setup_xfail "alpha*-*-osf*" "alpha*-*-netware*"
+    setup_xfail "alpha*-*-osf*"
     setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
     setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*" "mips*-sony-bsd*"
 
@@ -102,7 +102,7 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
 
     # This test does not work correctly on ECOFF targets, because ECOFF
     # stores most symbols twice, which messes up the nm output.
-    setup_xfail "alpha*-*-osf*" "alpha*-*-netware*"
+    setup_xfail "alpha*-*-osf*"
     setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
     setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*" "mips*-sony-bsd*"
 
@@ -135,7 +135,6 @@ if {   [is_elf_format]
     || [istarget *-*-freebsd*]
     || [istarget *-*-lynxos*]
     || [istarget "mmix-knuth-mmixware"]
-    || [istarget *-*-netware*]
     || [istarget *-*-nto*]
     || [istarget *-*-rdos*]
     || [istarget *-*-tpf*]
@@ -160,7 +159,7 @@ if {![binutils_assemble $srcdir/$subdir/$nm_1_src tmpdir/nm-1.o]} then {
 
     # This test does not work correctly on ECOFF targets, because ECOFF
     # stores most symbols twice, which messes up the nm output.
-    setup_xfail "alpha*-*-osf*" "alpha*-*-netware*"
+    setup_xfail "alpha*-*-osf*"
     setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
     setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*" "mips*-sony-bsd*"
 

@@ -335,7 +335,6 @@ ALL_EMULATION_SOURCES = \
 	ei386msdos.c \
 	ei386nbsd.c \
 	ei386nto.c \
-	ei386nw.c \
 	ei386pe.c \
 	ei386pe_posix.c \
 	em32relf.c \
@@ -377,7 +376,6 @@ ALL_EMULATION_SOURCES = \
 	epjlelf.c \
 	eppclynx.c \
 	eppcmacos.c \
-	eppcnw.c \
 	eppcpe.c \
 	epruelf.c \
 	eriscix.c \
@@ -1500,9 +1498,6 @@ ei386nbsd.c:	$(srcdir)/emulparams/i386nbsd.sh \
 ei386nto.c:	$(srcdir)/emulparams/i386nto.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-ei386nw.c:	$(srcdir)/emulparams/i386nw.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/nw.sc ${GEN_DEPENDS}
-
 ei386pe.c: $(srcdir)/emulparams/i386pe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 
@@ -1695,9 +1690,6 @@ eppclynx.c: $(srcdir)/emulparams/ppclynx.sh \
 
 eppcmacos.c:	$(srcdir)/emulparams/ppcmacos.sh \
   $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
-
-eppcnw.c:	$(srcdir)/emulparams/ppcnw.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/nw.sc ${GEN_DEPENDS}
 
 eppcpe.c: $(srcdir)/emulparams/ppcpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/ppcpe.sc ${GEN_DEPENDS}

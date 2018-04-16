@@ -152,7 +152,6 @@ DESCRIPTION
 .  bfd_target_xcoff_flavour,
 .  bfd_target_elf_flavour,
 .  bfd_target_ieee_flavour,
-.  bfd_target_nlm_flavour,
 .  bfd_target_oasys_flavour,
 .  bfd_target_tekhex_flavour,
 .  bfd_target_srec_flavour,
@@ -594,7 +593,6 @@ extern const bfd_target aarch64_mach_o_vec;
 extern const bfd_target alpha_ecoff_le_vec;
 extern const bfd_target alpha_elf64_vec;
 extern const bfd_target alpha_elf64_fbsd_vec;
-extern const bfd_target alpha_nlm32_vec;
 extern const bfd_target alpha_vms_vec;
 extern const bfd_target alpha_vms_lib_txt_vec;
 extern const bfd_target am33_elf32_linux_vec;
@@ -681,7 +679,6 @@ extern const bfd_target i386_elf32_sol2_vec;
 extern const bfd_target i386_elf32_vxworks_vec;
 extern const bfd_target i386_mach_o_vec;
 extern const bfd_target i386_msdos_vec;
-extern const bfd_target i386_nlm32_vec;
 extern const bfd_target i386_pe_vec;
 extern const bfd_target i386_pei_vec;
 extern const bfd_target iamcu_elf32_vec;
@@ -799,7 +796,6 @@ extern const bfd_target powerpc_elf32_vxworks_vec;
 extern const bfd_target powerpc_elf64_vec;
 extern const bfd_target powerpc_elf64_le_vec;
 extern const bfd_target powerpc_elf64_fbsd_vec;
-extern const bfd_target powerpc_nlm32_vec;
 extern const bfd_target powerpc_pe_vec;
 extern const bfd_target powerpc_pe_le_vec;
 extern const bfd_target powerpc_pei_vec;
@@ -861,7 +857,6 @@ extern const bfd_target sparc_elf32_vxworks_vec;
 extern const bfd_target sparc_elf64_vec;
 extern const bfd_target sparc_elf64_fbsd_vec;
 extern const bfd_target sparc_elf64_sol2_vec;
-extern const bfd_target sparc_nlm32_vec;
 extern const bfd_target spu_elf32_vec;
 extern const bfd_target sym_vec;
 extern const bfd_target tic30_aout_vec;
@@ -977,7 +972,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&alpha_ecoff_le_vec,
 	&alpha_elf64_vec,
 	&alpha_elf64_fbsd_vec,
-	&alpha_nlm32_vec,
 	&alpha_vms_vec,
 #endif
 	&alpha_vms_lib_txt_vec,
@@ -1111,7 +1105,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&i386_elf32_vxworks_vec,
 	&i386_mach_o_vec,
 	&i386_msdos_vec,
-	&i386_nlm32_vec,
 	&i386_pe_vec,
 	&i386_pei_vec,
 
@@ -1291,7 +1284,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&powerpc_elf64_le_vec,
 	&powerpc_elf64_fbsd_vec,
 #endif
-	&powerpc_nlm32_vec,
 	&powerpc_pe_vec,
 	&powerpc_pe_le_vec,
 	&powerpc_pei_vec,
@@ -1376,7 +1368,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&sparc_elf64_fbsd_vec,
 	&sparc_elf64_sol2_vec,
 #endif
-	&sparc_nlm32_vec,
 
 	&spu_elf32_vec,
 
@@ -1872,7 +1863,6 @@ bfd_flavour_name (enum bfd_flavour flavour)
     case bfd_target_xcoff_flavour: return "XCOFF";
     case bfd_target_elf_flavour: return "ELF";
     case bfd_target_ieee_flavour: return "IEEE";
-    case bfd_target_nlm_flavour: return "NLM";
     case bfd_target_oasys_flavour: return "Oasys";
     case bfd_target_tekhex_flavour: return "Tekhex";
     case bfd_target_srec_flavour: return "Srec";

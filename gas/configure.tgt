@@ -490,7 +490,6 @@ case ${generic_target} in
   *-*-solaris*)				fmt=elf em=solaris ;;
   *-*-aros*)				fmt=elf em=linux ;;
   *-*-vxworks* | *-*-windiss)		fmt=elf em=vxworks ;;
-  *-*-netware)				fmt=elf em=netware ;;
 esac
 
 case ${cpu_type} in

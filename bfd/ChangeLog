@@ -1,5 +1,31 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove netware support.
+	* bfd-in.h: Likewise.
+	* bfd.c: Likewise.
+	* config.bfd: Likewise.
+	* configure.ac: Likewise.
+	* doc/bfdint.texi: Likewise.
+	* ecoff.c: Likewise.
+	* targets.c: Likewise.
+	* libnlm.h: Delete.
+	* nlm-target.h: Delete.
+	* nlm.c: Delete.
+	* nlm32-alpha.c: Delete.
+	* nlm32-i386.c: Delete.
+	* nlm32-ppc.c: Delete.
+	* nlm32-sparc.c: Delete.
+	* nlm32.c: Delete.
+	* nlm64.c: Delete.
+	* nlmcode.h: Delete.
+	* nlmswap.h: Delete.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* archures.c: Remove tahoe support.
 	* config.bfd: Likewise.
 	* configure.ac: Likewise.

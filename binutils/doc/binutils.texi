@@ -34,7 +34,6 @@ section entitled ``GNU Free Documentation License''.
 * c++filt: (binutils)c++filt.	  Filter to demangle encoded C++ symbols.
 * cxxfilt: (binutils)c++filt.     MS-DOS name for c++filt.
 * dlltool: (binutils)dlltool.	  Create files needed to build and use DLLs.
-* nlmconv: (binutils)nlmconv.     Converts object code into an NLM.
 * nm: (binutils)nm.               List symbols from object files.
 * objcopy: (binutils)objcopy.	  Copy and translate object files.
 * objdump: (binutils)objdump.     Display information from object files.
@@ -121,9 +120,6 @@ Demangle encoded C++ symbols (on MS-DOS, this program is named
 @item addr2line
 Convert addresses into file names and line numbers
 
-@item nlmconv
-Convert object code into a Netware Loadable Module
-
 @item windres
 Manipulate Windows resources
 
@@ -151,7 +147,6 @@ in the section entitled ``GNU Free Documentation License''.
 * c++filt::			Filter to demangle encoded C++ symbols
 * cxxfilt: c++filt.             MS-DOS name for c++filt
 * addr2line::			Convert addresses to file and line
-* nlmconv::                     Converts object code into an NLM
 * windmc::			Generator for Windows message resources
 * windres::			Manipulate Windows resources
 * dlltool::			Create files needed to build and use DLLs
@@ -3694,111 +3689,6 @@ prefixed with @samp{(inlined by)}.
 @ignore
 @c man begin SEEALSO addr2line
 Info entries for @file{binutils}.
-@c man end
-@end ignore
-
-@node nlmconv
-@chapter nlmconv
-
-@command{nlmconv} converts a relocatable object file into a NetWare
-Loadable Module.
-
-@ignore
-@command{nlmconv} currently works with @samp{i386} object
-files in @code{coff}, @sc{elf}, or @code{a.out} format, and @sc{SPARC}
-object files in @sc{elf}, or @code{a.out} format@footnote{
-@command{nlmconv} should work with any @samp{i386} or @sc{sparc} object
-format in the Binary File Descriptor library.  It has only been tested
-with the above formats.}.
-@end ignore
-
-@quotation
-@emph{Warning:} @command{nlmconv} is not always built as part of the binary
-utilities, since it is only useful for NLM targets.
-@end quotation
-
-@c man title nlmconv converts object code into an NLM.
-
-@smallexample
-@c man begin SYNOPSIS nlmconv
-nlmconv [@option{-I} @var{bfdname}|@option{--input-target=}@var{bfdname}]
-        [@option{-O} @var{bfdname}|@option{--output-target=}@var{bfdname}]
-        [@option{-T} @var{headerfile}|@option{--header-file=}@var{headerfile}]
-        [@option{-d}|@option{--debug}] [@option{-l} @var{linker}|@option{--linker=}@var{linker}]
-        [@option{-h}|@option{--help}] [@option{-V}|@option{--version}]
-        @var{infile} @var{outfile}
-@c man end
-@end smallexample
-
-@c man begin DESCRIPTION nlmconv
-
-@command{nlmconv} converts the relocatable @samp{i386} object file
-@var{infile} into the NetWare Loadable Module @var{outfile}, optionally
-reading @var{headerfile} for NLM header information.  For instructions
-on writing the NLM command file language used in header files, see the
-@samp{linkers} section, @samp{NLMLINK} in particular, of the @cite{NLM
-Development and Tools Overview}, which is part of the NLM Software
-Developer's Kit (``NLM SDK''), available from Novell, Inc.
-@command{nlmconv} uses the @sc{gnu} Binary File Descriptor library to read
-@var{infile};
-@ifclear man
-see @ref{BFD,,BFD,ld.info,Using LD}, for more information.
-@end ifclear
-
-@command{nlmconv} can perform a link step.  In other words, you can list
-more than one object file for input if you list them in the definitions
-file (rather than simply specifying one input file on the command line).
-In this case, @command{nlmconv} calls the linker for you.
-
-@c man end
-
-@c man begin OPTIONS nlmconv
-
-@table @env
-@item -I @var{bfdname}
-@itemx --input-target=@var{bfdname}
-Object format of the input file.  @command{nlmconv} can usually determine
-the format of a given file (so no default is necessary).
-@xref{Target Selection}, for more information.
-
-@item -O @var{bfdname}
-@itemx --output-target=@var{bfdname}
-Object format of the output file.  @command{nlmconv} infers the output
-format based on the input format, e.g. for a @samp{i386} input file the
-output format is @samp{nlm32-i386}.
-@xref{Target Selection}, for more information.
-
-@item -T @var{headerfile}
-@itemx --header-file=@var{headerfile}
-Reads @var{headerfile} for NLM header information.  For instructions on
-writing the NLM command file language used in header files, see@ see the
-@samp{linkers} section, of the @cite{NLM Development and Tools
-Overview}, which is part of the NLM Software Developer's Kit, available
-from Novell, Inc.
-
-@item -d
-@itemx --debug
-Displays (on standard error) the linker command line used by @command{nlmconv}.
-
-@item -l @var{linker}
-@itemx --linker=@var{linker}
-Use @var{linker} for any linking.  @var{linker} can be an absolute or a
-relative pathname.
-
-@item -h
-@itemx --help
-Prints a usage summary.
-
-@item -V
-@itemx --version
-Prints the version number for @command{nlmconv}.
-@end table
-
-@c man end
-
-@ignore
-@c man begin SEEALSO nlmconv
-the Info entries for @file{binutils}.
 @c man end
 @end ignore
 

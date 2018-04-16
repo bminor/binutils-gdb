@@ -250,7 +250,6 @@ ei386moss.c
 ei386msdos.c
 ei386nbsd.c
 ei386nto.c
-ei386nw.c
 ei386pe.c
 ei386pe_posix.c
 ei386pep.c
@@ -295,7 +294,6 @@ epjelf.c
 epjlelf.c
 eppclynx.c
 eppcmacos.c
-eppcnw.c
 eppcpe.c
 epruelf.c
 eriscix.c

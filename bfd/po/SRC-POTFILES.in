@@ -288,7 +288,6 @@ libcoff.h
 libecoff.h
 libhppa.h
 libieee.h
-libnlm.h
 liboasys.h
 libpei.h
 libxcoff.h
@@ -311,16 +310,6 @@ mmo.c
 netbsd-core.c
 netbsd.h
 newsos3.c
-nlm-target.h
-nlm.c
-nlm32-alpha.c
-nlm32-i386.c
-nlm32-ppc.c
-nlm32-sparc.c
-nlm32.c
-nlm64.c
-nlmcode.h
-nlmswap.h
 ns32k.h
 ns32knetbsd.c
 oasys.c

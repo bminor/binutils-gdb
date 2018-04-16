@@ -603,7 +603,6 @@ core_create_function_syms (void)
     case bfd_target_ecoff_flavour:
     case bfd_target_xcoff_flavour:
     case bfd_target_elf_flavour:
-    case bfd_target_nlm_flavour:
     case bfd_target_som_flavour:
       core_has_func_syms = 1;
     }

@@ -33,8 +33,6 @@ is-strip.c
 maybe-ranlib.c
 maybe-strip.c
 mclex.c
-nlmconv.c
-nlmconv.h
 nm.c
 not-ranlib.c
 not-strip.c
