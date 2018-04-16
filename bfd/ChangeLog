@@ -1,3 +1,12 @@
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
+	* archures.c: Remove tahoe support.
+	* config.bfd: Likewise.
+	* configure.ac: Likewise.
+	* hosts/tahoe.h: Delete.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+
 2018-04-14  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_backend_data): Add relropagesize.

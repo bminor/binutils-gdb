@@ -1071,10 +1071,6 @@ changequote([,])dnl
   sparc-*-netbsd* | sparc*-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
-  tahoe-*-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/tahoe.h"'
-	;;
   vax-*-netbsd* | vax-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;

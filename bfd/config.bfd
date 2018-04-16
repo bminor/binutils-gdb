@@ -109,7 +109,6 @@ case $targ in
  sparc-*-netware* | \
  sparc64-*-aout* | \
  sparc*-*-coff* | \
- tahoe-*-* | \
  vax-*-bsd* | vax-*-ultrix* | \
  we32k-*-* | \
  w65-*-* | \
@@ -145,6 +144,7 @@ case $targ in
  maxq-*-coff | \
  mips*el-*-rtems* | \
  sparc-*-lynxos* | \
+ tahoe-*-* | \
  vax-*-vms* | \
  null)
     echo "*** Configuration $targ is obsolete." >&2
@@ -1702,13 +1702,6 @@ case "${targ}" in
     targ_defvec=spu_elf32_vec
     want64=true
     ;;
-
-#if HAVE_aout_vec
-  tahoe-*-*)
-    targ_defvec=aout_vec
-    targ_underscore=yes
-    ;;
-#endif
 
   tic6x-*-elf)
     targ_defvec=tic6x_elf32_c6000_le_vec

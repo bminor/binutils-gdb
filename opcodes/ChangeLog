@@ -1,3 +1,8 @@
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Remove tahoe support.
+	* configure: Regenerate.
+
 2018-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (prefix_table): Replace Em with Edq on tpause and

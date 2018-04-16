@@ -1,3 +1,7 @@
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/objdump.exp: Remove tahoe support.
+
 2018-04-14  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_machine_name): Revert 2018-04-11 change.

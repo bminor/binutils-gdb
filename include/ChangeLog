@@ -1,3 +1,7 @@
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
+	* opcode/tahoe.h: Delete.
+
 2018-04-11  Alan Modra  <amodra@gmail.com>
 
 	* aout/adobe.h: Delete.
