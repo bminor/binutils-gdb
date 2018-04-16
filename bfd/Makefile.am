@@ -400,7 +400,6 @@ BFD32_BACKENDS = \
 	i386msdos.lo \
 	i386netbsd.lo \
 	i386os9k.lo \
-	ieee.lo \
 	m68k4knetbsd.lo \
 	m68klinux.lo \
 	m68knetbsd.lo \
@@ -585,7 +584,6 @@ BFD32_BACKENDS_CFILES = \
 	i386msdos.c \
 	i386netbsd.c \
 	i386os9k.c \
-	ieee.c \
 	m68k4knetbsd.c \
 	m68klinux.c \
 	m68knetbsd.c \
@@ -787,7 +785,7 @@ SOURCE_HFILES = \
 	elf-bfd.h elf-hppa.h elf-linux-core.h elf32-hppa.h \
 	elf64-hppa.h elfcode.h elfcore.h \
 	freebsd.h genlink.h go32stub.h \
-	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h libieee.h \
+	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	liboasys.h libpei.h libxcoff.h mach-o.h \
 	netbsd.h ns32k.h \
 	pef.h pef-traceback.h peicode.h som.h version.h \

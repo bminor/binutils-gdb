@@ -3646,8 +3646,8 @@ dump_bfd (bfd *abfd)
 	      exit_status = 1;
 	    }
 	}
-      /* PR 6483: If there was no STABS or IEEE debug
-	 info in the file, try DWARF instead.  */
+      /* PR 6483: If there was no STABS debug info in the file, try
+	 DWARF instead.  */
       else if (! dump_dwarf_section_info)
 	{
 	  dwarf_select_sections_all ();

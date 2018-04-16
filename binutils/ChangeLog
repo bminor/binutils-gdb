@@ -1,5 +1,18 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am: Remove IEEE 695 support.
+	* budbg.h: Likewise.
+	* doc/binutils.texi: Likewise.
+	* makefile.vms: Likewise.
+	* objcopy.c: Likewise.
+	* objdump.c: Likewise.
+	* rddbg.c: Likewise.
+	* ieee.c: Delete.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/copy-2.d: Remove newsos3 support.
 	* testsuite/binutils-all/nm.exp: Likewise.
 

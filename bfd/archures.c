@@ -1168,19 +1168,6 @@ bfd_default_scan (const bfd_arch_info_type *info, const char *string)
 
   switch (number)
     {
-      /* FIXME: These are needed to parse IEEE objects.  */
-      /* The following seven case's are here only for compatibility with
-	 older binutils (at least IEEE objects from binutils 2.9.1 require
-	 them).  */
-    case bfd_mach_m68000:
-    case bfd_mach_m68010:
-    case bfd_mach_m68020:
-    case bfd_mach_m68030:
-    case bfd_mach_m68040:
-    case bfd_mach_m68060:
-    case bfd_mach_cpu32:
-      arch = bfd_arch_m68k;
-      break;
     case 68000:
       arch = bfd_arch_m68k;
       number = bfd_mach_m68000;

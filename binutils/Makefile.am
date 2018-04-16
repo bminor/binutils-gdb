@@ -130,7 +130,7 @@ CFILES = \
 	coffdump.c coffgrok.c cxxfilt.c \
 	dwarf.c debug.c dlltool.c dllwrap.c \
 	elfcomm.c emul_aix.c emul_vanilla.c filemode.c \
-	ieee.c is-ranlib.c is-strip.c maybe-ranlib.c maybe-strip.c \
+	is-ranlib.c is-strip.c maybe-ranlib.c maybe-strip.c \
 	nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c \
 	od-xcoff.c od-macho.c \
@@ -145,7 +145,7 @@ GENERATED_CFILES = \
 	arparse.c arlex.c sysroff.c sysinfo.c syslex.c \
 	defparse.c deflex.c rcparse.c mcparse.c
 
-DEBUG_SRCS = rddbg.c debug.c stabs.c ieee.c rdcoff.c
+DEBUG_SRCS = rddbg.c debug.c stabs.c rdcoff.c
 WRITE_DEBUG_SRCS = $(DEBUG_SRCS) wrstabs.c
 
 # Extra object files for objdump

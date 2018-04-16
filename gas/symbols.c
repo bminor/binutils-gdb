@@ -1355,7 +1355,7 @@ resolve_symbol_value (symbolS *symp)
 	     operands must be absolute.  We already handled the case of
 	     addition or subtraction of a constant above.  This will
 	     probably need to be changed for an object file format which
-	     supports arbitrary expressions, such as IEEE-695.  */
+	     supports arbitrary expressions.  */
 	  if (!(seg_left == absolute_section
 		&& seg_right == absolute_section)
 	      && !(op == O_eq || op == O_ne)

@@ -4251,9 +4251,6 @@ write_debugging_info (bfd *obfd, void *dhandle,
 		      long *symcountp ATTRIBUTE_UNUSED,
 		      asymbol ***symppp ATTRIBUTE_UNUSED)
 {
-  if (bfd_get_flavour (obfd) == bfd_target_ieee_flavour)
-    return write_ieee_debugging_info (obfd, dhandle);
-
   if (bfd_get_flavour (obfd) == bfd_target_coff_flavour
       || bfd_get_flavour (obfd) == bfd_target_elf_flavour)
     {

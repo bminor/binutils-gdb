@@ -277,7 +277,6 @@ i386mach3.c
 i386msdos.c
 i386netbsd.c
 i386os9k.c
-ieee.c
 ihex.c
 init.c
 irix-core.c
@@ -287,7 +286,6 @@ libbfd.h
 libcoff.h
 libecoff.h
 libhppa.h
-libieee.h
 liboasys.h
 libpei.h
 libxcoff.h

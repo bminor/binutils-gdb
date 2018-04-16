@@ -151,7 +151,6 @@ DESCRIPTION
 .  bfd_target_ecoff_flavour,
 .  bfd_target_xcoff_flavour,
 .  bfd_target_elf_flavour,
-.  bfd_target_ieee_flavour,
 .  bfd_target_oasys_flavour,
 .  bfd_target_tekhex_flavour,
 .  bfd_target_srec_flavour,
@@ -689,7 +688,6 @@ extern const bfd_target ia64_elf64_le_vec;
 extern const bfd_target ia64_elf64_hpux_be_vec;
 extern const bfd_target ia64_elf64_vms_vec;
 extern const bfd_target ia64_pei_vec;
-extern const bfd_target ieee_vec;
 extern const bfd_target ip2k_elf32_vec;
 extern const bfd_target iq2000_elf32_vec;
 extern const bfd_target k1om_elf64_vec;
@@ -1120,8 +1118,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&ia64_elf64_vms_vec,
 	&ia64_pei_vec,
 #endif
-
-	&ieee_vec,
 
 	&ip2k_elf32_vec,
 	&iq2000_elf32_vec,
@@ -1860,7 +1856,6 @@ bfd_flavour_name (enum bfd_flavour flavour)
     case bfd_target_ecoff_flavour: return "ECOFF";
     case bfd_target_xcoff_flavour: return "XCOFF";
     case bfd_target_elf_flavour: return "ELF";
-    case bfd_target_ieee_flavour: return "IEEE";
     case bfd_target_oasys_flavour: return "Oasys";
     case bfd_target_tekhex_flavour: return "Tekhex";
     case bfd_target_srec_flavour: return "Srec";

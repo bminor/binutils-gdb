@@ -336,8 +336,6 @@ COFF.
 ECOFF.
 @item bfd_target_elf_flavour
 ELF.
-@item bfd_target_ieee_flavour
-IEEE-695.
 @item bfd_target_oasys_flavour
 OASYS.
 @item bfd_target_tekhex_flavour
@@ -1167,8 +1165,7 @@ address of the section contents.
 In general, relocations can be arbitrarily complex.  For example,
 relocations used in dynamic linking systems often require the linker to
 allocate space in a different section and use the offset within that
-section as the value to store.  In the IEEE object file format,
-relocations may involve arbitrary expressions.
+section as the value to store.
 
 When doing a relocatable link, the linker may or may not have to do
 anything with a relocation, depending upon the definition of the

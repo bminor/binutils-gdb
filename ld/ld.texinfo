@@ -8609,9 +8609,6 @@ language, but restricted to one of these output formats:
 S-records, if @var{output-format} is @samp{S}
 
 @item
-IEEE, if @var{output-format} is @samp{IEEE}
-
-@item
 COFF (the @samp{coff-m68k} variant in BFD), if @var{output-format} is
 @samp{COFF}
 @end enumerate

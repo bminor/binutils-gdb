@@ -65,10 +65,7 @@ SUBSECTION
 	data in place until a <<bfd_get_section_contents>> call is
 	made. Other back ends may read in all the data at once.  For
 	example, an S-record file has to be read once to determine the
-	size of the data. An IEEE-695 file doesn't contain raw data in
-	sections, but data and relocation expressions intermixed, so
-	the data area has to be parsed to get out the data and
-	relocations.
+	size of the data.
 
 INODE
 Section Output, typedef asection, Section Input, Sections

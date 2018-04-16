@@ -1,5 +1,10 @@
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
+	* app.c: Remove IEEE 695 support.
+	* symbols.c: Likewise.
+
+2018-04-16  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Remove netware support.
 	* config/tc-i386.c: Likewise.
 	* configure.tgt: Likewise.

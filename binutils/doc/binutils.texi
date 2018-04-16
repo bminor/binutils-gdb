@@ -2162,9 +2162,9 @@ for more information on demangling.
 
 @item -g
 @itemx --debugging
-Display debugging information.  This attempts to parse STABS and IEEE
+Display debugging information.  This attempts to parse STABS
 debugging format information stored in the file and print it out using
-a C like syntax.  If neither of these formats are found this option
+a C like syntax.  If no STABS debuging was found this option
 falls back on the @option{-W} option to print any DWARF information in
 the file.
 

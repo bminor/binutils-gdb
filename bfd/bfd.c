@@ -310,8 +310,6 @@ CODE_FRAGMENT
 .      struct pe_tdata *pe_obj_data;
 .      struct xcoff_tdata *xcoff_obj_data;
 .      struct ecoff_tdata *ecoff_obj_data;
-.      struct ieee_data_struct *ieee_data;
-.      struct ieee_ar_data_struct *ieee_ar_data;
 .      struct srec_data_struct *srec_data;
 .      struct verilog_data_struct *verilog_data;
 .      struct ihex_data_struct *ihex_data;
