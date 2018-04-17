@@ -1,3 +1,22 @@
+2018-04-09 Andrew Sadek  <andrew.sadek.se@gmail.com>
+
+	Microblaze Target: PIC data text relative
+
+	* gas/config/tc-microblaze.c (Handle new relocs directives in
+	assembler): Handle new relocs from compiler output.
+	(imm_types): add new imm types for data text relative addressing
+	TEXT_OFFSET, TEXT_PC_OFFSET
+	(md_convert_frag): conversion for BFD_RELOC_MICROBLAZE_64_TEXTPCREL,
+	BFD_RELOC_MICROBLAZE_64_TEXTPCREL
+	(md_apply_fix): apply fix for BFD_RELOC_MICROBLAZE_64_TEXTPCREL,
+	BFD_RELOC_MICROBLAZE_64_TEXTPCREL
+	(md_estimate_size_before_relax): estimate size for
+	BFD_RELOC_MICROBLAZE_64_TEXTPCREL,
+	BFD_RELOC_MICROBLAZE_64_TEXTPCREL
+	(tc_gen_reloc): generate relocations for
+	BFD_RELOC_MICROBLAZE_64_TEXTPCREL,
+	BFD_RELOC_MICROBLAZE_64_TEXTPCREL
+
 2018-04-17  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* testsuite/gas/i386/nops.s: Revert back deleted lines and

@@ -314,6 +314,11 @@ static const struct ld_option ld_options[] =
   { {"demangle", optional_argument, NULL, OPTION_DEMANGLE},
     '\0', N_("[=STYLE]"), N_("Demangle symbol names [using STYLE]"),
     TWO_DASHES },
+  { {"disable-multiple-abs-defs", no_argument, NULL,
+     OPTION_DISABLE_MULTIPLE_DEFS_ABS},
+    '\0', NULL, N_("Do not allow multiple definitions with symbols included\n"
+		   "           in filename invoked by -R or --just-symbols"),
+    TWO_DASHES},
   { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
     '\0', NULL, N_("Generate embedded relocs"), TWO_DASHES},
   { {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL},
@@ -1158,6 +1163,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_NO_STRIP_DISCARDED:
 	  link_info.strip_discarded = FALSE;
+	  break;
+	case OPTION_DISABLE_MULTIPLE_DEFS_ABS:
+	  link_info.prohibit_multiple_definition_absolute = TRUE;
 	  break;
 	case OPTION_SHARED:
 	  if (config.has_shared)

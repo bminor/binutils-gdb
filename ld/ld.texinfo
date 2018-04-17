@@ -1561,6 +1561,11 @@ that the relocs are stored in a target specific section.  This option
 is only supported by the @samp{BFIN}, @samp{CR16} and @emph{M68K}
 targets.
 
+@kindex --disable-multiple-abs-defs
+@item --disable-multiple-abs-defs
+Do not allow multiple definitions with symbols included
+in filename invoked by -R or --just-symbols
+
 @kindex --fatal-warnings
 @kindex --no-fatal-warnings
 @item --fatal-warnings

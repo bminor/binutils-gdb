@@ -1,3 +1,20 @@
+2018-04-09 Andrew Sadek  <andrew.sadek.se@gmail.com>
+
+	Microblaze Target: PIC data text relative
+
+	* bfd/reloc.c (2 new BFD relocations):
+	BFD_RELOC_MICROBLAZE_64_TEXTPCREL &
+	BFD_RELOC_MICROBLAZE_64_TEXTPCREL
+	* bfd/bfd-in2.h: Regenerate
+	* bfd/libbfd.h: Regenerate
+	* bfd/elf32-microblaze.c (Handle new relocs): define 'HOWTO' of 3
+	new relocs and handle them in both relocate and relax functions.
+	(microblaze_elf_reloc_type_lookup): add mapping between for new
+	bfd relocs.
+	(microblaze_elf_relocate_section): Handle new relocs in case of
+	elf relocation.
+	(microblaze_elf_relax_section): Handle new relocs for elf relaxation.
+
 2018-04-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 23055

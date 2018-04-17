@@ -1,3 +1,16 @@
+2018-04-09 Andrew Sadek  <andrew.sadek.se@gmail.com>
+
+	Microblaze Target: PIC data text relative
+
+	* ld/lexsup.c (Add 2 ld options):
+	(ld_options): add disable-multiple-abs-defs @ 'ld_options' array
+	(parse_args): parse new option and pass flag to 'link_info' struct.
+	* ld/ldlex.h (Add enum): add new enum @ 'option_values' enum.
+	* ld/ld.texinfo (Add new option): Add description for
+	'disable-multiple-abs-defs'
+	* ld/main.c: Initialize flags with false @ 'main'. Handle
+	disable-multiple-abs-defs @ 'mutiple_definition'.
+
 2018-04-16  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/sunos.em: Delete.

@@ -5831,6 +5831,16 @@ to two words (uses imm instruction).  */
 to two words (uses imm instruction).  */
   BFD_RELOC_MICROBLAZE_64_TLSTPREL,
 
+/* This is a 64 bit reloc that stores the 32 bit pc relative
+value in two words (with an imm instruction).  The relocation is
+PC-relative offset from start of TEXT.  */
+  BFD_RELOC_MICROBLAZE_64_TEXTPCREL,
+
+/* This is a 64 bit reloc that stores the 32 bit offset
+value in two words (with an imm instruction).  The relocation is
+relative offset from start of TEXT.  */
+  BFD_RELOC_MICROBLAZE_64_TEXTREL,
+
 /* AArch64 pseudo relocation code to mark the start of the AArch64
 relocation enumerators.  N.B. the order of the enumerators is
 important as several tables in the AArch64 bfd backend are indexed

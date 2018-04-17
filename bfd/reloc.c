@@ -6906,6 +6906,18 @@ ENUM
 ENUMDOC
   This is a 64 bit reloc that stores 32-bit thread pointer relative offset
   to two words (uses imm instruction).
+ENUM
+  BFD_RELOC_MICROBLAZE_64_TEXTPCREL
+ENUMDOC
+  This is a 64 bit reloc that stores the 32 bit pc relative
+  value in two words (with an imm instruction).  The relocation is
+  PC-relative offset from start of TEXT.
+ENUM
+  BFD_RELOC_MICROBLAZE_64_TEXTREL
+ENUMDOC
+  This is a 64 bit reloc that stores the 32 bit offset
+  value in two words (with an imm instruction).  The relocation is
+  relative offset from start of TEXT.
 
 ENUM
   BFD_RELOC_AARCH64_RELOC_START
