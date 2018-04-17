@@ -106,8 +106,8 @@ static int
 sixg_string_p (struct type *type)
 {
   if (TYPE_NFIELDS (type) == 2
-      && TYPE_TAG_NAME (type) != NULL
-      && strcmp (TYPE_TAG_NAME (type), "string") == 0)
+      && TYPE_NAME (type) != NULL
+      && strcmp (TYPE_NAME (type), "string") == 0)
     return 1;
 
   return 0;

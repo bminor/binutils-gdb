@@ -1469,12 +1469,6 @@ smash_to_method_type (struct type *type, struct type *self_type,
 const char *
 type_name_no_tag (const struct type *type)
 {
-  if (TYPE_TAG_NAME (type) != NULL)
-    return TYPE_TAG_NAME (type);
-
-  /* Is there code which expects this to return the name if there is
-     no tag name?  My guess is that this is mainly used for C++ in
-     cases where the two will always be the same.  */
   return TYPE_NAME (type);
 }
 
@@ -2445,10 +2439,8 @@ check_typedef (struct type *type)
 	    return make_qualified_type (type, instance_flags, NULL);
 
 	  name = type_name_no_tag (type);
-	  /* FIXME: shouldn't we separately check the TYPE_NAME and
-	     the TYPE_TAG_NAME, and look in STRUCT_DOMAIN and/or
-	     VAR_DOMAIN as appropriate?  (this code was written before
-	     TYPE_NAME and TYPE_TAG_NAME were separate).  */
+	  /* FIXME: shouldn't we look in STRUCT_DOMAIN and/or
+	     VAR_DOMAIN as appropriate?  */
 	  if (name == NULL)
 	    {
 	      stub_noname_complaint ();
@@ -2534,10 +2526,8 @@ check_typedef (struct type *type)
   else if (TYPE_STUB (type) && !currently_reading_symtab)
     {
       const char *name = type_name_no_tag (type);
-      /* FIXME: shouldn't we separately check the TYPE_NAME and the
-         TYPE_TAG_NAME, and look in STRUCT_DOMAIN and/or VAR_DOMAIN
-         as appropriate?  (this code was written before TYPE_NAME and
-         TYPE_TAG_NAME were separate).  */
+      /* FIXME: shouldn't we look in STRUCT_DOMAIN and/or VAR_DOMAIN
+         as appropriate?  */
       struct symbol *sym;
 
       if (name == NULL)
@@ -3669,8 +3659,7 @@ check_types_equal (struct type *type1, struct type *type2,
       || TYPE_NFIELDS (type1) != TYPE_NFIELDS (type2))
     return false;
 
-  if (!compare_maybe_null_strings (TYPE_TAG_NAME (type1),
-				   TYPE_TAG_NAME (type2)))
+  if (!compare_maybe_null_strings (TYPE_NAME (type1), TYPE_NAME (type2)))
     return false;
   if (!compare_maybe_null_strings (TYPE_NAME (type1), TYPE_NAME (type2)))
     return false;
@@ -4530,10 +4519,6 @@ recursive_dump_type (struct type *type, int spaces)
 		    TYPE_NAME (type) ? TYPE_NAME (type) : "<NULL>");
   gdb_print_host_address (TYPE_NAME (type), gdb_stdout);
   printf_filtered (")\n");
-  printfi_filtered (spaces, "tagname '%s' (",
-		    TYPE_TAG_NAME (type) ? TYPE_TAG_NAME (type) : "<NULL>");
-  gdb_print_host_address (TYPE_TAG_NAME (type), gdb_stdout);
-  printf_filtered (")\n");
   printfi_filtered (spaces, "code 0x%x ", TYPE_CODE (type));
   switch (TYPE_CODE (type))
     {
@@ -4917,8 +4902,6 @@ copy_type_recursive (struct objfile *objfile,
 
   if (TYPE_NAME (type))
     TYPE_NAME (new_type) = xstrdup (TYPE_NAME (type));
-  if (TYPE_TAG_NAME (type))
-    TYPE_TAG_NAME (new_type) = xstrdup (TYPE_TAG_NAME (type));
 
   TYPE_INSTANCE_FLAGS (new_type) = TYPE_INSTANCE_FLAGS (type);
   TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
@@ -5256,7 +5239,7 @@ arch_composite_type (struct gdbarch *gdbarch, const char *name,
 
   gdb_assert (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION);
   t = arch_type (gdbarch, code, 0, NULL);
-  TYPE_TAG_NAME (t) = name;
+  TYPE_NAME (t) = name;
   INIT_CPLUS_SPECIFIC (t);
   return t;
 }

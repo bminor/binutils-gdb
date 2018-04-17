@@ -721,25 +721,11 @@ struct main_type
 
   /* * Name of this type, or NULL if none.
 
-     This is used for printing only, except by poorly designed C++
-     code.  For looking up a name, look for a symbol in the
-     VAR_DOMAIN.  This is generally allocated in the objfile's
-     obstack.  However coffread.c uses malloc.  */
+     This is used for printing only.  For looking up a name, look for
+     a symbol in the VAR_DOMAIN.  This is generally allocated in the
+     objfile's obstack.  However coffread.c uses malloc.  */
 
   const char *name;
-
-  /* * Tag name for this type, or NULL if none.  This means that the
-     name of the type consists of a keyword followed by the tag name.
-     Which keyword is determined by the type code ("struct" for
-     TYPE_CODE_STRUCT, etc.).  As far as I know C/C++ are the only
-     languages with this feature.
-
-     This is used for printing only, except by poorly designed C++ code.
-     For looking up a name, look for a symbol in the STRUCT_DOMAIN.
-     One more legitimate use is that if TYPE_STUB is set, this is
-     the name to use to look for definitions in other files.  */
-
-  const char *tag_name;
 
   /* * Every type is now associated with a particular objfile, and the
      type is allocated on the objfile_obstack for that objfile.  One
@@ -1293,7 +1279,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_INSTANCE_FLAGS(thistype) (thistype)->instance_flags
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
 #define TYPE_NAME(thistype) TYPE_MAIN_TYPE(thistype)->name
-#define TYPE_TAG_NAME(type) TYPE_MAIN_TYPE(type)->tag_name
 #define TYPE_TARGET_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type

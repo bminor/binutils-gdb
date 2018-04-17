@@ -1343,8 +1343,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
-      if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
-	TYPE_TAG_NAME (SYMBOL_TYPE (sym))
+      if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+	TYPE_NAME (SYMBOL_TYPE (sym))
 	  = obconcat (&objfile->objfile_obstack,
 		      SYMBOL_LINKAGE_NAME (sym),
 		      (char *) NULL);
@@ -1699,7 +1699,7 @@ again:
 	   type.  */
 	type = dbx_alloc_type (typenums, objfile);
 	TYPE_CODE (type) = code;
-	TYPE_TAG_NAME (type) = type_name;
+	TYPE_NAME (type) = type_name;
 	INIT_CPLUS_SPECIFIC (type);
 	TYPE_STUB (type) = 1;
 
@@ -1764,7 +1764,6 @@ again:
                copies of a type otherwise.  */
 	    replace_type (type, xtype);
 	    TYPE_NAME (type) = NULL;
-	    TYPE_TAG_NAME (type) = NULL;
 	  }
 	else
 	  {
@@ -3413,9 +3412,9 @@ complain_about_struct_wipeout (struct type *type)
   const char *name = "";
   const char *kind = "";
 
-  if (TYPE_TAG_NAME (type))
+  if (TYPE_NAME (type))
     {
-      name = TYPE_TAG_NAME (type);
+      name = TYPE_NAME (type);
       switch (TYPE_CODE (type))
         {
         case TYPE_CODE_STRUCT: kind = "struct "; break;
@@ -3423,11 +3422,6 @@ complain_about_struct_wipeout (struct type *type)
         case TYPE_CODE_ENUM:   kind = "enum ";   break;
         default: kind = "";
         }
-    }
-  else if (TYPE_NAME (type))
-    {
-      name = TYPE_NAME (type);
-      kind = "";
     }
   else
     {
@@ -4458,7 +4452,7 @@ add_undefined_type_1 (struct type *type)
 static void
 add_undefined_type (struct type *type, int typenums[2])
 {
-  if (TYPE_TAG_NAME (type) == NULL)
+  if (TYPE_NAME (type) == NULL)
     add_undefined_type_noname (type, typenums);
   else
     add_undefined_type_1 (type);
@@ -4543,7 +4537,7 @@ cleanup_undefined_types_1 (void)
 		struct pending *ppt;
 		int i;
 		/* Name of the type, without "struct" or "union".  */
-		const char *type_name = TYPE_TAG_NAME (*type);
+		const char *type_name = TYPE_NAME (*type);
 
 		if (type_name == NULL)
 		  {

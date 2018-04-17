@@ -61,8 +61,6 @@ find_size_for_pointer_math (struct type *ptr_type)
 	  
 	  name = TYPE_NAME (ptr_target);
 	  if (name == NULL)
-	    name = TYPE_TAG_NAME (ptr_target);
-	  if (name == NULL)
 	    error (_("Cannot perform pointer math on incomplete types, "
 		   "try casting to a known type, or void *."));
 	  else

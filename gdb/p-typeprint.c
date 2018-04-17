@@ -522,9 +522,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
          only after args !!  */
       break;
     case TYPE_CODE_STRUCT:
-      if (TYPE_TAG_NAME (type) != NULL)
+      if (TYPE_NAME (type) != NULL)
 	{
-	  fputs_filtered (TYPE_TAG_NAME (type), stream);
+	  fputs_filtered (TYPE_NAME (type), stream);
 	  fputs_filtered (" = ", stream);
 	}
       if (HAVE_CPLUS_STRUCT (type))
@@ -538,9 +538,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       goto struct_union;
 
     case TYPE_CODE_UNION:
-      if (TYPE_TAG_NAME (type) != NULL)
+      if (TYPE_NAME (type) != NULL)
 	{
-	  fputs_filtered (TYPE_TAG_NAME (type), stream);
+	  fputs_filtered (TYPE_NAME (type), stream);
 	  fputs_filtered (" = ", stream);
 	}
       fprintf_filtered (stream, "case <?> of ");
@@ -550,10 +550,10 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       if (show < 0)
 	{
 	  /* If we just printed a tag name, no need to print anything else.  */
-	  if (TYPE_TAG_NAME (type) == NULL)
+	  if (TYPE_NAME (type) == NULL)
 	    fprintf_filtered (stream, "{...}");
 	}
-      else if (show > 0 || TYPE_TAG_NAME (type) == NULL)
+      else if (show > 0 || TYPE_NAME (type) == NULL)
 	{
 	  pascal_type_print_derivation_info (stream, type);
 
@@ -740,9 +740,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_ENUM:
-      if (TYPE_TAG_NAME (type) != NULL)
+      if (TYPE_NAME (type) != NULL)
 	{
-	  fputs_filtered (TYPE_TAG_NAME (type), stream);
+	  fputs_filtered (TYPE_NAME (type), stream);
 	  if (show > 0)
 	    fputs_filtered (" ", stream);
 	}
@@ -753,10 +753,10 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       if (show < 0)
 	{
 	  /* If we just printed a tag name, no need to print anything else.  */
-	  if (TYPE_TAG_NAME (type) == NULL)
+	  if (TYPE_NAME (type) == NULL)
 	    fprintf_filtered (stream, "(...)");
 	}
-      else if (show > 0 || TYPE_TAG_NAME (type) == NULL)
+      else if (show > 0 || TYPE_NAME (type) == NULL)
 	{
 	  fprintf_filtered (stream, "(");
 	  len = TYPE_NFIELDS (type);

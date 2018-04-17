@@ -1781,11 +1781,11 @@ process_coff_symbol (struct coff_symbol *cs,
 	  /* Some compilers try to be helpful by inventing "fake"
 	     names for anonymous enums, structures, and unions, like
 	     "~0fake" or ".0fake".  Thanks, but no thanks...  */
-	  if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
+	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 	    if (SYMBOL_LINKAGE_NAME (sym) != NULL
 		&& *SYMBOL_LINKAGE_NAME (sym) != '~'
 		&& *SYMBOL_LINKAGE_NAME (sym) != '.')
-	      TYPE_TAG_NAME (SYMBOL_TYPE (sym)) =
+	      TYPE_NAME (SYMBOL_TYPE (sym)) =
 		concat (SYMBOL_LINKAGE_NAME (sym), (char *)NULL);
 
 	  add_symbol_to_list (sym, &file_symbols);
@@ -1950,10 +1950,6 @@ decode_base_type (struct coff_symbol *cs,
 	  type = coff_alloc_type (cs->c_symnum);
 	  TYPE_CODE (type) = TYPE_CODE_STRUCT;
 	  TYPE_NAME (type) = NULL;
-	  /* This used to set the tag to "<opaque>".  But I think
-	     setting it to NULL is right, and the printing code can
-	     print it as "struct {...}".  */
-	  TYPE_TAG_NAME (type) = NULL;
 	  INIT_CPLUS_SPECIFIC (type);
 	  TYPE_LENGTH (type) = 0;
 	  TYPE_FIELDS (type) = 0;
@@ -1974,10 +1970,6 @@ decode_base_type (struct coff_symbol *cs,
 	  /* Anonymous union type.  */
 	  type = coff_alloc_type (cs->c_symnum);
 	  TYPE_NAME (type) = NULL;
-	  /* This used to set the tag to "<opaque>".  But I think
-	     setting it to NULL is right, and the printing code can
-	     print it as "union {...}".  */
-	  TYPE_TAG_NAME (type) = NULL;
 	  INIT_CPLUS_SPECIFIC (type);
 	  TYPE_LENGTH (type) = 0;
 	  TYPE_FIELDS (type) = 0;
@@ -2000,10 +1992,6 @@ decode_base_type (struct coff_symbol *cs,
 	  type = coff_alloc_type (cs->c_symnum);
 	  TYPE_CODE (type) = TYPE_CODE_ENUM;
 	  TYPE_NAME (type) = NULL;
-	  /* This used to set the tag to "<opaque>".  But I think
-	     setting it to NULL is right, and the printing code can
-	     print it as "enum {...}".  */
-	  TYPE_TAG_NAME (type) = NULL;
 	  TYPE_LENGTH (type) = 0;
 	  TYPE_FIELDS (type) = 0;
 	  TYPE_NFIELDS (type) = 0;

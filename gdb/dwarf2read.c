@@ -9762,8 +9762,6 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 				     saved_package_name);
       struct symbol *sym;
 
-      TYPE_TAG_NAME (type) = TYPE_NAME (type);
-
       sym = allocate_symbol (objfile);
       SYMBOL_SET_LANGUAGE (sym, language_go, &objfile->objfile_obstack);
       SYMBOL_SET_NAMES (sym, saved_package_name,
@@ -15653,18 +15651,13 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	  if (get_die_type (die, cu) != NULL)
 	    return get_die_type (die, cu);
 
-	  TYPE_TAG_NAME (type) = full_name;
-	  if (die->tag == DW_TAG_structure_type
-	      || die->tag == DW_TAG_class_type)
-	    TYPE_NAME (type) = TYPE_TAG_NAME (type);
+	  TYPE_NAME (type) = full_name;
 	}
       else
 	{
 	  /* The name is already allocated along with this objfile, so
 	     we don't need to duplicate it for the type.  */
-	  TYPE_TAG_NAME (type) = name;
-	  if (die->tag == DW_TAG_class_type)
-	    TYPE_NAME (type) = TYPE_TAG_NAME (type);
+	  TYPE_NAME (type) = name;
 	}
     }
 
@@ -15944,8 +15937,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		  if (i < TYPE_N_BASECLASSES (t))
 		    complaint (_("virtual function table pointer "
 				 "not found when defining class '%s'"),
-			       TYPE_TAG_NAME (type) ? TYPE_TAG_NAME (type) :
-			       "");
+			       TYPE_NAME (type) ? TYPE_NAME (type) : "");
 		}
 	      else
 		{
@@ -16135,7 +16127,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   name = dwarf2_full_name (NULL, die, cu);
   if (name != NULL)
-    TYPE_TAG_NAME (type) = name;
+    TYPE_NAME (type) = name;
 
   attr = dwarf2_attr (die, DW_AT_type, cu);
   if (attr != NULL)
@@ -16686,7 +16678,6 @@ read_namespace_type (struct die_info *die, struct dwarf2_cu *cu)
 
   /* Create the type.  */
   type = init_type (objfile, TYPE_CODE_NAMESPACE, 0, name);
-  TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
   return set_die_type (die, type, cu);
 }
@@ -16750,9 +16741,6 @@ read_module_type (struct die_info *die, struct dwarf2_cu *cu)
     complaint (_("DW_TAG_module has no name, offset %s"),
                sect_offset_str (die->sect_off));
   type = init_type (objfile, TYPE_CODE_MODULE, 0, module_name);
-
-  /* determine_prefix uses TYPE_TAG_NAME.  */
-  TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
   return set_die_type (die, type, cu);
 }
@@ -22183,18 +22171,18 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	   DW_TAG_namespace DIEs with a name of "::" for the global namespace.
 	   Work around this problem here.  */
 	if (cu->language == language_cplus
-	    && strcmp (TYPE_TAG_NAME (parent_type), "::") == 0)
+	    && strcmp (TYPE_NAME (parent_type), "::") == 0)
 	  return "";
 	/* We give a name to even anonymous namespaces.  */
-	return TYPE_TAG_NAME (parent_type);
+	return TYPE_NAME (parent_type);
       case DW_TAG_class_type:
       case DW_TAG_interface_type:
       case DW_TAG_structure_type:
       case DW_TAG_union_type:
       case DW_TAG_module:
 	parent_type = read_type_die (parent, cu);
-	if (TYPE_TAG_NAME (parent_type) != NULL)
-	  return TYPE_TAG_NAME (parent_type);
+	if (TYPE_NAME (parent_type) != NULL)
+	  return TYPE_NAME (parent_type);
 	else
 	  /* An anonymous structure is only allowed non-static data
 	     members; no typedefs, no member functions, et cetera.
@@ -22219,8 +22207,8 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	parent_type = read_type_die (parent, cu);
 	if (TYPE_DECLARED_CLASS (parent_type))
 	  {
-	    if (TYPE_TAG_NAME (parent_type) != NULL)
-	      return TYPE_TAG_NAME (parent_type);
+	    if (TYPE_NAME (parent_type) != NULL)
+	      return TYPE_NAME (parent_type);
 	    return "";
 	  }
 	/* Fall through.  */

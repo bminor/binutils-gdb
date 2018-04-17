@@ -1,3 +1,12 @@
+2018-06-01  Tom Tromey  <tom@tromey.com>
+
+	* gdb.xml/tdesc-regs.exp (load_description): Update expected
+	results.
+	* gdb.dwarf2/method-ptr.exp: Set language to C++.
+	* gdb.dwarf2/member-ptr-forwardref.exp: Set language to C++.
+	* gdb.cp/typeid.exp (do_typeid_tests): Update type_re.
+	* gdb.base/maint.exp (maint_pass_if): Update.
+
 2018-05-31  Maciej W. Rozycki  <macro@mips.com>
 
 	* gdb.base/endian.exp: New test.

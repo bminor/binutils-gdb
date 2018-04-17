@@ -189,7 +189,6 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
     {
       m_type = arch_composite_type (m_gdbarch, NULL, TYPE_CODE_STRUCT);
       TYPE_NAME (m_type) = xstrdup (e->name.c_str ());
-      TYPE_TAG_NAME (m_type) = TYPE_NAME (m_type);
 
       for (const tdesc_type_field &f : e->fields)
 	{

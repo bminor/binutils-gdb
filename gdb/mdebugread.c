@@ -1024,10 +1024,10 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	   (.Fxx or .xxfake or empty) for unnamed struct/union/enums.
 	   Alpha cc puts out an sh->iss of zero for those.  */
 	if (sh->iss == 0 || name[0] == '.' || name[0] == '\0')
-	  TYPE_TAG_NAME (t) = NULL;
+	  TYPE_NAME (t) = NULL;
 	else
-	  TYPE_TAG_NAME (t) = obconcat (&mdebugread_objfile->objfile_obstack,
-					name, (char *) NULL);
+	  TYPE_NAME (t) = obconcat (&mdebugread_objfile->objfile_obstack,
+				    name, (char *) NULL);
 
 	TYPE_CODE (t) = type_code;
 	TYPE_LENGTH (t) = sh->value;
@@ -1687,10 +1687,10 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  /* Do not set the tag name if it is a compiler generated tag name
 	     (.Fxx or .xxfake or empty) for unnamed struct/union/enums.  */
 	  if (name[0] == '.' || name[0] == '\0')
-	    TYPE_TAG_NAME (tp) = NULL;
-	  else if (TYPE_TAG_NAME (tp) == NULL
-		   || strcmp (TYPE_TAG_NAME (tp), name) != 0)
-	    TYPE_TAG_NAME (tp)
+	    TYPE_NAME (tp) = NULL;
+	  else if (TYPE_NAME (tp) == NULL
+		   || strcmp (TYPE_NAME (tp), name) != 0)
+	    TYPE_NAME (tp)
 	      = ((const char *)
 		 obstack_copy0 (&mdebugread_objfile->objfile_obstack,
 				name, strlen (name)));

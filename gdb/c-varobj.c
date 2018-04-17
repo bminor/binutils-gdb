@@ -145,8 +145,7 @@ c_is_path_expr_parent (const struct varobj *var)
   /* Anonymous unions and structs are also not path_expr parents.  */
   if ((TYPE_CODE (type) == TYPE_CODE_STRUCT
        || TYPE_CODE (type) == TYPE_CODE_UNION)
-      && TYPE_NAME (type) == NULL
-      && TYPE_TAG_NAME (type) == NULL)
+      && TYPE_NAME (type) == NULL)
     {
       const struct varobj *parent = var->parent;
 

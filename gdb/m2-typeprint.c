@@ -439,21 +439,13 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 
   if (m2_is_long_set (type))
     {
-      if (TYPE_TAG_NAME (type) != NULL)
-	{
-	  fputs_filtered (TYPE_TAG_NAME (type), stream);
-	  if (show == 0)
-	    return 1;
-	}
-      else if (TYPE_NAME (type) != NULL)
+      if (TYPE_NAME (type) != NULL)
 	{
 	  fputs_filtered (TYPE_NAME (type), stream);
 	  if (show == 0)
 	    return 1;
+	  fputs_filtered (" = ", stream);
 	}
-
-      if (TYPE_TAG_NAME (type) != NULL || TYPE_NAME (type) != NULL)
-	fputs_filtered (" = ", stream);
 
       if (get_long_set_bounds (type, &low, &high))
 	{
@@ -537,11 +529,11 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 		  int level, const struct type_print_options *flags)
 {
   /* Print the tag if it exists.  */
-  if (TYPE_TAG_NAME (type) != NULL)
+  if (TYPE_NAME (type) != NULL)
     {
-      if (!startswith (TYPE_TAG_NAME (type), "$$"))
+      if (!startswith (TYPE_NAME (type), "$$"))
 	{
-	  fputs_filtered (TYPE_TAG_NAME (type), stream);
+	  fputs_filtered (TYPE_NAME (type), stream);
 	  if (show > 0)
 	    fprintf_filtered (stream, " = ");
 	}
@@ -601,10 +593,10 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
   if (show < 0)
     {
       /* If we just printed a tag name, no need to print anything else.  */
-      if (TYPE_TAG_NAME (type) == NULL)
+      if (TYPE_NAME (type) == NULL)
 	fprintf_filtered (stream, "(...)");
     }
-  else if (show > 0 || TYPE_TAG_NAME (type) == NULL)
+  else if (show > 0 || TYPE_NAME (type) == NULL)
     {
       fprintf_filtered (stream, "(");
       len = TYPE_NFIELDS (type);

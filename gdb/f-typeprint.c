@@ -290,7 +290,12 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 
   if ((show <= 0) && (TYPE_NAME (type) != NULL))
     {
-      fprintfi_filtered (level, stream, "%s", TYPE_NAME (type));
+      const char *prefix = "";
+      if (TYPE_CODE (type) == TYPE_CODE_UNION)
+	prefix = "Type, C_Union :: ";
+      else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	prefix = "Type ";
+      fprintfi_filtered (level, stream, "%s%s", prefix, TYPE_NAME (type));
       return;
     }
 
@@ -370,7 +375,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	fprintfi_filtered (level, stream, "Type, C_Union :: ");
       else
 	fprintfi_filtered (level, stream, "Type ");
-      fputs_filtered (TYPE_TAG_NAME (type), stream);
+      fputs_filtered (TYPE_NAME (type), stream);
       /* According to the definition,
          we only print structure elements in case show > 0.  */
       if (show > 0)
@@ -387,12 +392,12 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      fputs_filtered ("\n", stream);
 	    }
 	  fprintfi_filtered (level, stream, "End Type ");
-	  fputs_filtered (TYPE_TAG_NAME (type), stream);
+	  fputs_filtered (TYPE_NAME (type), stream);
 	}
       break;
 
     case TYPE_CODE_MODULE:
-      fprintfi_filtered (level, stream, "module %s", TYPE_TAG_NAME (type));
+      fprintfi_filtered (level, stream, "module %s", TYPE_NAME (type));
       break;
 
     default_case:

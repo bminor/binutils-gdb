@@ -199,7 +199,7 @@ inspect_type (struct demangle_parse_info *info,
 	      && strcmp (TYPE_NAME (type), name) == 0)
 	    return 0;
 
-	  is_anon = (TYPE_TAG_NAME (type) == NULL
+	  is_anon = (TYPE_NAME (type) == NULL
 		     && (TYPE_CODE (type) == TYPE_CODE_ENUM
 			 || TYPE_CODE (type) == TYPE_CODE_STRUCT
 			 || TYPE_CODE (type) == TYPE_CODE_UNION));

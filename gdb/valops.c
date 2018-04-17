@@ -3243,7 +3243,7 @@ enum_constant_from_type (struct type *type, const char *name)
     }
 
   error (_("no constant named \"%s\" in enum \"%s\""),
-	 name, TYPE_TAG_NAME (type));
+	 name, TYPE_NAME (type));
 }
 
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
@@ -3581,7 +3581,7 @@ value_namespace_elt (const struct type *curtype,
 
   if (retval == NULL)
     error (_("No symbol \"%s\" in namespace \"%s\"."), 
-	   name, TYPE_TAG_NAME (curtype));
+	   name, TYPE_NAME (curtype));
 
   return retval;
 }
@@ -3597,7 +3597,7 @@ value_maybe_namespace_elt (const struct type *curtype,
 			   const char *name, int want_address,
 			   enum noside noside)
 {
-  const char *namespace_name = TYPE_TAG_NAME (curtype);
+  const char *namespace_name = TYPE_NAME (curtype);
   struct block_symbol sym;
   struct value *result;
 

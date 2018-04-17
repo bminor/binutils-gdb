@@ -416,10 +416,16 @@ static PyObject *
 typy_get_tag (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
+  const char *tagname = nullptr;
 
-  if (!TYPE_TAG_NAME (type))
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_UNION
+      || TYPE_CODE (type) == TYPE_CODE_ENUM)
+    tagname = TYPE_NAME (type);
+
+  if (tagname == nullptr)
     Py_RETURN_NONE;
-  return PyString_FromString (TYPE_TAG_NAME (type));
+  return PyString_FromString (tagname);
 }
 
 /* Return the type, stripped of typedefs. */

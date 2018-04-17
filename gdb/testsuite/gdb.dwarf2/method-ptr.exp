@@ -82,5 +82,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
+gdb_test_no_output "set language c++"
 gdb_test "ptype the_typedef" \
     "type = int \\(S::\\*\\)\\(S \\* const, float\\)"

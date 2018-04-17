@@ -95,8 +95,8 @@ rust_tuple_type_p (struct type *type)
      nothing else in the debuginfo to distinguish a tuple from a
      struct.  */
   return (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	  && TYPE_TAG_NAME (type) != NULL
-	  && TYPE_TAG_NAME (type)[0] == '(');
+	  && TYPE_NAME (type) != NULL
+	  && TYPE_NAME (type)[0] == '(');
 }
 
 /* Return true if all non-static fields of a structlike type are in a
@@ -143,9 +143,9 @@ static bool
 rust_slice_type_p (struct type *type)
 {
   return (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	  && TYPE_TAG_NAME (type) != NULL
-	  && (strncmp (TYPE_TAG_NAME (type), "&[", 2) == 0
-	      || strcmp (TYPE_TAG_NAME (type), "&str") == 0));
+	  && TYPE_NAME (type) != NULL
+	  && (strncmp (TYPE_NAME (type), "&[", 2) == 0
+	      || strcmp (TYPE_NAME (type), "&str") == 0));
 }
 
 /* Return true if TYPE is a range type, otherwise false.  */
@@ -157,8 +157,8 @@ rust_range_type_p (struct type *type)
 
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
       || TYPE_NFIELDS (type) > 2
-      || TYPE_TAG_NAME (type) == NULL
-      || strstr (TYPE_TAG_NAME (type), "::Range") == NULL)
+      || TYPE_NAME (type) == NULL
+      || strstr (TYPE_NAME (type), "::Range") == NULL)
     return false;
 
   if (TYPE_NFIELDS (type) == 0)
@@ -187,8 +187,8 @@ rust_range_type_p (struct type *type)
 static bool
 rust_inclusive_range_type_p (struct type *type)
 {
-  return (strstr (TYPE_TAG_NAME (type), "::RangeInclusive") != NULL
-	  || strstr (TYPE_TAG_NAME (type), "::RangeToInclusive") != NULL);
+  return (strstr (TYPE_NAME (type), "::RangeInclusive") != NULL
+	  || strstr (TYPE_NAME (type), "::RangeToInclusive") != NULL);
 }
 
 /* Return true if TYPE seems to be the type "u8", otherwise false.  */
@@ -353,13 +353,13 @@ val_print_struct (struct type *type, int embedded_offset,
 
   if (!is_tuple)
     {
-      if (TYPE_TAG_NAME (type) != NULL)
-        fprintf_filtered (stream, "%s", TYPE_TAG_NAME (type));
+      if (TYPE_NAME (type) != NULL)
+        fprintf_filtered (stream, "%s", TYPE_NAME (type));
 
       if (TYPE_NFIELDS (type) == 0)
         return;
 
-      if (TYPE_TAG_NAME (type) != NULL)
+      if (TYPE_NAME (type) != NULL)
         fputs_filtered (" ", stream);
     }
 
@@ -628,7 +628,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
   /* Print a tuple type simply.  */
   if (rust_tuple_type_p (type))
     {
-      fputs_filtered (TYPE_TAG_NAME (type), stream);
+      fputs_filtered (TYPE_NAME (type), stream);
       return;
     }
 
@@ -638,7 +638,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
 
   /* Compute properties of TYPE here because, in the enum case, the
      rest of the code ends up looking only at the variant part.  */
-  const char *tagname = TYPE_TAG_NAME (type);
+  const char *tagname = TYPE_NAME (type);
   bool is_tuple_struct = rust_tuple_struct_type_p (type);
   bool is_tuple = rust_tuple_type_p (type);
   bool is_enum = rust_enum_p (type);
@@ -819,11 +819,11 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	int i, len = 0;
 
 	fputs_filtered ("enum ", stream);
-	if (TYPE_TAG_NAME (type) != NULL)
+	if (TYPE_NAME (type) != NULL)
 	  {
-	    fputs_filtered (TYPE_TAG_NAME (type), stream);
+	    fputs_filtered (TYPE_NAME (type), stream);
 	    fputs_filtered (" ", stream);
-	    len = strlen (TYPE_TAG_NAME (type));
+	    len = strlen (TYPE_NAME (type));
 	  }
 	fputs_filtered ("{\n", stream);
 
@@ -834,7 +834,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	    QUIT;
 
 	    if (len > 0
-		&& strncmp (name, TYPE_TAG_NAME (type), len) == 0
+		&& strncmp (name, TYPE_NAME (type), len) == 0
 		&& name[len] == ':'
 		&& name[len + 1] == ':')
 	      name += len + 2;
@@ -882,7 +882,6 @@ rust_composite_type (struct type *original,
 
   TYPE_CODE (result) = TYPE_CODE_STRUCT;
   TYPE_NAME (result) = name;
-  TYPE_TAG_NAME (result) = name;
 
   TYPE_NFIELDS (result) = nfields;
   TYPE_FIELDS (result)
@@ -1060,10 +1059,10 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
        && TYPE_CODE (type) != TYPE_CODE_ENUM)
       || rust_tuple_type_p (type))
     error (_("Method calls only supported on struct or enum types"));
-  if (TYPE_TAG_NAME (type) == NULL)
+  if (TYPE_NAME (type) == NULL)
     error (_("Method call on nameless type"));
 
-  std::string name = std::string (TYPE_TAG_NAME (type)) + "::" + method;
+  std::string name = std::string (TYPE_NAME (type)) + "::" + method;
 
   block = get_selected_block (0);
   sym = lookup_symbol (name.c_str (), block, VAR_DOMAIN, NULL);
@@ -1583,13 +1582,13 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 		if (outer_type != NULL)
 		  error(_("Cannot access field %d of variant %s::%s, "
 			  "there are only %d fields"),
-			field_number, TYPE_TAG_NAME (outer_type),
-			rust_last_path_segment (TYPE_TAG_NAME (type)),
+			field_number, TYPE_NAME (outer_type),
+			rust_last_path_segment (TYPE_NAME (type)),
 			nfields);
 		else
 		  error(_("Cannot access field %d of %s, "
 			  "there are only %d fields"),
-			field_number, TYPE_TAG_NAME (type), nfields);
+			field_number, TYPE_NAME (type), nfields);
 	      }
 
 	    /* Tuples are tuple structs too.  */
@@ -1597,13 +1596,13 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	      {
 		if (outer_type != NULL)
 		  error(_("Variant %s::%s is not a tuple variant"),
-			TYPE_TAG_NAME (outer_type),
-			rust_last_path_segment (TYPE_TAG_NAME (type)));
+			TYPE_NAME (outer_type),
+			rust_last_path_segment (TYPE_NAME (type)));
 		else
 		  error(_("Attempting to access anonymous field %d "
 			  "of %s, which is not a tuple, tuple struct, or "
 			  "tuple-like variant"),
-		      field_number, TYPE_TAG_NAME (type));
+		      field_number, TYPE_NAME (type));
 	      }
 
 	    result = value_primitive_field (lhs, 0, field_number, type);
@@ -1645,7 +1644,7 @@ tuple structs, and tuple-like enum variants"));
 	    if (rust_tuple_type_p (type) || rust_tuple_struct_type_p (type))
 		error (_("Attempting to access named field foo of tuple "
 			 "variant %s::%s, which has only anonymous fields"),
-		       TYPE_TAG_NAME (outer_type),
+		       TYPE_NAME (outer_type),
 		       rust_last_path_segment (TYPE_NAME (type)));
 
 	    TRY
@@ -1656,7 +1655,7 @@ tuple structs, and tuple-like enum variants"));
 	    CATCH (except, RETURN_MASK_ERROR)
 	      {
 		error (_("Could not find field %s of struct variant %s::%s"),
-		       field_name, TYPE_TAG_NAME (outer_type),
+		       field_name, TYPE_NAME (outer_type),
 		       rust_last_path_segment (TYPE_NAME (type)));
 	      }
 	    END_CATCH

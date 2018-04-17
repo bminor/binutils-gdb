@@ -27,7 +27,7 @@ proc do_typeid_tests {started} {
     global hex
 
     # We might see the standard type or gdb's internal type.
-    set type_re "(std::type_info|struct gdb_gnu_v3_type_info)"
+    set type_re "(std::type_info|gdb_gnu_v3_type_info)"
 
 
     foreach simple_var {i cp ccp ca b} {

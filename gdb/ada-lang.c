@@ -8111,18 +8111,15 @@ ada_prefer_type (struct type *type0, struct type *type1)
   return 0;
 }
 
-/* The name of TYPE, which is either its TYPE_NAME, or, if that is
-   null, its TYPE_TAG_NAME.  Null if TYPE is null.  */
+/* The name of TYPE, which is its TYPE_NAME.  Null if TYPE is
+   null.  */
 
 const char *
 ada_type_name (struct type *type)
 {
   if (type == NULL)
     return NULL;
-  else if (TYPE_NAME (type) != NULL)
-    return TYPE_NAME (type);
-  else
-    return TYPE_TAG_NAME (type);
+  return TYPE_NAME (type);
 }
 
 /* Search the list of "descriptive" types associated to TYPE for a type
@@ -8291,7 +8288,6 @@ empty_record (struct type *templ)
   TYPE_FIELDS (type) = NULL;
   INIT_CPLUS_SPECIFIC (type);
   TYPE_NAME (type) = "<empty>";
-  TYPE_TAG_NAME (type) = NULL;
   TYPE_LENGTH (type) = 0;
   return type;
 }
@@ -8350,7 +8346,6 @@ ada_template_to_fixed_record_type_1 (struct type *type,
     TYPE_ALLOC (rtype, nfields * sizeof (struct field));
   memset (TYPE_FIELDS (rtype), 0, sizeof (struct field) * nfields);
   TYPE_NAME (rtype) = ada_type_name (type);
-  TYPE_TAG_NAME (rtype) = NULL;
   TYPE_FIXED_INSTANCE (rtype) = 1;
 
   off = 0;
@@ -8627,7 +8622,6 @@ template_to_static_fixed_type (struct type *type0)
 	      memcpy (TYPE_FIELDS (type), TYPE_FIELDS (type0),
 		      sizeof (struct field) * nfields);
 	      TYPE_NAME (type) = ada_type_name (type0);
-	      TYPE_TAG_NAME (type) = NULL;
 	      TYPE_FIXED_INSTANCE (type) = 1;
 	      TYPE_LENGTH (type) = 0;
 	    }
@@ -8677,7 +8671,6 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   memcpy (TYPE_FIELDS (rtype), TYPE_FIELDS (type),
           sizeof (struct field) * nfields);
   TYPE_NAME (rtype) = ada_type_name (type);
-  TYPE_TAG_NAME (rtype) = NULL;
   TYPE_FIXED_INSTANCE (rtype) = 1;
   TYPE_LENGTH (rtype) = TYPE_LENGTH (type);
 
@@ -9288,11 +9281,11 @@ ada_check_typedef (struct type *type)
   type = check_typedef (type);
   if (type == NULL || TYPE_CODE (type) != TYPE_CODE_ENUM
       || !TYPE_STUB (type)
-      || TYPE_TAG_NAME (type) == NULL)
+      || TYPE_NAME (type) == NULL)
     return type;
   else
     {
-      const char *name = TYPE_TAG_NAME (type);
+      const char *name = TYPE_NAME (type);
       struct type *type1 = ada_find_any_type (name);
 
       if (type1 == NULL)
