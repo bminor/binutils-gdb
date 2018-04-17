@@ -606,11 +606,14 @@ simple_object_xcoff_find_sections (simple_object_read *sobj,
 		      || auxent->u.xcoff64.x_csect.x_smclas != XMC_XO)
 		    continue;
 
-		  x_scnlen64 = fetch_32 (aux + offsetof (union external_auxent,
-							 u.xcoff64.x_csect.x_scnlen_hi));
-		  x_scnlen = x_scnlen64 << 32
-			     | fetch_32 (aux + offsetof (union external_auxent,
-							 u.xcoff64.x_csect.x_scnlen_lo));
+		  x_scnlen64 = 
+		    fetch_32 (aux + offsetof (union external_auxent,
+					      u.xcoff64.x_csect.x_scnlen_hi));
+		  x_scnlen = 
+		    ((x_scnlen64 << 32)
+		     | fetch_32 (aux
+				 + offsetof (union external_auxent,
+					     u.xcoff64.x_csect.x_scnlen_lo)));
 		}
 	      else
 		{
