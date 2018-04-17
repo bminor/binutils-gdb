@@ -1,3 +1,8 @@
+2018-06-01  Tom Tromey  <tom@tromey.com>
+
+	* typeprint.h (c_type_print_varspec_suffix): Don't declare.
+	* c-typeprint.c (c_type_print_varspec_suffix): Now static.
+
 2018-06-01  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_sve_register_names): New const

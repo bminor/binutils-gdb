@@ -50,6 +50,10 @@ enum access_specifier
   s_protected
 };
 
+static void c_type_print_varspec_suffix (struct type *, struct ui_file *, int,
+					 int, int,
+					 const struct type_print_options *);
+
 static void c_type_print_varspec_prefix (struct type *,
 					 struct ui_file *,
 					 int, int, int,
@@ -716,7 +720,7 @@ remove_qualifiers (char *qid)
    needed after the variable name (to describe its type).
    Args work like c_type_print_varspec_prefix.  */
 
-void
+static void
 c_type_print_varspec_suffix (struct type *type,
 			     struct ui_file *stream,
 			     int show, int passed_a_ptr,
