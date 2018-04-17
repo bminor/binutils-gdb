@@ -193,7 +193,8 @@ static struct cmd_list_element *
 do_add_cmd (const char *name, enum command_class theclass,
 	    const char *doc, struct cmd_list_element **list)
 {
-  struct cmd_list_element *c = XNEW (struct cmd_list_element);
+  struct cmd_list_element *c = new struct cmd_list_element (name, theclass,
+							    doc);
   struct cmd_list_element *p, *iter;
 
   /* Turn each alias of the old command into an alias of the new
@@ -226,34 +227,6 @@ do_add_cmd (const char *name, enum command_class theclass,
       c->next = p->next;
       p->next = c;
     }
-
-  c->name = name;
-  c->theclass = theclass;
-  set_cmd_context (c, NULL);
-  c->doc = doc;
-  c->cmd_deprecated = 0;
-  c->deprecated_warn_user = 0;
-  c->malloced_replacement = 0;
-  c->doc_allocated = 0;
-  c->replacement = NULL;
-  c->pre_show_hook = NULL;
-  c->hook_in = 0;
-  c->prefixlist = NULL;
-  c->prefixname = NULL;
-  c->allow_unknown = 0;
-  c->prefix = NULL;
-  c->abbrev_flag = 0;
-  set_cmd_completer (c, symbol_completer);
-  c->completer_handle_brkchars = NULL;
-  c->destroyer = NULL;
-  c->type = not_set_cmd;
-  c->var = NULL;
-  c->var_type = var_boolean;
-  c->enums = NULL;
-  c->user_commands = NULL;
-  c->cmd_pointer = NULL;
-  c->alias_chain = NULL;
-  c->suppress_notification = NULL;
 
   return c;
 }
@@ -841,8 +814,6 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 	  *prehookee = iter->hookee_pre;
 	  if (iter->hookee_post)
 	    iter->hookee_post->hook_post = 0;
-	  if (iter->doc && iter->doc_allocated)
-	    xfree ((char *) iter->doc);
 	  *posthook = iter->hook_post;
 	  *posthookee = iter->hookee_post;
 
@@ -866,7 +837,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 	      *prevp = iter->alias_chain;
 	    }
 
-	  xfree (iter);
+	  delete iter;
 
 	  /* We won't see another command with the same name.  */
 	  break;

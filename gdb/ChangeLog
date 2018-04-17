@@ -1,3 +1,11 @@
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-decode.h (cmd_list_element): New constructor.
+	(~cmd_list_element): New destructor.
+	(struct cmd_list_element): Add initializers.
+	* cli/cli-decode.c (do_add_cmd): Use "new".
+	(delete_cmd): Use "delete".
+
 2018-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves <palves@redhat.com>
 
