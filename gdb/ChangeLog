@@ -1,3 +1,12 @@
+2018-04-17  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* symtab.c (print_symbol_info): Skip printing filename and line
+	number when `last' is NULL.
+	(symtab_symbol_info): Use empty string instead of NULL for first
+	invocation of print_symbol_info.
+	(rbreak_command): Pass NULL to `last' parameter of
+	print_symbol_info.
+
 2018-04-16  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* linux-tdep.c (linux_spu_make_corefile_notes): Return note_data

@@ -4500,7 +4500,9 @@ search_symbols (const char *regexp, enum search_domain kind,
 
 /* Helper function for symtab_symbol_info, this function uses
    the data returned from search_symbols() to print information
-   regarding the match to gdb_stdout.  */
+   regarding the match to gdb_stdout.  If LAST is not NULL,
+   print file and line number information for the symbol as
+   well.  Skip printing the filename if it matches LAST.  */
 
 static void
 print_symbol_info (enum search_domain kind,
@@ -4508,19 +4510,23 @@ print_symbol_info (enum search_domain kind,
 		   int block, const char *last)
 {
   struct symtab *s = symbol_symtab (sym);
-  const char *s_filename = symtab_to_filename_for_display (s);
 
-  if (last == NULL || filename_cmp (last, s_filename) != 0)
+  if (last != NULL)
     {
-      fputs_filtered ("\nFile ", gdb_stdout);
-      fputs_filtered (s_filename, gdb_stdout);
-      fputs_filtered (":\n", gdb_stdout);
-    }
+      const char *s_filename = symtab_to_filename_for_display (s);
 
-  if (SYMBOL_LINE (sym) != 0)
-    printf_filtered ("%d:\t", SYMBOL_LINE (sym));
-  else
-    puts_filtered ("\t");
+      if (filename_cmp (last, s_filename) != 0)
+	{
+	  fputs_filtered ("\nFile ", gdb_stdout);
+	  fputs_filtered (s_filename, gdb_stdout);
+	  fputs_filtered (":\n", gdb_stdout);
+	}
+
+      if (SYMBOL_LINE (sym) != 0)
+	printf_filtered ("%d:\t", SYMBOL_LINE (sym));
+      else
+	puts_filtered ("\t");
+    }
 
   if (kind != TYPES_DOMAIN && block == STATIC_BLOCK)
     printf_filtered ("static ");
@@ -4573,7 +4579,7 @@ symtab_symbol_info (const char *regexp, enum search_domain kind, int from_tty)
 {
   static const char * const classnames[] =
     {"variable", "function", "type"};
-  const char *last_filename = NULL;
+  const char *last_filename = "";
   int first = 1;
 
   gdb_assert (kind <= TYPES_DOMAIN);
@@ -4684,10 +4690,7 @@ rbreak_command (const char *regexp, int from_tty)
 	  string = string_printf ("%s:'%s'", fullname,
 				  SYMBOL_LINKAGE_NAME (p.symbol));
 	  break_command (&string[0], from_tty);
-	  print_symbol_info (FUNCTIONS_DOMAIN,
-			     p.symbol,
-			     p.block,
-			     symtab_to_filename_for_display (symtab));
+	  print_symbol_info (FUNCTIONS_DOMAIN, p.symbol, p.block, NULL);
 	}
       else
 	{
