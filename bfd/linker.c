@@ -495,6 +495,9 @@ bfd_link_hash_lookup (struct bfd_link_hash_table *table,
 {
   struct bfd_link_hash_entry *ret;
 
+  if (table == NULL || string == NULL)
+    return NULL;
+
   ret = ((struct bfd_link_hash_entry *)
 	 bfd_hash_lookup (&table->table, string, create, copy));
 
@@ -941,6 +944,9 @@ _bfd_generic_link_add_archive_symbols
 	      continue;
 	    }
 
+	  if (arsym->name == NULL)
+	    goto error_return;
+				  
 	  h = bfd_link_hash_lookup (info->hash, arsym->name,
 				    FALSE, FALSE, TRUE);
 

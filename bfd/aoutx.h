@@ -2723,7 +2723,10 @@ NAME (aout, find_nearest_line) (bfd *abfd,
 		  const char *symname;
 
 		  symname = q->symbol.name;
-		  if (strcmp (symname + strlen (symname) - 2, ".o") == 0)
+
+		  if (symname != NULL
+		      && strlen (symname) > 2
+		      && strcmp (symname + strlen (symname) - 2, ".o") == 0)
 		    {
 		      if (q->symbol.value > low_line_vma)
 			{
@@ -2788,8 +2791,8 @@ NAME (aout, find_nearest_line) (bfd *abfd,
 	    case N_FUN:
 	      {
 		/* We'll keep this if it is nearer than the one we have already.  */
-		if (q->symbol.value >= low_func_vma &&
-		    q->symbol.value <= offset)
+		if (q->symbol.value >= low_func_vma
+		    && q->symbol.value <= offset)
 		  {
 		    low_func_vma = q->symbol.value;
 		    func = (asymbol *)q;

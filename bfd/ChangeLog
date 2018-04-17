@@ -1,5 +1,16 @@
 2018-04-17  Nick Clifton  <nickc@redhat.com>
 
+	PR 23055
+	* aoutx.h (find_nearest_line): Check that the symbol name exists
+	and is long enough, before attempting to see if it is for a .o
+	file.
+	* hash.c (bfd_hash_hash): Add an assertion that the string is not
+	NULL.
+	* linker.c (bfd_link_hash_lookup): Fail if the table or string are
+	NULL.
+	(_bfd_generic_link_add_archive_symbols): Fail if an archive entry
+	has no name.
+
 	PR 23065
 	* dwarf2.c (concat_filename): Check for a NULL table pointer.
 
