@@ -915,7 +915,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
 			 const struct block *block,
 			 const domain_enum domain)
 {
-  /* type_name_no_tag_or_error provides better error reporting using the
+  /* type_name_or_error provides better error reporting using the
      original type.  */
   struct type *saved_parent_type = parent_type;
 
@@ -923,7 +923,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
 
   if (symbol_lookup_debug)
     {
-      const char *type_name = type_name_no_tag (saved_parent_type);
+      const char *type_name = TYPE_NAME (saved_parent_type);
 
       fprintf_unfiltered (gdb_stdlog,
 			  "cp_lookup_nested_symbol (%s, %s, %s, %s)\n",
@@ -944,7 +944,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
     case TYPE_CODE_MODULE:
       {
 	int size;
-	const char *parent_name = type_name_no_tag_or_error (saved_parent_type);
+	const char *parent_name = type_name_or_error (saved_parent_type);
 	struct block_symbol sym;
 	char *concatenated_name;
 	int is_in_anonymous;

@@ -1245,7 +1245,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    for (j = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)) - 1; j >= 0; j--)
 	      if (TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) == 0)
 		TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) =
-		  type_name_no_tag (TYPE_BASECLASS (SYMBOL_TYPE (sym), j));
+		  TYPE_NAME (TYPE_BASECLASS (SYMBOL_TYPE (sym), j));
 	  }
 
       if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
@@ -2782,7 +2782,7 @@ read_cpp_abbrev (struct field_info *fip, const char **pp, struct type *type,
       switch (cpp_abbrev)
 	{
 	case 'f':		/* $vf -- a virtual function table pointer */
-	  name = type_name_no_tag (context);
+	  name = TYPE_NAME (context);
 	  if (name == NULL)
 	    {
 	      name = "";
@@ -2792,7 +2792,7 @@ read_cpp_abbrev (struct field_info *fip, const char **pp, struct type *type,
 	  break;
 
 	case 'b':		/* $vb -- a virtual bsomethingorother */
-	  name = type_name_no_tag (context);
+	  name = TYPE_NAME (context);
 	  if (name == NULL)
 	    {
 	      complaint (_("C++ abbreviated type name "
@@ -3196,7 +3196,7 @@ read_baseclasses (struct field_info *fip, const char **pp, struct type *type,
          field's name.  */
 
       newobj->field.type = read_type (pp, objfile);
-      newobj->field.name = type_name_no_tag (newobj->field.type);
+      newobj->field.name = TYPE_NAME (newobj->field.type);
 
       /* Skip trailing ';' and bump count of number of fields seen.  */
       if (**pp == ';')

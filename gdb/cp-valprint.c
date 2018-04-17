@@ -95,7 +95,7 @@ extern const char vtbl_ptr_name[] = "__vtbl_ptr_type";
 int
 cp_is_vtbl_ptr_type (struct type *type)
 {
-  const char *type_name = type_name_no_tag (type);
+  const char *type_name = TYPE_NAME (type);
 
   return (type_name != NULL && !strcmp (type_name, vtbl_ptr_name));
 }
@@ -243,7 +243,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		  fprintf_filtered (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
 		  fputs_filtered ("members of ", stream);
-		  fputs_filtered (type_name_no_tag (type), stream);
+		  fputs_filtered (TYPE_NAME (type), stream);
 		  fputs_filtered (": ", stream);
 		}
 	    }
@@ -787,7 +787,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
       const char *name;
 
       fputs_filtered (prefix, stream);
-      name = type_name_no_tag (self_type);
+      name = TYPE_NAME (self_type);
       if (name)
 	fputs_filtered (name, stream);
       else

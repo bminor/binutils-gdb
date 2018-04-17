@@ -260,7 +260,7 @@ cp_type_print_derivation_info (struct ui_file *stream,
 			? "public" : (TYPE_FIELD_PROTECTED (type, i)
 				      ? "protected" : "private"),
 			BASETYPE_VIA_VIRTUAL (type, i) ? " virtual" : "");
-      name = type_name_no_tag (TYPE_BASECLASS (type, i));
+      name = TYPE_NAME (TYPE_BASECLASS (type, i));
       if (name)
 	print_name_maybe_canonical (name, flags, stream);
       else
@@ -392,9 +392,8 @@ c_type_print_varspec_prefix (struct type *type,
 
     case TYPE_CODE_MEMBERPTR:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0, language, flags,
-				   podata);
-      name = type_name_no_tag (TYPE_SELF_TYPE (type));
+				   stream, show, 0, 0, language, flags, podata);
+      name = TYPE_NAME (TYPE_SELF_TYPE (type));
       if (name)
 	print_name_maybe_canonical (name, flags, stream);
       else
@@ -409,7 +408,7 @@ c_type_print_varspec_prefix (struct type *type,
 				   stream, show, 0, 0, language, flags,
 				   podata);
       fprintf_filtered (stream, "(");
-      name = type_name_no_tag (TYPE_SELF_TYPE (type));
+      name = TYPE_NAME (TYPE_SELF_TYPE (type));
       if (name)
 	print_name_maybe_canonical (name, flags, stream);
       else
@@ -1380,7 +1379,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 	  int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	  const char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
-	  const char *name = type_name_no_tag (type);
+	  const char *name = TYPE_NAME (type);
 	  int is_constructor = name && strcmp (method_name,
 					       name) == 0;
 

@@ -489,7 +489,7 @@ const char pascal_vtbl_ptr_name[] =
 int
 pascal_object_is_vtbl_ptr_type (struct type *type)
 {
-  const char *type_name = type_name_no_tag (type);
+  const char *type_name = TYPE_NAME (type);
 
   return (type_name != NULL
 	  && strcmp (type_name, pascal_vtbl_ptr_name) == 0);
@@ -587,7 +587,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		  fprintf_filtered (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
 		  fputs_filtered ("members of ", stream);
-		  fputs_filtered (type_name_no_tag (type), stream);
+		  fputs_filtered (TYPE_NAME (type), stream);
 		  fputs_filtered (": ", stream);
 		}
 	    }
@@ -729,7 +729,7 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
     {
       LONGEST boffset = 0;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-      const char *basename = type_name_no_tag (baseclass);
+      const char *basename = TYPE_NAME (baseclass);
       const gdb_byte *base_valaddr = NULL;
       LONGEST thisoffset;
       int skip = 0;

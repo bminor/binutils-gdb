@@ -15034,7 +15034,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	SET_FIELD_BITPOS (*fp, offset * bits_per_byte);
       FIELD_BITSIZE (*fp) = 0;
       FIELD_TYPE (*fp) = die_type (die, cu);
-      FIELD_NAME (*fp) = type_name_no_tag (fp->type);
+      FIELD_NAME (*fp) = TYPE_NAME (fp->type);
     }
   else if (die->tag == DW_TAG_variant_part)
     {
@@ -18224,7 +18224,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 
       /* The exception for DW_TAG_typedef with has_children above is
 	 a workaround of GCC PR debug/47510.  In the case of this complaint
-	 type_name_no_tag_or_error will error on such types later.
+	 type_name_or_error will error on such types later.
 
 	 GDB skipped children of DW_TAG_typedef by the shortcut above and then
 	 it could not find the child DIEs referenced later, this is checked

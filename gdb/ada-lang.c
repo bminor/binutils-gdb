@@ -4399,7 +4399,7 @@ parse_old_style_renaming (struct type *type,
       || TYPE_NFIELDS (type) != 1)
     return ADA_NOT_RENAMING;
 
-  name = type_name_no_tag (type);
+  name = TYPE_NAME (type);
   if (name == NULL)
     return ADA_NOT_RENAMING;
   
@@ -5189,7 +5189,7 @@ xget_renaming_scope (struct type *renaming_type)
      So, to extract the scope, we search for the "___XR" extension,
      and then backtrack until we find the first "__".  */
 
-  const char *name = type_name_no_tag (renaming_type);
+  const char *name = TYPE_NAME (renaming_type);
   const char *suffix = strstr (name, "___XR");
   const char *last;
 
@@ -8101,8 +8101,8 @@ ada_prefer_type (struct type *type0, struct type *type1)
     return 1;
   else
     {
-      const char *type0_name = type_name_no_tag (type0);
-      const char *type1_name = type_name_no_tag (type1);
+      const char *type0_name = TYPE_NAME (type0);
+      const char *type1_name = TYPE_NAME (type1);
 
       if (type0_name != NULL && strstr (type0_name, "___XR") != NULL
 	  && (type1_name == NULL || strstr (type1_name, "___XR") == NULL))
@@ -13411,7 +13411,7 @@ catch_assert_command (const char *arg_entry, int from_tty,
 static int
 ada_is_exception_sym (struct symbol *sym)
 {
-  const char *type_name = type_name_no_tag (SYMBOL_TYPE (sym));
+  const char *type_name = TYPE_NAME (SYMBOL_TYPE (sym));
 
   return (SYMBOL_CLASS (sym) != LOC_TYPEDEF
           && SYMBOL_CLASS (sym) != LOC_BLOCK

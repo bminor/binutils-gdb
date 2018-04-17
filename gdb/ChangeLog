@@ -1,5 +1,34 @@
 2018-06-01  Tom Tromey  <tom@tromey.com>
 
+	* valops.c (value_cast_structs, destructor_name_p): Update.
+	* symtab.c (gdb_mangle_name): Update.
+	* stabsread.c (define_symbol, read_cpp_abbrev, read_baseclasses):
+	Update.
+	* p-valprint.c (pascal_object_is_vtbl_ptr_type)
+	(pascal_object_print_value_fields, pascal_object_print_value):
+	Update.
+	* p-typeprint.c (pascal_type_print_derivation_info): Update.
+	* linespec.c (find_methods): Update.
+	* gdbtypes.h (type_name_no_tag): Remove.
+	(type_name_or_error): Rename from type_name_no_tag_or_error.
+	* gdbtypes.c (type_name_no_tag): Remove.
+	(type_name_or_error): Rename from type_name_no_tag_or_error.
+	(lookup_struct_elt_type, check_typedef): Update.
+	* expprint.c (print_subexp_standard): Update.
+	* dwarf2read.c (dwarf2_add_field, load_partial_dies): Update.
+	* d-namespace.c (d_lookup_nested_symbol): Update.
+	* cp-valprint.c (cp_is_vtbl_ptr_type, cp_print_value_fields)
+	(cp_print_class_member): Update.
+	* cp-namespace.c (cp_lookup_nested_symbol): Update.
+	* completer.c (add_struct_fields): Update.
+	* c-typeprint.c (cp_type_print_derivation_info)
+	(c_type_print_varspec_prefix, c_type_print_base_struct_union):
+	Update.
+	* ada-lang.c (parse_old_style_renaming, xget_renaming_scope)
+	(ada_prefer_type, ada_is_exception_sym): Update.
+
+2018-06-01  Tom Tromey  <tom@tromey.com>
+
 	* valops.c (enum_constant_from_type, value_namespace_elt)
 	(value_maybe_namespace_elt): Update.
 	* valarith.c (find_size_for_pointer_math): Update.

@@ -1463,16 +1463,7 @@ smash_to_method_type (struct type *type, struct type *self_type,
   TYPE_LENGTH (type) = 1;	/* In practice, this is never needed.  */
 }
 
-/* Return a typename for a struct/union/enum type without "struct ",
-   "union ", or "enum ".  If the type has a NULL name, return NULL.  */
-
-const char *
-type_name_no_tag (const struct type *type)
-{
-  return TYPE_NAME (type);
-}
-
-/* A wrapper of type_name_no_tag which calls error if the type is anonymous.
+/* A wrapper of TYPE_NAME which calls error if the type is anonymous.
    Since GCC PR debug/47510 DWARF provides associated information to detect the
    anonymous class linkage name from its typedef.
 
@@ -1480,7 +1471,7 @@ type_name_no_tag (const struct type *type)
    apply it itself.  */
 
 const char *
-type_name_no_tag_or_error (struct type *type)
+type_name_or_error (struct type *type)
 {
   struct type *saved_type = type;
   const char *name;
@@ -1488,11 +1479,11 @@ type_name_no_tag_or_error (struct type *type)
 
   type = check_typedef (type);
 
-  name = type_name_no_tag (type);
+  name = TYPE_NAME (type);
   if (name != NULL)
     return name;
 
-  name = type_name_no_tag (saved_type);
+  name = TYPE_NAME (saved_type);
   objfile = TYPE_OBJFILE (saved_type);
   error (_("Invalid anonymous type %s [in module %s], GCC PR debug/47510 bug?"),
 	 name ? name : "<anonymous>",
@@ -1686,7 +1677,7 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
   {
     char *type_name;
 
-    type_name = type_name_no_tag (type);
+    type_name = TYPE_NAME (type);
     if (type_name != NULL && strcmp (type_name, name) == 0)
       return type;
   }
@@ -2438,7 +2429,7 @@ check_typedef (struct type *type)
 	  if (currently_reading_symtab)
 	    return make_qualified_type (type, instance_flags, NULL);
 
-	  name = type_name_no_tag (type);
+	  name = TYPE_NAME (type);
 	  /* FIXME: shouldn't we look in STRUCT_DOMAIN and/or
 	     VAR_DOMAIN as appropriate?  */
 	  if (name == NULL)
@@ -2491,7 +2482,7 @@ check_typedef (struct type *type)
       && opaque_type_resolution 
       && !currently_reading_symtab)
     {
-      const char *name = type_name_no_tag (type);
+      const char *name = TYPE_NAME (type);
       struct type *newtype;
 
       if (name == NULL)
@@ -2525,7 +2516,7 @@ check_typedef (struct type *type)
      types.  */
   else if (TYPE_STUB (type) && !currently_reading_symtab)
     {
-      const char *name = type_name_no_tag (type);
+      const char *name = TYPE_NAME (type);
       /* FIXME: shouldn't we look in STRUCT_DOMAIN and/or VAR_DOMAIN
          as appropriate?  */
       struct symbol *sym;

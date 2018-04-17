@@ -86,7 +86,7 @@ print_subexp_standard (struct expression *exp, int *pos,
     case OP_SCOPE:
       myprec = PREC_PREFIX;
       assoc = 0;
-      fputs_filtered (type_name_no_tag (exp->elts[pc + 1].type), stream);
+      fputs_filtered (TYPE_NAME (exp->elts[pc + 1].type), stream);
       fputs_filtered ("::", stream);
       nargs = longest_to_int (exp->elts[pc + 2].longconst);
       (*pos) += 4 + BYTES_TO_EXP_ELEM (nargs + 1);

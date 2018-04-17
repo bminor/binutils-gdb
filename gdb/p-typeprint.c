@@ -139,7 +139,7 @@ pascal_type_print_derivation_info (struct ui_file *stream, struct type *type)
       fprintf_filtered (stream, "%s%s ",
 			BASETYPE_VIA_PUBLIC (type, i) ? "public" : "private",
 			BASETYPE_VIA_VIRTUAL (type, i) ? " virtual" : "");
-      name = type_name_no_tag (TYPE_BASECLASS (type, i));
+      name = TYPE_NAME (TYPE_BASECLASS (type, i));
       fprintf_filtered (stream, "%s", name ? name : "(null)");
     }
   if (i > 0)
