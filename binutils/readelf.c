@@ -515,7 +515,8 @@ print_symbol (signed int width, const char *symbol)
       width = - width;
       extra_padding = TRUE;
     }
-  assert (width != 0);
+  else if (width == 0)
+    return 0;
 
   if (do_wide)
     /* Set the remaining width to a very large value.

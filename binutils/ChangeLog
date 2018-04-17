@@ -1,5 +1,9 @@
 2018-04-17  Nick Clifton  <nickc@redhat.com>
 
+	PR 26063
+	* readelf.c (print_symbol): If the width is zero, return straight
+	away.
+
 	PR 23064
 	* dwarf.c (process_cu_tu_index): Test for a potential buffer
 	overrun before copying signature pointer.
