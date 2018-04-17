@@ -9287,7 +9287,18 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 		}
 
 	      if (!do_display)
-		memcpy (&this_set[row - 1].signature, ph, sizeof (uint64_t));
+		{
+		  size_t num_copy = sizeof (uint64_t);
+
+		  /* PR 23064: Beware of buffer overflow.  */
+		  if (ph + num_copy < limit)
+		    memcpy (&this_set[row - 1].signature, ph, num_copy);
+		  else
+		    {
+		      warn (_("Signature (%p) extends beyond end of space in section\n"), ph);
+		      return 0;
+		    }
+		}
 
 	      prow = poffsets + (row - 1) * ncols * 4;
 	      /* PR 17531: file: b8ce60a8.  */

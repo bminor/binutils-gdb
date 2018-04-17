@@ -1,3 +1,9 @@
+2018-04-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 23064
+	* dwarf.c (process_cu_tu_index): Test for a potential buffer
+	overrun before copying signature pointer.
+
 2018-04-17  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c: Revert 2018-04-16 and 2018-04-11 changes.
