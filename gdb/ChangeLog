@@ -1,5 +1,19 @@
 2018-06-01  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (dwarf2_compute_name): Pass CU's language to
+	c_print_type.
+	* c-typeprint.c (c_print_type_1): Add "language" parameter.
+	(c_print_type): Update.
+	(c_print_type): New overload.
+	(c_type_print_varspec_prefix, c_type_print_args)
+	(c_type_print_varspec_suffix, c_print_type_no_offsets)
+	(c_type_print_base_struct_union, c_type_print_base_1)
+	(cp_type_print_method_args): Add "language" parameter.
+	(c_type_print_base): Update.
+	* c-lang.h (c_print_type): Add new overload.
+
+2018-06-01  Tom Tromey  <tom@tromey.com>
+
 	* typeprint.h (c_type_print_varspec_suffix): Don't declare.
 	* c-typeprint.c (c_type_print_varspec_suffix): Now static.
 

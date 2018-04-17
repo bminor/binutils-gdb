@@ -52,11 +52,13 @@ enum access_specifier
 
 static void c_type_print_varspec_suffix (struct type *, struct ui_file *, int,
 					 int, int,
+					 enum language,
 					 const struct type_print_options *);
 
 static void c_type_print_varspec_prefix (struct type *,
 					 struct ui_file *,
 					 int, int, int,
+					 enum language,
 					 const struct type_print_options *,
 					 struct print_offset_data *);
 
@@ -66,7 +68,7 @@ static void c_type_print_modifier (struct type *,
 				   int, int);
 
 static void c_type_print_base_1 (struct type *type, struct ui_file *stream,
-				 int show, int level,
+				 int show, int level, enum language language,
 				 const struct type_print_options *flags,
 				 struct print_offset_data *podata);
 
@@ -108,6 +110,7 @@ c_print_type_1 (struct type *type,
 		const char *varstring,
 		struct ui_file *stream,
 		int show, int level,
+		enum language language,
 		const struct type_print_options *flags,
 		struct print_offset_data *podata)
 {
@@ -128,7 +131,7 @@ c_print_type_1 (struct type *type,
     }
   else
     {
-      c_type_print_base_1 (type, stream, show, level, flags, podata);
+      c_type_print_base_1 (type, stream, show, level, language, flags, podata);
       code = TYPE_CODE (type);
       if ((varstring != NULL && *varstring != '\0')
 	  /* Need a space if going to print stars or brackets;
@@ -144,7 +147,7 @@ c_print_type_1 (struct type *type,
 	fputs_filtered (" ", stream);
       need_post_space = (varstring != NULL && strcmp (varstring, "") != 0);
       c_type_print_varspec_prefix (type, stream, show, 0, need_post_space,
-				   flags, podata);
+				   language, flags, podata);
     }
 
   if (varstring != NULL)
@@ -158,7 +161,7 @@ c_print_type_1 (struct type *type,
 	  demangled_args = strchr (varstring, '(') != NULL;
 	  c_type_print_varspec_suffix (type, stream, show,
 				       0, demangled_args,
-				       flags);
+				       language, flags);
 	}
     }
 }
@@ -174,7 +177,25 @@ c_print_type (struct type *type,
 {
   struct print_offset_data podata;
 
-  c_print_type_1 (type, varstring, stream, show, level, flags, &podata);
+  c_print_type_1 (type, varstring, stream, show, level,
+		  current_language->la_language, flags, &podata);
+}
+
+
+/* See c-lang.h.  */
+
+void
+c_print_type (struct type *type,
+	      const char *varstring,
+	      struct ui_file *stream,
+	      int show, int level,
+	      enum language language,
+	      const struct type_print_options *flags)
+{
+  struct print_offset_data podata;
+
+  c_print_type_1 (type, varstring, stream, show, level, language, flags,
+		  &podata);
 }
 
 /* Print a typedef using C syntax.  TYPE is the underlying type.
@@ -257,6 +278,7 @@ static void
 cp_type_print_method_args (struct type *mtype, const char *prefix,
 			   const char *varstring, int staticp,
 			   struct ui_file *stream,
+			   enum language language,
 			   const struct type_print_options *flags)
 {
   struct field *args = TYPE_FIELDS (mtype);
@@ -297,7 +319,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
     }
   else if (varargs)
     fprintf_filtered (stream, "...");
-  else if (current_language->la_language == language_cplus)
+  else if (language == language_cplus)
     fprintf_filtered (stream, "void");
 
   fprintf_filtered (stream, ")");
@@ -344,6 +366,7 @@ c_type_print_varspec_prefix (struct type *type,
 			     struct ui_file *stream,
 			     int show, int passed_a_ptr,
 			     int need_post_space,
+			     enum language language,
 			     const struct type_print_options *flags,
 			     struct print_offset_data *podata)
 {
@@ -361,40 +384,46 @@ c_type_print_varspec_prefix (struct type *type,
     {
     case TYPE_CODE_PTR:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 1, 1, flags, podata);
+				   stream, show, 1, 1, language, flags,
+				   podata);
       fprintf_filtered (stream, "*");
       c_type_print_modifier (type, stream, 1, need_post_space);
       break;
 
     case TYPE_CODE_MEMBERPTR:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0, flags, podata);
+				   stream, show, 0, 0, language, flags,
+				   podata);
       name = type_name_no_tag (TYPE_SELF_TYPE (type));
       if (name)
 	print_name_maybe_canonical (name, flags, stream);
       else
 	c_type_print_base_1 (TYPE_SELF_TYPE (type),
-			     stream, -1, passed_a_ptr, flags, podata);
+			     stream, -1, passed_a_ptr, language, flags,
+			     podata);
       fprintf_filtered (stream, "::*");
       break;
 
     case TYPE_CODE_METHODPTR:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0, flags, podata);
+				   stream, show, 0, 0, language, flags,
+				   podata);
       fprintf_filtered (stream, "(");
       name = type_name_no_tag (TYPE_SELF_TYPE (type));
       if (name)
 	print_name_maybe_canonical (name, flags, stream);
       else
 	c_type_print_base_1 (TYPE_SELF_TYPE (type),
-			     stream, -1, passed_a_ptr, flags, podata);
+			     stream, -1, passed_a_ptr, language, flags,
+			     podata);
       fprintf_filtered (stream, "::*");
       break;
 
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 1, 0, flags, podata);
+				   stream, show, 1, 0, language, flags,
+				   podata);
       fprintf_filtered (stream, TYPE_CODE(type) == TYPE_CODE_REF ? "&" : "&&");
       c_type_print_modifier (type, stream, 1, need_post_space);
       break;
@@ -402,22 +431,24 @@ c_type_print_varspec_prefix (struct type *type,
     case TYPE_CODE_METHOD:
     case TYPE_CODE_FUNC:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0, flags, podata);
+				   stream, show, 0, 0, language, flags,
+				   podata);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
 
     case TYPE_CODE_ARRAY:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0, flags, podata);
+				   stream, show, 0, 0, language, flags,
+				   podata);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
 
     case TYPE_CODE_TYPEDEF:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, passed_a_ptr, 0, flags,
-				   podata);
+				   stream, show, passed_a_ptr, 0,
+				   language, flags, podata);
       break;
 
     case TYPE_CODE_UNDEF:
@@ -556,7 +587,7 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 	  param_type = make_cv_type (0, 0, param_type, NULL);
 	}
 
-      c_print_type (param_type, "", stream, -1, 0, flags);
+      c_print_type (param_type, "", stream, -1, 0, language, flags);
       printed_any = 1;
     }
 
@@ -725,6 +756,7 @@ c_type_print_varspec_suffix (struct type *type,
 			     struct ui_file *stream,
 			     int show, int passed_a_ptr,
 			     int demangled_args,
+			     enum language language,
 			     const struct type_print_options *flags)
 {
   if (type == 0)
@@ -757,26 +789,26 @@ c_type_print_varspec_suffix (struct type *type,
 	fprintf_filtered (stream, (is_vector ? ")))" : "]"));
 
 	c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				     show, 0, 0, flags);
+				     show, 0, 0, language, flags);
       }
       break;
 
     case TYPE_CODE_MEMBERPTR:
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				   show, 0, 0, flags);
+				   show, 0, 0, language, flags);
       break;
 
     case TYPE_CODE_METHODPTR:
       fprintf_filtered (stream, ")");
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				   show, 0, 0, flags);
+				   show, 0, 0, language, flags);
       break;
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				   show, 1, 0, flags);
+				   show, 1, 0, language, flags);
       break;
 
     case TYPE_CODE_METHOD:
@@ -784,15 +816,14 @@ c_type_print_varspec_suffix (struct type *type,
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
       if (!demangled_args)
-	c_type_print_args (type, stream, 0, current_language->la_language,
-			   flags);
+	c_type_print_args (type, stream, 0, language, flags);
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				   show, passed_a_ptr, 0, flags);
+				   show, passed_a_ptr, 0, language, flags);
       break;
 
     case TYPE_CODE_TYPEDEF:
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				   show, passed_a_ptr, 0, flags);
+				   show, passed_a_ptr, 0, language, flags);
       break;
 
     case TYPE_CODE_UNDEF:
@@ -1107,6 +1138,7 @@ c_print_type_no_offsets (struct type *type,
 			 const char *varstring,
 			 struct ui_file *stream,
 			 int show, int level,
+			 enum language language,
 			 struct type_print_options *flags,
 			 struct print_offset_data *podata)
 {
@@ -1115,7 +1147,8 @@ c_print_type_no_offsets (struct type *type,
   /* Temporarily disable print_offsets, because it would mess with
      indentation.  */
   flags->print_offsets = 0;
-  c_print_type_1 (type, varstring, stream, show, level, flags, podata);
+  c_print_type_1 (type, varstring, stream, show, level, language, flags,
+		  podata);
   flags->print_offsets = old_po;
 }
 
@@ -1125,6 +1158,7 @@ c_print_type_no_offsets (struct type *type,
 static void
 c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 				int show, int level,
+				enum language language,
 				const struct type_print_options *flags,
 				struct print_offset_data *podata)
 {
@@ -1305,7 +1339,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	  c_print_type_1 (TYPE_FIELD_TYPE (type, i),
 			  TYPE_FIELD_NAME (type, i),
 			  stream, newshow, level + 4,
-			  &local_flags, &local_podata);
+			  language, &local_flags, &local_podata);
 
 	  if (!is_static && TYPE_FIELD_PACKED (type, i))
 	    {
@@ -1394,7 +1428,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		{
 		  c_print_type_no_offsets
 		    (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
-		     "", stream, -1, 0, &local_flags, podata);
+		     "", stream, -1, 0, language, &local_flags, podata);
 
 		  fputs_filtered (" ", stream);
 		}
@@ -1426,7 +1460,8 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 						 "",
 						 method_name,
 						 staticp,
-						 stream, &local_flags);
+						 stream, language,
+						 &local_flags);
 		    }
 		  else
 		    fprintf_filtered (stream,
@@ -1480,7 +1515,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 							flags);
 	      c_print_type_no_offsets (TYPE_NESTED_TYPES_FIELD_TYPE (type, i),
 				       "", stream, show, level + 4,
-				       &semi_local_flags, podata);
+				       language, &semi_local_flags, podata);
 	      fprintf_filtered (stream, ";\n");
 	    }
 	}
@@ -1518,7 +1553,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	      c_print_type_no_offsets (target,
 				       TYPE_TYPEDEF_FIELD_NAME (type, i),
 				       stream, show - 1, level + 4,
-				       &semi_local_flags, podata);
+				       language, &semi_local_flags, podata);
 	      fprintf_filtered (stream, ";\n");
 	    }
 	}
@@ -1568,6 +1603,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 static void
 c_type_print_base_1 (struct type *type, struct ui_file *stream,
 		     int show, int level,
+		     enum language language,
 		     const struct type_print_options *flags,
 		     struct print_offset_data *podata)
 {
@@ -1615,7 +1651,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	type_print_unknown_return_type (stream);
       else
 	c_type_print_base_1 (TYPE_TARGET_TYPE (type),
-			     stream, show, level, flags, podata);
+			     stream, show, level, language, flags, podata);
       break;
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_PTR:
@@ -1624,13 +1660,13 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
     case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_METHODPTR:
       c_type_print_base_1 (TYPE_TARGET_TYPE (type),
-			   stream, show, level, flags, podata);
+			   stream, show, level, language, flags, podata);
       break;
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      c_type_print_base_struct_union (type, stream, show, level, flags,
-				      podata);
+      c_type_print_base_struct_union (type, stream, show, level,
+				      language, flags, podata);
       break;
 
     case TYPE_CODE_ENUM:
@@ -1671,8 +1707,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	     print too much than too little; but conversely not to
 	     print something egregiously outside the current
 	     language's syntax.  */
-	  if (current_language->la_language == language_cplus
-	      && TYPE_TARGET_TYPE (type) != NULL)
+	  if (language == language_cplus && TYPE_TARGET_TYPE (type) != NULL)
 	    {
 	      struct type *underlying = check_typedef (TYPE_TARGET_TYPE (type));
 
@@ -1733,7 +1768,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 		c_print_type_1 (TYPE_FIELD_TYPE (type, i),
 				TYPE_FIELD_NAME (type, i),
 				stream, show, level + 4,
-				&local_flags, podata);
+				language, &local_flags, podata);
 		fprintf_filtered (stream, " @%s",
 				  plongest (TYPE_FIELD_BITPOS (type, i)));
 		if (TYPE_FIELD_BITSIZE (type, i) > 1)
@@ -1802,5 +1837,6 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 {
   struct print_offset_data podata;
 
-  c_type_print_base_1 (type, stream, show, level, flags, &podata);
+  c_type_print_base_1 (type, stream, show, level,
+		       current_language->la_language, flags, &podata);
 }

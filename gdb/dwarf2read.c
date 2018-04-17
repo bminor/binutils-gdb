@@ -10811,7 +10811,8 @@ dwarf2_compute_name (const char *name,
 
 		  if (child->tag == DW_TAG_template_type_param)
 		    {
-		      c_print_type (type, "", &buf, -1, 0, &type_print_raw_options);
+		      c_print_type (type, "", &buf, -1, 0, cu->language,
+				    &type_print_raw_options);
 		      continue;
 		    }
 

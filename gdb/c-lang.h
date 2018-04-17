@@ -72,6 +72,13 @@ extern void c_print_type (struct type *, const char *,
 			  struct ui_file *, int, int,
 			  const struct type_print_options *);
 
+/* Print a type but allow the precise language to be specified.  */
+
+extern void c_print_type (struct type *, const char *,
+			  struct ui_file *, int, int,
+			  enum language,
+			  const struct type_print_options *);
+
 extern void c_print_typedef (struct type *,
 			     struct symbol *,
 			     struct ui_file *);
