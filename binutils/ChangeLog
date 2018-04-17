@@ -1,6 +1,6 @@
 2018-04-17  Nick Clifton  <nickc@redhat.com>
 
-	PR 26063
+	PR 23063
 	* readelf.c (print_symbol): If the width is zero, return straight
 	away.
 
