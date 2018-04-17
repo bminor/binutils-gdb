@@ -1566,7 +1566,7 @@ concat_filename (struct line_info_table *table, unsigned int file)
 {
   char *filename;
 
-  if (file - 1 >= table->num_files)
+  if (table == NULL || file - 1 >= table->num_files)
     {
       /* FILE == 0 means unknown.  */
       if (file)
