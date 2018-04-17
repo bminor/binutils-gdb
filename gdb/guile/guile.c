@@ -209,7 +209,7 @@ guile_command (const char *arg, int from_tty)
     }
   else
     {
-      command_line_up l = get_command_line (guile_control, "");
+      counted_command_line l = get_command_line (guile_control, "");
 
       execute_control_command_untraced (l.get ());
     }
@@ -256,12 +256,12 @@ gdbscm_eval_from_control_command
   char *script, *msg;
   struct cleanup *cleanup;
 
-  if (cmd->body_count != 1)
+  if (cmd->body_list_1 != nullptr)
     error (_("Invalid \"guile\" block structure."));
 
   cleanup = make_cleanup (null_cleanup, NULL);
 
-  script = compute_scheme_string (cmd->body_list[0]);
+  script = compute_scheme_string (cmd->body_list_0.get ());
   msg = gdbscm_safe_eval_string (script, 0);
   xfree (script);
   if (msg != NULL)
@@ -408,7 +408,7 @@ guile_command (const char *arg, int from_tty)
     {
       /* Even if Guile isn't enabled, we still have to slurp the
 	 command list to the corresponding "end".  */
-      command_line_up l = get_command_line (guile_control, "");
+      counted_command_line l = get_command_line (guile_control, "");
 
       execute_control_command_untraced (l.get ());
     }

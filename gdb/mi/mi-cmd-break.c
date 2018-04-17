@@ -489,7 +489,7 @@ mi_read_next_line (void)
 void
 mi_cmd_break_commands (const char *command, char **argv, int argc)
 {
-  command_line_up break_command;
+  counted_command_line break_command;
   char *endptr;
   int bnum;
   struct breakpoint *b;

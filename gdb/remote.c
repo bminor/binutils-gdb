@@ -12537,7 +12537,7 @@ remote_download_command_source (int num, ULONGEST addr,
       if (cmd->control_type == while_control
 	  || cmd->control_type == while_stepping_control)
 	{
-	  remote_download_command_source (num, addr, *cmd->body_list);
+	  remote_download_command_source (num, addr, cmd->body_list_0.get ());
 
 	  QUIT;	/* Allow user to bail out with ^C.  */
 	  strcpy (rs->buf, "QTDPsrc:");

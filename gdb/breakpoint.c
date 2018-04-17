@@ -1015,8 +1015,8 @@ check_no_tracepoint_commands (struct command_line *commands)
 	error (_("The 'while-stepping' command can "
 		 "only be used for tracepoints"));
 
-      for (i = 0; i < c->body_count; ++i)
-	check_no_tracepoint_commands ((c->body_list)[i]);
+      check_no_tracepoint_commands (c->body_list_0.get ());
+      check_no_tracepoint_commands (c->body_list_1.get ());
 
       /* Not that command parsing removes leading whitespace and comment
 	 lines and also empty lines.  So, we only need to check for
@@ -1127,8 +1127,8 @@ validate_commands_for_breakpoint (struct breakpoint *b,
 	{
 	  struct command_line *c2;
 
-	  gdb_assert (while_stepping->body_count == 1);
-	  c2 = while_stepping->body_list[0];
+	  gdb_assert (while_stepping->body_list_1 == nullptr);
+	  c2 = while_stepping->body_list_0.get ();
 	  for (; c2; c2 = c2->next)
 	    {
 	      if (c2->control_type == while_stepping_control)
@@ -1168,7 +1168,7 @@ static_tracepoints_here (CORE_ADDR addr)
 
 void
 breakpoint_set_commands (struct breakpoint *b, 
-			 command_line_up &&commands)
+			 counted_command_line &&commands)
 {
   validate_commands_for_breakpoint (b, commands.get ());
 
@@ -1248,7 +1248,7 @@ commands_command_1 (const char *arg, int from_tty,
        if (cmd == NULL)
 	 {
 	   if (control != NULL)
-	     cmd = copy_command_lines (control->body_list[0]);
+	     cmd = control->body_list_0;
 	   else
 	     {
 	       std::string str
@@ -8773,18 +8773,12 @@ update_dprintf_command_list (struct breakpoint *b)
 		    _("Invalid dprintf style."));
 
   gdb_assert (printf_line != NULL);
+
   /* Manufacture a printf sequence.  */
-  {
-    struct command_line *printf_cmd_line = XNEW (struct command_line);
-
-    printf_cmd_line->control_type = simple_control;
-    printf_cmd_line->body_count = 0;
-    printf_cmd_line->body_list = NULL;
-    printf_cmd_line->next = NULL;
-    printf_cmd_line->line = printf_line;
-
-    breakpoint_set_commands (b, command_line_up (printf_cmd_line));
-  }
+  struct command_line *printf_cmd_line
+    = new struct command_line (simple_control, printf_line);
+  breakpoint_set_commands (b, counted_command_line (printf_cmd_line,
+						    command_lines_deleter ()));
 }
 
 /* Update all dprintf commands, making their command lists reflect
@@ -14785,7 +14779,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
      function.  */
   if (!utp->cmd_strings.empty ())
     {
-      command_line_up cmd_list;
+      counted_command_line cmd_list;
 
       this_utp = utp;
       next_cmd = 0;

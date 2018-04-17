@@ -167,8 +167,7 @@ char *trace_stop_notes = NULL;
 struct collection_list;
 static char *mem2hex (gdb_byte *, char *, int);
 
-static struct command_line *
-  all_tracepoint_actions_and_cleanup (struct breakpoint *t);
+static counted_command_line all_tracepoint_actions (struct breakpoint *);
 
 static struct trace_status trace_status;
 
@@ -578,8 +577,9 @@ actions_command (const char *args, int from_tty)
 	string_printf ("Enter actions for tracepoint %d, one per line.",
 		       t->number);
 
-      command_line_up l = read_command_lines (&tmpbuf[0], from_tty, 1,
-					      check_tracepoint_command, t);
+      counted_command_line l = read_command_lines (&tmpbuf[0], from_tty, 1,
+						   check_tracepoint_command,
+						   t);
       breakpoint_set_commands (t, std::move (l));
     }
   /* else just return */
@@ -1436,7 +1436,7 @@ encode_actions_1 (struct command_line *action,
 	     here.  */
 	  gdb_assert (stepping_list);
 
-	  encode_actions_1 (action->body_list[0], tloc, frame_reg,
+	  encode_actions_1 (action->body_list_0.get (), tloc, frame_reg,
 			    frame_offset, stepping_list, NULL);
 	}
       else
@@ -1452,17 +1452,17 @@ encode_actions (struct bp_location *tloc,
 		struct collection_list *tracepoint_list,
 		struct collection_list *stepping_list)
 {
-  struct command_line *actions;
   int frame_reg;
   LONGEST frame_offset;
 
   gdbarch_virtual_frame_pointer (tloc->gdbarch,
 				 tloc->address, &frame_reg, &frame_offset);
 
-  actions = all_tracepoint_actions_and_cleanup (tloc->owner);
-
-  encode_actions_1 (actions, tloc, frame_reg, frame_offset,
+  counted_command_line actions = all_tracepoint_actions (tloc->owner);
+  encode_actions_1 (actions.get (), tloc, frame_reg, frame_offset,
 		    tracepoint_list, stepping_list);
+  encode_actions_1 (breakpoint_commands (tloc->owner), tloc,
+		    frame_reg, frame_offset, tracepoint_list, stepping_list);
 
   tracepoint_list->finish ();
   stepping_list->finish ();
@@ -2662,11 +2662,9 @@ trace_dump_actions (struct command_line *action,
 
       if (cmd_cfunc_eq (cmd, while_stepping_pseudocommand))
 	{
-	  int i;
-
-	  for (i = 0; i < action->body_count; ++i)
-	    trace_dump_actions (action->body_list[i],
-				1, stepping_frame, from_tty);
+	  gdb_assert (action->body_list_1 == nullptr);
+	  trace_dump_actions (action->body_list_0.get (),
+			      1, stepping_frame, from_tty);
 	}
       else if (cmd_cfunc_eq (cmd, collect_pseudocommand))
 	{
@@ -2777,16 +2775,12 @@ get_traceframe_location (int *stepping_frame_p)
   return t->loc;
 }
 
-/* Return all the actions, including default collect, of a tracepoint
-   T.  It constructs cleanups into the chain, and leaves the caller to
-   handle them (call do_cleanups).  */
+/* Return the default collect actions of a tracepoint T.  */
 
-static struct command_line *
-all_tracepoint_actions_and_cleanup (struct breakpoint *t)
+static counted_command_line
+all_tracepoint_actions (struct breakpoint *t)
 {
-  struct command_line *actions;
-
-  actions = breakpoint_commands (t);
+  counted_command_line actions (nullptr, command_lines_deleter ());
 
   /* If there are default expressions to collect, make up a collect
      action and prepend to the action list to encode.  Note that since
@@ -2796,17 +2790,13 @@ all_tracepoint_actions_and_cleanup (struct breakpoint *t)
   if (*default_collect)
     {
       struct command_line *default_collect_action;
-      char *default_collect_line;
+      gdb::unique_xmalloc_ptr<char> default_collect_line
+	(xstrprintf ("collect %s", default_collect));
 
-      default_collect_line = xstrprintf ("collect %s", default_collect);
-      make_cleanup (xfree, default_collect_line);
-
-      validate_actionline (default_collect_line, t);
-      default_collect_action = XNEW (struct command_line);
-      make_cleanup (xfree, default_collect_action);
-      default_collect_action->next = actions;
-      default_collect_action->line = default_collect_line;
-      actions = default_collect_action;
+      validate_actionline (default_collect_line.get (), t);
+      actions.reset (new struct command_line (simple_control,
+					      default_collect_line.release ()),
+		     command_lines_deleter ());
     }
 
   return actions;
@@ -2819,7 +2809,6 @@ tdump_command (const char *args, int from_tty)
 {
   int stepping_frame = 0;
   struct bp_location *loc;
-  struct command_line *actions;
 
   /* This throws an error is not inspecting a trace frame.  */
   loc = get_traceframe_location (&stepping_frame);
@@ -2833,9 +2822,11 @@ tdump_command (const char *args, int from_tty)
 
   select_frame (get_current_frame ());
 
-  actions = all_tracepoint_actions_and_cleanup (loc->owner);
+  counted_command_line actions = all_tracepoint_actions (loc->owner);
 
-  trace_dump_actions (actions, 0, stepping_frame, from_tty);
+  trace_dump_actions (actions.get (), 0, stepping_frame, from_tty);
+  trace_dump_actions (breakpoint_commands (loc->owner), 0, stepping_frame,
+		      from_tty);
 }
 
 /* Encode a piece of a tracepoint's source-level definition in a form

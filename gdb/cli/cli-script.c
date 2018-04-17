@@ -134,32 +134,23 @@ multi_line_command_p (enum command_control_type type)
 static struct command_line *
 build_command_line (enum command_control_type type, const char *args)
 {
-  struct command_line *cmd;
-
   if ((args == NULL || *args == '\0')
       && (type == if_control || type == while_control))
     error (_("if/while commands require arguments."));
   gdb_assert (args != NULL);
 
-  cmd = XNEW (struct command_line);
-  cmd->next = NULL;
-  cmd->control_type = type;
-
-  cmd->body_count = 1;
-  cmd->body_list = XCNEWVEC (struct command_line *, cmd->body_count);
-  cmd->line = xstrdup (args);
-
-  return cmd;
+  return new struct command_line (type, xstrdup (args));
 }
 
 /* Build and return a new command structure for the control commands
    such as "if" and "while".  */
 
-command_line_up
+counted_command_line
 get_command_line (enum command_control_type type, const char *arg)
 {
   /* Allocate and build a new command line structure.  */
-  command_line_up cmd (build_command_line (type, arg));
+  counted_command_line cmd (build_command_line (type, arg),
+			    command_lines_deleter ());
 
   /* Read in the body of this command.  */
   if (recurse_read_control_structure (read_next_line, cmd.get (), 0, 0)
@@ -228,7 +219,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	  else
 	    uiout->field_string (NULL, list->line);
 	  uiout->text ("\n");
-	  print_command_lines (uiout, *list->body_list, depth + 1);
+	  print_command_lines (uiout, list->body_list_0.get (), depth + 1);
 	  if (depth)
 	    uiout->spaces (2 * depth);
 	  uiout->field_string (NULL, "end");
@@ -244,16 +235,16 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	  uiout->field_fmt (NULL, "if %s", list->line);
 	  uiout->text ("\n");
 	  /* The true arm.  */
-	  print_command_lines (uiout, list->body_list[0], depth + 1);
+	  print_command_lines (uiout, list->body_list_0.get (), depth + 1);
 
 	  /* Show the false arm if it exists.  */
-	  if (list->body_count == 2)
+	  if (list->body_list_1 != nullptr)
 	    {
 	      if (depth)
 		uiout->spaces (2 * depth);
 	      uiout->field_string (NULL, "else");
 	      uiout->text ("\n");
-	      print_command_lines (uiout, list->body_list[1], depth + 1);
+	      print_command_lines (uiout, list->body_list_1.get (), depth + 1);
 	    }
 
 	  if (depth)
@@ -273,7 +264,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	  else
 	    uiout->field_string (NULL, "commands");
 	  uiout->text ("\n");
-	  print_command_lines (uiout, *list->body_list, depth + 1);
+	  print_command_lines (uiout, list->body_list_0.get (), depth + 1);
 	  if (depth)
 	    uiout->spaces (2 * depth);
 	  uiout->field_string (NULL, "end");
@@ -287,7 +278,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	  uiout->field_string (NULL, "python");
 	  uiout->text ("\n");
 	  /* Don't indent python code at all.  */
-	  print_command_lines (uiout, *list->body_list, 0);
+	  print_command_lines (uiout, list->body_list_0.get (), 0);
 	  if (depth)
 	    uiout->spaces (2 * depth);
 	  uiout->field_string (NULL, "end");
@@ -300,7 +291,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	{
 	  uiout->field_string (NULL, "compile expression");
 	  uiout->text ("\n");
-	  print_command_lines (uiout, *list->body_list, 0);
+	  print_command_lines (uiout, list->body_list_0.get (), 0);
 	  if (depth)
 	    uiout->spaces (2 * depth);
 	  uiout->field_string (NULL, "end");
@@ -313,7 +304,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	{
 	  uiout->field_string (NULL, "guile");
 	  uiout->text ("\n");
-	  print_command_lines (uiout, *list->body_list, depth + 1);
+	  print_command_lines (uiout, list->body_list_0.get (), depth + 1);
 	  if (depth)
 	    uiout->spaces (2 * depth);
 	  uiout->field_string (NULL, "end");
@@ -377,14 +368,17 @@ void
 execute_user_command (struct cmd_list_element *c, const char *args)
 {
   struct ui *ui = current_ui;
-  struct command_line *cmdlines;
+  counted_command_line cmdlines_copy;
   enum command_control_type ret;
   extern unsigned int max_user_call_depth;
 
-  cmdlines = c->user_commands;
-  if (cmdlines == 0)
+  /* Ensure that the user commands can't be deleted while they are
+     executing.  */
+  cmdlines_copy = c->user_commands;
+  if (cmdlines_copy == 0)
     /* Null command */
     return;
+  struct command_line *cmdlines = cmdlines_copy.get ();
 
   scoped_user_args_level push_user_args (args);
 
@@ -527,7 +521,7 @@ execute_control_command_1 (struct command_line *cmd)
 	      break;
 
 	    /* Execute the body of the while statement.  */
-	    current = *cmd->body_list;
+	    current = cmd->body_list_0.get ();
 	    while (current)
 	      {
 		scoped_restore save_nesting
@@ -581,9 +575,9 @@ execute_control_command_1 (struct command_line *cmd)
 	/* Choose which arm to take commands from based on the value
 	   of the conditional expression.  */
 	if (value_true (val))
-	  current = *cmd->body_list;
-	else if (cmd->body_count == 2)
-	  current = *(cmd->body_list + 1);
+	  current = cmd->body_list_0.get ();
+	else if (cmd->body_list_1 != nullptr)
+	  current = cmd->body_list_1.get ();
 	value_free_to_mark (val_mark);
 
 	/* Execute commands in the given arm.  */
@@ -665,7 +659,7 @@ static void
 while_command (const char *arg, int from_tty)
 {
   control_level = 1;
-  command_line_up command = get_command_line (while_control, arg);
+  counted_command_line command = get_command_line (while_control, arg);
 
   if (command == NULL)
     return;
@@ -682,7 +676,7 @@ static void
 if_command (const char *arg, int from_tty)
 {
   control_level = 1;
-  command_line_up command = get_command_line (if_control, arg);
+  counted_command_line command = get_command_line (if_control, arg);
 
   if (command == NULL)
     return;
@@ -828,31 +822,6 @@ user_args::insert_args (const char *line) const
 }
 
 
-/* Expand the body_list of COMMAND so that it can hold NEW_LENGTH
-   code bodies.  This is typically used when we encounter an "else"
-   clause for an "if" command.  */
-
-static void
-realloc_body_list (struct command_line *command, int new_length)
-{
-  int n;
-  struct command_line **body_list;
-
-  n = command->body_count;
-
-  /* Nothing to do?  */
-  if (new_length <= n)
-    return;
-
-  body_list = XCNEWVEC (struct command_line *, new_length);
-
-  memcpy (body_list, command->body_list, sizeof (struct command_line *) * n);
-
-  xfree (command->body_list);
-  command->body_list = body_list;
-  command->body_count = new_length;
-}
-
 /* Read next line from stdin.  Passed to read_command_line_1 and
    recurse_read_control_structure whenever we need to read commands
    from stdin.  */
@@ -1012,23 +981,9 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	  *command = build_command_line (guile_control, "");
 	}
       else if (p_end - p == 10 && startswith (p, "loop_break"))
-	{
-	  *command = XNEW (struct command_line);
-	  (*command)->next = NULL;
-	  (*command)->line = NULL;
-	  (*command)->control_type = break_control;
-	  (*command)->body_count = 0;
-	  (*command)->body_list = NULL;
-	}
+	*command = new struct command_line (break_control);
       else if (p_end - p == 13 && startswith (p, "loop_continue"))
-	{
-	  *command = XNEW (struct command_line);
-	  (*command)->next = NULL;
-	  (*command)->line = NULL;
-	  (*command)->control_type = continue_control;
-	  (*command)->body_count = 0;
-	  (*command)->body_list = NULL;
-	}
+	*command = new struct command_line (continue_control);
       else
 	not_handled = 1;
     }
@@ -1036,12 +991,8 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
   if (!parse_commands || not_handled)
     {
       /* A normal command.  */
-      *command = XNEW (struct command_line);
-      (*command)->next = NULL;
-      (*command)->line = savestring (p, p_end - p);
-      (*command)->control_type = simple_control;
-      (*command)->body_count = 0;
-      (*command)->body_list = NULL;
+      *command = new struct command_line (simple_control,
+					  savestring (p, p_end - p));
     }
 
   if (validator)
@@ -1053,7 +1004,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	}
       CATCH (ex, RETURN_MASK_ALL)
 	{
-	  xfree (*command);
+	  free_command_lines (command);
 	  throw_exception (ex);
 	}
       END_CATCH
@@ -1073,20 +1024,16 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 				void (*validator)(char *, void *),
 				void *closure)
 {
-  int current_body, i;
   enum misc_command_type val;
   enum command_control_type ret;
   struct command_line **body_ptr, *child_tail, *next;
+  counted_command_line *current_body = &current_cmd->body_list_0;
 
   child_tail = NULL;
-  current_body = 1;
 
   /* Sanity checks.  */
   if (current_cmd->control_type == simple_control)
     error (_("Recursed on a simple control type."));
-
-  if (current_body > current_cmd->body_count)
-    error (_("Allocated body is smaller than this command type needs."));
 
   /* Read lines from the input stream and build control structures.  */
   while (1)
@@ -1123,10 +1070,9 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
       if (val == else_command)
 	{
 	  if (current_cmd->control_type == if_control
-	      && current_body == 1)
+	      && current_body == &current_cmd->body_list_0)
 	    {
-	      realloc_body_list (current_cmd, 2);
-	      current_body = 2;
+	      current_body = &current_cmd->body_list_1;
 	      child_tail = NULL;
 	      continue;
 	    }
@@ -1142,14 +1088,7 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 	  child_tail->next = next;
 	}
       else
-	{
-	  body_ptr = current_cmd->body_list;
-	  for (i = 1; i < current_body; i++)
-	    body_ptr++;
-
-	  *body_ptr = next;
-
-	}
+	*current_body = counted_command_line (next, command_lines_deleter ());
 
       child_tail = next;
 
@@ -1183,7 +1122,7 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 
 #define END_MESSAGE "End with a line saying just \"end\"."
 
-command_line_up
+counted_command_line
 read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
 		    void (*validator)(char *, void *), void *closure)
 {
@@ -1205,7 +1144,7 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
 
   /* Reading commands assumes the CLI behavior, so temporarily
      override the current interpreter with CLI.  */
-  command_line_up head;
+  counted_command_line head (nullptr, command_lines_deleter ());
   if (current_interp_named_p (INTERP_CONSOLE))
     head = read_command_lines_1 (read_next_line, parse_commands,
 				 validator, closure);
@@ -1228,12 +1167,12 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
 /* Act the same way as read_command_lines, except that each new line is
    obtained using READ_NEXT_LINE_FUNC.  */
 
-command_line_up
+counted_command_line
 read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands,
 		      void (*validator)(char *, void *), void *closure)
 {
   struct command_line *tail, *next;
-  command_line_up head;
+  counted_command_line head (nullptr, command_lines_deleter ());
   enum command_control_type ret;
   enum misc_command_type val;
 
@@ -1279,7 +1218,7 @@ read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands,
 	}
       else
 	{
-	  head.reset (next);
+	  head = counted_command_line (next, command_lines_deleter ());
 	}
       tail = next;
     }
@@ -1299,53 +1238,14 @@ free_command_lines (struct command_line **lptr)
 {
   struct command_line *l = *lptr;
   struct command_line *next;
-  struct command_line **blist;
-  int i;
 
   while (l)
     {
-      if (l->body_count > 0)
-	{
-	  blist = l->body_list;
-	  for (i = 0; i < l->body_count; i++, blist++)
-	    free_command_lines (blist);
-	}
       next = l->next;
-      xfree (l->line);
-      xfree (l);
+      delete l;
       l = next;
     }
   *lptr = NULL;
-}
-
-command_line_up
-copy_command_lines (struct command_line *cmds)
-{
-  struct command_line *result = NULL;
-
-  if (cmds)
-    {
-      result = XNEW (struct command_line);
-
-      result->next = copy_command_lines (cmds->next).release ();
-      result->line = xstrdup (cmds->line);
-      result->control_type = cmds->control_type;
-      result->body_count = cmds->body_count;
-      if (cmds->body_count > 0)
-        {
-          int i;
-
-          result->body_list = XNEWVEC (struct command_line *, cmds->body_count);
-
-          for (i = 0; i < cmds->body_count; i++)
-            result->body_list[i]
-	      = copy_command_lines (cmds->body_list[i]).release ();
-        }
-      else
-        result->body_list = NULL;
-    }
-
-  return command_line_up (result);
 }
 
 /* Validate that *COMNAME is a valid name for a command.  Return the
@@ -1483,15 +1383,12 @@ define_command (const char *comname, int from_tty)
 
   xsnprintf (tmpbuf, sizeof (tmpbuf),
 	     "Type commands for definition of \"%s\".", comfull);
-  command_line_up cmds = read_command_lines (tmpbuf, from_tty, 1, 0, 0);
-
-  if (c && c->theclass == class_user)
-    free_command_lines (&c->user_commands);
+  counted_command_line cmds = read_command_lines (tmpbuf, from_tty, 1, 0, 0);
 
   newc = add_cmd (comname, class_user, user_defined_command,
 		  (c && c->theclass == class_user)
 		  ? c->doc : xstrdup ("User-defined."), list);
-  newc->user_commands = cmds.release ();
+  newc->user_commands = std::move (cmds);
 
   /* If this new command is a hook, then mark both commands as being
      tied.  */
@@ -1534,7 +1431,8 @@ document_command (const char *comname, int from_tty)
 
   xsnprintf (tmpbuf, sizeof (tmpbuf), "Type documentation for \"%s\".",
 	     comfull);
-  command_line_up doclines = read_command_lines (tmpbuf, from_tty, 0, 0, 0);
+  counted_command_line doclines = read_command_lines (tmpbuf, from_tty,
+						      0, 0, 0);
 
   if (c->doc)
     xfree ((char *) c->doc);
@@ -1611,7 +1509,7 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
       return;
     }
 
-  cmdlines = c->user_commands;
+  cmdlines = c->user_commands.get ();
   fprintf_filtered (stream, "User command \"%s%s\":\n", prefix, name);
 
   if (!cmdlines)

@@ -24,6 +24,7 @@
 /* Include the public interfaces.  */
 #include "command.h"
 #include "gdb_regex.h"
+#include "cli-script.h"
 
 #if 0
 /* FIXME: cagney/2002-03-17: Once cmd_type() has been removed, ``enum
@@ -213,7 +214,7 @@ struct cmd_list_element
     const char *const *enums = nullptr;
 
     /* Pointer to command strings of user-defined commands */
-    struct command_line *user_commands = nullptr;
+    counted_command_line user_commands;
 
     /* Pointer to command that is hooked by this one, (by hook_pre)
        so the hook can be removed when this one is deleted.  */

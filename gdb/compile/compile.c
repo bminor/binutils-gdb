@@ -149,7 +149,7 @@ compile_code_command (const char *arg, int from_tty)
     eval_compile_command (NULL, arg, scope, NULL);
   else
     {
-      command_line_up l = get_command_line (compile_control, "");
+      counted_command_line l = get_command_line (compile_control, "");
 
       l->control_u.compile.scope = scope;
       execute_control_command_untraced (l.get ());
@@ -187,7 +187,7 @@ compile_print_command (const char *arg, int from_tty)
     eval_compile_command (NULL, arg, scope, &fmt);
   else
     {
-      command_line_up l = get_command_line (compile_control, "");
+      counted_command_line l = get_command_line (compile_control, "");
 
       l->control_u.compile.scope = scope;
       l->control_u.compile.scope_data = &fmt;
@@ -512,7 +512,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     {
       struct command_line *iter;
 
-      for (iter = cmd->body_list[0]; iter; iter = iter->next)
+      for (iter = cmd->body_list_0.get (); iter; iter = iter->next)
 	{
 	  input_buf.puts (iter->line);
 	  input_buf.puts ("\n");

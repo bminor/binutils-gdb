@@ -1,5 +1,49 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* tracepoint.c (all_tracepoint_actions): Rename from
+	all_tracepoint_actions_and_cleanup.  Change return type.
+	(actions_command, encode_actions_1, encode_actions)
+	(trace_dump_actions, tdump_command): Update.
+	* remote.c (remote_download_command_source): Update.
+	* python/python.c (gdbpy_eval_from_control_command)
+	(python_command, python_interactive_command): Update.
+	* mi/mi-cmd-break.c (mi_cmd_break_commands): Update.
+	* guile/guile.c (guile_command)
+	(gdbscm_eval_from_control_command, guile_command): Update.
+	* compile/compile.c (compile_code_command)
+	(compile_print_command, compile_to_object): Update.
+	* cli/cli-script.h (struct command_lines_deleter): New.
+	(counted_command_line): New typedef.
+	(struct command_line): Add constructor, destructor.
+	<body_list>: Remove.
+	<body_list_0, body_list_1>: New members.
+	(command_line_up): Remove typedef.
+	(read_command_lines, read_command_lines_1, get_command_line):
+	Update.
+	(copy_command_lines): Don't declare.
+	* cli/cli-script.c (build_command_line): Use "new".
+	(get_command_line): Return counted_command_line.
+	(print_command_lines, execute_user_command)
+	(execute_control_command_1, while_command, if_command): Update.
+	(realloc_body_list): Remove.
+	(process_next_line, recurse_read_control_structure): Update.
+	(read_command_lines, read_command_lines_1): Return counted_command_line.
+	(free_command_lines): Use "delete".
+	(copy_command_lines): Remove.
+	(define_command, document_command, show_user_1): Update.
+	* cli/cli-decode.h (struct cmd_list_element) <user_commands>: Now
+	a counted_command_line.
+	* breakpoint.h (counted_command_line): Remove typedef.
+	(breakpoint_set_commands): Update.
+	* breakpoint.c (check_no_tracepoint_commands)
+	(validate_commands_for_breakpoint): Update.
+	(breakpoint_set_commands): Change commands to be a
+	counted_command_line.
+	(commands_command_1, update_dprintf_command_list)
+	(create_tracepoint_from_upload): Update.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-decode.h (cmd_list_element): New constructor.
 	(~cmd_list_element): New destructor.
 	(struct cmd_list_element): Add initializers.

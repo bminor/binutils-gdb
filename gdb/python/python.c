@@ -385,12 +385,12 @@ gdbpy_eval_from_control_command (const struct extension_language_defn *extlang,
 {
   int ret;
 
-  if (cmd->body_count != 1)
+  if (cmd->body_list_1 != nullptr)
     error (_("Invalid \"python\" block structure."));
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  std::string script = compute_python_string (cmd->body_list[0]);
+  std::string script = compute_python_string (cmd->body_list_0.get ());
   ret = PyRun_SimpleString (script.c_str ());
   if (ret)
     error (_("Error while executing Python code."));
@@ -413,7 +413,7 @@ python_command (const char *arg, int from_tty)
     }
   else
     {
-      command_line_up l = get_command_line (python_control, "");
+      counted_command_line l = get_command_line (python_control, "");
 
       execute_control_command_untraced (l.get ());
     }
@@ -1583,7 +1583,7 @@ python_interactive_command (const char *arg, int from_tty)
     error (_("Python scripting is not supported in this copy of GDB."));
   else
     {
-      command_line_up l = get_command_line (python_control, "");
+      counted_command_line l = get_command_line (python_control, "");
 
       execute_control_command_untraced (l.get ());
     }

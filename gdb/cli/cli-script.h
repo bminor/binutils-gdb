@@ -45,31 +45,7 @@ enum command_control_type
   invalid_control
 };
 
-/* * Structure for saved commands lines (for breakpoints, defined
-   commands, etc).  */
-
-struct command_line
-{
-  struct command_line *next;
-  char *line;
-  enum command_control_type control_type;
-  union
-    {
-      struct
-	{
-	  enum compile_i_scope_types scope;
-	  void *scope_data;
-	}
-      compile;
-    }
-  control_u;
-  /* * The number of elements in body_list.  */
-  int body_count;
-  /* * For composite commands, the nested lists of commands.  For
-     example, for "if" command this will contain the then branch and
-     the else branch, if that is available.  */
-  struct command_line **body_list;
-};
+struct command_line;
 
 extern void free_command_lines (struct command_line **);
 
@@ -83,16 +59,58 @@ struct command_lines_deleter
   }
 };
 
-/* A unique pointer to a command_line.  */
+/* A reference-counted struct command_line.  */
+typedef std::shared_ptr<command_line> counted_command_line;
 
-typedef std::unique_ptr<command_line, command_lines_deleter> command_line_up;
+/* * Structure for saved commands lines (for breakpoints, defined
+   commands, etc).  */
 
-extern command_line_up read_command_lines (char *, int, int,
-					   void (*)(char *, void *),
-					   void *);
-extern command_line_up read_command_lines_1 (char * (*) (void), int,
-					     void (*)(char *, void *),
-					     void *);
+struct command_line
+{
+  explicit command_line (command_control_type type_, char *line_ = nullptr)
+    : line (line_),
+      control_type (type_)
+  {
+    memset (&control_u, 0, sizeof (control_u));
+  }
+
+  DISABLE_COPY_AND_ASSIGN (command_line);
+
+  struct command_line *next = nullptr;
+  char *line;
+  enum command_control_type control_type;
+  union
+    {
+      struct
+	{
+	  enum compile_i_scope_types scope;
+	  void *scope_data;
+	}
+      compile;
+    }
+  control_u;
+  /* * For composite commands, the nested lists of commands.  For
+     example, for "if" command this will contain the then branch and
+     the else branch, if that is available.  */
+  counted_command_line body_list_0;
+  counted_command_line body_list_1;
+
+private:
+
+  friend void free_command_lines (struct command_line **);
+
+  ~command_line ()
+  {
+    xfree (line);
+  }
+};
+
+extern counted_command_line read_command_lines (char *, int, int,
+						void (*)(char *, void *),
+						void *);
+extern counted_command_line read_command_lines_1 (char * (*) (void), int,
+						  void (*)(char *, void *),
+						  void *);
 
 
 /* Exported to cli/cli-cmds.c */
@@ -112,13 +130,11 @@ extern enum command_control_type
 extern enum command_control_type
 	execute_control_command_untraced (struct command_line *cmd);
 
-extern command_line_up get_command_line (enum command_control_type,
-					 const char *);
+extern counted_command_line get_command_line (enum command_control_type,
+					      const char *);
 
 extern void print_command_lines (struct ui_out *,
 				 struct command_line *, unsigned int);
-
-extern command_line_up copy_command_lines (struct command_line *cmds);
 
 /* Exported to gdb/infrun.c */
 
