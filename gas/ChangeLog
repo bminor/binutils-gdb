@@ -1,3 +1,7 @@
+2018-04-18  Alan Modra  <amodra@gmail.com>
+
+	* configure.tgt: Remove *-*-bsd* entry.
+
 2018-04-17 Andrew Sadek  <andrew.sadek.se@gmail.com>
 
 	Microblaze Target: PIC data text relative

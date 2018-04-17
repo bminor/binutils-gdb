@@ -448,7 +448,6 @@ case ${generic_target} in
   *-*-cloudabi*)			fmt=elf ;;
   *-*-dragonfly*)			fmt=elf em=dragonfly ;;
   *-*-freebsd* | *-*-kfreebsd*-gnu)	fmt=elf em=freebsd ;;
-  *-*-bsd*)				fmt=aout em=sun3 ;;
   *-*-generic)				fmt=generic ;;
   *-*-xray | *-*-hms)			fmt=coff ;;
   *-*-sim)				fmt=coff ;;
