@@ -2518,7 +2518,9 @@ error_alignment:
 	       abfd = abfd->link.next)
 	    if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
 		&& (abfd->flags
-		    & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+		    & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0
+		&& bed->relocs_compatible (abfd->xvec,
+					   info->output_bfd->xvec))
 	      {
 		htab->elf.dynobj = abfd;
 		dynobj = abfd;

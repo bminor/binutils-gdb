@@ -1,3 +1,9 @@
+2018-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23055
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Use a
+	normal input file with compatible relocation.
+
 2018-04-18  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am: Remove support for assorted i386 aout and coff targets.
