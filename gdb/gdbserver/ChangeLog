@@ -1,5 +1,19 @@
 2018-04-18  Alan Hayward  <alan.hayward@arm.com>
 
+	* configure.srv (aarch64*-*-linux*): Don't include xml.
+	(i[34567]86-*-cygwin*): Likewise.
+	(i[34567]86-*-linux*): Likewise.
+	(i[34567]86-*-lynxos*): Likewise.
+	(i[34567]86-*-mingw32ce*): Likewise.
+	(i[34567]86-*-mingw*): Likewise.
+	(i[34567]86-*-nto*): Likewise.
+	(tic6x-*-uclinux): Likewise.
+	(x86_64-*-linux*): Likewise.
+	(x86_64-*-mingw*): Likewise.
+	(x86_64-*-cygwin*): Likewise.
+
+2018-04-18  Alan Hayward  <alan.hayward@arm.com>
+
 	* tdesc.c: Remove xml parameter.
 
 2018-04-18  Alan Hayward  <alan.hayward@arm.com>
