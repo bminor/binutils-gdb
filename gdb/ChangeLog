@@ -1,5 +1,12 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	PR python/22731:
+	* NEWS: Mention that breakpoint commands are writable.
+	* python/py-breakpoint.c (bppy_set_commands): New function.
+	(breakpoint_object_getset) <"commands">: Use it.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (actions_command): Update.
 	* mi/mi-cmd-break.c (mi_command_line_array)
 	(mi_command_line_array_cnt, mi_command_line_array_ptr)

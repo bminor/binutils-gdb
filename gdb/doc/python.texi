@@ -5136,7 +5136,7 @@ value is @code{None}.  This attribute is writable.
 This attribute holds the commands attached to the breakpoint.  If
 there are commands, this attribute's value is a string holding all the
 commands, separated by newlines.  If there are no commands, this
-attribute is @code{None}.  This attribute is not writable.
+attribute is @code{None}.  This attribute is writable.
 @end defvar
 
 @node Finish Breakpoints in Python

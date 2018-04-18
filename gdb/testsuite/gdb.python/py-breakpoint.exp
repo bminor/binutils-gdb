@@ -197,8 +197,16 @@ proc_with_prefix test_bkpt_cond_and_cmds { } {
 
     gdb_py_test_silent_cmd "python blist = gdb.breakpoints()" \
 	"Get Breakpoint List" 0
-    gdb_test "python print (blist\[len(blist)-1\].commands)" \
+    gdb_py_test_silent_cmd "python last_bp = blist\[len(blist)-1\]" \
+	"Find last breakpoint" 0
+    gdb_test "python print (last_bp.commands)" \
 	"print \"Command for breakpoint has been executed.\".*print result"
+
+    gdb_test_no_output "python last_bp.commands = 'echo hi\\necho there'" \
+	"set commands"
+    # Note the length is 3 because the string ends in a \n.
+    gdb_test "python print (len(last_bp.commands.split('\\n')))" "3" \
+	"check number of lines in commands"
 }
 
 proc_with_prefix test_bkpt_invisible { } {

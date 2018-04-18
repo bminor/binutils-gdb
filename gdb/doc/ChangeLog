@@ -1,3 +1,9 @@
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
+	PR python/22731:
+	* python.texi (Breakpoints In Python): Mention that "commands" is
+	writable.
+
 2018-05-02  Tom Tromey  <tom@tromey.com>
 
 	PR python/20084:

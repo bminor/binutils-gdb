@@ -31,6 +31,9 @@ set|show record btrace cpu
 
   ** Type alignment is now exposed via the "align" attribute of a gdb.Type.
 
+  ** The commands attached to a breakpoint can be set by assigning to
+     the breakpoint's "commands" field.
+
 * New targets
 
 RiscV ELF			riscv*-*-elf

@@ -1,5 +1,10 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	PR python/22731:
+	* gdb.python/py-breakpoint.exp: Test setting breakpoint commands.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	PR gdb/11750:
 	* gdb.base/define.exp: Test defining a user command inside a user
 	command.

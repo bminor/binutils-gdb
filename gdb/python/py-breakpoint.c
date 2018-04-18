@@ -510,6 +510,49 @@ bppy_get_commands (PyObject *self, void *closure)
   return host_string_to_python_string (stb.c_str ());
 }
 
+/* Set the commands attached to a breakpoint.  Returns 0 on success.
+   Returns -1 on error, with a python exception set.  */
+static int
+bppy_set_commands (PyObject *self, PyObject *newvalue, void *closure)
+{
+  gdbpy_breakpoint_object *self_bp = (gdbpy_breakpoint_object *) self;
+  struct breakpoint *bp = self_bp->bp;
+  struct gdb_exception except = exception_none;
+
+  BPPY_SET_REQUIRE_VALID (self_bp);
+
+  gdb::unique_xmalloc_ptr<char> commands
+    (python_string_to_host_string (newvalue));
+  if (commands == nullptr)
+    return -1;
+
+  TRY
+    {
+      bool first = true;
+      char *save_ptr = nullptr;
+      auto reader
+	= [&] ()
+	  {
+	    const char *result = strtok_r (first ? commands.get () : nullptr,
+					   "\n", &save_ptr);
+	    first = false;
+	    return result;
+	  };
+
+      counted_command_line lines = read_command_lines_1 (reader, 1, nullptr);
+      breakpoint_set_commands (self_bp->bp, std::move (lines));
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      except = ex;
+    }
+  END_CATCH
+
+  GDB_PY_SET_HANDLE_EXCEPTION (except);
+
+  return 0;
+}
+
 /* Python function to get the breakpoint type.  */
 static PyObject *
 bppy_get_type (PyObject *self, void *closure)
@@ -1185,7 +1228,7 @@ when setting this property.", NULL },
   { "condition", bppy_get_condition, bppy_set_condition,
     "Condition of the breakpoint, as specified by the user,\
 or None if no condition set."},
-  { "commands", bppy_get_commands, NULL,
+  { "commands", bppy_get_commands, bppy_set_commands,
     "Commands of the breakpoint, as specified by the user."},
   { "type", bppy_get_type, NULL,
     "Type of breakpoint."},
