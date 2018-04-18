@@ -1,5 +1,15 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* tracepoint.c (actions_command): Update.
+	* cli/cli-script.h (read_command_lines): Update.
+	* cli/cli-script.c (read_command_lines): Constify prompt_arg.
+	(MAX_TMPBUF): Remove define.
+	(define_command): Use string_printf.
+	(document_command): Likewise.
+	* breakpoint.c (commands_command_1): Update.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* top.c (execute_command): Update.
 	* cli/cli-script.h (print_command_lines): Now varargs.
 	* cli/cli-script.c (print_command_lines): Now varargs.

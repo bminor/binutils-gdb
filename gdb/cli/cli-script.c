@@ -1121,7 +1121,7 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 #define END_MESSAGE "End with a line saying just \"end\"."
 
 counted_command_line
-read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
+read_command_lines (const char *prompt_arg, int from_tty, int parse_commands,
 		    void (*validator)(char *, void *), void *closure)
 {
   if (from_tty && input_interactive_p (current_ui))
@@ -1306,7 +1306,6 @@ user_defined_command (const char *ignore, int from_tty)
 static void
 define_command (const char *comname, int from_tty)
 {
-#define MAX_TMPBUF 128   
   enum cmd_hook_type
     {
       CMD_NO_HOOK = 0,
@@ -1315,7 +1314,6 @@ define_command (const char *comname, int from_tty)
     };
   struct cmd_list_element *c, *newc, *hookc = 0, **list;
   const char *tem, *comfull;
-  char tmpbuf[MAX_TMPBUF];
   int  hook_type      = CMD_NO_HOOK;
   int  hook_name_size = 0;
    
@@ -1379,9 +1377,10 @@ define_command (const char *comname, int from_tty)
 
   comname = xstrdup (comname);
 
-  xsnprintf (tmpbuf, sizeof (tmpbuf),
-	     "Type commands for definition of \"%s\".", comfull);
-  counted_command_line cmds = read_command_lines (tmpbuf, from_tty, 1, 0, 0);
+  std::string prompt
+    = string_printf ("Type commands for definition of \"%s\".", comfull);
+  counted_command_line cmds = read_command_lines (prompt.c_str (), from_tty,
+						  1, 0, 0);
 
   newc = add_cmd (comname, class_user, user_defined_command,
 		  (c && c->theclass == class_user)
@@ -1416,7 +1415,6 @@ document_command (const char *comname, int from_tty)
   struct cmd_list_element *c, **list;
   const char *tem;
   const char *comfull;
-  char tmpbuf[128];
 
   comfull = comname;
   list = validate_comname (&comname);
@@ -1427,10 +1425,10 @@ document_command (const char *comname, int from_tty)
   if (c->theclass != class_user)
     error (_("Command \"%s\" is built-in."), comfull);
 
-  xsnprintf (tmpbuf, sizeof (tmpbuf), "Type documentation for \"%s\".",
-	     comfull);
-  counted_command_line doclines = read_command_lines (tmpbuf, from_tty,
-						      0, 0, 0);
+  std::string prompt = string_printf ("Type documentation for \"%s\".",
+				      comfull);
+  counted_command_line doclines = read_command_lines (prompt.c_str (),
+						      from_tty, 0, 0, 0);
 
   if (c->doc)
     xfree ((char *) c->doc);

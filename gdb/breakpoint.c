@@ -1256,8 +1256,7 @@ commands_command_1 (const char *arg, int from_tty,
 				    "%s, one per line."),
 				  arg);
 
-	       cmd = read_command_lines (&str[0],
-					 from_tty, 1,
+	       cmd = read_command_lines (str.c_str (), from_tty, 1,
 					 (is_tracepoint (b)
 					  ? check_tracepoint_command : 0),
 					 b);

@@ -577,7 +577,8 @@ actions_command (const char *args, int from_tty)
 	string_printf ("Enter actions for tracepoint %d, one per line.",
 		       t->number);
 
-      counted_command_line l = read_command_lines (&tmpbuf[0], from_tty, 1,
+      counted_command_line l = read_command_lines (tmpbuf.c_str (),
+						   from_tty, 1,
 						   check_tracepoint_command,
 						   t);
       breakpoint_set_commands (t, std::move (l));

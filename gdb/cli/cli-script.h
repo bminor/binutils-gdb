@@ -105,7 +105,7 @@ private:
   }
 };
 
-extern counted_command_line read_command_lines (char *, int, int,
+extern counted_command_line read_command_lines (const char *, int, int,
 						void (*)(char *, void *),
 						void *);
 extern counted_command_line read_command_lines_1 (char * (*) (void), int,
