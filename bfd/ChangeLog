@@ -1,3 +1,16 @@
+2018-04-19  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am: Revert 2018-04-18 coff-mips changes.
+	* config.bfd: Add back mips_ecoff_le_vec and mips_ecoff_be_vec
+	to selvecs for mips targets change 2018-04-18.
+	* configure.ac: Reinstate mips_ecoff_le_vec, mips_ecoff_be_vec
+	and  mips_ecoff_bele_vec.
+	* targets.c: Likewise.
+	* coff-mips.c: Resurrect.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2018-04-18  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am: Remove mips aout and coff support.

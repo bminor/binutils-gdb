@@ -267,6 +267,7 @@ BFD32_BACKENDS = \
 	coff-arm.lo \
 	coff-go32.lo \
 	coff-i386.lo \
+	coff-mips.lo \
 	coff-rs6000.lo \
 	coff-sh.lo \
 	coff-stgo32.lo \
@@ -406,6 +407,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-arm.c \
 	coff-go32.c \
 	coff-i386.c \
+	coff-mips.c \
 	coff-rs6000.c \
 	coff-sh.c \
 	coff-stgo32.c \

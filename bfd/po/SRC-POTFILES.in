@@ -24,6 +24,7 @@ coff-arm.c
 coff-bfd.c
 coff-go32.c
 coff-i386.c
+coff-mips.c
 coff-rs6000.c
 coff-sh.c
 coff-stgo32.c
