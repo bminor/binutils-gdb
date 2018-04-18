@@ -2174,19 +2174,28 @@ read_and_display_attr_value (unsigned long           attribute,
 	      debug_info_p->have_frame_base [num] = have_frame_base;
 	      if (attribute != DW_AT_GNU_locviews)
 		{
-		  debug_info_p->loc_offsets [num] = uvalue;
-		  debug_info_p->num_loc_offsets++;
-		  assert (debug_info_p->num_loc_offsets
-			  - debug_info_p->num_loc_views <= 1);
+		  /* Corrupt DWARF info can produce more offsets than views.
+		     See PR 23062 for an example.  */
+		  if (debug_info_p->num_loc_offsets
+		      > debug_info_p->num_loc_views)
+		    warn (_("More location offset attributes than DW_AT_GNU_locview attributes\n"));
+		  else
+		    {
+		      debug_info_p->loc_offsets [num] = uvalue;
+		      debug_info_p->num_loc_offsets++;
+		    }
 		}
 	      else
 		{
 		  assert (debug_info_p->num_loc_views <= num);
 		  num = debug_info_p->num_loc_views;
-		  debug_info_p->loc_views [num] = uvalue;
-		  debug_info_p->num_loc_views++;
-		  assert (debug_info_p->num_loc_views
-			  - debug_info_p->num_loc_offsets <= 1);
+		  if (num > debug_info_p->num_loc_offsets)
+		    warn (_("More DW_AT_GNU_locview attributes than location offset attributes\n"));
+		  else
+		    {
+		      debug_info_p->loc_views [num] = uvalue;
+		      debug_info_p->num_loc_views++;
+		    }
 		}
 	    }
 	  break;
