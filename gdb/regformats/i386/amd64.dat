@@ -1,6 +1,7 @@
 # THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi :set ro:
 # Generated from: i386/amd64.xml
 name:amd64
+feature:1
 xmltarget:amd64.xml
 expedite:rbp,rsp,rip
 64:rax

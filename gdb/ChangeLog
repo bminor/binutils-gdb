@@ -1,5 +1,33 @@
 2018-04-18  Alan Hayward  <alan.hayward@arm.com>
 
+	* features/Makefile: Add feature marker to targets with new style
+	target descriptions.
+	* regformats/aarch64.dat: Regenerate.
+	* regformats/i386/amd64-avx-avx512-linux.dat: Likewise.
+	* regformats/i386/amd64-avx-linux.dat: Likewise.
+	* regformats/i386/amd64-avx-mpx-avx512-pku-linux.dat: Likewise.
+	* regformats/i386/amd64-avx-mpx-linux.dat: Likewise.
+	* regformats/i386/amd64-linux.dat: Likewise.
+	* regformats/i386/amd64-mpx-linux.dat: Likewise.
+	* regformats/i386/amd64.dat: Likewise.
+	* regformats/i386/i386-avx-avx512-linux.dat: Likewise.
+	* regformats/i386/i386-avx-linux.dat: Likewise.
+	* regformats/i386/i386-avx-mpx-avx512-pku-linux.dat: Likewise.
+	* regformats/i386/i386-avx-mpx-linux.dat: Likewise.
+	* regformats/i386/i386-linux.dat: Likewise.
+	* regformats/i386/i386-mmx-linux.dat: Likewise.
+	* regformats/i386/i386-mpx-linux.dat: Likewise.
+	* regformats/i386/i386.dat: Likewise.
+	* regformats/i386/x32-avx-avx512-linux.dat: Likewise.
+	* regformats/i386/x32-avx-linux.dat: Likewise.
+	* regformats/i386/x32-linux.dat: Likewise.
+	* regformats/tic6x-c62x-linux.dat: Likewise.
+	* regformats/tic6x-c64x-linux.dat: Likewise.
+	* regformats/tic6x-c64xp-linux.dat: Likewise.
+	* regformats/regdat.sh: Parse feature marker.
+
+2018-04-18  Alan Hayward  <alan.hayward@arm.com>
+
 	* common/tdesc.h (tdesc_architecture_name): Add new declaration.
 	(tdesc_osabi_name): Likewise.
 	* target-descriptions.c (tdesc_architecture_name): Add new
