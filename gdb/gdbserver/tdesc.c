@@ -23,8 +23,6 @@
 
 target_desc::~target_desc ()
 {
-  int i;
-
   xfree ((char *) arch);
   xfree ((char *) osabi);
 }
@@ -55,19 +53,21 @@ init_target_desc (struct target_desc *tdesc)
   int offset = 0;
 
   /* Go through all the features and populate reg_defs.  */
-  for (const tdesc_reg_up &treg : tdesc->registers)
-    {
-      int regnum = treg->target_regnum;
+  for (const tdesc_feature_up &feature : tdesc->features)
+    for (const tdesc_reg_up &treg : feature->registers)
+      {
+	int regnum = treg->target_regnum;
 
-      /* Register number will increase (possibly with gaps) or be zero.  */
-      gdb_assert (regnum == 0 || regnum >= tdesc->reg_defs.size ());
+	/* Register number will increase (possibly with gaps) or be zero.  */
+	gdb_assert (regnum == 0 || regnum >= tdesc->reg_defs.size ());
 
-      if (regnum != 0)
-	tdesc->reg_defs.resize (regnum, reg (offset));
+	if (regnum != 0)
+	  tdesc->reg_defs.resize (regnum, reg (offset));
 
-      tdesc->reg_defs.emplace_back (treg->name.c_str (), offset, treg->bitsize);
-      offset += treg->bitsize;
-    }
+	tdesc->reg_defs.emplace_back (treg->name.c_str (), offset,
+				      treg->bitsize);
+	offset += treg->bitsize;
+      }
 
   tdesc->registers_size = offset / 8;
 
@@ -150,11 +150,10 @@ tdesc_get_features_xml (target_desc *tdesc)
 	  buffer += "</osabi>";
 	}
 
-
-      for (const std::string &xml : tdesc->features)
+      for (const tdesc_feature_up &feature : tdesc->features)
 	{
 	  buffer += "<xi:include href=\"";
-	  buffer += xml;
+	  buffer += feature->name;
 	  buffer += "\"/>";
 	}
 
@@ -167,19 +166,16 @@ tdesc_get_features_xml (target_desc *tdesc)
 }
 #endif
 
-struct tdesc_type
-{};
-
 /* See common/tdesc.h.  */
 
 struct tdesc_feature *
 tdesc_create_feature (struct target_desc *tdesc, const char *name,
 		      const char *xml)
 {
-#ifndef IN_PROCESS_AGENT
-  tdesc->features.emplace_back (xml);
-#endif
-  return tdesc;
+  struct tdesc_feature *new_feature = new tdesc_feature
+    (xml != nullptr ? xml : name);
+  tdesc->features.emplace_back (new_feature);
+  return new_feature;
 }
 
 /* See common/tdesc.h.  */
@@ -220,21 +216,6 @@ tdesc_type_with_fields *
 tdesc_create_struct (struct tdesc_feature *feature, const char *id)
 {
   return NULL;
-}
-
-/* See common/tdesc.h.  */
-
-void
-tdesc_create_reg (struct tdesc_feature *feature, const char *name,
-		  int regnum, int save_restore, const char *group,
-		  int bitsize, const char *type)
-{
-  struct target_desc *tdesc = (struct target_desc *) feature;
-
-  tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
-				  group, bitsize, type);
-
-  tdesc->registers.emplace_back (reg);
 }
 
 /* See common/tdesc.h.  */

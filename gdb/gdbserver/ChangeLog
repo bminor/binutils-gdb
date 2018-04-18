@@ -1,5 +1,14 @@
 2018-04-18  Alan Hayward  <alan.hayward@arm.com>
 
+	* tdesc.c (~target_desc): Remove implictly deleted items.
+	(init_target_desc): Iterate all features.
+	(tdesc_get_features_xml): Use vector.
+	(tdesc_create_feature): Create feature.
+	* tdesc.h (tdesc_feature) Remove
+	(target_desc): Add features.
+
+2018-04-18  Alan Hayward  <alan.hayward@arm.com>
+
 	* Makefile.in: Add common/tdesc.c
 	* tdesc.c (init_target_desc): init all reg_defs from register
 	vector.

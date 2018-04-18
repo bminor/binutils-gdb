@@ -1,5 +1,20 @@
 2018-04-18  Alan Hayward  <alan.hayward@arm.com>
 
+	* common/tdesc.c (tdesc_feature::accept): Move to here.
+	(tdesc_feature::operator==): Likewise.
+	(tdesc_create_reg): Likewise.
+	* common/tdesc.h (tdesc_type_kind): Likewise.
+	(struct tdesc_type): Likewise.
+	(struct tdesc_feature): Likewise.
+	* regformats/regdat.sh: Create a feature.
+	* target-descriptions.c (tdesc_type_kind): Move from here.
+	(tdesc_type): Likewise.
+	(tdesc_type_up): Likewise.
+	(tdesc_feature): Likewise.
+	(tdesc_create_reg): Likewise.
+
+2018-04-18  Alan Hayward  <alan.hayward@arm.com>
+
 	* Makefile.in: Add arch/tdesc.c
 	* common/tdesc.c: New file.
 	* common/tdesc.h (tdesc_element_visitor): Move to here.

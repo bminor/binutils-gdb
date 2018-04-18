@@ -24,16 +24,10 @@
 #include "regdef.h"
 #include <vector>
 
-struct tdesc_feature
-{
-  /* The registers associated with this feature.  */
-  std::vector<tdesc_reg_up> registers;
-};
-
 /* A target description.  Inherit from tdesc_feature so that target_desc
    can be used as tdesc_feature.  */
 
-struct target_desc : tdesc_feature
+struct target_desc
 {
   /* A vector of elements of register definitions that
      describe the inferior's register set.  */
@@ -41,6 +35,9 @@ struct target_desc : tdesc_feature
 
   /* The register cache size, in bytes.  */
   int registers_size;
+
+  /* XML features in this target description.  */
+  std::vector<tdesc_feature_up> features;
 
 #ifndef IN_PROCESS_AGENT
   /* An array of register names.  These are the "expedite" registers:
@@ -55,9 +52,6 @@ struct target_desc : tdesc_feature
      It can be NULL, then, its content is got from the following three
      fields features, arch, and osabi in tdesc_get_features_xml.  */
   const char *xmltarget = NULL;
-
-  /* XML features in this target description.  */
-  std::vector<std::string> features;
 
   /* The value of <architecture> element in the XML, replying GDB.  */
   const char *arch = NULL;
