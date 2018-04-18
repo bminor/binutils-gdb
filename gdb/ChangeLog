@@ -1,3 +1,49 @@
+2018-04-10  Alan Hayward  <alan.hayward@arm.com>
+
+	* common/tdesc.h (tdesc_create_feature): Remove xml filename
+	parameter.
+	* features/aarch64-core.c (create_feature_aarch64_core):
+	Regenerate.
+	* features/aarch64-fpu.c (create_feature_aarch64_fpu):
+	Likewise.
+	* features/i386/32bit-avx.c (create_feature_i386_32bit_avx):
+	Likewise.
+	* features/i386/32bit-avx512.c
+	(create_feature_i386_32bit_avx512): Likewise.
+	* features/i386/32bit-core.c (create_feature_i386_32bit_core):
+	Likewise.
+	* features/i386/32bit-linux.c (create_feature_i386_32bit_linux):
+	Likewise.
+	* features/i386/32bit-mpx.c (create_feature_i386_32bit_mpx):
+	Likewise.
+	* features/i386/32bit-pkeys.c (create_feature_i386_32bit_pkeys):
+	Likewise.
+	* features/i386/32bit-sse.c (create_feature_i386_32bit_sse):
+	Likewise.
+	* features/i386/64bit-avx.c (create_feature_i386_64bit_avx):
+	Likewise.
+	* features/i386/64bit-avx512.c
+	(create_feature_i386_64bit_avx512): Likewise.
+	* features/i386/64bit-core.c (create_feature_i386_64bit_core):
+	Likewise.
+	* features/i386/64bit-linux.c (create_feature_i386_64bit_linux):
+	Likewise.
+	* features/i386/64bit-mpx.c (create_feature_i386_64bit_mpx):
+	Likewise.
+	* features/i386/64bit-pkeys.c (create_feature_i386_64bit_pkeys):
+	Likewise.
+	* features/i386/64bit-segments.c
+	(create_feature_i386_64bit_segments): Likewise.
+	* features/i386/64bit-sse.c (create_feature_i386_64bit_sse):
+	Likewise.
+	* features/i386/x32-core.c
+	(create_feature_i386_x32_core): Likewise.
+	* features/tic6x-c6xp.c (create_feature_tic6x_c6xp): Likewise.
+	* features/tic6x-core.c (create_feature_tic6x_core): Likewise.
+	* features/tic6x-gp.c (create_feature_tic6x_gp): Likewise.
+	* target-descriptions.c: In generated code, don't pass xml
+	filename.
+
 2018-04-18  Alan Hayward  <alan.hayward@arm.com>
 
 	* common/tdesc.c (print_xml_feature::visit_pre): Add xml parsing.

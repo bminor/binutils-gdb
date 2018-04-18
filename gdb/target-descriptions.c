@@ -1131,8 +1131,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 /* See common/tdesc.h.  */
 
 struct tdesc_feature *
-tdesc_create_feature (struct target_desc *tdesc, const char *name,
-		      const char *xml)
+tdesc_create_feature (struct target_desc *tdesc, const char *name)
 {
   struct tdesc_feature *new_feature = new tdesc_feature (name);
 
@@ -1600,8 +1599,8 @@ public:
     printf_unfiltered ("  struct tdesc_feature *feature;\n");
 
     printf_unfiltered
-      ("\n  feature = tdesc_create_feature (result, \"%s\", \"%s\");\n",
-       e->name.c_str (), lbasename (m_filename_after_features.c_str ()));
+      ("\n  feature = tdesc_create_feature (result, \"%s\");\n",
+       e->name.c_str ());
   }
 
   void visit_post (const tdesc_feature *e) override
