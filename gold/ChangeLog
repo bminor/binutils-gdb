@@ -1,3 +1,7 @@
+2018-04-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2018-03-27  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/split_x86_64.sh: Fix bad regexp.
