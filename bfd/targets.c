@@ -702,11 +702,6 @@ extern const bfd_target mep_elf32_le_vec;
 extern const bfd_target metag_elf32_vec;
 extern const bfd_target microblaze_elf32_vec;
 extern const bfd_target microblaze_elf32_le_vec;
-extern const bfd_target mips_aout_be_vec;
-extern const bfd_target mips_aout_le_vec;
-extern const bfd_target mips_ecoff_be_vec;
-extern const bfd_target mips_ecoff_le_vec;
-extern const bfd_target mips_ecoff_bele_vec;
 extern const bfd_target mips_elf32_be_vec;
 extern const bfd_target mips_elf32_le_vec;
 extern const bfd_target mips_elf32_n_be_vec;
@@ -727,8 +722,6 @@ extern const bfd_target mips_elf64_trad_be_vec;
 extern const bfd_target mips_elf64_trad_le_vec;
 extern const bfd_target mips_elf64_tradfbsd_be_vec;
 extern const bfd_target mips_elf64_tradfbsd_le_vec;
-extern const bfd_target mips_pe_le_vec;
-extern const bfd_target mips_pei_le_vec;
 extern const bfd_target mmix_elf64_vec;
 extern const bfd_target mmix_mmo_vec;
 extern const bfd_target mn10200_elf32_vec;
@@ -1078,14 +1071,6 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&microblaze_elf32_vec,
 
-#if 0
-	/* No one seems to use this.  */
-	&mips_aout_be_vec,
-#endif
-	&mips_aout_le_vec,
-	&mips_ecoff_be_vec,
-	&mips_ecoff_le_vec,
-	&mips_ecoff_bele_vec,
 #ifdef BFD64
 	&mips_elf32_be_vec,
 	&mips_elf32_le_vec,
@@ -1108,8 +1093,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&mips_elf64_tradfbsd_be_vec,
 	&mips_elf64_tradfbsd_le_vec,
 #endif
-	&mips_pe_le_vec,
-	&mips_pei_le_vec,
 
 #ifdef BFD64
 	&mmix_elf64_vec,

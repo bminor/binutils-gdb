@@ -267,7 +267,6 @@ BFD32_BACKENDS = \
 	coff-arm.lo \
 	coff-go32.lo \
 	coff-i386.lo \
-	coff-mips.lo \
 	coff-rs6000.lo \
 	coff-sh.lo \
 	coff-stgo32.lo \
@@ -364,7 +363,6 @@ BFD32_BACKENDS = \
 	mach-o.lo \
 	mach-o-i386.lo \
 	mach-o-arm.lo \
-	mipsbsd.lo \
 	ns32knetbsd.lo \
 	pc532-mach.lo \
 	pdp11.lo \
@@ -372,7 +370,6 @@ BFD32_BACKENDS = \
 	pe-arm.lo \
 	pe-i386.lo \
 	pe-mcore.lo \
-	pe-mips.lo \
 	pe-ppc.lo \
 	pe-sh.lo \
 	pef.lo \
@@ -380,7 +377,6 @@ BFD32_BACKENDS = \
 	pei-arm.lo \
 	pei-i386.lo \
 	pei-mcore.lo \
-	pei-mips.lo \
 	pei-ppc.lo \
 	pei-sh.lo \
 	peigen.lo \
@@ -410,7 +406,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-arm.c \
 	coff-go32.c \
 	coff-i386.c \
-	coff-mips.c \
 	coff-rs6000.c \
 	coff-sh.c \
 	coff-stgo32.c \
@@ -507,7 +502,6 @@ BFD32_BACKENDS_CFILES = \
 	mach-o.c \
 	mach-o-i386.c \
 	mach-o-arm.c \
-	mipsbsd.c \
 	ns32knetbsd.c \
 	pc532-mach.c \
 	pdp11.c \
@@ -515,7 +509,6 @@ BFD32_BACKENDS_CFILES = \
 	pe-arm.c \
 	pe-i386.c \
 	pe-mcore.c \
-	pe-mips.c \
 	pe-ppc.c \
 	pe-sh.c \
 	pef.c \
@@ -523,7 +516,6 @@ BFD32_BACKENDS_CFILES = \
 	pei-arm.c \
 	pei-i386.c \
 	pei-mcore.c \
-	pei-mips.c \
 	pei-ppc.c \
 	pei-sh.c \
 	plugin.c \

@@ -1,3 +1,17 @@
+2018-04-18  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am: Remove mips aout and coff support.
+	* config.bfd: Likewise.
+	* configure.ac: Likewise.
+	* targets.c: Likewise.
+	* coff-mips.c: Delete
+	* mipsbsd.c: Delete
+	* pe-mips.c: Delete
+	* pei-mips.c: Delete
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2018-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf32_bed): Define before including

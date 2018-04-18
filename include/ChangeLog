@@ -1,5 +1,9 @@
 2018-04-18  Alan Modra  <amodra@gmail.com>
 
+	* coff/mipspe.h: Delete.
+
+2018-04-18  Alan Modra  <amodra@gmail.com>
+
 	* aout/dynix3.h: Delete.
 
 2018-04-17 Andrew Sadek  <andrew.sadek.se@gmail.com>

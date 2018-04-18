@@ -53,17 +53,8 @@ case $targ in
     echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
     exit 1
     ;;
- mips*-*-irix5* | mips*-*-irix6*)
-    # Not obsolete
-    ;;
  arm*-*-aout | \
  arm*-*-coff | \
- mips*-big-* | \
- mips*-dec-* | mips*el-*-ecoff* | \
- mips*-*-ecoff* | \
- mips*-sgi-* | mips*-*-bsd* | \
- mips*-*-lnews* | \
- mips*-*-sysv* | mips*-*-riscos* | \
  powerpc-*-lynxos* | powerpc-*-windiss* | \
  null)
     if test "x$enable_obsolete" != xyes; then
@@ -76,7 +67,8 @@ case $targ in
 esac
 
 case $targ in
- *-*-netbsdelf* | i[3-7]86-*-netbsd*-gnu* | i[3-7]86-*-knetbsd*-gnu)
+ *-*-netbsdelf* | i[3-7]86-*-netbsd*-gnu* | i[3-7]86-*-knetbsd*-gnu | \
+ mips*-*-irix5* | mips*-*-irix6*)
     # Not obsolete
     ;;
  *-adobe-* | \
@@ -133,6 +125,16 @@ case $targ in
  m68*-netx-* | \
  m88*-*-* | \
  maxq-*-coff | \
+ mips*-*-bsd* | \
+ mips*-*-ecoff* | \
+ mips*-*-lnews* | \
+ mips*-*-mach3* | \
+ mips*-*-pe* | \
+ mips*-*-riscos* | \
+ mips*-*-sysv* | \
+ mips*-big-* | \
+ mips*-dec-* | \
+ mips*-sgi-* | \
  mips*el-*-rtems* | \
  sh*-*-symbianelf* | sh5*-*-* | sh64*-*-* | \
  sparc*-*-*aout* | \
@@ -207,26 +209,8 @@ esac
 #  Make sure that the left side always has two dashes.  Otherwise you
 #  can get spurious matches.  Even for unambiguous cases, do this as a
 #  convention, else the table becomes a real mess to understand and maintain.
-#
-#  Keep obsolete entries above the START comment, to keep them out of
-#  targmatch.h.
 
 case "${targ}" in
-  mips*-dec-bsd*)
-    echo "This target is obsolete and has been removed."
-    exit 1
-    ;;
-
-  mips*-*-mach3*)
-    echo "This target is obsolete and has been removed."
-    exit 1
-    ;;
-
-  mips*-*-pe*)
-    echo "This target is obsolete and has been removed."
-    exit 1
-    ;;
-
   plugin)
     targ_defvec=plugin_vec
     targ_selvecs="plugin_vec"
@@ -876,28 +860,16 @@ case "${targ}" in
     targ_selvecs=microblaze_elf32_le_vec
     ;;
 
-  mips*-big-*)
-    targ_defvec=mips_ecoff_be_vec
-    targ_selvecs=mips_ecoff_le_vec
-    ;;
 #ifdef BFD64
   mips*el-*-netbsd*)
     targ_defvec=mips_elf32_trad_le_vec
-    targ_selvecs="mips_elf32_trad_be_vec mips_elf64_trad_be_vec mips_elf64_trad_le_vec mips_ecoff_le_vec mips_ecoff_be_vec"
+    targ_selvecs="mips_elf32_trad_be_vec mips_elf64_trad_be_vec mips_elf64_trad_le_vec"
     ;;
   mips*-*-netbsd*)
     targ_defvec=mips_elf32_trad_be_vec
-    targ_selvecs="mips_elf32_trad_le_vec mips_elf64_trad_be_vec mips_elf64_trad_le_vec mips_ecoff_be_vec mips_ecoff_le_vec"
+    targ_selvecs="mips_elf32_trad_le_vec mips_elf64_trad_be_vec mips_elf64_trad_le_vec"
     ;;
 #endif
-  mips*-dec-* | mips*el-*-ecoff*)
-    targ_defvec=mips_ecoff_le_vec
-    targ_selvecs=mips_ecoff_be_vec
-    ;;
-  mips*-*-ecoff*)
-    targ_defvec=mips_ecoff_be_vec
-    targ_selvecs=mips_ecoff_le_vec
-    ;;
 #ifdef BFD64
   mips*-*-irix6*)
     targ_defvec=mips_elf32_n_be_vec
@@ -913,27 +885,9 @@ case "${targ}" in
     ;;
   mips*-*-irix5*)
     targ_defvec=mips_elf32_be_vec
-    targ_selvecs="mips_elf32_le_vec mips_ecoff_be_vec mips_ecoff_le_vec"
+    targ_selvecs="mips_elf32_le_vec"
     ;;
 #endif
-  mips*-sgi-* | mips*-*-bsd*)
-    targ_defvec=mips_ecoff_be_vec
-    targ_selvecs=mips_ecoff_le_vec
-    ;;
-  mips*-*-lnews*)
-    targ_defvec=mips_ecoff_bele_vec
-    targ_selvecs="mips_ecoff_le_vec mips_ecoff_be_vec"
-    ;;
-#ifdef BFD64
-  mips*-*-sysv4*)
-    targ_defvec=mips_elf32_trad_be_vec
-    targ_selvecs="mips_elf32_trad_le_vec mips_ecoff_be_vec mips_ecoff_le_vec"
-    ;;
-#endif
-  mips*-*-sysv* | mips*-*-riscos*)
-    targ_defvec=mips_ecoff_be_vec
-    targ_selvecs=mips_ecoff_le_vec
-    ;;
 #ifdef BFD64
   mips*el-*-vxworks*)
     targ_defvec=mips_elf32_vxworks_le_vec
@@ -965,11 +919,11 @@ case "${targ}" in
     ;;
   mips*el-*-openbsd*)
     targ_defvec=mips_elf32_le_vec
-    targ_selvecs="mips_elf32_be_vec mips_elf64_be_vec mips_elf64_le_vec mips_ecoff_le_vec mips_ecoff_be_vec"
+    targ_selvecs="mips_elf32_be_vec mips_elf64_be_vec mips_elf64_le_vec"
     ;;
   mips*-*-openbsd*)
     targ_defvec=mips_elf32_be_vec
-    targ_selvecs="mips_elf32_le_vec mips_elf64_be_vec mips_elf64_le_vec mips_ecoff_be_vec mips_ecoff_le_vec"
+    targ_selvecs="mips_elf32_le_vec mips_elf64_be_vec mips_elf64_le_vec"
     ;;
   mips64*el-*-linux*)
     targ_defvec=mips_elf32_ntrad_le_vec
@@ -981,11 +935,11 @@ case "${targ}" in
     ;;
   mips*el-*-linux*)
     targ_defvec=mips_elf32_trad_le_vec
-    targ_selvecs="mips_elf32_trad_be_vec mips_ecoff_le_vec mips_ecoff_be_vec mips_elf32_ntrad_le_vec mips_elf64_trad_le_vec mips_elf32_ntrad_be_vec mips_elf64_trad_be_vec"
+    targ_selvecs="mips_elf32_trad_be_vec mips_elf32_ntrad_le_vec mips_elf64_trad_le_vec mips_elf32_ntrad_be_vec mips_elf64_trad_be_vec"
     ;;
   mips*-*-linux*)
     targ_defvec=mips_elf32_trad_be_vec
-    targ_selvecs="mips_elf32_trad_le_vec mips_ecoff_be_vec mips_ecoff_le_vec mips_elf32_ntrad_be_vec mips_elf64_trad_be_vec mips_elf32_ntrad_le_vec mips_elf64_trad_le_vec"
+    targ_selvecs="mips_elf32_trad_le_vec mips_elf32_ntrad_be_vec mips_elf64_trad_be_vec mips_elf32_ntrad_le_vec mips_elf64_trad_le_vec"
     ;;
   mips64*el-*-freebsd* | mips64*el-*-kfreebsd*-gnu)
     # FreeBSD vectors

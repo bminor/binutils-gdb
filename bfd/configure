@@ -14450,9 +14450,6 @@ do
     metag_elf32_vec)		 tb="$tb elf32-metag.lo elf32.lo $elf" ;;
     microblaze_elf32_vec)	 tb="$tb elf32-microblaze.lo elf32.lo $elf" ;;
     microblaze_elf32_le_vec)	 tb="$tb elf32-microblaze.lo elf32.lo $elf" ;;
-    mips_ecoff_be_vec)		 tb="$tb coff-mips.lo ecoff.lo $ecoff" ;;
-    mips_ecoff_le_vec)		 tb="$tb coff-mips.lo ecoff.lo $ecoff" ;;
-    mips_ecoff_bele_vec)	 tb="$tb coff-mips.lo ecoff.lo $ecoff" ;;
     mips_elf32_be_vec)		 tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf $ecoff" ;;
     mips_elf32_le_vec)		 tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf $ecoff" ;;
     mips_elf32_n_be_vec)	 tb="$tb elfn32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf $ecoff"; target_size=64 ;;
@@ -14473,8 +14470,6 @@ do
     mips_elf64_trad_le_vec)	 tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf $ecoff"; target_size=64 ;;
     mips_elf64_tradfbsd_be_vec)  tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf $ecoff"; target_size=64 ;;
     mips_elf64_tradfbsd_le_vec)  tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf $ecoff"; target_size=64 ;;
-    mips_pe_le_vec)		 tb="$tb pe-mips.lo peigen.lo $coff" ;;
-    mips_pei_le_vec)		 tb="$tb pei-mips.lo peigen.lo $coff" ;;
     mmix_elf64_vec)		 tb="$tb elf64-mmix.lo elf64.lo $elf" target_size=64 ;;
     mmix_mmo_vec)			 tb="$tb mmo.lo" target_size=64 ;;
     mn10200_elf32_vec)		 tb="$tb elf-m10200.lo elf32.lo $elf" ;;
@@ -14822,18 +14817,9 @@ if test "${target}" = "${host}"; then
   mips-*-netbsd* | mips*-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
-  mips-dec-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/decstation.h"'
-	;;
   mips-sgi-irix4*)	COREFILE=irix-core.lo ;;
   mips-sgi-irix5*)	COREFILE=irix-core.lo ;;
   mips-sgi-irix6*)	COREFILE=irix-core.lo ;;
-  mips-*-sysv4*)	;;
-  mips-*-sysv* | mips-*-riscos*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/riscos.h"'
-	;;
   m68*-*-linux-*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/m68klinux.h"'
