@@ -107,11 +107,27 @@ current_target_desc (void)
 
 /* See common/tdesc.h.  */
 
+const char *
+tdesc_architecture_name (const struct target_desc *target_desc)
+{
+  return target_desc->arch;
+}
+
+/* See common/tdesc.h.  */
+
 void
 set_tdesc_architecture (struct target_desc *target_desc,
 			const char *name)
 {
   target_desc->arch = xstrdup (name);
+}
+
+/* See common/tdesc.h.  */
+
+const char *
+tdesc_osabi_name (const struct target_desc *target_desc)
+{
+  return target_desc->osabi;
 }
 
 /* See common/tdesc.h.  */
@@ -140,13 +156,14 @@ tdesc_get_features_xml (target_desc *tdesc)
       buffer += "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">";
       buffer += "<target>";
       buffer += "<architecture>";
-      buffer += tdesc->arch;
+      buffer += tdesc_architecture_name (tdesc);
       buffer += "</architecture>";
 
-      if (tdesc->osabi != nullptr)
+      const char *osabi = tdesc_osabi_name (tdesc);
+      if (osabi != nullptr)
 	{
 	  buffer += "<osabi>";
-	  buffer += tdesc->osabi;
+	  buffer += osabi;
 	  buffer += "</osabi>";
 	}
 
