@@ -380,4 +380,30 @@ void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		       int regnum, int save_restore, const char *group,
 		       int bitsize, const char *type);
 
+/* Return the tdesc in string XML format.  */
+
+const char *tdesc_get_features_xml (const target_desc *tdesc);
+
+/* Print target description as xml.  */
+
+class print_xml_feature : public tdesc_element_visitor
+{
+public:
+  print_xml_feature (std::string *buffer_)
+    : m_buffer (buffer_)
+  {}
+
+  void visit_pre (const target_desc *e) override;
+  void visit_post (const target_desc *e) override;
+  void visit_pre (const tdesc_feature *e) override;
+  void visit_post (const tdesc_feature *e) override;
+  void visit (const tdesc_type_builtin *type) override;
+  void visit (const tdesc_type_vector *type) override;
+  void visit (const tdesc_type_with_fields *type) override;
+  void visit (const tdesc_reg *reg) override;
+
+private:
+  std::string *m_buffer;
+};
+
 #endif /* ARCH_TDESC_H */

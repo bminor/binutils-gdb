@@ -1,5 +1,14 @@
 2018-04-18  Alan Hayward  <alan.hayward@arm.com>
 
+	* server.c (get_features_xml): Remove cast.
+	* tdesc.c (void target_desc::accept): Fill in function.
+	(tdesc_get_features_xml): Remove old xml creation.
+	(print_xml_feature::visit_pre): Add xml vistor.
+	* tdesc.h (struct target_desc): Make xmltarget mutable.
+	(tdesc_get_features_xml): Remove declaration.
+
+2018-04-18  Alan Hayward  <alan.hayward@arm.com>
+
 	* tdesc.c (tdesc_architecture_name): Add new function.
 	(tdesc_osabi_name): Likewise.
 	(tdesc_get_features_xml): Use new functions.

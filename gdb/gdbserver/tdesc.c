@@ -47,6 +47,18 @@ bool target_desc::operator== (const target_desc &other) const
 
 #endif
 
+void target_desc::accept (tdesc_element_visitor &v) const
+{
+#ifndef IN_PROCESS_AGENT
+  v.visit_pre (this);
+
+  for (const tdesc_feature_up &feature : features)
+    feature->accept (v);
+
+  v.visit_post (this);
+#endif
+}
+
 void
 init_target_desc (struct target_desc *tdesc)
 {
@@ -138,11 +150,10 @@ set_tdesc_osabi (struct target_desc *target_desc, const char *name)
   target_desc->osabi = xstrdup (name);
 }
 
-/* Return a string which is of XML format, including XML target
-   description to be sent to GDB.  */
+/* See common/tdesc.h.  */
 
 const char *
-tdesc_get_features_xml (target_desc *tdesc)
+tdesc_get_features_xml (const target_desc *tdesc)
 {
   /* Either .xmltarget or .features is not NULL.  */
   gdb_assert (tdesc->xmltarget != NULL
@@ -151,31 +162,9 @@ tdesc_get_features_xml (target_desc *tdesc)
 
   if (tdesc->xmltarget == NULL)
     {
-      std::string buffer ("@<?xml version=\"1.0\"?>");
-
-      buffer += "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">";
-      buffer += "<target>";
-      buffer += "<architecture>";
-      buffer += tdesc_architecture_name (tdesc);
-      buffer += "</architecture>";
-
-      const char *osabi = tdesc_osabi_name (tdesc);
-      if (osabi != nullptr)
-	{
-	  buffer += "<osabi>";
-	  buffer += osabi;
-	  buffer += "</osabi>";
-	}
-
-      for (const tdesc_feature_up &feature : tdesc->features)
-	{
-	  buffer += "<xi:include href=\"";
-	  buffer += feature->name;
-	  buffer += "\"/>";
-	}
-
-      buffer += "</target>";
-
+      std::string buffer ("@");
+      print_xml_feature v (&buffer);
+      tdesc->accept (v);
       tdesc->xmltarget = xstrdup (buffer.c_str ());
     }
 

@@ -752,3 +752,15 @@ target_fetch_description_xml (struct target_ops *ops)
   return output;
 #endif
 }
+
+/* See xml-tdesc.h.  */
+
+const struct target_desc *
+string_read_description_xml (const char *xml)
+{
+  return tdesc_parse_xml (xml, [] (const char *href, void *baton)
+    {
+      error (_("xincludes are unsupported with this method"));
+      return gdb::optional<gdb::char_vector> ();
+    }, nullptr);
+}

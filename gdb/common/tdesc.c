@@ -290,3 +290,112 @@ tdesc_add_enum_value (tdesc_type_with_fields *type, int value,
 			     tdesc_predefined_type (TDESC_TYPE_INT32),
 			     value, -1);
 }
+
+void print_xml_feature::visit_pre (const tdesc_feature *e)
+{
+  string_appendf (*m_buffer, "<feature name=\"%s\">\n", e->name.c_str ());
+}
+
+void print_xml_feature::visit_post (const tdesc_feature *e)
+{
+  string_appendf (*m_buffer, "</feature>\n");
+}
+
+void print_xml_feature::visit (const tdesc_type_builtin *t)
+{
+  error (_("xml output is not supported for type \"%s\"."), t->name.c_str ());
+}
+
+void print_xml_feature::visit (const tdesc_type_vector *t)
+{
+  string_appendf (*m_buffer, "<vector id=\"%s\" type=\"%s\" count=\"%d\"/>\n",
+		  t->name.c_str (), t->element_type->name.c_str (), t->count);
+}
+
+void print_xml_feature::visit (const tdesc_type_with_fields *t)
+{
+  struct tdesc_type_field *f;
+  const static char *types[] = { "struct", "union", "flags", "enum" };
+
+  gdb_assert (t->kind >= TDESC_TYPE_STRUCT && t->kind <= TDESC_TYPE_ENUM);
+
+  string_appendf (*m_buffer,
+		  "<%s id=\"%s\"", types[t->kind - TDESC_TYPE_STRUCT],
+		  t->name.c_str ());
+
+  switch (t->kind)
+    {
+    case TDESC_TYPE_STRUCT:
+    case TDESC_TYPE_FLAGS:
+      if (t->size > 0)
+	string_appendf (*m_buffer, " size=\"%d\"", t->size);
+      string_appendf (*m_buffer, ">\n");
+
+      for (const tdesc_type_field &f : t->fields)
+	{
+	  string_appendf (*m_buffer, "  <field name=\"%s\" ", f.name.c_str ());
+	  if (f.start == -1)
+	    string_appendf (*m_buffer, "type=\"%s\"/>\n",
+			    f.type->name.c_str ());
+	  else
+	    string_appendf (*m_buffer, "start=\"%d\" end=\"%d\"/>\n", f.start,
+			    f.end);
+	}
+      break;
+
+    case TDESC_TYPE_ENUM:
+      string_appendf (*m_buffer, ">\n");
+      for (const tdesc_type_field &f : t->fields)
+	string_appendf (*m_buffer, "  <field name=\"%s\" start=\"%d\"/>\n",
+			f.name.c_str (), f.start);
+      break;
+
+    case TDESC_TYPE_UNION:
+      string_appendf (*m_buffer, ">\n");
+      for (const tdesc_type_field &f : t->fields)
+	string_appendf (*m_buffer, "  <field name=\"%s\" type=\"%s\"/>\n",
+			f.name.c_str (), f.type->name.c_str ());
+      break;
+
+    default:
+      error (_("xml output is not supported for type \"%s\"."),
+	     t->name.c_str ());
+    }
+
+  string_appendf (*m_buffer, "</%s>\n", types[t->kind - TDESC_TYPE_STRUCT]);
+}
+
+void print_xml_feature::visit (const tdesc_reg *r)
+{
+  string_appendf (*m_buffer,
+		  "<reg name=\"%s\" bitsize=\"%d\" type=\"%s\" regnum=\"%ld\"",
+		  r->name.c_str (), r->bitsize, r->type.c_str (),
+		  r->target_regnum);
+
+  if (r->group.length () > 0)
+    string_appendf (*m_buffer, " group=\"%s\"", r->group.c_str ());
+
+  if (r->save_restore == 0)
+    string_appendf (*m_buffer, " save-restore=\"no\"");
+
+  string_appendf (*m_buffer, "/>\n");
+}
+
+void print_xml_feature::visit_pre (const target_desc *e)
+{
+#ifndef IN_PROCESS_AGENT
+  string_appendf (*m_buffer, "<?xml version=\"1.0\"?>\n");
+  string_appendf (*m_buffer, "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">\n");
+  string_appendf (*m_buffer, "<target>\n<architecture>%s</architecture>\n",
+		  tdesc_architecture_name (e));
+
+  const char *osabi = tdesc_osabi_name (e);
+  if (osabi != nullptr)
+    string_appendf (*m_buffer, "<osabi>%s</osabi>", osabi);
+#endif
+}
+
+void print_xml_feature::visit_post (const target_desc *e)
+{
+  string_appendf (*m_buffer, "</target>\n");
+}

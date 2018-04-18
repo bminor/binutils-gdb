@@ -333,6 +333,9 @@ struct target_desc : tdesc_element
   /* The features associated with this target.  */
   std::vector<tdesc_feature_up> features;
 
+  /* Used to cache the generated xml version of the target description.  */
+  mutable char *xmltarget = nullptr;
+
   void accept (tdesc_element_visitor &v) const override
   {
     v.visit_pre (this);
@@ -1667,6 +1670,21 @@ private:
   int m_next_regnum = 0;
 };
 
+/* See common/tdesc.h.  */
+
+const char *
+tdesc_get_features_xml (const target_desc *tdesc)
+{
+  if (tdesc->xmltarget == nullptr)
+    {
+      std::string buffer ("@");
+      print_xml_feature v (&buffer);
+      tdesc->accept (v);
+      tdesc->xmltarget = xstrdup (buffer.c_str ());
+    }
+  return tdesc->xmltarget;
+}
+
 static void
 maint_print_c_tdesc_cmd (const char *args, int from_tty)
 {
@@ -1739,6 +1757,39 @@ record_xml_tdesc (const char *xml_file, const struct target_desc *tdesc)
 
 }
 
+/* Test the convesion process of a target description to/from xml: Take a target
+   description TDESC, convert to xml, back to a description, and confirm the new
+   tdesc is identical to the original.  */
+static bool
+maintenance_check_tdesc_xml_convert (const target_desc *tdesc, const char *name)
+{
+  const char *xml = tdesc_get_features_xml (tdesc);
+
+  if (xml == nullptr || *xml != '@')
+    {
+      printf_filtered (_("Could not convert description for %s to xml.\n"),
+		       name);
+      return false;
+    }
+
+  const target_desc *tdesc_trans = string_read_description_xml (xml + 1);
+
+  if (tdesc_trans == nullptr)
+    {
+      printf_filtered (_("Could not convert description for %s from xml.\n"),
+		       name);
+      return false;
+    }
+  else if (*tdesc != *tdesc_trans)
+    {
+      printf_filtered (_("Converted description for %s does not match.\n"),
+		       name);
+      return false;
+    }
+  return true;
+}
+
+
 /* Check that the target descriptions created dynamically by
    architecture-specific code equal the descriptions created from XML files
    found in the specified directory DIR.  */
@@ -1760,6 +1811,12 @@ maintenance_check_xml_descriptions (const char *dir, int from_tty)
 	= file_read_description_xml (tdesc_xml.data ());
 
       if (tdesc == NULL || *tdesc != *e.second)
+	{
+	  printf_filtered ( _("Descriptions for %s do not match.\n"), e.first);
+	  failed++;
+	}
+      else if (!maintenance_check_tdesc_xml_convert (tdesc, e.first)
+	       || !maintenance_check_tdesc_xml_convert (e.second, e.first))
 	failed++;
     }
   printf_filtered (_("Tested %lu XML files, %d failed\n"),

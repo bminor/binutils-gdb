@@ -940,7 +940,7 @@ get_features_xml (const char *annex)
 
   if (strcmp (annex, "target.xml") == 0)
     {
-      const char *ret = tdesc_get_features_xml ((target_desc*) desc);
+      const char *ret = tdesc_get_features_xml (desc);
 
       if (*ret == '@')
 	return ret + 1;

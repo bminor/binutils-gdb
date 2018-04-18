@@ -1,5 +1,20 @@
 2018-04-18  Alan Hayward  <alan.hayward@arm.com>
 
+	* common/tdesc.c (print_xml_feature::visit_pre): Add xml parsing.
+	(print_xml_feature::visit_post): Likewise.
+	(print_xml_feature::visit): Likewise.
+	* common/tdesc.h (tdesc_get_features_xml): Use const tdesc.
+	(print_xml_feature): Add new class.
+	* regformats/regdat.sh: Null xmltarget on feature targets.
+	* target-descriptions.c (struct target_desc): Add xmltarget.
+	(maintenance_check_tdesc_xml_convert): Add unittest function.
+	(tdesc_get_features_xml): Add function to get xml.
+	(maintenance_check_xml_descriptions): Test xml generation.
+	* xml-tdesc.c (string_read_description_xml): Add function.
+	* xml-tdesc.h (string_read_description_xml): Add declaration.
+
+2018-04-18  Alan Hayward  <alan.hayward@arm.com>
+
 	* features/Makefile: Add feature marker to targets with new style
 	target descriptions.
 	* regformats/aarch64.dat: Regenerate.
