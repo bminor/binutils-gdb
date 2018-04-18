@@ -39,10 +39,10 @@
 /* Prototypes for local functions.  */
 
 static enum command_control_type
-recurse_read_control_structure (char * (*read_next_line_func) (void),
-				struct command_line *current_cmd,
-				void (*validator)(char *, void *),
-				void *closure);
+recurse_read_control_structure
+    (gdb::function_view<const char * ()> read_next_line_func,
+     struct command_line *current_cmd,
+     gdb::function_view<void (const char *)> validator);
 
 static void do_define_command (const char *comname, int from_tty,
 			       const counted_command_line *commands);
@@ -163,7 +163,7 @@ get_command_line (enum command_control_type type, const char *arg)
 			    command_lines_deleter ());
 
   /* Read in the body of this command.  */
-  if (recurse_read_control_structure (read_next_line, cmd.get (), 0, 0)
+  if (recurse_read_control_structure (read_next_line, cmd.get (), 0)
       == invalid_control)
     {
       warning (_("Error reading in canned sequence of commands."));
@@ -897,11 +897,13 @@ line_first_arg (const char *p)
    Otherwise, only "end" is recognized.  */
 
 static enum misc_command_type
-process_next_line (char *p, struct command_line **command, int parse_commands,
-		   void (*validator)(char *, void *), void *closure)
+process_next_line (const char *p, struct command_line **command,
+		   int parse_commands,
+		   gdb::function_view<void (const char *)> validator)
+
 {
-  char *p_end;
-  char *p_start;
+  const char *p_end;
+  const char *p_start;
   int not_handled = 0;
 
   /* Not sure what to do here.  */
@@ -1013,10 +1015,9 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 
   if (validator)
     {
-
       TRY
 	{
-	  validator ((*command)->line, closure);
+	  validator ((*command)->line);
 	}
       CATCH (ex, RETURN_MASK_ALL)
 	{
@@ -1035,10 +1036,9 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
    obtain lines of the command.  */
 
 static enum command_control_type
-recurse_read_control_structure (char * (*read_next_line_func) (void),
+recurse_read_control_structure (gdb::function_view<const char * ()> read_next_line_func,
 				struct command_line *current_cmd,
-				void (*validator)(char *, void *),
-				void *closure)
+				gdb::function_view<void (const char *)> validator)
 {
   enum misc_command_type val;
   enum command_control_type ret;
@@ -1061,7 +1061,7 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 			       current_cmd->control_type != python_control
 			       && current_cmd->control_type != guile_control
 			       && current_cmd->control_type != compile_control,
-			       validator, closure);
+			       validator);
 
       /* Just skip blanks and comments.  */
       if (val == nop_command)
@@ -1114,7 +1114,7 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 	{
 	  control_level++;
 	  ret = recurse_read_control_structure (read_next_line_func, next,
-						validator, closure);
+						validator);
 	  control_level--;
 
 	  if (ret != simple_control)
@@ -1140,7 +1140,7 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 
 counted_command_line
 read_command_lines (const char *prompt_arg, int from_tty, int parse_commands,
-		    void (*validator)(char *, void *), void *closure)
+		    gdb::function_view<void (const char *)> validator)
 {
   if (from_tty && input_interactive_p (current_ui))
     {
@@ -1163,13 +1163,13 @@ read_command_lines (const char *prompt_arg, int from_tty, int parse_commands,
   counted_command_line head (nullptr, command_lines_deleter ());
   if (current_interp_named_p (INTERP_CONSOLE))
     head = read_command_lines_1 (read_next_line, parse_commands,
-				 validator, closure);
+				 validator);
   else
     {
       scoped_restore_interp interp_restorer (INTERP_CONSOLE);
 
       head = read_command_lines_1 (read_next_line, parse_commands,
-				   validator, closure);
+				   validator);
     }
 
   if (from_tty && input_interactive_p (current_ui)
@@ -1184,8 +1184,9 @@ read_command_lines (const char *prompt_arg, int from_tty, int parse_commands,
    obtained using READ_NEXT_LINE_FUNC.  */
 
 counted_command_line
-read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands,
-		      void (*validator)(char *, void *), void *closure)
+read_command_lines_1 (gdb::function_view<const char * ()> read_next_line_func,
+		      int parse_commands,
+		      gdb::function_view<void (const char *)> validator)
 {
   struct command_line *tail, *next;
   counted_command_line head (nullptr, command_lines_deleter ());
@@ -1199,7 +1200,7 @@ read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands,
     {
       dont_repeat ();
       val = process_next_line (read_next_line_func (), &next, parse_commands,
-			       validator, closure);
+			       validator);
 
       /* Ignore blank lines or comments.  */
       if (val == nop_command)
@@ -1221,7 +1222,7 @@ read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands,
 	{
 	  control_level++;
 	  ret = recurse_read_control_structure (read_next_line_func, next,
-						validator, closure);
+						validator);
 	  control_level--;
 
 	  if (ret == invalid_control)
@@ -1407,7 +1408,7 @@ do_define_command (const char *comname, int from_tty,
     {
       std::string prompt
 	= string_printf ("Type commands for definition of \"%s\".", comfull);
-      cmds = read_command_lines (prompt.c_str (), from_tty, 1, 0, 0);
+      cmds = read_command_lines (prompt.c_str (), from_tty, 1, 0);
     }
   else
     cmds = *commands;
@@ -1464,7 +1465,7 @@ document_command (const char *comname, int from_tty)
   std::string prompt = string_printf ("Type documentation for \"%s\".",
 				      comfull);
   counted_command_line doclines = read_command_lines (prompt.c_str (),
-						      from_tty, 0, 0, 0);
+						      from_tty, 0, 0);
 
   if (c->doc)
     xfree ((char *) c->doc);

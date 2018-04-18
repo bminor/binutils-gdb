@@ -1608,10 +1608,6 @@ extern int is_tracepoint (const struct breakpoint *b);
    it.  */
 extern VEC(breakpoint_p) *static_tracepoints_here (CORE_ADDR addr);
 
-/* Function that can be passed to read_command_line to validate
-   that each command is suitable for tracepoint command list.  */
-extern void check_tracepoint_command (char *line, void *closure);
-
 /* Create an instance of this to start registering breakpoint numbers
    for a later "commands" command.  */
 

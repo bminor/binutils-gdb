@@ -106,12 +106,11 @@ private:
   }
 };
 
-extern counted_command_line read_command_lines (const char *, int, int,
-						void (*)(char *, void *),
-						void *);
-extern counted_command_line read_command_lines_1 (char * (*) (void), int,
-						  void (*)(char *, void *),
-						  void *);
+extern counted_command_line read_command_lines
+    (const char *, int, int, gdb::function_view<void (const char *)>);
+extern counted_command_line read_command_lines_1
+    (gdb::function_view<const char * ()>, int,
+     gdb::function_view<void (const char *)>);
 
 
 /* Exported to cli/cli-cmds.c */

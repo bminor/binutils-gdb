@@ -1,5 +1,23 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* tracepoint.c (actions_command): Update.
+	* mi/mi-cmd-break.c (mi_command_line_array)
+	(mi_command_line_array_cnt, mi_command_line_array_ptr)
+	(mi_read_next_line): Remove.
+	(mi_cmd_break_commands): Update.
+	* cli/cli-script.h (read_command_lines, read_command_lines_1): Use
+	function_view.
+	* cli/cli-script.c (get_command_line): Update.
+	(process_next_line): Use function_view.  Constify.
+	(recurse_read_control_structure, read_command_lines)
+	(read_command_lines_1): Change argument types to function_view.
+	(do_define_command, document_command): Update.
+	* breakpoint.h (check_tracepoint_command): Don't declare.
+	* breakpoint.c (check_tracepoint_command): Remove.
+	(commands_command_1, create_tracepoint_from_upload): Update.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	PR gdb/11750:
 	* cli/cli-script.h (enum command_control_type) <define_control>:
 	New constant.

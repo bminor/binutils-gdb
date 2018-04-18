@@ -1216,14 +1216,6 @@ breakpoint_set_task (struct breakpoint *b, int task)
     gdb::observers::breakpoint_modified.notify (b);
 }
 
-void
-check_tracepoint_command (char *line, void *closure)
-{
-  struct breakpoint *b = (struct breakpoint *) closure;
-
-  validate_actionline (line, b);
-}
-
 static void
 commands_command_1 (const char *arg, int from_tty,
 		    struct command_line *control)
@@ -1256,10 +1248,15 @@ commands_command_1 (const char *arg, int from_tty,
 				    "%s, one per line."),
 				  arg);
 
-	       cmd = read_command_lines (str.c_str (), from_tty, 1,
-					 (is_tracepoint (b)
-					  ? check_tracepoint_command : 0),
-					 b);
+	       auto do_validate = [=] (const char *line)
+				  {
+				    validate_actionline (line, b);
+				  };
+	       gdb::function_view<void (const char *)> validator;
+	       if (is_tracepoint (b))
+		 validator = do_validate;
+
+	       cmd = read_command_lines (str.c_str (), from_tty, 1, validator);
 	     }
 	 }
 
@@ -14783,7 +14780,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
       this_utp = utp;
       next_cmd = 0;
 
-      cmd_list = read_command_lines_1 (read_uploaded_action, 1, NULL, NULL);
+      cmd_list = read_command_lines_1 (read_uploaded_action, 1, NULL);
 
       breakpoint_set_commands (tp, std::move (cmd_list));
     }

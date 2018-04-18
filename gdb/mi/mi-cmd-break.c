@@ -32,6 +32,7 @@
 #include "linespec.h"
 #include "gdb_obstack.h"
 #include <ctype.h>
+#include "tracepoint.h"
 
 enum
   {
@@ -468,24 +469,6 @@ mi_cmd_break_watch (const char *command, char **argv, int argc)
     }
 }
 
-/* The mi_read_next_line consults these variable to return successive
-   command lines.  While it would be clearer to use a closure pointer,
-   it is not expected that any future code will use read_command_lines_1,
-   therefore no point of overengineering.  */
-
-static char **mi_command_line_array;
-static int mi_command_line_array_cnt;
-static int mi_command_line_array_ptr;
-
-static char *
-mi_read_next_line (void)
-{
-  if (mi_command_line_array_ptr == mi_command_line_array_cnt)
-    return NULL;
-  else
-    return mi_command_line_array[mi_command_line_array_ptr++];
-}
-
 void
 mi_cmd_break_commands (const char *command, char **argv, int argc)
 {
@@ -509,15 +492,24 @@ mi_cmd_break_commands (const char *command, char **argv, int argc)
   if (b == NULL)
     error (_("breakpoint %d not found."), bnum);
 
-  mi_command_line_array = argv;
-  mi_command_line_array_ptr = 1;
-  mi_command_line_array_cnt = argc;
+  int count = 1;
+  auto reader
+    = [&] ()
+      {
+	const char *result = nullptr;
+	if (count < argc)
+	  result = argv[count++];
+	return result;
+      };
 
   if (is_tracepoint (b))
-    break_command = read_command_lines_1 (mi_read_next_line, 1,
-					  check_tracepoint_command, b);
+    break_command = read_command_lines_1 (reader, 1,
+					  [=] (const char *line)
+					    {
+					      validate_actionline (line, b);
+					    });
   else
-    break_command = read_command_lines_1 (mi_read_next_line, 1, 0, 0);
+    break_command = read_command_lines_1 (reader, 1, 0);
 
   breakpoint_set_commands (b, std::move (break_command));
 }

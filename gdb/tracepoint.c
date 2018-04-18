@@ -579,8 +579,10 @@ actions_command (const char *args, int from_tty)
 
       counted_command_line l = read_command_lines (tmpbuf.c_str (),
 						   from_tty, 1,
-						   check_tracepoint_command,
-						   t);
+						   [=] (const char *line)
+						     {
+						       validate_actionline (line, t);
+						     });
       breakpoint_set_commands (t, std::move (l));
     }
   /* else just return */
