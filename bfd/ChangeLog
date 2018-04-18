@@ -1,5 +1,13 @@
 2018-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf32_bed): Define before including
+	"elf32-target.h".
+	* elf64-x86-64.c (elf64_bed): Define before including
+	"elf64-target.h".
+	(elf32_bed): Define before including "elf32-target.h".
+
+2018-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/23055
 	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Use a
 	normal input file with compatible relocation.
