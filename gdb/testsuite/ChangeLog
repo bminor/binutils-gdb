@@ -1,3 +1,10 @@
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/11750:
+	* gdb.base/define.exp: Test defining a user command inside a user
+	command.
+	* gdb.base/commands.exp (define_if_without_arg_test): Test "define".
+
 2018-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves <palves@redhat.com>
 

@@ -298,5 +298,13 @@ gdb_test_multiple "set prompt \\(gdb\\) " "reset gdb_prompt" {
     }
 }
 
+gdb_test_multiple "define do-define" "" {
+    -re "Type commands for definition of \"do-define\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "define do-printit\necho here\\n\nend\nend" "" "define do-define"
+    }
+}
+gdb_test_no_output "do-define" "invoke do-define"
+gdb_test "do-printit" "here" "invoke do-printit"
+
 gdb_exit
 return 0

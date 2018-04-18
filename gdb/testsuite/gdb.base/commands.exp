@@ -1014,7 +1014,7 @@ proc_with_prefix redefine_backtrace_test {} {
 # Test using "if" and "while" without args when building a command list.
 
 proc define_if_without_arg_test {} {
-    foreach cmd {if while} {
+    foreach cmd {if while define} {
 	set test "define some_command_$cmd"
 	gdb_test_multiple $test $test {
 	    -re "End with"  {
@@ -1022,7 +1022,7 @@ proc define_if_without_arg_test {} {
 	    }
 	}
 
-	gdb_test "$cmd" "if/while commands require arguments." "type $cmd without args"
+	gdb_test "$cmd" "$cmd command requires an argument." "type $cmd without args"
     }
 }
 

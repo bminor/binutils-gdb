@@ -44,6 +44,9 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 				void (*validator)(char *, void *),
 				void *closure);
 
+static void do_define_command (const char *comname, int from_tty,
+			       const counted_command_line *commands);
+
 static char *read_next_line (void);
 
 /* Level of control structure when reading.  */
@@ -122,6 +125,7 @@ multi_line_command_p (enum command_control_type type)
     case compile_control:
     case python_control:
     case guile_control:
+    case define_control:
       return 1;
     default:
       return 0;
@@ -134,9 +138,15 @@ multi_line_command_p (enum command_control_type type)
 static struct command_line *
 build_command_line (enum command_control_type type, const char *args)
 {
-  if ((args == NULL || *args == '\0')
-      && (type == if_control || type == while_control))
-    error (_("if/while commands require arguments."));
+  if (args == NULL || *args == '\0')
+    {
+      if (type == if_control)
+	error (_("if command requires an argument."));
+      else if (type == while_control)
+	error (_("while command requires an argument."));
+      else if (type == define_control)
+	error (_("define command requires an argument."));
+    }
   gdb_assert (args != NULL);
 
   return new struct command_line (type, xstrdup (args));
@@ -611,6 +621,12 @@ execute_control_command_1 (struct command_line *cmd)
       ret = simple_control;
       break;
 
+    case define_control:
+      print_command_trace ("define %s", cmd->line);
+      do_define_command (cmd->line, 0, &cmd->body_list_0);
+      ret = simple_control;
+      break;
+
     case python_control:
     case guile_control:
       {
@@ -960,6 +976,8 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	{
 	  *command = build_command_line (commands_control, line_first_arg (p));
 	}
+      else if (command_name_equals (cmd, "define"))
+	*command = build_command_line (define_control, line_first_arg (p));
       else if (command_name_equals (cmd, "python") && !inline_cmd)
 	{
 	  /* Note that we ignore the inline "python command" form
@@ -1303,8 +1321,15 @@ user_defined_command (const char *ignore, int from_tty)
 {
 }
 
+/* Define a user-defined command.  If COMMANDS is NULL, then this is a
+   top-level call and the commands will be read using
+   read_command_lines.  Otherwise, it is a "define" command in an
+   existing command and the commands are provided.  In the
+   non-top-level case, various prompts and warnings are disabled.  */
+
 static void
-define_command (const char *comname, int from_tty)
+do_define_command (const char *comname, int from_tty,
+		   const counted_command_line *commands)
 {
   enum cmd_hook_type
     {
@@ -1331,7 +1356,7 @@ define_command (const char *comname, int from_tty)
   if (c && strcmp (comname, c->name) != 0)
     c = 0;
 
-  if (c)
+  if (c && commands == nullptr)
     {
       int q;
 
@@ -1365,7 +1390,7 @@ define_command (const char *comname, int from_tty)
       hookc = lookup_cmd (&tem, *list, "", -1, 0);
       if (hookc && strcmp (comname + hook_name_size, hookc->name) != 0)
 	hookc = 0;
-      if (!hookc)
+      if (!hookc && commands == nullptr)
 	{
 	  warning (_("Your new `%s' command does not "
 		     "hook any existing command."),
@@ -1377,10 +1402,15 @@ define_command (const char *comname, int from_tty)
 
   comname = xstrdup (comname);
 
-  std::string prompt
-    = string_printf ("Type commands for definition of \"%s\".", comfull);
-  counted_command_line cmds = read_command_lines (prompt.c_str (), from_tty,
-						  1, 0, 0);
+  counted_command_line cmds;
+  if (commands == nullptr)
+    {
+      std::string prompt
+	= string_printf ("Type commands for definition of \"%s\".", comfull);
+      cmds = read_command_lines (prompt.c_str (), from_tty, 1, 0, 0);
+    }
+  else
+    cmds = *commands;
 
   newc = add_cmd (comname, class_user, user_defined_command,
 		  (c && c->theclass == class_user)
@@ -1407,6 +1437,12 @@ define_command (const char *comname, int from_tty)
 	  internal_error (__FILE__, __LINE__, _("bad switch"));
         }
     }
+}
+
+static void
+define_command (const char *comname, int from_tty)
+{
+  do_define_command (comname, from_tty, nullptr);
 }
 
 static void

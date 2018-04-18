@@ -1,5 +1,16 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	PR gdb/11750:
+	* cli/cli-script.h (enum command_control_type) <define_control>:
+	New constant.
+	* cli/cli-script.c (multi_line_command_p): Handle define_control.
+	(build_command_line, execute_control_command_1)
+	(process_next_line): Likewise.
+	(do_define_command): New function, extracted from define_command.
+	(define_command): Use it.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (actions_command): Update.
 	* cli/cli-script.h (read_command_lines): Update.
 	* cli/cli-script.c (read_command_lines): Constify prompt_arg.
