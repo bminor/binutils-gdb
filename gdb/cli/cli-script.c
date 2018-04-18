@@ -426,8 +426,9 @@ reset_command_nest_depth (void)
    via while_command or if_command.  Inner levels of 'if' and 'while'
    are dealt with directly.  Therefore we can use these functions
    to determine whether the command has been printed already or not.  */
+ATTRIBUTE_PRINTF (1, 2)
 void
-print_command_trace (const char *cmd)
+print_command_trace (const char *fmt, ...)
 {
   int i;
 
@@ -443,7 +444,12 @@ print_command_trace (const char *cmd)
   for (i=0; i < command_nest_depth; i++)
     printf_filtered ("+");
 
-  printf_filtered ("%s\n", cmd);
+  va_list args;
+
+  va_start (args, fmt);
+  vprintf_filtered (fmt, args);
+  va_end (args);
+  puts_filtered ("\n");
 }
 
 /* Helper for execute_control_command.  */
@@ -490,11 +496,7 @@ execute_control_command_1 (struct command_line *cmd)
 
     case while_control:
       {
-	int len = strlen (cmd->line) + 7;
-	char *buffer = (char *) alloca (len);
-
-	xsnprintf (buffer, len, "while %s", cmd->line);
-	print_command_trace (buffer);
+	print_command_trace ("while %s", cmd->line);
 
 	/* Parse the loop control expression for the while statement.  */
 	std::string new_line = insert_user_defined_cmd_args (cmd->line);
@@ -555,11 +557,7 @@ execute_control_command_1 (struct command_line *cmd)
 
     case if_control:
       {
-	int len = strlen (cmd->line) + 4;
-	char *buffer = (char *) alloca (len);
-
-	xsnprintf (buffer, len, "if %s", cmd->line);
-	print_command_trace (buffer);
+	print_command_trace ("if %s", cmd->line);
 
 	/* Parse the conditional for the if statement.  */
 	std::string new_line = insert_user_defined_cmd_args (cmd->line);

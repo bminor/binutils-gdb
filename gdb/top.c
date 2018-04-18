@@ -571,7 +571,7 @@ execute_command (const char *p, int from_tty)
       line = p;
 
       /* If trace-commands is set then this will print this command.  */
-      print_command_trace (p);
+      print_command_trace ("%s", p);
 
       c = lookup_cmd (&cmd, cmdlist, "", 0, 1);
       p = cmd;

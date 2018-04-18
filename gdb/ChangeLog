@@ -1,5 +1,13 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* top.c (execute_command): Update.
+	* cli/cli-script.h (print_command_lines): Now varargs.
+	* cli/cli-script.c (print_command_lines): Now varargs.
+	(execute_control_command_1) <case while_control, case if_control>:
+	Update.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (all_tracepoint_actions): Rename from
 	all_tracepoint_actions_and_cleanup.  Change return type.
 	(actions_command, encode_actions_1, encode_actions)

@@ -148,7 +148,8 @@ extern std::string insert_user_defined_cmd_args (const char *line);
 
 /* Exported to top.c */
 
-extern void print_command_trace (const char *cmd);
+extern void print_command_trace (const char *cmd, ...)
+  ATTRIBUTE_PRINTF (1, 2);
 
 /* Exported to event-top.c */
 
