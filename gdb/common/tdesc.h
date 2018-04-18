@@ -189,6 +189,72 @@ struct tdesc_type : tdesc_element
 
 typedef std::unique_ptr<tdesc_type> tdesc_type_up;
 
+struct tdesc_type_builtin : tdesc_type
+{
+  tdesc_type_builtin (const std::string &name, enum tdesc_type_kind kind)
+  : tdesc_type (name, kind)
+  {}
+
+  void accept (tdesc_element_visitor &v) const override
+  {
+    v.visit (this);
+  }
+};
+
+/* tdesc_type for vector types.  */
+
+struct tdesc_type_vector : tdesc_type
+{
+  tdesc_type_vector (const std::string &name, tdesc_type *element_type_,
+		     int count_)
+  : tdesc_type (name, TDESC_TYPE_VECTOR),
+    element_type (element_type_), count (count_)
+  {}
+
+  void accept (tdesc_element_visitor &v) const override
+  {
+    v.visit (this);
+  }
+
+  struct tdesc_type *element_type;
+  int count;
+};
+
+/* A named type from a target description.  */
+
+struct tdesc_type_field
+{
+  tdesc_type_field (const std::string &name_, tdesc_type *type_,
+		    int start_, int end_)
+  : name (name_), type (type_), start (start_), end (end_)
+  {}
+
+  std::string name;
+  struct tdesc_type *type;
+  /* For non-enum-values, either both are -1 (non-bitfield), or both are
+     not -1 (bitfield).  For enum values, start is the value (which could be
+     -1), end is -1.  */
+  int start, end;
+};
+
+/* tdesc_type for struct, union, flags, and enum types.  */
+
+struct tdesc_type_with_fields : tdesc_type
+{
+  tdesc_type_with_fields (const std::string &name, tdesc_type_kind kind,
+			  int size_ = 0)
+  : tdesc_type (name, kind), size (size_)
+  {}
+
+  void accept (tdesc_element_visitor &v) const override
+  {
+    v.visit (this);
+  }
+
+  std::vector<tdesc_type_field> fields;
+  int size;
+};
+
 /* A feature from a target description.  Each feature is a collection
    of other elements, e.g. registers and types.  */
 
@@ -264,10 +330,22 @@ tdesc_type_with_fields *tdesc_create_flags (struct tdesc_feature *feature,
 					    const char *name,
 					    int size);
 
+/* Return the created enum tdesc_type named NAME in FEATURE.  */
+tdesc_type_with_fields *tdesc_create_enum (struct tdesc_feature *feature,
+					   const char *name,
+					   int size);
+
 /* Add a new field to TYPE.  FIELD_NAME is its name, and FIELD_TYPE is
    its type.  */
 void tdesc_add_field (tdesc_type_with_fields *type, const char *field_name,
 		      struct tdesc_type *field_type);
+
+/* Add a new bitfield to TYPE, with range START to END.  FIELD_NAME is its name,
+   and FIELD_TYPE is its type.  */
+void tdesc_add_typed_bitfield (tdesc_type_with_fields *type,
+			       const char *field_name,
+			       int start, int end,
+			       struct tdesc_type *field_type);
 
 /* Set the total length of TYPE.  Structs which contain bitfields may
    omit the reserved bits, so the end of the last field may not
@@ -284,6 +362,10 @@ void tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
    This function is kept to minimize changes in generated files.  */
 void tdesc_add_flag (tdesc_type_with_fields *type, int start,
 		     const char *flag_name);
+
+/* Add field with VALUE and NAME to the enum TYPE.  */
+void tdesc_add_enum_value (tdesc_type_with_fields *type, int value,
+			   const char *name);
 
 /* Create a register in feature FEATURE.  */
 void tdesc_create_reg (struct tdesc_feature *feature, const char *name,

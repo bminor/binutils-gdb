@@ -1,5 +1,48 @@
 2018-04-18  Alan Hayward  <alan.hayward@arm.com>
 
+	* common/tdesc.c (tdesc_predefined_type): Move to here.
+	(tdesc_named_type): Likewise.
+	(tdesc_create_vector): Likewise.
+	(tdesc_create_struct): Likewise.
+	(tdesc_set_struct_size): Likewise.
+	(tdesc_create_union): Likewise.
+	(tdesc_create_flags): Likewise.
+	(tdesc_create_enum): Likewise.
+	(tdesc_add_field): Likewise.
+	(tdesc_add_typed_bitfield): Likewise.
+	(tdesc_add_bitfield): Likewise.
+	(tdesc_add_flag): Likewise.
+	(tdesc_add_enum_value): Likewise.
+	* common/tdesc.h (struct tdesc_type_builtin): Likewise.
+	(struct tdesc_type_vector): Likewise.
+	(struct tdesc_type_field): Likewise.
+	(struct tdesc_type_with_fields): Likewise.
+	(tdesc_create_enum): Add declaration.
+	(tdesc_add_typed_bitfield): Likewise.
+	(tdesc_add_enum_value): Likewise.
+	* target-descriptions.c (tdesc_type_field): Move from here.
+	(tdesc_type_builtin): Likewise.
+	(tdesc_type_vector): Likewise.
+	(tdesc_type_with_fields): Likewise.
+	(tdesc_predefined_types): Likewise.
+	(tdesc_named_type): Likewise.
+	(tdesc_create_vector): Likewise.
+	(tdesc_create_struct): Likewise.
+	(tdesc_set_struct_size): Likewise.
+	(tdesc_create_union): Likewise.
+	(tdesc_create_flags): Likewise.
+	(tdesc_create_enum): Likewise.
+	(tdesc_add_field): Likewise.
+	(tdesc_add_typed_bitfield): Likewise.
+	(tdesc_add_bitfield): Likewise.
+	(tdesc_add_flag): Likewise.
+	(tdesc_add_enum_value): Likewise.
+	* gdb/target-descriptions.h (tdesc_create_enum): Likewise.
+	(tdesc_add_typed_bitfield): Likewise.
+	(tdesc_add_enum_value): Likewise.
+
+2018-04-18  Alan Hayward  <alan.hayward@arm.com>
+
 	* common/tdesc.c (tdesc_feature::accept): Move to here.
 	(tdesc_feature::operator==): Likewise.
 	(tdesc_create_reg): Likewise.
