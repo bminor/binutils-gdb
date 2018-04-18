@@ -1,3 +1,17 @@
+2018-04-18  Alan Hayward  <alan.hayward@arm.com>
+
+	* Makefile.in: Add arch/tdesc.c
+	* common/tdesc.c: New file.
+	* common/tdesc.h (tdesc_element_visitor): Move to here.
+	(tdesc_element): Likewise.
+	(tdesc_reg): Likewise.
+	(tdesc_reg_up): Likewise.
+	* regformats/regdef.h (reg): Add offset to constructors.
+	* target-descriptions.c (tdesc_element_visitor): Move from here.
+	(tdesc_element): Likewise.
+	(tdesc_reg): Likewise.
+	(tdesc_reg_up): Likewise.
+
 2018-04-17  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (quirk_rust_enum): Conditionally drop the

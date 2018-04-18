@@ -54,10 +54,19 @@ init_target_desc (struct target_desc *tdesc)
 {
   int offset = 0;
 
-  for (reg &reg : tdesc->reg_defs)
+  /* Go through all the features and populate reg_defs.  */
+  for (const tdesc_reg_up &treg : tdesc->registers)
     {
-      reg.offset = offset;
-      offset += reg.size;
+      int regnum = treg->target_regnum;
+
+      /* Register number will increase (possibly with gaps) or be zero.  */
+      gdb_assert (regnum == 0 || regnum >= tdesc->reg_defs.size ());
+
+      if (regnum != 0)
+	tdesc->reg_defs.resize (regnum, reg (offset));
+
+      tdesc->reg_defs.emplace_back (treg->name.c_str (), offset, treg->bitsize);
+      offset += treg->bitsize;
     }
 
   tdesc->registers_size = offset / 8;
@@ -222,12 +231,10 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 {
   struct target_desc *tdesc = (struct target_desc *) feature;
 
-  gdb_assert (regnum == 0 || regnum >= tdesc->reg_defs.size ());
+  tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
+				  group, bitsize, type);
 
-  if (regnum != 0)
-    tdesc->reg_defs.resize (regnum);
-
-  tdesc->reg_defs.emplace_back (name, bitsize);
+  tdesc->registers.emplace_back (reg);
 }
 
 /* See common/tdesc.h.  */

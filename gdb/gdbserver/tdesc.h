@@ -25,7 +25,10 @@
 #include <vector>
 
 struct tdesc_feature
-{};
+{
+  /* The registers associated with this feature.  */
+  std::vector<tdesc_reg_up> registers;
+};
 
 /* A target description.  Inherit from tdesc_feature so that target_desc
    can be used as tdesc_feature.  */
