@@ -5020,6 +5020,9 @@ elf_x86_64_special_sections[]=
 #define elf_backend_hide_symbol \
   _bfd_x86_elf_hide_symbol
 
+#undef	elf64_bed
+#define elf64_bed elf64_x86_64_bed
+
 #include "elf64-target.h"
 
 /* CloudABI support.  */
@@ -5303,6 +5306,9 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
 #undef elf_backend_size_info
 #define elf_backend_size_info \
   _bfd_elf32_size_info
+
+#undef	elf32_bed
+#define	elf32_bed			elf32_x86_64_bed
 
 #include "elf32-target.h"
 

@@ -4435,6 +4435,8 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 
 #define elf_backend_linux_prpsinfo32_ugid16	TRUE
 
+#define	elf32_bed			      elf32_i386_bed
+
 #include "elf32-target.h"
 
 /* FreeBSD support.  */
