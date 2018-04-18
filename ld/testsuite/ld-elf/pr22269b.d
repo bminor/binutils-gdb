@@ -3,7 +3,7 @@
 #ld: -pie --no-dynamic-linker -z dynamic-undefined-weak
 #readelf: -r -x .data.rel.ro
 #warning: -z dynamic-undefined-weak ignored
-#target: *-*-linux* *-*-gnu* *-*-nacl*
+#target: *-*-linux* *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
 
 There are no relocations in this file.
 

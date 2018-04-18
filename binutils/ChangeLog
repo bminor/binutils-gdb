@@ -1,4 +1,12 @@
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
+
+	* testsuite/binutils-all/elfedit-2.d: Accept arm*-*-uclinuxfdpiceabi.
+	* testsuite/binutils-all/elfedit-3.d: Likewise.
+	* testsuite/binutils-all/objcopy.exp: Likewise.
+	* testsuite/binutils-all/strip-3.d: Likewise.
+	* testsuite/lib/binutils-common.exp: Likewise.
+
+2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
 	* readelf.c (decode_ARM_machine_flags): Support EF_ARM_PIC.

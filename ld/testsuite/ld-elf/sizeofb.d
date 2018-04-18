@@ -1,7 +1,7 @@
 #source: sizeof.s
 #ld: -shared
 #readelf: -sW
-#target: *-*-linux* *-*-gnu*
+#target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name

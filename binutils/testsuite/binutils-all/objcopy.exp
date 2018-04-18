@@ -564,7 +564,7 @@ proc copy_setup { } {
     set res [build_wrapper testglue.o]
     set flags { debug }
 
-    if { [istarget *-*-uclinux*] && ![istarget tic6x-*-*] } {
+    if { [istarget *-*-uclinux*] && ![istarget tic6x-*-*] && ![istarget arm*-*-uclinuxfdpiceabi] } {
 	return 1
     }
 

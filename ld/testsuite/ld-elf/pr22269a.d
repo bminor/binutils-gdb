@@ -2,7 +2,7 @@
 #source: pr22269.s
 #ld: -pie --no-dynamic-linker
 #readelf: -r -x .data.rel.ro
-#target: *-*-linux* *-*-gnu* *-*-nacl*
+#target: *-*-linux* *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
 
 There are no relocations in this file.
 

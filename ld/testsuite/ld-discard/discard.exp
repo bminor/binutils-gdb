@@ -29,6 +29,7 @@ if { ![istarget *-*-linux*]
      && ![istarget *-*-gnu*]
      && ![istarget *-*-nacl*]
      && ![istarget hppa*64*-*-hpux*]
+     && ![istarget arm*-*-uclinuxfdpiceabi]
      && ![istarget *-*-elf] } {
     return
 }

@@ -1,7 +1,7 @@
 #source: pr20022b.s
 #ld: --gc-sections -e _start tmpdir/pr20022.so
 #readelf: -SsW
-#target: *-*-linux* *-*-gnu*
+#target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
 #notarget: frv-*-linux* metag-*-linux* mips*-*-*
 # Skip on targets without dynamic relocations in .text section.
 
