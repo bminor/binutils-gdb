@@ -62,7 +62,7 @@ AR_FLAGS = rc
 # Dependency tracking information.
 DEPMODE = @CCDEPMODE@
 DEPDIR = @DEPDIR@
-depcomp = $(SHELL) $(srcdir)/../depcomp
+depcomp = $(SHELL) $(srcdir)/../../depcomp
 
 # Directory containing source files.  Don't clean up the spacing,
 # this exact string is matched for by the "configure" script.
@@ -652,8 +652,12 @@ else
 $(all_object_files) : $(generated_files)
 endif
 
+# All the .deps files to include.
+all_deps_files = $(foreach dep,$(patsubst %.o,%.Po,$(all_object_files)),\
+		   $(dir $(dep))/$(DEPDIR)/$(notdir $(dep)))
+
 # Dependencies.
--include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
+-include $(all_deps_files)
 
 # Disable implicit make rules.
 include $(srcdir)/../disable-implicit-rules.mk

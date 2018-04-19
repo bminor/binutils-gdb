@@ -1,3 +1,8 @@
+2018-04-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (depcomp): Add "..".
+	(all_deps_files): New and use it.
+
 2018-04-18  Alan Hayward  <alan.hayward@arm.com>
 
 	* configure.srv (aarch64*-*-linux*): Don't include xml.
