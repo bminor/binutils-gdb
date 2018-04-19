@@ -1,5 +1,12 @@
 2018-04-19  Alan Modra  <amodra@gmail.com>
 
+	PR 22537
+	* elf32-hppa.c (elf32_hppa_size_stubs): Init "destination" to -1.
+	(hppa_type_of_stub): Don't return a long branch stub for
+	symbols other than those defined statically.
+
+2018-04-19  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am: Revert 2018-04-18 coff-mips changes.
 	* config.bfd: Add back mips_ecoff_le_vec and mips_ecoff_be_vec
 	to selvecs for mips targets change 2018-04-18.

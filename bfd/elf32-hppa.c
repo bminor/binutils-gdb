@@ -612,6 +612,9 @@ hppa_type_of_stub (asection *input_sec,
       return hppa_stub_import;
     }
 
+  if (destination == (bfd_vma) -1)
+    return hppa_stub_none;
+
   /* Determine where the call point is.  */
   location = (input_sec->output_offset
 	      + input_sec->output_section->vma
@@ -2843,7 +2846,7 @@ elf32_hppa_size_stubs
 		     section.  */
 		  sym_sec = NULL;
 		  sym_value = 0;
-		  destination = 0;
+		  destination = -1;
 		  hh = NULL;
 		  if (r_indx < symtab_hdr->sh_info)
 		    {
