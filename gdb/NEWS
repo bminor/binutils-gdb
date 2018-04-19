@@ -34,6 +34,8 @@ set|show record btrace cpu
   ** The commands attached to a breakpoint can be set by assigning to
      the breakpoint's "commands" field.
 
+  ** gdb.execute can now execute multi-line gdb commands.
+
 * New targets
 
 RiscV ELF			riscv*-*-elf

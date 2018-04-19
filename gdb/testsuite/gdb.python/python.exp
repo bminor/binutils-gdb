@@ -119,6 +119,9 @@ gdb_test_no_output \
     "python x = gdb.execute('printf \"%d\", 23', to_string = True)"
 gdb_test "python print (x)" "23"
 
+gdb_test "python gdb.execute('echo 2\\necho 3\\\\n\\n')" "23" \
+    "multi-line execute"
+
 # Test post_event.
 gdb_py_test_multiple "post event insertion" \
   "python" "" \

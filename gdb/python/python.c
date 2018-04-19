@@ -588,6 +588,20 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
     {
       struct interp *interp;
 
+      std::string arg_copy = arg;
+      bool first = true;
+      char *save_ptr = nullptr;
+      auto reader
+	= [&] ()
+	  {
+	    const char *result = strtok_r (first ? &arg_copy[0] : nullptr,
+					   "\n", &save_ptr);
+	    first = false;
+	    return result;
+	  };
+
+      counted_command_line lines = read_command_lines_1 (reader, 1, nullptr);
+
       scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
       scoped_restore save_uiout = make_scoped_restore (&current_uiout);
@@ -599,9 +613,10 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 
       scoped_restore preventer = prevent_dont_repeat ();
       if (to_string)
-	to_string_res = execute_command_to_string (arg, from_tty);
+	to_string_res = execute_control_commands_to_string (lines.get (),
+							    from_tty);
       else
-	execute_command (arg, from_tty);
+	execute_control_commands (lines.get (), from_tty);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

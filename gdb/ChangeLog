@@ -1,5 +1,21 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	PR python/22730:
+	* NEWS: Mention gdb.execute change.
+	* gdbcmd.h (execute_control_command): Don't declare.
+	* python/python.c (execute_gdb_command): Use read_command_lines_1,
+	execute_control_commands, execute_control_commands_to_string.
+	* cli/cli-script.h (execute_control_commands)
+	(execute_control_commands_to_string): Declare.
+	(execute_control_command): Add from_tty parameter.
+	* cli/cli-script.c (execute_control_commands)
+	(execute_control_commands_to_string): New functions.
+	(execute_user_command): Use execute_control_commands.
+	(execute_control_command_1): Add "from_tty" parameter.  Update.
+	(execute_control_command): Likewise.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	PR python/22731:
 	* NEWS: Mention that breakpoint commands are writable.
 	* python/py-breakpoint.c (bppy_set_commands): New function.

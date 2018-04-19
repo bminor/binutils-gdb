@@ -122,10 +122,23 @@ extern void show_user_1 (struct cmd_list_element *c,
 			 const char *name,
 			 struct ui_file *stream);
 
+/* Execute the commands in CMDLINES.  */
+
+extern void execute_control_commands (struct command_line *cmdlines,
+				      int from_tty);
+
+/* Run execute_control_commands for COMMANDS.  Capture its output into
+   the returned string, do not display it to the screen.  BATCH_FLAG
+   will be temporarily set to true.  */
+
+extern std::string execute_control_commands_to_string
+    (struct command_line *commands, int from_tty);
+
 /* Exported to gdb/breakpoint.c */
 
 extern enum command_control_type
-	execute_control_command (struct command_line *cmd);
+	execute_control_command (struct command_line *cmd,
+				 int from_tty = 0);
 
 extern enum command_control_type
 	execute_control_command_untraced (struct command_line *cmd);

@@ -135,8 +135,6 @@ extern struct cmd_list_element *save_cmdlist;
 extern void execute_command (const char *, int);
 extern std::string execute_command_to_string (const char *p, int from_tty);
 
-enum command_control_type execute_control_command (struct command_line *);
-
 extern void print_command_line (struct command_line *, unsigned int,
 				struct ui_file *);
 extern void print_command_lines (struct ui_out *,

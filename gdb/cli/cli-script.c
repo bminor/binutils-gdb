@@ -374,12 +374,69 @@ execute_cmd_post_hook (struct cmd_list_element *c)
     }
 }
 
+/* See cli-script.h.  */
+
+void
+execute_control_commands (struct command_line *cmdlines, int from_tty)
+{
+  /* Set the instream to 0, indicating execution of a
+     user-defined function.  */
+  scoped_restore restore_instream
+    = make_scoped_restore (&current_ui->instream, nullptr);
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
+  scoped_restore save_nesting
+    = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
+
+  while (cmdlines)
+    {
+      enum command_control_type ret = execute_control_command (cmdlines,
+							       from_tty);
+      if (ret != simple_control && ret != break_control)
+	{
+	  warning (_("Error executing canned sequence of commands."));
+	  break;
+	}
+      cmdlines = cmdlines->next;
+    }
+}
+
+/* See cli-script.h.  */
+
+std::string
+execute_control_commands_to_string (struct command_line *commands,
+				    int from_tty)
+{
+  /* GDB_STDOUT should be better already restored during these
+     restoration callbacks.  */
+  set_batch_flag_and_restore_page_info save_page_info;
+
+  string_file str_file;
+
+  {
+    current_uiout->redirect (&str_file);
+    ui_out_redirect_pop redirect_popper (current_uiout);
+
+    scoped_restore save_stdout
+      = make_scoped_restore (&gdb_stdout, &str_file);
+    scoped_restore save_stderr
+      = make_scoped_restore (&gdb_stderr, &str_file);
+    scoped_restore save_stdlog
+      = make_scoped_restore (&gdb_stdlog, &str_file);
+    scoped_restore save_stdtarg
+      = make_scoped_restore (&gdb_stdtarg, &str_file);
+    scoped_restore save_stdtargerr
+      = make_scoped_restore (&gdb_stdtargerr, &str_file);
+
+    execute_control_commands (commands, from_tty);
+  }
+
+  return std::move (str_file.string ());
+}
+
 void
 execute_user_command (struct cmd_list_element *c, const char *args)
 {
-  struct ui *ui = current_ui;
   counted_command_line cmdlines_copy;
-  enum command_control_type ret;
   extern unsigned int max_user_call_depth;
 
   /* Ensure that the user commands can't be deleted while they are
@@ -395,25 +452,7 @@ execute_user_command (struct cmd_list_element *c, const char *args)
   if (user_args_stack.size () > max_user_call_depth)
     error (_("Max user call depth exceeded -- command aborted."));
 
-  /* Set the instream to 0, indicating execution of a
-     user-defined function.  */
-  scoped_restore restore_instream
-    = make_scoped_restore (&ui->instream, nullptr);
-
-  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
-
-  scoped_restore save_nesting
-    = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
-  while (cmdlines)
-    {
-      ret = execute_control_command (cmdlines);
-      if (ret != simple_control && ret != break_control)
-	{
-	  warning (_("Error executing canned sequence of commands."));
-	  break;
-	}
-      cmdlines = cmdlines->next;
-    }
+  execute_control_commands (cmdlines, 0);
 }
 
 /* This function is called every time GDB prints a prompt.  It ensures
@@ -465,7 +504,7 @@ print_command_trace (const char *fmt, ...)
 /* Helper for execute_control_command.  */
 
 static enum command_control_type
-execute_control_command_1 (struct command_line *cmd)
+execute_control_command_1 (struct command_line *cmd, int from_tty)
 {
   struct command_line *current;
   struct value *val;
@@ -483,7 +522,7 @@ execute_control_command_1 (struct command_line *cmd)
       {
 	/* A simple command, execute it and return.  */
 	std::string new_line = insert_user_defined_cmd_args (cmd->line);
-	execute_command (new_line.c_str (), 0);
+	execute_command (new_line.c_str (), from_tty);
 	ret = cmd->control_type;
 	break;
       }
@@ -538,7 +577,7 @@ execute_control_command_1 (struct command_line *cmd)
 	      {
 		scoped_restore save_nesting
 		  = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
-		ret = execute_control_command_1 (current);
+		ret = execute_control_command_1 (current, from_tty);
 
 		/* If we got an error, or a "break" command, then stop
 		   looping.  */
@@ -593,7 +632,7 @@ execute_control_command_1 (struct command_line *cmd)
 	  {
 	    scoped_restore save_nesting
 	      = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
-	    ret = execute_control_command_1 (current);
+	    ret = execute_control_command_1 (current, from_tty);
 
 	    /* If we got an error, get out.  */
 	    if (ret != simple_control)
@@ -644,7 +683,7 @@ execute_control_command_1 (struct command_line *cmd)
 }
 
 enum command_control_type
-execute_control_command (struct command_line *cmd)
+execute_control_command (struct command_line *cmd, int from_tty)
 {
   /* Make sure we use the console uiout.  It's possible that we are executing
      breakpoint commands while running the MI interpreter.  */
@@ -652,7 +691,7 @@ execute_control_command (struct command_line *cmd)
   scoped_restore save_uiout
     = make_scoped_restore (&current_uiout, interp_ui_out (console));
 
-  return execute_control_command_1 (cmd);
+  return execute_control_command_1 (cmd, from_tty);
 }
 
 /* Like execute_control_command, but first set
