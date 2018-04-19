@@ -263,7 +263,7 @@ gc_process_relocs(
 	  if (is_ordinary
 	      && check_section_for_function_pointers
               && lsym.get_st_type() != elfcpp::STT_OBJECT
- 	      && scan.local_reloc_may_be_function_pointer(symtab, NULL, NULL,
+ 	      && scan.local_reloc_may_be_function_pointer(symtab, NULL, target,
 							  src_obj, src_indx,
 			                       		  NULL, reloc, r_type,
 							  lsym))
