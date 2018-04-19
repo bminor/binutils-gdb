@@ -2568,6 +2568,7 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	  break;
 	case REGISTERS_FORMAT:
 	  registers_format = oarg[0];
+	  break;
 	case MEMORY_CONTENTS:
 	  memory_contents = 1;
 	  break;

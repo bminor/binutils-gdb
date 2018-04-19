@@ -245,6 +245,7 @@ mi_cmd_stack_list_locals (const char *command, char **argv, int argc)
 	    {
 	    case NO_FRAME_FILTERS:
 	      raw_arg = oind;
+	      break;
 	    case SKIP_UNAVAILABLE:
 	      skip_unavailable = 1;
 	      break;
