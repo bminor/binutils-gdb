@@ -1,3 +1,8 @@
+2018-04-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* thread.c (thread_apply_all_command): Fix comment.
+	(thread_command): Fix comment.
+
 2018-04-10  Alan Hayward  <alan.hayward@arm.com>
 
 	* common/tdesc.h (tdesc_create_feature): Remove xml filename
