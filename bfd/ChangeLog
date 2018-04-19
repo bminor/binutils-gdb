@@ -1,3 +1,14 @@
+2018-04-20  Alan Modra  <amodra@gmail.com>
+
+	PR 22978
+	* elf32-hppa.c (got_relocs_needed): Add extra param to special
+	case both dtprel and tprel relocs.
+	(allocate_dynrelocs): Adjust conditions for got relocs.
+	(elf32_hppa_relocate_section): Likewise for local sym got relocs.
+	Emit dynamic relocs on TLS GOT entries for shared libraries,
+	not when pic.  Omit dynamic reloc on dtprel entry when local,
+	and on tprel entry when local and executable.
+
 2018-04-19  Alan Modra  <amodra@gmail.com>
 
 	PR 22537

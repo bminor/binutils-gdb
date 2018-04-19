@@ -1894,18 +1894,19 @@ got_entries_needed (int tls_type)
 }
 
 /* Calculate size of relocs needed for symbol given its TLS_TYPE and
-   NEEDed GOT entries.  KNOWN says a TPREL offset can be calculated
-   at link time.  */
+   NEEDed GOT entries.  TPREL_KNOWN says a TPREL offset can be
+   calculated at link time.  DTPREL_KNOWN says the same for a DTPREL
+   offset.  */
 
 static inline unsigned int
-got_relocs_needed (int tls_type, unsigned int need, bfd_boolean known)
+got_relocs_needed (int tls_type, unsigned int need,
+		   bfd_boolean dtprel_known, bfd_boolean tprel_known)
 {
   /* All the entries we allocated need relocs.
-     Except IE in executable with a local symbol.  We could also omit
-     the DTPOFF reloc on the second word of a GD entry under the same
-     condition as that for IE, but ld.so might want to differentiate
-     LD and GD entries at some stage.  */
-  if ((tls_type & GOT_TLS_IE) != 0 && known)
+     Except for GD and IE with local symbols.  */
+  if ((tls_type & GOT_TLS_GD) != 0 && dtprel_known)
+    need -= GOT_ENTRY_SIZE;
+  if ((tls_type & GOT_TLS_IE) != 0 && tprel_known)
     need -= GOT_ENTRY_SIZE;
   return need * sizeof (Elf32_External_Rela) / GOT_ENTRY_SIZE;
 }
@@ -1959,15 +1960,16 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
       need = got_entries_needed (hh->tls_type);
       sec->size += need;
       if (htab->etab.dynamic_sections_created
-	  && (bfd_link_pic (info)
+	  && (bfd_link_dll (info)
+	      || (bfd_link_pic (info) && (hh->tls_type & GOT_NORMAL) != 0)
 	      || (eh->dynindx != -1
 		  && !SYMBOL_REFERENCES_LOCAL (info, eh)))
 	  && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh))
 	{
-	  bfd_boolean tprel_known = (bfd_link_executable (info)
-				     && SYMBOL_REFERENCES_LOCAL (info, eh));
+	  bfd_boolean local = SYMBOL_REFERENCES_LOCAL (info, eh);
 	  htab->etab.srelgot->size
-	    += got_relocs_needed (hh->tls_type, need, tprel_known);
+	    += got_relocs_needed (hh->tls_type, need, local,
+				  local && bfd_link_executable (info));
 	}
     }
   else
@@ -2192,12 +2194,12 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      *local_got = sec->size;
 	      need = got_entries_needed (*local_tls_type);
 	      sec->size += need;
-	      if (bfd_link_pic (info))
-		{
-		  bfd_boolean tprel_known = bfd_link_executable (info);
-		  htab->etab.srelgot->size
-		    += got_relocs_needed (*local_tls_type, need, tprel_known);
-		}
+	      if (bfd_link_dll (info)
+		  || (bfd_link_pic (info)
+		      && (*local_tls_type & GOT_NORMAL) != 0))
+		htab->etab.srelgot->size
+		  += got_relocs_needed (*local_tls_type, need, TRUE,
+					bfd_link_executable (info));
 	    }
 	  else
 	    *local_got = (bfd_vma) -1;
@@ -4041,7 +4043,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		   GD GOT are necessary, we emit the GD first.  */
 
 		if (indx != 0
-		    || (bfd_link_pic (info)
+		    || (bfd_link_dll (info)
 			&& (hh == NULL
 			    || !UNDEFWEAK_NO_DYNAMIC_RELOC (info, &hh->eh))))
 		  {
@@ -4065,6 +4067,20 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 			bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 			htab->etab.srelgot->reloc_count++;
 			loc += sizeof (Elf32_External_Rela);
+			bfd_put_32 (output_bfd, 0,
+				    htab->etab.sgot->contents + cur_off);
+		      }
+		    else
+		      /* If we are not emitting relocations for a
+			 general dynamic reference, then we must be in a
+			 static link or an executable link with the
+			 symbol binding locally.  Mark it as belonging
+			 to module 1, the executable.  */
+		      bfd_put_32 (output_bfd, 1,
+				  htab->etab.sgot->contents + cur_off);
+
+		    if (indx != 0)
+		      {
 			outrel.r_info
 			  = ELF32_R_INFO (indx, R_PARISC_TLS_DTPOFF32);
 			outrel.r_offset += 4;
@@ -4072,22 +4088,11 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 			htab->etab.srelgot->reloc_count++;
 			loc += sizeof (Elf32_External_Rela);
 			bfd_put_32 (output_bfd, 0,
-				    htab->etab.sgot->contents + cur_off);
-			bfd_put_32 (output_bfd, 0,
 				    htab->etab.sgot->contents + cur_off + 4);
 		      }
 		    else
-		      {
-			/* If we are not emitting relocations for a
-			   general dynamic reference, then we must be in a
-			   static link or an executable link with the
-			   symbol binding locally.  Mark it as belonging
-			   to module 1, the executable.  */
-			bfd_put_32 (output_bfd, 1,
-				    htab->etab.sgot->contents + cur_off);
-			bfd_put_32 (output_bfd, relocation - dtpoff_base (info),
-				    htab->etab.sgot->contents + cur_off + 4);
-		      }
+		      bfd_put_32 (output_bfd, relocation - dtpoff_base (info),
+				  htab->etab.sgot->contents + cur_off + 4);
 		    cur_off += 8;
 		  }
 
