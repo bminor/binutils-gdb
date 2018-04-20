@@ -850,6 +850,7 @@ dump_subexp_body_standard (struct expression *exp,
     case UNOP_PREDECREMENT:
     case UNOP_POSTDECREMENT:
     case UNOP_SIZEOF:
+    case UNOP_ALIGNOF:
     case UNOP_PLUS:
     case UNOP_CAP:
     case UNOP_CHR:

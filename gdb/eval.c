@@ -2667,6 +2667,19 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       return evaluate_subexp_for_sizeof (exp, pos, noside);
 
+    case UNOP_ALIGNOF:
+      {
+	struct type *type
+	  = value_type (evaluate_subexp (NULL_TYPE, exp, pos,
+					 EVAL_AVOID_SIDE_EFFECTS));
+	/* FIXME: This should be size_t.  */
+	struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
+	ULONGEST align = type_align (type);
+	if (align == 0)
+	  error (_("could not determine alignment of type"));
+	return value_from_longest (size_type, align);
+      }
+
     case UNOP_CAST:
       (*pos) += 2;
       type = exp->elts[pc + 1].type;

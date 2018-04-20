@@ -751,6 +751,7 @@ const struct op_print c_op_print_tab[] =
   {"*", UNOP_IND, PREC_PREFIX, 0},
   {"&", UNOP_ADDR, PREC_PREFIX, 0},
   {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
+  {"alignof ", UNOP_ALIGNOF, PREC_PREFIX, 0},
   {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
   {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
   {NULL, OP_NULL, PREC_PREFIX, 0}

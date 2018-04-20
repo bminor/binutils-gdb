@@ -1,5 +1,18 @@
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
+	PR exp/17095:
+	* NEWS: Update.
+	* std-operator.def (UNOP_ALIGNOF): New operator.
+	* expprint.c (dump_subexp_body_standard) <case UNOP_ALIGNOF>:
+	New.
+	* eval.c (evaluate_subexp_standard) <case UNOP_ALIGNOF>: New.
+	* c-lang.c (c_op_print_tab): Add alignof.
+	* c-exp.y (ALIGNOF): New token.
+	(exp): Add "ALIGNOF" production.
+	(ident_tokens): Add _Alignof and alignof.
+
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
 	* i386-tdep.c (i386_type_align): New function.
 	(i386_gdbarch_init): Update.
 	* gdbarch.sh (type_align): New method.

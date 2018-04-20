@@ -3003,6 +3003,36 @@ gdb_caching_proc skip_btrace_pt_tests {
     return $skip_btrace_tests
 }
 
+# A helper that compiles a test case to see if __int128 is supported.
+proc gdb_int128_helper {lang} {
+    set src [standard_temp_file i128[pid].c]
+    set obj [standard_temp_file i128[pid].o]
+
+    verbose -log "checking $lang for __int128"
+    gdb_produce_source $src {
+	__int128 x;
+	int main() { return 0; }
+    }
+
+    set lines [gdb_compile $src $obj object [list nowarnings quiet $lang]]
+    file delete $src
+    file delete $obj
+
+    set result [expr {!![string match "" $lines]}]
+    verbose -log "__int128 for $lang result = $result"
+    return $result
+}
+
+# Return true if the C compiler understands the __int128 type.
+gdb_caching_proc has_int128_c {
+    return [gdb_int128_helper c]
+}
+
+# Return true if the C++ compiler understands the __int128 type.
+gdb_caching_proc has_int128_cxx {
+    return [gdb_int128_helper c++]
+}
+
 # Return whether we should skip tests for showing inlined functions in
 # backtraces.  Requires get_compiler_info and get_debug_format.
 

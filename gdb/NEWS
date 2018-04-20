@@ -9,6 +9,9 @@
 * 'info proc' now works on running processes on FreeBSD systems and core
   files created on FreeBSD systems.
 
+* C expressions can now use _Alignof, and C++ expressions can now use
+  alignof.
+
 * New commands
 
 set debug fbsd-nat

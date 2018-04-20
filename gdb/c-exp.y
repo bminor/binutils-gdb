@@ -173,7 +173,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 %token <ssym> NAME_OR_INT
 
 %token OPERATOR
-%token STRUCT CLASS UNION ENUM SIZEOF UNSIGNED COLONCOLON
+%token STRUCT CLASS UNION ENUM SIZEOF ALIGNOF UNSIGNED COLONCOLON
 %token TEMPLATE
 %token ERROR
 %token NEW DELETE
@@ -305,6 +305,10 @@ exp	:	TYPEID '(' type_exp ')' %prec UNARY
 
 exp	:	SIZEOF exp       %prec UNARY
 			{ write_exp_elt_opcode (pstate, UNOP_SIZEOF); }
+	;
+
+exp	:	ALIGNOF '(' type_exp ')'	%prec UNARY
+			{ write_exp_elt_opcode (pstate, UNOP_ALIGNOF); }
 	;
 
 exp	:	exp ARROW name
@@ -2329,6 +2333,8 @@ static const struct token ident_tokens[] =
     {"struct", STRUCT, OP_NULL, 0},
     {"signed", SIGNED_KEYWORD, OP_NULL, 0},
     {"sizeof", SIZEOF, OP_NULL, 0},
+    {"_Alignof", ALIGNOF, OP_NULL, 0},
+    {"alignof", ALIGNOF, OP_NULL, FLAG_CXX},
     {"double", DOUBLE_KEYWORD, OP_NULL, 0},
     {"false", FALSEKEYWORD, OP_NULL, FLAG_CXX},
     {"class", CLASS, OP_NULL, FLAG_CXX},

@@ -1,3 +1,12 @@
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
+	PR exp/17095:
+	* gdb.dwarf2/dw2-align.exp: New file.
+	* gdb.cp/align.exp: New file.
+	* gdb.base/align.exp: New file.
+	* lib/gdb.exp (gdb_int128_helper): New proc.
+	(has_int128_c, has_int128_cxx): New caching procs.
+
 2018-04-27  Tom Tromey  <tom@tromey.com>
 
 	PR rust/22545:
