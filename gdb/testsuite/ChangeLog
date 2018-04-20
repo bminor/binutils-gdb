@@ -1,3 +1,8 @@
+2018-04-19  Richard Bunt  <richard.bunt@arm.com>
+
+	* gdb.threads/multiple-successive-infcall.c: New test.
+	* gdb.threads/multiple-successive-infcall.exp: New file.
+
 2018-04-17  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/simple.rs (Union): New type.
