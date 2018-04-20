@@ -987,6 +987,14 @@ default_in_indirect_branch_thunk (gdbarch *gdbarch, CORE_ADDR pc)
   return false;
 }
 
+/* See arch-utils.h.  */
+
+ULONGEST
+default_type_align (struct gdbarch *gdbarch, struct type *type)
+{
+  return TYPE_LENGTH (check_typedef (type));
+}
+
 void
 _initialize_gdbarch_utils (void)
 {

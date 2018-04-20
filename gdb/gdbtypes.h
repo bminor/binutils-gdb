@@ -802,6 +802,10 @@ struct main_type
   struct dynamic_prop_list *dyn_prop_list;
 };
 
+/* * Number of bits allocated for alignment.  */
+
+#define TYPE_ALIGN_BITS 8
+
 /* * A ``struct type'' describes a particular instance of a type, with
    some particular qualification.  */
 
@@ -831,6 +835,14 @@ struct type
 
   struct type *chain;
 
+  /* * The alignment for this type.  Zero means that the alignment was
+     not specified in the debug info.  Note that this is stored in a
+     funny way: as the log base 2 (plus 1) of the alignment; so a
+     value of 1 means the alignment is 1, and a value of 9 means the
+     alignment is 256.  */
+
+  unsigned align_log2 : TYPE_ALIGN_BITS;
+
   /* * Flags specific to this instance of the type, indicating where
      on the ring we are.
 
@@ -841,7 +853,7 @@ struct type
      instance flags are completely inherited from the target type.  No
      qualifiers can be cleared by the typedef.  See also
      check_typedef.  */
-  int instance_flags;
+  unsigned instance_flags : 9;
 
   /* * Length of storage for a value of this type.  The value is the
      expression in host bytes of what sizeof(type) would return.  This
@@ -1292,6 +1304,26 @@ extern void allocate_gnat_aux_type (struct type *);
    so you only have to call check_typedef once.  Since allocate_value
    calls check_typedef, TYPE_LENGTH (VALUE_TYPE (X)) is safe.  */
 #define TYPE_LENGTH(thistype) (thistype)->length
+
+/* * Return the alignment of the type in target addressable memory
+   units, or 0 if no alignment was specified.  */
+#define TYPE_RAW_ALIGN(thistype) type_raw_align (thistype)
+
+/* * Return the alignment of the type in target addressable memory
+   units, or 0 if no alignment was specified.  */
+extern unsigned type_raw_align (struct type *);
+
+/* * Return the alignment of the type in target addressable memory
+   units.  Return 0 if the alignment cannot be determined; but note
+   that this makes an effort to compute the alignment even it it was
+   not specified in the debug info.  */
+extern unsigned type_align (struct type *);
+
+/* * Set the alignment of the type.  The alignment must be a power of
+   2.  Returns false if the given value does not fit in the available
+   space in struct type.  */
+extern bool set_type_align (struct type *, ULONGEST);
+
 /* * Note that TYPE_CODE can be TYPE_CODE_TYPEDEF, so if you want the real
    type, you need to do TYPE_CODE (check_type (this_type)).  */
 #define TYPE_CODE(thistype) TYPE_MAIN_TYPE(thistype)->code

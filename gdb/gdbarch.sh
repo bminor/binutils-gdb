@@ -1163,6 +1163,9 @@ m;int;addressable_memory_unit_size;void;;;default_addressable_memory_unit_size;;
 v;char **;disassembler_options;;;0;0;;0;pstring_ptr (gdbarch->disassembler_options)
 v;const disasm_options_t *;valid_disassembler_options;;;0;0;;0;host_address_to_string (gdbarch->valid_disassembler_options)
 
+# Type alignment.
+m;ULONGEST;type_align;struct type *type;type;;default_type_align;;0
+
 EOF
 }
 

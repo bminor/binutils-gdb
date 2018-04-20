@@ -3013,6 +3013,128 @@ init_pointer_type (struct objfile *objfile,
   return t;
 }
 
+/* See gdbtypes.h.  */
+
+unsigned
+type_raw_align (struct type *type)
+{
+  if (type->align_log2 != 0)
+    return 1 << (type->align_log2 - 1);
+  return 0;
+}
+
+/* See gdbtypes.h.  */
+
+unsigned
+type_align (struct type *type)
+{
+  unsigned raw_align = type_raw_align (type);
+  if (raw_align != 0)
+    return raw_align;
+
+  ULONGEST align = 0;
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_FLAGS:
+    case TYPE_CODE_INT:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_DECFLOAT:
+      {
+	struct gdbarch *arch = get_type_arch (type);
+	align = gdbarch_type_align (arch, type);
+      }
+      break;
+
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_TYPEDEF:
+      align = type_align (TYPE_TARGET_TYPE (type));
+      break;
+
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      {
+	if (TYPE_NFIELDS (type) == 0)
+	  {
+	    /* An empty struct has alignment 1.  */
+	    align = 1;
+	    break;
+	  }
+	for (unsigned i = 0; i < TYPE_NFIELDS (type); ++i)
+	  {
+	    ULONGEST f_align = type_align (TYPE_FIELD_TYPE (type, i));
+	    if (f_align == 0)
+	      {
+		/* Don't pretend we know something we don't.  */
+		align = 0;
+		break;
+	      }
+	    if (f_align > align)
+	      align = f_align;
+	  }
+      }
+      break;
+
+    case TYPE_CODE_SET:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_STRING:
+      /* Not sure what to do here, and these can't appear in C or C++
+	 anyway.  */
+      break;
+
+    case TYPE_CODE_METHODPTR:
+    case TYPE_CODE_MEMBERPTR:
+      align = TYPE_LENGTH (type);
+      break;
+
+    case TYPE_CODE_VOID:
+      align = 1;
+      break;
+
+    case TYPE_CODE_ERROR:
+    case TYPE_CODE_METHOD:
+    default:
+      break;
+    }
+
+  if ((align & (align - 1)) != 0)
+    {
+      /* Not a power of 2, so pass.  */
+      align = 0;
+    }
+
+  return align;
+}
+
+/* See gdbtypes.h.  */
+
+bool
+set_type_align (struct type *type, ULONGEST align)
+{
+  /* Must be a power of 2.  Zero is ok.  */
+  gdb_assert ((align & (align - 1)) == 0);
+
+  unsigned result = 0;
+  while (align != 0)
+    {
+      ++result;
+      align >>= 1;
+    }
+
+  if (result >= (1 << TYPE_ALIGN_BITS))
+    return false;
+
+  type->align_log2 = result;
+  return true;
+}
+
 
 /* Queries on types.  */
 

@@ -8347,6 +8347,31 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 }
 
 
+
+/* Implement the type_align gdbarch function.  */
+
+static ULONGEST
+i386_type_align (struct gdbarch *gdbarch, struct type *type)
+{
+  type = check_typedef (type);
+
+  if (gdbarch_ptr_bit (gdbarch) == 32)
+    {
+      if ((TYPE_CODE (type) == TYPE_CODE_INT
+	   || TYPE_CODE (type) == TYPE_CODE_FLT)
+	  && TYPE_LENGTH (type) > 4)
+	return 4;
+
+      /* Handle x86's funny long double.  */
+      if (TYPE_CODE (type) == TYPE_CODE_FLT
+	  && gdbarch_long_double_bit (gdbarch) == TYPE_LENGTH (type) * 8)
+	return 4;
+    }
+
+  return TYPE_LENGTH (type);
+}
+
+
 /* Note: This is called for both i386 and amd64.  */
 
 static struct gdbarch *
@@ -8405,6 +8430,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->record_regmap = i386_record_regmap;
 
   set_gdbarch_long_long_align_bit (gdbarch, 32);
+  set_gdbarch_type_align (gdbarch, i386_type_align);
 
   /* The format used for `long double' on almost all i386 targets is
      the i387 extended floating-point format.  In fact, of all targets

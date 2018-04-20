@@ -1,3 +1,24 @@
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
+	* i386-tdep.c (i386_type_align): New function.
+	(i386_gdbarch_init): Update.
+	* gdbarch.sh (type_align): New method.
+	* gdbarch.c, gdbarch.h: Rebuild.
+	* arch-utils.h (default_type_align): Declare.
+	* arch-utils.c (default_type_align): New function.
+	* gdbtypes.h (TYPE_ALIGN_BITS): New define.
+	(struct type) <align_log2>: New field.
+	<instance_flags>: Now a bitfield.
+	(TYPE_RAW_ALIGN): New macro.
+	(type_align, type_raw_align, set_type_align): Declare.
+	* gdbtypes.c (type_align, type_raw_align, set_type_align): New
+	functions.
+	* dwarf2read.c (quirk_rust_enum): Set type alignment.
+	(get_alignment, maybe_set_alignment): New functions.
+	(read_structure_type, read_enumeration_type, read_array_type)
+	(read_set_type, read_tag_pointer_type, read_tag_reference_type)
+	(read_subrange_type, read_base_type): Set type alignment.
+
 2018-04-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2read.c (read_index_from_section): Use bool.

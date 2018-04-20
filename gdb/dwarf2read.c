@@ -9907,6 +9907,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       TYPE_FIELDS (union_type)
 	= (struct field *) TYPE_ZALLOC (type, 3 * sizeof (struct field));
       TYPE_LENGTH (union_type) = TYPE_LENGTH (type);
+      set_type_align (union_type, TYPE_RAW_ALIGN (type));
 
       /* Put the discriminant must at index 0.  */
       TYPE_FIELD_TYPE (union_type, 0) = field_type;
@@ -9962,6 +9963,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       TYPE_CODE (union_type) = TYPE_CODE_UNION;
       TYPE_NFIELDS (union_type) = TYPE_NFIELDS (type);
       TYPE_LENGTH (union_type) = TYPE_LENGTH (type);
+      set_type_align (union_type, TYPE_RAW_ALIGN (type));
       TYPE_FIELDS (union_type) = TYPE_FIELDS (type);
 
       struct type *field_type = TYPE_FIELD_TYPE (union_type, 0);
@@ -10027,6 +10029,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       TYPE_CODE (union_type) = TYPE_CODE_UNION;
       TYPE_NFIELDS (union_type) = 1 + TYPE_NFIELDS (type);
       TYPE_LENGTH (union_type) = TYPE_LENGTH (type);
+      set_type_align (union_type, TYPE_RAW_ALIGN (type));
       TYPE_FIELDS (union_type)
 	= (struct field *) TYPE_ZALLOC (union_type,
 					(TYPE_NFIELDS (union_type)
@@ -15578,6 +15581,82 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
   smash_to_methodptr_type (type, new_type);
 }
 
+/* If the DIE has a DW_AT_alignment attribute, return its value, doing
+   appropriate error checking and issuing complaints if there is a
+   problem.  */
+
+static ULONGEST
+get_alignment (struct dwarf2_cu *cu, struct die_info *die)
+{
+  struct attribute *attr = dwarf2_attr (die, DW_AT_alignment, cu);
+
+  if (attr == nullptr)
+    return 0;
+
+  if (!attr_form_is_constant (attr))
+    {
+      complaint (&symfile_complaints,
+		 _("DW_AT_alignment must have constant form"
+		   " - DIE at %s [in module %s]"),
+		 sect_offset_str (die->sect_off),
+		 objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+      return 0;
+    }
+
+  ULONGEST align;
+  if (attr->form == DW_FORM_sdata)
+    {
+      LONGEST val = DW_SND (attr);
+      if (val < 0)
+	{
+	  complaint (&symfile_complaints,
+		     _("DW_AT_alignment value must not be negative"
+		       " - DIE at %s [in module %s]"),
+		     sect_offset_str (die->sect_off),
+		     objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+	  return 0;
+	}
+      align = val;
+    }
+  else
+    align = DW_UNSND (attr);
+
+  if (align == 0)
+    {
+      complaint (&symfile_complaints,
+		 _("DW_AT_alignment value must not be zero"
+		   " - DIE at %s [in module %s]"),
+		 sect_offset_str (die->sect_off),
+		 objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+      return 0;
+    }
+  if ((align & (align - 1)) != 0)
+    {
+      complaint (&symfile_complaints,
+		 _("DW_AT_alignment value must be a power of 2"
+		   " - DIE at %s [in module %s]"),
+		 sect_offset_str (die->sect_off),
+		 objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+      return 0;
+    }
+
+  return align;
+}
+
+/* If the DIE has a DW_AT_alignment attribute, use its value to set
+   the alignment for TYPE.  */
+
+static void
+maybe_set_alignment (struct dwarf2_cu *cu, struct die_info *die,
+		     struct type *type)
+{
+  if (!set_type_align (type, get_alignment (cu, die)))
+    complaint (&symfile_complaints,
+	       _("DW_AT_alignment value too large"
+		 " - DIE at %s [in module %s]"),
+	       sect_offset_str (die->sect_off),
+	       objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+}
 
 /* Called when we find the DIE that starts a structure or union scope
    (definition) to create a type for the structure or union.  Fill in
@@ -15687,6 +15766,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       TYPE_LENGTH (type) = 0;
     }
+
+  maybe_set_alignment (cu, die, type);
 
   if (producer_is_icc_lt_14 (cu) && (TYPE_LENGTH (type) == 0))
     {
@@ -16132,6 +16213,8 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_LENGTH (type) = 0;
     }
 
+  maybe_set_alignment (cu, die, type);
+
   /* The enumeration DIE can be incomplete.  In Ada, any type can be
      declared as private in the package spec, and then defined only
      inside the package body.  Such types are known as Taft Amendment
@@ -16157,6 +16240,9 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_UNSIGNED (type) = TYPE_UNSIGNED (TYPE_TARGET_TYPE (type));
       if (TYPE_LENGTH (type) == 0)
 	TYPE_LENGTH (type) = TYPE_LENGTH (TYPE_TARGET_TYPE (type));
+      if (TYPE_RAW_ALIGN (type) == 0
+	  && TYPE_RAW_ALIGN (TYPE_TARGET_TYPE (type)) != 0)
+	set_type_align (type, TYPE_RAW_ALIGN (TYPE_TARGET_TYPE (type)));
     }
 
   TYPE_DECLARED_CLASS (type) = dwarf2_flag_true_p (die, DW_AT_enum_class, cu);
@@ -16381,6 +16467,8 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (name)
     TYPE_NAME (type) = name;
 
+  maybe_set_alignment (cu, die, type);
+
   /* Install the type in the die.  */
   set_die_type (die, type, cu);
 
@@ -16444,6 +16532,8 @@ read_set_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     TYPE_LENGTH (set_type) = DW_UNSND (attr);
+
+  maybe_set_alignment (cu, die, set_type);
 
   return set_die_type (die, set_type, cu);
 }
@@ -16816,10 +16906,15 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
   else
     addr_class = DW_ADDR_none;
 
-  /* If the pointer size or address class is different than the
-     default, create a type variant marked as such and set the
-     length accordingly.  */
-  if (TYPE_LENGTH (type) != byte_size || addr_class != DW_ADDR_none)
+  ULONGEST alignment = get_alignment (cu, die);
+
+  /* If the pointer size, alignment, or address class is different
+     than the default, create a type variant marked as such and set
+     the length accordingly.  */
+  if (TYPE_LENGTH (type) != byte_size
+      || (alignment != 0 && TYPE_RAW_ALIGN (type) != 0
+	  && alignment != TYPE_RAW_ALIGN (type))
+      || addr_class != DW_ADDR_none)
     {
       if (gdbarch_address_class_type_flags_p (gdbarch))
 	{
@@ -16836,6 +16931,14 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
 	  complaint (&symfile_complaints,
 		     _("invalid pointer size %d"), byte_size);
 	}
+      else if (TYPE_RAW_ALIGN (type) != alignment)
+	{
+	  complaint (&symfile_complaints,
+		     _("Invalid DW_AT_alignment"
+		       " - DIE at %s [in module %s]"),
+		     sect_offset_str (die->sect_off),
+		     objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+	}
       else
 	{
 	  /* Should we also complain about unhandled address classes?  */
@@ -16843,6 +16946,7 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   TYPE_LENGTH (type) = byte_size;
+  set_type_align (type, alignment);
   return set_die_type (die, type, cu);
 }
 
@@ -16912,6 +17016,7 @@ read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu,
     {
       TYPE_LENGTH (type) = cu_header->addr_size;
     }
+  maybe_set_alignment (cu, die, type);
   return set_die_type (die, type, cu);
 }
 
@@ -17398,6 +17503,8 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   if (name && strcmp (name, "char") == 0)
     TYPE_NOSIGN (type) = 1;
 
+  maybe_set_alignment (cu, die, type);
+
   return set_die_type (die, type, cu);
 }
 
@@ -17659,6 +17766,8 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     TYPE_LENGTH (range_type) = DW_UNSND (attr);
+
+  maybe_set_alignment (cu, die, range_type);
 
   set_die_type (die, range_type, cu);
 

@@ -267,4 +267,8 @@ extern CORE_ADDR gdbarch_skip_prologue_noexcept (gdbarch *gdbarch,
 extern bool default_in_indirect_branch_thunk (gdbarch *gdbarch,
 					      CORE_ADDR pc);
 
+/* Default implementation of gdbarch type_align method.  */
+extern ULONGEST default_type_align (struct gdbarch *gdbarch,
+				    struct type *type);
+
 #endif
