@@ -2028,15 +2028,17 @@ The new thread ID must be currently known."),
 		  &thread_cmd_list, "thread ", 1, &cmdlist);
 
   add_prefix_cmd ("apply", class_run, thread_apply_command,
-		  _("Apply a command to a list of threads."),
+		  _("Apply a command to a list of threads.\n\
+Usage: thread apply ID... COMMAND\n\
+ID is a space-separated list of IDs of threads to apply COMMAND on."),
 		  &thread_apply_list, "thread apply ", 1, &thread_cmd_list);
 
   add_cmd ("all", class_run, thread_apply_all_command,
 	   _("\
 Apply a command to all threads.\n\
 \n\
-Usage: thread apply all [-ascending] <command>\n\
--ascending: Call <command> for all threads in ascending order.\n\
+Usage: thread apply all [-ascending] COMMAND\n\
+-ascending: Call COMMAND for all threads in ascending order.\n\
             The default is descending order.\
 "),
 	   &thread_apply_list);
