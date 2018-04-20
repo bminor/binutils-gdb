@@ -1,3 +1,15 @@
+2018-04-20  Kito Cheng  <kito.cheng@gmail.com>
+
+	* config/tc-riscv.c (options): Add OPTION_RELAX and
+	OPTION_NO_RELAX.
+	(md_longopts): New option -mrelax and -mno-relax.
+	(md_parse_option): Handle -mrelax and -mno-relax.
+	* doc/c-riscv.texi: Document for -mrelax and -mno-relax.
+	* testsuite/gas/riscv/no-relax-reloc.d: New.
+	* testsuite/gas/riscv/no-relax-reloc.s: New.
+	* testsuite/gas/riscv/relax-reloc.d: New.
+	* testsuite/gas/riscv/relax-reloc.s: New.
+
 2018-04-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

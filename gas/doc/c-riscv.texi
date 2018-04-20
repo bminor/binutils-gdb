@@ -48,6 +48,15 @@ by "f", "d", or "q" to indicate single-precision, double-precision, or
 quad-precision floating-point calling convention, or none to indicate
 the soft-float calling convention.
 
+@cindex @samp{-mrelax} option, RISC-V
+@item -mrelax
+Take advantage of linker relaxations to reduce the number of instructions
+required to materialize symbol addresses. (default)
+
+@cindex @samp{-mno-relax} option, RISC-V
+@item -mno-relax
+Don't do linker relaxations.
+
 @end table
 @c man end
 

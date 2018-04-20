@@ -2136,6 +2136,8 @@ enum options
   OPTION_PIC,
   OPTION_NO_PIC,
   OPTION_MABI,
+  OPTION_RELAX,
+  OPTION_NO_RELAX,
   OPTION_END_OF_ENUM
 };
 
@@ -2146,6 +2148,8 @@ struct option md_longopts[] =
   {"fpic", no_argument, NULL, OPTION_PIC},
   {"fno-pic", no_argument, NULL, OPTION_NO_PIC},
   {"mabi", required_argument, NULL, OPTION_MABI},
+  {"mrelax", no_argument, NULL, OPTION_RELAX},
+  {"mno-relax", no_argument, NULL, OPTION_NO_RELAX},
 
   {NULL, no_argument, NULL, 0}
 };
@@ -2203,6 +2207,14 @@ md_parse_option (int c, const char *arg)
 	riscv_set_abi (64, FLOAT_ABI_QUAD);
       else
 	return 0;
+      break;
+
+    case OPTION_RELAX:
+      riscv_opts.relax = TRUE;
+      break;
+
+    case OPTION_NO_RELAX:
+      riscv_opts.relax = FALSE;
       break;
 
     default:
@@ -2921,6 +2933,8 @@ RISC-V options:\n\
   -fno-pic       don't generate position-independent code (default)\n\
   -march=ISA     set the RISC-V architecture\n\
   -mabi=ABI      set the RISC-V ABI\n\
+  -mrelax        enable relax (default)\n\
+  -mno-relax     disable relax\n\
 "));
 }
 
