@@ -930,6 +930,13 @@ description of the @code{Type.fields} method for a description of the
 
 An instance of @code{Type} has the following attributes:
 
+@defvar Type.alignof
+The alignment of this type, in bytes.  Type alignment comes from the
+debugging information; if it was not specified, then @value{GDBN} will
+use the relevant ABI to try to determine the alignment.  In some
+cases, even this is not possible, and zero will be returned.
+@end defvar
+
 @defvar Type.code
 The type code for this type.  The type code will be one of the
 @code{TYPE_CODE_} constants defined below.

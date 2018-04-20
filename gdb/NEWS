@@ -27,6 +27,10 @@ set|show record btrace cpu
   Controls the processor to be used for enabling errata workarounds for
   branch trace decode.
 
+* Python API
+
+  ** Type alignment is now exposed via the "align" attribute of a gdb.Type.
+
 * New targets
 
 RiscV ELF			riscv*-*-elf

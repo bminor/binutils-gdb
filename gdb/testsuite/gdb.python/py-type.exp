@@ -278,6 +278,10 @@ if { [build_inferior "${binfile}" "c"] == 0 } {
   gdb_test "python print(gdb.lookup_type('int').optimized_out())" \
       "<optimized out>"
 
+  set sint [get_sizeof int 0]
+  gdb_test "python print(gdb.parse_and_eval('aligncheck').type.alignof)" \
+      $sint
+
   with_test_prefix "lang_c" {
       runto_bp "break to inspect struct and array."
       test_fields "c"

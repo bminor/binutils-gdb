@@ -730,6 +730,28 @@ typy_get_sizeof (PyObject *self, void *closure)
   return gdb_py_long_from_longest (TYPE_LENGTH (type));
 }
 
+/* Return the alignment of the type represented by SELF, in bytes.  */
+static PyObject *
+typy_get_alignof (PyObject *self, void *closure)
+{
+  struct type *type = ((type_object *) self)->type;
+
+  ULONGEST align = 0;
+  TRY
+    {
+      align = type_align (type);
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      align = 0;
+    }
+  END_CATCH
+
+  /* Ignore exceptions.  */
+
+  return gdb_py_object_from_ulongest (align);
+}
+
 static struct type *
 typy_lookup_typename (const char *type_name, const struct block *block)
 {
@@ -1410,6 +1432,8 @@ gdbpy_initialize_types (void)
 
 static gdb_PyGetSetDef type_object_getset[] =
 {
+  { "alignof", typy_get_alignof, NULL,
+    "The alignment of this type, in bytes.", NULL },
   { "code", typy_get_code, NULL,
     "The code for this type.", NULL },
   { "name", typy_get_name, NULL,

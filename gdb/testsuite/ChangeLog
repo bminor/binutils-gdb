@@ -1,5 +1,10 @@
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
+	* gdb.python/py-type.exp: Check align attribute.
+	* gdb.python/py-type.c: New "aligncheck" global.
+
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
 	PR exp/17095:
 	* gdb.dwarf2/dw2-align.exp: New file.
 	* gdb.cp/align.exp: New file.

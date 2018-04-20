@@ -30,6 +30,8 @@ struct SS
 typedef struct s TS;
 TS ts;
 
+int aligncheck;
+
 #ifdef __cplusplus
 struct C
 {
