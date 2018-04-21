@@ -11421,7 +11421,8 @@ arm_record_vfp_data_proc_insn (insn_decode_record *arm_insn_r)
   opc3 = bits (arm_insn_r->arm_insn, 6, 7);
   dp_op_sz = bit (arm_insn_r->arm_insn, 8);
   bit_d = bit (arm_insn_r->arm_insn, 22);
-  opc1 = opc1 & 0x04;
+  /* Mask off the "D" bit.  */
+  opc1 = opc1 & ~0x04;
 
   /* Handle VMLA, VMLS.  */
   if (opc1 == 0x00)
@@ -11486,7 +11487,7 @@ arm_record_vfp_data_proc_insn (insn_decode_record *arm_insn_r)
         }
     }
   /* Handle VDIV.  */
-  else if (opc1 == 0x0b)
+  else if (opc1 == 0x08)
     {
       if (dp_op_sz)
         curr_insn_type = INSN_T1;

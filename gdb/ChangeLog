@@ -1,3 +1,9 @@
+2018-05-07  Tom Tromey  <tom@tromey.com>
+
+	PR tdep/20362:
+	* arm-tdep.c (arm_record_vfp_data_proc_insn): Properly mask off D
+	bit.  Use correct value for VDIV.
+
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.
