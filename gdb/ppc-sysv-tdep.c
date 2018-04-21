@@ -1907,7 +1907,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
   struct type *func_type = function ? value_type (function) : NULL;
   int opencl_abi = func_type? ppc_sysv_use_opencl_abi (func_type) : 0;
   struct type *eltype;
-  int nelt, i, ok;
+  int nelt, ok;
 
   /* This function exists to support a calling convention that
      requires floating-point registers.  It shouldn't be used on
@@ -1919,7 +1919,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
     {
       eltype = check_typedef (TYPE_TARGET_TYPE (valtype));
 
-      for (i = 0; i < 2; i++)
+      for (int i = 0; i < 2; i++)
 	{
 	  ok = ppc64_sysv_abi_return_value_base (gdbarch, eltype, regcache,
 						 readbuf, writebuf, i);
@@ -1945,7 +1945,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
 	eltype = register_type (gdbarch, tdep->ppc_vr0_regnum);
 
       nelt = TYPE_LENGTH (valtype) / TYPE_LENGTH (eltype);
-      for (i = 0; i < nelt; i++)
+      for (int i = 0; i < nelt; i++)
 	{
 	  ok = ppc64_sysv_abi_return_value_base (gdbarch, eltype, regcache,
 						 readbuf, writebuf, i);
@@ -2001,7 +2001,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
 	      && tdep->vector_abi == POWERPC_VEC_ALTIVEC
 	      && TYPE_LENGTH (eltype) == 16)))
     {
-      for (i = 0; i < nelt; i++)
+      for (int i = 0; i < nelt; i++)
 	{
 	  ok = ppc64_sysv_abi_return_value_base (gdbarch, eltype, regcache,
 						 readbuf, writebuf, i);
@@ -2027,9 +2027,8 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
     {
       int n_regs = ((TYPE_LENGTH (valtype) + tdep->wordsize - 1)
 		    / tdep->wordsize);
-      int i;
 
-      for (i = 0; i < n_regs; i++)
+      for (int i = 0; i < n_regs; i++)
 	{
 	  gdb_byte regval[PPC_MAX_REGISTER_SIZE];
 	  int regnum = tdep->ppc_gp0_regnum + 3 + i;

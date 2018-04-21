@@ -1743,10 +1743,10 @@ operator_check_standard (struct expression *exp, int pos,
 
 	for (arg = 0; arg < nargs; arg++)
 	  {
-	    struct type *type = elts[pos + 3 + arg].type;
-	    struct objfile *objfile = TYPE_OBJFILE (type);
+	    struct type *inst_type = elts[pos + 3 + arg].type;
+	    struct objfile *inst_objfile = TYPE_OBJFILE (inst_type);
 
-	    if (objfile && (*objfile_func) (objfile, data))
+	    if (inst_objfile && (*objfile_func) (inst_objfile, data))
 	      return 1;
 	  }
       }

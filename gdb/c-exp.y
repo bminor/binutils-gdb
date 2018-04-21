@@ -2660,7 +2660,6 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
     case '@':
       {
 	const char *p = &tokstart[1];
-	size_t len = strlen ("entry");
 
 	if (parse_language (par_state)->la_language == language_objc)
 	  {
@@ -2678,6 +2677,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 
 	while (ISSPACE (*p))
 	  p++;
+	size_t len = strlen ("entry");
 	if (strncmp (p, "entry", len) == 0 && !c_ident_is_alnum (p[len])
 	    && p[len] != '_')
 	  {

@@ -1112,7 +1112,6 @@ yylex (void)
 {
   int c;
   int namelen;
-  unsigned int i;
   const char *tokstart;
   char *uptokstart;
   const char *tokptr;
@@ -1129,7 +1128,7 @@ yylex (void)
 
   /* See if it is a special token of length 3.  */
   if (explen > 2)
-    for (i = 0; i < sizeof (tokentab3) / sizeof (tokentab3[0]); i++)
+    for (int i = 0; i < sizeof (tokentab3) / sizeof (tokentab3[0]); i++)
       if (strncasecmp (tokstart, tokentab3[i].oper, 3) == 0
           && (!isalpha (tokentab3[i].oper[0]) || explen == 3
               || (!isalpha (tokstart[3])
@@ -1142,7 +1141,7 @@ yylex (void)
 
   /* See if it is a special token of length 2.  */
   if (explen > 1)
-  for (i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
+  for (int i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
       if (strncasecmp (tokstart, tokentab2[i].oper, 2) == 0
           && (!isalpha (tokentab2[i].oper[0]) || explen == 2
               || (!isalpha (tokstart[2])
@@ -1519,7 +1518,7 @@ yylex (void)
     /* second chance uppercased (as Free Pascal does).  */
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
       {
-       for (i = 0; i <= namelen; i++)
+       for (int i = 0; i <= namelen; i++)
          {
            if ((tmp[i] >= 'a' && tmp[i] <= 'z'))
              tmp[i] -= ('a'-'A');
@@ -1535,7 +1534,7 @@ yylex (void)
     /* Third chance Capitalized (as GPC does).  */
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
       {
-       for (i = 0; i <= namelen; i++)
+       for (int i = 0; i <= namelen; i++)
          {
            if (i == 0)
              {

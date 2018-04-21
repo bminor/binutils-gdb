@@ -58,15 +58,16 @@ get_number_trailer (const char **pp, int trailer)
 	     null-terminate it to pass to lookup_internalvar().  */
 	  char *varname;
 	  const char *start = ++p;
-	  LONGEST val;
+	  LONGEST longest_val;
 
 	  while (isalnum (*p) || *p == '_')
 	    p++;
 	  varname = (char *) alloca (p - start + 1);
 	  strncpy (varname, start, p - start);
 	  varname[p - start] = '\0';
-	  if (get_internalvar_integer (lookup_internalvar (varname), &val))
-	    retval = (int) val;
+	  if (get_internalvar_integer (lookup_internalvar (varname),
+				       &longest_val))
+	    retval = (int) longest_val;
 	  else
 	    {
 	      printf_filtered (_("Convenience variable must "

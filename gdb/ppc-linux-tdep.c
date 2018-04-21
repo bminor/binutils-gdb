@@ -877,7 +877,6 @@ ppc_linux_syscall_record (struct regcache *regcache)
   ULONGEST scnum;
   enum gdb_syscall syscall_gdb;
   int ret;
-  int i;
 
   regcache_raw_read_unsigned (regcache, tdep->ppc_gp0_regnum, &scnum);
   syscall_gdb = ppc_canonicalize_syscall (scnum);
@@ -932,7 +931,7 @@ ppc_linux_syscall_record (struct regcache *regcache)
     return ret;
 
   /* Record registers clobbered during syscall.  */
-  for (i = 3; i <= 12; i++)
+  for (int i = 3; i <= 12; i++)
     {
       if (record_full_arch_list_add_reg (regcache, tdep->ppc_gp0_regnum + i))
 	return -1;
@@ -1434,9 +1433,9 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 		       data.gprs, 0, sizeof data.gprs)
 	  == sizeof data.gprs)
 	{
-	  auto cooked_read = [&data] (int regnum, gdb_byte *buf)
+	  auto cooked_read = [&data] (int regnum, gdb_byte *out_buf)
 	    {
-	      return ppu2spu_unwind_register (&data, regnum, buf);
+	      return ppu2spu_unwind_register (&data, regnum, out_buf);
 	    };
 	  struct ppu2spu_cache *cache
 	    = FRAME_OBSTACK_CALLOC (1, struct ppu2spu_cache);

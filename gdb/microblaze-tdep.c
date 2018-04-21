@@ -353,12 +353,13 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	 instruction.  */
 
       {
-	unsigned op = (unsigned)insn >> 26;
+	unsigned ctrl_op = (unsigned)insn >> 26;
 
 	/* continue if not control flow (branch, return).  */
-	if (op != 0x26 && op != 0x27 && op != 0x2d && op != 0x2e && op != 0x2f)
+	if (ctrl_op != 0x26 && ctrl_op != 0x27 && ctrl_op != 0x2d
+	    && ctrl_op != 0x2e && ctrl_op != 0x2f)
 	  continue;
-	else if (op == 0x2c)
+	else if (ctrl_op == 0x2c)
 	  continue;    /* continue if imm.  */
       }
 

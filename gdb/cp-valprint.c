@@ -378,7 +378,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
 	  if (last_set_recurse != recurse)
 	    {
-	      size_t obstack_final_size =
+	      obstack_final_size =
 		obstack_object_size (&dont_print_stat_array_obstack);
 	      
 	      if (obstack_final_size > stat_array_obstack_initial_size)

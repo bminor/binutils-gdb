@@ -1011,14 +1011,14 @@ ctf_read_tsv (struct uploaded_tsv **uploaded_tsvs)
 #define SET_ARRAY_FIELD(EVENT, SCOPE, VAR, NUM, ARRAY)	\
   do							\
     {							\
-      uint32_t u32, i;						\
+      uint32_t lu32, i;						\
       const struct bt_definition *def;				\
 								\
-      u32 = (uint32_t) bt_ctf_get_uint64 (bt_ctf_get_field ((EVENT),	\
-							    (SCOPE),	\
-							    #NUM));	\
+      lu32 = (uint32_t) bt_ctf_get_uint64 (bt_ctf_get_field ((EVENT),	\
+							     (SCOPE),	\
+							     #NUM));	\
       def = bt_ctf_get_field ((EVENT), (SCOPE), #ARRAY);		\
-      for (i = 0; i < u32; i++)					\
+      for (i = 0; i < lu32; i++)					\
 	{								\
 	  const struct bt_definition *element				\
 	    = bt_ctf_get_index ((EVENT), def, i);			\

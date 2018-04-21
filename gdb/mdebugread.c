@@ -593,7 +593,6 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
   struct block *b;
   struct mdebug_pending *pend;
   struct type *t;
-  struct field *f;
   int count = 1;
   TIR tir;
   long svalue = sh->value;
@@ -1155,7 +1154,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  const struct blockvector *bv
 	    = SYMTAB_BLOCKVECTOR (top_stack->cur_st);
 	  struct mdebug_extra_func_info *e;
-	  struct block *b = top_stack->cur_block;
+	  struct block *cblock = top_stack->cur_block;
 	  struct type *ftype = top_stack->cur_type;
 	  int i;
 
@@ -1179,12 +1178,12 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	    {
 	      struct block *b_bad = BLOCKVECTOR_BLOCK (bv, i);
 
-	      if (BLOCK_SUPERBLOCK (b_bad) == b
+	      if (BLOCK_SUPERBLOCK (b_bad) == cblock
 		  && BLOCK_START (b_bad) == top_stack->procadr
 		  && BLOCK_END (b_bad) == top_stack->procadr)
 		{
-		  BLOCK_START (b_bad) = BLOCK_START (b);
-		  BLOCK_END (b_bad) = BLOCK_END (b);
+		  BLOCK_START (b_bad) = BLOCK_START (cblock);
+		  BLOCK_END (b_bad) = BLOCK_END (cblock);
 		}
 	    }
 
@@ -1205,7 +1204,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		    TYPE_ALLOC (ftype, nparams * sizeof (struct field));
 
 		  iparams = 0;
-		  ALL_BLOCK_SYMBOLS (b, iter, sym)
+		  ALL_BLOCK_SYMBOLS (cblock, iter, sym)
 		    {
 		      if (iparams == nparams)
 			break;
@@ -1246,13 +1245,16 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       break;
 
     case stMember:		/* member of struct or union */
-      f = &TYPE_FIELDS (top_stack->cur_type)[top_stack->cur_field++];
-      FIELD_NAME (*f) = name;
-      SET_FIELD_BITPOS (*f, sh->value);
-      bitsize = 0;
-      FIELD_TYPE (*f) = parse_type (cur_fd, ax, sh->index,
-				    &bitsize, bigend, name);
-      FIELD_BITSIZE (*f) = bitsize;
+      {
+	struct field *f
+	  = &TYPE_FIELDS (top_stack->cur_type)[top_stack->cur_field++];
+	FIELD_NAME (*f) = name;
+	SET_FIELD_BITPOS (*f, sh->value);
+	bitsize = 0;
+	FIELD_TYPE (*f) = parse_type (cur_fd, ax, sh->index,
+				      &bitsize, bigend, name);
+	FIELD_BITSIZE (*f) = bitsize;
+      }
       break;
 
     case stIndirect:		/* forward declaration on Irix5 */
@@ -2383,10 +2385,10 @@ parse_partial_symbols (minimal_symbol_reader &reader,
   fdr_to_pst = fdr_to_pst_holder.data ();
   fdr_to_pst++;
   {
-    struct partial_symtab *pst = new_psymtab ("", objfile);
+    struct partial_symtab *new_pst = new_psymtab ("", objfile);
 
-    fdr_to_pst[-1].pst = pst;
-    FDR_IDX (pst) = -1;
+    fdr_to_pst[-1].pst = new_pst;
+    FDR_IDX (new_pst) = -1;
   }
 
   /* Allocate the global pending list.  */
@@ -2885,7 +2887,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  case N_SO:
 		    {
 		      static int prev_so_symnum = -10;
-		      const char *p;
+		      const char *basename;
 
 		      /* A zero value is probably an indication for the
 			 SunPRO 3.0 compiler.  dbx_end_psymtab explicitly tests
@@ -2925,8 +2927,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			 the second the file name.  If pst exists, is
 			 empty, and has a filename ending in '/', we assume
 			 the previous N_SO was a directory name.  */
-		      p = lbasename (namestring);
-		      if (p != namestring && *p == '\000')
+		      basename = lbasename (namestring);
+		      if (basename != namestring && *basename == '\000')
 			continue;		/* Simply ignore directory
 						   name SOs.  */
 
@@ -3353,7 +3355,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	{
 	  for (cur_sdx = 0; cur_sdx < fh->csym;)
 	    {
-	      char *name;
+	      char *sym_name;
 	      enum address_class theclass;
 	      CORE_ADDR minsym_value;
 	      short section = -1;
@@ -3380,7 +3382,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  continue;
 		}
 
-	      name = debug_info->ss + fh->issBase + sh.iss;
+	      sym_name = debug_info->ss + fh->issBase + sh.iss;
 
 	      minsym_value = sh.value;
 
@@ -3413,7 +3415,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  int new_sdx;
 
 		case stStaticProc:
-		  reader.record_with_info (name, minsym_value,
+		  reader.record_with_info (sym_name, minsym_value,
 					   mst_file_text,
 					   SECT_OFF_TEXT (objfile));
 
@@ -3425,7 +3427,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    {
 		      /* Should not happen, but does when cross-compiling
 		         with the MIPS compiler.  FIXME -- pull later.  */
-		      index_complaint (name);
+		      index_complaint (sym_name);
 		      new_sdx = cur_sdx + 1;	/* Don't skip at all.  */
 		    }
 		  else
@@ -3438,7 +3440,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    {
 		      /* This should not happen either... FIXME.  */
 		      complaint (_("bad proc end in aux found from symbol %s"),
-				 name);
+				 sym_name);
 		      new_sdx = cur_sdx + 1;	/* Don't skip backward.  */
 		    }
 
@@ -3464,13 +3466,13 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		     symbol table, and the MAIN__ symbol via the minimal
 		     symbol table.  */
 		  if (sh.st == stProc)
-		    add_psymbol_to_list (name, strlen (name), 1,
+		    add_psymbol_to_list (sym_name, strlen (sym_name), 1,
 					 VAR_DOMAIN, LOC_BLOCK,
 					 section,
 					 &objfile->global_psymbols,
 					 sh.value, psymtab_language, objfile);
 		  else
-		    add_psymbol_to_list (name, strlen (name), 1,
+		    add_psymbol_to_list (sym_name, strlen (sym_name), 1,
 					 VAR_DOMAIN, LOC_BLOCK,
 					 section,
 					 &objfile->static_psymbols,
@@ -3500,11 +3502,11 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
 		case stStatic:	/* Variable */
 		  if (SC_IS_DATA (sh.sc))
-		    reader.record_with_info (name, minsym_value,
+		    reader.record_with_info (sym_name, minsym_value,
 					     mst_file_data,
 					     SECT_OFF_DATA (objfile));
 		  else
-		    reader.record_with_info (name, minsym_value,
+		    reader.record_with_info (sym_name, minsym_value,
 					     mst_file_bss,
 					     SECT_OFF_BSS (objfile));
 		  theclass = LOC_STATIC;
@@ -3537,7 +3539,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		      && sh.iss != 0
 		      && sh.index != cur_sdx + 2)
 		    {
-		      add_psymbol_to_list (name, strlen (name), 1,
+		      add_psymbol_to_list (sym_name, strlen (sym_name), 1,
 					   STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 					   &objfile->static_psymbols,
 					   0, psymtab_language, objfile);
@@ -3549,7 +3551,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  if (new_sdx <= cur_sdx)
 		    {
 		      /* This happens with the Ultrix kernel.  */
-		      complaint (_("bad aux index at block symbol %s"), name);
+		      complaint (_("bad aux index at block symbol %s"),
+				 sym_name);
 		      new_sdx = cur_sdx + 1;	/* Don't skip backward.  */
 		    }
 		  cur_sdx = new_sdx;
@@ -3567,16 +3570,16 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  goto skip;
 
 		default:
-		  /* Both complaints are valid:  one gives symbol name,
+		  /* Both complaints are valid:  one gives symbol sym_name,
 		     the other the offending symbol type.  */
 		  complaint (_("unknown local symbol %s"),
-			     name);
+			     sym_name);
 		  complaint (_("with type %d"), sh.st);
 		  cur_sdx++;
 		  continue;
 		}
 	      /* Use this gdb symbol.  */
-	      add_psymbol_to_list (name, strlen (name), 1,
+	      add_psymbol_to_list (sym_name, strlen (sym_name), 1,
 				   VAR_DOMAIN, theclass, section,
 				   &objfile->static_psymbols,
 				   sh.value, psymtab_language, objfile);
@@ -3593,7 +3596,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	    {
 	      enum address_class theclass;
 	      SYMR *psh;
-	      char *name;
 	      CORE_ADDR svalue;
 	      short section;
 
@@ -3655,8 +3657,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  theclass = LOC_STATIC;
 		  break;
 		}
-	      name = debug_info->ssext + psh->iss;
-	      add_psymbol_to_list (name, strlen (name), 1,
+	      char *sym_name = debug_info->ssext + psh->iss;
+	      add_psymbol_to_list (sym_name, strlen (sym_name), 1,
 				   VAR_DOMAIN, theclass,
 				   section,
 				   &objfile->global_psymbols,

@@ -147,7 +147,6 @@ tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 			struct tic6x_unwind_cache *cache,
 			struct frame_info *this_frame)
 {
-  unsigned long inst;
   unsigned int src_reg, base_reg, dst_reg;
   int i;
   CORE_ADDR pc = start_pc;
@@ -242,7 +241,7 @@ tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
     }
   /* Step 2: Skip insn on setting up dsbt if it is.  Usually, it looks like,
      ldw .D2T2 *+b14(0),b14 */
-  inst = tic6x_fetch_instruction (gdbarch, pc);
+  unsigned long inst = tic6x_fetch_instruction (gdbarch, pc);
   /* The s bit determines which file dst will be loaded into, same effect as
      other places.  */
   dst_reg = tic6x_register_number ((inst >> 23) & 0x1f, (inst >> 1) & 1, 0);
@@ -1067,7 +1066,6 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      if (typecode == TYPE_CODE_COMPLEX)
 		{
 		  /* The argument is being passed by reference on stack.  */
-		  CORE_ADDR addr;
 		  references_offset = align_up (references_offset, 8);
 
 		  addr = sp + references_offset;

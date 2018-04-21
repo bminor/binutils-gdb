@@ -627,7 +627,6 @@ host_float_ops<T>::from_target (const struct floatformat *fmt,
     }
 
   unsigned char *ufrom = (unsigned char *) from;
-  T dto;
   long exponent;
   unsigned long mant;
   unsigned int mant_bits, mant_off;
@@ -685,7 +684,7 @@ host_float_ops<T>::from_target (const struct floatformat *fmt,
 
   mant_bits_left = fmt->man_len;
   mant_off = fmt->man_start;
-  dto = 0.0;
+  T dto = 0.0;
 
   special_exponent = exponent == 0 || exponent == fmt->exp_nan;
 

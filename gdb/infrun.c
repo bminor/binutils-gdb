@@ -4747,7 +4747,7 @@ handle_no_resumed (struct execution_control_state *ecs)
       if (inf->pid == 0)
 	continue;
 
-      thread_info *thread = any_live_thread_of_inferior (inf);
+      thread = any_live_thread_of_inferior (inf);
       if (thread == NULL)
 	{
 	  if (debug_infrun)
@@ -5662,13 +5662,13 @@ handle_signal_stop (struct execution_control_state *ecs)
   if (debug_infrun)
     {
       struct regcache *regcache = get_thread_regcache (ecs->event_thread);
-      struct gdbarch *gdbarch = regcache->arch ();
+      struct gdbarch *reg_gdbarch = regcache->arch ();
       scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
       inferior_ptid = ecs->ptid;
 
       fprintf_unfiltered (gdb_stdlog, "infrun: stop_pc = %s\n",
-			  paddress (gdbarch,
+			  paddress (reg_gdbarch,
 				    ecs->event_thread->suspend.stop_pc));
       if (target_stopped_by_watchpoint ())
 	{
@@ -5679,7 +5679,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  if (target_stopped_data_address (current_top_target (), &addr))
             fprintf_unfiltered (gdb_stdlog,
                                 "infrun: stopped data address = %s\n",
-                                paddress (gdbarch, addr));
+                                paddress (reg_gdbarch, addr));
           else
             fprintf_unfiltered (gdb_stdlog,
                                 "infrun: (no data address available)\n");
@@ -8461,7 +8461,7 @@ static void
 handle_command (const char *args, int from_tty)
 {
   int digits, wordlen;
-  int sigfirst, signum, siglast;
+  int sigfirst, siglast;
   enum gdb_signal oursig;
   int allsigs;
   int nsigs;
@@ -8556,9 +8556,7 @@ handle_command (const char *args, int from_tty)
 	  if (sigfirst > siglast)
 	    {
 	      /* Bet he didn't figure we'd think of this case...  */
-	      signum = sigfirst;
-	      sigfirst = siglast;
-	      siglast = signum;
+	      std::swap (sigfirst, siglast);
 	    }
 	}
       else
@@ -8578,7 +8576,7 @@ handle_command (const char *args, int from_tty)
       /* If any signal numbers or symbol names were found, set flags for
          which signals to apply actions to.  */
 
-      for (signum = sigfirst; signum >= 0 && signum <= siglast; signum++)
+      for (int signum = sigfirst; signum >= 0 && signum <= siglast; signum++)
 	{
 	  switch ((enum gdb_signal) signum)
 	    {
@@ -8611,7 +8609,7 @@ Are you sure you want to change it? "),
 	}
     }
 
-  for (signum = 0; signum < nsigs; signum++)
+  for (int signum = 0; signum < nsigs; signum++)
     if (sigs[signum])
       {
 	signal_cache_update (-1);

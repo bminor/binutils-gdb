@@ -1609,19 +1609,21 @@ cooked_read_test (struct gdbarch *gdbarch)
 
   /* Test that read one raw register from regcache_no_target will go
      to the target layer.  */
-  int regnum;
 
   /* Find a raw register which size isn't zero.  */
-  for (regnum = 0; regnum < gdbarch_num_regs (gdbarch); regnum++)
+  int nonzero_regnum;
+  for (nonzero_regnum = 0;
+       nonzero_regnum < gdbarch_num_regs (gdbarch);
+       nonzero_regnum++)
     {
-      if (register_size (gdbarch, regnum) != 0)
+      if (register_size (gdbarch, nonzero_regnum) != 0)
 	break;
     }
 
   readwrite_regcache readwrite (gdbarch);
-  gdb::def_vector<gdb_byte> buf (register_size (gdbarch, regnum));
+  gdb::def_vector<gdb_byte> buf (register_size (gdbarch, nonzero_regnum));
 
-  readwrite.raw_read (regnum, buf.data ());
+  readwrite.raw_read (nonzero_regnum, buf.data ());
 
   /* raw_read calls target_fetch_registers.  */
   SELF_CHECK (mock_target.fetch_registers_called > 0);
@@ -1642,9 +1644,10 @@ cooked_read_test (struct gdbarch *gdbarch)
       if (register_size (gdbarch, regnum) == 0)
 	continue;
 
-      gdb::def_vector<gdb_byte> buf (register_size (gdbarch, regnum));
+      gdb::def_vector<gdb_byte> inner_buf (register_size (gdbarch, regnum));
 
-      SELF_CHECK (REG_VALID == readwrite.cooked_read (regnum, buf.data ()));
+      SELF_CHECK (REG_VALID == readwrite.cooked_read (regnum,
+						      inner_buf.data ()));
 
       SELF_CHECK (mock_target.fetch_registers_called == 0);
       SELF_CHECK (mock_target.store_registers_called == 0);
@@ -1669,9 +1672,9 @@ cooked_read_test (struct gdbarch *gdbarch)
       if (register_size (gdbarch, regnum) == 0)
 	continue;
 
-      gdb::def_vector<gdb_byte> buf (register_size (gdbarch, regnum));
+      gdb::def_vector<gdb_byte> inner_buf (register_size (gdbarch, regnum));
       enum register_status status = readonly.cooked_read (regnum,
-							  buf.data ());
+							  inner_buf.data ());
 
       if (regnum < gdbarch_num_regs (gdbarch))
 	{

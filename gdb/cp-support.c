@@ -133,7 +133,6 @@ inspect_type (struct demangle_parse_info *info,
 	      canonicalization_ftype *finder,
 	      void *data)
 {
-  int i;
   char *name;
   struct symbol *sym;
 
@@ -144,7 +143,7 @@ inspect_type (struct demangle_parse_info *info,
   name[ret_comp->u.s_name.len] = '\0';
 
   /* Ignore any typedefs that should not be substituted.  */
-  for (i = 0; i < ARRAY_SIZE (ignore_typedefs); ++i)
+  for (int i = 0; i < ARRAY_SIZE (ignore_typedefs); ++i)
     {
       if (strcmp (name, ignore_typedefs[i]) == 0)
 	return 0;

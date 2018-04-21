@@ -5497,7 +5497,6 @@ read_debug_names_from_section (struct objfile *objfile,
   const gdb_byte *abbrev_table_start = addr;
   for (;;)
     {
-      unsigned int bytes_read;
       const ULONGEST index_num = read_unsigned_leb128 (abfd, addr, &bytes_read);
       addr += bytes_read;
       if (index_num == 0)
@@ -8079,18 +8078,14 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   dwarf2_build_include_psymtabs (cu, comp_unit_die, pst);
 
   if (dwarf_read_debug)
-    {
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
-
-      fprintf_unfiltered (gdb_stdlog,
-			  "Psymtab for %s unit @%s: %s - %s"
-			  ", %d global, %d static syms\n",
-			  per_cu->is_debug_types ? "type" : "comp",
-			  sect_offset_str (per_cu->sect_off),
-			  paddress (gdbarch, pst->text_low (objfile)),
-			  paddress (gdbarch, pst->text_high (objfile)),
-			  pst->n_global_syms, pst->n_static_syms);
-    }
+    fprintf_unfiltered (gdb_stdlog,
+			"Psymtab for %s unit @%s: %s - %s"
+			", %d global, %d static syms\n",
+			per_cu->is_debug_types ? "type" : "comp",
+			sect_offset_str (per_cu->sect_off),
+			paddress (gdbarch, pst->text_low (objfile)),
+			paddress (gdbarch, pst->text_high (objfile)),
+			pst->n_global_syms, pst->n_static_syms);
 }
 
 /* Subroutine of dwarf2_build_psymtabs_hard to simplify it.
@@ -9112,18 +9107,21 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	      struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
 	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
 	      CORE_ADDR baseaddr;
-	      CORE_ADDR highpc;
-	      CORE_ADDR lowpc;
+	      CORE_ADDR this_highpc;
+	      CORE_ADDR this_lowpc;
 
 	      baseaddr = ANOFFSET (objfile->section_offsets,
 				   SECT_OFF_TEXT (objfile));
-	      lowpc = (gdbarch_adjust_dwarf2_addr (gdbarch,
-						   pdi->lowpc + baseaddr)
-		       - baseaddr);
-	      highpc = (gdbarch_adjust_dwarf2_addr (gdbarch,
-						    pdi->highpc + baseaddr)
-			- baseaddr);
-	      addrmap_set_empty (objfile->psymtabs_addrmap, lowpc, highpc - 1,
+	      this_lowpc
+		= (gdbarch_adjust_dwarf2_addr (gdbarch,
+					       pdi->lowpc + baseaddr)
+		   - baseaddr);
+	      this_highpc
+		= (gdbarch_adjust_dwarf2_addr (gdbarch,
+					       pdi->highpc + baseaddr)
+		   - baseaddr);
+	      addrmap_set_empty (objfile->psymtabs_addrmap,
+				 this_lowpc, this_highpc - 1,
 				 cu->per_cu->v.psymtab);
 	    }
         }
@@ -20339,21 +20337,21 @@ dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu)
       /* Read directory table.  */
       read_formatted_entries (dwarf2_per_objfile, abfd, &line_ptr, lh.get (),
 			      &cu->header,
-			      [] (struct line_header *lh, const char *name,
+			      [] (struct line_header *header, const char *name,
 				  dir_index d_index, unsigned int mod_time,
 				  unsigned int length)
 	{
-	  lh->add_include_dir (name);
+	  header->add_include_dir (name);
 	});
 
       /* Read file name table.  */
       read_formatted_entries (dwarf2_per_objfile, abfd, &line_ptr, lh.get (),
 			      &cu->header,
-			      [] (struct line_header *lh, const char *name,
+			      [] (struct line_header *header, const char *name,
 				  dir_index d_index, unsigned int mod_time,
 				  unsigned int length)
 	{
-	  lh->add_file_name (name, d_index, mod_time, length);
+	  header->add_file_name (name, d_index, mod_time, length);
 	});
     }
   else

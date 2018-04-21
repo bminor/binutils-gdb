@@ -3069,7 +3069,6 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 			   struct dwarf2_per_cu_data *per_cu)
 {
   gdbarch *arch = expr->gdbarch;
-  int i;
   std::vector<int> dw_labels, patches;
   const gdb_byte * const base = op_ptr;
   const gdb_byte *previous_piece = op_ptr;
@@ -3611,7 +3610,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
         case DW_OP_piece:
 	case DW_OP_bit_piece:
 	  {
-	    uint64_t size, offset;
+	    uint64_t size;
 
 	    if (op_ptr - 1 == previous_piece)
 	      error (_("Cannot translate empty pieces to agent expressions"));
@@ -3621,10 +3620,10 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    if (op == DW_OP_piece)
 	      {
 		size *= 8;
-		offset = 0;
+		uoffset = 0;
 	      }
 	    else
-	      op_ptr = safe_read_uleb128 (op_ptr, op_end, &offset);
+	      op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 
 	    if (bits_collected + size > 8 * sizeof (LONGEST))
 	      error (_("Expression pieces exceed word size"));
@@ -3638,11 +3637,11 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 
 	      case axs_lvalue_memory:
 		/* Offset the pointer, if needed.  */
-		if (offset > 8)
+		if (uoffset > 8)
 		  {
-		    ax_const_l (expr, offset / 8);
+		    ax_const_l (expr, uoffset / 8);
 		    ax_simple (expr, aop_add);
-		    offset %= 8;
+		    uoffset %= 8;
 		  }
 		access_memory (arch, expr, size);
 		break;
@@ -3688,8 +3687,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    uoffset = extract_unsigned_integer (op_ptr, size, byte_order);
 	    op_ptr += size;
 
-	    cu_offset offset = (cu_offset) uoffset;
-	    block = dwarf2_fetch_die_loc_cu_off (offset, per_cu,
+	    cu_offset cuoffset = (cu_offset) uoffset;
+	    block = dwarf2_fetch_die_loc_cu_off (cuoffset, per_cu,
 						 get_ax_pc, expr);
 
 	    /* DW_OP_call_ref is currently not supported.  */
@@ -3712,7 +3711,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
     }
 
   /* Patch all the branches we emitted.  */
-  for (i = 0; i < patches.size (); ++i)
+  for (int i = 0; i < patches.size (); ++i)
     {
       int targ = offsets[dw_labels[i]];
       if (targ == -1)
@@ -4234,7 +4233,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_deref_type:
 	case DW_OP_GNU_deref_type:
 	  {
-	    int addr_size = *data++;
+	    int deref_addr_size = *data++;
 	    struct type *type;
 
 	    data = safe_read_uleb128 (data, end, &ul);
@@ -4244,7 +4243,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	    type_print (type, "", stream, -1);
 	    fprintf_filtered (stream, " [0x%s]> %d",
 			      phex_nz (to_underlying (offset), 0),
-			      addr_size);
+			      deref_addr_size);
 	  }
 	  break;
 

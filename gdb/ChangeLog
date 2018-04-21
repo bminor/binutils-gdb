@@ -1,3 +1,156 @@
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
+	* ctf.c (SET_ARRAY_FIELD): Rename "u32".
+	* p-valprint.c (pascal_val_print): Split inner "i" variable.
+	* xtensa-tdep.c (xtensa_push_dummy_call): Declare "i" in loop
+	header.
+	* xstormy16-tdep.c (xstormy16_push_dummy_call): Declare "val" in
+	more inner scope.
+	* xcoffread.c (read_xcoff_symtab): Rename inner "symbol".
+	* varobj.c (varobj_update): Rename inner "newobj",
+	"type_changed".
+	* valprint.c (generic_emit_char): Rename inner "buf".
+	* valops.c (find_overload_match): Rename inner "temp".
+	(value_struct_elt_for_reference): Declare "v" in more inner
+	scope.
+	* v850-tdep.c (v850_push_dummy_call): Rename "len".
+	* unittests/array-view-selftests.c (run_tests): Rename inner
+	"vec".
+	* tui/tui-stack.c (tui_show_frame_info): Declare "i" in loop
+	header.
+	* tracepoint.c (merge_uploaded_trace_state_variables): Declare
+	"tsv" in more inner scope.
+	(print_one_static_tracepoint_marker): Rename inner
+	"tuple_emitter".
+	* tic6x-tdep.c (tic6x_analyze_prologue): Declare "inst" lower.
+	(tic6x_push_dummy_call): Don't redeclare "addr".
+	* target-float.c: Declare "dto" lower.
+	* symtab.c (lookup_local_symbol): Rename inner "sym".
+	(find_pc_sect_line): Rename inner "pc".
+	* stack.c (print_frame): Don't redeclare "gdbarch".
+	(return_command): Rename inner "gdbarch".
+	* s390-tdep.c (s390_prologue_frame_unwind_cache): Renam inner
+	"sp".
+	* rust-lang.c (rust_internal_print_type): Declare "i" in loop
+	header.
+	* rs6000-tdep.c (ppc_process_record): Rename inner "addr".
+	* riscv-tdep.c (riscv_push_dummy_call): Declare "info" in inner
+	scope.
+	* remote.c (remote_target::update_thread_list): Don't redeclare
+	"tp".
+	(remote_target::process_initial_stop_replies): Rename inner
+	"thread".
+	(remote_target::remote_parse_stop_reply): Don't redeclare "p".
+	(remote_target::wait_as): Don't redeclare "stop_reply".
+	(remote_target::get_thread_local_address): Rename inner
+	"result".
+	(remote_target::get_tib_address): Likewise.
+
+	* regcache.c (cooked_read_test): Rename "regnum".
+	* record-btrace.c (cmd_record_btrace_start): Rename inner
+	"exception".
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_return_value): Declare "i" in
+	loop header.
+	* ppc-linux-tdep.c (ppc_linux_syscall_record): Declare "i" in loop
+	header.
+	(ppu2spu_sniffer): Rename inner "buf".
+	* parse.c (operator_check_standard): Rename inner "type",
+	"objfile".
+	* p-valprint.c (pascal_val_print): Introduce new scope for
+	"low_bound", "high_bound".
+	* p-exp.y (yylex): Declare "i" in loop header.
+	* objfiles.c (objfile_relocate1): Declare "i" in loop header.
+	Lower declaration of "s".
+	* nios2-tdep.c (nios2_analyze_prologue): Declare "i" in loop
+	header.
+	(nios2_push_dummy_call): Rename "len".
+	* nat/linux-osdata.c (linux_xfer_osdata_cpus): Rename static
+	"buf".
+	(linux_xfer_osdata_fds, linux_xfer_osdata_shm)
+	(linux_xfer_osdata_sem, linux_xfer_osdata_msg)
+	(linux_xfer_osdata_modules): Likewise.
+	* mips-tdep.c (mips_eabi_push_dummy_call): Rename outer "len".
+	(mips_n32n64_push_dummy_call, mips_o32_push_dummy_call)
+	(mips_o64_push_dummy_call): Likewise.
+	* microblaze-tdep.c (microblaze_analyze_prologue): Rename inner
+	"op".
+	* mi/mi-main.c (list_available_thread_groups): Rename inner
+	"tuple_emitter".
+	(mi_cmd_data_read_memory): Rename inner "opts".
+	* mi/mi-cmd-var.c (varobj_update_one): Rename inner
+	"tuple_emitter".
+	* mep-tdep.c (mep_analyze_prologue): Declare "rn" in loop header.
+	* mdebugread.c (parse_symbol): Rename inner "b".  Declare "f" in
+	more inner scope.
+	(parse_partial_symbols): Rename inner "pst", "p", "name"
+	* main.c (captured_main_1): Rename inner "i"s.
+	* machoread.c (macho_symfile_read_all_oso): Don't redeclare
+	"oso2".
+	* linux-tdep.c (linux_info_proc): Rename inner "filename".
+	* linespec.c (linespec_lexer_lex_string): Rename inner "p".
+	* infrun.c (handle_no_resumed): Don't redeclare "thread".
+	(handle_signal_stop): Rename inner "gdbarch".
+	(handle_command): Declare "signum" in loop header.
+	* ia64-tdep.c (ia64_pseudo_register_read): Don't redeclare
+	"status".
+	(examine_prologue): Rename inner "sol" and "sof".
+	(ia64_extract_return_value): Rename inner "val".  Declare another
+	"val" in a more inner scope.
+	* hppa-bsd-tdep.c (hppabsd_find_global_pointer): Declare "buf" in
+	inner scope.
+	* guile/scm-symbol.c (gdbscm_lookup_symbol): Rename inner
+	"except".
+	* findvar.c (default_read_var_value): Don't redeclare "addr".
+	* f-exp.y (yylex): Declare "i" in loop header.
+	* eval.c (evaluate_subexp_standard): Don't redeclare "type".
+	Rename inner "type", "expect_type".
+	(evaluate_subexp_for_sizeof): Rename inner "pc".
+	* elfread.c (elf_symfile_read): Rename inner "abfd".
+	* dwarf2read.c (read_debug_names_from_section): Don't redeclare
+	"bytes_read".
+	(process_psymtab_comp_unit_reader): Don't redeclare "gdbarch".
+	(add_partial_subprogram): Rename inner "lowpc" and "highpc".
+	(dwarf_decode_line_header): Rename inner "lh".
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Don't redeclare
+	"offset".  Declare "i" in loop header.
+	(disassemble_dwarf_expression): Rename inner "addr_size".
+	* dwarf2expr.c (dwarf_expr_context::execute_stack_op): Rename
+	inner "result".
+	(dwarf_expr_context::execute_stack_op): Rename inner "offset".
+	* dwarf2-frame.c (decode_frame_entry_1): Rename inner "length"s.
+	* disasm.c (do_mixed_source_and_assembly_deprecated): Rename inner
+	"inner_list_emitter".
+	(do_mixed_source_and_assembly): Rename inner "tuple_emitter".
+	* disasm-selftests.c (print_one_insn_test): Wrap "bplen"
+	declaration in a block.
+	* csky-tdep.c (csky_analyze_prologue): Declare "offset" lower.
+	* cp-valprint.c (cp_print_value_fields): Don't redeclare
+	"obstack_final_size".
+	* cp-support.c (inspect_type): Declare "i" in loop header.
+	* compile/compile.c (compile_instance::insert_symbol_error):
+	Rename inner "e".
+	* common/agent.c (agent_run_command): Remove inner "ret"
+	declaration.
+	* coffread.c (coff_symfile_read): Rename inner "name".
+	(coff_symfile_read): Rename inner "abfd".
+	* cli/cli-utils.c (get_number_trailer): Rename inner "val".
+	* cli/cli-cmds.c (print_disassembly): Rename inner "low" and
+	"high".
+	* c-exp.y (lex_one_token): Move "len" declaration lower.
+	* breakpoint.c (create_longjmp_master_breakpoint): Don't redeclare
+	"gdbarch".
+	(create_exception_master_breakpoint): Likewise.  Don't redeclare
+	"b".
+	(watch_command_1): Declare "mark" later.
+	(clear_command): Don't shadow "a" or "b".
+	(delete_command): Rename inner "b".
+	(delete_trace_command): Likewise.
+	* arm-tdep.c (thumb_process_displaced_32bit_insn): Rename inner
+	"op".
+	(arm_gdbarch_init): Remove inner "e_flags".
+	* arch/arm-get-next-pcs.c (thumb_get_next_pcs_raw): Declare
+	"offset" in inner blocks.
+
 2018-10-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf-index-write.c (file_write): Don't write if the vector is

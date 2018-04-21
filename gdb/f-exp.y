@@ -923,7 +923,7 @@ yylex (void)
 {
   int c;
   int namelen;
-  unsigned int i,token;
+  unsigned int token;
   const char *tokstart;
   
  retry:
@@ -937,7 +937,7 @@ yylex (void)
   
   if (*lexptr == '.')
     { 
-      for (i = 0; boolean_values[i].name != NULL; i++)
+      for (int i = 0; boolean_values[i].name != NULL; i++)
 	{
 	  if (strncmp (tokstart, boolean_values[i].name,
 		       strlen (boolean_values[i].name)) == 0)
@@ -951,7 +951,7 @@ yylex (void)
   
   /* See if it is a special .foo. operator.  */
   
-  for (i = 0; dot_ops[i].oper != NULL; i++)
+  for (int i = 0; dot_ops[i].oper != NULL; i++)
     if (strncmp (tokstart, dot_ops[i].oper,
 		 strlen (dot_ops[i].oper)) == 0)
       {
@@ -1120,7 +1120,7 @@ yylex (void)
   
   /* Catch specific keywords.  */
   
-  for (i = 0; f77_keywords[i].oper != NULL; i++)
+  for (int i = 0; f77_keywords[i].oper != NULL; i++)
     if (strlen (f77_keywords[i].oper) == namelen
 	&& strncmp (tokstart, f77_keywords[i].oper, namelen) == 0)
       {
@@ -1151,10 +1151,9 @@ yylex (void)
       VAR_DOMAIN,
       MODULE_DOMAIN
     };
-    int i;
     int hextype;
 
-    for (i = 0; i < ARRAY_SIZE (lookup_domains); ++i)
+    for (int i = 0; i < ARRAY_SIZE (lookup_domains); ++i)
       {
 	/* Initialize this in case we *don't* use it in this call; that
 	   way we can refer to it unconditionally below.  */

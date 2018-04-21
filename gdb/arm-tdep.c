@@ -7460,9 +7460,9 @@ thumb_process_displaced_32bit_insn (struct gdbarch *gdbarch, uint16_t insn1,
 	{
 	  if (bit (insn1, 9)) /* Data processing (plain binary imm).  */
 	    {
-	      int op = bits (insn1, 4, 8);
+	      int dp_op = bits (insn1, 4, 8);
 	      int rn = bits (insn1, 0, 3);
-	      if ((op == 0 || op == 0xa) && rn == 0xf)
+	      if ((dp_op == 0 || dp_op == 0xa) && rn == 0xf)
 		err = thumb_copy_pc_relative_32bit (gdbarch, insn1, insn2,
 						    regs, dsc);
 	      else
@@ -9046,8 +9046,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	  if (fp_model == ARM_FLOAT_AUTO)
 	    {
-	      int e_flags = elf_elfheader (info.abfd)->e_flags;
-
 	      switch (e_flags & (EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT))
 		{
 		case 0:

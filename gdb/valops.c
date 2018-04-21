@@ -2675,20 +2675,20 @@ find_overload_match (struct value **args, int nargs,
               && TYPE_CODE (check_typedef (SYMBOL_TYPE (fsym)))
 	      == TYPE_CODE_FUNC)
             {
-	      char *temp;
+	      char *temp_func;
 
-	      temp = cp_func_name (qualified_name);
+	      temp_func = cp_func_name (qualified_name);
 
 	      /* If cp_func_name did not remove anything, the name of the
 	         symbol did not include scope or argument types - it was
 	         probably a C-style function.  */
-	      if (temp)
+	      if (temp_func)
 		{
-		  make_cleanup (xfree, temp);
-		  if (strcmp (temp, qualified_name) == 0)
+		  make_cleanup (xfree, temp_func);
+		  if (strcmp (temp_func, qualified_name) == 0)
 		    func_name = NULL;
 		  else
-		    func_name = temp;
+		    func_name = temp_func;
 		}
             }
         }
@@ -3337,7 +3337,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 {
   struct type *t = check_typedef (curtype);
   int i;
-  struct value *v, *result;
+  struct value *result;
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
@@ -3352,7 +3352,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	{
 	  if (field_is_static (&TYPE_FIELD (t, i)))
 	    {
-	      v = value_static_field (t, i);
+	      struct value *v = value_static_field (t, i);
 	      if (want_address)
 		v = value_addr (v);
 	      return v;
@@ -3371,7 +3371,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      /* Try to evaluate NAME as a qualified name with implicit
 		 this pointer.  In this case, attempt to return the
 		 equivalent to `this->*(&TYPE::NAME)'.  */
-	      v = value_of_this_silent (current_language);
+	      struct value *v = value_of_this_silent (current_language);
 	      if (v != NULL)
 		{
 		  struct value *ptr;
@@ -3519,7 +3519,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      if (s == NULL)
 		return NULL;
 
-	      v = read_var_value (s, 0, 0);
+	      struct value *v = read_var_value (s, 0, 0);
 	      if (!want_address)
 		result = v;
 	      else

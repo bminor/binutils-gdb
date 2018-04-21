@@ -2972,10 +2972,10 @@ cmd_record_btrace_start (const char *args, int from_tty)
 	{
 	  execute_command ("target record-btrace", from_tty);
 	}
-      CATCH (exception, RETURN_MASK_ALL)
+      CATCH (ex, RETURN_MASK_ALL)
 	{
 	  record_btrace_conf.format = BTRACE_FORMAT_NONE;
-	  throw_exception (exception);
+	  throw_exception (ex);
 	}
       END_CATCH
     }

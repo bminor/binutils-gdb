@@ -1019,7 +1019,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argreg;
   int argnum;
-  int len = 0;
+  int arg_space = 0;
   int stack_offset;
 
   if (gdbarch_tdep (gdbarch)->abi == V850_ABI_RH850)
@@ -1034,8 +1034,8 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ((TYPE_LENGTH (value_type (args[argnum])) + 3) & ~3);
-  sp -= len + stack_offset;
+    arg_space += ((TYPE_LENGTH (value_type (args[argnum])) + 3) & ~3);
+  sp -= arg_space + stack_offset;
 
   argreg = E_ARG0_REGNUM;
   /* The struct_return pointer occupies the first parameter register.  */

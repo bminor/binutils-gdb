@@ -811,8 +811,6 @@ rust_internal_print_type (struct type *type, const char *varstring,
 			  const struct type_print_options *flags,
 			  bool for_rust_enum, print_offset_data *podata)
 {
-  int i;
-
   QUIT;
   if (show <= 0
       && TYPE_NAME (type) != NULL)
@@ -846,7 +844,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
       if (varstring != NULL)
 	fputs_filtered (varstring, stream);
       fputs_filtered ("(", stream);
-      for (i = 0; i < TYPE_NFIELDS (type); ++i)
+      for (int i = 0; i < TYPE_NFIELDS (type); ++i)
 	{
 	  QUIT;
 	  if (i > 0)
@@ -891,7 +889,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 
     case TYPE_CODE_ENUM:
       {
-	int i, len = 0;
+	int len = 0;
 
 	fputs_filtered ("enum ", stream);
 	if (TYPE_NAME (type) != NULL)
@@ -902,7 +900,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	  }
 	fputs_filtered ("{\n", stream);
 
-	for (i = 0; i < TYPE_NFIELDS (type); ++i)
+	for (int i = 0; i < TYPE_NFIELDS (type); ++i)
 	  {
 	    const char *name = TYPE_FIELD_NAME (type, i);
 

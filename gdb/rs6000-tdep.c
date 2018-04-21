@@ -5651,15 +5651,15 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
     case 47:		/* Store Multiple Word */
 	{
-	  ULONGEST addr = 0;
+	  ULONGEST iaddr = 0;
 
 	  if (PPC_RA (insn) != 0)
 	    regcache_raw_read_unsigned (regcache,
 					tdep->ppc_gp0_regnum + PPC_RA (insn),
-					&addr);
+					&iaddr);
 
-	  addr += PPC_D (insn);
-	  record_full_arch_list_add_mem (addr, 4 * (32 - PPC_RS (insn)));
+	  iaddr += PPC_D (insn);
+	  record_full_arch_list_add_mem (iaddr, 4 * (32 - PPC_RS (insn)));
 	}
       break;
 
@@ -5677,14 +5677,14 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 52:		/* Store Floating-Point Single */
     case 54:		/* Store Floating-Point Double */
 	{
-	  ULONGEST addr = 0;
+	  ULONGEST iaddr = 0;
 	  int size = -1;
 
 	  if (PPC_RA (insn) != 0)
 	    regcache_raw_read_unsigned (regcache,
 					tdep->ppc_gp0_regnum + PPC_RA (insn),
-					&addr);
-	  addr += PPC_D (insn);
+					&iaddr);
+	  iaddr += PPC_D (insn);
 
 	  if (op6 == 36 || op6 == 37 || op6 == 52 || op6 == 53)
 	    size = 4;
@@ -5697,7 +5697,7 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  else
 	    gdb_assert (0);
 
-	  record_full_arch_list_add_mem (addr, size);
+	  record_full_arch_list_add_mem (iaddr, size);
 	}
       break;
 
@@ -5750,7 +5750,7 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 			/* Store Doubleword with Update */
 			/* Store Quadword with Update */
 	{
-	  ULONGEST addr = 0;
+	  ULONGEST iaddr = 0;
 	  int size;
 	  int sub2 = PPC_FIELD (insn, 30, 2);
 
@@ -5760,12 +5760,12 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  if (PPC_RA (insn) != 0)
 	    regcache_raw_read_unsigned (regcache,
 					tdep->ppc_gp0_regnum + PPC_RA (insn),
-					&addr);
+					&iaddr);
 
 	  size = (sub2 == 2) ? 16 : 8;
 
-	  addr += PPC_DS (insn) << 2;
-	  record_full_arch_list_add_mem (addr, size);
+	  iaddr += PPC_DS (insn) << 2;
+	  record_full_arch_list_add_mem (iaddr, size);
 
 	  if (op6 == 62 && sub2 == 1)
 	    record_full_arch_list_add_reg (regcache,

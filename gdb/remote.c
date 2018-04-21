@@ -3830,7 +3830,7 @@ remote_target::update_thread_list ()
 
 	      remote_notice_new_inferior (item.ptid, executing);
 
-	      thread_info *tp = find_thread_ptid (item.ptid);
+	      tp = find_thread_ptid (item.ptid);
 	      remote_thread_info *info = get_remote_thread_info (tp);
 	      info->core = item.core;
 	      info->extra = std::move (item.extra);
@@ -4398,7 +4398,6 @@ remote_target::process_initial_stop_replies (int from_tty)
       ptid_t event_ptid;
       struct target_waitstatus ws;
       int ignore_event = 0;
-      struct thread_info *thread;
 
       memset (&ws, 0, sizeof (ws));
       event_ptid = target_wait (waiton_ptid, &ws, TARGET_WNOHANG);
@@ -4427,7 +4426,7 @@ remote_target::process_initial_stop_replies (int from_tty)
       if (ignore_event)
 	continue;
 
-      thread = find_thread_ptid (event_ptid);
+      struct thread_info *evthread = find_thread_ptid (event_ptid);
 
       if (ws.kind == TARGET_WAITKIND_STOPPED)
 	{
@@ -4437,19 +4436,19 @@ remote_target::process_initial_stop_replies (int from_tty)
 	     instead of signal 0.  Suppress it.  */
 	  if (sig == GDB_SIGNAL_TRAP)
 	    sig = GDB_SIGNAL_0;
-	  thread->suspend.stop_signal = sig;
+	  evthread->suspend.stop_signal = sig;
 	  ws.value.sig = sig;
 	}
 
-      thread->suspend.waitstatus = ws;
+      evthread->suspend.waitstatus = ws;
 
       if (ws.kind != TARGET_WAITKIND_STOPPED
 	  || ws.value.sig != GDB_SIGNAL_0)
-	thread->suspend.waitstatus_pending_p = 1;
+	evthread->suspend.waitstatus_pending_p = 1;
 
       set_executing (event_ptid, 0);
       set_running (event_ptid, 0);
-      get_remote_thread_info (thread)->vcont_resumed = 0;
+      get_remote_thread_info (evthread)->vcont_resumed = 0;
     }
 
   /* "Notice" the new inferiors before anything related to
@@ -7509,7 +7508,6 @@ Packet: '%s'\n"),
       break;
     case 'w':		/* Thread exited.  */
       {
-	const char *p;
 	ULONGEST value;
 
 	event->ws.kind = TARGET_WAITKIND_THREAD_EXITED;
@@ -7523,7 +7521,6 @@ Packet: '%s'\n"),
     case 'W':		/* Target exited.  */
     case 'X':
       {
-	const char *p;
 	int pid;
 	ULONGEST value;
 
@@ -7864,8 +7861,6 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status, int options)
       break;
     case 'N': case 'T': case 'S': case 'X': case 'W':
       {
-	struct stop_reply *stop_reply;
-
 	/* There is a stop reply to handle.  */
 	rs->waiting_for_stop_reply = 0;
 
@@ -11550,10 +11545,10 @@ remote_target::get_thread_local_address (ptid_t ptid, CORE_ADDR lm,
 			  &remote_protocol_packets[PACKET_qGetTLSAddr]);
       if (result == PACKET_OK)
 	{
-	  ULONGEST result;
+	  ULONGEST addr;
 
-	  unpack_varlen_hex (rs->buf, &result);
-	  return result;
+	  unpack_varlen_hex (rs->buf, &addr);
+	  return addr;
 	}
       else if (result == PACKET_UNKNOWN)
 	throw_error (TLS_GENERIC_ERROR,
@@ -11593,11 +11588,10 @@ remote_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 			  &remote_protocol_packets[PACKET_qGetTIBAddr]);
       if (result == PACKET_OK)
 	{
-	  ULONGEST result;
-
-	  unpack_varlen_hex (rs->buf, &result);
+	  ULONGEST val;
+	  unpack_varlen_hex (rs->buf, &val);
 	  if (addr)
-	    *addr = (CORE_ADDR) result;
+	    *addr = (CORE_ADDR) val;
 	  return true;
 	}
       else if (result == PACKET_UNKNOWN)

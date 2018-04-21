@@ -3300,8 +3300,6 @@ create_longjmp_master_breakpoint (void)
 
       if (!bp_objfile_data->longjmp_probes.empty ())
 	{
-	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-
 	  for (probe *p : bp_objfile_data->longjmp_probes)
 	    {
 	      struct breakpoint *b;
@@ -3453,12 +3451,10 @@ create_exception_master_breakpoint (void)
 
       if (!bp_objfile_data->exception_probes.empty ())
 	{
-	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	  gdbarch = get_objfile_arch (objfile);
 
 	  for (probe *p : bp_objfile_data->exception_probes)
 	    {
-	      struct breakpoint *b;
-
 	      b = create_internal_breakpoint (gdbarch,
 					      p->get_relocated_address (objfile),
 					      bp_exception_master,
@@ -10518,7 +10514,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 {
   struct breakpoint *scope_breakpoint = NULL;
   const struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
-  struct value *mark, *result;
+  struct value *result;
   int saved_bitpos = 0, saved_bitsize = 0;
   const char *exp_start = NULL;
   const char *exp_end = NULL;
@@ -10643,7 +10639,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
     }
 
   exp_valid_block = innermost_block.block ();
-  mark = value_mark ();
+  struct value *mark = value_mark ();
   struct value *val_as_value = nullptr;
   fetch_subexp_value (exp.get (), &pc, &val_as_value, &result, NULL,
 		      just_location);
@@ -11494,14 +11490,14 @@ clear_command (const char *arg, int from_tty)
 
   /* Remove duplicates from the vec.  */
   std::sort (found.begin (), found.end (),
-	     [] (const breakpoint *a, const breakpoint *b)
+	     [] (const breakpoint *bp_a, const breakpoint *bp_b)
 	     {
-	       return compare_breakpoints (a, b) < 0;
+	       return compare_breakpoints (bp_a, bp_b) < 0;
 	     });
   found.erase (std::unique (found.begin (), found.end (),
-			    [] (const breakpoint *a, const breakpoint *b)
+			    [] (const breakpoint *bp_a, const breakpoint *bp_b)
 			    {
-			      return compare_breakpoints (a, b) == 0;
+			      return compare_breakpoints (bp_a, bp_b) == 0;
 			    }),
 	       found.end ());
 
@@ -13290,9 +13286,9 @@ delete_command (const char *arg, int from_tty)
     }
   else
     map_breakpoint_numbers
-      (arg, [&] (breakpoint *b)
+      (arg, [&] (breakpoint *br)
        {
-	 iterate_over_related_breakpoints (b, delete_breakpoint);
+	 iterate_over_related_breakpoints (br, delete_breakpoint);
        });
 }
 
@@ -14861,9 +14857,9 @@ delete_trace_command (const char *arg, int from_tty)
     }
   else
     map_breakpoint_numbers
-      (arg, [&] (breakpoint *b)
+      (arg, [&] (breakpoint *br)
        {
-	 iterate_over_related_breakpoints (b, delete_breakpoint);
+	 iterate_over_related_breakpoints (br, delete_breakpoint);
        });
 }
 

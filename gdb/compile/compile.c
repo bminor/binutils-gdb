@@ -195,11 +195,11 @@ compile_instance::insert_symbol_error (const struct symbol *sym,
   slot = htab_find_slot (m_symbol_err_map.get (), &e, INSERT);
   if (*slot == NULL)
     {
-      struct symbol_error *e = XNEW (struct symbol_error);
+      struct symbol_error *ep = XNEW (struct symbol_error);
 
-      e->sym = sym;
-      e->message = xstrdup (text);
-      *slot = e;
+      ep->sym = sym;
+      ep->message = xstrdup (text);
+      *slot = ep;
     }
 }
 

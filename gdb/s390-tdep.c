@@ -2360,11 +2360,11 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
 	     Recognize this case by looking ahead a bit ...  */
 
 	  struct s390_prologue_data data2;
-	  pv_t *sp = &data2.gpr[S390_SP_REGNUM - S390_R0_REGNUM];
+	  pv_t *sp2 = &data2.gpr[S390_SP_REGNUM - S390_R0_REGNUM];
 
 	  if (!(s390_analyze_prologue (gdbarch, func, (CORE_ADDR)-1, &data2)
-		&& pv_is_register (*sp, S390_SP_REGNUM)
-		&& sp->k != 0))
+		&& pv_is_register (*sp2, S390_SP_REGNUM)
+		&& sp2->k != 0))
 	    return 0;
 	}
     }

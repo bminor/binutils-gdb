@@ -1187,7 +1187,6 @@ print_frame (struct frame_info *frame, int print_level,
     uiout->text (" (");
     if (print_args)
       {
-	struct gdbarch *gdbarch = get_frame_arch (frame);
 	int numargs;
 
 	if (gdbarch_frame_num_args_p (gdbarch))
@@ -2458,11 +2457,11 @@ return_command (const char *retval_exp, int from_tty)
   if (return_value != NULL)
     {
       struct type *return_type = value_type (return_value);
-      struct gdbarch *gdbarch = get_current_regcache ()->arch ();
+      struct gdbarch *cache_arch = get_current_regcache ()->arch ();
 
       gdb_assert (rv_conv != RETURN_VALUE_STRUCT_CONVENTION
 		  && rv_conv != RETURN_VALUE_ABI_RETURNS_ADDRESS);
-      gdbarch_return_value (gdbarch, function, return_type,
+      gdbarch_return_value (cache_arch, function, return_type,
 			    get_current_regcache (), NULL /*read*/,
 			    value_contents (return_value) /*write*/);
     }

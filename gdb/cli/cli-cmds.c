@@ -1123,12 +1123,13 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
         {
 	  for (int i = 0; i < BLOCK_NRANGES (block); i++)
 	    {
-	      CORE_ADDR low = BLOCK_RANGE_START (block, i);
-	      CORE_ADDR high = BLOCK_RANGE_END (block, i);
+	      CORE_ADDR range_low = BLOCK_RANGE_START (block, i);
+	      CORE_ADDR range_high = BLOCK_RANGE_END (block, i);
 	      printf_filtered (_("Address range %s to %s:\n"),
-			       paddress (gdbarch, low),
-			       paddress (gdbarch, high));
-	      gdb_disassembly (gdbarch, current_uiout, flags, -1, low, high);
+			       paddress (gdbarch, range_low),
+			       paddress (gdbarch, range_high));
+	      gdb_disassembly (gdbarch, current_uiout, flags, -1,
+			       range_low, range_high);
 	    }
 	}
       printf_filtered ("End of assembler dump.\n");

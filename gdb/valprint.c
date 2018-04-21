@@ -2360,13 +2360,13 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
 {
   enum bfd_endian byte_order
     = gdbarch_byte_order (get_type_arch (type));
-  gdb_byte *buf;
+  gdb_byte *c_buf;
   int need_escape = 0;
 
-  buf = (gdb_byte *) alloca (TYPE_LENGTH (type));
-  pack_long (buf, type, c);
+  c_buf = (gdb_byte *) alloca (TYPE_LENGTH (type));
+  pack_long (c_buf, type, c);
 
-  wchar_iterator iter (buf, TYPE_LENGTH (type), encoding, TYPE_LENGTH (type));
+  wchar_iterator iter (c_buf, TYPE_LENGTH (type), encoding, TYPE_LENGTH (type));
 
   /* This holds the printable form of the wchar_t data.  */
   auto_obstack wchar_buf;

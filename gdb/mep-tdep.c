@@ -1661,14 +1661,13 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
 {
   CORE_ADDR pc;
   unsigned long insn;
-  int rn;
   pv_t reg[MEP_NUM_REGS];
   CORE_ADDR after_last_frame_setup_insn = start_pc;
 
   memset (result, 0, sizeof (*result));
   result->gdbarch = gdbarch;
 
-  for (rn = 0; rn < MEP_NUM_REGS; rn++)
+  for (int rn = 0; rn < MEP_NUM_REGS; rn++)
     {
       reg[rn] = pv_register (rn, 0);
       result->reg_offset[rn] = 1;

@@ -234,7 +234,6 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
   int argreg = E_1ST_ARG_REGNUM;
   int i, j;
   int typelen, slacklen;
-  const gdb_byte *val;
   gdb_byte buf[xstormy16_pc_size];
 
   /* If struct_return is true, then the struct return address will
@@ -257,7 +256,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
 	break;
 
       /* Put argument into registers wordwise.  */
-      val = value_contents (args[i]);
+      const gdb_byte *val = value_contents (args[i]);
       for (j = 0; j < typelen; j += xstormy16_reg_size)
 	{
 	  ULONGEST regval;

@@ -1943,12 +1943,12 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
       cie->saw_z_augmentation = (*augmentation == 'z');
       if (cie->saw_z_augmentation)
 	{
-	  uint64_t length;
+	  uint64_t uleb_length;
 
-	  buf = gdb_read_uleb128 (buf, end, &length);
+	  buf = gdb_read_uleb128 (buf, end, &uleb_length);
 	  if (buf == NULL)
 	    return NULL;
-	  cie->initial_instructions = buf + length;
+	  cie->initial_instructions = buf + uleb_length;
 	  augmentation++;
 	}
 
@@ -2061,12 +2061,12 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
 	 can skip the whole thing.  */
       if (fde->cie->saw_z_augmentation)
 	{
-	  uint64_t length;
+	  uint64_t uleb_length;
 
-	  buf = gdb_read_uleb128 (buf, end, &length);
+	  buf = gdb_read_uleb128 (buf, end, &uleb_length);
 	  if (buf == NULL)
 	    return NULL;
-	  buf += length;
+	  buf += uleb_length;
 	  if (buf > end)
 	    return NULL;
 	}

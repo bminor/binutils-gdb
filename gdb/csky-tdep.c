@@ -1205,7 +1205,6 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 	  else if (CSKY_16_IS_LRW4 (insn) || CSKY_16_IS_MOVI4 (insn))
 	    {
 	      int adjust = 0;
-	      int offset = 0;
 	      unsigned int insn2;
 
 	      if (csky_debug)
@@ -1239,7 +1238,7 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		  fprintf_unfiltered (gdb_stdlog,
 				      "csky: looking for r4 adjusters...\n");
 		}
-	      offset = 2;
+	      int offset = 2;
 	      insn_len = csky_get_insn (gdbarch, addr + offset, &insn2);
 	      while (CSKY_IS_R4_ADJUSTER (insn2))
 		{

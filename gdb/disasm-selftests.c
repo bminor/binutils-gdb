@@ -81,9 +81,11 @@ print_one_insn_test (struct gdbarch *gdbarch)
       /* nios2, riscv, and score need to know the current instruction
 	 to select breakpoint instruction.  Give the breakpoint
 	 instruction kind explicitly.  */
-      int bplen;
-      insn = gdbarch_sw_breakpoint_from_kind (gdbarch, 4, &bplen);
-      len = bplen;
+      {
+	int bplen;
+	insn = gdbarch_sw_breakpoint_from_kind (gdbarch, 4, &bplen);
+	len = bplen;
+      }
       break;
     default:
       {

@@ -565,7 +565,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   struct coff_symfile_info *info;
   bfd *abfd = objfile->obfd;
   coff_data_type *cdata = coff_data (abfd);
-  char *name = bfd_get_filename (abfd);
+  char *filename = bfd_get_filename (abfd);
   int val;
   unsigned int num_symbols;
   int symtab_offset;
@@ -637,7 +637,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
       val = init_lineno (abfd, info->min_lineno_offset,
                          info->max_lineno_offset - info->min_lineno_offset);
       if (val < 0)
-        error (_("\"%s\": error reading line numbers."), name);
+        error (_("\"%s\": error reading line numbers."), filename);
     }
 
   /* Now read the string table, all at once.  */
@@ -645,7 +645,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   make_cleanup (free_stringtab_cleanup, 0 /*ignore*/);
   val = init_stringtab (abfd, stringtab_offset);
   if (val < 0)
-    error (_("\"%s\": can't get string table"), name);
+    error (_("\"%s\": can't get string table"), filename);
 
   minimal_symbol_reader reader (objfile);
 
@@ -709,7 +709,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	{
 	  error (_("The debugging information in `%s' is corrupted.\nThe "
 		   "file has a `.stabs' section, but no `.stabstr' section."),
-		 name);
+		 filename);
 	}
 
       /* FIXME: dubious.  Why can't we use something normal like
@@ -741,9 +741,9 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
       if (!debugfile.empty ())
 	{
-	  gdb_bfd_ref_ptr abfd (symfile_bfd_open (debugfile.c_str ()));
+	  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (debugfile.c_str ()));
 
-	  symbol_file_add_separate (abfd.get (), debugfile.c_str (),
+	  symbol_file_add_separate (debug_bfd.get (), debugfile.c_str (),
 				    symfile_flags, objfile);
 	}
     }

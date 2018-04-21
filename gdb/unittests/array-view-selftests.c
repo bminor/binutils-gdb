@@ -444,14 +444,14 @@ run_tests ()
 
   /* op[] */
   {
-    std::vector<gdb_byte> vec = {0x11, 0x22};
-    gdb::array_view<gdb_byte> view = vec;
-    gdb::array_view<const gdb_byte> cview = vec;
+    std::vector<gdb_byte> vec2 = {0x11, 0x22};
+    gdb::array_view<gdb_byte> view = vec2;
+    gdb::array_view<const gdb_byte> cview = vec2;
 
     /* Check that op[] on a non-const view of non-const T returns a
        mutable reference.  */
     view[0] = 0x33;
-    SELF_CHECK (vec[0] == 0x33);
+    SELF_CHECK (vec2[0] == 0x33);
 
     /* OTOH, check that assigning through op[] on a view of const T
        wouldn't compile.  */

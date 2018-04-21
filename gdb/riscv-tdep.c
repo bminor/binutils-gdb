@@ -2242,7 +2242,6 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 
   struct riscv_arg_info *arg_info =
     (struct riscv_arg_info *) alloca (nargs * sizeof (struct riscv_arg_info));
-  struct riscv_arg_info *info;
 
   struct riscv_call_info call_info (gdbarch);
 
@@ -2252,12 +2251,11 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
   if (struct_return)
     ++call_info.int_regs.next_regnum;
 
-  for (i = 0, info = &arg_info[0];
-       i < nargs;
-       ++i, ++info)
+  for (i = 0; i < nargs; ++i)
     {
       struct value *arg_value;
       struct type *arg_type;
+      struct riscv_arg_info *info = &arg_info[i];
 
       arg_value = args[i];
       arg_type = check_typedef (value_type (arg_value));

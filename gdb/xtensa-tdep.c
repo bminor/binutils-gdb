@@ -1699,7 +1699,6 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 			CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int i;
   int size, onstack_size;
   gdb_byte *buf = (gdb_byte *) alloca (16);
   CORE_ADDR ra, ps;
@@ -1725,13 +1724,12 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 
   if (xtensa_debug_level > 3)
     {
-      int i;
       DEBUGINFO ("[xtensa_push_dummy_call] nargs = %d\n", nargs);
       DEBUGINFO ("[xtensa_push_dummy_call] sp=0x%x, struct_return=%d, "
 		 "struct_addr=0x%x\n",
 		 (int) sp, (int) struct_return, (int) struct_addr);
 
-      for (i = 0; i < nargs; i++)
+      for (int i = 0; i < nargs; i++)
         {
 	  struct value *arg = args[i];
 	  struct type *arg_type = check_typedef (value_type (arg));
@@ -1762,12 +1760,11 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 
   size = 0;
   onstack_size = 0;
-  i = 0;
 
   if (struct_return)
     size = REGISTER_SIZE;
 
-  for (i = 0; i < nargs; i++)
+  for (int i = 0; i < nargs; i++)
     {
       struct argument_info *info = &arg_info[i];
       struct value *arg = args[i];
@@ -1847,7 +1844,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
       regcache->cooked_write (ARG_1ST (gdbarch), buf);
     }
 
-  for (i = 0; i < nargs; i++)
+  for (int i = 0; i < nargs; i++)
     {
       struct argument_info *info = &arg_info[i];
 

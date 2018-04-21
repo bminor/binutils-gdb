@@ -433,8 +433,8 @@ do_mixed_source_and_assembly_deprecated
 						       "src_and_asm_line");
 		      print_source_lines (symtab, next_line, next_line + 1,
 					  psl_flags);
-		      ui_out_emit_list inner_list_emitter (uiout,
-							   "line_asm_insn");
+		      ui_out_emit_list temp_list_emitter (uiout,
+							  "line_asm_insn");
 		    }
 		  /* Print the last line and leave list open for
 		     asm instructions to be added.  */
@@ -660,7 +660,8 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 		   l < end_preceding_line_to_display;
 		   ++l)
 		{
-		  ui_out_emit_tuple tuple_emitter (uiout, "src_and_asm_line");
+		  ui_out_emit_tuple line_tuple_emitter (uiout,
+							"src_and_asm_line");
 		  print_source_lines (sal.symtab, l, l + 1, psl_flags);
 		  ui_out_emit_list chain_line_emitter (uiout, "line_asm_insn");
 		}

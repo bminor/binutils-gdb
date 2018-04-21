@@ -1674,7 +1674,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	   only).  */
 	if (gnu_runtime)
 	  {
-	    struct type *type = selector_type;
+	    type = selector_type;
 
 	    type = lookup_function_type (type);
 	    type = lookup_pointer_type (type);
@@ -1861,18 +1861,18 @@ evaluate_subexp_standard (struct type *expect_type,
 	       it's opinion (ie. through "whatis"), it won't offer
 	       it.  */
 
-	    struct type *type = value_type (called_method);
+	    struct type *callee_type = value_type (called_method);
 
-	    if (type && TYPE_CODE (type) == TYPE_CODE_PTR)
-	      type = TYPE_TARGET_TYPE (type);
-	    type = TYPE_TARGET_TYPE (type);
+	    if (callee_type && TYPE_CODE (callee_type) == TYPE_CODE_PTR)
+	      callee_type = TYPE_TARGET_TYPE (callee_type);
+	    callee_type = TYPE_TARGET_TYPE (callee_type);
 
-	    if (type)
+	    if (callee_type)
 	    {
-	      if ((TYPE_CODE (type) == TYPE_CODE_ERROR) && expect_type)
+	      if ((TYPE_CODE (callee_type) == TYPE_CODE_ERROR) && expect_type)
 		return allocate_value (expect_type);
 	      else
-		return allocate_value (type);
+		return allocate_value (callee_type);
 	    }
 	    else
 	      error (_("Expression of type other than "
@@ -2048,15 +2048,15 @@ evaluate_subexp_standard (struct type *expect_type,
 	 with rtti type in order to continue on with successful
 	 lookup of member / method only available in the rtti type.  */
       {
-        struct type *type = value_type (arg1);
+        struct type *arg_type = value_type (arg1);
         struct type *real_type;
         int full, using_enc;
         LONGEST top;
 	struct value_print_options opts;
 
 	get_user_print_options (&opts);
-        if (opts.objectprint && TYPE_TARGET_TYPE(type)
-            && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
+        if (opts.objectprint && TYPE_TARGET_TYPE (arg_type)
+            && (TYPE_CODE (TYPE_TARGET_TYPE (arg_type)) == TYPE_CODE_STRUCT))
           {
             real_type = value_rtti_indirect_type (arg1, &full, &top,
 						  &using_enc);
@@ -2121,9 +2121,10 @@ evaluate_subexp_standard (struct type *expect_type,
 	for (ix = 0; ix < nargs; ++ix)
 	  arg_types[ix] = exp->elts[pc + 2 + ix + 1].type;
 
-	fake_method expect_type (flags, nargs, arg_types);
+	fake_method fake_expect_type (flags, nargs, arg_types);
 	*(pos) += 4 + nargs;
-	return evaluate_subexp_standard (expect_type.type (), exp, pos, noside);
+	return evaluate_subexp_standard (fake_expect_type.type (), exp, pos,
+					 noside);
       }
 
     case BINOP_CONCAT:
@@ -2704,9 +2705,8 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case UNOP_ALIGNOF:
       {
-	struct type *type
-	  = value_type (evaluate_subexp (NULL_TYPE, exp, pos,
-					 EVAL_AVOID_SIDE_EFFECTS));
+	type = value_type (evaluate_subexp (NULL_TYPE, exp, pos,
+					    EVAL_AVOID_SIDE_EFFECTS));
 	/* FIXME: This should be size_t.  */
 	struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
 	ULONGEST align = type_align (type);
@@ -2905,7 +2905,7 @@ evaluate_subexp_standard (struct type *expect_type,
 		  || sub_op == STRUCTOP_PTR
 		  || sub_op == OP_SCOPE))
 	    {
-	      struct type *type = value_type (result);
+	      type = value_type (result);
 
 	      if (!TYPE_IS_REFERENCE (type))
 		{
@@ -3193,11 +3193,11 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	(*pos) += 4;
 
 	minimal_symbol *msymbol = exp->elts[pc + 2].msymbol;
-	value *val = evaluate_var_msym_value (noside,
-					      exp->elts[pc + 1].objfile,
-					      msymbol);
+	value *mval = evaluate_var_msym_value (noside,
+					       exp->elts[pc + 1].objfile,
+					       msymbol);
 
-	type = value_type (val);
+	type = value_type (mval);
 	if (TYPE_CODE (type) == TYPE_CODE_ERROR)
 	  error_unknown_type (MSYMBOL_PRINT_NAME (msymbol));
 
@@ -3212,9 +3212,9 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
     case BINOP_SUBSCRIPT:
       if (noside == EVAL_NORMAL)
 	{
-	  int pc = (*pos) + 1;
+	  int npc = (*pos) + 1;
 
-	  val = evaluate_subexp (NULL_TYPE, exp, &pc, EVAL_AVOID_SIDE_EFFECTS);
+	  val = evaluate_subexp (NULL_TYPE, exp, &npc, EVAL_AVOID_SIDE_EFFECTS);
 	  type = check_typedef (value_type (val));
 	  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
 	    {

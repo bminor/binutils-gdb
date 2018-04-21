@@ -4500,7 +4500,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argreg;
   int float_argreg;
   int argnum;
-  int len = 0;
+  int arg_space = 0;
   int stack_offset = 0;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = find_function_addr (function, NULL);
@@ -4527,13 +4527,14 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      than necessary for EABI, because the first few arguments are
      passed in registers, but that's OK.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += align_up (TYPE_LENGTH (value_type (args[argnum])), abi_regsize);
-  sp -= align_up (len, 16);
+    arg_space += align_up (TYPE_LENGTH (value_type (args[argnum])), abi_regsize);
+  sp -= align_up (arg_space, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"mips_eabi_push_dummy_call: sp=%s allocated %ld\n",
-			paddress (gdbarch, sp), (long) align_up (len, 16));
+			paddress (gdbarch, sp),
+			(long) align_up (arg_space, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = MIPS_A0_REGNUM;
@@ -4894,7 +4895,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argreg;
   int float_argreg;
   int argnum;
-  int len = 0;
+  int arg_space = 0;
   int stack_offset = 0;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = find_function_addr (function, NULL);
@@ -4918,13 +4919,14 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += align_up (TYPE_LENGTH (value_type (args[argnum])), MIPS64_REGSIZE);
-  sp -= align_up (len, 16);
+    arg_space += align_up (TYPE_LENGTH (value_type (args[argnum])), MIPS64_REGSIZE);
+  sp -= align_up (arg_space, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"mips_n32n64_push_dummy_call: sp=%s allocated %ld\n",
-			paddress (gdbarch, sp), (long) align_up (len, 16));
+			paddress (gdbarch, sp),
+			(long) align_up (arg_space, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = MIPS_A0_REGNUM;
@@ -5350,7 +5352,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argreg;
   int float_argreg;
   int argnum;
-  int len = 0;
+  int arg_space = 0;
   int stack_offset = 0;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = find_function_addr (function, NULL);
@@ -5379,16 +5381,17 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       /* Align to double-word if necessary.  */
       if (mips_type_needs_double_align (arg_type))
-	len = align_up (len, MIPS32_REGSIZE * 2);
+	arg_space = align_up (arg_space, MIPS32_REGSIZE * 2);
       /* Allocate space on the stack.  */
-      len += align_up (TYPE_LENGTH (arg_type), MIPS32_REGSIZE);
+      arg_space += align_up (TYPE_LENGTH (arg_type), MIPS32_REGSIZE);
     }
-  sp -= align_up (len, 16);
+  sp -= align_up (arg_space, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"mips_o32_push_dummy_call: sp=%s allocated %ld\n",
-			paddress (gdbarch, sp), (long) align_up (len, 16));
+			paddress (gdbarch, sp),
+			(long) align_up (arg_space, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = MIPS_A0_REGNUM;
@@ -5874,7 +5877,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argreg;
   int float_argreg;
   int argnum;
-  int len = 0;
+  int arg_space = 0;
   int stack_offset = 0;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = find_function_addr (function, NULL);
@@ -5902,14 +5905,15 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *arg_type = check_typedef (value_type (args[argnum]));
 
       /* Allocate space on the stack.  */
-      len += align_up (TYPE_LENGTH (arg_type), MIPS64_REGSIZE);
+      arg_space += align_up (TYPE_LENGTH (arg_type), MIPS64_REGSIZE);
     }
-  sp -= align_up (len, 16);
+  sp -= align_up (arg_space, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"mips_o64_push_dummy_call: sp=%s allocated %ld\n",
-			paddress (gdbarch, sp), (long) align_up (len, 16));
+			paddress (gdbarch, sp),
+			(long) align_up (arg_space, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = MIPS_A0_REGNUM;

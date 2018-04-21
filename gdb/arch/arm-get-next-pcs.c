@@ -271,7 +271,6 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
   unsigned short inst1;
   CORE_ADDR nextpc = pc + 2;		/* Default is next instruction.  */
-  unsigned long offset;
   ULONGEST status, itstate;
   struct regcache *regcache = self->regcache;
   std::vector<CORE_ADDR> next_pcs;
@@ -409,7 +408,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 
       /* Fetch the saved PC from the stack.  It's stored above
          all of the other registers.  */
-      offset = bitcount (bits (inst1, 0, 7)) * INT_REGISTER_SIZE;
+      unsigned long offset = bitcount (bits (inst1, 0, 7)) * INT_REGISTER_SIZE;
       sp = regcache_raw_get_unsigned (regcache, ARM_SP_REGNUM);
       nextpc = self->ops->read_mem_uint (sp + offset, 4, byte_order);
     }
@@ -450,7 +449,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	      j1 = bit (inst2, 13);
 	      j2 = bit (inst2, 11);
 
-	      offset = ((imm1 << 12) + (imm2 << 1));
+	      unsigned long offset = ((imm1 << 12) + (imm2 << 1));
 	      offset ^= ((!j2) << 22) | ((!j1) << 23);
 
 	      nextpc = pc_val + offset;
@@ -477,7 +476,8 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 		  j1 = bit (inst2, 13);
 		  j2 = bit (inst2, 11);
 
-		  offset = (sign << 20) + (j2 << 19) + (j1 << 18);
+		  unsigned long offset
+		    = (sign << 20) + (j2 << 19) + (j1 << 18);
 		  offset += (imm1 << 12) + (imm2 << 1);
 
 		  nextpc = pc_val + offset;

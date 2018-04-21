@@ -1421,12 +1421,12 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	case C_BSTAT:
 	  /* Begin static block.  */
 	  {
-	    struct internal_syment symbol;
+	    struct internal_syment static_symbol;
 
-	    read_symbol (&symbol, cs->c_value);
-	    static_block_base = symbol.n_value;
+	    read_symbol (&static_symbol, cs->c_value);
+	    static_block_base = static_symbol.n_value;
 	    static_block_section =
-	      secnum_to_section (symbol.n_scnum, objfile);
+	      secnum_to_section (static_symbol.n_scnum, objfile);
 	  }
 	  break;
 

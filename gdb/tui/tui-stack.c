@@ -358,7 +358,6 @@ tui_show_frame_info (struct frame_info *fi)
 {
   struct tui_win_info *win_info;
   int locator_changed_p;
-  int i;
 
   if (fi)
     {
@@ -473,7 +472,7 @@ tui_show_frame_info (struct frame_info *fi)
 	return 0;
 
       tui_show_locator_content ();
-      for (i = 0; i < (tui_source_windows ())->count; i++)
+      for (int i = 0; i < (tui_source_windows ())->count; i++)
 	{
 	  win_info = (tui_source_windows ())->list[i];
 	  tui_clear_source_content (win_info, EMPTY_SOURCE_PROMPT);

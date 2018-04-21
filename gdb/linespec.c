@@ -793,16 +793,16 @@ linespec_lexer_lex_string (linespec_parser *parser)
 		      == language_cplus)
 		  && (PARSER_STREAM (parser) - start) >= CP_OPERATOR_LEN)
 		{
-		  const char *p = PARSER_STREAM (parser);
+		  const char *op = PARSER_STREAM (parser);
 
-		  while (p > start && isspace (p[-1]))
-		    p--;
-		  if (p - start >= CP_OPERATOR_LEN)
+		  while (op > start && isspace (op[-1]))
+		    op--;
+		  if (op - start >= CP_OPERATOR_LEN)
 		    {
-		      p -= CP_OPERATOR_LEN;
-		      if (strncmp (p, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0
-			  && (p == start
-			      || !(isalnum (p[-1]) || p[-1] == '_')))
+		      op -= CP_OPERATOR_LEN;
+		      if (strncmp (op, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0
+			  && (op == start
+			      || !(isalnum (op[-1]) || op[-1] == '_')))
 			{
 			  /* This is an operator name.  Keep going.  */
 			  ++(PARSER_STREAM (parser));
@@ -813,15 +813,15 @@ linespec_lexer_lex_string (linespec_parser *parser)
 		    }
 		}
 
-	      const char *p = find_parameter_list_end (PARSER_STREAM (parser));
-	      PARSER_STREAM (parser) = p;
+	      const char *end = find_parameter_list_end (PARSER_STREAM (parser));
+	      PARSER_STREAM (parser) = end;
 
 	      /* Don't loop around to the normal \0 case above because
 		 we don't want to misinterpret a potential keyword at
 		 the end of the token when the string isn't
 		 "()<>"-balanced.  This handles "b
 		 function(thread<tab>" in completion mode.  */
-	      if (*p == '\0')
+	      if (*end == '\0')
 		{
 		  LS_TOKEN_STOKEN (token).ptr = start;
 		  LS_TOKEN_STOKEN (token).length
@@ -839,9 +839,9 @@ linespec_lexer_lex_string (linespec_parser *parser)
 		   == language_cplus)
 		  && (PARSER_STREAM (parser) - start) > CP_OPERATOR_LEN)
 		{
-		  const char *p = strstr (start, CP_OPERATOR_STR);
+		  const char *op = strstr (start, CP_OPERATOR_STR);
 
-		  if (p != NULL && is_operator_name (p))
+		  if (op != NULL && is_operator_name (op))
 		    {
 		      /* This is an operator name.  Keep going.  */
 		      ++(PARSER_STREAM (parser));

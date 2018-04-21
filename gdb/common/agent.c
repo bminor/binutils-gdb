@@ -212,7 +212,6 @@ agent_run_command (int pid, const char *cmd, int len)
   if (fd >= 0)
     {
       char buf[1] = "";
-      int ret;
 
       DEBUG_AGENT ("agent: signalling helper thread\n");
 

@@ -2141,12 +2141,12 @@ lookup_local_symbol (const char *name,
 
       if (language == language_cplus || language == language_fortran)
         {
-          struct block_symbol sym
+          struct block_symbol blocksym
 	    = cp_lookup_symbol_imports_or_template (scope, name, block,
 						    domain);
 
-          if (sym.symbol != NULL)
-            return sym;
+          if (blocksym.symbol != NULL)
+            return blocksym;
         }
 
       if (BLOCK_FUNCTION (block) != NULL && block_inlined_p (block))
@@ -3213,10 +3213,10 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       if (item->pc > pc && (!alt || item->pc < alt->pc))
 	alt = item;
 
-      auto pc_compare = [](const CORE_ADDR & pc,
+      auto pc_compare = [](const CORE_ADDR & comp_pc,
 			   const struct linetable_entry & lhs)->bool
       {
-	return pc < lhs.pc;
+	return comp_pc < lhs.pc;
       };
 
       struct linetable_entry *first = item;

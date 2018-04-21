@@ -801,28 +801,28 @@ captured_main_1 (struct captured_main_args *context)
 	    break;
 	  case 'b':
 	    {
-	      int i;
+	      int rate;
 	      char *p;
 
-	      i = strtol (optarg, &p, 0);
-	      if (i == 0 && p == optarg)
+	      rate = strtol (optarg, &p, 0);
+	      if (rate == 0 && p == optarg)
 		warning (_("could not set baud rate to `%s'."),
 			 optarg);
 	      else
-		baud_rate = i;
+		baud_rate = rate;
 	    }
             break;
 	  case 'l':
 	    {
-	      int i;
+	      int timeout;
 	      char *p;
 
-	      i = strtol (optarg, &p, 0);
-	      if (i == 0 && p == optarg)
+	      timeout = strtol (optarg, &p, 0);
+	      if (timeout == 0 && p == optarg)
 		warning (_("could not set timeout limit to `%s'."),
 			 optarg);
 	      else
-		remote_timeout = i;
+		remote_timeout = timeout;
 	    }
 	    break;
 

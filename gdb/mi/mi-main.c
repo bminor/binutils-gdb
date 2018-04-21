@@ -768,7 +768,7 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 
 	      for (const osdata_item &child : children)
 		{
-		  ui_out_emit_tuple tuple_emitter (uiout, NULL);
+		  ui_out_emit_tuple inner_tuple_emitter (uiout, NULL);
 		  const std::string *tid = get_osdata_column (child, "tid");
 		  const std::string *tcore = get_osdata_column (child, "core");
 
@@ -1376,7 +1376,7 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
       {
 	int col;
 	int col_byte;
-	struct value_print_options opts;
+	struct value_print_options print_opts;
 
 	ui_out_emit_tuple tuple_emitter (uiout, NULL);
 	uiout->field_core_addr ("addr", gdbarch, addr + row_byte);
@@ -1384,7 +1384,7 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
 	   row_byte); */
 	{
 	  ui_out_emit_list list_data_emitter (uiout, "data");
-	  get_formatted_print_options (&opts, word_format);
+	  get_formatted_print_options (&print_opts, word_format);
 	  for (col = 0, col_byte = row_byte;
 	       col < nr_cols;
 	       col++, col_byte += word_size)
@@ -1396,8 +1396,8 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
 	      else
 		{
 		  stream.clear ();
-		  print_scalar_formatted (&mbuf[col_byte], word_type, &opts,
-					  word_asize, &stream);
+		  print_scalar_formatted (&mbuf[col_byte], word_type,
+					  &print_opts, word_asize, &stream);
 		  uiout->field_stream (NULL, stream);
 		}
 	    }

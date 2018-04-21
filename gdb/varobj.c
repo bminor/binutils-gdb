@@ -1629,7 +1629,7 @@ varobj_update (struct varobj **varp, bool is_explicit)
 	 for which -var-list-children was never invoked.  */
       if (varobj_is_dynamic_p (v))
 	{
-	  std::vector<varobj *> changed, type_changed, unchanged, newobj;
+	  std::vector<varobj *> changed, type_changed_vec, unchanged, newobj_vec;
 	  bool children_changed = false;
 
 	  if (v->frozen)
@@ -1661,48 +1661,49 @@ varobj_update (struct varobj **varp, bool is_explicit)
 
 	  /* If update_dynamic_varobj_children returns false, then we have
 	     a non-conforming pretty-printer, so we skip it.  */
-	  if (update_dynamic_varobj_children (v, &changed, &type_changed, &newobj,
-					      &unchanged, &children_changed, true,
-					      v->from, v->to))
+	  if (update_dynamic_varobj_children (v, &changed, &type_changed_vec,
+					      &newobj_vec,
+					      &unchanged, &children_changed,
+					      true, v->from, v->to))
 	    {
-	      if (children_changed || !newobj.empty ())
+	      if (children_changed || !newobj_vec.empty ())
 		{
 		  r.children_changed = true;
-		  r.newobj = std::move (newobj);
+		  r.newobj = std::move (newobj_vec);
 		}
 	      /* Push in reverse order so that the first child is
 		 popped from the work stack first, and so will be
 		 added to result first.  This does not affect
 		 correctness, just "nicer".  */
-	      for (int i = type_changed.size () - 1; i >= 0; --i)
+	      for (int i = type_changed_vec.size () - 1; i >= 0; --i)
 		{
-		  varobj_update_result r (type_changed[i]);
+		  varobj_update_result item (type_changed_vec[i]);
 
 		  /* Type may change only if value was changed.  */
-		  r.changed = true;
-		  r.type_changed = true;
-		  r.value_installed = true;
+		  item.changed = true;
+		  item.type_changed = true;
+		  item.value_installed = true;
 
-		  stack.push_back (std::move (r));
+		  stack.push_back (std::move (item));
 		}
 	      for (int i = changed.size () - 1; i >= 0; --i)
 		{
-		  varobj_update_result r (changed[i]);
+		  varobj_update_result item (changed[i]);
 
-		  r.changed = true;
-		  r.value_installed = true;
+		  item.changed = true;
+		  item.value_installed = true;
 
-		  stack.push_back (std::move (r));
+		  stack.push_back (std::move (item));
 		}
 	      for (int i = unchanged.size () - 1; i >= 0; --i)
 		{
 		  if (!unchanged[i]->frozen)
 		    {
-		      varobj_update_result r (unchanged[i]);
+		      varobj_update_result item (unchanged[i]);
 
-		      r.value_installed = true;
+		      item.value_installed = true;
 
-		      stack.push_back (std::move (r));
+		      stack.push_back (std::move (item));
 		    }
 		}
 	      if (r.changed || r.children_changed)

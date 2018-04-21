@@ -3224,7 +3224,6 @@ void
 merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
 {
   struct uploaded_tsv *utsv;
-  struct trace_state_variable *tsv;
   int highest;
 
   /* Most likely some numbers will have to be reassigned as part of
@@ -3234,7 +3233,7 @@ merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
 
   for (utsv = *uploaded_tsvs; utsv; utsv = utsv->next)
     {
-      tsv = find_matching_tsv (utsv);
+      struct trace_state_variable *tsv = find_matching_tsv (utsv);
       if (tsv)
 	{
 	  if (info_verbose)
@@ -3727,7 +3726,7 @@ print_one_static_tracepoint_marker (int count,
       int ix;
 
       {
-	ui_out_emit_tuple tuple_emitter (uiout, "tracepoints-at");
+	ui_out_emit_tuple inner_tuple_emitter (uiout, "tracepoints-at");
 
 	uiout->text (extra_field_indent);
 	uiout->text (_("Probed by static tracepoints: "));
