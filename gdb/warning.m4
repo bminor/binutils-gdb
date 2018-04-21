@@ -45,7 +45,8 @@ build_warnings="-Wall -Wpointer-arith \
 -Wno-error=deprecated-register \
 -Wsuggest-override \
 -Wimplicit-fallthrough=3 \
--Wduplicated-cond"
+-Wduplicated-cond \
+-Wshadow=local"
 
 case "${host}" in
   *-*-mingw32*)
