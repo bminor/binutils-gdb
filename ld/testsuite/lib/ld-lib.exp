@@ -85,6 +85,8 @@ proc run_host_cmd { prog command } {
     global link_output
     global gcc_B_opt
     global ld_L_opt
+    global gcc_ld_B_opt_tested
+    global ld
 
     if { ![is_remote host] && [which "$prog"] == 0 } then {
 	perror "$prog does not exist"
@@ -106,6 +108,22 @@ proc run_host_cmd { prog command } {
     set gccexe [string replace $gccexe 0 [string last "/" $gccexe] ""]
     if {[string match "*cc*" $gccexe] || [string match "*++*" $gccexe]} then {
 	set gccflags "$gcc_B_opt $gccflags $ld_L_opt"
+	if {![info exists gcc_ld_B_opt_tested]} {
+	    set gcc_ld_B_opt_tested 1
+	    set ld_version_message [run_host_cmd "$ld" "--version"]
+	    set gcc_ld_version_message [run_host_cmd "$prog" "$gccflags -Wl,--version"]
+	    if {[string first $ld_version_message $gcc_ld_version_message] < 0} {
+		perror "************************************************************************"
+		perror "Your compiler driver ignores -B when choosing ld."
+		perror "You will not be testing the new ld in many of the following tests."
+		set gcc_ld_version [run_host_cmd "$prog" "$gccflags --print-prog-name=ld"]
+		if {![string match "" $gcc_ld_version] && ![string match "ld" $gcc_ld_version]} {
+		
+		    perror "It seems you will be testing $gcc_ld_version instead."
+		}
+		perror "************************************************************************"
+	    }
+	}
     }
 
     verbose -log "$prog $gccflags $command"
