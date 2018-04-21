@@ -1,3 +1,10 @@
+2018-04-21  Pedro Alves  <palves@redhat.com>
+	    Rajendra SY  <rajendra.sy@gmail.com>
+
+	* inf-ptrace.c (inf_ptrace_attach): Mark the thread as executing.
+	* remote.c (extended_remote_attach): In all-stop mode, mark the
+	thread as executing.
+
 2018-04-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* thread.c (thread_apply_all_command): Fix comment.

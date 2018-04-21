@@ -235,7 +235,10 @@ inf_ptrace_attach (struct target_ops *ops, const char *args, int from_tty)
 
   /* Always add a main thread.  If some target extends the ptrace
      target, it should decorate the ptid later with more info.  */
-  add_thread_silent (inferior_ptid);
+  thread_info *thr = add_thread_silent (inferior_ptid);
+  /* Don't consider the thread stopped until we've processed its
+     initial SIGSTOP stop.  */
+  set_executing (thr->ptid, true);
 
   unpusher.release ();
 }

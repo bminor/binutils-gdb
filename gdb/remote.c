@@ -5316,7 +5316,10 @@ extended_remote_attach (struct target_ops *target, const char *args,
       inferior_ptid = remote_current_thread (inferior_ptid);
 
       /* Add the main thread to the thread list.  */
-      add_thread_silent (inferior_ptid);
+      thread_info *thr = add_thread_silent (inferior_ptid);
+      /* Don't consider the thread stopped until we've processed the
+	 saved stop reply.  */
+      set_executing (thr->ptid, true);
     }
 
   /* Next, if the target can specify a description, read it.  We do
