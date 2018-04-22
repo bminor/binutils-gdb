@@ -1,5 +1,10 @@
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
+	* linux-tdep.c (linux_make_mappings_corefile_notes): Introduce new
+	variable "size".
+
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
 	* mdebugread.c (parse_partial_symbols): Use std::string.
 
 2018-10-04  Tom Tromey  <tom@tromey.com>
