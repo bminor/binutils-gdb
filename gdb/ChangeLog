@@ -1,5 +1,10 @@
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
+	* guile/scm-frame.c (gdbscm_frame_read_var): Remove inner
+	declaration of "block".
+
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
 	* common/filestuff.c (fdwalk): Remove inner declaration of
 	"result".
 
