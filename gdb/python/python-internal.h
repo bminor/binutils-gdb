@@ -477,6 +477,8 @@ extern enum ext_lang_rc gdbpy_get_matching_xmethod_workers
 
 
 PyObject *gdbpy_history (PyObject *self, PyObject *args);
+PyObject *gdbpy_convenience_variable (PyObject *self, PyObject *args);
+PyObject *gdbpy_set_convenience_variable (PyObject *self, PyObject *args);
 PyObject *gdbpy_breakpoints (PyObject *, PyObject *);
 PyObject *gdbpy_frame_stop_reason_string (PyObject *, PyObject *);
 PyObject *gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw);

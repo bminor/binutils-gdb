@@ -2132,6 +2132,14 @@ Return a tuple containing all inferiors." },
 Invalidate any cached frame objects in gdb.\n\
 Intended for internal use only." },
 
+  { "convenience_variable", gdbpy_convenience_variable, METH_VARARGS,
+    "convenience_variable (NAME) -> value.\n\
+Return the value of the convenience variable $NAME,\n\
+or None if not set." },
+  { "set_convenience_variable", gdbpy_set_convenience_variable, METH_VARARGS,
+    "convenience_variable (NAME, VALUE) -> None.\n\
+Set the value of the convenience variable $NAME." },
+
   {NULL, NULL, 0, NULL}
 };
 

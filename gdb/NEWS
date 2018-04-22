@@ -42,6 +42,10 @@ set|show record btrace cpu
 
   ** gdb.execute can now execute multi-line gdb commands.
 
+  ** The new functions gdb.convenience_variable and
+     gdb.set_convenience_variable can be used to get and set the value
+     of convenience variables.
+
 * New targets
 
 RiscV ELF			riscv*-*-elf

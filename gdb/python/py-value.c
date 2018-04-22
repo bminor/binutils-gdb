@@ -1746,6 +1746,83 @@ gdbpy_history (PyObject *self, PyObject *args)
   return value_to_value_object (res_val);
 }
 
+/* Return the value of a convenience variable.  */
+PyObject *
+gdbpy_convenience_variable (PyObject *self, PyObject *args)
+{
+  const char *varname;
+  struct value *res_val = NULL;
+
+  if (!PyArg_ParseTuple (args, "s", &varname))
+    return NULL;
+
+  TRY
+    {
+      struct internalvar *var = lookup_only_internalvar (varname);
+
+      if (var != NULL)
+	{
+	  res_val = value_of_internalvar (python_gdbarch, var);
+	  if (TYPE_CODE (value_type (res_val)) == TYPE_CODE_VOID)
+	    res_val = NULL;
+	}
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
+
+  if (res_val == NULL)
+    Py_RETURN_NONE;
+
+  return value_to_value_object (res_val);
+}
+
+/* Set the value of a convenience variable.  */
+PyObject *
+gdbpy_set_convenience_variable (PyObject *self, PyObject *args)
+{
+  const char *varname;
+  PyObject *value_obj;
+  struct value *value = NULL;
+
+  if (!PyArg_ParseTuple (args, "sO", &varname, &value_obj))
+    return NULL;
+
+  /* None means to clear the variable.  */
+  if (value_obj != Py_None)
+    {
+      value = convert_value_from_python (value_obj);
+      if (value == NULL)
+	return NULL;
+    }
+
+  TRY
+    {
+      if (value == NULL)
+	{
+	  struct internalvar *var = lookup_only_internalvar (varname);
+
+	  if (var != NULL)
+	    clear_internalvar (var);
+	}
+      else
+	{
+	  struct internalvar *var = lookup_internalvar (varname);
+
+	  set_internalvar (var, value);
+	}
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
+
+  Py_RETURN_NONE;
+}
+
 /* Returns 1 in OBJ is a gdb.Value object, 0 otherwise.  */
 
 int

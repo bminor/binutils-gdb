@@ -477,3 +477,23 @@ gdb_py_test_silent_cmd "step" "Step into func2" 1
 gdb_py_test_silent_cmd "up" "Step out of func2" 1
 
 gdb_test "python print (gdb.find_pc_line(gdb.selected_frame().pc()).line > line)" "True" "test find_pc_line with resume address"
+
+gdb_test_no_output "set variable \$cvar1 = 23" "set convenience variable"
+gdb_test "python print(gdb.convenience_variable('cvar1'))" "23"
+gdb_test "python print(gdb.convenience_variable('cvar2'))" "None"
+gdb_test_no_output "python gdb.set_convenience_variable('cvar1', 89)" \
+    "change convenience variable from python"
+gdb_test "python print(gdb.convenience_variable('cvar1'))" "89" \
+    "print new value of convenience variable from python"
+gdb_test "print \$cvar1" " = 89" \
+    "print new value of convenience variable from CLI"
+gdb_test_no_output "python gdb.set_convenience_variable('cvar3', -5)" \
+    "make convenience variable from python"
+gdb_test "python print(gdb.convenience_variable('cvar3'))" "-5" \
+    "print value of new convenience variable from python"
+gdb_test_no_output "python gdb.set_convenience_variable('cvar3', None)" \
+    "reset convenience variable from python"
+gdb_test "python print(gdb.convenience_variable('cvar3'))" "None" \
+    "print reset convenience variable from python"
+gdb_test "print \$cvar3" "= void" \
+    "print reset convenience variable from CLI"
