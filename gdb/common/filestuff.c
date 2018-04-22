@@ -80,7 +80,6 @@ fdwalk (int (*func) (void *, int), void *arg)
 	{
 	  long fd;
 	  char *tail;
-	  int result;
 
 	  errno = 0;
 	  fd = strtol (entry->d_name, &tail, 10);

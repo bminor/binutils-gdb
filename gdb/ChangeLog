@@ -1,5 +1,10 @@
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
+	* common/filestuff.c (fdwalk): Remove inner declaration of
+	"result".
+
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
 	* msp430-tdep.c (msp430_push_dummy_call): Rename inner
 	"structs_addr" and hoist declaration.
 
