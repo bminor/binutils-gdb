@@ -1,5 +1,9 @@
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
+	* mdebugread.c (parse_partial_symbols): Use std::string.
+
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
 	* ctf.c (SET_ARRAY_FIELD): Rename "u32".
 	* p-valprint.c (pascal_val_print): Split inner "i" variable.
 	* xtensa-tdep.c (xtensa_push_dummy_call): Declare "i" in loop

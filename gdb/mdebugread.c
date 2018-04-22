@@ -3197,13 +3197,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		      case 'f':
 			if (! pst)
 			  {
-			    int name_len = p - namestring;
-			    char *name = (char *) xmalloc (name_len + 1);
-
-			    memcpy (name, namestring, name_len);
-			    name[name_len] = '\0';
-			    function_outside_compilation_unit_complaint (name);
-			    xfree (name);
+			    std::string copy (namestring, p);
+			    function_outside_compilation_unit_complaint
+			      (copy.c_str ());
 			  }
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_BLOCK,
@@ -3220,13 +3216,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		      case 'F':
 			if (! pst)
 			  {
-			    int name_len = p - namestring;
-			    char *name = (char *) xmalloc (name_len + 1);
-
-			    memcpy (name, namestring, name_len);
-			    name[name_len] = '\0';
-			    function_outside_compilation_unit_complaint (name);
-			    xfree (name);
+			    std::string copy (namestring, p);
+			    function_outside_compilation_unit_complaint
+			      (copy.c_str ());
 			  }
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_BLOCK,
