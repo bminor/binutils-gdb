@@ -68,8 +68,6 @@ protected:
 private:
 
   void field_separator ();
-  void out_field_fmt (int fldno, const char *fldname, const char *format, ...)
-    ATTRIBUTE_PRINTF (4, 5);
 
   std::vector<ui_file *> m_streams;
   bool m_suppress_output;

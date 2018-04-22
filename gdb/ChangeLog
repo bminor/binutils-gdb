@@ -1,3 +1,9 @@
+2018-04-24  Tom Tromey  <tom@tromey.com>
+
+	* cli-out.c (cli_ui_out::out_field_fmt): Remove.
+	(cli_ui_out::do_field_string): Use fputs_filtered.
+	* cli-out.h (class cli_ui_out) <out_field_fmt>: Remove.
+
 2018-04-23  Tom Tromey  <tom@tromey.com>
 
 	* guile/scm-frame.c (gdbscm_frame_read_var): Use

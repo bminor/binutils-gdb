@@ -156,7 +156,7 @@ cli_ui_out::do_field_string (int fldno, int width, ui_align align,
     spaces (before);
 
   if (string)
-    out_field_fmt (fldno, fldname, "%s", string);
+    fputs_filtered (string, m_streams.back ());
 
   if (after)
     spaces (after);
@@ -237,22 +237,6 @@ cli_ui_out::do_redirect (ui_file *outstream)
 }
 
 /* local functions */
-
-/* Like cli_ui_out::do_field_fmt, but takes a variable number of args
-   and makes a va_list and does not insert a separator.  */
-
-/* VARARGS */
-void
-cli_ui_out::out_field_fmt (int fldno, const char *fldname,
-			   const char *format, ...)
-{
-  va_list args;
-
-  va_start (args, format);
-  vfprintf_filtered (m_streams.back (), format, args);
-
-  va_end (args);
-}
 
 void
 cli_ui_out::field_separator ()
