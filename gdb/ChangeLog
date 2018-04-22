@@ -1,3 +1,10 @@
+2018-04-22  Rajendra SY  <rajendra.sy@gmail.com>
+
+	PR gdb/23095
+	* gdb/testsuite/gdb.base/break-probes.exp: Pass shlib_load to
+	prepare_for_testing.  Set normal_bp to r_debug_state if target
+	is bsd.
+
 2018-04-21  Pedro Alves  <palves@redhat.com>
 	    Rajendra SY  <rajendra.sy@gmail.com>
 
