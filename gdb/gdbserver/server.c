@@ -3367,9 +3367,9 @@ handle_status (char *own_buf)
       /* If the last event thread is not found for some reason, look
 	 for some other thread that might have an event to report.  */
       if (thread == NULL)
-	thread = find_thread ([] (thread_info *thread)
+	thread = find_thread ([] (thread_info *thr_arg)
 	  {
-	    return thread->status_pending_p;
+	    return thr_arg->status_pending_p;
 	  });
 
       /* If we're still out of luck, simply pick the first thread in
@@ -4028,7 +4028,6 @@ process_serial_event (void)
   client_state &cs = get_client_state ();
   int signal;
   unsigned int len;
-  int res;
   CORE_ADDR mem_addr;
   unsigned char sig;
   int packet_len;
@@ -4172,13 +4171,15 @@ process_serial_event (void)
 	}
       break;
     case 'm':
-      require_running_or_break (cs.own_buf);
-      decode_m_packet (&cs.own_buf[1], &mem_addr, &len);
-      res = gdb_read_memory (mem_addr, mem_buf, len);
-      if (res < 0)
-	write_enn (cs.own_buf);
-      else
-	bin2hex (mem_buf, cs.own_buf, res);
+      {
+	require_running_or_break (cs.own_buf);
+	decode_m_packet (&cs.own_buf[1], &mem_addr, &len);
+	int res = gdb_read_memory (mem_addr, mem_buf, len);
+	if (res < 0)
+	  write_enn (cs.own_buf);
+	else
+	  bin2hex (mem_buf, cs.own_buf, res);
+      }
       break;
     case 'M':
       require_running_or_break (cs.own_buf);

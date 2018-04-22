@@ -1,3 +1,12 @@
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
+	* server.c (handle_status): Rename inner "thread".
+	(process_serial_event): Declare "res" in 'm' case.
+	* linux-low.c (last_thread_of_process_p, find_lwp_pid)
+	(iterate_over_lwps): Rename inner "thread".
+	(linux_qxfer_libraries_svr4): Rename inner "len".
+	* gdbthread.h (find_thread_in_random): Rename inner "thread".
+
 2018-10-01  Gary Benson <gbenson@redhat.com>
 
 	* gdb_proc_service.h: Moved common code to

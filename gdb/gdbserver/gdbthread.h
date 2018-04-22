@@ -188,8 +188,8 @@ find_thread_in_random (Func func)
   random_selector = (int)
     ((count * (double) rand ()) / (RAND_MAX + 1.0));
 
-  thread_info *thread = find_thread ([&] (thread_info *thread) {
-    return func (thread) && (random_selector-- == 0);
+  thread_info *thread = find_thread ([&] (thread_info *thr_arg) {
+    return func (thr_arg) && (random_selector-- == 0);
   });
 
   gdb_assert (thread != NULL);
