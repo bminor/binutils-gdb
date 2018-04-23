@@ -543,12 +543,12 @@ generate_asm_file (int type, const char *file)
   while (tmp < file_endp)
     {
       const char *bslash = strchr (tmp, '\\');
-      size_t len = (bslash) ? (size_t) (bslash - tmp + 1) : strlen (tmp);
+      size_t len = bslash != NULL ? bslash - tmp + 1 : file_endp - tmp;
 
       /* Double all backslashes, since demand_copy_C_string (used by
 	 s_stab to extract the part in quotes) will try to replace them as
 	 escape sequences.  backslash may appear in a filespec.  */
-      strncpy (bufp, tmp, len);
+      memcpy (bufp, tmp, len);
 
       tmp += len;
       bufp += len;

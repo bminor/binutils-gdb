@@ -1,3 +1,12 @@
+2018-04-23  Alan Modra  <amodra@gmail.com>
+
+	* elf-linux-core.h (swap_linux_prpsinfo32_ugid32_out): Disable
+	gcc-8 string truncation warning.
+	(swap_linux_prpsinfo32_ugid16_out): Likewise.
+	(swap_linux_prpsinfo64_ugid32_out): Likewise.
+	(swap_linux_prpsinfo64_ugid16_out): Likewise.
+	* elf.c (elfcore_write_prpsinfo): Likewise.
+
 2018-04-20  Alan Modra  <amodra@gmail.com>
 
 	PR 22978

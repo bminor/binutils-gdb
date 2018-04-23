@@ -1,3 +1,10 @@
+2018-04-23  Alan Modra  <amodra@gmail.com>
+
+	* stabs.c (generate_asm_file): Use memcpy rather than strncpy.
+	Remove call to strlen inside loop.
+	* config/tc-cr16.c (getreg_image): Warning fix.
+	* config/tc-crx.c (getreg_image): Warning fix.
+
 2018-04-20  Kito Cheng  <kito.cheng@gmail.com>
 
 	* config/tc-riscv.c (options): Add OPTION_RELAX and
