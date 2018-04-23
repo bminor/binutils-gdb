@@ -4658,7 +4658,7 @@ program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
 # We require a C++11 compiler.  Check if one is available, and if
 # necessary, set CXX_DIALECT to some -std=xxx switch.
 
-      ax_cxx_compile_cxx11_required=true
+  ax_cxx_compile_alternatives="11 0x"    ax_cxx_compile_cxx11_required=true
   ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -4974,7 +4974,8 @@ $as_echo "$ax_cv_cxx_compile_cxx11" >&6; }
   fi
 
     if test x$ac_success = xno; then
-    for switch in -std=gnu++11 -std=gnu++0x; do
+    for alternative in ${ax_cxx_compile_alternatives}; do
+      switch="-std=gnu++${alternative}"
       cachevar=`$as_echo "ax_cv_cxx_compile_cxx11_$switch" | $as_tr_sh`
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CXX supports C++11 features with $switch" >&5
 $as_echo_n "checking whether $CXX supports C++11 features with $switch... " >&6; }
@@ -5292,16 +5293,17 @@ $as_echo "$ac_res" >&6; }
   fi
 
     if test x$ac_success = xno; then
-                for switch in -std=c++11 -std=c++0x +std=c++11 "-h std=c++11"; do
-      cachevar=`$as_echo "ax_cv_cxx_compile_cxx11_$switch" | $as_tr_sh`
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CXX supports C++11 features with $switch" >&5
+                for alternative in ${ax_cxx_compile_alternatives}; do
+      for switch in -std=c++${alternative} +std=c++${alternative} "-h std=c++${alternative}"; do
+        cachevar=`$as_echo "ax_cv_cxx_compile_cxx11_$switch" | $as_tr_sh`
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CXX supports C++11 features with $switch" >&5
 $as_echo_n "checking whether $CXX supports C++11 features with $switch... " >&6; }
 if { as_var=$cachevar; eval "test \"\${$as_var+set}\" = set"; }; then :
   $as_echo_n "(cached) " >&6
 else
   ac_save_CXX="$CXX"
-         CXX="$CXX $switch"
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+           CXX="$CXX $switch"
+           cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
@@ -5596,14 +5598,18 @@ else
   eval $cachevar=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-         CXX="$ac_save_CXX"
+           CXX="$ac_save_CXX"
 fi
 eval ac_res=\$$cachevar
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
-      if eval test x\$$cachevar = xyes; then
-        CXX_DIALECT="$switch"
-        ac_success=yes
+        if eval test x\$$cachevar = xyes; then
+          CXX_DIALECT="$switch"
+          ac_success=yes
+          break
+        fi
+      done
+      if test x$ac_success = xyes; then
         break
       fi
     done
@@ -7165,7 +7171,8 @@ build_warnings="-Wall -Wpointer-arith \
 -Wno-switch -Wno-char-subscripts \
 -Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable \
 -Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized \
--Wno-mismatched-tags"
+-Wno-mismatched-tags \
+-Wno-error=deprecated-register"
 
 case "${host}" in
   *-*-mingw32*)
