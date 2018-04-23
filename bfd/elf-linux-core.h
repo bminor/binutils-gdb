@@ -69,12 +69,8 @@ swap_linux_prpsinfo32_ugid32_out
   bfd_put_32 (obfd, from->pr_ppid, to->pr_ppid);
   bfd_put_32 (obfd, from->pr_pgrp, to->pr_pgrp);
   bfd_put_32 (obfd, from->pr_sid, to->pr_sid);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
   strncpy (to->pr_fname, from->pr_fname, sizeof (to->pr_fname));
   strncpy (to->pr_psargs, from->pr_psargs, sizeof (to->pr_psargs));
-#pragma GCC diagnostic pop
 }
 
 /* External 32-bit structure for PRPSINFO.  This structure is
@@ -125,12 +121,8 @@ swap_linux_prpsinfo32_ugid16_out
   bfd_put_32 (obfd, from->pr_ppid, to->pr_ppid);
   bfd_put_32 (obfd, from->pr_pgrp, to->pr_pgrp);
   bfd_put_32 (obfd, from->pr_sid, to->pr_sid);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
   strncpy (to->pr_fname, from->pr_fname, sizeof (to->pr_fname));
   strncpy (to->pr_psargs, from->pr_psargs, sizeof (to->pr_psargs));
-#pragma GCC diagnostic pop
 }
 
 /* External 64-bit structure for PRPSINFO.  This structure is
@@ -182,12 +174,8 @@ swap_linux_prpsinfo64_ugid32_out
   bfd_put_32 (obfd, from->pr_ppid, to->pr_ppid);
   bfd_put_32 (obfd, from->pr_pgrp, to->pr_pgrp);
   bfd_put_32 (obfd, from->pr_sid, to->pr_sid);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
   strncpy (to->pr_fname, from->pr_fname, sizeof (to->pr_fname));
   strncpy (to->pr_psargs, from->pr_psargs, sizeof (to->pr_psargs));
-#pragma GCC diagnostic pop
 }
 
 /* External 64-bit structure for PRPSINFO.  This structure is
@@ -239,12 +227,8 @@ swap_linux_prpsinfo64_ugid16_out
   bfd_put_32 (obfd, from->pr_ppid, to->pr_ppid);
   bfd_put_32 (obfd, from->pr_pgrp, to->pr_pgrp);
   bfd_put_32 (obfd, from->pr_sid, to->pr_sid);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
   strncpy (to->pr_fname, from->pr_fname, sizeof (to->pr_fname));
   strncpy (to->pr_psargs, from->pr_psargs, sizeof (to->pr_psargs));
-#pragma GCC diagnostic pop
 }
 
 #endif

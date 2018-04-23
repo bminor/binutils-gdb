@@ -10549,12 +10549,8 @@ elfcore_write_prpsinfo (bfd  *abfd,
 #endif
 
       memset (&data, 0, sizeof (data));
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
       strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
       strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
-#pragma GCC diagnostic pop
       return elfcore_write_note (abfd, buf, bufsiz,
 				 "CORE", note_type, &data, sizeof (data));
     }
