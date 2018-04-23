@@ -862,47 +862,6 @@ rust_print_type (struct type *type, const char *varstring,
 
 
 
-/* Compute the alignment of the type T.  */
-
-static int
-rust_type_alignment (struct type *t)
-{
-  t = check_typedef (t);
-  switch (TYPE_CODE (t))
-    {
-    default:
-      error (_("Could not compute alignment of type"));
-
-    case TYPE_CODE_PTR:
-    case TYPE_CODE_ENUM:
-    case TYPE_CODE_INT:
-    case TYPE_CODE_FLT:
-    case TYPE_CODE_REF:
-    case TYPE_CODE_CHAR:
-    case TYPE_CODE_BOOL:
-      return TYPE_LENGTH (t);
-
-    case TYPE_CODE_ARRAY:
-    case TYPE_CODE_COMPLEX:
-      return rust_type_alignment (TYPE_TARGET_TYPE (t));
-
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-      {
-	int i;
-	int align = 1;
-
-	for (i = 0; i < TYPE_NFIELDS (t); ++i)
-	  {
-	    int a = rust_type_alignment (TYPE_FIELD_TYPE (t, i));
-	    if (a > align)
-	      align = a;
-	  }
-	return align;
-      }
-    }
-}
-
 /* Like arch_composite_type, but uses TYPE to decide how to allocate
    -- either on an obstack or on a gdbarch.  */
 
@@ -945,7 +904,7 @@ rust_composite_type (struct type *original,
   if (field2 != NULL)
     {
       struct field *field = &TYPE_FIELD (result, i);
-      int align = rust_type_alignment (type2);
+      unsigned align = type_align (type2);
 
       if (align != 0)
 	{
