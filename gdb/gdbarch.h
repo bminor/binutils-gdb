@@ -147,12 +147,6 @@ extern void set_gdbarch_long_bit (struct gdbarch *gdbarch, int long_bit);
 extern int gdbarch_long_long_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_long_bit (struct gdbarch *gdbarch, int long_long_bit);
 
-/* Alignment of a long long or unsigned long long for the target
-   machine. */
-
-extern int gdbarch_long_long_align_bit (struct gdbarch *gdbarch);
-extern void set_gdbarch_long_long_align_bit (struct gdbarch *gdbarch, int long_long_align_bit);
-
 /* The ABI default bit-size and format for "half", "float", "double", and
    "long double".  These bit/format pairs should eventually be combined
    into a single object.  For the moment, just initialize them as a pair.

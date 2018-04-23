@@ -413,8 +413,8 @@ jit_read_code_entry (struct gdbarch *gdbarch,
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   ptr_size = TYPE_LENGTH (ptr_type);
 
-  /* Figure out where the longlong value will be.  */
-  align_bytes = gdbarch_long_long_align_bit (gdbarch) / 8;
+  /* Figure out where the uint64_t value will be.  */
+  align_bytes = type_align (builtin_type (gdbarch)->builtin_uint64);
   off = 3 * ptr_size;
   off = (off + (align_bytes - 1)) & ~(align_bytes - 1);
 

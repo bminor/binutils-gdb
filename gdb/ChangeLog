@@ -1,5 +1,16 @@
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
+	* jit.c (jit_read_code_entry): Use type_align.
+	* i386-tdep.c (i386_gdbarch_init): Don't call
+	set_gdbarch_long_long_align_bit.
+	* gdbarch.sh: Remove long_long_align_bit.
+	* gdbarch.c, gdbarch.h: Rebuild.
+	* arc-tdep.c (arc_type_align): New function.
+	(arc_gdbarch_init): Use arc_type_align.  Don't call
+	set_gdbarch_long_long_align_bit.
+
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_type_alignment): Remove.
 	(rust_composite_type): Use type_align.
 

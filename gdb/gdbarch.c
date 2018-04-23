@@ -175,7 +175,6 @@ struct gdbarch
   int int_bit;
   int long_bit;
   int long_long_bit;
-  int long_long_align_bit;
   int half_bit;
   const struct floatformat ** half_format;
   int float_bit;
@@ -389,7 +388,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->int_bit = 4*TARGET_CHAR_BIT;
   gdbarch->long_bit = 4*TARGET_CHAR_BIT;
   gdbarch->long_long_bit = 2*gdbarch->long_bit;
-  gdbarch->long_long_align_bit = 2*gdbarch->long_bit;
   gdbarch->half_bit = 2*TARGET_CHAR_BIT;
   gdbarch->float_bit = 4*TARGET_CHAR_BIT;
   gdbarch->double_bit = 8*TARGET_CHAR_BIT;
@@ -530,7 +528,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of int_bit, invalid_p == 0 */
   /* Skip verify of long_bit, invalid_p == 0 */
   /* Skip verify of long_long_bit, invalid_p == 0 */
-  /* Skip verify of long_long_align_bit, invalid_p == 0 */
   /* Skip verify of half_bit, invalid_p == 0 */
   if (gdbarch->half_format == 0)
     gdbarch->half_format = floatformats_ieee_half;
@@ -1166,9 +1163,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: long_double_format = %s\n",
                       pformat (gdbarch->long_double_format));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: long_long_align_bit = %s\n",
-                      plongest (gdbarch->long_long_align_bit));
-  fprintf_unfiltered (file,
                       "gdbarch_dump: long_long_bit = %s\n",
                       plongest (gdbarch->long_long_bit));
   fprintf_unfiltered (file,
@@ -1636,23 +1630,6 @@ set_gdbarch_long_long_bit (struct gdbarch *gdbarch,
                            int long_long_bit)
 {
   gdbarch->long_long_bit = long_long_bit;
-}
-
-int
-gdbarch_long_long_align_bit (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of long_long_align_bit, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_long_long_align_bit called\n");
-  return gdbarch->long_long_align_bit;
-}
-
-void
-set_gdbarch_long_long_align_bit (struct gdbarch *gdbarch,
-                                 int long_long_align_bit)
-{
-  gdbarch->long_long_align_bit = long_long_align_bit;
 }
 
 int

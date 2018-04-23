@@ -1957,6 +1957,15 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
   return TRUE;
 }
 
+/* Implement the type_align gdbarch function.  */
+
+static ULONGEST
+arc_type_align (struct gdbarch *gdbarch, struct type *type)
+{
+  type = check_typedef (type);
+  return std::min<ULONGEST> (4, TYPE_LENGTH (type));
+}
+
 /* Implement the "init" gdbarch method.  */
 
 static struct gdbarch *
@@ -1982,7 +1991,7 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_int_bit (gdbarch, 32);
   set_gdbarch_long_bit (gdbarch, 32);
   set_gdbarch_long_long_bit (gdbarch, 64);
-  set_gdbarch_long_long_align_bit (gdbarch, 32);
+  set_gdbarch_type_align (gdbarch, arc_type_align);
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
   set_gdbarch_double_bit (gdbarch, 64);
