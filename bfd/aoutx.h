@@ -1343,7 +1343,7 @@ aout_get_external_symbols (bfd *abfd)
 #ifdef USE_MMAP
       if (stringsize >= BYTES_IN_WORD)
 	{
-	  if (! bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize,
+	  if (! bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize + 1,
 				     &obj_aout_string_window (abfd), TRUE))
 	    return FALSE;
 	  strings = (char *) obj_aout_string_window (abfd).data;
@@ -1351,7 +1351,7 @@ aout_get_external_symbols (bfd *abfd)
       else
 #endif
 	{
-	  strings = (char *) bfd_malloc (stringsize);
+	  strings = (char *) bfd_malloc (stringsize + 1);
 	  if (strings == NULL)
 	    return FALSE;
 
@@ -1370,7 +1370,8 @@ aout_get_external_symbols (bfd *abfd)
       /* Ensure that a zero index yields an empty string.  */
       strings[0] = '\0';
 
-      strings[stringsize - 1] = 0;
+      /* Ensure that the string buffer is NUL terminated.  */
+      strings[stringsize] = 0;
 
       obj_aout_external_strings (abfd) = strings;
       obj_aout_external_string_size (abfd) = stringsize;
