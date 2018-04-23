@@ -1776,7 +1776,10 @@ Versions::symbol_section_contents(const Symbol_table* symtab,
 	version_index = this->version_index(symtab, dynpool, *p);
       // If the symbol was defined as foo@V1 instead of foo@@V1, add
       // the hidden bit.
-      if ((*p)->version() != NULL && !(*p)->is_default())
+      if ((*p)->version() != NULL
+	  && (*p)->is_defined()
+	  && !(*p)->is_default()
+	  && !(*p)->from_dyn())
         version_index |= elfcpp::VERSYM_HIDDEN;
       elfcpp::Swap<16, big_endian>::writeval(pbuf + (*p)->dynsym_index() * 2,
                                              version_index);

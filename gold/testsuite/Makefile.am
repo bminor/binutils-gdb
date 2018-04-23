@@ -2516,6 +2516,23 @@ plugin_pr22868_b_ir.o: plugin_pr22868_b.c
 plugin_pr22868_b.o: plugin_pr22868_b.c
 	$(COMPILE) -c -fpic -o $@ $<
 
+check_SCRIPTS += ver_test_pr16504.sh
+check_DATA += ver_test_pr16504.stdout
+ver_test_pr16504.stdout: ver_test_pr16504.so
+	$(TEST_READELF) -W --dyn-syms $< >$@ 2>/dev/null
+ver_test_pr16504.so: ver_test_pr16504_a.so ver_test_pr16504_b.o.syms ver_test_pr16504_b.script gcctestdir/ld
+	gcctestdir/ld -shared -o $@ --plugin ./plugin_test.so --version-script $(srcdir)/ver_test_pr16504_b.script ver_test_pr16504_b.o.syms ver_test_pr16504_a.so
+ver_test_pr16504_a.so: ver_test_pr16504_a.o ver_test_pr16504_a.script gcctestdir/ld
+	gcctestdir/ld -shared -o $@ --version-script $(srcdir)/ver_test_pr16504_a.script ver_test_pr16504_a.o
+ver_test_pr16504_a.o: ver_test_pr16504_a.c
+	$(COMPILE) -c -fpic -o $@ $<
+# Filter out the UNDEFs from the symbols file to simulate GCC behavior,
+# which does not pass the UNDEF from a .symver directive.
+ver_test_pr16504_b.o.syms: ver_test_pr16504_b.o
+	$(TEST_READELF) -sW $< 2>/dev/null | grep -v "UND" >$@
+ver_test_pr16504_b.o: ver_test_pr16504_b.c
+	$(COMPILE) -c -fpic -o $@ $<
+
 endif PLUGINS
 
 check_PROGRAMS += exclude_libs_test

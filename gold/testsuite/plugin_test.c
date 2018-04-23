@@ -46,6 +46,7 @@ struct sym_info
   char* vis;
   char* sect;
   char* name;
+  char* ver;
 };
 
 static struct claimed_file* first_claimed_file = NULL;
@@ -397,7 +398,14 @@ claim_file_hook (const struct ld_plugin_input_file* file, int* claimed)
           syms[nsyms].name = malloc(len + 1);
           strncpy(syms[nsyms].name, info.name, len + 1);
         }
-      syms[nsyms].version = NULL;
+      if (info.ver == NULL)
+        syms[nsyms].version = NULL;
+      else
+        {
+          len = strlen(info.ver);
+          syms[nsyms].version = malloc(len + 1);
+          strncpy(syms[nsyms].version, info.ver, len + 1);
+        }
       syms[nsyms].def = def;
       syms[nsyms].visibility = vis;
       syms[nsyms].size = info.size;
@@ -676,11 +684,26 @@ parse_readelf_line(char* p, struct sym_info* info)
   p += strspn(p, " ");
 
   /* Name field.  */
-  /* FIXME:  Look for version.  */
-  len = strlen(p);
-  if (len == 0)
-    p = NULL;
-  else if (p[len-1] == '\n')
-    p[--len] = '\0';
-  info->name = p;
+  len = strcspn(p, "@\n");
+  if (len > 0 && p[len] == '@')
+    {
+      /* Get the symbol version.  */
+      char* vp = p + len;
+      int vlen;
+
+      vp += strspn(vp, "@");
+      vlen = strcspn(vp, "\n");
+      vp[vlen] = '\0';
+      if (vlen > 0)
+	info->ver = vp;
+      else
+	info->ver = NULL;
+    }
+  else
+    info->ver = NULL;
+  p[len] = '\0';
+  if (len > 0)
+    info->name = p;
+  else
+    info->name = NULL;
 }

@@ -1,3 +1,22 @@
+2018-04-24  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/16504
+	* dynobj.cc (Versions::symbol_section_contents): Don't set
+	VERSYM_HIDDEN flag for undefined symbols.
+	* symtab.cc (Symbol_table::add_from_object): Don't override default
+	version definition with a different default version.
+	* symtab.h (Symbol::from_dyn): New method.
+	* testsuite/plugin_test.c (struct sym_info): Add ver field.
+	(claim_file_hook): Pass symbol version to plugin API.
+	(parse_readelf_line): Parse symbol version.
+	* testsuite/Makefile.am (ver_test_pr16504): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/ver_test_pr16504.sh: New test script.
+	* testsuite/ver_test_pr16504_a.c: New source file.
+	* testsuite/ver_test_pr16504_a.script: New version script.
+	* testsuite/ver_test_pr16504_b.c: New source file.
+	* testsuite/ver_test_pr16504_b.script: New version script.
+
 2018-04-19  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/23046

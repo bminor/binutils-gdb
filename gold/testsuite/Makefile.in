@@ -612,7 +612,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_pr22868.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_53 = plugin_final_layout.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_layout_with_alignment.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_pr22868.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_pr22868.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	ver_test_pr16504.sh
 
 # Uses the plugin_final_layout.sh script above to avoid duplication
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_54 = plugin_final_layout.stdout \
@@ -620,7 +621,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_layout_new_file.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_layout_new_file_readelf.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_layout_with_alignment.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_pr22868.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_pr22868.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	ver_test_pr16504.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_55 = exclude_libs_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test
@@ -5368,6 +5370,8 @@ plugin_layout_with_alignment.sh.log: plugin_layout_with_alignment.sh
 	@p='plugin_layout_with_alignment.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 plugin_pr22868.sh.log: plugin_pr22868.sh
 	@p='plugin_pr22868.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_pr16504.sh.log: ver_test_pr16504.sh
+	@p='ver_test_pr16504.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 exclude_libs_test.sh.log: exclude_libs_test.sh
 	@p='exclude_libs_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 discard_locals_test.sh.log: discard_locals_test.sh
@@ -7219,6 +7223,20 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_pr22868_b_ir.o: plugin_pr22868_b.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -c -DIR -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_pr22868_b.o: plugin_pr22868_b.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@ver_test_pr16504.stdout: ver_test_pr16504.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -W --dyn-syms $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@ver_test_pr16504.so: ver_test_pr16504_a.so ver_test_pr16504_b.o.syms ver_test_pr16504_b.script gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	gcctestdir/ld -shared -o $@ --plugin ./plugin_test.so --version-script $(srcdir)/ver_test_pr16504_b.script ver_test_pr16504_b.o.syms ver_test_pr16504_a.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@ver_test_pr16504_a.so: ver_test_pr16504_a.o ver_test_pr16504_a.script gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	gcctestdir/ld -shared -o $@ --version-script $(srcdir)/ver_test_pr16504_a.script ver_test_pr16504_a.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@ver_test_pr16504_a.o: ver_test_pr16504_a.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+# Filter out the UNDEFs from the symbols file to simulate GCC behavior,
+# which does not pass the UNDEF from a .symver directive.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@ver_test_pr16504_b.o.syms: ver_test_pr16504_b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< 2>/dev/null | grep -v "UND" >$@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@ver_test_pr16504_b.o: ver_test_pr16504_b.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test.syms: exclude_libs_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
