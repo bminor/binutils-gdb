@@ -119,7 +119,7 @@ class ui_out
      a hack to encapsulate that test.  Once GDB manages to separate the
      CLI/MI from the core of GDB the problem should just go away ....  */
 
-  bool is_mi_like_p ();
+  bool is_mi_like_p () const;
 
   bool query_table_field (int colno, int *width, int *alignment,
 			  const char **col_name);
@@ -157,7 +157,7 @@ class ui_out
   /* Set as not MI-like by default.  It is overridden in subclasses if
      necessary.  */
 
-  virtual bool do_is_mi_like_p ()
+  virtual bool do_is_mi_like_p () const
   { return false; }
 
  private:

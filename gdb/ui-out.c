@@ -581,7 +581,7 @@ ui_out::test_flags (ui_out_flags mask)
 }
 
 bool
-ui_out::is_mi_like_p ()
+ui_out::is_mi_like_p () const
 {
   return do_is_mi_like_p ();
 }
