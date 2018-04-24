@@ -1,3 +1,8 @@
+2018-04-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/23104
+	* gdb.base/info-shared.exp: Replace libs=-ldl with shlib_load.
+
 2018-04-19  Richard Bunt  <richard.bunt@arm.com>
 
 	* gdb.threads/multiple-successive-infcall.c: New test.
