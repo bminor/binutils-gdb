@@ -4022,15 +4022,22 @@ ignore_section_sym (bfd *abfd, asymbol *sym)
 {
   elf_symbol_type *type_ptr;
 
+  if (sym == NULL)
+    return FALSE;
+
   if ((sym->flags & BSF_SECTION_SYM) == 0)
     return FALSE;
+
+  if (sym->section == NULL)
+    return TRUE;
 
   type_ptr = elf_symbol_from (abfd, sym);
   return ((type_ptr != NULL
 	   && type_ptr->internal_elf_sym.st_shndx != 0
 	   && bfd_is_abs_section (sym->section))
 	  || !(sym->section->owner == abfd
-	       || (sym->section->output_section->owner == abfd
+	       || (sym->section->output_section != NULL
+		   && sym->section->output_section->owner == abfd
 		   && sym->section->output_offset == 0)
 	       || bfd_is_abs_section (sym->section)));
 }

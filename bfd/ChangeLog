@@ -1,5 +1,9 @@
 2018-04-24  Nick Clifton  <nickc@redhat.com>
 
+	PR 23113
+	* elf.c (ignore_section_sym): Check for the output_section pointer
+	being NULL before dereferencing it.
+
 	PR 23110
 	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Check for
 	a negative PE_DEBUG_DATA size before iterating over the debug data.
