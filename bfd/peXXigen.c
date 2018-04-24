@@ -2993,6 +2993,15 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 		 (uint64_t) (section->size - (addr - section->vma)));
 	      return FALSE;
 	    }
+	  /* PR 23110.  */
+	  else if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size < 0)
+	    {
+	      /* xgettext:c-format */
+	      _bfd_error_handler
+		(_("%pB: Data Directory size (%#lx) is negative"),
+		 obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size);
+	      return FALSE;
+	    }
 
 	  for (i = 0; i < ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
 		 / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
