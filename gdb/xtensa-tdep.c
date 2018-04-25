@@ -3145,16 +3145,12 @@ xtensa_derive_tdep (struct gdbarch_tdep *tdep)
 	max_size = rmap->byte_size;
       if (rmap->mask != 0 && tdep->num_regs == 0)
 	tdep->num_regs = n;
-      /* Find out out how to deal with priveleged registers.
-
-         if ((rmap->flags & XTENSA_REGISTER_FLAGS_PRIVILEGED) != 0
-              && tdep->num_nopriv_regs == 0)
-           tdep->num_nopriv_regs = n;
-      */
       if ((rmap->flags & XTENSA_REGISTER_FLAGS_PRIVILEGED) != 0
-	  && tdep->num_regs == 0)
-	tdep->num_regs = n;
+	  && tdep->num_nopriv_regs == 0)
+	tdep->num_nopriv_regs = n;
     }
+  if (tdep->num_regs == 0)
+    tdep->num_regs = tdep->num_nopriv_regs;
 
   /* Number of pseudo registers.  */
   tdep->num_pseudo_regs = n - tdep->num_regs;

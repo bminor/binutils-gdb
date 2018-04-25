@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "xtensa-tdep.h"
 #include "osabi.h"
 #include "linux-tdep.h"
 #include "solib-svr4.h"
@@ -97,6 +98,11 @@ xtensa_linux_gdb_signal_to_target (struct gdbarch *gdbarch,
 static void
 xtensa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->num_nopriv_regs < tdep->num_regs)
+    tdep->num_regs = tdep->num_nopriv_regs;
+
   linux_init_abi (info, gdbarch);
 
   set_solib_svr4_fetch_link_map_offsets

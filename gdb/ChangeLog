@@ -1,3 +1,12 @@
+2018-05-09  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-linux-tdep.c (xtensa-tdep.h): New include.
+	(xtensa_linux_init_abi): Limit tdep->num_regs by
+	tdep->num_nopriv_regs.
+	* xtensa-tdep.c (xtensa_derive_tdep): Calculate
+	tdep->num_nopriv_regs and only copy it to tdep->num_regs if it's
+	not initialized.
+
 2018-05-08  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* unittests/string_view-selftests.c: Define GNULIB_NAMESPACE.
