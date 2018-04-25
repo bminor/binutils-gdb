@@ -1,3 +1,21 @@
+2018-04-26  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_0F38F8, PREFIX_0F38F9,
+	MOD_0F38F8_PREFIX_2, MOD_0F38F9_PREFIX_0.
+	(prefix_table): New instructions (see prefix above).
+	(mod_table): New instructions (see prefix above).
+	Add Gva macro and handle in OP_G.
+	* i386-gen.c (cpu_flag_init): Add CPU_MOVDIRI_FLAGS,
+	CPU_MOVDIR64B_FLAGS.
+	(cpu_flags): Likewise.
+	(opcode_modifiers): Add AddrPrefixOpReg.
+	(i386_opcode_modifier): Likewise.
+	* i386-opc.h (enum): Add CpuMOVDIRI, CpuMOVDIR64B.
+	(i386_cpu_flags): Likewise.
+	* i386-opc.tbl: Add movidir{i,64b}.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl: Fold various non-memory operand AVX512VL
