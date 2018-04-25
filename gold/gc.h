@@ -247,7 +247,12 @@ gc_process_relocs(
 		(*secvec).push_back(Section_id(src_obj, dst_indx));
 	      else
                 (*secvec).push_back(Section_id(NULL, 0));
-              (*symvec).push_back(NULL);
+              // If the target of the relocation is an STT_SECTION symbol,
+              // make a note of that by storing -1 in the symbol vector.
+              if (lsym.get_st_type() == elfcpp::STT_SECTION)
+		(*symvec).push_back(reinterpret_cast<Symbol*>(-1));
+	      else
+		(*symvec).push_back(NULL);
 	      (*addendvec).push_back(std::make_pair(
 					static_cast<long long>(symvalue),
 					static_cast<long long>(addend)));

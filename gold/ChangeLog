@@ -1,5 +1,13 @@
 2018-04-24  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/20642
+	PR gold/22820
+	* gc.h (gc_process_relocs): Flag STT_SECTION symbols in symvec.
+	* icf.cc (get_section_contents): For merge sections, ignore the
+	addend for relocations against non-section symbols.
+
+2018-04-24  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/16504
 	* dynobj.cc (Versions::symbol_section_contents): Don't set
 	VERSYM_HIDDEN flag for undefined symbols.
