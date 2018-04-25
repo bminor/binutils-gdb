@@ -1,3 +1,7 @@
+2018-05-11  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* configure.tgt (xtensa*-*-linux*): Drop gdb_target definition.
+
 2018-05-11  Pedro Alves  <palves@redhat.com>
 
 	* corelow.c (core_target) <core_target>: No longer inline.
