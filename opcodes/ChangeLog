@@ -1,3 +1,8 @@
+2018-04-25  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from master branch
+	* aarch64-tbl.h (sqrdmlah, sqrdmlsh): Fix masks.
+
 2018-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master branch
