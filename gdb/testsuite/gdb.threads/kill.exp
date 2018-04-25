@@ -70,7 +70,7 @@ proc test {threaded} {
 
 	gdb_test_multiple "kill" "kill" {
 	    -re "Kill the program being debugged\\? \\(y or n\\) $" {
-		gdb_test "y" "\\\[Inferior $decimal \\(.*\\) has been killed\\\]" "kill"
+		gdb_test "y" "\\\[Inferior $decimal \\(.*\\) killed\\\]" "kill"
 	    }
 	}
     }

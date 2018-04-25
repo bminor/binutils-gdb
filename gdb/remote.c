@@ -5138,7 +5138,9 @@ remote_detach_1 (int from_tty, inferior *inf)
      breakpoints that should be available for the followed inferior.  */
   if (!is_fork_parent)
     {
-      std::string infpid = target_pid_to_str (inferior_ptid);
+      /* Save the pid as a string before mourning, since that will
+	 unpush the remote target, and we need the string after.  */
+      std::string infpid = target_pid_to_str (pid_to_ptid (pid));
 
       target_mourn_inferior (inferior_ptid);
       if (print_inferior_events)

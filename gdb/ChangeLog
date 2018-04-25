@@ -1,3 +1,11 @@
+2018-04-25  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (kill_command): Print the pid as string, not the whole
+	thread's ptid.  Add comment.  s/has been killed/killed/ in output
+	message.
+	* remote.c (remote_detach_1): Print the pid as string, not the
+	whole thread's ptid.
+
 2018-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Pedro Alves  <palves@redhat.com>

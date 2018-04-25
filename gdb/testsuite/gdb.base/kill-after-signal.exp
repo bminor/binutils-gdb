@@ -39,6 +39,6 @@ gdb_test "continue" "Program received signal SIGUSR1, .*"
 gdb_test "stepi" "\r\nhandler .*"
 gdb_test_multiple "kill" "kill" {
     -re "Kill the program being debugged\\? \\(y or n\\) $" {
-       gdb_test "y" "\\\[Inferior $decimal \\(.*\\) has been killed\\\]" "kill"
+       gdb_test "y" "\\\[Inferior $decimal \\(.*\\) killed\\\]" "kill"
     }
 }
