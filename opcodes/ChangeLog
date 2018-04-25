@@ -1,3 +1,9 @@
+2018-04-25  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (vpslld, vpsrad, vpsrld): Drop AVX512VL
+	register-only forms.
+	* i386-tlb.h: Re-generate.
+
 2018-04-25  Tamar Christina  <tamar.christina@arm.com>
 
 	* aarch64-tbl.h (sqrdmlah, sqrdmlsh): Fix masks.
