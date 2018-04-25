@@ -1,3 +1,9 @@
+2018-04-25  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/gas/aarch64/rdma.s: Test for larger register numbers.
+	* testsuite/gas/aarch64/rdma.d: Update results.
+	* testsuite/gas/aarch64/rdma-directive.d: Likewise.
+
 2018-04-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

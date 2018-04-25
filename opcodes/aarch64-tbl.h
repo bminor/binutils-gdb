@@ -2601,8 +2601,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SIMD_INSN ("bit", 0x2ea01c00, 0xbfe0fc00, asimdsame, 0, OP3 (Vd, Vn, Vm), QL_V3SAMEB, F_SIZEQ),
   SIMD_INSN ("bif", 0x2ee01c00, 0xbfe0fc00, asimdsame, 0, OP3 (Vd, Vn, Vm), QL_V3SAMEB, F_SIZEQ),
   /* AdvSIMD three same extension.  */
-  RDMA_INSN ("sqrdmlah",0x2e008400, 0xbf20fe00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3SAMEHS, F_SIZEQ),
-  RDMA_INSN ("sqrdmlsh",0x2e008c00, 0xbf20fe00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3SAMEHS, F_SIZEQ),
+  RDMA_INSN ("sqrdmlah",0x2e008400, 0xbf20fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3SAMEHS, F_SIZEQ),
+  RDMA_INSN ("sqrdmlsh",0x2e008c00, 0xbf20fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3SAMEHS, F_SIZEQ),
   CNUM_INSN ("fcmla", 0x2e00c400, 0xbf20e400, asimdsame, 0, OP4 (Vd, Vn, Vm, IMM_ROT1), QL_V3SAMEHSD_ROT, F_SIZEQ),
   CNUM_INSN ("fcadd", 0x2e00e400, 0xbf20ec00, asimdsame, 0, OP4 (Vd, Vn, Vm, IMM_ROT3), QL_V3SAMEHSD_ROT, F_SIZEQ),
   /* AdvSIMD shift by immediate.  */
