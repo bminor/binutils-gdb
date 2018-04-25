@@ -23886,11 +23886,13 @@ Print ten commands just after the commands last printed.
 Certain commands to @value{GDBN} may produce large amounts of
 information output to the screen.  To help you read all of it,
 @value{GDBN} pauses and asks you for input at the end of each page of
-output.  Type @key{RET} when you want to continue the output, or @kbd{q}
-to discard the remaining output.  Also, the screen width setting
-determines when to wrap lines of output.  Depending on what is being
-printed, @value{GDBN} tries to break the line at a readable place,
-rather than simply letting it overflow onto the following line.
+output.  Type @key{RET} when you want to see one more page of output,
+@kbd{q} to discard the remaining output, or @kbd{c} to continue
+without paging for the rest of the current command.  Also, the screen
+width setting determines when to wrap lines of output.  Depending on
+what is being printed, @value{GDBN} tries to break the line at a
+readable place, rather than simply letting it overflow onto the
+following line.
 
 Normally @value{GDBN} knows the size of the screen from the terminal
 driver software.  For example, on Unix @value{GDBN} uses the termcap data base

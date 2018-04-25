@@ -1,3 +1,11 @@
+2018-06-05  Tom Tromey	<tom@tromey.com>
+
+	PR cli/12326:
+	* gdb.cp/static-print-quit.exp: Update.
+	* lib/gdb.exp (pagination_prompt): Update.
+	* gdb.base/page.exp: Use pagination_prompt.  Add new tests.
+	* gdb.python/python.exp: Update.
+
 2018-06-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.mi/list-thread-groups-no-inferior.exp: New testcase.

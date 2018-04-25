@@ -1,3 +1,13 @@
+2018-06-05  Tom Tromey	<tom@tromey.com>
+
+	PR cli/12326:
+	* NEWS: Add entry about pager.
+	* utils.c (pagination_disabled_for_command): New global.
+	(prompt_for_continue): Allow "c" response to prompt.
+	(reinitialize_more_filter): Clear
+	pagination_disabled_for_command.
+	(fputs_maybe_filtered): Check pagination_disabled_for_command.
+
 2018-06-04  Tom Tromey  <tom@tromey.com>
 
 	* ada-lang.h (ada_lookup_symbol_list): Update.

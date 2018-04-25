@@ -1283,6 +1283,10 @@ show_chars_per_line (struct ui_file *file, int from_tty,
 /* Current count of lines printed on this page, chars on this line.  */
 static unsigned int lines_printed, chars_printed;
 
+/* True if pagination is disabled for just one command.  */
+
+static bool pagination_disabled_for_command;
+
 /* Buffer and start column of buffered text, for doing smarter word-
    wrapping.  When someone calls wrap_here(), we start buffering output
    that comes through fputs_filtered().  If we see a newline, we just
@@ -1467,12 +1471,14 @@ prompt_for_continue (void)
      prompt_for_continue_wait_time.  */
   using namespace std::chrono;
   steady_clock::time_point prompt_started = steady_clock::now ();
+  bool disable_pagination = pagination_disabled_for_command;
 
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032pre-prompt-for-continue\n"));
 
   strcpy (cont_prompt,
-	  "---Type <return> to continue, or q <return> to quit---");
+	  "--Type <RET> for more, q to quit, "
+	  "c to continue without paging--");
   if (annotation_level > 1)
     strcat (cont_prompt, "\n\032\032prompt-for-continue\n");
 
@@ -1502,11 +1508,14 @@ prompt_for_continue (void)
       if (p[0] == 'q')
 	/* Do not call quit here; there is no possibility of SIGINT.  */
 	throw_quit ("Quit");
+      if (p[0] == 'c')
+	disable_pagination = true;
     }
 
   /* Now we have to do this again, so that GDB will know that it doesn't
      need to save the ---Type <return>--- line at the top of the screen.  */
   reinitialize_more_filter ();
+  pagination_disabled_for_command = disable_pagination;
 
   dont_repeat ();		/* Forget prev cmd -- CR won't repeat it.  */
 }
@@ -1536,6 +1545,7 @@ reinitialize_more_filter (void)
 {
   lines_printed = 0;
   chars_printed = 0;
+  pagination_disabled_for_command = false;
 }
 
 /* Indicate that if the next sequence of characters overflows the line,
@@ -1680,6 +1690,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
   /* Don't do any filtering if it is disabled.  */
   if (stream != gdb_stdout
       || !pagination_enabled
+      || pagination_disabled_for_command
       || batch_flag
       || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX)
       || top_level_interpreter () == NULL
@@ -1696,8 +1707,11 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
   lineptr = linebuffer;
   while (*lineptr)
     {
-      /* Possible new page.  */
-      if (filter && (lines_printed >= lines_per_page - 1))
+      /* Possible new page.  Note that PAGINATION_DISABLED_FOR_COMMAND
+	 might be set during this loop, so we must continue to check
+	 it here.  */
+      if (filter && (lines_printed >= lines_per_page - 1)
+	  && !pagination_disabled_for_command)
 	prompt_for_continue ();
 
       while (*lineptr && *lineptr != '\n')
@@ -1737,8 +1751,11 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      if (wrap_column)
 		fputc_unfiltered ('\n', stream);
 
-	      /* Possible new page.  */
-	      if (lines_printed >= lines_per_page - 1)
+	      /* Possible new page.  Note that
+		 PAGINATION_DISABLED_FOR_COMMAND might be set during
+		 this loop, so we must continue to check it here.  */
+	      if (lines_printed >= lines_per_page - 1
+		  && !pagination_disabled_for_command)
 		prompt_for_continue ();
 
 	      /* Now output indentation and wrapped string.  */

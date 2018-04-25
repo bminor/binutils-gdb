@@ -9,6 +9,9 @@
   or by inferring from the last executable used, rather than the startup
   default.
 
+* The pager now allows a "c" response, meaning to disable the pager
+  for the rest of the current command.
+
 * The commands 'info variables/functions/types' now show the source line
   numbers of symbol definitions when available.
 
