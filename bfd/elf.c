@@ -10508,6 +10508,10 @@ elfcore_write_note (bfd *abfd,
   return buf;
 }
 
+#if GCC_VERSION >= 8000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
 char *
 elfcore_write_prpsinfo (bfd  *abfd,
 			char *buf,
@@ -10566,6 +10570,9 @@ elfcore_write_prpsinfo (bfd  *abfd,
   free (buf);
   return NULL;
 }
+#if GCC_VERSION >= 8000
+#pragma GCC diagnostic pop
+#endif
 
 char *
 elfcore_write_linux_prpsinfo32

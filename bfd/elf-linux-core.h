@@ -21,6 +21,25 @@
 #ifndef ELF_LINUX_CORE_H
 #define ELF_LINUX_CORE_H
 
+/* gcc-8 warns (*) on all the strncpy calls in this file about
+   possible string truncation.  The "truncation" is not a bug.  We
+   have an external representation of structs with fields that are not
+   necessarily NULL terminated and corresponding internal
+   representation fields that are one larger so that they can always
+   be NULL terminated.
+   gcc versions between 4.2 and 4.6 do not allow pragma control of
+   diagnostics inside functions, giving a hard error if you try to use
+   the finer control available with later versions.
+   gcc prior to 4.2 warns about diagnostic push and pop.
+   gcc-5, gcc-6 and gcc-7 warn that -Wstringop-truncation is unknown,
+   unless you also add #pragma GCC diagnostic ignored "-Wpragma".
+   (*) Depending on your system header files!  */
+
+#if GCC_VERSION >= 8000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
+
 /* External 32-bit structure for PRPSINFO.  This structure is
    ABI-defined, thus we choose to use char arrays here in order to
    avoid dealing with different types in different architectures.
@@ -230,5 +249,9 @@ swap_linux_prpsinfo64_ugid16_out
   strncpy (to->pr_fname, from->pr_fname, sizeof (to->pr_fname));
   strncpy (to->pr_psargs, from->pr_psargs, sizeof (to->pr_psargs));
 }
+
+#if GCC_VERSION >= 8000
+#pragma GCC diagnostic pop
+#endif
 
 #endif
