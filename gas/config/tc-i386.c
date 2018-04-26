@@ -10154,21 +10154,23 @@ parse_real_register (char *reg_string, char **end_op)
       && !cpu_arch_flags.bitfield.cpui386)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.regmmx && !cpu_arch_flags.bitfield.cpuregmmx)
+  if (r->reg_type.bitfield.regmmx && !cpu_arch_flags.bitfield.cpummx)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.xmmword && !cpu_arch_flags.bitfield.cpuregxmm)
-    return (const reg_entry *) NULL;
+  if (!cpu_arch_flags.bitfield.cpuavx512f)
+    {
+      if (r->reg_type.bitfield.zmmword || r->reg_type.bitfield.regmask)
+	return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.ymmword && !cpu_arch_flags.bitfield.cpuregymm)
-    return (const reg_entry *) NULL;
+      if (!cpu_arch_flags.bitfield.cpuavx)
+	{
+	  if (r->reg_type.bitfield.ymmword)
+	    return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.zmmword && !cpu_arch_flags.bitfield.cpuregzmm)
-    return (const reg_entry *) NULL;
-
-  if (r->reg_type.bitfield.regmask
-      && !cpu_arch_flags.bitfield.cpuregmask)
-    return (const reg_entry *) NULL;
+	  if (!cpu_arch_flags.bitfield.cpusse && r->reg_type.bitfield.xmmword)
+	    return (const reg_entry *) NULL;
+	}
+    }
 
   if (r->reg_type.bitfield.regbnd && !cpu_arch_flags.bitfield.cpumpx)
     return (const reg_entry *) NULL;

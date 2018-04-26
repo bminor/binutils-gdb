@@ -231,16 +231,6 @@ enum
   CpuWAITPKG,
   /* CLDEMOTE instruction required */
   CpuCLDEMOTE,
-  /* MMX register support required */
-  CpuRegMMX,
-  /* XMM register support required */
-  CpuRegXMM,
-  /* YMM register support required */
-  CpuRegYMM,
-  /* ZMM register support required */
-  CpuRegZMM,
-  /* Mask register support required */
-  CpuRegMask,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -364,11 +354,6 @@ typedef union i386_cpu_flags
       unsigned int cpupconfig:1;
       unsigned int cpuwaitpkg:1;
       unsigned int cpucldemote:1;
-      unsigned int cpuregmmx:1;
-      unsigned int cpuregxmm:1;
-      unsigned int cpuregymm:1;
-      unsigned int cpuregzmm:1;
-      unsigned int cpuregmask:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused

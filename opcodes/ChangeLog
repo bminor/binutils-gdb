@@ -1,5 +1,21 @@
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (cpu_flag_init): Drop all uses of CpuRegMMX,
+	CpuRegXMM, CpuRegYMM, CpuRegZMM, and CpuRegMask. Use
+	CPU_AVX2_FLAGS for CPU_AVX512F_FLAGS and drop bogus comment.
+	Don't use CPU_AVX2_FLAGS for CPU_AVX512VL_FLAGS and drop bogus
+	comment.
+	(cpu_flags): Drop CpuRegMMX, CpuRegXMM, CpuRegYMM, CpuRegZMM,
+	and CpuRegMask.
+	* i386-opc.h: CpuRegMMX, CpuRegXMM, CpuRegYMM, CpuRegZMM,
+	CpuRegMask: Delete.
+	(union i386_cpu_flags): Remove cpuregmmx, cpuregxmm, cpuregymm,
+	cpuregzmm, and cpuregmask.
+	* i386-init.h: Re-generate.
+	* i386-tbl.h: Re-generate.
+
+2018-04-26  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (cpu_flag_init): CPU_I586_FLAGS inherits Cpu387 only.
 	CPU_287_FLAGS is Cpu287 only. CPU_387_FLAGS is Cpu387 only.
 	* i386-init.h: Re-generate.
