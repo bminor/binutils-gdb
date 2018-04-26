@@ -1,3 +1,10 @@
+2018-04-26  Andrzej Kaczmarek  <andrzej.kaczmarek@codecoup.pl>
+
+	PR remote/9665
+	* remote.c (send_g_packet): Use putpkt/getpkt/packet_check_result
+	instead of remote_send.
+	(remote_send): Remove.
+
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
 	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Use
