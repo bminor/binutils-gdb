@@ -10109,6 +10109,11 @@ parse_real_register (char *reg_string, char **end_op)
   /* Handle floating point regs, allowing spaces in the (i) part.  */
   if (r == i386_regtab /* %st is first entry of table  */)
     {
+      if (!cpu_arch_flags.bitfield.cpu8087
+	  && !cpu_arch_flags.bitfield.cpu287
+	  && !cpu_arch_flags.bitfield.cpu387)
+	return (const reg_entry *) NULL;
+
       if (is_space_char (*s))
 	++s;
       if (*s == '(')
@@ -10147,12 +10152,6 @@ parse_real_register (char *reg_string, char **end_op)
        || r->reg_type.bitfield.debug
        || r->reg_type.bitfield.test)
       && !cpu_arch_flags.bitfield.cpui386)
-    return (const reg_entry *) NULL;
-
-  if (r->reg_type.bitfield.tbyte
-      && !cpu_arch_flags.bitfield.cpu8087
-      && !cpu_arch_flags.bitfield.cpu287
-      && !cpu_arch_flags.bitfield.cpu387)
     return (const reg_entry *) NULL;
 
   if (r->reg_type.bitfield.regmmx && !cpu_arch_flags.bitfield.cpuregmmx)
