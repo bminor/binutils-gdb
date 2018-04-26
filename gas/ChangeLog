@@ -1,5 +1,12 @@
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/xsave.s: Add AVX, LWP, MPX, and PKU
+	dependency tests.
+	* testsuite/gas/i386/xsave.d,
+	testsuite/gas/i386/xsave-intel.d: Adjust expecations.
+
+2018-04-26  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (parse_real_register): Re-write {,x,y,z}mm
 	and mask register handling.
 	* testsuite/gas/i386/avx512f-ymm.s, testsuite/gas/i386/avx512f-ymm.d,

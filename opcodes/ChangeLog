@@ -1,5 +1,13 @@
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (cpu_flag_init): Use CPU_XOP_FLAGS for
+	CPU_BDVER1_FLAGS. Use CPU_AVX2_FLAGS for CPU_ZNVER1_FLAGS. Use
+	CPU_AVX_FLAGS for CPU_BTVER1_FLAGS. Add CPU_XSAVE_FLAGS to
+	CPU_LWP_FLAGS, CPU_AVX_FLAGS, CPU_MPX_FLAGS, and CPU_OSPKE_FLAGS.
+	* i386-init.h: Re-generate.
+
+2018-04-26  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (cpu_flag_init): Drop all uses of CpuRegMMX,
 	CpuRegXMM, CpuRegYMM, CpuRegZMM, and CpuRegMask. Use
 	CPU_AVX2_FLAGS for CPU_AVX512F_FLAGS and drop bogus comment.
