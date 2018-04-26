@@ -159,7 +159,6 @@ static CORE_ADDR cache_pc_function_low = 0;
 static CORE_ADDR cache_pc_function_high = 0;
 static const char *cache_pc_function_name = 0;
 static struct obj_section *cache_pc_function_section = NULL;
-static int cache_pc_function_is_gnu_ifunc = 0;
 
 /* Clear cache, e.g. when symbol table is discarded.  */
 
@@ -170,7 +169,6 @@ clear_pc_function_cache (void)
   cache_pc_function_high = 0;
   cache_pc_function_name = (char *) 0;
   cache_pc_function_section = NULL;
-  cache_pc_function_is_gnu_ifunc = 0;
 }
 
 /* Finds the "function" (text symbol) that is smaller than PC but
@@ -178,19 +176,17 @@ clear_pc_function_cache (void)
    *NAME and/or *ADDRESS conditionally if that pointer is non-null.
    If ENDADDR is non-null, then set *ENDADDR to be the end of the
    function (exclusive), but passing ENDADDR as non-null means that
-   the function might cause symbols to be read.  If IS_GNU_IFUNC_P is provided
-   *IS_GNU_IFUNC_P is set to 1 on return if the function is STT_GNU_IFUNC.
-   This function either succeeds or fails (not halfway succeeds).  If it
-   succeeds, it sets *NAME, *ADDRESS, and *ENDADDR to real information and
-   returns 1.  If it fails, it sets *NAME, *ADDRESS, *ENDADDR and
-   *IS_GNU_IFUNC_P to zero and returns 0.  */
+   the function might cause symbols to be read.  This function either
+   succeeds or fails (not halfway succeeds).  If it succeeds, it sets
+   *NAME, *ADDRESS, and *ENDADDR to real information and returns 1.
+   If it fails, it sets *NAME, *ADDRESS and *ENDADDR to zero and
+   returns 0.  */
 
 /* Backward compatibility, no section argument.  */
 
 int
-find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
-				    CORE_ADDR *address, CORE_ADDR *endaddr,
-				    int *is_gnu_ifunc_p)
+find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
+			  CORE_ADDR *endaddr)
 {
   struct obj_section *section;
   struct symbol *f;
@@ -243,7 +239,6 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
 	  cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
 	  cache_pc_function_name = SYMBOL_LINKAGE_NAME (f);
 	  cache_pc_function_section = section;
-	  cache_pc_function_is_gnu_ifunc = TYPE_GNU_IFUNC (SYMBOL_TYPE (f));
 	  goto return_cached_value;
 	}
     }
@@ -266,16 +261,12 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
 	*address = 0;
       if (endaddr != NULL)
 	*endaddr = 0;
-      if (is_gnu_ifunc_p != NULL)
-	*is_gnu_ifunc_p = 0;
       return 0;
     }
 
   cache_pc_function_low = BMSYMBOL_VALUE_ADDRESS (msymbol);
   cache_pc_function_name = MSYMBOL_LINKAGE_NAME (msymbol.minsym);
   cache_pc_function_section = section;
-  cache_pc_function_is_gnu_ifunc = (MSYMBOL_TYPE (msymbol.minsym)
-				    == mst_text_gnu_ifunc);
   cache_pc_function_high = minimal_symbol_upper_bound (msymbol);
 
  return_cached_value:
@@ -307,20 +298,7 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
 	*endaddr = cache_pc_function_high;
     }
 
-  if (is_gnu_ifunc_p)
-    *is_gnu_ifunc_p = cache_pc_function_is_gnu_ifunc;
-
   return 1;
-}
-
-/* See find_pc_partial_function_gnu_ifunc, only the IS_GNU_IFUNC_P parameter
-   is omitted here for backward API compatibility.  */
-
-int
-find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
-			  CORE_ADDR *endaddr)
-{
-  return find_pc_partial_function_gnu_ifunc (pc, name, address, endaddr, NULL);
 }
 
 /* See symtab.h.  */

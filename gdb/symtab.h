@@ -1665,11 +1665,6 @@ extern struct symbol *find_pc_sect_function (CORE_ADDR, struct obj_section *);
 
 extern struct symbol *find_symbol_at_address (CORE_ADDR);
 
-extern int find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
-					       CORE_ADDR *address,
-					       CORE_ADDR *endaddr,
-					       int *is_gnu_ifunc_p);
-
 /* lookup function from address, return name, start addr and end addr.  */
 
 extern int find_pc_partial_function (CORE_ADDR, const char **, CORE_ADDR *,

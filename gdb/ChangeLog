@@ -1,5 +1,15 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* blockframe.c (cache_pc_function_is_gnu_ifunc): Delete.  Remove
+	all references.
+	(find_pc_partial_function_gnu_ifunc): Rename to ...
+	(find_pc_partial_function): ... this, and remove references to
+	'is_gnu_ifunc_p'.
+	(find_pc_partial_function): Delete old implementation.
+	* symtab.h (find_pc_partial_function_gnu_ifunc): Delete.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* linespec.c (struct bound_minimal_symbol_search_key): New.
 	(convert_linespec_to_sals): Sort minimal symbols earlier.  Don't
 	skip first line if we found a GNU ifunc minimal symbol by name.
