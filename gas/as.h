@@ -595,6 +595,10 @@ COMMON int flag_allow_nonconst_size;
 /* If we should generate ELF common symbols with the STT_COMMON type.  */
 extern int flag_use_elf_stt_common;
 
+/* TRUE iff GNU Build attribute notes should
+   be generated if none are in the input files.  */
+extern bfd_boolean flag_generate_build_notes;
+
 /* If section name substitution sequences should be honored */
 COMMON int flag_sectname_subst;
 #endif

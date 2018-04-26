@@ -39,6 +39,10 @@
 /* Define if you want compressed debug sections by default. */
 #undef DEFAULT_FLAG_COMPRESS_DEBUG
 
+/* Define to 1 if you want to generate GNU Build attribute notes by default,
+   if none are contained in the input. */
+#undef DEFAULT_GENERATE_BUILD_NOTES
+
 /* Define to 1 if you want to generate ELF common symbols with the STT_COMMON
    type by default. */
 #undef DEFAULT_GENERATE_ELF_STT_COMMON

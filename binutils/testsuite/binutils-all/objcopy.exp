@@ -1058,6 +1058,7 @@ if [is_elf_format] {
 	run_dump_test "note-3-32"
 	run_dump_test "note-4-32"
     }
+    run_dump_test "note-5"
 }
 
 run_dump_test "copy-2"

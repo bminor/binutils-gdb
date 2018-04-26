@@ -241,6 +241,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{-Z}] [@b{@@@var{FILE}}]
  [@b{--sectname-subst}] [@b{--size-check=[error|warning]}]
  [@b{--elf-stt-common=[no|yes]}]
+ [@b{--generate-missing-build-notes=[no|yes]}]
  [@b{--target-help}] [@var{target-options}]
  [@b{--}|@var{files} @dots{}]
 @c
@@ -743,6 +744,14 @@ Issue an error or warning for invalid ELF .size directive.
 These options control whether the ELF assembler should generate common
 symbols with the @code{STT_COMMON} type.  The default can be controlled
 by a configure option @option{--enable-elf-stt-common}.
+
+@item --generate-missing-build-notes=yes
+@itemx --generate-missing-build-notes=no
+These options control whether the ELF assembler should generate GNU Build
+attribute notes if none are present in the input sources.
+The default can be controlled by the @option{--enable-generate-build-notes}
+configure option.
+
 @end ifset
 
 @item --help

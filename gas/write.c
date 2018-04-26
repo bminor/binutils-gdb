@@ -1867,25 +1867,200 @@ create_obj_attrs_section (void)
   const char *name;
 
   size = bfd_elf_obj_attr_size (stdoutput);
-  if (size)
-    {
-      name = get_elf_backend_data (stdoutput)->obj_attrs_section;
-      if (!name)
-	name = ".gnu.attributes";
-      s = subseg_new (name, 0);
-      elf_section_type (s)
-	= get_elf_backend_data (stdoutput)->obj_attrs_section_type;
-      bfd_set_section_flags (stdoutput, s, SEC_READONLY | SEC_DATA);
-      frag_now_fix ();
-      p = frag_more (size);
-      bfd_elf_set_obj_attr_contents (stdoutput, (bfd_byte *)p, size);
+  if (size == 0)
+    return;
 
-      subsegs_finish_section (s);
-      relax_segment (seg_info (s)->frchainP->frch_root, s, 0);
-      size_seg (stdoutput, s, NULL);
+  name = get_elf_backend_data (stdoutput)->obj_attrs_section;
+  if (!name)
+    name = ".gnu.attributes";
+  s = subseg_new (name, 0);
+  elf_section_type (s)
+    = get_elf_backend_data (stdoutput)->obj_attrs_section_type;
+  bfd_set_section_flags (stdoutput, s, SEC_READONLY | SEC_DATA);
+  frag_now_fix ();
+  p = frag_more (size);
+  bfd_elf_set_obj_attr_contents (stdoutput, (bfd_byte *)p, size);
+
+  subsegs_finish_section (s);
+  relax_segment (seg_info (s)->frchainP->frch_root, s, 0);
+  size_seg (stdoutput, s, NULL);
+}
+
+#include "struc-symbol.h"
+
+/* Create a relocation against an entry in a GNU Build attribute section.  */
+
+static void
+create_note_reloc (segT           sec,
+		   symbolS *      sym,
+		   bfd_size_type  offset,
+		   int            reloc_type,
+		   bfd_vma        addend,
+		   char *         note)
+{
+  struct reloc_list * reloc;
+
+  reloc = XNEW (struct reloc_list);
+
+  /* We create a .b type reloc as resolve_reloc_expr_symbols() has already been called.  */
+  reloc->u.b.sec   = sec;
+  reloc->u.b.s     = sym->bsym;
+  reloc->u.b.r.sym_ptr_ptr = & reloc->u.b.s;
+  reloc->u.b.r.address     = offset;
+  reloc->u.b.r.addend      = addend;
+  reloc->u.b.r.howto       = bfd_reloc_type_lookup (stdoutput, reloc_type);
+
+  if (reloc->u.b.r.howto == NULL)
+    {
+      as_bad (_("unable to create reloc for build note"));
+      return;
+    }
+
+  reloc->file = N_("<gnu build note>");
+  reloc->line = 0;
+
+  reloc->next = reloc_list;
+  reloc_list = reloc;
+
+  /* For REL relocs, store the addend in the section.  */
+  if (! sec->use_rela_p
+      /* The SH target is a special case that uses RELA relocs
+	 but still stores the addend in the word being relocated.  */
+      || strstr (bfd_get_target (stdoutput), "-sh") != NULL)
+    {
+      if (target_big_endian)
+	{
+	  if (bfd_arch_bits_per_address (stdoutput) <= 32)
+	    note[offset + 3] = addend;
+	  else
+	    note[offset + 7] = addend;
+	}
+      else
+	note[offset] = addend;
     }
 }
-#endif
+
+static void
+maybe_generate_build_notes (void)
+{
+  segT      sec;
+  char *    note;
+  offsetT   note_size;
+  offsetT   desc_size;
+  offsetT   desc2_offset;
+  int       desc_reloc;
+  symbolS * sym;
+
+  if (! flag_generate_build_notes
+      || bfd_get_section_by_name (stdoutput,
+				  GNU_BUILD_ATTRS_SECTION_NAME) != NULL)
+    return;
+
+  /* Create a GNU Build Attribute section.  */
+  sec = subseg_new (GNU_BUILD_ATTRS_SECTION_NAME, FALSE);
+  elf_section_type (sec) = SHT_NOTE;
+  bfd_set_section_flags (stdoutput, sec,
+			 SEC_READONLY | SEC_HAS_CONTENTS | SEC_DATA);
+  bfd_set_section_alignment (stdoutput, sec, 2);
+
+  /* Create a version note.  */
+  if (bfd_arch_bits_per_address (stdoutput) <= 32)
+    {
+      note_size = 28;
+      desc_size = 8; /* Two 4-byte offsets.  */
+      desc2_offset = 24;
+
+      /* FIXME: The BFD backend for the CRX target does not support the
+	 BFD_RELOC_32, even though it really should.  Likewise for the
+	 CR16 target.  So we have special case code here...  */
+      if (strstr (bfd_get_target (stdoutput), "-crx") != NULL)
+	desc_reloc = BFD_RELOC_CRX_NUM32;
+      else if (strstr (bfd_get_target (stdoutput), "-cr16") != NULL)
+	desc_reloc = BFD_RELOC_CR16_NUM32;
+      else
+	desc_reloc = BFD_RELOC_32;
+    }
+  else
+    {
+      note_size = 36;
+      desc_size = 16; /* Two  8-byte offsets.  */
+      desc2_offset = 28;
+      /* FIXME: The BFD backend for the IA64 target does not support the
+	 BFD_RELOC_64, even though it really should.  The HPPA backend
+	 has a similar issue, although it does not support BFD_RELOCs at
+	 all!  So we have special case code to handle these targets.  */
+      if (strstr (bfd_get_target (stdoutput), "-ia64") != NULL)
+	desc_reloc = target_big_endian ? BFD_RELOC_IA64_DIR32MSB : BFD_RELOC_IA64_DIR32LSB;
+      else if (strstr (bfd_get_target (stdoutput), "-hppa") != NULL)
+	desc_reloc = 80; /* R_PARISC_DIR64.  */
+      else
+	desc_reloc = BFD_RELOC_64;
+    }
+  
+  frag_now_fix ();
+  note = frag_more (note_size);
+  memset (note, 0, note_size);
+
+  if (target_big_endian)
+    {
+      note[3] = 8; /* strlen (name) + 1.  */
+      note[7] = desc_size; /* Two 8-byte offsets.  */
+      note[10] = NT_GNU_BUILD_ATTRIBUTE_OPEN >> 8;
+      note[11] = NT_GNU_BUILD_ATTRIBUTE_OPEN & 0xff;
+    }
+  else
+    {
+      note[0] = 8; /* strlen (name) + 1.  */
+      note[4] = desc_size; /* Two 8-byte offsets.  */
+      note[8] = NT_GNU_BUILD_ATTRIBUTE_OPEN & 0xff;
+      note[9] = NT_GNU_BUILD_ATTRIBUTE_OPEN >> 8;
+    }
+
+  /* The a1 version number indicates that this note was
+     generated by the assembler and not the gcc annobin plugin.  */
+  memcpy (note + 12, "GA$3a1", 8);
+
+  /* Find the first code section symbol.  */
+  for (sym = symbol_rootP; sym != NULL; sym = sym->sy_next)
+    if (sym->bsym != NULL
+	&& sym->bsym->flags & BSF_SECTION_SYM
+	&& sym->bsym->section != NULL
+	&& sym->bsym->section->flags & SEC_CODE)
+      {
+	/* Found one - now create a relocation against this symbol.  */
+	create_note_reloc (sec, sym, 20, desc_reloc, 0, note);
+	break;
+      }
+
+  /* Find the last code section symbol.  */
+  if (sym)
+    {
+      for (sym = symbol_lastP; sym != NULL; sym = sym->sy_previous)
+	if (sym->bsym != NULL
+	    && sym->bsym->flags & BSF_SECTION_SYM
+	    && sym->bsym->section != NULL
+	    && sym->bsym->section->flags & SEC_CODE)
+	  {
+	    /* Create a relocation against the end of this symbol.  */
+	    create_note_reloc (sec, sym, desc2_offset, desc_reloc,
+			       bfd_get_section_size (sym->bsym->section),
+			       note);
+	    break;
+	  }
+    }
+  /* else - if we were unable to find any code section symbols then
+     probably there is no code in the output.  So leaving the start
+     and end values as zero in the note is OK.  */
+
+  /* FIXME: Maybe add a note recording the assembler command line and version ?  */
+
+  /* Install the note(s) into the section.  */
+  bfd_set_section_contents (stdoutput, sec, (bfd_byte *) note, 0, note_size);
+  subsegs_finish_section (sec);
+  relax_segment (seg_info (sec)->frchainP->frch_root, sec, 0);
+  size_seg (stdoutput, sec, NULL);
+}
+#endif /* OBJ_ELF */
 
 /* Write the object file.  */
 
@@ -2097,6 +2272,11 @@ write_object_file (void)
   resolve_local_symbol_values ();
   resolve_reloc_expr_symbols ();
 
+#ifdef OBJ_ELF
+  if (IS_ELF)
+    maybe_generate_build_notes ();
+#endif
+  
   PROGRESS (1);
 
 #ifdef tc_frob_file_before_adjust
@@ -2273,6 +2453,7 @@ write_object_file (void)
 #ifdef obj_coff_generate_pdata
   obj_coff_generate_pdata ();
 #endif
+
   bfd_map_over_sections (stdoutput, write_relocs, (char *) 0);
 
 #ifdef tc_frob_file_after_relocs

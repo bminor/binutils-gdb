@@ -100,6 +100,20 @@ AC_ARG_ENABLE(elf_stt_common,
   yes)  ac_default_elf_stt_common=1 ;;
 esac])dnl
 
+
+# Decide if the ELF assembler should default to generating
+# GNU Build notes if none are provided by the input.
+ac_default_generate_build_notes=0
+# Provide a configuration option to override the default.
+AC_ARG_ENABLE(generate_build_notes,
+	      AS_HELP_STRING([--enable-generate-build-notes],
+	      [generate GNU Build notes if none are provided by the input]),
+[case "${enableval}" in
+  yes)  ac_default_generate_build_notes=1 ;;
+  no)   ac_default_generate_build_notes=0 ;;
+esac])dnl
+
+
 using_cgen=no
 
 AM_BINUTILS_WARNINGS
@@ -595,6 +609,11 @@ AC_DEFINE_UNQUOTED(DEFAULT_GENERATE_ELF_STT_COMMON,
   $ac_default_elf_stt_common,
   [Define to 1 if you want to generate ELF common symbols with the
    STT_COMMON type by default.])
+
+AC_DEFINE_UNQUOTED(DEFAULT_GENERATE_BUILD_NOTES,
+  $ac_default_generate_build_notes,
+  [Define to 1 if you want to generate GNU Build attribute notes
+   by default, if none are contained in the input.])
 
 if test x$ac_default_compressed_debug_sections = xyes ; then
   AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1, [Define if you want compressed debug sections by default.])

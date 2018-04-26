@@ -1,3 +1,23 @@
+2018-04-26  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (flag_generate_build_notes): New variable.
+	(show_usage): Add entry for --generate-missing-build-notes.
+	(parse_args): Parse --generate-missing-build-notes.
+	* as.h: Export flag_generate_build_notes.
+	* symbols.c (save_symbol_name): Ensure that the name parameter is
+	not NULL.
+	* write.c (create_obj_attrs_section): Reformat.
+	(create_note_reloc): New function - creates a relocation for a
+	field in a GNU Build attribute note.
+	(maybe_generate_build_notes): New function - created GNU Build
+	attribute notes if none are present in the output file.
+	(write_object_file): Call maybe_generate_build_notes.
+	* configure.ac (--enable-generate-build-notes): New option.
+	* NEWS: Announce the new feature.
+	* doc/as.textinfo: Document the new option.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (check_VecOperands): Add AVX512VL check. Set
@@ -22,7 +42,7 @@
 	recording EVEX encoding. Don't check previously specified
 	encoding.
 	* testsuite/gas/i386/xmmhi32.s: Add {x,y,z}mm{16,24} cases.
-	* testsuite/gas/i386/xmmhi32.d: Adjust expectations.	
+	* testsuite/gas/i386/xmmhi32.d: Adjust expectations.
 	* testsuite/gas/i386/xmmhi64.s, testsuite/gas/i386/xmmhi64.d:
 	New.
 	* testsuite/gas/i386/i386.exp: Run new test.
