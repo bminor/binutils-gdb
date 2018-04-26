@@ -137,6 +137,14 @@ extern struct cmd_list_element *showchecklist;
 
 extern struct cmd_list_element *save_cmdlist;
 
+/* Chain containing all defined "set source" subcommands.  */
+
+extern struct cmd_list_element *setsourcelist;
+
+/* Chain containing all defined "show source" subcommands.  */
+
+extern struct cmd_list_element *showsourcelist;
+
 /* Limit the call depth of user-defined commands */
 
 extern unsigned int max_user_call_depth;

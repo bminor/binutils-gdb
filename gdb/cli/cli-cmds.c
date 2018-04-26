@@ -168,6 +168,10 @@ struct cmd_list_element *setchecklist;
 
 struct cmd_list_element *showchecklist;
 
+struct cmd_list_element *setsourcelist;
+
+struct cmd_list_element *showsourcelist;
+
 /* Command tracing state.  */
 
 int source_verbose = 0;

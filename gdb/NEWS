@@ -3,12 +3,21 @@
 
 *** Changes since GDB 11
 
+* New commands
+
 maint set backtrace-on-fatal-signal on|off
 maint show backtrace-on-fatal-signal
   This setting is 'on' by default.  When 'on' GDB will print a limited
   backtrace to stderr in the situation where GDB terminates with a
   fatal signal.  This only supported on some platforms where the
   backtrace and backtrace_symbols_fd functions are available.
+
+set source open on|off
+show source open
+  This setting, which is on by default, controls whether GDB will try
+  to open source code files.  Switching this off will stop GDB trying
+  to open and read source code files, which can be useful if the files
+  are located over a slow network connection.
 
 * Python API
 

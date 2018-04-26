@@ -8919,6 +8919,7 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 * Search::                      Searching source files
 * Source Path::                 Specifying source directories
 * Machine Code::                Source and machine code
+* Disable Reading Source::	Disable Reading Source Code
 @end menu
 
 @node List
@@ -9926,6 +9927,31 @@ OFF, which means never display the disassembly of the next line or
 instruction.
 @end table
 
+@node Disable Reading Source
+@section Disable Reading Source Code
+@cindex source code, disable access
+
+In some cases it can be desirable to prevent @value{GDBN} from
+accessing source code files.  One case where this might be desirable
+is if the source code files are located over a slow network
+connection.
+
+The following command can be used to control whether @value{GDBN}
+should access source code files or not:
+
+@table @code
+@kindex set source open
+@kindex show source open
+@item set source open @r{[}on@r{|}off@r{]}
+@itemx show source open
+When this option is @code{on}, which is the default, @value{GDBN} will
+access source code files when needed, for example to print source
+lines when @value{GDBN} stops, or in response to the @code{list}
+command.
+
+When this option is @code{off}, @value{GDBN} will not access source
+code files.
+@end table
 
 @node Data
 @chapter Examining Data

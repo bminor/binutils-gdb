@@ -148,7 +148,21 @@ show_filename_display_string (struct ui_file *file, int from_tty,
 {
   fprintf_filtered (file, _("Filenames are displayed as \"%s\".\n"), value);
 }
- 
+
+/* When true GDB will stat and open source files as required, but when
+   false, GDB will avoid accessing source files as much as possible.  */
+
+static bool source_open = true;
+
+/* Implement 'show source open'.  */
+
+static void
+show_source_open (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Source opening is \"%s\".\n"), value);
+}
+
 /* Line number of last line printed.  Default for various commands.
    current_source_line is usually, but not always, the same as this.  */
 
@@ -1048,8 +1062,13 @@ find_and_open_source (const char *filename,
   const char *p;
   int result;
 
-  /* Quick way out if we already know its full name.  */
+  /* If reading of source files is disabled then return a result indicating
+     the attempt to read this source file failed.  GDB will then display
+     the filename and line number instead.  */
+  if (!source_open)
+    return scoped_fd (-1);
 
+  /* Quick way out if we already know its full name.  */
   if (*fullname)
     {
       /* The user may have requested that source paths be rewritten
@@ -1062,6 +1081,7 @@ find_and_open_source (const char *filename,
 	*fullname = std::move (rewritten_fullname);
 
       result = gdb_open_cloexec (fullname->get (), OPEN_MODE, 0);
+
       if (result >= 0)
 	{
 	  *fullname = gdb_realpath (fullname->get ());
@@ -1300,7 +1320,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
   /* If printing of source lines is disabled, just print file and line
      number.  */
-  if (uiout->test_flags (ui_source_list))
+  if (uiout->test_flags (ui_source_list) && source_open)
     {
       /* Only prints "No such file or directory" once.  */
       if (s == last_source_visited)
@@ -1602,6 +1622,9 @@ search_command_helper (const char *regex, int from_tty, bool forward)
     = get_source_location (current_program_space);
   if (loc->symtab () == nullptr)
     select_source_symtab (0);
+
+  if (!source_open)
+    error (_("source code access disabled"));
 
   scoped_fd desc (open_source_file (loc->symtab ()));
   if (desc.get () < 0)
@@ -1927,6 +1950,22 @@ source_lines_range::source_lines_range (int startline,
     }
 }
 
+/* Handle the "set source" base command.  */
+
+static void
+set_source (const char *arg, int from_tty)
+{
+  help_list (setsourcelist, "set source ", all_commands, gdb_stdout);
+}
+
+/* Handle the "show source" base command.  */
+
+static void
+show_source (const char *args, int from_tty)
+{
+  help_list (showsourcelist, "show source ", all_commands, gdb_stdout);
+}
+
 
 void _initialize_source ();
 void
@@ -2050,4 +2089,25 @@ By default, relative filenames are displayed."),
 			show_filename_display_string,
 			&setlist, &showlist);
 
+  add_prefix_cmd ("source", no_class, set_source,
+                  _("Generic command for setting how sources are handled."),
+                  &setsourcelist, 0, &setlist);
+
+  add_prefix_cmd ("source", no_class, show_source,
+                  _("Generic command for showing source settings."),
+                  &showsourcelist, 0, &showlist);
+
+  add_setshow_boolean_cmd ("open", class_files, &source_open, _("\
+Set whether GDB should open source files."), _("\
+Show whether GDB should open source files."), _("\
+When this option is on GDB will open source files and display the\n\
+contents when appropriate, for example, when GDB stops, or the list\n\
+command is used.\n\
+When this option is off GDB will not try to open source files, instead\n\
+GDB will print the file and line number that would have been displayed.\n\
+This can be useful if access to source code files is slow, for example\n\
+due to the source being located over a slow network connection."),
+                           NULL,
+                           show_source_open,
+                           &setsourcelist, &showsourcelist);
 }
