@@ -4343,6 +4343,7 @@ add_minsym (struct minimal_symbol *minsym, struct objfile *objfile,
 
   struct bound_minimal_symbol mo = {minsym, objfile};
   msyms->push_back (mo);
+  return;
 }
 
 /* Search for minimal symbols called NAME.  If SEARCH_PSPACE
@@ -4383,6 +4384,7 @@ search_minsyms_for_name (struct collect_info *info,
 					    add_minsym (msym, objfile, nullptr,
 							info->state->list_mode,
 							&minsyms);
+					    return false;
 					  });
 	}
       }
@@ -4398,6 +4400,7 @@ search_minsyms_for_name (struct collect_info *info,
 	       {
 		 add_minsym (msym, SYMTAB_OBJFILE (symtab), symtab,
 			     info->state->list_mode, &minsyms);
+		 return false;
 	       });
 	}
     }

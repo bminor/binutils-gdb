@@ -1,5 +1,15 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* c-exp.y (variable production): Prefer ifunc minsyms over
+	regular function symbols.
+	* symtab.c (find_gnu_ifunc): New function.
+	* minsyms.h (lookup_msym_prefer): New enum.
+	(lookup_minimal_symbol_by_pc_section): Replace 'want_trampoline'
+	parameter by a lookup_msym_prefer parameter.
+	* symtab.h (find_gnu_ifunc): New declaration.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* blockframe.c (find_gnu_ifunc_target_type): New function.
 	(find_function_type): New.
 	* eval.c (evaluate_var_msym_value): For GNU ifunc types, always

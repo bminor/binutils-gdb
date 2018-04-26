@@ -4953,6 +4953,38 @@ symbol_is_function_or_method (minimal_symbol *msymbol)
     }
 }
 
+/* See symtab.h.  */
+
+bound_minimal_symbol
+find_gnu_ifunc (const symbol *sym)
+{
+  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+    return {};
+
+  lookup_name_info lookup_name (SYMBOL_SEARCH_NAME (sym),
+				symbol_name_match_type::SEARCH_NAME);
+  struct objfile *objfile = symbol_objfile (sym);
+
+  CORE_ADDR address = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+  minimal_symbol *ifunc = NULL;
+
+  iterate_over_minimal_symbols (objfile, lookup_name,
+				[&] (minimal_symbol *minsym)
+    {
+      if (MSYMBOL_TYPE (minsym) == mst_text_gnu_ifunc
+	  && MSYMBOL_VALUE_ADDRESS (objfile, minsym) == address)
+	{
+	  ifunc = minsym;
+	  return true;
+	}
+      return false;
+    });
+
+  if (ifunc != NULL)
+    return {ifunc, objfile};
+  return {};
+}
+
 /* Add matching symbols from SYMTAB to the current completion list.  */
 
 static void

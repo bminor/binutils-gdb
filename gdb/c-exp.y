@@ -1041,10 +1041,22 @@ variable:	name_not_typename
 			      if (symbol_read_needs_frame (sym.symbol))
 				innermost_block.update (sym);
 
-			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			      write_exp_elt_block (pstate, sym.block);
-			      write_exp_elt_sym (pstate, sym.symbol);
-			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+			      /* If we found a function, see if it's
+				 an ifunc resolver that has the same
+				 address as the ifunc symbol itself.
+				 If so, prefer the ifunc symbol.  */
+
+			      bound_minimal_symbol resolver
+				= find_gnu_ifunc (sym.symbol);
+			      if (resolver.minsym != NULL)
+				write_exp_msymbol (pstate, resolver);
+			      else
+				{
+				  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+				  write_exp_elt_block (pstate, sym.block);
+				  write_exp_elt_sym (pstate, sym.symbol);
+				  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+				}
 			    }
 			  else if ($1.is_a_field_of_this)
 			    {
