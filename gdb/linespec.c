@@ -4244,10 +4244,24 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 	      struct minimal_symbol *msymbol,
 	      std::vector<symtab_and_line> *result)
 {
-  struct symtab_and_line sal;
+  bool want_start_sal;
 
   CORE_ADDR func_addr;
-  if (msymbol_is_function (objfile, msymbol, &func_addr))
+  bool is_function = msymbol_is_function (objfile, msymbol, &func_addr);
+
+  if (is_function)
+    {
+      const char *msym_name = MSYMBOL_LINKAGE_NAME (msymbol);
+
+      if (MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc)
+	want_start_sal = gnu_ifunc_resolve_name (msym_name, &func_addr);
+      else
+	want_start_sal = true;
+    }
+
+  symtab_and_line sal;
+
+  if (is_function && want_start_sal)
     {
       sal = find_pc_sect_line (func_addr, NULL, 0);
 
@@ -4270,7 +4284,13 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   else
     {
       sal.objfile = objfile;
-      sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
+      sal.msymbol = msymbol;
+      /* Store func_addr, not the minsym's address in case this was an
+	 ifunc that hasn't been resolved yet.  */
+      if (is_function)
+	sal.pc = func_addr;
+      else
+	sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
       sal.pspace = current_program_space;
     }
 

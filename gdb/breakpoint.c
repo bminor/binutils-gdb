@@ -7156,37 +7156,29 @@ set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
       || loc->owner->type == bp_hardware_breakpoint
       || is_tracepoint (loc->owner))
     {
-      int is_gnu_ifunc;
       const char *function_name;
-      CORE_ADDR func_addr;
 
-      find_pc_partial_function_gnu_ifunc (loc->address, &function_name,
-					  &func_addr, NULL, &is_gnu_ifunc);
-
-      if (is_gnu_ifunc && !explicit_loc)
+      if (loc->msymbol != NULL
+	  && MSYMBOL_TYPE (loc->msymbol) == mst_text_gnu_ifunc
+	  && !explicit_loc)
 	{
 	  struct breakpoint *b = loc->owner;
 
-	  gdb_assert (loc->pspace == current_program_space);
-	  if (gnu_ifunc_resolve_name (function_name,
-				      &loc->requested_address))
-	    {
-	      /* Recalculate ADDRESS based on new REQUESTED_ADDRESS.  */
-	      loc->address = adjust_breakpoint_address (loc->gdbarch,
-							loc->requested_address,
-							b->type);
-	    }
-	  else if (b->type == bp_breakpoint && b->loc == loc
-	           && loc->next == NULL && b->related_breakpoint == b)
+	  function_name = MSYMBOL_LINKAGE_NAME (loc->msymbol);
+
+	  if (b->type == bp_breakpoint && b->loc == loc
+	      && loc->next == NULL && b->related_breakpoint == b)
 	    {
 	      /* Create only the whole new breakpoint of this type but do not
 		 mess more complicated breakpoints with multiple locations.  */
 	      b->type = bp_gnu_ifunc_resolver;
 	      /* Remember the resolver's address for use by the return
 	         breakpoint.  */
-	      loc->related_address = func_addr;
+	      loc->related_address = loc->address;
 	    }
 	}
+      else
+	find_pc_partial_function (loc->address, &function_name, NULL, NULL);
 
       if (function_name)
 	loc->function_name = xstrdup (function_name);
@@ -8650,6 +8642,8 @@ add_location_to_breakpoint (struct breakpoint *b,
   loc->line_number = sal->line;
   loc->symtab = sal->symtab;
   loc->symbol = sal->symbol;
+  loc->msymbol = sal->msymbol;
+  loc->objfile = sal->objfile;
 
   set_breakpoint_location_function (loc,
 				    sal->explicit_pc || sal->explicit_line);

@@ -490,6 +490,14 @@ public:
      ascertain when an event location was set at a different location than
      the one originally selected by parsing, e.g., inlined symbols.  */
   const struct symbol *symbol = NULL;
+
+  /* Similarly, the minimal symbol found by the location parser, if
+     any.  This may be used to ascertain if the location was
+     originally set on a GNU ifunc symbol.  */
+  const minimal_symbol *msymbol = NULL;
+
+  /* The objfile the symbol or minimal symbol were found in.  */
+  const struct objfile *objfile = NULL;
 };
 
 /* The possible return values for print_bpstat, print_it_normal,

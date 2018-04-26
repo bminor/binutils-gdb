@@ -1765,6 +1765,7 @@ struct symtab_and_line
   struct symtab *symtab = NULL;
   struct symbol *symbol = NULL;
   struct obj_section *section = NULL;
+  struct minimal_symbol *msymbol = NULL;
   /* Line number.  Line numbers start at 1 and proceed through symtab->nlines.
      0 is never a valid line number; it is used to indicate that line number
      information is not available.  */

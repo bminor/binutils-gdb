@@ -1,5 +1,17 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (set_breakpoint_location_function): Don't resolve
+	ifunc targets here.  Instead, if we have an ifunc minsym, use its
+	address/name.
+	(add_location_to_breakpoint): Store the minsym and the objfile in
+	the breakpoint location.
+	* breakpoint.h (bp_location) <msymbol, objfile>: New fields.
+	* linespec.c (minsym_found): Resolve GNU ifunc targets here.
+	Record the minsym in the sal.
+	* symtab.h (symtab_and_line) <msymbol>: New field.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* elfread.c (elf_gnu_ifunc_resolve_by_got): Don't write to *ADDR_P
 	unless we actually resolved the ifunc.
 
