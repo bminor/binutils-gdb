@@ -6567,22 +6567,16 @@ build_modrm_byte (void)
   unsigned int source, dest;
   int vex_3_sources;
 
-  /* The first operand of instructions with VEX prefix and 3 sources
-     must be VEX_Imm4.  */
   vex_3_sources = i.tm.opcode_modifier.vexsources == VEX3SOURCES;
   if (vex_3_sources)
     {
       unsigned int nds, reg_slot;
       expressionS *exp;
 
-      if (i.tm.opcode_modifier.veximmext
-          && i.tm.opcode_modifier.immext)
-        {
-          dest = i.operands - 2;
-          gas_assert (dest == 3);
-        }
-      else
-        dest = i.operands - 1;
+      gas_assert (!i.tm.opcode_modifier.veximmext
+ 		 || !i.tm.opcode_modifier.immext);
+
+      dest = i.operands - 1;
       nds = dest - 1;
 
       /* There are 2 kinds of instructions:
@@ -6621,15 +6615,6 @@ build_modrm_byte (void)
             {
               source = 1;
               reg_slot = 0;
-            }
-
-          /* FMA swaps REG and NDS.  */
-          if (i.tm.cpu_flags.bitfield.cpufma)
-            {
-              unsigned int tmp;
-              tmp = reg_slot;
-              reg_slot = nds;
-              nds = tmp;
             }
 
           gas_assert (i.tm.operand_types[reg_slot].bitfield.regsimd);
