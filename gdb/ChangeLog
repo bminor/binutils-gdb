@@ -1,5 +1,19 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* minsyms.c (lookup_minimal_symbol_by_pc_section_1): Rename to ...
+	(lookup_minimal_symbol_by_pc_section): ... this.  Replace
+	'want_trampoline' parameter by a lookup_msym_prefer parameter.
+	Handle it.
+	(lookup_minimal_symbol_by_pc_section): Delete old implementation.
+	(lookup_minimal_symbol_by_pc): Adjust.
+	(in_gnu_ifunc_stub): Prefer GNU ifunc symbols.
+	(lookup_solib_trampoline_symbol_by_pc): Adjust.
+	* minsyms.h (lookup_msym_prefer): New enum.
+	(lookup_minimal_symbol_by_pc_section): Replace 'want_trampoline'
+	parameter by a lookup_msym_prefer parameter.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* elfread.c (elf_gnu_ifunc_record_cache): Check if the symbol name
 	ends in "@plt" instead of looking at the symbol's section.
 

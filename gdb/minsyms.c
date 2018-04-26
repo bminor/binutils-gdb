@@ -669,10 +669,9 @@ frob_address (struct objfile *objfile, CORE_ADDR *pc)
    there are text and trampoline symbols at the same address.
    Otherwise prefer mst_text symbols.  */
 
-static struct bound_minimal_symbol
-lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc_in,
-				       struct obj_section *section,
-				       int want_trampoline)
+bound_minimal_symbol
+lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *section,
+				     lookup_msym_prefer prefer)
 {
   int lo;
   int hi;
@@ -682,10 +681,27 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc_in,
   struct minimal_symbol *best_symbol = NULL;
   struct objfile *best_objfile = NULL;
   struct bound_minimal_symbol result;
-  enum minimal_symbol_type want_type, other_type;
+  enum minimal_symbol_type want_type;
 
-  want_type = want_trampoline ? mst_solib_trampoline : mst_text;
-  other_type = want_trampoline ? mst_text : mst_solib_trampoline;
+  if (section == NULL)
+    {
+      section = find_pc_section (pc_in);
+      if (section == NULL)
+	return {};
+    }
+
+  switch (prefer)
+    {
+    case lookup_msym_prefer::TEXT:
+      want_type = mst_text;
+      break;
+    case lookup_msym_prefer::TRAMPOLINE:
+      want_type = mst_solib_trampoline;
+      break;
+    case lookup_msym_prefer::GNU_IFUNC:
+      want_type = mst_text_gnu_ifunc;
+      break;
+    }
 
   /* We can not require the symbol found to be in section, because
      e.g. IRIX 6.5 mdebug relies on this code returning an absolute
@@ -804,7 +820,7 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc_in,
 		     preceding symbol too.  If they are otherwise
 		     identical prefer that one.  */
 		  if (hi > 0
-		      && MSYMBOL_TYPE (&msymbol[hi]) == other_type
+		      && MSYMBOL_TYPE (&msymbol[hi]) != want_type
 		      && MSYMBOL_TYPE (&msymbol[hi - 1]) == want_type
 		      && (MSYMBOL_SIZE (&msymbol[hi])
 			  == MSYMBOL_SIZE (&msymbol[hi - 1]))
@@ -901,41 +917,12 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc_in,
   return result;
 }
 
-struct bound_minimal_symbol
-lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, struct obj_section *section)
-{
-  if (section == NULL)
-    {
-      /* NOTE: cagney/2004-01-27: This was using find_pc_mapped_section to
-	 force the section but that (well unless you're doing overlay
-	 debugging) always returns NULL making the call somewhat useless.  */
-      section = find_pc_section (pc);
-      if (section == NULL)
-	{
-	  struct bound_minimal_symbol result;
-
-	  memset (&result, 0, sizeof (result));
-	  return result;
-	}
-    }
-  return lookup_minimal_symbol_by_pc_section_1 (pc, section, 0);
-}
-
 /* See minsyms.h.  */
 
 struct bound_minimal_symbol
 lookup_minimal_symbol_by_pc (CORE_ADDR pc)
 {
-  struct obj_section *section = find_pc_section (pc);
-
-  if (section == NULL)
-    {
-      struct bound_minimal_symbol result;
-
-      memset (&result, 0, sizeof (result));
-      return result;
-    }
-  return lookup_minimal_symbol_by_pc_section_1 (pc, section, 0);
+  return lookup_minimal_symbol_by_pc_section (pc, NULL);
 }
 
 /* Return non-zero iff PC is in an STT_GNU_IFUNC function resolver.  */
@@ -943,8 +930,9 @@ lookup_minimal_symbol_by_pc (CORE_ADDR pc)
 int
 in_gnu_ifunc_stub (CORE_ADDR pc)
 {
-  struct bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (pc);
-
+  bound_minimal_symbol msymbol
+    = lookup_minimal_symbol_by_pc_section (pc, NULL,
+					   lookup_msym_prefer::GNU_IFUNC);
   return msymbol.minsym && MSYMBOL_TYPE (msymbol.minsym) == mst_text_gnu_ifunc;
 }
 
@@ -1453,12 +1441,9 @@ terminate_minimal_symbol_table (struct objfile *objfile)
 static struct minimal_symbol *
 lookup_solib_trampoline_symbol_by_pc (CORE_ADDR pc)
 {
-  struct obj_section *section = find_pc_section (pc);
-  struct bound_minimal_symbol msymbol;
-
-  if (section == NULL)
-    return NULL;
-  msymbol = lookup_minimal_symbol_by_pc_section_1 (pc, section, 1);
+  bound_minimal_symbol msymbol
+    = lookup_minimal_symbol_by_pc_section (pc, NULL,
+					   lookup_msym_prefer::TRAMPOLINE);
 
   if (msymbol.minsym != NULL
       && MSYMBOL_TYPE (msymbol.minsym) == mst_solib_trampoline)

@@ -238,6 +238,22 @@ struct bound_minimal_symbol lookup_minimal_symbol_solib_trampoline
 struct minimal_symbol *lookup_minimal_symbol_by_pc_name
     (CORE_ADDR, const char *, struct objfile *);
 
+enum class lookup_msym_prefer
+{
+  /* Prefer mst_text symbols.  */
+  TEXT,
+
+  /* Prefer mst_solib_trampoline symbols when there are text and
+     trampoline symbols at the same address.  Otherwise prefer
+     mst_text symbols.  */
+  TRAMPOLINE,
+
+  /* Prefer mst_text_gnu_ifunc symbols when there are text and ifunc
+     symbols at the same address.  Otherwise prefer mst_text
+     symbols.  */
+  GNU_IFUNC,
+};
+
 /* Search through the minimal symbol table for each objfile and find
    the symbol whose address is the largest address that is still less
    than or equal to PC, and which matches SECTION.
@@ -246,11 +262,15 @@ struct minimal_symbol *lookup_minimal_symbol_by_pc_name
    instead.
 
    The result has a non-NULL 'minsym' member if such a symbol is
-   found, or NULL if PC is not in a suitable range.  */
+   found, or NULL if PC is not in a suitable range.
+
+   See definition of lookup_msym_prefer for description of PREFER.  By
+   default mst_text symbols are preferred.  */
 
 struct bound_minimal_symbol lookup_minimal_symbol_by_pc_section
-    (CORE_ADDR,
-     struct obj_section *);
+  (CORE_ADDR,
+   struct obj_section *,
+   lookup_msym_prefer prefer = lookup_msym_prefer::TEXT);
 
 /* Backward compatibility: search through the minimal symbol table 
    for a matching PC (no section given).
