@@ -1,5 +1,16 @@
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (optimize_encoding): Check for zeroing
+	masking.
+	* testsuite/gas/i386/optimize-1.d,
+	testsuite/gas/i386/optimize-4.d,
+	testsuite/gas/i386/optimize-5.d,
+	testsuite/gas/i386/x86-64-optimize-2.d,
+	testsuite/gas/i386/x86-64-optimize-5.d,
+	testsuite/gas/i386/x86-64-optimize-6.d: Adjust expectations.
+
+2018-04-26  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (parse_real_register): Check .cpuvrex before
 	recording EVEX encoding. Don't check previously specified
 	encoding.

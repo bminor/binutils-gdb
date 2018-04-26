@@ -3878,7 +3878,7 @@ optimize_encoding (void)
 	   && i.op[0].regs == i.op[1].regs
 	   && !i.types[2].bitfield.xmmword
 	   && (i.tm.opcode_modifier.vex
-	       || (!i.mask
+	       || ((!i.mask || i.mask->zeroing)
 		   && !i.rounding
 		   && is_evex_encoding (&i.tm)
 		   && (i.vec_encoding != vex_encoding_evex
