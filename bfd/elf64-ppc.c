@@ -3366,13 +3366,23 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
       if (!relocatable && symcount > 1)
 	{
-	  /* Trim duplicate syms, since we may have merged the normal and
-	     dynamic symbols.  Actually, we only care about syms that have
-	     different values, so trim any with the same value.  */
+	  /* Trim duplicate syms, since we may have merged the normal
+	     and dynamic symbols.  Actually, we only care about syms
+	     that have different values, so trim any with the same
+	     value.  Don't consider ifunc and ifunc resolver symbols
+	     duplicates however, because GDB wants to know whether a
+	     text symbol is an ifunc resolver.  */
 	  for (i = 1, j = 1; i < symcount; ++i)
-	    if (syms[i - 1]->value + syms[i - 1]->section->vma
-		!= syms[i]->value + syms[i]->section->vma)
-	      syms[j++] = syms[i];
+	    {
+	      const asymbol *s0 = syms[i - 1];
+	      const asymbol *s1 = syms[i];
+
+	      if ((s0->value + s0->section->vma
+		   != s1->value + s1->section->vma)
+		  || ((s0->flags & BSF_GNU_INDIRECT_FUNCTION)
+		      != (s1->flags & BSF_GNU_INDIRECT_FUNCTION)))
+		syms[j++] = syms[i];
+	    }
 	  symcount = j;
 	}
 

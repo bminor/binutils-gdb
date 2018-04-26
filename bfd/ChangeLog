@@ -1,3 +1,8 @@
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Don't consider
+	ifunc and non-ifunc symbols duplicates.
+
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 	Mickaël Guêné  <mickael.guene@st.com>
 
