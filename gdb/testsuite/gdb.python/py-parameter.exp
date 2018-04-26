@@ -179,3 +179,26 @@ gdb_test "python print (test_param.value)" "False" "test parameter value"
 gdb_test "help show print test-param" "State of the Test Parameter.*" "test show help"
 gdb_test "help set print test-param" "Set the state of the Test Parameter.*" "test set help"
 gdb_test "help set print" "set print test-param -- Set the state of the Test Parameter.*" "test general help"
+
+foreach kind {PARAM_ZUINTEGER PARAM_ZUINTEGER_UNLIMITED} {
+    gdb_py_test_multiple "Simple gdb $kind" \
+	"python" "" \
+	"class TestNodocParam (gdb.Parameter):" "" \
+	"   def __init__ (self, name):" "" \
+	"      super (TestNodocParam, self).__init__ (name, gdb.COMMAND_DATA, gdb.$kind)" "" \
+	"      self.value = 0" "" \
+	"test_param_$kind = TestNodocParam ('test-$kind')" "" \
+	"end"
+
+    gdb_test "python print(gdb.parameter('test-$kind'))" "0"
+
+    gdb_test "python test_param_$kind.value = -5" "RuntimeError: Range exceeded.*"
+
+    if {$kind == "PARAM_ZUINTEGER"} {
+	gdb_test "python test_param_$kind.value = -1" "RuntimeError: Range exceeded.*"
+    } else {
+	gdb_test_no_output "python test_param_$kind.value = -1" ""
+	gdb_test "python print(gdb.parameter('test-$kind'))" "-1" \
+	    "check that PARAM_ZUINTEGER value is -1 after setting"
+    }
+}

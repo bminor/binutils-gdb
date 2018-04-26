@@ -1,3 +1,9 @@
+2018-05-02  Tom Tromey  <tom@tromey.com>
+
+	PR python/20084:
+	* python.texi (Parameters In Python): Document PARAM_ZUINTEGER and
+	PARAM_ZUINTEGER_UNLIMITED.
+
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
 	* python.texi (Types In Python): Document Type.align.

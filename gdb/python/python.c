@@ -467,6 +467,7 @@ gdbpy_parameter_value (enum var_types type, void *var)
 	Py_RETURN_NONE;
       /* Fall through.  */
     case var_zinteger:
+    case var_zuinteger_unlimited:
       return PyLong_FromLong (* (int *) var);
 
     case var_uinteger:
@@ -475,6 +476,12 @@ gdbpy_parameter_value (enum var_types type, void *var)
 
 	if (val == UINT_MAX)
 	  Py_RETURN_NONE;
+	return PyLong_FromUnsignedLong (val);
+      }
+
+    case var_zuinteger:
+      {
+	unsigned int val = * (unsigned int *) var;
 	return PyLong_FromUnsignedLong (val);
       }
     }

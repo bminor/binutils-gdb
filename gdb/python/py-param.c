@@ -47,6 +47,8 @@ struct parm_constant parm_constants[] =
   { "PARAM_OPTIONAL_FILENAME", var_optional_filename },
   { "PARAM_FILENAME", var_filename },
   { "PARAM_ZINTEGER", var_zinteger },
+  { "PARAM_ZUINTEGER", var_zuinteger },
+  { "PARAM_ZUINTEGER_UNLIMITED", var_zuinteger_unlimited },
   { "PARAM_ENUM", var_enum },
   { NULL, 0 }
 };
@@ -225,6 +227,8 @@ set_parameter_value (parmpy_object *self, PyObject *value)
     case var_integer:
     case var_zinteger:
     case var_uinteger:
+    case var_zuinteger:
+    case var_zuinteger_unlimited:
       {
 	long l;
 	int ok;
@@ -239,20 +243,33 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 	if (! gdb_py_int_as_long (value, &l))
 	  return -1;
 
-	if (self->type == var_uinteger)
+	switch (self->type)
 	  {
-	    ok = (l >= 0 && l <= UINT_MAX);
+	  case var_uinteger:
 	    if (l == 0)
 	      l = UINT_MAX;
-	  }
-	else if (self->type == var_integer)
-	  {
+	    /* Fall through.  */
+	  case var_zuinteger:
+	    ok = (l >= 0 && l <= UINT_MAX);
+	    break;
+
+	  case var_zuinteger_unlimited:
+	    ok = (l >= -1 && l <= INT_MAX);
+	    break;
+
+	  case var_integer:
 	    ok = (l >= INT_MIN && l <= INT_MAX);
 	    if (l == 0)
 	      l = INT_MAX;
+	    break;
+
+	  case var_zinteger:
+	    ok = (l >= INT_MIN && l <= INT_MAX);
+	    break;
+
+	  default:
+	    gdb_assert_not_reached ("unknown var_ constant");
 	  }
-	else
-	  ok = (l >= INT_MIN && l <= INT_MAX);
 
 	if (! ok)
 	  {
@@ -261,7 +278,10 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 	    return -1;
 	  }
 
-	self->value.intval = (int) l;
+	if (self->type == var_uinteger || self->type == var_zuinteger)
+	  self->value.uintval = (unsigned) l;
+	else
+	  self->value.intval = (int) l;
 	break;
       }
 
@@ -526,6 +546,21 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
 				set_list, show_list);
       break;
 
+    case var_zuinteger:
+      add_setshow_zuinteger_cmd (cmd_name, cmdclass,
+				&self->value.uintval, set_doc, show_doc,
+				help_doc, get_set_value, get_show_value,
+				set_list, show_list);
+      break;
+
+    case var_zuinteger_unlimited:
+      add_setshow_zuinteger_unlimited_cmd (cmd_name, cmdclass,
+					   &self->value.intval, set_doc,
+					   show_doc, help_doc, get_set_value,
+					   get_show_value,
+					   set_list, show_list);
+      break;
+
     case var_enum:
       add_setshow_enum_cmd (cmd_name, cmdclass, self->enumeration,
 			    &self->value.cstringval, set_doc, show_doc,
@@ -658,7 +693,8 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
       && parmclass != var_uinteger && parmclass != var_integer
       && parmclass != var_string && parmclass != var_string_noescape
       && parmclass != var_optional_filename && parmclass != var_filename
-      && parmclass != var_zinteger && parmclass != var_enum)
+      && parmclass != var_zinteger && parmclass != var_zuinteger
+      && parmclass != var_zuinteger_unlimited && parmclass != var_enum)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Invalid parameter class argument."));

@@ -1,3 +1,15 @@
+2018-05-02  Tom Tromey  <tom@tromey.com>
+
+	PR python/20084:
+	* python/python.c (gdbpy_parameter_value): Handle var_zuinteger
+	and var_zuinteger_unlimited.
+	* python/py-param.c (struct parm_constant): Add PARAM_ZUINTEGER
+	and PARAM_ZUINTEGER_UNLIMITED.
+	(set_parameter_value): Handle var_zuinteger and
+	var_zuinteger_unlimited.
+	(add_setshow_generic): Likewise.
+	(parmpy_init): Likewise.
+
 2018-04-28  Dan Robertson  <danlrobertson89@gmail.com>
 
 	PR rust/23124

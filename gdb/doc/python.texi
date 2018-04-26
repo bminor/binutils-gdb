@@ -3807,6 +3807,19 @@ The value is a filename.  This is just like
 The value is an integer.  This is like @code{PARAM_INTEGER}, except 0
 is interpreted as itself.
 
+@findex PARAM_ZUINTEGER
+@findex gdb.PARAM_ZUINTEGER
+@item gdb.PARAM_ZUINTEGER
+The value is an unsigned integer.  This is like @code{PARAM_INTEGER},
+except 0 is interpreted as itself, and the value cannot be negative.
+
+@findex PARAM_ZUINTEGER_UNLIMITED
+@findex gdb.PARAM_ZUINTEGER_UNLIMITED
+@item gdb.PARAM_ZUINTEGER_UNLIMITED
+The value is a signed integer.  This is like @code{PARAM_ZUINTEGER},
+except the special value -1 should be interpreted to mean
+``unlimited''.  Other negative values are not allowed.
+
 @findex PARAM_ENUM
 @findex gdb.PARAM_ENUM
 @item gdb.PARAM_ENUM
