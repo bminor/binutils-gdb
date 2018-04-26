@@ -535,8 +535,7 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
 {
   bfd *obfd = objfile->obfd;
   const struct elf_backend_data *bed = get_elf_backend_data (obfd);
-  asection *plt, *relplt, *got_plt;
-  int plt_elf_idx;
+  asection *relplt, *got_plt;
   bfd_size_type reloc_count, reloc;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
@@ -544,11 +543,6 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
 
   if (objfile->separate_debug_objfile_backlink)
     return;
-
-  plt = bfd_get_section_by_name (obfd, ".plt");
-  if (plt == NULL)
-    return;
-  plt_elf_idx = elf_section_data (plt)->this_idx;
 
   got_plt = bfd_get_section_by_name (obfd, ".got.plt");
   if (got_plt == NULL)
@@ -559,12 +553,25 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
 	return;
     }
 
+  /* Depending on system, we may find jump slots in a relocation
+     section for either .got.plt or .plt.  */
+  asection *plt = bfd_get_section_by_name (obfd, ".plt");
+  int plt_elf_idx = (plt != NULL) ? elf_section_data (plt)->this_idx : -1;
+
+  int got_plt_elf_idx = elf_section_data (got_plt)->this_idx;
+
   /* This search algorithm is from _bfd_elf_canonicalize_dynamic_reloc.  */
   for (relplt = obfd->sections; relplt != NULL; relplt = relplt->next)
-    if (elf_section_data (relplt)->this_hdr.sh_info == plt_elf_idx
-	&& (elf_section_data (relplt)->this_hdr.sh_type == SHT_REL
-	    || elf_section_data (relplt)->this_hdr.sh_type == SHT_RELA))
-      break;
+    {
+      const auto &this_hdr = elf_section_data (relplt)->this_hdr;
+
+      if (this_hdr.sh_type == SHT_REL || this_hdr.sh_type == SHT_RELA)
+	{
+	  if (this_hdr.sh_info == plt_elf_idx
+	      || this_hdr.sh_info == got_plt_elf_idx)
+	    break;
+	}
+    }
   if (relplt == NULL)
     return;
 
@@ -572,6 +579,17 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
     return;
 
   std::string string_buffer;
+
+  /* Does ADDRESS reside in SECTION of OBFD?  */
+  auto within_section = [obfd] (asection *section, CORE_ADDR address)
+    {
+      if (section == NULL)
+	return false;
+
+      return (bfd_get_section_vma (obfd, section) <= address
+	      && (address < bfd_get_section_vma (obfd, section)
+		  + bfd_get_section_size (section)));
+    };
 
   reloc_count = relplt->size / elf_section_data (relplt)->this_hdr.sh_entsize;
   for (reloc = 0; reloc < reloc_count; reloc++)
@@ -585,10 +603,15 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
       name = bfd_asymbol_name (*relplt->relocation[reloc].sym_ptr_ptr);
       address = relplt->relocation[reloc].address;
 
-      /* Does the pointer reside in the .got.plt section?  */
-      if (!(bfd_get_section_vma (obfd, got_plt) <= address
-            && address < bfd_get_section_vma (obfd, got_plt)
-			 + bfd_get_section_size (got_plt)))
+      asection *msym_section;
+
+      /* Does the pointer reside in either the .got.plt or .plt
+	 sections?  */
+      if (within_section (got_plt, address))
+	msym_section = got_plt;
+      else if (within_section (plt, address))
+	msym_section = plt;
+      else
 	continue;
 
       /* We cannot check if NAME is a reference to mst_text_gnu_ifunc as in
@@ -600,8 +623,8 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
 
       msym = record_minimal_symbol (reader, string_buffer.c_str (),
 				    string_buffer.size (),
-                                    true, address, mst_slot_got_plt, got_plt,
-				    objfile);
+				    true, address, mst_slot_got_plt,
+				    msym_section, objfile);
       if (msym)
 	SET_MSYMBOL_SIZE (msym, ptr_size);
     }

@@ -1,3 +1,7 @@
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
+	* elfread.c (elf_rel_plt_read): Look for relocations for .got.plt too.
+
 2018-04-25  Pedro Alves  <palves@redhat.com>
 
 	* infcmd.c (kill_command): Print the pid as string, not the whole
