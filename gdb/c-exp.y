@@ -1081,7 +1081,9 @@ variable:	name_not_typename
 				 is important for example for "p
 				 *__errno_location()".  */
 			      symbol *alias_target
-				= find_function_alias_target (msymbol);
+				= (msymbol.minsym->type != mst_text_gnu_ifunc
+				   ? find_function_alias_target (msymbol)
+				   : NULL);
 			      if (alias_target != NULL)
 				{
 				  write_exp_elt_opcode (pstate, OP_VAR_VALUE);

@@ -1,5 +1,10 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* c-exp.y (variable production): Skip finding an alias for ifunc
+	symbols.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* elfread.c (elf_rel_plt_read): Look for relocations for .got.plt too.
 
 2018-04-25  Pedro Alves  <palves@redhat.com>
