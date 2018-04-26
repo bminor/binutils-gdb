@@ -6589,6 +6589,19 @@ build_modrm_byte (void)
 		  && i.tm.opcode_modifier.vexw
 		  && i.tm.operand_types[dest].bitfield.regsimd);
 
+      /* If VexW1 is set, the first non-immediate operand is the source and
+	 the second non-immediate one is encoded in the immediate operand.  */
+      if (i.tm.opcode_modifier.vexw == VEXW1)
+	{
+	  source = i.imm_operands;
+	  reg_slot = i.imm_operands + 1;
+	}
+      else
+	{
+	  source = i.imm_operands + 1;
+	  reg_slot = i.imm_operands;
+	}
+
       if (i.imm_operands == 0)
         {
           /* When there is no immediate operand, generate an 8bit
@@ -6597,18 +6610,6 @@ build_modrm_byte (void)
           i.op[i.operands].imms = exp;
           i.types[i.operands] = imm8;
           i.operands++;
-          /* If VexW1 is set, the first operand is the source and
-             the second operand is encoded in the immediate operand.  */
-          if (i.tm.opcode_modifier.vexw == VEXW1)
-            {
-              source = 0;
-              reg_slot = 1;
-            }
-          else
-            {
-              source = 1;
-              reg_slot = 0;
-            }
 
           gas_assert (i.tm.operand_types[reg_slot].bitfield.regsimd);
           exp->X_op = O_constant;
@@ -6620,23 +6621,6 @@ build_modrm_byte (void)
           unsigned int imm_slot;
 
 	  gas_assert (i.imm_operands == 1 && i.types[0].bitfield.vec_imm4);
-
-          if (i.tm.opcode_modifier.vexw == VEXW0)
-            {
-              /* If VexW0 is set, the third operand is the source and
-                 the second operand is encoded in the immediate
-                 operand.  */
-              source = 2;
-              reg_slot = 1;
-            }
-          else
-            {
-              /* VexW1 is set, the second operand is the source and
-                 the third operand is encoded in the immediate
-                 operand.  */
-              source = 1;
-              reg_slot = 2;
-            }
 
           if (i.tm.opcode_modifier.immext)
             {
