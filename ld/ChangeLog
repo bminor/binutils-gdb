@@ -1,3 +1,9 @@
+2018-04-26  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* testsuite/ld-elf/pr2404b.c (main): Adjust printf to account for
+	new variable name.
+	* testsuite/ld-elf/pr2404.out: Adjust expected output accordingly.
+
 2018-04-25  Christophe Lyon  <christophe.lyon@st.com>
 
 	* testsuite/ld-arm/export-class.exp: Accept arm*-*-uclinuxfdpiceabi.

@@ -14,7 +14,7 @@ main ()
 
   printf ("time1: %d\n", time1);
   time1 = 10;
-  printf ("time: %d\n", time1);
+  printf ("time1: %d\n", time1);
   bar ();
 
   return 0;
