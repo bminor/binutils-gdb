@@ -1,5 +1,15 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* linespec.c (struct bound_minimal_symbol_search_key): New.
+	(convert_linespec_to_sals): Sort minimal symbols earlier.  Don't
+	skip first line if we found a GNU ifunc minimal symbol by name.
+	(compare_msymbols): Change parameters to work with a destructured
+	lhs minsym.
+	(compare_msymbols_for_qsort, compare_msymbols_for_bsearch): New
+	functions.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (set_breakpoint_location_function): Don't resolve
 	ifunc targets here.  Instead, if we have an ifunc minsym, use its
 	address/name.
