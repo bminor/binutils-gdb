@@ -1,5 +1,10 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Use
+	find_function_start_sal instead of find_pc_line.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (set_breakpoint_location_function): Handle
 	mst_data_gnu_ifunc.
 	* c-exp.y (variable production): Handle mst_data_gnu_ifunc.

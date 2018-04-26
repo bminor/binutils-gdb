@@ -106,6 +106,9 @@ proc_with_prefix set-break {resolver_attr resolver_debug final_debug} {
 	return 1
     }
 
+    gdb_breakpoint [gdb_get_line_number "break-at-call"]
+    gdb_continue_to_breakpoint "break-at-call" ".*break-at-call.*"
+
     set ws "\[ \t\]+"
     set dot "\\.?"
 
@@ -131,19 +134,21 @@ proc_with_prefix set-break {resolver_attr resolver_debug final_debug} {
 	    "Breakpoint $decimal at gnu-indirect-function resolver at $hex"
 	gdb_test "info breakpoints" \
 	    "$decimal${ws}STT_GNU_IFUNC resolver${ws}keep${ws}y${ws}$hex <${gnu_ifunc_resolver}>"
+
+	# Make the breakpoint conditional on a condition that always
+	# fails.  This is so that when the ifunc-resolver breakpoint
+	# triggers, GDB resumes the program immediately.
+	gdb_test_no_output "condition \$bpnum 0"
     }
 
     global final_src
 
     with_test_prefix "resolve" {
-	delete_breakpoints
 	gdb_breakpoint [gdb_get_line_number "break-at-exit"]
 	gdb_continue_to_breakpoint "break-at-exit" ".*break-at-exit.*"
     }
 
     with_test_prefix "after resolving" {
-	delete_breakpoints
-
 	if {!$final_debug} {
 	    # Set a breakpoint both at the ifunc, and at the ifunc's
 	    # target.  GDB should resolve both to the same address.
@@ -176,7 +181,12 @@ proc_with_prefix set-break {resolver_attr resolver_debug final_debug} {
 	    gdb_test "break gnu_ifunc" "Breakpoint .* at $hex: file .*$final_src, line $lineno\\."
 	    set location "$decimal${ws}breakpoint${ws}keep${ws}y${ws}$hex in final at .*$final_src:$lineno"
 	}
-	gdb_test "info breakpoints" "$location\r\n$location"
+
+	# The first location here is for the breakpoint that was set
+	# before the ifunc was resolved.  It should be resolved by
+	# now, and it should have the exact same address/line as the
+	# other two locations.
+	gdb_test "info breakpoints" "$location\r\n.*$location\r\n$location"
     }
 }
 

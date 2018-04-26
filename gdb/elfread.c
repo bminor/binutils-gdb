@@ -1026,7 +1026,8 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
 
   b->type = bp_breakpoint;
   update_breakpoint_locations (b, current_program_space,
-			       find_pc_line (resolved_pc, 0), {});
+			       find_function_start_sal (resolved_pc, NULL, true),
+			       {});
 }
 
 /* A helper function for elf_symfile_read that reads the minimal
