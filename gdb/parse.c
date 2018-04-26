@@ -461,42 +461,35 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct obj_section *section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
   enum minimal_symbol_type type = MSYMBOL_TYPE (msymbol);
-  CORE_ADDR pc;
 
   bool is_tls = (section != NULL
 		 && section->the_bfd_section->flags & SEC_THREAD_LOCAL);
 
-  /* Addresses of TLS symbols are really offsets into a
-     per-objfile/per-thread storage block.  */
-  CORE_ADDR addr = (is_tls
-		    ? MSYMBOL_VALUE_RAW_ADDRESS (bound_msym.minsym)
-		    : BMSYMBOL_VALUE_ADDRESS (bound_msym));
-
   /* The minimal symbol might point to a function descriptor;
      resolve it to the actual code address instead.  */
-  pc = gdbarch_convert_from_func_ptr_addr (gdbarch, addr, &current_target);
-  if (pc != addr)
+  CORE_ADDR addr;
+  if (is_tls)
     {
-      struct bound_minimal_symbol ifunc_msym = lookup_minimal_symbol_by_pc (pc);
-
-      /* In this case, assume we have a code symbol instead of
-	 a data symbol.  */
-
-      if (ifunc_msym.minsym != NULL
-	  && MSYMBOL_TYPE (ifunc_msym.minsym) == mst_text_gnu_ifunc
-	  && BMSYMBOL_VALUE_ADDRESS (ifunc_msym) == pc)
-	{
-	  /* A function descriptor has been resolved but PC is still in the
-	     STT_GNU_IFUNC resolver body (such as because inferior does not
-	     run to be able to call it).  */
-
-	  type = mst_text_gnu_ifunc;
-	}
-      else
-	type = mst_text;
-      section = NULL;
-      addr = pc;
+      /* Addresses of TLS symbols are really offsets into a
+	 per-objfile/per-thread storage block.  */
+      addr = MSYMBOL_VALUE_RAW_ADDRESS (bound_msym.minsym);
     }
+  else if (msymbol_is_function (objfile, msymbol, &addr))
+    {
+      if (addr != BMSYMBOL_VALUE_ADDRESS (bound_msym))
+	{
+	  /* This means we resolved a function descriptor, and we now
+	     have an address for a code/text symbol instead of a data
+	     symbol.  */
+	  if (MSYMBOL_TYPE (msymbol) == mst_data_gnu_ifunc)
+	    type = mst_text_gnu_ifunc;
+	  else
+	    type = mst_text;
+	  section = NULL;
+	}
+    }
+  else
+    addr = BMSYMBOL_VALUE_ADDRESS (bound_msym);
 
   if (overlay_debugging)
     addr = symbol_overlayed_address (addr, section);

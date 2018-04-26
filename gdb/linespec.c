@@ -2292,10 +2292,25 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 		       ++m)
 		    {
 		      if (MSYMBOL_TYPE (elem->minsym) == mst_text_gnu_ifunc
-			  && BMSYMBOL_VALUE_ADDRESS (*elem) == addr)
+			  || MSYMBOL_TYPE (elem->minsym) == mst_data_gnu_ifunc)
 			{
-			  found_ifunc = true;
-			  break;
+			  CORE_ADDR msym_addr = BMSYMBOL_VALUE_ADDRESS (*elem);
+			  if (MSYMBOL_TYPE (elem->minsym) == mst_data_gnu_ifunc)
+			    {
+			      struct gdbarch *gdbarch
+				= get_objfile_arch (elem->objfile);
+			      msym_addr
+				= (gdbarch_convert_from_func_ptr_addr
+				   (gdbarch,
+				    msym_addr,
+				    &current_target));
+			    }
+
+			  if (msym_addr == addr)
+			    {
+			      found_ifunc = true;
+			      break;
+			    }
 			}
 		    }
 		}
@@ -4283,7 +4298,8 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
     {
       const char *msym_name = MSYMBOL_LINKAGE_NAME (msymbol);
 
-      if (MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc)
+      if (MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
+	  || MSYMBOL_TYPE (msymbol) == mst_data_gnu_ifunc)
 	want_start_sal = gnu_ifunc_resolve_name (msym_name, &func_addr);
       else
 	want_start_sal = true;

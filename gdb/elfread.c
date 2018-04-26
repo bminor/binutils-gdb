@@ -422,7 +422,11 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	    {
 	      if (sym->flags & (BSF_GLOBAL | BSF_WEAK | BSF_GNU_UNIQUE))
 		{
-		  if (sym->section->flags & SEC_LOAD)
+		  if (sym->flags & BSF_GNU_INDIRECT_FUNCTION)
+		    {
+		      ms_type = mst_data_gnu_ifunc;
+		    }
+		  else if (sym->section->flags & SEC_LOAD)
 		    {
 		      ms_type = mst_data;
 		    }
@@ -614,9 +618,10 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
       else
 	continue;
 
-      /* We cannot check if NAME is a reference to mst_text_gnu_ifunc as in
-	 OBJFILE the symbol is undefined and the objfile having NAME defined
-	 may not yet have been loaded.  */
+      /* We cannot check if NAME is a reference to
+	 mst_text_gnu_ifunc/mst_data_gnu_ifunc as in OBJFILE the
+	 symbol is undefined and the objfile having NAME defined may
+	 not yet have been loaded.  */
 
       string_buffer.assign (name);
       string_buffer.append (got_suffix, got_suffix + got_suffix_len);

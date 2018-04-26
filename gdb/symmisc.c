@@ -209,6 +209,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	  ms_type = 'T';
 	  break;
 	case mst_text_gnu_ifunc:
+	case mst_data_gnu_ifunc:
 	  ms_type = 'i';
 	  break;
 	case mst_solib_trampoline:

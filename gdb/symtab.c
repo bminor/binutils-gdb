@@ -4977,10 +4977,21 @@ find_gnu_ifunc (const symbol *sym)
 				[&] (minimal_symbol *minsym)
     {
       if (MSYMBOL_TYPE (minsym) == mst_text_gnu_ifunc
-	  && MSYMBOL_VALUE_ADDRESS (objfile, minsym) == address)
+	  || MSYMBOL_TYPE (minsym) == mst_data_gnu_ifunc)
 	{
-	  ifunc = minsym;
-	  return true;
+	  CORE_ADDR msym_addr = MSYMBOL_VALUE_ADDRESS (objfile, minsym);
+	  if (MSYMBOL_TYPE (minsym) == mst_data_gnu_ifunc)
+	    {
+	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	      msym_addr = gdbarch_convert_from_func_ptr_addr (gdbarch,
+							      msym_addr,
+							      &current_target);
+	    }
+	  if (msym_addr == address)
+	    {
+	      ifunc = minsym;
+	      return true;
+	    }
 	}
       return false;
     });

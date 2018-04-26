@@ -580,8 +580,26 @@ enum minimal_symbol_type
 {
   mst_unknown = 0,		/* Unknown type, the default */
   mst_text,			/* Generally executable instructions */
-  mst_text_gnu_ifunc,		/* Executable code returning address
+
+  /* A GNU ifunc symbol, in the .text section.  GDB uses to know
+     whether the user is setting a breakpoint on a GNU ifunc function,
+     and thus GDB needs to actually set the breakpoint on the target
+     function.  It is also used to know whether the program stepped
+     into an ifunc resolver -- the resolver may get a separate
+     symbol/alias under a different name, but it'll have the same
+     address as the ifunc symbol.  */
+  mst_text_gnu_ifunc,           /* Executable code returning address
 				   of executable code */
+
+  /* A GNU ifunc function descriptor symbol, in a data section
+     (typically ".opd").  Seen on architectures that use function
+     descriptors, like PPC64/ELFv1.  In this case, this symbol's value
+     is the address of the descriptor.  There'll be a corresponding
+     mst_text_gnu_ifunc synthetic symbol for the text/entry
+     address.  */
+  mst_data_gnu_ifunc,		/* Executable code returning address
+				   of executable code */
+
   mst_slot_got_plt,		/* GOT entries for .plt sections */
   mst_data,			/* Generally initialized data */
   mst_bss,			/* Generally uninitialized data */

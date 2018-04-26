@@ -70,6 +70,7 @@ msymbol_is_function (struct objfile *objfile, minimal_symbol *minsym,
     case mst_abs:
     case mst_file_data:
     case mst_file_bss:
+    case mst_data_gnu_ifunc:
       {
 	struct gdbarch *gdbarch = get_objfile_arch (objfile);
 	CORE_ADDR pc = gdbarch_convert_from_func_ptr_addr (gdbarch, msym_addr,
@@ -1072,6 +1073,7 @@ minimal_symbol_reader::record (const char *name, CORE_ADDR address,
       section = SECT_OFF_TEXT (m_objfile);
       break;
     case mst_data:
+    case mst_data_gnu_ifunc:
     case mst_file_data:
       section = SECT_OFF_DATA (m_objfile);
       break;
@@ -1472,26 +1474,19 @@ find_solib_trampoline_target (struct frame_info *frame, CORE_ADDR pc)
     {
       ALL_MSYMBOLS (objfile, msymbol)
       {
-	if ((MSYMBOL_TYPE (msymbol) == mst_text
-	    || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc)
-	    && strcmp (MSYMBOL_LINKAGE_NAME (msymbol),
-		       MSYMBOL_LINKAGE_NAME (tsymbol)) == 0)
-	  return MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
-
 	/* Also handle minimal symbols pointing to function descriptors.  */
-	if (MSYMBOL_TYPE (msymbol) == mst_data
+	if ((MSYMBOL_TYPE (msymbol) == mst_text
+	     || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
+	     || MSYMBOL_TYPE (msymbol) == mst_data
+	     || MSYMBOL_TYPE (msymbol) == mst_data_gnu_ifunc)
 	    && strcmp (MSYMBOL_LINKAGE_NAME (msymbol),
 		       MSYMBOL_LINKAGE_NAME (tsymbol)) == 0)
 	  {
 	    CORE_ADDR func;
 
-	    func = gdbarch_convert_from_func_ptr_addr
-		    (get_objfile_arch (objfile),
-		     MSYMBOL_VALUE_ADDRESS (objfile, msymbol),
-		     &current_target);
-
-	    /* Ignore data symbols that are not function descriptors.  */
-	    if (func != MSYMBOL_VALUE_ADDRESS (objfile, msymbol))
+	    /* Ignore data symbols that are not function
+	       descriptors.  */
+	    if (msymbol_is_function (objfile, msymbol, &func))
 	      return func;
 	  }
       }

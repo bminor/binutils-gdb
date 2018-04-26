@@ -7159,7 +7159,8 @@ set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
       const char *function_name;
 
       if (loc->msymbol != NULL
-	  && MSYMBOL_TYPE (loc->msymbol) == mst_text_gnu_ifunc
+	  && (MSYMBOL_TYPE (loc->msymbol) == mst_text_gnu_ifunc
+	      || MSYMBOL_TYPE (loc->msymbol) == mst_data_gnu_ifunc)
 	  && !explicit_loc)
 	{
 	  struct breakpoint *b = loc->owner;

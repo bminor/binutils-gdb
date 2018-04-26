@@ -1,5 +1,26 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (set_breakpoint_location_function): Handle
+	mst_data_gnu_ifunc.
+	* c-exp.y (variable production): Handle mst_data_gnu_ifunc.
+	* elfread.c (elf_symtab_read): Give data symbols with
+	BSF_GNU_INDIRECT_FUNCTION set mst_data_gnu_ifunc type.
+	(elf_rel_plt_read): Update comment.
+	* linespec.c (convert_linespec_to_sals): Handle
+	mst_data_gnu_ifunc.
+	(minsym_found): Handle mst_data_gnu_ifunc.
+	* minsyms.c (msymbol_is_function, minimal_symbol_reader::record)
+	(find_solib_trampoline_target): Handle mst_data_gnu_ifunc.
+	* parse.c (find_minsym_type_and_address): Handle
+	mst_data_gnu_ifunc.
+	* symmisc.c (dump_msymbols): Handle mst_data_gnu_ifunc.
+	* symtab.c (find_gnu_ifunc): Handle mst_data_gnu_ifunc.
+	* symtab.h (minimal_symbol_type) <mst_text_gnu_ifunc>: Update
+	comment.
+	<mst_data_gnu_ifunc>: New enumerator.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* minsyms.c (lookup_minimal_symbol_by_pc_section_1): Rename to ...
 	(lookup_minimal_symbol_by_pc_section): ... this.  Replace
 	'want_trampoline' parameter by a lookup_msym_prefer parameter.
