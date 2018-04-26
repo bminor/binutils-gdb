@@ -23,12 +23,6 @@ init_stub (int arg)
   return 0;
 }
 
-int
-final (int arg)
-{
-  return arg + 1;
-}
-
 /* Make differentiation of how the gnu_ifunc call resolves before and after
    calling gnu_ifunc_pre.  This ensures the resolved function address is not
    being cached anywhere for the debugging purposes.  */

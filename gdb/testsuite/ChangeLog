@@ -1,5 +1,18 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/gnu-ifunc-final.c: New file.
+	* gdb.base/gnu-ifunc.c (final): Delete, moved to gnu-ifunc-final.c.
+	* gdb.base/gnu-ifunc.exp (executable): Delete.
+	(staticexecutable): Adjust.
+	(lib_opts, exec_opts): Delete.
+	(make_binsuffix, build, set-break): New procedures.
+	(misc_tests): New, with tests factored out from the top level.
+	(top level): Test different combinations of ifunc resolver name,
+	resolver with and with debug info, and ifunc target with and
+	without debug info.  Wrap static tests with with_target_prefix.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* gdb.compile/compile-ifunc.exp: Also expect "function has unknown
 	return type" warnings.
 
