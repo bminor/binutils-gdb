@@ -10180,17 +10180,15 @@ parse_real_register (char *reg_string, char **end_op)
       && (r->reg_num == RegEiz || r->reg_num == RegRiz))
     return (const reg_entry *) NULL;
 
-  /* Upper 16 vector register is only available with VREX in 64bit
-     mode.  */
-  if ((r->reg_flags & RegVRex))
+  /* Upper 16 vector registers are only available with VREX in 64bit
+     mode, and require EVEX encoding.  */
+  if (r->reg_flags & RegVRex)
     {
-      if (i.vec_encoding == vex_encoding_default)
-	i.vec_encoding = vex_encoding_evex;
-
       if (!cpu_arch_flags.bitfield.cpuvrex
-	  || i.vec_encoding != vex_encoding_evex
 	  || flag_code != CODE_64BIT)
 	return (const reg_entry *) NULL;
+
+      i.vec_encoding = vex_encoding_evex;
     }
 
   if (((r->reg_flags & (RegRex64 | RegRex))

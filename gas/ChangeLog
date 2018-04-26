@@ -1,5 +1,16 @@
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (parse_real_register): Check .cpuvrex before
+	recording EVEX encoding. Don't check previously specified
+	encoding.
+	* testsuite/gas/i386/xmmhi32.s: Add {x,y,z}mm{16,24} cases.
+	* testsuite/gas/i386/xmmhi32.d: Adjust expectations.	
+	* testsuite/gas/i386/xmmhi64.s, testsuite/gas/i386/xmmhi64.d:
+	New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2018-04-26  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/xsave.s: Add AVX, LWP, MPX, and PKU
 	dependency tests.
 	* testsuite/gas/i386/xsave.d,
