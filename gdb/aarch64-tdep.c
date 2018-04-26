@@ -2247,100 +2247,76 @@ aarch64_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   return group == all_reggroup;
 }
 
+/* Helper for aarch64_pseudo_read_value.  */
+
+static struct value *
+aarch64_pseudo_read_value_1 (readable_regcache *regcache, int regnum_offset,
+			     int regsize, struct value *result_value)
+{
+  gdb_byte reg_buf[V_REGISTER_SIZE];
+  unsigned v_regnum = AARCH64_V0_REGNUM + regnum_offset;
+
+  if (regcache->raw_read (v_regnum, reg_buf) != REG_VALID)
+    mark_value_bytes_unavailable (result_value, 0,
+				  TYPE_LENGTH (value_type (result_value)));
+  else
+    memcpy (value_contents_raw (result_value), reg_buf, regsize);
+  return result_value;
+ }
+
 /* Implement the "pseudo_register_read_value" gdbarch method.  */
 
 static struct value *
-aarch64_pseudo_read_value (struct gdbarch *gdbarch,
-			   readable_regcache *regcache,
+aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
 			   int regnum)
 {
-  gdb_byte reg_buf[V_REGISTER_SIZE];
-  struct value *result_value;
-  gdb_byte *buf;
+  struct value *result_value = allocate_value (register_type (gdbarch, regnum));
 
-  result_value = allocate_value (register_type (gdbarch, regnum));
   VALUE_LVAL (result_value) = lval_register;
   VALUE_REGNUM (result_value) = regnum;
-  buf = value_contents_raw (result_value);
 
   regnum -= gdbarch_num_regs (gdbarch);
 
   if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
-    {
-      enum register_status status;
-      unsigned v_regnum;
-
-      v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_Q0_REGNUM;
-      status = regcache->raw_read (v_regnum, reg_buf);
-      if (status != REG_VALID)
-	mark_value_bytes_unavailable (result_value, 0,
-				      TYPE_LENGTH (value_type (result_value)));
-      else
-	memcpy (buf, reg_buf, Q_REGISTER_SIZE);
-      return result_value;
-    }
+    return aarch64_pseudo_read_value_1 (regcache, regnum - AARCH64_Q0_REGNUM,
+					Q_REGISTER_SIZE, result_value);
 
   if (regnum >= AARCH64_D0_REGNUM && regnum < AARCH64_D0_REGNUM + 32)
-    {
-      enum register_status status;
-      unsigned v_regnum;
-
-      v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_D0_REGNUM;
-      status = regcache->raw_read (v_regnum, reg_buf);
-      if (status != REG_VALID)
-	mark_value_bytes_unavailable (result_value, 0,
-				      TYPE_LENGTH (value_type (result_value)));
-      else
-	memcpy (buf, reg_buf, D_REGISTER_SIZE);
-      return result_value;
-    }
+    return aarch64_pseudo_read_value_1 (regcache, regnum - AARCH64_D0_REGNUM,
+					D_REGISTER_SIZE, result_value);
 
   if (regnum >= AARCH64_S0_REGNUM && regnum < AARCH64_S0_REGNUM + 32)
-    {
-      enum register_status status;
-      unsigned v_regnum;
-
-      v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_S0_REGNUM;
-      status = regcache->raw_read (v_regnum, reg_buf);
-      if (status != REG_VALID)
-	mark_value_bytes_unavailable (result_value, 0,
-				      TYPE_LENGTH (value_type (result_value)));
-      else
-	memcpy (buf, reg_buf, S_REGISTER_SIZE);
-      return result_value;
-    }
+    return aarch64_pseudo_read_value_1 (regcache, regnum - AARCH64_S0_REGNUM,
+					S_REGISTER_SIZE, result_value);
 
   if (regnum >= AARCH64_H0_REGNUM && regnum < AARCH64_H0_REGNUM + 32)
-    {
-      enum register_status status;
-      unsigned v_regnum;
-
-      v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_H0_REGNUM;
-      status = regcache->raw_read (v_regnum, reg_buf);
-      if (status != REG_VALID)
-	mark_value_bytes_unavailable (result_value, 0,
-				      TYPE_LENGTH (value_type (result_value)));
-      else
-	memcpy (buf, reg_buf, H_REGISTER_SIZE);
-      return result_value;
-    }
+    return aarch64_pseudo_read_value_1 (regcache, regnum - AARCH64_H0_REGNUM,
+					H_REGISTER_SIZE, result_value);
 
   if (regnum >= AARCH64_B0_REGNUM && regnum < AARCH64_B0_REGNUM + 32)
-    {
-      enum register_status status;
-      unsigned v_regnum;
-
-      v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_B0_REGNUM;
-      status = regcache->raw_read (v_regnum, reg_buf);
-      if (status != REG_VALID)
-	mark_value_bytes_unavailable (result_value, 0,
-				      TYPE_LENGTH (value_type (result_value)));
-      else
-	memcpy (buf, reg_buf, B_REGISTER_SIZE);
-      return result_value;
-    }
+    return aarch64_pseudo_read_value_1 (regcache, regnum - AARCH64_B0_REGNUM,
+					B_REGISTER_SIZE, result_value);
 
   gdb_assert_not_reached ("regnum out of bound");
+}
+
+/* Helper for aarch64_pseudo_write.  */
+
+static void
+aarch64_pseudo_write_1 (struct regcache *regcache, int regnum_offset,
+			int regsize, const gdb_byte *buf)
+{
+  gdb_byte reg_buf[V_REGISTER_SIZE];
+  unsigned v_regnum = AARCH64_V0_REGNUM + regnum_offset;
+
+  /* Ensure the register buffer is zero, we want gdb writes of the
+     various 'scalar' pseudo registers to behavior like architectural
+     writes, register width bytes are written the remainder are set to
+     zero.  */
+  memset (reg_buf, 0, sizeof (reg_buf));
+
+  memcpy (reg_buf, buf, regsize);
+  regcache->raw_write (v_regnum, reg_buf);
 }
 
 /* Implement the "pseudo_register_write" gdbarch method.  */
@@ -2349,69 +2325,27 @@ static void
 aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 		      int regnum, const gdb_byte *buf)
 {
-  gdb_byte reg_buf[V_REGISTER_SIZE];
-
-  /* Ensure the register buffer is zero, we want gdb writes of the
-     various 'scalar' pseudo registers to behavior like architectural
-     writes, register width bytes are written the remainder are set to
-     zero.  */
-  memset (reg_buf, 0, sizeof (reg_buf));
-
   regnum -= gdbarch_num_regs (gdbarch);
 
   if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
-    {
-      /* pseudo Q registers */
-      unsigned v_regnum;
-
-      v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_Q0_REGNUM;
-      memcpy (reg_buf, buf, Q_REGISTER_SIZE);
-      regcache->raw_write (v_regnum, reg_buf);
-      return;
-    }
+    return aarch64_pseudo_write_1 (regcache, regnum - AARCH64_Q0_REGNUM,
+				   Q_REGISTER_SIZE, buf);
 
   if (regnum >= AARCH64_D0_REGNUM && regnum < AARCH64_D0_REGNUM + 32)
-    {
-      /* pseudo D registers */
-      unsigned v_regnum;
-
-      v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_D0_REGNUM;
-      memcpy (reg_buf, buf, D_REGISTER_SIZE);
-      regcache->raw_write (v_regnum, reg_buf);
-      return;
-    }
+    return aarch64_pseudo_write_1 (regcache, regnum - AARCH64_D0_REGNUM,
+				   D_REGISTER_SIZE, buf);
 
   if (regnum >= AARCH64_S0_REGNUM && regnum < AARCH64_S0_REGNUM + 32)
-    {
-      unsigned v_regnum;
-
-      v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_S0_REGNUM;
-      memcpy (reg_buf, buf, S_REGISTER_SIZE);
-      regcache->raw_write (v_regnum, reg_buf);
-      return;
-    }
+    return aarch64_pseudo_write_1 (regcache, regnum - AARCH64_S0_REGNUM,
+				   S_REGISTER_SIZE, buf);
 
   if (regnum >= AARCH64_H0_REGNUM && regnum < AARCH64_H0_REGNUM + 32)
-    {
-      /* pseudo H registers */
-      unsigned v_regnum;
-
-      v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_H0_REGNUM;
-      memcpy (reg_buf, buf, H_REGISTER_SIZE);
-      regcache->raw_write (v_regnum, reg_buf);
-      return;
-    }
+    return aarch64_pseudo_write_1 (regcache, regnum - AARCH64_H0_REGNUM,
+				   H_REGISTER_SIZE, buf);
 
   if (regnum >= AARCH64_B0_REGNUM && regnum < AARCH64_B0_REGNUM + 32)
-    {
-      /* pseudo B registers */
-      unsigned v_regnum;
-
-      v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_B0_REGNUM;
-      memcpy (reg_buf, buf, B_REGISTER_SIZE);
-      regcache->raw_write (v_regnum, reg_buf);
-      return;
-    }
+    return aarch64_pseudo_write_1 (regcache, regnum - AARCH64_B0_REGNUM,
+				   B_REGISTER_SIZE, buf);
 
   gdb_assert_not_reached ("regnum out of bound");
 }

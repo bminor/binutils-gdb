@@ -1,3 +1,10 @@
+2018-06-04  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (aarch64_pseudo_read_value_1): New helper func.
+	(aarch64_pseudo_write_1): Likewise.
+	(aarch64_pseudo_read_value): Use helper.
+	(aarch64_pseudo_write): Likewise.
+
 2018-06-04  Pedro Alves  <palves@redhat.com>
 
 	* darwin-nat.c (darwin_ops): Delete.
