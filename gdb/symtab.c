@@ -3575,46 +3575,36 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
   return sal.symtab != 0;
 }
 
-/* Given a function symbol SYM, find the symtab and line for the start
-   of the function.
-   If the argument FUNFIRSTLINE is nonzero, we want the first line
-   of real code inside the function.
-   This function should return SALs matching those from minsym_found,
-   otherwise false multiple-locations breakpoints could be placed.  */
+/* See symtab.h.  */
 
-struct symtab_and_line
-find_function_start_sal (struct symbol *sym, int funfirstline)
+symtab_and_line
+find_function_start_sal (CORE_ADDR func_addr, obj_section *section,
+			 bool funfirstline)
 {
-  fixup_symbol_section (sym, NULL);
-
-  obj_section *section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
-  symtab_and_line sal
-    = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
-  sal.symbol = sym;
+  symtab_and_line sal = find_pc_sect_line (func_addr, section, 0);
 
   if (funfirstline && sal.symtab != NULL
       && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
 	  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
     {
-      struct gdbarch *gdbarch = symbol_arch (sym);
+      struct gdbarch *gdbarch = get_objfile_arch (SYMTAB_OBJFILE (sal.symtab));
 
-      sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      sal.pc = func_addr;
       if (gdbarch_skip_entrypoint_p (gdbarch))
 	sal.pc = gdbarch_skip_entrypoint (gdbarch, sal.pc);
       return sal;
     }
 
   /* We always should have a line for the function start address.
-     If we don't, something is odd.  Create a plain SAL refering
+     If we don't, something is odd.  Create a plain SAL referring
      just the PC and hope that skip_prologue_sal (if requested)
      can find a line number for after the prologue.  */
-  if (sal.pc < BLOCK_START (SYMBOL_BLOCK_VALUE (sym)))
+  if (sal.pc < func_addr)
     {
       sal = {};
       sal.pspace = current_program_space;
-      sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      sal.pc = func_addr;
       sal.section = section;
-      sal.symbol = sym;
     }
 
   if (funfirstline)
@@ -3622,6 +3612,21 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
 
   return sal;
 }
+
+/* See symtab.h.  */
+
+symtab_and_line
+find_function_start_sal (symbol *sym, bool funfirstline)
+{
+  fixup_symbol_section (sym, NULL);
+  symtab_and_line sal
+    = find_function_start_sal (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+			       SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym),
+			       funfirstline);
+  sal.symbol = sym;
+  return sal;
+}
+
 
 /* Given a function start address FUNC_ADDR and SYMTAB, find the first
    address for that function that has an entry in SYMTAB's line info

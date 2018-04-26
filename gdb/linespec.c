@@ -4292,25 +4292,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   symtab_and_line sal;
 
   if (is_function && want_start_sal)
-    {
-      sal = find_pc_sect_line (func_addr, NULL, 0);
-
-      if (self->funfirstline)
-	{
-	  if (sal.symtab != NULL
-	      && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
-		  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
-	    {
-	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
-
-	      sal.pc = func_addr;
-	      if (gdbarch_skip_entrypoint_p (gdbarch))
-		sal.pc = gdbarch_skip_entrypoint (gdbarch, sal.pc);
-	    }
-	  else
-	    skip_prologue_sal (&sal);
-	}
-    }
+    sal = find_function_start_sal (func_addr, NULL, self->funfirstline);
   else
     {
       sal.objfile = objfile;
