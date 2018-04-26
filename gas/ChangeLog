@@ -1,5 +1,9 @@
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (build_modrm_byte): Use tabs for indentation.
+
+2018-04-26  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (build_modrm_byte): Move and fold
 	source/reg_slot calculations.
 
