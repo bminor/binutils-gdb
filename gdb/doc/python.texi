@@ -3748,14 +3748,16 @@ parameter.  It can be read and assigned to just as any other
 attribute.  @value{GDBN} does validation when assignments are made.
 @end defvar
 
-There are two methods that should be implemented in any
-@code{Parameter} class.  These are:
+There are two methods that may be implemented in any @code{Parameter}
+class.  These are:
 
 @defun Parameter.get_set_string (self)
-@value{GDBN} will call this method when a @var{parameter}'s value has
-been changed via the @code{set} API (for example, @kbd{set foo off}).
-The @code{value} attribute has already been populated with the new
-value and may be used in output.  This method must return a string.
+If this method exists, @value{GDBN} will call it when a
+@var{parameter}'s value has been changed via the @code{set} API (for
+example, @kbd{set foo off}).  The @code{value} attribute has already
+been populated with the new value and may be used in output.  This
+method must return a string.  If the returned string is not empty,
+@value{GDBN} will present it to the user.
 @end defun
 
 @defun Parameter.get_show_string (self, svalue)

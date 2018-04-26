@@ -46,6 +46,10 @@ set|show record btrace cpu
      gdb.set_convenience_variable can be used to get and set the value
      of convenience variables.
 
+  ** A gdb.Parameter will no longer print the "set" help text on an
+     ordinary "set"; instead by default a "set" will be silent unless
+     the get_set_string method returns a non-empty string.
+
 * New targets
 
 RiscV ELF			riscv*-*-elf

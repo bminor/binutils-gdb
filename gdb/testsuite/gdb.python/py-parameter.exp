@@ -151,7 +151,7 @@ gdb_py_test_multiple "Simple gdb booleanparameter" \
    "end"
 
 gdb_test "show print test-nodoc-param" "This command is not documented.*" "show parameter on"
-gdb_test "set print test-nodoc-param off" "This command is not documented.*" "turn off parameter"
+gdb_test_no_output "set print test-nodoc-param off" "turn off parameter"
 gdb_test "show print test-nodoc-param" "This command is not documented.*.*" "show parameter off"
 gdb_test "python print (test_nodoc_param.value)" "False" "test parameter value"
 gdb_test "help show print test-nodoc-param" "This command is not documented.*" "test show help"
@@ -173,7 +173,7 @@ gdb_py_test_multiple "Simple gdb booleanparameter" \
 
 gdb_test "python print (test_param.value)" "True" "test parameter value"
 gdb_test "show print test-param" "State of the Test Parameter on.*" "show parameter on"
-gdb_test "set print test-param off" "Set the state of the Test Parameter.*" "turn off parameter"
+gdb_test_no_output "set print test-param off" "turn off parameter"
 gdb_test "show print test-param" "State of the Test Parameter off.*" "show parameter off"
 gdb_test "python print (test_param.value)" "False" "test parameter value"
 gdb_test "help show print test-param" "State of the Test Parameter.*" "test show help"

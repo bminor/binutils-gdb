@@ -401,15 +401,10 @@ get_set_value (const char *args, int from_tty,
 	  return;
 	}
     }
-  else
-    {
-      /* We have to preserve the existing < GDB 7.3 API.  If a
-	 callback function does not exist, then attempt to read the
-	 set_doc attribute.  */
-      set_doc_string  = get_doc_string (obj, set_doc_cst);
-    }
 
-  fprintf_filtered (gdb_stdout, "%s\n", set_doc_string.get ());
+  const char *str = set_doc_string.get ();
+  if (str != nullptr && str[0] != '\0')
+    fprintf_filtered (gdb_stdout, "%s\n", str);
 }
 
 /* A callback function that is registered against the respective
