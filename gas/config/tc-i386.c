@@ -6573,9 +6573,6 @@ build_modrm_byte (void)
       unsigned int nds, reg_slot;
       expressionS *exp;
 
-      gas_assert (!i.tm.opcode_modifier.veximmext
- 		 || !i.tm.opcode_modifier.immext);
-
       dest = i.operands - 1;
       nds = dest - 1;
 
@@ -6585,13 +6582,10 @@ build_modrm_byte (void)
          VexW0 or VexW1.  The destination must be either XMM, YMM or
 	 ZMM register.
          2. 4 operands: 4 register operands or 3 register operands
-         plus 1 memory operand, VexXDS, and VexImmExt  */
+	 plus 1 memory operand, with VexXDS.  */
       gas_assert ((i.reg_operands == 4
                    || (i.reg_operands == 3 && i.mem_operands == 1))
                   && i.tm.opcode_modifier.vexvvvv == VEXXDS
-                  && (i.tm.opcode_modifier.veximmext
-                      || (i.imm_operands == 1
-			  && i.types[0].bitfield.vec_imm4))
 		  && i.tm.opcode_modifier.vexw
 		  && i.tm.operand_types[dest].bitfield.regsimd);
 
@@ -6624,6 +6618,8 @@ build_modrm_byte (void)
       else
         {
           unsigned int imm_slot;
+
+	  gas_assert (i.imm_operands == 1 && i.types[0].bitfield.vec_imm4);
 
           if (i.tm.opcode_modifier.vexw == VEXW0)
             {

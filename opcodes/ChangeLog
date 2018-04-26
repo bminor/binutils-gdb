@@ -1,3 +1,10 @@
+2018-04-26  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (VexImmExt): Delete.
+	* i386-opc.h (VexImmExt, veximmext): Delete.
+	* i386-opc.tbl: Drop all VexImmExt uses.
+	* i386-tlb.h: Re-generate.
+
 2018-04-25  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (vpslld, vpsrad, vpsrld): Drop AVX512VL
