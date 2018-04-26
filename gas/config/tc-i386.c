@@ -4966,6 +4966,30 @@ static int
 check_VecOperands (const insn_template *t)
 {
   unsigned int op;
+  i386_cpu_flags cpu;
+  static const i386_cpu_flags avx512 = CPU_ANY_AVX512F_FLAGS;
+
+  /* Templates allowing for ZMMword as well as YMMword and/or XMMword for
+     any one operand are implicity requiring AVX512VL support if the actual
+     operand size is YMMword or XMMword.  Since this function runs after
+     template matching, there's no need to check for YMMword/XMMword in
+     the template.  */
+  cpu = cpu_flags_and (t->cpu_flags, avx512);
+  if (!cpu_flags_all_zero (&cpu)
+      && !t->cpu_flags.bitfield.cpuavx512vl
+      && !cpu_arch_flags.bitfield.cpuavx512vl)
+    {
+      for (op = 0; op < t->operands; ++op)
+	{
+	  if (t->operand_types[op].bitfield.zmmword
+	      && (i.types[op].bitfield.ymmword
+		  || i.types[op].bitfield.xmmword))
+	    {
+	      i.error = unsupported;
+	      return 1;
+	    }
+	}
+    }
 
   /* Without VSIB byte, we can't have a vector register for index.  */
   if (!t->opcode_modifier.vecsib
@@ -5095,6 +5119,7 @@ check_VecOperands (const insn_template *t)
 	{
 	  unsigned int j;
 
+	  type.bitfield.baseindex = 1;
 	  for (j = 0; j < i.operands; ++j)
 	    {
 	      if (j != op
@@ -5263,7 +5288,9 @@ match_template (char mnem_suffix)
   addr_prefix_disp = -1;
 
   memset (&suffix_check, 0, sizeof (suffix_check));
-  if (i.suffix == BYTE_MNEM_SUFFIX)
+  if (intel_syntax && i.broadcast)
+    /* nothing */;
+  else if (i.suffix == BYTE_MNEM_SUFFIX)
     suffix_check.no_bsuf = 1;
   else if (i.suffix == WORD_MNEM_SUFFIX)
     suffix_check.no_wsuf = 1;
@@ -5431,7 +5458,15 @@ match_template (char mnem_suffix)
 	continue;
 
       /* We check register size if needed.  */
-      check_register = t->opcode_modifier.checkregsize;
+      if (t->opcode_modifier.checkregsize)
+	{
+	  check_register = (1 << t->operands) - 1;
+	  if (i.broadcast)
+	    check_register &= ~(1 << i.broadcast->operand);
+	}
+      else
+	check_register = 0;
+
       overlap0 = operand_type_and (i.types[0], operand_types[0]);
       switch (t->operands)
 	{
@@ -5475,7 +5510,7 @@ match_template (char mnem_suffix)
 	  overlap1 = operand_type_and (i.types[1], operand_types[1]);
 	  if (!operand_type_match (overlap0, i.types[0])
 	      || !operand_type_match (overlap1, i.types[1])
-	      || (check_register
+	      || ((check_register & 3) == 3
 		  && !operand_type_register_match (i.types[0],
 						   operand_types[0],
 						   i.types[1],
@@ -5542,30 +5577,32 @@ check_reverse:
 		  /* Fall through.  */
 		case 4:
 		  if (!operand_type_match (overlap3, i.types[3])
-		      || (check_register
-			  && (!operand_type_register_match (i.types[1],
+		      || ((check_register & 0xa) == 0xa
+			  && !operand_type_register_match (i.types[1],
 							    operand_types[1],
 							    i.types[3],
-							    operand_types[3])
-			      || !operand_type_register_match (i.types[2],
-							       operand_types[2],
-							       i.types[3],
-							       operand_types[3]))))
+							    operand_types[3]))
+		      || ((check_register & 0xc) == 0xc
+			  && !operand_type_register_match (i.types[2],
+							    operand_types[2],
+							    i.types[3],
+							    operand_types[3])))
 		    continue;
 		  /* Fall through.  */
 		case 3:
 		  /* Here we make use of the fact that there are no
 		     reverse match 3 operand instructions.  */
 		  if (!operand_type_match (overlap2, i.types[2])
-		      || (check_register
-			  && (!operand_type_register_match (i.types[0],
+		      || ((check_register & 5) == 5
+			  && !operand_type_register_match (i.types[0],
 							    operand_types[0],
 							    i.types[2],
-							    operand_types[2])
-			      || !operand_type_register_match (i.types[1],
-							       operand_types[1],
-							       i.types[2],
-							       operand_types[2]))))
+							    operand_types[2]))
+		      || ((check_register & 6) == 6
+			  && !operand_type_register_match (i.types[1],
+							    operand_types[1],
+							    i.types[2],
+							    operand_types[2])))
 		    continue;
 		  break;
 		}

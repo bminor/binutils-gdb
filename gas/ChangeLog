@@ -1,5 +1,12 @@
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (check_VecOperands): Add AVX512VL check. Set
+	.baseindex.
+	(match_template): Don't set suffix_check when Intel syntax and
+	broadcast. Make check_register a per-operand bitmap.
+
+2018-04-26  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_encoding): Check for zeroing
 	masking.
 	* testsuite/gas/i386/optimize-1.d,
