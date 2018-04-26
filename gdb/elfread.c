@@ -833,10 +833,12 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
 						 &current_target);
       addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
-      if (addr_p)
-	*addr_p = addr;
       if (elf_gnu_ifunc_record_cache (name, addr))
-	return 1;
+	{
+	  if (addr_p != NULL)
+	    *addr_p = addr;
+	  return 1;
+	}
     }
 
   return 0;

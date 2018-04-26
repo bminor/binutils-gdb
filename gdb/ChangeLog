@@ -1,5 +1,10 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* elfread.c (elf_gnu_ifunc_resolve_by_got): Don't write to *ADDR_P
+	unless we actually resolved the ifunc.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* c-exp.y (variable production): Prefer ifunc minsyms over
 	regular function symbols.
 	* symtab.c (find_gnu_ifunc): New function.
