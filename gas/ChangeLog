@@ -1,5 +1,10 @@
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (build_modrm_byte): Extend assertion in
+	vex_3_sources handling to cover more cases.
+
+2018-04-26  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (build_modrm_byte): Drop code dealing with
 	.veximmext and .immext set at the same time. Drop code dealing
 	with .cpufma when .vexsources == VEX3SOURCES.

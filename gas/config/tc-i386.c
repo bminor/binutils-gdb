@@ -6591,10 +6591,9 @@ build_modrm_byte (void)
                   && i.tm.opcode_modifier.vexvvvv == VEXXDS
                   && (i.tm.opcode_modifier.veximmext
                       || (i.imm_operands == 1
-                          && i.types[0].bitfield.vec_imm4
-                          && (i.tm.opcode_modifier.vexw == VEXW0
-                              || i.tm.opcode_modifier.vexw == VEXW1)
-                          && i.tm.operand_types[dest].bitfield.regsimd)));
+			  && i.types[0].bitfield.vec_imm4))
+		  && i.tm.opcode_modifier.vexw
+		  && i.tm.operand_types[dest].bitfield.regsimd);
 
       if (i.imm_operands == 0)
         {
