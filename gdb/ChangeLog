@@ -1,5 +1,10 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* elfread.c (elf_gnu_ifunc_record_cache): Check if the symbol name
+	ends in "@plt" instead of looking at the symbol's section.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* blockframe.c (cache_pc_function_is_gnu_ifunc): Delete.  Remove
 	all references.
 	(find_pc_partial_function_gnu_ifunc): Rename to ...

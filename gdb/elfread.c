@@ -680,7 +680,6 @@ static int
 elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
 {
   struct bound_minimal_symbol msym;
-  asection *sect;
   struct objfile *objfile;
   htab_t htab;
   struct elf_gnu_ifunc_cache entry_local, *entry_p;
@@ -691,14 +690,17 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
     return 0;
   if (BMSYMBOL_VALUE_ADDRESS (msym) != addr)
     return 0;
-  /* minimal symbols have always SYMBOL_OBJ_SECTION non-NULL.  */
-  sect = MSYMBOL_OBJ_SECTION (msym.objfile, msym.minsym)->the_bfd_section;
   objfile = msym.objfile;
 
   /* If .plt jumps back to .plt the symbol is still deferred for later
-     resolution and it has no use for GDB.  Besides ".text" this symbol can
-     reside also in ".opd" for ppc64 function descriptor.  */
-  if (strcmp (bfd_get_section_name (objfile->obfd, sect), ".plt") == 0)
+     resolution and it has no use for GDB.  */
+  const char *target_name = MSYMBOL_LINKAGE_NAME (msym.minsym);
+  size_t len = strlen (target_name);
+
+  /* Note we check the symbol's name instead of checking whether the
+     symbol is in the .plt section because some systems have @plt
+     symbols in the .text section.  */
+  if (len > 4 && strcmp (target_name + len - 4, "@plt") == 0)
     return 0;
 
   htab = (htab_t) objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
