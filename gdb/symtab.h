@@ -1675,6 +1675,17 @@ extern int find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
 extern int find_pc_partial_function (CORE_ADDR, const char **, CORE_ADDR *,
 				     CORE_ADDR *);
 
+/* Return the type of a function with its first instruction exactly at
+   the PC address.  Return NULL otherwise.  */
+
+extern struct type *find_function_type (CORE_ADDR pc);
+
+/* See if we can figure out the function's actual type from the type
+   that the resolver returns.  RESOLVER_FUNADDR is the address of the
+   ifunc resolver.  */
+
+extern struct type *find_gnu_ifunc_target_type (CORE_ADDR resolver_funaddr);
+
 extern void clear_pc_function_cache (void);
 
 /* Expand symtab containing PC, SECTION if not already expanded.  */

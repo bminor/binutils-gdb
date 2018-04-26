@@ -323,6 +323,45 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
   return find_pc_partial_function_gnu_ifunc (pc, name, address, endaddr, NULL);
 }
 
+/* See symtab.h.  */
+
+struct type *
+find_function_type (CORE_ADDR pc)
+{
+  struct symbol *sym = find_pc_function (pc);
+
+  if (sym != NULL && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == pc)
+    return SYMBOL_TYPE (sym);
+
+  return NULL;
+}
+
+/* See symtab.h.  */
+
+struct type *
+find_gnu_ifunc_target_type (CORE_ADDR resolver_funaddr)
+{
+  struct type *resolver_type = find_function_type (resolver_funaddr);
+  if (resolver_type != NULL)
+    {
+      /* Get the return type of the resolver.  */
+      struct type *resolver_ret_type
+	= check_typedef (TYPE_TARGET_TYPE (resolver_type));
+
+      /* If we found a pointer to function, then the resolved type
+	 is the type of the pointed-to function.  */
+      if (TYPE_CODE (resolver_ret_type) == TYPE_CODE_PTR)
+	{
+	  struct type *resolved_type
+	    = TYPE_TARGET_TYPE (resolver_ret_type);
+	  if (TYPE_CODE (check_typedef (resolved_type)) == TYPE_CODE_FUNC)
+	    return resolved_type;
+	}
+    }
+
+  return NULL;
+}
+
 /* Return the innermost stack frame that is executing inside of BLOCK and is
    at least as old as the selected frame. Return NULL if there is no
    such frame.  If BLOCK is NULL, just return NULL.  */

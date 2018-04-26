@@ -1,5 +1,28 @@
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
+	* blockframe.c (find_gnu_ifunc_target_type): New function.
+	(find_function_type): New.
+	* eval.c (evaluate_var_msym_value): For GNU ifunc types, always
+	return a value with a memory address.
+	(eval_call): For calls to GNU ifunc functions, try to find the
+	type of the target function from the type that the resolver
+	returns.
+	* gdbtypes.c (objfile_type): Don't install a return type for ifunc
+	symbols.
+	* infcall.c (find_function_return_type): Delete.
+	(find_function_addr): Add 'function_type' parameter.  For calls to
+	GNU ifunc functions, try to find the type of the target function
+	from the type that the resolver returns, and return it via
+	FUNCTION_TYPE.
+	(call_function_by_hand_dummy): Adjust to use the function type
+	returned by find_function_addr.
+	(find_function_addr): Add 'function_type' parameter and move
+	description here.
+	* symtab.h (find_function_type, find_gnu_ifunc_target_type): New
+	declarations.
+
+2018-04-26  Pedro Alves  <palves@redhat.com>
+
 	* c-exp.y (variable production): Skip finding an alias for ifunc
 	symbols.
 

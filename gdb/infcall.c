@@ -229,26 +229,12 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
   return value_cast (type, arg);
 }
 
-/* Return the return type of a function with its first instruction exactly at
-   the PC address.  Return NULL otherwise.  */
-
-static struct type *
-find_function_return_type (CORE_ADDR pc)
-{
-  struct symbol *sym = find_pc_function (pc);
-
-  if (sym != NULL && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == pc
-      && SYMBOL_TYPE (sym) != NULL)
-    return TYPE_TARGET_TYPE (SYMBOL_TYPE (sym));
-
-  return NULL;
-}
-
-/* Determine a function's address and its return type from its value.
-   Calls error() if the function is not valid for calling.  */
+/* See infcall.h.  */
 
 CORE_ADDR
-find_function_addr (struct value *function, struct type **retval_type)
+find_function_addr (struct value *function,
+		    struct type **retval_type,
+		    struct type **function_type)
 {
   struct type *ftype = check_typedef (value_type (function));
   struct gdbarch *gdbarch = get_type_arch (ftype);
@@ -275,17 +261,33 @@ find_function_addr (struct value *function, struct type **retval_type)
   if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
       || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
     {
-      value_type = TYPE_TARGET_TYPE (ftype);
-
       if (TYPE_GNU_IFUNC (ftype))
 	{
-	  funaddr = gnu_ifunc_resolve_addr (gdbarch, funaddr);
+	  CORE_ADDR resolver_addr = funaddr;
 
-	  /* Skip querying the function symbol if no RETVAL_TYPE has been
-	     asked for.  */
-	  if (retval_type)
-	    value_type = find_function_return_type (funaddr);
+	  /* Resolve the ifunc.  Note this may call the resolver
+	     function in the inferior.  */
+	  funaddr = gnu_ifunc_resolve_addr (gdbarch, resolver_addr);
+
+	  /* Skip querying the function symbol if no RETVAL_TYPE or
+	     FUNCTION_TYPE have been asked for.  */
+	  if (retval_type != NULL || function_type != NULL)
+	    {
+	      type *target_ftype = find_function_type (funaddr);
+	      /* If we don't have debug info for the target function,
+		 see if we can instead extract the target function's
+		 type from the type that the resolver returns.  */
+	      if (target_ftype == NULL)
+		target_ftype = find_gnu_ifunc_target_type (resolver_addr);
+	      if (target_ftype != NULL)
+		{
+		  value_type = TYPE_TARGET_TYPE (check_typedef (target_ftype));
+		  ftype = target_ftype;
+		}
+	    }
 	}
+      else
+	value_type = TYPE_TARGET_TYPE (ftype);
     }
   else if (TYPE_CODE (ftype) == TYPE_CODE_INT)
     {
@@ -320,6 +322,8 @@ find_function_addr (struct value *function, struct type **retval_type)
 
   if (retval_type != NULL)
     *retval_type = value_type;
+  if (function_type != NULL)
+    *function_type = ftype;
   return funaddr + gdbarch_deprecated_function_start_offset (gdbarch);
 }
 
@@ -719,15 +723,13 @@ call_function_by_hand_dummy (struct value *function,
 			     void *dummy_dtor_data)
 {
   CORE_ADDR sp;
-  struct type *values_type, *target_values_type;
+  struct type *target_values_type;
   unsigned char struct_return = 0, hidden_first_param_p = 0;
   CORE_ADDR struct_addr = 0;
   struct infcall_control_state *inf_status;
   struct cleanup *inf_status_cleanup;
   struct infcall_suspend_state *caller_state;
-  CORE_ADDR funaddr;
   CORE_ADDR real_pc;
-  struct type *ftype = check_typedef (value_type (function));
   CORE_ADDR bp_addr;
   struct frame_id dummy_id;
   struct frame_info *frame;
@@ -737,9 +739,6 @@ call_function_by_hand_dummy (struct value *function,
   struct gdb_exception e;
   char name_buf[RAW_FUNCTION_ADDRESS_SIZE];
   bool stack_temporaries = thread_stack_temporaries_enabled_p (inferior_ptid);
-
-  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
-    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
 
   if (!target_has_execution)
     noprocess ();
@@ -864,7 +863,10 @@ call_function_by_hand_dummy (struct value *function,
       }
   }
 
-  funaddr = find_function_addr (function, &values_type);
+  type *ftype;
+  type *values_type;
+  CORE_ADDR funaddr = find_function_addr (function, &values_type, &ftype);
+
   if (values_type == NULL)
     values_type = default_return_type;
   if (values_type == NULL)

@@ -37,7 +37,9 @@ with_test_prefix "nodebug" {
     }
 
     gdb_test "compile code resultvar = gnu_ifunc (10);" \
-	"warning: variable has unknown type; assuming int"
+	[multi_line \
+	     "warning: variable has unknown type; assuming int" \
+	     "warning: function has unknown return type; assuming int"]
 
     gdb_test "p (int) resultvar" " = 11"
 
@@ -52,10 +54,9 @@ with_test_prefix "debug" {
     if ![runto_main] {
 	return -1
     }
-
     # gnu_ifunc (10): error: too many arguments to function 'gnu_ifunc'
-    gdb_test_no_output "compile code resultvar = gnu_ifunc_alias (10);"
-
+    gdb_test "compile code resultvar = gnu_ifunc_alias (10);" \
+	"warning: function has unknown return type; assuming int"
     gdb_test "p resultvar" " = 11"
 
 }

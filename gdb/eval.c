@@ -734,17 +734,13 @@ value *
 evaluate_var_msym_value (enum noside noside,
 			 struct objfile *objfile, minimal_symbol *msymbol)
 {
-  if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    {
-      type *the_type = find_minsym_type_and_address (msymbol, objfile, NULL);
-      return value_zero (the_type, not_lval);
-    }
+  CORE_ADDR address;
+  type *the_type = find_minsym_type_and_address (msymbol, objfile, &address);
+
+  if (noside == EVAL_AVOID_SIDE_EFFECTS && !TYPE_GNU_IFUNC (the_type))
+    return value_zero (the_type, not_lval);
   else
-    {
-      CORE_ADDR address;
-      type *the_type = find_minsym_type_and_address (msymbol, objfile, &address);
-      return value_at_lazy (the_type, address);
-    }
+    return value_at_lazy (the_type, address);
 }
 
 /* Helper for returning a value when handling EVAL_SKIP.  */
@@ -797,6 +793,15 @@ eval_call (expression *exp, enum noside noside,
       else if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
 	       || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
 	{
+	  if (TYPE_GNU_IFUNC (ftype))
+	    {
+	      CORE_ADDR address = value_address (argvec[0]);
+	      type *resolved_type = find_gnu_ifunc_target_type (address);
+
+	      if (resolved_type != NULL)
+		ftype = resolved_type;
+	    }
+
 	  type *return_type = TYPE_TARGET_TYPE (ftype);
 
 	  if (return_type == NULL)
