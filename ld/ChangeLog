@@ -1,3 +1,7 @@
+2018-04-27  Alan Modra  <amodra@gmail.com>
+
+	* po/BLD-POTFILES.in: Regenerate.
+
 2018-04-26  Christophe Lyon  <christophe.lyon@linaro.org>
 
 	* testsuite/ld-elf/pr2404b.c (main): Adjust printf to account for
