@@ -127,6 +127,17 @@ proc is_elf64 { binary_file } {
     return 0
 }
 
+# True if the target matches TARGET, specified as a TCL procedure if
+# in square brackets or as machine triplet otherwise.
+#
+proc match_target { target } {
+   if [string match {\[*\]} $target] {
+	return $target
+   } else {
+	return [istarget $target]
+   }
+}
+
 # True if the ELF target supports STB_GNU_UNIQUE with the ELF header's
 # OSABI field set to ELFOSABI_GNU.
 #

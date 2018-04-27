@@ -1,3 +1,10 @@
+2018-04-27  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/lib/binutils-common.exp (match_target): New procedure.
+	* testsuite/lib/utils-lib.exp (run_dump_test): Use it in place
+	of `istarget' for matching with `target', `not-target', `skip'
+	and `not-skip' options.
+
 2018-04-26  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (is_32bit_abs_reloc): Support R_PARISC_DIR32 as a

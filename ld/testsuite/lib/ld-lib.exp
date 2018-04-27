@@ -535,19 +535,26 @@ proc ld_link_defsyms {} {
 #       once.
 #
 #   target: TARGET
-#       Only run the test for TARGET.  This may occur more than once; the
-#       target being tested must match at least one.  You may provide target
-#       name "cfi" for any target supporting the CFI statements.  You may
-#       provide target name "shared" for any target supporting shared
-#       libraries.
+#	Only run the test for TARGET.
+#	You may provide target name "cfi" for any target supporting the
+#	CFI statements.  You may provide target name "shared" for any
+#	target supporting shared libraries.  Otherwise TARGET is called
+#	as a TCL procedure if surrounded by square brackets, or passed
+#	to "istarget" if not.
+#	This may occur more than once; the target being tested must match
+#	at least one.
 #
 #   alltargets: TARGET
-#       Only run the test for TARGET.  This may occur more than once; the
-#       target being tested must match all of them.
+#	Only run the test for TARGET.
+#	The syntax for TARGET is as with 'target'.
+#	This may occur more than once; the target being tested must match
+#	all of them.
 #
 #   notarget: TARGET
-#       Do not run the test for TARGET.  This may occur more than once;
-#       the target being tested must not match any of them.
+#	Do not run the test for TARGET.
+#	The syntax for TARGET is as with 'target'.
+#	This may occur more than once; the target being tested must not
+#	match any of them.
 #
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
@@ -743,7 +750,7 @@ proc run_dump_test { name {extra_options {}} } {
     if { [llength $opts(target)] > 0 } {
 	set targmatch 0
 	foreach targ $opts(target) {
-	    if [istarget $targ] {
+	    if [match_target $targ] {
 		set targmatch 1
 		break
 	    }
@@ -753,12 +760,12 @@ proc run_dump_test { name {extra_options {}} } {
 	}
     }
     foreach targ $opts(alltargets) {
-	if ![istarget $targ] {
+	if ![match_target $targ] {
 	    return
 	}
     }
     foreach targ $opts(notarget) {
-	if [istarget $targ] {
+	if [match_target $targ] {
 	    return
 	}
     }
