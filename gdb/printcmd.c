@@ -50,10 +50,6 @@
 #include "source.h"
 #include "common/byte-vector.h"
 
-#ifdef TUI
-#include "tui/tui.h"		/* For tui_active et al.   */
-#endif
-
 /* Last specified output format.  */
 
 static char last_format = 0;
@@ -215,9 +211,7 @@ decode_format (const char **string_ptr, int oformat, int osize)
 	break;
     }
 
-  while (*p == ' ' || *p == '\t')
-    p++;
-  *string_ptr = p;
+  *string_ptr = skip_spaces (p);
 
   /* Set defaults for format and size if not specified.  */
   if (val.format == '?')

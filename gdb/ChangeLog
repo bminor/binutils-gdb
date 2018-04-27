@@ -1,5 +1,10 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* printcmd.c: Don't include tui.h.
+	(decode_format): Use skip_spaces.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	PR gdb/22619:
 	* printcmd.c (last_count): New global.
 	(x_command): Use saved count when repeating.
