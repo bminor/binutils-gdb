@@ -273,9 +273,22 @@ convert_func (struct compile_c_instance *context, struct type *type)
 static gcc_type
 convert_int (struct compile_c_instance *context, struct type *type)
 {
-  return C_CTX (context)->c_ops->int_type_v0 (C_CTX (context),
-					      TYPE_UNSIGNED (type),
-					      TYPE_LENGTH (type));
+  if (C_CTX (context)->c_ops->c_version >= GCC_C_FE_VERSION_1)
+    {
+      if (TYPE_NOSIGN (type))
+	{
+	  gdb_assert (TYPE_LENGTH (type) == 1);
+	  return C_CTX (context)->c_ops->char_type (C_CTX (context));
+	}
+      return C_CTX (context)->c_ops->int_type (C_CTX (context),
+					       TYPE_UNSIGNED (type),
+					       TYPE_LENGTH (type),
+					       TYPE_NAME (type));
+    }
+  else
+    return C_CTX (context)->c_ops->int_type_v0 (C_CTX (context),
+						TYPE_UNSIGNED (type),
+						TYPE_LENGTH (type));
 }
 
 /* Convert a floating-point type to its gcc representation.  */
@@ -283,8 +296,13 @@ convert_int (struct compile_c_instance *context, struct type *type)
 static gcc_type
 convert_float (struct compile_c_instance *context, struct type *type)
 {
-  return C_CTX (context)->c_ops->float_type_v0 (C_CTX (context),
-						TYPE_LENGTH (type));
+  if (C_CTX (context)->c_ops->c_version >= GCC_C_FE_VERSION_1)
+    return C_CTX (context)->c_ops->float_type (C_CTX (context),
+					       TYPE_LENGTH (type),
+					       TYPE_NAME (type));
+  else
+    return C_CTX (context)->c_ops->float_type_v0 (C_CTX (context),
+						  TYPE_LENGTH (type));
 }
 
 /* Convert the 'void' type to its gcc representation.  */
