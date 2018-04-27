@@ -1,3 +1,11 @@
+2018-04-27  Alan Modra  <amodra@gmail.com>
+
+	PR 23123
+	PR 22374
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Don't drop plt
+	relocs for ifuncs.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Comment fixes.
+
 2018-04-26  Pedro Alves  <palves@redhat.com>
 
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Don't consider
