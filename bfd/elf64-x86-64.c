@@ -439,6 +439,10 @@ elf_x86_64_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 }
 
 #ifdef CORE_HEADER
+# if GCC_VERSION >= 8000
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wstringop-truncation"
+# endif
 static char *
 elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 			    int note_type, ...)
@@ -524,6 +528,9 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
     }
   /* NOTREACHED */
 }
+# if GCC_VERSION >= 8000
+#  pragma GCC diagnostic pop
+# endif
 #endif
 
 /* Functions for the x86-64 ELF linker.	 */

@@ -2405,7 +2405,7 @@ ppc_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type, ...)
 
     case NT_PRPSINFO:
       {
-	char data[128];
+	char data[128] ATTRIBUTE_NONSTRING;
 	va_list ap;
 
 	va_start (ap, note_type);

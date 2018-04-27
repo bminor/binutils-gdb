@@ -1,3 +1,24 @@
+2018-05-04  Alan Modra  <amodra@gmail.com>
+
+	* elf-linux-core.h (struct elf_external_linux_prpsinfo32_ugid32),
+	(struct elf_external_linux_prpsinfo32_ugid16),
+	(struct elf_external_linux_prpsinfo64_ugid32),
+	(struct elf_external_linux_prpsinfo64_ugid16): Add ATTRIBUTE_NONSTRING
+	to pr_fname and pr_psargs fields.  Remove GCC diagnostic pragmas.
+	Move comment to..
+	* elf.c (elfcore_write_prpsinfo): ..here.  Indent nested preprocessor
+	directives.
+	* elf32-arm.c (elf32_arm_nabi_write_core_note): Add ATTRIBUTE_NONSTRING
+	to data.
+	* elf32-ppc.c (ppc_elf_write_core_note): Likewise.
+	* elf32-s390.c (elf_s390_write_core_note): Likewise.
+	* elf64-s390.c (elf_s390_write_core_note): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_write_core_note): Likewise.
+	* elf64-x86-64.c (elf_x86_64_write_core_note): Add GCC diagnostic
+	pragmas.
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Use strnlen to avoid
+	false positive gcc-8 warning.
+
 2018-05-04  Tulio Magno Quites Machado Filho  <tuliom@linux.ibm.com>
 
 	* elf32-ppc.c (_bfd_elf_ppc_merge_fp_attributes): Fix the order

@@ -3942,7 +3942,7 @@ elf_s390_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 
     case NT_PRPSINFO:
       {
-	char data[124] = { 0 };
+	char data[124] ATTRIBUTE_NONSTRING = { 0 };
 	const char *fname, *psargs;
 
 	va_start (ap, note_type);

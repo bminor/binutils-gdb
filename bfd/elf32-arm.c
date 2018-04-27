@@ -2168,7 +2168,7 @@ elf32_arm_nabi_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 
     case NT_PRPSINFO:
       {
-	char data[124];
+	char data[124] ATTRIBUTE_NONSTRING;
 	va_list ap;
 
 	va_start (ap, note_type);

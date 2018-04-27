@@ -653,7 +653,7 @@ _bfd_aarch64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_ty
 
     case NT_PRPSINFO:
       {
-	char data[136];
+	char data[136] ATTRIBUTE_NONSTRING;
 	va_list ap;
 
 	va_start (ap, note_type);

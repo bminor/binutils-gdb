@@ -1051,9 +1051,10 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
        by ld --omagic, or by obcopy --writable-text.  */
 
     for (p = known_sections; p->section_name; p++)
-      if (strcmp (scnhdr_int->s_name, p->section_name) == 0)
+      if (strncmp (scnhdr_int->s_name, p->section_name,
+		   sizeof scnhdr_int->s_name) == 0)
 	{
-	  if (strcmp (scnhdr_int->s_name, ".text")
+	  if (strncmp (scnhdr_int->s_name, ".text", sizeof scnhdr_int->s_name)
 	      || (bfd_get_file_flags (abfd) & WP_TEXT))
 	    scnhdr_int->s_flags &= ~IMAGE_SCN_MEM_WRITE;
 	  scnhdr_int->s_flags |= p->must_have;
@@ -1066,7 +1067,7 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
   if (coff_data (abfd)->link_info
       && ! bfd_link_relocatable (coff_data (abfd)->link_info)
       && ! bfd_link_pic (coff_data (abfd)->link_info)
-      && strcmp (scnhdr_int->s_name, ".text") == 0)
+      && strncmp (scnhdr_int->s_name, ".text", sizeof scnhdr_int->s_name) == 0)
     {
       /* By inference from looking at MS output, the 32 bit field
 	 which is the combination of the number_of_relocs and

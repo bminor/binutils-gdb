@@ -1,3 +1,10 @@
+2018-05-04  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-evax.c (shorten_identifier): Use memcpy in place
+	of strncpy.
+	* config/obj-macho.c (obj_mach_o_make_or_get_sect): Ensure
+	segname and sectname fields are NUL terminated.
+
 2018-05-01  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

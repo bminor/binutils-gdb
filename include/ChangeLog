@@ -1,3 +1,10 @@
+2018-05-04  Alan Modra  <amodra@gmail.com>
+
+	* ansidecl.h: Import from gcc.
+	* coff/internal.h (struct internal_scnhdr): Add ATTRIBUTE_NONSTRING
+	to s_name.
+	(struct internal_syment): Add ATTRIBUTE_NONSTRING to _n_name.
+
 2018-04-30  Francois H. Theron <francois.theron@netronome.com>
 
 	* dis-asm.h: Added print_nfp_disassembler_options prototype.

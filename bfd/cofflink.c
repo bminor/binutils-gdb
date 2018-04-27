@@ -1839,7 +1839,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 
 	    case C_FCN:
 	      if (obj_pe (input_bfd)
-		  && strcmp (isym.n_name, ".bf") != 0
+		  && strncmp (isym.n_name, ".bf", sizeof isym.n_name) != 0
 		  && isym.n_scnum > 0)
 		{
 		  /* For PE, .lf and .ef get their value left alone,
