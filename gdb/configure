@@ -15365,7 +15365,8 @@ build_warnings="-Wall -Wpointer-arith \
 -Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable \
 -Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized \
 -Wno-mismatched-tags \
--Wno-error=deprecated-register"
+-Wno-error=deprecated-register \
+-Wsuggest-override"
 
 case "${host}" in
   *-*-mingw32*)

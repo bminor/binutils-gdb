@@ -1,3 +1,21 @@
+2018-04-27  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+	* warning.m4 (AM_GDB_WARNINGS): Add -Wsuggest-override.
+	* dwarf2loc.c (class dwarf_evaluate_loc_desc): Use "override", not
+	"OVERRIDE".
+	(class symbol_needs_eval_context): Likewise.
+	* dwarf2read.c (mock_mapped_index::symbol_name_count)
+	(mock_mapped_index::symbol_name_at): Use "override".  Remove
+	"virtual".
+	* dwarf2-frame.c (dwarf_expr_executor::get_addr_index): Use
+	"override".
+	(class dwarf_expr_executor): Use "override", not "OVERRIDE".
+	* aarch64-tdep.c (instruction_reader::read): Use "override".
+	(instruction_reader_test::read): Likewise.
+	* arm-tdep.c (instruction_reader::read): Use "override".
+	(instruction_reader_thumb::read): Likewise.
+
 2018-04-26  Andrzej Kaczmarek  <andrzej.kaczmarek@codecoup.pl>
 
 	PR remote/9665

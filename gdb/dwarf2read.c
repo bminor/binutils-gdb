@@ -4577,13 +4577,13 @@ public:
   DISABLE_COPY_AND_ASSIGN (mock_mapped_index);
 
   /* Return the number of names in the symbol table.  */
-  virtual size_t symbol_name_count () const
+  size_t symbol_name_count () const override
   {
     return m_symbol_table.size ();
   }
 
   /* Get the name of the symbol at IDX in the symbol table.  */
-  virtual const char *symbol_name_at (offset_type idx) const
+  const char *symbol_name_at (offset_type idx) const override
   {
     return m_symbol_table[idx];
   }

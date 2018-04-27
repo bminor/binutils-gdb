@@ -230,12 +230,12 @@ class dwarf_expr_executor : public dwarf_expr_context
 
   struct frame_info *this_frame;
 
-  CORE_ADDR read_addr_from_reg (int reg) OVERRIDE
+  CORE_ADDR read_addr_from_reg (int reg) override
   {
     return ::read_addr_from_reg (this_frame, reg);
   }
 
-  struct value *get_reg_value (struct type *type, int reg) OVERRIDE
+  struct value *get_reg_value (struct type *type, int reg) override
   {
     struct gdbarch *gdbarch = get_frame_arch (this_frame);
     int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
@@ -243,44 +243,44 @@ class dwarf_expr_executor : public dwarf_expr_context
     return value_from_register (type, regnum, this_frame);
   }
 
-  void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t len) OVERRIDE
+  void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t len) override
   {
     read_memory (addr, buf, len);
   }
 
-  void get_frame_base (const gdb_byte **start, size_t *length) OVERRIDE
+  void get_frame_base (const gdb_byte **start, size_t *length) override
   {
     invalid ("DW_OP_fbreg");
   }
 
   void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
 				   union call_site_parameter_u kind_u,
-				   int deref_size) OVERRIDE
+				   int deref_size) override
   {
     invalid ("DW_OP_entry_value");
   }
 
-  CORE_ADDR get_object_address () OVERRIDE
+  CORE_ADDR get_object_address () override
   {
     invalid ("DW_OP_push_object_address");
   }
 
-  CORE_ADDR get_frame_cfa () OVERRIDE
+  CORE_ADDR get_frame_cfa () override
   {
     invalid ("DW_OP_call_frame_cfa");
   }
 
-  CORE_ADDR get_tls_address (CORE_ADDR offset) OVERRIDE
+  CORE_ADDR get_tls_address (CORE_ADDR offset) override
   {
     invalid ("DW_OP_form_tls_address");
   }
 
-  void dwarf_call (cu_offset die_offset) OVERRIDE
+  void dwarf_call (cu_offset die_offset) override
   {
     invalid ("DW_OP_call*");
   }
 
-  CORE_ADDR get_addr_index (unsigned int index)
+  CORE_ADDR get_addr_index (unsigned int index) override
   {
     invalid ("DW_OP_GNU_addr_index");
   }

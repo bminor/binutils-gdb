@@ -210,6 +210,7 @@ class instruction_reader : public abstract_instruction_reader
 {
  public:
   ULONGEST read (CORE_ADDR memaddr, int len, enum bfd_endian byte_order)
+    override
   {
     return read_code_unsigned_integer (memaddr, len, byte_order);
   }
@@ -505,6 +506,7 @@ public:
   {}
 
   ULONGEST read (CORE_ADDR memaddr, int len, enum bfd_endian byte_order)
+    override
   {
     SELF_CHECK (len == 4);
     SELF_CHECK (memaddr % 4 == 0);

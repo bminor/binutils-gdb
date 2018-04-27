@@ -13061,7 +13061,7 @@ public:
 class instruction_reader : public abstract_memory_reader
 {
  public:
-  bool read (CORE_ADDR memaddr, gdb_byte *buf, const size_t len)
+  bool read (CORE_ADDR memaddr, gdb_byte *buf, const size_t len) override
   {
     if (target_read_memory (memaddr, buf, len))
       return false;
@@ -13214,7 +13214,7 @@ public:
     : m_endian (endian), m_insns (insns), m_insns_size (SIZE)
   {}
 
-  bool read (CORE_ADDR memaddr, gdb_byte *buf, const size_t len)
+  bool read (CORE_ADDR memaddr, gdb_byte *buf, const size_t len) override
   {
     SELF_CHECK (len == 4 || len == 2);
     SELF_CHECK (memaddr % 2 == 0);
