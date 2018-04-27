@@ -1,5 +1,29 @@
 2018-04-27  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/ld-mips-elf/bal-jalx-pic.d: Only run for
+	`check_shared_lib_support' targets.
+	* testsuite/ld-mips-elf/bal-jalx-pic-n32.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-n64.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips-n32.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips-n64.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-n32.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-n64.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips.d:
+	Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips-n32.d:
+	Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips-n64.d:
+	Likewise.
+	* testsuite/ld-mips-elf/hash1a.d: Likewise.
+	* testsuite/ld-mips-elf/hash1b.d: Likewise.
+	* testsuite/ld-mips-elf/hash1c.d: Likewise.
+	* testsuite/ld-mips-elf/relax-jalr-n32-shared.d: Likewise.
+	* testsuite/ld-mips-elf/relax-jalr-n64-shared.d: Likewise.
+
+2018-04-27  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/lib/ld-lib.exp (run_dump_test): Use `match_target'
 	in place of `istarget' for matching with `target', `alltargets'
 	and `notarget' options.
