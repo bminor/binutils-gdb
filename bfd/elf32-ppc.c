@@ -5551,9 +5551,9 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	      && !readonly_dynrelocs (h))
 	    {
 	      h->pointer_equality_needed = 0;
-	      /* If we haven't seen a branch reloc then we don't need
-		 a plt entry.  */
-	      if (!h->needs_plt)
+	      /* If we haven't seen a branch reloc and the symbol
+		 isn't an ifunc then we don't need a plt entry.  */
+	      if (!h->needs_plt && h->type != STT_GNU_IFUNC)
 		h->plt.plist = NULL;
 	    }
 	  else if (!bfd_link_pic (info))

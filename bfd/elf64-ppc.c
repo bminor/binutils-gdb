@@ -7183,8 +7183,8 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	      if (!readonly_dynrelocs (h))
 		{
 		  h->pointer_equality_needed = 0;
-		  /* If we haven't seen a branch reloc then we don't need
-		     a plt entry.  */
+		  /* If we haven't seen a branch reloc and the symbol
+		     isn't an ifunc then we don't need a plt entry.  */
 		  if (!h->needs_plt)
 		    h->plt.plist = NULL;
 		}
@@ -7200,8 +7200,8 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       else if (!h->needs_plt
 	       && !readonly_dynrelocs (h))
 	{
-	  /* If we haven't seen a branch reloc then we don't need a
-	     plt entry.  */
+	  /* If we haven't seen a branch reloc and the symbol isn't an
+	     ifunc then we don't need a plt entry.  */
 	  h->plt.plist = NULL;
 	  h->pointer_equality_needed = 0;
 	  return TRUE;
