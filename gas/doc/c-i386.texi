@@ -176,8 +176,6 @@ accept various extension mnemonics.  For example,
 @code{clflushopt},
 @code{se1},
 @code{clwb},
-@code{movdiri},
-@code{movdir64b},
 @code{avx512f},
 @code{avx512cd},
 @code{avx512er},
@@ -1278,7 +1276,6 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.clwb} @tab @samp{.rdpid} @tab @samp{.ptwrite} @tab @item @samp{.ibt}
 @item @samp{.wbnoinvd} @tab @samp{.pconfig} @tab @samp{.waitpkg} @tab @samp{.cldemote}
 @item @samp{.shstk} @tab @samp{.gfni} @tab @samp{.vaes} @tab @samp{.vpclmulqdq}
-@item @samp{.movdiri} @tab @samp{.movdir64b}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
