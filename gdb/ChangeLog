@@ -1,5 +1,11 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	PR gdb/22619:
+	* printcmd.c (last_count): New global.
+	(x_command): Use saved count when repeating.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* nto-procfs.c (do_closedir_cleanup): Remove.
 	(procfs_pidlist): Use gdb_dir_up.
 	* procfs.c (do_closedir_cleanup): Remove.

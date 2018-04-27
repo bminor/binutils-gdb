@@ -1,3 +1,9 @@
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/22619:
+	* gdb.base/long_long.exp (gdb_test_long_long): Add test for repeat
+	behavior.
+
 2018-05-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/maint.exp: Process output from 'maint print registers'

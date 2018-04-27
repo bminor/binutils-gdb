@@ -62,6 +62,10 @@ static char last_format = 0;
 
 static char last_size = 'w';
 
+/* Last specified count for the 'x' command.  */
+
+static int last_count;
+
 /* Default address to examine next, and associated architecture.  */
 
 static struct gdbarch *next_gdbarch;
@@ -1616,6 +1620,11 @@ x_command (const char *exp, int from_tty)
   fmt.count = 1;
   fmt.raw = 0;
 
+  /* If there is no expression and no format, use the most recent
+     count.  */
+  if (exp == nullptr && last_count > 0)
+    fmt.count = last_count;
+
   if (exp && *exp == '/')
     {
       const char *tmp = exp + 1;
@@ -1623,6 +1632,8 @@ x_command (const char *exp, int from_tty)
       fmt = decode_format (&tmp, last_format, last_size);
       exp = (char *) tmp;
     }
+
+  last_count = fmt.count;
 
   /* If we have an expression, evaluate it and use it as the address.  */
 
