@@ -133,7 +133,9 @@ gdb_test "print \[23usize; 4\]" " = \\\[23, 23, 23, 23\\\]"
 gdb_test "ptype \[23usize; 4\]" " = \\\[usize; 4\\\]"
 gdb_test "print \[mut 23usize; 4\]" " = \\\[23, 23, 23, 23\\\]"
 
-# Test a lexer corner case.
+# Test lexer corner cases.
+gdb_test "print 0x0 as *const ()" " = \\\(\\\(\\\) \\*\\\) 0x0"
+gdb_test "print 0x0 as fn(i64) -> ()" " = \\\(\\\(\\\) \\\(\\*\\\)\\\(i64\\\)\\\) 0x0"
 gdb_test "print r#" "syntax error in expression, near `#'\\."
 
 gdb_test "printf \"%d %d\\n\", 23+1, 23-1" "24 22"

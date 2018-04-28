@@ -1,3 +1,9 @@
+2018-04-28  Dan Robertson  <danlrobertson89@gmail.com>
+
+	PR rust/23124
+	* gdb.rust/expr.exp: Test that the unit type is correctly parsed
+	when casting.
+
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
 	* gdb.python/py-type.exp: Check align attribute.

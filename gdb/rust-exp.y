@@ -2019,8 +2019,11 @@ convert_params_to_types (struct parser_state *state, rust_op_vector *params)
 {
   std::vector<struct type *> result;
 
-  for (const rust_op *op : *params)
-    result.push_back (convert_ast_to_type (state, op));
+  if (params != nullptr)
+    {
+      for (const rust_op *op : *params)
+        result.push_back (convert_ast_to_type (state, op));
+    }
 
   return result;
 }
