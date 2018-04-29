@@ -493,7 +493,9 @@ init_syscall_table (void)
   syscall_table[SYS_utssys] = "utssys";
   syscall_table[SYS_uucopy] = "uucopy";
   syscall_table[SYS_uucopystr] = "uucopystr";
+#ifdef SYS_uuidsys
   syscall_table[SYS_uuidsys] = "uuidsys";
+#endif
 #ifdef SYS_va_mask
   syscall_table[SYS_va_mask] = "va_mask";
 #endif
