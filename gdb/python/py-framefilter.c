@@ -368,8 +368,7 @@ py_print_single_arg (struct ui_out *out,
 
   annotate_arg_name_end ();
 
-  if (! out->is_mi_like_p ())
-    out->text ("=");
+  out->text ("=");
 
   if (print_args_field)
     out->field_int ("arg", 1);
@@ -602,16 +601,11 @@ enumerate_locals (PyObject *iter,
 	  if (print_args_field || args_type != NO_VALUES)
 	    tuple.emplace (out, nullptr);
 	}
-      if (! out->is_mi_like_p ())
-	{
-	  /* If the output is not MI we indent locals.  */
-	  out->spaces (local_indent);
-	}
 
+      /* If the output is not MI we indent locals.  */
+      out->spaces (local_indent);
       out->field_string ("name", sym_name.get ());
-
-      if (! out->is_mi_like_p ())
-	out->text (" = ");
+      out->text (" = ");
 
       if (args_type == MI_PRINT_SIMPLE_VALUES)
 	py_print_type (out, val);
@@ -717,16 +711,14 @@ py_print_args (PyObject *filter,
 
   out->wrap_hint ("   ");
   annotate_frame_args ();
-  if (! out->is_mi_like_p ())
-    out->text (" (");
+  out->text (" (");
 
   if (args_iter != Py_None
       && (enumerate_args (args_iter.get (), out, args_type, 0, frame)
 	  == EXT_LANG_BT_ERROR))
     return EXT_LANG_BT_ERROR;
 
-  if (! out->is_mi_like_p ())
-    out->text (")");
+  out->text (")");
 
   return EXT_LANG_BT_OK;
 }
@@ -996,8 +988,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
 	  ui_out_emit_list inner_list_emiter (out, "children");
 
-	  if (! out->is_mi_like_p ())
-	    indent++;
+	  indent++;
 
 	  while ((item = PyIter_Next (elided.get ())))
 	    {
