@@ -1,5 +1,10 @@
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
+	* spu-tdep.c (info_spu_mailbox_list, info_spu_dma_cmdlist)
+	(info_spu_event_command): Remove some uses of is_mi_like_p.
+
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
 	* python/py-framefilter.c (py_print_single_arg)
 	(enumerate_locals, py_print_args, py_print_frame): Remove some
 	uses of is_mi_like_p.

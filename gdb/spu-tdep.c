@@ -2096,18 +2096,10 @@ info_spu_event_command (const char *args, int from_tty)
  
   ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoEvent");
 
-  if (current_uiout->is_mi_like_p ())
-    {
-      current_uiout->field_fmt ("event_status",
-				"0x%s", phex_nz (event_status, 4));
-      current_uiout->field_fmt ("event_mask",
-				"0x%s", phex_nz (event_mask, 4));
-    }
-  else
-    {
-      printf_filtered (_("Event Status 0x%s\n"), phex (event_status, 4));
-      printf_filtered (_("Event Mask   0x%s\n"), phex (event_mask, 4));
-    }
+  current_uiout->text (_("Event Status "));
+  current_uiout->field_fmt ("event_status", "0x%s", phex_nz (event_status, 4));
+  current_uiout->text (_("\nEvent Mask   "));
+  current_uiout->field_fmt ("event_mask", "0x%s", phex_nz (event_mask, 4));
 }
 
 static void
@@ -2226,8 +2218,7 @@ info_spu_mailbox_list (gdb_byte *buf, int nr, enum bfd_endian byte_order,
 	current_uiout->field_fmt (field, "0x%s", phex (val, 4));
       }
 
-      if (!current_uiout->is_mi_like_p ())
-	printf_filtered ("\n");
+      current_uiout->text ("\n");
     }
 }
 
@@ -2454,8 +2445,7 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
 	  current_uiout->field_skip ("error_p");
       }
 
-      if (!current_uiout->is_mi_like_p ())
-	printf_filtered ("\n");
+      current_uiout->text ("\n");
     }
 }
 
