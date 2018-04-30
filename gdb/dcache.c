@@ -595,7 +595,7 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
       i = strtol (exp, &linestart, 10);
       if (linestart == exp || i < 0)
 	{
-	  printf_filtered (_("Usage: info dcache [linenumber]\n"));
+	  printf_filtered (_("Usage: info dcache [LINENUMBER]\n"));
           return;
 	}
 
@@ -701,9 +701,10 @@ exists only for compatibility reasons."),
   add_info ("dcache", info_dcache_command,
 	    _("\
 Print information on the dcache performance.\n\
+Usage: info dcache [LINENUMBER]\n\
 With no arguments, this command prints the cache configuration and a\n\
-summary of each line in the cache.  Use \"info dcache <lineno> to dump\"\n\
-the contents of a given line."));
+summary of each line in the cache.  With an argument, dump\"\n\
+the contents of the given line."));
 
   add_prefix_cmd ("dcache", class_obscure, set_dcache_command, _("\
 Use this command to set number of lines in dcache and line-size."),
