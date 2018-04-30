@@ -2708,9 +2708,12 @@ To find out what inferiors exist at any moment, use @w{@code{info
 inferiors}}:
 
 @table @code
-@kindex info inferiors
+@kindex info inferiors [ @var{id}@dots{} ]
 @item info inferiors
 Print a list of all inferiors currently being managed by @value{GDBN}.
+By default all inferiors are printed, but the argument @var{id}@dots{}
+-- a space separated list of inferior numbers -- can be used to limit
+the display to just the requested inferiors.
 
 @value{GDBN} displays for each inferior (in this order):
 

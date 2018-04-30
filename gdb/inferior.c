@@ -996,12 +996,15 @@ initialize_inferiors (void)
   /* The architecture will be initialized shortly, by
      initialize_current_architecture.  */
 
-  add_info ("inferiors", info_inferiors_command, 
-	    _("IDs of specified inferiors (all inferiors if no argument)."));
+  add_info ("inferiors", info_inferiors_command,
+	    _("Print a list of inferiors being managed.\n\
+Usage: info inferiors [ID]...\n\
+If IDs are specified, the list is limited to just those inferiors.\n\
+By default all inferiors are displayed."));
 
   c = add_com ("add-inferior", no_class, add_inferior_command, _("\
 Add a new inferior.\n\
-Usage: add-inferior [-copies <N>] [-exec <FILENAME>]\n\
+Usage: add-inferior [-copies N] [-exec FILENAME]\n\
 N is the optional number of inferiors to add, default is 1.\n\
 FILENAME is the file name of the executable to use\n\
 as main program."));
@@ -1013,22 +1016,25 @@ Usage: remove-inferiors ID..."));
 
   add_com ("clone-inferior", no_class, clone_inferior_command, _("\
 Clone inferior ID.\n\
-Usage: clone-inferior [-copies <N>] [ID]\n\
+Usage: clone-inferior [-copies N] [ID]\n\
 Add N copies of inferior ID.  The new inferior has the same\n\
 executable loaded as the copied inferior.  If -copies is not specified,\n\
 adds 1 copy.  If ID is not specified, it is the current inferior\n\
 that is cloned."));
 
   add_cmd ("inferiors", class_run, detach_inferior_command, _("\
-Detach from inferior ID (or list of IDS)."),
+Detach from inferior ID (or list of IDS).\n\
+Usage; detach inferiors ID..."),
 	   &detachlist);
 
   add_cmd ("inferiors", class_run, kill_inferior_command, _("\
-Kill inferior ID (or list of IDs)."),
+Kill inferior ID (or list of IDs).\n\
+Usage: kill inferiors ID..."),
 	   &killlist);
 
   add_cmd ("inferior", class_run, inferior_command, _("\
 Use this command to switch between inferiors.\n\
+Usage: inferior ID\n\
 The new inferior ID must be currently known."),
 	   &cmdlist);
 
