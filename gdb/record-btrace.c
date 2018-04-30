@@ -3245,8 +3245,8 @@ replay."),
   add_prefix_cmd ("cpu", class_support, cmd_set_record_btrace_cpu,
 		  _("\
 Set the cpu to be used for trace decode.\n\n\
-The format is \"<vendor>:<identifier>\" or \"none\" or \"auto\" (default).\n\
-For vendor \"intel\" the format is \"<family>/<model>[/<stepping>]\".\n\n\
+The format is \"VENDOR:IDENTIFIER\" or \"none\" or \"auto\" (default).\n\
+For vendor \"intel\" the format is \"FAMILY/MODEL[/STEPPING]\".\n\n\
 When decoding branch trace, enable errata workarounds for the specified cpu.\n\
 The default is \"auto\", which uses the cpu on which the trace was recorded.\n\
 When GDB does not support that cpu, this option can be used to enable\n\
