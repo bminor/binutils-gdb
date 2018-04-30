@@ -876,10 +876,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 	}
     }
   else
-    {
-      result.reset (Py_None);
-      Py_INCREF (Py_None);
-    }
+    result = gdbpy_ref<>::new_reference (Py_None);
 
   gdbpy_ref<> return_result (PyTuple_New (2));
   if (return_result == NULL)
@@ -892,10 +889,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 	return NULL;
     }
   else
-    {
-      unparsed.reset (Py_None);
-      Py_INCREF (Py_None);
-    }
+    unparsed = gdbpy_ref<>::new_reference (Py_None);
 
   PyTuple_SetItem (return_result.get (), 0, unparsed.release ());
   PyTuple_SetItem (return_result.get (), 1, result.release ());

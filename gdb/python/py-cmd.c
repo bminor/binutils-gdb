@@ -138,8 +138,8 @@ cmdpy_function (struct cmd_list_element *command,
       error (_("Could not convert arguments to Python string."));
     }
 
-  gdbpy_ref<> ttyobj (from_tty ? Py_True : Py_False);
-  Py_INCREF (ttyobj.get ());
+  gdbpy_ref<> ttyobj
+    = gdbpy_ref<>::new_reference (from_tty ? Py_True : Py_False);
   gdbpy_ref<> result (PyObject_CallMethodObjArgs ((PyObject *) obj, invoke_cst,
 						  argobj.get (), ttyobj.get (),
 						  NULL));
@@ -246,8 +246,7 @@ cmdpy_completer_helper (struct cmd_list_element *command,
   if (word == NULL)
     {
       /* "brkchars" phase.  */
-      wordobj.reset (Py_None);
-      Py_INCREF (Py_None);
+      wordobj = gdbpy_ref<>::new_reference (Py_None);
     }
   else
     {

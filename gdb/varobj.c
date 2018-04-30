@@ -1455,9 +1455,8 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
   gdbpy_enter_varobj enter_py (var);
 
   mainmod = PyImport_AddModule ("__main__");
-  gdbpy_ref<> globals (PyModule_GetDict (mainmod));
-  Py_INCREF (globals.get ());
-
+  gdbpy_ref<> globals
+    = gdbpy_ref<>::new_reference (PyModule_GetDict (mainmod));
   gdbpy_ref<> constructor (PyRun_String (visualizer, Py_eval_input,
 					 globals.get (), globals.get ()));
 

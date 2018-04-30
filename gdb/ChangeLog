@@ -1,5 +1,12 @@
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (varobj_set_visualizer): Use new_reference.
+	* python/python.c (gdbpy_decode_line): Use new_reference.
+	* python/py-cmd.c (cmdpy_function, cmdpy_completer_helper): Use
+	new_reference.
+
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (install_new_value): Use new_reference.
 	* value.h (value_incref): Return void.  Swap intro comment with
 	value_decref.
