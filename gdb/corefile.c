@@ -485,6 +485,7 @@ _initialize_core (void)
 
   c = add_cmd ("core-file", class_files, core_file_command, _("\
 Use FILE as core dump for examining memory and registers.\n\
+Usage: core-file FILE\n\
 No arg means have no core file.  This command has been superseded by the\n\
 `target core' and `detach' commands."), &cmdlist);
   set_cmd_completer (c, filename_completer);
