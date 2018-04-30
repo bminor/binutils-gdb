@@ -4067,13 +4067,13 @@ De-select any trace frame and resume 'live' debugging."),
 
   add_com ("tstop", class_trace, tstop_command, _("\
 Stop trace data collection.\n\
-Usage: tstop [ <notes> ... ]\n\
+Usage: tstop [NOTES]...\n\
 Any arguments supplied are recorded with the trace as a stop reason and\n\
 reported by tstatus (if the target supports trace notes)."));
 
   add_com ("tstart", class_trace, tstart_command, _("\
 Start trace data collection.\n\
-Usage: tstart [ <notes> ... ]\n\
+Usage: tstart [NOTES]...\n\
 Any arguments supplied are recorded with the trace as a note and\n\
 reported by tstatus (if the target supports trace notes)."));
 
