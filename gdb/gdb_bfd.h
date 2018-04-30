@@ -68,27 +68,16 @@ struct gdb_bfd_ref_policy
 /* A gdb::ref_ptr that has been specialized for BFD objects.  */
 typedef gdb::ref_ptr<struct bfd, gdb_bfd_ref_policy> gdb_bfd_ref_ptr;
 
-/* A helper function that calls gdb_bfd_ref and returns a
-   gdb_bfd_ref_ptr.  */
-
-static inline gdb_bfd_ref_ptr
-new_bfd_ref (struct bfd *abfd)
-{
-  gdb_bfd_ref (abfd);
-  return gdb_bfd_ref_ptr (abfd);
-}
-
 /* Open a read-only (FOPEN_RB) BFD given arguments like bfd_fopen.
    If NAME starts with TARGET_SYSROOT_PREFIX then the BFD will be
    opened using target fileio operations if necessary.  Returns NULL
-   on error.  On success, returns a new reference to the BFD, which
-   must be freed with gdb_bfd_unref.  BFDs returned by this call are
-   shared among all callers opening the same file.  If FD is not -1,
-   then after this call it is owned by BFD.  If the BFD was not
-   accessed using target fileio operations then the filename
-   associated with the BFD and accessible with bfd_get_filename will
-   not be exactly NAME but rather NAME with TARGET_SYSROOT_PREFIX
-   stripped.  */
+   on error.  On success, returns a new reference to the BFD.  BFDs
+   returned by this call are shared among all callers opening the same
+   file.  If FD is not -1, then after this call it is owned by BFD.
+   If the BFD was not accessed using target fileio operations then the
+   filename associated with the BFD and accessible with
+   bfd_get_filename will not be exactly NAME but rather NAME with
+   TARGET_SYSROOT_PREFIX stripped.  */
 
 gdb_bfd_ref_ptr gdb_bfd_open (const char *name, const char *target, int fd);
 

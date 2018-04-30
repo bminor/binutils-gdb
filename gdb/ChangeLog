@@ -1,5 +1,15 @@
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
+	* symfile-mem.c (symbol_file_add_from_memory): Use new_reference.
+	* gdb_bfd.h (new_bfd_ref): Remove.
+	(gdb_bfd_open): Update comment.
+	* gdb_bfd.c (gdb_bfd_open, gdb_bfd_fopen, gdb_bfd_openr)
+	(gdb_bfd_openw, gdb_bfd_openr_iovec, gdb_bfd_record_inclusion)
+	(gdb_bfd_fdopenr): Use new_reference.
+	* exec.c (exec_file_attach): Use new_reference.
+
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
 	* common/gdb_ref_ptr.h (ref_ptr::new_reference): New static
 	method.
 

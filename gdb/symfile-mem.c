@@ -99,7 +99,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
     error (_("Failed to read a valid object file image from memory."));
 
   /* Manage the new reference for the duration of this function.  */
-  gdb_bfd_ref_ptr nbfd_holder = new_bfd_ref (nbfd);
+  gdb_bfd_ref_ptr nbfd_holder = gdb_bfd_ref_ptr::new_reference (nbfd);
 
   xfree (bfd_get_filename (nbfd));
   if (name == NULL)

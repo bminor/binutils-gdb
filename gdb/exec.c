@@ -246,7 +246,7 @@ exec_file_attach (const char *filename, int from_tty)
   /* First, acquire a reference to the current exec_bfd.  We release
      this at the end of the function; but acquiring it now lets the
      BFD cache return it if this call refers to the same file.  */
-  gdb_bfd_ref_ptr exec_bfd_holder = new_bfd_ref (exec_bfd);
+  gdb_bfd_ref_ptr exec_bfd_holder = gdb_bfd_ref_ptr::new_reference (exec_bfd);
 
   /* Remove any previous exec file.  */
   exec_close ();
