@@ -88,12 +88,12 @@ struct value_print_options;
 
 struct value;
 
+/* Increase VAL's reference count.  */
+
+extern void value_incref (struct value *val);
+
 /* Decrease VAL's reference count.  When the reference count drops to
    0, VAL will be freed.  */
-
-extern struct value *value_incref (struct value *val);
-
-/* Increate VAL's reference count.  VAL is returned.  */
 
 extern void value_decref (struct value *val);
 

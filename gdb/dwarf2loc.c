@@ -2482,7 +2482,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    /* Preserve VALUE because we are going to free values back
 	       to the mark, but we still need the value contents
 	       below.  */
-	    value_ref_ptr value_holder (value_incref (value));
+	    value_ref_ptr value_holder = value_ref_ptr::new_reference (value);
 	    free_values.free_to_mark ();
 
 	    retval = allocate_value (subobj_type);

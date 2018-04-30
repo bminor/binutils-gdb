@@ -1329,7 +1329,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
      code that might release it.  */
   value_ref_ptr value_holder;
   if (value != NULL)
-    value_holder.reset (value_incref (value));
+    value_holder = value_ref_ptr::new_reference (value);
 
   /* Below, we'll be comparing string rendering of old and new
      values.  Don't get string rendering if the value is
