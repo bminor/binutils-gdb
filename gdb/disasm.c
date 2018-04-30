@@ -1036,7 +1036,7 @@ _initialize_disasm (void)
   cmd = add_setshow_string_noescape_cmd ("disassembler-options", no_class,
 					 &prospective_options, _("\
 Set the disassembler options.\n\
-Usage: set disassembler-options <option>[,<option>...]\n\n\
+Usage: set disassembler-options OPTION [,OPTION]...\n\n\
 See: 'show disassembler-options' for valid option values.\n"), _("\
 Show the disassembler options."), NULL,
 					 set_disassembler_options_sfunc,
