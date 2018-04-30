@@ -374,7 +374,7 @@ _initialize_tui_layout (void)
 
   cmd = add_com ("layout", class_tui, tui_layout_command, _("\
 Change the layout of windows.\n\
-Usage: layout prev | next | <layout_name> \n\
+Usage: layout prev | next | LAYOUT-NAME\n\
 Layout names are:\n\
    src   : Displays source and command windows.\n\
    asm   : Displays disassembly and command windows.\n\

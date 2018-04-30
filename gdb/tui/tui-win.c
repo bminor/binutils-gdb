@@ -78,9 +78,8 @@ static void parse_scrolling_args (const char *,
 /***************************************
 ** DEFINITIONS
 ***************************************/
-#define WIN_HEIGHT_USAGE    "Usage: winheight <win_name> [+ | -] <#lines>\n"
-#define XDBWIN_HEIGHT_USAGE "Usage: w <#lines>\n"
-#define FOCUS_USAGE         "Usage: focus {<win> | next | prev}\n"
+#define WIN_HEIGHT_USAGE    "Usage: winheight WINDOW-NAME> [+ | -] NUM-LINES>\n"
+#define FOCUS_USAGE         "Usage: focus [WINDOW-NAME | next | prev]\n"
 
 /***************************************
 ** PUBLIC FUNCTIONS
@@ -456,11 +455,11 @@ _initialize_tui_win (void)
            _("Refresh the terminal display.\n"));
   add_com ("tabset", class_tui, tui_set_tab_width_command, _("\
 Set the width (in characters) of tab stops.\n\
-Usage: tabset <n>\n"));
+Usage: tabset N\n"));
   cmd = add_com ("winheight", class_tui, tui_set_win_height_command, _("\
-Set or modify the height of a specified window.\n\
-Usage: winheight <win_name> [+ | -] <#lines>\n\
-Window names are:\n\
+Set or modify the height of a specified window.\n"
+WIN_HEIGHT_USAGE
+"Window names are:\n\
 src  : the source window\n\
 cmd  : the command window\n\
 asm  : the disassembly window\n\
@@ -470,9 +469,9 @@ regs : the register display\n"));
   add_info ("win", tui_all_windows_info,
 	    _("List of all displayed windows.\n"));
   cmd = add_com ("focus", class_tui, tui_set_focus_command, _("\
-Set focus to named window or next/prev window.\n\
-Usage: focus {<win> | next | prev}\n\
-Valid Window names are:\n\
+Set focus to named window or next/prev window.\n"
+FOCUS_USAGE
+"Valid Window names are:\n\
 src  : the source window\n\
 asm  : the disassembly window\n\
 regs : the register display\n\
@@ -481,16 +480,16 @@ cmd  : the command window\n"));
   set_cmd_completer (cmd, focus_completer);
   add_com ("+", class_tui, tui_scroll_forward_command, _("\
 Scroll window forward.\n\
-Usage: + [win] [n]\n"));
+Usage: + [WIN] [N]\n"));
   add_com ("-", class_tui, tui_scroll_backward_command, _("\
 Scroll window backward.\n\
-Usage: - [win] [n]\n"));
+Usage: - [WIN] [N]\n"));
   add_com ("<", class_tui, tui_scroll_left_command, _("\
 Scroll window text to the left.\n\
-Usage: < [win] [n]\n"));
+Usage: < [WIN] [N]\n"));
   add_com (">", class_tui, tui_scroll_right_command, _("\
 Scroll window text to the right.\n\
-Usage: > [win] [n]\n"));
+Usage: > [WIN] [N]\n"));
 
   /* Define the tui control variables.  */
   add_setshow_enum_cmd ("border-kind", no_class, tui_border_kind_enums,
