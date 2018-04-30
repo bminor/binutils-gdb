@@ -603,28 +603,28 @@ _initialize_mem (void)
 Define attributes for memory region or reset memory region handling to\n\
 target-based.\n\
 Usage: mem auto\n\
-       mem <lo addr> <hi addr> [<mode> <width> <cache>],\n\
-where <mode>  may be rw (read/write), ro (read-only) or wo (write-only),\n\
-      <width> may be 8, 16, 32, or 64, and\n\
-      <cache> may be cache or nocache"));
+       mem LOW HIGH [MODE WIDTH CACHE],\n\
+where MODE  may be rw (read/write), ro (read-only) or wo (write-only),\n\
+      WIDTH may be 8, 16, 32, or 64, and\n\
+      CACHE may be cache or nocache"));
 
   add_cmd ("mem", class_vars, enable_mem_command, _("\
 Enable memory region.\n\
-Arguments are the code numbers of the memory regions to enable.\n\
-Usage: enable mem <code number>...\n\
-Do \"info mem\" to see current list of code numbers."), &enablelist);
+Arguments are the IDs of the memory regions to enable.\n\
+Usage: enable mem [ID]...\n\
+Do \"info mem\" to see current list of IDs."), &enablelist);
 
   add_cmd ("mem", class_vars, disable_mem_command, _("\
 Disable memory region.\n\
-Arguments are the code numbers of the memory regions to disable.\n\
-Usage: disable mem <code number>...\n\
-Do \"info mem\" to see current list of code numbers."), &disablelist);
+Arguments are the IDs of the memory regions to disable.\n\
+Usage: disable mem [ID]...\n\
+Do \"info mem\" to see current list of IDs."), &disablelist);
 
   add_cmd ("mem", class_vars, delete_mem_command, _("\
 Delete memory region.\n\
-Arguments are the code numbers of the memory regions to delete.\n\
-Usage: delete mem <code number>...\n\
-Do \"info mem\" to see current list of code numbers."), &deletelist);
+Arguments are the IDs of the memory regions to delete.\n\
+Usage: delete mem [ID]...\n\
+Do \"info mem\" to see current list of IDs."), &deletelist);
 
   add_info ("mem", info_mem_command,
 	    _("Memory region attributes"));
