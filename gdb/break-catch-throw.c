@@ -238,8 +238,7 @@ print_it_exception_catchpoint (bpstat bs)
   bp_temp = b->disposition == disp_del;
   uiout->text (bp_temp ? "Temporary catchpoint "
 		       : "Catchpoint ");
-  if (!uiout->is_mi_like_p ())
-    uiout->field_int ("bkptno", b->number);
+  uiout->field_int ("bkptno", b->number);
   uiout->text ((kind == EX_EVENT_THROW ? " (exception thrown), "
 		: (kind == EX_EVENT_CATCH ? " (exception caught), "
 		   : " (exception rethrown), ")));
@@ -248,7 +247,6 @@ print_it_exception_catchpoint (bpstat bs)
       uiout->field_string ("reason",
 			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
-      uiout->field_int ("bkptno", b->number);
     }
   return PRINT_SRC_AND_LOC;
 }

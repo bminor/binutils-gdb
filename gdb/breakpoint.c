@@ -8596,9 +8596,7 @@ static void
 mention (struct breakpoint *b)
 {
   b->ops->print_mention (b);
-  if (current_uiout->is_mi_like_p ())
-    return;
-  printf_filtered ("\n");
+  current_uiout->text ("\n");
 }
 
 
@@ -9795,12 +9793,9 @@ print_mention_ranged_breakpoint (struct breakpoint *b)
   gdb_assert (bl);
   gdb_assert (b->type == bp_hardware_breakpoint);
 
-  if (uiout->is_mi_like_p ())
-    return;
-
-  printf_filtered (_("Hardware assisted ranged breakpoint %d from %s to %s."),
-		   b->number, paddress (bl->gdbarch, bl->address),
-		   paddress (bl->gdbarch, bl->address + bl->length - 1));
+  uiout->message (_("Hardware assisted ranged breakpoint %d from %s to %s."),
+		  b->number, paddress (bl->gdbarch, bl->address),
+		  paddress (bl->gdbarch, bl->address + bl->length - 1));
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for
