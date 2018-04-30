@@ -354,18 +354,11 @@ interp_exec (struct interp *interp, const char *command_str)
 {
   struct ui_interp_info *ui_interp = get_current_interp_info ();
 
-  struct gdb_exception ex;
-  struct interp *save_command_interp;
-
   /* See `command_interp' for why we do this.  */
-  save_command_interp = ui_interp->command_interpreter;
-  ui_interp->command_interpreter = interp;
+  scoped_restore save_command_interp
+    = make_scoped_restore (&ui_interp->command_interpreter, interp);
 
-  ex = interp->exec (command_str);
-
-  ui_interp->command_interpreter = save_command_interp;
-
-  return ex;
+  return interp->exec (command_str);
 }
 
 /* A convenience routine that nulls out all the common command hooks.

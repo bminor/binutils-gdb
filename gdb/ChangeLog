@@ -1,5 +1,10 @@
 2018-05-25  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-interp.c (safe_execute_command): Use scoped_restore.
+	* interps.c (interp_exec): Use scoped_restore.
+
+2018-05-25  Tom Tromey  <tom@tromey.com>
+
 	* remote.c (remote_target::remote_file_get): Use
 	gdb::byte_vector.
 	(remote_target::remote_file_put): Likewise.
