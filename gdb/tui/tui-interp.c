@@ -58,9 +58,7 @@ public:
 static tui_interp *
 as_tui_interp (struct interp *interp)
 {
-  if (strcmp (interp_name (interp), INTERP_TUI) == 0)
-    return (tui_interp *) interp;
-  return NULL;
+  return dynamic_cast<tui_interp *> (interp);
 }
 
 /* Cleanup the tui before exiting.  */

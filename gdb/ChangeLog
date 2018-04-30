@@ -1,5 +1,11 @@
 2018-05-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-interp.c (as_tui_interp): Use dynamic_cast.
+	* mi/mi-interp.c (as_mi_interp): Use dynamic_cast.
+	* cli/cli-interp.c (as_cli_interp): Use dynamic_cast.
+
+2018-05-25  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-interp.c (safe_execute_command): Use scoped_restore.
 	* interps.c (interp_exec): Use scoped_restore.
 

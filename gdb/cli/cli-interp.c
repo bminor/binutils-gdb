@@ -73,9 +73,7 @@ struct cli_suppress_notification cli_suppress_notification =
 static struct cli_interp *
 as_cli_interp (struct interp *interp)
 {
-  if (strcmp (interp_name (interp), INTERP_CONSOLE) == 0)
-    return (struct cli_interp *) interp;
-  return NULL;
+  return dynamic_cast<cli_interp *> (interp);
 }
 
 /* Longjmp-safe wrapper for "execute_command".  */

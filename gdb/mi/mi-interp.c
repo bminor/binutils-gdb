@@ -106,9 +106,7 @@ display_mi_prompt (struct mi_interp *mi)
 static struct mi_interp *
 as_mi_interp (struct interp *interp)
 {
-  if (interp_ui_out (interp)->is_mi_like_p ())
-    return (struct mi_interp *) interp;
-  return NULL;
+  return dynamic_cast<mi_interp *> (interp);
 }
 
 void
