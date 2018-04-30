@@ -1,3 +1,7 @@
+2018-04-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2read.c (read_index_from_section): Use bool.
+
 2018-04-29  Fabian Groffen  <grobian@gentoo.org>
 
 	PR gdb/22950
