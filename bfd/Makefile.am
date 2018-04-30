@@ -135,6 +135,7 @@ ALL_MACHINES = \
 	cpu-msp430.lo \
 	cpu-mt.lo \
 	cpu-nds32.lo \
+	cpu-nfp.lo \
 	cpu-nios2.lo \
 	cpu-ns32k.lo \
 	cpu-or1k.lo \
@@ -218,6 +219,7 @@ ALL_MACHINES_CFILES = \
 	cpu-msp430.c \
 	cpu-mt.c \
 	cpu-nds32.c \
+	cpu-nfp.c \
 	cpu-ns32k.c \
 	cpu-nios2.c \
 	cpu-or1k.c \
@@ -555,6 +557,7 @@ BFD64_BACKENDS = \
 	elf64-mips.lo \
 	elfxx-mips.lo \
 	elf64-mmix.lo \
+	elf64-nfp.lo \
 	elf64-ppc.lo \
 	elf32-riscv.lo \
 	elf64-riscv.lo \
@@ -590,6 +593,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-ia64-vms.c \
 	elf64-mips.c \
 	elf64-mmix.c \
+	elf64-nfp.c \
 	elf64-ppc.c \
 	elf64-s390.c \
 	elf64-sparc.c \

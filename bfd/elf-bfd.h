@@ -1671,6 +1671,7 @@ struct bfd_elf_section_data
 #define elf_linked_to_section(sec) (elf_section_data(sec)->linked_to)
 #define elf_section_type(sec)	(elf_section_data(sec)->this_hdr.sh_type)
 #define elf_section_flags(sec)	(elf_section_data(sec)->this_hdr.sh_flags)
+#define elf_section_info(sec)	(elf_section_data(sec)->this_hdr.sh_info)
 #define elf_group_name(sec)	(elf_section_data(sec)->group.name)
 #define elf_group_id(sec)	(elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec)	(elf_section_data(sec)->next_in_group)

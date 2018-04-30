@@ -1,3 +1,18 @@
+2018-04-30  Francois H. Theron <francois.theron@netronome.com>
+
+	* Makefile.am: Added NFP files to build.
+	* archures.c: Added bfd_arch_nfp
+	* config.bfd: Added NFP support.
+	* configure.ac: Added NFP support.
+	* cpu-nfp.c: New, for NFP support.
+	* elf-bfd.h: Added elf_section_info()
+	* elf64-nfp.c: New, for NFP support.
+	* po/SRC-POTFILES.in: Added NFP source files.
+	* targets.c: Added nfp_elf64_vec
+	* bfd-in2.h: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2018-04-27  Alan Modra  <amodra@gmail.com>
 
 	* bfd-in2.h: Regenerate.

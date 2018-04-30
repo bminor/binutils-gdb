@@ -182,6 +182,7 @@ m68*)		 targ_archs=bfd_m68k_arch ;;
 microblaze*)	 targ_archs=bfd_microblaze_arch ;;
 mips*)		 targ_archs=bfd_mips_arch ;;
 nds32*)		 targ_archs=bfd_nds32_arch ;;
+nfp)		 targ_archs=bfd_nfp_arch ;;
 nios2*)          targ_archs=bfd_nios2_arch ;;
 or1k*|or1knd*)	 targ_archs=bfd_or1k_arch ;;
 pdp11*)		 targ_archs=bfd_pdp11_arch ;;
@@ -991,6 +992,12 @@ case "${targ}" in
     targ_defvec=nds32_elf32_be_vec
     targ_selvecs=nds32_elf32_le_vec
     ;;
+
+#ifdef BFD64
+  nfp-*-*)
+    targ_defvec=nfp_elf64_vec
+    ;;
+#endif
 
   ns32k-pc532-mach* | ns32k-pc532-ux*)
     targ_defvec=ns32k_aout_pc532mach_vec

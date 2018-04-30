@@ -1,3 +1,16 @@
+2018-04-30  Francois H. Theron <francois.theron@netronome.com>
+
+	* readelf.c: Very basic support for EM_NFP and its section types.
+	* testsuite/binutils-all/nfp: New directory.
+	* testsuite/binutils-all/nfp/objdump.exp: New file.  Run new
+	tests.
+	* testsuite/binutils-all/nfp/test2_ctx8.d: New file.
+	* testsuite/binutils-all/nfp/test2_no-pc_ctx4.d: New file.
+	* testsuite/binutils-all/nfp/test1.d: New file.
+	* testsuite/binutils-all/nfp/nfp6000.nffw: New file.
+	* testsuite/binutils-all/nfp/test2_nfp6000.nffw: New file.
+	* NEWS: Mention the new support.
+
 2018-04-27  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/lib/binutils-common.exp (match_target): New procedure.

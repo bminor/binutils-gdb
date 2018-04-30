@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for disassembling netronome Flow Processor (NFP) firmware files.
+
 Changes in 2.30:
 
 * Add --debug-dump=links option to readelf and --dwarf=links option to objdump

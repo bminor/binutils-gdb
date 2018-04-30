@@ -64,6 +64,7 @@
 #define ARCH_mt
 #define ARCH_msp430
 #define ARCH_nds32
+#define ARCH_nfp
 #define ARCH_nios2
 #define ARCH_ns32k
 #define ARCH_or1k
@@ -273,6 +274,11 @@ disassembler (enum bfd_architecture a,
 #ifdef ARCH_nds32
     case bfd_arch_nds32:
       disassemble = print_insn_nds32;
+      break;
+#endif
+#ifdef ARCH_nfp
+    case bfd_arch_nfp:
+      disassemble = print_insn_nfp;
       break;
 #endif
 #ifdef ARCH_ns32k
@@ -536,6 +542,9 @@ disassembler_usage (FILE *stream ATTRIBUTE_UNUSED)
 #endif
 #ifdef ARCH_mips
   print_mips_disassembler_options (stream);
+#endif
+#ifdef ARCH_nfp
+  print_nfp_disassembler_options (stream);
 #endif
 #ifdef ARCH_powerpc
   print_ppc_disassembler_options (stream);

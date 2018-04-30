@@ -131,6 +131,7 @@
 #include "elf/mt.h"
 #include "elf/msp430.h"
 #include "elf/nds32.h"
+#include "elf/nfp.h"
 #include "elf/nios2.h"
 #include "elf/or1k.h"
 #include "elf/pj.h"
@@ -776,6 +777,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_CYGNUS_M32R:
     case EM_SCORE:
     case EM_XGATE:
+    case EM_NFP:
       return FALSE;
 
       /* Targets that use RELA relocations.  */
@@ -1559,6 +1561,13 @@ dump_relocations (Filedata *          filedata,
 
 	case EM_TI_PRU:
 	  rtype = elf_pru_reloc_type (type);
+	  break;
+
+	case EM_NFP:
+	  if (EF_NFP_MACH (filedata->file_header.e_flags) == E_NFP_MACH_3200)
+	    rtype = elf_nfp3200_reloc_type (type);
+	  else
+	    rtype = elf_nfp_reloc_type (type);
 	  break;
 	}
 
@@ -2472,6 +2481,7 @@ get_machine_name (unsigned e_machine)
     case EM_RISCV: 	 	return "RISC-V";
     case EM_LANAI:		return "Lanai 32-bit processor";
     case EM_BPF:		return "Linux BPF";
+    case EM_NFP:		return "Netronome Flow Processor";
 
       /* Large numbers...  */
     case EM_MT:                 return "Morpho Techologies MT processor";
@@ -3440,6 +3450,18 @@ get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
 	  decode_NDS32_machine_flags (e_flags, buf, sizeof buf);
 	  break;
 
+	case EM_NFP:
+	  switch (EF_NFP_MACH (e_flags))
+	    {
+	    case E_NFP_MACH_3200:
+	      strcat (buf, ", NFP-32xx");
+	      break;
+	    case E_NFP_MACH_6000:
+	      strcat (buf, ", NFP-6xxx");
+	      break;
+	    }
+	  break;
+
 	case EM_RISCV:
 	  if (e_flags & EF_RISCV_RVC)
 	    strcat (buf, ", RVC");
@@ -4136,6 +4158,18 @@ get_msp430x_section_type_name (unsigned int sh_type)
 }
 
 static const char *
+get_nfp_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_NFP_MECONFIG:	return "NFP_MECONFIG";
+    case SHT_NFP_INITREG:	return "NFP_INITREG";
+    case SHT_NFP_UDEBUG:	return "NFP_UDEBUG";
+    default:			return NULL;
+    }
+}
+
+static const char *
 get_v850_section_type_name (unsigned int sh_type)
 {
   switch (sh_type)
@@ -4220,6 +4254,9 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
 	      break;
 	    case EM_MSP430:
 	      result = get_msp430x_section_type_name (sh_type);
+	      break;
+	    case EM_NFP:
+	      result = get_nfp_section_type_name (sh_type);
 	      break;
 	    case EM_V800:
 	    case EM_V850:

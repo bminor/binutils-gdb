@@ -1,3 +1,14 @@
+2018-04-30  Francois H. Theron <francois.theron@netronome.com>
+
+	Makefile.am: Added nfp-dis.c.
+	configure.ac: Added bfd_nfp_arch.
+	disassemble.h: Added print_insn_nfp prototype.
+	disassemble.c: Added ARCH_nfp and call to print_insn_nfp
+	nfp-dis.c: New, for NFP support.
+	po/POTFILES.in: Added nfp-dis.c to the list.
+	Makefile.in: Regenerate.
+	configure: Regenerate.
+
 2018-04-26  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl: Fold various non-memory operand AVX512VL

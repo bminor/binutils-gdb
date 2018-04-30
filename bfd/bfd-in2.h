@@ -2381,6 +2381,9 @@ enum bfd_architecture
 #define bfd_mach_wasm32        1
   bfd_arch_pru,       /* PRU.  */
 #define bfd_mach_pru           0
+  bfd_arch_nfp,       /* Netronome Flow Processor */
+#define bfd_mach_nfp3200       0x3200
+#define bfd_mach_nfp6000       0x6000
   bfd_arch_last
   };
 

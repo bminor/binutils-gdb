@@ -511,6 +511,9 @@ DESCRIPTION
 .#define bfd_mach_wasm32	1
 .  bfd_arch_pru,       {* PRU.  *}
 .#define bfd_mach_pru		0
+.  bfd_arch_nfp,       {* Netronome Flow Processor *}
+.#define bfd_mach_nfp3200	0x3200
+.#define bfd_mach_nfp6000	0x6000
 .  bfd_arch_last
 .  };
 */
@@ -601,6 +604,7 @@ extern const bfd_arch_info_type bfd_ft32_arch;
 extern const bfd_arch_info_type bfd_msp430_arch;
 extern const bfd_arch_info_type bfd_mt_arch;
 extern const bfd_arch_info_type bfd_nds32_arch;
+extern const bfd_arch_info_type bfd_nfp_arch;
 extern const bfd_arch_info_type bfd_nios2_arch;
 extern const bfd_arch_info_type bfd_ns32k_arch;
 extern const bfd_arch_info_type bfd_or1k_arch;
@@ -689,6 +693,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_msp430_arch,
     &bfd_mt_arch,
     &bfd_nds32_arch,
+    &bfd_nfp_arch,
     &bfd_nios2_arch,
     &bfd_ns32k_arch,
     &bfd_or1k_arch,
