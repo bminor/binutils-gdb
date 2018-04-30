@@ -1,3 +1,18 @@
+2018-05-25  Tom Tromey	<tom@tromey.com>
+
+	* utils.c (fputs_maybe_filtered): Update.
+	* linespec.c (decode_line_full): Update.
+	* mi/mi-interp.c (mi_on_normal_stop_1, mi_tsv_modified)
+	(mi_print_breakpoint_for_event, mi_solib_loaded)
+	(mi_solib_unloaded, mi_command_param_changed, mi_memory_changed)
+	(mi_user_selected_context_changed): Update.
+	* mi/mi-main.c (mi_execute_command): Update.
+	* cli/cli-script.c (execute_control_command): Update.
+	* python/python.c (execute_gdb_command): Update.
+	* solib.c (info_sharedlibrary_command): Update.
+	* interps.c (interp_ui_out): Remove.
+	* interps.h (interp_ui_out): Remove.
+
 2018-05-25  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-interp.c (as_tui_interp): Use dynamic_cast.

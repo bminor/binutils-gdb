@@ -689,7 +689,7 @@ execute_control_command (struct command_line *cmd, int from_tty)
      breakpoint commands while running the MI interpreter.  */
   interp *console = interp_lookup (current_ui, INTERP_CONSOLE);
   scoped_restore save_uiout
-    = make_scoped_restore (&current_uiout, interp_ui_out (console));
+    = make_scoped_restore (&current_uiout, console->interp_ui_out ());
 
   return execute_control_command_1 (cmd, from_tty);
 }

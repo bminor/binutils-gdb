@@ -251,18 +251,6 @@ set_top_level_interpreter (const char *name)
   interp_set (interp, true);
 }
 
-/* Returns the current interpreter.  */
-
-struct ui_out *
-interp_ui_out (struct interp *interp)
-{
-  struct ui_interp_info *ui_interp = get_current_interp_info ();
-
-  if (interp == NULL)
-    interp = ui_interp->current_interpreter;
-  return interp->interp_ui_out ();
-}
-
 void
 current_interp_set_logging (ui_file_up logfile,
 			    bool logging_redirect)

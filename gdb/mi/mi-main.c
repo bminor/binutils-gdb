@@ -1993,7 +1993,7 @@ mi_execute_command (const char *cmd, int from_tty)
 
       if (/* The notifications are only output when the top-level
 	     interpreter (specified on the command line) is MI.  */
-	  interp_ui_out (top_level_interpreter ())->is_mi_like_p ()
+	  top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ()
 	  /* Don't try report anything if there are no threads --
 	     the program is dead.  */
 	  && thread_count () != 0

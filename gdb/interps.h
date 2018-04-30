@@ -98,7 +98,6 @@ extern struct interp *interp_lookup (struct ui *ui, const char *name);
    interpreter fails to initialize.  */
 extern void set_top_level_interpreter (const char *name);
 
-extern struct ui_out *interp_ui_out (struct interp *interp);
 extern const char *interp_name (struct interp *interp);
 
 /* Temporarily set the current interpreter, and reset it on

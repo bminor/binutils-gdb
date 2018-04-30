@@ -1093,7 +1093,7 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 	    uiout->field_skip ("to");
 	  }
 
-	if (! interp_ui_out (top_level_interpreter ())->is_mi_like_p ()
+	if (! top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ()
 	    && so->symbols_loaded
 	    && !objfile_has_symbols (so->objfile))
 	  {

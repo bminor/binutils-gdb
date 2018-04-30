@@ -609,7 +609,7 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       /* Use the console interpreter uiout to have the same print format
 	for console or MI.  */
       interp = interp_lookup (current_ui, "console");
-      current_uiout = interp_ui_out (interp);
+      current_uiout = interp->interp_ui_out ();
 
       scoped_restore preventer = prevent_dont_repeat ();
       if (to_string)

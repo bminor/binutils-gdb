@@ -1683,7 +1683,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
       || batch_flag
       || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX)
       || top_level_interpreter () == NULL
-      || interp_ui_out (top_level_interpreter ())->is_mi_like_p ())
+      || top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ())
     {
       fputs_unfiltered (linebuffer, stream);
       return;

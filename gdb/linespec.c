@@ -3293,7 +3293,7 @@ decode_line_full (const struct event_location *location, int flags,
 
   if (select_mode == NULL)
     {
-      if (interp_ui_out (top_level_interpreter ())->is_mi_like_p ())
+      if (top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ())
 	select_mode = multiple_symbols_all;
       else
 	select_mode = multiple_symbols_select_mode ();
