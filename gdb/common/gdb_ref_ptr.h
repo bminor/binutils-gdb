@@ -149,6 +149,13 @@ class ref_ptr
     return m_obj;
   }
 
+  /* Acquire a new reference and return a ref_ptr that owns it.  */
+  static ref_ptr<T, Policy> new_reference (T *obj)
+  {
+    Policy::incref (obj);
+    return ref_ptr<T, Policy> (obj);
+  }
+
  private:
 
   T *m_obj;

@@ -1,5 +1,10 @@
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
+	* common/gdb_ref_ptr.h (ref_ptr::new_reference): New static
+	method.
+
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
 	* jit.c (jit_read_code_entry): Use type_align.
 	* i386-tdep.c (i386_gdbarch_init): Don't call
 	set_gdbarch_long_long_align_bit.
