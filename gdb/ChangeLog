@@ -1,5 +1,10 @@
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
+	* darwin-nat-info.c (darwin_debug_regions_recurse): Remove use of
+	is_mi_like_p.
+
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (mention): Remove use of is_mi_like_p.
 	(print_mention_ranged_breakpoint): Likewise.
 	* break-catch-throw.c (print_it_exception_catchpoint): Remove use

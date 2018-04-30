@@ -676,8 +676,7 @@ darwin_debug_regions_recurse (task_t task)
 	  uiout->field_int ("tag", r_info.user_tag);
       }
 
-      if (!uiout->is_mi_like_p ())
-	uiout->text ("\n");
+      uiout->text ("\n");
 
       if (r_info.is_submap)
 	r_depth++;
