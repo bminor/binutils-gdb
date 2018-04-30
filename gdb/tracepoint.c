@@ -420,51 +420,50 @@ tvariables_info_1 (void)
 {
   struct ui_out *uiout = current_uiout;
 
-  if (tvariables.empty () && !uiout->is_mi_like_p ())
-    {
-      printf_filtered (_("No trace state variables.\n"));
-      return;
-    }
-
   /* Try to acquire values from the target.  */
   for (trace_state_variable &tsv : tvariables)
     tsv.value_known
       = target_get_trace_state_variable_value (tsv.number, &tsv.value);
 
-  ui_out_emit_table table_emitter (uiout, 3, tvariables.size (),
-				   "trace-variables");
-  uiout->table_header (15, ui_left, "name", "Name");
-  uiout->table_header (11, ui_left, "initial", "Initial");
-  uiout->table_header (11, ui_left, "current", "Current");
+  {
+    ui_out_emit_table table_emitter (uiout, 3, tvariables.size (),
+				     "trace-variables");
+    uiout->table_header (15, ui_left, "name", "Name");
+    uiout->table_header (11, ui_left, "initial", "Initial");
+    uiout->table_header (11, ui_left, "current", "Current");
 
-  uiout->table_body ();
+    uiout->table_body ();
 
-  for (const trace_state_variable &tsv : tvariables)
-    {
-      const char *c;
+    for (const trace_state_variable &tsv : tvariables)
+      {
+	const char *c;
 
-      ui_out_emit_tuple tuple_emitter (uiout, "variable");
+	ui_out_emit_tuple tuple_emitter (uiout, "variable");
 
-      uiout->field_string ("name", std::string ("$") + tsv.name);
-      uiout->field_string ("initial", plongest (tsv.initial_value));
+	uiout->field_string ("name", std::string ("$") + tsv.name);
+	uiout->field_string ("initial", plongest (tsv.initial_value));
 
-      if (tsv.value_known)
-        c = plongest (tsv.value);
-      else if (uiout->is_mi_like_p ())
-        /* For MI, we prefer not to use magic string constants, but rather
-           omit the field completely.  The difference between unknown and
-           undefined does not seem important enough to represent.  */
-        c = NULL;
-      else if (current_trace_status ()->running || traceframe_number >= 0)
-	/* The value is/was defined, but we don't have it.  */
-        c = "<unknown>";
-      else
-	/* It is not meaningful to ask about the value.  */
-        c = "<undefined>";
-      if (c)
-        uiout->field_string ("current", c);
-      uiout->text ("\n");
-    }
+	if (tsv.value_known)
+	  c = plongest (tsv.value);
+	else if (uiout->is_mi_like_p ())
+	  /* For MI, we prefer not to use magic string constants, but rather
+	     omit the field completely.  The difference between unknown and
+	     undefined does not seem important enough to represent.  */
+	  c = NULL;
+	else if (current_trace_status ()->running || traceframe_number >= 0)
+	  /* The value is/was defined, but we don't have it.  */
+	  c = "<unknown>";
+	else
+	  /* It is not meaningful to ask about the value.  */
+	  c = "<undefined>";
+	if (c)
+	  uiout->field_string ("current", c);
+	uiout->text ("\n");
+      }
+  }
+
+  if (tvariables.empty ())
+    uiout->text (_("No trace state variables.\n"));
 }
 
 /* List all the trace state variables.  */

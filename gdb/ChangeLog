@@ -1,5 +1,9 @@
 2018-04-30  Tom Tromey  <tom@tromey.com>
 
+	* tracepoint.c (tvariables_info_1): Remove use of is_mi_like_p.
+
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
 	* spu-tdep.c (info_spu_mailbox_list, info_spu_dma_cmdlist)
 	(info_spu_event_command): Remove some uses of is_mi_like_p.
 
