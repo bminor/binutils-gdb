@@ -822,8 +822,8 @@ A size of \"unlimited\" means unlimited lines.  The default is 10."),
 
   c = add_cmd ("save", class_obscure, cmd_record_save,
 	       _("Save the execution log to a file.\n\
-Argument is optional filename.\n\
-Default filename is 'gdb_record.<process_id>'."),
+Usage: record save [FILENAME]\n\
+Default filename is 'gdb_record.PROCESS_ID'."),
 	       &record_cmdlist);
   set_cmd_completer (c, filename_completer);
 
