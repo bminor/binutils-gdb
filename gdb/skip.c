@@ -610,13 +610,13 @@ _initialize_step_skip (void)
 Ignore a function while stepping.\n\
 \n\
 Usage: skip [FUNCTION-NAME]\n\
-       skip [<file-spec>] [<function-spec>]\n\
+       skip [FILE-SPEC] [FUNCTION-SPEC]\n\
 If no arguments are given, ignore the current function.\n\
 \n\
-<file-spec> is one of:\n\
+FILE-SPEC is one of:\n\
        -fi|-file FILE-NAME\n\
        -gfi|-gfile GLOB-FILE-PATTERN\n\
-<function-spec> is one of:\n\
+FUNCTION-SPEC is one of:\n\
        -fu|-function FUNCTION-NAME\n\
        -rfu|-rfunction FUNCTION-NAME-REGULAR-EXPRESSION"),
                   &skiplist, "skip ", 1, &cmdlist);
@@ -639,28 +639,28 @@ If no function name is given, skip the current function."),
 Enable skip entries.  You can specify numbers (e.g. \"skip enable 1 3\"), \
 ranges (e.g. \"skip enable 4-8\"), or both (e.g. \"skip enable 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll enable all skip entries.\n\n\
-Usage: skip enable [NUMBERS AND/OR RANGES]"),
+Usage: skip enable [NUMBER | RANGE]..."),
 	   &skiplist);
 
   add_cmd ("disable", class_breakpoint, skip_disable_command, _("\
 Disable skip entries.  You can specify numbers (e.g. \"skip disable 1 3\"), \
 ranges (e.g. \"skip disable 4-8\"), or both (e.g. \"skip disable 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll disable all skip entries.\n\n\
-Usage: skip disable [NUMBERS AND/OR RANGES]"),
+Usage: skip disable [NUMBER | RANGE]..."),
 	   &skiplist);
 
   add_cmd ("delete", class_breakpoint, skip_delete_command, _("\
 Delete skip entries.  You can specify numbers (e.g. \"skip delete 1 3\"), \
 ranges (e.g. \"skip delete 4-8\"), or both (e.g. \"skip delete 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll delete all skip entries.\n\n\
-Usage: skip delete [NUMBERS AND/OR RANGES]"),
+Usage: skip delete [NUMBER | RANGES]..."),
            &skiplist);
 
   add_info ("skip", info_skip_command, _("\
 Display the status of skips.  You can specify numbers (e.g. \"skip info 1 3\"), \
 ranges (e.g. \"skip info 4-8\"), or both (e.g. \"skip info 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll show all skips.\n\n\
-Usage: skip info [NUMBERS AND/OR RANGES]\n\
+Usage: skip info [NUMBER | RANGES]...\n\
 The \"Type\" column indicates one of:\n\
 \tfile        - ignored file\n\
 \tfunction    - ignored function"));
