@@ -3445,7 +3445,7 @@ Execution will also stop upon exit from the current stack frame."));
 
   c = add_com ("jump", class_run, jump_command, _("\
 Continue program being debugged at specified line or address.\n\
-Usage: jump <location>\n\
+Usage: jump LOCATION\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
 for an address to start at."));
   set_cmd_completer (c, location_completer);
