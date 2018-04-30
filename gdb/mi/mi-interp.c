@@ -113,7 +113,6 @@ void
 mi_interp::init (bool top_level)
 {
   mi_interp *mi = this;
-  const char *name;
   int mi_version;
 
   /* Store the current output channel, so that we can create a console
@@ -129,7 +128,6 @@ mi_interp::init (bool top_level)
   mi->targ = new mi_console_file (mi->raw_stdout, "@", '"');
   mi->event_channel = new mi_console_file (mi->raw_stdout, "=", 0);
 
-  name = interp_name (this);
   /* INTERP_MI selects the most recent released version.  "mi2" was
      released as part of GDB 6.0.  */
   if (strcmp (name, INTERP_MI) == 0)

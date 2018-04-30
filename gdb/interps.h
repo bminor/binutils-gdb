@@ -98,8 +98,6 @@ extern struct interp *interp_lookup (struct ui *ui, const char *name);
    interpreter fails to initialize.  */
 extern void set_top_level_interpreter (const char *name);
 
-extern const char *interp_name (struct interp *interp);
-
 /* Temporarily set the current interpreter, and reset it on
    destruction.  */
 class scoped_restore_interp
@@ -113,7 +111,7 @@ public:
 
   ~scoped_restore_interp ()
   {
-    set_interp (interp_name (m_interp));
+    set_interp (m_interp->name);
   }
 
   scoped_restore_interp (const scoped_restore_interp &) = delete;

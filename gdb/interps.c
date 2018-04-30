@@ -274,14 +274,6 @@ scoped_restore_interp::set_interp (const char *name)
   return old_interp;
 }
 
-/* Returns the interpreter's name.  */
-
-const char *
-interp_name (struct interp *interp)
-{
-  return interp->name;
-}
-
 /* Returns true if the current interp is the passed in name.  */
 int
 current_interp_named_p (const char *interp_name)

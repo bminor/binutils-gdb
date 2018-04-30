@@ -1,5 +1,13 @@
 2018-05-25  Tom Tromey	<tom@tromey.com>
 
+	* interps.c (interp_name): Remove.
+	* mi/mi-interp.c (mi_interp::init): Update.
+	* interps.h (interp_name): Remove.
+	(~scoped_restore_interp): Update.
+	* tui/tui.c (tui_enable): Update.
+
+2018-05-25  Tom Tromey	<tom@tromey.com>
+
 	* utils.c (fputs_maybe_filtered): Update.
 	* linespec.c (decode_line_full): Update.
 	* mi/mi-interp.c (mi_on_normal_stop_1, mi_tsv_modified)
