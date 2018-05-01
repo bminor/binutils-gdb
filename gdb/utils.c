@@ -2730,14 +2730,18 @@ When set, debugging messages will be marked with seconds and microseconds."),
 CORE_ADDR
 address_significant (gdbarch *gdbarch, CORE_ADDR addr)
 {
-  /* Truncate address to the significant bits of a target address,
-     avoiding shifts larger or equal than the width of a CORE_ADDR.
-     The local variable ADDR_BIT stops the compiler reporting a shift
-     overflow when it won't occur.  */
+  /* Clear insignificant bits of a target address and sign extend resulting
+     address, avoiding shifts larger or equal than the width of a CORE_ADDR.
+     The local variable ADDR_BIT stops the compiler reporting a shift overflow
+     when it won't occur.  */
   int addr_bit = gdbarch_significant_addr_bit (gdbarch);
 
   if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
-    addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
+    {
+      CORE_ADDR sign = (CORE_ADDR) 1 << (addr_bit - 1);
+      addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
+      addr = (addr ^ sign) - sign;
+    }
 
   return addr;
 }

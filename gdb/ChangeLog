@@ -1,3 +1,12 @@
+2018-05-10  Omair Javaid  <omair.javaid@linaro.org>
+
+	PR gdb/23127
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Add call to
+	set_gdbarch_significant_addr_bit.
+	* aarch64-tdep.c (aarch64_gdbarch_init): Remove call to
+	set_gdbarch_significant_addr_bit.
+	* utils.c (address_significant): Update to sign extend addr.
+
 2018-04-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/23053

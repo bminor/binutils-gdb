@@ -1062,6 +1062,11 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Syscall record.  */
   tdep->aarch64_syscall_record = aarch64_linux_syscall_record;
 
+  /* The top byte of a user space address known as the "tag",
+     is ignored by the kernel and can be regarded as additional
+     data associated with the address.  */
+  set_gdbarch_significant_addr_bit (gdbarch, 56);
+
   /* Initialize the aarch64_linux_record_tdep.  */
   /* These values are the size of the type that will be used in a system
      call.  They are obtained from Linux Kernel source.  */

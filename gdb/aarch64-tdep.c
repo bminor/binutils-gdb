@@ -2970,11 +2970,6 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_tdesc_pseudo_register_reggroup_p (gdbarch,
 					aarch64_pseudo_register_reggroup_p);
 
-  /* The top byte of an address is known as the "tag" and is
-     ignored by the kernel, the hardware, etc. and can be regarded
-     as additional data associated with the address.  */
-  set_gdbarch_significant_addr_bit (gdbarch, 56);
-
   /* ABI */
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
