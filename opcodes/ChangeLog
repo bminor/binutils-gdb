@@ -1,3 +1,7 @@
+2018-05-01  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-dis.c (aarch64_opcode_decode): Moved memory clear code.
+
 2018-04-30  Francois H. Theron <francois.theron@netronome.com>
 
 	Makefile.am: Added nfp-dis.c.

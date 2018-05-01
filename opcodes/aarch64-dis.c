@@ -2733,15 +2733,15 @@ aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
 
   assert (opcode && inst);
 
+  /* Clear inst.  */
+  memset (inst, '\0', sizeof (aarch64_inst));
+
   /* Check the base opcode.  */
   if ((code & opcode->mask) != (opcode->opcode & opcode->mask))
     {
       DEBUG_TRACE ("base opcode match FAIL");
       goto decode_fail;
     }
-
-  /* Clear inst.  */
-  memset (inst, '\0', sizeof (aarch64_inst));
 
   inst->opcode = opcode;
   inst->value = code;
