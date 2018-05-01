@@ -1,3 +1,8 @@
+2018-05-01  Nick Clifton  <nickc@redhat.com>
+
+	* config.guess: Synchronize with config project master sources.
+	* config.sub: Likewise.
+
 2018-05-01  Francois H. Theron  <francois.theron@netronome.com>
 
 	* configure.ac: Added "nfp" target.
