@@ -59,9 +59,9 @@ public:
   int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
 			 struct expression *) override;
 
-  int stopped_by_watchpoint () override;
+  bool stopped_by_watchpoint () override;
 
-  int stopped_data_address (CORE_ADDR *) override;
+  bool stopped_data_address (CORE_ADDR *) override;
 
   int region_ok_for_hw_watchpoint (CORE_ADDR, int) override;
 
@@ -572,7 +572,7 @@ mips_linux_nat_target::can_use_hw_breakpoint (enum bptype type,
    stopped by watchpoint.  The watchhi R and W bits indicate the watch
    register triggered.  */
 
-int
+bool
 mips_linux_nat_target::stopped_by_watchpoint ()
 {
   int n;
@@ -581,27 +581,27 @@ mips_linux_nat_target::stopped_by_watchpoint ()
   if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
 					&watch_readback,
 					&watch_readback_valid, 1))
-    return 0;
+    return false;
 
   num_valid = mips_linux_watch_get_num_valid (&watch_readback);
 
   for (n = 0; n < MAX_DEBUG_REGISTER && n < num_valid; n++)
     if (mips_linux_watch_get_watchhi (&watch_readback, n) & (R_MASK | W_MASK))
-      return 1;
+      return true;
 
-  return 0;
+  return false;
 }
 
 /* Target to_stopped_data_address implementation.  Set the address
    where the watch triggered (if known).  Return 1 if the address was
    known.  */
 
-int
+bool
 mips_linux_nat_target::stopped_data_address (CORE_ADDR *paddr)
 {
   /* On mips we don't know the low order 3 bits of the data address,
      so we must return false.  */
-  return 0;
+  return false;
 }
 
 /* Target to_region_ok_for_hw_watchpoint implementation.  Return 1 if

@@ -67,9 +67,9 @@ public:
 			 struct expression *) override;
   int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
 			 struct expression *) override;
-  int stopped_by_watchpoint () override;
-  int stopped_data_address (CORE_ADDR *) override;
-  int watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
+  bool stopped_by_watchpoint () override;
+  bool stopped_data_address (CORE_ADDR *) override;
+  bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
 
   int can_do_single_step () override;
 
@@ -733,7 +733,7 @@ aarch64_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 
 /* Implement the "stopped_data_address" target_ops method.  */
 
-int
+bool
 aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   siginfo_t siginfo;
@@ -741,12 +741,12 @@ aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
   struct aarch64_debug_reg_state *state;
 
   if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
-    return 0;
+    return false;
 
   /* This must be a hardware breakpoint.  */
   if (siginfo.si_signo != SIGTRAP
       || (siginfo.si_code & 0xffff) != TRAP_HWBKPT)
-    return 0;
+    return false;
 
   /* Check if the address matches any watched address.  */
   state = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
@@ -762,16 +762,16 @@ aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 	  && addr_trap < addr_watch + len)
 	{
 	  *addr_p = addr_trap;
-	  return 1;
+	  return true;
 	}
     }
 
-  return 0;
+  return false;
 }
 
 /* Implement the "stopped_by_watchpoint" target_ops method.  */
 
-int
+bool
 aarch64_linux_nat_target::stopped_by_watchpoint ()
 {
   CORE_ADDR addr;
@@ -781,7 +781,7 @@ aarch64_linux_nat_target::stopped_by_watchpoint ()
 
 /* Implement the "watchpoint_addr_within_range" target_ops method.  */
 
-int
+bool
 aarch64_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
 							CORE_ADDR start, int length)
 {

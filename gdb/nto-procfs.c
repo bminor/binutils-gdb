@@ -100,7 +100,7 @@ struct nto_procfs_target : public inf_child_target
   int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
 			 struct expression *) override;
 
-  int stopped_by_watchpoint () override;
+  bool stopped_by_watchpoint () override;
 
   void kill () override;
 
@@ -111,7 +111,7 @@ struct nto_procfs_target : public inf_child_target
 
   void pass_signals (int, unsigned char *) override;
 
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
 
   void update_thread_list () override;
 
@@ -297,8 +297,9 @@ procfs_set_thread (ptid_t ptid)
   devctl (ctl_fd, DCMD_PROC_CURTHREAD, &tid, sizeof (tid), 0);
 }
 
-/*  Return nonzero if the thread TH is still alive.  */
-int
+/*  Return true if the thread TH is still alive.  */
+
+bool
 nto_procfs_target::thread_alive (ptid_t ptid)
 {
   pid_t tid;
@@ -310,12 +311,12 @@ nto_procfs_target::thread_alive (ptid_t ptid)
   pid = ptid_get_pid (ptid);
 
   if (kill (pid, 0) == -1)
-    return 0;
+    return false;
 
   status.tid = tid;
   if ((err = devctl (ctl_fd, DCMD_PROC_TIDSTATUS,
 		     &status, sizeof (status), 0)) != EOK)
-    return 0;
+    return false;
 
   /* Thread is alive or dead but not yet joined,
      or dead and there is an alive (or dead unjoined) thread with
@@ -1583,7 +1584,7 @@ procfs_hw_watchpoint (int addr, int len, enum target_hw_bp_type type)
   return 0;
 }
 
-int
+bool
 nto_procfs_target::can_use_hw_breakpoint (enum bptype type,
 					  int cnt, int othertype)
 {
@@ -1606,7 +1607,7 @@ nto_procfs_target::insert_hw_watchpoint (CORE_ADDR addr, int len,
   return procfs_hw_watchpoint (addr, len, type);
 }
 
-int
+bool
 nto_procfs_target::stopped_by_watchpoint ()
 {
   /* NOTE: nto_stopped_by_watchpoint will be called ONLY while we are

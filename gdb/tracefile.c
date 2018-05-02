@@ -425,7 +425,7 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
 
 /* This is the implementation of target_ops method to_has_all_memory.  */
 
-int
+bool
 tracefile_target::has_all_memory ()
 {
   return 1;
@@ -433,7 +433,7 @@ tracefile_target::has_all_memory ()
 
 /* This is the implementation of target_ops method to_has_memory.  */
 
-int
+bool
 tracefile_target::has_memory ()
 {
   return 1;
@@ -443,7 +443,7 @@ tracefile_target::has_memory ()
    The target has a stack when GDB has already selected one trace
    frame.  */
 
-int
+bool
 tracefile_target::has_stack ()
 {
   return get_traceframe_number () != -1;
@@ -453,7 +453,7 @@ tracefile_target::has_stack ()
    The target has registers when GDB has already selected one trace
    frame.  */
 
-int
+bool
 tracefile_target::has_registers ()
 {
   return get_traceframe_number () != -1;
@@ -462,7 +462,7 @@ tracefile_target::has_registers ()
 /* This is the implementation of target_ops method to_thread_alive.
    tracefile has one thread faked by GDB.  */
 
-int
+bool
 tracefile_target::thread_alive (ptid_t ptid)
 {
   return 1;

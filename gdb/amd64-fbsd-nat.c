@@ -45,7 +45,7 @@ public:
   const struct target_desc *read_description () override;
 
 #if defined(HAVE_PT_GETDBREGS) && defined(USE_SIGTRAP_SIGINFO)
-  int supports_stopped_by_hw_breakpoint () override;
+  bool supports_stopped_by_hw_breakpoint () override;
 #endif
 };
 
@@ -202,10 +202,10 @@ amd64_fbsd_nat_target::read_description ()
 #if defined(HAVE_PT_GETDBREGS) && defined(USE_SIGTRAP_SIGINFO)
 /* Implement the supports_stopped_by_hw_breakpoints method.  */
 
-int
+bool
 amd64_fbsd_nat_target::supports_stopped_by_hw_breakpoint ()
 {
-  return 1;
+  return true;
 }
 #endif
 

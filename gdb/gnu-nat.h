@@ -130,7 +130,7 @@ struct gnu_nat_target : public inf_child_target
   void create_inferior (const char *, const std::string &,
 			char **, int) override;
   void mourn_inferior () override;
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
   const char *pid_to_str (ptid_t) override;
   void stop (ptid_t) override;
 };

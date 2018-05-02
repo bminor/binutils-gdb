@@ -57,7 +57,7 @@ public:
   void kill () override;
 
   void mourn_inferior () override;
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
 
   void update_thread_list () override;
 
@@ -67,23 +67,23 @@ public:
 
   struct address_space *thread_address_space (ptid_t) override;
 
-  int stopped_by_watchpoint () override;
+  bool stopped_by_watchpoint () override;
 
-  int stopped_data_address (CORE_ADDR *) override;
+  bool stopped_data_address (CORE_ADDR *) override;
 
-  int stopped_by_sw_breakpoint () override;
-  int supports_stopped_by_sw_breakpoint () override;
+  bool stopped_by_sw_breakpoint () override;
+  bool supports_stopped_by_sw_breakpoint () override;
 
-  int stopped_by_hw_breakpoint () override;
-  int supports_stopped_by_hw_breakpoint () override;
+  bool stopped_by_hw_breakpoint () override;
+  bool supports_stopped_by_hw_breakpoint () override;
 
   void thread_events (int) override;
 
-  int can_async_p () override;
-  int is_async_p () override;
+  bool can_async_p () override;
+  bool is_async_p () override;
 
-  int supports_non_stop () override;
-  int always_non_stop_p () override;
+  bool supports_non_stop () override;
+  bool always_non_stop_p () override;
 
   void async (int) override;
 
@@ -91,13 +91,13 @@ public:
 
   void stop (ptid_t) override;
 
-  int supports_multi_process () override;
+  bool supports_multi_process () override;
 
-  int supports_disable_randomization () override;
+  bool supports_disable_randomization () override;
 
   int core_of_thread (ptid_t ptid) override;
 
-  int filesystem_is_local () override;
+  bool filesystem_is_local () override;
 
   int fileio_open (struct inferior *inf, const char *filename,
 		   int flags, int mode, int warn_if_slow,
@@ -140,11 +140,11 @@ public:
   virtual void low_resume (ptid_t ptid, int step, enum gdb_signal sig)
   { inf_ptrace_target::resume (ptid, step, sig); }
 
-  virtual int low_stopped_by_watchpoint ()
-  { return 0; }
+  virtual bool low_stopped_by_watchpoint ()
+  { return false; }
 
-  virtual int low_stopped_data_address (CORE_ADDR *addr_p)
-  { return 0; }
+  virtual bool low_stopped_data_address (CORE_ADDR *addr_p)
+  { return false; }
 };
 
 /* The final/concrete instance.  */

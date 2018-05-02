@@ -124,7 +124,7 @@ public:
 
   void update_thread_list () override;
 
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
 
   const char *pid_to_str (ptid_t) override;
 
@@ -145,7 +145,7 @@ public:
     override;
 #endif
 
-  int stopped_by_watchpoint () override;
+  bool stopped_by_watchpoint () override;
 
   int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
 			 struct expression *) override;
@@ -156,7 +156,7 @@ public:
   int region_ok_for_hw_watchpoint (CORE_ADDR, int) override;
 
   int can_use_hw_breakpoint (enum bptype, int, int) override;
-  int stopped_data_address (CORE_ADDR *) override;
+  bool stopped_data_address (CORE_ADDR *) override;
 };
 
 static procfs_target the_procfs_target;
@@ -3179,7 +3179,7 @@ procfs_target::update_thread_list ()
    really seem to be doing his job.  Got to investigate how to tell
    when a thread is really gone.  */
 
-int
+bool
 procfs_target::thread_alive (ptid_t ptid)
 {
   int proc, thread;
@@ -3189,18 +3189,18 @@ procfs_target::thread_alive (ptid_t ptid)
   thread  = ptid_get_lwp (ptid);
   /* If I don't know it, it ain't alive!  */
   if ((pi = find_procinfo (proc, thread)) == NULL)
-    return 0;
+    return false;
 
   /* If I can't get its status, it ain't alive!
      What's more, I need to forget about it!  */
   if (!proc_get_status (pi))
     {
       destroy_procinfo (pi);
-      return 0;
+      return false;
     }
   /* I couldn't have got its status if it weren't alive, so it's
      alive.  */
-  return 1;
+  return true;
 }
 
 /* Convert PTID to a string.  Returns the string in a static
@@ -3301,7 +3301,7 @@ procfs_target::can_use_hw_breakpoint (enum bptype type, int cnt, int othertype)
 /* Returns non-zero if process is stopped on a hardware watchpoint
    fault, else returns zero.  */
 
-int
+bool
 procfs_target::stopped_by_watchpoint ()
 {
   procinfo *pi;
@@ -3313,10 +3313,10 @@ procfs_target::stopped_by_watchpoint ()
       if (proc_why (pi) == PR_FAULTED)
 	{
 	  if (proc_what (pi) == FLTWATCH)
-	    return 1;
+	    return true;
 	}
     }
-  return 0;
+  return false;
 }
 
 /* Returns 1 if the OS knows the position of the triggered watchpoint,
@@ -3325,7 +3325,7 @@ procfs_target::stopped_by_watchpoint ()
    procfs_stopped_by_watchpoint returned 1, thus no further checks are
    done.  The function also assumes that ADDR is not NULL.  */
 
-int
+bool
 procfs_target::stopped_data_address (CORE_ADDR *addr)
 {
   procinfo *pi;

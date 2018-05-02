@@ -1,5 +1,69 @@
 2018-05-02  Pedro Alves  <palves@redhat.com>
 
+	* target.h (target_ops)
+	<stopped_by_sw_breakpoint, supports_stopped_by_sw_breakpoint,
+	stopped_by_hw_breakpoint, supports_stopped_by_hw_breakpoint,
+	stopped_by_watchpoint, have_continuable_watchpoint,
+	stopped_data_address, watchpoint_addr_within_range,
+	can_accel_watchpoint_condition, can_run, thread_alive,
+	has_all_memory, has_memory, has_stack, has_registers,
+	has_execution, can_async_p, is_async_p, supports_non_stop,
+	always_non_stop_p, can_execute_reverse, supports_multi_process,
+	supports_enable_disable_tracepoint,
+	supports_disable_randomization, supports_string_tracing,
+	supports_evaluation_of_breakpoint_conditions,
+	can_run_breakpoint_commands, filesystem_is_local,
+	can_download_tracepoint, get_trace_state_variable_value,
+	set_trace_notes, get_tib_address, use_agent, can_use_agent,
+	record_is_replaying, record_will_replay,
+	augmented_libraries_svr4_read>: Adjust to return bool.
+	* aarch64-linux-nat.c: All implementations adjusted.
+	* aix-thread.c: All implementations adjusted.
+	* arm-linux-nat.c: All implementations adjusted.
+	* breakpoint.c: All implementations adjusted.
+	* bsd-kvm.c: All implementations adjusted.
+	* bsd-uthread.c: All implementations adjusted.
+	* corelow.c: All implementations adjusted.
+	* ctf.c: All implementations adjusted.
+	* darwin-nat.c: All implementations adjusted.
+	* darwin-nat.h: All implementations adjusted.
+	* exec.c: All implementations adjusted.
+	* fbsd-nat.c: All implementations adjusted.
+	* fbsd-nat.h: All implementations adjusted.
+	* gnu-nat.c: All implementations adjusted.
+	* gnu-nat.h: All implementations adjusted.
+	* go32-nat.c: All implementations adjusted.
+	* ia64-linux-nat.c: All implementations adjusted.
+	* inf-child.c: All implementations adjusted.
+	* inf-child.h: All implementations adjusted.
+	* inf-ptrace.c: All implementations adjusted.
+	* inf-ptrace.h: All implementations adjusted.
+	* linux-nat.c: All implementations adjusted.
+	* linux-nat.h: All implementations adjusted.
+	* mips-linux-nat.c: All implementations adjusted.
+	* nto-procfs.c: All implementations adjusted.
+	* ppc-linux-nat.c: All implementations adjusted.
+	* procfs.c: All implementations adjusted.
+	* ravenscar-thread.c: All implementations adjusted.
+	* record-btrace.c: All implementations adjusted.
+	* record-full.c: All implementations adjusted.
+	* remote-sim.c: All implementations adjusted.
+	* remote.c: All implementations adjusted.
+	* s390-linux-nat.c: All implementations adjusted.
+	* sol-thread.c: All implementations adjusted.
+	* spu-multiarch.c: All implementations adjusted.
+	* target-delegates.c: All implementations adjusted.
+	* target.c: All implementations adjusted.
+	* target.h: All implementations adjusted.
+	* tracefile-tfile.c: All implementations adjusted.
+	* tracefile.c: All implementations adjusted.
+	* tracefile.h: All implementations adjusted.
+	* windows-nat.c: All implementations adjusted.
+	* x86-linux-nat.h: All implementations adjusted.
+	* x86-nat.h: All implementations adjusted.
+
+2018-05-02  Pedro Alves  <palves@redhat.com>
+
 	* make-target-delegates (scan_target_h): Don't trim lines here.
 	Replace sequences of tabs and/or whitespace with a single
 	whitespace.

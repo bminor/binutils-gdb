@@ -122,11 +122,11 @@ public:
   tracefile_target ();
 
   int get_trace_status (trace_status *ts) override;
-  int has_all_memory () override;
-  int has_memory () override;
-  int has_stack () override;
-  int has_registers () override;
-  int thread_alive (ptid_t ptid) override;
+  bool has_all_memory () override;
+  bool has_memory () override;
+  bool has_stack () override;
+  bool has_registers () override;
+  bool thread_alive (ptid_t ptid) override;
 };
 
 extern void tracefile_fetch_registers (struct regcache *regcache, int regno);

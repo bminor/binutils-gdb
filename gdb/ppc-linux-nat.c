@@ -296,13 +296,13 @@ struct ppc_linux_nat_target final : public linux_nat_target
   int remove_mask_watchpoint (CORE_ADDR, CORE_ADDR, enum target_hw_bp_type)
     override;
 
-  int stopped_by_watchpoint () override;
+  bool stopped_by_watchpoint () override;
 
-  int stopped_data_address (CORE_ADDR *) override;
+  bool stopped_data_address (CORE_ADDR *) override;
 
-  int watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
+  bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
 
-  int can_accel_watchpoint_condition (CORE_ADDR, int, int, struct expression *)
+  bool can_accel_watchpoint_condition (CORE_ADDR, int, int, struct expression *)
     override;
 
   int masked_watch_num_registers (CORE_ADDR, CORE_ADDR) override;
@@ -1986,7 +1986,7 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
 /* Return non-zero if the target is capable of using hardware to evaluate
    the condition expression, thus only triggering the watchpoint when it is
    true.  */
-int
+bool
 ppc_linux_nat_target::can_accel_watchpoint_condition (CORE_ADDR addr, int len,
 						      int rw,
 						      struct expression *cond)
@@ -2222,17 +2222,17 @@ ppc_linux_thread_exit (struct thread_info *tp, int silent)
   xfree (t);
 }
 
-int
+bool
 ppc_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   siginfo_t siginfo;
 
   if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
-    return 0;
+    return false;
 
   if (siginfo.si_signo != SIGTRAP
       || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
-    return 0;
+    return false;
 
   if (have_ptrace_hwdebug_interface ())
     {
@@ -2253,22 +2253,22 @@ ppc_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 	   if (hw_breaks[i].hw_break && hw_breaks[i].slot == slot
 	       && hw_breaks[i].hw_break->trigger_type
 		    == PPC_BREAKPOINT_TRIGGER_EXECUTE)
-	     return 0;
+	     return false;
 	}
     }
 
   *addr_p = (CORE_ADDR) (uintptr_t) siginfo.si_addr;
-  return 1;
+  return true;
 }
 
-int
+bool
 ppc_linux_nat_target::stopped_by_watchpoint ()
 {
   CORE_ADDR addr;
   return stopped_data_address (&addr);
 }
 
-int
+bool
 ppc_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
 						    CORE_ADDR start,
 						    int length)

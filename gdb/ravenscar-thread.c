@@ -95,15 +95,15 @@ struct ravenscar_thread_target final : public target_ops
 
   void prepare_to_store (struct regcache *) override;
 
-  int stopped_by_sw_breakpoint () override;
+  bool stopped_by_sw_breakpoint () override;
 
-  int stopped_by_hw_breakpoint () override;
+  bool stopped_by_hw_breakpoint () override;
 
-  int stopped_by_watchpoint () override;
+  bool stopped_by_watchpoint () override;
 
-  int stopped_data_address (CORE_ADDR *) override;
+  bool stopped_data_address (CORE_ADDR *) override;
 
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
 
   int core_of_thread (ptid_t ptid) override;
 
@@ -117,11 +117,11 @@ struct ravenscar_thread_target final : public target_ops
 
   void mourn_inferior () override;
 
-  int has_all_memory ()  override { return default_child_has_all_memory (); }
-  int has_memory ()  override { return default_child_has_memory (); }
-  int has_stack ()  override { return default_child_has_stack (); }
-  int has_registers ()  override { return default_child_has_registers (); }
-  int has_execution (ptid_t ptid) override
+  bool has_all_memory ()  override { return default_child_has_all_memory (); }
+  bool has_memory ()  override { return default_child_has_memory (); }
+  bool has_stack ()  override { return default_child_has_stack (); }
+  bool has_registers ()  override { return default_child_has_registers (); }
+  bool has_execution (ptid_t ptid) override
   { return default_child_has_execution (ptid); }
 };
 
@@ -396,11 +396,11 @@ ravenscar_thread_target::extra_thread_info (thread_info *tp)
   return "Ravenscar task";
 }
 
-int
+bool
 ravenscar_thread_target::thread_alive (ptid_t ptid)
 {
   /* Ravenscar tasks are non-terminating.  */
-  return 1;
+  return true;
 }
 
 const char *
@@ -475,12 +475,12 @@ ravenscar_thread_target::prepare_to_store (struct regcache *regcache)
 
 /* Implement the to_stopped_by_sw_breakpoint target_ops "method".  */
 
-int
+bool
 ravenscar_thread_target::stopped_by_sw_breakpoint ()
 {
   ptid_t saved_ptid = inferior_ptid;
   struct target_ops *beneath = find_target_beneath (this);
-  int result;
+  bool result;
 
   inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
   result = beneath->stopped_by_sw_breakpoint ();
@@ -490,12 +490,12 @@ ravenscar_thread_target::stopped_by_sw_breakpoint ()
 
 /* Implement the to_stopped_by_hw_breakpoint target_ops "method".  */
 
-int
+bool
 ravenscar_thread_target::stopped_by_hw_breakpoint ()
 {
   ptid_t saved_ptid = inferior_ptid;
   struct target_ops *beneath = find_target_beneath (this);
-  int result;
+  bool result;
 
   inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
   result = beneath->stopped_by_hw_breakpoint ();
@@ -505,12 +505,12 @@ ravenscar_thread_target::stopped_by_hw_breakpoint ()
 
 /* Implement the to_stopped_by_watchpoint target_ops "method".  */
 
-int
+bool
 ravenscar_thread_target::stopped_by_watchpoint ()
 {
   ptid_t saved_ptid = inferior_ptid;
   struct target_ops *beneath = find_target_beneath (this);
-  int result;
+  bool result;
 
   inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
   result = beneath->stopped_by_watchpoint ();
@@ -520,12 +520,12 @@ ravenscar_thread_target::stopped_by_watchpoint ()
 
 /* Implement the to_stopped_data_address target_ops "method".  */
 
-int
+bool
 ravenscar_thread_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   ptid_t saved_ptid = inferior_ptid;
   struct target_ops *beneath = find_target_beneath (this);
-  int result;
+  bool result;
 
   inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
   result = beneath->stopped_data_address (addr_p);

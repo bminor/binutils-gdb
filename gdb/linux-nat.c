@@ -2474,7 +2474,7 @@ check_stopped_by_watchpoint (struct lwp_info *lp)
 
 /* Returns true if the LWP had stopped for a watchpoint.  */
 
-int
+bool
 linux_nat_target::stopped_by_watchpoint ()
 {
   struct lwp_info *lp = find_lwp_pid (inferior_ptid);
@@ -2484,7 +2484,7 @@ linux_nat_target::stopped_by_watchpoint ()
   return lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
 
-int
+bool
 linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   struct lwp_info *lp = find_lwp_pid (inferior_ptid);
@@ -2835,7 +2835,7 @@ save_stop_reason (struct lwp_info *lp)
 
 /* Returns true if the LWP had stopped for a software breakpoint.  */
 
-int
+bool
 linux_nat_target::stopped_by_sw_breakpoint ()
 {
   struct lwp_info *lp = find_lwp_pid (inferior_ptid);
@@ -2847,7 +2847,7 @@ linux_nat_target::stopped_by_sw_breakpoint ()
 
 /* Implement the supports_stopped_by_sw_breakpoint method.  */
 
-int
+bool
 linux_nat_target::supports_stopped_by_sw_breakpoint ()
 {
   return USE_SIGTRAP_SIGINFO;
@@ -2856,7 +2856,7 @@ linux_nat_target::supports_stopped_by_sw_breakpoint ()
 /* Returns true if the LWP had stopped for a hardware
    breakpoint/watchpoint.  */
 
-int
+bool
 linux_nat_target::stopped_by_hw_breakpoint ()
 {
   struct lwp_info *lp = find_lwp_pid (inferior_ptid);
@@ -2868,7 +2868,7 @@ linux_nat_target::stopped_by_hw_breakpoint ()
 
 /* Implement the supports_stopped_by_hw_breakpoint method.  */
 
-int
+bool
 linux_nat_target::supports_stopped_by_hw_breakpoint ()
 {
   return USE_SIGTRAP_SIGINFO;
@@ -3940,7 +3940,7 @@ linux_nat_target::xfer_partial (enum target_object object,
 					  offset, len, xfered_len);
 }
 
-int
+bool
 linux_nat_target::thread_alive (ptid_t ptid)
 {
   /* As long as a PTID is in lwp list, consider it alive.  */
@@ -4322,7 +4322,7 @@ linux_nat_target::static_tracepoint_markers_by_strid (const char *strid)
 
 /* target_is_async_p implementation.  */
 
-int
+bool
 linux_nat_target::is_async_p ()
 {
   return linux_is_async_p ();
@@ -4330,7 +4330,7 @@ linux_nat_target::is_async_p ()
 
 /* target_can_async_p implementation.  */
 
-int
+bool
 linux_nat_target::can_async_p ()
 {
   /* We're always async, unless the user explicitly prevented it with the
@@ -4338,7 +4338,7 @@ linux_nat_target::can_async_p ()
   return target_async_permitted;
 }
 
-int
+bool
 linux_nat_target::supports_non_stop ()
 {
   return 1;
@@ -4346,7 +4346,7 @@ linux_nat_target::supports_non_stop ()
 
 /* to_always_non_stop_p implementation.  */
 
-int
+bool
 linux_nat_target::always_non_stop_p ()
 {
   return 1;
@@ -4357,13 +4357,13 @@ linux_nat_target::always_non_stop_p ()
 
 int linux_multi_process = 1;
 
-int
+bool
 linux_nat_target::supports_multi_process ()
 {
   return linux_multi_process;
 }
 
-int
+bool
 linux_nat_target::supports_disable_randomization ()
 {
 #ifdef HAVE_PERSONALITY
@@ -4574,13 +4574,13 @@ linux_nat_target::core_of_thread (ptid_t ptid)
 
 /* Implementation of to_filesystem_is_local.  */
 
-int
+bool
 linux_nat_target::filesystem_is_local ()
 {
   struct inferior *inf = current_inferior ();
 
   if (inf->fake_pid_p || inf->pid == 0)
-    return 1;
+    return true;
 
   return linux_ns_same (inf->pid, LINUX_NS_MNT);
 }

@@ -65,7 +65,7 @@ public:
 
   void mourn_inferior () override;
 
-  int can_run () override;
+  bool can_run () override;
 
   bool can_create_inferior () override;
   void create_inferior (const char *, const std::string &,
@@ -78,17 +78,17 @@ public:
 
   /* We must default these because they must be implemented by any
      target that can run.  */
-  int can_async_p () override { return 0; }
-  int supports_non_stop () override { return 0; }
-  int supports_disable_randomization () override { return 0; }
+  bool can_async_p ()  override { return false; }
+  bool supports_non_stop ()  override { return false; }
+  bool supports_disable_randomization () override { return false; }
 
   char *pid_to_exec_file (int pid) override;
 
-  int has_all_memory () override;
-  int has_memory () override;
-  int has_stack () override;
-  int has_registers () override;
-  int has_execution (ptid_t) override;
+  bool has_all_memory () override;
+  bool has_memory () override;
+  bool has_stack () override;
+  bool has_registers () override;
+  bool has_execution (ptid_t) override;
 
   int fileio_open (struct inferior *inf, const char *filename,
 		   int flags, int mode, int warn_if_slow,
@@ -105,9 +105,9 @@ public:
   gdb::optional<std::string> fileio_readlink (struct inferior *inf,
 					      const char *filename,
 					      int *target_errno) override;
-  int use_agent (int use) override;
+  bool use_agent (bool use) override;
 
-  int can_use_agent () override;
+  bool can_use_agent () override;
 
 protected:
   /* Unpush the target if it wasn't explicitly open with "target native"

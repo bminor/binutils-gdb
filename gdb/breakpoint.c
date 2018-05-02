@@ -4733,7 +4733,7 @@ bpstats::bpstats ()
 int
 watchpoints_triggered (struct target_waitstatus *ws)
 {
-  int stopped_by_watchpoint = target_stopped_by_watchpoint ();
+  bool stopped_by_watchpoint = target_stopped_by_watchpoint ();
   CORE_ADDR addr;
   struct breakpoint *b;
 

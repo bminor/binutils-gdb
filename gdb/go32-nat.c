@@ -375,7 +375,7 @@ struct go32_nat_target final : public x86_nat_target<inf_child_target>
 
   void mourn_inferior () override;
 
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
 
   const char *pid_to_str (ptid_t) override;
 };
@@ -987,7 +987,7 @@ go32_nat_target::pass_ctrlc ()
 {
 }
 
-int
+bool
 go32_nat_target::thread_alive (ptid_t ptid)
 {
   return !ptid_equal (ptid, null_ptid);

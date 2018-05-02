@@ -62,7 +62,7 @@ Specify the filename of the CTF directory.");
   void files_info () override;
   int trace_find (enum trace_find_type type, int num,
 			  CORE_ADDR addr1, CORE_ADDR addr2, int *tpp) override;
-  int get_trace_state_variable_value (int tsv, LONGEST *val) override;
+  bool get_trace_state_variable_value (int tsv, LONGEST *val) override;
   traceframe_info_up traceframe_info () override;
 };
 
@@ -1430,11 +1430,11 @@ ctf_target::xfer_partial (enum target_object object,
    trace variable is found, set the value of it to *VAL and return
    true, otherwise return false.  */
 
-int
+bool
 ctf_target::get_trace_state_variable_value (int tsvnum, LONGEST *val)
 {
   struct bt_iter_pos *pos;
-  int found = 0;
+  bool found = false;
 
   gdb_assert (ctf_iter != NULL);
   /* Save the current position.  */
@@ -1465,7 +1465,7 @@ ctf_target::get_trace_state_variable_value (int tsvnum, LONGEST *val)
 	      def = bt_ctf_get_field (event, scope, "val");
 	      *val = bt_ctf_get_uint64 (def);
 
-	      found = 1;
+	      found = true;
 	    }
 	}
 

@@ -103,16 +103,16 @@ struct x86_nat_target : public BaseTarget
 			    struct bp_target_info *bp_tgt) override
   { return x86_remove_hw_breakpoint (gdbarch, bp_tgt); }
 
-  int stopped_by_watchpoint () override
+  bool stopped_by_watchpoint () override
   { return x86_stopped_by_watchpoint (); }
 
-  int stopped_data_address (CORE_ADDR *addr_p) override
+  bool stopped_data_address (CORE_ADDR *addr_p) override
   { return x86_stopped_data_address (addr_p); }
 
   /* A target must provide an implementation of the
      "supports_stopped_by_hw_breakpoint" target method before this
      callback will be used.  */
-  int stopped_by_hw_breakpoint () override
+  bool stopped_by_hw_breakpoint () override
   { return x86_stopped_by_hw_breakpoint (); }
 };
 

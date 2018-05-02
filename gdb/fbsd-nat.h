@@ -51,7 +51,7 @@ public:
 #endif
 
 #ifdef PT_LWPINFO
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
   const char *pid_to_str (ptid_t) override;
 
 #ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME
@@ -71,8 +71,8 @@ public:
   void post_attach (int) override;
 
 #ifdef USE_SIGTRAP_SIGINFO
-  int supports_stopped_by_sw_breakpoint () override;
-  int stopped_by_sw_breakpoint () override;
+  bool supports_stopped_by_sw_breakpoint () override;
+  bool stopped_by_sw_breakpoint () override;
 #endif
 
 #ifdef TDP_RFPPWAIT

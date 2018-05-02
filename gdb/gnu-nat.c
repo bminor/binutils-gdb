@@ -2288,7 +2288,7 @@ gnu_nat_target::stop (ptid_t ptid)
   error (_("stop target function not implemented"));
 }
 
-int
+bool
 gnu_nat_target::thread_alive (ptid_t ptid)
 {
   inf_update_procs (gnu_current_inf);

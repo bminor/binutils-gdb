@@ -122,9 +122,9 @@ public:
   int remove_hw_breakpoint (struct gdbarch *, struct bp_target_info *)
     override;
   int region_ok_for_hw_watchpoint (CORE_ADDR, int) override;
-  int have_continuable_watchpoint () { return 1; }
-  int stopped_by_watchpoint () override;
-  int watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
+  bool have_continuable_watchpoint () { return 1; }
+  bool stopped_by_watchpoint () override;
+  bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
   int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
 			 struct expression *) override;
   int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
@@ -657,21 +657,20 @@ s390_show_debug_regs (int tid, const char *where)
 		per_info.lowcore.words.access_id);
 }
 
-int
+bool
 s390_linux_nat_target::stopped_by_watchpoint ()
 {
   struct s390_debug_reg_state *state
     = s390_get_debug_reg_state (ptid_get_pid (inferior_ptid));
   per_lowcore_bits per_lowcore;
   ptrace_area parea;
-  int result;
 
   if (show_debug_regs)
     s390_show_debug_regs (s390_inferior_tid (), "stop");
 
   /* Speed up common case.  */
   if (VEC_empty (s390_watch_area, state->watch_areas))
-    return 0;
+    return false;
 
   parea.len = sizeof (per_lowcore);
   parea.process_addr = (addr_t) & per_lowcore;
@@ -679,8 +678,8 @@ s390_linux_nat_target::stopped_by_watchpoint ()
   if (ptrace (PTRACE_PEEKUSR_AREA, s390_inferior_tid (), &parea, 0) < 0)
     perror_with_name (_("Couldn't retrieve watchpoint status"));
 
-  result = (per_lowcore.perc_storage_alteration == 1
-	    && per_lowcore.perc_store_real_address == 0);
+  bool result = (per_lowcore.perc_storage_alteration == 1
+		 && per_lowcore.perc_store_real_address == 0);
 
   if (result)
     {

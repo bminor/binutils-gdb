@@ -99,7 +99,7 @@ public:
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
 
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
   void update_thread_list () override;
 };
 
@@ -700,7 +700,7 @@ sol_thread_target::mourn_inferior ()
 
 /* Return true if PTID is still active in the inferior.  */
 
-int
+bool
 sol_thread_target::thread_alive (ptid_t ptid)
 {
   if (ptid_tid_p (ptid))
@@ -712,10 +712,10 @@ sol_thread_target::thread_alive (ptid_t ptid)
 
       pid = ptid_get_tid (ptid);
       if ((val = p_td_ta_map_id2thr (main_ta, pid, &th)) != TD_OK)
-	return 0;		/* Thread not found.  */
+	return false;		/* Thread not found.  */
       if ((val = p_td_thr_validate (&th)) != TD_OK)
-	return 0;		/* Thread not valid.  */
-      return 1;			/* Known thread.  */
+	return false;		/* Thread not valid.  */
+      return true;		/* Known thread.  */
     }
   else
     {

@@ -482,11 +482,11 @@ struct target_ops
        done from the target, so GDB needs to be able to tell whether
        it should ignore the event and whether it should adjust the PC.
        See adjust_pc_after_break.  */
-    virtual int stopped_by_sw_breakpoint ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool stopped_by_sw_breakpoint ()
+      TARGET_DEFAULT_RETURN (false);
     /* Returns true if the above method is supported.  */
-    virtual int supports_stopped_by_sw_breakpoint ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool supports_stopped_by_sw_breakpoint ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* Returns true if the target stopped for a hardware breakpoint.
        Likewise, if the target supports hardware breakpoints, this
@@ -495,11 +495,11 @@ struct target_ops
        require PC adjustment, GDB needs to be able to tell whether the
        hardware breakpoint event is a delayed event for a breakpoint
        that is already gone and should thus be ignored.  */
-    virtual int stopped_by_hw_breakpoint ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool stopped_by_hw_breakpoint ()
+      TARGET_DEFAULT_RETURN (false);
     /* Returns true if the above method is supported.  */
-    virtual int supports_stopped_by_hw_breakpoint ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool supports_stopped_by_hw_breakpoint ()
+      TARGET_DEFAULT_RETURN (false);
 
     virtual int can_use_hw_breakpoint (enum bptype, int, int)
       TARGET_DEFAULT_RETURN (0);
@@ -527,15 +527,15 @@ struct target_ops
     virtual int remove_mask_watchpoint (CORE_ADDR, CORE_ADDR,
 					enum target_hw_bp_type)
       TARGET_DEFAULT_RETURN (1);
-    virtual int stopped_by_watchpoint ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool stopped_by_watchpoint ()
+      TARGET_DEFAULT_RETURN (false);
     virtual int have_steppable_watchpoint ()
-      TARGET_DEFAULT_RETURN (0);
+      TARGET_DEFAULT_RETURN (false);
     virtual bool have_continuable_watchpoint ()
-      TARGET_DEFAULT_RETURN (0);
-    virtual int stopped_data_address (CORE_ADDR *)
-      TARGET_DEFAULT_RETURN (0);
-    virtual int watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int)
+      TARGET_DEFAULT_RETURN (false);
+    virtual bool stopped_data_address (CORE_ADDR *)
+      TARGET_DEFAULT_RETURN (false);
+    virtual bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int)
       TARGET_DEFAULT_FUNC (default_watchpoint_addr_within_range);
 
     /* Documentation of this routine is provided with the corresponding
@@ -543,9 +543,9 @@ struct target_ops
     virtual int region_ok_for_hw_watchpoint (CORE_ADDR, int)
       TARGET_DEFAULT_FUNC (default_region_ok_for_hw_watchpoint);
 
-    virtual int can_accel_watchpoint_condition (CORE_ADDR, int, int,
-						struct expression *)
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool can_accel_watchpoint_condition (CORE_ADDR, int, int,
+						 struct expression *)
+      TARGET_DEFAULT_RETURN (false);
     virtual int masked_watch_num_registers (CORE_ADDR, CORE_ADDR)
       TARGET_DEFAULT_RETURN (-1);
 
@@ -555,7 +555,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (-1);
 
     virtual bool supports_terminal_ours ()
-      TARGET_DEFAULT_RETURN (0);
+      TARGET_DEFAULT_RETURN (false);
     virtual void terminal_init ()
       TARGET_DEFAULT_IGNORE ();
     virtual void terminal_inferior ()
@@ -607,7 +607,7 @@ struct target_ops
     /* Note that can_run is special and can be invoked on an unpushed
        target.  Targets defining this method must also define
        to_can_async_p and to_supports_non_stop.  */
-    virtual int can_run ();
+    virtual bool can_run ();
 
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
@@ -621,8 +621,8 @@ struct target_ops
 				  unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
       TARGET_DEFAULT_IGNORE ();
 
-    virtual int thread_alive (ptid_t ptid)
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool thread_alive (ptid_t ptid)
+      TARGET_DEFAULT_RETURN (false);
     virtual void update_thread_list ()
       TARGET_DEFAULT_IGNORE ();
     virtual const char *pid_to_str (ptid_t)
@@ -652,11 +652,11 @@ struct target_ops
     enum strata to_stratum;
 
     /* Provide default values for all "must have" methods.  */
-    virtual int has_all_memory () { return 0; }
-    virtual int has_memory () { return 0; }
-    virtual int has_stack () { return 0; }
-    virtual int has_registers () { return 0; }
-    virtual int has_execution (ptid_t) { return 0; }
+    virtual bool has_all_memory () { return false; }
+    virtual bool has_memory () { return false; }
+    virtual bool has_stack () { return false; }
+    virtual bool has_registers () { return false; }
+    virtual bool has_execution (ptid_t) { return false; }
 
     /* Control thread execution.  */
     virtual thread_control_capabilities get_thread_control_capabilities ()
@@ -665,22 +665,22 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
     /* This method must be implemented in some situations.  See the
        comment on 'can_run'.  */
-    virtual int can_async_p ()
-      TARGET_DEFAULT_RETURN (0);
-    virtual int is_async_p ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool can_async_p ()
+      TARGET_DEFAULT_RETURN (false);
+    virtual bool is_async_p ()
+      TARGET_DEFAULT_RETURN (false);
     virtual void async (int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     virtual void thread_events (int)
       TARGET_DEFAULT_IGNORE ();
     /* This method must be implemented in some situations.  See the
        comment on 'can_run'.  */
-    virtual int supports_non_stop ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool supports_non_stop ()
+      TARGET_DEFAULT_RETURN (false);
     /* Return true if the target operates in non-stop mode even with
        "set non-stop off".  */
-    virtual int always_non_stop_p ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool always_non_stop_p ()
+      TARGET_DEFAULT_RETURN (false);
     /* find_memory_regions support method for gcore */
     virtual int find_memory_regions (find_memory_region_ftype func, void *data)
       TARGET_DEFAULT_FUNC (dummy_find_memory_regions);
@@ -815,8 +815,8 @@ struct target_ops
       TARGET_DEFAULT_FUNC (default_search_memory);
 
     /* Can target execute in reverse?  */
-    virtual int can_execute_reverse ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool can_execute_reverse ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* The direction the target is currently executing.  Must be
        implemented on targets that support reverse execution and async
@@ -826,31 +826,31 @@ struct target_ops
 
     /* Does this target support debugging multiple processes
        simultaneously?  */
-    virtual int supports_multi_process ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool supports_multi_process ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* Does this target support enabling and disabling tracepoints while a trace
        experiment is running?  */
-    virtual int supports_enable_disable_tracepoint ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool supports_enable_disable_tracepoint ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* Does this target support disabling address space randomization?  */
-    virtual int supports_disable_randomization ()
+    virtual bool supports_disable_randomization ()
       TARGET_DEFAULT_FUNC (find_default_supports_disable_randomization);
 
     /* Does this target support the tracenz bytecode for string collection?  */
-    virtual int supports_string_tracing ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool supports_string_tracing ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* Does this target support evaluation of breakpoint conditions on its
        end?  */
-    virtual int supports_evaluation_of_breakpoint_conditions ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool supports_evaluation_of_breakpoint_conditions ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* Does this target support evaluation of breakpoint commands on its
        end?  */
-    virtual int can_run_breakpoint_commands ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool can_run_breakpoint_commands ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* Determine current architecture of thread PTID.
 
@@ -876,8 +876,8 @@ struct target_ops
 
     /* Return nonzero if the filesystem seen by the current inferior
        is the local filesystem, zero otherwise.  */
-    virtual int filesystem_is_local ()
-      TARGET_DEFAULT_RETURN (1);
+    virtual bool filesystem_is_local ()
+      TARGET_DEFAULT_RETURN (true);
 
     /* Open FILENAME on the target, in the filesystem as seen by INF,
        using FLAGS and MODE.  If INF is NULL, use the filesystem seen
@@ -944,8 +944,8 @@ struct target_ops
 
     /* Is the target able to download tracepoint locations in current
        state?  */
-    virtual int can_download_tracepoint ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool can_download_tracepoint ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* Send full details of a trace state variable to the target.  */
     virtual void download_trace_state_variable (const trace_state_variable &tsv)
@@ -993,8 +993,8 @@ struct target_ops
     /* Get the value of the trace state variable number TSV, returning
        1 if the value is known and writing the value itself into the
        location pointed to by VAL, else returning 0.  */
-    virtual int get_trace_state_variable_value (int tsv, LONGEST *val)
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool get_trace_state_variable_value (int tsv, LONGEST *val)
+      TARGET_DEFAULT_RETURN (false);
 
     virtual int save_trace_data (const char *filename)
       TARGET_DEFAULT_NORETURN (tcomplain ());
@@ -1028,9 +1028,9 @@ struct target_ops
 
     /* Add/change textual notes about the trace run, returning 1 if
        successful, 0 otherwise.  */
-    virtual int set_trace_notes (const char *user, const char *notes,
-				 const char *stopnotes)
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool set_trace_notes (const char *user, const char *notes,
+				  const char *stopnotes)
+      TARGET_DEFAULT_RETURN (false);
 
     /* Return the processor core that thread PTID was last seen on.
        This information is updated only when:
@@ -1052,7 +1052,7 @@ struct target_ops
 
     /* Return the address of the start of the Thread Information Block
        a Windows OS specific feature.  */
-    virtual int get_tib_address (ptid_t ptid, CORE_ADDR *addr)
+    virtual bool get_tib_address (ptid_t ptid, CORE_ADDR *addr)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Send the new settings of write permission variables.  */
@@ -1078,14 +1078,14 @@ struct target_ops
     virtual traceframe_info_up traceframe_info ()
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
-    /* Ask the target to use or not to use agent according to USE.  Return 1
-       successful, 0 otherwise.  */
-    virtual int use_agent (int use)
+    /* Ask the target to use or not to use agent according to USE.
+       Return true if successful, false otherwise.  */
+    virtual bool use_agent (bool use)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Is the target able to use agent in current state?  */
-    virtual int can_use_agent ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool can_use_agent ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* Enable branch tracing for PTID using CONF configuration.
        Return a branch trace target information struct for reading and for
@@ -1140,13 +1140,13 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Query if the record target is currently replaying PTID.  */
-    virtual int record_is_replaying (ptid_t ptid)
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool record_is_replaying (ptid_t ptid)
+      TARGET_DEFAULT_RETURN (false);
 
     /* Query if the record target will replay PTID if it were resumed in
        execution direction DIR.  */
-    virtual int record_will_replay (ptid_t ptid, int dir)
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool record_will_replay (ptid_t ptid, int dir)
+      TARGET_DEFAULT_RETURN (false);
 
     /* Stop replaying.  */
     virtual void record_stop_replaying ()
@@ -1203,10 +1203,10 @@ struct target_ops
     virtual void call_history_range (ULONGEST begin, ULONGEST end, record_print_flags flags)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
-    /* Nonzero if TARGET_OBJECT_LIBRARIES_SVR4 may be read with a
+    /* True if TARGET_OBJECT_LIBRARIES_SVR4 may be read with a
        non-empty annex.  */
-    virtual int augmented_libraries_svr4_read ()
-      TARGET_DEFAULT_RETURN (0);
+    virtual bool augmented_libraries_svr4_read ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* Those unwinders are tried before any other arch unwinders.  If
        SELF doesn't have unwinders, it should delegate to the
@@ -2481,19 +2481,19 @@ public:
     return NULL;
   }
 
-  int has_registers () override
+  bool has_registers () override
   {
-    return 1;
+    return true;
   }
 
-  int has_stack () override
+  bool has_stack () override
   {
-    return 1;
+    return true;
   }
 
-  int has_memory () override
+  bool has_memory () override
   {
-    return 1;
+    return true;
   }
 
   void prepare_to_store (regcache *regs) override

@@ -333,7 +333,7 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   void mourn_inferior () override;
 
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
 
   const char *pid_to_str (ptid_t) override;
 
@@ -343,7 +343,7 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   ptid_t get_ada_task_ptid (long lwp, long thread) override;
 
-  int get_tib_address (ptid_t ptid, CORE_ADDR *addr) override;
+  bool get_tib_address (ptid_t ptid, CORE_ADDR *addr) override;
 
   const char *thread_name (struct thread_info *) override;
 };
@@ -2975,19 +2975,19 @@ windows_nat_target::xfer_partial (enum target_object object,
 /* Provide thread local base, i.e. Thread Information Block address.
    Returns 1 if ptid is found and sets *ADDR to thread_local_base.  */
 
-int
+bool
 windows_nat_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 {
   windows_thread_info *th;
 
   th = thread_rec (ptid_get_tid (ptid), 0);
   if (th == NULL)
-    return 0;
+    return false;
 
   if (addr != NULL)
     *addr = th->thread_local_base;
 
-  return 1;
+  return true;
 }
 
 ptid_t
@@ -3156,7 +3156,7 @@ cygwin_get_dr7 (void)
    by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
    it means that the thread has died.  Otherwise it is assumed to be alive.  */
 
-int
+bool
 windows_nat_target::thread_alive (ptid_t ptid)
 {
   int tid;
@@ -3164,8 +3164,7 @@ windows_nat_target::thread_alive (ptid_t ptid)
   gdb_assert (ptid_get_tid (ptid) != 0);
   tid = ptid_get_tid (ptid);
 
-  return WaitForSingleObject (thread_rec (tid, FALSE)->h, 0) == WAIT_OBJECT_0
-    ? FALSE : TRUE;
+  return WaitForSingleObject (thread_rec (tid, FALSE)->h, 0) != WAIT_OBJECT_0;
 }
 
 void

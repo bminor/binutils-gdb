@@ -52,7 +52,7 @@ struct spu_multiarch_target final : public target_ops
 
   void mourn_inferior () override;
 
-    void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
@@ -162,6 +162,7 @@ spu_multiarch_target::thread_architecture (ptid_t ptid)
 }
 
 /* Override the to_region_ok_for_hw_watchpoint routine.  */
+
 int
 spu_multiarch_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {

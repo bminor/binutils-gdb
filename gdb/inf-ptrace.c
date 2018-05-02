@@ -610,7 +610,7 @@ inf_ptrace_target::xfer_partial (enum target_object object,
 
 /* Return non-zero if the thread specified by PTID is alive.  */
 
-int
+bool
 inf_ptrace_target::thread_alive (ptid_t ptid)
 {
   /* ??? Is kill the right way to do this?  */

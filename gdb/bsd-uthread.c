@@ -57,7 +57,7 @@ struct bsd_uthread_target final : public target_ops
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
   void resume (ptid_t, int, enum gdb_signal) override;
 
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
 
   void update_thread_list () override;
 
@@ -437,7 +437,7 @@ bsd_uthread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
   beneath->resume (ptid, step, sig);
 }
 
-int
+bool
 bsd_uthread_target::thread_alive (ptid_t ptid)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
@@ -453,7 +453,7 @@ bsd_uthread_target::thread_alive (ptid_t ptid)
 
       state = read_memory_unsigned_integer (addr + offset, 4, byte_order);
       if (state == BSD_UTHREAD_PS_DEAD)
-	return 0;
+	return false;
     }
 
   return beneath->thread_alive (ptid);

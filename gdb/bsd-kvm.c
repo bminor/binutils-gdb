@@ -93,12 +93,12 @@ Optionally specify the filename of a core dump.");
 					ULONGEST *xfered_len) override;
 
   void files_info () override;
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
   const char *pid_to_str (ptid_t) override;
 
-  int has_memory () override { return 1; }
-  int has_stack () override { return 1; }
-  int has_registers () override { return 1; }
+  bool has_memory () override { return true; }
+  bool has_stack () override { return true; }
+  bool has_registers () override { return true; }
 };
 
 /* Target ops for libkvm interface.  */
@@ -364,10 +364,10 @@ bsd_kvm_pcb_cmd (const char *arg, int fromtty)
   print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
 }
 
-int
+bool
 bsd_kvm_target::thread_alive (ptid_t ptid)
 {
-  return 1;
+  return true;
 }
 
 const char *

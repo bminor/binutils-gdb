@@ -70,11 +70,11 @@ public:
      has determined that a hardware watchpoint has indeed been hit.
      The CPU will then be able to execute one instruction without
      triggering a watchpoint.  */
-  int have_steppable_watchpoint () { return 1; }
+  bool have_steppable_watchpoint () { return 1; }
 
   int can_use_hw_breakpoint (enum bptype, int, int) override;
-  int stopped_by_watchpoint () override;
-  int stopped_data_address (CORE_ADDR *) override;
+  bool stopped_by_watchpoint () override;
+  bool stopped_data_address (CORE_ADDR *) override;
   int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
 			 struct expression *) override;
   int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
@@ -688,7 +688,7 @@ ia64_linux_new_thread (struct lwp_info *lp)
     enable_watchpoints_in_psr (lp->ptid);
 }
 
-int
+bool
 ia64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   CORE_ADDR psr;
@@ -696,11 +696,11 @@ ia64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
   struct regcache *regcache = get_current_regcache ();
 
   if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
-    return 0;
+    return false;
 
   if (siginfo.si_signo != SIGTRAP
       || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
-    return 0;
+    return false;
 
   regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr);
   psr |= IA64_PSR_DD;	/* Set the dd bit - this will disable the watchpoint
@@ -708,10 +708,10 @@ ia64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
   regcache_cooked_write_unsigned (regcache, IA64_PSR_REGNUM, psr);
 
   *addr_p = (CORE_ADDR) siginfo.si_addr;
-  return 1;
+  return true;
 }
 
-int
+bool
 ia64_linux_nat_target::stopped_by_watchpoint ()
 {
   CORE_ADDR addr;

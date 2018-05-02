@@ -807,7 +807,7 @@ show_fbsd_nat_debug (struct ui_file *file, int from_tty,
 
 /* Return true if PTID is still active in the inferior.  */
 
-int
+bool
 fbsd_nat_target::thread_alive (ptid_t ptid)
 {
   if (ptid_lwp_p (ptid))
@@ -816,14 +816,14 @@ fbsd_nat_target::thread_alive (ptid_t ptid)
 
       if (ptrace (PT_LWPINFO, ptid_get_lwp (ptid), (caddr_t) &pl, sizeof pl)
 	  == -1)
-	return 0;
+	return false;
 #ifdef PL_FLAG_EXITED
       if (pl.pl_flags & PL_FLAG_EXITED)
-	return 0;
+	return false;
 #endif
     }
 
-  return 1;
+  return true;
 }
 
 /* Convert PTID to a string.  Returns the string in a static
@@ -1452,14 +1452,14 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 #ifdef USE_SIGTRAP_SIGINFO
 /* Implement the "stopped_by_sw_breakpoint" target_ops method.  */
 
-int
+bool
 fbsd_nat_target::stopped_by_sw_breakpoint ()
 {
   struct ptrace_lwpinfo pl;
 
   if (ptrace (PT_LWPINFO, get_ptrace_pid (inferior_ptid), (caddr_t) &pl,
 	      sizeof pl) == -1)
-    return 0;
+    return false;
 
   return ((pl.pl_flags & PL_FLAG_SI)
 	  && pl.pl_siginfo.si_signo == SIGTRAP
@@ -1469,10 +1469,10 @@ fbsd_nat_target::stopped_by_sw_breakpoint ()
 /* Implement the "supports_stopped_by_sw_breakpoint" target_ops
    method.  */
 
-int
+bool
 fbsd_nat_target::supports_stopped_by_sw_breakpoint ()
 {
-  return 1;
+  return true;
 }
 #endif
 

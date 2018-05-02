@@ -137,7 +137,7 @@ public:
 
   void mourn_inferior () override;
 
-  int thread_alive (ptid_t ptid) override;
+  bool thread_alive (ptid_t ptid) override;
 
   const char *pid_to_str (ptid_t) override;
 
@@ -1762,7 +1762,7 @@ aix_thread_target::mourn_inferior ()
 
 /* Return whether thread PID is still valid.  */
 
-int
+bool
 aix_thread_target::thread_alive (ptid_t ptid)
 {
   struct target_ops *beneath = find_target_beneath (this);
