@@ -1,3 +1,8 @@
+2018-05-04  Tulio Magno Quites Machado Filho  <tuliom@linux.ibm.com>
+
+	* elf32-ppc.c (_bfd_elf_ppc_merge_fp_attributes): Fix the order
+	of arguments when warning about different long double types.
+
 2018-05-03  Simon Atanasyan  <simon@atanasyan.com>
 
 	* elf32-mips.c: (elf32_mips_fixup_symbol): New function.
