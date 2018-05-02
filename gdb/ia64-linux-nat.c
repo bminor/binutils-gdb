@@ -79,6 +79,9 @@ public:
 			 struct expression *) override;
   int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
 			 struct expression *) override;
+  /* Override linux_nat_target low methods.  */
+  void low_new_thread (struct lwp_info *lp) override;
+  bool low_status_is_event (int status) override;
 };
 
 static ia64_linux_nat_target the_ia64_linux_nat_target;
@@ -916,8 +919,8 @@ ia64_linux_nat_target::xfer_partial (enum target_object object,
    ia64 does not use gdbarch_decr_pc_after_break so we do not have to make any
    difference for the signals here.  */
 
-static int
-ia64_linux_status_is_event (int status)
+bool
+ia64_linux_nat_target::low_status_is_event (int status)
 {
   return WIFSTOPPED (status) && (WSTOPSIG (status) == SIGTRAP
 				 || WSTOPSIG (status) == SIGILL);
@@ -931,6 +934,4 @@ _initialize_ia64_linux_nat (void)
   /* Register the target.  */
   linux_target = &the_ia64_linux_nat_target;
   add_target (t);
-  linux_nat_set_new_thread (t, ia64_linux_new_thread);
-  linux_nat_set_status_is_event (t, ia64_linux_status_is_event);
 }

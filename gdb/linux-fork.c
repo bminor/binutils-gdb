@@ -141,7 +141,7 @@ delete_fork (ptid_t ptid)
 
   fpprev = NULL;
 
-  linux_nat_forget_process (ptid_get_pid (ptid));
+  linux_target->low_forget_process (ptid_get_pid (ptid));
 
   for (fp = fork_list; fp; fpprev = fp, fp = fp->next)
     if (ptid_equal (fp->ptid, ptid))

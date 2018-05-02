@@ -1,5 +1,51 @@
 2018-05-02  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.h (linux_nat_target) <low_new_thread,
+	low_delete_thread, low_new_fork, low_forget_process,
+	low_prepare_to_resume, low_siginfo_fixup, low_status_is_event>:
+	New virtual methods.
+	(linux_nat_set_new_thread, linux_nat_set_delete_thread)
+	(linux_nat_new_fork_ftype, linux_nat_set_new_fork)
+	(linux_nat_forget_process_ftype, linux_nat_set_forget_process)
+	(linux_nat_forget_process, linux_nat_set_siginfo_fixup)
+	(linux_nat_set_prepare_to_resume, linux_nat_set_status_is_event):
+	Delete.
+	* linux-fork.c (delete_fork): Adjust to call low method.
+	* linux-nat.c (linux_nat_new_thread, linux_nat_delete_thread)
+	(linux_nat_new_fork, linux_nat_forget_process_hook)
+	(linux_nat_prepare_to_resume, linux_nat_siginfo_fixup)
+	(linux_nat_status_is_event):
+	(linux_nat_target::follow_fork, lwp_free, add_lwp, detach_one_lwp)
+	(linux_resume_one_lwp_throw, linux_handle_extended_wait): Adjust
+	to call low method.
+	(sigtrap_is_event): Rename to ...
+	(linux_nat_target::low_status_is_event): ... this.
+	(linux_nat_set_status_is_event): Delete.
+	(save_stop_reason, linux_nat_wait_1)
+	(linux_nat_target::mourn_inferior, siginfo_fixup): Adjust to call
+	low methods.
+	(linux_nat_set_new_thread, linux_nat_set_delete_thread)
+	(linux_nat_set_new_fork, linux_nat_set_forget_process)
+	(linux_nat_forget_process, linux_nat_set_siginfo_fixup)
+	(linux_nat_set_prepare_to_resume): Delete.
+	* aarch64-linux-nat.c: All linux_nat_set_* callbacks converted to
+	low virtual methods.
+	* amd64-linux-nat.c: Likewise.
+	* arm-linux-nat.c: Likewise.
+	* i386-linux-nat.c: Likewise.
+	* ia64-linux-nat.c: Likewise.
+	* mips-linux-nat.c: Likewise.
+	* ppc-linux-nat.c: Likewise.
+	* s390-linux-nat.c: Likewise.
+	* sparc64-linux-nat.c: Likewise.
+	* x86-linux-nat.c: Likewise.
+	* x86-linux-nat.h: Include "nat/x86-linux.h".
+	(x86_linux_nat_target) <low_new_fork, low_forget_process,
+	low_prepare_to_resume, low_new_thread, low_delete_thread>:
+	Override methods.
+
+2018-05-02  Pedro Alves  <palves@redhat.com>
+
 	* target.h (target_ops)
 	<stopped_by_sw_breakpoint, supports_stopped_by_sw_breakpoint,
 	stopped_by_hw_breakpoint, supports_stopped_by_hw_breakpoint,

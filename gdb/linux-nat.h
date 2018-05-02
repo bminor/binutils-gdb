@@ -145,6 +145,42 @@ public:
 
   virtual bool low_stopped_data_address (CORE_ADDR *addr_p)
   { return false; }
+
+  /* The method to call, if any, when a new thread is attached.  */
+  virtual void low_new_thread (struct lwp_info *)
+  {}
+
+  /* The method to call, if any, when a thread is destroyed.  */
+  virtual void low_delete_thread (struct arch_lwp_info *lp)
+  {
+    gdb_assert (lp == NULL);
+  }
+
+  /* The method to call, if any, when a new fork is attached.  */
+  virtual void low_new_fork (struct lwp_info *parent, pid_t child_pid)
+  {}
+
+  /* The method to call, if any, when a process is no longer
+     attached.  */
+  virtual void low_forget_process (pid_t pid)
+  {}
+
+  /* Hook to call prior to resuming a thread.  */
+  virtual void low_prepare_to_resume (struct lwp_info *)
+  {}
+
+  /* Convert a ptrace/host siginfo object, into/from the siginfo in
+     the layout of the inferiors' architecture.  Returns true if any
+     conversion was done; false otherwise, in which case the caller
+     does a straight memcpy.  If DIRECTION is 1, then copy from INF to
+     PTRACE.  If DIRECTION is 0, copy from PTRACE to INF.  */
+  virtual bool low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf,
+				  int direction)
+  { return false; }
+
+  /* SIGTRAP-like breakpoint status events recognizer.  The default
+     recognizes SIGTRAP only.  */
+  virtual bool low_status_is_event (int status);
 };
 
 /* The final/concrete instance.  */
@@ -278,42 +314,6 @@ extern void linux_stop_and_wait_all_lwps (void);
    left stopped.)  */
 extern void linux_unstop_all_lwps (void);
 
-/* Register a method to call whenever a new thread is attached.  */
-void linux_nat_set_new_thread (struct target_ops *, void (*) (struct lwp_info *));
-
-/* Register a method to call whenever a new thread is deleted.  */
-void linux_nat_set_delete_thread (struct target_ops *,
-				  void (*) (struct arch_lwp_info *));
-
-/* Register a method to call whenever a new fork is attached.  */
-typedef void (linux_nat_new_fork_ftype) (struct lwp_info *parent,
-					 pid_t child_pid);
-void linux_nat_set_new_fork (struct target_ops *ops,
-			     linux_nat_new_fork_ftype *fn);
-
-/* Register a method to call whenever a process is killed or
-   detached.  */
-typedef void (linux_nat_forget_process_ftype) (pid_t pid);
-void linux_nat_set_forget_process (struct target_ops *ops,
-				   linux_nat_forget_process_ftype *fn);
-
-/* Call the method registered with the function above.  PID is the
-   process to forget about.  */
-void linux_nat_forget_process (pid_t pid);
-
-/* Register a method that converts a siginfo object between the layout
-   that ptrace returns, and the layout in the architecture of the
-   inferior.  */
-void linux_nat_set_siginfo_fixup (struct target_ops *,
-				  int (*) (siginfo_t *,
-					   gdb_byte *,
-					   int));
-
-/* Register a method to call prior to resuming a thread.  */
-
-void linux_nat_set_prepare_to_resume (struct target_ops *,
-				      void (*) (struct lwp_info *));
-
 /* Update linux-nat internal state when changing from one fork
    to another.  */
 void linux_nat_switch_fork (ptid_t new_ptid);
@@ -322,7 +322,3 @@ void linux_nat_switch_fork (ptid_t new_ptid);
    Return 1 if it was retrieved successfully, 0 otherwise (*SIGINFO is
    uninitialized in such case).  */
 int linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo);
-
-/* Set alternative SIGTRAP-like events recognizer.  */
-void linux_nat_set_status_is_event (struct target_ops *t,
-				    int (*status_is_event) (int status));

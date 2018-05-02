@@ -94,6 +94,17 @@ public:
   bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
 
   const struct target_desc *read_description () override;
+
+  /* Override linux_nat_target low methods.  */
+
+  /* Handle thread creation and exit.  */
+  void low_new_thread (struct lwp_info *lp) override;
+  void low_delete_thread (struct arch_lwp_info *lp) override;
+  void low_prepare_to_resume (struct lwp_info *lp) override;
+
+  /* Handle process creation and exit.  */
+  void low_new_fork (struct lwp_info *parent, pid_t child_pid) override;
+  void low_forget_process (pid_t pid) override;
 };
 
 static arm_linux_nat_target the_arm_linux_nat_target;
@@ -815,8 +826,8 @@ arm_linux_process_info_get (pid_t pid)
 /* Called whenever GDB is no longer debugging process PID.  It deletes
    data structures that keep track of debug register state.  */
 
-static void
-arm_linux_forget_process (pid_t pid)
+void
+arm_linux_nat_target::low_forget_process (pid_t pid)
 {
   struct arm_linux_process_info *proc, **proc_link;
 
@@ -1209,8 +1220,8 @@ arm_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
 
 /* Handle thread creation.  We need to copy the breakpoints and watchpoints
    in the parent thread to the child thread.  */
-static void
-arm_linux_new_thread (struct lwp_info *lp)
+void
+arm_linux_nat_target::low_new_thread (struct lwp_info *lp)
 {
   int i;
   struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
@@ -1229,8 +1240,8 @@ arm_linux_new_thread (struct lwp_info *lp)
 
 /* Function to call when a thread is being deleted.  */
 
-static void
-arm_linux_delete_thread (struct arch_lwp_info *arch_lwp)
+void
+arm_linux_nat_target::low_delete_thread (struct arch_lwp_info *arch_lwp)
 {
   xfree (arch_lwp);
 }
@@ -1238,8 +1249,8 @@ arm_linux_delete_thread (struct arch_lwp_info *arch_lwp)
 /* Called when resuming a thread.
    The hardware debug registers are updated when there is any change.  */
 
-static void
-arm_linux_prepare_to_resume (struct lwp_info *lwp)
+void
+arm_linux_nat_target::low_prepare_to_resume (struct lwp_info *lwp)
 {
   int pid, i;
   struct arm_linux_hw_breakpoint *bpts, *wpts;
@@ -1292,8 +1303,8 @@ arm_linux_prepare_to_resume (struct lwp_info *lwp)
 
 /* linux_nat_new_fork hook.  */
 
-static void
-arm_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
+void
+arm_linux_nat_target::low_new_fork (struct lwp_info *parent, pid_t child_pid)
 {
   pid_t parent_pid;
   struct arm_linux_debug_reg_state *parent_state;
@@ -1324,13 +1335,4 @@ _initialize_arm_linux_nat (void)
   /* Register the target.  */
   linux_target = &the_arm_linux_nat_target;
   add_target (t);
-
-  /* Handle thread creation and exit.  */
-  linux_nat_set_new_thread (t, arm_linux_new_thread);
-  linux_nat_set_delete_thread (t, arm_linux_delete_thread);
-  linux_nat_set_prepare_to_resume (t, arm_linux_prepare_to_resume);
-
-  /* Handle process creation and exit.  */
-  linux_nat_set_new_fork (t, arm_linux_new_fork);
-  linux_nat_set_forget_process (t, arm_linux_forget_process);
 }

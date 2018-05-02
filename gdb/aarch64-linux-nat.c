@@ -75,6 +75,21 @@ public:
 
   /* Override the GNU/Linux inferior startup hook.  */
   void post_startup_inferior (ptid_t) override;
+
+  /* These three defer to common nat/ code.  */
+  void low_new_thread (struct lwp_info *lp) override
+  { aarch64_linux_new_thread (lp); }
+  void low_delete_thread (struct arch_lwp_info *lp) override
+  { aarch64_linux_delete_thread (lp); }
+  void low_prepare_to_resume (struct lwp_info *lp) override
+  { aarch64_linux_prepare_to_resume (lp); }
+
+  void low_new_fork (struct lwp_info *parent, pid_t child_pid) override;
+  void low_forget_process (pid_t pid) override;
+
+  /* Add our siginfo layout converter.  */
+  bool low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
+    override;
 };
 
 static aarch64_linux_nat_target the_aarch64_linux_nat_target;
@@ -147,8 +162,8 @@ aarch64_process_info_get (pid_t pid)
 /* Called whenever GDB is no longer debugging process PID.  It deletes
    data structures that keep track of debug register state.  */
 
-static void
-aarch64_forget_process (pid_t pid)
+void
+aarch64_linux_nat_target::low_forget_process (pid_t pid)
 {
   struct aarch64_process_info *proc, **proc_link;
 
@@ -456,8 +471,9 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 
 /* linux_nat_new_fork hook.   */
 
-static void
-aarch64_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
+void
+aarch64_linux_nat_target::low_new_fork (struct lwp_info *parent,
+					pid_t child_pid)
 {
   pid_t parent_pid;
   struct aarch64_debug_reg_state *parent_state;
@@ -500,7 +516,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
 void
 aarch64_linux_nat_target::post_startup_inferior (ptid_t ptid)
 {
-  aarch64_forget_process (ptid_get_pid (ptid));
+  low_forget_process (ptid_get_pid (ptid));
   aarch64_linux_get_debug_reg_capacity (ptid_get_pid (ptid));
   linux_nat_target::post_startup_inferior (ptid);
 }
@@ -534,8 +550,9 @@ aarch64_linux_nat_target::read_description ()
    from INF to NATIVE.  If DIRECTION is 0, copy from NATIVE to
    INF.  */
 
-static int
-aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
+bool
+aarch64_linux_nat_target::low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
+					     int direction)
 {
   struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
 
@@ -550,10 +567,10 @@ aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
 	aarch64_siginfo_from_compat_siginfo (native,
 					     (struct compat_siginfo *) inf);
 
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
 /* Returns the number of hardware watchpoints of type TYPE that we can
@@ -827,12 +844,4 @@ _initialize_aarch64_linux_nat (void)
   /* Register the target.  */
   linux_target = &the_aarch64_linux_nat_target;
   add_target (t);
-  linux_nat_set_new_thread (t, aarch64_linux_new_thread);
-  linux_nat_set_delete_thread (t, aarch64_linux_delete_thread);
-  linux_nat_set_new_fork (t, aarch64_linux_new_fork);
-  linux_nat_set_forget_process (t, aarch64_forget_process);
-  linux_nat_set_prepare_to_resume (t, aarch64_linux_prepare_to_resume);
-
-  /* Add our siginfo layout converter.  */
-  linux_nat_set_siginfo_fixup (t, aarch64_linux_siginfo_fixup);
 }

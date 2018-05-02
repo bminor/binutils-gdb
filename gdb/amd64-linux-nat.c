@@ -50,6 +50,9 @@ struct amd64_linux_nat_target final : public x86_linux_nat_target
   /* Add our register access methods.  */
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
+
+  bool low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
+    override;
 };
 
 static amd64_linux_nat_target the_amd64_linux_nat_target;
@@ -384,22 +387,24 @@ ps_get_thread_area (struct ps_prochandle *ph,
    from INF to PTRACE.  If DIRECTION is 0, copy from PTRACE to
    INF.  */
 
-static int
-amd64_linux_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
+bool
+amd64_linux_nat_target::low_siginfo_fixup (siginfo_t *ptrace,
+					   gdb_byte *inf,
+					   int direction)
 {
   struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
 
   /* Is the inferior 32-bit?  If so, then do fixup the siginfo
      object.  */
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
-      return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
-					       FIXUP_32);
+    return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
+					     FIXUP_32);
   /* No fixup for native x32 GDB.  */
   else if (gdbarch_addr_bit (gdbarch) == 32 && sizeof (void *) == 8)
-      return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
-					       FIXUP_X32);
+    return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
+					     FIXUP_X32);
   else
-    return 0;
+    return false;
 }
 
 void
@@ -416,8 +421,5 @@ _initialize_amd64_linux_nat (void)
   linux_target = &the_amd64_linux_nat_target;
 
   /* Add the target.  */
-  x86_linux_add_target (linux_target);
-
-  /* Add our siginfo layout converter.  */
-  linux_nat_set_siginfo_fixup (linux_target, amd64_linux_siginfo_fixup);
+  add_target (linux_target);
 }

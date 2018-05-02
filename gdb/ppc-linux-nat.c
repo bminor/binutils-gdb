@@ -314,6 +314,9 @@ struct ppc_linux_nat_target final : public linux_nat_target
   int auxv_parse (gdb_byte **readptr,
 		  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
     override;
+
+  /* Override linux_nat_target low methods.  */
+  void low_new_thread (struct lwp_info *lp) override;
 };
 
 static ppc_linux_nat_target the_ppc_linux_nat_target;
@@ -2151,8 +2154,8 @@ ppc_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
   return ret;
 }
 
-static void
-ppc_linux_new_thread (struct lwp_info *lp)
+void
+ppc_linux_nat_target::low_new_thread (struct lwp_info *lp)
 {
   int tid = ptid_get_lwp (lp->ptid);
 
@@ -2507,6 +2510,4 @@ _initialize_ppc_linux_nat (void)
 
   /* Register the target.  */
   add_target (linux_target);
-
-  linux_nat_set_new_thread (linux_target, ppc_linux_new_thread);
 }

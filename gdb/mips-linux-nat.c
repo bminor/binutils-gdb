@@ -72,6 +72,9 @@ protected:
   CORE_ADDR register_u_offset (struct gdbarch *gdbarch,
 			       int regno, int store_p) override;
 
+  /* Override linux_nat_target low methods.  */
+  void low_new_thread (struct lwp_info *lp) override;
+
 private:
   /* Helpers.  See definitions.  */
   void mips64_regsets_store_registers (struct regcache *regcache,
@@ -642,11 +645,11 @@ write_watchpoint_regs (void)
   return 0;
 }
 
-/* linux_nat new_thread implementation.  Write the mirrored watch
- register values for the new thread.  */
+/* linux_nat_target::low_new_thread implementation.  Write the
+   mirrored watch register values for the new thread.  */
 
-static void
-mips_linux_new_thread (struct lwp_info *lp)
+void
+mips_linux_nat_target::low_new_thread (struct lwp_info *lp)
 {
   long tid = lp->ptid.lwp ();
 
@@ -800,6 +803,4 @@ triggers a breakpoint or watchpoint."),
 
   linux_target = &the_mips_linux_nat_target;
   add_target (&the_mips_linux_nat_target);
-  linux_nat_set_new_thread (&the_mips_linux_nat_target,
-			    mips_linux_new_thread);
 }

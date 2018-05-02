@@ -191,29 +191,6 @@ struct linux_nat_target *linux_target;
 /* Does the current host support PTRACE_GETREGSET?  */
 enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
 
-/* The method to call, if any, when a new thread is attached.  */
-static void (*linux_nat_new_thread) (struct lwp_info *);
-
-/* The method to call, if any, when a thread is destroyed.  */
-static void (*linux_nat_delete_thread) (struct arch_lwp_info *);
-
-/* The method to call, if any, when a new fork is attached.  */
-static linux_nat_new_fork_ftype *linux_nat_new_fork;
-
-/* The method to call, if any, when a process is no longer
-   attached.  */
-static linux_nat_forget_process_ftype *linux_nat_forget_process_hook;
-
-/* Hook to call prior to resuming a thread.  */
-static void (*linux_nat_prepare_to_resume) (struct lwp_info *);
-
-/* The method to call, if any, when the siginfo object needs to be
-   converted between the layout returned by ptrace, and the layout in
-   the architecture of the inferior.  */
-static int (*linux_nat_siginfo_fixup) (siginfo_t *,
-				       gdb_byte *,
-				       int);
-
 /* The saved to_close method, inherited from inf-ptrace.c.
    Called by our to_close.  */
 static void (*super_close) (struct target_ops *);
@@ -301,9 +278,6 @@ static void delete_lwp (ptid_t ptid);
 static struct lwp_info *find_lwp_pid (ptid_t ptid);
 
 static int lwp_status_pending_p (struct lwp_info *lp);
-
-static int sigtrap_is_event (int status);
-static int (*linux_nat_status_is_event) (int status) = sigtrap_is_event;
 
 static void save_stop_reason (struct lwp_info *lp);
 
@@ -497,8 +471,7 @@ linux_nat_target::follow_fork (int follow_child, int detach_fork)
 	  struct cleanup *old_chain = make_cleanup (delete_lwp_cleanup,
 						    child_lp);
 
-	  if (linux_nat_prepare_to_resume != NULL)
-	    linux_nat_prepare_to_resume (child_lp);
+	  linux_target->low_prepare_to_resume (child_lp);
 
 	  /* When debugging an inferior in an architecture that supports
 	     hardware single stepping on a kernel without commit
@@ -835,10 +808,7 @@ static void
 lwp_free (struct lwp_info *lp)
 {
   /* Let the arch specific bits release arch_lwp_info.  */
-  if (linux_nat_delete_thread != NULL)
-    linux_nat_delete_thread (lp->arch_private);
-  else
-    gdb_assert (lp->arch_private == NULL);
+  linux_target->low_delete_thread (lp->arch_private);
 
   xfree (lp);
 }
@@ -924,8 +894,7 @@ add_lwp (ptid_t ptid)
      clients of this callback take the opportunity to install
      watchpoints in the new thread.  We don't do this for the first
      thread though.  See add_initial_lwp.  */
-  if (linux_nat_new_thread != NULL)
-    linux_nat_new_thread (lp);
+  linux_target->low_new_thread (lp);
 
   return lp;
 }
@@ -1425,8 +1394,7 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
      it below, when detach fails with ESRCH.  */
   TRY
     {
-      if (linux_nat_prepare_to_resume != NULL)
-	linux_nat_prepare_to_resume (lp);
+      linux_target->low_prepare_to_resume (lp);
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -1553,8 +1521,7 @@ linux_resume_one_lwp_throw (struct lwp_info *lp, int step,
   else
     lp->stop_pc = 0;
 
-  if (linux_nat_prepare_to_resume != NULL)
-    linux_nat_prepare_to_resume (lp);
+  linux_target->low_prepare_to_resume (lp);
   linux_target->low_resume (lp->ptid, step, signo);
 
   /* Successfully resumed.  Clear state that no longer makes sense,
@@ -1998,8 +1965,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	  /* The arch-specific native code may need to know about new
 	     forks even if those end up never mapped to an
 	     inferior.  */
-	  if (linux_nat_new_fork != NULL)
-	    linux_nat_new_fork (lp, new_pid);
+	  linux_target->low_new_fork (lp, new_pid);
 	}
 
       if (event == PTRACE_EVENT_FORK
@@ -2498,21 +2464,10 @@ linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 
 /* Commonly any breakpoint / watchpoint generate only SIGTRAP.  */
 
-static int
-sigtrap_is_event (int status)
+bool
+linux_nat_target::low_status_is_event (int status)
 {
   return WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP;
-}
-
-/* Set alternative SIGTRAP-like events recognizer.  If
-   breakpoint_inserted_here_p there then gdbarch_decr_pc_after_break will be
-   applied.  */
-
-void
-linux_nat_set_status_is_event (struct target_ops *t,
-			       int (*status_is_event) (int status))
-{
-  linux_nat_status_is_event = status_is_event;
 }
 
 /* Wait until LP is stopped.  */
@@ -2729,7 +2684,7 @@ save_stop_reason (struct lwp_info *lp)
   gdb_assert (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON);
   gdb_assert (lp->status != 0);
 
-  if (!linux_nat_status_is_event (lp->status))
+  if (!linux_target->low_status_is_event (lp->status))
     return;
 
   regcache = get_thread_regcache (lp->ptid);
@@ -3468,7 +3423,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
       resume_clear_callback (lp, NULL);
     }
 
-  if (linux_nat_status_is_event (status))
+  if (linux_target->low_status_is_event (status))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -3735,7 +3690,7 @@ kill_unfollowed_fork_children (struct inferior *inf)
 
 	    /* Let the arch-specific native code know this process is
 	       gone.  */
-	    linux_nat_forget_process (child_pid);
+	    linux_target->low_forget_process (child_pid);
 	  }
       }
 }
@@ -3788,7 +3743,7 @@ linux_nat_target::mourn_inferior ()
     linux_fork_mourn_inferior ();
 
   /* Let the arch-specific native code know this process is gone.  */
-  linux_nat_forget_process (pid);
+  linux_target->low_forget_process (pid);
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the
@@ -3797,14 +3752,9 @@ linux_nat_target::mourn_inferior ()
 static void
 siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo, int direction)
 {
-  int done = 0;
-
-  if (linux_nat_siginfo_fixup != NULL)
-    done = linux_nat_siginfo_fixup (siginfo, inf_siginfo, direction);
-
-  /* If there was no callback, or the callback didn't do anything,
-     then just do a straight memcpy.  */
-  if (!done)
+  /* If the low target didn't do anything, then just do a straight
+     memcpy.  */
+  if (!linux_target->low_siginfo_fixup (siginfo, inf_siginfo, direction))
     {
       if (direction == 1)
 	memcpy (siginfo, inf_siginfo, sizeof (siginfo_t));
@@ -4679,80 +4629,6 @@ linux_nat_target::linux_nat_target ()
      is a little strange, since this is a multi-threaded-capable
      target, but we want to be on the stack below thread_db, and we
      also want to be used for single-threaded processes.  */
-}
-
-/* Register a method to call whenever a new thread is attached.  */
-void
-linux_nat_set_new_thread (struct target_ops *t,
-			  void (*new_thread) (struct lwp_info *))
-{
-  /* Save the pointer.  We only support a single registered instance
-     of the GNU/Linux native target, so we do not need to map this to
-     T.  */
-  linux_nat_new_thread = new_thread;
-}
-
-/* Register a method to call whenever a new thread is attached.  */
-void
-linux_nat_set_delete_thread (struct target_ops *t,
-			     void (*delete_thread) (struct arch_lwp_info *))
-{
-  /* Save the pointer.  We only support a single registered instance
-     of the GNU/Linux native target, so we do not need to map this to
-     T.  */
-  linux_nat_delete_thread = delete_thread;
-}
-
-/* See declaration in linux-nat.h.  */
-
-void
-linux_nat_set_new_fork (struct target_ops *t,
-			linux_nat_new_fork_ftype *new_fork)
-{
-  /* Save the pointer.  */
-  linux_nat_new_fork = new_fork;
-}
-
-/* See declaration in linux-nat.h.  */
-
-void
-linux_nat_set_forget_process (struct target_ops *t,
-			      linux_nat_forget_process_ftype *fn)
-{
-  /* Save the pointer.  */
-  linux_nat_forget_process_hook = fn;
-}
-
-/* See declaration in linux-nat.h.  */
-
-void
-linux_nat_forget_process (pid_t pid)
-{
-  if (linux_nat_forget_process_hook != NULL)
-    linux_nat_forget_process_hook (pid);
-}
-
-/* Register a method that converts a siginfo object between the layout
-   that ptrace returns, and the layout in the architecture of the
-   inferior.  */
-void
-linux_nat_set_siginfo_fixup (struct target_ops *t,
-			     int (*siginfo_fixup) (siginfo_t *,
-						   gdb_byte *,
-						   int))
-{
-  /* Save the pointer.  */
-  linux_nat_siginfo_fixup = siginfo_fixup;
-}
-
-/* Register a method to call prior to resuming a thread.  */
-
-void
-linux_nat_set_prepare_to_resume (struct target_ops *t,
-				 void (*prepare_to_resume) (struct lwp_info *))
-{
-  /* Save the pointer.  */
-  linux_nat_prepare_to_resume = prepare_to_resume;
 }
 
 /* See linux-nat.h.  */

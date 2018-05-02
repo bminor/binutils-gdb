@@ -42,10 +42,10 @@
 #include "nat/x86-linux-dregs.h"
 #include "nat/linux-ptrace.h"
 
-/* linux_nat_new_fork hook.   */
+/* linux_nat_target::low_new_fork implementation.  */
 
-static void
-x86_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
+void
+x86_linux_nat_target::low_new_fork (struct lwp_info *parent, pid_t child_pid)
 {
   pid_t parent_pid;
   struct x86_debug_reg_state *parent_state;
@@ -311,10 +311,8 @@ x86_linux_get_thread_area (pid_t pid, void *addr, unsigned int *base_addr)
 }
 
 
-/* Add an x86 GNU/Linux target.  */
-
 void
-x86_linux_add_target (linux_nat_target *t)
+_initialize_x86_linux_nat ()
 {
   /* Initialize the debug register function vectors.  */
   x86_dr_low.set_control = x86_linux_dr_set_control;
@@ -323,11 +321,4 @@ x86_linux_add_target (linux_nat_target *t)
   x86_dr_low.get_status = x86_linux_dr_get_status;
   x86_dr_low.get_control = x86_linux_dr_get_control;
   x86_set_debug_register_length (sizeof (void *));
-
-  add_target (t);
-  linux_nat_set_new_thread (t, x86_linux_new_thread);
-  linux_nat_set_delete_thread (t, x86_linux_delete_thread);
-  linux_nat_set_new_fork (t, x86_linux_new_fork);
-  linux_nat_set_forget_process (t, x86_forget_process);
-  linux_nat_set_prepare_to_resume (t, x86_linux_prepare_to_resume);
 }

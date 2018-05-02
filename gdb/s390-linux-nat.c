@@ -135,6 +135,13 @@ public:
   int auxv_parse (gdb_byte **readptr,
 		  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
     override;
+
+  /* Override linux_nat_target low methods.  */
+  void low_new_thread (struct lwp_info *lp) override;
+  void low_delete_thread (struct arch_lwp_info *lp) override;
+  void low_prepare_to_resume (struct lwp_info *lp) override;
+  void low_new_fork (struct lwp_info *parent, pid_t child_pid) override;
+  void low_forget_process (pid_t pid) override;
 };
 
 static s390_linux_nat_target the_s390_linux_nat_target;
@@ -575,8 +582,8 @@ s390_get_debug_reg_state (pid_t pid)
 /* Called whenever GDB is no longer debugging process PID.  It deletes
    data structures that keep track of hardware debug state.  */
 
-static void
-s390_forget_process (pid_t pid)
+void
+s390_linux_nat_target::low_forget_process (pid_t pid)
 {
   struct s390_process_info *proc, **proc_link;
 
@@ -601,8 +608,8 @@ s390_forget_process (pid_t pid)
 
 /* linux_nat_new_fork hook.   */
 
-static void
-s390_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
+void
+s390_linux_nat_target::low_new_fork (struct lwp_info *parent, pid_t child_pid)
 {
   pid_t parent_pid;
   struct s390_debug_reg_state *parent_state;
@@ -694,8 +701,8 @@ s390_linux_nat_target::stopped_by_watchpoint ()
 
 /* Each time before resuming a thread, update its PER info.  */
 
-static void
-s390_prepare_to_resume (struct lwp_info *lp)
+void
+s390_linux_nat_target::low_prepare_to_resume (struct lwp_info *lp)
 {
   int tid;
   pid_t pid = ptid_get_pid (ptid_of_lwp (lp));
@@ -811,16 +818,16 @@ s390_mark_per_info_changed (struct lwp_info *lp)
 
 /* When attaching to a new thread, mark its PER info as changed.  */
 
-static void
-s390_new_thread (struct lwp_info *lp)
+void
+s390_linux_nat_target::low_new_thread (struct lwp_info *lp)
 {
   s390_mark_per_info_changed (lp);
 }
 
 /* Function to call when a thread is being deleted.  */
 
-static void
-s390_delete_thread (struct arch_lwp_info *arch_lwp)
+void
+s390_linux_nat_target::low_delete_thread (struct arch_lwp_info *arch_lwp)
 {
   xfree (arch_lwp);
 }
@@ -1063,11 +1070,6 @@ _initialize_s390_nat (void)
   /* Register the target.  */
   linux_target = &the_s390_linux_nat_target;
   add_target (t);
-  linux_nat_set_new_thread (t, s390_new_thread);
-  linux_nat_set_delete_thread (t, s390_delete_thread);
-  linux_nat_set_prepare_to_resume (t, s390_prepare_to_resume);
-  linux_nat_set_forget_process (t, s390_forget_process);
-  linux_nat_set_new_fork (t, s390_linux_new_fork);
 
   /* A maintenance command to enable showing the PER state.  */
   add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,

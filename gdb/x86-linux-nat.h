@@ -23,6 +23,7 @@
 #include "gdb_proc_service.h"  /* For ps_err_e.  */
 #include "linux-nat.h"
 #include "x86-nat.h"
+#include "nat/x86-linux.h"
 
 struct x86_linux_nat_target : public x86_nat_target<linux_nat_target>
 {
@@ -58,6 +59,20 @@ struct x86_linux_nat_target : public x86_nat_target<linux_nat_target>
 
   bool low_stopped_data_address (CORE_ADDR *addr_p) override
   { return x86_nat_target::stopped_data_address (addr_p); }
+
+  void low_new_fork (struct lwp_info *parent, pid_t child_pid) override;
+
+  void low_forget_process (pid_t pid) override
+  { x86_forget_process (pid); }
+
+  void low_prepare_to_resume (struct lwp_info *lwp) override
+  { x86_linux_prepare_to_resume (lwp); }
+
+  void low_new_thread (struct lwp_info *lwp) override
+  { x86_linux_new_thread (lwp); }
+
+  void low_delete_thread (struct arch_lwp_info *lwp) override
+  { x86_linux_delete_thread (lwp); }
 };
 
 
@@ -68,10 +83,5 @@ struct x86_linux_nat_target : public x86_nat_target<linux_nat_target>
 
 extern ps_err_e x86_linux_get_thread_area (pid_t pid, void *addr,
 					   unsigned int *base_addr);
-
-
-/* Add an x86 GNU/Linux target.  */
-
-extern void x86_linux_add_target (linux_nat_target *t);
 
 #endif
