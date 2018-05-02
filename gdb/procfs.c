@@ -171,7 +171,9 @@ procfs_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 }
 #endif
 
-struct target_ops *
+/* Create a procfs target.  */
+
+static struct target_ops *
 procfs_target (void)
 {
   struct target_ops *t = inf_child_target ();
@@ -3770,6 +3772,8 @@ _initialize_procfs (void)
 	   _("Cancel a trace of entries into the syscall."));
   add_com ("proc-untrace-exit", no_class, proc_untrace_sysexit_cmd,
 	   _("Cancel a trace of exits from the syscall."));
+
+  add_target (procfs_target ());
 }
 
 /* =================== END, GDB  "MODULE" =================== */

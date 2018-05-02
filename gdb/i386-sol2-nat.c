@@ -133,11 +133,6 @@ fill_fpregset (const struct regcache *regcache,
 void
 _initialize_amd64_sol2_nat (void)
 {
-  struct target_ops *t;
-
-  /* Fill in the generic procfs methods.  */
-  t = procfs_target ();
-
 #if defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
   amd64_native_gregset32_reg_offset = amd64_sol2_gregset32_reg_offset;
   amd64_native_gregset32_num_regs =
@@ -146,6 +141,4 @@ _initialize_amd64_sol2_nat (void)
   amd64_native_gregset64_num_regs =
     ARRAY_SIZE (amd64_sol2_gregset64_reg_offset);
 #endif
-
-  add_target (t);
 }

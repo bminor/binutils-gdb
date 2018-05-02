@@ -1,5 +1,15 @@
 2018-05-02  Pedro Alves  <palves@redhat.com>
 
+	* i386-sol2-nat.c (_initialize_amd64_sol2_nat): Don't call
+	procfs_target/add_target here.
+	* procfs.c (procfs_target): Make static.
+	(_initialize_procfs): Call add_target here.
+	* procfs.h (struct target_ops): Remove forward declaration.
+	(procfs_target): Remove declaration.
+	* sparc-sol2-nat.c (_initialize_sparc_sol2_nat): Delete.
+
+2018-05-02  Pedro Alves  <palves@redhat.com>
+
 	* procfs.c (procfs_stopped_by_watchpoint)
 	(procfs_insert_watchpoint, procfs_remove_watchpoint)
 	(procfs_region_ok_for_hw_watchpoint, procfs_stopped_data_address):

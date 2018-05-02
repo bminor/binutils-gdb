@@ -17,13 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct target_ops;
-
-/* Create a prototype generic procfs target.  The client can override
-   it with local methods.  */
-
-extern struct target_ops *procfs_target (void);
-
 /* Return a ptid for which we guarantee we will be able to find a
    'live' procinfo.  */
 
