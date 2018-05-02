@@ -24,12 +24,6 @@ struct target_ops;
 
 extern struct target_ops *procfs_target (void);
 
-/* Call this in the native _initialize routine that creates and
-   customizes the prototype target returned by procfs_target, if the
-   native debug interface supports procfs watchpoints.  */
-
-extern void procfs_use_watchpoints (struct target_ops *t);
-
 /* Return a ptid for which we guarantee we will be able to find a
    'live' procinfo.  */
 

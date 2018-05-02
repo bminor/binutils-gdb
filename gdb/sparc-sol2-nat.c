@@ -104,6 +104,5 @@ _initialize_sparc_sol2_nat (void)
   struct target_ops *t;
 
   t = procfs_target ();
-  procfs_use_watchpoints (t);
   add_target (t);
 }

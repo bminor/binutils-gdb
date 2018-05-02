@@ -126,6 +126,22 @@ static int procfs_can_use_hw_breakpoint (struct target_ops *self,
 static void procfs_info_proc (struct target_ops *, const char *,
 			      enum info_proc_what);
 
+static int procfs_stopped_by_watchpoint (struct target_ops *);
+
+static int procfs_insert_watchpoint (struct target_ops *,
+				     CORE_ADDR, int,
+				     enum target_hw_bp_type,
+				     struct expression *);
+
+static int procfs_remove_watchpoint (struct target_ops *,
+				     CORE_ADDR, int,
+				     enum target_hw_bp_type,
+				     struct expression *);
+
+static int procfs_region_ok_for_hw_watchpoint (struct target_ops *,
+					       CORE_ADDR, int);
+static int procfs_stopped_data_address (struct target_ops *, CORE_ADDR *);
+
 #if defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
 /* When GDB is built as 64-bit application on Solaris, the auxv data
    is presented in 64-bit format.  We need to provide a custom parser
@@ -185,6 +201,13 @@ procfs_target (void)
 #if defined(PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
   t->to_auxv_parse = procfs_auxv_parse;
 #endif
+
+  t->to_stopped_by_watchpoint = procfs_stopped_by_watchpoint;
+  t->to_insert_watchpoint = procfs_insert_watchpoint;
+  t->to_remove_watchpoint = procfs_remove_watchpoint;
+  t->to_region_ok_for_hw_watchpoint = procfs_region_ok_for_hw_watchpoint;
+  t->to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
+  t->to_stopped_data_address = procfs_stopped_data_address;
 
   t->to_magic = OPS_MAGIC;
 
@@ -3383,17 +3406,6 @@ procfs_region_ok_for_hw_watchpoint (struct target_ops *self,
      the allowed size for the watched area either.  So we just tell
      GDB 'yes'.  */
   return 1;
-}
-
-void
-procfs_use_watchpoints (struct target_ops *t)
-{
-  t->to_stopped_by_watchpoint = procfs_stopped_by_watchpoint;
-  t->to_insert_watchpoint = procfs_insert_watchpoint;
-  t->to_remove_watchpoint = procfs_remove_watchpoint;
-  t->to_region_ok_for_hw_watchpoint = procfs_region_ok_for_hw_watchpoint;
-  t->to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
-  t->to_stopped_data_address = procfs_stopped_data_address;
 }
 
 /* Memory Mappings Functions: */

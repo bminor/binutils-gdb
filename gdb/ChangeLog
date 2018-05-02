@@ -1,3 +1,17 @@
+2018-05-02  Pedro Alves  <palves@redhat.com>
+
+	* procfs.c (procfs_stopped_by_watchpoint)
+	(procfs_insert_watchpoint, procfs_remove_watchpoint)
+	(procfs_region_ok_for_hw_watchpoint, procfs_stopped_data_address):
+	Forward declare.
+	(procfs_use_watchpoints): Delete, move contents...
+	(procfs_target): ... here.
+	* procfs.h (procfs_use_watchpoints): Delete declaration.
+	* i386-sol2-nat.c (_initialize_amd64_sol2_nat): Don't call
+	procfs_use_watchpoints.
+	* sparc-sol2-nat.c (_initialize_sparc_sol2_nat): Don't call
+	procfs_use_watchpoints.
+
 2018-05-02  Tom Tromey  <tom@tromey.com>
 
 	PR python/20084:

@@ -138,8 +138,6 @@ _initialize_amd64_sol2_nat (void)
   /* Fill in the generic procfs methods.  */
   t = procfs_target ();
 
-  procfs_use_watchpoints (t);
-
 #if defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
   amd64_native_gregset32_reg_offset = amd64_sol2_gregset32_reg_offset;
   amd64_native_gregset32_num_regs =
