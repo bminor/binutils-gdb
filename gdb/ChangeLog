@@ -1,4 +1,12 @@
 2018-05-02  Pedro Alves  <palves@redhat.com>
+
+	* make-target-delegates (scan_target_h): Don't trim lines here.
+	Replace sequences of tabs and/or whitespace with a single
+	whitespace.
+	(top level, parsing methods): Trim each line before processing it
+	here.
+
+2018-05-02  Pedro Alves  <palves@redhat.com>
 	    John Baldwin  <jhb@freebsd.org>
 
 	* target.h (enum strata) <debug_stratum>: New.

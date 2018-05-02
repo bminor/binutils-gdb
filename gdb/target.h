@@ -1067,7 +1067,8 @@ struct target_ops
 
     /* Return a vector of all tracepoints markers string id ID, or all
        markers if ID is NULL.  */
-    virtual std::vector<static_tracepoint_marker> static_tracepoint_markers_by_strid (const char *id)
+    virtual std::vector<static_tracepoint_marker>
+      static_tracepoint_markers_by_strid (const char *id)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Return a traceframe info object describing the current

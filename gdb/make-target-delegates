@@ -102,13 +102,27 @@ sub scan_target_h() {
 
 	# Strip // comments.
 	$_ =~ s,//.*$,,;
-	$_ = trim ($_);
 
 	$all_the_text .= $_;
     }
 
     # Now strip out the C comments.
     $all_the_text =~ s,/\*(.*?)\*/,,g;
+
+    # Replace sequences of tabs and/or whitespace with a single
+    # whitespace character.  We need the whitespace because the method
+    # may have been split between multiple lines, like e.g.:
+    #
+    #  virtual std::vector<long_type_name>
+    #    my_long_method_name ()
+    #    TARGET_DEFAULT_IGNORE ();
+    #
+    # If we didn't preserve the whitespace, then we'd end up with:
+    #
+    #  virtual std::vector<long_type_name>my_long_method_name ()TARGET_DEFAULT_IGNORE ()
+    #
+    # ... which wouldn't later be parsed correctly.
+    $all_the_text =~ s/[\t\s]+/ /g;
 
     return split (/;/, $all_the_text);
 }
@@ -348,6 +362,10 @@ print "\n";
 @argtypes_array = ();
 
 foreach $current_line (@lines) {
+    # See comments in scan_target_h.  Here we strip away the leading
+    # and trailing whitespace.
+    $current_line = trim ($current_line);
+
     next unless $current_line =~ m/$METHOD/;
 
     my $name = $+{name};
