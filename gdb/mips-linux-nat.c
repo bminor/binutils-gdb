@@ -24,7 +24,7 @@
 #include "mips-tdep.h"
 #include "target.h"
 #include "regcache.h"
-#include "linux-nat.h"
+#include "linux-nat-trad.h"
 #include "mips-linux-tdep.h"
 #include "target-descriptions.h"
 

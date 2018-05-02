@@ -4338,7 +4338,7 @@ linux_child_static_tracepoint_markers_by_strid (struct target_ops *self,
 /* Create a prototype generic GNU/Linux target.  The client can override
    it with local methods.  */
 
-static void
+void
 linux_target_install_ops (struct target_ops *t)
 {
   t->to_insert_fork_catchpoint = linux_child_insert_fork_catchpoint;
@@ -4366,17 +4366,6 @@ linux_target (void)
   struct target_ops *t;
 
   t = inf_ptrace_target ();
-  linux_target_install_ops (t);
-
-  return t;
-}
-
-struct target_ops *
-linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int))
-{
-  struct target_ops *t;
-
-  t = inf_ptrace_trad_target (register_u_offset);
   linux_target_install_ops (t);
 
   return t;

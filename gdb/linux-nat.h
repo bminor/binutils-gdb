@@ -153,10 +153,9 @@ extern void linux_unstop_all_lwps (void);
    override it with local methods.  */
 struct target_ops * linux_target (void);
 
-/* Create a generic GNU/Linux target using traditional 
-   ptrace register access.  */
-struct target_ops *
-linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int));
+/* Make a prototype generic GNU/Linux target.  The client can override
+   it with local methods.  */
+void linux_target_install_ops (struct target_ops *t);
 
 /* Register the customized GNU/Linux target.  This should be used
    instead of calling add_target directly.  */

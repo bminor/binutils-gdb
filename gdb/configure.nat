@@ -115,7 +115,7 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    alpha)
 		# Host: Little-endian Alpha running Linux
-		NATDEPFILES="${NATDEPFILES} alpha-linux-nat.o"
+		NATDEPFILES="${NATDEPFILES} linux-nat-trad.o alpha-linux-nat.o"
 		# doublest.c currently assumes some properties of FP arithmetic
 		# on the host which require this.
 		MH_CFLAGS='-mieee'
@@ -255,8 +255,8 @@ case ${gdb_host} in
 		;;
 	    mips)
 		# Host: Linux/MIPS
-		NATDEPFILES="${NATDEPFILES} mips-linux-nat.o \
-		mips-linux-watch.o"
+		NATDEPFILES="${NATDEPFILES} linux-nat-trad.o \
+		mips-linux-nat.o mips-linux-watch.o"
 		;;
 	    pa)
 		# Host: Hewlett-Packard PA-RISC machine, running Linux

@@ -19,7 +19,7 @@
 #include "defs.h"
 #include "target.h"
 #include "regcache.h"
-#include "linux-nat.h"
+#include "linux-nat-trad.h"
 
 #include "alpha-tdep.h"
 

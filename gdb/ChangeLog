@@ -1,5 +1,23 @@
 2018-05-02  Pedro Alves  <palves@redhat.com>
 
+	* alpha-linux-nat.c: Include "linux-nat-trad.h" instead of
+	"linux-nat.h".
+	* configure.nat (alpha-linux, linux-mips): Add linux-nat-trad.o.
+	* inf-ptrace.c (inf_ptrace_register_u_offset)
+	(inf_ptrace_fetch_register, inf_ptrace_fetch_registers)
+	(inf_ptrace_store_register, inf_ptrace_store_registers)
+	(inf_ptrace_trad_target): Move to ...
+	* linux-nat-trad.c: ... this new file.
+	* linux-nat-trad.h: New file.
+	* linux-nat.c (linux_target_install_ops): Make extern.
+	(linux_trad_target): Delete.
+	* linux-nat.h (linux_trad_target): Delete declaration.
+	(linux_target_install_ops): Declare.
+	* mips-linux-nat.c: Include "linux-nat-trad.h" instead of
+	"linux-nat.h".
+
+2018-05-02  Pedro Alves  <palves@redhat.com>
+
 	* i386-sol2-nat.c (_initialize_amd64_sol2_nat): Don't call
 	procfs_target/add_target here.
 	* procfs.c (procfs_target): Make static.
