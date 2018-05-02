@@ -204,7 +204,7 @@ ppcfbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 void
 _initialize_ppcfbsd_nat (void)
 {
-  add_target (&the_ppc_fbsd_nat_target);
+  add_inf_child_target (&the_ppc_fbsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (ppcfbsd_supply_pcb);

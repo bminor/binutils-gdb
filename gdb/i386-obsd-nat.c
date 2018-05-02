@@ -93,7 +93,7 @@ static i386_bsd_nat_target<obsd_nat_target> the_i386_obsd_nat_target;
 void
 _initialize_i386obsd_nat (void)
 {
-  add_target (&i386_obsd_nat_target);
+  add_inf_child_target (&i386_obsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (i386obsd_supply_pcb);

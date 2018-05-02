@@ -469,7 +469,7 @@ static struct core_fns arm_netbsd_elfcore_fns =
 void
 _initialize_arm_netbsd_nat (void)
 {
-  add_target (&the_arm_netbsd_nat_target);
+  add_inf_child_target (&the_arm_netbsd_nat_target);
 
   deprecated_add_core_fns (&arm_netbsd_elfcore_fns);
 }

@@ -75,17 +75,19 @@
    of the ptid_t prevents thread IDs changing when libpthread is
    loaded or unloaded.  */
 
+static const target_info thread_db_target_info = {
+  "multi-thread",
+  N_("multi-threaded child process."),
+  N_("Threads and pthreads support.")
+};
+
 class thread_db_target final : public target_ops
 {
 public:
   thread_db_target ();
 
-  const char *shortname () override
-  { return "multi-thread"; }
-  const char *longname () override
-  { return _("multi-threaded child process."); }
-  const char *doc () override
-  { return _("Threads and pthreads support."); }
+  const target_info &info () const override
+  { return thread_db_target_info; }
 
   void detach (inferior *, int) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;

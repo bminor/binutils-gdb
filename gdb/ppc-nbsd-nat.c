@@ -186,5 +186,5 @@ _initialize_ppcnbsd_nat (void)
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (ppcnbsd_supply_pcb);
 
-  add_target (&the_ppc_nbsd_nat_target);
+  add_inf_child_target (&the_ppc_nbsd_nat_target);
 }

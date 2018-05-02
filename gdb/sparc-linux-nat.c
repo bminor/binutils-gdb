@@ -73,5 +73,5 @@ _initialize_sparc_linux_nat (void)
 
   /* Register the target.  */
   linux_target = &the_sparc_linux_nat_target;
-  add_target (&the_sparc_linux_nat_target);
+  add_inf_child_target (&the_sparc_linux_nat_target);
 }

@@ -123,7 +123,7 @@ _initialize_sparc64obsd_nat (void)
   sparc_fpregmap = &sparc64_bsd_fpregmap;
 
   /* Add some extra features to the generic SPARC target.  */
-  add_target (&the_sparc64_obsd_nat_target);
+  add_inf_child_target (&the_sparc64_obsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (sparc64obsd_supply_pcb);

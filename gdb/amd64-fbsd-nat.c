@@ -217,7 +217,7 @@ _initialize_amd64fbsd_nat (void)
   amd64_native_gregset32_reg_offset = amd64fbsd32_r_reg_offset;
   amd64_native_gregset64_reg_offset = amd64fbsd64_r_reg_offset;
 
-  add_target (&the_amd64_fbsd_nat_target);
+  add_inf_child_target (&the_amd64_fbsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (amd64fbsd_supply_pcb);

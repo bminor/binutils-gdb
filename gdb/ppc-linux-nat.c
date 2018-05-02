@@ -2509,5 +2509,5 @@ _initialize_ppc_linux_nat (void)
   gdb::observers::thread_exit.attach (ppc_linux_thread_exit);
 
   /* Register the target.  */
-  add_target (linux_target);
+  add_inf_child_target (linux_target);
 }

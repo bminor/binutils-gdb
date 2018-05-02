@@ -49,6 +49,13 @@
 
 void (*deprecated_file_changed_hook) (const char *);
 
+static const target_info exec_target_info = {
+  "exec",
+  N_("Local exec file"),
+  N_("Use an executable file as a target.\n\
+Specify the filename of the executable file.")
+};
+
 /* The target vector for executable files.  */
 
 struct exec_target final : public target_ops
@@ -56,20 +63,9 @@ struct exec_target final : public target_ops
   exec_target ()
   { to_stratum = file_stratum; }
 
-  const char *shortname () override
-  { return "exec"; }
+  const target_info &info () const override
+  { return exec_target_info; }
 
-  const char *longname () override
-  { return _("Local exec file"); }
-
-  const char *doc () override
-  {
-    return _("\
-Use an executable file as a target.\n\
-Specify the filename of the executable file.");
-  }
-
-  void open (const char *, int) override;
   void close () override;
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,
@@ -99,8 +95,8 @@ show_write_files (struct ui_file *file, int from_tty,
 }
 
 
-void
-exec_target::open (const char *args, int from_tty)
+static void
+exec_target_open (const char *args, int from_tty)
 {
   target_preopen (from_tty);
   exec_file_attach (args, from_tty);
@@ -1090,5 +1086,5 @@ Show writing into executable and core files."), NULL,
 			   show_write_files,
 			   &setlist, &showlist);
 
-  add_target_with_completer (&exec_ops, filename_completer);
+  add_target (exec_target_info, exec_target_open, filename_completer);
 }

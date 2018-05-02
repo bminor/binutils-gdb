@@ -40,22 +40,18 @@
 
 /* The tfile target.  */
 
+static const target_info tfile_target_info = {
+  "tfile",
+  N_("Local trace dump file"),
+  N_("Use a trace file as a target.  Specify the filename of the trace file.")
+};
+
 class tfile_target final : public tracefile_target
 {
  public:
-  const char *shortname () override
-  { return "tfile"; }
+  const target_info &info () const override
+  { return tfile_target_info; }
 
-  const char *longname () override
-  { return _("Local trace dump file"); }
-
-  const char *doc () override
-  {
-    return _("\
-Use a trace file as a target.  Specify the filename of the trace file.");
-  }
-
-  void open (const char *, int) override;
   void close () override;
   void fetch_registers (struct regcache *, int) override;
   enum target_xfer_status xfer_partial (enum target_object object,
@@ -451,8 +447,10 @@ tfile_read (gdb_byte *readbuf, int size)
     error (_("Premature end of file while reading trace file"));
 }
 
-void
-tfile_target::open (const char *arg, int from_tty)
+/* Open the tfile target.  */
+
+static void
+tfile_target_open (const char *arg, int from_tty)
 {
   int flags;
   int scratch_chan;
@@ -1139,5 +1137,5 @@ tfile_append_tdesc_line (const char *line)
 void
 _initialize_tracefile_tfile (void)
 {
-  add_target_with_completer (&tfile_ops, filename_completer);
+  add_target (tfile_target_info, tfile_target_open, filename_completer);
 }

@@ -404,27 +404,44 @@ typedef void async_callback_ftype (enum inferior_event_type event_type,
 #define TARGET_DEFAULT_RETURN(ARG)
 #define TARGET_DEFAULT_FUNC(ARG)
 
+/* Each target that can be activated with "target TARGET_NAME" passes
+   the address of one of these objects to add_target, which uses the
+   object's address as unique identifier, and registers the "target
+   TARGET_NAME" command using SHORTNAME as target name.  */
+
+struct target_info
+{
+  /* Name of this target.  */
+  const char *shortname;
+
+  /* Name for printing.  */
+  const char *longname;
+
+  /* Documentation.  Does not include trailing newline, and starts
+     with a one-line description (probably similar to longname).  */
+  const char *doc;
+};
+
 struct target_ops
   {
     struct target_ops *beneath;	/* To the target under this one.  */
 
+    /* Free resources associated with the target.  Note that singleton
+       targets, like e.g., native targets, are global objects, not
+       heap allocated, and are thus only deleted on GDB exit.  The
+       main teardown entry point is the "close" method, below.  */
     virtual ~target_ops () {}
 
+    /* Return a reference to this target's unique target_info
+       object.  */
+    virtual const target_info &info () const = 0;
+
     /* Name this target type.  */
-    virtual const char *shortname () = 0;
+    const char *shortname ()
+    { return info ().shortname; }
 
-    /* Name for printing.  */
-    virtual const char *longname () = 0;
-
-    /* Documentation.  Does not include trailing newline, and starts
-       ith a one-line description (probably similar to longname).  */
-    virtual const char *doc () = 0;
-
-    /* The open routine takes the rest of the parameters from the
-       command, and (if successful) pushes a new target onto the
-       stack.  Targets should supply this routine, if only to provide
-       an error message.  */
-    virtual void open (const char *, int);
+    const char *longname ()
+    { return info ().longname; }
 
     /* Close the target.  This is where the target can handle
        teardown.  Heap-allocated targets should delete themselves
@@ -1225,6 +1242,15 @@ struct target_ops
     virtual void done_generating_core ()
       TARGET_DEFAULT_IGNORE ();
   };
+
+/* Native target backends call this once at initialization time to
+   inform the core about which is the target that can respond to "run"
+   or "attach".  Note: native targets are always singletons.  */
+extern void set_native_target (target_ops *target);
+
+/* Get the registered native target, if there's one.  Otherwise return
+   NULL.  */
+extern target_ops *get_native_target ();
 
 /* The ops structure for our "current" target process.  This should
    never be NULL.  If there is no target, it points to the dummy_target.  */
@@ -2207,15 +2233,25 @@ int target_verify_memory (const gdb_byte *data,
    no matter where it is on the list.  Returns 0 if no
    change, 1 if removed from stack.  */
 
-extern void add_target (struct target_ops *);
+/* Type of callback called when the user activates a target with
+   "target TARGET_NAME".  The callback routine takes the rest of the
+   parameters from the command, and (if successful) pushes a new
+   target onto the stack.  */
+typedef void target_open_ftype (const char *args, int from_tty);
 
-extern void add_target_with_completer (struct target_ops *t,
-				       completer_ftype *completer);
+/* Add the target described by INFO to the list of possible targets
+   and add a new command 'target $(INFO->shortname)'.  Set COMPLETER
+   as the command's completer if not NULL.  */
 
-/* Adds a command ALIAS for target T and marks it deprecated.  This is useful
-   for maintaining backwards compatibility when renaming targets.  */
+extern void add_target (const target_info &info,
+			target_open_ftype *func,
+			completer_ftype *completer = NULL);
 
-extern void add_deprecated_target_alias (struct target_ops *t,
+/* Adds a command ALIAS for the target described by INFO and marks it
+   deprecated.  This is useful for maintaining backwards compatibility
+   when renaming targets.  */
+
+extern void add_deprecated_target_alias (const target_info &info,
 					 const char *alias);
 
 extern void push_target (struct target_ops *);
@@ -2466,20 +2502,7 @@ public:
     to_stratum = process_stratum;
   }
 
-  const char *shortname () override
-  {
-    return NULL;
-  }
-
-  const char *longname () override
-  {
-    return NULL;
-  }
-
-  const char *doc () override
-  {
-    return NULL;
-  }
+  const target_info &info () const override;
 
   bool has_registers () override
   {

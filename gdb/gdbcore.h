@@ -143,6 +143,10 @@ extern struct target_ops *the_core_target;
 
 extern int write_files;
 
+/* Open and set up the core file bfd.  */
+
+extern void core_target_open (const char *arg, int from_tty);
+
 extern void core_file_command (const char *filename, int from_tty);
 
 extern void exec_file_attach (const char *filename, int from_tty);

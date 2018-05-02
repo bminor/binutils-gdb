@@ -128,28 +128,31 @@ struct nto_procfs_target : public inf_child_target
 };
 
 /* For "target native".  */
-struct nto_procfs_target_native final : public nto_procfs_target
+
+static const target_info nto_native_target_info = {
+  "native",
+  N_("QNX Neutrino local process"),
+  N_("QNX Neutrino local process (started by the \"run\" command).")
+};
+
+class nto_procfs_target_native final : public nto_procfs_target
 {
-  /* Leave shortname as "native".  */
-
-  const char *longname () override
-  { return _("QNX Neutrino local process"); }
-
-  const char *doc () override
-  { return _("QNX Neutrino local process (started by the \"run\" command)."); }
+  const target_info &info () const override
+  { return nto_native_target_info; }
 };
 
 /* For "target procfs <node>".  */
+
+static const target_info nto_procfs_target_info = {
+  "procfs",
+  N_("QNX Neutrino local or remote process"),
+  N_("QNX Neutrino process.  target procfs <node>")
+};
+
 struct nto_procfs_target_procfs final : public nto_procfs_target
 {
-  const char *shortname () override
-  { return "procfs"; }
-
-  const char *longname () override
-  { return _("QNX Neutrino local or remote process"); }
-
-  const char *doc () override
-  { return _("QNX Neutrino process.  target procfs <node>"); }
+  const target_info &info () const override
+  { return nto_procfs_target_info; }
 };
 
 static ptid_t do_attach (ptid_t ptid);
@@ -1519,10 +1522,11 @@ static void
 init_procfs_targets (void)
 {
   /* Register "target native".  This is the default run target.  */
-  add_target (&nto_native_ops);
+  add_target (nto_native_target_info, inf_child_open_target);
+  set_native_target (&nto_native_ops);
 
   /* Register "target procfs <node>".  */
-  add_target (&nto_procfs_ops);
+  add_target (nto_procfs_target_info, inf_child_open_target);
 }
 
 #define OSTYPE_NTO 1

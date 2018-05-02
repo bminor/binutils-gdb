@@ -440,5 +440,5 @@ _initialize_i386gnu_nat (void)
 #endif /* i386_DEBUG_STATE */
 
   /* Register the target.  */
-  add_target (&the_i386_gnu_nat_target);
+  add_inf_child_target (&the_i386_gnu_nat_target);
 }

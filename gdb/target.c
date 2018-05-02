@@ -49,6 +49,7 @@
 #include "byte-vector.h"
 #include "terminal.h"
 #include <algorithm>
+#include <unordered_map>
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
@@ -103,10 +104,14 @@ static const char *default_pid_to_str (struct target_ops *ops, ptid_t ptid);
 static enum exec_direction_kind default_execution_direction
     (struct target_ops *self);
 
-/* Vector of existing target structures. */
-typedef struct target_ops *target_ops_p;
-DEF_VEC_P (target_ops_p);
-static VEC (target_ops_p) *target_structs;
+/* Mapping between target_info objects (which have address identity)
+   and corresponding open/factory function/callback.  Each add_target
+   call adds one entry to this map, and registers a "target
+   TARGET_NAME" command that when invoked calls the factory registered
+   here.  The target_info object is associated with the command via
+   the command's context.  */
+static std::unordered_map<const target_info *, target_open_ftype *>
+  target_factories;
 
 /* The initial current target, so that there is always a semi-valid
    current target.  */
@@ -178,6 +183,27 @@ target_command (const char *arg, int from_tty)
   fputs_filtered ("Argument required (target name).  Try `help target'\n",
 		  gdb_stdout);
 }
+
+#if GDB_SELF_TEST
+namespace selftests {
+
+/* A mock process_stratum target_ops that doesn't read/write registers
+   anywhere.  */
+
+static const target_info test_target_info = {
+  "test",
+  N_("unit tests target"),
+  N_("You should never see this"),
+};
+
+const target_info &
+test_target_ops::info () const
+{
+  return test_target_info;
+}
+
+} /* namespace selftests */
+#endif /* GDB_SELF_TEST */
 
 /* Default target_has_* methods for process_stratum targets.  */
 
@@ -304,30 +330,33 @@ target_has_execution_current (void)
 static void
 open_target (const char *args, int from_tty, struct cmd_list_element *command)
 {
-  struct target_ops *ops = (struct target_ops *) get_cmd_context (command);
+  auto *ti = static_cast<target_info *> (get_cmd_context (command));
+  target_open_ftype *func = target_factories[ti];
 
   if (targetdebug)
-    fprintf_unfiltered (gdb_stdlog, "-> %s->to_open (...)\n",
-			ops->shortname ());
+    fprintf_unfiltered (gdb_stdlog, "-> %s->open (...)\n",
+			ti->shortname);
 
-  ops->open (args, from_tty);
+  func (args, from_tty);
 
   if (targetdebug)
-    fprintf_unfiltered (gdb_stdlog, "<- %s->to_open (%s, %d)\n",
-			ops->shortname (), args, from_tty);
+    fprintf_unfiltered (gdb_stdlog, "<- %s->open (%s, %d)\n",
+			ti->shortname, args, from_tty);
 }
 
-/* Add possible target architecture T to the list and add a new
-   command 'target T->shortname ()'.  Set COMPLETER as the command's
-   completer if not NULL.  */
+/* See target.h.  */
 
 void
-add_target_with_completer (struct target_ops *t,
-			   completer_ftype *completer)
+add_target (const target_info &t, target_open_ftype *func,
+	    completer_ftype *completer)
 {
   struct cmd_list_element *c;
 
-  VEC_safe_push (target_ops_p, target_structs, t);
+  auto &func_slot = target_factories[&t];
+  if (func_slot != nullptr)
+    internal_error (__FILE__, __LINE__,
+		    _("target already added (\"%s\")."), t.shortname);
+  func_slot = func;
 
   if (targetlist == NULL)
     add_prefix_cmd ("target", class_run, target_command, _("\
@@ -337,35 +366,27 @@ Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
 		    &targetlist, "target ", 0, &cmdlist);
-  c = add_cmd (t->shortname (), no_class, t->doc (), &targetlist);
+  c = add_cmd (t.shortname, no_class, t.doc, &targetlist);
+  set_cmd_context (c, (void *) &t);
   set_cmd_sfunc (c, open_target);
-  set_cmd_context (c, t);
   if (completer != NULL)
     set_cmd_completer (c, completer);
-}
-
-/* Add a possible target architecture to the list.  */
-
-void
-add_target (struct target_ops *t)
-{
-  add_target_with_completer (t, NULL);
 }
 
 /* See target.h.  */
 
 void
-add_deprecated_target_alias (struct target_ops *t, const char *alias)
+add_deprecated_target_alias (const target_info &tinfo, const char *alias)
 {
   struct cmd_list_element *c;
   char *alt;
 
   /* If we use add_alias_cmd, here, we do not get the deprecated warning,
      see PR cli/15104.  */
-  c = add_cmd (alias, no_class, t->doc (), &targetlist);
+  c = add_cmd (alias, no_class, tinfo.doc, &targetlist);
   set_cmd_sfunc (c, open_target);
-  set_cmd_context (c, t);
-  alt = xstrprintf ("target %s", t->shortname ());
+  set_cmd_context (c, (void *) &tinfo);
+  alt = xstrprintf ("target %s", tinfo.shortname);
   deprecate_cmd (c, alt);
 }
 
@@ -2420,6 +2441,32 @@ show_auto_connect_native_target (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* A pointer to the target that can respond to "run" or "attach".
+   Native targets are always singletons and instantiated early at GDB
+   startup.  */
+static target_ops *the_native_target;
+
+/* See target.h.  */
+
+void
+set_native_target (target_ops *target)
+{
+  if (the_native_target != NULL)
+    internal_error (__FILE__, __LINE__,
+		    _("native target already set (\"%s\")."),
+		    the_native_target->longname ());
+
+  the_native_target = target;
+}
+
+/* See target.h.  */
+
+target_ops *
+get_native_target ()
+{
+  return the_native_target;
+}
+
 /* Look through the list of possible targets for a target that can
    execute a run or attach command without any other data.  This is
    used to locate the default process stratum.
@@ -2430,36 +2477,12 @@ show_auto_connect_native_target (struct ui_file *file, int from_tty,
 static struct target_ops *
 find_default_run_target (const char *do_mesg)
 {
-  struct target_ops *runable = NULL;
+  if (auto_connect_native_target && the_native_target != NULL)
+    return the_native_target;
 
-  if (auto_connect_native_target)
-    {
-      struct target_ops *t;
-      int count = 0;
-      int i;
-
-      for (i = 0; VEC_iterate (target_ops_p, target_structs, i, t); ++i)
-	{
-	  if (t->can_run ())
-	    {
-	      runable = t;
-	      ++count;
-	    }
-	}
-
-      if (count != 1)
-	runable = NULL;
-    }
-
-  if (runable == NULL)
-    {
-      if (do_mesg)
-	error (_("Don't know how to %s.  Try \"help target\"."), do_mesg);
-      else
-	return NULL;
-    }
-
-  return runable;
+  if (do_mesg != NULL)
+    error (_("Don't know how to %s.  Try \"help target\"."), do_mesg);
+  return NULL;
 }
 
 /* See target.h.  */
@@ -2467,20 +2490,15 @@ find_default_run_target (const char *do_mesg)
 struct target_ops *
 find_attach_target (void)
 {
-  struct target_ops *t;
-
   /* If a target on the current stack can attach, use it.  */
-  for (t = target_stack; t != NULL; t = t->beneath)
+  for (target_ops *t = target_stack; t != NULL; t = t->beneath)
     {
       if (t->can_attach ())
-	break;
+	return t;
     }
 
   /* Otherwise, use the default run target for attaching.  */
-  if (t == NULL)
-    t = find_default_run_target ("attach");
-
-  return t;
+  return find_default_run_target ("attach");
 }
 
 /* See target.h.  */
@@ -2488,20 +2506,15 @@ find_attach_target (void)
 struct target_ops *
 find_run_target (void)
 {
-  struct target_ops *t;
-
   /* If a target on the current stack can run, use it.  */
-  for (t = target_stack; t != NULL; t = t->beneath)
+  for (target_ops *t = target_stack; t != NULL; t = t->beneath)
     {
       if (t->can_create_inferior ())
-	break;
+	return t;
     }
 
   /* Otherwise, use the default run target.  */
-  if (t == NULL)
-    t = find_default_run_target ("run");
-
-  return t;
+  return find_default_run_target ("run");
 }
 
 bool
@@ -2612,12 +2625,6 @@ target_thread_address_space (ptid_t ptid)
   gdb_assert (aspace != NULL);
 
   return aspace;
-}
-
-void
-target_ops::open (const char *, int)
-{
-  gdb_assert_not_reached ("target_ops::open called");
 }
 
 void
@@ -3332,27 +3339,15 @@ dummy_make_corefile_notes (struct target_ops *self,
 #include "target-delegates.c"
 
 
+static const target_info dummy_target_info = {
+  "None",
+  N_("None"),
+  ""
+};
+
 dummy_target::dummy_target ()
 {
   to_stratum = dummy_stratum;
-}
-
-const char *
-dummy_target::shortname ()
-{
-  return "None";
-}
-
-const char *
-dummy_target::longname ()
-{
-  return _("None");
-}
-
-const char *
-dummy_target::doc ()
-{
-  return "";
 }
 
 debug_target::debug_target ()
@@ -3360,22 +3355,16 @@ debug_target::debug_target ()
   to_stratum = debug_stratum;
 }
 
-const char *
-debug_target::shortname ()
+const target_info &
+dummy_target::info () const
 {
-  return beneath->shortname ();
+  return dummy_target_info;
 }
 
-const char *
-debug_target::longname ()
+const target_info &
+debug_target::info () const
 {
-  return beneath->longname ();
-}
-
-const char *
-debug_target::doc ()
-{
-  return beneath->doc ();
+  return beneath->info ();
 }
 
 

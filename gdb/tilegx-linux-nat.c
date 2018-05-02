@@ -168,5 +168,5 @@ void
 _initialize_tile_linux_nat (void)
 {
   linux_target = &the_tilegx_linux_nat_target;
-  add_target (&the_tilegx_linux_nat_target);
+  add_inf_child_target (&the_tilegx_linux_nat_target);
 }

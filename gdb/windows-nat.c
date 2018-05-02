@@ -3018,7 +3018,7 @@ _initialize_windows_nat (void)
      calling x86_set_debug_register_length function
      in processor windows specific native file.  */
 
-  add_target (&the_windows_nat_target);
+  add_inf_child_target (&the_windows_nat_target);
 
 #ifdef __CYGWIN__
   cygwin_internal (CW_SET_DOS_FILE_WARNING, 0);

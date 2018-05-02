@@ -1,5 +1,241 @@
 2018-05-02  Pedro Alves  <palves@redhat.com>
 
+	* aarch64-fbsd-nat.c (_initialize_aarch64_fbsd_nat): Use
+	add_inf_child_target.
+	* aarch64-linux-nat.c (_initialize_aarch64_linux_nat): Use
+	add_inf_child_target.
+	* aix-thread.c (aix_thread_target_info): New.
+	(aix_thread_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	* alpha-bsd-nat.c (_initialize_alphabsd_nat): Use
+	add_inf_child_target.
+	* alpha-linux-nat.c (_initialize_alpha_linux_nat): Use
+	add_inf_child_target.
+	* amd64-fbsd-nat.c (_initialize_amd64fbsd_nat): Use
+	add_inf_child_target.
+	* amd64-linux-nat.c (_initialize_amd64_linux_nat): Use
+	add_inf_child_target.
+	* amd64-nbsd-nat.c (_initialize_amd64nbsd_nat): Use
+	add_inf_child_target.
+	* amd64-obsd-nat.c (_initialize_amd64obsd_nat): Use
+	add_inf_child_target.
+	* arm-fbsd-nat.c (_initialize_arm_fbsd_nat): Use
+	add_inf_child_target.
+	* arm-linux-nat.c (_initialize_arm_linux_nat): Use
+	add_inf_child_target.
+	* arm-nbsd-nat.c (_initialize_arm_netbsd_nat): Use
+	add_inf_child_target.
+	* bfd-target.c (target_bfd_target_info): New.
+	(target_bfd) <shortname, longname, doc>: Delete.
+	<info>: New.
+	* bsd-kvm.c (bsd_kvm_target_info): New.
+	(bsd_kvm_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	(bsd_kvm_target::open): Rename to ...
+	(bsd_kvm_target_open): ... this.  Adjust.
+	* bsd-uthread.c (bsd_uthread_target_info): New.
+	(bsd_uthread_target) <shortname, longname, doc>: Delete.
+	<info>:	New.
+	* corefile.c (core_file_command): Adjust.
+	* corelow.c (core_target_info): New.
+	(core_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	(core_target::open): Rename to ...
+	(core_target_open): ... this.  Adjust.
+	* ctf.c (ctf_target_info): New.
+	(ctf_target) <shortname, longname, doc>: Delete.
+	<info>:	New.
+	(ctf_target::open): Rename to ...
+	(ctf_target_open): ... this.
+	(_initialize_ctf): Adjust.
+	* exec.c (exec_target_info): New.
+	(exec_target) <shortname, longname, doc>: Delete.
+	<info>:	New.
+	(exec_target::open): Rename to ...
+	(exec_target_open): ... this.
+	* gdbcore.h (core_target_open): Declare.
+	* go32-nat.c (_initialize_go32_nat): Use add_inf_child_target.
+	* hppa-linux-nat.c (_initialize_hppa_linux_nat): Use
+	add_inf_child_target.
+	* hppa-nbsd-nat.c (_initialize_hppanbsd_nat): Use
+	add_inf_child_target.
+	* hppa-obsd-nat.c (_initialize_hppaobsd_nat): Use
+	add_inf_child_target.
+	* i386-darwin-nat.c (_initialize_i386_darwin_nat): Use
+	add_inf_child_target.
+	* i386-fbsd-nat.c (_initialize_i386fbsd_nat): Use
+	add_inf_child_target.
+	* i386-gnu-nat.c (_initialize_i386gnu_nat): Use
+	add_inf_child_target.
+	* i386-linux-nat.c (_initialize_i386_linux_nat): Use
+	add_inf_child_target.
+	* i386-nbsd-nat.c (_initialize_i386nbsd_nat): Use
+	add_inf_child_target.
+	* i386-obsd-nat.c (_initialize_i386obsd_nat): Use
+	add_inf_child_target.
+	* ia64-linux-nat.c (_initialize_ia64_linux_nat): Use
+	add_inf_child_target.
+	* inf-child.c (inf_child_target_info): New.
+	(inf_child_target::info): New.
+	(inf_child_open_target): Remove 'target' parameter.  Use
+	get_native_target instead.
+	(inf_child_target::open): Delete.
+	(add_inf_child_target): New.
+	* inf-child.h (inf_child_target) <shortname, longname, doc, open>:
+	Delete.
+	<info>:	New.
+	(add_inf_child_target): Declare.
+	(inf_child_open_target): Declare.
+	* linux-thread-db.c (thread_db_target_info): New.
+	(thread_db_target) <shortname, longname, doc>: Delete.
+	<info>:	New.
+	* m32r-linux-nat.c (_initialize_m32r_linux_nat): Use
+	add_inf_child_target.
+	* m68k-bsd-nat.c (_initialize_m68kbsd_nat): Use
+	add_inf_child_target.
+	* m68k-linux-nat.c (_initialize_m68k_linux_nat): Use
+	add_inf_child_target.
+	* m88k-bsd-nat.c (_initialize_m88kbsd_nat): Use
+	add_inf_child_target.
+	* make-target-delegates (print_class): Adjust.
+	* mips-fbsd-nat.c (_initialize_mips_fbsd_nat): Use
+	add_inf_child_target.
+	* mips-linux-nat.c (_initialize_mips_linux_nat): Use
+	add_inf_child_target.
+	* mips-nbsd-nat.c (_initialize_mipsnbsd_nat): Use
+	add_inf_child_target.
+	* mips64-obsd-nat.c (_initialize_mips64obsd_nat): Use
+	add_inf_child_target.
+	* nto-procfs.c (nto_native_target_info): New.
+	(nto_procfs_target_native) <shortname, longname, doc>:
+	Delete.
+	<info>:	New.
+	(nto_procfs_target_info): New.
+	(nto_procfs_target_procfs) <shortname, longname, doc>:
+	Delete.
+	<info>:	New.
+	(init_procfs_targets): Adjust.
+	* ppc-fbsd-nat.c (_initialize_ppcfbsd_nat): Use
+	add_inf_child_target.
+	* ppc-linux-nat.c (_initialize_ppc_linux_nat): Use
+	add_inf_child_target.
+	* ppc-nbsd-nat.c (_initialize_ppcnbsd_nat): Use
+	add_inf_child_target.
+	* ppc-obsd-nat.c (_initialize_ppcobsd_nat): Use
+	add_inf_child_target.
+	* ravenscar-thread.c (ravenscar_target_info): New.
+	(ravenscar_thread_target) <shortname, longname, doc>:
+	Delete.
+	<info>:	New.
+	* record-btrace.c (record_btrace_target_info):
+	(record_btrace_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	(record_btrace_target::open): Rename to ...
+	(record_btrace_target_open): ... this.  Adjust.
+	* record-full.c (record_longname, record_doc): New.
+	(record_full_base_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	(record_full_target_info): New.
+	(record_full_target): <shortname>: Delete.
+	<info>: New.
+	(record_full_core_open_1, record_full_open_1): Update comments.
+	(record_full_base_target::open): Rename to ...
+	(record_full_open): ... this.
+	(cmd_record_full_restore): Update.
+	(_initialize_record_full): Update.
+	* remote-sim.c (remote_sim_target_info): New.
+	(gdbsim_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	(gdbsim_target::open): Rename to ...
+	(gdbsim_target_open): ... this.
+	(_initialize_remote_sim): Adjust.
+	* remote.c (remote_doc): New.
+	(remote_target_info): New.
+	(remote_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	(extended_remote_target_info): New.
+	(extended_remote_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	(remote_target::open_1): Make static.  Adjust.
+	* rs6000-nat.c (_initialize_rs6000_nat): Use add_inf_child_target.
+	* s390-linux-nat.c (_initialize_s390_nat): Use
+	add_inf_child_target.
+	* sh-nbsd-nat.c (_initialize_shnbsd_nat): Use
+	add_inf_child_target.
+	* sol-thread.c (thread_db_target_info): New.
+	(sol_thread_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	* sparc-linux-nat.c (_initialize_sparc_linux_nat): Use
+	add_inf_child_target.
+	* sparc-nbsd-nat.c (_initialize_sparcnbsd_nat): Use
+	add_inf_child_target.
+	* sparc64-fbsd-nat.c (_initialize_sparc64fbsd_nat): Use
+	add_inf_child_target.
+	* sparc64-linux-nat.c (_initialize_sparc64_linux_nat): Use
+	add_inf_child_target.
+	* sparc64-nbsd-nat.c (_initialize_sparc64nbsd_nat): Use
+	add_inf_child_target.
+	* sparc64-obsd-nat.c (_initialize_sparc64obsd_nat): Use
+	add_inf_child_target.
+	* spu-linux-nat.c (_initialize_spu_nat): Use
+	add_inf_child_target.
+	* spu-multiarch.c (spu_multiarch_target_info): New.
+	(spu_multiarch_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	* target-delegates.c: Regenerate.
+	* target.c: Include <unordered_map>.
+	(target_ops_p): Delete.
+	(DEF_VEC_P(target_ops_p)): Delete.
+	(target_factories): New.
+	(test_target_info): New.
+	(test_target_ops::info): New.
+	(open_target): Adjust to use target_factories.
+	(add_target_with_completer): Rename to ...
+	(add_target): ... this.  Change prototype.  Register target_info
+	and open callback in target_factories.  Register target_info in
+	command context instead of target_ops.
+	(add_target): Delete old implementation.
+	(add_deprecated_target_alias): Change prototype.  Adjust.
+	(the_native_target): New.
+	(set_native_target, get_native_target): New.
+	(find_default_run_target): Use the_native_target.
+	(find_attach_target, find_run_target): Simplify.
+	(target_ops::open): Delete.
+	(dummy_target_info): New.
+	(dummy_target::shortname, dummy_target::longname)
+	(dummy_target::doc): Delete.
+	(dummy_target::info): New.
+	(debug_target::shortname, debug_target::longname)
+	(debug_target::doc): Delete.
+	(debug_target::info): New.
+	* target.h (struct target_info): New.
+	(target_ops::~target_ops): Add comment.
+	(target_ops::info): New.
+	(target_ops::shortname, target_ops::longname, target_ops::doc): No
+	longer virtual.  Implement in terms of target_info.
+	(set_native_target, get_native_target): Declare.
+	(target_open_ftype): New.
+	(add_target, add_target_with_completer)
+	(add_deprecated_target_alias): Change prototype.
+	(test_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	* tilegx-linux-nat.c (_initialize_tile_linux_nat): Use
+	add_inf_child_target.
+	* tracefile-tfile.c (tfile_target_info): New.
+	(tfile_target) <shortname, longname, doc>: Delete.
+	<info>: New.
+	(tfile_target::open): Rename to ...
+	(tfile_target_open): ... this.
+	(_initialize_tracefile_tfile): Adjust.
+	* vax-bsd-nat.c (_initialize_vaxbsd_nat): Use
+	add_inf_child_target.
+	* windows-nat.c (_initialize_windows_nat): Use
+	add_inf_child_target.
+	* xtensa-linux-nat.c (_initialize_xtensa_linux_nat): Use
+	add_inf_child_target.
+
+2018-05-02  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.h (linux_nat_target) <low_new_thread,
 	low_delete_thread, low_new_fork, low_forget_process,
 	low_prepare_to_resume, low_siginfo_fixup, low_status_is_event>:

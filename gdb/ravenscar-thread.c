@@ -73,19 +73,19 @@ static const char first_task_name[] = "system__tasking__debug__first_task";
 static const char ravenscar_runtime_initializer[] =
   "system__bb__threads__initialize";
 
+static const target_info ravenscar_target_info = {
+  "ravenscar",
+  N_("Ravenscar tasks."),
+  N_("Ravenscar tasks support.")
+};
+
 struct ravenscar_thread_target final : public target_ops
 {
   ravenscar_thread_target ()
   { to_stratum = thread_stratum; }
 
-  const char *shortname () override
-  { return "ravenscar"; }
-
-  const char *longname () override
-  { return _("Ravenscar tasks."); }
-
-  const char *doc () override
-  { return _("Ravenscar tasks support."); }
+  const target_info &info () const override
+  { return ravenscar_target_info; }
 
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
   void resume (ptid_t, int, enum gdb_signal) override;

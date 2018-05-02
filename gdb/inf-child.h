@@ -32,16 +32,8 @@ public:
   inf_child_target ();
   ~inf_child_target () override = 0;
 
-  const char *shortname () override
-  { return "native"; }
+  const target_info &info () const override;
 
-  const char *longname () override
-  { return _("Native process"); }
-
-  const char *doc () override
-  { return _("Native process (started by the \"run\" command)."); }
-
-  void open (const char *arg, int from_tty) override;
   void close () override;
 
   void disconnect (const char *, int) override;
@@ -123,5 +115,14 @@ protected:
 
 /* This is for native targets which use a unix/POSIX-style waitstatus.  */
 extern void store_waitstatus (struct target_waitstatus *, int);
+
+/* Register TARGET as native target and set it up to respond to the
+   "target native" command.  */
+extern void add_inf_child_target (inf_child_target *target);
+
+/* target_open_ftype callback for inf-child targets.  Used by targets
+   that want to register an alternative target_info object.  Most
+   targets use add_inf_child_target instead.  */
+extern void inf_child_open_target (const char *arg, int from_tty);
 
 #endif

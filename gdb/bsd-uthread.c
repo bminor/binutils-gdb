@@ -33,19 +33,19 @@
 
 #include "bsd-uthread.h"
 
+static const target_info bsd_uthread_target_info = {
+  "bsd-uthreads",
+  N_("BSD user-level threads"),
+  N_("BSD user-level threads")
+};
+
 struct bsd_uthread_target final : public target_ops
 {
   bsd_uthread_target ()
   { to_stratum = thread_stratum; }
 
-  const char *shortname () override
-  { return "bsd-uthreads"; }
-
-  const char *longname () override
-  { return _("BSD user-level threads"); }
-
-  const char *doc () override
-  { return _("BSD user-level threads"); }
+  const target_info &info () const override
+  { return bsd_uthread_target_info; }
 
   void close () override;
 

@@ -2090,7 +2090,7 @@ _initialize_go32_nat (void)
   x86_dr_low.get_addr = go32_get_dr;
   x86_set_debug_register_length (4);
 
-  add_target (&the_go32_nat_target);
+  add_inf_child_target (&the_go32_nat_target);
 
   /* Initialize child's cwd as empty to be initialized when starting
      the child.  */

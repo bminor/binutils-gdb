@@ -52,25 +52,21 @@
 
 /* The core file target.  */
 
+static const target_info core_target_info = {
+  "core",
+  N_("Local core dump file"),
+  N_("Use a core file as a target.  Specify the filename of the core file.")
+};
+
 class core_target final : public target_ops
 {
 public:
   core_target ()
   { to_stratum = process_stratum; }
 
-  const char *shortname () override
-  { return "core"; }
+  const target_info &info () const override
+  { return core_target_info; }
 
-  const char *longname () override
-  { return _("Local core dump file"); }
-
-  const char *doc () override
-  {
-    return _("\
-Use a core file as a target.  Specify the filename of the core file.");
-  }
-
-  void open (const char *, int) override;
   void close () override;
   void detach (inferior *, int) override;
   void fetch_registers (struct regcache *, int) override;
@@ -313,10 +309,10 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
     inferior_ptid = ptid;			/* Yes, make it current.  */
 }
 
-/* This routine opens and sets up the core file bfd.  */
+/* See gdbcore.h.  */
 
 void
-core_target::open (const char *arg, int from_tty)
+core_target_open (const char *arg, int from_tty)
 {
   const char *p;
   int siggy;
@@ -1031,5 +1027,5 @@ _initialize_corelow (void)
 		    the_core_target->longname ());
   the_core_target = &core_ops;
 
-  add_target_with_completer (&core_ops, filename_completer);
+  add_target (core_target_info, core_target_open, filename_completer);
 }

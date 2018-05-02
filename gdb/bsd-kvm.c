@@ -63,25 +63,22 @@ static ptid_t bsd_kvm_ptid;
 
 /* The libkvm target.  */
 
+static const target_info bsd_kvm_target_info = {
+  "kvm",
+  N_("Kernel memory interface"),
+  N_("Use a kernel virtual memory image as a target.\n\
+Optionally specify the filename of a core dump.")
+};
+
 class bsd_kvm_target final : public target_ops
 {
 public:
   bsd_kvm_target ()
   { this->to_stratum = process_stratum; }
 
-  const char *shortname () override
-  { return "kvm"; }
+  const target_info &info () const override
+  { return bsd_kvm_target_info; }
 
-  const char *longname () override
-  { return _("Kernel memory interface"); }
-
-  const char *doc () override
-  {
-    return _("Use a kernel virtual memory image as a target.\n\
-Optionally specify the filename of a core dump.");
-  }
-
-  void open (const char *, int) override;
   void close () override;
 
   void fetch_registers (struct regcache *, int) override;
@@ -105,7 +102,7 @@ Optionally specify the filename of a core dump.");
 static bsd_kvm_target bsd_kvm_ops;
 
 static void
-bsd_kvm_target::open (const char *arg, int from_tty)
+bsd_kvm_target_open (const char *arg, int from_tty)
 {
   char errbuf[_POSIX2_LINE_MAX];
   char *execfile = NULL;
@@ -388,7 +385,7 @@ bsd_kvm_add_target (int (*supply_pcb)(struct regcache *, struct pcb *))
   gdb_assert (bsd_kvm_supply_pcb == NULL);
   bsd_kvm_supply_pcb = supply_pcb;
 
-  add_target (&bsd_kvm_ops);
+  add_target (bsd_kvm_target_info, bsd_kvm_target_open);
   
   add_prefix_cmd ("kvm", class_obscure, bsd_kvm_cmd, _("\
 Generic command for manipulating the kernel memory interface."),

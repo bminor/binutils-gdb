@@ -190,7 +190,7 @@ ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 void
 _initialize_ppcobsd_nat (void)
 {
-  add_target (&the_ppc_obsd_nat_target);
+  add_inf_child_target (&the_ppc_obsd_nat_target);
 
   /* General-purpose registers.  */
   ppcobsd_reg_offsets.r0_offset = offsetof (struct reg, gpr);

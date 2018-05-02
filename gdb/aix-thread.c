@@ -108,18 +108,20 @@ struct pd_thread {
 
 /* This module's target-specific operations, active while pd_able is true.  */
 
+static const target_info aix_thread_target_info = {
+  "aix-threads",
+  N_("AIX pthread support"),
+  N_("AIX pthread support")
+};
+
 class aix_thread_target final : public target_ops
 {
 public:
   aix_thread_target ()
   { to_stratum = thread_stratum; }
 
-  const char *shortname () override
-  { return "aix-threads"; }
-  const char *longname () override
-  { return _("AIX pthread support"); }
-  const char *doc () override
-  { return _("AIX pthread support"); }
+  const target_info &info () const override
+  { return aix_thread_target_info; }
 
   void detach (inferior *, int) override;
   void resume (ptid_t, int, enum gdb_signal) override;

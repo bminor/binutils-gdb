@@ -717,5 +717,5 @@ _initialize_i386_linux_nat (void)
   linux_target = &the_i386_linux_nat_target;
 
   /* Add the target.  */
-  add_target (linux_target);
+  add_inf_child_target (linux_target);
 }

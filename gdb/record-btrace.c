@@ -41,6 +41,12 @@
 #include "vec.h"
 #include <algorithm>
 
+static const target_info record_btrace_target_info = {
+  "record-btrace",
+  N_("Branch tracing target"),
+  N_("Collect control-flow trace and provide the execution history.")
+};
+
 /* The target_ops of record-btrace.  */
 
 class record_btrace_target final : public target_ops
@@ -49,16 +55,9 @@ public:
   record_btrace_target ()
   { to_stratum = record_stratum; }
 
-  const char *shortname () override
-  { return "record-btrace"; }
+  const target_info &info () const override
+  { return record_btrace_target_info; }
 
-  const char *longname () override
-  { return _("Branch tracing target"); }
-
-  const char *doc () override
-  { return _("Collect control-flow trace and provide the execution history."); }
-
-  void open (const char *, int) override;
   void close () override;
   void async (int) override;
 
@@ -372,10 +371,10 @@ private:
   std::forward_list<thread_info *> m_threads;
 };
 
-/* The open method of target record-btrace.  */
+/* Open target record-btrace.  */
 
-void
-record_btrace_target::open (const char *args, int from_tty)
+static void
+record_btrace_target_open (const char *args, int from_tty)
 {
   /* If we fail to enable btrace for one thread, disable it for the threads for
      which it was successfully enabled.  */
@@ -3314,7 +3313,7 @@ to see the actual buffer size."), NULL, show_record_pt_buffer_size_value,
 			    &set_record_btrace_pt_cmdlist,
 			    &show_record_btrace_pt_cmdlist);
 
-  add_target (&record_btrace_ops);
+  add_target (record_btrace_target_info, record_btrace_target_open);
 
   bfcache = htab_create_alloc (50, bfcache_hash, bfcache_eq, NULL,
 			       xcalloc, xfree);

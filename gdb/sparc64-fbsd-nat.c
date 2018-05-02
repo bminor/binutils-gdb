@@ -65,9 +65,7 @@ static sparc_target<fbsd_nat_target> the_sparc64_fbsd_nat_target;
 void
 _initialize_sparc64fbsd_nat (void)
 {
-  struct target_ops *t;
-
-  add_target (&the_sparc64_fbsd_nat_target);
+  add_inf_child_target (&the_sparc64_fbsd_nat_target);
 
   sparc_gregmap = &sparc64fbsd_gregmap;
 

@@ -118,5 +118,5 @@ mips64_obsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 void
 _initialize_mips64obsd_nat (void)
 {
-  add_target (&the_mips64_obsd_nat_target);
+  add_inf_child_target (&the_mips64_obsd_nat_target);
 }

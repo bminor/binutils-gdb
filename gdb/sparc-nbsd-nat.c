@@ -63,7 +63,7 @@ _initialize_sparcnbsd_nat (void)
   sparc_gregmap = &sparc32nbsd_gregmap;
   sparc_fpregmap = &sparc32_bsd_fpregmap;
 
-  add_target (&sparc_nbsd_nat_target);
+  add_inf_child_target (&sparc_nbsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (sparc32nbsd_supply_pcb);

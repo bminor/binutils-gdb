@@ -658,5 +658,5 @@ spu_linux_nat_target::can_use_hw_breakpoint (enum bptype type,
 void 
 _initialize_spu_nat (void)
 {
-  add_target (&the_spu_linux_nat_target);
+  add_inf_child_target (&the_spu_linux_nat_target);
 }

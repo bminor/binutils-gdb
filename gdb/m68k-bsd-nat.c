@@ -225,7 +225,7 @@ m68kbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 void
 _initialize_m68kbsd_nat (void)
 {
-  add_target (&the_m68k_bsd_nat_target);
+  add_inf_child_target (&the_m68k_bsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (m68kbsd_supply_pcb);

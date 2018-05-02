@@ -135,7 +135,7 @@ vaxbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 void
 _initialize_vaxbsd_nat (void)
 {
-  add_target (&the_vax_bsd_nat_target);
+  add_inf_child_target (&the_vax_bsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (vaxbsd_supply_pcb);

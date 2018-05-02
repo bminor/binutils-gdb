@@ -39,6 +39,18 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+static const target_info inf_child_target_info = {
+  "native",
+  N_("Native process"),
+  N_("Native process (started by the \"run\" command).")
+};
+
+const target_info &
+inf_child_target::info () const
+{
+  return inf_child_target_info;
+}
+
 /* Helper function for child_wait and the derivatives of child_wait.
    HOSTSTATUS is the waitstatus from wait() or the equivalent; store our
    translation of that in OURSTATUS.  */
@@ -139,20 +151,19 @@ static int inf_child_explicitly_opened;
 /* See inf-child.h.  */
 
 void
-inf_child_open_target (struct target_ops *target, const char *arg,
-		       int from_tty)
+inf_child_open_target (const char *arg, int from_tty)
 {
+  target_ops *target = get_native_target ();
+
+  /* There's always only ever one native target, and if we get here,
+     it better be an inf-child target.  */
+  gdb_assert (dynamic_cast<inf_child_target *> (target) != NULL);
+
   target_preopen (from_tty);
   push_target (target);
   inf_child_explicitly_opened = 1;
   if (from_tty)
     printf_filtered ("Done.  Use the \"run\" command to start a process.\n");
-}
-
-void
-inf_child_target::open (const char *arg, int from_tty)
-{
-  inf_child_open_target (this, arg, from_tty);
 }
 
 /* Implement the to_disconnect target_ops method.  */
@@ -425,4 +436,13 @@ inf_child_target::can_use_agent ()
 inf_child_target::inf_child_target ()
 {
   this->to_stratum = process_stratum;
+}
+
+/* See inf-child.h.  */
+
+void
+add_inf_child_target (inf_child_target *target)
+{
+  set_native_target (target);
+  add_target (inf_child_target_info, inf_child_open_target);
 }

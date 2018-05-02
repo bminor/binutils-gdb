@@ -671,5 +671,5 @@ rs6000_nat_target::xfer_shared_libraries
 void
 _initialize_rs6000_nat (void)
 {
-  add_target (&the_rs6000_nat_target);
+  add_inf_child_target (&the_rs6000_nat_target);
 }

@@ -255,5 +255,5 @@ hppa_obsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 void
 _initialize_hppaobsd_nat (void)
 {
-  add_target (&the_hppa_obsd_nat_target);
+  add_inf_child_target (&the_hppa_obsd_nat_target);
 }

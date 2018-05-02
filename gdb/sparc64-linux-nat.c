@@ -91,13 +91,11 @@ fill_fpregset (const struct regcache *regcache,
 void
 _initialize_sparc64_linux_nat (void)
 {
-  target_ops *t = &the_sparc64_linux_nat_target;
-
   sparc_fpregmap = &sparc64_bsd_fpregmap;
 
   /* Register the target.  */
   linux_target = &the_sparc64_linux_nat_target;
-  add_target (t);
+  add_inf_child_target (&the_sparc64_linux_nat_target);
 
   sparc_gregmap = &sparc64_linux_ptrace_gregmap;
 }

@@ -1330,9 +1330,7 @@ arm_linux_nat_target::low_new_fork (struct lwp_info *parent, pid_t child_pid)
 void
 _initialize_arm_linux_nat (void)
 {
-  target_ops *t = &the_arm_linux_nat_target;
-
   /* Register the target.  */
   linux_target = &the_arm_linux_nat_target;
-  add_target (t);
+  add_inf_child_target (&the_arm_linux_nat_target);
 }

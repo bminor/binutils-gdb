@@ -148,5 +148,5 @@ arm_fbsd_nat_target::read_description ()
 void
 _initialize_arm_fbsd_nat (void)
 {
-  add_target (&the_arm_fbsd_nat_target);
+  add_inf_child_target (&the_arm_fbsd_nat_target);
 }

@@ -837,11 +837,9 @@ triggers a breakpoint or watchpoint."),
 void
 _initialize_aarch64_linux_nat (void)
 {
-  struct target_ops *t = &the_aarch64_linux_nat_target;
-
   add_show_debug_regs_command ();
 
   /* Register the target.  */
   linux_target = &the_aarch64_linux_nat_target;
-  add_target (t);
+  add_inf_child_target (&the_aarch64_linux_nat_target);
 }

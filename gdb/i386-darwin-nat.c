@@ -659,5 +659,5 @@ _initialize_i386_darwin_nat (void)
   x86_set_debug_register_length (4);
 #endif
 
-  add_target (&darwin_target);
+  add_inf_child_target (&darwin_target);
 }

@@ -62,12 +62,14 @@ core_file_command (const char *filename, int from_tty)
 {
   dont_repeat ();		/* Either way, seems bogus.  */
 
-  gdb_assert (the_core_target != NULL);
-
   if (!filename)
-    the_core_target->detach (current_inferior (), from_tty);
+    {
+      gdb_assert (the_core_target != NULL);
+
+      the_core_target->detach (current_inferior (), from_tty);
+    }
   else
-    the_core_target->open (filename, from_tty);
+    core_target_open (filename, from_tty);
 }
 
 

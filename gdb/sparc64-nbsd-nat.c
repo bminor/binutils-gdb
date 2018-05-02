@@ -180,7 +180,7 @@ _initialize_sparc64nbsd_nat (void)
   sparc_gregset_supplies_p = sparc64nbsd_gregset_supplies_p;
   sparc_fpregset_supplies_p = sparc64nbsd_fpregset_supplies_p;
 
-  add_target (&the_sparc64_nbsd_nat_target);
+  add_inf_child_target (&the_sparc64_nbsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (sparc64nbsd_supply_pcb);

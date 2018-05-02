@@ -8,9 +8,7 @@ struct dummy_target : public target_ops
 {
   dummy_target ();
 
-  const char *shortname () override;
-  const char *longname () override;
-  const char *doc () override;
+  const target_info &info () const override;
 
   void post_attach (int arg0) override;
   void detach (inferior *arg0, int arg1) override;
@@ -178,9 +176,7 @@ struct debug_target : public target_ops
 {
   debug_target ();
 
-  const char *shortname () override;
-  const char *longname () override;
-  const char *doc () override;
+  const target_info &info () const override;
 
   void post_attach (int arg0) override;
   void detach (inferior *arg0, int arg1) override;

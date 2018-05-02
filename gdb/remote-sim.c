@@ -75,22 +75,21 @@ void simulator_command (char *args, int from_tty);
    sim_* are the interface to the simulator (see remote-sim.h).
    gdbsim_* are stuff which is internal to gdb.  */
 
+static const target_info gdbsim_target_info = {
+  "sim",
+  N_("simulator"),
+  N_("Use the compiled-in simulator.")
+};
+
 struct gdbsim_target final
   : public memory_breakpoint_target<target_ops>
 {
   gdbsim_target ()
   { to_stratum = process_stratum; }
 
-  const char *shortname () override
-  { return "sim"; }
+  const target_info &info () const override
+  { return gdbsim_target_info; }
 
-  const char *longname () override
-  { return _("simulator"); }
-
-  const char *doc () override
-  { return _("Use the compiled-in simulator."); }
-
-  void open (const char *, int) override;
   void close () override;
 
   void detach (inferior *inf, int) override;
@@ -701,8 +700,8 @@ gdbsim_target::create_inferior (const char *exec_file,
    Targets should supply this routine, if only to provide an error message.  */
 /* Called when selecting the simulator.  E.g. (gdb) target sim name.  */
 
-void
-gdbsim_target::open (const char *args, int from_tty)
+static void
+gdbsim_target_open (const char *args, int from_tty)
 {
   int len;
   char *arg_buf;
@@ -1344,7 +1343,7 @@ _initialize_remote_sim (void)
 {
   struct cmd_list_element *c;
 
-  add_target (&gdbsim_ops);
+  add_target (gdbsim_target_info, gdbsim_target_open);
 
   c = add_com ("sim", class_obscure, simulator_command,
 	       _("Send a command to the simulator."));

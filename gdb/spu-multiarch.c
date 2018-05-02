@@ -36,19 +36,19 @@
 
 /* The SPU multi-architecture support target.  */
 
+static const target_info spu_multiarch_target_info = {
+  "spu",
+  N_("SPU multi-architecture support."),
+  N_("SPU multi-architecture support.")
+};
+
 struct spu_multiarch_target final : public target_ops
 {
   spu_multiarch_target ()
   { to_stratum = arch_stratum; };
 
-  const char *shortname () override
-  { return "spu"; }
-
-  const char *longname () override
-  { return _("SPU multi-architecture support."); }
-
-  const char *doc () override
-  { return _("SPU multi-architecture support."); }
+  const target_info &info () const override
+  { return spu_multiarch_target_info; }
 
   void mourn_inferior () override;
 

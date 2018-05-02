@@ -34,23 +34,19 @@
 
 /* The CTF target.  */
 
+static const target_info ctf_target_info = {
+  "ctf",
+  N_("CTF file"),
+  N_("(Use a CTF directory as a target.\n\
+Specify the filename of the CTF directory.")
+};
+
 class ctf_target final : public tracefile_target
 {
 public:
-  const char *shortname () override
-  { return "ctf"; }
+  const target_info &info () const override
+  { return ctf_target_info; }
 
-  const char *longname () override
-  { return _("CTF file"); }
-
-  const char *doc () override
-  {
-    return _("\
-Use a CTF directory as a target.\n\
-Specify the filename of the CTF directory.");
-  }
-
-  void open (const char *, int) override;
   void close () override;
   void fetch_registers (struct regcache *, int) override;
   enum target_xfer_status xfer_partial (enum target_object object,
@@ -1108,8 +1104,8 @@ ctf_read_tp (struct uploaded_tp **uploaded_tps)
    definitions from the first packet.  Set the start position at the
    second packet which contains events on trace blocks.  */
 
-void
-ctf_target::open (const char *dirname, int from_tty)
+static void
+ctf_target_open (const char *dirname, int from_tty)
 {
   struct bt_ctf_event *event;
   uint32_t event_id;
@@ -1724,6 +1720,6 @@ void
 _initialize_ctf (void)
 {
 #if HAVE_LIBBABELTRACE
-  add_target_with_completer (&ctf_ops, filename_completer);
+  add_target (ctf_target_info, ctf_target_open, filename_completer);
 #endif
 }

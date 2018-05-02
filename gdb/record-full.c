@@ -206,6 +206,11 @@ static unsigned int record_full_insn_num = 0;
    than count of insns presently in execution log).  */
 static ULONGEST record_full_insn_count;
 
+static const char record_longname[]
+  = N_("Process record and replay target");
+static const char record_doc[]
+  = N_("Log program while executing and replay execution from log.");
+
 /* Base class implementing functionality common to both the
    "record-full" and "record-core" targets.  */
 
@@ -215,15 +220,8 @@ public:
   record_full_base_target ()
   { to_stratum = record_stratum; }
 
-  const char *shortname () override = 0;
+  const target_info &info () const override = 0;
 
-  const char *longname () override
-  { return _("Process record and replay target"); }
-
-  const char *doc () override
-  { return _("Log program while executing and replay execution from log."); }
-
-  void open (const char *, int) override;
   void close () override;
   void async (int) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
@@ -257,11 +255,17 @@ public:
 
 /* The "record-full" target.  */
 
+static const target_info record_full_target_info = {
+  "record-full",
+  record_longname,
+  record_doc,
+};
+
 class record_full_target final : public record_full_base_target
 {
 public:
-  const char *shortname () override
-  { return "record-full"; }
+  const target_info &info () const override
+  { return record_full_target_info; }
 
   void commit_resume () override;
   void resume (ptid_t, int, enum gdb_signal) override;
@@ -285,11 +289,17 @@ public:
 
 /* The "record-core" target.  */
 
+static const target_info record_full_core_target_info = {
+  "record-core",
+  record_longname,
+  record_doc,
+};
+
 class record_full_core_target final : public record_full_base_target
 {
 public:
-  const char *shortname () override
-  { return "record-core"; }
+  const target_info &info () const override
+  { return record_full_core_target_info; }
 
   void resume (ptid_t, int, enum gdb_signal) override;
   void disconnect (const char *, int) override;
@@ -900,7 +910,7 @@ record_full_async_inferior_event_handler (gdb_client_data data)
   inferior_event_handler (INF_REG_EVENT, NULL);
 }
 
-/* Open the process record target.  */
+/* Open the process record target for 'core' files.  */
 
 static void
 record_full_core_open_1 (const char *name, int from_tty)
@@ -930,7 +940,7 @@ record_full_core_open_1 (const char *name, int from_tty)
   record_full_restore ();
 }
 
-/* "open" target method for 'live' processes.  */
+/* Open the process record target for 'live' processes.  */
 
 static void
 record_full_open_1 (const char *name, int from_tty)
@@ -954,10 +964,10 @@ record_full_open_1 (const char *name, int from_tty)
 
 static void record_full_init_record_breakpoints (void);
 
-/* "open" target method.  Open the process record target.  */
+/* Open the process record target.  */
 
-void
-record_full_base_target::open (const char *name, int from_tty)
+static void
+record_full_open (const char *name, int from_tty)
 {
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog, "Process record: record_full_open\n");
@@ -2519,7 +2529,7 @@ static void
 cmd_record_full_restore (const char *args, int from_tty)
 {
   core_file_command (args, from_tty);
-  record_full_ops.open (args, from_tty);
+  record_full_open (args, from_tty);
 }
 
 /* Save the execution log to a file.  We use a modified elf corefile
@@ -2808,9 +2818,9 @@ _initialize_record_full (void)
   record_full_first.next = NULL;
   record_full_first.type = record_full_end;
 
-  add_target (&record_full_ops);
-  add_deprecated_target_alias (&record_full_ops, "record");
-  add_target (&record_full_core_ops);
+  add_target (record_full_target_info, record_full_open);
+  add_deprecated_target_alias (record_full_target_info, "record");
+  add_target (record_full_core_target_info, record_full_open);
 
   add_prefix_cmd ("full", class_obscure, cmd_record_full_start,
 		  _("Start full execution recording."), &record_full_cmdlist,
