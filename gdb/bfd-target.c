@@ -68,7 +68,7 @@ target_bfd_get_section_table (struct target_ops *ops)
 }
 
 static void
-target_bfd_xclose (struct target_ops *t)
+target_bfd_close (struct target_ops *t)
 {
   struct target_bfd_data *data = (struct target_bfd_data *) t->to_data;
 
@@ -95,7 +95,7 @@ target_bfd_reopen (struct bfd *abfd)
   t->to_doc = _("You should never see this");
   t->to_get_section_table = target_bfd_get_section_table;
   t->to_xfer_partial = target_bfd_xfer_partial;
-  t->to_xclose = target_bfd_xclose;
+  t->to_close = target_bfd_close;
   t->to_data = data;
   t->to_magic = OPS_MAGIC;
 

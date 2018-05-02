@@ -1,5 +1,14 @@
 2018-05-02  Pedro Alves  <palves@redhat.com>
 
+	* bfd-target.c (target_bfd_xclose): Rename to ...
+	(target_bfd_close): ... this.
+	(target_bfd_reopen): Adjust.
+	* target.c (target_close): Remove references to to_xclose.
+	* target.h (target_ops::to_xclose): Delete.
+	(target_ops::to_close): Update comments.
+
+2018-05-02  Pedro Alves  <palves@redhat.com>
+
 	* alpha-linux-nat.c: Include "linux-nat-trad.h" instead of
 	"linux-nat.h".
 	* configure.nat (alpha-linux, linux-mips): Add linux-nat-trad.o.

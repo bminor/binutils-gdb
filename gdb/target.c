@@ -3416,9 +3416,7 @@ target_close (struct target_ops *targ)
 
   fileio_handles_invalidate_target (targ);
 
-  if (targ->to_xclose != NULL)
-    targ->to_xclose (targ);
-  else if (targ->to_close != NULL)
+  if (targ->to_close != NULL)
     targ->to_close (targ);
 
   if (targetdebug)

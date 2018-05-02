@@ -418,11 +418,12 @@ struct target_ops
        stack.  Targets should supply this routine, if only to provide
        an error message.  */
     void (*to_open) (const char *, int);
-    /* Old targets with a static target vector provide "to_close".
-       New re-entrant targets provide "to_xclose" and that is expected
-       to xfree everything (including the "struct target_ops").  */
-    void (*to_xclose) (struct target_ops *targ);
+
+    /* Close the target.  This is where the target can handle
+       teardown.  Heap-allocated targets should delete themselves
+       before returning.  */
     void (*to_close) (struct target_ops *);
+
     /* Attaches to a process on the target side.  Arguments are as
        passed to the `attach' command by the user.  This routine can
        be called when the target is not on the target-stack, if the
