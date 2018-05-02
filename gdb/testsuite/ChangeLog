@@ -1,5 +1,9 @@
 2018-05-02  Tom Tromey  <tom@tromey.com>
 
+	* gdb.python/py-parameter.exp: Set test message.
+
+2018-05-02  Tom Tromey  <tom@tromey.com>
+
 	PR python/20084:
 	* gdb.python/py-parameter.exp: Add PARAM_ZUINTEGER and
 	PARAM_ZUINTEGER_UNLIMITED tests.
