@@ -37,6 +37,14 @@
 #include "inf-ptrace.h"
 #include "bsd-kvm.h"
 
+struct ppc_fbsd_nat_target final : public fbsd_nat_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static ppc_fbsd_nat_target the_ppc_fbsd_nat_target;
+
 /* Fill GDB's register array with the general-purpose register values
    in *GREGSETP.  */
 
@@ -115,9 +123,8 @@ getfpregs_supplies (struct gdbarch *gdbarch, int regno)
 /* Fetch register REGNO from the child process. If REGNO is -1, do it
    for all registers.  */
 
-static void
-ppcfbsd_fetch_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int regno)
+void
+ppc_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   gdb_gregset_t regs;
   pid_t pid = ptid_get_lwp (regcache_get_ptid (regcache));
@@ -142,9 +149,8 @@ ppcfbsd_fetch_inferior_registers (struct target_ops *ops,
 /* Store register REGNO back into the child process. If REGNO is -1,
    do this for all registers.  */
 
-static void
-ppcfbsd_store_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int regno)
+void
+ppc_fbsd_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   gdb_gregset_t regs;
   pid_t pid = ptid_get_lwp (regcache_get_ptid (regcache));
@@ -198,13 +204,7 @@ ppcfbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 void
 _initialize_ppcfbsd_nat (void)
 {
-  struct target_ops *t;
-
-  /* Add in local overrides.  */
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = ppcfbsd_fetch_inferior_registers;
-  t->to_store_registers = ppcfbsd_store_inferior_registers;
-  fbsd_nat_add_target (t);
+  add_target (&the_ppc_fbsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (ppcfbsd_supply_pcb);

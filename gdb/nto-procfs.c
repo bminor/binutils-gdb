@@ -55,22 +55,104 @@ static sighandler_t ofunc;
 
 static procfs_run run;
 
+/* Create the "native" and "procfs" targets.  */
+
+struct nto_procfs_target : public inf_child_target
+{
+  void open (const char *arg, int from_tty) override;
+
+  void attach (const char *, int) override = 0;
+
+  void post_attach (int);
+
+  void detach (inferior *, int) override;
+
+  void resume (ptid_t, int, enum gdb_signal) override;
+
+  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
+  void files_info () override;
+
+  int insert_breakpoint (struct gdbarch *, struct bp_target_info *) override;
+
+  int remove_breakpoint (struct gdbarch *, struct bp_target_info *,
+			 enum remove_bp_reason) override;
+
+  int can_use_hw_breakpoint (enum bptype, int, int) override;
+
+  int insert_hw_breakpoint (struct gdbarch *, struct bp_target_info *) override;
+
+  int remove_hw_breakpoint (struct gdbarch *, struct bp_target_info *) override;
+
+  int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
+			 struct expression *) override;
+
+  int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
+			 struct expression *) override;
+
+  int stopped_by_watchpoint () override;
+
+  void kill () override;
+
+  void create_inferior (const char *, const std::string &,
+			char **, int) override;
+
+  void mourn_inferior () override;
+
+  void pass_signals (int, unsigned char *) override;
+
+  int thread_alive (ptid_t ptid) override;
+
+  void update_thread_list () override;
+
+  const char *pid_to_str (ptid_t) override;
+
+  void interrupt () override;
+
+  bool have_continuable_watchpoint ()
+  { return true; }
+
+  const char *extra_thread_info (struct thread_info *) override;
+
+  char *pid_to_exec_file (int pid) override;
+};
+
+/* For "target native".  */
+struct nto_procfs_target_native final : public nto_procfs_target
+{
+  /* Leave shortname as "native".  */
+
+  const char *longname () override
+  { return _("QNX Neutrino local process"); }
+
+  const char *doc () override
+  { return _("QNX Neutrino local process (started by the \"run\" command)."); }
+};
+
+/* For "target procfs <node>".  */
+struct nto_procfs_target_procfs final : public nto_procfs_target
+{
+  const char *shortname () override
+  { return "procfs"; }
+
+  const char *longname () override
+  { return _("QNX Neutrino local or remote process"); }
+
+  const char *doc () override
+  { return _("QNX Neutrino process.  target procfs <node>"); }
+};
+
 static ptid_t do_attach (ptid_t ptid);
-
-static int procfs_can_use_hw_breakpoint (struct target_ops *self,
-					 enum bptype, int, int);
-
-static int procfs_insert_hw_watchpoint (struct target_ops *self,
-					CORE_ADDR addr, int len,
-					enum target_hw_bp_type type,
-					struct expression *cond);
-
-static int procfs_remove_hw_watchpoint (struct target_ops *self,
-					CORE_ADDR addr, int len,
-					enum target_hw_bp_type type,
-					struct expression *cond);
-
-static int procfs_stopped_by_watchpoint (struct target_ops *ops);
 
 /* These two globals are only ever set in procfs_open_1, but are
    referenced elsewhere.  'nto_procfs_node' is a flag used to say
@@ -109,8 +191,8 @@ procfs_is_nto_target (bfd *abfd)
    <arg>' from the (gdb) prompt.  For QNX6 (nto), the only valid arg
    will be a QNX node string, eg: "/net/some_node".  If arg is not a
    valid QNX node, we will default to local.  */
-static void
-procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
+void
+nto_procfs_target::open (const char *arg, int from_tty)
 {
   char *endstr;
   char buffer[50];
@@ -202,7 +284,7 @@ procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
 	}
     }
 
-  inf_child_open_target (ops, arg, from_tty);
+  inf_child_target::open (arg, from_tty);
   printf_filtered ("Debugging using %s\n", nto_procfs_path);
 }
 
@@ -216,8 +298,8 @@ procfs_set_thread (ptid_t ptid)
 }
 
 /*  Return nonzero if the thread TH is still alive.  */
-static int
-procfs_thread_alive (struct target_ops *ops, ptid_t ptid)
+int
+nto_procfs_target::thread_alive (ptid_t ptid)
 {
   pid_t tid;
   pid_t pid;
@@ -298,8 +380,8 @@ update_thread_private_data (struct thread_info *new_thread,
 #endif /* _NTO_VERSION */
 }
 
-static void
-procfs_update_thread_list (struct target_ops *ops)
+void
+nto_procfs_target::update_thread_list ()
 {
   procfs_status status;
   pid_t pid;
@@ -586,8 +668,8 @@ procfs_meminfo (const char *args, int from_tty)
 }
 
 /* Print status information about what we're accessing.  */
-static void
-procfs_files_info (struct target_ops *ignore)
+void
+nto_procfs_target::files_info ()
 {
   struct inferior *inf = current_inferior ();
 
@@ -599,8 +681,8 @@ procfs_files_info (struct target_ops *ignore)
 
 /* Target to_pid_to_exec_file implementation.  */
 
-static char *
-procfs_pid_to_exec_file (struct target_ops *ops, const int pid)
+char *
+nto_procfs_target::pid_to_exec_file (const int pid)
 {
   int proc_fd;
   static char proc_path[PATH_MAX];
@@ -625,8 +707,8 @@ procfs_pid_to_exec_file (struct target_ops *ops, const int pid)
 }
 
 /* Attach to process PID, then initialize for debugging it.  */
-static void
-procfs_attach (struct target_ops *ops, const char *args, int from_tty)
+void
+nto_procfs_target::attach (const char *args, int from_tty)
 {
   char *exec_file;
   int pid;
@@ -661,8 +743,8 @@ procfs_attach (struct target_ops *ops, const char *args, int from_tty)
   procfs_update_thread_list (ops);
 }
 
-static void
-procfs_post_attach (struct target_ops *self, pid_t pid)
+void
+nto_procfs_target::post_attach (pid_t pid)
 {
   if (exec_bfd)
     solib_create_inferior_hook (0);
@@ -729,9 +811,9 @@ nto_handle_sigint (int signo)
   target_interrupt ();
 }
 
-static ptid_t
-procfs_wait (struct target_ops *ops,
-	     ptid_t ptid, struct target_waitstatus *ourstatus, int options)
+sptid_t
+nto_procfs_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+			 int options)
 {
   sigset_t set;
   siginfo_t info;
@@ -835,9 +917,8 @@ procfs_wait (struct target_ops *ops,
 /* Read the current values of the inferior's registers, both the
    general register set and floating point registers (if supported)
    and update gdb's idea of their current values.  */
-static void
-procfs_fetch_registers (struct target_ops *ops,
-			struct regcache *regcache, int regno)
+void
+nto_procfs_target::fetch_registers (struct regcache *regcache, int regno)
 {
   union
   {
@@ -883,11 +964,11 @@ procfs_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 
 /* Target to_xfer_partial implementation.  */
 
-static enum target_xfer_status
-procfs_xfer_partial (struct target_ops *ops, enum target_object object,
-		     const char *annex, gdb_byte *readbuf,
-		     const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
-		     ULONGEST *xfered_len)
+enum target_xfer_status
+nto_procfs_target::xfer_partial (enum target_object object,
+				 const char *annex, gdb_byte *readbuf,
+				 const gdb_byte *writebuf, ULONGEST offset,
+				 ULONGEST len, ULONGEST *xfered_len)
 {
   switch (object)
     {
@@ -926,9 +1007,9 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
 	}
 	/* Fallthru */
     default:
-      return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					    readbuf, writebuf, offset, len,
-					    xfered_len);
+      return this->beneath->xfer_partial (object, annex,
+					  readbuf, writebuf, offset, len,
+					  xfered_len);
     }
 }
 
@@ -936,8 +1017,8 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
    The program resumes execution and will no longer stop
    on signals, etc.  We'd better not have left any breakpoints
    in the program or it'll die when it hits one.  */
-static void
-procfs_detach (struct target_ops *ops, inferior *inf, int from_tty)
+void
+nto_procfs_target::detach (inferior *inf, int from_tty)
 {
   int pid;
 
@@ -970,43 +1051,41 @@ procfs_breakpoint (CORE_ADDR addr, int type, int size)
   return 0;
 }
 
-static int
-procfs_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
-			  struct bp_target_info *bp_tgt)
+int
+nto_procfs_target::insert_breakpoint (struct gdbarch *gdbarch,
+				      struct bp_target_info *bp_tgt)
 {
   bp_tgt->placed_address = bp_tgt->reqstd_address;
   return procfs_breakpoint (bp_tgt->placed_address, _DEBUG_BREAK_EXEC, 0);
 }
 
-static int
-procfs_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
-			  struct bp_target_info *bp_tgt,
-			  enum remove_bp_reason reason)
+int
+nto_procfs_target::remove_breakpoint (struct gdbarch *gdbarch,
+				      struct bp_target_info *bp_tgt,
+				      enum remove_bp_reason reason)
 {
   return procfs_breakpoint (bp_tgt->placed_address, _DEBUG_BREAK_EXEC, -1);
 }
 
-static int
-procfs_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
-			     struct bp_target_info *bp_tgt)
+int
+nto_procfs_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
+					 struct bp_target_info *bp_tgt)
 {
   bp_tgt->placed_address = bp_tgt->reqstd_address;
   return procfs_breakpoint (bp_tgt->placed_address,
 			    _DEBUG_BREAK_EXEC | _DEBUG_BREAK_HW, 0);
 }
 
-static int
-procfs_remove_hw_breakpoint (struct target_ops *self,
-			     struct gdbarch *gdbarch,
-			     struct bp_target_info *bp_tgt)
+int
+nto_procfs_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
+					 struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address,
 			    _DEBUG_BREAK_EXEC | _DEBUG_BREAK_HW, -1);
 }
 
-static void
-procfs_resume (struct target_ops *ops,
-	       ptid_t ptid, int step, enum gdb_signal signo)
+void
+nto_procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 {
   int signal_to_pass;
   procfs_status status;
@@ -1065,8 +1144,8 @@ procfs_resume (struct target_ops *ops,
     }
 }
 
-static void
-procfs_mourn_inferior (struct target_ops *ops)
+void
+nto_procfs_target::mourn_inferior ()
 {
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
@@ -1138,10 +1217,10 @@ breakup_args (char *scratch, char **argv)
   *argv = NULL;
 }
 
-static void
-procfs_create_inferior (struct target_ops *ops, const char *exec_file,
-			const std::string &allargs,
-			char **env, int from_tty)
+void
+nto_procfs_target::create_inferior (const char *exec_file,
+				    const std::string &allargs,
+				    char **env, int from_tty)
 {
   struct inheritance inherit;
   pid_t pid;
@@ -1268,14 +1347,14 @@ procfs_create_inferior (struct target_ops *ops, const char *exec_file,
     solib_create_inferior_hook (0);
 }
 
-static void
-procfs_interrupt (struct target_ops *self)
+void
+nto_procfs_target::interrupt ()
 {
   devctl (ctl_fd, DCMD_PROC_STOP, NULL, 0, 0);
 }
 
-static void
-procfs_kill_inferior (struct target_ops *ops)
+void
+nto_procfs_target::kill ()
 {
   target_mourn_inferior (inferior_ptid);
 }
@@ -1313,9 +1392,8 @@ get_regset (int regset, char *buf, int bufsize, int *regsize)
   return dev_set;
 }
 
-static void
-procfs_store_registers (struct target_ops *ops,
-			struct regcache *regcache, int regno)
+void
+nto_procfs_target::store_registers (struct regcache *regcache, int regno)
 {
   union
   {
@@ -1380,9 +1458,8 @@ procfs_store_registers (struct target_ops *ops,
 
 /* Set list of signals to be handled in the target.  */
 
-static void
-procfs_pass_signals (struct target_ops *self,
-		     int numsigs, unsigned char *pass_signals)
+void
+nto_procfs_target::pass_signals (int numsigs, unsigned char *pass_signals)
 {
   int signo;
 
@@ -1396,8 +1473,8 @@ procfs_pass_signals (struct target_ops *self,
     }
 }
 
-static char *
-procfs_pid_to_str (struct target_ops *ops, ptid_t ptid)
+char *
+nto_procfs_target::pid_to_str (ptid_t ptid)
 {
   static char buf[1024];
   int pid, tid, n;
@@ -1423,87 +1500,27 @@ procfs_pid_to_str (struct target_ops *ops, ptid_t ptid)
   "target procfs <node>" wouldn't make sense as default run target, as
   it needs <node>.  */
 
-static int
-procfs_can_run (struct target_ops *self)
+int
+nto_procfs_target::can_run ()
 {
   return 0;
 }
 
 /* "target procfs".  */
-static struct target_ops nto_procfs_ops;
+static nto_procfs_target_procfs nto_procfs_ops;
 
 /* "target native".  */
-static struct target_ops *nto_native_ops;
-
-/* to_open implementation for "target procfs".  */
-
-static void
-procfs_open (const char *arg, int from_tty)
-{
-  procfs_open_1 (&nto_procfs_ops, arg, from_tty);
-}
-
-/* to_open implementation for "target native".  */
-
-static void
-procfs_native_open (const char *arg, int from_tty)
-{
-  procfs_open_1 (nto_native_ops, arg, from_tty);
-}
+static nto_procfs_target_native nto_native_ops;
 
 /* Create the "native" and "procfs" targets.  */
 
 static void
 init_procfs_targets (void)
 {
-  struct target_ops *t = inf_child_target ();
-
-  /* Leave to_shortname as "native".  */
-  t->to_longname = "QNX Neutrino local process";
-  t->to_doc = "QNX Neutrino local process (started by the \"run\" command).";
-  t->to_open = procfs_native_open;
-  t->to_attach = procfs_attach;
-  t->to_post_attach = procfs_post_attach;
-  t->to_detach = procfs_detach;
-  t->to_resume = procfs_resume;
-  t->to_wait = procfs_wait;
-  t->to_fetch_registers = procfs_fetch_registers;
-  t->to_store_registers = procfs_store_registers;
-  t->to_xfer_partial = procfs_xfer_partial;
-  t->to_files_info = procfs_files_info;
-  t->to_insert_breakpoint = procfs_insert_breakpoint;
-  t->to_remove_breakpoint = procfs_remove_breakpoint;
-  t->to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
-  t->to_insert_hw_breakpoint = procfs_insert_hw_breakpoint;
-  t->to_remove_hw_breakpoint = procfs_remove_hw_breakpoint;
-  t->to_insert_watchpoint = procfs_insert_hw_watchpoint;
-  t->to_remove_watchpoint = procfs_remove_hw_watchpoint;
-  t->to_stopped_by_watchpoint = procfs_stopped_by_watchpoint;
-  t->to_kill = procfs_kill_inferior;
-  t->to_create_inferior = procfs_create_inferior;
-  t->to_mourn_inferior = procfs_mourn_inferior;
-  t->to_pass_signals = procfs_pass_signals;
-  t->to_thread_alive = procfs_thread_alive;
-  t->to_update_thread_list = procfs_update_thread_list;
-  t->to_pid_to_str = procfs_pid_to_str;
-  t->to_interrupt = procfs_interrupt;
-  t->to_have_continuable_watchpoint = 1;
-  t->to_extra_thread_info = nto_extra_thread_info;
-  t->to_pid_to_exec_file = procfs_pid_to_exec_file;
-
-  nto_native_ops = t;
-
   /* Register "target native".  This is the default run target.  */
-  add_target (t);
+  add_target (&nto_native_ops);
 
   /* Register "target procfs <node>".  */
-  nto_procfs_ops = *t;
-  nto_procfs_ops.to_shortname = "procfs";
-  nto_procfs_ops.to_can_run = procfs_can_run;
-  t->to_longname = "QNX Neutrino local or remote process";
-  t->to_doc = "QNX Neutrino process.  target procfs <node>";
-  t->to_open = procfs_open;
-
   add_target (&nto_procfs_ops);
 }
 
@@ -1566,34 +1583,31 @@ procfs_hw_watchpoint (int addr, int len, enum target_hw_bp_type type)
   return 0;
 }
 
-static int
-procfs_can_use_hw_breakpoint (struct target_ops *self,
-			      enum bptype type,
-			      int cnt, int othertype)
+int
+nto_procfs_target::can_use_hw_breakpoint (enum bptype type,
+					  int cnt, int othertype)
 {
   return 1;
 }
 
-static int
-procfs_remove_hw_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len,
-			     enum target_hw_bp_type type,
-			     struct expression *cond)
+int
+nto_procfs_target::remove_hw_watchpoint (CORE_ADDR addr, int len,
+					 enum target_hw_bp_type type,
+					 struct expression *cond)
 {
   return procfs_hw_watchpoint (addr, -1, type);
 }
 
-static int
-procfs_insert_hw_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len,
-			     enum target_hw_bp_type type,
-			     struct expression *cond)
+int
+nto_procfs_target::insert_hw_watchpoint (CORE_ADDR addr, int len,
+					 enum target_hw_bp_type type,
+					 struct expression *cond)
 {
   return procfs_hw_watchpoint (addr, len, type);
 }
 
-static int
-procfs_stopped_by_watchpoint (struct target_ops *ops)
+int
+nto_procfs_target::stopped_by_watchpoint ()
 {
   /* NOTE: nto_stopped_by_watchpoint will be called ONLY while we are
      stopped due to a SIGTRAP.  This assumes gdb works in 'all-stop' mode;

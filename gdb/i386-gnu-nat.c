@@ -54,6 +54,23 @@ static int reg_offset[] =
 #define REG_ADDR(state, regnum) ((char *)(state) + reg_offset[regnum])
 
 
+
+/* The i386 GNU Hurd target.  */
+
+#ifdef i386_DEBUG_STATE
+using gnu_base_target = x86_nat_target<gnu_nat_target>;
+#else
+using gnu_base_target = gnu_nat_target;
+#endif
+
+struct i386_gnu_nat_target final : public gnu_base_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static i386_gnu_nat_target the_i386_gnu_nat_target;
+
 /* Get the whole floating-point state of THREAD and record the values
    of the corresponding (pseudo) registers.  */
 
@@ -412,14 +429,7 @@ i386_gnu_dr_get_control (void)
 void
 _initialize_i386gnu_nat (void)
 {
-  struct target_ops *t;
-
-  /* Fill in the generic GNU/Hurd methods.  */
-  t = gnu_target ();
-
 #ifdef i386_DEBUG_STATE
-  x86_use_watchpoints (t);
-
   x86_dr_low.set_control = i386_gnu_dr_set_control;
   gdb_assert (DR_FIRSTADDR == 0 && DR_LASTADDR < i386_DEBUG_STATE_COUNT);
   x86_dr_low.set_addr = i386_gnu_dr_set_addr;
@@ -429,9 +439,6 @@ _initialize_i386gnu_nat (void)
   x86_set_debug_register_length (4);
 #endif /* i386_DEBUG_STATE */
 
-  t->to_fetch_registers = gnu_fetch_registers;
-  t->to_store_registers = gnu_store_registers;
-
   /* Register the target.  */
-  add_target (t);
+  add_target (&the_i386_gnu_nat_target);
 }

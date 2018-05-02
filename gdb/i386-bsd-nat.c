@@ -127,9 +127,8 @@ i386bsd_collect_gregset (const struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating point registers).  */
 
-static void
-i386bsd_fetch_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int regnum)
+void
+i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
 
@@ -191,9 +190,8 @@ i386bsd_fetch_inferior_registers (struct target_ops *ops,
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating point registers).  */
 
-static void
-i386bsd_store_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int regnum)
+void
+i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
 
@@ -265,20 +263,6 @@ i386bsd_store_inferior_registers (struct target_ops *ops,
         }
 #endif
     }
-}
-
-/* Create a prototype *BSD/i386 target.  The client can override it
-   with local methods.  */
-
-struct target_ops *
-i386bsd_target (void)
-{
-  struct target_ops *t;
-
-  t = x86bsd_target ();
-  t->to_fetch_registers = i386bsd_fetch_inferior_registers;
-  t->to_store_registers = i386bsd_store_inferior_registers;
-  return t;
 }
 
 void

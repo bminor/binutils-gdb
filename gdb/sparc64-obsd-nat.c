@@ -106,6 +106,9 @@ sparc64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   return 1;
 }
 
+/* Add some extra features to the generic SPARC target.  */
+static sparc_target<obsd_nat_target> the_sparc64_obsd_nat_target;
+
 void
 _initialize_sparc64obsd_nat (void)
 {
@@ -120,7 +123,7 @@ _initialize_sparc64obsd_nat (void)
   sparc_fpregmap = &sparc64_bsd_fpregmap;
 
   /* Add some extra features to the generic SPARC target.  */
-  obsd_add_target (sparc_target ());
+  add_target (&the_sparc64_obsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (sparc64obsd_supply_pcb);

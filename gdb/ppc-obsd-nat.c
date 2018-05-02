@@ -35,6 +35,14 @@
 #include "obsd-nat.h"
 #include "bsd-kvm.h"
 
+struct ppc_obsd_nat_target final : public obsd_nat_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static ppc_obsd_nat_target the_ppc_obsd_nat_target;
+
 /* OpenBSD/powerpc didn't have PT_GETFPREGS/PT_SETFPREGS until release
    4.0.  On older releases the floating-point registers are handled by
    PT_GETREGS/PT_SETREGS, but fpscr wasn't available..  */
@@ -70,9 +78,8 @@ getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
-static void
-ppcobsd_fetch_registers (struct target_ops *ops,
-			 struct regcache *regcache, int regnum)
+void
+ppc_obsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -105,9 +112,8 @@ ppcobsd_fetch_registers (struct target_ops *ops,
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers.  */
 
-static void
-ppcobsd_store_registers (struct target_ops *ops,
-			 struct regcache *regcache, int regnum)
+void
+ppc_obsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -184,13 +190,7 @@ ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 void
 _initialize_ppcobsd_nat (void)
 {
-  struct target_ops *t;
-
-  /* Add in local overrides.  */
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = ppcobsd_fetch_registers;
-  t->to_store_registers = ppcobsd_store_registers;
-  obsd_add_target (t);
+  add_target (&the_ppc_obsd_nat_target);
 
   /* General-purpose registers.  */
   ppcobsd_reg_offsets.r0_offset = offsetof (struct reg, gpr);

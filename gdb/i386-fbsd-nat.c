@@ -34,12 +34,29 @@
 #include "x86-bsd-nat.h"
 #include "i386-bsd-nat.h"
 
+class i386_fbsd_nat_target final
+  : public i386_bsd_nat_target<fbsd_nat_target>
+{
+public:
+  /* Add some extra features to the common *BSD/i386 target.  */
+#ifdef PT_GETXSTATE_INFO
+  const struct target_desc *read_description () override;
+#endif
+
+  void resume (ptid_t, int, enum gdb_signal) override;
+
+#if defined(HAVE_PT_GETDBREGS) && defined(USE_SIGTRAP_SIGINFO)
+  int supports_stopped_by_hw_breakpoint () override;
+#endif
+};
+
+static i386_fbsd_nat_target the_i386_fbsd_nat_target;
+
 /* Resume execution of the inferior process.  If STEP is nonzero,
    single-step it.  If SIGNAL is nonzero, give it that signal.  */
 
-static void
-i386fbsd_resume (struct target_ops *ops,
-		 ptid_t ptid, int step, enum gdb_signal signal)
+void
+i386_fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
   pid_t pid = ptid_get_pid (ptid);
   int request = PT_STEP;
@@ -119,10 +136,10 @@ i386fbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
 
 #ifdef PT_GETXSTATE_INFO
-/* Implement the to_read_description method.  */
+/* Implement the read_description method.  */
 
-static const struct target_desc *
-i386fbsd_read_description (struct target_ops *ops)
+const struct target_desc *
+i386_fbsd_nat_target::read_description ()
 {
   static int xsave_probed;
   static uint64_t xcr0;
@@ -147,20 +164,20 @@ i386fbsd_read_description (struct target_ops *ops)
 }
 #endif
 
+#if defined(HAVE_PT_GETDBREGS) && defined(USE_SIGTRAP_SIGINFO)
+/* Implement the supports_stopped_by_hw_breakpoints method.  */
+
+int
+i386_fbsd_nat_target::supports_stopped_by_hw_breakpoint ()
+{
+  return 1;
+}
+#endif
+
 void
 _initialize_i386fbsd_nat (void)
 {
-  struct target_ops *t;
-
-  /* Add some extra features to the common *BSD/i386 target.  */
-  t = i386bsd_target ();
-
-#ifdef PT_GETXSTATE_INFO
-  t->to_read_description = i386fbsd_read_description;
-#endif
-
-  t->to_resume = i386fbsd_resume;
-  fbsd_nat_add_target (t);
+  add_target (&the_i386_fbsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (i386fbsd_supply_pcb);

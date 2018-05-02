@@ -36,6 +36,14 @@
 #include "bsd-kvm.h"
 #include "inf-ptrace.h"
 
+struct ppc_nbsd_nat_target final : public inf_ptrace_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static ppc_nbsd_nat_target the_ppc_nbsd_nat_target;
+
 /* Returns true if PT_GETREGS fetches this register.  */
 
 static int
@@ -76,9 +84,8 @@ getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
 	  || regnum == tdep->ppc_fpscr_regnum);
 }
 
-static void
-ppcnbsd_fetch_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int regnum)
+void
+ppc_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -106,9 +113,8 @@ ppcnbsd_fetch_inferior_registers (struct target_ops *ops,
     }
 }
 
-static void
-ppcnbsd_store_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int regnum)
+void
+ppc_nbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -177,14 +183,8 @@ ppcnbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 void
 _initialize_ppcnbsd_nat (void)
 {
-  struct target_ops *t;
-
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (ppcnbsd_supply_pcb);
 
-  /* Add in local overrides.  */
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = ppcnbsd_fetch_inferior_registers;
-  t->to_store_registers = ppcnbsd_store_inferior_registers;
-  add_target (t);
+  add_target (&the_ppc_nbsd_nat_target);
 }

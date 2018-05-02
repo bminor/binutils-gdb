@@ -29,6 +29,14 @@
 #include "m68k-tdep.h"
 #include "inf-ptrace.h"
 
+struct m68k_bsd_nat_target final : public inf_ptrace_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static m68k_bsd_nat_target the_m68k_bsd_nat_target;
+
 static int
 m68kbsd_gregset_supplies_p (int regnum)
 {
@@ -107,9 +115,8 @@ m68kbsd_collect_fpregset (struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating-point registers).  */
 
-static void
-m68kbsd_fetch_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int regnum)
+void
+m68k_bsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
@@ -137,9 +144,8 @@ m68kbsd_fetch_inferior_registers (struct target_ops *ops,
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating-point registers).  */
 
-static void
-m68kbsd_store_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int regnum)
+void
+m68k_bsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
@@ -219,12 +225,7 @@ m68kbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 void
 _initialize_m68kbsd_nat (void)
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = m68kbsd_fetch_inferior_registers;
-  t->to_store_registers = m68kbsd_store_inferior_registers;
-  add_target (t);
+  add_target (&the_m68k_bsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (m68kbsd_supply_pcb);

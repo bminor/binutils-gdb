@@ -30,6 +30,16 @@
 #include "arm-tdep.h"
 #include "inf-ptrace.h"
 
+class arm_netbsd_nat_target final : public inf_ptrace_target
+{
+public:
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static arm_netbsd_nat_target the_arm_netbsd_nat_target;
+
 extern int arm_apcs_32;
 
 static void
@@ -190,9 +200,8 @@ fetch_fp_regs (struct regcache *regcache)
   arm_supply_fparegset (regcache, &inferior_fp_registers);
 }
 
-static void
-armnbsd_fetch_registers (struct target_ops *ops,
-			 struct regcache *regcache, int regno)
+void
+arm_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     {
@@ -391,9 +400,8 @@ store_fp_regs (const struct regcache *regcache)
     warning (_("unable to store floating-point registers"));
 }
 
-static void
-armnbsd_store_registers (struct target_ops *ops,
-			 struct regcache *regcache, int regno)
+void
+arm_nbsd_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     {
@@ -461,12 +469,7 @@ static struct core_fns arm_netbsd_elfcore_fns =
 void
 _initialize_arm_netbsd_nat (void)
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = armnbsd_fetch_registers;
-  t->to_store_registers = armnbsd_store_registers;
-  add_target (t);
+  add_target (&the_arm_netbsd_nat_target);
 
   deprecated_add_core_fns (&arm_netbsd_elfcore_fns);
 }

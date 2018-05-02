@@ -29,6 +29,15 @@
 #include "arm-fbsd-tdep.h"
 #include "inf-ptrace.h"
 
+struct arm_fbsd_nat_target : public fbsd_nat_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+  const struct target_desc *read_description () override;
+};
+
+static arm_fbsd_nat_target the_arm_fbsd_nat_target;
+
 /* Determine if PT_GETREGS fetches REGNUM.  */
 
 static bool
@@ -52,9 +61,8 @@ getvfpregs_supplies (struct gdbarch *gdbarch, int regnum)
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
-static void
-arm_fbsd_fetch_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regnum)
+void
+arm_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
 
@@ -87,9 +95,8 @@ arm_fbsd_fetch_inferior_registers (struct target_ops *ops,
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers.  */
 
-static void
-arm_fbsd_store_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regnum)
+void
+arm_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
 
@@ -127,25 +134,19 @@ arm_fbsd_store_inferior_registers (struct target_ops *ops,
 
 /* Implement the to_read_description method.  */
 
-static const struct target_desc *
-arm_fbsd_read_description (struct target_ops *ops)
+const struct target_desc *
+arm_fbsd_nat_target::read_description ()
 {
   const struct target_desc *desc;
 
-  desc = arm_fbsd_read_description_auxv (ops);
+  desc = arm_fbsd_read_description_auxv (this);
   if (desc == NULL)
-    desc = ops->beneath->to_read_description (ops->beneath);
+    desc = this->beneath->read_description ();
   return desc;
 }
 
 void
 _initialize_arm_fbsd_nat (void)
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = arm_fbsd_fetch_inferior_registers;
-  t->to_store_registers = arm_fbsd_store_inferior_registers;
-  t->to_read_description = arm_fbsd_read_description;
-  fbsd_nat_add_target (t);
+  add_target (&the_arm_fbsd_nat_target);
 }

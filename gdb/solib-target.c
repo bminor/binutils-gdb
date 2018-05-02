@@ -258,7 +258,7 @@ solib_target_current_sos (void)
 
   /* Fetch the list of shared libraries.  */
   gdb::optional<gdb::char_vector> library_document
-    = target_read_stralloc (&current_target, TARGET_OBJECT_LIBRARIES, NULL);
+    = target_read_stralloc (target_stack, TARGET_OBJECT_LIBRARIES, NULL);
   if (!library_document)
     return NULL;
 

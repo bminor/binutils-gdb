@@ -20,9 +20,13 @@
 #ifndef NBSD_NAT_H
 #define NBSD_NAT_H
 
-/* Return the name of a file that can be opened to get the symbols for
-   the child process identified by PID.  */
+#include "inf-ptrace.h"
 
-extern char *nbsd_pid_to_exec_file (struct target_ops *self, int pid);
+/* A prototype NetBSD target.  */
+
+struct nbsd_nat_target : public inf_ptrace_target
+{
+  char *pid_to_exec_file (int pid) override;
+};
 
 #endif /* nbsd-nat.h */

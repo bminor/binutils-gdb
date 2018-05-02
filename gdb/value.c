@@ -3069,7 +3069,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 
       set_value_address (v,
 	gdbarch_convert_from_func_ptr_addr
-	   (gdbarch, BMSYMBOL_VALUE_ADDRESS (msym), &current_target));
+	   (gdbarch, BMSYMBOL_VALUE_ADDRESS (msym), target_stack));
     }
 
   if (arg1p)

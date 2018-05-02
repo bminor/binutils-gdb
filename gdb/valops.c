@@ -964,7 +964,7 @@ read_value_memory (struct value *val, LONGEST bit_offset,
       enum target_xfer_status status;
       ULONGEST xfered_partial;
 
-      status = target_xfer_partial (current_target.beneath,
+      status = target_xfer_partial (target_stack,
 				    object, NULL,
 				    buffer + xfered_total * unit_size, NULL,
 				    memaddr + xfered_total,
@@ -1208,7 +1208,7 @@ value_assign (struct value *toval, struct value *fromval)
     case lval_register:
     case lval_computed:
 
-      gdb::observers::target_changed.notify (&current_target);
+      gdb::observers::target_changed.notify (target_stack);
 
       /* Having destroyed the frame cache, restore the selected
 	 frame.  */

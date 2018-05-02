@@ -29,6 +29,14 @@
 #include "aarch64-fbsd-tdep.h"
 #include "inf-ptrace.h"
 
+struct aarch64_fbsd_nat_target final : public fbsd_nat_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static aarch64_fbsd_nat_target the_aarch64_fbsd_nat_target;
+
 /* Determine if PT_GETREGS fetches REGNUM.  */
 
 static bool
@@ -48,9 +56,9 @@ getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
-static void
-aarch64_fbsd_fetch_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regnum)
+void
+aarch64_fbsd_nat_target::fetch_registers (struct regcache *regcache,
+					  int regnum)
 {
   pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
 
@@ -81,9 +89,9 @@ aarch64_fbsd_fetch_inferior_registers (struct target_ops *ops,
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers.  */
 
-static void
-aarch64_fbsd_store_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regnum)
+void
+aarch64_fbsd_nat_target::store_registers (struct regcache *regcache,
+					  int regnum)
 {
   pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
 
@@ -120,10 +128,5 @@ aarch64_fbsd_store_inferior_registers (struct target_ops *ops,
 void
 _initialize_aarch64_fbsd_nat (void)
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = aarch64_fbsd_fetch_inferior_registers;
-  t->to_store_registers = aarch64_fbsd_store_inferior_registers;
-  fbsd_nat_add_target (t);
+  add_target (&the_aarch64_fbsd_nat_target);
 }

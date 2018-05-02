@@ -66,6 +66,38 @@
 
 extern int arm_apcs_32;
 
+class arm_linux_nat_target final : public linux_nat_target
+{
+public:
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  /* Add our hardware breakpoint and watchpoint implementation.  */
+  int can_use_hw_breakpoint (enum bptype, int, int) override;
+
+  int insert_hw_breakpoint (struct gdbarch *, struct bp_target_info *) override;
+
+  int remove_hw_breakpoint (struct gdbarch *, struct bp_target_info *) override;
+
+  int region_ok_for_hw_watchpoint (CORE_ADDR, int) override;
+
+  int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
+			 struct expression *) override;
+
+  int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
+			 struct expression *) override;
+  int stopped_by_watchpoint () override;
+
+  int stopped_data_address (CORE_ADDR *) override;
+
+  int watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
+
+  const struct target_desc *read_description () override;
+};
+
+static arm_linux_nat_target the_arm_linux_nat_target;
+
 /* Get the whole floating point state of the process and store it
    into regcache.  */
 
@@ -374,9 +406,8 @@ store_vfp_regs (const struct regcache *regcache)
    regno == -1, otherwise fetch all general registers or all floating
    point registers depending upon the value of regno.  */
 
-static void
-arm_linux_fetch_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regno)
+void
+arm_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -412,9 +443,8 @@ arm_linux_fetch_inferior_registers (struct target_ops *ops,
    regno == -1, otherwise store all general registers or all floating
    point registers depending upon the value of regno.  */
 
-static void
-arm_linux_store_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regno)
+void
+arm_linux_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -495,8 +525,8 @@ ps_get_thread_area (struct ps_prochandle *ph,
   return PS_OK;
 }
 
-static const struct target_desc *
-arm_linux_read_description (struct target_ops *ops)
+const struct target_desc *
+arm_linux_nat_target::read_description ()
 {
   CORE_ADDR arm_hwcap = 0;
 
@@ -516,9 +546,9 @@ arm_linux_read_description (struct target_ops *ops)
 	have_ptrace_getregset = TRIBOOL_TRUE;
     }
 
-  if (target_auxv_search (ops, AT_HWCAP, &arm_hwcap) != 1)
+  if (target_auxv_search (this, AT_HWCAP, &arm_hwcap) != 1)
     {
-      return ops->beneath->to_read_description (ops->beneath);
+      return this->beneath->read_description ();
     }
 
   if (arm_hwcap & HWCAP_IWMMXT)
@@ -551,7 +581,7 @@ arm_linux_read_description (struct target_ops *ops)
       return result;
     }
 
-  return ops->beneath->to_read_description (ops->beneath);
+  return this->beneath->read_description ();
 }
 
 /* Information describing the hardware breakpoint capabilities.  */
@@ -635,10 +665,9 @@ arm_linux_get_hw_watchpoint_count (void)
 
 /* Have we got a free break-/watch-point available for use?  Returns -1 if
    there is not an appropriate resource available, otherwise returns 1.  */
-static int
-arm_linux_can_use_hw_breakpoint (struct target_ops *self,
-				 enum bptype type,
-				 int cnt, int ot)
+int
+arm_linux_nat_target::can_use_hw_breakpoint (enum bptype type,
+					     int cnt, int ot)
 {
   if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
       || type == bp_access_watchpoint || type == bp_watchpoint)
@@ -1026,10 +1055,9 @@ arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt,
 }
 
 /* Insert a Hardware breakpoint.  */
-static int
-arm_linux_insert_hw_breakpoint (struct target_ops *self,
-				struct gdbarch *gdbarch, 
-				struct bp_target_info *bp_tgt)
+int
+arm_linux_nat_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
+					    struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
@@ -1045,10 +1073,9 @@ arm_linux_insert_hw_breakpoint (struct target_ops *self,
 }
 
 /* Remove a hardware breakpoint.  */
-static int
-arm_linux_remove_hw_breakpoint (struct target_ops *self,
-				struct gdbarch *gdbarch, 
-				struct bp_target_info *bp_tgt)
+int
+arm_linux_nat_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
+					    struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
@@ -1065,9 +1092,8 @@ arm_linux_remove_hw_breakpoint (struct target_ops *self,
 
 /* Are we able to use a hardware watchpoint for the LEN bytes starting at 
    ADDR?  */
-static int
-arm_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
-				       CORE_ADDR addr, int len)
+int
+arm_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
   const struct arm_linux_hwbp_cap *cap = arm_linux_get_hwbp_cap ();
   CORE_ADDR max_wp_length, aligned_addr;
@@ -1098,11 +1124,10 @@ arm_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
 }
 
 /* Insert a Hardware breakpoint.  */
-static int
-arm_linux_insert_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len,
-			     enum target_hw_bp_type rw,
-			     struct expression *cond)
+int
+arm_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
+					 enum target_hw_bp_type rw,
+					 struct expression *cond)
 {
   struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
@@ -1118,10 +1143,10 @@ arm_linux_insert_watchpoint (struct target_ops *self,
 }
 
 /* Remove a hardware breakpoint.  */
-static int
-arm_linux_remove_watchpoint (struct target_ops *self, CORE_ADDR addr,
-			     int len, enum target_hw_bp_type rw,
-			     struct expression *cond)
+int
+arm_linux_nat_target::remove_watchpoint (CORE_ADDR addr,
+					 int len, enum target_hw_bp_type rw,
+					 struct expression *cond)
 {
   struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
@@ -1137,8 +1162,8 @@ arm_linux_remove_watchpoint (struct target_ops *self, CORE_ADDR addr,
 }
 
 /* What was the data address the target was stopped on accessing.  */
-static int
-arm_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
+int
+arm_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   siginfo_t siginfo;
   int slot;
@@ -1167,17 +1192,17 @@ arm_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 }
 
 /* Has the target been stopped by hitting a watchpoint?  */
-static int
-arm_linux_stopped_by_watchpoint (struct target_ops *ops)
+int
+arm_linux_nat_target::stopped_by_watchpoint ()
 {
   CORE_ADDR addr;
-  return arm_linux_stopped_data_address (ops, &addr);
+  return stopped_data_address (&addr);
 }
 
-static int
-arm_linux_watchpoint_addr_within_range (struct target_ops *target,
-					CORE_ADDR addr,
-					CORE_ADDR start, int length)
+int
+arm_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
+						    CORE_ADDR start,
+						    int length)
 {
   return start <= addr && start + length - 1 >= addr;
 }
@@ -1294,30 +1319,11 @@ arm_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
 void
 _initialize_arm_linux_nat (void)
 {
-  struct target_ops *t;
-
-  /* Fill in the generic GNU/Linux methods.  */
-  t = linux_target ();
-
-  /* Add our register access methods.  */
-  t->to_fetch_registers = arm_linux_fetch_inferior_registers;
-  t->to_store_registers = arm_linux_store_inferior_registers;
-
-  /* Add our hardware breakpoint and watchpoint implementation.  */
-  t->to_can_use_hw_breakpoint = arm_linux_can_use_hw_breakpoint;
-  t->to_insert_hw_breakpoint = arm_linux_insert_hw_breakpoint;
-  t->to_remove_hw_breakpoint = arm_linux_remove_hw_breakpoint;
-  t->to_region_ok_for_hw_watchpoint = arm_linux_region_ok_for_hw_watchpoint;
-  t->to_insert_watchpoint = arm_linux_insert_watchpoint;
-  t->to_remove_watchpoint = arm_linux_remove_watchpoint;
-  t->to_stopped_by_watchpoint = arm_linux_stopped_by_watchpoint;
-  t->to_stopped_data_address = arm_linux_stopped_data_address;
-  t->to_watchpoint_addr_within_range = arm_linux_watchpoint_addr_within_range;
-
-  t->to_read_description = arm_linux_read_description;
+  target_ops *t = &the_arm_linux_nat_target;
 
   /* Register the target.  */
-  linux_nat_add_target (t);
+  linux_target = &the_arm_linux_nat_target;
+  add_target (t);
 
   /* Handle thread creation and exit.  */
   linux_nat_set_new_thread (t, arm_linux_new_thread);

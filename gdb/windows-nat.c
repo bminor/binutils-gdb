@@ -201,10 +201,6 @@ typedef enum
 #define DEBUG_MEM(x)	if (debug_memory)	printf_unfiltered x
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
 
-static void windows_interrupt (struct target_ops *self);
-static int windows_thread_alive (struct target_ops *, ptid_t);
-static void windows_kill_inferior (struct target_ops *);
-
 static void cygwin_set_dr (int i, CORE_ADDR addr);
 static void cygwin_set_dr7 (unsigned long val);
 static CORE_ADDR cygwin_get_dr (int i);
@@ -301,6 +297,58 @@ static const struct xlate_exception
   {EXCEPTION_SINGLE_STEP, GDB_SIGNAL_TRAP},
   {STATUS_FLOAT_DIVIDE_BY_ZERO, GDB_SIGNAL_FPE},
   {-1, GDB_SIGNAL_UNKNOWN}};
+
+
+struct windows_nat_target final : public x86_nat_target<inf_child_target>
+{
+  void close () override;
+
+  void attach (const char *, int) override;
+
+  bool attach_no_wait () override
+  { return true; }
+
+  void detach (inferior *, int) override;
+
+  void resume (ptid_t, int , enum gdb_signal) override;
+
+  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
+  void files_info () override;
+
+  void kill () override;
+
+  void create_inferior (const char *, const std::string &,
+			char **, int) override;
+
+  void mourn_inferior () override;
+
+  int thread_alive (ptid_t ptid) override;
+
+  const char *pid_to_str (ptid_t) override;
+
+  void interrupt () override;
+
+  char *pid_to_exec_file (int pid) override;
+
+  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+
+  int get_tib_address (ptid_t ptid, CORE_ADDR *addr) override;
+
+  const char *thread_name (struct thread_info *) override;
+};
+
+static windows_nat_target the_windows_nat_target;
 
 /* Set the MAPPINGS static global to OFFSETS.
    See the description of MAPPINGS for more details.  */
@@ -531,9 +579,8 @@ do_windows_fetch_inferior_registers (struct regcache *regcache,
     }
 }
 
-static void
-windows_fetch_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int r)
+void
+windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 {
   DWORD pid = ptid_get_tid (regcache_get_ptid (regcache));
   windows_thread_info *th = thread_rec (pid, TRUE);
@@ -560,9 +607,9 @@ do_windows_store_inferior_registers (const struct regcache *regcache,
 
 /* Store a new register value into the context of the thread tied to
    REGCACHE.  */
-static void
-windows_store_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int r)
+
+void
+windows_nat_target::store_registers (struct regcache *regcache, int r)
 {
   DWORD pid = ptid_get_tid (regcache_get_ptid (regcache));
   windows_thread_info *th = thread_rec (pid, TRUE);
@@ -1310,9 +1357,8 @@ fake_create_process (void)
   return main_thread_id;
 }
 
-static void
-windows_resume (struct target_ops *ops,
-		ptid_t ptid, int step, enum gdb_signal sig)
+void
+windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 {
   windows_thread_info *th;
   DWORD continue_status = DBG_CONTINUE;
@@ -1373,8 +1419,7 @@ windows_resume (struct target_ops *ops,
 	  /* Single step by setting t bit.  */
 	  struct regcache *regcache = get_current_regcache ();
 	  struct gdbarch *gdbarch = regcache->arch ();
-	  windows_fetch_inferior_registers (ops, regcache,
-					    gdbarch_ps_regnum (gdbarch));
+	  fetch_registers (regcache, gdbarch_ps_regnum (gdbarch));
 	  th->context.EFlags |= FLAG_TRACE_BIT;
 	}
 
@@ -1631,9 +1676,9 @@ out:
 }
 
 /* Wait for interesting events to occur in the target process.  */
-static ptid_t
-windows_wait (struct target_ops *ops,
-	      ptid_t ptid, struct target_waitstatus *ourstatus, int options)
+ptid_t
+windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+			  int options)
 {
   int pid = -1;
 
@@ -1676,7 +1721,7 @@ windows_wait (struct target_ops *ops,
 	     the user tries to resume the execution in the inferior.
 	     This is a classic race that we should try to fix one day.  */
       SetConsoleCtrlHandler (&ctrl_c_handler, TRUE);
-      retval = get_windows_debug_event (ops, pid, ourstatus);
+      retval = get_windows_debug_event (this, pid, ourstatus);
       SetConsoleCtrlHandler (&ctrl_c_handler, FALSE);
 
       if (retval)
@@ -1689,7 +1734,7 @@ windows_wait (struct target_ops *ops,
 	    detach = deprecated_ui_loop_hook (0);
 
 	  if (detach)
-	    windows_kill_inferior (ops);
+	    kill ();
 	}
     }
 }
@@ -1791,7 +1836,7 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
     {
       struct target_waitstatus status;
 
-      windows_wait (ops, minus_one_ptid, &status, 0);
+      ops->wait (minus_one_ptid, &status, 0);
 
       /* Note windows_wait returns TARGET_WAITKIND_SPURIOUS for thread
 	 events.  */
@@ -1799,7 +1844,7 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
 	  && status.kind != TARGET_WAITKIND_SPURIOUS)
 	break;
 
-      windows_resume (ops, minus_one_ptid, 0, GDB_SIGNAL_0);
+      ops->resume (minus_one_ptid, 0, GDB_SIGNAL_0);
     }
 
   /* Now that the inferior has been started and all DLLs have been mapped,
@@ -1873,8 +1918,9 @@ out:
 }
 
 /* Attach to process PID, then initialize for debugging it.  */
-static void
-windows_attach (struct target_ops *ops, const char *args, int from_tty)
+
+void
+windows_nat_target::attach (const char *args, int from_tty)
 {
   BOOL ok;
   DWORD pid;
@@ -1922,17 +1968,17 @@ windows_attach (struct target_ops *ops, const char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  do_initial_windows_stuff (ops, pid, 1);
+  do_initial_windows_stuff (this, pid, 1);
   target_terminal::ours ();
 }
 
-static void
-windows_detach (struct target_ops *ops, inferior *inf, int from_tty)
+void
+windows_nat_target::detach (inferior *inf, int from_tty)
 {
   int detached = 1;
 
   ptid_t ptid = minus_one_ptid;
-  windows_resume (ops, ptid, 0, GDB_SIGNAL_0);
+  resume (ptid, 0, GDB_SIGNAL_0);
 
   if (!DebugActiveProcessStop (current_event.dwProcessId))
     {
@@ -1956,7 +2002,7 @@ windows_detach (struct target_ops *ops, inferior *inf, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (current_event.dwProcessId);
 
-  inf_child_maybe_unpush_target (ops);
+  maybe_unpush_target ();
 }
 
 /* Try to determine the executable filename.
@@ -2013,8 +2059,8 @@ windows_get_exec_module_filename (char *exe_name_ret, size_t exe_name_max_len)
 
 /* The pid_to_exec_file target_ops method for this platform.  */
 
-static char *
-windows_pid_to_exec_file (struct target_ops *self, int pid)
+char *
+windows_nat_target::pid_to_exec_file (int pid)
 {
   static char path[__PMAX];
 #ifdef __CYGWIN__
@@ -2041,8 +2087,8 @@ windows_pid_to_exec_file (struct target_ops *self, int pid)
 
 /* Print status information about what we're accessing.  */
 
-static void
-windows_files_info (struct target_ops *ignore)
+void
+windows_nat_target::files_info ()
 {
   struct inferior *inf = current_inferior ();
 
@@ -2430,10 +2476,10 @@ redirect_inferior_handles (const char *cmd_orig, char *cmd,
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
 
-static void
-windows_create_inferior (struct target_ops *ops, const char *exec_file,
-			 const std::string &origallargs, char **in_env,
-			 int from_tty)
+void
+windows_nat_target::create_inferior (const char *exec_file,
+				     const std::string &origallargs,
+				     char **in_env, int from_tty)
 {
   STARTUPINFO si;
 #ifdef __CYGWIN__
@@ -2751,13 +2797,13 @@ windows_create_inferior (struct target_ops *ops, const char *exec_file,
   else
     saw_create = 0;
 
-  do_initial_windows_stuff (ops, pi.dwProcessId, 0);
+  do_initial_windows_stuff (this, pi.dwProcessId, 0);
 
   /* windows_continue (DBG_CONTINUE, -1, 0); */
 }
 
-static void
-windows_mourn_inferior (struct target_ops *ops)
+void
+windows_nat_target::mourn_inferior ()
 {
   (void) windows_continue (DBG_CONTINUE, -1, 0);
   x86_cleanup_dregs();
@@ -2766,14 +2812,14 @@ windows_mourn_inferior (struct target_ops *ops)
       CHECK (CloseHandle (current_process_handle));
       open_process_used = 0;
     }
-  inf_child_mourn_inferior (ops);
+  inf_child_target::mourn_inferior ();
 }
 
 /* Send a SIGINT to the process group.  This acts just like the user typed a
    ^C on the controlling terminal.  */
 
-static void
-windows_interrupt (struct target_ops *self)
+void
+windows_nat_target::interrupt ()
 {
   DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT, current_event.dwProcessId));
@@ -2820,8 +2866,8 @@ windows_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
     return success ? TARGET_XFER_OK : TARGET_XFER_E_IO;
 }
 
-static void
-windows_kill_inferior (struct target_ops *ops)
+void
+windows_nat_target::kill ()
 {
   CHECK (TerminateProcess (current_process_handle, 0));
 
@@ -2838,16 +2884,16 @@ windows_kill_inferior (struct target_ops *ops)
   target_mourn_inferior (inferior_ptid);	/* Or just windows_mourn_inferior?  */
 }
 
-static void
-windows_close (struct target_ops *self)
+void
+windows_nat_target::close ()
 {
   DEBUG_EVENTS (("gdb: windows_close, inferior_ptid=%d\n",
 		ptid_get_pid (inferior_ptid)));
 }
 
 /* Convert pid to printable format.  */
-static const char *
-windows_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+windows_nat_target::pid_to_str (ptid_t ptid)
 {
   static char buf[80];
 
@@ -2904,11 +2950,11 @@ windows_xfer_shared_libraries (struct target_ops *ops,
   return len != 0 ? TARGET_XFER_OK : TARGET_XFER_EOF;
 }
 
-static enum target_xfer_status
-windows_xfer_partial (struct target_ops *ops, enum target_object object,
-		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
-		      ULONGEST *xfered_len)
+enum target_xfer_status
+windows_nat_target::xfer_partial (enum target_object object,
+				  const char *annex, gdb_byte *readbuf,
+				  const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+				  ULONGEST *xfered_len)
 {
   switch (object)
     {
@@ -2916,22 +2962,21 @@ windows_xfer_partial (struct target_ops *ops, enum target_object object,
       return windows_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
 
     case TARGET_OBJECT_LIBRARIES:
-      return windows_xfer_shared_libraries (ops, object, annex, readbuf,
+      return windows_xfer_shared_libraries (this, object, annex, readbuf,
 					    writebuf, offset, len, xfered_len);
 
     default:
-      return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					    readbuf, writebuf, offset, len,
-					    xfered_len);
+      return beneath->xfer_partial (object, annex,
+				    readbuf, writebuf, offset, len,
+				    xfered_len);
     }
 }
 
 /* Provide thread local base, i.e. Thread Information Block address.
    Returns 1 if ptid is found and sets *ADDR to thread_local_base.  */
 
-static int
-windows_get_tib_address (struct target_ops *self,
-			 ptid_t ptid, CORE_ADDR *addr)
+int
+windows_nat_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 {
   windows_thread_info *th;
 
@@ -2945,58 +2990,24 @@ windows_get_tib_address (struct target_ops *self,
   return 1;
 }
 
-static ptid_t
-windows_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
+ptid_t
+windows_nat_target::get_ada_task_ptid (long lwp, long thread)
 {
   return ptid_build (ptid_get_pid (inferior_ptid), 0, lwp);
 }
 
 /* Implementation of the to_thread_name method.  */
 
-static const char *
-windows_thread_name (struct target_ops *self, struct thread_info *thr)
+const char *
+windows_nat_target::thread_name (struct thread_info *thr)
 {
   return thread_rec (ptid_get_tid (thr->ptid), 0)->name;
 }
 
-static struct target_ops *
-windows_target (void)
-{
-  struct target_ops *t = inf_child_target ();
-
-  t->to_close = windows_close;
-  t->to_attach = windows_attach;
-  t->to_attach_no_wait = 1;
-  t->to_detach = windows_detach;
-  t->to_resume = windows_resume;
-  t->to_wait = windows_wait;
-  t->to_fetch_registers = windows_fetch_inferior_registers;
-  t->to_store_registers = windows_store_inferior_registers;
-  t->to_xfer_partial = windows_xfer_partial;
-  t->to_files_info = windows_files_info;
-  t->to_kill = windows_kill_inferior;
-  t->to_create_inferior = windows_create_inferior;
-  t->to_mourn_inferior = windows_mourn_inferior;
-  t->to_thread_alive = windows_thread_alive;
-  t->to_pid_to_str = windows_pid_to_str;
-  t->to_interrupt = windows_interrupt;
-  t->to_pid_to_exec_file = windows_pid_to_exec_file;
-  t->to_get_ada_task_ptid = windows_get_ada_task_ptid;
-  t->to_get_tib_address = windows_get_tib_address;
-  t->to_thread_name = windows_thread_name;
-
-  return t;
-}
 
 void
 _initialize_windows_nat (void)
 {
-  struct target_ops *t;
-
-  t = windows_target ();
-
-  x86_use_watchpoints (t);
-
   x86_dr_low.set_control = cygwin_set_dr7;
   x86_dr_low.set_addr = cygwin_set_dr;
   x86_dr_low.get_addr = cygwin_get_dr;
@@ -3007,7 +3018,7 @@ _initialize_windows_nat (void)
      calling x86_set_debug_register_length function
      in processor windows specific native file.  */
 
-  add_target (t);
+  add_target (&the_windows_nat_target);
 
 #ifdef __CYGWIN__
   cygwin_internal (CW_SET_DOS_FILE_WARNING, 0);
@@ -3144,8 +3155,9 @@ cygwin_get_dr7 (void)
 /* Determine if the thread referenced by "ptid" is alive
    by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
    it means that the thread has died.  Otherwise it is assumed to be alive.  */
-static int
-windows_thread_alive (struct target_ops *ops, ptid_t ptid)
+
+int
+windows_nat_target::thread_alive (ptid_t ptid)
 {
   int tid;
 

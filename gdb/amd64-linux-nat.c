@@ -30,7 +30,6 @@
 #include "gdb_proc_service.h"
 
 #include "amd64-nat.h"
-#include "linux-nat.h"
 #include "amd64-tdep.h"
 #include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
@@ -45,6 +44,15 @@
 #ifndef PTRACE_ARCH_PRCTL
 #define PTRACE_ARCH_PRCTL      30
 #endif
+
+struct amd64_linux_nat_target final : public x86_linux_nat_target
+{
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static amd64_linux_nat_target the_amd64_linux_nat_target;
 
 /* Mapping between the general-purpose registers in GNU/Linux x86-64
    `struct user' format and GDB's register cache layout for GNU/Linux
@@ -130,9 +138,8 @@ fill_fpregset (const struct regcache *regcache,
    this for all registers (including the floating point and SSE
    registers).  */
 
-static void
-amd64_linux_fetch_inferior_registers (struct target_ops *ops,
-				      struct regcache *regcache, int regnum)
+void
+amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   int tid;
@@ -209,9 +216,8 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
    -1, do this for all registers (including the floating-point and SSE
    registers).  */
 
-static void
-amd64_linux_store_inferior_registers (struct target_ops *ops,
-				      struct regcache *regcache, int regnum)
+void
+amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   int tid;
@@ -399,8 +405,6 @@ amd64_linux_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 void
 _initialize_amd64_linux_nat (void)
 {
-  struct target_ops *t;
-
   amd64_native_gregset32_reg_offset = amd64_linux_gregset32_reg_offset;
   amd64_native_gregset32_num_regs = I386_LINUX_NUM_REGS;
   amd64_native_gregset64_reg_offset = amd64_linux_gregset_reg_offset;
@@ -409,16 +413,11 @@ _initialize_amd64_linux_nat (void)
   gdb_assert (ARRAY_SIZE (amd64_linux_gregset32_reg_offset)
 	      == amd64_native_gregset32_num_regs);
 
-  /* Create a generic x86 GNU/Linux target.  */
-  t = x86_linux_create_target ();
-
-  /* Add our register access methods.  */
-  t->to_fetch_registers = amd64_linux_fetch_inferior_registers;
-  t->to_store_registers = amd64_linux_store_inferior_registers;
+  linux_target = &the_amd64_linux_nat_target;
 
   /* Add the target.  */
-  x86_linux_add_target (t);
+  x86_linux_add_target (linux_target);
 
   /* Add our siginfo layout converter.  */
-  linux_nat_set_siginfo_fixup (t, amd64_linux_siginfo_fixup);
+  linux_nat_set_siginfo_fixup (linux_target, amd64_linux_siginfo_fixup);
 }

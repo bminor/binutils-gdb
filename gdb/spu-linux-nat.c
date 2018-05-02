@@ -40,6 +40,28 @@
 #define INSTR_SC	0x44000002
 #define NR_spu_run	0x0116
 
+class spu_linux_nat_target final : public inf_ptrace_target
+{
+public:
+  void fetch_registers (struct regcache *regcache, int regnum) override;
+  void store_registers (struct regcache *regcache, int regnum) override;
+
+  void post_attach (int) override;
+  void post_startup_inferior (ptid_t) override;
+
+  ptid_t wait (ptid_t, struct target_waitstatus *, int options) override;
+
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
+  int can_use_hw_breakpoint (enum bptype, int, int) override;
+};
+
+static spu_linux_nat_target the_spu_linux_nat_target;
 
 /* Fetch PPU register REGNO.  */
 static ULONGEST
@@ -394,8 +416,8 @@ spu_symbol_file_add_from_memory (int inferior_fd)
 
 /* Override the post_startup_inferior routine to continue running
    the inferior until the first spu_run system call.  */
-static void
-spu_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
+void
+spu_linux_nat_target::post_startup_inferior (ptid_t ptid)
 {
   int fd;
   ULONGEST addr;
@@ -413,8 +435,8 @@ spu_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 
 /* Override the post_attach routine to try load the SPE executable
    file image from its copy inside the target process.  */
-static void
-spu_child_post_attach (struct target_ops *self, int pid)
+void
+spu_linux_nat_target::post_attach (int pid)
 {
   int fd;
   ULONGEST addr;
@@ -436,9 +458,9 @@ spu_child_post_attach (struct target_ops *self, int pid)
 
 /* Wait for child PTID to do something.  Return id of the child,
    minus_one_ptid in case of error; store status into *OURSTATUS.  */
-static ptid_t
-spu_child_wait (struct target_ops *ops,
-		ptid_t ptid, struct target_waitstatus *ourstatus, int options)
+ptid_t
+spu_linux_nat_target:::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+			     int options)
 {
   int save_errno;
   int status;
@@ -485,9 +507,8 @@ spu_child_wait (struct target_ops *ops,
 }
 
 /* Override the fetch_inferior_register routine.  */
-static void
-spu_fetch_inferior_registers (struct target_ops *ops,
-			      struct regcache *regcache, int regno)
+void
+spu_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   int fd;
   ULONGEST addr;
@@ -537,9 +558,8 @@ spu_fetch_inferior_registers (struct target_ops *ops,
 }
 
 /* Override the store_inferior_register routine.  */
-static void
-spu_store_inferior_registers (struct target_ops *ops,
-			      struct regcache *regcache, int regno)
+void
+spu_linux_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   int fd;
   ULONGEST addr;
@@ -578,11 +598,11 @@ spu_store_inferior_registers (struct target_ops *ops,
 }
 
 /* Override the to_xfer_partial routine.  */
-static enum target_xfer_status
-spu_xfer_partial (struct target_ops *ops,
-		  enum target_object object, const char *annex,
-		  gdb_byte *readbuf, const gdb_byte *writebuf,
-		  ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+enum target_xfer_status
+spu_linux_nat_target::xfer_partial (enum target_object object, const char *annex,
+				    gdb_byte *readbuf, const gdb_byte *writebuf,
+				    ULONGEST offset, ULONGEST len,
+				    ULONGEST *xfered_len)
 {
   if (object == TARGET_OBJECT_SPU)
     return spu_proc_xfer_spu (annex, readbuf, writebuf, offset, len,
@@ -627,9 +647,9 @@ spu_xfer_partial (struct target_ops *ops,
 }
 
 /* Override the to_can_use_hw_breakpoint routine.  */
-static int
-spu_can_use_hw_breakpoint (struct target_ops *self,
-			   enum bptype type, int cnt, int othertype)
+int
+spu_linux_nat_target::can_use_hw_breakpoint (enum bptype type,
+					     int cnt, int othertype)
 {
   return 0;
 }
@@ -638,19 +658,5 @@ spu_can_use_hw_breakpoint (struct target_ops *self,
 void 
 _initialize_spu_nat (void)
 {
-  /* Generic ptrace methods.  */
-  struct target_ops *t;
-  t = inf_ptrace_target ();
-
-  /* Add SPU methods.  */
-  t->to_post_attach = spu_child_post_attach;  
-  t->to_post_startup_inferior = spu_child_post_startup_inferior;
-  t->to_wait = spu_child_wait;
-  t->to_fetch_registers = spu_fetch_inferior_registers;
-  t->to_store_registers = spu_store_inferior_registers;
-  t->to_xfer_partial = spu_xfer_partial;
-  t->to_can_use_hw_breakpoint = spu_can_use_hw_breakpoint;
-
-  /* Register SPU target.  */
-  add_target (t);
+  add_target (&the_spu_linux_nat_target);
 }

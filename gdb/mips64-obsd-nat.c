@@ -35,6 +35,14 @@
 #define MIPS_FP0_REGNUM	MIPS_EMBED_FP0_REGNUM
 #define MIPS_FSR_REGNUM MIPS_EMBED_FP0_REGNUM + 32
 
+struct mips64_obsd_nat_target final : public obsd_nat_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static mips64_obsd_nat_target the_mips64_obsd_nat_target;
+
 /* Supply the general-purpose registers stored in GREGS to REGCACHE.  */
 
 static void
@@ -77,9 +85,8 @@ mips64obsd_collect_gregset (const struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
-static void
-mips64obsd_fetch_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regnum)
+void
+mips64_obsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -94,8 +101,7 @@ mips64obsd_fetch_inferior_registers (struct target_ops *ops,
    this for all registers.  */
 
 static void
-mips64obsd_store_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regnum)
+mips64_obsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -112,10 +118,5 @@ mips64obsd_store_inferior_registers (struct target_ops *ops,
 void
 _initialize_mips64obsd_nat (void)
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = mips64obsd_fetch_inferior_registers;
-  t->to_store_registers = mips64obsd_store_inferior_registers;
-  obsd_add_target (t);
+  add_target (&the_mips64_obsd_nat_target);
 }

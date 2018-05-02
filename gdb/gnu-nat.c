@@ -1461,9 +1461,10 @@ extern "C" int notify_server (mach_msg_header_t *, mach_msg_header_t *);
 extern "C" int process_reply_server (mach_msg_header_t *, mach_msg_header_t *);
 
 /* Wait for something to happen in the inferior, returning what in STATUS.  */
-static ptid_t
-gnu_wait (struct target_ops *ops,
-	  ptid_t ptid, struct target_waitstatus *status, int options)
+
+ptid_t
+gnu_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
+		      int options)
 {
   struct msg
     {
@@ -1998,9 +1999,8 @@ port_msgs_queued (mach_port_t port)
    still unprocessed from the last resume we did (any given resume may result
    in multiple events returned by wait).  */
 
-static void
-gnu_resume (struct target_ops *ops,
-	    ptid_t ptid, int step, enum gdb_signal sig)
+void
+gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 {
   struct proc *step_thread = 0;
   int resume_all;
@@ -2075,8 +2075,8 @@ gnu_resume (struct target_ops *ops,
 }
 
 
-static void
-gnu_kill_inferior (struct target_ops *ops)
+void
+gnu_nat_target::kill ()
 {
   struct proc *task = gnu_current_inf->task;
 
@@ -2090,12 +2090,12 @@ gnu_kill_inferior (struct target_ops *ops)
 }
 
 /* Clean up after the inferior dies.  */
-static void
-gnu_mourn_inferior (struct target_ops *ops)
+void
+gnu_nat_target::mourn_inferior ()
 {
   inf_debug (gnu_current_inf, "rip");
   inf_detach (gnu_current_inf);
-  inf_child_mourn_inferior (ops);
+  inf_child_target::mourn_inferior ();
 }
 
 
@@ -2131,11 +2131,11 @@ gnu_ptrace_me (void)
     trace_start_error_with_name ("ptrace");
 }
 
-static void
-gnu_create_inferior (struct target_ops *ops, 
-		     const char *exec_file, const std::string &allargs,
-		     char **env,
-		     int from_tty)
+void
+gnu_nat_target::create_inferior (const char *exec_file,
+				 const std::string &allargs,
+				 char **env,
+				 int from_tty)
 {
   struct inf *inf = cur_inf ();
   int pid;
@@ -2155,7 +2155,7 @@ gnu_create_inferior (struct target_ops *ops,
 
   inf_attach (inf, pid);
 
-  push_target (ops);
+  push_target (this);
 
   inf->pending_execs = 1;
   inf->nomsg = 1;
@@ -2190,8 +2190,8 @@ gnu_create_inferior (struct target_ops *ops,
 
 /* Attach to process PID, then initialize for debugging it
    and wait for the trace-trap that results from attaching.  */
-static void
-gnu_attach (struct target_ops *ops, const char *args, int from_tty)
+void
+gnu_nat_target::attach (const char *args, int from_tty)
 {
   int pid;
   char *exec_file;
@@ -2220,7 +2220,7 @@ gnu_attach (struct target_ops *ops, const char *args, int from_tty)
 
   inf_attach (inf, pid);
 
-  push_target (ops);
+  push_target (this);
 
   inferior = current_inferior ();
   inferior_appeared (inferior, pid);
@@ -2254,8 +2254,8 @@ gnu_attach (struct target_ops *ops, const char *args, int from_tty)
    to work, it may be necessary for the process to have been
    previously attached.  It *might* work if the program was
    started via fork.  */
-static void
-gnu_detach (struct target_ops *ops, inferior *inf, int from_tty)
+void
+gnu_nat_target::detach (inferior *inf, int from_tty)
 {
   int pid;
 
@@ -2282,14 +2282,14 @@ gnu_detach (struct target_ops *ops, inferior *inf, int from_tty)
 }
 
 
-static void
-gnu_stop (struct target_ops *self, ptid_t ptid)
+void
+gnu_nat_target::stop (ptid_t ptid)
 {
-  error (_("to_stop target function not implemented"));
+  error (_("stop target function not implemented"));
 }
 
-static int
-gnu_thread_alive (struct target_ops *ops, ptid_t ptid)
+int
+gnu_nat_target::thread_alive (ptid_t ptid)
 {
   inf_update_procs (gnu_current_inf);
   return !!inf_tid_to_thread (gnu_current_inf,
@@ -2599,11 +2599,11 @@ gnu_xfer_auxv (gdb_byte *readbuf, const gdb_byte *writebuf,
 
 /* Target to_xfer_partial implementation.  */
 
-static enum target_xfer_status
-gnu_xfer_partial (struct target_ops *ops, enum target_object object,
-		  const char *annex, gdb_byte *readbuf,
-		  const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
-		  ULONGEST *xfered_len)
+enum target_xfer_status
+gnu_nat_target::xfer_partial (enum target_object object,
+			      const char *annex, gdb_byte *readbuf,
+			      const gdb_byte *writebuf, ULONGEST offset,
+			      ULONGEST len, ULONGEST *xfered_len)
 {
   switch (object)
     {
@@ -2617,9 +2617,10 @@ gnu_xfer_partial (struct target_ops *ops, enum target_object object,
 }
 
 /* Call FUNC on each memory region in the task.  */
-static int
-gnu_find_memory_regions (struct target_ops *self,
-			 find_memory_region_ftype func, void *data)
+
+int
+gnu_nat_target::find_memory_regions (find_memory_region_ftype func,
+				     void *data)
 {
   kern_return_t err;
   task_t task;
@@ -2711,8 +2712,8 @@ proc_string (struct proc *proc)
   return tid_str;
 }
 
-static const char *
-gnu_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+gnu_nat_target::pid_to_str (ptid_t ptid)
 {
   struct inf *inf = gnu_current_inf;
   int tid = ptid_get_lwp (ptid);
@@ -2727,32 +2728,6 @@ gnu_pid_to_str (struct target_ops *ops, ptid_t ptid)
       xsnprintf (tid_str, sizeof (tid_str), "bogus thread id %d", tid);
       return tid_str;
     }
-}
-
-
-/* Create a prototype generic GNU/Hurd target.  The client can
-   override it with local methods.  */
-
-struct target_ops *
-gnu_target (void)
-{
-  struct target_ops *t = inf_child_target ();
-
-  t->to_attach = gnu_attach;
-  t->to_attach_no_wait = 1;
-  t->to_detach = gnu_detach;
-  t->to_resume = gnu_resume;
-  t->to_wait = gnu_wait;
-  t->to_xfer_partial = gnu_xfer_partial;
-  t->to_find_memory_regions = gnu_find_memory_regions;
-  t->to_kill = gnu_kill_inferior;
-  t->to_create_inferior = gnu_create_inferior;
-  t->to_mourn_inferior = gnu_mourn_inferior;
-  t->to_thread_alive = gnu_thread_alive;
-  t->to_pid_to_str = gnu_pid_to_str;
-  t->to_stop = gnu_stop;
-
-  return t;
 }
 
 

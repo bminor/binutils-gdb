@@ -22,9 +22,25 @@
 
 #include "linux-nat.h"
 
-/* Create a generic GNU/Linux target using traditional
-   ptrace register access.  */
-struct target_ops *linux_trad_target
-  (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int));
+/* A prototype GNU/Linux target using traditional ptrace register
+   access.  A concrete type should override REGISTER_U_OFFSET.  */
+
+class linux_nat_trad_target : public linux_nat_target
+{
+public:
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+protected:
+  /* Return the offset within the user area where a particular
+     register is stored.  */
+  virtual CORE_ADDR register_u_offset (struct gdbarch *gdbarch,
+				       int regnum, int store) = 0;
+
+private:
+  /* Helpers.  See definition.  */
+  void fetch_register (struct regcache *regcache, int regnum);
+  void store_register (const struct regcache *regcache, int regnum);
+};
 
 #endif /* LINUX_NAT_TRAD_H */

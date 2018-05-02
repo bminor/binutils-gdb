@@ -75,6 +75,40 @@
    of the ptid_t prevents thread IDs changing when libpthread is
    loaded or unloaded.  */
 
+class thread_db_target final : public target_ops
+{
+public:
+  thread_db_target ();
+
+  const char *shortname () override
+  { return "multi-thread"; }
+  const char *longname () override
+  { return _("multi-threaded child process."); }
+  const char *doc () override
+  { return _("Threads and pthreads support."); }
+
+  void detach (inferior *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  void resume (ptid_t, int, enum gdb_signal) override;
+  void mourn_inferior () override;
+  void update_thread_list () override;
+  const char *pid_to_str (ptid_t) override;
+  CORE_ADDR get_thread_local_address (ptid_t ptid,
+				      CORE_ADDR load_module_addr,
+				      CORE_ADDR offset) override;
+  const char *extra_thread_info (struct thread_info *) override;
+  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+
+  thread_info *thread_handle_to_thread_info (const gdb_byte *thread_handle,
+					     int handle_len,
+					     inferior *inf) override;
+};
+
+thread_db_target::thread_db_target ()
+{
+  this->to_stratum = thread_stratum;
+}
+
 static char *libthread_db_search_path;
 
 /* Set to non-zero if thread_db auto-loading is enabled
@@ -118,7 +152,7 @@ show_libthread_db_debug (struct ui_file *file, int from_tty,
    threads.  */
 
 /* This module's target vector.  */
-static struct target_ops thread_db_ops;
+static thread_db_target the_thread_db_target;
 
 /* Non-zero if we have determined the signals used by the threads
    library.  */
@@ -635,7 +669,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
   /* The thread library was detected.  Activate the thread_db target
      if this is the first process using it.  */
   if (thread_db_list->next == NULL)
-    push_target (&thread_db_ops);
+    push_target (&the_thread_db_target);
 
   return 1;
 }
@@ -889,7 +923,7 @@ thread_db_load (void)
     return 0;
 
   /* Don't attempt to use thread_db for remote targets.  */
-  if (!(target_can_run (&current_target) || core_bfd))
+  if (!(target_can_run () || core_bfd))
     return 0;
 
   if (thread_db_load_search ())
@@ -980,7 +1014,7 @@ static void
 check_pid_namespace_match (void)
 {
   /* Check is only relevant for local targets targets.  */
-  if (target_can_run (&current_target))
+  if (target_can_run ())
     {
       /* If the child is in a different PID namespace, its idea of its
 	 PID will differ from our idea of its PID.  When we scan the
@@ -1055,32 +1089,31 @@ record_thread (struct thread_db_info *info,
   return tp;
 }
 
-static void
-thread_db_detach (struct target_ops *ops, inferior *inf, int from_tty)
+void
+thread_db_target::detach (inferior *inf, int from_tty)
 {
-  struct target_ops *target_beneath = find_target_beneath (ops);
+  struct target_ops *target_beneath = find_target_beneath (this);
 
   delete_thread_db_info (inf->pid);
 
-  target_beneath->to_detach (target_beneath, inf, from_tty);
+  target_beneath->detach (inf, from_tty);
 
   /* NOTE: From this point on, inferior_ptid is null_ptid.  */
 
   /* If there are no more processes using libpthread, detach the
      thread_db target ops.  */
   if (!thread_db_list)
-    unpush_target (&thread_db_ops);
+    unpush_target (this);
 }
 
-static ptid_t
-thread_db_wait (struct target_ops *ops,
-		ptid_t ptid, struct target_waitstatus *ourstatus,
-		int options)
+ptid_t
+thread_db_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+			int options)
 {
   struct thread_db_info *info;
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
 
-  ptid = beneath->to_wait (beneath, ptid, ourstatus, options);
+  ptid = beneath->wait (ptid, ourstatus, options);
 
   switch (ourstatus->kind)
     {
@@ -1103,7 +1136,7 @@ thread_db_wait (struct target_ops *ops,
 	 not unless we find otherwise.  */
       delete_thread_db_info (ptid_get_pid (ptid));
       if (!thread_db_list)
- 	unpush_target (&thread_db_ops);
+	unpush_target (&the_thread_db_target);
 
       return ptid;
     }
@@ -1114,18 +1147,18 @@ thread_db_wait (struct target_ops *ops,
   return ptid;
 }
 
-static void
-thread_db_mourn_inferior (struct target_ops *ops)
+void
+thread_db_target::mourn_inferior ()
 {
-  struct target_ops *target_beneath = find_target_beneath (ops);
+  struct target_ops *target_beneath = find_target_beneath (this);
 
   delete_thread_db_info (ptid_get_pid (inferior_ptid));
 
-  target_beneath->to_mourn_inferior (target_beneath);
+  target_beneath->mourn_inferior ();
 
   /* Detach thread_db target ops.  */
   if (!thread_db_list)
-    unpush_target (ops);
+    unpush_target (&the_thread_db_target);
 }
 
 struct callback_data
@@ -1293,8 +1326,8 @@ thread_db_find_new_threads_1 (ptid_t ptid)
 /* Implement the to_update_thread_list target method for this
    target.  */
 
-static void
-thread_db_update_thread_list (struct target_ops *ops)
+void
+thread_db_target::update_thread_list ()
 {
   struct thread_db_info *info;
   struct inferior *inf;
@@ -1334,11 +1367,11 @@ thread_db_update_thread_list (struct target_ops *ops)
     }
 
   /* Give the beneath target a chance to do extra processing.  */
-  ops->beneath->to_update_thread_list (ops->beneath);
+  this->beneath->update_thread_list ();
 }
 
-static const char *
-thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+thread_db_target::pid_to_str (ptid_t ptid)
 {
   struct thread_info *thread_info = find_thread_ptid (ptid);
   struct target_ops *beneath;
@@ -1354,16 +1387,15 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
       return buf;
     }
 
-  beneath = find_target_beneath (ops);
-  return beneath->to_pid_to_str (beneath, ptid);
+  beneath = find_target_beneath (this);
+  return beneath->pid_to_str (ptid);
 }
 
 /* Return a string describing the state of the thread specified by
    INFO.  */
 
-static const char *
-thread_db_extra_thread_info (struct target_ops *self,
-			     struct thread_info *info)
+const char *
+thread_db_target::extra_thread_info (thread_info *info)
 {
   if (info->priv == NULL)
     return NULL;
@@ -1379,11 +1411,10 @@ thread_db_extra_thread_info (struct target_ops *self,
 /* Return pointer to the thread_info struct which corresponds to
    THREAD_HANDLE (having length HANDLE_LEN).  */
 
-static struct thread_info *
-thread_db_thread_handle_to_thread_info (struct target_ops *ops,
-					const gdb_byte *thread_handle,
-					int handle_len,
-					struct inferior *inf)
+thread_info *
+thread_db_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
+						int handle_len,
+						inferior *inf)
 {
   struct thread_info *tp;
   thread_t handle_tid;
@@ -1412,11 +1443,10 @@ thread_db_thread_handle_to_thread_info (struct target_ops *ops,
 /* Get the address of the thread local variable in load module LM which
    is stored at OFFSET within the thread local storage for thread PTID.  */
 
-static CORE_ADDR
-thread_db_get_thread_local_address (struct target_ops *ops,
-				    ptid_t ptid,
-				    CORE_ADDR lm,
-				    CORE_ADDR offset)
+CORE_ADDR
+thread_db_target::get_thread_local_address (ptid_t ptid,
+					    CORE_ADDR lm,
+					    CORE_ADDR offset)
 {
   struct thread_info *thread_info;
   struct target_ops *beneath;
@@ -1491,24 +1521,23 @@ thread_db_get_thread_local_address (struct target_ops *ops,
 	      : (CORE_ADDR) (uintptr_t) address);
     }
 
-  beneath = find_target_beneath (ops);
-  return beneath->to_get_thread_local_address (beneath, ptid, lm, offset);
+  beneath = find_target_beneath (this);
+  return beneath->get_thread_local_address (ptid, lm, offset);
 }
 
 /* Implement the to_get_ada_task_ptid target method for this target.  */
 
-static ptid_t
-thread_db_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
+ptid_t
+thread_db_target::get_ada_task_ptid (long lwp, long thread)
 {
   /* NPTL uses a 1:1 model, so the LWP id suffices.  */
   return ptid_build (ptid_get_pid (inferior_ptid), lwp, 0);
 }
 
-static void
-thread_db_resume (struct target_ops *ops,
-		  ptid_t ptid, int step, enum gdb_signal signo)
+void
+thread_db_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
   struct thread_db_info *info;
 
   if (ptid_equal (ptid, minus_one_ptid))
@@ -1522,7 +1551,7 @@ thread_db_resume (struct target_ops *ops,
   if (info)
     info->need_stale_parent_threads_check = 0;
 
-  beneath->to_resume (beneath, ptid, step, signo);
+  beneath->resume (ptid, step, signo);
 }
 
 /* std::sort helper function for info_auto_load_libthread_db, sort the
@@ -1637,35 +1666,9 @@ info_auto_load_libthread_db (const char *args, int from_tty)
     uiout->message (_("No auto-loaded libthread-db.\n"));
 }
 
-static void
-init_thread_db_ops (void)
-{
-  thread_db_ops.to_shortname = "multi-thread";
-  thread_db_ops.to_longname = "multi-threaded child process.";
-  thread_db_ops.to_doc = "Threads and pthreads support.";
-  thread_db_ops.to_detach = thread_db_detach;
-  thread_db_ops.to_wait = thread_db_wait;
-  thread_db_ops.to_resume = thread_db_resume;
-  thread_db_ops.to_mourn_inferior = thread_db_mourn_inferior;
-  thread_db_ops.to_update_thread_list = thread_db_update_thread_list;
-  thread_db_ops.to_pid_to_str = thread_db_pid_to_str;
-  thread_db_ops.to_stratum = thread_stratum;
-  thread_db_ops.to_has_thread_control = tc_schedlock;
-  thread_db_ops.to_get_thread_local_address
-    = thread_db_get_thread_local_address;
-  thread_db_ops.to_extra_thread_info = thread_db_extra_thread_info;
-  thread_db_ops.to_get_ada_task_ptid = thread_db_get_ada_task_ptid;
-  thread_db_ops.to_thread_handle_to_thread_info = thread_db_thread_handle_to_thread_info;
-  thread_db_ops.to_magic = OPS_MAGIC;
-
-  complete_target_initialization (&thread_db_ops);
-}
-
 void
 _initialize_thread_db (void)
 {
-  init_thread_db_ops ();
-
   /* Defer loading of libthread_db.so until inferior is running.
      This allows gdb to load correct libthread_db for a given
      executable -- there could be multiple versions of glibc,

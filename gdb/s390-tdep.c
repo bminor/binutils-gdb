@@ -661,7 +661,7 @@ s390_load (struct s390_prologue_data *data,
   if (pv_is_constant (addr))
     {
       struct target_section *secp;
-      secp = target_section_by_addr (&current_target, addr.k);
+      secp = target_section_by_addr (target_stack, addr.k);
       if (secp != NULL
 	  && (bfd_get_section_flags (secp->the_bfd_section->owner,
 				     secp->the_bfd_section)

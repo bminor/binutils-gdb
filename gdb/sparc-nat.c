@@ -134,8 +134,7 @@ sparc32_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum)
    for all registers (including the floating-point registers).  */
 
 void
-sparc_fetch_inferior_registers (struct target_ops *ops,
-				struct regcache *regcache, int regnum)
+sparc_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   pid_t pid;
@@ -187,8 +186,7 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
 }
 
 void
-sparc_store_inferior_registers (struct target_ops *ops,
-				struct regcache *regcache, int regnum)
+sparc_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   pid_t pid;
@@ -253,7 +251,7 @@ sparc_store_inferior_registers (struct target_ops *ops,
 /* Implement the to_xfer_partial target_ops method for
    TARGET_OBJECT_WCOOKIE.  Fetch StackGhost Per-Process XOR cookie.  */
 
-static enum target_xfer_status
+enum target_xfer_status
 sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
@@ -305,38 +303,7 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
   *xfered_len = (ULONGEST) len;
   return TARGET_XFER_OK;
 }
-
-target_xfer_partial_ftype *inf_ptrace_xfer_partial;
-
-static enum target_xfer_status
-sparc_xfer_partial (struct target_ops *ops, enum target_object object,
-		    const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
-		    ULONGEST *xfered_len)
-{
-  if (object == TARGET_OBJECT_WCOOKIE)
-    return sparc_xfer_wcookie (ops, object, annex, readbuf, writebuf, 
-			       offset, len, xfered_len);
-
-  return inf_ptrace_xfer_partial (ops, object, annex, readbuf, writebuf,
-				  offset, len, xfered_len);
-}
 
-/* Create a prototype generic SPARC target.  The client can override
-   it with local methods.  */
-
-struct target_ops *
-sparc_target (void)
-{
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = sparc_fetch_inferior_registers;
-  t->to_store_registers = sparc_store_inferior_registers;
-  inf_ptrace_xfer_partial = t->to_xfer_partial;
-  t->to_xfer_partial = sparc_xfer_partial;
-  return t;
-}
 
 void
 _initialize_sparc_nat (void)

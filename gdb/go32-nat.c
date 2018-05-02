@@ -232,7 +232,6 @@ static int dr_ref_count[4];
 #define SOME_PID 42
 
 static int prog_has_started = 0;
-static void go32_mourn_inferior (struct target_ops *ops);
 
 #define r_ofs(x) (offsetof(TSS,x))
 
@@ -335,8 +334,56 @@ static struct {
   {GDB_SIGNAL_LAST, -1}
 };
 
-static void
-go32_attach (struct target_ops *ops, const char *args, int from_tty)
+/* The go32 target.  */
+
+struct go32_nat_target final : public x86_nat_target<inf_child_target>
+{
+  void attach (const char *, int) override;
+
+  void resume (ptid_t, int, enum gdb_signal) override;
+
+  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
+  void files_info () override;
+
+  void terminal_init () override;
+
+  void terminal_inferior () override;
+
+  void terminal_ours_for_output () override;
+
+  void terminal_ours () override;
+
+  void terminal_info (const char *, int) override;
+
+  void pass_ctrlc () override;
+
+  void kill () override;
+
+  void create_inferior (const char *, const std::string &,
+			char **, int) override;
+
+  void mourn_inferior () override;
+
+  int thread_alive (ptid_t ptid) override;
+
+  const char *pid_to_str (ptid_t) override;
+};
+
+static go32_nat_target the_go32_nat_target;
+
+void
+go32_nat_target::attach (const char *args, int from_tty)
 {
   error (_("\
 You cannot attach to a running program on this platform.\n\
@@ -346,9 +393,8 @@ Use the `run' command to run DJGPP programs."));
 static int resume_is_step;
 static int resume_signal = -1;
 
-static void
-go32_resume (struct target_ops *ops,
-	     ptid_t ptid, int step, enum gdb_signal siggnal)
+void
+go32_nat_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
 {
   int i;
 
@@ -371,9 +417,9 @@ go32_resume (struct target_ops *ops,
 
 static char child_cwd[FILENAME_MAX];
 
-static ptid_t
-go32_wait (struct target_ops *ops,
-	   ptid_t ptid, struct target_waitstatus *status, int options)
+ptid_t
+go32_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
+		       int options)
 {
   int i;
   unsigned char saved_opcode;
@@ -505,9 +551,8 @@ fetch_register (struct regcache *regcache, int regno)
 		    _("Invalid register no. %d in fetch_register."), regno);
 }
 
-static void
-go32_fetch_registers (struct target_ops *ops,
-		      struct regcache *regcache, int regno)
+void
+go32_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     fetch_register (regcache, regno);
@@ -536,9 +581,8 @@ store_register (const struct regcache *regcache, int regno)
 		    _("Invalid register no. %d in store_register."), regno);
 }
 
-static void
-go32_store_registers (struct target_ops *ops,
-		      struct regcache *regcache, int regno)
+void
+go32_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   unsigned r;
 
@@ -598,11 +642,12 @@ go32_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 
 /* Target to_xfer_partial implementation.  */
 
-static enum target_xfer_status
-go32_xfer_partial (struct target_ops *ops, enum target_object object,
-		   const char *annex, gdb_byte *readbuf,
-		   const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
-		   ULONGEST *xfered_len)
+enum target_xfer_status
+go32_nat_target::xfer_partial (enum target_object object,
+			       const char *annex, gdb_byte *readbuf,
+			       const gdb_byte *writebuf, ULONGEST offset,
+			       ULONGEST len,
+			       ULONGEST *xfered_len)
 {
   switch (object)
     {
@@ -610,30 +655,30 @@ go32_xfer_partial (struct target_ops *ops, enum target_object object,
       return go32_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
 
     default:
-      return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					    readbuf, writebuf, offset, len,
-					    xfered_len);
+      return this->beneath->xfer_partial (object, annex,
+					  readbuf, writebuf, offset, len,
+					  xfered_len);
     }
 }
 
 static cmdline_t child_cmd;	/* Parsed child's command line kept here.  */
 
-static void
-go32_files_info (struct target_ops *target)
+void
+go32_nat_target::files_info ()
 {
   printf_unfiltered ("You are running a DJGPP V2 program.\n");
 }
 
-static void
-go32_kill_inferior (struct target_ops *ops)
+void
+go32_nat_target::kill_inferior ()
 {
-  go32_mourn_inferior (ops);
+  mourn_inferior ();
 }
 
-static void
-go32_create_inferior (struct target_ops *ops,
-		      const char *exec_file,
-		      const std::string &allargs, char **env, int from_tty)
+void
+go32_nat_target::create_inferior (const char *exec_file,
+				  const std::string &allargs,
+				  char **env, int from_tty)
 {
   extern char **environ;
   jmp_buf start_state;
@@ -711,8 +756,8 @@ go32_create_inferior (struct target_ops *ops,
   inf = current_inferior ();
   inferior_appeared (inf, SOME_PID);
 
-  if (!target_is_pushed (ops))
-    push_target (ops);
+  if (!target_is_pushed (this))
+    push_target (this);
 
   add_thread_silent (inferior_ptid);
 
@@ -721,8 +766,8 @@ go32_create_inferior (struct target_ops *ops,
   prog_has_started = 1;
 }
 
-static void
-go32_mourn_inferior (struct target_ops *ops)
+void
+go32_nat_target::mourn_inferior ()
 {
   ptid_t ptid;
 
@@ -747,7 +792,7 @@ go32_mourn_inferior (struct target_ops *ops)
   prog_has_started = 0;
 
   generic_mourn_inferior ();
-  inf_child_maybe_unpush_target (ops);
+  maybe_unpush_target ();
 }
 
 /* Hardware watchpoint support.  */
@@ -852,15 +897,15 @@ static int inf_terminal_mode;
    second call will always see GDB's own cooked terminal.  */
 static int terminal_is_ours = 1;
 
-static void
-go32_terminal_init (struct target_ops *self)
+void
+go32_nat_target::terminal_init ()
 {
   inf_mode_valid = 0;	/* Reinitialize, in case they are restarting child.  */
   terminal_is_ours = 1;
 }
 
-static void
-go32_terminal_info (struct target_ops *self, const char *args, int from_tty)
+void
+go32_nat_target::terminal_info (const char *args, int from_tty)
 {
   printf_unfiltered ("Inferior's terminal is in %s mode.\n",
 		     !inf_mode_valid
@@ -889,8 +934,8 @@ go32_terminal_info (struct target_ops *self, const char *args, int from_tty)
 #endif
 }
 
-static void
-go32_terminal_inferior (struct target_ops *self)
+void
+go32_nat_target::terminal_inferior ()
 {
   /* Redirect standard handles as child wants them.  */
   errno = 0;
@@ -910,8 +955,8 @@ go32_terminal_inferior (struct target_ops *self)
   }
 }
 
-static void
-go32_terminal_ours (struct target_ops *self)
+void
+go32_nat_target::terminal_ours ()
 {
   /* Switch to cooked mode on the gdb terminal and save the inferior
      terminal mode to be restored when it is resumed.  */
@@ -937,50 +982,21 @@ go32_terminal_ours (struct target_ops *self)
   }
 }
 
-static void
-go32_pass_ctrlc (struct target_ops *self)
+void
+go32_nat_target::pass_ctrlc ()
 {
 }
 
-static int
-go32_thread_alive (struct target_ops *ops, ptid_t ptid)
+int
+go32_nat_target::thread_alive (ptid_t ptid)
 {
   return !ptid_equal (ptid, null_ptid);
 }
 
-static const char *
-go32_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+go32_nat_target::pid_to_str (ptid_t ptid)
 {
   return normal_pid_to_str (ptid);
-}
-
-/* Create a go32 target.  */
-
-static struct target_ops *
-go32_target (void)
-{
-  struct target_ops *t = inf_child_target ();
-
-  t->to_attach = go32_attach;
-  t->to_resume = go32_resume;
-  t->to_wait = go32_wait;
-  t->to_fetch_registers = go32_fetch_registers;
-  t->to_store_registers = go32_store_registers;
-  t->to_xfer_partial = go32_xfer_partial;
-  t->to_files_info = go32_files_info;
-  t->to_terminal_init = go32_terminal_init;
-  t->to_terminal_inferior = go32_terminal_inferior;
-  t->to_terminal_ours_for_output = go32_terminal_ours;
-  t->to_terminal_ours = go32_terminal_ours;
-  t->to_terminal_info = go32_terminal_info;
-  t->to_pass_ctrlc = go32_pass_ctrlc;
-  t->to_kill = go32_kill_inferior;
-  t->to_create_inferior = go32_create_inferior;
-  t->to_mourn_inferior = go32_mourn_inferior;
-  t->to_thread_alive = go32_thread_alive;
-  t->to_pid_to_str = go32_pid_to_str;
-
-  return t;
 }
 
 /* Return the current DOS codepage number.  */
@@ -2067,8 +2083,6 @@ go32_info_dos_command (const char *args, int from_tty)
 void
 _initialize_go32_nat (void)
 {
-  struct target_ops *t = go32_target ();
-
   x86_dr_low.set_control = go32_set_dr7;
   x86_dr_low.set_addr = go32_set_dr;
   x86_dr_low.get_status = go32_get_dr6;
@@ -2076,8 +2090,7 @@ _initialize_go32_nat (void)
   x86_dr_low.get_addr = go32_get_dr;
   x86_set_debug_register_length (4);
 
-  x86_use_watchpoints (t);
-  add_target (t);
+  add_target (&the_go32_nat_target);
 
   /* Initialize child's cwd as empty to be initialized when starting
      the child.  */

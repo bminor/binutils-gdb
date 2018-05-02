@@ -60,9 +60,6 @@
 /* If non-null, ravenscar task support is enabled.  */
 static int ravenscar_task_support = 1;
 
-/* This module's target-specific operations.  */
-static struct target_ops ravenscar_ops;
-
 /* PTID of the last thread that received an event.
    This can be useful to determine the associated task that received
    the event, to make it the current task.  */
@@ -76,20 +73,62 @@ static const char first_task_name[] = "system__tasking__debug__first_task";
 static const char ravenscar_runtime_initializer[] =
   "system__bb__threads__initialize";
 
-static void ravenscar_update_thread_list (struct target_ops *ops);
+struct ravenscar_thread_target final : public target_ops
+{
+  ravenscar_thread_target ()
+  { to_stratum = thread_stratum; }
+
+  const char *shortname () override
+  { return "ravenscar"; }
+
+  const char *longname () override
+  { return _("Ravenscar tasks."); }
+
+  const char *doc () override
+  { return _("Ravenscar tasks support."); }
+
+  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  void resume (ptid_t, int, enum gdb_signal) override;
+
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  void prepare_to_store (struct regcache *) override;
+
+  int stopped_by_sw_breakpoint () override;
+
+  int stopped_by_hw_breakpoint () override;
+
+  int stopped_by_watchpoint () override;
+
+  int stopped_data_address (CORE_ADDR *) override;
+
+  int thread_alive (ptid_t ptid) override;
+
+  int core_of_thread (ptid_t ptid) override;
+
+  void update_thread_list () override;
+
+  const char *extra_thread_info (struct thread_info *) override;
+
+  const char *pid_to_str (ptid_t) override;
+
+  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+
+  void mourn_inferior () override;
+
+  int has_all_memory ()  override { return default_child_has_all_memory (); }
+  int has_memory ()  override { return default_child_has_memory (); }
+  int has_stack ()  override { return default_child_has_stack (); }
+  int has_registers ()  override { return default_child_has_registers (); }
+  int has_execution (ptid_t ptid) override
+  { return default_child_has_execution (ptid); }
+};
+
+/* This module's target-specific operations.  */
+static ravenscar_thread_target ravenscar_ops;
+
 static ptid_t ravenscar_active_task (int cpu);
-static const char *ravenscar_extra_thread_info (struct target_ops *self,
-						struct thread_info *tp);
-static int ravenscar_thread_alive (struct target_ops *ops, ptid_t ptid);
-static void ravenscar_fetch_registers (struct target_ops *ops,
-                                       struct regcache *regcache, int regnum);
-static void ravenscar_store_registers (struct target_ops *ops,
-                                       struct regcache *regcache, int regnum);
-static void ravenscar_prepare_to_store (struct target_ops *self,
-					struct regcache *regcache);
-static void ravenscar_resume (struct target_ops *ops, ptid_t ptid, int step,
-			      enum gdb_signal siggnal);
-static void ravenscar_mourn_inferior (struct target_ops *ops);
 static void ravenscar_update_inferior_ptid (void);
 static int has_ravenscar_runtime (void);
 static int ravenscar_runtime_initialized (void);
@@ -281,26 +320,25 @@ get_running_thread_id (int cpu)
   return extract_typed_address (buf, builtin_type_void_data_ptr);
 }
 
-static void
-ravenscar_resume (struct target_ops *ops, ptid_t ptid, int step,
-		  enum gdb_signal siggnal)
+void
+ravenscar_thread_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
 
   inferior_ptid = base_ptid;
-  beneath->to_resume (beneath, base_ptid, step, siggnal);
+  beneath->resume (base_ptid, step, siggnal);
 }
 
-static ptid_t
-ravenscar_wait (struct target_ops *ops, ptid_t ptid,
-                struct target_waitstatus *status,
-                int options)
+ptid_t
+ravenscar_thread_target::wait (ptid_t ptid,
+			       struct target_waitstatus *status,
+			       int options)
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
   ptid_t event_ptid;
 
   inferior_ptid = base_ptid;
-  event_ptid = beneath->to_wait (beneath, base_ptid, status, 0);
+  event_ptid = beneath->wait (base_ptid, status, 0);
   /* Find any new threads that might have been created, and update
      inferior_ptid to the active thread.
 
@@ -312,7 +350,7 @@ ravenscar_wait (struct target_ops *ops, ptid_t ptid,
       && status->kind != TARGET_WAITKIND_SIGNALLED)
     {
       inferior_ptid = event_ptid;
-      ravenscar_update_thread_list (ops);
+      this->update_thread_list ();
       ravenscar_update_inferior_ptid ();
     }
   return inferior_ptid;
@@ -328,8 +366,8 @@ ravenscar_add_thread (struct ada_task_info *task)
     add_thread (task->ptid);
 }
 
-static void
-ravenscar_update_thread_list (struct target_ops *ops)
+void
+ravenscar_thread_target::update_thread_list ()
 {
   ada_build_task_list ();
 
@@ -352,21 +390,21 @@ ravenscar_active_task (int cpu)
     return ptid_build (ptid_get_pid (base_ptid), 0, tid);
 }
 
-static const char *
-ravenscar_extra_thread_info (struct target_ops *self, struct thread_info *tp)
+const char *
+ravenscar_thread_target::extra_thread_info (thread_info *tp)
 {
   return "Ravenscar task";
 }
 
-static int
-ravenscar_thread_alive (struct target_ops *ops, ptid_t ptid)
+int
+ravenscar_thread_target::thread_alive (ptid_t ptid)
 {
   /* Ravenscar tasks are non-terminating.  */
   return 1;
 }
 
-static const char *
-ravenscar_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+ravenscar_thread_target::pid_to_str (ptid_t ptid)
 {
   static char buf[30];
 
@@ -374,11 +412,10 @@ ravenscar_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return buf;
 }
 
-static void
-ravenscar_fetch_registers (struct target_ops *ops,
-                           struct regcache *regcache, int regnum)
+void
+ravenscar_thread_target::fetch_registers (struct regcache *regcache, int regnum)
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
   ptid_t ptid = regcache_get_ptid (regcache);
 
   if (ravenscar_runtime_initialized ()
@@ -392,14 +429,14 @@ ravenscar_fetch_registers (struct target_ops *ops,
       arch_ops->to_fetch_registers (regcache, regnum);
     }
   else
-    beneath->to_fetch_registers (beneath, regcache, regnum);
+    beneath->fetch_registers (regcache, regnum);
 }
 
-static void
-ravenscar_store_registers (struct target_ops *ops,
-                           struct regcache *regcache, int regnum)
+void
+ravenscar_thread_target::store_registers (struct regcache *regcache,
+					  int regnum)
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  target_ops *beneath = find_target_beneath (this);
   ptid_t ptid = regcache_get_ptid (regcache);
 
   if (ravenscar_runtime_initialized ()
@@ -410,17 +447,16 @@ ravenscar_store_registers (struct target_ops *ops,
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
-      arch_ops->to_store_registers (regcache, regnum);
+      beneath->store_registers (regcache, regnum);
     }
   else
-    beneath->to_store_registers (beneath, regcache, regnum);
+    beneath->store_registers (regcache, regnum);
 }
 
-static void
-ravenscar_prepare_to_store (struct target_ops *self,
-			    struct regcache *regcache)
+void
+ravenscar_thread_target::prepare_to_store (struct regcache *regcache)
 {
-  struct target_ops *beneath = find_target_beneath (self);
+  target_ops *beneath = find_target_beneath (this);
   ptid_t ptid = regcache_get_ptid (regcache);
 
   if (ravenscar_runtime_initialized ()
@@ -431,93 +467,93 @@ ravenscar_prepare_to_store (struct target_ops *self,
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
-      arch_ops->to_prepare_to_store (regcache);
+      beneath->prepare_to_store (regcache);
     }
   else
-    beneath->to_prepare_to_store (beneath, regcache);
+    beneath->prepare_to_store (regcache);
 }
 
 /* Implement the to_stopped_by_sw_breakpoint target_ops "method".  */
 
-static int
-ravenscar_stopped_by_sw_breakpoint (struct target_ops *ops)
+int
+ravenscar_thread_target::stopped_by_sw_breakpoint ()
 {
   ptid_t saved_ptid = inferior_ptid;
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
   int result;
 
   inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
-  result = beneath->to_stopped_by_sw_breakpoint (beneath);
+  result = beneath->stopped_by_sw_breakpoint ();
   inferior_ptid = saved_ptid;
   return result;
 }
 
 /* Implement the to_stopped_by_hw_breakpoint target_ops "method".  */
 
-static int
-ravenscar_stopped_by_hw_breakpoint (struct target_ops *ops)
+int
+ravenscar_thread_target::stopped_by_hw_breakpoint ()
 {
   ptid_t saved_ptid = inferior_ptid;
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
   int result;
 
   inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
-  result = beneath->to_stopped_by_hw_breakpoint (beneath);
+  result = beneath->stopped_by_hw_breakpoint ();
   inferior_ptid = saved_ptid;
   return result;
 }
 
 /* Implement the to_stopped_by_watchpoint target_ops "method".  */
 
-static int
-ravenscar_stopped_by_watchpoint (struct target_ops *ops)
+int
+ravenscar_thread_target::stopped_by_watchpoint ()
 {
   ptid_t saved_ptid = inferior_ptid;
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
   int result;
 
   inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
-  result = beneath->to_stopped_by_watchpoint (beneath);
+  result = beneath->stopped_by_watchpoint ();
   inferior_ptid = saved_ptid;
   return result;
 }
 
 /* Implement the to_stopped_data_address target_ops "method".  */
 
-static int
-ravenscar_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
+int
+ravenscar_thread_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   ptid_t saved_ptid = inferior_ptid;
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
   int result;
 
   inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
-  result = beneath->to_stopped_data_address (beneath, addr_p);
+  result = beneath->stopped_data_address (addr_p);
   inferior_ptid = saved_ptid;
   return result;
 }
 
-static void
-ravenscar_mourn_inferior (struct target_ops *ops)
+void
+ravenscar_thread_target::mourn_inferior ()
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
 
   base_ptid = null_ptid;
-  beneath->to_mourn_inferior (beneath);
+  beneath->mourn_inferior ();
   unpush_target (&ravenscar_ops);
 }
 
 /* Implement the to_core_of_thread target_ops "method".  */
 
-static int
-ravenscar_core_of_thread (struct target_ops *ops, ptid_t ptid)
+int
+ravenscar_thread_target::core_of_thread (ptid_t ptid)
 {
   ptid_t saved_ptid = inferior_ptid;
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
   int result;
 
   inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
-  result = beneath->to_core_of_thread (beneath, inferior_ptid);
+  result = beneath->core_of_thread (inferior_ptid);
   inferior_ptid = saved_ptid;
   return result;
 }
@@ -545,43 +581,10 @@ ravenscar_inferior_created (struct target_ops *target, int from_tty)
   push_target (&ravenscar_ops);
 }
 
-static ptid_t
-ravenscar_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
+ptid_t
+ravenscar_thread_target::get_ada_task_ptid (long lwp, long thread)
 {
   return ptid_build (ptid_get_pid (base_ptid), 0, thread);
-}
-
-static void
-init_ravenscar_thread_ops (void)
-{
-  ravenscar_ops.to_shortname = "ravenscar";
-  ravenscar_ops.to_longname = "Ravenscar tasks.";
-  ravenscar_ops.to_doc = "Ravenscar tasks support.";
-  ravenscar_ops.to_resume = ravenscar_resume;
-  ravenscar_ops.to_wait = ravenscar_wait;
-  ravenscar_ops.to_fetch_registers = ravenscar_fetch_registers;
-  ravenscar_ops.to_store_registers = ravenscar_store_registers;
-  ravenscar_ops.to_prepare_to_store = ravenscar_prepare_to_store;
-  ravenscar_ops.to_stopped_by_sw_breakpoint
-    = ravenscar_stopped_by_sw_breakpoint;
-  ravenscar_ops.to_stopped_by_hw_breakpoint
-    = ravenscar_stopped_by_hw_breakpoint;
-  ravenscar_ops.to_stopped_by_watchpoint = ravenscar_stopped_by_watchpoint;
-  ravenscar_ops.to_stopped_data_address = ravenscar_stopped_data_address;
-  ravenscar_ops.to_thread_alive = ravenscar_thread_alive;
-  ravenscar_ops.to_update_thread_list = ravenscar_update_thread_list;
-  ravenscar_ops.to_pid_to_str = ravenscar_pid_to_str;
-  ravenscar_ops.to_extra_thread_info = ravenscar_extra_thread_info;
-  ravenscar_ops.to_get_ada_task_ptid = ravenscar_get_ada_task_ptid;
-  ravenscar_ops.to_mourn_inferior = ravenscar_mourn_inferior;
-  ravenscar_ops.to_has_all_memory = default_child_has_all_memory;
-  ravenscar_ops.to_has_memory = default_child_has_memory;
-  ravenscar_ops.to_has_stack = default_child_has_stack;
-  ravenscar_ops.to_has_registers = default_child_has_registers;
-  ravenscar_ops.to_has_execution = default_child_has_execution;
-  ravenscar_ops.to_stratum = thread_stratum;
-  ravenscar_ops.to_core_of_thread = ravenscar_core_of_thread;
-  ravenscar_ops.to_magic = OPS_MAGIC;
 }
 
 /* Command-list for the "set/show ravenscar" prefix command.  */
@@ -627,14 +630,11 @@ Support for Ravenscar task/thread switching is disabled\n"));
 void
 _initialize_ravenscar (void)
 {
-  init_ravenscar_thread_ops ();
   base_ptid = null_ptid;
 
   /* Notice when the inferior is created in order to push the
      ravenscar ops if needed.  */
   gdb::observers::inferior_created.attach (ravenscar_inferior_created);
-
-  complete_target_initialization (&ravenscar_ops);
 
   add_prefix_cmd ("ravenscar", no_class, set_ravenscar_command,
                   _("Prefix command for changing Ravenscar-specific settings"),

@@ -171,7 +171,7 @@ spu_current_sos (void)
     ;
 
   /* Determine list of SPU ids.  */
-  size = target_read (&current_target, TARGET_OBJECT_SPU, NULL,
+  size = target_read (target_stack, TARGET_OBJECT_SPU, NULL,
 		      buf, 0, sizeof buf);
 
   /* Do not add stand-alone SPE executable context as shared library,
@@ -206,7 +206,7 @@ spu_current_sos (void)
 	 already created the SPE context, but not installed the object-id
 	 yet.  Skip such entries; we'll be back for them later.  */
       xsnprintf (annex, sizeof annex, "%d/object-id", fd);
-      len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
+      len = target_read (target_stack, TARGET_OBJECT_SPU, annex,
 			 (gdb_byte *) id, 0, sizeof id);
       if (len <= 0 || len >= sizeof id)
 	continue;
@@ -418,7 +418,7 @@ spu_enable_break (struct objfile *objfile)
       CORE_ADDR addr = BMSYMBOL_VALUE_ADDRESS (spe_event_sym);
 
       addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (), addr,
-                                                 &current_target);
+						 target_stack);
       create_solib_event_breakpoint (target_gdbarch (), addr);
       return 1;
     }

@@ -135,7 +135,9 @@ extern void specify_exec_file_hook (void (*hook) (const char *filename));
 
 extern bfd *core_bfd;
 
-extern struct target_ops *core_target;
+/* corelow.c target.  It is never NULL after GDB initialization.  */
+
+extern struct target_ops *the_core_target;
 
 /* Whether to open exec and core files read-only or read-write.  */
 
@@ -152,8 +154,6 @@ extern void exec_file_attach (const char *filename, int from_tty);
    DEFER_BP_RESET uses SYMFILE_DEFER_BP_RESET for the main symbol file.  */
 
 extern void exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty);
-
-extern void exec_file_clear (int from_tty);
 
 extern void validate_files (void);
 

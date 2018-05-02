@@ -1488,30 +1488,12 @@ current_regcache_test (void)
   SELF_CHECK (regcache_access::current_regcache_size () == 2);
 }
 
-static void test_target_fetch_registers (target_ops *self, regcache *regs,
-					 int regno);
-static void test_target_store_registers (target_ops *self, regcache *regs,
-					 int regno);
-static enum target_xfer_status
-  test_target_xfer_partial (struct target_ops *ops,
-			    enum target_object object,
-			    const char *annex, gdb_byte *readbuf,
-			    const gdb_byte *writebuf,
-			    ULONGEST offset, ULONGEST len,
-			    ULONGEST *xfered_len);
-
 class target_ops_no_register : public test_target_ops
 {
 public:
   target_ops_no_register ()
     : test_target_ops {}
-  {
-    to_fetch_registers = test_target_fetch_registers;
-    to_store_registers = test_target_store_registers;
-    to_xfer_partial = test_target_xfer_partial;
-
-    to_data = this;
-  }
+  {}
 
   void reset ()
   {
@@ -1520,38 +1502,42 @@ public:
     xfer_partial_called = 0;
   }
 
+  void fetch_registers (regcache *regs, int regno) override;
+  void store_registers (regcache *regs, int regno) override;
+
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex, gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
   unsigned int fetch_registers_called = 0;
   unsigned int store_registers_called = 0;
   unsigned int xfer_partial_called = 0;
 };
 
-static void
-test_target_fetch_registers (target_ops *self, regcache *regs, int regno)
+void
+target_ops_no_register::fetch_registers (regcache *regs, int regno)
 {
-  auto ops = static_cast<target_ops_no_register *> (self->to_data);
-
   /* Mark register available.  */
   regs->raw_supply_zeroed (regno);
-  ops->fetch_registers_called++;
+  this->fetch_registers_called++;
 }
 
-static void
-test_target_store_registers (target_ops *self, regcache *regs, int regno)
+void
+target_ops_no_register::store_registers (regcache *regs, int regno)
 {
-  auto ops = static_cast<target_ops_no_register *> (self->to_data);
-
-  ops->store_registers_called++;
+  this->store_registers_called++;
 }
 
-static enum target_xfer_status
-test_target_xfer_partial (struct target_ops *self, enum target_object object,
-			  const char *annex, gdb_byte *readbuf,
-			  const gdb_byte *writebuf,
-			  ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+enum target_xfer_status
+target_ops_no_register::xfer_partial (enum target_object object,
+				      const char *annex, gdb_byte *readbuf,
+				      const gdb_byte *writebuf,
+				      ULONGEST offset, ULONGEST len,
+				      ULONGEST *xfered_len)
 {
-  auto ops = static_cast<target_ops_no_register *> (self->to_data);
-
-  ops->xfer_partial_called++;
+  this->xfer_partial_called++;
 
   *xfered_len = len;
   return TARGET_XFER_OK;
@@ -1573,7 +1559,7 @@ cooked_read_test (struct gdbarch *gdbarch)
 {
   /* Error out if debugging something, because we're going to push the
      test target, which would pop any existing target.  */
-  if (current_target.to_stratum >= process_stratum)
+  if (target_stack->to_stratum >= process_stratum)
     error (_("target already pushed"));
 
   /* Create a mock environment.  An inferior with a thread, with a
@@ -1747,7 +1733,7 @@ cooked_write_test (struct gdbarch *gdbarch)
 {
   /* Error out if debugging something, because we're going to push the
      test target, which would pop any existing target.  */
-  if (current_target.to_stratum >= process_stratum)
+  if (target_stack->to_stratum >= process_stratum)
     error (_("target already pushed"));
 
   /* Create a mock environment.  A process_stratum target pushed.  */

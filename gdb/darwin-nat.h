@@ -17,8 +17,49 @@
 #ifndef __DARWIN_NAT_H__
 #define __DARWIN_NAT_H__
 
+#include "inf-child.h"
 #include <mach/mach.h>
 #include "gdbthread.h"
+
+/* This needs to be overridden by the platform specific nat code.  */
+
+class darwin_nat_target : public inf_child_target
+{
+  void create_inferior (const char *exec_file,
+			const std::string &allargs,
+			char **env, int from_tty);
+
+  void attach (const char *, int) override;
+
+  void detach (inferior *, int) override;
+
+  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+
+  void mourn_inferior () override;
+
+  void kill () override;
+
+  void interrupt () override;
+
+  void resume (ptid_t, int , enum gdb_signal) override;
+
+  int thread_alive (ptid_t ptid) override;
+
+  const char *pid_to_str (ptid_t) override;
+
+  char *pid_to_exec_file (int pid) override;
+
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
+  int supports_multi_process () override;
+
+  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+};
 
 /* Describe the mach exception handling state for a task.  This state is saved
    before being changed and restored when a process is detached.
@@ -157,11 +198,6 @@ extern void mach_check_error (kern_return_t ret, const char *file,
 			      unsigned int line, const char *func);
 
 void darwin_set_sstep (thread_t thread, int enable);
-
-/* This one is called in darwin-nat.c, but needs to be provided by the
-   platform specific nat code.  It allows each platform to add platform specific
-   stuff to the darwin_ops.  */
-extern void darwin_complete_target (struct target_ops *target);
 
 void darwin_check_osabi (darwin_inferior *inf, thread_t thread);
 

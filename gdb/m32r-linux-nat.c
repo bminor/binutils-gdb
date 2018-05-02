@@ -34,7 +34,15 @@
 #include "m32r-tdep.h"
 
 
+class m32r_linux_nat_target final : public linux_nat_target
+{
+public:
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
 
+static m32r_linux_nat_target the_m32r_linux_nat_target;
 
 /* Since EVB register is not available for native debug, we reduce
    the number of registers.  */
@@ -191,9 +199,8 @@ fill_fpregset (const struct regcache *regcache,
    this for all registers (including the floating point and SSE
    registers).  */
 
-static void
-m32r_linux_fetch_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regno)
+void
+m32r_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
@@ -213,9 +220,8 @@ m32r_linux_fetch_inferior_registers (struct target_ops *ops,
 /* Store register REGNO back into the child process.  If REGNO is -1,
    do this for all registers (including the floating point and SSE
    registers).  */
-static void
-m32r_linux_store_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regno)
+void
+m32r_linux_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
@@ -234,15 +240,7 @@ m32r_linux_store_inferior_registers (struct target_ops *ops,
 void
 _initialize_m32r_linux_nat (void)
 {
-  struct target_ops *t;
-
-  /* Fill in the generic GNU/Linux methods.  */
-  t = linux_target ();
-
-  /* Add our register access methods.  */
-  t->to_fetch_registers = m32r_linux_fetch_inferior_registers;
-  t->to_store_registers = m32r_linux_store_inferior_registers;
-
   /* Register the target.  */
-  linux_nat_add_target (t);
+  linux_target = &the_m32r_linux_nat_target;
+  add_target (&the_m32r_linux_nat_target);
 }

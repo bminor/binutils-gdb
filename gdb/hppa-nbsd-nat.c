@@ -30,6 +30,14 @@
 
 #include "nbsd-nat.h"
 
+class hppa_nbsd_nat_target final : public nbsd_nat_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static hppa_nbsd_nat_target the_hppa_nbsd_nat_target;
+
 static int
 hppanbsd_gregset_supplies_p (int regnum)
 {
@@ -158,9 +166,8 @@ hppanbsd_collect_fpregset (struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating-point registers).  */
 
-static void
-hppanbsd_fetch_registers (struct target_ops *ops,
-			  struct regcache *regcache, int regnum)
+void
+hppa_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -189,9 +196,8 @@ hppanbsd_fetch_registers (struct target_ops *ops,
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating-point registers).  */
 
-static void
-hppanbsd_store_registers (struct target_ops *ops,
-			  struct regcache *regcache, int regnum)
+void
+hppa_nbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
@@ -225,15 +231,5 @@ hppanbsd_store_registers (struct target_ops *ops,
 void
 _initialize_hppanbsd_nat (void)
 {
-  struct target_ops *t;
-
-  /* Add some extra features to the ptrace target.  */
-  t = inf_ptrace_target ();
-
-  t->to_fetch_registers = hppanbsd_fetch_registers;
-  t->to_store_registers = hppanbsd_store_registers;
-
-  t->to_pid_to_exec_file = nbsd_pid_to_exec_file;
-
-  add_target (t);
+  add_target (&the_hppa_nbsd_nat_target);
 }

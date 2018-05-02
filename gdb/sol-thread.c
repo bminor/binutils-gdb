@@ -69,7 +69,41 @@
 #include "minsyms.h"
 #include "objfiles.h"
 
-struct target_ops sol_thread_ops;
+class sol_thread_target final : public target_ops
+{
+public:
+  sol_thread_target ()
+  { this->to_stratum = thread_stratum; }
+
+  const char *shortname () override
+  { return "solaris-threads"; }
+  const char *longname () override
+  { return _("Solaris threads and pthread."); }
+  const char *doc () override
+  { return _("Solaris threads and pthread support."); }
+
+  void detach (inferior *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  void resume (ptid_t, int, enum gdb_signal) override;
+  void mourn_inferior () override;
+  const char *pid_to_str (ptid_t) override;
+  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
+  int thread_alive (ptid_t ptid) override;
+  void update_thread_list () override;
+};
+
+static sol_thread_target sol_thread_ops;
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
@@ -92,8 +126,6 @@ struct string_map
 static struct ps_prochandle main_ph;
 static td_thragent_t *main_ta;
 static int sol_thread_active = 0;
-
-static void init_sol_thread_ops (void);
 
 /* Default definitions: These must be defined in tm.h if they are to
    be shared with a process module such as procfs.  */
@@ -347,15 +379,15 @@ lwp_to_thread (ptid_t lwp)
    process to have been previously attached.  It *might* work if the
    program was started via the normal ptrace (PTRACE_TRACEME).  */
 
-static void
-sol_thread_detach (struct target_ops *ops, inferior *inf, int from_tty)
+void
+sol_thread_target::detach (inferior *inf, int from_tty)
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
 
   sol_thread_active = 0;
   inferior_ptid = pid_to_ptid (ptid_get_pid (main_ph.ptid));
-  unpush_target (ops);
-  beneath->to_detach (beneath, inf, from_tty);
+  unpush_target (this);
+  beneath->detach (inf, from_tty);
 }
 
 /* Resume execution of process PTID.  If STEP is nozero, then just
@@ -363,11 +395,10 @@ sol_thread_detach (struct target_ops *ops, inferior *inf, int from_tty)
    activated.  We may have to convert PTID from a thread ID to an LWP
    ID for procfs.  */
 
-static void
-sol_thread_resume (struct target_ops *ops,
-		   ptid_t ptid, int step, enum gdb_signal signo)
+void
+sol_thread_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
 
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
@@ -387,19 +418,19 @@ sol_thread_resume (struct target_ops *ops,
 		 ptid_get_tid (save_ptid));
     }
 
-  beneath->to_resume (beneath, ptid, step, signo);
+  beneath->resume (ptid, step, signo);
 }
 
 /* Wait for any threads to stop.  We may have to convert PTID from a
    thread ID to an LWP ID, and vice versa on the way out.  */
 
-static ptid_t
-sol_thread_wait (struct target_ops *ops,
-		 ptid_t ptid, struct target_waitstatus *ourstatus, int options)
+ptid_t
+sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+			 int options)
 {
   ptid_t rtnval;
   ptid_t save_ptid;
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
 
   save_ptid = inferior_ptid;
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
@@ -420,7 +451,7 @@ sol_thread_wait (struct target_ops *ops,
 		 ptid_get_tid (save_ptid));
     }
 
-  rtnval = beneath->to_wait (beneath, ptid, ourstatus, options);
+  rtnval = beneath->wait (ptid, ourstatus, options);
 
   if (ourstatus->kind != TARGET_WAITKIND_EXITED)
     {
@@ -444,9 +475,8 @@ sol_thread_wait (struct target_ops *ops,
   return rtnval;
 }
 
-static void
-sol_thread_fetch_registers (struct target_ops *ops,
-			    struct regcache *regcache, int regnum)
+void
+sol_thread_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   thread_t thread;
   td_thrhandle_t thandle;
@@ -455,13 +485,13 @@ sol_thread_fetch_registers (struct target_ops *ops,
   prfpregset_t fpregset;
   gdb_gregset_t *gregset_p = &gregset;
   gdb_fpregset_t *fpregset_p = &fpregset;
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
   ptid_t ptid = regcache_get_ptid (regcache);
 
   if (!ptid_tid_p (ptid))
     {
       /* It's an LWP; pass the request on to the layer beneath.  */
-      beneath->to_fetch_registers (beneath, regcache, regnum);
+      beneath->fetch_registers (regcache, regnum);
       return;
     }
 
@@ -500,9 +530,8 @@ sol_thread_fetch_registers (struct target_ops *ops,
   supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset_p);
 }
 
-static void
-sol_thread_store_registers (struct target_ops *ops,
-			    struct regcache *regcache, int regnum)
+void
+sol_thread_target::store_registers (struct regcache *regcache, int regnum)
 {
   thread_t thread;
   td_thrhandle_t thandle;
@@ -513,10 +542,10 @@ sol_thread_store_registers (struct target_ops *ops,
 
   if (!ptid_tid_p (ptid))
     {
-      struct target_ops *beneath = find_target_beneath (ops);
+      struct target_ops *beneath = find_target_beneath (this);
 
       /* It's an LWP; pass the request on to the layer beneath.  */
-      beneath->to_store_registers (beneath, regcache, regnum);
+      beneath->store_registers (regcache, regnum);
       return;
     }
 
@@ -557,13 +586,14 @@ sol_thread_store_registers (struct target_ops *ops,
    target_write_partial for details of each variant.  One, and only
    one, of readbuf or writebuf must be non-NULL.  */
 
-static enum target_xfer_status
-sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
-			  const char *annex, gdb_byte *readbuf,
-			  const gdb_byte *writebuf,
-			 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+enum target_xfer_status
+sol_thread_target::xfer_partial (enum target_object object,
+				 const char *annex, gdb_byte *readbuf,
+				 const gdb_byte *writebuf,
+				 ULONGEST offset, ULONGEST len,
+				 ULONGEST *xfered_len)
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
 
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
@@ -577,8 +607,8 @@ sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
       inferior_ptid = procfs_first_available ();
     }
 
-  return beneath->to_xfer_partial (beneath, object, annex, readbuf,
-				   writebuf, offset, len, xfered_len);
+  return beneath->xfer_partial (object, annex, readbuf,
+				writebuf, offset, len, xfered_len);
 }
 
 static void
@@ -588,7 +618,7 @@ check_for_thread_db (void)
   ptid_t ptid;
 
   /* Don't attempt to use thread_db for remote targets.  */
-  if (!(target_can_run (&current_target) || core_bfd))
+  if (!(target_can_run () || core_bfd))
     return;
 
   /* Do nothing if we couldn't load libthread_db.so.1.  */
@@ -656,22 +686,22 @@ sol_thread_new_objfile (struct objfile *objfile)
 
 /* Clean up after the inferior dies.  */
 
-static void
-sol_thread_mourn_inferior (struct target_ops *ops)
+void
+sol_thread_target::mourn_inferior ()
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
 
   sol_thread_active = 0;
 
-  unpush_target (ops);
+  unpush_target (this);
 
-  beneath->to_mourn_inferior (beneath);
+  beneath->mourn_inferior ();
 }
 
 /* Return true if PTID is still active in the inferior.  */
 
-static int
-sol_thread_alive (struct target_ops *ops, ptid_t ptid)
+int
+sol_thread_target::thread_alive (ptid_t ptid)
 {
   if (ptid_tid_p (ptid))
     {
@@ -689,10 +719,10 @@ sol_thread_alive (struct target_ops *ops, ptid_t ptid)
     }
   else
     {
-      struct target_ops *beneath = find_target_beneath (ops);
+      struct target_ops *beneath = find_target_beneath (this);
 
       /* It's an LPW; pass the request on to the layer below.  */
-      return beneath->to_thread_alive (beneath, ptid);
+      return beneath->thread_alive (ptid);
     }
 }
 
@@ -976,8 +1006,8 @@ ps_lgetLDT (struct ps_prochandle *ph, lwpid_t lwpid,
 
 /* Convert PTID to printable form.  */
 
-static const char *
-solaris_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+sol_thread_target::pid_to_str (ptid_t ptid)
 {
   static char buf[100];
 
@@ -1027,16 +1057,16 @@ sol_update_thread_list_callback (const td_thrhandle_t *th, void *ignored)
   return 0;
 }
 
-static void
-sol_update_thread_list (struct target_ops *ops)
+void
+sol_thread_target::update_thread_list ()
 {
-  struct target_ops *beneath = find_target_beneath (ops);
+  struct target_ops *beneath = find_target_beneath (this);
 
   /* Delete dead threads.  */
   prune_threads ();
 
   /* Find any new LWP's.  */
-  beneath->to_update_thread_list (beneath);
+  beneath->update_thread_list ();
 
   /* Then find any new user-level threads.  */
   p_td_ta_thr_iter (main_ta, sol_update_thread_list_callback, (void *) 0,
@@ -1143,8 +1173,8 @@ thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
   return 0;
 }
 
-static ptid_t
-sol_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
+ptid_t
+sol_thread_target::get_ada_task_ptid (long lwp, long thread)
 {
   struct thread_info *thread_info =
     iterate_over_threads (thread_db_find_thread_from_tid, &thread);
@@ -1153,7 +1183,7 @@ sol_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
     {
       /* The list of threads is probably not up to date.  Find any
          thread that is missing from the list, and try again.  */
-      sol_update_thread_list (&current_target);
+      update_thread_list ();
       thread_info = iterate_over_threads (thread_db_find_thread_from_tid,
                                           &thread);
     }
@@ -1163,33 +1193,10 @@ sol_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
   return (thread_info->ptid);
 }
 
-static void
-init_sol_thread_ops (void)
-{
-  sol_thread_ops.to_shortname = "solaris-threads";
-  sol_thread_ops.to_longname = "Solaris threads and pthread.";
-  sol_thread_ops.to_doc = "Solaris threads and pthread support.";
-  sol_thread_ops.to_detach = sol_thread_detach;
-  sol_thread_ops.to_resume = sol_thread_resume;
-  sol_thread_ops.to_wait = sol_thread_wait;
-  sol_thread_ops.to_fetch_registers = sol_thread_fetch_registers;
-  sol_thread_ops.to_store_registers = sol_thread_store_registers;
-  sol_thread_ops.to_xfer_partial = sol_thread_xfer_partial;
-  sol_thread_ops.to_mourn_inferior = sol_thread_mourn_inferior;
-  sol_thread_ops.to_thread_alive = sol_thread_alive;
-  sol_thread_ops.to_pid_to_str = solaris_pid_to_str;
-  sol_thread_ops.to_update_thread_list = sol_update_thread_list;
-  sol_thread_ops.to_stratum = thread_stratum;
-  sol_thread_ops.to_get_ada_task_ptid = sol_get_ada_task_ptid;
-  sol_thread_ops.to_magic = OPS_MAGIC;
-}
-
 void
 _initialize_sol_thread (void)
 {
   void *dlhandle;
-
-  init_sol_thread_ops ();
 
   dlhandle = dlopen ("libthread_db.so.1", RTLD_NOW);
   if (!dlhandle)
@@ -1222,8 +1229,6 @@ _initialize_sol_thread (void)
   resolve (td_ta_map_lwp2thr);
   resolve (td_thr_getgregs);
   resolve (td_thr_setgregs);
-
-  complete_target_initialization (&sol_thread_ops);
 
   add_cmd ("sol-threads", class_maintenance, info_solthreads,
 	   _("Show info on Solaris user threads."), &maintenanceinfolist);

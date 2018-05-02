@@ -23,14 +23,10 @@
 #include "nat/gdb_ptrace.h"
 #include "inf-ptrace.h"
 
-/* Pointer to a function that returns the offset within the user area
-   where a particular register is stored.  */
-static CORE_ADDR (*inf_ptrace_register_u_offset)(struct gdbarch *, int, int);
-
 /* Fetch register REGNUM from the inferior.  */
 
-static void
-inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
+void
+linux_nat_trad_target::fetch_register (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR addr;
@@ -40,7 +36,7 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
   int i;
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
-  addr = inf_ptrace_register_u_offset (gdbarch, regnum, 0);
+  addr = register_u_offset (gdbarch, regnum, 0);
   if (addr == (CORE_ADDR)-1
       || gdbarch_cannot_fetch_register (gdbarch, regnum))
     {
@@ -72,23 +68,23 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
-static void
-inf_ptrace_fetch_registers (struct target_ops *ops,
-			    struct regcache *regcache, int regnum)
+void
+linux_nat_trad_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0;
 	 regnum < gdbarch_num_regs (regcache->arch ());
 	 regnum++)
-      inf_ptrace_fetch_register (regcache, regnum);
+      fetch_register (regcache, regnum);
   else
-    inf_ptrace_fetch_register (regcache, regnum);
+    fetch_register (regcache, regnum);
 }
 
 /* Store register REGNUM into the inferior.  */
 
-static void
-inf_ptrace_store_register (const struct regcache *regcache, int regnum)
+void
+linux_nat_trad_target::store_register (const struct regcache *regcache,
+				       int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR addr;
@@ -98,7 +94,7 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
   int i;
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
-  addr = inf_ptrace_register_u_offset (gdbarch, regnum, 1);
+  addr = register_u_offset (gdbarch, regnum, 1);
   if (addr == (CORE_ADDR)-1
       || gdbarch_cannot_store_register (gdbarch, regnum))
     return;
@@ -127,34 +123,14 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers.  */
 
-static void
-inf_ptrace_store_registers (struct target_ops *ops,
-			    struct regcache *regcache, int regnum)
+void
+linux_nat_trad_target::store_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0;
 	 regnum < gdbarch_num_regs (regcache->arch ());
 	 regnum++)
-      inf_ptrace_store_register (regcache, regnum);
+      store_register (regcache, regnum);
   else
-    inf_ptrace_store_register (regcache, regnum);
-}
-
-/* Create a "traditional" Linux/ptrace target.  REGISTER_U_OFFSET
-   should be a function returning the offset within the user area
-   where a particular register is stored.  */
-
-struct target_ops *
-linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int))
-{
-  struct target_ops *t = inf_ptrace_target();
-
-  gdb_assert (register_u_offset);
-  inf_ptrace_register_u_offset = register_u_offset;
-  t->to_fetch_registers = inf_ptrace_fetch_registers;
-  t->to_store_registers = inf_ptrace_store_registers;
-
-  linux_target_install_ops (t);
-
-  return t;
+    store_register (regcache, regnum);
 }

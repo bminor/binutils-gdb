@@ -74,7 +74,7 @@ msymbol_is_function (struct objfile *objfile, minimal_symbol *minsym,
       {
 	struct gdbarch *gdbarch = get_objfile_arch (objfile);
 	CORE_ADDR pc = gdbarch_convert_from_func_ptr_addr (gdbarch, msym_addr,
-							   &current_target);
+							   target_stack);
 	if (pc != msym_addr)
 	  {
 	    if (func_address_p != NULL)

@@ -43,6 +43,14 @@ typedef struct fpreg fpregset_t;
 
 #include "gregset.h"
 
+struct alpha_bsd_nat_target final : public inf_ptrace_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static alpha_bsd_nat_target the_alpha_bsd_nat_target;
+
 /* Provide *regset() wrappers around the generic Alpha BSD register
    supply/fill routines.  */
 
@@ -83,9 +91,8 @@ getregs_supplies (int regno)
 /* Fetch register REGNO from the inferior.  If REGNO is -1, do this
    for all registers (including the floating point registers).  */
 
-static void
-alphabsd_fetch_inferior_registers (struct target_ops *ops,
-				   struct regcache *regcache, int regno)
+void
+alpha_bsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   if (regno == -1 || getregs_supplies (regno))
     {
@@ -116,9 +123,8 @@ alphabsd_fetch_inferior_registers (struct target_ops *ops,
 /* Store register REGNO back into the inferior.  If REGNO is -1, do
    this for all registers (including the floating point registers).  */
 
-static void
-alphabsd_store_inferior_registers (struct target_ops *ops,
-				   struct regcache *regcache, int regno)
+void
+alpha_bsd_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   if (regno == -1 || getregs_supplies (regno))
     {
@@ -190,12 +196,7 @@ alphabsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 void
 _initialize_alphabsd_nat (void)
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = alphabsd_fetch_inferior_registers;
-  t->to_store_registers = alphabsd_store_inferior_registers;
-  add_target (t);
+  add_target (&the_alpha_bsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (alphabsd_supply_pcb);

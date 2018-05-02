@@ -42,19 +42,49 @@
 #define PTRACE_GET_THREAD_AREA 25
 #endif
 
+class mips_linux_nat_target final : public linux_nat_trad_target
+{
+public:
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  void close () override;
+
+  int can_use_hw_breakpoint (enum bptype, int, int) override;
+
+  int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
+			 struct expression *) override;
+
+  int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
+			 struct expression *) override;
+
+  int stopped_by_watchpoint () override;
+
+  int stopped_data_address (CORE_ADDR *) override;
+
+  int region_ok_for_hw_watchpoint (CORE_ADDR, int) override;
+
+  const struct target_desc *read_description () override;
+
+protected:
+  /* Override linux_nat_trad_target methods.  */
+  CORE_ADDR register_u_offset (struct gdbarch *gdbarch,
+			       int regno, int store_p) override;
+
+private:
+  /* Helpers.  See definitions.  */
+  void mips64_regsets_store_registers (struct regcache *regcache,
+				       int regno);
+  void mips64_regsets_fetch_registers (struct regcache *regcache,
+				       int regno);
+};
+
+static mips_linux_nat_target the_mips_linux_nat_target;
+
 /* Assume that we have PTRACE_GETREGS et al. support.  If we do not,
    we'll clear this and use PTRACE_PEEKUSER instead.  */
 static int have_ptrace_regsets = 1;
-
-/* Saved function pointers to fetch and store a single register using
-   PTRACE_PEEKUSER and PTRACE_POKEUSER.  */
-
-static void (*super_fetch_registers) (struct target_ops *,
-				      struct regcache *, int);
-static void (*super_store_registers) (struct target_ops *,
-				      struct regcache *, int);
-
-static void (*super_close) (struct target_ops *);
 
 /* Map gdb internal register number to ptrace ``address''.
    These ``addresses'' are normally defined in <asm/ptrace.h>. 
@@ -208,9 +238,9 @@ fill_fpregset (const struct regcache *regcache,
 /* Fetch REGNO (or all registers if REGNO == -1) from the target
    using PTRACE_GETREGS et al.  */
 
-static void
-mips64_linux_regsets_fetch_registers (struct target_ops *ops,
-				      struct regcache *regcache, int regno)
+void
+mips_linux_nat_target::mips64_regsets_fetch_registers
+  (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   int is_fp, is_dsp;
@@ -280,23 +310,24 @@ mips64_linux_regsets_fetch_registers (struct target_ops *ops,
     }
 
   if (is_dsp)
-    super_fetch_registers (ops, regcache, regno);
+    linux_nat_trad_target::fetch_registers (regcache, regno);
   else if (regno == -1 && have_dsp)
     {
       for (regi = mips_regnum (gdbarch)->dspacc;
 	   regi < mips_regnum (gdbarch)->dspacc + 6;
 	   regi++)
-	super_fetch_registers (ops, regcache, regi);
-      super_fetch_registers (ops, regcache, mips_regnum (gdbarch)->dspctl);
+	linux_nat_trad_target::fetch_registers (regcache, regi);
+      linux_nat_trad_target::fetch_registers (regcache,
+					      mips_regnum (gdbarch)->dspctl);
     }
 }
 
 /* Store REGNO (or all registers if REGNO == -1) to the target
    using PTRACE_SETREGS et al.  */
 
-static void
-mips64_linux_regsets_store_registers (struct target_ops *ops,
-				      struct regcache *regcache, int regno)
+void
+mips_linux_nat_target::mips64_regsets_store_registers
+  (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   int is_fp, is_dsp;
@@ -357,56 +388,56 @@ mips64_linux_regsets_store_registers (struct target_ops *ops,
     }
 
   if (is_dsp)
-    super_store_registers (ops, regcache, regno);
+    linux_nat_trad_target::store_registers (regcache, regno);
   else if (regno == -1 && have_dsp)
     {
       for (regi = mips_regnum (gdbarch)->dspacc;
 	   regi < mips_regnum (gdbarch)->dspacc + 6;
 	   regi++)
-	super_store_registers (ops, regcache, regi);
-      super_store_registers (ops, regcache, mips_regnum (gdbarch)->dspctl);
+	linux_nat_trad_target::store_registers (regcache, regi);
+      linux_nat_trad_target::store_registers (regcache,
+					      mips_regnum (gdbarch)->dspctl);
     }
 }
 
 /* Fetch REGNO (or all registers if REGNO == -1) from the target
    using any working method.  */
 
-static void
-mips64_linux_fetch_registers (struct target_ops *ops,
-			      struct regcache *regcache, int regnum)
+void
+mips_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   /* Unless we already know that PTRACE_GETREGS does not work, try it.  */
   if (have_ptrace_regsets)
-    mips64_linux_regsets_fetch_registers (ops, regcache, regnum);
+    mips64_regsets_fetch_registers (regcache, regnum);
 
   /* If we know, or just found out, that PTRACE_GETREGS does not work, fall
      back to PTRACE_PEEKUSER.  */
   if (!have_ptrace_regsets)
-    super_fetch_registers (ops, regcache, regnum);
+    linux_nat_trad_target::fetch_registers (regcache, regnum);
 }
 
 /* Store REGNO (or all registers if REGNO == -1) to the target
    using any working method.  */
 
-static void
-mips64_linux_store_registers (struct target_ops *ops,
-			      struct regcache *regcache, int regnum)
+void
+mips_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   /* Unless we already know that PTRACE_GETREGS does not work, try it.  */
   if (have_ptrace_regsets)
-    mips64_linux_regsets_store_registers (ops, regcache, regnum);
+    mips64_regsets_store_registers (regcache, regnum);
 
   /* If we know, or just found out, that PTRACE_GETREGS does not work, fall
      back to PTRACE_PEEKUSER.  */
   if (!have_ptrace_regsets)
-    super_store_registers (ops, regcache, regnum);
+    linux_nat_trad_target::store_registers (regcache, regnum);
 }
 
 /* Return the address in the core dump or inferior of register
    REGNO.  */
 
-static CORE_ADDR
-mips_linux_register_u_offset (struct gdbarch *gdbarch, int regno, int store_p)
+CORE_ADDR
+mips_linux_nat_target::register_u_offset (struct gdbarch *gdbarch,
+					  int regno, int store_p)
 {
   if (mips_abi_regsize (gdbarch) == 8)
     return mips64_linux_register_addr (gdbarch, regno, store_p);
@@ -414,8 +445,8 @@ mips_linux_register_u_offset (struct gdbarch *gdbarch, int regno, int store_p)
     return mips_linux_register_addr (gdbarch, regno, store_p);
 }
 
-static const struct target_desc *
-mips_linux_read_description (struct target_ops *ops)
+const struct target_desc *
+mips_linux_nat_target::read_description ()
 {
   static int have_dsp = -1;
 
@@ -499,10 +530,9 @@ mips_show_dr (const char *func, CORE_ADDR addr,
 /* Target to_can_use_hw_breakpoint implementation.  Return 1 if we can
    handle the specified watch type.  */
 
-static int
-mips_linux_can_use_hw_breakpoint (struct target_ops *self,
-				  enum bptype type,
-				  int cnt, int ot)
+int
+mips_linux_nat_target::can_use_hw_breakpoint (enum bptype type,
+					      int cnt, int ot)
 {
   int i;
   uint32_t wanted_mask, irw_mask;
@@ -542,8 +572,8 @@ mips_linux_can_use_hw_breakpoint (struct target_ops *self,
    stopped by watchpoint.  The watchhi R and W bits indicate the watch
    register triggered.  */
 
-static int
-mips_linux_stopped_by_watchpoint (struct target_ops *ops)
+int
+mips_linux_nat_target::stopped_by_watchpoint ()
 {
   int n;
   int num_valid;
@@ -566,8 +596,8 @@ mips_linux_stopped_by_watchpoint (struct target_ops *ops)
    where the watch triggered (if known).  Return 1 if the address was
    known.  */
 
-static int
-mips_linux_stopped_data_address (struct target_ops *t, CORE_ADDR *paddr)
+int
+mips_linux_nat_target::stopped_data_address (CORE_ADDR *paddr)
 {
   /* On mips we don't know the low order 3 bits of the data address,
      so we must return false.  */
@@ -577,9 +607,8 @@ mips_linux_stopped_data_address (struct target_ops *t, CORE_ADDR *paddr)
 /* Target to_region_ok_for_hw_watchpoint implementation.  Return 1 if
    the specified region can be covered by the watch registers.  */
 
-static int
-mips_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
-					CORE_ADDR addr, int len)
+int
+mips_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
   struct pt_watch_regs dummy_regs;
   int i;
@@ -633,11 +662,10 @@ mips_linux_new_thread (struct lwp_info *lp)
 /* Target to_insert_watchpoint implementation.  Try to insert a new
    watch.  Return zero on success.  */
 
-static int
-mips_linux_insert_watchpoint (struct target_ops *self,
-			      CORE_ADDR addr, int len,
-			      enum target_hw_bp_type type,
-			      struct expression *cond)
+int
+mips_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
+					  enum target_hw_bp_type type,
+					  struct expression *cond)
 {
   struct pt_watch_regs regs;
   struct mips_watchpoint *new_watch;
@@ -687,11 +715,10 @@ mips_linux_insert_watchpoint (struct target_ops *self,
 /* Target to_remove_watchpoint implementation.  Try to remove a watch.
    Return zero on success.  */
 
-static int
-mips_linux_remove_watchpoint (struct target_ops *self,
-			      CORE_ADDR addr, int len,
-			      enum target_hw_bp_type type,
-			      struct expression *cond)
+int
+mips_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
+					  enum target_hw_bp_type type,
+					  struct expression *cond)
 {
   int retval;
   int deleted_one;
@@ -736,8 +763,8 @@ mips_linux_remove_watchpoint (struct target_ops *self,
 /* Target to_close implementation.  Free any watches and call the
    super implementation.  */
 
-static void
-mips_linux_close (struct target_ops *self)
+void
+mips_linux_nat_target::close ()
 {
   struct mips_watchpoint *w;
   struct mips_watchpoint *nw;
@@ -752,15 +779,12 @@ mips_linux_close (struct target_ops *self)
     }
   current_watches = NULL;
 
-  if (super_close)
-    super_close (self);
+  linux_nat_trad_target::close ();
 }
 
 void
 _initialize_mips_linux_nat (void)
 {
-  struct target_ops *t;
-
   add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
 			   &show_debug_regs, _("\
 Set whether to show variables that mirror the mips debug registers."), _("\
@@ -774,26 +798,8 @@ triggers a breakpoint or watchpoint."),
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 
-  t = linux_trad_target (mips_linux_register_u_offset);
-
-  super_close = t->to_close;
-  t->to_close = mips_linux_close;
-
-  super_fetch_registers = t->to_fetch_registers;
-  super_store_registers = t->to_store_registers;
-
-  t->to_fetch_registers = mips64_linux_fetch_registers;
-  t->to_store_registers = mips64_linux_store_registers;
-
-  t->to_can_use_hw_breakpoint = mips_linux_can_use_hw_breakpoint;
-  t->to_remove_watchpoint = mips_linux_remove_watchpoint;
-  t->to_insert_watchpoint = mips_linux_insert_watchpoint;
-  t->to_stopped_by_watchpoint = mips_linux_stopped_by_watchpoint;
-  t->to_stopped_data_address = mips_linux_stopped_data_address;
-  t->to_region_ok_for_hw_watchpoint = mips_linux_region_ok_for_hw_watchpoint;
-
-  t->to_read_description = mips_linux_read_description;
-
-  linux_nat_add_target (t);
-  linux_nat_set_new_thread (t, mips_linux_new_thread);
+  linux_target = &the_mips_linux_nat_target;
+  add_target (&the_mips_linux_nat_target);
+  linux_nat_set_new_thread (&the_mips_linux_nat_target,
+			    mips_linux_new_thread);
 }

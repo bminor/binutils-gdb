@@ -23,6 +23,7 @@
 #include "target.h"
 
 #include "amd64-tdep.h"
+#include "amd64-bsd-nat.h"
 #include "amd64-nat.h"
 #include "obsd-nat.h"
 
@@ -125,6 +126,8 @@ amd64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   return 1;
 }
 
+static amd64_bsd_nat_target<obsd_nat_target> the_amd64_obsd_nat_target;
+
 void
 _initialize_amd64obsd_nat (void)
 {
@@ -132,8 +135,7 @@ _initialize_amd64obsd_nat (void)
   amd64_native_gregset32_num_regs = ARRAY_SIZE (amd64obsd32_r_reg_offset);
   amd64_native_gregset64_reg_offset = amd64obsd_r_reg_offset;
 
-  /* Add some extra features to the common *BSD/amd64 target.  */
-  obsd_add_target (amd64bsd_target ());
+  add_target (&the_amd64_obsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (amd64obsd_supply_pcb);

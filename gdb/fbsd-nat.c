@@ -46,19 +46,11 @@
 
 #include <list>
 
-#ifdef TRAP_BRKPT
-/* MIPS does not set si_code for SIGTRAP.  sparc64 reports
-   non-standard values in si_code for SIGTRAP.  */
-# if !defined(__mips__) && !defined(__sparc64__)
-#  define USE_SIGTRAP_SIGINFO
-# endif
-#endif
-
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
-static char *
-fbsd_pid_to_exec_file (struct target_ops *self, int pid)
+char *
+fbsd_nat_target::pid_to_exec_file (int pid)
 {
   ssize_t len;
   static char buf[PATH_MAX];
@@ -96,9 +88,9 @@ fbsd_pid_to_exec_file (struct target_ops *self, int pid)
    calling FUNC for each memory region.  OBFD is passed as the last
    argument to FUNC.  */
 
-static int
-fbsd_find_memory_regions (struct target_ops *self,
-			  find_memory_region_ftype func, void *obfd)
+int
+fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
+				      void *obfd)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   struct kinfo_vmentry *kve;
@@ -170,9 +162,9 @@ fbsd_read_mapping (FILE *mapfile, unsigned long *start, unsigned long *end,
    calling FUNC for each memory region.  OBFD is passed as the last
    argument to FUNC.  */
 
-static int
-fbsd_find_memory_regions (struct target_ops *self,
-			  find_memory_region_ftype func, void *obfd)
+int
+fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
+				      void *obfd)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   unsigned long start, end, size;
@@ -259,11 +251,10 @@ fbsd_fetch_kinfo_proc (pid_t pid, struct kinfo_proc *kp)
   return (sysctl (mib, 4, kp, &len, NULL, 0) == 0);
 }
 
-/* Implement the "to_info_proc target_ops" method.  */
+/* Implement the "info_proc" target_ops method.  */
 
-static void
-fbsd_info_proc (struct target_ops *ops, const char *args,
-		enum info_proc_what what)
+bool
+fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 {
 #ifdef HAVE_KINFO_GETFILE
   gdb::unique_xmalloc_ptr<struct kinfo_file> fdtbl;
@@ -378,7 +369,7 @@ fbsd_info_proc (struct target_ops *ops, const char *args,
 	}
 #endif
       if (exe == NULL)
-	exe = fbsd_pid_to_exec_file (ops, pid);
+	exe = pid_to_exec_file (pid);
       if (exe != NULL)
 	printf_filtered ("exe = '%s'\n", exe);
       else
@@ -539,17 +530,11 @@ fbsd_info_proc (struct target_ops *ops, const char *args,
 	  printf_filtered ("\n");
 	}
     }
+
+  return true;
 }
 
 #ifdef KERN_PROC_AUXV
-static enum target_xfer_status (*super_xfer_partial) (struct target_ops *ops,
-						      enum target_object object,
-						      const char *annex,
-						      gdb_byte *readbuf,
-						      const gdb_byte *writebuf,
-						      ULONGEST offset,
-						      ULONGEST len,
-						      ULONGEST *xfered_len);
 
 #ifdef PT_LWPINFO
 /* Return the size of siginfo for the current inferior.  */
@@ -680,13 +665,14 @@ fbsd_convert_siginfo (siginfo_t *si)
 }
 #endif
 
-/* Implement the "to_xfer_partial target_ops" method.  */
+/* Implement the "xfer_partial" target_ops method.  */
 
-static enum target_xfer_status
-fbsd_xfer_partial (struct target_ops *ops, enum target_object object,
-		   const char *annex, gdb_byte *readbuf,
-		   const gdb_byte *writebuf,
-		   ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+enum target_xfer_status
+fbsd_nat_target::xfer_partial (enum target_object object,
+			       const char *annex, gdb_byte *readbuf,
+			       const gdb_byte *writebuf,
+			       ULONGEST offset, ULONGEST len,
+			       ULONGEST *xfered_len)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
 
@@ -766,8 +752,9 @@ fbsd_xfer_partial (struct target_ops *ops, enum target_object object,
 	return TARGET_XFER_E_IO;
       }
     default:
-      return super_xfer_partial (ops, object, annex, readbuf, writebuf, offset,
-				 len, xfered_len);
+      return inf_ptrace_target::xfer_partial (object, annex,
+					      readbuf, writebuf, offset,
+					      len, xfered_len);
     }
 }
 #endif
@@ -775,15 +762,6 @@ fbsd_xfer_partial (struct target_ops *ops, enum target_object object,
 #ifdef PT_LWPINFO
 static int debug_fbsd_lwp;
 static int debug_fbsd_nat;
-
-static void (*super_resume) (struct target_ops *,
-			     ptid_t,
-			     int,
-			     enum gdb_signal);
-static ptid_t (*super_wait) (struct target_ops *,
-			     ptid_t,
-			     struct target_waitstatus *,
-			     int);
 
 static void
 show_fbsd_lwp_debug (struct ui_file *file, int from_tty,
@@ -829,8 +807,8 @@ show_fbsd_nat_debug (struct ui_file *file, int from_tty,
 
 /* Return true if PTID is still active in the inferior.  */
 
-static int
-fbsd_thread_alive (struct target_ops *ops, ptid_t ptid)
+int
+fbsd_nat_target::thread_alive (ptid_t ptid)
 {
   if (ptid_lwp_p (ptid))
     {
@@ -851,8 +829,8 @@ fbsd_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* Convert PTID to a string.  Returns the string in a static
    buffer.  */
 
-static const char *
-fbsd_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+fbsd_nat_target::pid_to_str (ptid_t ptid)
 {
   lwpid_t lwp;
 
@@ -873,8 +851,8 @@ fbsd_pid_to_str (struct target_ops *ops, ptid_t ptid)
 /* Return the name assigned to a thread by an application.  Returns
    the string in a static buffer.  */
 
-static const char *
-fbsd_thread_name (struct target_ops *self, struct thread_info *thr)
+const char *
+fbsd_nat_target::thread_name (struct thread_info *thr)
 {
   struct ptrace_lwpinfo pl;
   struct kinfo_proc kp;
@@ -984,10 +962,10 @@ fbsd_add_threads (pid_t pid)
     }
 }
 
-/* Implement the "to_update_thread_list" target_ops method.  */
+/* Implement the "update_thread_list" target_ops method.  */
 
-static void
-fbsd_update_thread_list (struct target_ops *ops)
+void
+fbsd_nat_target::update_thread_list ()
 {
 #ifdef PT_LWP_EVENTS
   /* With support for thread events, threads are added/deleted from the
@@ -1102,11 +1080,10 @@ fbsd_next_vfork_done (void)
 #endif
 #endif
 
-/* Implement the "to_resume" target_ops method.  */
+/* Implement the "resume" target_ops method.  */
 
-static void
-fbsd_resume (struct target_ops *ops,
-	     ptid_t ptid, int step, enum gdb_signal signo)
+void
+fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 {
 #if defined(TDP_RFPPWAIT) && !defined(PTRACE_VFORK)
   pid_t pid;
@@ -1193,7 +1170,7 @@ fbsd_resume (struct target_ops *ops,
     }
   ptid = ptid_t (ptid.pid ());
 #endif
-  super_resume (ops, ptid, step, signo);
+  inf_ptrace_target::resume (ptid, step, signo);
 }
 
 #ifdef USE_SIGTRAP_SIGINFO
@@ -1202,8 +1179,7 @@ fbsd_resume (struct target_ops *ops,
    core, return true.  */
 
 static bool
-fbsd_handle_debug_trap (struct target_ops *ops, ptid_t ptid,
-			const struct ptrace_lwpinfo &pl)
+fbsd_handle_debug_trap (ptid_t ptid, const struct ptrace_lwpinfo &pl)
 {
 
   /* Ignore traps without valid siginfo or for signals other than
@@ -1250,10 +1226,9 @@ fbsd_handle_debug_trap (struct target_ops *ops, ptid_t ptid,
    process ID of the child, or MINUS_ONE_PTID in case of error; store
    the status in *OURSTATUS.  */
 
-static ptid_t
-fbsd_wait (struct target_ops *ops,
-	   ptid_t ptid, struct target_waitstatus *ourstatus,
-	   int target_options)
+ptid_t
+fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+		       int target_options)
 {
   ptid_t wptid;
 
@@ -1267,7 +1242,7 @@ fbsd_wait (struct target_ops *ops,
 	  return wptid;
 	}
 #endif
-      wptid = super_wait (ops, ptid, ourstatus, target_options);
+      wptid = inf_ptrace_target::wait (ptid, ourstatus, target_options);
       if (ourstatus->kind == TARGET_WAITKIND_STOPPED)
 	{
 	  struct ptrace_lwpinfo pl;
@@ -1296,7 +1271,7 @@ fbsd_wait (struct target_ops *ops,
 	  if (pl.pl_flags & PL_FLAG_EXITED)
 	    {
 	      /* If GDB attaches to a multi-threaded process, exiting
-		 threads might be skipped during fbsd_post_attach that
+		 threads might be skipped during post_attach that
 		 have not yet reported their PL_FLAG_EXITED event.
 		 Ignore EXITED events for an unknown LWP.  */
 	      if (in_thread_list (wptid))
@@ -1426,13 +1401,13 @@ fbsd_wait (struct target_ops *ops,
 	    {
 	      ourstatus->kind = TARGET_WAITKIND_EXECD;
 	      ourstatus->value.execd_pathname
-		= xstrdup (fbsd_pid_to_exec_file (NULL, pid));
+		= xstrdup (pid_to_exec_file (pid));
 	      return wptid;
 	    }
 #endif
 
 #ifdef USE_SIGTRAP_SIGINFO
-	  if (fbsd_handle_debug_trap (ops, wptid, pl))
+	  if (fbsd_handle_debug_trap (wptid, pl))
 	    return wptid;
 #endif
 
@@ -1475,10 +1450,10 @@ fbsd_wait (struct target_ops *ops,
 }
 
 #ifdef USE_SIGTRAP_SIGINFO
-/* Implement the "to_stopped_by_sw_breakpoint" target_ops method.  */
+/* Implement the "stopped_by_sw_breakpoint" target_ops method.  */
 
-static int
-fbsd_stopped_by_sw_breakpoint (struct target_ops *ops)
+int
+fbsd_nat_target::stopped_by_sw_breakpoint ()
 {
   struct ptrace_lwpinfo pl;
 
@@ -1491,22 +1466,13 @@ fbsd_stopped_by_sw_breakpoint (struct target_ops *ops)
 	  && pl.pl_siginfo.si_code == TRAP_BRKPT);
 }
 
-/* Implement the "to_supports_stopped_by_sw_breakpoint" target_ops
+/* Implement the "supports_stopped_by_sw_breakpoint" target_ops
    method.  */
 
-static int
-fbsd_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
+int
+fbsd_nat_target::supports_stopped_by_sw_breakpoint ()
 {
   return 1;
-}
-
-/* Implement the "to_supports_stopped_by_hw_breakpoint" target_ops
-   method.  */
-
-static int
-fbsd_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
-{
-  return ops->to_stopped_by_hw_breakpoint != NULL;
 }
 #endif
 
@@ -1514,9 +1480,8 @@ fbsd_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
 /* Target hook for follow_fork.  On entry and at return inferior_ptid is
    the ptid of the followed inferior.  */
 
-static int
-fbsd_follow_fork (struct target_ops *ops, int follow_child,
-			int detach_fork)
+int
+fbsd_nat_target::follow_fork (int follow_child, int detach_fork)
 {
   if (!follow_child && detach_fork)
     {
@@ -1562,43 +1527,43 @@ fbsd_follow_fork (struct target_ops *ops, int follow_child,
   return 0;
 }
 
-static int
-fbsd_insert_fork_catchpoint (struct target_ops *self, int pid)
+int
+fbsd_nat_target::insert_fork_catchpoint (int pid)
 {
   return 0;
 }
 
-static int
-fbsd_remove_fork_catchpoint (struct target_ops *self, int pid)
+int
+fbsd_nat_target::remove_fork_catchpoint (int pid)
 {
   return 0;
 }
 
-static int
-fbsd_insert_vfork_catchpoint (struct target_ops *self, int pid)
+int
+fbsd_nat_target::insert_vfork_catchpoint (int pid)
 {
   return 0;
 }
 
-static int
-fbsd_remove_vfork_catchpoint (struct target_ops *self, int pid)
+int
+fbsd_nat_target::remove_vfork_catchpoint (int pid)
 {
   return 0;
 }
 #endif
 
-/* Implement the "to_post_startup_inferior" target_ops method.  */
+/* Implement the "post_startup_inferior" target_ops method.  */
 
-static void
-fbsd_post_startup_inferior (struct target_ops *self, ptid_t pid)
+void
+fbsd_nat_target::post_startup_inferior (ptid_t pid)
 {
   fbsd_enable_proc_events (ptid_get_pid (pid));
 }
 
-/* Implement the "to_post_attach" target_ops method.  */
+/* Implement the "post_attach" target_ops method.  */
 
-static void
-fbsd_post_attach (struct target_ops *self, int pid)
+void
+fbsd_nat_target::post_attach (int pid)
 {
   fbsd_enable_proc_events (pid);
   fbsd_add_threads (pid);
@@ -1608,24 +1573,24 @@ fbsd_post_attach (struct target_ops *self, int pid)
 /* If the FreeBSD kernel supports PL_FLAG_EXEC, then traced processes
    will always stop after exec.  */
 
-static int
-fbsd_insert_exec_catchpoint (struct target_ops *self, int pid)
+int
+fbsd_nat_target::insert_exec_catchpoint (int pid)
 {
   return 0;
 }
 
-static int
-fbsd_remove_exec_catchpoint (struct target_ops *self, int pid)
+int
+fbsd_nat_target::remove_exec_catchpoint (int pid)
 {
   return 0;
 }
 #endif
 
 #ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
-static int
-fbsd_set_syscall_catchpoint (struct target_ops *self, int pid, bool needed,
-			     int any_count,
-			     gdb::array_view<const int> syscall_counts)
+int
+fbsd_nat_target::set_syscall_catchpoint (int pid, bool needed,
+					 int any_count,
+					 gdb::array_view<const int> syscall_counts)
 {
 
   /* Ignore the arguments.  inf-ptrace.c will use PT_SYSCALL which
@@ -1635,55 +1600,6 @@ fbsd_set_syscall_catchpoint (struct target_ops *self, int pid, bool needed,
 }
 #endif
 #endif
-
-void
-fbsd_nat_add_target (struct target_ops *t)
-{
-  t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
-  t->to_find_memory_regions = fbsd_find_memory_regions;
-  t->to_info_proc = fbsd_info_proc;
-#ifdef KERN_PROC_AUXV
-  super_xfer_partial = t->to_xfer_partial;
-  t->to_xfer_partial = fbsd_xfer_partial;
-#endif
-#ifdef PT_LWPINFO
-  t->to_thread_alive = fbsd_thread_alive;
-  t->to_pid_to_str = fbsd_pid_to_str;
-#ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME
-  t->to_thread_name = fbsd_thread_name;
-#endif
-  t->to_update_thread_list = fbsd_update_thread_list;
-  t->to_has_thread_control = tc_schedlock;
-  super_resume = t->to_resume;
-  t->to_resume = fbsd_resume;
-  super_wait = t->to_wait;
-  t->to_wait = fbsd_wait;
-  t->to_post_startup_inferior = fbsd_post_startup_inferior;
-  t->to_post_attach = fbsd_post_attach;
-#ifdef USE_SIGTRAP_SIGINFO
-  t->to_stopped_by_sw_breakpoint = fbsd_stopped_by_sw_breakpoint;
-  t->to_supports_stopped_by_sw_breakpoint
-    = fbsd_supports_stopped_by_sw_breakpoint;
-  t->to_supports_stopped_by_hw_breakpoint
-    = fbsd_supports_stopped_by_hw_breakpoint;
-#endif
-#ifdef TDP_RFPPWAIT
-  t->to_follow_fork = fbsd_follow_fork;
-  t->to_insert_fork_catchpoint = fbsd_insert_fork_catchpoint;
-  t->to_remove_fork_catchpoint = fbsd_remove_fork_catchpoint;
-  t->to_insert_vfork_catchpoint = fbsd_insert_vfork_catchpoint;
-  t->to_remove_vfork_catchpoint = fbsd_remove_vfork_catchpoint;
-#endif
-#ifdef PL_FLAG_EXEC
-  t->to_insert_exec_catchpoint = fbsd_insert_exec_catchpoint;
-  t->to_remove_exec_catchpoint = fbsd_remove_exec_catchpoint;
-#endif
-#ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
-  t->to_set_syscall_catchpoint = fbsd_set_syscall_catchpoint;
-#endif
-#endif
-  add_target (t);
-}
 
 void
 _initialize_fbsd_nat (void)

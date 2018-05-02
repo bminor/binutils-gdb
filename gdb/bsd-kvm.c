@@ -56,16 +56,56 @@ static struct pcb *bsd_kvm_paddr;
    register state from PCB and supplies it to REGCACHE.  */
 static int (*bsd_kvm_supply_pcb)(struct regcache *regcache, struct pcb *pcb);
 
-/* Target ops for libkvm interface.  */
-static struct target_ops bsd_kvm_ops;
-
 /* This is the ptid we use while we're connected to kvm.  The kvm
    target currently doesn't export any view of the running processes,
    so this represents the kernel task.  */
 static ptid_t bsd_kvm_ptid;
 
+/* The libkvm target.  */
+
+class bsd_kvm_target final : public target_ops
+{
+public:
+  bsd_kvm_target ()
+  { this->to_stratum = process_stratum; }
+
+  const char *shortname () override
+  { return "kvm"; }
+
+  const char *longname () override
+  { return _("Kernel memory interface"); }
+
+  const char *doc () override
+  {
+    return _("Use a kernel virtual memory image as a target.\n\
+Optionally specify the filename of a core dump.");
+  }
+
+  void open (const char *, int) override;
+  void close () override;
+
+  void fetch_registers (struct regcache *, int) override;
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
+  void files_info () override;
+  int thread_alive (ptid_t ptid) override;
+  const char *pid_to_str (ptid_t) override;
+
+  int has_memory () override { return 1; }
+  int has_stack () override { return 1; }
+  int has_registers () override { return 1; }
+};
+
+/* Target ops for libkvm interface.  */
+static bsd_kvm_target bsd_kvm_ops;
+
 static void
-bsd_kvm_open (const char *arg, int from_tty)
+bsd_kvm_target::open (const char *arg, int from_tty)
 {
   char errbuf[_POSIX2_LINE_MAX];
   char *execfile = NULL;
@@ -107,8 +147,8 @@ bsd_kvm_open (const char *arg, int from_tty)
   print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
 }
 
-static void
-bsd_kvm_close (struct target_ops *self)
+void
+bsd_kvm_target::close ()
 {
   if (core_kd)
     {
@@ -134,11 +174,11 @@ bsd_kvm_xfer_memory (CORE_ADDR addr, ULONGEST len,
   return nbytes;
 }
 
-static enum target_xfer_status
-bsd_kvm_xfer_partial (struct target_ops *ops, enum target_object object,
-		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf,
-		      ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+enum target_xfer_status
+bsd_kvm_target::xfer_partial (enum target_object object,
+			      const char *annex, gdb_byte *readbuf,
+			      const gdb_byte *writebuf,
+			      ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   switch (object)
     {
@@ -162,8 +202,8 @@ bsd_kvm_xfer_partial (struct target_ops *ops, enum target_object object,
     }
 }
 
-static void
-bsd_kvm_files_info (struct target_ops *ops)
+void
+bsd_kvm_target::files_info ()
 {
   if (bsd_kvm_corefile && strcmp (bsd_kvm_corefile, _PATH_MEM) != 0)
     printf_filtered (_("\tUsing the kernel crash dump %s.\n"),
@@ -186,9 +226,8 @@ bsd_kvm_fetch_pcb (struct regcache *regcache, struct pcb *paddr)
   return bsd_kvm_supply_pcb (regcache, &pcb);
 }
 
-static void
-bsd_kvm_fetch_registers (struct target_ops *ops,
-			 struct regcache *regcache, int regnum)
+void
+bsd_kvm_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct nlist nl[2];
 
@@ -325,25 +364,18 @@ bsd_kvm_pcb_cmd (const char *arg, int fromtty)
   print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
 }
 
-static int
-bsd_kvm_thread_alive (struct target_ops *ops,
-		      ptid_t ptid)
+int
+bsd_kvm_target::thread_alive (ptid_t ptid)
 {
   return 1;
 }
 
-static const char *
-bsd_kvm_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+bsd_kvm_target::pid_to_str (ptid_t ptid)
 {
   static char buf[64];
   xsnprintf (buf, sizeof buf, "<kvm>");
   return buf;
-}
-
-static int
-bsd_kvm_return_one (struct target_ops *ops)
-{
-  return 1;
 }
 
 /* Add the libkvm interface to the list of all possible targets and
@@ -355,23 +387,6 @@ bsd_kvm_add_target (int (*supply_pcb)(struct regcache *, struct pcb *))
 {
   gdb_assert (bsd_kvm_supply_pcb == NULL);
   bsd_kvm_supply_pcb = supply_pcb;
-
-  bsd_kvm_ops.to_shortname = "kvm";
-  bsd_kvm_ops.to_longname = _("Kernel memory interface");
-  bsd_kvm_ops.to_doc = _("Use a kernel virtual memory image as a target.\n\
-Optionally specify the filename of a core dump.");
-  bsd_kvm_ops.to_open = bsd_kvm_open;
-  bsd_kvm_ops.to_close = bsd_kvm_close;
-  bsd_kvm_ops.to_fetch_registers = bsd_kvm_fetch_registers;
-  bsd_kvm_ops.to_xfer_partial = bsd_kvm_xfer_partial;
-  bsd_kvm_ops.to_files_info = bsd_kvm_files_info;
-  bsd_kvm_ops.to_thread_alive = bsd_kvm_thread_alive;
-  bsd_kvm_ops.to_pid_to_str = bsd_kvm_pid_to_str;
-  bsd_kvm_ops.to_stratum = process_stratum;
-  bsd_kvm_ops.to_has_memory = bsd_kvm_return_one;
-  bsd_kvm_ops.to_has_stack = bsd_kvm_return_one;
-  bsd_kvm_ops.to_has_registers = bsd_kvm_return_one;
-  bsd_kvm_ops.to_magic = OPS_MAGIC;
 
   add_target (&bsd_kvm_ops);
   

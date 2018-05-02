@@ -29,6 +29,14 @@
 #include "vax-tdep.h"
 #include "inf-ptrace.h"
 
+struct vax_bsd_nat_target final : public inf_ptrace_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static vax_bsd_nat_target the_vax_bsd_nat_target;
+
 /* Supply the general-purpose registers stored in GREGS to REGCACHE.  */
 
 static void
@@ -62,9 +70,8 @@ vaxbsd_collect_gregset (const struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
-static void
-vaxbsd_fetch_inferior_registers (struct target_ops *ops,
-				 struct regcache *regcache, int regnum)
+void
+vax_bsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -78,9 +85,8 @@ vaxbsd_fetch_inferior_registers (struct target_ops *ops,
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers.  */
 
-static void
-vaxbsd_store_inferior_registers (struct target_ops *ops,
-				 struct regcache *regcache, int regnum)
+void
+vax_bsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -129,12 +135,7 @@ vaxbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 void
 _initialize_vaxbsd_nat (void)
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = vaxbsd_fetch_inferior_registers;
-  t->to_store_registers = vaxbsd_store_inferior_registers;
-  add_target (t);
+  add_target (&the_vax_bsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (vaxbsd_supply_pcb);

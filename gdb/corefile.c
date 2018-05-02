@@ -53,9 +53,6 @@ static int exec_file_hook_count = 0;		/* Size of array.  */
 
 bfd *core_bfd = NULL;
 
-/* corelow.c target.  It is never NULL after GDB initialization.  */
-
-struct target_ops *core_target;
 
 
 /* Backward compatability with old way of specifying core files.  */
@@ -65,12 +62,12 @@ core_file_command (const char *filename, int from_tty)
 {
   dont_repeat ();		/* Either way, seems bogus.  */
 
-  gdb_assert (core_target != NULL);
+  gdb_assert (the_core_target != NULL);
 
   if (!filename)
-    (core_target->to_detach) (core_target, current_inferior (), from_tty);
+    the_core_target->detach (current_inferior (), from_tty);
   else
-    (core_target->to_open) (filename, from_tty);
+    the_core_target->open (filename, from_tty);
 }
 
 
@@ -237,8 +234,7 @@ read_memory_object (enum target_object object, CORE_ADDR memaddr,
       enum target_xfer_status status;
       ULONGEST xfered_len;
 
-      status = target_xfer_partial (current_target.beneath,
-				    object, NULL,
+      status = target_xfer_partial (target_stack, object, NULL,
 				    myaddr + xfered, NULL,
 				    memaddr + xfered, len - xfered,
 				    &xfered_len);

@@ -331,7 +331,7 @@ display_one_tib (ptid_t ptid)
       return -1;
     }
 
-  if (target_read (&current_target, TARGET_OBJECT_MEMORY,
+  if (target_read (target_stack, TARGET_OBJECT_MEMORY,
 		   NULL, tib, thread_local_base, tib_size) != tib_size)
     {
       printf_filtered (_("Unable to read thread information "

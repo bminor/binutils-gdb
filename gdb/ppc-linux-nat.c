@@ -267,6 +267,57 @@ int have_ptrace_getsetregs = 1;
    them and gotten an error.  */
 int have_ptrace_getsetfpregs = 1;
 
+struct ppc_linux_nat_target final : public linux_nat_target
+{
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  /* Add our breakpoint/watchpoint methods.  */
+  int can_use_hw_breakpoint (enum bptype, int, int) override;
+
+  int insert_hw_breakpoint (struct gdbarch *, struct bp_target_info *)
+    override;
+
+  int remove_hw_breakpoint (struct gdbarch *, struct bp_target_info *)
+    override;
+
+  int region_ok_for_hw_watchpoint (CORE_ADDR, int) override;
+
+  int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
+			 struct expression *) override;
+
+  int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
+			 struct expression *) override;
+
+  int insert_mask_watchpoint (CORE_ADDR, CORE_ADDR, enum target_hw_bp_type)
+    override;
+
+  int remove_mask_watchpoint (CORE_ADDR, CORE_ADDR, enum target_hw_bp_type)
+    override;
+
+  int stopped_by_watchpoint () override;
+
+  int stopped_data_address (CORE_ADDR *) override;
+
+  int watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
+
+  int can_accel_watchpoint_condition (CORE_ADDR, int, int, struct expression *)
+    override;
+
+  int masked_watch_num_registers (CORE_ADDR, CORE_ADDR) override;
+
+  int ranged_break_num_registers () override;
+
+  const struct target_desc *read_description ()  override;
+
+  int auxv_parse (gdb_byte **readptr,
+		  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+    override;
+};
+
+static ppc_linux_nat_target the_ppc_linux_nat_target;
+
 /* *INDENT-OFF* */
 /* registers layout, as presented by the ptrace interface:
 PT_R0, PT_R1, PT_R2, PT_R3, PT_R4, PT_R5, PT_R6, PT_R7,
@@ -806,9 +857,8 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
 /* Fetch registers from the child process.  Fetch all registers if
    regno == -1, otherwise fetch all general registers or all floating
    point registers depending upon the value of regno.  */
-static void
-ppc_linux_fetch_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regno)
+void
+ppc_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
@@ -1300,7 +1350,7 @@ ppc_linux_get_hwcap (void)
 {
   CORE_ADDR field;
 
-  if (target_auxv_search (&current_target, AT_HWCAP, &field))
+  if (target_auxv_search (target_stack, AT_HWCAP, &field))
     return (unsigned long) field;
 
   return 0;
@@ -1385,9 +1435,8 @@ have_ptrace_hwdebug_interface (void)
   return have_ptrace_hwdebug_interface;
 }
 
-static int
-ppc_linux_can_use_hw_breakpoint (struct target_ops *self,
-				 enum bptype type, int cnt, int ot)
+int
+ppc_linux_nat_target::can_use_hw_breakpoint (enum bptype type, int cnt, int ot)
 {
   int total_hw_wp, total_hw_bp;
 
@@ -1443,9 +1492,8 @@ ppc_linux_can_use_hw_breakpoint (struct target_ops *self,
   return 1;
 }
 
-static int
-ppc_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
-				       CORE_ADDR addr, int len)
+int
+ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
   /* Handle sub-8-byte quantities.  */
   if (len <= 0)
@@ -1603,8 +1651,8 @@ hwdebug_remove_point (struct ppc_hw_breakpoint *b, int tid)
 
 /* Return the number of registers needed for a ranged breakpoint.  */
 
-static int
-ppc_linux_ranged_break_num_registers (struct target_ops *target)
+int
+ppc_linux_nat_target::ranged_break_num_registers ()
 {
   return ((have_ptrace_hwdebug_interface ()
 	   && hwdebug_info.features & PPC_DEBUG_FEATURE_INSN_BP_RANGE)?
@@ -1614,10 +1662,9 @@ ppc_linux_ranged_break_num_registers (struct target_ops *target)
 /* Insert the hardware breakpoint described by BP_TGT.  Returns 0 for
    success, 1 if hardware breakpoints are not supported or -1 for failure.  */
 
-static int
-ppc_linux_insert_hw_breakpoint (struct target_ops *self,
-				struct gdbarch *gdbarch,
-				  struct bp_target_info *bp_tgt)
+int
+ppc_linux_nat_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
+					    struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
@@ -1651,10 +1698,9 @@ ppc_linux_insert_hw_breakpoint (struct target_ops *self,
   return 0;
 }
 
-static int
-ppc_linux_remove_hw_breakpoint (struct target_ops *self,
-				struct gdbarch *gdbarch,
-				  struct bp_target_info *bp_tgt)
+int
+ppc_linux_nat_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
+					    struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
@@ -1708,9 +1754,9 @@ get_trigger_type (enum target_hw_bp_type type)
    or hw_access for an access watchpoint.  Returns 0 on success and throws
    an error on failure.  */
 
-static int
-ppc_linux_insert_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
-				  CORE_ADDR mask, enum target_hw_bp_type rw)
+int
+ppc_linux_nat_target::insert_mask_watchpoint (CORE_ADDR addr,  CORE_ADDR mask,
+					      target_hw_bp_type rw)
 {
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
@@ -1736,9 +1782,9 @@ ppc_linux_insert_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
    or hw_access for an access watchpoint.  Returns 0 on success and throws
    an error on failure.  */
 
-static int
-ppc_linux_remove_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
-				  CORE_ADDR mask, enum target_hw_bp_type rw)
+int
+ppc_linux_nat_target::remove_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask,
+					      target_hw_bp_type rw)
 {
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
@@ -1940,10 +1986,10 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
 /* Return non-zero if the target is capable of using hardware to evaluate
    the condition expression, thus only triggering the watchpoint when it is
    true.  */
-static int
-ppc_linux_can_accel_watchpoint_condition (struct target_ops *self,
-					  CORE_ADDR addr, int len, int rw,
-					  struct expression *cond)
+int
+ppc_linux_nat_target::can_accel_watchpoint_condition (CORE_ADDR addr, int len,
+						      int rw,
+						      struct expression *cond)
 {
   CORE_ADDR data_value;
 
@@ -2003,10 +2049,10 @@ create_watchpoint_request (struct ppc_hw_breakpoint *p, CORE_ADDR addr,
   p->addr = (uint64_t) addr;
 }
 
-static int
-ppc_linux_insert_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
-			     enum target_hw_bp_type type,
-			     struct expression *cond)
+int
+ppc_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
+					 enum target_hw_bp_type type,
+					 struct expression *cond)
 {
   struct lwp_info *lp;
   int ret = -1;
@@ -2072,10 +2118,10 @@ ppc_linux_insert_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
   return ret;
 }
 
-static int
-ppc_linux_remove_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
-			     enum target_hw_bp_type type,
-			     struct expression *cond)
+int
+ppc_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
+					 enum target_hw_bp_type type,
+					 struct expression *cond)
 {
   struct lwp_info *lp;
   int ret = -1;
@@ -2176,8 +2222,8 @@ ppc_linux_thread_exit (struct thread_info *tp, int silent)
   xfree (t);
 }
 
-static int
-ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
+int
+ppc_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   siginfo_t siginfo;
 
@@ -2215,17 +2261,17 @@ ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
   return 1;
 }
 
-static int
-ppc_linux_stopped_by_watchpoint (struct target_ops *ops)
+int
+ppc_linux_nat_target::stopped_by_watchpoint ()
 {
   CORE_ADDR addr;
-  return ppc_linux_stopped_data_address (ops, &addr);
+  return stopped_data_address (&addr);
 }
 
-static int
-ppc_linux_watchpoint_addr_within_range (struct target_ops *target,
-					CORE_ADDR addr,
-					CORE_ADDR start, int length)
+int
+ppc_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
+						    CORE_ADDR start,
+						    int length)
 {
   int mask;
 
@@ -2245,9 +2291,8 @@ ppc_linux_watchpoint_addr_within_range (struct target_ops *target,
 
 /* Return the number of registers needed for a masked hardware watchpoint.  */
 
-static int
-ppc_linux_masked_watch_num_registers (struct target_ops *target,
-				      CORE_ADDR addr, CORE_ADDR mask)
+int
+ppc_linux_nat_target::masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask)
 {
   if (!have_ptrace_hwdebug_interface ()
 	   || (hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_MASK) == 0)
@@ -2263,9 +2308,8 @@ ppc_linux_masked_watch_num_registers (struct target_ops *target,
     return 2;
 }
 
-static void
-ppc_linux_store_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regno)
+void
+ppc_linux_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
@@ -2342,9 +2386,10 @@ ppc_linux_target_wordsize (void)
   return wordsize;
 }
 
-static int
-ppc_linux_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
-                      gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+int
+ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
+				  gdb_byte *endptr, CORE_ADDR *typep,
+				  CORE_ADDR *valp)
 {
   int sizeof_auxv_field = ppc_linux_target_wordsize ();
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
@@ -2365,8 +2410,8 @@ ppc_linux_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
   return 1;
 }
 
-static const struct target_desc *
-ppc_linux_read_description (struct target_ops *ops)
+const struct target_desc *
+ppc_linux_nat_target::read_description ()
 {
   int altivec = 0;
   int vsx = 0;
@@ -2456,38 +2501,12 @@ ppc_linux_read_description (struct target_ops *ops)
 void
 _initialize_ppc_linux_nat (void)
 {
-  struct target_ops *t;
-
-  /* Fill in the generic GNU/Linux methods.  */
-  t = linux_target ();
-
-  /* Add our register access methods.  */
-  t->to_fetch_registers = ppc_linux_fetch_inferior_registers;
-  t->to_store_registers = ppc_linux_store_inferior_registers;
-
-  /* Add our breakpoint/watchpoint methods.  */
-  t->to_can_use_hw_breakpoint = ppc_linux_can_use_hw_breakpoint;
-  t->to_insert_hw_breakpoint = ppc_linux_insert_hw_breakpoint;
-  t->to_remove_hw_breakpoint = ppc_linux_remove_hw_breakpoint;
-  t->to_region_ok_for_hw_watchpoint = ppc_linux_region_ok_for_hw_watchpoint;
-  t->to_insert_watchpoint = ppc_linux_insert_watchpoint;
-  t->to_remove_watchpoint = ppc_linux_remove_watchpoint;
-  t->to_insert_mask_watchpoint = ppc_linux_insert_mask_watchpoint;
-  t->to_remove_mask_watchpoint = ppc_linux_remove_mask_watchpoint;
-  t->to_stopped_by_watchpoint = ppc_linux_stopped_by_watchpoint;
-  t->to_stopped_data_address = ppc_linux_stopped_data_address;
-  t->to_watchpoint_addr_within_range = ppc_linux_watchpoint_addr_within_range;
-  t->to_can_accel_watchpoint_condition
-    = ppc_linux_can_accel_watchpoint_condition;
-  t->to_masked_watch_num_registers = ppc_linux_masked_watch_num_registers;
-  t->to_ranged_break_num_registers = ppc_linux_ranged_break_num_registers;
-
-  t->to_read_description = ppc_linux_read_description;
-  t->to_auxv_parse = ppc_linux_auxv_parse;
+  linux_target = &the_ppc_linux_nat_target;
 
   gdb::observers::thread_exit.attach (ppc_linux_thread_exit);
 
   /* Register the target.  */
-  linux_nat_add_target (t);
-  linux_nat_set_new_thread (t, ppc_linux_new_thread);
+  add_target (linux_target);
+
+  linux_nat_set_new_thread (linux_target, ppc_linux_new_thread);
 }

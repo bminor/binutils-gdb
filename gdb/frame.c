@@ -2217,7 +2217,7 @@ inside_main_func (struct frame_info *this_frame)
      returned.  */
   maddr = gdbarch_convert_from_func_ptr_addr (get_frame_arch (this_frame),
 					      BMSYMBOL_VALUE_ADDRESS (msymbol),
-					      &current_target);
+					      target_stack);
   return maddr == get_frame_func (this_frame);
 }
 

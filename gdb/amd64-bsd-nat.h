@@ -1,6 +1,6 @@
-/* Native-dependent code for modern i386 BSD's.
+/* Native-dependent code for modern AMD64 BSD's.
 
-   Copyright (C) 2004-2018 Free Software Foundation, Inc.
+   Copyright (C) 2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,26 +17,28 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef I386_BSD_NAT_H
-#define I386_BSD_NAT_H
+#ifndef AMD64_BSD_NAT_H
+#define AMD64_BSD_NAT_H
+
+#include "x86-bsd-nat.h"
 
 /* Helper functions.  See definitions.  */
-extern void i386bsd_fetch_inferior_registers (struct regcache *regcache,
-					      int regnum);
-extern void i386bsd_store_inferior_registers (struct regcache *regcache,
-					      int regnum);
+extern void amd64bsd_fetch_inferior_registers (struct regcache *regcache,
+					       int regnum);
+extern void amd64bsd_store_inferior_registers (struct regcache *regcache,
+					       int regnum);
 
-/* A prototype *BSD/i386 target.  */
+/* A prototype *BSD/AMD64 target.  */
 
 template<typename BaseTarget>
-class i386_bsd_nat_target : public x86bsd_nat_target<BaseTarget>
+class amd64_bsd_nat_target : public x86bsd_nat_target<BaseTarget>
 {
 public:
   void fetch_registers (struct regcache *regcache, int regnum) override
-  { i386bsd_fetch_inferior_registers (regcache, regnum); }
+  { amd64bsd_fetch_inferior_registers (regcache, regnum); }
 
   void store_registers (struct regcache *regcache, int regnum) override
-  { i386bsd_store_inferior_registers (regcache, regnum); }
+  { amd64bsd_store_inferior_registers (regcache, regnum); }
 };
 
 #endif /* i386-bsd-nat.h */

@@ -1203,7 +1203,7 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
   /* Look up cached address of thread-local variable.  */
   if (!ptid_equal (spe_context_cache_ptid, inferior_ptid))
     {
-      struct target_ops *target = &current_target;
+      struct target_ops *target = target_stack;
 
       TRY
 	{
@@ -1214,9 +1214,9 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
 	     Instead, we have cached the lm_addr value, and use that to
 	     directly call the target's to_get_thread_local_address.  */
 	  spe_context_cache_address
-	    = target->to_get_thread_local_address (target, inferior_ptid,
-						   spe_context_lm_addr,
-						   spe_context_offset);
+	    = target->get_thread_local_address (inferior_ptid,
+						spe_context_lm_addr,
+						spe_context_offset);
 	  spe_context_cache_ptid = inferior_ptid;
 	}
 
@@ -1363,7 +1363,7 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 	return 0;
 
       xsnprintf (annex, sizeof annex, "%d/regs", data.id);
-      if (target_read (&current_target, TARGET_OBJECT_SPU, annex,
+      if (target_read (target_stack, TARGET_OBJECT_SPU, annex,
 		       data.gprs, 0, sizeof data.gprs)
 	  == sizeof data.gprs)
 	{

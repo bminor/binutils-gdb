@@ -189,7 +189,7 @@ ULONGEST
 sparc_fetch_wcookie (struct gdbarch *gdbarch)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct target_ops *ops = &current_target;
+  struct target_ops *ops = target_stack;
   gdb_byte buf[8];
   int len;
 

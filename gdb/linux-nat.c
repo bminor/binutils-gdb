@@ -186,13 +186,10 @@ leader.  */
 #define O_LARGEFILE 0
 #endif
 
+struct linux_nat_target *linux_target;
+
 /* Does the current host support PTRACE_GETREGSET?  */
 enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
-
-/* The single-threaded native GNU/Linux target_ops.  We save a pointer for
-   the use of the multi-threaded target.  */
-static struct target_ops *linux_ops;
-static struct target_ops linux_ops_saved;
 
 /* The method to call, if any, when a new thread is attached.  */
 static void (*linux_nat_new_thread) (struct lwp_info *);
@@ -216,10 +213,6 @@ static void (*linux_nat_prepare_to_resume) (struct lwp_info *);
 static int (*linux_nat_siginfo_fixup) (siginfo_t *,
 				       gdb_byte *,
 				       int);
-
-/* The saved to_xfer_partial method, inherited from inf-ptrace.c.
-   Called by our to_xfer_partial.  */
-static target_xfer_partial_ftype *super_xfer_partial;
 
 /* The saved to_close method, inherited from inf-ptrace.c.
    Called by our to_close.  */
@@ -431,14 +424,17 @@ linux_init_ptrace (pid_t pid, int attached)
   linux_ptrace_init_warnings ();
 }
 
-static void
-linux_child_post_attach (struct target_ops *self, int pid)
+linux_nat_target::~linux_nat_target ()
+{}
+
+void
+linux_nat_target::post_attach (int pid)
 {
   linux_init_ptrace (pid, 1);
 }
 
-static void
-linux_child_post_startup_inferior (struct target_ops *self, ptid_t ptid)
+void
+linux_nat_target::post_startup_inferior (ptid_t ptid)
 {
   linux_init_ptrace (ptid_get_pid (ptid), 0);
 }
@@ -472,9 +468,8 @@ delete_lwp_cleanup (void *lp_voidp)
    ptid of the followed inferior.  At return, inferior_ptid will be
    unchanged.  */
 
-static int
-linux_child_follow_fork (struct target_ops *ops, int follow_child,
-			 int detach_fork)
+int
+linux_nat_target::follow_fork (int follow_child, int detach_fork)
 {
   if (!follow_child)
     {
@@ -638,46 +633,45 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
 }
 
 
-static int
-linux_child_insert_fork_catchpoint (struct target_ops *self, int pid)
+int
+linux_nat_target::insert_fork_catchpoint (int pid)
 {
   return !linux_supports_tracefork ();
 }
 
-static int
-linux_child_remove_fork_catchpoint (struct target_ops *self, int pid)
+int
+linux_nat_target::remove_fork_catchpoint (int pid)
 {
   return 0;
 }
 
-static int
-linux_child_insert_vfork_catchpoint (struct target_ops *self, int pid)
+int
+linux_nat_target::insert_vfork_catchpoint (int pid)
 {
   return !linux_supports_tracefork ();
 }
 
-static int
-linux_child_remove_vfork_catchpoint (struct target_ops *self, int pid)
+int
+linux_nat_target::remove_vfork_catchpoint (int pid)
 {
   return 0;
 }
 
-static int
-linux_child_insert_exec_catchpoint (struct target_ops *self, int pid)
+int
+linux_nat_target::insert_exec_catchpoint (int pid)
 {
   return !linux_supports_tracefork ();
 }
 
-static int
-linux_child_remove_exec_catchpoint (struct target_ops *self, int pid)
+int
+linux_nat_target::remove_exec_catchpoint (int pid)
 {
   return 0;
 }
 
-static int
-linux_child_set_syscall_catchpoint (struct target_ops *self,
-				    int pid, bool needed, int any_count,
-				    gdb::array_view<const int> syscall_counts)
+int
+linux_nat_target::set_syscall_catchpoint (int pid, bool needed, int any_count,
+					  gdb::array_view<const int> syscall_counts)
 {
   if (!linux_supports_tracesysgood ())
     return 1;
@@ -811,9 +805,8 @@ restore_child_signals_mask (sigset_t *prev_mask)
 static sigset_t pass_mask;
 
 /* Update signals to pass to the inferior.  */
-static void
-linux_nat_pass_signals (struct target_ops *self,
-			int numsigs, unsigned char *pass_signals)
+void
+linux_nat_target::pass_signals (int numsigs, unsigned char *pass_signals)
 {
   int signo;
 
@@ -831,7 +824,6 @@ linux_nat_pass_signals (struct target_ops *self,
 
 /* Prototypes for local functions.  */
 static int stop_wait_callback (struct lwp_info *lp, void *data);
-static char *linux_child_pid_to_exec_file (struct target_ops *self, int pid);
 static int resume_stopped_resumed_lwps (struct lwp_info *lp, void *data);
 static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
 
@@ -1113,10 +1105,10 @@ linux_nat_post_attach_wait (ptid_t ptid, int *signalled)
   return status;
 }
 
-static void
-linux_nat_create_inferior (struct target_ops *ops, 
-			   const char *exec_file, const std::string &allargs,
-			   char **env, int from_tty)
+void
+linux_nat_target::create_inferior (const char *exec_file,
+				   const std::string &allargs,
+				   char **env, int from_tty)
 {
   maybe_disable_address_space_randomization restore_personality
     (disable_randomization);
@@ -1125,9 +1117,9 @@ linux_nat_create_inferior (struct target_ops *ops,
      we have to mask the async mode.  */
 
   /* Make sure we report all signals during startup.  */
-  linux_nat_pass_signals (ops, 0, NULL);
+  pass_signals (0, NULL);
 
-  linux_ops->to_create_inferior (ops, exec_file, allargs, env, from_tty);
+  inf_ptrace_target::create_inferior (exec_file, allargs, env, from_tty);
 }
 
 /* Callback for linux_proc_attach_tgid_threads.  Attach to PTID if not
@@ -1207,19 +1199,19 @@ attach_proc_task_lwp_callback (ptid_t ptid)
   return 0;
 }
 
-static void
-linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
+void
+linux_nat_target::attach (const char *args, int from_tty)
 {
   struct lwp_info *lp;
   int status;
   ptid_t ptid;
 
   /* Make sure we report all signals during attach.  */
-  linux_nat_pass_signals (ops, 0, NULL);
+  pass_signals (0, NULL);
 
   TRY
     {
-      linux_ops->to_attach (ops, args, from_tty);
+      inf_ptrace_target::attach (args, from_tty);
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -1496,8 +1488,8 @@ detach_callback (struct lwp_info *lp, void *data)
   return 0;
 }
 
-static void
-linux_nat_detach (struct target_ops *ops, inferior *inf, int from_tty)
+void
+linux_nat_target::detach (inferior *inf, int from_tty)
 {
   struct lwp_info *main_lwp;
   int pid = inf->pid;
@@ -1536,7 +1528,7 @@ linux_nat_detach (struct target_ops *ops, inferior *inf, int from_tty)
 
       detach_one_lwp (main_lwp, &signo);
 
-      inf_ptrace_detach_success (ops, inf);
+      detach_success (inf);
     }
 }
 
@@ -1563,7 +1555,7 @@ linux_resume_one_lwp_throw (struct lwp_info *lp, int step,
 
   if (linux_nat_prepare_to_resume != NULL)
     linux_nat_prepare_to_resume (lp);
-  linux_ops->to_resume (linux_ops, lp->ptid, step, signo);
+  linux_target->low_resume (lp->ptid, step, signo);
 
   /* Successfully resumed.  Clear state that no longer makes sense,
      and mark the LWP as running.  Must not do this before resuming
@@ -1716,9 +1708,8 @@ resume_set_callback (struct lwp_info *lp, void *data)
   return 0;
 }
 
-static void
-linux_nat_resume (struct target_ops *ops,
-		  ptid_t ptid, int step, enum gdb_signal signo)
+void
+linux_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 {
   struct lwp_info *lp;
   int resume_many;
@@ -2117,7 +2108,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 
       ourstatus->kind = TARGET_WAITKIND_EXECD;
       ourstatus->value.execd_pathname
-	= xstrdup (linux_child_pid_to_exec_file (NULL, pid));
+	= xstrdup (linux_proc_pid_to_exec_file (pid));
 
       /* The thread that execed must have been resumed, but, when a
 	 thread execs, it changes its tid to the tgid, and the old
@@ -2468,22 +2459,14 @@ maybe_clear_ignore_sigint (struct lwp_info *lp)
 static int
 check_stopped_by_watchpoint (struct lwp_info *lp)
 {
-  if (linux_ops->to_stopped_by_watchpoint == NULL)
-    return 0;
-
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   inferior_ptid = lp->ptid;
 
-  if (linux_ops->to_stopped_by_watchpoint (linux_ops))
+  if (linux_target->low_stopped_by_watchpoint ())
     {
       lp->stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
-
-      if (linux_ops->to_stopped_data_address != NULL)
-	lp->stopped_data_address_p =
-	  linux_ops->to_stopped_data_address (&current_target,
-					      &lp->stopped_data_address);
-      else
-	lp->stopped_data_address_p = 0;
+      lp->stopped_data_address_p
+	= linux_target->low_stopped_data_address (&lp->stopped_data_address);
     }
 
   return lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
@@ -2491,8 +2474,8 @@ check_stopped_by_watchpoint (struct lwp_info *lp)
 
 /* Returns true if the LWP had stopped for a watchpoint.  */
 
-static int
-linux_nat_stopped_by_watchpoint (struct target_ops *ops)
+int
+linux_nat_target::stopped_by_watchpoint ()
 {
   struct lwp_info *lp = find_lwp_pid (inferior_ptid);
 
@@ -2501,8 +2484,8 @@ linux_nat_stopped_by_watchpoint (struct target_ops *ops)
   return lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
 
-static int
-linux_nat_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
+int
+linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   struct lwp_info *lp = find_lwp_pid (inferior_ptid);
 
@@ -2852,8 +2835,8 @@ save_stop_reason (struct lwp_info *lp)
 
 /* Returns true if the LWP had stopped for a software breakpoint.  */
 
-static int
-linux_nat_stopped_by_sw_breakpoint (struct target_ops *ops)
+int
+linux_nat_target::stopped_by_sw_breakpoint ()
 {
   struct lwp_info *lp = find_lwp_pid (inferior_ptid);
 
@@ -2864,8 +2847,8 @@ linux_nat_stopped_by_sw_breakpoint (struct target_ops *ops)
 
 /* Implement the supports_stopped_by_sw_breakpoint method.  */
 
-static int
-linux_nat_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
+int
+linux_nat_target::supports_stopped_by_sw_breakpoint ()
 {
   return USE_SIGTRAP_SIGINFO;
 }
@@ -2873,8 +2856,8 @@ linux_nat_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
 /* Returns true if the LWP had stopped for a hardware
    breakpoint/watchpoint.  */
 
-static int
-linux_nat_stopped_by_hw_breakpoint (struct target_ops *ops)
+int
+linux_nat_target::stopped_by_hw_breakpoint ()
 {
   struct lwp_info *lp = find_lwp_pid (inferior_ptid);
 
@@ -2885,8 +2868,8 @@ linux_nat_stopped_by_hw_breakpoint (struct target_ops *ops)
 
 /* Implement the supports_stopped_by_hw_breakpoint method.  */
 
-static int
-linux_nat_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
+int
+linux_nat_target::supports_stopped_by_hw_breakpoint ()
 {
   return USE_SIGTRAP_SIGINFO;
 }
@@ -3297,8 +3280,7 @@ filter_exit_event (struct lwp_info *event_child,
 }
 
 static ptid_t
-linux_nat_wait_1 (struct target_ops *ops,
-		  ptid_t ptid, struct target_waitstatus *ourstatus,
+linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 		  int target_options)
 {
   sigset_t prev_mask;
@@ -3600,10 +3582,9 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
   return 0;
 }
 
-static ptid_t
-linux_nat_wait (struct target_ops *ops,
-		ptid_t ptid, struct target_waitstatus *ourstatus,
-		int target_options)
+ptid_t
+linux_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+			int target_options)
 {
   ptid_t event_ptid;
 
@@ -3633,7 +3614,7 @@ linux_nat_wait (struct target_ops *ops,
   if (target_is_non_stop_p ())
     iterate_over_lwps (minus_one_ptid, resume_stopped_resumed_lwps, &ptid);
 
-  event_ptid = linux_nat_wait_1 (ops, ptid, ourstatus, target_options);
+  event_ptid = linux_nat_wait_1 (ptid, ourstatus, target_options);
 
   /* If we requested any event, and something came out, assume there
      may be more.  If we requested a specific lwp or process, also
@@ -3759,8 +3740,8 @@ kill_unfollowed_fork_children (struct inferior *inf)
       }
 }
 
-static void
-linux_nat_kill (struct target_ops *ops)
+void
+linux_nat_target::kill ()
 {
   /* If we're stopped while forking and we haven't followed yet,
      kill the other task.  We need to do this first because the
@@ -3790,8 +3771,8 @@ linux_nat_kill (struct target_ops *ops)
   target_mourn_inferior (inferior_ptid);
 }
 
-static void
-linux_nat_mourn_inferior (struct target_ops *ops)
+void
+linux_nat_target::mourn_inferior ()
 {
   int pid = ptid_get_pid (inferior_ptid);
 
@@ -3799,7 +3780,7 @@ linux_nat_mourn_inferior (struct target_ops *ops)
 
   if (! forks_exist_p ())
     /* Normal case, no other forks available.  */
-    linux_ops->to_mourn_inferior (ops);
+    inf_ptrace_target::mourn_inferior ();
   else
     /* Multi-fork case.  The current inferior_ptid has exited, but
        there are other viable forks to debug.  Delete the exiting
@@ -3833,7 +3814,7 @@ siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo, int direction)
 }
 
 static enum target_xfer_status
-linux_xfer_siginfo (struct target_ops *ops, enum target_object object,
+linux_xfer_siginfo (enum target_object object,
                     const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
 		    ULONGEST *xfered_len)
@@ -3888,15 +3869,33 @@ linux_xfer_siginfo (struct target_ops *ops, enum target_object object,
 }
 
 static enum target_xfer_status
-linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
-			const char *annex, gdb_byte *readbuf,
-			const gdb_byte *writebuf,
-			ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+linux_nat_xfer_osdata (enum target_object object,
+		       const char *annex, gdb_byte *readbuf,
+		       const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		       ULONGEST *xfered_len);
+
+static enum target_xfer_status
+linux_proc_xfer_spu (enum target_object object,
+		     const char *annex, gdb_byte *readbuf,
+		     const gdb_byte *writebuf,
+		     ULONGEST offset, ULONGEST len, ULONGEST *xfered_len);
+
+static enum target_xfer_status
+linux_proc_xfer_partial (enum target_object object,
+			 const char *annex, gdb_byte *readbuf,
+			 const gdb_byte *writebuf,
+			 ULONGEST offset, LONGEST len, ULONGEST *xfered_len);
+
+enum target_xfer_status
+linux_nat_target::xfer_partial (enum target_object object,
+				const char *annex, gdb_byte *readbuf,
+				const gdb_byte *writebuf,
+				ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   enum target_xfer_status xfer;
 
   if (object == TARGET_OBJECT_SIGNAL_INFO)
-    return linux_xfer_siginfo (ops, object, annex, readbuf, writebuf,
+    return linux_xfer_siginfo (object, annex, readbuf, writebuf,
 			       offset, len, xfered_len);
 
   /* The target is connected but no live inferior is selected.  Pass
@@ -3905,14 +3904,44 @@ linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
   if (object == TARGET_OBJECT_MEMORY && ptid_equal (inferior_ptid, null_ptid))
     return TARGET_XFER_EOF;
 
-  xfer = linux_ops->to_xfer_partial (ops, object, annex, readbuf, writebuf,
-				     offset, len, xfered_len);
+  if (object == TARGET_OBJECT_AUXV)
+    return memory_xfer_auxv (this, object, annex, readbuf, writebuf,
+			     offset, len, xfered_len);
 
-  return xfer;
+  if (object == TARGET_OBJECT_OSDATA)
+    return linux_nat_xfer_osdata (object, annex, readbuf, writebuf,
+				  offset, len, xfered_len);
+
+  if (object == TARGET_OBJECT_SPU)
+    return linux_proc_xfer_spu (object, annex, readbuf, writebuf,
+				offset, len, xfered_len);
+
+  /* GDB calculates all addresses in the largest possible address
+     width.
+     The address width must be masked before its final use - either by
+     linux_proc_xfer_partial or inf_ptrace_target::xfer_partial.
+
+     Compare ADDR_BIT first to avoid a compiler warning on shift overflow.  */
+
+  if (object == TARGET_OBJECT_MEMORY)
+    {
+      int addr_bit = gdbarch_addr_bit (target_gdbarch ());
+
+      if (addr_bit < (sizeof (ULONGEST) * HOST_CHAR_BIT))
+	offset &= ((ULONGEST) 1 << addr_bit) - 1;
+    }
+
+  xfer = linux_proc_xfer_partial (object, annex, readbuf, writebuf,
+				  offset, len, xfered_len);
+  if (xfer != TARGET_XFER_EOF)
+    return xfer;
+
+  return inf_ptrace_target::xfer_partial (object, annex, readbuf, writebuf,
+					  offset, len, xfered_len);
 }
 
-static int
-linux_nat_thread_alive (struct target_ops *ops, ptid_t ptid)
+int
+linux_nat_target::thread_alive (ptid_t ptid)
 {
   /* As long as a PTID is in lwp list, consider it alive.  */
   return find_lwp_pid (ptid) != NULL;
@@ -3921,8 +3950,8 @@ linux_nat_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* Implement the to_update_thread_list target method for this
    target.  */
 
-static void
-linux_nat_update_thread_list (struct target_ops *ops)
+void
+linux_nat_target::update_thread_list ()
 {
   struct lwp_info *lwp;
 
@@ -3943,8 +3972,8 @@ linux_nat_update_thread_list (struct target_ops *ops)
     }
 }
 
-static const char *
-linux_nat_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+linux_nat_target::pid_to_str (ptid_t ptid)
 {
   static char buf[64];
 
@@ -3959,8 +3988,8 @@ linux_nat_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
-static const char *
-linux_nat_thread_name (struct target_ops *self, struct thread_info *thr)
+const char *
+linux_nat_target::thread_name (struct thread_info *thr)
 {
   return linux_proc_tid_get_name (thr->ptid);
 }
@@ -3968,8 +3997,8 @@ linux_nat_thread_name (struct target_ops *self, struct thread_info *thr)
 /* Accepts an integer PID; Returns a string representing a file that
    can be opened to get the symbols for the child process.  */
 
-static char *
-linux_child_pid_to_exec_file (struct target_ops *self, int pid)
+char *
+linux_nat_target::pid_to_exec_file (int pid)
 {
   return linux_proc_pid_to_exec_file (pid);
 }
@@ -3979,7 +4008,7 @@ linux_child_pid_to_exec_file (struct target_ops *self, int pid)
    efficient than banging away at PTRACE_PEEKTEXT.  */
 
 static enum target_xfer_status
-linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
+linux_proc_xfer_partial (enum target_object object,
 			 const char *annex, gdb_byte *readbuf,
 			 const gdb_byte *writebuf,
 			 ULONGEST offset, LONGEST len, ULONGEST *xfered_len)
@@ -4083,7 +4112,7 @@ spu_enumerate_spu_ids (int pid, gdb_byte *buf, ULONGEST offset, ULONGEST len)
    object type, using the /proc file system.  */
 
 static enum target_xfer_status
-linux_proc_xfer_spu (struct target_ops *ops, enum target_object object,
+linux_proc_xfer_spu (enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
 		     const gdb_byte *writebuf,
 		     ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
@@ -4223,7 +4252,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending,
 }
 
 static enum target_xfer_status
-linux_nat_xfer_osdata (struct target_ops *ops, enum target_object object,
+linux_nat_xfer_osdata (enum target_object object,
 		       const char *annex, gdb_byte *readbuf,
 		       const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
 		       ULONGEST *xfered_len)
@@ -4237,49 +4266,6 @@ linux_nat_xfer_osdata (struct target_ops *ops, enum target_object object,
     return TARGET_XFER_OK;
 }
 
-static enum target_xfer_status
-linux_xfer_partial (struct target_ops *ops, enum target_object object,
-                    const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
-		    ULONGEST *xfered_len)
-{
-  enum target_xfer_status xfer;
-
-  if (object == TARGET_OBJECT_AUXV)
-    return memory_xfer_auxv (ops, object, annex, readbuf, writebuf,
-			     offset, len, xfered_len);
-
-  if (object == TARGET_OBJECT_OSDATA)
-    return linux_nat_xfer_osdata (ops, object, annex, readbuf, writebuf,
-				  offset, len, xfered_len);
-
-  if (object == TARGET_OBJECT_SPU)
-    return linux_proc_xfer_spu (ops, object, annex, readbuf, writebuf,
-				offset, len, xfered_len);
-
-  /* GDB calculates all the addresses in possibly larget width of the address.
-     Address width needs to be masked before its final use - either by
-     linux_proc_xfer_partial or inf_ptrace_xfer_partial.
-
-     Compare ADDR_BIT first to avoid a compiler warning on shift overflow.  */
-
-  if (object == TARGET_OBJECT_MEMORY)
-    {
-      int addr_bit = gdbarch_addr_bit (target_gdbarch ());
-
-      if (addr_bit < (sizeof (ULONGEST) * HOST_CHAR_BIT))
-	offset &= ((ULONGEST) 1 << addr_bit) - 1;
-    }
-
-  xfer = linux_proc_xfer_partial (ops, object, annex, readbuf, writebuf,
-				  offset, len, xfered_len);
-  if (xfer != TARGET_XFER_EOF)
-    return xfer;
-
-  return super_xfer_partial (ops, object, annex, readbuf, writebuf,
-			     offset, len, xfered_len);
-}
-
 static void
 cleanup_target_stop (void *arg)
 {
@@ -4291,9 +4277,8 @@ cleanup_target_stop (void *arg)
   target_continue_no_signal (*ptid);
 }
 
-static std::vector<static_tracepoint_marker>
-linux_child_static_tracepoint_markers_by_strid (struct target_ops *self,
-						const char *strid)
+std::vector<static_tracepoint_marker>
+linux_nat_target::static_tracepoint_markers_by_strid (const char *strid)
 {
   char s[IPA_CMD_BUF_SIZE];
   struct cleanup *old_chain;
@@ -4335,70 +4320,34 @@ linux_child_static_tracepoint_markers_by_strid (struct target_ops *self,
   return markers;
 }
 
-/* Create a prototype generic GNU/Linux target.  The client can override
-   it with local methods.  */
-
-void
-linux_target_install_ops (struct target_ops *t)
-{
-  t->to_insert_fork_catchpoint = linux_child_insert_fork_catchpoint;
-  t->to_remove_fork_catchpoint = linux_child_remove_fork_catchpoint;
-  t->to_insert_vfork_catchpoint = linux_child_insert_vfork_catchpoint;
-  t->to_remove_vfork_catchpoint = linux_child_remove_vfork_catchpoint;
-  t->to_insert_exec_catchpoint = linux_child_insert_exec_catchpoint;
-  t->to_remove_exec_catchpoint = linux_child_remove_exec_catchpoint;
-  t->to_set_syscall_catchpoint = linux_child_set_syscall_catchpoint;
-  t->to_pid_to_exec_file = linux_child_pid_to_exec_file;
-  t->to_post_startup_inferior = linux_child_post_startup_inferior;
-  t->to_post_attach = linux_child_post_attach;
-  t->to_follow_fork = linux_child_follow_fork;
-
-  super_xfer_partial = t->to_xfer_partial;
-  t->to_xfer_partial = linux_xfer_partial;
-
-  t->to_static_tracepoint_markers_by_strid
-    = linux_child_static_tracepoint_markers_by_strid;
-}
-
-struct target_ops *
-linux_target (void)
-{
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  linux_target_install_ops (t);
-
-  return t;
-}
-
 /* target_is_async_p implementation.  */
 
-static int
-linux_nat_is_async_p (struct target_ops *ops)
+int
+linux_nat_target::is_async_p ()
 {
   return linux_is_async_p ();
 }
 
 /* target_can_async_p implementation.  */
 
-static int
-linux_nat_can_async_p (struct target_ops *ops)
+int
+linux_nat_target::can_async_p ()
 {
   /* We're always async, unless the user explicitly prevented it with the
      "maint set target-async" command.  */
   return target_async_permitted;
 }
 
-static int
-linux_nat_supports_non_stop (struct target_ops *self)
+int
+linux_nat_target::supports_non_stop ()
 {
   return 1;
 }
 
 /* to_always_non_stop_p implementation.  */
 
-static int
-linux_nat_always_non_stop_p (struct target_ops *self)
+int
+linux_nat_target::always_non_stop_p ()
 {
   return 1;
 }
@@ -4408,14 +4357,14 @@ linux_nat_always_non_stop_p (struct target_ops *self)
 
 int linux_multi_process = 1;
 
-static int
-linux_nat_supports_multi_process (struct target_ops *self)
+int
+linux_nat_target::supports_multi_process ()
 {
   return linux_multi_process;
 }
 
-static int
-linux_nat_supports_disable_randomization (struct target_ops *self)
+int
+linux_nat_target::supports_disable_randomization ()
 {
 #ifdef HAVE_PERSONALITY
   return 1;
@@ -4494,8 +4443,8 @@ linux_async_pipe (int enable)
 
 /* target_async implementation.  */
 
-static void
-linux_nat_async (struct target_ops *ops, int enable)
+void
+linux_nat_target::async (int enable)
 {
   if (enable)
     {
@@ -4563,23 +4512,20 @@ linux_nat_stop_lwp (struct lwp_info *lwp, void *data)
   return 0;
 }
 
-static void
-linux_nat_stop (struct target_ops *self, ptid_t ptid)
+void
+linux_nat_target::stop (ptid_t ptid)
 {
   iterate_over_lwps (ptid, linux_nat_stop_lwp, NULL);
 }
 
-static void
-linux_nat_close (struct target_ops *self)
+void
+linux_nat_target::close ()
 {
   /* Unregister from the event loop.  */
-  if (linux_nat_is_async_p (self))
-    linux_nat_async (self, 0);
+  if (is_async_p ())
+    async (0);
 
-  if (linux_ops->to_close)
-    linux_ops->to_close (linux_ops);
-
-  super_close (self);
+  inf_ptrace_target::close ();
 }
 
 /* When requests are passed down from the linux-nat layer to the
@@ -4589,8 +4535,8 @@ linux_nat_close (struct target_ops *self)
    lwpid is a "main" process id or not (it assumes so).  We reverse
    look up the "main" process id from the lwp here.  */
 
-static struct address_space *
-linux_nat_thread_address_space (struct target_ops *t, ptid_t ptid)
+struct address_space *
+linux_nat_target::thread_address_space (ptid_t ptid)
 {
   struct lwp_info *lwp;
   struct inferior *inf;
@@ -4616,8 +4562,8 @@ linux_nat_thread_address_space (struct target_ops *t, ptid_t ptid)
 
 /* Return the cached value of the processor core for thread PTID.  */
 
-static int
-linux_nat_core_of_thread (struct target_ops *ops, ptid_t ptid)
+int
+linux_nat_target::core_of_thread (ptid_t ptid)
 {
   struct lwp_info *info = find_lwp_pid (ptid);
 
@@ -4628,8 +4574,8 @@ linux_nat_core_of_thread (struct target_ops *ops, ptid_t ptid)
 
 /* Implementation of to_filesystem_is_local.  */
 
-static int
-linux_nat_filesystem_is_local (struct target_ops *ops)
+int
+linux_nat_target::filesystem_is_local ()
 {
   struct inferior *inf = current_inferior ();
 
@@ -4658,11 +4604,10 @@ linux_nat_fileio_pid_of (struct inferior *inf)
 
 /* Implementation of to_fileio_open.  */
 
-static int
-linux_nat_fileio_open (struct target_ops *self,
-		       struct inferior *inf, const char *filename,
-		       int flags, int mode, int warn_if_slow,
-		       int *target_errno)
+int
+linux_nat_target::fileio_open (struct inferior *inf, const char *filename,
+			       int flags, int mode, int warn_if_slow,
+			       int *target_errno)
 {
   int nat_flags;
   mode_t nat_mode;
@@ -4685,10 +4630,9 @@ linux_nat_fileio_open (struct target_ops *self,
 
 /* Implementation of to_fileio_readlink.  */
 
-static gdb::optional<std::string>
-linux_nat_fileio_readlink (struct target_ops *self,
-			   struct inferior *inf, const char *filename,
-			   int *target_errno)
+gdb::optional<std::string>
+linux_nat_target::fileio_readlink (struct inferior *inf, const char *filename,
+				   int *target_errno)
 {
   char buf[PATH_MAX];
   int len;
@@ -4706,10 +4650,9 @@ linux_nat_fileio_readlink (struct target_ops *self,
 
 /* Implementation of to_fileio_unlink.  */
 
-static int
-linux_nat_fileio_unlink (struct target_ops *self,
-			 struct inferior *inf, const char *filename,
-			 int *target_errno)
+int
+linux_nat_target::fileio_unlink (struct inferior *inf, const char *filename,
+				 int *target_errno)
 {
   int ret;
 
@@ -4723,76 +4666,19 @@ linux_nat_fileio_unlink (struct target_ops *self,
 
 /* Implementation of the to_thread_events method.  */
 
-static void
-linux_nat_thread_events (struct target_ops *ops, int enable)
+void
+linux_nat_target::thread_events (int enable)
 {
   report_thread_events = enable;
 }
 
-void
-linux_nat_add_target (struct target_ops *t)
+linux_nat_target::linux_nat_target ()
 {
-  /* Save the provided single-threaded target.  We save this in a separate
-     variable because another target we've inherited from (e.g. inf-ptrace)
-     may have saved a pointer to T; we want to use it for the final
-     process stratum target.  */
-  linux_ops_saved = *t;
-  linux_ops = &linux_ops_saved;
-
-  /* Override some methods for multithreading.  */
-  t->to_create_inferior = linux_nat_create_inferior;
-  t->to_attach = linux_nat_attach;
-  t->to_detach = linux_nat_detach;
-  t->to_resume = linux_nat_resume;
-  t->to_wait = linux_nat_wait;
-  t->to_pass_signals = linux_nat_pass_signals;
-  t->to_xfer_partial = linux_nat_xfer_partial;
-  t->to_kill = linux_nat_kill;
-  t->to_mourn_inferior = linux_nat_mourn_inferior;
-  t->to_thread_alive = linux_nat_thread_alive;
-  t->to_update_thread_list = linux_nat_update_thread_list;
-  t->to_pid_to_str = linux_nat_pid_to_str;
-  t->to_thread_name = linux_nat_thread_name;
-  t->to_has_thread_control = tc_schedlock;
-  t->to_thread_address_space = linux_nat_thread_address_space;
-  t->to_stopped_by_watchpoint = linux_nat_stopped_by_watchpoint;
-  t->to_stopped_data_address = linux_nat_stopped_data_address;
-  t->to_stopped_by_sw_breakpoint = linux_nat_stopped_by_sw_breakpoint;
-  t->to_supports_stopped_by_sw_breakpoint = linux_nat_supports_stopped_by_sw_breakpoint;
-  t->to_stopped_by_hw_breakpoint = linux_nat_stopped_by_hw_breakpoint;
-  t->to_supports_stopped_by_hw_breakpoint = linux_nat_supports_stopped_by_hw_breakpoint;
-  t->to_thread_events = linux_nat_thread_events;
-
-  t->to_can_async_p = linux_nat_can_async_p;
-  t->to_is_async_p = linux_nat_is_async_p;
-  t->to_supports_non_stop = linux_nat_supports_non_stop;
-  t->to_always_non_stop_p = linux_nat_always_non_stop_p;
-  t->to_async = linux_nat_async;
-
-  super_close = t->to_close;
-  t->to_close = linux_nat_close;
-
-  t->to_stop = linux_nat_stop;
-
-  t->to_supports_multi_process = linux_nat_supports_multi_process;
-
-  t->to_supports_disable_randomization
-    = linux_nat_supports_disable_randomization;
-
-  t->to_core_of_thread = linux_nat_core_of_thread;
-
-  t->to_filesystem_is_local = linux_nat_filesystem_is_local;
-  t->to_fileio_open = linux_nat_fileio_open;
-  t->to_fileio_readlink = linux_nat_fileio_readlink;
-  t->to_fileio_unlink = linux_nat_fileio_unlink;
-
   /* We don't change the stratum; this target will sit at
      process_stratum and thread_db will set at thread_stratum.  This
      is a little strange, since this is a multi-threaded-capable
      target, but we want to be on the stack below thread_db, and we
      also want to be used for single-threaded processes.  */
-
-  add_target (t);
 }
 
 /* Register a method to call whenever a new thread is attached.  */

@@ -25,7 +25,7 @@
    the child process identified by PID.  */
 
 char *
-nbsd_pid_to_exec_file (struct target_ops *self, int pid)
+nbsd_nat_target::pid_to_exec_file (int pid)
 {
   ssize_t len;
   static char buf[PATH_MAX];

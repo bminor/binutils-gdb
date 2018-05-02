@@ -45,6 +45,16 @@
    hardware-specific overlays.  */
 #include "xtensa-xtregs.c"
 
+class xtensa_linux_nat_target final : public linux_nat_target
+{
+public:
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static xtensa_linux_nat_target the_xtensa_linux_nat_target;
+
 void
 fill_gregset (const struct regcache *regcache,
 	      gdb_gregset_t *gregsetp, int regnum)
@@ -289,9 +299,9 @@ store_xtregs (struct regcache *regcache, int regnum)
     perror_with_name (_("Couldn't write extended registers"));
 }
 
-static void
-xtensa_linux_fetch_inferior_registers (struct target_ops *ops,
-				       struct regcache *regcache, int regnum)
+void
+xtensa_linux_nat_target::fetch_registers (struct regcache *regcache,
+					  int regnum)
 {
   if (regnum == -1)
     {
@@ -304,9 +314,9 @@ xtensa_linux_fetch_inferior_registers (struct target_ops *ops,
     fetch_xtregs (regcache, regnum);
 }
 
-static void
-xtensa_linux_store_inferior_registers (struct target_ops *ops,
-				       struct regcache *regcache, int regnum)
+void
+xtensa_linux_nat_target::store_registers (struct regcache *regcache,
+					  int regnum)
 {
   if (regnum == -1)
     {
@@ -341,7 +351,6 @@ ps_get_thread_area (struct ps_prochandle *ph,
 void
 _initialize_xtensa_linux_nat (void)
 {
-  struct target_ops *t;
   const xtensa_regtable_t *ptr;
 
   /* Calculate the number range for extended registers.  */
@@ -355,12 +364,6 @@ _initialize_xtensa_linux_nat (void)
 	xtreg_high = ptr->gdb_regnum;
     }
 
-  /* Fill in the generic GNU/Linux methods.  */
-  t = linux_target ();
-
-  /* Add our register access methods.  */
-  t->to_fetch_registers = xtensa_linux_fetch_inferior_registers;
-  t->to_store_registers = xtensa_linux_store_inferior_registers;
-
-  linux_nat_add_target (t);
+  linux_target = &the_xtensa_linux_nat_target;
+  add_target (&the_xtensa_linux_nat_target);
 }

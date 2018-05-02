@@ -338,7 +338,7 @@ target_write_memory_blocks (const std::vector<memory_write_request> &requests,
     {
       LONGEST len;
 
-      len = target_write_with_progress (current_target.beneath,
+      len = target_write_with_progress (target_stack,
 					TARGET_OBJECT_MEMORY, NULL,
 					iter.data, iter.begin,
 					iter.end - iter.begin,
@@ -361,7 +361,7 @@ target_write_memory_blocks (const std::vector<memory_write_request> &requests,
 	{
 	  LONGEST len;
 
-	  len = target_write_with_progress (&current_target,
+	  len = target_write_with_progress (target_stack,
 					    TARGET_OBJECT_FLASH, NULL,
 					    iter.data, iter.begin,
 					    iter.end - iter.begin,

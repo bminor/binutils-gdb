@@ -74,7 +74,34 @@
 # define ARCH64() (register_size (target_gdbarch (), 0) == 8)
 #endif
 
-static target_xfer_partial_ftype rs6000_xfer_shared_libraries;
+class rs6000_nat_target final : public inf_ptrace_target
+{
+public:
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
+  void create_inferior (const char *, const std::string &,
+			char **, int) override;
+
+  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+
+private:
+  enum target_xfer_status
+    xfer_shared_libraries (enum target_object object,
+			   const char *annex, gdb_byte *readbuf,
+			   const gdb_byte *writebuf,
+			   ULONGEST offset, ULONGEST len,
+			   ULONGEST *xfered_len);
+};
+
+static rs6000_nat_target the_rs6000_nat_target;
 
 /* Given REGNO, a gdb register number, return the corresponding
    number suitable for use as a ptrace() parameter.  Return -1 if
@@ -277,9 +304,8 @@ store_register (struct regcache *regcache, int regno)
 /* Read from the inferior all registers if REGNO == -1 and just register
    REGNO otherwise.  */
 
-static void
-rs6000_fetch_inferior_registers (struct target_ops *ops,
-				 struct regcache *regcache, int regno)
+void
+rs6000_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   if (regno != -1)
@@ -320,9 +346,8 @@ rs6000_fetch_inferior_registers (struct target_ops *ops,
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
-static void
-rs6000_store_inferior_registers (struct target_ops *ops,
-				 struct regcache *regcache, int regno)
+void
+rs6000_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   if (regno != -1)
@@ -361,11 +386,12 @@ rs6000_store_inferior_registers (struct target_ops *ops,
 
 /* Implement the to_xfer_partial target_ops method.  */
 
-static enum target_xfer_status
-rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
-		     const char *annex, gdb_byte *readbuf,
-		     const gdb_byte *writebuf,
-		     ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+enum target_xfer_status
+rs6000_nat_target::xfer_partial (enum target_object object,
+				 const char *annex, gdb_byte *readbuf,
+				 const gdb_byte *writebuf,
+				 ULONGEST offset, ULONGEST len,
+				 ULONGEST *xfered_len)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   int arch64 = ARCH64 ();
@@ -373,9 +399,9 @@ rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
   switch (object)
     {
     case TARGET_OBJECT_LIBRARIES_AIX:
-      return rs6000_xfer_shared_libraries (ops, object, annex,
-					   readbuf, writebuf,
-					   offset, len, xfered_len);
+      return xfer_shared_libraries (object, annex,
+				    readbuf, writebuf,
+				    offset, len, xfered_len);
     case TARGET_OBJECT_MEMORY:
       {
 	union
@@ -467,9 +493,9 @@ rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
    process ID of the child, or MINUS_ONE_PTID in case of error; store
    the status in *OURSTATUS.  */
 
-static ptid_t
-rs6000_wait (struct target_ops *ops,
-	     ptid_t ptid, struct target_waitstatus *ourstatus, int options)
+ptid_t
+rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+			 int options)
 {
   pid_t pid;
   int status, save_errno;
@@ -524,20 +550,17 @@ rs6000_wait (struct target_ops *ops,
 /* Set the current architecture from the host running GDB.  Called when
    starting a child process.  */
 
-static void (*super_create_inferior) (struct target_ops *,
-				      const char *exec_file,
-				      const std::string &allargs,
-				      char **env, int from_tty);
-static void
-rs6000_create_inferior (struct target_ops * ops, const char *exec_file,
-			const std::string &allargs, char **env, int from_tty)
+void
+rs6000_nat_target::create_inferior (const char *exec_file,
+				    const std::string &allargs,
+				    char **env, int from_tty)
 {
   enum bfd_architecture arch;
   unsigned long mach;
   bfd abfd;
   struct gdbarch_info info;
 
-  super_create_inferior (ops, exec_file, allargs, env, from_tty);
+  inf_ptrace_target::create_inferior (exec_file, allargs, env, from_tty);
 
   if (__power_rs ())
     {
@@ -617,9 +640,9 @@ rs6000_ptrace_ldinfo (ptid_t ptid)
 /* Implement the to_xfer_partial target_ops method for
    TARGET_OBJECT_LIBRARIES_AIX objects.  */
 
-static enum target_xfer_status
-rs6000_xfer_shared_libraries
-  (struct target_ops *ops, enum target_object object,
+enum target_xfer_status
+rs6000_nat_target::xfer_shared_libraries
+  (enum target_object object,
    const char *annex, gdb_byte *readbuf, const gdb_byte *writebuf,
    ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
@@ -648,17 +671,5 @@ rs6000_xfer_shared_libraries
 void
 _initialize_rs6000_nat (void)
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = rs6000_fetch_inferior_registers;
-  t->to_store_registers = rs6000_store_inferior_registers;
-  t->to_xfer_partial = rs6000_xfer_partial;
-
-  super_create_inferior = t->to_create_inferior;
-  t->to_create_inferior = rs6000_create_inferior;
-
-  t->to_wait = rs6000_wait;
-
-  add_target (t);
+  add_target (&the_rs6000_nat_target);
 }

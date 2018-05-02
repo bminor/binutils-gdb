@@ -3240,7 +3240,7 @@ start_remote (int from_tty)
   /* Now that the inferior has stopped, do any bookkeeping like
      loading shared libraries.  We want to do this before normal_stop,
      so that the displayed frame is up to date.  */
-  post_create_inferior (&current_target, from_tty);
+  post_create_inferior (target_stack, from_tty);
 
   normal_stop ();
 }
@@ -5697,7 +5697,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 
 	  fprintf_unfiltered (gdb_stdlog, "infrun: stopped by watchpoint\n");
 
-          if (target_stopped_data_address (&current_target, &addr))
+	  if (target_stopped_data_address (target_stack, &addr))
             fprintf_unfiltered (gdb_stdlog,
                                 "infrun: stopped data address = %s\n",
                                 paddress (gdbarch, addr));
@@ -8742,7 +8742,7 @@ siginfo_value_read (struct value *v)
   validate_registers_access ();
 
   transferred =
-    target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO,
+    target_read (target_stack, TARGET_OBJECT_SIGNAL_INFO,
 		 NULL,
 		 value_contents_all_raw (v),
 		 value_offset (v),
@@ -8764,7 +8764,7 @@ siginfo_value_write (struct value *v, struct value *fromval)
      vice versa.  */
   validate_registers_access ();
 
-  transferred = target_write (&current_target,
+  transferred = target_write (target_stack,
 			      TARGET_OBJECT_SIGNAL_INFO,
 			      NULL,
 			      value_contents_all_raw (fromval),
@@ -8843,7 +8843,7 @@ save_infcall_suspend_state (void)
       siginfo_data = (gdb_byte *) xmalloc (len);
       back_to = make_cleanup (xfree, siginfo_data);
 
-      if (target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,
+      if (target_read (target_stack, TARGET_OBJECT_SIGNAL_INFO, NULL,
 		       siginfo_data, 0, len) == len)
 	discard_cleanups (back_to);
       else
@@ -8893,7 +8893,7 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
       struct type *type = gdbarch_get_siginfo_type (gdbarch);
 
       /* Errors ignored.  */
-      target_write (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,
+      target_write (target_stack, TARGET_OBJECT_SIGNAL_INFO, NULL,
 		    inf_state->siginfo_data, 0, TYPE_LENGTH (type));
     }
 

@@ -531,7 +531,7 @@ prepare_execution_command (struct target_ops *target, int background)
 {
   /* If we get a request for running in the bg but the target
      doesn't support it, error out.  */
-  if (background && !target->to_can_async_p (target))
+  if (background && !target->can_async_p ())
     error (_("Asynchronous execution not supported on this target."));
 
   if (!background)
@@ -600,7 +600,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   prepare_execution_command (run_target, async_exec);
 
-  if (non_stop && !run_target->to_supports_non_stop (run_target))
+  if (non_stop && !run_target->supports_non_stop ())
     error (_("The target does not support running in non-stop mode."));
 
   /* Done.  Can now set breakpoints, change inferior args, etc.  */
@@ -639,10 +639,10 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   /* We call get_inferior_args() because we might need to compute
      the value now.  */
-  run_target->to_create_inferior (run_target, exec_file,
-				  std::string (get_inferior_args ()),
-				  current_inferior ()->environment.envp (),
-				  from_tty);
+  run_target->create_inferior (exec_file,
+			       std::string (get_inferior_args ()),
+			       current_inferior ()->environment.envp (),
+			       from_tty);
   /* to_create_inferior should push the target, so after this point we
      shouldn't refer to run_target again.  */
   run_target = NULL;
@@ -660,7 +660,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   /* Pass zero for FROM_TTY, because at this point the "run" command
      has done its thing; now we are setting up the running program.  */
-  post_create_inferior (&current_target, 0);
+  post_create_inferior (target_stack, 0);
 
   /* Queue a pending event so that the program stops immediately.  */
   if (run_how == RUN_STOP_AT_FIRST_INSN)
@@ -896,7 +896,7 @@ continue_command (const char *args, int from_tty)
       ensure_not_running ();
     }
 
-  prepare_execution_command (&current_target, async_exec);
+  prepare_execution_command (target_stack, async_exec);
 
   if (from_tty)
     printf_filtered (_("Continuing.\n"));
@@ -1043,7 +1043,7 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
     = strip_bg_char (count_string, &async_exec);
   count_string = stripped.get ();
 
-  prepare_execution_command (&current_target, async_exec);
+  prepare_execution_command (target_stack, async_exec);
 
   count = count_string ? parse_and_eval_long (count_string) : 1;
 
@@ -1232,7 +1232,7 @@ jump_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (&current_target, async_exec);
+  prepare_execution_command (target_stack, async_exec);
 
   if (!arg)
     error_no_arg (_("starting address"));
@@ -1312,7 +1312,7 @@ signal_command (const char *signum_exp, int from_tty)
     = strip_bg_char (signum_exp, &async_exec);
   signum_exp = stripped.get ();
 
-  prepare_execution_command (&current_target, async_exec);
+  prepare_execution_command (target_stack, async_exec);
 
   if (!signum_exp)
     error_no_arg (_("signal number"));
@@ -1585,7 +1585,7 @@ until_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (&current_target, async_exec);
+  prepare_execution_command (target_stack, async_exec);
 
   if (arg)
     until_break_command (arg, from_tty, 0);
@@ -1610,7 +1610,7 @@ advance_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (&current_target, async_exec);
+  prepare_execution_command (target_stack, async_exec);
 
   until_break_command (arg, from_tty, 1);
 }
@@ -1990,7 +1990,7 @@ finish_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (&current_target, async_exec);
+  prepare_execution_command (target_stack, async_exec);
 
   if (arg)
     error (_("The \"finish\" command does not take any arguments."));
@@ -2686,7 +2686,7 @@ setup_inferior (int from_tty)
   /* Take any necessary post-attaching actions for this platform.  */
   target_post_attach (ptid_get_pid (inferior_ptid));
 
-  post_create_inferior (&current_target, from_tty);
+  post_create_inferior (target_stack, from_tty);
 }
 
 /* What to do after the first program stops after attaching.  */
@@ -2849,10 +2849,10 @@ attach_command (const char *args, int from_tty)
 
   prepare_execution_command (attach_target, async_exec);
 
-  if (non_stop && !attach_target->to_supports_non_stop (attach_target))
+  if (non_stop && !attach_target->supports_non_stop ())
     error (_("Cannot attach to this target in non-stop mode"));
 
-  attach_target->to_attach (attach_target, args, from_tty);
+  attach_target->attach (args, from_tty);
   /* to_attach should push the target, so after this point we
      shouldn't refer to attach_target again.  */
   attach_target = NULL;
@@ -2903,7 +2903,7 @@ attach_command (const char *args, int from_tty)
 
   /* Some system don't generate traps when attaching to inferior.
      E.g. Mach 3 or GNU hurd.  */
-  if (!target_attach_no_wait)
+  if (!target_attach_no_wait ())
     {
       struct attach_command_continuation_args *a;
 

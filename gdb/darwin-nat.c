@@ -83,35 +83,11 @@
 #define PTRACE(CMD, PID, ADDR, SIG) \
  darwin_ptrace(#CMD, CMD, (PID), (ADDR), (SIG))
 
-static void darwin_interrupt (struct target_ops *self);
-
-static void darwin_resume_to (struct target_ops *ops, ptid_t ptid, int step,
-                              enum gdb_signal signal);
-static void darwin_resume (ptid_t ptid, int step,
-			   enum gdb_signal signal);
-
-static ptid_t darwin_wait_to (struct target_ops *ops, ptid_t ptid,
-                              struct target_waitstatus *status, int options);
 static ptid_t darwin_wait (ptid_t ptid, struct target_waitstatus *status);
-
-static void darwin_mourn_inferior (struct target_ops *ops);
-
-static void darwin_kill_inferior (struct target_ops *ops);
 
 static void darwin_ptrace_me (void);
 
 static void darwin_ptrace_him (int pid);
-
-static void darwin_create_inferior (struct target_ops *ops,
-				    const char *exec_file,
-				    const std::string &allargs,
-				    char **env, int from_tty);
-
-static void darwin_files_info (struct target_ops *ops);
-
-static const char *darwin_pid_to_str (struct target_ops *ops, ptid_t tpid);
-
-static int darwin_thread_alive (struct target_ops *ops, ptid_t tpid);
 
 static void darwin_encode_reply (mig_reply_error_t *reply,
 				 mach_msg_header_t *hdr, integer_t code);
@@ -942,8 +918,8 @@ darwin_suspend_inferior_threads (struct inferior *inf)
     }
 }
 
-static void
-darwin_resume (ptid_t ptid, int step, enum gdb_signal signal)
+void
+darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
   struct target_waitstatus status;
   int pid;
@@ -1005,13 +981,6 @@ darwin_resume (ptid_t ptid, int step, enum gdb_signal signal)
       /* Resume the task.  */
       darwin_resume_inferior (inf);
     }
-}
-
-static void
-darwin_resume_to (struct target_ops *ops, ptid_t ptid, int step,
-                  enum gdb_signal signal)
-{
-  return darwin_resume (ptid, step, signal);
 }
 
 static ptid_t
@@ -1334,22 +1303,22 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
   return res;
 }
 
-static ptid_t
-darwin_wait_to (struct target_ops *ops,
-                ptid_t ptid, struct target_waitstatus *status, int options)
+ptid_t
+darwin_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
+			 int options)
 {
   return darwin_wait (ptid, status);
 }
 
-static void
-darwin_interrupt (struct target_ops *self)
+void
+darwin_nat_target::interrupt ()
 {
   struct inferior *inf = current_inferior ();
   darwin_inferior *priv = get_darwin_inferior (inf);
 
   /* FIXME: handle in no_ptrace mode.  */
   gdb_assert (!priv->no_ptrace);
-  kill (inf->pid, SIGINT);
+  ::kill (inf->pid, SIGINT);
 }
 
 /* Deallocate threads port and vector.  */
@@ -1368,8 +1337,8 @@ darwin_deallocate_threads (struct inferior *inf)
   priv->threads.clear ();
 }
 
-static void
-darwin_mourn_inferior (struct target_ops *ops)
+void
+darwin_nat_target::mourn_inferior ()
 {
   struct inferior *inf = current_inferior ();
   darwin_inferior *priv = get_darwin_inferior (inf);
@@ -1414,7 +1383,7 @@ darwin_mourn_inferior (struct target_ops *ops)
 
   inf->priv = NULL;
 
-  inf_child_mourn_inferior (ops);
+  inf_child_target::mourn_inferior ();
 }
 
 static void
@@ -1538,8 +1507,8 @@ darwin_setup_exceptions (struct inferior *inf)
 	   kret);
 }
 
-static void
-darwin_kill_inferior (struct target_ops *ops)
+void
+darwin_nat_target::kill ()
 {
   struct inferior *inf = current_inferior ();
   darwin_inferior *priv = get_darwin_inferior (inf);
@@ -1559,7 +1528,7 @@ darwin_kill_inferior (struct target_ops *ops)
 
   darwin_reply_to_all_pending_messages (inf);
 
-  res = kill (inf->pid, 9);
+  res = ::kill (inf->pid, 9);
 
   if (res == 0)
     {
@@ -1835,11 +1804,10 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
   posix_spawnp (NULL, argv[0], NULL, &attr, argv, env);
 }
 
-static void
-darwin_create_inferior (struct target_ops *ops,
-			const char *exec_file,
-			const std::string &allargs,
-			char **env, int from_tty)
+void
+darwin_nat_target::create_inferior (const char *exec_file,
+				    const std::string &allargs,
+				    char **env, int from_tty)
 {
   /* Do the hard work.  */
   fork_inferior (exec_file, allargs, env, darwin_ptrace_me,
@@ -1877,8 +1845,8 @@ darwin_setup_fake_stop_event (struct inferior *inf)
 
 /* Attach to process PID, then initialize for debugging it
    and wait for the trace-trap that results from attaching.  */
-static void
-darwin_attach (struct target_ops *ops, const char *args, int from_tty)
+void
+darwin_nat_target::attach (const char *args, int from_tty)
 {
   pid_t pid;
   pid_t pid2;
@@ -1906,7 +1874,7 @@ darwin_attach (struct target_ops *ops, const char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  if (pid == 0 || kill (pid, 0) < 0)
+  if (pid == 0 || ::kill (pid, 0) < 0)
     error (_("Can't attach to process %d: %s (%d)"),
            pid, safe_strerror (errno), errno);
 
@@ -1937,8 +1905,9 @@ darwin_attach (struct target_ops *ops, const char *args, int from_tty)
    to work, it may be necessary for the process to have been
    previously attached.  It *might* work if the program was
    started via fork.  */
-static void
-darwin_detach (struct target_ops *ops, inferior *inf, int from_tty)
+
+void
+darwin_nat_target::detach (inferior *inf, int from_tty)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   darwin_inferior *priv = get_darwin_inferior (inf);
@@ -1971,16 +1940,11 @@ darwin_detach (struct target_ops *ops, inferior *inf, int from_tty)
   if (priv->no_ptrace)
     darwin_resume_inferior (inf);
 
-  darwin_mourn_inferior (ops);
+  mourn_inferior ();
 }
 
-static void
-darwin_files_info (struct target_ops *ops)
-{
-}
-
-static const char *
-darwin_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+darwin_nat_target::pid_to_str (ptid_t ptid)
 {
   static char buf[80];
   long tid = ptid_get_tid (ptid);
@@ -1995,8 +1959,8 @@ darwin_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
-static int
-darwin_thread_alive (struct target_ops *ops, ptid_t ptid)
+int
+darwin_nat_target::thread_alive (ptid_t ptid)
 {
   return 1;
 }
@@ -2193,11 +2157,11 @@ darwin_read_dyld_info (task_t task, CORE_ADDR addr, gdb_byte *rdaddr,
 
 
 
-static enum target_xfer_status
-darwin_xfer_partial (struct target_ops *ops,
-		     enum target_object object, const char *annex,
-		     gdb_byte *readbuf, const gdb_byte *writebuf,
-		     ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+enum target_xfer_status
+darwin_nat_target::xfer_partial (enum target_object object, const char *annex,
+				 gdb_byte *readbuf, const gdb_byte *writebuf,
+				 ULONGEST offset, ULONGEST len,
+				 ULONGEST *xfered_len)
 {
   struct inferior *inf = current_inferior ();
   darwin_inferior *priv = get_darwin_inferior (inf);
@@ -2264,8 +2228,8 @@ set_enable_mach_exceptions (const char *args, int from_tty,
     }
 }
 
-static char *
-darwin_pid_to_exec_file (struct target_ops *self, int pid)
+char *
+darwin_nat_target::pid_to_exec_file (int pid)
 {
   static char path[PATH_MAX];
   int res;
@@ -2277,8 +2241,8 @@ darwin_pid_to_exec_file (struct target_ops *self, int pid)
     return NULL;
 }
 
-static ptid_t
-darwin_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
+ptid_t
+darwin_nat_target::get_ada_task_ptid (long lwp, long thread)
 {
   struct inferior *inf = current_inferior ();
   darwin_inferior *priv = get_darwin_inferior (inf);
@@ -2342,14 +2306,14 @@ darwin_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
     return null_ptid;
 }
 
-static int
-darwin_supports_multi_process (struct target_ops *self)
+int
+darwin_nat_target::supports_multi_process ()
 {
   return 1;
 }
 
 void
-_initialize_darwin_inferior (void)
+_initialize_darwin_nat ()
 {
   kern_return_t kret;
 
@@ -2363,30 +2327,6 @@ _initialize_darwin_inferior (void)
       mach_page_size = 0x1000;
       MACH_CHECK_ERROR (kret);
     }
-
-  darwin_ops = inf_child_target ();
-
-  darwin_ops->to_create_inferior = darwin_create_inferior;
-  darwin_ops->to_attach = darwin_attach;
-  darwin_ops->to_attach_no_wait = 0;
-  darwin_ops->to_detach = darwin_detach;
-  darwin_ops->to_files_info = darwin_files_info;
-  darwin_ops->to_wait = darwin_wait_to;
-  darwin_ops->to_mourn_inferior = darwin_mourn_inferior;
-  darwin_ops->to_kill = darwin_kill_inferior;
-  darwin_ops->to_interrupt = darwin_interrupt;
-  darwin_ops->to_resume = darwin_resume_to;
-  darwin_ops->to_thread_alive = darwin_thread_alive;
-  darwin_ops->to_pid_to_str = darwin_pid_to_str;
-  darwin_ops->to_pid_to_exec_file = darwin_pid_to_exec_file;
-  darwin_ops->to_load = NULL;
-  darwin_ops->to_xfer_partial = darwin_xfer_partial;
-  darwin_ops->to_supports_multi_process = darwin_supports_multi_process;
-  darwin_ops->to_get_ada_task_ptid = darwin_get_ada_task_ptid;
-
-  darwin_complete_target (darwin_ops);
-
-  add_target (darwin_ops);
 
   inferior_debug (2, _("GDB task: 0x%lx, pid: %d\n"),
 		  (unsigned long) mach_task_self (), getpid ());

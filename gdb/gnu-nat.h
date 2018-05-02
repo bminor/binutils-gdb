@@ -103,8 +103,36 @@ extern int gnu_debug_flag;
         fprintf_unfiltered (gdb_stdlog, "%s:%d: " msg "\r\n", \
 			    __FILE__ , __LINE__ , ##args); } while (0)
 
-/* Create a prototype generic GNU/Hurd target.  The client can
-   override it with local methods.  */
-struct target_ops *gnu_target (void);
+/* A prototype generic GNU/Hurd target.  The client can override it
+   with local methods.  */
+
+struct gnu_nat_target : public inf_child_target
+{
+  void attach (const char *, int) override;
+  bool attach_no_wait () override
+  { return true; }
+
+  void detach (inferior *, int) override;
+  void resume (ptid_t, int, enum gdb_signal) override;
+
+  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
+  int find_memory_regions (find_memory_region_ftype func, void *data)
+    override;
+  void kill () override;
+
+  void create_inferior (const char *, const std::string &,
+			char **, int) override;
+  void mourn_inferior () override;
+  int thread_alive (ptid_t ptid) override;
+  const char *pid_to_str (ptid_t) override;
+  void stop (ptid_t) override;
+};
 
 #endif /* __GNU_NAT_H__ */

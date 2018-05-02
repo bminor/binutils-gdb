@@ -35,8 +35,8 @@
 
 #ifdef PT_GET_THREAD_FIRST
 
-static const char *
-obsd_pid_to_str (struct target_ops *ops, ptid_t ptid)
+const char *
+obsd_nat_target::pid_to_str (ptid_t ptid)
 {
   if (ptid_get_lwp (ptid) != 0)
     {
@@ -49,8 +49,8 @@ obsd_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
-static void
-obsd_update_thread_list (struct target_ops *ops)
+void
+obsd_nat_target::update_thread_list ()
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   struct ptrace_thread_state pts;
@@ -77,9 +77,9 @@ obsd_update_thread_list (struct target_ops *ops)
     }
 }
 
-static ptid_t
-obsd_wait (struct target_ops *ops,
-	   ptid_t ptid, struct target_waitstatus *ourstatus, int options)
+ptid_t
+obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+		       int options)
 {
   pid_t pid;
   int status, save_errno;
@@ -163,24 +163,6 @@ obsd_wait (struct target_ops *ops,
 
   store_waitstatus (ourstatus, status);
   return ptid;
-}
-
-void
-obsd_add_target (struct target_ops *t)
-{
-  /* Override some methods to support threads.  */
-  t->to_pid_to_str = obsd_pid_to_str;
-  t->to_update_thread_list = obsd_update_thread_list;
-  t->to_wait = obsd_wait;
-  add_target (t);
-}
-
-#else
-
-void
-obsd_add_target (struct target_ops *t)
-{
-  add_target (t);
 }
 
 #endif /* PT_GET_THREAD_FIRST */

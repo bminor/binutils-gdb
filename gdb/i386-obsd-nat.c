@@ -88,11 +88,12 @@ i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   return 1;
 }
 
+static i386_bsd_nat_target<obsd_nat_target> the_i386_obsd_nat_target;
+
 void
 _initialize_i386obsd_nat (void)
 {
-  /* Add some extra features to the common *BSD/i386 target.  */
-  obsd_add_target (i386bsd_target ());
+  add_target (&i386_obsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (i386obsd_supply_pcb);

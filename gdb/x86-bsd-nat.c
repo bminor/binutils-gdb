@@ -40,16 +40,6 @@ size_t x86bsd_xsave_len;
 /* Support for debug registers.  */
 
 #ifdef HAVE_PT_GETDBREGS
-static void (*super_mourn_inferior) (struct target_ops *ops);
-
-/* Implement the "to_mourn_inferior" target_ops method.  */
-
-static void
-x86bsd_mourn_inferior (struct target_ops *ops)
-{
-  x86_cleanup_dregs ();
-  super_mourn_inferior (ops);
-}
 
 /* Helper macro to access debug register X.  FreeBSD/amd64 and modern
    versions of FreeBSD/i386 provide this macro in system headers.  Define
@@ -134,28 +124,15 @@ x86bsd_dr_get_control (void)
 
 #endif /* PT_GETDBREGS */
 
-/* Create a prototype *BSD/x86 target.  The client can override it
-   with local methods.  */
-
-struct target_ops *
-x86bsd_target (void)
+void
+_initialize_x86_bsd_nat ()
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-
 #ifdef HAVE_PT_GETDBREGS
-  x86_use_watchpoints (t);
-
   x86_dr_low.set_control = x86bsd_dr_set_control;
   x86_dr_low.set_addr = x86bsd_dr_set_addr;
   x86_dr_low.get_addr = x86bsd_dr_get_addr;
   x86_dr_low.get_status = x86bsd_dr_get_status;
   x86_dr_low.get_control = x86bsd_dr_get_control;
   x86_set_debug_register_length (sizeof (void *));
-  super_mourn_inferior = t->to_mourn_inferior;
-  t->to_mourn_inferior = x86bsd_mourn_inferior;
 #endif /* HAVE_PT_GETDBREGS */
-
-  return t;
 }

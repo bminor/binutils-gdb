@@ -34,6 +34,16 @@
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
+class tilegx_linux_nat_target final : public linux_nat_target
+{
+public:
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static tilegx_linux_nat_target the_tilegx_linux_nat_target;
+
 /* The register sets used in GNU/Linux ELF core-dumps are identical to
    the register sets in `struct user' that is used for a.out
    core-dumps, and is also used by `ptrace'.  The corresponding types
@@ -122,9 +132,9 @@ fill_fpregset (const struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
-static void
-fetch_inferior_registers (struct target_ops *ops,
-			  struct regcache *regcache, int regnum)
+void
+tilegx_linux_nat_target::fetch_registers (struct regcache *regcache,
+					  int regnum)
 {
   elf_gregset_t regs;
   pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
@@ -138,9 +148,9 @@ fetch_inferior_registers (struct target_ops *ops,
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers.  */
 
-static void
-store_inferior_registers (struct target_ops *ops,
-			  struct regcache *regcache, int regnum)
+void
+tilegx_linux_nat_target::store_registers (struct regcache *regcache,
+					  int regnum)
 {
   elf_gregset_t regs;
   pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
@@ -157,15 +167,6 @@ store_inferior_registers (struct target_ops *ops,
 void
 _initialize_tile_linux_nat (void)
 {
-  struct target_ops *t;
-
-  /* Fill in the generic GNU/Linux methods.  */
-  t = linux_target ();
-
-  /* Add our register access methods.  */
-  t->to_fetch_registers = fetch_inferior_registers;
-  t->to_store_registers = store_inferior_registers;
-
-  /* Register the target.  */
-  linux_nat_add_target (t);
+  linux_target = &the_tilegx_linux_nat_target;
+  add_target (&the_tilegx_linux_nat_target);
 }

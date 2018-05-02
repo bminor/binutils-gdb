@@ -425,16 +425,16 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
 
 /* This is the implementation of target_ops method to_has_all_memory.  */
 
-static int
-tracefile_has_all_memory (struct target_ops *ops)
+int
+tracefile_target::has_all_memory ()
 {
   return 1;
 }
 
 /* This is the implementation of target_ops method to_has_memory.  */
 
-static int
-tracefile_has_memory (struct target_ops *ops)
+int
+tracefile_target::has_memory ()
 {
   return 1;
 }
@@ -443,8 +443,8 @@ tracefile_has_memory (struct target_ops *ops)
    The target has a stack when GDB has already selected one trace
    frame.  */
 
-static int
-tracefile_has_stack (struct target_ops *ops)
+int
+tracefile_target::has_stack ()
 {
   return get_traceframe_number () != -1;
 }
@@ -453,8 +453,8 @@ tracefile_has_stack (struct target_ops *ops)
    The target has registers when GDB has already selected one trace
    frame.  */
 
-static int
-tracefile_has_registers (struct target_ops *ops)
+int
+tracefile_target::has_registers ()
 {
   return get_traceframe_number () != -1;
 }
@@ -462,8 +462,8 @@ tracefile_has_registers (struct target_ops *ops)
 /* This is the implementation of target_ops method to_thread_alive.
    tracefile has one thread faked by GDB.  */
 
-static int
-tracefile_thread_alive (struct target_ops *ops, ptid_t ptid)
+int
+tracefile_target::thread_alive (ptid_t ptid)
 {
   return 1;
 }
@@ -471,8 +471,8 @@ tracefile_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* This is the implementation of target_ops method to_get_trace_status.
    The trace status for a file is that tracing can never be run.  */
 
-static int
-tracefile_get_trace_status (struct target_ops *self, struct trace_status *ts)
+int
+tracefile_target::get_trace_status (struct trace_status *ts)
 {
   /* Other bits of trace status were collected as part of opening the
      trace files, so nothing to do here.  */
@@ -480,19 +480,9 @@ tracefile_get_trace_status (struct target_ops *self, struct trace_status *ts)
   return -1;
 }
 
-/* Initialize OPS for tracefile related targets.  */
-
-void
-init_tracefile_ops (struct target_ops *ops)
+tracefile_target::tracefile_target ()
 {
-  ops->to_stratum = process_stratum;
-  ops->to_get_trace_status = tracefile_get_trace_status;
-  ops->to_has_all_memory = tracefile_has_all_memory;
-  ops->to_has_memory = tracefile_has_memory;
-  ops->to_has_stack = tracefile_has_stack;
-  ops->to_has_registers = tracefile_has_registers;
-  ops->to_thread_alive = tracefile_thread_alive;
-  ops->to_magic = OPS_MAGIC;
+  this->to_stratum = process_stratum;
 }
 
 void

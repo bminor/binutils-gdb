@@ -49,6 +49,36 @@
 #define TRAP_HWBKPT 0x0004
 #endif
 
+class aarch64_linux_nat_target final : public linux_nat_target
+{
+public:
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  const struct target_desc *read_description () override;
+
+  /* Add our hardware breakpoint and watchpoint implementation.  */
+  int can_use_hw_breakpoint (enum bptype, int, int) override;
+  int insert_hw_breakpoint (struct gdbarch *, struct bp_target_info *) override;
+  int remove_hw_breakpoint (struct gdbarch *, struct bp_target_info *) override;
+  int region_ok_for_hw_watchpoint (CORE_ADDR, int) override;
+  int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
+			 struct expression *) override;
+  int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
+			 struct expression *) override;
+  int stopped_by_watchpoint () override;
+  int stopped_data_address (CORE_ADDR *) override;
+  int watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
+
+  int can_do_single_step () override;
+
+  /* Override the GNU/Linux inferior startup hook.  */
+  void post_startup_inferior (ptid_t) override;
+};
+
+static aarch64_linux_nat_target the_aarch64_linux_nat_target;
+
 /* Per-process data.  We don't bind this to a per-inferior registry
    because of targets like x86 GNU/Linux that need to keep track of
    processes that aren't bound to any inferior (e.g., fork children,
@@ -342,12 +372,11 @@ store_fpregs_to_thread (const struct regcache *regcache)
     }
 }
 
-/* Implement the "to_fetch_register" target_ops method.  */
+/* Implement the "fetch_registers" target_ops method.  */
 
-static void
-aarch64_linux_fetch_inferior_registers (struct target_ops *ops,
-					struct regcache *regcache,
-					int regno)
+void
+aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
+					   int regno)
 {
   if (regno == -1)
     {
@@ -360,12 +389,11 @@ aarch64_linux_fetch_inferior_registers (struct target_ops *ops,
     fetch_fpregs_from_thread (regcache);
 }
 
-/* Implement the "to_store_register" target_ops method.  */
+/* Implement the "store_registers" target_ops method.  */
 
-static void
-aarch64_linux_store_inferior_registers (struct target_ops *ops,
-					struct regcache *regcache,
-					int regno)
+void
+aarch64_linux_nat_target::store_registers (struct regcache *regcache,
+					   int regno)
 {
   if (regno == -1)
     {
@@ -467,26 +495,22 @@ ps_get_thread_area (struct ps_prochandle *ph,
 }
 
 
-static void (*super_post_startup_inferior) (struct target_ops *self,
-					    ptid_t ptid);
+/* Implement the "post_startup_inferior" target_ops method.  */
 
-/* Implement the "to_post_startup_inferior" target_ops method.  */
-
-static void
-aarch64_linux_child_post_startup_inferior (struct target_ops *self,
-					   ptid_t ptid)
+void
+aarch64_linux_nat_target::post_startup_inferior (ptid_t ptid)
 {
   aarch64_forget_process (ptid_get_pid (ptid));
   aarch64_linux_get_debug_reg_capacity (ptid_get_pid (ptid));
-  super_post_startup_inferior (self, ptid);
+  linux_nat_target::post_startup_inferior (ptid);
 }
 
 extern struct target_desc *tdesc_arm_with_neon;
 
-/* Implement the "to_read_description" target_ops method.  */
+/* Implement the "read_description" target_ops method.  */
 
-static const struct target_desc *
-aarch64_linux_read_description (struct target_ops *ops)
+const struct target_desc *
+aarch64_linux_nat_target::read_description ()
 {
   int ret, tid;
   gdb_byte regbuf[VFP_REGS_SIZE];
@@ -542,10 +566,9 @@ aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
    one).  OTHERTYPE is non-zero if other types of watchpoints are
    currently enabled.  */
 
-static int
-aarch64_linux_can_use_hw_breakpoint (struct target_ops *self,
-				     enum bptype type,
-				     int cnt, int othertype)
+int
+aarch64_linux_nat_target::can_use_hw_breakpoint (enum bptype type,
+						 int cnt, int othertype)
 {
   if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
       || type == bp_access_watchpoint || type == bp_watchpoint)
@@ -573,10 +596,9 @@ aarch64_linux_can_use_hw_breakpoint (struct target_ops *self,
 /* Insert a hardware-assisted breakpoint at BP_TGT->reqstd_address.
    Return 0 on success, -1 on failure.  */
 
-static int
-aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
-				    struct gdbarch *gdbarch,
-				    struct bp_target_info *bp_tgt)
+int
+aarch64_linux_nat_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
+						struct bp_target_info *bp_tgt)
 {
   int ret;
   CORE_ADDR addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
@@ -607,10 +629,9 @@ aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
 /* Remove a hardware-assisted breakpoint at BP_TGT->placed_address.
    Return 0 on success, -1 on failure.  */
 
-static int
-aarch64_linux_remove_hw_breakpoint (struct target_ops *self,
-				    struct gdbarch *gdbarch,
-				    struct bp_target_info *bp_tgt)
+int
+aarch64_linux_nat_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
+						struct bp_target_info *bp_tgt)
 {
   int ret;
   CORE_ADDR addr = bp_tgt->placed_address;
@@ -637,17 +658,16 @@ aarch64_linux_remove_hw_breakpoint (struct target_ops *self,
   return ret;
 }
 
-/* Implement the "to_insert_watchpoint" target_ops method.
+/* Implement the "insert_watchpoint" target_ops method.
 
    Insert a watchpoint to watch a memory region which starts at
    address ADDR and whose length is LEN bytes.  Watch memory accesses
    of the type TYPE.  Return 0 on success, -1 on failure.  */
 
-static int
-aarch64_linux_insert_watchpoint (struct target_ops *self,
-				 CORE_ADDR addr, int len,
-				 enum target_hw_bp_type type,
-				 struct expression *cond)
+int
+aarch64_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
+					     enum target_hw_bp_type type,
+					     struct expression *cond)
 {
   int ret;
   struct aarch64_debug_reg_state *state
@@ -671,16 +691,15 @@ aarch64_linux_insert_watchpoint (struct target_ops *self,
   return ret;
 }
 
-/* Implement the "to_remove_watchpoint" target_ops method.
+/* Implement the "remove_watchpoint" target_ops method.
    Remove a watchpoint that watched the memory region which starts at
    address ADDR, whose length is LEN bytes, and for accesses of the
    type TYPE.  Return 0 on success, -1 on failure.  */
 
-static int
-aarch64_linux_remove_watchpoint (struct target_ops *self,
-				 CORE_ADDR addr, int len,
-				 enum target_hw_bp_type type,
-				 struct expression *cond)
+int
+aarch64_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
+					     enum target_hw_bp_type type,
+					     struct expression *cond)
 {
   int ret;
   struct aarch64_debug_reg_state *state
@@ -704,20 +723,18 @@ aarch64_linux_remove_watchpoint (struct target_ops *self,
   return ret;
 }
 
-/* Implement the "to_region_ok_for_hw_watchpoint" target_ops method.  */
+/* Implement the "region_ok_for_hw_watchpoint" target_ops method.  */
 
-static int
-aarch64_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
-					   CORE_ADDR addr, int len)
+int
+aarch64_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
   return aarch64_linux_region_ok_for_watchpoint (addr, len);
 }
 
-/* Implement the "to_stopped_data_address" target_ops method.  */
+/* Implement the "stopped_data_address" target_ops method.  */
 
-static int
-aarch64_linux_stopped_data_address (struct target_ops *target,
-				    CORE_ADDR *addr_p)
+int
+aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   siginfo_t siginfo;
   int i, tid;
@@ -752,30 +769,29 @@ aarch64_linux_stopped_data_address (struct target_ops *target,
   return 0;
 }
 
-/* Implement the "to_stopped_by_watchpoint" target_ops method.  */
+/* Implement the "stopped_by_watchpoint" target_ops method.  */
 
-static int
-aarch64_linux_stopped_by_watchpoint (struct target_ops *ops)
+int
+aarch64_linux_nat_target::stopped_by_watchpoint ()
 {
   CORE_ADDR addr;
 
-  return aarch64_linux_stopped_data_address (ops, &addr);
+  return stopped_data_address (&addr);
 }
 
-/* Implement the "to_watchpoint_addr_within_range" target_ops method.  */
+/* Implement the "watchpoint_addr_within_range" target_ops method.  */
 
-static int
-aarch64_linux_watchpoint_addr_within_range (struct target_ops *target,
-					    CORE_ADDR addr,
-					    CORE_ADDR start, int length)
+int
+aarch64_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
+							CORE_ADDR start, int length)
 {
   return start <= addr && start + length - 1 >= addr;
 }
 
-/* Implement the "to_can_do_single_step" target_ops method.  */
+/* Implement the "can_do_single_step" target_ops method.  */
 
-static int
-aarch64_linux_can_do_single_step (struct target_ops *target)
+int
+aarch64_linux_nat_target::can_do_single_step ()
 {
   return 1;
 }
@@ -804,38 +820,13 @@ triggers a breakpoint or watchpoint."),
 void
 _initialize_aarch64_linux_nat (void)
 {
-  struct target_ops *t;
-
-  /* Fill in the generic GNU/Linux methods.  */
-  t = linux_target ();
+  struct target_ops *t = &the_aarch64_linux_nat_target;
 
   add_show_debug_regs_command ();
 
-  /* Add our register access methods.  */
-  t->to_fetch_registers = aarch64_linux_fetch_inferior_registers;
-  t->to_store_registers = aarch64_linux_store_inferior_registers;
-
-  t->to_read_description = aarch64_linux_read_description;
-
-  t->to_can_use_hw_breakpoint = aarch64_linux_can_use_hw_breakpoint;
-  t->to_insert_hw_breakpoint = aarch64_linux_insert_hw_breakpoint;
-  t->to_remove_hw_breakpoint = aarch64_linux_remove_hw_breakpoint;
-  t->to_region_ok_for_hw_watchpoint =
-    aarch64_linux_region_ok_for_hw_watchpoint;
-  t->to_insert_watchpoint = aarch64_linux_insert_watchpoint;
-  t->to_remove_watchpoint = aarch64_linux_remove_watchpoint;
-  t->to_stopped_by_watchpoint = aarch64_linux_stopped_by_watchpoint;
-  t->to_stopped_data_address = aarch64_linux_stopped_data_address;
-  t->to_watchpoint_addr_within_range =
-    aarch64_linux_watchpoint_addr_within_range;
-  t->to_can_do_single_step = aarch64_linux_can_do_single_step;
-
-  /* Override the GNU/Linux inferior startup hook.  */
-  super_post_startup_inferior = t->to_post_startup_inferior;
-  t->to_post_startup_inferior = aarch64_linux_child_post_startup_inferior;
-
   /* Register the target.  */
-  linux_nat_add_target (t);
+  linux_target = &the_aarch64_linux_nat_target;
+  add_target (t);
   linux_nat_set_new_thread (t, aarch64_linux_new_thread);
   linux_nat_set_delete_thread (t, aarch64_linux_delete_thread);
   linux_nat_set_new_fork (t, aarch64_linux_new_fork);

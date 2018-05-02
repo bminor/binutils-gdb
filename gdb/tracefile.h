@@ -2,6 +2,7 @@
 #define TRACEFILE_H 1
 
 #include "tracepoint.h"
+#include "target.h"
 
 struct trace_file_writer;
 
@@ -113,7 +114,20 @@ struct trace_file_writer
 
 extern struct trace_file_writer *tfile_trace_file_writer_new (void);
 
-extern void init_tracefile_ops (struct target_ops *ops);
+/* Base class for tracefile related targets.  */
+
+class tracefile_target : public target_ops
+{
+public:
+  tracefile_target ();
+
+  int get_trace_status (trace_status *ts) override;
+  int has_all_memory () override;
+  int has_memory () override;
+  int has_stack () override;
+  int has_registers () override;
+  int thread_alive (ptid_t ptid) override;
+};
 
 extern void tracefile_fetch_registers (struct regcache *regcache, int regno);
 

@@ -31,6 +31,14 @@
 
 #include "obsd-nat.h"
 
+struct hppa_obsd_nat_target final : public obsd_nat_target
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static hppa_obsd_nat_target the_hppa_obsd_nat_target;
+
 static int
 hppaobsd_gregset_supplies_p (int regnum)
 {
@@ -185,9 +193,8 @@ hppaobsd_collect_fpregset (struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating-point registers).  */
 
-static void
-hppaobsd_fetch_registers (struct target_ops *ops,
-			  struct regcache *regcache, int regnum)
+void
+hppa_obsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
@@ -215,9 +222,8 @@ hppaobsd_fetch_registers (struct target_ops *ops,
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating-point registers).  */
 
-static void
-hppaobsd_store_registers (struct target_ops *ops,
-			  struct regcache *regcache, int regnum)
+void
+hppa_obsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1 || hppaobsd_gregset_supplies_p (regnum))
     {
@@ -249,10 +255,5 @@ hppaobsd_store_registers (struct target_ops *ops,
 void
 _initialize_hppaobsd_nat (void)
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = hppaobsd_fetch_registers;
-  t->to_store_registers = hppaobsd_store_registers;
-  obsd_add_target (t);
+  add_target (&the_hppa_obsd_nat_target);
 }

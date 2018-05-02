@@ -283,16 +283,15 @@ default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
    Return -1 if there is insufficient buffer for a whole entry.
    Return 1 if an entry was read into *TYPEP and *VALP.  */
 int
-target_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
-                  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+target_auxv_parse (gdb_byte **readptr,
+		   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
   struct gdbarch *gdbarch = target_gdbarch();
 
   if (gdbarch_auxv_parse_p (gdbarch))
     return gdbarch_auxv_parse (gdbarch, readptr, endptr, typep, valp);
 
-  return current_target.to_auxv_parse (&current_target, readptr, endptr,
-				       typep, valp);
+  return target_stack->auxv_parse (readptr, endptr, typep, valp);
 }
 
 
@@ -382,7 +381,7 @@ target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
   size_t len = info->data->size ();
 
   while (1)
-    switch (target_auxv_parse (ops, &ptr, data + len, &type, &val))
+    switch (target_auxv_parse (&ptr, data + len, &type, &val))
       {
       case 1:			/* Here's an entry, check it.  */
 	if (type == match)
@@ -532,7 +531,7 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
   gdb_byte *ptr = data;
   size_t len = info->data->size ();
 
-  while (target_auxv_parse (ops, &ptr, data + len, &type, &val) > 0)
+  while (target_auxv_parse (&ptr, data + len, &type, &val) > 0)
     {
       gdbarch_print_auxv_entry (gdbarch, file, type, val);
       ++ents;
@@ -550,7 +549,7 @@ info_auxv_command (const char *cmd, int from_tty)
     error (_("The program has no auxiliary information now."));
   else
     {
-      int ents = fprint_target_auxv (gdb_stdout, &current_target);
+      int ents = fprint_target_auxv (gdb_stdout, target_stack);
 
       if (ents < 0)
 	error (_("No auxiliary vector found, or failed reading it."));

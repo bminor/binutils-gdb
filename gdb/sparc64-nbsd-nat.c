@@ -167,6 +167,9 @@ sparc64nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   return 1;
 }
 
+/* We've got nothing to add to the generic SPARC target.  */
+static sparc_target<inf_ptrace_target> the_sparc64_nbsd_nat_target;
+
 void
 _initialize_sparc64nbsd_nat (void)
 {
@@ -177,8 +180,7 @@ _initialize_sparc64nbsd_nat (void)
   sparc_gregset_supplies_p = sparc64nbsd_gregset_supplies_p;
   sparc_fpregset_supplies_p = sparc64nbsd_fpregset_supplies_p;
 
-  /* We've got nothing to add to the generic SPARC target.  */
-  add_target (sparc_target ());
+  add_target (&the_sparc64_nbsd_nat_target);
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (sparc64nbsd_supply_pcb);

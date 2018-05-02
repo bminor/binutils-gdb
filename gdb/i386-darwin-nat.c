@@ -43,12 +43,21 @@
 #include "amd64-darwin-tdep.h"
 #endif
 
+struct i386_darwin_nat_target final : public x86_nat_target<darwin_nat_target>
+{
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static struct i386_darwin_nat_target darwin_target;
+
 /* Read register values from the inferior process.
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
-static void
-i386_darwin_fetch_inferior_registers (struct target_ops *ops,
-				      struct regcache *regcache, int regno)
+
+void
+i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   thread_t current_thread = ptid_get_tid (regcache_get_ptid (regcache));
   int fetched = 0;
@@ -163,9 +172,9 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
-static void
-i386_darwin_store_inferior_registers (struct target_ops *ops,
-				      struct regcache *regcache, int regno)
+void
+i386_darwin_nat_target::store_registers (struct regcache *regcache,
+					 int regno)
 {
   thread_t current_thread = ptid_get_tid (regcache_get_ptid (regcache));
   struct gdbarch *gdbarch = regcache->arch ();
@@ -628,7 +637,7 @@ darwin_set_sstep (thread_t thread, int enable)
 }
 
 void
-darwin_complete_target (struct target_ops *target)
+_initialize_i386_darwin_nat (void)
 {
 #ifdef BFD64
   amd64_native_gregset64_reg_offset = amd64_darwin_thread_state_reg_offset;
@@ -636,8 +645,6 @@ darwin_complete_target (struct target_ops *target)
   amd64_native_gregset32_reg_offset = i386_darwin_thread_state_reg_offset;
   amd64_native_gregset32_num_regs = i386_darwin_thread_state_num_regs;
 #endif
-
-  x86_use_watchpoints (target);
 
   x86_dr_low.set_control = i386_darwin_dr_set_control;
   x86_dr_low.set_addr = i386_darwin_dr_set_addr;
@@ -652,6 +659,5 @@ darwin_complete_target (struct target_ops *target)
   x86_set_debug_register_length (4);
 #endif
 
-  target->to_fetch_registers = i386_darwin_fetch_inferior_registers;
-  target->to_store_registers = i386_darwin_store_inferior_registers;
+  add_target (&darwin_target);
 }

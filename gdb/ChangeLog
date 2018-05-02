@@ -1,4 +1,1012 @@
 2018-05-02  Pedro Alves  <palves@redhat.com>
+	    John Baldwin  <jhb@freebsd.org>
+
+	* target.h (enum strata) <debug_stratum>: New.
+	(struct target_ops) <all delegation methods>: Replace by C++
+	virtual methods, and drop "to_" prefix.  All references updated
+	throughout.
+	<to_shortname, to_longname, to_doc, to_data,
+	to_have_steppable_watchpoint, to_have_continuable_watchpoint,
+	to_has_thread_control, to_attach_no_wait>: Delete, replaced by
+	virtual methods.  All references updated throughout.
+	<can_attach, supports_terminal_ours, can_create_inferior,
+	get_thread_control_capabilities, attach_no_wait>: New
+	virtual methods.
+	<insert_breakpoint, remove_breakpoint>: Now
+	TARGET_DEFAULT_NORETURN methods.
+	<info_proc>: Now returns bool.
+	<to_magic>: Delete.
+	(OPS_MAGIC): Delete.
+	(current_target): Delete.  All references replaced by references
+	to ...
+	(target_stack): ... this.  New.
+	(target_shortname, target_longname): Adjust.
+	(target_can_run): Now a function declaration.
+	(default_child_has_all_memory, default_child_has_memory)
+	(default_child_has_stack, default_child_has_registers)
+	(default_child_has_execution): Remove target_ops parameter.
+	(complete_target_initialization): Delete.
+	(memory_breakpoint_target): New template class.
+	(test_target_ops): Refactor as a C++ class with virtual methods.
+	* make-target-delegates (NAME_PART): Tighten.
+	(POINTER_PART, CP_SYMBOL): New.
+	(SIMPLE_RETURN_PART): Reimplement.
+	(VEC_RETURN_PART): Expect less.
+	(RETURN_PART, VIRTUAL_PART): New.
+	(METHOD): Adjust to C++ virtual methods.
+	(scan_target_h): Remove reference to C99.
+	(dname): Output "target_ops::" prefix.
+	(write_function_header): Adjust to output a C++ class method.
+	(write_declaration): New.
+	(write_delegator): Adjust to output a C++ class method.
+	(tdname): Output "dummy_target::" prefix.
+	(write_tdefault, write_debugmethod): Adjust to output a C++ class
+	method.
+	(tdefault_names, debug_names): Delete.
+	(return_types, tdefaults, styles, argtypes_array): New.
+	(top level): All methods are delegators.
+	(print_class): New.
+	(top level): Print dummy_target and debug_target classes.
+	* target-delegates.c: Regenerate.
+	* target-debug.h (target_debug_print_enum_info_proc_what)
+	(target_debug_print_thread_control_capabilities)
+	(target_debug_print_thread_info_p): New.
+	* target.c (dummy_target): Delete.
+	(the_dummy_target, the_debug_target): New.
+	(target_stack): Now extern.
+	(set_targetdebug): Push/unpush debug target.
+	(default_child_has_all_memory, default_child_has_memory)
+	(default_child_has_stack, default_child_has_registers)
+	(default_child_has_execution): Remove target_ops parameter.
+	(complete_target_initialization): Delete.
+	(add_target_with_completer): No longer call
+	complete_target_initialization.
+	(target_supports_terminal_ours): Use regular delegation.
+	(update_current_target): Delete.
+	(push_target): No longer check magic number.  Don't call
+	update_current_target.
+	(unpush_target): Don't call update_current_target.
+	(target_is_pushed): No longer check magic number.
+	(target_require_runnable): Skip for all stratums over
+	process_stratum.
+	(target_ops::info_proc): New.
+	(target_info_proc): Use find_target_at and
+	find_default_run_target.
+	(target_supports_disable_randomization): Use regular delegation.
+	(target_get_osdata): Use find_target_at.
+	(target_ops::open, target_ops::close, target_ops::can_attach)
+	(target_ops::attach, target_ops::can_create_inferior)
+	(target_ops::create_inferior, target_ops::can_run)
+	(target_can_run): New.
+	(default_fileio_target): Use regular delegation.
+	(target_ops::fileio_open, target_ops::fileio_pwrite)
+	(target_ops::fileio_pread, target_ops::fileio_fstat)
+	(target_ops::fileio_close, target_ops::fileio_unlink)
+	(target_ops::fileio_readlink): New.
+	(target_fileio_open_1, target_fileio_unlink)
+	(target_fileio_readlink): Always call the target method.  Handle
+	FILEIO_ENOSYS.
+	(return_zero, return_zero_has_execution): Delete.
+	(init_dummy_target): Delete.
+	(dummy_target::dummy_target, dummy_target::shortname)
+	(dummy_target::longname, dummy_target::doc)
+	(debug_target::debug_target, debug_target::shortname)
+	(debug_target::longname, debug_target::doc): New.
+	(target_supports_delete_record): Use regular delegation.
+	(setup_target_debug): Delete.
+	(maintenance_print_target_stack): Skip debug_stratum.
+	(initialize_targets): Instantiate the_dummy_target and
+	the_debug_target.
+	* auxv.c (target_auxv_parse): Remove 'ops' parameter.  Adjust to
+	use target_stack.
+	(target_auxv_search, fprint_target_auxv): Adjust.
+	(info_auxv_command): Adjust to use target_stack.
+	* auxv.h (target_auxv_parse): Remove 'ops' parameter.
+	* exceptions.c (print_flush): Handle a NULL target_stack.
+	* regcache.c (target_ops_no_register): Refactor as class with
+	virtual methods.
+
+	* exec.c (exec_target): New class.
+	(exec_ops): Now an exec_target.
+	(exec_open, exec_close_1, exec_get_section_table)
+	(exec_xfer_partial, exec_files_info, exec_has_memory)
+	(exec_make_note_section): Refactor as exec_target methods.
+	(exec_file_clear, ignore, exec_remove_breakpoint, init_exec_ops):
+	Delete.
+	(exec_target::find_memory_regions): New.
+	(_initialize_exec): Don't call init_exec_ops.
+	* gdbcore.h (exec_file_clear): Delete.
+
+	* corefile.c (core_target): Delete.
+	(core_file_command): Adjust.
+	* corelow.c (core_target): New class.
+	(the_core_target): New.
+	(core_close): Remove target_ops parameter.
+	(core_close_cleanup): Adjust.
+	(core_target::close): New.
+	(core_open, core_detach, get_core_registers, core_files_info)
+	(core_xfer_partial, core_thread_alive, core_read_description)
+	(core_pid_to_str, core_thread_name, core_has_memory)
+	(core_has_stack, core_has_registers, core_info_proc): Rework as
+	core_target methods.
+	(ignore, core_remove_breakpoint, init_core_ops): Delete.
+	(_initialize_corelow): Initialize the_core_target.
+	* gdbcore.h (core_target): Delete.
+	(the_core_target): New.
+
+	* ctf.c: (ctf_target): New class.
+	(ctf_ops): Now a ctf_target.
+	(ctf_open, ctf_close, ctf_files_info, ctf_fetch_registers)
+	(ctf_xfer_partial, ctf_get_trace_state_variable_value)
+	(ctf_trace_find, ctf_traceframe_info): Refactor as ctf_target
+	methods.
+	(init_ctf_ops): Delete.
+	(_initialize_ctf): Don't call it.
+	* tracefile-tfile.c (tfile_target): New class.
+	(tfile_ops): Now a tfile_target.
+	(tfile_open, tfile_close, tfile_files_info)
+	(tfile_get_tracepoint_status, tfile_trace_find)
+	(tfile_fetch_registers, tfile_xfer_partial)
+	(tfile_get_trace_state_variable_value, tfile_traceframe_info):
+	Refactor as tfile_target methods.
+	(tfile_xfer_partial_features): Remove target_ops parameter.
+	(init_tfile_ops): Delete.
+	(_initialize_tracefile_tfile): Don't call it.
+	* tracefile.c (tracefile_has_all_memory, tracefile_has_memory)
+	(tracefile_has_stack, tracefile_has_registers)
+	(tracefile_thread_alive, tracefile_get_trace_status): Refactor as
+	tracefile_target methods.
+	(init_tracefile_ops): Delete.
+	(tracefile_target::tracefile_target): New.
+	* tracefile.h: Include "target.h".
+	(tracefile_target): New class.
+	(init_tracefile_ops): Delete.
+
+	* spu-multiarch.c (spu_multiarch_target): New class.
+	(spu_ops): Now a spu_multiarch_target.
+	(spu_thread_architecture, spu_region_ok_for_hw_watchpoint)
+	(spu_fetch_registers, spu_store_registers, spu_xfer_partial)
+	(spu_search_memory, spu_mourn_inferior): Refactor as
+	spu_multiarch_target methods.
+	(init_spu_ops): Delete.
+	(_initialize_spu_multiarch): Remove references to init_spu_ops,
+	complete_target_initialization.
+
+	* ravenscar-thread.c (ravenscar_thread_target): New class.
+	(ravenscar_ops): Now a ravenscar_thread_target.
+	(ravenscar_resume, ravenscar_wait, ravenscar_update_thread_list)
+	(ravenscar_thread_alive, ravenscar_pid_to_str)
+	(ravenscar_fetch_registers, ravenscar_store_registers)
+	(ravenscar_prepare_to_store, ravenscar_stopped_by_sw_breakpoint)
+	(ravenscar_stopped_by_hw_breakpoint)
+	(ravenscar_stopped_by_watchpoint, ravenscar_stopped_data_address)
+	(ravenscar_mourn_inferior, ravenscar_core_of_thread)
+	(ravenscar_get_ada_task_ptid): Refactor as ravenscar_thread_target
+	methods.
+	(init_ravenscar_thread_ops): Delete.
+	(_initialize_ravenscar): Remove references to
+	init_ravenscar_thread_ops and complete_target_initialization.
+
+	* bsd-uthread.c (bsd_uthread_ops_hack): Delete.
+	(bsd_uthread_target): New class.
+	(bsd_uthread_ops): Now a bsd_uthread_target.
+	(bsd_uthread_activate): Adjust to refer to bsd_uthread_ops.
+	(bsd_uthread_close, bsd_uthread_mourn_inferior)
+	(bsd_uthread_fetch_registers, bsd_uthread_store_registers)
+	(bsd_uthread_wait, bsd_uthread_resume, bsd_uthread_thread_alive)
+	(bsd_uthread_update_thread_list, bsd_uthread_extra_thread_info)
+	(bsd_uthread_pid_to_str): Refactor as bsd_uthread_target methods.
+	(bsd_uthread_target): Delete function.
+	(_initialize_bsd_uthread): Remove reference to
+	complete_target_initialization.
+
+	* bfd-target.c (target_bfd_data): Delete.  Fields folded into ...
+	(target_bfd): ... this new class.
+	(target_bfd_xfer_partial, target_bfd_get_section_table)
+	(target_bfd_close): Refactor as target_bfd methods.
+	(target_bfd::~target_bfd): New.
+	(target_bfd_reopen): Adjust.
+	(target_bfd::close): New.
+
+	* record-btrace.c (record_btrace_target): New class.
+	(record_btrace_ops): Now a record_btrace_target.
+	(record_btrace_open, record_btrace_stop_recording)
+	(record_btrace_disconnect, record_btrace_close)
+	(record_btrace_async, record_btrace_info)
+	(record_btrace_insn_history, record_btrace_insn_history_range)
+	(record_btrace_insn_history_from, record_btrace_call_history)
+	(record_btrace_call_history_range)
+	(record_btrace_call_history_from, record_btrace_record_method)
+	(record_btrace_is_replaying, record_btrace_will_replay)
+	(record_btrace_xfer_partial, record_btrace_insert_breakpoint)
+	(record_btrace_remove_breakpoint, record_btrace_fetch_registers)
+	(record_btrace_store_registers, record_btrace_prepare_to_store)
+	(record_btrace_to_get_unwinder)
+	(record_btrace_to_get_tailcall_unwinder, record_btrace_resume)
+	(record_btrace_commit_resume, record_btrace_wait)
+	(record_btrace_stop, record_btrace_can_execute_reverse)
+	(record_btrace_stopped_by_sw_breakpoint)
+	(record_btrace_supports_stopped_by_sw_breakpoint)
+	(record_btrace_stopped_by_hw_breakpoint)
+	(record_btrace_supports_stopped_by_hw_breakpoint)
+	(record_btrace_update_thread_list, record_btrace_thread_alive)
+	(record_btrace_goto_begin, record_btrace_goto_end)
+	(record_btrace_goto, record_btrace_stop_replaying_all)
+	(record_btrace_execution_direction)
+	(record_btrace_prepare_to_generate_core)
+	(record_btrace_done_generating_core): Refactor as
+	record_btrace_target methods.
+	(init_record_btrace_ops): Delete.
+	(_initialize_record_btrace): Remove reference to
+	init_record_btrace_ops.
+	* record-full.c (RECORD_FULL_IS_REPLAY): Adjust to always refer to
+	the execution_direction global.
+	(record_full_base_target, record_full_target)
+	(record_full_core_target): New classes.
+	(record_full_ops): Now a record_full_target.
+	(record_full_core_ops): Now a record_full_core_target.
+	(record_full_target::detach, record_full_target::disconnect)
+	(record_full_core_target::disconnect)
+	(record_full_target::mourn_inferior, record_full_target::kill):
+	New.
+	(record_full_open, record_full_close, record_full_async): Refactor
+	as methods of the record_full_base_target class.
+	(record_full_resume, record_full_commit_resume): Refactor
+	as methods of the record_full_target class.
+	(record_full_wait, record_full_stopped_by_watchpoint)
+	(record_full_stopped_data_address)
+	(record_full_stopped_by_sw_breakpoint)
+	(record_full_supports_stopped_by_sw_breakpoint)
+	(record_full_stopped_by_hw_breakpoint)
+	(record_full_supports_stopped_by_hw_breakpoint): Refactor as
+	methods of the record_full_base_target class.
+	(record_full_store_registers, record_full_xfer_partial)
+	(record_full_insert_breakpoint, record_full_remove_breakpoint):
+	Refactor as methods of the record_full_target class.
+	(record_full_can_execute_reverse, record_full_get_bookmark)
+	(record_full_goto_bookmark, record_full_execution_direction)
+	(record_full_record_method, record_full_info, record_full_delete)
+	(record_full_is_replaying, record_full_will_replay)
+	(record_full_goto_begin, record_full_goto_end, record_full_goto)
+	(record_full_stop_replaying): Refactor as methods of the
+	record_full_base_target class.
+	(record_full_core_resume, record_full_core_kill)
+	(record_full_core_fetch_registers)
+	(record_full_core_prepare_to_store)
+	(record_full_core_store_registers, record_full_core_xfer_partial)
+	(record_full_core_insert_breakpoint)
+	(record_full_core_remove_breakpoint)
+	(record_full_core_has_execution): Refactor
+	as methods of the record_full_core_target class.
+	(record_full_base_target::supports_delete_record): New.
+	(init_record_full_ops): Delete.
+	(init_record_full_core_ops): Delete.
+	(record_full_save): Refactor as method of the
+	record_full_base_target class.
+	(_initialize_record_full): Remove references to
+	init_record_full_ops and init_record_full_core_ops.
+
+	* remote.c (remote_target, extended_remote_target): New classes.
+	(remote_ops): Now a remote_target.
+	(extended_remote_ops): Now an extended_remote_target.
+	(remote_insert_fork_catchpoint, remote_remove_fork_catchpoint)
+	(remote_insert_vfork_catchpoint, remote_remove_vfork_catchpoint)
+	(remote_insert_exec_catchpoint, remote_remove_exec_catchpoint)
+	(remote_pass_signals, remote_set_syscall_catchpoint)
+	(remote_program_signals, )
+	(remote_thread_always_alive): Remove target_ops parameter.
+	(remote_thread_alive, remote_thread_name)
+	(remote_update_thread_list, remote_threads_extra_info)
+	(remote_static_tracepoint_marker_at)
+	(remote_static_tracepoint_markers_by_strid)
+	(remote_get_ada_task_ptid, remote_close, remote_start_remote)
+	(remote_open): Refactor as methods of remote_target.
+	(extended_remote_open, extended_remote_detach)
+	(extended_remote_attach, extended_remote_post_attach):
+	(extended_remote_supports_disable_randomization)
+	(extended_remote_create_inferior): : Refactor as method of
+	extended_remote_target.
+	(remote_set_permissions, remote_open_1, remote_detach)
+	(remote_follow_fork, remote_follow_exec, remote_disconnect)
+	(remote_resume, remote_commit_resume, remote_stop)
+	(remote_interrupt, remote_pass_ctrlc, remote_terminal_inferior)
+	(remote_terminal_ours, remote_wait, remote_fetch_registers)
+	(remote_prepare_to_store, remote_store_registers)
+	(remote_flash_erase, remote_flash_done, remote_files_info)
+	(remote_kill, remote_mourn, remote_insert_breakpoint)
+	(remote_remove_breakpoint, remote_insert_watchpoint)
+	(remote_watchpoint_addr_within_range)
+	(remote_remove_watchpoint, remote_region_ok_for_hw_watchpoint)
+	(remote_check_watch_resources, remote_stopped_by_sw_breakpoint)
+	(remote_supports_stopped_by_sw_breakpoint)
+	(remote_stopped_by_hw_breakpoint)
+	(remote_supports_stopped_by_hw_breakpoint)
+	(remote_stopped_by_watchpoint, remote_stopped_data_address)
+	(remote_insert_hw_breakpoint, remote_remove_hw_breakpoint)
+	(remote_verify_memory): Refactor as methods of remote_target.
+	(remote_write_qxfer, remote_read_qxfer): Remove target_ops
+	parameter.
+	(remote_xfer_partial, remote_get_memory_xfer_limit)
+	(remote_search_memory, remote_rcmd, remote_memory_map)
+	(remote_pid_to_str, remote_get_thread_local_address)
+	(remote_get_tib_address, remote_read_description): Refactor as
+	methods of remote_target.
+	(remote_target::fileio_open, remote_target::fileio_pwrite)
+	(remote_target::fileio_pread, remote_target::fileio_close): New.
+	(remote_hostio_readlink, remote_hostio_fstat)
+	(remote_filesystem_is_local, remote_can_execute_reverse)
+	(remote_supports_non_stop, remote_supports_disable_randomization)
+	(remote_supports_multi_process, remote_supports_cond_breakpoints)
+	(remote_supports_enable_disable_tracepoint)
+	(remote_supports_string_tracing)
+	(remote_can_run_breakpoint_commands, remote_trace_init)
+	(remote_download_tracepoint, remote_can_download_tracepoint)
+	(remote_download_trace_state_variable, remote_enable_tracepoint)
+	(remote_disable_tracepoint, remote_trace_set_readonly_regions)
+	(remote_trace_start, remote_get_trace_status)
+	(remote_get_tracepoint_status, remote_trace_stop)
+	(remote_trace_find, remote_get_trace_state_variable_value)
+	(remote_save_trace_data, remote_get_raw_trace_data)
+	(remote_set_disconnected_tracing, remote_core_of_thread)
+	(remote_set_circular_trace_buffer, remote_traceframe_info)
+	(remote_get_min_fast_tracepoint_insn_len)
+	(remote_set_trace_buffer_size, remote_set_trace_notes)
+	(remote_use_agent, remote_can_use_agent, remote_enable_btrace)
+	(remote_disable_btrace, remote_teardown_btrace)
+	(remote_read_btrace, remote_btrace_conf)
+	(remote_augmented_libraries_svr4_read, remote_load)
+	(remote_pid_to_exec_file, remote_can_do_single_step)
+	(remote_execution_direction, remote_thread_handle_to_thread_info):
+	Refactor as methods of remote_target.
+	(init_remote_ops, init_extended_remote_ops): Delete.
+	(remote_can_async_p, remote_is_async_p, remote_async)
+	(remote_thread_events, remote_upload_tracepoints)
+	(remote_upload_trace_state_variables): Refactor as methods of
+	remote_target.
+	(_initialize_remote): Remove references to init_remote_ops and
+	init_extended_remote_ops.
+
+	* remote-sim.c (gdbsim_target): New class.
+	(gdbsim_fetch_register, gdbsim_store_register, gdbsim_kill)
+	(gdbsim_load, gdbsim_create_inferior, gdbsim_open, gdbsim_close)
+	(gdbsim_detach, gdbsim_resume, gdbsim_interrupt)
+	(gdbsim_wait, gdbsim_prepare_to_store, gdbsim_xfer_partial)
+	(gdbsim_files_info, gdbsim_mourn_inferior, gdbsim_thread_alive)
+	(gdbsim_pid_to_str, gdbsim_has_all_memory, gdbsim_has_memory):
+	Refactor as methods of gdbsim_target.
+	(gdbsim_ops): Now a gdbsim_target.
+	(init_gdbsim_ops): Delete.
+	(gdbsim_cntrl_c): Adjust.
+	(_initialize_remote_sim): Remove reference to init_gdbsim_ops.
+
+	* amd64-linux-nat.c (amd64_linux_nat_target): New class.
+	(the_amd64_linux_nat_target): New.
+	(amd64_linux_fetch_inferior_registers)
+	(amd64_linux_store_inferior_registers): Refactor as methods of
+	amd64_linux_nat_target.
+	(_initialize_amd64_linux_nat): Adjust.  Set linux_target.
+	* i386-linux-nat.c: Don't include "linux-nat.h".
+	(i386_linux_nat_target): New class.
+	(the_i386_linux_nat_target): New.
+	(i386_linux_fetch_inferior_registers)
+	(i386_linux_store_inferior_registers, i386_linux_resume): Refactor
+	as methods of i386_linux_nat_target.
+	(_initialize_i386_linux_nat): Adjust.  Set linux_target.
+	* inf-child.c (inf_child_ops): Delete.
+	(inf_child_fetch_inferior_registers)
+	(inf_child_store_inferior_registers): Delete.
+	(inf_child_post_attach, inf_child_prepare_to_store): Refactor as
+	methods of inf_child_target.
+	(inf_child_target::supports_terminal_ours)
+	(inf_child_target::terminal_init)
+	(inf_child_target::terminal_inferior)
+	(inf_child_target::terminal_ours_for_output)
+	(inf_child_target::terminal_ours, inf_child_target::interrupt)
+	(inf_child_target::pass_ctrlc, inf_child_target::terminal_info):
+	New.
+	(inf_child_open, inf_child_disconnect, inf_child_close)
+	(inf_child_mourn_inferior, inf_child_maybe_unpush_target)
+	(inf_child_post_startup_inferior, inf_child_can_run)
+	(inf_child_pid_to_exec_file): Refactor as methods of
+	inf_child_target.
+	(inf_child_follow_fork): Delete.
+	(inf_child_target::can_create_inferior)
+	(inf_child_target::can_attach): New.
+	(inf_child_target::has_all_memory, inf_child_target::has_memory)
+	(inf_child_target::has_stack, inf_child_target::has_registers)
+	(inf_child_target::has_execution): New.
+	(inf_child_fileio_open, inf_child_fileio_pwrite)
+	(inf_child_fileio_pread, inf_child_fileio_fstat)
+	(inf_child_fileio_close, inf_child_fileio_unlink)
+	(inf_child_fileio_readlink, inf_child_use_agent)
+	(inf_child_can_use_agent): Refactor as methods of
+	inf_child_target.
+	(return_zero, inf_child_target): Delete.
+	(inf_child_target::inf_child_target): New.
+	* inf-child.h: Include "target.h".
+	(inf_child_target): Delete function prototype.
+	(inf_child_target): New class.
+	(inf_child_open_target, inf_child_mourn_inferior)
+	(inf_child_maybe_unpush_target): Delete.
+	* inf-ptrace.c (inf_ptrace_target::~inf_ptrace_target): New.
+	(inf_ptrace_follow_fork, inf_ptrace_insert_fork_catchpoint)
+	(inf_ptrace_remove_fork_catchpoint, inf_ptrace_create_inferior)
+	(inf_ptrace_post_startup_inferior, inf_ptrace_mourn_inferior)
+	(inf_ptrace_attach, inf_ptrace_post_attach, inf_ptrace_detach)
+	(inf_ptrace_detach_success, inf_ptrace_kill, inf_ptrace_resume)
+	(inf_ptrace_wait, inf_ptrace_xfer_partial)
+	(inf_ptrace_thread_alive, inf_ptrace_files_info)
+	(inf_ptrace_pid_to_str, inf_ptrace_auxv_parse): Refactor as
+	methods of inf_ptrace_target.
+	(inf_ptrace_target): Delete function.
+	* inf-ptrace.h: Include "inf-child.h".
+	(inf_ptrace_target): Delete function declaration.
+	(inf_ptrace_target): New class.
+	(inf_ptrace_trad_target, inf_ptrace_detach_success): Delete.
+	* linux-nat.c (linux_target): New.
+	(linux_ops, linux_ops_saved, super_xfer_partial): Delete.
+	(linux_nat_target::~linux_nat_target): New.
+	(linux_child_post_attach, linux_child_post_startup_inferior)
+	(linux_child_follow_fork, linux_child_insert_fork_catchpoint)
+	(linux_child_remove_fork_catchpoint)
+	(linux_child_insert_vfork_catchpoint)
+	(linux_child_remove_vfork_catchpoint)
+	(linux_child_insert_exec_catchpoint)
+	(linux_child_remove_exec_catchpoint)
+	(linux_child_set_syscall_catchpoint, linux_nat_pass_signals)
+	(linux_nat_create_inferior, linux_nat_attach, linux_nat_detach)
+	(linux_nat_resume, linux_nat_stopped_by_watchpoint)
+	(linux_nat_stopped_data_address)
+	(linux_nat_stopped_by_sw_breakpoint)
+	(linux_nat_supports_stopped_by_sw_breakpoint)
+	(linux_nat_stopped_by_hw_breakpoint)
+	(linux_nat_supports_stopped_by_hw_breakpoint, linux_nat_wait)
+	(linux_nat_kill, linux_nat_mourn_inferior)
+	(linux_nat_xfer_partial, linux_nat_thread_alive)
+	(linux_nat_update_thread_list, linux_nat_pid_to_str)
+	(linux_nat_thread_name, linux_child_pid_to_exec_file)
+	(linux_child_static_tracepoint_markers_by_strid)
+	(linux_nat_is_async_p, linux_nat_can_async_p)
+	(linux_nat_supports_non_stop, linux_nat_always_non_stop_p)
+	(linux_nat_supports_multi_process)
+	(linux_nat_supports_disable_randomization, linux_nat_async)
+	(linux_nat_stop, linux_nat_close, linux_nat_thread_address_space)
+	(linux_nat_core_of_thread, linux_nat_filesystem_is_local)
+	(linux_nat_fileio_open, linux_nat_fileio_readlink)
+	(linux_nat_fileio_unlink, linux_nat_thread_events): Refactor as
+	methods of linux_nat_target.
+	(linux_nat_wait_1, linux_xfer_siginfo, linux_proc_xfer_partial)
+	(linux_proc_xfer_spu, linux_nat_xfer_osdata): Remove target_ops
+	parameter.
+	(check_stopped_by_watchpoint): Adjust.
+	(linux_xfer_partial): Delete.
+	(linux_target_install_ops, linux_target, linux_nat_add_target):
+	Delete.
+	(linux_nat_target::linux_nat_target): New.
+	* linux-nat.h: Include "inf-ptrace.h".
+	(linux_nat_target): New.
+	(linux_target, linux_target_install_ops, linux_nat_add_target):
+	Delete function declarations.
+	(linux_target): Declare global.
+	* linux-thread-db.c (thread_db_target): New.
+	(thread_db_target::thread_db_target): New.
+	(thread_db_ops): Delete.
+	(the_thread_db_target): New.
+	(thread_db_detach, thread_db_wait, thread_db_mourn_inferior)
+	(thread_db_update_thread_list, thread_db_pid_to_str)
+	(thread_db_extra_thread_info)
+	(thread_db_thread_handle_to_thread_info)
+	(thread_db_get_thread_local_address, thread_db_get_ada_task_ptid)
+	(thread_db_resume): Refactor as methods of thread_db_target.
+	(init_thread_db_ops): Delete.
+	(_initialize_thread_db): Remove reference to init_thread_db_ops.
+	* x86-linux-nat.c: Don't include "linux-nat.h".
+	(super_post_startup_inferior): Delete.
+	(x86_linux_nat_target::~x86_linux_nat_target): New.
+	(x86_linux_child_post_startup_inferior)
+	(x86_linux_read_description, x86_linux_enable_btrace)
+	(x86_linux_disable_btrace, x86_linux_teardown_btrace)
+	(x86_linux_read_btrace, x86_linux_btrace_conf): Refactor as
+	methods of x86_linux_nat_target.
+	(x86_linux_create_target): Delete.  Bits folded ...
+	(x86_linux_add_target): ... here.  Now takes a linux_nat_target
+	pointer.
+	* x86-linux-nat.h: Include "linux-nat.h" and "x86-nat.h".
+	(x86_linux_nat_target): New class.
+	(x86_linux_create_target): Delete.
+	(x86_linux_add_target): Now takes a linux_nat_target pointer.
+	* x86-nat.c (x86_insert_watchpoint, x86_remove_watchpoint)
+	(x86_region_ok_for_watchpoint, x86_stopped_data_address)
+	(x86_stopped_by_watchpoint, x86_insert_hw_breakpoint)
+	(x86_remove_hw_breakpoint, x86_can_use_hw_breakpoint)
+	(x86_stopped_by_hw_breakpoint): Remove target_ops parameter and
+	make extern.
+	(x86_use_watchpoints): Delete.
+	* x86-nat.h: Include "breakpoint.h" and "target.h".
+	(x86_use_watchpoints): Delete.
+	(x86_can_use_hw_breakpoint, x86_region_ok_for_hw_watchpoint)
+	(x86_stopped_by_watchpoint, x86_stopped_data_address)
+	(x86_insert_watchpoint, x86_remove_watchpoint)
+	(x86_insert_hw_breakpoint, x86_remove_hw_breakpoint)
+	(x86_stopped_by_hw_breakpoint): New declarations.
+	(x86_nat_target): New template class.
+
+	* ppc-linux-nat.c (ppc_linux_nat_target): New class.
+	(the_ppc_linux_nat_target): New.
+	(ppc_linux_fetch_inferior_registers)
+	(ppc_linux_can_use_hw_breakpoint)
+	(ppc_linux_region_ok_for_hw_watchpoint)
+	(ppc_linux_ranged_break_num_registers)
+	(ppc_linux_insert_hw_breakpoint, ppc_linux_remove_hw_breakpoint)
+	(ppc_linux_insert_mask_watchpoint)
+	(ppc_linux_remove_mask_watchpoint)
+	(ppc_linux_can_accel_watchpoint_condition)
+	(ppc_linux_insert_watchpoint, ppc_linux_remove_watchpoint)
+	(ppc_linux_stopped_data_address, ppc_linux_stopped_by_watchpoint)
+	(ppc_linux_watchpoint_addr_within_range)
+	(ppc_linux_masked_watch_num_registers)
+	(ppc_linux_store_inferior_registers, ppc_linux_auxv_parse)
+	(ppc_linux_read_description): Refactor as methods of
+	ppc_linux_nat_target.
+	(_initialize_ppc_linux_nat): Adjust.  Set linux_target.
+
+	* procfs.c (procfs_xfer_partial): Delete forward declaration.
+	(procfs_target): New class.
+	(the_procfs_target): New.
+	(procfs_target): Delete function.
+	(procfs_auxv_parse, procfs_attach, procfs_detach)
+	(procfs_fetch_registers, procfs_store_registers, procfs_wait)
+	(procfs_xfer_partial, procfs_resume, procfs_pass_signals)
+	(procfs_files_info, procfs_kill_inferior, procfs_mourn_inferior)
+	(procfs_create_inferior, procfs_update_thread_list)
+	(procfs_thread_alive, procfs_pid_to_str)
+	(procfs_can_use_hw_breakpoint, procfs_stopped_by_watchpoint)
+	(procfs_stopped_data_address, procfs_insert_watchpoint)
+	(procfs_remove_watchpoint, procfs_region_ok_for_hw_watchpoint)
+	(proc_find_memory_regions, procfs_info_proc)
+	(procfs_make_note_section): Refactor as methods of procfs_target.
+	(_initialize_procfs): Adjust.
+	* sol-thread.c (sol_thread_target): New class.
+	(sol_thread_ops): Now a sol_thread_target.
+	(sol_thread_detach, sol_thread_resume, sol_thread_wait)
+	(sol_thread_fetch_registers, sol_thread_store_registers)
+	(sol_thread_xfer_partial, sol_thread_mourn_inferior)
+	(sol_thread_alive, solaris_pid_to_str, sol_update_thread_list)
+	(sol_get_ada_task_ptid): Refactor as methods of sol_thread_target.
+	(init_sol_thread_ops): Delete.
+	(_initialize_sol_thread): Adjust.  Remove references to
+	init_sol_thread_ops and complete_target_initialization.
+
+	* windows-nat.c (windows_nat_target): New class.
+	(windows_fetch_inferior_registers)
+	(windows_store_inferior_registers, windows_resume, windows_wait)
+	(windows_attach, windows_detach, windows_pid_to_exec_file)
+	(windows_files_info, windows_create_inferior)
+	(windows_mourn_inferior, windows_interrupt, windows_kill_inferior)
+	(windows_close, windows_pid_to_str, windows_xfer_partial)
+	(windows_get_tib_address, windows_get_ada_task_ptid)
+	(windows_thread_name, windows_thread_alive): Refactor as
+	windows_nat_target methods.
+	(do_initial_windows_stuff): Adjust.
+	(windows_target): Delete function.
+	(_initialize_windows_nat): Adjust.
+
+	* darwin-nat.c (darwin_resume, darwin_wait_to, darwin_interrupt)
+	(darwin_mourn_inferior, darwin_kill_inferior)
+	(darwin_create_inferior, darwin_attach, darwin_detach)
+	(darwin_pid_to_str, darwin_thread_alive, darwin_xfer_partial)
+	(darwin_pid_to_exec_file, darwin_get_ada_task_ptid)
+	(darwin_supports_multi_process): Refactor as darwin_nat_target
+	methods.
+	(darwin_resume_to, darwin_files_info): Delete.
+	(_initialize_darwin_inferior): Rename to ...
+	(_initialize_darwin_nat): ... this.  Adjust to C++ification.
+	* darwin-nat.h: Include "inf-child.h".
+	(darwin_nat_target): New class.
+	(darwin_complete_target): Delete.
+	* i386-darwin-nat.c (i386_darwin_nat_target): New class.
+	(darwin_target): New.
+	(i386_darwin_fetch_inferior_registers)
+	(i386_darwin_store_inferior_registers): Refactor as methods of
+	darwin_nat_target.
+	(darwin_complete_target): Delete, with ...
+	(_initialize_i386_darwin_nat): ... bits factored out here.
+
+	* alpha-linux-nat.c (alpha_linux_nat_target): New class.
+	(the_alpha_linux_nat_target): New.
+	(alpha_linux_register_u_offset): Refactor as
+	alpha_linux_nat_target method.
+	(_initialize_alpha_linux_nat): Adjust.
+	* linux-nat-trad.c (inf_ptrace_register_u_offset): Delete.
+	(inf_ptrace_fetch_register, inf_ptrace_fetch_registers)
+	(inf_ptrace_store_register, inf_ptrace_store_registers): Refact as
+	methods of linux_nat_trad_target.
+	(linux_trad_target): Delete.
+	* linux-nat-trad.h (linux_trad_target): Delete function.
+	(linux_nat_trad_target): New class.
+	* mips-linux-nat.c (mips_linux_nat_target): New class.
+	(super_fetch_registers, super_store_registers, super_close):
+	Delete.
+	(the_mips_linux_nat_target): New.
+	(mips64_linux_regsets_fetch_registers)
+	(mips64_linux_regsets_store_registers)
+	(mips64_linux_fetch_registers, mips64_linux_store_registers)
+	(mips_linux_register_u_offset, mips_linux_read_description)
+	(mips_linux_can_use_hw_breakpoint)
+	(mips_linux_stopped_by_watchpoint)
+	(mips_linux_stopped_data_address)
+	(mips_linux_region_ok_for_hw_watchpoint)
+	(mips_linux_insert_watchpoint, mips_linux_remove_watchpoint)
+	(mips_linux_close): Refactor as methods of mips_linux_nat.
+	(_initialize_mips_linux_nat): Adjust to C++ification.
+
+	* aix-thread.c (aix_thread_target): New class.
+	(aix_thread_ops): Now an aix_thread_target.
+	(aix_thread_detach, aix_thread_resume, aix_thread_wait)
+	(aix_thread_fetch_registers, aix_thread_store_registers)
+	(aix_thread_xfer_partial, aix_thread_mourn_inferior)
+	(aix_thread_thread_alive, aix_thread_pid_to_str)
+	(aix_thread_extra_thread_info, aix_thread_get_ada_task_ptid):
+	Refactor as methods of aix_thread_target.
+	(init_aix_thread_ops): Delete.
+	(_initialize_aix_thread): Remove references to init_aix_thread_ops
+	and complete_target_initialization.
+	* rs6000-nat.c (rs6000_xfer_shared_libraries): Delete.
+	(rs6000_nat_target): New class.
+	(the_rs6000_nat_target): New.
+	(rs6000_fetch_inferior_registers, rs6000_store_inferior_registers)
+	(rs6000_xfer_partial, rs6000_wait, rs6000_create_inferior)
+	(rs6000_xfer_shared_libraries): Refactor as rs6000_nat_target methods.
+	(super_create_inferior): Delete.
+	(_initialize_rs6000_nat): Adjust to C++ification.
+
+	* arm-linux-nat.c (arm_linux_nat_target): New class.
+	(the_arm_linux_nat_target): New.
+	(arm_linux_fetch_inferior_registers)
+	(arm_linux_store_inferior_registers, arm_linux_read_description)
+	(arm_linux_can_use_hw_breakpoint, arm_linux_insert_hw_breakpoint)
+	(arm_linux_remove_hw_breakpoint)
+	(arm_linux_region_ok_for_hw_watchpoint)
+	(arm_linux_insert_watchpoint, arm_linux_remove_watchpoint)
+	(arm_linux_stopped_data_address, arm_linux_stopped_by_watchpoint)
+	(arm_linux_watchpoint_addr_within_range): Refactor as methods of
+	arm_linux_nat_target.
+	(_initialize_arm_linux_nat): Adjust to C++ification.
+
+	* aarch64-linux-nat.c (aarch64_linux_nat_target): New class.
+	(the_aarch64_linux_nat_target): New.
+	(aarch64_linux_fetch_inferior_registers)
+	(aarch64_linux_store_inferior_registers)
+	(aarch64_linux_child_post_startup_inferior)
+	(aarch64_linux_read_description)
+	(aarch64_linux_can_use_hw_breakpoint)
+	(aarch64_linux_insert_hw_breakpoint)
+	(aarch64_linux_remove_hw_breakpoint)
+	(aarch64_linux_insert_watchpoint, aarch64_linux_remove_watchpoint)
+	(aarch64_linux_region_ok_for_hw_watchpoint)
+	(aarch64_linux_stopped_data_address)
+	(aarch64_linux_stopped_by_watchpoint)
+	(aarch64_linux_watchpoint_addr_within_range)
+	(aarch64_linux_can_do_single_step): Refactor as methods of
+	aarch64_linux_nat_target.
+	(super_post_startup_inferior): Delete.
+	(_initialize_aarch64_linux_nat): Adjust to C++ification.
+
+	* hppa-linux-nat.c (hppa_linux_nat_target): New class.
+	(the_hppa_linux_nat_target): New.
+	(hppa_linux_fetch_inferior_registers)
+	(hppa_linux_store_inferior_registers): Refactor as methods of
+	hppa_linux_nat_target.
+	(_initialize_hppa_linux_nat): Adjust to C++ification.
+
+	* ia64-linux-nat.c (ia64_linux_nat_target): New class.
+	(the_ia64_linux_nat_target): New.
+	(ia64_linux_insert_watchpoint, ia64_linux_remove_watchpoint)
+	(ia64_linux_stopped_data_address)
+	(ia64_linux_stopped_by_watchpoint, ia64_linux_fetch_registers)
+	(ia64_linux_store_registers, ia64_linux_xfer_partial): Refactor as
+	ia64_linux_nat_target methods.
+	(super_xfer_partial): Delete.
+	(_initialize_ia64_linux_nat): Adjust to C++ification.
+
+	* m32r-linux-nat.c (m32r_linux_nat_target): New class.
+	(the_m32r_linux_nat_target): New.
+	(m32r_linux_fetch_inferior_registers)
+	(m32r_linux_store_inferior_registers): Refactor as
+	m32r_linux_nat_target methods.
+	(_initialize_m32r_linux_nat): Adjust to C++ification.
+
+	* m68k-linux-nat.c (m68k_linux_nat_target): New class.
+	(the_m68k_linux_nat_target): New.
+	(m68k_linux_fetch_inferior_registers)
+	(m68k_linux_store_inferior_registers): Refactor as
+	m68k_linux_nat_target methods.
+	(_initialize_m68k_linux_nat): Adjust to C++ification.
+
+	* s390-linux-nat.c (s390_linux_nat_target): New class.
+	(the_s390_linux_nat_target): New.
+	(s390_linux_fetch_inferior_registers)
+	(s390_linux_store_inferior_registers, s390_stopped_by_watchpoint)
+	(s390_insert_watchpoint, s390_remove_watchpoint)
+	(s390_can_use_hw_breakpoint, s390_insert_hw_breakpoint)
+	(s390_remove_hw_breakpoint, s390_region_ok_for_hw_watchpoint)
+	(s390_auxv_parse, s390_read_description): Refactor as methods of
+	s390_linux_nat_target.
+	(_initialize_s390_nat): Adjust to C++ification.
+
+	* sparc-linux-nat.c (sparc_linux_nat_target): New class.
+	(the_sparc_linux_nat_target): New.
+	(_initialize_sparc_linux_nat): Adjust to C++ification.
+	* sparc-nat.c (sparc_fetch_inferior_registers)
+	(sparc_store_inferior_registers): Remove target_ops parameter.
+	* sparc-nat.h (sparc_fetch_inferior_registers)
+	(sparc_store_inferior_registers): Remove target_ops parameter.
+	* sparc64-linux-nat.c (sparc64_linux_nat_target): New class.
+	(the_sparc64_linux_nat_target): New.
+	(_initialize_sparc64_linux_nat): Adjust to C++ification.
+
+	* spu-linux-nat.c (spu_linux_nat_target): New class.
+	(the_spu_linux_nat_target): New.
+	(spu_child_post_startup_inferior, spu_child_post_attach)
+	(spu_child_wait, spu_fetch_inferior_registers)
+	(spu_store_inferior_registers, spu_xfer_partial)
+	(spu_can_use_hw_breakpoint): Refactor as spu_linux_nat_target
+	methods.
+	(_initialize_spu_nat): Adjust to C++ification.
+
+	* tilegx-linux-nat.c (tilegx_linux_nat_target): New class.
+	(the_tilegx_linux_nat_target): New.
+	(fetch_inferior_registers, store_inferior_registers):
+	Refactor as methods.
+	(_initialize_tile_linux_nat): Adjust to C++ification.
+
+	* xtensa-linux-nat.c (xtensa_linux_nat_target): New class.
+	(the_xtensa_linux_nat_target): New.
+	(xtensa_linux_fetch_inferior_registers)
+	(xtensa_linux_store_inferior_registers): Refactor as
+	xtensa_linux_nat_target methods.
+	(_initialize_xtensa_linux_nat): Adjust to C++ification.
+
+	* fbsd-nat.c (USE_SIGTRAP_SIGINFO): Delete.
+	(fbsd_pid_to_exec_file, fbsd_find_memory_regions)
+	(fbsd_find_memory_regions, fbsd_info_proc, fbsd_xfer_partial)
+	(fbsd_thread_alive, fbsd_pid_to_str, fbsd_thread_name)
+	(fbsd_update_thread_list, fbsd_resume, fbsd_wait)
+	(fbsd_stopped_by_sw_breakpoint)
+	(fbsd_supports_stopped_by_sw_breakpoint, fbsd_follow_fork)
+	(fbsd_insert_fork_catchpoint, fbsd_remove_fork_catchpoint)
+	(fbsd_insert_vfork_catchpoint, fbsd_remove_vfork_catchpoint)
+	(fbsd_post_startup_inferior, fbsd_post_attach)
+	(fbsd_insert_exec_catchpoint, fbsd_remove_exec_catchpoint)
+	(fbsd_set_syscall_catchpoint)
+	(super_xfer_partial, super_resume, super_wait)
+	(fbsd_supports_stopped_by_hw_breakpoint): Delete.
+	(fbsd_handle_debug_trap): Remove target_ops parameter.
+	(fbsd_nat_add_target): Delete.
+	* fbsd-nat.h: Include "inf-ptrace.h".
+	(fbsd_nat_add_target): Delete.
+	(USE_SIGTRAP_SIGINFO): Define.
+	(fbsd_nat_target): New class.
+
+	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers)
+	(amd64bsd_store_inferior_registers): Remove target_ops parameter.
+	(amd64bsd_target): Delete.
+	* amd64-bsd-nat.h: New file.
+	* amd64-fbsd-nat.c: Include "amd64-bsd-nat.h" instead of
+	"x86-bsd-nat.h".
+	(amd64_fbsd_nat_target): New class.
+	(the_amd64_fbsd_nat_target): New.
+	(amd64fbsd_read_description): Refactor as method of
+	amd64_fbsd_nat_target.
+	(amd64_fbsd_nat_target::supports_stopped_by_hw_breakpoint): New.
+	(_initialize_amd64fbsd_nat): Adjust to C++ification.
+	* amd64-nat.h (amd64bsd_target): Delete function declaration.
+	* i386-bsd-nat.c (i386bsd_fetch_inferior_registers)
+	(i386bsd_store_inferior_registers): Remove target_ops parameter.
+	(i386bsd_target): Delete.
+	* i386-bsd-nat.h (i386bsd_target): Delete function declaration.
+	(i386bsd_fetch_inferior_registers)
+	(i386bsd_store_inferior_registers): Declare.
+	(i386_bsd_nat_target): New class.
+	* i386-fbsd-nat.c (i386_fbsd_nat_target): New class.
+	(the_i386_fbsd_nat_target): New.
+	(i386fbsd_resume, i386fbsd_read_description): Refactor as
+	i386_fbsd_nat_target methods.
+	(i386_fbsd_nat_target::supports_stopped_by_hw_breakpoint): New.
+	(_initialize_i386fbsd_nat): Adjust to C++ification.
+	* x86-bsd-nat.c (super_mourn_inferior): Delete.
+	(x86bsd_mourn_inferior, x86bsd_target): Delete.
+	(_initialize_x86_bsd_nat): Adjust to C++ification.
+	* x86-bsd-nat.h: Include "x86-nat.h".
+	(x86bsd_target): Delete declaration.
+	(x86bsd_nat_target): New class.
+
+	* aarch64-fbsd-nat.c (aarch64_fbsd_nat_target): New class.
+	(the_aarch64_fbsd_nat_target): New.
+	(aarch64_fbsd_fetch_inferior_registers)
+	(aarch64_fbsd_store_inferior_registers): Refactor as methods of
+	aarch64_fbsd_nat_target.
+	(_initialize_aarch64_fbsd_nat): Adjust to C++ification.
+	* alpha-bsd-nat.c (alpha_bsd_nat_target): New class.
+	(the_alpha_bsd_nat_target): New.
+	(alphabsd_fetch_inferior_registers)
+	(alphabsd_store_inferior_registers): Refactor as
+	alpha_bsd_nat_target methods.
+	(_initialize_alphabsd_nat): Refactor as methods of
+	alpha_bsd_nat_target.
+	* amd64-nbsd-nat.c: Include "amd64-bsd-nat.h".
+	(the_amd64_nbsd_nat_target): New.
+	(_initialize_amd64nbsd_nat): Adjust to C++ification.
+	* amd64-obsd-nat.c: Include "amd64-bsd-nat.h".
+	(the_amd64_obsd_nat_target): New.
+	(_initialize_amd64obsd_nat): Adjust to C++ification.
+	* arm-fbsd-nat.c (arm_fbsd_nat_target): New.
+	(the_arm_fbsd_nat_target): New.
+	(arm_fbsd_fetch_inferior_registers)
+	(arm_fbsd_store_inferior_registers, arm_fbsd_read_description):
+	(_initialize_arm_fbsd_nat): Refactor as methods of
+	arm_fbsd_nat_target.
+	(_initialize_arm_fbsd_nat): Adjust to C++ification.
+	* arm-nbsd-nat.c (arm_netbsd_nat_target): New class.
+	(the_arm_netbsd_nat_target): New.
+	(armnbsd_fetch_registers, armnbsd_store_registers): Refactor as
+	arm_netbsd_nat_target.
+	(_initialize_arm_netbsd_nat): Adjust to C++ification.
+	* hppa-nbsd-nat.c (hppa_nbsd_nat_target): New class.
+	(the_hppa_nbsd_nat_target): New.
+	(hppanbsd_fetch_registers, hppanbsd_store_registers): Refactor as
+	hppa_nbsd_nat_target methods.
+	(_initialize_hppanbsd_nat): Adjust to C++ification.
+	* hppa-obsd-nat.c (hppa_obsd_nat_target): New class.
+	(the_hppa_obsd_nat_target): New.
+	(hppaobsd_fetch_registers, hppaobsd_store_registers): Refactor as
+	methods of hppa_obsd_nat_target.
+	(_initialize_hppaobsd_nat): Adjust to C++ification.  Use
+	add_target.
+	* i386-nbsd-nat.c (the_i386_nbsd_nat_target): New.
+	(_initialize_i386nbsd_nat): Adjust to C++ification.  Use
+	add_target.
+	* i386-obsd-nat.c (the_i386_obsd_nat_target): New.
+	(_initialize_i386obsd_nat): Use add_target.
+	* m68k-bsd-nat.c (m68k_bsd_nat_target): New class.
+	(the_m68k_bsd_nat_target): New.
+	(m68kbsd_fetch_inferior_registers)
+	(m68kbsd_store_inferior_registers): Refactor as methods of
+	m68k_bsd_nat_target.
+	(_initialize_m68kbsd_nat): Adjust to C++ification.
+	* mips-fbsd-nat.c (mips_fbsd_nat_target): New class.
+	(the_mips_fbsd_nat_target): New.
+	(mips_fbsd_fetch_inferior_registers)
+	(mips_fbsd_store_inferior_registers): Refactor as methods of
+	mips_fbsd_nat_target.
+	(_initialize_mips_fbsd_nat): Adjust to C++ification.  Use
+	add_target.
+	* mips-nbsd-nat.c (mips_nbsd_nat_target): New class.
+	(the_mips_nbsd_nat_target): New.
+	(mipsnbsd_fetch_inferior_registers)
+	(mipsnbsd_store_inferior_registers): Refactor as methods of
+	mips_nbsd_nat_target.
+	(_initialize_mipsnbsd_nat): Adjust to C++ification.
+	* mips64-obsd-nat.c (mips64_obsd_nat_target): New class.
+	(the_mips64_obsd_nat_target): New.
+	(mips64obsd_fetch_inferior_registers)
+	(mips64obsd_store_inferior_registers): Refactor as methods of
+	mips64_obsd_nat_target.
+	(_initialize_mips64obsd_nat): Adjust to C++ification.  Use
+	add_target.
+	* nbsd-nat.c (nbsd_pid_to_exec_file): Refactor as method of
+	nbsd_nat_target.
+	* nbsd-nat.h: Include "inf-ptrace.h".
+	(nbsd_nat_target): New class.
+	* obsd-nat.c (obsd_pid_to_str, obsd_update_thread_list)
+	(obsd_wait): Refactor as methods of obsd_nat_target.
+	(obsd_add_target): Delete.
+	* obsd-nat.h: Include "inf-ptrace.h".
+	(obsd_nat_target): New class.
+	* ppc-fbsd-nat.c (ppc_fbsd_nat_target): New class.
+	(the_ppc_fbsd_nat_target): New.
+	(ppcfbsd_fetch_inferior_registers)
+	(ppcfbsd_store_inferior_registers): Refactor as methods of
+	ppc_fbsd_nat_target.
+	(_initialize_ppcfbsd_nat): Adjust to C++ification.  Use
+	add_target.
+	* ppc-nbsd-nat.c (ppc_nbsd_nat_target): New class.
+	(the_ppc_nbsd_nat_target): New.
+	(ppcnbsd_fetch_inferior_registers)
+	(ppcnbsd_store_inferior_registers): Refactor as methods of
+	ppc_nbsd_nat_target.
+	(_initialize_ppcnbsd_nat): Adjust to C++ification.
+	* ppc-obsd-nat.c (ppc_obsd_nat_target): New class.
+	(the_ppc_obsd_nat_target): New.
+	(ppcobsd_fetch_registers, ppcobsd_store_registers): Refactor as
+	methods of ppc_obsd_nat_target.
+	(_initialize_ppcobsd_nat): Adjust to C++ification.  Use
+	add_target.
+	* sh-nbsd-nat.c (sh_nbsd_nat_target): New class.
+	(the_sh_nbsd_nat_target): New.
+	(shnbsd_fetch_inferior_registers)
+	(shnbsd_store_inferior_registers): Refactor as methods of
+	sh_nbsd_nat_target.
+	(_initialize_shnbsd_nat): Adjust to C++ification.
+	* sparc-nat.c (sparc_xfer_wcookie): Make extern.
+	(inf_ptrace_xfer_partial): Delete.
+	(sparc_xfer_partial, sparc_target): Delete.
+	* sparc-nat.h (sparc_fetch_inferior_registers)
+	(sparc_store_inferior_registers, sparc_xfer_wcookie): Declare.
+	(sparc_target): Delete function declaration.
+	(sparc_target): New template class.
+	* sparc-nbsd-nat.c (the_sparc_nbsd_nat_target): New.
+	(_initialize_sparcnbsd_nat): Adjust to C++ification.
+	* sparc64-fbsd-nat.c (the_sparc64_fbsd_nat_target): New.
+	(_initialize_sparc64fbsd_nat): Adjust to C++ification.  Use
+	add_target.
+	* sparc64-nbsd-nat.c (the_sparc64_nbsd_nat_target): New.
+	(_initialize_sparc64nbsd_nat): Adjust to C++ification.
+	* sparc64-obsd-nat.c (the_sparc64_obsd_nat_target): New.
+	(_initialize_sparc64obsd_nat): Adjust to C++ification.  Use
+	add_target.
+	* vax-bsd-nat.c (vax_bsd_nat_target): New class.
+	(the_vax_bsd_nat_target): New.
+	(vaxbsd_fetch_inferior_registers)
+	(vaxbsd_store_inferior_registers): Refactor as vax_bsd_nat_target
+	methods.
+	(_initialize_vaxbsd_nat): Adjust to C++ification.
+
+	* bsd-kvm.c (bsd_kvm_target): New class.
+	(bsd_kvm_ops): Now a bsd_kvm_target.
+	(bsd_kvm_open, bsd_kvm_close, bsd_kvm_xfer_partial)
+	(bsd_kvm_files_info, bsd_kvm_fetch_registers)
+	(bsd_kvm_thread_alive, bsd_kvm_pid_to_str): Refactor as methods of
+	bsd_kvm_target.
+	(bsd_kvm_return_one): Delete.
+	(bsd_kvm_add_target): Adjust to C++ification.
+
+	* nto-procfs.c (nto_procfs_target, nto_procfs_target_native)
+	(nto_procfs_target_procfs): New classes.
+	(procfs_open_1, procfs_thread_alive, procfs_update_thread_list)
+	(procfs_files_info, procfs_pid_to_exec_file, procfs_attach)
+	(procfs_post_attach, procfs_wait, procfs_fetch_registers)
+	(procfs_xfer_partial, procfs_detach, procfs_insert_breakpoint)
+	(procfs_remove_breakpoint, procfs_insert_hw_breakpoint)
+	(procfs_remove_hw_breakpoint, procfs_resume)
+	(procfs_mourn_inferior, procfs_create_inferior, procfs_interrupt)
+	(procfs_kill_inferior, procfs_store_registers)
+	(procfs_pass_signals, procfs_pid_to_str, procfs_can_run): Refactor
+	as methods of nto_procfs_target.
+	(nto_procfs_ops): Now an nto_procfs_target_procfs.
+	(nto_native_ops): Delete.
+	(procfs_open, procfs_native_open): Delete.
+	(nto_native_ops): Now an nto_procfs_target_native.
+	(init_procfs_targets): Adjust to C++ification.
+	(procfs_can_use_hw_breakpoint, procfs_remove_hw_watchpoint)
+	(procfs_insert_hw_watchpoint, procfs_stopped_by_watchpoint):
+	Refactor as methods of nto_procfs_target.
+
+	* go32-nat.c (go32_nat_target): New class.
+	(the_go32_nat_target): New.
+	(go32_attach, go32_resume, go32_wait, go32_fetch_registers)
+	(go32_store_registers, go32_xfer_partial, go32_files_info)
+	(go32_kill_inferior, go32_create_inferior, go32_mourn_inferior)
+	(go32_terminal_init, go32_terminal_info, go32_terminal_inferior)
+	(go32_terminal_ours, go32_pass_ctrlc, go32_thread_alive)
+	(go32_pid_to_str): Refactor as methods of go32_nat_target.
+	(go32_target): Delete.
+	(_initialize_go32_nat): Adjust to C++ification.
+
+	* gnu-nat.c (gnu_wait, gnu_resume, gnu_kill_inferior)
+	(gnu_mourn_inferior, gnu_create_inferior, gnu_attach, gnu_detach)
+	(gnu_stop, gnu_thread_alive, gnu_xfer_partial)
+	(gnu_find_memory_regions, gnu_pid_to_str): Refactor as methods of
+	gnu_nat_target.
+	(gnu_target): Delete.
+	* gnu-nat.h (gnu_target): Delete.
+	(gnu_nat_target): New class.
+	* i386-gnu-nat.c (gnu_base_target): New.
+	(i386_gnu_nat_target): New class.
+	(the_i386_gnu_nat_target): New.
+	(_initialize_i386gnu_nat): Adjust to C++ification.
+
+2018-05-02  Pedro Alves  <palves@redhat.com>
 
 	* bfd-target.c (target_bfd_xclose): Rename to ...
 	(target_bfd_close): ... this.

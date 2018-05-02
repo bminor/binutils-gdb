@@ -432,11 +432,11 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size,
   int pt_phdr_p = 0;
 
   /* Get required auxv elements from target.  */
-  if (target_auxv_search (&current_target, AT_PHDR, &at_phdr) <= 0)
+  if (target_auxv_search (target_stack, AT_PHDR, &at_phdr) <= 0)
     return 0;
-  if (target_auxv_search (&current_target, AT_PHENT, &at_phent) <= 0)
+  if (target_auxv_search (target_stack, AT_PHENT, &at_phent) <= 0)
     return 0;
-  if (target_auxv_search (&current_target, AT_PHNUM, &at_phnum) <= 0)
+  if (target_auxv_search (target_stack, AT_PHNUM, &at_phnum) <= 0)
     return 0;
   if (!at_phdr || !at_phnum)
     return 0;
@@ -1244,7 +1244,7 @@ svr4_current_sos_via_xfer_libraries (struct svr4_library_list *list,
 
   /* Fetch the list of shared libraries.  */
   gdb::optional<gdb::char_vector> svr4_library_document
-    = target_read_stralloc (&current_target, TARGET_OBJECT_LIBRARIES_SVR4,
+    = target_read_stralloc (target_stack, TARGET_OBJECT_LIBRARIES_SVR4,
 			    annex);
   if (!svr4_library_document)
     return 0;
@@ -2219,7 +2219,7 @@ enable_break (struct svr4_info *info, int from_tty)
       sym_addr = gdbarch_addr_bits_remove
 	(target_gdbarch (), gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							     sym_addr,
-							     &current_target));
+							     target_stack));
 
       /* On at least some versions of Solaris there's a dynamic relocation
 	 on _r_debug.r_brk and SYM_ADDR may not be relocated yet, e.g., if
@@ -2334,7 +2334,7 @@ enable_break (struct svr4_info *info, int from_tty)
       /* If we were not able to find the base address of the loader
          from our so_list, then try using the AT_BASE auxilliary entry.  */
       if (!load_addr_found)
-        if (target_auxv_search (&current_target, AT_BASE, &load_addr) > 0)
+	if (target_auxv_search (target_stack, AT_BASE, &load_addr) > 0)
 	  {
 	    int addr_bit = gdbarch_addr_bit (target_gdbarch ());
 
@@ -2459,7 +2459,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	  sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 	  sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							 sym_addr,
-							 &current_target);
+							 target_stack);
 	  svr4_create_solib_event_breakpoints (target_gdbarch (), sym_addr);
 	  return 1;
 	}
@@ -2476,7 +2476,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	      sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 	      sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							     sym_addr,
-							     &current_target);
+							     target_stack);
 	      svr4_create_solib_event_breakpoints (target_gdbarch (), sym_addr);
 	      return 1;
 	    }
@@ -2571,7 +2571,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
   if ((bfd_get_file_flags (exec_bfd) & DYNAMIC) == 0)
     return 0;
 
-  if (target_auxv_search (&current_target, AT_ENTRY, &entry_point) <= 0)
+  if (target_auxv_search (target_stack, AT_ENTRY, &entry_point) <= 0)
     return 0;
 
   exec_displacement = entry_point - bfd_get_start_address (exec_bfd);

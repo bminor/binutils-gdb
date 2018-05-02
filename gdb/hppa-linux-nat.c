@@ -34,6 +34,16 @@
 
 #include "hppa-tdep.h"
 
+class hppa_linux_nat_target final : public linux_nat_target
+{
+public:
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
+
+static hppa_linux_nat_target the_hppa_linux_nat_target;
+
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
@@ -262,9 +272,9 @@ store_register (const struct regcache *regcache, int regno)
    regno == -1, otherwise fetch all general registers or all floating
    point registers depending upon the value of regno.  */
 
-static void
-hppa_linux_fetch_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regno)
+void
+hppa_linux_nat_target::fetch_inferior_registers (struct regcache *regcache,
+						 int regno)
 {
   if (-1 == regno)
     {
@@ -283,9 +293,8 @@ hppa_linux_fetch_inferior_registers (struct target_ops *ops,
    regno == -1, otherwise store all general registers or all floating
    point registers depending upon the value of regno.  */
 
-static void
-hppa_linux_store_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regno)
+void
+hppa_linux_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {
@@ -380,15 +389,7 @@ fill_fpregset (const struct regcache *regcache,
 void
 _initialize_hppa_linux_nat (void)
 {
-  struct target_ops *t;
-
-  /* Fill in the generic GNU/Linux methods.  */
-  t = linux_target ();
-
-  /* Add our register access methods.  */
-  t->to_fetch_registers = hppa_linux_fetch_inferior_registers;
-  t->to_store_registers = hppa_linux_store_inferior_registers;
-
   /* Register the target.  */
-  linux_nat_add_target (t);
+  linux_target = &the_hppa_linux_nat_target;
+  add_target (&the_hppa_linux_nat_target);
 }
