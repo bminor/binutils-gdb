@@ -2344,7 +2344,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 
 			if (highval > pst->text_high ())
 			  pst->set_text_high (highval);
-			if (pst->text_low () == 0
+			if (!pst->text_low_valid
 			    || symbol.n_value < pst->text_low ())
 			  pst->set_text_low (symbol.n_value);
 		      }

@@ -2736,7 +2736,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
 			  /* Kludge for Irix 5.2 zero fh->adr.  */
 			  if (!relocatable
-			      && (pst->text_low () == 0
+			      && (!pst->text_low_valid
 				  || procaddr < pst->text_low ()))
 			    pst->set_text_low (procaddr);
 			  if (high > pst->text_high ())
@@ -3512,7 +3512,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
 		  /* Kludge for Irix 5.2 zero fh->adr.  */
 		  if (!relocatable
-		      && (pst->text_low () == 0
+		      && (!pst->text_low_valid
 			  || procaddr < pst->text_low ()))
 		    pst->set_text_low (procaddr);
 
@@ -3711,7 +3711,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
          other cases.  */
       save_pst = fdr_to_pst[f_idx].pst;
       if (save_pst != NULL
-	  && save_pst->text_low () != 0
+	  && save_pst->text_low_valid
 	  && !(objfile->flags & OBJF_REORDERED))
 	{
 	  ALL_OBJFILE_PSYMTABS (objfile, pst)
@@ -3922,7 +3922,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
   /* Do nothing if this is a dummy psymtab.  */
 
   if (pst->n_global_syms == 0 && pst->n_static_syms == 0
-      && pst->text_low () == 0 && pst->text_high () == 0)
+      && !pst->text_low_valid && !pst->text_high_valid)
     return;
 
   /* Now read the symbols for this symtab.  */

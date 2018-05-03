@@ -1,3 +1,15 @@
+2018-07-26  Tom Tromey  <tromey@redhat.com>
+
+	* dbxread.c (end_psymtab): Use text_high_valid and
+	text_low_valid.
+	* mdebugread.c (parse_partial_symbols): Use text_low_valid.
+	(psymtab_to_symtab_1): Use text_high_valid and text_low_valid.
+	* psympriv.h (struct partial_symtab) <m_text_low, m_text_high>:
+	Update comment.
+	<text_low_valid, text_high_valid>: New fields.
+	<set_text_low, set_text_high>: Update.
+	* xcoffread.c (scan_xcoff_symtab): Use text_low_valid.
+
 2018-07-26  Tom Tromey  <tom@tromey.com>
 
 	* dbxread.c (read_dbx_symtab, end_psymtab, read_ofile_symtab):

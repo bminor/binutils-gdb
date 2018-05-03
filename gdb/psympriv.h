@@ -114,12 +114,14 @@ struct partial_symtab
   void set_text_low (CORE_ADDR addr)
   {
     m_text_low = addr;
+    text_low_valid = 1;
   }
 
   /* Set the hight text address of this partial_symtab.  */
   void set_text_high (CORE_ADDR addr)
   {
     m_text_high = addr;
+    text_high_valid = 1;
   }
 
 
@@ -144,7 +146,9 @@ struct partial_symtab
   /* Range of text addresses covered by this file; texthigh is the
      beginning of the next section.  Do not use if PSYMTABS_ADDRMAP_SUPPORTED
      is set.  Do not refer directly to these fields.  Instead, use the
-     accessors.  */
+     accessors.  The validity of these fields is determined by the
+     text_low_valid and text_high_valid fields; these are located later
+     in this structure for better packing.  */
 
   CORE_ADDR m_text_low;
   CORE_ADDR m_text_high;
@@ -229,6 +233,11 @@ struct partial_symtab
   /* A flag that is temporarily used when searching psymtabs.  */
 
   ENUM_BITFIELD (psymtab_search_status) searched_flag : 2;
+
+  /* Validity of the m_text_low and m_text_high fields.  */
+
+  unsigned int text_low_valid : 1;
+  unsigned int text_high_valid : 1;
 
   /* Pointer to compunit eventually allocated for this source file, 0 if
      !readin or if we haven't looked for the symtab after it was readin.  */

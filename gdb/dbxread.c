@@ -2002,7 +2002,7 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
      a reliable texthigh by taking the address plus size of the
      last function in the file.  */
 
-  if (pst->text_high () == 0 && last_function_name
+  if (!pst->text_high_valid && last_function_name
       && gdbarch_sofun_address_maybe_missing (gdbarch))
     {
       int n;
@@ -2047,13 +2047,11 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       /* If we know our own starting text address, then walk through all other
          psymtabs for this objfile, and if any didn't know their ending text
          address, set it to our starting address.  Take care to not set our
-         own ending address to our starting address, nor to set addresses on
-         `dependency' files that have both textlow and texthigh zero.  */
+         own ending address to our starting address.  */
 
       ALL_OBJFILE_PSYMTABS (objfile, p1)
       {
-	if (p1->text_high () == 0 && p1->text_low () != 0
-	    && p1 != pst)
+	if (!p1->text_high_valid && p1->text_low_valid && p1 != pst)
 	  p1->set_text_high (pst->text_low ());
       }
     }
