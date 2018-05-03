@@ -3372,13 +3372,23 @@ amd64_supply_xsave (struct regcache *regcache, int regnum,
       && gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 64)
     {
       const gdb_byte *regs = (const gdb_byte *) xsave;
+      static const gdb_byte zero[I386_MAX_REGISTER_SIZE] = { 0 };
+      ULONGEST clear_bv;
 
-      if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
-	regcache_raw_supply (regcache, I387_FISEG_REGNUM (tdep),
-			     regs + 12);
-      if (regnum == -1 || regnum == I387_FOSEG_REGNUM (tdep))
-	regcache_raw_supply (regcache, I387_FOSEG_REGNUM (tdep),
-			     regs + 20);
+      clear_bv = i387_xsave_get_clear_bv (gdbarch, xsave);
+
+      /* If the FISEG and FOSEG registers have not been initialised yet
+	 (their CLEAR_BV bit is set) then their default values of zero will
+	 have already been setup by I387_SUPPLY_XSAVE.  */
+      if (!(clear_bv & X86_XSTATE_X87))
+	{
+	  if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
+	    regcache_raw_supply (regcache, I387_FISEG_REGNUM (tdep),
+				 regs + 12);
+	  if (regnum == -1 || regnum == I387_FOSEG_REGNUM (tdep))
+	    regcache_raw_supply (regcache, I387_FOSEG_REGNUM (tdep),
+				 regs + 20);
+	}
     }
 }
 

@@ -1,3 +1,13 @@
+2018-05-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* i387-fp.c (i387_cache_to_xsave): Only write x87 control
+	registers to the cache if their values have changed.
+	(i387_xsave_to_cache): Provide default values for x87 control
+	registers when these features are available, but disabled.
+	* regcache.c (supply_register_by_name_zeroed): New function.
+	* regcache.h (supply_register_by_name_zeroed): Declare new
+	function.
+
 2018-05-07  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.

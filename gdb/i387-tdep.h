@@ -156,6 +156,12 @@ extern void i387_collect_fxsave (const struct regcache *regcache, int regnum,
 extern void i387_collect_xsave (const struct regcache *regcache,
 				int regnum, void *xsave, int gcore);
 
+/* Extract a bitset from XSAVE indicating which features are available in
+   the inferior, but not yet initialised.  */
+
+extern ULONGEST i387_xsave_get_clear_bv (struct gdbarch *gdbarch,
+					 const void *xsave);
+
 /* Prepare the FPU stack in REGCACHE for a function return.  */
 
 extern void i387_return_value (struct gdbarch *gdbarch,

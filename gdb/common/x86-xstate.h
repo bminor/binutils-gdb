@@ -72,4 +72,17 @@
       (HAS_MPX (XCR0) ? X86_XSTATE_BNDCFG_SIZE : \
        (HAS_AVX (XCR0) ? X86_XSTATE_AVX_SIZE : X86_XSTATE_SSE_SIZE))))
 
+/* Initial value for fctrl register, as defined in the X86 manual, and
+   confirmed in the (Linux) kernel source.  When the x87 floating point
+   feature is not enabled in an inferior we use this as the value of the
+   fcrtl register.  */
+
+#define I387_FCTRL_INIT_VAL 0x037f
+
+/* Initial value for mxcsr register.  When the avx and sse floating point
+   features are not enabled in an inferior we use this as the value of the
+   mxcsr register.  */
+
+#define I387_MXCSR_INIT_VAL 0x1f80
+
 #endif /* X86_XSTATE_H */

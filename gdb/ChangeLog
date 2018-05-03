@@ -1,3 +1,20 @@
+2018-05-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* common/x86-xstate.h (I387_FCTRL_INIT_VAL): New constant.
+	(I387_MXCSR_INIT_VAL): New constant.
+	* amd64-tdep.c (amd64_supply_xsave): Only read state from xsave
+	buffer if it was supplied by the inferior.
+	* i387-tdep.c (i387_supply_fsave): Use I387_MXCSR_INIT_VAL.
+	(i387_xsave_get_clear_bv): New function.
+	(i387_supply_xsave): Only read x87 control registers from the
+	xsave buffer if the feature is enabled, and the state will have
+	been written, otherwise, provide a suitable default.
+	(i387_collect_xsave): Pre-clear all registers in xsave buffer,
+	including x87 control registers.  Update control registers if they
+	have changed from the default value, and mark features as enabled
+	as required.
+	* i387-tdep.h (i387_xsave_get_clear_bv): Declare.
+
 2018-05-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (info_spu_event_command): Fix output formatting.

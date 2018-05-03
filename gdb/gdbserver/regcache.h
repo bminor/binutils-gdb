@@ -107,6 +107,9 @@ void supply_register_zeroed (struct regcache *regcache, int n);
 void supply_register_by_name (struct regcache *regcache,
 			      const char *name, const void *buf);
 
+void supply_register_by_name_zeroed (struct regcache *regcache,
+				     const char *name);
+
 void supply_regblock (struct regcache *regcache, const void *buf);
 
 void collect_register (struct regcache *regcache, int n, void *buf);

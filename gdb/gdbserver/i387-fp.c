@@ -294,16 +294,30 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
   if (clear_bv)
     {
       if ((clear_bv & X86_XSTATE_X87))
-	for (i = 0; i < 8; i++)
-	  memset (((char *) &fp->st_space[0]) + i * 16, 0, 10);
+	{
+	  for (i = 0; i < 8; i++)
+	    memset (((char *) &fp->st_space[0]) + i * 16, 0, 10);
+
+	  fp->fioff = 0;
+	  fp->fooff = 0;
+	  fp->fctrl = I387_FCTRL_INIT_VAL;
+	  fp->fstat = 0;
+	  fp->ftag = 0;
+	  fp->fiseg = 0;
+	  fp->foseg = 0;
+	  fp->fop = 0;
+	}
 
       if ((clear_bv & X86_XSTATE_SSE))
-	for (i = 0; i < num_xmm_registers; i++) 
+	for (i = 0; i < num_xmm_registers; i++)
 	  memset (((char *) &fp->xmm_space[0]) + i * 16, 0, 16);
 
       if ((clear_bv & X86_XSTATE_AVX))
-	for (i = 0; i < num_xmm_registers; i++) 
+	for (i = 0; i < num_xmm_registers; i++)
 	  memset (((char *) &fp->ymmh_space[0]) + i * 16, 0, 16);
+
+      if ((clear_bv & X86_XSTATE_SSE) && (clear_bv & X86_XSTATE_AVX))
+	memset (((char *) &fp->mxcsr), 0, 4);
 
       if ((clear_bv & X86_XSTATE_BNDREGS))
 	for (i = 0; i < num_mpx_bnd_registers; i++)
@@ -523,43 +537,93 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	}
     }
 
+  if ((x86_xcr0 & X86_XSTATE_SSE) || (x86_xcr0 & X86_XSTATE_AVX))
+    {
+      collect_register_by_name (regcache, "mxcsr", raw);
+      if (memcmp (raw, &fp->mxcsr, 4) != 0)
+	{
+	  if (((fp->xstate_bv | xstate_bv)
+	       & (X86_XSTATE_SSE | X86_XSTATE_AVX)) == 0)
+	    xstate_bv |= X86_XSTATE_SSE;
+	  memcpy (&fp->mxcsr, raw, 4);
+	}
+    }
+
+  if (x86_xcr0 & X86_XSTATE_X87)
+    {
+      collect_register_by_name (regcache, "fioff", raw);
+      if (memcmp (raw, &fp->fioff, 4) != 0)
+	{
+	  xstate_bv |= X86_XSTATE_X87;
+	  memcpy (&fp->fioff, raw, 4);
+	}
+
+      collect_register_by_name (regcache, "fooff", raw);
+      if (memcmp (raw, &fp->fooff, 4) != 0)
+	{
+	  xstate_bv |= X86_XSTATE_X87;
+	  memcpy (&fp->fooff, raw, 4);
+	}
+
+      /* This one's 11 bits... */
+      collect_register_by_name (regcache, "fop", &val2);
+      val2 = (val2 & 0x7FF) | (fp->fop & 0xF800);
+      if (fp->fop != val2)
+	{
+	  xstate_bv |= X86_XSTATE_X87;
+	  fp->fop = val2;
+	}
+
+      /* Some registers are 16-bit.  */
+      collect_register_by_name (regcache, "fctrl", &val);
+      if (fp->fctrl != val)
+	{
+	  xstate_bv |= X86_XSTATE_X87;
+	  fp->fctrl = val;
+	}
+
+      collect_register_by_name (regcache, "fstat", &val);
+      if (fp->fstat != val)
+	{
+	  xstate_bv |= X86_XSTATE_X87;
+	  fp->fstat = val;
+	}
+
+      /* Convert to the simplifed tag form stored in fxsave data.  */
+      collect_register_by_name (regcache, "ftag", &val);
+      val &= 0xFFFF;
+      val2 = 0;
+      for (i = 7; i >= 0; i--)
+	{
+	  int tag = (val >> (i * 2)) & 3;
+
+	  if (tag != 3)
+	    val2 |= (1 << i);
+	}
+      if (fp->ftag != val2)
+	{
+	  xstate_bv |= X86_XSTATE_X87;
+	  fp->ftag = val2;
+	}
+
+      collect_register_by_name (regcache, "fiseg", &val);
+      if (fp->fiseg != val)
+	{
+	  xstate_bv |= X86_XSTATE_X87;
+	  fp->fiseg = val;
+	}
+
+      collect_register_by_name (regcache, "foseg", &val);
+      if (fp->foseg != val)
+	{
+	  xstate_bv |= X86_XSTATE_X87;
+	  fp->foseg = val;
+	}
+    }
+
   /* Update the corresponding bits in xstate_bv if any SSE/AVX
      registers are changed.  */
   fp->xstate_bv |= xstate_bv;
-
-  collect_register_by_name (regcache, "fioff", &fp->fioff);
-  collect_register_by_name (regcache, "fooff", &fp->fooff);
-  collect_register_by_name (regcache, "mxcsr", &fp->mxcsr);
-
-  /* This one's 11 bits... */
-  collect_register_by_name (regcache, "fop", &val2);
-  fp->fop = (val2 & 0x7FF) | (fp->fop & 0xF800);
-
-  /* Some registers are 16-bit.  */
-  collect_register_by_name (regcache, "fctrl", &val);
-  fp->fctrl = val;
-
-  collect_register_by_name (regcache, "fstat", &val);
-  fp->fstat = val;
-
-  /* Convert to the simplifed tag form stored in fxsave data.  */
-  collect_register_by_name (regcache, "ftag", &val);
-  val &= 0xFFFF;
-  val2 = 0;
-  for (i = 7; i >= 0; i--)
-    {
-      int tag = (val >> (i * 2)) & 3;
-
-      if (tag != 3)
-	val2 |= (1 << i);
-    }
-  fp->ftag = val2;
-
-  collect_register_by_name (regcache, "fiseg", &val);
-  fp->fiseg = val;
-
-  collect_register_by_name (regcache, "foseg", &val);
-  fp->foseg = val;
 }
 
 static int
@@ -844,39 +908,67 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
     }
 
-  supply_register_by_name (regcache, "fioff", &fp->fioff);
-  supply_register_by_name (regcache, "fooff", &fp->fooff);
-  supply_register_by_name (regcache, "mxcsr", &fp->mxcsr);
-
-  /* Some registers are 16-bit.  */
-  val = fp->fctrl & 0xFFFF;
-  supply_register_by_name (regcache, "fctrl", &val);
-
-  val = fp->fstat & 0xFFFF;
-  supply_register_by_name (regcache, "fstat", &val);
-
-  /* Generate the form of ftag data that GDB expects.  */
-  top = (fp->fstat >> 11) & 0x7;
-  val = 0;
-  for (i = 7; i >= 0; i--)
+  if ((clear_bv & (X86_XSTATE_SSE | X86_XSTATE_AVX))
+      == (X86_XSTATE_SSE | X86_XSTATE_AVX))
     {
-      int tag;
-      if (fp->ftag & (1 << i))
-	tag = i387_ftag (fxp, (i + 8 - top) % 8);
-      else
-	tag = 3;
-      val |= tag << (2 * i);
+      unsigned int default_mxcsr = I387_MXCSR_INIT_VAL;
+      supply_register_by_name (regcache, "mxcsr", &default_mxcsr);
     }
-  supply_register_by_name (regcache, "ftag", &val);
+  else
+    supply_register_by_name (regcache, "mxcsr", &fp->mxcsr);
 
-  val = fp->fiseg & 0xFFFF;
-  supply_register_by_name (regcache, "fiseg", &val);
+  if ((clear_bv & X86_XSTATE_X87) != 0)
+    {
+      supply_register_by_name_zeroed (regcache, "fioff");
+      supply_register_by_name_zeroed (regcache, "fooff");
 
-  val = fp->foseg & 0xFFFF;
-  supply_register_by_name (regcache, "foseg", &val);
+      val = I387_FCTRL_INIT_VAL;
+      supply_register_by_name (regcache, "fctrl", &val);
 
-  val = (fp->fop) & 0x7FF;
-  supply_register_by_name (regcache, "fop", &val);
+      supply_register_by_name_zeroed (regcache, "fstat");
+
+      val = 0xFFFF;
+      supply_register_by_name (regcache, "ftag", &val);
+
+      supply_register_by_name_zeroed (regcache, "fiseg");
+      supply_register_by_name_zeroed (regcache, "foseg");
+      supply_register_by_name_zeroed (regcache, "fop");
+    }
+  else
+    {
+      supply_register_by_name (regcache, "fioff", &fp->fioff);
+      supply_register_by_name (regcache, "fooff", &fp->fooff);
+
+      /* Some registers are 16-bit.  */
+      val = fp->fctrl & 0xFFFF;
+      supply_register_by_name (regcache, "fctrl", &val);
+
+      val = fp->fstat & 0xFFFF;
+      supply_register_by_name (regcache, "fstat", &val);
+
+      /* Generate the form of ftag data that GDB expects.  */
+      top = (fp->fstat >> 11) & 0x7;
+      val = 0;
+      for (i = 7; i >= 0; i--)
+	{
+	  int tag;
+	  if (fp->ftag & (1 << i))
+	    tag = i387_ftag (fxp, (i + 8 - top) % 8);
+	  else
+	    tag = 3;
+	  val |= tag << (2 * i);
+	}
+      supply_register_by_name (regcache, "ftag", &val);
+
+      val = fp->fiseg & 0xFFFF;
+      supply_register_by_name (regcache, "fiseg", &val);
+
+      val = fp->foseg & 0xFFFF;
+      supply_register_by_name (regcache, "foseg", &val);
+
+      val = (fp->fop) & 0x7FF;
+      supply_register_by_name (regcache, "fop", &val);
+    }
 }
 
 /* Default to SSE.  */

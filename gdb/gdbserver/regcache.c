@@ -346,6 +346,19 @@ supply_register_zeroed (struct regcache *regcache, int n)
 #endif
 }
 
+#ifndef IN_PROCESS_AGENT
+
+/* Supply register called NAME with value zero to REGCACHE.  */
+
+void
+supply_register_by_name_zeroed (struct regcache *regcache,
+				const char *name)
+{
+  supply_register_zeroed (regcache, find_regno (regcache->tdesc, name));
+}
+
+#endif
+
 /* Supply the whole register set whose contents are stored in BUF, to
    REGCACHE.  If BUF is NULL, all the registers' values are recorded
    as unavailable.  */
