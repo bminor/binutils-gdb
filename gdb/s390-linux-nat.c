@@ -122,9 +122,8 @@ public:
   int remove_hw_breakpoint (struct gdbarch *, struct bp_target_info *)
     override;
   int region_ok_for_hw_watchpoint (CORE_ADDR, int) override;
-  bool have_continuable_watchpoint () { return 1; }
+  bool have_continuable_watchpoint () override { return true; }
   bool stopped_by_watchpoint () override;
-  bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
   int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
 			 struct expression *) override;
   int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,

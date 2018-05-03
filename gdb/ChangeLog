@@ -1,3 +1,11 @@
+2018-05-03  Pedro Alves  <palves@redhat.com>
+
+	* s390-linux-nat.c
+	(s390_linux_nat_target::have_continuable_watchpoint): Mark with
+	override.  Write 'true' instead of '1'.
+	(s390_linux_nat_target::watchpoint_addr_within_range): Remove
+	declaration.
+
 2018-05-02  Pedro Alves  <palves@redhat.com>
 
 	* aarch64-fbsd-nat.c (_initialize_aarch64_fbsd_nat): Use
