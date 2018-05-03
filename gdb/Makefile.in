@@ -2500,7 +2500,7 @@ po/$(PACKAGE).pot: force
 	  mv $@.new $@
 %.c: %.l
 	if [ "$(FLEX)" ] && $(FLEX) --version >/dev/null 2>&1; then \
-	    $(FLEX) --stdout $<  \
+	    $(FLEX) -t $<  \
 	    | sed -e '/extern.*malloc/d' \
 	        -e '/extern.*realloc/d' \
 	        -e '/extern.*free/d' \
