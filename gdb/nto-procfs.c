@@ -424,15 +424,8 @@ nto_procfs_target::update_thread_list ()
 }
 
 static void
-do_closedir_cleanup (void *dir)
-{
-  closedir (dir);
-}
-
-static void
 procfs_pidlist (const char *args, int from_tty)
 {
-  DIR *dp = NULL;
   struct dirent *dirp = NULL;
   char buf[PATH_MAX];
   procfs_info *pidinfo = NULL;
@@ -441,13 +434,12 @@ procfs_pidlist (const char *args, int from_tty)
   pid_t num_threads = 0;
   pid_t pid;
   char name[512];
-  struct cleanup *cleanups;
   char procfs_dir[PATH_MAX];
 
   snprintf (procfs_dir, sizeof (procfs_dir), "%s%s",
 	    (nodestr != NULL) ? nodestr : "", "/proc");
 
-  dp = opendir (procfs_dir);
+  gdb_dir_up dp (opendir (procfs_dir));
   if (dp == NULL)
     {
       fprintf_unfiltered (gdb_stderr, "failed to opendir \"%s\" - %d (%s)",
@@ -455,22 +447,17 @@ procfs_pidlist (const char *args, int from_tty)
       return;
     }
 
-  cleanups = make_cleanup (do_closedir_cleanup, dp);
-
   /* Start scan at first pid.  */
-  rewinddir (dp);
+  rewinddir (dp.get ());
 
   do
     {
       /* Get the right pid and procfs path for the pid.  */
       do
 	{
-	  dirp = readdir (dp);
+	  dirp = readdir (dp.get ());
 	  if (dirp == NULL)
-	    {
-	      do_cleanups (cleanups);
-	      return;
-	    }
+	    return;
 	  snprintf (buf, sizeof (buf), "%s%s/%s/as",
 		    (nodestr != NULL) ? nodestr : "",
 		    "/proc", dirp->d_name);
@@ -521,9 +508,6 @@ procfs_pidlist (const char *args, int from_tty)
 	}
     }
   while (dirp != NULL);
-
-  do_cleanups (cleanups);
-  return;
 }
 
 static void

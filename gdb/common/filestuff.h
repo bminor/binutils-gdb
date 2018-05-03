@@ -19,6 +19,8 @@
 #ifndef FILESTUFF_H
 #define FILESTUFF_H
 
+#include <dirent.h>
+
 /* Note all the file descriptors which are open when this is called.
    These file descriptors will not be closed by close_most_fds.  */
 
@@ -83,5 +85,17 @@ extern int gdb_pipe_cloexec (int filedes[2]);
 /* Return a new cleanup that closes FD.  */
 
 extern struct cleanup *make_cleanup_close (int fd);
+
+struct gdb_dir_deleter
+{
+  void operator() (DIR *dir) const
+  {
+    closedir (dir);
+  }
+};
+
+/* A unique pointer to a DIR.  */
+
+typedef std::unique_ptr<DIR, gdb_dir_deleter> gdb_dir_up;
 
 #endif /* FILESTUFF_H */

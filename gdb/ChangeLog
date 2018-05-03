@@ -1,5 +1,14 @@
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
+	* nto-procfs.c (do_closedir_cleanup): Remove.
+	(procfs_pidlist): Use gdb_dir_up.
+	* procfs.c (do_closedir_cleanup): Remove.
+	(proc_update_threads): Use gdb_dir_up.
+	* common/filestuff.h (struct gdb_dir_deleter): New.
+	(gdb_dir_up): New typedef.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (print_mention_exception): Use std::string.
 
 2018-05-04  Tom Tromey  <tom@tromey.com>

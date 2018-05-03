@@ -1722,20 +1722,13 @@ proc_delete_dead_threads (procinfo *parent, procinfo *thread, void *ignore)
   return 0;	/* keep iterating */
 }
 
-static void
-do_closedir_cleanup (void *dir)
-{
-  closedir ((DIR *) dir);
-}
-
 static int
 proc_update_threads (procinfo *pi)
 {
   char pathname[MAX_PROC_NAME_SIZE + 16];
   struct dirent *direntry;
-  struct cleanup *old_chain = NULL;
   procinfo *thread;
-  DIR *dirp;
+  gdb_dir_up dirp;
   int lwpid;
 
   /* We should never have to apply this operation to any procinfo
@@ -1756,11 +1749,11 @@ proc_update_threads (procinfo *pi)
 
   strcpy (pathname, pi->pathname);
   strcat (pathname, "/lwp");
-  if ((dirp = opendir (pathname)) == NULL)
+  dirp.reset (opendir (pathname));
+  if (dirp == NULL)
     proc_error (pi, "update_threads, opendir", __LINE__);
 
-  old_chain = make_cleanup (do_closedir_cleanup, dirp);
-  while ((direntry = readdir (dirp)) != NULL)
+  while ((direntry = readdir (dirp.get ())) != NULL)
     if (direntry->d_name[0] != '.')		/* skip '.' and '..' */
       {
 	lwpid = atoi (&direntry->d_name[0]);
@@ -1768,7 +1761,6 @@ proc_update_threads (procinfo *pi)
 	  proc_error (pi, "update_threads, create_procinfo", __LINE__);
       }
   pi->threads_valid = 1;
-  do_cleanups (old_chain);
   return 1;
 }
 
