@@ -1143,12 +1143,12 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	      if (past_first_source_file && pst
 		  /* The gould NP1 uses low values for .o and -l symbols
 		     which are not the address.  */
-		  && nlist.n_value >= pst->textlow)
+		  && nlist.n_value >= pst->text_low ())
 		{
 		  dbx_end_psymtab (objfile, pst, psymtab_include_list,
 				   includes_used, symnum * symbol_size,
-				   nlist.n_value > pst->texthigh
-				   ? nlist.n_value : pst->texthigh,
+				   nlist.n_value > pst->text_high ()
+				   ? nlist.n_value : pst->text_high (),
 				   dependency_list, dependencies_used,
 				   textlow_not_set);
 		  pst = (struct partial_symtab *) 0;
@@ -1263,8 +1263,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		  {
 		    dbx_end_psymtab (objfile, pst, psymtab_include_list,
 				     includes_used, symnum * symbol_size,
-				     valu > pst->texthigh
-				     ? valu : pst->texthigh,
+				     (valu > pst->text_high ()
+				      ? valu : pst->text_high ()),
 				     dependency_list, dependencies_used,
 				     prev_textlow_not_set);
 		    pst = (struct partial_symtab *) 0;
@@ -1438,8 +1438,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		 function relative stabs, or the address of the function's
 		 end for old style stabs.  */
 	      valu = nlist.n_value + last_function_start;
-	      if (pst->texthigh == 0 || valu > pst->texthigh)
-		pst->texthigh = valu;
+	      if (pst->text_high () == 0 || valu > pst->text_high ())
+		pst->set_text_high (valu);
 	      break;
 	    }
 
@@ -1653,7 +1653,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	      if (pst && textlow_not_set
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
-		  pst->textlow = nlist.n_value;
+		  pst->set_text_low (nlist.n_value);
 		  textlow_not_set = 0;
 		}
 	      /* End kludge.  */
@@ -1668,12 +1668,12 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		 the partial symbol table.  */
 	      if (pst
 		  && (textlow_not_set
-		      || (nlist.n_value < pst->textlow
+		      || (nlist.n_value < pst->text_low ()
 			  && (nlist.n_value
 			      != ANOFFSET (objfile->section_offsets,
 					   SECT_OFF_TEXT (objfile))))))
 		{
-		  pst->textlow = nlist.n_value;
+		  pst->set_text_low (nlist.n_value);
 		  textlow_not_set = 0;
 		}
 	      add_psymbol_to_list (sym_name, sym_len, 1,
@@ -1722,7 +1722,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	      if (pst && textlow_not_set
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
-		  pst->textlow = nlist.n_value;
+		  pst->set_text_low (nlist.n_value);
 		  textlow_not_set = 0;
 		}
 	      /* End kludge.  */
@@ -1737,12 +1737,12 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		 the partial symbol table.  */
 	      if (pst
 		  && (textlow_not_set
-		      || (nlist.n_value < pst->textlow
+		      || (nlist.n_value < pst->text_low ()
 			  && (nlist.n_value
 			      != ANOFFSET (objfile->section_offsets,
 					   SECT_OFF_TEXT (objfile))))))
 		{
-		  pst->textlow = nlist.n_value;
+		  pst->set_text_low (nlist.n_value);
 		  textlow_not_set = 0;
 		}
 	      add_psymbol_to_list (sym_name, sym_len, 1,
@@ -1854,10 +1854,10 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	  continue;
 
 	case N_ENDM:
-	  /* Solaris 2 end of module, finish current partial symbol table.
-	     dbx_end_psymtab will set pst->texthigh to the proper value, which
-	     is necessary if a module compiled without debugging info
-	     follows this module.  */
+	  /* Solaris 2 end of module, finish current partial symbol
+	     table.  dbx_end_psymtab will set the high text address of
+	     PST to the proper value, which is necessary if a module
+	     compiled without debugging info follows this module.  */
 	  if (pst && gdbarch_sofun_address_maybe_missing (gdbarch))
 	    {
 	      dbx_end_psymtab (objfile, pst,
@@ -1918,7 +1918,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
   /* If there's stuff to be cleaned up, clean it up.  */
   if (pst)
     {
-      /* Don't set pst->texthigh lower than it already is.  */
+      /* Don't set high text address of PST lower than it already
+	 is.  */
       CORE_ADDR text_end =
 	(lowest_text_address == (CORE_ADDR) -1
 	 ? (text_addr + ANOFFSET (objfile->section_offsets,
@@ -1928,7 +1929,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 
       dbx_end_psymtab (objfile, pst, psymtab_include_list, includes_used,
 		       symnum * symbol_size,
-		       text_end > pst->texthigh ? text_end : pst->texthigh,
+		       (text_end > pst->text_high ()
+			? text_end : pst->text_high ()),
 		       dependency_list, dependencies_used, textlow_not_set);
     }
 }
@@ -1983,7 +1985,7 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 
   if (capping_symbol_offset != -1)
     LDSYMLEN (pst) = capping_symbol_offset - LDSYMOFF (pst);
-  pst->texthigh = capping_text;
+  pst->set_text_high (capping_text);
 
   /* Under Solaris, the N_SO symbols always have a value of 0,
      instead of the usual address of the .o file.  Therefore,
@@ -2000,7 +2002,7 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
      a reliable texthigh by taking the address plus size of the
      last function in the file.  */
 
-  if (pst->texthigh == 0 && last_function_name
+  if (pst->text_high () == 0 && last_function_name
       && gdbarch_sofun_address_maybe_missing (gdbarch))
     {
       int n;
@@ -2027,8 +2029,8 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 	}
 
       if (minsym.minsym)
-	pst->texthigh = (BMSYMBOL_VALUE_ADDRESS (minsym)
-			 + MSYMBOL_SIZE (minsym.minsym));
+	pst->set_text_high (BMSYMBOL_VALUE_ADDRESS (minsym)
+			    + MSYMBOL_SIZE (minsym.minsym));
 
       last_function_name = NULL;
     }
@@ -2037,7 +2039,7 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
     ;
   /* This test will be true if the last .o file is only data.  */
   else if (textlow_not_set)
-    pst->textlow = pst->texthigh;
+    pst->set_text_low (pst->text_high ());
   else
     {
       struct partial_symtab *p1;
@@ -2050,8 +2052,9 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 
       ALL_OBJFILE_PSYMTABS (objfile, p1)
       {
-	if (p1->texthigh == 0 && p1->textlow != 0 && p1 != pst)
-	  p1->texthigh = pst->textlow;
+	if (p1->text_high () == 0 && p1->text_low () != 0
+	    && p1 != pst)
+	  p1->set_text_high (pst->text_low ());
       }
     }
 
@@ -2079,9 +2082,7 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       subpst->read_symtab_private =
 	XOBNEW (&objfile->objfile_obstack, struct symloc);
       LDSYMOFF (subpst) =
-	LDSYMLEN (subpst) =
-	subpst->textlow =
-	subpst->texthigh = 0;
+	LDSYMLEN (subpst) = 0;
 
       /* We could save slight bits of space by only making one of these,
          shared by the entire set of include files.  FIXME-someday.  */
@@ -2239,8 +2240,8 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
   sym_offset = LDSYMOFF (pst);
   sym_size = LDSYMLEN (pst);
-  text_offset = pst->textlow;
-  text_size = pst->texthigh - pst->textlow;
+  text_offset = pst->text_low ();
+  text_size = pst->text_high () - pst->text_low ();
   section_offsets = objfile->section_offsets;
 
   dbxread_objfile = objfile;
@@ -2367,15 +2368,15 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	}
     }
 
-  /* In a Solaris elf file, this variable, which comes from the
-     value of the N_SO symbol, will still be 0.  Luckily, text_offset,
-     which comes from pst->textlow is correct.  */
+  /* In a Solaris elf file, this variable, which comes from the value
+     of the N_SO symbol, will still be 0.  Luckily, text_offset, which
+     comes from low text address of PST, is correct.  */
   if (get_last_source_start_addr () == 0)
     set_last_source_start_addr (text_offset);
 
   /* In reordered executables last_source_start_addr may not be the
      lower bound for this symtab, instead use text_offset which comes
-     from pst->textlow which is correct.  */
+     from the low text address of PST, which is correct.  */
   if (get_last_source_start_addr () > text_offset)
     set_last_source_start_addr (text_offset);
 

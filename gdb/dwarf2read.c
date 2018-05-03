@@ -6507,9 +6507,6 @@ dwarf2_create_include_psymtab (const char *name, struct partial_symtab *pst,
       subpst->dirname = pst->dirname;
     }
 
-  subpst->textlow = 0;
-  subpst->texthigh = 0;
-
   subpst->dependencies
     = XOBNEW (&objfile->objfile_obstack, struct partial_symtab *);
   subpst->dependencies[0] = pst;
@@ -6548,7 +6545,8 @@ dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
     return;  /* No linetable, so no includes.  */
 
   /* NOTE: pst->dirname is DW_AT_comp_dir (if present).  */
-  dwarf_decode_lines (lh.get (), pst->dirname, cu, pst, pst->textlow, 1);
+  dwarf_decode_lines (lh.get (), pst->dirname, cu, pst,
+		      pst->text_low (), 1);
 }
 
 static hashval_t
@@ -7970,8 +7968,10 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 	  best_highpc = highpc;
 	}
     }
-  pst->textlow = gdbarch_adjust_dwarf2_addr (gdbarch, best_lowpc + baseaddr);
-  pst->texthigh = gdbarch_adjust_dwarf2_addr (gdbarch, best_highpc + baseaddr);
+  pst->set_text_low (gdbarch_adjust_dwarf2_addr (gdbarch,
+						 best_lowpc + baseaddr));
+  pst->set_text_high (gdbarch_adjust_dwarf2_addr (gdbarch,
+						  best_highpc + baseaddr));
 
   end_psymtab_common (objfile, pst);
 
@@ -8008,8 +8008,8 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 			  ", %d global, %d static syms\n",
 			  per_cu->is_debug_types ? "type" : "comp",
 			  sect_offset_str (per_cu->sect_off),
-			  paddress (gdbarch, pst->textlow),
-			  paddress (gdbarch, pst->texthigh),
+			  paddress (gdbarch, pst->text_low ()),
+			  paddress (gdbarch, pst->text_high ()),
 			  pst->n_global_syms, pst->n_static_syms);
     }
 }

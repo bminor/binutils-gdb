@@ -1,3 +1,24 @@
+2018-07-26  Tom Tromey  <tom@tromey.com>
+
+	* dbxread.c (read_dbx_symtab, end_psymtab, read_ofile_symtab):
+	Update.
+	* dwarf2read.c (dwarf2_create_include_psymtab): Don't initialize
+	textlow and texthigh fields.
+	(process_psymtab_comp_unit_reader, dwarf2_build_include_psymtabs):
+	Update.
+	* mdebugread.c (parse_lines, parse_partial_symbols)
+	(psymtab_to_symtab_1): Update.
+	* psympriv.h (struct partial_symtab) <m_text_low, m_text_high>:
+	Rename fields.  Update comment.  Now private.
+	<text_low, text_high, set_text_low, set_text_high>: New methods.
+	* psymtab.c (find_pc_sect_psymtab_closer, find_pc_sect_psymtab)
+	(find_pc_sect_psymbol, relocate_psymtabs, dump_psymtab)
+	(start_psymtab_common, maintenance_info_psymtabs)
+	(maintenance_check_psymtabs): Update.
+	* xcoffread.c (xcoff_end_psymtab): Don't initialize textlow and
+	texthigh fields.
+	(scan_xcoff_symtab): Update.
+
 2018-07-26  Tom Tromey  <tromey@redhat.com>
 
 	* psympriv.h (struct partial_symbol) <unrelocated_address,

@@ -232,7 +232,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
 {
   struct partial_symtab *tpst;
   struct partial_symtab *best_pst = pst;
-  CORE_ADDR best_addr = pst->textlow;
+  CORE_ADDR best_addr = pst->text_low ();
 
   gdb_assert (!pst->psymtabs_addrmap_supported);
 
@@ -256,7 +256,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
      that is closest and still less than the given PC.  */
   for (tpst = pst; tpst != NULL; tpst = tpst->next)
     {
-      if (pc >= tpst->textlow && pc < tpst->texthigh)
+      if (pc >= tpst->text_low () && pc < tpst->text_high ())
 	{
 	  struct partial_symbol *p;
 	  CORE_ADDR this_addr;
@@ -277,7 +277,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
 	  if (p != NULL)
 	    this_addr = p->address (objfile);
 	  else
-	    this_addr = tpst->textlow;
+	    this_addr = tpst->text_low ();
 
 	  /* Check whether it is closer than our current
 	     BEST_ADDR.  Since this symbol address is
@@ -361,7 +361,7 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, pst)
     if (!pst->psymtabs_addrmap_supported
-	&& pc >= pst->textlow && pc < pst->texthigh)
+	&& pc >= pst->text_low () && pc < pst->text_high ())
       {
 	struct partial_symtab *best_pst;
 
@@ -415,7 +415,8 @@ find_pc_sect_psymbol (struct objfile *objfile,
   gdb_assert (psymtab != NULL);
 
   /* Cope with programs that start at address 0.  */
-  best_pc = (psymtab->textlow != 0) ? psymtab->textlow - 1 : 0;
+  best_pc = ((psymtab->text_low () != 0)
+	     ? psymtab->text_low () - 1 : 0);
 
   /* Search the global symbols as well as the static symbols, so that
      find_pc_partial_function doesn't use a minimal symbol and thus
@@ -428,7 +429,7 @@ find_pc_sect_psymbol (struct objfile *objfile,
 	  && p->aclass == LOC_BLOCK
 	  && pc >= p->address (objfile)
 	  && (p->address (objfile) > best_pc
-	      || (psymtab->textlow == 0
+	      || (psymtab->text_low () == 0
 		  && best_pc == 0 && p->address (objfile) == 0)))
 	{
 	  if (section != NULL)  /* Match on a specific section.  */
@@ -451,7 +452,7 @@ find_pc_sect_psymbol (struct objfile *objfile,
 	  && p->aclass == LOC_BLOCK
 	  && pc >= p->address (objfile)
 	  && (p->address (objfile) > best_pc
-	      || (psymtab->textlow == 0
+	      || (psymtab->text_low () == 0
 		  && best_pc == 0 && p->address (objfile) == 0)))
 	{
 	  if (section != NULL)  /* Match on a specific section.  */
@@ -806,8 +807,10 @@ psym_relocate (struct objfile *objfile,
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, p)
     {
-      p->textlow += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-      p->texthigh += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+      p->set_text_low (p->text_low ()
+		       + ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
+      p->set_text_high (p->text_high ()
+			+ ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
     }
 
   for (partial_symbol *psym : objfile->global_psymbols)
@@ -1012,9 +1015,9 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
     }
 
   fprintf_filtered (outfile, "  Symbols cover text addresses ");
-  fputs_filtered (paddress (gdbarch, psymtab->textlow), outfile);
+  fputs_filtered (paddress (gdbarch, psymtab->text_low ()), outfile);
   fprintf_filtered (outfile, "-");
-  fputs_filtered (paddress (gdbarch, psymtab->texthigh), outfile);
+  fputs_filtered (paddress (gdbarch, psymtab->text_high ()), outfile);
   fprintf_filtered (outfile, "\n");
   fprintf_filtered (outfile, "  Address map supported - %s.\n",
 		    psymtab->psymtabs_addrmap_supported ? "yes" : "no");
@@ -1594,8 +1597,8 @@ start_psymtab_common (struct objfile *objfile,
   struct partial_symtab *psymtab;
 
   psymtab = allocate_psymtab (filename, objfile);
-  psymtab->textlow = textlow;
-  psymtab->texthigh = psymtab->textlow;		/* default */
+  psymtab->set_text_low (textlow);
+  psymtab->set_text_high (psymtab->text_low ()); /* default */
   psymtab->globals_offset = global_psymbols.size ();
   psymtab->statics_offset = static_psymbols.size ();
   return psymtab;
@@ -2147,10 +2150,10 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
 			       psymtab->fullname
 			       ? psymtab->fullname : "(null)");
 	      printf_filtered ("    text addresses ");
-	      fputs_filtered (paddress (gdbarch, psymtab->textlow),
+	      fputs_filtered (paddress (gdbarch, psymtab->text_low ()),
 			      gdb_stdout);
 	      printf_filtered (" -- ");
-	      fputs_filtered (paddress (gdbarch, psymtab->texthigh),
+	      fputs_filtered (paddress (gdbarch, psymtab->text_high ()),
 			      gdb_stdout);
 	      printf_filtered ("\n");
 	      printf_filtered ("    psymtabs_addrmap_supported %s\n",
@@ -2230,14 +2233,14 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
     cust = ps->compunit_symtab;
 
     /* First do some checks that don't require the associated symtab.  */
-    if (ps->texthigh < ps->textlow)
+    if (ps->text_high () < ps->text_low ())
       {
 	printf_filtered ("Psymtab ");
 	puts_filtered (ps->filename);
 	printf_filtered (" covers bad range ");
-	fputs_filtered (paddress (gdbarch, ps->textlow), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->text_low ()), gdb_stdout);
 	printf_filtered (" - ");
-	fputs_filtered (paddress (gdbarch, ps->texthigh), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->text_high ()), gdb_stdout);
 	printf_filtered ("\n");
 	continue;
       }
@@ -2282,15 +2285,16 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	  }
 	psym++;
       }
-    if (ps->texthigh != 0
-	&& (ps->textlow < BLOCK_START (b) || ps->texthigh > BLOCK_END (b)))
+    if (ps->text_high () != 0
+	&& (ps->text_low () < BLOCK_START (b)
+	    || ps->text_high () > BLOCK_END (b)))
       {
 	printf_filtered ("Psymtab ");
 	puts_filtered (ps->filename);
 	printf_filtered (" covers ");
-	fputs_filtered (paddress (gdbarch, ps->textlow), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->text_low ()), gdb_stdout);
 	printf_filtered (" - ");
-	fputs_filtered (paddress (gdbarch, ps->texthigh), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->text_high ()), gdb_stdout);
 	printf_filtered (" but symtab covers only ");
 	fputs_filtered (paddress (gdbarch, BLOCK_START (b)), gdb_stdout);
 	printf_filtered (" - ");
