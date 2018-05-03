@@ -841,6 +841,10 @@ objfile_relocate1 (struct objfile *objfile,
     }
   }
 
+  /* This stores relocated addresses and so must be cleared.  This
+     will cause it to be recreated on demand.  */
+  objfile->psymbol_map.clear ();
+
   /* Relocate isolated symbols.  */
   {
     struct symbol *iter;
@@ -848,13 +852,6 @@ objfile_relocate1 (struct objfile *objfile,
     for (iter = objfile->template_symbols; iter; iter = iter->hash_next)
       relocate_one_symbol (iter, objfile, delta);
   }
-
-  if (objfile->psymtabs_addrmap)
-    addrmap_relocate (objfile->psymtabs_addrmap,
-		      ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
-
-  if (objfile->sf)
-    objfile->sf->qf->relocate (objfile, new_offsets, delta);
 
   {
     int i;

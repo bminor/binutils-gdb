@@ -62,9 +62,6 @@ static struct partial_symbol *find_pc_sect_psymbol (struct objfile *,
 						    CORE_ADDR,
 						    struct obj_section *);
 
-static void fixup_psymbol_section (struct partial_symbol *psym,
-				   struct objfile *objfile);
-
 static struct compunit_symtab *psymtab_to_symtab (struct objfile *objfile,
 						  struct partial_symtab *pst);
 
@@ -232,7 +229,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
 {
   struct partial_symtab *tpst;
   struct partial_symtab *best_pst = pst;
-  CORE_ADDR best_addr = pst->text_low ();
+  CORE_ADDR best_addr = pst->text_low (objfile);
 
   gdb_assert (!pst->psymtabs_addrmap_supported);
 
@@ -256,7 +253,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
      that is closest and still less than the given PC.  */
   for (tpst = pst; tpst != NULL; tpst = tpst->next)
     {
-      if (pc >= tpst->text_low () && pc < tpst->text_high ())
+      if (pc >= tpst->text_low (objfile) && pc < tpst->text_high (objfile))
 	{
 	  struct partial_symbol *p;
 	  CORE_ADDR this_addr;
@@ -277,7 +274,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
 	  if (p != NULL)
 	    this_addr = p->address (objfile);
 	  else
-	    this_addr = tpst->text_low ();
+	    this_addr = tpst->text_low (objfile);
 
 	  /* Check whether it is closer than our current
 	     BEST_ADDR.  Since this symbol address is
@@ -310,6 +307,8 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 		      struct bound_minimal_symbol msymbol)
 {
   struct partial_symtab *pst;
+  CORE_ADDR baseaddr = ANOFFSET (objfile->section_offsets,
+				 SECT_OFF_TEXT (objfile));
 
   /* Try just the PSYMTABS_ADDRMAP mapping first as it has better granularity
      than the later used TEXTLOW/TEXTHIGH one.  */
@@ -317,7 +316,7 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
   if (objfile->psymtabs_addrmap != NULL)
     {
       pst = ((struct partial_symtab *)
-	     addrmap_find (objfile->psymtabs_addrmap, pc));
+	     addrmap_find (objfile->psymtabs_addrmap, pc - baseaddr));
       if (pst != NULL)
 	{
 	  /* FIXME: addrmaps currently do not handle overlayed sections,
@@ -361,7 +360,7 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, pst)
     if (!pst->psymtabs_addrmap_supported
-	&& pc >= pst->text_low () && pc < pst->text_high ())
+	&& pc >= pst->text_low (objfile) && pc < pst->text_high (objfile))
       {
 	struct partial_symtab *best_pst;
 
@@ -411,12 +410,12 @@ find_pc_sect_psymbol (struct objfile *objfile,
 {
   struct partial_symbol *best = NULL;
   CORE_ADDR best_pc;
+  const CORE_ADDR textlow = psymtab->text_low (objfile);
 
   gdb_assert (psymtab != NULL);
 
   /* Cope with programs that start at address 0.  */
-  best_pc = ((psymtab->text_low () != 0)
-	     ? psymtab->text_low () - 1 : 0);
+  best_pc = (textlow != 0) ? textlow - 1 : 0;
 
   /* Search the global symbols as well as the static symbols, so that
      find_pc_partial_function doesn't use a minimal symbol and thus
@@ -429,12 +428,11 @@ find_pc_sect_psymbol (struct objfile *objfile,
 	  && p->aclass == LOC_BLOCK
 	  && pc >= p->address (objfile)
 	  && (p->address (objfile) > best_pc
-	      || (psymtab->text_low () == 0
+	      || (psymtab->text_low (objfile) == 0
 		  && best_pc == 0 && p->address (objfile) == 0)))
 	{
 	  if (section != NULL)  /* Match on a specific section.  */
 	    {
-	      fixup_psymbol_section (p, objfile);
 	      if (!matching_obj_sections (p->obj_section (objfile),
 					  section))
 		continue;
@@ -452,12 +450,11 @@ find_pc_sect_psymbol (struct objfile *objfile,
 	  && p->aclass == LOC_BLOCK
 	  && pc >= p->address (objfile)
 	  && (p->address (objfile) > best_pc
-	      || (psymtab->text_low () == 0
+	      || (psymtab->text_low (objfile) == 0
 		  && best_pc == 0 && p->address (objfile) == 0)))
 	{
 	  if (section != NULL)  /* Match on a specific section.  */
 	    {
-	      fixup_psymbol_section (p, objfile);
 	      if (!matching_obj_sections (p->obj_section (objfile),
 					  section))
 		continue;
@@ -468,35 +465,6 @@ find_pc_sect_psymbol (struct objfile *objfile,
     }
 
   return best;
-}
-
-static void
-fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
-{
-  CORE_ADDR addr;
-
-  if (psym == NULL)
-    return;
-
-  if (psym->section >= 0)
-    return;
-
-  gdb_assert (objfile);
-
-  switch (psym->aclass)
-    {
-    case LOC_STATIC:
-    case LOC_LABEL:
-    case LOC_BLOCK:
-      addr = psym->address (objfile);
-      break;
-    default:
-      /* Nothing else will be listed in the minsyms -- no use looking
-	 it up.  */
-      return;
-    }
-
-  fixup_section (psym, addr, objfile);
 }
 
 /* Psymtab version of lookup_symbol.  See its definition in
@@ -795,42 +763,6 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
   return pst->compunit_symtab;
 }
 
-/* Psymtab version of relocate.  See its definition in
-   the definition of quick_symbol_functions in symfile.h.  */
-
-static void
-psym_relocate (struct objfile *objfile,
-	       const struct section_offsets *new_offsets,
-	       const struct section_offsets *delta)
-{
-  struct partial_symtab *p;
-
-  ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, p)
-    {
-      p->set_text_low (p->text_low ()
-		       + ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
-      p->set_text_high (p->text_high ()
-			+ ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
-    }
-
-  for (partial_symbol *psym : objfile->global_psymbols)
-    {
-      fixup_psymbol_section (psym, objfile);
-      if (psym->section >= 0)
-	psym->set_address (psym->unrelocated_address ()
-			   + ANOFFSET (delta, psym->section));
-    }
-  for (partial_symbol *psym : objfile->static_psymbols)
-    {
-      fixup_psymbol_section (psym, objfile);
-      if (psym->section >= 0)
-	psym->set_address (psym->unrelocated_address ()
-			   + ANOFFSET (delta, psym->section));
-    }
-
-  objfile->psymbol_map.clear ();
-}
-
 /* Psymtab version of find_last_source_symtab.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 
@@ -1015,9 +947,9 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
     }
 
   fprintf_filtered (outfile, "  Symbols cover text addresses ");
-  fputs_filtered (paddress (gdbarch, psymtab->text_low ()), outfile);
+  fputs_filtered (paddress (gdbarch, psymtab->text_low (objfile)), outfile);
   fprintf_filtered (outfile, "-");
-  fputs_filtered (paddress (gdbarch, psymtab->text_high ()), outfile);
+  fputs_filtered (paddress (gdbarch, psymtab->text_high (objfile)), outfile);
   fprintf_filtered (outfile, "\n");
   fprintf_filtered (outfile, "  Address map supported - %s.\n",
 		    psymtab->psymtabs_addrmap_supported ? "yes" : "no");
@@ -1551,7 +1483,6 @@ const struct quick_symbol_functions psym_functions =
   psym_lookup_symbol,
   psym_print_stats,
   psym_dump,
-  psym_relocate,
   psym_expand_symtabs_for_function,
   psym_expand_all_symtabs,
   psym_expand_symtabs_with_fullname,
@@ -1598,7 +1529,7 @@ start_psymtab_common (struct objfile *objfile,
 
   psymtab = allocate_psymtab (filename, objfile);
   psymtab->set_text_low (textlow);
-  psymtab->set_text_high (psymtab->text_low ()); /* default */
+  psymtab->set_text_high (psymtab->raw_text_low ()); /* default */
   psymtab->globals_offset = global_psymbols.size ();
   psymtab->statics_offset = static_psymbols.size ();
   return psymtab;
@@ -1718,14 +1649,15 @@ static struct partial_symbol *
 add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
 		       domain_enum domain,
 		       enum address_class theclass,
+		       short section,
 		       CORE_ADDR coreaddr,
 		       enum language language, struct objfile *objfile,
 		       int *added)
 {
   struct partial_symbol psymbol;
 
-  psymbol.set_address (coreaddr);
-  psymbol.section = -1;
+  psymbol.set_unrelocated_address (coreaddr);
+  psymbol.section = section;
   psymbol.domain = domain;
   psymbol.aclass = theclass;
 
@@ -1759,6 +1691,7 @@ void
 add_psymbol_to_list (const char *name, int namelength, int copy_name,
 		     domain_enum domain,
 		     enum address_class theclass,
+		     short section,
 		     std::vector<partial_symbol *> *list,
 		     CORE_ADDR coreaddr,
 		     enum language language, struct objfile *objfile)
@@ -1769,7 +1702,7 @@ add_psymbol_to_list (const char *name, int namelength, int copy_name,
 
   /* Stash the partial symbol away in the cache.  */
   psym = add_psymbol_to_bcache (name, namelength, copy_name, domain, theclass,
-				coreaddr, language, objfile, &added);
+				section, coreaddr, language, objfile, &added);
 
   /* Do not duplicate global partial symbols.  */
   if (list == &objfile->global_psymbols
@@ -2150,10 +2083,10 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
 			       psymtab->fullname
 			       ? psymtab->fullname : "(null)");
 	      printf_filtered ("    text addresses ");
-	      fputs_filtered (paddress (gdbarch, psymtab->text_low ()),
+	      fputs_filtered (paddress (gdbarch, psymtab->text_low (objfile)),
 			      gdb_stdout);
 	      printf_filtered (" -- ");
-	      fputs_filtered (paddress (gdbarch, psymtab->text_high ()),
+	      fputs_filtered (paddress (gdbarch, psymtab->text_high (objfile)),
 			      gdb_stdout);
 	      printf_filtered ("\n");
 	      printf_filtered ("    psymtabs_addrmap_supported %s\n",
@@ -2233,14 +2166,16 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
     cust = ps->compunit_symtab;
 
     /* First do some checks that don't require the associated symtab.  */
-    if (ps->text_high () < ps->text_low ())
+    if (ps->text_high (objfile) < ps->text_low (objfile))
       {
 	printf_filtered ("Psymtab ");
 	puts_filtered (ps->filename);
 	printf_filtered (" covers bad range ");
-	fputs_filtered (paddress (gdbarch, ps->text_low ()), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->text_low (objfile)),
+			gdb_stdout);
 	printf_filtered (" - ");
-	fputs_filtered (paddress (gdbarch, ps->text_high ()), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->text_high (objfile)),
+			gdb_stdout);
 	printf_filtered ("\n");
 	continue;
       }
@@ -2285,16 +2220,18 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	  }
 	psym++;
       }
-    if (ps->text_high () != 0
-	&& (ps->text_low () < BLOCK_START (b)
-	    || ps->text_high () > BLOCK_END (b)))
+    if (ps->raw_text_high () != 0
+	&& (ps->text_low (objfile) < BLOCK_START (b)
+	    || ps->text_high (objfile) > BLOCK_END (b)))
       {
 	printf_filtered ("Psymtab ");
 	puts_filtered (ps->filename);
 	printf_filtered (" covers ");
-	fputs_filtered (paddress (gdbarch, ps->text_low ()), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->text_low (objfile)),
+			gdb_stdout);
 	printf_filtered (" - ");
-	fputs_filtered (paddress (gdbarch, ps->text_high ()), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->text_high (objfile)),
+			gdb_stdout);
 	printf_filtered (" but symtab covers only ");
 	fputs_filtered (paddress (gdbarch, BLOCK_START (b)), gdb_stdout);
 	printf_filtered (" - ");

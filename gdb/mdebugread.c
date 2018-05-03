@@ -2160,12 +2160,9 @@ parse_external (EXTR *es, int bigend, struct section_offsets *section_offsets,
    numbers can go back and forth, apparently we can live
    with that and do not need to reorder our linetables.  */
 
-static void parse_lines (FDR *, PDR *, struct linetable *, int,
-			 struct partial_symtab *, CORE_ADDR);
-
 static void
 parse_lines (FDR *fh, PDR *pr, struct linetable *lt, int maxlines,
-	     struct partial_symtab *pst, CORE_ADDR lowest_pdr_addr)
+	     CORE_ADDR textlow, CORE_ADDR lowest_pdr_addr)
 {
   unsigned char *base;
   int j, k;
@@ -2196,7 +2193,7 @@ parse_lines (FDR *fh, PDR *pr, struct linetable *lt, int maxlines,
 	halt = base + fh->cbLine;
       base += pr->cbLineOffset;
 
-      adr = pst->text_low () + pr->adr - lowest_pdr_addr;
+      adr = textlow + pr->adr - lowest_pdr_addr;
 
       l = adr >> 2;		/* in words */
       for (lineno = pr->lnLow; base < halt;)
@@ -2619,12 +2616,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       /* Determine the start address for this object file from the
          file header and relocate it, except for Irix 5.2 zero fh->adr.  */
       if (fh->cpd)
-	{
-	  textlow = fh->adr;
-	  if (relocatable || textlow != 0)
-	    textlow += ANOFFSET (objfile->section_offsets,
-				 SECT_OFF_TEXT (objfile));
-	}
+	textlow = fh->adr;
       else
 	textlow = 0;
       pst = start_psymtab_common (objfile,
@@ -2671,7 +2663,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	psymtab_language = prev_language;
       PST_PRIVATE (pst)->pst_language = psymtab_language;
 
-      pst->set_text_high (pst->text_low ());
+      pst->set_text_high (pst->raw_text_low ());
 
       /* For stabs-in-ecoff files, the second symbol must be @stab.
          This symbol is emitted by mips-tfile to signal that the
@@ -2717,8 +2709,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
                                                  mst_file_text, sh.sc,
                                                  objfile);
 			}
-		      sh.value += ANOFFSET (objfile->section_offsets,
-					    SECT_OFF_TEXT (objfile));
 		      procaddr = sh.value;
 
 		      isym = AUX_GET_ISYM (fh->fBigendian,
@@ -2737,9 +2727,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			  /* Kludge for Irix 5.2 zero fh->adr.  */
 			  if (!relocatable
 			      && (!pst->text_low_valid
-				  || procaddr < pst->text_low ()))
+				  || procaddr < pst->raw_text_low ()))
 			    pst->set_text_low (procaddr);
-			  if (high > pst->text_high ())
+			  if (high > pst->raw_text_high ())
 			    pst->set_text_high (high);
 			}
 		    }
@@ -2762,8 +2752,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
                           record_minimal_symbol (reader, namestring, sh.value,
                                                  mst_file_data, sh.sc,
                                                  objfile);
-			  sh.value += ANOFFSET (objfile->section_offsets,
-						SECT_OFF_DATA (objfile));
 			  break;
 
 			default:
@@ -2773,8 +2761,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
                           record_minimal_symbol (reader, namestring, sh.value,
                                                  mst_file_bss, sh.sc,
                                                  objfile);
-			  sh.value += ANOFFSET (objfile->section_offsets,
-						SECT_OFF_BSS (objfile));
 			  break;
 			}
 		    }
@@ -2827,22 +2813,16 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
 		  case N_TEXT | N_EXT:
 		  case N_NBTEXT | N_EXT:
-		    sh.value += ANOFFSET (objfile->section_offsets,
-					  SECT_OFF_TEXT (objfile));
 		    goto record_it;
 
 		  case N_DATA | N_EXT:
 		  case N_NBDATA | N_EXT:
-		    sh.value += ANOFFSET (objfile->section_offsets,
-					  SECT_OFF_DATA (objfile));
 		    goto record_it;
 
 		  case N_BSS:
 		  case N_BSS | N_EXT:
 		  case N_NBBSS | N_EXT:
 		  case N_SETV | N_EXT:		/* FIXME, is this in BSS?  */
-		    sh.value += ANOFFSET (objfile->section_offsets,
-					  SECT_OFF_BSS (objfile));
 		    goto record_it;
 
 		  case N_ABS | N_EXT:
@@ -2865,8 +2845,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    continue;
 
 		  case N_DATA:
-		    sh.value += ANOFFSET (objfile->section_offsets,
-					  SECT_OFF_DATA (objfile));
 		    goto record_it;
 
 		  case N_UNDF | N_EXT:
@@ -3067,27 +3045,24 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    switch (p[1])
 		      {
 		      case 'S':
-			sh.value += ANOFFSET (objfile->section_offsets,
-					      SECT_OFF_DATA (objfile));
-
 			if (gdbarch_static_transform_name_p (gdbarch))
 			  namestring = gdbarch_static_transform_name
 					 (gdbarch, namestring);
 
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_STATIC,
+					     SECT_OFF_DATA (objfile),
 					     &objfile->static_psymbols,
 					     sh.value,
 					     psymtab_language, objfile);
 			continue;
 		      case 'G':
-			sh.value += ANOFFSET (objfile->section_offsets,
-					      SECT_OFF_DATA (objfile));
 			/* The addresses in these entries are reported
 			   to be wrong.  See the code that reads 'G's
 			   for symtabs.  */
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_STATIC,
+					     SECT_OFF_DATA (objfile),
 					     &objfile->global_psymbols,
 					     sh.value,
 					     psymtab_language, objfile);
@@ -3106,6 +3081,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			  {
 			    add_psymbol_to_list (namestring, p - namestring, 1,
 						 STRUCT_DOMAIN, LOC_TYPEDEF,
+						 -1,
 						 &objfile->static_psymbols,
 						 0, psymtab_language, objfile);
 			    if (p[2] == 't')
@@ -3114,6 +3090,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				add_psymbol_to_list (namestring,
 						     p - namestring, 1,
 						     VAR_DOMAIN, LOC_TYPEDEF,
+						     -1,
 						     &objfile->static_psymbols,
 						     0, psymtab_language,
 						     objfile);
@@ -3127,6 +3104,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			  {
 			    add_psymbol_to_list (namestring, p - namestring, 1,
 						 VAR_DOMAIN, LOC_TYPEDEF,
+						 -1,
 						 &objfile->static_psymbols,
 						 0, psymtab_language, objfile);
 			  }
@@ -3191,6 +3169,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				   symtabs.  */
 				add_psymbol_to_list (p, q - p, 1,
 						     VAR_DOMAIN, LOC_CONST,
+						     -1,
 						     &objfile->static_psymbols,
 						     0, psymtab_language,
 						     objfile);
@@ -3208,7 +3187,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		      case 'c':
 			/* Constant, e.g. from "const" in Pascal.  */
 			add_psymbol_to_list (namestring, p - namestring, 1,
-					     VAR_DOMAIN, LOC_CONST,
+					     VAR_DOMAIN, LOC_CONST, -1,
 					     &objfile->static_psymbols,
 					     0, psymtab_language, objfile);
 			continue;
@@ -3224,10 +3203,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			    function_outside_compilation_unit_complaint (name);
 			    xfree (name);
 			  }
-			sh.value += ANOFFSET (objfile->section_offsets,
-					      SECT_OFF_TEXT (objfile));
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_BLOCK,
+					     SECT_OFF_TEXT (objfile),
 					     &objfile->static_psymbols,
 					     sh.value,
 					     psymtab_language, objfile);
@@ -3248,10 +3226,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			    function_outside_compilation_unit_complaint (name);
 			    xfree (name);
 			  }
-			sh.value += ANOFFSET (objfile->section_offsets,
-					      SECT_OFF_TEXT (objfile));
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_BLOCK,
+					     SECT_OFF_TEXT (objfile),
 					     &objfile->global_psymbols,
 					     sh.value,
 					     psymtab_language, objfile);
@@ -3323,7 +3300,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    continue;
 
 		  case N_RBRAC:
-		    if (sh.value > save_pst->text_high ())
+		    if (sh.value > save_pst->raw_text_high ())
 		      save_pst->set_text_high (sh.value);
 		    continue;
 		  case N_EINCL:
@@ -3379,6 +3356,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	      char *name;
 	      enum address_class theclass;
 	      CORE_ADDR minsym_value;
+	      short section = -1;
 
 	      (*swap_sym_in) (cur_bfd,
 			      ((char *) debug_info->external_sym
@@ -3413,21 +3391,18 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  /* The value of a stEnd symbol is the displacement from the
 		     corresponding start symbol value, do not relocate it.  */
 		  if (sh.st != stEnd)
-		    sh.value += ANOFFSET (objfile->section_offsets,
-					  SECT_OFF_TEXT (objfile));
+		    section = SECT_OFF_TEXT (objfile);
 		  break;
 		case scData:
 		case scSData:
 		case scRData:
 		case scPData:
 		case scXData:
-		  sh.value += ANOFFSET (objfile->section_offsets,
-					SECT_OFF_DATA (objfile));
+		  section = SECT_OFF_DATA (objfile);
 		  break;
 		case scBss:
 		case scSBss:
-		  sh.value += ANOFFSET (objfile->section_offsets,
-					SECT_OFF_BSS (objfile));
+		  section = SECT_OFF_BSS (objfile);
 		  break;
 		}
 
@@ -3491,11 +3466,13 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  if (sh.st == stProc)
 		    add_psymbol_to_list (name, strlen (name), 1,
 					 VAR_DOMAIN, LOC_BLOCK,
+					 section,
 					 &objfile->global_psymbols,
 					 sh.value, psymtab_language, objfile);
 		  else
 		    add_psymbol_to_list (name, strlen (name), 1,
 					 VAR_DOMAIN, LOC_BLOCK,
+					 section,
 					 &objfile->static_psymbols,
 					 sh.value, psymtab_language, objfile);
 
@@ -3513,11 +3490,11 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  /* Kludge for Irix 5.2 zero fh->adr.  */
 		  if (!relocatable
 		      && (!pst->text_low_valid
-			  || procaddr < pst->text_low ()))
+			  || procaddr < pst->raw_text_low ()))
 		    pst->set_text_low (procaddr);
 
 		  high = procaddr + sh.value;
-		  if (high > pst->text_high ())
+		  if (high > pst->raw_text_high ())
 		    pst->set_text_high (high);
 		  continue;
 
@@ -3561,7 +3538,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		      && sh.index != cur_sdx + 2)
 		    {
 		      add_psymbol_to_list (name, strlen (name), 1,
-					   STRUCT_DOMAIN, LOC_TYPEDEF,
+					   STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 					   &objfile->static_psymbols,
 					   0, psymtab_language, objfile);
 		    }
@@ -3600,7 +3577,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		}
 	      /* Use this gdb symbol.  */
 	      add_psymbol_to_list (name, strlen (name), 1,
-				   VAR_DOMAIN, theclass,
+				   VAR_DOMAIN, theclass, section,
 				   &objfile->static_psymbols,
 				   sh.value, psymtab_language, objfile);
 	    skip:
@@ -3618,6 +3595,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	      SYMR *psh;
 	      char *name;
 	      CORE_ADDR svalue;
+	      short section;
 
 	      if (ext_ptr->ifd != f_idx)
 		internal_error (__FILE__, __LINE__,
@@ -3631,23 +3609,21 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	      svalue = psh->value;
 	      switch (psh->sc)
 		{
+		default:
 		case scText:
 		case scRConst:
-		  svalue += ANOFFSET (objfile->section_offsets,
-				      SECT_OFF_TEXT (objfile));
+		  section = SECT_OFF_TEXT (objfile);
 		  break;
 		case scData:
 		case scSData:
 		case scRData:
 		case scPData:
 		case scXData:
-		  svalue += ANOFFSET (objfile->section_offsets,
-				      SECT_OFF_DATA (objfile));
+		  section = SECT_OFF_DATA (objfile);
 		  break;
 		case scBss:
 		case scSBss:
-		  svalue += ANOFFSET (objfile->section_offsets,
-				      SECT_OFF_BSS (objfile));
+		  section = SECT_OFF_BSS (objfile);
 		  break;
 		}
 
@@ -3682,6 +3658,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	      name = debug_info->ssext + psh->iss;
 	      add_psymbol_to_list (name, strlen (name), 1,
 				   VAR_DOMAIN, theclass,
+				   section,
 				   &objfile->global_psymbols,
 				   svalue, psymtab_language, objfile);
 	    }
@@ -3692,7 +3669,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       fdr_to_pst[f_idx].pst
 	= dbx_end_psymtab (objfile, save_pst,
 			   psymtab_include_list, includes_used,
-			   -1, save_pst->text_high (),
+			   -1, save_pst->raw_text_high (),
 			   dependency_list, dependencies_used,
 			   textlow_not_set);
       includes_used = 0;
@@ -3717,9 +3694,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	  ALL_OBJFILE_PSYMTABS (objfile, pst)
 	  {
 	    if (save_pst != pst
-		&& save_pst->text_low () >= pst->text_low ()
-		&& save_pst->text_low () < pst->text_high ()
-		&& save_pst->text_high () > pst->text_high ())
+		&& save_pst->raw_text_low () >= pst->raw_text_low ()
+		&& save_pst->raw_text_low () < pst->raw_text_high ()
+		&& save_pst->raw_text_high () > pst->raw_text_high ())
 	      {
 		objfile->flags |= OBJF_REORDERED;
 		break;
@@ -3842,9 +3819,9 @@ handle_psymbol_enumerators (struct objfile *objfile, FDR *fh, int stype,
       /* Note that the value doesn't matter for enum constants
          in psymtabs, just in symtabs.  */
       add_psymbol_to_list (name, strlen (name), 1,
-			   VAR_DOMAIN, LOC_CONST,
-			   &objfile->static_psymbols,
-			   0, psymtab_language, objfile);
+			   VAR_DOMAIN, LOC_CONST, -1,
+			   &objfile->static_psymbols, 0,
+			   psymtab_language, objfile);
       ext_sym += external_sym_size;
     }
 }
@@ -4071,7 +4048,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 
       if (! last_symtab_ended)
 	{
-	  cust = end_symtab (pst->text_high (), SECT_OFF_TEXT (objfile));
+	  cust = end_symtab (pst->raw_text_high (), SECT_OFF_TEXT (objfile));
 	  end_stabs ();
 	}
 
@@ -4147,7 +4124,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
       top_stack->cur_st = COMPUNIT_FILETABS (cust);
       top_stack->cur_block
 	= BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), STATIC_BLOCK);
-      BLOCK_START (top_stack->cur_block) = pst->text_low ();
+      BLOCK_START (top_stack->cur_block) = pst->text_low (objfile);
       BLOCK_END (top_stack->cur_block) = 0;
       top_stack->blocktype = stFile;
       top_stack->cur_type = 0;
@@ -4208,7 +4185,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 		}
 
 	      parse_lines (fh, pr_block.data (), lines, maxlines,
-			   pst, lowest_pdr_addr);
+			   pst->text_low (objfile), lowest_pdr_addr);
 	      if (lines->nitems < fh->cline)
 		lines = shrink_linetable (lines);
 

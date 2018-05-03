@@ -191,12 +191,6 @@ struct quick_symbol_functions
      gdb_stdout.  This is used for "maint print objfiles".  */
   void (*dump) (struct objfile *objfile);
 
-  /* This is called by objfile_relocate to relocate any indices loaded
-     for OBJFILE.  */
-  void (*relocate) (struct objfile *objfile,
-		    const struct section_offsets *new_offsets,
-		    const struct section_offsets *delta);
-
   /* Find all the symbols in OBJFILE named FUNC_NAME, and ensure that
      the corresponding symbol tables are loaded.  */
   void (*expand_symtabs_for_function) (struct objfile *objfile,

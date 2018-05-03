@@ -427,12 +427,8 @@ static void
 add_address_entry (struct objfile *objfile, data_buf &addr_vec,
 		   CORE_ADDR start, CORE_ADDR end, unsigned int cu_index)
 {
-  CORE_ADDR baseaddr;
-
-  baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-
-  addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, start - baseaddr);
-  addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, end - baseaddr);
+  addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, start);
+  addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, end);
   addr_vec.append_data (MAYBE_SWAP (cu_index));
 }
 

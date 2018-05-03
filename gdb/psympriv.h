@@ -54,12 +54,12 @@ struct partial_symbol : public general_symbol_info
      the offsets provided in OBJFILE.  */
   CORE_ADDR address (const struct objfile *objfile) const
   {
-    return value.address;
+    return value.address + ANOFFSET (objfile->section_offsets, section);
   }
 
   /* Set the address of this partial symbol.  The address must be
      unrelocated.  */
-  void set_address (CORE_ADDR addr)
+  void set_unrelocated_address (CORE_ADDR addr)
   {
     value.address = addr;
   }
@@ -98,16 +98,30 @@ enum psymtab_search_status
 
 struct partial_symtab
 {
-  /* Return the low text address of this partial_symtab.  */
-  CORE_ADDR text_low () const
+  /* Return the raw low text address of this partial_symtab.  */
+  CORE_ADDR raw_text_low () const
   {
     return m_text_low;
   }
 
-  /* Return the high text address of this partial_symtab.  */
-  CORE_ADDR text_high () const
+  /* Return the raw high text address of this partial_symtab.  */
+  CORE_ADDR raw_text_high () const
   {
     return m_text_high;
+  }
+
+  /* Return the relocated low text address of this partial_symtab.  */
+  CORE_ADDR text_low (struct objfile *objfile) const
+  {
+    return m_text_low + ANOFFSET (objfile->section_offsets,
+				  SECT_OFF_TEXT (objfile));
+  }
+
+  /* Return the relocated high text address of this partial_symtab.  */
+  CORE_ADDR text_high (struct objfile *objfile) const
+  {
+    return m_text_high + ANOFFSET (objfile->section_offsets,
+				   SECT_OFF_TEXT (objfile));
   }
 
   /* Set the low text address of this partial_symtab.  */
@@ -262,6 +276,7 @@ struct partial_symtab
 extern void add_psymbol_to_list (const char *, int,
 				 int, domain_enum,
 				 enum address_class,
+				 short /* section */,
 				 std::vector<partial_symbol *> *,
 				 CORE_ADDR,
 				 enum language, struct objfile *);
