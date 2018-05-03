@@ -1,3 +1,7 @@
+2018-07-26  Tom Tromey  <tromey@redhat.com>
+
+	* dbxread.c (end_psymtab): Remove dead code.
+
 2018-07-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2-frame-tailcall.c (tailcall_frame_sniffer): Exit early if

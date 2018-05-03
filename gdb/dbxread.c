@@ -2051,13 +2051,7 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       ALL_OBJFILE_PSYMTABS (objfile, p1)
       {
 	if (p1->texthigh == 0 && p1->textlow != 0 && p1 != pst)
-	  {
-	    p1->texthigh = pst->textlow;
-	    /* If this file has only data, then make textlow match
-	       texthigh.  */
-	    if (p1->textlow == 0)
-	      p1->textlow = p1->texthigh;
-	  }
+	  p1->texthigh = pst->textlow;
       }
     }
 
