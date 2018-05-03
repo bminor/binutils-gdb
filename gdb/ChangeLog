@@ -1,3 +1,19 @@
+2018-07-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf-index-write.c (write_psymbols, debug_names::insert)
+	(debug_names::write_psymbols): Update.
+	* psympriv.h (struct partial_symbol): Derive from
+	general_symbol_info.
+	<obj_section>: New method.
+	(PSYMBOL_DOMAIN, PSYMBOL_CLASS): Remove.n
+	* psymtab.c (find_pc_sect_psymtab_closer, find_pc_sect_psymtab)
+	(find_pc_sect_psymbol, fixup_psymbol_section)
+	(match_partial_symbol, lookup_partial_symbol, relocate_psymtabs)
+	(print_partial_symbols, recursively_search_psymtabs)
+	(compare_psymbols, psymbol_hash, psymbol_compare)
+	(add_psymbol_to_bcache, maintenance_check_psymtabs)
+	(psymbol_name_matches, psym_fill_psymbol_map): Update.
+
 2018-07-26  Tom Tromey  <tromey@redhat.com>
 
 	* dbxread.c (end_psymtab): Remove dead code.

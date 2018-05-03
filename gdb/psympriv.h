@@ -33,11 +33,16 @@
 /* This structure is space critical.  See space comments at the top of
    symtab.h.  */
 
-struct partial_symbol
+struct partial_symbol : public general_symbol_info
 {
-  /* The general symbol info required for all types of symbols.  */
-
-  struct general_symbol_info ginfo;
+  /* Return the section for this partial symbol, or nullptr if no
+     section has been set.  */
+  struct obj_section *obj_section (struct objfile *objfile) const
+  {
+    if (section >= 0)
+      return &objfile->sections[section];
+    return nullptr;
+  }
 
   /* Name space code.  */
 
@@ -49,9 +54,6 @@ struct partial_symbol
 
   ENUM_BITFIELD(address_class) aclass : SYMBOL_ACLASS_BITS;
 };
-
-#define PSYMBOL_DOMAIN(psymbol)	(psymbol)->domain
-#define PSYMBOL_CLASS(psymbol)		(psymbol)->aclass
 
 /* A convenience enum to give names to some constants used when
    searching psymtabs.  This is internal to psymtab and should not be
