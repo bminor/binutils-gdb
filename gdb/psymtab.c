@@ -267,7 +267,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
 	     object's symbol table.  */
 	  p = find_pc_sect_psymbol (objfile, tpst, pc, section);
 	  if (p != NULL
-	      && (p->value.address == BMSYMBOL_VALUE_ADDRESS (msymbol)))
+	      && (p->address (objfile) == BMSYMBOL_VALUE_ADDRESS (msymbol)))
 	    return tpst;
 
 	  /* Also accept the textlow value of a psymtab as a
@@ -275,7 +275,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
 	     symbol tables with line information but no debug
 	     symbols (e.g. those produced by an assembler).  */
 	  if (p != NULL)
-	    this_addr = p->value.address;
+	    this_addr = p->address (objfile);
 	  else
 	    this_addr = tpst->textlow;
 
@@ -333,7 +333,8 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 		 object's symbol table.  */
 	      p = find_pc_sect_psymbol (objfile, pst, pc, section);
 	      if (p == NULL
-		  || (p->value.address != BMSYMBOL_VALUE_ADDRESS (msymbol)))
+		  || (p->address (objfile)
+		      != BMSYMBOL_VALUE_ADDRESS (msymbol)))
 		goto next;
 	    }
 
@@ -425,10 +426,10 @@ find_pc_sect_psymbol (struct objfile *objfile,
 
       if (p->domain == VAR_DOMAIN
 	  && p->aclass == LOC_BLOCK
-	  && pc >= p->value.address
-	  && (p->value.address > best_pc
+	  && pc >= p->address (objfile)
+	  && (p->address (objfile) > best_pc
 	      || (psymtab->textlow == 0
-		  && best_pc == 0 && p->value.address == 0)))
+		  && best_pc == 0 && p->address (objfile) == 0)))
 	{
 	  if (section != NULL)  /* Match on a specific section.  */
 	    {
@@ -437,7 +438,7 @@ find_pc_sect_psymbol (struct objfile *objfile,
 					  section))
 		continue;
 	    }
-	  best_pc = p->value.address;
+	  best_pc = p->address (objfile);
 	  best = p;
 	}
     }
@@ -448,10 +449,10 @@ find_pc_sect_psymbol (struct objfile *objfile,
 
       if (p->domain == VAR_DOMAIN
 	  && p->aclass == LOC_BLOCK
-	  && pc >= p->value.address
-	  && (p->value.address > best_pc
+	  && pc >= p->address (objfile)
+	  && (p->address (objfile) > best_pc
 	      || (psymtab->textlow == 0
-		  && best_pc == 0 && p->value.address == 0)))
+		  && best_pc == 0 && p->address (objfile) == 0)))
 	{
 	  if (section != NULL)  /* Match on a specific section.  */
 	    {
@@ -460,7 +461,7 @@ find_pc_sect_psymbol (struct objfile *objfile,
 					  section))
 		continue;
 	    }
-	  best_pc = p->value.address;
+	  best_pc = p->address (objfile);
 	  best = p;
 	}
     }
@@ -486,7 +487,7 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
     case LOC_STATIC:
     case LOC_LABEL:
     case LOC_BLOCK:
-      addr = psym->value.address;
+      addr = psym->address (objfile);
       break;
     default:
       /* Nothing else will be listed in the minsyms -- no use looking
@@ -813,13 +814,15 @@ psym_relocate (struct objfile *objfile,
     {
       fixup_psymbol_section (psym, objfile);
       if (psym->section >= 0)
-	psym->value.address += ANOFFSET (delta, psym->section);
+	psym->set_address (psym->unrelocated_address ()
+			   + ANOFFSET (delta, psym->section));
     }
   for (partial_symbol *psym : objfile->static_psymbols)
     {
       fixup_psymbol_section (psym, objfile);
       if (psym->section >= 0)
-	psym->value.address += ANOFFSET (delta, psym->section);
+	psym->set_address (psym->unrelocated_address ()
+			   + ANOFFSET (delta, psym->section));
     }
 
   objfile->psymbol_map.clear ();
@@ -883,7 +886,7 @@ psym_forget_cached_source_info (struct objfile *objfile)
 }
 
 static void
-print_partial_symbols (struct gdbarch *gdbarch,
+print_partial_symbols (struct gdbarch *gdbarch, struct objfile *objfile,
 		       struct partial_symbol **p, int count, const char *what,
 		       struct ui_file *outfile)
 {
@@ -967,7 +970,7 @@ print_partial_symbols (struct gdbarch *gdbarch,
 	  break;
 	}
       fputs_filtered (", ", outfile);
-      fputs_filtered (paddress (gdbarch, (*p)->value.address), outfile);
+      fputs_filtered (paddress (gdbarch, (*p)->unrelocated_address ()), outfile);
       fprintf_filtered (outfile, "\n");
       p++;
     }
@@ -1032,13 +1035,13 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
     }
   if (psymtab->n_global_syms > 0)
     {
-      print_partial_symbols (gdbarch,
+      print_partial_symbols (gdbarch, objfile,
 			     &objfile->global_psymbols[psymtab->globals_offset],
 			     psymtab->n_global_syms, "Global", outfile);
     }
   if (psymtab->n_static_syms > 0)
     {
-      print_partial_symbols (gdbarch,
+      print_partial_symbols (gdbarch, objfile,
 			     &objfile->static_psymbols[psymtab->statics_offset],
 			     psymtab->n_static_syms, "Static", outfile);
     }
@@ -1475,7 +1478,7 @@ psym_fill_psymbol_map (struct objfile *objfile,
 
       if (psym->aclass == LOC_STATIC)
 	{
-	  CORE_ADDR addr = psym->value.address;
+	  CORE_ADDR addr = psym->address (objfile);
 	  if (seen_addrs->find (addr) == seen_addrs->end ())
 	    {
 	      seen_addrs->insert (addr);
@@ -1718,7 +1721,7 @@ add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
 {
   struct partial_symbol psymbol;
 
-  psymbol.value.address = coreaddr;
+  psymbol.set_address (coreaddr);
   psymbol.section = -1;
   psymbol.domain = domain;
   psymbol.aclass = theclass;

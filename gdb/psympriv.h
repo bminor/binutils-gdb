@@ -44,6 +44,26 @@ struct partial_symbol : public general_symbol_info
     return nullptr;
   }
 
+  /* Return the unrelocated address of this partial symbol.  */
+  CORE_ADDR unrelocated_address () const
+  {
+    return value.address;
+  }
+
+  /* Return the address of this partial symbol, relocated according to
+     the offsets provided in OBJFILE.  */
+  CORE_ADDR address (const struct objfile *objfile) const
+  {
+    return value.address;
+  }
+
+  /* Set the address of this partial symbol.  The address must be
+     unrelocated.  */
+  void set_address (CORE_ADDR addr)
+  {
+    value.address = addr;
+  }
+
   /* Name space code.  */
 
   ENUM_BITFIELD(domain_enum_tag) domain : SYMBOL_DOMAIN_BITS;
