@@ -2903,12 +2903,6 @@ mips_elf_output_extsym (struct mips_elf_link_hash_entry *h, void *data)
 	      h->esym.asym.value =
 		mips_elf_hash_table (einfo->info)->procedure_count;
 	    }
-	  else if (strcmp (name, "_gp_disp") == 0 && ! NEWABI_P (einfo->abfd))
-	    {
-	      h->esym.asym.sc = scAbs;
-	      h->esym.asym.st = stLabel;
-	      h->esym.asym.value = elf_gp (einfo->abfd);
-	    }
 	  else
 	    h->esym.asym.sc = scUndefined;
 	}
@@ -10975,12 +10969,6 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
       sym->st_shndx = SHN_ABS;
       sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
       sym->st_value = 1;
-    }
-  else if (strcmp (name, "_gp_disp") == 0 && ! NEWABI_P (output_bfd))
-    {
-      sym->st_shndx = SHN_ABS;
-      sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
-      sym->st_value = elf_gp (output_bfd);
     }
   else if (SGI_COMPAT (output_bfd))
     {

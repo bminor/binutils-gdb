@@ -1,3 +1,11 @@
+2018-05-03  Simon Atanasyan  <simon@atanasyan.com>
+
+	* elf32-mips.c: (elf32_mips_fixup_symbol): New function.
+	(elf_backend_fixup_symbol): New macro.
+	* elfxx-mips.c: (mips_elf_output_extsym): Discard _gp_disp
+	handling.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+
 2018-04-30  Francois H. Theron <francois.theron@netronome.com>
 
 	* Makefile.am: Added NFP files to build.

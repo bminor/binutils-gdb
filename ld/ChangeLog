@@ -1,3 +1,16 @@
+2018-05-03  Simon Atanasyan  <simon@atanasyan.com>
+
+	* testsuite/ld-mips-elf/gp-disp-sym.d: New test.
+	* testsuite/ld-mips-elf/gp-disp-sym.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+	* testsuite/ld-mips-elf/mips16-pic-2.ad: Update for _gp_disp
+	symbol removal.
+	* testsuite/ld-mips-elf/mips16-pic-2.nd: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-3a.dd: Likewise.
+	* testsuite/ld-mips-elf/tlslib-o32-hidden.got: Likewise.
+	* testsuite/ld-mips-elf/tlslib-o32-ver.got: Likewise.
+	* testsuite/ld-mips-elf/tlslib-o32.got: Likewise.
+
 2018-04-27  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/ld-mips-elf/bal-jalx-pic.d: Only run for

@@ -2420,6 +2420,17 @@ elf32_mips_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
       }
     }
 }
+
+/* Remove the magic _gp_disp symbol from the symbol tables.  */
+
+static bfd_boolean
+elf32_mips_fixup_symbol (struct bfd_link_info *info,
+			 struct elf_link_hash_entry *h)
+{
+  if (strcmp (h->root.root.string, "_gp_disp") == 0)
+    _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
+  return TRUE;
+}
 
 /* Depending on the target vector we generate some version of Irix
    executables or "normal" MIPS ELF ABI executables.  */
@@ -2523,6 +2534,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define elf_backend_gc_mark_hook	_bfd_mips_elf_gc_mark_hook
 #define elf_backend_copy_indirect_symbol \
 					_bfd_mips_elf_copy_indirect_symbol
+#define elf_backend_fixup_symbol	elf32_mips_fixup_symbol
 #define elf_backend_grok_prstatus	elf32_mips_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_mips_grok_psinfo
 #define elf_backend_ecoff_debug_swap	&mips_elf32_ecoff_debug_swap
