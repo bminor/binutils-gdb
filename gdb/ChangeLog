@@ -1,3 +1,8 @@
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
+	* remote.c (remote_query_supported_append): Change type.
+	(remote_check_symbols): Update.
+
 2018-05-04  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/11420

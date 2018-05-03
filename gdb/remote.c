@@ -4957,13 +4957,12 @@ register_remote_support_xml (const char *xml)
 #endif
 }
 
-static char *
-remote_query_supported_append (char *msg, const char *append)
+static void
+remote_query_supported_append (std::string *msg, const char *append)
 {
-  if (msg)
-    return reconcat (msg, msg, ";", append, (char *) NULL);
-  else
-    return xstrdup (append);
+  if (!msg->empty ())
+    msg->append (";");
+  msg->append (append);
 }
 
 static void
@@ -4984,48 +4983,45 @@ remote_query_supported (void)
   rs->buf[0] = 0;
   if (packet_support (PACKET_qSupported) != PACKET_DISABLE)
     {
-      char *q = NULL;
-      struct cleanup *old_chain = make_cleanup (free_current_contents, &q);
+      std::string q;
 
       if (packet_set_cmd_state (PACKET_multiprocess_feature) != AUTO_BOOLEAN_FALSE)
-	q = remote_query_supported_append (q, "multiprocess+");
+	remote_query_supported_append (&q, "multiprocess+");
 
       if (packet_set_cmd_state (PACKET_swbreak_feature) != AUTO_BOOLEAN_FALSE)
-	q = remote_query_supported_append (q, "swbreak+");
+	remote_query_supported_append (&q, "swbreak+");
       if (packet_set_cmd_state (PACKET_hwbreak_feature) != AUTO_BOOLEAN_FALSE)
-	q = remote_query_supported_append (q, "hwbreak+");
+	remote_query_supported_append (&q, "hwbreak+");
 
-      q = remote_query_supported_append (q, "qRelocInsn+");
+      remote_query_supported_append (&q, "qRelocInsn+");
 
       if (packet_set_cmd_state (PACKET_fork_event_feature)
 	  != AUTO_BOOLEAN_FALSE)
-	q = remote_query_supported_append (q, "fork-events+");
+	remote_query_supported_append (&q, "fork-events+");
       if (packet_set_cmd_state (PACKET_vfork_event_feature)
 	  != AUTO_BOOLEAN_FALSE)
-	q = remote_query_supported_append (q, "vfork-events+");
+	remote_query_supported_append (&q, "vfork-events+");
       if (packet_set_cmd_state (PACKET_exec_event_feature)
 	  != AUTO_BOOLEAN_FALSE)
-	q = remote_query_supported_append (q, "exec-events+");
+	remote_query_supported_append (&q, "exec-events+");
 
       if (packet_set_cmd_state (PACKET_vContSupported) != AUTO_BOOLEAN_FALSE)
-	q = remote_query_supported_append (q, "vContSupported+");
+	remote_query_supported_append (&q, "vContSupported+");
 
       if (packet_set_cmd_state (PACKET_QThreadEvents) != AUTO_BOOLEAN_FALSE)
-	q = remote_query_supported_append (q, "QThreadEvents+");
+	remote_query_supported_append (&q, "QThreadEvents+");
 
       if (packet_set_cmd_state (PACKET_no_resumed) != AUTO_BOOLEAN_FALSE)
-	q = remote_query_supported_append (q, "no-resumed+");
+	remote_query_supported_append (&q, "no-resumed+");
 
       /* Keep this one last to work around a gdbserver <= 7.10 bug in
 	 the qSupported:xmlRegisters=i386 handling.  */
       if (remote_support_xml != NULL
 	  && packet_support (PACKET_qXfer_features) != PACKET_DISABLE)
-	q = remote_query_supported_append (q, remote_support_xml);
+	remote_query_supported_append (&q, remote_support_xml);
 
-      q = reconcat (q, "qSupported:", q, (char *) NULL);
-      putpkt (q);
-
-      do_cleanups (old_chain);
+      q = "qSupported:" + q;
+      putpkt (q.c_str ());
 
       getpkt (&rs->buf, &rs->buf_size, 0);
 
