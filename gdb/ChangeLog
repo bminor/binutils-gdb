@@ -1,3 +1,7 @@
+2018-05-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-linux-nat.c (spu_linux_nat_target::wait): Fix syntax error.
+
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
 	* remote.c (remote_query_supported_append): Change type.

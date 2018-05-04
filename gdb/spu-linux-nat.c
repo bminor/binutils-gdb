@@ -459,8 +459,8 @@ spu_linux_nat_target::post_attach (int pid)
 /* Wait for child PTID to do something.  Return id of the child,
    minus_one_ptid in case of error; store status into *OURSTATUS.  */
 ptid_t
-spu_linux_nat_target:::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			     int options)
+spu_linux_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+			    int options)
 {
   int save_errno;
   int status;
