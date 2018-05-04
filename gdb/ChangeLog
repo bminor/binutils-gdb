@@ -1,3 +1,12 @@
+2018-05-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* sparc-tdep.c (sparc_structure_return_p): Re-implement to
+	match the ABI as summarized in GCC's gcc/config/sparc/sparc.c.
+	(sparc_arg_by_memory_p): Renamed from sparc_arg_on_registers_p.
+	Re-implement to match the ABI as summarized in GCC's
+	gcc/config/sparc/sparc.c.  All callers updated.
+	(sparc32_store_arguments): Remove assertion.
+
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
 	* printcmd.c: Don't include tui.h.

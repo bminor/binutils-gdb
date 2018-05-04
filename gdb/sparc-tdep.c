@@ -297,41 +297,61 @@ sparc_structure_or_union_p (const struct type *type)
   return 0;
 }
 
-/* Check whether TYPE is returned on registers.  */
+/* Return true if TYPE is returned by memory, false if returned by
+   register.  */
 
 static bool
 sparc_structure_return_p (const struct type *type)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_LENGTH (type) <= 8)
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
     {
-      struct type *t = check_typedef (TYPE_TARGET_TYPE (type));
-
-      if (sparc_floating_p (t) && TYPE_LENGTH (t) == 8)
-        return true;
-      return false;
+      /* Float vectors are always returned by memory.  */
+      if (sparc_floating_p (check_typedef (TYPE_TARGET_TYPE (type))))
+	return true;
+      /* Integer vectors are returned by memory if the vector size
+	 is greater than 8 bytes long.  */
+      return (TYPE_LENGTH (type) > 8);
     }
-  if (sparc_floating_p (type) && TYPE_LENGTH (type) == 16)
-    return true;
+
+  if (sparc_floating_p (type))
+    {
+      /* Floating point types are passed by register for size 4 and
+	 8 bytes, and by memory for size 16 bytes.  */
+      return (TYPE_LENGTH (type) == 16);
+    }
+
+  /* Other than that, only aggregates of all sizes get returned by
+     memory.  */
   return sparc_structure_or_union_p (type);
 }
 
-/* Check whether TYPE is passed on registers.  */
+/* Return true if arguments of the given TYPE are passed by
+   memory; false if returned by register.  */
 
 static bool
-sparc_arg_on_registers_p (const struct type *type)
+sparc_arg_by_memory_p (const struct type *type)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_LENGTH (type) <= 8)
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
     {
-      struct type *t = check_typedef (TYPE_TARGET_TYPE (type));
-
-      if (sparc_floating_p (t) && TYPE_LENGTH (t) == 8)
-        return false;
-      return true;
+      /* Float vectors are always passed by memory.  */
+      if (sparc_floating_p (check_typedef (TYPE_TARGET_TYPE (type))))
+	return true;
+      /* Integer vectors are passed by memory if the vector size
+	 is greater than 8 bytes long.  */
+      return (TYPE_LENGTH (type) > 8);
     }
-  if (sparc_structure_or_union_p (type) || sparc_complex_floating_p (type)
-      || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
-    return false;
-  return true;
+
+  /* Floats are passed by register for size 4 and 8 bytes, and by memory
+     for size 16 bytes.  */
+  if (sparc_floating_p (type))
+    return (TYPE_LENGTH (type) == 16);
+
+  /* Complex floats and aggregates of all sizes are passed by memory.  */
+  if (sparc_complex_floating_p (type) || sparc_structure_or_union_p (type))
+    return true;
+
+  /* Everything else gets passed by register.  */
+  return false;
 }
 
 /* Register information.  */
@@ -606,7 +626,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
 
-      if (!sparc_arg_on_registers_p (type))
+      if (sparc_arg_by_memory_p (type))
 	{
 	  /* Structure, Union and Quad-Precision Arguments.  */
 	  sp -= len;
@@ -627,9 +647,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 	}
       else
 	{
-	  /* Integral and pointer arguments.  */
-	  gdb_assert (sparc_integral_or_pointer_p (type)
-	              || (TYPE_CODE (type) == TYPE_CODE_ARRAY && len <= 8));
+	  /* Arguments passed via the General Purpose Registers.  */
 	  num_elements += ((len + 3) / 4);
 	}
     }
