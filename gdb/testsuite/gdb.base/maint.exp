@@ -261,7 +261,7 @@ if { ! $have_gdb_index } {
 				timeout { fail "$test_name (timeout)" }
 			    }
 			    gdb_test "shell rm -f $psymbols_output" ".*" \
-				"shell rm -f psymbols_output"
+				"${test_name}: shell rm -f psymbols_output"
 			}
 			-re ".*$gdb_prompt $" { fail "$test_name" }
 			timeout { fail "$test_name (timeout)" }
@@ -282,14 +282,9 @@ gdb_expect  {
 	send_gdb "shell ls $msymbols_output\n"
 	gdb_expect {
 	    -re "$msymbols_output_re\r\n$gdb_prompt $" {
-		send_gdb "shell grep factorial $msymbols_output\n"
-		gdb_expect {
-		    -re "\\\[ *$decimal\\\] \[tT\]\[ \t\]+$hex \\.?factorial.*$gdb_prompt $" {
-			pass "maint print msymbols"
-		    }
-		    -re ".*$gdb_prompt $" { fail "maint print msymbols" }
-		    timeout { fail "maint print msymbols (timeout)" }
-		}
+		gdb_test "shell grep factorial $msymbols_output" \
+		    "\\\[ *$decimal\\\] \[tT\]\[ \t\]+$hex \\.?factorial.*" \
+		    "maint print msymbols, absolute pathname"
 		gdb_test "shell rm -f $msymbols_output" ".*" \
 		    "shell rm -f msymbols_output"
 	    }
@@ -313,7 +308,7 @@ gdb_test_multiple "maint print msymbols -objfile ${testfile} msymbols_output2" "
 	    -re "msymbols_output2\r\n$gdb_prompt $" {
 		gdb_test "shell grep factorial msymbols_output2" \
 		    "\\\[ *$decimal\\\] \[tT\]\[ \t\]+$hex \\.?factorial.*" \
-		    "maint print msymbols"
+		    "maint print msymbols, relative pathname"
 		gdb_test "shell rm -f msymbols_output2" ".*"
 	    }
 	}
@@ -352,7 +347,7 @@ foreach { test_name command } $test_list {
 			timeout { fail "$test_name (timeout)" }
 		    }
 		    gdb_test "shell rm -f $symbols_output" ".*" \
-			"shell rm -f symbols_output"
+			"$test_name: shell rm -f symbols_output"
 		}
 		-re ".*$gdb_prompt $" { fail "$test_name" }
 		timeout { fail "$test_name (timeout)" }
@@ -533,11 +528,9 @@ set timeout $oldtimeout
 
 #============test help on maint commands
 
-gdb_test "help maint" \
-    "Commands for use by GDB maintainers\\..*Includes commands to dump specific internal GDB structures in.*a human readable form, to cause GDB to deliberately dump core, etc\\..*List of maintenance subcommands:.*maintenance info.*maintenance internal-error.*maintenance print.*maintenance set.*maintenance show.*Type.*help maintenance.*followed by maintenance subcommand name for full documentation\\..*Command name abbreviations are allowed if unambiguous\\..*" 
-
-gdb_test "help maint info" \
-    "Commands for showing internal info about the program being debugged.*unambiguous\\..*"
+test_prefix_command_help {"maint info" "maintenance info"} {
+    "Commands for showing internal info about the program being debugged\\.\[\r\n\]+"
+}
 
 test_prefix_command_help {"maint print" "maintenance print"} {
     "Maintenance command for printing GDB internal state\\.\[\r\n\]+"

@@ -1,3 +1,9 @@
+2018-05-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/maint.exp: Make test names unique, use
+	test_prefix_command_help to test 'help maint info', and remove
+	repeated test of 'help maint'.
+
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
 	PR gdb/22619:
