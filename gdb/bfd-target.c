@@ -53,7 +53,7 @@ public:
 
 private:
   /* The BFD we're wrapping.  */
-  struct bfd *m_bfd;
+  gdb_bfd_ref_ptr m_bfd;
 
   /* The section table build from the ALLOC sections in BFD.  Note
      that we can't rely on extracting the BFD from a random section in
@@ -90,10 +90,9 @@ target_bfd::get_section_table ()
 }
 
 target_bfd::target_bfd (struct bfd *abfd)
+  : m_bfd (gdb_bfd_ref_ptr::new_reference (abfd))
 {
   this->to_stratum = file_stratum;
-  m_bfd = abfd;
-  gdb_bfd_ref (abfd);
   m_table.sections = NULL;
   m_table.sections_end = NULL;
   build_section_table (abfd, &m_table.sections, &m_table.sections_end);
@@ -101,7 +100,6 @@ target_bfd::target_bfd (struct bfd *abfd)
 
 target_bfd::~target_bfd ()
 {
-  gdb_bfd_unref (m_bfd);
   xfree (m_table.sections);
 }
 

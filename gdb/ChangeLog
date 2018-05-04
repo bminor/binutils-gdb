@@ -1,3 +1,8 @@
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
+	* bfd-target.c (target_bfd::m_bfd): Now a gdb_bfd_ref_ptr.
+	(target_bfd::target_bfd, target_bfd::~target_bfd): Update.
+
 2018-05-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-linux-nat.c (spu_linux_nat_target::wait): Fix syntax error.
