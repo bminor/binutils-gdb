@@ -757,7 +757,7 @@ earmelfb_linux_eabi.c: $(srcdir)/emulparams/armelfb_linux_eabi.sh \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 earmelfb_linux_fdpiceabi.c: $(srcdir)/emulparams/armelfb_linux_fdpiceabi.sh \
-  $(srcdir)/emulparams/armelfb_linux_fdpiceabi.sh \
+  $(srcdir)/emulparams/armelf_linux_fdpiceabi.sh \
   $(srcdir)/emulparams/armelf_linux.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

@@ -1,3 +1,7 @@
+2018-05-03  Jim Wilson  <jimw@sifive.com>
+
+	* Makefile.am (earmelfb_linux_fdpiceabi.c): Fix typo in dependencies.
+
 2018-05-03  Simon Atanasyan  <simon@atanasyan.com>
 
 	* testsuite/ld-mips-elf/gp-disp-sym.d: New test.
