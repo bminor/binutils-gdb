@@ -1,3 +1,10 @@
+2018-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves <palves@redhat.com>
+
+	PR breakpoints/19806 and support for PR external/20207.
+	* gdb.base/watchpoint-unaligned.c: New file.
+	* gdb.base/watchpoint-unaligned.exp: New file.
+
 2018-05-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/maint.exp: Make test names unique, use

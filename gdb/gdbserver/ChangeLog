@@ -1,3 +1,9 @@
+2018-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves <palves@redhat.com>
+
+	* linux-aarch64-low.c (aarch64_stopped_data_address):
+	Likewise.
+
 2018-04-27  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.

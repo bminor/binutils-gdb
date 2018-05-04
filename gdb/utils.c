@@ -2849,22 +2849,6 @@ gdb_realpath_tests ()
 
 #endif /* GDB_SELF_TEST */
 
-ULONGEST
-align_up (ULONGEST v, int n)
-{
-  /* Check that N is really a power of two.  */
-  gdb_assert (n && (n & (n-1)) == 0);
-  return (v + n - 1) & -n;
-}
-
-ULONGEST
-align_down (ULONGEST v, int n)
-{
-  /* Check that N is really a power of two.  */
-  gdb_assert (n && (n & (n-1)) == 0);
-  return (v & -n);
-}
-
 /* Allocation function for the libiberty hash table which uses an
    obstack.  The obstack is passed as DATA.  */
 

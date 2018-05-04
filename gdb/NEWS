@@ -42,6 +42,16 @@ SH-5/SH64 ELF			sh64-*-elf*, SH-5/SH64 support in sh*
 SH-5/SH64 running GNU/Linux	SH-5/SH64 support in sh*-*-linux*
 SH-5/SH64 running OpenBSD 	SH-5/SH64 support in sh*-*-openbsd*
 
+* Aarch64/Linux hardware watchpoints improvements
+
+  Hardware watchpoints on unaligned addresses are now properly
+  supported when running Linux kernel 4.10 or higher: read and access
+  watchpoints are no longer spuriously missed, and all watchpoints
+  lengths between 1 and 8 bytes are supported.  On older kernels,
+  watchpoints set on unaligned addresses are no longer missed, with
+  the tradeoff that there is a possibility of false hits being
+  reported.
+
 *** Changes in GDB 8.1
 
 * GDB now supports dynamically creating arbitrary register groups specified

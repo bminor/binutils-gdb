@@ -151,4 +151,36 @@ in_inclusive_range (T value, T low, T high)
    we're expecting a regular file.  */
 extern bool is_regular_file (const char *name, int *errno_ptr);
 
+/* Ensure that V is aligned to an N byte boundary (B's assumed to be a
+   power of 2).  Round up/down when necessary.  Examples of correct
+   use include:
+
+    addr = align_up (addr, 8); -- VALUE needs 8 byte alignment
+    write_memory (addr, value, len);
+    addr += len;
+
+   and:
+
+    sp = align_down (sp - len, 16); -- Keep SP 16 byte aligned
+    write_memory (sp, value, len);
+
+   Note that uses such as:
+
+    write_memory (addr, value, len);
+    addr += align_up (len, 8);
+
+   and:
+
+    sp -= align_up (len, 8);
+    write_memory (sp, value, len);
+
+   are typically not correct as they don't ensure that the address (SP
+   or ADDR) is correctly aligned (relying on previous alignment to
+   keep things right).  This is also why the methods are called
+   "align_..." instead of "round_..." as the latter reads better with
+   this incorrect coding style.  */
+
+extern ULONGEST align_up (ULONGEST v, int n);
+extern ULONGEST align_down (ULONGEST v, int n);
+
 #endif

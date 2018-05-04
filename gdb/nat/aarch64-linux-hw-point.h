@@ -77,13 +77,13 @@
 
    31                             13          5      3      1     0
    +--------------------------------+----------+------+------+----+
-   |         RESERVED (SBZ)         |  LENGTH  | TYPE | PRIV | EN |
+   |         RESERVED (SBZ)         |   MASK   | TYPE | PRIV | EN |
    +--------------------------------+----------+------+------+----+
 
    The TYPE field is ignored for breakpoints.  */
 
 #define DR_CONTROL_ENABLED(ctrl)	(((ctrl) & 0x1) == 1)
-#define DR_CONTROL_LENGTH(ctrl)		(((ctrl) >> 5) & 0xff)
+#define DR_CONTROL_MASK(ctrl)		(((ctrl) >> 5) & 0xff)
 
 /* Each bit of a variable of this type is used to indicate whether a
    hardware breakpoint or watchpoint setting has been changed since
@@ -147,7 +147,10 @@ struct aarch64_debug_reg_state
   unsigned int dr_ref_count_bp[AARCH64_HBP_MAX_NUM];
 
   /* hardware watchpoint */
+  /* Address aligned down to AARCH64_HWP_ALIGNMENT.  */
   CORE_ADDR dr_addr_wp[AARCH64_HWP_MAX_NUM];
+  /* Address as entered by user without any forced alignment.  */
+  CORE_ADDR dr_addr_orig_wp[AARCH64_HWP_MAX_NUM];
   unsigned int dr_ctrl_wp[AARCH64_HWP_MAX_NUM];
   unsigned int dr_ref_count_wp[AARCH64_HWP_MAX_NUM];
 };
@@ -166,6 +169,7 @@ struct arch_lwp_info
 extern int aarch64_num_bp_regs;
 extern int aarch64_num_wp_regs;
 
+unsigned int aarch64_watchpoint_offset (unsigned int ctrl);
 unsigned int aarch64_watchpoint_length (unsigned int ctrl);
 
 int aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
@@ -175,7 +179,7 @@ int aarch64_handle_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			       int len, int is_insert,
 			       struct aarch64_debug_reg_state *state);
 
-void aarch64_linux_set_debug_regs (const struct aarch64_debug_reg_state *state,
+void aarch64_linux_set_debug_regs (struct aarch64_debug_reg_state *state,
 				   int tid, int watchpoint);
 
 void aarch64_show_debug_reg_state (struct aarch64_debug_reg_state *state,

@@ -1,3 +1,39 @@
+2018-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves <palves@redhat.com>
+
+	PR breakpoints/19806 and support for PR external/20207.
+	* NEWS: Mention Aarch64 watchpoint improvements.
+	* aarch64-linux-nat.c (aarch64_linux_stopped_data_address): Fix missed
+	watchpoints and PR external/20207 watchpoints.
+	* nat/aarch64-linux-hw-point.c
+	(kernel_supports_any_contiguous_range): New.
+	(aarch64_watchpoint_offset): New.
+	(aarch64_watchpoint_length): Support PR external/20207 watchpoints.
+	(aarch64_point_encode_ctrl_reg): New parameter offset, new asserts.
+	(aarch64_point_is_aligned): Support PR external/20207 watchpoints.
+	(aarch64_align_watchpoint): New parameters aligned_offset_p and
+	next_addr_orig_p.  Support PR external/20207 watchpoints.
+	(aarch64_downgrade_regs): New.
+	(aarch64_dr_state_insert_one_point): New parameters offset and
+	addr_orig.
+	(aarch64_dr_state_remove_one_point): Likewise.
+	(aarch64_handle_breakpoint): Update caller.
+	(aarch64_handle_aligned_watchpoint): Likewise.
+	(aarch64_handle_unaligned_watchpoint): Support addr_orig and
+	aligned_offset.
+	(aarch64_linux_set_debug_regs): Remove const from state.  Call
+	aarch64_downgrade_regs.
+	(aarch64_show_debug_reg_state): Print also dr_addr_orig_wp.
+	* nat/aarch64-linux-hw-point.h (DR_CONTROL_LENGTH): Rename to ...
+	(DR_CONTROL_MASK): ... this.
+	(struct aarch64_debug_reg_state): New field dr_addr_orig_wp.
+	(unsigned int aarch64_watchpoint_offset): New prototype.
+	(aarch64_linux_set_debug_regs): Remove const from state.
+	* utils.c (align_up, align_down): Move to ...
+	* common/common-utils.c (align_up, align_down): ... here.
+	* utils.h (align_up, align_down): Move to ...
+	* common/common-utils.h (align_up, align_down): ... here.
+
 2018-05-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* sparc-tdep.c (sparc_structure_return_p): Re-implement to

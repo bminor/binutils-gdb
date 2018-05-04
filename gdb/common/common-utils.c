@@ -440,3 +440,23 @@ is_regular_file (const char *name, int *errno_ptr)
     *errno_ptr = EINVAL;
   return false;
 }
+
+/* See common/common-utils.h.  */
+
+ULONGEST
+align_up (ULONGEST v, int n)
+{
+  /* Check that N is really a power of two.  */
+  gdb_assert (n && (n & (n-1)) == 0);
+  return (v + n - 1) & -n;
+}
+
+/* See common/common-utils.h.  */
+
+ULONGEST
+align_down (ULONGEST v, int n)
+{
+  /* Check that N is really a power of two.  */
+  gdb_assert (n && (n & (n-1)) == 0);
+  return (v & -n);
+}
