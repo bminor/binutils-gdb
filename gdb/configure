@@ -10441,7 +10441,7 @@ $as_echo_n "checking for ${version}... " >&6; }
   save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
   CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
-  LIBS="$LIBS $new_LIBS"
+  LIBS="$new_LIBS $LIBS"
   found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -10478,13 +10478,13 @@ $as_echo "${found_usable_python}" >&6; }
   version=python2.7
 
   new_CPPFLAGS=${python_includes}
-  new_LIBS="${python_libs} -lpython2.7"
+  new_LIBS="-lpython2.7 ${python_libs}"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${version}" >&5
 $as_echo_n "checking for ${version}... " >&6; }
   save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
   CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
-  LIBS="$LIBS $new_LIBS"
+  LIBS="$new_LIBS $LIBS"
   found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -10516,13 +10516,13 @@ $as_echo "${found_usable_python}" >&6; }
   version=python2.6
 
   new_CPPFLAGS=${python_includes}
-  new_LIBS="${python_libs} -lpython2.6"
+  new_LIBS="-lpython2.6 ${python_libs}"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${version}" >&5
 $as_echo_n "checking for ${version}... " >&6; }
   save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
   CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
-  LIBS="$LIBS $new_LIBS"
+  LIBS="$new_LIBS $LIBS"
   found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -10554,13 +10554,13 @@ $as_echo "${found_usable_python}" >&6; }
   version=python2.5
 
   new_CPPFLAGS=${python_includes}
-  new_LIBS="${python_libs} -lpython2.5"
+  new_LIBS="-lpython2.5 ${python_libs}"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${version}" >&5
 $as_echo_n "checking for ${version}... " >&6; }
   save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
   CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
-  LIBS="$LIBS $new_LIBS"
+  LIBS="$new_LIBS $LIBS"
   found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -10592,13 +10592,13 @@ $as_echo "${found_usable_python}" >&6; }
   version=python2.4
 
   new_CPPFLAGS=${python_includes}
-  new_LIBS="${python_libs} -lpython2.4"
+  new_LIBS="-lpython2.4 ${python_libs}"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${version}" >&5
 $as_echo_n "checking for ${version}... " >&6; }
   save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
   CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
-  LIBS="$LIBS $new_LIBS"
+  LIBS="$new_LIBS $LIBS"
   found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */

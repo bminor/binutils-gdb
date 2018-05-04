@@ -732,7 +732,7 @@ AC_DEFUN([AC_TRY_LIBPYTHON],
   save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
   CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
-  LIBS="$LIBS $new_LIBS"
+  LIBS="$new_LIBS $LIBS"
   found_usable_python=no
   AC_LINK_IFELSE(AC_LANG_PROGRAM([[#include "Python.h"]],
                                  [[Py_Initialize ();]]),
@@ -922,19 +922,19 @@ else
   elif test "${have_python_config}" != failed; then
     if test "${have_libpython}" = no; then
       AC_TRY_LIBPYTHON(python2.7, have_libpython,
-                       ${python_includes}, "${python_libs} -lpython2.7")
+                       ${python_includes}, "-lpython2.7 ${python_libs}")
     fi
     if test "${have_libpython}" = no; then
       AC_TRY_LIBPYTHON(python2.6, have_libpython,
-                       ${python_includes}, "${python_libs} -lpython2.6")
+                       ${python_includes}, "-lpython2.6 ${python_libs}")
     fi
     if test ${have_libpython} = no; then
       AC_TRY_LIBPYTHON(python2.5, have_libpython,
-                       ${python_includes}, "${python_libs} -lpython2.5")
+                       ${python_includes}, "-lpython2.5 ${python_libs}")
     fi
     if test ${have_libpython} = no; then
       AC_TRY_LIBPYTHON(python2.4, have_libpython,
-                       ${python_includes}, "${python_libs} -lpython2.4")
+                       ${python_includes}, "-lpython2.4 ${python_libs}")
     fi
   fi
   if test "${have_libpython}" = python2.7 -o "${have_libpython}" = python27; then
