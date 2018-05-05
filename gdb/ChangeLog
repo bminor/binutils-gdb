@@ -1,5 +1,20 @@
 2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* stack.c: (trailing_outermost_frame): New function, mostly
+	extracted from backtrace_command_1.
+	(leading_innermost_frame): New function.
+	(backtrace_command_1): Update to call trailing_outermost_frame.
+	(frame_apply_command_count): New function.
+	(frame_apply_level_command): New function.
+	(frame_apply_all_command): New function.
+	(frame_apply_command): New function.
+	(faas_command): New function.
+	(frame_cmd_list): New variable.
+	(_initialize_stack): Update to setup the new commands 'frame apply'
+	and 'faas'.
+
+2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli-utils.c (number_or_range_parser::get_number): Only handle
 	numbers or convenience var as numbers.
 	(parse_flags): New function.

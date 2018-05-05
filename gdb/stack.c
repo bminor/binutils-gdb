@@ -1687,6 +1687,58 @@ info_frame_command (const char *addr_exp, int from_tty)
   }
 }
 
+/* Return the innermost frame at level LEVEL.  */
+
+static struct frame_info *
+leading_innermost_frame (int level)
+{
+  struct frame_info *leading;
+
+  leading = get_current_frame ();
+
+  gdb_assert (level >= 0);
+
+  while (leading != nullptr && level)
+    {
+      QUIT;
+      leading = get_prev_frame (leading);
+      level--;
+    }
+
+  return leading;
+}
+
+/* Return the starting frame needed to handle COUNT outermost frames.  */
+
+static struct frame_info *
+trailing_outermost_frame (int count)
+{
+  struct frame_info *current;
+  struct frame_info *trailing;
+
+  trailing = get_current_frame ();
+
+  gdb_assert (count > 0);
+
+  current = trailing;
+  while (current != nullptr && count--)
+    {
+      QUIT;
+      current = get_prev_frame (current);
+    }
+
+  /* Will stop when CURRENT reaches the top of the stack.
+     TRAILING will be COUNT below it.  */
+  while (current != nullptr)
+    {
+      QUIT;
+      trailing = get_prev_frame (trailing);
+      current = get_prev_frame (current);
+    }
+
+  return trailing;
+}
+
 /* Print briefly all stack frames or just the innermost COUNT_EXP
    frames.  */
 
@@ -1751,32 +1803,14 @@ backtrace_command_1 (const char *count_exp, frame_filter_flags flags,
 	 variable TRAILING to the frame from which we should start
 	 printing.  Second, it must set the variable count to the number
 	 of frames which we should print, or -1 if all of them.  */
-      trailing = get_current_frame ();
 
       if (count_exp != NULL && count < 0)
 	{
-	  struct frame_info *current;
-
-	  count = -count;
-
-	  current = trailing;
-	  while (current && count--)
-	    {
-	      QUIT;
-	      current = get_prev_frame (current);
-	    }
-
-	  /* Will stop when CURRENT reaches the top of the stack.
-	     TRAILING will be COUNT below it.  */
-	  while (current)
-	    {
-	      QUIT;
-	      trailing = get_prev_frame (trailing);
-	      current = get_prev_frame (current);
-	    }
-
+	  trailing = trailing_outermost_frame (-count);
 	  count = -1;
 	}
+      else
+	trailing = get_current_frame ();
 
       for (fi = trailing; fi && count--; fi = get_prev_frame (fi))
 	{
@@ -2494,9 +2528,198 @@ func_command (const char *arg, int from_tty)
     }
 }
 
+/* Apply a GDB command to all stack frames, or a set of identified frames,
+   or innermost COUNT frames.
+   With a negative COUNT, apply command on outermost -COUNT frames.
+
+   frame apply 3 info frame     Apply 'info frame' to frames 0, 1, 2
+   frame apply -3 info frame    Apply 'info frame' to outermost 3 frames.
+   frame apply all x/i $pc      Apply 'x/i $pc' cmd to all frames.
+   frame apply all -s p local_var_no_idea_in_which_frame
+                If a frame has a local variable called
+                local_var_no_idea_in_which_frame, print frame
+                and value of local_var_no_idea_in_which_frame.
+   frame apply all -s -q p local_var_no_idea_in_which_frame
+                Same as before, but only print the variable value.
+   frame apply level 2-5 0 4-7 -s p i = i + 1
+                Adds 1 to the variable i in the specified frames.
+                Note that i will be incremented twice in
+                frames 4 and 5.  */
+
+/* Apply a GDB command to COUNT stack frames, starting at TRAILING.
+   CMD starts with 0 or more qcs flags followed by the GDB command to apply.
+   COUNT -1 means all frames starting at TRAILING.  WHICH_COMMAND is used
+   for error messages.  */
+
+static void
+frame_apply_command_count (const char *which_command,
+			   const char *cmd, int from_tty,
+			   struct frame_info *trailing, int count)
+{
+  qcs_flags flags;
+  struct frame_info *fi;
+
+  while (cmd != NULL && parse_flags_qcs (which_command, &cmd, &flags))
+    ;
+
+  if (cmd == NULL || *cmd == '\0')
+    error (_("Please specify a command to apply on the selected frames"));
+
+  /* The below will restore the current inferior/thread/frame.
+     Usually, only the frame is effectively to be restored.
+     But in case CMD switches of inferior/thread, better restore
+     these also.  */
+  scoped_restore_current_thread restore_thread;
+
+  for (fi = trailing; fi && count--; fi = get_prev_frame (fi))
+    {
+      QUIT;
+
+      select_frame (fi);
+      TRY
+	{
+	  std::string cmd_result;
+	  {
+	    /* In case CMD switches of inferior/thread/frame, the below
+	       restores the inferior/thread/frame.  FI can then be
+	       set to the selected frame.  */
+	    scoped_restore_current_thread restore_fi_current_frame;
+
+	    cmd_result = execute_command_to_string (cmd, from_tty);
+	  }
+	  fi = get_selected_frame (_("frame apply "
+				     "unable to get selected frame."));
+	  if (!flags.silent || cmd_result.length () > 0)
+	    {
+	      if (!flags.quiet)
+		print_stack_frame (fi, 1, LOCATION, 0);
+	      printf_filtered ("%s", cmd_result.c_str ());
+	    }
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  fi = get_selected_frame (_("frame apply "
+				     "unable to get selected frame."));
+	  if (!flags.silent)
+	    {
+	      if (!flags.quiet)
+		print_stack_frame (fi, 1, LOCATION, 0);
+	      if (flags.cont)
+		printf_filtered ("%s\n", ex.message);
+	      else
+		throw_exception (ex);
+	    }
+	}
+      END_CATCH;
+    }
+}
+
+/* Implementation of the "frame apply level" command.  */
+
+static void
+frame_apply_level_command (const char *cmd, int from_tty)
+{
+  if (!target_has_stack)
+    error (_("No stack."));
+
+  bool level_found = false;
+  const char *levels_str = cmd;
+  number_or_range_parser levels (levels_str);
+
+  /* Skip the LEVEL list to find the flags and command args.  */
+  while (!levels.finished ())
+    {
+      const int level_beg = levels.get_number ();
+
+      level_found = true;
+      if (levels.in_range ())
+	levels.skip_range ();
+    }
+
+  if (!level_found)
+    error (_("Missing or invalid LEVEL... argument"));
+
+  cmd = levels.cur_tok ();
+
+  /* Redo the LEVELS parsing, but applying COMMAND.  */
+  levels.init (levels_str);
+  while (!levels.finished ())
+    {
+      const int level_beg = levels.get_number ();
+      int n_frames;
+
+      if (levels.in_range ())
+	{
+	  n_frames = levels.end_value () - level_beg + 1;
+	  levels.skip_range ();
+	}
+      else
+	n_frames = 1;
+
+      frame_apply_command_count ("frame apply level", cmd, from_tty,
+				 leading_innermost_frame (level_beg), n_frames);
+    }
+}
+
+/* Implementation of the "frame apply all" command.  */
+
+static void
+frame_apply_all_command (const char *cmd, int from_tty)
+{
+  if (!target_has_stack)
+    error (_("No stack."));
+
+  frame_apply_command_count ("frame apply all", cmd, from_tty,
+			     get_current_frame (), INT_MAX);
+}
+
+/* Implementation of the "frame apply" command.  */
+
+static void
+frame_apply_command (const char* cmd, int from_tty)
+{
+  int count;
+  struct frame_info *trailing;
+
+  if (!target_has_stack)
+    error (_("No stack."));
+
+  if (cmd == NULL)
+    error (_("Missing COUNT argument."));
+  count = get_number_trailer (&cmd, 0);
+  if (count == 0)
+    error (_("Invalid COUNT argument."));
+
+  if (count < 0)
+    {
+      trailing = trailing_outermost_frame (-count);
+      count = -1;
+    }
+  else
+    trailing = get_current_frame ();
+
+  frame_apply_command_count ("frame apply", cmd, from_tty,
+			     trailing, count);
+}
+
+/* Implementation of the "faas" command.  */
+
+static void
+faas_command (const char *cmd, int from_tty)
+{
+  std::string expanded = std::string ("frame apply all -s ") + cmd;
+  execute_command (expanded.c_str (), from_tty);
+}
+
+
+/* Commands with a prefix of `frame'.  */
+struct cmd_list_element *frame_cmd_list = NULL;
+
 void
 _initialize_stack (void)
 {
+  static struct cmd_list_element *frame_apply_list = NULL;
+
   add_com ("return", class_stack, return_command, _("\
 Make selected stack frame return to its caller.\n\
 Control remains in the debugger, but when you continue\n\
@@ -2519,13 +2742,52 @@ An argument says how many frames down to go."));
 Same as the `down' command, but does not print anything.\n\
 This is useful in command scripts."));
 
-  add_com ("frame", class_stack, frame_command, _("\
+  add_prefix_cmd ("frame", class_stack, frame_command, _("\
 Select and print a stack frame.\nWith no argument, \
 print the selected stack frame.  (See also \"info frame\").\n\
 An argument specifies the frame to select.\n\
-It can be a stack frame number or the address of the frame."));
+It can be a stack frame number or the address of the frame."),
+		  &frame_cmd_list, "frame ", 1, &cmdlist);
 
   add_com_alias ("f", "frame", class_stack, 1);
+
+#define FRAME_APPLY_FLAGS_HELP "\
+Prints the frame location information followed by COMMAND output.\n\
+FLAG arguments are -q (quiet), -c (continue), -s (silent).\n\
+Flag -q disables printing the frame location information.\n\
+By default, if a COMMAND raises an error, frame apply is aborted.\n\
+Flag -c indicates to print the error and continue.\n\
+Flag -s indicates to silently ignore a COMMAND that raises an error\n\
+or produces no output."
+
+  add_prefix_cmd ("apply", class_stack, frame_apply_command,
+		  _("Apply a command to a number of frames.\n\
+Usage: frame apply COUNT [FLAG]... COMMAND\n\
+With a negative COUNT argument, applies the command on outermost -COUNT frames.\n"
+FRAME_APPLY_FLAGS_HELP),
+		  &frame_apply_list, "frame apply ", 1, &frame_cmd_list);
+
+  add_cmd ("all", class_stack, frame_apply_all_command,
+	   _("\
+Apply a command to all frames.\n\
+\n\
+Usage: frame apply all [FLAG]... COMMAND\n"
+FRAME_APPLY_FLAGS_HELP),
+	   &frame_apply_list);
+
+  add_cmd ("level", class_stack, frame_apply_level_command,
+	   _("\
+Apply a command to a list of frames.\n\
+\n\
+Usage: frame apply level LEVEL... [FLAG]... COMMAND\n\
+ID is a space-separated list of LEVELs of frames to apply COMMAND on.\n"
+FRAME_APPLY_FLAGS_HELP),
+	   &frame_apply_list);
+
+  add_com ("faas", class_stack, faas_command, _("\
+Apply a command to all frames (ignoring errors and empty output).\n\
+Usage: faas COMMAND\n\
+shortcut for 'frame apply all -s COMMAND'"));
 
   add_com_suppress_notification ("select-frame", class_stack, select_frame_command, _("\
 Select a stack frame without printing anything.\n\
