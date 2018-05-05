@@ -69,9 +69,9 @@ gdb_test "skip function baz" "Function baz will be skipped when stepping\."
 gdb_test "skip enable 999" "No skiplist entries found with number 999."
 gdb_test "skip disable 999" "No skiplist entries found with number 999."
 gdb_test "skip delete 999" "No skiplist entries found with number 999."
-gdb_test "skip enable a" "Args must be numbers or '\\$' variables."
-gdb_test "skip disable a" "Args must be numbers or '\\$' variables."
-gdb_test "skip delete a" "Args must be numbers or '\\$' variables."
+gdb_test "skip enable a" "Arguments must be numbers or '\\$' variables."
+gdb_test "skip disable a" "Arguments must be numbers or '\\$' variables."
+gdb_test "skip delete a" "Arguments must be numbers or '\\$' variables."
 
 # Ask for info on a skiplist entry which doesn't exist.
 

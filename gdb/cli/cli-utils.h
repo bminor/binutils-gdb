@@ -75,8 +75,7 @@ public:
 		    const char *end_ptr);
 
   /* Returns true if parsing has completed.  */
-  bool finished () const
-  { return m_finished; }
+  bool finished () const;
 
   /* Return the string being parsed.  When parsing has finished, this
      points past the last parsed token.  */
@@ -96,15 +95,13 @@ public:
   {
     gdb_assert (m_in_range);
     m_cur_tok = m_end_ptr;
+    m_in_range = false;
   }
 
 private:
   /* No need for these.  They are intentionally not defined anywhere.  */
   number_or_range_parser (const number_or_range_parser &);
   number_or_range_parser &operator= (const number_or_range_parser &);
-
-  /* True if parsing has completed.  */
-  bool m_finished;
 
   /* The string being parsed.  When parsing has finished, this points
      past the last parsed token.  */
@@ -173,4 +170,42 @@ check_for_argument (char **str, const char *arg, int arg_len)
 			     arg, arg_len);
 }
 
+/* A helper function that looks for a set of flags at the start of a
+   string.  The possible flags are given as a null terminated string.
+   A flag in STR must either be at the end of the string,
+   or be followed by whitespace.
+   Returns 0 if no valid flag is found at the start of STR.
+   Otherwise updates *STR, and returns N (which is > 0),
+   such that FLAGS [N - 1] is the valid found flag.  */
+extern int parse_flags (const char **str, const char *flags);
+
+/* qcs_flags struct regroups the flags parsed by parse_flags_qcs.  */
+
+struct qcs_flags
+{
+  bool quiet = false;
+  bool cont = false;
+  bool silent = false;
+};
+
+/* A helper function that uses parse_flags to handle the flags qcs :
+     A flag -q sets FLAGS->QUIET to true.
+     A flag -c sets FLAGS->CONT to true.
+     A flag -s sets FLAGS->SILENT to true.
+
+   The caller is responsible to initialize *FLAGS to false before the (first)
+   call to parse_flags_qcs.
+   parse_flags_qcs can then be called iteratively to search for more
+   valid flags, as part of a 'main parsing loop' searching for -q/-c/-s
+   flags together with other flags and options.
+
+   Returns true and updates *STR and one of FLAGS->QUIET, FLAGS->CONT,
+   FLAGS->SILENT if it finds a valid flag.
+   Returns false if no valid flag is found at the beginning of STR.
+
+   Throws an error if a flag is found such that both FLAGS->CONT and
+   FLAGS->SILENT are true.  */
+
+extern bool parse_flags_qcs (const char *which_command, const char **str,
+			     qcs_flags *flags);
 #endif /* CLI_UTILS_H */

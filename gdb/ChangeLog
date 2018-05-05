@@ -1,3 +1,16 @@
+2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli-utils.c (number_or_range_parser::get_number): Only handle
+	numbers or convenience var as numbers.
+	(parse_flags): New function.
+	(parse_flags_qcs): New function.
+	(number_or_range_parser::finished): Ensure parsing end is detected
+	before end of string.
+	* cli-utils.h (parse_flags): New function.
+	(parse_flags_qcs): New function.
+	(number_or_range_parser): Remove m_finished bool.
+	(number_or_range_parser::skip_range): Set m_in_range to false.
+
 2018-07-12  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* ser-tcp.c (try_connect): Declare 'ioarg' as 'u_long' if building
