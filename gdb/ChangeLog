@@ -1,5 +1,15 @@
 2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* thread.c (thr_try_catch_cmd): New function.
+	(thread_apply_all_command): Handle qcs flags.
+	(thread_apply_command): Handle qcs flags.
+	(taas_command): New function.
+	(tfaas_command): New function.
+	(_initialize_thread): Update to setup the new commands 'taas
+	and 'tfaas'. Change doc string for 'thread apply'.
+
+2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* stack.c: (trailing_outermost_frame): New function, mostly
 	extracted from backtrace_command_1.
 	(leading_innermost_frame): New function.

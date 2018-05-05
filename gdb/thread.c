@@ -1583,6 +1583,44 @@ tp_array_compar (const thread_info *a, const thread_info *b)
     return (a->per_inf_num > b->per_inf_num);
 }
 
+/* Switch to thread THR and execute CMD.
+   FLAGS.QUIET controls the printing of the thread information.
+   FLAGS.CONT and FLAGS.SILENT control how to handle errors.  */
+
+static void
+thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
+		   const qcs_flags &flags)
+{
+  switch_to_thread (thr);
+  TRY
+    {
+      std::string cmd_result = execute_command_to_string (cmd, from_tty);
+      if (!flags.silent || cmd_result.length () > 0)
+	{
+	  if (!flags.quiet)
+	    printf_filtered (_("\nThread %s (%s):\n"),
+			     print_thread_id (thr),
+			     target_pid_to_str (inferior_ptid));
+	  printf_filtered ("%s", cmd_result.c_str ());
+	}
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (!flags.silent)
+	{
+	  if (!flags.quiet)
+	    printf_filtered (_("\nThread %s (%s):\n"),
+			     print_thread_id (thr),
+			     target_pid_to_str (inferior_ptid));
+	  if (flags.cont)
+	    printf_filtered ("%s\n", ex.message);
+	  else
+	    throw_exception (ex);
+	}
+    }
+  END_CATCH;
+}
+
 /* Apply a GDB command to a list of threads.  List syntax is a whitespace
    separated list of numbers, or ranges, or the keyword `all'.  Ranges consist
    of two numbers separated by a hyphen.  Examples:
@@ -1594,16 +1632,27 @@ tp_array_compar (const thread_info *a, const thread_info *b)
 static void
 thread_apply_all_command (const char *cmd, int from_tty)
 {
+  qcs_flags flags;
+
   tp_array_compar_ascending = false;
-  if (cmd != NULL
-      && check_for_argument (&cmd, "-ascending", strlen ("-ascending")))
+
+  while (cmd != NULL)
     {
-      cmd = skip_spaces (cmd);
-      tp_array_compar_ascending = true;
+      if (check_for_argument (&cmd, "-ascending", strlen ("-ascending")))
+	{
+	  cmd = skip_spaces (cmd);
+	  tp_array_compar_ascending = true;
+	  continue;
+	}
+
+      if (parse_flags_qcs ("thread apply all", &cmd, &flags))
+	continue;
+
+      break;
     }
 
   if (cmd == NULL || *cmd == '\000')
-    error (_("Please specify a command following the thread ID list"));
+    error (_("Please specify a command at the end of 'thread apply all'"));
 
   update_thread_list ();
 
@@ -1639,14 +1688,7 @@ thread_apply_all_command (const char *cmd, int from_tty)
 
       for (thread_info *thr : thr_list_cpy)
 	if (thread_alive (thr))
-	  {
-	    switch_to_thread (thr);
-	    printf_filtered (_("\nThread %s (%s):\n"),
-			     print_thread_id (thr),
-			     target_pid_to_str (inferior_ptid));
-
-	    execute_command (cmd, from_tty);
-	  }
+	  thr_try_catch_cmd (thr, cmd, from_tty, flags);
     }
 }
 
@@ -1655,7 +1697,9 @@ thread_apply_all_command (const char *cmd, int from_tty)
 static void
 thread_apply_command (const char *tidlist, int from_tty)
 {
+  qcs_flags flags;
   const char *cmd = NULL;
+  const char *cmd_or_flags;
   tid_range_parser parser;
 
   if (tidlist == NULL || *tidlist == '\000')
@@ -1673,6 +1717,10 @@ thread_apply_command (const char *tidlist, int from_tty)
 	}
     }
 
+  cmd_or_flags = cmd;
+  while (cmd != NULL && parse_flags_qcs ("thread apply", &cmd, &flags))
+    ;
+
   if (cmd == NULL)
     error (_("Please specify a command following the thread ID list"));
 
@@ -1682,7 +1730,7 @@ thread_apply_command (const char *tidlist, int from_tty)
   scoped_restore_current_thread restore_thread;
 
   parser.init (tidlist, current_inferior ()->num);
-  while (!parser.finished () && parser.cur_tok () < cmd)
+  while (!parser.finished () && parser.cur_tok () < cmd_or_flags)
     {
       struct thread_info *tp = NULL;
       struct inferior *inf;
@@ -1727,12 +1775,28 @@ thread_apply_command (const char *tidlist, int from_tty)
 	  continue;
 	}
 
-      switch_to_thread (tp);
-
-      printf_filtered (_("\nThread %s (%s):\n"), print_thread_id (tp),
-		       target_pid_to_str (inferior_ptid));
-      execute_command (cmd, from_tty);
+      thr_try_catch_cmd (tp, cmd, from_tty, flags);
     }
+}
+
+
+/* Implementation of the "taas" command.  */
+
+static void
+taas_command (const char *cmd, int from_tty)
+{
+  std::string expanded = std::string ("thread apply all -s ") + cmd;
+  execute_command (expanded.c_str (), from_tty);
+}
+
+/* Implementation of the "tfaas" command.  */
+
+static void
+tfaas_command (const char *cmd, int from_tty)
+{
+  std::string expanded
+    = std::string ("thread apply all -s frame apply all -s ") + cmd;
+  execute_command (expanded.c_str (), from_tty);
 }
 
 /* Switch to the specified thread, or print the current thread.  */
@@ -2032,21 +2096,42 @@ Use this command to switch between threads.\n\
 The new thread ID must be currently known."),
 		  &thread_cmd_list, "thread ", 1, &cmdlist);
 
+#define THREAD_APPLY_FLAGS_HELP "\
+Prints per-inferior thread number and target system's thread id\n\
+followed by COMMAND output.\n\
+FLAG arguments are -q (quiet), -c (continue), -s (silent).\n\
+Flag -q disables printing the thread information.\n\
+By default, if a COMMAND raises an error, thread apply is aborted.\n\
+Flag -c indicates to print the error and continue.\n\
+Flag -s indicates to silently ignore a COMMAND that raises an error\n\
+or produces no output."
+
   add_prefix_cmd ("apply", class_run, thread_apply_command,
 		  _("Apply a command to a list of threads.\n\
-Usage: thread apply ID... COMMAND\n\
-ID is a space-separated list of IDs of threads to apply COMMAND on."),
+Usage: thread apply ID... [FLAG]... COMMAND\n\
+ID is a space-separated list of IDs of threads to apply COMMAND on.\n"
+THREAD_APPLY_FLAGS_HELP),
 		  &thread_apply_list, "thread apply ", 1, &thread_cmd_list);
 
   add_cmd ("all", class_run, thread_apply_all_command,
 	   _("\
 Apply a command to all threads.\n\
 \n\
-Usage: thread apply all [-ascending] COMMAND\n\
+Usage: thread apply all [-ascending] [FLAG]... COMMAND\n\
 -ascending: Call COMMAND for all threads in ascending order.\n\
-            The default is descending order.\
-"),
+            The default is descending order.\n"
+THREAD_APPLY_FLAGS_HELP),
 	   &thread_apply_list);
+
+  add_com ("taas", class_run, taas_command, _("\
+Apply a command to all threads (ignoring errors and empty output).\n\
+Usage: taas COMMAND\n\
+shortcut for 'thread apply all -s COMMAND'"));
+
+  add_com ("tfaas", class_run, tfaas_command, _("\
+Apply a command to all frames of all threads (ignoring errors and empty output).\n\
+Usage: tfaas COMMAND\n\
+shortcut for 'thread apply all -s frame apply all -s COMMAND'"));
 
   add_cmd ("name", class_run, thread_name_command,
 	   _("Set the current thread's name.\n\
