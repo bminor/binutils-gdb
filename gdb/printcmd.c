@@ -520,63 +520,50 @@ print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
 			struct ui_file *stream,
 			int do_demangle, const char *leadin)
 {
-  char *name = NULL;
-  char *filename = NULL;
+  std::string name, filename;
   int unmapped = 0;
   int offset = 0;
   int line = 0;
 
-  /* Throw away both name and filename.  */
-  struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &name);
-  make_cleanup (free_current_contents, &filename);
-
   if (build_address_symbolic (gdbarch, addr, do_demangle, &name, &offset,
 			      &filename, &line, &unmapped))
-    {
-      do_cleanups (cleanup_chain);
-      return 0;
-    }
+    return 0;
 
   fputs_filtered (leadin, stream);
   if (unmapped)
     fputs_filtered ("<*", stream);
   else
     fputs_filtered ("<", stream);
-  fputs_filtered (name, stream);
+  fputs_filtered (name.c_str (), stream);
   if (offset != 0)
     fprintf_filtered (stream, "+%u", (unsigned int) offset);
 
   /* Append source filename and line number if desired.  Give specific
      line # of this addr, if we have it; else line # of the nearest symbol.  */
-  if (print_symbol_filename && filename != NULL)
+  if (print_symbol_filename && !filename.empty ())
     {
       if (line != -1)
-	fprintf_filtered (stream, " at %s:%d", filename, line);
+	fprintf_filtered (stream, " at %s:%d", filename.c_str (), line);
       else
-	fprintf_filtered (stream, " in %s", filename);
+	fprintf_filtered (stream, " in %s", filename.c_str ());
     }
   if (unmapped)
     fputs_filtered ("*>", stream);
   else
     fputs_filtered (">", stream);
 
-  do_cleanups (cleanup_chain);
   return 1;
 }
 
-/* Given an address ADDR return all the elements needed to print the
-   address in a symbolic form.  NAME can be mangled or not depending
-   on DO_DEMANGLE (and also on the asm_demangle global variable,
-   manipulated via ''set print asm-demangle'').  Return 0 in case of
-   success, when all the info in the OUT paramters is valid.  Return 1
-   otherwise.  */
+/* See valprint.h.  */
+
 int
 build_address_symbolic (struct gdbarch *gdbarch,
 			CORE_ADDR addr,  /* IN */
 			int do_demangle, /* IN */
-			char **name,     /* OUT */
+			std::string *name, /* OUT */
 			int *offset,     /* OUT */
-			char **filename, /* OUT */
+			std::string *filename, /* OUT */
 			int *line,       /* OUT */
 			int *unmapped)   /* OUT */
 {
@@ -678,7 +665,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
 
   *offset = addr - name_location;
 
-  *name = xstrdup (name_temp);
+  *name = name_temp;
 
   if (print_symbol_filename)
     {
@@ -688,7 +675,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
 
       if (sal.symtab)
 	{
-	  *filename = xstrdup (symtab_to_filename_for_display (sal.symtab));
+	  *filename = symtab_to_filename_for_display (sal.symtab);
 	  *line = sal.line;
 	}
     }

@@ -30,6 +30,7 @@
 #include "safe-ctype.h"
 #include <algorithm>
 #include "common/gdb_optional.h"
+#include "valprint.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -199,8 +200,6 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
   int offset;
   int line;
   int size;
-  char *filename = NULL;
-  char *name = NULL;
   CORE_ADDR pc;
   struct gdbarch *gdbarch = arch ();
 
@@ -237,6 +236,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
       uiout->text (pc_prefix (pc));
     uiout->field_core_addr ("address", gdbarch, pc);
 
+    std::string name, filename;
     if (!build_address_symbolic (gdbarch, pc, 0, &name, &offset, &filename,
 				 &line, &unmapped))
       {
@@ -244,18 +244,13 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
 	   the future.  */
 	uiout->text (" <");
 	if ((flags & DISASSEMBLY_OMIT_FNAME) == 0)
-	  uiout->field_string ("func-name", name);
+	  uiout->field_string ("func-name", name.c_str ());
 	uiout->text ("+");
 	uiout->field_int ("offset", offset);
 	uiout->text (">:\t");
       }
     else
       uiout->text (":\t");
-
-    if (filename != NULL)
-      xfree (filename);
-    if (name != NULL)
-      xfree (name);
 
     m_insn_stb.clear ();
 

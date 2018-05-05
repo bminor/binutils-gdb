@@ -1,3 +1,13 @@
+2018-06-07  Tom Tromey  <tom@tromey.com>
+
+	* valprint.h (build_address_symbolic): Declare.
+	* printcmd.c (print_address_symbolic): Update.
+	(build_address_symbolic): Change "name" and "filename" to
+	std::string.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn):
+	Update.
+	* defs.h (build_address_symbolic): Remove declaration.
+
 2018-06-07  Alan Hayward  <alan.hayward@arm.com>
 
         * aarch64-tdep.c (AARCH64_SVE_V0_REGNUM): Add define.

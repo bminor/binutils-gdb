@@ -327,15 +327,6 @@ extern int print_address_symbolic (struct gdbarch *, CORE_ADDR,
 				   struct ui_file *, int,
 				   const char *);
 
-extern int build_address_symbolic (struct gdbarch *,
-				   CORE_ADDR addr,
-				   int do_demangle, 
-				   char **name, 
-				   int *offset, 
-				   char **filename, 
-				   int *line, 	
-				   int *unmapped);
-
 extern void print_address (struct gdbarch *, CORE_ADDR, struct ui_file *);
 extern const char *pc_prefix (CORE_ADDR);
 
