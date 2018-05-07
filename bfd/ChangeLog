@@ -1,3 +1,12 @@
+2018-05-07  Alan Modra  <amodra@gmail.com>
+
+	* cofflink.c (_bfd_coff_link_input_bfd): Use memcmp rather than
+	strncmp when checking for ".bf" special symbol.
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Make pe_required_section_flags
+	section name a char array, remove sentinal known_sections entry,
+	and adjust loop over known_sections to suit.  Use memcmp rather
+	than strncmp.
+
 2018-05-04  Alan Modra  <amodra@gmail.com>
 
 	* elf-linux-core.h (struct elf_external_linux_prpsinfo32_ugid32),
@@ -18,6 +27,7 @@
 	pragmas.
 	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Use strnlen to avoid
 	false positive gcc-8 warning.
+	* cofflink.c (_bfd_coff_link_input_bfd): Likewise.
 
 2018-05-04  Tulio Magno Quites Machado Filho  <tuliom@linux.ibm.com>
 
