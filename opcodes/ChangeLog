@@ -1,3 +1,9 @@
+2018-05-08  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (PPC_OPCD_SEGS): Define using PPC_OP.
+	(VLE_OPCD_SEGS, SPE2_OPCD_SEGS): Similarly, using macros used to
+	partition opcode space for index lookup.
+
 2018-05-07  Peter Bergner  <bergner@vnet.ibm.com.com>
 
 	* ppc-dis.c (print_insn_powerpc) <insn_is_short>: Replace this...
