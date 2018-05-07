@@ -380,58 +380,42 @@ static unsigned short spe2_opcd_indices[SPE2_OPCD_SEGS+1];
 void
 disassemble_init_powerpc (struct disassemble_info *info)
 {
-  int i;
-  unsigned short last;
-
   if (powerpc_opcd_indices[PPC_OPCD_SEGS] == 0)
     {
-      i = powerpc_num_opcodes;
-      while (--i >= 0)
+      unsigned seg, idx, op;
+
+      /* PPC opcodes */
+      for (seg = 0, idx = 0; seg <= PPC_OPCD_SEGS; seg++)
 	{
-	  unsigned op = PPC_OP (powerpc_opcodes[i].opcode);
-	  powerpc_opcd_indices[op] = i;
+	  powerpc_opcd_indices[seg] = idx;
+	  for (; idx < powerpc_num_opcodes; idx++)
+	    if (seg < PPC_OP (powerpc_opcodes[idx].opcode))
+	      break;
 	}
 
-      last = powerpc_num_opcodes;
-      for (i = PPC_OPCD_SEGS; i > 0; --i)
+      /* VLE opcodes */
+      for (seg = 0, idx = 0; seg <= VLE_OPCD_SEGS; seg++)
 	{
-	  if (powerpc_opcd_indices[i] == 0)
-	    powerpc_opcd_indices[i] = last;
-	  last = powerpc_opcd_indices[i];
+	  vle_opcd_indices[seg] = idx;
+	  for (; idx < vle_num_opcodes; idx++)
+	    {
+	      op = VLE_OP (vle_opcodes[idx].opcode, vle_opcodes[idx].mask);
+	      if (seg < VLE_OP_TO_SEG (op))
+		break;
+	    }
 	}
 
-      i = vle_num_opcodes;
-      while (--i >= 0)
+      /* SPE2 opcodes */
+      for (seg = 0, idx = 0; seg <= SPE2_OPCD_SEGS; seg++)
 	{
-	  unsigned op = VLE_OP (vle_opcodes[i].opcode, vle_opcodes[i].mask);
-	  unsigned seg = VLE_OP_TO_SEG (op);
-	  vle_opcd_indices[seg] = i;
+	  spe2_opcd_indices[seg] = idx;
+	  for (; idx < spe2_num_opcodes; idx++)
+	    {
+	      op = SPE2_XOP (spe2_opcodes[idx].opcode);
+	      if (seg < SPE2_XOP_TO_SEG (op))
+		break;
+	    }
 	}
-
-      last = vle_num_opcodes;
-      for (i = VLE_OPCD_SEGS; i > 0; --i)
-	{
-	  if (vle_opcd_indices[i] == 0)
-	    vle_opcd_indices[i] = last;
-	  last = vle_opcd_indices[i];
-	}
-    }
-
-  /* SPE2 opcodes */
-  i = spe2_num_opcodes;
-  while (--i >= 0)
-    {
-      unsigned xop = SPE2_XOP (spe2_opcodes[i].opcode);
-      unsigned seg = SPE2_XOP_TO_SEG (xop);
-      spe2_opcd_indices[seg] = i;
-    }
-
-  last = spe2_num_opcodes;
-  for (i = SPE2_OPCD_SEGS; i > 1; --i)
-    {
-      if (spe2_opcd_indices[i] == 0)
-	spe2_opcd_indices[i] = last;
-      last = spe2_opcd_indices[i];
     }
 
   powerpc_init_dialect (info);

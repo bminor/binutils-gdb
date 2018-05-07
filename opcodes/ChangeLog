@@ -1,3 +1,14 @@
+2018-05-07  Peter Bergner  <bergner@vnet.ibm.com.com>
+
+	* ppc-opc.c (powerpc_num_opcodes): Change type to unsigned.
+	(vle_num_opcodes): Likewise.
+	(spe2_num_opcodes): Likewise.
+	* ppc-dis.c (disassemble_init_powerpc) <powerpc_opcd_indices>: Rewrite
+	initialization loop.
+	(disassemble_init_powerpc) <vle_opcd_indices>: Likewise.
+	(disassemble_init_powerpc) <spe2_opcd_indices>: Likewise.  Initialize
+	only once.
+
 2018-05-01  Tamar Christina  <tamar.christina@arm.com>
 
 	* aarch64-dis.c (aarch64_opcode_decode): Moved memory clear code.

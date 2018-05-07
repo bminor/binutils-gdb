@@ -1,3 +1,9 @@
+2018-05-07  Peter Bergner  <bergner@vnet.ibm.com.com>
+
+	* opcode/ppc.h (powerpc_num_opcodes): Change type to unsigned.
+	(vle_num_opcodes): Likewise.
+	(spe2_num_opcodes): Likewise.
+
 2018-05-04  Alan Modra  <amodra@gmail.com>
 
 	* ansidecl.h: Import from gcc.

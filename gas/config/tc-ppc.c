@@ -1602,28 +1602,24 @@ ppc_setup_opcodes (void)
     {
       if (ENABLE_CHECKING)
 	{
-	  if (op != powerpc_opcodes)
-	    {
-	      int old_opcode = PPC_OP (op[-1].opcode);
-	      int new_opcode = PPC_OP (op[0].opcode);
+	  unsigned int new_opcode = PPC_OP (op[0].opcode);
 
 #ifdef PRINT_OPCODE_TABLE
-	      printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
-		      op->name, (unsigned int) (op - powerpc_opcodes),
-		      (unsigned int) new_opcode, (unsigned long long) op->opcode,
-		      (unsigned long long) op->mask, (unsigned long long) op->flags);
+	  printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
+		  op->name, (unsigned int) (op - powerpc_opcodes),
+		  new_opcode, (unsigned long long) op->opcode,
+		  (unsigned long long) op->mask, (unsigned long long) op->flags);
 #endif
 
-	      /* The major opcodes had better be sorted.  Code in the
-		 disassembler assumes the insns are sorted according to
-		 major opcode.  */
-	      if (new_opcode < old_opcode)
-		{
-		  as_bad (_("major opcode is not sorted for %s"),
-			  op->name);
-		  bad_insn = TRUE;
-		}
+	  /* The major opcodes had better be sorted.  Code in the disassembler
+	     assumes the insns are sorted according to major opcode.  */
+	  if (op != powerpc_opcodes
+	      && new_opcode < PPC_OP (op[-1].opcode))
+	    {
+	      as_bad (_("major opcode is not sorted for %s"), op->name);
+	      bad_insn = TRUE;
 	    }
+
 	  if ((op->flags & PPC_OPCODE_VLE) != 0)
 	    {
 	      as_bad (_("%s is enabled by vle flag"), op->name);
@@ -1663,30 +1659,22 @@ ppc_setup_opcodes (void)
     {
       if (ENABLE_CHECKING)
 	{
-	  if (op != vle_opcodes)
-	    {
-	      unsigned old_seg, new_seg;
-
-	      old_seg = VLE_OP (op[-1].opcode, op[-1].mask);
-	      old_seg = VLE_OP_TO_SEG (old_seg);
-	      new_seg = VLE_OP (op[0].opcode, op[0].mask);
-	      new_seg = VLE_OP_TO_SEG (new_seg);
+	  unsigned new_seg = VLE_OP_TO_SEG (VLE_OP (op[0].opcode, op[0].mask));
 
 #ifdef PRINT_OPCODE_TABLE
-	      printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
-		      op->name, (unsigned int) (op - powerpc_opcodes),
-		      (unsigned int) new_seg, (unsigned long long) op->opcode,
-		      (unsigned long long) op->mask, (unsigned long long) op->flags);
+	  printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
+		  op->name, (unsigned int) (op - vle_opcodes),
+		  (unsigned int) new_seg, (unsigned long long) op->opcode,
+		  (unsigned long long) op->mask, (unsigned long long) op->flags);
 #endif
-	      /* The major opcodes had better be sorted.  Code in the
-		 disassembler assumes the insns are sorted according to
-		 major opcode.  */
-	      if (new_seg < old_seg)
-		{
-		  as_bad (_("major opcode is not sorted for %s"),
-			  op->name);
-		  bad_insn = TRUE;
-		}
+
+	  /* The major opcodes had better be sorted.  Code in the disassembler
+	     assumes the insns are sorted according to major opcode.  */
+	  if (op != vle_opcodes
+	      && new_seg < VLE_OP_TO_SEG (VLE_OP (op[-1].opcode, op[-1].mask)))
+	    {
+	      as_bad (_("major opcode is not sorted for %s"), op->name);
+	      bad_insn = TRUE;
 	    }
 
 	  bad_insn |= insn_validate (op);

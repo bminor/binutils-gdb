@@ -75,11 +75,11 @@ struct powerpc_opcode
    in the order in which the disassembler should consider
    instructions.  */
 extern const struct powerpc_opcode powerpc_opcodes[];
-extern const int powerpc_num_opcodes;
+extern const unsigned int powerpc_num_opcodes;
 extern const struct powerpc_opcode vle_opcodes[];
-extern const int vle_num_opcodes;
+extern const unsigned int vle_num_opcodes;
 extern const struct powerpc_opcode spe2_opcodes[];
-extern const int spe2_num_opcodes;
+extern const unsigned int spe2_num_opcodes;
 
 /* Values defined for the flags field of a struct powerpc_opcode.  */
 
