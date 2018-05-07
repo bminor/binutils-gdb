@@ -1,5 +1,9 @@
 2018-05-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/gas/i386/xmmhi32.d: Also allow dir32 relocation.
+
+2018-05-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/gas/i386/avx512f-plain.s: Append ".p2align 4,0".
 	* testsuite/gas/i386/avx512vl-plain.s: Likewise.
 	* testsuite/gas/i386/bnd.s: Likewise.
