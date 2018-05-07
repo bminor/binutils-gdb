@@ -1,3 +1,21 @@
+2018-05-07  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (Gva): New.
+	(enum): Add PREFIX_0F38F8, PREFIX_0F38F9,
+	MOD_0F38F8_PREFIX_2, MOD_0F38F9_PREFIX_0.
+	(prefix_table): New instructions (see prefix above).
+	(mod_table): New instructions (see prefix above).
+	(OP_G): Handle va_mode.
+	* i386-gen.c (cpu_flag_init): Add CPU_MOVDIRI_FLAGS,
+	CPU_MOVDIR64B_FLAGS.
+	(cpu_flags): Add CpuMOVDIRI and CpuMOVDIR64B.
+	* i386-opc.h (enum): Add CpuMOVDIRI, CpuMOVDIR64B.
+	(i386_cpu_flags): Add cpumovdiri and cpumovdir64b.
+	* i386-opc.tbl: Add movidir{i,64b}.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2018-05-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Replace AddrPrefixOp0 with

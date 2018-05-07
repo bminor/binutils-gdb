@@ -1029,6 +1029,10 @@ static const arch_entry cpu_arch[] =
     CPU_WAITPKG_FLAGS, 0 },
   { STRING_COMMA_LEN (".cldemote"), PROCESSOR_UNKNOWN,
     CPU_CLDEMOTE_FLAGS, 0 },
+  { STRING_COMMA_LEN (".movdiri"), PROCESSOR_UNKNOWN,
+    CPU_MOVDIRI_FLAGS, 0 },
+  { STRING_COMMA_LEN (".movdir64b"), PROCESSOR_UNKNOWN,
+    CPU_MOVDIR64B_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
@@ -1064,6 +1068,8 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noavx512_bitalg"), CPU_ANY_AVX512_BITALG_FLAGS },
   { STRING_COMMA_LEN ("noibt"), CPU_ANY_IBT_FLAGS },
   { STRING_COMMA_LEN ("noshstk"), CPU_ANY_SHSTK_FLAGS },
+  { STRING_COMMA_LEN ("nomovdiri"), CPU_ANY_MOVDIRI_FLAGS },
+  { STRING_COMMA_LEN ("nomovdir64b"), CPU_ANY_MOVDIR64B_FLAGS },
 };
 
 #ifdef I386COFF
@@ -6042,6 +6048,41 @@ process_suffix (void)
 	i.rex |= REX_W;
 
       break;
+    }
+
+  if (i.reg_operands != 0
+      && i.operands > 1
+      && i.tm.opcode_modifier.addrprefixopreg
+      && !i.tm.opcode_modifier.immext)
+    {
+      /* Check invalid register operand when the address size override
+	 prefix changes the size of register operands.  */
+      unsigned int op;
+      enum { need_word, need_dword, need_qword } need;
+
+      if (flag_code == CODE_32BIT)
+	need = i.prefix[ADDR_PREFIX] ? need_word : need_dword;
+      else
+	{
+	  if (i.prefix[ADDR_PREFIX])
+	    need = need_dword;
+	  else
+	    need = flag_code == CODE_64BIT ? need_qword : need_word;
+	}
+
+      for (op = 0; op < i.operands; op++)
+	if (i.types[op].bitfield.reg
+	    && ((need == need_word
+		 && !i.op[op].regs->reg_type.bitfield.word)
+		|| (need == need_dword
+		    && !i.op[op].regs->reg_type.bitfield.dword)
+		|| (need == need_qword
+		    && !i.op[op].regs->reg_type.bitfield.qword)))
+	  {
+	    as_bad (_("invalid register operand size for `%s'"),
+		    i.tm.name);
+	    return 0;
+	  }
     }
 
   return 1;

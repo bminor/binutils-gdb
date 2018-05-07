@@ -281,6 +281,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Gd { OP_G, d_mode }
 #define Gdq { OP_G, dq_mode }
 #define Gm { OP_G, m_mode }
+#define Gva { OP_G, va_mode }
 #define Gw { OP_G, w_mode }
 #define Rd { OP_R, d_mode }
 #define Rdq { OP_R, dq_mode }
@@ -835,6 +836,8 @@ enum
   MOD_0F382A_PREFIX_2,
   MOD_0F38F5_PREFIX_2,
   MOD_0F38F6_PREFIX_0,
+  MOD_0F38F8_PREFIX_2,
+  MOD_0F38F9_PREFIX_0,
   MOD_62_32BIT,
   MOD_C4_32BIT,
   MOD_C5_32BIT,
@@ -1081,6 +1084,8 @@ enum
   PREFIX_0F38F1,
   PREFIX_0F38F5,
   PREFIX_0F38F6,
+  PREFIX_0F38F8,
+  PREFIX_0F38F9,
   PREFIX_0F3A08,
   PREFIX_0F3A09,
   PREFIX_0F3A0A,
@@ -4680,6 +4685,18 @@ static const struct dis386 prefix_table[][4] = {
     { Bad_Opcode },
   },
 
+  /* PREFIX_0F38F8 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F38F8_PREFIX_2) },
+  },
+
+  /* PREFIX_0F38F9 */
+  {
+    { MOD_TABLE (MOD_0F38F9_PREFIX_0) },
+  },
+
   /* PREFIX_0F3A08 */
   {
     { Bad_Opcode },
@@ -7444,8 +7461,8 @@ static const struct dis386 three_byte_table[][256] = {
     { PREFIX_TABLE (PREFIX_0F38F6) },
     { Bad_Opcode },
     /* f8 */
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F38F8) },
+    { PREFIX_TABLE (PREFIX_0F38F9) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -11837,6 +11854,14 @@ static const struct dis386 mod_table[][2] = {
     { "wrssK",		{ M, Gdq }, PREFIX_OPCODE },
   },
   {
+    /* MOD_0F38F8_PREFIX_2 */
+    { "movdir64b",	{ Gva, M }, PREFIX_OPCODE },
+  },
+  {
+    /* MOD_0F38F9_PREFIX_0 */
+    { "movdiri",	{ Em, Gv }, PREFIX_OPCODE },
+  },
+  {
     /* MOD_62_32BIT */
     { "bound{S|}",	{ Gv, Ma }, 0 },
     { EVEX_TABLE (EVEX_0F) },
@@ -15652,6 +15677,7 @@ static void
 OP_G (int bytemode, int sizeflag)
 {
   int add = 0;
+  const char **names;
   USED_REX (REX_R);
   if (rex & REX_R)
     add += 8;
@@ -15699,6 +15725,24 @@ OP_G (int bytemode, int sizeflag)
 	    oappend (names16[modrm.reg + add]);
 	  used_prefixes |= (prefixes & PREFIX_DATA);
 	}
+      break;
+    case va_mode:
+      names = (address_mode == mode_64bit
+	       ? names64 : names32);
+      if (!(prefixes & PREFIX_ADDR))
+	{
+	  if (address_mode == mode_16bit)
+	    names = names16;
+	}
+      else
+	{
+	  /* Remove "addr16/addr32".  */
+	  all_prefixes[last_addr_prefix] = 0;
+	  names = (address_mode != mode_32bit
+		       ? names32 : names16);
+	  used_prefixes |= PREFIX_ADDR;
+	}
+      oappend (names[modrm.reg + add]);
       break;
     case m_mode:
       if (address_mode == mode_64bit)

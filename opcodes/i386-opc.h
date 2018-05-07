@@ -231,6 +231,10 @@ enum
   CpuWAITPKG,
   /* CLDEMOTE instruction required */
   CpuCLDEMOTE,
+  /* MOVDIRI instruction support required */
+  CpuMOVDIRI,
+  /* MOVDIRR64B instruction required */
+  CpuMOVDIR64B,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -354,6 +358,8 @@ typedef union i386_cpu_flags
       unsigned int cpupconfig:1;
       unsigned int cpuwaitpkg:1;
       unsigned int cpucldemote:1;
+      unsigned int cpumovdiri:1;
+      unsigned int cpumovdir64b:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused

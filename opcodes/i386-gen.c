@@ -283,6 +283,10 @@ static initializer cpu_flag_init[] =
     "CpuWAITPKG" },
   { "CPU_CLDEMOTE_FLAGS",
     "CpuCLDEMOTE" },
+  { "CPU_MOVDIRI_FLAGS",
+    "CpuMOVDIRI" },
+  { "CPU_MOVDIR64B_FLAGS",
+    "CpuMOVDIR64B" },
   { "CPU_ANY_X87_FLAGS",
     "CPU_ANY_287_FLAGS|Cpu8087" },
   { "CPU_ANY_287_FLAGS",
@@ -343,6 +347,10 @@ static initializer cpu_flag_init[] =
     "CpuAVX512_VNNI" },
   { "CPU_ANY_AVX512_BITALG_FLAGS",
     "CpuAVX512_BITALG" },
+  { "CPU_ANY_MOVDIRI_FLAGS",
+    "CpuMOVDIRI" },
+  { "CPU_ANY_MOVDIR64B_FLAGS",
+    "CpuMOVDIR64B" },
 };
 
 static const initializer operand_type_shorthands[] =
@@ -577,6 +585,8 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuPCONFIG),
   BITFIELD (CpuWAITPKG),
   BITFIELD (CpuCLDEMOTE),
+  BITFIELD (CpuMOVDIRI),
+  BITFIELD (CpuMOVDIR64B),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif
