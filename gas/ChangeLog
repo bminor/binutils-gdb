@@ -1,3 +1,8 @@
+2018-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (process_suffix): Check addrprefixopreg
+	instead of addrprefixop0.
+
 2018-05-07  Peter Bergner  <bergner@vnet.ibm.com.com>
 
 	* config/tc-ppc.c (ppc_setup_opcodes) <powerpc_opcodes>: Rewrite code

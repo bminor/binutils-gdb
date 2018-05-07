@@ -618,7 +618,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (HLEPrefixOk),
   BITFIELD (ToDword),
   BITFIELD (ToQword),
-  BITFIELD (AddrPrefixOp0),
+  BITFIELD (AddrPrefixOpReg),
   BITFIELD (IsPrefix),
   BITFIELD (ImmExt),
   BITFIELD (NoRex64),

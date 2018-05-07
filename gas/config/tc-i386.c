@@ -5997,14 +5997,18 @@ process_suffix (void)
       /* Now select between word & dword operations via the operand
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
-      if (i.tm.opcode_modifier.addrprefixop0)
+      if (i.reg_operands > 0
+	  && i.types[0].bitfield.reg
+	  && i.tm.opcode_modifier.addrprefixopreg
+	  && (i.tm.opcode_modifier.immext
+	      || i.operands == 1))
 	{
 	  /* The address size override prefix changes the size of the
 	     first operand.  */
 	  if ((flag_code == CODE_32BIT
-	       && i.op->regs[0].reg_type.bitfield.word)
+	       && i.op[0].regs->reg_type.bitfield.word)
 	      || (flag_code != CODE_32BIT
-		  && i.op->regs[0].reg_type.bitfield.dword))
+		  && i.op[0].regs->reg_type.bitfield.dword))
 	    if (!add_prefix (ADDR_PREFIX_OPCODE))
 	      return 0;
 	}

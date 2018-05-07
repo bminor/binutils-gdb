@@ -1,3 +1,12 @@
+2018-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Replace AddrPrefixOp0 with
+	AddrPrefixOpReg.
+	* i386-opc.h (AddrPrefixOp0): Renamed to ...
+	(AddrPrefixOpReg): This.
+	(i386_opcode_modifier): Rename addrprefixop0 to addrprefixopreg.
+	* i386-opc.tbl: Replace AddrPrefixOp0 with AddrPrefixOpReg.
+
 2018-05-07  Peter Bergner  <bergner@vnet.ibm.com.com>
 
 	* ppc-opc.c (powerpc_num_opcodes): Change type to unsigned.
