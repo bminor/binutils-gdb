@@ -6,3 +6,4 @@ stN:
 	mov	eax, st(7)
 	mov	eax, st ( 7 )
 	mov	eax, x(7)
+	.p2align 4,0

@@ -24,3 +24,5 @@ GAS LISTING .*
 [ 	]*15[ 	]+\.arch \.vpclmulqdq
 [ 	]*16[ 	]+\?\?\?\? 62F36D28[ 	]+\{evex\} vpclmulqdq[ 	]+\$0, %ymm1, %ymm2, %ymm3
 [ 	]*16[ 	]+44D900
+[ 	]*17[ 	]+\?\?\?\? 00000000 		\.p2align 4,0
+#...

@@ -14,3 +14,4 @@ _start:
 
 	.arch .vpclmulqdq
 	vpclmulqdq	$0, %zmm1, %zmm2, %zmm3
+	.p2align 4,0

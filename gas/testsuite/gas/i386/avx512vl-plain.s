@@ -14,3 +14,4 @@ _start:
 
 	.arch .vpclmulqdq
 	{evex} vpclmulqdq	$0, %ymm1, %ymm2, %ymm3
+	.p2align 4,0
