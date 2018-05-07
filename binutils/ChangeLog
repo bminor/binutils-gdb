@@ -1,3 +1,9 @@
+2018-05-07  Alan Modra  <amodra@gmail.com>
+
+	PR 23142
+	* objcopy.c (group_signature): Don't accept groups that use a
+	symbol table other than the one we've read.
+
 2018-04-30  Francois H. Theron <francois.theron@netronome.com>
 
 	* readelf.c: Very basic support for EM_NFP and its section types.

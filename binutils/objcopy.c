@@ -1211,14 +1211,13 @@ group_signature (asection *group)
     return NULL;
 
   ghdr = &elf_section_data (group)->this_hdr;
-  if (ghdr->sh_link < elf_numsections (abfd))
+  if (ghdr->sh_link == elf_onesymtab (abfd))
     {
       const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-      Elf_Internal_Shdr *symhdr = elf_elfsections (abfd) [ghdr->sh_link];
+      Elf_Internal_Shdr *symhdr = &elf_symtab_hdr (abfd);
 
-      if (symhdr->sh_type == SHT_SYMTAB
-	  && ghdr->sh_info > 0
-	  && ghdr->sh_info < (symhdr->sh_size / bed->s->sizeof_sym))
+      if (ghdr->sh_info > 0
+	  && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
 	return isympp[ghdr->sh_info - 1];
     }
   return NULL;
