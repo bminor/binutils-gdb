@@ -1,3 +1,11 @@
+2018-05-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 22809
+	* elf.c (bfd_elf_get_str_section): Check for an excessively large
+	string section.
+	* elf-attrs.c (_bfd_elf_parse_attributes): Issue an error if the
+	attribute section is larger than the size of the file.
+
 2018-05-07  Alan Modra  <amodra@gmail.com>
 
 	* cofflink.c (_bfd_coff_link_input_bfd): Use memcmp rather than

@@ -438,6 +438,15 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
   /* PR 17512: file: 2844a11d.  */
   if (hdr->sh_size == 0)
     return;
+  if (hdr->sh_size > bfd_get_file_size (abfd))
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: error: attribute section '%pA' too big: %#llx"),
+			  abfd, hdr->bfd_section, (long long) hdr->sh_size);
+      bfd_set_error (bfd_error_invalid_operation);
+      return;
+    }
+
   contents = (bfd_byte *) bfd_malloc (hdr->sh_size + 1);
   if (!contents)
     return;
