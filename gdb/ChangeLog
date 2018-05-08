@@ -1,3 +1,7 @@
+2018-05-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* unittests/string_view-selftests.c: Define GNULIB_NAMESPACE.
+
 2018-05-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* common/x86-xstate.h (I387_FCTRL_INIT_VAL): New constant.

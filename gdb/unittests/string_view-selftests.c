@@ -21,6 +21,8 @@
    the "real" version.  */
 #if __cplusplus < 201703L
 
+#define GNULIB_NAMESPACE gnulib
+
 #include "defs.h"
 #include "selftest.h"
 #include "common/gdb_string_view.h"
