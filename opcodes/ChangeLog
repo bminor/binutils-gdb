@@ -1,3 +1,12 @@
+2018-05-08  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-opc.c (match_c_slli, match_slli_as_c_slli): New.
+	(match_c_slli64, match_srxi_as_c_srxi): New.
+	(riscv_opcodes) <slli, sll>: Use match_slli_as_c_slli.
+	<srli, srl, srai, sra>: Use match_srxi_as_c_srxi.
+	<c.slli, c.srli, c.srai>: Use match_s_slli.
+	<c.slli64, c.srli64, c.srai64>: New.
+
 2018-05-08  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (PPC_OPCD_SEGS): Define using PPC_OP.

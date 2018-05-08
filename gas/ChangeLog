@@ -1,3 +1,11 @@
+2018-05-08  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/gas/riscv/c-zero-imm.d: Add more tests.
+	* testsuite/gas/riscv/c-zero-imm.s: Likewise.
+	* testsuite/gas/riscv/c-zero-reg.d: Fix typo in test.  Add disabled
+	future test for RV128 support.
+	* testsuite/gas/riscv/c-zero-reg.s: Likewise.
+
 2018-05-07  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

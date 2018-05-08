@@ -1,3 +1,9 @@
+2018-05-08  Jim Wilson  <jimw@sifive.com>
+
+	* opcode/riscv-opc.h (MATCH_C_SRLI64, MASK_C_SRLI64): New.
+	(MATCH_C_SRAI64, MASK_C_SRAI64): New.
+	(MATCH_C_SLLI64, MASK_C_SLLI64): New.
+
 2018-05-07  Peter Bergner  <bergner@vnet.ibm.com.com>
 
 	* opcode/ppc.h (powerpc_num_opcodes): Change type to unsigned.
