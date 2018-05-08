@@ -266,6 +266,8 @@ ALL_EMULATION_SOURCES = \
 	eelf32ppcvxworks.c \
 	eelf32ppcwindiss.c \
 	eelf32lriscv.c \
+	eelf32lriscv_ilp32f.c \
+	eelf32lriscv_ilp32.c \
 	eelf32rl78.c \
 	eelf32rx.c \
 	eelf32tilegx.c \
@@ -434,6 +436,8 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64hppa.c \
 	eelf64lppc.c \
 	eelf64lriscv.c \
+	eelf64lriscv_lp64f.c \
+	eelf64lriscv_lp64.c \
 	eelf64ltsmip.c \
 	eelf64ltsmip_fbsd.c \
 	eelf64mmix.c \
@@ -1103,6 +1107,16 @@ eelf32lriscv.c: $(srcdir)/emulparams/elf32lriscv.sh \
   $(srcdir)/emultempl/riscvelf.em $(srcdir)/scripttempl/elf.sc \
   ${GEN_DEPENDS}
 
+eelf32lriscv_ilp32f.c: $(srcdir)/emulparams/elf32lriscv_ilp32f.sh \
+  $(srcdir)/emulparams/elf32lriscv-defs.sh $(ELF_DEPS) \
+  $(srcdir)/emultempl/riscvelf.em $(srcdir)/scripttempl/elf.sc \
+  ${GEN_DEPENDS}
+
+eelf32lriscv_ilp32.c: $(srcdir)/emulparams/elf32lriscv_ilp32.sh \
+  $(srcdir)/emulparams/elf32lriscv-defs.sh $(ELF_DEPS) \
+  $(srcdir)/emultempl/riscvelf.em $(srcdir)/scripttempl/elf.sc \
+  ${GEN_DEPENDS}
+
 eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \
   $(srcdir)/emulparams/elf32lmip.sh $(srcdir)/emulparams/elf32bmip.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc \
@@ -1743,6 +1757,18 @@ eelf64lppc.c: $(srcdir)/emulparams/elf64lppc.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf64lriscv.c: $(srcdir)/emulparams/elf64lriscv.sh \
+  $(srcdir)/emulparams/elf64lriscv-defs.sh \
+  $(srcdir)/emulparams/elf32lriscv-defs.sh $(ELF_DEPS) \
+  $(srcdir)/emultempl/riscvelf.em $(srcdir)/scripttempl/elf.sc \
+  ${GEN_DEPENDS}
+
+eelf64lriscv_lp64f.c: $(srcdir)/emulparams/elf64lriscv_lp64f.sh \
+  $(srcdir)/emulparams/elf64lriscv-defs.sh \
+  $(srcdir)/emulparams/elf32lriscv-defs.sh $(ELF_DEPS) \
+  $(srcdir)/emultempl/riscvelf.em $(srcdir)/scripttempl/elf.sc \
+  ${GEN_DEPENDS}
+
+eelf64lriscv_lp64.c: $(srcdir)/emulparams/elf64lriscv_lp64.sh \
   $(srcdir)/emulparams/elf64lriscv-defs.sh \
   $(srcdir)/emulparams/elf32lriscv-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/riscvelf.em $(srcdir)/scripttempl/elf.sc \

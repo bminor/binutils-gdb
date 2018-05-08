@@ -1,3 +1,24 @@
+2018-05-08  Jim Wilson  <jimw@sifive.com>
+
+	PR ld/22962
+	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf32lriscv_ilp32f.c,
+	eelf32lriscv_ilp32.c, eelf64lriscv_lp64f.c, eelf64lriscv_lp64.c.
+	(eelf32lriscv_ilp32f.c, eelf32lriscv_ilp32.c): New build rules.
+	(eelf64lriscv_lp64f.c, eelf64lriscv_lp64.c): New build rules.
+	* Makefile.in: Regenerated.
+	* configure.tgt (riscv32*-*-linux*, riscv64*-*-linux*): New.
+	* ld/emulparams/elf32lriscv.sh: Set LIBPATH_SUFFIX.
+	* ld/emulparams/elf32lriscv_ilp32.sh: New.
+	* ld/emulparams/elf32lriscv_ilp32f.sh: New.
+	* ld/emulparams/elf64lriscv-defs.sh: Don't set LIBPATH_SUFFIX here.
+	* ld/emulparams/elf64lriscv.sh: Set LIBPATH_SUFFIX.
+	* ld/emulparams/elf64lriscv_lp64.sh: New.
+	* ld/emulparams/elf64lriscv_lp64f.sh: New.
+	* ld/genscripts.sh (append_to_lib_path): Change LIBPATH_SUFFIX test to
+	a for.  Inside loop, change LIBPATH_SUFFIX uses to libpath_suffix.
+	(LIB_PATH): In LIB_PATH if, add loop for LIBPATH_SUFFIX, changes uses
+	inside loop to libpath_suffix.
+
 2018-05-03  Jim Wilson  <jimw@sifive.com>
 
 	* Makefile.am (earmelfb_linux_fdpiceabi.c): Fix typo in dependencies.
