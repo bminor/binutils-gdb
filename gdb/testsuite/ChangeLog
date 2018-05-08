@@ -1,3 +1,7 @@
+2018-05-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/watchpoint-unaligned.exp: Use skip_hw_watchpoint_tests.
+
 2018-05-04  Tom Tromey  <tom@tromey.com>
 
 	PR python/22730:
