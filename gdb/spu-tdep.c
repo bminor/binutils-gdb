@@ -2097,9 +2097,11 @@ info_spu_event_command (const char *args, int from_tty)
   ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoEvent");
 
   current_uiout->text (_("Event Status "));
-  current_uiout->field_fmt ("event_status", "0x%s", phex_nz (event_status, 4));
-  current_uiout->text (_("\nEvent Mask   "));
-  current_uiout->field_fmt ("event_mask", "0x%s", phex_nz (event_mask, 4));
+  current_uiout->field_fmt ("event_status", "0x%s", phex (event_status, 4));
+  current_uiout->text ("\n");
+  current_uiout->text (_("Event Mask   "));
+  current_uiout->field_fmt ("event_mask", "0x%s", phex (event_mask, 4));
+  current_uiout->text ("\n");
 }
 
 static void
