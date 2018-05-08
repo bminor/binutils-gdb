@@ -1343,14 +1343,15 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
       const char *gname;
       asection *elt, *first;
 
+      gsym = group_signature (sec);
+      /* Strip groups without a valid signature.  */
+      if (gsym == NULL)
+	return TRUE;
+
       /* PR binutils/3181
 	 If we are going to strip the group signature symbol, then
 	 strip the group section too.  */
-      gsym = group_signature (sec);
-      if (gsym != NULL)
-	gname = gsym->name;
-      else
-	gname = sec->name;
+      gname = gsym->name;
       if ((strip_symbols == STRIP_ALL
 	   && !is_specified_symbol (gname, keep_specific_htab))
 	  || is_specified_symbol (gname, strip_specific_htab))
