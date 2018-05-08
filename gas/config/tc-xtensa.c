@@ -11260,6 +11260,14 @@ static struct litpool_frag *xg_find_litpool (struct litpool_seg *lps,
   return lp;
 }
 
+static bfd_boolean xtensa_is_init_fini (segT seg)
+{
+  if (!seg)
+    return 0;
+  return strcmp (segment_name (seg), INIT_SECTION_NAME) == 0
+    || strcmp (segment_name (seg), FINI_SECTION_NAME) == 0;
+}
+
 static void
 xtensa_move_literals (void)
 {
@@ -11291,6 +11299,9 @@ xtensa_move_literals (void)
       struct litpool_frag *lpf = lps->frag_list.next;
       addressT addr = 0;
 
+      if (xtensa_is_init_fini (lps->seg))
+	continue;
+
       for ( ; frchP; frchP = frchP->frch_next)
 	{
 	  fragS *fragP;
@@ -11311,22 +11322,23 @@ xtensa_move_literals (void)
 		  int slot;
 		  for (slot = 0; slot < MAX_SLOTS; slot++)
 		    {
-		      if (fragP->tc_frag_data.literal_frags[slot])
+		      fragS *litfrag = fragP->tc_frag_data.literal_frags[slot];
+
+		      if (litfrag
+			  && litfrag->tc_frag_data.is_literal
+			  && !litfrag->tc_frag_data.literal_frag)
 			{
-			  /* L32R; point its literal to the nearest litpool
-			     preferring non-"candidate" positions to avoid
-			     the jump-around.  */
-			  fragS *litfrag = fragP->tc_frag_data.literal_frags[slot];
+			  /* L32R referring .literal or generated as a result
+			     of relaxation.  Point its literal to the nearest
+			     litpool preferring non-"candidate" positions to
+			     avoid the jump-around.  */
 
-			  if (!litfrag->tc_frag_data.literal_frag)
-			    {
-			      struct litpool_frag *lp;
+			  struct litpool_frag *lp;
 
-			      lp = xg_find_litpool (lps, lpf, addr);
-			      /* Take earliest use of this literal to avoid
-				 forward refs.  */
-			      litfrag->tc_frag_data.literal_frag = lp->fragP;
-			    }
+			  lp = xg_find_litpool (lps, lpf, addr);
+			  /* Take earliest use of this literal to avoid
+			     forward refs.  */
+			  litfrag->tc_frag_data.literal_frag = lp->fragP;
 			}
 		    }
 		}
@@ -11594,14 +11606,11 @@ xtensa_switch_to_non_abs_literal_fragment (emit_state *result)
 {
   fragS *pool_location = get_literal_pool_location (now_seg);
   segT lit_seg;
-  bfd_boolean is_init =
-    (now_seg && !strcmp (segment_name (now_seg), INIT_SECTION_NAME));
-  bfd_boolean is_fini =
-    (now_seg && !strcmp (segment_name (now_seg), FINI_SECTION_NAME));
+  bfd_boolean is_init_fini = xtensa_is_init_fini (now_seg);
 
   if (pool_location == NULL
       && !use_literal_section
-      && !is_init && ! is_fini)
+      && !is_init_fini)
     {
       if (!auto_litpools)
 	{
@@ -11615,7 +11624,7 @@ xtensa_switch_to_non_abs_literal_fragment (emit_state *result)
   xtensa_switch_section_emit_state (result, lit_seg, 0);
 
   if (!use_literal_section
-      && !is_init && !is_fini
+      && !is_init_fini
       && get_literal_pool_location (now_seg) != pool_location)
     {
       /* Close whatever frag is there.  */

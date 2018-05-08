@@ -1,3 +1,21 @@
+2018-05-09  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_is_init_fini): New function.
+	(xtensa_move_literals): Only attempt to assign literal pool to
+	literals with tc_frag_data.is_literal mark and not in .init or
+	.fini sections.
+	Join nested 'if' conditions to simplify function structure.
+	(xtensa_switch_to_non_abs_literal_fragment): Use
+	xtensa_is_init_fini to test for .init/.fini sections.
+	* testsuite/gas/xtensa/all.exp (auto-litpools-3)
+	(auto-litpools-4, text-section-literals-1): New tests.
+	* testsuite/gas/xtensa/auto-litpools-3.d: New test results.
+	* testsuite/gas/xtensa/auto-litpools-3.s: New test source.
+	* testsuite/gas/xtensa/auto-litpools-4.d: New test results.
+	* testsuite/gas/xtensa/auto-litpools-4.s: New test source.
+	* testsuite/gas/xtensa/text-section-literals-1.d: New test results.
+	* testsuite/gas/xtensa/text-section-literals-1.s: New test source.
+
 2018-05-09  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* config/tc-pru.c (md_apply_fix): Make LDI32 relocation conformant
