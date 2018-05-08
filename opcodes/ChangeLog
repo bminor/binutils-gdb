@@ -1,3 +1,9 @@
+2018-05-07  Peter Bergner  <bergner@vnet.ibm.com.com>
+
+	* ppc-dis.c (print_insn_powerpc) <insn_is_short>: Replace this...
+	<insn_length>: ...with this.  Update usage.
+	Remove duplicate call to *info->memory_error_func.
+
 2018-05-07  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
