@@ -2339,7 +2339,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
   FDR *fh;
   char *ext_out;
   char *ext_out_end;
-  EXTR *ext_block;
   EXTR *ext_in;
   EXTR *ext_in_end;
   SYMR sh;
@@ -2355,7 +2354,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
   /* Index within current psymtab dependency list.  */
   struct partial_symtab **dependency_list;
   int dependencies_used, dependencies_allocated;
-  struct cleanup *old_chain;
   char *name;
   enum language prev_language;
   asection *text_sect;
@@ -2404,8 +2402,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
   /* Allocate the map FDR -> PST.
      Minor hack: -O3 images might claim some global data belongs
      to FDR -1.  We`ll go along with that.  */
-  fdr_to_pst = XCNEWVEC (struct pst_map, hdr->ifdMax + 1);
-  old_chain = make_cleanup (xfree, fdr_to_pst);
+  gdb::def_vector<struct pst_map> fdr_to_pst_holder (hdr->ifdMax + 1);
+  fdr_to_pst = fdr_to_pst_holder.data ();
   fdr_to_pst++;
   {
     struct partial_symtab *pst = new_psymtab ("", objfile);
@@ -2423,17 +2421,16 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	  hdr->ifdMax * sizeof (struct mdebug_pending *));
 
   /* Pass 0 over external syms: swap them in.  */
-  ext_block = XNEWVEC (EXTR, hdr->iextMax);
-  make_cleanup (xfree, ext_block);
+  gdb::def_vector<EXTR> ext_block (hdr->iextMax);
 
   ext_out = (char *) debug_info->external_ext;
   ext_out_end = ext_out + hdr->iextMax * external_ext_size;
-  ext_in = ext_block;
+  ext_in = ext_block.data ();
   for (; ext_out < ext_out_end; ext_out += external_ext_size, ext_in++)
     (*swap_ext_in) (cur_bfd, ext_out, ext_in);
 
   /* Pass 1 over external syms: Presize and partition the list.  */
-  ext_in = ext_block;
+  ext_in = ext_block.data ();
   ext_in_end = ext_in + hdr->iextMax;
   for (; ext_in < ext_in_end; ext_in++)
     {
@@ -2486,7 +2483,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
      symbol table.  */
 
   /* Pass 2 over external syms: fill in external symbols.  */
-  ext_in = ext_block;
+  ext_in = ext_block.data ();
   ext_in_end = ext_in + hdr->iextMax;
   for (; ext_in < ext_in_end; ext_in++)
     {
@@ -3812,7 +3809,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       && objfile->psymtabs->n_global_syms == 0
       && objfile->psymtabs->n_static_syms == 0)
     objfile->psymtabs = NULL;
-  do_cleanups (old_chain);
 }
 
 /* If the current psymbol has an enumerated type, we need to add
@@ -4121,20 +4117,17 @@ psymtab_to_symtab_1 (struct objfile *objfile,
       /* Fill in procedure info next.  */
       if (fh->cpd > 0)
 	{
-	  PDR *pr_block;
-	  struct cleanup *old_chain;
 	  char *pdr_ptr;
 	  char *pdr_end;
 	  PDR *pdr_in;
 	  PDR *pdr_in_end;
 
-	  pr_block = XNEWVEC (PDR, fh->cpd);
-	  old_chain = make_cleanup (xfree, pr_block);
+	  gdb::def_vector<PDR> pr_block (fh->cpd);
 
 	  pdr_ptr = ((char *) debug_info->external_pdr
 		     + fh->ipdFirst * external_pdr_size);
 	  pdr_end = pdr_ptr + fh->cpd * external_pdr_size;
-	  pdr_in = pr_block;
+	  pdr_in = pr_block.data ();
 	  for (;
 	       pdr_ptr < pdr_end;
 	       pdr_ptr += external_pdr_size, pdr_in++)
@@ -4143,18 +4136,16 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 
 	      /* Determine lowest PDR address, the PDRs are not always
 	         sorted.  */
-	      if (pdr_in == pr_block)
+	      if (pdr_in == pr_block.data ())
 		lowest_pdr_addr = pdr_in->adr;
 	      else if (pdr_in->adr < lowest_pdr_addr)
 		lowest_pdr_addr = pdr_in->adr;
 	    }
 
-	  pdr_in = pr_block;
+	  pdr_in = pr_block.data ();
 	  pdr_in_end = pdr_in + fh->cpd;
 	  for (; pdr_in < pdr_in_end; pdr_in++)
 	    parse_procedure (pdr_in, cust, pst);
-
-	  do_cleanups (old_chain);
 	}
     }
   else
@@ -4224,21 +4215,17 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	     structures, so we swap them all first.  */
 	  if (fh->cpd > 0)
 	    {
-	      PDR *pr_block;
-	      struct cleanup *old_chain;
 	      char *pdr_ptr;
 	      char *pdr_end;
 	      PDR *pdr_in;
 	      PDR *pdr_in_end;
 
-	      pr_block = XNEWVEC (PDR, fh->cpd);
-
-	      old_chain = make_cleanup (xfree, pr_block);
+	      gdb::def_vector<PDR> pr_block (fh->cpd);
 
 	      pdr_ptr = ((char *) debug_info->external_pdr
 			 + fh->ipdFirst * external_pdr_size);
 	      pdr_end = pdr_ptr + fh->cpd * external_pdr_size;
-	      pdr_in = pr_block;
+	      pdr_in = pr_block.data ();
 	      for (;
 		   pdr_ptr < pdr_end;
 		   pdr_ptr += external_pdr_size, pdr_in++)
@@ -4247,24 +4234,22 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 
 		  /* Determine lowest PDR address, the PDRs are not always
 		     sorted.  */
-		  if (pdr_in == pr_block)
+		  if (pdr_in == pr_block.data ())
 		    lowest_pdr_addr = pdr_in->adr;
 		  else if (pdr_in->adr < lowest_pdr_addr)
 		    lowest_pdr_addr = pdr_in->adr;
 		}
 
-	      parse_lines (fh, pr_block, lines, maxlines,
+	      parse_lines (fh, pr_block.data (), lines, maxlines,
 			   pst, lowest_pdr_addr);
 	      if (lines->nitems < fh->cline)
 		lines = shrink_linetable (lines);
 
 	      /* Fill in procedure info next.  */
-	      pdr_in = pr_block;
+	      pdr_in = pr_block.data ();
 	      pdr_in_end = pdr_in + fh->cpd;
 	      for (; pdr_in < pdr_in_end; pdr_in++)
 		parse_procedure (pdr_in, NULL, pst);
-
-	      do_cleanups (old_chain);
 	    }
 	}
 
