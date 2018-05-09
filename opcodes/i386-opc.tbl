@@ -5832,9 +5832,9 @@ cldemote, 1, 0x0f1c, 0x0, 2, CpuCLDEMOTE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lS
 
 // MOVDIR[I,64B] instructions.
 
-movdiri, 2, 0xf38f9, None, 3, CpuMOVDIRI, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+movdiri, 2, 0xf38f9, None, 3, CpuMOVDIRI, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 
-movdir64b, 2, 0x660f38f8, None, 3, CpuMOVDIR64B|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|AddrPrefixOpReg, { Unspecified|BaseIndex|Disp8|Disp16|Disp32, Reg16|Reg32 }
-movdir64b, 2, 0x660f38f8, None, 3, CpuMOVDIR64B|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64|AddrPrefixOpReg, { Unspecified|BaseIndex|Disp8|Disp32|Disp32S, Reg32|Reg64 }
+movdir64b, 2, 0x660f38f8, None, 3, CpuMOVDIR64B|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|AddrPrefixOpReg, { Unspecified|BaseIndex, Reg16|Reg32 }
+movdir64b, 2, 0x660f38f8, None, 3, CpuMOVDIR64B|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64|AddrPrefixOpReg, { Unspecified|BaseIndex, Reg32|Reg64 }
 
 // MOVEDIR instructions end.
