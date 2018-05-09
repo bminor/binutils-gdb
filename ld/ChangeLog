@@ -1,3 +1,7 @@
+2018-05-09  Alan Modra  <amodra@gmail.com>
+
+	* po/BLD-POTFILES.in: Regenerate.
+
 2018-05-08  Jim Wilson  <jimw@sifive.com>
 
 	PR ld/22962
