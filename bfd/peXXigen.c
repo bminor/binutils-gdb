@@ -1671,7 +1671,7 @@ pe_print_edata (bfd * abfd, void * vfile)
     }
 
   /* PR 17512: Handle corrupt PE binaries.  */
-  if (datasize < 36)
+  if (datasize < 40)
     {
       fprintf (file,
 	       /* xgettext:c-format */

@@ -1,5 +1,10 @@
 2018-05-09  Alan Modra  <amodra@gmail.com>
 
+	PR 23148
+	* peXXigen.c (pe_print_edata): Correct minimum size.
+
+2018-05-09  Alan Modra  <amodra@gmail.com>
+
 	PR 23147
 	* peXXigen.c (pe_print_idata): Bound check hint_addr.
 
