@@ -1,3 +1,14 @@
+2018-05-09  2018-05-02  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* scripttempl/pru.sc: Add LD sections to allow linking TI
+	toolchain object files.
+	* scripttempl/pru.sc: Switch to init_array.
+	* testsuite/ld-pru/ldi32.d: Update LDI32 test to conform to TI ABI.
+	* testsuite/ld-pru/norelax_ldi32-data.d: Likewise.
+	* testsuite/ld-pru/norelax_ldi32-dis.d: Likewise.
+	* testsuite/ld-pru/relax_ldi32-data.d: Likewise.
+	* testsuite/ld-pru/relax_ldi32-dis.d: Likewise.
+
 2018-05-09  Alan Modra  <amodra@gmail.com>
 
 	* po/BLD-POTFILES.in: Regenerate.

@@ -539,7 +539,7 @@ pru_elf32_do_ldi32_relocate (bfd *abfd, reloc_howto_type *howto,
   bfd_signed_vma relocation;
   bfd_size_type octets = offset * bfd_octets_per_byte (abfd);
   bfd_byte *location;
-  unsigned long in1, in2, num;
+  unsigned long in1, in2;
 
   /* A hacked-up version of _bfd_final_link_relocate() follows.  */
 
@@ -564,17 +564,22 @@ pru_elf32_do_ldi32_relocate (bfd *abfd, reloc_howto_type *howto,
   in1 = bfd_get_32 (abfd, location);
   in2 = bfd_get_32 (abfd, location + 4);
 
-  /* Extract the addend - should be zero per my understanding.  */
-  num = GET_INSN_FIELD (IMM16, in1) | (GET_INSN_FIELD (IMM16, in2) << 16);
-  BFD_ASSERT (!num);
-
-  relocation += num;
-
-  SET_INSN_FIELD (IMM16, in1, relocation & 0xffff);
-  SET_INSN_FIELD (IMM16, in2, relocation >> 16);
+  SET_INSN_FIELD (IMM16, in1, relocation >> 16);
+  SET_INSN_FIELD (IMM16, in2, relocation & 0xffff);
 
   bfd_put_32 (abfd, in1, location);
   bfd_put_32 (abfd, in2, location + 4);
+
+  /* Old GAS and LD versions have a bug, where the two
+     LDI instructions are swapped.  Detect such object
+     files and bail.  */
+  if (GET_INSN_FIELD (RDSEL, in1) != RSEL_31_16)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("error: %pB: old incompatible object file detected"),
+			  abfd);
+      return bfd_reloc_notsupported;
+    }
 
   return bfd_reloc_ok;
 }
@@ -594,6 +599,7 @@ pru_elf32_pmem_relocate (bfd *abfd, arelent *reloc_entry,
     return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
+  BFD_ASSERT (0);
   return pru_elf32_do_pmem_relocate (abfd, reloc_entry->howto,
 				     input_section,
 				     data, reloc_entry->address,
@@ -681,14 +687,23 @@ pru_elf32_relocate_section (bfd *output_bfd,
 			    Elf_Internal_Sym *local_syms,
 			    asection **local_sections)
 {
+  struct bfd_elf_section_data * esd = elf_section_data (input_section);
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
+  bfd_boolean is_rel_reloc;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   relend = relocs + input_section->reloc_count;
+
+  /* See if we have a REL type relocation.  */
+  is_rel_reloc = (esd->rel.hdr != NULL);
+  /* Sanity check - only one type of relocation per section.
+     FIXME: Theoretically it is possible to have both types,
+     but if that happens how can we distinguish between the two ?  */
+  BFD_ASSERT (! is_rel_reloc || ! esd->rela.hdr);
 
   for (rel = relocs; rel < relend; rel++)
     {
@@ -702,6 +717,10 @@ pru_elf32_relocate_section (bfd *output_bfd,
       const char *name = NULL;
       const char* msg = (const char*) NULL;
       bfd_boolean unresolved_reloc;
+      bfd_vma addend;
+
+      /* If we are using a REL relocation then the addend should be empty.  */
+      BFD_ASSERT (! is_rel_reloc || rel->r_addend == 0);
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
@@ -744,15 +763,52 @@ pru_elf32_relocate_section (bfd *output_bfd,
 	      r = bfd_reloc_ok;
 	      break;
 
+	    case R_PRU_U16:
+	      if (is_rel_reloc)
+		{
+		  unsigned long insn;
+		  insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		  addend = GET_INSN_FIELD (IMM16, insn);
+		}
+	      else
+		addend = rel->r_addend;
+	      r = _bfd_final_link_relocate (howto, input_bfd,
+					    input_section, contents,
+					    rel->r_offset, relocation,
+					    addend);
+	      break;
+
 	    case R_PRU_U16_PMEMIMM:
 	    case R_PRU_32_PMEM:
 	    case R_PRU_16_PMEM:
+	      if (is_rel_reloc && howto->type == R_PRU_U16_PMEMIMM)
+		{
+		  unsigned long insn;
+		  insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		  addend = GET_INSN_FIELD (IMM16, insn) << 2;
+		}
+	      else if (is_rel_reloc && howto->type == R_PRU_32_PMEM)
+		{
+		  addend = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		  addend <<= 2;
+		}
+	      else if (is_rel_reloc && howto->type == R_PRU_16_PMEM)
+		{
+		  addend = bfd_get_16 (input_bfd, contents + rel->r_offset);
+		  addend <<= 2;
+		}
+	      else
+		{
+		  BFD_ASSERT (!is_rel_reloc);
+		  addend = rel->r_addend;
+		}
 	      r = pru_elf32_do_pmem_relocate (input_bfd, howto,
 						input_section,
 						contents, rel->r_offset,
-						relocation, rel->r_addend);
+						relocation, addend);
 	      break;
 	    case R_PRU_S10_PCREL:
+	      BFD_ASSERT (! is_rel_reloc);
 	      r = pru_elf32_do_s10_pcrel_relocate (input_bfd, howto,
 						      input_section,
 						      contents,
@@ -761,6 +817,7 @@ pru_elf32_relocate_section (bfd *output_bfd,
 						      rel->r_addend);
 	      break;
 	    case R_PRU_U8_PCREL:
+	      BFD_ASSERT (! is_rel_reloc);
 	      r = pru_elf32_do_u8_pcrel_relocate (input_bfd, howto,
 						      input_section,
 						      contents,
@@ -769,28 +826,69 @@ pru_elf32_relocate_section (bfd *output_bfd,
 						      rel->r_addend);
 	      break;
 	    case R_PRU_LDI32:
+	      if (is_rel_reloc)
+		{
+		  unsigned long in1, in2;
+		  in1 = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		  in2 = bfd_get_32 (input_bfd, contents + rel->r_offset + 4);
+		  addend = (GET_INSN_FIELD (IMM16, in1) << 16)
+			    | GET_INSN_FIELD (IMM16, in2);
+		}
+	      else
+		{
+		  addend = rel->r_addend;
+		}
 	      r = pru_elf32_do_ldi32_relocate (input_bfd, howto,
 					       input_section,
 					       contents,
 					       rel->r_offset,
 					       relocation,
-					       rel->r_addend);
+					       addend);
 	      break;
 	    case R_PRU_GNU_DIFF8:
 	    case R_PRU_GNU_DIFF16:
 	    case R_PRU_GNU_DIFF32:
 	    case R_PRU_GNU_DIFF16_PMEM:
 	    case R_PRU_GNU_DIFF32_PMEM:
+	      /* GNU extensions support only rela.  */
+	      BFD_ASSERT (! is_rel_reloc);
 	      /* Nothing to do here, as contents already contain the
 		 diff value.  */
 	      r = bfd_reloc_ok;
 	      break;
 
-	    default:
+	    case R_PRU_BFD_RELOC_16:
+	      if (is_rel_reloc)
+		addend = bfd_get_16 (input_bfd, contents + rel->r_offset);
+	      else
+		addend = rel->r_addend;
+	      r = _bfd_final_link_relocate (howto, input_bfd,
+					    input_section, contents,
+					    rel->r_offset, relocation,
+					    addend);
+	      break;
+
+	    case R_PRU_BFD_RELOC_32:
+	      if (is_rel_reloc)
+		addend = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      else
+		addend = rel->r_addend;
+	      r = _bfd_final_link_relocate (howto, input_bfd,
+					    input_section, contents,
+					    rel->r_offset, relocation,
+					    addend);
+	      break;
+
+	    case R_PRU_GNU_BFD_RELOC_8:
+	      BFD_ASSERT (! is_rel_reloc);
 	      r = _bfd_final_link_relocate (howto, input_bfd,
 					    input_section, contents,
 					    rel->r_offset, relocation,
 					    rel->r_addend);
+	      break;
+
+	    default:
+	      BFD_ASSERT (0);
 	      break;
 	    }
 	}
@@ -1094,7 +1192,7 @@ pru_elf_relax_delete_bytes (bfd *abfd,
 	 continue;
 
        shrinked_insn_address = (sec->output_section->vma
-				+ sec->output_offset + addr - count);
+				+ sec->output_offset + addr);
 
        irel = elf_section_data (isec)->relocs;
        /* PR 12161: Read in the relocs for this section if necessary.  */
@@ -1354,17 +1452,39 @@ pru_elf32_relax_section (bfd * abfd, asection * sec,
 
 	  if ((long) value >> 16 == 0)
 	    {
+	      unsigned long insn;
+
 	      /* Note that we've changed the relocs, section contents.  */
 	      elf_section_data (sec)->relocs = internal_relocs;
 	      elf_section_data (sec)->this_hdr.contents = contents;
 	      symtab_hdr->contents = (unsigned char *) isymbuf;
 
-	      /* Delete bytes.  */
-	      if (!pru_elf_relax_delete_bytes (abfd, sec, irel->r_offset + 4, 4))
+	      /* Make the second instruction load the 16-bit constant
+		 into the full 32-bit register.  */
+	      insn = bfd_get_32 (abfd, contents + irel->r_offset + 4);
+
+	      /* Old GAS and LD versions have a bug, where the two
+		 LDI instructions are swapped.  Detect such object
+		 files and bail.  */
+	      if (GET_INSN_FIELD (RDSEL, insn) != RSEL_15_0)
+		{
+		  /* xgettext:c-format */
+		  _bfd_error_handler (_("error: %pB: old incompatible object file detected"),
+				      abfd);
+		  goto error_return;
+		}
+
+	      SET_INSN_FIELD (RDSEL, insn, RSEL_31_0);
+	      bfd_put_32 (abfd, insn, contents + irel->r_offset + 4);
+
+	      /* Delete the first LDI instruction.  Note that there should
+		 be no relocations or symbols pointing to the second LDI
+		 instruction.  */
+	      if (!pru_elf_relax_delete_bytes (abfd, sec, irel->r_offset, 4))
 		goto error_return;
 
-	      /* We're done with deletion of the second instruction.
-		 Set a regular LDI relocation for the first instruction
+	      /* We're done with deletion of the first instruction.
+		 Set a regular LDI relocation for the second instruction
 		 we left to load the 16-bit value into the 32-bit
 		 register.  */
 	      irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
@@ -1466,11 +1586,16 @@ pru_elf32_link_hash_table_create (bfd *abfd)
 #define bfd_elf32_bfd_reloc_type_lookup	  pru_elf32_bfd_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	  pru_elf32_bfd_reloc_name_lookup
 
-/* elf_info_to_howto (using RELA relocations).  */
-
 #define elf_info_to_howto		pru_elf32_info_to_howto
+#define elf_info_to_howto_rel		NULL
 
 /* elf backend functions.  */
+
+/* TI folks like to use a mix of REL and RELA relocations.  See also
+   the MSP430 and TI C6X backends.  */
+#define elf_backend_may_use_rel_p  1
+#define elf_backend_may_use_rela_p 1
+#define elf_backend_default_use_rela_p 1
 
 #define elf_backend_rela_normal		1
 

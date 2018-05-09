@@ -22,5 +22,6 @@ if { [istarget pru-*-*] } {
     run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 
     run_list_test "illegal" ""
+    run_list_test "illegal2" ""
     run_list_test "warn_reglabel" ""
 }

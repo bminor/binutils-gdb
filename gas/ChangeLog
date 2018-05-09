@@ -1,3 +1,15 @@
+2018-05-09  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* config/tc-pru.c (md_apply_fix): Make LDI32 relocation conformant
+	to TI ABI.
+	(pru_assemble_arg_i): Likewise.
+	(output_insn_ldi32): Likewise.
+	* testsuite/gas/pru/ldi.d: Update test for the now fixed LDI32.
+	* gas/config/tc-pru.c (pru_assemble_arg_b): Check imm8 operand range.
+	* gas/testsuite/gas/pru/illegal2.l: New test.
+	* gas/testsuite/gas/pru/illegal2.s: New test.
+	* gas/testsuite/gas/pru/pru.exp: Register new illegal2 test.
+
 2018-05-08  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/gas/riscv/c-zero-imm.d: Add more tests.

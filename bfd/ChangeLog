@@ -1,3 +1,17 @@
+2018-05-09  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* elf32-pru.c (pru_elf32_do_ldi32_relocate): Make LDI32 relocation
+	conformant to TI ABI.
+	(pru_elf32_relax_section): Likewise.
+	(pru_elf_relax_delete_bytes): Fix offsets for new LDI32 code.
+	* elf32-pru.c (pru_elf32_do_ldi32_relocate): Ignore addend.
+	(pru_elf32_pmem_relocate): Trap - should not get here.
+	(pru_elf32_relocate_section): Add support for REL relocations.
+	(elf_info_to_howto_rel): Enable REL.
+	(elf_backend_may_use_rel_p): Likewise.
+	(elf_backend_may_use_rela_p): Likewise.
+	(elf_backend_default_use_rela_p): Likewise.
+
 2018-05-09  Alan Modra  <amodra@gmail.com>
 
 	PR 23148
