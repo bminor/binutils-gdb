@@ -1,3 +1,8 @@
+2018-05-09  Alan Modra  <amodra@gmail.com>
+
+	PR 23147
+	* peXXigen.c (pe_print_idata): Bound check hint_addr.
+
 2018-05-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 22809
