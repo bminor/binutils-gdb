@@ -28,7 +28,7 @@ enum {
   msr_e500_spu_enable = BIT(38)
 };
 
-/* E500 regsiters.  */
+/* E500 registers.  */
 
 enum
   {

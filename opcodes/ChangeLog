@@ -1,3 +1,8 @@
+2018-05-09  Sebastian Rasmussen  <sebras@gmail.com>
+
+	* cr16-opc.c (cr16_instruction): Comment typo fix.
+	* hppa-dis.c (print_insn_hppa): Likewise.
+
 2018-05-08  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-opc.c (match_c_slli, match_slli_as_c_slli): New.

@@ -1688,7 +1688,7 @@ dump_unwind_encoding_x86 (unsigned int encoding, unsigned int sz,
 	unsigned int regs;
 	char pfx = sz == 8 ? 'R' : 'E';
 
-	regs = encoding & MACH_O_UNWIND_X86_64_RBP_FRAME_REGSITERS;
+	regs = encoding & MACH_O_UNWIND_X86_64_RBP_FRAME_REGISTERS
 	printf (" %cSP frame", pfx);
 	if (regs != 0)
 	  {
