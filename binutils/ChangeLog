@@ -1,3 +1,7 @@
+2018-05-09  Alan Modra  <amodra@gmail.com>
+
+	* od-macho.c (dump_unwind_encoding_x86): Fix typo in last patch.
+
 2018-05-09  Sebastian Rasmussen  <sebras@gmail.com>
 
 	* od-macho.c (dump_unwind_encoding_x86): Adjust for macro renaming.
