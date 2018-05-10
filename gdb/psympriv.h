@@ -271,13 +271,22 @@ struct partial_symtab
   void *read_symtab_private;
 };
 
+/* Specify whether a partial psymbol should be allocated on the global
+   list or the static list.  */
+
+enum class psymbol_placement
+{
+  STATIC,
+  GLOBAL
+};
+
 /* Add any kind of symbol to a partial_symbol vector.  */
 
 extern void add_psymbol_to_list (const char *, int,
 				 int, domain_enum,
 				 enum address_class,
 				 short /* section */,
-				 std::vector<partial_symbol *> *,
+				 enum psymbol_placement,
 				 CORE_ADDR,
 				 enum language, struct objfile *);
 

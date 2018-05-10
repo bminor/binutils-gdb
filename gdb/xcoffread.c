@@ -2654,7 +2654,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_STATIC,
 				     SECT_OFF_DATA (objfile),
-				     &objfile->static_psymbols,
+				     psymbol_placement::STATIC,
 				     symbol.n_value,
 				     psymtab_language, objfile);
 		continue;
@@ -2665,7 +2665,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_STATIC,
 				     SECT_OFF_DATA (objfile),
-				     &objfile->global_psymbols,
+				     psymbol_placement::GLOBAL,
 				     symbol.n_value,
 				     psymtab_language, objfile);
 		continue;
@@ -2683,14 +2683,14 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		  {
 		    add_psymbol_to_list (namestring, p - namestring, 1,
 					 STRUCT_DOMAIN, LOC_TYPEDEF, -1,
-					 &objfile->static_psymbols,
+					 psymbol_placement::STATIC,
 					 0, psymtab_language, objfile);
 		    if (p[2] == 't')
 		      {
 			/* Also a typedef with the same name.  */
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_TYPEDEF, -1,
-					     &objfile->static_psymbols,
+					     psymbol_placement::STATIC,
 					     0, psymtab_language, objfile);
 			p += 1;
 		      }
@@ -2702,7 +2702,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		  {
 		    add_psymbol_to_list (namestring, p - namestring, 1,
 					 VAR_DOMAIN, LOC_TYPEDEF, -1,
-					 &objfile->static_psymbols,
+					 psymbol_placement::STATIC,
 					 0, psymtab_language, objfile);
 		  }
 	      check_enum:
@@ -2764,7 +2764,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			   enum constants in psymtabs, just in symtabs.  */
 			add_psymbol_to_list (p, q - p, 1,
 					     VAR_DOMAIN, LOC_CONST, -1,
-					     &objfile->static_psymbols,
+					     psymbol_placement::STATIC,
 					     0, psymtab_language, objfile);
 			/* Point past the name.  */
 			p = q;
@@ -2782,7 +2782,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		/* Constant, e.g. from "const" in Pascal.  */
 		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_CONST, -1,
-				     &objfile->static_psymbols,
+				     psymbol_placement::STATIC,
 				     0, psymtab_language, objfile);
 		continue;
 
@@ -2800,7 +2800,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_BLOCK,
 				     SECT_OFF_TEXT (objfile),
-				     &objfile->static_psymbols,
+				     psymbol_placement::STATIC,
 				     symbol.n_value,
 				     psymtab_language, objfile);
 		continue;
@@ -2830,7 +2830,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_BLOCK,
 				     SECT_OFF_TEXT (objfile),
-				     &objfile->global_psymbols,
+				     psymbol_placement::GLOBAL,
 				     symbol.n_value,
 				     psymtab_language, objfile);
 		continue;

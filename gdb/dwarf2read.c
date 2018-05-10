@@ -8888,7 +8888,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
 			       SECT_OFF_TEXT (objfile),
-			       &objfile->global_psymbols,
+			       psymbol_placement::GLOBAL,
 			       addr,
 			       cu->language, objfile);
 	}
@@ -8898,7 +8898,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
 			       SECT_OFF_TEXT (objfile),
-			       &objfile->static_psymbols,
+			       psymbol_placement::STATIC,
 			       addr, cu->language, objfile);
 	}
 
@@ -8906,17 +8906,12 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	set_objfile_main_name (objfile, actual_name, cu->language);
       break;
     case DW_TAG_constant:
-      {
-	std::vector<partial_symbol *> *list;
-
-	if (pdi->is_external)
-	  list = &objfile->global_psymbols;
-	else
-	  list = &objfile->static_psymbols;
-	add_psymbol_to_list (actual_name, strlen (actual_name),
-			     built_actual_name != NULL, VAR_DOMAIN, LOC_STATIC,
-			     -1, list, 0, cu->language, objfile);
-      }
+      add_psymbol_to_list (actual_name, strlen (actual_name),
+			   built_actual_name != NULL, VAR_DOMAIN, LOC_STATIC,
+			   -1, (pdi->is_external
+				? psymbol_placement::GLOBAL
+				: psymbol_placement::STATIC),
+			   0, cu->language, objfile);
       break;
     case DW_TAG_variable:
       if (pdi->d.locdesc)
@@ -8951,7 +8946,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 				 built_actual_name != NULL,
 				 VAR_DOMAIN, LOC_STATIC,
 				 SECT_OFF_TEXT (objfile),
-				 &objfile->global_psymbols,
+				 psymbol_placement::GLOBAL,
 				 addr, cu->language, objfile);
 	}
       else
@@ -8970,7 +8965,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_STATIC,
 			       SECT_OFF_TEXT (objfile),
-			       &objfile->static_psymbols,
+			       psymbol_placement::STATIC,
 			       has_loc ? addr : 0,
 			       cu->language, objfile);
 	}
@@ -8981,7 +8976,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   built_actual_name != NULL,
 			   VAR_DOMAIN, LOC_TYPEDEF, -1,
-			   &objfile->static_psymbols,
+			   psymbol_placement::STATIC,
 			   0, cu->language, objfile);
       break;
     case DW_TAG_imported_declaration:
@@ -8989,14 +8984,14 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   built_actual_name != NULL,
 			   VAR_DOMAIN, LOC_TYPEDEF, -1,
-			   &objfile->global_psymbols,
+			   psymbol_placement::GLOBAL,
 			   0, cu->language, objfile);
       break;
     case DW_TAG_module:
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   built_actual_name != NULL,
 			   MODULE_DOMAIN, LOC_TYPEDEF, -1,
-			   &objfile->global_psymbols,
+			   psymbol_placement::GLOBAL,
 			   0, cu->language, objfile);
       break;
     case DW_TAG_class_type:
@@ -9021,8 +9016,8 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			   built_actual_name != NULL,
 			   STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 			   cu->language == language_cplus
-			   ? &objfile->global_psymbols
-			   : &objfile->static_psymbols,
+			   ? psymbol_placement::GLOBAL
+			   : psymbol_placement::STATIC,
 			   0, cu->language, objfile);
 
       break;
@@ -9031,8 +9026,8 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			   built_actual_name != NULL,
 			   VAR_DOMAIN, LOC_CONST, -1,
 			   cu->language == language_cplus
-			   ? &objfile->global_psymbols
-			   : &objfile->static_psymbols,
+			   ? psymbol_placement::GLOBAL
+			   : psymbol_placement::STATIC,
 			   0, cu->language, objfile);
       break;
     default:
@@ -18440,7 +18435,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  if (building_psymtab && pdi.name != NULL)
 	    add_psymbol_to_list (pdi.name, strlen (pdi.name), 0,
 				 VAR_DOMAIN, LOC_TYPEDEF, -1,
-				 &objfile->static_psymbols,
+				 psymbol_placement::STATIC,
 				 0, cu->language, objfile);
 	  info_ptr = locate_pdi_sibling (reader, &pdi, info_ptr);
 	  continue;
@@ -18475,8 +18470,8 @@ load_partial_dies (const struct die_reader_specs *reader,
 	    add_psymbol_to_list (pdi.name, strlen (pdi.name), 0,
 				 VAR_DOMAIN, LOC_CONST, -1,
 				 cu->language == language_cplus
-				 ? &objfile->global_psymbols
-				 : &objfile->static_psymbols,
+				 ? psymbol_placement::GLOBAL
+				 : psymbol_placement::STATIC,
 				 0, cu->language, objfile);
 
 	  info_ptr = locate_pdi_sibling (reader, &pdi, info_ptr);

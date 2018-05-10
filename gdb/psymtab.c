@@ -1638,7 +1638,7 @@ add_psymbol_to_list (const char *name, int namelength, int copy_name,
 		     domain_enum domain,
 		     enum address_class theclass,
 		     short section,
-		     std::vector<partial_symbol *> *list,
+		     psymbol_placement where,
 		     CORE_ADDR coreaddr,
 		     enum language language, struct objfile *objfile)
 {
@@ -1651,11 +1651,14 @@ add_psymbol_to_list (const char *name, int namelength, int copy_name,
 				section, coreaddr, language, objfile, &added);
 
   /* Do not duplicate global partial symbols.  */
-  if (list == &objfile->global_psymbols
-      && !added)
+  if (where == psymbol_placement::GLOBAL && !added)
     return;
 
   /* Save pointer to partial symbol in psymtab, growing symtab if needed.  */
+  std::vector<partial_symbol *> *list
+    = (where == psymbol_placement::STATIC
+       ? &objfile->static_psymbols
+       : &objfile->global_psymbols);
   append_psymbol_to_list (list, psym, objfile);
 }
 
