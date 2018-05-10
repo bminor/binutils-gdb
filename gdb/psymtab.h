@@ -31,13 +31,26 @@ struct partial_symbol;
 struct psymbol_bcache;
 
 /* An instance of this class manages the partial symbol tables and
-   partial symbols for a given objfile.  */
+   partial symbols for a given objfile.
+
+   The core psymtab functions -- those in psymtab.c -- arrange for
+   nearly all psymtab- and psymbol-related allocations to happen
+   either in the psymtab_storage object (either on its obstack or in
+   other memory managed by this class), or on the per-BFD object.  The
+   only link from the psymtab storage object back to the objfile (or
+   objfile_obstack) that is made by the core psymtab code is the
+   compunit_symtab member in the psymtab.
+
+   However, it is up to each symbol reader to maintain this invariant
+   in other ways, if it wants to reuse psymtabs across multiple
+   objfiles.  The main issue here is ensuring that read_symtab_private
+   does not point into objfile_obstack.  */
 
 class psymtab_storage
 {
 public:
 
-  explicit psymtab_storage (struct objfile *objfile);
+  psymtab_storage ();
 
   ~psymtab_storage ();
 
@@ -60,7 +73,9 @@ public:
 
   struct obstack *obstack ()
   {
-    return m_obstack;
+    if (!m_obstack.has_value ())
+      m_obstack.emplace ();
+    return &*m_obstack;
   }
 
   /* Allocate storage for the "dependencies" field of a psymtab.
@@ -108,9 +123,10 @@ private:
 
   struct partial_symtab *free_psymtabs = nullptr;
 
-  /* The obstack where allocations are made.  */
+  /* The obstack where allocations are made.  This is lazily allocated
+     so that we don't waste memory when there are no psymtabs.  */
 
-  struct obstack *m_obstack;
+  gdb::optional<auto_obstack> m_obstack;
 };
 
 

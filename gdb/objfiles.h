@@ -298,7 +298,7 @@ struct objfile
   void reset_psymtabs ()
   {
     psymbol_map.clear ();
-    partial_symtabs.reset (new psymtab_storage (this));
+    partial_symtabs.reset (new psymtab_storage ());
   }
 
 

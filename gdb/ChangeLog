@@ -1,5 +1,15 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (objfile::reset_psymtabs): Update.
+	* objfiles.c (objfile::objfile): Update.
+	* psymtab.h (psymtab_storage::obstack): Update.
+	(psymtab_storage::m_obstack): Use gdb::optional.
+	(class psymtab_storage): Update comment.  Remove objfile
+	parameter.
+	* psymtab.c (psymtab_storage::psymtab_storage): Update.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.h (psymtab_storage::allocate_psymtab): New method.
 	<free_psymtabs>: Now private.
 	* psymtab.c (psymtab_storage::allocate_psymtab): Implement.

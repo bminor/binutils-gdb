@@ -369,7 +369,7 @@ build_objfile_section_table (struct objfile *objfile)
 objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
   : flags (flags_),
     pspace (current_program_space),
-    partial_symtabs (new psymtab_storage (this)),
+    partial_symtabs (new psymtab_storage ()),
     obfd (abfd)
 {
   const char *expanded_name;
