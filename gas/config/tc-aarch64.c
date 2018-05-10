@@ -2279,7 +2279,6 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
   char *str = *ccp;
   char *fpnum;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  int found_fpchar = 0;
   int64_t val = 0;
   unsigned fpword = 0;
   bfd_boolean hex_p = FALSE;
@@ -2309,26 +2308,10 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
 
       hex_p = TRUE;
     }
-  else
-    {
-      if (reg_name_p (str, reg_type))
-	{
-	  set_recoverable_error (_("immediate operand required"));
-	  return FALSE;
-	}
-
-      /* We must not accidentally parse an integer as a floating-point number.
-	 Make sure that the value we parse is not an integer by checking for
-	 special characters '.' or 'e'.  */
-      for (; *fpnum != '\0' && *fpnum != ' ' && *fpnum != '\n'; fpnum++)
-	if (*fpnum == '.' || *fpnum == 'e' || *fpnum == 'E')
-	  {
-	    found_fpchar = 1;
-	    break;
-	  }
-
-      if (!found_fpchar)
-	return FALSE;
+  else if (reg_name_p (str, reg_type))
+   {
+     set_recoverable_error (_("immediate operand required"));
+     return FALSE;
     }
 
   if (! hex_p)

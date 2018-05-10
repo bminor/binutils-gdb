@@ -1,5 +1,15 @@
 2018-05-10  Tamar Christina  <tamar.christina@arm.com>
 
+	* config/tc-aarch64.c (parse_aarch64_imm_float): Remove restrictions.
+	* testsuite/gas/aarch64/diagnostic.s: Move fmov int test to..
+	* testsuite/gas/aarch64/fpmov.s: Here.
+	* testsuite/gas/aarch64/fpmov.d: Update results with fmov.
+	* testsuite/gas/aarch64/diagnostic.l: Remove fmov values.
+	* testsuite/gas/aarch64/sve-invalid.s: Update test files.
+	* testsuite/gas/aarch64/sve-invalid.l: Likewise
+
+2018-05-10  Tamar Christina  <tamar.christina@arm.com>
+
 	* gas/config/tc-arm.c (do_neon_mov): Allow integer literal for float
 	immediate.
 	* testsuite/gas/arm/vfp-mov-enc.s: New.

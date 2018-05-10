@@ -259,10 +259,10 @@
 	ld2	{v0.b, v1.b}[16], [x0]
 	ld2	{v0.b, v1.b}[67], [x0]
 
-	fmov	d0, #2
-	fmov	d0, #-2
-	fmov	s0, 2
-	fmov	s0, -2
+
+
+
+
 
 	st2	{v0.4s, v1.4s}, [sp], xzr
 	str	x1, [x2, sp]
