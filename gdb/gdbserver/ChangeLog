@@ -1,3 +1,9 @@
+2018-05-10  Joel Brobecker  <brobecker@adacore.com>
+
+	PR server/23158:
+	* win32-low.c (create_process): Only call gdb_tilde_expand if
+	inferior_cwd is not NULL.
+
 2018-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* server.c (captured_main): Change order of error message printed
