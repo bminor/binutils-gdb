@@ -293,6 +293,15 @@ struct objfile
 
   DISABLE_COPY_AND_ASSIGN (objfile);
 
+  /* Reset the storage for the partial symbol tables.  */
+
+  void reset_psymtabs ()
+  {
+    psymbol_map.clear ();
+    partial_symtabs.reset (new psymtab_storage (this));
+  }
+
+
   /* All struct objfile's are chained together by their next pointers.
      The program space field "objfiles"  (frequently referenced via
      the macro "object_files") points to the first link in this chain.  */
