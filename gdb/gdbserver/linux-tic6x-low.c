@@ -199,10 +199,8 @@ tic6x_read_description (enum c6x_feature feature)
   if (*tdesc == NULL)
     {
       *tdesc = tic6x_create_target_description (feature);
-      init_target_desc (*tdesc);
-
       static const char *expedite_regs[] = { "A15", "PC", NULL };
-      (*tdesc)->expedite_regs = expedite_regs;
+      init_target_desc (*tdesc, expedite_regs);
     }
 
   return *tdesc;

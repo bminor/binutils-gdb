@@ -21,6 +21,7 @@
 #include <sys/ptrace.h>
 #include "x86-xstate.h"
 #include "arch/i386.h"
+#include "x86-tdesc.h"
 
 /* The following two typedefs are defined in a .h file which is not
    in the standard include path (/sys/include/family/x86/ucontext.h),
@@ -296,7 +297,7 @@ lynx_i386_arch_setup (void)
   struct target_desc *tdesc
     = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
 
-  init_target_desc (tdesc);
+  init_target_desc (tdesc, i386_expedite_regs);
 
   lynx_tdesc = tdesc;
 }

@@ -1,6 +1,4 @@
-/* GNU/Linux/aarch64 specific target description, for the remote server
-   for GDB.
-   Copyright (C) 2017-2018 Free Software Foundation, Inc.
+/* Copyright (C) 2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,26 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "server.h"
-#include "tdesc.h"
-#include "arch/aarch64.h"
-#include "linux-aarch32-low.h"
+#ifndef X86_TDESC_H
 
-/* Create the aarch64 target description.  */
+/* The "expedite" registers for x86 targets.  */
+static const char *i386_expedite_regs[] = {"ebp", "esp", "eip", NULL};
 
-const target_desc *
-aarch64_linux_read_description ()
-{
-  static target_desc *aarch64_tdesc = NULL;
-  target_desc **tdesc = &aarch64_tdesc;
+/* The "expedite" registers for x86_64 targets.  */
+static const char *amd64_expedite_regs[] = {"rbp", "rsp", "rip", NULL};
 
-  if (*tdesc == NULL)
-    {
-      *tdesc = aarch64_create_target_description ();
-
-      static const char *expedite_regs_aarch64[] = { "x29", "sp", "pc", NULL };
-      init_target_desc (*tdesc, expedite_regs_aarch64);
-    }
-
-  return *tdesc;
-}
+#endif /* X86_TDESC_H */
