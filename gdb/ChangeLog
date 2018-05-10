@@ -1,3 +1,9 @@
+2018-05-10  Joel Brobecker  <brobecker@adacore.com>
+
+	PR server/23158:
+	* regformats/regdat.sh: Adjust script, following the addition
+	of the new expedite_regs parameter to init_target_desc.
+
 2018-05-10  Omair Javaid  <omair.javaid@linaro.org>
 
 	PR gdb/23127

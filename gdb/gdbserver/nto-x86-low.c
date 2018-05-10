@@ -25,6 +25,7 @@
 #include <x86/context.h>
 #include "x86-xstate.h"
 #include "arch/i386.h"
+#include "x86-tdesc.h"
 
 const unsigned char x86_breakpoint[] = { 0xCC };
 #define x86_breakpoint_len 1
@@ -90,7 +91,7 @@ nto_x86_arch_setup (void)
   struct target_desc *tdesc
     = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
 
-  init_target_desc (tdesc);
+  init_target_desc (tdesc, i386_expedite_regs);
 
   nto_tdesc = tdesc;
 }

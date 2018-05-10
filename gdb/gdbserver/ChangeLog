@@ -1,6 +1,31 @@
 2018-05-10  Joel Brobecker  <brobecker@adacore.com>
 
 	PR server/23158:
+	* tdesc.h (init_target_desc) <expedite_regs>: New parameter.
+	* tdesc.c (init_target_desc) <expedite_regs>: New parameter.
+	Use it to set the expedite_regs field in the given tdesc.
+	* x86-tdesc.h: New file.
+	* linux-aarch64-tdesc.c (aarch64_linux_read_description):
+	Adjust following the addition of the new expedite_regs parameter
+	to init_target_desc.
+	* linux-tic6x-low.c (tic6x_read_description): Likewise.
+	* linux-x86-tdesc.c: #include "x86-tdesc.h".
+	(i386_linux_read_description, amd64_linux_read_description):
+	Adjust following the addition of the new expedite_regs parameter
+	to init_target_desc.
+	* lynx-i386-low.c: #include "x86-tdesc.h".
+	(lynx_i386_arch_setup): Adjust following the addition of the new
+	expedite_regs parameter to init_target_desc.
+	* nto-x86-low.c: #include "x86-tdesc.h".
+	(nto_x86_arch_setup): Adjust following the addition of the new
+	expedite_regs parameter to init_target_desc.
+	* win32-i386-low.c: #include "x86-tdesc.h".
+	(i386_arch_setup): Adjust following the addition of the new
+	expedite_regs parameter to init_target_desc.
+
+2018-05-10  Joel Brobecker  <brobecker@adacore.com>
+
+	PR server/23158:
 	* win32-low.c (win32_create_inferior): Add call to my_wait
 	setting last_status global.
 

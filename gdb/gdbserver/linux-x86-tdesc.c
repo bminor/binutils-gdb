@@ -25,6 +25,7 @@
 #ifdef __x86_64__
 #include "arch/amd64.h"
 #endif
+#include "x86-tdesc.h"
 
 /* Return the right x86_linux_tdesc index for a given XCR0.  Return
    X86_TDESC_LAST if can't find a match.  */
@@ -88,12 +89,7 @@ i386_linux_read_description (uint64_t xcr0)
     {
       *tdesc = i386_create_target_description (xcr0, true);
 
-      init_target_desc (*tdesc);
-
-#ifndef IN_PROCESS_AGENT
-      static const char *expedite_regs_i386[] = { "ebp", "esp", "eip", NULL };
-      (*tdesc)->expedite_regs = expedite_regs_i386;
-#endif
+      init_target_desc (*tdesc, i386_expedite_regs);
     }
 
   return *tdesc;;
@@ -124,12 +120,7 @@ amd64_linux_read_description (uint64_t xcr0, bool is_x32)
     {
       *tdesc = amd64_create_target_description (xcr0, is_x32, true);
 
-      init_target_desc (*tdesc);
-
-#ifndef IN_PROCESS_AGENT
-      static const char *expedite_regs_amd64[] = { "rbp", "rsp", "rip", NULL };
-      (*tdesc)->expedite_regs = expedite_regs_amd64;
-#endif
+      init_target_desc (*tdesc, amd64_expedite_regs);
     }
   return *tdesc;
 }

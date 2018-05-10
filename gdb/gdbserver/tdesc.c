@@ -20,7 +20,8 @@
 #include "regdef.h"
 
 void
-init_target_desc (struct target_desc *tdesc)
+init_target_desc (struct target_desc *tdesc,
+		  const char **expedite_regs)
 {
   int offset = 0;
 
@@ -35,6 +36,10 @@ init_target_desc (struct target_desc *tdesc)
   /* Make sure PBUFSIZ is large enough to hold a full register
      packet.  */
   gdb_assert (2 * tdesc->registers_size + 32 <= PBUFSIZ);
+
+#ifndef IN_PROCESS_AGENT
+  tdesc->expedite_regs = expedite_regs;
+#endif
 }
 
 struct target_desc *
