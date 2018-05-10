@@ -68,8 +68,8 @@ static struct compunit_symtab *psymtab_to_symtab (struct objfile *objfile,
 
 
 psymtab_storage::psymtab_storage (struct objfile *objfile)
-  : obstack (&objfile->objfile_obstack),
-    psymbol_cache (psymbol_bcache_init ())
+  : psymbol_cache (psymbol_bcache_init ()),
+    m_obstack (&objfile->objfile_obstack)
 {
 }
 

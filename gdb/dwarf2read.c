@@ -3191,7 +3191,7 @@ create_addrmap_from_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
     }
 
   objfile->partial_symtabs->psymtabs_addrmap
-    = addrmap_create_fixed (mutable_map, &objfile->objfile_obstack);
+    = addrmap_create_fixed (mutable_map, objfile->partial_symtabs->obstack ());
 }
 
 /* Read the address map data from DWARF-5 .debug_aranges, and use it to
@@ -3352,7 +3352,7 @@ create_addrmap_from_aranges (struct dwarf2_per_objfile *dwarf2_per_objfile,
     }
 
   objfile->partial_symtabs->psymtabs_addrmap
-    = addrmap_create_fixed (mutable_map, &objfile->objfile_obstack);
+    = addrmap_create_fixed (mutable_map, objfile->partial_symtabs->obstack ());
 }
 
 /* Find a slot in the mapped index INDEX for the object named NAME.
@@ -8491,7 +8491,7 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
   objfile->partial_symtabs->psymtabs_addrmap
     = addrmap_create_fixed (objfile->partial_symtabs->psymtabs_addrmap,
-			    &objfile->objfile_obstack);
+			    objfile->partial_symtabs->obstack ());
   /* At this point we want to keep the address map.  */
   save_psymtabs_addrmap.release ();
 

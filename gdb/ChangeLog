@@ -1,5 +1,14 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.h (psymtab_storage::obstack): New method.
+	<m_obstack>: Rename from obstack; now private.
+	* psymtab.c (psymtab_storage): Update.
+	* dwarf2read.c (create_addrmap_from_index)
+	(create_addrmap_from_aranges, dwarf2_build_psymtabs_hard):
+	Update.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (reread_symbols): Call objfile->reset_psymtabs.
 	* objfiles.h (objfile::reset_psymtabs): New method.
 

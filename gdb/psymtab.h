@@ -55,6 +55,13 @@ public:
 
   void discard_psymtab (struct partial_symtab *pst);
 
+  /* Return the obstack that is used for storage by this object.  */
+
+  struct obstack *obstack ()
+  {
+    return m_obstack;
+  }
+
 
   /* Each objfile points to a linked list of partial symtabs derived from
      this file, one partial symtab structure for each compilation unit
@@ -73,10 +80,6 @@ public:
 
   struct partial_symtab *free_psymtabs = nullptr;
 
-  /* The obstack where allocations are made.  */
-
-  struct obstack *obstack;
-
   /* A byte cache where we can stash arbitrary "chunks" of bytes that
      will not change.  */
 
@@ -87,6 +90,12 @@ public:
 
   std::vector<partial_symbol *> global_psymbols;
   std::vector<partial_symbol *> static_psymbols;
+
+private:
+
+  /* The obstack where allocations are made.  */
+
+  struct obstack *m_obstack;
 };
 
 
