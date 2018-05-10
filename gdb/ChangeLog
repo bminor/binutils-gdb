@@ -1,5 +1,17 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_end_psymtab): Use allocate_dependencies.
+	* psymtab.h (psymtab_storage::allocate_dependencies): New method.
+	* mdebugread.c (parse_partial_symbols): Use
+	allocate_dependencies.
+	* dwarf2read.c (dwarf2_create_include_psymtab): Use
+	allocate_dependencies.
+	(process_psymtab_comp_unit_reader)
+	(build_type_psymtab_dependencies): Likewise.
+	* dbxread.c (dbx_end_psymtab): Use allocate_dependencies.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (add_psymbol_to_bcache): Pass psymtab obstack to
 	PSYMBOL_SET_LANGUAGE.
 	(allocate_psymtab): Allocate psymtab on the psymtab obstack.

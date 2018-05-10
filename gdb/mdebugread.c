@@ -3709,8 +3709,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       /* Skip the first file indirect entry as it is a self dependency for
          source files or a reverse .h -> .c dependency for header files.  */
       pst->number_of_dependencies = 0;
-      pst->dependencies = XOBNEWVEC (&objfile->objfile_obstack,
-				     partial_symtab *, (fh->crfd - 1));
+      pst->dependencies
+	= objfile->partial_symtabs->allocate_dependencies (fh->crfd - 1);
       for (s_idx = 1; s_idx < fh->crfd; s_idx++)
 	{
 	  RFDT rh;

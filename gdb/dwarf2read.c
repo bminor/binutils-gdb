@@ -6585,8 +6585,7 @@ dwarf2_create_include_psymtab (const char *name, struct partial_symtab *pst,
       subpst->dirname = pst->dirname;
     }
 
-  subpst->dependencies
-    = XOBNEW (&objfile->objfile_obstack, struct partial_symtab *);
+  subpst->dependencies = objfile->partial_symtabs->allocate_dependencies (1);
   subpst->dependencies[0] = pst;
   subpst->number_of_dependencies = 1;
 
@@ -8061,8 +8060,8 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
       /* Fill in 'dependencies' here; we fill in 'users' in a
 	 post-pass.  */
       pst->number_of_dependencies = len;
-      pst->dependencies =
-	XOBNEWVEC (&objfile->objfile_obstack, struct partial_symtab *, len);
+      pst->dependencies
+	= objfile->partial_symtabs->allocate_dependencies (len);
       for (i = 0;
 	   VEC_iterate (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs,
 			i, iter);
@@ -8315,8 +8314,7 @@ build_type_psymtab_dependencies (void **slot, void *info)
   gdb_assert (IS_TYPE_UNIT_GROUP (per_cu));
 
   pst->number_of_dependencies = len;
-  pst->dependencies =
-    XOBNEWVEC (&objfile->objfile_obstack, struct partial_symtab *, len);
+  pst->dependencies = objfile->partial_symtabs->allocate_dependencies (len);
   for (i = 0;
        VEC_iterate (sig_type_ptr, tu_group->tus, i, iter);
        ++i)

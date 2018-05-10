@@ -20,6 +20,7 @@
 #ifndef PSYMTAB_H
 #define PSYMTAB_H
 
+#include "gdb_obstack.h"
 #include "symfile.h"
 #include "common/next-iterator.h"
 
@@ -60,6 +61,14 @@ public:
   struct obstack *obstack ()
   {
     return m_obstack;
+  }
+
+  /* Allocate storage for the "dependencies" field of a psymtab.
+     NUMBER says how many dependencies there are.  */
+
+  struct partial_symtab **allocate_dependencies (int number)
+  {
+    return OBSTACK_CALLOC (obstack (), number, struct partial_symtab *);
   }
 
 
