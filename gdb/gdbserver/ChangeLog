@@ -1,6 +1,12 @@
 2018-05-10  Joel Brobecker  <brobecker@adacore.com>
 
 	PR server/23158:
+	* win32-low.c (win32_create_inferior): Add call to my_wait
+	setting last_status global.
+
+2018-05-10  Joel Brobecker  <brobecker@adacore.com>
+
+	PR server/23158:
 	* win32-low.c (create_process): Only call gdb_tilde_expand if
 	inferior_cwd is not NULL.
 
