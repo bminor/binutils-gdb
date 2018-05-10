@@ -1,5 +1,49 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* symmisc.c (print_symbol_bcache_statistics): Update.
+	(print_objfile_statistics): Update.
+	* symfile.c (reread_symbols): Update.
+	* psymtab.h (class psymtab_storage): New.
+	* psymtab.c (psymtab_storage): New constructor.
+	(~psymtab_storage): New destructor.
+	(require_partial_symbols): Update.
+	(ALL_OBJFILE_PSYMTABS_REQUIRED): Rewrite.
+	(find_pc_sect_psymtab, find_pc_sect_psymbol)
+	(match_partial_symbol, lookup_partial_symbol, dump_psymtab)
+	(psym_dump, recursively_search_psymtabs, psym_has_symbols)
+	(psym_find_compunit_symtab_by_address, sort_pst_symbols)
+	(start_psymtab_common, end_psymtab_common)
+	(add_psymbol_to_bcache, add_psymbol_to_list, init_psymbol_list)
+	(allocate_psymtab): Update.
+	(psymtab_storage::discard_psymtab): Rename from discard_psymtab.
+	Update.
+	(dump_psymtab_addrmap, maintenance_print_psymbols)
+	(maintenance_check_psymtabs): Update.
+	(class objfile_psymtabs): Move to objfiles.h.
+	* psympriv.h (discard_psymtab): Now inline.
+	(psymtab_discarder::psymtab_discarder): Update.
+	(psymtab_discarder::~psymtab_discarder): Update.
+	(ALL_OBJFILE_PSYMTABS): Rewrite.
+	* objfiles.h (struct objfile) <psymtabs, psymtabs_addrmap,
+	free_psymtabs, psymbol_cache, global_psymbols, static_psymbols>:
+	Remove fields.
+	<partial_symtabs>: New field.
+	(class objfile_psymtabs): Move from psymtab.h.  Update.
+	* objfiles.c (objfile::objfile): Initialize partial_symtabs, not
+	psymbol_cache.
+	(objfile::~objfile): Don't destroy psymbol_cache.
+	* mdebugread.c (parse_partial_symbols): Update.
+	* dwarf2read.c (create_addrmap_from_index)
+	(create_addrmap_from_aranges, dw2_find_pc_sect_compunit_symtab)
+	(process_psymtab_comp_unit_reader, dwarf2_build_psymtabs_hard)
+	(add_partial_subprogram, dwarf2_ranges_read): Update.
+	* dwarf-index-write.c (write_address_map)
+	(write_one_signatured_type, recursively_write_psymbols)
+	(class debug_names, class debug_names, write_psymtabs_to_index):
+	Update.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* symtab.h (SYMBOL_SET_NAMES): Update.
 	(symbol_set_names): Update.
 	(MSYMBOL_SET_NAMES): Update.

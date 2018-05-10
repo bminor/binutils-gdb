@@ -474,8 +474,8 @@ write_address_map (struct objfile *objfile, data_buf &addr_vec,
   addrmap_index_data.objfile = objfile;
   addrmap_index_data.previous_valid = 0;
 
-  addrmap_foreach (objfile->psymtabs_addrmap, add_address_entry_worker,
-		   &addrmap_index_data);
+  addrmap_foreach (objfile->partial_symtabs->psymtabs_addrmap,
+		   add_address_entry_worker, &addrmap_index_data);
 
   /* It's highly unlikely the last entry (end address = 0xff...ff)
      is valid, but we should still handle it.
@@ -582,13 +582,13 @@ write_one_signatured_type (void **slot, void *d)
 
   write_psymbols (info->symtab,
 		  info->psyms_seen,
-		  (info->objfile->global_psymbols.data ()
+		  (info->objfile->partial_symtabs->global_psymbols.data ()
 		   + psymtab->globals_offset),
 		  psymtab->n_global_syms, info->cu_index,
 		  0);
   write_psymbols (info->symtab,
 		  info->psyms_seen,
-		  (info->objfile->static_psymbols.data ()
+		  (info->objfile->partial_symtabs->static_psymbols.data ()
 		   + psymtab->statics_offset),
 		  psymtab->n_static_syms, info->cu_index,
 		  1);
@@ -639,12 +639,14 @@ recursively_write_psymbols (struct objfile *objfile,
 
   write_psymbols (symtab,
 		  psyms_seen,
-		  objfile->global_psymbols.data () + psymtab->globals_offset,
+		  (objfile->partial_symtabs->global_psymbols.data ()
+		   + psymtab->globals_offset),
 		  psymtab->n_global_syms, cu_index,
 		  0);
   write_psymbols (symtab,
 		  psyms_seen,
-		  objfile->static_psymbols.data () + psymtab->statics_offset,
+		  (objfile->partial_symtabs->static_psymbols.data ()
+		   + psymtab->statics_offset),
 		  psymtab->n_static_syms, cu_index,
 		  1);
 }
@@ -835,10 +837,12 @@ public:
 				    psyms_seen, cu_index);
 
     write_psymbols (psyms_seen,
-		    objfile->global_psymbols.data () + psymtab->globals_offset,
+		    (objfile->partial_symtabs->global_psymbols.data ()
+		     + psymtab->globals_offset),
 		    psymtab->n_global_syms, cu_index, false, unit_kind::cu);
     write_psymbols (psyms_seen,
-		    objfile->static_psymbols.data () + psymtab->statics_offset,
+		    (objfile->partial_symtabs->static_psymbols.data ()
+		     + psymtab->statics_offset),
 		    psymtab->n_static_syms, cu_index, true, unit_kind::cu);
   }
 
@@ -1195,12 +1199,12 @@ private:
     struct partial_symtab *psymtab = entry->per_cu.v.psymtab;
 
     write_psymbols (info->psyms_seen,
-		    (info->objfile->global_psymbols.data ()
+		    (info->objfile->partial_symtabs->global_psymbols.data ()
 		     + psymtab->globals_offset),
 		    psymtab->n_global_syms, info->cu_index, false,
 		    unit_kind::tu);
     write_psymbols (info->psyms_seen,
-		    (info->objfile->static_psymbols.data ()
+		    (info->objfile->partial_symtabs->static_psymbols.data ()
 		     + psymtab->statics_offset),
 		    psymtab->n_static_syms, info->cu_index, true,
 		    unit_kind::tu);
@@ -1554,7 +1558,8 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
   if (VEC_length (dwarf2_section_info_def, dwarf2_per_objfile->types) > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));
 
-  if (!objfile->psymtabs || !objfile->psymtabs_addrmap)
+  if (!objfile->partial_symtabs->psymtabs
+      || !objfile->partial_symtabs->psymtabs_addrmap)
     return;
 
   struct stat st;

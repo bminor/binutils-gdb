@@ -3739,11 +3739,12 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
   /* Remove the dummy psymtab created for -O3 images above, if it is
      still empty, to enable the detection of stripped executables.  */
-  if (objfile->psymtabs->next == NULL
-      && objfile->psymtabs->number_of_dependencies == 0
-      && objfile->psymtabs->n_global_syms == 0
-      && objfile->psymtabs->n_static_syms == 0)
-    objfile->psymtabs = NULL;
+  pst = objfile->partial_symtabs->psymtabs;
+  if (pst->next == NULL
+      && pst->number_of_dependencies == 0
+      && pst->n_global_syms == 0
+      && pst->n_static_syms == 0)
+    objfile->partial_symtabs->psymtabs = NULL;
 }
 
 /* If the current psymbol has an enumerated type, we need to add

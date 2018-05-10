@@ -23,9 +23,72 @@
 #include "symfile.h"
 #include "common/next-iterator.h"
 
+struct partial_symbol;
+
 /* A bcache for partial symbols.  */
 
 struct psymbol_bcache;
+
+/* An instance of this class manages the partial symbol tables and
+   partial symbols for a given objfile.  */
+
+class psymtab_storage
+{
+public:
+
+  explicit psymtab_storage (struct objfile *objfile);
+
+  ~psymtab_storage ();
+
+  DISABLE_COPY_AND_ASSIGN (psymtab_storage);
+
+  /* Discard all partial symbol tables starting with "psymtabs" and
+     proceeding until "to" has been discarded.  */
+
+  void discard_psymtabs_to (struct partial_symtab *to)
+  {
+    while (psymtabs != to)
+      discard_psymtab (psymtabs);
+  }
+
+  /* Discard the partial symbol table.  */
+
+  void discard_psymtab (struct partial_symtab *pst);
+
+
+  /* Each objfile points to a linked list of partial symtabs derived from
+     this file, one partial symtab structure for each compilation unit
+     (source file).  */
+
+  struct partial_symtab *psymtabs = nullptr;
+
+  /* Map addresses to the entries of PSYMTABS.  It would be more efficient to
+     have a map per the whole process but ADDRMAP cannot selectively remove
+     its items during FREE_OBJFILE.  This mapping is already present even for
+     PARTIAL_SYMTABs which still have no corresponding full SYMTABs read.  */
+
+  struct addrmap *psymtabs_addrmap = nullptr;
+
+  /* List of freed partial symtabs, available for re-use.  */
+
+  struct partial_symtab *free_psymtabs = nullptr;
+
+  /* The obstack where allocations are made.  */
+
+  struct obstack *obstack;
+
+  /* A byte cache where we can stash arbitrary "chunks" of bytes that
+     will not change.  */
+
+  struct psymbol_bcache *psymbol_cache;
+
+  /* Vectors of all partial symbols read in from file.  The actual data
+     is stored in the objfile_obstack.  */
+
+  std::vector<partial_symbol *> global_psymbols;
+  std::vector<partial_symbol *> static_psymbols;
+};
+
 
 extern struct psymbol_bcache *psymbol_bcache_init (void);
 extern void psymbol_bcache_free (struct psymbol_bcache *);
@@ -36,24 +99,12 @@ extern const struct quick_symbol_functions psym_functions;
 extern const struct quick_symbol_functions dwarf2_gdb_index_functions;
 extern const struct quick_symbol_functions dwarf2_debug_names_functions;
 
-/* A range adapter that makes it possible to iterate over all
-   psymtabs in one objfile.  */
-
-class objfile_psymtabs : public next_adapter<struct partial_symtab>
-{
-public:
-
-  explicit objfile_psymtabs (struct objfile *objfile)
-    : next_adapter<struct partial_symtab> (objfile->psymtabs)
-  {
-  }
-};
-
 /* Ensure that the partial symbols for OBJFILE have been loaded.  If
    VERBOSE is non-zero, then this will print a message when symbols
    are loaded.  This function returns a range adapter suitable for
    iterating over the psymtabs of OBJFILE.  */
 
+class objfile_psymtabs;
 extern objfile_psymtabs require_partial_symbols (struct objfile *objfile,
 						 int verbose);
 

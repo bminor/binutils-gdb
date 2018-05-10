@@ -2526,21 +2526,21 @@ reread_symbols (void)
 
 	  /* FIXME: Do we have to free a whole linked list, or is this
 	     enough?  */
-	  objfile->global_psymbols.clear ();
-	  objfile->static_psymbols.clear ();
+	  objfile->partial_symtabs->global_psymbols.clear ();
+	  objfile->partial_symtabs->static_psymbols.clear ();
 
 	  /* Free the obstacks for non-reusable objfiles.  */
-	  psymbol_bcache_free (objfile->psymbol_cache);
-	  objfile->psymbol_cache = psymbol_bcache_init ();
+	  psymbol_bcache_free (objfile->partial_symtabs->psymbol_cache);
+	  objfile->partial_symtabs->psymbol_cache = psymbol_bcache_init ();
 
 	  /* NB: after this call to obstack_free, objfiles_changed
 	     will need to be called (see discussion below).  */
 	  obstack_free (&objfile->objfile_obstack, 0);
 	  objfile->sections = NULL;
 	  objfile->compunit_symtabs = NULL;
-	  objfile->psymtabs = NULL;
-	  objfile->psymtabs_addrmap = NULL;
-	  objfile->free_psymtabs = NULL;
+	  objfile->partial_symtabs->psymtabs = NULL;
+	  objfile->partial_symtabs->psymtabs_addrmap = NULL;
+	  objfile->partial_symtabs->free_psymtabs = NULL;
 	  objfile->template_symbols = NULL;
 	  objfile->static_links = NULL;
 

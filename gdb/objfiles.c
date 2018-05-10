@@ -369,8 +369,8 @@ build_objfile_section_table (struct objfile *objfile)
 objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
   : flags (flags_),
     pspace (current_program_space),
-    obfd (abfd),
-    psymbol_cache (psymbol_bcache_init ())
+    partial_symtabs (new psymtab_storage (this)),
+    obfd (abfd)
 {
   const char *expanded_name;
 
@@ -713,7 +713,6 @@ objfile::~objfile ()
   }
 
   /* Free the obstacks for non-reusable objfiles.  */
-  psymbol_bcache_free (psymbol_cache);
   obstack_free (&objfile_obstack, 0);
 
   /* Rebuild section map next time we need it.  */

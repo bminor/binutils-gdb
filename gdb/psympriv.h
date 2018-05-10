@@ -311,7 +311,11 @@ extern struct partial_symtab *allocate_psymtab (const char *filename,
 						struct objfile *objfile)
   ATTRIBUTE_NONNULL (1);
 
-extern void discard_psymtab (struct objfile *, struct partial_symtab *);
+static inline void
+discard_psymtab (struct objfile *objfile, struct partial_symtab *pst)
+{
+  objfile->partial_symtabs->discard_psymtab (pst);
+}
 
 /* Used when recording partial symbol tables.  On destruction,
    discards any partial symbol tables that have been built.  However,
@@ -322,15 +326,14 @@ class psymtab_discarder
 
   psymtab_discarder (struct objfile *objfile)
     : m_objfile (objfile),
-      m_psymtab (objfile->psymtabs)
+      m_psymtab (objfile->partial_symtabs->psymtabs)
   {
   }
 
   ~psymtab_discarder ()
   {
     if (m_objfile != NULL)
-      while (m_objfile->psymtabs != m_psymtab)
-	discard_psymtab (m_objfile, m_objfile->psymtabs);
+      m_objfile->partial_symtabs->discard_psymtabs_to (m_psymtab);
   }
 
   /* Keep any partial symbol tables that were built.  */
