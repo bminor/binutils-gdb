@@ -44,7 +44,7 @@ build_warnings="-Wall -Wpointer-arith \
 -Wno-mismatched-tags \
 -Wno-error=deprecated-register \
 -Wsuggest-override \
--Wimplicit-fallthrough \
+-Wimplicit-fallthrough=3 \
 -Wduplicated-cond"
 
 case "${host}" in
