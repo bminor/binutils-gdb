@@ -1,3 +1,9 @@
+2018-05-10  Joel Brobecker  <brobecker@adacore.com>
+
+	PR server/23158:
+	* win32-low.c (create_process): Only call gdb_tilde_expand if
+	inferior_cwd is not NULL.
+
 2018-05-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* i387-fp.c (i387_cache_to_xsave): Only write x87 control
