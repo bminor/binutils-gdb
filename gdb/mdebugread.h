@@ -37,4 +37,13 @@ struct mdebug_extra_func_info
 
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
 
+extern void mdebug_build_psymtabs (minimal_symbol_reader &,
+				   struct objfile *,
+				   const struct ecoff_debug_swap *,
+				   struct ecoff_debug_info *);
+
+extern void elfmdebug_build_psymtabs (struct objfile *,
+				      const struct ecoff_debug_swap *,
+				      asection *);
+
 #endif /* MDEBUGREAD_H */

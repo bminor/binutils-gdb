@@ -47,6 +47,7 @@
 #include "build-id.h"
 #include "location.h"
 #include "auxv.h"
+#include "mdebugread.h"
 
 /* Forward declarations.  */
 extern const struct sym_fns elf_sym_fns_gdb_index;

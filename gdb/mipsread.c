@@ -28,6 +28,7 @@
 #include "symtab.h"
 #include "objfiles.h"
 #include "stabsread.h"
+#include "mdebugread.h"
 
 #include "coff/sym.h"
 #include "coff/internal.h"

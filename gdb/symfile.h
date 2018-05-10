@@ -610,16 +610,7 @@ extern bool dwarf2_initialize_objfile (struct objfile *objfile,
 extern void dwarf2_build_psymtabs (struct objfile *);
 extern void dwarf2_build_frame_info (struct objfile *);
 
-/* From mdebugread.c */
-
-extern void mdebug_build_psymtabs (minimal_symbol_reader &,
-				   struct objfile *,
-				   const struct ecoff_debug_swap *,
-				   struct ecoff_debug_info *);
-
-extern void elfmdebug_build_psymtabs (struct objfile *,
-				      const struct ecoff_debug_swap *,
-				      asection *);
+void dwarf2_free_objfile (struct objfile *);
 
 /* From minidebug.c.  */
 
