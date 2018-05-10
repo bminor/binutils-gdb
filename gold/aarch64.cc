@@ -6965,11 +6965,11 @@ Target_aarch64<size, big_endian>::do_finalize_sections(
     }
 
   // Set the size of the _GLOBAL_OFFSET_TABLE_ symbol to the size of
-  // the .got.plt section.
+  // the .got section.
   Symbol* sym = this->global_offset_table_;
   if (sym != NULL)
     {
-      uint64_t data_size = this->got_plt_->current_data_size();
+      uint64_t data_size = this->got_->current_data_size();
       symtab->get_sized_symbol<size>(sym)->set_symsize(data_size);
 
       // If the .got section is more than 0x8000 bytes, we add
