@@ -1637,7 +1637,8 @@ add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
 
   memset (&psymbol.language_specific, 0, sizeof (psymbol.language_specific));
   psymbol.ada_mangled = 0;
-  symbol_set_language (&psymbol, language, &objfile->objfile_obstack);
+  symbol_set_language (&psymbol, language,
+		       objfile->partial_symtabs->obstack ());
   symbol_set_names (&psymbol, name, namelength, copy_name, objfile->per_bfd);
 
   /* Stash the partial symbol away in the cache.  */
@@ -1722,7 +1723,7 @@ allocate_psymtab (const char *filename, struct objfile *objfile)
       objfile->partial_symtabs->free_psymtabs = psymtab->next;
     }
   else
-    psymtab = XOBNEW (&objfile->objfile_obstack, partial_symtab);
+    psymtab = XOBNEW (objfile->partial_symtabs->obstack (), partial_symtab);
 
   memset (psymtab, 0, sizeof (struct partial_symtab));
   psymtab->filename

@@ -1,5 +1,11 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.c (add_psymbol_to_bcache): Pass psymtab obstack to
+	PSYMBOL_SET_LANGUAGE.
+	(allocate_psymtab): Allocate psymtab on the psymtab obstack.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.h (psymtab_storage::obstack): New method.
 	<m_obstack>: Rename from obstack; now private.
 	* psymtab.c (psymtab_storage): Update.
