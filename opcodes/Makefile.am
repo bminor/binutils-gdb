@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = 1.11 foreign no-dist
+AUTOMAKE_OPTIONS = foreign no-dist
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
 # Build '.' first so all generated files exist.

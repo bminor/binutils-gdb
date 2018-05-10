@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = 1.11 dejagnu foreign no-dist
+AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
 SUBDIRS = doc po
@@ -43,14 +43,14 @@ AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC)
 
 TARG_CPU = @target_cpu_type@
 TARG_CPU_C = $(srcdir)/config/tc-@target_cpu_type@.c
-TARG_CPU_O = tc-@target_cpu_type@.@OBJEXT@
+TARG_CPU_O = config/tc-@target_cpu_type@.@OBJEXT@
 TARG_CPU_H = $(srcdir)/config/tc-@target_cpu_type@.h
 OBJ_FORMAT_C = $(srcdir)/config/obj-@obj_format@.c
-OBJ_FORMAT_O = obj-@obj_format@.@OBJEXT@
+OBJ_FORMAT_O = config/obj-@obj_format@.@OBJEXT@
 OBJ_FORMAT_H = $(srcdir)/config/obj-@obj_format@.h
 TARG_ENV_H = $(srcdir)/config/te-@te_file@.h
 ATOF_TARG_C = $(srcdir)/config/atof-@atof@.c
-ATOF_TARG_O = atof-@atof@.@OBJEXT@
+ATOF_TARG_O = config/atof-@atof@.@OBJEXT@
 
 # use @target_cpu_type@ for refering to configured target name
 IT_HDRS=itbl-parse.h $(srcdir)/itbl-ops.h

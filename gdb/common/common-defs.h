@@ -21,11 +21,22 @@
 #define COMMON_DEFS_H
 
 #include "config.h"
+
+#undef PACKAGE_NAME
+#undef PACKAGE_VERSION
+#undef PACKAGE_STRING
+#undef PACKAGE_TARNAME
+
 #ifdef GDBSERVER
 #include "build-gnulib-gdbserver/config.h"
 #else
 #include "build-gnulib/config.h"
 #endif
+
+#undef PACKAGE_NAME
+#undef PACKAGE_VERSION
+#undef PACKAGE_STRING
+#undef PACKAGE_TARNAME
 
 /* From:
     https://www.gnu.org/software/gnulib/manual/html_node/stdint_002eh.html

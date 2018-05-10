@@ -18,7 +18,6 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.59)dnl
 AC_INIT(main.c)
 AC_CONFIG_HEADER(config.h:config.in)
 AM_MAINTAINER_MODE
@@ -734,8 +733,8 @@ AC_DEFUN([AC_TRY_LIBPYTHON],
   CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
   LIBS="$new_LIBS $LIBS"
   found_usable_python=no
-  AC_LINK_IFELSE(AC_LANG_PROGRAM([[#include "Python.h"]],
-                                 [[Py_Initialize ();]]),
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "Python.h"]],
+                                 [[Py_Initialize ();]])],
                  [have_libpython_var=${version}
                   found_usable_python=yes
                   PYTHON_CPPFLAGS=$new_CPPFLAGS
@@ -1021,12 +1020,12 @@ if test "${have_libpython}" != no; then
   CPPFLAGS="${PYTHON_CPPFLAGS}"
   # Note that the test is reversed so that python_has_threads=yes on
   # unexpected failures.
-  AC_PREPROC_IFELSE(AC_LANG_SOURCE([[
+  AC_PREPROC_IFELSE([AC_LANG_SOURCE([[
 #include <Python.h>
 #ifdef WITH_THREAD
 # error
 #endif
-  ]]), [python_has_threads=no], [python_has_threads=yes])
+  ]])], [python_has_threads=no], [python_has_threads=yes])
   AC_MSG_RESULT(${python_has_threads})
   CPPFLAGS="${saved_CPPFLAGS}"
 else
@@ -1100,8 +1099,8 @@ AC_DEFUN([AC_TRY_LIBGUILE],
     save_LIBS=$LIBS
     CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
     LIBS="$LIBS $new_LIBS"
-    AC_LINK_IFELSE(AC_LANG_PROGRAM([[#include "libguile.h"]],
-                                   [[scm_init_guile ();]]),
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "libguile.h"]],
+                                   [[scm_init_guile ();]])],
                    [have_libguile_var=yes
                     GUILE_CPPFLAGS=$new_CPPFLAGS
                     GUILE_LIBS=$new_LIBS],
@@ -1271,12 +1270,12 @@ if test "${with_intel_pt}" = no; then
   AC_MSG_WARN([Intel Processor Trace support disabled; some features may be unavailable.])
   HAVE_LIBIPT=no
 else
-  AC_PREPROC_IFELSE(AC_LANG_SOURCE([[
+  AC_PREPROC_IFELSE([AC_LANG_SOURCE([[
 #include <linux/perf_event.h>
 #ifndef PERF_ATTR_SIZE_VER5
 # error
 #endif
-  ]]), [perf_event=yes], [perf_event=no])
+  ]])], [perf_event=yes], [perf_event=no])
   if test "$perf_event" != yes; then
     if test "$with_intel_pt" = yes; then
       AC_MSG_ERROR([linux/perf_event.h missing or too old])
@@ -1720,13 +1719,13 @@ if test "${gdb_native}" = yes; then
      old_CPPFLAGS="$CPPFLAGS"
      CPPFLAGS="$CPPFLAGS $PYTHON_CPPFLAGS"
      AC_RUN_IFELSE(
-       AC_LANG_PROGRAM(
+       [AC_LANG_PROGRAM(
          [#include "Python.h"],
          [int err;
           Py_Initialize ();
           err = PyRun_SimpleString ("import itertools\n");
           Py_Finalize ();
-          return err == 0 ? 0 : 1;]),
+          return err == 0 ? 0 : 1;])],
        [dynamic_list=true], [], [true])
      LIBS="$old_LIBS"
      CFLAGS="$old_CFLAGS"

@@ -18,8 +18,6 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.59)dnl
-
 AC_INIT(server.c)
 AC_CONFIG_HEADER(config.h:config.in)
 
@@ -429,7 +427,7 @@ fi
 dnl Check for -fvisibility=hidden support in the compiler.
 saved_cflags="$CFLAGS"
 CFLAGS="$CFLAGS -fvisibility=hidden"
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([]),
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])],
 		        [gdbsrv_cv_have_visibility_hidden=yes],
 	        	[gdbsrv_cv_have_visibility_hidden=no])
 CFLAGS="$saved_cflags"

@@ -14,7 +14,6 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.64)dnl
 AC_INIT(Makefile.in)
 sinclude(../common/acinclude.m4)
 

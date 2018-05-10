@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = dejagnu no-texinfo.tex no-dist foreign
+AUTOMAKE_OPTIONS = dejagnu no-texinfo.tex no-dist foreign info-in-builddir
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 TEXINFO_TEX = ../texinfo/texinfo.tex
 
@@ -80,7 +80,7 @@ INCDIR	= $(BASEDIR)/include
 # What version of the manual to build
 DOCVER = gen
 
-# Options to extract the man page from ld.texinfo
+# Options to extract the man page from ld.texi
 MANCONF = -Dman
 
 TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl $(AM_MAKEINFOFLAGS)
@@ -135,9 +135,9 @@ CXXFLAGS_FOR_TARGET = `echo $(CXXFLAGS) | sed -e 's/-fsanitize=address//g' -e 's
 
 transform = s/^ld-new$$/$(installed_linker)/;@program_transform_name@
 bin_PROGRAMS = ld-new
-info_TEXINFOS = ld.texinfo
+info_TEXINFOS = ld.texi
 ld_TEXINFOS = configdoc.texi
-noinst_TEXINFOS = ldint.texinfo
+noinst_TEXINFOS = ldint.texi
 man_MANS = ld.1
 
 AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
@@ -1928,9 +1928,9 @@ configdoc.texi:	${DOCVER}-doc.texi
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
 # the man output looks standard.
-ld.1: $(srcdir)/ld.texinfo configdoc.texi
+ld.1: $(srcdir)/ld.texi configdoc.texi
 	touch $@
-	-$(TEXI2POD) $(MANCONF) < $(srcdir)/ld.texinfo > ld.pod
+	-$(TEXI2POD) $(MANCONF) < $(srcdir)/ld.texi > ld.pod
 	-($(POD2MAN) ld.pod | \
 		sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || \
@@ -1994,10 +1994,3 @@ distclean-local:
 	rm -rf ldscripts
 
 MAINTAINERCLEANFILES += ld.info
-
-# Automake 1.9 will only build info files in the objdir if they are
-# mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,
-# though, so we use a bogus condition.
-if GENINSRC_NEVER
-DISTCLEANFILES += ld.info
-endif

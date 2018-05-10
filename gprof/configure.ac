@@ -16,7 +16,6 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
 dnl
-AC_PREREQ(2.59)
 m4_include([../bfd/version.m4])
 AC_INIT([gprof], BFD_VERSION)
 AC_CONFIG_SRCDIR([gprof.c])
