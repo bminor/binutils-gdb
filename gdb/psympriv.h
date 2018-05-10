@@ -284,9 +284,7 @@ extern void add_psymbol_to_list (const char *, int,
 extern void init_psymbol_list (struct objfile *, int);
 
 extern struct partial_symtab *start_psymtab_common (struct objfile *,
-						    const char *, CORE_ADDR,
-						    std::vector<partial_symbol *> &,
-						    std::vector<partial_symbol *> &);
+						    const char *, CORE_ADDR);
 
 extern void end_psymtab_common (struct objfile *, struct partial_symtab *);
 

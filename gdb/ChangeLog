@@ -1,5 +1,19 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_start_psymtab): Remove global_psymbols and
+	static_psymbols parameters.
+	(scan_xcoff_symtab): Update.
+	* psymtab.c (start_psymtab_common): Remove global_psymbols and
+	static_psymbols parameters.
+	* psympriv.h (start_psymtab_common): Update.
+	* mdebugread.c (parse_partial_symbols): Update.
+	* dwarf2read.c (create_partial_symtab): Update.
+	* dbxread.c (read_dbx_symtab): Update.
+	(start_psymtab): Remove global_psymbols and static_psymbols
+	parameters.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_end_psymtab): Remove some initializations.
 	* psymtab.c (allocate_psymtab): Add comment.
 	* psympriv.h (allocate_psymtab): Add comment.

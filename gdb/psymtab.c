@@ -1469,17 +1469,15 @@ sort_pst_symbols (struct objfile *objfile, struct partial_symtab *pst)
 struct partial_symtab *
 start_psymtab_common (struct objfile *objfile,
 		      const char *filename,
-		      CORE_ADDR textlow,
-		      std::vector<partial_symbol *> &global_psymbols,
-		      std::vector<partial_symbol *> &static_psymbols)
+		      CORE_ADDR textlow)
 {
   struct partial_symtab *psymtab;
 
   psymtab = allocate_psymtab (filename, objfile);
   psymtab->set_text_low (textlow);
   psymtab->set_text_high (psymtab->raw_text_low ()); /* default */
-  psymtab->globals_offset = global_psymbols.size ();
-  psymtab->statics_offset = static_psymbols.size ();
+  psymtab->globals_offset = objfile->global_psymbols.size ();
+  psymtab->statics_offset = objfile->static_psymbols.size ();
   return psymtab;
 }
 

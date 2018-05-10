@@ -2026,16 +2026,13 @@ static unsigned int first_fun_line_offset;
 
 static struct partial_symtab *
 xcoff_start_psymtab (struct objfile *objfile,
-		     const char *filename, int first_symnum,
-		     std::vector<partial_symbol *> &global_psymbols,
-		     std::vector<partial_symbol *> &static_psymbols)
+		     const char *filename, int first_symnum)
 {
   struct partial_symtab *result =
     start_psymtab_common (objfile,
 			  filename,
 			  /* We fill in textlow later.  */
-			  0,
-			  global_psymbols, static_psymbols);
+			  0);
 
   result->read_symtab_private =
     XOBNEW (&objfile->objfile_obstack, struct symloc);
@@ -2317,9 +2314,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			    pst = xcoff_start_psymtab
 			      (objfile,
 			       filestring,
-			       symnum_before,
-			       objfile->global_psymbols,
-			       objfile->static_psymbols);
+			       symnum_before);
 			  }
 		      }
 		    /* Activate the misc_func_recorded mechanism for
@@ -2501,9 +2496,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 
 	    pst = xcoff_start_psymtab (objfile,
 				       filestring,
-				       symnum_before,
-				       objfile->global_psymbols,
-				       objfile->static_psymbols);
+				       symnum_before);
 	    last_csect_name = NULL;
 	  }
 	  break;
