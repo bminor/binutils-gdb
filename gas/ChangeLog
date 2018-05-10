@@ -1,3 +1,10 @@
+2018-05-10  Tamar Christina  <tamar.christina@arm.com>
+
+	* gas/config/tc-arm.c (do_neon_mov): Allow integer literal for float
+	immediate.
+	* testsuite/gas/arm/vfp-mov-enc.s: New.
+	* testsuite/gas/arm/vfp-mov-enc.d: New.
+
 2018-05-09  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (xtensa_is_init_fini): New function.

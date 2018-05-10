@@ -16691,6 +16691,14 @@ do_neon_mov (void)
     case NS_FI:  /* case 10 (fconsts).  */
       ldconst = "fconsts";
       encode_fconstd:
+      if (!inst.operands[1].immisfloat)
+	{
+	  /* Immediate has to fit in 8 bits so float is enough.  */
+	  float imm = (float)inst.operands[1].imm;
+	  memcpy (&inst.operands[1].imm, &imm, sizeof (float));
+	  inst.operands[1].immisfloat = 1;
+	}
+
       if (is_quarter_float (inst.operands[1].imm))
 	{
 	  inst.operands[1].imm = neon_qfloat_bits (inst.operands[1].imm);
