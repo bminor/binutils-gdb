@@ -1610,7 +1610,7 @@ add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
   memset (&psymbol.language_specific, 0, sizeof (psymbol.language_specific));
   psymbol.ada_mangled = 0;
   symbol_set_language (&psymbol, language, &objfile->objfile_obstack);
-  symbol_set_names (&psymbol, name, namelength, copy_name, objfile);
+  symbol_set_names (&psymbol, name, namelength, copy_name, objfile->per_bfd);
 
   /* Stash the partial symbol away in the cache.  */
   return psymbol_bcache_full (&psymbol, objfile->psymbol_cache, added);

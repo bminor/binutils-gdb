@@ -1,5 +1,15 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* symtab.h (SYMBOL_SET_NAMES): Update.
+	(symbol_set_names): Update.
+	(MSYMBOL_SET_NAMES): Update.
+	* symtab.c (symbol_set_names): Change argument to be an
+	objfile_per_bfd_storage.
+	* psymtab.c (add_psymbol_to_bcache): Update.
+	* psympriv.h (PSYMBOL_SET_NAMES): Take per_bfd argument.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (create_demangled_names_hash): Change argument to be an
 	objfile_per_bfd_storage.
 	(symbol_set_names): Update.
