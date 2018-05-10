@@ -2991,14 +2991,11 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
   if (val != size)
     perror_with_name (_("reading symbol table"));
 
-  /* If we are reinitializing, or if we have never loaded syms yet, init.  */
-  if (objfile->global_psymbols.capacity () == 0
-      && objfile->static_psymbols.capacity () == 0)
-    /* I'm not sure how how good num_symbols is; the rule of thumb in
-       init_psymbol_list was developed for a.out.  On the one hand,
-       num_symbols includes auxents.  On the other hand, it doesn't
-       include N_SLINE.  */
-    init_psymbol_list (objfile, num_symbols);
+  /* I'm not sure how how good num_symbols is; the rule of thumb in
+     init_psymbol_list was developed for a.out.  On the one hand,
+     num_symbols includes auxents.  On the other hand, it doesn't
+     include N_SLINE.  */
+  init_psymbol_list (objfile, num_symbols);
 
   scoped_free_pendings free_pending;
   minimal_symbol_reader reader (objfile);

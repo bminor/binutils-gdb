@@ -6299,9 +6299,7 @@ dwarf2_build_psymtabs (struct objfile *objfile)
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = get_dwarf2_per_objfile (objfile);
 
-  if (objfile->global_psymbols.capacity () == 0
-      && objfile->static_psymbols.capacity () == 0)
-    init_psymbol_list (objfile, 1024);
+  init_psymbol_list (objfile, 1024);
 
   TRY
     {

@@ -1662,20 +1662,21 @@ add_psymbol_to_list (const char *name, int namelength, int copy_name,
   append_psymbol_to_list (list, psym, objfile);
 }
 
-/* Initialize storage for partial symbols.  */
+/* See psympriv.h.  */
 
 void
 init_psymbol_list (struct objfile *objfile, int total_symbols)
 {
-  /* Free any previously allocated psymbol lists.  */
-  objfile->global_psymbols.clear ();
-  objfile->static_psymbols.clear ();
-
-  /* Current best guess is that approximately a twentieth
-     of the total symbols (in a debugging file) are global or static
-     oriented symbols, then multiply that by slop factor of two.  */
-  objfile->global_psymbols.reserve (total_symbols / 10);
-  objfile->static_psymbols.reserve (total_symbols / 10);
+  if (objfile->global_psymbols.capacity () == 0
+      && objfile->static_psymbols.capacity () == 0)
+    {
+      /* Current best guess is that approximately a twentieth of the
+	 total symbols (in a debugging file) are global or static
+	 oriented symbols, then multiply that by slop factor of
+	 two.  */
+      objfile->global_psymbols.reserve (total_symbols / 10);
+      objfile->static_psymbols.reserve (total_symbols / 10);
+    }
 }
 
 /* See psympriv.h.  */

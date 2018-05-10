@@ -290,7 +290,11 @@ extern void add_psymbol_to_list (const char *, int,
 				 CORE_ADDR,
 				 enum language, struct objfile *);
 
-extern void init_psymbol_list (struct objfile *, int);
+/* Initialize storage for partial symbols.  If partial symbol storage
+   has already been initialized, this does nothing.  TOTAL_SYMBOLS is
+   an estimate of how many symbols there will be.  */
+
+extern void init_psymbol_list (struct objfile *objfile, int total_symbols);
 
 extern struct partial_symtab *start_psymtab_common (struct objfile *,
 						    const char *, CORE_ADDR);

@@ -1,5 +1,16 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_initial_scan): Unconditionally call
+	init_psymbol_list.
+	* psymtab.c (init_psymbol_list): Do nothing if already called.
+	* psympriv.h (init_psymbol_list): Add comment.
+	* dwarf2read.c (dwarf2_build_psymtabs): Unconditionally call
+	init_psymbol_list.
+	* dbxread.c (dbx_symfile_read): Unconditionally call
+	init_psymbol_list.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (scan_xcoff_symtab): Update.
 	* psymtab.c (add_psymbol_to_list): Replace "list" parameter with
 	"where".
