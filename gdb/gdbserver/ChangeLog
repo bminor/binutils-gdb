@@ -1,3 +1,12 @@
+2018-05-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* lynx-i386-low.c (LYNXOS_178): New macro.
+	[LYNXOS_178] (usr_fcontext_t): Provide a definition that matches
+	the layout on LynxOS-178.
+	(lynx_i386_fill_fpregset, lynx_i386_store_fpregset): Do not
+	handle floating point registers that are not supported by
+	LynxOS-178.
+
 2018-05-10  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.
