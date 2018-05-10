@@ -1,3 +1,7 @@
+2018-05-10  John Darrington  <john@darrington.wattle.id.au>
+
+	* readelf.c (get_machine_name): EM_S12Z - handle new case.
+
 2018-05-09  Alan Modra  <amodra@gmail.com>
 
 	* od-macho.c (dump_unwind_encoding_x86): Fix typo in last patch.

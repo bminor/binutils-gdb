@@ -368,6 +368,9 @@
 /* Unofficial value for Web Assembly binaries, as used by LLVM.  */
 #define EM_WEBASSEMBLY		0x4157
 
+/* Freescale S12Z.   The Freescale toolchain generates elf files with this value.  */
+#define EM_S12Z               0x4DEF
+
 /* DLX magic number.  Written in the absense of an ABI.  */
 #define EM_DLX			0x5aa5
 
