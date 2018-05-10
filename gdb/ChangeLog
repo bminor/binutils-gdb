@@ -1,3 +1,9 @@
+2018-06-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Richard Bunt <Richard.Bunt@arm.com>
+
+	* linux-nat.c (stop_wait_callback): Don't discard SIGSTOP if it
+	was requested by GDB.
+
 2018-06-15  Tom de Vries  <tdevries@suse.de>
 
 	* MAINTAINERS (Write After Approval): Add Tom de Vries.

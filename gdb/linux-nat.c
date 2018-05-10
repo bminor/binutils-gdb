@@ -2527,17 +2527,23 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 	}
       else
 	{
-	  /* We caught the SIGSTOP that we intended to catch, so
-	     there's no SIGSTOP pending.  */
+	  /* We caught the SIGSTOP that we intended to catch.  */
 
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"SWC: Expected SIGSTOP caught for %s.\n",
 				target_pid_to_str (lp->ptid));
 
-	  /* Reset SIGNALLED only after the stop_wait_callback call
-	     above as it does gdb_assert on SIGNALLED.  */
 	  lp->signalled = 0;
+
+	  /* If we are waiting for this stop so we can report the thread
+	     stopped then we need to record this status.  Otherwise, we can
+	     now discard this stop event.  */
+	  if (lp->last_resume_kind == resume_stop)
+	    {
+	      lp->status = status;
+	      save_stop_reason (lp);
+	    }
 	}
     }
 

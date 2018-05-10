@@ -1,3 +1,10 @@
+2018-06-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Richard Bunt <Richard.Bunt@arm.com>
+
+	* gdb.threads/attach-slow-waitpid.c: New file.
+	* gdb.threads/attach-slow-waitpid.exp: New file.
+	* gdb.threads/slow-waitpid.c: New file.
+
 2018-06-14  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/fork-running-state.c: Include <errno.h>.
