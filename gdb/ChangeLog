@@ -1,5 +1,11 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (create_demangled_names_hash): Change argument to be an
+	objfile_per_bfd_storage.
+	(symbol_set_names): Update.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_initial_scan): Unconditionally call
 	init_psymbol_list.
 	* psymtab.c (init_psymbol_list): Do nothing if already called.
