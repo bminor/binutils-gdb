@@ -704,6 +704,10 @@ win32_create_inferior (const char *program,
 
   do_initial_child_stuff (pi.hProcess, pi.dwProcessId, 0);
 
+  /* Wait till we are at 1st instruction in program, return new pid
+     (assuming success).  */
+  last_ptid = win32_wait (pid_to_ptid (current_process_id), &last_status, 0);
+
   return current_process_id;
 }
 
