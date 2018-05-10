@@ -1,3 +1,8 @@
+2018-05-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* i387-tdep.c (i387_collect_xsave): Use FXSAVE_MXCSR_ADDR not
+	FXSAVE_ADDR for the mxcsr register.
+
 2018-05-11  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* configure.tgt (xtensa*-*-linux*): Drop gdb_target definition.

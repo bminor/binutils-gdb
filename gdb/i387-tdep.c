@@ -1490,7 +1490,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	 require clearing.  */
       if ((clear_bv & (X86_XSTATE_AVX | X86_XSTATE_SSE))
 	  == (X86_XSTATE_AVX | X86_XSTATE_SSE))
-	store_unsigned_integer (FXSAVE_ADDR (tdep, regs, i), 2, byte_order,
+	store_unsigned_integer (FXSAVE_MXCSR_ADDR (regs), 2, byte_order,
 				I387_MXCSR_INIT_VAL);
 
       if ((clear_bv & X86_XSTATE_X87))
@@ -1643,7 +1643,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	{
 	  i = I387_MXCSR_REGNUM (tdep);
 	  regcache_raw_collect (regcache, i, raw);
-	  p = FXSAVE_ADDR (tdep, regs, i);
+	  p = FXSAVE_MXCSR_ADDR (regs);
 	  if (memcmp (raw, p, 4))
 	    {
 	      /* Now, we need to mark one of either SSE of AVX as enabled.
