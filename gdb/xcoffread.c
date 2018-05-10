@@ -2103,13 +2103,6 @@ xcoff_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       subpst->dependencies[0] = pst;
       subpst->number_of_dependencies = 1;
 
-      subpst->globals_offset =
-	subpst->n_global_syms =
-	subpst->statics_offset =
-	subpst->n_static_syms = 0;
-
-      subpst->readin = 0;
-      subpst->compunit_symtab = NULL;
       subpst->read_symtab = pst->read_symtab;
     }
 

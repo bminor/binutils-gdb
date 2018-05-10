@@ -1677,6 +1677,8 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
   objfile->static_psymbols.reserve (total_symbols / 10);
 }
 
+/* See psympriv.h.  */
+
 struct partial_symtab *
 allocate_psymtab (const char *filename, struct objfile *objfile)
 {

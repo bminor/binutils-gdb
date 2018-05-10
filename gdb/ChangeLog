@@ -1,5 +1,14 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_end_psymtab): Remove some initializations.
+	* psymtab.c (allocate_psymtab): Add comment.
+	* psympriv.h (allocate_psymtab): Add comment.
+	* dwarf2read.c (dwarf2_create_include_psymtab): Remove some
+	initializations.
+	* dbxread.c (dbx_end_psymtab): Remove some initializations.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* symfile.h (mdebug_build_psymtabs, elfmdebug_build_psymtabs):
 	Don't declare.
 	* mipsread.c: Include mdebugread.h.

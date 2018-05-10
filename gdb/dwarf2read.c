@@ -6592,13 +6592,7 @@ dwarf2_create_include_psymtab (const char *name, struct partial_symtab *pst,
   subpst->dependencies[0] = pst;
   subpst->number_of_dependencies = 1;
 
-  subpst->globals_offset = 0;
-  subpst->n_global_syms = 0;
-  subpst->statics_offset = 0;
-  subpst->n_static_syms = 0;
-  subpst->compunit_symtab = NULL;
   subpst->read_symtab = pst->read_symtab;
-  subpst->readin = 0;
 
   /* No private part is necessary for include psymtabs.  This property
      can be used to differentiate between such include psymtabs and

@@ -290,8 +290,14 @@ extern struct partial_symtab *start_psymtab_common (struct objfile *,
 
 extern void end_psymtab_common (struct objfile *, struct partial_symtab *);
 
-extern struct partial_symtab *allocate_psymtab (const char *,
-						struct objfile *)
+/* Allocate a new partial symbol table associated with OBJFILE.
+   FILENAME (which must be non-NULL) is the filename of this partial
+   symbol table; it is copied into the appropriate storage.  A new
+   partial symbol table is returned; aside from "next" and "filename",
+   its fields are initialized to zero.  */
+
+extern struct partial_symtab *allocate_psymtab (const char *filename,
+						struct objfile *objfile)
   ATTRIBUTE_NONNULL (1);
 
 extern void discard_psymtab (struct objfile *, struct partial_symtab *);
