@@ -1,5 +1,12 @@
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.h (psymtab_storage::allocate_psymtab): New method.
+	<free_psymtabs>: Now private.
+	* psymtab.c (psymtab_storage::allocate_psymtab): Implement.
+	(allocate_psymtab): Use new method.
+
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_end_psymtab): Use allocate_dependencies.
 	* psymtab.h (psymtab_storage::allocate_dependencies): New method.
 	* mdebugread.c (parse_partial_symbols): Use

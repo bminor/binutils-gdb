@@ -71,6 +71,12 @@ public:
     return OBSTACK_CALLOC (obstack (), number, struct partial_symtab *);
   }
 
+  /* Allocate a new psymtab on the psymtab obstack.  The new psymtab
+     will be linked in to the "psymtabs" list, but otherwise all other
+     fields will be zero.  */
+
+  struct partial_symtab *allocate_psymtab ();
+
 
   /* Each objfile points to a linked list of partial symtabs derived from
      this file, one partial symtab structure for each compilation unit
@@ -85,10 +91,6 @@ public:
 
   struct addrmap *psymtabs_addrmap = nullptr;
 
-  /* List of freed partial symtabs, available for re-use.  */
-
-  struct partial_symtab *free_psymtabs = nullptr;
-
   /* A byte cache where we can stash arbitrary "chunks" of bytes that
      will not change.  */
 
@@ -101,6 +103,10 @@ public:
   std::vector<partial_symbol *> static_psymbols;
 
 private:
+
+  /* List of freed partial symtabs, available for re-use.  */
+
+  struct partial_symtab *free_psymtabs = nullptr;
 
   /* The obstack where allocations are made.  */
 

@@ -78,6 +78,29 @@ psymtab_storage::~psymtab_storage ()
   psymbol_bcache_free (psymbol_cache);
 }
 
+/* See psymtab.h.  */
+
+struct partial_symtab *
+psymtab_storage::allocate_psymtab ()
+{
+  struct partial_symtab *psymtab;
+
+  if (free_psymtabs != nullptr)
+    {
+      psymtab = free_psymtabs;
+      free_psymtabs = psymtab->next;
+    }
+  else
+    psymtab = XOBNEW (obstack (), struct partial_symtab);
+
+  memset (psymtab, 0, sizeof (struct partial_symtab));
+
+  psymtab->next = psymtabs;
+  psymtabs = psymtab;
+
+  return psymtab;
+}
+
 
 
 /* See psymtab.h.  */
@@ -1715,28 +1738,13 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
 struct partial_symtab *
 allocate_psymtab (const char *filename, struct objfile *objfile)
 {
-  struct partial_symtab *psymtab;
+  struct partial_symtab *psymtab
+    = objfile->partial_symtabs->allocate_psymtab ();
 
-  if (objfile->partial_symtabs->free_psymtabs)
-    {
-      psymtab = objfile->partial_symtabs->free_psymtabs;
-      objfile->partial_symtabs->free_psymtabs = psymtab->next;
-    }
-  else
-    psymtab = XOBNEW (objfile->partial_symtabs->obstack (), partial_symtab);
-
-  memset (psymtab, 0, sizeof (struct partial_symtab));
   psymtab->filename
     = (const char *) bcache (filename, strlen (filename) + 1,
 			     objfile->per_bfd->filename_cache);
   psymtab->compunit_symtab = NULL;
-
-  /* Prepend it to the psymtab list for the objfile it belongs to.
-     Psymtabs are searched in most recent inserted -> least recent
-     inserted order.  */
-
-  psymtab->next = objfile->partial_symtabs->psymtabs;
-  objfile->partial_symtabs->psymtabs = psymtab;
 
   if (symtab_create_debug)
     {
