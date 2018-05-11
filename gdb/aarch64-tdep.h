@@ -73,6 +73,15 @@ struct gdbarch_tdep
 
   /* syscall record.  */
   int (*aarch64_syscall_record) (struct regcache *regcache, unsigned long svc_number);
+
+  /* The VQ value for SVE targets, or zero if SVE is not supported.  */
+  long vq;
+
+  /* Returns true if the target supports SVE.  */
+  bool has_sve ()
+  {
+    return vq != 0;
+  }
 };
 
 const target_desc *aarch64_read_description (long vq);

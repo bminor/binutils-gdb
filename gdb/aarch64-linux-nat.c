@@ -32,6 +32,7 @@
 #include "aarch32-linux-nat.h"
 #include "nat/aarch64-linux.h"
 #include "nat/aarch64-linux-hw-point.h"
+#include "nat/aarch64-sve-linux-ptrace.h"
 
 #include "elf/external.h"
 #include "elf/common.h"
@@ -537,8 +538,7 @@ aarch64_linux_nat_target::read_description ()
   if (ret == 0)
     return tdesc_arm_with_neon;
   else
-    /* SVE not yet supported.  */
-    return aarch64_read_description (0);
+    return aarch64_read_description (aarch64_sve_get_vq (tid));
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the
