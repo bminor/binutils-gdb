@@ -69,6 +69,7 @@
 #define AARCH64_S0_REGNUM (AARCH64_D0_REGNUM + 32)
 #define AARCH64_H0_REGNUM (AARCH64_S0_REGNUM + 32)
 #define AARCH64_B0_REGNUM (AARCH64_H0_REGNUM + 32)
+#define AARCH64_SVE_V0_REGNUM (AARCH64_B0_REGNUM + 32)
 
 /* All possible aarch64 target descriptors.  */
 struct target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1];
@@ -1766,6 +1767,33 @@ aarch64_vnb_type (struct gdbarch *gdbarch)
   return tdep->vnb_type;
 }
 
+/* Return the type for an AdvSISD V register.  */
+
+static struct type *
+aarch64_vnv_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->vnv_type == NULL)
+    {
+      struct type *t;
+      struct type *elem;
+
+      t = arch_composite_type (gdbarch, "__gdb_builtin_type_vnv",
+			       TYPE_CODE_UNION);
+
+      append_composite_type_field (t, "d", aarch64_vnd_type (gdbarch));
+      append_composite_type_field (t, "s", aarch64_vns_type (gdbarch));
+      append_composite_type_field (t, "h", aarch64_vnh_type (gdbarch));
+      append_composite_type_field (t, "b", aarch64_vnb_type (gdbarch));
+      append_composite_type_field (t, "q", aarch64_vnq_type (gdbarch));
+
+      tdep->vnv_type = t;
+    }
+
+  return tdep->vnv_type;
+}
+
 /* Implement the "dwarf2_reg_to_regnum" gdbarch method.  */
 
 static int
@@ -2114,6 +2142,8 @@ aarch64_gen_return_address (struct gdbarch *gdbarch,
 static const char *
 aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   static const char *const q_name[] =
     {
       "q0", "q1", "q2", "q3",
@@ -2191,6 +2221,25 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   if (regnum >= AARCH64_B0_REGNUM && regnum < AARCH64_B0_REGNUM + 32)
     return b_name[regnum - AARCH64_B0_REGNUM];
 
+  if (tdep->has_sve ())
+    {
+      static const char *const sve_v_name[] =
+	{
+	  "v0", "v1", "v2", "v3",
+	  "v4", "v5", "v6", "v7",
+	  "v8", "v9", "v10", "v11",
+	  "v12", "v13", "v14", "v15",
+	  "v16", "v17", "v18", "v19",
+	  "v20", "v21", "v22", "v23",
+	  "v24", "v25", "v26", "v27",
+	  "v28", "v29", "v30", "v31",
+	};
+
+      if (regnum >= AARCH64_SVE_V0_REGNUM
+	  && regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
+	return sve_v_name[regnum - AARCH64_SVE_V0_REGNUM];
+    }
+
   internal_error (__FILE__, __LINE__,
 		  _("aarch64_pseudo_register_name: bad register number %d"),
 		  regnum);
@@ -2201,6 +2250,8 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 static struct type *
 aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   regnum -= gdbarch_num_regs (gdbarch);
 
   if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
@@ -2218,6 +2269,10 @@ aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= AARCH64_B0_REGNUM && regnum < AARCH64_B0_REGNUM + 32)
     return aarch64_vnb_type (gdbarch);
 
+  if (tdep->has_sve () && regnum >= AARCH64_SVE_V0_REGNUM
+      && regnum < AARCH64_SVE_V0_REGNUM + 32)
+    return aarch64_vnv_type (gdbarch);
+
   internal_error (__FILE__, __LINE__,
 		  _("aarch64_pseudo_register_type: bad register number %d"),
 		  regnum);
@@ -2229,6 +2284,8 @@ static int
 aarch64_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 				    struct reggroup *group)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   regnum -= gdbarch_num_regs (gdbarch);
 
   if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
@@ -2243,6 +2300,9 @@ aarch64_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return group == all_reggroup || group == vector_reggroup;
   else if (regnum >= AARCH64_B0_REGNUM && regnum < AARCH64_B0_REGNUM + 32)
     return group == all_reggroup || group == vector_reggroup;
+  else if (tdep->has_sve () && regnum >= AARCH64_SVE_V0_REGNUM
+	   && regnum < AARCH64_SVE_V0_REGNUM + 32)
+    return group == all_reggroup || group == vector_reggroup;
 
   return group == all_reggroup;
 }
@@ -2250,17 +2310,30 @@ aarch64_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 /* Inner version of aarch64_pseudo_read_value.  */
 
 static struct value *
-aarch64_pseudo_read_value_2 (readable_regcache *regcache, int regnum_offset,
+aarch64_pseudo_read_value_2 (struct gdbarch *gdbarch,
+			     readable_regcache *regcache, int regnum_offset,
 			     int regsize, struct value *result_value)
 {
-  gdb_byte reg_buf[V_REGISTER_SIZE];
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  gdb_byte v_buf[V_REGISTER_SIZE], *reg_buf;
+  gdb_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
   unsigned v_regnum = AARCH64_V0_REGNUM + regnum_offset;
+
+  /* Enough space to read a full vector register.  */
+  if (tdep->has_sve ())
+    reg_buf = (gdb_byte *) xmalloc (register_size (gdbarch, AARCH64_V0_REGNUM));
+  else
+    reg_buf = v_buf;
 
   if (regcache->raw_read (v_regnum, reg_buf) != REG_VALID)
     mark_value_bytes_unavailable (result_value, 0,
 				  TYPE_LENGTH (value_type (result_value)));
   else
     memcpy (value_contents_raw (result_value), reg_buf, regsize);
+
+  if (tdep->has_sve ())
+    xfree (reg_buf);
+
   return result_value;
  }
 
@@ -2270,6 +2343,7 @@ static struct value *
 aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
 			   int regnum)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct value *result_value = allocate_value (register_type (gdbarch, regnum));
 
   VALUE_LVAL (result_value) = lval_register;
@@ -2278,24 +2352,35 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
   regnum -= gdbarch_num_regs (gdbarch);
 
   if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
-    return aarch64_pseudo_read_value_2 (regcache, regnum - AARCH64_Q0_REGNUM,
+    return aarch64_pseudo_read_value_2 (gdbarch, regcache,
+					regnum - AARCH64_Q0_REGNUM,
 					Q_REGISTER_SIZE, result_value);
 
   if (regnum >= AARCH64_D0_REGNUM && regnum < AARCH64_D0_REGNUM + 32)
-    return aarch64_pseudo_read_value_2 (regcache, regnum - AARCH64_D0_REGNUM,
+    return aarch64_pseudo_read_value_2 (gdbarch, regcache,
+					regnum - AARCH64_D0_REGNUM,
 					D_REGISTER_SIZE, result_value);
 
   if (regnum >= AARCH64_S0_REGNUM && regnum < AARCH64_S0_REGNUM + 32)
-    return aarch64_pseudo_read_value_2 (regcache, regnum - AARCH64_S0_REGNUM,
+    return aarch64_pseudo_read_value_2 (gdbarch, regcache,
+					regnum - AARCH64_S0_REGNUM,
 					S_REGISTER_SIZE, result_value);
 
   if (regnum >= AARCH64_H0_REGNUM && regnum < AARCH64_H0_REGNUM + 32)
-    return aarch64_pseudo_read_value_2 (regcache, regnum - AARCH64_H0_REGNUM,
+    return aarch64_pseudo_read_value_2 (gdbarch, regcache,
+					regnum - AARCH64_H0_REGNUM,
 					H_REGISTER_SIZE, result_value);
 
   if (regnum >= AARCH64_B0_REGNUM && regnum < AARCH64_B0_REGNUM + 32)
-    return aarch64_pseudo_read_value_2 (regcache, regnum - AARCH64_B0_REGNUM,
+    return aarch64_pseudo_read_value_2 (gdbarch, regcache,
+					regnum - AARCH64_B0_REGNUM,
 					B_REGISTER_SIZE, result_value);
+
+  if (tdep->has_sve () && regnum >= AARCH64_SVE_V0_REGNUM
+      && regnum < AARCH64_SVE_V0_REGNUM + 32)
+    return aarch64_pseudo_read_value_2 (gdbarch, regcache,
+					regnum - AARCH64_SVE_V0_REGNUM,
+					V_REGISTER_SIZE, result_value);
 
   gdb_assert_not_reached ("regnum out of bound");
 }
@@ -2303,20 +2388,31 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
 /* Inner version of aarch64_pseudo_write.  */
 
 static void
-aarch64_pseudo_write_2 (struct regcache *regcache, int regnum_offset,
-			int regsize, const gdb_byte *buf)
+aarch64_pseudo_write_2 (struct gdbarch *gdbarch, struct regcache *regcache,
+			int regnum_offset, int regsize, const gdb_byte *buf)
 {
-  gdb_byte reg_buf[V_REGISTER_SIZE];
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  gdb_byte v_buf[V_REGISTER_SIZE], *reg_buf;
+  gdb_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
   unsigned v_regnum = AARCH64_V0_REGNUM + regnum_offset;
+
+  /* Enough space to write a full vector register.  */
+  if (tdep->has_sve ())
+    reg_buf = (gdb_byte *) xmalloc (register_size (gdbarch, AARCH64_V0_REGNUM));
+  else
+    reg_buf = v_buf;
 
   /* Ensure the register buffer is zero, we want gdb writes of the
      various 'scalar' pseudo registers to behavior like architectural
      writes, register width bytes are written the remainder are set to
      zero.  */
-  memset (reg_buf, 0, sizeof (reg_buf));
+  memset (reg_buf, 0, register_size (gdbarch, AARCH64_V0_REGNUM));
 
   memcpy (reg_buf, buf, regsize);
   regcache->raw_write (v_regnum, reg_buf);
+
+  if (tdep->has_sve ())
+    xfree (reg_buf);
 }
 
 /* Implement the "pseudo_register_write" gdbarch method.  */
@@ -2325,28 +2421,39 @@ static void
 aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 		      int regnum, const gdb_byte *buf)
 {
-
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   regnum -= gdbarch_num_regs (gdbarch);
 
   if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
-    return aarch64_pseudo_write_2 (regcache, regnum - AARCH64_Q0_REGNUM,
-				   Q_REGISTER_SIZE, buf);
+    return aarch64_pseudo_write_2 (gdbarch, regcache,
+				   regnum - AARCH64_Q0_REGNUM, Q_REGISTER_SIZE,
+				   buf);
 
   if (regnum >= AARCH64_D0_REGNUM && regnum < AARCH64_D0_REGNUM + 32)
-    return aarch64_pseudo_write_2 (regcache, regnum - AARCH64_D0_REGNUM,
-				   D_REGISTER_SIZE, buf);
+    return aarch64_pseudo_write_2 (gdbarch, regcache,
+				   regnum - AARCH64_D0_REGNUM, D_REGISTER_SIZE,
+				   buf);
 
   if (regnum >= AARCH64_S0_REGNUM && regnum < AARCH64_S0_REGNUM + 32)
-    return aarch64_pseudo_write_2 (regcache, regnum - AARCH64_S0_REGNUM,
-				   S_REGISTER_SIZE, buf);
+    return aarch64_pseudo_write_2 (gdbarch, regcache,
+				   regnum - AARCH64_S0_REGNUM, S_REGISTER_SIZE,
+				   buf);
 
   if (regnum >= AARCH64_H0_REGNUM && regnum < AARCH64_H0_REGNUM + 32)
-    return aarch64_pseudo_write_2 (regcache, regnum - AARCH64_H0_REGNUM,
-				   H_REGISTER_SIZE, buf);
+    return aarch64_pseudo_write_2 (gdbarch, regcache,
+				   regnum - AARCH64_H0_REGNUM, H_REGISTER_SIZE,
+				   buf);
 
   if (regnum >= AARCH64_B0_REGNUM && regnum < AARCH64_B0_REGNUM + 32)
-    return aarch64_pseudo_write_2 (regcache, regnum - AARCH64_B0_REGNUM,
-				   B_REGISTER_SIZE, buf);
+    return aarch64_pseudo_write_2 (gdbarch, regcache,
+				   regnum - AARCH64_B0_REGNUM, B_REGISTER_SIZE,
+				   buf);
+
+  if (tdep->has_sve () && regnum >= AARCH64_SVE_V0_REGNUM
+      && regnum < AARCH64_SVE_V0_REGNUM + 32)
+    return aarch64_pseudo_write_2 (gdbarch, regcache,
+				   regnum - AARCH64_SVE_V0_REGNUM,
+				   V_REGISTER_SIZE, buf);
 
   gdb_assert_not_reached ("regnum out of bound");
 }
