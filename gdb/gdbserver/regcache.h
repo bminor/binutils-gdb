@@ -28,31 +28,31 @@ struct target_desc;
    inferior; this is primarily for simplicity, as the performance
    benefit is minimal.  */
 
-struct regcache
+struct regcache : public reg_buffer_common
 {
   /* The regcache's target description.  */
-  const struct target_desc *tdesc;
+  const struct target_desc *tdesc = nullptr;
 
   /* Whether the REGISTERS buffer's contents are valid.  If false, we
      haven't fetched the registers from the target yet.  Not that this
      register cache is _not_ pass-through, unlike GDB's.  Note that
      "valid" here is unrelated to whether the registers are available
      in a traceframe.  For that, check REGISTER_STATUS below.  */
-  int registers_valid;
-  int registers_owned;
-  unsigned char *registers;
+  int registers_valid = 0;
+  int registers_owned = 0;
+  unsigned char *registers = nullptr;
 #ifndef IN_PROCESS_AGENT
   /* One of REG_UNAVAILBLE or REG_VALID.  */
-  unsigned char *register_status;
+  unsigned char *register_status = nullptr;
 #endif
 
-  void raw_supply (int regnum, const void *buf);
+  void raw_supply (int regnum, const void *buf) override;
 
-  void raw_collect (int regnum, void *buf) const;
+  void raw_collect (int regnum, void *buf) const override;
 
-  int raw_compare (int regnum, const void *buf, int offset) const;
+  bool raw_compare (int regnum, const void *buf, int offset) const override;
 
-  enum register_status get_register_status (int regnum) const;
+  enum register_status get_register_status (int regnum) const override;
 };
 
 struct regcache *init_register_cache (struct regcache *regcache,

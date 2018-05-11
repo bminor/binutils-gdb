@@ -62,4 +62,13 @@ extern enum register_status regcache_raw_read_unsigned
 
 ULONGEST regcache_raw_get_unsigned (struct regcache *regcache, int regnum);
 
+struct reg_buffer_common
+{
+  virtual ~reg_buffer_common () = default;
+  virtual void raw_supply (int regnum, const void *buf) = 0;
+  virtual void raw_collect (int regnum, void *buf) const = 0;
+  virtual bool raw_compare (int regnum, const void *buf, int offset) const = 0;
+  virtual register_status get_register_status (int regnum) const = 0;
+};
+
 #endif /* COMMON_REGCACHE_H */

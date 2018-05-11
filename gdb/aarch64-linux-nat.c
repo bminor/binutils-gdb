@@ -384,19 +384,65 @@ store_fpregs_to_thread (ptid_t ptid, const reg_buffer *regcache)
     }
 }
 
+/* Fill GDB's register array with the sve register values
+   from the current thread.  */
+
+static void
+fetch_sveregs_from_thread (ptid_t ptid, reg_buffer *regcache)
+{
+  gdb_byte *base = aarch64_sve_get_sveregs (ptid.lwp ());
+  aarch64_sve_regs_copy_to_regcache (regcache, base);
+  xfree (base);
+}
+
+/* Store to the current thread the valid sve register
+   values in the GDB's register array.  */
+
+static void
+store_sveregs_to_thread (ptid_t ptid, reg_buffer *regcache)
+{
+  gdb_byte *base;
+  int ret, tid;
+  struct iovec iovec;
+
+  tid = ptid_get_lwp (inferior_ptid);
+
+  /* Obtain a dump of SVE registers from ptrace.  */
+  base = aarch64_sve_get_sveregs (tid);
+
+  /* Overwrite with regcache state.  */
+  aarch64_sve_regs_copy_from_regcache (regcache, base);
+
+  /* Write back to the kernel.  */
+  iovec.iov_base = base;
+  iovec.iov_len = ((struct user_sve_header *) base)->size;
+  ret = ptrace (PTRACE_SETREGSET, tid, NT_ARM_SVE, &iovec);
+  xfree (base);
+
+  if (ret < 0)
+    perror_with_name (_("Unable to store sve registers"));
+}
+
 /* Implement the "fetch_registers" target_ops method.  */
 
 void
 aarch64_linux_nat_target::fetch_registers (ptid_t ptid, reg_buffer *regcache,
 					   int regno)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+
   if (regno == -1)
     {
       fetch_gregs_from_thread (ptid, regcache);
-      fetch_fpregs_from_thread (ptid, regcache);
+      if (tdep->has_sve ())
+	fetch_sveregs_from_thread (ptid, regcache);
+      else
+	fetch_fpregs_from_thread (ptid, regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
     fetch_gregs_from_thread (ptid, regcache);
+  else if (tdep->has_sve ())
+    fetch_sveregs_from_thread (ptid, regcache);
   else
     fetch_fpregs_from_thread (ptid, regcache);
 }
@@ -407,13 +453,20 @@ void
 aarch64_linux_nat_target::store_registers (ptid_t ptid, reg_buffer *regcache,
 					   int regno)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+
   if (regno == -1)
     {
       store_gregs_to_thread (ptid, regcache);
-      store_fpregs_to_thread (ptid, regcache);
+      if (tdep->has_sve ())
+	store_sveregs_to_thread (ptid, regcache);
+      else
+	store_fpregs_to_thread (ptid, regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
     store_gregs_to_thread (ptid, regcache);
+  else if (tdep->has_sve ())
+    store_sveregs_to_thread (ptid, regcache);
   else
     store_fpregs_to_thread (ptid, regcache);
 }

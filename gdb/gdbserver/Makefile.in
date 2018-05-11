@@ -219,6 +219,7 @@ SFILES = \
 	$(srcdir)/common/tdesc.c \
 	$(srcdir)/common/vec.c \
 	$(srcdir)/common/xml-utils.c \
+	$(srcdir)/nat/aarch64-sve-linux-ptrace.c \
 	$(srcdir)/nat/linux-btrace.c \
 	$(srcdir)/nat/linux-namespaces.c \
 	$(srcdir)/nat/linux-osdata.c \

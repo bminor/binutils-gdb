@@ -159,7 +159,7 @@ init_register_cache (struct regcache *regcache,
 struct regcache *
 new_register_cache (const struct target_desc *tdesc)
 {
-  struct regcache *regcache = XCNEW (struct regcache);
+  struct regcache *regcache = new struct regcache;
 
   gdb_assert (tdesc->registers_size != 0);
 
@@ -174,7 +174,7 @@ free_register_cache (struct regcache *regcache)
       if (regcache->registers_owned)
 	free (regcache->registers);
       free (regcache->register_status);
-      free (regcache);
+      delete regcache;
     }
 }
 
@@ -506,10 +506,10 @@ regcache::get_register_status (int regnum) const
    first OFFSET bytes) to the contents of BUF (without any offset).  Returns 0
    if identical.  */
 
-int
+bool
 regcache::raw_compare (int regnum, const void *buf, int offset) const
 {
   gdb_assert (register_size (tdesc, regnum) > offset);
   return memcmp (buf, register_data (this, regnum, 1) + offset,
-		 register_size (tdesc, regnum) - offset);
+		 register_size (tdesc, regnum) - offset) == 0;
 }

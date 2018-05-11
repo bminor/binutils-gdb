@@ -1087,7 +1087,7 @@ reg_buffer::collect_regset (const struct regset *regset,
    first OFFSET bytes) to the contents of BUF (without any offset).  Returns 0
    if identical.  */
 
-int
+bool
 reg_buffer::raw_compare (int regnum, const void *buf, int offset) const
 {
   const char *regbuf;
@@ -1098,7 +1098,7 @@ reg_buffer::raw_compare (int regnum, const void *buf, int offset) const
 
   regbuf = (const char *) register_buffer (regnum);
   size = m_descr->sizeof_register[regnum];
-  return memcmp (buf, regbuf + offset, size - offset);
+  return memcmp (buf, regbuf + offset, size - offset) == 0;
 }
 
 /* Special handling for register PC.  */

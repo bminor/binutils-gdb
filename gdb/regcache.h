@@ -121,7 +121,7 @@ typedef struct cached_reg
 
 /* Buffer of registers.  */
 
-class reg_buffer
+class reg_buffer : public reg_buffer_common
 {
 public:
   reg_buffer (gdbarch *gdbarch, bool has_pseudo);
@@ -133,10 +133,10 @@ public:
 
   /* Get the availability status of the value of register REGNUM in this
      buffer.  */
-  enum register_status get_register_status (int regnum) const;
+  enum register_status get_register_status (int regnum) const override;
 
   /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
-  void raw_collect (int regnum, void *buf) const;
+  void raw_collect (int regnum, void *buf) const override;
 
   void raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
 			    bool is_signed) const;
@@ -145,7 +145,7 @@ public:
 		       void *buf, size_t size) const;
 
   /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
-  void raw_supply (int regnum, const void *buf);
+  void raw_supply (int regnum, const void *buf) override;
 
   void raw_supply (int regnum, const reg_buffer &src)
   {
@@ -162,7 +162,7 @@ public:
 
   void invalidate (int regnum);
 
-  int raw_compare (int regnum, const void *buf, int offset) const;
+  bool raw_compare (int regnum, const void *buf, int offset) const override;
 
   /* Dump the contents of a register from the register cache to the target
      debug.  */
