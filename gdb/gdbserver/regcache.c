@@ -300,7 +300,7 @@ regcache_register_size (const struct regcache *regcache, int n)
 }
 
 static unsigned char *
-register_data (struct regcache *regcache, int n, int fetch)
+register_data (const struct regcache *regcache, int n, int fetch)
 {
   return (regcache->registers
 	  + find_register_by_number (regcache->tdesc, n).offset / 8);
@@ -313,22 +313,26 @@ register_data (struct regcache *regcache, int n, int fetch)
 void
 supply_register (struct regcache *regcache, int n, const void *buf)
 {
+  return regcache->raw_supply (n, buf);
+}
+
+void
+regcache::raw_supply (int n, const void *buf)
+{
   if (buf)
     {
-      memcpy (register_data (regcache, n, 0), buf,
-	      register_size (regcache->tdesc, n));
+      memcpy (register_data (this, n, 0), buf, register_size (tdesc, n));
 #ifndef IN_PROCESS_AGENT
-      if (regcache->register_status != NULL)
-	regcache->register_status[n] = REG_VALID;
+      if (register_status != NULL)
+	register_status[n] = REG_VALID;
 #endif
     }
   else
     {
-      memset (register_data (regcache, n, 0), 0,
-	      register_size (regcache->tdesc, n));
+      memset (register_data (this, n, 0), 0, register_size (tdesc, n));
 #ifndef IN_PROCESS_AGENT
-      if (regcache->register_status != NULL)
-	regcache->register_status[n] = REG_UNAVAILABLE;
+      if (register_status != NULL)
+	register_status[n] = REG_UNAVAILABLE;
 #endif
     }
 }
@@ -410,9 +414,15 @@ supply_register_by_name (struct regcache *regcache,
 void
 collect_register (struct regcache *regcache, int n, void *buf)
 {
-  memcpy (buf, register_data (regcache, n, 1),
-	  register_size (regcache->tdesc, n));
+  regcache->raw_collect (n, buf);
 }
+
+void
+regcache::raw_collect (int n, void *buf) const
+{
+  memcpy (buf, register_data (this, n, 1), register_size (tdesc, n));
+}
+
 
 enum register_status
 regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
@@ -480,3 +490,26 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 }
 
 #endif
+
+enum register_status
+regcache::get_register_status (int regnum) const
+{
+#ifndef IN_PROCESS_AGENT
+  gdb_assert (regnum >= 0 && regnum < tdesc->reg_defs.size ());
+  return (enum register_status) (register_status[regnum]);
+#else
+  return REG_VALID;
+#endif
+}
+
+/* Compare the contents of the register stored in the regcache (ignoring the
+   first OFFSET bytes) to the contents of BUF (without any offset).  Returns 0
+   if identical.  */
+
+int
+regcache::raw_compare (int regnum, const void *buf, int offset) const
+{
+  gdb_assert (register_size (tdesc, regnum) > offset);
+  return memcmp (buf, register_data (this, regnum, 1) + offset,
+		 register_size (tdesc, regnum) - offset);
+}

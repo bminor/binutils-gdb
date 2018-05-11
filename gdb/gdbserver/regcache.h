@@ -45,6 +45,14 @@ struct regcache
   /* One of REG_UNAVAILBLE or REG_VALID.  */
   unsigned char *register_status;
 #endif
+
+  void raw_supply (int regnum, const void *buf);
+
+  void raw_collect (int regnum, void *buf) const;
+
+  int raw_compare (int regnum, const void *buf, int offset) const;
+
+  enum register_status get_register_status (int regnum) const;
 };
 
 struct regcache *init_register_cache (struct regcache *regcache,

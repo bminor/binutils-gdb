@@ -162,6 +162,8 @@ public:
 
   void invalidate (int regnum);
 
+  int raw_compare (int regnum, const void *buf, int offset) const;
+
   /* Dump the contents of a register from the register cache to the target
      debug.  */
   void debug_print_register (const char *func, int regno);

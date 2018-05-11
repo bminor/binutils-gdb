@@ -1083,6 +1083,23 @@ reg_buffer::collect_regset (const struct regset *regset,
   transfer_regset (regset, NULL, regnum, NULL, buf, size);
 }
 
+/* Compare the contents of the register stored in the regcache (ignoring the
+   first OFFSET bytes) to the contents of BUF (without any offset).  Returns 0
+   if identical.  */
+
+int
+reg_buffer::raw_compare (int regnum, const void *buf, int offset) const
+{
+  const char *regbuf;
+  size_t size;
+
+  gdb_assert (buf != NULL);
+  assert_regnum (regnum);
+
+  regbuf = (const char *) register_buffer (regnum);
+  size = m_descr->sizeof_register[regnum];
+  return memcmp (buf, regbuf + offset, size - offset);
+}
 
 /* Special handling for register PC.  */
 
