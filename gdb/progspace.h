@@ -157,6 +157,9 @@ struct program_space
      It needs to be freed by xfree.  It is not NULL iff EBFD is not NULL.  */
   char *pspace_exec_filename = NULL;
 
+  /* Binary file diddling handle for the core file.  */
+  bfd *cbfd = NULL;
+
   /* The address space attached to this program space.  More than one
      program space may be bound to the same address space.  In the
      traditional unix-like debugging scenario, this will usually

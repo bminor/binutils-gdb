@@ -1,3 +1,10 @@
+2018-05-11  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <tromey@redhat.com>
+
+	* corefile.c (core_bfd): Remove.
+	* gdbcore.h (core_bfd): Now a macro.
+	* progspace.h (struct program_space) <cbfd>: New field.
+
 2018-05-11  Tom Tromey  <tom@tromey.com>
 
 	* mdebugread.c (parse_partial_symbols, psymtab_to_symtab_1): Use

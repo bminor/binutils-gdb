@@ -49,10 +49,6 @@ static hook_type *exec_file_extra_hooks;	/* Array of additional
 						   hooks.  */
 static int exec_file_hook_count = 0;		/* Size of array.  */
 
-/* Binary file diddling handle for the core file.  */
-
-bfd *core_bfd = NULL;
-
 
 
 /* Backward compatability with old way of specifying core files.  */

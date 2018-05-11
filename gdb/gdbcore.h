@@ -133,7 +133,7 @@ extern void specify_exec_file_hook (void (*hook) (const char *filename));
 
 /* Binary File Diddler for the core file.  */
 
-extern bfd *core_bfd;
+#define core_bfd (current_program_space->cbfd)
 
 /* corelow.c target.  It is never NULL after GDB initialization.  */
 
