@@ -51,24 +51,6 @@ static int exec_file_hook_count = 0;		/* Size of array.  */
 
 
 
-/* Backward compatability with old way of specifying core files.  */
-
-void
-core_file_command (const char *filename, int from_tty)
-{
-  dont_repeat ();		/* Either way, seems bogus.  */
-
-  if (!filename)
-    {
-      gdb_assert (the_core_target != NULL);
-
-      the_core_target->detach (current_inferior (), from_tty);
-    }
-  else
-    core_target_open (filename, from_tty);
-}
-
-
 /* If there are two or more functions that wish to hook into
    exec_file_command, this function will call all of the hook
    functions.  */

@@ -92,9 +92,6 @@ public:
   bool info_proc (const char *, enum info_proc_what) override;
 };
 
-/* See gdbcore.h.  */
-struct target_ops *the_core_target;
-
 /* List of all available core_fns.  On gdb startup, each core file
    register reader calls deprecated_add_core_fns() to register
    information on each core format it is prepared to read.  */
@@ -309,6 +306,36 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
     inferior_ptid = ptid;			/* Yes, make it current.  */
 }
 
+/* Issue a message saying we have no core to debug, if FROM_TTY.  */
+
+static void
+maybe_say_no_core_file_now (int from_tty)
+{
+  if (from_tty)
+    printf_filtered (_("No core file now.\n"));
+}
+
+/* Backward compatability with old way of specifying core files.  */
+
+void
+core_file_command (const char *filename, int from_tty)
+{
+  dont_repeat ();		/* Either way, seems bogus.  */
+
+  if (filename == NULL)
+    {
+      if (core_bfd != NULL)
+	{
+	  target_detach (current_inferior (), from_tty);
+	  gdb_assert (core_bfd == NULL);
+	}
+      else
+	maybe_say_no_core_file_now (from_tty);
+    }
+  else
+    core_target_open (filename, from_tty);
+}
+
 /* See gdbcore.h.  */
 
 void
@@ -513,8 +540,7 @@ core_target::detach (inferior *inf, int from_tty)
 {
   unpush_target (this);
   reinit_frame_cache ();
-  if (from_tty)
-    printf_filtered (_("No core file now.\n"));
+  maybe_say_no_core_file_now (from_tty);
 }
 
 /* Try to retrieve registers from a section in core_bfd, and supply
@@ -1021,11 +1047,5 @@ core_target::info_proc (const char *args, enum info_proc_what request)
 void
 _initialize_corelow (void)
 {
-  if (the_core_target != NULL)
-    internal_error (__FILE__, __LINE__,
-		    _("core target already exists (\"%s\")."),
-		    the_core_target->longname ());
-  the_core_target = &core_ops;
-
   add_target (core_target_info, core_target_open, filename_completer);
 }

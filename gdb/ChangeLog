@@ -1,3 +1,15 @@
+2018-05-11  Pedro Alves  <palves@redhat.com>
+
+	* corefile.c (core_file_command): Move to corelow.c.
+	* corelow.c (the_core_target): Delete.
+	(core_file_command): Moved from corefile.c.  Check exec_bfd
+	instead of the_core_target.  Use target_detach instead of calling
+	into the_core_target directly.
+	(maybe_say_no_core_file_now): New.
+	(core_target::detach): Use it.
+	(_initialize_corelow): Remove references to the_core_target.
+	* gdbcore.h (the_core_target): Delete.
+
 2018-05-11  Tom Tromey  <tromey@redhat.com>
 	    Pedro Alves  <tromey@redhat.com>
 
