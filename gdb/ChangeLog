@@ -39,7 +39,7 @@
 	* gdbcore.h (the_core_target): Delete.
 
 2018-05-11  Tom Tromey  <tromey@redhat.com>
-	    Pedro Alves  <tromey@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
 
 	* corefile.c (core_bfd): Remove.
 	* gdbcore.h (core_bfd): Now a macro.
