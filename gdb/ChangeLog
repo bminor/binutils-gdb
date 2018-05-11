@@ -1,5 +1,33 @@
 2018-05-11  Pedro Alves  <palves@redhat.com>
 
+	* corelow.c (core_target) <core_target>: No longer inline.
+	Initialize m_core_gdbarch, m_core_vec and build the section table
+	here.
+	<~core_target>: New.
+	<core_gdbarch, get_core_register_section>: New methods.
+	<m_core_section_table, m_core_vec, m_core_gdbarch>: New fields,
+	factored out from ...
+	<core_data, core_vec, core_gdbarch>: ... these deleted globals.
+	(core_ops): Delete.
+	(sniff_core_bfd): Add gdbarch parameter.
+	(core_close): Delete, merged into ...
+	(core_target::close): ... here.  Delete self.
+	(core_close_cleanup): Delete.
+	(core_target_open): Allocate a core_target on the heap.  Use a
+	unique_ptr instead of a cleanup.  Bits moved into the core_target
+	ctor.  Adjust to use core_target methods instead of globals.
+	(get_core_register_section): Rename to ...
+	(core_target::get_core_register_section): ... this and adjust.
+	(struct get_core_registers_cb_data): New.
+	(get_core_registers_cb): Use it.  Use bool.
+	(core_target::fetch_registers, core_target::files_info)
+	(core_target::xfer_partial, core_target::read_description)
+	(core_target::pid_to, core_target::thread_name): Adjust to
+	reference class fields instead of globals.
+	* target.h (struct target_ops_deleter, target_ops_up): New.
+
+2018-05-11  Pedro Alves  <palves@redhat.com>
+
 	* corefile.c (core_file_command): Move to corelow.c.
 	* corelow.c (the_core_target): Delete.
 	(core_file_command): Moved from corefile.c.  Check exec_bfd

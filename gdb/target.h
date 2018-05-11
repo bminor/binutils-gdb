@@ -1243,6 +1243,20 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
   };
 
+/* Deleter for std::unique_ptr.  See comments in
+   target_ops::~target_ops and target_ops::close about heap-allocated
+   targets.  */
+struct target_ops_deleter
+{
+  void operator() (target_ops *target)
+  {
+    target->close ();
+  }
+};
+
+/* A unique pointer for target_ops.  */
+typedef std::unique_ptr<target_ops, target_ops_deleter> target_ops_up;
+
 /* Native target backends call this once at initialization time to
    inform the core about which is the target that can respond to "run"
    or "attach".  Note: native targets are always singletons.  */
