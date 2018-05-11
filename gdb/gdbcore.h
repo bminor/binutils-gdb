@@ -133,7 +133,7 @@ extern void specify_exec_file_hook (void (*hook) (const char *filename));
 
 /* Binary File Diddler for the core file.  */
 
-#define core_bfd (current_program_space->cbfd)
+#define core_bfd (current_program_space->cbfd.get ())
 
 /* Whether to open exec and core files read-only or read-write.  */
 

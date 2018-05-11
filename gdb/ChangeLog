@@ -1,5 +1,13 @@
 2018-05-16  Tom Tromey  <tom@tromey.com>
 
+	* gdbcore.h (core_bfd): Redefine.
+	* corelow.c (core_target::close): Update.
+	(core_target_open): Update.
+	* progspace.h (struct program_space) <cbfd>: Now a
+	gdb_bfd_ref_ptr.
+
+2018-05-16  Tom Tromey  <tom@tromey.com>
+
 	PR cli/19551:
 	* symfile-add-flags.h (enum symfile_add_flags)
 	<SYMFILE_NOT_FILENAME>: New constant.

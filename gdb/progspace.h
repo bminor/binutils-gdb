@@ -23,6 +23,7 @@
 
 #include "target.h"
 #include "vec.h"
+#include "gdb_bfd.h"
 #include "gdb_vecs.h"
 #include "registry.h"
 
@@ -158,7 +159,7 @@ struct program_space
   char *pspace_exec_filename = NULL;
 
   /* Binary file diddling handle for the core file.  */
-  bfd *cbfd = NULL;
+  gdb_bfd_ref_ptr cbfd;
 
   /* The address space attached to this program space.  More than one
      program space may be bound to the same address space.  In the

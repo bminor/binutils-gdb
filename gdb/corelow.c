@@ -270,8 +270,7 @@ core_target::close ()
          comments in clear_solib in solib.c.  */
       clear_solib ();
 
-      gdb_bfd_unref (core_bfd);
-      core_bfd = NULL;
+      current_program_space->cbfd.reset (nullptr);
     }
 
   /* Core targets are heap-allocated (see core_target_open), so here
@@ -406,7 +405,7 @@ core_target_open (const char *arg, int from_tty)
 	     filename.get (), bfd_errmsg (bfd_get_error ()));
     }
 
-  core_bfd = temp_bfd.release ();
+  current_program_space->cbfd = std::move (temp_bfd);
 
   core_target *target = new core_target ();
 
