@@ -1,3 +1,14 @@
+2018-05-12  Alan Modra  <amodra@gmail.com>
+
+	PR 20659
+	* elf.c (rewrite_elf_program_header): Use segment_mark only for
+	PT_LOAD headers.  Delete first_matching_lma and first_suggested_lma.
+	Instead make matching_lma and suggested_lma pointers to the
+	sections.  Align section vma and lma calculated from segment.
+	Don't clear includes_phdrs or includes_filehdr based on p_paddr
+	test.  Try to handle alignment padding before first section by
+	adjusting new segment lma down.  Adjust PT_PHDR map p_paddr.
+
 2018-05-09  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* elf32-pru.c (pru_elf32_do_ldi32_relocate): Make LDI32 relocation

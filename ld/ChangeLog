@@ -1,3 +1,10 @@
+2018-05-12  Alan Modra  <amodra@gmail.com>
+
+	PR 20659
+	* testsuite/ld-elf/changelma.d,
+	* testsuite/ld-elf/changelma.lnk,
+	* testsuite/ld-elf/changelma.s: New test.
+
 2018-05-09  2018-05-02  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* scripttempl/pru.sc: Add LD sections to allow linking TI
