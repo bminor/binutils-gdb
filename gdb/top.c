@@ -1278,9 +1278,9 @@ command_line_input (const char *prompt_arg, int repeat,
   return cmd;
 }
 
-/* Print the GDB banner.  */
+/* See top.h.  */
 void
-print_gdb_version (struct ui_file *stream)
+print_gdb_version (struct ui_file *stream, bool interactive)
 {
   /* From GNU coding standards, first line is meant to be easy for a
      program to parse, and is just canonical program name and version
@@ -1301,8 +1301,13 @@ print_gdb_version (struct ui_file *stream)
   fprintf_filtered (stream, "\
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\
 \nThis is free software: you are free to change and redistribute it.\n\
-There is NO WARRANTY, to the extent permitted by law.  Type \"show copying\"\n\
-and \"show warranty\" for details.\n");
+There is NO WARRANTY, to the extent permitted by law.");
+
+  if (!interactive)
+    return;
+
+  fprintf_filtered (stream, ("\nType \"show copying\" and "
+			     "\"show warranty\" for details.\n"));
 
   /* After the required info we print the configuration information.  */
 
@@ -1316,18 +1321,21 @@ and \"show warranty\" for details.\n");
     {
       fprintf_filtered (stream, "%s", host_name);
     }
-  fprintf_filtered (stream, "\".\n\
-Type \"show configuration\" for configuration details.");
+  fprintf_filtered (stream, "\".\n");
+
+  fprintf_filtered (stream, _("Type \"show configuration\" "
+			      "for configuration details.\n"));
 
   if (REPORT_BUGS_TO[0])
     {
       fprintf_filtered (stream,
-			_("\nFor bug reporting instructions, please see:\n"));
+			_("For bug reporting instructions, please see:\n"));
       fprintf_filtered (stream, "%s.\n", REPORT_BUGS_TO);
     }
   fprintf_filtered (stream,
 		    _("Find the GDB manual and other documentation \
-resources online at:\n<http://www.gnu.org/software/gdb/documentation/>.\n"));
+resources online at:\n    <http://www.gnu.org/software/gdb/documentation/>."));
+  fprintf_filtered (stream, "\n\n");
   fprintf_filtered (stream, _("For help, type \"help\".\n"));
   fprintf_filtered (stream, _("Type \"apropos word\" to search for \
 commands related to \"word\"."));

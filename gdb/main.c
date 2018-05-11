@@ -918,7 +918,7 @@ captured_main_1 (struct captured_main_args *context)
 
   if (print_version)
     {
-      print_gdb_version (gdb_stdout);
+      print_gdb_version (gdb_stdout, false);
       wrap_here ("");
       printf_filtered ("\n");
       exit (0);
@@ -947,7 +947,7 @@ captured_main_1 (struct captured_main_args *context)
     {
       /* Print all the junk at the top, with trailing "..." if we are
          about to read a symbol file (possibly slowly).  */
-      print_gdb_version (gdb_stdout);
+      print_gdb_version (gdb_stdout, true);
       if (symarg)
 	printf_filtered ("..");
       wrap_here ("");
@@ -968,7 +968,7 @@ captured_main_1 (struct captured_main_args *context)
     {
       /* Print all the junk at the top, with trailing "..." if we are
          about to read a symbol file (possibly slowly).  */
-      print_gdb_version (gdb_stdout);
+      print_gdb_version (gdb_stdout, true);
       if (symarg)
 	printf_filtered ("..");
       wrap_here ("");

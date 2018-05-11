@@ -222,7 +222,13 @@ extern int confirm;
 extern int inhibit_gdbinit;
 extern const char gdbinit[];
 
-extern void print_gdb_version (struct ui_file *);
+/* Print the GDB version banner to STREAM.  If INTERACTIVE is false,
+   then information referring to commands (e.g., "show configuration")
+   is omitted; this mode is used for the --version command line
+   option.  If INTERACTIVE is true, then interactive commands are
+   mentioned.  */
+extern void print_gdb_version (struct ui_file *stream, bool interactive);
+
 extern void print_gdb_configuration (struct ui_file *);
 
 extern void read_command_file (FILE *);

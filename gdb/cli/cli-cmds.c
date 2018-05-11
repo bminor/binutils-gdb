@@ -315,7 +315,7 @@ is_complete_command (struct cmd_list_element *c)
 static void
 show_version (const char *args, int from_tty)
 {
-  print_gdb_version (gdb_stdout);
+  print_gdb_version (gdb_stdout, true);
   printf_filtered ("\n");
 }
 

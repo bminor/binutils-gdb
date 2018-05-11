@@ -1,3 +1,12 @@
+2018-06-05  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-cmds.c (show_version): Update.
+	* top.c (print_gdb_version): Add "interactive" parameter.
+	Update.
+	* main.c (captured_main_1): Update.
+	* top.h (print_gdb_version): Add "interactive" parameter and a
+	comment.
+
 2018-06-05  David Malcolm  <dmalcolm@redhat.com>
 
 	* common/enum-flags.h: Add trailing semicolon to example in
