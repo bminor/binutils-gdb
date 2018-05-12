@@ -1,3 +1,9 @@
+2018-05-12  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-score.c (s3_do_macro_bcmp): Don't use fixed size
+	buffers.
+	(s3_do_macro_bcmpz): Likewise.
+
 2018-05-10  Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-aarch64.c (parse_aarch64_imm_float): Remove restrictions.
