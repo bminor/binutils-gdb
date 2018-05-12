@@ -1,3 +1,7 @@
+2018-05-18  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/ptype-offsets.exp: Update.
+
 2018-05-17  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.ada/bp_inlined_func.exp: Update inlined frame locations

@@ -1,3 +1,9 @@
+2018-05-18  Tom Tromey  <tom@tromey.com>
+
+	* c-typeprint.c (maybe_print_hole): New function.
+	(c_print_type_struct_field_offset): Update.
+	(c_type_print_base_struct_union): Call maybe_print_hole.
+
 2018-05-17  Keith Seitz  <keiths@redhat.com>
 
 	* breakpoint.c (build_bpstat_chain): New function, moved from

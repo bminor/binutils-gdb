@@ -937,6 +937,42 @@ c_print_type_union_field_offset (struct type *type, unsigned int field_idx,
   fprintf_filtered (stream, "/*              %4u */", TYPE_LENGTH (ftype));
 }
 
+/* Helper function for ptype/o implementation that prints information
+   about a hole, if necessary.  STREAM is where to print.  BITPOS is
+   the bitpos of the current field.  PODATA is the offset-printing
+   state.  FOR_WHAT is a string describing the purpose of the
+   hole.  */
+
+static void
+maybe_print_hole (struct ui_file *stream, unsigned int bitpos,
+		  struct print_offset_data *podata, const char *for_what)
+{
+  /* We check for PODATA->END_BITPOS > 0 because there is a specific
+     scenario when PODATA->END_BITPOS can be zero and BITPOS can be >
+     0: when we are dealing with a struct/class with a virtual method.
+     Because of the vtable, the first field of the struct/class will
+     have an offset of sizeof (void *) (the size of the vtable).  If
+     we do not check for PODATA->END_BITPOS > 0 here, GDB will report
+     a hole before the first field, which is not accurate.  */
+  if (podata->end_bitpos > 0 && podata->end_bitpos < bitpos)
+    {
+      /* If PODATA->END_BITPOS is smaller than the current type's
+	 bitpos, it means there's a hole in the struct, so we report
+	 it here.  */
+      unsigned int hole = bitpos - podata->end_bitpos;
+      unsigned int hole_byte = hole / TARGET_CHAR_BIT;
+      unsigned int hole_bit = hole % TARGET_CHAR_BIT;
+
+      if (hole_bit > 0)
+	fprintf_filtered (stream, "/* XXX %2u-bit %s  */\n", hole_bit,
+			  for_what);
+
+      if (hole_byte > 0)
+	fprintf_filtered (stream, "/* XXX %2u-byte %s */\n", hole_byte,
+			  for_what);
+    }
+}
+
 /* Print information about field at index FIELD_IDX of the struct type
    TYPE.
 
@@ -963,28 +999,7 @@ c_print_type_struct_field_offset (struct type *type, unsigned int field_idx,
   unsigned int fieldsize_byte = TYPE_LENGTH (ftype);
   unsigned int fieldsize_bit = fieldsize_byte * TARGET_CHAR_BIT;
 
-  /* We check for PODATA->END_BITPOS > 0 because there is a specific
-     scenario when PODATA->END_BITPOS can be zero and BITPOS can be >
-     0: when we are dealing with a struct/class with a virtual method.
-     Because of the vtable, the first field of the struct/class will
-     have an offset of sizeof (void *) (the size of the vtable).  If
-     we do not check for PODATA->END_BITPOS > 0 here, GDB will report
-     a hole before the first field, which is not accurate.  */
-  if (podata->end_bitpos > 0 && podata->end_bitpos < bitpos)
-    {
-      /* If PODATA->END_BITPOS is smaller than the current type's
-	 bitpos, it means there's a hole in the struct, so we report
-	 it here.  */
-      unsigned int hole = bitpos - podata->end_bitpos;
-      unsigned int hole_byte = hole / TARGET_CHAR_BIT;
-      unsigned int hole_bit = hole % TARGET_CHAR_BIT;
-
-      if (hole_bit > 0)
-	fprintf_filtered (stream, "/* XXX %2u-bit hole   */\n", hole_bit);
-
-      if (hole_byte > 0)
-	fprintf_filtered (stream, "/* XXX %2u-byte hole  */\n", hole_byte);
-    }
+  maybe_print_hole (stream, bitpos, podata, "hole");
 
   if (TYPE_FIELD_PACKED (type, field_idx))
     {
@@ -1508,6 +1523,9 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	{
 	  if (show > 0)
 	    {
+	      unsigned int bitpos = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
+	      maybe_print_hole (stream, bitpos, podata, "padding");
+
 	      fputs_filtered ("\n", stream);
 	      print_spaces_filtered_with_print_options (level + 4,
 							stream,
