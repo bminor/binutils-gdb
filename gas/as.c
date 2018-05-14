@@ -1256,7 +1256,7 @@ main (int argc, char ** argv)
 
 	  if (stat (argv[i], &sib) == 0)
 	    {
-	      if (sib.st_ino == sob.st_ino)
+	      if (sib.st_ino == sob.st_ino && sib.st_ino != 0)
 		{
 		  /* Don't let as_fatal remove the output file!  */
 		  out_file_name = NULL;

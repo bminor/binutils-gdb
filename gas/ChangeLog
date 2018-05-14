@@ -1,3 +1,9 @@
+2018-05-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 23153
+	* as.c (main): When checking for an output file that is also an
+	input file, also check that the inode is not zero.
+
 2018-05-12  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-score.c (s3_do_macro_bcmp): Don't use fixed size
