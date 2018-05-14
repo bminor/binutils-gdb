@@ -1,5 +1,19 @@
 2018-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/23169
+	* testsuite/ld-ifunc/ifunc-9-i386.d: New file.
+	* testsuite/ld-ifunc/ifunc-9-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/pr23169a.c: Likewise.
+	* testsuite/ld-ifunc/pr23169a.rd: Likewise.
+	* testsuite/ld-ifunc/pr23169b.c: Likewise.
+	* testsuite/ld-ifunc/pr23169b.c: Likewise.
+	* testsuite/ld-ifunc/pr23169c.rd: Likewise.
+	* testsuite/ld-ifunc/pr23169c.rd: Likewise.
+	* testsuite/ld-ifunc/ifunc-9-x86.d: Removed.
+	* testsuite/ld-ifunc/ifunc.exp: Run PR ld/23169 tests.
+
+2018-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/23162
 	* testsuite/ld-elf/pr23162.map: New file.
 	* testsuite/ld-elf/pr23162.rd: Likewise.

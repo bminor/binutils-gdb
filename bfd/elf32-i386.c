@@ -3805,6 +3805,8 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	sym->st_value = 0;
     }
 
+  _bfd_x86_elf_link_fixup_ifunc_symbol (info, htab, h, sym);
+
   /* Don't generate dynamic GOT relocation against undefined weak
      symbol in executable.  */
   if (h->got.offset != (bfd_vma) -1

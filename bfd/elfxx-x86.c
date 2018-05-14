@@ -1730,6 +1730,52 @@ _bfd_x86_elf_fixup_symbol (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Change the STT_GNU_IFUNC symbol defined in position-dependent
+   executable into the normal function symbol and set its address
+   to its PLT entry, which should be resolved by R_*_IRELATIVE at
+   run-time.  */
+
+void
+_bfd_x86_elf_link_fixup_ifunc_symbol (struct bfd_link_info *info,
+				      struct elf_x86_link_hash_table *htab,
+				      struct elf_link_hash_entry *h,
+				      Elf_Internal_Sym *sym)
+{
+  if (bfd_link_pde (info)
+      && h->def_regular
+      && h->dynindx != -1
+      && h->plt.offset != (bfd_vma) -1
+      && h->type == STT_GNU_IFUNC
+      && h->pointer_equality_needed)
+    {
+      asection *plt_s;
+      bfd_vma plt_offset;
+      bfd *output_bfd = info->output_bfd;
+
+      if (htab->plt_second)
+	{
+	  struct elf_x86_link_hash_entry *eh
+	    = (struct elf_x86_link_hash_entry *) h;
+
+	  plt_s = htab->plt_second;
+	  plt_offset = eh->plt_second.offset;
+	}
+      else
+	{
+	  plt_s = htab->elf.splt;
+	  plt_offset = h->plt.offset;
+	}
+
+      sym->st_size = 0;
+      sym->st_info = ELF_ST_INFO (ELF_ST_BIND (sym->st_info), STT_FUNC);
+      sym->st_shndx
+	= _bfd_elf_section_from_bfd_section (output_bfd,
+					     plt_s->output_section);
+      sym->st_value = (plt_s->output_section->vma
+		       + plt_s->output_offset + plt_offset);
+    }
+}
+
 /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
 
 bfd_boolean

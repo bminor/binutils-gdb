@@ -1,5 +1,17 @@
 2018-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/23169
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Don't issue
+	an error on IFUNC pointer defined in PDE.
+	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Call
+	_bfd_x86_elf_link_fixup_ifunc_symbol.
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_fixup_ifunc_symbol): New
+	function.
+	* elfxx-x86.h (_bfd_x86_elf_link_fixup_ifunc_symbol): New.
+
+2018-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/23162
 	* elfxx-x86.c (elf_x86_linker_defined): New function.
 	(_bfd_x86_elf_link_check_relocs): Use it to mark __bss_start,

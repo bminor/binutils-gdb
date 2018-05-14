@@ -674,6 +674,10 @@ extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
 extern bfd * _bfd_x86_elf_link_setup_gnu_properties
   (struct bfd_link_info *, struct elf_x86_init_table *);
 
+extern void _bfd_x86_elf_link_fixup_ifunc_symbol
+  (struct bfd_link_info *, struct elf_x86_link_hash_table *,
+   struct elf_link_hash_entry *, Elf_Internal_Sym *sym);
+
 #define bfd_elf64_mkobject \
   _bfd_x86_elf_mkobject
 #define bfd_elf32_mkobject \
