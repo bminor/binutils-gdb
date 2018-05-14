@@ -1,3 +1,10 @@
+2018-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23162
+	* elfxx-x86.c (elf_x86_linker_defined): New function.
+	(_bfd_x86_elf_link_check_relocs): Use it to mark __bss_start,
+	_end and _edata locally defined within executables.
+
 2018-05-12  Alan Modra  <amodra@gmail.com>
 
 	PR 20659

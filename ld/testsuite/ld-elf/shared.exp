@@ -1349,3 +1349,49 @@ proc mix_pic_and_non_pic {xfails cflags ldflags exe} {
 
 mix_pic_and_non_pic [list "arm*-*-*" "aarch64*-*-*"] "" "" "pr19719"
 mix_pic_and_non_pic [] "-fPIE" "-pie" "pr19719pie"
+
+if { ([istarget "i?86-*-*"]
+      || [istarget "x86_64-*-*"]) } {
+    run_ld_link_tests [list \
+	[list \
+	    "Build libpr23162a.so" \
+	    "-shared" \
+	    "" \
+	    "$AFLAGS_PIC" \
+	    { pr23162a.c } \
+	    "" \
+	    "libpr23162a.so" \
+	    "-fPIC -O2" \
+	] \
+	[list \
+	    "Build pr23162a" \
+	    "-pie --no-as-needed tmpdir/libpr23162a.so" \
+	    "" \
+	    "-mrelax-relocations=yes" \
+	    { pr23162b.c } \
+	    {{readelf {--dyn-syms -rW} pr23162.rd}} \
+	    "pr23162a" \
+	    "-fPIC -O0" \
+	] \
+	[list \
+	    "Build libpr23162b.so" \
+	    "-shared --version-script=pr23162.map" \
+	    "" \
+	    "$AFLAGS_PIC" \
+	    { pr23162a.c } \
+	    "" \
+	    "libpr23162b.so" \
+	    "-fPIC -O2" \
+	] \
+	[list \
+	    "Build pr23162b" \
+	    "-pie --no-as-needed tmpdir/libpr23162b.so" \
+	    "" \
+	    "-mrelax-relocations=yes" \
+	    { pr23162b.c } \
+	    {{readelf {--dyn-syms -rW} pr23162.rd}} \
+	    "pr23162b" \
+	    "-fPIC -O0" \
+	] \
+    ]
+}

@@ -849,6 +849,33 @@ _bfd_x86_elf_compare_relocs (const void *ap, const void *bp)
     return 0;
 }
 
+/* Mark symbol, NAME, as locally defined by linker if it is referenced
+   and not defined in a relocatable object file.  */
+
+static void
+elf_x86_linker_defined (struct bfd_link_info *info, const char *name)
+{
+  struct elf_link_hash_entry *h;
+
+  h = elf_link_hash_lookup (elf_hash_table (info), name,
+			    FALSE, FALSE, FALSE);
+  if (h == NULL)
+    return;
+
+  while (h->root.type == bfd_link_hash_indirect)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  if (h->root.type == bfd_link_hash_new
+      || h->root.type == bfd_link_hash_undefined
+      || h->root.type == bfd_link_hash_undefweak
+      || h->root.type == bfd_link_hash_common
+      || (!h->def_regular && h->def_dynamic))
+    {
+      elf_x86_hash_entry (h)->local_ref = 2;
+      elf_x86_hash_entry (h)->linker_def = 1;
+    }
+}
+
 bfd_boolean
 _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 {
@@ -879,17 +906,15 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 
 	  /* "__ehdr_start" will be defined by linker as a hidden symbol
 	     later if it is referenced and not defined.  */
-	  h = elf_link_hash_lookup (elf_hash_table (info),
-				    "__ehdr_start",
-				    FALSE, FALSE, FALSE);
-	  if (h != NULL
-	      && (h->root.type == bfd_link_hash_new
-		  || h->root.type == bfd_link_hash_undefined
-		  || h->root.type == bfd_link_hash_undefweak
-		  || h->root.type == bfd_link_hash_common))
+	  elf_x86_linker_defined (info, "__ehdr_start");
+
+	  if (bfd_link_executable (info))
 	    {
-	      elf_x86_hash_entry (h)->local_ref = 2;
-	      elf_x86_hash_entry (h)->linker_def = 1;
+	      /* References to __bss_start, _end and _edata should be
+		 locally resolved within executables.  */
+	      elf_x86_linker_defined (info, "__bss_start");
+	      elf_x86_linker_defined (info, "_end");
+	      elf_x86_linker_defined (info, "_edata");
 	    }
 	}
     }
