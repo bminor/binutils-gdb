@@ -1,3 +1,7 @@
+2018-05-14  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (rust_union_quirks): Clear rust_unions.
+
 2018-05-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* i387-tdep.c (i387_collect_xsave): Use FXSAVE_MXCSR_ADDR not

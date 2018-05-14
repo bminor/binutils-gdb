@@ -10105,6 +10105,8 @@ rust_union_quirks (struct dwarf2_cu *cu)
   gdb_assert (cu->language == language_rust);
   for (struct type *type : cu->rust_unions)
     quirk_rust_enum (type, cu->per_cu->dwarf2_per_objfile->objfile);
+  /* We don't need this any more.  */
+  cu->rust_unions.clear ();
 }
 
 /* Return the symtab for PER_CU.  This works properly regardless of
