@@ -1,5 +1,10 @@
 2018-05-14  Nick Clifton  <nickc@redhat.com>
 
+	* write.c (maybe_generate_build_notes): Generate notes on a
+	per-code-section basis.  Skip linkonce sections.
+
+2018-05-14  Nick Clifton  <nickc@redhat.com>
+
 	PR 23153
 	* as.c (main): When checking for an output file that is also an
 	input file, also check that the inode is not zero.

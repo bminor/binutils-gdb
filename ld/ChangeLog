@@ -1,3 +1,10 @@
+2018-05-14  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-elf/notes.exp: New file: Run new test.
+	* testsuite/ld-elf/note1_1.s: New file: Source file for test.
+	* testsuite/ld-elf/note1_2.s: New file: Source file for test.
+	* testsuite/ld-elf/note1.r: New file: Expected readelf output.
+
 2018-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23169
