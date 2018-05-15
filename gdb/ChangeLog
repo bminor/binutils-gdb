@@ -1,3 +1,10 @@
+2018-05-15  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/21446
+	* aarch64-tdep.c (aarch64_analyze_prologue,
+	aarch64_software_single_step, aarch64_displaced_step_copy_insn):
+	Indicate not interested in errors.
+
 2018-05-15  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-linux-nat.c (mips_linux_nat_target::fetch_registers):

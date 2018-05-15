@@ -957,9 +957,17 @@ struct aarch64_opnd_info
 	  unsigned preind : 1;		/* Pre-indexed.  */
 	  unsigned postind : 1;		/* Post-indexed.  */
 	} addr;
+
+      struct
+	{
+	  /* The encoding of the system register.  */
+	  aarch64_insn value;
+
+	  /* The system register flags.  */
+	  uint32_t flags;
+	} sysreg;
+
       const aarch64_cond *cond;
-      /* The encoding of the system register.  */
-      aarch64_insn sysreg;
       /* The encoding of the PSTATE field.  */
       aarch64_insn pstatefield;
       const aarch64_sys_ins_reg *sysins_op;
@@ -1138,7 +1146,8 @@ extern int
 aarch64_zero_register_p (const aarch64_opnd_info *);
 
 extern int
-aarch64_decode_insn (aarch64_insn, aarch64_inst *, bfd_boolean);
+aarch64_decode_insn (aarch64_insn, aarch64_inst *, bfd_boolean,
+		     aarch64_operand_error *errors);
 
 /* Given an operand qualifier, return the expected data element size
    of a qualified operand.  */

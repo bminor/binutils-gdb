@@ -3556,7 +3556,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_SYSREG:
       for (i = 0; aarch64_sys_regs[i].name; ++i)
-	if (aarch64_sys_regs[i].value == opnd->sysreg
+	if (aarch64_sys_regs[i].value == opnd->sysreg.value
 	    && ! aarch64_sys_reg_deprecated_p (&aarch64_sys_regs[i]))
 	  break;
       if (aarch64_sys_regs[i].name)
@@ -3564,7 +3564,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       else
 	{
 	  /* Implementation defined system register.  */
-	  unsigned int value = opnd->sysreg;
+	  unsigned int value = opnd->sysreg.value;
 	  snprintf (buf, size, "s%u_%u_c%u_c%u_%u", (value >> 14) & 0x3,
 		    (value >> 11) & 0x7, (value >> 7) & 0xf, (value >> 3) & 0xf,
 		    value & 0x7);

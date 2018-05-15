@@ -1,3 +1,69 @@
+2018-05-15  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/21446
+	* aarch64-asm.h (aarch64_insert_operand, aarch64_##x): Return boolean
+	and take error struct.
+	* aarch64-asm.c (aarch64_ext_regno, aarch64_ins_reglane,
+	aarch64_ins_reglist, aarch64_ins_ldst_reglist,
+	aarch64_ins_ldst_reglist_r, aarch64_ins_ldst_elemlist,
+	aarch64_ins_advsimd_imm_shift, aarch64_ins_imm, aarch64_ins_imm_half,
+	aarch64_ins_advsimd_imm_modified, aarch64_ins_fpimm,
+	aarch64_ins_imm_rotate1, aarch64_ins_imm_rotate2, aarch64_ins_fbits,
+	aarch64_ins_aimm, aarch64_ins_limm_1, aarch64_ins_limm,
+	aarch64_ins_inv_limm, aarch64_ins_ft, aarch64_ins_addr_simple,
+	aarch64_ins_addr_regoff, aarch64_ins_addr_offset, aarch64_ins_addr_simm,
+	aarch64_ins_addr_simm10, aarch64_ins_addr_uimm12,
+	aarch64_ins_simd_addr_post, aarch64_ins_cond, aarch64_ins_sysreg,
+	aarch64_ins_pstatefield, aarch64_ins_sysins_op, aarch64_ins_barrier,
+	aarch64_ins_prfop, aarch64_ins_hint, aarch64_ins_reg_extended,
+	aarch64_ins_reg_shifted, aarch64_ins_sve_addr_ri_s4xvl,
+	aarch64_ins_sve_addr_ri_s6xvl, aarch64_ins_sve_addr_ri_s9xvl,
+	aarch64_ins_sve_addr_ri_s4, aarch64_ins_sve_addr_ri_u6,
+	aarch64_ins_sve_addr_rr_lsl, aarch64_ins_sve_addr_rz_xtw,
+	aarch64_ins_sve_addr_zi_u5, aarch64_ext_sve_addr_zz,
+	aarch64_ins_sve_addr_zz_lsl, aarch64_ins_sve_addr_zz_sxtw,
+	aarch64_ins_sve_addr_zz_uxtw, aarch64_ins_sve_aimm,
+	aarch64_ins_sve_asimm, aarch64_ins_sve_index, aarch64_ins_sve_limm_mov,
+	aarch64_ins_sve_quad_index, aarch64_ins_sve_reglist,
+	aarch64_ins_sve_scale, aarch64_ins_sve_shlimm, aarch64_ins_sve_shrimm,
+	aarch64_ins_sve_float_half_one, aarch64_ins_sve_float_half_two,
+	aarch64_ins_sve_float_zero_one, aarch64_opcode_encode): Likewise.
+	* aarch64-dis.h (aarch64_extract_operand, aarch64_##x): Likewise.
+	* aarch64-dis.c (aarch64_ext_regno, aarch64_ext_reglane,
+	aarch64_ext_reglist, aarch64_ext_ldst_reglist,
+	aarch64_ext_ldst_reglist_r, aarch64_ext_ldst_elemlist,
+	aarch64_ext_advsimd_imm_shift, aarch64_ext_imm, aarch64_ext_imm_half,
+	aarch64_ext_advsimd_imm_modified, aarch64_ext_fpimm,
+	aarch64_ext_imm_rotate1, aarch64_ext_imm_rotate2, aarch64_ext_fbits,
+	aarch64_ext_aimm, aarch64_ext_limm_1, aarch64_ext_limm, decode_limm,
+	aarch64_ext_inv_limm, aarch64_ext_ft, aarch64_ext_addr_simple,
+	aarch64_ext_addr_regoff, aarch64_ext_addr_offset, aarch64_ext_addr_simm,
+	aarch64_ext_addr_simm10, aarch64_ext_addr_uimm12,
+	aarch64_ext_simd_addr_post, aarch64_ext_cond, aarch64_ext_sysreg,
+	aarch64_ext_pstatefield, aarch64_ext_sysins_op, aarch64_ext_barrier,
+	aarch64_ext_prfop, aarch64_ext_hint, aarch64_ext_reg_extended,
+	aarch64_ext_reg_shifted, aarch64_ext_sve_addr_ri_s4xvl,
+	aarch64_ext_sve_addr_ri_s6xvl, aarch64_ext_sve_addr_ri_s9xvl,
+	aarch64_ext_sve_addr_ri_s4, aarch64_ext_sve_addr_ri_u6,
+	aarch64_ext_sve_addr_rr_lsl, aarch64_ext_sve_addr_rz_xtw,
+	aarch64_ext_sve_addr_zi_u5, aarch64_ext_sve_addr_zz,
+	aarch64_ext_sve_addr_zz_lsl, aarch64_ext_sve_addr_zz_sxtw,
+	aarch64_ext_sve_addr_zz_uxtw, aarch64_ext_sve_aimm,
+	aarch64_ext_sve_asimm, aarch64_ext_sve_index, aarch64_ext_sve_limm_mov,
+	aarch64_ext_sve_quad_index, aarch64_ext_sve_reglist,
+	aarch64_ext_sve_scale, aarch64_ext_sve_shlimm, aarch64_ext_sve_shrimm,
+	aarch64_ext_sve_float_half_one, aarch64_ext_sve_float_half_two,
+	aarch64_ext_sve_float_zero_one, aarch64_opcode_decode): Likewise.
+	(determine_disassembling_preference, aarch64_decode_insn,
+	print_insn_aarch64_word, print_insn_data): Take errors struct.
+	(print_insn_aarch64): Use errors.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-gen.c (print_operand_inserter): Use errors and change type to
+	boolean in aarch64_insert_operan.
+	(print_operand_extractor): Likewise.
+	* aarch64-opc.c (aarch64_print_operand): Use sysreg struct.
+
 2018-05-15  Francois H. Theron  <francois.theron@netronome.com>
 
 	* nfp-dis.c: Use uint64_t for instruction variables, not bfd_vma.

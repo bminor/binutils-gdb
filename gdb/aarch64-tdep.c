@@ -244,7 +244,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 
       insn = reader.read (start, 4, byte_order_for_code);
 
-      if (aarch64_decode_insn (insn, &inst, 1) != 0)
+      if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
 	break;
 
       if (inst.opcode->iclass == addsub_imm
@@ -2425,7 +2425,7 @@ aarch64_software_single_step (struct regcache *regcache)
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
   aarch64_inst inst;
 
-  if (aarch64_decode_insn (insn, &inst, 1) != 0)
+  if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
     return {};
 
   /* Look for a Load Exclusive instruction which begins the sequence.  */
@@ -2438,7 +2438,7 @@ aarch64_software_single_step (struct regcache *regcache)
       insn = read_memory_unsigned_integer (loc, insn_size,
 					   byte_order_for_code);
 
-      if (aarch64_decode_insn (insn, &inst, 1) != 0)
+      if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
 	return {};
       /* Check if the instruction is a conditional branch.  */
       if (inst.opcode->iclass == condbranch)
@@ -2731,7 +2731,7 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
   struct aarch64_displaced_step_data dsd;
   aarch64_inst inst;
 
-  if (aarch64_decode_insn (insn, &inst, 1) != 0)
+  if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
     return NULL;
 
   /* Look for a Load Exclusive instruction which begins the sequence.  */

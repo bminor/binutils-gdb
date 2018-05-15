@@ -1,3 +1,9 @@
+2018-05-15  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/21446
+	* opcode/aarch64.h (aarch64_opnd_info): Change sysreg to struct.
+	(aarch64_decode_insn): Accept error struct.
+
 2018-05-15  Francois H. Theron  <francois.theron@netronome.com>
 
 	* opcode/nfp.h: Use uint64_t instead of bfd_vma.

@@ -3934,7 +3934,8 @@ parse_barrier_psb (char **str,
 
 static int
 parse_sys_reg (char **str, struct hash_control *sys_regs,
-	       int imple_defined_p, int pstatefield_p)
+	       int imple_defined_p, int pstatefield_p,
+	       uint32_t* flags)
 {
   char *p, *q;
   char buf[32];
@@ -3965,6 +3966,8 @@ parse_sys_reg (char **str, struct hash_control *sys_regs,
 	  if (op0 > 3 || op1 > 7 || cn > 15 || cm > 15 || op2 > 7)
 	    return PARSE_FAIL;
 	  value = (op0 << 14) | (op1 << 11) | (cn << 7) | (cm << 3) | op2;
+	  if (flags)
+	    *flags = 0;
 	}
     }
   else
@@ -3979,6 +3982,8 @@ parse_sys_reg (char **str, struct hash_control *sys_regs,
 	as_warn (_("system register name '%s' is deprecated and may be "
 		   "removed in a future release"), buf);
       value = o->value;
+      if (flags)
+	*flags = o->flags;
     }
 
   *str = q;
@@ -6347,17 +6352,21 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  goto regoff_addr;
 
 	case AARCH64_OPND_SYSREG:
-	  if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1, 0))
-	      == PARSE_FAIL)
-	    {
-	      set_syntax_error (_("unknown or missing system register name"));
-	      goto failure;
-	    }
-	  inst.base.operands[i].sysreg = val;
-	  break;
+	 {
+	   uint32_t sysreg_flags;
+	   if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1, 0,
+				     &sysreg_flags)) == PARSE_FAIL)
+	     {
+	       set_syntax_error (_("unknown or missing system register name"));
+	       goto failure;
+	     }
+	   inst.base.operands[i].sysreg.value = val;
+	   inst.base.operands[i].sysreg.flags = sysreg_flags;
+	   break;
+	 }
 
 	case AARCH64_OPND_PSTATEFIELD:
-	  if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0, 1))
+	  if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0, 1, NULL))
 	      == PARSE_FAIL)
 	    {
 	      set_syntax_error (_("unknown or missing PSTATE field name"));

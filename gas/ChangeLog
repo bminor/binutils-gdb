@@ -1,3 +1,9 @@
+2018-05-15  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/21446
+	* config/tc-aarch64.c (parse_sys_reg): Return register flags.
+	(parse_operands): Fill in register flags.
+
 2018-05-14  Nick Clifton  <nickc@redhat.com>
 
 	* write.c (maybe_generate_build_notes): Generate notes on a
