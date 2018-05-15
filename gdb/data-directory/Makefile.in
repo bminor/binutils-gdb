@@ -79,6 +79,7 @@ PYTHON_FILE_LIST = \
 	gdb/missing_debug.py \
 	gdb/printing.py \
 	gdb/prompt.py \
+	gdb/ptwrite.py \
 	gdb/styling.py \
 	gdb/types.py \
 	gdb/unwinder.py \

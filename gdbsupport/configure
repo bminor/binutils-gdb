@@ -12993,6 +12993,17 @@ _ACEOF
 
 fi
 
+      ac_fn_c_check_member "$LINENO" "struct pt_event" "variant.ptwrite" "ac_cv_member_struct_pt_event_variant_ptwrite" "#include <intel-pt.h>
+"
+if test "x$ac_cv_member_struct_pt_event_variant_ptwrite" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_PT_EVENT_VARIANT_PTWRITE 1
+_ACEOF
+
+
+fi
+
       LIBS=$save_LIBS
     fi
   fi

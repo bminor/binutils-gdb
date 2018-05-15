@@ -200,6 +200,8 @@ AC_DEFUN([GDB_AC_COMMON], [
       AC_CHECK_FUNCS(pt_insn_event)
       AC_CHECK_MEMBERS([struct pt_insn.enabled, struct pt_insn.resynced], [], [],
 		       [#include <intel-pt.h>])
+      AC_CHECK_MEMBERS([struct pt_event.variant.ptwrite], [], [],
+		       [#include <intel-pt.h>])
       LIBS=$save_LIBS
     fi
   fi

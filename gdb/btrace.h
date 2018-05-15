@@ -35,6 +35,7 @@
 #endif
 
 #include <vector>
+#include <string>
 
 struct thread_info;
 struct btrace_function;
@@ -351,6 +352,16 @@ struct btrace_thread_info
   /* Optional auxiliary information that is printed in all commands
      displaying or stepping through the execution history.  */
   std::vector<std::string> aux_data;
+
+  /* Function pointer to the ptwrite callback.  Returns the string returned
+     by the ptwrite filter function.  */
+  std::optional<std::string> (*ptw_callback_fun) (const uint64_t payload,
+						  const uint64_t ip,
+						  const void *ptw_context)
+						    = nullptr;
+
+  /* Context for the ptw_callback_fun.  */
+  void *ptw_context = nullptr;
 
   /* The function level offset.  When added to each function's LEVEL,
      this normalizes the function levels such that the smallest level

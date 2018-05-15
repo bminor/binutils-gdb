@@ -562,6 +562,19 @@ apply_ext_lang_frame_filter (const frame_info_ptr &frame,
   return EXT_LANG_BT_NO_FILTERS;
 }
 
+/* Used for registering the ptwrite filter to the current thread.  */
+
+void
+apply_ext_lang_ptwrite_filter (btrace_thread_info *btinfo)
+{
+  for (const struct extension_language_defn *extlang : extension_languages)
+    {
+      if (extlang->ops != nullptr
+	  && extlang->ops->apply_ptwrite_filter != nullptr)
+	extlang->ops->apply_ptwrite_filter (extlang, btinfo);
+    }
+}
+
 /* Update values held by the extension language when OBJFILE is discarded.
    New global types must be created for every such value, which must then be
    updated to use the new types.

@@ -188,6 +188,11 @@ struct extension_language_ops
      enum ext_lang_frame_args args_type,
      struct ui_out *out, int frame_low, int frame_high);
 
+  /* Used for registering the ptwrite filter to the current thread.  */
+  void (*apply_ptwrite_filter)
+    (const struct extension_language_defn *extlang,
+     struct btrace_thread_info *btinfo);
+
   /* Update values held by the extension language when OBJFILE is discarded.
      New global types must be created for every such value, which must then be
      updated to use the new types.

@@ -303,6 +303,9 @@ extern enum ext_lang_bt_status apply_ext_lang_frame_filter
    enum ext_lang_frame_args args_type,
    struct ui_out *out, int frame_low, int frame_high);
 
+extern void apply_ext_lang_ptwrite_filter
+  (struct btrace_thread_info *btinfo);
+
 extern void preserve_ext_lang_values (struct objfile *, htab_t copied_types);
 
 extern const struct extension_language_defn *get_breakpoint_cond_ext_lang
