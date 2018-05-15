@@ -1122,7 +1122,7 @@ mips_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 }
 
 /* Should the upper word of 64-bit addresses be zeroed?  */
-enum auto_boolean mask_address_var = AUTO_BOOLEAN_AUTO;
+static enum auto_boolean mask_address_var = AUTO_BOOLEAN_AUTO;
 
 static int
 mips_mask_address_p (struct gdbarch_tdep *tdep)
