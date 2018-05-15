@@ -20305,11 +20305,11 @@ public:
      we're processing the end of a sequence.  */
   void record_line (bool end_sequence);
 
-  /* Check address and if invalid nop-out the rest of the lines in this
-     sequence.  */
+  /* Check ADDRESS is zero and less than UNRELOCATED_LOWPC and if true
+     nop-out rest of the lines in this sequence.  */
   void check_line_address (struct dwarf2_cu *cu,
 			   const gdb_byte *line_ptr,
-			   CORE_ADDR lowpc, CORE_ADDR address);
+			   CORE_ADDR unrelocated_lowpc, CORE_ADDR address);
 
   void handle_set_discriminator (unsigned int discriminator)
   {
@@ -20653,14 +20653,14 @@ lnp_state_machine::lnp_state_machine (gdbarch *arch, line_header *lh,
 void
 lnp_state_machine::check_line_address (struct dwarf2_cu *cu,
 				       const gdb_byte *line_ptr,
-				       CORE_ADDR lowpc, CORE_ADDR address)
+				       CORE_ADDR unrelocated_lowpc, CORE_ADDR address)
 {
-  /* If address < lowpc then it's not a usable value, it's outside the
-     pc range of the CU.  However, we restrict the test to only address
-     values of zero to preserve GDB's previous behaviour which is to
-     handle the specific case of a function being GC'd by the linker.  */
+  /* If ADDRESS < UNRELOCATED_LOWPC then it's not a usable value, it's outside
+     the pc range of the CU.  However, we restrict the test to only ADDRESS
+     values of zero to preserve GDB's previous behaviour which is to handle
+     the specific case of a function being GC'd by the linker.  */
 
-  if (address == 0 && address < lowpc)
+  if (address == 0 && address < unrelocated_lowpc)
     {
       /* This line table is for a function which has been
 	 GCd by the linker.  Ignore it.  PR gdb/12528 */
@@ -20754,7 +20754,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		    line_ptr += bytes_read;
 
 		    state_machine.check_line_address (cu, line_ptr,
-						      lowpc, address);
+						      lowpc - baseaddr, address);
 		    state_machine.handle_set_address (baseaddr, address);
 		  }
 		  break;

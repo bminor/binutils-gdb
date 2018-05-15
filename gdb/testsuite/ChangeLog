@@ -1,3 +1,9 @@
+2018-06-27  Omair Javaid  <omair.javaid@linaro.org>
+
+	PR gdb/21695
+	* gdb.base/infoline-reloc-main-from-zero.exp: New test.
+	* gdb.base/infoline-reloc-main-from-zero.c: New file.
+
 2018-06-26  Tom Tromey  <tom@tromey.com>
 
 	PR rust/22574:

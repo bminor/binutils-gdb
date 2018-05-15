@@ -1,3 +1,9 @@
+2018-06-27  Omair Javaid  <omair.javaid@linaro.org>
+
+	PR gdb/21695
+	* dwarf2read.c (lnp_state_machine::check_line_address): Update declaration.
+	(dwarf_decode_lines_1): Adjust.
+
 2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* fbsd-nat.h (class fbsd_nat_target) <find_memory_regions>: Add
