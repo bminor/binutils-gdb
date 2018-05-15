@@ -1108,7 +1108,9 @@ static const bfd_target * const _bfd_target_vector[] =
 	&nds32_elf32_linux_be_vec,
 	&nds32_elf32_linux_le_vec,
 
+#ifdef BFD64
 	&nfp_elf64_vec,
+#endif
 
 	&nios2_elf32_be_vec,
 	&nios2_elf32_le_vec,

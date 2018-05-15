@@ -1,3 +1,7 @@
+2018-05-15  Francois H. Theron  <francois.theron@netronome.com>
+
+	* opcode/nfp.h: Use uint64_t instead of bfd_vma.
+
 2018-05-10  John Darrington  <john@darrington.wattle.id.au>
 
 	* elf/common.h (EM_S12Z): New macro.

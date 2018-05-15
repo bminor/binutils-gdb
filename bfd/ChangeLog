@@ -1,3 +1,7 @@
+2018-05-15  Francois H. Theron  <francois.theron@netronome.com>
+
+	* targets.c: Wrap nfp_elf64_vec in BFD64 ifdef.
+
 2018-05-15  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt.po: New Portuguese translation.

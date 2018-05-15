@@ -1,3 +1,7 @@
+2018-05-15  Francois H. Theron  <francois.theron@netronome.com>
+
+	* nfp-dis.c: Use uint64_t for instruction variables, not bfd_vma.
+
 2018-05-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Remove Disp<N> from movidir{i,64b}.
