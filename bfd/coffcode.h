@@ -5864,6 +5864,9 @@ coff_bigobj_swap_aux_in (bfd *abfd,
   AUXENT_BIGOBJ *ext = (AUXENT_BIGOBJ *) ext1;
   union internal_auxent *in = (union internal_auxent *) in1;
 
+  /* Make sure that all fields in the aux structure are
+     initialised.  */
+  memset (in, 0, sizeof * in);
   switch (in_class)
     {
     case C_FILE:
