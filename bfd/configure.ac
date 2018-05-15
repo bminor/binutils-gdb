@@ -143,7 +143,7 @@ bfd_default_target_size=32
 
 # host stuff:
 
-ALL_LINGUAS="da es fi fr hr id ja ro ru rw sr sv tr uk vi zh_CN"
+ALL_LINGUAS="da es fi fr hr id ja ro ru rw sr sv tr uk vi zh_CN pt"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 
