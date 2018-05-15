@@ -41,3 +41,5 @@ run_ld_link_tests [list \
 	 {{readelf {--wide --notes} note1.r}} \
 	 "note1.so" ] \
 ]
+
+set LDFLAGS $old_ldflags
