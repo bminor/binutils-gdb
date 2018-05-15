@@ -1,3 +1,8 @@
+2018-05-15  Christophe Guillon  <christophe.guillon@st.com>
+
+	* coffcode.h (coff_bigobj_swap_aux_in): Make sure that all fields
+	of the aux structure are initialised.
+
 2018-05-15  Francois H. Theron  <francois.theron@netronome.com>
 
 	* targets.c: Wrap nfp_elf64_vec in BFD64 ifdef.
