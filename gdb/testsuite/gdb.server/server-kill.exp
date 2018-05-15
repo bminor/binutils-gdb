@@ -46,7 +46,7 @@ gdb_test_multiple $test $test {
     }
 }
 
-if {$server_pid == "" } {
+if ![info exists server_pid] {
     return -1
 }
 

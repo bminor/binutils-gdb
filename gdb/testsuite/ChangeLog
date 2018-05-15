@@ -1,3 +1,9 @@
+2018-05-15  Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb.server/server-kill.exp: Verify whether `server_pid' exists
+	rather then trying to access it in determining whether the PID
+	of `gdbserver' could have been retrieved.
+
 2018-05-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/amd64-init-x87-values.S: New file.
