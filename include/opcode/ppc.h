@@ -68,6 +68,8 @@ struct powerpc_opcode
    instructions.  */
 extern const struct powerpc_opcode powerpc_opcodes[];
 extern const unsigned int powerpc_num_opcodes;
+extern const struct powerpc_opcode prefix_opcodes[];
+extern const unsigned int prefix_num_opcodes;
 extern const struct powerpc_opcode vle_opcodes[];
 extern const unsigned int vle_num_opcodes;
 extern const struct powerpc_opcode spe2_opcodes[];
@@ -226,6 +228,9 @@ extern const unsigned int spe2_num_opcodes;
 /* Opcode is supported by EFS2.  */
 #define PPC_OPCODE_EFS2	    0x200000000000ull
 
+/* Opcode is only supported by powerxx architecture.  */
+#define PPC_OPCODE_POWERXX  0x400000000000ull
+
 /* A macro to extract the major opcode from an instruction.  */
 #define PPC_OP(i) (((i) >> 26) & 0x3f)
 
@@ -243,6 +248,19 @@ extern const unsigned int spe2_num_opcodes;
 
 /* A macro to convert a SPE2 extended opcode to a SPE2 xopcode segment.  */
 #define SPE2_XOP_TO_SEG(i) ((i) >> 7)
+
+/* A macro to extract the prefix word from an 8-byte PREFIX instruction.  */
+#define PPC_GET_PREFIX(i) (((i) >> 32) & ((1LL << 32) - 1))
+
+/* A macro to extract the suffix word from an 8-byte PREFIX instruction.  */
+#define PPC_GET_SUFFIX(i) ((i) & ((1LL << 32) - 1))
+
+/* A macro to determine whether insn I is an 8-byte prefix instruction.  */
+#define PPC_PREFIX_P(i) (PPC_OP (PPC_GET_PREFIX (i)) == 0x1)
+
+/* A macro used to hash 8-byte PREFIX instructions.  */
+#define PPC_PREFIX_SEG(i) (PPC_OP (i) >> 1)
+
 
 /* The operands table is an array of struct powerpc_operand.  */
 

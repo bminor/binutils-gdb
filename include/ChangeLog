@@ -1,3 +1,11 @@
+2019-05-24  Peter Bergner  <bergner@linux.ibm.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* dis-asm.h (WIDE_OUTPUT): Define.
+	* opcode/ppc.h (prefix_opcodes, prefix_num_opcodes): Declare.
+	(PPC_OPCODE_POWERXX, PPC_GET_PREFIX, PPC_GET_SUFFIX),
+	(PPC_PREFIX_P, PPC_PREFIX_SEG): Define.
+
 2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elf/bpf.h: New file.

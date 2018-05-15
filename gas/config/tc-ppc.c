@@ -1673,6 +1673,50 @@ ppc_setup_opcodes (void)
     for (op = powerpc_opcodes; op < op_end; op++)
       hash_insert (ppc_hash, op->name, (void *) op);
 
+  op_end = prefix_opcodes + prefix_num_opcodes;
+  for (op = prefix_opcodes; op < op_end; op++)
+    {
+      if (ENABLE_CHECKING)
+	{
+	  unsigned int new_opcode = PPC_PREFIX_SEG (op[0].opcode);
+
+#ifdef PRINT_OPCODE_TABLE
+	  printf ("%-14s\t#%04u\tmajor op/2: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
+		  op->name, (unsigned int) (op - prefix_opcodes),
+		  new_opcode, (unsigned long long) op->opcode,
+		  (unsigned long long) op->mask, (unsigned long long) op->flags);
+#endif
+
+	  /* The major opcodes had better be sorted.  Code in the disassembler
+	     assumes the insns are sorted according to major opcode.  */
+	  if (op != prefix_opcodes
+	      && new_opcode < PPC_PREFIX_SEG (op[-1].opcode))
+	    {
+	      as_bad (_("major opcode is not sorted for %s"), op->name);
+	      bad_insn = TRUE;
+	    }
+	  bad_insn |= insn_validate (op);
+	}
+
+      if ((ppc_cpu & op->flags) != 0
+	  && !(ppc_cpu & op->deprecated))
+	{
+	  const char *retval;
+
+	  retval = hash_insert (ppc_hash, op->name, (void *) op);
+	  if (retval != NULL)
+	    {
+	      as_bad (_("duplicate instruction %s"),
+		      op->name);
+	      bad_insn = TRUE;
+	    }
+	}
+    }
+
+  if ((ppc_cpu & PPC_OPCODE_ANY) != 0)
+    for (op = prefix_opcodes; op < op_end; op++)
+      hash_insert (ppc_hash, op->name, (void *) op);
+
   op_end = vle_opcodes + vle_num_opcodes;
   for (op = vle_opcodes; op < op_end; op++)
     {
@@ -2740,6 +2784,90 @@ ppc_apuinfo_section_add (unsigned int apu, unsigned int version)
 #undef APUID
 #endif
 
+/* Various frobbings of labels and their addresses.  */
+
+/* Symbols labelling the current insn.  */
+struct insn_label_list
+{
+  struct insn_label_list *next;
+  symbolS *label;
+};
+
+static struct insn_label_list *insn_labels;
+static struct insn_label_list *free_insn_labels;
+
+static void
+ppc_record_label (symbolS *sym)
+{
+  struct insn_label_list *l;
+
+  if (free_insn_labels == NULL)
+    l = XNEW (struct insn_label_list);
+  else
+    {
+      l = free_insn_labels;
+      free_insn_labels = l->next;
+    }
+
+  l->label = sym;
+  l->next = insn_labels;
+  insn_labels = l;
+}
+
+static void
+ppc_clear_labels (void)
+{
+  while (insn_labels != NULL)
+    {
+      struct insn_label_list *l = insn_labels;
+      insn_labels = l->next;
+      l->next = free_insn_labels;
+      free_insn_labels = l;
+    }
+}
+
+void
+ppc_start_line_hook (void)
+{
+  ppc_clear_labels ();
+}
+
+void
+ppc_new_dot_label (symbolS *sym)
+{
+  ppc_record_label (sym);
+#ifdef OBJ_XCOFF
+  /* Anchor this label to the current csect for relocations.  */
+  symbol_get_tc (sym)->within = ppc_current_csect;
+#endif
+}
+
+void
+ppc_frob_label (symbolS *sym)
+{
+  ppc_record_label (sym);
+
+#ifdef OBJ_XCOFF
+  /* Set the class of a label based on where it is defined.  This handles
+     symbols without suffixes.  Also, move the symbol so that it follows
+     the csect symbol.  */
+  if (ppc_current_csect != (symbolS *) NULL)
+    {
+      if (symbol_get_tc (sym)->symbol_class == -1)
+	symbol_get_tc (sym)->symbol_class = symbol_get_tc (ppc_current_csect)->symbol_class;
+
+      symbol_remove (sym, &symbol_rootP, &symbol_lastP);
+      symbol_append (sym, symbol_get_tc (ppc_current_csect)->within,
+		     &symbol_rootP, &symbol_lastP);
+      symbol_get_tc (ppc_current_csect)->within = sym;
+      symbol_get_tc (sym)->within = ppc_current_csect;
+    }
+#endif
+
+#ifdef OBJ_ELF
+  dwarf2_emit_label (sym);
+#endif
+}
 
 /* We need to keep a list of fixups.  We can't simply generate them as
    we go, because that would require us to first create the frag, and
@@ -3074,6 +3202,7 @@ md_assemble (char *str)
       else
 	ppc_macro (s, macro);
 
+      ppc_clear_labels ();
       return;
     }
 
@@ -3828,14 +3957,50 @@ md_assemble (char *str)
   if ((frag_now_fix () & addr_mask) != 0)
     as_bad (_("instruction address is not a multiple of %d"), addr_mask + 1);
 
-  /* Differentiate between two and four byte insns.  */
+  /* Differentiate between two, four, and eight byte insns.  */
   insn_length = 4;
   if ((ppc_cpu & PPC_OPCODE_VLE) != 0 && PPC_OP_SE_VLE (insn))
     insn_length = 2;
+  else if ((opcode->flags & PPC_OPCODE_POWERXX) != 0
+	   && PPC_PREFIX_P (insn))
+    {
+      struct insn_label_list *l;
+
+      insn_length = 8;
+
+      /* 8-byte prefix instructions are not allowed to cross 64-byte
+	 boundaries.  */
+      frag_align_code (6, 4);
+      record_alignment (now_seg, 6);
+
+      /* Update "dot" in any expressions used by this instruction, and
+	 a label attached to the instruction.  By "attached" we mean
+	 on the same source line as the instruction and without any
+	 intervening semicolons.  */
+      dot_value = frag_now_fix ();
+      dot_frag = frag_now;
+      for (l = insn_labels; l != NULL; l = l->next)
+	{
+	  symbol_set_frag (l->label, dot_frag);
+	  S_SET_VALUE (l->label, dot_value);
+	}
+    }
+
+  ppc_clear_labels ();
 
   f = frag_more (insn_length);
   frag_now->insn_addr = addr_mask;
-  md_number_to_chars (f, insn, insn_length);
+
+  /* The prefix part of an 8-byte instruction always occupies the lower
+     addressed word in a doubleword, regardless of endianness.  */
+  if (!target_big_endian && insn_length == 8)
+    {
+      md_number_to_chars (f, PPC_GET_PREFIX (insn), 4);
+      md_number_to_chars (f + 4, PPC_GET_SUFFIX (insn), 4);
+    }
+  else
+    md_number_to_chars (f, insn, insn_length);
+
   last_insn = insn;
   last_seg = now_seg;
   last_subseg = now_subseg;
@@ -6118,30 +6283,6 @@ ppc_symbol_new_hook (symbolS *sym)
     as_bad (_("unrecognized symbol suffix"));
 }
 
-/* Set the class of a label based on where it is defined.  This
-   handles symbols without suffixes.  Also, move the symbol so that it
-   follows the csect symbol.  */
-
-void
-ppc_frob_label (symbolS *sym)
-{
-  if (ppc_current_csect != (symbolS *) NULL)
-    {
-      if (symbol_get_tc (sym)->symbol_class == -1)
-	symbol_get_tc (sym)->symbol_class = symbol_get_tc (ppc_current_csect)->symbol_class;
-
-      symbol_remove (sym, &symbol_rootP, &symbol_lastP);
-      symbol_append (sym, symbol_get_tc (ppc_current_csect)->within,
-		     &symbol_rootP, &symbol_lastP);
-      symbol_get_tc (ppc_current_csect)->within = sym;
-      symbol_get_tc (sym)->within = ppc_current_csect;
-    }
-
-#ifdef OBJ_ELF
-  dwarf2_emit_label (sym);
-#endif
-}
-
 /* This variable is set by ppc_frob_symbol if any absolute symbols are
    seen.  It tells ppc_adjust_symtab whether it needs to look through
    the symbols.  */
@@ -6673,14 +6814,6 @@ ppc_force_relocation (fixS *fix)
 
   return generic_force_reloc (fix);
 }
-
-void
-ppc_new_dot_label (symbolS *sym)
-{
-  /* Anchor this label to the current csect for relocations.  */
-  symbol_get_tc (sym)->within = ppc_current_csect;
-}
-
 #endif /* OBJ_XCOFF */
 
 #ifdef OBJ_ELF

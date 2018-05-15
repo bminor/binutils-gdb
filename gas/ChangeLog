@@ -1,3 +1,22 @@
+2019-05-24  Peter Bergner  <bergner@linux.ibm.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_setup_opcodes): Handle prefix_opcodes.
+	(struct insn_label_list): New.
+	(insn_labels, free_insn_labels): New variables.
+	(ppc_record_label, ppc_clear_labels, ppc_start_line_hook): New funcs.
+	(ppc_frob_label, ppc_new_dot_label): Move functions earlier in file
+	and call ppc_record_label.
+	(md_assemble): Handle 64-bit prefix instructions.  Align labels
+	that are on the same line as a prefix instruction.
+	* config/tc-ppc.h (tc_frob_label, ppc_frob_label): Move to
+	later in the file.
+	(md_start_line_hook): Define.
+	(ppc_start_line_hook): Declare.
+	* testsuite/gas/ppc/prefix-align.d,
+	* testsuite/gas/ppc/prefix-align.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run new test.
+
 2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* configure.ac: Handle bpf-*-* targets.

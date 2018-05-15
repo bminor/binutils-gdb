@@ -1946,7 +1946,8 @@ disassemble_bytes (struct disassemble_info * inf,
 	      inf->stream = &sfile;
 	      inf->bytes_per_line = 0;
 	      inf->bytes_per_chunk = 0;
-	      inf->flags = disassemble_all ? DISASSEMBLE_DATA : 0;
+	      inf->flags = ((disassemble_all ? DISASSEMBLE_DATA : 0)
+			    | (wide_output ? WIDE_OUTPUT : 0));
 	      if (machine)
 		inf->flags |= USER_SPECIFIED_MACHINE_TYPE;
 

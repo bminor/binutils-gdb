@@ -1,3 +1,7 @@
+2019-05-24  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (disassemble_bytes): Set WIDE_OUTPUT in flags.
+
 2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* MAINTAINERS: Add myself as the maintainer for BPF.

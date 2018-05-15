@@ -185,6 +185,11 @@ struct ppc_mopt ppc_opts[] = {
 		| PPC_OPCODE_POWER7 | PPC_OPCODE_POWER8 | PPC_OPCODE_POWER9
 		| PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX),
     0 },
+  { "future",  (PPC_OPCODE_PPC | PPC_OPCODE_ISEL | PPC_OPCODE_64
+		| PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
+		| PPC_OPCODE_POWER7 | PPC_OPCODE_POWER8 | PPC_OPCODE_POWER9
+		| PPC_OPCODE_POWERXX | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX),
+    0 },
   { "ppc",     PPC_OPCODE_PPC,
     0 },
   { "ppc32",   PPC_OPCODE_PPC,
@@ -376,6 +381,8 @@ powerpc_init_dialect (struct disassemble_info *info)
 
 #define PPC_OPCD_SEGS (1 + PPC_OP (-1))
 static unsigned short powerpc_opcd_indices[PPC_OPCD_SEGS + 1];
+#define PREFIX_OPCD_SEGS (1 + PPC_PREFIX_SEG (-1))
+static unsigned short prefix_opcd_indices[PPC_OPCD_SEGS+1];
 #define VLE_OPCD_SEGS (1 + VLE_OP_TO_SEG (VLE_OP (-1, 0xffff)))
 static unsigned short vle_opcd_indices[VLE_OPCD_SEGS + 1];
 #define SPE2_OPCD_SEGS (1 + SPE2_XOP_TO_SEG (SPE2_XOP (-1)))
@@ -397,6 +404,15 @@ disassemble_init_powerpc (struct disassemble_info *info)
 	  powerpc_opcd_indices[seg] = idx;
 	  for (; idx < powerpc_num_opcodes; idx++)
 	    if (seg < PPC_OP (powerpc_opcodes[idx].opcode))
+	      break;
+	}
+
+      /* 64-bit prefix opcodes */
+      for (seg = 0, idx = 0; seg <= PREFIX_OPCD_SEGS; seg++)
+	{
+	  prefix_opcd_indices[seg] = idx;
+	  for (; idx < prefix_num_opcodes; idx++)
+	    if (seg < PPC_PREFIX_SEG (prefix_opcodes[idx].opcode))
 	      break;
 	}
 
@@ -520,6 +536,57 @@ lookup_powerpc (uint64_t insn, ppc_cpu_t dialect)
   opcode_end = powerpc_opcodes + powerpc_opcd_indices[op + 1];
   last = NULL;
   for (opcode = powerpc_opcodes + powerpc_opcd_indices[op];
+       opcode < opcode_end;
+       ++opcode)
+    {
+      const unsigned char *opindex;
+      const struct powerpc_operand *operand;
+      int invalid;
+
+      if ((insn & opcode->mask) != opcode->opcode
+	  || ((dialect & PPC_OPCODE_ANY) == 0
+	      && ((opcode->flags & dialect) == 0
+		  || (opcode->deprecated & dialect) != 0)))
+	continue;
+
+      /* Check validity of operands.  */
+      invalid = 0;
+      for (opindex = opcode->operands; *opindex != 0; opindex++)
+	{
+	  operand = powerpc_operands + *opindex;
+	  if (operand->extract)
+	    (*operand->extract) (insn, dialect, &invalid);
+	}
+      if (invalid)
+	continue;
+
+      if ((dialect & PPC_OPCODE_RAW) == 0)
+	return opcode;
+
+      /* The raw machine insn is one that is not a specialization.  */
+      if (last == NULL
+	  || (last->mask & ~opcode->mask) != 0)
+	last = opcode;
+    }
+
+  return last;
+}
+
+/* Find a match for INSN in the PREFIX opcode table.  */
+
+static const struct powerpc_opcode *
+lookup_prefix (uint64_t insn, ppc_cpu_t dialect)
+{
+  const struct powerpc_opcode *opcode, *opcode_end, *last;
+  unsigned long seg;
+
+  /* Get the opcode segment of the instruction.  */
+  seg = PPC_PREFIX_SEG (insn);
+
+  /* Find the first match in the opcode table for this major opcode.  */
+  opcode_end = prefix_opcodes + prefix_opcd_indices[seg + 1];
+  last = NULL;
+  for (opcode = prefix_opcodes + prefix_opcd_indices[seg];
        opcode < opcode_end;
        ++opcode)
     {
@@ -699,7 +766,31 @@ print_insn_powerpc (bfd_vma memaddr,
 
   /* Get the major opcode of the insn.  */
   opcode = NULL;
-  if ((dialect & PPC_OPCODE_VLE) != 0)
+  if ((dialect & PPC_OPCODE_POWERXX) != 0
+      && PPC_OP (insn) == 0x1)
+    {
+      uint64_t temp_insn, suffix;
+      status = (*info->read_memory_func) (memaddr + 4, buffer, 4, info);
+      if (status == 0)
+	{
+	  if (bigendian)
+	    suffix = bfd_getb32 (buffer);
+	  else
+	    suffix = bfd_getl32 (buffer);
+	  temp_insn = (insn << 32) | suffix;
+	  opcode = lookup_prefix (temp_insn, dialect & ~PPC_OPCODE_ANY);
+	  if (opcode == NULL && (dialect & PPC_OPCODE_ANY) != 0)
+	    opcode = lookup_prefix (temp_insn, dialect);
+	  if (opcode != NULL)
+	    {
+	      insn = temp_insn;
+	      insn_length = 8;
+	      if ((info->flags & WIDE_OUTPUT) != 0)
+		info->bytes_per_line = 8;
+	    }
+	}
+    }
+  if (opcode == NULL && (dialect & PPC_OPCODE_VLE) != 0)
     {
       opcode = lookup_vle (insn);
       if (opcode != NULL && PPC_OP_SE_VLE (opcode->mask))

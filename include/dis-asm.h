@@ -116,6 +116,8 @@ typedef struct disassemble_info
   /* Set if the user has specifically set the machine type encoded in the
      mach field of this structure.  */
 #define USER_SPECIFIED_MACHINE_TYPE (1 << 29)
+  /* Set if the user has requested wide output.  */
+#define WIDE_OUTPUT (1 << 28)
 
   /* Use internally by the target specific disassembly code.  */
   void *private_data;

@@ -2721,6 +2721,18 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define OP(x) ((((uint64_t)(x)) & 0x3f) << 26)
 #define OP_MASK OP (0x3f)
 
+/* The prefix opcode.  */
+#define PREFIX_OP (1ULL << 58)
+
+/* The 2-bit prefix form.  */
+#define PREFIX_FORM(x) ((x & 3ULL) << 56)
+
+#define SUFFIX_MASK ((1ULL << 32) - 1)
+#define PREFIX_MASK (SUFFIX_MASK << 32)
+
+/* Prefix insn, modified register to register form MRR.  */
+#define PMRR (PREFIX_OP | PREFIX_FORM (3))
+
 /* The main opcode combined with a trap code in the TO field of a D
    form instruction.  Used for extended mnemonics for the trap
    instructions.  */
@@ -3547,6 +3559,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define POWER7	PPC_OPCODE_POWER7
 #define POWER8	PPC_OPCODE_POWER8
 #define POWER9	PPC_OPCODE_POWER9
+#define POWERXX PPC_OPCODE_POWERXX
 #define CELL	PPC_OPCODE_CELL
 #define PPC64	PPC_OPCODE_64 | PPC_OPCODE_64_BRIDGE
 #define NON32	(PPC_OPCODE_64 | PPC_OPCODE_POWER4	\
@@ -7795,6 +7808,17 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 const unsigned int powerpc_num_opcodes =
   sizeof (powerpc_opcodes) / sizeof (powerpc_opcodes[0]);
+
+/* The opcode table for 8-byte prefix instructions.
+
+   The format of this opcode table is the same as the main opcode table.  */
+
+const struct powerpc_opcode prefix_opcodes[] = {
+{"pnop",	  PMRR,		       PREFIX_MASK,	POWERXX, 0,	{0}},
+};
+
+const unsigned int prefix_num_opcodes =
+  sizeof (prefix_opcodes) / sizeof (prefix_opcodes[0]);
 
 /* The VLE opcode table.
 
