@@ -1,5 +1,10 @@
 2018-05-15  Maciej W. Rozycki  <macro@mips.com>
 
+	* mips-linux-nat.c (mips_linux_nat_target::fetch_registers):
+	Supply the MIPS_ZERO_REGNUM register.
+
+2018-05-15  Maciej W. Rozycki  <macro@mips.com>
+
 	* mips-tdep.c (mask_address_var): Make variable static.
 
 2018-05-14  Tom Tromey  <tom@tromey.com>

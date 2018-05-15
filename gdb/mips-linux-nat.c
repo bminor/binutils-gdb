@@ -416,7 +416,13 @@ mips_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
   /* If we know, or just found out, that PTRACE_GETREGS does not work, fall
      back to PTRACE_PEEKUSER.  */
   if (!have_ptrace_regsets)
-    linux_nat_trad_target::fetch_registers (regcache, regnum);
+    {
+      linux_nat_trad_target::fetch_registers (regcache, regnum);
+
+      /* Fill the inaccessible zero register with zero.  */
+      if (regnum == MIPS_ZERO_REGNUM || regnum == -1)
+	regcache->raw_supply_zeroed (MIPS_ZERO_REGNUM);
+    }
 }
 
 /* Store REGNO (or all registers if REGNO == -1) to the target
