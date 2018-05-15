@@ -46,7 +46,8 @@ static bfd_vma last_mapping_addr = 0;
 
 /* Other options */
 static int no_aliases = 0;	/* If set disassemble as most general inst.  */
-
+static int no_notes = 1;	/* If set do not print disassemble notes in the
+				  output as comments.  */
 
 static void
 set_default_aarch64_dis_options (struct disassemble_info *info ATTRIBUTE_UNUSED)
@@ -66,6 +67,18 @@ parse_aarch64_dis_option (const char *option, unsigned int len ATTRIBUTE_UNUSED)
   if (CONST_STRNEQ (option, "aliases"))
     {
       no_aliases = 0;
+      return;
+    }
+
+  if (CONST_STRNEQ (option, "no-notes"))
+    {
+      no_notes = 1;
+      return;
+    }
+
+  if (CONST_STRNEQ (option, "notes"))
+    {
+      no_notes = 0;
       return;
     }
 
@@ -2950,6 +2963,7 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
 		const aarch64_opnd_info *opnds, struct disassemble_info *info)
 {
   int i, pcrel_p, num_printed;
+  char *notes = NULL;
   for (i = 0, num_printed = 0; i < AARCH64_MAX_OPND_NUM; ++i)
     {
       char str[128];
@@ -2964,7 +2978,7 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
 
       /* Generate the operand string in STR.  */
       aarch64_print_operand (str, sizeof (str), pc, opcode, opnds, i, &pcrel_p,
-			     &info->target);
+			     &info->target, &notes);
 
       /* Print the delimiter (taking account of omitted operand(s)).  */
       if (str[0] != '\0')
@@ -2977,6 +2991,9 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
       else
 	(*info->fprintf_func) (info->stream, "%s", str);
     }
+
+    if (notes && !no_notes)
+      (*info->fprintf_func) (info->stream, "\t; note: %s", notes);
 }
 
 /* Set NAME to a copy of INST's mnemonic with the "." suffix removed.  */
@@ -3336,6 +3353,12 @@ with the -M switch (multiple options should be separated by commas):\n"));
 
   fprintf (stream, _("\n\
   aliases            Do print instruction aliases.\n"));
+
+  fprintf (stream, _("\n\
+  no-notes         Don't print instruction notes.\n"));
+
+  fprintf (stream, _("\n\
+  notes            Do print instruction notes.\n"));
 
 #ifdef DEBUG_AARCH64
   fprintf (stream, _("\n\

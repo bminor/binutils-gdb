@@ -3033,7 +3033,7 @@ void
 aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		       const aarch64_opcode *opcode,
 		       const aarch64_opnd_info *opnds, int idx, int *pcrel_p,
-		       bfd_vma *address)
+		       bfd_vma *address, char** notes ATTRIBUTE_UNUSED)
 {
   unsigned int i, num_conds;
   const char *name = NULL;

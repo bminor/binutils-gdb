@@ -1,6 +1,12 @@
 2018-05-15  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/21446
+	* opcode/aarch64.h (aarch64_operand_error): Add non_fatal.
+	(aarch64_print_operand): Support notes.
+
+2018-05-15  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/21446
 	* opcode/aarch64.h (aarch64_opnd_info): Change sysreg to struct.
 	(aarch64_decode_insn): Accept error struct.
 

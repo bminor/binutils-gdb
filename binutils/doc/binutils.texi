@@ -2342,6 +2342,11 @@ using the switch @option{--disassembler-options=force-thumb}.  This can be
 useful when attempting to disassemble thumb code produced by other
 compilers.
 
+For AArch64 targets this switch can be used to set whether instructions are
+disassembled as the most general instruction using the @option{-M no-aliases}
+option or whether instruction notes should be generated as comments in the
+disasssembly using @option{-M notes}.
+
 For the x86, some of the options duplicate functions of the @option{-m}
 switch, but allow finer grained control.  Multiple selections from the
 following may be specified as a comma separated string.

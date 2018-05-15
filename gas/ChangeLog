@@ -1,6 +1,14 @@
 2018-05-15  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/21446
+	* config/tc-aarch64.c (print_operands): Indicate no notes.
+	(output_operand_error_record): Support non-fatal errors.
+	(output_operand_error_report, warn_unpredictable_ldst, md_assemble):
+	Likewise.
+
+2018-05-15  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/21446
 	* config/tc-aarch64.c (parse_sys_reg): Return register flags.
 	(parse_operands): Fill in register flags.
 

@@ -1,6 +1,15 @@
 2018-05-15  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/21446
+	* aarch64-dis.c (no_notes: New.
+	(parse_aarch64_dis_option): Support notes.
+	(aarch64_decode_insn, print_operands): Likewise.
+	(print_aarch64_disassembler_options): Document notes.
+	* aarch64-opc.c (aarch64_print_operand): Support notes.
+
+2018-05-15  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/21446
 	* aarch64-asm.h (aarch64_insert_operand, aarch64_##x): Return boolean
 	and take error struct.
 	* aarch64-asm.c (aarch64_ext_regno, aarch64_ins_reglane,

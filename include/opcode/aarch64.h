@@ -1101,6 +1101,7 @@ struct aarch64_operand_error
   int index;
   const char *error;
   int data[3];	/* Some data for extra information.  */
+  bfd_boolean non_fatal;
 };
 
 typedef struct aarch64_operand_error aarch64_operand_error;
@@ -1125,7 +1126,8 @@ aarch64_get_opcode (enum aarch64_op);
 /* Generate the string representation of an operand.  */
 extern void
 aarch64_print_operand (char *, size_t, bfd_vma, const aarch64_opcode *,
-		       const aarch64_opnd_info *, int, int *, bfd_vma *);
+		       const aarch64_opnd_info *, int, int *, bfd_vma *,
+		       char **);
 
 /* Miscellaneous interface.  */
 

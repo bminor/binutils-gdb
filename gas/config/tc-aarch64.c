@@ -4533,7 +4533,8 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 	break;
 
       /* Generate the operand string in STR.  */
-      aarch64_print_operand (str, sizeof (str), 0, opcode, opnds, i, NULL, NULL);
+      aarch64_print_operand (str, sizeof (str), 0, opcode, opnds, i, NULL, NULL,
+			     NULL);
 
       /* Delimiter.  */
       if (str[0] != '\0')
@@ -4579,12 +4580,14 @@ output_operand_error_record (const operand_error_record *record, char *str)
   enum aarch64_opnd opd_code = (idx >= 0 ? opcode->operands[idx]
 				: AARCH64_OPND_NIL);
 
+  typedef void (*handler_t)(const char *format, ...);
+  handler_t handler = detail->non_fatal ? as_warn : as_bad;
+
   switch (detail->kind)
     {
     case AARCH64_OPDE_NIL:
       gas_assert (0);
       break;
-
     case AARCH64_OPDE_SYNTAX_ERROR:
     case AARCH64_OPDE_RECOVERABLE:
     case AARCH64_OPDE_FATAL_SYNTAX_ERROR:
@@ -4594,21 +4597,21 @@ output_operand_error_record (const operand_error_record *record, char *str)
       if (detail->error != NULL)
 	{
 	  if (idx < 0)
-	    as_bad (_("%s -- `%s'"), detail->error, str);
+	    handler (_("%s -- `%s'"), detail->error, str);
 	  else
-	    as_bad (_("%s at operand %d -- `%s'"),
-		    detail->error, idx + 1, str);
+	    handler (_("%s at operand %d -- `%s'"),
+		     detail->error, idx + 1, str);
 	}
       else
 	{
 	  gas_assert (idx >= 0);
-	  as_bad (_("operand %d must be %s -- `%s'"), idx + 1,
-		aarch64_get_operand_desc (opd_code), str);
+	  handler (_("operand %d must be %s -- `%s'"), idx + 1,
+		   aarch64_get_operand_desc (opd_code), str);
 	}
       break;
 
     case AARCH64_OPDE_INVALID_VARIANT:
-      as_bad (_("operand mismatch -- `%s'"), str);
+      handler (_("operand mismatch -- `%s'"), str);
       if (verbose_error_p)
 	{
 	  /* We will try to correct the erroneous instruction and also provide
@@ -4705,36 +4708,36 @@ output_operand_error_record (const operand_error_record *record, char *str)
       break;
 
     case AARCH64_OPDE_UNTIED_OPERAND:
-      as_bad (_("operand %d must be the same register as operand 1 -- `%s'"),
-	      detail->index + 1, str);
+      handler (_("operand %d must be the same register as operand 1 -- `%s'"),
+	       detail->index + 1, str);
       break;
 
     case AARCH64_OPDE_OUT_OF_RANGE:
       if (detail->data[0] != detail->data[1])
-	as_bad (_("%s out of range %d to %d at operand %d -- `%s'"),
-		detail->error ? detail->error : _("immediate value"),
-		detail->data[0], detail->data[1], idx + 1, str);
+	handler (_("%s out of range %d to %d at operand %d -- `%s'"),
+		 detail->error ? detail->error : _("immediate value"),
+		 detail->data[0], detail->data[1], idx + 1, str);
       else
-	as_bad (_("%s must be %d at operand %d -- `%s'"),
-		detail->error ? detail->error : _("immediate value"),
-		detail->data[0], idx + 1, str);
+	handler (_("%s must be %d at operand %d -- `%s'"),
+		 detail->error ? detail->error : _("immediate value"),
+		 detail->data[0], idx + 1, str);
       break;
 
     case AARCH64_OPDE_REG_LIST:
       if (detail->data[0] == 1)
-	as_bad (_("invalid number of registers in the list; "
-		  "only 1 register is expected at operand %d -- `%s'"),
-		idx + 1, str);
+	handler (_("invalid number of registers in the list; "
+		   "only 1 register is expected at operand %d -- `%s'"),
+		 idx + 1, str);
       else
-	as_bad (_("invalid number of registers in the list; "
-		  "%d registers are expected at operand %d -- `%s'"),
-	      detail->data[0], idx + 1, str);
+	handler (_("invalid number of registers in the list; "
+		   "%d registers are expected at operand %d -- `%s'"),
+	       detail->data[0], idx + 1, str);
       break;
 
     case AARCH64_OPDE_UNALIGNED:
-      as_bad (_("immediate value must be a multiple of "
-		"%d at operand %d -- `%s'"),
-	      detail->data[0], idx + 1, str);
+      handler (_("immediate value must be a multiple of "
+		 "%d at operand %d -- `%s'"),
+	       detail->data[0], idx + 1, str);
       break;
 
     default:
@@ -4748,10 +4751,15 @@ output_operand_error_record (const operand_error_record *record, char *str)
    When this function is called, the operand error information had
    been collected for an assembly line and there will be multiple
    errors in the case of multiple instruction templates; output the
-   error message that most closely describes the problem.  */
+   error message that most closely describes the problem.
+
+   The errors to be printed can be filtered on printing all errors
+   or only non-fatal errors.  This distinction has to be made because
+   the error buffer may already be filled with fatal errors we don't want to
+   print due to the different instruction templates.  */
 
 static void
-output_operand_error_report (char *str)
+output_operand_error_report (char *str, bfd_boolean non_fatal_only)
 {
   int largest_error_pos;
   const char *msg = NULL;
@@ -4769,9 +4777,14 @@ output_operand_error_report (char *str)
   /* Only one error.  */
   if (head == operand_error_report.tail)
     {
-      DEBUG_TRACE ("single opcode entry with error kind: %s",
-		   operand_mismatch_kind_names[head->detail.kind]);
-      output_operand_error_record (head, str);
+      /* If the only error is a non-fatal one and we don't want to print it,
+	 just exit.  */
+      if (!non_fatal_only || head->detail.non_fatal)
+	{
+	  DEBUG_TRACE ("single opcode entry with error kind: %s",
+		       operand_mismatch_kind_names[head->detail.kind]);
+	  output_operand_error_record (head, str);
+	}
       return;
     }
 
@@ -4791,7 +4804,10 @@ output_operand_error_report (char *str)
   largest_error_pos = -2; /* Index can be -1 which means unknown index.  */
   for (curr = head; curr != NULL; curr = curr->next)
     {
-      if (curr->detail.kind != kind)
+      /* If we don't want to print non-fatal errors then don't consider them
+	 at all.  */
+      if (curr->detail.kind != kind
+	  || (non_fatal_only && !head->detail.non_fatal))
 	continue;
       /* If there are multiple errors, pick up the one with the highest
 	 mismatching operand index.  In the case of multiple errors with
@@ -4806,6 +4822,17 @@ output_operand_error_report (char *str)
 	  msg = record->detail.error;
 	}
     }
+
+  /* The way errors are collected in the back-end is a bit non-intuitive.  But
+     essentially, because each operand template is tried recursively you may
+     always have errors collected from the previous tried OPND.  These are
+     usually skipped if there is one successful match.  However now with the
+     non-fatal errors we have to ignore those previously collected hard errors
+     when we're only interested in printing the non-fatal ones.  This condition
+     prevents us from printing errors that are not appropriate, since we did
+     match a condition, but it also has warnings that it wants to print.  */
+  if (non_fatal_only && !record)
+    return;
 
   gas_assert (largest_error_pos != -2 && record != NULL);
   DEBUG_TRACE ("Pick up error kind %s to report",
@@ -6352,18 +6379,18 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  goto regoff_addr;
 
 	case AARCH64_OPND_SYSREG:
-	 {
-	   uint32_t sysreg_flags;
-	   if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1, 0,
-				     &sysreg_flags)) == PARSE_FAIL)
-	     {
-	       set_syntax_error (_("unknown or missing system register name"));
-	       goto failure;
-	     }
-	   inst.base.operands[i].sysreg.value = val;
-	   inst.base.operands[i].sysreg.flags = sysreg_flags;
-	   break;
-	 }
+	  {
+	    uint32_t sysreg_flags;
+	    if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1, 0,
+				      &sysreg_flags)) == PARSE_FAIL)
+	      {
+		set_syntax_error (_("unknown or missing system register name"));
+		goto failure;
+	      }
+	    inst.base.operands[i].sysreg.value = val;
+	    inst.base.operands[i].sysreg.flags = sysreg_flags;
+	    break;
+	  }
 
 	case AARCH64_OPND_PSTATEFIELD:
 	  if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0, 1, NULL))
@@ -6689,15 +6716,15 @@ do_encode (const aarch64_opcode *opcode, aarch64_inst *instr,
 	   aarch64_insn *code)
 {
   aarch64_operand_error error_info;
+  memset (&error_info, '\0', sizeof (error_info));
   error_info.kind = AARCH64_OPDE_NIL;
-  if (aarch64_opcode_encode (opcode, instr, code, NULL, &error_info))
+  if (aarch64_opcode_encode (opcode, instr, code, NULL, &error_info)
+      && !error_info.non_fatal)
     return TRUE;
-  else
-    {
-      gas_assert (error_info.kind != AARCH64_OPDE_NIL);
-      record_operand_error_info (opcode, &error_info);
-      return FALSE;
-    }
+
+  gas_assert (error_info.kind != AARCH64_OPDE_NIL);
+  record_operand_error_info (opcode, &error_info);
+  return error_info.non_fatal;
 }
 
 #ifdef DEBUG_AARCH64
@@ -6834,6 +6861,9 @@ md_assemble (char *str)
 	      memcpy (copy, &inst.base, sizeof (struct aarch64_inst));
 	      output_inst (copy);
 	    }
+
+	  /* Issue non-fatal messages if any.  */
+	  output_operand_error_report (str, TRUE);
 	  return;
 	}
 
@@ -6847,7 +6877,7 @@ md_assemble (char *str)
   while (template != NULL);
 
   /* Issue the error messages if any.  */
-  output_operand_error_report (str);
+  output_operand_error_report (str, FALSE);
 }
 
 /* Various frobbings of labels and their addresses.  */
