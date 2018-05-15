@@ -1081,7 +1081,9 @@ if [is_elf_format] {
 
     if { [istarget "mips64*-*-openbsd*"] } {
 	set reloc_format mips64
-    } elseif { [istarget "arm-*"] \
+    } elseif { ([istarget "arm*-*"] \
+		&& ![istarget "*-*-vxworks"] \
+		&& ![istarget "*-*-windiss"]) \
 	       || [istarget "d10v-*"] \
 	       || [istarget "dlx-*"] \
 	       || [istarget "i*86-*"] \

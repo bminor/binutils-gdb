@@ -1,3 +1,11 @@
+2018-05-15  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp (is_elf_format): Add chorus,
+	cloudabi, fuchsia, kaos and nto.  Merge netbsdelf* into *elf*,
+	and *uclinux* into *linux*.
+	* testsuite/binutils-all/objcopy.exp: Accept armeb for rel
+	strip-13 test, exclude arm-vxworks and arm-windiss.
+
 2018-05-10  John Darrington  <john@darrington.wattle.id.au>
 
 	* readelf.c (get_machine_name): EM_S12Z - handle new case.

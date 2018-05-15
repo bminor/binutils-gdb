@@ -26,32 +26,35 @@ proc is_elf_format {} {
     if { [istarget m68hc1*-*] || [istarget xgate-*] } {
 	return 1;
     }
+# vxworks (and windiss) excluded due to number of ELF tests that need
+# modifying to pass on those targets.
+#	 && ![istarget *-*-vxworks*]
+#	 && ![istarget *-*-windiss*]
 
-    if {    ![istarget *-*-eabi*]
-	 && ![istarget *-*-elf*]
-	 && ![istarget *-*-freebsd*]
+    if {    ![istarget *-*-chorus*]
+	 && ![istarget *-*-cloudabi*]
+	 && ![istarget *-*-eabi*]
+	 && ![istarget *-*-*elf*]
+	 && ![istarget *-*-*freebsd*]
+	 && ![istarget *-*-fuchsia*]
 	 && ![istarget *-*-gnu*]
 	 && ![istarget *-*-irix5*]
 	 && ![istarget *-*-irix6*]
-	 && ![istarget *-*-linux*]
+	 && ![istarget *-*-kaos*]
+	 && ![istarget *-*-*linux*]
 	 && ![istarget *-*-lynxos*]
 	 && ![istarget *-*-nacl*]
 	 && ![istarget *-*-netbsd*]
+	 && ![istarget *-*-nto*]
 	 && ![istarget *-*-openbsd*]
 	 && ![istarget *-*-rtems*]
 	 && ![istarget *-*-solaris2*]
-	 && ![istarget *-*-symbianelf*]
 	 && ![istarget *-*-sysv4*]
 	 && ![istarget *-*-unixware*]
 	 && ![istarget *-*-wasm32*]
-	 && ![istarget arm*-*-uclinuxfdpiceabi]
 	 && ![istarget avr-*-*]
-	 && ![istarget bfin-*-uclinux]
-	 && ![istarget frv-*-uclinux*]
 	 && ![istarget hppa*64*-*-hpux*]
-	 && ![istarget ia64-*-hpux*]
-	 && ![istarget sh*-*-uclinux*]
-	 && ![istarget tic6x*-*-uclinux*] } {
+	 && ![istarget ia64-*-hpux*] } {
 	return 0
     }
 
