@@ -1179,7 +1179,22 @@ aarch64_ext_sysreg (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* op0:op1:CRn:CRm:op2 */
   info->sysreg.value = extract_fields (code, 0, 5, FLD_op0, FLD_op1, FLD_CRn,
 				       FLD_CRm, FLD_op2);
-  return 1;
+  info->sysreg.flags = 0;
+
+  /* If a system instruction, check which restrictions should be on the register
+     value during decoding, these will be enforced then.  */
+  if (inst->opcode->iclass == ic_system)
+    {
+      /* Check to see if it's read-only, else check if it's write only.
+	 if it's both or unspecified don't care.  */
+      if ((inst->opcode->flags & (F_SYS_READ | F_SYS_WRITE)) == F_SYS_READ)
+	info->sysreg.flags = F_REG_READ;
+      else if ((inst->opcode->flags & (F_SYS_READ | F_SYS_WRITE))
+	       == F_SYS_WRITE)
+	info->sysreg.flags = F_REG_WRITE;
+    }
+
+  return TRUE;
 }
 
 /* Decode the PSTATE field operand for e.g. MSR <pstatefield>, #<imm>.  */

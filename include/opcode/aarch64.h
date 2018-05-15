@@ -765,7 +765,11 @@ extern aarch64_opcode aarch64_opcode_table[];
 #define F_LSE_SZ (1 << 27)
 /* Require an exact qualifier match, even for NIL qualifiers.  */
 #define F_STRICT (1ULL << 28)
-/* Next bit is 29.  */
+/* This system instruction is used to read system registers.  */
+#define F_SYS_READ (1ULL << 29)
+/* This system instruction is used to write system registers.  */
+#define F_SYS_WRITE (1ULL << 30)
+/* Next bit is 31.  */
 
 static inline bfd_boolean
 alias_opcode_p (const aarch64_opcode *opcode)

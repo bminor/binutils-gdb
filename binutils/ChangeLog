@@ -2,6 +2,11 @@
 
 	PR binutils/21446
 	* doc/binutils.texi (-M): Document AArch64 options.
+
+2018-05-15  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/21446
+	* doc/binutils.texi (-M): Document AArch64 options.
 	* NEWS: Document notes and warnings.
 
 2018-05-15  Alan Modra  <amodra@gmail.com>

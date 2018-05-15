@@ -1,6 +1,34 @@
 2018-05-15  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/21446
+	* aarch64-asm.c (opintl.h): Include.
+	(aarch64_ins_sysreg): Enforce read/write constraints.
+	* aarch64-dis.c (aarch64_ext_sysreg): Likewise.
+	* aarch64-opc.h (F_DEPRECATED, F_ARCHEXT, F_HASXT): Moved here.
+	(F_REG_READ, F_REG_WRITE): New.
+	* aarch64-opc.c (aarch64_print_operand): Generate notes for
+	AARCH64_OPND_SYSREG.
+	(F_DEPRECATED, F_ARCHEXT, F_HASXT): Move to aarch64-opc.h.
+	(aarch64_sys_regs): Add constraints to currentel, midr_el1, ctr_el0,
+	mpidr_el1, revidr_el1, aidr_el1, dczid_el0, id_dfr0_el1, id_pfr0_el1,
+	id_pfr1_el1, id_afr0_el1, id_mmfr0_el1, id_mmfr1_el1, id_mmfr2_el1,
+	id_mmfr3_el1, id_mmfr4_el1, id_isar0_el1, id_isar1_el1, id_isar2_el1,
+	id_isar3_el1, id_isar4_el1, id_isar5_el1, mvfr0_el1, mvfr1_el1,
+	mvfr2_el1, ccsidr_el1, id_aa64pfr0_el1, id_aa64pfr1_el1,
+	id_aa64dfr0_el1, id_aa64dfr1_el1, id_aa64isar0_el1, id_aa64isar1_el1,
+	id_aa64mmfr0_el1, id_aa64mmfr1_el1, id_aa64mmfr2_el1, id_aa64afr0_el1,
+	id_aa64afr0_el1, id_aa64afr1_el1, id_aa64zfr0_el1, clidr_el1,
+	csselr_el1, vsesr_el2, erridr_el1, erxfr_el1, rvbar_el1, rvbar_el2,
+	rvbar_el3, isr_el1, tpidrro_el0, cntfrq_el0, cntpct_el0, cntvct_el0,
+	mdccsr_el0, dbgdtrrx_el0, dbgdtrtx_el0, osdtrrx_el1, osdtrtx_el1,
+	mdrar_el1, oslar_el1, oslsr_el1, dbgauthstatus_el1, pmbidr_el1,
+	pmsidr_el1, pmswinc_el0, pmceid0_el0, pmceid1_el0.
+	* aarch64-tbl.h (aarch64_opcode_table): Add constraints to
+	msr (F_SYS_WRITE), mrs (F_SYS_READ).
+
+2018-05-15  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/21446
 	* aarch64-dis.c (no_notes: New.
 	(parse_aarch64_dis_option): Support notes.
 	(aarch64_decode_insn, print_operands): Likewise.

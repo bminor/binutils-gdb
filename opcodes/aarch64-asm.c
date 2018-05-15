@@ -22,6 +22,7 @@
 #include <stdarg.h>
 #include "libiberty.h"
 #include "aarch64-asm.h"
+#include "opintl.h"
 
 /* Utilities.  */
 
@@ -785,6 +786,36 @@ aarch64_ins_sysreg (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		    const aarch64_inst *inst,
 		    aarch64_operand_error *detail ATTRIBUTE_UNUSED)
 {
+   /* If a system instruction check if we have any restrictions on which
+      registers it can use.  */
+   if (inst->opcode->iclass == ic_system)
+     {
+        uint64_t opcode_flags
+	  = inst->opcode->flags & (F_SYS_READ | F_SYS_WRITE);
+	uint32_t sysreg_flags
+	  = info->sysreg.flags & (F_REG_READ | F_REG_WRITE);
+
+        /* Check to see if it's read-only, else check if it's write only.
+	   if it's both or unspecified don't care.  */
+	if (opcode_flags == F_SYS_READ
+	    && sysreg_flags
+	    && sysreg_flags != F_REG_READ)
+	  {
+		detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+		detail->error = _("specified register cannot be read from");
+		detail->index = info->idx;
+		detail->non_fatal = TRUE;
+	  }
+	else if (opcode_flags == F_SYS_WRITE
+		 && sysreg_flags
+		 && sysreg_flags != F_REG_WRITE)
+	  {
+		detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+		detail->error = _("specified register cannot be written to");
+		detail->index = info->idx;
+		detail->non_fatal = TRUE;
+	  }
+     }
   /* op0:op1:CRn:CRm:op2 */
   insert_fields (code, info->sysreg.value, inst->opcode->mask, 5,
 		 FLD_op2, FLD_CRm, FLD_CRn, FLD_op1, FLD_op0);

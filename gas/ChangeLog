@@ -1,6 +1,16 @@
 2018-05-15  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/21446
+	* testsuite/gas/aarch64/illegal-sysreg-2.s: Fix pmbidr_el1 test.
+	* testsuite/gas/aarch64/illegal-sysreg-2.l: Likewise.
+	* testsuite/gas/aarch64/illegal-sysreg-2.d: Likewise.
+	* testsuite/gas/aarch64/sysreg-diagnostic.s: New.
+	* testsuite/gas/aarch64/sysreg-diagnostic.l: New.
+	* testsuite/gas/aarch64/sysreg-diagnostic.d: New.
+
+2018-05-15  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/21446
 	* config/tc-aarch64.c (print_operands): Indicate no notes.
 	(output_operand_error_record): Support non-fatal errors.
 	(output_operand_error_report, warn_unpredictable_ldst, md_assemble):
