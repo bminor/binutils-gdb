@@ -845,17 +845,22 @@ struct dwp_file
 
 struct dwz_file
 {
+  dwz_file (gdb_bfd_ref_ptr &&bfd)
+    : dwz_bfd (std::move (bfd))
+  {
+  }
+
   /* A dwz file can only contain a few sections.  */
-  struct dwarf2_section_info abbrev;
-  struct dwarf2_section_info info;
-  struct dwarf2_section_info str;
-  struct dwarf2_section_info line;
-  struct dwarf2_section_info macro;
-  struct dwarf2_section_info gdb_index;
-  struct dwarf2_section_info debug_names;
+  struct dwarf2_section_info abbrev {};
+  struct dwarf2_section_info info {};
+  struct dwarf2_section_info str {};
+  struct dwarf2_section_info line {};
+  struct dwarf2_section_info macro {};
+  struct dwarf2_section_info gdb_index {};
+  struct dwarf2_section_info debug_names {};
 
   /* The dwz's BFD.  */
-  bfd *dwz_bfd;
+  gdb_bfd_ref_ptr dwz_bfd;
 };
 
 /* Struct used to pass misc. parameters to read_die_and_children, et
@@ -2151,9 +2156,6 @@ dwarf2_per_objfile::~dwarf2_per_objfile ()
   if (dwo_files != NULL)
     free_dwo_files (dwo_files, objfile);
 
-  if (dwz_file != NULL && dwz_file->dwz_bfd)
-    gdb_bfd_unref (dwz_file->dwz_bfd);
-
   /* Everything else should be on the objfile obstack.  */
 }
 
@@ -2639,13 +2641,12 @@ static struct dwz_file *
 dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
   const char *filename;
-  struct dwz_file *result;
   bfd_size_type buildid_len_arg;
   size_t buildid_len;
   bfd_byte *buildid;
 
   if (dwarf2_per_objfile->dwz_file != NULL)
-    return dwarf2_per_objfile->dwz_file;
+    return dwarf2_per_objfile->dwz_file.get ();
 
   bfd_set_error (bfd_error_no_error);
   gdb::unique_xmalloc_ptr<char> data
@@ -2691,15 +2692,16 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
     error (_("could not find '.gnu_debugaltlink' file for %s"),
 	   objfile_name (dwarf2_per_objfile->objfile));
 
-  result = OBSTACK_ZALLOC (&dwarf2_per_objfile->objfile->objfile_obstack,
-			   struct dwz_file);
-  result->dwz_bfd = dwz_bfd.release ();
+  std::unique_ptr<struct dwz_file> result
+    (new struct dwz_file (std::move (dwz_bfd)));
 
-  bfd_map_over_sections (result->dwz_bfd, locate_dwz_sections, result);
+  bfd_map_over_sections (result->dwz_bfd.get (), locate_dwz_sections,
+			 result.get ());
 
-  gdb_bfd_record_inclusion (dwarf2_per_objfile->objfile->obfd, result->dwz_bfd);
-  dwarf2_per_objfile->dwz_file = result;
-  return result;
+  gdb_bfd_record_inclusion (dwarf2_per_objfile->objfile->obfd,
+			    result->dwz_bfd.get ());
+  dwarf2_per_objfile->dwz_file = std::move (result);
+  return dwarf2_per_objfile->dwz_file.get ();
 }
 
 /* DWARF quick_symbols_functions support.  */

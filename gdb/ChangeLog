@@ -1,5 +1,14 @@
 2018-05-18  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (struct dwz_file): Add constructor, initializers.
+	<dwz_bfd>: Now a gdb_bfd_ref_ptr.
+	(~dwarf2_per_objfile): Update
+	(dwarf2_get_dwz_file): Use new.
+	* dwarf2read.h (struct dwarf2_per_objfile) <dwz_file>: Now a
+	unique_ptr.
+
+2018-05-18  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.h (struct dwarf2_per_objfile) <dwp_file>: Now a
 	unique_ptr.
 	* dwarf2read.c (struct dwp_file): Add constructor and
