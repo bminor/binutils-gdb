@@ -47,11 +47,6 @@ extern void complaint_internal (struct complaints **complaints,
     }								\
   while (0)
 
-extern void internal_complaint (struct complaints **complaints,
-				const char *file, int line,
-				const char *fmt,
-				...) ATTRIBUTE_PRINTF (4, 5);
-
 /* Clear out / initialize all complaint counters that have ever been
    incremented.  If LESS_VERBOSE is 1, be less verbose about
    successive complaints, since the messages are appearing all

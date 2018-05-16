@@ -1,3 +1,8 @@
+2018-05-23  Tom Tromey  <tom@tromey.com>
+
+	* complaints.c (internal_complaint): Remove.
+	* complaints.h (internal_complaint): Remove.
+
 2018-05-22  Maciej W. Rozycki  <macro@mips.com>
 
 	* i387-tdep.c (i387_collect_xsave): Make `i' unsigned.

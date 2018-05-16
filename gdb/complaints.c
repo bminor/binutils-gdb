@@ -245,16 +245,6 @@ complaint_internal (struct complaints **complaints, const char *fmt, ...)
   va_end (args);
 }
 
-void
-internal_complaint (struct complaints **complaints, const char *file,
-		    int line, const char *fmt, ...)
-{
-  va_list args;
-  va_start (args, fmt);
-  vcomplaint (complaints, file, line, fmt, args);
-  va_end (args);
-}
-
 /* Clear out / initialize all complaint counters that have ever been
    incremented.  If LESS_VERBOSE is 1, be less verbose about
    successive complaints, since the messages are appearing all
