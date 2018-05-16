@@ -6808,7 +6808,7 @@ nds32_convert_32_to_16 (bfd *abfd, uint32_t insn, uint16_t *pinsn16,
 {
   int op6;
   uint16_t insn16 = 0;
-  int insn_type;
+  int insn_type = 0;
   unsigned long mach = bfd_get_mach (abfd);
 
   /* Decode 32-bit instruction.  */
