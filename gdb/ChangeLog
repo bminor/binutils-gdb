@@ -1,3 +1,8 @@
+2018-05-17  Tom Tromey  <tom@tromey.com>
+
+	* extension.h (struct ext_lang_type_printers) <py_type_printers>:
+	Initialize.
+
 2018-05-16  Maciej W. Rozycki  <macro@mips.com>
 
 	PR gdb/22286

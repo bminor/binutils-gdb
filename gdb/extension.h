@@ -152,7 +152,7 @@ struct ext_lang_type_printers
   DISABLE_COPY_AND_ASSIGN (ext_lang_type_printers);
 
   /* Type-printers from Python.  */
-  void *py_type_printers;
+  void *py_type_printers = nullptr;
 };
 
 /* The return code for some API calls.  */
