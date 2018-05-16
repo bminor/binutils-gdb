@@ -1,3 +1,8 @@
+2018-05-16  Maciej W. Rozycki  <macro@mips.com>
+
+	* tc-nds32.c (md_assemble): Rename `expr' local variable to
+	`insn_expr'.
+
 2018-05-15  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/21446

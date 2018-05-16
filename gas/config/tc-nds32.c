@@ -5209,7 +5209,7 @@ void
 md_assemble (char *str)
 {
   struct nds32_asm_insn insn;
-  expressionS expr;
+  expressionS insn_expr;
   char *out;
   struct nds32_pseudo_opcode *popcode;
   const struct nds32_field *fld = NULL;
@@ -5245,7 +5245,7 @@ md_assemble (char *str)
     }
 
   label_exist = 0;
-  insn.info = & expr;
+  insn.info = &insn_expr;
   asm_desc.result = NASM_OK;
   nds32_assemble (&asm_desc, &insn, str);
 
