@@ -1,3 +1,9 @@
+2018-05-16  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/23109
+	* aarch64-tbl.h (aarch64_opcode_table): Correct sdot and udot.
+	* aarch64-dis-2.c: Regenerate.
+
 2018-05-15  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/21446
