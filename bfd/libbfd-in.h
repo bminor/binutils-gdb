@@ -53,6 +53,9 @@ struct section_hash_entry
   asection section;
 };
 
+/* Unique section id.  */
+extern unsigned int _bfd_section_id;
+
 /* tdata for an archive.  For an input archive, cache
    needs to be free()'d.  For an output archive, symdefs do.  */
 

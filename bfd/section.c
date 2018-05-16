@@ -820,21 +820,21 @@ _bfd_generic_new_section_hook (bfd *abfd, asection *newsect)
   return TRUE;
 }
 
-static unsigned int section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
+unsigned int _bfd_section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
 
 /* Initializes a new section.  NEWSECT->NAME is already set.  */
 
 static asection *
 bfd_section_init (bfd *abfd, asection *newsect)
 {
-  newsect->id = section_id;
+  newsect->id = _bfd_section_id;
   newsect->index = abfd->section_count;
   newsect->owner = abfd;
 
   if (! BFD_SEND (abfd, _new_section_hook, (abfd, newsect)))
     return NULL;
 
-  section_id++;
+  _bfd_section_id++;
   abfd->section_count++;
   bfd_section_list_append (abfd, newsect);
   return newsect;
@@ -1282,23 +1282,6 @@ asection *
 bfd_make_section (bfd *abfd, const char *name)
 {
   return bfd_make_section_with_flags (abfd, name, 0);
-}
-
-/*
-FUNCTION
-	bfd_get_next_section_id
-
-SYNOPSIS
-	int bfd_get_next_section_id (void);
-
-DESCRIPTION
-	Returns the id that the next section created will have.
-*/
-
-int
-bfd_get_next_section_id (void)
-{
-  return section_id;
 }
 
 /*

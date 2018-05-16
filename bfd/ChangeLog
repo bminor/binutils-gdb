@@ -1,3 +1,22 @@
+2018-05-16  Alan Modra  <amodra@gmail.com>
+
+	PR 22458
+	* format.c (struct bfd_preserve): Add section_id.
+	(bfd_preserve_save, bfd_preserve_restore): Save and restore
+	_bfd_section_id.
+	(bfd_reinit): Set _bfd_section_id.
+	(bfd_check_format_matches): Put all matches of any priority into
+	matching_vector.  Save initial section id and start each attempted
+	match at that section id.
+	* libbfd-in.h (_bfd_section_id): Declare.
+	* section.c (_bfd_section_id): Rename from section_id and make
+	global.  Adjust uses.
+	(bfd_get_next_section_id): Delete.
+	* elf64-ppc.c (ppc64_elf_setup_section_lists): Replace use of
+	bfd_get_section_id with _bfd_section_id.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2018-05-15  Christophe Guillon  <christophe.guillon@st.com>
 
 	* coffcode.h (coff_bigobj_swap_aux_in): Make sure that all fields

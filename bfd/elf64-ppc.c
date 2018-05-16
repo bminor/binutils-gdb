@@ -11760,7 +11760,7 @@ ppc64_elf_setup_section_lists (struct bfd_link_info *info)
   if (htab == NULL)
     return -1;
 
-  htab->sec_info_arr_size = bfd_get_next_section_id ();
+  htab->sec_info_arr_size = _bfd_section_id;
   amt = sizeof (*htab->sec_info) * (htab->sec_info_arr_size);
   htab->sec_info = bfd_zmalloc (amt);
   if (htab->sec_info == NULL)
