@@ -29,9 +29,10 @@ void
 linux_nat_trad_target::fetch_register (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR addr;
+  gdb_byte *buf;
   size_t size;
-  PTRACE_TYPE_RET *buf;
   pid_t pid;
   int i;
 
@@ -47,18 +48,21 @@ linux_nat_trad_target::fetch_register (struct regcache *regcache, int regnum)
   pid = get_ptrace_pid (regcache_get_ptid (regcache));
 
   size = register_size (gdbarch, regnum);
-  gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
-  buf = (PTRACE_TYPE_RET *) alloca (size);
+  buf = (gdb_byte *) alloca (size);
 
   /* Read the register contents from the inferior a chunk at a time.  */
-  for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
+  for (i = 0; i < size; i += sizeof (PTRACE_TYPE_RET))
     {
+      size_t chunk = std::min (sizeof (PTRACE_TYPE_RET), size - i);
+      PTRACE_TYPE_RET val;
+
       errno = 0;
-      buf[i] = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3)(uintptr_t)addr, 0);
+      val = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3) (uintptr_t) addr, 0);
       if (errno != 0)
 	error (_("Couldn't read register %s (#%d): %s."),
 	       gdbarch_register_name (gdbarch, regnum),
 	       regnum, safe_strerror (errno));
+      store_unsigned_integer (buf + i, chunk, byte_order, val);
 
       addr += sizeof (PTRACE_TYPE_RET);
     }
@@ -87,9 +91,10 @@ linux_nat_trad_target::store_register (const struct regcache *regcache,
 				       int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR addr;
   size_t size;
-  PTRACE_TYPE_RET *buf;
+  gdb_byte *buf;
   pid_t pid;
   int i;
 
@@ -102,15 +107,18 @@ linux_nat_trad_target::store_register (const struct regcache *regcache,
   pid = get_ptrace_pid (regcache_get_ptid (regcache));
 
   size = register_size (gdbarch, regnum);
-  gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
-  buf = (PTRACE_TYPE_RET *) alloca (size);
+  buf = (gdb_byte *) alloca (size);
 
   /* Write the register contents into the inferior a chunk at a time.  */
   regcache_raw_collect (regcache, regnum, buf);
-  for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
+  for (i = 0; i < size; i += sizeof (PTRACE_TYPE_RET))
     {
+      size_t chunk = std::min (sizeof (PTRACE_TYPE_RET), size - i);
+      PTRACE_TYPE_RET val;
+
+      val = extract_unsigned_integer (buf + i, chunk, byte_order);
       errno = 0;
-      ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3)(uintptr_t)addr, buf[i]);
+      ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3) (uintptr_t) addr, val);
       if (errno != 0)
 	error (_("Couldn't write register %s (#%d): %s."),
 	       gdbarch_register_name (gdbarch, regnum),

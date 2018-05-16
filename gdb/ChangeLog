@@ -1,3 +1,11 @@
+2018-05-16  Maciej W. Rozycki  <macro@mips.com>
+
+	PR gdb/22286
+	* linux-nat-trad.c (linux_nat_trad_target::fetch_register):
+	Also handle registers whose width is not a multiple of
+	PTRACE_TYPE_RET.
+	(linux_nat_trad_target::store_register): Likewise.
+
 2018-05-16  Tom Tromey  <tom@tromey.com>
 
 	* gdbcore.h (core_bfd): Redefine.
