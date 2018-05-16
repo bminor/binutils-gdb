@@ -845,11 +845,6 @@ regcache::cooked_write (int regnum, const gdb_byte *buf)
 /* Perform a partial register transfer using a read, modify, write
    operation.  */
 
-typedef void (regcache_read_ftype) (struct regcache *regcache, int regnum,
-				    void *buf);
-typedef void (regcache_write_ftype) (struct regcache *regcache, int regnum,
-				     const void *buf);
-
 enum register_status
 readable_regcache::read_part (int regnum, int offset, int len, void *in,
 			      bool is_raw)
