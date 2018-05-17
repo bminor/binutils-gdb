@@ -29,17 +29,9 @@ enum complaint_series {
   /* Isolated self explanatory message.  */
   ISOLATED_MESSAGE,
 
-  /* First message of a series, includes an explanation.  */
-  FIRST_MESSAGE,
-
   /* First message of a series, but does not need to include any sort
      of explanation.  */
   SHORT_FIRST_MESSAGE,
-
-  /* Subsequent message of a series that needs no explanation (the
-     user already knows we have a problem so we can just state our
-     piece).  */
-  SUBSEQUENT_MESSAGE
 };
 
 /* Structure to manage complaints about symbol file contents.  */
@@ -82,8 +74,6 @@ static struct complain complaint_sentinel;
 
 static struct explanation symfile_explanations[] = {
   { "During symbol reading, ", "." },
-  { "During symbol reading...", "..."},
-  { "", "..."},
   { "", "..."},
   { NULL, NULL }
 };
@@ -169,10 +159,7 @@ vcomplaint (struct complaints **c, const char *file,
   if (complaint->counter > stop_whining)
     return;
 
-  if (info_verbose)
-    series = SUBSEQUENT_MESSAGE;
-  else
-    series = complaints->series;
+  series = complaints->series;
 
   /* Pass 'fmt' instead of 'complaint->fmt' to printf-like callees
      from here on, to avoid "format string is not a string literal"
@@ -194,16 +181,13 @@ vcomplaint (struct complaints **c, const char *file,
 	{
 	  std::string msg = string_vprintf (fmt, args);
 	  wrap_here ("");
-	  if (series != SUBSEQUENT_MESSAGE)
-	    begin_line ();
+	  begin_line ();
 	  /* XXX: i18n */
 	  fprintf_filtered (gdb_stderr, "%s%s%s",
 			    complaints->explanation[series].prefix,
 			    msg.c_str (),
 			    complaints->explanation[series].postfix);
-	  /* Force a line-break after any isolated message.  For the
-             other cases, clear_complaints() takes care of any missing
-             trailing newline, the wrap_here() is just a hint.  */
+	  /* Force a line-break after any isolated message.  */
 	  if (series == ISOLATED_MESSAGE)
 	    /* It would be really nice to use begin_line() here.
 	       Unfortunately that function doesn't track GDB_STDERR and
@@ -213,19 +197,6 @@ vcomplaint (struct complaints **c, const char *file,
 	  else
 	    wrap_here ("");
 	}
-    }
-
-  switch (series)
-    {
-    case ISOLATED_MESSAGE:
-      break;
-    case FIRST_MESSAGE:
-      complaints->series = SUBSEQUENT_MESSAGE;
-      break;
-    case SUBSEQUENT_MESSAGE:
-    case SHORT_FIRST_MESSAGE:
-      complaints->series = SUBSEQUENT_MESSAGE;
-      break;
     }
 
   /* If GDB dumps core, we'd like to see the complaints first.
@@ -264,33 +235,8 @@ clear_complaints (struct complaints **c, int less_verbose, int noisy)
       p->counter = 0;
     }
 
-  switch (complaints->series)
-    {
-    case FIRST_MESSAGE:
-      /* Haven't yet printed anything.  */
-      break;
-    case SHORT_FIRST_MESSAGE:
-      /* Haven't yet printed anything.  */
-      break;
-    case ISOLATED_MESSAGE:
-      /* The code above, always forces a line-break.  No need to do it
-         here.  */
-      break;
-    case SUBSEQUENT_MESSAGE:
-      /* It would be really nice to use begin_line() here.
-         Unfortunately that function doesn't track GDB_STDERR and
-         consequently will sometimes supress a line when it
-         shouldn't.  */
-      fputs_unfiltered ("\n", gdb_stderr);
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
-    }
-
   if (!less_verbose)
     complaints->series = ISOLATED_MESSAGE;
-  else if (!noisy)
-    complaints->series = FIRST_MESSAGE;
   else
     complaints->series = SHORT_FIRST_MESSAGE;
 }

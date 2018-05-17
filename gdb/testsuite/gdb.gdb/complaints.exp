@@ -85,29 +85,6 @@ proc test_initial_complaints { } {
     return 0
 }
 
-proc test_serial_complaints { } {
-    gdb_test_exact "call clear_complaints (&symfile_complaints, 1, 0)" "" "serial start"
-
-    # Prime the system
-    test_complaint \
-	"call complaint_internal (&symfile_complaints, \"serial line 1\")" \
-	"During symbol reading...serial line 1..." \
-	"serial line 1"
-
-    # Add a second complaint, expect it
-    test_complaint \
-	"call complaint_internal (&symfile_complaints, \"serial line 2\")" \
-	"serial line 2..." \
-	"serial line 2"
-
-    gdb_test_stdio "call clear_complaints (&symfile_complaints, 1, 0)" \
-	"\r\n" \
-	"" \
-	"serial end"
-
-    return 0
-}
-
 # For short complaints, all are the same
 
 proc test_short_complaints { } {
@@ -124,11 +101,6 @@ proc test_short_complaints { } {
 	"call complaint_internal (&symfile_complaints, \"short line 2\")" \
 	"short line 2..." \
 	"short line 2"
-
-    gdb_test_stdio "call clear_complaints (&symfile_complaints, 1, 0)" \
-	"\r\n" \
-	"" \
-	"short end"
 
     return 0
 }
@@ -173,7 +145,6 @@ proc test_empty_complaints { } {
 
 do_self_tests captured_command_loop {
     test_initial_complaints
-    test_serial_complaints
     test_short_complaints
     test_empty_complaints
 }

@@ -1,5 +1,12 @@
 2018-05-23  Tom Tromey  <tom@tromey.com>
 
+	* complaints.c (enum complaint_series): Remove FIRST_MESSAGE,
+	SUBSEQUENT_MESSAGE.
+	(vcomplaint, clear_complaints): Update.
+	(symfile_explanations): Remove some messages.
+
+2018-05-23  Tom Tromey  <tom@tromey.com>
+
 	* complaints.c (internal_complaint): Remove.
 	* complaints.h (internal_complaint): Remove.
 
