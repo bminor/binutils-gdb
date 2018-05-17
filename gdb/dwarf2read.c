@@ -807,32 +807,38 @@ struct dwp_hash_table
 
 struct dwp_file
 {
+  dwp_file (const char *name_, gdb_bfd_ref_ptr &&abfd)
+    : name (name_),
+      dbfd (std::move (abfd))
+  {
+  }
+
   /* Name of the file.  */
   const char *name;
 
   /* File format version.  */
-  int version;
+  int version = 0;
 
   /* The bfd.  */
-  bfd *dbfd;
+  gdb_bfd_ref_ptr dbfd;
 
   /* Section info for this file.  */
-  struct dwp_sections sections;
+  struct dwp_sections sections {};
 
   /* Table of CUs in the file.  */
-  const struct dwp_hash_table *cus;
+  const struct dwp_hash_table *cus = nullptr;
 
   /* Table of TUs in the file.  */
-  const struct dwp_hash_table *tus;
+  const struct dwp_hash_table *tus = nullptr;
 
   /* Tables of loaded CUs/TUs.  Each entry is a struct dwo_unit *.  */
-  htab_t loaded_cus;
-  htab_t loaded_tus;
+  htab_t loaded_cus {};
+  htab_t loaded_tus {};
 
   /* Table to map ELF section numbers to their sections.
      This is only needed for the DWP V1 file format.  */
-  unsigned int num_sections;
-  asection **elf_sections;
+  unsigned int num_sections = 0;
+  asection **elf_sections = nullptr;
 };
 
 /* This represents a '.dwz' file.  */
@@ -2144,8 +2150,6 @@ dwarf2_per_objfile::~dwarf2_per_objfile ()
 
   if (dwo_files != NULL)
     free_dwo_files (dwo_files, objfile);
-  if (dwp_file != NULL)
-    gdb_bfd_unref (dwp_file->dbfd);
 
   if (dwz_file != NULL && dwz_file->dwz_bfd)
     gdb_bfd_unref (dwz_file->dwz_bfd);
@@ -12038,7 +12042,7 @@ create_dwp_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		       struct dwp_file *dwp_file, int is_debug_types)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  bfd *dbfd = dwp_file->dbfd;
+  bfd *dbfd = dwp_file->dbfd.get ();
   const gdb_byte *index_ptr, *index_end;
   struct dwarf2_section_info *index;
   uint32_t version, nr_columns, nr_units, nr_slots;
@@ -12281,7 +12285,7 @@ create_dwo_unit_in_dwp_v1 (struct dwarf2_per_objfile *dwarf2_per_objfile,
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   const struct dwp_hash_table *dwp_htab =
     is_debug_types ? dwp_file->tus : dwp_file->cus;
-  bfd *dbfd = dwp_file->dbfd;
+  bfd *dbfd = dwp_file->dbfd.get ();
   const char *kind = is_debug_types ? "TU" : "CU";
   struct dwo_file *dwo_file;
   struct dwo_unit *dwo_unit;
@@ -12483,7 +12487,7 @@ create_dwo_unit_in_dwp_v2 (struct dwarf2_per_objfile *dwarf2_per_objfile,
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   const struct dwp_hash_table *dwp_htab =
     is_debug_types ? dwp_file->tus : dwp_file->cus;
-  bfd *dbfd = dwp_file->dbfd;
+  bfd *dbfd = dwp_file->dbfd.get ();
   const char *kind = is_debug_types ? "TU" : "CU";
   struct dwo_file *dwo_file;
   struct dwo_unit *dwo_unit;
@@ -12653,7 +12657,7 @@ lookup_dwo_unit_in_dwp (struct dwarf2_per_objfile *dwarf2_per_objfile,
 {
   const struct dwp_hash_table *dwp_htab =
     is_debug_types ? dwp_file->tus : dwp_file->cus;
-  bfd *dbfd = dwp_file->dbfd;
+  bfd *dbfd = dwp_file->dbfd.get ();
   uint32_t mask = dwp_htab->nr_slots - 1;
   uint32_t hash = signature & mask;
   uint32_t hash2 = ((signature >> 32) & mask) | 1;
@@ -13095,11 +13099,10 @@ open_dwp_file (struct dwarf2_per_objfile *dwarf2_per_objfile,
    By convention the name of the DWP file is ${objfile}.dwp.
    The result is NULL if it can't be found.  */
 
-static struct dwp_file *
+static std::unique_ptr<struct dwp_file>
 open_and_init_dwp_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  struct dwp_file *dwp_file;
 
   /* Try to find first .dwp for the binary file before any symbolic links
      resolving.  */
@@ -13133,11 +13136,12 @@ open_and_init_dwp_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
     {
       if (dwarf_read_debug)
 	fprintf_unfiltered (gdb_stdlog, "DWP file not found: %s\n", dwp_name.c_str ());
-      return NULL;
+      return std::unique_ptr<dwp_file> ();
     }
-  dwp_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwp_file);
-  dwp_file->name = bfd_get_filename (dbfd.get ());
-  dwp_file->dbfd = dbfd.release ();
+
+  const char *name = bfd_get_filename (dbfd.get ());
+  std::unique_ptr<struct dwp_file> dwp_file
+    (new struct dwp_file (name, std::move (dbfd)));
 
   /* +1: section 0 is unused */
   dwp_file->num_sections = bfd_count_sections (dwp_file->dbfd) + 1;
@@ -13145,12 +13149,15 @@ open_and_init_dwp_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
     OBSTACK_CALLOC (&objfile->objfile_obstack,
 		    dwp_file->num_sections, asection *);
 
-  bfd_map_over_sections (dwp_file->dbfd, dwarf2_locate_common_dwp_sections,
-			 dwp_file);
+  bfd_map_over_sections (dwp_file->dbfd.get (),
+			 dwarf2_locate_common_dwp_sections,
+			 dwp_file.get ());
 
-  dwp_file->cus = create_dwp_hash_table (dwarf2_per_objfile, dwp_file, 0);
+  dwp_file->cus = create_dwp_hash_table (dwarf2_per_objfile, dwp_file.get (),
+					 0);
 
-  dwp_file->tus = create_dwp_hash_table (dwarf2_per_objfile, dwp_file, 1);
+  dwp_file->tus = create_dwp_hash_table (dwarf2_per_objfile, dwp_file.get (),
+					 1);
 
   /* The DWP file version is stored in the hash table.  Oh well.  */
   if (dwp_file->cus && dwp_file->tus
@@ -13173,8 +13180,9 @@ open_and_init_dwp_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
     dwp_file->version = 2;
 
   if (dwp_file->version == 2)
-    bfd_map_over_sections (dwp_file->dbfd, dwarf2_locate_v2_dwp_sections,
-			   dwp_file);
+    bfd_map_over_sections (dwp_file->dbfd.get (),
+			   dwarf2_locate_v2_dwp_sections,
+			   dwp_file.get ());
 
   dwp_file->loaded_cus = allocate_dwp_loaded_cutus_table (objfile);
   dwp_file->loaded_tus = allocate_dwp_loaded_cutus_table (objfile);
@@ -13202,7 +13210,7 @@ get_dwp_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	= open_and_init_dwp_file (dwarf2_per_objfile);
       dwarf2_per_objfile->dwp_checked = 1;
     }
-  return dwarf2_per_objfile->dwp_file;
+  return dwarf2_per_objfile->dwp_file.get ();
 }
 
 /* Subroutine of lookup_dwo_comp_unit, lookup_dwo_type_unit.

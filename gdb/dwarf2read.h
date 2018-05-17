@@ -194,7 +194,7 @@ public:
   bool dwp_checked = false;
 
   /* The DWP file if there is one, or NULL.  */
-  struct dwp_file *dwp_file = NULL;
+  std::unique_ptr<struct dwp_file> dwp_file;
 
   /* The shared '.dwz' file, if one exists.  This is used when the
      original data was compressed using 'dwz -m'.  */
