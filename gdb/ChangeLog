@@ -1,5 +1,11 @@
 2018-05-23  Tom Tromey  <tom@tromey.com>
 
+	* complaints.c (struct complain) <file, line>: Remove.
+	(find_complaint): Remove file, line parameters.
+	(complaint_internal): Update.
+
+2018-05-23  Tom Tromey  <tom@tromey.com>
+
 	* complaints.c (vcomplaint): Remove.
 	(complaint_internal) Merge in contents of vcomplaint.
 

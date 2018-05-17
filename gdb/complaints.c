@@ -38,8 +38,6 @@ enum complaint_series {
 
 struct complain
 {
-  const char *file;
-  int line;
   const char *fmt;
   int counter;
   struct complain *next;
@@ -59,9 +57,8 @@ static struct complaints symfile_complaint_book = {
   ISOLATED_MESSAGE
 };
 
-static struct complain * ATTRIBUTE_PRINTF (4, 0)
-find_complaint (struct complaints *complaints, const char *file,
-		int line, const char *fmt)
+static struct complain * ATTRIBUTE_PRINTF (2, 0)
+find_complaint (struct complaints *complaints, const char *fmt)
 {
   struct complain *complaint;
 
@@ -73,17 +70,13 @@ find_complaint (struct complaints *complaints, const char *file,
        complaint != NULL;
        complaint = complaint->next)
     {
-      if (complaint->fmt == fmt
-	  && complaint->file == file
-	  && complaint->line == line)
+      if (complaint->fmt == fmt)
 	return complaint;
     }
 
   /* Oops not seen before, fill in a new complaint.  */
   complaint = XNEW (struct complain);
   complaint->fmt = fmt;
-  complaint->file = file;
-  complaint->line = line;
   complaint->counter = 0;
   complaint->next = NULL;
 
@@ -107,8 +100,7 @@ complaint_internal (const char *fmt, ...)
 {
   va_list args;
 
-  struct complain *complaint = find_complaint (&symfile_complaint_book, NULL,
-					       0, fmt);
+  struct complain *complaint = find_complaint (&symfile_complaint_book, fmt);
   enum complaint_series series;
 
   complaint->counter++;
@@ -125,9 +117,7 @@ complaint_internal (const char *fmt, ...)
      string somewhere up the call chain.  */
   gdb_assert (complaint->fmt == fmt);
 
-  if (complaint->file != NULL)
-    internal_vwarning (complaint->file, complaint->line, fmt, args);
-  else if (deprecated_warning_hook)
+  if (deprecated_warning_hook)
     (*deprecated_warning_hook) (fmt, args);
   else
     {
