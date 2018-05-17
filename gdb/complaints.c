@@ -21,6 +21,7 @@
 #include "complaints.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include <unordered_map>
 
 /* Should each complaint message be self explanatory, or should we
    assume that a series of complaints is being produced?  */
@@ -34,58 +35,18 @@ enum complaint_series {
   SHORT_FIRST_MESSAGE,
 };
 
-/* Structure to manage complaints about symbol file contents.  */
+/* Map format strings to counters.  */
 
-struct complain
-{
-  const char *fmt;
-  int counter;
-  struct complain *next;
-};
+static std::unordered_map<const char *, int> counters;
 
 struct complaints
 {
-  struct complain *root;
-
   enum complaint_series series;
 };
 
-static struct complain complaint_sentinel;
-
 static struct complaints symfile_complaint_book = {
-  &complaint_sentinel,
   ISOLATED_MESSAGE
 };
-
-static struct complain * ATTRIBUTE_PRINTF (2, 0)
-find_complaint (struct complaints *complaints, const char *fmt)
-{
-  struct complain *complaint;
-
-  /* Find the complaint in the table.  A more efficient search
-     algorithm (based on hash table or something) could be used.  But
-     that can wait until someone shows evidence that this lookup is
-     a real bottle neck.  */
-  for (complaint = complaints->root;
-       complaint != NULL;
-       complaint = complaint->next)
-    {
-      if (complaint->fmt == fmt)
-	return complaint;
-    }
-
-  /* Oops not seen before, fill in a new complaint.  */
-  complaint = XNEW (struct complain);
-  complaint->fmt = fmt;
-  complaint->counter = 0;
-  complaint->next = NULL;
-
-  /* File it, return it.  */
-  complaint->next = complaints->root;
-  complaints->root = complaint;
-  return complaint;
-}
-
 
 /* How many complaints about a particular thing should be printed
    before we stop whining about it?  Default is no whining at all,
@@ -99,23 +60,13 @@ void
 complaint_internal (const char *fmt, ...)
 {
   va_list args;
-
-  struct complain *complaint = find_complaint (&symfile_complaint_book, fmt);
   enum complaint_series series;
 
-  complaint->counter++;
-  if (complaint->counter > stop_whining)
+  if (counters[fmt]++ > stop_whining)
     return;
 
   va_start (args, fmt);
   series = symfile_complaint_book.series;
-
-  /* Pass 'fmt' instead of 'complaint->fmt' to printf-like callees
-     from here on, to avoid "format string is not a string literal"
-     warnings.  'fmt' is this function's printf-format parameter, so
-     the compiler can assume the passed in argument is a literal
-     string somewhere up the call chain.  */
-  gdb_assert (complaint->fmt == fmt);
 
   if (deprecated_warning_hook)
     (*deprecated_warning_hook) (fmt, args);
@@ -150,10 +101,7 @@ clear_complaints (int less_verbose)
 {
   struct complain *p;
 
-  for (p = symfile_complaint_book.root; p != NULL; p = p->next)
-    {
-      p->counter = 0;
-    }
+  counters.clear ();
 
   if (!less_verbose)
     symfile_complaint_book.series = ISOLATED_MESSAGE;

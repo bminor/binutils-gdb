@@ -57,25 +57,17 @@ proc test_initial_complaints { } {
     # Unsupress complaints
     gdb_test "set stop_whining = 2"
 
+    gdb_test_no_output "set var \$cstr = \"Register a complaint\""
+
     # Prime the system
     gdb_test_stdio \
-	"call complaint_internal (\"Register a complaint\")" \
+	"call complaint_internal (\$cstr)" \
 	"During symbol reading, Register a complaint."
-
-    # Check that the complaint was inserted and where
-    gdb_test "print symfile_complaint_book.root->fmt" \
-	    ".\[0-9\]+ =.*\"Register a complaint\""
 
     # Re-issue the first message #1
     gdb_test_stdio \
-	"call complaint_internal (symfile_complaint_book.root->fmt)" \
+	"call complaint_internal (\$cstr)" \
 	"During symbol reading, Register a complaint."
-
-    # Check that there is only one thing in the list.  How the boolean
-    # result is output depends on whether GDB is built as a C or C++
-    # program.
-    gdb_test "print symfile_complaint_book.root->next == &complaint_sentinel" \
-	    ".\[0-9\]+ = \(1|true\)" "list has one entry"
 
     # Add a second complaint, expect it
     gdb_test_stdio \
