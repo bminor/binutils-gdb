@@ -22,16 +22,21 @@
 
 struct frame_info;
 struct frame_unwind;
+struct bpstats;
 
 /* The inline frame unwinder.  */
 
 extern const struct frame_unwind inline_frame_unwind;
 
 /* Skip all inlined functions whose call sites are at the current PC.
-   Frames for the hidden functions will not appear in the backtrace until the
-   user steps into them.  */
 
-void skip_inline_frames (ptid_t ptid);
+   If non-NULL, STOP_CHAIN is used to determine whether a stop was caused by
+   a user breakpoint.  In that case, do not skip that inlined frame.  This
+   allows the inlined frame to be treated as if it were non-inlined from the
+   user's perspective.  GDB will stop "in" the inlined frame instead of
+   the caller.  */
+
+void skip_inline_frames (ptid_t ptid, struct bpstats *stop_chain);
 
 /* Forget about any hidden inlined functions in PTID, which is new or
    about to be resumed.  If PTID is minus_one_ptid, forget about all

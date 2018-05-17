@@ -1,3 +1,18 @@
+2018-05-17  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.ada/bp_inlined_func.exp: Update inlined frame locations
+	in expected breakpoint stop locations.
+	* gdb.dwarf2/implptr.exp (implptr_test_baz): Use up/down to
+	move to proper scope to test variable values.
+	* gdb.opt/inline-break.c (inline_func1, not_inline_func1)
+	(inline_func2, not_inline_func2, inline_func3, not_inline_func3):
+	New functions.
+	(main): Call not_inline_func3.
+	* gdb.opt/inline-break.exp: Start inferior and set breakpoints at
+	inline_func1, inline_func2, and inline_func3.  Test that when each
+	breakpoint is hit, GDB properly reports both the stop location
+	and the backtrace. Repeat tests for temporary breakpoints.
+
 2018-05-15  Maciej W. Rozycki  <macro@mips.com>
 
 	* gdb.server/server-kill.exp: Verify whether `server_pid' exists

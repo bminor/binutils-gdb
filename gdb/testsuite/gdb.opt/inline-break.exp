@@ -185,4 +185,50 @@ for {set i 1} {$i <= [array size results]} {incr i} {
     gdb_test "info break $i" $results($i)
 }
 
+# Test "permanent" and "temporary" breakpoints.
+foreach_with_prefix cmd [list "break" "tbreak"] {
+
+    # Start with a clean state.
+    delete_breakpoints
+    if {![runto main]} {
+	untested "could not run to main"
+	return -1
+    }
+
+    # Assemble flags to pass to gdb_breakpoint.  Lame but this is just
+    # a test suite!
+    set break_flags "message"
+    if {[string match $cmd "tbreak"]} {
+	lappend break_flags "temporary"
+    }
+
+    # Insert breakpoints for all inline_func? and not_inline_func? and check
+    # that we actually stop where we think we should.
+    for {set i 1} {$i < 4} {incr i} {
+	foreach inline {"not_inline" "inline"} {
+	    eval gdb_breakpoint "${inline}_func$i" $break_flags
+	}
+    }
+
+    set ws {[\r\n\t ]+}
+    set backtrace [list "(in|at)? main"]
+    for {set i 3} {$i > 0} {incr i -1} {
+
+	foreach inline {"not_inline" "inline"} {
+
+	    # Check that we stop at the correct location and print out
+	    # the (possibly) inlined frames.
+	    set num [gdb_get_line_number "/* ${inline}_func$i  */"]
+	    set pattern ".*$srcfile:$num${ws}.*$num${ws}int y = $decimal;"
+	    append pattern "${ws}/\\\* ${inline}_func$i  \\\*/"
+	    send_log "Expecting $pattern\n"
+	    gdb_continue_to_breakpoint "${inline}_func$i" $pattern
+
+	    # Also check for the correct backtrace.
+	    set backtrace [linsert $backtrace 0 "(in|at)?${ws}${inline}_func$i"]
+	    gdb_test_sequence "bt" "bt stopped in ${inline}_func$i" $backtrace
+	}
+    }
+}
+
 unset -nocomplain results

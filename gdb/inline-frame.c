@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "breakpoint.h"
 #include "inline-frame.h"
 #include "addrmap.h"
 #include "block.h"
@@ -284,12 +285,36 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
   return 1;
 }
 
-/* Skip all inlined functions whose call sites are at the current PC.
-   Frames for the hidden functions will not appear in the backtrace until the
-   user steps into them.  */
+/* Loop over the stop chain and determine if execution stopped in an
+   inlined frame because of a user breakpoint.  THIS_PC is the current
+   frame's PC.  */
+
+static bool
+stopped_by_user_bp_inline_frame (CORE_ADDR this_pc, bpstat stop_chain)
+{
+  for (bpstat s = stop_chain; s != NULL; s = s->next)
+    {
+      struct breakpoint *bpt = s->breakpoint_at;
+
+      if (bpt != NULL && user_breakpoint_p (bpt))
+	{
+	  bp_location *loc = s->bp_location_at;
+	  enum bp_loc_type t = loc->loc_type;
+
+	  if (loc->address == this_pc
+	      && (t == bp_loc_software_breakpoint
+		  || t == bp_loc_hardware_breakpoint))
+	    return true;
+	}
+    }
+
+  return false;
+}
+
+/* See inline-frame.h.  */
 
 void
-skip_inline_frames (ptid_t ptid)
+skip_inline_frames (ptid_t ptid, bpstat stop_chain)
 {
   const struct block *frame_block, *cur_block;
   struct symbol *last_sym = NULL;
@@ -313,8 +338,14 @@ skip_inline_frames (ptid_t ptid)
 	      if (BLOCK_START (cur_block) == this_pc
 		  || block_starting_point_at (this_pc, cur_block))
 		{
-		  skip_count++;
-		  last_sym = BLOCK_FUNCTION (cur_block);
+		  /* Do not skip the inlined frame if execution
+		     stopped in an inlined frame because of a user
+		     breakpoint.  */
+		  if (!stopped_by_user_bp_inline_frame (this_pc, stop_chain))
+		    {
+		      skip_count++;
+		      last_sym = BLOCK_FUNCTION (cur_block);
+		    }
 		}
 	      else
 		break;

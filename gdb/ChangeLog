@@ -1,3 +1,23 @@
+2018-05-17  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (build_bpstat_chain): New function, moved from
+	bpstat_stop_status.
+	(bpstat_stop_status): Add optional parameter, `stop_chain'.
+	If no stop chain is passed, call build_bpstat_chain to build it.
+	* breakpoint.h (build_bpstat_chain): Declare.
+	(bpstat_stop_status): Move documentation here from breakpoint.c.
+	* infrun.c (handle_signal_stop): Before eliding inlined frames,
+	build the stop chain and pass it to skip_inline_frames.
+	Pass this stop chain to bpstat_stop_status.
+	* inline-frame.c: Include breakpoint.h.
+	(stopped_by_user_bp_inline_frame): New function.
+	(skip_inline_frames): Add parameter `stop_chain'.
+	Move documention to inline-frame.h.
+	If non-NULL, use stopped_by_user_bp_inline_frame to determine
+	whether the frame should be elided.
+	* inline-frame.h (skip_inline_frames): Add parameter `stop_chain'.
+	Add moved documentation and update for new parameter.
+
 2018-05-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR cli/14975

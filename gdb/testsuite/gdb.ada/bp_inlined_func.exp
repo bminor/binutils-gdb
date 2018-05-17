@@ -38,21 +38,13 @@ gdb_test "break read_small" \
 # We do not verify each breakpoint info, but use continue commands instead
 # to verify that we properly stop on each expected breakpoint.
 
-gdb_test "continue" \
-         "Breakpoint $decimal, b\\.doit \\(\\).*" \
-         "Hitting first call of read_small"
-
-gdb_test "continue" \
-         "Breakpoint $decimal, foo \\(\\).*" \
-         "Hitting second call of read_small"
-
-gdb_test "continue" \
-         "Breakpoint $decimal, c\\.c_doit \\(\\).*" \
-         "Hitting third call of read_small"
-
-gdb_test "continue" \
-         "Breakpoint $decimal, c\\.c_doit2 \\(\\).*" \
-         "Hitting fourth call of read_small"
+for {set i 0} {$i < 4} {incr i} {
+    with_test_prefix "iteration $i" {
+	gdb_test "continue" \
+	    "Breakpoint $decimal, b\\.read_small \\(\\).*" \
+	    "stopped in read_small"
+    }
+}
 
 gdb_test "continue" \
          "Continuing\..*$inferior_exited_re.*" \

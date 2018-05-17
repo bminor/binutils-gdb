@@ -128,6 +128,54 @@ func8a (int x)
   return func8b (x * 31);
 }
 
+static inline ATTR int
+inline_func1 (int x)
+{
+  int y = 1;			/* inline_func1  */
+
+  return y + x;
+}
+
+static int
+not_inline_func1 (int x)
+{
+  int y = 2;			/* not_inline_func1  */
+
+  return y + inline_func1 (x);
+}
+
+inline ATTR int
+inline_func2 (int x)
+{
+  int y = 3;			/* inline_func2  */
+
+  return y + not_inline_func1 (x);
+}
+
+int
+not_inline_func2 (int x)
+{
+  int y = 4;			/* not_inline_func2  */
+
+  return y + inline_func2 (x);
+}
+
+static inline ATTR int
+inline_func3 (int x)
+{
+  int y = 5;			/* inline_func3  */
+
+  return y + not_inline_func2 (x);
+}
+
+static int
+not_inline_func3 (int x)
+{
+  int y = 6;			/* not_inline_func3  */
+
+  return y + inline_func3 (x);
+}
+
 /* Entry point.  */
 
 int
@@ -154,6 +202,8 @@ main (int argc, char *argv[])
   x = func7a (x) + func7b (x);
 
   x = func8a (x) + func8b (x);
+
+  x = not_inline_func3 (-21);
 
   return x;
 }

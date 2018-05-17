@@ -920,9 +920,37 @@ extern void bpstat_clear (bpstat *);
    is part of the bpstat is copied as well.  */
 extern bpstat bpstat_copy (bpstat);
 
+/* Build the (raw) bpstat chain for the stop information given by ASPACE,
+   BP_ADDR, and WS.  Returns the head of the bpstat chain.  */
+
+extern bpstat build_bpstat_chain (const address_space *aspace,
+				  CORE_ADDR bp_addr,
+				  const struct target_waitstatus *ws);
+
+/* Get a bpstat associated with having just stopped at address
+   BP_ADDR in thread PTID.  STOP_CHAIN may be supplied as a previously
+   computed stop chain or NULL, in which case the stop chain will be
+   computed using build_bpstat_chain.
+
+   Determine whether we stopped at a breakpoint, etc, or whether we
+   don't understand this stop.  Result is a chain of bpstat's such
+   that:
+
+   if we don't understand the stop, the result is a null pointer.
+
+   if we understand why we stopped, the result is not null.
+
+   Each element of the chain refers to a particular breakpoint or
+   watchpoint at which we have stopped.  (We may have stopped for
+   several reasons concurrently.)
+
+   Each element of the chain has valid next, breakpoint_at,
+   commands, FIXME??? fields.  */
+
 extern bpstat bpstat_stop_status (const address_space *aspace,
 				  CORE_ADDR pc, ptid_t ptid,
-				  const struct target_waitstatus *ws);
+				  const struct target_waitstatus *ws,
+				  bpstat stop_chain = NULL);
 
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
    breakpoint (a challenging task).
