@@ -1,3 +1,9 @@
+2018-05-18  Alan Modra  <amodra@gmail.com>
+
+	* nfp-dis.c: Don't #include libbfd.h.
+	(init_nfp3200_priv): Use bfd_get_section_contents.
+	(nit_nfp6000_mecsr_sec): Likewise.
+
 2018-05-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/zh_CN.po: Updated simplified Chinese translation.

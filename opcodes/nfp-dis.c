@@ -34,7 +34,6 @@
 #include "elf-bfd.h"
 #include "bfd.h"
 #include "bfd_stdint.h"
-#include "libbfd.h"
 
 #define _NFP_ERR_STOP -1
 #define _NFP_ERR_CONT -8
@@ -2573,9 +2572,8 @@ init_nfp3200_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
 
       mecfg = &priv->mecfgs[isl][menum][1];
 
-      if (!_bfd_generic_get_section_contents (dinfo->section->owner,
-					      sec->bfd_section, buffer,
-					      roff, sizeof (buffer)))
+      if (!bfd_get_section_contents (dinfo->section->owner, sec->bfd_section,
+				     buffer, roff, sizeof (buffer)))
 	return FALSE;
 
       mecfg_ent.ctx_enables = bfd_getl32 (buffer + offsetof (Elf_Nfp_MeConfig,
@@ -2622,9 +2620,8 @@ init_nfp6000_mecsr_sec (nfp_priv_data * priv, Elf_Internal_Shdr * sec,
       uint32_t csr_off;
       nfp_priv_mecfg *mecfg;
 
-      if (!_bfd_generic_get_section_contents (dinfo->section->owner,
-					      sec->bfd_section, buffer,
-					      ireg_off, sizeof (buffer)))
+      if (!bfd_get_section_contents (dinfo->section->owner, sec->bfd_section,
+				     buffer, ireg_off, sizeof (buffer)))
 	return FALSE;
 
       ireg.cpp_offset_lo = bfd_getl32 (buffer
