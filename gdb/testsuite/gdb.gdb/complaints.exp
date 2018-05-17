@@ -85,13 +85,13 @@ proc test_short_complaints { } {
     # Prime the system
     test_complaint \
 	"call complaint_internal (\"short line 1\")" \
-	"short line 1..." \
+	"short line 1" \
 	"short line 1"
 
     # Add a second complaint, expect it
     test_complaint \
 	"call complaint_internal (\"short line 2\")" \
-	"short line 2..." \
+	"short line 2" \
 	"short line 2"
 
     return 0

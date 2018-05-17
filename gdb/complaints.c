@@ -72,7 +72,7 @@ complaint_internal (const char *fmt, ...)
 	fprintf_filtered (gdb_stderr, "During symbol reading, %s.\n",
 			  msg.c_str ());
       else
-	fprintf_filtered (gdb_stderr, "%s...", msg.c_str ());
+	fprintf_filtered (gdb_stderr, "%s\n", msg.c_str ());
     }
 
   /* If GDB dumps core, we'd like to see the complaints first.

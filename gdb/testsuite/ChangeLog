@@ -1,5 +1,12 @@
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
+	PR cli/22234:
+	* gdb.dwarf2/dw2-stack-boundary.exp: Update expected output.
+	* gdb.gdb/complaints.exp (test_short_complaints): Update expected
+	output.
+
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/attach.exp (test_command_line_attach_run): Use -quiet;
 	set width and height to 0.
 	(test_command_line_attach_run): Use -quiet.
