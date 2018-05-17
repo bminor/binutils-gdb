@@ -1614,8 +1614,6 @@ value_free_to_mark (const struct value *mark)
 value_ref_ptr
 release_value (struct value *val)
 {
-  struct value *v;
-
   if (val == nullptr)
     return value_ref_ptr ();
 
@@ -1789,8 +1787,6 @@ set_value_component_location (struct value *component,
 int
 record_latest_value (struct value *val)
 {
-  int i;
-
   /* We don't want this value to have anything to do with the inferior anymore.
      In particular, "set $1 = 50" should not affect the variable from which
      the value was taken, and fast watchpoints should be able to assume that
@@ -1812,7 +1808,6 @@ record_latest_value (struct value *val)
 struct value *
 access_value_history (int num)
 {
-  int i;
   int absnum = num;
 
   if (absnum <= 0)
@@ -2507,7 +2502,6 @@ preserve_values (struct objfile *objfile)
 {
   htab_t copied_types;
   struct internalvar *var;
-  int i;
 
   /* Create the hash table.  We allocate on the objfile's obstack, since
      it is soon to be deleted.  */

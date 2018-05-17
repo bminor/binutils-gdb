@@ -1,3 +1,10 @@
+2018-05-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* value.c (release_value): Remove unused variable.
+	(record_latest_value): Likewise.
+	(access_value_history): Likewise.
+	(preserve_values): Likewise.
+
 2018-05-17  Tom Tromey  <tom@tromey.com>
 
 	* extension.h (struct ext_lang_type_printers) <py_type_printers>:
