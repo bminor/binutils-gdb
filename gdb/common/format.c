@@ -56,6 +56,9 @@ format_pieces::format_pieces (const char **arg)
 	    case 'b':
 	      *f++ = '\b';
 	      break;
+	    case 'e':
+	      *f++ = '\e';
+	      break;
 	    case 'f':
 	      *f++ = '\f';
 	      break;

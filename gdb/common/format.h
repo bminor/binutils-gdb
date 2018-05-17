@@ -20,6 +20,8 @@
 #ifndef COMMON_FORMAT_H
 #define COMMON_FORMAT_H
 
+#include "common/gdb_string_view.h"
+
 #if defined(__MINGW32__) && !defined(PRINTF_HAS_LONG_LONG)
 # define USE_PRINTF_I64 1
 # define PRINTF_HAS_LONG_LONG
@@ -54,6 +56,12 @@ struct format_piece
   {
   }
 
+  bool operator== (const format_piece &other) const
+  {
+    return (this->argclass == other.argclass
+	    && gdb::string_view (this->string) == other.string);
+  }
+
   const char *string;
   enum argclass argclass;
 };
@@ -66,11 +74,6 @@ public:
   ~format_pieces () = default;
 
   DISABLE_COPY_AND_ASSIGN (format_pieces);
-
-  format_piece &operator[] (size_t index)
-  {
-    return m_pieces[index];
-  }
 
   typedef std::vector<format_piece>::iterator iterator;
 

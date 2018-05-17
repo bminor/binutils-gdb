@@ -418,6 +418,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/array-view-selftests.c \
 	unittests/common-utils-selftests.c \
 	unittests/environ-selftests.c \
+	unittests/format_pieces-selftests.c \
 	unittests/function-view-selftests.c \
 	unittests/lookup_name_info-selftests.c \
 	unittests/memory-map-selftests.c \

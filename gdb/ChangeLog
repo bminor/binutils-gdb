@@ -1,3 +1,13 @@
+2018-05-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR cli/14975
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/format_pieces-selftests.c.
+	* common/format.h (format_piece) <operator==>: New.
+	(format_pieces) <operator[]>: Remove.
+	* common/format.c (format_pieces::format_pieces): Handle \e.
+	* unittests/format_pieces-selftests.c: New.
+
 2018-05-17  Tom Tromey  <tom@tromey.com>
 
 	PR symtab/23010:
