@@ -27,6 +27,9 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#ifndef _LIBBFD_H
+#define _LIBBFD_H 1
+
 #include "hashtab.h"
 
 #ifdef __cplusplus
@@ -3230,4 +3233,5 @@ bfd_boolean _bfd_generic_verify_endian_match
 
 #ifdef __cplusplus
 }
+#endif
 #endif

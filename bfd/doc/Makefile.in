@@ -1013,6 +1013,7 @@ libbfd.h: $(LIBBFD_H_DEP)
 	echo "#ifdef __cplusplus" >> $@
 	echo "}" >> $@
 	echo "#endif" >> $@
+	echo "#endif" >> $@
 
 libcoff.h: $(LIBCOFF_H_DEP)
 	echo "$(LIBCOFF_H_DEP)" | sed -f $(srcdir)/header.sed > $@
@@ -1027,6 +1028,7 @@ libcoff.h: $(LIBCOFF_H_DEP)
 	done
 	echo "#ifdef __cplusplus" >> $@
 	echo "}" >> $@
+	echo "#endif" >> $@
 	echo "#endif" >> $@
 
 bfd.h: $(BFD_H_DEP)

@@ -277,6 +277,7 @@ libbfd.h: $(LIBBFD_H_DEP)
 	echo "#ifdef __cplusplus" >> $@
 	echo "}" >> $@
 	echo "#endif" >> $@
+	echo "#endif" >> $@
 
 LIBCOFF_H_DEP = \
 	$(srcdir)/../libcoff-in.h	\
@@ -298,6 +299,7 @@ libcoff.h: $(LIBCOFF_H_DEP)
 	done
 	echo "#ifdef __cplusplus" >> $@
 	echo "}" >> $@
+	echo "#endif" >> $@
 	echo "#endif" >> $@
 
 BFD_H_DEP = \

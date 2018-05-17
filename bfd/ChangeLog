@@ -1,3 +1,12 @@
+2018-05-18  Alan Modra  <amodra@gmail.com>
+
+	* libbfd-in.h: Add include guard.
+	* libcoff-in.h: Likewise.
+	* doc/Makefile.am (libbfd.h, libcoff.h): Append another #endif.
+	* doc/Makefile.in: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
 2018-05-16  Maciej W. Rozycki  <macro@mips.com>
 
 	* elf32-nds32.c (nds32_convert_32_to_16): Preset `insn_type'.
