@@ -1111,7 +1111,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
 	deprecated_pre_add_symbol_hook (name);
       else
 	{
-	  printf_unfiltered (_("Reading symbols from %s..."), name);
+	  printf_filtered (_("Reading symbols from %s..."), name);
 	  wrap_here ("");
 	  gdb_flush (gdb_stdout);
 	}
@@ -1127,7 +1127,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
     {
       if (should_print)
 	{
-	  printf_unfiltered (_("expanding to full symbols..."));
+	  printf_filtered (_("expanding to full symbols..."));
 	  wrap_here ("");
 	  gdb_flush (gdb_stdout);
 	}
@@ -1139,7 +1139,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
   if (should_print && !objfile_has_symbols (objfile))
     {
       wrap_here ("");
-      printf_unfiltered (_("(no debugging symbols found)..."));
+      printf_filtered (_("(no debugging symbols found)..."));
       wrap_here ("");
     }
 
@@ -1148,7 +1148,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
       if (deprecated_post_add_symbol_hook)
 	deprecated_post_add_symbol_hook ();
       else
-	printf_unfiltered (_("done.\n"));
+	printf_filtered (_("done.\n"));
     }
 
   /* We print some messages regardless of whether 'from_tty ||
@@ -1268,7 +1268,7 @@ symbol_file_clear (int from_tty)
 
   gdb_assert (symfile_objfile == NULL);
   if (from_tty)
-    printf_unfiltered (_("No symbol file now.\n"));
+    printf_filtered (_("No symbol file now.\n"));
 }
 
 /* See symfile.h.  */
@@ -1294,7 +1294,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
     return 0;
 
   if (separate_debug_file_debug)
-    printf_unfiltered (_("  Trying %s\n"), name.c_str ());
+    printf_filtered (_("  Trying %s\n"), name.c_str ());
 
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (name.c_str (), gnutarget, -1));
 
@@ -1384,8 +1384,8 @@ find_separate_debug_file (const char *dir,
 			  unsigned long crc32, struct objfile *objfile)
 {
   if (separate_debug_file_debug)
-    printf_unfiltered (_("\nLooking for separate debug info (debug link) for "
-		         "%s\n"), objfile_name (objfile));
+    printf_filtered (_("\nLooking for separate debug info (debug link) for "
+		       "%s\n"), objfile_name (objfile));
 
   /* First try in the same directory as the original file.  */
   std::string debugfile = dir;
@@ -2259,8 +2259,8 @@ add_symbol_file_command (const char *args, int from_tty)
          index is not used for any other purpose.
       */
       section_addrs.emplace_back (addr, sec, section_addrs.size ());
-      printf_unfiltered ("\t%s_addr = %s\n", sec,
-			 paddress (gdbarch, addr));
+      printf_filtered ("\t%s_addr = %s\n", sec,
+		       paddress (gdbarch, addr));
 
       /* The object's sections are initialized when a
 	 call is made to build_objfile_section_table (objfile).
@@ -2398,8 +2398,8 @@ reread_symbols (void)
       if (res != 0)
 	{
 	  /* FIXME, should use print_sys_errmsg but it's not filtered.  */
-	  printf_unfiltered (_("`%s' has disappeared; keeping its symbols.\n"),
-			     objfile_name (objfile));
+	  printf_filtered (_("`%s' has disappeared; keeping its symbols.\n"),
+			   objfile_name (objfile));
 	  continue;
 	}
       new_modtime = new_statbuf.st_mtime;
@@ -2409,8 +2409,8 @@ reread_symbols (void)
 	  struct section_offsets *offsets;
 	  int num_offsets;
 
-	  printf_unfiltered (_("`%s' has changed; re-reading symbols.\n"),
-			     objfile_name (objfile));
+	  printf_filtered (_("`%s' has changed; re-reading symbols.\n"),
+			   objfile_name (objfile));
 
 	  /* There are various functions like symbol_file_add,
 	     symfile_bfd_open, syms_from_objfile, etc., which might
@@ -2574,7 +2574,7 @@ reread_symbols (void)
 	  if (!objfile_has_symbols (objfile))
 	    {
 	      wrap_here ("");
-	      printf_unfiltered (_("(no debugging symbols found)\n"));
+	      printf_filtered (_("(no debugging symbols found)\n"));
 	      wrap_here ("");
 	    }
 
@@ -2762,13 +2762,13 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename)
 	{
 	  xfree (last_objfile_name);
 	  last_objfile_name = xstrdup (objfile_name (objfile));
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Creating one or more symtabs for objfile %s ...\n",
-			      last_objfile_name);
+	  fprintf_filtered (gdb_stdlog,
+			    "Creating one or more symtabs for objfile %s ...\n",
+			    last_objfile_name);
 	}
-      fprintf_unfiltered (gdb_stdlog,
-			  "Created symtab %s for module %s.\n",
-			  host_address_to_string (symtab), filename);
+      fprintf_filtered (gdb_stdlog,
+			"Created symtab %s for module %s.\n",
+			host_address_to_string (symtab), filename);
     }
 
   /* Add it to CUST's list of symtabs.  */
@@ -2814,10 +2814,10 @@ allocate_compunit_symtab (struct objfile *objfile, const char *name)
 
   if (symtab_create_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Created compunit symtab %s for %s.\n",
-			  host_address_to_string (cu),
-			  cu->name);
+      fprintf_filtered (gdb_stdlog,
+			"Created compunit symtab %s for %s.\n",
+			host_address_to_string (cu),
+			cu->name);
     }
 
   return cu;

@@ -79,8 +79,8 @@ require_partial_symbols (struct objfile *objfile, int verbose)
 	{
 	  if (verbose)
 	    {
-	      printf_unfiltered (_("Reading symbols from %s..."),
-				 objfile_name (objfile));
+	      printf_filtered (_("Reading symbols from %s..."),
+			       objfile_name (objfile));
 	      gdb_flush (gdb_stdout);
 	    }
 	  (*objfile->sf->sym_read_psymbols) (objfile);
@@ -95,11 +95,11 @@ require_partial_symbols (struct objfile *objfile, int verbose)
 	      if (!objfile_has_symbols (objfile))
 		{
 		  wrap_here ("");
-		  printf_unfiltered (_("(no debugging symbols found)..."));
+		  printf_filtered (_("(no debugging symbols found)..."));
 		  wrap_here ("");
 		}
 
-	      printf_unfiltered (_("done.\n"));
+	      printf_filtered (_("done.\n"));
 	    }
 	}
     }
@@ -931,10 +931,10 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
   fprintf_filtered (outfile, "(object ");
   gdb_print_host_address (psymtab, outfile);
   fprintf_filtered (outfile, ")\n\n");
-  fprintf_unfiltered (outfile, "  Read from object file %s (",
-		      objfile_name (objfile));
+  fprintf_filtered (outfile, "  Read from object file %s (",
+		    objfile_name (objfile));
   gdb_print_host_address (objfile, outfile);
-  fprintf_unfiltered (outfile, ")\n");
+  fprintf_filtered (outfile, ")\n");
 
   if (psymtab->readin)
     {
@@ -1766,13 +1766,13 @@ allocate_psymtab (const char *filename, struct objfile *objfile)
 	{
 	  xfree (last_objfile_name);
 	  last_objfile_name = xstrdup (objfile_name (objfile));
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Creating one or more psymtabs for objfile %s ...\n",
-			      last_objfile_name);
+	  fprintf_filtered (gdb_stdlog,
+			    "Creating one or more psymtabs for objfile %s ...\n",
+			    last_objfile_name);
 	}
-      fprintf_unfiltered (gdb_stdlog,
-			  "Created psymtab %s for module %s.\n",
-			  host_address_to_string (psymtab), filename);
+      fprintf_filtered (gdb_stdlog,
+			"Created psymtab %s for module %s.\n",
+			host_address_to_string (psymtab), filename);
     }
 
   return psymtab;
