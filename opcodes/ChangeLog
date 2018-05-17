@@ -1,3 +1,7 @@
+2018-05-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated simplified Chinese translation.
+
 2018-05-16  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/23109
