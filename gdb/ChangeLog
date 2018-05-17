@@ -1,5 +1,13 @@
 2018-05-23  Tom Tromey  <tom@tromey.com>
 
+	* complaints.c (struct complaints): Remove.
+	(symfile_complaint_book): Remove.
+	(series): New global.
+	(complaint_internal): Update.
+	(clear_complaints): Update.
+
+2018-05-23  Tom Tromey  <tom@tromey.com>
+
 	* complaints.c (counters): New global.
 	(struct complain): Remove.
 	(struct complaints) <root>: Remove.

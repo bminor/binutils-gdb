@@ -39,14 +39,9 @@ enum complaint_series {
 
 static std::unordered_map<const char *, int> counters;
 
-struct complaints
-{
-  enum complaint_series series;
-};
+/* How to print the next complaint.  */
 
-static struct complaints symfile_complaint_book = {
-  ISOLATED_MESSAGE
-};
+static complaint_series series;
 
 /* How many complaints about a particular thing should be printed
    before we stop whining about it?  Default is no whining at all,
@@ -60,13 +55,11 @@ void
 complaint_internal (const char *fmt, ...)
 {
   va_list args;
-  enum complaint_series series;
 
   if (counters[fmt]++ > stop_whining)
     return;
 
   va_start (args, fmt);
-  series = symfile_complaint_book.series;
 
   if (deprecated_warning_hook)
     (*deprecated_warning_hook) (fmt, args);
@@ -104,9 +97,9 @@ clear_complaints (int less_verbose)
   counters.clear ();
 
   if (!less_verbose)
-    symfile_complaint_book.series = ISOLATED_MESSAGE;
+    series = ISOLATED_MESSAGE;
   else
-    symfile_complaint_book.series = SHORT_FIRST_MESSAGE;
+    series = SHORT_FIRST_MESSAGE;
 }
 
 static void
