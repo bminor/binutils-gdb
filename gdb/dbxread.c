@@ -164,21 +164,19 @@ static int has_line_numbers;
 static void
 unknown_symtype_complaint (const char *arg1)
 {
-  complaint (&symfile_complaints, _("unknown symbol type %s"), arg1);
+  complaint (_("unknown symbol type %s"), arg1);
 }
 
 static void
 lbrac_mismatch_complaint (int arg1)
 {
-  complaint (&symfile_complaints,
-	     _("N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d"), arg1);
+  complaint (_("N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d"), arg1);
 }
 
 static void
 repeated_header_complaint (const char *arg1, int arg2)
 {
-  complaint (&symfile_complaints,
-	     _("\"repeated\" header file %s not "
+  complaint (_("\"repeated\" header file %s not "
 	       "previously seen, at symtab pos %d"),
 	     arg1, arg2);
 }
@@ -940,8 +938,7 @@ set_namestring (struct objfile *objfile, const struct internal_nlist *nlist)
       >= DBX_STRINGTAB_SIZE (objfile)
       || nlist->n_strx + file_string_table_offset < nlist->n_strx)
     {
-      complaint (&symfile_complaints,
-		 _("bad string table offset in symbol %d"),
+      complaint (_("bad string table offset in symbol %d"),
 		 symnum);
       namestring = "<bad string table offset>";
     } 
@@ -999,8 +996,7 @@ find_stab_function_addr (const char *namestring, const char *filename,
 static void
 function_outside_compilation_unit_complaint (const char *arg1)
 {
-  complaint (&symfile_complaints,
-	     _("function `%s' appears to be defined "
+  complaint (_("function `%s' appears to be defined "
 	       "outside of all compilation units"),
 	     arg1);
 }
@@ -1389,8 +1385,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	      {
 		/* FIXME: we should not get here without a PST to work on.
 		   Attempt to recover.  */
-		complaint (&symfile_complaints,
-			   _("N_BINCL %s not in entries for "
+		complaint (_("N_BINCL %s not in entries for "
 			     "any file, at symtab pos %d"),
 			   namestring, symnum);
 		continue;
@@ -1839,8 +1834,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		 time searching to the end of every string looking for
 		 a backslash.  */
 
-	      complaint (&symfile_complaints,
-			 _("unknown symbol descriptor `%c'"),
+	      complaint (_("unknown symbol descriptor `%c'"),
 			 p[1]);
 
 	      /* Ignore it; perhaps it is an extension that we don't
@@ -2635,8 +2629,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	     2000 would output N_LSYM entries after N_LBRAC
 	     entries.  As a consequence, these symbols are simply
 	     discarded.  Complain if this is the case.  */
-	  complaint (&symfile_complaints,
-		     _("misplaced N_LBRAC entry; discarding local "
+	  complaint (_("misplaced N_LBRAC entry; discarding local "
 		       "symbols which have no enclosing block"));
 	}
       local_symbols = newobj->locals;
@@ -2656,8 +2649,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		 ??? Which compilers?  Is this ever harmful?.  */
 	      if (newobj->start_addr > valu)
 		{
-		  complaint (&symfile_complaints,
-			     _("block start larger than block end"));
+		  complaint (_("block start larger than block end"));
 		  newobj->start_addr = valu;
 		}
 	      /* Make a block for the local symbols within.  */
@@ -2937,8 +2929,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
 	      if (context_stack_depth > 1)
 		{
-		  complaint (&symfile_complaints,
-			     _("unmatched N_LBRAC before symtab pos %d"),
+		  complaint (_("unmatched N_LBRAC before symtab pos %d"),
 			     symnum);
 		  break;
 		}

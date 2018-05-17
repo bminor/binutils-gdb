@@ -25,25 +25,21 @@
    particular category.  */
 struct complaints;
 
-/* Predefined categories.  */
-extern struct complaints *symfile_complaints;
-
 /* Helper for complaint.  */
-extern void complaint_internal (struct complaints **complaints,
-				const char *fmt, ...)
-  ATTRIBUTE_PRINTF (2, 3);
+extern void complaint_internal (const char *fmt, ...)
+  ATTRIBUTE_PRINTF (1, 2);
 
 /* Register a complaint.  This is a macro around complaint_internal to
    avoid computing complaint's arguments when complaints are disabled.
    Running FMT via gettext [i.e., _(FMT)] can be quite expensive, for
    example.  */
-#define complaint(COMPLAINTS, FMT, ...)				\
+#define complaint(FMT, ...)					\
   do								\
     {								\
       extern int stop_whining;					\
 								\
       if (stop_whining > 0)					\
-	complaint_internal (COMPLAINTS, FMT, ##__VA_ARGS__);	\
+	complaint_internal (FMT, ##__VA_ARGS__);		\
     }								\
   while (0)
 
@@ -55,8 +51,7 @@ extern void complaint_internal (struct complaints **complaints,
    noisy is 1, we are in a noisy command, and our caller will print
    enough context for the user to figure it out.  */
 
-extern void clear_complaints (struct complaints **complaints,
-			      int less_verbose);
+extern void clear_complaints (int less_verbose);
 
 
 #endif /* !defined (COMPLAINTS_H) */

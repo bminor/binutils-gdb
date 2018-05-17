@@ -1284,8 +1284,7 @@ filter_overlapping_sections (struct obj_section **map, int map_size)
 
 	      struct gdbarch *const gdbarch = get_objfile_arch (objf1);
 
-	      complaint (&symfile_complaints,
-			 _("unexpected overlap between:\n"
+	      complaint (_("unexpected overlap between:\n"
 			   " (A) section `%s' from `%s' [%s, %s)\n"
 			   " (B) section `%s' from `%s' [%s, %s).\n"
 			   "Will ignore section B"),

@@ -607,8 +607,7 @@ dtrace_process_dof (asection *sect, struct objfile *objfile,
   return;
 	  
  invalid_dof_data:
-  complaint (&symfile_complaints,
-	     _("skipping section '%s' which does not contain valid DOF data."),
+  complaint (_("skipping section '%s' which does not contain valid DOF data."),
 	     sect->name);
 }
 
@@ -858,8 +857,7 @@ dtrace_static_probe_ops::get_probes (std::vector<probe *> *probesp,
 	  /* Read the contents of the DOF section and then process it to
 	     extract the information of any probe defined into it.  */
 	  if (!bfd_malloc_and_get_section (abfd, sect, &dof))
-	    complaint (&symfile_complaints,
-		       _("could not obtain the contents of"
+	    complaint (_("could not obtain the contents of"
 			 "section '%s' in objfile `%s'."),
 		       sect->name, abfd->filename);
       

@@ -478,8 +478,7 @@ macro_include (struct macro_source_file *source,
 
       link_fullname = macro_source_fullname (*link);
       source_fullname = macro_source_fullname (source);
-      complaint (&symfile_complaints,
-		 _("both `%s' and `%s' allegedly #included at %s:%d"),
+      complaint (_("both `%s' and `%s' allegedly #included at %s:%d"),
 		 included, link_fullname, source_fullname, line);
       xfree (source_fullname);
       xfree (link_fullname);
@@ -730,8 +729,7 @@ check_for_redefinition (struct macro_source_file *source, int line,
 	  
 	  source_fullname = macro_source_fullname (source);
 	  found_key_fullname = macro_source_fullname (found_key->start_file);
-	  complaint (&symfile_complaints,
-		     _("macro `%s' redefined at %s:%d; "
+	  complaint (_("macro `%s' redefined at %s:%d; "
 		       "original definition at %s:%d"),
 		     name, source_fullname, line, found_key_fullname,
 		     found_key->start_line);
@@ -859,8 +857,7 @@ macro_undef (struct macro_source_file *source, int line,
 
 	      source_fullname = macro_source_fullname (source);
 	      key_fullname = macro_source_fullname (key->end_file);
-              complaint (&symfile_complaints,
-                         _("macro '%s' is #undefined twice,"
+              complaint (_("macro '%s' is #undefined twice,"
                            " at %s:%d and %s:%d"),
 			 name, source_fullname, line, key_fullname,
 			 key->end_line);
@@ -880,8 +877,7 @@ macro_undef (struct macro_source_file *source, int line,
          has no macro definition in scope is ignored.  So we should
          ignore it too.  */
 #if 0
-      complaint (&symfile_complaints,
-		 _("no definition for macro `%s' in scope to #undef at %s:%d"),
+      complaint (_("no definition for macro `%s' in scope to #undef at %s:%d"),
 		 name, source->filename, line);
 #endif
     }

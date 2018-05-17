@@ -2892,8 +2892,7 @@ dwarf_reg_to_regnum (struct gdbarch *arch, int dwarf_reg)
 
   if (reg == -1)
     {
-      complaint (&symfile_complaints,
-		 _("bad DWARF register number %d"), dwarf_reg);
+      complaint (_("bad DWARF register number %d"), dwarf_reg);
     }
   return reg;
 }

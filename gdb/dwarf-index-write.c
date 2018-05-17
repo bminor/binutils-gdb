@@ -933,8 +933,7 @@ private:
 	    = m_str_table.emplace (c_str_view (s),
 				   data - dwarf2_per_objfile->str.buffer);
 	  if (!insertpair.second)
-	    complaint (&symfile_complaints,
-		       _("Duplicate string \"%s\" in "
+	    complaint (_("Duplicate string \"%s\" in "
 			 ".debug_str section [in module %s]"),
 		       s, bfd_get_filename (m_abfd));
 	  data += strlen (s) + 1;

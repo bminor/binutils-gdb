@@ -76,8 +76,7 @@ sal_macro_scope (struct symtab_and_line sal)
       ms->file = main_file;
       ms->line = -1;
 
-      complaint (&symfile_complaints,
-                 _("symtab found for `%s', but that file\n"
+      complaint (_("symtab found for `%s', but that file\n"
                  "is not covered in the compilation unit's macro information"),
                  symtab_to_filename_for_display (sal.symtab));
     }

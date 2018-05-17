@@ -182,22 +182,19 @@ static const struct dwarf2_debug_sections dwarf2_xcoff_names = {
 static void
 bf_notfound_complaint (void)
 {
-  complaint (&symfile_complaints,
-	     _("line numbers off, `.bf' symbol not found"));
+  complaint (_("line numbers off, `.bf' symbol not found"));
 }
 
 static void
 ef_complaint (int arg1)
 {
-  complaint (&symfile_complaints,
-	     _("Mismatched .ef symbol ignored starting at symnum %d"), arg1);
+  complaint (_("Mismatched .ef symbol ignored starting at symnum %d"), arg1);
 }
 
 static void
 eb_complaint (int arg1)
 {
-  complaint (&symfile_complaints,
-	     _("Mismatched .eb symbol ignored starting at symnum %d"), arg1);
+  complaint (_("Mismatched .eb symbol ignored starting at symnum %d"), arg1);
 }
 
 static void xcoff_initial_scan (struct objfile *, symfile_add_flags);
@@ -558,7 +555,7 @@ record_include_begin (struct coff_symbol *cs)
       /* This can happen with old versions of GCC.
          GCC 2.3.3-930426 does not exhibit this on a test case which
          a user said produced the message for him.  */
-      complaint (&symfile_complaints, _("Nested C_BINCL symbols"));
+      complaint (_("Nested C_BINCL symbols"));
     }
   ++inclDepth;
 
@@ -575,7 +572,7 @@ record_include_end (struct coff_symbol *cs)
 
   if (inclDepth == 0)
     {
-      complaint (&symfile_complaints, _("Mismatched C_BINCL/C_EINCL pair"));
+      complaint (_("Mismatched C_BINCL/C_EINCL pair"));
     }
 
   allocate_include_entry ();
@@ -856,8 +853,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
     {
       if (endoffset >= limit_offset)
 	{
-	  complaint (&symfile_complaints,
-		     _("Bad line table offset in C_EINCL directive"));
+	  complaint (_("Bad line table offset in C_EINCL directive"));
 	  return;
 	}
       limit_offset = endoffset;
@@ -978,7 +974,7 @@ xcoff_next_symbol_text (struct objfile *objfile)
   bfd_coff_swap_sym_in (objfile->obfd, raw_symbol, &symbol);
   if (symbol.n_zeroes)
     {
-      complaint (&symfile_complaints, _("Unexpected symbol continuation"));
+      complaint (_("Unexpected symbol continuation"));
 
       /* Return something which points to '\0' and hope the symbol reading
          code does something reasonable.  */
@@ -992,7 +988,7 @@ xcoff_next_symbol_text (struct objfile *objfile)
     }
   else
     {
-      complaint (&symfile_complaints, _("Unexpected symbol continuation"));
+      complaint (_("Unexpected symbol continuation"));
 
       /* Return something which points to '\0' and hope the symbol reading
          code does something reasonable.  */
@@ -1446,8 +1442,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	case C_UNTAG:
 	case C_ENTAG:
 	  {
-	    complaint (&symfile_complaints,
-		       _("Unrecognized storage class %d."),
+	    complaint (_("Unrecognized storage class %d."),
 		       cs->c_sclass);
 	  }
 	  break;
@@ -1632,7 +1627,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
 	  break;
 
 	default:
-	  complaint (&symfile_complaints, _("Unexpected storage class: %d"),
+	  complaint (_("Unexpected storage class: %d"),
 		     cs->c_sclass);
 	  /* FALLTHROUGH */
 
@@ -1717,7 +1712,7 @@ read_symbol (struct internal_syment *symbol, int symno)
 
   if (symno < 0 || symno >= nsyms)
     {
-      complaint (&symfile_complaints, _("Invalid symbol offset"));
+      complaint (_("Invalid symbol offset"));
       symbol->n_value = 0;
       symbol->n_scnum = -1;
       return;
@@ -2192,8 +2187,7 @@ swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
 static void
 function_outside_compilation_unit_complaint (const char *arg1)
 {
-  complaint (&symfile_complaints,
-	     _("function `%s' appears to be defined "
+  complaint (_("function `%s' appears to be defined "
 	       "outside of all compilation units"),
 	     arg1);
 }
@@ -2524,8 +2518,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 
 	default:
 	  {
-	    complaint (&symfile_complaints,
-		       _("Storage class %d not recognized during scan"),
+	    complaint (_("Storage class %d not recognized during scan"),
 		       sclass);
 	  }
 	  /* FALLTHROUGH */
@@ -2901,8 +2894,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		   the end of every string looking for a
 		   backslash.  */
 
-		complaint (&symfile_complaints,
-			   _("unknown symbol descriptor `%c'"), p[1]);
+		complaint (_("unknown symbol descriptor `%c'"), p[1]);
 
 		/* Ignore it; perhaps it is an extension that we don't
 		   know about.  */

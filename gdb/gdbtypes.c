@@ -1887,7 +1887,7 @@ get_vptr_fieldno (struct type *type, struct type **basetypep)
 static void
 stub_noname_complaint (void)
 {
-  complaint (&symfile_complaints, _("stub type has NULL name"));
+  complaint (_("stub type has NULL name"));
 }
 
 /* Return nonzero if TYPE has a DYN_PROP_BYTE_STRIDE dynamic property

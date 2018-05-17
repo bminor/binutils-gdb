@@ -1108,8 +1108,7 @@ cp_find_first_component_aux (const char *name, int permissive)
 static void
 demangled_name_complaint (const char *name)
 {
-  complaint (&symfile_complaints,
-	     "unexpected demangled name '%s'", name);
+  complaint ("unexpected demangled name '%s'", name);
 }
 
 /* If NAME is the fully-qualified name of a C++

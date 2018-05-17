@@ -216,7 +216,7 @@ dwarf2_restore_rule (struct gdbarch *gdbarch, ULONGEST reg_num,
     {
       int regnum = dwarf_reg_to_regnum (gdbarch, reg);
 
-      complaint (&symfile_complaints, _("\
+      complaint (_("\
 incomplete CFI data; DW_CFA_restore unspecified\n\
 register %s (#%d) at %s"),
 		 gdbarch_register_name (gdbarch, regnum), regnum,
@@ -449,7 +449,7 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 
 		if (old_rs == NULL)
 		  {
-		    complaint (&symfile_complaints, _("\
+		    complaint (_("\
 bad CFI data; mismatched DW_CFA_restore_state at %s"),
 			       paddress (gdbarch, fs->pc));
 		  }
@@ -1111,7 +1111,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 	if (fs.regs.reg[column].how == DWARF2_FRAME_REG_UNSPECIFIED)
 	  {
 	    if (cache->reg[regnum].how == DWARF2_FRAME_REG_UNSPECIFIED)
-	      complaint (&symfile_complaints, _("\
+	      complaint (_("\
 incomplete CFI data; unspecified registers (e.g., %s) at %s"),
 			 gdbarch_register_name (gdbarch, regnum),
 			 paddress (gdbarch, fs.pc));
@@ -2144,22 +2144,21 @@ decode_frame_entry (struct comp_unit *unit, const gdb_byte *start,
       break;
 
     case ALIGN4:
-      complaint (&symfile_complaints, _("\
+      complaint (_("\
 Corrupt data in %s:%s; align 4 workaround apparently succeeded"),
 		 unit->dwarf_frame_section->owner->filename,
 		 unit->dwarf_frame_section->name);
       break;
 
     case ALIGN8:
-      complaint (&symfile_complaints, _("\
+      complaint (_("\
 Corrupt data in %s:%s; align 8 workaround apparently succeeded"),
 		 unit->dwarf_frame_section->owner->filename,
 		 unit->dwarf_frame_section->name);
       break;
 
     default:
-      complaint (&symfile_complaints,
-		 _("Corrupt data in %s:%s"),
+      complaint (_("Corrupt data in %s:%s"),
 		 unit->dwarf_frame_section->owner->filename,
 		 unit->dwarf_frame_section->name);
       break;

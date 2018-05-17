@@ -876,7 +876,7 @@ handle_unload_dll ()
      4 mysterious UNLOAD_DLL_DEBUG_EVENTs during the startup phase (these
      events are apparently caused by the WOW layer, the interface between
      32bit and 64bit worlds).  */
-  complaint (&symfile_complaints, _("dll starting at %s not found."),
+  complaint (_("dll starting at %s not found."),
 	     host_address_to_string (lpBaseOfDll));
 }
 

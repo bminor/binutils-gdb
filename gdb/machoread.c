@@ -191,8 +191,7 @@ macho_symtab_read (minimal_symbol_reader &reader,
 	      if (sym->name == NULL || sym->name[0] == 0)
                 {
                   /* Unexpected empty N_SO.  */
-                  complaint (&symfile_complaints,
-                             _("Unexpected empty N_SO stab"));
+                  complaint (_("Unexpected empty N_SO stab"));
                 }
               else
                 {
@@ -209,8 +208,7 @@ macho_symtab_read (minimal_symbol_reader &reader,
                 }
 
               /* Debugging symbols are not expected here.  */
-              complaint (&symfile_complaints,
-                         _("%s: Unexpected debug stab outside SO markers"),
+              complaint (_("%s: Unexpected debug stab outside SO markers"),
                          objfile_name (objfile));
             }
           else
@@ -227,7 +225,7 @@ macho_symtab_read (minimal_symbol_reader &reader,
 	      if (sym->name == NULL || sym->name[0] == 0)
                 {
                   /* Unexpected empty N_SO.  */
-                  complaint (&symfile_complaints, _("Empty SO section"));
+                  complaint (_("Empty SO section"));
                   state = S_NO_SO;
                 }
               else if (state == S_FIRST_SO)
@@ -237,7 +235,7 @@ macho_symtab_read (minimal_symbol_reader &reader,
                   state = S_SECOND_SO;
                 }
               else
-                complaint (&symfile_complaints, _("Three SO in a raw"));
+                complaint (_("Three SO in a raw"));
             }
           else if (mach_o_sym->n_type == N_OSO)
             {
@@ -258,8 +256,7 @@ macho_symtab_read (minimal_symbol_reader &reader,
                 }
             }
           else
-            complaint (&symfile_complaints,
-                       _("Unexpected stab after SO"));
+            complaint (_("Unexpected stab after SO"));
           break;
 
         case S_STAB_FILE:
@@ -276,7 +273,7 @@ macho_symtab_read (minimal_symbol_reader &reader,
                 }
               else
                 {
-                  complaint (&symfile_complaints, _("Missing nul SO"));
+                  complaint (_("Missing nul SO"));
                   file_so = sym;
                   state = S_FIRST_SO;
                 }
@@ -304,21 +301,19 @@ macho_symtab_read (minimal_symbol_reader &reader,
                     case N_GSYM:
                       break;
                     default:
-                      complaint (&symfile_complaints,
-                                 _("unhandled stab for dwarf OSO file"));
+                      complaint (_("unhandled stab for dwarf OSO file"));
                       break;
                     }
                 }
             }
           else
-            complaint (&symfile_complaints,
-                       _("non-debugging symbol within SO"));
+            complaint (_("non-debugging symbol within SO"));
           break;
         }
     }
 
   if (state != S_NO_SO)
-    complaint (&symfile_complaints, _("missing nul SO"));
+    complaint (_("missing nul SO"));
 }
 
 /* If NAME describes an archive member (ie: ARCHIVE '(' MEMBER ')'),
@@ -496,8 +491,7 @@ macho_add_oso_symfile (oso_el *oso, const gdb_bfd_ref_ptr &abfd,
           ent = (struct macho_sym_hash_entry *)
             bfd_hash_lookup (&table, sym->name, TRUE, FALSE);
           if (ent->sym != NULL)
-            complaint (&symfile_complaints,
-                       _("Duplicated symbol %s in symbol table"), sym->name);
+            complaint (_("Duplicated symbol %s in symbol table"), sym->name);
           else
             {
               if (mach_o_debug_level > 4)

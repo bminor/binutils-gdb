@@ -445,15 +445,13 @@ finish_block_internal (struct symbol *symbol,
     {
       if (symbol)
 	{
-	  complaint (&symfile_complaints,
-		     _("block end address less than block "
+	  complaint (_("block end address less than block "
 		       "start address in %s (patched it)"),
 		     SYMBOL_PRINT_NAME (symbol));
 	}
       else
 	{
-	  complaint (&symfile_complaints,
-		     _("block end address %s less than block "
+	  complaint (_("block end address %s less than block "
 		       "start address %s (patched it)"),
 		     paddress (gdbarch, BLOCK_END (block)),
 		     paddress (gdbarch, BLOCK_START (block)));
@@ -485,14 +483,12 @@ finish_block_internal (struct symbol *symbol,
 	    {
 	      if (symbol)
 		{
-		  complaint (&symfile_complaints,
-			     _("inner block not inside outer block in %s"),
+		  complaint (_("inner block not inside outer block in %s"),
 			     SYMBOL_PRINT_NAME (symbol));
 		}
 	      else
 		{
-		  complaint (&symfile_complaints,
-			     _("inner block (%s-%s) not "
+		  complaint (_("inner block (%s-%s) not "
 			       "inside outer block (%s-%s)"),
 			     paddress (gdbarch, BLOCK_START (pblock->block)),
 			     paddress (gdbarch, BLOCK_END (pblock->block)),
@@ -653,7 +649,7 @@ make_blockvector (void)
 	      CORE_ADDR start
 		= BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i));
 
-	      complaint (&symfile_complaints, _("block at %s out of order"),
+	      complaint (_("block at %s out of order"),
 			 hex_string ((LONGEST) start));
 	    }
 	}
@@ -1237,8 +1233,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
 	     same.  FIXME: Find out why it is happening.  This is not
 	     believed to happen in most cases (even for coffread.c);
 	     it used to be an abort().  */
-	  complaint (&symfile_complaints,
-	             _("Context stack not empty in end_symtab"));
+	  complaint (_("Context stack not empty in end_symtab"));
 	  context_stack_depth = 0;
 	}
     }
@@ -1585,17 +1580,15 @@ augment_type_symtab (void)
 
   if (context_stack_depth > 0)
     {
-      complaint (&symfile_complaints,
-		 _("Context stack not empty in augment_type_symtab"));
+      complaint (_("Context stack not empty in augment_type_symtab"));
       context_stack_depth = 0;
     }
   if (pending_blocks != NULL)
-    complaint (&symfile_complaints, _("Blocks in a type symtab"));
+    complaint (_("Blocks in a type symtab"));
   if (pending_macros != NULL)
-    complaint (&symfile_complaints, _("Macro in a type symtab"));
+    complaint (_("Macro in a type symtab"));
   if (have_line_numbers)
-    complaint (&symfile_complaints,
-	       _("Line numbers recorded in a type symtab"));
+    complaint (_("Line numbers recorded in a type symtab"));
 
   if (file_symbols != NULL)
     {

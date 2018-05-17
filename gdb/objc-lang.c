@@ -124,8 +124,7 @@ lookup_objc_class (struct gdbarch *gdbarch, const char *classname)
     function = find_function_in_inferior("objc_lookup_class", NULL);
   else
     {
-      complaint (&symfile_complaints,
-		 _("no way to lookup Objective-C classes"));
+      complaint (_("no way to lookup Objective-C classes"));
       return 0;
     }
 
@@ -154,8 +153,7 @@ lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
     function = find_function_in_inferior("sel_get_any_uid", NULL);
   else
     {
-      complaint (&symfile_complaints,
-		 _("no way to lookup Objective-C selectors"));
+      complaint (_("no way to lookup Objective-C selectors"));
       return 0;
     }
 
@@ -626,8 +624,7 @@ info_selectors_command (const char *regexp, int from_tty)
 	  name = (char *) strchr (name+2, ' ');
 	  if (name == NULL)
 	    {
-	      complaint (&symfile_complaints, 
-			 _("Bad method name '%s'"), 
+	      complaint (_("Bad method name '%s'"),
 			 MSYMBOL_NATURAL_NAME (msymbol));
 	      continue;
 	    }

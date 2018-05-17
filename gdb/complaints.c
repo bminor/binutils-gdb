@@ -83,21 +83,6 @@ static struct complaints symfile_complaint_book = {
   ISOLATED_MESSAGE,
   symfile_explanations
 };
-struct complaints *symfile_complaints = &symfile_complaint_book;
-
-/* Wrapper function to, on-demand, fill in a complaints object.  */
-
-static struct complaints *
-get_complaints (struct complaints **c)
-{
-  if ((*c) != NULL)
-    return (*c);
-  (*c) = XNEW (struct complaints);
-  (*c)->root = &complaint_sentinel;
-  (*c)->series = ISOLATED_MESSAGE;
-  (*c)->explanation = NULL;
-  return (*c);
-}
 
 static struct complain * ATTRIBUTE_PRINTF (4, 0)
 find_complaint (struct complaints *complaints, const char *file,
@@ -143,23 +128,20 @@ int stop_whining = 0;
 /* Print a complaint, and link the complaint block into a chain for
    later handling.  */
 
-static void ATTRIBUTE_PRINTF (4, 0)
-vcomplaint (struct complaints **c, const char *file, 
+static void ATTRIBUTE_PRINTF (3, 0)
+vcomplaint (const char *file,
 	    int line, const char *fmt,
 	    va_list args)
 {
-  struct complaints *complaints = get_complaints (c);
-  struct complain *complaint = find_complaint (complaints, file, 
+  struct complain *complaint = find_complaint (&symfile_complaint_book, file,
 					       line, fmt);
   enum complaint_series series;
-
-  gdb_assert (complaints != NULL);
 
   complaint->counter++;
   if (complaint->counter > stop_whining)
     return;
 
-  series = complaints->series;
+  series = symfile_complaint_book.series;
 
   /* Pass 'fmt' instead of 'complaint->fmt' to printf-like callees
      from here on, to avoid "format string is not a string literal"
@@ -174,7 +156,7 @@ vcomplaint (struct complaints **c, const char *file,
     (*deprecated_warning_hook) (fmt, args);
   else
     {
-      if (complaints->explanation == NULL)
+      if (symfile_complaint_book.explanation == NULL)
 	/* A [v]warning() call always appends a newline.  */
 	vwarning (fmt, args);
       else
@@ -184,9 +166,9 @@ vcomplaint (struct complaints **c, const char *file,
 	  begin_line ();
 	  /* XXX: i18n */
 	  fprintf_filtered (gdb_stderr, "%s%s%s",
-			    complaints->explanation[series].prefix,
+			    symfile_complaint_book.explanation[series].prefix,
 			    msg.c_str (),
-			    complaints->explanation[series].postfix);
+			    symfile_complaint_book.explanation[series].postfix);
 	  /* Force a line-break after any isolated message.  */
 	  if (series == ISOLATED_MESSAGE)
 	    /* It would be really nice to use begin_line() here.
@@ -207,12 +189,12 @@ vcomplaint (struct complaints **c, const char *file,
 }
 
 void
-complaint_internal (struct complaints **complaints, const char *fmt, ...)
+complaint_internal (const char *fmt, ...)
 {
   va_list args;
 
   va_start (args, fmt);
-  vcomplaint (complaints, NULL/*file*/, 0/*line*/, fmt, args);
+  vcomplaint (NULL/*file*/, 0/*line*/, fmt, args);
   va_end (args);
 }
 
@@ -223,20 +205,19 @@ complaint_internal (struct complaints **complaints, const char *fmt, ...)
    complaints (rather than being interleaved with other messages).  */
 
 void
-clear_complaints (struct complaints **c, int less_verbose)
+clear_complaints (int less_verbose)
 {
-  struct complaints *complaints = get_complaints (c);
   struct complain *p;
 
-  for (p = complaints->root; p != NULL; p = p->next)
+  for (p = symfile_complaint_book.root; p != NULL; p = p->next)
     {
       p->counter = 0;
     }
 
   if (!less_verbose)
-    complaints->series = ISOLATED_MESSAGE;
+    symfile_complaint_book.series = ISOLATED_MESSAGE;
   else
-    complaints->series = SHORT_FIRST_MESSAGE;
+    symfile_complaint_book.series = SHORT_FIRST_MESSAGE;
 }
 
 static void

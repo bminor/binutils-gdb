@@ -1,5 +1,13 @@
 2018-05-23  Tom Tromey  <tom@tromey.com>
 
+	* gdb.gdb/complaints.exp (test_initial_complaints): Don't mention
+	symfile_complaints.
+	(test_short_complaints): Likewise.
+	(test_empty_complaints): Likewise.
+	(test_initial_complaints): Update.
+
+2018-05-23  Tom Tromey  <tom@tromey.com>
+
 	* gdb.gdb/complaints.exp (test_empty_complaints): Update.
 
 2018-05-23  Tom Tromey  <tom@tromey.com>
