@@ -100,22 +100,22 @@ find_complaint (struct complaints *complaints, const char *file,
 
 int stop_whining = 0;
 
-/* Print a complaint, and link the complaint block into a chain for
-   later handling.  */
+/* See complaints.h.  */
 
-static void ATTRIBUTE_PRINTF (3, 0)
-vcomplaint (const char *file,
-	    int line, const char *fmt,
-	    va_list args)
+void
+complaint_internal (const char *fmt, ...)
 {
-  struct complain *complaint = find_complaint (&symfile_complaint_book, file,
-					       line, fmt);
+  va_list args;
+
+  struct complain *complaint = find_complaint (&symfile_complaint_book, NULL,
+					       0, fmt);
   enum complaint_series series;
 
   complaint->counter++;
   if (complaint->counter > stop_whining)
     return;
 
+  va_start (args, fmt);
   series = symfile_complaint_book.series;
 
   /* Pass 'fmt' instead of 'complaint->fmt' to printf-like callees
@@ -146,15 +146,6 @@ vcomplaint (const char *file,
      becomes a performance hog.  */
 
   gdb_flush (gdb_stderr);
-}
-
-void
-complaint_internal (const char *fmt, ...)
-{
-  va_list args;
-
-  va_start (args, fmt);
-  vcomplaint (NULL/*file*/, 0/*line*/, fmt, args);
   va_end (args);
 }
 
