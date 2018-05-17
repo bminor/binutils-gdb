@@ -45,43 +45,18 @@ struct complain
   struct complain *next;
 };
 
-/* The explanatory message that should accompany the complaint.  The
-   message is in two parts - pre and post - that are printed around
-   the complaint text.  */
-struct explanation
-{
-  const char *prefix;
-  const char *postfix;
-};
-
 struct complaints
 {
   struct complain *root;
 
   enum complaint_series series;
-
-  /* The explanatory messages that should accompany the complaint.
-     NOTE: cagney/2002-08-14: In a desperate attempt at being vaguely
-     i18n friendly, this is an array of two messages.  When present,
-     the PRE and POST EXPLANATION[SERIES] are used to wrap the
-     message.  */
-  const struct explanation *explanation;
 };
 
 static struct complain complaint_sentinel;
 
-/* The symbol table complaint table.  */
-
-static struct explanation symfile_explanations[] = {
-  { "During symbol reading, ", "." },
-  { "", "..."},
-  { NULL, NULL }
-};
-
 static struct complaints symfile_complaint_book = {
   &complaint_sentinel,
-  ISOLATED_MESSAGE,
-  symfile_explanations
+  ISOLATED_MESSAGE
 };
 
 static struct complain * ATTRIBUTE_PRINTF (4, 0)
@@ -156,29 +131,14 @@ vcomplaint (const char *file,
     (*deprecated_warning_hook) (fmt, args);
   else
     {
-      if (symfile_complaint_book.explanation == NULL)
-	/* A [v]warning() call always appends a newline.  */
-	vwarning (fmt, args);
+      std::string msg = string_vprintf (fmt, args);
+      wrap_here ("");
+      begin_line ();
+      if (series == ISOLATED_MESSAGE)
+	fprintf_filtered (gdb_stderr, "During symbol reading, %s.\n",
+			  msg.c_str ());
       else
-	{
-	  std::string msg = string_vprintf (fmt, args);
-	  wrap_here ("");
-	  begin_line ();
-	  /* XXX: i18n */
-	  fprintf_filtered (gdb_stderr, "%s%s%s",
-			    symfile_complaint_book.explanation[series].prefix,
-			    msg.c_str (),
-			    symfile_complaint_book.explanation[series].postfix);
-	  /* Force a line-break after any isolated message.  */
-	  if (series == ISOLATED_MESSAGE)
-	    /* It would be really nice to use begin_line() here.
-	       Unfortunately that function doesn't track GDB_STDERR and
-	       consequently will sometimes supress a line when it
-	       shouldn't.  */
-	    fputs_filtered ("\n", gdb_stderr);
-	  else
-	    wrap_here ("");
-	}
+	fprintf_filtered (gdb_stderr, "%s...", msg.c_str ());
     }
 
   /* If GDB dumps core, we'd like to see the complaints first.

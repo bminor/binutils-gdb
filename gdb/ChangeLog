@@ -1,5 +1,13 @@
 2018-05-23  Tom Tromey  <tom@tromey.com>
 
+	* complaints.c (struct complaints) <explanation>: Remove.
+	(symfile_explanations): Remove.
+	(symfile_complaint_book): Update.
+	(vcomplaint): Update.
+	(struct explanation): Remove.
+
+2018-05-23  Tom Tromey  <tom@tromey.com>
+
 	* complaints.c (symfile_complaints): Remove.
 	(complaint_internal): Remove "complaints" parameter.
 	(clear_complaints, vcomplaint): Remove "c" parameter.
