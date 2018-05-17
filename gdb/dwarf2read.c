@@ -195,7 +195,7 @@ struct mapped_index final : public mapped_index_base
   };
 
   /* Index data format version.  */
-  int version;
+  int version = 0;
 
   /* The address table data.  */
   gdb::array_view<const gdb_byte> address_table;
@@ -204,7 +204,7 @@ struct mapped_index final : public mapped_index_base
   gdb::array_view<symbol_table_slot> symbol_table;
 
   /* A pointer to the constant pool.  */
-  const char *constant_pool;
+  const char *constant_pool = nullptr;
 
   bool symbol_name_slot_invalid (offset_type idx) const override
   {
@@ -2150,9 +2150,6 @@ dwarf2_per_objfile::~dwarf2_per_objfile ()
   if (dwz_file != NULL && dwz_file->dwz_bfd)
     gdb_bfd_unref (dwz_file->dwz_bfd);
 
-  if (index_table != NULL)
-    index_table->~mapped_index ();
-
   /* Everything else should be on the objfile obstack.  */
 }
 
@@ -3537,21 +3534,21 @@ to use the section anyway."),
 static int
 dwarf2_read_index (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
-  struct mapped_index local_map, *map;
   const gdb_byte *cu_list, *types_list, *dwz_list = NULL;
   offset_type cu_list_elements, types_list_elements, dwz_list_elements = 0;
   struct dwz_file *dwz;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
 
+  std::unique_ptr<struct mapped_index> map (new struct mapped_index);
   if (!read_index_from_section (objfile, objfile_name (objfile),
 				use_deprecated_index_sections,
-				&dwarf2_per_objfile->gdb_index, &local_map,
+				&dwarf2_per_objfile->gdb_index, map.get (),
 				&cu_list, &cu_list_elements,
 				&types_list, &types_list_elements))
     return 0;
 
   /* Don't use the index if it's empty.  */
-  if (local_map.symbol_table.empty ())
+  if (map->symbol_table.empty ())
     return 0;
 
   /* If there is a .dwz file, read it so we can get its CU list as
@@ -3595,13 +3592,9 @@ dwarf2_read_index (struct dwarf2_per_objfile *dwarf2_per_objfile)
 					       types_list, types_list_elements);
     }
 
-  create_addrmap_from_index (dwarf2_per_objfile, &local_map);
+  create_addrmap_from_index (dwarf2_per_objfile, map.get ());
 
-  map = XOBNEW (&objfile->objfile_obstack, struct mapped_index);
-  map = new (map) mapped_index ();
-  *map = local_map;
-
-  dwarf2_per_objfile->index_table = map;
+  dwarf2_per_objfile->index_table = std::move (map);
   dwarf2_per_objfile->using_index = 1;
   dwarf2_per_objfile->quick_file_names_table =
     create_quick_file_names_table (dwarf2_per_objfile->all_comp_units.size ());
@@ -3916,7 +3909,7 @@ dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
   iter->next = 0;
   iter->global_seen = 0;
 
-  mapped_index *index = dwarf2_per_objfile->index_table;
+  mapped_index *index = dwarf2_per_objfile->index_table.get ();
 
   /* index is NULL if OBJF_READNOW.  */
   if (index != NULL && find_slot_in_mapped_hash (index, name, &iter->vec))

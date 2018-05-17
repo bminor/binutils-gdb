@@ -209,7 +209,7 @@ public:
   bool using_index = false;
 
   /* The mapped index, or NULL if .gdb_index is missing or not being used.  */
-  mapped_index *index_table = NULL;
+  std::unique_ptr<mapped_index> index_table;
 
   /* The mapped index, or NULL if .debug_names is missing or not being used.  */
   std::unique_ptr<mapped_debug_names> debug_names_table;

@@ -1,3 +1,12 @@
+2018-05-18  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (dwarf2_per_objfile): Update.
+	(struct mapped_index): Add initializers.
+	(dwarf2_read_index): Use new.
+	(dw2_symtab_iter_init): Update.
+	* dwarf2read.h (struct dwarf2_per_objfile) <index_table>: Now a
+	unique_ptr.
+
 2018-05-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2read.c (mapped_index) <total_size>: Remove.
