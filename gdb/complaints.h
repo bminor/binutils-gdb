@@ -56,7 +56,7 @@ extern void complaint_internal (struct complaints **complaints,
    enough context for the user to figure it out.  */
 
 extern void clear_complaints (struct complaints **complaints,
-			      int less_verbose, int noisy);
+			      int less_verbose);
 
 
 #endif /* !defined (COMPLAINTS_H) */

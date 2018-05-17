@@ -1,5 +1,9 @@
 2018-05-23  Tom Tromey  <tom@tromey.com>
 
+	* gdb.gdb/complaints.exp (test_empty_complaints): Update.
+
+2018-05-23  Tom Tromey  <tom@tromey.com>
+
 	* gdb.gdb/complaints.exp (test_serial_complaints): Remove.
 	(test_short_complaints): Update.
 

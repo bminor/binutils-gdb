@@ -88,7 +88,7 @@ proc test_initial_complaints { } {
 # For short complaints, all are the same
 
 proc test_short_complaints { } {
-    gdb_test_exact "call clear_complaints (&symfile_complaints, 1, 1)" "" "short start"
+    gdb_test_exact "call clear_complaints (&symfile_complaints, 1)" "" "short start"
 
     # Prime the system
     test_complaint \
@@ -131,14 +131,10 @@ proc test_empty_complaint { cmd msg } {
 
 proc test_empty_complaints { } {
 
-    test_empty_complaint "call clear_complaints(&symfile_complaints,0,0)" \
-	    "empty non-verbose non-noisy clear"
-    test_empty_complaint "call clear_complaints(&symfile_complaints,1,0)" \
-	    "empty verbose non-noisy clear"
-    test_empty_complaint "call clear_complaints(&symfile_complaints,1,1)" \
-	    "empty verbose noisy clear"
-    test_empty_complaint "call clear_complaints(&symfile_complaints,0,1)" \
-	    "empty non-verbose noisy clear"
+    test_empty_complaint "call clear_complaints(&symfile_complaints,0)" \
+	    "empty non-verbose clear"
+    test_empty_complaint "call clear_complaints(&symfile_complaints,1)" \
+	    "empty verbose clear"
 
     return 0
 }

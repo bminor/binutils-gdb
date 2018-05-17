@@ -220,12 +220,10 @@ complaint_internal (struct complaints **complaints, const char *fmt, ...)
    incremented.  If LESS_VERBOSE is 1, be less verbose about
    successive complaints, since the messages are appearing all
    together during a command that is reporting a contiguous block of
-   complaints (rather than being interleaved with other messages).  If
-   noisy is 1, we are in a noisy command, and our caller will print
-   enough context for the user to figure it out.  */
+   complaints (rather than being interleaved with other messages).  */
 
 void
-clear_complaints (struct complaints **c, int less_verbose, int noisy)
+clear_complaints (struct complaints **c, int less_verbose)
 {
   struct complaints *complaints = get_complaints (c);
   struct complain *p;
