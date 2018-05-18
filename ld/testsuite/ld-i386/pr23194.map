@@ -1,0 +1,6 @@
+FOO {
+  global:
+    bar;
+  local:
+    *;
+};

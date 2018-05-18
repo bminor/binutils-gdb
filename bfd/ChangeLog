@@ -1,5 +1,12 @@
 2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/23194
+	* elfxx-x86.c (_bfd_x86_elf_link_symbol_references_local): Don't
+	set eh->local_ref to 1 if a symbol is versioned and there is a
+	version script.
+
+2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/23189
 	* elf32-i386.c (elf_i386_relocate_section): Handle R_386_GOT32X
 	like R_386_GOT32.

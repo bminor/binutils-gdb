@@ -1,5 +1,17 @@
 2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/23194
+	* testsuite/ld-i386/i386.exp: Run pr23194.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr23194.d: New file.
+	* testsuite/ld-i386/pr23194.map: Likewise.
+	* testsuite/ld-i386/pr23194.s: Likewise.
+	* testsuite/ld-x86-64/pr23194.d: Likewise.
+	* testsuite/ld-x86-64/pr23194.map: Likewise.
+	* testsuite/ld-x86-64/pr23194.s: Likewise.
+
+2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/23189
 	* testsuite/ld-i386/i386.exp: Run pr23189.
 	* testsuite/ld-x86-64/x86-64.exp: Likewise.
