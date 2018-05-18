@@ -269,6 +269,22 @@ frame_stash_invalidate (void)
   htab_empty (frame_stash);
 }
 
+/* See frame.h  */
+scoped_restore_selected_frame::scoped_restore_selected_frame ()
+{
+  m_fid = get_frame_id (get_selected_frame (NULL));
+}
+
+/* See frame.h  */
+scoped_restore_selected_frame::~scoped_restore_selected_frame ()
+{
+  frame_info *frame = frame_find_by_id (m_fid);
+  if (frame == NULL)
+    warning (_("Unable to restore previously selected frame."));
+  else
+    select_frame (frame);
+}
+
 /* Flag to control debugging.  */
 
 unsigned int frame_debug;

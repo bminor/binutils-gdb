@@ -164,6 +164,25 @@ struct frame_id
   int artificial_depth;
 };
 
+/* Save and restore the currently selected frame.  */
+
+class scoped_restore_selected_frame
+{
+public:
+  /* Save the currently selected frame.  */
+  scoped_restore_selected_frame ();
+
+  /* Restore the currently selected frame.  */
+  ~scoped_restore_selected_frame ();
+
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_selected_frame);
+
+private:
+
+  /* The ID of the previously selected frame.  */
+  struct frame_id m_fid;
+};
+
 /* Methods for constructing and comparing Frame IDs.  */
 
 /* For convenience.  All fields are zero.  This means "there is no frame".  */

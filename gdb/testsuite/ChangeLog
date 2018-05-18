@@ -1,3 +1,10 @@
+2018-05-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/23203
+	* gdb.base/bt-selected-frame.c: New file.
+	* gdb.base/bt-selected-frame.exp: New file.
+	* lib/gdb.exp (get_current_frame_number): New function.
+
 2018-05-24  Maciej W. Rozycki  <macro@mips.com>
 	    Pedro Alves  <palves@redhat.com>
 

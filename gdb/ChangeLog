@@ -1,3 +1,16 @@
+2018-05-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/23203
+	* frame.c
+	(scoped_restore_selected_frame::scoped_restore_selected_frame):
+	Define.
+	(scoped_restore_selected_frame::~scoped_restore_selected_frame):
+	Define.
+	* frame.h (class scoped_restore_selected_frame): New class.
+	* stack.c (print_frame_local_vars): Remove catching and rethrowing
+	of any exception, use scoped_restore_selected_frame to restore the
+	frame instead.
+
 2018-05-24  Pedro Alves  <palves@redhat.com>
 
 	* darwin-nat.h (darwin_nat_target::create_inferior): Mark with

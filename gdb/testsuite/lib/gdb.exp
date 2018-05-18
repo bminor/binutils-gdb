@@ -5805,6 +5805,22 @@ proc get_var_address { var } {
     return ""
 }
 
+# Return the frame number for the currently selected frame
+proc get_current_frame_number {{test_name ""}} {
+    global gdb_prompt
+
+    if { $test_name == "" } {
+	set test_name "get current frame number"
+    }
+    set frame_num -1
+    gdb_test_multiple "frame" $test_name {
+	-re "#(\[0-9\]+) .*$gdb_prompt $" {
+	    set frame_num $expect_out(1,string)
+	}
+    }
+    return $frame_num
+}
+
 # Get the current value for remotetimeout and return it.
 proc get_remotetimeout { } {
     global gdb_prompt
