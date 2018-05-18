@@ -1,3 +1,11 @@
+2018-05-18  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (allocate_dynrelocs): Discard dynamic relocations if
+	UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+	(riscv_elf_relocate_section): Don't generate dynamic relocation if
+	UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+	(riscv_elf_finish_dynamic_symbol): Likewise.
+
 2018-05-18  John Darrington  <john@darrington.wattle.id.au>
 
 	* Makefile.am: Add s12z files.

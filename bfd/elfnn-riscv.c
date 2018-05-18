@@ -1001,7 +1001,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       else
 	{
 	  s->size += RISCV_ELF_WORD_BYTES;
-	  if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h))
+	  if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
+	      && ! UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    htab->elf.srelgot->size += sizeof (ElfNN_External_Rela);
 	}
     }
@@ -1040,7 +1041,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
@@ -1731,6 +1733,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       int r_type = ELFNN_R_TYPE (rel->r_info), tls_type;
       reloc_howto_type *howto = riscv_elf_rtype_to_howto (input_bfd, r_type);
       const char *msg = NULL;
+      bfd_boolean resolved_to_zero;
 
       if (howto == NULL
 	  || r_type == R_RISCV_GNU_VTINHERIT || r_type == R_RISCV_GNU_VTENTRY)
@@ -1784,6 +1787,9 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  if (name == NULL || *name == '\0')
 	    name = bfd_section_name (input_bfd, sec);
 	}
+
+      resolved_to_zero = (h != NULL
+			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
 
       switch (r_type)
 	{
@@ -2032,7 +2038,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	  if ((bfd_link_pic (info)
 	       && (h == NULL
-		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		       && !resolved_to_zero)
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (! howto->pc_relative
 		   || !SYMBOL_CALLS_LOCAL (info, h)))
@@ -2356,7 +2363,8 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   if (h->got.offset != (bfd_vma) -1
-      && !(riscv_elf_hash_entry (h)->tls_type & (GOT_TLS_GD | GOT_TLS_IE)))
+      && !(riscv_elf_hash_entry (h)->tls_type & (GOT_TLS_GD | GOT_TLS_IE))
+      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
     {
       asection *sgot;
       asection *srela;
