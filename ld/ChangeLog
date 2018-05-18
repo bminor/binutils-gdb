@@ -1,3 +1,15 @@
+2018-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23189
+	* testsuite/ld-i386/i386.exp: Run pr23189.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr23189.d: New file.
+	* testsuite/ld-i386/pr23189.s: Likewise.
+	* testsuite/ld-i386/pr23189.t: Likewise.
+	* testsuite/ld-x86-64/pr23189.d: Likewise.
+	* testsuite/ld-x86-64/pr23189.s: Likewise.
+	* testsuite/ld-x86-64/pr23189.t: Likewise.
+
 2018-05-15  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/notes.exp: Restore LDFLAGS.
