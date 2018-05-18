@@ -2316,7 +2316,6 @@ reread_symbols (void)
 	  struct cleanup *old_cleanups;
 	  struct section_offsets *offsets;
 	  int num_offsets;
-	  char *original_name;
 
 	  printf_unfiltered (_("`%s' has changed; re-reading symbols.\n"),
 			     objfile_name (objfile));
@@ -2382,8 +2381,7 @@ reread_symbols (void)
 	      error (_("Can't open %s to read symbols."), obfd_filename);
 	  }
 
-	  original_name = xstrdup (objfile->original_name);
-	  make_cleanup (xfree, original_name);
+	  std::string original_name = objfile->original_name;
 
 	  /* bfd_openr sets cacheable to true, which is what we want.  */
 	  if (!bfd_check_format (objfile->obfd, bfd_object))
@@ -2429,8 +2427,9 @@ reread_symbols (void)
 	  set_objfile_per_bfd (objfile);
 
 	  objfile->original_name
-	    = (char *) obstack_copy0 (&objfile->objfile_obstack, original_name,
-				      strlen (original_name));
+	    = (char *) obstack_copy0 (&objfile->objfile_obstack,
+				      original_name.c_str (),
+				      original_name.size ());
 
 	  /* Reset the sym_fns pointer.  The ELF reader can change it
 	     based on whether .gdb_index is present, and we need it to
