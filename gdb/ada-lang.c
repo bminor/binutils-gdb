@@ -12341,8 +12341,6 @@ ada_exception_name_addr_1 (enum ada_exception_catchpoint_kind ex,
    return the message which was associated to the exception, if
    available.  Return NULL if the message could not be retrieved.
 
-   The caller must xfree the string after use.
-
    Note: The exception message can be associated to an exception
    either through the use of the Raise_Exception function, or
    more simply (Ada 2005 and later), via:
@@ -12351,13 +12349,11 @@ ada_exception_name_addr_1 (enum ada_exception_catchpoint_kind ex,
 
    */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 ada_exception_message_1 (void)
 {
   struct value *e_msg_val;
-  char *e_msg = NULL;
   int e_msg_len;
-  struct cleanup *cleanups;
 
   /* For runtimes that support this feature, the exception message
      is passed as an unbounded string argument called "message".  */
@@ -12374,22 +12370,20 @@ ada_exception_message_1 (void)
   if (e_msg_len <= 0)
     return NULL;
 
-  e_msg = (char *) xmalloc (e_msg_len + 1);
-  cleanups = make_cleanup (xfree, e_msg);
-  read_memory_string (value_address (e_msg_val), e_msg, e_msg_len + 1);
-  e_msg[e_msg_len] = '\0';
+  gdb::unique_xmalloc_ptr<char> e_msg ((char *) xmalloc (e_msg_len + 1));
+  read_memory_string (value_address (e_msg_val), e_msg.get (), e_msg_len + 1);
+  e_msg.get ()[e_msg_len] = '\0';
 
-  discard_cleanups (cleanups);
   return e_msg;
 }
 
 /* Same as ada_exception_message_1, except that all exceptions are
    contained here (returning NULL instead).  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 ada_exception_message (void)
 {
-  char *e_msg = NULL;  /* Avoid a spurious uninitialized warning.  */
+  gdb::unique_xmalloc_ptr<char> e_msg;
 
   TRY
     {
@@ -12397,7 +12391,7 @@ ada_exception_message (void)
     }
   CATCH (e, RETURN_MASK_ERROR)
     {
-      e_msg = NULL;
+      e_msg.reset (nullptr);
     }
   END_CATCH
 
@@ -12638,7 +12632,6 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 {
   struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;
-  char *exception_message;
 
   annotate_catchpoint (b->number);
 
@@ -12706,16 +12699,12 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 	break;
     }
 
-  exception_message = ada_exception_message ();
+  gdb::unique_xmalloc_ptr<char> exception_message = ada_exception_message ();
   if (exception_message != NULL)
     {
-      struct cleanup *cleanups = make_cleanup (xfree, exception_message);
-
       uiout->text (" (");
-      uiout->field_string ("exception-message", exception_message);
+      uiout->field_string ("exception-message", exception_message.get ());
       uiout->text (")");
-
-      do_cleanups (cleanups);
     }
 
   uiout->text (" at ");

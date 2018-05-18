@@ -1,5 +1,11 @@
 2018-05-21  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_exception_message_1, ada_exception_message):
+	Return unique_xmalloc_ptr.
+	(print_it_exception): Update.
+
+2018-05-21  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (trace_dump_actions): Use std::string.
 
 2018-05-21  Tom Tromey  <tom@tromey.com>
