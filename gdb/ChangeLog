@@ -1,5 +1,23 @@
 2018-05-21  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-cmd-catch.c (mi_cmd_catch_assert)
+	(mi_cmd_catch_exception, mi_cmd_catch_handlers): Update.
+	* ada-lang.h (create_ada_exception_catchpoint): Update.
+	* ada-lang.c (struct ada_catchpoint) <excep_string>: Now a
+	std::string.
+	(create_excep_cond_exprs, ~ada_catchpoint)
+	(should_stop_exception, print_one_exception)
+	(print_mention_exception, print_recreate_exception): Update.
+	(ada_get_next_arg): Remove.
+	(catch_ada_exception_command_split): Use std::string.  Change type
+	of "excep_string", "cond_string".
+	(catch_ada_exception_command): Update.
+	(create_ada_exception_catchpoint): Change type of excep_string.
+	(ada_exception_sal): Remove excep_string parameter.
+	(~ada_catchpoint): Remove.
+
+2018-05-21  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_collect_symbol_completion_matches): Remove
 	cleanup.
 

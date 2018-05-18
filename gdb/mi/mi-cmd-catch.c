@@ -79,8 +79,8 @@ mi_cmd_catch_assert (const char *cmd, char *argv[], int argc)
     error (_("Invalid argument: %s"), argv[oind]);
 
   scoped_restore restore_breakpoint_reporting = setup_breakpoint_reporting ();
-  create_ada_exception_catchpoint (gdbarch, ada_catch_assert,
-				   NULL, condition, temp, enabled, 0);
+  create_ada_exception_catchpoint (gdbarch, ada_catch_assert, std::string (),
+				   condition, temp, enabled, 0);
 }
 
 /* Handler for the -catch-exception command.  */
@@ -91,7 +91,7 @@ mi_cmd_catch_exception (const char *cmd, char *argv[], int argc)
   struct gdbarch *gdbarch = get_current_arch();
   std::string condition;
   int enabled = 1;
-  char *exception_name = NULL;
+  std::string exception_name;
   int temp = 0;
   enum ada_exception_catchpoint_kind ex_kind = ada_catch_exception;
 
@@ -148,14 +148,10 @@ mi_cmd_catch_exception (const char *cmd, char *argv[], int argc)
 
   /* Specifying an exception name does not make sense when requesting
      an unhandled exception breakpoint.  */
-  if (ex_kind == ada_catch_exception_unhandled && exception_name != NULL)
+  if (ex_kind == ada_catch_exception_unhandled && !exception_name.empty ())
     error (_("\"-e\" and \"-u\" are mutually exclusive"));
 
   scoped_restore restore_breakpoint_reporting = setup_breakpoint_reporting ();
-  /* create_ada_exception_catchpoint needs EXCEPTION_NAME to be
-     xstrdup'ed, and will assume control of its lifetime.  */
-  if (exception_name != NULL)
-    exception_name = xstrdup (exception_name);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
 				   exception_name,
 				   condition, temp, enabled, 0);
@@ -169,7 +165,7 @@ mi_cmd_catch_handlers (const char *cmd, char *argv[], int argc)
   struct gdbarch *gdbarch = get_current_arch ();
   std::string condition;
   int enabled = 1;
-  char *exception_name = NULL;
+  std::string exception_name;
   int temp = 0;
 
   int oind = 0;
@@ -220,10 +216,6 @@ mi_cmd_catch_handlers (const char *cmd, char *argv[], int argc)
 
   scoped_restore restore_breakpoint_reporting
     = setup_breakpoint_reporting ();
-  /* create_ada_exception_catchpoint needs EXCEPTION_NAME to be
-     xstrdup'ed, and will assume control of its lifetime.  */
-  if (exception_name != NULL)
-    exception_name = xstrdup (exception_name);
   create_ada_exception_catchpoint (gdbarch, ada_catch_handlers,
 				   exception_name,
 				   condition, temp, enabled, 0);

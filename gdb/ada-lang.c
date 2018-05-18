@@ -12476,10 +12476,8 @@ static const struct bp_location_ops ada_catchpoint_location_ops =
 
 struct ada_catchpoint : public breakpoint
 {
-  ~ada_catchpoint () override;
-
   /* The name of the specific exception the user specified.  */
-  char *excep_string;
+  std::string excep_string;
 };
 
 /* Parse the exception condition string in the context of each of the
@@ -12492,7 +12490,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
   struct bp_location *bl;
 
   /* Nothing to do if there's no specific exception to catch.  */
-  if (c->excep_string == NULL)
+  if (c->excep_string.empty ())
     return;
 
   /* Same if there are no locations... */
@@ -12502,7 +12500,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
   /* Compute the condition expression in text form, from the specific
      expection we want to catch.  */
   std::string cond_string
-    = ada_exception_catchpoint_cond_string (c->excep_string, ex);
+    = ada_exception_catchpoint_cond_string (c->excep_string.c_str (), ex);
 
   /* Iterate over all the catchpoint's locations, and parse an
      expression for each.  */
@@ -12534,13 +12532,6 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
 
       ada_loc->excep_cond_expr = std::move (exp);
     }
-}
-
-/* ada_catchpoint destructor.  */
-
-ada_catchpoint::~ada_catchpoint ()
-{
-  xfree (this->excep_string);
 }
 
 /* Implement the ALLOCATE_LOCATION method in the breakpoint_ops
@@ -12583,7 +12574,7 @@ should_stop_exception (const struct bp_location *bl)
   int stop;
 
   /* With no specific exception, should always stop.  */
-  if (c->excep_string == NULL)
+  if (c->excep_string.empty ())
     return 1;
 
   if (ada_loc->excep_cond_expr == NULL)
@@ -12733,12 +12724,12 @@ print_one_exception (enum ada_exception_catchpoint_kind ex,
   switch (ex)
     {
       case ada_catch_exception:
-        if (c->excep_string != NULL)
+        if (!c->excep_string.empty ())
           {
-            char *msg = xstrprintf (_("`%s' Ada exception"), c->excep_string);
+	    std::string msg = string_printf (_("`%s' Ada exception"),
+					     c->excep_string.c_str ());
 
             uiout->field_string ("what", msg);
-            xfree (msg);
           }
         else
           uiout->field_string ("what", "all Ada exceptions");
@@ -12750,11 +12741,11 @@ print_one_exception (enum ada_exception_catchpoint_kind ex,
         break;
       
       case ada_catch_handlers:
-        if (c->excep_string != NULL)
+        if (!c->excep_string.empty ())
           {
 	    uiout->field_fmt ("what",
 			      _("`%s' Ada exception handlers"),
-			      c->excep_string);
+			      c->excep_string.c_str ());
           }
         else
 	  uiout->field_string ("what", "all Ada exceptions handlers");
@@ -12788,10 +12779,10 @@ print_mention_exception (enum ada_exception_catchpoint_kind ex,
   switch (ex)
     {
       case ada_catch_exception:
-        if (c->excep_string != NULL)
+        if (!c->excep_string.empty ())
 	  {
 	    std::string info = string_printf (_("`%s' Ada exception"),
-					      c->excep_string);
+					      c->excep_string.c_str ());
 	    uiout->text (info.c_str ());
 	  }
         else
@@ -12803,11 +12794,11 @@ print_mention_exception (enum ada_exception_catchpoint_kind ex,
         break;
 
       case ada_catch_handlers:
-        if (c->excep_string != NULL)
+        if (!c->excep_string.empty ())
 	  {
 	    std::string info
 	      = string_printf (_("`%s' Ada exception handlers"),
-			       c->excep_string);
+			       c->excep_string.c_str ());
 	    uiout->text (info.c_str ());
 	  }
         else
@@ -12837,8 +12828,8 @@ print_recreate_exception (enum ada_exception_catchpoint_kind ex,
     {
       case ada_catch_exception:
 	fprintf_filtered (fp, "catch exception");
-	if (c->excep_string != NULL)
-	  fprintf_filtered (fp, " %s", c->excep_string);
+	if (!c->excep_string.empty ())
+	  fprintf_filtered (fp, " %s", c->excep_string.c_str ());
 	break;
 
       case ada_catch_exception_unhandled:
@@ -13047,40 +13038,6 @@ print_recreate_catch_handlers (struct breakpoint *b,
 
 static struct breakpoint_ops catch_handlers_breakpoint_ops;
 
-/* Return a newly allocated copy of the first space-separated token
-   in ARGSP, and then adjust ARGSP to point immediately after that
-   token.
-
-   Return NULL if ARGPS does not contain any more tokens.  */
-
-static char *
-ada_get_next_arg (const char **argsp)
-{
-  const char *args = *argsp;
-  const char *end;
-  char *result;
-
-  args = skip_spaces (args);
-  if (args[0] == '\0')
-    return NULL; /* No more arguments.  */
-  
-  /* Find the end of the current argument.  */
-
-  end = skip_to_space (args);
-
-  /* Adjust ARGSP to point to the start of the next argument.  */
-
-  *argsp = end;
-
-  /* Make a copy of the current argument and return it.  */
-
-  result = (char *) xmalloc (end - args + 1);
-  strncpy (result, args, end - args);
-  result[end - args] = '\0';
-  
-  return result;
-}
-
 /* Split the arguments specified in a "catch exception" command.  
    Set EX to the appropriate catchpoint type.
    Set EXCEP_STRING to the name of the specific exception if
@@ -13095,24 +13052,20 @@ static void
 catch_ada_exception_command_split (const char *args,
 				   bool is_catch_handlers_cmd,
                                    enum ada_exception_catchpoint_kind *ex,
-				   char **excep_string,
-				   std::string &cond_string)
+				   std::string *excep_string,
+				   std::string *cond_string)
 {
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  char *exception_name;
-  char *cond = NULL;
+  std::string exception_name;
 
-  exception_name = ada_get_next_arg (&args);
-  if (exception_name != NULL && strcmp (exception_name, "if") == 0)
+  exception_name = extract_arg (&args);
+  if (exception_name == "if")
     {
       /* This is not an exception name; this is the start of a condition
 	 expression for a catchpoint on all exceptions.  So, "un-get"
 	 this token, and set exception_name to NULL.  */
-      xfree (exception_name);
-      exception_name = NULL;
+      exception_name.clear ();
       args -= 2;
     }
-  make_cleanup (xfree, exception_name);
 
   /* Check to see if we have a condition.  */
 
@@ -13125,8 +13078,7 @@ catch_ada_exception_command_split (const char *args,
 
       if (args[0] == '\0')
         error (_("Condition missing after `if' keyword"));
-      cond = xstrdup (args);
-      make_cleanup (xfree, cond);
+      *cond_string = args;
 
       args += strlen (args);
     }
@@ -13137,25 +13089,23 @@ catch_ada_exception_command_split (const char *args,
   if (args[0] != '\0')
     error (_("Junk at end of expression"));
 
-  discard_cleanups (old_chain);
-
   if (is_catch_handlers_cmd)
     {
       /* Catch handling of exceptions.  */
       *ex = ada_catch_handlers;
       *excep_string = exception_name;
     }
-  else if (exception_name == NULL)
+  else if (exception_name.empty ())
     {
       /* Catch all exceptions.  */
       *ex = ada_catch_exception;
-      *excep_string = NULL;
+      excep_string->clear ();
     }
-  else if (strcmp (exception_name, "unhandled") == 0)
+  else if (exception_name == "unhandled")
     {
       /* Catch unhandled exceptions.  */
       *ex = ada_catch_exception_unhandled;
-      *excep_string = NULL;
+      excep_string->clear ();
     }
   else
     {
@@ -13163,8 +13113,6 @@ catch_ada_exception_command_split (const char *args,
       *ex = ada_catch_exception;
       *excep_string = exception_name;
     }
-  if (cond != NULL)
-    cond_string.assign (cond);
 }
 
 /* Return the name of the symbol on which we should break in order to
@@ -13288,15 +13236,12 @@ ada_exception_catchpoint_cond_string (const char *excep_string,
 /* Return the symtab_and_line that should be used to insert an exception
    catchpoint of the TYPE kind.
 
-   EXCEP_STRING should contain the name of a specific exception that
-   the catchpoint should catch, or NULL otherwise.
-
    ADDR_STRING returns the name of the function where the real
    breakpoint that implements the catchpoints is set, depending on the
    type of catchpoint we need to create.  */
 
 static struct symtab_and_line
-ada_exception_sal (enum ada_exception_catchpoint_kind ex, char *excep_string,
+ada_exception_sal (enum ada_exception_catchpoint_kind ex,
 		   const char **addr_string, const struct breakpoint_ops **ops)
 {
   const char *sym_name;
@@ -13332,15 +13277,11 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex, char *excep_string,
 
    EX_KIND is the kind of exception catchpoint to be created.
 
-   If EXCEPT_STRING is NULL, this catchpoint is expected to trigger
+   If EXCEPT_STRING is empty, this catchpoint is expected to trigger
    for all exceptions.  Otherwise, EXCEPT_STRING indicates the name
-   of the exception to which this catchpoint applies.  When not NULL,
-   the string must be allocated on the heap, and its deallocation
-   is no longer the responsibility of the caller.
+   of the exception to which this catchpoint applies.
 
-   COND_STRING, if not NULL, is the catchpoint condition.  This string
-   must be allocated on the heap, and its deallocation is no longer
-   the responsibility of the caller.
+   COND_STRING, if not empty, is the catchpoint condition.
 
    TEMPFLAG, if nonzero, means that the underlying breakpoint
    should be temporary.
@@ -13350,7 +13291,7 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex, char *excep_string,
 void
 create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 enum ada_exception_catchpoint_kind ex_kind,
-				 char *excep_string,
+				 const std::string &excep_string,
 				 const std::string &cond_string,
 				 int tempflag,
 				 int disabled,
@@ -13358,8 +13299,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 {
   const char *addr_string = NULL;
   const struct breakpoint_ops *ops = NULL;
-  struct symtab_and_line sal
-    = ada_exception_sal (ex_kind, excep_string, &addr_string, &ops);
+  struct symtab_and_line sal = ada_exception_sal (ex_kind, &addr_string, &ops);
 
   std::unique_ptr<ada_catchpoint> c (new ada_catchpoint ());
   init_ada_exception_breakpoint (c.get (), gdbarch, sal, addr_string,
@@ -13381,7 +13321,7 @@ catch_ada_exception_command (const char *arg_entry, int from_tty,
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
   enum ada_exception_catchpoint_kind ex_kind;
-  char *excep_string = NULL;
+  std::string excep_string;
   std::string cond_string;
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
@@ -13389,7 +13329,7 @@ catch_ada_exception_command (const char *arg_entry, int from_tty,
   if (!arg)
     arg = "";
   catch_ada_exception_command_split (arg, false, &ex_kind, &excep_string,
-				     cond_string);
+				     &cond_string);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
 				   excep_string, cond_string,
 				   tempflag, 1 /* enabled */,
@@ -13406,7 +13346,7 @@ catch_ada_handlers_command (const char *arg_entry, int from_tty,
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
   enum ada_exception_catchpoint_kind ex_kind;
-  char *excep_string = NULL;
+  std::string excep_string;
   std::string cond_string;
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
@@ -13414,7 +13354,7 @@ catch_ada_handlers_command (const char *arg_entry, int from_tty,
   if (!arg)
     arg = "";
   catch_ada_exception_command_split (arg, true, &ex_kind, &excep_string,
-				     cond_string);
+				     &cond_string);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
 				   excep_string, cond_string,
 				   tempflag, 1 /* enabled */,
