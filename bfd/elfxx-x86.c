@@ -1966,7 +1966,11 @@ _bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
       return TRUE;
     }
 
-  eh->local_ref = 1;
+  /* Symbols created by HIDDEN and PROVIDE_HIDDEN assignments in linker
+     script aren't forced local here yet.  */
+  if (!h->root.ldscript_def)
+    eh->local_ref = 1;
+
   return FALSE;
 }
 
