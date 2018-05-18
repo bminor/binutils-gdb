@@ -588,6 +588,8 @@ void bfd_putb64 (bfd_uint64_t, void *);
 void bfd_putl64 (bfd_uint64_t, void *);
 void bfd_putb32 (bfd_vma, void *);
 void bfd_putl32 (bfd_vma, void *);
+void bfd_putb24 (bfd_vma, void *);
+void bfd_putl24 (bfd_vma, void *);
 void bfd_putb16 (bfd_vma, void *);
 void bfd_putl16 (bfd_vma, void *);
 
@@ -2149,6 +2151,8 @@ enum bfd_architecture
 #define bfd_mach_m6812s        2
   bfd_arch_m9s12x,    /* Freescale S12X.  */
   bfd_arch_m9s12xg,   /* Freescale XGATE.  */
+  bfd_arch_s12z,    /* Freescale S12Z.  */
+#define bfd_mach_s12z_default 0
   bfd_arch_z8k,       /* Zilog Z8000.  */
 #define bfd_mach_z8001         1
 #define bfd_mach_z8002         2
@@ -5252,6 +5256,11 @@ a matching HI8XG part.  */
 This is the 8 bit high part of an absolute address and immediately follows
 a matching LO8XG part.  */
   BFD_RELOC_M68HC12_HI8XG,
+
+/* Freescale S12Z reloc.
+This is a 15 bit relative address.  If the most significant bits are all zero
+then it may be truncated to 8 bits.  */
+  BFD_RELOC_S12Z_15_PCREL,
 
 /* NS CR16C Relocations.  */
   BFD_RELOC_16C_NUM08,

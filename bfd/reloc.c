@@ -431,6 +431,7 @@ bfd_get_reloc_size (reloc_howto_type *howto)
 {
   switch (howto->size)
     {
+    case 5: return 3;
     case 0: return 1;
     case 1: return 2;
     case 2: return 4;
@@ -917,6 +918,16 @@ space consuming.  For each target:
 
   switch (howto->size)
     {
+    case 5:
+      {
+	long x = bfd_get_32 (abfd, (bfd_byte *) data + octets);
+	x >>= 8;
+	DOIT (x);
+	bfd_put_16 (abfd, (bfd_vma) (x >> 8), (bfd_byte *) data + octets);
+	bfd_put_8 (abfd, (x & 0xFF), (unsigned char *) data + 2 + octets);
+      }
+      break;
+
     case 0:
       {
 	char x = bfd_get_8 (abfd, (char *) data + octets);
@@ -5948,6 +5959,12 @@ ENUMDOC
   Motorola 68HC12/XGATE reloc.
   This is the 8 bit high part of an absolute address and immediately follows
   a matching LO8XG part.
+ENUM
+  BFD_RELOC_S12Z_15_PCREL
+ENUMDOC
+  Freescale S12Z reloc.
+  This is a 15 bit relative address.  If the most significant bits are all zero
+  then it may be truncated to 8 bits.
 ENUM
   BFD_RELOC_16C_NUM08
 ENUMX

@@ -684,6 +684,7 @@ extern const bfd_target m32r_elf32_linux_le_vec;
 extern const bfd_target m68hc11_elf32_vec;
 extern const bfd_target m68hc12_elf32_vec;
 extern const bfd_target m68k_elf32_vec;
+extern const bfd_target s12z_elf32_vec;
 extern const bfd_target mach_o_be_vec;
 extern const bfd_target mach_o_le_vec;
 extern const bfd_target mach_o_fat_vec;
@@ -1043,6 +1044,8 @@ static const bfd_target * const _bfd_target_vector[] =
 	&m68hc12_elf32_vec,
 
 	&m68k_elf32_vec,
+
+	&s12z_elf32_vec,
 
 	&mach_o_be_vec,
 	&mach_o_le_vec,

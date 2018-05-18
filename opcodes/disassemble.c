@@ -251,6 +251,11 @@ disassembler (enum bfd_architecture a,
       disassemble = print_insn_m9s12xg;
       break;
 #endif
+#if defined(ARCH_s12z)
+    case bfd_arch_s12z:
+      disassemble = print_insn_s12z;
+      break;
+#endif
 #ifdef ARCH_m68k
     case bfd_arch_m68k:
       disassemble = print_insn_m68k;

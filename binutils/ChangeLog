@@ -1,3 +1,9 @@
+2018-05-18  John Darrington  <john@darrington.wattle.id.au>
+
+	* readelf.c: Add support for s12z architecture.
+	* testsuite/lib/binutils-common.exp (is_elf_format): Excluse s12z
+	targets.
+
 2018-05-15  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/21446

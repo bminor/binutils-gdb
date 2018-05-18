@@ -75,6 +75,7 @@ case ${cpu} in
   m680[012346]0)	cpu_type=m68k ;;
   m6811|m6812|m68hc12)	cpu_type=m68hc11 ;;
   m683??)		cpu_type=m68k ;;
+  s12z)               cpu_type=s12z ;;
   mep)			cpu_type=mep endian=little ;;
   microblazeel*)	cpu_type=microblaze endian=little;;
   microblaze*)		cpu_type=microblaze endian=big;;
@@ -284,6 +285,8 @@ case ${generic_target} in
   m68k-*-uclinux*)			fmt=elf em=uclinux ;;
   m68k-*-gnu*)				fmt=elf ;;
   m68k-*-netbsdelf*)			fmt=elf em=nbsd ;;
+
+  s12z-*-*)				fmt=elf ;;
 
   mep-*-elf)				fmt=elf ;;
 

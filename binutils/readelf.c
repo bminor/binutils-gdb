@@ -119,6 +119,7 @@
 #include "elf/m32r.h"
 #include "elf/m68k.h"
 #include "elf/m68hc11.h"
+#include "elf/s12z.h"
 #include "elf/mcore.h"
 #include "elf/mep.h"
 #include "elf/metag.h"
@@ -1272,6 +1273,10 @@ dump_relocations (Filedata *          filedata,
 	case EM_68HC11:
 	case EM_68HC12:
 	  rtype = elf_m68hc11_reloc_type (type);
+	  break;
+
+	case EM_S12Z:
+	  rtype = elf_s12z_reloc_type (type);
 	  break;
 
 	case EM_68K:
@@ -12309,6 +12314,8 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_68HC11:
     case EM_68HC12:
       return reloc_type == 6; /* R_M68HC11_32.  */
+    case EM_S12Z:
+      return reloc_type == 6; /* R_S12Z_EXT32.  */
     case EM_MCORE:
       return reloc_type == 1; /* R_MCORE_ADDR32.  */
     case EM_CYGNUS_MEP:

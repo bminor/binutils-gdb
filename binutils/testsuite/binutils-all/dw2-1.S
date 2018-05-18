@@ -27,6 +27,8 @@ _start:
 func_cu1:
 .Lbegin_func_cu1:
 	.4byte 0
+	.global func_cu1_end
+func_cu1_end:	
 .Lend_func_cu1:
 	.size func_cu1, .-func_cu1
 .Lend_text1:

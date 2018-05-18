@@ -1,3 +1,23 @@
+2018-05-18  John Darrington  <john@darrington.wattle.id.au>
+
+	* Makefile.am: Add support for s12z architecture.
+	* configure.tgt: Likewise.
+	* Makefile.in: Regenerate.
+	* emulparams/m9s12zelf.sh: New file.
+	* scripttempl/elfm9s12z.sc: New file.
+	* testsuite/ld-discard/static.d: Expect to fail for the s12z
+	target.
+	* testsuite/ld-elf/endsym.d: Likewise.
+	* testsuite/ld-elf/merge.d: Likewise.
+	* testsuite/ld-elf/pr14926.d: Skip for the s12z target.
+	* testsuite/ld-elf/sec64k.exp: Likewise.
+	* testsuite/ld-s12z: New directory.
+	* testsuite/ld-s12z/opr-linking.d: New file.
+	* testsuite/ld-s12z/opr-linking.s: New file.
+	* testsuite/ld-s12z/relative-linking.d: New file.
+	* testsuite/ld-s12z/relative-linking.s: New file.
+	* testsuite/ld-s12z/z12s.exp: New file.
+
 2018-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23189

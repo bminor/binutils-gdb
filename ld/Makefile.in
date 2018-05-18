@@ -693,6 +693,7 @@ ALL_EMULATION_SOURCES = \
 	em68hc12elfb.c \
 	em68kelf.c \
 	em68kelfnbsd.c \
+	em9s12zelf.c \
 	emcorepe.c \
 	emn10200.c \
 	emn10300.c \
@@ -1305,6 +1306,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em68hc12elfb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em68kelf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em68kelfnbsd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em9s12zelf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emcorepe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emmo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emn10200.Po@am__quote@
@@ -2937,6 +2939,10 @@ em68kelfnbsd.c: $(srcdir)/emulparams/m68kelfnbsd.sh \
   $(srcdir)/emulparams/m68kelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/m68kelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+em9s12zelf.c: $(srcdir)/emulparams/m9s12zelf.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/generic.em \
+  $(srcdir)/scripttempl/elfm9s12z.sc ${GEN_DEPENDS}
 
 emcorepe.c: $(srcdir)/emulparams/mcorepe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}

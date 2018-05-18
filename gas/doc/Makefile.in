@@ -340,6 +340,7 @@ CPU_DOCS = \
 	c-m32r.texi \
 	c-m68hc11.texi \
 	c-m68k.texi \
+	c-s12z.texi \
 	c-metag.texi \
 	c-microblaze.texi \
 	c-mips.texi \

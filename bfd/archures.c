@@ -281,6 +281,8 @@ DESCRIPTION
 .#define bfd_mach_m6812s	2
 .  bfd_arch_m9s12x,    {* Freescale S12X.  *}
 .  bfd_arch_m9s12xg,   {* Freescale XGATE.  *}
+.  bfd_arch_s12z,    {* Freescale S12Z.  *}
+.#define bfd_mach_s12z_default 0
 .  bfd_arch_z8k,       {* Zilog Z8000.  *}
 .#define bfd_mach_z8001		1
 .#define bfd_mach_z8002		2
@@ -590,6 +592,7 @@ extern const bfd_arch_info_type bfd_m68hc11_arch;
 extern const bfd_arch_info_type bfd_m68hc12_arch;
 extern const bfd_arch_info_type bfd_m9s12x_arch;
 extern const bfd_arch_info_type bfd_m9s12xg_arch;
+extern const bfd_arch_info_type bfd_s12z_arch;
 extern const bfd_arch_info_type bfd_m68k_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_mep_arch;
@@ -679,6 +682,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_m68hc12_arch,
     &bfd_m9s12x_arch,
     &bfd_m9s12xg_arch,
+    &bfd_s12z_arch,
     &bfd_m68k_arch,
     &bfd_mcore_arch,
     &bfd_mep_arch,

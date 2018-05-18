@@ -452,6 +452,7 @@ TARGET_CPU_CFILES = \
 	config/tc-m32r.c \
 	config/tc-m68hc11.c \
 	config/tc-m68k.c \
+	config/tc-s12z.c \
 	config/tc-mcore.c \
 	config/tc-mep.c \
 	config/tc-metag.c \
@@ -525,6 +526,7 @@ TARGET_CPU_HFILES = \
 	config/tc-m32r.h \
 	config/tc-m68hc11.h \
 	config/tc-m68k.h \
+	config/tc-s12z.h \
 	config/tc-mcore.h \
 	config/tc-mep.h \
 	config/tc-metag.h \
@@ -872,6 +874,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-m32r.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-m68hc11.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-m68k.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-s12z.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-mcore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-mep.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-metag.Po@am__quote@
@@ -1317,6 +1320,20 @@ tc-m68k.obj: config/tc-m68k.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-m68k.c' object='tc-m68k.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-m68k.obj `if test -f 'config/tc-m68k.c'; then $(CYGPATH_W) 'config/tc-m68k.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-m68k.c'; fi`
+
+tc-s12z.o: config/tc-s12z.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-s12z.o -MD -MP -MF $(DEPDIR)/tc-s12z.Tpo -c -o tc-s12z.o `test -f 'config/tc-s12z.c' || echo '$(srcdir)/'`config/tc-s12z.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-s12z.Tpo $(DEPDIR)/tc-s12z.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-s12z.c' object='tc-s12z.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-s12z.o `test -f 'config/tc-s12z.c' || echo '$(srcdir)/'`config/tc-s12z.c
+
+tc-s12z.obj: config/tc-s12z.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-s12z.obj -MD -MP -MF $(DEPDIR)/tc-s12z.Tpo -c -o tc-s12z.obj `if test -f 'config/tc-s12z.c'; then $(CYGPATH_W) 'config/tc-s12z.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-s12z.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-s12z.Tpo $(DEPDIR)/tc-s12z.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-s12z.c' object='tc-s12z.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-s12z.obj `if test -f 'config/tc-s12z.c'; then $(CYGPATH_W) 'config/tc-s12z.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-s12z.c'; fi`
 
 tc-mcore.o: config/tc-mcore.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-mcore.o -MD -MP -MF $(DEPDIR)/tc-mcore.Tpo -c -o tc-mcore.o `test -f 'config/tc-mcore.c' || echo '$(srcdir)/'`config/tc-mcore.c

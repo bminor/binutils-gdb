@@ -61,6 +61,7 @@ extern int print_insn_m68hc11		(bfd_vma, disassemble_info *);
 extern int print_insn_m68hc12		(bfd_vma, disassemble_info *);
 extern int print_insn_m9s12x		(bfd_vma, disassemble_info *);
 extern int print_insn_m9s12xg		(bfd_vma, disassemble_info *);
+extern int print_insn_s12z		(bfd_vma, disassemble_info *);
 extern int print_insn_m68k		(bfd_vma, disassemble_info *);
 extern int print_insn_mcore		(bfd_vma, disassemble_info *);
 extern int print_insn_metag		(bfd_vma, disassemble_info *);

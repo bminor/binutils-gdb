@@ -40,6 +40,7 @@ if {[istarget "ft32-*-*"]
     || [istarget "h8300-*-*"]
     || [istarget "ip2k-*-*"]
     || [istarget "m68hc1*-*"]
+    || [istarget "s12z-*"]
     || [istarget "xgate-*"] } {
     return
 }

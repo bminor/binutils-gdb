@@ -581,6 +581,8 @@ void bfd_putb64 (bfd_uint64_t, void *);
 void bfd_putl64 (bfd_uint64_t, void *);
 void bfd_putb32 (bfd_vma, void *);
 void bfd_putl32 (bfd_vma, void *);
+void bfd_putb24 (bfd_vma, void *);
+void bfd_putl24 (bfd_vma, void *);
 void bfd_putb16 (bfd_vma, void *);
 void bfd_putl16 (bfd_vma, void *);
 

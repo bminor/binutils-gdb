@@ -175,6 +175,7 @@ TARGET_LIBOPCODES_CFILES = \
 	m68hc11-opc.c \
 	m68k-dis.c \
 	m68k-opc.c \
+	s12z-dis.c \
 	mcore-dis.c \
 	mep-asm.c \
 	mep-desc.c \

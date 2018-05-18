@@ -613,6 +613,27 @@ bfd_putl16 (bfd_vma data, void *p)
   addr[1] = (data >> 8) & 0xff;
 }
 
+
+void
+bfd_putb24 (bfd_vma data, void *p)
+{
+  bfd_byte *addr = (bfd_byte *) p;
+  addr[0] = (data >> 16) & 0xff;
+  addr[1] = (data >> 8) & 0xff;
+  addr[2] = data & 0xff;
+}
+
+
+void
+bfd_putl24 (bfd_vma data, void *p)
+{
+  bfd_byte *addr = (bfd_byte *) p;
+  addr[0] = data & 0xff;
+  addr[1] = (data >> 8) & 0xff;
+  addr[2] = (data >> 16) & 0xff;
+}
+
+
 bfd_vma
 bfd_getb32 (const void *p)
 {

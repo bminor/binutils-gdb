@@ -1,3 +1,22 @@
+2018-05-18  John Darrington  <john@darrington.wattle.id.au>
+
+	* Makefile.am: Add s12z files.
+	* Makefile.in: Regenerate.
+	* archures.c: Add bfd_s12z_arch.
+	* bfd-in.h: Add exports of bfd_putb24 and bfd_putl24.
+	* bfd-in2.h: Regenerate.
+	* config.bfd: Add s12z target.
+	* configure.ac: Add s12z target.
+	* configure: Regenerate.
+	* cpu-s12z.c: New file.
+	* elf32-s12z.c: New file.
+	* libbfd.c (bfd_putb24): New function.
+	(bfd_putl24): New function.
+	* libbfd.h: Regenerate.
+	* reloc.c: Add s12z relocations.
+	(bfd_get_reloc_size): Handle size 5 relocs.
+	* targets.c: Add s12z_elf32_vec.
+
 2018-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23189

@@ -1,3 +1,14 @@
+2018-05-18  John Darrington  <john@darrington.wattle.id.au>
+
+	* Makefile.am: Add support for s12z architecture.
+	* configure.ac: Likewise.
+	* disassemble.c: Likewise.
+	* disassemble.h: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* s12z-dis.c: New file.
+	* s12z.h: New file.
+
 2018-05-18  Alan Modra  <amodra@gmail.com>
 
 	* nfp-dis.c: Don't #include libbfd.h.

@@ -7565,6 +7565,9 @@ subject, see the hardware manufacturer's manual.
 @ifset M68HC11
 * M68HC11-Dependent::           M68HC11 and 68HC12 Dependent Features
 @end ifset
+@ifset S12Z
+* S12Z-Dependent::            S12Z Dependent Features
+@end ifset
 @ifset METAG
 * Meta-Dependent ::             Meta Dependent Features
 @end ifset
@@ -7774,6 +7777,10 @@ family.
 
 @ifset M68HC11
 @include c-m68hc11.texi
+@end ifset
+
+@ifset S12Z
+@include c-s12z.texi
 @end ifset
 
 @ifset METAG
