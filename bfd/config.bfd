@@ -665,6 +665,10 @@ case "${targ}" in
   x86_64-*-elf* | x86_64-*-rtems* | x86_64-*-fuchsia)
     targ_defvec=x86_64_elf64_vec
     targ_selvecs="i386_elf32_vec iamcu_elf32_vec x86_64_elf32_vec l1om_elf64_vec k1om_elf64_vec"
+    case "${targ}" in
+      x86_64-*-rtems*)
+    targ_selvecs="${targ_selvecs} x86_64_pei_vec"
+    esac
     want64=true
     ;;
   x86_64-*-dragonfly*)

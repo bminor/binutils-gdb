@@ -1,3 +1,8 @@
+2018-05-30  Amaan Cheval <amaan.cheval@gmail.com>
+
+	* config.bfd (x86_64-*-*): Add pei-x86-64 target to x86_64-*-rtems*
+	This is needed to generate UEFI application image files from ELFs.
+
 2018-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_lazy_plt): Add plt_tlsdesc_entry,
