@@ -48,12 +48,12 @@ test_escape_sequences ()
 static void
 test_format_specifier ()
 {
-  check ("Hello %d%llx%%d",
+  check ("Hello %d%llx%%d", /* ARI: %ll */
     {
       format_piece ("Hello ", literal_piece),
       format_piece ("%d", int_arg),
       format_piece ("", literal_piece),
-      format_piece ("%llx", long_long_arg),
+      format_piece ("%llx", long_long_arg), /* ARI: %ll */
       format_piece ("%%d", literal_piece),
     });
 }
