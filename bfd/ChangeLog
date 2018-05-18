@@ -1,3 +1,12 @@
+2018-05-18  Alan Modra  <amodra@gmail.com>
+
+	PR 23199
+	* elf.c (setup_group): Formatting.  Check that SHT_GROUP entries
+	don't point at other SHT_GROUP sections.  Set shdr corresponding
+	to invalid entry, to NULL rather than section 0.  Identify
+	SHT_GROUP section index when reporting an error.  Cope with NULL
+	shdr pointer.
+
 2018-05-15  Christophe Guillon  <christophe.guillon@st.com>
 
 	* coffcode.h (coff_bigobj_swap_aux_in): Make sure that all fields

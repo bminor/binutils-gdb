@@ -627,7 +627,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 	      bfd_alloc2 (abfd, num_group, sizeof (Elf_Internal_Shdr *));
 	  if (elf_tdata (abfd)->group_sect_ptr == NULL)
 	    return FALSE;
-	  memset (elf_tdata (abfd)->group_sect_ptr, 0, num_group * sizeof (Elf_Internal_Shdr *));
+	  memset (elf_tdata (abfd)->group_sect_ptr, 0,
+		  num_group * sizeof (Elf_Internal_Shdr *));
 	  num_group = 0;
 
 	  for (i = 0; i < shnum; i++)
@@ -706,13 +707,16 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 			      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 			  break;
 			}
-		      if (idx >= shnum)
+		      if (idx < shnum)
+			dest->shdr = elf_elfsections (abfd)[idx];
+		      if (idx >= shnum
+			  || dest->shdr->sh_type == SHT_GROUP)
 			{
 			  _bfd_error_handler
-			    (_("%B: invalid SHT_GROUP entry"), abfd);
-			  idx = 0;
+			    (_("%B: invalid entry in SHT_GROUP section [%u]"),
+			     abfd, i);
+			  dest->shdr = NULL;
 			}
-		      dest->shdr = elf_elfsections (abfd)[idx];
 		    }
 		}
 	    }
@@ -778,7 +782,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		idx = (Elf_Internal_Group *) shdr->contents;
 		n_elt = shdr->sh_size / 4;
 		while (--n_elt != 0)
-		  if ((s = (++idx)->shdr->bfd_section) != NULL
+		  if ((++idx)->shdr != NULL
+		      && (s = idx->shdr->bfd_section) != NULL
 		      && elf_next_in_group (s) != NULL)
 		    break;
 		if (n_elt != 0)
