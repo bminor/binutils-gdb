@@ -3,6 +3,10 @@
 
 *** Changes since GDB 8.2
 
+* GDB and GDBserver now support IPv6 connections.  IPv6 addresses
+  can be passed using the '[ADDRESS]:PORT' notation, or the regular
+  'ADDRESS:PORT' method.
+
 *** Changes in GDB 8.2
 
 * The 'set disassembler-options' command now supports specifying options

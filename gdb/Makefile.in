@@ -430,6 +430,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/offset-type-selftests.c \
 	unittests/observable-selftests.c \
 	unittests/optional-selftests.c \
+	unittests/parse-connection-spec-selftests.c \
 	unittests/ptid-selftests.c \
 	unittests/rsp-low-selftests.c \
 	unittests/scoped_fd-selftests.c \
@@ -959,6 +960,7 @@ COMMON_SFILES = \
 	common/job-control.c \
 	common/gdb_tilde_expand.c \
 	common/gdb_vecs.c \
+	common/netstuff.c \
 	common/new-op.c \
 	common/pathstuff.c \
 	common/print-utils.c \
@@ -1439,6 +1441,7 @@ HFILES_NO_SRCDIR = \
 	common/gdb_vecs.h \
 	common/gdb_wait.h \
 	common/common-inferior.h \
+	common/netstuff.h \
 	common/host-defs.h \
 	common/pathstuff.h \
 	common/print-utils.h \

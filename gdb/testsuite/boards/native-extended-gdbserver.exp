@@ -24,8 +24,6 @@ load_generic_config "extended-gdbserver"
 load_board_description "gdbserver-base"
 load_board_description "local-board"
 
-set_board_info sockethost "localhost:"
-
 # We will be using the extended GDB remote protocol.
 set_board_info gdb_protocol "extended-remote"
 

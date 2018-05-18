@@ -53,7 +53,7 @@ save_vars { GDBFLAGS } {
     set use_gdb_stub 0
 
     gdb_test "target ${gdbserver_protocol} ${gdbserver_gdbport}" \
-	"Remote debugging using $gdbserver_gdbport" \
+	"Remote debugging using [string_to_regexp $gdbserver_gdbport]" \
 	"connect to gdbserver"
 
     gdb_test "run" \

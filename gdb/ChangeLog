@@ -1,3 +1,26 @@
+2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Paul Fertser  <fercerpav@gmail.com>
+	    Tsutomu Seki  <sekiriki@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	'unittests/parse-connection-spec-selftests.c'.
+	(COMMON_SFILES): Add 'common/netstuff.c'.
+	(HFILES_NO_SRCDIR): Add 'common/netstuff.h'.
+	* NEWS (Changes since GDB 8.2): Mention IPv6 support.
+	* common/netstuff.c: New file.
+	* common/netstuff.h: New file.
+	* ser-tcp.c: Include 'netstuff.h' and 'wspiapi.h'.
+	(wait_for_connect): Update comment.  New parameter
+	'gdb::optional<int> sock' instead of 'struct serial *scb'.
+	Use 'sock' directly instead of 'scb->fd'.
+	(try_connect): New function, with code from 'net_open'.
+	(net_open): Rewrite main loop to deal with multiple
+	sockets/addresses.  Handle IPv6-style hostnames; implement
+	support for IPv6 connections.
+	* unittests/parse-connection-spec-selftests.c: New file.
+
 2018-07-11  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/23377

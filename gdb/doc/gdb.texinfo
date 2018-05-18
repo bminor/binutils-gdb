@@ -20517,16 +20517,27 @@ If you're using a serial line, you may want to give @value{GDBN} the
 @code{target} command.
 
 @item target remote @code{@var{host}:@var{port}}
+@itemx target remote @code{@var{[host]}:@var{port}}
 @itemx target remote @code{tcp:@var{host}:@var{port}}
+@itemx target remote @code{tcp:@var{[host]}:@var{port}}
+@itemx target remote @code{tcp4:@var{host}:@var{port}}
+@itemx target remote @code{tcp6:@var{host}:@var{port}}
+@itemx target remote @code{tcp6:@var{[host]}:@var{port}}
 @itemx target extended-remote @code{@var{host}:@var{port}}
+@itemx target extended-remote @code{@var{[host]}:@var{port}}
 @itemx target extended-remote @code{tcp:@var{host}:@var{port}}
+@itemx target extended-remote @code{tcp:@var{[host]}:@var{port}}
+@itemx target extended-remote @code{tcp4:@var{host}:@var{port}}
+@itemx target extended-remote @code{tcp6:@var{host}:@var{port}}
+@itemx target extended-remote @code{tcp6:@var{[host]}:@var{port}}
 @cindex @acronym{TCP} port, @code{target remote}
 Debug using a @acronym{TCP} connection to @var{port} on @var{host}.
-The @var{host} may be either a host name or a numeric @acronym{IP}
-address; @var{port} must be a decimal number.  The @var{host} could be
-the target machine itself, if it is directly connected to the net, or
-it might be a terminal server which in turn has a serial line to the
-target.
+The @var{host} may be either a host name, a numeric @acronym{IPv4}
+address, or a numeric @acronym{IPv6} address (with or without the
+square brackets to separate the address from the port); @var{port}
+must be a decimal number.  The @var{host} could be the target machine
+itself, if it is directly connected to the net, or it might be a
+terminal server which in turn has a serial line to the target.
 
 For example, to connect to port 2828 on a terminal server named
 @code{manyfarms}:
@@ -20534,6 +20545,28 @@ For example, to connect to port 2828 on a terminal server named
 @smallexample
 target remote manyfarms:2828
 @end smallexample
+
+To connect to port 2828 on a terminal server whose address is
+@code{2001:0db8:85a3:0000:0000:8a2e:0370:7334}, you can either use the
+square bracket syntax:
+
+@smallexample
+target remote [2001:0db8:85a3:0000:0000:8a2e:0370:7334]:2828
+@end smallexample
+
+@noindent
+or explicitly specify the @acronym{IPv6} protocol:
+
+@smallexample
+target remote tcp6:2001:0db8:85a3:0000:0000:8a2e:0370:7334:2828
+@end smallexample
+
+This last example may be confusing to the reader, because there is no
+visible separation between the hostname and the port number.
+Therefore, we recommend the user to provide @acronym{IPv6} addresses
+using square brackets for clarity.  However, it is important to
+mention that for @value{GDBN} there is no ambiguity: the number after
+the last colon is considered to be the port number.
 
 If your remote target is actually running on the same machine as your
 debugger session (e.g.@: a simulator for your target running on the
@@ -20548,7 +20581,15 @@ target remote :1234
 Note that the colon is still required here.
 
 @item target remote @code{udp:@var{host}:@var{port}}
+@itemx target remote @code{udp:@var{[host]}:@var{port}}
+@itemx target remote @code{udp4:@var{host}:@var{port}}
+@itemx target remote @code{udp6:@var{[host]}:@var{port}}
 @itemx target extended-remote @code{udp:@var{host}:@var{port}}
+@itemx target extended-remote @code{udp:@var{host}:@var{port}}
+@itemx target extended-remote @code{udp:@var{[host]}:@var{port}}
+@itemx target extended-remote @code{udp4:@var{host}:@var{port}}
+@itemx target extended-remote @code{udp6:@var{host}:@var{port}}
+@itemx target extended-remote @code{udp6:@var{[host]}:@var{port}}
 @cindex @acronym{UDP} port, @code{target remote}
 Debug using @acronym{UDP} packets to @var{port} on @var{host}.  For example, to
 connect to @acronym{UDP} port 2828 on a terminal server named @code{manyfarms}:

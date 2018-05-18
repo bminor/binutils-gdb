@@ -1,4 +1,24 @@
 2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Paul Fertser  <fercerpav@gmail.com>
+	    Tsutomu Seki  <sekiriki@gmail.com>
+
+	* README (Testsuite Parameters): Mention new 'GDB_TEST_SOCKETHOST'
+	parameter.
+	* boards/native-extended-gdbserver.exp: Do not set 'sockethost'
+	by default.
+	* boards/native-gdbserver.exp: Likewise.
+	* gdb.server/run-without-local-binary.exp: Improve regexp used
+	for detecting when a remote debugging connection succeeds.
+	* gdb.server/server-connect.exp: New file.
+	* lib/gdbserver-support.exp (gdbserver_default_get_comm_port):
+	Do not prefix the port number with ":".
+	(gdbserver_start): New global GDB_TEST_SOCKETHOST.  Implement
+	support for detecting and using it.  Add '$debughost_gdbserver'
+	to the list of arguments used to start gdbserver.  Handle case
+	when gdbserver cannot resolve a network name.
+
+2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR c++/23373
 	* gdb.base/ptype-offsets.cc (struct static_member): New

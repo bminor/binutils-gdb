@@ -1,3 +1,22 @@
+2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Paul Fertser  <fercerpav@gmail.com>
+	    Tsutomu Seki  <sekiriki@gmail.com>
+
+	* Makefile.in (SFILES): Add '$(srcdir)/common/netstuff.c'.
+	(OBS): Add 'common/netstuff.o'.
+	(GDBREPLAY_OBS): Likewise.
+	* gdbreplay.c: Include 'wspiapi.h' and 'netstuff.h'.
+	(remote_open): Implement support for IPv6
+	connections.
+	* remote-utils.c: Include 'netstuff.h', 'filestuff.h'
+	and 'wspiapi.h'.
+	(handle_accept_event): Accept connections from IPv6 sources.
+	(remote_prepare): Handle IPv6-style hostnames; implement
+	support for IPv6 connections.
+	(remote_open): Implement support for printing connections from
+	IPv6 sources.
+
 2018-07-11  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/23377

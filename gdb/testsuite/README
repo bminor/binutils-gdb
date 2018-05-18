@@ -259,6 +259,20 @@ This make (not runtest) variable is used to specify whether the
 testsuite preloads the read1.so library into expect.  Any non-empty
 value means true.  See "Race detection" below.
 
+GDB_TEST_SOCKETHOST
+
+This variable can provide the hostname/address that should be used
+when performing GDBserver-related tests.  This is useful in some
+situations, e.g., when you want to test the IPv6 connectivity of GDB
+and GDBserver, or when using a different hostname/address is needed.
+For example, to make GDB and GDBserver use IPv6-only connections, you
+can do:
+
+	make check TESTS="gdb.server/*.exp" RUNTESTFLAGS='GDB_TEST_SOCKETHOST=tcp6:[::1]'
+
+Note that only a hostname/address can be provided, without a port
+number.
+
 Race detection
 **************
 
