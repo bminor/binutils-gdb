@@ -1,3 +1,18 @@
+2018-05-18  Kito Cheng  <kito.cheng@gmail.com>
+	    Monk Chiang  <sh.chiang04@gmail.com>
+	    Jim Wilson <jimw@sifive.com>
+
+	* config/tc-riscv.c (rve_abi): New.
+	(riscv_set_options): Add rve field.  Initialize it.
+	(riscv_set_rve) New function.
+	(riscv_set_arch): Support 'e' ISA subset.
+	(reg_lookup_internal): If rve, check register is available.
+	(riscv_set_abi): New parameter rve.
+	(md_parse_option): Pass new argument to riscv_set_abi.
+	(riscv_after_parse_args): Call riscv_set_rve.  If rve_abi, set
+	EF_RISCV_RVE.
+	* doc/c-riscv.texi (-mabi): Document new ilp32e argument.
+
 2018-05-18  John Darrington  <john@darrington.wattle.id.au>
 
 	* Makefile.am: Add support for s12z target.

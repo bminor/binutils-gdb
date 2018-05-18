@@ -1,3 +1,8 @@
+2018-05-18  Kito Cheng  <kito.cheng@gmail.com>
+
+	* elfnn-riscv.c (_bfd_riscv_elf_merge_private_bfd_data): Handle
+	EF_RISCV_RVE.
+
 2018-05-18  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (allocate_dynrelocs): Discard dynamic relocations if

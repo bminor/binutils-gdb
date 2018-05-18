@@ -2625,6 +2625,14 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       goto fail;
     }
 
+  /* Disallow linking RVE and non-RVE.  */
+  if ((old_flags ^ new_flags) & EF_RISCV_RVE)
+    {
+      (*_bfd_error_handler)
+       (_("%pB: can't link RVE with other target"), ibfd);
+      goto fail;
+    }
+
   /* Allow linking RVC and non-RVC, and keep the RVC flag.  */
   elf_elfheader (obfd)->e_flags |= new_flags & EF_RISCV_RVC;
 
