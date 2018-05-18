@@ -197,9 +197,6 @@ struct mapped_index final : public mapped_index_base
   /* Index data format version.  */
   int version;
 
-  /* The total length of the buffer.  */
-  off_t total_size;
-
   /* The address table data.  */
   gdb::array_view<const gdb_byte> address_table;
 
@@ -3500,7 +3497,6 @@ to use the section anyway."),
     return 0;
 
   map->version = version;
-  map->total_size = section->size;
 
   metadata = (offset_type *) (addr + sizeof (offset_type));
 

@@ -1,5 +1,9 @@
 2018-05-18  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dwarf2read.c (mapped_index) <total_size>: Remove.
+
+2018-05-18  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* unittests/format_pieces-selftests.c (test_format_specifier):
 	Add ARI comments.
 
