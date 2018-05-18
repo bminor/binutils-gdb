@@ -147,6 +147,9 @@ struct name_component
 
 struct mapped_index_base
 {
+  mapped_index_base () = default;
+  DISABLE_COPY_AND_ASSIGN (mapped_index_base);
+
   /* The name_component table (a sorted vector).  See name_component's
      description above.  */
   std::vector<name_component> name_components;
@@ -5603,17 +5606,18 @@ create_cus_from_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
 static bool
 dwarf2_read_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
-  mapped_debug_names local_map (dwarf2_per_objfile);
+  std::unique_ptr<mapped_debug_names> map
+    (new mapped_debug_names (dwarf2_per_objfile));
   mapped_debug_names dwz_map (dwarf2_per_objfile);
   struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   if (!read_debug_names_from_section (objfile, objfile_name (objfile),
 				      &dwarf2_per_objfile->debug_names,
-				      local_map))
+				      *map))
     return false;
 
   /* Don't use the index if it's empty.  */
-  if (local_map.name_count == 0)
+  if (map->name_count == 0)
     return false;
 
   /* If there is a .dwz file, read it so we can get its CU list as
@@ -5631,9 +5635,9 @@ dwarf2_read_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	}
     }
 
-  create_cus_from_debug_names (dwarf2_per_objfile, local_map, dwz_map);
+  create_cus_from_debug_names (dwarf2_per_objfile, *map, dwz_map);
 
-  if (local_map.tu_count != 0)
+  if (map->tu_count != 0)
     {
       /* We can only handle a single .debug_types when we have an
 	 index.  */
@@ -5644,15 +5648,13 @@ dwarf2_read_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile)
 						dwarf2_per_objfile->types, 0);
 
       create_signatured_type_table_from_debug_names
-	(dwarf2_per_objfile, local_map, section, &dwarf2_per_objfile->abbrev);
+	(dwarf2_per_objfile, *map, section, &dwarf2_per_objfile->abbrev);
     }
 
   create_addrmap_from_aranges (dwarf2_per_objfile,
 			       &dwarf2_per_objfile->debug_aranges);
 
-  dwarf2_per_objfile->debug_names_table.reset
-    (new mapped_debug_names (dwarf2_per_objfile));
-  *dwarf2_per_objfile->debug_names_table = std::move (local_map);
+  dwarf2_per_objfile->debug_names_table = std::move (map);
   dwarf2_per_objfile->using_index = 1;
   dwarf2_per_objfile->quick_file_names_table =
     create_quick_file_names_table (dwarf2_per_objfile->all_comp_units.size ());

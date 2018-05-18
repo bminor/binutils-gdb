@@ -1,3 +1,9 @@
+2018-05-21  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (dwarf2_read_debug_names): Use std::unique_ptr.
+	(mapped_index_base): Use DISABLE_COPY_AND_ASSIGN.  Default
+	constructor.
+
 2018-05-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common/traits.h (HAVE_IS_TRIVIALLY_COPYABLE): Rename the wrong
