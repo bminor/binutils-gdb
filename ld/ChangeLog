@@ -1,3 +1,8 @@
+2018-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run pr23189 for all targets.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2018-05-18  John Darrington  <john@darrington.wattle.id.au>
 
 	* Makefile.am: Add support for s12z architecture.
