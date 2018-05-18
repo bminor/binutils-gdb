@@ -1,3 +1,10 @@
+2018-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23194
+	* elfxx-x86.c (_bfd_x86_elf_link_symbol_references_local): Don't
+	set eh->local_ref to 1 if a symbol is versioned and there is a
+	version script.
+
 2018-05-18  Kito Cheng  <kito.cheng@gmail.com>
 
 	* elfnn-riscv.c (_bfd_riscv_elf_merge_private_bfd_data): Handle
