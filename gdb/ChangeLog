@@ -1,5 +1,10 @@
 2018-05-21  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_collect_symbol_completion_matches): Remove
+	cleanup.
+
+2018-05-21  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_exception_message_1, ada_exception_message):
 	Return unique_xmalloc_ptr.
 	(print_it_exception): Update.

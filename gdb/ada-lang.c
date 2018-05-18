@@ -6444,7 +6444,6 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
   struct objfile *objfile;
   const struct block *b, *surrounding_static_block = 0;
   struct block_iterator iter;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   gdb_assert (code == TYPE_CODE_UNDEF);
 
@@ -6549,8 +6548,6 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 				lookup_name, text, word);
     }
   }
-
-  do_cleanups (old_chain);
 }
 
                                 /* Field Access */
