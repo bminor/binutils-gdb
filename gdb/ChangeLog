@@ -1,3 +1,7 @@
+2018-05-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* stack.c (print_frame_info): Fix comment.
+
 2018-05-18  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (struct dwz_file): Add constructor, initializers.

@@ -777,7 +777,7 @@ do_gdb_disassembly (struct gdbarch *gdbarch,
    
    SRC_LINE: Print only source line.
    LOCATION: Print only location.
-   LOC_AND_SRC: Print location and source line.
+   SRC_AND_LOC: Print location and source line.
 
    Used in "where" output, and to emit breakpoint or step
    messages.  */
