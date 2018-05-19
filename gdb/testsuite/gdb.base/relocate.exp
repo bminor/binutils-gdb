@@ -116,11 +116,11 @@ gdb_test_multiple "add-symbol-file -s -section-name 0x200 $binfile 0x100" $test 
 # Since we're here, might as well test the 'symbol-file' command and
 # if its arguments can also be passed at any position.
 gdb_test "symbol-file -readnow $binfile" \
-    "Reading symbols from ${binfile}\.\.\.expanding to full symbols\.\.\.done\." \
+    "Reading symbols from ${binfile}\.\.\.\r\nExpanding full symbols from ${binfile}\.\.\." \
     "symbol-file with -readnow first"
 clean_restart
 gdb_test "symbol-file $binfile -readnow" \
-    "Reading symbols from ${binfile}\.\.\.expanding to full symbols\.\.\.done\." \
+    "Reading symbols from ${binfile}\.\.\.\r\nExpanding full symbols from ${binfile}\.\.\." \
     "symbol-file with -readnow second"
 gdb_test "symbol-file -readnow" \
     "no symbol file name was specified" \
@@ -130,7 +130,7 @@ gdb_test "symbol-file -- -non-existent-file" \
     "symbol-file with -- disables option processing"
 clean_restart
 gdb_test "symbol-file -readnow -- $binfile" \
-    "Reading symbols from ${binfile}\.\.\.expanding to full symbols\.\.\.done\." \
+    "Reading symbols from ${binfile}\.\.\.\r\nExpanding full symbols from ${binfile}\.\.\." \
     "symbol-file with -- and -readnow"
 gdb_test "symbol-file -- $binfile -readnow" \
     "Unrecognized argument \"-readnow\"" \
@@ -147,7 +147,7 @@ gdb_test "add-symbol-file ${binfile} 0 -s .whatever" \
 
 # Load the object file.
 gdb_test "add-symbol-file ${binfile} 0" \
-	"Reading symbols from .*${testfile}\\.o\\.\\.\\.done\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
+	"Reading symbols from .*${testfile}\\.o\\.\\.\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
 	"add-symbol-file ${testfile}.o 0" \
 	"add symbol table from file \".*${testfile}\\.o\" at\[ \t\r\n\]+\.text_addr = 0x0\[\r\n\]+\\(y or n\\) " \
 	"y"
@@ -196,7 +196,7 @@ gdb_test_no_output "set \$offset = 0x10000"
 
 # Load the object file.
 gdb_test "add-symbol-file ${binfile} \$offset" \
-	"Reading symbols from .*${testfile}\\.o\\.\\.\\.done\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
+	"Reading symbols from .*${testfile}\\.o\\.\\.\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
 	"add-symbol-file ${testfile}.o \$offset" \
 	"add symbol table from file \".*${testfile}\\.o\" at\[ \t\r\n\]+\.text_addr = 0x10000\[\r\n\]+\\(y or n\\) " \
 	"y"
@@ -217,7 +217,7 @@ if { "${function_foo_addr}" == "${new_function_foo_addr}" } {
 set offset 0x10000
 clean_restart
 gdb_test "symbol-file -o $offset $binfile" \
-    "Reading symbols from ${binfile}\.\.\.done\." \
+    "Reading symbols from ${binfile}\.\.\." \
     "symbol-file with offset"
 
 # Make sure the address of a static variable is moved by offset.
@@ -241,7 +241,7 @@ gdb_assert {${new_function_foo_addr} == ${function_foo_addr} + $offset} \
 set offset 0x10000
 clean_restart
 gdb_test "add-symbol-file -o $offset $binfile" \
-    "Reading symbols from ${binfile}\.\.\.done\." \
+    "Reading symbols from ${binfile}\.\.\." \
     "add-symbol-file with offset" \
     "add symbol table from file \".*${testfile}\\.o\" with all sections offset by $offset\[\r\n\]+\\(y or n\\) " \
     "y"
@@ -266,7 +266,7 @@ gdb_assert { ${new_function_foo_addr} == ${function_foo_addr} + $offset } \
 set text [ format "0x%x" [expr ${function_foo_addr} + 0x20000] ]
 clean_restart
 gdb_test "add-symbol-file $binfile -o $offset $text" \
-    "Reading symbols from ${binfile}\.\.\.done\." \
+    "Reading symbols from ${binfile}\.\.\." \
     "add-symbol-file with offset, text address given" \
     "add symbol table from file \".*${testfile}\\.o\" at\[ \t\r\n\]+\.text_addr = ${text}\[\r\n\]+with other sections offset by ${offset}\[\r\n\]+\\(y or n\\) " \
     "y"
@@ -281,7 +281,7 @@ gdb_assert { ${function_foo_addr} != ${new_function_foo_addr} } \
 set data [ format "0x%x" [expr ${global_foo_addr} + 0x20000] ]
 clean_restart
 gdb_test "add-symbol-file $binfile -o $offset -s .data $data" \
-    "Reading symbols from ${binfile}\.\.\.done\." \
+    "Reading symbols from ${binfile}\.\.\." \
     "add-symbol-file with offset, data address given" \
     "add symbol table from file \".*${testfile}\\.o\" at\[ \t\r\n\]+\.data_addr = ${data}\[\r\n\]+with other sections offset by ${offset}\[\r\n\]+\\(y or n\\) " \
     "y"

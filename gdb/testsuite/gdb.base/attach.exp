@@ -165,10 +165,10 @@ proc do_attach_tests {} {
     set test "set file, before attach1"
     gdb_test_multiple "file $binfile" "$test" {
 	-re "Load new symbol table from.*y or n. $" {
-	    gdb_test "y" "Reading symbols from $escapedbinfile\.\.\.*done." \
+	    gdb_test "y" "Reading symbols from $escapedbinfile\.\.\.*" \
 		"$test (re-read)"
 	}
-	-re "Reading symbols from $escapedbinfile\.\.\.*done.*$gdb_prompt $" {
+	-re "Reading symbols from $escapedbinfile\.\.\.*$gdb_prompt $" {
 	    pass "$test"
 	}
     }
@@ -224,7 +224,7 @@ proc do_attach_tests {} {
 	    # executable's symbol table.  This in turn always results in
 	    # asking the user for actually loading the symbol table of the
 	    # executable.
-	    gdb_test "y" "Reading symbols from $sysroot$escapedbinfile\.\.\.*done." \
+	    gdb_test "y" "Reading symbols from $sysroot$escapedbinfile\.\.\.*" \
 		"$test (reset file)"
 
 	    set found_exec_file 1
@@ -239,10 +239,10 @@ proc do_attach_tests {} {
 	set test "load file manually, after attach2"
 	gdb_test_multiple "file $binfile" "$test" {
 	    -re "A program is being debugged already..*Are you sure you want to change the file.*y or n. $" {
-		gdb_test "y" "Reading symbols from $escapedbinfile\.\.\.*done." \
+		gdb_test "y" "Reading symbols from $escapedbinfile\.\.\.*" \
 		    "$test (re-read)"
 	    }
-	    -re "Reading symbols from $escapedbinfile\.\.\.*done.*$gdb_prompt $" {
+	    -re "Reading symbols from $escapedbinfile\.\.\.*$gdb_prompt $" {
 		pass "$test"
 	    }
 	}

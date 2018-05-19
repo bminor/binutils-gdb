@@ -504,7 +504,7 @@ proc mi_gdb_file_cmd { arg } {
 # output.  Queries are an error for mi.
     send_gdb "105-file-exec-and-symbols $arg\n"
     gdb_expect 120 {
-	-re "Reading symbols from.*done.*$mi_gdb_prompt$" {
+	-re "Reading symbols from.*$mi_gdb_prompt$" {
 	    verbose "\t\tLoaded $arg into the $GDB"
 	    return 0
 	}
@@ -515,7 +515,7 @@ proc mi_gdb_file_cmd { arg } {
 	-re "Load new symbol table from \".*\".*y or n. $" {
 	    send_gdb "y\n"
 	    gdb_expect 120 {
-		-re "Reading symbols from.*done.*$mi_gdb_prompt$" {
+		-re "Reading symbols from.*$mi_gdb_prompt$" {
 		    verbose "\t\tLoaded $arg with new symbol table into $GDB"
 		    # All OK
 		}

@@ -258,7 +258,7 @@ proc test_attach_gdb {file pid displacement prefix} {
 	# Print the "PIE (Position Independent Executable) displacement" message.
 	gdb_test_no_output "set verbose on"
 
-	gdb_test "file $file" "Reading symbols from .*done\\." "file"
+	gdb_test "file $file" "Reading symbols from .*" "file"
 
 	set test "attach"
 	gdb_test_multiple "attach $pid" $test {

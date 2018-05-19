@@ -140,7 +140,7 @@ with_test_prefix "sepdebug" {
 	-re "\r\nwarning: Invalid entry in \\.debug_gdb_scripts section.*\r\n$gdb_prompt $" {
 	    fail $test
 	}
-	-re "done\\.\r\n$gdb_prompt $" {
+	-re "\r\n$gdb_prompt $" {
 	    pass $test
 	}
     }

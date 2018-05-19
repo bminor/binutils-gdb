@@ -1,5 +1,33 @@
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
+	PR cli/19551:
+	* lib/mi-support.exp (mi_gdb_file_cmd): Update.
+	* lib/gdb.exp (gdb_file_cmd): Update.
+	* gdb.stabs/weird.exp (print_weird_var): Update.
+	* gdb.server/solib-list.exp: Update.
+	* gdb.multi/remove-inferiors.exp (test_remove_inferiors): Update.
+	* gdb.mi/mi-cli.exp: Update.
+	* gdb.linespec/linespec.exp: Update.
+	* gdb.dwarf2/dw2-stack-boundary.exp: Update.
+	* gdb.dwarf2/dw2-objfile-overlap.exp: Update.
+	* gdb.cp/cp-relocate.exp: Update.
+	* gdb.base/sym-file.exp: Update.
+	* gdb.base/relocate.exp: Update.
+	* gdb.base/readnever.exp: Update.
+	* gdb.base/print-symbol-loading.exp (test_load_core): Update.
+	* gdb.base/kill-detach-inferiors-cmd.exp: Update.
+	* gdb.base/dbx.exp (gdb_file_cmd): Update.
+	* gdb.base/code_elim.exp: Update.
+	* gdb.base/break-unload-file.exp (test_break): Update.
+	* gdb.base/break-interp.exp (test_attach_gdb): Update.
+	* gdb.base/break-idempotent.exp (force_breakpoint_re_set):
+	Update.
+	* gdb.base/attach.exp (do_attach_tests): Update.
+	* gdb.base/sepdebug.exp: Update.
+	* gdb.python/py-section-script.exp: Update.
+
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
 	PR cli/22234:
 	* gdb.dwarf2/dw2-stack-boundary.exp: Update expected output.
 	* gdb.gdb/complaints.exp (test_short_complaints): Update expected

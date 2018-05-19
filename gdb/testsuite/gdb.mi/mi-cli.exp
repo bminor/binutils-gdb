@@ -56,7 +56,7 @@ mi_gdb_test "-interpreter-exec console bogus" \
 #   {(=.*)+\^done} \
 #   "-interpreter-exec console \"file \$binfile\""
 mi_gdb_test "-interpreter-exec console \"file $binfile\"" \
-  {~"Reading symbols from .*mi-cli...".*\^done} \
+  {~"Reading symbols from .*mi-cli...\\n".*} \
   "-interpreter-exec console \"file \$binfile\""
 
 mi_run_to_main

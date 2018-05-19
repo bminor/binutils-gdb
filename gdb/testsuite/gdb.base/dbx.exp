@@ -174,7 +174,7 @@ proc gdb_file_cmd {arg} {
 
     send_gdb "symbol-file $arg\n"
     gdb_expect {
-        -re "Reading symbols from.*done.*$gdb_prompt $" {
+        -re "Reading symbols from.*$gdb_prompt $" {
             verbose "\t\tLoaded $arg into the $GDB"
             send_gdb "exec-file $arg\n" 
             gdb_expect {

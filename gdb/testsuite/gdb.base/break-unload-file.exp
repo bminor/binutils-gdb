@@ -132,7 +132,7 @@ proc test_break { initial_load always_inserted break_command } {
 		send_gdb "y\n"
 		exp_continue
 	    }
-	    -re "Reading symbols from.*done.*$gdb_prompt $" {
+	    -re "Reading symbols from.*$gdb_prompt $" {
 		pass $test
 	    }
 	}

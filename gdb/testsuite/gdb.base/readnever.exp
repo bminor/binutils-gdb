@@ -74,7 +74,7 @@ save_vars { GDBFLAGS } {
 gdb_exit
 gdb_start
 gdb_test "symbol-file ${binfile}0.o -readnever" \
-    "Reading symbols from ${binfile}0\.o\.\.\.\\\(no debugging symbols found\\\)\.\.\.done\." \
+    "Reading symbols from ${binfile}0\.o\.\.\.\r\n\\\(No debugging symbols found in .*\\\)" \
     "use symbol-file -readnever"
 
 gdb_test_no_output "maint info symtabs" \

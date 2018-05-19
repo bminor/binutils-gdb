@@ -1110,11 +1110,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
       if (deprecated_pre_add_symbol_hook)
 	deprecated_pre_add_symbol_hook (name);
       else
-	{
-	  printf_filtered (_("Reading symbols from %s..."), name);
-	  wrap_here ("");
-	  gdb_flush (gdb_stdout);
-	}
+	printf_filtered (_("Reading symbols from %s...\n"), name);
     }
   syms_from_objfile (objfile, addrs, add_flags);
 
@@ -1126,29 +1122,19 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
   if ((flags & OBJF_READNOW))
     {
       if (should_print)
-	{
-	  printf_filtered (_("expanding to full symbols..."));
-	  wrap_here ("");
-	  gdb_flush (gdb_stdout);
-	}
+	printf_filtered (_("Expanding full symbols from %s...\n"), name);
 
       if (objfile->sf)
 	objfile->sf->qf->expand_all_symtabs (objfile);
     }
 
   if (should_print && !objfile_has_symbols (objfile))
-    {
-      wrap_here ("");
-      printf_filtered (_("(no debugging symbols found)..."));
-      wrap_here ("");
-    }
+    printf_filtered (_("(No debugging symbols found in %s)\n"), name);
 
   if (should_print)
     {
       if (deprecated_post_add_symbol_hook)
 	deprecated_post_add_symbol_hook ();
-      else
-	printf_filtered (_("done.\n"));
     }
 
   /* We print some messages regardless of whether 'from_tty ||

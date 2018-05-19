@@ -78,11 +78,8 @@ require_partial_symbols (struct objfile *objfile, int verbose)
       if (objfile->sf->sym_read_psymbols)
 	{
 	  if (verbose)
-	    {
-	      printf_filtered (_("Reading symbols from %s..."),
-			       objfile_name (objfile));
-	      gdb_flush (gdb_stdout);
-	    }
+	    printf_filtered (_("Reading symbols from %s...\n"),
+			     objfile_name (objfile));
 	  (*objfile->sf->sym_read_psymbols) (objfile);
 
 	  /* Partial symbols list are not expected to changed after this
@@ -90,17 +87,9 @@ require_partial_symbols (struct objfile *objfile, int verbose)
 	  objfile->global_psymbols.shrink_to_fit ();
 	  objfile->static_psymbols.shrink_to_fit ();
 
-	  if (verbose)
-	    {
-	      if (!objfile_has_symbols (objfile))
-		{
-		  wrap_here ("");
-		  printf_filtered (_("(no debugging symbols found)..."));
-		  wrap_here ("");
-		}
-
-	      printf_filtered (_("done.\n"));
-	    }
+	  if (verbose && !objfile_has_symbols (objfile))
+	    printf_filtered (_("(No debugging symbols found in %s)\n"),
+			     objfile_name (objfile));
 	}
     }
 

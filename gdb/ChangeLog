@@ -1,5 +1,11 @@
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
+	PR cli/19551:
+	* symfile.c (symbol_file_add_with_addrs): Update output.
+	* psymtab.c (require_partial_symbols): Update output.
+
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
 	PR cli/22234:
 	* complaints.c: Emit \n.
 
