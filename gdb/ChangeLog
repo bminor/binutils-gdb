@@ -1,5 +1,9 @@
 2018-05-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* stack.c (backtrace_command_1): Remove useless variable int i.
+
+2018-05-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* stack.c (print_frame_info): Fix comment.
 
 2018-05-18  Tom Tromey  <tom@tromey.com>

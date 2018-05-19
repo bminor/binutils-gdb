@@ -1696,7 +1696,6 @@ backtrace_command_1 (const char *count_exp, frame_filter_flags flags,
 {
   struct frame_info *fi;
   int count;
-  int i;
   int py_start = 0, py_end = 0;
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
 
@@ -1779,7 +1778,7 @@ backtrace_command_1 (const char *count_exp, frame_filter_flags flags,
 	  count = -1;
 	}
 
-      for (i = 0, fi = trailing; fi && count--; i++, fi = get_prev_frame (fi))
+      for (fi = trailing; fi && count--; fi = get_prev_frame (fi))
 	{
 	  QUIT;
 
