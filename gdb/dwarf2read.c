@@ -21026,9 +21026,6 @@ dwarf2_start_symtab (struct dwarf2_cu *cu,
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);
 
-  /* We assume that we're processing GCC output.  */
-  processing_gcc_compilation = 2;
-
   cu->processing_has_namespace_info = 0;
 
   return cust;

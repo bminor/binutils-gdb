@@ -66,11 +66,6 @@ struct subfile
 
 EXTERN struct subfile *current_subfile;
 
-/* Global variable which, when set, indicates that we are processing a
-   .o file compiled with gcc */
-
-EXTERN unsigned char processing_gcc_compilation;
-
 /* Record the symbols defined for each context in a list.  We don't
    create a struct block for the context until we know how long to
    make it.  */

@@ -1,5 +1,12 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* stabsread.h (processing_gcc_compilation): Move from buildsym.h.
+	* dwarf2read.c (dwarf2_start_symtab): Don't set
+	processing_gcc_compilation.
+	* buildsym.h (processing_gcc_compilation): Move to stabsread.h.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* stabsread.h (HASHSIZE, hashname, symnum, next_symbol_text)
 	(next_symbol_text_func): Move from buildsym.h.
 	* stabsread.c (hashname): Move from buildsym.c.

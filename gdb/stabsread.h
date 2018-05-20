@@ -48,6 +48,11 @@ EXTERN unsigned int symnum;
 
 EXTERN const char *(*next_symbol_text_func) (struct objfile *);
 
+/* Global variable which, when set, indicates that we are processing a
+   .o file compiled with gcc */
+
+EXTERN unsigned char processing_gcc_compilation;
+
 /* Hash table of global symbols whose values are not known yet.
    They are chained thru the SYMBOL_VALUE_CHAIN, since we don't
    have the correct data for that slot yet.
