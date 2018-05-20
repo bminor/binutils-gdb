@@ -1,5 +1,10 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* dbxread.c (processing_acc_compilation): New global.
+	* buildsym.h (processing_acc_compilation): Don't declare.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (aix_process_linenos, complete_symtab): Update.
 	* dbxread.c (read_ofile_symtab): Update.
 	* coffread.c (coff_start_symtab, coff_end_symtab): Update.

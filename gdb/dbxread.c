@@ -145,6 +145,14 @@ static unsigned int next_file_string_table_offset;
 
 static int symfile_relocatable = 0;
 
+/* When set, we are processing a .o file compiled by sun acc.  This is
+   misnamed; it refers to all stabs-in-elf implementations which use
+   N_UNDF the way Sun does, including Solaris gcc.  Hopefully all
+   stabs-in-elf implementations ever invented will choose to be
+   compatible.  */
+
+static unsigned char processing_acc_compilation;
+
 
 /* The lowest text address we have yet encountered.  This is needed
    because in an a.out file, there is no header field which tells us
