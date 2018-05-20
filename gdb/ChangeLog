@@ -1,5 +1,13 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c (struct buildsym_compunit) <m_have_line_numbers>: New
+	member.
+	(have_line_numbers): Remove.
+	(record_line, prepare_for_building, end_symtab_get_static_block)
+	(augment_type_symtab): Update.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (~buildsym_compunit): Free the macro table.
 	(struct buildsym_compunit) <get_macro_table, release_macros>: New
 	methods.

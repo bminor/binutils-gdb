@@ -191,6 +191,10 @@ struct buildsym_compunit
   /* The macro table for the compilation unit whose symbols we're
      currently reading.  */
   struct macro_table *m_pending_macros = nullptr;
+
+  /* True if symtab has line number info.  This prevents an otherwise
+     empty symtab from being tossed.  */
+  bool m_have_line_numbers = false;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -201,11 +205,6 @@ static struct buildsym_compunit *buildsym_compunit;
 /* List of free `struct pending' structures for reuse.  */
 
 static struct pending *free_pendings;
-
-/* Non-zero if symtab has line number info.  This prevents an
-   otherwise empty symtab from being tossed.  */
-
-static int have_line_numbers;
 
 /* The mutable address map for the compilation unit whose symbols
    we're currently reading.  The symtabs' shared blockvector will
@@ -929,7 +928,7 @@ record_line (struct subfile *subfile, int line, CORE_ADDR pc)
 	xmalloc (sizeof (struct linetable)
 	   + subfile->line_vector_length * sizeof (struct linetable_entry));
       subfile->line_vector->nitems = 0;
-      have_line_numbers = 1;
+      buildsym_compunit->m_have_line_numbers = true;
     }
 
   if (subfile->line_vector->nitems + 1 >= subfile->line_vector_length)
@@ -1025,7 +1024,6 @@ prepare_for_building (CORE_ADDR start_addr)
   local_symbols = NULL;
   local_using_directives = NULL;
   within_function = 0;
-  have_line_numbers = 0;
 
   context_stack_depth = 0;
 
@@ -1282,7 +1280,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
       && pending_blocks == NULL
       && file_symbols == NULL
       && global_symbols == NULL
-      && have_line_numbers == 0
+      && !buildsym_compunit->m_have_line_numbers
       && buildsym_compunit->m_pending_macros == NULL
       && global_using_directives == NULL)
     {
@@ -1588,7 +1586,7 @@ augment_type_symtab (void)
     complaint (_("Blocks in a type symtab"));
   if (buildsym_compunit->m_pending_macros != NULL)
     complaint (_("Macro in a type symtab"));
-  if (have_line_numbers)
+  if (buildsym_compunit->m_have_line_numbers)
     complaint (_("Line numbers recorded in a type symtab"));
 
   if (file_symbols != NULL)
