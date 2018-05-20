@@ -1,5 +1,10 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.h (merge_symbol_lists): Remove.
+	* buildsym.c (merge_symbol_lists): Remove.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* stabsread.c (scan_file_globals): Update comment.
 	* stabsread.h (scan_file_globals): Move from buildsym.h.
 	* buildsym.h (scan_file_globals): Move to stabsread.h.

@@ -236,9 +236,6 @@ extern void record_debugformat (const char *format);
 
 extern void record_producer (const char *producer);
 
-extern void merge_symbol_lists (struct pending **srclist,
-				struct pending **targetlist);
-
 /* Set the name of the last source file.  NAME is copied by this
    function.  */
 

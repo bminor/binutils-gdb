@@ -1677,33 +1677,6 @@ record_producer (const char *producer)
   buildsym_compunit->producer = producer;
 }
 
-/* Merge the first symbol list SRCLIST into the second symbol list
-   TARGETLIST by repeated calls to add_symbol_to_list().  This
-   procedure "frees" each link of SRCLIST by adding it to the
-   free_pendings list.  Caller must set SRCLIST to a null list after
-   calling this function.
-
-   Void return.  */
-
-void
-merge_symbol_lists (struct pending **srclist, struct pending **targetlist)
-{
-  int i;
-
-  if (!srclist || !*srclist)
-    return;
-
-  /* Merge in elements from current link.  */
-  for (i = 0; i < (*srclist)->nsyms; i++)
-    add_symbol_to_list ((*srclist)->symbol[i], targetlist);
-
-  /* Recurse on next.  */
-  merge_symbol_lists (&(*srclist)->next, targetlist);
-
-  /* "Free" the current link.  */
-  (*srclist)->next = free_pendings;
-  free_pendings = (*srclist);
-}
 
 
 /* See buildsym.h.  */
