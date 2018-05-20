@@ -1021,6 +1021,7 @@ prepare_for_building (const char *name, CORE_ADDR start_addr)
   gdb_assert (pending_macros == NULL);
   gdb_assert (pending_addrmap == NULL);
   gdb_assert (current_subfile == NULL);
+  gdb_assert (buildsym_compunit == nullptr);
 }
 
 /* Start a new symtab for a new source file in OBJFILE.  Called, for example,
