@@ -1031,7 +1031,6 @@ prepare_for_building ()
 {
   local_symbols = NULL;
   local_using_directives = NULL;
-  within_function = 0;
 
   context_stack_depth = 0;
 

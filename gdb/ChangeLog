@@ -1,5 +1,13 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* stabsread.h (within_function): Move from buildsym.h.
+	* stabsread.c (start_stabs): Clear within_function.
+	* coffread.c (coff_start_symtab): Clear within_function.
+	* buildsym.h (within_function): Move to stabsread.h.
+	* buildsym.c (prepare_for_building): Update.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* stabsread.h (processing_gcc_compilation): Move from buildsym.h.
 	* dwarf2read.c (dwarf2_start_symtab): Don't set
 	processing_gcc_compilation.

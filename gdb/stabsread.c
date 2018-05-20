@@ -4758,6 +4758,7 @@ start_stabs (void)
   n_this_object_header_files = 1;
   type_vector_length = 0;
   type_vector = (struct type **) 0;
+  within_function = 0;
 
   /* FIXME: If common_block_name is not already NULL, we should complain().  */
   common_block_name = NULL;
