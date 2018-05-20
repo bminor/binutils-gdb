@@ -105,9 +105,10 @@ struct buildsym_compunit
      COMP_DIR is the directory in which the compilation unit was compiled
      (or NULL if not known).  */
 
-  buildsym_compunit (struct objfile *objfile_, const char *comp_dir_,
-		     enum language language_)
+  buildsym_compunit (struct objfile *objfile_, const char *name,
+		     const char *comp_dir_, enum language language_)
     : objfile (objfile_),
+      m_last_source_file (name == nullptr ? nullptr : xstrdup (name)),
       comp_dir (comp_dir_ == nullptr ? nullptr : xstrdup (comp_dir_)),
       language (language_)
   {
@@ -128,6 +129,12 @@ struct buildsym_compunit
       }
   }
 
+  void set_last_source_file (const char *name)
+  {
+    char *new_name = name == NULL ? NULL : xstrdup (name);
+    m_last_source_file.reset (new_name);
+  }
+
   /* The objfile we're reading debug info from.  */
   struct objfile *objfile;
 
@@ -139,6 +146,11 @@ struct buildsym_compunit
 
   /* The subfile of the main source file.  */
   struct subfile *main_subfile = nullptr;
+
+  /* Name of source file whose symbol data we are now processing.  This
+     comes from a symbol of type N_SO for stabs.  For DWARF it comes
+     from the DW_AT_name attribute of a DW_TAG_compile_unit DIE.  */
+  gdb::unique_xmalloc_ptr<char> m_last_source_file;
 
   /* E.g., DW_AT_comp_dir if DWARF.  Space for this is malloc'd.  */
   gdb::unique_xmalloc_ptr<char> comp_dir;
@@ -1001,9 +1013,8 @@ get_macro_table (void)
    buildsym_init.  */
 
 static void
-prepare_for_building (const char *name, CORE_ADDR start_addr)
+prepare_for_building (CORE_ADDR start_addr)
 {
-  set_last_source_file (name);
   last_source_start_addr = start_addr;
 
   local_symbols = NULL;
@@ -1040,9 +1051,9 @@ struct compunit_symtab *
 start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
 	      CORE_ADDR start_addr, enum language language)
 {
-  prepare_for_building (name, start_addr);
+  prepare_for_building (start_addr);
 
-  buildsym_compunit = new struct buildsym_compunit (objfile, comp_dir,
+  buildsym_compunit = new struct buildsym_compunit (objfile, name, comp_dir,
 						    language);
 
   /* Allocate the compunit symtab now.  The caller needs it to allocate
@@ -1077,10 +1088,11 @@ void
 restart_symtab (struct compunit_symtab *cust,
 		const char *name, CORE_ADDR start_addr)
 {
-  prepare_for_building (name, start_addr);
+  prepare_for_building (start_addr);
 
   buildsym_compunit
     = new struct buildsym_compunit (COMPUNIT_OBJFILE (cust),
+				    name,
 				    COMPUNIT_DIRNAME (cust),
 				    compunit_language (cust));
   buildsym_compunit->compunit_symtab = cust;
@@ -1168,8 +1180,6 @@ watch_main_source_file_lossage (void)
 static void
 reset_symtab_globals (void)
 {
-  set_last_source_file (NULL);
-
   local_symbols = NULL;
   local_using_directives = NULL;
   file_symbols = NULL;
@@ -1699,19 +1709,14 @@ merge_symbol_lists (struct pending **srclist, struct pending **targetlist)
 }
 
 
-/* Name of source file whose symbol data we are now processing.  This
-   comes from a symbol of type N_SO for stabs.  For Dwarf it comes
-   from the DW_AT_name attribute of a DW_TAG_compile_unit DIE.  */
-
-static char *last_source_file;
-
 /* See buildsym.h.  */
 
 void
 set_last_source_file (const char *name)
 {
-  xfree (last_source_file);
-  last_source_file = name == NULL ? NULL : xstrdup (name);
+  gdb_assert (buildsym_compunit != nullptr || name == nullptr);
+  if (buildsym_compunit != nullptr)
+    buildsym_compunit->set_last_source_file (name);
 }
 
 /* See buildsym.h.  */
@@ -1719,7 +1724,9 @@ set_last_source_file (const char *name)
 const char *
 get_last_source_file (void)
 {
-  return last_source_file;
+  if (buildsym_compunit == nullptr)
+    return nullptr;
+  return buildsym_compunit->m_last_source_file.get ();
 }
 
 

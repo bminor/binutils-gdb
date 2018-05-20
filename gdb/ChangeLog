@@ -1,5 +1,16 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c (buildsym_compunit::buildsym_compunit): Add name
+	parameter.
+	(buildsym_compunit::set_last_source_file): New method.
+	<m_last_source_file>: New member.
+	(prepare_for_building): Remove "name" parameter.
+	(start_symtab, restart_symtab, reset_symtab_globals): Update.
+	(last_source_file): Remove.
+	(set_last_source_file, get_last_source_file): Update.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (prepare_for_building): Add assert.
 
 2018-07-16  Tom Tromey  <tom@tromey.com>
