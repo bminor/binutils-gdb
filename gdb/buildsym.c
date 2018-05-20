@@ -100,6 +100,35 @@
 
 struct buildsym_compunit
 {
+  /* Start recording information about a primary source file (IOW, not an
+     included source file).
+     COMP_DIR is the directory in which the compilation unit was compiled
+     (or NULL if not known).  */
+
+  buildsym_compunit (struct objfile *objfile_, const char *comp_dir_,
+		     enum language language_)
+    : objfile (objfile_),
+      comp_dir (comp_dir_ == nullptr ? nullptr : xstrdup (comp_dir_)),
+      language (language_)
+  {
+  }
+
+  ~buildsym_compunit ()
+  {
+    struct subfile *subfile, *nextsub;
+
+    for (subfile = subfiles;
+	 subfile != NULL;
+	 subfile = nextsub)
+      {
+	nextsub = subfile->next;
+	xfree (subfile->name);
+	xfree (subfile->line_vector);
+	xfree (subfile);
+      }
+    xfree (comp_dir);
+  }
+
   /* The objfile we're reading debug info from.  */
   struct objfile *objfile;
 
@@ -107,24 +136,24 @@ struct buildsym_compunit
      Files are added to the front of the list.
      This is important mostly for the language determination hacks we use,
      which iterate over previously added files.  */
-  struct subfile *subfiles;
+  struct subfile *subfiles = nullptr;
 
   /* The subfile of the main source file.  */
-  struct subfile *main_subfile;
+  struct subfile *main_subfile = nullptr;
 
   /* E.g., DW_AT_comp_dir if DWARF.  Space for this is malloc'd.  */
   char *comp_dir;
 
   /* Space for this is not malloc'd, and is assumed to have at least
      the same lifetime as objfile.  */
-  const char *producer;
+  const char *producer = nullptr;
 
   /* Space for this is not malloc'd, and is assumed to have at least
      the same lifetime as objfile.  */
-  const char *debugformat;
+  const char *debugformat = nullptr;
 
   /* The compunit we are building.  */
-  struct compunit_symtab *compunit_symtab;
+  struct compunit_symtab *compunit_symtab = nullptr;
 
   /* Language of this compunit_symtab.  */
   enum language language;
@@ -759,54 +788,14 @@ start_subfile (const char *name)
     }
 }
 
-/* Start recording information about a primary source file (IOW, not an
-   included source file).
-   COMP_DIR is the directory in which the compilation unit was compiled
-   (or NULL if not known).  */
-
-static struct buildsym_compunit *
-start_buildsym_compunit (struct objfile *objfile, const char *comp_dir,
-			 enum language language)
-{
-  struct buildsym_compunit *bscu;
-
-  bscu = XNEW (struct buildsym_compunit);
-  memset (bscu, 0, sizeof (struct buildsym_compunit));
-
-  bscu->objfile = objfile;
-  bscu->comp_dir = (comp_dir == NULL) ? NULL : xstrdup (comp_dir);
-  bscu->language = language;
-
-  /* Initialize the debug format string to NULL.  We may supply it
-     later via a call to record_debugformat.  */
-  bscu->debugformat = NULL;
-
-  /* Similarly for the producer.  */
-  bscu->producer = NULL;
-
-  return bscu;
-}
-
 /* Delete the buildsym compunit.  */
 
 static void
 free_buildsym_compunit (void)
 {
-  struct subfile *subfile, *nextsub;
-
   if (buildsym_compunit == NULL)
     return;
-  for (subfile = buildsym_compunit->subfiles;
-       subfile != NULL;
-       subfile = nextsub)
-    {
-      nextsub = subfile->next;
-      xfree (subfile->name);
-      xfree (subfile->line_vector);
-      xfree (subfile);
-    }
-  xfree (buildsym_compunit->comp_dir);
-  xfree (buildsym_compunit);
+  delete buildsym_compunit;
   buildsym_compunit = NULL;
   current_subfile = NULL;
 }
@@ -1053,7 +1042,8 @@ start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
 {
   prepare_for_building (name, start_addr);
 
-  buildsym_compunit = start_buildsym_compunit (objfile, comp_dir, language);
+  buildsym_compunit = new struct buildsym_compunit (objfile, comp_dir,
+						    language);
 
   /* Allocate the compunit symtab now.  The caller needs it to allocate
      non-primary symtabs.  It is also needed by get_macro_table.  */
@@ -1089,9 +1079,10 @@ restart_symtab (struct compunit_symtab *cust,
 {
   prepare_for_building (name, start_addr);
 
-  buildsym_compunit = start_buildsym_compunit (COMPUNIT_OBJFILE (cust),
-					       COMPUNIT_DIRNAME (cust),
-					       compunit_language (cust));
+  buildsym_compunit
+    = new struct buildsym_compunit (COMPUNIT_OBJFILE (cust),
+				    COMPUNIT_DIRNAME (cust),
+				    compunit_language (cust));
   buildsym_compunit->compunit_symtab = cust;
 }
 

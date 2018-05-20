@@ -1,3 +1,11 @@
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
+	* buildsym.c (struct buildsym_compunit): Add constructor,
+	destructor, initializers.
+	(start_buildsym_compunit): Remove.
+	(free_buildsym_compunit): Use "delete".
+	(start_symtab, restart_symtab): Use "new".
+
 2018-07-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* symfile.c (set_objfile_default_section_offset): Remove struct
