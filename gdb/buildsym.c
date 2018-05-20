@@ -118,6 +118,9 @@ struct buildsym_compunit
   {
     struct subfile *subfile, *nextsub;
 
+    if (m_pending_macros != nullptr)
+      free_macro_table (m_pending_macros);
+
     for (subfile = subfiles;
 	 subfile != NULL;
 	 subfile = nextsub)
@@ -133,6 +136,22 @@ struct buildsym_compunit
   {
     char *new_name = name == NULL ? NULL : xstrdup (name);
     m_last_source_file.reset (new_name);
+  }
+
+  struct macro_table *get_macro_table ()
+  {
+    if (m_pending_macros == nullptr)
+      m_pending_macros = new_macro_table (&objfile->per_bfd->storage_obstack,
+					  objfile->per_bfd->macro_cache,
+					  compunit_symtab);
+    return m_pending_macros;
+  }
+
+  struct macro_table *release_macros ()
+  {
+    struct macro_table *result = m_pending_macros;
+    m_pending_macros = nullptr;
+    return result;
   }
 
   /* The objfile we're reading debug info from.  */
@@ -168,6 +187,10 @@ struct buildsym_compunit
 
   /* Language of this compunit_symtab.  */
   enum language language;
+
+  /* The macro table for the compilation unit whose symbols we're
+     currently reading.  */
+  struct macro_table *m_pending_macros = nullptr;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -227,10 +250,6 @@ struct subfile_stack
   };
 
 static struct subfile_stack *subfile_stack;
-
-/* The macro table for the compilation unit whose symbols we're
-   currently reading.  */
-static struct macro_table *pending_macros;
 
 static void free_buildsym_compunit (void);
 
@@ -340,10 +359,6 @@ scoped_free_pendings::~scoped_free_pendings ()
       xfree ((void *) next);
     }
   global_symbols = NULL;
-
-  if (pending_macros)
-    free_macro_table (pending_macros);
-  pending_macros = NULL;
 
   if (pending_addrmap)
     obstack_free (&pending_addrmap_obstack, NULL);
@@ -994,17 +1009,7 @@ get_macro_table (void)
   struct objfile *objfile;
 
   gdb_assert (buildsym_compunit != NULL);
-
-  objfile = buildsym_compunit->objfile;
-
-  if (! pending_macros)
-    {
-      pending_macros = new_macro_table (&objfile->per_bfd->storage_obstack,
-					objfile->per_bfd->macro_cache,
-					buildsym_compunit->compunit_symtab);
-    }
-
-  return pending_macros;
+  return buildsym_compunit->get_macro_table ();
 }
 
 /* Init state to prepare for building a symtab.
@@ -1029,7 +1034,6 @@ prepare_for_building (CORE_ADDR start_addr)
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
   gdb_assert (global_using_directives == NULL);
-  gdb_assert (pending_macros == NULL);
   gdb_assert (pending_addrmap == NULL);
   gdb_assert (current_subfile == NULL);
   gdb_assert (buildsym_compunit == nullptr);
@@ -1186,10 +1190,6 @@ reset_symtab_globals (void)
   global_symbols = NULL;
   global_using_directives = NULL;
 
-  /* We don't free pending_macros here because if the symtab was successfully
-     built then ownership was transferred to the symtab.  */
-  pending_macros = NULL;
-
   if (pending_addrmap)
     obstack_free (&pending_addrmap_obstack, NULL);
   pending_addrmap = NULL;
@@ -1283,7 +1283,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
       && file_symbols == NULL
       && global_symbols == NULL
       && have_line_numbers == 0
-      && pending_macros == NULL
+      && buildsym_compunit->m_pending_macros == NULL
       && global_using_directives == NULL)
     {
       /* Ignore symtabs that have no functions with real debugging info.  */
@@ -1436,7 +1436,7 @@ end_symtab_with_blockvector (struct block *static_block,
 
   COMPUNIT_BLOCK_LINE_SECTION (cu) = section;
 
-  COMPUNIT_MACRO_TABLE (cu) = pending_macros;
+  COMPUNIT_MACRO_TABLE (cu) = buildsym_compunit->release_macros ();
 
   /* Default any symbols without a specified symtab to the primary symtab.  */
   {
@@ -1586,7 +1586,7 @@ augment_type_symtab (void)
     }
   if (pending_blocks != NULL)
     complaint (_("Blocks in a type symtab"));
-  if (pending_macros != NULL)
+  if (buildsym_compunit->m_pending_macros != NULL)
     complaint (_("Macro in a type symtab"));
   if (have_line_numbers)
     complaint (_("Line numbers recorded in a type symtab"));
@@ -1757,7 +1757,6 @@ buildsym_init (void)
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
   gdb_assert (global_using_directives == NULL);
-  gdb_assert (pending_macros == NULL);
   gdb_assert (pending_addrmap == NULL);
   gdb_assert (buildsym_compunit == NULL);
 }

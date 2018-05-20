@@ -1,5 +1,17 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c (~buildsym_compunit): Free the macro table.
+	(struct buildsym_compunit) <get_macro_table, release_macros>: New
+	methods.
+	<m_pending_macros>: New member.
+	(pending_macros): Remove.
+	(~scoped_free_pendings, get_macro_table, prepare_for_building)
+	(reset_symtab_globals, end_symtab_get_static_block)
+	(end_symtab_with_blockvector, augment_type_symtab)
+	(buildsym_init): Update.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (buildsym_compunit::buildsym_compunit): Add name
 	parameter.
 	(buildsym_compunit::set_last_source_file): New method.
