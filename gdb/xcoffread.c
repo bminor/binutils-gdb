@@ -814,7 +814,7 @@ aix_process_linenos (struct objfile *objfile)
     return;
 
   /* Process line numbers and enter them into line vector.  */
-  process_linenos (last_source_start_addr, cur_src_end_addr);
+  process_linenos (get_last_source_start_addr (), cur_src_end_addr);
 }
 
 
@@ -900,7 +900,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
 
 #define complete_symtab(name, start_addr) {	\
   set_last_source_file (name);			\
-  last_source_start_addr = start_addr;		\
+  set_last_source_start_addr (start_addr);	\
 }
 
 

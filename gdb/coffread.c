@@ -390,8 +390,8 @@ coff_start_symtab (struct objfile *objfile, const char *name)
 		 xstrdup (name),
   /* We never know the directory name for COFF.  */
 		 NULL,
-  /* The start address is irrelevant, since we set
-     last_source_start_addr in coff_end_symtab.  */
+  /* The start address is irrelevant, since we call
+     set_last_source_start_addr in coff_end_symtab.  */
 		 0,
   /* Let buildsym.c deduce the language for this symtab.  */
 		 language_unknown);
@@ -420,7 +420,7 @@ complete_symtab (const char *name, CORE_ADDR start_addr, unsigned int size)
 static void
 coff_end_symtab (struct objfile *objfile)
 {
-  last_source_start_addr = current_source_start_addr;
+  set_last_source_start_addr (current_source_start_addr);
 
   end_symtab (current_source_end_addr, SECT_OFF_TEXT (objfile));
 

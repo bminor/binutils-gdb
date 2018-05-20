@@ -49,12 +49,6 @@ struct dynamic_prop;
 #define HASHSIZE 127		/* Size of things hashed via
 				   hashname().  */
 
-/* Core address of start of text of current source file.  This too
-   comes from the N_SO symbol.  For Dwarf it typically comes from the
-   DW_AT_low_pc attribute of a DW_TAG_compile_unit DIE.  */
-
-EXTERN CORE_ADDR last_source_start_addr;
-
 /* The list of sub-source-files within the current individual
    compilation.  Each file gets its own symtab with its own linetable
    and associated info, but they all share one blockvector.  */
@@ -309,6 +303,16 @@ extern struct compunit_symtab *buildsym_compunit_symtab (void);
    end_symtab* functions.  */
 
 extern struct macro_table *get_macro_table (void);
+
+/* Set the last source start address.  Can only be used between
+   start_symtab and end_symtab* calls.  */
+
+extern void set_last_source_start_addr (CORE_ADDR addr);
+
+/* Get the last source start address.  Can only be used between
+   start_symtab and end_symtab* calls.  */
+
+extern CORE_ADDR get_last_source_start_addr ();
 
 #undef EXTERN
 

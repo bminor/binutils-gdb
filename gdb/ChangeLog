@@ -1,5 +1,23 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (aix_process_linenos, complete_symtab): Update.
+	* dbxread.c (read_ofile_symtab): Update.
+	* coffread.c (coff_start_symtab, coff_end_symtab): Update.
+	* buildsym.h (last_source_start_addr): Remove.
+	(set_last_source_start_addr, get_last_source_start_addr):
+	Declare.
+	* buildsym.c (buildsym_compunit::buildsym_compunit): Add last_addr
+	parameter.
+	(struct buildsym_compunit) <m_last_source_start_addr>: New
+	member.
+	(prepare_for_building): Remove start_addr parameter.
+	(start_symtab, restart_symtab, end_symtab_get_static_block)
+	(end_symtab_with_blockvector): Update.
+	(set_last_source_start_addr, get_last_source_start_addr): New
+	functions.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (struct buildsym_compunit) <m_have_line_numbers>: New
 	member.
 	(have_line_numbers): Remove.

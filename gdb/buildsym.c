@@ -106,11 +106,13 @@ struct buildsym_compunit
      (or NULL if not known).  */
 
   buildsym_compunit (struct objfile *objfile_, const char *name,
-		     const char *comp_dir_, enum language language_)
+		     const char *comp_dir_, enum language language_,
+		     CORE_ADDR last_addr)
     : objfile (objfile_),
       m_last_source_file (name == nullptr ? nullptr : xstrdup (name)),
       comp_dir (comp_dir_ == nullptr ? nullptr : xstrdup (comp_dir_)),
-      language (language_)
+      language (language_),
+      m_last_source_start_addr (last_addr)
   {
   }
 
@@ -195,6 +197,11 @@ struct buildsym_compunit
   /* True if symtab has line number info.  This prevents an otherwise
      empty symtab from being tossed.  */
   bool m_have_line_numbers = false;
+
+  /* Core address of start of text of current source file.  This too
+     comes from the N_SO symbol.  For Dwarf it typically comes from the
+     DW_AT_low_pc attribute of a DW_TAG_compile_unit DIE.  */
+  CORE_ADDR m_last_source_start_addr;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -1017,10 +1024,8 @@ get_macro_table (void)
    buildsym_init.  */
 
 static void
-prepare_for_building (CORE_ADDR start_addr)
+prepare_for_building ()
 {
-  last_source_start_addr = start_addr;
-
   local_symbols = NULL;
   local_using_directives = NULL;
   within_function = 0;
@@ -1053,10 +1058,10 @@ struct compunit_symtab *
 start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
 	      CORE_ADDR start_addr, enum language language)
 {
-  prepare_for_building (start_addr);
+  prepare_for_building ();
 
   buildsym_compunit = new struct buildsym_compunit (objfile, name, comp_dir,
-						    language);
+						    language, start_addr);
 
   /* Allocate the compunit symtab now.  The caller needs it to allocate
      non-primary symtabs.  It is also needed by get_macro_table.  */
@@ -1090,13 +1095,14 @@ void
 restart_symtab (struct compunit_symtab *cust,
 		const char *name, CORE_ADDR start_addr)
 {
-  prepare_for_building (start_addr);
+  prepare_for_building ();
 
   buildsym_compunit
     = new struct buildsym_compunit (COMPUNIT_OBJFILE (cust),
 				    name,
 				    COMPUNIT_DIRNAME (cust),
-				    compunit_language (cust));
+				    compunit_language (cust),
+				    start_addr);
   buildsym_compunit->compunit_symtab = cust;
 }
 
@@ -1291,8 +1297,8 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
     {
       /* Define the STATIC_BLOCK.  */
       return finish_block_internal (NULL, &file_symbols, NULL, NULL,
-				    last_source_start_addr, end_addr,
-				    0, expandable);
+				    buildsym_compunit->m_last_source_start_addr,
+				    end_addr, 0, expandable);
     }
 }
 
@@ -1319,7 +1325,7 @@ end_symtab_with_blockvector (struct block *static_block,
 
   /* Create the GLOBAL_BLOCK and build the blockvector.  */
   finish_block_internal (NULL, &global_symbols, NULL, NULL,
-			 last_source_start_addr, end_addr,
+			 buildsym_compunit->m_last_source_start_addr, end_addr,
 			 1, expandable);
   blockvector = make_blockvector ();
 
@@ -1725,6 +1731,24 @@ get_last_source_file (void)
   if (buildsym_compunit == nullptr)
     return nullptr;
   return buildsym_compunit->m_last_source_file.get ();
+}
+
+/* See buildsym.h.  */
+
+void
+set_last_source_start_addr (CORE_ADDR addr)
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  buildsym_compunit->m_last_source_start_addr = addr;
+}
+
+/* See buildsym.h.  */
+
+CORE_ADDR
+get_last_source_start_addr ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  return buildsym_compunit->m_last_source_start_addr;
 }
 
 

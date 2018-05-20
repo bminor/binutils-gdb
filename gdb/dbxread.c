@@ -2371,14 +2371,14 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
   /* In a Solaris elf file, this variable, which comes from the
      value of the N_SO symbol, will still be 0.  Luckily, text_offset,
      which comes from pst->textlow is correct.  */
-  if (last_source_start_addr == 0)
-    last_source_start_addr = text_offset;
+  if (get_last_source_start_addr () == 0)
+    set_last_source_start_addr (text_offset);
 
   /* In reordered executables last_source_start_addr may not be the
      lower bound for this symtab, instead use text_offset which comes
      from pst->textlow which is correct.  */
-  if (last_source_start_addr > text_offset)
-    last_source_start_addr = text_offset;
+  if (get_last_source_start_addr () > text_offset)
+    set_last_source_start_addr (text_offset);
 
   pst->compunit_symtab = end_symtab (text_offset + text_size,
 				     SECT_OFF_TEXT (objfile));
