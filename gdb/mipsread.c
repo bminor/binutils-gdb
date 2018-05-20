@@ -54,7 +54,7 @@ static void
 mipscoff_new_init (struct objfile *ignore)
 {
   stabsread_new_init ();
-  buildsym_new_init ();
+  buildsym_init ();
 }
 
 /* Initialize to read a symbol file (nothing to do).  */

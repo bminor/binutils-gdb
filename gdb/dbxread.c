@@ -568,7 +568,7 @@ static void
 dbx_new_init (struct objfile *ignore)
 {
   stabsread_new_init ();
-  buildsym_new_init ();
+  buildsym_init ();
   init_header_files ();
 }
 
@@ -3037,7 +3037,7 @@ coffstab_build_psymtabs (struct objfile *objfile,
     perror_with_name (name);
 
   stabsread_new_init ();
-  buildsym_new_init ();
+  buildsym_init ();
   free_header_files ();
   init_header_files ();
 
@@ -3125,7 +3125,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
     perror_with_name (name);
 
   stabsread_new_init ();
-  buildsym_new_init ();
+  buildsym_init ();
   free_header_files ();
   init_header_files ();
 
@@ -3227,7 +3227,7 @@ stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
     perror_with_name (name);
 
   stabsread_new_init ();
-  buildsym_new_init ();
+  buildsym_init ();
   free_header_files ();
   init_header_files ();
 

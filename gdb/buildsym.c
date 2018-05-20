@@ -1751,7 +1751,7 @@ get_last_source_start_addr ()
    corresponding to a psymtab.  */
 
 void
-buildsym_init (void)
+buildsym_init ()
 {
   subfile_stack = NULL;
 
@@ -1774,14 +1774,4 @@ buildsym_init (void)
   gdb_assert (global_using_directives == NULL);
   gdb_assert (pending_addrmap == NULL);
   gdb_assert (buildsym_compunit == NULL);
-}
-
-/* Initialize anything that needs initializing when a completely new
-   symbol file is specified (not just adding some symbols from another
-   file, e.g. a shared library).  */
-
-void
-buildsym_new_init (void)
-{
-  buildsym_init ();
 }

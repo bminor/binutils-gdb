@@ -209,9 +209,7 @@ extern void augment_type_symtab (void);
 
 extern void scan_file_globals (struct objfile *objfile);
 
-extern void buildsym_new_init (void);
-
-extern void buildsym_init (void);
+extern void buildsym_init ();
 
 extern struct context_stack *push_context (int desc, CORE_ADDR valu);
 

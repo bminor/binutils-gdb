@@ -1,5 +1,16 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_new_init): Update.
+	* mipsread.c (mipscoff_new_init): Update.
+	* mdebugread.c (mdebug_build_psymtabs): Update.
+	* elfread.c (elf_new_init): Update.
+	* dbxread.c (dbx_new_init, coffstab_build_psymtabs)
+	(elfstab_build_psymtabs, stabsect_build_psymtabs): Update.
+	* buildsym.h (buildsym_new_init): Don't declare.
+	* buildsym.c (buildsym_new_init): Remove.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* stabsread.h (within_function): Move from buildsym.h.
 	* stabsread.c (start_stabs): Clear within_function.
 	* coffread.c (coff_start_symtab): Clear within_function.

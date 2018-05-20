@@ -1920,7 +1920,7 @@ static void
 xcoff_new_init (struct objfile *objfile)
 {
   stabsread_new_init ();
-  buildsym_new_init ();
+  buildsym_init ();
 }
 
 /* Do initialization in preparation for reading symbols from OBJFILE.
