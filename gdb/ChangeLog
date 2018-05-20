@@ -1,5 +1,12 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c (~buildsym_compunit): Update.
+	(struct buildsym_compunit) <comp_unit>: Now a unique_xmalloc_ptr.
+	(start_subfile, patch_subfile_names)
+	(end_symtab_with_blockvector): Update.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (struct buildsym_compunit): Add constructor,
 	destructor, initializers.
 	(start_buildsym_compunit): Remove.

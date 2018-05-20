@@ -126,7 +126,6 @@ struct buildsym_compunit
 	xfree (subfile->line_vector);
 	xfree (subfile);
       }
-    xfree (comp_dir);
   }
 
   /* The objfile we're reading debug info from.  */
@@ -142,7 +141,7 @@ struct buildsym_compunit
   struct subfile *main_subfile = nullptr;
 
   /* E.g., DW_AT_comp_dir if DWARF.  Space for this is malloc'd.  */
-  char *comp_dir;
+  gdb::unique_xmalloc_ptr<char> comp_dir;
 
   /* Space for this is not malloc'd, and is assumed to have at least
      the same lifetime as objfile.  */
@@ -699,7 +698,7 @@ start_subfile (const char *name)
 
   gdb_assert (buildsym_compunit != NULL);
 
-  subfile_dirname = buildsym_compunit->comp_dir;
+  subfile_dirname = buildsym_compunit->comp_dir.get ();
 
   /* See if this subfile is already registered.  */
 
@@ -820,7 +819,7 @@ patch_subfile_names (struct subfile *subfile, const char *name)
       && subfile->name != NULL
       && IS_DIR_SEPARATOR (subfile->name[strlen (subfile->name) - 1]))
     {
-      buildsym_compunit->comp_dir = subfile->name;
+      buildsym_compunit->comp_dir.reset (subfile->name);
       subfile->name = xstrdup (name);
       set_last_source_file (name);
 
@@ -1405,10 +1404,10 @@ end_symtab_with_blockvector (struct block *static_block,
   if (buildsym_compunit->comp_dir != NULL)
     {
       /* Reallocate the dirname on the symbol obstack.  */
+      const char *comp_dir = buildsym_compunit->comp_dir.get ();
       COMPUNIT_DIRNAME (cu)
 	= (const char *) obstack_copy0 (&objfile->objfile_obstack,
-					buildsym_compunit->comp_dir,
-					strlen (buildsym_compunit->comp_dir));
+					comp_dir, strlen (comp_dir));
     }
 
   /* Save the debug format string (if any) in the symtab.  */
