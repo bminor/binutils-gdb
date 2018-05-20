@@ -4589,9 +4589,7 @@ cleanup_undefined_stabs_types (struct objfile *objfile)
   cleanup_undefined_types_noname (objfile);
 }
 
-/* Scan through all of the global symbols defined in the object file,
-   assigning values to the debugging symbols that need to be assigned
-   to.  Get these symbols from the minimal symbol table.  */
+/* See stabsread.h.  */
 
 void
 scan_file_globals (struct objfile *objfile)

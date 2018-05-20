@@ -223,4 +223,10 @@ extern void free_header_files (void);
 
 extern void init_header_files (void);
 
+/* Scan through all of the global symbols defined in the object file,
+   assigning values to the debugging symbols that need to be assigned
+   to.  Get these symbols from the minimal symbol table.  */
+
+extern void scan_file_globals (struct objfile *objfile);
+
 #undef EXTERN

@@ -1,5 +1,11 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* stabsread.c (scan_file_globals): Update comment.
+	* stabsread.h (scan_file_globals): Move from buildsym.h.
+	* buildsym.h (scan_file_globals): Move to stabsread.h.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_new_init): Update.
 	* mipsread.c (mipscoff_new_init): Update.
 	* mdebugread.c (mdebug_build_psymtabs): Update.

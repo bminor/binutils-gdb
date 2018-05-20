@@ -205,10 +205,6 @@ extern struct compunit_symtab *end_expandable_symtab (CORE_ADDR end_addr,
 
 extern void augment_type_symtab (void);
 
-/* Defined in stabsread.c.  */
-
-extern void scan_file_globals (struct objfile *objfile);
-
 extern void buildsym_init ();
 
 extern struct context_stack *push_context (int desc, CORE_ADDR valu);
