@@ -891,11 +891,7 @@ push_subfile (void)
 
   tem->next = subfile_stack;
   subfile_stack = tem;
-  if (current_subfile == NULL || current_subfile->name == NULL)
-    {
-      internal_error (__FILE__, __LINE__, 
-		      _("failed internal consistency check"));
-    }
+  gdb_assert (current_subfile != NULL && current_subfile->name != NULL);
   tem->name = current_subfile->name;
 }
 
@@ -905,11 +901,7 @@ pop_subfile (void)
   char *name;
   struct subfile_stack *link = subfile_stack;
 
-  if (link == NULL)
-    {
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
-    }
+  gdb_assert (link != NULL);
   name = link->name;
   subfile_stack = link->next;
   xfree ((void *) link);

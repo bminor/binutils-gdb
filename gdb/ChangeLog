@@ -1,5 +1,10 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c (push_subfile): Use gdb_assert.
+	(pop_subfile): Use gdb_assert.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.h (merge_symbol_lists): Remove.
 	* buildsym.c (merge_symbol_lists): Remove.
 
