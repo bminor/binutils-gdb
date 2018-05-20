@@ -257,6 +257,10 @@ struct subfile_stack
 
 static struct subfile_stack *subfile_stack;
 
+/* Currently allocated size of context stack.  */
+
+static int context_stack_size;
+
 static void free_buildsym_compunit (void);
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);

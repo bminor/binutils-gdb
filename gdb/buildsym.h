@@ -159,10 +159,6 @@ EXTERN struct context_stack *context_stack;
 
 EXTERN int context_stack_depth;
 
-/* Currently allocated size of context stack.  */
-
-EXTERN int context_stack_size;
-
 /* Non-zero if the context stack is empty.  */
 #define outermost_context_p() (context_stack_depth == 0)
 

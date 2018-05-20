@@ -1,5 +1,10 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.h (context_stack_size): Don't declare.
+	* buildsym.c (context_stack_size): New global.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* dbxread.c (processing_acc_compilation): New global.
 	* buildsym.h (processing_acc_compilation): Don't declare.
 
