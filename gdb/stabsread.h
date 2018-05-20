@@ -31,6 +31,23 @@ enum language;
 #define	EXTERN extern
 #endif
 
+#define HASHSIZE 127		/* Size of things hashed via
+				   hashname().  */
+
+/* Compute a small integer hash code for the given name.  */
+
+extern int hashname (const char *name);
+
+/* Count symbols as they are processed, for error messages.  */
+
+EXTERN unsigned int symnum;
+
+#define next_symbol_text(objfile) (*next_symbol_text_func)(objfile)
+
+/* Function to invoke get the next symbol.  Return the symbol name.  */
+
+EXTERN const char *(*next_symbol_text_func) (struct objfile *);
+
 /* Hash table of global symbols whose values are not known yet.
    They are chained thru the SYMBOL_VALUE_CHAIN, since we don't
    have the correct data for that slot yet.

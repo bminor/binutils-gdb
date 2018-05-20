@@ -1,5 +1,15 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* stabsread.h (HASHSIZE, hashname, symnum, next_symbol_text)
+	(next_symbol_text_func): Move from buildsym.h.
+	* stabsread.c (hashname): Move from buildsym.c.
+	* buildsym.h (HASHSIZE, symnum, next_symbol_text)
+	(next_symbol_text_func, hashname): Move to stabsread.h.
+	* buildsym.c: Don't include bcache.h
+	(hashname): Move to stasbread.c.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.h (context_stack_size): Don't declare.
 	* buildsym.c (context_stack_size): New global.
 

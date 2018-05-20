@@ -44,6 +44,7 @@
 #include "target-float.h"
 #include "cp-abi.h"
 #include "cp-support.h"
+#include "bcache.h"
 #include <ctype.h>
 
 /* Ask stabsread.h to define the vars it normally declares `extern'.  */
@@ -4812,6 +4813,14 @@ find_name_end (const char *name)
     {
       return strchr (s, ':');
     }
+}
+
+/* See stabsread.h.  */
+
+int
+hashname (const char *name)
+{
+  return hash (name, strlen (name)) % HASHSIZE;
 }
 
 /* Initializer for this module.  */

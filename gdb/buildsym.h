@@ -46,9 +46,6 @@ struct dynamic_prop;
 #define	EXTERN extern
 #endif
 
-#define HASHSIZE 127		/* Size of things hashed via
-				   hashname().  */
-
 /* The list of sub-source-files within the current individual
    compilation.  Each file gets its own symtab with its own linetable
    and associated info, but they all share one blockvector.  */
@@ -73,10 +70,6 @@ EXTERN struct subfile *current_subfile;
    .o file compiled with gcc */
 
 EXTERN unsigned char processing_gcc_compilation;
-
-/* Count symbols as they are processed, for error messages.  */
-
-EXTERN unsigned int symnum;
 
 /* Record the symbols defined for each context in a list.  We don't
    create a struct block for the context until we know how long to
@@ -173,12 +166,6 @@ typedef void (record_line_ftype) (struct subfile *subfile, int line,
 
 
 
-#define next_symbol_text(objfile) (*next_symbol_text_func)(objfile)
-
-/* Function to invoke get the next symbol.  Return the symbol name.  */
-
-EXTERN const char *(*next_symbol_text_func) (struct objfile *);
-
 extern void add_symbol_to_list (struct symbol *symbol,
 				struct pending **listhead);
 
@@ -250,8 +237,6 @@ extern struct compunit_symtab *start_symtab (struct objfile *objfile,
 
 extern void restart_symtab (struct compunit_symtab *cust,
 			    const char *name, CORE_ADDR start_addr);
-
-extern int hashname (const char *name);
 
 extern void free_pending_blocks (void);
 

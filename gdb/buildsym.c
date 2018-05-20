@@ -74,7 +74,6 @@
 #include "gdbtypes.h"
 #include "complaints.h"
 #include "expression.h"		/* For "enum exp_opcode" used by...  */
-#include "bcache.h"
 #include "filenames.h"		/* For DOSish file names.  */
 #include "macrotab.h"
 #include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
@@ -1665,15 +1664,6 @@ pop_context (void)
   return (&context_stack[--context_stack_depth]);
 }
 
-
-
-/* Compute a small integer hash code for the given name.  */
-
-int
-hashname (const char *name)
-{
-    return (hash(name,strlen(name)) % HASHSIZE);
-}
 
 
 void
