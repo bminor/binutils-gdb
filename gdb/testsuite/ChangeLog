@@ -1,5 +1,10 @@
 2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* gdb.threads/pthreads.exp: Test qcs FLAG arguments.
+	Add some test prefixes to make tests unique.
+
+2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* gdb.base/frameapply.c: New file.
 	* gdb.base/frameapply.exp: New file.
 
