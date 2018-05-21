@@ -144,14 +144,14 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 	  storage
 	    = ((struct objfile_per_bfd_storage *)
 	       bfd_alloc (abfd, sizeof (struct objfile_per_bfd_storage)));
+	  /* objfile_per_bfd_storage is not trivially constructible, must
+	     call the ctor manually.  */
+	  storage = new (storage) objfile_per_bfd_storage ();
 	  set_bfd_data (abfd, objfiles_bfd_data, storage);
 	}
       else
-	storage = XOBNEW (&objfile->objfile_obstack, objfile_per_bfd_storage);
-
-      /* objfile_per_bfd_storage is not trivially constructible, must
-	 call the ctor manually.  */
-      storage = new (storage) objfile_per_bfd_storage ();
+	storage
+	  = obstack_new<objfile_per_bfd_storage> (&objfile->objfile_obstack);
 
       /* Look up the gdbarch associated with the BFD.  */
       if (abfd != NULL)

@@ -38,7 +38,7 @@
    in GCC 5.  */
 #if (__has_feature(is_trivially_constructible) \
      || (defined __GNUC__ && __GNUC__ >= 5))
-# define HAVE_IS_TRIVIALLY_COPYABLE 1
+# define HAVE_IS_TRIVIALLY_CONSTRUCTIBLE 1
 #endif
 
 namespace gdb {
