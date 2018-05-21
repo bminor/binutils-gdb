@@ -77,20 +77,6 @@ struct pending
     struct symbol *symbol[PENDINGSIZE];
   };
 
-/* Here are the three lists that symbols are put on.  */
-
-/* static at top level, and types */
-
-EXTERN struct pending *file_symbols;
-
-/* global functions and variables */
-
-EXTERN struct pending *global_symbols;
-
-/* everything local to lexical context */
-
-EXTERN struct pending *local_symbols;
-
 /* Stack representing unclosed lexical contexts (that will become
    blocks, eventually).  */
 
@@ -274,6 +260,18 @@ extern int get_context_stack_depth ();
 /* Return the current subfile.  */
 
 extern struct subfile *get_current_subfile ();
+
+/* Return the local symbol list.  */
+
+extern struct pending **get_local_symbols ();
+
+/* Return the file symbol list.  */
+
+extern struct pending **get_file_symbols ();
+
+/* Return the global symbol list.  */
+
+extern struct pending **get_global_symbols ();
 
 #undef EXTERN
 

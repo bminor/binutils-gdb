@@ -9715,7 +9715,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
   struct pending *list;
   int i;
 
-  for (list = global_symbols; list != NULL; list = list->next)
+  for (list = *get_global_symbols (); list != NULL; list = list->next)
     {
       for (i = 0; i < list->nsyms; ++i)
 	{
@@ -9768,7 +9768,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
       SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
       SYMBOL_TYPE (sym) = type;
 
-      add_symbol_to_list (sym, &global_symbols);
+      add_symbol_to_list (sym, get_global_symbols ());
 
       xfree (package_name);
     }
@@ -13628,7 +13628,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       attr_to_dynamic_prop (attr, die, cu, newobj->static_link);
     }
 
-  cu->list_in_scope = &local_symbols;
+  cu->list_in_scope = get_local_symbols ();
 
   if (die->child != NULL)
     {
@@ -13713,13 +13713,13 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
      a function declares a class that has methods).  This means that
      when we finish processing a function scope, we may need to go
      back to building a containing block's symbol lists.  */
-  local_symbols = cstk.locals;
+  *get_local_symbols () = cstk.locals;
   set_local_using_directives (cstk.local_using_directives);
 
   /* If we've finished processing a top-level function, subsequent
      symbols go in the file symbol list.  */
   if (outermost_context_p ())
-    cu->list_in_scope = &file_symbols;
+    cu->list_in_scope = get_file_symbols ();
 }
 
 /* Process all the DIES contained within a lexical block scope.  Start
@@ -13771,7 +13771,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   inherit_abstract_dies (die, cu);
   struct context_stack cstk = pop_context ();
 
-  if (local_symbols != NULL || (*get_local_using_directives ()) != NULL)
+  if (*get_local_symbols () != NULL || (*get_local_using_directives ()) != NULL)
     {
       struct block *block
         = finish_block (0, cstk.old_blocks, NULL,
@@ -13789,7 +13789,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
          to do.  */
       dwarf2_record_block_ranges (die, block, baseaddr, cu);
     }
-  local_symbols = cstk.locals;
+  *get_local_symbols () = cstk.locals;
   set_local_using_directives (cstk.local_using_directives);
 }
 
@@ -21015,7 +21015,7 @@ dwarf2_start_symtab (struct dwarf2_cu *cu,
     = start_symtab (cu->per_cu->dwarf2_per_objfile->objfile, name, comp_dir,
 		    low_pc, cu->language);
 
-  cu->list_in_scope = &file_symbols;
+  cu->list_in_scope = get_file_symbols ();
 
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);
@@ -21208,7 +21208,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
                  access them globally.  For instance, we want to be able
                  to break on a nested subprogram without having to
                  specify the context.  */
-	      list_to_add = &global_symbols;
+	      list_to_add = get_global_symbols ();
 	    }
 	  else
 	    {
@@ -21251,7 +21251,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      if (!suppress_add)
 		{
 		  if (attr2 && (DW_UNSND (attr2) != 0))
-		    list_to_add = &global_symbols;
+		    list_to_add = get_global_symbols ();
 		  else
 		    list_to_add = cu->list_in_scope;
 		}
@@ -21296,8 +21296,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
 		  /* A variable with DW_AT_external is never static,
 		     but it may be block-scoped.  */
-		  list_to_add = (cu->list_in_scope == &file_symbols
-				 ? &global_symbols : cu->list_in_scope);
+		  list_to_add = (cu->list_in_scope == get_file_symbols ()
+				 ? get_global_symbols () : cu->list_in_scope);
 		}
 	      else
 		list_to_add = cu->list_in_scope;
@@ -21327,8 +21327,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		{
 		  /* A variable with DW_AT_external is never static, but it
 		     may be block-scoped.  */
-		  list_to_add = (cu->list_in_scope == &file_symbols
-				 ? &global_symbols : cu->list_in_scope);
+		  list_to_add = (cu->list_in_scope == get_file_symbols ()
+				 ? get_global_symbols () : cu->list_in_scope);
 
 		  SYMBOL_ACLASS_INDEX (sym) = LOC_UNRESOLVED;
 		}
@@ -21393,9 +21393,9 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
 	    if (!suppress_add)
 	      {
-		list_to_add = (cu->list_in_scope == &file_symbols
+		list_to_add = (cu->list_in_scope == get_file_symbols ()
 			       && cu->language == language_cplus
-			       ? &global_symbols : cu->list_in_scope);
+			       ? get_global_symbols () : cu->list_in_scope);
 
 		/* The semantics of C++ state that "struct foo {
 		   ... }" also defines a typedef for "foo".  */
@@ -21434,20 +21434,20 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    /* NOTE: carlton/2003-11-10: See comment above in the
 	       DW_TAG_class_type, etc. block.  */
 
-	    list_to_add = (cu->list_in_scope == &file_symbols
+	    list_to_add = (cu->list_in_scope == get_file_symbols ()
 			   && cu->language == language_cplus
-			   ? &global_symbols : cu->list_in_scope);
+			   ? get_global_symbols () : cu->list_in_scope);
 	  }
 	  break;
 	case DW_TAG_imported_declaration:
 	case DW_TAG_namespace:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
-	  list_to_add = &global_symbols;
+	  list_to_add = get_global_symbols ();
 	  break;
 	case DW_TAG_module:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = MODULE_DOMAIN;
-	  list_to_add = &global_symbols;
+	  list_to_add = get_global_symbols ();
 	  break;
 	case DW_TAG_common_block:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_COMMON_BLOCK;

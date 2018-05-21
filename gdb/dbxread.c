@@ -2573,7 +2573,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
       if (desc != cstk.depth)
 	lbrac_mismatch_complaint (symnum);
 
-      if (local_symbols != NULL)
+      if (*get_local_symbols () != NULL)
 	{
 	  /* GCC development snapshots from March to December of
 	     2000 would output N_LSYM entries after N_LBRAC
@@ -2582,7 +2582,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	  complaint (_("misplaced N_LBRAC entry; discarding local "
 		       "symbols which have no enclosing block"));
 	}
-      local_symbols = cstk.locals;
+      *get_local_symbols () = cstk.locals;
 
       if (get_context_stack_depth () > 1)
 	{
@@ -2592,7 +2592,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	     for them (but don't bother if the block contains no
 	     symbols.  Should we complain on blocks without symbols?
 	     I can't think of any useful purpose for them).  */
-	  if (local_symbols != NULL)
+	  if (*get_local_symbols () != NULL)
 	    {
 	      /* Muzzle a compiler bug that makes end < start.
 

@@ -131,6 +131,20 @@ struct buildsym_compunit
 	xfree (subfile->line_vector);
 	xfree (subfile);
       }
+
+    struct pending *next, *next1;
+
+    for (next = m_file_symbols; next != NULL; next = next1)
+      {
+	next1 = next->next;
+	xfree ((void *) next);
+      }
+
+    for (next = m_global_symbols; next != NULL; next = next1)
+      {
+	next1 = next->next;
+	xfree ((void *) next);
+      }
   }
 
   void set_last_source_file (const char *name)
@@ -249,6 +263,15 @@ struct buildsym_compunit
      are just waiting to be built into a blockvector when finalizing the
      associated symtab.  */
   struct pending_block *m_pending_blocks = nullptr;
+
+  /* Pending static symbols and types at the top level.  */
+  struct pending *m_file_symbols = nullptr;
+
+  /* Pending global functions and variables.  */
+  struct pending *m_global_symbols = nullptr;
+
+  /* Pending symbols that are local to the lexical context.  */
+  struct pending *m_local_symbols = nullptr;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -339,22 +362,6 @@ find_symbol_in_list (struct pending *list, char *name, int length)
 
 scoped_free_pendings::~scoped_free_pendings ()
 {
-  struct pending *next, *next1;
-
-  for (next = file_symbols; next != NULL; next = next1)
-    {
-      next1 = next->next;
-      xfree ((void *) next);
-    }
-  file_symbols = NULL;
-
-  for (next = global_symbols; next != NULL; next = next1)
-    {
-      next1 = next->next;
-      xfree ((void *) next);
-    }
-  global_symbols = NULL;
-
   free_buildsym_compunit ();
 }
 
@@ -559,7 +566,8 @@ finish_block (struct symbol *symbol,
 	      const struct dynamic_prop *static_link,
 	      CORE_ADDR start, CORE_ADDR end)
 {
-  return finish_block_internal (symbol, &local_symbols, old_blocks, static_link,
+  return finish_block_internal (symbol, &buildsym_compunit->m_local_symbols,
+				old_blocks, static_link,
 				start, end, 0, 0);
 }
 
@@ -985,12 +993,8 @@ get_macro_table (void)
 static void
 prepare_for_building ()
 {
-  local_symbols = NULL;
-
   /* These should have been reset either by successful completion of building
      a symtab, or by the scoped_free_pendings destructor.  */
-  gdb_assert (file_symbols == NULL);
-  gdb_assert (global_symbols == NULL);
   gdb_assert (buildsym_compunit == nullptr);
 }
 
@@ -1140,10 +1144,6 @@ watch_main_source_file_lossage (void)
 static void
 reset_symtab_globals (void)
 {
-  local_symbols = NULL;
-  file_symbols = NULL;
-  global_symbols = NULL;
-
   free_buildsym_compunit ();
 }
 
@@ -1230,8 +1230,8 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
 
   if (!required
       && buildsym_compunit->m_pending_blocks == NULL
-      && file_symbols == NULL
-      && global_symbols == NULL
+      && buildsym_compunit->m_file_symbols == NULL
+      && buildsym_compunit->m_global_symbols == NULL
       && !buildsym_compunit->m_have_line_numbers
       && buildsym_compunit->m_pending_macros == NULL
       && buildsym_compunit->m_global_using_directives == NULL)
@@ -1242,7 +1242,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
   else
     {
       /* Define the STATIC_BLOCK.  */
-      return finish_block_internal (NULL, &file_symbols, NULL, NULL,
+      return finish_block_internal (NULL, get_file_symbols (), NULL, NULL,
 				    buildsym_compunit->m_last_source_start_addr,
 				    end_addr, 0, expandable);
     }
@@ -1270,7 +1270,7 @@ end_symtab_with_blockvector (struct block *static_block,
   end_addr = BLOCK_END (static_block);
 
   /* Create the GLOBAL_BLOCK and build the blockvector.  */
-  finish_block_internal (NULL, &global_symbols, NULL, NULL,
+  finish_block_internal (NULL, get_global_symbols (), NULL, NULL,
 			 buildsym_compunit->m_last_source_start_addr, end_addr,
 			 1, expandable);
   blockvector = make_blockvector ();
@@ -1538,26 +1538,27 @@ augment_type_symtab (void)
   if (buildsym_compunit->m_have_line_numbers)
     complaint (_("Line numbers recorded in a type symtab"));
 
-  if (file_symbols != NULL)
+  if (buildsym_compunit->m_file_symbols != NULL)
     {
       struct block *block = BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK);
 
       /* First mark any symbols without a specified symtab as belonging
 	 to the primary symtab.  */
-      set_missing_symtab (file_symbols, cust);
+      set_missing_symtab (buildsym_compunit->m_file_symbols, cust);
 
-      dict_add_pending (BLOCK_DICT (block), file_symbols);
+      dict_add_pending (BLOCK_DICT (block), buildsym_compunit->m_file_symbols);
     }
 
-  if (global_symbols != NULL)
+  if (buildsym_compunit->m_global_symbols != NULL)
     {
       struct block *block = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
 
       /* First mark any symbols without a specified symtab as belonging
 	 to the primary symtab.  */
-      set_missing_symtab (global_symbols, cust);
+      set_missing_symtab (buildsym_compunit->m_global_symbols, cust);
 
-      dict_add_pending (BLOCK_DICT (block), global_symbols);
+      dict_add_pending (BLOCK_DICT (block),
+			buildsym_compunit->m_global_symbols);
     }
 
   reset_symtab_globals ();
@@ -1576,14 +1577,14 @@ push_context (int desc, CORE_ADDR valu)
   struct context_stack *newobj = &buildsym_compunit->m_context_stack.back ();
 
   newobj->depth = desc;
-  newobj->locals = local_symbols;
+  newobj->locals = buildsym_compunit->m_local_symbols;
   newobj->old_blocks = buildsym_compunit->m_pending_blocks;
   newobj->start_addr = valu;
   newobj->local_using_directives
     = buildsym_compunit->m_local_using_directives;
   newobj->name = NULL;
 
-  local_symbols = NULL;
+  buildsym_compunit->m_local_symbols = NULL;
   buildsym_compunit->m_local_using_directives = NULL;
 
   return newobj;
@@ -1721,6 +1722,33 @@ get_current_subfile ()
   return buildsym_compunit->m_current_subfile;
 }
 
+/* See buildsym.h.  */
+
+struct pending **
+get_local_symbols ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  return &buildsym_compunit->m_local_symbols;
+}
+
+/* See buildsym.h.  */
+
+struct pending **
+get_file_symbols ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  return &buildsym_compunit->m_file_symbols;
+}
+
+/* See buildsym.h.  */
+
+struct pending **
+get_global_symbols ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  return &buildsym_compunit->m_global_symbols;
+}
+
 
 
 /* Initialize anything that needs initializing when starting to read a
@@ -1730,9 +1758,4 @@ get_current_subfile ()
 void
 buildsym_init ()
 {
-  /* Ensure the scoped_free_pendings destructor was called after
-     the last time.  */
-  gdb_assert (file_symbols == NULL);
-  gdb_assert (global_symbols == NULL);
-  gdb_assert (buildsym_compunit == NULL);
 }

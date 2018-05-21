@@ -1496,7 +1496,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		  eb_complaint (cs->c_symnum);
 		  break;
 		}
-	      if (local_symbols && !outermost_context_p ())
+	      if (*get_local_symbols () && !outermost_context_p ())
 		{
 		  /* Make a block for the local symbols within.  */
 		  finish_block (cstk.name,
@@ -1506,7 +1506,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 				 + ANOFFSET (objfile->section_offsets,
 					     SECT_OFF_TEXT (objfile))));
 		}
-	      local_symbols = cstk.locals;
+	      *get_local_symbols () = cstk.locals;
 	    }
 	  break;
 
@@ -1594,9 +1594,9 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
       SYMBOL_DUP (sym, sym2);
 
       if (cs->c_sclass == C_EXT || C_WEAKEXT)
-	add_symbol_to_list (sym2, &global_symbols);
+	add_symbol_to_list (sym2, get_global_symbols ());
       else if (cs->c_sclass == C_HIDEXT || cs->c_sclass == C_STAT)
-	add_symbol_to_list (sym2, &file_symbols);
+	add_symbol_to_list (sym2, get_file_symbols ());
     }
   else
     {

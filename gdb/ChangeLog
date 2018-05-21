@@ -1,5 +1,32 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (read_xcoff_symtab, process_xcoff_symbol): Update.
+	* stabsread.c (patch_block_stabs, define_symbol, read_type)
+	(read_enum_type, common_block_start, common_block_end)
+	(cleanup_undefined_types_1, finish_global_stabs): Update.
+	* mdebugread.c (psymtab_to_symtab_1): Update.
+	* dwarf2read.c (fixup_go_packaging, read_func_scope)
+	(read_lexical_block_scope, new_symbol): Update.
+	* dbxread.c (process_one_symbol): Update.
+	* coffread.c (coff_symtab_read, process_coff_symbol)
+	(coff_read_enum_type): Update.
+	* buildsym.h (file_symbols, global_symbols, local_symbols): Don't
+	declare.
+	(get_local_symbols, get_file_symbols, get_global_symbols): New
+	functions.
+	* buildsym.c (~buildsym_compunit): Clean up m_file_symbols and
+	m_global_symbols.
+	<m_file_symbols, m_local_symbols, m_global_symbols>: New members.
+	(~scoped_free_pendings): Update.
+	(finish_block, prepare_for_building, reset_symtab_globals)
+	(end_symtab_get_static_block, end_symtab_with_blockvector)
+	(augment_type_symtab, push_context): Update.
+	(get_local_symbols, get_file_symbols, get_global_symbols): New
+	functions.
+	(buildsym_init): Update.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (process_full_comp_unit): Do not set list_in_scope.
 	(process_full_type_unit): Likewise.
 	(dwarf2_start_symtab): Set list_in_scope.

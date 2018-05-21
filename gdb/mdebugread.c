@@ -4040,7 +4040,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 		  SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_void;
 		  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
 		  e->pdr.framereg = -1;
-		  add_symbol_to_list (s, &local_symbols);
+		  add_symbol_to_list (s, get_local_symbols ());
 		}
 	    }
 	  else if (sh.st == stLabel)

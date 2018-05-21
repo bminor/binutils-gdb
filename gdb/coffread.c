@@ -1171,7 +1171,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 			     symnum);
 		  break;
 		}
-	      if (local_symbols && !outermost_context_p ())
+	      if (*get_local_symbols () && !outermost_context_p ())
 		{
 		  tmpaddr =
 		    cs->c_value + ANOFFSET (objfile->section_offsets,
@@ -1181,7 +1181,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 				cstk.start_addr, tmpaddr);
 		}
 	      /* Now pop locals of block just finished.  */
-	      local_symbols = cstk.locals;
+	      *get_local_symbols () = cstk.locals;
 	    }
 	  break;
 
@@ -1647,10 +1647,10 @@ process_coff_symbol (struct coff_symbol *cs,
       SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
       if (cs->c_sclass == C_STAT || cs->c_sclass == C_THUMBSTAT
 	  || cs->c_sclass == C_THUMBSTATFUNC)
-	add_symbol_to_list (sym, &file_symbols);
+	add_symbol_to_list (sym, get_file_symbols ());
       else if (cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT
 	       || cs->c_sclass == C_THUMBEXTFUNC)
-	add_symbol_to_list (sym, &global_symbols);
+	add_symbol_to_list (sym, get_global_symbols ());
     }
   else
     {
@@ -1662,7 +1662,7 @@ process_coff_symbol (struct coff_symbol *cs,
 
 	case C_AUTO:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_LOCAL;
-	  add_symbol_to_list (sym, &local_symbols);
+	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_THUMBEXT:
@@ -1672,7 +1672,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	  SYMBOL_VALUE_ADDRESS (sym) = (CORE_ADDR) cs->c_value;
 	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets,
 						  SECT_OFF_TEXT (objfile));
-	  add_symbol_to_list (sym, &global_symbols);
+	  add_symbol_to_list (sym, get_global_symbols ());
 	  break;
 
 	case C_THUMBSTAT:
@@ -1685,12 +1685,12 @@ process_coff_symbol (struct coff_symbol *cs,
 	  if (within_function)
 	    {
 	      /* Static symbol of local scope.  */
-	      add_symbol_to_list (sym, &local_symbols);
+	      add_symbol_to_list (sym, get_local_symbols ());
 	    }
 	  else
 	    {
 	      /* Static symbol at top level of file.  */
-	      add_symbol_to_list (sym, &file_symbols);
+	      add_symbol_to_list (sym, get_file_symbols ());
 	    }
 	  break;
 
@@ -1700,7 +1700,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_REG:
 	  SYMBOL_ACLASS_INDEX (sym) = coff_register_index;
 	  SYMBOL_VALUE (sym) = cs->c_value;
-	  add_symbol_to_list (sym, &local_symbols);
+	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_THUMBLABEL:
@@ -1710,14 +1710,14 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_ARG:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_ARG;
 	  SYMBOL_IS_ARGUMENT (sym) = 1;
-	  add_symbol_to_list (sym, &local_symbols);
+	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_REGPARM:
 	  SYMBOL_ACLASS_INDEX (sym) = coff_register_index;
 	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  SYMBOL_VALUE (sym) = cs->c_value;
-	  add_symbol_to_list (sym, &local_symbols);
+	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_TPDEF:
@@ -1771,7 +1771,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	      SYMBOL_VALUE_CHAIN (sym) = opaque_type_chain[i];
 	      opaque_type_chain[i] = sym;
 	    }
-	  add_symbol_to_list (sym, &file_symbols);
+	  add_symbol_to_list (sym, get_file_symbols ());
 	  break;
 
 	case C_STRTAG:
@@ -1790,7 +1790,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	      TYPE_NAME (SYMBOL_TYPE (sym)) =
 		concat (SYMBOL_LINKAGE_NAME (sym), (char *)NULL);
 
-	  add_symbol_to_list (sym, &file_symbols);
+	  add_symbol_to_list (sym, get_file_symbols ());
 	  break;
 
 	default:
@@ -2154,9 +2154,9 @@ coff_read_enum_type (int index, int length, int lastsym,
 
   type = coff_alloc_type (index);
   if (within_function)
-    symlist = &local_symbols;
+    symlist = get_local_symbols ();
   else
-    symlist = &file_symbols;
+    symlist = get_file_symbols ();
   osyms = *symlist;
   o_nsyms = osyms ? osyms->nsyms : 0;
 
