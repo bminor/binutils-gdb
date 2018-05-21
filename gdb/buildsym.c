@@ -25,7 +25,6 @@
 
    The basic way this module is used is as follows:
 
-   buildsym_init ();
    scoped_free_pendings free_pending;
    cust = start_symtab (...);
    ... read debug info ...
@@ -40,7 +39,6 @@
 
    Reading DWARF Type Units is another variation:
 
-   buildsym_init ();
    scoped_free_pendings free_pending;
    cust = start_symtab (...);
    ... read debug info ...
@@ -49,7 +47,6 @@
    And then reading subsequent Type Units within the containing "Comp Unit"
    will use a second flow:
 
-   buildsym_init ();
    scoped_free_pendings free_pending;
    cust = restart_symtab (...);
    ... read debug info ...
@@ -57,7 +54,6 @@
 
    dbxread.c and xcoffread.c use another variation:
 
-   buildsym_init ();
    scoped_free_pendings free_pending;
    cust = start_symtab (...);
    ... read debug info ...
@@ -985,19 +981,6 @@ get_macro_table (void)
   return buildsym_compunit->get_macro_table ();
 }
 
-/* Init state to prepare for building a symtab.
-   Note: This can't be done in buildsym_init because dbxread.c and xcoffread.c
-   can call start_symtab+end_symtab multiple times after one call to
-   buildsym_init.  */
-
-static void
-prepare_for_building ()
-{
-  /* These should have been reset either by successful completion of building
-     a symtab, or by the scoped_free_pendings destructor.  */
-  gdb_assert (buildsym_compunit == nullptr);
-}
-
 /* Start a new symtab for a new source file in OBJFILE.  Called, for example,
    when a stabs symbol of type N_SO is seen, or when a DWARF
    TAG_compile_unit DIE is seen.  It indicates the start of data for
@@ -1014,7 +997,9 @@ struct compunit_symtab *
 start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
 	      CORE_ADDR start_addr, enum language language)
 {
-  prepare_for_building ();
+  /* These should have been reset either by successful completion of building
+     a symtab, or by the scoped_free_pendings destructor.  */
+  gdb_assert (buildsym_compunit == nullptr);
 
   buildsym_compunit = new struct buildsym_compunit (objfile, name, comp_dir,
 						    language, start_addr);
@@ -1051,7 +1036,9 @@ void
 restart_symtab (struct compunit_symtab *cust,
 		const char *name, CORE_ADDR start_addr)
 {
-  prepare_for_building ();
+  /* These should have been reset either by successful completion of building
+     a symtab, or by the scoped_free_pendings destructor.  */
+  gdb_assert (buildsym_compunit == nullptr);
 
   buildsym_compunit
     = new struct buildsym_compunit (COMPUNIT_OBJFILE (cust),
@@ -1135,11 +1122,7 @@ watch_main_source_file_lossage (void)
     }
 }
 
-/* Reset state after a successful building of a symtab.
-   This exists because dbxread.c and xcoffread.c can call
-   start_symtab+end_symtab multiple times after one call to buildsym_init,
-   and before the scoped_free_pendings destructor is called.
-   We keep the free_pendings list around for dbx/xcoff sake.  */
+/* Reset state after a successful building of a symtab.  */
 
 static void
 reset_symtab_globals (void)
@@ -1747,15 +1730,4 @@ get_global_symbols ()
 {
   gdb_assert (buildsym_compunit != nullptr);
   return &buildsym_compunit->m_global_symbols;
-}
-
-
-
-/* Initialize anything that needs initializing when starting to read a
-   fresh piece of a symbol file, e.g. reading in the stuff
-   corresponding to a psymtab.  */
-
-void
-buildsym_init ()
-{
 }

@@ -171,8 +171,6 @@ extern struct compunit_symtab *end_expandable_symtab (CORE_ADDR end_addr,
 
 extern void augment_type_symtab (void);
 
-extern void buildsym_init ();
-
 extern struct context_stack *push_context (int desc, CORE_ADDR valu);
 
 extern struct context_stack pop_context ();

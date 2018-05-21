@@ -804,7 +804,6 @@ coff_symtab_read (minimal_symbol_reader &reader,
   CORE_ADDR tmpaddr;
   struct minimal_symbol *msym;
 
-  buildsym_init ();
   scoped_free_pendings free_pending;
 
   /* Work around a stdio bug in SunOS4.1.1 (this makes me nervous....

@@ -1,5 +1,25 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* coffread.c (coff_symtab_read): Update.
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Update.
+	(xcoff_new_init): Update.
+	* mipsread.c (mipscoff_new_init): Update.
+	* mdebugread.c (mdebug_build_psymtabs): Update.
+	* elfread.c (elf_new_init): Update.
+	* dwarf2read.c (process_full_comp_unit, process_full_type_unit):
+	Update.
+	* dbxread.c (dbx_new_init, dbx_psymtab_to_symtab_1)
+	(coffstab_build_psymtabs, elfstab_build_psymtabs)
+	(stabsect_build_psymtabs): Update.
+	* buildsym.h (buildsym_init): Don't declare.
+	* buildsym.c: Update comment.
+	(prepare_for_building): Remove.
+	(start_symtab, restart_symtab): Update.
+	(reset_symtab_globals): Update comment.
+	(buildsym_init): Remove.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (read_xcoff_symtab, process_xcoff_symbol): Update.
 	* stabsread.c (patch_block_stabs, define_symbol, read_type)
 	(read_enum_type, common_block_start, common_block_end)

@@ -567,7 +567,6 @@ static void
 dbx_new_init (struct objfile *ignore)
 {
   stabsread_new_init ();
-  buildsym_init ();
   init_header_files ();
 }
 
@@ -2164,7 +2163,6 @@ dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
     {
       /* Init stuff necessary for reading in symbols */
       stabsread_init ();
-      buildsym_init ();
       scoped_free_pendings free_pending;
       file_string_table_offset = FILE_STRING_OFFSET (pst);
       symbol_size = SYMBOL_SIZE (pst);
@@ -3037,7 +3035,6 @@ coffstab_build_psymtabs (struct objfile *objfile,
     perror_with_name (name);
 
   stabsread_new_init ();
-  buildsym_init ();
   free_header_files ();
   init_header_files ();
 
@@ -3125,7 +3122,6 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
     perror_with_name (name);
 
   stabsread_new_init ();
-  buildsym_init ();
   free_header_files ();
   init_header_files ();
 
@@ -3227,7 +3223,6 @@ stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
     perror_with_name (name);
 
   stabsread_new_init ();
-  buildsym_init ();
   free_header_files ();
   init_header_files ();
 

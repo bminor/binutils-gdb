@@ -10241,7 +10241,6 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  buildsym_init ();
   scoped_free_pendings free_pending;
 
   /* Clear the list here in case something was left over.  */
@@ -10344,7 +10343,6 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
   gdb_assert (per_cu->is_debug_types);
   sig_type = (struct signatured_type *) per_cu;
 
-  buildsym_init ();
   scoped_free_pendings free_pending;
 
   /* Clear the list here in case something was left over.  */

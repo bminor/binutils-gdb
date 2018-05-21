@@ -1870,7 +1870,6 @@ xcoff_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
     {
       /* Init stuff necessary for reading in symbols.  */
       stabsread_init ();
-      buildsym_init ();
 
       scoped_free_pendings free_pending;
       read_xcoff_symtab (objfile, pst);
@@ -1922,7 +1921,6 @@ static void
 xcoff_new_init (struct objfile *objfile)
 {
   stabsread_new_init ();
-  buildsym_init ();
 }
 
 /* Do initialization in preparation for reading symbols from OBJFILE.
