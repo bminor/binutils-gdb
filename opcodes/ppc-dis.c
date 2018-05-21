@@ -725,12 +725,6 @@ print_insn_powerpc (bfd_vma memaddr,
 
 	  operand = powerpc_operands + *opindex;
 
-	  /* Operands that are marked FAKE are simply ignored.  We
-	     already made sure that the extract function considered
-	     the instruction to be valid.  */
-	  if ((operand->flags & PPC_OPERAND_FAKE) != 0)
-	    continue;
-
 	  /* If all of the optional operands have the value zero,
 	     then don't print any of them.  */
 	  if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)

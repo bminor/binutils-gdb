@@ -1,3 +1,17 @@
+2018-05-21  Peter Bergner  <bergner@vnet.ibm.com.com>
+
+	* ppc-opc.c (insert_bat, extract_bat, insert_bba, extract_bba,
+	insert_rbs, extract_rbs, insert_xb6s, extract_xb6s): Delete functions.
+	(insert_bab, extract_bab, insert_btab, extract_btab,
+	insert_rsb, extract_rsb, insert_xab6, extract_xab6): New functions.
+	(BAT, BBA VBA RBS XB6S): Delete macros.
+	(BTAB, BAB, VAB, RAB, RSB, XAB6): New macros.
+	(BB, BD, RBX, XC6): Update for new macros.
+	(powerpc_opcodes) <evmr, evnot, vmr, vnot, crnot, crclr, crset,
+	crmove, not, not., mr, mr., xxspltd, xxswapd, xvmovsp, xvmovdp,
+	e_crnot, e_crclr, e_crset, e_crmove>: Likewise.
+	* ppc-dis.c (print_insn_powerpc): Delete handling of fake operands.
+
 2018-05-18  John Darrington  <john@darrington.wattle.id.au>
 
 	* Makefile.am: Add support for s12z architecture.

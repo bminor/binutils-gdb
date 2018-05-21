@@ -31,9 +31,11 @@
 	evandc          rS, rA, rB
 	evxor           rS, rA, rB
 	evmr            rS, rA
+	evor            rS, rA, rA
 	evor            rS, rA, rB
 	evnor           rS, rA, rB
 	evnot           rS, rA
+	evnor           rS, rA, rA
 	eveqv           rS, rA, rB
 	evorc           rS, rA, rB
 	evnand          rS, rA, rB

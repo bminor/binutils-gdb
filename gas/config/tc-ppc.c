@@ -2807,11 +2807,9 @@ md_assemble (char *str)
 		}
 	    }
 
-	  /* Compute the number of expected operands.
-	     Do not count fake operands.  */
+	  /* Compute the number of expected operands.  */
 	  for (num_operands_expected = 0, i = 0; opcode->operands[i]; i ++)
-	    if ((powerpc_operands [opcode->operands[i]].flags & PPC_OPERAND_FAKE) == 0)
-	      ++ num_operands_expected;
+	    ++ num_operands_expected;
 
 	  /* If there are fewer operands in the line then are called
 	     for by the instruction, we want to skip the optional
@@ -2843,16 +2841,6 @@ md_assemble (char *str)
 	  next_opindex = 0;
 	}
       errmsg = NULL;
-
-      /* If this is a fake operand, then we do not expect anything
-	 from the input.  */
-      if ((operand->flags & PPC_OPERAND_FAKE) != 0)
-	{
-	  insn = (*operand->insert) (insn, 0L, ppc_cpu, &errmsg);
-	  if (errmsg != (const char *) NULL)
-	    as_bad ("%s", errmsg);
-	  continue;
-	}
 
       /* If this is an optional operand, and we are skipping it, just
 	 insert a zero.  */

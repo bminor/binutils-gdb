@@ -1,3 +1,7 @@
+2018-05-21  Peter Bergner  <bergner@vnet.ibm.com.com>
+
+	* opcode/ppc.h (PPC_OPERAND_FAKE): Delete macro.
+
 2018-05-18  Kito Cheng  <kito.cheng@gmail.com>
 
 	* elf/riscv.h (EF_RISCV_RVE): New define.
