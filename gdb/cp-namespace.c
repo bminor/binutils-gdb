@@ -94,7 +94,7 @@ cp_scan_for_anonymous_namespaces (const struct symbol *const symbol,
 		 namespace given by the previous component if there is
 		 one, or to the global namespace if there isn't.  */
 	      std::vector<const char *> excludes;
-	      add_using_directive (&local_using_directives,
+	      add_using_directive (get_local_using_directives (),
 				   dest, src, NULL, NULL, excludes, 1,
 				   &objfile->objfile_obstack);
 	    }

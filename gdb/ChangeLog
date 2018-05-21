@@ -1,5 +1,23 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (using_directives, read_func_scope)
+	(read_lexical_block_scope): Update.
+	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Update.
+	* buildsym.h (local_using_directives, global_using_directives):
+	Don't declare.
+	(get_local_using_directives, set_local_using_directives)
+	(get_global_using_directives): Declare.
+	* buildsym.c (struct buildsym_compunit) <m_local_using_directives,
+	m_global_using_directives>: New members.
+	(finish_block_internal, prepare_for_building)
+	(reset_symtab_globals, end_symtab_get_static_block)
+	(push_context): Update.
+	(get_local_using_directives, set_local_using_directives)
+	(get_global_using_directives): New functions.
+	(buildsym_init): Update.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_initial_scan): Don't call
 	free_pending_blocks.
 	* dbxread.c (dbx_symfile_read): Don't call free_pending_blocks.

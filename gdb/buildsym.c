@@ -204,6 +204,12 @@ struct buildsym_compunit
 
   /* Stack of subfile names.  */
   std::vector<const char *> m_subfile_stack;
+
+  /* The "using" directives local to lexical context.  */
+  struct using_direct *m_local_using_directives = nullptr;
+
+  /* Global "using" directives.  */
+  struct using_direct *m_global_using_directives = nullptr;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -573,13 +579,13 @@ finish_block_internal (struct symbol *symbol,
 
   block_set_using (block,
 		   (is_global
-		    ? global_using_directives
-		    : local_using_directives),
+		    ? buildsym_compunit->m_global_using_directives
+		    : buildsym_compunit->m_local_using_directives),
 		   &objfile->objfile_obstack);
   if (is_global)
-    global_using_directives = NULL;
+    buildsym_compunit->m_global_using_directives = NULL;
   else
-    local_using_directives = NULL;
+    buildsym_compunit->m_local_using_directives = NULL;
 
   record_pending_block (objfile, block, opblock);
 
@@ -1018,7 +1024,6 @@ static void
 prepare_for_building ()
 {
   local_symbols = NULL;
-  local_using_directives = NULL;
 
   context_stack_depth = 0;
 
@@ -1026,7 +1031,6 @@ prepare_for_building ()
      a symtab, or by the scoped_free_pendings destructor.  */
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
-  gdb_assert (global_using_directives == NULL);
   gdb_assert (pending_addrmap == NULL);
   gdb_assert (current_subfile == NULL);
   gdb_assert (buildsym_compunit == nullptr);
@@ -1179,10 +1183,8 @@ static void
 reset_symtab_globals (void)
 {
   local_symbols = NULL;
-  local_using_directives = NULL;
   file_symbols = NULL;
   global_symbols = NULL;
-  global_using_directives = NULL;
 
   if (pending_addrmap)
     obstack_free (&pending_addrmap_obstack, NULL);
@@ -1278,7 +1280,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
       && global_symbols == NULL
       && !buildsym_compunit->m_have_line_numbers
       && buildsym_compunit->m_pending_macros == NULL
-      && global_using_directives == NULL)
+      && buildsym_compunit->m_global_using_directives == NULL)
     {
       /* Ignore symtabs that have no functions with real debugging info.  */
       return NULL;
@@ -1632,11 +1634,12 @@ push_context (int desc, CORE_ADDR valu)
   newobj->locals = local_symbols;
   newobj->old_blocks = pending_blocks;
   newobj->start_addr = valu;
-  newobj->local_using_directives = local_using_directives;
+  newobj->local_using_directives
+    = buildsym_compunit->m_local_using_directives;
   newobj->name = NULL;
 
   local_symbols = NULL;
-  local_using_directives = NULL;
+  buildsym_compunit->m_local_using_directives = NULL;
 
   return newobj;
 }
@@ -1705,6 +1708,33 @@ get_last_source_start_addr ()
   return buildsym_compunit->m_last_source_start_addr;
 }
 
+/* See buildsym.h.  */
+
+struct using_direct **
+get_local_using_directives ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  return &buildsym_compunit->m_local_using_directives;
+}
+
+/* See buildsym.h.  */
+
+void
+set_local_using_directives (struct using_direct *new_local)
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  buildsym_compunit->m_local_using_directives = new_local;
+}
+
+/* See buildsym.h.  */
+
+struct using_direct **
+get_global_using_directives ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  return &buildsym_compunit->m_global_using_directives;
+}
+
 
 
 /* Initialize anything that needs initializing when starting to read a
@@ -1730,7 +1760,6 @@ buildsym_init ()
   gdb_assert (pending_blocks == NULL);
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
-  gdb_assert (global_using_directives == NULL);
   gdb_assert (pending_addrmap == NULL);
   gdb_assert (buildsym_compunit == NULL);
 }

@@ -93,14 +93,6 @@ EXTERN struct pending *global_symbols;
 
 EXTERN struct pending *local_symbols;
 
-/* "using" directives local to lexical context.  */
-
-EXTERN struct using_direct *local_using_directives;
-
-/* global "using" directives.  */
-
-EXTERN struct using_direct *global_using_directives;
-
 /* Stack representing unclosed lexical contexts (that will become
    blocks, eventually).  */
 
@@ -265,6 +257,18 @@ extern void set_last_source_start_addr (CORE_ADDR addr);
    start_symtab and end_symtab* calls.  */
 
 extern CORE_ADDR get_last_source_start_addr ();
+
+/* Return the local using directives.  */
+
+extern struct using_direct **get_local_using_directives ();
+
+/* Set the list of local using directives.  */
+
+extern void set_local_using_directives (struct using_direct *new_local);
+
+/* Return the global using directives.  */
+
+extern struct using_direct **get_global_using_directives ();
 
 #undef EXTERN
 

@@ -11104,9 +11104,9 @@ static struct using_direct **
 using_directives (enum language language)
 {
   if (language == language_ada && context_stack_depth == 0)
-    return &global_using_directives;
+    return get_global_using_directives ();
   else
-    return &local_using_directives;
+    return get_local_using_directives ();
 }
 
 /* Read the import statement specified by the given die and record it.  */
@@ -13721,7 +13721,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
      when we finish processing a function scope, we may need to go
      back to building a containing block's symbol lists.  */
   local_symbols = newobj->locals;
-  local_using_directives = newobj->local_using_directives;
+  set_local_using_directives (newobj->local_using_directives);
 
   /* If we've finished processing a top-level function, subsequent
      symbols go in the file symbol list.  */
@@ -13779,7 +13779,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   inherit_abstract_dies (die, cu);
   newobj = pop_context ();
 
-  if (local_symbols != NULL || local_using_directives != NULL)
+  if (local_symbols != NULL || (*get_local_using_directives ()) != NULL)
     {
       struct block *block
         = finish_block (0, &local_symbols, newobj->old_blocks, NULL,
@@ -13798,7 +13798,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
       dwarf2_record_block_ranges (die, block, baseaddr, cu);
     }
   local_symbols = newobj->locals;
-  local_using_directives = newobj->local_using_directives;
+  set_local_using_directives (newobj->local_using_directives);
 }
 
 /* Read in DW_TAG_call_site and insert it to CU->call_site_htab.  */
