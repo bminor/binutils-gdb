@@ -216,6 +216,22 @@ struct buildsym_compunit
   std::vector<struct context_stack> m_context_stack;
 
   struct subfile *m_current_subfile = nullptr;
+
+  /* The mutable address map for the compilation unit whose symbols
+     we're currently reading.  The symtabs' shared blockvector will
+     point to a fixed copy of this.  */
+  struct addrmap *m_pending_addrmap = nullptr;
+
+  /* The obstack on which we allocate pending_addrmap.
+     If pending_addrmap is NULL, this is uninitialized; otherwise, it is
+     initialized (and holds pending_addrmap).  */
+  auto_obstack m_pending_addrmap_obstack;
+
+  /* True if we recorded any ranges in the addrmap that are different
+     from those in the blockvector already.  We set this to false when
+     we start processing a symfile, and if it's still false at the
+     end, then we just toss the addrmap.  */
+  bool m_pending_addrmap_interesting = false;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -226,22 +242,6 @@ static struct buildsym_compunit *buildsym_compunit;
 /* List of free `struct pending' structures for reuse.  */
 
 static struct pending *free_pendings;
-
-/* The mutable address map for the compilation unit whose symbols
-   we're currently reading.  The symtabs' shared blockvector will
-   point to a fixed copy of this.  */
-static struct addrmap *pending_addrmap;
-
-/* The obstack on which we allocate pending_addrmap.
-   If pending_addrmap is NULL, this is uninitialized; otherwise, it is
-   initialized (and holds pending_addrmap).  */
-static struct obstack pending_addrmap_obstack;
-
-/* Non-zero if we recorded any ranges in the addrmap that are
-   different from those in the blockvector already.  We set this to
-   zero when we start processing a symfile, and if it's still zero at
-   the end, then we just toss the addrmap.  */
-static int pending_addrmap_interesting;
 
 /* An obstack used for allocating pending blocks.  */
 
@@ -377,10 +377,6 @@ scoped_free_pendings::~scoped_free_pendings ()
       xfree ((void *) next);
     }
   global_symbols = NULL;
-
-  if (pending_addrmap)
-    obstack_free (&pending_addrmap_obstack, NULL);
-  pending_addrmap = NULL;
 
   free_buildsym_compunit ();
 }
@@ -654,15 +650,14 @@ record_block_range (struct block *block,
      need to record this block in the addrmap.  */
   if (start != BLOCK_START (block)
       || end_inclusive + 1 != BLOCK_END (block))
-    pending_addrmap_interesting = 1;
+    buildsym_compunit->m_pending_addrmap_interesting = true;
 
-  if (! pending_addrmap)
-    {
-      obstack_init (&pending_addrmap_obstack);
-      pending_addrmap = addrmap_create_mutable (&pending_addrmap_obstack);
-    }
+  if (buildsym_compunit->m_pending_addrmap == nullptr)
+    buildsym_compunit->m_pending_addrmap
+      = addrmap_create_mutable (&buildsym_compunit->m_pending_addrmap_obstack);
 
-  addrmap_set_empty (pending_addrmap, start, end_inclusive, block);
+  addrmap_set_empty (buildsym_compunit->m_pending_addrmap,
+		     start, end_inclusive, block);
 }
 
 static struct blockvector *
@@ -700,9 +695,11 @@ make_blockvector (void)
 
   /* If we needed an address map for this symtab, record it in the
      blockvector.  */
-  if (pending_addrmap && pending_addrmap_interesting)
+  if (buildsym_compunit->m_pending_addrmap != nullptr
+      && buildsym_compunit->m_pending_addrmap_interesting)
     BLOCKVECTOR_MAP (blockvector)
-      = addrmap_create_fixed (pending_addrmap, &objfile->objfile_obstack);
+      = addrmap_create_fixed (buildsym_compunit->m_pending_addrmap,
+			      &objfile->objfile_obstack);
   else
     BLOCKVECTOR_MAP (blockvector) = 0;
 
@@ -1031,7 +1028,6 @@ prepare_for_building ()
      a symtab, or by the scoped_free_pendings destructor.  */
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
-  gdb_assert (pending_addrmap == NULL);
   gdb_assert (buildsym_compunit == nullptr);
 }
 
@@ -1184,10 +1180,6 @@ reset_symtab_globals (void)
   local_symbols = NULL;
   file_symbols = NULL;
   global_symbols = NULL;
-
-  if (pending_addrmap)
-    obstack_free (&pending_addrmap_obstack, NULL);
-  pending_addrmap = NULL;
 
   free_buildsym_compunit ();
 }
@@ -1775,14 +1767,11 @@ get_current_subfile ()
 void
 buildsym_init ()
 {
-  pending_addrmap_interesting = 0;
-
   /* Ensure the scoped_free_pendings destructor was called after
      the last time.  */
   gdb_assert (free_pendings == NULL);
   gdb_assert (pending_blocks == NULL);
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
-  gdb_assert (pending_addrmap == NULL);
   gdb_assert (buildsym_compunit == NULL);
 }

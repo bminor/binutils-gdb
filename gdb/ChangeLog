@@ -1,5 +1,16 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c (struct buildsym_compunit) <m_pending_addrmap,
+	m_pending_addrmap_obstack, m_pending_addrmap_interesting>: New
+	members.
+	(pending_addrmap, pending_addrmap_obstack)
+	(pending_addrmap_interesting): Remove.
+	(scoped_free_pendings, record_block_range, make_blockvector)
+	(prepare_for_building, reset_symtab_globals, buildsym_init):
+	Update.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (process_linenos): Update.
 	* stabsread.c (define_symbol, read_type, read_enum_type): Update.
 	* mdebugread.c (psymtab_to_symtab_1): Update.
