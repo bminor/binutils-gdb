@@ -256,10 +256,6 @@ struct buildsym_compunit
 
 static struct buildsym_compunit *buildsym_compunit;
 
-/* List of free `struct pending' structures for reuse.  */
-
-static struct pending *free_pendings;
-
 /* List of blocks already made (lexical contexts already closed).
    This is used at the end to make the blockvector.  */
 
@@ -301,16 +297,7 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
      don't have a link with room in it, add a new link.  */
   if (*listhead == NULL || (*listhead)->nsyms == PENDINGSIZE)
     {
-      if (free_pendings)
-	{
-	  link = free_pendings;
-	  free_pendings = link->next;
-	}
-      else
-	{
-	  link = XNEW (struct pending);
-	}
-
+      link = XNEW (struct pending);
       link->next = *listhead;
       *listhead = link;
       link->nsyms = 0;
@@ -353,13 +340,6 @@ find_symbol_in_list (struct pending *list, char *name, int length)
 scoped_free_pendings::~scoped_free_pendings ()
 {
   struct pending *next, *next1;
-
-  for (next = free_pendings; next; next = next1)
-    {
-      next1 = next->next;
-      xfree ((void *) next);
-    }
-  free_pendings = NULL;
 
   for (next = file_symbols; next != NULL; next = next1)
     {
@@ -482,13 +462,12 @@ finish_block_internal (struct symbol *symbol,
   if (static_link != NULL)
     objfile_register_static_link (objfile, block, static_link);
 
-  /* Now "free" the links of the list, and empty the list.  */
+  /* Now free the links of the list, and empty the list.  */
 
   for (next = *listhead; next; next = next1)
     {
       next1 = next->next;
-      next->next = free_pendings;
-      free_pendings = next;
+      xfree (next);
     }
   *listhead = NULL;
 
@@ -1753,7 +1732,6 @@ buildsym_init ()
 {
   /* Ensure the scoped_free_pendings destructor was called after
      the last time.  */
-  gdb_assert (free_pendings == NULL);
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
   gdb_assert (buildsym_compunit == NULL);

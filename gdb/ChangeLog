@@ -1,5 +1,11 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c (free_pendings): Remove.
+	(add_symbol_to_list, scoped_free_pendings)
+	(finish_block_internal, buildsym_init): Update.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (read_xcoff_symtab): Update.
 	* dwarf2read.c (read_func_scope, read_lexical_block_scope):
 	Update.
