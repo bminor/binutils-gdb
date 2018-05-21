@@ -198,8 +198,8 @@ struct arch_lwp_info
 
 /* Pseudo registers can not be read.  ptrace does not provide a way to
    read (or set) PS_REGNUM, and there's no point in reading or setting
-   ZERO_REGNUM.  We also can not set BADVADDR, CAUSE, or FCRIR via
-   ptrace().  */
+   ZERO_REGNUM, it's always 0.  We also can not set BADVADDR, CAUSE,
+   or FCRIR via ptrace().  */
 
 static int
 mips_cannot_fetch_register (int regno)
@@ -238,6 +238,20 @@ mips_cannot_store_register (int regno)
 
   if (find_regno (tdesc, "fir") == regno)
     return 1;
+
+  return 0;
+}
+
+static int
+mips_fetch_register (struct regcache *regcache, int regno)
+{
+  const struct target_desc *tdesc = current_process ()->tdesc;
+
+  if (find_regno (tdesc, "r0") == regno)
+    {
+      supply_register_zeroed (regcache, regno);
+      return 1;
+    }
 
   return 0;
 }
@@ -750,7 +764,9 @@ mips_store_gregset (struct regcache *regcache, const void *buf)
 
   use_64bit = (register_size (regcache->tdesc, 0) == 8);
 
-  for (i = 0; i < 32; i++)
+  supply_register_by_name_zeroed (regcache, "r0");
+
+  for (i = 1; i < 32; i++)
     mips_supply_register (regcache, use_64bit, i, regset + i);
 
   mips_supply_register (regcache, use_64bit,
@@ -879,7 +895,7 @@ struct linux_target_ops the_low_target = {
   mips_regs_info,
   mips_cannot_fetch_register,
   mips_cannot_store_register,
-  NULL, /* fetch_register */
+  mips_fetch_register,
   mips_get_pc,
   mips_set_pc,
   NULL, /* breakpoint_kind_from_pc */

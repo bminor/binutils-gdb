@@ -1,3 +1,10 @@
+2018-05-21  Maciej W. Rozycki  <macro@mips.com>
+
+	* linux-mips-low.c (mips_fetch_register): New function.  Update
+	preceding comment.
+	(mips_store_gregset): Supply 0 rather than $restart for $zero.
+	(the_low_target): Wire `mips_fetch_register'.
+
 2018-05-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* lynx-i386-low.c (LYNXOS_178): New macro.
