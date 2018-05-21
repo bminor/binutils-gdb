@@ -11103,7 +11103,7 @@ read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
 static struct using_direct **
 using_directives (enum language language)
 {
-  if (language == language_ada && context_stack_depth == 0)
+  if (language == language_ada && outermost_context_p ())
     return get_global_using_directives ();
   else
     return get_local_using_directives ();
@@ -21353,7 +21353,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	     when we do not have enough information to show inlined frames;
 	     pretend it's a local variable in that case so that the user can
 	     still see it.  */
-	  if (context_stack_depth > 0
+	  if (!outermost_context_p ()
 	      && context_stack[context_stack_depth - 1].name != NULL)
 	    SYMBOL_IS_ARGUMENT (sym) = 1;
 	  attr = dwarf2_attr (die, DW_AT_location, cu);

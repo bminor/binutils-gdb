@@ -1,5 +1,13 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (read_xcoff_symtab): Use outermost_context_p.
+	* dwarf2read.c (using_directives, new_symbol): Use
+	outermost_context_p.
+	* dbxread.c (process_one_symbol): Use outermost_context_p.
+	* coffread.c (coff_symtab_read): Use outermost_context_p.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (using_directives, read_func_scope)
 	(read_lexical_block_scope): Update.
 	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Update.

@@ -2493,7 +2493,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	     the current block.  */
 	  struct block *block;
 
- 	  if (context_stack_depth <= 0)
+	  if (outermost_context_p ())
  	    {
 	      lbrac_mismatch_complaint (symnum);
  	      break;
@@ -2562,7 +2562,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
       valu += function_start_offset;
 
-      if (context_stack_depth <= 0)
+      if (outermost_context_p ())
 	{
 	  lbrac_mismatch_complaint (symnum);
 	  break;
@@ -2883,7 +2883,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		  break;
 		}
 
-	      if (context_stack_depth > 0)
+	      if (!outermost_context_p ())
 		{
 		  struct block *block;
 

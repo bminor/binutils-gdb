@@ -1391,7 +1391,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	      /* { main_aux.x_sym.x_misc.x_lnsz.x_lnno
 	         contains number of lines to '}' */
 
-	      if (context_stack_depth <= 0)
+	      if (outermost_context_p ())
 		{	/* We attempted to pop an empty context stack.  */
 		  ef_complaint (cs->c_symnum);
 		  within_function = 0;
@@ -1399,7 +1399,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		}
 	      newobj = pop_context ();
 	      /* Stack must be empty now.  */
-	      if (context_stack_depth > 0 || newobj == NULL)
+	      if (!outermost_context_p () || newobj == NULL)
 		{
 		  ef_complaint (cs->c_symnum);
 		  within_function = 0;
@@ -1483,7 +1483,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	    }
 	  else if (strcmp (cs->c_name, ".eb") == 0)
 	    {
-	      if (context_stack_depth <= 0)
+	      if (outermost_context_p ())
 		{	/* We attempted to pop an empty context stack.  */
 		  eb_complaint (cs->c_symnum);
 		  break;
@@ -1494,7 +1494,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		  eb_complaint (cs->c_symnum);
 		  break;
 		}
-	      if (local_symbols && context_stack_depth > 0)
+	      if (local_symbols && !outermost_context_p ())
 		{
 		  /* Make a block for the local symbols within.  */
 		  finish_block (newobj->name, &local_symbols,

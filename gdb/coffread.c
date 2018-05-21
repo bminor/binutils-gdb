@@ -1088,7 +1088,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	      /* { main_aux.x_sym.x_misc.x_lnsz.x_lnno
 	         contains number of lines to '}' */
 
-	      if (context_stack_depth <= 0)
+	      if (outermost_context_p ())
 		{	/* We attempted to pop an empty context stack.  */
 		  complaint (_("`.ef' symbol without matching `.bf' "
 			       "symbol ignored starting at symnum %d"),
@@ -1099,7 +1099,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 
 	      newobj = pop_context ();
 	      /* Stack must be empty now.  */
-	      if (context_stack_depth > 0 || newobj == NULL)
+	      if (!outermost_context_p () || newobj == NULL)
 		{
 		  complaint (_("Unmatched .ef symbol(s) ignored "
 			       "starting at symnum %d"),
@@ -1152,7 +1152,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	    }
 	  else if (strcmp (cs->c_name, ".eb") == 0)
 	    {
-	      if (context_stack_depth <= 0)
+	      if (outermost_context_p ())
 		{	/* We attempted to pop an empty context stack.  */
 		  complaint (_("`.eb' symbol without matching `.bb' "
 			       "symbol ignored starting at symnum %d"),
@@ -1168,7 +1168,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 			     symnum);
 		  break;
 		}
-	      if (local_symbols && context_stack_depth > 0)
+	      if (local_symbols && !outermost_context_p ())
 		{
 		  tmpaddr =
 		    cs->c_value + ANOFFSET (objfile->section_offsets,
