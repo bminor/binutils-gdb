@@ -1,5 +1,12 @@
 2018-05-21  Tom Tromey  <tom@tromey.com>
 
+	* printcmd.c (output_command): Remove.
+	(output_command_const): Rename to output_command.
+	* valprint.h (output_command): Rename from output_command_const.
+	* tracepoint.c (trace_dump_actions): Call output_command.
+
+2018-05-21  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-cmd-catch.c (mi_cmd_catch_assert)
 	(mi_cmd_catch_exception, mi_cmd_catch_handlers): Update.
 	* ada-lang.h (create_ada_exception_catchpoint): Update.

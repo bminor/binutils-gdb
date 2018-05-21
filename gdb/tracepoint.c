@@ -2713,7 +2713,7 @@ trace_dump_actions (struct command_line *action,
 			}
 
 		      printf_filtered ("%s = ", exp);
-		      output_command_const (exp, from_tty);
+		      output_command (exp, from_tty);
 		      printf_filtered ("\n");
 		    }
 		  action_exp = next_comma;

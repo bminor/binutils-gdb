@@ -210,7 +210,7 @@ extern void generic_printstr (struct ui_file *stream, struct type *type,
    arguments passed to all command implementations, except ARGS is
    const.  */
 
-extern void output_command_const (const char *args, int from_tty);
+extern void output_command (const char *args, int from_tty);
 
 extern int val_print_scalar_type_p (struct type *type);
 

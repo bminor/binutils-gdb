@@ -1221,16 +1221,8 @@ call_command (const char *exp, int from_tty)
 
 /* Implementation of the "output" command.  */
 
-static void
-output_command (const char *exp, int from_tty)
-{
-  output_command_const (exp, from_tty);
-}
-
-/* Like output_command, but takes a const string as argument.  */
-
 void
-output_command_const (const char *exp, int from_tty)
+output_command (const char *exp, int from_tty)
 {
   char format = 0;
   struct value *val;
