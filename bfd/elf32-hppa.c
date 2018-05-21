@@ -3267,18 +3267,19 @@ final_link_relocate (asection *input_section,
     case R_PARISC_PCREL22F:
       /* If this call should go via the plt, find the import stub in
 	 the stub hash.  */
-      if (sym_sec == NULL
-	  || sym_sec->output_section == NULL
-	  || (hh != NULL
-	      && hh->eh.plt.offset != (bfd_vma) -1
-	      && hh->eh.dynindx != -1
-	      && !hh->plabel
-	      && (bfd_link_pic (info)
-		  || !hh->eh.def_regular
-		  || hh->eh.root.type == bfd_link_hash_defweak)))
+      if ((input_section->flags & SEC_ALLOC) != 0
+	  && (sym_sec == NULL
+	      || sym_sec->output_section == NULL
+	      || (hh != NULL
+		  && hh->eh.plt.offset != (bfd_vma) -1
+		  && hh->eh.dynindx != -1
+		  && !hh->plabel
+		  && (bfd_link_pic (info)
+		      || !hh->eh.def_regular
+		      || hh->eh.root.type == bfd_link_hash_defweak))))
 	{
 	  hsh = hppa_get_stub_entry (input_section, sym_sec,
-					    hh, rela, htab);
+				     hh, rela, htab);
 	  if (hsh != NULL)
 	    {
 	      value = (hsh->stub_offset
@@ -3478,7 +3479,7 @@ final_link_relocate (asection *input_section,
       if (value + addend + max_branch_offset >= 2*max_branch_offset)
 	{
 	  hsh = hppa_get_stub_entry (input_section, sym_sec,
-					    hh, rela, htab);
+				     hh, rela, htab);
 	  if (hsh == NULL)
 	    return bfd_reloc_undefined;
 

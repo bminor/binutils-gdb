@@ -1,3 +1,9 @@
+2018-05-22  Alan Modra  <amodra@gmail.com>
+
+	PR 23207
+	* elf32-hppa.c (final_link_relocate): Don't look for plt call
+	stubs in non-alloc sections.
+
 2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23201
