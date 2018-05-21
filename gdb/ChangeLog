@@ -1,5 +1,33 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c (buildsym_compunit::buildsym_compunit): Do more
+	initialization.
+	(buildsym_compunit): Add new constructor.
+	(struct buildsym_compunit) <get_last_source_file, finish_block,
+	record_block_range, start_subfile, patch_subfile_names,
+	push_subfile, pop_subfile, record_line, get_compunit_symtab,
+	set_last_source_start_addr, get_last_source_start_addr,
+	get_local_using_directives, set_local_using_directives,
+	get_global_using_directives, outermost_context_p,
+	get_current_context_stack, get_context_stack_depth,
+	get_current_subfile, get_local_symbols, get_file_symbols,
+	get_global_symbols, record_debugformat, record_producer,
+	push_context, pop_context, end_symtab_get_static_block,
+	end_symtab_from_static_block, end_symtab, end_expandable_symtab>:
+	New public methods.
+	<record_pending_block, finish_block_internal, make_blockvector,
+	watch_main_source_file_lossage, end_symtab_with_blockvector>: New
+	private methods.
+	Update all users.
+
+2018-05-22  Tom Tromey  <tom@tromey.com>
+
+	* buildsym.c (record_pending_block): Move earlier.  Remove objfile
+	parameter.
+	(finish_block_internal): Update.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (record_pending_block): Move earlier.  Remove objfile
 	parameter.
 	(finish_block_internal): Update.
