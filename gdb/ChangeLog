@@ -1,5 +1,25 @@
 2018-05-20  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* ada-lang.c (cache_symbol): Use XOBNEW and/or XOBNEWVEC and/or
+	OBSTACK_ZALLOC.
+	* dwarf2-frame.c (dwarf2_build_frame_info): Likewise.
+	* hppa-tdep.c (hppa_init_objfile_priv_data): Likewise.
+	* mdebugread.c (mdebug_build_psymtabs): Likewise.
+	(add_pending): Likewise.
+	(parse_symbol): Likewise.
+	(parse_partial_symbols): Likewise.
+	(psymtab_to_symtab_1): Likewise.
+	(new_psymtab): Likewise.
+	(elfmdebug_build_psymtabs): Likewise.
+	* minsyms.c (terminate_minimal_symbol_table): Likewise.
+	* objfiles.c (get_objfile_bfd_data): Likewise.
+	(objfile_register_static_link): Likewise.
+	* psymtab.c (allocate_psymtab): Likewise.
+	* stabsread.c (read_member_functions): Likewise.
+	* xcoffread.c (xcoff_end_psymtab): Likewise.
+
+2018-05-20  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* common/traits.h (HAVE_IS_TRIVIALLY_COPYABLE): Define if
 	compiler supports std::is_trivially_constructible.
 	* common/poison.h: Include obstack.h.

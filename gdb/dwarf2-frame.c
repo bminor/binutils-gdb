@@ -2205,8 +2205,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
   fde_table.entries = NULL;
 
   /* Build a minimal decoding of the DWARF2 compilation unit.  */
-  unit = (struct comp_unit *) obstack_alloc (&objfile->objfile_obstack,
-					     sizeof (struct comp_unit));
+  unit = XOBNEW (&objfile->objfile_obstack, comp_unit);
   unit->abfd = objfile->obfd;
   unit->objfile = objfile;
   unit->dbase = 0;

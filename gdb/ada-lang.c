@@ -4744,8 +4744,7 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
     return;
 
   h = msymbol_hash (name) % HASH_SIZE;
-  e = (struct cache_entry *) obstack_alloc (&sym_cache->cache_space,
-					    sizeof (*e));
+  e = XOBNEW (&sym_cache->cache_space, cache_entry);
   e->next = sym_cache->root[h];
   sym_cache->root[h] = e;
   e->name = copy

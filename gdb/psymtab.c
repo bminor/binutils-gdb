@@ -1805,9 +1805,7 @@ allocate_psymtab (const char *filename, struct objfile *objfile)
       objfile->free_psymtabs = psymtab->next;
     }
   else
-    psymtab = (struct partial_symtab *)
-      obstack_alloc (&objfile->objfile_obstack,
-		     sizeof (struct partial_symtab));
+    psymtab = XOBNEW (&objfile->objfile_obstack, partial_symtab);
 
   memset (psymtab, 0, sizeof (struct partial_symtab));
   psymtab->filename

@@ -205,13 +205,10 @@ hppa_symbol_address(const char *sym)
 static struct hppa_objfile_private *
 hppa_init_objfile_priv_data (struct objfile *objfile)
 {
-  struct hppa_objfile_private *priv;
+  hppa_objfile_private *priv
+    = OBSTACK_ZALLOC (&objfile->objfile_obstack, hppa_objfile_private);
 
-  priv = (struct hppa_objfile_private *)
-  	 obstack_alloc (&objfile->objfile_obstack,
-	 		sizeof (struct hppa_objfile_private));
   set_objfile_data (objfile, hppa_objfile_priv_data, priv);
-  memset (priv, 0, sizeof (*priv));
 
   return priv;
 }

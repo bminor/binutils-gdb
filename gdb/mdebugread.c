@@ -356,9 +356,8 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
       char *fdr_end;
       FDR *fdr_ptr;
 
-      info->fdr = (FDR *) obstack_alloc (&objfile->objfile_obstack,
-					 (info->symbolic_header.ifdMax
-					  * sizeof (FDR)));
+      info->fdr = (FDR *) XOBNEWVEC (&objfile->objfile_obstack, FDR,
+				     info->symbolic_header.ifdMax);
       fdr_src = (char *) info->external_fdr;
       fdr_end = (fdr_src
 		 + info->symbolic_header.ifdMax * swap->external_fdr_size);
@@ -508,9 +507,7 @@ add_pending (FDR *fh, char *sh, struct type *t)
   /* Make sure we do not make duplicates.  */
   if (!p)
     {
-      p = ((struct mdebug_pending *)
-	   obstack_alloc (&mdebugread_objfile->objfile_obstack,
-			  sizeof (struct mdebug_pending)));
+      p = XOBNEW (&mdebugread_objfile->objfile_obstack, mdebug_pending);
       p->s = sh;
       p->t = t;
       p->next = pending_list[f_idx];
@@ -1174,10 +1171,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 	  SYMBOL_ACLASS_INDEX (s) = LOC_CONST;
 	  SYMBOL_TYPE (s) = objfile_type (mdebugread_objfile)->builtin_void;
-	  e = ((struct mdebug_extra_func_info *)
-	       obstack_alloc (&mdebugread_objfile->objfile_obstack,
-			      sizeof (struct mdebug_extra_func_info)));
-	  memset (e, 0, sizeof (struct mdebug_extra_func_info));
+	  e = OBSTACK_ZALLOC (&mdebugread_objfile->objfile_obstack,
+			      mdebug_extra_func_info);
 	  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
 	  e->numargs = top_stack->numargs;
 	  e->pdr.framereg = -1;
@@ -2370,8 +2365,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       && (bfd_get_section_flags (cur_bfd, text_sect) & SEC_RELOC))
     relocatable = 1;
 
-  extern_tab = (EXTR *) obstack_alloc (&objfile->objfile_obstack,
-				       sizeof (EXTR) * hdr->iextMax);
+  extern_tab = XOBNEWVEC (&objfile->objfile_obstack, EXTR, hdr->iextMax);
 
   includes_allocated = 30;
   includes_used = 0;
@@ -2413,10 +2407,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
   }
 
   /* Allocate the global pending list.  */
-  pending_list =
-    ((struct mdebug_pending **)
-     obstack_alloc (&objfile->objfile_obstack,
-		    hdr->ifdMax * sizeof (struct mdebug_pending *)));
+  pending_list = XOBNEWVEC (&objfile->objfile_obstack, mdebug_pending *,
+			    hdr->ifdMax);
   memset (pending_list, 0,
 	  hdr->ifdMax * sizeof (struct mdebug_pending *));
 
@@ -2656,8 +2648,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				  textlow,
 				  objfile->global_psymbols,
 				  objfile->static_psymbols);
-      pst->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
-						sizeof (struct symloc));
+      pst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, symloc);
       memset (pst->read_symtab_private, 0, sizeof (struct symloc));
 
       save_pst = pst;
@@ -3771,11 +3762,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       /* Skip the first file indirect entry as it is a self dependency for
          source files or a reverse .h -> .c dependency for header files.  */
       pst->number_of_dependencies = 0;
-      pst->dependencies =
-	((struct partial_symtab **)
-	 obstack_alloc (&objfile->objfile_obstack,
-			((fh->crfd - 1)
-			 * sizeof (struct partial_symtab *))));
+      pst->dependencies = XOBNEWVEC (&objfile->objfile_obstack,
+				     partial_symtab *, (fh->crfd - 1));
       for (s_idx = 1; s_idx < fh->crfd; s_idx++)
 	{
 	  RFDT rh;
@@ -4061,13 +4049,11 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 		{
 		  /* Make up special symbol to contain
 		     procedure specific info.  */
-		  struct mdebug_extra_func_info *e =
-		    ((struct mdebug_extra_func_info *)
-		     obstack_alloc (&mdebugread_objfile->objfile_obstack,
-				    sizeof (struct mdebug_extra_func_info)));
+		  mdebug_extra_func_info *e
+		    = OBSTACK_ZALLOC (&mdebugread_objfile->objfile_obstack,
+				      mdebug_extra_func_info);
 		  struct symbol *s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 
-		  memset (e, 0, sizeof (struct mdebug_extra_func_info));
 		  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 		  SYMBOL_ACLASS_INDEX (s) = LOC_CONST;
 		  SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_void;
@@ -4736,9 +4722,8 @@ new_psymtab (const char *name, struct objfile *objfile)
 
   /* Keep a backpointer to the file's symbols.  */
 
-  psymtab->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
-						sizeof (struct symloc));
-  memset (psymtab->read_symtab_private, 0, sizeof (struct symloc));
+  psymtab->read_symtab_private
+    = OBSTACK_ZALLOC (&objfile->objfile_obstack, symloc);
   CUR_BFD (psymtab) = cur_bfd;
   DEBUG_SWAP (psymtab) = debug_swap;
   DEBUG_INFO (psymtab) = debug_info;
@@ -4863,9 +4848,7 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 
   minimal_symbol_reader reader (objfile);
 
-  info = ((struct ecoff_debug_info *)
-	  obstack_alloc (&objfile->objfile_obstack,
-			 sizeof (struct ecoff_debug_info)));
+  info = XOBNEW (&objfile->objfile_obstack, ecoff_debug_info);
 
   if (!(*swap->read_debug_info) (abfd, sec, info))
     error (_("Error reading ECOFF debugging information: %s"),

@@ -1419,10 +1419,8 @@ void
 terminate_minimal_symbol_table (struct objfile *objfile)
 {
   if (! objfile->per_bfd->msymbols)
-    objfile->per_bfd->msymbols
-      = ((struct minimal_symbol *)
-	 obstack_alloc (&objfile->per_bfd->storage_obstack,
-			sizeof (struct minimal_symbol)));
+    objfile->per_bfd->msymbols = XOBNEW (&objfile->per_bfd->storage_obstack,
+					 minimal_symbol);
 
   {
     struct minimal_symbol *m
