@@ -1,5 +1,9 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c: Remove TODO comment.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* coffread.c (coff_symtab_read): Update.
 	* xcoffread.c (xcoff_psymtab_to_symtab_1): Update.
 	(xcoff_new_init): Update.

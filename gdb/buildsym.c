@@ -90,8 +90,7 @@
 
 #include "stabsread.h"
 
-/* Buildsym's counterpart to struct compunit_symtab.
-   TODO(dje): Move all related global state into here.  */
+/* Buildsym's counterpart to struct compunit_symtab.  */
 
 struct buildsym_compunit
 {
