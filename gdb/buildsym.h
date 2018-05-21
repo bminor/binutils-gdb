@@ -176,7 +176,7 @@ class scoped_free_pendings
 {
 public:
 
-  scoped_free_pendings () = default;
+  scoped_free_pendings ();
   ~scoped_free_pendings ();
 
   DISABLE_COPY_AND_ASSIGN (scoped_free_pendings);
@@ -221,8 +221,6 @@ extern struct compunit_symtab *start_symtab (struct objfile *objfile,
 
 extern void restart_symtab (struct compunit_symtab *cust,
 			    const char *name, CORE_ADDR start_addr);
-
-extern void free_pending_blocks (void);
 
 /* Record the name of the debug format in the current pending symbol
    table.  FORMAT must be a string with a lifetime at least as long as

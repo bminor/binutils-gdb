@@ -545,7 +545,6 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   symbol_size = DBX_SYMBOL_SIZE (objfile);
   symbol_table_offset = DBX_SYMTAB_OFFSET (objfile);
 
-  free_pending_blocks ();
   scoped_free_pendings free_pending;
 
   minimal_symbol_reader reader (objfile);

@@ -3018,8 +3018,6 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
        include N_SLINE.  */
     init_psymbol_list (objfile, num_symbols);
 
-  free_pending_blocks ();
-
   scoped_free_pendings free_pending;
   minimal_symbol_reader reader (objfile);
 

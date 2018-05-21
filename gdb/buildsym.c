@@ -263,6 +263,8 @@ static void record_pending_block (struct objfile *objfile,
 				  struct block *block,
 				  struct pending_block *opblock);
 
+static void free_pending_blocks ();
+
 /* Initial sizes of data structures.  These are realloc'd larger if
    needed, and realloc'd down to the size actually used, when
    completed.  */
@@ -331,6 +333,11 @@ find_symbol_in_list (struct pending *list, char *name, int length)
   return (NULL);
 }
 
+scoped_free_pendings::scoped_free_pendings ()
+{
+  gdb_assert (pending_blocks == nullptr);
+}
+
 /* At end of reading syms, or in case of quit, ensure everything
    associated with building symtabs is freed.
 
@@ -373,8 +380,8 @@ scoped_free_pendings::~scoped_free_pendings ()
 
 /* This function is called to discard any pending blocks.  */
 
-void
-free_pending_blocks (void)
+static void
+free_pending_blocks ()
 {
   if (pending_blocks != NULL)
     {

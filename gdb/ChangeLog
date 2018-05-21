@@ -1,5 +1,15 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_initial_scan): Don't call
+	free_pending_blocks.
+	* dbxread.c (dbx_symfile_read): Don't call free_pending_blocks.
+	* buildsym.h (class scoped_free_pendings): Add constructor.
+	(free_pending_blocks): Don't declare.
+	* buildsym.c (scoped_free_pendings::scoped_free_pendings): New.
+	(free_pending_blocks): Now static.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.h (push_subfile, pop_subfile): Update declarations.
 	* buildsym.c (struct buildsym_compunit) <m_subfile_stack>: New
 	member.
