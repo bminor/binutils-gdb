@@ -30,21 +30,12 @@ enum language;
    file-reading routines.
 
    They originated in dbxread.c of gdb-4.2, and were split out to
-   make xcoffread.c more maintainable by sharing code.
-
-   Variables declared in this file can be defined by #define-ing the
-   name EXTERN to null.  It is used to declare variables that are
-   normally extern, but which get defined in a single module using
-   this technique.  */
+   make xcoffread.c more maintainable by sharing code.  */
 
 struct block;
 struct pending_block;
 
 struct dynamic_prop;
-
-#ifndef EXTERN
-#define	EXTERN extern
-#endif
 
 /* The list of sub-source-files within the current individual
    compilation.  Each file gets its own symtab with its own linetable
@@ -270,7 +261,5 @@ extern struct pending **get_file_symbols ();
 /* Return the global symbol list.  */
 
 extern struct pending **get_global_symbols ();
-
-#undef EXTERN
 
 #endif /* defined (BUILDSYM_H) */

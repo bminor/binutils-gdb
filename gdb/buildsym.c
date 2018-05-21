@@ -62,6 +62,7 @@
 */
 
 #include "defs.h"
+#include "buildsym.h"
 #include "bfd.h"
 #include "gdb_obstack.h"
 #include "symtab.h"
@@ -78,12 +79,6 @@
 #include "dictionary.h"
 #include "addrmap.h"
 #include <algorithm>
-
-/* Ask buildsym.h to define the vars it normally declares `extern'.  */
-#define	EXTERN
-/**/
-#include "buildsym.h"		/* Our own declarations.  */
-#undef	EXTERN
 
 /* For cleanup_undefined_stabs_types and finish_global_stabs (somewhat
    questionable--see comment where we call them).  */

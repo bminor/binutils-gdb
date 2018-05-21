@@ -1,5 +1,10 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.h (EXTERN): Don't define or undef.
+	* buildsym.c (EXTERN): Don't define.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c: Remove TODO comment.
 
 2018-07-20  Tom Tromey  <tom@tromey.com>
