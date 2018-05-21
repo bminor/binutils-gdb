@@ -471,15 +471,10 @@ gdbarch_alloc (const struct gdbarch_info *info,
 }
 
 
-/* Allocate extra space using the per-architecture obstack.  */
 
-void *
-gdbarch_obstack_zalloc (struct gdbarch *arch, long size)
+obstack *gdbarch_obstack (gdbarch *arch)
 {
-  void *data = obstack_alloc (arch->obstack, size);
-
-  memset (data, 0, size);
-  return data;
+  return arch->obstack;
 }
 
 /* See gdbarch.h.  */

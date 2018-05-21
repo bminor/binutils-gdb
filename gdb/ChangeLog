@@ -1,3 +1,27 @@
+2018-05-20  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/traits.h (HAVE_IS_TRIVIALLY_COPYABLE): Define if
+	compiler supports std::is_trivially_constructible.
+	* common/poison.h: Include obstack.h.
+	(IsMallocable): Define to is_trivially_constructible if the
+	compiler supports it, define to true_type otherwise.
+	(xobnew): New.
+	(XOBNEW): Redefine.
+	(xobnewvec): New.
+	(XOBNEWVEC): Redefine.
+	* gdb_obstack.h (obstack_zalloc): New.
+	(OBSTACK_ZALLOC): Redefine.
+	(obstack_calloc): New.
+	(OBSTACK_CALLOC): Redefine.
+	(obstack_new): New.
+	* gdbarch.sh: Include gdb_obstack in gdbarch.h.
+	(gdbarch_obstack): New declaration in gdbarch.h, definition in
+	gdbarch.c.
+	(GDBARCH_OBSTACK_CALLOC, GDBARCH_OBSTACK_ZALLOC): Use
+	obstack_calloc/obstack_zalloc.
+	(gdbarch_obstack_zalloc): Remove.
+	* target-descriptions.c (tdesc_data_init): Use obstack_new.
+
 2018-05-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* stack.c (backtrace_command_1): Remove useless variable int i.

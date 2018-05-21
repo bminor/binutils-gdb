@@ -21,6 +21,7 @@
 #define COMMON_POISON_H
 
 #include "traits.h"
+#include "obstack.h"
 
 /* Poison memset of non-POD types.  The idea is catching invalid
    initialization of non-POD structs that is easy to be introduced as
@@ -88,7 +89,11 @@ void *memmove (D *dest, const S *src, size_t n) = delete;
    objects that require new/delete.  */
 
 template<typename T>
-using IsMallocable = std::is_pod<T>;
+#if HAVE_IS_TRIVIALLY_CONSTRUCTIBLE
+using IsMallocable = std::is_trivially_constructible<T>;
+#else
+using IsMallocable = std::true_type;
+#endif
 
 template<typename T>
 using IsFreeable = gdb::Or<std::is_trivially_destructible<T>, std::is_void<T>>;
@@ -215,5 +220,29 @@ non-POD data type.");
 
 #undef XRESIZEVAR
 #define XRESIZEVAR(T, P, S) xresizevar<T> (P, S)
+
+template<typename T>
+static T *
+xobnew (obstack *ob)
+{
+  static_assert (IsMallocable<T>::value, "Trying to use XOBNEW with a \
+non-POD data type.");
+  return XOBNEW (ob, T);
+}
+
+#undef XOBNEW
+#define XOBNEW(O, T) xobnew<T> (O)
+
+template<typename T>
+static T *
+xobnewvec (obstack *ob, size_t n)
+{
+  static_assert (IsMallocable<T>::value, "Trying to use XOBNEWVEC with a \
+non-POD data type.");
+  return XOBNEWVEC (ob, T, n);
+}
+
+#undef XOBNEWVEC
+#define XOBNEWVEC(O, T, N) xobnewvec<T> (O, N)
 
 #endif /* COMMON_POISON_H */

@@ -723,12 +723,7 @@ tdesc_find_type (struct gdbarch *gdbarch, const char *id)
 static void *
 tdesc_data_init (struct obstack *obstack)
 {
-  struct tdesc_arch_data *data;
-
-  data = OBSTACK_ZALLOC (obstack, struct tdesc_arch_data);
-  new (data) tdesc_arch_data ();
-
-  return data;
+  return obstack_new<tdesc_arch_data> (obstack);
 }
 
 /* Similar, but for the temporary copy used during architecture

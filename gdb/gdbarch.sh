@@ -1261,6 +1261,7 @@ cat <<EOF
 #include <vector>
 #include "frame.h"
 #include "dis-asm.h"
+#include "gdb_obstack.h"
 
 struct floatformat;
 struct ui_file;
@@ -1532,14 +1533,19 @@ extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gd
 
 extern void gdbarch_free (struct gdbarch *);
 
+/* Get the obstack owned by ARCH.  */
+
+extern obstack *gdbarch_obstack (gdbarch *arch);
 
 /* Helper function.  Allocate memory from the \`\`struct gdbarch''
    obstack.  The memory is freed when the corresponding architecture
    is also freed.  */
 
-extern void *gdbarch_obstack_zalloc (struct gdbarch *gdbarch, long size);
-#define GDBARCH_OBSTACK_CALLOC(GDBARCH, NR, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), (NR) * sizeof (TYPE)))
-#define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), sizeof (TYPE)))
+#define GDBARCH_OBSTACK_CALLOC(GDBARCH, NR, TYPE) \
+  obstack_calloc<TYPE> (gdbarch_obstack ((GDBARCH)), (NR))
+
+#define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE) \
+  obstack_zalloc<TYPE> (gdbarch_obstack ((GDBARCH)))
 
 /* Duplicate STRING, returning an equivalent string that's allocated on the
    obstack associated with GDBARCH.  The string is freed when the corresponding
@@ -1849,15 +1855,10 @@ EOF
 printf "\n"
 printf "\n"
 cat <<EOF
-/* Allocate extra space using the per-architecture obstack.  */
 
-void *
-gdbarch_obstack_zalloc (struct gdbarch *arch, long size)
+obstack *gdbarch_obstack (gdbarch *arch)
 {
-  void *data = obstack_alloc (arch->obstack, size);
-
-  memset (data, 0, size);
-  return data;
+  return arch->obstack;
 }
 
 /* See gdbarch.h.  */
