@@ -366,8 +366,10 @@ struct language_defn
        characters, excluding any eventual terminating null character.
        Otherwise *LENGTH will include all characters - including any nulls.
        CHARSET will hold the encoding used in the string.  */
-    void (*la_get_string) (struct value *value, gdb_byte **buffer, int *length,
-			   struct type **chartype, const char **charset);
+    void (*la_get_string) (struct value *value,
+			   gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
+			   int *length, struct type **chartype,
+			   const char **charset);
 
     /* Return an expression that can be used for a location
        watchpoint.  TYPE is a pointer type that points to the memory
@@ -627,8 +629,10 @@ int default_pass_by_reference (struct type *type);
 void default_print_typedef (struct type *type, struct symbol *new_symbol,
 			    struct ui_file *stream);
 
-void default_get_string (struct value *value, gdb_byte **buffer, int *length,
-			 struct type **char_type, const char **charset);
+void default_get_string (struct value *value,
+			 gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
+			 int *length, struct type **char_type,
+			 const char **charset);
 
 /* Default name hashing function.  */
 
@@ -638,8 +642,10 @@ void default_get_string (struct value *value, gdb_byte **buffer, int *length,
    comparison operators hash to the same value.  */
 extern unsigned int default_search_name_hash (const char *search_name);
 
-void c_get_string (struct value *value, gdb_byte **buffer, int *length,
-		   struct type **char_type, const char **charset);
+void c_get_string (struct value *value,
+		   gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
+		   int *length, struct type **char_type,
+		   const char **charset);
 
 /* The default implementation of la_symbol_name_matcher.  Matches with
    strncmp_iw.  */

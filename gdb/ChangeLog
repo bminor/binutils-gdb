@@ -1,5 +1,18 @@
 2018-06-18  Tom Tromey  <tom@tromey.com>
 
+	* valprint.h (read_string): Update.
+	* valprint.c (read_string): Change type of "buffer".
+	(val_print_string): Update.
+	* python/py-value.c (valpy_string): Update.
+	* language.h (struct language_defn) <la_get_string>: Change
+	type of "buffer".
+	(default_get_string, c_get_string): Update.
+	* language.c (default_get_string): Change type of "buffer".
+	* guile/scm-value.c (gdbscm_value_to_string): Update.
+	* c-lang.c (c_get_string): Change type of "buffer".
+
+2018-06-18  Tom Tromey  <tom@tromey.com>
+
 	* ser-mingw.c (struct pipe_state_destroyer): New.
 	(pipe_state_up): New typedef.
 	(cleanup_pipe_state): Remove.

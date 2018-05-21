@@ -691,8 +691,9 @@ default_print_array_index (struct value *index_value, struct ui_file *stream,
 }
 
 void
-default_get_string (struct value *value, gdb_byte **buffer, int *length,
-		    struct type **char_type, const char **charset)
+default_get_string (struct value *value,
+		    gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
+		    int *length, struct type **char_type, const char **charset)
 {
   error (_("Getting a string is unsupported in this language."));
 }

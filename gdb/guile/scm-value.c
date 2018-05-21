@@ -1106,7 +1106,7 @@ gdbscm_value_to_string (SCM self, SCM rest)
   char *encoding = NULL;
   SCM errors = SCM_BOOL_F;
   int length = -1;
-  gdb_byte *buffer = NULL;
+  gdb::unique_xmalloc_ptr<gdb_byte> buffer;
   const char *la_encoding = NULL;
   struct type *char_type = NULL;
   SCM result;
@@ -1163,9 +1163,10 @@ gdbscm_value_to_string (SCM self, SCM rest)
   scm_dynwind_begin ((scm_t_dynwind_flags) 0);
 
   gdbscm_dynwind_xfree (encoding);
-  gdbscm_dynwind_xfree (buffer);
+  gdb_byte *buffer_contents = buffer.release ();
+  gdbscm_dynwind_xfree (buffer_contents);
 
-  result = scm_from_stringn ((const char *) buffer,
+  result = scm_from_stringn ((const char *) buffer_contents,
 			     length * TYPE_LENGTH (char_type),
 			     (encoding != NULL && *encoding != '\0'
 			      ? encoding

@@ -517,9 +517,8 @@ static PyObject *
 valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 {
   int length = -1;
-  gdb_byte *buffer;
+  gdb::unique_xmalloc_ptr<gdb_byte> buffer;
   struct value *value = ((value_object *) self)->value;
-  PyObject *unicode;
   const char *encoding = NULL;
   const char *errors = NULL;
   const char *user_encoding = NULL;
@@ -542,12 +541,9 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
   END_CATCH
 
   encoding = (user_encoding && *user_encoding) ? user_encoding : la_encoding;
-  unicode = PyUnicode_Decode ((const char *) buffer,
-			      length * TYPE_LENGTH (char_type),
-			      encoding, errors);
-  xfree (buffer);
-
-  return unicode;
+  return PyUnicode_Decode ((const char *) buffer.get (),
+			   length * TYPE_LENGTH (char_type),
+			   encoding, errors);
 }
 
 /* A helper function that implements the various cast operators.  */
