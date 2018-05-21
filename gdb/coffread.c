@@ -858,7 +858,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	     language_unknown, since such a ``file name'' is not
 	     recognized.  Override that with the minimal language to
 	     allow printing values in this symtab.  */
-	  current_subfile->language = language_minimal;
+	  get_current_subfile ()->language = language_minimal;
 	  complete_symtab ("_globals_", 0, 0);
 	  /* Done with all files, everything from here on out is
 	     globals.  */
@@ -1128,7 +1128,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	         of the closing '}', and for which we do not have any
 	         other statement-line-number.  */
 	      if (fcn_last_line == 1)
-		record_line (current_subfile, fcn_first_line,
+		record_line (get_current_subfile (), fcn_first_line,
 			     gdbarch_addr_bits_remove (gdbarch,
 						       fcn_first_line_addr));
 	      else
@@ -1504,7 +1504,7 @@ enter_linenos (long file_offset, int first_line,
 	  CORE_ADDR addr = lptr.l_addr.l_paddr;
 	  addr += ANOFFSET (objfile->section_offsets,
 			    SECT_OFF_TEXT (objfile));
-	  record_line (current_subfile,
+	  record_line (get_current_subfile (),
 		       first_line + L_LNNO32 (&lptr),
 		       gdbarch_addr_bits_remove (gdbarch, addr));
 	}
@@ -1627,7 +1627,7 @@ process_coff_symbol (struct coff_symbol *cs,
 
   name = cs->c_name;
   name = EXTERNAL_NAME (name, objfile->obfd);
-  SYMBOL_SET_LANGUAGE (sym, current_subfile->language,
+  SYMBOL_SET_LANGUAGE (sym, get_current_subfile ()->language,
 		       &objfile->objfile_obstack);
   SYMBOL_SET_NAMES (sym, name, strlen (name), 1, objfile);
 

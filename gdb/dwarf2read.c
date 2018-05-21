@@ -11574,18 +11574,18 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 
 	  dwarf2_start_subfile (fe.name, fe.include_dir (cu->line_header));
 
-	  if (current_subfile->symtab == NULL)
+	  if (get_current_subfile ()->symtab == NULL)
 	    {
 	      /* NOTE: start_subfile will recognize when it's been
 		 passed a file it has already seen.  So we can't
 		 assume there's a simple mapping from
 		 cu->line_header->file_names to subfiles, plus
 		 cu->line_header->file_names may contain dups.  */
-	      current_subfile->symtab
-		= allocate_symtab (cust, current_subfile->name);
+	      get_current_subfile ()->symtab
+		= allocate_symtab (cust, get_current_subfile ()->name);
 	    }
 
-	  fe.symtab = current_subfile->symtab;
+	  fe.symtab = get_current_subfile ()->symtab;
 	  tu_group->symtabs[i] = fe.symtab;
 	}
     }
@@ -20461,7 +20461,7 @@ lnp_state_machine::handle_set_file (file_name_index file)
     {
       const char *dir = fe->include_dir (m_line_header);
 
-      m_last_subfile = current_subfile;
+      m_last_subfile = get_current_subfile ();
       m_line_has_non_zero_discriminator = m_discriminator != 0;
       dwarf2_start_subfile (fe->name, dir);
     }
@@ -20526,7 +20526,7 @@ dwarf_record_line_p (unsigned int line, unsigned int last_line,
 		     int line_has_non_zero_discriminator,
 		     struct subfile *last_subfile)
 {
-  if (current_subfile != last_subfile)
+  if (get_current_subfile () != last_subfile)
     return 1;
   if (line != last_line)
     return 1;
@@ -20607,7 +20607,7 @@ lnp_state_machine::record_line (bool end_sequence)
       fe->included_p = 1;
       if (m_record_lines_p && m_is_stmt)
 	{
-	  if (m_last_subfile != current_subfile || end_sequence)
+	  if (m_last_subfile != get_current_subfile () || end_sequence)
 	    {
 	      dwarf_finish_line (m_gdbarch, m_last_subfile,
 				 m_address, m_record_line_callback);
@@ -20619,11 +20619,11 @@ lnp_state_machine::record_line (bool end_sequence)
 				       m_line_has_non_zero_discriminator,
 				       m_last_subfile))
 		{
-		  dwarf_record_line_1 (m_gdbarch, current_subfile,
+		  dwarf_record_line_1 (m_gdbarch, get_current_subfile (),
 				       m_line, m_address,
 				       m_record_line_callback);
 		}
-	      m_last_subfile = current_subfile;
+	      m_last_subfile = get_current_subfile ();
 	      m_last_line = m_line;
 	    }
 	}
@@ -20954,12 +20954,12 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
 
 	  dwarf2_start_subfile (fe.name, fe.include_dir (lh));
 
-	  if (current_subfile->symtab == NULL)
+	  if (get_current_subfile ()->symtab == NULL)
 	    {
-	      current_subfile->symtab
-		= allocate_symtab (cust, current_subfile->name);
+	      get_current_subfile ()->symtab
+		= allocate_symtab (cust, get_current_subfile ()->name);
 	    }
-	  fe.symtab = current_subfile->symtab;
+	  fe.symtab = get_current_subfile ()->symtab;
 	}
     }
 }

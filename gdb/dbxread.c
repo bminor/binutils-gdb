@@ -2508,7 +2508,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	    {
 	      CORE_ADDR addr = last_function_start + valu;
 
-	      record_line (current_subfile, 0,
+	      record_line (get_current_subfile (), 0,
 			   gdbarch_addr_bits_remove (gdbarch, addr));
 	    }
 
@@ -2642,7 +2642,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	     name.  Patch things up.  */
 	  if (previous_stab_code == (unsigned char) N_SO)
 	    {
-	      patch_subfile_names (current_subfile, name);
+	      patch_subfile_names (get_current_subfile (), name);
 	      break;		/* Ignore repeated SOs.  */
 	    }
 	  end_symtab (valu, SECT_OFF_TEXT (objfile));
@@ -2712,12 +2712,12 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	  CORE_ADDR addr = processing_gcc_compilation == 2 ?
 			   last_function_start : valu;
 
-	  record_line (current_subfile, desc,
+	  record_line (get_current_subfile (), desc,
 		       gdbarch_addr_bits_remove (gdbarch, addr));
 	  sline_found_in_function = 1;
 	}
       else
-	record_line (current_subfile, desc,
+	record_line (get_current_subfile (), desc,
 		     gdbarch_addr_bits_remove (gdbarch, valu));
       break;
 

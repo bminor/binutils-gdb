@@ -214,6 +214,8 @@ struct buildsym_compunit
   /* The stack of contexts that are pushed by push_context and popped
      by pop_context.  */
   std::vector<struct context_stack> m_context_stack;
+
+  struct subfile *m_current_subfile = nullptr;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -761,7 +763,7 @@ start_subfile (const char *name)
 
       if (FILENAME_CMP (subfile_name, name) == 0)
 	{
-	  current_subfile = subfile;
+	  buildsym_compunit->m_current_subfile = subfile;
 	  if (subfile_name != subfile->name)
 	    xfree (subfile_name);
 	  return;
@@ -779,7 +781,7 @@ start_subfile (const char *name)
   subfile->next = buildsym_compunit->subfiles;
   buildsym_compunit->subfiles = subfile;
 
-  current_subfile = subfile;
+  buildsym_compunit->m_current_subfile = subfile;
 
   subfile->name = xstrdup (name);
 
@@ -839,7 +841,6 @@ free_buildsym_compunit (void)
     return;
   delete buildsym_compunit;
   buildsym_compunit = NULL;
-  current_subfile = NULL;
 }
 
 /* For stabs readers, the first N_SO symbol is assumed to be the
@@ -895,8 +896,10 @@ void
 push_subfile ()
 {
   gdb_assert (buildsym_compunit != nullptr);
-  gdb_assert (current_subfile != NULL && current_subfile->name != NULL);
-  buildsym_compunit->m_subfile_stack.push_back (current_subfile->name);
+  gdb_assert (buildsym_compunit->m_current_subfile != NULL);
+  gdb_assert (buildsym_compunit->m_current_subfile->name != NULL);
+  buildsym_compunit->m_subfile_stack.push_back
+    (buildsym_compunit->m_current_subfile->name);
 }
 
 const char *
@@ -1029,7 +1032,6 @@ prepare_for_building ()
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
   gdb_assert (pending_addrmap == NULL);
-  gdb_assert (current_subfile == NULL);
   gdb_assert (buildsym_compunit == nullptr);
 }
 
@@ -1068,7 +1070,7 @@ start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
   start_subfile (name);
   /* Save this so that we don't have to go looking for it at the end
      of the subfiles list.  */
-  buildsym_compunit->main_subfile = current_subfile;
+  buildsym_compunit->main_subfile = buildsym_compunit->m_current_subfile;
 
   return buildsym_compunit->compunit_symtab;
 }
@@ -1753,6 +1755,15 @@ get_context_stack_depth ()
 {
   gdb_assert (buildsym_compunit != nullptr);
   return buildsym_compunit->m_context_stack.size ();
+}
+
+/* See buildsym.h.  */
+
+struct subfile *
+get_current_subfile ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  return buildsym_compunit->m_current_subfile;
 }
 
 

@@ -1,5 +1,24 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (process_linenos): Update.
+	* stabsread.c (define_symbol, read_type, read_enum_type): Update.
+	* mdebugread.c (psymtab_to_symtab_1): Update.
+	* dwarf2read.c (setup_type_unit_groups)
+	(lnp_state_machine::handle_set_file, dwarf_record_line_p)
+	(lnp_state_machine::record_line, dwarf_decode_lines): Update.
+	* dbxread.c (process_one_symbol): Update.
+	* coffread.c (coff_symtab_read, enter_linenos)
+	(process_coff_symbol): Update.
+	* buildsym.h (current_subfile): Don't declare.
+	(get_current_subfile): Declare.
+	* buildsym.c (struct buildsym_compunit) <m_current_subfile>: New
+	member.
+	(start_subfile, free_buildsym_compunit, push_subfile)
+	(prepare_for_building, start_symtab): Update.
+	(get_current_subfile): New function.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* coffread.c (coff_symtab_read): Update.
 	* xcoffread.c (read_xcoff_symtab): Update.
 	* dwarf2read.c (new_symbol): Update.

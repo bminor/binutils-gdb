@@ -695,7 +695,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_LINE (sym) = 0;	/* unknown */
     }
 
-  SYMBOL_SET_LANGUAGE (sym, current_subfile->language,
+  SYMBOL_SET_LANGUAGE (sym, get_current_subfile ()->language,
 		       &objfile->objfile_obstack);
 
   if (is_cplus_marker (string[0]))
@@ -1296,7 +1296,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 		 */
 
 	      /* Pascal accepts names for pointer types.  */
-	      if (current_subfile->language == language_pascal)
+	      if (get_current_subfile ()->language == language_pascal)
 		{
 		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_LINKAGE_NAME (sym);
           	}
@@ -1638,7 +1638,7 @@ again:
 		return error_type (pp, objfile);
 	    }
 	  type_name = NULL;
-	  if (current_subfile->language == language_cplus)
+	  if (get_current_subfile ()->language == language_cplus)
 	    {
 	      char *name = (char *) alloca (p - *pp + 1);
 
@@ -3678,7 +3678,7 @@ read_enum_type (const char **pp, struct type *type,
 
       sym = allocate_symbol (objfile);
       SYMBOL_SET_LINKAGE_NAME (sym, name);
-      SYMBOL_SET_LANGUAGE (sym, current_subfile->language,
+      SYMBOL_SET_LANGUAGE (sym, get_current_subfile ()->language,
 			   &objfile->objfile_obstack);
       SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;

@@ -713,6 +713,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
       /* Line numbers are not necessarily ordered.  xlc compilation will
          put static function to the end.  */
 
+      struct subfile *current_subfile = get_current_subfile ();
       lineTb = arrange_linetable (lv);
       if (lv == lineTb)
 	{
@@ -775,8 +776,9 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	    if (fakename == NULL)
 	      fakename = " ?";
 	    start_subfile (fakename);
-	    xfree (current_subfile->name);
+	    xfree (get_current_subfile ()->name);
 	  }
+	  struct subfile *current_subfile = get_current_subfile ();
 	  current_subfile->name = xstrdup (inclTable[ii].name);
 #endif
 

@@ -64,8 +64,6 @@ struct subfile
   struct symtab *symtab;
 };
 
-EXTERN struct subfile *current_subfile;
-
 /* Record the symbols defined for each context in a list.  We don't
    create a struct block for the context until we know how long to
    make it.  */
@@ -273,6 +271,10 @@ extern struct context_stack *get_current_context_stack ();
 /* Return the context stack depth.  */
 
 extern int get_context_stack_depth ();
+
+/* Return the current subfile.  */
+
+extern struct subfile *get_current_subfile ();
 
 #undef EXTERN
 
