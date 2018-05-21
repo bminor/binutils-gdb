@@ -1,5 +1,28 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* coffread.c (coff_symtab_read): Update.
+	* xcoffread.c (read_xcoff_symtab): Update.
+	* dwarf2read.c (new_symbol): Update.
+	(read_func_scope, read_lexical_block_scope): Update.
+	* dbxread.c (process_one_symbol): Update.
+	* buildsym.h (context_stack, context_stack_depth): Don't declare.
+	(outermost_context_p): Remove macro.
+	(outermost_context_p, get_current_context_stack)
+	(get_context_stack_depth): Declare.
+	(pop_context): Return struct context_stack.
+	* buildsym.c (struct buildsym_compunit) <m_context_stack: New
+	member.
+	(context_stack_size): Remove.
+	(INITIAL_CONTEXT_STACK_SIZE): Remove.
+	(prepare_for_building, end_symtab_get_static_block)
+	(augment_type_symtab, push_context): Update.
+	(pop_context): Return struct context_stack.
+	(outermost_context_p, get_current_context_stack)
+	(get_context_stack_depth): New functions.
+	(buildsym_init): Update.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* rust-exp.y: Now a pure parser.  Update all rules.
 	(%union): Move earlier.
 	(current_parser, work_obstack): Remove globals.

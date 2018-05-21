@@ -210,6 +210,10 @@ struct buildsym_compunit
 
   /* Global "using" directives.  */
   struct using_direct *m_global_using_directives = nullptr;
+
+  /* The stack of contexts that are pushed by push_context and popped
+     by pop_context.  */
+  std::vector<struct context_stack> m_context_stack;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -257,10 +261,6 @@ struct pending_block
 
 static struct pending_block *pending_blocks;
 
-/* Currently allocated size of context stack.  */
-
-static int context_stack_size;
-
 static void free_buildsym_compunit (void);
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
@@ -275,7 +275,6 @@ static void free_pending_blocks ();
    needed, and realloc'd down to the size actually used, when
    completed.  */
 
-#define	INITIAL_CONTEXT_STACK_SIZE	10
 #define	INITIAL_LINE_VECTOR_LENGTH	1000
 
 
@@ -1025,8 +1024,6 @@ prepare_for_building ()
 {
   local_symbols = NULL;
 
-  context_stack_depth = 0;
-
   /* These should have been reset either by successful completion of building
      a symtab, or by the scoped_free_pendings destructor.  */
   gdb_assert (file_symbols == NULL);
@@ -1215,15 +1212,15 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
   /* Finish the lexical context of the last function in the file; pop
      the context stack.  */
 
-  if (context_stack_depth > 0)
+  if (!buildsym_compunit->m_context_stack.empty ())
     {
-      struct context_stack *cstk = pop_context ();
+      struct context_stack cstk = pop_context ();
 
       /* Make a block for the local symbols within.  */
-      finish_block (cstk->name, &local_symbols, cstk->old_blocks, NULL,
-		    cstk->start_addr, end_addr);
+      finish_block (cstk.name, &local_symbols, cstk.old_blocks, NULL,
+		    cstk.start_addr, end_addr);
 
-      if (context_stack_depth > 0)
+      if (!buildsym_compunit->m_context_stack.empty ())
 	{
 	  /* This is said to happen with SCO.  The old coffread.c
 	     code simply emptied the context stack, so we do the
@@ -1231,7 +1228,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
 	     believed to happen in most cases (even for coffread.c);
 	     it used to be an abort().  */
 	  complaint (_("Context stack not empty in end_symtab"));
-	  context_stack_depth = 0;
+	  buildsym_compunit->m_context_stack.clear ();
 	}
     }
 
@@ -1575,11 +1572,8 @@ augment_type_symtab (void)
   struct compunit_symtab *cust = buildsym_compunit->compunit_symtab;
   const struct blockvector *blockvector = COMPUNIT_BLOCKVECTOR (cust);
 
-  if (context_stack_depth > 0)
-    {
-      complaint (_("Context stack not empty in augment_type_symtab"));
-      context_stack_depth = 0;
-    }
+  if (!buildsym_compunit->m_context_stack.empty ())
+    complaint (_("Context stack not empty in augment_type_symtab"));
   if (pending_blocks != NULL)
     complaint (_("Blocks in a type symtab"));
   if (buildsym_compunit->m_pending_macros != NULL)
@@ -1619,17 +1613,11 @@ augment_type_symtab (void)
 struct context_stack *
 push_context (int desc, CORE_ADDR valu)
 {
-  struct context_stack *newobj;
+  gdb_assert (buildsym_compunit != nullptr);
 
-  if (context_stack_depth == context_stack_size)
-    {
-      context_stack_size *= 2;
-      context_stack = (struct context_stack *)
-	xrealloc ((char *) context_stack,
-		  (context_stack_size * sizeof (struct context_stack)));
-    }
+  buildsym_compunit->m_context_stack.emplace_back ();
+  struct context_stack *newobj = &buildsym_compunit->m_context_stack.back ();
 
-  newobj = &context_stack[context_stack_depth++];
   newobj->depth = desc;
   newobj->locals = local_symbols;
   newobj->old_blocks = pending_blocks;
@@ -1647,11 +1635,14 @@ push_context (int desc, CORE_ADDR valu)
 /* Pop a context block.  Returns the address of the context block just
    popped.  */
 
-struct context_stack *
-pop_context (void)
+struct context_stack
+pop_context ()
 {
-  gdb_assert (context_stack_depth > 0);
-  return (&context_stack[--context_stack_depth]);
+  gdb_assert (buildsym_compunit != nullptr);
+  gdb_assert (!buildsym_compunit->m_context_stack.empty ());
+  struct context_stack result = buildsym_compunit->m_context_stack.back ();
+  buildsym_compunit->m_context_stack.pop_back ();
+  return result;
 }
 
 
@@ -1735,6 +1726,35 @@ get_global_using_directives ()
   return &buildsym_compunit->m_global_using_directives;
 }
 
+/* See buildsym.h.  */
+
+bool
+outermost_context_p ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  return buildsym_compunit->m_context_stack.empty ();
+}
+
+/* See buildsym.h.  */
+
+struct context_stack *
+get_current_context_stack ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  if (buildsym_compunit->m_context_stack.empty ())
+    return nullptr;
+  return &buildsym_compunit->m_context_stack.back ();
+}
+
+/* See buildsym.h.  */
+
+int
+get_context_stack_depth ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  return buildsym_compunit->m_context_stack.size ();
+}
+
 
 
 /* Initialize anything that needs initializing when starting to read a
@@ -1745,14 +1765,6 @@ void
 buildsym_init ()
 {
   pending_addrmap_interesting = 0;
-
-  /* Context stack is initially empty.  Allocate first one with room
-     for a few levels; reuse it forever afterward.  */
-  if (context_stack == NULL)
-    {
-      context_stack_size = INITIAL_CONTEXT_STACK_SIZE;
-      context_stack = XNEWVEC (struct context_stack, context_stack_size);
-    }
 
   /* Ensure the scoped_free_pendings destructor was called after
      the last time.  */

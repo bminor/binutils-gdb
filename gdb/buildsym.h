@@ -133,15 +133,6 @@ struct context_stack
 
   };
 
-EXTERN struct context_stack *context_stack;
-
-/* Index of first unused entry in context stack.  */
-
-EXTERN int context_stack_depth;
-
-/* Non-zero if the context stack is empty.  */
-#define outermost_context_p() (context_stack_depth == 0)
-
 /* The type of the record_line function.  */
 typedef void (record_line_ftype) (struct subfile *subfile, int line,
 				  CORE_ADDR pc);
@@ -201,7 +192,7 @@ extern void buildsym_init ();
 
 extern struct context_stack *push_context (int desc, CORE_ADDR valu);
 
-extern struct context_stack *pop_context (void);
+extern struct context_stack pop_context ();
 
 extern record_line_ftype record_line;
 
@@ -269,6 +260,19 @@ extern void set_local_using_directives (struct using_direct *new_local);
 /* Return the global using directives.  */
 
 extern struct using_direct **get_global_using_directives ();
+
+/* True if the context stack is empty.  */
+
+extern bool outermost_context_p ();
+
+/* Return the top of the context stack, or nullptr if there is an
+   entry.  */
+
+extern struct context_stack *get_current_context_stack ();
+
+/* Return the context stack depth.  */
+
+extern int get_context_stack_depth ();
 
 #undef EXTERN
 

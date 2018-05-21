@@ -2448,6 +2448,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct context_stack *newobj;
+  struct context_stack cstk;
   /* This remembers the address of the start of a function.  It is
      used because in Solaris 2, N_LBRAC, N_RBRAC, and N_SLINE entries
      are relative to the current function's start address.  On systems
@@ -2512,16 +2513,16 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	    }
 
 	  within_function = 0;
-	  newobj = pop_context ();
+	  cstk = pop_context ();
 
 	  /* Make a block for the local symbols within.  */
-	  block = finish_block (newobj->name, &local_symbols,
-				newobj->old_blocks, NULL,
-				newobj->start_addr, newobj->start_addr + valu);
+	  block = finish_block (cstk.name, &local_symbols,
+				cstk.old_blocks, NULL,
+				cstk.start_addr, cstk.start_addr + valu);
 
 	  /* For C++, set the block's scope.  */
-	  if (SYMBOL_LANGUAGE (newobj->name) == language_cplus)
-	    cp_set_block_scope (newobj->name, block, &objfile->objfile_obstack);
+	  if (SYMBOL_LANGUAGE (cstk.name) == language_cplus)
+	    cp_set_block_scope (cstk.name, block, &objfile->objfile_obstack);
 
 	  /* May be switching to an assembler file which may not be using
 	     block relative stabs, so reset the offset.  */
@@ -2568,8 +2569,8 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	  break;
 	}
 
-      newobj = pop_context ();
-      if (desc != newobj->depth)
+      cstk = pop_context ();
+      if (desc != cstk.depth)
 	lbrac_mismatch_complaint (symnum);
 
       if (local_symbols != NULL)
@@ -2581,9 +2582,9 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	  complaint (_("misplaced N_LBRAC entry; discarding local "
 		       "symbols which have no enclosing block"));
 	}
-      local_symbols = newobj->locals;
+      local_symbols = cstk.locals;
 
-      if (context_stack_depth > 1)
+      if (get_context_stack_depth () > 1)
 	{
 	  /* This is not the outermost LBRAC...RBRAC pair in the
 	     function, its local symbols preceded it, and are the ones
@@ -2596,14 +2597,14 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	      /* Muzzle a compiler bug that makes end < start.
 
 		 ??? Which compilers?  Is this ever harmful?.  */
-	      if (newobj->start_addr > valu)
+	      if (cstk.start_addr > valu)
 		{
 		  complaint (_("block start larger than block end"));
-		  newobj->start_addr = valu;
+		  cstk.start_addr = valu;
 		}
 	      /* Make a block for the local symbols within.  */
-	      finish_block (0, &local_symbols, newobj->old_blocks, NULL,
-			    newobj->start_addr, valu);
+	      finish_block (0, &local_symbols, cstk.old_blocks, NULL,
+			    cstk.start_addr, valu);
 	    }
 	}
       else
@@ -2876,7 +2877,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
 	      within_function = 1;
 
-	      if (context_stack_depth > 1)
+	      if (get_context_stack_depth () > 1)
 		{
 		  complaint (_("unmatched N_LBRAC before symtab pos %d"),
 			     symnum);
@@ -2887,15 +2888,15 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		{
 		  struct block *block;
 
-		  newobj = pop_context ();
+		  cstk = pop_context ();
 		  /* Make a block for the local symbols within.  */
-		  block = finish_block (newobj->name, &local_symbols,
-					newobj->old_blocks, NULL,
-					newobj->start_addr, valu);
+		  block = finish_block (cstk.name, &local_symbols,
+					cstk.old_blocks, NULL,
+					cstk.start_addr, valu);
 
 		  /* For C++, set the block's scope.  */
-		  if (SYMBOL_LANGUAGE (newobj->name) == language_cplus)
-		    cp_set_block_scope (newobj->name, block,
+		  if (SYMBOL_LANGUAGE (cstk.name) == language_cplus)
+		    cp_set_block_scope (cstk.name, block,
 					&objfile->objfile_obstack);
 		}
 

@@ -1397,17 +1397,17 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		  within_function = 0;
 		  break;
 		}
-	      newobj = pop_context ();
+	      struct context_stack cstk = pop_context ();
 	      /* Stack must be empty now.  */
-	      if (!outermost_context_p () || newobj == NULL)
+	      if (!outermost_context_p ())
 		{
 		  ef_complaint (cs->c_symnum);
 		  within_function = 0;
 		  break;
 		}
 
-	      finish_block (newobj->name, &local_symbols, newobj->old_blocks,
-			    NULL, newobj->start_addr,
+	      finish_block (cstk.name, &local_symbols, cstk.old_blocks,
+			    NULL, cstk.start_addr,
 			    (fcn_cs_saved.c_value
 			     + fcn_aux_saved.x_sym.x_misc.x_fsize
 			     + ANOFFSET (objfile->section_offsets,
@@ -1488,8 +1488,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		  eb_complaint (cs->c_symnum);
 		  break;
 		}
-	      newobj = pop_context ();
-	      if (depth-- != newobj->depth)
+	      struct context_stack cstk = pop_context ();
+	      if (depth-- != cstk.depth)
 		{
 		  eb_complaint (cs->c_symnum);
 		  break;
@@ -1497,14 +1497,14 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	      if (local_symbols && !outermost_context_p ())
 		{
 		  /* Make a block for the local symbols within.  */
-		  finish_block (newobj->name, &local_symbols,
-				newobj->old_blocks, NULL,
-				newobj->start_addr,
+		  finish_block (cstk.name, &local_symbols,
+				cstk.old_blocks, NULL,
+				cstk.start_addr,
 				(cs->c_value
 				 + ANOFFSET (objfile->section_offsets,
 					     SECT_OFF_TEXT (objfile))));
 		}
-	      local_symbols = newobj->locals;
+	      local_symbols = cstk.locals;
 	    }
 	  break;
 

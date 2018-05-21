@@ -13683,10 +13683,10 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  newobj = pop_context ();
+  struct context_stack cstk = pop_context ();
   /* Make a block for the local symbols within.  */
-  block = finish_block (newobj->name, &local_symbols, newobj->old_blocks,
-			newobj->static_link, lowpc, highpc);
+  block = finish_block (cstk.name, &local_symbols, cstk.old_blocks,
+			cstk.static_link, lowpc, highpc);
 
   /* For C++, set the block's scope.  */
   if ((cu->language == language_cplus
@@ -13700,7 +13700,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* If we have address ranges, record them.  */
   dwarf2_record_block_ranges (die, block, baseaddr, cu);
 
-  gdbarch_make_symbol_special (gdbarch, newobj->name, objfile);
+  gdbarch_make_symbol_special (gdbarch, cstk.name, objfile);
 
   /* Attach template arguments to function.  */
   if (!template_args.empty ())
@@ -13720,8 +13720,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
      a function declares a class that has methods).  This means that
      when we finish processing a function scope, we may need to go
      back to building a containing block's symbol lists.  */
-  local_symbols = newobj->locals;
-  set_local_using_directives (newobj->local_using_directives);
+  local_symbols = cstk.locals;
+  set_local_using_directives (cstk.local_using_directives);
 
   /* If we've finished processing a top-level function, subsequent
      symbols go in the file symbol list.  */
@@ -13737,7 +13737,6 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct context_stack *newobj;
   CORE_ADDR lowpc, highpc;
   struct die_info *child_die;
   CORE_ADDR baseaddr;
@@ -13777,13 +13776,13 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
   inherit_abstract_dies (die, cu);
-  newobj = pop_context ();
+  struct context_stack cstk = pop_context ();
 
   if (local_symbols != NULL || (*get_local_using_directives ()) != NULL)
     {
       struct block *block
-        = finish_block (0, &local_symbols, newobj->old_blocks, NULL,
-			newobj->start_addr, highpc);
+        = finish_block (0, &local_symbols, cstk.old_blocks, NULL,
+			cstk.start_addr, highpc);
 
       /* Note that recording ranges after traversing children, as we
          do here, means that recording a parent's ranges entails
@@ -13797,8 +13796,8 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
          to do.  */
       dwarf2_record_block_ranges (die, block, baseaddr, cu);
     }
-  local_symbols = newobj->locals;
-  set_local_using_directives (newobj->local_using_directives);
+  local_symbols = cstk.locals;
+  set_local_using_directives (cstk.local_using_directives);
 }
 
 /* Read in DW_TAG_call_site and insert it to CU->call_site_htab.  */
@@ -21348,26 +21347,28 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    }
 	  break;
 	case DW_TAG_formal_parameter:
-	  /* If we are inside a function, mark this as an argument.  If
-	     not, we might be looking at an argument to an inlined function
-	     when we do not have enough information to show inlined frames;
-	     pretend it's a local variable in that case so that the user can
-	     still see it.  */
-	  if (!outermost_context_p ()
-	      && context_stack[context_stack_depth - 1].name != NULL)
-	    SYMBOL_IS_ARGUMENT (sym) = 1;
-	  attr = dwarf2_attr (die, DW_AT_location, cu);
-	  if (attr)
-	    {
-	      var_decode_location (attr, sym, cu);
-	    }
-	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
-	  if (attr)
-	    {
-	      dwarf2_const_value (attr, sym, cu);
-	    }
+	  {
+	    /* If we are inside a function, mark this as an argument.  If
+	       not, we might be looking at an argument to an inlined function
+	       when we do not have enough information to show inlined frames;
+	       pretend it's a local variable in that case so that the user can
+	       still see it.  */
+	    struct context_stack *curr = get_current_context_stack ();
+	    if (curr != nullptr && curr->name != nullptr)
+	      SYMBOL_IS_ARGUMENT (sym) = 1;
+	    attr = dwarf2_attr (die, DW_AT_location, cu);
+	    if (attr)
+	      {
+		var_decode_location (attr, sym, cu);
+	      }
+	    attr = dwarf2_attr (die, DW_AT_const_value, cu);
+	    if (attr)
+	      {
+		dwarf2_const_value (attr, sym, cu);
+	      }
 
-	  list_to_add = cu->list_in_scope;
+	    list_to_add = cu->list_in_scope;
+	  }
 	  break;
 	case DW_TAG_unspecified_parameters:
 	  /* From varargs functions; gdb doesn't seem to have any
