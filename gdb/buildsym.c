@@ -576,12 +576,11 @@ finish_block_internal (struct symbol *symbol,
 
 struct block *
 finish_block (struct symbol *symbol,
-	      struct pending **listhead,
 	      struct pending_block *old_blocks,
 	      const struct dynamic_prop *static_link,
 	      CORE_ADDR start, CORE_ADDR end)
 {
-  return finish_block_internal (symbol, listhead, old_blocks, static_link,
+  return finish_block_internal (symbol, &local_symbols, old_blocks, static_link,
 				start, end, 0, 0);
 }
 
@@ -1196,7 +1195,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
       struct context_stack cstk = pop_context ();
 
       /* Make a block for the local symbols within.  */
-      finish_block (cstk.name, &local_symbols, cstk.old_blocks, NULL,
+      finish_block (cstk.name, cstk.old_blocks, NULL,
 		    cstk.start_addr, end_addr);
 
       if (!buildsym_compunit->m_context_stack.empty ())

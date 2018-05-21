@@ -1408,7 +1408,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 		  break;
 		}
 
-	      finish_block (cstk.name, &local_symbols, cstk.old_blocks,
+	      finish_block (cstk.name, cstk.old_blocks,
 			    NULL, cstk.start_addr,
 			    (fcn_cs_saved.c_value
 			     + fcn_aux_saved.x_sym.x_misc.x_fsize
@@ -1499,7 +1499,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	      if (local_symbols && !outermost_context_p ())
 		{
 		  /* Make a block for the local symbols within.  */
-		  finish_block (cstk.name, &local_symbols,
+		  finish_block (cstk.name,
 				cstk.old_blocks, NULL,
 				cstk.start_addr,
 				(cs->c_value

@@ -13685,7 +13685,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   struct context_stack cstk = pop_context ();
   /* Make a block for the local symbols within.  */
-  block = finish_block (cstk.name, &local_symbols, cstk.old_blocks,
+  block = finish_block (cstk.name, cstk.old_blocks,
 			cstk.static_link, lowpc, highpc);
 
   /* For C++, set the block's scope.  */
@@ -13781,7 +13781,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (local_symbols != NULL || (*get_local_using_directives ()) != NULL)
     {
       struct block *block
-        = finish_block (0, &local_symbols, cstk.old_blocks, NULL,
+        = finish_block (0, cstk.old_blocks, NULL,
 			cstk.start_addr, highpc);
 
       /* Note that recording ranges after traversing children, as we

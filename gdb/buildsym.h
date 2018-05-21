@@ -144,7 +144,6 @@ extern struct symbol *find_symbol_in_list (struct pending *list,
 					   char *name, int length);
 
 extern struct block *finish_block (struct symbol *symbol,
-				   struct pending **listhead,
 				   struct pending_block *old_blocks,
 				   const struct dynamic_prop *static_link,
 				   CORE_ADDR start,

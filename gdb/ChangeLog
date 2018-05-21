@@ -1,5 +1,16 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (read_xcoff_symtab): Update.
+	* dwarf2read.c (read_func_scope, read_lexical_block_scope):
+	Update.
+	* dbxread.c (process_one_symbol): Update.
+	* coffread.c (coff_symtab_read): Update.
+	* buildsym.h (finish_block): Update.
+	* buildsym.c (finish_block): Remove "listhead" argument.
+	(end_symtab_get_static_block): Update.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.h (class scoped_free_pendings): Remove constructor.
 	* buildsym.c (struct buildsym_compunit) <free_pending_blocks>: New
 	method.

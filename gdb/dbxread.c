@@ -2516,7 +2516,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	  cstk = pop_context ();
 
 	  /* Make a block for the local symbols within.  */
-	  block = finish_block (cstk.name, &local_symbols,
+	  block = finish_block (cstk.name,
 				cstk.old_blocks, NULL,
 				cstk.start_addr, cstk.start_addr + valu);
 
@@ -2603,7 +2603,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		  cstk.start_addr = valu;
 		}
 	      /* Make a block for the local symbols within.  */
-	      finish_block (0, &local_symbols, cstk.old_blocks, NULL,
+	      finish_block (0, cstk.old_blocks, NULL,
 			    cstk.start_addr, valu);
 	    }
 	}
@@ -2890,7 +2890,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
 		  cstk = pop_context ();
 		  /* Make a block for the local symbols within.  */
-		  block = finish_block (cstk.name, &local_symbols,
+		  block = finish_block (cstk.name,
 					cstk.old_blocks, NULL,
 					cstk.start_addr, valu);
 
