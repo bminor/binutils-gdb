@@ -1,5 +1,19 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.h (class scoped_free_pendings): Remove constructor.
+	* buildsym.c (struct buildsym_compunit) <free_pending_blocks>: New
+	method.
+	<m_pending_block_obstack, m_pending_blocks>: New members.
+	(pending_block_obstack, pending_blocks): Remove.
+	(scoped_free_pendings::scoped_free_pendings): Default.
+	(~scoped_free_pendings): Update.
+	(free_pending_blocks): Remove.
+	(finish_block_internal, record_pending_block, make_blockvector)
+	(end_symtab_get_static_block, augment_type_symtab, push_context)
+	(buildsym_init): Update.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (struct buildsym_compunit) <m_pending_addrmap,
 	m_pending_addrmap_obstack, m_pending_addrmap_interesting>: New
 	members.

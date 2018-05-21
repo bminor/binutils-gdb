@@ -155,6 +155,14 @@ struct buildsym_compunit
     return result;
   }
 
+  /* This function is called to discard any pending blocks.  */
+
+  void free_pending_blocks ()
+  {
+    m_pending_block_obstack.clear ();
+    m_pending_blocks = nullptr;
+  }
+
   /* The objfile we're reading debug info from.  */
   struct objfile *objfile;
 
@@ -232,6 +240,15 @@ struct buildsym_compunit
      we start processing a symfile, and if it's still false at the
      end, then we just toss the addrmap.  */
   bool m_pending_addrmap_interesting = false;
+
+  /* An obstack used for allocating pending blocks.  */
+  auto_obstack m_pending_block_obstack;
+
+  /* Pointer to the head of a linked list of symbol blocks which have
+     already been finalized (lexical contexts already closed) and which
+     are just waiting to be built into a blockvector when finalizing the
+     associated symtab.  */
+  struct pending_block *m_pending_blocks = nullptr;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -243,10 +260,6 @@ static struct buildsym_compunit *buildsym_compunit;
 
 static struct pending *free_pendings;
 
-/* An obstack used for allocating pending blocks.  */
-
-static struct obstack pending_block_obstack;
-
 /* List of blocks already made (lexical contexts already closed).
    This is used at the end to make the blockvector.  */
 
@@ -256,13 +269,6 @@ struct pending_block
     struct block *block;
   };
 
-/* Pointer to the head of a linked list of symbol blocks which have
-   already been finalized (lexical contexts already closed) and which
-   are just waiting to be built into a blockvector when finalizing the
-   associated symtab.  */
-
-static struct pending_block *pending_blocks;
-
 static void free_buildsym_compunit (void);
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
@@ -270,8 +276,6 @@ static int compare_line_numbers (const void *ln1p, const void *ln2p);
 static void record_pending_block (struct objfile *objfile,
 				  struct block *block,
 				  struct pending_block *opblock);
-
-static void free_pending_blocks ();
 
 /* Initial sizes of data structures.  These are realloc'd larger if
    needed, and realloc'd down to the size actually used, when
@@ -340,11 +344,6 @@ find_symbol_in_list (struct pending *list, char *name, int length)
   return (NULL);
 }
 
-scoped_free_pendings::scoped_free_pendings ()
-{
-  gdb_assert (pending_blocks == nullptr);
-}
-
 /* At end of reading syms, or in case of quit, ensure everything
    associated with building symtabs is freed.
 
@@ -362,8 +361,6 @@ scoped_free_pendings::~scoped_free_pendings ()
     }
   free_pendings = NULL;
 
-  free_pending_blocks ();
-
   for (next = file_symbols; next != NULL; next = next1)
     {
       next1 = next->next;
@@ -379,18 +376,6 @@ scoped_free_pendings::~scoped_free_pendings ()
   global_symbols = NULL;
 
   free_buildsym_compunit ();
-}
-
-/* This function is called to discard any pending blocks.  */
-
-static void
-free_pending_blocks ()
-{
-  if (pending_blocks != NULL)
-    {
-      obstack_free (&pending_block_obstack, NULL);
-      pending_blocks = NULL;
-    }
 }
 
 /* Take one of the lists of symbols and make a block from it.  Keep
@@ -533,7 +518,7 @@ finish_block_internal (struct symbol *symbol,
      start of this scope that don't have superblocks yet.  */
 
   opblock = NULL;
-  for (pblock = pending_blocks; 
+  for (pblock = buildsym_compunit->m_pending_blocks; 
        pblock && pblock != old_blocks; 
        pblock = pblock->next)
     {
@@ -613,10 +598,8 @@ record_pending_block (struct objfile *objfile, struct block *block,
 {
   struct pending_block *pblock;
 
-  if (pending_blocks == NULL)
-    obstack_init (&pending_block_obstack);
-
-  pblock = XOBNEW (&pending_block_obstack, struct pending_block);
+  pblock = XOBNEW (&buildsym_compunit->m_pending_block_obstack,
+		   struct pending_block);
   pblock->block = block;
   if (opblock)
     {
@@ -625,8 +608,8 @@ record_pending_block (struct objfile *objfile, struct block *block,
     }
   else
     {
-      pblock->next = pending_blocks;
-      pending_blocks = pblock;
+      pblock->next = buildsym_compunit->m_pending_blocks;
+      buildsym_compunit->m_pending_blocks = pblock;
     }
 }
 
@@ -670,8 +653,10 @@ make_blockvector (void)
 
   /* Count the length of the list of blocks.  */
 
-  for (next = pending_blocks, i = 0; next; next = next->next, i++)
-    {;
+  for (next = buildsym_compunit->m_pending_blocks, i = 0;
+       next;
+       next = next->next, i++)
+    {
     }
 
   blockvector = (struct blockvector *)
@@ -686,12 +671,12 @@ make_blockvector (void)
      sure this is true.  */
 
   BLOCKVECTOR_NBLOCKS (blockvector) = i;
-  for (next = pending_blocks; next; next = next->next)
+  for (next = buildsym_compunit->m_pending_blocks; next; next = next->next)
     {
       BLOCKVECTOR_BLOCK (blockvector, --i) = next->block;
     }
 
-  free_pending_blocks ();
+  buildsym_compunit->free_pending_blocks ();
 
   /* If we needed an address map for this symtab, record it in the
      blockvector.  */
@@ -1229,13 +1214,13 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
   /* Reordered executables may have out of order pending blocks; if
      OBJF_REORDERED is true, then sort the pending blocks.  */
 
-  if ((objfile->flags & OBJF_REORDERED) && pending_blocks)
+  if ((objfile->flags & OBJF_REORDERED) && buildsym_compunit->m_pending_blocks)
     {
       struct pending_block *pb;
 
       std::vector<block *> barray;
 
-      for (pb = pending_blocks; pb != NULL; pb = pb->next)
+      for (pb = buildsym_compunit->m_pending_blocks; pb != NULL; pb = pb->next)
 	barray.push_back (pb->block);
 
       /* Sort blocks by start address in descending order.  Blocks with the
@@ -1248,7 +1233,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
 			});
 
       int i = 0;
-      for (pb = pending_blocks; pb != NULL; pb = pb->next)
+      for (pb = buildsym_compunit->m_pending_blocks; pb != NULL; pb = pb->next)
 	pb->block = barray[i++];
     }
 
@@ -1266,7 +1251,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
   finish_global_stabs (objfile);
 
   if (!required
-      && pending_blocks == NULL
+      && buildsym_compunit->m_pending_blocks == NULL
       && file_symbols == NULL
       && global_symbols == NULL
       && !buildsym_compunit->m_have_line_numbers
@@ -1568,7 +1553,7 @@ augment_type_symtab (void)
 
   if (!buildsym_compunit->m_context_stack.empty ())
     complaint (_("Context stack not empty in augment_type_symtab"));
-  if (pending_blocks != NULL)
+  if (buildsym_compunit->m_pending_blocks != NULL)
     complaint (_("Blocks in a type symtab"));
   if (buildsym_compunit->m_pending_macros != NULL)
     complaint (_("Macro in a type symtab"));
@@ -1614,7 +1599,7 @@ push_context (int desc, CORE_ADDR valu)
 
   newobj->depth = desc;
   newobj->locals = local_symbols;
-  newobj->old_blocks = pending_blocks;
+  newobj->old_blocks = buildsym_compunit->m_pending_blocks;
   newobj->start_addr = valu;
   newobj->local_using_directives
     = buildsym_compunit->m_local_using_directives;
@@ -1770,7 +1755,6 @@ buildsym_init ()
   /* Ensure the scoped_free_pendings destructor was called after
      the last time.  */
   gdb_assert (free_pendings == NULL);
-  gdb_assert (pending_blocks == NULL);
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
   gdb_assert (buildsym_compunit == NULL);

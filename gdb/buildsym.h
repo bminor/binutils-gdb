@@ -157,7 +157,7 @@ class scoped_free_pendings
 {
 public:
 
-  scoped_free_pendings ();
+  scoped_free_pendings () = default;
   ~scoped_free_pendings ();
 
   DISABLE_COPY_AND_ASSIGN (scoped_free_pendings);
