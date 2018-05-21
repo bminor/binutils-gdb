@@ -1,5 +1,11 @@
 2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/cli-utils-selftests.c
+	* unittests/cli-utils-selftests.c: New file.
+
+2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* NEWS: Mention new commands. Mention change to 'thread apply'.
 
 2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>

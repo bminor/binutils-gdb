@@ -420,6 +420,7 @@ SUBDIR_PYTHON_CFLAGS =
 
 SUBDIR_UNITTESTS_SRCS = \
 	unittests/array-view-selftests.c \
+	unittests/cli-utils-selftests.c \
 	unittests/common-utils-selftests.c \
 	unittests/environ-selftests.c \
 	unittests/format_pieces-selftests.c \
