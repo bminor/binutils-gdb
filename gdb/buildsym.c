@@ -201,6 +201,9 @@ struct buildsym_compunit
      comes from the N_SO symbol.  For Dwarf it typically comes from the
      DW_AT_low_pc attribute of a DW_TAG_compile_unit DIE.  */
   CORE_ADDR m_last_source_start_addr;
+
+  /* Stack of subfile names.  */
+  std::vector<const char *> m_subfile_stack;
 };
 
 /* The work-in-progress of the compunit we are building.
@@ -247,14 +250,6 @@ struct pending_block
    associated symtab.  */
 
 static struct pending_block *pending_blocks;
-
-struct subfile_stack
-  {
-    struct subfile_stack *next;
-    char *name;
-  };
-
-static struct subfile_stack *subfile_stack;
 
 /* Currently allocated size of context stack.  */
 
@@ -885,27 +880,21 @@ patch_subfile_names (struct subfile *subfile, const char *name)
    order.  */
 
 void
-push_subfile (void)
+push_subfile ()
 {
-  struct subfile_stack *tem = XNEW (struct subfile_stack);
-
-  tem->next = subfile_stack;
-  subfile_stack = tem;
+  gdb_assert (buildsym_compunit != nullptr);
   gdb_assert (current_subfile != NULL && current_subfile->name != NULL);
-  tem->name = current_subfile->name;
+  buildsym_compunit->m_subfile_stack.push_back (current_subfile->name);
 }
 
-char *
-pop_subfile (void)
+const char *
+pop_subfile ()
 {
-  char *name;
-  struct subfile_stack *link = subfile_stack;
-
-  gdb_assert (link != NULL);
-  name = link->name;
-  subfile_stack = link->next;
-  xfree ((void *) link);
-  return (name);
+  gdb_assert (buildsym_compunit != nullptr);
+  gdb_assert (!buildsym_compunit->m_subfile_stack.empty ());
+  const char *name = buildsym_compunit->m_subfile_stack.back ();
+  buildsym_compunit->m_subfile_stack.pop_back ();
+  return name;
 }
 
 /* Add a linetable entry for line number LINE and address PC to the
@@ -1718,8 +1707,6 @@ get_last_source_start_addr ()
 void
 buildsym_init ()
 {
-  subfile_stack = NULL;
-
   pending_addrmap_interesting = 0;
 
   /* Context stack is initially empty.  Allocate first one with room

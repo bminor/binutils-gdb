@@ -186,9 +186,9 @@ extern void start_subfile (const char *name);
 
 extern void patch_subfile_names (struct subfile *subfile, const char *name);
 
-extern void push_subfile (void);
+extern void push_subfile ();
 
-extern char *pop_subfile (void);
+extern const char *pop_subfile ();
 
 extern struct block *end_symtab_get_static_block (CORE_ADDR end_addr,
 						  int expandable,

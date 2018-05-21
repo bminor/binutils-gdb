@@ -1,5 +1,14 @@
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.h (push_subfile, pop_subfile): Update declarations.
+	* buildsym.c (struct buildsym_compunit) <m_subfile_stack>: New
+	member.
+	(struct subfile_stack): Remove.
+	(subfile_stack): Remove.
+	(push_subfile, pop_subfile, buildsym_init): Update.
+
+2018-07-16  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (push_subfile): Use gdb_assert.
 	(pop_subfile): Use gdb_assert.
 
