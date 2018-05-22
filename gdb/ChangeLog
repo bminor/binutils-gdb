@@ -1,5 +1,13 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.h (struct buildsym_compunit): Move from buildsym.c.
+	* buildsym.c (struct buildsym_compunit): Move to buildsym.h.
+	(buildsym_compunit::buildsym_compunit)
+	(buildsym_compunit::~buildsym_compunit)
+	(buildsym_compunit::get_macro_table): Define.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (reset_symtab_globals): Remove.
 	(buildsym_compunit::end_symtab_from_static_block): Update.
 	(buildsym_compunit::augment_type_symtab): Update.
