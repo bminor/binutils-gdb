@@ -1,5 +1,17 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (DEFAULT_MAX_MEMORY_PACKET_SIZE): Rename to ...
+	(DEFAULT_MAX_MEMORY_PACKET_SIZE_FIXED): ... this.
+	(get_fixed_memory_packet_size): New.
+	(get_memory_packet_size): Use it.
+	(set_memory_packet_size): Don't override the config size with
+	DEFAULT_MAX_MEMORY_PACKET_SIZE.
+	(show_memory_packet_size): Use get_fixed_memory_packet_size.
+	Don't refer to get_memory_packet_size if not connected to a remote
+	target.  Show "(default)" if configured size is 0.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_target::mourn_inferior): Move
 	discard_pending_stop_replies call here from ...
 	(_initialize_remote): ... here.

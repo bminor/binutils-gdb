@@ -1,5 +1,12 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/remote.exp: Adjust expected output of "show remote
+	memory-write-packet-size".  Add tests for "set remote
+	memory-write-packet-size 0" and "set remote
+	memory-write-packet-size fixed/limit".
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/22973
 	* gdb.base/utf8-identifiers.c: New file.
 	* gdb.base/utf8-identifiers.exp: New file.

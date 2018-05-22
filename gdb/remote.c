@@ -1328,15 +1328,28 @@ struct memory_packet_config
   int fixed_p;
 };
 
-/* The default max memory-write-packet-size.  The 16k is historical.
-   (It came from older GDB's using alloca for buffers and the
-   knowledge (folklore?) that some hosts don't cope very well with
-   large alloca calls.)  */
-#define DEFAULT_MAX_MEMORY_PACKET_SIZE 16384
+/* The default max memory-write-packet-size, when the setting is
+   "fixed".  The 16k is historical.  (It came from older GDB's using
+   alloca for buffers and the knowledge (folklore?) that some hosts
+   don't cope very well with large alloca calls.)  */
+#define DEFAULT_MAX_MEMORY_PACKET_SIZE_FIXED 16384
 
 /* The minimum remote packet size for memory transfers.  Ensures we
    can write at least one byte.  */
 #define MIN_MEMORY_PACKET_SIZE 20
+
+/* Get the memory packet size, assuming it is fixed.  */
+
+static long
+get_fixed_memory_packet_size (struct memory_packet_config *config)
+{
+  gdb_assert (config->fixed_p);
+
+  if (config->size <= 0)
+    return DEFAULT_MAX_MEMORY_PACKET_SIZE_FIXED;
+  else
+    return config->size;
+}
 
 /* Compute the current size of a read/write packet.  Since this makes
    use of ``actual_register_packet_size'' the computation is dynamic.  */
@@ -1349,12 +1362,7 @@ get_memory_packet_size (struct memory_packet_config *config)
 
   long what_they_get;
   if (config->fixed_p)
-    {
-      if (config->size <= 0)
-	what_they_get = DEFAULT_MAX_MEMORY_PACKET_SIZE;
-      else
-	what_they_get = config->size;
-    }
+    what_they_get = get_fixed_memory_packet_size (config);
   else
     {
       what_they_get = get_remote_packet_size ();
@@ -1414,16 +1422,17 @@ set_memory_packet_size (const char *args, struct memory_packet_config *config)
 	 something arbitrarily large.  */
     }
 
-  /* So that the query shows the correct value.  */
-  if (size <= 0)
-    size = DEFAULT_MAX_MEMORY_PACKET_SIZE;
-
   /* Extra checks?  */
   if (fixed_p && !config->fixed_p)
     {
+      /* So that the query shows the correct value.  */
+      long query_size = (size <= 0
+			 ? DEFAULT_MAX_MEMORY_PACKET_SIZE_FIXED
+			 : size);
+
       if (! query (_("The target may not be able to correctly handle a %s\n"
 		   "of %ld bytes. Change the packet size? "),
-		   config->name, size))
+		   config->name, query_size))
 	error (_("Packet size not changed."));
     }
   /* Update the config.  */
@@ -1434,13 +1443,24 @@ set_memory_packet_size (const char *args, struct memory_packet_config *config)
 static void
 show_memory_packet_size (struct memory_packet_config *config)
 {
-  printf_filtered (_("The %s is %ld. "), config->name, config->size);
+  if (config->size == 0)
+    printf_filtered (_("The %s is 0 (default). "), config->name);
+  else
+    printf_filtered (_("The %s is %ld. "), config->name, config->size);
   if (config->fixed_p)
     printf_filtered (_("Packets are fixed at %ld bytes.\n"),
-		     get_memory_packet_size (config));
+		     get_fixed_memory_packet_size (config));
   else
-    printf_filtered (_("Packets are limited to %ld bytes.\n"),
-		     get_memory_packet_size (config));
+    {
+      struct remote_state *rs = get_remote_state ();
+
+      if (rs->remote_desc != NULL)
+	printf_filtered (_("Packets are limited to %ld bytes.\n"),
+			 get_memory_packet_size (config));
+      else
+	puts_filtered ("The actual limit will be further reduced "
+		       "dependent on the target.\n");
+    }
 }
 
 static struct memory_packet_config memory_write_packet_config =
