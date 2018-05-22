@@ -1,5 +1,12 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* arch-utils.c: Do not include buildsym.h.
+	* mipsread.c: Do not include buildsym.h.
+	* machoread.c: Do not include buildsym.h.
+	* elfread.c: Do not include buildsym.h.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (buildsym_compunit::buildsym_compunit): Do more
 	initialization.
 	(buildsym_compunit): Add new constructor.

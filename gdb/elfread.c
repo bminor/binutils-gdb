@@ -28,7 +28,6 @@
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "buildsym.h"
 #include "stabsread.h"
 #include "gdb-stabs.h"
 #include "complaints.h"

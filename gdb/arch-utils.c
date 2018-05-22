@@ -20,7 +20,6 @@
 #include "defs.h"
 
 #include "arch-utils.h"
-#include "buildsym.h"
 #include "gdbcmd.h"
 #include "inferior.h"		/* enum CALL_DUMMY_LOCATION et al.  */
 #include "infrun.h"

@@ -27,7 +27,6 @@
 #include "bfd.h"
 #include "symtab.h"
 #include "objfiles.h"
-#include "buildsym.h"
 #include "stabsread.h"
 
 #include "coff/sym.h"

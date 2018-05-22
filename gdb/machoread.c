@@ -24,7 +24,6 @@
 #include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "buildsym.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "mach-o.h"
