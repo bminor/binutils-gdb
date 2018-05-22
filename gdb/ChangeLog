@@ -1,3 +1,9 @@
+2018-05-22  Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-linux-nat.c (mips64_linux_register_addr): Return -1 if
+	the width of the requested register exceeds the width of the
+	`ptrace' data type.
+
 2018-05-21  Tom Tromey  <tom@tromey.com>
 
 	* printcmd.c (output_command): Remove.

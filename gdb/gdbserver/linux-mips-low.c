@@ -211,6 +211,10 @@ mips_cannot_fetch_register (int regno)
 
   tdesc = current_process ()->tdesc;
 
+  /* On n32 we can't access 64-bit registers via PTRACE_PEEKUSR.  */
+  if (register_size (tdesc, regno) > sizeof (PTRACE_XFER_TYPE))
+    return 1;
+
   if (find_regno (tdesc, "r0") == regno)
     return 1;
 
@@ -226,6 +230,10 @@ mips_cannot_store_register (int regno)
     return 1;
 
   tdesc = current_process ()->tdesc;
+
+  /* On n32 we can't access 64-bit registers via PTRACE_POKEUSR.  */
+  if (register_size (tdesc, regno) > sizeof (PTRACE_XFER_TYPE))
+    return 1;
 
   if (find_regno (tdesc, "r0") == regno)
     return 1;

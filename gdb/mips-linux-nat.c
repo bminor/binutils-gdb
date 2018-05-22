@@ -145,6 +145,11 @@ mips64_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
   if (regno < 0 || regno >= gdbarch_num_regs (gdbarch))
     error (_("Bogon register number %d."), regno);
 
+  /* On n32 we can't access 64-bit registers via PTRACE_PEEKUSR
+     or PTRACE_POKEUSR.  */
+  if (register_size (gdbarch, regno) > sizeof (PTRACE_TYPE_RET))
+    return (CORE_ADDR) -1;
+
   if (regno > MIPS_ZERO_REGNUM && regno < MIPS_ZERO_REGNUM + 32)
     regaddr = regno;
   else if ((regno >= mips_regnum (gdbarch)->fp0)

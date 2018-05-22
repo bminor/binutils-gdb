@@ -1,3 +1,10 @@
+2018-05-22  Maciej W. Rozycki  <macro@mips.com>
+
+	* linux-mips-low.c (mips_cannot_fetch_register): Return 1 if the
+	width of the requested register exceeds the width of the
+	`ptrace' data type.
+	(mips_cannot_store_register): Likewise.
+
 2018-05-21  Maciej W. Rozycki  <macro@mips.com>
 
 	* linux-mips-low.c (mips_fetch_register): New function.  Update
