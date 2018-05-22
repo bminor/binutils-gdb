@@ -1,3 +1,9 @@
+2018-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23199
+	* elf.c (setup_group): Mark section in a section group with
+	SHF_GROUP.
+
 2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23194
