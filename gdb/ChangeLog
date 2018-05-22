@@ -1,5 +1,156 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* remote-fileio.c (remote_fileio_reply, remote_fileio_ioerror)
+	(remote_fileio_badfd, remote_fileio_return_errno)
+	(remote_fileio_return_success, remote_fileio_func_open)
+	(remote_fileio_func_open, remote_fileio_func_close)
+	(remote_fileio_func_read, remote_fileio_func_write)
+	(remote_fileio_func_lseek, remote_fileio_func_rename)
+	(remote_fileio_func_unlink, remote_fileio_func_stat)
+	(remote_fileio_func_fstat, remote_fileio_func_gettimeofday)
+	(remote_fileio_func_isatty, remote_fileio_func_system): Add
+	remote_target parameter.
+	(remote_fio_func_map) <func>: Add remote_target parameter.
+	(do_remote_fileio_request, remote_fileio_request):
+	* remote-fileio.h (remote_fileio_request):
+	* remote-notif.c (remote_notif_ack, remote_notif_parse, ): Add
+	remote_target parameter.
+	(remote_notif_process, handle_notification): Adjust to pass down
+	the remote.
+	(remote_notif_state_allocate): Add remote_target parameter.  Save
+	it.
+	* remote-notif.h (struct remote_target): Forward declare.
+	(struct notif_client) <parse, ack, can_get_pending_events>: Add
+	remote_target parameter.
+	(struct remote_notif_state) <remote>: New field.
+	(remote_notif_ack, remote_notif_parse): Add remote_target
+	parameter.
+	(remote_notif_state_allocate, remote_notif_state_allocate): Add
+	remote_target parameter.
+	* remote.c (OPAQUETHREADBYTES, threadref, gdb_ext_thread_info)
+	(threads_listing_context, rmt_thread_action, protocol_feature)
+	(packet_reg, stop_reply, stop_reply_p, enum packet_support)
+	(packet_result, struct threads_listing_context, remote_state):
+	Move definitions and declarations higher up.
+	(remote_target) <~remote_target>: Declare.
+	(remote_download_command_source, remote_file_put, remote_file_get)
+	(remote_file_delete, remote_hostio_pread, remote_hostio_pwrite)
+	(remote_hostio_pread_vFile, remote_hostio_send_command)
+	(remote_hostio_set_filesystem, remote_hostio_open)
+	(remote_hostio_close, remote_hostio_unlink, remote_state)
+	(get_remote_state, get_remote_packet_size, get_memory_packet_size)
+	(get_memory_write_packet_size, get_memory_read_packet_size)
+	(append_pending_thread_resumptions, remote_detach_1)
+	(append_resumption, remote_resume_with_vcont)
+	(add_current_inferior_and_thread, wait_ns, wait_as)
+	(process_stop_reply, remote_notice_new_inferior)
+	(process_initial_stop_replies, remote_add_thread)
+	(btrace_sync_conf, remote_btrace_maybe_reopen)
+	(remove_new_fork_children, kill_new_fork_children)
+	(discard_pending_stop_replies, stop_reply_queue_length)
+	(check_pending_events_prevent_wildcard_vcont)
+	(discard_pending_stop_replies_in_queue, stop_reply)
+	(remote_notif_remove_queued_reply, stop_reply *queued_stop_reply)
+	(peek_stop_reply, remote_parse_stop_reply, remote_stop_ns)
+	(remote_interrupt_as, remote_interrupt_ns)
+	(remote_get_noisy_reply, remote_query_attached)
+	(remote_add_inferior, remote_current_thread, get_current_thread)
+	(set_thread, set_general_thread, set_continue_thread)
+	(set_general_process, write_ptid)
+	(remote_unpack_thread_info_response, remote_get_threadinfo)
+	(parse_threadlist_response, remote_get_threadlist)
+	(remote_threadlist_iterator, remote_get_threads_with_ql)
+	(remote_get_threads_with_qxfer)
+	(remote_get_threads_with_qthreadinfo, extended_remote_restart)
+	(get_offsets, remote_check_symbols, remote_supported_packet)
+	(remote_query_supported, remote_packet_size)
+	(remote_serial_quit_handler, remote_detach_pid)
+	(remote_vcont_probe, remote_resume_with_hc)
+	(send_interrupt_sequence, interrupt_query)
+	(remote_notif_get_pending_events, fetch_register_using_p)
+	(send_g_packet, process_g_packet, fetch_registers_using_g)
+	(store_register_using_P, store_registers_using_G)
+	(set_remote_traceframe, check_binary_download)
+	(remote_write_bytes_aux, remote_write_bytes, remote_read_bytes_1)
+	(remote_xfer_live_readonly_partial, remote_read_bytes)
+	(remote_send_printf, remote_flash_write, readchar)
+	(remote_serial_write, putpkt, putpkt_binary, skip_frame)
+	(read_frame, getpkt, getpkt_or_notif_sane_1, getpkt_sane)
+	(getpkt_or_notif_sane, remote_vkill, remote_kill_k)
+	(extended_remote_disable_randomization, extended_remote_run)
+	(send_environment_packet, extended_remote_environment_support)
+	(extended_remote_set_inferior_cwd, remote_write_qxfer)
+	(remote_read_qxfer, push_stop_reply, vcont_r_supported)
+	(packet_command): Now methods of ...
+	(remote_target): ... this class.
+	(m_remote_state) <remote_target>: New field.
+	(struct remote_state) <stop_reply_queue,
+	remote_async_inferior_event_token, wait_forever_enabled_p>: New
+	fields.
+	(remote_state::remote_state): Allocate stop_reply_queue.
+	(remote_state): Delete global.
+	(get_remote_state_raw): Delete.
+	(remote_target::get_remote_state): Allocate m_remote_state on
+	demand.
+	(get_current_remote_target): New.
+	(remote_ops, extended_remote_ops): Delete.
+	(wait_forever_enabled_p, remote_async_inferior_event_token):
+	Delete, moved to struct remote_state.
+	(remote_target::close): Delete self.  Destruction bits split to
+	...
+	(remote_target::~remote_target): ... this.
+	(show_memory_packet_size): Adjust to use
+	get_current_remote_target.
+	(struct protocol_feature) <func>: Add remote_target parameter.
+	All callers adjusted.
+	(curr_quit_handler_target): New.
+	(remote_serial_quit_handler): Reimplement.
+	(remote_target::open_1): Adjust to use get_current_remote_target.
+	Heap-allocate remote_target/extended_remote_target instances.
+	(vcont_builder::vcont_builder): Add remote_target parameter, and
+	save it in m_remote.  All callers adjusted.
+	(vcont_builder::m_remote): New field.
+	(vcont_builder::restart, vcont_builder::flush)
+	(vcont_builder::push_action): Use it.
+	(remote_target::commit_resume): Use it.
+	(struct queue_iter_param) <remote>: New field.
+	(remote_target::remove_new_fork_children): Fill in 'remote' field.
+	(check_pending_event_prevents_wildcard_vcont_callback_data): New.
+	(check_pending_event_prevents_wildcard_vcont_callback)
+	(remote_target::check_pending_events_prevent_wildcard_vcont)
+	(remote_target::discard_pending_stop_replies)
+	(remote_target::discard_pending_stop_replies_in_queue)
+	(remote_target::remote_notif_remove_queued_reply): Fill in
+	'remote' field.
+	(remote_notif_get_pending_events): New.
+	(remote_target::readchar, remote_target::remote_serial_write):
+	Save/restore curr_quit_handler_target.
+	(putpkt): New.
+	(kill_new_fork_children): Fill in 'remote' field.
+	(packet_command): Use get_current_remote_target, defer to
+	remote_target method of same name.
+	(scoped_remote_fd::scoped_remote_fd): Add 'remote_target'
+	parameter, and save it in m_remote.  All callers adjusted.
+	(scoped_remote_fd::release): Use m_remote.
+	(scoped_remote_fd::m_remote): New field.
+	(remote_file_put, remote_file_get, remote_file_delete): Use
+	get_current_remote_target, defer to remote_target method of same
+	name.
+	(remote_btrace_reset): Add remote_state paremeter.  Update all
+	callers.
+	(remote_async_inferior_event_handler). Pass down 'data'.
+	(remote_new_objfile): Use get_current_remote_target.
+	(remote_target::vcont_r_supported): New.
+	(set_range_stepping): Use get_current_remote_target and
+	remote_target::vcont_r_supported.
+	(_initialize_remote): Don't allocate 'remote_state' and
+	'stop_reply_queue' globals.
+	* remote.h (struct remote_target): Forward declare.
+	(getpkt, putpkt, remote_notif_get_pending_events): Add
+	'remote_target' parameter.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (vcont_builder): Now a class.  Make all data members
 	private.
 	(vcont_builder) <vcont_builder, restart, flush, push_action>:

@@ -58,7 +58,8 @@ static void do_notif_event_xfree (void *arg);
    acknowledge.  */
 
 void
-remote_notif_ack (struct notif_client *nc, char *buf)
+remote_notif_ack (remote_target *remote,
+		  struct notif_client *nc, char *buf)
 {
   struct notif_event *event = nc->alloc_event ();
   struct cleanup *old_chain
@@ -68,8 +69,8 @@ remote_notif_ack (struct notif_client *nc, char *buf)
     fprintf_unfiltered (gdb_stdlog, "notif: ack '%s'\n",
 			nc->ack_command);
 
-  nc->parse (nc, buf, event);
-  nc->ack (nc, buf, event);
+  nc->parse (remote, nc, buf, event);
+  nc->ack (remote, nc, buf, event);
 
   discard_cleanups (old_chain);
 }
@@ -77,7 +78,8 @@ remote_notif_ack (struct notif_client *nc, char *buf)
 /* Parse the BUF for the expected notification NC.  */
 
 struct notif_event *
-remote_notif_parse (struct notif_client *nc, char *buf)
+remote_notif_parse (remote_target *remote,
+		    struct notif_client *nc, char *buf)
 {
   struct notif_event *event = nc->alloc_event ();
   struct cleanup *old_chain
@@ -86,7 +88,7 @@ remote_notif_parse (struct notif_client *nc, char *buf)
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog, "notif: parse '%s'\n", nc->name);
 
-  nc->parse (nc, buf, event);
+  nc->parse (remote, nc, buf, event);
 
   discard_cleanups (old_chain);
   return event;
@@ -108,8 +110,8 @@ remote_notif_process (struct remote_notif_state *state,
 
       gdb_assert (nc != except);
 
-      if (nc->can_get_pending_events (nc))
-	remote_notif_get_pending_events (nc);
+      if (nc->can_get_pending_events (state->remote, nc))
+	remote_notif_get_pending_events (state->remote, nc);
     }
 }
 
@@ -157,7 +159,7 @@ handle_notification (struct remote_notif_state *state, char *buf)
   else
     {
       struct notif_event *event
-	= remote_notif_parse (nc, buf + strlen (nc->name) + 1);
+	= remote_notif_parse (state->remote, nc, buf + strlen (nc->name) + 1);
 
       /* Be careful to only set it after parsing, since an error
 	 may be thrown then.  */
@@ -236,9 +238,11 @@ do_notif_event_xfree (void *arg)
 /* Return an allocated remote_notif_state.  */
 
 struct remote_notif_state *
-remote_notif_state_allocate (void)
+remote_notif_state_allocate (remote_target *remote)
 {
   struct remote_notif_state *notif_state = XCNEW (struct remote_notif_state);
+
+  notif_state->remote = remote;
 
   notif_state->notif_queue = QUEUE_alloc (notif_client_p, NULL);
 
