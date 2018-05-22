@@ -1,3 +1,32 @@
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
+	* arch/ppc-linux-common.c: New file.
+	* arch/ppc-linux-common.h: New file.
+	* arch/ppc-linux-tdesc.h: New file.
+	* configure.tgt (powerpc*-*-linux*): Add arch/ppc-linux-common.o.
+	* Makefile.in (ALL_TARGET_OBS): Add arch/ppc-linux-common.o.
+	(HFILES_NO_SRCDIR): Add arch/ppc-linux-common.h and
+	arch/ppc-linux-tdesc.h.
+	* ppc-linux-nat.c: Include arch/ppc-linux-common.h and
+	arch/ppc-linux-tdesc.h.
+	(ppc_linux_nat_target::read_description): Remove target
+	description matching code. Fill a ppc_linux_features struct and
+	call ppc_linux_match_description with it. Move comment about ISA
+	2.05 to ppc-linux-common.c.
+	* ppc-linux-tdep.c: Include arch/ppc-linux-common.h and
+	arch/ppc-linux-tdesc.h.
+	(ppc_linux_core_read_description): Remove target description
+	matching code. Fill a ppc_linux_features struct and call
+	ppc_linux_match_description with it.
+	* ppc-linux-tdep.h (tdesc_powerpc_32l, tdesc_powerpc_64l)
+	(tdesc_powerpc_altivec32l, tdesc_powerpc_altivec64l)
+	(tdesc_powerpc_cell32l, tdesc_powerpc_cell64l)
+	(tdesc_powerpc_vsx32l, tdesc_powerpc_vsx64l)
+	(tdesc_powerpc_isa205_32l, tdesc_powerpc_isa205_64l)
+	(tdesc_powerpc_isa205_altivec32l, tdesc_powerpc_isa205_altivec64l)
+	(tdesc_powerpc_isa205_vsx32l, tdesc_powerpc_isa205_vsx64l)
+	(tdesc_powerpc_e500l): Remove.
+
 2018-05-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (catch_assert_command): Pass empty string instead

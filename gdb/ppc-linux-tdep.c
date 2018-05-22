@@ -37,6 +37,8 @@
 #include "ppc-tdep.h"
 #include "ppc64-tdep.h"
 #include "ppc-linux-tdep.h"
+#include "arch/ppc-linux-common.h"
+#include "arch/ppc-linux-tdesc.h"
 #include "glibc-tdep.h"
 #include "trad-frame.h"
 #include "frame-unwind.h"
@@ -966,38 +968,37 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
 				 struct target_ops *target,
 				 bfd *abfd)
 {
+  struct ppc_linux_features features = ppc_linux_no_features;
   asection *cell = bfd_sections_find_if (abfd, ppc_linux_spu_section, NULL);
   asection *altivec = bfd_get_section_by_name (abfd, ".reg-ppc-vmx");
   asection *vsx = bfd_get_section_by_name (abfd, ".reg-ppc-vsx");
   asection *section = bfd_get_section_by_name (abfd, ".reg");
+
   if (! section)
     return NULL;
 
   switch (bfd_section_size (abfd, section))
     {
     case 48 * 4:
-      if (cell)
-	return tdesc_powerpc_cell32l;
-      else if (vsx)
-	return tdesc_powerpc_vsx32l;
-      else if (altivec)
-	return tdesc_powerpc_altivec32l;
-      else
-	return tdesc_powerpc_32l;
-
+      features.wordsize = 4;
+      break;
     case 48 * 8:
-      if (cell)
-	return tdesc_powerpc_cell64l;
-      else if (vsx)
-	return tdesc_powerpc_vsx64l;
-      else if (altivec)
-	return tdesc_powerpc_altivec64l;
-      else
-	return tdesc_powerpc_64l;
-
+      features.wordsize = 8;
+      break;
     default:
       return NULL;
     }
+
+  if (cell)
+    features.cell = true;
+
+  if (altivec)
+    features.altivec = true;
+
+  if (vsx)
+    features.vsx = true;
+
+  return ppc_linux_match_description (features);
 }
 
 

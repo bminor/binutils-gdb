@@ -1,3 +1,25 @@
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
+	* configure.srv (srv_tgtobj): Add arch/ppc-linux-common.o.
+	* Makefile.in (SFILES): Add arch/ppc-linux-common.c.
+	* linux-ppc-tdesc.h: Rename to linux-ppc-tdesc-init.h.
+	* linux-ppc-tdesc-init.h (tdesc_powerpc_32l, tdesc_powerpc_64l)
+	(tdesc_powerpc_altivec32l, tdesc_powerpc_altivec64l)
+	(tdesc_powerpc_cell32l, tdesc_powerpc_cell64l)
+	(tdesc_powerpc_vsx32l, tdesc_powerpc_vsx64l)
+	(tdesc_powerpc_isa205_32l, tdesc_powerpc_isa205_64l)
+	(tdesc_powerpc_isa205_altivec32l, tdesc_powerpc_isa205_altivec64l)
+	(tdesc_powerpc_isa205_vsx32l, tdesc_powerpc_isa205_vsx64l)
+	(tdesc_powerpc_e500l): Remove.
+	* linux-ppc-ipa.c: Include arch/ppc-linux-tdesc.h and
+	linux-ppc-tdesc-init.h. Don't include linux-ppc-tdesc.h.
+	* linux-ppc-low.c: Include arch/ppc-linux-common.h,
+	arch/ppc-linux-tdesc.h, and linux-ppc-tdesc-init.h. Don't include
+	linux-ppc-tdesc.h.
+	(ppc_arch_setup): Remove target description matching code. Fill a
+	ppc_linux_features struct and call ppc_linux_match_description
+	with it.
+
 2018-05-22  Maciej W. Rozycki  <macro@mips.com>
 
 	* linux-mips-low.c (mips_cannot_fetch_register): Return 1 if the

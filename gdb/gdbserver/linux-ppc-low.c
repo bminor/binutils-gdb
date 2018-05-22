@@ -23,8 +23,10 @@
 #include <elf.h>
 #include <asm/ptrace.h>
 
+#include "arch/ppc-linux-common.h"
+#include "arch/ppc-linux-tdesc.h"
 #include "nat/ppc-linux.h"
-#include "linux-ppc-tdesc.h"
+#include "linux-ppc-tdesc-init.h"
 #include "ax.h"
 #include "tracepoint.h"
 
@@ -617,6 +619,10 @@ static void
 ppc_arch_setup (void)
 {
   const struct target_desc *tdesc;
+  struct ppc_linux_features features = ppc_linux_no_features;
+
+  features.wordsize = 4;
+
 #ifdef __powerpc64__
   long msr;
   struct regcache *regcache;
@@ -634,57 +640,33 @@ ppc_arch_setup (void)
   free_register_cache (regcache);
   if (ppc64_64bit_inferior_p (msr))
     {
-      ppc_get_auxv (AT_HWCAP, &ppc_hwcap);
-      if (ppc_hwcap & PPC_FEATURE_CELL)
-	tdesc = tdesc_powerpc_cell64l;
-      else if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
-	{
-	  /* Power ISA 2.05 (implemented by Power 6 and newer processors)
-	     increases the FPSCR from 32 bits to 64 bits. Even though Power 7
-	     supports this ISA version, it doesn't have PPC_FEATURE_ARCH_2_05
-	     set, only PPC_FEATURE_ARCH_2_06.  Since for now the only bits
-	     used in the higher half of the register are for Decimal Floating
-	     Point, we check if that feature is available to decide the size
-	     of the FPSCR.  */
-	  if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
-	    tdesc = tdesc_powerpc_isa205_vsx64l;
-	  else
-	    tdesc = tdesc_powerpc_vsx64l;
-	}
-      else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
-	{
-	  if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
-	    tdesc = tdesc_powerpc_isa205_altivec64l;
-	  else
-	    tdesc = tdesc_powerpc_altivec64l;
-	}
-
-      current_process ()->tdesc = tdesc;
-      return;
+      features.wordsize = 8;
     }
 #endif
 
-  /* OK, we have a 32-bit inferior.  */
-  tdesc = tdesc_powerpc_32l;
-  current_process ()->tdesc = tdesc;
+  if (features.wordsize == 4)
+    {
+      /* OK, we have a 32-bit inferior.  */
+      tdesc = tdesc_powerpc_32l;
+      current_process ()->tdesc = tdesc;
+    }
 
+  /* The value of current_process ()->tdesc needs to be set for this
+     call.  */
   ppc_get_auxv (AT_HWCAP, &ppc_hwcap);
+
+  features.isa205 = ppc_linux_has_isa205 (ppc_hwcap);
+
+  if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
+    features.vsx = true;
+
+  if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
+    features.altivec = true;
+
   if (ppc_hwcap & PPC_FEATURE_CELL)
-    tdesc = tdesc_powerpc_cell32l;
-  else if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
-    {
-      if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
-	tdesc = tdesc_powerpc_isa205_vsx32l;
-      else
-	tdesc = tdesc_powerpc_vsx32l;
-    }
-  else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
-    {
-      if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
-	tdesc = tdesc_powerpc_isa205_altivec32l;
-      else
-	tdesc = tdesc_powerpc_altivec32l;
-    }
+    features.cell = true;
+
+  tdesc = ppc_linux_match_description (features);
 
   /* On 32-bit machines, check for SPE registers.
      Set the low target's regmap field as appropriately.  */
@@ -707,6 +689,7 @@ ppc_arch_setup (void)
       ppc_regmap_adjusted = 1;
    }
 #endif
+
   current_process ()->tdesc = tdesc;
 }
 

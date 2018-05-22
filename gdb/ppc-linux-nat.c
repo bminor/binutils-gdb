@@ -45,6 +45,8 @@
 #include "elf/common.h"
 #include "auxv.h"
 
+#include "arch/ppc-linux-common.h"
+#include "arch/ppc-linux-tdesc.h"
 #include "nat/ppc-linux.h"
 
 /* Similarly for the hardware watchpoint support.  These requests are used
@@ -2416,11 +2418,6 @@ ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
 const struct target_desc *
 ppc_linux_nat_target::read_description ()
 {
-  int altivec = 0;
-  int vsx = 0;
-  int isa205 = 0;
-  int cell = 0;
-
   int tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
     tid = ptid_get_pid (inferior_ptid);
@@ -2438,13 +2435,19 @@ ppc_linux_nat_target::read_description ()
 	perror_with_name (_("Unable to fetch SPE registers"));
     }
 
+  struct ppc_linux_features features = ppc_linux_no_features;
+
+  features.wordsize = ppc_linux_target_wordsize ();
+
+  unsigned long hwcap = ppc_linux_get_hwcap ();
+
   if (have_ptrace_getsetvsxregs
-      && (ppc_linux_get_hwcap () & PPC_FEATURE_HAS_VSX))
+      && (hwcap & PPC_FEATURE_HAS_VSX))
     {
       gdb_vsxregset_t vsxregset;
 
       if (ptrace (PTRACE_GETVSXREGS, tid, 0, &vsxregset) >= 0)
-	vsx = 1;
+	features.vsx = true;
 
       /* EIO means that the PTRACE_GETVSXREGS request isn't supported.
 	 Anything else needs to be reported.  */
@@ -2453,12 +2456,12 @@ ppc_linux_nat_target::read_description ()
     }
 
   if (have_ptrace_getvrregs
-      && (ppc_linux_get_hwcap () & PPC_FEATURE_HAS_ALTIVEC))
+      && (hwcap & PPC_FEATURE_HAS_ALTIVEC))
     {
       gdb_vrregset_t vrregset;
 
       if (ptrace (PTRACE_GETVRREGS, tid, 0, &vrregset) >= 0)
-        altivec = 1;
+        features.altivec = true;
 
       /* EIO means that the PTRACE_GETVRREGS request isn't supported.
 	 Anything else needs to be reported.  */
@@ -2466,39 +2469,12 @@ ppc_linux_nat_target::read_description ()
 	perror_with_name (_("Unable to fetch AltiVec registers"));
     }
 
-  /* Power ISA 2.05 (implemented by Power 6 and newer processors) increases
-     the FPSCR from 32 bits to 64 bits.  Even though Power 7 supports this
-     ISA version, it doesn't have PPC_FEATURE_ARCH_2_05 set, only
-     PPC_FEATURE_ARCH_2_06.  Since for now the only bits used in the higher
-     half of the register are for Decimal Floating Point, we check if that
-     feature is available to decide the size of the FPSCR.  */
-  if (ppc_linux_get_hwcap () & PPC_FEATURE_HAS_DFP)
-    isa205 = 1;
+  if (hwcap & PPC_FEATURE_CELL)
+    features.cell = true;
 
-  if (ppc_linux_get_hwcap () & PPC_FEATURE_CELL)
-    cell = 1;
+  features.isa205 = ppc_linux_has_isa205 (hwcap);
 
-  if (ppc_linux_target_wordsize () == 8)
-    {
-      if (cell)
-	return tdesc_powerpc_cell64l;
-      else if (vsx)
-	return isa205? tdesc_powerpc_isa205_vsx64l : tdesc_powerpc_vsx64l;
-      else if (altivec)
-	return isa205
-	  ? tdesc_powerpc_isa205_altivec64l : tdesc_powerpc_altivec64l;
-
-      return isa205? tdesc_powerpc_isa205_64l : tdesc_powerpc_64l;
-    }
-
-  if (cell)
-    return tdesc_powerpc_cell32l;
-  else if (vsx)
-    return isa205? tdesc_powerpc_isa205_vsx32l : tdesc_powerpc_vsx32l;
-  else if (altivec)
-    return isa205? tdesc_powerpc_isa205_altivec32l : tdesc_powerpc_altivec32l;
-
-  return isa205? tdesc_powerpc_isa205_32l : tdesc_powerpc_32l;
+  return ppc_linux_match_description (features);
 }
 
 void

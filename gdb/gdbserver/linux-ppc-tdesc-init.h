@@ -36,35 +36,27 @@ enum ppc_linux_tdesc {
 
 /* Defined in auto-generated file powerpc-32l.c.  */
 void init_registers_powerpc_32l (void);
-extern const struct target_desc *tdesc_powerpc_32l;
 
 /* Defined in auto-generated file powerpc-altivec32l.c.  */
 void init_registers_powerpc_altivec32l (void);
-extern const struct target_desc *tdesc_powerpc_altivec32l;
 
 /* Defined in auto-generated file powerpc-cell32l.c.  */
 void init_registers_powerpc_cell32l (void);
-extern const struct target_desc *tdesc_powerpc_cell32l;
 
 /* Defined in auto-generated file powerpc-vsx32l.c.  */
 void init_registers_powerpc_vsx32l (void);
-extern const struct target_desc *tdesc_powerpc_vsx32l;
 
 /* Defined in auto-generated file powerpc-isa205-32l.c.  */
 void init_registers_powerpc_isa205_32l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_32l;
 
 /* Defined in auto-generated file powerpc-isa205-altivec32l.c.  */
 void init_registers_powerpc_isa205_altivec32l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_altivec32l;
 
 /* Defined in auto-generated file powerpc-isa205-vsx32l.c.  */
 void init_registers_powerpc_isa205_vsx32l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_vsx32l;
 
 /* Defined in auto-generated file powerpc-e500l.c.  */
 void init_registers_powerpc_e500l (void);
-extern const struct target_desc *tdesc_powerpc_e500l;
 
 #endif
 
@@ -72,30 +64,23 @@ extern const struct target_desc *tdesc_powerpc_e500l;
 
 /* Defined in auto-generated file powerpc-64l.c.  */
 void init_registers_powerpc_64l (void);
-extern const struct target_desc *tdesc_powerpc_64l;
 
 /* Defined in auto-generated file powerpc-altivec64l.c.  */
 void init_registers_powerpc_altivec64l (void);
-extern const struct target_desc *tdesc_powerpc_altivec64l;
 
 /* Defined in auto-generated file powerpc-cell64l.c.  */
 void init_registers_powerpc_cell64l (void);
-extern const struct target_desc *tdesc_powerpc_cell64l;
 
 /* Defined in auto-generated file powerpc-vsx64l.c.  */
 void init_registers_powerpc_vsx64l (void);
-extern const struct target_desc *tdesc_powerpc_vsx64l;
 
 /* Defined in auto-generated file powerpc-isa205-64l.c.  */
 void init_registers_powerpc_isa205_64l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_64l;
 
 /* Defined in auto-generated file powerpc-isa205-altivec64l.c.  */
 void init_registers_powerpc_isa205_altivec64l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_altivec64l;
 
 /* Defined in auto-generated file powerpc-isa205-vsx64l.c.  */
 void init_registers_powerpc_isa205_vsx64l (void);
-extern const struct target_desc *tdesc_powerpc_isa205_vsx64l;
 
 #endif

@@ -21,7 +21,8 @@
 #include "server.h"
 #include <sys/mman.h>
 #include "tracepoint.h"
-#include "linux-ppc-tdesc.h"
+#include "arch/ppc-linux-tdesc.h"
+#include "linux-ppc-tdesc-init.h"
 #include <elf.h>
 #ifdef HAVE_GETAUXVAL
 #include <sys/auxv.h>

@@ -196,6 +196,7 @@ SFILES = \
 	$(srcdir)/arch/arm.c \
 	$(srcdir)/arch/arm-get-next-pcs.c \
 	$(srcdir)/arch/arm-linux.c \
+	$(srcdir)/arch/ppc-linux-common.c \
 	$(srcdir)/common/btrace-common.c \
 	$(srcdir)/common/buffer.c \
 	$(srcdir)/common/cleanups.c \

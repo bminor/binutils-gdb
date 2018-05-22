@@ -225,6 +225,7 @@ case "${target}" in
 			srv_regobj="${srv_regobj} powerpc-isa205-altivec64l.o"
 			srv_regobj="${srv_regobj} powerpc-isa205-vsx64l.o"
 			srv_tgtobj="$srv_linux_obj linux-ppc-low.o ppc-linux.o"
+			srv_tgtobj="${srv_tgtobj} arch/ppc-linux-common.o"
 			srv_xmlfiles="rs6000/powerpc-32l.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/powerpc-altivec32l.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/powerpc-cell32l.xml"
