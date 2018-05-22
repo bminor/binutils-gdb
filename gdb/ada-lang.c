@@ -13408,7 +13408,7 @@ catch_assert_command (const char *arg_entry, int from_tty,
     arg = "";
   catch_ada_assert_command_split (arg, cond_string);
   create_ada_exception_catchpoint (gdbarch, ada_catch_assert,
-				   NULL, cond_string,
+				   "", cond_string,
 				   tempflag, 1 /* enabled */,
 				   from_tty);
 }
