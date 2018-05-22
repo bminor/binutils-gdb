@@ -1,5 +1,10 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (compare_section_command): Remove set_general_process
+	call.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (struct packet_reg, struct remote_arch_state):
 	Move higher up in the file.
 	(remote_state) <m_arch_states>: Store remote_arch_state values

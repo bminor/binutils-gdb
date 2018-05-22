@@ -10516,9 +10516,6 @@ compare_sections_command (const char *args, int from_tty)
   if (!exec_bfd)
     error (_("command cannot be used without an exec file"));
 
-  /* Make sure the remote is pointing at the right process.  */
-  set_general_process ();
-
   if (args != NULL && strcmp (args, "-r") == 0)
     {
       read_only = 1;
