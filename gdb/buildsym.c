@@ -1240,14 +1240,6 @@ buildsym_compunit::watch_main_source_file_lossage ()
     }
 }
 
-/* Reset state after a successful building of a symtab.  */
-
-static void
-reset_symtab_globals (void)
-{
-  free_buildsym_compunit ();
-}
-
 /* Implementation of the first part of end_symtab.  It allows modifying
    STATIC_BLOCK before it gets finalized by end_symtab_from_static_block.
    If the returned value is NULL there is no blockvector created for
@@ -1550,8 +1542,6 @@ buildsym_compunit::end_symtab_from_static_block (struct block *static_block,
   else
     cu = end_symtab_with_blockvector (static_block, section, expandable);
 
-  reset_symtab_globals ();
-
   return cu;
 }
 
@@ -1658,8 +1648,6 @@ buildsym_compunit::augment_type_symtab ()
       dict_add_pending (BLOCK_DICT (block),
 			m_global_symbols);
     }
-
-  reset_symtab_globals ();
 }
 
 /* Push a context block.  Args are an identifying nesting level
@@ -1885,7 +1873,7 @@ end_symtab_from_static_block (struct block *static_block,
   struct compunit_symtab *result
     = buildsym_compunit->end_symtab_from_static_block (static_block,
 						       section, expandable);
-  reset_symtab_globals ();
+  free_buildsym_compunit ();
   return result;
 }
 
@@ -1895,7 +1883,7 @@ end_symtab (CORE_ADDR end_addr, int section)
   gdb_assert (buildsym_compunit != nullptr);
   struct compunit_symtab *result
     = buildsym_compunit->end_symtab (end_addr, section);
-  reset_symtab_globals ();
+  free_buildsym_compunit ();
   return result;
 }
 
@@ -1905,7 +1893,7 @@ end_expandable_symtab (CORE_ADDR end_addr, int section)
   gdb_assert (buildsym_compunit != nullptr);
   struct compunit_symtab *result
     = buildsym_compunit->end_expandable_symtab (end_addr, section);
-  reset_symtab_globals ();
+  free_buildsym_compunit ();
   return result;
 }
 
@@ -1914,7 +1902,7 @@ augment_type_symtab ()
 {
   gdb_assert (buildsym_compunit != nullptr);
   buildsym_compunit->augment_type_symtab ();
-  reset_symtab_globals ();
+  free_buildsym_compunit ();
 }
 
 struct context_stack *

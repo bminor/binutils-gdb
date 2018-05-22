@@ -1,5 +1,14 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c (reset_symtab_globals): Remove.
+	(buildsym_compunit::end_symtab_from_static_block): Update.
+	(buildsym_compunit::augment_type_symtab): Update.
+	(end_symtab_from_static_block): Call free_buildsym_compunit.
+	(augment_type_symtab, end_symtab, end_expandable_symtab):
+	Likewise.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* arch-utils.c: Do not include buildsym.h.
 	* mipsread.c: Do not include buildsym.h.
 	* machoread.c: Do not include buildsym.h.
