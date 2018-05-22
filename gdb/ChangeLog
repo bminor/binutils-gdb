@@ -1,4 +1,13 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
+
+	(struct vCont_action_support): Use bool and initialize all fields.
+	(struct readahead_cache): Initialize all fields.
+	(remote_state): Use bool and initialize all fields.
+	(remote_state::remote_state, remote_state::~remote_state): New.
+	(new_remote_state): Delete.
+	(_initialize_remote): Use new to allocate remote_state.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
 	    張俊芝  <zjz@zjz.name>
 
 	PR gdb/22973
