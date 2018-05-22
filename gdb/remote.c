@@ -9671,6 +9671,10 @@ remote_target::mourn_inferior ()
 {
   struct remote_state *rs = get_remote_state ();
 
+  /* We're no longer interested in notification events of an inferior
+     that exited or was killed/detached.  */
+  discard_pending_stop_replies (current_inferior ());
+
   /* In 'target remote' mode with one inferior, we close the connection.  */
   if (!rs->extended && number_of_live_inferiors () <= 1)
     {
@@ -14073,9 +14077,6 @@ _initialize_remote (void)
 
   /* Hook into new objfile notification.  */
   gdb::observers::new_objfile.attach (remote_new_objfile);
-  /* We're no longer interested in notification events of an inferior
-     when it exits.  */
-  gdb::observers::inferior_exit.attach (discard_pending_stop_replies);
 
 #if 0
   init_remote_threadtests ();

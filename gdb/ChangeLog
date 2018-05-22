@@ -1,5 +1,11 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_target::mourn_inferior): Move
+	discard_pending_stop_replies call here from ...
+	(_initialize_remote): ... here.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (compare_section_command): Remove set_general_process
 	call.
 
