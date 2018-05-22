@@ -213,11 +213,6 @@ _initialize_ppcobsd_nat (void)
   ppcobsd_fpreg_offsets.fpscr_size = 4;
 #endif
 
-  /* AltiVec registers.  */
-  ppcobsd_reg_offsets.vr0_offset = offsetof (struct vreg, vreg);
-  ppcobsd_reg_offsets.vscr_offset = offsetof (struct vreg, vscr);
-  ppcobsd_reg_offsets.vrsave_offset = offsetof (struct vreg, vrsave);
-
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (ppcobsd_supply_pcb);
 }

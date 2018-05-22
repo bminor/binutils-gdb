@@ -289,10 +289,6 @@ _initialize_ppcobsd_tdep (void)
       ppcobsd_reg_offsets.f0_offset = 128;
       ppcobsd_reg_offsets.fpscr_offset = -1;
 
-      /* AltiVec registers.  */
-      ppcobsd_reg_offsets.vr0_offset = 0;
-      ppcobsd_reg_offsets.vscr_offset = 512;
-      ppcobsd_reg_offsets.vrsave_offset = 520;
     }
 
   if (ppcobsd_fpreg_offsets.fpscr_offset == 0)

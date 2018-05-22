@@ -1,5 +1,53 @@
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
+	* ppc-tdep.h (struct ppc_reg_offsets): Remove vector register
+	offset fields.
+	* ppc-fbsd-tdep.c (ppc32_fbsd_reg_offsets): Remove initializers
+	for vector register offset fields.
+	(ppc64_fbsd_reg_offsets): Likewise.
+	* ppc-nbsd-tdep.c (_initialize_ppcnbsd_tdep): Remove assignment
+	to vector register offset fields.
+	* ppc-obsd-tdep.c (_initialize_ppcnbsd_tdep): Remove assignment
+	to vector register offset fields.
+	* ppc-obsd-nat.c (_initialize_ppcobsd_nat): Remove assignment to
+	vector register offset fields.
+	* rs6000-aix-tdep.c (rs6000_aix32_reg_offsets): Remove
+	initializers for vector register offset fields.
+	(rs6000_aix64_reg_offsets): Likewise.
+	* rs6000-tdep.c (ppc_vrreg_offset): Remove.
+	(ppc_supply_vrregset): Remove.
+	(ppc_collect_vrregset): Remove.
+	* ppc-linux-tdep.c (ppc_linux_collect_vrregset): New function.
+	(ppc_linux_vrregset) : New function.
+	(ppc32_le_linux_vrregmap, ppc32_be_linux_vrregmap)
+	(ppc32_le_linux_vrregset, ppc32_be_linux_vrregset): New globals.
+	(ppc32_linux_vrregset): Remove.
+	(ppc_linux_iterate_over_regset_sections): Call ppc_linux_vrregset
+	and use result instead of ppc32_linux_vrregset.
+	(ppc32_linux_reg_offsets): Remove initializers for vector register
+	offset fields.
+	(ppc64_linux_reg_offsets): Likewise.
+	* ppc-linux-tdep.h (ppc_linux_vrregset): New declaration.
+	* ppc-linux-nat.c: Include regset.h.
+	(gdb_vrregset_t): Adjust comment to account for little-endian
+	mode.
+	(supply_vrregset, fill_vrregset): Remove.
+	(fetch_altivec_register, store_altivec_register): Remove.
+	(fetch_altivec_registers): Add regno parameter. Get regset using
+	ppc_linux_vrregset. Use regset to supply registers.
+	(store_altivec_registers): Add regno parameter. Get regset using
+	ppc_linux_vrregset. Use regset to collect registers.
+	(fetch_register): Call fetch_altivec_registers instead of
+	fetch_altivec_register.
+	(store_register): Call store_altivec_registers instead of
+	store_altivec_register.
+	(fetch_ppc_registers): Call fetch_altivec_registers with -1 for
+	the new regno parameter.
+	(store_ppc_registers): Call store_altivec_registers with -1 for
+	the new regno parameter.
+
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
 	* arch/ppc-linux-common.h (PPC_LINUX_SIZEOF_VRREGSET)
 	(PPC_LINUX_SIZEOF_VSXREGSET): Define.
 	* ppc-linux-nat.c (SIZEOF_VSXREGS, SIZEOF_VRREGS): Remove.

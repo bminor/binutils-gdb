@@ -486,12 +486,22 @@ ppc_fill_vrregset (struct regcache *regcache, void *buf)
 {
   int i, base;
   char *regset = (char *) buf;
+  int vscr_offset = 0;
 
   base = find_regno (regcache->tdesc, "vr0");
   for (i = 0; i < 32; i++)
     collect_register (regcache, base + i, &regset[i * 16]);
 
-  collect_register_by_name (regcache, "vscr", &regset[32 * 16 + 12]);
+  if (__BYTE_ORDER == __BIG_ENDIAN)
+    vscr_offset = 12;
+
+  /* Zero-pad the unused bytes in the fields for vscr and vrsave in
+     case they get displayed somewhere.  */
+  memset (&regset[32 * 16], 0, 16);
+  collect_register_by_name (regcache, "vscr",
+			    &regset[32 * 16 + vscr_offset]);
+
+  memset (&regset[33 * 16], 0, 16);
   collect_register_by_name (regcache, "vrsave", &regset[33 * 16]);
 }
 
@@ -500,12 +510,17 @@ ppc_store_vrregset (struct regcache *regcache, const void *buf)
 {
   int i, base;
   const char *regset = (const char *) buf;
+  int vscr_offset = 0;
 
   base = find_regno (regcache->tdesc, "vr0");
   for (i = 0; i < 32; i++)
     supply_register (regcache, base + i, &regset[i * 16]);
 
-  supply_register_by_name (regcache, "vscr", &regset[32 * 16 + 12]);
+  if (__BYTE_ORDER == __BIG_ENDIAN)
+    vscr_offset = 12;
+
+  supply_register_by_name (regcache, "vscr",
+			   &regset[32 * 16 + vscr_offset]);
   supply_register_by_name (regcache, "vrsave", &regset[33 * 16]);
 }
 

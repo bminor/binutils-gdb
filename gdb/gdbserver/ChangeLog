@@ -1,5 +1,15 @@
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
+	* linux-ppc-low.c (ppc_fill_vrregset): Add vscr_offset variable.
+	Set vscr_offset to 0 in little-endian mode and 12 in big-endian
+	mode. Call collect_register_by_name with vscr using
+	vscr_offset. Zero-pad vscr and vrsave fields in collector buffer.
+	(ppc_store_vrregset): Add and set vscr_offset variable as in
+	ppc_fill_vrregset. Call supply_register_by_name with vscr using
+	vscr_offset.
+
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
 	* linux-ppc-low.c (SIZEOF_VSXREGS, SIZEOF_VRREGS): Remove.
 	(ppc_arch_setup): Change SIZEOF_VRREGS and SIZEOF_VSXREGS to
 	PPC_LINUX_SIZEOF_VRREGSET and PPC_LINUX_SIZEOF_VSXREGSET.

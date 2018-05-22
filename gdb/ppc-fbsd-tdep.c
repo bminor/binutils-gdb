@@ -56,13 +56,7 @@ static const struct ppc_reg_offsets ppc32_fbsd_reg_offsets =
 	/* Floating-point registers.  */
 	/* .f0_offset = */     0,
 	/* .fpscr_offset = */  256,
-	/* .fpscr_size = */    8,
-#ifdef NOTYET
-	/* AltiVec registers.  */
-	/* .vr0_offset = */    0,
-	/* .vscr_offset = */   512 + 12,
-	/* .vrsave_offset = */ 512
-#endif
+	/* .fpscr_size = */    8
   };
 
 /* 64-bit regset descriptions.  */
@@ -84,13 +78,7 @@ static const struct ppc_reg_offsets ppc64_fbsd_reg_offsets =
 	/* Floating-point registers.  */
 	/* .f0_offset = */     0,
 	/* .fpscr_offset = */  256,
-	/* .fpscr_size = */    8,
-#ifdef NOYET
-	/* AltiVec registers.  */
-	/* .vr0_offset = */    0,
-	/* .vscr_offset = */   512 + 12,
-	/* .vrsave_offset = */ 528
-#endif
+	/* .fpscr_size = */    8
   };
 
 /* 32-bit general-purpose register set.  */

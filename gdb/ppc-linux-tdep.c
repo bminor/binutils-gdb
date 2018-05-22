@@ -444,6 +444,24 @@ ppc_linux_collect_gregset (const struct regset *regset,
     }
 }
 
+static void
+ppc_linux_collect_vrregset (const struct regset *regset,
+			    const struct regcache *regcache,
+			    int regnum, void *buf, size_t len)
+{
+  gdb_byte *vrregs = (gdb_byte *) buf;
+
+  /* Zero-pad the unused bytes in the fields for vscr and vrsave
+     in case they get displayed somewhere (e.g. in core files).  */
+  if (regnum == PPC_VSCR_REGNUM || regnum == -1)
+    memset (&vrregs[32 * 16], 0, 16);
+
+  if (regnum == PPC_VRSAVE_REGNUM || regnum == -1)
+    memset (&vrregs[33 * 16], 0, 16);
+
+  regcache_collect_regset (regset, regcache, regnum, buf, len);
+}
+
 /* Regset descriptions.  */
 static const struct ppc_reg_offsets ppc32_linux_reg_offsets =
   {
@@ -462,12 +480,7 @@ static const struct ppc_reg_offsets ppc32_linux_reg_offsets =
     /* Floating-point registers.  */
     /* .f0_offset = */ 0,
     /* .fpscr_offset = */ 256,
-    /* .fpscr_size = */ 8,
-
-    /* AltiVec registers.  */
-    /* .vr0_offset = */ 0,
-    /* .vscr_offset = */ 512 + 12,
-    /* .vrsave_offset = */ 528
+    /* .fpscr_size = */ 8
   };
 
 static const struct ppc_reg_offsets ppc64_linux_reg_offsets =
@@ -487,12 +500,7 @@ static const struct ppc_reg_offsets ppc64_linux_reg_offsets =
     /* Floating-point registers.  */
     /* .f0_offset = */ 0,
     /* .fpscr_offset = */ 256,
-    /* .fpscr_size = */ 8,
-
-    /* AltiVec registers.  */
-    /* .vr0_offset = */ 0,
-    /* .vscr_offset = */ 512 + 12,
-    /* .vrsave_offset = */ 528
+    /* .fpscr_size = */ 8
   };
 
 static const struct regset ppc32_linux_gregset = {
@@ -513,10 +521,36 @@ static const struct regset ppc32_linux_fpregset = {
   ppc_collect_fpregset
 };
 
-static const struct regset ppc32_linux_vrregset = {
-  &ppc32_linux_reg_offsets,
-  ppc_supply_vrregset,
-  ppc_collect_vrregset
+static const struct regcache_map_entry ppc32_le_linux_vrregmap[] =
+  {
+      { 32, PPC_VR0_REGNUM, 16 },
+      { 1, PPC_VSCR_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 1, PPC_VRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 0 }
+  };
+
+static const struct regcache_map_entry ppc32_be_linux_vrregmap[] =
+  {
+      { 32, PPC_VR0_REGNUM, 16 },
+      { 1, REGCACHE_MAP_SKIP, 12},
+      { 1, PPC_VSCR_REGNUM, 4 },
+      { 1, PPC_VRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 0 }
+  };
+
+static const struct regset ppc32_le_linux_vrregset = {
+  ppc32_le_linux_vrregmap,
+  regcache_supply_regset,
+  ppc_linux_collect_vrregset
+};
+
+static const struct regset ppc32_be_linux_vrregset = {
+  ppc32_be_linux_vrregmap,
+  regcache_supply_regset,
+  ppc_linux_collect_vrregset
 };
 
 static const struct regset ppc32_linux_vsxregset = {
@@ -535,6 +569,15 @@ const struct regset *
 ppc_linux_fpregset (void)
 {
   return &ppc32_linux_fpregset;
+}
+
+const struct regset *
+ppc_linux_vrregset (struct gdbarch *gdbarch)
+{
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+    return &ppc32_be_linux_vrregset;
+  else
+    return &ppc32_le_linux_vrregset;
 }
 
 /* Iterate over supported core file register note sections. */
@@ -557,8 +600,11 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg2", 264, &ppc32_linux_fpregset, NULL, cb_data);
 
   if (have_altivec)
-    cb (".reg-ppc-vmx", PPC_LINUX_SIZEOF_VRREGSET, &ppc32_linux_vrregset,
-	"ppc Altivec", cb_data);
+    {
+      const struct regset *vrregset = ppc_linux_vrregset (gdbarch);
+      cb (".reg-ppc-vmx", PPC_LINUX_SIZEOF_VRREGSET, vrregset,
+	  "ppc Altivec", cb_data);
+    }
 
   if (have_vsx)
     cb (".reg-ppc-vsx", PPC_LINUX_SIZEOF_VSXREGSET,

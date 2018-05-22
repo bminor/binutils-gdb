@@ -70,12 +70,7 @@ static struct ppc_reg_offsets rs6000_aix32_reg_offsets =
   /* Floating-point registers.  */
   336, /* f0_offset */
   56, /* fpscr_offset */
-  4,  /* fpscr_size */
-
-  /* AltiVec registers.  */
-  -1, /* vr0_offset */
-  -1, /* vscr_offset */
-  -1 /* vrsave_offset */
+  4  /* fpscr_size */
 };
 
 static struct ppc_reg_offsets rs6000_aix64_reg_offsets =
@@ -95,12 +90,7 @@ static struct ppc_reg_offsets rs6000_aix64_reg_offsets =
   /* Floating-point registers.  */
   312, /* f0_offset */
   296, /* fpscr_offset */
-  4,  /* fpscr_size */
-
-  /* AltiVec registers.  */
-  -1, /* vr0_offset */
-  -1, /* vscr_offset */
-  -1 /* vrsave_offset */
+  4  /* fpscr_size */
 };
 
 

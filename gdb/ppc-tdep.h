@@ -100,11 +100,6 @@ struct ppc_reg_offsets
   int f0_offset;
   int fpscr_offset;
   int fpscr_size;
-
-  /* AltiVec registers.  */
-  int vr0_offset;
-  int vscr_offset;
-  int vrsave_offset;
 };
 
 extern void ppc_supply_reg (struct regcache *regcache, int regnum,

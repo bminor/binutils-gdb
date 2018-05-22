@@ -28,6 +28,9 @@ struct regset;
 const struct regset *ppc_linux_gregset (int);
 const struct regset *ppc_linux_fpregset (void);
 
+/* Get the vector regset that matches the target byte order.  */
+const struct regset *ppc_linux_vrregset (struct gdbarch *gdbarch);
+
 /* Extra register number constants.  The Linux kernel stores a
    "trap" code and the original value of r3 into special "registers";
    these need to be saved and restored when performing an inferior

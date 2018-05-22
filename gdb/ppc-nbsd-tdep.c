@@ -215,9 +215,5 @@ _initialize_ppcnbsd_tdep (void)
       ppcnbsd_reg_offsets.fpscr_offset = 256;
       ppcnbsd_reg_offsets.fpscr_size = 4;
 
-      /* AltiVec registers.  */
-      ppcnbsd_reg_offsets.vr0_offset = 0;
-      ppcnbsd_reg_offsets.vrsave_offset = 512;
-      ppcnbsd_reg_offsets.vscr_offset = 524;
     }
 }
